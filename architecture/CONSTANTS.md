@@ -120,8 +120,12 @@ Wash cost formula and concrete coefficient values: see `components/P2_identity.m
 |---|---|---|
 | Federation root threshold (MVP) | 2-of-5 | T4_attestation_bootstrap |
 | Federation root threshold (long-term target) | 3-of-9 | T4_attestation_bootstrap |
-| Peer attestation freshness window | 30 days (default) | P2_identity §4 |
-| Min vouchers for L3 promotion | 3 (default) | P2_identity §2 |
+| `PEER_ATTESTATION_FRESHNESS_WINDOW_DAYS` | `30` | P2_identity §4 |
+| `MIN_VOUCHERS_FOR_L3_PROMOTION` | `3` | P2_identity §2 |
+| `FEDERATION_ROOT_THRESHOLD_MVP` / `FEDERATION_ROOT_COUNT_MVP` | `2` / `5` | T4_attestation_bootstrap |
+| `FEDERATION_ROOT_THRESHOLD_TARGET` / `FEDERATION_ROOT_COUNT_TARGET` | `3` / `9` | T4_attestation_bootstrap |
+| `WASH_COST_FALSE_CLAIM_WEIGHT_DEFAULT` | `1.0` | P2 §3 / D004 §A |
+| `ED25519_MULTICODEC_PREFIX` | `0xed01` | W3C did:key §6.1 |
 
 ## Registry (P4)
 

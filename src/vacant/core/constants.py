@@ -71,3 +71,31 @@ ED25519_PUBLIC_KEY_BYTES: Final[int] = 32
 
 ED25519_SIGNATURE_BYTES: Final[int] = 64
 """Length of a raw Ed25519 signature."""
+
+# --- Identity (P2) -----------------------------------------------------------
+
+PEER_ATTESTATION_FRESHNESS_WINDOW_DAYS: Final[int] = 30
+"""Default validity window for a `PeerAttestation` (issued_at + 30d).
+CONSTANTS.md §Identity / P2 §4."""
+
+MIN_VOUCHERS_FOR_L3_PROMOTION: Final[int] = 3
+"""Default minimum number of valid peer attestations required to promote
+an `L2Identity` to `L3Identity`. CONSTANTS.md §Identity / P2 §2."""
+
+FEDERATION_ROOT_THRESHOLD_MVP: Final[int] = 2
+FEDERATION_ROOT_COUNT_MVP: Final[int] = 5
+"""MVP attestation root set: 2-of-5. CONSTANTS.md §Identity /
+T4_attestation_bootstrap."""
+
+FEDERATION_ROOT_THRESHOLD_TARGET: Final[int] = 3
+FEDERATION_ROOT_COUNT_TARGET: Final[int] = 9
+"""Long-term target attestation root set: 3-of-9. CONSTANTS.md §Identity /
+T4_attestation_bootstrap."""
+
+WASH_COST_FALSE_CLAIM_WEIGHT_DEFAULT: Final[float] = 1.0
+"""Multiplier on the per-history-entry forgery cost (P2 §3 / D004 §A).
+Tests vary this to verify cost increases monotonically with false-claim
+weight."""
+
+# Ed25519 multicodec prefix used by the W3C `did:key` method (§6.1).
+ED25519_MULTICODEC_PREFIX: Final[bytes] = b"\xed\x01"
