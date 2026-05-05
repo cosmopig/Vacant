@@ -7,25 +7,39 @@ Responsibility-layer residency form for AI agents — sits on top of A2A / MCP, 
 ## Status
 
 - **Theory**: V5 final, hardened through 3 rounds of codex adversarial review (`no fatal issues remain`). See `architecture/THEORY_V5.md`.
-- **Implementation**: 14-week MVP. See `architecture/tasks/` and `dispatch/` for breakdown.
+- **Implementation**: 14-week MVP. P0 bootstrap landed; component PRs P1–P7 in progress. See `architecture/tasks/` and `dispatch/` for breakdown.
 - **Docs site**: https://vacant.zeabur.app/ (separate repo: [vacant-docs-web](https://github.com/cosmopig/vacant-docs-web))
 
 ## Quick start
 
+Requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
+
 ```bash
-uv sync
-uv run pytest
-uv run streamlit run src/vacant/mvp/dashboard.py
+uv sync                              # install runtime + dev deps
+uv run vacant --help                 # CLI command tree (stubs until P1+)
+uv run pytest                        # unit + property tests
+uv run pytest --cov=vacant           # with coverage
+uv run ruff check . && uv run ruff format --check .
+uv run mypy src/
+```
+
+The Streamlit dashboard and demo scenarios land with P7:
+
+```bash
+uv run streamlit run src/vacant/mvp/dashboard.py   # P7
 ```
 
 ## Layout
 
-- `architecture/` — specs, theory, decisions, research
-- `dispatch/` — prompts for cloud Claude Code sessions (one per component)
+- `architecture/` — specs, theory, decisions, research (the **contract**; do not edit without an ADR)
+- `dispatch/` — prompts for cloud Claude Code sessions, one per component
 - `src/vacant/` — implementation
-- `tests/` — unit / property / integration
+  - `core/` — shared types (`VacantId`, `Logbook`, `ResidentForm`, …), constants, crypto
+  - `identity/ runtime/ reputation/ registry/ composite/ protocol/ substrate/ mvp/` — component modules
+  - `cli.py` — `vacant` console-script
+- `tests/` — `unit/`, `property/` (hypothesis), `integration/` (`pytest -m slow`)
 
-See [CLAUDE.md](CLAUDE.md) for the full implementation guide.
+See [CLAUDE.md](CLAUDE.md) for the full implementation guide and conventions.
 
 ## License
 

@@ -1,0 +1,109 @@
+[project]
+name = "vacant"
+version = "0.0.1"
+description = "Responsibility-layer residency form for AI agents (atop A2A / MCP)."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "TBD" }
+authors = [{ name = "cosmopig" }]
+dependencies = [
+    "pydantic>=2.5",
+    "pynacl>=1.5",
+    "cryptography>=42.0",
+    "httpx>=0.27",
+    "fastapi>=0.110",
+    "sqlmodel>=0.0.16",
+    "aiosqlite>=0.20",
+    "alembic>=1.13",
+    "structlog>=24.1",
+    "anthropic>=0.40",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=5.0",
+    "hypothesis>=6.100",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+demo = [
+    "streamlit>=1.34",
+    "pandas>=2.2",
+    "plotly>=5.21",
+]
+
+[project.scripts]
+vacant = "vacant.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vacant"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W", "I",
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "S",   # flake8-bandit
+    "RUF", # ruff-specific
+]
+ignore = [
+    "E501",  # line length handled by formatter
+    "S101",  # asserts are fine in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S311"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+disallow_any_generics = true
+warn_return_any = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+no_implicit_reexport = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["nacl.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+markers = [
+    "slow: integration scenarios that spin up multiple vacants in-process",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["src/vacant"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
