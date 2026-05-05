@@ -106,4 +106,6 @@ exclude_lines = [
     "pragma: no cover",
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
+    # Protocol method bodies are `...` and never execute at runtime.
+    '^\s*\.\.\.\s*$',
 ]

@@ -131,8 +131,13 @@ Wash cost formula and concrete coefficient values: see `components/P2_identity.m
 
 | Constant | Value | Citation |
 |---|---|---|
-| Merkle snapshot interval | 1 hour | P4 §3 |
-| Sequence-number monotonicity tolerance | 0 (strict) | P4 §3 |
+| `MERKLE_SNAPSHOT_INTERVAL_S` | `3600` (1 hour) | P4 §3 |
+| Sequence-number monotonicity tolerance | `0` (strict) | P4 §3 |
+| `EVENT_LOG_DEFAULT_PAGE_SIZE` / `EVENT_LOG_MAX_PAGE_SIZE` | `100` / `500` | P4 §3.2 |
+| `ANOMALY_REP_JUMP_THRESHOLD` / `ANOMALY_REP_JUMP_WINDOW_S` | `0.4` / `60` | P4 §3.2 anomaly table |
+| `ANOMALY_REVIEW_PER_TARGET_HOUR` | `5` | P4 §3.2 anomaly table |
+| `ANOMALY_SPAWN_PER_PARENT_HOUR` | `10` | P4 §3.2 anomaly table |
+| `REGISTRY_DB_DEFAULT_URL` | `sqlite+aiosqlite:///:memory:` | D006 §B (test default) |
 
 ## Composite (P5)
 

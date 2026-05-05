@@ -99,3 +99,22 @@ weight."""
 
 # Ed25519 multicodec prefix used by the W3C `did:key` method (§6.1).
 ED25519_MULTICODEC_PREFIX: Final[bytes] = b"\xed\x01"
+
+# --- Registry (P4) -----------------------------------------------------------
+
+MERKLE_SNAPSHOT_INTERVAL_S: Final[int] = 3600
+"""Hourly Merkle epoch sealing cadence. CONSTANTS.md §Registry / P4 §3."""
+
+EVENT_LOG_DEFAULT_PAGE_SIZE: Final[int] = 100
+EVENT_LOG_MAX_PAGE_SIZE: Final[int] = 500
+"""Read pagination caps for `/v1/event_log/{vid}` (P4 §3.2)."""
+
+ANOMALY_REP_JUMP_THRESHOLD: Final[float] = 0.4
+ANOMALY_REP_JUMP_WINDOW_S: Final[int] = 60
+ANOMALY_REVIEW_PER_TARGET_HOUR: Final[int] = 5
+ANOMALY_SPAWN_PER_PARENT_HOUR: Final[int] = 10
+"""Rule-based anomaly thresholds (P4 §3.2 anomaly table). Surfaced as
+signals; the engine raises a `triggered` flag rather than auto-blocking."""
+
+REGISTRY_DB_DEFAULT_URL: Final[str] = "sqlite+aiosqlite:///:memory:"
+"""Default SQLAlchemy async URL for in-memory testing. D006 §B."""
