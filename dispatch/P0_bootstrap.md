@@ -125,7 +125,27 @@ jobs:
 
 ruff + ruff-format + mypy hooks.
 
-### 9. README update
+### 9. `vacant` CLI scaffolding — `src/vacant/cli.py`
+
+A console_script entrypoint registered in `pyproject.toml` as `vacant = "vacant.cli:main"`.
+
+For P0, only stub the command tree so subsequent components can fill in:
+
+```
+vacant init <name>           # P2 will implement: create keypair + seed logbook
+vacant status                # P1 will implement: show state of local vacants
+vacant heartbeat             # P1
+vacant call <vid> <cap>      # P6
+vacant publish               # P4: flip LOCAL → ACTIVE
+vacant lineage <vid>         # P4: print parent chain
+vacant demo <scenario>       # P7
+```
+
+For now, each command prints `"Not yet implemented (Px)"` and exits 0. The CLI itself is wired up via `argparse` or `typer` (pick one and stick with it across components).
+
+Acceptance: `uv run vacant --help` prints the command tree.
+
+### 10. README update
 
 Update `README.md` Quick start section to be accurate after this PR.
 

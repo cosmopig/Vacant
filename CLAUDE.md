@@ -86,6 +86,27 @@ Vacant/
 - **Streamlit** for the P7 demo dashboard.
 - LLM substrate: abstract `SubstrateBackend`. Concrete impls: `AnthropicSubstrate` (uses `anthropic` SDK; default model `claude-sonnet-4-6`), `OllamaSubstrate`. Test impls: `MockSubstrate`, `DeterministicSubstrate`.
 
+## The `vacant` CLI
+
+P0 scaffolds `vacant` as a console_script. Each subsequent component PR fills in its commands:
+
+| Command | Owned by | Behavior |
+|---|---|---|
+| `vacant init <name>` | P2 | create keypair + seed logbook |
+| `vacant status [--all]` | P1 | show local vacants and their states |
+| `vacant heartbeat` | P1 | manually trigger a heartbeat tick |
+| `vacant call <vid> <capability>` | P6 | send a request to a vacant |
+| `vacant publish` | P4 | flip LOCAL → ACTIVE (publish halo) |
+| `vacant unpublish` | P4 | flip ACTIVE → LOCAL |
+| `vacant lineage <vid>` | P4 | print parent chain |
+| `vacant attest <target_vid> <claim>` | P2 | issue peer attestation |
+| `vacant demo <scenario>` | P7 | run a demo scenario |
+
+Each component PR must:
+1. Implement its commands (replace the `"Not yet implemented"` stub)
+2. Add `tests/unit/test_cli_<component>.py` with click/typer test runner
+3. Update `docs/CLI.md` (create if needed) with usage examples
+
 ## Common commands
 
 ```bash

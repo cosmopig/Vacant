@@ -32,9 +32,16 @@ P0 ── P1 ──┐
 | 4 | `P5_composite.md` | P1, P2, P4 | — | 2 |
 | 5 | `P7_mvp.md` | all above | — | 4 (= W11-14) |
 
+## Companion files
+
+- `HOW_TO_DISPATCH.md` — three modes (claude.ai/code, Agent SDK, GitHub Actions) + secrets + branch protection
+- `Padv_review.md` — adversarial review prompt to run after any PR touching identity/reputation/registry/composite/protocol
+- `P7_demo_seed.md` — fixed seeds + expected outputs for all 4 demo scenarios + 1 adversarial seed
+- `../architecture/CONSTANTS.md` — single source of truth for all numeric thresholds (every prompt cites this)
+
 ## How to dispatch
 
-For each stage, copy the prompt content into a new cloud Claude Code session pointed at this repo. Do not paraphrase. Each prompt assumes its predecessor's PR is merged unless explicitly told otherwise.
+For each stage, copy the prompt content into a new cloud Claude Code session pointed at this repo. Do not paraphrase. Each prompt assumes its predecessor's PR is merged unless explicitly told otherwise. See `HOW_TO_DISPATCH.md` for the three modes available and full operational checklist.
 
 After every merge, pull locally and verify:
 
