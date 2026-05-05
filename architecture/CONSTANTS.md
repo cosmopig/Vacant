@@ -9,8 +9,9 @@ All values were extracted from `THEORY_V5.md` and `components/P1-P7` on 2026-05-
 | Constant | Value | Citation |
 |---|---|---|
 | `HEARTBEAT_BASE_PERIOD_S` | configurable per substrate; demo: `60` | THEORY_V5 §3, P1 §D2 |
-| `HEARTBEAT_DECAYED_PERIOD_S` (Sunk) | `86400` (24h) | P1 §D5, line 59 |
-| `HEARTBEAT_SUNK_LIVENESS_PERIOD_S` | `600` (10 min) | THEORY_V5 §3, line 340 |
+| `HEARTBEAT_HIBERNATING_PERIOD_S` | `86400` (24h) | P1 §D6 line 73 |
+| `HEARTBEAT_DECAYED_PERIOD_S` (alias for HIBERNATING) | `86400` (24h) | kept for back-compat; see D003 |
+| `HEARTBEAT_SUNK_LIVENESS_PERIOD_S` | `600` (10 min) | THEORY_V5 §4.2 / §3 line 340 |
 | `IDEMPOTENCY_WINDOW_S` | `86400` (24h) | P1 §3.2 |
 | `STALE_AFTER_HIBERNATING_DAYS` | `30` | P1 §D6, line 156 |
 | `WARMUP_WINDOW_S` | `86400` (24h) | P1 §3.3.1, line 191 |

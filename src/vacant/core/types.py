@@ -336,6 +336,10 @@ class ResidentForm(BaseModel):
     substrate_spec: SubstrateSpec
     runtime_state: VacantState = VacantState.LOCAL
     capability_card: CapabilityCard | None = None
+    parent_id: VacantId | None = None
+    """Lineage anchor (THEORY_V5 §4.3). None for root / Path-Zero vacants.
+    Secondary parents (D4 lineage-merge) live in the BIRTH log entry payload —
+    see D003 ADR."""
 
     def verify_self(self) -> bool:
         """Cross-component integrity check."""

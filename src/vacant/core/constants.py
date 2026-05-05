@@ -16,13 +16,18 @@ HEARTBEAT_BASE_PERIOD_S: Final[int] = 60
 """Demo-default heartbeat period for an Active vacant.
 CONSTANTS.md §Lifecycle / P1 §D2."""
 
-HEARTBEAT_DECAYED_PERIOD_S: Final[int] = 86_400
-"""Heartbeat period for a Sunk vacant (decayed cadence).
-CONSTANTS.md §Lifecycle / P1 §D5 line 59."""
+HEARTBEAT_HIBERNATING_PERIOD_S: Final[int] = 86_400
+"""Heartbeat period while in HIBERNATING (one minimal attestation per 24h).
+CONSTANTS.md §Lifecycle / P1 §D6 line 73."""
+
+HEARTBEAT_DECAYED_PERIOD_S: Final[int] = HEARTBEAT_HIBERNATING_PERIOD_S
+"""Back-compat alias for HEARTBEAT_HIBERNATING_PERIOD_S (kept since P0).
+The "(Sunk)" label in CONSTANTS.md was an artefact of an earlier pass;
+THEORY_V5 §4.2 splits SUNK out at 10 min. See D003."""
 
 HEARTBEAT_SUNK_LIVENESS_PERIOD_S: Final[int] = 600
 """Sunk-state custody-attestation heartbeat period (10 min).
-CONSTANTS.md §Lifecycle / THEORY_V5 §3 line 340."""
+CONSTANTS.md §Lifecycle / THEORY_V5 §4.2 / §3 line 340."""
 
 IDEMPOTENCY_WINDOW_S: Final[int] = 86_400
 """Window in which a (vacant_id, request_id) tuple must dedupe.
