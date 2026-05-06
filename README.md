@@ -79,15 +79,37 @@ Three load-bearing decisions:
 
 ---
 
-## Try it (one line)
+## For Claude Code users (one command)
 
-```bash
-curl -LsSf https://raw.githubusercontent.com/cosmopig/Vacant/main/install.sh | bash
+If you already use [Claude Code](https://claude.com/claude-code), the
+fastest way to get a vacant is to install it as a plugin:
+
+```text
+/plugin marketplace add cosmopig/Vacant
+/plugin install vacant@cosmopig-vacant
 ```
 
-Installs [uv](https://docs.astral.sh/uv/) if missing, clones into `~/Vacant`, runs `uv sync`. Then:
+Restart your session and Claude Code can call the new
+**`vacant_describe`** and **`vacant_call`** MCP tools directly. The
+plugin manifest spawns
+[`uvx --from git+https://github.com/cosmopig/Vacant vacant mcp`](.claude-plugin/plugin.json)
+under the hood — nothing else to install.
+
+> No local vacant on disk yet? `vacant mcp` boots an *ephemeral* demo
+> identity (fresh keypair per launch, never persisted) so the plugin
+> works the moment you install it. Run `vacant init <name>` later for
+> a stable identity. See [`docs/INTEGRATION.md`](docs/INTEGRATION.md) §0
+> for the verification flow (`/mcp`, `vacant_describe`, …).
+
+---
+
+## Try it without Claude Code
+
+The same code works without the plugin. Two paths:
 
 ```bash
+# 1. curl + script (clone into ~/Vacant)
+curl -LsSf https://raw.githubusercontent.com/cosmopig/Vacant/main/install.sh | bash
 cd ~/Vacant
 
 # Run a demo scenario (deterministic mock substrate, no API key needed)
@@ -100,10 +122,10 @@ uv run vacant demo multilingual_translation       # cross-substrate dispatch
 uv run streamlit run src/vacant/mvp/dashboard.py
 ```
 
-**No-install alternative** — run a scenario without cloning anything:
-
 ```bash
+# 2. uvx — no clone, no install
 uvx --from git+https://github.com/cosmopig/Vacant vacant demo law_firm
+uvx --from git+https://github.com/cosmopig/Vacant vacant mcp   # raw stdio MCP server
 ```
 
 **With a real LLM — substrate matrix** (substrate is swappable; see THEORY_V5 §2 — the LLM is a *resource*, not the *identity*):

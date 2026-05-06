@@ -15,6 +15,70 @@ document is operational.
 
 ---
 
+## 0 · Claude Code plugin (one-command install)
+
+If your client is [Claude Code](https://claude.com/claude-code), skip
+the rest of this document for the first pass and install the plugin.
+The plugin manifest spawns `vacant mcp` over stdio via `uvx`, so you
+get the same `vacant_describe` / `vacant_call` MCP tools that §2.4
+walks through manually — without writing a config file.
+
+### 0.1 Install
+
+Inside any Claude Code session:
+
+```text
+/plugin marketplace add cosmopig/Vacant
+/plugin install vacant@cosmopig-vacant
+```
+
+Restart the session (close + reopen, or `/restart`) so Claude Code
+picks up the new MCP server.
+
+### 0.2 Verify
+
+```text
+/mcp
+```
+
+You should see a `vacant` MCP server listed with status `connected`.
+Then ask Claude:
+
+> *Use the vacant_describe tool to show me the local vacant's identity.*
+
+The response is a JSON dict with `vacant_id`, `capability_text`, and
+(if you've run `vacant init` locally) on-disk halo metadata. If you
+haven't run `vacant init`, the identity is *ephemeral* — fresh
+keypair per launch — and the server's stderr shows a `WARN:` line.
+
+### 0.3 Stable identity (optional)
+
+```bash
+uv tool install vacant   # or: brew install uv ; uvx pip install vacant
+vacant init alice        # creates ~/.vacant/alice/ + stores the seed in your OS keyring
+```
+
+The next time Claude Code restarts the plugin's MCP subprocess,
+`vacant mcp` picks up `~/.vacant/alice/` automatically. See
+[`SECURITY.md`](../SECURITY.md) §"Local key storage" for the threat
+model on the keyring vs. `--insecure-demo` paths.
+
+### 0.4 Troubleshooting
+
+- **`/mcp` doesn't list `vacant`.** Confirm `uvx` is on
+  `$PATH` from inside Claude Code's shell (some GUI launchers don't
+  inherit your interactive shell's path). Check the session log; the
+  most common error is `uvx: command not found`. Fix: install
+  [uv](https://docs.astral.sh/uv/) and `/plugin reload vacant`.
+- **First launch is slow.** First-time `uvx` resolves dependencies
+  from PyPI (20–60 seconds on a slow network). Subsequent launches
+  are instant (uv caches).
+- **You see `WARN: no local vacant on disk`.** Expected — see §0.3.
+- **You want to drive the vacant from your own MCP client.** Skip the
+  plugin path; jump to §2.4 below for a manual `mcp.json` example.
+
+---
+
 ## 1 · Prerequisites
 
 | Tool | Version | Why |

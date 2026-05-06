@@ -1,0 +1,16 @@
+{
+  "name": "cosmopig-vacant",
+  "owner": {
+    "name": "cosmopig",
+    "url": "https://github.com/cosmopig"
+  },
+  "plugins": [
+    {
+      "name": "vacant",
+      "source": "./",
+      "description": "嫁接到 Claude Code 的 responsibility-layer agent",
+      "version": "0.1.0",
+      "category": "agent-network"
+    }
+  ]
+}

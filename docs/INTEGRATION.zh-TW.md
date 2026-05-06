@@ -14,6 +14,76 @@ MCP `sampling/createMessage` 借用呼叫端 LLM 的那個 substrate。
 
 ---
 
+## 0 · Claude Code plugin（一條指令裝好）
+
+如果你的客戶端是 [Claude Code](https://claude.com/claude-code)，第
+一次接觸的話請直接走 plugin 流程、跳過底下大半的手動 config。Plugin
+manifest 透過 `uvx` spawn `vacant mcp` 走 stdio，跑出來的 MCP tool
+跟 §2.4 手動設定 `mcp.json` 之後看到的 `vacant_describe` /
+`vacant_call` 完全一樣 — 但你不用寫一行 config。
+
+### 0.1 安裝
+
+在任何 Claude Code session 裡：
+
+```text
+/plugin marketplace add cosmopig/Vacant
+/plugin install vacant@cosmopig-vacant
+```
+
+之後 restart session（關掉重開、或 `/restart`），讓 Claude Code
+load 新的 MCP server。
+
+### 0.2 確認
+
+```text
+/mcp
+```
+
+你應該會看到一個 `vacant` MCP server，狀態 `connected`。沒看到的話
+跳到 §0.4 troubleshoot。
+
+接著用自然語言跟 Claude 說：
+
+> *用 vacant_describe tool 給我看一下本地 vacant 的身份。*
+
+Claude 會 call `vacant_describe`；回傳是一個 JSON dict，含 `vacant_id`、
+`capability_text`，如果你跑過 `vacant init` 也會帶 on-disk halo
+metadata。如果還沒 `vacant init`，回傳會是 *ephemeral* 身份 — 每
+launch 重新 keygen — server 的 stderr 會出現一行 `WARN:` 告訴你。
+
+### 0.3 穩定身份（可選）
+
+Ephemeral 身份夠你做「這東西能跑嗎」的測試，但每次 Claude Code
+restart plugin 的 MCP subprocess 就會換一把 key。要永久身份的話：
+
+```bash
+uv tool install vacant   # 或：brew install uv ; uvx pip install vacant
+vacant init alice        # 建 ~/.vacant/alice/ + 把 seed 存進 OS keyring
+```
+
+下次 Claude Code restart plugin 時，`vacant mcp` 會自動撿
+`~/.vacant/alice/` — 同一個身份、同一份 logbook、跨 session 持續。
+Threat model 見 [`SECURITY.md`](../SECURITY.md) §"Local key storage"
+（keyring 對 `--insecure-demo` 的取捨）。
+
+### 0.4 Troubleshooting
+
+- **`/mcp` 沒列出 `vacant`。** 先確認 Claude Code 的 shell environment
+  裡 `$PATH` 找得到 `uvx`（GUI 啟動的 client 有時不繼承 interactive
+  shell 的 path）。看 Claude Code 的 session log，最常見錯誤是
+  `uvx: command not found`。修法：裝 [uv](https://docs.astral.sh/uv/)
+  然後 `/plugin reload vacant`。
+- **`vacant mcp` 第一次起來卡住。** 第一次 `uvx` 會從 PyPI 解所有
+  dependency，慢的網路 20–60 秒。之後 uv cache 過了就秒開。
+- **看到 `WARN: no local vacant on disk`。** 這是預期行為 — 見上面
+  §0.3。要消掉這 WARN，跑一次 `vacant init <name>`，下次 plugin
+  reload 就會撿到。
+- **想用自己的 MCP client（不是 Claude Code）call vacant。** 跳過
+  plugin，直接看 §2.4 手動 `mcp.json` 範例。
+
+---
+
 ## 1 · 先決條件
 
 | 工具 | 版本 | 用途 |
