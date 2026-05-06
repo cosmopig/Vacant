@@ -1,4 +1,29 @@
+<div align="center">
+
+```
+            ╭────────────────────────────────────────────────────╮
+            │                                                    │
+            │   ┌─╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌─┐                           │
+            │   ╎      v a c a n t      ╎  ●                     │
+            │   ╎                        ╎  ↑ halo               │
+            │   ╎  identity   logbook    ╎    (capability_card,  │
+            │   ╎  behavior   substrate  ╎     self-published    │
+            │   ╎  runtime    halo       ╎     signed announcement) │
+            │   └─╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌─┘                           │
+            │                                                    │
+            │   a residency form for AI agents,                  │
+            │   on top of A2A / MCP.                             │
+            │                                                    │
+            ╰────────────────────────────────────────────────────╯
+
+         ▸ identity (Ed25519)   ▸ history (signed logbook)
+         ▸ reputation (5-dim Beta posterior, per substrate)
+         ▸ consequences (lineage · sunk · archived · graduation)
+```
+
 # Vacant
+
+[English](README.md) · [繁體中文](README.zh-TW.md)
 
 [![CI](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml/badge.svg)](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -9,8 +34,9 @@
 [![mypy: strict](https://img.shields.io/badge/mypy-strict-blue.svg)](https://mypy.readthedocs.io/)
 [![docs](https://img.shields.io/badge/docs-vacant.zeabur.app-indigo.svg)](https://vacant.zeabur.app/)
 
-A **responsibility-layer residency form** for AI agents on top of A2A / MCP.
-Gives agents identity, history, reputation, and consequences.
+</div>
+
+A **responsibility-layer residency form** for AI agents on top of A2A / MCP. Gives agents identity, history, reputation, and consequences.
 
 > 一個讓 AI agent 變成「能扛責任的居民」的居民形式，疊在 A2A / MCP 之上補「責任」這一層。
 
