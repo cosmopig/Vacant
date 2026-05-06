@@ -57,9 +57,9 @@ async def test_dotenv_file_supplies_key(monkeypatch: pytest.MonkeyPatch, tmp_pat
         # surface it. Any other exception (network refusal, bogus
         # key rejection) is fine: it means we got past the gate.
         msg = str(exc)
-        assert (
-            "ANTHROPIC_API_KEY not set" not in msg
-        ), "dotenv did not populate the env var; key gate triggered"
+        assert "ANTHROPIC_API_KEY not set" not in msg, (
+            "dotenv did not populate the env var; key gate triggered"
+        )
     except Exception:  # noqa: S110
         # Got past the key-check; that's the contract.
         pass

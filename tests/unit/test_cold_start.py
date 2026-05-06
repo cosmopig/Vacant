@@ -204,6 +204,6 @@ async def test_cold_start_simulation_new_gets_traction() -> None:
                 source="peer_review",
             )
 
-    assert (
-        new_vacant_calls > 0
-    ), "new vacant must be selected at least once in 100 ticks (UCB exploration)"
+    assert new_vacant_calls > 0, (
+        "new vacant must be selected at least once in 100 ticks (UCB exploration)"
+    )
