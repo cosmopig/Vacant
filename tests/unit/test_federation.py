@@ -117,8 +117,12 @@ def test_rotate_root_swaps_with_quorum() -> None:
     new_sk, new_vk = keygen()
     new_id = VacantId.from_verify_key(new_vk)
     sigs = [
-        sign_rotation(root=ids[0], root_signing_key=sks[0], old_root=ids[2], new_root=new_id),
-        sign_rotation(root=ids[1], root_signing_key=sks[1], old_root=ids[2], new_root=new_id),
+        sign_rotation(
+            rootset=rs, root=ids[0], root_signing_key=sks[0], old_root=ids[2], new_root=new_id
+        ),
+        sign_rotation(
+            rootset=rs, root=ids[1], root_signing_key=sks[1], old_root=ids[2], new_root=new_id
+        ),
     ]
     rotated = rotate_root(rs, old_root=ids[2], new_root=new_id, signatures=sigs)
     assert new_id in rotated.roots
@@ -131,7 +135,9 @@ def test_rotate_root_rejects_below_quorum() -> None:
     rs = RootSet(threshold=2, roots=tuple(ids))
     new_id = VacantId.from_verify_key(keygen()[1])
     sigs = [
-        sign_rotation(root=ids[0], root_signing_key=sks[0], old_root=ids[2], new_root=new_id),
+        sign_rotation(
+            rootset=rs, root=ids[0], root_signing_key=sks[0], old_root=ids[2], new_root=new_id
+        ),
     ]
     with pytest.raises(FederationError):
         rotate_root(rs, old_root=ids[2], new_root=new_id, signatures=sigs)
@@ -151,8 +157,12 @@ def test_rotate_root_rejects_duplicate_new_root() -> None:
     ids, sks = _make_roots(5)
     rs = RootSet(threshold=2, roots=tuple(ids))
     sigs = [
-        sign_rotation(root=ids[0], root_signing_key=sks[0], old_root=ids[2], new_root=ids[3]),
-        sign_rotation(root=ids[1], root_signing_key=sks[1], old_root=ids[2], new_root=ids[3]),
+        sign_rotation(
+            rootset=rs, root=ids[0], root_signing_key=sks[0], old_root=ids[2], new_root=ids[3]
+        ),
+        sign_rotation(
+            rootset=rs, root=ids[1], root_signing_key=sks[1], old_root=ids[2], new_root=ids[3]
+        ),
     ]
     with pytest.raises(FederationError):
         rotate_root(rs, old_root=ids[2], new_root=ids[3], signatures=sigs)

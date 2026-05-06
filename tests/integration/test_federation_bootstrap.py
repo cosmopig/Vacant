@@ -86,8 +86,12 @@ def test_pre_rotation_attestation_still_verifies_against_prior_rootset() -> None
     new_sk, new_vk = keygen()
     new_id = VacantId.from_verify_key(new_vk)
     rotation_sigs = [
-        sign_rotation(root=ids[0], root_signing_key=sks[0], old_root=ids[2], new_root=new_id),
-        sign_rotation(root=ids[1], root_signing_key=sks[1], old_root=ids[2], new_root=new_id),
+        sign_rotation(
+            rootset=rs, root=ids[0], root_signing_key=sks[0], old_root=ids[2], new_root=new_id
+        ),
+        sign_rotation(
+            rootset=rs, root=ids[1], root_signing_key=sks[1], old_root=ids[2], new_root=new_id
+        ),
     ]
     rotated = rotate_root(rs, old_root=ids[2], new_root=new_id, signatures=rotation_sigs)
 

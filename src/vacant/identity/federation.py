@@ -41,10 +41,18 @@ __all__ = [
 
 @dataclass(frozen=True)
 class RootSet:
-    """An (M, N) root set for federated attestations."""
+    """An (M, N) root set for federated attestations.
+
+    `revision` is a monotonic counter incremented by every successful
+    rotation. It exists solely to make the state hash strictly
+    increasing so that "rotate-out-then-back-in" sequences (which
+    return to the same membership) still produce a distinct state hash
+    and therefore reject replayed rotation signatures (D005 §1).
+    """
 
     threshold: int
     roots: tuple[VacantId, ...] = field(default_factory=tuple)
+    revision: int = 0
 
     def __post_init__(self) -> None:
         if self.threshold < 1:
@@ -53,6 +61,8 @@ class RootSet:
             raise FederationError(f"RootSet has {len(self.roots)} roots, need >= {self.threshold}")
         if len(set(self.roots)) != len(self.roots):
             raise FederationError("RootSet contains duplicate roots")
+        if self.revision < 0:
+            raise FederationError(f"RootSet.revision must be >= 0, got {self.revision}")
 
     @property
     def n(self) -> int:
@@ -60,6 +70,27 @@ class RootSet:
 
     def contains(self, vid: VacantId) -> bool:
         return vid in self.roots
+
+    def state_hash(self) -> bytes:
+        """BLAKE2b digest binding rotation signatures to *this* rootset state.
+
+        Without this binding, a quorum's rotation signature for `(old, new)`
+        could be replayed against any future rootset that still contains
+        `old` and lacks `new` — including a state arrived at by re-adding
+        `old` after a previous rotation removed it (Padv-P2 finding D005
+        §1). Including threshold + sorted pubkeys + monotonic `revision`
+        makes signatures single-state even across rotate-out-then-back-in
+        sequences.
+        """
+        return hash_blake2b(
+            b"vacant:rootset:state"
+            + b"\x1f"
+            + str(self.threshold).encode("utf-8")
+            + b"\x1f"
+            + str(self.revision).encode("utf-8")
+            + b"\x1f"
+            + b"\x1f".join(sorted(r.pubkey_bytes for r in self.roots))
+        )
 
 
 def default_mvp_rootset(*, vacant_ids: list[VacantId] | None = None) -> RootSet:
@@ -145,6 +176,22 @@ def verify_federated(attestation: FederatedAttestation, rootset: RootSet) -> boo
 # --- Rotation ----------------------------------------------------------------
 
 
+def _rotation_payload(rootset: RootSet, old_root: VacantId, new_root: VacantId) -> bytes:
+    """Canonical bytes signed during a rotation. Bound to the *current*
+    rootset state so signatures cannot replay against a future state that
+    happens to satisfy the same `(old_root, new_root)` precondition
+    (Padv-P2 finding D005)."""
+    return hash_blake2b(
+        b"vacant:federation:rotate"
+        + b"\x1f"
+        + rootset.state_hash()
+        + b"\x1f"
+        + old_root.pubkey_bytes
+        + b"\x1f"
+        + new_root.pubkey_bytes
+    )
+
+
 def rotate_root(
     rootset: RootSet,
     *,
@@ -156,26 +203,22 @@ def rotate_root(
 
     The rotation must itself be authorised by ≥ `rootset.threshold` valid
     signatures from the *current* rootset over the rotation payload
-    (`old_root || new_root`). Callers are responsible for collecting
-    those signatures from the current quorum.
+    (`state_hash || old_root || new_root`). Callers are responsible for
+    collecting those signatures from the current quorum.
 
     Constraints:
     - `old_root` must be in `rootset`
     - `new_root` must NOT already be in `rootset` (rotation is a swap, not a duplicate)
     - rotation signatures must reach quorum under the *current* rootset
+    - rotation signatures are bound to the current rootset state hash and
+      cannot be replayed against a different rootset (Padv-P2 / D005).
     """
     if not rootset.contains(old_root):
         raise FederationError(f"rotate_root: {old_root} is not in the current rootset")
     if rootset.contains(new_root):
         raise FederationError(f"rotate_root: {new_root} is already in the rootset")
 
-    payload = hash_blake2b(
-        b"vacant:federation:rotate"
-        + b"\x1f"
-        + old_root.pubkey_bytes
-        + b"\x1f"
-        + new_root.pubkey_bytes
-    )
+    payload = _rotation_payload(rootset, old_root, new_root)
     seen: set[VacantId] = set()
     for rs in signatures:
         if rs.root in seen or not rootset.contains(rs.root):
@@ -187,23 +230,23 @@ def rotate_root(
             f"rotate_root: only {len(seen)} valid quorum signatures, need {rootset.threshold}"
         )
     new_roots = tuple(new_root if r == old_root else r for r in rootset.roots)
-    return replace(rootset, roots=new_roots)
+    return replace(rootset, roots=new_roots, revision=rootset.revision + 1)
 
 
 def sign_rotation(
     *,
+    rootset: RootSet,
     root: VacantId,
     root_signing_key: SigningKey,
     old_root: VacantId,
     new_root: VacantId,
 ) -> RootSignature:
-    """Helper: build a single root's signature on a rotation request."""
-    payload = hash_blake2b(
-        b"vacant:federation:rotate"
-        + b"\x1f"
-        + old_root.pubkey_bytes
-        + b"\x1f"
-        + new_root.pubkey_bytes
-    )
+    """Helper: build a single root's signature on a rotation request.
+
+    Includes `rootset` so the signature is bound to a specific rootset
+    state — a quorum's rotation signature is single-use against the
+    rootset it was collected for (Padv-P2 / D005).
+    """
+    payload = _rotation_payload(rootset, old_root, new_root)
     sig = sign(root_signing_key, payload)
     return RootSignature(root=root, signature=sig)
