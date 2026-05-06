@@ -524,6 +524,72 @@ def call_cmd(
     typer.echo(json.dumps(out, sort_keys=True))
 
 
+# -- serve --------------------------------------------------------------------
+
+
+@app.command("serve")
+def serve_cmd(
+    port: int = typer.Option(8443, "--port", "-p", help="HTTP bind port."),
+    host: str = typer.Option("127.0.0.1", "--host", help="HTTP bind host."),
+    name: str | None = typer.Option(None, "--name", help="Local vacant name."),
+    mcp: bool = typer.Option(False, "--mcp", help="Also expose an MCP stdio server."),
+    endpoint: str | None = typer.Option(
+        None,
+        "--endpoint",
+        help="Public endpoint URL to advertise in /card (defaults to meta.endpoint).",
+    ),
+) -> None:
+    """Start an HTTP A2A server for the local vacant. (P6)
+
+    The server listens on `host:port` and accepts inbound A2A
+    `message/send` requests at `/a2a/message/send`. The default
+    behaviour callback echoes the request text back, signed by the
+    vacant's own key — sufficient for the live-network acceptance test.
+
+    `--mcp` additionally launches an MCP stdio server in a worker
+    thread. This is what closes the "嫁接到客戶端" thesis claim: the
+    same vacant accepts both A2A HTTP and MCP stdio simultaneously.
+    """
+    import uvicorn
+
+    from vacant.cli.server import build_serve_app
+
+    n = _resolve_name(name)
+    bundle = build_serve_app(n, endpoint=endpoint)
+
+    if mcp:
+        # Lazy import — only paid for when --mcp is set.
+        import threading
+
+        from vacant.cli.mcp_server import run_mcp_stdio_server
+
+        t = threading.Thread(
+            target=run_mcp_stdio_server,
+            kwargs={
+                "form": bundle.form,
+                "signing_key": bundle.signing_key,
+                "replay_store": bundle.replay_store,
+            },
+            daemon=True,
+            name="vacant-mcp-stdio",
+        )
+        t.start()
+
+    typer.echo(
+        json.dumps(
+            {
+                "name": n,
+                "vacant_id": bundle.form.identity.hex(),
+                "host": host,
+                "port": port,
+                "mcp": mcp,
+            },
+            sort_keys=True,
+        )
+    )
+    uvicorn.run(bundle.app, host=host, port=port, log_level="warning")
+
+
 # -- demo ---------------------------------------------------------------------
 
 
