@@ -1,0 +1,27 @@
+{
+  "name": "vacant",
+  "version": "0.1.0",
+  "description": "Responsibility-layer residency form for AI agents — identity, history, reputation, consequences",
+  "author": "cosmopig",
+  "license": "MIT",
+  "homepage": "https://github.com/cosmopig/Vacant",
+  "mcpServers": {
+    "vacant": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/cosmopig/Vacant", "vacant", "mcp"]
+    }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo Vacant plugin ready: vacant MCP server registered"
+          }
+        ]
+      }
+    ]
+  }
+}
