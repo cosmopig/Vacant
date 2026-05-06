@@ -1,5 +1,12 @@
 # Vacant
 
+[![CI](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml/badge.svg)](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
+[![uv](https://img.shields.io/badge/managed%20by-uv-261230)](https://docs.astral.sh/uv/)
+[![tests: 736](https://img.shields.io/badge/tests-736%20passing-brightgreen.svg)](#)
+[![docs](https://img.shields.io/badge/docs-vacant.zeabur.app-indigo.svg)](https://vacant.zeabur.app/)
+
 Responsibility-layer residency form for AI agents — sits on top of A2A / MCP, gives agents identity, history, reputation, and consequences. Undergraduate thesis project, 2026.
 
 > 一個讓 AI agent 變成「能扛責任的居民」的居民形式，疊在 A2A / MCP 之上補「責任」這一層。
@@ -63,4 +70,4 @@ See [CLAUDE.md](CLAUDE.md) for the full implementation guide and conventions.
 
 ## License
 
-TBD.
+[MIT](LICENSE).
