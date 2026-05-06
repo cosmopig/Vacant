@@ -76,7 +76,7 @@ Replace or supplement `tests/integration/test_a2a_full.py`. The current test use
 4. Asserts the request appears in A's logbook with valid signature, response in B's logbook
 5. Tear down both subprocesses
 
-`@pytest.mark.slow`. This is what the user shows the defense committee as "live network".
+`@pytest.mark.slow`. This is what the user shows during the demo presentation / 答辯 as "live network".
 
 ### A5 — A2A endpoint full envelope validation (`F3`)
 
@@ -261,9 +261,9 @@ Update both `README.md` and `README.zh-TW.md`:
 
 ---
 
-## Group C — Defense narrative cleanup (cross-cutting)
+## Group C — Demo narrative cleanup (cross-cutting)
 
-After A and B merge, these are smaller cleanups that make the defense walkthrough tight.
+After A and B merge, these are smaller cleanups that make the demo presentation / 答辯 walkthrough tight.
 
 ### C1 — Single citable enforcement points
 
@@ -287,7 +287,7 @@ For each load-bearing decision in CLAUDE.md "Load-bearing theory decisions", mak
 1. **PR-A: Live-network capability** (Group A, ~2 weeks of work, ~3000-4000 LOC)
 2. **PR-D: Substrate diversity + client-inherited** (Group D, ~1 week, ~1500 LOC). D2 (`client-inherited` via MCP `sampling/createMessage`) is what closes the "嫁接到客戶端" core claim.
 3. **PR-B: Demo fidelity** (Group B, ~1.5 weeks, ~2000 LOC)
-4. **PR-C: Defense narrative** (Group C, ~3 days, ~500 LOC)
+4. **PR-C: Demo narrative** (Group C, ~3 days, ~500 LOC)
 
 If time-constrained, prioritize A1 + A2 + A3 + A4 + D2 (live CLI + serve + real MCP + live e2e + client-inherited substrate) — these together are the literal "嫁接到客戶端" deliverables the core claims. D1 (more provider substrates) and Group B/C can degrade gracefully.
 
