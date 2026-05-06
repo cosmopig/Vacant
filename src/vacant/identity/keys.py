@@ -65,22 +65,64 @@ _FILEVAULT_SALT_BYTES = 16
 class KeyVault(ABC):
     """Abstract key-of-record store. Real HSM / TEE impls plug in here.
 
-    All operations are sync (vaults are typically tiny local stores; making
-    them async forces every caller into asyncio for no benefit). I/O-heavy
-    impls can wrap themselves in `asyncio.to_thread` at the call site.
+    All operations are sync (vaults are typically tiny local stores;
+    making them async forces every caller into asyncio for no
+    benefit). I/O-heavy implementations can wrap themselves in
+    `asyncio.to_thread` at the call site.
     """
 
     @abstractmethod
-    def store(self, key_id: str, signing_key: SigningKey) -> None: ...
+    def store(self, key_id: str, signing_key: SigningKey) -> None:
+        """Persist `signing_key` under `key_id`.
+
+        Args:
+            key_id: Non-empty identifier. Implementations may impose
+                additional restrictions (e.g. `FileVault` rejects
+                separators).
+            signing_key: The Ed25519 private key to store.
+
+        Raises:
+            KeyVaultError: On invalid `key_id` or write failure.
+        """
 
     @abstractmethod
-    def load(self, key_id: str) -> SigningKey: ...
+    def load(self, key_id: str) -> SigningKey:
+        """Retrieve the signing key registered under `key_id`.
+
+        Args:
+            key_id: Identifier previously passed to `store()`.
+
+        Returns:
+            The reconstituted `SigningKey`.
+
+        Raises:
+            KeyNotFoundError: If `key_id` is not registered.
+            KeyVaultError: On decryption / decode failure (e.g.
+                wrong passphrase for `FileVault`).
+        """
 
     @abstractmethod
-    def delete(self, key_id: str) -> None: ...
+    def delete(self, key_id: str) -> None:
+        """Remove `key_id` from the vault.
+
+        Args:
+            key_id: Identifier previously passed to `store()`.
+
+        Raises:
+            KeyNotFoundError: If `key_id` is not registered.
+        """
 
     @abstractmethod
-    def has(self, key_id: str) -> bool: ...
+    def has(self, key_id: str) -> bool:
+        """Check whether `key_id` is registered.
+
+        Args:
+            key_id: Identifier to look up.
+
+        Returns:
+            `True` if `load(key_id)` would succeed, `False` otherwise.
+            Implementations should not raise for missing keys here.
+        """
 
 
 class InMemoryVault(KeyVault):
@@ -114,8 +156,17 @@ class FileVault(KeyVault):
     """File-backed vault, AES-GCM under PBKDF2 via `cryptography.fernet`.
 
     The passphrase is supplied at construction (callers should source it
-    from an env var or OS keyring; the vault never logs or stringifies it).
-    Each `key_id` becomes one file `<root>/<key_id>.vault`.
+    from an env var or OS keyring; the vault never logs or stringifies
+    it). Each `key_id` becomes one file `<root>/<key_id>.vault`. PBKDF2
+    iteration count tracks 2026 OWASP guidance for SHA-256 (>= 600k);
+    rotating that constant requires re-encrypting existing blobs.
+
+    Args:
+        root: Directory to write vault files into. Created if missing.
+        passphrase: Non-empty secret. `str` is encoded as UTF-8.
+
+    Raises:
+        KeyVaultError: If `passphrase` is empty.
     """
 
     SUFFIX = ".vault"
@@ -195,8 +246,16 @@ class FileVault(KeyVault):
 
 @dataclass(frozen=True)
 class RotationRecord:
-    """Result of `rotate_key`. The new keypair is returned to the caller;
-    the `entry` is the `KEY_ROTATION` log entry that has been appended.
+    """Result of `rotate_key`.
+
+    Attributes:
+        new_signing_key: The freshly-generated private key. Caller is
+            responsible for storing it in the vault under whatever
+            `key_id` they want.
+        new_verify_key: Public side of `new_signing_key`.
+        entry: The `KEY_ROTATION` log entry that was appended to the
+            logbook in this same call. Its `payload` carries the
+            old/new pubkey hashes and the new key's consent signature.
     """
 
     new_signing_key: SigningKey
@@ -213,13 +272,27 @@ def rotate_key(
     old_signing_key: SigningKey,
     logbook: Logbook,
 ) -> RotationRecord:
-    """Atomic rotation: generate a new keypair, write a `KEY_ROTATION`
-    entry to `logbook` carrying signatures from BOTH keys.
+    """Rotate to a fresh keypair, atomically appending a chain-of-custody entry.
 
-    Why double-signature: the old key proves it consented to handing off
-    custody; the new key proves it accepted (i.e. nobody can replay an
-    old key's "rotate to X" attestation against an unwilling X). A future
-    verifier can reconstruct the rotation chain from the logbook alone.
+    The new entry is signed by both keys: the old key proves it
+    consented to handing off custody (it owns the entry signature); the
+    new key proves it accepted (its consent signature lives inside the
+    payload). Without the new-side consent, a leaked old key could
+    rotate-to-attacker against an unwilling target. With it, a future
+    verifier can reconstruct the entire rotation chain from the logbook
+    alone — no out-of-band state needed.
+
+    Args:
+        old_signing_key: The currently-active private key. Will sign
+            the resulting log entry.
+        logbook: The vacant's logbook. A new `KEY_ROTATION` entry is
+            appended in-place.
+
+    Returns:
+        A `RotationRecord` carrying the new keypair and the appended
+        log entry. The caller MUST persist `new_signing_key` (e.g.
+        `vault.store(key_id, record.new_signing_key)`) and stop using
+        `old_signing_key` for new entries.
     """
     old_vk = old_signing_key.verify_key
     new_sk, new_vk = keygen()
@@ -244,7 +317,12 @@ def rotate_key(
 
 @dataclass(frozen=True)
 class RevocationRecord:
-    """Terminal record for a revoked key."""
+    """Terminal record for a revoked key.
+
+    Attributes:
+        entry: The appended `KEY_REVOCATION` log entry.
+        reason: Free-form explanation (echoed from the call site).
+    """
 
     entry: LogEntry
     reason: str
@@ -256,11 +334,28 @@ def revoke_key(
     logbook: Logbook,
     reason: str,
 ) -> RevocationRecord:
-    """Append a terminal `KEY_REVOCATION` entry signed by the key being
-    revoked. Callers MUST stop signing with this key afterwards; this is
-    a contract, not a runtime guard (the signing key object itself is
-    still cryptographically capable of producing valid signatures, which
-    is exactly why we make the revocation visible in the logbook).
+    """Append a terminal `KEY_REVOCATION` entry signed by the key itself.
+
+    The signing key remains cryptographically capable of producing
+    valid signatures after this call — that's precisely why the
+    revocation is published into the auditable logbook: future
+    verifiers consult `is_key_revoked()` and reject any subsequent
+    signatures from this key. Callers MUST stop signing with the
+    revoked key; this is a contract, not a runtime guard.
+
+    Args:
+        signing_key: The key being revoked. Signs its own revocation.
+        logbook: The vacant's logbook. A new `KEY_REVOCATION` entry is
+            appended in-place.
+        reason: Non-empty explanation. Stored verbatim in the entry
+            payload.
+
+    Returns:
+        A `RevocationRecord` carrying the appended entry and the
+        reason.
+
+    Raises:
+        KeyRevokedError: If `reason` is blank or whitespace-only.
     """
     if not reason.strip():
         raise KeyRevokedError("revoke_key: reason must be non-empty")
@@ -273,7 +368,20 @@ def revoke_key(
 
 
 def is_key_revoked(logbook: Logbook, vk: VerifyKey) -> bool:
-    """True iff a `KEY_REVOCATION` entry naming `vk` appears in `logbook`."""
+    """Check the logbook for a `KEY_REVOCATION` entry naming `vk`.
+
+    Args:
+        logbook: A logbook that has already been verified
+            (`verify_chain` / `verify_chain_or_raise`); this function
+            does not re-verify, it only scans the kind + payload.
+        vk: The verify-key whose pubkey_hash is being checked.
+
+    Returns:
+        `True` iff at least one entry of kind `KEY_REVOCATION` whose
+        payload's `pubkey_hash` matches `vk` appears anywhere in
+        `logbook.entries`. Order is irrelevant — once revoked, always
+        revoked.
+    """
     target = _pubkey_hash(vk).hex()
     for entry in logbook.entries:
         if entry.kind == KEY_REVOCATION_KIND and entry.payload.get("pubkey_hash") == target:
