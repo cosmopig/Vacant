@@ -1,0 +1,16 @@
+{
+  "release-type": "python",
+  "packages": {
+    ".": {
+      "package-name": "vacant",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "toml",
+          "path": "pyproject.toml",
+          "jsonpath": "$.project.version"
+        }
+      ]
+    }
+  }
+}
