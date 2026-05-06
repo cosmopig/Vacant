@@ -1,0 +1,12 @@
+[[mcp_servers]]
+name = "vacant"
+command = "uvx"
+args = [
+    "--from",
+    "git+https://github.com/cosmopig/Vacant.git",
+    "vacant",
+    "mcp",
+]
+
+[mcp_servers.env]
+VACANT_NAME = "alice"
