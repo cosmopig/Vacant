@@ -26,6 +26,9 @@ build/
 dist/
 *.egg
 
+# mkdocs build output (CI deploys via gh-deploy; site/ is never checked in)
+/site/
+
 # Secrets & local config
 .env
 .env.*
