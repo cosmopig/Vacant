@@ -194,16 +194,24 @@ async def test_serve_rejects_bad_jsonrpc(
 
 
 def test_serve_help_lists_options() -> None:
-    """`vacant serve --help` advertises the documented flags."""
-    result = subprocess.run(
-        [sys.executable, "-m", "vacant.cli", "serve", "--help"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert result.returncode == 0, result.stdout + result.stderr
+    """`vacant serve --help` advertises the documented flags.
+
+    Uses `CliRunner` rather than `subprocess.run` because Typer's
+    rich-formatted help wraps long lines and inserts ANSI escapes when
+    stdout is detected as a terminal (which CI sometimes is, depending
+    on runner). `CliRunner` invokes the command in-process with stable
+    plain output.
+    """
+    from typer.testing import CliRunner
+
+    from vacant.cli import app
+
+    result = CliRunner().invoke(app, ["serve", "--help"])
+    assert result.exit_code == 0, result.stdout
     out = result.stdout
-    for flag in ("--port", "--host", "--name", "--mcp"):
+    for flag in ("port", "host", "name", "mcp"):
+        # Substring without dashes — Typer can wrap "--port" across two
+        # lines under tight terminal widths, which breaks `"--port" in out`.
         assert flag in out
 
 
