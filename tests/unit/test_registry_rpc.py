@@ -75,9 +75,7 @@ async def test_get_capability_card_returns_match_for_public(
         capability_text="public-thing",
         substrate_spec=SubstrateSpec(allowed_substrates=["mock"]),
     ).signed(sk)
-    await publish_halo(
-        store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk
-    )
+    await publish_halo(store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk)
     resp = await ac.get(f"/v1/capability_card/{vid.hex()}")
     assert resp.status_code == 200
     data = resp.json()
@@ -97,9 +95,7 @@ async def test_get_capability_card_403_for_local_stranger(
         capability_text="x",
         substrate_spec=SubstrateSpec(allowed_substrates=["mock"]),
     ).signed(sk)
-    await publish_halo(
-        store=store, card=card, runtime_state=VacantState.LOCAL, signing_key=sk
-    )
+    await publish_halo(store=store, card=card, runtime_state=VacantState.LOCAL, signing_key=sk)
     resp = await ac.get(f"/v1/capability_card/{vid.hex()}")
     assert resp.status_code == 403
 
@@ -115,9 +111,7 @@ async def test_query_capability_returns_matches(
         capability_text="legal-research",
         substrate_spec=SubstrateSpec(allowed_substrates=["mock"]),
     ).signed(sk)
-    await publish_halo(
-        store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk
-    )
+    await publish_halo(store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk)
     resp = await ac.post("/v1/query_capability?capability=legal-research")
     assert resp.status_code == 200
     body = resp.json()
@@ -147,9 +141,7 @@ async def test_event_log_returns_register_event(
         capability_text="x",
         substrate_spec=SubstrateSpec(allowed_substrates=["mock"]),
     ).signed(sk)
-    await publish_halo(
-        store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk
-    )
+    await publish_halo(store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk)
     resp = await ac.get(f"/v1/event_log/{vid.hex()}")
     assert resp.status_code == 200
     rows = resp.json()
@@ -186,9 +178,7 @@ async def test_revocation_list_returns_revoked(
         capability_text="x",
         substrate_spec=SubstrateSpec(allowed_substrates=["mock"]),
     ).signed(sk)
-    await publish_halo(
-        store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk
-    )
+    await publish_halo(store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk)
     await store.update_vacant_status(vid.hex(), "revoked")
     resp = await ac.get("/v1/revocation_list")
     assert resp.status_code == 200
@@ -215,9 +205,7 @@ async def test_epoch_round_trip(
         capability_text="x",
         substrate_spec=SubstrateSpec(allowed_substrates=["mock"]),
     ).signed(sk)
-    await publish_halo(
-        store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk
-    )
+    await publish_halo(store=store, card=card, runtime_state=VacantState.ACTIVE, signing_key=sk)
     epoch = await store.seal_epoch(signing_key=sk)
     resp = await ac.get(f"/v1/epoch/{epoch.epoch_id}")
     assert resp.status_code == 200

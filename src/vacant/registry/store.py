@@ -48,6 +48,7 @@ from vacant.registry.errors import (
     IdempotencyConflict,
     NotFoundError,
     RegistryWriteError,
+    SignatureRejected,
     VisibilityViolation,
 )
 from vacant.registry.models import (
@@ -195,6 +196,20 @@ class RegistryStore:
             signature=draft.signature,
         )
 
+        # --- L1b: cross-actor impersonation guard ------------------------------
+        # Padv-P4 §1: without this check, an attacker with their own keypair
+        # could submit events filed under any `actor_vacant_id` so long as
+        # `signed_by_pubkey` matches their own key (the signature would
+        # verify under their key, but the event would be filed as "from"
+        # the victim). Bind the actor identity to its registered pubkey.
+        actor = await self.get_vacant(draft.actor_vacant_id)
+        if actor is None:
+            raise SignatureRejected(f"unknown actor {draft.actor_vacant_id}: vacant not registered")
+        if actor.public_key != draft.signed_by_pubkey:
+            raise SignatureRejected(
+                f"signed_by_pubkey does not match registered key for actor {draft.actor_vacant_id}"
+            )
+
         async with self._write_lock:
             # --- idempotency: same key + same payload_hash returns existing -
             existing = await self.lookup_idempotency(draft.idempotency_key)
@@ -286,6 +301,87 @@ class RegistryStore:
         async with self._sessionmaker() as s:
             res = await s.execute(select(Attestation).where(Attestation.vacant_id == vacant_id))
             return list(res.scalars().all())
+
+    # --- integrity verifiers (Padv-P4 §3) -----------------------------------
+
+    async def verify_event_chain(self) -> bool:
+        """Recompute every stored event's `payload_hash`, signature, and
+        `event_hash` from `payload_json` + canonical bytes. Returns False on
+        any mismatch — i.e. detects in-place tampering that bypassed the
+        signed write path (UPDATE instead of INSERT). The append-only
+        guard (L6) catches DELETE; this catches UPDATE.
+        """
+        expected_prev = b"\x00" * 32
+        async with self._sessionmaker() as s:
+            res = await s.execute(select(Event).order_by(Event.seq))  # type: ignore[arg-type]
+            for ev in res.scalars().all():
+                if ev.prev_event_hash != expected_prev:
+                    return False
+                # Recompute payload_hash from stored canonical payload_json.
+                recomputed_payload_hash = hash_blake2b(ev.payload_json.encode("utf-8"))
+                if recomputed_payload_hash != ev.payload_hash:
+                    return False
+                # Recompute canonical bytes.
+                canonical = canonical_event_bytes(
+                    event_type=ev.event_type,
+                    actor_vacant_id=ev.actor_vacant_id,
+                    subject_vacant_id=ev.subject_vacant_id,
+                    payload_hash=ev.payload_hash,
+                    idempotency_key=ev.idempotency_key,
+                    signed_by_pubkey=ev.signed_by_pubkey,
+                    ts=ev.ts,
+                    actor_seq=ev.actor_seq,
+                )
+                # Re-verify signature.
+                try:
+                    verify_event_signature(
+                        pubkey_bytes=ev.signed_by_pubkey,
+                        canonical_bytes=canonical,
+                        signature=ev.signature,
+                    )
+                except Exception:
+                    return False
+                # Re-derive event_hash.
+                recomputed_hash = compute_event_hash(
+                    prev_event_hash=ev.prev_event_hash,
+                    canonical_bytes=canonical,
+                    signature=ev.signature,
+                )
+                if recomputed_hash != ev.event_hash:
+                    return False
+                expected_prev = ev.event_hash
+        return True
+
+    async def verify_vacant_index_consistent(self, vacant_id: str) -> bool:
+        """True iff the indexed `vacant.visibility` column matches the
+        visibility recorded on the most recent `register` event for that
+        vacant. Catches direct SQL UPDATE of the visibility column —
+        Padv-P4 §2.
+
+        Returns True if the vacant has no register events on file (nothing
+        to compare against; rejected at higher levels).
+        """
+        v = await self.get_vacant(vacant_id)
+        if v is None:
+            return False
+        async with self._sessionmaker() as s:
+            res = await s.execute(
+                select(Event)
+                .where(Event.actor_vacant_id == vacant_id)
+                .where(Event.event_type == "register")
+                .order_by(sa_desc(Event.seq))  # type: ignore[arg-type]
+                .limit(1)
+            )
+            latest_register = res.scalar_one_or_none()
+        if latest_register is None:
+            # No register events: nothing to compare. Treat as inconsistent
+            # because every vacant in the index *must* have a register event.
+            return False
+        try:
+            payload = json.loads(latest_register.payload_json)
+        except json.JSONDecodeError:
+            return False
+        return bool(v.visibility == payload.get("visibility"))
 
     # --- merkle epochs ------------------------------------------------------
 
