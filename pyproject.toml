@@ -124,12 +124,24 @@ asyncio_mode = "auto"
 [tool.coverage.run]
 source = ["src/vacant"]
 branch = true
+omit = [
+    # Streamlit UI app — exercised manually / visually, not unit-tested.
+    # Boot is verified via `import vacant.mvp.dashboard` in CI smoke step.
+    "src/vacant/mvp/dashboard.py",
+    # CLI module entrypoint — runs only when invoked as `python -m vacant.cli`.
+    "src/vacant/cli/__main__.py",
+    # Substrate stubs (no real impl yet — covered when the actual integration
+    # lands in a follow-up). Fully covered by their own __init__ smoke tests.
+    "src/vacant/substrate/hermes.py",
+    "src/vacant/substrate/openclaw.py",
+]
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
 exclude_lines = [
     "pragma: no cover",
+    "if __name__ == .__main__.:",
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
     # Protocol method bodies are `...` and never execute at runtime.
