@@ -1,0 +1,15 @@
+{
+  "vacant": {
+    "command": "uvx",
+    "args": [
+      "--from",
+      "git+https://github.com/cosmopig/Vacant.git",
+      "vacant",
+      "mcp"
+    ],
+    "env": {
+      "VACANT_NAME": "${VACANT_NAME:-default}",
+      "VACANT_HOME": "${VACANT_HOME:-${HOME}/.vacant}"
+    }
+  }
+}

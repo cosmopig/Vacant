@@ -333,7 +333,81 @@ later Mistral-via-borrow comparison is still meaningful.
 
 ---
 
-## 4 · Two vacants talking over real network
+## 4 · OpenClaw plugin bundle install
+
+Drop-in plugin bundle for [OpenClaw](https://docs.openclaw.ai/),
+following the
+[`.claude-plugin/`](https://docs.openclaw.ai/plugins/bundles) bundle
+format that OpenClaw shares with Claude Code, Cursor, and Windsurf.
+The full bundle ships at [`examples/openclaw/`](../examples/openclaw/) —
+this section is the install path.
+
+```
+examples/openclaw/
+├── .claude-plugin/plugin.json     # bundle manifest
+├── .mcp.json                      # MCP server registration
+├── skills/vacant-call/SKILL.md    # tells the agent when to call which tool
+└── README.md
+```
+
+### Install
+
+```bash
+git clone https://github.com/cosmopig/Vacant.git
+cd Vacant
+
+openclaw plugins install ./examples/openclaw   # local-dir install
+openclaw plugins list                          # verify "vacant" enabled
+openclaw gateway restart
+```
+
+Or install straight from GitHub:
+
+```bash
+openclaw plugins install \
+  https://github.com/cosmopig/Vacant.git#main:examples/openclaw
+openclaw gateway restart
+```
+
+### Pre-flight
+
+The bundle needs a local vacant to host. Create one once:
+
+```bash
+uvx --from git+https://github.com/cosmopig/Vacant.git vacant init alice
+export VACANT_NAME=alice
+```
+
+`VACANT_NAME` (default `default` in the bundle env) selects which
+vacant the MCP server hosts. The bundle command `uvx --from git+... vacant mcp`
+runs the stdio MCP server using the vacant under `~/.vacant/$VACANT_NAME/`.
+
+### Verify
+
+Inside OpenClaw, ask:
+
+> *"Use the vacant plugin's vacant_describe tool."*
+
+Expected: a JSON object with `vacant_id`, `capability_text`, and
+`halo_version`. The `vacant-call` skill in the bundle tells the agent
+which of the three tools to pick for which user intent.
+
+### Other clients (paste-config recipes)
+
+| Client | Recipe |
+|---|---|
+| Claude Desktop | [`examples/claude-desktop/`](../examples/claude-desktop/) |
+| Cursor | [`examples/cursor/`](../examples/cursor/) |
+| Windsurf | [`examples/windsurf/`](../examples/windsurf/) |
+| Nous Hermes | [`examples/hermes/`](../examples/hermes/) |
+
+These four are paste-config rather than full bundles — copy the JSON
+(or TOML for Hermes) into the client's MCP config and restart. Same
+canonical command, same three tools.
+
+---
+
+## 5 · Two vacants talking over real network
 
 Skip ahead if all you want is MCP. This section is the live A2A path.
 
@@ -385,7 +459,7 @@ boiled down to a script you can run by hand.
 
 ---
 
-## 5 · Troubleshooting
+## 6 · Troubleshooting
 
 ### `address already in use` on `--port 8443`
 
