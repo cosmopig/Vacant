@@ -1,0 +1,16 @@
+{
+  "scenario": "multilingual_translation",
+  "seed": 271,
+  "invariants": [
+    "6 vacants spread across 3 substrate slots (claude / gpt / ollama)",
+    "vacant 0 is polyglot (claude + gpt) -- demonstrates portability_factor",
+    "per-(vacant, substrate) posteriors tracked separately",
+    "polyglot vacant's F differs across its two substrates (no conflation)",
+    "all logbook chains verify"
+  ],
+  "metrics": {
+    "n_substrate_specific_posteriors": 7,
+    "served_two_substrates": true
+  },
+  "tolerance_notes": "Quality profile primary=0.92 (even idx) / 0.86 (odd), cross-substrate=0.78 for polyglot."
+}

@@ -1,0 +1,23 @@
+{
+  "scenario": "self_replication",
+  "seed": 314,
+  "invariants": [
+    "lineage tree depth = 2 (root -> 4 children, no grandchildren)",
+    "all 5 vacants share no keypair",
+    "all children have parent_id correctly pointing to root",
+    "root's logbook has 4 SPAWN entries",
+    "D2 child stays LOCAL until graduation",
+    "post-graduation: same keypair, logbook continues, manifest closed_by_default=False",
+    "all logbook chains verify"
+  ],
+  "metrics": {
+    "n_spawns": 4,
+    "lineage_depth": 2,
+    "unique_keypairs": 5,
+    "root_spawn_log_entries": 4,
+    "all_children_parent_root": true,
+    "d2_graduated": true,
+    "d2_keypair_preserved": true
+  },
+  "tolerance_notes": "Spawn schedule: D1@30, D2@50, D3@80, D5@120; graduation@180; total ticks=200."
+}

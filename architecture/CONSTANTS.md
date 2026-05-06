@@ -9,8 +9,9 @@ All values were extracted from `THEORY_V5.md` and `components/P1-P7` on 2026-05-
 | Constant | Value | Citation |
 |---|---|---|
 | `HEARTBEAT_BASE_PERIOD_S` | configurable per substrate; demo: `60` | THEORY_V5 §3, P1 §D2 |
-| `HEARTBEAT_DECAYED_PERIOD_S` (Sunk) | `86400` (24h) | P1 §D5, line 59 |
-| `HEARTBEAT_SUNK_LIVENESS_PERIOD_S` | `600` (10 min) | THEORY_V5 §3, line 340 |
+| `HEARTBEAT_HIBERNATING_PERIOD_S` | `86400` (24h) | P1 §D6 line 73 |
+| `HEARTBEAT_DECAYED_PERIOD_S` (alias for HIBERNATING) | `86400` (24h) | kept for back-compat; see D003 |
+| `HEARTBEAT_SUNK_LIVENESS_PERIOD_S` | `600` (10 min) | THEORY_V5 §4.2 / §3 line 340 |
 | `IDEMPOTENCY_WINDOW_S` | `86400` (24h) | P1 §3.2 |
 | `STALE_AFTER_HIBERNATING_DAYS` | `30` | P1 §D6, line 156 |
 | `WARMUP_WINDOW_S` | `86400` (24h) | P1 §3.3.1, line 191 |
@@ -41,11 +42,11 @@ State transitions (event-driven thresholds, not pure time-elapsed):
 
 | Dim | Half-life | α₀ | β₀ | Source |
 |---|---|---|---|---|
-| Factual (F) | 90 | 1.5 | 1.0 | P3 line 418 |
-| Logical (L) | 180 | 1.5 | 1.0 | P3 line 419 |
-| Relevance (R) | 60 | 1.5 | 1.0 | P3 line 420 |
-| Honesty (H) | 30 | 2.0 | 1.0 | P3 line 421 |
-| Adoption (A) | 90 | 1.0 | 3.0 | P3 line 422 |
+| Factual (F) | 90 | 1.0 | 1.0 | P3 §3.2 (D008 §A: 1.5 in older table was L1-applied) |
+| Logical (L) | 180 | 1.0 | 1.0 | P3 §3.2 |
+| Relevance (R) | 60 | 1.0 | 1.0 | P3 §3.2 |
+| Honesty (H) | 30 | 2.0 | 1.0 | P3 §3.2 |
+| Adoption (A) | 90 | 1.0 | 3.0 | P3 §3.2 |
 
 ### Source weights (signal multipliers)
 
@@ -119,15 +120,32 @@ Wash cost formula and concrete coefficient values: see `components/P2_identity.m
 |---|---|---|
 | Federation root threshold (MVP) | 2-of-5 | T4_attestation_bootstrap |
 | Federation root threshold (long-term target) | 3-of-9 | T4_attestation_bootstrap |
-| Peer attestation freshness window | 30 days (default) | P2_identity §4 |
-| Min vouchers for L3 promotion | 3 (default) | P2_identity §2 |
+| `PEER_ATTESTATION_FRESHNESS_WINDOW_DAYS` | `30` | P2_identity §4 |
+| `MIN_VOUCHERS_FOR_L3_PROMOTION` | `3` | P2_identity §2 |
+| `FEDERATION_ROOT_THRESHOLD_MVP` / `FEDERATION_ROOT_COUNT_MVP` | `2` / `5` | T4_attestation_bootstrap |
+| `FEDERATION_ROOT_THRESHOLD_TARGET` / `FEDERATION_ROOT_COUNT_TARGET` | `3` / `9` | T4_attestation_bootstrap |
+| `WASH_COST_FALSE_CLAIM_WEIGHT_DEFAULT` | `1.0` | P2 §3 / D004 §A |
+| `ED25519_MULTICODEC_PREFIX` | `0xed01` | W3C did:key §6.1 |
 
 ## Registry (P4)
 
 | Constant | Value | Citation |
 |---|---|---|
-| Merkle snapshot interval | 1 hour | P4 §3 |
-| Sequence-number monotonicity tolerance | 0 (strict) | P4 §3 |
+| `MERKLE_SNAPSHOT_INTERVAL_S` | `3600` (1 hour) | P4 §3 |
+| Sequence-number monotonicity tolerance | `0` (strict) | P4 §3 |
+| `EVENT_LOG_DEFAULT_PAGE_SIZE` / `EVENT_LOG_MAX_PAGE_SIZE` | `100` / `500` | P4 §3.2 |
+| `ANOMALY_REP_JUMP_THRESHOLD` / `ANOMALY_REP_JUMP_WINDOW_S` | `0.4` / `60` | P4 §3.2 anomaly table |
+| `ANOMALY_REVIEW_PER_TARGET_HOUR` | `5` | P4 §3.2 anomaly table |
+| `ANOMALY_SPAWN_PER_PARENT_HOUR` | `10` | P4 §3.2 anomaly table |
+| `REGISTRY_DB_DEFAULT_URL` | `sqlite+aiosqlite:///:memory:` | D006 §B (test default) |
+
+## Protocol (P6)
+
+| Constant | Value | Citation |
+|---|---|---|
+| `A2A_VACANT_METADATA_KEY` | `urn:vacant:v1` | P6 §3.2 |
+| `CALL_TIMEOUT_DEFAULT_S` | `60` | P6 §3.4 |
+| `REGISTRY_CACHE_TTL_S` | `300` | P6 §3.4 |
 
 ## Composite (P5)
 
@@ -135,6 +153,8 @@ Wash cost formula and concrete coefficient values: see `components/P2_identity.m
 |---|---|---|
 | Graduation rate limit | per parent per 24h: see P5 spec | P5 §graduation |
 | Closed-child default visibility | `NONE` | P5 §1 |
+| `GRADUATION_RATE_LIMIT_PER_PARENT_24H` | `3` | D012 §A |
+| `GRADUATION_COLLUSION_THRESHOLD` | `0.6` | D012 §B |
 
 ## Demo (P7)
 
