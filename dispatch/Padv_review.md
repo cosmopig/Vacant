@@ -10,7 +10,7 @@ After **any** PR that touches one of:
 - `src/vacant/composite/graduation.py` (P5)
 - `src/vacant/protocol/replay_protect.py` (P6)
 
-These are the load-bearing security/integrity surfaces. The thesis went through 3 rounds of codex adversarial review with `no fatal issues remain`. **Do not regress that property.**
+These are the load-bearing security/integrity surfaces. The project went through 3 rounds of codex adversarial review with `no fatal issues remain`. **Do not regress that property.**
 
 ## Goal
 

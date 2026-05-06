@@ -1,6 +1,6 @@
 # P7 demo seeds — reproducible scenario specifications
 
-P7's four demo scenarios MUST be reproducible at fixed seeds so the thesis defense and any later replays produce identical structure (within deterministic substrates) and statistically-similar reputation distributions (within real-LLM substrates).
+P7's four demo scenarios MUST be reproducible at fixed seeds so the demo presentation and any later replays produce identical structure (within deterministic substrates) and statistically-similar reputation distributions (within real-LLM substrates).
 
 ## Substrate determinism contract
 

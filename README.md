@@ -21,7 +21,7 @@ A **responsibility-layer residency form** for AI agents on top of A2A / MCP. Giv
 
 > 一個讓 AI agent 變成「能扛責任的居民」的居民形式，疊在 A2A / MCP 之上補「責任」這一層。
 
-Undergraduate thesis project · 2026 · Theory V5 · 14-week MVP shipped.
+Capstone project · 2026 · Theory V5 · 14-week MVP shipped.
 
 ---
 
@@ -31,7 +31,7 @@ Today's agents are fluent but **unaccountable**. When an LLM-driven agent gives 
 
 **Vacant fills that gap.** It's not another agent framework. It's a *form an agent chooses to take* — like the difference between "a person on the street" and "a registered citizen with a passport, a credit history, and consequences." The agent doesn't have to become a vacant. But once it does, it carries identity (Ed25519 keypair), history (signed append-only logbook), and a reputation that costs real exploration cycles to build and can be lost.
 
-The thesis claim:
+The core claim:
 
 > Without a responsibility layer, multi-agent networks degrade into adversarial unaccountable LLM calls. Vacant is one possible responsibility layer — designed cost-aware (Skalse 2022 impossibility theorem assumed true), with quantified defense levels (P/D/C), 38 attack vectors enumerated, and a 14-week MVP that demonstrates the core mechanics.
 
@@ -273,7 +273,7 @@ Vacant/
 │
 ├── docs/                       ← runtime / demo docs
 │   ├── RUNBOOK.md              ← demo operator manual
-│   └── DEMO_SCRIPT.md          ← 5-minute thesis-defense walk
+│   └── DEMO_SCRIPT.md          ← 5-minute demo walk-through
 │
 ├── alembic/                    ← DB migrations
 ├── install.sh                  ← one-line installer (curl|bash)
@@ -335,7 +335,7 @@ If you reference this work in academic writing:
   title  = {Vacant: A Responsibility-Layer Residency Form for AI Agents},
   author = {cosmopig},
   year   = {2026},
-  note   = {Undergraduate thesis. Theory V5, 14-week MVP.},
+  note   = {Capstone project. Theory V5, 14-week MVP.},
   url    = {https://github.com/cosmopig/Vacant}
 }
 ```

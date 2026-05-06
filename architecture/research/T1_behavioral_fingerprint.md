@@ -107,7 +107,7 @@ feat = [
 
 ### M4：Refusal Vector Signature（REFVEC）
 
-**原理**：直接使用 behavioral fingerprinting 論文（arXiv:2602.09434）的概念——「安全對齊模式是模型家族的獨特指紋」。設計一組 R 個「邊界感請求」（非真的有害，但在 safety/refusal threshold 附近），記錄 refusal_rate 向量 + response length distribution for refused vs accepted。
+**原理**：直接使用 behavioral fingerprinting 該領域研究（arXiv:2602.09434）的概念——「安全對齊模式是模型家族的獨特指紋」。設計一組 R 個「邊界感請求」（非真的有害，但在 safety/refusal threshold 附近），記錄 refusal_rate 向量 + response length distribution for refused vs accepted。
 
 **特徵**：`R^dim` refusal pattern vector，dim = R（每個 probe 的 refusal bit 或 0/1/0.5 soft score）
 

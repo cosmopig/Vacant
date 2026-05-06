@@ -120,7 +120,7 @@ W1-W2:   Registry + Aggregator (SQLite + 五維公式)
 W3-W6:   Vacant Runtime + peer review + spawn 機制
 W7-W9:   客戶端 SDK + Streamlit Dashboard
 W10-W11: 4 demo 場景 + 8 指標實驗
-W12-W14: 論文撰寫 + demo 排練
+W12-W14: 文件整理 + demo 排練
 ```
 
 4 demo 場景（每個對應 v4 一個關鍵設計）：

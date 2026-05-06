@@ -64,7 +64,7 @@ Acceptance: `vacant serve --port 8443` followed by `vacant call <vid> <cap>` fro
 - `tools/list` returning the vacant's capabilities derived from `capability_card.capability_text`
 - `tools/call` routing through the existing `behavior` callback in `serve.py`
 
-Add `mcp` (or `fastmcp`) to `pyproject.toml`. Write `tests/integration/test_mcp_external_client.py` that uses the mcp SDK's client to call the running server and exchanges a real `tools/call`. **This is the test that the thesis defense rests on.**
+Add `mcp` (or `fastmcp`) to `pyproject.toml`. Write `tests/integration/test_mcp_external_client.py` that uses the mcp SDK's client to call the running server and exchanges a real `tools/call`. **This is the test that the demo presentation rests on.**
 
 ### A4 — Live two-vacant network e2e (`F2`)
 
@@ -167,7 +167,7 @@ Dashboard `Adversarial` page (`mvp/dashboard.py:178`) wires to this scenario, NO
 - **SUNK custody heartbeat**: when a vacant transitions to SUNK, emit a heartbeat with `key_in_custody=true, liveness=false`; assert lineage attribution still resolves to it.
 - **Lineage continuation despite individual stall**: spawn a fresh D1 child after the parent stalls; assert the child has a clean (non-discounted) posterior with optional inherited prior.
 
-This scenario is the ONE that demonstrates THEORY_V5 §4.3's central claim — losing it means the thesis loses its strongest theoretical claim.
+This scenario is the ONE that demonstrates THEORY_V5 §4.3's central claim — losing it means the project loses its strongest theoretical claim.
 
 ### B5 — Multilingual portability hardening (`F11`)
 
@@ -192,7 +192,7 @@ Tests in `tests/integration/test_mvp_full.py` compare to these with `pytest.appr
 
 ## Group D — Substrate diversity + client-inherited LLM (extension request)
 
-The user pointed out (correctly) that the README implies Anthropic is the only real-LLM option. The thesis claim is that **substrate is swappable** — the LLM is a *resource*, not the *identity*. Right now the project ships only `AnthropicSubstrate` and `OllamaSubstrate` (plus mock/deterministic). Two work items here:
+The user pointed out (correctly) that the README implies Anthropic is the only real-LLM option. The core claim is that **substrate is swappable** — the LLM is a *resource*, not the *identity*. Right now the project ships only `AnthropicSubstrate` and `OllamaSubstrate` (plus mock/deterministic). Two work items here:
 
 ### D1 — Multi-provider substrates
 
@@ -255,7 +255,7 @@ Update both `README.md` and `README.zh-TW.md`:
   vacant demo law_firm --substrate=client-inherited  # for use under MCP; client supplies the LLM
   ```
 
-- Add a "Hosting a vacant under your client" section showing how to run `vacant serve --mcp` and then point Claude Desktop / OpenClaw / Hermes at it. The vacant uses the client's LLM via MCP `sampling/createMessage`. **This is the demo that closes the "嫁接到客戶端" thesis claim.**
+- Add a "Hosting a vacant under your client" section showing how to run `vacant serve --mcp` and then point Claude Desktop / OpenClaw / Hermes at it. The vacant uses the client's LLM via MCP `sampling/createMessage`. **This is the demo that closes the "嫁接到客戶端" core claim.**
 
 - Update `docs/DEMO_SCRIPT.md` minute-by-minute to include this flow.
 
@@ -278,18 +278,18 @@ For each load-bearing decision in CLAUDE.md "Load-bearing theory decisions", mak
 
 - `docs/RUNBOOK.md` — update all command examples to use `vacant <cmd>` (CLI) instead of `python -m vacant.mvp.demo` where the CLI now wires it.
 - `README.md` and `README.zh-TW.md` — update the dashboard ↔ demo store mention to reflect the new SQLite-backed flow.
-- `docs/DEMO_SCRIPT.md` — the 5-minute thesis defense walk should reference: live network demo (A4), MCP external client demo (A3), adversarial scenario (B3), self-replication completeness (B4). One claim per minute.
+- `docs/DEMO_SCRIPT.md` — the 5-minute demo presentation walk should reference: live network demo (A4), MCP external client demo (A3), adversarial scenario (B3), self-replication completeness (B4). One claim per minute.
 
 ---
 
 ## Suggested PR sequence
 
 1. **PR-A: Live-network capability** (Group A, ~2 weeks of work, ~3000-4000 LOC)
-2. **PR-D: Substrate diversity + client-inherited** (Group D, ~1 week, ~1500 LOC). D2 (`client-inherited` via MCP `sampling/createMessage`) is what closes the "嫁接到客戶端" thesis claim.
+2. **PR-D: Substrate diversity + client-inherited** (Group D, ~1 week, ~1500 LOC). D2 (`client-inherited` via MCP `sampling/createMessage`) is what closes the "嫁接到客戶端" core claim.
 3. **PR-B: Demo fidelity** (Group B, ~1.5 weeks, ~2000 LOC)
 4. **PR-C: Defense narrative** (Group C, ~3 days, ~500 LOC)
 
-If time-constrained, prioritize A1 + A2 + A3 + A4 + D2 (live CLI + serve + real MCP + live e2e + client-inherited substrate) — these together are the literal "嫁接到客戶端" deliverables the thesis claims. D1 (more provider substrates) and Group B/C can degrade gracefully.
+If time-constrained, prioritize A1 + A2 + A3 + A4 + D2 (live CLI + serve + real MCP + live e2e + client-inherited substrate) — these together are the literal "嫁接到客戶端" deliverables the core claims. D1 (more provider substrates) and Group B/C can degrade gracefully.
 
 ## Acceptance for the whole batch
 

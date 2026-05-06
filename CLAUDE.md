@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Vacant — a "responsibility layer" residency form for AI agents that sits on top of A2A / MCP. This repo is the **14-week MVP implementation** of the architecture defined in `architecture/`. It is a working system, not a paper.
 
-The thesis owner works in **繁體中文**. Code, comments, commit messages, and PR descriptions are in **English**. User-facing text in the demo dashboard is in **繁體中文**.
+The project owner works in **繁體中文**. Code, comments, commit messages, and PR descriptions are in **English**. User-facing text in the demo dashboard is in **繁體中文**.
 
 ## The core mental model (do not lose this)
 
@@ -157,7 +157,7 @@ A component PR is mergeable when:
 
 ## Adversarial review
 
-Before merging any PR that touches reputation, identity, or registry, run an adversarial review pass: list at least 3 attacks the change might enable, and add tests covering them. The thesis went through 3 rounds of codex adversarial review with `no fatal issues remain`. Do not regress that property.
+Before merging any PR that touches reputation, identity, or registry, run an adversarial review pass: list at least 3 attacks the change might enable, and add tests covering them. The project went through 3 rounds of codex adversarial review with `no fatal issues remain`. Do not regress that property.
 
 ## What this MVP must demonstrate (P7)
 

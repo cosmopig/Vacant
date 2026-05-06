@@ -31,7 +31,7 @@
 
 **Vacant 補這一層。** 它**不是另一個 agent framework**，而是 *agent 自願選擇採納的形式* — 像「街上一個人」跟「有護照、有信用紀錄、要負後果的公民」的差別。Agent 沒有義務變成 vacant，但一旦選擇採納，就帶著身份（Ed25519 keypair）、歷史（簽章 append-only logbook）、跟一份**要花探索成本才建得起來、也會被失去的信譽**。
 
-論文 claim：
+專題核心主張：
 
 > 沒有責任層的多 agent 網路會退化成對抗性、不可究責的 LLM 呼叫集合。Vacant 是其中一種可能的責任層 — cost-aware 設計（接受 Skalse 2022 不可能定理為真），38 種攻擊向量列舉，三層防禦語言（P/D/C）量化標記，14 週 MVP 證明核心機制可實作。
 
@@ -273,7 +273,7 @@ Vacant/
 │
 ├── docs/                       ← Runtime / demo 文件
 │   ├── RUNBOOK.md              ← Demo operator 手冊
-│   └── DEMO_SCRIPT.md          ← 5 分鐘論文答辯流程
+│   └── DEMO_SCRIPT.md          ← 5 分鐘答辯流程
 │
 ├── alembic/                    ← DB migrations
 ├── install.sh                  ← 一行安裝（curl|bash）
@@ -305,7 +305,7 @@ Vacant/
 | 讀者 | 該讀 | 時間 |
 |---|---|---|
 | **快速 demo / 評委** | 這份 README + 跑 `vacant demo law_firm` | 10 分鐘 |
-| **論文口試委員** | [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md) §0–§4 + [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | 45 分鐘 |
+| **答辯委員** | [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md) §0–§4 + [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | 45 分鐘 |
 | **實作者 / 貢獻者** | [`CLAUDE.md`](CLAUDE.md) + [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) + 對應的 `components/P*.md` | 2 小時 |
 | **對抗審查者** | THEORY_V5 §6 + `tests/adversarial/` + `architecture/decisions/D*.md` | 4 小時 |
 | **好奇路人** | https://vacant.zeabur.app/ — 圖文敘事版本 | 5–30 分鐘 |
@@ -335,7 +335,7 @@ CI（`.github/workflows/ci.yml`）每次 push / PR 都跑 ruff + ruff format + m
   title  = {Vacant: A Responsibility-Layer Residency Form for AI Agents},
   author = {cosmopig},
   year   = {2026},
-  note   = {Undergraduate thesis. Theory V5, 14-week MVP.},
+  note   = {Capstone project. Theory V5, 14-week MVP.},
   url    = {https://github.com/cosmopig/Vacant}
 }
 ```

@@ -59,7 +59,7 @@
 **自驗：**
 - ✓ 是使用者原始概念（主題概念文件）
 - ⚠️ 弱點：「人」字會誤導讀者以為主張 vacant 有意識
-- ✓ 緩解：在 understand.html / 論文中搭配 Layer 6 的「**vacant 是責任的單位**」說明，避免人格化過度。
+- ✓ 緩解：在 understand.html / 專題網站/規格中搭配 Layer 6 的「**vacant 是責任的單位**」說明，避免人格化過度。
 
 ---
 
@@ -658,7 +658,7 @@
 **自驗：**
 - ✓ 與「責任有效性分析」§3.B.6 哲學考量一致
 - ⚠️ 大眾誤讀風險：「未來人」一詞可能誤導
-- ✓ 在 understand.html 與論文中明確區分
+- ✓ 在 understand.html 與專題網站/規格中明確區分
 
 ---
 
@@ -681,7 +681,7 @@
 
 ### Q49. 14 週 MVP 的範圍？
 
-**A.** **W1-W2** Registry + Aggregator (SQLite + 五維公式)；**W3-W6** Vacant Runtime + peer review + spawn 機制；**W7-W9** 客戶端 SDK + Streamlit Dashboard；**W10-W11** 4 demo 場景 + 8 指標實驗；**W12-W14** 論文 + demo 排練。三人團隊 W8 前完成所有元件。
+**A.** **W1-W2** Registry + Aggregator (SQLite + 五維公式)；**W3-W6** Vacant Runtime + peer review + spawn 機制；**W7-W9** 客戶端 SDK + Streamlit Dashboard；**W10-W11** 4 demo 場景 + 8 指標實驗；**W12-W14** 文件整理 + demo 排練。三人團隊 W8 前完成所有元件。
 
 **自驗：**
 - ✓ P7_mvp.md 詳細時程

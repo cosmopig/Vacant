@@ -4,7 +4,7 @@
 
 Wire all components together into a runnable demo: 4 scenarios + 8 metrics + a Streamlit dashboard. **If you cannot demo it visually, it is not done.**
 
-This is the thesis deliverable. Take 4 weeks (W11–14). Quality matters more than feature breadth — better to have 3 of 4 scenarios solid than 4 of 4 flaky.
+This is the capstone deliverable. Take 4 weeks (W11–14). Quality matters more than feature breadth — better to have 3 of 4 scenarios solid than 4 of 4 flaky.
 
 ## Read first (in order)
 
@@ -91,13 +91,13 @@ Reproducible (seedable) end-to-end runs. Used for both manual demos and the inte
 - Update `README.md` Quick start with concrete commands for the demo
 - Update top-level `CLAUDE.md` if any new common command emerges
 
-## Acceptance — the bar for thesis defense
+## Acceptance — the bar for demo presentation
 
 - All 4 scenarios run end-to-end on `MockSubstrate` and at least one cloud substrate (`AnthropicSubstrate` or `OllamaSubstrate`).
 - All 8 metrics computed and displayed.
 - The dashboard runs and is responsive on a laptop.
 - The full integration test passes in CI under 5 minutes.
-- A 5-minute live demo script is in `docs/DEMO_SCRIPT.md` — exactly what to click in the dashboard, in what order, to tell the thesis story.
+- A 5-minute live demo script is in `docs/DEMO_SCRIPT.md` — exactly what to click in the dashboard, in what order, to tell the project story.
 
 ## Output
 
@@ -107,7 +107,7 @@ PR description must include screenshots of each dashboard page, a demo script, a
 
 ## Out of scope
 
-- Production deployment / hosted demo — local run only is fine for thesis
+- Production deployment / hosted demo — local run only is fine for the capstone demo
 - Mobile UI for the dashboard — desktop only is fine
 - Real-money substrate billing — use Anthropic API in test mode only
 
@@ -115,7 +115,7 @@ PR description must include screenshots of each dashboard page, a demo script, a
 
 Priority order if W14 deadline pressure forces cuts:
 
-1. **Cut scenarios first** (4 → 3 → 2). Keep `law_firm` (composite) and `self_replication` (lineage) as the two non-negotiable ones — they tell the core thesis story.
+1. **Cut scenarios first** (4 → 3 → 2). Keep `law_firm` (composite) and `self_replication` (lineage) as the two non-negotiable ones — they tell the core project story.
 2. **Cut substrates next** — `MockSubstrate` + `AnthropicSubstrate` are sufficient.
-3. **Do not cut metrics or adversarial page** — those are the thesis defense.
+3. **Do not cut metrics or adversarial page** — those are the demo presentation.
 4. **Do not cut tests** — they are the proof of correctness for the defense.
