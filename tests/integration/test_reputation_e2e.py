@@ -85,9 +85,9 @@ async def test_reputation_distribution_stabilises_after_1000_reviews() -> None:
     assert avg_low < 0.3, f"low-quality avg should be < 0.3 after 1000 reviews; got {avg_low:.3f}"
     # High-quality stays high (relaxed: > 0.6 -- discounts and noise eat
     # the absolute level).
-    assert avg_high > 0.6, (
-        f"high-quality avg should be > 0.6 after 1000 reviews; got {avg_high:.3f}"
-    )
+    assert (
+        avg_high > 0.6
+    ), f"high-quality avg should be > 0.6 after 1000 reviews; got {avg_high:.3f}"
 
 
 @pytest.mark.asyncio

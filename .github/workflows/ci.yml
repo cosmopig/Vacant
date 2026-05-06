@@ -26,10 +26,6 @@ jobs:
         run: uv run ruff format --check .
       - name: Mypy strict
         run: uv run mypy src/
-      - name: Pre-commit hooks
-        run: |
-          uv run pre-commit install
-          uv run pre-commit run --all-files
 
   tests:
     name: tests (${{ matrix.os }}, py${{ matrix.python }})

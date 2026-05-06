@@ -72,12 +72,12 @@ async def test_code_review_scenario() -> None:
     assert result.metrics["ring_downweighted"] is True
 
     # F5: real same_controller detector hits seeded TP/FP thresholds.
-    assert result.metrics["same_controller_tp_meets_threshold"] is True, (
-        f"TP rate {result.metrics['same_controller_tp_rate']} below 0.8"
-    )
-    assert result.metrics["same_controller_fp_meets_threshold"] is True, (
-        f"FP rate {result.metrics['same_controller_fp_rate']} above 0.1"
-    )
+    assert (
+        result.metrics["same_controller_tp_meets_threshold"] is True
+    ), f"TP rate {result.metrics['same_controller_tp_rate']} below 0.8"
+    assert (
+        result.metrics["same_controller_fp_meets_threshold"] is True
+    ), f"FP rate {result.metrics['same_controller_fp_rate']} above 0.1"
     # Cost-raising: ring review still leaves a positive bump (D015 §A).
     assert result.metrics["ring_signal_bump"] > 0.0
     assert result.metrics["ring_signal_bump"] < result.metrics["unflagged_bump"]

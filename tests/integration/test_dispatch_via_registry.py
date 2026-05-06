@@ -128,9 +128,9 @@ async def test_halo_match_carries_signed_card_end_to_end(
         transport=fake_transport,
         aggregation_search=aggregation_search,
     )
-    assert posted_url["url"] == "http://target.test/v1", (
-        "dispatch must POST to card.endpoint extracted from HaloMatch — not to the registry"
-    )
+    assert (
+        posted_url["url"] == "http://target.test/v1"
+    ), "dispatch must POST to card.endpoint extracted from HaloMatch — not to the registry"
     assert isinstance(result.response_envelope, VacantEnvelope)
     assert result.target.vacant_id == target_vid
     _ = target_card  # signature verified above on the deserialized copy
