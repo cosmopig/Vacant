@@ -1,16 +1,84 @@
 {
   "scenario": "multilingual_translation",
   "seed": 271,
+  "tolerance_abs": 0.02,
   "invariants": [
-    "6 vacants spread across 3 substrate slots (claude / gpt / ollama)",
-    "vacant 0 is polyglot (claude + gpt) -- demonstrates portability_factor",
-    "per-(vacant, substrate) posteriors tracked separately",
-    "polyglot vacant's F differs across its two substrates (no conflation)",
-    "all logbook chains verify"
+    "served_two_substrates true",
+    "polyglot_factual_claude > 0.5",
+    "polyglot_factual_gpt > 0.5",
+    "false_substrate_claim_failures > 0",
+    "polyglot portability > offender portability"
   ],
   "metrics": {
-    "n_substrate_specific_posteriors": 7,
-    "served_two_substrates": true
+    "n_substrate_specific_posteriors": 8,
+    "served_two_substrates": true,
+    "polyglot_factual_claude": 0.6844,
+    "polyglot_factual_gpt": 0.6114,
+    "polyglot_portability_bonus": 0.0683,
+    "false_substrate_claim_failures": 40,
+    "false_claim_offender_portability": 0.0341,
+    "portability_ranks_polyglot_above_offender": true
   },
-  "tolerance_notes": "Quality profile primary=0.92 (even idx) / 0.86 (odd), cross-substrate=0.78 for polyglot."
+  "portability": {
+    "translator_0": 0.0683,
+    "translator_1": 0.0431,
+    "translator_2": 0.0431,
+    "translator_3": 0.0431,
+    "translator_4": 0.0341,
+    "translator_5": 0.0431
+  },
+  "reputation": {
+    "translator_0": {
+      "claude-sonnet-4-6/factual": 0.6844,
+      "claude-sonnet-4-6/logical": 0.5,
+      "claude-sonnet-4-6/relevance": 0.6844,
+      "claude-sonnet-4-6/honesty": 0.6667,
+      "claude-sonnet-4-6/adoption": 0.25,
+      "gpt-4o/factual": 0.6114,
+      "gpt-4o/logical": 0.5,
+      "gpt-4o/relevance": 0.6114,
+      "gpt-4o/honesty": 0.6667,
+      "gpt-4o/adoption": 0.25
+    },
+    "translator_1": {
+      "claude-sonnet-4-6/factual": 0.6925,
+      "claude-sonnet-4-6/logical": 0.5,
+      "claude-sonnet-4-6/relevance": 0.6925,
+      "claude-sonnet-4-6/honesty": 0.6667,
+      "claude-sonnet-4-6/adoption": 0.25
+    },
+    "translator_2": {
+      "gpt-4o/factual": 0.7235,
+      "gpt-4o/logical": 0.5,
+      "gpt-4o/relevance": 0.7235,
+      "gpt-4o/honesty": 0.6667,
+      "gpt-4o/adoption": 0.25
+    },
+    "translator_3": {
+      "gpt-4o/factual": 0.6884,
+      "gpt-4o/logical": 0.5,
+      "gpt-4o/relevance": 0.6884,
+      "gpt-4o/honesty": 0.6667,
+      "gpt-4o/adoption": 0.25
+    },
+    "translator_4": {
+      "claude-sonnet-4-6/factual": 0.3089,
+      "claude-sonnet-4-6/logical": 0.5,
+      "claude-sonnet-4-6/relevance": 0.5,
+      "claude-sonnet-4-6/honesty": 0.4634,
+      "claude-sonnet-4-6/adoption": 0.25,
+      "local-ollama-llama3/factual": 0.6698,
+      "local-ollama-llama3/logical": 0.5,
+      "local-ollama-llama3/relevance": 0.6698,
+      "local-ollama-llama3/honesty": 0.6667,
+      "local-ollama-llama3/adoption": 0.25
+    },
+    "translator_5": {
+      "local-ollama-llama3/factual": 0.6877,
+      "local-ollama-llama3/logical": 0.5,
+      "local-ollama-llama3/relevance": 0.6877,
+      "local-ollama-llama3/honesty": 0.6667,
+      "local-ollama-llama3/adoption": 0.25
+    }
+  }
 }

@@ -14,6 +14,7 @@ from vacant.mvp.scenarios._harness import (
     VacantSeed,
     build_vacant,
     context_from_form,
+    record_metric_snapshot,
     reputation_snapshot,
     seeded_random,
 )
@@ -22,6 +23,7 @@ from vacant.reputation import Aggregator
 from vacant.reputation.same_detect import same_controller
 
 if TYPE_CHECKING:
+    from vacant.mvp.demo_store import DemoStore
     from vacant.substrate.base import SubstrateBackend
 
 
@@ -30,7 +32,12 @@ N_QUERIES = 100
 N_REVIEWERS = 5
 
 
-async def run(*, substrate: SubstrateBackend, seed: int | None = None) -> ScenarioResult:
+async def run(
+    *,
+    substrate: SubstrateBackend,
+    seed: int | None = None,
+    store: DemoStore | None = None,
+) -> ScenarioResult:
     s = seed if seed is not None else DEFAULT_SEEDS[SCENARIO_NAME]
     rng = seeded_random(s)
     result = ScenarioResult(name=SCENARIO_NAME, seed=s)
@@ -110,6 +117,20 @@ async def run(*, substrate: SubstrateBackend, seed: int | None = None) -> Scenar
                 "ranked": [(vid.short(), round(score, 3)) for vid, score in ranked],
             }
         )
+        if store is not None:
+            store.record(
+                scenario=SCENARIO_NAME,
+                kind="call",
+                payload={"tick": q, "n_reviewers": N_REVIEWERS},
+                ts=float(q),
+            )
+            if (q + 1) % 10 == 0:
+                record_metric_snapshot(
+                    store=store,
+                    scenario=SCENARIO_NAME,
+                    aggregator=aggregator,
+                    ts=float(q),
+                )
 
     # Final ranking (last 20 should be stable; spot-check via metric).
     final_ranking = await aggregator.get_ranked("code-review", n=N_REVIEWERS)
