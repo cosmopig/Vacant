@@ -24,7 +24,7 @@ from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, FastAPI, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException, Request
 
 from vacant.core.crypto import SigningKey
 from vacant.core.types import EMPTY_PREV_HASH, ResidentForm, VacantState
@@ -105,7 +105,30 @@ def build_a2a_router(
     state_fn = state_provider or (lambda: self_form.runtime_state)
 
     @router.post("/message/send")
-    async def message_send(body: dict[str, Any]) -> dict[str, Any]:
+    async def message_send(request: Request, body: dict[str, Any]) -> dict[str, Any]:
+        # F3: spec-shape validation BEFORE we hand bytes to the parser.
+        # FastAPI normally parses application/json automatically, but a
+        # client sending text/plain or a non-JSON-RPC envelope must be
+        # rejected with a structured 400 — silently coercing causes
+        # subtle replay-protection bugs downstream.
+        content_type = (request.headers.get("content-type") or "").split(";")[0].strip().lower()
+        if content_type and content_type != "application/json":
+            raise HTTPException(
+                status_code=415,
+                detail=f"unsupported content-type {content_type!r}; expected application/json",
+            )
+        if body.get("jsonrpc") != "2.0":
+            raise HTTPException(
+                status_code=400,
+                detail=f"jsonrpc field must be '2.0'; got {body.get('jsonrpc')!r}",
+            )
+        method = body.get("method")
+        if method != "message/send":
+            raise HTTPException(
+                status_code=400,
+                detail=f"method must be 'message/send'; got {method!r}",
+            )
+
         # 1. Parse envelope.
         try:
             request_env = from_a2a_jsonrpc(body)

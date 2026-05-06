@@ -19,18 +19,28 @@ from typing import Literal
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
+from vacant.core.types import VacantState
+from vacant.protocol.capability_card import deserialize as deserialize_card
+from vacant.protocol.errors import EnvelopeFormatError, UnsupportedHaloVersionError
 from vacant.registry.aggregation import (
+    DEFAULT_REPUTATION_ORACLE,
     HaloMatch,
+    ReputationOracle,
     lineage_query,
     rank_by_reputation,
     search_capability,
 )
 from vacant.registry.errors import (
+    IdempotencyConflict,
     NotFoundError,
     RegistryWriteError,
+    SequenceMonotonicityError,
+    SignatureRejected,
     VisibilityViolation,
 )
+from vacant.registry.halo import publish_halo_signed
 from vacant.registry.store import RegistryStore
+from vacant.registry.visibility import Visibility
 
 __all__ = ["build_app"]
 
@@ -43,14 +53,29 @@ class _Base(BaseModel):
 
 
 class HaloPublishRequest(_Base):
-    capability_text: str
-    capability_card_hex: str
-    """Hex-encoded canonical-bytes of a `CapabilityCard`. The handler
-    reconstructs and verifies it."""
+    """Body for ``POST /v1/halo``.
+
+    The caller serialises a signed ``CapabilityCard`` (via
+    ``vacant.protocol.capability_card.serialize``) and pre-signs the
+    audit-chain ``register`` event under their own Ed25519 key. The
+    server reconstructs the canonical event bytes from these fields,
+    re-verifies the signature, and submits the event to the store.
+    """
+
+    capability_card_blob_hex: str
+    """Hex-encoded ``serialize(card)`` bytes — full signed CapabilityCard."""
     runtime_state: Literal["LOCAL", "ACTIVE", "HIBERNATING", "STALE", "SUNK", "ARCHIVED"]
     visibility: Literal["NONE", "RESTRICTED", "PUBLIC"] = "PUBLIC"
     base_model: str = "unknown"
     base_model_family: str = "unknown"
+    owner_org: str | None = None
+    declared_capabilities: list[str] | None = None
+    parent_id: str | None = None
+    version: str = "0.0.1"
+    event_ts_ms: int
+    event_actor_seq: int = Field(..., ge=1)
+    event_idempotency_key: str
+    event_signature_hex: str
 
 
 class HaloResponse(_Base):
@@ -77,6 +102,11 @@ class HaloMatchResponse(_Base):
     vacant_id: str
     capability_card_hash_hex: str
     capability_card_sig_hex: str
+    capability_card_blob_hex: str = ""
+    """Hex of the canonical-JSON serialized signed card. Empty for legacy
+    rows written before the blob column existed; clients should treat
+    empty as an indication to fall back to ``capability_card_sig_hex``
+    + the index columns."""
     declared_capabilities_json: str
     base_model_family: str
     visibility: str
@@ -124,10 +154,16 @@ class StubResponse(_Base):
 
 
 def _match_to_response(m: HaloMatch) -> HaloMatchResponse:
+    blob_hex = ""
+    if m.capability_card is not None:
+        from vacant.protocol.capability_card import serialize as _serialize_card
+
+        blob_hex = _serialize_card(m.capability_card).hex()
     return HaloMatchResponse(
         vacant_id=m.vacant_id,
         capability_card_hash_hex=m.capability_card_hash.hex(),
         capability_card_sig_hex=m.capability_card_sig.hex(),
+        capability_card_blob_hex=blob_hex,
         declared_capabilities_json=m.declared_capabilities_json,
         base_model_family=m.base_model_family,
         visibility=m.visibility.value,
@@ -138,8 +174,21 @@ def _match_to_response(m: HaloMatch) -> HaloMatchResponse:
 # --- app builder -------------------------------------------------------------
 
 
-def build_app(store: RegistryStore) -> FastAPI:
-    """Build the FastAPI app with all 25 endpoints wired to `store`."""
+def build_app(
+    store: RegistryStore,
+    *,
+    reputation_oracle: ReputationOracle | None = None,
+) -> FastAPI:
+    """Build the FastAPI app with all 25 endpoints wired to `store`.
+
+    `reputation_oracle` is consulted by `/v1/query_capability` to
+    rank halo matches by 5-D Beta means (P3). When omitted the
+    `DEFAULT_REPUTATION_ORACLE` (zero-score stub) is used — that
+    falls back to insertion order, which is fine for unit tests but
+    not for the demo dashboard / production. The MVP demo wires a
+    real `vacant.reputation.aggregator.Aggregator` here (F6).
+    """
+    oracle: ReputationOracle = reputation_oracle or DEFAULT_REPUTATION_ORACLE
 
     app = FastAPI(
         title="Vacant Registry (P4 — central MVP)",
@@ -154,18 +203,61 @@ def build_app(store: RegistryStore) -> FastAPI:
 
     @app.post("/v1/halo", response_model=HaloResponse, tags=["write"])
     async def publish(req: HaloPublishRequest) -> HaloResponse:
-        # The body of `publish_halo` lives in halo.py; we cannot
-        # reconstruct a fully-typed CapabilityCard from a hex blob in this
-        # module without a circular import, so this endpoint is the seam:
-        # callers serialise their card in their own session and POST the
-        # canonical bytes. For tests we exercise `publish_halo` directly.
-        raise HTTPException(
-            status_code=501,
-            detail=(
-                "RPC publish stub: serialise CapabilityCard via the python "
-                "`vacant.registry.halo.publish_halo` API; HTTP body schema "
-                "lands with P6 envelope work."
-            ),
+        # F5: the registry must accept HTTP halo publishes so the
+        # `vacant publish` CLI command can put a signed capability card
+        # on the wire without going through Python imports. The caller
+        # pre-signs the register-event canonical bytes; the server
+        # reconstructs them inside `publish_halo_signed` and rejects
+        # bad signatures via `submit_event`'s L1 verifier.
+        try:
+            blob = bytes.fromhex(req.capability_card_blob_hex)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400, detail=f"capability_card_blob_hex not hex: {exc}"
+            ) from exc
+        try:
+            card = deserialize_card(blob)
+        except (EnvelopeFormatError, UnsupportedHaloVersionError) as exc:
+            raise HTTPException(
+                status_code=400, detail=f"capability card parse failed: {exc}"
+            ) from exc
+        try:
+            signature = bytes.fromhex(req.event_signature_hex)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400, detail=f"event_signature_hex not hex: {exc}"
+            ) from exc
+
+        try:
+            record = await publish_halo_signed(
+                store=store,
+                card=card,
+                runtime_state=VacantState(req.runtime_state),
+                visibility=Visibility(req.visibility),
+                base_model=req.base_model,
+                base_model_family=req.base_model_family,
+                owner_org=req.owner_org,
+                declared_capabilities=req.declared_capabilities,
+                parent_id=req.parent_id,
+                version=req.version,
+                event_ts_ms=req.event_ts_ms,
+                event_actor_seq=req.event_actor_seq,
+                event_idempotency_key=req.event_idempotency_key,
+                event_signature=signature,
+            )
+        except SignatureRejected as exc:
+            raise HTTPException(status_code=401, detail=str(exc)) from exc
+        except SequenceMonotonicityError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except IdempotencyConflict as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except RegistryWriteError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return HaloResponse(
+            vacant_id=record.vacant_id,
+            visibility=record.visibility.value,
+            event_seq=record.event_seq,
+            capability_card_hash_hex=record.capability_card_hash.hex(),
         )
 
     @app.post("/v1/revoke_halo", response_model=RevokeHaloResponse, tags=["write"])
@@ -280,7 +372,10 @@ def build_app(store: RegistryStore) -> FastAPI:
         limit: int = Query(default=20, ge=1, le=100),
     ) -> CapabilitySearchResponse:
         matches = await search_capability(store=store, query=capability, family=family, limit=limit)
-        ranked = await rank_by_reputation(matches)
+        # F6: use the wired-in oracle (P3 Aggregator in production /
+        # demo) instead of the zero-score default, otherwise the public
+        # capability search returns matches in arbitrary insertion order.
+        ranked = await rank_by_reputation(matches, oracle=oracle)
         return CapabilitySearchResponse(matches=[_match_to_response(m) for m in ranked])
 
     @app.get("/v1/reputation/{vacant_id}", response_model=StubResponse, tags=["read"])
