@@ -66,6 +66,10 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101", "S311", "S105", "S106"]
+# Dashboard + scenarios use 繁體中文 UI text and seeded RNG for reproducible
+# demos; RUF001 flags fullwidth CJK punctuation, S311 flags non-crypto RNG.
+"src/vacant/mvp/dashboard.py" = ["RUF001"]
+"src/vacant/mvp/scenarios/**/*.py" = ["S311", "RUF001"]
 
 [tool.ruff.format]
 quote-style = "double"

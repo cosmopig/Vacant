@@ -1,0 +1,18 @@
+{
+  "scenario": "code_review",
+  "seed": 137,
+  "invariants": [
+    "all 5 reviewers dispatched concurrently per query",
+    "top-2 reviewers F >= 0.8",
+    "bottom reviewer F <= 0.4",
+    "ranking stable across last 20 queries",
+    "ring same-controller signal downweights flagged review by >= 50%"
+  ],
+  "metrics": {
+    "n_queries": 100,
+    "n_reviewers": 5,
+    "ranking_stable": true,
+    "ring_downweighted": true
+  },
+  "tolerance_notes": "Quality profile encoded in scenario file: [0.92, 0.88, 0.78, 0.55, 0.32]. Per-call jitter +-0.03."
+}

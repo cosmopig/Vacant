@@ -1,0 +1,17 @@
+{
+  "scenario": "law_firm",
+  "seed": 42,
+  "invariants": [
+    "parent F >= 0.7",
+    "parent R >= 0.65",
+    "factual_sub F >= 0.75",
+    "logical_sub L >= 0.7",
+    "all logbook chains verify",
+    "both subs remain LOCAL"
+  ],
+  "metrics": {
+    "n_calls": 30,
+    "closed_children_remained_local": true
+  },
+  "tolerance_notes": "Reputation values measured from MockSubstrate run; invariants are spec thresholds (P7_demo_seed §Scenario 1). Exact numerical values may shift by +-0.05 with reputation-engine changes -- update this fixture in the same PR per dispatch/P7_demo_seed.md §'Updating fixtures'."
+}

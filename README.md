@@ -23,11 +23,22 @@ uv run ruff check . && uv run ruff format --check .
 uv run mypy src/
 ```
 
-The Streamlit dashboard and demo scenarios land with P7:
+The Streamlit dashboard and demo scenarios:
 
 ```bash
-uv run streamlit run src/vacant/mvp/dashboard.py   # P7
+# Run the dashboard.
+uv run streamlit run src/vacant/mvp/dashboard.py
+
+# Or run a single scenario from the CLI.
+uv run python -m vacant.mvp.demo --scenario=law_firm
+uv run python -m vacant.mvp.demo --scenario=self_replication --seed=314
+
+# Full integration test (4 scenarios + tamper-detection regression).
+uv run pytest -m slow tests/integration/test_mvp_full.py
 ```
+
+See [`docs/RUNBOOK.md`](docs/RUNBOOK.md) for full demo instructions and
+[`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) for the 5-minute thesis-defence walk.
 
 ## Layout
 

@@ -1,0 +1,17 @@
+{
+  "scenario": "adversarial",
+  "seed": 666,
+  "invariants": [
+    "10 ACTIVE vacants, 4 share controller_id (the colluding ring)",
+    "after 200 reviews: same-controller signal fires on the 4-ring with strength >= 0.7",
+    "ring members' reviews count for <= 0.5 weight when target is also in the ring",
+    "non-ring vacants outrank ring members under UCB despite ring's inflated raw scores",
+    "dashboard visualises the detected ring + 'cost-raising not preventing' framing"
+  ],
+  "metrics": {
+    "ring_size": 4,
+    "non_ring_size": 6,
+    "review_count": 200
+  },
+  "tolerance_notes": "Adversarial scenario lives on the dashboard's 'Adversarial' page; it reuses code_review's ring-downweight metrics for the regression guard."
+}
