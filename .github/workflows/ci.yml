@@ -30,10 +30,6 @@ jobs:
   tests:
     name: tests (${{ matrix.os }}, py${{ matrix.python }})
     runs-on: ${{ matrix.os }}
-    # macOS is informational-only until we can repro the runner-specific
-    # failure locally — full suite passes on a developer Mac. Linux on
-    # 3.12 + 3.13 are blocking gates.
-    continue-on-error: ${{ matrix.os == 'macos-latest' }}
     strategy:
       fail-fast: false
       matrix:
@@ -42,13 +38,27 @@ jobs:
         exclude:
           - os: macos-latest
             python: "3.13"
+    env:
+      # Pin uv's Python discovery to the matrix interpreter. Without
+      # this, uv resolves against any newer Python it finds on the
+      # runner — we saw it pick 3.14 on macos-latest, where the
+      # SQLAlchemy → greenlet conditional-marker chain silently dropped
+      # greenlet, breaking every async-sqlalchemy test. UV_PYTHON +
+      # `uv sync --python` together belt-and-braces this. The
+      # underlying greenlet fix is commit 3625a7e.
+      UV_PYTHON: ${{ matrix.python }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: ${{ matrix.python }}
           enable-cache: true
-      - run: uv sync --all-extras
+      - name: Sync deps (pinned to matrix python)
+        run: uv sync --all-extras --python ${{ matrix.python }}
+      - name: Sanity-check interpreter + greenlet present
+        run: |
+          uv run python -c "import sys; expected='${{ matrix.python }}'; actual='%d.%d' % sys.version_info[:2]; assert actual == expected, (actual, expected); print('python', sys.version)"
+          uv run python -c "import greenlet; print('greenlet', greenlet.__version__)"
       - name: Unit + property tests
         run: uv run pytest --cov=vacant --cov-report=xml --cov-report=term --cov-fail-under=90
       - name: Slow integration tests
