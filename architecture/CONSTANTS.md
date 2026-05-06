@@ -145,6 +145,8 @@ Wash cost formula and concrete coefficient values: see `components/P2_identity.m
 |---|---|---|
 | Graduation rate limit | per parent per 24h: see P5 spec | P5 §graduation |
 | Closed-child default visibility | `NONE` | P5 §1 |
+| `GRADUATION_RATE_LIMIT_PER_PARENT_24H` | `3` | D012 §A |
+| `GRADUATION_COLLUSION_THRESHOLD` | `0.6` | D012 §B |
 
 ## Demo (P7)
 

@@ -118,3 +118,18 @@ signals; the engine raises a `triggered` flag rather than auto-blocking."""
 
 REGISTRY_DB_DEFAULT_URL: Final[str] = "sqlite+aiosqlite:///:memory:"
 """Default SQLAlchemy async URL for in-memory testing. D006 §B."""
+
+# --- Composite (P5) ----------------------------------------------------------
+
+GRADUATION_RATE_LIMIT_PER_PARENT_24H: Final[int] = 3
+"""Per-parent graduation rate limit over a 24h sliding window.
+CONSTANTS.md §Composite / D012 §A. Defaults to 3 to mirror P1's
+per-target review limit pattern; tunable per `CompositeRuntime` for
+demo orchestration."""
+
+GRADUATION_COLLUSION_THRESHOLD: Final[float] = 0.6
+"""Maximum tolerated `same_*` signal strength on the parent->child pair
+during graduation. Above this the graduation is blocked regardless of
+parent consent. CONSTANTS.md §Composite / D012 §B. Aligned with
+`DIMENSION_CORRELATION_ALERT_THRESHOLD` so the two collusion signals
+share a calibration anchor."""
