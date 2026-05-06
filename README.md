@@ -126,6 +126,44 @@ Copy `.env.example` → `.env` and fill in only the keys you actually use.
 
 ---
 
+## Hosting a vacant under your client
+
+Vacant runs as a network resident, not as part of your agent client.
+The intended deployment is: **`vacant serve --mcp` exposes A2A + MCP
+transports**; your client (Claude Desktop, OpenClaw, Hermes, any
+MCP-aware tool) connects, the vacant lists its capabilities via
+`tools/list`, and *the calling client supplies the LLM* via MCP
+`sampling/createMessage`. The vacant signs the resulting logbook
+entry; the client's LLM is the substrate; **no API key is needed on
+the vacant side**.
+
+```bash
+# Terminal — start a vacant
+vacant init alice
+vacant serve --mcp --port 8443 --name alice
+```
+
+Point your MCP client (e.g. Claude Desktop's `mcp.json`) at
+`http://localhost:8443/mcp`, then call any of alice's tools. Alice's
+`substrate_spec.allowed_substrates` includes `client-inherited`; the
+recorded substrate identity is `client-inherited:<caller_vid>:<model>`,
+so per-substrate reputation works the same way it does for any other
+backend.
+
+Verify the wiring externally with `npx @modelcontextprotocol/inspector`
+or the `mcp` Python SDK's client. The integration test pinning this
+flow is `tests/integration/test_mcp_external_client.py`. ADR
+`architecture/decisions/D017_client_inherited_substrate.md` documents
+the security model: the vacant trusts the caller's LLM output, but
+signs its own logbook entry, and the substrate identity is recorded
+so reputation per-substrate still works.
+
+For non-MCP deployments, pick any substrate that has a key
+(`anthropic`, `openai`, `gemini`, `mistral`, `ollama`) — see
+`docs/RUNBOOK.md` for the full matrix.
+
+---
+
 ## What is a *vacant*?
 
 A vacant is a *resident form* — an agent that has voluntarily adopted six components, in exchange for being addressable, reviewable, and persistent on the network:
@@ -163,7 +201,7 @@ Each scenario is a runnable script that exercises a different cross-component fl
 
 1 root vacant spawns over 200 ticks: D1 (clone-with-mutation), D2 (subagent-bud), D3 (capability-fork), D5 (cross-substrate respawn). Demonstrates: parent_id chain, identical-keypair-through-graduation (D2 child graduates from `LOCAL` → `ACTIVE`, **same keypair preserved**), STYLO discount stalls individual-vacant evolution after epoch 5 while a new D1 spawn resets the lineage clock — the load-bearing §4.3 mechanism that lets *lineages* evolve infinitely while *individuals* mortal.
 
-Each scenario emits structured JSON to stdout. The dashboard reads from `var/demo.db` for live visualization.
+Each scenario emits structured JSON to stdout **and** writes per-event records into a SQLite event store at `var/demo.db`. The Streamlit dashboard reads from that store, so opening the dashboard after a `vacant demo` run replays exactly what happened — no recompute, no cache invalidation. `vacant demo --tail` streams the same events live for terminal-only visualization.
 
 ---
 
@@ -318,7 +356,7 @@ Full list with citations to enforcement points: [`CLAUDE.md`](CLAUDE.md) §"Load
 | Audience | Read | Time |
 |---|---|---|
 | **Quick demo / evaluator** | This README + run `vacant demo law_firm` | 10 min |
-| **Thesis committee** | [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md) §0–§4 + [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | 45 min |
+| **Demo presenter / 答辯** | [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md) §0–§4 + [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | 45 min |
 | **Implementer / contributor** | [`CLAUDE.md`](CLAUDE.md) + [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) + the relevant `components/P*.md` | 2 hours |
 | **Adversarial reviewer** | THEORY_V5 §6 + `tests/adversarial/` + `architecture/decisions/D*.md` | 4 hours |
 | **Curious public** | https://vacant.zeabur.app/ — narrative version with diagrams | 5–30 min |

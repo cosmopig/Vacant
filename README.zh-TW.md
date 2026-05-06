@@ -127,6 +127,40 @@ uv run vacant demo law_firm --substrate=ollama         # 本機 Ollama，不需 
 
 ---
 
+## 嫁接到客戶端跑（host a vacant under your client）
+
+Vacant 是網路上的居民、不嵌進你的 agent 客戶端。設想的部署方式是：
+**`vacant serve --mcp` 同時開 A2A 跟 MCP 兩種傳輸**；你的客戶端
+（Claude Desktop / OpenClaw / Hermes / 任何 MCP-aware 工具）接上去，
+vacant 透過 `tools/list` 公告自己的 capability，*呼叫端負責出 LLM*
+（用 MCP 的 `sampling/createMessage`）。Vacant 簽自己 logbook 上的
+entry；客戶端的 LLM 是 substrate；**vacant 端完全不需要 API key**。
+
+```bash
+# 終端機 — 起一個 vacant
+vacant init alice
+vacant serve --mcp --port 8443 --name alice
+```
+
+把你的 MCP 客戶端（例如 Claude Desktop 的 `mcp.json`）指向
+`http://localhost:8443/mcp`，就能呼叫 alice 的所有 tool。alice 的
+`substrate_spec.allowed_substrates` 內含 `client-inherited`；記錄下來的
+substrate identity 是 `client-inherited:<caller_vid>:<model>`，所以
+per-substrate 信譽計算跟其他 backend 一視同仁。
+
+接線正確與否可以用 `npx @modelcontextprotocol/inspector` 或 `mcp` Python
+SDK 的 client 從外部驗證。針對這個流程的 integration test 是
+`tests/integration/test_mcp_external_client.py`。安全模型在 ADR
+`architecture/decisions/D017_client_inherited_substrate.md`：vacant
+信任呼叫端的 LLM 輸出，但自己簽自己的 logbook entry；substrate identity
+記下來，per-substrate 信譽機制照走。
+
+非 MCP 部署的場合，挑一個有 key 的 substrate
+（`anthropic`、`openai`、`gemini`、`mistral`、`ollama`）即可 — 完整矩陣
+見 `docs/RUNBOOK.md`。
+
+---
+
 ## 什麼是 *vacant*？
 
 一個 vacant 是 *居民形式* — agent 自願採納六樣構件，換取在網路上「可以被找到、可以被評鑑、可以持續存在」這件事：
@@ -164,7 +198,7 @@ uv run vacant demo law_firm --substrate=ollama         # 本機 Ollama，不需 
 
 1 個 root vacant 在 200 個模擬 tick 內依序 spawn：D1（clone-with-mutation）、D2（subagent-bud）、D3（capability-fork）、D5（cross-substrate respawn）。展示：parent_id 鏈、**graduation 過程 keypair 不變**（D2 子代從 `LOCAL` → `ACTIVE`，**同一把 keypair 保留**）、STYLO discount 讓個體 vacant 在 epoch 5 後自我演化停滯，但新 D1 spawn 重設 lineage clock — **關鍵 §4.3 機制**：lineage 無限演化，個體會死。
 
-每個 scenario 把結構化 JSON 印到 stdout。Dashboard 從 `var/demo.db` 讀來做即時視覺化。
+每個 scenario 把結構化 JSON 印到 stdout，**同時**把每筆事件寫進 SQLite event store `var/demo.db`。Streamlit dashboard 從這個 store 讀資料 — 跑完 `vacant demo` 之後打開 dashboard，看到的就是剛剛那次的 replay，不重新計算、不需要 cache invalidation。`vacant demo --tail` 串流同樣的事件到 stdout，給只開終端機的場合用。
 
 ---
 
