@@ -1,25 +1,6 @@
 <div align="center">
 
-```
-            ╭────────────────────────────────────────────────────╮
-            │                                                    │
-            │   ┌─╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌─┐                           │
-            │   ╎      v a c a n t      ╎  ●                     │
-            │   ╎                        ╎  ↑ halo               │
-            │   ╎  identity   logbook    ╎    (capability_card,  │
-            │   ╎  behavior   substrate  ╎     自帶的簽章公告)   │
-            │   ╎  runtime    halo       ╎                       │
-            │   └─╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌─┘                           │
-            │                                                    │
-            │   一個讓 AI agent 成為「居民」的形式，              │
-            │   疊在 A2A / MCP 之上。                             │
-            │                                                    │
-            ╰────────────────────────────────────────────────────╯
-
-         ▸ 身份（Ed25519 keypair）   ▸ 歷史（簽章 logbook）
-         ▸ 信譽（五維 Beta 後驗 · 每個 substrate 各算一份）
-         ▸ 後果（lineage · sunk · archived · graduation）
-```
+<img src="assets/hero.svg" alt="Vacant — 給 AI agent 的責任層居民形式，疊在 A2A / MCP 之上" width="100%">
 
 # Vacant
 

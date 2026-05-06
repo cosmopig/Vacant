@@ -1,25 +1,6 @@
 <div align="center">
 
-```
-            ╭────────────────────────────────────────────────────╮
-            │                                                    │
-            │   ┌─╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌─┐                           │
-            │   ╎      v a c a n t      ╎  ●                     │
-            │   ╎                        ╎  ↑ halo               │
-            │   ╎  identity   logbook    ╎    (capability_card,  │
-            │   ╎  behavior   substrate  ╎     self-published    │
-            │   ╎  runtime    halo       ╎     signed announcement) │
-            │   └─╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌─┘                           │
-            │                                                    │
-            │   a residency form for AI agents,                  │
-            │   on top of A2A / MCP.                             │
-            │                                                    │
-            ╰────────────────────────────────────────────────────╯
-
-         ▸ identity (Ed25519)   ▸ history (signed logbook)
-         ▸ reputation (5-dim Beta posterior, per substrate)
-         ▸ consequences (lineage · sunk · archived · graduation)
-```
+<img src="assets/hero.svg" alt="Vacant — a residency form for AI agents on top of A2A / MCP" width="100%">
 
 # Vacant
 
