@@ -221,20 +221,22 @@ def _match_to_card(match: Any) -> CapabilityCard:
     """Extract a `CapabilityCard` from the search result.
 
     Supports two shapes:
-    - A `CapabilityCard` instance directly (test stubs).
-    - A P4 `HaloMatch` whose fields can be combined with the registry's
-      stored card row. For the unit-test stub form we expect the test
-      to hand back `CapabilityCard` instances directly.
+    - A `CapabilityCard` instance directly (test stubs / `call_local`).
+    - A P4 `HaloMatch` carrying `capability_card` (D015 §C). Registry
+      rows now persist the canonical-JSON serialized signed card, so
+      `HaloMatch.capability_card` is populated for every published vacant
+      and dispatch can call `card.endpoint` without re-querying.
     """
     if isinstance(match, CapabilityCard):
         return match
-    # Heuristic for P4 HaloMatch: build a *minimal* CapabilityCard from
-    # its fields. Endpoint must be present on the match (we extend P4
-    # in this PR or rely on call sites to pre-rehydrate).
     card = getattr(match, "capability_card", None)
     if isinstance(card, CapabilityCard):
         return card
-    raise EnvelopeFormatError(f"unsupported search result shape: {type(match).__name__}")
+    raise EnvelopeFormatError(
+        f"search result {type(match).__name__} carries no signed CapabilityCard "
+        "(HaloMatch.capability_card is None — was the row published before the "
+        "capability_card_blob column existed?)"
+    )
 
 
 async def _pick_winner(matches: list[Any], reputation_oracle: Any | None) -> Any:

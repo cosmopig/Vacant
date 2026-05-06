@@ -24,9 +24,11 @@ from vacant.reputation.discount import (
     dimension_imbalance_alert,
 )
 from vacant.reputation.errors import (
+    ChainTamperError,
     IneligibleReviewerError,
     InvalidDimensionError,
     InvalidSignalError,
+    MissingAuditKeyError,
     ReputationError,
     ReviewRateLimitError,
 )
@@ -61,6 +63,7 @@ __all__ = [
     "Beta",
     "Beta5D",
     "BirthPath",
+    "ChainTamperError",
     "ColdStartCaveats",
     "CumulativeDriftTracker",
     "Dim",
@@ -68,6 +71,7 @@ __all__ = [
     "InsufficientDataLabel",
     "InvalidDimensionError",
     "InvalidSignalError",
+    "MissingAuditKeyError",
     "ReputationError",
     "ReviewRateLimitError",
     "ReviewRecord",

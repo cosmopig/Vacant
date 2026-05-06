@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from vacant.core.constants import SAME_SIGNAL_DISCOUNT_FLOOR
 from vacant.core.crypto import keygen
 from vacant.core.types import VacantId
 from vacant.reputation import (
@@ -182,6 +183,30 @@ def test_discount_from_signals_empty_returns_one() -> None:
     assert discount_from_signals([]) == 1.0
 
 
-def test_discount_from_signals_full_strength_zeroes() -> None:
+def test_discount_from_signals_full_strength_respects_floor() -> None:
+    """F1 regression: strength=1.0 must not zero the reviewer's weight.
+
+    Same-* detection is cost-raising, not preventing (CLAUDE.md §Load-bearing
+    theory decisions / D015). At strength=1.0 the residual weight equals the
+    floor, never zero — that would convert detection into a unilateral mute.
+    """
     sigs = [SameDetectSignal(strength=1.0, suspected_cluster=frozenset(), rationale="x")]
-    assert discount_from_signals(sigs) == 0.0
+    discount = discount_from_signals(sigs)
+    assert discount == pytest.approx(SAME_SIGNAL_DISCOUNT_FLOOR)
+    assert discount > 0.0
+
+
+def test_discount_from_signals_above_floor_at_lower_strengths() -> None:
+    sigs = [SameDetectSignal(strength=0.4, suspected_cluster=frozenset(), rationale="m")]
+    # 1 - 0.4 = 0.6; floor never bites here.
+    assert discount_from_signals(sigs) == pytest.approx(0.6)
+
+
+def test_discount_from_signals_floor_holds_for_any_signal_combination() -> None:
+    """Floor binds even when several maximal signals stack."""
+    sigs = [
+        SameDetectSignal(strength=1.0, suspected_cluster=frozenset(), rationale="a"),
+        SameDetectSignal(strength=1.0, suspected_cluster=frozenset(), rationale="b"),
+        SameDetectSignal(strength=0.95, suspected_cluster=frozenset(), rationale="c"),
+    ]
+    assert discount_from_signals(sigs) >= SAME_SIGNAL_DISCOUNT_FLOOR

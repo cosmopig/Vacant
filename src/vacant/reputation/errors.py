@@ -24,3 +24,15 @@ class InvalidSignalError(ReputationError):
 class ReviewRateLimitError(ReputationError):
     """A target's per-window review rate limit was exceeded
     (Padv-P3 finding D010 §1)."""
+
+
+class ChainTamperError(ReputationError):
+    """A reviewer's logbook failed `verify_chain` during `record_review`
+    audit (D015 §D). Posterior update is rolled back and the review is
+    rejected — the auditable history of reputation events is the load-
+    bearing claim of the thesis (CLAUDE.md §load-bearing decisions)."""
+
+
+class MissingAuditKeyError(ReputationError):
+    """The aggregator was constructed in audit mode but the reviewer's
+    signing key / logbook is not registered (D015 §D)."""

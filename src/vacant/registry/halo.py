@@ -15,6 +15,7 @@ from typing import Any
 
 from vacant.core.crypto import SigningKey, hash_blake2b, sign
 from vacant.core.types import CapabilityCard, VacantState
+from vacant.protocol.capability_card import serialize as serialize_card
 from vacant.registry.errors import RegistryWriteError
 from vacant.registry.models import Vacant
 from vacant.registry.store import RegistryStore, SignedEventDraft, now_ms
@@ -79,6 +80,7 @@ async def publish_halo(
     eff_vis = effective_visibility(runtime_state, visibility)
     capabilities = declared_capabilities or [card.capability_text]
     capability_card_hash = _capability_card_hash(card)
+    capability_card_blob = serialize_card(card)
     ts = now_ms()
 
     existing = await store.get_vacant(vacant_id)
@@ -94,6 +96,7 @@ async def publish_halo(
             declared_capabilities_json=json.dumps(capabilities),
             capability_card_hash=capability_card_hash,
             capability_card_sig=card.signature,
+            capability_card_blob=capability_card_blob,
             status="active",
             visibility=eff_vis.value,
             registered_at=ts,

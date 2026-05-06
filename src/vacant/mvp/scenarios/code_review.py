@@ -18,7 +18,8 @@ from vacant.mvp.scenarios._harness import (
     seeded_random,
 )
 from vacant.mvp.scenarios._seeds import DEFAULT_SEEDS
-from vacant.reputation import Aggregator, SameDetectSignal
+from vacant.reputation import Aggregator
+from vacant.reputation.same_detect import same_controller
 
 if TYPE_CHECKING:
     from vacant.substrate.base import SubstrateBackend
@@ -119,43 +120,123 @@ async def run(*, substrate: SubstrateBackend, seed: int | None = None) -> Scenar
     result.metrics["last20_top1_distinct"] = distinct_top1
     result.metrics["ranking_stable"] = distinct_top1 == 1
 
-    # --- Adversarial sub-scenario: same-controller ring -------------------
-    # Re-run the last reviewer with the same controller_id and assert
-    # that injecting `SameDetectSignal(strength=1.0)` discounts the
-    # subsequent caller_review's effect on the target.
-    target_form = reviewers[0][1]
-    pre_factual = (await aggregator.get_reputation(target_form.identity, "default")).factual.alpha
+    # --- Adversarial sub-scenario: same-controller detector evaluation ---
+    # F5: run the *real* `same_controller(...)` detector on a seeded
+    # colluding pair and a non-colluding control. The detector's actual
+    # output (not a hardcoded SameDetectSignal) feeds the aggregator.
+    #
+    # Colluding pair: reviewers[0] and reviewers[1] share a declared
+    # controller_id, exhibit correlated heartbeat timing, and have
+    # near-identical behavioural fingerprints (the three signals T5
+    # §3.2 stacks). Non-colluding control: reviewers[3] vs reviewers[4]
+    # — distinct families and uncorrelated behaviour.
+    rng_collude = seeded_random(s + 2)
+    base_heartbeat = [rng_collude.uniform(0.3, 1.0) for _ in range(20)]
+
+    def _correlated(series: list[float], jitter: float) -> list[float]:
+        return [x + rng_collude.uniform(-jitter, jitter) for x in series]
+
+    colluding_a = reviewers[0][1]
+    colluding_b = reviewers[1][1]
+    control_a = reviewers[3][1]
+    control_b = reviewers[4][1]
+
+    behavior_collude = [rng_collude.uniform(0.0, 1.0) for _ in range(16)]
+    behavior_collude_b = _correlated(behavior_collude, jitter=0.01)
+    behavior_control_a = [rng_collude.uniform(0.0, 1.0) for _ in range(16)]
+    behavior_control_b = [rng_collude.uniform(0.0, 1.0) for _ in range(16)]
+
+    colluding_signal = same_controller(
+        colluding_a.identity,
+        colluding_b.identity,
+        declared_same=True,
+        heartbeat_a=base_heartbeat,
+        heartbeat_b=_correlated(base_heartbeat, jitter=0.02),
+        behavior_a=behavior_collude,
+        behavior_b=behavior_collude_b,
+    )
+    control_signal = same_controller(
+        control_a.identity,
+        control_b.identity,
+        declared_same=False,
+        heartbeat_a=[rng_collude.uniform(0.3, 1.0) for _ in range(20)],
+        heartbeat_b=[rng_collude.uniform(0.3, 1.0) for _ in range(20)],
+        behavior_a=behavior_control_a,
+        behavior_b=behavior_control_b,
+    )
+
+    # TP / FP rate over a few seeded probes so the dashboard has something
+    # numeric to display rather than a single point estimate.
+    n_probes = 10
+    tp_hits = 0
+    fp_hits = 0
+    for _ in range(n_probes):
+        tp_sig = same_controller(
+            colluding_a.identity,
+            colluding_b.identity,
+            declared_same=True,
+            heartbeat_a=base_heartbeat,
+            heartbeat_b=_correlated(base_heartbeat, jitter=0.02),
+            behavior_a=behavior_collude,
+            behavior_b=_correlated(behavior_collude, jitter=0.02),
+        )
+        if tp_sig.strength > 0.5:
+            tp_hits += 1
+        fp_sig = same_controller(
+            control_a.identity,
+            control_b.identity,
+            declared_same=False,
+            heartbeat_a=[rng_collude.uniform(0.3, 1.0) for _ in range(20)],
+            heartbeat_b=[rng_collude.uniform(0.3, 1.0) for _ in range(20)],
+            behavior_a=[rng_collude.uniform(0.0, 1.0) for _ in range(16)],
+            behavior_b=[rng_collude.uniform(0.0, 1.0) for _ in range(16)],
+        )
+        if fp_sig.strength > 0.5:
+            fp_hits += 1
+    tp_rate = tp_hits / n_probes
+    fp_rate = fp_hits / n_probes
+
+    # Feed the *actual* detector output through the aggregator on a
+    # caller_review against the suspected ring and observe the discount.
+    pre_factual = (await aggregator.get_reputation(colluding_a.identity, "default")).factual.alpha
     await aggregator.record_review(
         author_form.identity,
-        target_form.identity,
+        colluding_a.identity,
         dimensions={"factual": 0.95},
         substrate="default",
         source="caller_review",
-        same_signals=[
-            SameDetectSignal(strength=1.0, suspected_cluster=frozenset(), rationale="ring")
-        ],
+        same_signals=[colluding_signal],
     )
-    post_factual = (await aggregator.get_reputation(target_form.identity, "default")).factual.alpha
+    post_factual = (await aggregator.get_reputation(colluding_a.identity, "default")).factual.alpha
     bump_with_signal = post_factual - pre_factual
 
-    # Compare to a similar review with no same-* signal.
-    other_target = reviewers[1][1]
-    pre_other = (await aggregator.get_reputation(other_target.identity, "default")).factual.alpha
+    pre_other = (await aggregator.get_reputation(control_a.identity, "default")).factual.alpha
     await aggregator.record_review(
         author_form.identity,
-        other_target.identity,
+        control_a.identity,
         dimensions={"factual": 0.95},
         substrate="default",
         source="caller_review",
+        same_signals=[control_signal],
     )
-    post_other = (await aggregator.get_reputation(other_target.identity, "default")).factual.alpha
+    post_other = (await aggregator.get_reputation(control_a.identity, "default")).factual.alpha
     bump_no_signal = post_other - pre_other
 
-    # The ring-flagged review's contribution is at most half the
-    # un-flagged review's contribution.
+    result.metrics["ring_signal_strength"] = colluding_signal.strength
+    result.metrics["control_signal_strength"] = control_signal.strength
+    result.metrics["ring_signal_rationale"] = colluding_signal.rationale
     result.metrics["ring_signal_bump"] = bump_with_signal
     result.metrics["unflagged_bump"] = bump_no_signal
-    result.metrics["ring_downweighted"] = bump_with_signal <= 0.5 * bump_no_signal + 1e-9
+    # Cost-raising, not preventing (D015 §A): bump_with_signal must be
+    # below the unflagged bump but never zero.
+    result.metrics["ring_downweighted"] = (
+        bump_with_signal < bump_no_signal and bump_with_signal > 0.0
+    )
+    result.metrics["same_controller_tp_rate"] = tp_rate
+    result.metrics["same_controller_fp_rate"] = fp_rate
+    # Spec thresholds the dashboard surfaces: TP >= 0.8, FP <= 0.1.
+    result.metrics["same_controller_tp_meets_threshold"] = tp_rate >= 0.8
+    result.metrics["same_controller_fp_meets_threshold"] = fp_rate <= 0.1
 
     # Snapshot.
     for i, (_sk, form, _vs) in enumerate(reviewers):

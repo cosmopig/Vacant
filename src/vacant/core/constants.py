@@ -246,6 +246,17 @@ SAME_CONTROLLER_BEHAVIOR_THRESHOLD: Final[float] = 0.88
 SAME_CONTROLLER_DECLARED_STRENGTH: Final[float] = 1.0
 """Same-controller detection thresholds. T5 §3.3 / D008 §C."""
 
+SAME_SIGNAL_DISCOUNT_FLOOR: Final[float] = 0.1
+"""Minimum residual weight a same-* signal can leave a review with.
+
+Same-* detection is *cost-raising, not preventing* (CLAUDE.md §Load-bearing
+theory decisions / D015). Even a maximum-strength signal (strength=1.0)
+must not zero a reviewer's contribution — that would convert detection
+into a unilateral mute. This floor ensures `discount_from_signals(...)`
+returns at least `SAME_SIGNAL_DISCOUNT_FLOOR` when any signal fires, so
+suspected colluders still get downweighted but are never silenced.
+CONSTANTS.md §Reputation / D015."""
+
 # --- Protocol (P6) -----------------------------------------------------------
 
 A2A_VACANT_METADATA_KEY: Final[str] = "urn:vacant:v1"

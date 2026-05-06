@@ -30,10 +30,12 @@ from vacant.core.constants import (
     SAME_MODEL_HEAVY_DISCOUNT,
     SOURCE_BASE_WEIGHTS,
 )
-from vacant.core.types import VacantId, VacantState
+from vacant.core.crypto import SigningKey
+from vacant.core.types import Logbook, VacantId, VacantState
 from vacant.reputation.cold_start import birth_path_bonus  # noqa: F401  re-export
 from vacant.reputation.discount import apply_discount_5d
 from vacant.reputation.errors import (
+    ChainTamperError,
     IneligibleReviewerError,
     InvalidDimensionError,
     InvalidSignalError,
@@ -96,8 +98,19 @@ class Aggregator:
         contexts: dict[VacantId, VacantContext] | None = None,
         *,
         review_limit_per_target_24h: int | None = None,
+        logbooks: dict[VacantId, Logbook] | None = None,
+        signing_keys: dict[VacantId, SigningKey] | None = None,
     ) -> None:
         self._contexts: dict[VacantId, VacantContext] = dict(contexts or {})
+        # Audit trail (D015 §D). When `logbooks` and `signing_keys` are
+        # both supplied, `record_review` will append a signed REVIEW_EVENT
+        # to the reviewer's logbook *before* the posterior is mutated; if
+        # the chain fails to verify the review is rejected and the
+        # posterior is left untouched. The maps are optional only to keep
+        # legacy unit tests that don't care about audit working — when
+        # absent, `record_review` skips the audit step.
+        self._logbooks: dict[VacantId, Logbook] = dict(logbooks or {})
+        self._signing_keys: dict[VacantId, SigningKey] = dict(signing_keys or {})
         # Per (vacant, substrate) Beta5D.
         self._posteriors: dict[tuple[VacantId, str], Beta5D] = {}
         # Per (reviewer, target) review-count for novelty discount.
@@ -122,6 +135,16 @@ class Aggregator:
     def add_context(self, ctx: VacantContext) -> None:
         """Register a vacant + its metadata."""
         self._contexts[ctx.vacant_id] = ctx
+
+    def register_audit(self, vid: VacantId, *, logbook: Logbook, signing_key: SigningKey) -> None:
+        """Attach a `Logbook` + `SigningKey` for `vid`. If both reviewer and
+        target have audit registered, `record_review` will emit a signed
+        REVIEW_EVENT to the reviewer's logbook (D015 §D)."""
+        self._logbooks[vid] = logbook
+        self._signing_keys[vid] = signing_key
+
+    def _audit_enabled_for(self, reviewer: VacantId) -> bool:
+        return reviewer in self._logbooks and reviewer in self._signing_keys
 
     def get_context(self, vid: VacantId) -> VacantContext:
         try:
@@ -216,6 +239,22 @@ class Aggregator:
         target_ctx = self._contexts[target]
         when = ts if ts is not None else time.time()
 
+        # --- D015 §D audit: sign + append a REVIEW_EVENT to reviewer's logbook
+        # *before* mutating the posterior. If the reviewer's existing chain
+        # is broken (tamper) we reject the review entirely; if the new
+        # entry fails post-append verification we roll back and reject.
+        # Read paths (`get_reputation`, `score`, `get_ranked`) do not
+        # require audit registration; only mutation does.
+        if self._audit_enabled_for(reviewer):
+            self._append_signed_review_event(
+                reviewer=reviewer,
+                target=target,
+                dimensions=dimensions,
+                substrate=substrate,
+                source=source,
+                when=when,
+            )
+
         # --- L2: per-(reviewer, target) rate limit (Padv-P3 D010 §1) -------
         # Spec P1 line 259: "每 24h 對同一 target_did 的 review 上限: 3" —
         # this is a REVIEWER-side spam cap. Defense: enforce a sliding-window
@@ -309,6 +348,47 @@ class Aggregator:
                 return 0.0
         means = rep.means()
         return sum(means[d] for d in dims) / len(dims)
+
+    # --- audit helpers (D015 §D) ------------------------------------------
+
+    def _append_signed_review_event(
+        self,
+        *,
+        reviewer: VacantId,
+        target: VacantId,
+        dimensions: Mapping[str, float],
+        substrate: str,
+        source: str,
+        when: float,
+    ) -> None:
+        """Append a signed REVIEW_EVENT entry to the reviewer's logbook,
+        verifying the chain before and after. Raises `ChainTamperError`
+        if verification fails (and rolls the new entry back so the
+        logbook stays valid for the next caller)."""
+        logbook = self._logbooks[reviewer]
+        signing_key = self._signing_keys[reviewer]
+        pubkey = reviewer.verify_key()
+        if not logbook.verify_chain(pubkey):
+            raise ChainTamperError(
+                f"reviewer {reviewer} logbook fails verify_chain — "
+                "refusing to record review (D015 §D)"
+            )
+        payload = {
+            "kind": "REVIEW_EVENT",
+            "target": target.hex(),
+            "dimensions": {d: float(s) for d, s in dimensions.items()},
+            "substrate": substrate,
+            "source": source,
+            "ts": when,
+        }
+        logbook.append("REVIEW_EVENT", payload, signing_key)
+        if not logbook.verify_chain(pubkey):
+            # Roll back; the post-append verification failed.
+            logbook.entries.pop()
+            raise ChainTamperError(
+                f"REVIEW_EVENT append produced an invalid chain for {reviewer} — "
+                "rolling back (D015 §D)"
+            )
 
     # --- maintenance -------------------------------------------------------
 
