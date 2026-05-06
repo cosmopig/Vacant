@@ -605,6 +605,104 @@ def serve_cmd(
     uvicorn.run(bundle.app, host=host, port=port, log_level="warning")
 
 
+# -- mcp (pure stdio, no HTTP) -----------------------------------------------
+
+
+def _build_ephemeral_form() -> tuple[ResidentForm, Any]:
+    """Construct an in-memory `(form, signing_key)` for `vacant mcp`
+    when no local vacant exists.
+
+    Useful when a user hits `claude plugin install vacant` without
+    having run `vacant init` first — they still get a working MCP
+    server backed by a demo identity. The keypair never touches the
+    disk; restarting the process gives a fresh identity.
+    """
+    from vacant.core.crypto import keygen
+
+    sk, vk = keygen()
+    vid = VacantId.from_verify_key(vk)
+    spec = SubstrateSpec(allowed_substrates=["mock", "client-inherited"])
+    bundle = BehaviorBundle(system_prompt="vacant mcp (ephemeral demo)")
+    card = CapabilityCard(
+        vacant_id=vid,
+        capability_text="ephemeral demo vacant — no on-disk state, fresh keypair per launch",
+        substrate_spec=spec,
+    ).signed(sk)
+    form = ResidentForm(
+        identity=vid,
+        logbook=Logbook(),
+        behavior_bundle=bundle,
+        substrate_spec=spec,
+        runtime_state=VacantState.LOCAL,
+        capability_card=card,
+    )
+    return form, sk
+
+
+@app.command("mcp")
+def mcp_cmd(
+    name: str | None = typer.Option(
+        None,
+        "--name",
+        help=(
+            "Local vacant name to serve. Defaults to `$VACANT_NAME` or the "
+            "single existing local vacant. If no local vacant exists, an "
+            "ephemeral demo vacant is used (with a stderr WARN)."
+        ),
+    ),
+) -> None:
+    """Run the vacant as a pure-stdio MCP server. (D2 / Claude Code plugin)
+
+    No HTTP, no worker threads, no `uvicorn` — the process IS the
+    MCP server. Spawned by `uvx vacant mcp` from the
+    `.claude-plugin/plugin.json` manifest, which is what Claude Code
+    calls when a user runs `/plugin install vacant`. EOF on stdin
+    (the parent closing the pipe) ends the loop.
+
+    Identity resolution:
+
+    1. `--name <n>` ⇒ load `~/.vacant/<n>/`
+    2. otherwise `$VACANT_NAME` ⇒ same
+    3. otherwise the only initialised local vacant ⇒ same
+    4. nothing initialised ⇒ ephemeral in-memory demo vacant + a
+       stderr WARN telling the operator to run `vacant init` for a
+       persistent identity.
+    """
+    from vacant.cli.mcp_server import run_mcp_stdio_server
+    from vacant.cli.server import build_serve_app
+
+    if name is not None:
+        bundle = build_serve_app(name)
+        form = bundle.form
+        signing_key = bundle.signing_key
+        replay_store = bundle.replay_store
+    else:
+        try:
+            n = ls.current_name()
+        except LocalVacantNotFound:
+            sys.stderr.write(
+                "WARN: no local vacant on disk; running an EPHEMERAL demo "
+                "vacant. The keypair is fresh-per-launch and never persisted. "
+                "Run `vacant init <name>` for a stable identity that survives "
+                "process restarts. See SECURITY.md §Local key storage.\n"
+            )
+            from vacant.protocol import InMemoryReplayStore
+
+            form, signing_key = _build_ephemeral_form()
+            replay_store = InMemoryReplayStore()
+        else:
+            bundle = build_serve_app(n)
+            form = bundle.form
+            signing_key = bundle.signing_key
+            replay_store = bundle.replay_store
+
+    run_mcp_stdio_server(
+        form=form,
+        signing_key=signing_key,
+        replay_store=replay_store,
+    )
+
+
 # -- demo ---------------------------------------------------------------------
 
 

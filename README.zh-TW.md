@@ -79,15 +79,35 @@
 
 ---
 
-## 一行命令試跑
+## Claude Code 使用者（一條指令）
 
-```bash
-curl -LsSf https://raw.githubusercontent.com/cosmopig/Vacant/main/install.sh | bash
+已經在用 [Claude Code](https://claude.com/claude-code) 的話，最快的
+方式是用 plugin marketplace：
+
+```text
+/plugin marketplace add cosmopig/Vacant
+/plugin install vacant@cosmopig-vacant
 ```
 
-自動安裝 [uv](https://docs.astral.sh/uv/)（如果沒有的話）、clone 進 `~/Vacant`、跑 `uv sync`。然後：
+裝完 restart session，Claude Code 直接就能 call **`vacant_describe`** /
+**`vacant_call`** 這兩個 MCP tool。Plugin manifest 背後跑的是
+[`uvx --from git+https://github.com/cosmopig/Vacant vacant mcp`](.claude-plugin/plugin.json)，沒
+有要手動裝什麼。
+
+> 還沒在本機 `vacant init` 過？`vacant mcp` 會跑一個 *ephemeral*
+> demo 身份（每次 launch 重 keygen、不寫盤），plugin 裝完立刻能
+> 用。事後再跑 `vacant init <name>` 換成永久身份。驗證流程見
+> [`docs/INTEGRATION.md`](docs/INTEGRATION.md) §0。
+
+---
+
+## 不用 Claude Code 也能跑
+
+同一份 code 不用 plugin 也能跑。兩條路：
 
 ```bash
+# 1. curl + script（clone 進 ~/Vacant）
+curl -LsSf https://raw.githubusercontent.com/cosmopig/Vacant/main/install.sh | bash
 cd ~/Vacant
 
 # 跑 demo scenario（決定性 mock substrate，不需要 API key）
@@ -100,10 +120,10 @@ uv run vacant demo multilingual_translation       # 跨 substrate 派發
 uv run streamlit run src/vacant/mvp/dashboard.py
 ```
 
-**不安裝直接跑** — 連 clone 都不用：
-
 ```bash
+# 2. uvx — 不 clone、不安裝
 uvx --from git+https://github.com/cosmopig/Vacant vacant demo law_firm
+uvx --from git+https://github.com/cosmopig/Vacant vacant mcp   # 純 stdio MCP server
 ```
 
 **用真的 LLM — substrate 矩陣**（substrate 是可換的；見 THEORY_V5 §2 — LLM 是 *資源*，不是 *身份*）：
