@@ -225,3 +225,15 @@ SAME_CONTROLLER_TEMPORAL_THRESHOLD: Final[float] = 0.70
 SAME_CONTROLLER_BEHAVIOR_THRESHOLD: Final[float] = 0.88
 SAME_CONTROLLER_DECLARED_STRENGTH: Final[float] = 1.0
 """Same-controller detection thresholds. T5 §3.3 / D008 §C."""
+
+# --- Protocol (P6) -----------------------------------------------------------
+
+A2A_VACANT_METADATA_KEY: Final[str] = "urn:vacant:v1"
+"""A2A metadata key under which Vacant envelope fields are mounted
+(P6 §3.2)."""
+
+CALL_TIMEOUT_DEFAULT_S: Final[int] = 60
+"""Default A2A call timeout in seconds. P6 §3.4 server.json default."""
+
+REGISTRY_CACHE_TTL_S: Final[int] = 300
+"""Default registry cache TTL for MCP adapter. P6 §3.4."""

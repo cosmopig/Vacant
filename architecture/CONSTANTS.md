@@ -139,6 +139,14 @@ Wash cost formula and concrete coefficient values: see `components/P2_identity.m
 | `ANOMALY_SPAWN_PER_PARENT_HOUR` | `10` | P4 §3.2 anomaly table |
 | `REGISTRY_DB_DEFAULT_URL` | `sqlite+aiosqlite:///:memory:` | D006 §B (test default) |
 
+## Protocol (P6)
+
+| Constant | Value | Citation |
+|---|---|---|
+| `A2A_VACANT_METADATA_KEY` | `urn:vacant:v1` | P6 §3.2 |
+| `CALL_TIMEOUT_DEFAULT_S` | `60` | P6 §3.4 |
+| `REGISTRY_CACHE_TTL_S` | `300` | P6 §3.4 |
+
 ## Composite (P5)
 
 | Constant | Value | Citation |
