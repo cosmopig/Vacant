@@ -34,7 +34,7 @@ IDEMPOTENCY_WINDOW_S: Final[int] = 86_400
 CONSTANTS.md §Lifecycle / P1 §3.2."""
 
 STALE_AFTER_HIBERNATING_DAYS: Final[int] = 30
-"""Hibernating → Stale-flag transition threshold (no service ≥ 30 days).
+"""Hibernating → Stale-flag transition threshold (no service >= 30 days).
 CONSTANTS.md §Lifecycle / D001."""
 
 ARCHIVED_AFTER_SUNK_DAYS: Final[int] = 180
@@ -118,3 +118,110 @@ signals; the engine raises a `triggered` flag rather than auto-blocking."""
 
 REGISTRY_DB_DEFAULT_URL: Final[str] = "sqlite+aiosqlite:///:memory:"
 """Default SQLAlchemy async URL for in-memory testing. D006 §B."""
+
+# --- Reputation (P3) ---------------------------------------------------------
+
+REPUTATION_DIMS: Final[tuple[str, ...]] = (
+    "factual",
+    "logical",
+    "relevance",
+    "honesty",
+    "adoption",
+)
+"""Five reputation dimensions. P3 §3.2 / D008 §A."""
+
+BETA_BASE_PRIORS: Final[dict[str, tuple[float, float]]] = {
+    "factual": (1.0, 1.0),
+    "logical": (1.0, 1.0),
+    "relevance": (1.0, 1.0),
+    "honesty": (2.0, 1.0),
+    "adoption": (1.0, 3.0),
+}
+"""Base Beta priors per dimension. P3 §3.2 / D008 §A.
+
+CONSTANTS.md previously listed (1.5, 1.0) for F/L/R; that was the
+worked example's L1-attestation-applied value being mistakenly imported
+as the base. The L1 +0.5alpha boost is applied separately in cold_start.py
+so the bonus is auditable rather than baked in."""
+
+DIM_HALF_LIFE_DAYS: Final[dict[str, int]] = {
+    "factual": 90,
+    "logical": 180,
+    "relevance": 60,
+    "honesty": 30,
+    "adoption": 90,
+}
+"""Per-dimension half-life. P3 §3.2 / CONSTANTS.md §Reputation."""
+
+SOURCE_BASE_WEIGHTS: Final[dict[str, float]] = {
+    "ground_truth": 1.0,
+    "caller_review": 0.6,
+    "peer_review": 0.4,
+    "self_eval": 0.05,
+    "adoption_event": 0.3,
+    "redteam_probe": 0.8,
+}
+"""Per-source base weights. P3 §3.4 table 1 / CONSTANTS.md §Reputation."""
+
+SAME_BASE_MODEL_DISCOUNT: Final[float] = 0.5
+SAME_MODEL_HEAVY_DISCOUNT: Final[float] = 0.25
+"""Same-base-model peer review discount; >5 reviews/30d → heavier discount.
+P3 §3.4.1."""
+
+REVIEWER_CREDIBILITY_FLOOR: Final[float] = 0.3
+"""Reviewer credibility floor; even low-rep reviewers count for at least 0.3.
+P3 §3.4.2."""
+
+NOVELTY_DECAY_COEFFICIENT: Final[float] = 0.4
+"""Per-repeat-review novelty decay. P3 §3.4.3."""
+
+COLLUSION_DENSITY_THRESHOLD: Final[float] = 0.6
+COLLUSION_RECIPROCITY_THRESHOLD: Final[float] = 0.7
+COLLUSION_SEVERE_DENSITY: Final[float] = 0.8
+COLLUSION_SEVERE_MULTIPLIER: Final[float] = 0.1
+"""Collusion graph thresholds. P3 §3.4.4."""
+
+UCB_C_BASE: Final[float] = 1.0
+UCB_C_EXPLORE: Final[float] = 0.5
+UCB_CONSERVATIVE_C_EXPLORE: Final[float] = 0.1
+"""UCB exploration coefficients. P3 §3.7."""
+
+N_MIN_FOR_STABLE_SCORE: Final[int] = 30
+N_SHOW_MIN_THRESHOLD: Final[int] = 10
+"""Sample-size thresholds for stable scoring + UI display. P3 §3.7-§3.8."""
+
+COLD_START_FLOORS_BY_LEVEL: Final[dict[str, float]] = {
+    "L0": 0.0,
+    "L1": 0.05,
+    "L2": 0.10,
+    "L3": 0.15,
+}
+"""Cold-start UCB floor by attestation level. P3 §3.7."""
+
+S_REF_USDC: Final[float] = 100.0
+"""Reference stake amount (USDC equivalent) for stake-bonus normalisation.
+P3 §3.7."""
+
+L1_ATTESTATION_ALPHA_BOOST: Final[float] = 0.5
+L3_VOUCH_ALPHA_BOOST: Final[float] = 0.3
+"""Cold-start alpha boosts for L1 attestation (per F/L/R dim) and L3 vouch
+(per voucher, applied to H). P3 §3.8."""
+
+NETWORK_EXPLORATION_FLOOR: Final[float] = 0.01
+"""Minimum fraction of traffic reserved for new vacants. P3 §3.7 line 343."""
+
+DIMENSION_CORRELATION_ALERT_THRESHOLD: Final[float] = 0.6
+"""Cross-dimension correlation alert (anti-Goodhart). P3 §3.6 line 290."""
+
+PORTABILITY_FACTOR_MAX_BONUS: Final[float] = 0.10
+"""Maximum portability bonus added to UCB call_score for vacants serving
+multiple substrates. P3-derived; CONSTANTS.md §Reputation."""
+
+IDLE_REVIEW_THRESHOLD_S: Final[int] = 3600
+"""How long a vacant must be idle before being eligible to peer-review
+new vacants. Cold-start §3.6 hook."""
+
+SAME_CONTROLLER_TEMPORAL_THRESHOLD: Final[float] = 0.70
+SAME_CONTROLLER_BEHAVIOR_THRESHOLD: Final[float] = 0.88
+SAME_CONTROLLER_DECLARED_STRENGTH: Final[float] = 1.0
+"""Same-controller detection thresholds. T5 §3.3 / D008 §C."""
