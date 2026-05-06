@@ -13,7 +13,8 @@
 [![tests: 736](https://img.shields.io/badge/tests-736%20passing-brightgreen.svg)](#testing)
 [![coverage: 91%](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](#testing)
 [![mypy: strict](https://img.shields.io/badge/mypy-strict-blue.svg)](https://mypy.readthedocs.io/)
-[![docs](https://img.shields.io/badge/docs-vacant.zeabur.app-indigo.svg)](https://vacant.zeabur.app/)
+[![docs](https://img.shields.io/badge/docs-cosmopig.github.io%2FVacant-indigo.svg)](https://cosmopig.github.io/Vacant/)
+[![site](https://img.shields.io/badge/site-vacant.zeabur.app-blueviolet.svg)](https://vacant.zeabur.app/)
 
 </div>
 
@@ -353,13 +354,30 @@ Full list with citations to enforcement points: [`CLAUDE.md`](CLAUDE.md) §"Load
 
 ## Documentation
 
+The full **API reference + theory + runbook** is auto-built from this
+repo on every push to `main` and served at:
+
+> **<https://cosmopig.github.io/Vacant/>**
+
+The same site embeds:
+
+- 10 module pages of API reference (`vacant.core`, `vacant.identity`,
+  …, `vacant.cli`) auto-generated from the source docstrings via
+  [mkdocstrings](https://mkdocstrings.github.io/).
+- The full theory: `BRIEFING`, `ARCHITECTURE`, `THEORY_V5`, `FAQ`,
+  `CONSTANTS`.
+- The demo / ops material: `RUNBOOK.md` and the 5-minute
+  `DEMO_SCRIPT.md`.
+
+If you'd rather walk the repo directly, here's the entry table:
+
 | Audience | Read | Time |
 |---|---|---|
 | **Quick demo / evaluator** | This README + run `vacant demo law_firm` | 10 min |
 | **Demo presenter / 答辯** | [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md) §0–§4 + [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | 45 min |
-| **Implementer / contributor** | [`CLAUDE.md`](CLAUDE.md) + [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) + the relevant `components/P*.md` | 2 hours |
+| **Implementer / contributor** | [`CLAUDE.md`](CLAUDE.md) + [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) + the relevant `components/P*.md` + the [API reference](https://cosmopig.github.io/Vacant/api/) | 2 hours |
 | **Adversarial reviewer** | THEORY_V5 §6 + `tests/adversarial/` + `architecture/decisions/D*.md` | 4 hours |
-| **Curious public** | https://vacant.zeabur.app/ — narrative version with diagrams | 5–30 min |
+| **Curious public — narrative** | https://vacant.zeabur.app/ — diagrams + walkthrough | 5–30 min |
 
 ---
 

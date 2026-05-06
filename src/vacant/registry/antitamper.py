@@ -67,9 +67,29 @@ def canonical_event_bytes(
     ts: int,
     actor_seq: int,
 ) -> bytes:
-    """Canonical byte form of an event, used for both signing and the
-    pre-image of `event_hash`. Matches P4 §3.1 hash-chain canonical rules
-    (modulo BLAKE2b vs BLAKE3 — see D006 §A).
+    """Build the canonical byte form of a registry event.
+
+    The same byte string is fed to both `sign()` (when the actor
+    creates the event) and `verify()` (when the registry accepts it).
+    It is also the pre-image of `event_hash`. Matches P4 §3.1 hash-
+    chain canonical rules (modulo BLAKE2b vs BLAKE3 — see D006 §A).
+
+    Args:
+        event_type: Event kind (e.g. `"halo_publish"`, `"review"`).
+        actor_vacant_id: Hex of the vacant submitting the event.
+        subject_vacant_id: Optional hex of the vacant the event is
+            *about* (e.g. the target of a review). Empty string when
+            absent.
+        payload_hash: BLAKE2b of the event-specific payload.
+        idempotency_key: Caller-supplied identifier for de-dup.
+        signed_by_pubkey: Raw 32-byte Ed25519 pubkey expected to have
+            signed the event.
+        ts: Unix timestamp in seconds (or epoch-resolution of choice).
+        actor_seq: Strictly-increasing per-actor sequence number.
+
+    Returns:
+        Bytes with the eight fields joined by the `0x1f` separator,
+        suitable for signing or verification.
     """
     return b"\x1f".join(
         [
@@ -91,7 +111,17 @@ def verify_event_signature(
     canonical_bytes: bytes,
     signature: bytes,
 ) -> None:
-    """Raise `SignatureRejected` if `signature` doesn't verify."""
+    """Verify an event signature, raising on any failure.
+
+    Args:
+        pubkey_bytes: Raw 32-byte Ed25519 pubkey to verify under.
+        canonical_bytes: Output of `canonical_event_bytes(...)`.
+        signature: Ed25519 signature claimed by the actor.
+
+    Raises:
+        SignatureRejected: If `pubkey_bytes` is malformed, or the
+            signature does not validate over `canonical_bytes`.
+    """
     try:
         vk = pubkey_from_bytes(pubkey_bytes)
     except Exception as exc:
@@ -103,12 +133,21 @@ def verify_event_signature(
 def compute_event_hash(
     *, prev_event_hash: bytes, canonical_bytes: bytes, signature: bytes
 ) -> bytes:
-    """`event_hash = H(prev_event_hash || canonical_bytes || signature)`.
+    """Compute the hash that links one event to the next in the chain.
 
-    Includes the signature so two events with identical canonical bytes
-    but different actors (one impersonating the other) produce distinct
-    hashes — defensive against an adversary who somehow forged a
+    The signature is mixed in so two events with identical canonical
+    bytes but distinct actors (one impersonating the other) cannot
+    collide — defensive against an adversary who somehow forged a
     canonical-byte collision.
+
+    Args:
+        prev_event_hash: Hash of the previous event in the chain.
+        canonical_bytes: Output of `canonical_event_bytes(...)`.
+        signature: Actor's Ed25519 signature over `canonical_bytes`.
+
+    Returns:
+        `BLAKE2b(prev || canonical || signature)`. Stored on the event
+        row and used as `prev_event_hash` for the next insert.
     """
     return hash_blake2b(prev_event_hash + canonical_bytes + signature)
 
@@ -117,10 +156,23 @@ def compute_event_hash(
 
 
 def check_sequence_monotonic(*, last_seq: int, candidate_seq: int) -> None:
-    """Strictly increasing per-vacant `actor_seq`. CONSTANTS.md says
-    "Sequence-number monotonicity tolerance: 0 (strict)" — the candidate
-    must be exactly `last_seq + 1`, not just `> last_seq`. This catches
-    both reordering attacks and gap-introduction attacks.
+    """Enforce strict-by-one monotonicity for a per-actor sequence number.
+
+    `CONSTANTS.md` pins "Sequence-number monotonicity tolerance: 0
+    (strict)" — the candidate must be **exactly** `last_seq + 1`, not
+    just `> last_seq`. The strict form catches both reordering attacks
+    (where a stale event is replayed) and gap-introduction attacks
+    (where a malicious actor bumps the sequence to skip auditable
+    history).
+
+    Args:
+        last_seq: Highest `actor_seq` already accepted for this actor.
+            Use `0` for a fresh actor (their first event must claim
+            `actor_seq=1`).
+        candidate_seq: The `actor_seq` claimed by the inbound event.
+
+    Raises:
+        SequenceMonotonicityError: If `candidate_seq != last_seq + 1`.
     """
     expected = last_seq + 1
     if candidate_seq != expected:
@@ -138,10 +190,21 @@ def check_attestation_freshness(
     valid_until_ms: int | None,
     now_ms: int,
 ) -> None:
-    """Raise `FreshnessError` if `now_ms` is outside `[valid_from, valid_until]`.
+    """Reject attestations that are outside their validity window.
 
-    `valid_until=None` means no expiry (per spec; aggregator may still
-    apply a ceiling at consume time).
+    Args:
+        valid_from_ms: Earliest moment the attestation should be
+            accepted, in milliseconds since epoch.
+        valid_until_ms: Latest moment, or `None` for no upstream
+            ceiling. The aggregator may still apply its own ceiling at
+            consume time.
+        now_ms: Wall-clock timestamp the registry will compare
+            against.
+
+    Raises:
+        FreshnessError: If `now_ms < valid_from_ms` ("not yet valid")
+            or, when `valid_until_ms` is set, `now_ms > valid_until_ms`
+            ("expired").
     """
     if now_ms < valid_from_ms:
         raise FreshnessError(
@@ -176,8 +239,17 @@ def _leaf(data: bytes) -> bytes:
 
 
 def build_merkle_tree(leaves: Sequence[bytes]) -> list[list[bytes]]:
-    """Build the full tree (list of levels, root last). Empty tree has root
-    `H(b"\\x00")` to give a stable shape for empty epochs.
+    """Build the full Merkle tree as a list of levels.
+
+    Args:
+        leaves: Pre-image bytes for each leaf. Order is significant —
+            inclusion proofs index into this order.
+
+    Returns:
+        A list of levels, leaves first, root last (so the root is at
+        `tree[-1][0]`). For an empty input the tree is
+        `[[BLAKE2b(b"\\x00")]]` so empty epochs still have a stable
+        root shape.
     """
     hashed = [_leaf(b) for b in leaves]
     if not hashed:
@@ -192,23 +264,52 @@ def build_merkle_tree(leaves: Sequence[bytes]) -> list[list[bytes]]:
 
 
 def build_merkle_root(leaves: Sequence[bytes]) -> bytes:
-    """Convenience: just the root."""
+    """Build only the root (convenience wrapper).
+
+    Args:
+        leaves: Pre-image bytes for each leaf, in deterministic order.
+
+    Returns:
+        The 32-byte root hash. For empty input, a stable empty-epoch
+        root.
+    """
     return build_merkle_tree(leaves)[-1][0]
 
 
 @dataclass(frozen=True)
 class MerkleProof:
-    """Inclusion proof: sibling hashes from leaf up to (but excluding) root."""
+    """Inclusion proof: sibling hashes from leaf up to (but excluding) root.
+
+    The position of each sibling (left vs right) is reconstructed by
+    walking the bits of `leaf_index` rather than tagging each sibling
+    explicitly — saves a byte per level and matches RFC 6962.
+
+    Attributes:
+        leaf_index: Position of the leaf in the original sequence.
+        leaf: The hashed leaf (`BLAKE2b(b"\\x00" || preimage)`).
+        siblings: Hashes of the sibling at each level, leaf side
+            up. Length equals `log2(padded_n)`.
+    """
 
     leaf_index: int
     leaf: bytes
     siblings: tuple[bytes, ...]
-    """Each sibling tagged with its position: pairs of (is_right, hash)
-    are encoded as the high-bit of the index — we reconstruct the side
-    by walking the index bits."""
 
 
 def merkle_inclusion_proof(leaves: Sequence[bytes], leaf_index: int) -> MerkleProof:
+    """Build an inclusion proof for the leaf at `leaf_index`.
+
+    Args:
+        leaves: The full leaf sequence the tree was built over.
+        leaf_index: Index into `leaves`.
+
+    Returns:
+        A `MerkleProof` whose `verify_inclusion_proof(...)` will
+        succeed against the root of the same tree.
+
+    Raises:
+        IndexError: If `leaf_index` is out of range.
+    """
     if leaf_index < 0 or leaf_index >= len(leaves):
         raise IndexError(f"leaf_index {leaf_index} out of range for {len(leaves)} leaves")
     levels = build_merkle_tree(leaves)
@@ -226,7 +327,17 @@ def merkle_inclusion_proof(leaves: Sequence[bytes], leaf_index: int) -> MerklePr
 
 
 def verify_inclusion_proof(proof: MerkleProof, root: bytes) -> bool:
-    """True iff `proof.leaf` is included in a tree with the given `root`."""
+    """Verify that `proof.leaf` is included in a tree with `root`.
+
+    Args:
+        proof: The proof returned by `merkle_inclusion_proof`.
+        root: The expected Merkle root.
+
+    Returns:
+        `True` iff folding `proof.leaf` upward with `proof.siblings`
+        (using `proof.leaf_index` to decide left/right at each level)
+        yields `root`.
+    """
     h = proof.leaf
     idx = proof.leaf_index
     for sib in proof.siblings:
@@ -239,11 +350,33 @@ def verify_inclusion_proof(proof: MerkleProof, root: bytes) -> bool:
 
 
 def sign_epoch_root(*, root: bytes, signing_key: SigningKey) -> bytes:
-    """Operator-key signature over an epoch root."""
+    """Operator-key signature over an epoch root.
+
+    Args:
+        root: The epoch's Merkle root.
+        signing_key: The registry operator's private key.
+
+    Returns:
+        Ed25519 signature over `b"vacant:registry:epoch:" || root`.
+        The domain-separation prefix prevents the signature from being
+        replayed against a non-epoch payload that happens to start
+        with these bytes.
+    """
     return sign(signing_key, b"vacant:registry:epoch:" + root)
 
 
 def verify_epoch_signature(*, root: bytes, signature: bytes, operator_pubkey: VerifyKey) -> bool:
+    """Verify a previously-signed epoch root.
+
+    Args:
+        root: The epoch's Merkle root.
+        signature: Output of `sign_epoch_root`.
+        operator_pubkey: The expected operator verify-key.
+
+    Returns:
+        `True` iff `signature` validates over the domain-separated
+        epoch payload.
+    """
     return verify(operator_pubkey, b"vacant:registry:epoch:" + root, signature)
 
 
@@ -252,6 +385,17 @@ def verify_epoch_signature(*, root: bytes, signature: bytes, operator_pubkey: Ve
 
 @dataclass(frozen=True)
 class AnomalyAssessment:
+    """Outcome of evaluating one anomaly counter against its threshold.
+
+    Attributes:
+        metric: Counter name (e.g. `"rep_jump_24h"`).
+        value: Measured value.
+        threshold: Threshold from the operator's configuration.
+        triggered: `True` iff `value >= threshold`. Surfaced to the
+            operator as a flag, **not** as a hard reject — anomaly
+            counters are detection signals, not authorisation gates.
+    """
+
     metric: str
     value: float
     threshold: float
@@ -259,6 +403,17 @@ class AnomalyAssessment:
 
 
 def assess_anomaly(*, metric: str, value: float, threshold: float) -> AnomalyAssessment:
+    """Compare `value` to `threshold` and package as an `AnomalyAssessment`.
+
+    Args:
+        metric: Counter name.
+        value: Measured value.
+        threshold: Threshold to compare against.
+
+    Returns:
+        An `AnomalyAssessment` with `triggered=True` iff
+        `value >= threshold`.
+    """
     return AnomalyAssessment(
         metric=metric,
         value=value,
@@ -275,5 +430,16 @@ def assess_anomaly(*, metric: str, value: float, threshold: float) -> AnomalyAss
 
 
 def sha256_hex(data: bytes) -> str:
-    """For payload-hash ergonomics in test fixtures (BLAKE2b is canonical)."""
+    """SHA-256 hex digest helper for test-fixture ergonomics.
+
+    BLAKE2b is the canonical hash everywhere in the registry; this
+    helper exists only because some fixtures predate the BLAKE2b
+    canonicalisation and retain SHA-256 inputs.
+
+    Args:
+        data: Bytes to digest.
+
+    Returns:
+        Lowercase 64-character hex digest.
+    """
     return hashlib.sha256(data).hexdigest()

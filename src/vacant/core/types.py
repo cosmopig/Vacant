@@ -79,7 +79,19 @@ def _utc_iso(ts: datetime) -> str:
 
 
 class VacantId(BaseModel):
-    """Numerical-sameness identity (Ricoeur idem). Wraps an Ed25519 pubkey."""
+    """Numerical-sameness identity (Ricoeur *idem*) — wraps an Ed25519 pubkey.
+
+    A `VacantId` is the *unchanging* part of a vacant: the same bytes
+    always refer to the same vacant, across substrate changes,
+    rotations, graduation, and SUNK transitions. Equality and hashing
+    are derived from `pubkey_bytes` so `VacantId` is safe to use as a
+    dict key or set member.
+
+    Attributes:
+        pubkey_bytes: Raw 32-byte Ed25519 public key. Validated at
+            construction time; lengths other than
+            `ED25519_PUBLIC_KEY_BYTES` raise `ValidationError`.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -89,16 +101,42 @@ class VacantId(BaseModel):
 
     @classmethod
     def from_verify_key(cls, vk: VerifyKey) -> VacantId:
+        """Construct a `VacantId` from a `nacl.signing.VerifyKey`.
+
+        Args:
+            vk: An Ed25519 verify key (pubkey side of a `SigningKey`).
+
+        Returns:
+            A new `VacantId` whose `pubkey_bytes` are the raw 32 bytes
+            of `vk`.
+        """
         return cls(pubkey_bytes=bytes(vk))
 
     def verify_key(self) -> VerifyKey:
+        """Re-derive the `VerifyKey` for cryptographic verification.
+
+        Returns:
+            The `nacl.signing.VerifyKey` corresponding to this id's
+            `pubkey_bytes`. Use this to call `verify()` against any
+            signature claimed to be from this vacant.
+        """
         return pubkey_from_bytes(self.pubkey_bytes)
 
     def hex(self) -> str:
+        """Hex-encode the full 32-byte public key.
+
+        Returns:
+            64-character lowercase hex string.
+        """
         return self.pubkey_bytes.hex()
 
     def short(self) -> str:
-        """First 12 hex chars — for log lines / dashboards."""
+        """Hex prefix suitable for log lines / dashboards.
+
+        Returns:
+            The first 12 hex characters of `hex()`. Not collision-free;
+            never use as an equality key.
+        """
         return self.hex()[:12]
 
     def __str__(self) -> str:
@@ -115,7 +153,24 @@ class VacantId(BaseModel):
 
 
 class LogEntry(BaseModel):
-    """A single signed line in a vacant's logbook (Ricoeur ipse)."""
+    """A single signed line in a vacant's logbook (Ricoeur *ipse*).
+
+    Each entry carries a `kind` tag (e.g. `"BIRTH"`, `"SPAWN"`,
+    `"REVIEW_EVENT"`), a UTC timestamp, an arbitrary JSON-serialisable
+    payload, the BLAKE2b-256 hash of the previous entry, and an
+    Ed25519 signature over the canonical concatenation of the four.
+    The hash chain is what gives the logbook its tamper-evident
+    property; the signatures pin authorship.
+
+    Attributes:
+        kind: Non-empty event tag.
+        ts: UTC timestamp; tz-naive datetimes are coerced to UTC.
+        payload: JSON-serialisable dict. Encoded canonically (sorted
+            keys, no whitespace) before hashing.
+        prev_hash: 32-byte BLAKE2b-256 of the previous entry's
+            `signing_payload()`. Genesis entries use `EMPTY_PREV_HASH`.
+        signature: Ed25519 signature over `signing_payload()`.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -133,10 +188,15 @@ class LogEntry(BaseModel):
         return v
 
     def signing_payload(self) -> bytes:
-        """The exact byte-string that gets signed *and* hashed.
+        """Canonical bytes that get signed and hashed.
 
-        Includes `kind | ts | payload | prev_hash` — but not `signature`,
-        because `signature` is the output of signing this payload.
+        Concatenates `kind | ts (UTC ISO-8601) | canonical_json(payload)
+        | prev_hash`, joined with the ASCII `0x1f` separator.
+        `signature` itself is *not* part of the payload — it is the
+        output of signing it.
+
+        Returns:
+            The exact byte-string fed to `sign()` and `verify()`.
         """
         parts = [
             self.kind.encode("utf-8"),
@@ -147,23 +207,54 @@ class LogEntry(BaseModel):
         return b"\x1f".join(parts)
 
     def compute_hash(self) -> bytes:
-        """BLAKE2b-256 over `signing_payload()`. Used as the next entry's `prev_hash`."""
+        """BLAKE2b-256 over `signing_payload()`.
+
+        Returns:
+            The 32-byte digest used as the *next* entry's `prev_hash`.
+        """
         return hash_blake2b(self.signing_payload())
 
     def verify(self, pubkey: VerifyKey) -> bool:
-        """True iff `signature` is a valid Ed25519 sig over `signing_payload()`."""
+        """Verify `signature` against `pubkey`.
+
+        Args:
+            pubkey: The Ed25519 verify-key the entry should have been
+                signed under (typically `vacant.identity.verify_key()`).
+
+        Returns:
+            `True` iff the signature is valid over `signing_payload()`.
+            Never raises on signature mismatch — use `verify_or_raise`
+            in `vacant.core.crypto` if you want exceptions.
+        """
         return verify(pubkey, self.signing_payload(), self.signature)
 
 
 class Logbook(BaseModel):
-    """Append-only signed history of a vacant's outward behaviour."""
+    """Append-only signed history of a vacant's outward behaviour.
+
+    The logbook is the only **mutable** core type — it grows by
+    appending to `entries`. Existing entries are never edited; tampering
+    with one breaks both the signature and the hash chain to the next
+    entry. Use `verify_chain` (or the raising variant) to confirm an
+    incoming logbook is intact before consuming it.
+
+    Attributes:
+        entries: Ordered list of `LogEntry`. Index 0 is genesis;
+            `entries[i].prev_hash == entries[i-1].compute_hash()` for
+            every `i > 0`.
+    """
 
     model_config = ConfigDict(arbitrary_types_allowed=False)
 
     entries: list[LogEntry] = Field(default_factory=list)
 
     def latest_hash(self) -> bytes:
-        """Hash of the last entry, or `EMPTY_PREV_HASH` if the logbook is empty."""
+        """Compute the hash that the next entry should use as `prev_hash`.
+
+        Returns:
+            `entries[-1].compute_hash()` if the logbook has any entries;
+            `EMPTY_PREV_HASH` (32 zero bytes) otherwise.
+        """
         if not self.entries:
             return EMPTY_PREV_HASH
         return self.entries[-1].compute_hash()
@@ -175,7 +266,21 @@ class Logbook(BaseModel):
         signing_key: SigningKey,
         ts: datetime | None = None,
     ) -> LogEntry:
-        """Build, sign, and append a new entry. Returns the new entry."""
+        """Build, sign, and append a new entry.
+
+        Args:
+            kind: Non-empty event tag (e.g. `"BIRTH"`, `"SPAWN"`).
+            payload: JSON-serialisable dict; non-serialisable contents
+                raise `TypeIntegrityError` at canonicalisation time.
+            signing_key: The vacant's private Ed25519 key. The
+                resulting `signature` will verify against the matching
+                `verify_key`.
+            ts: Optional explicit timestamp (coerced to UTC). Defaults
+                to `datetime.now(UTC)` for fresh entries.
+
+        Returns:
+            The newly-appended (signed) `LogEntry`. Mutates `self.entries`.
+        """
         entry_ts = (ts or datetime.now(UTC)).astimezone(UTC)
         prev = self.latest_hash()
         unsigned = LogEntry(
@@ -191,7 +296,19 @@ class Logbook(BaseModel):
         return signed
 
     def verify_chain(self, pubkey: VerifyKey) -> bool:
-        """True iff every entry's signature verifies and the prev_hash chain is intact."""
+        """Verify every signature and that the hash chain is intact.
+
+        Args:
+            pubkey: The vacant's Ed25519 verify-key. *Every* entry must
+                verify against this single key — keys do not rotate
+                within a single logbook.
+
+        Returns:
+            `True` iff (1) every `entries[i].prev_hash` equals the
+            previous entry's `compute_hash()` (or `EMPTY_PREV_HASH` for
+            the genesis), AND (2) every `entries[i].verify(pubkey)`
+            returns `True`. Never raises.
+        """
         expected_prev = EMPTY_PREV_HASH
         for entry in self.entries:
             if entry.prev_hash != expected_prev:
@@ -202,7 +319,16 @@ class Logbook(BaseModel):
         return True
 
     def verify_chain_or_raise(self, pubkey: VerifyKey) -> None:
-        """Like `verify_chain` but raises `HashChainError` on the first break."""
+        """Strict variant of `verify_chain` that names the failing entry.
+
+        Args:
+            pubkey: As for `verify_chain`.
+
+        Raises:
+            HashChainError: On the first broken hash link or invalid
+                signature. The message includes the entry index and,
+                for hash mismatches, the expected vs actual hash.
+        """
         expected_prev = EMPTY_PREV_HASH
         for i, entry in enumerate(self.entries):
             if entry.prev_hash != expected_prev:
@@ -219,7 +345,21 @@ class Logbook(BaseModel):
 
 
 class SubstrateSpec(BaseModel):
-    """Multi-substrate declaration (THEORY_V5 §2)."""
+    """Multi-substrate declaration (THEORY_V5 §2).
+
+    Lists which substrates a vacant is willing to be invoked under
+    (e.g. `"anthropic:claude-sonnet-4-6"`, `"openai:gpt-4o"`,
+    `"client-inherited"`) plus an opaque `policy` dict the dispatcher
+    can use for substrate-specific gating. Substrate is a *resource*,
+    not the *identity* — switching substrates does not change
+    `vacant_id`.
+
+    Attributes:
+        allowed_substrates: Non-empty substrate identifiers. Blank
+            strings raise `ValidationError`.
+        policy: Free-form per-substrate config (rate limits, model
+            overrides, …).
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -235,6 +375,14 @@ class SubstrateSpec(BaseModel):
         return v
 
     def canonical_bytes(self) -> bytes:
+        """Stable byte encoding for hashing into a `CapabilityCard`.
+
+        Returns:
+            Canonical JSON (sorted keys, no whitespace) of
+            `{allowed_substrates, policy}`. Used inside
+            `CapabilityCard.signing_payload()` so the substrate spec is
+            covered by the halo signature.
+        """
         return _canonical_json(
             {
                 "allowed_substrates": list(self.allowed_substrates),
@@ -244,7 +392,24 @@ class SubstrateSpec(BaseModel):
 
 
 class BehaviorBundle(BaseModel):
-    """System prompt + policy DSL + tool whitelist (Ricoeur character)."""
+    """System prompt + policy DSL + tool whitelist (Ricoeur *character*).
+
+    The `bundle_hash` is computed and self-validated at construction:
+    pass an empty `bundle_hash` and it gets filled in; pass a non-empty
+    one that doesn't match the content and `TypeIntegrityError` fires.
+    Downstream code that wants to detect "did the behaviour change
+    silently?" compares `bundle_hash` rather than serialising fields.
+
+    Attributes:
+        system_prompt: The prompt the substrate sees as its system
+            message.
+        policy_dsl: Optional policy DSL string (P5 future). Empty by
+            default.
+        tool_whitelist: List of tool names the vacant is allowed to
+            invoke. Hash is order-independent (sorted internally).
+        bundle_hash: BLAKE2b-256 over a canonical JSON of the three
+            fields. Auto-computed when left empty.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -274,7 +439,30 @@ class BehaviorBundle(BaseModel):
 
 
 class CapabilityCard(BaseModel):
-    """The `halo` — public capability announcement (THEORY_V5 §7.1)."""
+    """The *halo* — a vacant's self-published capability announcement.
+
+    Spec: THEORY_V5 §7.1. Each vacant carries its own halo; the
+    "Registry" is an aggregation/index over halos and is **never** a
+    routed-through component. Discovery hands a halo to the caller; the
+    caller then dispatches directly to `endpoint`.
+
+    Attributes:
+        vacant_id: The vacant the halo is *about*. Anyone can mint a
+            card claiming to be `vacant_id`, but `verify()` will only
+            return `True` if `signature` was produced by the matching
+            private key.
+        capability_text: Human-readable capability announcement (e.g.
+            "I translate technical English to Traditional Chinese").
+        substrate_spec: Which substrates this vacant accepts. Covered
+            by the signature.
+        halo_version: Monotonic counter for halo revisions. Must be
+            >= 1.
+        endpoint: A2A endpoint URL for direct dispatch. `None` for
+            LOCAL or not-yet-deployed vacants. Part of the signing
+            payload so an attacker can't substitute the endpoint
+            post-issuance (D009 §A).
+        signature: Ed25519 signature over `signing_payload()`.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -283,10 +471,6 @@ class CapabilityCard(BaseModel):
     substrate_spec: SubstrateSpec
     halo_version: int = DEFAULT_HALO_VERSION
     endpoint: str | None = None
-    """A2A endpoint URL for direct calls. None for LOCAL or yet-to-be-deployed
-    vacants. P6 dispatch reads this field to POST envelopes directly. The
-    endpoint is part of the signing payload so it can't be substituted post-
-    issuance (D009 §A)."""
     signature: bytes = b""
 
     @field_validator("halo_version")
@@ -297,6 +481,15 @@ class CapabilityCard(BaseModel):
         return v
 
     def signing_payload(self) -> bytes:
+        """Canonical bytes that get signed.
+
+        Concatenates `pubkey | capability_text | substrate_spec |
+        halo_version | endpoint`, joined with `0x1f`. `signature`
+        itself is not included.
+
+        Returns:
+            The exact byte-string fed to `sign()` / `verify()`.
+        """
         parts = [
             self.vacant_id.pubkey_bytes,
             self.capability_text.encode("utf-8"),
@@ -307,11 +500,29 @@ class CapabilityCard(BaseModel):
         return b"\x1f".join(parts)
 
     def signed(self, signing_key: SigningKey) -> CapabilityCard:
-        """Return a copy with `signature` filled in by `signing_key`."""
+        """Return a copy of this card with `signature` filled in.
+
+        Args:
+            signing_key: The vacant's private Ed25519 key. Must match
+                the public key embedded in `vacant_id` or downstream
+                `verify()` calls will fail.
+
+        Returns:
+            A new `CapabilityCard` (the model is frozen) with a valid
+            `signature`.
+        """
         sig = sign(signing_key, self.signing_payload())
         return self.model_copy(update={"signature": sig})
 
     def verify(self) -> bool:
+        """Verify the signature against the embedded public key.
+
+        Returns:
+            `True` iff `signature` is non-empty AND validates as an
+            Ed25519 signature over `signing_payload()` under
+            `vacant_id.verify_key()`. Empty signatures (un-signed
+            drafts) return `False` rather than raising.
+        """
         if not self.signature:
             return False
         return verify(self.vacant_id.verify_key(), self.signing_payload(), self.signature)
@@ -321,7 +532,14 @@ class CapabilityCard(BaseModel):
 
 
 class VacantState(StrEnum):
-    """5-state lifecycle plus the LOCAL visibility flag (CLAUDE.md §LOCAL)."""
+    """The 6 lifecycle states a vacant can be in (CLAUDE.md §LOCAL).
+
+    `LOCAL` is the default for newly-spawned vacants; it is fully
+    runnable but never appears in the public registry index. The state
+    machine in `vacant.runtime.state_machine` defines the legal
+    transitions; predicates `can_review` / `can_be_called` /
+    `is_runnable` derive admission rules from the state.
+    """
 
     LOCAL = "LOCAL"
     ACTIVE = "ACTIVE"
@@ -332,7 +550,25 @@ class VacantState(StrEnum):
 
 
 class ResidentForm(BaseModel):
-    """The full 6-component vacant. Only `runtime_state` is mutable in P0."""
+    """The full 6-component vacant — identity through behaviour through halo.
+
+    `ResidentForm` is the in-memory representation of a vacant. P0
+    treats most of it as immutable; only `runtime_state` mutates as
+    the lifecycle progresses. P1 onward also append to `logbook` via
+    the explicit `append()` API.
+
+    Attributes:
+        identity: `VacantId` (pubkey).
+        logbook: Append-only signed history.
+        behavior_bundle: System prompt + policy DSL + tool whitelist.
+        substrate_spec: Allowed substrate set.
+        runtime_state: One of `VacantState`. Defaults to `LOCAL`.
+        capability_card: The signed halo. `None` until P4 publishes
+            it.
+        parent_id: Lineage anchor (THEORY_V5 §4.3). `None` for root /
+            Path-Zero vacants. Secondary parents (D4 lineage-merge)
+            live in the BIRTH log entry payload — see D003 ADR.
+    """
 
     model_config = ConfigDict(arbitrary_types_allowed=False)
 
@@ -343,12 +579,21 @@ class ResidentForm(BaseModel):
     runtime_state: VacantState = VacantState.LOCAL
     capability_card: CapabilityCard | None = None
     parent_id: VacantId | None = None
-    """Lineage anchor (THEORY_V5 §4.3). None for root / Path-Zero vacants.
-    Secondary parents (D4 lineage-merge) live in the BIRTH log entry payload —
-    see D003 ADR."""
 
     def verify_self(self) -> bool:
-        """Cross-component integrity check."""
+        """Cross-component integrity check.
+
+        Verifies (1) the logbook hash chain + every signature against
+        `identity.verify_key()`, and (2) if a `capability_card` is
+        attached, that its `vacant_id` matches `identity` and its
+        signature verifies.
+
+        Returns:
+            `True` iff every checked component is intact. `False` if
+            any signature, hash link, or identity mismatch is found.
+            Never raises — callers that need exception semantics can
+            wrap with `Logbook.verify_chain_or_raise`.
+        """
         pubkey = self.identity.verify_key()
         if not self.logbook.verify_chain(pubkey):
             return False

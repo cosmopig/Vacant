@@ -13,7 +13,8 @@
 [![tests: 736](https://img.shields.io/badge/tests-736%20passing-brightgreen.svg)](#測試)
 [![coverage: 91%](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](#測試)
 [![mypy: strict](https://img.shields.io/badge/mypy-strict-blue.svg)](https://mypy.readthedocs.io/)
-[![docs](https://img.shields.io/badge/docs-vacant.zeabur.app-indigo.svg)](https://vacant.zeabur.app/)
+[![docs](https://img.shields.io/badge/docs-cosmopig.github.io%2FVacant-indigo.svg)](https://cosmopig.github.io/Vacant/)
+[![site](https://img.shields.io/badge/site-vacant.zeabur.app-blueviolet.svg)](https://vacant.zeabur.app/)
 
 </div>
 
@@ -350,13 +351,25 @@ Vacant/
 
 ## 文件
 
+完整的 **API reference + 理論 + 操作 runbook** 會在每次 push `main` 自動 build，部署於：
+
+> **<https://cosmopig.github.io/Vacant/>**
+
+該站包含：
+
+- 10 個模組的 API 參考（`vacant.core`、`vacant.identity`、…、`vacant.cli`），由 source docstring 透過 [mkdocstrings](https://mkdocstrings.github.io/) 自動產生。
+- 完整理論：`BRIEFING`、`ARCHITECTURE`、`THEORY_V5`、`FAQ`、`CONSTANTS`。
+- Demo / 維運素材：`RUNBOOK.md` 跟 5 分鐘 `DEMO_SCRIPT.md`。
+
+如果你想直接走 repo，入口表：
+
 | 讀者 | 該讀 | 時間 |
 |---|---|---|
 | **快速 demo / 評委** | 這份 README + 跑 `vacant demo law_firm` | 10 分鐘 |
 | **答辯委員** | [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md) §0–§4 + [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | 45 分鐘 |
-| **實作者 / 貢獻者** | [`CLAUDE.md`](CLAUDE.md) + [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) + 對應的 `components/P*.md` | 2 小時 |
+| **實作者 / 貢獻者** | [`CLAUDE.md`](CLAUDE.md) + [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) + 對應的 `components/P*.md` + [API reference](https://cosmopig.github.io/Vacant/api/) | 2 小時 |
 | **對抗審查者** | THEORY_V5 §6 + `tests/adversarial/` + `architecture/decisions/D*.md` | 4 小時 |
-| **好奇路人** | https://vacant.zeabur.app/ — 圖文敘事版本 | 5–30 分鐘 |
+| **好奇路人 — 敘事版** | https://vacant.zeabur.app/ — 圖文版本 | 5–30 分鐘 |
 
 ---
 
