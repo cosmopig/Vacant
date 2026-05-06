@@ -18,6 +18,9 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
+from vacant.core.types import CapabilityCard
+from vacant.protocol.capability_card import deserialize as deserialize_card
+from vacant.protocol.errors import EnvelopeFormatError, UnsupportedHaloVersionError
 from vacant.registry.errors import NotFoundError
 from vacant.registry.models import Vacant
 from vacant.registry.store import RegistryStore
@@ -35,8 +38,13 @@ __all__ = [
 
 @dataclass(frozen=True)
 class HaloMatch:
-    """A single search/rank result. Carries the halo signature so the
-    caller can verify the card without re-querying the registry.
+    """A single search/rank result.
+
+    Carries the halo signature *and* the full signed `CapabilityCard`
+    (D015 §C) so the caller can verify the card and dispatch directly to
+    `card.endpoint` in a single round-trip — no registry rehydration.
+    `capability_card` is optional only for legacy rows written before
+    the blob column existed; new rows always carry one.
     """
 
     vacant_id: str
@@ -46,6 +54,7 @@ class HaloMatch:
     base_model_family: str
     visibility: Visibility
     score: float = 0.0
+    capability_card: CapabilityCard | None = None
 
 
 class ReputationOracle(Protocol):
@@ -63,6 +72,16 @@ class _ZeroOracle:
 DEFAULT_REPUTATION_ORACLE: ReputationOracle = _ZeroOracle()
 
 
+def _deserialize_card_safe(blob: bytes) -> CapabilityCard | None:
+    if not blob:
+        return None
+    try:
+        return deserialize_card(blob)
+    except (EnvelopeFormatError, UnsupportedHaloVersionError):
+        # Legacy / malformed row: caller can fall back to the index columns.
+        return None
+
+
 def _to_match(v: Vacant, score: float = 0.0) -> HaloMatch:
     return HaloMatch(
         vacant_id=v.vacant_id,
@@ -72,6 +91,7 @@ def _to_match(v: Vacant, score: float = 0.0) -> HaloMatch:
         base_model_family=v.base_model_family,
         visibility=Visibility(v.visibility),
         score=score,
+        capability_card=_deserialize_card_safe(v.capability_card_blob),
     )
 
 
@@ -117,6 +137,7 @@ async def rank_by_reputation(
                 base_model_family=m.base_model_family,
                 visibility=m.visibility,
                 score=s,
+                capability_card=m.capability_card,
             )
         )
     scored.sort(key=lambda m: m.score, reverse=True)

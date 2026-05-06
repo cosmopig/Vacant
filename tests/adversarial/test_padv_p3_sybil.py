@@ -169,5 +169,8 @@ async def test_attack_discount_from_signals_takes_max_strength() -> None:
         SameDetectSignal(strength=0.95, suspected_cluster=frozenset(), rationale="b"),
         SameDetectSignal(strength=0.4, suspected_cluster=frozenset(), rationale="c"),
     ]
-    # Conservative composition: 1 - max(0.95) = 0.05.
-    assert discount_from_signals(sigs) == pytest.approx(0.05)
+    # Conservative composition: max(SAME_SIGNAL_DISCOUNT_FLOOR, 1 - max(0.95))
+    # = max(0.1, 0.05) = 0.1 (D015 §A — cost-raising, not preventing).
+    from vacant.core.constants import SAME_SIGNAL_DISCOUNT_FLOOR
+
+    assert discount_from_signals(sigs) == pytest.approx(SAME_SIGNAL_DISCOUNT_FLOOR)

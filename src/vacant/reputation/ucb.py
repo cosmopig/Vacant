@@ -11,12 +11,18 @@ explore = c_explore * √(log N / max(n_w, 1))
 score = mu_w + c * sigma_w + explore
 ```
 
-Lineage prior (§4.3): a child can inherit a *fraction* of its parent's
-posterior as a soft prior -- the dispatch §2 hook
-`ucb_with_lineage_prior` re-shapes the child's effective Beta as
-`alpha_child + kappa(d) * alpha_parent` where `kappa(d) = alpha0_inherit * exp(-lambda * d)`.
-This shrinks with depth so a long chain of forks doesn't trivially
-inherit all of root's reputation.
+Lineage and UCB scoring are decoupled (D015 §B). `parent_id` is *caller-
+side metadata* — useful for filtering ("show me descendants of root R")
+or sort tie-breaks — but the parent's posterior MUST NOT bleed into the
+child's UCB score. CLAUDE.md §Load-bearing theory decisions makes the
+lineage-not-individuals-evolve invariant load-bearing: individuals do
+not inherit reputation from their parent; new lineage members reset
+the clock.
+
+`lineage_prior_alpha` is kept as a public helper for research callers
+that explicitly want a lineage-weighted Beta prior outside the UCB path
+(e.g. seeding a research probe). It is *not* used by `ucb_score`,
+`call_score`, or `ucb_with_lineage_prior`.
 """
 
 from __future__ import annotations
@@ -129,36 +135,33 @@ def lineage_prior_alpha(
 
 def ucb_with_lineage_prior(
     child_beta: Beta,
-    parent_beta: Beta,
+    parent_beta: Beta | None = None,
     *,
     n_global: int,
-    depth: int,
+    depth: int = 0,
     c_explore: float = UCB_C_EXPLORE,
     inherit_fraction: float = 0.25,
     decay_lambda: float = 0.5,
 ) -> float:
-    """Single-dim UCB on a child posterior with lineage-prior blending.
+    """Single-dim UCB on a *child* posterior. Parent posterior is ignored.
 
-    The blended Beta is `(alpha_child + kappa*alpha_parent, beta_child + kappa*beta_parent)`
-    with `kappa = inherit_fraction * exp(-decay_lambda * depth)`.
+    D015 §B: lineage is caller-side metadata; individual vacants do not
+    inherit reputation from their parent (CLAUDE.md §Load-bearing theory
+    decisions). The parameters `parent_beta`, `depth`, `inherit_fraction`,
+    `decay_lambda` are accepted for back-compatible call sites and for
+    future caller-side filtering (`depth` may still be used to sort
+    descendants), but they have no effect on the score.
+
+    Use `lineage_prior_alpha(...)` directly if you genuinely need a
+    lineage-weighted Beta prior outside the UCB pipeline.
     """
-    blended_alpha, blended_beta = lineage_prior_alpha(
-        base_alpha=child_beta.alpha,
-        base_beta=child_beta.beta,
-        parent_alpha=parent_beta.alpha,
-        parent_beta=parent_beta.beta,
-        depth=depth,
-        inherit_fraction=inherit_fraction,
-        decay_lambda=decay_lambda,
-    )
-    s = blended_alpha + blended_beta
-    mean = blended_alpha / s if s > 0 else 0.0
+    _ = (parent_beta, depth, inherit_fraction, decay_lambda)  # documented no-ops
+    s = child_beta.alpha + child_beta.beta
+    mean = child_beta.alpha / s if s > 0 else 0.0
     n_w = max(child_beta.n_eff, 1e-6)
     log_n = math.log(max(n_global, 2))
     # Floor at 1e-3 (not 1.0) so cold-start vacants (n_eff ~ 0) get a
     # genuinely larger explore term than warmed-up vacants with n_eff < 1.
-    # A 1.0 floor would lump all sub-1 n_eff values into the same bucket
-    # and kill cold-start exploration differentiation.
     explore = c_explore * math.sqrt(log_n / max(n_w, 1e-3))
     return mean + explore
 

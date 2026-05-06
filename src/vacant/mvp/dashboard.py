@@ -178,12 +178,23 @@ def render_adversarial() -> None:
     result = _ensure_scenario("code_review")
     bump_with = result.metrics.get("ring_signal_bump", 0.0)
     bump_without = result.metrics.get("unflagged_bump", 0.0)
+    tp_rate = result.metrics.get("same_controller_tp_rate", 0.0)
+    fp_rate = result.metrics.get("same_controller_fp_rate", 0.0)
+    rationale = result.metrics.get("ring_signal_rationale", "")
+    ring_strength = result.metrics.get("ring_signal_strength", 0.0)
     st.metric("環路被檢出 → 加權後信號", f"{bump_with:+.4f}")
     st.metric("未被檢出 → 加權後信號", f"{bump_without:+.4f}")
+    cols = st.columns(2)
+    cols[0].metric("same_controller TP rate (seeded ring)", f"{tp_rate:.2f}")
+    cols[1].metric("same_controller FP rate (control)", f"{fp_rate:.2f}")
+    st.metric("偵測強度（colluding pair）", f"{ring_strength:.2f}")
+    if rationale:
+        st.caption(f"偵測器理由：{rationale}")
     st.write(
-        "解讀：被同一控制者環路標記的 review 已被 `discount_from_signals` "
-        "幾乎歸零；未被標記的對照組保留。**這個系統不阻止造假；它讓造假的"
-        "成本上升**——攻擊者必須持續支付身份新陳代謝的代價。"
+        "解讀：信號由 `same_controller(...)` 真實跑出來（不是 hardcode）。"
+        "被偵測到的 review 仍保留 D015 §A 規定的最低權重 floor —— "
+        "**這個系統不阻止造假；它讓造假的成本上升**——攻擊者必須持續支付"
+        "身份新陳代謝的代價，但不會因為一次偵測命中而被永久封口。"
     )
 
 

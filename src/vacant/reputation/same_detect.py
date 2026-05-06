@@ -23,6 +23,7 @@ from vacant.core.constants import (
     SAME_CONTROLLER_BEHAVIOR_THRESHOLD,
     SAME_CONTROLLER_DECLARED_STRENGTH,
     SAME_CONTROLLER_TEMPORAL_THRESHOLD,
+    SAME_SIGNAL_DISCOUNT_FLOOR,
 )
 from vacant.core.types import VacantId
 
@@ -42,8 +43,10 @@ class SameDetectSignal:
     """Output of every same-* detector.
 
     `strength` ∈ [0, 1] is monotone in suspicion. The aggregator uses
-    `1 - max(strength)` as a per-review cost-raising multiplier, so
-    strength=0 → no penalty, strength=1 → full discount.
+    `max(SAME_SIGNAL_DISCOUNT_FLOOR, 1 - max(strength))` as a per-review
+    cost-raising multiplier, so strength=0 → no penalty and strength=1
+    leaves at least the floor (CLAUDE.md «same-* is cost-raising not
+    preventing» — D015).
 
     `suspected_cluster` includes both probe and target vacant ids when
     the signal fires; empty when strength is 0.
@@ -239,12 +242,17 @@ def same_stylo(
 def discount_from_signals(signals: Sequence[SameDetectSignal]) -> float:
     """Compose multiple `SameDetectSignal`s into a single weight multiplier.
 
-    `1 - max(strength)` is conservative: any one detector firing reduces
-    weight by its `strength`; the strongest detector dominates so we
-    don't compound penalties (the dispatch's explicit framing -- these
-    are signals, not evidence to be summed).
+    `max(SAME_SIGNAL_DISCOUNT_FLOOR, 1 - max(strength))` is conservative:
+    any one detector firing reduces weight by its `strength`; the strongest
+    detector dominates so we don't compound penalties (the dispatch's
+    explicit framing — these are signals, not evidence to be summed).
+
+    The floor (D015) is load-bearing: same-* detection is *cost-raising,
+    not preventing* (CLAUDE.md §Load-bearing theory decisions). Even at
+    `strength=1.0` we must not zero a reviewer's contribution — that
+    would convert a probabilistic suspicion into a unilateral mute.
     """
     if not signals:
         return 1.0
     max_strength = max(s.strength for s in signals)
-    return max(0.0, 1.0 - max_strength)
+    return max(SAME_SIGNAL_DISCOUNT_FLOOR, 1.0 - max_strength)

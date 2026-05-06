@@ -71,6 +71,7 @@ State transitions (event-driven thresholds, not pure time-elapsed):
 | Collusion density threshold τ_d | 0.6 | P3 line 194 |
 | Collusion reciprocity threshold τ_r | 0.7 | P3 line 194 |
 | Severe collusion density | 0.8 → multiplier 0.1 | P3 line 196 |
+| `SAME_SIGNAL_DISCOUNT_FLOOR` | 0.1 | D015 (cost-raising-not-preventing) |
 
 ### UCB exploration
 

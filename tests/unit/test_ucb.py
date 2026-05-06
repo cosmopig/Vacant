@@ -122,22 +122,53 @@ def test_lineage_prior_alpha_rejects_invalid_inputs() -> None:
         )
 
 
-def test_ucb_with_lineage_prior_uses_blended_mean() -> None:
+def test_ucb_with_lineage_prior_does_not_inherit_parent_score() -> None:
+    """F2 regression: child's UCB score MUST NOT depend on parent posterior.
+
+    CLAUDE.md §Load-bearing theory decisions / D015 §B: lineage (the
+    parent_id chain) is the subject of evolution, not individual vacants.
+    A high-reputation parent must not lift its newborn child's UCB score —
+    new lineage members reset the clock.
+    """
     child = Beta(alpha=1.0, beta=1.0, alpha0=1.0, beta0=1.0)
-    parent = Beta(alpha=20.0, beta=2.0, alpha0=1.0, beta0=1.0)  # high mean
-    score_no_lineage = ucb_with_lineage_prior(
-        child_beta=child,
-        parent_beta=Beta(),  # default = 1,1
-        n_global=10,
-        depth=0,
+    high_parent = Beta(alpha=100.0, beta=2.0, alpha0=1.0, beta0=1.0)
+    low_parent = Beta(alpha=2.0, beta=100.0, alpha0=1.0, beta0=1.0)
+    no_parent = Beta(alpha=1.0, beta=1.0, alpha0=1.0, beta0=1.0)
+
+    score_high = ucb_with_lineage_prior(
+        child_beta=child, parent_beta=high_parent, n_global=10, depth=0
     )
-    score_with_lineage = ucb_with_lineage_prior(
-        child_beta=child,
-        parent_beta=parent,
-        n_global=10,
-        depth=0,
+    score_low = ucb_with_lineage_prior(
+        child_beta=child, parent_beta=low_parent, n_global=10, depth=0
     )
-    assert score_with_lineage > score_no_lineage
+    score_none = ucb_with_lineage_prior(
+        child_beta=child, parent_beta=no_parent, n_global=10, depth=0
+    )
+    score_no_arg = ucb_with_lineage_prior(child_beta=child, n_global=10)
+
+    assert score_high == pytest.approx(score_low)
+    assert score_high == pytest.approx(score_none)
+    assert score_high == pytest.approx(score_no_arg)
+
+
+def test_ucb_with_lineage_prior_depth_is_metadata_only() -> None:
+    """Depth is accepted for caller-side ranking but does not move the score."""
+    child = Beta(alpha=1.0, beta=1.0)
+    parent = Beta(alpha=99.0, beta=1.0)
+    a = ucb_with_lineage_prior(child_beta=child, parent_beta=parent, n_global=10, depth=0)
+    b = ucb_with_lineage_prior(child_beta=child, parent_beta=parent, n_global=10, depth=8)
+    assert a == pytest.approx(b)
+
+
+def test_lineage_prior_alpha_helper_still_decays() -> None:
+    """`lineage_prior_alpha` remains usable as a research helper outside UCB."""
+    a0, _ = lineage_prior_alpha(
+        base_alpha=1.0, base_beta=1.0, parent_alpha=10.0, parent_beta=2.0, depth=0
+    )
+    a3, _ = lineage_prior_alpha(
+        base_alpha=1.0, base_beta=1.0, parent_alpha=10.0, parent_beta=2.0, depth=5
+    )
+    assert a0 > a3 > 1.0
 
 
 def test_exploration_boost_decays_to_zero_when_n_reaches_n_min() -> None:

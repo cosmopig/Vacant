@@ -50,6 +50,10 @@ class Vacant(SQLModel, table=True):
     declared_capabilities_json: str
     capability_card_hash: bytes = Field(sa_column=Column(LargeBinary, nullable=False))
     capability_card_sig: bytes = Field(sa_column=Column(LargeBinary, nullable=False))
+    capability_card_blob: bytes = Field(default=b"", sa_column=Column(LargeBinary, nullable=False))
+    """Canonical-JSON serialized signed `CapabilityCard` (D015 §C).
+    Carried verbatim through `HaloMatch` so dispatch can call `card.endpoint`
+    without rehydrating from individual columns."""
     stake_amount: int = 0
     status: str = Field(default="active", index=True)
     visibility: str = Field(default="PUBLIC", index=True)

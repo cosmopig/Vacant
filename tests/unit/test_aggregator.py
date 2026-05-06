@@ -5,9 +5,10 @@ from __future__ import annotations
 import pytest
 
 from vacant.core.crypto import keygen
-from vacant.core.types import VacantId, VacantState
+from vacant.core.types import Logbook, VacantId, VacantState
 from vacant.reputation import (
     Aggregator,
+    ChainTamperError,
     IneligibleReviewerError,
     InvalidDimensionError,
     InvalidSignalError,
@@ -239,3 +240,132 @@ async def test_same_model_review_is_discounted() -> None:
     same = (await agg2.get_reputation(target.vacant_id, "default")).factual.alpha
     # Same-model gets halved → smaller alpha bump.
     assert same < cross
+
+
+# --- F4 / D015 §D: signed REVIEW_EVENT audit trail --------------------------
+
+
+def _ctx_with_keys(
+    *, family: str = "claude", state: VacantState = VacantState.ACTIVE
+) -> tuple[VacantContext, Logbook, object]:
+    sk, vk = keygen()
+    vid = VacantId.from_verify_key(vk)
+    ctx = VacantContext(
+        vacant_id=vid,
+        base_model_family=family,
+        state=state,
+        capability_text="x",
+        attestation_level="L1",
+    )
+    lb = Logbook()
+    lb.append("genesis", {}, sk)
+    return ctx, lb, sk
+
+
+@pytest.mark.asyncio
+async def test_record_review_appends_signed_review_event() -> None:
+    """F4 regression: every reputation change leaves a signed audit trail."""
+    a_ctx, a_lb, a_sk = _ctx_with_keys()
+    b_ctx, b_lb, b_sk = _ctx_with_keys(family="gemini")
+    agg = Aggregator(
+        contexts={a_ctx.vacant_id: a_ctx, b_ctx.vacant_id: b_ctx},
+        review_limit_per_target_24h=10_000,
+        logbooks={a_ctx.vacant_id: a_lb, b_ctx.vacant_id: b_lb},
+        signing_keys={a_ctx.vacant_id: a_sk, b_ctx.vacant_id: b_sk},
+    )
+    initial_chain_len = len(a_lb.entries)
+    await agg.record_review(
+        a_ctx.vacant_id,
+        b_ctx.vacant_id,
+        dimensions={"factual": 1.0},
+        substrate="default",
+        source="caller_review",
+    )
+    assert len(a_lb.entries) == initial_chain_len + 1
+    appended = a_lb.entries[-1]
+    assert appended.kind == "REVIEW_EVENT"
+    assert appended.payload["target"] == b_ctx.vacant_id.hex()
+    assert appended.payload["source"] == "caller_review"
+    assert a_lb.verify_chain(a_ctx.vacant_id.verify_key())
+
+
+@pytest.mark.asyncio
+async def test_record_review_with_tampered_logbook_rejects_and_does_not_update_posterior() -> None:
+    """F4 regression: tamper the audit chain → ChainTamperError + posterior frozen."""
+    a_ctx, a_lb, a_sk = _ctx_with_keys()
+    b_ctx, b_lb, b_sk = _ctx_with_keys(family="gemini")
+    agg = Aggregator(
+        contexts={a_ctx.vacant_id: a_ctx, b_ctx.vacant_id: b_ctx},
+        review_limit_per_target_24h=10_000,
+        logbooks={a_ctx.vacant_id: a_lb, b_ctx.vacant_id: b_lb},
+        signing_keys={a_ctx.vacant_id: a_sk, b_ctx.vacant_id: b_sk},
+    )
+
+    # First, record a clean review so a posterior exists.
+    await agg.record_review(
+        a_ctx.vacant_id,
+        b_ctx.vacant_id,
+        dimensions={"factual": 1.0},
+        substrate="default",
+        source="caller_review",
+    )
+    pre = (await agg.get_reputation(b_ctx.vacant_id, "default")).factual.alpha
+
+    # Now tamper the reviewer's logbook: replace last entry's signature.
+    last = a_lb.entries[-1]
+    a_lb.entries[-1] = last.model_copy(update={"signature": b"\x00" * 64})
+
+    with pytest.raises(ChainTamperError):
+        await agg.record_review(
+            a_ctx.vacant_id,
+            b_ctx.vacant_id,
+            dimensions={"factual": 0.99},
+            substrate="default",
+            source="caller_review",
+        )
+
+    post = (await agg.get_reputation(b_ctx.vacant_id, "default")).factual.alpha
+    assert post == pre, "posterior must not change when audit chain fails"
+
+
+def test_register_audit_attaches_logbook_and_key() -> None:
+    a_ctx, a_lb, a_sk = _ctx_with_keys()
+    agg = Aggregator(contexts={a_ctx.vacant_id: a_ctx}, review_limit_per_target_24h=10_000)
+    assert agg._audit_enabled_for(a_ctx.vacant_id) is False
+    agg.register_audit(a_ctx.vacant_id, logbook=a_lb, signing_key=a_sk)
+    assert agg._audit_enabled_for(a_ctx.vacant_id) is True
+
+
+def test_add_context_then_get_context() -> None:
+    a_ctx, _lb, _sk = _ctx_with_keys()
+    agg = Aggregator()
+    agg.add_context(a_ctx)
+    assert agg.get_context(a_ctx.vacant_id) is a_ctx
+
+
+def test_get_context_unknown_raises() -> None:
+    agg = Aggregator()
+    ghost = VacantId.from_verify_key(keygen()[1])
+    with pytest.raises(InvalidSignalError):
+        agg.get_context(ghost)
+
+
+@pytest.mark.asyncio
+async def test_record_review_without_audit_registration_is_legacy_path() -> None:
+    """Legacy callers (no signing keys) keep working — the audit step is a
+    no-op for them. Read paths never require audit setup."""
+    a_ctx, _alb, _ask = _ctx_with_keys()
+    b_ctx, _blb, _bsk = _ctx_with_keys(family="gemini")
+    agg = Aggregator(
+        contexts={a_ctx.vacant_id: a_ctx, b_ctx.vacant_id: b_ctx},
+        review_limit_per_target_24h=10_000,
+    )
+    await agg.record_review(
+        a_ctx.vacant_id,
+        b_ctx.vacant_id,
+        dimensions={"factual": 0.7},
+        substrate="default",
+        source="caller_review",
+    )
+    rep = await agg.get_reputation(b_ctx.vacant_id, "default")
+    assert rep.factual.alpha > 1.0
