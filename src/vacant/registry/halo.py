@@ -89,8 +89,9 @@ async def publish_halo(
     ts = now_ms()
 
     existing = await store.get_vacant(vacant_id)
+    vacant_to_insert: Vacant | None = None
     if existing is None:
-        row = Vacant(
+        vacant_to_insert = Vacant(
             vacant_id=vacant_id,
             public_key=card.vacant_id.pubkey_bytes,
             owner_org=owner_org,
@@ -106,31 +107,36 @@ async def publish_halo(
             visibility=eff_vis.value,
             registered_at=ts,
         )
-        await store.insert_vacant(row)
-    else:
-        await store.update_vacant_visibility(vacant_id, eff_vis.value)
 
     # Emit signed `register` event so the publish lands in the audit chain.
+    # F-A: vacant insert/update + event submit are bundled into a single
+    # DB transaction by `submit_register_event_atomic`. If the event
+    # fails (signature reject, idempotency conflict, race lost), the
+    # vacant row insert / visibility flip is rolled back together — so
+    # the public state and the audit chain can never diverge.
     draft_payload = {
         "vacant_id": vacant_id,
         "card_hash": capability_card_hash.hex(),
         "halo_version": card.halo_version,
         "visibility": eff_vis.value,
     }
-    last = await store.latest_event_for_actor(vacant_id)
-    next_seq = (last.actor_seq if last else 0) + 1
+    if vacant_to_insert is None:
+        last = await store.latest_event_for_actor(vacant_id)
+        next_seq = (last.actor_seq if last else 0) + 1
+    else:
+        # Brand-new vacant: no prior events, so this is actor_seq 1.
+        next_seq = 1
+    idempotency_key = f"register:{vacant_id}:{ts}:{uuid.uuid4()}"
     canonical_payload = json.dumps(draft_payload, sort_keys=True, separators=(",", ":")).encode(
         "utf-8"
     )
     payload_hash = hash_blake2b(canonical_payload)
-    from vacant.registry.antitamper import canonical_event_bytes
-
     canonical = canonical_event_bytes(
         event_type="register",
         actor_vacant_id=vacant_id,
         subject_vacant_id=None,
         payload_hash=payload_hash,
-        idempotency_key=f"register:{vacant_id}:{ts}:{uuid.uuid4()}",
+        idempotency_key=idempotency_key,
         signed_by_pubkey=card.vacant_id.pubkey_bytes,
         ts=ts,
         actor_seq=next_seq,
@@ -141,51 +147,18 @@ async def publish_halo(
         actor_vacant_id=vacant_id,
         subject_vacant_id=None,
         payload=draft_payload,
-        idempotency_key=f"register:{vacant_id}:{ts}:{uuid.uuid4()}",
+        idempotency_key=idempotency_key,
         signed_by_pubkey=card.vacant_id.pubkey_bytes,
         signature=sig,
         actor_seq=next_seq,
         ts=ts,
     )
-    # Re-derive canonical bytes inside `submit_event`. The signature was
-    # produced over the same canonicalisation rules so it'll verify there.
-    # We sign a fresh idempotency_key, so update the draft to use the
-    # one we signed against.
-    draft = SignedEventDraft(
-        event_type=draft.event_type,
-        actor_vacant_id=draft.actor_vacant_id,
-        subject_vacant_id=draft.subject_vacant_id,
-        payload=draft.payload,
-        idempotency_key=f"register:{vacant_id}:{ts}",
-        signed_by_pubkey=draft.signed_by_pubkey,
-        signature=sig,  # signed against {idempotency_key=above}: rebuild
-        actor_seq=draft.actor_seq,
-        ts=draft.ts,
+    event = await store.submit_register_event_atomic(
+        vacant_to_insert=vacant_to_insert,
+        vacant_id_to_update=None if vacant_to_insert is not None else vacant_id,
+        new_visibility=None if vacant_to_insert is not None else eff_vis.value,
+        draft=draft,
     )
-    # Rebuild signature with the final idempotency_key.
-    canonical_final = canonical_event_bytes(
-        event_type=draft.event_type,
-        actor_vacant_id=draft.actor_vacant_id,
-        subject_vacant_id=draft.subject_vacant_id,
-        payload_hash=payload_hash,
-        idempotency_key=draft.idempotency_key,
-        signed_by_pubkey=draft.signed_by_pubkey,
-        ts=draft.ts,
-        actor_seq=draft.actor_seq,
-    )
-    final_sig = sign(signing_key, canonical_final)
-    draft = SignedEventDraft(
-        event_type=draft.event_type,
-        actor_vacant_id=draft.actor_vacant_id,
-        subject_vacant_id=draft.subject_vacant_id,
-        payload=draft.payload,
-        idempotency_key=draft.idempotency_key,
-        signed_by_pubkey=draft.signed_by_pubkey,
-        signature=final_sig,
-        actor_seq=draft.actor_seq,
-        ts=draft.ts,
-    )
-    event = await store.submit_event(draft)
 
     return HaloRecord(
         vacant_id=vacant_id,
@@ -291,8 +264,9 @@ async def publish_halo_signed(
     capability_card_blob = serialize_card(card)
 
     existing = await store.get_vacant(vacant_id)
+    vacant_to_insert: Vacant | None = None
     if existing is None:
-        row = Vacant(
+        vacant_to_insert = Vacant(
             vacant_id=vacant_id,
             public_key=card.vacant_id.pubkey_bytes,
             owner_org=owner_org,
@@ -308,9 +282,6 @@ async def publish_halo_signed(
             visibility=eff_vis.value,
             registered_at=event_ts_ms,
         )
-        await store.insert_vacant(row)
-    else:
-        await store.update_vacant_visibility(vacant_id, eff_vis.value)
 
     inputs = RegisterEventDraftInputs(
         vacant_id=vacant_id,
@@ -332,7 +303,17 @@ async def publish_halo_signed(
         actor_seq=event_actor_seq,
         ts=event_ts_ms,
     )
-    event = await store.submit_event(draft)
+    # F-A: vacant insert/update + register event are submitted in one
+    # DB transaction so a failed `submit_event` (bad signature, race
+    # lost, idempotency conflict) rolls back the row insert and we
+    # never end up with a publicly-visible halo whose register event
+    # is missing from the audit chain.
+    event = await store.submit_register_event_atomic(
+        vacant_to_insert=vacant_to_insert,
+        vacant_id_to_update=None if vacant_to_insert is not None else vacant_id,
+        new_visibility=None if vacant_to_insert is not None else eff_vis.value,
+        draft=draft,
+    )
     return HaloRecord(
         vacant_id=vacant_id,
         visibility=eff_vis,

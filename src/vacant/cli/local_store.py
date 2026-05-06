@@ -1,43 +1,65 @@
 """On-disk layout for local vacants (`~/.vacant/<name>/`).
 
-A *local vacant* is the owner-side handle for a vacant: keypair on disk,
-logbook persisted to a `.jsonl` file, plus a small `meta.json` carrying
+A *local vacant* is the owner-side handle for a vacant: keypair stored
+in the OS keyring (or a plaintext file in `--insecure-demo` mode), a
+logbook persisted as `.jsonl`, and a small `meta.json` carrying
 visibility state, capability text, and endpoint URL. Higher-level CLI
 commands (`vacant init`, `status`, `publish`, `heartbeat`, `attest`,
 `call`) read and write through this module.
 
 Layout under `${VACANT_HOME:-~/.vacant}/<name>/`:
 
-    key.json       {"pubkey_hex": "...", "seed_hex": "..."}   (mode 0600)
+    key.json       {"pubkey_hex": "...", "key_storage": "keyring"}     (mode 0600)
+                   or {"pubkey_hex": ..., "seed_hex": ..., "key_storage": "plaintext"}
     logbook.jsonl  one JSON-encoded LogEntry per line
     meta.json      LocalMeta — state / endpoint / capability_text / etc.
 
-The key file uses a plain JSON-on-disk format. Production deployments
-should swap in `vacant.identity.keys.FileVault` (PBKDF2 + AES-GCM); the
-dispatch CLI is intentionally simple so a thesis-defense reviewer can
-inspect the on-disk state.
+Key storage (F-D codex final blockers): the Ed25519 *seed* is sensitive
+material — controlling it == owning the vacant. The default storage is
+the OS keyring (Keychain on macOS, Secret Service on Linux, Credential
+Locker on Windows) via the `keyring` package. The on-disk `key.json`
+holds only the public key and a `key_storage` discriminator so external
+tooling can verify signatures without unlocking the keychain.
+
+If the host has no keyring backend (e.g. headless CI without DBus),
+`init_vacant(insecure_demo=False)` raises rather than silently falling
+back to plaintext. To opt into plaintext storage explicitly, pass
+`insecure_demo=True` (the CLI surface is `vacant init <name>
+--insecure-demo`); a stderr WARN is emitted and `key.json` is written
+with the seed in the clear under mode 0600.
+
+The `--insecure-demo` mode exists for two purposes only: live demos
+where the operator is showing the file layout, and short-lived CI/test
+flows. **Do not use it on a host with real network exposure.** See
+`SECURITY.md` §"Local key storage" for the full risk model.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import keyring
+from keyring.errors import KeyringError
 from pydantic import BaseModel
 
 from vacant.core.crypto import SigningKey, keygen
 from vacant.core.types import Logbook, LogEntry, VacantId
 
 __all__ = [
+    "KEYRING_SERVICE",
     "LocalMeta",
     "LocalVacantError",
     "LocalVacantExists",
+    "LocalVacantKeyringUnavailable",
     "LocalVacantNotFound",
     "current_name",
     "init_vacant",
+    "keyring_backend_available",
     "list_vacant_names",
     "load_logbook",
     "load_meta",
@@ -54,6 +76,19 @@ KEY_FILE = "key.json"
 LOGBOOK_FILE = "logbook.jsonl"
 META_FILE = "meta.json"
 
+KEYRING_SERVICE = "vacant.cli"
+"""`service` argument used for every `keyring.set_password` /
+`keyring.get_password` call. Stable across versions so the OS keyring
+entry survives upgrades."""
+
+_INSECURE_WARN = (
+    "WARN: vacant {name!r} private seed written PLAINTEXT to {path} "
+    "(--insecure-demo). The seed controls the vacant; anyone who reads "
+    "this file can impersonate it. Use only for local demos / short-"
+    "lived CI; never on a system with real network exposure. See "
+    "SECURITY.md §Local key storage for the risk model.\n"
+)
+
 
 class LocalVacantError(RuntimeError):
     """Base class for local-store errors."""
@@ -65,6 +100,15 @@ class LocalVacantNotFound(LocalVacantError):
 
 class LocalVacantExists(LocalVacantError):
     """A local vacant with that name already exists."""
+
+
+class LocalVacantKeyringUnavailable(LocalVacantError):
+    """The default OS keyring is the `fail` / `null` backend.
+
+    Raised by `init_vacant` when the operator has not opted into
+    `insecure_demo=True`. The error message tells the operator how to
+    proceed: install a keyring backend or re-run with `--insecure-demo`.
+    """
 
 
 class LocalMeta(BaseModel):
@@ -79,6 +123,10 @@ class LocalMeta(BaseModel):
     last_heartbeat_at: str | None = None
     parent_id_hex: str | None = None
     halo_published: bool = False
+    key_storage: str = "plaintext"
+    """`keyring` (default, OS keyring) or `plaintext` (--insecure-demo).
+    Defaults to `plaintext` so `LocalMeta` files written before F-D
+    landed still load cleanly."""
 
 
 def vacant_home() -> Path:
@@ -129,25 +177,100 @@ def current_name() -> str:
     )
 
 
-def init_vacant(name: str) -> tuple[VacantId, SigningKey]:
-    """Generate a fresh keypair, write key+meta+seed-genesis-logbook.
+def keyring_backend_available() -> bool:
+    """True iff the host's default keyring is a real backend.
 
-    Returns the new `VacantId` and `SigningKey`. Raises
-    `LocalVacantExists` if the directory already exists.
+    The `keyring` library always returns *some* backend from
+    `get_keyring()`; on hosts without a working backend it returns
+    `keyring.backends.fail.Keyring` (a stub that raises on every
+    call). We detect that case by inspecting the module path so
+    callers can give a clear error before a write attempt fails.
+    """
+    try:
+        backend = keyring.get_keyring()
+    except KeyringError:
+        return False
+    module = type(backend).__module__
+    return not module.endswith(".fail") and not module.endswith(".null")
+
+
+def init_vacant(name: str, *, insecure_demo: bool = False) -> tuple[VacantId, SigningKey]:
+    """Generate a fresh keypair and persist the local-vacant directory.
+
+    Args:
+        name: Local vacant name. Validated against path traversal.
+        insecure_demo: If True, write the Ed25519 seed in plaintext into
+            `key.json` (mode 0600) and emit a stderr WARN. If False
+            (default), store the seed in the OS keyring; raise
+            `LocalVacantKeyringUnavailable` if no backend is present.
+
+    Returns:
+        The new `VacantId` and `SigningKey`.
+
+    Raises:
+        LocalVacantExists: If `~/.vacant/<name>/` already exists.
+        LocalVacantKeyringUnavailable: If `insecure_demo=False` and the
+            host has no working keyring backend.
+        LocalVacantError: Any other failure (path traversal, keyring
+            write error, …).
     """
     d = vacant_dir(name)
     if d.exists():
         raise LocalVacantExists(name)
-    d.mkdir(parents=True)
 
     sk, vk = keygen()
     vid = VacantId.from_verify_key(vk)
+    seed_hex = bytes(sk).hex()
 
-    key_path = d / KEY_FILE
-    key_path.write_text(
-        json.dumps({"pubkey_hex": vid.hex(), "seed_hex": bytes(sk).hex()}, sort_keys=True)
-    )
-    os.chmod(key_path, 0o600)
+    if insecure_demo:
+        d.mkdir(parents=True)
+        key_path = d / KEY_FILE
+        key_path.write_text(
+            json.dumps(
+                {
+                    "pubkey_hex": vid.hex(),
+                    "seed_hex": seed_hex,
+                    "key_storage": "plaintext",
+                },
+                sort_keys=True,
+            )
+        )
+        os.chmod(key_path, 0o600)
+        sys.stderr.write(_INSECURE_WARN.format(name=name, path=key_path))
+        key_storage = "plaintext"
+    else:
+        if not keyring_backend_available():
+            raise LocalVacantKeyringUnavailable(
+                f"no keyring backend available for vacant {name!r}; "
+                "the OS keyring (Keychain on macOS, Secret Service on Linux, "
+                "Credential Locker on Windows) is the default storage for the "
+                "private seed. Install / unlock a keyring backend, or re-run "
+                "`vacant init <name> --insecure-demo` to opt into plaintext "
+                "storage. See SECURITY.md §Local key storage for the risk model."
+            )
+        d.mkdir(parents=True)
+        try:
+            keyring.set_password(KEYRING_SERVICE, name, seed_hex)
+        except KeyringError as exc:
+            # Roll back the directory so a partial init doesn't block a
+            # retry under a different mode.
+            try:
+                d.rmdir()
+            except OSError:
+                pass
+            raise LocalVacantError(
+                f"keyring store for vacant {name!r} failed: {exc}. "
+                "Try `--insecure-demo` if this is a demo / CI host."
+            ) from exc
+        key_path = d / KEY_FILE
+        key_path.write_text(
+            json.dumps(
+                {"pubkey_hex": vid.hex(), "key_storage": "keyring"},
+                sort_keys=True,
+            )
+        )
+        os.chmod(key_path, 0o600)
+        key_storage = "keyring"
 
     lb = Logbook()
     lb.append(GENESIS_KIND, {"name": name, "vacant_id": vid.hex()}, sk)
@@ -157,17 +280,49 @@ def init_vacant(name: str) -> tuple[VacantId, SigningKey]:
         vacant_id_hex=vid.hex(),
         state="LOCAL",
         created_at=datetime.now(UTC).isoformat(),
+        key_storage=key_storage,
     )
     save_meta(name, meta)
     return vid, sk
 
 
 def load_signing_key(name: str) -> SigningKey:
-    """Load the Ed25519 signing key for `name`."""
+    """Load the Ed25519 signing key for `name`.
+
+    Looks up `key_storage` from `meta.json` (or, for legacy directories
+    without it, infers from `key.json`'s `key_storage` field, then falls
+    back to the plaintext seed). Raises `LocalVacantNotFound` if the
+    directory is missing entirely; raises `LocalVacantError` if the
+    keyring entry has gone missing under us (e.g. operator cleared the
+    Keychain after init).
+    """
     p = vacant_dir(name) / KEY_FILE
     if not p.exists():
         raise LocalVacantNotFound(name)
     obj = json.loads(p.read_text())
+    storage = obj.get("key_storage")
+    if storage is None:
+        # Legacy file: pre-F-D init wrote `seed_hex` without
+        # `key_storage`. Treat as plaintext.
+        storage = "plaintext" if "seed_hex" in obj else "keyring"
+
+    if storage == "keyring":
+        seed_hex = keyring.get_password(KEYRING_SERVICE, name)
+        if seed_hex is None:
+            raise LocalVacantError(
+                f"keyring entry for vacant {name!r} not found "
+                f"(service={KEYRING_SERVICE!r}); the OS keyring may have been "
+                "cleared, or the vacant was created on a different machine. "
+                "Reinitialise with `vacant init` or copy the keyring entry over."
+            )
+        return SigningKey(bytes.fromhex(seed_hex))
+
+    # Plaintext (--insecure-demo or legacy).
+    if "seed_hex" not in obj:
+        raise LocalVacantError(
+            f"vacant {name!r} key.json declares key_storage={storage!r} "
+            "but has no seed_hex on disk; cannot load the signing key"
+        )
     return SigningKey(bytes.fromhex(obj["seed_hex"]))
 
 

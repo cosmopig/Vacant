@@ -59,7 +59,7 @@ def _stdio_params(name: str, home: Path) -> StdioServerParameters:
 
 @pytest.mark.asyncio
 async def test_external_client_lists_tools(isolated_home: Path) -> None:
-    ls.init_vacant("alice")
+    ls.init_vacant("alice", insecure_demo=True)  # subprocess can't share fake keyring
     params = _stdio_params("alice", isolated_home)
     async with stdio_client(params) as (read, write):
         async with ClientSession(read, write) as session:
@@ -72,7 +72,7 @@ async def test_external_client_lists_tools(isolated_home: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_external_client_describes_vacant(isolated_home: Path) -> None:
-    ls.init_vacant("alice")
+    ls.init_vacant("alice", insecure_demo=True)  # subprocess can't share fake keyring
     meta = ls.load_meta("alice")
     params = _stdio_params("alice", isolated_home)
     async with stdio_client(params) as (read, write):
@@ -90,7 +90,7 @@ async def test_external_client_describes_vacant(isolated_home: Path) -> None:
 async def test_external_client_calls_vacant_with_signed_envelope(
     isolated_home: Path,
 ) -> None:
-    ls.init_vacant("alice")
+    ls.init_vacant("alice", insecure_demo=True)  # subprocess can't share fake keyring
     meta = ls.load_meta("alice")
     target_vid = VacantId(pubkey_bytes=bytes.fromhex(meta.vacant_id_hex))
 
