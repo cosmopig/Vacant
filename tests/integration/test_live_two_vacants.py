@@ -96,8 +96,8 @@ def isolated_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def two_vacants(
     isolated_home: Path,
 ) -> Iterator[tuple[tuple[str, int, VacantId], tuple[str, int, VacantId]]]:
-    ls.init_vacant("alice")
-    ls.init_vacant("bob")
+    ls.init_vacant("alice", insecure_demo=True)  # subprocess can't share fake keyring
+    ls.init_vacant("bob", insecure_demo=True)  # subprocess can't share fake keyring
     a_meta = ls.load_meta("alice")
     b_meta = ls.load_meta("bob")
     a_vid = VacantId(pubkey_bytes=bytes.fromhex(a_meta.vacant_id_hex))

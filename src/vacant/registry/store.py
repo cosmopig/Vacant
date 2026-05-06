@@ -48,6 +48,7 @@ from vacant.registry.errors import (
     IdempotencyConflict,
     NotFoundError,
     RegistryWriteError,
+    SequenceMonotonicityError,
     SignatureRejected,
     VisibilityViolation,
 )
@@ -176,6 +177,29 @@ class RegistryStore:
     async def submit_event(self, draft: SignedEventDraft) -> Event:
         """The hot path: idempotency → sig verify → seq monotone → chain
         → insert. Returns the persisted `Event` with `seq` and `event_hash`.
+
+        Race protection (F-B): the in-process `asyncio.Lock` is a
+        fast-path mutex within a single worker; the load-bearing defense
+        is the `(actor_vacant_id, actor_seq)` UNIQUE on the `event`
+        table, which turns concurrent inserts of the same `actor_seq`
+        into `IntegrityError` and back into `SequenceMonotonicityError`
+        for the loser of the race.
+        """
+        async with self._write_lock:
+            async with self._sessionmaker() as s:
+                async with s.begin():
+                    return await self._submit_event_in_session(s, draft)
+
+    async def _submit_event_in_session(self, s: AsyncSession, draft: SignedEventDraft) -> Event:
+        """The core submit logic, factored so it can run inside an
+        externally-managed transaction (used by F-A's
+        `submit_register_event_atomic`).
+
+        Caller MUST own the session lifecycle (commit / rollback). All
+        DB reads + the final insert run on `s`; this lets a sibling
+        write (e.g. inserting the corresponding `Vacant` row) live in
+        the same transaction so a failed insert here rolls back the
+        sibling write too.
         """
         # --- L1: signature verify on canonical bytes -----------------------
         payload_json = canonical_json(draft.payload)
@@ -196,13 +220,12 @@ class RegistryStore:
             signature=draft.signature,
         )
 
-        # --- L1b: cross-actor impersonation guard ------------------------------
-        # Padv-P4 §1: without this check, an attacker with their own keypair
-        # could submit events filed under any `actor_vacant_id` so long as
-        # `signed_by_pubkey` matches their own key (the signature would
-        # verify under their key, but the event would be filed as "from"
-        # the victim). Bind the actor identity to its registered pubkey.
-        actor = await self.get_vacant(draft.actor_vacant_id)
+        # --- L1b: cross-actor impersonation guard --------------------------
+        # Padv-P4 §1: without this check, an attacker with their own
+        # keypair could submit events filed under any `actor_vacant_id`
+        # as long as `signed_by_pubkey` matches their own key (the sig
+        # would verify under their key but be filed as the victim's).
+        actor = await s.get(Vacant, draft.actor_vacant_id)
         if actor is None:
             raise SignatureRejected(f"unknown actor {draft.actor_vacant_id}: vacant not registered")
         if actor.public_key != draft.signed_by_pubkey:
@@ -210,51 +233,118 @@ class RegistryStore:
                 f"signed_by_pubkey does not match registered key for actor {draft.actor_vacant_id}"
             )
 
-        async with self._write_lock:
-            # --- idempotency: same key + same payload_hash returns existing -
-            existing = await self.lookup_idempotency(draft.idempotency_key)
-            if existing is not None:
-                if existing.payload_hash == payload_hash:
-                    return existing
+        # --- idempotency: same key + same payload_hash returns existing ---
+        existing = (
+            await s.execute(select(Event).where(Event.idempotency_key == draft.idempotency_key))
+        ).scalar_one_or_none()
+        if existing is not None:
+            if existing.payload_hash == payload_hash:
+                return existing
+            raise IdempotencyConflict(
+                f"idempotency_key {draft.idempotency_key} reused with different payload"
+            )
+
+        # --- L2: per-actor sequence monotonicity (best-effort fast check)--
+        last_for_actor = (
+            await s.execute(
+                select(Event)
+                .where(Event.actor_vacant_id == draft.actor_vacant_id)
+                .order_by(sa_desc(Event.seq))  # type: ignore[arg-type]
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        last_actor_seq = last_for_actor.actor_seq if last_for_actor else 0
+        check_sequence_monotonic(last_seq=last_actor_seq, candidate_seq=draft.actor_seq)
+
+        # --- chain prev_event_hash to overall tip --------------------------
+        tip = (
+            await s.execute(select(Event).order_by(sa_desc(Event.seq)).limit(1))  # type: ignore[arg-type]
+        ).scalar_one_or_none()
+        prev_event_hash = tip.event_hash if tip else b"\x00" * 32
+
+        event_hash = compute_event_hash(
+            prev_event_hash=prev_event_hash,
+            canonical_bytes=canonical,
+            signature=draft.signature,
+        )
+
+        row = Event(
+            event_type=draft.event_type,
+            actor_vacant_id=draft.actor_vacant_id,
+            subject_vacant_id=draft.subject_vacant_id,
+            payload_json=payload_json,
+            payload_hash=payload_hash,
+            idempotency_key=draft.idempotency_key,
+            signed_by_pubkey=draft.signed_by_pubkey,
+            signature=draft.signature,
+            prev_event_hash=prev_event_hash,
+            event_hash=event_hash,
+            actor_seq=draft.actor_seq,
+            ts=draft.ts,
+        )
+        s.add(row)
+        try:
+            # Flush forces the INSERT (and therefore the UNIQUE check)
+            # without ending the outer transaction. SQLAlchemy populates
+            # `row.seq` from the autoincrement during flush, so we do
+            # not need a separate `refresh()` afterwards (which would
+            # fail under nested transactions on aiosqlite).
+            await s.flush()
+        except IntegrityError as exc:
+            # Two paths land here:
+            # 1. Another worker won the race for this `actor_seq` — turn
+            #    that into the same error the in-memory check would have
+            #    raised, so callers don't have to distinguish.
+            # 2. `idempotency_key` UNIQUE collided with a concurrently-
+            #    inserted row (we missed it in the lookup above) — surface
+            #    as `IdempotencyConflict`.
+            msg = str(exc.orig).lower() if exc.orig else str(exc).lower()
+            if "idempotency_key" in msg:
                 raise IdempotencyConflict(
-                    f"idempotency_key {draft.idempotency_key} reused with different payload"
-                )
+                    f"idempotency_key {draft.idempotency_key} concurrently used"
+                ) from exc
+            raise SequenceMonotonicityError(
+                f"actor_seq {draft.actor_seq} for actor {draft.actor_vacant_id} "
+                "concurrently used (race lost; retry with the next seq)"
+            ) from exc
+        return row
 
-            # --- L2: per-actor sequence monotonicity -------------------------
-            last_for_actor = await self.latest_event_for_actor(draft.actor_vacant_id)
-            last_actor_seq = last_for_actor.actor_seq if last_for_actor else 0
-            check_sequence_monotonic(last_seq=last_actor_seq, candidate_seq=draft.actor_seq)
+    async def submit_register_event_atomic(
+        self,
+        *,
+        vacant_to_insert: Vacant | None,
+        vacant_id_to_update: str | None,
+        new_visibility: str | None,
+        draft: SignedEventDraft,
+    ) -> Event:
+        """F-A defense: insert/update vacant + submit register event in
+        ONE transaction. If `submit_event` fails (signature rejected,
+        idempotency conflict, sequence race), the vacant row insert /
+        visibility update is rolled back, so the audit chain and the
+        publicly-visible state can never diverge.
 
-            # --- chain prev_event_hash to overall tip ------------------------
-            tip = await self.latest_event_overall()
-            prev_event_hash = tip.event_hash if tip else b"\x00" * 32
-
-            event_hash = compute_event_hash(
-                prev_event_hash=prev_event_hash,
-                canonical_bytes=canonical,
-                signature=draft.signature,
-            )
-
-            row = Event(
-                event_type=draft.event_type,
-                actor_vacant_id=draft.actor_vacant_id,
-                subject_vacant_id=draft.subject_vacant_id,
-                payload_json=payload_json,
-                payload_hash=payload_hash,
-                idempotency_key=draft.idempotency_key,
-                signed_by_pubkey=draft.signed_by_pubkey,
-                signature=draft.signature,
-                prev_event_hash=prev_event_hash,
-                event_hash=event_hash,
-                actor_seq=draft.actor_seq,
-                ts=draft.ts,
-            )
+        Exactly one of `vacant_to_insert` or `vacant_id_to_update` should
+        be non-None per call site. If both are None, only the event is
+        submitted (used by tests).
+        """
+        async with self._write_lock:
             async with self._sessionmaker() as s:
-                s.add(row)
-                await s.commit()
-                await s.refresh(row)
-
-            return row
+                async with s.begin():
+                    if vacant_to_insert is not None:
+                        s.add(vacant_to_insert)
+                        try:
+                            await s.flush()
+                        except IntegrityError as exc:
+                            raise RegistryWriteError(
+                                f"vacant {vacant_to_insert.vacant_id} already exists"
+                            ) from exc
+                    elif vacant_id_to_update is not None and new_visibility is not None:
+                        v = await s.get(Vacant, vacant_id_to_update)
+                        if v is None:
+                            raise NotFoundError(f"vacant {vacant_id_to_update} not found")
+                        v.visibility = new_visibility
+                        await s.flush()
+                    return await self._submit_event_in_session(s, draft)
 
     async def get_event(self, seq: int) -> Event | None:
         async with self._sessionmaker() as s:

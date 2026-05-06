@@ -36,6 +36,7 @@ dependencies = [
     "mcp>=1.10",
     "uvicorn>=0.30",
     "greenlet>=3.5.0",
+    "keyring>=24",
 ]
 
 [project.optional-dependencies]

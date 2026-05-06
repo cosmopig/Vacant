@@ -55,6 +55,56 @@ Pre-1.0. Only `main` is supported. Once the capstone defense passes and the proj
 | `main` | Active |
 | pre-1.0 tags | Not supported |
 
+## Local key storage
+
+`vacant init <name>` creates a fresh Ed25519 keypair for a local
+vacant. The private *seed* controls the vacant — anyone who reads it
+can sign as that vacant.
+
+Default storage (since codex round-3 F-D): the **OS keyring**
+(Keychain on macOS, Secret Service on Linux, Credential Locker on
+Windows) via the [`keyring`](https://pypi.org/project/keyring/)
+library. The on-disk `~/.vacant/<name>/key.json` carries only the
+public key + a `key_storage` discriminator; the seed never touches
+the filesystem.
+
+Opt-in plaintext (`vacant init <name> --insecure-demo`): on hosts
+without a working keyring backend (headless CI, locked-down
+containers, demo machines where you want to *show* the file layout
+to an audience) the seed is written into `key.json` in the clear,
+under file mode `0600`. A stderr `WARN` is emitted at every init.
+
+Threat model:
+
+- **Keyring path:** the seed is protected by the OS user account.
+  An attacker who compromises the user account already owns
+  everything else; the seed protection collapses to "is the user
+  account secure?".
+- **`--insecure-demo` path:** the seed is on disk in plaintext,
+  protected only by `0600`. Any local user / process that can read
+  `~/.vacant/<name>/key.json` can impersonate the vacant. Treat
+  this as **fully exposed** for any host with real network reach.
+  The mode 0600 reduces accidental cross-user reads but is not a
+  security boundary against root or any process the user runs.
+
+What this means in practice:
+
+- Use `--insecure-demo` only on machines you control for the
+  duration of a demo or test, then run `rm -rf ~/.vacant/<name>/`
+  + delete the keyring entry afterwards.
+- Never copy a `~/.vacant/<name>/` directory generated under
+  `--insecure-demo` to another host. Reinitialise.
+- A keyring-stored seed is bound to the host's user account; if you
+  reformat / lose / clear the keychain, the vacant is lost (no
+  off-keyring backup is created on purpose). Re-`vacant init` to
+  start a fresh lineage.
+
+Higher-assurance deployments should use
+[`vacant.identity.keys.FileVault`](https://cosmopig.github.io/Vacant/api/identity/#vacant.identity.keys.FileVault)
+(PBKDF2 + AES-GCM with operator-supplied passphrase) or plug an HSM
+behind the `KeyVault` ABC. The CLI's local store is intentionally
+simple so a reviewer can inspect the on-disk footprint.
+
 ## What we will and won't do
 
 **Will**:

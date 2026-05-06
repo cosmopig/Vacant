@@ -88,18 +88,33 @@ def _resolve_registry(explicit: str | None) -> str:
 
 
 @app.command("init")
-def init_cmd(name: str) -> None:
+def init_cmd(
+    name: str,
+    insecure_demo: bool = typer.Option(
+        False,
+        "--insecure-demo",
+        help=(
+            "Store the Ed25519 seed in plaintext key.json (mode 0600) "
+            "instead of the OS keyring. Demo / CI use only — see SECURITY.md."
+        ),
+    ),
+) -> None:
     """Create a fresh keypair + seed logbook for `name`. (P2)
 
     Writes `~/.vacant/<name>/{key.json,logbook.jsonl,meta.json}` with
-    file mode 0600 on the key. Subsequent commands (`status`,
-    `heartbeat`, `publish`) operate on this directory.
+    file mode 0600 on the key. The Ed25519 seed is stored in the OS
+    keyring by default (Keychain / Secret Service / Credential
+    Locker); pass `--insecure-demo` to fall back to plaintext on
+    hosts without a keyring backend.
     """
     try:
-        vid, _sk = ls.init_vacant(name)
+        vid, _sk = ls.init_vacant(name, insecure_demo=insecure_demo)
     except ls.LocalVacantExists:
         typer.echo(f"error: local vacant {name!r} already exists", err=True)
         raise typer.Exit(code=1) from None
+    except ls.LocalVacantKeyringUnavailable as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
     except LocalVacantError as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=1) from exc

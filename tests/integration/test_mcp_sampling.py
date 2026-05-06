@@ -60,7 +60,7 @@ def _stdio_params(name: str, home: Path) -> StdioServerParameters:
 
 @pytest.mark.asyncio
 async def test_vacant_borrows_caller_llm_via_sampling(isolated_home: Path) -> None:
-    ls.init_vacant("alice")
+    ls.init_vacant("alice", insecure_demo=True)  # subprocess can't share fake keyring
 
     sampling_calls: list[Any] = []
 

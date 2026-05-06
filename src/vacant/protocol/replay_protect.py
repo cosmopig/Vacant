@@ -8,6 +8,18 @@ hash). An incoming envelope is rejected if:
 - `prev_envelope_hash != stored_chain_tip[(from, to)]`.
 
 A new pair starts at `sequence_no = 1` and `chain_tip = EMPTY_PREV_HASH`.
+
+Race protection (F-C). The MVP previously stored one row per `(from,
+to)` pair with `last_sequence_no` updated in place, plus an in-process
+`asyncio.Lock`. Under multi-worker deployment two workers could both
+read the same `last_sequence_no = N`, both pass the monotonicity
+check, and both try to advance to `N + 1`. The fix: store one row
+**per accepted envelope**, with composite primary key
+`(from_vid_hex, to_vid_hex, sequence_no)`. Concurrent writes claiming
+the same triple collide on the PK at INSERT time and surface as
+`IntegrityError`, which the store re-raises as
+`ReplayDetectedError`. The "current state" of a pair is simply the
+row with the largest `sequence_no` for that pair.
 """
 
 from __future__ import annotations
@@ -17,6 +29,8 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from sqlalchemy import LargeBinary
+from sqlalchemy import desc as sa_desc
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from sqlmodel import Column, Field, SQLModel, select
 
@@ -103,22 +117,27 @@ class InMemoryReplayStore:
 
 
 class _ReplayRow(SQLModel, table=True):
-    """SQL row backing `SqliteReplayStore`. Created on first init.
+    """One accepted envelope per row, keyed by `(from, to, sequence_no)`.
 
-    `from_vid_hex` + `to_vid_hex` form a composite primary key. Row
-    update is a single UPDATE/INSERT inside a transaction.
+    F-C: the previous schema stored one row per pair with
+    `last_sequence_no` updated in place; concurrent writers could both
+    pass the monotonicity check and both try to advance. The composite
+    PK `(from_vid_hex, to_vid_hex, sequence_no)` makes that race
+    impossible — the second insert collides at the DB level. The
+    "current state" of a pair is the row with the maximum
+    `sequence_no` for that pair.
     """
 
     __tablename__ = "replay_protect"
 
     from_vid_hex: str = Field(primary_key=True)
     to_vid_hex: str = Field(primary_key=True)
-    last_sequence_no: int = 0
+    sequence_no: int = Field(primary_key=True)
     chain_tip: bytes = Field(sa_column=Column(LargeBinary, nullable=False), default=EMPTY_PREV_HASH)
 
 
 class SqliteReplayStore:
-    """SQLAlchemy/aiosqlite-backed replay store."""
+    """SQLAlchemy/aiosqlite-backed replay store with PK-enforced uniqueness."""
 
     def __init__(self, engine: AsyncEngine) -> None:
         self._engine = engine
@@ -130,45 +149,58 @@ class SqliteReplayStore:
             await conn.run_sync(_ReplayRow.metadata.create_all)
 
     async def get(self, key: PairKey) -> ReplayState:
+        """Read the latest row for a pair (largest `sequence_no`).
+
+        The PK already guarantees no duplicate `(from, to, seq)` so the
+        ordering is well-defined. New pairs return the empty state.
+        """
         async with self._sm() as s:
             row = await s.execute(
-                select(_ReplayRow).where(
+                select(_ReplayRow)
+                .where(
                     _ReplayRow.from_vid_hex == key.from_vid.hex(),
                     _ReplayRow.to_vid_hex == key.to_vid.hex(),
                 )
+                .order_by(sa_desc(_ReplayRow.sequence_no))  # type: ignore[arg-type]
+                .limit(1)
             )
             r = row.scalar_one_or_none()
             if r is None:
                 return ReplayState(last_sequence_no=0, chain_tip=EMPTY_PREV_HASH)
-            return ReplayState(last_sequence_no=r.last_sequence_no, chain_tip=r.chain_tip)
+            return ReplayState(last_sequence_no=r.sequence_no, chain_tip=r.chain_tip)
 
     async def check_and_advance(self, env: VacantEnvelope) -> None:
+        """Validate the envelope and atomically record its acceptance.
+
+        The fast-path check uses the in-process `_lock` to avoid wasted
+        work; the load-bearing race defense is the PK uniqueness on
+        `(from, to, sequence_no)`. If two workers (or two coroutines
+        that both hold their own copy of `_lock`) both pass `_check`
+        and both try to insert the same triple, the second INSERT
+        raises `IntegrityError` and we surface it as
+        `ReplayDetectedError`.
+        """
         key = PairKey.from_envelope(env)
         async with self._lock:
             cur = await self.get(key)
             _check(env, cur)
-            new_state = ReplayState(last_sequence_no=env.sequence_no, chain_tip=env.compute_hash())
+            row = _ReplayRow(
+                from_vid_hex=key.from_vid.hex(),
+                to_vid_hex=key.to_vid.hex(),
+                sequence_no=env.sequence_no,
+                chain_tip=env.compute_hash(),
+            )
             async with self._sm() as s:
-                row = await s.execute(
-                    select(_ReplayRow).where(
-                        _ReplayRow.from_vid_hex == key.from_vid.hex(),
-                        _ReplayRow.to_vid_hex == key.to_vid.hex(),
-                    )
-                )
-                existing = row.scalar_one_or_none()
-                if existing is None:
-                    s.add(
-                        _ReplayRow(
-                            from_vid_hex=key.from_vid.hex(),
-                            to_vid_hex=key.to_vid.hex(),
-                            last_sequence_no=new_state.last_sequence_no,
-                            chain_tip=new_state.chain_tip,
-                        )
-                    )
-                else:
-                    existing.last_sequence_no = new_state.last_sequence_no
-                    existing.chain_tip = new_state.chain_tip
-                await s.commit()
+                s.add(row)
+                try:
+                    await s.commit()
+                except IntegrityError as exc:
+                    await s.rollback()
+                    raise ReplayDetectedError(
+                        f"replay/race: envelope (from={key.from_vid.short()}, "
+                        f"to={key.to_vid.short()}, seq={env.sequence_no}) "
+                        "already accepted (PK collision; concurrent writer beat us)"
+                    ) from exc
 
 
 # --- shared check ----------------------------------------------------------

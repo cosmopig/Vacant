@@ -71,7 +71,9 @@ def isolated_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def served_vacant(isolated_home: Path) -> Iterator[tuple[str, int, VacantId]]:
     """Init a local vacant, spawn `vacant serve`, yield (name, port, vid)."""
     name = "alice"
-    ls.init_vacant(name)
+    # Subprocesses can't share the in-process fake keyring; use the
+    # plaintext fallback so the spawned `vacant serve` can load the seed.
+    ls.init_vacant(name, insecure_demo=True)
     port = _free_port()
     env = {**os.environ, "VACANT_HOME": str(isolated_home)}
     proc = subprocess.Popen(  # noqa: S603

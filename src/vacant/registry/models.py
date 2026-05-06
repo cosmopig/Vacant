@@ -13,6 +13,7 @@ Schema decisions reconciled in D006:
 
 from __future__ import annotations
 
+from sqlalchemy import UniqueConstraint
 from sqlmodel import Column, Field, LargeBinary, SQLModel
 
 __all__ = [
@@ -84,9 +85,20 @@ class Attestation(SQLModel, table=True):
 
 
 class Event(SQLModel, table=True):
-    """Append-only signed event log. P4 §3.1 table 3."""
+    """Append-only signed event log. P4 §3.1 table 3.
+
+    The `(actor_vacant_id, actor_seq)` UniqueConstraint is the
+    load-bearing race defense against codex F-B: an in-process
+    `asyncio.Lock` only guards concurrent submits inside a single
+    worker, so two workers reading the same `latest_event_for_actor`
+    could both pass `check_sequence_monotonic` and both try to insert
+    the same `actor_seq`. The DB-level UNIQUE turns that race into an
+    `IntegrityError` at insert time, which the store layer catches and
+    re-raises as `SequenceMonotonicityError`.
+    """
 
     __tablename__ = "event"
+    __table_args__ = (UniqueConstraint("actor_vacant_id", "actor_seq", name="uq_event_actor_seq"),)
 
     seq: int | None = Field(default=None, primary_key=True)
     event_type: str = Field(index=True)
