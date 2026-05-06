@@ -42,11 +42,11 @@ State transitions (event-driven thresholds, not pure time-elapsed):
 
 | Dim | Half-life | α₀ | β₀ | Source |
 |---|---|---|---|---|
-| Factual (F) | 90 | 1.5 | 1.0 | P3 line 418 |
-| Logical (L) | 180 | 1.5 | 1.0 | P3 line 419 |
-| Relevance (R) | 60 | 1.5 | 1.0 | P3 line 420 |
-| Honesty (H) | 30 | 2.0 | 1.0 | P3 line 421 |
-| Adoption (A) | 90 | 1.0 | 3.0 | P3 line 422 |
+| Factual (F) | 90 | 1.0 | 1.0 | P3 §3.2 (D008 §A: 1.5 in older table was L1-applied) |
+| Logical (L) | 180 | 1.0 | 1.0 | P3 §3.2 |
+| Relevance (R) | 60 | 1.0 | 1.0 | P3 §3.2 |
+| Honesty (H) | 30 | 2.0 | 1.0 | P3 §3.2 |
+| Adoption (A) | 90 | 1.0 | 3.0 | P3 §3.2 |
 
 ### Source weights (signal multipliers)
 
@@ -138,6 +138,14 @@ Wash cost formula and concrete coefficient values: see `components/P2_identity.m
 | `ANOMALY_REVIEW_PER_TARGET_HOUR` | `5` | P4 §3.2 anomaly table |
 | `ANOMALY_SPAWN_PER_PARENT_HOUR` | `10` | P4 §3.2 anomaly table |
 | `REGISTRY_DB_DEFAULT_URL` | `sqlite+aiosqlite:///:memory:` | D006 §B (test default) |
+
+## Protocol (P6)
+
+| Constant | Value | Citation |
+|---|---|---|
+| `A2A_VACANT_METADATA_KEY` | `urn:vacant:v1` | P6 §3.2 |
+| `CALL_TIMEOUT_DEFAULT_S` | `60` | P6 §3.4 |
+| `REGISTRY_CACHE_TTL_S` | `300` | P6 §3.4 |
 
 ## Composite (P5)
 

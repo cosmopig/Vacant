@@ -282,6 +282,11 @@ class CapabilityCard(BaseModel):
     capability_text: str
     substrate_spec: SubstrateSpec
     halo_version: int = DEFAULT_HALO_VERSION
+    endpoint: str | None = None
+    """A2A endpoint URL for direct calls. None for LOCAL or yet-to-be-deployed
+    vacants. P6 dispatch reads this field to POST envelopes directly. The
+    endpoint is part of the signing payload so it can't be substituted post-
+    issuance (D009 §A)."""
     signature: bytes = b""
 
     @field_validator("halo_version")
@@ -297,6 +302,7 @@ class CapabilityCard(BaseModel):
             self.capability_text.encode("utf-8"),
             self.substrate_spec.canonical_bytes(),
             self.halo_version.to_bytes(8, "big"),
+            (self.endpoint or "").encode("utf-8"),
         ]
         return b"\x1f".join(parts)
 
