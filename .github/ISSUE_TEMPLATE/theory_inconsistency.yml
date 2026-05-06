@@ -1,0 +1,34 @@
+name: 🧠 Theory inconsistency
+description: Two parts of `architecture/` (THEORY_V5, components, decisions, research) contradict each other
+labels: ["theory", "spec"]
+body:
+  - type: textarea
+    id: where_a
+    attributes:
+      label: Location A
+      description: First spec passage. Cite file + section/line.
+      placeholder: e.g. `architecture/THEORY_V5.md` §4.1 says SUNK cannot review.
+    validations:
+      required: true
+
+  - type: textarea
+    id: where_b
+    attributes:
+      label: Location B
+      description: Second passage that contradicts Location A.
+      placeholder: e.g. `architecture/components/P3_reputation.md` §3.7 implies SUNK can submit redteam_probe reviews.
+    validations:
+      required: true
+
+  - type: textarea
+    id: contradiction
+    attributes:
+      label: How they contradict
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed resolution (optional)
+      description: Which side should win? An ADR may be appropriate (`architecture/decisions/D###_*.md`).

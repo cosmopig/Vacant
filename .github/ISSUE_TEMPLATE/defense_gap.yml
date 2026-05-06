@@ -1,0 +1,59 @@
+name: 🛡️ Defense gap (attack the spec hasn't covered)
+description: An attack scenario the current code/spec doesn't defend against. Non-sensitive — for sensitive findings see SECURITY.md.
+labels: ["defense-gap", "needs-spec"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template if you've found an attack vector NOT in [`tests/adversarial/`](../../tree/main/tests/adversarial) and NOT in [`THEORY_V5.md` §6 (38-attack matrix)](../../blob/main/architecture/THEORY_V5.md). For sensitive findings (where public discussion would aid an active attack), use [SECURITY.md](../../SECURITY.md) instead.
+
+  - type: textarea
+    id: attack
+    attributes:
+      label: Attack scenario
+      description: Step-by-step what the attacker does and what they gain.
+      placeholder: |
+        1. Attacker spawns N vacants sharing controller_id...
+        2. They review each other up to threshold-just-below-detection...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: surface
+    attributes:
+      label: Affected surface
+      description: Which module(s) the attack targets, with file:line if possible.
+      placeholder: e.g. `src/vacant/reputation/same_detect.py:44` — same-controller signal computation
+    validations:
+      required: true
+
+  - type: textarea
+    id: existing
+    attributes:
+      label: Why existing defenses don't catch this
+      description: Explain why the attack survives the current `tests/adversarial/` coverage and the §6 attack matrix.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity (P/D/C taxonomy from THEORY_V5 §0.2)
+      description: |
+        - **P (Protocol)** — defense is structurally guaranteed
+        - **D (Detection)** — defense detects + raises cost, doesn't prevent
+        - **C (Convention)** — defense relies on operator behavior
+        Pick the level you'd want this defense to be at.
+      options:
+        - P (must structurally prevent)
+        - D (detect + cost-raising acceptable)
+        - C (operator convention sufficient)
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed defense (optional)
+      description: If you have a fix in mind. ADRs are welcome via PR.

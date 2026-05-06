@@ -1,0 +1,46 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Taipei"
+    open-pull-requests-limit: 5
+    labels: ["deps", "dependabot"]
+    groups:
+      runtime:
+        patterns:
+          - "pydantic"
+          - "fastapi"
+          - "httpx"
+          - "sqlmodel"
+          - "aiosqlite"
+          - "alembic"
+          - "structlog"
+          - "anthropic"
+          - "typer"
+          - "python-dotenv"
+      crypto:
+        patterns:
+          - "pynacl"
+          - "cryptography"
+      dev:
+        patterns:
+          - "pytest*"
+          - "hypothesis"
+          - "ruff"
+          - "mypy"
+      demo:
+        patterns:
+          - "streamlit"
+          - "pandas"
+          - "plotly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels: ["ci", "dependabot"]

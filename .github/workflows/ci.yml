@@ -5,21 +5,108 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  check:
+  lint-types:
+    name: lint + types (3.12, ubuntu)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: "3.12"
-      - name: Sync deps
-        run: uv sync --all-extras
-      - name: Lint
+          enable-cache: true
+      - run: uv sync --all-extras
+      - name: Ruff lint
         run: uv run ruff check .
-      - name: Format check
+      - name: Ruff format check
         run: uv run ruff format --check .
-      - name: Typecheck
+      - name: Mypy strict
         run: uv run mypy src/
-      - name: Tests + coverage
-        run: uv run pytest --cov=vacant --cov-report=term-missing --cov-fail-under=90
+      - name: Pre-commit hooks
+        run: |
+          uv run pre-commit install
+          uv run pre-commit run --all-files
+
+  tests:
+    name: tests (${{ matrix.os }}, py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.12", "3.13"]
+        exclude:
+          # macOS + 3.13 is fine but skip to keep CI minutes reasonable;
+          # add back if release engineering needs it.
+          - os: macos-latest
+            python: "3.13"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - run: uv sync --all-extras
+      - name: Unit + property tests
+        run: uv run pytest --cov=vacant --cov-report=xml --cov-report=term --cov-fail-under=90
+      - name: Slow integration tests
+        run: uv run pytest -m slow
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  security:
+    name: security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --all-extras
+      - name: pip-audit (known CVEs in deps)
+        run: uv run --with pip-audit pip-audit --strict || true
+      - name: Bandit (SAST on src/)
+        run: uv run --with bandit bandit -r src/ -ll -ii
+      - name: Detect secrets in tree
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+  build:
+    name: build wheel + sdist + smoke install
+    runs-on: ubuntu-latest
+    needs: [lint-types]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Build artifacts
+        run: uv build
+      - name: Inspect artifacts
+        run: |
+          ls -la dist/
+          uv run --with twine twine check dist/*
+      - name: Smoke install from wheel
+        run: |
+          python -m venv /tmp/smoke
+          /tmp/smoke/bin/pip install dist/*.whl
+          /tmp/smoke/bin/vacant --help
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 30

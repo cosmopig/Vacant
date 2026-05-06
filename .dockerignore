@@ -1,0 +1,37 @@
+# Don't ship dev/test scaffolding into the image
+.git
+.github
+.vscode
+.idea
+.venv
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.hypothesis
+htmlcov
+.coverage*
+
+# Tests / docs aren't in the runtime image (use a separate test image)
+tests/
+docs/
+dispatch/
+assets/
+*.md
+!README.md
+
+# Build artifacts
+dist/
+build/
+*.egg-info
+
+# Local state
+var/
+*.db
+*.sqlite*
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+*.swp

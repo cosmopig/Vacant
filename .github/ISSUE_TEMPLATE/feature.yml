@@ -1,0 +1,45 @@
+name: ✨ Feature request
+description: A new capability you'd like to see (open a Discussion first if unsure)
+labels: ["enhancement", "needs-discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For exploratory ideas, please open a [Discussion](https://github.com/cosmopig/Vacant/discussions) first. Use this template once you've validated the idea fits the project's load-bearing decisions in [CLAUDE.md](../../CLAUDE.md).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Concrete user / operator / contributor friction.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed feature
+      description: One paragraph; treat as the abstract.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Affected modules
+      description: Which `src/vacant/` modules + which spec sections it touches.
+    validations:
+      required: true
+
+  - type: textarea
+    id: invariants
+    attributes:
+      label: Theory invariant compatibility
+      description: Confirm none of the 8 load-bearing decisions in CLAUDE.md is violated. If one is, an ADR is required first.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
