@@ -14,7 +14,7 @@ jobs:
     name: lint + types (3.12, ubuntu)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: "3.12"
@@ -48,7 +48,7 @@ jobs:
       # underlying greenlet fix is commit 3625a7e.
       UV_PYTHON: ${{ matrix.python }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: ${{ matrix.python }}
@@ -75,7 +75,7 @@ jobs:
     name: security scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: "3.12"
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint-types]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: "3.12"

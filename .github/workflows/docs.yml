@@ -32,7 +32,7 @@ jobs:
     name: mkdocs build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0       # mkdocs git-revision plugins need full history
       - uses: astral-sh/setup-uv@v3
@@ -57,7 +57,7 @@ jobs:
     # Only deploy from `main`. Pull requests build (above) but do not deploy.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v3
