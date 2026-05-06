@@ -204,5 +204,57 @@ async def test_serve_hibernating_returns_423() -> None:
 @pytest.mark.asyncio
 async def test_serve_malformed_envelope_returns_400(serve_client) -> None:  # type: ignore[no-untyped-def]
     ac, _self_sk, _self_form, _ = serve_client
-    resp = await ac.post("/a2a/message/send", json={"params": {"message": {}}})
+    resp = await ac.post(
+        "/a2a/message/send",
+        json={"jsonrpc": "2.0", "id": "x", "method": "message/send", "params": {"message": {}}},
+    )
     assert resp.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_serve_rejects_missing_jsonrpc_field(serve_client) -> None:  # type: ignore[no-untyped-def]
+    """F3: spec requires `jsonrpc: "2.0"` envelope."""
+    ac, _self_sk, _self_form, _ = serve_client
+    resp = await ac.post(
+        "/a2a/message/send",
+        json={"id": "x", "method": "message/send", "params": {"message": {}}},
+    )
+    assert resp.status_code == 400
+    assert "jsonrpc" in resp.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_serve_rejects_wrong_jsonrpc_version(serve_client) -> None:  # type: ignore[no-untyped-def]
+    """F3: jsonrpc must be exactly '2.0'."""
+    ac, _self_sk, _self_form, _ = serve_client
+    resp = await ac.post(
+        "/a2a/message/send",
+        json={"jsonrpc": "1.0", "id": "x", "method": "message/send", "params": {"message": {}}},
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_serve_rejects_wrong_method(serve_client) -> None:  # type: ignore[no-untyped-def]
+    """F3: method must be 'message/send'."""
+    ac, _self_sk, _self_form, _ = serve_client
+    resp = await ac.post(
+        "/a2a/message/send",
+        json={"jsonrpc": "2.0", "id": "x", "method": "tools/call", "params": {"message": {}}},
+    )
+    assert resp.status_code == 400
+    assert "method" in resp.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_serve_rejects_non_json_content_type(serve_client) -> None:  # type: ignore[no-untyped-def]
+    """F3: only application/json envelopes accepted."""
+    ac, _self_sk, _self_form, _ = serve_client
+    resp = await ac.post(
+        "/a2a/message/send",
+        content=b"plain text body",
+        headers={"content-type": "text/plain"},
+    )
+    # FastAPI itself rejects non-JSON bodies parsed as dict; we should
+    # surface either 415 (our explicit guard) or 422 (FastAPI's parse).
+    assert resp.status_code in (415, 422)

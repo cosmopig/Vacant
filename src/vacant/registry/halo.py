@@ -16,6 +16,7 @@ from typing import Any
 from vacant.core.crypto import SigningKey, hash_blake2b, sign
 from vacant.core.types import CapabilityCard, VacantState
 from vacant.protocol.capability_card import serialize as serialize_card
+from vacant.registry.antitamper import canonical_event_bytes
 from vacant.registry.errors import RegistryWriteError
 from vacant.registry.models import Vacant
 from vacant.registry.store import RegistryStore, SignedEventDraft, now_ms
@@ -23,8 +24,12 @@ from vacant.registry.visibility import Visibility, effective_visibility
 
 __all__ = [
     "HaloRecord",
+    "RegisterEventDraftInputs",
     "RevocationRecord",
     "publish_halo",
+    "publish_halo_signed",
+    "register_event_canonical_bytes",
+    "register_event_payload",
     "revoke_halo",
 ]
 
@@ -182,6 +187,152 @@ async def publish_halo(
     )
     event = await store.submit_event(draft)
 
+    return HaloRecord(
+        vacant_id=vacant_id,
+        visibility=eff_vis,
+        event_seq=event.seq or 0,
+        capability_card_hash=capability_card_hash,
+    )
+
+
+@dataclass(frozen=True)
+class RegisterEventDraftInputs:
+    """Bag of inputs that name a single ``register`` event draft.
+
+    Both the client (CLI publishing over HTTP) and the server (HTTP
+    handler verifying the request) construct the same canonical bytes
+    from these fields, so the signature is bit-stable between sides.
+    """
+
+    vacant_id: str
+    capability_card_hash: bytes
+    halo_version: int
+    visibility: Visibility
+    ts_ms: int
+    actor_seq: int
+    idempotency_key: str
+
+
+def register_event_payload(inp: RegisterEventDraftInputs) -> dict[str, object]:
+    """Canonical payload dict the ``register`` event carries.
+
+    Mirrors the in-process ``publish_halo`` payload (lines above) so
+    HTTP-published rows produce the same audit footprint as direct
+    calls."""
+    return {
+        "vacant_id": inp.vacant_id,
+        "card_hash": inp.capability_card_hash.hex(),
+        "halo_version": inp.halo_version,
+        "visibility": inp.visibility.value,
+    }
+
+
+def register_event_canonical_bytes(
+    inp: RegisterEventDraftInputs, *, signed_by_pubkey: bytes
+) -> bytes:
+    """Canonical Ed25519-signing payload for a ``register`` event.
+
+    The CLI publishes via HTTP by computing this byte-string, signing
+    it under the vacant's own key, and POSTing card_blob + the
+    signature to ``/v1/halo``. The server reconstructs the same bytes
+    and verifies before letting the row land in the audit chain.
+    """
+    payload_bytes = json.dumps(
+        register_event_payload(inp), sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    payload_hash = hash_blake2b(payload_bytes)
+    return canonical_event_bytes(
+        event_type="register",
+        actor_vacant_id=inp.vacant_id,
+        subject_vacant_id=None,
+        payload_hash=payload_hash,
+        idempotency_key=inp.idempotency_key,
+        signed_by_pubkey=signed_by_pubkey,
+        ts=inp.ts_ms,
+        actor_seq=inp.actor_seq,
+    )
+
+
+async def publish_halo_signed(
+    *,
+    store: RegistryStore,
+    card: CapabilityCard,
+    runtime_state: VacantState,
+    visibility: Visibility = Visibility.PUBLIC,
+    base_model: str = "unknown",
+    base_model_family: str = "unknown",
+    owner_org: str | None = None,
+    declared_capabilities: list[str] | None = None,
+    parent_id: str | None = None,
+    version: str = "0.0.1",
+    event_ts_ms: int,
+    event_actor_seq: int,
+    event_idempotency_key: str,
+    event_signature: bytes,
+) -> HaloRecord:
+    """HTTP-friendly variant of `publish_halo`: the caller pre-signs the
+    register event so the registry never needs the vacant's private key.
+
+    Server-side flow:
+
+    1. Verify the capability card's own signature.
+    2. Insert the vacant row if missing (so ``submit_event``'s actor
+       lookup can succeed).
+    3. Submit the pre-signed register event via ``store.submit_event``,
+       which re-runs L1 signature verification + L2 sequence check.
+    """
+    if not card.verify():
+        raise RegistryWriteError("publish_halo_signed: capability card signature invalid")
+
+    vacant_id = card.vacant_id.hex()
+    eff_vis = effective_visibility(runtime_state, visibility)
+    capabilities = declared_capabilities or [card.capability_text]
+    capability_card_hash = _capability_card_hash(card)
+    capability_card_blob = serialize_card(card)
+
+    existing = await store.get_vacant(vacant_id)
+    if existing is None:
+        row = Vacant(
+            vacant_id=vacant_id,
+            public_key=card.vacant_id.pubkey_bytes,
+            owner_org=owner_org,
+            base_model=base_model,
+            base_model_family=base_model_family,
+            parent_id=parent_id,
+            version=version,
+            declared_capabilities_json=json.dumps(capabilities),
+            capability_card_hash=capability_card_hash,
+            capability_card_sig=card.signature,
+            capability_card_blob=capability_card_blob,
+            status="active",
+            visibility=eff_vis.value,
+            registered_at=event_ts_ms,
+        )
+        await store.insert_vacant(row)
+    else:
+        await store.update_vacant_visibility(vacant_id, eff_vis.value)
+
+    inputs = RegisterEventDraftInputs(
+        vacant_id=vacant_id,
+        capability_card_hash=capability_card_hash,
+        halo_version=card.halo_version,
+        visibility=eff_vis,
+        ts_ms=event_ts_ms,
+        actor_seq=event_actor_seq,
+        idempotency_key=event_idempotency_key,
+    )
+    draft = SignedEventDraft(
+        event_type="register",
+        actor_vacant_id=vacant_id,
+        subject_vacant_id=None,
+        payload=register_event_payload(inputs),
+        idempotency_key=event_idempotency_key,
+        signed_by_pubkey=card.vacant_id.pubkey_bytes,
+        signature=event_signature,
+        actor_seq=event_actor_seq,
+        ts=event_ts_ms,
+    )
+    event = await store.submit_event(draft)
     return HaloRecord(
         vacant_id=vacant_id,
         visibility=eff_vis,
