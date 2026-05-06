@@ -2,6 +2,10 @@
 
 Prints a JSON-encoded `ScenarioResult` to stdout for piping into
 `jq` / unit tests / fixture-snapshot tooling.
+
+If `VACANT_DEMO_DB_PATH` (or `--db`) is set, the run streams events
+into the SQLite demo store so the dashboard / `vacant demo --tail` can
+read them back.
 """
 
 from __future__ import annotations
@@ -13,7 +17,8 @@ import sys
 from dataclasses import asdict
 from typing import Any
 
-from vacant.mvp.scenarios import DEFAULT_SEEDS, get_runner
+from vacant.mvp.demo_store import DemoStore
+from vacant.mvp.scenarios import ADVERSARIAL_SEED, DEFAULT_SEEDS, get_runner
 from vacant.substrate import (
     AnthropicSubstrate,
     DeterministicSubstrate,
@@ -71,7 +76,10 @@ def _serialise(obj: Any) -> Any:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="vacant.mvp demo runner")
     parser.add_argument(
-        "--scenario", required=True, choices=sorted(DEFAULT_SEEDS.keys()), help="scenario to run"
+        "--scenario",
+        required=True,
+        choices=sorted({*DEFAULT_SEEDS.keys(), "adversarial"}),
+        help="scenario to run",
     )
     parser.add_argument(
         "--substrate",
@@ -82,18 +90,33 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--seed", type=int, default=None, help="override default seed for the scenario"
     )
+    parser.add_argument(
+        "--db",
+        default=None,
+        help="demo store path (default: $VACANT_DEMO_DB_PATH or var/demo.db)",
+    )
     args = parser.parse_args(argv)
 
     scenario = args.scenario
-    seed = args.seed if args.seed is not None else DEFAULT_SEEDS[scenario]
+    if args.seed is not None:
+        seed = args.seed
+    elif scenario == "adversarial":
+        seed = ADVERSARIAL_SEED
+    else:
+        seed = DEFAULT_SEEDS[scenario]
     substrate = _build_substrate(args.substrate, seed=seed)
 
     runner = get_runner(scenario)
 
-    async def _go() -> Any:
-        return await runner(substrate=substrate, seed=seed)
+    store = DemoStore(path=args.db)
 
-    result = asyncio.run(_go())
+    async def _go() -> Any:
+        return await runner(substrate=substrate, seed=seed, store=store)
+
+    try:
+        result = asyncio.run(_go())
+    finally:
+        store.close()
     json.dump(_serialise(result), sys.stdout, indent=2, default=str, ensure_ascii=False)
     sys.stdout.write("\n")
     return 0

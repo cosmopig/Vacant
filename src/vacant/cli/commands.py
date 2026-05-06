@@ -606,6 +606,10 @@ def demo_cmd(
         ),
     ),
     seed: int | None = typer.Option(None, "--seed", help="override default seed"),
+    tail: bool = typer.Option(
+        False, "--tail", help="stream demo-store events to stdout instead of running"
+    ),
+    db_path: str | None = typer.Option(None, "--db", help="demo store path (default: var/demo.db)"),
 ) -> None:
     """Run a demo scenario end-to-end. (P7)
 
@@ -613,12 +617,23 @@ def demo_cmd(
       vacant demo law_firm
       vacant demo law-firm --seed=42                # hyphen accepted
       vacant demo self_replication --substrate=anthropic
+      vacant demo law_firm --tail                   # tail events from demo store
     """
     from vacant.mvp.demo import main as demo_main
+
+    if tail:
+        from vacant.mvp.demo_store import DemoStore
+
+        with DemoStore(path=db_path) as store:
+            for ev in store.read(scenario=scenario.replace("-", "_")):
+                typer.echo(f"[{ev.ts:.1f}] {ev.kind}: {ev.payload}")
+        return
 
     argv = ["--scenario", scenario.replace("-", "_"), "--substrate", substrate]
     if seed is not None:
         argv += ["--seed", str(seed)]
+    if db_path is not None:
+        argv += ["--db", db_path]
     raise SystemExit(demo_main(argv))
 
 

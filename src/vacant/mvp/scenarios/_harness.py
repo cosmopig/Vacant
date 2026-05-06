@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from vacant.core.crypto import SigningKey, keygen
 from vacant.core.types import (
@@ -21,10 +21,15 @@ from vacant.core.types import (
 )
 from vacant.reputation import Aggregator, Beta5D, VacantContext
 
+if TYPE_CHECKING:
+    from vacant.mvp.demo_store import DemoStore
+
 __all__ = [
     "ScenarioResult",
     "VacantSeed",
     "build_vacant",
+    "record_metric_snapshot",
+    "reputation_snapshot",
     "seeded_random",
 ]
 
@@ -126,3 +131,65 @@ def reputation_snapshot(
     if rep is None:
         return {}
     return rep.means()
+
+
+def record_metric_snapshot(
+    *,
+    store: DemoStore | None,
+    scenario: str,
+    aggregator: Aggregator,
+    vacants: dict[VacantId, dict[str, Any]] | None = None,
+    extra: dict[str, Any] | None = None,
+    ts: float | None = None,
+) -> None:
+    """Compute the cheap subset of P7 metrics + reputation distribution and
+    write them into `store` as `metric` events.
+
+    No-op when `store is None`; this lets the integration test path
+    skip the demo-db side effect. Heavy metrics (signature throughput
+    benchmark, registry consistency) are NOT computed here -- the
+    dashboard pulls those from `metrics.compute_all` once at render
+    time.
+    """
+    if store is None:
+        return
+
+    from vacant.mvp.metrics import (
+        MetricsSnapshot as _MS,
+    )
+    from vacant.mvp.metrics import (
+        compute_lineage_depth_distribution,
+        compute_reputation_distribution,
+    )
+
+    # Build a Snapshot with the data we have. `vacants` may be empty for
+    # scenarios that don't track per-vacant metadata; the metrics are
+    # robust to that.
+    snap = _MS(
+        aggregator=aggregator,
+        vacants=({} if vacants is None else dict(vacants)),
+    )
+    payload_dist = compute_reputation_distribution(snap)
+    store.record(
+        scenario=scenario,
+        kind="metric",
+        payload={"name": "reputation_distribution", "value": payload_dist},
+        ts=ts,
+    )
+    store.record(
+        scenario=scenario,
+        kind="metric",
+        payload={
+            "name": "lineage_depth_distribution",
+            "value": compute_lineage_depth_distribution(snap),
+        },
+        ts=ts,
+    )
+    if extra:
+        for name, value in extra.items():
+            store.record(
+                scenario=scenario,
+                kind="metric",
+                payload={"name": name, "value": value},
+                ts=ts,
+            )

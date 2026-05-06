@@ -4,6 +4,7 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from vacant.mvp.scenarios import (
+    adversarial,
     code_review,
     law_firm,
     multilingual_translation,
@@ -19,6 +20,7 @@ SCENARIOS: dict[str, ScenarioRunner] = {
     code_review.SCENARIO_NAME: code_review.run,
     multilingual_translation.SCENARIO_NAME: multilingual_translation.run,
     self_replication.SCENARIO_NAME: self_replication.run,
+    adversarial.SCENARIO_NAME: adversarial.run,
 }
 
 
@@ -35,6 +37,7 @@ __all__ = [
     "ScenarioResult",
     "ScenarioRunner",
     "VacantSeed",
+    "adversarial",
     "code_review",
     "get_runner",
     "law_firm",

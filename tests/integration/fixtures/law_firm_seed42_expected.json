@@ -1,6 +1,7 @@
 {
   "scenario": "law_firm",
   "seed": 42,
+  "tolerance_abs": 0.02,
   "invariants": [
     "parent F >= 0.7",
     "parent R >= 0.65",
@@ -13,5 +14,27 @@
     "n_calls": 30,
     "closed_children_remained_local": true
   },
-  "tolerance_notes": "Reputation values measured from MockSubstrate run; invariants are spec thresholds (P7_demo_seed §Scenario 1). Exact numerical values may shift by +-0.05 with reputation-engine changes -- update this fixture in the same PR per dispatch/P7_demo_seed.md §'Updating fixtures'."
+  "reputation": {
+    "parent": {
+      "factual": 0.7892,
+      "logical": 0.5,
+      "relevance": 0.7883,
+      "honesty": 0.6667,
+      "adoption": 0.25
+    },
+    "factual_sub": {
+      "factual": 0.7835,
+      "logical": 0.5,
+      "relevance": 0.5,
+      "honesty": 0.6667,
+      "adoption": 0.25
+    },
+    "logical_sub": {
+      "factual": 0.5,
+      "logical": 0.752,
+      "relevance": 0.5,
+      "honesty": 0.6667,
+      "adoption": 0.25
+    }
+  }
 }

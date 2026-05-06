@@ -27,6 +27,7 @@ from vacant.mvp.scenarios._harness import (
     VacantSeed,
     build_vacant,
     context_from_form,
+    record_metric_snapshot,
     reputation_snapshot,
     seeded_random,
 )
@@ -34,6 +35,7 @@ from vacant.mvp.scenarios._seeds import DEFAULT_SEEDS
 from vacant.reputation import Aggregator, VacantContext
 
 if TYPE_CHECKING:
+    from vacant.mvp.demo_store import DemoStore
     from vacant.substrate.base import SubstrateBackend
 
 
@@ -57,7 +59,12 @@ def _build_handler(substrate: SubstrateBackend, capability: str) -> ChildHandler
     return handler
 
 
-async def run(*, substrate: SubstrateBackend, seed: int | None = None) -> ScenarioResult:
+async def run(
+    *,
+    substrate: SubstrateBackend,
+    seed: int | None = None,
+    store: DemoStore | None = None,
+) -> ScenarioResult:
     s = seed if seed is not None else DEFAULT_SEEDS[SCENARIO_NAME]
     rng = seeded_random(s)
     result = ScenarioResult(name=SCENARIO_NAME, seed=s)
@@ -146,6 +153,18 @@ async def run(*, substrate: SubstrateBackend, seed: int | None = None) -> Scenar
                 "query": q,
             }
         )
+        if store is not None:
+            store.record(
+                scenario=SCENARIO_NAME,
+                kind="call",
+                payload={
+                    "tick": i,
+                    "child": target_seed.name,
+                    "query": q,
+                    "ok": True,
+                },
+                ts=float(i),
+            )
         # Rotate caller across the 5 clients so novelty discount doesn't
         # crush the signal. ground_truth source (weight 1.0) is the
         # cleanest signal for a deterministic demo.
@@ -169,6 +188,14 @@ async def run(*, substrate: SubstrateBackend, seed: int | None = None) -> Scenar
             substrate="default",
             source="ground_truth",
         )
+        # Periodic metrics snapshot for the dashboard time series.
+        if store is not None and (i + 1) % 5 == 0:
+            record_metric_snapshot(
+                store=store,
+                scenario=SCENARIO_NAME,
+                aggregator=aggregator,
+                ts=float(i),
+            )
 
     # Aggregate-step: parent emits a summary log entry per spec.
     runtime.aggregate(
