@@ -9,6 +9,11 @@ copyright: MIT-licensed · capstone project · Theory V5
 theme:
   name: material
   language: en
+  # Theme override directory — adds Open Graph metadata + schema.org
+  # JSON-LD to <head> on every page (see overrides/main.html). Lets
+  # Google index the site as a SoftwareApplication on / and as
+  # TechArticle on individual doc pages.
+  custom_dir: overrides
   features:
     - navigation.tabs
     - navigation.tabs.sticky

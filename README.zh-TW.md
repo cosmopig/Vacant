@@ -2,6 +2,13 @@
 
 <img src="assets/hero.svg" alt="Vacant — 給 AI agent 的責任層居民形式，疊在 A2A / MCP 之上" width="100%">
 
+<!--
+  Demo 影片插槽。錄好的 60 秒 screencast 會放在 `assets/demo.gif`；
+  分鏡劇本見 `docs/DEMO_RECORDING_SCRIPT.md`。在錄製完成前這個註解
+  區塊作為定位標記，未來 commit 直接把檔案放進來不會動到其他段落。
+-->
+<sub><em>📹 60 秒 demo screencast — 錄製中（<a href="docs/DEMO_RECORDING_SCRIPT.md">分鏡劇本</a>）。會走過 <code>vacant demo law_firm</code>、dashboard 的對抗頁、以及 <code>vacant serve --mcp</code> 接 Claude Desktop。</em></sub>
+
 # Vacant
 
 [English](README.md) · [繁體中文](README.zh-TW.md)

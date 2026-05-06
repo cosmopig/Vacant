@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+title: "Vacant — a responsibility-layer residency form for AI agents"
+message: "If you use Vacant in academic or industrial work, please cite it using the metadata below."
+type: software
+authors:
+  - family-names: Hsu
+    given-names: Cosmo
+    alias: cosmopig
+    email: cosmo20050801@gmail.com
+abstract: >-
+  Vacant is a stand-alone "responsibility layer" that sits on top of
+  A2A and MCP. An agent that adopts the vacant residency form gains
+  Ed25519 identity, an append-only signed logbook (history), a
+  five-dimensional Beta-posterior reputation per substrate, with
+  STYLO-distance discount and same-controller / same-substrate /
+  same-stylo detection (cost-raising, not preventing). The 14-week MVP
+  ships four reference scenarios and one adversarial scenario,
+  asserted in CI against a frozen-fixture integration suite.
+keywords:
+  - multi-agent
+  - mcp
+  - a2a
+  - reputation
+  - identity
+  - responsibility-layer
+  - llm
+  - claude
+license: MIT
+repository-code: "https://github.com/cosmopig/Vacant"
+url: "https://cosmopig.github.io/Vacant/"
+version: 0.1.0
+date-released: 2026-05-06
+preferred-citation:
+  type: software
+  title: "Vacant — a responsibility-layer residency form for AI agents"
+  authors:
+    - family-names: Hsu
+      given-names: Cosmo
+      alias: cosmopig
+  year: 2026
+  version: 0.1.0
+  url: "https://github.com/cosmopig/Vacant"
+  notes: >-
+    Capstone project; Theory V5 is the canonical reference document
+    (see architecture/THEORY_V5.md in the repository).
