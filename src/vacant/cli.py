@@ -74,10 +74,28 @@ def attest_cmd(target_vid: str, claim: str) -> None:
 
 
 @app.command("demo")
-def demo_cmd(scenario: str) -> None:
-    """Run a demo scenario end-to-end. (P7)"""
-    _ = scenario
-    typer.echo(_NOT_YET.format(owner="P7"))
+def demo_cmd(
+    scenario: str,
+    substrate: str = typer.Option(
+        "mock", "--substrate", "-s", help="mock | deterministic | anthropic | ollama"
+    ),
+    seed: int | None = typer.Option(None, "--seed", help="override default seed"),
+) -> None:
+    """Run a demo scenario end-to-end. (P7)
+
+    Examples:
+      vacant demo law_firm
+      vacant demo law-firm --seed=42                # hyphen accepted
+      vacant demo self_replication --substrate=anthropic
+    """
+    from vacant.mvp.demo import main as demo_main
+
+    # Normalize hyphenated forms to underscore (scenarios are registered
+    # under underscore names in DEFAULT_SEEDS).
+    argv = ["--scenario", scenario.replace("-", "_"), "--substrate", substrate]
+    if seed is not None:
+        argv += ["--seed", str(seed)]
+    raise SystemExit(demo_main(argv))
 
 
 def main() -> None:

@@ -104,14 +104,12 @@ class Aggregator:
         self._review_counts: dict[tuple[VacantId, VacantId], int] = {}
         # Per (reviewer, target) sliding-window review timestamps for the
         # per-(reviewer,target) rate limit. Spec P1 line 259: "每 24h 對同一
-        # target_did 的 review 上限：3" — reviewer-side spam cap, not absolute
+        # target_did 的 review 上限: 3" — reviewer-side spam cap, not absolute
         # cap. Padv-P3 D010 §1 sniping defense (single peer flooding one
         # target) is satisfied because it's the (reviewer,target) pair that's
         # capped; popular targets can still receive many reviews from many
         # distinct reviewers.
-        self._target_review_timestamps: dict[
-            tuple[VacantId, VacantId], deque[float]
-        ] = {}
+        self._target_review_timestamps: dict[tuple[VacantId, VacantId], deque[float]] = {}
         self._review_limit_per_target_24h = (
             review_limit_per_target_24h
             if review_limit_per_target_24h is not None
@@ -219,7 +217,7 @@ class Aggregator:
         when = ts if ts is not None else time.time()
 
         # --- L2: per-(reviewer, target) rate limit (Padv-P3 D010 §1) -------
-        # Spec P1 line 259: "每 24h 對同一 target_did 的 review 上限：3" —
+        # Spec P1 line 259: "每 24h 對同一 target_did 的 review 上限: 3" —
         # this is a REVIEWER-side spam cap. Defense: enforce a sliding-window
         # cap of `REVIEW_LIMIT_PER_TARGET_24H` per (reviewer, target) pair.
         # This still defeats Padv-P3 attack 3 (single peer flooding one

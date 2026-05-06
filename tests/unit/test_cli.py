@@ -41,10 +41,18 @@ def test_help_lists_all_subcommands(runner: CliRunner) -> None:
         (["unpublish"], "P4"),
         (["lineage", "vid:abc"], "P4"),
         (["attest", "vid:abc", "is-honest"], "P2"),
-        (["demo", "law-firm"], "P7"),
     ],
 )
 def test_stub_commands_print_owner(runner: CliRunner, argv: list[str], owner: str) -> None:
     result = runner.invoke(app, argv)
     assert result.exit_code == 0
     assert owner in result.stdout
+
+
+def test_demo_command_runs_scenario(runner: CliRunner) -> None:
+    """`vacant demo` is no longer a stub — it delegates to vacant.mvp.demo.
+    Also verifies hyphen normalization (Bug 3): `law-firm` → `law_firm`."""
+    result = runner.invoke(app, ["demo", "law-firm", "--seed", "42"])
+    assert result.exit_code == 0
+    assert '"name": "law_firm"' in result.stdout
+    assert '"logbook_chains_ok": true' in result.stdout
