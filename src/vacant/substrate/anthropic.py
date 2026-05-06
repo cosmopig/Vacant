@@ -23,38 +23,13 @@ import asyncio
 import os
 from dataclasses import dataclass
 
+from vacant.substrate._env import _load_dotenv_once
 from vacant.substrate.base import (
     SubstrateBackend,
     SubstrateRequest,
     SubstrateResponse,
 )
 from vacant.substrate.errors import SubstrateRateLimitError, SubstrateUnavailableError
-
-_DOTENV_LOADED = False
-
-
-def _load_dotenv_once() -> None:
-    """Idempotent best-effort `.env` loader.
-
-    Cached so repeated `infer()` calls do not re-walk the filesystem.
-    Falls back silently if `python-dotenv` is not installed: the env
-    var must already be exported in that case.
-    """
-    global _DOTENV_LOADED
-    if _DOTENV_LOADED:
-        return
-    _DOTENV_LOADED = True
-    try:
-        from dotenv import find_dotenv, load_dotenv
-    except ImportError:
-        return
-    # `find_dotenv()` walks up from cwd; pass the resolved path so the
-    # default cwd-only behaviour does not silently no-op when the env
-    # file is in a parent dir of the script's working directory.
-    path = find_dotenv(usecwd=True)
-    if path:
-        load_dotenv(path, override=False)
-
 
 __all__ = ["AnthropicSubstrate"]
 

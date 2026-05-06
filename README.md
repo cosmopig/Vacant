@@ -105,11 +105,24 @@ uv run streamlit run src/vacant/mvp/dashboard.py
 uvx --from git+https://github.com/cosmopig/Vacant vacant demo law_firm
 ```
 
-**With a real LLM** (Anthropic Claude — needs `ANTHROPIC_API_KEY`):
+**With a real LLM — substrate matrix** (substrate is swappable; see THEORY_V5 §2 — the LLM is a *resource*, not the *identity*):
 
 ```bash
-uv run vacant demo law_firm --substrate=anthropic
+uv run vacant demo law_firm --substrate=mock           # default, deterministic, no key
+uv run vacant demo law_firm --substrate=anthropic      # ANTHROPIC_API_KEY (Claude)
+uv run vacant demo law_firm --substrate=openai         # OPENAI_API_KEY (also any OAI-compat
+                                                       #   endpoint via OPENAI_BASE_URL —
+                                                       #   Together / Fireworks / Groq /
+                                                       #   vLLM / LMStudio / llama.cpp …)
+uv run vacant demo law_firm --substrate=gemini         # GOOGLE_API_KEY (Gemini)
+uv run vacant demo law_firm --substrate=mistral        # MISTRAL_API_KEY
+uv run vacant demo law_firm --substrate=ollama         # local Ollama, no key
+# hermes / openclaw are stubs in D1; the load-bearing client integration
+# is `--substrate=client-inherited` (D2): vacant served via MCP uses the
+# calling client's LLM via sampling/createMessage, no key on the vacant.
 ```
+
+Copy `.env.example` → `.env` and fill in only the keys you actually use.
 
 ---
 
@@ -261,7 +274,7 @@ Vacant/
 │   ├── registry/    SQLite schema (13 tables) + 25 RPC + halo aggregation
 │   ├── composite/   ChildManifest + Tree-Only + graduation
 │   ├── protocol/    A2A/MCP envelope + dispatch + replay protect + MCP bridge
-│   ├── substrate/   abstract backend + Mock/Deterministic/Anthropic/Ollama impls
+│   ├── substrate/   abstract backend + Mock/Deterministic/Anthropic/Ollama/OpenAI/Gemini/Mistral/Hermes-stub/OpenClaw-stub
 │   ├── mvp/         scenarios + dashboard + demo CLI + metrics
 │   └── cli.py       `vacant` console-script entrypoint
 │

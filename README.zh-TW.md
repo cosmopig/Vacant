@@ -105,11 +105,25 @@ uv run streamlit run src/vacant/mvp/dashboard.py
 uvx --from git+https://github.com/cosmopig/Vacant vacant demo law_firm
 ```
 
-**用真的 LLM**（Anthropic Claude — 需要 `ANTHROPIC_API_KEY`）：
+**用真的 LLM — substrate 矩陣**（substrate 是可換的；見 THEORY_V5 §2 — LLM 是 *資源*，不是 *身份*）：
 
 ```bash
-uv run vacant demo law_firm --substrate=anthropic
+uv run vacant demo law_firm --substrate=mock           # 預設、決定性、不需 key
+uv run vacant demo law_firm --substrate=anthropic      # ANTHROPIC_API_KEY（Claude）
+uv run vacant demo law_firm --substrate=openai         # OPENAI_API_KEY（也支援任何 OAI-
+                                                       #   compatible endpoint，靠
+                                                       #   OPENAI_BASE_URL：Together /
+                                                       #   Fireworks / Groq / vLLM /
+                                                       #   LMStudio / llama.cpp …）
+uv run vacant demo law_firm --substrate=gemini         # GOOGLE_API_KEY（Gemini）
+uv run vacant demo law_firm --substrate=mistral        # MISTRAL_API_KEY
+uv run vacant demo law_firm --substrate=ollama         # 本機 Ollama，不需 key
+# hermes / openclaw 在 D1 是 stub；嫁接到 client 的 load-bearing 整合是
+# `--substrate=client-inherited`（D2）：vacant 透過 MCP 服務時用呼叫端
+# 的 LLM（sampling/createMessage），vacant 端不用任何 key。
 ```
+
+複製 `.env.example` → `.env`，只填你會用到的那幾組 key。
 
 ---
 
@@ -261,7 +275,7 @@ Vacant/
 │   ├── registry/    SQLite schema（13 表）+ 25 RPC + halo 聚合
 │   ├── composite/   ChildManifest + Tree-Only + graduation
 │   ├── protocol/    A2A/MCP envelope + dispatch + replay protect + MCP bridge
-│   ├── substrate/   抽象 backend + Mock/Deterministic/Anthropic/Ollama 實作
+│   ├── substrate/   抽象 backend + Mock/Deterministic/Anthropic/Ollama/OpenAI/Gemini/Mistral/Hermes-stub/OpenClaw-stub
 │   ├── mvp/         scenarios + dashboard + demo CLI + metrics
 │   └── cli.py       `vacant` console-script 入口
 │
