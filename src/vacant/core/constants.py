@@ -271,14 +271,7 @@ GRADUATION_COLLUSION_THRESHOLD: Final[float] = 0.6
 during graduation. Above this the graduation is blocked regardless of
 parent consent. CONSTANTS.md §Composite / D012 §B."""
 
-# --- Padv-P3 (D010) ----------------------------------------------------------
-
-CUMULATIVE_DRIFT_WINDOW_EPOCHS: Final[int] = 5
-"""Rolling-window size for cumulative STYLO drift detection. D010 §2."""
-
-CUMULATIVE_DRIFT_THRESHOLD_MULTIPLIER: Final[float] = 1.5
-"""Multiplier applied to STYLO_DRIFT_THRESHOLD for cumulative-drift trip
-threshold. D010 §2."""
-
-REVIEW_LIMIT_PER_TARGET_24H: Final[int] = 3
-"""Per-target review rate limit (24h sliding window). D010 §1 / P1 line 259."""
+# Padv-P3 (D010) constants — CUMULATIVE_DRIFT_WINDOW_EPOCHS,
+# CUMULATIVE_DRIFT_THRESHOLD_MULTIPLIER, REVIEW_LIMIT_PER_TARGET_24H —
+# are defined above (merged from feat/p3-reputation). Section kept here as a
+# pointer for D010 readers.

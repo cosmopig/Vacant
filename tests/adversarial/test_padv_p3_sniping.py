@@ -66,26 +66,26 @@ async def test_attack_sniper_blocked_at_default_3_per_24h() -> None:
 
 
 @pytest.mark.asyncio
-async def test_attack_sniping_via_distinct_reviewers_still_blocked() -> None:
-    """The rate limit is per-target, not per-reviewer -- three distinct
-    reviewers can't bypass it by rotating identities."""
+async def test_distinct_reviewers_are_not_blocked_by_rate_limit() -> None:
+    """Spec P1 line 259 is a per-(reviewer, target) cap, not a per-target
+    absolute cap. Otherwise popular vacants couldn't be reviewed by many
+    peers in a day, which kills network functionality.
+
+    Distinct reviewers rotating identities to attack one target is a
+    different attack vector, defeated by *other* Padv-P3 defenses:
+    same-controller detection, same-base-model discount, novelty decay,
+    Beta-posterior dilution. The rate limit alone is intentionally not
+    the line of defense here.
+    """
     target = _ctx()
     snipers = [_ctx(family=f"family-{i}") for i in range(5)]
     agg = _agg(target, *snipers)
 
-    # First 3 reviewers each get one shot at the target.
-    for s in snipers[:3]:
+    # Five distinct reviewers each give one review; none should be blocked
+    # by the rate limit (it's keyed on the (reviewer, target) pair).
+    for s in snipers:
         await agg.record_review(
             s.vacant_id,
-            target.vacant_id,
-            dimensions={"factual": 0.1},
-            substrate="default",
-            source="caller_review",
-        )
-    # 4th reviewer is blocked even though it's their first review.
-    with pytest.raises(ReviewRateLimitError):
-        await agg.record_review(
-            snipers[3].vacant_id,
             target.vacant_id,
             dimensions={"factual": 0.1},
             substrate="default",

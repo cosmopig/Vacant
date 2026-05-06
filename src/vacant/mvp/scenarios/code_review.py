@@ -75,7 +75,7 @@ async def run(*, substrate: SubstrateBackend, seed: int | None = None) -> Scenar
     contexts[author_form.identity] = context_from_form(author_form, author_seed)
     for cs, (_sk, cform) in zip(ci_seeds, cis, strict=True):
         contexts[cform.identity] = context_from_form(cform, cs)
-    aggregator = Aggregator(contexts=contexts)
+    aggregator = Aggregator(contexts=contexts, review_limit_per_target_24h=1_000)
 
     rng_jitter = seeded_random(s + 1)
     for q in range(N_QUERIES):

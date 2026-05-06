@@ -102,7 +102,7 @@ async def run(*, substrate: SubstrateBackend, seed: int | None = None) -> Scenar
     }
     for cs, (_sk, cform) in zip(client_seeds, clients, strict=True):
         contexts[cform.identity] = context_from_form(cform, cs)
-    aggregator = Aggregator(contexts=contexts)
+    aggregator = Aggregator(contexts=contexts, review_limit_per_target_24h=1_000)
     runtime = CompositeRuntime(parent_form=parent_form, parent_signing_key=sk_p)
     for child_seed_, sk_child, child_form in (
         (sub_factual_seed, sk_f, factual_form),

@@ -76,7 +76,7 @@ async def run(*, substrate: SubstrateBackend, seed: int | None = None) -> Scenar
         for ds, (_, form) in zip(seeds, forms, strict=True)
     }
     contexts[ci_form.identity] = context_from_form(ci_form, ci_seed)
-    aggregator = Aggregator(contexts=contexts)
+    aggregator = Aggregator(contexts=contexts, review_limit_per_target_24h=1_000)
 
     # Per-substrate quality profile per vacant: vacants 0..1 are
     # claude-strong, 2..3 gpt-strong, 4..5 ollama-strong. Vacant 0 also
