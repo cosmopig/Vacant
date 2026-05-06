@@ -96,3 +96,90 @@ def apply_discount_5d(rep: Beta5D, discount: float) -> Beta5D:
         honesty=apply_discount(rep.honesty, discount),
         adoption=apply_discount(rep.adoption, discount),
     )
+
+
+# --- Cumulative drift detector (Padv-P3 finding D010 §2) -------------------
+
+
+from collections import deque  # noqa: E402
+
+from vacant.core.constants import (  # noqa: E402
+    CUMULATIVE_DRIFT_THRESHOLD_MULTIPLIER,
+    CUMULATIVE_DRIFT_WINDOW_EPOCHS,
+)
+
+
+class CumulativeDriftTracker:
+    """Rolling-window sum of per-epoch STYLO drifts.
+
+    Single-shot `compute_discount` is fooled by an attacker who keeps
+    each epoch's drift just below `STYLO_DRIFT_THRESHOLD` while
+    accumulating change across many epochs (P3 §3.4 Padv-P3 §2). This
+    tracker keeps a rolling window of the last `window` per-epoch
+    drifts and trips when their sum exceeds
+    `threshold * threshold_multiplier`.
+
+    Tracker is per (vacant, substrate); the aggregator owns one per
+    target it scores.
+    """
+
+    __slots__ = ("_threshold", "_threshold_multiplier", "_window")
+
+    def __init__(
+        self,
+        *,
+        window: int = CUMULATIVE_DRIFT_WINDOW_EPOCHS,
+        threshold: float = STYLO_DRIFT_THRESHOLD,
+        threshold_multiplier: float = CUMULATIVE_DRIFT_THRESHOLD_MULTIPLIER,
+    ) -> None:
+        if window < 1:
+            raise ValueError(f"window must be >= 1; got {window}")
+        if threshold <= 0:
+            raise ValueError(f"threshold must be > 0; got {threshold}")
+        if threshold_multiplier <= 0:
+            raise ValueError(f"threshold_multiplier must be > 0; got {threshold_multiplier}")
+        self._window: deque[float] = deque(maxlen=window)
+        self._threshold = threshold
+        self._threshold_multiplier = threshold_multiplier
+
+    def observe(self, distance: float) -> None:
+        if distance < 0:
+            raise ValueError(f"distance must be >= 0; got {distance}")
+        self._window.append(distance)
+
+    @property
+    def cumulative(self) -> float:
+        return sum(self._window)
+
+    @property
+    def trip_threshold(self) -> float:
+        return self._threshold * self._threshold_multiplier
+
+    def is_tripped(self) -> bool:
+        return self.cumulative >= self.trip_threshold
+
+
+# --- Dimension correlation alert (Padv-P3 finding D010 §3) -----------------
+
+
+def dimension_imbalance_alert(rep: Beta5D, *, threshold: float | None = None) -> bool:
+    """Detect dimension imbalance (P3 §3.6 防線 4 / dispatch §"Dimension imbalance").
+
+    True iff at least one dimension's mean exceeds the threshold's gap
+    above the **lowest** dimension's mean. This catches the attack
+    pattern "pump only F while leaving A low":
+
+    - all-similar means → False (healthy distribution)
+    - one dim spiked while others stay near prior → True (imbalanced)
+
+    `threshold` defaults to `DIMENSION_CORRELATION_ALERT_THRESHOLD = 0.6`.
+    The implementation uses `max - min` as a quick proxy for the
+    correlation alert; a full pairwise correlation matrix is future work.
+    """
+    from vacant.core.constants import DIMENSION_CORRELATION_ALERT_THRESHOLD
+
+    thr = threshold if threshold is not None else DIMENSION_CORRELATION_ALERT_THRESHOLD
+    means = list(rep.means().values())
+    if not means:
+        return False
+    return (max(means) - min(means)) >= thr

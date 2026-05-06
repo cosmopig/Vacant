@@ -45,7 +45,7 @@ async def test_reputation_distribution_stabilises_after_1000_reviews() -> None:
         else:
             low_quality_ids.append(vid)
 
-    agg = Aggregator(contexts=contexts)
+    agg = Aggregator(contexts=contexts, review_limit_per_target_24h=10_000)
 
     all_ids = list(contexts.keys())
     for _ in range(1000):
@@ -101,7 +101,7 @@ async def test_reputation_e2e_chain_stays_consistent() -> None:
         vid = VacantId.from_verify_key(vk)
         contexts[vid] = VacantContext(vacant_id=vid)
         ids.append(vid)
-    agg = Aggregator(contexts=contexts)
+    agg = Aggregator(contexts=contexts, review_limit_per_target_24h=10_000)
     for _ in range(200):
         a, b = rng.sample(ids, 2)
         score = rng.uniform(0, 1)

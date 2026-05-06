@@ -217,6 +217,26 @@ PORTABILITY_FACTOR_MAX_BONUS: Final[float] = 0.10
 """Maximum portability bonus added to UCB call_score for vacants serving
 multiple substrates. P3-derived; CONSTANTS.md §Reputation."""
 
+REVIEW_LIMIT_PER_TARGET_24H: Final[int] = 3
+"""Per-target review rate limit. CONSTANTS.md §Review limits / P1 line 259.
+P3 aggregator enforces this in `record_review` to mitigate sniping
+(Padv-P3 finding D010 §1)."""
+
+REVIEW_LIMIT_PER_DOMAIN_24H: Final[int] = 20
+"""Per-reviewer per-capability-domain review rate limit. CONSTANTS.md
+§Review limits / P1 line 260."""
+
+PEER_REVIEW_BLOOM_TTL_S: Final[int] = 86_400
+"""Per-(target, answer) Bloom-filter TTL on peer reviewer side.
+CONSTANTS.md §Review limits / P1 line 249."""
+
+CUMULATIVE_DRIFT_WINDOW_EPOCHS: Final[int] = 5
+CUMULATIVE_DRIFT_THRESHOLD_MULTIPLIER: Final[float] = 1.5
+"""Cumulative STYLO-distance window for the cumulative drift detector
+(Padv-P3 finding D010 §2). Sum of per-epoch drifts over a rolling
+window of `CUMULATIVE_DRIFT_WINDOW_EPOCHS`; trips when the sum exceeds
+`STYLO_DRIFT_THRESHOLD * CUMULATIVE_DRIFT_THRESHOLD_MULTIPLIER`."""
+
 IDLE_REVIEW_THRESHOLD_S: Final[int] = 3600
 """How long a vacant must be idle before being eligible to peer-review
 new vacants. Cold-start §3.6 hook."""

@@ -146,7 +146,7 @@ async def test_cold_start_simulation_new_gets_traction() -> None:
         attestation_level="L1",
     )
 
-    agg = Aggregator(contexts=contexts)
+    agg = Aggregator(contexts=contexts, review_limit_per_target_24h=10_000)
 
     # Seed established vacants with history across ALL 5 dims so their
     # harmonic-mean n_eff grows -> explore term shrinks. With only F/L/R
