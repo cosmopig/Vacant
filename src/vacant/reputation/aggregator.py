@@ -17,12 +17,14 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections import deque
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 
 from vacant.core.constants import (
     NOVELTY_DECAY_COEFFICIENT,
     REPUTATION_DIMS,
+    REVIEW_LIMIT_PER_TARGET_24H,
     REVIEWER_CREDIBILITY_FLOOR,
     SAME_BASE_MODEL_DISCOUNT,
     SAME_MODEL_HEAVY_DISCOUNT,
@@ -35,6 +37,7 @@ from vacant.reputation.errors import (
     IneligibleReviewerError,
     InvalidDimensionError,
     InvalidSignalError,
+    ReviewRateLimitError,
 )
 from vacant.reputation.posterior import Beta5D, five_d_with_priors
 from vacant.reputation.same_detect import (
@@ -91,12 +94,22 @@ class Aggregator:
     def __init__(
         self,
         contexts: dict[VacantId, VacantContext] | None = None,
+        *,
+        review_limit_per_target_24h: int | None = None,
     ) -> None:
         self._contexts: dict[VacantId, VacantContext] = dict(contexts or {})
         # Per (vacant, substrate) Beta5D.
         self._posteriors: dict[tuple[VacantId, str], Beta5D] = {}
         # Per (reviewer, target) review-count for novelty discount.
         self._review_counts: dict[tuple[VacantId, VacantId], int] = {}
+        # Per (target) sliding-window review timestamps for the per-target
+        # rate limit (Padv-P3 finding D010 §1).
+        self._target_review_timestamps: dict[VacantId, deque[float]] = {}
+        self._review_limit_per_target_24h = (
+            review_limit_per_target_24h
+            if review_limit_per_target_24h is not None
+            else REVIEW_LIMIT_PER_TARGET_24H
+        )
         self._lock = asyncio.Lock()
 
     # --- public registry-side API ------------------------------------------
@@ -197,6 +210,24 @@ class Aggregator:
 
         target_ctx = self._contexts[target]
         when = ts if ts is not None else time.time()
+
+        # --- L2: per-target rate limit (Padv-P3 finding D010 §1) -----------
+        # Padv-P3 attack 3 (sniping): a single peer floods reviews against
+        # one target in a short window. Defense: enforce a sliding-window
+        # cap of `REVIEW_LIMIT_PER_TARGET_24H` per target, evicting any
+        # timestamp older than 24h before the check. The first review
+        # over the limit raises `ReviewRateLimitError`.
+        async with self._lock:
+            window = self._target_review_timestamps.setdefault(target, deque())
+            cutoff = when - 86_400.0
+            while window and window[0] <= cutoff:
+                window.popleft()
+            if len(window) >= self._review_limit_per_target_24h:
+                raise ReviewRateLimitError(
+                    f"target {target} received {len(window)} reviews in the past "
+                    f"24h (limit {self._review_limit_per_target_24h})"
+                )
+            window.append(when)
 
         # --- weight composition (§3.4) -------------------------------------
         base_weight = SOURCE_BASE_WEIGHTS[source]

@@ -146,7 +146,7 @@ async def test_cold_start_simulation_new_gets_traction() -> None:
         attestation_level="L1",
     )
 
-    agg = Aggregator(contexts=contexts)
+    agg = Aggregator(contexts=contexts, review_limit_per_target_24h=10_000)
 
     # Seed established vacants with history across ALL 5 dims so their
     # harmonic-mean n_eff grows -> explore term shrinks. With only F/L/R
@@ -154,8 +154,11 @@ async def test_cold_start_simulation_new_gets_traction() -> None:
     # both groups get the same enormous explore boost.
     estab_ids = [vid for vid in contexts if vid != new_vid]
     full_dims = {
-        "factual": 0.85, "logical": 0.85, "relevance": 0.85,
-        "honesty": 0.85, "adoption": 0.85,
+        "factual": 0.85,
+        "logical": 0.85,
+        "relevance": 0.85,
+        "honesty": 0.85,
+        "adoption": 0.85,
     }
     for established in estab_ids:
         reviewer = next(v for v in estab_ids if v != established)
@@ -174,8 +177,11 @@ async def test_cold_start_simulation_new_gets_traction() -> None:
         assert ranked
         chosen, _score = ranked[0]
         review_dims = {
-            "factual": 0.7, "logical": 0.7, "relevance": 0.7,
-            "honesty": 0.7, "adoption": 0.7,
+            "factual": 0.7,
+            "logical": 0.7,
+            "relevance": 0.7,
+            "honesty": 0.7,
+            "adoption": 0.7,
         }
         if chosen == new_vid:
             new_vacant_calls += 1

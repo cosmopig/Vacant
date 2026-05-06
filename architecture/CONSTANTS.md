@@ -112,6 +112,13 @@ State transitions (event-driven thresholds, not pure time-elapsed):
 | Redteam probe rate | 3% when call_count ≥ 100 | P3 line 261 |
 | Honesty gap → 0 mapping: `max(0, 1 - 2·gap)` | — | P3 line 227 |
 
+### Cumulative drift detection (Padv-P3 / D010 §2)
+
+| Constant | Value | Citation |
+|---|---|---|
+| `CUMULATIVE_DRIFT_WINDOW_EPOCHS` | `5` | D010 §2 |
+| `CUMULATIVE_DRIFT_THRESHOLD_MULTIPLIER` | `1.5` | D010 §2 |
+
 ## Identity (P2)
 
 Wash cost formula and concrete coefficient values: see `components/P2_identity.md` §3. Open ADR if values are not pinned there.

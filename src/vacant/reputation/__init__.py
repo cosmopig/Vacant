@@ -17,15 +17,18 @@ from vacant.reputation.cold_start import (
     show_label,
 )
 from vacant.reputation.discount import (
+    CumulativeDriftTracker,
     apply_discount,
     apply_discount_5d,
     compute_discount,
+    dimension_imbalance_alert,
 )
 from vacant.reputation.errors import (
     IneligibleReviewerError,
     InvalidDimensionError,
     InvalidSignalError,
     ReputationError,
+    ReviewRateLimitError,
 )
 from vacant.reputation.portability import compute_portability
 from vacant.reputation.posterior import (
@@ -59,12 +62,14 @@ __all__ = [
     "Beta5D",
     "BirthPath",
     "ColdStartCaveats",
+    "CumulativeDriftTracker",
     "Dim",
     "IneligibleReviewerError",
     "InsufficientDataLabel",
     "InvalidDimensionError",
     "InvalidSignalError",
     "ReputationError",
+    "ReviewRateLimitError",
     "ReviewRecord",
     "SameDetectSignal",
     "VacantContext",
@@ -78,6 +83,7 @@ __all__ = [
     "cosine_similarity",
     "cross_correlation",
     "decay_factor",
+    "dimension_imbalance_alert",
     "discount_from_signals",
     "exploration_boost",
     "five_d_with_priors",

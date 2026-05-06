@@ -19,3 +19,8 @@ class InvalidDimensionError(ReputationError):
 
 class InvalidSignalError(ReputationError):
     """A signal is malformed (e.g. score outside [0,1])."""
+
+
+class ReviewRateLimitError(ReputationError):
+    """A target's per-window review rate limit was exceeded
+    (Padv-P3 finding D010 §1)."""

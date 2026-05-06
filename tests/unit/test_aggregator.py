@@ -29,7 +29,7 @@ def _ctx(
 
 
 def _agg(*ctxs: VacantContext) -> Aggregator:
-    return Aggregator(contexts={c.vacant_id: c for c in ctxs})
+    return Aggregator(contexts={c.vacant_id: c for c in ctxs}, review_limit_per_target_24h=10_000)
 
 
 @pytest.mark.asyncio
