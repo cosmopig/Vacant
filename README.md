@@ -2,6 +2,15 @@
 
 <img src="assets/hero.svg" alt="Vacant — a residency form for AI agents on top of A2A / MCP" width="100%">
 
+<!--
+  Demo screencast slot. The 60-second walkthrough will live at
+  `assets/demo.gif` once recorded; see `docs/DEMO_RECORDING_SCRIPT.md`
+  for the storyboard + tooling. Until then this comment block stays as
+  the slot marker so a future commit drops the gif in the same spot
+  without an unrelated README diff.
+-->
+<sub><em>📹 60-second demo screencast — pending recording (<a href="docs/DEMO_RECORDING_SCRIPT.md">storyboard</a>). Walks through <code>vacant demo law_firm</code>, the dashboard's adversarial page, and <code>vacant serve --mcp</code> under Claude Desktop.</em></sub>
+
 # Vacant
 
 [English](README.md) · [繁體中文](README.zh-TW.md)

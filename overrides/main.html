@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{#
+  mkdocs-material theme override.
+
+  Adds:
+   - schema.org JSON-LD (SoftwareApplication on /, TechArticle on docs).
+     Lets Google index the project as a software product (App
+     knowledge-graph card) and individual doc pages as technical
+     articles (rich-result eligibility).
+   - Open Graph + Twitter card metadata. mkdocs-material emits some
+     of these by default; we layer ours on top so the social-preview
+     image and the canonical URL are explicit.
+   - JSON-LD validates against schema.org's reference and Google's
+     rich-result test (Search Console → Inspect URL).
+#}
+
+{% block extrahead %}
+  {{ super() }}
+
+  {# --- Open Graph / Twitter card --- #}
+  <meta property="og:site_name" content="Vacant">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ page.title | default(config.site_name) }}">
+  <meta property="og:description" content="{{ page.meta.description if page.meta and page.meta.description else config.site_description }}">
+  <meta property="og:url" content="{{ page.canonical_url }}">
+  <meta property="og:image" content="https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png">
+  <meta property="og:image:alt" content="Vacant — a responsibility-layer residency form for AI agents on top of A2A / MCP">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:locale" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page.title | default(config.site_name) }}">
+  <meta name="twitter:description" content="{{ page.meta.description if page.meta and page.meta.description else config.site_description }}">
+  <meta name="twitter:image" content="https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png">
+
+  {# --- Bluesky / fediverse note via the app: protocol-agnostic. --- #}
+  <link rel="me" href="https://github.com/cosmopig">
+
+  {# --- schema.org JSON-LD --- #}
+  {% if page.is_homepage %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Vacant",
+    "alternateName": "Vacant — responsibility-layer residency form for AI agents",
+    "applicationCategory": "DeveloperApplication",
+    "applicationSubCategory": "Multi-agent infrastructure",
+    "operatingSystem": "Linux, macOS, Windows",
+    "url": "https://github.com/cosmopig/Vacant",
+    "downloadUrl": "https://github.com/cosmopig/Vacant",
+    "softwareVersion": "0.1.0",
+    "datePublished": "2026-05-06",
+    "license": "https://opensource.org/licenses/MIT",
+    "programmingLanguage": "Python",
+    "description": "Vacant is a stand-alone responsibility layer that sits on top of A2A and MCP. Agents that adopt the vacant residency form gain Ed25519 identity, an append-only signed logbook, and a 5-dimensional Beta-posterior reputation per substrate, with same-controller / same-substrate / same-stylo detection (cost-raising, not preventing).",
+    "keywords": "multi-agent, mcp, a2a, reputation, identity, claude, llm",
+    "author": {
+      "@type": "Person",
+      "name": "Cosmo Hsu",
+      "alternateName": "cosmopig",
+      "url": "https://github.com/cosmopig"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "codeRepository": "https://github.com/cosmopig/Vacant",
+    "softwareRequirements": "Python 3.12, uv",
+    "isAccessibleForFree": true
+  }
+  </script>
+  {% else %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "{{ page.title | default(config.site_name) }}",
+    "description": "{{ page.meta.description if page.meta and page.meta.description else config.site_description }}",
+    "url": "{{ page.canonical_url }}",
+    "image": "https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png",
+    "datePublished": "2026-05-06",
+    "dateModified": "{{ build_date_utc.strftime('%Y-%m-%d') if build_date_utc else '2026-05-06' }}",
+    "author": {
+      "@type": "Person",
+      "name": "Cosmo Hsu",
+      "alternateName": "cosmopig",
+      "url": "https://github.com/cosmopig"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Vacant",
+      "url": "https://github.com/cosmopig/Vacant"
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Vacant — documentation",
+      "url": "{{ config.site_url }}"
+    },
+    "mainEntityOfPage": "{{ page.canonical_url }}",
+    "inLanguage": "en",
+    "keywords": "multi-agent, mcp, a2a, reputation, identity, claude, llm"
+  }
+  </script>
+  {% endif %}
+{% endblock %}
