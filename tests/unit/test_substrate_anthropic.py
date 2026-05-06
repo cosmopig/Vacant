@@ -13,6 +13,7 @@ from pathlib import Path
 
 import pytest
 
+from vacant.substrate import _env as substrate_env
 from vacant.substrate import anthropic as ant
 from vacant.substrate.base import SubstrateRequest
 from vacant.substrate.errors import SubstrateUnavailableError
@@ -21,7 +22,7 @@ from vacant.substrate.errors import SubstrateUnavailableError
 @pytest.fixture(autouse=True)
 def reset_dotenv_cache() -> None:
     """Each test re-resolves dotenv (the loader caches a 'done' flag)."""
-    ant._DOTENV_LOADED = False
+    substrate_env.reset_dotenv_cache_for_tests()
 
 
 @pytest.mark.asyncio

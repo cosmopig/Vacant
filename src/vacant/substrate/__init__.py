@@ -13,15 +13,25 @@ from vacant.substrate.errors import (
     SubstrateRateLimitError,
     SubstrateUnavailableError,
 )
+from vacant.substrate.gemini import GeminiSubstrate
+from vacant.substrate.hermes import HermesSubstrate
+from vacant.substrate.mistral import MistralSubstrate
 from vacant.substrate.mock import MockSubstrate
 from vacant.substrate.ollama import OllamaSubstrate
+from vacant.substrate.openai import OpenAISubstrate
+from vacant.substrate.openclaw import OpenClawSubstrate
 
 __all__ = [
     "AnthropicSubstrate",
     "ClientInheritedSubstrate",
     "DeterministicSubstrate",
+    "GeminiSubstrate",
+    "HermesSubstrate",
+    "MistralSubstrate",
     "MockSubstrate",
     "OllamaSubstrate",
+    "OpenAISubstrate",
+    "OpenClawSubstrate",
     "SamplingCallback",
     "SubstrateBackend",
     "SubstrateError",

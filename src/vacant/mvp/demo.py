@@ -17,9 +17,26 @@ from vacant.mvp.scenarios import DEFAULT_SEEDS, get_runner
 from vacant.substrate import (
     AnthropicSubstrate,
     DeterministicSubstrate,
+    GeminiSubstrate,
+    HermesSubstrate,
+    MistralSubstrate,
     MockSubstrate,
     OllamaSubstrate,
+    OpenAISubstrate,
+    OpenClawSubstrate,
     SubstrateBackend,
+)
+
+_SUBSTRATE_CHOICES = (
+    "mock",
+    "deterministic",
+    "anthropic",
+    "ollama",
+    "openai",
+    "gemini",
+    "mistral",
+    "hermes",
+    "openclaw",
 )
 
 
@@ -32,6 +49,16 @@ def _build_substrate(name: str, *, seed: int) -> SubstrateBackend:
         return AnthropicSubstrate()
     if name == "ollama":
         return OllamaSubstrate()
+    if name == "openai":
+        return OpenAISubstrate()
+    if name == "gemini":
+        return GeminiSubstrate()
+    if name == "mistral":
+        return MistralSubstrate()
+    if name == "hermes":
+        return HermesSubstrate()
+    if name == "openclaw":
+        return OpenClawSubstrate()
     raise SystemExit(f"unknown substrate {name!r}")
 
 
@@ -49,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--substrate",
         default="mock",
-        choices=["mock", "deterministic", "anthropic", "ollama"],
+        choices=list(_SUBSTRATE_CHOICES),
         help="substrate backend (default: mock)",
     )
     parser.add_argument(

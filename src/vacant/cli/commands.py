@@ -597,7 +597,13 @@ def serve_cmd(
 def demo_cmd(
     scenario: str,
     substrate: str = typer.Option(
-        "mock", "--substrate", "-s", help="mock | deterministic | anthropic | ollama"
+        "mock",
+        "--substrate",
+        "-s",
+        help=(
+            "mock | deterministic | anthropic | ollama | openai | gemini | "
+            "mistral | hermes | openclaw"
+        ),
     ),
     seed: int | None = typer.Option(None, "--seed", help="override default seed"),
 ) -> None:
