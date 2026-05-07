@@ -16,14 +16,16 @@
 [English](README.md) · [繁體中文](README.zh-TW.md)
 
 [![CI](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml/badge.svg)](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/cosmopig/Vacant?display_name=tag&sort=semver&color=blue)](https://github.com/cosmopig/Vacant/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/release/python-3120/)
 [![uv](https://img.shields.io/badge/managed%20by-uv-261230)](https://docs.astral.sh/uv/)
-[![tests: 736](https://img.shields.io/badge/tests-736%20passing-brightgreen.svg)](#testing)
+[![tests: 854](https://img.shields.io/badge/tests-854%20passing-brightgreen.svg)](#testing)
 [![coverage: 91%](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](#testing)
 [![mypy: strict](https://img.shields.io/badge/mypy-strict-blue.svg)](https://mypy.readthedocs.io/)
-[![docs](https://img.shields.io/badge/docs-cosmopig.github.io%2FVacant-indigo.svg)](https://cosmopig.github.io/Vacant/)
-[![site](https://img.shields.io/badge/site-vacant.zeabur.app-blueviolet.svg)](https://vacant.zeabur.app/)
+[![api docs](https://img.shields.io/badge/api%20docs-cosmopig.github.io-indigo.svg)](https://cosmopig.github.io/Vacant/)
+[![narrative](https://img.shields.io/badge/narrative-vacant.zeabur.app-blueviolet.svg)](https://vacant.zeabur.app/)
+[![Discussions](https://img.shields.io/github/discussions/cosmopig/Vacant)](https://github.com/cosmopig/Vacant/discussions)
 
 </div>
 
@@ -31,7 +33,7 @@ A **responsibility-layer residency form** for AI agents on top of A2A / MCP. Giv
 
 > 一個讓 AI agent 變成「能扛責任的居民」的居民形式，疊在 A2A / MCP 之上補「責任」這一層。
 
-Capstone project · 2026 · Theory V5 · 14-week MVP shipped.
+Capstone project · 2026 · Theory V5 · v0.2.0 · 854 tests · 91% coverage · 6 rounds of codex sign-off.
 
 ---
 
@@ -274,10 +276,14 @@ Common confusions, deliberately addressed:
 | Aspect | State |
 |---|---|
 | **Theory** | V5 final; hardened through **3 rounds of codex adversarial review** with `no fatal issues remain`. See [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md) (45KB, 8 layers, 38-attack matrix, 13 honest open questions). |
-| **Implementation** | 14-week MVP shipped. All 8 components (P0–P7) merged. 5 adversarial review passes (Padv-P2 / P3 / P4 / P5 / P6). 1 codex independent review pass (5 findings, all addressed; ADR D015). |
-| **Test suite** | 736 tests passing (711 unit/property + 25 slow integration). 91% line coverage. mypy `--strict` clean. |
-| **Demo readiness** | All 4 scenarios runnable on `MockSubstrate` (bit-exact) and `AnthropicSubstrate` (statistically reproducible). Streamlit dashboard renders network / lineage / scenarios / metrics / adversarial pages. |
-| **Docs site** | https://vacant.zeabur.app/ — landing page, narrative explainer (7 chapters), full technical version (7 sections, interactive), ecology simulator (drag-build vacants), document reader. |
+| **Releases** | [v0.2.0](https://github.com/cosmopig/Vacant/releases/tag/v0.2.0) (current) — Claude Code one-command plugin, OpenClaw bundle, 4 paste-config recipes, conventional-commit-driven auto-release. [v0.1.0](https://github.com/cosmopig/Vacant/releases/tag/v0.1.0) — capstone-defense MVP. Auto-changelog via release-please. |
+| **Implementation** | All 8 components (P0–P7) merged. 5 Padv adversarial review passes (P2/P3/P4/P5/P6). 6 rounds of independent codex review (3 theory + 1 OSS-readiness + 1 production-blockers + 1 sign-off post-v0.2.0). 4 production-grade blockers fixed (F-A halo TOCTOU, F-B/F-C race conditions, F-D plaintext key default → OS keyring). |
+| **Test suite** | **854 tests passing** (802 unit/property + 52 slow integration). 91% line coverage (gate: 90%). mypy `--strict` clean. ruff lint+format clean. |
+| **Demo readiness** | All 4 scenarios run deterministically on `MockSubstrate`; six real-LLM substrates (Anthropic / OpenAI + OAI-compat / Gemini / Mistral / Ollama / client-inherited via MCP `sampling/createMessage`). Streamlit dashboard with Network / Lineage / Scenarios / Metrics / Adversarial pages. |
+| **Client integrations** | Claude Code (one-command plugin · `/plugin marketplace add cosmopig/Vacant`), Claude Desktop / Cursor / Windsurf (paste-config), Hermes Agent (YAML), OpenClaw (plugin bundle). See [docs/INTEGRATION.md](docs/INTEGRATION.md). |
+| **CI / supply chain** | ubuntu+macos × py3.12+3.13 matrix, wheel-build smoke-install, pip-audit, Bandit, gitleaks, Codecov, conventional-commits PR-title lint, auto-label, manifest schema validation, mkdocs auto-deploy. Branch protection on `main`: 7 required status checks + linear history + no force-push + no deletion. |
+| **API docs** | https://cosmopig.github.io/Vacant/ — auto-generated from docstrings via mkdocstrings. |
+| **Narrative site** | https://vacant.zeabur.app/ — landing, 7-chapter explainer, interactive technical version, ecology simulator, document reader. |
 
 ---
 
