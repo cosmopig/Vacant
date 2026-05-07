@@ -14,14 +14,16 @@
 [English](README.md) · [繁體中文](README.zh-TW.md)
 
 [![CI](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml/badge.svg)](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/cosmopig/Vacant?display_name=tag&sort=semver&color=blue)](https://github.com/cosmopig/Vacant/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/release/python-3120/)
 [![uv](https://img.shields.io/badge/managed%20by-uv-261230)](https://docs.astral.sh/uv/)
-[![tests: 736](https://img.shields.io/badge/tests-736%20passing-brightgreen.svg)](#測試)
+[![tests: 854](https://img.shields.io/badge/tests-854%20passing-brightgreen.svg)](#測試)
 [![coverage: 91%](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](#測試)
 [![mypy: strict](https://img.shields.io/badge/mypy-strict-blue.svg)](https://mypy.readthedocs.io/)
-[![docs](https://img.shields.io/badge/docs-cosmopig.github.io%2FVacant-indigo.svg)](https://cosmopig.github.io/Vacant/)
-[![site](https://img.shields.io/badge/site-vacant.zeabur.app-blueviolet.svg)](https://vacant.zeabur.app/)
+[![api docs](https://img.shields.io/badge/api%20docs-cosmopig.github.io-indigo.svg)](https://cosmopig.github.io/Vacant/)
+[![narrative](https://img.shields.io/badge/narrative-vacant.zeabur.app-blueviolet.svg)](https://vacant.zeabur.app/)
+[![Discussions](https://img.shields.io/github/discussions/cosmopig/Vacant)](https://github.com/cosmopig/Vacant/discussions)
 
 </div>
 
@@ -29,7 +31,7 @@
 
 > A residency form for AI agents on top of A2A / MCP — identity, history, reputation, consequences.
 
-畢業專題 · 2026 · Theory V5 · 14 週 MVP 完成。
+畢業專題 · 2026 · Theory V5 · v0.2.0 · 854 個測試 · 91% coverage · codex 6 輪簽字。
 
 ---
 
@@ -267,10 +269,14 @@ SDK 的 client 從外部驗證。針對這個流程的 integration test 是
 | 面向 | 狀態 |
 |---|---|
 | **理論** | V5 定稿；經過 **codex 三輪對抗審查**，`no fatal issues remain`。見 [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md)（45KB、8 層、38 攻擊矩陣、13 條誠實開放問題）。 |
-| **實作** | 14 週 MVP 完成。8 個元件（P0-P7）全部 merge。5 輪 Padv 對抗審查（Padv-P2 / P3 / P4 / P5 / P6）。1 輪 codex 獨立合併後審查（5 個 finding 全處理；ADR D015）。 |
-| **測試** | 736 個測試全綠（711 unit/property + 25 slow integration）。91% 行覆蓋率。mypy `--strict` 通過。 |
-| **Demo 完整度** | 4 個 scenario 都能在 `MockSubstrate`（位元一致）跟 `AnthropicSubstrate`（統計重現）跑。Streamlit dashboard 渲染 network / lineage / scenarios / metrics / adversarial 五頁。 |
-| **文件網站** | https://vacant.zeabur.app/ — 著陸頁、敘事版（7 章）、完整技術版（7 段互動）、生態模擬器（拖拉建構 vacant）、文件閱讀器。 |
+| **發版** | [v0.2.0](https://github.com/cosmopig/Vacant/releases/tag/v0.2.0)（最新）— Claude Code 一指令 plugin、OpenClaw bundle、4 個 paste-config recipes、conventional-commit 自動 release。[v0.1.0](https://github.com/cosmopig/Vacant/releases/tag/v0.1.0) — 答辯 MVP。changelog 由 release-please 自動產生。 |
+| **實作** | 8 個元件（P0-P7）全部 merge。5 輪 Padv 對抗審查（P2/P3/P4/P5/P6）。**6 輪 codex 獨立審查**（3 輪理論 + 1 OSS-readiness + 1 production blockers + 1 v0.2.0 sign-off）。4 個 production-grade blocker 修補（F-A halo TOCTOU、F-B/F-C 並發 race、F-D 私鑰預設改 OS keyring）。 |
+| **測試** | **854 個測試全綠**（802 unit/property + 52 slow integration）。91% 行覆蓋率（gate：90%）。mypy `--strict` 通過。ruff lint+format 通過。 |
+| **Demo 完整度** | 4 個 scenario 在 `MockSubstrate`（位元一致）跑；六個真 LLM substrate（Anthropic / OpenAI + OAI-compat / Gemini / Mistral / Ollama / client-inherited via MCP `sampling/createMessage`）。Streamlit dashboard 五頁（網路 / 血緣 / Scenario / Metrics / Adversarial）。 |
+| **客戶端整合** | Claude Code（一指令 plugin · `/plugin marketplace add cosmopig/Vacant`）、Claude Desktop / Cursor / Windsurf（貼 config）、Hermes Agent（YAML）、OpenClaw（plugin bundle）。詳見 [docs/INTEGRATION.zh-TW.md](docs/INTEGRATION.zh-TW.md)。 |
+| **CI / 供應鏈** | ubuntu+macos × py3.12+3.13 matrix、wheel build smoke install、pip-audit、Bandit、gitleaks、Codecov、Conventional Commits PR title lint、auto-label、manifest schema validation、mkdocs auto-deploy。`main` 上 branch protection：7 條必過 status check + linear history + 禁 force push + 禁刪除。 |
+| **API 文件** | https://cosmopig.github.io/Vacant/ — 由 docstring 透過 mkdocstrings 自動生成。 |
+| **敘事網站** | https://vacant.zeabur.app/ — 著陸頁、7 章敘事版、互動技術版、生態模擬器、文件閱讀器。 |
 
 ---
 
