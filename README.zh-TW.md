@@ -112,10 +112,16 @@
 
 ## 不用 Claude Code 也能跑
 
-同一份 code 不用 plugin 也能跑。兩條路：
+同一份 code 不用 plugin 也能跑。三條路：
 
 ```bash
-# 1. curl + script（clone 進 ~/Vacant）
+# 1. pip / uv — PyPI 上的 distribution name 是 vacant-network，module 名仍是 vacant
+pip install vacant-network
+vacant demo law_firm
+```
+
+```bash
+# 2. curl + script（clone 進 ~/Vacant，要完整 repo 用 dashboard / fixtures 走這條）
 curl -LsSf https://raw.githubusercontent.com/cosmopig/Vacant/main/install.sh | bash
 cd ~/Vacant
 
@@ -130,9 +136,9 @@ uv run streamlit run src/vacant/mvp/dashboard.py
 ```
 
 ```bash
-# 2. uvx — 不 clone、不安裝
-uvx --from git+https://github.com/cosmopig/Vacant vacant demo law_firm
-uvx --from git+https://github.com/cosmopig/Vacant vacant mcp   # 純 stdio MCP server
+# 3. uvx — 完全不安裝
+uvx --from vacant-network vacant demo law_firm
+uvx --from vacant-network vacant mcp              # 純 stdio MCP server
 ```
 
 **用真的 LLM — substrate 矩陣**（substrate 是可換的；見 THEORY_V5 §2 — LLM 是 *資源*，不是 *身份*）：

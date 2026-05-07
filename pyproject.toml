@@ -1,5 +1,13 @@
 [project]
-name = "vacant"
+# PyPI distribution name. The Python module name is still `vacant` (see
+# `[tool.hatch.build.targets.wheel] packages` below), so:
+#   pip install vacant-network    ← distribution name
+#   import vacant                 ← module name (unchanged)
+#   vacant demo law_firm          ← console_script (unchanged)
+# The unqualified `vacant` name on PyPI was already taken (a Rust
+# domain-checker bindings package) at the time this project went public.
+# Same pattern as `python-dotenv`/`dotenv`, `discord.py`/`discord`.
+name = "vacant-network"
 version = "0.2.0"
 description = "Responsibility-layer residency form for AI agents (atop A2A / MCP)."
 readme = "README.md"

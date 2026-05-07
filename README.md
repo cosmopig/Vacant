@@ -116,10 +116,16 @@ under the hood — nothing else to install.
 
 ## Try it without Claude Code
 
-The same code works without the plugin. Two paths:
+The same code works without the plugin. Three paths:
 
 ```bash
-# 1. curl + script (clone into ~/Vacant)
+# 1. pip / uv — published on PyPI as `vacant-network`; module name is still `vacant`
+pip install vacant-network
+vacant demo law_firm
+```
+
+```bash
+# 2. curl + script (clones into ~/Vacant for full repo access — dashboard, fixtures, etc.)
 curl -LsSf https://raw.githubusercontent.com/cosmopig/Vacant/main/install.sh | bash
 cd ~/Vacant
 
@@ -134,9 +140,9 @@ uv run streamlit run src/vacant/mvp/dashboard.py
 ```
 
 ```bash
-# 2. uvx — no clone, no install
-uvx --from git+https://github.com/cosmopig/Vacant vacant demo law_firm
-uvx --from git+https://github.com/cosmopig/Vacant vacant mcp   # raw stdio MCP server
+# 3. uvx — no install at all
+uvx --from vacant-network vacant demo law_firm
+uvx --from vacant-network vacant mcp              # raw stdio MCP server
 ```
 
 **With a real LLM — substrate matrix** (substrate is swappable; see THEORY_V5 §2 — the LLM is a *resource*, not the *identity*):
