@@ -74,6 +74,15 @@ model on the keyring vs. `--insecure-demo` paths.
   from PyPI (20–60 seconds on a slow network). Subsequent launches
   are instant (uv caches).
 - **You see `WARN: no local vacant on disk`.** Expected — see §0.3.
+  The warning lands on the MCP subprocess's stderr; how visible that is
+  depends on the host. Claude Desktop and Cursor surface stderr in
+  *Logs → MCP servers → vacant* (you may need to scroll up to see the
+  startup message). The MCP Inspector CLI prints stderr inline. Some
+  IDEs swallow stderr entirely — if you don't see the warning anywhere
+  but want to confirm whether identity is ephemeral, call the
+  `vacant_describe` tool: the JSON response includes a
+  `"key_storage": "ephemeral" | "keyring" | "plaintext"` field that is
+  always reliable regardless of how the host renders stderr.
 - **You want to drive the vacant from your own MCP client.** Skip the
   plugin path; jump to §2.4 below for a manual `mcp.json` example.
 
