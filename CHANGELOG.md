@@ -36,16 +36,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 * SEO + discoverability + community readiness ([#38](https://github.com/cosmopig/Vacant/issues/38)) ([10b0591](https://github.com/cosmopig/Vacant/commit/10b059110eea83b4f0df3c74b3ce182a72c5ed06))
 
-## [Unreleased]
+## Pfix2 historical note (closed before 0.3.0)
 
-In flight (parallel branches at the time of this entry):
+The Pfix2 codex-round-2 follow-up work originally tracked four parallel
+branches. All of them landed via individual PRs that release-please rolled
+into `0.2.0` / `0.3.0`; the branches themselves have been pruned.
 
-- `claude/fix-codex-round-2-3StxD` — Pfix2 Group α: wire 8 CLI stubs, A2A envelope validation, halo HTTP publish, real Aggregator wiring, dotenv auto-load.
-- `feat/group-d1-multi-substrates` — additional `SubstrateBackend` implementations (OpenAI / Gemini / Mistral / Hermes / OpenClaw), `.env` matrix.
-- `feat/group-b-demo-fidelity` — SQLite demo store, real metrics snapshot, adversarial seed-666 scenario, self-replication completeness, multilingual portability hardening, frozen numeric fixtures.
-- `feat/a8-federation-rotation` — versioned `RootSet` with rotation history, ADR D016.
+- Group α (CLI stubs, A2A envelope validation, halo HTTP publish, Aggregator
+  wiring, dotenv auto-load) — landed pre-0.2.0.
+- Group D1 (`SubstrateBackend` implementations for OpenAI / Gemini / Mistral
+  / Hermes / OpenClaw + `.env` matrix) — landed pre-0.2.0.
+- Group B (SQLite demo store, real metrics snapshot, adversarial seed-666
+  scenario, self-replication completeness, multilingual portability
+  hardening, frozen numeric fixtures) — landed pre-0.2.0.
+- Group A8 (versioned `RootSet` + rotation history) — design recorded in
+  [ADR D016](architecture/decisions/D016_federation_root_rotation_history.md);
+  implementation lives in `src/vacant/identity/federation.py`.
 
-## [0.1.0] — 2026-05-XX (post-defense target)
+## [0.1.0] — historical project-snapshot description
 
 Target release for capstone defense. Items below are preserved as the project's first reproducible snapshot.
 
