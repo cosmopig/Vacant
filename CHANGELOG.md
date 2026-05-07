@@ -4,6 +4,19 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Pre-1.0 means breaking changes can land in any minor bump.
 
+## [0.3.0](https://github.com/cosmopig/Vacant/compare/v0.2.0...v0.3.0) (2026-05-07)
+
+
+### Features
+
+* add 30-second promo video (narration + bgm + sfx) to README ([#44](https://github.com/cosmopig/Vacant/issues/44)) ([c294958](https://github.com/cosmopig/Vacant/commit/c2949582f7ee99bc592dd0e9311b924612d07dca))
+* rename pypi distribution to vacant-network + auto-publish workflow ([#43](https://github.com/cosmopig/Vacant/issues/43)) ([74f5e7c](https://github.com/cosmopig/Vacant/commit/74f5e7cfbe79ec121cb7dae002ff15b9f1104229))
+
+
+### Documentation
+
+* refresh README badges + Status table for v0.2.0 ([#41](https://github.com/cosmopig/Vacant/issues/41)) ([93c3207](https://github.com/cosmopig/Vacant/commit/93c3207df83fcdd1bf1ba1f1f75b3d739ef9d442))
+
 ## [0.2.0](https://github.com/cosmopig/Vacant/compare/v0.1.0...v0.2.0) (2026-05-06)
 
 
