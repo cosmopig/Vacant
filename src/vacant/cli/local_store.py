@@ -58,12 +58,15 @@ __all__ = [
     "LocalVacantKeyringUnavailable",
     "LocalVacantNotFound",
     "current_name",
+    "envelope_state_file",
     "init_vacant",
     "keyring_backend_available",
     "list_vacant_names",
+    "load_envelope_state",
     "load_logbook",
     "load_meta",
     "load_signing_key",
+    "save_envelope_state",
     "save_logbook",
     "save_meta",
     "vacant_dir",
@@ -75,6 +78,15 @@ GENESIS_KIND = "GENESIS"
 KEY_FILE = "key.json"
 LOGBOOK_FILE = "logbook.jsonl"
 META_FILE = "meta.json"
+ENVELOPE_STATE_FILE = "envelope_state.json"
+"""Per-target chain state for outgoing calls (Pfix3 B6).
+
+Keyed by target ``vacant_id_hex``; tracks the last accepted envelope
+on the request (caller → target) and response (target → caller)
+chains so the next ``vacant call`` to the same target advances seq +
+prev_envelope_hash correctly. Without this file the CLI defaulted
+``sequence_no=1`` on every call → second call to a target was
+rejected as replay by the server."""
 
 KEYRING_SERVICE = "vacant.cli"
 """`service` argument used for every `keyring.set_password` /
@@ -381,3 +393,49 @@ def load_logbook(name: str) -> Logbook:
         entry = _dict_to_entry(json.loads(line))
         lb.entries.append(entry)
     return lb
+
+
+# --- envelope state (Pfix3 B6) ---------------------------------------------
+
+
+def envelope_state_file(name: str) -> Path:
+    return vacant_dir(name) / ENVELOPE_STATE_FILE
+
+
+def load_envelope_state(name: str) -> dict[str, Any]:
+    """Load the per-target chain state for ``vacant call``.
+
+    Returns ``{}`` if the file doesn't exist yet (first call). Schema:
+
+        {
+          "<target_vacant_id_hex>": {
+            "request":  {"last_seq": int, "last_hash_hex": str},
+            "response": {"last_seq": int, "last_hash_hex": str}
+          }
+        }
+
+    Returned as ``dict[str, Any]`` because the file is JSON: leaf
+    values are ints + strs and the caller knows the schema. Strict
+    typing would force every read site through casts without buying
+    safety beyond the schema docstring above.
+    """
+    p = envelope_state_file(name)
+    if not p.exists():
+        return {}
+    raw = json.loads(p.read_text())
+    if not isinstance(raw, dict):
+        return {}
+    return raw
+
+
+def save_envelope_state(name: str, state: dict[str, Any]) -> None:
+    """Atomically persist the envelope state. Uses ``tempfile +
+    os.replace`` so a crashed write does not leave a half-truncated
+    file (would otherwise cause the next call to replay seq=1).
+    """
+    d = vacant_dir(name)
+    d.mkdir(parents=True, exist_ok=True)
+    p = envelope_state_file(name)
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    tmp.write_text(json.dumps(state, sort_keys=True, separators=(",", ":")))
+    os.replace(tmp, p)

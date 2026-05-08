@@ -313,3 +313,125 @@ def _build_response(target_sk, target_vid, request_body):  # type: ignore[no-unt
     ).signed(target_sk)
     wire = to_a2a_jsonrpc(response)
     return {"jsonrpc": "2.0", "id": "rsp", "result": {"message": wire["params"]["message"]}}
+
+
+# --- Pfix3 B6: caller-side response validation -----------------------------
+
+
+@pytest.mark.asyncio
+async def test_call_local_rejects_response_with_wrong_from_vacant_id() -> None:
+    """A response whose envelope claims a from_vacant_id different from
+    the target we called must be rejected even when the signature is
+    valid for the claimed from-id (Pfix3 B6 defense in depth)."""
+    from vacant.core.crypto import keygen
+    from vacant.core.types import VacantId
+    from vacant.protocol.envelope import VacantEnvelope
+    from vacant.protocol.errors import EnvelopeFormatError
+
+    target_sk, _target_vid, target_card, _ = _build_form_and_card()
+    requester_sk, _r_vid, _r_card, requester_form = _build_form_and_card()
+    _, attacker_vk = keygen()
+    attacker_vid = VacantId.from_verify_key(attacker_vk)
+
+    async def transport(url: str, body: dict[str, Any]) -> dict[str, Any]:
+        # Envelope signed by target_sk but with from=attacker_vid. The
+        # signature is valid for the (mutated) signing_payload, so
+        # verify_or_raise(target_vk) passes; the from-id check is what
+        # catches the mismatch.
+        response = VacantEnvelope(
+            from_vacant_id=attacker_vid,
+            to_vacant_id=requester_form.identity,
+            sequence_no=1,
+            timestamp=datetime.now(UTC),
+            payload=A2AMessage(parts=[A2APart(text="ack")]),
+        ).signed(target_sk)
+        wire = to_a2a_jsonrpc(response)
+        return {
+            "jsonrpc": "2.0",
+            "id": "rsp",
+            "result": {"message": wire["params"]["message"]},
+        }
+
+    with pytest.raises(EnvelopeFormatError, match="from_vacant_id"):
+        await call_local(
+            target_card=target_card,
+            requester=requester_form,
+            requester_signing_key=requester_sk,
+            payload=A2AMessage(parts=[A2APart(text="x")]),
+            transport=transport,
+        )
+
+
+@pytest.mark.asyncio
+async def test_call_local_rejects_response_with_wrong_to_vacant_id() -> None:
+    """Response addressed to someone other than the requester must fail."""
+    from vacant.core.crypto import keygen
+    from vacant.core.types import VacantId
+    from vacant.protocol.envelope import VacantEnvelope
+    from vacant.protocol.errors import EnvelopeFormatError
+
+    target_sk, target_vid, target_card, _ = _build_form_and_card()
+    requester_sk, _r_vid, _r_card, requester_form = _build_form_and_card()
+    _, third_vk = keygen()
+    third_vid = VacantId.from_verify_key(third_vk)
+
+    async def transport(url: str, body: dict[str, Any]) -> dict[str, Any]:
+        response = VacantEnvelope(
+            from_vacant_id=target_vid,
+            to_vacant_id=third_vid,  # response addressed to a third party
+            sequence_no=1,
+            timestamp=datetime.now(UTC),
+            payload=A2AMessage(parts=[A2APart(text="ack")]),
+        ).signed(target_sk)
+        wire = to_a2a_jsonrpc(response)
+        return {
+            "jsonrpc": "2.0",
+            "id": "rsp",
+            "result": {"message": wire["params"]["message"]},
+        }
+
+    with pytest.raises(EnvelopeFormatError, match="to_vacant_id"):
+        await call_local(
+            target_card=target_card,
+            requester=requester_form,
+            requester_signing_key=requester_sk,
+            payload=A2AMessage(parts=[A2APart(text="x")]),
+            transport=transport,
+        )
+
+
+@pytest.mark.asyncio
+async def test_call_local_caller_replay_store_catches_duplicate_response() -> None:
+    """Two calls returning identical (seq=1, prev=EMPTY) responses must
+    fail the second time when a caller-side replay store is wired
+    (Pfix3 B6)."""
+    from vacant.protocol.errors import ReplayDetectedError
+    from vacant.protocol.replay_protect import InMemoryReplayStore
+
+    target_sk, target_vid, target_card, _ = _build_form_and_card()
+    requester_sk, _r_vid, _r_card, requester_form = _build_form_and_card()
+    transport = _make_echo_transport(target_sk, target_vid)
+
+    rsp_store = InMemoryReplayStore()
+
+    # First call: response seq=1 accepted into store.
+    await call_local(
+        target_card=target_card,
+        requester=requester_form,
+        requester_signing_key=requester_sk,
+        payload=A2AMessage(parts=[A2APart(text="x")]),
+        transport=transport,
+        caller_response_replay_store=rsp_store,
+    )
+    # Second call: echo transport returns seq=1 again → replay rejected.
+    with pytest.raises(ReplayDetectedError):
+        await call_local(
+            target_card=target_card,
+            requester=requester_form,
+            requester_signing_key=requester_sk,
+            payload=A2AMessage(parts=[A2APart(text="y")]),
+            transport=transport,
+            sequence_no=2,
+            prev_envelope_hash=b"\x00" * 32,  # any; request side not validated here
+            caller_response_replay_store=rsp_store,
+        )

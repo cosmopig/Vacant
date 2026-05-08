@@ -190,3 +190,42 @@ def test_demo_command_runs_scenario(runner: CliRunner) -> None:
     assert result.exit_code == 0
     assert '"name": "law_firm"' in result.stdout
     assert '"logbook_chains_ok": true' in result.stdout
+
+
+# --- Pfix3 B6: envelope_state persistence ---------------------------------
+
+
+def test_load_envelope_state_returns_empty_when_missing(runner: CliRunner) -> None:
+    """First call has no state file yet; helper must return {} so the
+    CLI can default to seq=1 / EMPTY_PREV without raising."""
+    runner.invoke(app, ["init", "alice", "--insecure-demo"])
+    state = ls.load_envelope_state("alice")
+    assert state == {}
+
+
+def test_save_then_load_envelope_state_round_trips(runner: CliRunner) -> None:
+    runner.invoke(app, ["init", "alice", "--insecure-demo"])
+    payload = {
+        "bb" * 32: {
+            "request": {"last_seq": 3, "last_hash_hex": "ab" * 32},
+            "response": {"last_seq": 3, "last_hash_hex": "cd" * 32},
+        }
+    }
+    ls.save_envelope_state("alice", payload)
+    assert ls.load_envelope_state("alice") == payload
+
+
+def test_save_envelope_state_writes_atomically(runner: CliRunner) -> None:
+    """tempfile + os.replace: an in-progress write must not leave a
+    half-truncated file that would zero out chain state."""
+    import os
+
+    runner.invoke(app, ["init", "alice", "--insecure-demo"])
+    payload = {"aa" * 32: {"request": {"last_seq": 1, "last_hash_hex": "00" * 32}}}
+    ls.save_envelope_state("alice", payload)
+    p = ls.envelope_state_file("alice")
+    assert p.exists()
+    # No leftover .tmp file from atomic rename.
+    assert not (p.parent / (p.name + ".tmp")).exists()
+    # File mode at least readable to owner; default umask leaves 0644 typical.
+    assert os.stat(p).st_size > 0

@@ -495,9 +495,15 @@ def call_cmd(
     async def _go() -> dict[str, Any]:
         import httpx
 
+        from vacant.core.types import EMPTY_PREV_HASH
         from vacant.protocol.capability_card import deserialize as deserialize_card
         from vacant.protocol.dispatch import call_local, make_httpx_transport
         from vacant.protocol.envelope import A2AMessage, A2APart
+        from vacant.protocol.replay_protect import (
+            InMemoryReplayStore,
+            PairKey,
+            ReplayState,
+        )
 
         sk = ls.load_signing_key(n)
         form = _residentform_for(n)
@@ -516,15 +522,61 @@ def call_cmd(
             )
         target_card = deserialize_card(bytes.fromhex(blob_hex))
         transport = make_httpx_transport(timeout=30.0)
+
+        # Pfix3 B6: continue the per-pair envelope chain from disk.
+        # Without this, every CLI call defaulted to seq=1 / EMPTY prev,
+        # and the second call to the same target was rejected as
+        # replay by the server. Layout in envelope_state.json:
+        #   {"<target_hex>": {"request": {...}, "response": {...}}}
+        env_state = ls.load_envelope_state(n)
+        target_hex = target_card.vacant_id.hex()
+        target_state = env_state.get(target_hex, {})
+        req_state = target_state.get("request", {})
+        last_req_seq = int(req_state.get("last_seq", 0))
+        last_req_hash_hex = str(req_state.get("last_hash_hex", ""))
+        last_req_hash = bytes.fromhex(last_req_hash_hex) if last_req_hash_hex else EMPTY_PREV_HASH
+
+        # Caller-side response replay store, seeded so the first
+        # response on a pair starts at seq=1 / EMPTY prev (matching
+        # `make_response_envelope` on the server side).
+        rsp_state = target_state.get("response", {})
+        last_rsp_seq = int(rsp_state.get("last_seq", 0))
+        last_rsp_hash_hex = str(rsp_state.get("last_hash_hex", ""))
+        last_rsp_hash = bytes.fromhex(last_rsp_hash_hex) if last_rsp_hash_hex else EMPTY_PREV_HASH
+        caller_rsp_store = InMemoryReplayStore()
+        if last_rsp_seq > 0:
+            inverse_key = PairKey(from_vid=target_card.vacant_id, to_vid=form.identity)
+            caller_rsp_store._state[inverse_key] = ReplayState(
+                last_sequence_no=last_rsp_seq,
+                chain_tip=last_rsp_hash,
+            )
+
         result = await call_local(
             target_card=target_card,
             requester=form,
             requester_signing_key=sk,
             payload=A2AMessage(role="ROLE_USER", parts=[A2APart(text=text)]),
             transport=transport,
+            sequence_no=last_req_seq + 1,
+            prev_envelope_hash=last_req_hash,
+            caller_response_replay_store=caller_rsp_store,
         )
+
+        # Persist the new chain tips so the next call advances.
+        env_state[target_hex] = {
+            "request": {
+                "last_seq": result.request_envelope.sequence_no,
+                "last_hash_hex": result.request_envelope.compute_hash().hex(),
+            },
+            "response": {
+                "last_seq": result.response_envelope.sequence_no,
+                "last_hash_hex": result.response_envelope.compute_hash().hex(),
+            },
+        }
+        ls.save_envelope_state(n, env_state)
+
         return {
-            "target": target_card.vacant_id.hex(),
+            "target": target_hex,
             "endpoint": target_card.endpoint,
             "request_seq": result.request_envelope.sequence_no,
             "response_role": result.response_envelope.payload.role,

@@ -39,6 +39,7 @@ from vacant.protocol.errors import (
     EnvelopeSignatureError,
     TargetNotFoundError,
 )
+from vacant.protocol.replay_protect import ReplayStore
 
 __all__ = [
     "DispatchResult",
@@ -113,6 +114,7 @@ async def call_capability(
     reputation_oracle: Any | None = None,
     sequence_no: int = 1,
     prev_envelope_hash: bytes = EMPTY_PREV_HASH,
+    caller_response_replay_store: ReplayStore | None = None,
 ) -> DispatchResult:
     """Discover + call a remote vacant offering `query`.
 
@@ -146,6 +148,7 @@ async def call_capability(
         transport=transport,
         sequence_no=sequence_no,
         prev_envelope_hash=prev_envelope_hash,
+        caller_response_replay_store=caller_response_replay_store,
     )
 
 
@@ -158,10 +161,18 @@ async def call_local(
     transport: DispatchTransport,
     sequence_no: int = 1,
     prev_envelope_hash: bytes = EMPTY_PREV_HASH,
+    caller_response_replay_store: ReplayStore | None = None,
 ) -> DispatchResult:
     """Direct call against a known capability card. Used by owner /
     parent paths to reach LOCAL-visibility vacants the public lookup
     excludes.
+
+    ``caller_response_replay_store`` (Pfix3 B6): when provided, the
+    incoming response envelope is run through ``check_and_advance`` on
+    the ``(target → requester)`` chain, so responses can be checked for
+    replay / out-of-order / chain-fork on the caller side. Default
+    ``None`` keeps existing in-process tests (which use synthetic
+    transports that don't track response chains) green.
     """
     if not target_card.endpoint:
         raise TargetNotFoundError(f"target {target_card.vacant_id.short()} has no endpoint URL")
@@ -196,6 +207,26 @@ async def call_local(
 
     response_env = from_a2a_jsonrpc(wrapped)
     response_env.verify_or_raise(target_card.vacant_id.verify_key())
+
+    # Pfix3 B6: caller-side response validation. The signature check
+    # above only proves "someone with target's key signed this"; the
+    # routing checks below prove "this response is on our (target → me)
+    # chain", and the replay store catches duplicate / out-of-order /
+    # forked responses.
+    if response_env.from_vacant_id != target_card.vacant_id:
+        raise EnvelopeFormatError(
+            "response envelope from_vacant_id "
+            f"{response_env.from_vacant_id.short()} != target "
+            f"{target_card.vacant_id.short()}"
+        )
+    if response_env.to_vacant_id != requester.identity:
+        raise EnvelopeFormatError(
+            "response envelope to_vacant_id "
+            f"{response_env.to_vacant_id.short()} != requester "
+            f"{requester.identity.short()}"
+        )
+    if caller_response_replay_store is not None:
+        await caller_response_replay_store.check_and_advance(response_env)
 
     return DispatchResult(
         request_envelope=request,
