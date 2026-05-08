@@ -66,12 +66,16 @@ class HaloPublishRequest(_Base):
     """Hex-encoded ``serialize(card)`` bytes — full signed CapabilityCard."""
     runtime_state: Literal["LOCAL", "ACTIVE", "HIBERNATING", "STALE", "SUNK", "ARCHIVED"]
     visibility: Literal["NONE", "RESTRICTED", "PUBLIC"] = "PUBLIC"
-    base_model: str = "unknown"
-    base_model_family: str = "unknown"
+    # Pfix3 F2: ``None`` defaults so that an HTTP republish that omits
+    # these fields preserves the existing column instead of clobbering
+    # it with a kwarg default. ``publish_halo_signed`` falls back to
+    # ``"unknown"`` / ``"0.0.1"`` on the *new-vacant insert* path.
+    base_model: str | None = None
+    base_model_family: str | None = None
     owner_org: str | None = None
     declared_capabilities: list[str] | None = None
     parent_id: str | None = None
-    version: str = "0.0.1"
+    version: str | None = None
     event_ts_ms: int
     event_actor_seq: int = Field(..., ge=1)
     event_idempotency_key: str

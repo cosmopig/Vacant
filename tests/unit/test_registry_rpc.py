@@ -326,6 +326,50 @@ async def test_halo_publish_malformed_card_rejected(
 
 
 @pytest.mark.asyncio
+async def test_halo_publish_http_republish_preserves_unspecified_metadata(
+    rpc_client: tuple[AsyncClient, RegistryStore],
+) -> None:
+    """Pfix3 F2: HTTP republish that omits base_model / version / etc.
+    must NOT clobber the existing row with kwarg defaults — only the
+    card-derived columns + visibility update."""
+    ac, store = rpc_client
+    sk, vk = keygen()
+    vid = VacantId.from_verify_key(vk)
+
+    # First publish carries metadata explicitly.
+    body = await _signed_publish_body(sk=sk, vid=vid, actor_seq=1)
+    body["base_model"] = "claude-3.5"
+    body["base_model_family"] = "claude"
+    body["version"] = "0.5.0"
+    body["owner_org"] = "acme corp"
+    r1 = await ac.post("/v1/halo", json=body)
+    assert r1.status_code == 200, r1.text
+    pre = await store.get_vacant(vid.hex())
+    assert pre is not None and pre.version == "0.5.0"
+
+    # Republish with bumped halo_version + a new capability_text, but
+    # NO metadata kwargs in the request body.
+    body2 = await _signed_publish_body(
+        sk=sk,
+        vid=vid,
+        capability_text="upgraded",
+        actor_seq=2,
+        ts_ms=int(body["event_ts_ms"]) + 1,  # type: ignore[arg-type]
+    )
+    r2 = await ac.post("/v1/halo", json=body2)
+    assert r2.status_code == 200, r2.text
+    post = await store.get_vacant(vid.hex())
+    assert post is not None
+    # Metadata preserved (defaults are None → skipped from update).
+    assert post.base_model == "claude-3.5"
+    assert post.base_model_family == "claude"
+    assert post.version == "0.5.0"
+    assert post.owner_org == "acme corp"
+    # Card-derived columns moved (intrinsic to republish).
+    assert post.capability_card_hash != pre.capability_card_hash
+
+
+@pytest.mark.asyncio
 async def test_halo_publish_replay_same_seq_idempotent(
     rpc_client: tuple[AsyncClient, RegistryStore],
 ) -> None:
