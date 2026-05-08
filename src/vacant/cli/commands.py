@@ -242,8 +242,8 @@ async def _do_publish(
     registry_url: str,
     capability_text: str,
     endpoint: str | None,
-    base_model: str,
-    base_model_family: str,
+    base_model: str | None,
+    base_model_family: str | None,
 ) -> dict[str, Any]:
     import httpx
 
@@ -279,17 +279,22 @@ async def _do_publish(
         )
         canonical = register_event_canonical_bytes(inputs, signed_by_pubkey=vid.pubkey_bytes)
         signature = sign(sk, canonical)
-        body = {
+        body: dict[str, Any] = {
             "capability_card_blob_hex": blob_hex,
             "runtime_state": "ACTIVE",
             "visibility": visibility.value,
-            "base_model": base_model,
-            "base_model_family": base_model_family,
             "event_ts_ms": ts_ms,
             "event_actor_seq": actor_seq,
             "event_idempotency_key": idempotency_key,
             "event_signature_hex": signature.hex(),
         }
+        # Pfix3 F2: only include caller-supplied metadata in the wire
+        # body. Omitted flags → omitted in JSON → server interprets as
+        # "preserve existing on republish, fallback to default on insert".
+        if base_model is not None:
+            body["base_model"] = base_model
+        if base_model_family is not None:
+            body["base_model_family"] = base_model_family
         r = await http.post(f"{registry_url}/v1/halo", json=body)
         r.raise_for_status()
         result = r.json()
@@ -308,8 +313,23 @@ def publish_cmd(
     endpoint: str | None = typer.Option(None, "--endpoint", help="A2A endpoint URL."),
     registry: str | None = typer.Option(None, "--registry", help="Registry URL."),
     name: str | None = typer.Option(None, "--name", help="Local vacant name."),
-    base_model: str = typer.Option("unknown", "--base-model"),
-    base_model_family: str = typer.Option("unknown", "--base-model-family"),
+    base_model: str | None = typer.Option(
+        None,
+        "--base-model",
+        help=(
+            "Base model identifier (e.g. 'claude-sonnet-4-6'). On the "
+            "first publish, omitted → defaults to 'unknown'. On a "
+            "republish, omitted → preserves the stored value (Pfix3 F2)."
+        ),
+    ),
+    base_model_family: str | None = typer.Option(
+        None,
+        "--base-model-family",
+        help=(
+            "Base model family (e.g. 'claude'). Same null-vs-default "
+            "semantics as --base-model."
+        ),
+    ),
 ) -> None:
     """Flip LOCAL → ACTIVE (publish halo to registry). (P4)"""
     n = _resolve_name(name)
