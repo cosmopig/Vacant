@@ -14,6 +14,7 @@ from vacant.reputation import (
     InvalidSignalError,
     VacantContext,
 )
+from vacant.reputation.errors import MissingAuditKeyError, ReviewRateLimitError
 
 
 def _ctx(
@@ -369,3 +370,111 @@ async def test_record_review_without_audit_registration_is_legacy_path() -> None
     )
     rep = await agg.get_reputation(b_ctx.vacant_id, "default")
     assert rep.factual.alpha > 1.0
+
+
+# --- Pfix3 B4: fail-closed audit + atomic record_review --------------------
+
+
+@pytest.mark.asyncio
+async def test_audit_aware_mode_rejects_unregistered_reviewer() -> None:
+    """Once any reviewer is registered, a record_review whose reviewer
+    has no logbook/signing_key registered must raise MissingAuditKeyError
+    rather than silently skipping the audit append (Pfix3 B4)."""
+    a_ctx, a_lb, a_sk = _ctx_with_keys()
+    b_ctx, _blb, _bsk = _ctx_with_keys(family="gemini")
+    c_ctx, _clb, _csk = _ctx_with_keys(family="mistral")
+    # Construct in audit-aware mode by registering A's logbook/key only.
+    agg = Aggregator(
+        contexts={
+            a_ctx.vacant_id: a_ctx,
+            b_ctx.vacant_id: b_ctx,
+            c_ctx.vacant_id: c_ctx,
+        },
+        review_limit_per_target_24h=10_000,
+        logbooks={a_ctx.vacant_id: a_lb},
+        signing_keys={a_ctx.vacant_id: a_sk},
+    )
+    # Reviewer A is registered — works.
+    await agg.record_review(
+        a_ctx.vacant_id,
+        b_ctx.vacant_id,
+        dimensions={"factual": 1.0},
+        substrate="default",
+        source="caller_review",
+    )
+    # Reviewer C is NOT registered → fail-closed.
+    with pytest.raises(MissingAuditKeyError):
+        await agg.record_review(
+            c_ctx.vacant_id,
+            b_ctx.vacant_id,
+            dimensions={"factual": 1.0},
+            substrate="default",
+            source="caller_review",
+        )
+
+
+@pytest.mark.asyncio
+async def test_rate_limit_breach_does_not_append_audit_event() -> None:
+    """Atomicity: when the per-(reviewer,target) cap is exceeded the
+    rate-limit raises BEFORE the signed REVIEW_EVENT is appended, so the
+    logbook stays clean (Pfix3 B4)."""
+    a_ctx, a_lb, a_sk = _ctx_with_keys()
+    b_ctx, b_lb, b_sk = _ctx_with_keys(family="gemini")
+    agg = Aggregator(
+        contexts={a_ctx.vacant_id: a_ctx, b_ctx.vacant_id: b_ctx},
+        review_limit_per_target_24h=2,  # cap of 2
+        logbooks={a_ctx.vacant_id: a_lb, b_ctx.vacant_id: b_lb},
+        signing_keys={a_ctx.vacant_id: a_sk, b_ctx.vacant_id: b_sk},
+    )
+    initial = len(a_lb.entries)
+    # 2 successful reviews → 2 REVIEW_EVENT entries.
+    for _ in range(2):
+        await agg.record_review(
+            a_ctx.vacant_id,
+            b_ctx.vacant_id,
+            dimensions={"factual": 1.0},
+            substrate="default",
+            source="caller_review",
+        )
+    assert len(a_lb.entries) == initial + 2
+    # 3rd review hits cap; logbook must NOT grow.
+    with pytest.raises(ReviewRateLimitError):
+        await agg.record_review(
+            a_ctx.vacant_id,
+            b_ctx.vacant_id,
+            dimensions={"factual": 1.0},
+            substrate="default",
+            source="caller_review",
+        )
+    assert len(a_lb.entries) == initial + 2, "rate-limit must short-circuit before audit append"
+
+
+@pytest.mark.asyncio
+async def test_audit_append_failure_rolls_back_rate_limit_window() -> None:
+    """If the signed REVIEW_EVENT append fails (chain tamper), the
+    tentative rate-limit window timestamp must be popped so the slot
+    isn't burned (Pfix3 B4)."""
+    a_ctx, a_lb, a_sk = _ctx_with_keys()
+    b_ctx, b_lb, b_sk = _ctx_with_keys(family="gemini")
+    agg = Aggregator(
+        contexts={a_ctx.vacant_id: a_ctx, b_ctx.vacant_id: b_ctx},
+        review_limit_per_target_24h=10_000,
+        logbooks={a_ctx.vacant_id: a_lb, b_ctx.vacant_id: b_lb},
+        signing_keys={a_ctx.vacant_id: a_sk, b_ctx.vacant_id: b_sk},
+    )
+    # Tamper A's logbook so the next audit append fails verify_chain.
+    last = a_lb.entries[-1]
+    a_lb.entries[-1] = last.model_copy(update={"signature": b"\x00" * 64})
+
+    with pytest.raises(ChainTamperError):
+        await agg.record_review(
+            a_ctx.vacant_id,
+            b_ctx.vacant_id,
+            dimensions={"factual": 1.0},
+            substrate="default",
+            source="caller_review",
+        )
+    # Window must be empty (no phantom slot consumed).
+    pair = (a_ctx.vacant_id, b_ctx.vacant_id)
+    window = agg._target_review_timestamps.get(pair)
+    assert not window, "tentative timestamp must be rolled back on audit failure"

@@ -39,6 +39,7 @@ from vacant.reputation.errors import (
     IneligibleReviewerError,
     InvalidDimensionError,
     InvalidSignalError,
+    MissingAuditKeyError,
     ReviewRateLimitError,
 )
 from vacant.reputation.posterior import Beta5D, five_d_with_priors
@@ -102,15 +103,28 @@ class Aggregator:
         signing_keys: dict[VacantId, SigningKey] | None = None,
     ) -> None:
         self._contexts: dict[VacantId, VacantContext] = dict(contexts or {})
-        # Audit trail (D015 §D). When `logbooks` and `signing_keys` are
-        # both supplied, `record_review` will append a signed REVIEW_EVENT
-        # to the reviewer's logbook *before* the posterior is mutated; if
-        # the chain fails to verify the review is rejected and the
-        # posterior is left untouched. The maps are optional only to keep
-        # legacy unit tests that don't care about audit working — when
-        # absent, `record_review` skips the audit step.
+        # Audit trail (D015 §D). The aggregator runs in one of two modes:
+        #
+        #   audit-aware  — `_logbooks` is non-empty (constructor seeded
+        #                  or `register_audit` was called). Every
+        #                  `record_review` requires the reviewer to be
+        #                  registered; missing registration raises
+        #                  `MissingAuditKeyError` (Pfix3 B4 fail-closed).
+        #                  README's "record_review first appends signed
+        #                  REVIEW_EVENT" claim holds in this mode.
+        #
+        #   no-audit     — `_logbooks` is empty and stays empty. Used by
+        #                  unit tests + offline tooling that don't care
+        #                  about D015 §D. Mutation is permitted without
+        #                  any audit append.
+        #
+        # The discriminant is `_audit_mode_active` below. Once a logbook
+        # has been registered (either via constructor or `register_audit`)
+        # the aggregator is locked into audit-aware mode for the rest of
+        # its life — a partial fixture cannot bypass the gate.
         self._logbooks: dict[VacantId, Logbook] = dict(logbooks or {})
         self._signing_keys: dict[VacantId, SigningKey] = dict(signing_keys or {})
+        self._audit_mode_active: bool = bool(self._logbooks)
         # Per (vacant, substrate) Beta5D.
         self._posteriors: dict[tuple[VacantId, str], Beta5D] = {}
         # Per (reviewer, target) review-count for novelty discount.
@@ -137,11 +151,13 @@ class Aggregator:
         self._contexts[ctx.vacant_id] = ctx
 
     def register_audit(self, vid: VacantId, *, logbook: Logbook, signing_key: SigningKey) -> None:
-        """Attach a `Logbook` + `SigningKey` for `vid`. If both reviewer and
-        target have audit registered, `record_review` will emit a signed
-        REVIEW_EVENT to the reviewer's logbook (D015 §D)."""
+        """Attach a `Logbook` + `SigningKey` for `vid`. Registering ANY
+        reviewer flips the aggregator into audit-aware mode for the rest
+        of its lifetime: subsequent `record_review` calls require the
+        reviewer to be registered, otherwise `MissingAuditKeyError`."""
         self._logbooks[vid] = logbook
         self._signing_keys[vid] = signing_key
+        self._audit_mode_active = True
 
     def _audit_enabled_for(self, reviewer: VacantId) -> bool:
         return reviewer in self._logbooks and reviewer in self._signing_keys
@@ -239,31 +255,30 @@ class Aggregator:
         target_ctx = self._contexts[target]
         when = ts if ts is not None else time.time()
 
-        # --- D015 §D audit: sign + append a REVIEW_EVENT to reviewer's logbook
-        # *before* mutating the posterior. If the reviewer's existing chain
-        # is broken (tamper) we reject the review entirely; if the new
-        # entry fails post-append verification we roll back and reject.
-        # Read paths (`get_reputation`, `score`, `get_ranked`) do not
-        # require audit registration; only mutation does.
-        if self._audit_enabled_for(reviewer):
-            self._append_signed_review_event(
-                reviewer=reviewer,
-                target=target,
-                dimensions=dimensions,
-                substrate=substrate,
-                source=source,
-                when=when,
+        # --- Audit gate (Pfix3 B4) -----------------------------------------
+        # Once any reviewer is registered the aggregator is in audit-aware
+        # mode and every record_review must have audit covered for the
+        # reviewer. This makes the README claim ("first appends signed
+        # REVIEW_EVENT") honest in production. Tests that don't construct
+        # with logbooks stay in no-audit mode and skip the append.
+        if self._audit_mode_active and not self._audit_enabled_for(reviewer):
+            raise MissingAuditKeyError(
+                f"reviewer {reviewer} has no logbook/signing_key registered "
+                "but the aggregator is in audit-aware mode (D015 §D); "
+                "call `register_audit(reviewer, logbook=..., signing_key=...)` "
+                "before record_review"
             )
 
-        # --- L2: per-(reviewer, target) rate limit (Padv-P3 D010 §1) -------
-        # Spec P1 line 259: "每 24h 對同一 target_did 的 review 上限: 3" —
-        # this is a REVIEWER-side spam cap. Defense: enforce a sliding-window
-        # cap of `REVIEW_LIMIT_PER_TARGET_24H` per (reviewer, target) pair.
-        # This still defeats Padv-P3 attack 3 (single peer flooding one
-        # target) while letting popular targets accept many reviews from
-        # distinct reviewers.
+        # --- Atomic mutation under a single lock ---------------------------
+        # Order: rate-limit → tentative window append → signed REVIEW_EVENT
+        # append (rollback window on failure) → composition → posterior
+        # update. Holding the lock for the whole sequence guarantees that
+        # an exception at any step leaves the aggregator's observable
+        # state (window, logbook, posterior) coherent.
         pair = (reviewer, target)
         async with self._lock:
+            # L2: per-(reviewer, target) rate limit (Padv-P3 D010 §1).
+            # Spec P1 line 259: "每 24h 對同一 target_did 的 review 上限: 3"
             window = self._target_review_timestamps.setdefault(pair, deque())
             cutoff = when - 86_400.0
             while window and window[0] <= cutoff:
@@ -275,39 +290,41 @@ class Aggregator:
                 )
             window.append(when)
 
-        # --- weight composition (§3.4) -------------------------------------
-        base_weight = SOURCE_BASE_WEIGHTS[source]
+            # D015 §D audit append. Failure rolls back the window
+            # timestamp so retry isn't penalised by a phantom slot.
+            if self._audit_enabled_for(reviewer):
+                try:
+                    self._append_signed_review_event(
+                        reviewer=reviewer,
+                        target=target,
+                        dimensions=dimensions,
+                        substrate=substrate,
+                        source=source,
+                        when=when,
+                    )
+                except Exception:
+                    window.pop()  # remove the tentative timestamp we just appended
+                    raise
 
-        # Same-base-model discount (§3.4.1).
-        same_model_w = 1.0
-        if reviewer_ctx.base_model_family == target_ctx.base_model_family:
-            same_model_w *= SAME_BASE_MODEL_DISCOUNT
+            # Weight composition (§3.4).
+            base_weight = SOURCE_BASE_WEIGHTS[source]
+            same_model_w = 1.0
+            if reviewer_ctx.base_model_family == target_ctx.base_model_family:
+                same_model_w *= SAME_BASE_MODEL_DISCOUNT
 
-        # Novelty (§3.4.3).
-        async with self._lock:
-            self._review_counts.setdefault((reviewer, target), 0)
-            self._review_counts[(reviewer, target)] += 1
-            k = self._review_counts[(reviewer, target)]
-        novelty = 1.0 / (1.0 + NOVELTY_DECAY_COEFFICIENT * max(0, k - 1))
-        # If this is the 6th+ same-model repeat, escalate the discount.
-        if reviewer_ctx.base_model_family == target_ctx.base_model_family and k > 5:
-            same_model_w = SAME_MODEL_HEAVY_DISCOUNT
+            # Novelty (§3.4.3).
+            self._review_counts.setdefault(pair, 0)
+            self._review_counts[pair] += 1
+            k = self._review_counts[pair]
+            novelty = 1.0 / (1.0 + NOVELTY_DECAY_COEFFICIENT * max(0, k - 1))
+            if reviewer_ctx.base_model_family == target_ctx.base_model_family and k > 5:
+                same_model_w = SAME_MODEL_HEAVY_DISCOUNT
 
-        # Reviewer credibility (§3.4.2): `cred = floor + (1-floor) * mu`.
-        # Recursive trust weighting terminates here at the floor -- even
-        # an L0 reviewer counts for `REVIEWER_CREDIBILITY_FLOOR`.
-        async with self._lock:
             reviewer_rep = self._posteriors.get((reviewer, substrate))
-        # If this review touches multiple dims, take the per-dim mean as
-        # the credibility multiplier per dim.
+            sig_discount = discount_from_signals(same_signals)
+            composed = base_weight * same_model_w * novelty * sig_discount
 
-        # Same-* signals (§3.4.4 / dispatch §5).
-        sig_discount = discount_from_signals(same_signals)
-
-        composed = base_weight * same_model_w * novelty * sig_discount
-
-        # --- apply per-dim --------------------------------------------------
-        async with self._lock:
+            # Apply per-dim posterior update (§3.4.2 reviewer credibility).
             key = (target, substrate)
             rep = self._posteriors.get(key) or five_d_with_priors(now_ts=when)
             for d, s in dimensions.items():
