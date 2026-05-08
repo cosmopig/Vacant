@@ -162,3 +162,29 @@ These are real concerns but distinct from the codex round-3 list:
 - Behavior-side ctx injection so sampling can ride the standard `vacant_call` envelope path. Defer; revisit if/when a second sampling-shaped tool is added.
 - Reputation: `audit_enabled_for` symmetry on read paths (currently tolerant, will stay tolerant).
 - THEORY V5 has no claim that conflicts with the fallback path chosen for #4 — INFERENCE_EVENT + SUBSTRATE_BORROWED in the logbook is consistent with §responsibility chain wording.
+
+---
+
+## Outcome (closed 2026-05-08)
+
+All seven batches landed.
+
+| Batch | Commit | Tests |
+|---|---|---|
+| docs | `cb16170` | — |
+| B1 metadata | `1346741` | 854 (no test changes) |
+| B2 README | `c4b2cd0` | 854 (no code changes) |
+| B3 alembic | `1bc106b` | +1 → 855 |
+| B4 reputation | `71b99b9` | +3 → 858 |
+| B5 halo republish | `bfb0410` | +3 → 861 |
+| B6 dispatch + CLI | `5c9c2d8` | +6 → 867 |
+| B7 MCP sampling | `da8eca9` | 867 (rewrote 1 integration test, contract change) |
+
+**Final state:** 867 tests pass (52 slow); ruff + ruff format + mypy strict on `src/` all green.
+
+**Carry-over decisions to remember:**
+
+- The aggregator's "audit-aware mode" latch is one-way. Once any reviewer registers, every subsequent `record_review` requires audit registration. If a future caller wants to opt back out, they must construct a fresh aggregator.
+- Halo republish `parent_id` immutability is enforced by exact equality, including `None == None`. A caller who passes `parent_id=None` (default) on republish for a vacant whose stored `parent_id` is non-None gets `RegistryWriteError` — they must explicitly pass the existing parent_id.
+- CLI `envelope_state.json` lives alongside the keypair; deleting it forces seq=1 / EMPTY on the next call, which the server will reject as replay until the server's replay store also forgets the pair. Document this as part of the "rotate identity" workflow if/when that ships.
+- The fallback path for #4 means `vacant_call_with_sampling` and `vacant_call` share envelope semantics but diverge in one place: sampling's response carries `substrate` + `model_id` + `proof` *alongside* the signed `message`. Clients that consume the sampling tool need to read both keys.
