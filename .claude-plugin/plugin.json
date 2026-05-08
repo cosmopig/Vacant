@@ -1,7 +1,7 @@
 {
   "name": "vacant",
   "version": "0.3.0",
-  "description": "Responsibility-layer residency form for AI agents — identity, history, reputation, consequences",
+  "description": "[Capstone MVP · 2026] Responsibility-layer residency form for AI agents — identity, history, reputation, consequences. 14-week undergraduate thesis project; demonstrates the mechanics, not production-hardened.",
   "author": {
     "name": "cosmopig",
     "url": "https://github.com/cosmopig"
