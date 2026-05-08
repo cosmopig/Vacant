@@ -111,12 +111,12 @@ async def publish_halo(
     card: CapabilityCard,
     runtime_state: VacantState,
     signing_key: SigningKey,
-    base_model: str = "unknown",
-    base_model_family: str = "unknown",
+    base_model: str | None = None,
+    base_model_family: str | None = None,
     owner_org: str | None = None,
     declared_capabilities: list[str] | None = None,
     parent_id: str | None = None,
-    version: str = "0.0.1",
+    version: str | None = None,
     visibility: Visibility = Visibility.PUBLIC,
 ) -> HaloRecord:
     """Insert / update a vacant's halo + emit a `register` event.
@@ -125,6 +125,18 @@ async def publish_halo(
     - LOCAL state forces `Visibility.NONE` regardless of `visibility`.
     - LOCAL halos are stored (so owner/parent direct lookup works) but
       `effective_visibility` returns NONE → discovery filters them out.
+
+    Republish kwargs policy (Pfix3 F2): ``base_model``,
+    ``base_model_family``, ``owner_org``, ``version`` are
+    ``None``-default. On *new* publish, they fall back to defaults
+    (``"unknown"`` / ``"0.0.1"`` / ``None``). On *republish*, a
+    ``None`` argument means "leave the existing column untouched";
+    only non-``None`` arguments overwrite the row. This avoids
+    accidentally clobbering `version="0.5.0"` with the default
+    `"0.0.1"` when a caller republishes only to flip visibility.
+    Card-derived columns (``capability_card_*``,
+    ``declared_capabilities_json``, ``visibility``) always overwrite
+    on republish — they are intrinsic to the new card.
     """
     if not card.verify():
         raise RegistryWriteError("publish_halo: capability card signature invalid")
@@ -144,10 +156,10 @@ async def publish_halo(
             vacant_id=vacant_id,
             public_key=card.vacant_id.pubkey_bytes,
             owner_org=owner_org,
-            base_model=base_model,
-            base_model_family=base_model_family,
+            base_model=base_model or "unknown",
+            base_model_family=base_model_family or "unknown",
             parent_id=parent_id,
-            version=version,
+            version=version or "0.0.1",
             declared_capabilities_json=json.dumps(capabilities),
             capability_card_hash=capability_card_hash,
             capability_card_sig=card.signature,
@@ -160,7 +172,9 @@ async def publish_halo(
         prev_halo_version = 0
     else:
         # Republish: enforce identity-custody invariants then build a
-        # full field-update payload so the row tracks the new card.
+        # *partial* field-update payload — the card-derived columns
+        # always overwrite (they ARE the card), but caller-supplied
+        # metadata kwargs only overwrite when explicitly passed.
         last = await store.latest_event_for_actor(vacant_id)
         prev_halo_version = _extract_halo_version(last.payload_json) if last else 0
         _check_republish_invariants(
@@ -175,12 +189,16 @@ async def publish_halo(
             "capability_card_sig": card.signature,
             "capability_card_blob": capability_card_blob,
             "declared_capabilities_json": json.dumps(capabilities),
-            "base_model": base_model,
-            "base_model_family": base_model_family,
-            "owner_org": owner_org,
-            "version": version,
             "visibility": eff_vis.value,
         }
+        if base_model is not None:
+            vacant_field_updates["base_model"] = base_model
+        if base_model_family is not None:
+            vacant_field_updates["base_model_family"] = base_model_family
+        if owner_org is not None:
+            vacant_field_updates["owner_org"] = owner_org
+        if version is not None:
+            vacant_field_updates["version"] = version
 
     # Emit signed `register` event so the publish lands in the audit chain.
     # F-A: vacant insert/update + event submit are bundled into a single
@@ -301,12 +319,12 @@ async def publish_halo_signed(
     card: CapabilityCard,
     runtime_state: VacantState,
     visibility: Visibility = Visibility.PUBLIC,
-    base_model: str = "unknown",
-    base_model_family: str = "unknown",
+    base_model: str | None = None,
+    base_model_family: str | None = None,
     owner_org: str | None = None,
     declared_capabilities: list[str] | None = None,
     parent_id: str | None = None,
-    version: str = "0.0.1",
+    version: str | None = None,
     event_ts_ms: int,
     event_actor_seq: int,
     event_idempotency_key: str,
@@ -322,6 +340,11 @@ async def publish_halo_signed(
        lookup can succeed).
     3. Submit the pre-signed register event via ``store.submit_event``,
        which re-runs L1 signature verification + L2 sequence check.
+
+    Republish kwargs policy mirrors ``publish_halo`` (Pfix3 F2):
+    ``None`` arguments leave the existing column untouched on
+    republish; only non-``None`` values overwrite. New publishes fall
+    back to ``"unknown"`` / ``"0.0.1"`` defaults.
     """
     if not card.verify():
         raise RegistryWriteError("publish_halo_signed: capability card signature invalid")
@@ -340,10 +363,10 @@ async def publish_halo_signed(
             vacant_id=vacant_id,
             public_key=card.vacant_id.pubkey_bytes,
             owner_org=owner_org,
-            base_model=base_model,
-            base_model_family=base_model_family,
+            base_model=base_model or "unknown",
+            base_model_family=base_model_family or "unknown",
             parent_id=parent_id,
-            version=version,
+            version=version or "0.0.1",
             declared_capabilities_json=json.dumps(capabilities),
             capability_card_hash=capability_card_hash,
             capability_card_sig=card.signature,
@@ -354,7 +377,8 @@ async def publish_halo_signed(
         )
     else:
         # Republish: enforce identity-custody invariants then build a
-        # full field-update payload so the row tracks the new card.
+        # *partial* field-update payload — see publish_halo for the
+        # detailed kwargs policy.
         last = await store.latest_event_for_actor(vacant_id)
         prev_halo_version = _extract_halo_version(last.payload_json) if last else 0
         _check_republish_invariants(
@@ -368,12 +392,16 @@ async def publish_halo_signed(
             "capability_card_sig": card.signature,
             "capability_card_blob": capability_card_blob,
             "declared_capabilities_json": json.dumps(capabilities),
-            "base_model": base_model,
-            "base_model_family": base_model_family,
-            "owner_org": owner_org,
-            "version": version,
             "visibility": eff_vis.value,
         }
+        if base_model is not None:
+            vacant_field_updates["base_model"] = base_model
+        if base_model_family is not None:
+            vacant_field_updates["base_model_family"] = base_model_family
+        if owner_org is not None:
+            vacant_field_updates["owner_org"] = owner_org
+        if version is not None:
+            vacant_field_updates["version"] = version
 
     inputs = RegisterEventDraftInputs(
         vacant_id=vacant_id,

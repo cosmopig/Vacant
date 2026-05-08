@@ -195,3 +195,47 @@ async def test_publish_halo_republish_rejects_halo_version_downgrade(
             runtime_state=VacantState.ACTIVE,
             signing_key=sk,
         )
+
+
+@pytest.mark.asyncio
+async def test_publish_halo_republish_preserves_unspecified_metadata(
+    registry_store: RegistryStore,
+) -> None:
+    """Pfix3 F2: a republish that doesn't pass base_model / version /
+    owner_org / base_model_family must NOT overwrite those columns
+    with kwarg defaults. Only the card-derived columns + visibility
+    update."""
+    sk, vk = keygen()
+    card_v1 = _make_card(sk, vk)
+    await publish_halo(
+        store=registry_store,
+        card=card_v1,
+        runtime_state=VacantState.ACTIVE,
+        base_model="claude-3.5",
+        base_model_family="claude",
+        version="0.5.0",
+        owner_org="acme corp",
+        signing_key=sk,
+    )
+    pre = await registry_store.get_vacant(card_v1.vacant_id.hex())
+    assert pre is not None
+
+    # Republish with only the card bumped; no metadata kwargs supplied.
+    card_v2 = _make_card_v2(sk, vk, capability_text="upgraded")
+    await publish_halo(
+        store=registry_store,
+        card=card_v2,
+        runtime_state=VacantState.ACTIVE,
+        signing_key=sk,
+    )
+    post = await registry_store.get_vacant(card_v1.vacant_id.hex())
+    assert post is not None
+
+    # Card-derived columns moved (intrinsic to republish):
+    assert post.capability_card_hash != pre.capability_card_hash
+    assert b"upgraded" in post.capability_card_blob
+    # Caller-supplied metadata preserved (was not specified on republish):
+    assert post.base_model == "claude-3.5"
+    assert post.base_model_family == "claude"
+    assert post.version == "0.5.0"
+    assert post.owner_org == "acme corp"

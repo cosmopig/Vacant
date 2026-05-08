@@ -108,7 +108,10 @@ def build_fastmcp_server(
     pass ``None`` so the entries stay in memory only.
     """
     rs = replay_store if replay_store is not None else InMemoryReplayStore()
-    lb = logbook if logbook is not None else form.logbook
+    # `form.logbook` is non-Optional on `ResidentForm`; this fallback
+    # makes `lb` provably non-None so the sampling tool can append
+    # without a defensive guard.
+    lb: Logbook = logbook if logbook is not None else form.logbook
     bridge = VacantAsMCPServer(
         self_form=form,
         self_signing_key=signing_key,
@@ -229,40 +232,39 @@ def build_fastmcp_server(
         #    INFERENCE_EVENT records the input/output hashes so an
         #    auditor can replay verification without keeping the raw
         #    prompt/response.
-        if lb is not None:
-            now = time.time()
-            request_env_id_hex = request_env.compute_hash().hex()
-            prompt_hash_hex = hash_blake2b(user_prompt.encode("utf-8")).hex()
-            response_hash_hex = hash_blake2b(sub_res.text.encode("utf-8")).hex()
-            lb.append(
-                "SUBSTRATE_BORROWED",
-                {
-                    "kind": "SUBSTRATE_BORROWED",
-                    "caller": request_env.from_vacant_id.hex(),
-                    "substrate": substrate.name,
-                    "model_hint": model_hint,
-                    "request_envelope_id_hex": request_env_id_hex,
-                    "ts": now,
-                },
-                signing_key,
-            )
-            lb.append(
-                "INFERENCE_EVENT",
-                {
-                    "kind": "INFERENCE_EVENT",
-                    "caller": request_env.from_vacant_id.hex(),
-                    "request_envelope_id_hex": request_env_id_hex,
-                    "prompt_hash_hex": prompt_hash_hex,
-                    "response_hash_hex": response_hash_hex,
-                    "substrate": substrate.name,
-                    "model_id": sub_res.model_id,
-                    "proof": sub_res.proof,
-                    "ts": now,
-                },
-                signing_key,
-            )
-            if on_logbook_change is not None:
-                on_logbook_change(lb)
+        now = time.time()
+        request_env_id_hex = request_env.compute_hash().hex()
+        prompt_hash_hex = hash_blake2b(user_prompt.encode("utf-8")).hex()
+        response_hash_hex = hash_blake2b(sub_res.text.encode("utf-8")).hex()
+        lb.append(
+            "SUBSTRATE_BORROWED",
+            {
+                "kind": "SUBSTRATE_BORROWED",
+                "caller": request_env.from_vacant_id.hex(),
+                "substrate": substrate.name,
+                "model_hint": model_hint,
+                "request_envelope_id_hex": request_env_id_hex,
+                "ts": now,
+            },
+            signing_key,
+        )
+        lb.append(
+            "INFERENCE_EVENT",
+            {
+                "kind": "INFERENCE_EVENT",
+                "caller": request_env.from_vacant_id.hex(),
+                "request_envelope_id_hex": request_env_id_hex,
+                "prompt_hash_hex": prompt_hash_hex,
+                "response_hash_hex": response_hash_hex,
+                "substrate": substrate.name,
+                "model_id": sub_res.model_id,
+                "proof": sub_res.proof,
+                "ts": now,
+            },
+            signing_key,
+        )
+        if on_logbook_change is not None:
+            on_logbook_change(lb)
 
         # 4. Build a signed response envelope (target → caller chain).
         response_payload = A2AMessage(role="ROLE_AGENT", parts=[A2APart(text=sub_res.text)])

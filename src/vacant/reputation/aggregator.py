@@ -122,6 +122,13 @@ class Aggregator:
         # has been registered (either via constructor or `register_audit`)
         # the aggregator is locked into audit-aware mode for the rest of
         # its life — a partial fixture cannot bypass the gate.
+        #
+        # ONE-WAY LATCH: `_audit_mode_active` is intentionally never
+        # cleared back to False. Manually flipping it (e.g., in a test)
+        # silently re-introduces the silent-skip behaviour Pfix3 B4
+        # explicitly removed; do not do that. If a future use case
+        # genuinely needs to "drop audit mode" mid-life, build a fresh
+        # Aggregator instead.
         self._logbooks: dict[VacantId, Logbook] = dict(logbooks or {})
         self._signing_keys: dict[VacantId, SigningKey] = dict(signing_keys or {})
         self._audit_mode_active: bool = bool(self._logbooks)

@@ -98,6 +98,16 @@ class InMemoryReplayStore:
         self._state: dict[PairKey, ReplayState] = {}
         self._lock = asyncio.Lock()
 
+    def seed(self, key: PairKey, state: ReplayState) -> None:
+        """Pre-load the per-pair state from disk / another snapshot.
+
+        Used by the CLI (Pfix3 B6) to rehydrate the response chain on
+        ``vacant call`` so a target's reply seq=N+1 is recognised after
+        a process restart. Synchronous (no lock): callers must seed
+        before the store sees concurrent traffic.
+        """
+        self._state[key] = state
+
     async def get(self, key: PairKey) -> ReplayState:
         async with self._lock:
             return self._state.get(key, ReplayState(last_sequence_no=0, chain_tip=EMPTY_PREV_HASH))

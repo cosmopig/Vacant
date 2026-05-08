@@ -546,9 +546,9 @@ def call_cmd(
         caller_rsp_store = InMemoryReplayStore()
         if last_rsp_seq > 0:
             inverse_key = PairKey(from_vid=target_card.vacant_id, to_vid=form.identity)
-            caller_rsp_store._state[inverse_key] = ReplayState(
-                last_sequence_no=last_rsp_seq,
-                chain_tip=last_rsp_hash,
+            caller_rsp_store.seed(
+                inverse_key,
+                ReplayState(last_sequence_no=last_rsp_seq, chain_tip=last_rsp_hash),
             )
 
         result = await call_local(
