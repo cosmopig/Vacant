@@ -184,7 +184,28 @@ All seven batches landed.
 
 **Carry-over decisions to remember:**
 
-- The aggregator's "audit-aware mode" latch is one-way. Once any reviewer registers, every subsequent `record_review` requires audit registration. If a future caller wants to opt back out, they must construct a fresh aggregator.
-- Halo republish `parent_id` immutability is enforced by exact equality, including `None == None`. A caller who passes `parent_id=None` (default) on republish for a vacant whose stored `parent_id` is non-None gets `RegistryWriteError` — they must explicitly pass the existing parent_id.
+- The aggregator's "audit-aware mode" latch is one-way. Once any reviewer registers, every subsequent `record_review` requires audit registration. If a future caller wants to opt back out, they must construct a fresh aggregator. (Marked `ONE-WAY LATCH` in the source after F4.)
+- Halo republish `parent_id` immutability uses **None-as-preserve** semantics (after F2 follow-up): a caller passing `parent_id=None` (or omitting the field) on republish leaves the existing column untouched; a caller passing a *different non-None* parent_id is rejected. To genuinely unset a parent, callers need an explicit revoke flow (out of scope).
 - CLI `envelope_state.json` lives alongside the keypair; deleting it forces seq=1 / EMPTY on the next call, which the server will reject as replay until the server's replay store also forgets the pair. Document this as part of the "rotate identity" workflow if/when that ships.
 - The fallback path for #4 means `vacant_call_with_sampling` and `vacant_call` share envelope semantics but diverge in one place: sampling's response carries `substrate` + `model_id` + `proof` *alongside* the signed `message`. Clients that consume the sampling tool need to read both keys.
+
+---
+
+## Self-review fixes (F1–F4 + follow-ups, 2026-05-08)
+
+After Pfix3 landed, a PR-style self-review surfaced four risks that
+hadn't broken tests but were either smells or latent footguns. Two
+also turned out to have residual bugs at adjacent layers, caught on
+re-review and fixed.
+
+| Fix | Commit | What |
+|---|---|---|
+| F1 | `5d6f193` | `InMemoryReplayStore.seed()` public method; CLI no longer pokes `_state` |
+| F2 (core) | `5d6f193` | `publish_halo[_signed]` kwargs use `None` defaults; partial-update on republish |
+| F2 (rpc) | `f43dbee` | `HaloPublishRequest` schema also uses `None` defaults so HTTP path is consistent |
+| F2 (parent_id) | `210d10d` | `parent_id` invariant treats `None` as "preserve" (was firing on legitimate omit-on-republish) |
+| F2 (cli) | `4e97515` | `vacant publish` typer flags use `None` defaults + omit from JSON when unset |
+| F3 + F4 | `5d6f193` | Drop dead `lb is not None` guard in MCP sampling tool; strengthen audit-mode latch docstring |
+| Test coverage | `f72f454` | `seed()` unit tests; HTTP republish-preserves; parent_id-preserves |
+
+**Final test count:** 872 passed (52 slow). All ruff / format / mypy strict checks green.
