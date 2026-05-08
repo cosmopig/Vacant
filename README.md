@@ -177,15 +177,40 @@ the vacant side**.
 ```bash
 # Terminal — start a vacant
 vacant init alice
+# Either: stdio MCP only (recommended for clients that spawn the server)
+vacant mcp --name alice
+# Or: HTTP A2A + stdio MCP from a single process (the MCP side is still
+# stdio — the --port flag exposes the A2A FastAPI app, not a /mcp route)
 vacant serve --mcp --port 8443 --name alice
 ```
 
-Point your MCP client (e.g. Claude Desktop's `mcp.json`) at
-`http://localhost:8443/mcp`, then call any of alice's tools. Alice's
-`substrate_spec.allowed_substrates` includes `client-inherited`; the
-recorded substrate identity is `client-inherited:<caller_vid>:<model>`,
-so per-substrate reputation works the same way it does for any other
-backend.
+The MCP transport is **stdio** — the easiest way to wire it into a
+client is the plugin manifest above (`.claude-plugin/plugin.json`),
+which already pins `"type": "stdio"` and the `vacant mcp` command. For
+clients that read `mcp.json` directly, the equivalent entry is:
+
+```json
+{
+  "mcpServers": {
+    "vacant-alice": {
+      "type": "stdio",
+      "command": "vacant",
+      "args": ["mcp", "--name", "alice"]
+    }
+  }
+}
+```
+
+Once connected, alice's `substrate_spec.allowed_substrates` includes
+`client-inherited`; the recorded substrate identity is
+`client-inherited:<caller_vid>:<model>`, so per-substrate reputation
+works the same way it does for any other backend.
+
+> A streamable-HTTP / SSE `/mcp` route is **not** mounted on the
+> FastAPI app today — `--port 8443` exposes only A2A + `/card` +
+> `/health`. If your client cannot speak stdio, run the inspector
+> bridge (`npx @modelcontextprotocol/inspector vacant mcp ...`) which
+> gives you an HTTP endpoint to point at.
 
 Verify the wiring externally with `npx @modelcontextprotocol/inspector`
 or the `mcp` Python SDK's client. The integration test pinning this
