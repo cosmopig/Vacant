@@ -2781,8 +2781,8 @@ wheels = [
 ]
 
 [[package]]
-name = "vacant"
-version = "0.0.1"
+name = "vacant-network"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
