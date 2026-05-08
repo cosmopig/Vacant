@@ -316,6 +316,7 @@ class RegistryStore:
         vacant_id_to_update: str | None,
         new_visibility: str | None,
         draft: SignedEventDraft,
+        vacant_field_updates: dict[str, object] | None = None,
     ) -> Event:
         """F-A defense: insert/update vacant + submit register event in
         ONE transaction. If `submit_event` fails (signature rejected,
@@ -326,6 +327,15 @@ class RegistryStore:
         Exactly one of `vacant_to_insert` or `vacant_id_to_update` should
         be non-None per call site. If both are None, only the event is
         submitted (used by tests).
+
+        ``vacant_field_updates`` (Pfix3 B5): when ``vacant_id_to_update``
+        is set, callers can pass a dict of column-name → new-value to
+        apply onto the existing row before the register event lands.
+        Used by ``publish_halo`` republish so the row's
+        ``capability_card_*`` columns track the new card instead of
+        going stale while the audit chain advances. ``new_visibility``
+        is the legacy single-field path; if ``vacant_field_updates``
+        contains a ``visibility`` key it takes precedence.
         """
         async with self._write_lock:
             async with self._sessionmaker() as s:
@@ -338,11 +348,15 @@ class RegistryStore:
                             raise RegistryWriteError(
                                 f"vacant {vacant_to_insert.vacant_id} already exists"
                             ) from exc
-                    elif vacant_id_to_update is not None and new_visibility is not None:
+                    elif vacant_id_to_update is not None:
                         v = await s.get(Vacant, vacant_id_to_update)
                         if v is None:
                             raise NotFoundError(f"vacant {vacant_id_to_update} not found")
-                        v.visibility = new_visibility
+                        if vacant_field_updates:
+                            for fname, fval in vacant_field_updates.items():
+                                setattr(v, fname, fval)
+                        elif new_visibility is not None:
+                            v.visibility = new_visibility
                         await s.flush()
                     return await self._submit_event_in_session(s, draft)
 

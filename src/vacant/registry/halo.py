@@ -57,6 +57,54 @@ def _capability_card_hash(card: CapabilityCard) -> bytes:
     return hash_blake2b(card.signing_payload())
 
 
+def _extract_halo_version(payload_json: str | dict[str, Any]) -> int:
+    """Pull ``halo_version`` from a register-event payload (Pfix3 B5).
+
+    The event store keeps payloads as JSON strings; decode + extract,
+    falling back to 0 on any parse failure so the monotonicity check
+    never blocks publish on a malformed historical event.
+    """
+    try:
+        payload = payload_json if isinstance(payload_json, dict) else json.loads(payload_json)
+        return int(payload.get("halo_version", 0))
+    except (json.JSONDecodeError, ValueError, TypeError):
+        return 0
+
+
+def _check_republish_invariants(
+    *,
+    existing: Vacant,
+    card: CapabilityCard,
+    new_parent_id: str | None,
+    prev_halo_version: int,
+) -> None:
+    """Reject a republish that would violate identity-custody or chain
+    monotonicity (Pfix3 B5).
+
+    - Public key must match: ``vacant_id`` is derived from the pubkey,
+      so this is a defensive check that the new card was signed by the
+      same key the existing row records.
+    - ``parent_id`` is immutable across republish: changing parent
+      breaks the lineage chain that powers cold-start priors.
+    - ``halo_version`` must be monotonic: rejects accidental replay of
+      a stale signed card.
+    """
+    if card.vacant_id.pubkey_bytes != existing.public_key:
+        raise RegistryWriteError(
+            "publish_halo republish: card pubkey does not match existing public_key"
+        )
+    if new_parent_id != existing.parent_id:
+        raise RegistryWriteError(
+            "publish_halo republish: parent_id is immutable; "
+            f"existing={existing.parent_id!r} new={new_parent_id!r}"
+        )
+    if card.halo_version < prev_halo_version:
+        raise RegistryWriteError(
+            "publish_halo republish: halo_version must be monotonic; "
+            f"existing={prev_halo_version} new={card.halo_version}"
+        )
+
+
 async def publish_halo(
     *,
     store: RegistryStore,
@@ -90,6 +138,7 @@ async def publish_halo(
 
     existing = await store.get_vacant(vacant_id)
     vacant_to_insert: Vacant | None = None
+    vacant_field_updates: dict[str, object] | None = None
     if existing is None:
         vacant_to_insert = Vacant(
             vacant_id=vacant_id,
@@ -107,6 +156,31 @@ async def publish_halo(
             visibility=eff_vis.value,
             registered_at=ts,
         )
+        next_seq = 1
+        prev_halo_version = 0
+    else:
+        # Republish: enforce identity-custody invariants then build a
+        # full field-update payload so the row tracks the new card.
+        last = await store.latest_event_for_actor(vacant_id)
+        prev_halo_version = _extract_halo_version(last.payload_json) if last else 0
+        _check_republish_invariants(
+            existing=existing,
+            card=card,
+            new_parent_id=parent_id,
+            prev_halo_version=prev_halo_version,
+        )
+        next_seq = (last.actor_seq if last else 0) + 1
+        vacant_field_updates = {
+            "capability_card_hash": capability_card_hash,
+            "capability_card_sig": card.signature,
+            "capability_card_blob": capability_card_blob,
+            "declared_capabilities_json": json.dumps(capabilities),
+            "base_model": base_model,
+            "base_model_family": base_model_family,
+            "owner_org": owner_org,
+            "version": version,
+            "visibility": eff_vis.value,
+        }
 
     # Emit signed `register` event so the publish lands in the audit chain.
     # F-A: vacant insert/update + event submit are bundled into a single
@@ -120,12 +194,6 @@ async def publish_halo(
         "halo_version": card.halo_version,
         "visibility": eff_vis.value,
     }
-    if vacant_to_insert is None:
-        last = await store.latest_event_for_actor(vacant_id)
-        next_seq = (last.actor_seq if last else 0) + 1
-    else:
-        # Brand-new vacant: no prior events, so this is actor_seq 1.
-        next_seq = 1
     idempotency_key = f"register:{vacant_id}:{ts}:{uuid.uuid4()}"
     canonical_payload = json.dumps(draft_payload, sort_keys=True, separators=(",", ":")).encode(
         "utf-8"
@@ -158,6 +226,7 @@ async def publish_halo(
         vacant_id_to_update=None if vacant_to_insert is not None else vacant_id,
         new_visibility=None if vacant_to_insert is not None else eff_vis.value,
         draft=draft,
+        vacant_field_updates=vacant_field_updates,
     )
 
     return HaloRecord(
@@ -265,6 +334,7 @@ async def publish_halo_signed(
 
     existing = await store.get_vacant(vacant_id)
     vacant_to_insert: Vacant | None = None
+    vacant_field_updates: dict[str, object] | None = None
     if existing is None:
         vacant_to_insert = Vacant(
             vacant_id=vacant_id,
@@ -282,6 +352,28 @@ async def publish_halo_signed(
             visibility=eff_vis.value,
             registered_at=event_ts_ms,
         )
+    else:
+        # Republish: enforce identity-custody invariants then build a
+        # full field-update payload so the row tracks the new card.
+        last = await store.latest_event_for_actor(vacant_id)
+        prev_halo_version = _extract_halo_version(last.payload_json) if last else 0
+        _check_republish_invariants(
+            existing=existing,
+            card=card,
+            new_parent_id=parent_id,
+            prev_halo_version=prev_halo_version,
+        )
+        vacant_field_updates = {
+            "capability_card_hash": capability_card_hash,
+            "capability_card_sig": card.signature,
+            "capability_card_blob": capability_card_blob,
+            "declared_capabilities_json": json.dumps(capabilities),
+            "base_model": base_model,
+            "base_model_family": base_model_family,
+            "owner_org": owner_org,
+            "version": version,
+            "visibility": eff_vis.value,
+        }
 
     inputs = RegisterEventDraftInputs(
         vacant_id=vacant_id,
@@ -313,6 +405,7 @@ async def publish_halo_signed(
         vacant_id_to_update=None if vacant_to_insert is not None else vacant_id,
         new_visibility=None if vacant_to_insert is not None else eff_vis.value,
         draft=draft,
+        vacant_field_updates=vacant_field_updates,
     )
     return HaloRecord(
         vacant_id=vacant_id,
