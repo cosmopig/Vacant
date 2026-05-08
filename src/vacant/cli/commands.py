@@ -325,10 +325,7 @@ def publish_cmd(
     base_model_family: str | None = typer.Option(
         None,
         "--base-model-family",
-        help=(
-            "Base model family (e.g. 'claude'). Same null-vs-default "
-            "semantics as --base-model."
-        ),
+        help=("Base model family (e.g. 'claude'). Same null-vs-default semantics as --base-model."),
     ),
 ) -> None:
     """Flip LOCAL → ACTIVE (publish halo to registry). (P4)"""

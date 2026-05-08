@@ -16,6 +16,7 @@ from vacant.protocol import (
     InMemoryReplayStore,
     PairKey,
     ReplayDetectedError,
+    ReplayState,
     SqliteReplayStore,
     VacantEnvelope,
 )
@@ -155,3 +156,58 @@ async def test_sqlite_replay_store_chain_fork_rejected() -> None:
     with pytest.raises(ChainForkError):
         await store.check_and_advance(bad)
     await engine.dispose()
+
+
+# --- Pfix3 F1: InMemoryReplayStore.seed() ---------------------------------
+
+
+@pytest.mark.asyncio
+async def test_in_memory_replay_store_seed_then_advance() -> None:
+    """Pfix3 F1: seed() rehydrates pair state so the next envelope on a
+    pair is checked against the seeded last_seq + chain_tip, not the
+    empty initial state. Used by the CLI to continue an envelope chain
+    across process restarts."""
+    sk_a, frm, _sk_b, to = _pair()
+    store = InMemoryReplayStore()
+
+    env1 = _envelope(sk=sk_a, frm=frm, to=to, seq=1)
+    await store.check_and_advance(env1)
+
+    # Re-create the store (simulating process restart) and seed from
+    # the stored state.
+    new_store = InMemoryReplayStore()
+    key = PairKey(from_vid=frm, to_vid=to)
+    new_store.seed(
+        key,
+        ReplayState(last_sequence_no=1, chain_tip=env1.compute_hash()),
+    )
+    state = await new_store.get(key)
+    assert state.last_sequence_no == 1
+    assert state.chain_tip == env1.compute_hash()
+
+    # seq=2 chained from env1's hash succeeds against the seeded store.
+    env2 = _envelope(sk=sk_a, frm=frm, to=to, seq=2, prev=env1.compute_hash())
+    await new_store.check_and_advance(env2)
+
+    # seq=2 again is rejected as replay (the seeded store advanced).
+    with pytest.raises(ReplayDetectedError):
+        await new_store.check_and_advance(env2)
+
+
+@pytest.mark.asyncio
+async def test_in_memory_replay_store_seed_overwrites_existing_pair() -> None:
+    """seed() unconditionally writes — used by CLI to resync with disk
+    state. No 'merge' semantics."""
+    sk_a, frm, _sk_b, to = _pair()
+    store = InMemoryReplayStore()
+    env1 = _envelope(sk=sk_a, frm=frm, to=to, seq=1)
+    await store.check_and_advance(env1)
+
+    key = PairKey(from_vid=frm, to_vid=to)
+    store.seed(
+        key,
+        ReplayState(last_sequence_no=42, chain_tip=b"\x55" * 32),
+    )
+    state = await store.get(key)
+    assert state.last_sequence_no == 42
+    assert state.chain_tip == b"\x55" * 32
