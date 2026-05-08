@@ -8,7 +8,7 @@
     {
       "name": "vacant",
       "source": "./",
-      "description": "[畢業專題 MVP · 2026] 嫁接到 Claude Code 的 responsibility-layer agent — 14 週 undergraduate thesis 作品，展示機制可實作，非 production-grade",
+      "description": "嫁接到 Claude Code 的 responsibility-layer agent",
       "version": "0.3.0",
       "category": "agent-network"
     }
