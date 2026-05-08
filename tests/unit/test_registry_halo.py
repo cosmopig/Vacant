@@ -176,6 +176,49 @@ async def test_publish_halo_republish_rejects_parent_id_change(
 
 
 @pytest.mark.asyncio
+async def test_publish_halo_republish_omitting_parent_id_preserves_existing(
+    registry_store: RegistryStore,
+) -> None:
+    """Pfix3 F2 follow-up: parent_id immutability must distinguish
+    'caller forgot to send' (None → preserve) from 'caller asked to
+    change to a different value' (explicit non-None → reject)."""
+    # Set up a vacant with parent_id="aa"*32 first.
+    parent_sk, parent_vk = keygen()
+    parent_id_hex = VacantId.from_verify_key(parent_vk).hex()
+    parent_card = _make_card(parent_sk, parent_vk)
+    await publish_halo(
+        store=registry_store,
+        card=parent_card,
+        runtime_state=VacantState.ACTIVE,
+        signing_key=parent_sk,
+    )
+
+    child_sk, child_vk = keygen()
+    child_card_v1 = _make_card(child_sk, child_vk)
+    await publish_halo(
+        store=registry_store,
+        card=child_card_v1,
+        runtime_state=VacantState.ACTIVE,
+        parent_id=parent_id_hex,
+        signing_key=child_sk,
+    )
+    pre = await registry_store.get_vacant(child_card_v1.vacant_id.hex())
+    assert pre is not None and pre.parent_id == parent_id_hex
+
+    # Republish without parent_id: must NOT raise (None means preserve).
+    child_card_v2 = _make_card_v2(child_sk, child_vk)
+    await publish_halo(
+        store=registry_store,
+        card=child_card_v2,
+        runtime_state=VacantState.ACTIVE,
+        signing_key=child_sk,
+    )
+    post = await registry_store.get_vacant(child_card_v1.vacant_id.hex())
+    assert post is not None
+    assert post.parent_id == parent_id_hex, "parent_id must be preserved"
+
+
+@pytest.mark.asyncio
 async def test_publish_halo_republish_rejects_halo_version_downgrade(
     registry_store: RegistryStore,
 ) -> None:

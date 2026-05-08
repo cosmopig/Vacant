@@ -85,7 +85,11 @@ def _check_republish_invariants(
       so this is a defensive check that the new card was signed by the
       same key the existing row records.
     - ``parent_id`` is immutable across republish: changing parent
-      breaks the lineage chain that powers cold-start priors.
+      breaks the lineage chain that powers cold-start priors. Pfix3
+      F2 follow-up: ``new_parent_id=None`` means "caller didn't
+      specify; preserve existing" (consistent with the kwargs policy
+      for other metadata fields). Only fires when the caller passes
+      a *different non-None* parent_id than what's stored.
     - ``halo_version`` must be monotonic: rejects accidental replay of
       a stale signed card.
     """
@@ -93,7 +97,7 @@ def _check_republish_invariants(
         raise RegistryWriteError(
             "publish_halo republish: card pubkey does not match existing public_key"
         )
-    if new_parent_id != existing.parent_id:
+    if new_parent_id is not None and new_parent_id != existing.parent_id:
         raise RegistryWriteError(
             "publish_halo republish: parent_id is immutable; "
             f"existing={existing.parent_id!r} new={new_parent_id!r}"
