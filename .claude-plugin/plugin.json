@@ -2,7 +2,10 @@
   "name": "vacant",
   "version": "0.3.0",
   "description": "Responsibility-layer residency form for AI agents — identity, history, reputation, consequences",
-  "author": "cosmopig",
+  "author": {
+    "name": "cosmopig",
+    "url": "https://github.com/cosmopig"
+  },
   "license": "MIT",
   "homepage": "https://github.com/cosmopig/Vacant",
   "mcpServers": {
