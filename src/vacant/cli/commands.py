@@ -723,11 +723,13 @@ def mcp_cmd(
     from vacant.cli.mcp_server import run_mcp_stdio_server
     from vacant.cli.server import build_serve_app
 
+    persistent_name: str | None = None
     if name is not None:
         bundle = build_serve_app(name)
         form = bundle.form
         signing_key = bundle.signing_key
         replay_store = bundle.replay_store
+        persistent_name = name
     else:
         try:
             n = ls.current_name()
@@ -747,11 +749,27 @@ def mcp_cmd(
             form = bundle.form
             signing_key = bundle.signing_key
             replay_store = bundle.replay_store
+            persistent_name = n
+
+    # Pfix3 B7: persist signed SUBSTRATE_BORROWED + INFERENCE_EVENT
+    # entries from sampling calls to the vacant's on-disk logbook
+    # when we have a persistent identity. Ephemeral mode gets the
+    # entries appended in memory but they're lost at process exit
+    # (the keypair is also fresh-per-launch, so there's no audit
+    # trail to preserve anyway).
+    persistent_lb = None
+    on_lb_change: Any = None
+    if persistent_name is not None:
+        persistent_lb = ls.load_logbook(persistent_name)
+        captured_name = persistent_name
+        on_lb_change = lambda lb: ls.save_logbook(captured_name, lb)  # noqa: E731
 
     run_mcp_stdio_server(
         form=form,
         signing_key=signing_key,
         replay_store=replay_store,
+        logbook=persistent_lb,
+        on_logbook_change=on_lb_change,
     )
 
 
