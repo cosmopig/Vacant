@@ -790,6 +790,72 @@ def mcp_cmd(
     )
 
 
+# -- install ------------------------------------------------------------------
+
+
+@app.command("install")
+def install_cmd(
+    client: str = typer.Argument(
+        ...,
+        help=(
+            "MCP client to register vacant with: claude-code | claude-desktop | "
+            "cursor | windsurf | openclaw | hermes"
+        ),
+    ),
+    config_path: str | None = typer.Option(
+        None,
+        "--config-path",
+        help="Override the default config-file location for this client.",
+    ),
+    name: str = typer.Option(
+        "alice",
+        "--name",
+        help=(
+            "VACANT_NAME env var written into the registered MCP entry "
+            "(picks which `~/.vacant/<name>/` identity the spawned `vacant mcp` "
+            "uses; defaults to `alice`)."
+        ),
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Overwrite an existing `vacant` entry in the client's config.",
+    ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Print what would be written without touching any file.",
+    ),
+) -> None:
+    """Register vacant as an MCP server with a local client. (Pfix4)
+
+    One unified entry point — the README's per-client one-liners
+    (OpenClaw / Hermes / Claude Desktop / Cursor / Windsurf) all
+    collapse to:
+
+        vacant install <client>
+
+    Idempotent: re-running with no flags is a no-op when an entry is
+    already in place. Pass `--force` to overwrite.
+    """
+    from pathlib import Path
+
+    from vacant.cli.install import SUPPORTED_CLIENTS, install
+
+    if client not in SUPPORTED_CLIENTS:
+        typer.echo(
+            f"error: unknown client {client!r}; supported: {', '.join(SUPPORTED_CLIENTS)}",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+
+    cp = Path(config_path) if config_path else None
+    msg = install(client, config_path=cp, name=name, force=force, dry_run=dry_run)
+    typer.echo(msg)
+    if msg.startswith("ERROR"):
+        raise typer.Exit(code=1)
+
+
 # -- demo ---------------------------------------------------------------------
 
 

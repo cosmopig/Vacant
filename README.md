@@ -111,41 +111,41 @@ under the hood — nothing else to install.
 
 ---
 
-## For other clients (one line each)
+## For other clients (one command, any client)
 
-Vacant rides on top of an MCP-aware client. Pick the one you already use:
-
-### OpenClaw
-
-The `openclaw` CLI must be on your `PATH` (install OpenClaw per its
-own docs first). Then:
+Vacant rides on top of an MCP-aware client. **One unified
+installer**, regardless of which one you use:
 
 ```bash
-openclaw plugins install https://github.com/cosmopig/Vacant.git#main:examples/openclaw && openclaw gateway restart
+uvx --from vacant-network vacant install <client>
 ```
 
-### Hermes Agent
+`<client>` is one of `claude-desktop`, `cursor`, `windsurf`,
+`openclaw`, `hermes`, `claude-code`. The command:
 
-Append the shipped paste-config to your Hermes MCP config and
-restart. Replace the path on the right if your Hermes lives
-elsewhere:
+- writes the right shape into the right config file (JSON for
+  Claude Desktop / Cursor / Windsurf, TOML for Hermes),
+- shells out to `openclaw plugins install` for OpenClaw,
+- prints the slash-command flow for Claude Code (which installs
+  itself via `/plugin marketplace add cosmopig/Vacant` from inside
+  the CLI — see the section above).
+
+It's idempotent — re-running with no flags is a no-op when an
+entry's already in place. Pass `--force` to overwrite, `--name
+<vid>` to pick a different on-disk vacant identity, `--dry-run` to
+see what would be written without touching anything.
 
 ```bash
-curl -sL https://raw.githubusercontent.com/cosmopig/Vacant/main/examples/hermes/hermes_mcp.toml \
-  >> ~/.hermes/mcp.toml
+# Examples
+uvx --from vacant-network vacant install claude-desktop
+uvx --from vacant-network vacant install cursor --name research
+uvx --from vacant-network vacant install hermes --dry-run
+uvx --from vacant-network vacant install openclaw  # needs `openclaw` CLI on PATH
 ```
 
-### Claude Desktop · Cursor · Windsurf
-
-These three share the standard `mcpServers` JSON shape. Copy the
-relevant `mcp.json` snippet from
-[`examples/<client>/`](examples/) into your client's MCP config file
-and restart. Full per-client paths in
-[`docs/INTEGRATION.md`](docs/INTEGRATION.md) §1–3.
-
-> Coming soon: `vacant install <client>` will fold all three
-> patterns above into one unified subcommand. Tracked in the Pfix4
-> work; see CHANGELOG.
+If you'd rather edit configs by hand, the raw per-client commands
+and config-file paths live in
+[`docs/INTEGRATION.md`](docs/INTEGRATION.md) §1–4.
 
 ---
 

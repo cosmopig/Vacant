@@ -109,37 +109,39 @@
 
 ---
 
-## 其他客戶端（每條都是一行）
+## 其他客戶端（一條指令、所有 client）
 
-Vacant 是疊在 MCP-aware client 上的 plugin。挑你已經在用的那個：
-
-### OpenClaw
-
-`openclaw` CLI 必須在 `PATH` 上（OpenClaw 本身的安裝看它官方文件）。然後：
+Vacant 是疊在 MCP-aware client 上的 plugin。**統一的安裝器**，
+不管你用哪個 client：
 
 ```bash
-openclaw plugins install https://github.com/cosmopig/Vacant.git#main:examples/openclaw && openclaw gateway restart
+uvx --from vacant-network vacant install <client>
 ```
 
-### Hermes Agent
+`<client>` 是 `claude-desktop`、`cursor`、`windsurf`、`openclaw`、
+`hermes`、`claude-code` 其中一個。這條指令會：
 
-把 repo 自帶的 paste-config 接到 Hermes 的 MCP config 後重啟。
-路徑跟你機器上 Hermes 設定檔位置對齊：
+- 把正確 shape 寫進正確 config 檔（Claude Desktop / Cursor /
+  Windsurf 是 JSON，Hermes 是 TOML）
+- OpenClaw 的話 shell out 到 `openclaw plugins install`
+- Claude Code 的話印出 slash command 流程（CC 是從自己 CLI 裡跑
+  `/plugin marketplace add cosmopig/Vacant`，見上面那節）
+
+Idempotent：沒帶 flag 重跑會 no-op。`--force` 覆寫、
+`--name <vid>` 選不同的 on-disk vacant 身份、`--dry-run` 預覽
+不寫盤。
 
 ```bash
-curl -sL https://raw.githubusercontent.com/cosmopig/Vacant/main/examples/hermes/hermes_mcp.toml \
-  >> ~/.hermes/mcp.toml
+# 範例
+uvx --from vacant-network vacant install claude-desktop
+uvx --from vacant-network vacant install cursor --name research
+uvx --from vacant-network vacant install hermes --dry-run
+uvx --from vacant-network vacant install openclaw  # 需要 openclaw CLI 在 PATH
 ```
 
-### Claude Desktop · Cursor · Windsurf
-
-這三家共用標準的 `mcpServers` JSON 格式。從
-[`examples/<client>/`](examples/) 複製對應的 `mcp.json` 片段貼進
-client 的 MCP config 檔重啟即可。每個 client 的 config 檔路徑見
-[`docs/INTEGRATION.zh-TW.md`](docs/INTEGRATION.zh-TW.md) §1–3。
-
-> 接下來會做：`vacant install <client>` 會把上面三條 pattern 統一
-> 成單一 subcommand，所有 client 都同一條指令。追在 Pfix4，見 CHANGELOG。
+不想用 installer、想自己手改 config 的話，每個 client 的原始指令
+跟 config 檔路徑在
+[`docs/INTEGRATION.zh-TW.md`](docs/INTEGRATION.zh-TW.md) §1–4。
 
 ---
 
