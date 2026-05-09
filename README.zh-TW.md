@@ -109,6 +109,40 @@
 
 ---
 
+## 其他客戶端（每條都是一行）
+
+Vacant 是疊在 MCP-aware client 上的 plugin。挑你已經在用的那個：
+
+### OpenClaw
+
+`openclaw` CLI 必須在 `PATH` 上（OpenClaw 本身的安裝看它官方文件）。然後：
+
+```bash
+openclaw plugins install https://github.com/cosmopig/Vacant.git#main:examples/openclaw && openclaw gateway restart
+```
+
+### Hermes Agent
+
+把 repo 自帶的 paste-config 接到 Hermes 的 MCP config 後重啟。
+路徑跟你機器上 Hermes 設定檔位置對齊：
+
+```bash
+curl -sL https://raw.githubusercontent.com/cosmopig/Vacant/main/examples/hermes/hermes_mcp.toml \
+  >> ~/.hermes/mcp.toml
+```
+
+### Claude Desktop · Cursor · Windsurf
+
+這三家共用標準的 `mcpServers` JSON 格式。從
+[`examples/<client>/`](examples/) 複製對應的 `mcp.json` 片段貼進
+client 的 MCP config 檔重啟即可。每個 client 的 config 檔路徑見
+[`docs/INTEGRATION.zh-TW.md`](docs/INTEGRATION.zh-TW.md) §1–3。
+
+> 接下來會做：`vacant install <client>` 會把上面三條 pattern 統一
+> 成單一 subcommand，所有 client 都同一條指令。追在 Pfix4，見 CHANGELOG。
+
+---
+
 ## 不用 Claude Code 也能跑
 
 同一份 code 不用 plugin 也能跑。三條路：

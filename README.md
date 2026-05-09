@@ -111,6 +111,44 @@ under the hood — nothing else to install.
 
 ---
 
+## For other clients (one line each)
+
+Vacant rides on top of an MCP-aware client. Pick the one you already use:
+
+### OpenClaw
+
+The `openclaw` CLI must be on your `PATH` (install OpenClaw per its
+own docs first). Then:
+
+```bash
+openclaw plugins install https://github.com/cosmopig/Vacant.git#main:examples/openclaw && openclaw gateway restart
+```
+
+### Hermes Agent
+
+Append the shipped paste-config to your Hermes MCP config and
+restart. Replace the path on the right if your Hermes lives
+elsewhere:
+
+```bash
+curl -sL https://raw.githubusercontent.com/cosmopig/Vacant/main/examples/hermes/hermes_mcp.toml \
+  >> ~/.hermes/mcp.toml
+```
+
+### Claude Desktop · Cursor · Windsurf
+
+These three share the standard `mcpServers` JSON shape. Copy the
+relevant `mcp.json` snippet from
+[`examples/<client>/`](examples/) into your client's MCP config file
+and restart. Full per-client paths in
+[`docs/INTEGRATION.md`](docs/INTEGRATION.md) §1–3.
+
+> Coming soon: `vacant install <client>` will fold all three
+> patterns above into one unified subcommand. Tracked in the Pfix4
+> work; see CHANGELOG.
+
+---
+
 ## Try it without Claude Code
 
 The same code works without the plugin. Three paths:
