@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Pre-1.0 means breaking changes can land in any minor bump.
 
+## [0.5.0](https://github.com/cosmopig/Vacant/compare/v0.4.0...v0.5.0) (2026-05-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* vacant install bootstraps identity; vacant mcp strict on missing (Pfix5)
+
+### Features
+
+* vacant install bootstraps identity; vacant mcp strict on missing (Pfix5) ([5b7dd27](https://github.com/cosmopig/Vacant/commit/5b7dd2796391a785022be8bdebbba2292ad84255))
+
+
+### Bug Fixes
+
+* **cli:** cover install.py branches + drop dead _main + sync __version__ to 0.4.0 ([7b3cd75](https://github.com/cosmopig/Vacant/commit/7b3cd750a6858be11483be3c549668416f1a6514))
+
 ## [0.4.0](https://github.com/cosmopig/Vacant/compare/v0.3.0...v0.4.0) (2026-05-09)
 
 
