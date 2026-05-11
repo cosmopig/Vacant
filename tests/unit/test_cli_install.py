@@ -292,6 +292,58 @@ def test_typer_install_dry_run_exit_zero(runner: CliRunner, tmp_path: Path) -> N
     assert not cfg.exists()
 
 
+def test_default_config_path_windows_without_appdata(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Coverage for the Windows fallback when %APPDATA% is absent (e.g.
+    Windows in a stripped container env)."""
+    monkeypatch.delenv("APPDATA", raising=False)
+    with patch("platform.system", return_value="Windows"):
+        p = default_config_path("claude-desktop")
+    assert "AppData/Roaming/Claude" in str(p).replace("\\", "/")
+
+
+def test_install_cursor_rejects_non_dict_mcpservers(tmp_path: Path) -> None:
+    """If a user's existing config has `mcpServers` set to a non-object
+    (string, list, etc.) we must refuse to overwrite rather than crash."""
+    cfg = tmp_path / "mcp.json"
+    cfg.write_text(json.dumps({"mcpServers": "not-an-object"}))
+    msg = install_cursor(config_path=cfg)
+    assert msg.startswith("ERROR")
+    assert "mcpServers" in msg
+
+
+def test_install_openclaw_force_adds_reinstall_flag(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """--force passes --reinstall through to `openclaw plugins install`."""
+    monkeypatch.setattr("vacant.cli.install.shutil.which", lambda _: "/usr/bin/openclaw")
+    calls: list[list[str]] = []
+    monkeypatch.setattr(
+        "vacant.cli.install.subprocess.run",
+        lambda cmd, check: calls.append(cmd),
+    )
+    install_openclaw(force=True)
+    assert any("--reinstall" in c for c in calls)
+
+
+def test_install_openclaw_subprocess_failure_returns_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """If `openclaw plugins install` exits non-zero, surface it as ERROR."""
+    import subprocess as sp
+
+    monkeypatch.setattr("vacant.cli.install.shutil.which", lambda _: "/usr/bin/openclaw")
+
+    def boom(cmd: list[str], check: bool) -> None:
+        raise sp.CalledProcessError(returncode=1, cmd=cmd)
+
+    monkeypatch.setattr("vacant.cli.install.subprocess.run", boom)
+    msg = install_openclaw()
+    assert msg.startswith("ERROR")
+    assert "openclaw command failed" in msg
+
+
 def test_supported_clients_set_is_documented() -> None:
     """If we add a client, the SUPPORTED_CLIENTS tuple must include it
     so the dispatcher rejects unknown values uniformly."""

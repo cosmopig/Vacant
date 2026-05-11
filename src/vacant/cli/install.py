@@ -18,7 +18,6 @@ import os
 import platform
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 from typing import Any, Literal
 
@@ -319,48 +318,3 @@ def install(
         return install_openclaw(force=force, dry_run=dry_run)
     # Unreachable by the SUPPORTED_CLIENTS guard above; keeps mypy happy.
     raise AssertionError(f"unhandled client {client!r}")
-
-
-# Make `python -m vacant.cli.install <client>` work for quick CLI tests
-# without going through the full Typer app.
-def _main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-    if not args:
-        print(
-            "usage: python -m vacant.cli.install <client> [--name NAME] [--force] [--dry-run]",
-            file=sys.stderr,
-        )
-        return 2
-    client = args[0]
-    name = "alice"
-    force = False
-    dry_run = False
-    config_path: Path | None = None
-    i = 1
-    while i < len(args):
-        tok = args[i]
-        if tok == "--force":
-            force = True
-        elif tok == "--dry-run":
-            dry_run = True
-        elif tok == "--name" and i + 1 < len(args):
-            name = args[i + 1]
-            i += 1
-        elif tok == "--config-path" and i + 1 < len(args):
-            config_path = Path(args[i + 1])
-            i += 1
-        else:
-            print(f"unknown arg {tok!r}", file=sys.stderr)
-            return 2
-        i += 1
-    try:
-        msg = install(client, config_path=config_path, name=name, force=force, dry_run=dry_run)
-    except ValueError as exc:
-        print(f"error: {exc}", file=sys.stderr)
-        return 2
-    print(msg)
-    return 0 if not msg.startswith("ERROR") else 1
-
-
-if __name__ == "__main__":
-    raise SystemExit(_main())
