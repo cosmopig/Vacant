@@ -3,6 +3,7 @@
   "release-type": "python",
   "include-component-in-tag": false,
   "include-v-in-tag": true,
+  "bump-minor-pre-major": true,
   "packages": {
     ".": {
       "package-name": "vacant",
@@ -12,7 +13,8 @@
           "type": "toml",
           "path": "pyproject.toml",
           "jsonpath": "$.project.version"
-        }
+        },
+        "src/vacant/__init__.py"
       ]
     }
   },
