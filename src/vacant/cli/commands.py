@@ -714,9 +714,12 @@ def mcp_cmd(
         None,
         "--name",
         help=(
-            "Local vacant name to serve. Defaults to `$VACANT_NAME` or the "
-            "single existing local vacant. If no local vacant exists, an "
-            "ephemeral demo vacant is used (with a stderr WARN)."
+            "Local vacant name to serve. If `--name <n>` (or env "
+            "$VACANT_NAME=<n>) is set but `~/.vacant/<n>/` doesn't exist, "
+            "this command exits with code 2 — it deliberately does NOT "
+            "fall back to ephemeral mode to avoid silently dropping the "
+            "audit chain. Run `vacant install <client>` or `vacant init "
+            "<n>` to bootstrap the identity first."
         ),
     ),
 ) -> None:
@@ -728,34 +731,74 @@ def mcp_cmd(
     calls when a user runs `/plugin install vacant`. EOF on stdin
     (the parent closing the pipe) ends the loop.
 
-    Identity resolution:
+    **Pfix5 runtime contract** — identity resolution is strict and
+    side-effect-free:
 
-    1. `--name <n>` ⇒ load `~/.vacant/<n>/`
-    2. otherwise `$VACANT_NAME` ⇒ same
-    3. otherwise the only initialised local vacant ⇒ same
-    4. nothing initialised ⇒ ephemeral in-memory demo vacant + a
-       stderr WARN telling the operator to run `vacant init` for a
-       persistent identity.
+    1. `--name <n>` or env `$VACANT_NAME=<n>` is set:
+       - if `~/.vacant/<n>/` exists ⇒ serve as `<n>`
+       - if missing ⇒ print clear stderr error + exit 2
+         (does NOT silently fall back; does NOT auto-init)
+    2. no `--name` and no `$VACANT_NAME`, but exactly one local vacant
+       on disk ⇒ serve as that vacant
+    3. no `--name`, no `$VACANT_NAME`, no local vacants ⇒ ephemeral
+       in-memory demo + stderr WARN (this is the explicit "no
+       identity asked for" case, not a fallback)
+
+    Why strict on case 1: when a client config pins
+    `VACANT_NAME=alice`, the operator *intends* for that identity to
+    be used. Falling back to ephemeral would mean the client thinks it
+    has a persistent vacant alice but every spawn is a fresh keypair —
+    audit chains, reputation, and the entire responsibility-layer
+    claim silently collapse. Better to fail loudly + point the
+    operator at `vacant install <client>` or `vacant init`.
     """
     from vacant.cli.mcp_server import run_mcp_stdio_server
     from vacant.cli.server import build_serve_app
 
+    # Resolve effective name. CLI flag > env var > implicit pick.
+    explicit_name = name
+    if explicit_name is None:
+        env_name = os.environ.get("VACANT_NAME") or None
+        if env_name:
+            explicit_name = env_name
+
     persistent_name: str | None = None
-    if name is not None:
-        bundle = build_serve_app(name)
+    if explicit_name is not None:
+        # Pfix5: strict mode. The operator named an identity — refuse
+        # to silently swap in an ephemeral one.
+        try:
+            bundle = build_serve_app(explicit_name)
+        except LocalVacantNotFound:
+            sys.stderr.write(
+                f"ERROR: vacant {explicit_name!r} not initialised at "
+                f"{ls.vacant_dir(explicit_name)}\n"
+                "\n"
+                "  This is a runtime command — it doesn't create identity "
+                "on the fly to avoid silently downgrading your audit chain.\n"
+                "  Run one of:\n"
+                f"    vacant install <client> --name {explicit_name}   "
+                "# set up + register with the client config\n"
+                f"    vacant init {explicit_name}                       "
+                "# create the identity only (uses OS keyring)\n"
+                f"    vacant init {explicit_name} --insecure-demo       "
+                "# create the identity using plaintext key (CI / demo only)\n"
+            )
+            raise typer.Exit(code=2) from None
         form = bundle.form
         signing_key = bundle.signing_key
         replay_store = bundle.replay_store
-        persistent_name = name
+        persistent_name = explicit_name
     else:
         try:
             n = ls.current_name()
         except LocalVacantNotFound:
             sys.stderr.write(
-                "WARN: no local vacant on disk; running an EPHEMERAL demo "
-                "vacant. The keypair is fresh-per-launch and never persisted. "
-                "Run `vacant init <name>` for a stable identity that survives "
-                "process restarts. See SECURITY.md §Local key storage.\n"
+                "WARN: no local vacant on disk and no --name / "
+                "$VACANT_NAME given; running an EPHEMERAL demo vacant. "
+                "The keypair is fresh-per-launch and never persisted. "
+                "Run `vacant init <name>` for a stable identity that "
+                "survives process restarts. See SECURITY.md §Local key "
+                "storage.\n"
             )
             from vacant.protocol import InMemoryReplayStore
 
@@ -826,8 +869,26 @@ def install_cmd(
         "--dry-run",
         help="Print what would be written without touching any file.",
     ),
+    insecure_demo: bool = typer.Option(
+        False,
+        "--insecure-demo",
+        help=(
+            "When auto-creating identity, store the Ed25519 seed in "
+            "plaintext key.json (mode 0600) instead of the OS keyring. "
+            "Demo / CI only — never production responsibility-layer use."
+        ),
+    ),
+    skip_init: bool = typer.Option(
+        False,
+        "--skip-init",
+        help=(
+            "Don't auto-create `~/.vacant/<name>/` if missing. Use when "
+            "you'll bring your own identity (already-init'd elsewhere, "
+            "or about to `vacant init` manually with custom flags)."
+        ),
+    ),
 ) -> None:
-    """Register vacant as an MCP server with a local client. (Pfix4)
+    """Register vacant as an MCP server with a local client. (Pfix5)
 
     One unified entry point — the README's per-client one-liners
     (OpenClaw / Hermes / Claude Desktop / Cursor / Windsurf) all
@@ -835,8 +896,20 @@ def install_cmd(
 
         vacant install <client>
 
-    Idempotent: re-running with no flags is a no-op when an entry is
-    already in place. Pass `--force` to overwrite.
+    Pfix5 contract:
+
+    - **Setup-phase**: this command has side effects. By default it
+      ALSO bootstraps `~/.vacant/<name>/` (running `vacant init` for
+      you with OS-keyring storage) so the runtime `vacant mcp --name
+      <name>` invocation that the client spawns later actually works.
+    - Idempotent: re-running with no flags is a no-op when the
+      identity and the config entry both exist. `--force` overwrites
+      the config entry. Identity init is always skipped if the dir
+      exists.
+    - `--insecure-demo` opts into plaintext key storage (no keyring
+      backend needed).
+    - `--skip-init` tells the installer "I manage the identity";
+      leaves `~/.vacant/<name>/` alone.
     """
     from pathlib import Path
 
@@ -850,9 +923,17 @@ def install_cmd(
         raise typer.Exit(code=2)
 
     cp = Path(config_path) if config_path else None
-    msg = install(client, config_path=cp, name=name, force=force, dry_run=dry_run)
+    msg = install(
+        client,
+        config_path=cp,
+        name=name,
+        force=force,
+        dry_run=dry_run,
+        insecure_demo=insecure_demo,
+        skip_init=skip_init,
+    )
     typer.echo(msg)
-    if msg.startswith("ERROR"):
+    if msg.startswith("ERROR") or "\nERROR" in msg:
         raise typer.Exit(code=1)
 
 

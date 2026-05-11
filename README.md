@@ -121,31 +121,50 @@ uvx --from vacant-network vacant install <client>
 ```
 
 `<client>` is one of `claude-desktop`, `cursor`, `windsurf`,
-`openclaw`, `hermes`, `claude-code`. The command:
+`openclaw`, `hermes`, `claude-code`. The command does two things:
 
-- writes the right shape into the right config file (JSON for
-  Claude Desktop / Cursor / Windsurf, TOML for Hermes),
-- shells out to `openclaw plugins install` for OpenClaw,
-- prints the slash-command flow for Claude Code (which installs
-  itself via `/plugin marketplace add cosmopig/Vacant` from inside
-  the CLI — see the section above).
+1. **Bootstraps your identity** at `~/.vacant/<name>/` if it doesn't
+   already exist. By default the Ed25519 seed is stored in your **OS
+   keyring** (macOS Keychain / Linux Secret Service / Windows
+   Credential Manager) — pass `--insecure-demo` to opt into a
+   plaintext `key.json` (for demos / CI hosts without a keyring).
+2. **Registers vacant** with the client: writes the right shape into
+   the right config file (JSON for Claude Desktop / Cursor /
+   Windsurf, YAML's `mcp_servers` key for Hermes), shells out to
+   `openclaw plugins install` for OpenClaw, or prints the slash-
+   command flow for Claude Code.
 
-It's idempotent — re-running with no flags is a no-op when an
-entry's already in place. Pass `--force` to overwrite, `--name
-<vid>` to pick a different on-disk vacant identity, `--dry-run` to
-see what would be written without touching anything.
+Idempotent — re-running with no flags is a no-op when the identity
+and config entry both exist.
 
 ```bash
 # Examples
 uvx --from vacant-network vacant install claude-desktop
 uvx --from vacant-network vacant install cursor --name research
-uvx --from vacant-network vacant install hermes --dry-run
-uvx --from vacant-network vacant install openclaw  # needs `openclaw` CLI on PATH
+uvx --from vacant-network vacant install hermes --insecure-demo   # CI / Linux without keyring
+uvx --from vacant-network vacant install hermes --dry-run         # preview, don't write
+uvx --from vacant-network vacant install openclaw                 # needs `openclaw` CLI on PATH
+uvx --from vacant-network vacant install claude-desktop --skip-init  # bring your own identity
 ```
+
+**Flags**: `--name <vid>` (which identity; default `alice`) ·
+`--force` (overwrite an existing client config entry) ·
+`--insecure-demo` (allow plaintext key when keyring isn't available) ·
+`--skip-init` (don't touch `~/.vacant/<name>/`; advanced) ·
+`--config-path <path>` (override the client's default config-file
+location) · `--dry-run` (print what would change).
 
 If you'd rather edit configs by hand, the raw per-client commands
 and config-file paths live in
 [`docs/INTEGRATION.md`](docs/INTEGRATION.md) §1–4.
+
+> The runtime command `vacant mcp --name <name>` is **strict**: if
+> `~/.vacant/<name>/` is missing it exits with code 2 + a clear
+> message rather than silently falling back to an ephemeral
+> identity. Silent fallback would mean clients think they have a
+> persistent vacant but every spawn is a fresh keypair — the audit
+> chain claim would silently collapse. `vacant install` is the
+> setup command that gets you to a valid state.
 
 ---
 

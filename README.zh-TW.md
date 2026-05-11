@@ -119,29 +119,47 @@ uvx --from vacant-network vacant install <client>
 ```
 
 `<client>` 是 `claude-desktop`、`cursor`、`windsurf`、`openclaw`、
-`hermes`、`claude-code` 其中一個。這條指令會：
+`hermes`、`claude-code` 其中一個。這條指令做兩件事：
 
-- 把正確 shape 寫進正確 config 檔（Claude Desktop / Cursor /
-  Windsurf 是 JSON，Hermes 是 TOML）
-- OpenClaw 的話 shell out 到 `openclaw plugins install`
-- Claude Code 的話印出 slash command 流程（CC 是從自己 CLI 裡跑
-  `/plugin marketplace add cosmopig/Vacant`，見上面那節）
+1. **建身份**：如果 `~/.vacant/<name>/` 不存在就 bootstrap。預設
+   把 Ed25519 seed 存進你 OS 的 **keyring**（macOS Keychain /
+   Linux Secret Service / Windows Credential Manager）—— 沒
+   keyring 的 host 加 `--insecure-demo` 退到 plaintext `key.json`
+   （demo / CI 可用，production 不應該）。
+2. **註冊 vacant 到 client**：寫對位置、對 shape（Claude Desktop /
+   Cursor / Windsurf 是 JSON；Hermes 是 YAML 的 `mcp_servers`
+   key），OpenClaw 走 `openclaw plugins install`，Claude Code 印
+   slash command 流程。
 
-Idempotent：沒帶 flag 重跑會 no-op。`--force` 覆寫、
-`--name <vid>` 選不同的 on-disk vacant 身份、`--dry-run` 預覽
-不寫盤。
+Idempotent：身份跟 config 都在就重跑 no-op。
 
 ```bash
 # 範例
 uvx --from vacant-network vacant install claude-desktop
 uvx --from vacant-network vacant install cursor --name research
-uvx --from vacant-network vacant install hermes --dry-run
-uvx --from vacant-network vacant install openclaw  # 需要 openclaw CLI 在 PATH
+uvx --from vacant-network vacant install hermes --insecure-demo   # CI / 無 keyring 的 Linux
+uvx --from vacant-network vacant install hermes --dry-run         # 預覽不寫盤
+uvx --from vacant-network vacant install openclaw                 # 需要 openclaw CLI 在 PATH
+uvx --from vacant-network vacant install claude-desktop --skip-init  # 我自己管身份
 ```
+
+**Flags**：`--name <vid>`（用哪個身份，預設 `alice`）·
+`--force`（覆寫既有的 client config entry）·
+`--insecure-demo`（沒 keyring 時允許 plaintext key）·
+`--skip-init`（不動 `~/.vacant/<name>/`，進階用）·
+`--config-path <path>`（覆寫 client 預設 config 檔路徑）·
+`--dry-run`（預覽變更）。
 
 不想用 installer、想自己手改 config 的話，每個 client 的原始指令
 跟 config 檔路徑在
 [`docs/INTEGRATION.zh-TW.md`](docs/INTEGRATION.zh-TW.md) §1–4。
+
+> 執行階段 `vacant mcp --name <name>` 是**嚴格的**：找不到
+> `~/.vacant/<name>/` 就直接 exit code 2 + 印明確錯誤訊息，**不
+> 會**靜默 fallback 到 ephemeral 身份。靜默 fallback 會讓 client
+> 以為自己有持久 vacant、實際每次 spawn 都是新 keypair，audit
+> chain 主張就靜默崩壞了。`vacant install` 才是把你帶到正確狀態
+> 的 setup 指令。
 
 ---
 

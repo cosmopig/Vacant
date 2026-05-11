@@ -112,3 +112,39 @@ async def test_vacant_mcp_subcommand_falls_back_to_ephemeral_when_no_local(
     # The ephemeral capability_text mentions the demo identity.
     assert obj["capability_text"]
     assert "demo" in obj["capability_text"].lower()
+
+
+def test_vacant_mcp_subcommand_strict_mode_errors_on_missing_name(
+    isolated_home: Path,
+) -> None:
+    """Pfix5 runtime contract: `vacant mcp --name X` where
+    `~/.vacant/X/` doesn't exist must exit non-zero with a clear
+    stderr message pointing at the fix — NOT silently fall back to
+    ephemeral. Falling back would mean the client thinks it has a
+    persistent vacant alice but every spawn is a fresh keypair, which
+    silently breaks the audit chain claim."""
+    import subprocess
+
+    # Precondition: alice doesn't exist on disk.
+    assert ls.list_vacant_names() == []
+
+    proc = subprocess.run(
+        [sys.executable, "-m", "vacant.cli", "mcp", "--name", "alice"],
+        capture_output=True,
+        text=True,
+        env={**os.environ, "VACANT_HOME": str(isolated_home)},
+        timeout=15,
+        check=False,
+    )
+    # Exit code 2: "user error / precondition not met" (Typer convention).
+    assert proc.returncode == 2, (
+        f"expected strict-mode exit 2 but got {proc.returncode}\n"
+        f"stdout: {proc.stdout}\nstderr: {proc.stderr}"
+    )
+    # Stderr should tell the operator exactly how to fix it.
+    err = proc.stderr
+    assert "not initialised" in err
+    assert "vacant install" in err
+    assert "vacant init" in err
+    # NOT in ephemeral fallback (which would print "WARN" instead).
+    assert "EPHEMERAL" not in err
