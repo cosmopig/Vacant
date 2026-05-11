@@ -4,6 +4,37 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Pre-1.0 means breaking changes can land in any minor bump.
 
+## [0.4.0](https://github.com/cosmopig/Vacant/compare/v0.3.0...v0.4.0) (2026-05-09)
+
+
+### Features
+
+* **cli:** vacant install &lt;client&gt; unified installer (Pfix4 B) ([1b46fdc](https://github.com/cosmopig/Vacant/commit/1b46fdca040118eee5db4d3b4eebabd661900149))
+
+
+### Bug Fixes
+
+* **alembic:** make upgrade head SQLite-safe (Pfix3 B3) ([1bc106b](https://github.com/cosmopig/Vacant/commit/1bc106bdefb79cf82260245a7ebc4b04add6adab))
+* **cli:** publish flags use None defaults so omitted → preserve (Pfix3 F2 follow-up) ([4e97515](https://github.com/cosmopig/Vacant/commit/4e97515d8689ff3d0692aeff07fd23198a6ab4ca))
+* **dispatch+cli:** A2A response validation + per-pair envelope_state (Pfix3 B6) ([5c9c2d8](https://github.com/cosmopig/Vacant/commit/5c9c2d8cf678d759c89c9da0b624c31e5f2568b1))
+* **halo:** parent_id invariant treats None as preserve, not as 'unset' (Pfix3 F2 follow-up) ([210d10d](https://github.com/cosmopig/Vacant/commit/210d10db3dddcdbdbcc3729f4db4b2ddef3a7114))
+* **mcp:** vacant_call_with_sampling requires signed envelope + signed audit trail (Pfix3 B7) ([da8eca9](https://github.com/cosmopig/Vacant/commit/da8eca9b88d680fb468a83f7493e5a7ae610cb7c))
+* **plugin:** plugin.json author must be object + marketplace version 0.3.0 ([8e2c485](https://github.com/cosmopig/Vacant/commit/8e2c485cc6717a43c9415f01f08dda12e340f8c8))
+* **registry:** republish overwrites whole card row + invariants (Pfix3 B5) ([bfb0410](https://github.com/cosmopig/Vacant/commit/bfb04101ae35bf62e6604afb9510ff9192e4bd50))
+* **reputation:** atomic record_review + fail-closed audit (Pfix3 B4) ([71b99b9](https://github.com/cosmopig/Vacant/commit/71b99b934d252fe06047f37de471adc6b479cd6b))
+* **rpc:** HTTP /v1/halo schema also uses None defaults (Pfix3 F2 follow-up) ([f43dbee](https://github.com/cosmopig/Vacant/commit/f43dbee74aacd10154553505cf93a054ddc06ca5))
+
+
+### Documentation
+
+* **changelog:** close Pfix2 [Unreleased] section — all 4 groups landed ([d4bff6f](https://github.com/cosmopig/Vacant/commit/d4bff6fd00a7812ae547d217d4412f14963e43cd))
+* open Pfix3 — codex round-3 review response plan ([cb16170](https://github.com/cosmopig/Vacant/commit/cb161701caaa598c2806624eeffdcfa3eb7c717e))
+* **pfix3:** record F1–F4 + 4 follow-up fixes from self-review ([0a24ada](https://github.com/cosmopig/Vacant/commit/0a24ada09ef300b61e9ec78d1c0860d7e27ce91f))
+* **pfix3:** record outcome — 7 batches landed, 867 tests pass ([88d1451](https://github.com/cosmopig/Vacant/commit/88d145112f5804ba7d72e1da436a96756c53a2a3))
+* **plugin:** disclose 14-week MVP / thesis status in plugin descriptions ([fcbac60](https://github.com/cosmopig/Vacant/commit/fcbac60599a1e5a2cbb47c82bb8d6aff75d1f9c3))
+* **readme:** correct MCP transport claim — stdio, not HTTP /mcp (Pfix3 B2) ([c4b2cd0](https://github.com/cosmopig/Vacant/commit/c4b2cd063e860ccb9fe2843b7ef3d0acb7fe2be8))
+* **readme:** surface OpenClaw / Hermes / Claude Desktop install commands (Pfix4 A) ([51c3810](https://github.com/cosmopig/Vacant/commit/51c3810068029aecf2c6be1b0006d3ebf776633a))
+
 ## [0.3.0](https://github.com/cosmopig/Vacant/compare/v0.2.0...v0.3.0) (2026-05-07)
 
 
