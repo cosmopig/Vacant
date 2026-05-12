@@ -132,6 +132,19 @@ def test_mcp_json_command_invokes_vacant_mcp() -> None:
     assert "github.com/cosmopig/Vacant" in joined or "git+" in joined, args
 
 
+def test_mcp_json_vacant_name_default_aligns_with_pfix5() -> None:
+    """`VACANT_NAME` must default to `alice` so a third party who runs
+    `vacant install openclaw` (which bootstraps `alice`) gets a working
+    bundle without having to `export VACANT_NAME=alice` themselves.
+
+    Pfix5 contract: the installer creates `alice`; the bundle must
+    resolve to the same name when no override is present.
+    """
+    mcp = _load_json(BUNDLE_ROOT / ".mcp.json")
+    env = mcp["vacant"].get("env", {})
+    assert env.get("VACANT_NAME") == "${VACANT_NAME:-alice}", env.get("VACANT_NAME")
+
+
 def test_mcp_json_command_is_resolvable_via_vacant_cli() -> None:
     """`vacant mcp` must actually be a registered Typer subcommand."""
     from typer.testing import CliRunner

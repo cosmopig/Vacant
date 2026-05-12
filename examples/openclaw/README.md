@@ -61,12 +61,17 @@ openclaw plugins install vacant@community
 ## Pre-flight: create at least one local vacant
 
 The MCP server hosts whatever vacant `VACANT_NAME` selects (defaults to
-`default`). Create one before invoking any vacant tool:
+`alice`, matching the Pfix5 `vacant install` contract). Create one
+before invoking any vacant tool:
 
 ```bash
-uvx --from git+https://github.com/cosmopig/Vacant.git vacant init alice
-export VACANT_NAME=alice          # or set it inline in OpenClaw's env
+uvx --from vacant-network vacant install openclaw --insecure-demo
+# or, BYO identity:
+uvx --from vacant-network vacant init alice
 ```
+
+To run under a non-default identity, set `VACANT_NAME` in OpenClaw's
+env before launch.
 
 ## Verify
 

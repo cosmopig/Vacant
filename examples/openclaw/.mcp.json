@@ -8,7 +8,7 @@
       "mcp"
     ],
     "env": {
-      "VACANT_NAME": "${VACANT_NAME:-default}",
+      "VACANT_NAME": "${VACANT_NAME:-alice}",
       "VACANT_HOME": "${VACANT_HOME:-${HOME}/.vacant}"
     }
   }
