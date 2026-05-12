@@ -313,14 +313,21 @@ def test_install_openclaw_dry_run(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("vacant.cli.install.shutil.which", lambda _: "/usr/bin/openclaw")
     msg = install_openclaw(dry_run=True)
     assert msg.startswith("[dry-run]")
-    assert "openclaw plugins install" in msg
-    assert "openclaw gateway restart" in msg
+    assert "openclaw plugins install -l" in msg
+    assert ".openclaw-bundle" in msg
 
 
-def test_install_openclaw_runs_two_subprocess_calls(
-    monkeypatch: pytest.MonkeyPatch,
+def test_install_openclaw_renders_bundle_and_links(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("vacant.cli.install.shutil.which", lambda _: "/usr/bin/openclaw")
+    """Happy path: install_openclaw writes a rendered bundle dir
+    (substituted .mcp.json + static assets) and invokes
+    ``openclaw plugins install -l <bundle>``."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    monkeypatch.setattr(
+        "vacant.cli.install.shutil.which",
+        lambda exe: f"/usr/bin/{exe}",
+    )
     calls: list[list[str]] = []
 
     def fake_run(cmd: list[str], check: bool) -> None:
@@ -328,11 +335,28 @@ def test_install_openclaw_runs_two_subprocess_calls(
         assert check is True
 
     monkeypatch.setattr("vacant.cli.install.subprocess.run", fake_run)
-    msg = install_openclaw()
-    assert "gateway restarted" in msg
-    assert len(calls) == 2
-    assert calls[0][:3] == ["openclaw", "plugins", "install"]
-    assert calls[1] == ["openclaw", "gateway", "restart"]
+    msg = install_openclaw(name="alice")
+    assert "rendered OpenClaw bundle" in msg
+    assert len(calls) == 1
+    assert calls[0][:4] == ["openclaw", "plugins", "install", "-l"]
+
+    bundle_dir = tmp_path / ".openclaw-bundle" / "alice"
+    assert (bundle_dir / ".claude-plugin" / "plugin.json").exists()
+    assert (bundle_dir / "skills" / "vacant-call" / "SKILL.md").exists()
+    assert (bundle_dir / "README.md").exists()
+    mcp = json.loads((bundle_dir / ".mcp.json").read_text())
+    # Env values must be literal (no shell substitution syntax), since
+    # OpenClaw passes env through verbatim.
+    env = mcp["vacant"]["env"]
+    assert env["VACANT_NAME"] == "alice"
+    assert env["VACANT_HOME"] == str(tmp_path)
+    assert "${" not in env["VACANT_NAME"]
+    assert "${" not in env["VACANT_HOME"]
+    # Args must pin --name so the spawned vacant mcp loads the right
+    # identity even if env is stripped.
+    args = mcp["vacant"]["args"]
+    assert "--name" in args
+    assert args[args.index("--name") + 1] == "alice"
 
 
 # --- claude-code (slash command pointer) -----------------------------------
@@ -512,25 +536,31 @@ def test_install_cursor_rejects_non_dict_mcpservers(tmp_path: Path) -> None:
     assert "mcpServers" in msg
 
 
-def test_install_openclaw_force_adds_reinstall_flag(
-    monkeypatch: pytest.MonkeyPatch,
+def test_install_openclaw_force_passes_force_flag(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("vacant.cli.install.shutil.which", lambda _: "/usr/bin/openclaw")
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    monkeypatch.setattr(
+        "vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}"
+    )
     calls: list[list[str]] = []
     monkeypatch.setattr(
         "vacant.cli.install.subprocess.run",
         lambda cmd, check: calls.append(cmd),
     )
     install_openclaw(force=True)
-    assert any("--reinstall" in c for c in calls)
+    assert any("--force" in c for c in calls)
 
 
 def test_install_openclaw_subprocess_failure_returns_error(
-    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     import subprocess as sp
 
-    monkeypatch.setattr("vacant.cli.install.shutil.which", lambda _: "/usr/bin/openclaw")
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    monkeypatch.setattr(
+        "vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}"
+    )
 
     def boom(cmd: list[str], check: bool) -> None:
         raise sp.CalledProcessError(returncode=1, cmd=cmd)
@@ -538,7 +568,7 @@ def test_install_openclaw_subprocess_failure_returns_error(
     monkeypatch.setattr("vacant.cli.install.subprocess.run", boom)
     msg = install_openclaw()
     assert msg.startswith("ERROR")
-    assert "openclaw command failed" in msg
+    assert "openclaw plugins install failed" in msg
 
 
 def test_install_hermes_rejects_yaml_top_level_list(tmp_path: Path) -> None:
@@ -555,11 +585,14 @@ def test_install_dispatcher_openclaw_routes_through_identity(
 ) -> None:
     """Even openclaw goes through ensure_identity so subsequent
     `VACANT_NAME=<name> openclaw …` finds the identity on disk."""
-    monkeypatch.setattr("vacant.cli.install.shutil.which", lambda _: "/usr/bin/openclaw")
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    monkeypatch.setattr(
+        "vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}"
+    )
     monkeypatch.setattr("vacant.cli.install.subprocess.run", lambda cmd, check: None)
     msg = install("openclaw", name="oc-bot", insecure_demo=True)
     assert "created identity 'oc-bot'" in msg
-    assert "gateway restarted" in msg
+    assert "rendered OpenClaw bundle" in msg
 
 
 def test_install_reinstall_idempotent_identity_message_absent(tmp_path: Path) -> None:

@@ -708,6 +708,76 @@ def _build_ephemeral_form() -> tuple[ResidentForm, Any]:
     return form, sk
 
 
+@app.command("route")
+def route_cmd(
+    prompt: str = typer.Argument(..., help="The user task / question."),
+    name: str = typer.Option("alice", "--name", help="Local vacant name to host the MCP server."),
+    model: str = typer.Option(
+        "gemma4:e2b", "--model", help="Model id at the OpenAI-compatible endpoint."
+    ),
+    base_url: str = typer.Option(
+        None,
+        "--base-url",
+        envvar=["LLM_BASE_URL", "OLLAMA_BASE_URL"],
+        help="OpenAI-compat base URL (must include /v1).",
+    ),
+    api_key: str = typer.Option(
+        "",
+        "--api-key",
+        envvar=["LLM_API_KEY", "OLLAMA_API_KEY"],
+        help="Bearer token for the LLM endpoint (some, e.g. Ollama, accept any value).",
+    ),
+    max_rounds: int = typer.Option(8, "--max-rounds", help="Maximum LLM ↔ tool rounds."),
+    temperature: float = typer.Option(0.0, "--temperature"),
+    vacant_home: str | None = typer.Option(
+        None,
+        "--vacant-home",
+        envvar="VACANT_HOME",
+        help="Override $VACANT_HOME for the spawned MCP server.",
+    ),
+    uvx: str = typer.Option(
+        "uvx", "--uvx", envvar="UVX", help="uvx executable to spawn `vacant mcp` with."
+    ),
+) -> None:
+    """ReAct-style agent loop for ANY LLM (model-agnostic).
+
+    Hermes / OpenClaw / Claude Desktop / Cursor route LLM ↔ Vacant
+    traffic through OpenAI function-call JSON. Models below ~7B can't
+    emit that format reliably, so the framework swallows the call.
+    `vacant route` is the workaround: a tiny XML-ish action protocol
+    that any model with `/v1/chat/completions` can drive.
+
+    Example::
+
+        LLM_BASE_URL=http://192.168.50.130:11434/v1 \\
+        LLM_API_KEY=ollama \\
+        vacant route --name alice --model gemma4:e2b \\
+          "Translate this technical Chinese paragraph; spawn a D1 child if helpful."
+    """
+    from vacant.cli import route as route_mod
+
+    if not base_url:
+        typer.echo(
+            "error: --base-url (or LLM_BASE_URL / OLLAMA_BASE_URL) is required",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+
+    rc = route_mod.main(
+        prompt=prompt,
+        name=name,
+        model=model,
+        base_url=base_url,
+        api_key=api_key,
+        max_rounds=max_rounds,
+        temperature=temperature,
+        vacant_home=vacant_home,
+        uvx=uvx,
+    )
+    if rc != 0:
+        raise typer.Exit(code=rc)
+
+
 @app.command("mcp")
 def mcp_cmd(
     name: str | None = typer.Option(
