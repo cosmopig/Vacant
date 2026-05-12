@@ -543,9 +543,7 @@ def test_install_openclaw_link_install_does_not_pass_force(
     install is inherently idempotent so we drop the CLI flag and let
     `force=True` just mean "re-render the bundle directory"."""
     monkeypatch.setenv("VACANT_HOME", str(tmp_path))
-    monkeypatch.setattr(
-        "vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}"
-    )
+    monkeypatch.setattr("vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}")
     calls: list[list[str]] = []
     monkeypatch.setattr(
         "vacant.cli.install.subprocess.run",
@@ -563,9 +561,7 @@ def test_install_openclaw_subprocess_failure_returns_error(
     import subprocess as sp
 
     monkeypatch.setenv("VACANT_HOME", str(tmp_path))
-    monkeypatch.setattr(
-        "vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}"
-    )
+    monkeypatch.setattr("vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}")
 
     def boom(cmd: list[str], check: bool) -> None:
         raise sp.CalledProcessError(returncode=1, cmd=cmd)
@@ -591,9 +587,7 @@ def test_install_dispatcher_openclaw_routes_through_identity(
     """Even openclaw goes through ensure_identity so subsequent
     `VACANT_NAME=<name> openclaw …` finds the identity on disk."""
     monkeypatch.setenv("VACANT_HOME", str(tmp_path))
-    monkeypatch.setattr(
-        "vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}"
-    )
+    monkeypatch.setattr("vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}")
     monkeypatch.setattr("vacant.cli.install.subprocess.run", lambda cmd, check: None)
     msg = install("openclaw", name="oc-bot", insecure_demo=True)
     assert "created identity 'oc-bot'" in msg
