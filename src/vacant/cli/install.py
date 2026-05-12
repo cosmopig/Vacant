@@ -386,9 +386,12 @@ def install_openclaw(*, name: str = "alice", force: bool = False, dry_run: bool 
 
     bundle_dir = ls.vacant_home() / ".openclaw-bundle" / name
 
+    # OpenClaw rejects `--force` together with `-l/--link`. The link
+    # install is inherently idempotent (it replaces the existing
+    # symlink), so we treat `force=True` as "render the bundle even if
+    # it exists" — which we do unconditionally below — and drop the
+    # CLI flag.
     install_cmd = ["openclaw", "plugins", "install", "-l", str(bundle_dir)]
-    if force:
-        install_cmd.append("--force")
 
     if dry_run:
         return (

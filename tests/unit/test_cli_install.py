@@ -536,9 +536,12 @@ def test_install_cursor_rejects_non_dict_mcpservers(tmp_path: Path) -> None:
     assert "mcpServers" in msg
 
 
-def test_install_openclaw_force_passes_force_flag(
+def test_install_openclaw_link_install_does_not_pass_force(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """OpenClaw rejects `--force` together with `--link`; the link
+    install is inherently idempotent so we drop the CLI flag and let
+    `force=True` just mean "re-render the bundle directory"."""
     monkeypatch.setenv("VACANT_HOME", str(tmp_path))
     monkeypatch.setattr(
         "vacant.cli.install.shutil.which", lambda exe: f"/usr/bin/{exe}"
@@ -549,7 +552,9 @@ def test_install_openclaw_force_passes_force_flag(
         lambda cmd, check: calls.append(cmd),
     )
     install_openclaw(force=True)
-    assert any("--force" in c for c in calls)
+    assert calls
+    for cmd in calls:
+        assert "--force" not in cmd, cmd
 
 
 def test_install_openclaw_subprocess_failure_returns_error(
