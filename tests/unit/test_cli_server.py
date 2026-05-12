@@ -121,7 +121,7 @@ async def test_echo_behavior_returns_signed_text() -> None:
 # --- cli.mcp_server ---------------------------------------------------------
 
 
-def test_build_fastmcp_server_registers_three_tools() -> None:
+def test_build_fastmcp_server_registers_four_tools() -> None:
     ls.init_vacant("alice")
     bundle = build_serve_app("alice")
     mcp = build_fastmcp_server(
@@ -131,7 +131,12 @@ def test_build_fastmcp_server_registers_three_tools() -> None:
     )
     tools = asyncio.run(mcp.list_tools())
     names = {t.name for t in tools}
-    assert names == {"vacant_describe", "vacant_call", "vacant_call_with_sampling"}
+    assert names == {
+        "vacant_describe",
+        "vacant_call",
+        "vacant_call_with_sampling",
+        "vacant_spawn",
+    }
 
 
 def test_build_fastmcp_server_default_replay_store() -> None:
@@ -143,7 +148,158 @@ def test_build_fastmcp_server_default_replay_store() -> None:
         signing_key=bundle.signing_key,
     )
     tools = asyncio.run(mcp.list_tools())
-    assert len(tools) == 3
+    assert len(tools) == 4
+
+
+def test_persist_spawned_child_refuses_existing_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The persist helper must surface a clear LocalVacantExists when the
+    target directory already exists, instead of silently overwriting and
+    breaking the chain."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    from vacant.runtime.spawn import spawn_clone_with_mutation
+
+    result = spawn_clone_with_mutation(bundle.form, bundle.signing_key, policy_mutation="x")
+    ls.persist_spawned_child(
+        "alice__d1__first",
+        child_vacant_id=result.child.identity,
+        child_signing_key=result.child_signing_key,
+        child_logbook=result.child.logbook,
+        parent_vacant_id=result.child.parent_id,
+    )
+    # Second call with the same name must raise.
+    with pytest.raises(ls.LocalVacantExists):
+        ls.persist_spawned_child(
+            "alice__d1__first",
+            child_vacant_id=result.child.identity,
+            child_signing_key=result.child_signing_key,
+            child_logbook=result.child.logbook,
+            parent_vacant_id=result.child.parent_id,
+        )
+
+
+def test_vacant_spawn_refuses_when_no_parent_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """vacant_spawn requires a persistent parent; ephemeral mode must surface a
+    clear error rather than spawn an unattributable orphan."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        # parent_local_name + persist_spawned_child intentionally omitted
+    )
+    out = asyncio.run(mcp.call_tool("vacant_spawn", {"policy_mutation": "x"}))
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "vacant_spawn requires a persistent parent identity" in text
+
+
+def test_vacant_spawn_creates_child_directly(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Exercise the vacant_spawn tool body without an MCP subprocess so the
+    happy + persistence path lands inside the unit-test coverage window."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+
+    captured: dict[str, object] = {}
+
+    def _persist(result: object, child_name: str, parent_name: str) -> None:
+        captured["result"] = result
+        captured["child_name"] = child_name
+        captured["parent_name"] = parent_name
+        ls.persist_spawned_child(
+            child_name,
+            child_vacant_id=result.child.identity,  # type: ignore[attr-defined]
+            child_signing_key=result.child_signing_key,  # type: ignore[attr-defined]
+            child_logbook=result.child.logbook,  # type: ignore[attr-defined]
+            parent_vacant_id=result.child.parent_id,  # type: ignore[attr-defined]
+            state=result.child.runtime_state.value,  # type: ignore[attr-defined]
+        )
+
+    saved_logbooks: list[object] = []
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+        persist_spawned_child=_persist,
+        on_logbook_change=lambda lb: saved_logbooks.append(lb),
+    )
+    out = asyncio.run(
+        mcp.call_tool(
+            "vacant_spawn",
+            {"policy_mutation": "always quote the source", "child_name_hint": "quote"},
+        )
+    )
+    payload = out[0] if isinstance(out, tuple) else out
+    import json as _json
+
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    body = _json.loads(text)
+    assert body["ok"] is True
+    assert body["path"] == "D1"
+    assert body["child_name"].startswith("alice__quote__")
+    assert "result" in captured
+    assert "parent_name" in captured and captured["parent_name"] == "alice"
+    # The parent's SPAWN entry should have triggered an on_logbook_change.
+    assert saved_logbooks, "expected on_logbook_change to fire after spawn"
+
+
+def test_vacant_spawn_surfaces_persist_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A failure inside the persist callback must come back as
+    ``{"error": "persist_failed: ..."}`` so an LLM caller sees a textual
+    reason instead of an MCP-level crash."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+
+    def _persist(*_args: object, **_kwargs: object) -> None:
+        raise OSError("disk full")
+
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+        persist_spawned_child=_persist,
+    )
+    out = asyncio.run(mcp.call_tool("vacant_spawn", {"policy_mutation": "x"}))
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "persist_failed: disk full" in text
+
+
+def test_vacant_spawn_surfaces_spawn_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Empty policy_mutation must come back as `{"error": "spawn_failed: ..."}`,
+    not raise a Python exception across the wire."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+
+    def _persist(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("persist must not be called on a failed spawn")
+
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+        persist_spawned_child=_persist,
+    )
+    out = asyncio.run(mcp.call_tool("vacant_spawn", {"policy_mutation": "   "}))
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "spawn_failed" in text
 
 
 # --- cli.mcp_serve_test_runner ---------------------------------------------

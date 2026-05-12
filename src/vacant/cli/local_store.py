@@ -66,6 +66,7 @@ __all__ = [
     "load_logbook",
     "load_meta",
     "load_signing_key",
+    "persist_spawned_child",
     "save_envelope_state",
     "save_logbook",
     "save_meta",
@@ -296,6 +297,58 @@ def init_vacant(name: str, *, insecure_demo: bool = False) -> tuple[VacantId, Si
     )
     save_meta(name, meta)
     return vid, sk
+
+
+def persist_spawned_child(
+    name: str,
+    *,
+    child_vacant_id: VacantId,
+    child_signing_key: SigningKey,
+    child_logbook: Logbook,
+    parent_vacant_id: VacantId,
+    state: str = "LOCAL",
+    capability_text: str | None = None,
+) -> None:
+    """Write a spawned child vacant to disk under ``~/.vacant/<name>/``.
+
+    Unlike ``init_vacant`` which generates a fresh keypair, this
+    persists a *spawned* child whose keypair was already produced by
+    one of the ``vacant.runtime.spawn`` paths. The child's logbook is
+    expected to already carry a signed ``BIRTH`` entry naming the
+    parent. The parent's matching ``SPAWN`` entry is the caller's
+    responsibility (it lives in the parent's logbook, not the child's).
+
+    Stores the seed in plaintext under ``key.json`` (mode 0600). This
+    helper is currently used only by the ``vacant_spawn`` MCP tool,
+    which runs on demo / replication hosts where plaintext storage is
+    the established convention (parent is already ``--insecure-demo``).
+    """
+    d = vacant_dir(name)
+    if d.exists():
+        raise LocalVacantExists(name)
+    d.mkdir(parents=True)
+    key_path = d / KEY_FILE
+    key_path.write_text(
+        json.dumps(
+            {
+                "pubkey_hex": child_vacant_id.hex(),
+                "seed_hex": bytes(child_signing_key).hex(),
+                "key_storage": "plaintext",
+            },
+            sort_keys=True,
+        )
+    )
+    os.chmod(key_path, 0o600)
+    save_logbook(name, child_logbook)
+    meta = LocalMeta(
+        vacant_id_hex=child_vacant_id.hex(),
+        state=state,
+        capability_text=capability_text,
+        created_at=datetime.now(UTC).isoformat(),
+        parent_id_hex=parent_vacant_id.hex(),
+        key_storage="plaintext",
+    )
+    save_meta(name, meta)
 
 
 def load_signing_key(name: str) -> SigningKey:

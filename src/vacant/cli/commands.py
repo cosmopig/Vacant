@@ -819,10 +819,22 @@ def mcp_cmd(
     # trail to preserve anyway).
     persistent_lb = None
     on_lb_change: Any = None
+    persist_child: Any = None
     if persistent_name is not None:
         persistent_lb = ls.load_logbook(persistent_name)
         captured_name = persistent_name
         on_lb_change = lambda lb: ls.save_logbook(captured_name, lb)  # noqa: E731
+
+        def persist_child(result: Any, child_name: str, _parent_name: str) -> None:
+            """Persist a SpawnResult child to ~/.vacant/<child_name>/."""
+            ls.persist_spawned_child(
+                child_name,
+                child_vacant_id=result.child.identity,
+                child_signing_key=result.child_signing_key,
+                child_logbook=result.child.logbook,
+                parent_vacant_id=result.child.parent_id,
+                state=result.child.runtime_state.value,
+            )
 
     run_mcp_stdio_server(
         form=form,
@@ -830,6 +842,8 @@ def mcp_cmd(
         replay_store=replay_store,
         logbook=persistent_lb,
         on_logbook_change=on_lb_change,
+        parent_local_name=persistent_name,
+        persist_spawned_child=persist_child,
     )
 
 

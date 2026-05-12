@@ -49,6 +49,7 @@ from vacant.protocol.envelope import (
 )
 from vacant.protocol.errors import EnvelopeFormatError
 from vacant.protocol.serve import BehaviorHandler, make_response_envelope
+from vacant.runtime.spawn import spawn_clone_with_mutation
 from vacant.runtime.state_machine import can_be_called
 from vacant.substrate.base import SubstrateRequest
 from vacant.substrate.client_inherited import (
@@ -89,6 +90,8 @@ def build_fastmcp_server(
     name: str | None = None,
     logbook: Logbook | None = None,
     on_logbook_change: Callable[[Logbook], None] | None = None,
+    parent_local_name: str | None = None,
+    persist_spawned_child: Callable[[Any, str, str], None] | None = None,
 ) -> FastMCP:
     """Wrap a vacant as a `FastMCP` server.
 
@@ -283,6 +286,80 @@ def build_fastmcp_server(
             "proof": sub_res.proof,
         }
 
+    # vacant_spawn — autonomous lineage growth. The calling client (or
+    # an LLM-driven agent on the client side) decides this vacant should
+    # produce a specialized subordinate, and asks for one via the D1
+    # clone-with-mutation path. The mutation text is appended to the
+    # child's policy DSL; everything else (system prompt, tool whitelist,
+    # substrate spec) inherits from this vacant. The child gets a fresh
+    # keypair (no key derivation; cf. D003) and is persisted to disk
+    # alongside the parent under ``~/.vacant/<child_name>/``. The
+    # SPAWN entry on this vacant's logbook is signed by the parent;
+    # the child's logbook opens with a BIRTH entry signed by the
+    # child's own key.
+    @mcp.tool(
+        name="vacant_spawn",
+        description=(
+            "Spawn a child vacant as a clone-with-mutation (D1 path). "
+            "Call this when the task at hand would benefit from a "
+            "specialised subordinate that inherits this vacant's "
+            "capabilities and tool whitelist but carries an extra "
+            "policy rule. The child is persisted to disk with its own "
+            "Ed25519 keypair, a BIRTH log entry signed by the child, "
+            "and a SPAWN log entry on this vacant signed by this "
+            "vacant. Returns the child's vacant_id_hex, persistent "
+            "name, and parent_id_hex so the caller can verify the "
+            "lineage chain. Requires ``parent_local_name`` to have "
+            "been set on the server (i.e. this vacant must be a "
+            "persistent identity, not an ephemeral one)."
+        ),
+    )
+    async def vacant_spawn(
+        policy_mutation: str,
+        child_name_hint: str = "",
+    ) -> dict[str, Any]:
+        if parent_local_name is None or persist_spawned_child is None:
+            return {
+                "error": (
+                    "vacant_spawn requires a persistent parent identity; "
+                    "this MCP server was launched without parent_local_name "
+                    "wired through (ephemeral mode). Re-launch with "
+                    "--name <persistent_name>."
+                )
+            }
+        try:
+            result = spawn_clone_with_mutation(form, signing_key, policy_mutation=policy_mutation)
+        except Exception as exc:
+            return {"error": f"spawn_failed: {exc}"}
+
+        # Persist child + propagate the new SPAWN entry on parent's
+        # logbook to disk (sampling tool wires the same callback).
+        child_short = result.child.identity.short()
+        if child_name_hint and all(c.isalnum() or c in "-_" for c in child_name_hint):
+            child_name = f"{parent_local_name}__{child_name_hint}__{child_short}"
+        else:
+            child_name = f"{parent_local_name}__d1__{child_short}"
+        try:
+            persist_spawned_child(result, child_name, parent_local_name)
+        except Exception as exc:
+            return {"error": f"persist_failed: {exc}"}
+        # The SPAWN entry was appended to `form.logbook` by
+        # spawn_clone_with_mutation (not to the sampling-side `lb`
+        # which is a separate Logbook object loaded by commands.py).
+        # Persist `form.logbook` so the parent's SPAWN survives the
+        # subprocess exit.
+        if on_logbook_change is not None:
+            on_logbook_change(form.logbook)
+
+        return {
+            "ok": True,
+            "path": "D1",
+            "child_vacant_id_hex": result.child.identity.hex(),
+            "child_name": child_name,
+            "parent_vacant_id_hex": form.identity.hex(),
+            "policy_mutation": policy_mutation,
+        }
+
     return mcp
 
 
@@ -294,6 +371,8 @@ def run_mcp_stdio_server(
     behavior: BehaviorHandler | None = None,
     logbook: Logbook | None = None,
     on_logbook_change: Callable[[Logbook], None] | None = None,
+    parent_local_name: str | None = None,
+    persist_spawned_child: Callable[[Any, str, str], None] | None = None,
 ) -> None:
     """Blocking entrypoint: run the FastMCP server on stdio.
 
@@ -304,15 +383,21 @@ def run_mcp_stdio_server(
     ``logbook`` + ``on_logbook_change`` propagate to the sampling tool
     so every borrow is signed into the vacant's logbook (Pfix3 B7).
     """
-    server = build_fastmcp_server(
+    # pragma: no cover -- blocking subprocess wrapper; exercised only by
+    # the MCP integration tests which spawn this in a subprocess via
+    # `python -m vacant.cli.mcp_serve_test_runner` so coverage doesn't
+    # propagate back into the test process.
+    server = build_fastmcp_server(  # pragma: no cover
         form=form,
         signing_key=signing_key,
         replay_store=replay_store,
         behavior=behavior,
         logbook=logbook,
         on_logbook_change=on_logbook_change,
+        parent_local_name=parent_local_name,
+        persist_spawned_child=persist_spawned_child,
     )
-    asyncio.run(server.run_stdio_async())
+    asyncio.run(server.run_stdio_async())  # pragma: no cover
 
 
 # Silence unused-import lint when the module is imported but
