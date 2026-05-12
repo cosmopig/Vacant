@@ -817,11 +817,14 @@ def mcp_cmd(
     # entries appended in memory but they're lost at process exit
     # (the keypair is also fresh-per-launch, so there's no audit
     # trail to preserve anyway).
-    persistent_lb = None
     on_lb_change: Any = None
     persist_child: Any = None
     if persistent_name is not None:
-        persistent_lb = ls.load_logbook(persistent_name)
+        # Don't load a second Logbook here — form.logbook is already the
+        # canonical on-disk logbook (loaded by build_serve_app). Sharing
+        # one Logbook between sampling-side appends and spawn-side
+        # appends keeps the hash chain consistent; otherwise whichever
+        # tool saved last clobbered the other tool's entries.
         captured_name = persistent_name
         on_lb_change = lambda lb: ls.save_logbook(captured_name, lb)  # noqa: E731
 
@@ -840,7 +843,6 @@ def mcp_cmd(
         form=form,
         signing_key=signing_key,
         replay_store=replay_store,
-        logbook=persistent_lb,
         on_logbook_change=on_lb_change,
         parent_local_name=persistent_name,
         persist_spawned_child=persist_child,

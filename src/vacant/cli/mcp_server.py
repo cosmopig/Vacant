@@ -343,11 +343,10 @@ def build_fastmcp_server(
             persist_spawned_child(result, child_name, parent_local_name)
         except Exception as exc:
             return {"error": f"persist_failed: {exc}"}
-        # The SPAWN entry was appended to `form.logbook` by
-        # spawn_clone_with_mutation (not to the sampling-side `lb`
-        # which is a separate Logbook object loaded by commands.py).
-        # Persist `form.logbook` so the parent's SPAWN survives the
-        # subprocess exit.
+        # spawn_clone_with_mutation appended SPAWN to form.logbook.
+        # When commands.py defaults logbook=None, lb is form.logbook
+        # (single-object invariant), so the SPAWN is already on lb.
+        # Persist via the same callback the sampling tool uses.
         if on_logbook_change is not None:
             on_logbook_change(form.logbook)
 
