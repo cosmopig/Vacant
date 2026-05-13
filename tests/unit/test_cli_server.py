@@ -121,7 +121,7 @@ async def test_echo_behavior_returns_signed_text() -> None:
 # --- cli.mcp_server ---------------------------------------------------------
 
 
-def test_build_fastmcp_server_registers_four_tools() -> None:
+def test_build_fastmcp_server_registers_six_tools() -> None:
     ls.init_vacant("alice")
     bundle = build_serve_app("alice")
     mcp = build_fastmcp_server(
@@ -136,6 +136,8 @@ def test_build_fastmcp_server_registers_four_tools() -> None:
         "vacant_call",
         "vacant_call_with_sampling",
         "vacant_spawn",
+        "vacant_list_children",
+        "vacant_delegate",
     }
 
 
@@ -148,7 +150,7 @@ def test_build_fastmcp_server_default_replay_store() -> None:
         signing_key=bundle.signing_key,
     )
     tools = asyncio.run(mcp.list_tools())
-    assert len(tools) == 4
+    assert len(tools) == 6
 
 
 def test_persist_spawned_child_refuses_existing_dir(
@@ -179,6 +181,184 @@ def test_persist_spawned_child_refuses_existing_dir(
             child_logbook=result.child.logbook,
             parent_vacant_id=result.child.parent_id,
         )
+
+
+def test_vacant_list_children_empty(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """No children yet → returns empty list with parent's vacant_id."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+    )
+    out = asyncio.run(mcp.call_tool("vacant_list_children", {}))
+    payload = out[0] if isinstance(out, tuple) else out
+    import json as _json
+
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    body = _json.loads(text)
+    assert body["children"] == []
+    assert body["parent_vacant_id_hex"] == bundle.form.identity.hex()
+
+
+def test_vacant_list_children_reports_spawned_d1(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """vacant_list_children must surface a freshly-spawned D1 child with
+    its policy_mutation pulled out of the child's BIRTH log entry."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+
+    def _persist(result: object, child_name: str, _parent_name: str) -> None:
+        ls.persist_spawned_child(
+            child_name,
+            child_vacant_id=result.child.identity,  # type: ignore[attr-defined]
+            child_signing_key=result.child_signing_key,  # type: ignore[attr-defined]
+            child_logbook=result.child.logbook,  # type: ignore[attr-defined]
+            parent_vacant_id=result.child.parent_id,  # type: ignore[attr-defined]
+            state=result.child.runtime_state.value,  # type: ignore[attr-defined]
+        )
+
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+        persist_spawned_child=_persist,
+    )
+    spawn_out = asyncio.run(
+        mcp.call_tool(
+            "vacant_spawn",
+            {"policy_mutation": "always cite sources", "child_name_hint": "cite"},
+        )
+    )
+    spawn_payload = spawn_out[0] if isinstance(spawn_out, tuple) else spawn_out
+    import json as _json
+
+    spawn_body = _json.loads(
+        spawn_payload[0].text if hasattr(spawn_payload[0], "text") else str(spawn_payload[0])
+    )
+    child_name = spawn_body["child_name"]
+
+    list_out = asyncio.run(mcp.call_tool("vacant_list_children", {}))
+    list_payload = list_out[0] if isinstance(list_out, tuple) else list_out
+    list_body = _json.loads(
+        list_payload[0].text if hasattr(list_payload[0], "text") else str(list_payload[0])
+    )
+    assert len(list_body["children"]) == 1
+    entry = list_body["children"][0]
+    assert entry["name"] == child_name
+    assert entry["vacant_id_hex"] == spawn_body["child_vacant_id_hex"]
+    assert entry["policy_mutation"] == "always cite sources"
+    assert entry["inference_count"] == 0
+    assert entry["attestation_count"] == 0
+
+
+def test_vacant_list_children_skips_non_vacant_dirs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A directory under VACANT_HOME without meta.json (e.g. the rendered
+    OpenClaw bundle dir, scratch dirs) must NOT appear in the listing."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    (tmp_path / ".openclaw-bundle").mkdir()
+    (tmp_path / "scratch").mkdir()
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+    )
+    out = asyncio.run(mcp.call_tool("vacant_list_children", {}))
+    payload = out[0] if isinstance(out, tuple) else out
+    import json as _json
+
+    body = _json.loads(payload[0].text if hasattr(payload[0], "text") else str(payload[0]))
+    assert body["children"] == []
+
+
+def test_vacant_delegate_refuses_when_no_parent_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Ephemeral mode (parent_local_name=None) must reject delegate."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+    )
+    out = asyncio.run(mcp.call_tool("vacant_delegate", {"child_name": "alice__c__x", "task": "y"}))
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "ephemeral" in text
+
+
+def test_vacant_delegate_rejects_unsafe_child_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+    )
+    for bad in ("", "../escape", "has space", "with/slash"):
+        out = asyncio.run(mcp.call_tool("vacant_delegate", {"child_name": bad, "task": "x"}))
+        payload = out[0] if isinstance(out, tuple) else out
+        text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+        assert "invalid child_name" in text, bad
+
+
+def test_vacant_delegate_refuses_unknown_child(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+    )
+    out = asyncio.run(
+        mcp.call_tool(
+            "vacant_delegate",
+            {"child_name": "alice__nope__deadbeef", "task": "x"},
+        )
+    )
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "not found on disk" in text
+
+
+def test_vacant_delegate_refuses_non_descendant(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A vacant on disk whose parent_id doesn't match this vacant must
+    not be delegate-able (otherwise the trust chain is breakable)."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    ls.init_vacant("bob", insecure_demo=True)  # peer, NOT alice's child
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+    )
+    out = asyncio.run(mcp.call_tool("vacant_delegate", {"child_name": "bob", "task": "x"}))
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "not a direct descendant" in text
 
 
 def test_vacant_spawn_refuses_when_no_parent_name(

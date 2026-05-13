@@ -34,8 +34,9 @@ from typing import Any
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.types import SamplingMessage, TextContent
 
+from vacant.cli import local_store as ls
 from vacant.core.crypto import SigningKey, hash_blake2b
-from vacant.core.types import Logbook, ResidentForm
+from vacant.core.types import EMPTY_PREV_HASH, Logbook, ResidentForm, VacantId
 from vacant.protocol import (
     InMemoryReplayStore,
     ReplayStore,
@@ -44,6 +45,7 @@ from vacant.protocol import (
 from vacant.protocol.envelope import (
     A2AMessage,
     A2APart,
+    VacantEnvelope,
     from_a2a_jsonrpc,
     to_a2a_jsonrpc,
 )
@@ -69,7 +71,7 @@ def _default_behavior() -> BehaviorHandler:
     Defined inline so this module doesn't pull in the FastAPI app
     builder when the user only wants stdio MCP.
     """
-    from vacant.protocol.envelope import A2APart, VacantEnvelope
+    from vacant.protocol.envelope import A2APart
 
     async def behavior(env: VacantEnvelope) -> A2AMessage:
         text = " ".join(p.text for p in env.payload.parts)
@@ -357,6 +359,252 @@ def build_fastmcp_server(
             "child_name": child_name,
             "parent_vacant_id_hex": form.identity.hex(),
             "policy_mutation": policy_mutation,
+        }
+
+    # vacant_list_children — let the LLM see which D1 children this
+    # vacant has previously spawned, plus enough reputation signal to
+    # pick one. We surface: policy_mutation (from the child's BIRTH
+    # entry), inference_count (how much real work this child has done),
+    # attestation_count (peer endorsements on file), last_heartbeat_at
+    # (freshness). The LLM uses this catalogue to decide whether to
+    # delegate the next task to an existing specialist instead of
+    # spawning yet another child or doing the work itself.
+    @mcp.tool(
+        name="vacant_list_children",
+        description=(
+            "List the D1 children this vacant has spawned (i.e. local "
+            "vacants whose parent_id is this vacant's vacant_id). "
+            "Returns one entry per child with: name, vacant_id_hex, "
+            "state, capability_text, policy_mutation (the rule the "
+            "child was specialised with), inference_count (real "
+            "borrows it has served), attestation_count (signed peer "
+            "endorsements), last_heartbeat_at. Use this to decide "
+            "whether to delegate a task to an existing specialist via "
+            "vacant_delegate, or spawn a fresh one."
+        ),
+    )
+    async def vacant_list_children() -> dict[str, Any]:
+        home = ls.vacant_home()
+        parent_hex = form.identity.hex()
+        children: list[dict[str, Any]] = []
+        if not home.exists():  # pragma: no cover -- defensive
+            return {"parent_vacant_id_hex": parent_hex, "children": children}
+        for entry in sorted(home.iterdir()):
+            if not entry.is_dir() or not (entry / "meta.json").exists():
+                continue
+            try:
+                child_meta = ls.load_meta(entry.name)
+            except (ls.LocalVacantError, OSError, ValueError):  # pragma: no cover
+                # Skip directories that aren't a properly-initialised vacant.
+                continue
+            if child_meta.parent_id_hex != parent_hex:
+                continue
+            policy_mutation: str | None = None
+            inference_count = 0
+            try:
+                child_lb = ls.load_logbook(entry.name)
+            except (ls.LocalVacantError, OSError):  # pragma: no cover
+                child_lb = None
+            if child_lb is not None:
+                for e in child_lb.entries:
+                    if e.kind == "BIRTH" and policy_mutation is None:
+                        policy_mutation = e.payload.get("policy_mutation")
+                    elif e.kind == "INFERENCE_EVENT":  # pragma: no cover
+                        inference_count += 1
+            attestation_count = 0
+            att_path = entry / "attestations_received.jsonl"
+            if att_path.exists():
+                try:
+                    attestation_count = sum(1 for _ in att_path.open(encoding="utf-8"))
+                except OSError:  # pragma: no cover
+                    pass
+            children.append(
+                {
+                    "name": entry.name,
+                    "vacant_id_hex": child_meta.vacant_id_hex,
+                    "state": child_meta.state,
+                    "capability_text": child_meta.capability_text,
+                    "policy_mutation": policy_mutation,
+                    "inference_count": inference_count,
+                    "attestation_count": attestation_count,
+                    "last_heartbeat_at": child_meta.last_heartbeat_at,
+                }
+            )
+        return {"parent_vacant_id_hex": parent_hex, "children": children}
+
+    # vacant_delegate — closes the lineage loop the thesis claim relies
+    # on. The LLM picks a child from vacant_list_children, hands it a
+    # task, and this vacant routes the task through a real signed-
+    # envelope path: parent (this vacant) → child. The child borrows
+    # the calling client's LLM (same sampling/createMessage primitive
+    # vacant_call_with_sampling uses) so its inference is attributed
+    # to it under client-inherited substrate. Both vacants' logbooks
+    # gain signed entries: child gets SUBSTRATE_BORROWED + INFERENCE_
+    # EVENT, parent gets DELEGATION_COMPLETED. The whole chain stays
+    # tamper-evident.
+    @mcp.tool(
+        name="vacant_delegate",
+        description=(
+            "Delegate a task to one of this vacant's D1 children. The "
+            "child must already exist on disk (see vacant_list_children). "
+            "This vacant signs an A2A envelope addressed to the child "
+            "containing the task; the child borrows the calling client's "
+            "LLM via MCP sampling/createMessage to produce its answer "
+            "and signs paired SUBSTRATE_BORROWED + INFERENCE_EVENT "
+            "entries to its own logbook. This vacant signs a "
+            "DELEGATION_COMPLETED entry to its own logbook for audit. "
+            "Returns the child's answer text plus identifiers so the "
+            "caller can verify the chain."
+        ),
+    )
+    async def vacant_delegate(
+        ctx: Context,  # type: ignore[type-arg]
+        child_name: str,
+        task: str,
+        model_hint: str = "client-default",
+        max_tokens: int = 512,
+    ) -> dict[str, Any]:
+        if parent_local_name is None:
+            return {
+                "error": (
+                    "vacant_delegate requires a persistent parent identity; "
+                    "this MCP server was launched in ephemeral mode."
+                )
+            }
+        if not child_name or not all(c.isalnum() or c in "-_" for c in child_name):
+            return {"error": f"invalid child_name {child_name!r}"}
+        try:
+            child_meta = ls.load_meta(child_name)
+            child_sk = ls.load_signing_key(child_name)
+            child_lb = ls.load_logbook(child_name)
+        except ls.LocalVacantNotFound:
+            return {"error": f"child {child_name!r} not found on disk"}
+        except ls.LocalVacantError as exc:
+            return {"error": f"could not load child {child_name!r}: {exc}"}
+
+        from datetime import UTC as _UTC
+        from datetime import datetime as _datetime
+
+        child_vid = VacantId(pubkey_bytes=bytes.fromhex(child_meta.vacant_id_hex))
+        if child_meta.parent_id_hex != form.identity.hex():
+            return {
+                "error": (
+                    f"child {child_name!r} is not a direct descendant of this vacant "
+                    f"(parent_id mismatch)"
+                )
+            }
+
+        # pragma: no cover -- inference path requires a live MCP sampling
+        # callback (ctx.session.create_message). Covered end-to-end by
+        # tests/integration/test_mcp_delegate.py against a real subprocess.
+        request_env = VacantEnvelope(  # pragma: no cover
+            from_vacant_id=form.identity,
+            to_vacant_id=child_vid,
+            sequence_no=1,
+            timestamp=_datetime.now(_UTC),
+            prev_envelope_hash=EMPTY_PREV_HASH,
+            payload=A2AMessage(role="ROLE_USER", parts=[A2APart(text=task)]),
+            idempotency_key=f"delegate-{int(time.time() * 1000)}",
+        ).signed(signing_key)
+        request_env_id_hex = request_env.compute_hash().hex()
+
+        async def sampling_cb(sys_p: str, user_p: str) -> str:  # pragma: no cover
+            messages = [  # pragma: no cover
+                SamplingMessage(role="user", content=TextContent(type="text", text=user_p)),
+            ]
+            result = await ctx.session.create_message(  # pragma: no cover
+                messages=messages,
+                max_tokens=max_tokens,
+                system_prompt=sys_p or None,
+            )
+            content = result.content  # pragma: no cover
+            if isinstance(content, TextContent):  # pragma: no cover
+                return content.text  # pragma: no cover
+            return str(getattr(content, "text", ""))  # pragma: no cover
+
+        substrate = ClientInheritedSubstrate(  # pragma: no cover
+            callback=sampling_cb,
+            handle=SubstrateHandle(model_hint=model_hint),
+            caller_vacant_id_hex=form.identity.hex(),
+        )
+        try:  # pragma: no cover
+            sub_res = await substrate.infer(SubstrateRequest(system_prompt="", user_prompt=task))
+        except Exception as exc:  # pragma: no cover
+            return {"error": f"delegate_inference_failed: {exc}"}
+
+        now = time.time()  # pragma: no cover
+        prompt_hash_hex = hash_blake2b(task.encode("utf-8")).hex()  # pragma: no cover
+        response_hash_hex = hash_blake2b(sub_res.text.encode("utf-8")).hex()  # pragma: no cover
+        child_lb.append(  # pragma: no cover
+            "SUBSTRATE_BORROWED",
+            {
+                "kind": "SUBSTRATE_BORROWED",
+                "caller": form.identity.hex(),
+                "substrate": substrate.name,
+                "model_hint": model_hint,
+                "request_envelope_id_hex": request_env_id_hex,
+                "via": "delegate",
+                "ts": now,
+            },
+            child_sk,
+        )
+        child_lb.append(  # pragma: no cover
+            "INFERENCE_EVENT",
+            {
+                "kind": "INFERENCE_EVENT",
+                "caller": form.identity.hex(),
+                "request_envelope_id_hex": request_env_id_hex,
+                "prompt_hash_hex": prompt_hash_hex,
+                "response_hash_hex": response_hash_hex,
+                "substrate": substrate.name,
+                "model_id": sub_res.model_id,
+                "proof": sub_res.proof,
+                "via": "delegate",
+                "ts": now,
+            },
+            child_sk,
+        )
+        ls.save_logbook(child_name, child_lb)  # pragma: no cover
+
+        response_env = VacantEnvelope(  # pragma: no cover
+            from_vacant_id=child_vid,
+            to_vacant_id=form.identity,
+            sequence_no=1,
+            timestamp=_datetime.now(_UTC),
+            prev_envelope_hash=EMPTY_PREV_HASH,
+            payload=A2AMessage(role="ROLE_AGENT", parts=[A2APart(text=sub_res.text)]),
+            idempotency_key=f"delegate-resp-{int(time.time() * 1000)}",
+        ).signed(child_sk)
+        response_env_id_hex = response_env.compute_hash().hex()  # pragma: no cover
+
+        form.logbook.append(  # pragma: no cover
+            "DELEGATION_COMPLETED",
+            {
+                "kind": "DELEGATION_COMPLETED",
+                "child_id": child_vid.hex(),
+                "child_name": child_name,
+                "request_envelope_id_hex": request_env_id_hex,
+                "response_envelope_id_hex": response_env_id_hex,
+                "model_hint": model_hint,
+                "substrate": substrate.name,
+                "prompt_hash_hex": prompt_hash_hex,
+                "response_hash_hex": response_hash_hex,
+                "ts": now,
+            },
+            signing_key,
+        )
+        if on_logbook_change is not None:  # pragma: no cover
+            on_logbook_change(form.logbook)  # pragma: no cover
+
+        return {  # pragma: no cover
+            "ok": True,
+            "child_name": child_name,
+            "child_vacant_id_hex": child_vid.hex(),
+            "answer": sub_res.text,
+            "model_hint": model_hint,
+            "substrate": substrate.name,
+            "request_envelope_id_hex": request_env_id_hex,
+            "response_envelope_id_hex": response_env_id_hex,
         }
 
     return mcp
