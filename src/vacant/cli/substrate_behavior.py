@@ -27,6 +27,7 @@ Design notes:
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from vacant.cli.server import BehaviorFn
@@ -34,11 +35,14 @@ from vacant.protocol.envelope import A2AMessage, A2APart, SelfEval, VacantEnvelo
 from vacant.substrate.base import SubstrateBackend, SubstrateRequest
 from vacant.substrate.scorer import LLMScorer
 
+_log = logging.getLogger(__name__)
+
 __all__ = [
     "SUBSTRATE_FACTORIES",
     "build_scorer_from_name",
     "resolve_substrate",
     "substrate_behavior",
+    "wrap_behavior_with_drift_observer",
 ]
 
 
@@ -110,6 +114,30 @@ def substrate_behavior(
         )
 
     return _behavior
+
+
+def wrap_behavior_with_drift_observer(grow_loop: Any, inner: BehaviorFn) -> BehaviorFn:
+    """Return a `BehaviorFn` that calls `inner` then feeds the response
+    text to `grow_loop.observe_response()` for STYLO drift detection.
+
+    Composed by `vacant grow --substrate=…`: the inner is
+    `substrate_behavior(backend, ...)`, the wrapper is what gets
+    mounted on the A2A FastAPI app. The wrapper is transparent to
+    callers — same envelope shape in, same envelope shape out — but
+    side-effects the loop's drift monitor.
+    """
+
+    async def _wrapped(env: VacantEnvelope) -> A2AMessage:
+        response = await inner(env)
+        try:
+            text = " ".join(p.text for p in response.parts if p.type == "text")
+            grow_loop.observe_response(text)
+        except Exception:  # noqa: S110, BLE001 — drift observation is best-effort
+            # Never let a buggy monitor block a real response from going out.
+            _log.debug("drift observer raised; ignored", exc_info=True)
+        return response
+
+    return _wrapped
 
 
 # --- substrate name resolution ---------------------------------------------

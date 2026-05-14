@@ -830,21 +830,53 @@ def grow_cmd(
         build_scorer_from_name,
         resolve_substrate,
         substrate_behavior,
+        wrap_behavior_with_drift_observer,
     )
     from vacant.runtime.grow import GrowLoop, make_grow_lifespan
 
     n = _resolve_name(name)
-    behavior = None
+
+    # Two-phase construction so the grow loop can observe responses
+    # for drift detection. Phase A: build the loop with a placeholder
+    # behavior. Phase B: wrap the real substrate behavior with
+    # `loop.observe_response` and pass that to build_serve_app.
+    # We hold a mutable cell so the behavior assigned to FastAPI never
+    # changes its callable identity — only the loop reference inside.
+    raw_behavior = None
     if substrate is not None:
         backend = resolve_substrate(substrate)
-        # System prompt comes from meta if available; otherwise a default.
         try:
             meta_for_prompt = ls.load_meta(n)
             sysprompt = meta_for_prompt.capability_text or "You are a helpful vacant."
         except ls.LocalVacantNotFound:
             sysprompt = "You are a helpful vacant."
-        behavior = substrate_behavior(backend, system_prompt=sysprompt)
-    bundle = build_serve_app(n, behavior=behavior, endpoint=endpoint)
+        raw_behavior = substrate_behavior(backend, system_prompt=sysprompt)
+
+    # Build a placeholder loop just so wrap_behavior_with_drift_observer
+    # has a target. The form + signing_key get rebuilt below in
+    # build_serve_app; this temp loop is replaced after the bundle is
+    # ready, but the closure inside the wrapper still points at the
+    # placeholder. To keep things simple we resolve form + signing_key
+    # ONCE here, then pass them through.
+    _placeholder_meta = ls.load_meta(n)
+    _placeholder_vid = VacantId(pubkey_bytes=bytes.fromhex(_placeholder_meta.vacant_id_hex))
+    _placeholder_sk = ls.load_signing_key(n)
+    placeholder_form = ResidentForm(
+        identity=_placeholder_vid,
+        logbook=ls.load_logbook(n) or Logbook(),
+        behavior_bundle=BehaviorBundle(system_prompt="vacant grow"),
+        substrate_spec=SubstrateSpec(allowed_substrates=["mock"]),
+        runtime_state=VacantState(_placeholder_meta.state),
+    )
+    early_loop = GrowLoop(
+        self_form=placeholder_form,
+        self_signing_key=_placeholder_sk,
+    )
+
+    wrapped_behavior = raw_behavior
+    if raw_behavior is not None:
+        wrapped_behavior = wrap_behavior_with_drift_observer(early_loop, raw_behavior)
+    bundle = build_serve_app(n, behavior=wrapped_behavior, endpoint=endpoint)
     advertised = endpoint or f"http://{host}:{port}"
     try:
         meta = ls.load_meta(n)
@@ -856,14 +888,17 @@ def grow_cmd(
 
     scorer = build_scorer_from_name(scorer_substrate)
 
-    loop = GrowLoop(
-        self_form=bundle.form,
-        self_signing_key=bundle.signing_key,
-        peer_review_period_s=peer_review_period_s,
-        redteam_every_n_ticks=redteam_every_n,
-        heartbeat_every_n_ticks=heartbeat_every_n,
-        scorer=scorer,
-    )
+    # Promote the placeholder loop into the real one, now that we have
+    # bundle.form + bundle.signing_key from build_serve_app. We mutate
+    # in place so the wrapper closure (already pointing at early_loop)
+    # gets the upgraded state.
+    early_loop.self_form = bundle.form
+    early_loop.self_signing_key = bundle.signing_key
+    early_loop.peer_review_period_s = peer_review_period_s
+    early_loop.redteam_every_n_ticks = redteam_every_n
+    early_loop.heartbeat_every_n_ticks = heartbeat_every_n
+    early_loop.scorer = scorer
+    loop = early_loop
     bundle.app.router.lifespan_context = make_grow_lifespan(loop)
 
     @bundle.app.get("/grow/stats")

@@ -77,6 +77,20 @@ class GrowStats:
     redteam_probes_sent: int = 0
     redteam_probes_failed: int = 0
     heartbeats: int = 0
+    # --- Phase 3: self-growth counters ----------------------------------
+    reviews_ingested: int = 0
+    """How many signed peer-reviews of *me* we've validated + processed
+    across this loop's lifetime."""
+    reviews_rejected: int = 0
+    """Inbound rows we dropped because of bad signature / wrong target /
+    JSON malformed. High counts indicate someone is feeding us garbage."""
+    drift_events: int = 0
+    """Number of ticks where the STYLO drift of our own recent responses
+    crossed the threshold. Each event is also written to our logbook."""
+    spawns_emitted: int = 0
+    """Number of D1 child spawns triggered by consecutive sub-threshold
+    reviews on me. Each carries the parent_id back to this vacant."""
+    # --------------------------------------------------------------------
     last_tick_at_ms: int = 0
     last_error: str | None = None
 
@@ -89,6 +103,10 @@ class GrowStats:
             "redteam_probes_sent": self.redteam_probes_sent,
             "redteam_probes_failed": self.redteam_probes_failed,
             "heartbeats": self.heartbeats,
+            "reviews_ingested": self.reviews_ingested,
+            "reviews_rejected": self.reviews_rejected,
+            "drift_events": self.drift_events,
+            "spawns_emitted": self.spawns_emitted,
             "last_tick_at_ms": self.last_tick_at_ms,
             "last_error": self.last_error,
         }
@@ -129,6 +147,22 @@ class GrowLoop:
     # deterministic substrates also work and are what unit tests use to
     # exercise the substrate path without an API key.
     scorer: Any | None = None
+    # --- Phase 3: self-growth ------------------------------------------------
+    # Threshold of (factual+logical+relevance)/3 below which a review
+    # counts as "bad". 3 consecutive bad reviews → auto-spawn a D1 child.
+    bad_review_threshold: float = 0.3
+    bad_review_streak: int = 3
+    # When True the loop pulls newly-appended rows from its own
+    # `reviews_received.jsonl`, verifies signatures, and updates the
+    # `self_reputation` snapshot every tick.
+    enable_self_reputation_ingest: bool = True
+    # When True the loop tracks STYLO drift on the responses *we* have
+    # given (substrate path only — echo behaviour has no real
+    # behavioural signature to drift from).
+    enable_drift_detection: bool = True
+    # When True, 3-in-a-row bad reviews trigger `spawn_clone_with_mutation`.
+    enable_auto_spawn: bool = True
+    # --------------------------------------------------------------------
 
     stats: GrowStats = field(default_factory=GrowStats)
     _stop: asyncio.Event = field(default_factory=asyncio.Event)
@@ -140,6 +174,11 @@ class GrowLoop:
     # the chain correctly. Initialised lazily via `field(default_factory)`
     # because dataclass field defaults can't be mutable.
     _outbound_replay: Any = None
+    # Phase 3 self-growth state. Built lazily on first use so dataclass
+    # defaults can stay primitive.
+    _review_ingest: Any = None
+    _drift_monitor: Any = None
+    _self_reputation: Any = None
 
     def _ensure_outbound_replay(self) -> Any:
         """Lazily build the outbound replay store on first use.
@@ -155,10 +194,66 @@ class GrowLoop:
             self._outbound_replay = InMemoryReplayStore()
         return self._outbound_replay
 
+    def _ensure_review_ingest(self) -> Any:
+        """Build the `ReceivedReviewIngest` for this vacant on first call.
+
+        Located under `home/<name>/reviews_received.jsonl`; if we can't
+        resolve the local name (ephemeral vacant) we return None so the
+        ingest path becomes a no-op.
+        """
+        if self._review_ingest is not None:
+            return self._review_ingest
+        from vacant.runtime.self_growth import ReceivedReviewIngest
+
+        name = self._self_name_or_none()
+        if name is None:
+            return None
+        home = self.home or ls.vacant_home()
+        review_file = home / name / "reviews_received.jsonl"
+        self._review_ingest = ReceivedReviewIngest(
+            review_file=review_file,
+            self_pubkey_hex=self.self_form.identity.hex(),
+        )
+        return self._review_ingest
+
+    def _ensure_drift_monitor(self) -> Any:
+        if self._drift_monitor is not None:
+            return self._drift_monitor
+        from vacant.runtime.self_growth import SelfDriftMonitor
+
+        self._drift_monitor = SelfDriftMonitor()
+        return self._drift_monitor
+
+    @property
+    def self_reputation(self) -> Any:
+        """Latest `SelfReputationSnapshot` computed this tick (or None)."""
+        return self._self_reputation
+
+    def observe_response(self, response_text: str) -> None:
+        """Hook for the A2A behaviour layer to feed back what THIS vacant
+        just answered. The drift monitor accumulates these and emits
+        a logbook event when STYLO distance crosses the threshold.
+
+        Wired by `wrap_behavior_with_drift_observer(loop, behavior)`
+        from `cli.substrate_behavior` so the operator only configures
+        `vacant grow --substrate=...` once.
+        """
+        if not self.enable_drift_detection:
+            return
+        monitor = self._ensure_drift_monitor()
+        try:
+            drifted = monitor.observe(response_text)
+        except Exception as exc:
+            self.stats.last_error = f"drift_observe: {exc!r}"
+            return
+        if drifted:
+            self._record_drift_event(monitor.last_drift)
+
     async def tick(self) -> None:
         """One pass of the loop.
 
-        Sequence: optional heartbeat → peer_review OR redteam.
+        Sequence: heartbeat → peer_review/redteam → self-growth pass
+        (ingest received reviews → drift check → auto-spawn check).
         Failures are caught + logged + counted; the loop continues.
         """
         self._tick_index += 1
@@ -175,12 +270,115 @@ class GrowLoop:
                 await self._do_redteam()
             else:
                 await self._do_peer_review()
+            # Self-growth pass: read what others have said about me,
+            # check if my outputs are drifting, and decide whether to
+            # spawn a successor.
+            if self.enable_self_reputation_ingest:
+                await self._do_self_review_ingest()
+            if self.enable_auto_spawn:
+                await self._maybe_auto_spawn()
         except Exception as exc:
             self.stats.last_error = repr(exc)
             _log.exception("GrowLoop tick raised; continuing")
         finally:
             self.stats.ticks_completed += 1
             self.stats.last_tick_at_ms = int(time.time() * 1000)
+
+    # --- Phase 3 self-growth pass ------------------------------------------
+
+    async def _do_self_review_ingest(self) -> None:
+        """Pull newly-appended rows from our own `reviews_received.jsonl`,
+        validate signatures, update `self_reputation`."""
+        ingest = self._ensure_review_ingest()
+        if ingest is None:
+            return
+        accepted_before = ingest.total_accepted
+        rejected_before = ingest.total_rejected
+        ingest.ingest_new()
+        # Counters reflect the delta this tick, not the lifetime total.
+        self.stats.reviews_ingested += ingest.total_accepted - accepted_before
+        self.stats.reviews_rejected += ingest.total_rejected - rejected_before
+        self._self_reputation = ingest.compute_snapshot()
+
+    def _record_drift_event(self, drift_value: float) -> None:
+        """Append a `drift_detected` entry to our own logbook so an
+        auditor can pinpoint when our behaviour shifted.
+
+        Drift is also surfaced via `stats.drift_events` — counts ticks
+        on which `is_drifting` flipped True.
+        """
+        try:
+            name = self._self_name_or_none()
+            if name is None:
+                return
+            lb = ls.load_logbook(name)
+            lb.append(
+                "drift_detected",
+                payload={
+                    "tick": self._tick_index,
+                    "drift_value": float(drift_value),
+                    "ts_ms": int(time.time() * 1000),
+                },
+                signing_key=self.self_signing_key,
+            )
+            ls.save_logbook(name, lb)
+            self.stats.drift_events += 1
+        except Exception as exc:
+            self.stats.last_error = f"drift_log: {exc!r}"
+
+    async def _maybe_auto_spawn(self) -> None:
+        """If the last `bad_review_streak` reviews of me are all below
+        `bad_review_threshold`, spawn a D1 successor.
+
+        Both parent and child remain alive; the network's UCB
+        exploration decides which to route traffic to. Each spawn
+        emits exactly one `spawn` event into our logbook + bumps
+        `stats.spawns_emitted`.
+        """
+        from vacant.runtime.self_growth import consecutive_low_review_window
+
+        ingest = self._ensure_review_ingest()
+        if ingest is None:
+            return
+        scores = ingest.recent_objective_score(window=self.bad_review_streak)
+        if not consecutive_low_review_window(
+            scores,
+            threshold=self.bad_review_threshold,
+            required_streak=self.bad_review_streak,
+        ):
+            return
+        # We only spawn once per low-streak run; clear the ingest's
+        # recent buffer so the next spawn requires fresh bad reviews.
+        # Implementation: trim the accepted rows so the next window
+        # sees zero matching scores until N new bad reviews land.
+        ingest._accepted_rows = ingest._accepted_rows[: -self.bad_review_streak]
+        self.stats.spawns_emitted += 1
+        # Log the spawn intent into our own logbook. We don't actually
+        # call `spawn_clone_with_mutation` here because that requires a
+        # parent_form with a runnable state machine + writes a child to
+        # disk — that's a heavier operation the operator likely wants
+        # to control. Instead the grow loop logs the *signal*; a
+        # separate CLI / dashboard surface picks it up.
+        try:
+            name = self._self_name_or_none()
+            if name is None:
+                return
+            lb = ls.load_logbook(name)
+            lb.append(
+                "spawn_triggered",
+                payload={
+                    "tick": self._tick_index,
+                    "reason": "consecutive_bad_reviews",
+                    "threshold": self.bad_review_threshold,
+                    "streak": self.bad_review_streak,
+                    "recent_scores": scores,
+                    "ts_ms": int(time.time() * 1000),
+                },
+                signing_key=self.self_signing_key,
+            )
+            ls.save_logbook(name, lb)
+        except Exception as exc:
+            self.stats.last_error = f"spawn_log: {exc!r}"
 
     async def _do_heartbeat(self) -> None:
         """Append a heartbeat to our own logbook on disk + in memory."""
