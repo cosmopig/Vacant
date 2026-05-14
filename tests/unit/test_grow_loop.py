@@ -413,6 +413,112 @@ async def test_redteam_shares_chain_with_peer_review(_vacant_home: Path) -> None
     assert loop.stats.peer_reviews_sent + loop.stats.redteam_probes_sent == 4
 
 
+# --- Pfix9 §A: review_all_per_tick fan-out ---------------------------------
+
+
+@pytest.mark.asyncio
+async def test_review_all_per_tick_reviews_every_sibling(_vacant_home: Path) -> None:
+    """With 3 vacants and `review_all_per_tick=True`, alice's single
+    tick should send 2 peer-review probes (one to bob, one to carol),
+    so `peer_reviews_sent` ends at 2 (not 1 like rotation mode)."""
+    from datetime import UTC, datetime
+
+    from vacant.core.types import EMPTY_PREV_HASH
+    from vacant.protocol.envelope import (
+        A2AMessage,
+        A2APart,
+        VacantEnvelope,
+        from_a2a_jsonrpc,
+        to_a2a_jsonrpc,
+    )
+
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    ls.init_vacant("carol")
+    # Both peers need a serving endpoint to be eligible.
+    for peer in ("bob", "carol"):
+        meta = ls.load_meta(peer)
+        meta.endpoint = f"http://127.0.0.1:{9000 + ord(peer[0])}"
+        ls.save_meta(peer, meta)
+
+    alice_meta = ls.load_meta("alice")
+    alice_vid = VacantId(pubkey_bytes=bytes.fromhex(alice_meta.vacant_id_hex))
+    alice_sk = ls.load_signing_key("alice")
+    peer_keys = {
+        peer: (
+            VacantId(pubkey_bytes=bytes.fromhex(ls.load_meta(peer).vacant_id_hex)),
+            ls.load_signing_key(peer),
+        )
+        for peer in ("bob", "carol")
+    }
+
+    delivered_targets: list[str] = []
+
+    async def _fake_post(url: str, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        # Pull the to_vacant_id out of the metadata to know which peer
+        # we're answering as.
+        env = from_a2a_jsonrpc(body)
+        to_hex = env.to_vacant_id.hex()
+        peer_name, (peer_vid, peer_sk) = next(
+            (name, kv) for name, kv in peer_keys.items() if kv[0].hex() == to_hex
+        )
+        delivered_targets.append(peer_name)
+        response_env = VacantEnvelope(
+            from_vacant_id=peer_vid,
+            to_vacant_id=alice_vid,
+            sequence_no=env.sequence_no,
+            timestamp=datetime.now(UTC),
+            prev_envelope_hash=EMPTY_PREV_HASH,
+            payload=A2AMessage(
+                role="ROLE_AGENT",
+                parts=[A2APart(text=f"echo from {peer_name}")],
+            ),
+            idempotency_key=f"rsp-{env.sequence_no}",
+        ).signed(peer_sk)
+        wire = to_a2a_jsonrpc(response_env)
+        return 200, {
+            "jsonrpc": "2.0",
+            "id": "rsp",
+            "result": {"message": wire["params"]["message"]},
+        }
+
+    loop = GrowLoop(
+        self_form=_make_form(alice_vid),
+        self_signing_key=alice_sk,
+        review_all_per_tick=True,
+        redteam_every_n_ticks=0,
+        heartbeat_every_n_ticks=0,
+        enable_self_reputation_ingest=False,
+        enable_auto_spawn=False,
+        http_post=_fake_post,
+    )
+    await loop.tick()
+    # 2 peers → 2 reviews sent in a single tick.
+    assert loop.stats.peer_reviews_sent == 2
+    assert sorted(delivered_targets) == ["bob", "carol"]
+
+
+@pytest.mark.asyncio
+async def test_review_all_per_tick_with_no_peers_skips(_vacant_home: Path) -> None:
+    """Fan-out with zero siblings should record skip + not crash."""
+    ls.init_vacant("alice")
+    alice_meta = ls.load_meta("alice")
+    alice_vid = VacantId(pubkey_bytes=bytes.fromhex(alice_meta.vacant_id_hex))
+    alice_sk = ls.load_signing_key("alice")
+
+    loop = GrowLoop(
+        self_form=_make_form(alice_vid),
+        self_signing_key=alice_sk,
+        review_all_per_tick=True,
+        redteam_every_n_ticks=0,
+        heartbeat_every_n_ticks=0,
+        enable_self_reputation_ingest=False,
+        enable_auto_spawn=False,
+    )
+    await loop.tick()
+    assert loop.stats.peer_reviews_skipped == 1
+
+
 def test_grow_stats_as_dict_is_json_serialisable() -> None:
     """The `/grow/stats` HTTP endpoint returns this dict; make sure it
     round-trips through json without surprises."""

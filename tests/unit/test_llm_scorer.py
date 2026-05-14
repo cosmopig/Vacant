@@ -35,35 +35,49 @@ from vacant.substrate.scorer import (
 # --- parse_scorer_response --------------------------------------------------
 
 
-def test_parse_plain_json() -> None:
+def test_parse_plain_json_default_is_3dim() -> None:
+    """Default peer-review parser emits F/L/R only (spec §P3 §D3).
+    Extra dims in the response are silently dropped."""
     raw = '{"factual": 0.9, "logical": 0.8, "relevance": 0.7, "honesty": 0.6, "adoption": 0.5}'
     out = parse_scorer_response(raw)
-    assert out == {
-        "factual": 0.9,
-        "logical": 0.8,
-        "relevance": 0.7,
-        "honesty": 0.6,
-        "adoption": 0.5,
-    }
+    assert out == {"factual": 0.9, "logical": 0.8, "relevance": 0.7}
+    assert "honesty" not in out
+    assert "adoption" not in out
 
 
 def test_parse_markdown_fence() -> None:
-    raw = '```json\n{"factual": 0.5, "logical": 0.5, "relevance": 0.5, "honesty": 0.5, "adoption": 0.5}\n```'
+    raw = '```json\n{"factual": 0.5, "logical": 0.5, "relevance": 0.5}\n```'
     out = parse_scorer_response(raw)
     assert out["factual"] == 0.5
 
 
 def test_parse_preamble_tolerated() -> None:
+    """The 5-dim numbers may be in the response (some LLMs leak H/A
+    anyway) but the parser ignores them under the default 3D contract."""
     raw = 'Sure, here\'s my evaluation:\n{"factual": 0.3, "logical": 0.4, "relevance": 0.5, "honesty": 0.6, "adoption": 0.7}\nLet me know if you want more detail.'
     out = parse_scorer_response(raw)
-    assert out["honesty"] == 0.6
+    assert out["factual"] == 0.3
+    assert out["relevance"] == 0.5
+    assert "honesty" not in out
 
 
 def test_parse_missing_dim_defaults_to_half() -> None:
     raw = '{"factual": 0.9}'
     out = parse_scorer_response(raw)
-    assert set(out) == set(REPUTATION_DIMS)
+    # 3-dim default: F is 0.9, L+R default to 0.5.
+    assert set(out) == {"factual", "logical", "relevance"}
     assert out["logical"] == 0.5
+    assert out["relevance"] == 0.5
+
+
+def test_parse_opt_in_5dim_for_ablation() -> None:
+    """Operators running ablation studies can opt into the full 5D
+    contract by passing `dimensions=REPUTATION_DIMS`; H/A then go
+    through the parser. Production peer-review stays on 3D."""
+    raw = '{"factual": 0.5, "logical": 0.5, "relevance": 0.5, "honesty": 0.6, "adoption": 0.7}'
+    out = parse_scorer_response(raw, dimensions=REPUTATION_DIMS)
+    assert set(out) == set(REPUTATION_DIMS)
+    assert out["honesty"] == 0.6
 
 
 def test_parse_out_of_range_clamped() -> None:
@@ -102,6 +116,8 @@ class _FakeBackend(SubstrateBackend):
 
 @pytest.mark.asyncio
 async def test_score_response_with_llm_happy_path() -> None:
+    """3D peer-review scoring per spec. Backend returns 5 dims but the
+    parser drops H/A — they come from separate channels."""
     backend = _FakeBackend()
     out = await score_response_with_llm(
         request_text="What is 2+2?",
@@ -109,7 +125,7 @@ async def test_score_response_with_llm_happy_path() -> None:
         scorer=backend,
     )
     assert out["relevance"] == 0.9
-    assert set(out) == set(REPUTATION_DIMS)
+    assert set(out) == {"factual", "logical", "relevance"}
     # System + user prompts went through.
     assert len(backend.received) == 1
     assert "Q: What is 2+2?" in backend.received[0].user_prompt

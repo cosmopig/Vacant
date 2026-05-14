@@ -162,6 +162,14 @@ class GrowLoop:
     enable_drift_detection: bool = True
     # When True, 3-in-a-row bad reviews trigger `spawn_clone_with_mutation`.
     enable_auto_spawn: bool = True
+    # When True, every peer-review tick iterates over EVERY eligible
+    # sibling in `~/.vacant/` and submits one review each. Cost is
+    # O(peers) per tick — fine for small local networks (≤ ~10
+    # vacants), expensive for big ones (use the default rotation
+    # mode at scale). When False (default), one peer per tick chosen
+    # by `select_peer` based on lowest review coverage — converges
+    # to all-peers eventually with O(1) work per tick.
+    review_all_per_tick: bool = False
     # --------------------------------------------------------------------
 
     stats: GrowStats = field(default_factory=GrowStats)
@@ -398,21 +406,84 @@ class GrowLoop:
             self.stats.last_error = f"heartbeat: {exc!r}"
 
     async def _do_peer_review(self) -> PeerReviewTickResult:
-        result = await peer_review_tick(
-            self_form=self.self_form,
-            self_signing_key=self.self_signing_key,
-            home=self.home,
-            http_post=self.http_post,
-            outbound_replay_store=self._ensure_outbound_replay(),
-            scorer=self.scorer,
+        """One peer-review pass.
+
+        Two modes:
+        - `review_all_per_tick=False` (default): rotation — pick one
+          lowest-coverage peer per tick via `select_peer`. Cheap;
+          converges to full coverage at O(N) ticks.
+        - `review_all_per_tick=True`: explicit fan-out — every sibling
+          gets reviewed in this tick. Cost is O(N) per tick; suitable
+          for small local networks (≤ ~10 vacants).
+
+        Stats are accumulated per-peer in fan-out mode, so a 3-peer
+        network on tick 1 in all-mode would bump `peer_reviews_sent`
+        by 3 (not 1).
+
+        Returns the LAST per-peer result for backward compatibility —
+        in fan-out mode the rest were already counted into stats.
+        """
+        if not self.review_all_per_tick:
+            result = await peer_review_tick(
+                self_form=self.self_form,
+                self_signing_key=self.self_signing_key,
+                home=self.home,
+                http_post=self.http_post,
+                outbound_replay_store=self._ensure_outbound_replay(),
+                scorer=self.scorer,
+            )
+            if result.skipped_reason:
+                self.stats.peer_reviews_skipped += 1
+            elif result.error:
+                self.stats.peer_reviews_failed += 1
+            elif result.dimensions:
+                self.stats.peer_reviews_sent += 1
+            return result
+
+        # Fan-out mode: review every eligible sibling.
+        home = self.home or ls.vacant_home()
+        last_result = PeerReviewTickResult(
+            reviewer_vacant_id_hex=self.self_form.identity.hex(),
+            skipped_reason="no_eligible_peer",
         )
-        if result.skipped_reason:
+        if not home.exists():
             self.stats.peer_reviews_skipped += 1
-        elif result.error:
-            self.stats.peer_reviews_failed += 1
-        elif result.dimensions:
-            self.stats.peer_reviews_sent += 1
-        return result
+            return last_result
+        self_hex = self.self_form.identity.hex()
+        targets: list[str] = []
+        for entry in sorted(home.iterdir()):
+            if not entry.is_dir() or not (entry / "meta.json").exists():
+                continue
+            try:
+                meta = ls.load_meta(entry.name)
+            except ls.LocalVacantError:
+                continue
+            if meta.vacant_id_hex == self_hex:
+                continue
+            if not meta.endpoint:
+                continue
+            targets.append(entry.name)
+        if not targets:
+            self.stats.peer_reviews_skipped += 1
+            return last_result
+        for target in targets:
+            result = await peer_review_tick(
+                self_form=self.self_form,
+                self_signing_key=self.self_signing_key,
+                home=self.home,
+                http_post=self.http_post,
+                outbound_replay_store=self._ensure_outbound_replay(),
+                scorer=self.scorer,
+                target_name=target,
+            )
+            if result.skipped_reason:
+                self.stats.peer_reviews_skipped += 1
+            elif result.error:
+                self.stats.peer_reviews_failed += 1
+            elif result.dimensions:
+                self.stats.peer_reviews_sent += 1
+            last_result = result
+        return last_result
 
     async def _do_redteam(self) -> ProbeResult | None:
         """Pick a peer + a red-team probe, send it, score it, append

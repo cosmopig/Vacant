@@ -799,9 +799,21 @@ def grow_cmd(
         None,
         "--scorer-substrate",
         help=(
-            "LLM substrate this vacant uses to SCORE peers (5D). "
+            "LLM substrate this vacant uses to SCORE peers (3D: F/L/R per spec). "
             "Same value space as --substrate. Default: length-based heuristic. "
-            "Recommended different from --substrate for cross-model diversity."
+            "Recommended different from --substrate for cross-model diversity. "
+            "Honesty + adoption come from separate channels and are NOT in "
+            "the peer-review path (see architecture/components/P3_reputation.md)."
+        ),
+    ),
+    review_all_per_tick: bool = typer.Option(
+        False,
+        "--review-all-per-tick",
+        help=(
+            "Every tick, review EVERY sibling instead of rotating one-per-tick. "
+            "Cost is O(peers) per tick; recommended for small local networks "
+            "(<= ~10 vacants) where you want tight coverage. Default is "
+            "rotation mode which converges to all-peers coverage at O(1)/tick."
         ),
     ),
 ) -> None:
@@ -898,6 +910,7 @@ def grow_cmd(
     early_loop.redteam_every_n_ticks = redteam_every_n
     early_loop.heartbeat_every_n_ticks = heartbeat_every_n
     early_loop.scorer = scorer
+    early_loop.review_all_per_tick = review_all_per_tick
     loop = early_loop
     bundle.app.router.lifespan_context = make_grow_lifespan(loop)
 
@@ -919,6 +932,7 @@ def grow_cmd(
                     "heartbeat_every_n": heartbeat_every_n,
                     "substrate": substrate or "echo",
                     "scorer_substrate": scorer_substrate or "heuristic",
+                    "review_all_per_tick": review_all_per_tick,
                 },
             },
             sort_keys=True,

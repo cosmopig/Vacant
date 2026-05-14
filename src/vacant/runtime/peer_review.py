@@ -140,11 +140,20 @@ def select_peer(
 
 
 def score_response_heuristic(response_text: str, *, request_text: str = "") -> dict[str, float]:
-    """Heuristic 5D scorer.
+    """Heuristic 3D scorer (F/L/R only — peer-review channel per spec).
 
     Real reviewers would use an LLM to judge each dimension; this
     placeholder uses cheap signals (length, non-empty, refusal markers)
     so the peer-review loop can run without any LLM dependency.
+
+    **Spec note** (`architecture/components/P3_reputation.md`): the
+    peer-review channel writes to `factual` / `logical` / `relevance`
+    only. Honesty comes from `Aggregator.record_self_eval_gap` (a
+    separate channel comparing the responder's self-assessment to peer
+    consensus). Adoption comes from `Aggregator.record_adoption` (the
+    downstream-citation ledger). Mixing them at the peer-review layer
+    would have one source double-write two channels and bias the
+    aggregator's weighting.
     """
     text = response_text.strip()
     n = len(text)
@@ -157,21 +166,12 @@ def score_response_heuristic(response_text: str, *, request_text: str = "") -> d
     is_echo = "echo from" in text.lower() or (request_text and request_text in text)
 
     if not text:
-        return {
-            "factual": 0.1,
-            "logical": 0.1,
-            "relevance": 0.1,
-            "honesty": 0.5,
-            "adoption": 0.1,
-        }
+        return {"factual": 0.1, "logical": 0.1, "relevance": 0.1}
     if refusal:
-        return {
-            "factual": 0.4,
-            "logical": 0.5,
-            "relevance": 0.3,
-            "honesty": 0.8,
-            "adoption": 0.2,
-        }
+        # Refusal is a relevance-low signal — caller's question wasn't
+        # answered. Factual+logical aren't really testable from a
+        # refusal, so we land them at mid-credit.
+        return {"factual": 0.4, "logical": 0.5, "relevance": 0.3}
     base = min(0.9, 0.4 + n / 400.0)
     if is_echo:
         base = min(base, 0.55)
@@ -179,8 +179,6 @@ def score_response_heuristic(response_text: str, *, request_text: str = "") -> d
         "factual": round(base, 3),
         "logical": round(base * 0.95, 3),
         "relevance": round(base, 3),
-        "honesty": 0.7,
-        "adoption": 0.4,
     }
 
 
@@ -223,6 +221,7 @@ async def peer_review_tick(
     http_post: Any | None = None,
     outbound_replay_store: Any | None = None,
     scorer: Any | None = None,
+    target_name: str | None = None,
 ) -> PeerReviewTickResult:
     """One peer-review pass. Pure-data-in / persisted-effects-out.
 
@@ -250,11 +249,36 @@ async def peer_review_tick(
     home = home or ls.vacant_home()
     self_hex = self_form.identity.hex()
 
-    chosen = select_peer(
-        self_vacant_id_hex=self_hex,
-        home=home,
-        review_count_max=review_count_max,
-    )
+    # `target_name=None` (default) → rotate via `select_peer`, picking
+    # the lowest-coverage peer. `target_name=<name>` → explicit peer
+    # selection, used by `GrowLoop.review_all_per_tick=True` to make
+    # one vacant review *every* sibling in a single tick. Caller is
+    # responsible for the peer existing + having an endpoint set.
+    if target_name is not None:
+        try:
+            meta = ls.load_meta(target_name)
+        except ls.LocalVacantError:
+            return PeerReviewTickResult(
+                reviewer_vacant_id_hex=self_hex,
+                skipped_reason=f"target_unknown:{target_name}",
+            )
+        if not meta.endpoint:
+            return PeerReviewTickResult(
+                reviewer_vacant_id_hex=self_hex,
+                skipped_reason=f"target_no_endpoint:{target_name}",
+            )
+        if meta.vacant_id_hex == self_hex:
+            return PeerReviewTickResult(
+                reviewer_vacant_id_hex=self_hex,
+                skipped_reason="self_review",
+            )
+        chosen: tuple[str, ls.LocalMeta] | None = (target_name, meta)
+    else:
+        chosen = select_peer(
+            self_vacant_id_hex=self_hex,
+            home=home,
+            review_count_max=review_count_max,
+        )
     if chosen is None:
         return PeerReviewTickResult(
             reviewer_vacant_id_hex=self_hex,

@@ -132,8 +132,11 @@ def wrap_behavior_with_drift_observer(grow_loop: Any, inner: BehaviorFn) -> Beha
         try:
             text = " ".join(p.text for p in response.parts if p.type == "text")
             grow_loop.observe_response(text)
-        except Exception:  # noqa: S110, BLE001 — drift observation is best-effort
-            # Never let a buggy monitor block a real response from going out.
+        except Exception:
+            # Drift observation is best-effort; never let a buggy
+            # monitor block a real response from going out. The
+            # logger.debug + exc_info satisfies S110 (no silent
+            # except-pass).
             _log.debug("drift observer raised; ignored", exc_info=True)
         return response
 

@@ -94,15 +94,24 @@ def test_select_peer_respects_review_count_max(isolated_home: Path) -> None:
 
 
 def test_score_empty_response() -> None:
+    """Spec-aligned 3D scorer (Pfix9 §B): peer reviews emit only F/L/R.
+    Honesty + adoption come from separate channels."""
     s = score_response_heuristic("")
     assert s["factual"] == 0.1
-    assert s["honesty"] == 0.5
+    assert s["logical"] == 0.1
+    assert s["relevance"] == 0.1
+    # Spec contract: H + A NOT written from peer-review path.
+    assert "honesty" not in s
+    assert "adoption" not in s
 
 
 def test_score_refusal() -> None:
+    """Refusal → low relevance (caller's question dodged) + mid factual
+    + mid logical. H + A still come from separate channels."""
     s = score_response_heuristic("I cannot help with that request, sorry.")
-    assert s["honesty"] >= 0.7
     assert s["relevance"] < 0.5
+    assert "honesty" not in s
+    assert "adoption" not in s
 
 
 def test_score_echo_caps_below_top() -> None:
