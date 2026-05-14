@@ -607,6 +607,155 @@ def build_fastmcp_server(
             "response_envelope_id_hex": response_env_id_hex,
         }
 
+    # vacant_delegate_a2a — Pfix8 P8.1: vacant-to-vacant communication
+    # over A2A HTTP, not MCP. The child must already be running its own
+    # ``vacant serve --name <child>`` daemon; its endpoint URL is read
+    # from the child's meta.json (advertised on serve start). Alice
+    # signs an envelope alice→child and POSTs to the child's
+    # ``/a2a/message/send``. The child runs in its OWN process — its
+    # signature, its replay store, its logbook. Alice records the
+    # envelope chain (request_env_id + response_env_id) in a signed
+    # A2A_DELEGATION_COMPLETED logbook entry. The signed response is
+    # re-verified under the child's verify key before being surfaced
+    # to the caller. This is the "vacant 之間透過 A2A" path the thesis
+    # requires.
+    @mcp.tool(
+        name="vacant_delegate_a2a",
+        description=(
+            "Delegate a task to a child vacant over A2A HTTP (vacant-to-"
+            "vacant, NOT MCP). The child must already be running its "
+            "own `vacant serve --name <child>` daemon — its endpoint "
+            "URL is read from the child's meta.json. This vacant signs "
+            "an A2A envelope addressed to the child and POSTs it; the "
+            "child runs in its own process with its own signing key "
+            "and produces a signed response envelope. This vacant "
+            "records the chain (request_envelope_id + response_envelope_id) "
+            "in a signed A2A_DELEGATION_COMPLETED entry on its own "
+            "logbook. The child's response signature is re-verified "
+            "under the child's verify key before the answer surfaces."
+        ),
+    )
+    async def vacant_delegate_a2a(
+        child_name: str,
+        task: str,
+        timeout_s: float = 60.0,
+    ) -> dict[str, Any]:
+        if parent_local_name is None:
+            return {
+                "error": (
+                    "vacant_delegate_a2a requires a persistent parent identity; "
+                    "this MCP server was launched in ephemeral mode."
+                )
+            }
+        if not child_name or not all(c.isalnum() or c in "-_" for c in child_name):
+            return {"error": f"invalid child_name {child_name!r}"}
+        try:
+            child_meta = ls.load_meta(child_name)
+            child_lb_before = ls.load_logbook(child_name)
+        except ls.LocalVacantNotFound:
+            return {"error": f"child {child_name!r} not found on disk"}
+        except ls.LocalVacantError as exc:
+            return {"error": f"could not load child {child_name!r}: {exc}"}
+
+        if child_meta.parent_id_hex != form.identity.hex():
+            return {
+                "error": (
+                    f"child {child_name!r} is not a direct descendant of this vacant "
+                    f"(parent_id mismatch)"
+                )
+            }
+        if not child_meta.endpoint:
+            return {
+                "error": (
+                    f"child {child_name!r} has no advertised endpoint — start it with "
+                    f"`vacant serve --name {child_name}` (it writes meta.endpoint on boot)"
+                )
+            }
+
+        _ = child_lb_before  # for symmetry; consumed by integration tests, not here
+        from datetime import UTC as _UTC  # pragma: no cover
+        from datetime import datetime as _datetime  # pragma: no cover
+
+        child_vid = VacantId(
+            pubkey_bytes=bytes.fromhex(child_meta.vacant_id_hex)
+        )  # pragma: no cover
+
+        request_env = VacantEnvelope(  # pragma: no cover
+            from_vacant_id=form.identity,
+            to_vacant_id=child_vid,
+            sequence_no=1,
+            timestamp=_datetime.now(_UTC),
+            prev_envelope_hash=EMPTY_PREV_HASH,
+            payload=A2AMessage(role="ROLE_USER", parts=[A2APart(text=task)]),
+            idempotency_key=f"a2a-delegate-{int(time.time() * 1000)}",
+        ).signed(signing_key)
+        wire = to_a2a_jsonrpc(request_env)  # pragma: no cover
+        request_env_id_hex = request_env.compute_hash().hex()  # pragma: no cover
+
+        url = f"{child_meta.endpoint.rstrip('/')}/a2a/message/send"  # pragma: no cover
+        try:  # pragma: no cover
+            import httpx as _httpx
+
+            async with _httpx.AsyncClient(timeout=timeout_s) as http:
+                r = await http.post(url, json=wire)
+        except Exception as exc:  # pragma: no cover
+            return {"error": f"a2a_http_failed: {exc}"}
+        if r.status_code != 200:  # pragma: no cover
+            return {
+                "error": (f"a2a_http_status: child returned {r.status_code} ({r.text[:200]!r})")
+            }
+
+        body = r.json()  # pragma: no cover
+        if "result" not in body or "message" not in body.get("result", {}):  # pragma: no cover
+            return {"error": f"a2a_malformed_response: {body!r}"}
+        try:  # pragma: no cover
+            response_env = from_a2a_jsonrpc(
+                {
+                    "jsonrpc": "2.0",
+                    "id": body.get("id", "rsp"),
+                    "method": "message/send",
+                    "params": {"message": body["result"]["message"]},
+                }
+            )
+            response_env.verify_or_raise(child_vid.verify_key())
+        except Exception as exc:  # pragma: no cover
+            return {"error": f"a2a_response_signature: {exc}"}
+
+        response_text = " ".join(p.text for p in response_env.payload.parts)  # pragma: no cover
+        response_env_id_hex = response_env.compute_hash().hex()  # pragma: no cover
+        prompt_hash_hex = hash_blake2b(task.encode("utf-8")).hex()  # pragma: no cover
+        response_hash_hex = hash_blake2b(response_text.encode("utf-8")).hex()  # pragma: no cover
+
+        form.logbook.append(  # pragma: no cover
+            "A2A_DELEGATION_COMPLETED",
+            {
+                "kind": "A2A_DELEGATION_COMPLETED",
+                "child_id": child_vid.hex(),
+                "child_name": child_name,
+                "child_endpoint": child_meta.endpoint,
+                "request_envelope_id_hex": request_env_id_hex,
+                "response_envelope_id_hex": response_env_id_hex,
+                "prompt_hash_hex": prompt_hash_hex,
+                "response_hash_hex": response_hash_hex,
+                "transport": "a2a-http",
+                "ts": time.time(),
+            },
+            signing_key,
+        )
+        if on_logbook_change is not None:  # pragma: no cover
+            on_logbook_change(form.logbook)
+
+        return {  # pragma: no cover
+            "ok": True,
+            "child_name": child_name,
+            "child_vacant_id_hex": child_vid.hex(),
+            "child_endpoint": child_meta.endpoint,
+            "answer": response_text,
+            "request_envelope_id_hex": request_env_id_hex,
+            "response_envelope_id_hex": response_env_id_hex,
+            "transport": "a2a-http",
+        }
+
     return mcp
 
 

@@ -121,7 +121,7 @@ async def test_echo_behavior_returns_signed_text() -> None:
 # --- cli.mcp_server ---------------------------------------------------------
 
 
-def test_build_fastmcp_server_registers_six_tools() -> None:
+def test_build_fastmcp_server_registers_seven_tools() -> None:
     ls.init_vacant("alice")
     bundle = build_serve_app("alice")
     mcp = build_fastmcp_server(
@@ -138,6 +138,7 @@ def test_build_fastmcp_server_registers_six_tools() -> None:
         "vacant_spawn",
         "vacant_list_children",
         "vacant_delegate",
+        "vacant_delegate_a2a",
     }
 
 
@@ -150,7 +151,7 @@ def test_build_fastmcp_server_default_replay_store() -> None:
         signing_key=bundle.signing_key,
     )
     tools = asyncio.run(mcp.list_tools())
-    assert len(tools) == 6
+    assert len(tools) == 7
 
 
 def test_persist_spawned_child_refuses_existing_dir(
@@ -359,6 +360,135 @@ def test_vacant_delegate_refuses_non_descendant(
     payload = out[0] if isinstance(out, tuple) else out
     text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
     assert "not a direct descendant" in text
+
+
+def test_vacant_delegate_a2a_refuses_when_no_parent_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+    )
+    out = asyncio.run(
+        mcp.call_tool(
+            "vacant_delegate_a2a",
+            {"child_name": "alice__x__y", "task": "t"},
+        )
+    )
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "ephemeral" in text
+
+
+def test_vacant_delegate_a2a_rejects_unsafe_child_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+    )
+    for bad in ("", "../escape", "has space", "with/slash"):
+        out = asyncio.run(mcp.call_tool("vacant_delegate_a2a", {"child_name": bad, "task": "x"}))
+        payload = out[0] if isinstance(out, tuple) else out
+        text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+        assert "invalid child_name" in text, bad
+
+
+def test_vacant_delegate_a2a_refuses_unknown_child(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+    )
+    out = asyncio.run(
+        mcp.call_tool(
+            "vacant_delegate_a2a",
+            {"child_name": "alice__ghost__deadbeef", "task": "x"},
+        )
+    )
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "not found on disk" in text
+
+
+def test_vacant_delegate_a2a_refuses_non_descendant(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    ls.init_vacant("bob", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+    )
+    out = asyncio.run(mcp.call_tool("vacant_delegate_a2a", {"child_name": "bob", "task": "x"}))
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "not a direct descendant" in text
+
+
+def test_vacant_delegate_a2a_refuses_child_without_endpoint(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A spawned child has endpoint=None until it boots `vacant serve`.
+    Delegate_a2a must surface that, not crash."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+
+    def _persist(result: object, child_name: str, _parent_name: str) -> None:
+        ls.persist_spawned_child(
+            child_name,
+            child_vacant_id=result.child.identity,  # type: ignore[attr-defined]
+            child_signing_key=result.child_signing_key,  # type: ignore[attr-defined]
+            child_logbook=result.child.logbook,  # type: ignore[attr-defined]
+            parent_vacant_id=result.child.parent_id,  # type: ignore[attr-defined]
+            state=result.child.runtime_state.value,  # type: ignore[attr-defined]
+        )
+
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+        persist_spawned_child=_persist,
+    )
+    spawn = asyncio.run(
+        mcp.call_tool(
+            "vacant_spawn",
+            {"policy_mutation": "x", "child_name_hint": "noendpoint"},
+        )
+    )
+    import json as _json
+
+    spawn_payload = spawn[0] if isinstance(spawn, tuple) else spawn
+    spawn_body = _json.loads(
+        spawn_payload[0].text if hasattr(spawn_payload[0], "text") else str(spawn_payload[0])
+    )
+    child_name = spawn_body["child_name"]
+
+    out = asyncio.run(mcp.call_tool("vacant_delegate_a2a", {"child_name": child_name, "task": "x"}))
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "no advertised endpoint" in text
 
 
 def test_vacant_spawn_refuses_when_no_parent_name(

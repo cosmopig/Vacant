@@ -659,6 +659,20 @@ def serve_cmd(
         )
         t.start()
 
+    # Pfix8 P8.1: advertise our endpoint in meta.json so peers (parent
+    # vacants performing A2A delegation, sibling vacants performing
+    # peer review) can discover us. Without this, vacant-to-vacant
+    # routing has to be configured out-of-band per call.
+    advertised = endpoint or f"http://{host}:{port}"
+    try:  # pragma: no cover -- exercised by tests/integration/test_a2a_delegation.py
+        meta = ls.load_meta(n)
+        if meta.endpoint != advertised:
+            meta.endpoint = advertised
+            ls.save_meta(n, meta)
+    except ls.LocalVacantNotFound:  # pragma: no cover
+        # Ephemeral / no on-disk identity — nothing to advertise.
+        pass
+
     typer.echo(
         json.dumps(
             {
@@ -666,6 +680,7 @@ def serve_cmd(
                 "vacant_id": bundle.form.identity.hex(),
                 "host": host,
                 "port": port,
+                "endpoint": advertised,
                 "mcp": mcp,
             },
             sort_keys=True,
