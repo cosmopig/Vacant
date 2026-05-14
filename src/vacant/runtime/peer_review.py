@@ -219,6 +219,7 @@ async def peer_review_tick(
     home: Path | None = None,
     review_count_max: int = 5,
     http_post: Any | None = None,
+    ingest_post: Any | None = None,
     outbound_replay_store: Any | None = None,
     scorer: Any | None = None,
     target_name: str | None = None,
@@ -228,8 +229,13 @@ async def peer_review_tick(
     Effects (when a peer is selected):
     - Signed A2A probe envelope sent to ``peer.meta.endpoint`` via
       ``http_post`` (injectable for tests; defaults to ``httpx.AsyncClient.post``).
-    - Signed review record appended to
-      ``~/.vacant/<peer>/reviews_received.jsonl``.
+    - Signed review record POSTed to ``peer.meta.endpoint + /reviews/ingest``
+      via ``ingest_post`` (injectable, defaults to same httpx client).
+      The peer's server then writes the record to its own
+      ``~/.vacant/<self>/reviews_received.jsonl`` after verifying the
+      signature. This is the P2P replacement for the older "writer
+      reaches into peer's local disk" path, which only worked when
+      reviewer + reviewee shared a filesystem.
 
     `outbound_replay_store` (Pfix9): when provided, the function looks up
     the current per-pair (self → peer) chain state, uses it as the
@@ -387,20 +393,49 @@ async def peer_review_tick(
         signing_key=self_signing_key,
     )
 
-    peer_dir = home / peer_name
-    with (peer_dir / "reviews_received.jsonl").open("a", encoding="utf-8") as f:
-        f.write(json.dumps(signed_record, sort_keys=True) + "\n")
+    # POST the signed review to the peer's own /reviews/ingest endpoint
+    # — the peer's server verifies signature + writes to its own disk.
+    # This is what makes the loop actually P2P (vs the older intra-host
+    # "writer reaches into peer's filesystem" design).
+    #
+    # Default behavior when caller didn't pass ingest_post: reuse the
+    # `http_post` callable they passed (URL routes the two semantics:
+    # probe at /a2a/message/send, review at /reviews/ingest). Tests
+    # that already URL-dispatch on `http_post` get cross-machine
+    # ingest for free.
+    if ingest_post is None:
+        ingest_post = http_post  # type: ignore[assignment]
+
+    ingest_url = f"{peer_meta.endpoint.rstrip('/')}/reviews/ingest"
+    try:
+        ingest_status, ingest_body = await ingest_post(ingest_url, signed_record)
+    except Exception as exc:
+        return PeerReviewTickResult(
+            reviewer_vacant_id_hex=self_hex,
+            target_vacant_id_hex=peer_vid.hex(),
+            probe_envelope_id_hex=probe_id_hex,
+            dimensions=dimensions,
+            error=f"ingest_http_failed: {exc}",
+        )
+    if ingest_status != 200 or not (isinstance(ingest_body, dict) and ingest_body.get("ok") is True):
+        return PeerReviewTickResult(
+            reviewer_vacant_id_hex=self_hex,
+            target_vacant_id_hex=peer_vid.hex(),
+            probe_envelope_id_hex=probe_id_hex,
+            dimensions=dimensions,
+            error=f"ingest_rejected: status={ingest_status} body={ingest_body}",
+        )
 
     # Advance the outbound chain so the next tick uses seq+1 / prev=this.hash.
-    # Doing it AFTER persisting the review keeps the chain state monotonic
-    # with the on-disk evidence — a partial failure leaves both untouched.
+    # Doing it AFTER successful ingest keeps the chain state monotonic
+    # with the peer-side evidence — a partial failure leaves both untouched.
     if outbound_replay_store is not None:
         await outbound_replay_store.check_and_advance(probe_env)
 
     return PeerReviewTickResult(
         reviewer_vacant_id_hex=self_hex,
         target_vacant_id_hex=peer_vid.hex(),
-        delivered_to=str(peer_dir / "reviews_received.jsonl"),
+        delivered_to=ingest_url,
         probe_envelope_id_hex=probe_id_hex,
         dimensions=dimensions,
     )

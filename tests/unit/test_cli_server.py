@@ -20,6 +20,8 @@ from httpx import ASGITransport, AsyncClient
 from vacant.cli import local_store as ls
 from vacant.cli.mcp_server import build_fastmcp_server
 from vacant.cli.server import build_serve_app, echo_behavior
+from vacant.core.crypto import hash_blake2b
+from vacant.core.types import VacantId
 from vacant.protocol.envelope import (
     A2AMessage,
     A2APart,
@@ -57,6 +59,147 @@ def test_build_serve_app_health_and_card_endpoints() -> None:
             assert data["vacant_id"] == bundle.form.identity.hex()
             assert data["capability_text"] == "echo"
             assert isinstance(data["capability_card_blob_hex"], str)
+
+    asyncio.run(_go())
+
+
+def _sign_review_for_target(
+    *,
+    reviewer_name: str,
+    target_vid_hex: str,
+    dims: dict[str, float] | None = None,
+    substrate: str = "peer-review:heuristic",
+    call_envelope_id_hex: str = "0" * 64,
+    claim: str = "test review",
+    issued_at_iso: str = "2026-05-14T12:00:00+00:00",
+) -> dict[str, object]:
+    """Build a signed review record the way peer_review_tick does."""
+    import json as _json
+
+    reviewer_meta = ls.load_meta(reviewer_name)
+    reviewer_sk = ls.load_signing_key(reviewer_name)
+    dims = dims or {"factual": 0.7, "logical": 0.7, "relevance": 0.7}
+    payload: dict[str, object] = {
+        "reviewer": reviewer_meta.vacant_id_hex,
+        "target": target_vid_hex,
+        "dimensions": dims,
+        "substrate": substrate,
+        "call_envelope_id_hex": call_envelope_id_hex,
+        "claim": claim,
+        "issued_at": issued_at_iso,
+    }
+    canonical = _json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    h = hash_blake2b(canonical.encode("utf-8"))
+    sig = reviewer_sk.sign(h).signature
+    return {**payload, "payload_hash_hex": h.hex(), "signature_hex": sig.hex()}
+
+
+def test_reviews_ingest_accepts_signed_review() -> None:
+    """P2P review path: a peer POSTs a signed review for THIS vacant.
+    Server verifies signature, writes to local reviews_received.jsonl."""
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    alice_bundle = build_serve_app("alice")
+    record = _sign_review_for_target(
+        reviewer_name="bob",
+        target_vid_hex=alice_bundle.form.identity.hex(),
+    )
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=alice_bundle.app), base_url="http://test"
+        ) as ac:
+            r = await ac.post("/reviews/ingest", json=record)
+            assert r.status_code == 200, r.text
+            data = r.json()
+            assert data["ok"] is True
+            assert data["duplicate"] is False
+            assert data["signature_hex"] == record["signature_hex"]
+            # Second POST → idempotent dedupe.
+            r2 = await ac.post("/reviews/ingest", json=record)
+            assert r2.status_code == 200
+            assert r2.json()["duplicate"] is True
+
+    asyncio.run(_go())
+
+    import json as _json
+
+    home = Path(ls.vacant_home())
+    jsonl = home / "alice" / "reviews_received.jsonl"
+    assert jsonl.exists()
+    rows = [_json.loads(line) for line in jsonl.read_text().splitlines() if line.strip()]
+    assert len(rows) == 1  # dedupe
+    assert rows[0]["reviewer"] == ls.load_meta("bob").vacant_id_hex
+    assert rows[0]["target"] == alice_bundle.form.identity.hex()
+
+
+def test_reviews_ingest_rejects_wrong_target() -> None:
+    """Server must reject reviews whose target != self — otherwise any
+    attacker could plant reviews into anyone's jsonl."""
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    ls.init_vacant("carol")
+    alice_bundle = build_serve_app("alice")
+    bob_vid = ls.load_meta("bob").vacant_id_hex
+    record = _sign_review_for_target(
+        reviewer_name="carol",
+        target_vid_hex=bob_vid,  # NOT alice
+    )
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=alice_bundle.app), base_url="http://test"
+        ) as ac:
+            r = await ac.post("/reviews/ingest", json=record)
+            assert r.status_code == 422
+            assert r.json()["error"] == "target_mismatch"
+
+    asyncio.run(_go())
+    home = Path(ls.vacant_home())
+    assert not (home / "alice" / "reviews_received.jsonl").exists()
+
+
+def test_reviews_ingest_rejects_bad_signature() -> None:
+    """Tampered review (dimensions changed after signing) → 401."""
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    alice_bundle = build_serve_app("alice")
+    record = _sign_review_for_target(
+        reviewer_name="bob",
+        target_vid_hex=alice_bundle.form.identity.hex(),
+    )
+    # Tamper after signing.
+    record["dimensions"] = {"factual": 0.99, "logical": 0.99, "relevance": 0.99}
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=alice_bundle.app), base_url="http://test"
+        ) as ac:
+            r = await ac.post("/reviews/ingest", json=record)
+            assert r.status_code == 401
+            assert r.json()["error"] == "signature_invalid"
+
+    asyncio.run(_go())
+
+
+def test_reviews_ingest_rejects_missing_dimensions() -> None:
+    """Reviews must carry F/L/R per spec; missing → 422."""
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    alice_bundle = build_serve_app("alice")
+    record = _sign_review_for_target(
+        reviewer_name="bob",
+        target_vid_hex=alice_bundle.form.identity.hex(),
+        dims={"factual": 0.7},  # missing L, R
+    )
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=alice_bundle.app), base_url="http://test"
+        ) as ac:
+            r = await ac.post("/reviews/ingest", json=record)
+            assert r.status_code == 422
+            assert "dimensions" in r.json()["error"]
 
     asyncio.run(_go())
 

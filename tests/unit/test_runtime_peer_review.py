@@ -141,7 +141,10 @@ async def test_peer_review_tick_no_eligible_peer(isolated_home: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_peer_review_tick_writes_signed_review_to_peer(isolated_home: Path) -> None:
+async def test_peer_review_tick_posts_signed_review_to_peer(isolated_home: Path) -> None:
+    """P2P review-ingest: tick POSTs signed review to peer's /reviews/ingest
+    rather than reaching into the peer's local filesystem. This is what
+    makes cross-machine peer review actually work."""
     ls.init_vacant("alice", insecure_demo=True)
     alice_bundle = build_serve_app("alice")
     ls.init_vacant("bob", insecure_demo=True)
@@ -172,27 +175,82 @@ async def test_peer_review_tick_writes_signed_review_to_peer(isolated_home: Path
             "result": {"message": wire["params"]["message"]},
         }
 
+    ingested: list[tuple[str, dict[str, Any]]] = []
+
+    async def fake_ingest(url: str, json_body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        ingested.append((url, json_body))
+        return 200, {"ok": True, "duplicate": False, "signature_hex": json_body.get("signature_hex")}
+
     res = await peer_review_tick(
         self_form=alice_bundle.form,
         self_signing_key=alice_bundle.signing_key,
         home=isolated_home,
         http_post=fake_post,
+        ingest_post=fake_ingest,
     )
     assert res.error is None
     assert res.skipped_reason is None
     assert res.target_vacant_id_hex == bob_vid.hex()
+    assert res.delivered_to == "http://127.0.0.1:9999/reviews/ingest"
     assert res.dimensions is not None
     assert res.dimensions["factual"] <= 0.55
 
-    received = isolated_home / "bob" / "reviews_received.jsonl"
-    assert received.exists()
-    rows = received.read_text(encoding="utf-8").strip().splitlines()
-    assert len(rows) == 1
-    row = json.loads(rows[0])
-    assert row["reviewer"] == alice_bundle.form.identity.hex()
-    assert row["target"] == bob_vid.hex()
-    assert row["substrate"] == "peer-review:heuristic"
-    assert len(row["signature_hex"]) > 0
+    assert len(ingested) == 1
+    url, body = ingested[0]
+    assert url == "http://127.0.0.1:9999/reviews/ingest"
+    assert body["reviewer"] == alice_bundle.form.identity.hex()
+    assert body["target"] == bob_vid.hex()
+    assert body["substrate"] == "peer-review:heuristic"
+    assert set(body["dimensions"]) == {"factual", "logical", "relevance"}
+    assert len(body["signature_hex"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_peer_review_tick_records_ingest_failure(isolated_home: Path) -> None:
+    """If the peer's /reviews/ingest returns non-200, the tick reports the
+    error so the grow loop's `peer_reviews_failed` counter increments."""
+    ls.init_vacant("alice", insecure_demo=True)
+    alice_bundle = build_serve_app("alice")
+    ls.init_vacant("bob", insecure_demo=True)
+    bob_meta = ls.load_meta("bob")
+    bob_meta.endpoint = "http://127.0.0.1:9999"
+    ls.save_meta("bob", bob_meta)
+    bob_sk = ls.load_signing_key("bob")
+    bob_vid = VacantId(pubkey_bytes=bytes.fromhex(bob_meta.vacant_id_hex))
+
+    async def fake_post(url: str, json_body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        response_env = VacantEnvelope(
+            from_vacant_id=bob_vid,
+            to_vacant_id=alice_bundle.form.identity,
+            sequence_no=1,
+            timestamp=datetime.now(UTC),
+            prev_envelope_hash=EMPTY_PREV_HASH,
+            payload=A2AMessage(
+                role="ROLE_AGENT",
+                parts=[A2APart(text=f"echo from {bob_vid.short()}: {PROBE_PROMPT}")],
+            ),
+            idempotency_key="peer-review-rsp-1",
+        ).signed(bob_sk)
+        wire = to_a2a_jsonrpc(response_env)
+        return 200, {
+            "jsonrpc": "2.0",
+            "id": "1",
+            "result": {"message": wire["params"]["message"]},
+        }
+
+    async def reject_ingest(url: str, json_body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        return 422, {"ok": False, "error": "target_mismatch"}
+
+    res = await peer_review_tick(
+        self_form=alice_bundle.form,
+        self_signing_key=alice_bundle.signing_key,
+        home=isolated_home,
+        http_post=fake_post,
+        ingest_post=reject_ingest,
+    )
+    assert res.error is not None
+    assert "ingest_rejected" in res.error
+    assert res.dimensions is not None  # scored before POST
 
 
 @pytest.mark.asyncio

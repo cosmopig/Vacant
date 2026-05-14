@@ -99,6 +99,12 @@ async def test_peer_review_tick_increments_sent_when_peer_answers(
     alice_sk = ls.load_signing_key("alice")
 
     async def _fake_post(url: str, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        # P2P review-ingest: peer_review_tick POSTs the signed review to
+        # the peer's /reviews/ingest after a successful probe. Tests
+        # don't need to verify ingest server logic here (covered by
+        # test_runtime_peer_review), so short-circuit with an ack.
+        if url.endswith("/reviews/ingest"):
+            return 200, {"ok": True, "duplicate": False}
         # Construct a real signed response envelope from bob → alice.
         response_env = VacantEnvelope(
             from_vacant_id=bob_vid,
@@ -307,6 +313,8 @@ async def test_multiple_ticks_each_increment_envelope_seq(_vacant_home: Path) ->
     captured_seqs: list[int] = []
 
     async def _fake_post(url: str, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        if url.endswith("/reviews/ingest"):
+            return 200, {"ok": True, "duplicate": False}
         # Capture the inbound seq from the metadata so we can assert
         # monotonicity AND construct a properly-signed response.
         env = from_a2a_jsonrpc(body)
@@ -376,6 +384,8 @@ async def test_redteam_shares_chain_with_peer_review(_vacant_home: Path) -> None
     captured: list[tuple[int, str]] = []
 
     async def _refusal_post(url: str, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        if url.endswith("/reviews/ingest"):
+            return 200, {"ok": True, "duplicate": False}
         env = from_a2a_jsonrpc(body)
         captured.append((env.sequence_no, env.payload.parts[0].text))
         response_env = VacantEnvelope(
@@ -455,6 +465,8 @@ async def test_review_all_per_tick_reviews_every_sibling(_vacant_home: Path) -> 
     delivered_targets: list[str] = []
 
     async def _fake_post(url: str, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        if url.endswith("/reviews/ingest"):
+            return 200, {"ok": True, "duplicate": False}
         # Pull the to_vacant_id out of the metadata to know which peer
         # we're answering as.
         env = from_a2a_jsonrpc(body)
