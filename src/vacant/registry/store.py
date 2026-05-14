@@ -52,14 +52,33 @@ from vacant.registry.errors import (
     SignatureRejected,
     VisibilityViolation,
 )
+from vacant.registry.git_anchor import (
+    DEFAULT_GIT_BRANCH,
+    GitAnchorReceipt,
+    try_anchor_to_git,
+)
 from vacant.registry.models import (
     AnomalyWindow,
     Attestation,
+    EpochWitness,
     Event,
     MerkleEpoch,
     Vacant,
 )
+from vacant.registry.ots_anchor import (
+    DEFAULT_CALENDAR_URLS,
+    compute_pending_proof,
+    is_upgraded_proof,
+    ots_proof_digest,
+    serialize_proof_file,
+    upgrade_pending_proof,
+)
 from vacant.registry.visibility import Visibility, effective_visibility
+from vacant.registry.witness import (
+    WitnessCosignature,
+    WitnessError,
+    verify_witness_cosignature,
+)
 
 __all__ = ["RegistryStore", "SignedEventDraft", "now_ms"]
 
@@ -498,9 +517,37 @@ class RegistryStore:
             )
             return list(res.scalars().all())
 
-    async def seal_epoch(self, *, signing_key: SigningKey) -> MerkleEpoch:
-        """Build a Merkle root over all unsealed events, store it, and
-        attach `epoch_id` back to each leaf event. Operator-signed.
+    async def seal_epoch(
+        self,
+        *,
+        signing_key: SigningKey,
+        git_anchor_repo: str | None = None,
+        git_anchor_branch: str = DEFAULT_GIT_BRANCH,
+        git_anchor_remote: str | None = None,
+        git_anchor_push: bool = False,
+        ots_anchor: bool = False,
+        ots_calendar_urls: tuple[str, ...] = DEFAULT_CALENDAR_URLS,
+    ) -> MerkleEpoch:
+        """Build a Merkle root over all unsealed events, store it, attach
+        `epoch_id` back to each leaf event, and optionally anchor the
+        root externally.
+
+        Anchor parameters (all optional):
+        - ``git_anchor_repo``: filesystem path to a transparency-log
+          git repo. If set, the sealed root is committed to
+          ``epochs/{epoch_id:08d}.json`` on ``git_anchor_branch``;
+          ``git_commit_sha`` is recorded back on the row. Anchor
+          failures are *advisory* — sealing still succeeds.
+        - ``git_anchor_remote`` / ``git_anchor_push``: configure /
+          attempt a remote push after committing locally. ``pushed_at``
+          is set on success.
+        - ``ots_anchor``: when True, generate an OpenTimestamps
+          pending-proof receipt for the root and record its BLAKE2b
+          digest on ``ots_proof_hash``. The operator can later upgrade
+          it to a real ``.ots`` proof via
+          ``record_ots_upgrade(epoch_id, upgraded_bytes)``.
+        - ``ots_calendar_urls``: which calendar servers the future
+          upgrade step should target. Defaults to the public OTS pool.
         """
         unsealed = await self.list_unsealed_events()
         if not unsealed:
@@ -526,7 +573,214 @@ class RegistryStore:
                 if e_db is not None:
                     e_db.epoch_id = epoch.epoch_id
             await s.commit()
+
+        # External anchors: best-effort. Failures don't roll back the seal —
+        # the epoch root is durable in the DB regardless. Operators retry
+        # via the explicit anchor / upgrade helpers below.
+        if git_anchor_repo is not None:
+            receipt = try_anchor_to_git(
+                epoch=epoch,
+                repo_path=git_anchor_repo,
+                branch=git_anchor_branch,
+                remote_url=git_anchor_remote,
+                push=git_anchor_push,
+            )
+            if receipt is not None:
+                await self._record_git_anchor(epoch, receipt)
+                # Reload so callers see the anchor metadata on the returned row.
+                async with self._sessionmaker() as s:
+                    refreshed = await s.get(MerkleEpoch, epoch.epoch_id)
+                    if refreshed is not None:
+                        epoch = refreshed
+
+        if ots_anchor:
+            pending = compute_pending_proof(root=epoch.root_hash, calendar_urls=ots_calendar_urls)
+            digest = ots_proof_digest(serialize_proof_file(pending))
+            await self._record_ots_pending(epoch, digest)
+            async with self._sessionmaker() as s:
+                refreshed = await s.get(MerkleEpoch, epoch.epoch_id)
+                if refreshed is not None:
+                    epoch = refreshed
+
         return epoch
+
+    async def _record_git_anchor(self, epoch: MerkleEpoch, receipt: GitAnchorReceipt) -> None:
+        """Persist `git_commit_sha` / `git_branch` / `git_repo_url` /
+        `pushed_at` onto the epoch row. Idempotent — overwriting an
+        existing receipt is allowed because re-anchoring the same epoch
+        is a recovery operation, not an audit-log mutation."""
+        async with self._sessionmaker() as s:
+            row = await s.get(MerkleEpoch, epoch.epoch_id)
+            if row is None:
+                raise NotFoundError(f"merkle_epoch {epoch.epoch_id} not found")
+            row.git_commit_sha = receipt.commit_sha
+            row.git_branch = receipt.branch
+            row.git_repo_url = receipt.remote_url or receipt.repo_path
+            row.pushed_at = now_ms() if receipt.pushed else None
+            await s.commit()
+
+    async def _record_ots_pending(self, epoch: MerkleEpoch, digest: bytes) -> None:
+        """Persist the pending-OTS digest. Idempotent."""
+        async with self._sessionmaker() as s:
+            row = await s.get(MerkleEpoch, epoch.epoch_id)
+            if row is None:
+                raise NotFoundError(f"merkle_epoch {epoch.epoch_id} not found")
+            row.ots_proof_hash = digest
+            await s.commit()
+
+    async def anchor_epoch_to_git(
+        self,
+        epoch_id: int,
+        *,
+        repo_path: str,
+        branch: str = DEFAULT_GIT_BRANCH,
+        remote_url: str | None = None,
+        push: bool = False,
+    ) -> GitAnchorReceipt:
+        """Retry the git anchor for an already-sealed epoch.
+
+        Used when ``seal_epoch(..., git_anchor_repo=...)`` was called
+        but the anchor failed (git not on PATH, remote unreachable, etc.)
+        or when the operator opted to anchor lazily.
+
+        Raises:
+            NotFoundError: If `epoch_id` is unknown.
+            GitAnchorError: If the anchor attempt itself fails (callers
+                wanting best-effort behavior should catch this).
+        """
+        epoch = await self.get_merkle_epoch(epoch_id)
+        if epoch is None:
+            raise NotFoundError(f"merkle_epoch {epoch_id} not found")
+        # Re-import lazily so a missing optional dep doesn't break import-time.
+        from vacant.registry.git_anchor import anchor_to_git
+
+        receipt = anchor_to_git(
+            epoch=epoch,
+            repo_path=repo_path,
+            branch=branch,
+            remote_url=remote_url,
+            push=push,
+        )
+        await self._record_git_anchor(epoch, receipt)
+        return receipt
+
+    async def record_ots_upgrade(
+        self, epoch_id: int, *, upgraded_bytes: bytes
+    ) -> tuple[bytes, int]:
+        """Replace a pending OTS receipt with a real `.ots` proof.
+
+        The operator runs ``ots stamp`` out-of-band (or
+        ``ots upgrade`` on an existing partial proof), reads the
+        resulting bytes, and calls this method. We validate that
+        ``upgraded_bytes`` carries the OpenTimestamps magic header
+        before persisting; full Bitcoin-anchor verification is left to
+        the optional ``opentimestamps`` library.
+
+        Args:
+            epoch_id: The epoch the upgrade applies to.
+            upgraded_bytes: Raw bytes of the real `.ots` proof.
+
+        Returns:
+            `(BLAKE2b(upgraded_bytes), ots_upgraded_at_ms)`. The
+            digest replaces ``ots_proof_hash`` and ``ots_upgraded_at``
+            is freshly stamped.
+
+        Raises:
+            NotFoundError: If the epoch is unknown.
+            OTSAnchorError: If the upgrade bytes do not look like a
+                real `.ots` proof.
+        """
+        if not is_upgraded_proof(upgraded_bytes):
+            # upgrade_pending_proof would raise OTSAnchorError, but we want
+            # the explicit shape here for the API surface.
+            from vacant.registry.ots_anchor import OTSAnchorError
+
+            raise OTSAnchorError("upgrade payload missing OpenTimestamps magic header")
+        epoch = await self.get_merkle_epoch(epoch_id)
+        if epoch is None:
+            raise NotFoundError(f"merkle_epoch {epoch_id} not found")
+        pending = compute_pending_proof(root=epoch.root_hash)
+        digest, upgraded_at = upgrade_pending_proof(pending=pending, upgraded_bytes=upgraded_bytes)
+        async with self._sessionmaker() as s:
+            row = await s.get(MerkleEpoch, epoch_id)
+            if row is None:
+                raise NotFoundError(f"merkle_epoch {epoch_id} not found")
+            row.ots_proof_hash = digest
+            row.ots_upgraded_at = upgraded_at
+            await s.commit()
+        return digest, upgraded_at
+
+    # --- federated witnesses ------------------------------------------------
+
+    async def record_witness_cosignature(
+        self,
+        epoch_id: int,
+        cosignature: WitnessCosignature,
+    ) -> EpochWitness:
+        """Verify + persist a peer registry's cosignature on an epoch root.
+
+        Decentralised-trust glue: an external verifier asks for the
+        epoch row + all its `EpochWitness` rows, then calls
+        ``verify_witness_quorum(epoch, rows, rootset)`` to decide whether
+        the central operator's single signature is sufficiently
+        attested by independent observers.
+
+        The signature is verified against the canonical witness
+        statement (``build_witness_statement``) *before* it lands in the
+        DB — so the `epoch_witness` table only ever stores cryptographically
+        valid cosignatures. Re-recording the same `(epoch_id, witness_id)`
+        pair raises `RegistryWriteError` (the table's composite primary key
+        already enforces uniqueness; we surface a typed error).
+
+        Args:
+            epoch_id: Target epoch (must exist).
+            cosignature: A `WitnessCosignature` produced by
+                `issue_witness_cosignature`.
+
+        Returns:
+            The persisted `EpochWitness` row.
+
+        Raises:
+            NotFoundError: If `epoch_id` is unknown.
+            WitnessError: If the cosignature fails Ed25519 verification.
+            RegistryWriteError: If this `(epoch, witness)` pair was
+                already recorded.
+        """
+        epoch = await self.get_merkle_epoch(epoch_id)
+        if epoch is None:
+            raise NotFoundError(f"merkle_epoch {epoch_id} not found")
+        if not verify_witness_cosignature(epoch=epoch, cosignature=cosignature):
+            raise WitnessError(
+                f"witness cosignature from {cosignature.witness_id} "
+                f"failed verification on epoch {epoch_id}"
+            )
+        row = EpochWitness(
+            epoch_id=epoch_id,
+            witness_id=cosignature.witness_id,
+            witness_pubkey=cosignature.witness_pubkey,
+            cosignature=cosignature.signature,
+            cosigned_at=now_ms(),
+        )
+        async with self._sessionmaker() as s:
+            s.add(row)
+            try:
+                await s.commit()
+            except IntegrityError as exc:
+                await s.rollback()
+                raise RegistryWriteError(
+                    f"witness {cosignature.witness_id} already cosigned epoch {epoch_id}"
+                ) from exc
+        return row
+
+    async def list_epoch_witnesses(self, epoch_id: int) -> Sequence[EpochWitness]:
+        """Return all witness cosignatures stored for `epoch_id`.
+
+        Verifiers call this together with `get_merkle_epoch(epoch_id)`
+        and pass both into `verify_witness_quorum(...)`.
+        """
+        async with self._sessionmaker() as s:
+            res = await s.execute(select(EpochWitness).where(EpochWitness.epoch_id == epoch_id))
+            return list(res.scalars().all())
 
     async def latest_merkle_epoch(self) -> MerkleEpoch | None:
         async with self._sessionmaker() as s:
