@@ -942,6 +942,114 @@ def build_fastmcp_server(
                     delivered = True
                     break
 
+        # P8.6: auto-spawn a competitor on consecutive failure
+        # (technical.html §06 - "when a vacant fails, a competitor is born").
+        # Trigger: target is a direct descendant of this vacant AND
+        # the last 3 reviews in reviews_received.jsonl have a mean
+        # dimension below 0.3. Spawn a new D1 sibling that inherits
+        # the failing child's policy_mutation with a corrective tail.
+        # The failing child is NOT deleted (architecture: failed
+        # vacants stay alive — history is preserved, network selects).
+        competitor: dict[str, Any] | None = None
+        if delivered and parent_local_name is not None and persist_spawned_child is not None:
+            target_dir = None
+            target_meta = None
+            for entry in ls.vacant_home().iterdir():
+                if not entry.is_dir() or not (entry / "meta.json").exists():  # pragma: no cover
+                    continue
+                try:
+                    tm = ls.load_meta(entry.name)
+                except (ls.LocalVacantError, OSError, ValueError):  # pragma: no cover
+                    continue
+                if tm.vacant_id_hex == target_vid.hex():
+                    target_dir = entry
+                    target_meta = tm
+                    break
+            if (
+                target_dir is not None
+                and target_meta is not None
+                and target_meta.parent_id_hex == form.identity.hex()
+            ):
+                reviews_path = target_dir / "reviews_received.jsonl"
+                recent: list[dict[str, float]] = []
+                if reviews_path.exists():
+                    with reviews_path.open(encoding="utf-8") as rf:
+                        for line in rf:
+                            line = line.strip()
+                            if not line:
+                                continue
+                            try:
+                                row = json.loads(line)
+                                rd = row.get("dimensions") or {}
+                                if isinstance(rd, dict):
+                                    recent.append(rd)
+                            except json.JSONDecodeError:  # pragma: no cover
+                                continue
+                last3 = recent[-3:]
+                if len(last3) >= 3:
+                    means = []
+                    for row in last3:
+                        nums = [
+                            float(row[k])
+                            for k in ("factual", "logical", "relevance", "honesty", "adoption")
+                            if k in row and isinstance(row[k], int | float)
+                        ]
+                        if nums:  # pragma: no cover -- branch coverage
+                            means.append(sum(nums) / len(nums))
+                    if means and all(m < 0.3 for m in means):
+                        # Find the failing child's BIRTH policy_mutation to
+                        # carry forward into the corrective mutation.
+                        old_mutation = ""
+                        try:
+                            failing_lb = ls.load_logbook(target_dir.name)
+                            for e in failing_lb.entries:
+                                if e.kind == "BIRTH":
+                                    old_mutation = e.payload.get("policy_mutation") or ""
+                                    break
+                        except (ls.LocalVacantError, OSError):  # pragma: no cover
+                            pass
+                        corrective = (
+                            f"{old_mutation} -- correction after 3 sub-0.3 reviews: "
+                            f"prioritise correctness over speed, ask for confirmation "
+                            f"on ambiguous inputs"
+                        ).strip(" -")
+                        try:
+                            result = spawn_clone_with_mutation(
+                                form, signing_key, policy_mutation=corrective
+                            )
+                        except Exception as exc:  # pragma: no cover
+                            competitor = {"error": f"competitor_spawn_failed: {exc}"}
+                        else:
+                            child_short = result.child.identity.short()
+                            sibling_name = f"{parent_local_name}__competitor__{child_short}"
+                            try:
+                                persist_spawned_child(result, sibling_name, parent_local_name)
+                            except Exception as exc:  # pragma: no cover
+                                competitor = {"error": f"competitor_persist_failed: {exc}"}
+                            else:
+                                form.logbook.append(
+                                    "COMPETITOR_SPAWNED",
+                                    {
+                                        "kind": "COMPETITOR_SPAWNED",
+                                        "failing_child_id": target_vid.hex(),
+                                        "failing_child_name": target_dir.name,
+                                        "competitor_child_id": result.child.identity.hex(),
+                                        "competitor_child_name": sibling_name,
+                                        "corrective_mutation": corrective,
+                                        "reason": "three_consecutive_reviews_below_0.3",
+                                        "ts": time.time(),
+                                    },
+                                    signing_key,
+                                )
+                                if on_logbook_change is not None:  # pragma: no cover -- branch
+                                    on_logbook_change(form.logbook)
+                                competitor = {
+                                    "competitor_child_name": sibling_name,
+                                    "competitor_child_vacant_id_hex": result.child.identity.hex(),
+                                    "corrective_mutation": corrective,
+                                    "reason": "three_consecutive_reviews_below_0.3",
+                                }
+
         return {
             "ok": True,
             "reviewer_vacant_id_hex": form.identity.hex(),
@@ -952,6 +1060,7 @@ def build_fastmcp_server(
             "payload_hash_hex": payload_hash.hex(),
             "signature_hex": signature.hex(),
             "delivered_locally": delivered,
+            "competitor_spawned": competitor,
         }
 
     return mcp

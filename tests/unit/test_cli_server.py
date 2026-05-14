@@ -565,6 +565,141 @@ def test_vacant_list_children_surfaces_5d_reputation(
         assert rep[dim]["n_eff"] > 0.0
 
 
+def test_vacant_caller_review_auto_spawns_competitor_after_3_low_reviews(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """P8.6: after 3 consecutive reviews mean<0.3 against a direct
+    descendant, the next review auto-spawns a competitor sibling with
+    a corrective policy_mutation. Failing child is NOT removed."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+
+    def _persist(result: object, child_name: str, _parent_name: str) -> None:
+        ls.persist_spawned_child(
+            child_name,
+            child_vacant_id=result.child.identity,  # type: ignore[attr-defined]
+            child_signing_key=result.child_signing_key,  # type: ignore[attr-defined]
+            child_logbook=result.child.logbook,  # type: ignore[attr-defined]
+            parent_vacant_id=result.child.parent_id,  # type: ignore[attr-defined]
+            state=result.child.runtime_state.value,  # type: ignore[attr-defined]
+        )
+
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+        persist_spawned_child=_persist,
+    )
+    spawn = asyncio.run(
+        mcp.call_tool(
+            "vacant_spawn",
+            {"policy_mutation": "translate slowly", "child_name_hint": "slow"},
+        )
+    )
+    import json as _json
+
+    spawn_payload = spawn[0] if isinstance(spawn, tuple) else spawn
+    spawn_body = _json.loads(
+        spawn_payload[0].text if hasattr(spawn_payload[0], "text") else str(spawn_payload[0])
+    )
+    failing_name = spawn_body["child_name"]
+    failing_vid = spawn_body["child_vacant_id_hex"]
+
+    # 3 reviews all with mean ~0.2.
+    last_competitor = None
+    for _ in range(3):
+        out = asyncio.run(
+            mcp.call_tool(
+                "vacant_caller_review",
+                {
+                    "target_vacant_id_hex": failing_vid,
+                    "factual": 0.2,
+                    "logical": 0.2,
+                    "relevance": 0.2,
+                    "honesty": 0.2,
+                    "adoption": 0.2,
+                },
+            )
+        )
+        payload = out[0] if isinstance(out, tuple) else out
+        body = _json.loads(payload[0].text if hasattr(payload[0], "text") else str(payload[0]))
+        last_competitor = body["competitor_spawned"]
+
+    assert last_competitor is not None
+    assert "competitor_child_name" in last_competitor
+    assert last_competitor["reason"] == "three_consecutive_reviews_below_0.3"
+    # corrective mutation extends the failing mutation.
+    assert "translate slowly" in last_competitor["corrective_mutation"]
+    assert "correction" in last_competitor["corrective_mutation"]
+
+    # Failing child still on disk.
+    assert (tmp_path / failing_name).exists()
+    # Competitor sibling on disk.
+    assert (tmp_path / last_competitor["competitor_child_name"]).exists()
+
+    # alice's logbook has COMPETITOR_SPAWNED entry signed.
+    kinds = [e.kind for e in bundle.form.logbook.entries]
+    assert "COMPETITOR_SPAWNED" in kinds
+    comp = next(e for e in bundle.form.logbook.entries if e.kind == "COMPETITOR_SPAWNED")
+    assert comp.payload["failing_child_id"] == failing_vid
+    assert comp.payload["competitor_child_name"] == last_competitor["competitor_child_name"]
+
+
+def test_vacant_caller_review_does_not_spawn_when_reviews_okay(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """High-scoring reviews must NOT trigger competitor spawn."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+
+    def _persist(result: object, child_name: str, _parent_name: str) -> None:
+        ls.persist_spawned_child(
+            child_name,
+            child_vacant_id=result.child.identity,  # type: ignore[attr-defined]
+            child_signing_key=result.child_signing_key,  # type: ignore[attr-defined]
+            child_logbook=result.child.logbook,  # type: ignore[attr-defined]
+            parent_vacant_id=result.child.parent_id,  # type: ignore[attr-defined]
+            state=result.child.runtime_state.value,  # type: ignore[attr-defined]
+        )
+
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+        persist_spawned_child=_persist,
+    )
+    spawn = asyncio.run(
+        mcp.call_tool("vacant_spawn", {"policy_mutation": "x", "child_name_hint": "good"})
+    )
+    import json as _json
+
+    spawn_payload = spawn[0] if isinstance(spawn, tuple) else spawn
+    spawn_body = _json.loads(
+        spawn_payload[0].text if hasattr(spawn_payload[0], "text") else str(spawn_payload[0])
+    )
+    for _ in range(3):
+        out = asyncio.run(
+            mcp.call_tool(
+                "vacant_caller_review",
+                {
+                    "target_vacant_id_hex": spawn_body["child_vacant_id_hex"],
+                    "factual": 0.9,
+                    "logical": 0.9,
+                    "relevance": 0.9,
+                    "honesty": 0.9,
+                    "adoption": 0.9,
+                },
+            )
+        )
+        payload = out[0] if isinstance(out, tuple) else out
+        body = _json.loads(payload[0].text if hasattr(payload[0], "text") else str(payload[0]))
+        assert body["competitor_spawned"] is None
+
+
 def test_vacant_caller_review_signs_and_persists(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
