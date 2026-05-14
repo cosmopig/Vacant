@@ -23,6 +23,7 @@
 [![api docs](https://img.shields.io/badge/api%20docs-cosmopig.github.io-indigo.svg)](https://cosmopig.github.io/Vacant/)
 [![narrative](https://img.shields.io/badge/narrative-vacant.zeabur.app-blueviolet.svg)](https://vacant.zeabur.app/)
 [![Discussions](https://img.shields.io/github/discussions/cosmopig/Vacant)](https://github.com/cosmopig/Vacant/discussions)
+[![SafeSkill 86/100](https://img.shields.io/badge/SafeSkill-86%2F100_Passes%20with%20Notes-yellow)](https://safeskill.dev/scan/cosmopig-vacant)
 
 </div>
 
