@@ -44,7 +44,10 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass
+
+import httpx
 
 from vacant.core.crypto import hash_blake2b
 from vacant.registry.errors import RegistryError
@@ -52,12 +55,15 @@ from vacant.registry.errors import RegistryError
 __all__ = [
     "OTS_PENDING_MAGIC",
     "OTSAnchorError",
+    "OTSCalendarReceipt",
     "OTSPendingProof",
     "compute_pending_proof",
     "deserialize_proof_file",
     "is_upgraded_proof",
     "ots_proof_digest",
     "serialize_proof_file",
+    "submit_to_calendar",
+    "submit_to_calendars",
     "upgrade_pending_proof",
 ]
 
@@ -203,6 +209,126 @@ def ots_proof_digest(data: bytes) -> bytes:
     full bytes in the DB.
     """
     return hash_blake2b(data)
+
+
+# --- live calendar submission -----------------------------------------------
+
+
+@dataclass(frozen=True)
+class OTSCalendarReceipt:
+    """Result of a real `submit_to_calendar(...)` HTTP round-trip.
+
+    The OpenTimestamps calendar protocol accepts a SHA-256 digest at
+    `POST <calendar_url>/digest` (some servers also accept the
+    `/digest` form with raw bytes). On success the calendar returns a
+    partial proof file in the binary `.ots` format — for our purposes
+    we record the bytes plus their BLAKE2b digest so the
+    `MerkleEpoch.ots_proof_hash` row can be updated atomically.
+
+    `is_real` flags whether the returned bytes actually start with the
+    `OTS_UPGRADED_MAGIC` header (a real `.ots` proof would). The
+    aggregator should treat `is_real=False` as a server-side error
+    rather than silently persisting junk.
+    """
+
+    calendar_url: str
+    proof_bytes: bytes
+    proof_digest: bytes
+    is_real: bool
+
+
+async def submit_to_calendar(
+    *,
+    digest: bytes,
+    calendar_url: str,
+    timeout_s: float = 30.0,
+) -> OTSCalendarReceipt:
+    """Submit `digest` to a real OpenTimestamps calendar over HTTP.
+
+    The OTS calendar protocol exposes a `POST /digest` endpoint that
+    accepts a 32-byte SHA-256 digest (binary or hex). The response is
+    the calendar's partial proof in `.ots` format. This function uses
+    `httpx.AsyncClient` so it composes with the rest of the async
+    registry stack.
+
+    Args:
+        digest: 32-byte digest to anchor. Typically
+            `MerkleEpoch.root_hash`; the OTS protocol doesn't care what
+            the digest is, only its length.
+        calendar_url: Base URL of the calendar (e.g.
+            `https://a.pool.opentimestamps.org`). We append `/digest`.
+        timeout_s: Total HTTP timeout. Calendars are usually fast (the
+            heavy Bitcoin-anchor wait is a separate "upgrade" call), so
+            a 30s default is generous.
+
+    Returns:
+        An `OTSCalendarReceipt` whose `proof_bytes` can be passed to
+        `RegistryStore.record_ots_upgrade(epoch_id,
+        upgraded_bytes=...)`.
+
+    Raises:
+        OTSAnchorError: If the digest length is wrong, the HTTP call
+            fails, or the server returns a non-2xx status.
+    """
+    if len(digest) != 32:
+        raise OTSAnchorError(f"OTS digest must be 32 bytes; got {len(digest)}")
+
+    url = calendar_url.rstrip("/") + "/digest"
+    try:
+        async with httpx.AsyncClient(timeout=timeout_s) as client:
+            resp = await client.post(
+                url,
+                content=digest,
+                headers={
+                    "Content-Type": "application/vnd.opentimestamps.v1",
+                    "Accept": "application/vnd.opentimestamps.v1",
+                },
+            )
+    except httpx.HTTPError as exc:
+        raise OTSAnchorError(f"OTS calendar {url!r} request failed: {exc}") from exc
+    if resp.status_code >= 400:
+        raise OTSAnchorError(
+            f"OTS calendar {url!r} returned status {resp.status_code}: {resp.text[:200]!r}"
+        )
+    body = resp.content
+    return OTSCalendarReceipt(
+        calendar_url=calendar_url,
+        proof_bytes=body,
+        proof_digest=ots_proof_digest(body),
+        is_real=is_upgraded_proof(body),
+    )
+
+
+async def submit_to_calendars(
+    *,
+    digest: bytes,
+    calendar_urls: Sequence[str] = DEFAULT_CALENDAR_URLS,
+    timeout_s: float = 30.0,
+) -> list[OTSCalendarReceipt]:
+    """Submit `digest` to several calendars in parallel.
+
+    The OTS design lets a digest be witnessed by multiple independent
+    calendar pools so a single operator outage doesn't break anchoring.
+    We return *every* successful receipt rather than the first; the
+    caller picks one to persist on the `MerkleEpoch` row (or stores
+    them all if they want maximum auditability).
+
+    Failures from individual calendars are swallowed — the operator
+    only needs *some* calendar to succeed. If *all* calendars fail the
+    return list is empty, which lets `RegistryStore.seal_epoch(
+    ots_submit_live=True)` distinguish "no calendar reachable" from
+    "got a partial receipt".
+    """
+    import asyncio
+
+    async def _one(url: str) -> OTSCalendarReceipt | None:
+        try:
+            return await submit_to_calendar(digest=digest, calendar_url=url, timeout_s=timeout_s)
+        except OTSAnchorError:
+            return None
+
+    results = await asyncio.gather(*(_one(u) for u in calendar_urls))
+    return [r for r in results if r is not None]
 
 
 def upgrade_pending_proof(

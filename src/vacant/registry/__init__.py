@@ -8,6 +8,10 @@ from vacant.registry.aggregation import (
     rank_by_reputation,
     search_capability,
 )
+from vacant.registry.anchor_scheduler import (
+    AnchorScheduler,
+    AnchorSchedulerStats,
+)
 from vacant.registry.antitamper import (
     MerkleProof,
     build_merkle_root,
@@ -22,6 +26,17 @@ from vacant.registry.antitamper import (
     verify_inclusion_proof,
 )
 from vacant.registry.backend import RegistryBackend
+from vacant.registry.dht import (
+    DEFAULT_K,
+    DEFAULT_REPLICATION,
+    DHTBackend,
+    DHTError,
+    DHTNode,
+    KademliaDHT,
+    build_dht_from_seeds,
+    record_key,
+    xor_distance,
+)
 from vacant.registry.errors import (
     AppendOnlyViolation,
     FreshnessError,
@@ -46,6 +61,11 @@ from vacant.registry.git_anchor import (
     epoch_to_anchor_payload,
     git_available,
     try_anchor_to_git,
+)
+from vacant.registry.gossip import (
+    GossipReplicator,
+    GossipStats,
+    event_to_draft,
 )
 from vacant.registry.halo import (
     HaloRecord,
@@ -72,12 +92,15 @@ from vacant.registry.ots_anchor import (
     DEFAULT_CALENDAR_URLS,
     OTS_PENDING_MAGIC,
     OTSAnchorError,
+    OTSCalendarReceipt,
     OTSPendingProof,
     compute_pending_proof,
     deserialize_proof_file,
     is_upgraded_proof,
     ots_proof_digest,
     serialize_proof_file,
+    submit_to_calendar,
+    submit_to_calendars,
     upgrade_pending_proof,
 )
 from vacant.registry.rpc import build_app
@@ -101,12 +124,19 @@ from vacant.registry.witness import (
 __all__ = [
     "DEFAULT_CALENDAR_URLS",
     "DEFAULT_GIT_BRANCH",
+    "DEFAULT_K",
+    "DEFAULT_REPLICATION",
     "DEFAULT_REPUTATION_ORACLE",
     "OTS_PENDING_MAGIC",
+    "AnchorScheduler",
+    "AnchorSchedulerStats",
     "AnomalyWindow",
     "AppendOnlyViolation",
     "Attestation",
     "CompositionLink",
+    "DHTBackend",
+    "DHTError",
+    "DHTNode",
     "EpochWitness",
     "Event",
     "EventFinalization",
@@ -115,14 +145,18 @@ __all__ = [
     "FreshnessError",
     "GitAnchorError",
     "GitAnchorReceipt",
+    "GossipReplicator",
+    "GossipStats",
     "HaloMatch",
     "HaloRecord",
     "HaloRevocationRecord",
     "IdempotencyConflict",
+    "KademliaDHT",
     "MerkleEpoch",
     "MerkleProof",
     "NotFoundError",
     "OTSAnchorError",
+    "OTSCalendarReceipt",
     "OTSPendingProof",
     "QuorumDisagreement",
     "ReadAudit",
@@ -145,6 +179,7 @@ __all__ = [
     "WitnessRootSet",
     "anchor_to_git",
     "build_app",
+    "build_dht_from_seeds",
     "build_merkle_root",
     "build_merkle_tree",
     "build_witness_statement",
@@ -157,6 +192,7 @@ __all__ = [
     "deserialize_proof_file",
     "effective_visibility",
     "epoch_to_anchor_payload",
+    "event_to_draft",
     "git_available",
     "is_upgraded_proof",
     "issue_witness_cosignature",
@@ -167,14 +203,18 @@ __all__ = [
     "publish_halo",
     "rank_by_reputation",
     "record_hash",
+    "record_key",
     "revoke_halo",
     "search_capability",
     "serialize_proof_file",
     "sign_epoch_root",
+    "submit_to_calendar",
+    "submit_to_calendars",
     "try_anchor_to_git",
     "upgrade_pending_proof",
     "verify_event_signature",
     "verify_inclusion_proof",
     "verify_witness_cosignature",
     "verify_witness_quorum",
+    "xor_distance",
 ]

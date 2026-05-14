@@ -16,14 +16,14 @@
   },
   "reputation": {
     "parent": {
-      "factual": 0.7892,
+      "factual": 0.8189,
       "logical": 0.5,
       "relevance": 0.7883,
       "honesty": 0.6667,
       "adoption": 0.25
     },
     "factual_sub": {
-      "factual": 0.7835,
+      "factual": 0.8234,
       "logical": 0.5,
       "relevance": 0.5,
       "honesty": 0.6667,

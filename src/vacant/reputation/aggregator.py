@@ -22,12 +22,14 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 
 from vacant.core.constants import (
+    GROUND_TRUTH_FACTUAL_MULTIPLIER,
     NOVELTY_DECAY_COEFFICIENT,
     REPUTATION_DIMS,
     REVIEW_LIMIT_PER_TARGET_24H,
     REVIEWER_CREDIBILITY_FLOOR,
     SAME_BASE_MODEL_DISCOUNT,
     SAME_MODEL_HEAVY_DISCOUNT,
+    SELF_EVAL_HONESTY_GAP_GAIN,
     SOURCE_BASE_WEIGHTS,
 )
 from vacant.core.crypto import SigningKey
@@ -338,6 +340,11 @@ class Aggregator:
             composed = base_weight * same_model_w * novelty * sig_discount
 
             # Apply per-dim posterior update (§3.4.2 reviewer credibility).
+            # `ground_truth` source: factual dim gets an extra 1.5x
+            # multiplier (technical.html §Reputation row 3) — programmatic
+            # verification is the strongest factual evidence we have, so
+            # it counts heavier than caller_review / peer_review on factual
+            # specifically. Other dims stay at `composed`.
             key = (target, substrate)
             rep = self._posteriors.get(key) or five_d_with_priors(now_ts=when)
             for d, s in dimensions.items():
@@ -347,9 +354,78 @@ class Aggregator:
                         REVIEWER_CREDIBILITY_FLOOR
                         + (1.0 - REVIEWER_CREDIBILITY_FLOOR) * reviewer_rep.get(d).mean
                     )
-                w = composed * cred
+                dim_multiplier = 1.0
+                if source == "ground_truth" and d == "factual":
+                    dim_multiplier = GROUND_TRUTH_FACTUAL_MULTIPLIER
+                w = composed * cred * dim_multiplier
                 rep = rep.update_dim(d, signal=float(s), weight=w, now_ts=when)
             self._posteriors[key] = rep
+
+    # --- self/peer eval gap → honesty (technical.html §Reputation row 4) -
+
+    async def record_self_eval_gap(
+        self,
+        target: VacantId,
+        substrate: str,
+        *,
+        self_scores: Mapping[str, float],
+        peer_scores: Mapping[str, float],
+        ts: float | None = None,
+    ) -> float:
+        """Compare a vacant's self-assessment to the peer consensus and
+        route the gap into the `honesty` dimension *exclusively*.
+
+        The honesty signal is `1.0 - mean(|self - peer|)` over the
+        dimensions that both maps cover, clipped to `[0, 1]`. A
+        perfectly calibrated self-eval (gap=0) yields signal=1.0; a
+        maximally wrong one (gap=1) yields signal=0. The gain is
+        `SELF_EVAL_HONESTY_GAP_GAIN` (default 1.0, linear).
+
+        This is the only path that writes to `honesty` from self-eval
+        data — other reviewers update honesty via the normal
+        `record_review` path. Keeping the channel separate is what
+        technical.html means by "honesty dimension exclusively".
+
+        Args:
+            target: The vacant whose honesty is being assessed.
+            substrate: Per-substrate posterior key.
+            self_scores: The vacant's own scores per dimension.
+            peer_scores: Aggregated peer consensus per dimension.
+                Typically derived from recent reviews; the dispatcher
+                supplies the mean.
+            ts: Override for testing.
+
+        Returns:
+            The honesty signal that was written (so callers can log /
+            display it). 0.0 if no overlapping dims (no update applied).
+        """
+        if target not in self._contexts:
+            raise InvalidSignalError(f"unknown target {target}")
+
+        overlap = sorted(set(self_scores) & set(peer_scores))
+        if not overlap:
+            return 0.0
+        for d in overlap:
+            if d not in REPUTATION_DIMS:
+                raise InvalidDimensionError(f"unknown dim {d!r}")
+            for src, m in (("self", self_scores), ("peer", peer_scores)):
+                v = float(m[d])
+                if not (0.0 <= v <= 1.0):
+                    raise InvalidSignalError(f"{src} score for dim {d} must be in [0, 1]; got {v}")
+
+        gaps = [abs(float(self_scores[d]) - float(peer_scores[d])) for d in overlap]
+        mean_gap = sum(gaps) / len(gaps)
+        # Linear with gain: gap=0 -> 1.0; gap=1 -> max(0, 1 - gain).
+        honesty_signal = max(0.0, min(1.0, 1.0 - SELF_EVAL_HONESTY_GAP_GAIN * mean_gap))
+        weight = SOURCE_BASE_WEIGHTS["self_eval"]
+        when = ts if ts is not None else time.time()
+
+        async with self._lock:
+            key = (target, substrate)
+            rep = self._posteriors.get(key) or five_d_with_priors(now_ts=when)
+            rep = rep.update_dim("honesty", signal=honesty_signal, weight=weight, now_ts=when)
+            self._posteriors[key] = rep
+        return honesty_signal
 
     # --- adoption signal (technical.html §Reputation row 5) --------------
 

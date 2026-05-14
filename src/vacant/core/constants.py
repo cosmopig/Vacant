@@ -163,6 +163,20 @@ SOURCE_BASE_WEIGHTS: Final[dict[str, float]] = {
 }
 """Per-source base weights. P3 §3.4 table 1 / CONSTANTS.md §Reputation."""
 
+GROUND_TRUTH_FACTUAL_MULTIPLIER: Final[float] = 1.5
+"""Extra weight multiplier applied to the `factual` dimension when a
+review's source is `ground_truth` (programmatic verification — unit
+tests, API validation). technical.html §Reputation row 3: `1.5x weight
+factual`. Other dimensions stay at `SOURCE_BASE_WEIGHTS["ground_truth"]`
+unchanged."""
+
+SELF_EVAL_HONESTY_GAP_GAIN: Final[float] = 1.0
+"""Gain on the `|self_score - peer_score|` honesty signal. A perfectly
+calibrated self-eval (gap == 0) maps to honesty signal=1.0; a maximally
+wrong one (gap == 1.0) maps to honesty signal=0.0. technical.html
+§Reputation row 4: self/peer eval gap routes to honesty dimension
+exclusively. Gain >1.0 sharpens the punishment; we default to 1.0 (linear)."""
+
 SAME_BASE_MODEL_DISCOUNT: Final[float] = 0.5
 SAME_MODEL_HEAVY_DISCOUNT: Final[float] = 0.25
 """Same-base-model peer review discount; >5 reviews/30d → heavier discount.

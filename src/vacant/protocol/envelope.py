@@ -45,6 +45,7 @@ __all__ = [
     "A2A_VACANT_METADATA_KEY",
     "A2AMessage",
     "A2APart",
+    "SelfEval",
     "VacantEnvelope",
     "from_a2a_jsonrpc",
     "to_a2a_jsonrpc",
@@ -70,6 +71,54 @@ class A2APart(BaseModel):
         return {"type": self.type, "text": self.text}
 
 
+class SelfEval(BaseModel):
+    """The responder vacant's own 5D self-assessment + scalar confidence.
+
+    technical.html §Layer 1: "Every response includes 5D self-assessment
+    + confidence". Carried as structured metadata on the response
+    envelope so the reputation aggregator can compute the self/peer gap
+    (`record_self_eval_gap` → honesty dim) without a separate round-trip.
+
+    Each dim is in `[0, 1]`. `confidence` is the responder's own scalar
+    "how sure am I this answer is correct" in the same range. Both are
+    signed by the responder when the envelope is signed (they live in
+    the same canonical-JSON `signing_dict`).
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    factual: float = Field(default=0.5, ge=0.0, le=1.0)
+    logical: float = Field(default=0.5, ge=0.0, le=1.0)
+    relevance: float = Field(default=0.5, ge=0.0, le=1.0)
+    honesty: float = Field(default=0.5, ge=0.0, le=1.0)
+    adoption: float = Field(default=0.5, ge=0.0, le=1.0)
+    confidence: float = Field(default=0.5, ge=0.0, le=1.0)
+
+    def canonical_dict(self) -> dict[str, Any]:
+        return {
+            "factual": float(self.factual),
+            "logical": float(self.logical),
+            "relevance": float(self.relevance),
+            "honesty": float(self.honesty),
+            "adoption": float(self.adoption),
+            "confidence": float(self.confidence),
+        }
+
+    def dims_dict(self) -> dict[str, float]:
+        """Just the 5 reputation dims (drops `confidence`).
+
+        Suitable for passing to `Aggregator.record_self_eval_gap`'s
+        `self_scores=` argument.
+        """
+        return {
+            "factual": float(self.factual),
+            "logical": float(self.logical),
+            "relevance": float(self.relevance),
+            "honesty": float(self.honesty),
+            "adoption": float(self.adoption),
+        }
+
+
 class A2AMessage(BaseModel):
     """A2A `message/send` payload (extracted shape, MVP subset)."""
 
@@ -79,6 +128,12 @@ class A2AMessage(BaseModel):
     parts: list[A2APart] = Field(default_factory=list)
     context_id: str | None = None
     message_id: str | None = None
+    self_eval: SelfEval | None = None
+    """Optional 5D self-assessment + confidence (technical.html §Layer 1).
+    Present on responder-side messages; the request-side message typically
+    leaves it None. When present, it's part of the canonical signing
+    payload so the responder commits cryptographically to their own
+    self-assessment — a self-eval cannot be retroactively edited."""
 
     def canonical_dict(self) -> dict[str, Any]:
         return {
@@ -86,6 +141,7 @@ class A2AMessage(BaseModel):
             "parts": [p.canonical_dict() for p in self.parts],
             "contextId": self.context_id,
             "messageId": self.message_id,
+            "selfEval": self.self_eval.canonical_dict() if self.self_eval else None,
         }
 
 
@@ -189,30 +245,37 @@ def to_a2a_jsonrpc(env: VacantEnvelope) -> dict[str, Any]:
     The Vacant-specific fields (caller_signature, sequence_no, prev_hash,
     idempotency_key) are mounted under
     `params.message.metadata[A2A_VACANT_METADATA_KEY]` per P6 §3.2.
+
+    When `env.payload.self_eval` is set (responder's 5D self-assessment
+    + confidence, technical.html §Layer 1), it's serialised as
+    `params.message.selfEval`. Because `self_eval` is in the canonical
+    `signing_dict`, the responder's Ed25519 signature already commits to
+    these scores — a verifier doesn't need a second signature pass.
     """
+    msg: dict[str, Any] = {
+        "role": env.payload.role,
+        "parts": [p.canonical_dict() for p in env.payload.parts],
+        "contextId": env.payload.context_id,
+        "messageId": env.payload.message_id,
+        "metadata": {
+            A2A_VACANT_METADATA_KEY: {
+                "from_vacant_id": env.from_vacant_id.hex(),
+                "to_vacant_id": env.to_vacant_id.hex(),
+                "sequence_no": env.sequence_no,
+                "timestamp": _utc_iso(env.timestamp),
+                "prev_envelope_hash": env.prev_envelope_hash.hex(),
+                "idempotency_key": env.idempotency_key,
+                "caller_signature": env.signature.hex(),
+            },
+        },
+    }
+    if env.payload.self_eval is not None:
+        msg["selfEval"] = env.payload.self_eval.canonical_dict()
     return {
         "jsonrpc": "2.0",
         "id": env.idempotency_key or env.compute_hash().hex(),
         "method": "message/send",
-        "params": {
-            "message": {
-                "role": env.payload.role,
-                "parts": [p.canonical_dict() for p in env.payload.parts],
-                "contextId": env.payload.context_id,
-                "messageId": env.payload.message_id,
-                "metadata": {
-                    A2A_VACANT_METADATA_KEY: {
-                        "from_vacant_id": env.from_vacant_id.hex(),
-                        "to_vacant_id": env.to_vacant_id.hex(),
-                        "sequence_no": env.sequence_no,
-                        "timestamp": _utc_iso(env.timestamp),
-                        "prev_envelope_hash": env.prev_envelope_hash.hex(),
-                        "idempotency_key": env.idempotency_key,
-                        "caller_signature": env.signature.hex(),
-                    },
-                },
-            },
-        },
+        "params": {"message": msg},
     }
 
 
@@ -241,11 +304,19 @@ def from_a2a_jsonrpc(body: dict[str, Any]) -> VacantEnvelope:
         raise EnvelopeFormatError(f"invalid metadata: {exc}") from exc
 
     parts = [A2APart(**p) for p in msg.get("parts", [])]
+    self_eval_obj: SelfEval | None = None
+    raw_self_eval = msg.get("selfEval")
+    if raw_self_eval is not None:
+        try:
+            self_eval_obj = SelfEval(**raw_self_eval)
+        except (TypeError, ValueError) as exc:
+            raise EnvelopeFormatError(f"invalid selfEval: {exc}") from exc
     payload = A2AMessage(
         role=msg.get("role", "ROLE_USER"),
         parts=parts,
         context_id=msg.get("contextId"),
         message_id=msg.get("messageId"),
+        self_eval=self_eval_obj,
     )
 
     return VacantEnvelope(
