@@ -27,8 +27,10 @@ same signed-envelope guarantees the HTTP path provides.
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime
 from typing import Any
 
 from mcp.server.fastmcp import Context, FastMCP
@@ -418,6 +420,62 @@ def build_fastmcp_server(
                     attestation_count = sum(1 for _ in att_path.open(encoding="utf-8"))
                 except OSError:  # pragma: no cover
                     pass
+            # P8.4: 5D reputation aggregated from reviews_received.jsonl.
+            # Beta posterior per dimension, source-weighted 1.0 (caller
+            # review). Pure read-side computation — no decay since we
+            # don't know the reviewer's intended timestamp granularity
+            # at display time. Fuller decay + UCB + cold-start
+            # gating lands when the local Registry persists into a
+            # dedicated table (P8.3).
+            reputation_5d: dict[str, dict[str, float]] = {}
+            review_count = 0
+            reviews_path = entry / "reviews_received.jsonl"
+            if reviews_path.exists():
+                from vacant.core.constants import (
+                    REPUTATION_DIMS as _DIMS,
+                )
+                from vacant.reputation.posterior import (
+                    five_d_with_priors as _five_d_with_priors,
+                )
+
+                beta5d = _five_d_with_priors(now_ts=time.time())
+                try:
+                    with reviews_path.open(encoding="utf-8") as rf:
+                        for line in rf:
+                            line = line.strip()
+                            if not line:
+                                continue
+                            try:
+                                row = json.loads(line)
+                                dims_in = row.get("dimensions", {})
+                            except json.JSONDecodeError:  # pragma: no cover
+                                continue
+                            for dim in _DIMS:
+                                v = dims_in.get(dim)
+                                if not isinstance(v, int | float):
+                                    continue
+                                if v < 0.0 or v > 1.0:
+                                    continue
+                                beta_dim = beta5d.get(dim)
+                                beta5d = beta5d.with_dim(
+                                    dim,
+                                    beta_dim.update_with_signal(
+                                        signal=float(v),
+                                        weight=1.0,
+                                        now_ts=time.time(),
+                                    ),
+                                )
+                            review_count += 1
+                except OSError:  # pragma: no cover
+                    pass
+                if review_count > 0:
+                    for dim in _DIMS:
+                        b = beta5d.get(dim)
+                        reputation_5d[dim] = {
+                            "mean": b.mean,
+                            "variance": b.variance,
+                            "n_eff": b.n_eff,
+                        }
             children.append(
                 {
                     "name": entry.name,
@@ -427,6 +485,8 @@ def build_fastmcp_server(
                     "policy_mutation": policy_mutation,
                     "inference_count": inference_count,
                     "attestation_count": attestation_count,
+                    "review_count": review_count,
+                    "reputation_5d": reputation_5d,
                     "last_heartbeat_at": child_meta.last_heartbeat_at,
                 }
             )
@@ -754,6 +814,144 @@ def build_fastmcp_server(
             "request_envelope_id_hex": request_env_id_hex,
             "response_envelope_id_hex": response_env_id_hex,
             "transport": "a2a-http",
+        }
+
+    # vacant_caller_review — Pfix8 P8.2: 5-dimensional signed review.
+    # The thesis-load-bearing peer-review primitive. A caller (this
+    # vacant) scores a target vacant's work along five orthogonal
+    # dimensions (factual / logical / relevance / honesty / adoption).
+    # The review is a signed payload over a canonical JSON encoding of
+    # (reviewer, target, dimensions, substrate, call_envelope_id_hex,
+    # issued_at) — anyone holding this vacant's pubkey can verify it
+    # later. Two side effects:
+    #   1. Signed REVIEW_ISSUED entry on this vacant's logbook.
+    #   2. JSONL line appended to the target's
+    #      ``~/.vacant/<target>/reviews_received.jsonl`` (when the
+    #      target is on the same VACANT_HOME). The transport detail
+    #      (local file vs HTTP A2A) is interchangeable because the
+    #      signature is over the payload, not over the wire.
+    @mcp.tool(
+        name="vacant_caller_review",
+        description=(
+            "Sign and persist a 5-dimensional peer review of a target "
+            "vacant. Dimensions are factual, logical, relevance, "
+            "honesty, adoption — each in [0.0, 1.0]. Used after a call "
+            "or delegate to record this vacant's judgement of the "
+            "target's work. The review is Ed25519-signed by this "
+            "vacant; a REVIEW_ISSUED entry lands on this vacant's "
+            "logbook, and a matching jsonl row lands in the target's "
+            "reviews_received.jsonl (so aggregators can read it later)."
+            " Pass call_envelope_id_hex when the review is tied to a "
+            "specific delegate/call envelope; pass substrate to "
+            "attribute the review to the substrate the target was "
+            "running on."
+        ),
+    )
+    async def vacant_caller_review(
+        target_vacant_id_hex: str,
+        factual: float,
+        logical: float,
+        relevance: float,
+        honesty: float,
+        adoption: float,
+        substrate: str = "unknown",
+        call_envelope_id_hex: str = "",
+        claim: str = "",
+    ) -> dict[str, Any]:
+        if parent_local_name is None:
+            return {
+                "error": (
+                    "vacant_caller_review requires a persistent reviewer "
+                    "identity; this MCP server was launched in ephemeral mode."
+                )
+            }
+        dims = {
+            "factual": factual,
+            "logical": logical,
+            "relevance": relevance,
+            "honesty": honesty,
+            "adoption": adoption,
+        }
+        for k, v in dims.items():
+            if v < 0.0 or v > 1.0:
+                return {"error": f"dimension {k!r} out of [0.0, 1.0]: {v}"}
+        try:
+            target_vid = VacantId(pubkey_bytes=bytes.fromhex(target_vacant_id_hex))
+        except (ValueError, TypeError) as exc:  # pragma: no cover -- defensive
+            return {"error": f"invalid target_vacant_id_hex: {exc}"}
+        if target_vid == form.identity:
+            return {"error": "self-review is not allowed"}
+
+        now_iso = datetime.now(UTC).isoformat()
+        review_payload: dict[str, Any] = {
+            "reviewer": form.identity.hex(),
+            "target": target_vid.hex(),
+            "dimensions": dims,
+            "substrate": substrate,
+            "call_envelope_id_hex": call_envelope_id_hex,
+            "claim": claim,
+            "issued_at": now_iso,
+        }
+        # Canonical JSON over the full payload (sorted keys, no whitespace
+        # padding) — Ed25519 signature is over this byte sequence.
+        canonical = json.dumps(review_payload, sort_keys=True, separators=(",", ":"))
+        payload_hash = hash_blake2b(canonical.encode("utf-8"))
+        signature = signing_key.sign(payload_hash).signature
+        signed_record = {
+            **review_payload,
+            "payload_hash_hex": payload_hash.hex(),
+            "signature_hex": signature.hex(),
+        }
+
+        # 1. REVIEW_ISSUED on reviewer's own logbook (signed entry).
+        form.logbook.append(
+            "REVIEW_ISSUED",
+            {
+                "kind": "REVIEW_ISSUED",
+                "target": target_vid.hex(),
+                "dimensions": dims,
+                "substrate": substrate,
+                "call_envelope_id_hex": call_envelope_id_hex,
+                "payload_hash_hex": payload_hash.hex(),
+                "signature_hex": signature.hex(),
+                "ts": time.time(),
+            },
+            signing_key,
+        )
+        if on_logbook_change is not None:
+            on_logbook_change(form.logbook)
+
+        # 2. Best-effort local delivery: append the signed record to the
+        #    target's reviews_received.jsonl when the target lives under
+        #    the same VACANT_HOME. Remote / cross-host delivery via A2A
+        #    is wired in P8.5; the signature is over the canonical
+        #    payload so both transports verify with the same code.
+        delivered = False
+        home = ls.vacant_home()
+        if home.exists():
+            for entry in home.iterdir():
+                if not entry.is_dir() or not (entry / "meta.json").exists():
+                    continue
+                try:
+                    tm = ls.load_meta(entry.name)
+                except (ls.LocalVacantError, OSError, ValueError):  # pragma: no cover
+                    continue
+                if tm.vacant_id_hex == target_vid.hex():
+                    with (entry / "reviews_received.jsonl").open("a", encoding="utf-8") as f:
+                        f.write(json.dumps(signed_record, sort_keys=True) + "\n")
+                    delivered = True
+                    break
+
+        return {
+            "ok": True,
+            "reviewer_vacant_id_hex": form.identity.hex(),
+            "target_vacant_id_hex": target_vid.hex(),
+            "dimensions": dims,
+            "substrate": substrate,
+            "call_envelope_id_hex": call_envelope_id_hex,
+            "payload_hash_hex": payload_hash.hex(),
+            "signature_hex": signature.hex(),
+            "delivered_locally": delivered,
         }
 
     return mcp

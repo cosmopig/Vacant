@@ -121,7 +121,7 @@ async def test_echo_behavior_returns_signed_text() -> None:
 # --- cli.mcp_server ---------------------------------------------------------
 
 
-def test_build_fastmcp_server_registers_seven_tools() -> None:
+def test_build_fastmcp_server_registers_eight_tools() -> None:
     ls.init_vacant("alice")
     bundle = build_serve_app("alice")
     mcp = build_fastmcp_server(
@@ -139,6 +139,7 @@ def test_build_fastmcp_server_registers_seven_tools() -> None:
         "vacant_list_children",
         "vacant_delegate",
         "vacant_delegate_a2a",
+        "vacant_caller_review",
     }
 
 
@@ -151,7 +152,7 @@ def test_build_fastmcp_server_default_replay_store() -> None:
         signing_key=bundle.signing_key,
     )
     tools = asyncio.run(mcp.list_tools())
-    assert len(tools) == 7
+    assert len(tools) == 8
 
 
 def test_persist_spawned_child_refuses_existing_dir(
@@ -489,6 +490,230 @@ def test_vacant_delegate_a2a_refuses_child_without_endpoint(
     payload = out[0] if isinstance(out, tuple) else out
     text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
     assert "no advertised endpoint" in text
+
+
+def test_vacant_list_children_surfaces_5d_reputation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """After signed caller reviews land in a child's reviews_received.jsonl,
+    vacant_list_children must surface aggregated 5D Beta-posterior stats
+    (mean, variance, n_eff) per dimension so the LLM can pick a
+    well-rated specialist for the next task."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+
+    def _persist(result: object, child_name: str, _parent_name: str) -> None:
+        ls.persist_spawned_child(
+            child_name,
+            child_vacant_id=result.child.identity,  # type: ignore[attr-defined]
+            child_signing_key=result.child_signing_key,  # type: ignore[attr-defined]
+            child_logbook=result.child.logbook,  # type: ignore[attr-defined]
+            parent_vacant_id=result.child.parent_id,  # type: ignore[attr-defined]
+            state=result.child.runtime_state.value,  # type: ignore[attr-defined]
+        )
+
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+        persist_spawned_child=_persist,
+    )
+    spawn = asyncio.run(
+        mcp.call_tool(
+            "vacant_spawn",
+            {"policy_mutation": "x", "child_name_hint": "rep"},
+        )
+    )
+    import json as _json
+
+    spawn_payload = spawn[0] if isinstance(spawn, tuple) else spawn
+    spawn_body = _json.loads(
+        spawn_payload[0].text if hasattr(spawn_payload[0], "text") else str(spawn_payload[0])
+    )
+    child_name = spawn_body["child_name"]
+    child_vid_hex = spawn_body["child_vacant_id_hex"]
+
+    # Issue two reviews for the child with different scores.
+    for f, h in [(0.9, 0.8), (0.7, 0.6)]:
+        asyncio.run(
+            mcp.call_tool(
+                "vacant_caller_review",
+                {
+                    "target_vacant_id_hex": child_vid_hex,
+                    "factual": f,
+                    "logical": 0.5,
+                    "relevance": 0.5,
+                    "honesty": h,
+                    "adoption": 0.5,
+                },
+            )
+        )
+
+    out = asyncio.run(mcp.call_tool("vacant_list_children", {}))
+    payload = out[0] if isinstance(out, tuple) else out
+    body = _json.loads(payload[0].text if hasattr(payload[0], "text") else str(payload[0]))
+    entry = body["children"][0]
+    assert entry["review_count"] == 2
+    rep = entry["reputation_5d"]
+    for dim in ("factual", "logical", "relevance", "honesty", "adoption"):
+        assert dim in rep
+        assert 0.0 <= rep[dim]["mean"] <= 1.0
+        assert rep[dim]["variance"] >= 0.0
+        # Two reviews × weight 1.0 → n_eff should be roughly 2 per dim.
+        assert rep[dim]["n_eff"] > 0.0
+
+
+def test_vacant_caller_review_signs_and_persists(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Happy path: 5D review signed by alice, REVIEW_ISSUED on alice's
+    logbook, JSONL row appended to target's reviews_received.jsonl."""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    ls.init_vacant("bob", insecure_demo=True)
+    bob_meta = ls.load_meta("bob")
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+    )
+    out = asyncio.run(
+        mcp.call_tool(
+            "vacant_caller_review",
+            {
+                "target_vacant_id_hex": bob_meta.vacant_id_hex,
+                "factual": 0.8,
+                "logical": 0.7,
+                "relevance": 0.9,
+                "honesty": 0.85,
+                "adoption": 0.5,
+                "substrate": "ollama:gemma4:e2b",
+                "claim": "bob handled the translation task correctly",
+            },
+        )
+    )
+    payload = out[0] if isinstance(out, tuple) else out
+    import json as _json
+
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    body = _json.loads(text)
+    assert body["ok"] is True
+    assert body["target_vacant_id_hex"] == bob_meta.vacant_id_hex
+    assert body["dimensions"]["factual"] == 0.8
+    assert body["delivered_locally"] is True
+
+    # REVIEW_ISSUED on alice's in-memory logbook (form.logbook).
+    kinds = [e.kind for e in bundle.form.logbook.entries]
+    assert "REVIEW_ISSUED" in kinds
+    issued = next(e for e in bundle.form.logbook.entries if e.kind == "REVIEW_ISSUED")
+    assert issued.payload["target"] == bob_meta.vacant_id_hex
+    assert issued.payload["dimensions"] == body["dimensions"]
+    assert issued.payload["signature_hex"] == body["signature_hex"]
+
+    # Bob's reviews_received.jsonl gained the signed row.
+    bob_received = tmp_path / "bob" / "reviews_received.jsonl"
+    assert bob_received.exists()
+    rows = bob_received.read_text(encoding="utf-8").strip().splitlines()
+    assert len(rows) == 1
+    row = _json.loads(rows[0])
+    assert row["reviewer"] == bundle.form.identity.hex()
+    assert row["target"] == bob_meta.vacant_id_hex
+    assert row["signature_hex"] == body["signature_hex"]
+
+
+def test_vacant_caller_review_rejects_out_of_range_dimension(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    ls.init_vacant("bob", insecure_demo=True)
+    bob_meta = ls.load_meta("bob")
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+    )
+    out = asyncio.run(
+        mcp.call_tool(
+            "vacant_caller_review",
+            {
+                "target_vacant_id_hex": bob_meta.vacant_id_hex,
+                "factual": 1.5,  # out of [0,1]
+                "logical": 0.5,
+                "relevance": 0.5,
+                "honesty": 0.5,
+                "adoption": 0.5,
+            },
+        )
+    )
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "out of [0.0, 1.0]" in text
+
+
+def test_vacant_caller_review_refuses_self_review(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+        parent_local_name="alice",
+    )
+    out = asyncio.run(
+        mcp.call_tool(
+            "vacant_caller_review",
+            {
+                "target_vacant_id_hex": bundle.form.identity.hex(),
+                "factual": 0.5,
+                "logical": 0.5,
+                "relevance": 0.5,
+                "honesty": 0.5,
+                "adoption": 0.5,
+            },
+        )
+    )
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "self-review is not allowed" in text
+
+
+def test_vacant_caller_review_refuses_ephemeral(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path))
+    ls.init_vacant("alice", insecure_demo=True)
+    bundle = build_serve_app("alice")
+    mcp = build_fastmcp_server(
+        form=bundle.form,
+        signing_key=bundle.signing_key,
+        replay_store=bundle.replay_store,
+    )
+    out = asyncio.run(
+        mcp.call_tool(
+            "vacant_caller_review",
+            {
+                "target_vacant_id_hex": "00" * 32,
+                "factual": 0.5,
+                "logical": 0.5,
+                "relevance": 0.5,
+                "honesty": 0.5,
+                "adoption": 0.5,
+            },
+        )
+    )
+    payload = out[0] if isinstance(out, tuple) else out
+    text = payload[0].text if hasattr(payload[0], "text") else str(payload[0])
+    assert "ephemeral" in text
 
 
 def test_vacant_spawn_refuses_when_no_parent_name(
