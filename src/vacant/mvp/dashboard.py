@@ -329,12 +329,159 @@ def _zh_metric(name: str) -> str:
     }.get(name, name)
 
 
+def _epoch_anchor_summary(epoch: Any) -> dict[str, Any]:
+    """Compact display dict for the 去中心化信任 page.
+
+    Pulls only the anchor-relevant columns; the actual `MerkleEpoch`
+    row has internal fields the operator doesn't need to see at a
+    glance.
+    """
+    return {
+        "epoch_id": getattr(epoch, "epoch_id", None),
+        "tree_size": getattr(epoch, "tree_size", None),
+        "root_hex": getattr(epoch, "root_hash", b"").hex()[:16] + "…",
+        "sealed_at": getattr(epoch, "sealed_at", None),
+        "git_commit_sha": (getattr(epoch, "git_commit_sha", None) or "—")[:12],
+        "git_branch": getattr(epoch, "git_branch", None) or "—",
+        "pushed_at": getattr(epoch, "pushed_at", None) or "—",
+        "ots_pending": "✅" if getattr(epoch, "ots_proof_hash", None) else "—",
+        "ots_upgraded": "✅" if getattr(epoch, "ots_upgraded_at", None) else "—",
+    }
+
+
+def render_decentralized_trust() -> None:
+    """去中心化信任 — transparency-log epochs + witness quorum + OTS state.
+
+    This page surfaces the 6-layer anti-tamper defenses that technical.html
+    promises: each sealed epoch has a Merkle root, an operator signature,
+    optional git-anchor commit SHA, optional OpenTimestamps receipt, and a
+    set of independent N-of-M witness cosignatures from peer registries.
+
+    Without a running registry the page renders an empty-state hint so
+    the demo dashboard doesn't crash when run against pure scenario
+    state.
+    """
+    st.title("去中心化信任 — Decentralized Trust")
+    st.caption("6 層防篡改：簽章 → 序號 → 新鮮度 → Merkle → 異常 → 附加（git/OTS/見證）。")
+
+    db_path = st.text_input(
+        "Registry SQLite 路徑（留空則略過此頁）",
+        value=st.session_state.get("decentral_db", ""),
+        key="decentral_db",
+        help=(
+            "例：var/registry.db。需先以 `RegistryStore` 寫入過事件並執行過 "
+            "`seal_epoch(...)`。本頁不會修改資料，只讀取。"
+        ),
+    )
+    if not db_path:
+        st.info(
+            "尚未指定 registry DB；請先跑情境並指向落地的 sqlite 檔。 "
+            "可用 CLI `vacant registry anchor / witness-cosign / verify-quorum` 操作。"
+        )
+        return
+
+    from pathlib import Path
+
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from sqlmodel import select
+
+    from vacant.registry import (
+        EpochWitness,
+        MerkleEpoch,
+        RegistryStore,
+        WitnessRootSet,
+        verify_witness_quorum,
+    )
+
+    if not Path(db_path).exists():
+        st.error(f"找不到 {db_path}")
+        return
+
+    async def _load() -> tuple[list[MerkleEpoch], dict[int, list[EpochWitness]]]:
+        engine = create_async_engine(f"sqlite+aiosqlite:///{db_path}")
+        store = RegistryStore(engine)
+        try:
+            async with store._sessionmaker() as s:
+                eres = await s.execute(select(MerkleEpoch).order_by(MerkleEpoch.epoch_id))  # type: ignore[arg-type]
+                epochs = list(eres.scalars().all())
+                witnesses: dict[int, list[EpochWitness]] = {}
+                for e in epochs:
+                    wres = await s.execute(
+                        select(EpochWitness).where(EpochWitness.epoch_id == e.epoch_id)
+                    )
+                    witnesses[int(e.epoch_id or 0)] = list(wres.scalars().all())
+            return epochs, witnesses
+        finally:
+            await engine.dispose()
+
+    epochs, witnesses = asyncio.run(_load())
+    if not epochs:
+        st.warning(
+            "此 registry 尚未 seal 過任何 epoch。執行 `await store.seal_epoch(...)` 後再回來。"
+        )
+        return
+
+    st.subheader(f"Sealed epochs（{len(epochs)} 筆）")
+    st.dataframe([_epoch_anchor_summary(e) for e in epochs], hide_index=True, width="stretch")
+
+    st.subheader("見證人 quorum（聯邦化信任）")
+    rootset_hex = st.text_input(
+        "見證人公鑰集合（逗號分隔 hex；N 個候選人）",
+        value=st.session_state.get("decentral_rootset", ""),
+        key="decentral_rootset",
+        help="例：abcd...,1234,...。將會檢查每個 epoch 是否達到 M-of-N 門檻。",
+    )
+    threshold = st.number_input(
+        "Quorum 門檻 M",
+        min_value=1,
+        value=int(st.session_state.get("decentral_thresh", 1)),
+        step=1,
+        key="decentral_thresh",
+    )
+
+    rootset_keys: tuple[bytes, ...] = ()
+    if rootset_hex.strip():
+        try:
+            rootset_keys = tuple(
+                bytes.fromhex(k.strip()) for k in rootset_hex.split(",") if k.strip()
+            )
+        except ValueError as exc:
+            st.error(f"rootset 解析失敗：{exc}")
+            rootset_keys = ()
+
+    rows = []
+    rs: WitnessRootSet | None = None
+    if rootset_keys and len(rootset_keys) >= int(threshold):
+        try:
+            rs = WitnessRootSet(threshold=int(threshold), keys=rootset_keys)
+        except Exception as exc:
+            st.error(f"WitnessRootSet 建立失敗：{exc}")
+            rs = None
+    for e in epochs:
+        ws = witnesses[int(e.epoch_id or 0)]
+        ok = verify_witness_quorum(epoch=e, cosignatures=ws, rootset=rs) if rs is not None else None
+        rows.append(
+            {
+                "epoch_id": e.epoch_id,
+                "見證人 (cosign)": len(ws),
+                "quorum": "✅" if ok else ("❌" if ok is False else "—"),
+            }
+        )
+    st.dataframe(rows, hide_index=True, width="stretch")
+    st.caption(
+        "✅ = M-of-N quorum 達成；❌ = 不足；— = 尚未輸入見證人公鑰集合。 "
+        "OTS upgraded 表示 `.ots` 比特幣錨定已升級。 "
+        "git_commit_sha 是公開可查的透明日誌節點。"
+    )
+
+
 PAGES = {
     "網路": render_network,
     "血緣": render_lineage,
     "情境": render_scenario,
     "指標": render_metrics,
     "對抗": render_adversarial,
+    "去中心化信任": render_decentralized_trust,
 }
 
 

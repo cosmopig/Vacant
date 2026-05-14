@@ -33,6 +33,11 @@ from vacant.registry.errors import (
     SignatureRejected,
     VisibilityViolation,
 )
+from vacant.registry.federated import (
+    FederatedRegistryBackend,
+    QuorumDisagreement,
+    record_hash,
+)
 from vacant.registry.git_anchor import (
     DEFAULT_GIT_BRANCH,
     GitAnchorError,
@@ -105,6 +110,7 @@ __all__ = [
     "EpochWitness",
     "Event",
     "EventFinalization",
+    "FederatedRegistryBackend",
     "Freeze",
     "FreshnessError",
     "GitAnchorError",
@@ -118,6 +124,7 @@ __all__ = [
     "NotFoundError",
     "OTSAnchorError",
     "OTSPendingProof",
+    "QuorumDisagreement",
     "ReadAudit",
     "RegistryBackend",
     "RegistryError",
@@ -159,6 +166,7 @@ __all__ = [
     "ots_proof_digest",
     "publish_halo",
     "rank_by_reputation",
+    "record_hash",
     "revoke_halo",
     "search_capability",
     "serialize_proof_file",

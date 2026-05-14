@@ -210,6 +210,14 @@ L3_VOUCH_ALPHA_BOOST: Final[float] = 0.3
 NETWORK_EXPLORATION_FLOOR: Final[float] = 0.01
 """Minimum fraction of traffic reserved for new vacants. P3 §3.7 line 343."""
 
+ADOPTION_SIGNAL_MIN_WINDOW_S: Final[int] = 86_400
+"""Earliest moment an adoption signal can fire after the source response
+(24h, technical.html Reputation row 5: 24-72h window)."""
+
+ADOPTION_SIGNAL_MAX_WINDOW_S: Final[int] = 259_200
+"""Latest moment an adoption signal can fire after the source response
+(72h, technical.html Reputation row 5)."""
+
 DIMENSION_CORRELATION_ALERT_THRESHOLD: Final[float] = 0.6
 """Cross-dimension correlation alert (anti-Goodhart). P3 §3.6 line 290."""
 

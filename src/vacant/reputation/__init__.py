@@ -1,5 +1,10 @@
 """P3 -- reputation: 5-dim Beta posterior, UCB, STYLO discount, cold start."""
 
+from vacant.reputation.adoption import (
+    AdoptionEvent,
+    AdoptionLedger,
+    AdoptionLedgerError,
+)
 from vacant.reputation.aggregator import (
     Aggregator,
     ReviewRecord,
@@ -59,6 +64,9 @@ from vacant.reputation.ucb import (
 )
 
 __all__ = [
+    "AdoptionEvent",
+    "AdoptionLedger",
+    "AdoptionLedgerError",
     "Aggregator",
     "Beta",
     "Beta5D",

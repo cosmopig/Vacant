@@ -1085,6 +1085,290 @@ def demo_cmd(
     raise SystemExit(demo_main(argv))
 
 
+# -- registry (decentralised trust) -------------------------------------------
+# Surface for the anti-tamper layers added in feat(registry): git anchor,
+# OpenTimestamps, federated witness cosignatures. All subcommands assume a
+# local SQLite registry DB (`--db`) for now — federated reads come later.
+
+
+registry_app = typer.Typer(
+    name="registry",
+    help="Registry transparency-log operations (anchor, witness, OTS).",
+    no_args_is_help=True,
+)
+app.add_typer(registry_app, name="registry")
+
+
+def _open_local_store(db_path: str) -> Any:
+    """Open a `RegistryStore` against `db_path` (file path or `:memory:`).
+
+    Centralised because every registry subcommand needs identical wiring;
+    keeping it inline would invite drift across `anchor` / `witness-cosign`
+    / `ots-upgrade`.
+    """
+    from sqlalchemy.ext.asyncio import create_async_engine
+
+    from vacant.registry import RegistryStore
+
+    url = db_path if "://" in db_path else f"sqlite+aiosqlite:///{db_path}"
+    engine = create_async_engine(url)
+    return engine, RegistryStore(engine)
+
+
+@registry_app.command("anchor")
+def registry_anchor_cmd(
+    epoch_id: int = typer.Argument(..., help="Sealed epoch_id to anchor"),
+    db: str = typer.Option(..., "--db", help="Registry SQLite path"),
+    repo: str = typer.Option(..., "--repo", help="Local transparency-log git repo"),
+    branch: str = typer.Option(
+        "transparency-log", "--branch", help="Branch name in the transparency-log repo"
+    ),
+    remote: str | None = typer.Option(
+        None, "--remote", help="Optional remote URL (`git push origin <branch>`)"
+    ),
+    push: bool = typer.Option(False, "--push", help="Attempt remote push after committing"),
+) -> None:
+    """Anchor a sealed Merkle epoch root to a git transparency log.
+
+    The git repo is created if absent; `epochs/{epoch_id:08d}.json`
+    receives the operator-signed root payload, and `git_commit_sha` is
+    persisted back to the `MerkleEpoch` row.
+    """
+
+    async def _run() -> None:
+        engine, store = _open_local_store(db)
+        try:
+            receipt = await store.anchor_epoch_to_git(
+                epoch_id, repo_path=repo, branch=branch, remote_url=remote, push=push
+            )
+            typer.echo(
+                json.dumps(
+                    {
+                        "epoch_id": receipt.epoch_id,
+                        "commit_sha": receipt.commit_sha,
+                        "branch": receipt.branch,
+                        "remote_url": receipt.remote_url,
+                        "pushed": receipt.pushed,
+                    },
+                    indent=2,
+                )
+            )
+        finally:
+            await engine.dispose()
+
+    asyncio.run(_run())
+
+
+@registry_app.command("witness-statement")
+def registry_witness_statement_cmd(
+    epoch_id: int = typer.Argument(..., help="Sealed epoch_id"),
+    db: str = typer.Option(..., "--db", help="Registry SQLite path"),
+) -> None:
+    """Print the canonical witness statement bytes (hex) for `epoch_id`.
+
+    A witness operator hashes + signs this with their Ed25519 key and
+    returns the cosignature to the registry via `witness-cosign`.
+    """
+
+    async def _run() -> None:
+        engine, store = _open_local_store(db)
+        try:
+            from vacant.registry import build_witness_statement
+
+            epoch = await store.get_merkle_epoch(epoch_id)
+            if epoch is None:
+                typer.echo(f"error: epoch {epoch_id} not found", err=True)
+                raise typer.Exit(code=2)
+            statement = build_witness_statement(epoch)
+            typer.echo(
+                json.dumps(
+                    {
+                        "epoch_id": epoch_id,
+                        "root_hex": epoch.root_hash.hex(),
+                        "statement_hex": statement.hex(),
+                    },
+                    indent=2,
+                )
+            )
+        finally:
+            await engine.dispose()
+
+    asyncio.run(_run())
+
+
+@registry_app.command("witness-cosign")
+def registry_witness_cosign_cmd(
+    epoch_id: int = typer.Argument(..., help="Sealed epoch_id to cosign"),
+    db: str = typer.Option(..., "--db", help="Registry SQLite path"),
+    name: str | None = typer.Option(
+        None, "--name", help="Local vacant whose key acts as the witness"
+    ),
+    witness_id: str = typer.Option(
+        ..., "--witness-id", help="Witness operator label (free-form, recorded on the row)"
+    ),
+) -> None:
+    """Sign + persist a witness cosignature on a sealed epoch.
+
+    Uses the local vacant's Ed25519 key (from `~/.vacant/<name>/`) as
+    the witness key. The cosignature is verified before insert, so
+    `EpochWitness` rows are guaranteed cryptographically valid.
+    """
+
+    async def _run() -> None:
+        from vacant.registry import issue_witness_cosignature
+
+        local_name = _resolve_name(name)
+        form = _residentform_for(local_name)
+        signing_key = ls.load_signing_key(local_name)
+        engine, store = _open_local_store(db)
+        try:
+            epoch = await store.get_merkle_epoch(epoch_id)
+            if epoch is None:
+                typer.echo(f"error: epoch {epoch_id} not found", err=True)
+                raise typer.Exit(code=2)
+            cos = issue_witness_cosignature(
+                epoch=epoch,
+                witness_id=witness_id,
+                witness_signing_key=signing_key,
+                witness_pubkey=form.identity.pubkey_bytes,
+            )
+            row = await store.record_witness_cosignature(epoch_id, cos)
+            typer.echo(
+                json.dumps(
+                    {
+                        "epoch_id": epoch_id,
+                        "witness_id": row.witness_id,
+                        "witness_pubkey_hex": row.witness_pubkey.hex(),
+                        "cosigned_at": row.cosigned_at,
+                    },
+                    indent=2,
+                )
+            )
+        finally:
+            await engine.dispose()
+
+    asyncio.run(_run())
+
+
+@registry_app.command("witnesses")
+def registry_witnesses_cmd(
+    epoch_id: int = typer.Argument(..., help="Sealed epoch_id"),
+    db: str = typer.Option(..., "--db", help="Registry SQLite path"),
+) -> None:
+    """List all witness cosignatures recorded for `epoch_id`."""
+
+    async def _run() -> None:
+        engine, store = _open_local_store(db)
+        try:
+            rows = await store.list_epoch_witnesses(epoch_id)
+            typer.echo(
+                json.dumps(
+                    [
+                        {
+                            "witness_id": r.witness_id,
+                            "witness_pubkey_hex": r.witness_pubkey.hex(),
+                            "cosigned_at": r.cosigned_at,
+                        }
+                        for r in rows
+                    ],
+                    indent=2,
+                )
+            )
+        finally:
+            await engine.dispose()
+
+    asyncio.run(_run())
+
+
+@registry_app.command("verify-quorum")
+def registry_verify_quorum_cmd(
+    epoch_id: int = typer.Argument(..., help="Sealed epoch_id"),
+    db: str = typer.Option(..., "--db", help="Registry SQLite path"),
+    threshold: int = typer.Option(..., "--threshold", help="Required distinct witnesses (M)"),
+    rootset: str = typer.Option(
+        ...,
+        "--rootset",
+        help="Comma-separated hex witness pubkeys (the N candidates)",
+    ),
+) -> None:
+    """Verify a quorum of witness cosignatures over an epoch root.
+
+    Exits 0 iff ≥ `threshold` distinct valid signatures from the
+    `rootset` are present on the epoch. This is the verifier surface a
+    third-party auditor would call.
+    """
+
+    async def _run() -> None:
+        from vacant.registry import WitnessRootSet, verify_witness_quorum
+
+        engine, store = _open_local_store(db)
+        try:
+            epoch = await store.get_merkle_epoch(epoch_id)
+            if epoch is None:
+                typer.echo(f"error: epoch {epoch_id} not found", err=True)
+                raise typer.Exit(code=2)
+            keys = tuple(bytes.fromhex(k.strip()) for k in rootset.split(",") if k.strip())
+            rs = WitnessRootSet(threshold=threshold, keys=keys)
+            rows = await store.list_epoch_witnesses(epoch_id)
+            ok = verify_witness_quorum(epoch=epoch, cosignatures=rows, rootset=rs)
+            typer.echo(
+                json.dumps(
+                    {
+                        "epoch_id": epoch_id,
+                        "threshold": threshold,
+                        "rootset_size": len(keys),
+                        "witnesses_present": len(rows),
+                        "quorum_satisfied": ok,
+                    },
+                    indent=2,
+                )
+            )
+            if not ok:
+                raise typer.Exit(code=1)
+        finally:
+            await engine.dispose()
+
+    asyncio.run(_run())
+
+
+@registry_app.command("ots-upgrade")
+def registry_ots_upgrade_cmd(
+    epoch_id: int = typer.Argument(..., help="Sealed epoch_id with a pending OTS receipt"),
+    db: str = typer.Option(..., "--db", help="Registry SQLite path"),
+    proof_path: str = typer.Option(
+        ..., "--proof", help="Path to a real `.ots` proof file produced by `ots stamp`"
+    ),
+) -> None:
+    """Replace a pending OTS receipt with a real `.ots` proof.
+
+    Operators run `ots stamp <root>` (or `ots upgrade <pending>.ots`)
+    out-of-band, then pipe the resulting file in. The store records the
+    real proof's BLAKE2b digest and stamps `ots_upgraded_at`.
+    """
+
+    async def _run() -> None:
+        from pathlib import Path
+
+        engine, store = _open_local_store(db)
+        try:
+            data = Path(proof_path).read_bytes()
+            digest, upgraded_at = await store.record_ots_upgrade(epoch_id, upgraded_bytes=data)
+            typer.echo(
+                json.dumps(
+                    {
+                        "epoch_id": epoch_id,
+                        "ots_proof_hash_hex": digest.hex(),
+                        "ots_upgraded_at": upgraded_at,
+                    },
+                    indent=2,
+                )
+            )
+        finally:
+            await engine.dispose()
+
+    asyncio.run(_run())
+
+
 def main() -> None:
     """Console-script entrypoint declared in `pyproject.toml`."""
     app()

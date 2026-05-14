@@ -32,6 +32,7 @@ from vacant.core.constants import (
 )
 from vacant.core.crypto import SigningKey
 from vacant.core.types import Logbook, VacantId, VacantState
+from vacant.reputation.adoption import AdoptionEvent, AdoptionLedger
 from vacant.reputation.cold_start import birth_path_bonus  # noqa: F401  re-export
 from vacant.reputation.discount import apply_discount_5d
 from vacant.reputation.errors import (
@@ -149,6 +150,11 @@ class Aggregator:
             if review_limit_per_target_24h is not None
             else REVIEW_LIMIT_PER_TARGET_24H
         )
+        # Adoption ledger: downstream vacants attesting they used a source
+        # vacant's response. Drives the `adoption` posterior dimension
+        # (technical.html §Reputation row 5). Indexed in-memory; persistence
+        # is the registry's job (post-MVP).
+        self._adoption_ledger = AdoptionLedger()
         self._lock = asyncio.Lock()
 
     # --- public registry-side API ------------------------------------------
@@ -344,6 +350,60 @@ class Aggregator:
                 w = composed * cred
                 rep = rep.update_dim(d, signal=float(s), weight=w, now_ts=when)
             self._posteriors[key] = rep
+
+    # --- adoption signal (technical.html §Reputation row 5) --------------
+
+    async def record_adoption(
+        self,
+        event: AdoptionEvent,
+        *,
+        same_signals: Sequence[SameDetectSignal] = (),
+    ) -> None:
+        """Record a downstream → source adoption signal.
+
+        Validation:
+        - `event.source_vid` and `event.downstream_vid` must both be in
+          `_contexts` (we only score vacants we know about).
+        - The ledger enforces 24-72h window + dedup + self-adoption
+          rejection (`AdoptionLedger.attest`); any failure surfaces as
+          `AdoptionLedgerError`.
+
+        Effect: the source vacant's `adoption` Beta posterior on
+        `event.substrate` is updated with signal=1.0 (adoption is binary
+        — they used it or they didn't) at weight
+        `SOURCE_BASE_WEIGHTS["adoption_event"] * sig_discount`, where
+        `sig_discount` reflects `same_*` collusion detection on the
+        downstream → source pair (so a Sybil-suspect downstream
+        contributes less than an independent one).
+        """
+        if event.source_vid not in self._contexts:
+            raise InvalidSignalError(f"unknown adoption source {event.source_vid}")
+        if event.downstream_vid not in self._contexts:
+            raise InvalidSignalError(f"unknown adoption downstream {event.downstream_vid}")
+
+        async with self._lock:
+            # Window + dedup + self-adoption. Raises AdoptionLedgerError;
+            # we let it propagate so the caller knows the signal was rejected.
+            self._adoption_ledger.attest(event)
+
+            base_weight = SOURCE_BASE_WEIGHTS["adoption_event"]
+            sig_discount = discount_from_signals(same_signals)
+            composed = base_weight * sig_discount
+
+            key = (event.source_vid, event.substrate)
+            rep = self._posteriors.get(key) or five_d_with_priors(now_ts=event.adoption_ts)
+            rep = rep.update_dim("adoption", signal=1.0, weight=composed, now_ts=event.adoption_ts)
+            self._posteriors[key] = rep
+
+    def adoption_count(self, source_vid: VacantId, *, substrate: str | None = None) -> int:
+        """How many distinct downstream vacants have adopted this source.
+
+        Read surface for dashboards / metrics that want to display the
+        "N vacants are building on this" signal without going through
+        the full posterior. The dedup is by downstream identity, so the
+        return value is the size of the unique-downstream set.
+        """
+        return len(self._adoption_ledger.distinct_downstreams(source_vid, substrate=substrate))
 
     # --- ReputationOracle protocol (P4 plug-in) ---------------------------
 
