@@ -127,6 +127,27 @@ class GrowLoop:
     stats: GrowStats = field(default_factory=GrowStats)
     _stop: asyncio.Event = field(default_factory=asyncio.Event)
     _tick_index: int = 0
+    # Per-pair outbound chain tracker. Each `(self → peer)` envelope must
+    # use a strictly-increasing `sequence_no` and prev_envelope_hash —
+    # the recipient's replay store rejects re-use of seq=1 across ticks.
+    # We track our outbound state per loop instance so each tick advances
+    # the chain correctly. Initialised lazily via `field(default_factory)`
+    # because dataclass field defaults can't be mutable.
+    _outbound_replay: Any = None
+
+    def _ensure_outbound_replay(self) -> Any:
+        """Lazily build the outbound replay store on first use.
+
+        Dataclass field defaults can't safely be a fresh `InMemoryReplayStore()`
+        instance (Python would share one between every loop), so we create
+        it on demand here. Idempotent — every subsequent call returns the
+        same store.
+        """
+        if self._outbound_replay is None:
+            from vacant.protocol.replay_protect import InMemoryReplayStore
+
+            self._outbound_replay = InMemoryReplayStore()
+        return self._outbound_replay
 
     async def tick(self) -> None:
         """One pass of the loop.
@@ -178,6 +199,7 @@ class GrowLoop:
             self_signing_key=self.self_signing_key,
             home=self.home,
             http_post=self.http_post,
+            outbound_replay_store=self._ensure_outbound_replay(),
         )
         if result.skipped_reason:
             self.stats.peer_reviews_skipped += 1
@@ -223,7 +245,12 @@ class GrowLoop:
 
     async def _send_probe_text(self, peer_meta: ls.LocalMeta, prompt_text: str) -> str | None:
         """Send `prompt_text` as an A2A `message/send` and return the
-        responder's concatenated text parts, or None on failure."""
+        responder's concatenated text parts, or None on failure.
+
+        Uses the same outbound chain tracker as peer-review so a
+        redteam probe doesn't collide with a regular peer-review probe
+        on the same `(self → peer)` pair.
+        """
         from datetime import UTC, datetime
 
         from vacant.core.types import EMPTY_PREV_HASH, VacantId
@@ -233,16 +260,21 @@ class GrowLoop:
             VacantEnvelope,
             to_a2a_jsonrpc,
         )
+        from vacant.protocol.replay_protect import PairKey
 
         if not peer_meta.endpoint:
             return None
         peer_vid = VacantId(pubkey_bytes=bytes.fromhex(peer_meta.vacant_id_hex))
+        store = self._ensure_outbound_replay()
+        cur = await store.get(PairKey(from_vid=self.self_form.identity, to_vid=peer_vid))
+        next_seq = cur.last_sequence_no + 1
+        prev_hash = cur.chain_tip if cur.last_sequence_no > 0 else EMPTY_PREV_HASH
         env = VacantEnvelope(
             from_vacant_id=self.self_form.identity,
             to_vacant_id=peer_vid,
-            sequence_no=1,
+            sequence_no=next_seq,
             timestamp=datetime.now(UTC),
-            prev_envelope_hash=EMPTY_PREV_HASH,
+            prev_envelope_hash=prev_hash,
             payload=A2AMessage(role="ROLE_USER", parts=[A2APart(text=prompt_text)]),
             idempotency_key=f"redteam-probe-{int(datetime.now(UTC).timestamp() * 1000)}",
         ).signed(self.self_signing_key)
@@ -256,6 +288,9 @@ class GrowLoop:
             return None
         if status != 200:
             return None
+        # Only advance the chain on a successful 200 so failed attempts
+        # don't burn sequence numbers (which would desync the receiver).
+        await store.check_and_advance(env)
         try:
             parts = body["result"]["message"]["parts"]
             return "".join(p.get("text", "") for p in parts if p.get("type") == "text")

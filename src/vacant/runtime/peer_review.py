@@ -221,6 +221,7 @@ async def peer_review_tick(
     home: Path | None = None,
     review_count_max: int = 5,
     http_post: Any | None = None,
+    outbound_replay_store: Any | None = None,
 ) -> PeerReviewTickResult:
     """One peer-review pass. Pure-data-in / persisted-effects-out.
 
@@ -229,6 +230,16 @@ async def peer_review_tick(
       ``http_post`` (injectable for tests; defaults to ``httpx.AsyncClient.post``).
     - Signed review record appended to
       ``~/.vacant/<peer>/reviews_received.jsonl``.
+
+    `outbound_replay_store` (Pfix9): when provided, the function looks up
+    the current per-pair (self → peer) chain state, uses it as the
+    envelope's `sequence_no` + `prev_envelope_hash`, and advances the
+    store on successful delivery. Without it (legacy callers), the tick
+    sends `seq=1, prev=EMPTY_PREV_HASH` every time — fine for one-shot
+    tests, broken for repeated peer-review loops because the
+    *recipient's* replay store rejects the second envelope with the
+    same seq. `GrowLoop` always passes a store; tests can pass one too
+    when they assert multi-tick behavior.
 
     Returns a ``PeerReviewTickResult`` describing what happened so
     callers can log / aggregate. ``error`` is non-None when the
@@ -251,12 +262,26 @@ async def peer_review_tick(
     peer_name, peer_meta = chosen
     peer_vid = VacantId(pubkey_bytes=bytes.fromhex(peer_meta.vacant_id_hex))
 
+    # Per-pair chain state. The replay store tracks `(self → peer)` so
+    # repeated probes advance the chain instead of all using seq=1.
+    if outbound_replay_store is not None:
+        from vacant.protocol.replay_protect import PairKey
+
+        cur = await outbound_replay_store.get(
+            PairKey(from_vid=self_form.identity, to_vid=peer_vid)
+        )
+        next_seq = cur.last_sequence_no + 1
+        prev_hash = cur.chain_tip if cur.last_sequence_no > 0 else EMPTY_PREV_HASH
+    else:
+        next_seq = 1
+        prev_hash = EMPTY_PREV_HASH
+
     probe_env = VacantEnvelope(
         from_vacant_id=self_form.identity,
         to_vacant_id=peer_vid,
-        sequence_no=1,
+        sequence_no=next_seq,
         timestamp=datetime.now(UTC),
-        prev_envelope_hash=EMPTY_PREV_HASH,
+        prev_envelope_hash=prev_hash,
         payload=A2AMessage(role="ROLE_USER", parts=[A2APart(text=PROBE_PROMPT)]),
         idempotency_key=f"peer-review-probe-{int(datetime.now(UTC).timestamp() * 1000)}",
     ).signed(self_signing_key)
@@ -327,6 +352,12 @@ async def peer_review_tick(
     peer_dir = home / peer_name
     with (peer_dir / "reviews_received.jsonl").open("a", encoding="utf-8") as f:
         f.write(json.dumps(signed_record, sort_keys=True) + "\n")
+
+    # Advance the outbound chain so the next tick uses seq+1 / prev=this.hash.
+    # Doing it AFTER persisting the review keeps the chain state monotonic
+    # with the on-disk evidence — a partial failure leaves both untouched.
+    if outbound_replay_store is not None:
+        await outbound_replay_store.check_and_advance(probe_env)
 
     return PeerReviewTickResult(
         reviewer_vacant_id_hex=self_hex,

@@ -269,6 +269,152 @@ async def test_redteam_skips_when_no_peer(_vacant_home: Path) -> None:
 # --- stats shape ------------------------------------------------------------
 
 
+# --- Phase 1: multi-tick chain (Bug A regression) ---------------------------
+
+
+@pytest.mark.asyncio
+async def test_multiple_ticks_each_increment_envelope_seq(_vacant_home: Path) -> None:
+    """Regression for Pfix9 Bug A: a GrowLoop with the outbound replay
+    store hooked up must send `seq=1, 2, 3, …` across consecutive ticks,
+    so the recipient's replay store accepts every envelope.
+
+    Without the fix every tick re-uses `seq=1` and the second one would
+    be rejected. We capture the sequence numbers and assert they're
+    strictly monotonic.
+    """
+    from datetime import UTC, datetime
+
+    from vacant.core.types import EMPTY_PREV_HASH
+    from vacant.protocol.envelope import (
+        A2AMessage,
+        A2APart,
+        VacantEnvelope,
+        from_a2a_jsonrpc,
+        to_a2a_jsonrpc,
+    )
+
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    bob_meta = ls.load_meta("bob")
+    bob_meta.endpoint = "http://127.0.0.1:9999"
+    ls.save_meta("bob", bob_meta)
+    bob_vid = VacantId(pubkey_bytes=bytes.fromhex(bob_meta.vacant_id_hex))
+    bob_sk = ls.load_signing_key("bob")
+    alice_meta = ls.load_meta("alice")
+    alice_vid = VacantId(pubkey_bytes=bytes.fromhex(alice_meta.vacant_id_hex))
+    alice_sk = ls.load_signing_key("alice")
+
+    captured_seqs: list[int] = []
+
+    async def _fake_post(url: str, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        # Capture the inbound seq from the metadata so we can assert
+        # monotonicity AND construct a properly-signed response.
+        env = from_a2a_jsonrpc(body)
+        captured_seqs.append(env.sequence_no)
+        # Build a real response envelope from bob.
+        response_env = VacantEnvelope(
+            from_vacant_id=bob_vid,
+            to_vacant_id=alice_vid,
+            sequence_no=env.sequence_no,
+            timestamp=datetime.now(UTC),
+            prev_envelope_hash=EMPTY_PREV_HASH,
+            payload=A2AMessage(
+                role="ROLE_AGENT",
+                parts=[A2APart(text="echo back: " + env.payload.parts[0].text)],
+            ),
+            idempotency_key=f"rsp-{env.sequence_no}",
+        ).signed(bob_sk)
+        wire = to_a2a_jsonrpc(response_env)
+        return 200, {
+            "jsonrpc": "2.0",
+            "id": "rsp",
+            "result": {"message": wire["params"]["message"]},
+        }
+
+    loop = GrowLoop(
+        self_form=_make_form(alice_vid),
+        self_signing_key=alice_sk,
+        redteam_every_n_ticks=0,
+        heartbeat_every_n_ticks=0,
+        http_post=_fake_post,
+    )
+    for _ in range(5):
+        await loop.tick()
+    # 5 ticks all delivered, sequence numbers strictly 1..5.
+    assert captured_seqs == [1, 2, 3, 4, 5]
+    assert loop.stats.peer_reviews_sent == 5
+    assert loop.stats.peer_reviews_failed == 0
+
+
+@pytest.mark.asyncio
+async def test_redteam_shares_chain_with_peer_review(_vacant_home: Path) -> None:
+    """A redteam probe and a peer-review probe on the same `(self →
+    peer)` pair must share the outbound chain — otherwise the redteam
+    probe re-uses an already-spent seq and the recipient rejects it."""
+    from datetime import UTC, datetime
+
+    from vacant.core.types import EMPTY_PREV_HASH
+    from vacant.protocol.envelope import (
+        A2AMessage,
+        A2APart,
+        VacantEnvelope,
+        from_a2a_jsonrpc,
+        to_a2a_jsonrpc,
+    )
+
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    bob_meta = ls.load_meta("bob")
+    bob_meta.endpoint = "http://127.0.0.1:9999"
+    ls.save_meta("bob", bob_meta)
+    bob_vid = VacantId(pubkey_bytes=bytes.fromhex(bob_meta.vacant_id_hex))
+    bob_sk = ls.load_signing_key("bob")
+    alice_meta = ls.load_meta("alice")
+    alice_vid = VacantId(pubkey_bytes=bytes.fromhex(alice_meta.vacant_id_hex))
+    alice_sk = ls.load_signing_key("alice")
+
+    captured: list[tuple[int, str]] = []
+
+    async def _refusal_post(
+        url: str, body: dict[str, Any]
+    ) -> tuple[int, dict[str, Any]]:
+        env = from_a2a_jsonrpc(body)
+        captured.append((env.sequence_no, env.payload.parts[0].text))
+        response_env = VacantEnvelope(
+            from_vacant_id=bob_vid,
+            to_vacant_id=alice_vid,
+            sequence_no=env.sequence_no,
+            timestamp=datetime.now(UTC),
+            prev_envelope_hash=EMPTY_PREV_HASH,
+            payload=A2AMessage(
+                role="ROLE_AGENT",
+                parts=[A2APart(text="I can't help with that.")],
+            ),
+            idempotency_key=f"rsp-{env.sequence_no}",
+        ).signed(bob_sk)
+        wire = to_a2a_jsonrpc(response_env)
+        return 200, {
+            "jsonrpc": "2.0",
+            "id": "rsp",
+            "result": {"message": wire["params"]["message"]},
+        }
+
+    # Alternating: peer review (tick 1), redteam (tick 2), peer review (3), …
+    loop = GrowLoop(
+        self_form=_make_form(alice_vid),
+        self_signing_key=alice_sk,
+        redteam_every_n_ticks=2,
+        heartbeat_every_n_ticks=0,
+        http_post=_refusal_post,
+    )
+    for _ in range(4):
+        await loop.tick()
+    # 4 envelopes total, all seq=1..4, both redteam + peer mixed.
+    seqs = [c[0] for c in captured]
+    assert seqs == [1, 2, 3, 4]
+    assert loop.stats.peer_reviews_sent + loop.stats.redteam_probes_sent == 4
+
+
 def test_grow_stats_as_dict_is_json_serialisable() -> None:
     """The `/grow/stats` HTTP endpoint returns this dict; make sure it
     round-trips through json without surprises."""
