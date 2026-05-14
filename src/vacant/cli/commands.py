@@ -642,6 +642,15 @@ def serve_cmd(
         "--tls-key",
         help="PEM-encoded TLS private key. Must be set together with --tls-cert.",
     ),
+    substrate: str | None = typer.Option(
+        None,
+        "--substrate",
+        help=(
+            "LLM substrate this vacant uses to answer inbound A2A calls. "
+            "mock | deterministic | anthropic | openai | ollama | gemini | mistral. "
+            "Default: pure echo (no LLM)."
+        ),
+    ),
 ) -> None:
     """Start an HTTP A2A server for the local vacant. (P6)
 
@@ -671,6 +680,7 @@ def serve_cmd(
     import uvicorn
 
     from vacant.cli.server import build_serve_app
+    from vacant.cli.substrate_behavior import resolve_substrate, substrate_behavior
 
     if public and host == "127.0.0.1":
         host = "0.0.0.0"  # noqa: S104 — explicit operator opt-in via --public
@@ -681,7 +691,16 @@ def serve_cmd(
         )
         raise typer.Exit(code=2)
     n = _resolve_name(name)
-    bundle = build_serve_app(n, endpoint=endpoint)
+    behavior = None
+    if substrate is not None:
+        backend = resolve_substrate(substrate)
+        try:
+            meta_for_prompt = ls.load_meta(n)
+            sysprompt = meta_for_prompt.capability_text or "You are a helpful vacant."
+        except ls.LocalVacantNotFound:
+            sysprompt = "You are a helpful vacant."
+        behavior = substrate_behavior(backend, system_prompt=sysprompt)
+    bundle = build_serve_app(n, behavior=behavior, endpoint=endpoint)
 
     if mcp:
         # Lazy import — only paid for when --mcp is set.
@@ -767,6 +786,24 @@ def grow_cmd(
         "--heartbeat-every-n",
         help="Append a heartbeat to our logbook every Nth tick (0 = never).",
     ),
+    substrate: str | None = typer.Option(
+        None,
+        "--substrate",
+        help=(
+            "LLM substrate this vacant uses to ANSWER incoming probes. "
+            "mock | deterministic | anthropic | openai | ollama | gemini | mistral. "
+            "Default: pure echo (no LLM). Real substrates need an API key."
+        ),
+    ),
+    scorer_substrate: str | None = typer.Option(
+        None,
+        "--scorer-substrate",
+        help=(
+            "LLM substrate this vacant uses to SCORE peers (5D). "
+            "Same value space as --substrate. Default: length-based heuristic. "
+            "Recommended different from --substrate for cross-model diversity."
+        ),
+    ),
 ) -> None:
     """Serve A2A *and* run the local-network grow loop.
 
@@ -789,10 +826,25 @@ def grow_cmd(
     import uvicorn
 
     from vacant.cli.server import build_serve_app
+    from vacant.cli.substrate_behavior import (
+        build_scorer_from_name,
+        resolve_substrate,
+        substrate_behavior,
+    )
     from vacant.runtime.grow import GrowLoop, make_grow_lifespan
 
     n = _resolve_name(name)
-    bundle = build_serve_app(n, endpoint=endpoint)
+    behavior = None
+    if substrate is not None:
+        backend = resolve_substrate(substrate)
+        # System prompt comes from meta if available; otherwise a default.
+        try:
+            meta_for_prompt = ls.load_meta(n)
+            sysprompt = meta_for_prompt.capability_text or "You are a helpful vacant."
+        except ls.LocalVacantNotFound:
+            sysprompt = "You are a helpful vacant."
+        behavior = substrate_behavior(backend, system_prompt=sysprompt)
+    bundle = build_serve_app(n, behavior=behavior, endpoint=endpoint)
     advertised = endpoint or f"http://{host}:{port}"
     try:
         meta = ls.load_meta(n)
@@ -802,12 +854,15 @@ def grow_cmd(
     except ls.LocalVacantNotFound:  # pragma: no cover
         pass
 
+    scorer = build_scorer_from_name(scorer_substrate)
+
     loop = GrowLoop(
         self_form=bundle.form,
         self_signing_key=bundle.signing_key,
         peer_review_period_s=peer_review_period_s,
         redteam_every_n_ticks=redteam_every_n,
         heartbeat_every_n_ticks=heartbeat_every_n,
+        scorer=scorer,
     )
     bundle.app.router.lifespan_context = make_grow_lifespan(loop)
 
@@ -827,6 +882,8 @@ def grow_cmd(
                     "peer_review_period_s": peer_review_period_s,
                     "redteam_every_n": redteam_every_n,
                     "heartbeat_every_n": heartbeat_every_n,
+                    "substrate": substrate or "echo",
+                    "scorer_substrate": scorer_substrate or "heuristic",
                 },
             },
             sort_keys=True,

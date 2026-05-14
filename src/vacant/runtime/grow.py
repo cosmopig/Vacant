@@ -123,6 +123,12 @@ class GrowLoop:
     redteam_every_n_ticks: int = 4
     heartbeat_every_n_ticks: int = 2
     http_post: Callable[[str, dict[str, Any]], Awaitable[tuple[int, dict[str, Any]]]] | None = None
+    # When set, peer-review ticks use this scorer for 5D scoring instead
+    # of the heuristic. Production loops with a real LLM substrate pass
+    # an `LLMScorer(backend=anthropic_or_openai_or_ollama)`. Mock /
+    # deterministic substrates also work and are what unit tests use to
+    # exercise the substrate path without an API key.
+    scorer: Any | None = None
 
     stats: GrowStats = field(default_factory=GrowStats)
     _stop: asyncio.Event = field(default_factory=asyncio.Event)
@@ -200,6 +206,7 @@ class GrowLoop:
             home=self.home,
             http_post=self.http_post,
             outbound_replay_store=self._ensure_outbound_replay(),
+            scorer=self.scorer,
         )
         if result.skipped_reason:
             self.stats.peer_reviews_skipped += 1

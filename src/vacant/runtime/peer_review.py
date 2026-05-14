@@ -222,6 +222,7 @@ async def peer_review_tick(
     review_count_max: int = 5,
     http_post: Any | None = None,
     outbound_replay_store: Any | None = None,
+    scorer: Any | None = None,
 ) -> PeerReviewTickResult:
     """One peer-review pass. Pure-data-in / persisted-effects-out.
 
@@ -267,9 +268,7 @@ async def peer_review_tick(
     if outbound_replay_store is not None:
         from vacant.protocol.replay_protect import PairKey
 
-        cur = await outbound_replay_store.get(
-            PairKey(from_vid=self_form.identity, to_vid=peer_vid)
-        )
+        cur = await outbound_replay_store.get(PairKey(from_vid=self_form.identity, to_vid=peer_vid))
         next_seq = cur.last_sequence_no + 1
         prev_hash = cur.chain_tip if cur.last_sequence_no > 0 else EMPTY_PREV_HASH
     else:
@@ -336,15 +335,30 @@ async def peer_review_tick(
         )
 
     response_text = " ".join(p.text for p in response_env.payload.parts)
-    dimensions = score_response_heuristic(response_text, request_text=PROBE_PROMPT)
+    if scorer is not None:
+        # `scorer` is an `LLMScorer` (or any object with `.score(request_text=,
+        # response_text=) -> dict[str, float]` + `.substrate_tag` property).
+        # Falling back to heuristic on exception keeps the loop alive.
+        try:
+            dimensions = await scorer.score(request_text=PROBE_PROMPT, response_text=response_text)
+            substrate_label = scorer.substrate_tag
+            claim = "idle peer-review probe; LLM 5D scorer"
+        except Exception:
+            dimensions = score_response_heuristic(response_text, request_text=PROBE_PROMPT)
+            substrate_label = "peer-review:heuristic-fallback"
+            claim = "idle peer-review probe; LLM scorer failed, heuristic fallback"
+    else:
+        dimensions = score_response_heuristic(response_text, request_text=PROBE_PROMPT)
+        substrate_label = "peer-review:heuristic"
+        claim = "idle peer-review probe; heuristic scorer"
     issued_at_iso = datetime.now(UTC).isoformat()
     signed_record = _sign_review_record(
         reviewer=self_form.identity,
         target=peer_vid,
         dimensions=dimensions,
-        substrate="peer-review:heuristic",
+        substrate=substrate_label,
         call_envelope_id_hex=probe_id_hex,
-        claim="idle peer-review probe; heuristic scorer",
+        claim=claim,
         issued_at_iso=issued_at_iso,
         signing_key=self_signing_key,
     )

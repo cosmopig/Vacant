@@ -375,9 +375,7 @@ async def test_redteam_shares_chain_with_peer_review(_vacant_home: Path) -> None
 
     captured: list[tuple[int, str]] = []
 
-    async def _refusal_post(
-        url: str, body: dict[str, Any]
-    ) -> tuple[int, dict[str, Any]]:
+    async def _refusal_post(url: str, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
         env = from_a2a_jsonrpc(body)
         captured.append((env.sequence_no, env.payload.parts[0].text))
         response_env = VacantEnvelope(
