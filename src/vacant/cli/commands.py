@@ -20,6 +20,7 @@ import json
 import os
 import sys
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import typer
@@ -622,6 +623,25 @@ def serve_cmd(
         "--endpoint",
         help="Public endpoint URL to advertise in /card (defaults to meta.endpoint).",
     ),
+    public: bool = typer.Option(
+        False,
+        "--public",
+        help=(
+            "Bind 0.0.0.0 instead of 127.0.0.1 so external machines can "
+            "reach this vacant. Implies you've thought about firewall + "
+            "TLS (use --tls-cert/--tls-key or a reverse proxy like Caddy)."
+        ),
+    ),
+    tls_cert: Path | None = typer.Option(  # noqa: B008 — Typer-required pattern
+        None,
+        "--tls-cert",
+        help="PEM-encoded TLS certificate. When set, uvicorn serves HTTPS.",
+    ),
+    tls_key: Path | None = typer.Option(  # noqa: B008 — Typer-required pattern
+        None,
+        "--tls-key",
+        help="PEM-encoded TLS private key. Must be set together with --tls-cert.",
+    ),
 ) -> None:
     """Start an HTTP A2A server for the local vacant. (P6)
 
@@ -633,11 +653,33 @@ def serve_cmd(
     `--mcp` additionally launches an MCP stdio server in a worker
     thread. This is what closes the "嫁接到客戶端" thesis claim: the
     same vacant accepts both A2A HTTP and MCP stdio simultaneously.
+
+    `--public` flips the bind host from 127.0.0.1 to 0.0.0.0 so machines
+    on your LAN (or the public internet, if you've configured port
+    forwarding / Cloudflare Tunnel / Tailscale / etc.) can reach this
+    vacant. By default `vacant serve` only listens on loopback — this
+    flag is an explicit acknowledgement that you've thought about how
+    callers reach you and whether you need TLS.
+
+    `--tls-cert` + `--tls-key` pin a PEM cert + key pair so uvicorn
+    serves HTTPS directly. Useful for Tailscale-internal hostnames
+    where Tailscale already issues the cert. For public domains the
+    saner pattern is to terminate TLS in Caddy / nginx / Cloudflare
+    and leave this vacant on plain HTTP behind it — see
+    `docs/DEPLOY_PUBLIC.md`.
     """
     import uvicorn
 
     from vacant.cli.server import build_serve_app
 
+    if public and host == "127.0.0.1":
+        host = "0.0.0.0"  # noqa: S104 — explicit operator opt-in via --public
+    if (tls_cert is None) != (tls_key is None):
+        typer.echo(
+            "error: --tls-cert and --tls-key must be set together",
+            err=True,
+        )
+        raise typer.Exit(code=2)
     n = _resolve_name(name)
     bundle = build_serve_app(n, endpoint=endpoint)
 
@@ -682,6 +724,110 @@ def serve_cmd(
                 "port": port,
                 "endpoint": advertised,
                 "mcp": mcp,
+                "tls": tls_cert is not None,
+                "public": public,
+            },
+            sort_keys=True,
+        )
+    )
+    uvicorn_kwargs: dict[str, Any] = {
+        "host": host,
+        "port": port,
+        "log_level": "warning",
+    }
+    if tls_cert is not None and tls_key is not None:
+        uvicorn_kwargs["ssl_certfile"] = str(tls_cert)
+        uvicorn_kwargs["ssl_keyfile"] = str(tls_key)
+    uvicorn.run(bundle.app, **uvicorn_kwargs)
+
+
+# -- grow (serve + background peer-review / redteam / heartbeat loop) -------
+
+
+@app.command("grow")
+def grow_cmd(
+    port: int = typer.Option(8443, "--port", "-p", help="HTTP bind port."),
+    host: str = typer.Option("127.0.0.1", "--host", help="HTTP bind host."),
+    name: str | None = typer.Option(None, "--name", help="Local vacant name."),
+    endpoint: str | None = typer.Option(
+        None, "--endpoint", help="Public endpoint URL to advertise."
+    ),
+    peer_review_period_s: float = typer.Option(
+        30.0,
+        "--peer-review-period",
+        help="Seconds between peer-review ticks.",
+    ),
+    redteam_every_n: int = typer.Option(
+        4,
+        "--redteam-every-n",
+        help="Inject a red-team probe every Nth tick (0 = never).",
+    ),
+    heartbeat_every_n: int = typer.Option(
+        2,
+        "--heartbeat-every-n",
+        help="Append a heartbeat to our logbook every Nth tick (0 = never).",
+    ),
+) -> None:
+    """Serve A2A *and* run the local-network grow loop.
+
+    Identical to `vacant serve` plus a background async task that
+    periodically peer-reviews siblings under the same `VACANT_HOME`,
+    injects red-team probes, and appends heartbeats to our own
+    logbook. Multiple `vacant grow` processes on the same machine
+    form a fully signed local vacant network — no central arbiter.
+
+    Quick start (one terminal per vacant):
+
+      vacant init alice
+      vacant init bob
+      vacant init carol
+      vacant grow --name alice --port 8443 &
+      vacant grow --name bob   --port 8444 &
+      vacant grow --name carol --port 8445 &
+      # then watch ~/.vacant/<name>/reviews_received.jsonl files fill up
+    """
+    import uvicorn
+
+    from vacant.cli.server import build_serve_app
+    from vacant.runtime.grow import GrowLoop, make_grow_lifespan
+
+    n = _resolve_name(name)
+    bundle = build_serve_app(n, endpoint=endpoint)
+    advertised = endpoint or f"http://{host}:{port}"
+    try:
+        meta = ls.load_meta(n)
+        if meta.endpoint != advertised:
+            meta.endpoint = advertised
+            ls.save_meta(n, meta)
+    except ls.LocalVacantNotFound:  # pragma: no cover
+        pass
+
+    loop = GrowLoop(
+        self_form=bundle.form,
+        self_signing_key=bundle.signing_key,
+        peer_review_period_s=peer_review_period_s,
+        redteam_every_n_ticks=redteam_every_n,
+        heartbeat_every_n_ticks=heartbeat_every_n,
+    )
+    bundle.app.router.lifespan_context = make_grow_lifespan(loop)
+
+    @bundle.app.get("/grow/stats")
+    async def _grow_stats() -> dict[str, Any]:
+        return loop.stats.as_dict()
+
+    typer.echo(
+        json.dumps(
+            {
+                "name": n,
+                "vacant_id": bundle.form.identity.hex(),
+                "host": host,
+                "port": port,
+                "endpoint": advertised,
+                "grow": {
+                    "peer_review_period_s": peer_review_period_s,
+                    "redteam_every_n": redteam_every_n,
+                    "heartbeat_every_n": heartbeat_every_n,
+                },
             },
             sort_keys=True,
         )
@@ -1329,6 +1475,143 @@ def registry_verify_quorum_cmd(
             await engine.dispose()
 
     asyncio.run(_run())
+
+
+# -- peer (remote vacant network membership) ---------------------------------
+
+
+peer_app = typer.Typer(
+    name="peer",
+    help="Manage remote vacant network peers (add / list / remove / gossip).",
+    no_args_is_help=True,
+)
+app.add_typer(peer_app, name="peer")
+
+
+@peer_app.command("add")
+def peer_add_cmd(
+    label: str = typer.Argument(..., help="Unique label for this peer."),
+    endpoint: str = typer.Argument(..., help="HTTP(S) base URL of the peer's A2A server."),
+) -> None:
+    """Remember a remote vacant network peer locally.
+
+    The peer can be unreachable at add time — we only record the URL.
+    `vacant peer gossip` is what actually contacts it.
+    """
+    from vacant.cli.peer_store import PeerStore, PeerStoreError
+
+    try:
+        entry = PeerStore().add(label, endpoint)
+    except PeerStoreError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    typer.echo(json.dumps(entry.as_dict(), sort_keys=True))
+
+
+@peer_app.command("list")
+def peer_list_cmd() -> None:
+    """Print every peer we know about, in insertion order."""
+    from vacant.cli.peer_store import PeerStore
+
+    peers = PeerStore().load()
+    typer.echo(json.dumps([p.as_dict() for p in peers], indent=2, sort_keys=True))
+
+
+@peer_app.command("remove")
+def peer_remove_cmd(
+    label: str = typer.Argument(..., help="Label of the peer to remove."),
+) -> None:
+    """Forget a previously-added peer."""
+    from vacant.cli.peer_store import PeerStore, PeerStoreError
+
+    try:
+        entry = PeerStore().remove(label)
+    except PeerStoreError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+    typer.echo(json.dumps({"removed": entry.as_dict()}, sort_keys=True))
+
+
+@peer_app.command("ping")
+def peer_ping_cmd(
+    label: str | None = typer.Option(None, "--label", help="Only ping this label."),
+    timeout_s: float = typer.Option(5.0, "--timeout", help="Per-peer timeout in seconds."),
+) -> None:
+    """Hit each peer's `/health` endpoint and print whether it answered.
+
+    Useful for diagnosing why `peer gossip` is skipping peers. No state
+    is mutated — purely a connectivity check.
+    """
+    import asyncio as _asyncio
+
+    import httpx
+
+    from vacant.cli.peer_store import PeerStore
+
+    peers = PeerStore().load()
+    if label is not None:
+        peers = [p for p in peers if p.label == label]
+        if not peers:
+            typer.echo(f"error: peer {label!r} not in store", err=True)
+            raise typer.Exit(code=2)
+
+    async def _ping_one(p: Any) -> dict[str, Any]:
+        url = p.endpoint.rstrip("/") + "/health"
+        try:
+            async with httpx.AsyncClient(timeout=timeout_s) as cli:
+                r = await cli.get(url)
+            return {
+                "label": p.label,
+                "endpoint": p.endpoint,
+                "status": r.status_code,
+                "body": r.json()
+                if r.headers.get("content-type", "").startswith("application/json")
+                else None,
+                "reachable": r.status_code == 200,
+            }
+        except Exception as exc:
+            return {
+                "label": p.label,
+                "endpoint": p.endpoint,
+                "reachable": False,
+                "error": repr(exc),
+            }
+
+    async def _run() -> list[dict[str, Any]]:
+        return await _asyncio.gather(*(_ping_one(p) for p in peers))
+
+    results = asyncio.run(_run())
+    typer.echo(json.dumps(results, indent=2, sort_keys=True))
+    if any(not r.get("reachable") for r in results):
+        raise typer.Exit(code=1)
+
+
+@peer_app.command("known-nodes")
+def peer_known_nodes_cmd(
+    url: str = typer.Option(
+        "https://raw.githubusercontent.com/cosmopig/Vacant/main/docs/known-nodes.json",
+        "--url",
+        help="URL of the community-maintained known-nodes seed list.",
+    ),
+    timeout_s: float = typer.Option(10.0, "--timeout", help="HTTP timeout in seconds."),
+) -> None:
+    """Fetch the community-maintained seed-node list.
+
+    Doesn't auto-add — prints the list so the operator can choose which
+    seeds to `peer add` manually. The community list is just a JSON
+    file in the repo: anyone can PR a seed, but no central party
+    decides which seed *you* trust.
+    """
+    import httpx
+
+    try:
+        with httpx.Client(timeout=timeout_s) as cli:
+            r = cli.get(url)
+        r.raise_for_status()
+        typer.echo(r.text)
+    except Exception as exc:
+        typer.echo(f"error: known-nodes fetch failed: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
 
 
 @registry_app.command("ots-upgrade")

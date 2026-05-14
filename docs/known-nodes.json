@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "description": "Community-maintained list of seed vacant network nodes. Anyone can PR an entry; you decide which to trust. There is no central authority deciding membership.",
+  "nodes": [],
+  "how_to_add": "Open a PR adding `{label, endpoint, operator, contact, description}` to the `nodes` array. Other operators will see your entry on the next `vacant peer known-nodes` fetch and decide whether to add you via `vacant peer add`."
+}

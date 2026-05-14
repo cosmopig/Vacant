@@ -6,6 +6,11 @@ from vacant.runtime.errors import (
     RuntimeError_,
     SpawnError,
 )
+from vacant.runtime.grow import (
+    GrowLoop,
+    GrowStats,
+    make_grow_lifespan,
+)
 from vacant.runtime.heartbeat import (
     HeartbeatScheduler,
     heartbeat_kind,
@@ -58,6 +63,8 @@ __all__ = [
     "AnchorDistribution",
     "ConsentError",
     "Event",
+    "GrowLoop",
+    "GrowStats",
     "HeartbeatScheduler",
     "InMemoryLogbookStore",
     "InvalidEventError",
@@ -85,6 +92,7 @@ __all__ = [
     "is_drifting",
     "is_runnable",
     "make_d4_consent",
+    "make_grow_lifespan",
     "pick_probe",
     "requires_revive",
     "score_probe_response",
