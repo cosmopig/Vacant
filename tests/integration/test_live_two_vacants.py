@@ -46,7 +46,10 @@ def _free_port() -> int:
     return int(port)
 
 
-def _wait_health(port: int, timeout: float = 8.0) -> None:
+def _wait_health(port: int, timeout: float = 30.0) -> None:
+    # Cold-start of `vacant serve` subprocess takes ~6-7s on most
+    # machines (FastAPI + uvicorn + module imports). 30s leaves a
+    # comfortable buffer; the previous 8s was a flaky razor's edge.
     deadline = time.time() + timeout
     last: Exception | None = None
     while time.time() < deadline:

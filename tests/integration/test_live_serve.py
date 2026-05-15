@@ -45,7 +45,16 @@ def _free_port() -> int:
     return int(port)
 
 
-def _wait_health(port: int, timeout: float = 8.0) -> None:
+def _wait_health(port: int, timeout: float = 30.0) -> None:
+    """Wait up to `timeout` seconds for `vacant serve` to bind.
+
+    Cold-start time on this codebase is ~6-7 seconds due to FastAPI +
+    uvicorn + module imports on a fresh Python interpreter. The
+    previous 8-second cap was a flaky razor's edge that produced 6
+    pre-existing test failures on otherwise-healthy machines. 30s is
+    a comfortable buffer that still fails fast when something is
+    actually wrong.
+    """
     deadline = time.time() + timeout
     last: Exception | None = None
     while time.time() < deadline:
