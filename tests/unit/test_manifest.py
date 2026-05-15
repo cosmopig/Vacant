@@ -182,6 +182,73 @@ def test_manifest_broker_config_round_trips() -> None:
     assert sd["outbound_policy"] == "parent-permitted"
 
 
+def test_manifest_legacy_v1_signature_falls_back_to_v1_verify() -> None:
+    """A persisted v1 manifest (signed before the 3-axis fields existed)
+    must still verify after the upgrade. verify() tries v2 first then
+    falls back to v1, so the pre-axis signature still passes."""
+    import json as _json
+
+    from vacant.core.crypto import sign as _sign
+
+    sk_p, p_id, sk_c, c_id = _ids()
+
+    # Reconstruct the OLD payload exactly as pre-upgrade code would have.
+    v1_payload_dict = {
+        "parent_id": p_id.hex(),
+        "child_id": c_id.hex(),
+        "birth_path": "D2",
+        "closed_by_default": True,
+        "tool_whitelist_inherited": [],
+        "tool_whitelist_added": [],
+        "tool_whitelist_removed": [],
+    }
+    v1_payload_bytes = _json.dumps(
+        v1_payload_dict, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+    sig_parent = _sign(sk_p, v1_payload_bytes)
+    sig_child = _sign(sk_c, v1_payload_bytes)
+
+    # Construct a manifest carrying the v1 sigs but default v2 schema.
+    # verify() will try v2 → fail, then fall back to v1 → succeed.
+    m = ChildManifest(
+        parent_id=p_id,
+        child_id=c_id,
+        birth_path="D2",
+        closed_by_default=True,
+        signature_parent=sig_parent,
+        signature_child=sig_child,
+    )
+    assert m.verify() is True
+
+
+def test_manifest_v2_default_for_fresh_construction() -> None:
+    """When code calls `ChildManifest(...)` without passing
+    `schema_version`, the new manifest is v2 (axis-bearing)."""
+    _sk_p, p_id, _sk_c, c_id = _ids()
+    m = ChildManifest(parent_id=p_id, child_id=c_id, birth_path="D2")
+    assert m.schema_version == "v2"
+
+
+def test_manifest_v1_only_does_not_fall_through_to_v2() -> None:
+    """A manifest explicitly tagged v1 must NOT silently upgrade.
+    Otherwise an attacker who knew only the v1 payload could attempt
+    to flip axis fields and have v2 verification rescue them."""
+    sk_p, p_id, sk_c, c_id = _ids()
+    m = ChildManifest(
+        parent_id=p_id, child_id=c_id, birth_path="D2", schema_version="v1"
+    )
+    m = m.signed_by_parent(sk_p).signed_by_child(sk_c)
+    assert m.verify() is True
+    # Mutate an axis field on the v1 manifest; sigs were over v1 payload,
+    # which doesn't include axes — so the mutation doesn't change the
+    # canonical payload and the sig still verifies. That's the v1 contract.
+    mutated = m.model_copy(update={"endpoint_reachability": Reachability.PUBLIC_A2A})
+    assert mutated.verify() is True  # v1 payload unchanged
+    # But flipping a v1 field DOES break v1 verify.
+    flipped = m.model_copy(update={"closed_by_default": False})
+    assert flipped.verify() is False
+
+
 def test_manifest_public_resident_least_privilege_outbound_no_external() -> None:
     """V5 §5.2 explicitly: a graduated vacant can still choose
     NO_EXTERNAL outbound (least privilege) — outbound is independent

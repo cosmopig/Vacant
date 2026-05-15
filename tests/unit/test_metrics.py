@@ -121,13 +121,28 @@ def test_lineage_depth_distribution_counts_chains() -> None:
     assert dist.get(2) == 1
 
 
-def test_graduation_rate_counts_recent_24h() -> None:
+def test_graduation_rate_uses_spawn_event_denominator() -> None:
+    """V5 §Layer 9: graduation_rate = |grad events| / |spawn events|.
+    Older code divided by composite-count; that's the wrong unit."""
     now = time.time()
     snap = MetricsSnapshot(
         graduations=(now - 1, now - 60, now - 86_400 * 2),  # 2 fresh, 1 stale
+        spawn_events=(
+            {"path": "D1", "ts": now - 30},
+            {"path": "D2", "ts": now - 60},
+            {"path": "D3", "ts": now - 120},
+            {"path": "D4", "ts": now - 86_400 * 2},  # stale, filtered
+        ),
     )
+    # Window: 2 grads / 3 spawn events = 0.666...
     rate = compute_graduation_rate(snap)
-    assert rate == pytest.approx(2.0)
+    assert rate == pytest.approx(2 / 3)
+
+
+def test_graduation_rate_zero_with_no_spawn_events() -> None:
+    """When no spawns happen in the window, rate is undefined → 0."""
+    snap = MetricsSnapshot(graduations=(time.time() - 60,), spawn_events=())
+    assert compute_graduation_rate(snap) == 0.0
 
 
 def test_dispatch_p99_latency_picks_high_quantile() -> None:

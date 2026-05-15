@@ -225,12 +225,27 @@ def compute_lineage_depth_distribution(snap: MetricsSnapshot) -> dict[int, int]:
 
 
 def compute_graduation_rate(snap: MetricsSnapshot, *, window_s: float = 86_400.0) -> float:
-    """Graduations per (composite, time-window)."""
-    n_composites = sum(1 for meta in snap.vacants.values() if meta.get("is_composite", False))
-    n_composites = max(n_composites, 1)
+    """Graduations per spawn event in the same window.
+
+    THEORY_V5 §Layer 9 defines this as
+    `|grad events| / |spawn events|`. The earlier implementation
+    divided by the composite-count instead, which produced a number
+    in a different unit (graduations/composite/window) and made the
+    dashboard read inversely to what the theory intended.
+
+    Returns 0.0 when there are no spawn events in the window (no
+    denominator) — that matches the V5 semantics of "the network
+    hasn't produced any spawns yet, so graduation_rate is undefined;
+    treat as 0 for plotting".
+    """
     cutoff = time.time() - window_s
-    recent = [t for t in snap.graduations if t >= cutoff]
-    return len(recent) / n_composites
+    recent_grads = [t for t in snap.graduations if t >= cutoff]
+    recent_spawns = [
+        e for e in snap.spawn_events if float(e.get("ts", 0)) >= cutoff
+    ]
+    if not recent_spawns:
+        return 0.0
+    return len(recent_grads) / len(recent_spawns)
 
 
 # --- 6. dispatch_p99_latency ----------------------------------------------

@@ -204,6 +204,137 @@ def test_reviews_ingest_rejects_missing_dimensions() -> None:
     asyncio.run(_go())
 
 
+def test_blinded_ingest_buffers_below_threshold_then_flushes() -> None:
+    """P1 wire-up of THEORY_V5 §3.9 #4 — blinded reviews accumulate
+    until threshold (3 by default); only then are they unblinded and
+    written to reviews_received.jsonl."""
+    import json as _json
+
+    from vacant.core.crypto import SigningKey as _SigningKey
+    from vacant.reputation.blinded_review import make_blinded_review_record
+
+    ls.init_vacant("alice")
+    bundle = build_serve_app("alice")
+    alice_vid_hex = bundle.form.identity.hex()
+
+    def _build_pair() -> tuple[dict, dict]:
+        sk = _SigningKey.generate()
+        rec, env = make_blinded_review_record(
+            reviewer_signing_key=sk,
+            target_vid_hex=alice_vid_hex,
+            dimensions={"factual": 0.7, "logical": 0.7, "relevance": 0.7},
+            substrate="peer-review:heuristic",
+            call_envelope_id_hex="00" * 32,
+            claim="blinded test",
+            issued_at_iso="2026-05-15T12:00:00+00:00",
+        )
+        return rec, env.to_dict()
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=bundle.app), base_url="http://test"
+        ) as ac:
+            # First two pairs: buffered, not flushed.
+            for expected_buffered in (1, 2):
+                rec, rev = _build_pair()
+                r = await ac.post(
+                    "/reviews/blinded_ingest", json={"record": rec, "reveal": rev}
+                )
+                assert r.status_code == 200, r.text
+                data = r.json()
+                assert data["ok"] is True
+                assert data["buffered"] == expected_buffered
+                assert data["flushed_count"] == 0
+            # Third pair: triggers flush.
+            rec, rev = _build_pair()
+            r = await ac.post(
+                "/reviews/blinded_ingest", json={"record": rec, "reveal": rev}
+            )
+            data = r.json()
+            assert data["ok"] is True
+            assert data["flushed_count"] == 3
+            assert data["buffered"] == 0
+
+    asyncio.run(_go())
+
+    # All 3 unblinded rows should now be in reviews_received.jsonl with
+    # plaintext `reviewer` field restored.
+    home = Path(ls.vacant_home())
+    jsonl = home / "alice" / "reviews_received.jsonl"
+    rows = [_json.loads(line) for line in jsonl.read_text().splitlines() if line.strip()]
+    assert len(rows) == 3
+    for row in rows:
+        assert "reviewer" in row and len(row["reviewer"]) == 64
+        assert "reviewer_commitment" not in row
+        assert row["target"] == alice_vid_hex
+
+
+def test_blinded_ingest_rejects_replayed_commitment() -> None:
+    """Same commitment submitted twice → 409. Spent-commitment store
+    prevents an attacker from inflating the batch with duplicates."""
+    from vacant.core.crypto import SigningKey as _SigningKey
+    from vacant.reputation.blinded_review import make_blinded_review_record
+
+    ls.init_vacant("alice")
+    bundle = build_serve_app("alice")
+    sk = _SigningKey.generate()
+    rec, env = make_blinded_review_record(
+        reviewer_signing_key=sk,
+        target_vid_hex=bundle.form.identity.hex(),
+        dimensions={"factual": 0.7, "logical": 0.7, "relevance": 0.7},
+        substrate="peer-review:heuristic",
+        call_envelope_id_hex="00" * 32,
+        claim="replay test",
+        issued_at_iso="2026-05-15T12:00:00+00:00",
+    )
+    payload = {"record": rec, "reveal": env.to_dict()}
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=bundle.app), base_url="http://test"
+        ) as ac:
+            r1 = await ac.post("/reviews/blinded_ingest", json=payload)
+            assert r1.status_code == 200
+            r2 = await ac.post("/reviews/blinded_ingest", json=payload)
+            assert r2.status_code == 409
+            assert r2.json()["error"] == "commitment_already_spent"
+
+    asyncio.run(_go())
+
+
+def test_blinded_ingest_rejects_wrong_target() -> None:
+    from vacant.core.crypto import SigningKey as _SigningKey
+    from vacant.reputation.blinded_review import make_blinded_review_record
+
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    alice_bundle = build_serve_app("alice")
+    sk = _SigningKey.generate()
+    # Commit/sign against BOB but POST to alice.
+    bob_vid_hex = ls.load_meta("bob").vacant_id_hex
+    rec, env = make_blinded_review_record(
+        reviewer_signing_key=sk,
+        target_vid_hex=bob_vid_hex,
+        dimensions={"factual": 0.7, "logical": 0.7, "relevance": 0.7},
+        substrate="peer-review:heuristic",
+        call_envelope_id_hex="00" * 32,
+        claim="target test",
+        issued_at_iso="2026-05-15T12:00:00+00:00",
+    )
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=alice_bundle.app), base_url="http://test"
+        ) as ac:
+            r = await ac.post(
+                "/reviews/blinded_ingest", json={"record": rec, "reveal": env.to_dict()}
+            )
+            assert r.status_code == 422
+            assert r.json()["error"] == "target_mismatch"
+
+    asyncio.run(_go())
+
+
 def test_chain_reset_accepts_signed_request_and_clears_pair() -> None:
     """P1b: A peer that drifted out of sync can POST a signed
     RESET_CHAIN envelope to /a2a/chain/reset; the server verifies the

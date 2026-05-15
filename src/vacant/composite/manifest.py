@@ -45,6 +45,7 @@ from vacant.core.types import VacantId
 
 __all__ = [
     "BIRTH_PATHS",
+    "MANIFEST_SCHEMA_VERSIONS",
     "ChildManifest",
     "OutboundPolicy",
     "Reachability",
@@ -53,6 +54,14 @@ __all__ = [
 
 
 BIRTH_PATHS = ("D1", "D2", "D3", "D4", "D5")
+
+# Manifest signing-payload schema versions.
+# - v1: pre-2026-05-15. Signed over the 7 original fields.
+# - v2: 2026-05-15+. Signed over v1 fields + endpoint_reachability + outbound_policy.
+# verify_or_raise() uses the manifest's own `schema_version` to pick which
+# canonical shape to feed Ed25519; this lets new code load older persisted
+# manifests without forcing a network-wide re-signing.
+MANIFEST_SCHEMA_VERSIONS: tuple[str, ...] = ("v1", "v2")
 
 
 class Reachability(StrEnum):
@@ -119,19 +128,32 @@ class ChildManifest(BaseModel):
     # callers that don't set these get the historically-implied semantics.
     endpoint_reachability: Reachability = Reachability.PARENT_ONLY
     outbound_policy: OutboundPolicy = OutboundPolicy.NO_EXTERNAL
+    schema_version: Literal["v1", "v2"] = "v2"
+    """Signing-payload schema version. New manifests sign with v2
+    (axis-bearing). Verification tries v2 first and falls back to v1
+    so manifests persisted by pre-2026-05-15 code remain valid without
+    a forced re-sign migration."""
     signature_parent: bytes = b""
     signature_child: bytes = b""
 
-    def signing_dict(self) -> dict[str, Any]:
+    def signing_dict(self, *, version: str | None = None) -> dict[str, Any]:
         """Canonical dict over which both parent and child sign.
 
         Excludes the two signature fields. Tool-whitelist lists are
         sorted so `["a","b"]` and `["b","a"]` produce the same payload.
+
+        Output shape depends on `version` (defaults to
+        `self.schema_version`):
+        - v1: original 7 fields only (matches pre-2026-05-15 verifiers).
+        - v2: v1 fields + `endpoint_reachability` + `outbound_policy`.
+
         `endpoint_reachability` and `outbound_policy` are serialised as
         their string values so older verifiers (that don't know the
         enum classes) can still re-derive the canonical bytes from
-        the stored manifest JSON."""
-        return {
+        the stored manifest JSON.
+        """
+        effective = version or self.schema_version
+        base: dict[str, Any] = {
             "parent_id": self.parent_id.hex(),
             "child_id": self.child_id.hex(),
             "birth_path": self.birth_path,
@@ -139,17 +161,27 @@ class ChildManifest(BaseModel):
             "tool_whitelist_inherited": sorted(self.tool_whitelist_inherited),
             "tool_whitelist_added": sorted(self.tool_whitelist_added),
             "tool_whitelist_removed": sorted(self.tool_whitelist_removed),
-            "endpoint_reachability": str(self.endpoint_reachability),
-            "outbound_policy": str(self.outbound_policy),
         }
+        if effective == "v1":
+            return base
+        # v2 (default for fresh manifests).
+        base["endpoint_reachability"] = str(self.endpoint_reachability)
+        base["outbound_policy"] = str(self.outbound_policy)
+        return base
 
-    def signing_payload(self) -> bytes:
+    def _signing_payload_for(self, version: str) -> bytes:
         return json.dumps(
-            self.signing_dict(),
+            self.signing_dict(version=version),
             sort_keys=True,
             separators=(",", ":"),
             ensure_ascii=False,
         ).encode("utf-8")
+
+    def signing_payload(self) -> bytes:
+        """Canonical bytes used at sign time (always the manifest's own
+        `schema_version`). Kept for callers that want to re-derive
+        the exact payload the sigs cover."""
+        return self._signing_payload_for(self.schema_version)
 
     def signed_by_parent(self, parent_signing_key: SigningKey) -> ChildManifest:
         sig = sign(parent_signing_key, self.signing_payload())
@@ -159,27 +191,67 @@ class ChildManifest(BaseModel):
         sig = sign(child_signing_key, self.signing_payload())
         return self.model_copy(update={"signature_child": sig})
 
-    def verify(self) -> bool:
-        """True iff *both* signatures verify under their respective keys."""
+    def _verify_against(self, version: str) -> bool:
+        """Verify both sigs against the canonical payload for `version`.
+        Returns False when sigs are missing or either fails."""
         if not self.signature_parent or not self.signature_child:
             return False
-        payload = self.signing_payload()
+        payload = self._signing_payload_for(version)
         if not verify(self.parent_id.verify_key(), payload, self.signature_parent):
             return False
         if not verify(self.child_id.verify_key(), payload, self.signature_child):
             return False
         return True
 
+    def verify(self) -> bool:
+        """True iff *both* signatures verify under their respective keys.
+
+        Tries the manifest's own `schema_version` first; if that fails
+        and `schema_version == "v2"`, falls back to `v1` so manifests
+        persisted by pre-upgrade code still load. The fallback is
+        one-way (v2 → v1 only) to avoid silently accepting tampered v2
+        manifests as v1."""
+        if self._verify_against(self.schema_version):
+            return True
+        if self.schema_version == "v2":
+            return self._verify_against("v1")
+        return False
+
     def verify_or_raise(self) -> None:
         if not self.signature_parent:
             raise ManifestError("manifest missing parent signature")
         if not self.signature_child:
             raise ManifestError("manifest missing child signature")
-        payload = self.signing_payload()
-        if not verify(self.parent_id.verify_key(), payload, self.signature_parent):
-            raise ManifestError(f"manifest parent signature invalid for {self.parent_id.short()}")
-        if not verify(self.child_id.verify_key(), payload, self.signature_child):
-            raise ManifestError(f"manifest child signature invalid for {self.child_id.short()}")
+        if self.verify():
+            return
+        # Diagnostic: figure out which side's signature is the bad one so
+        # the error message can point the operator to the actual fault.
+        # We try every supported version per-side, ordered "current-then-
+        # fallback", and report on the last one that failed.
+        versions_to_try = (self.schema_version,)
+        if self.schema_version == "v2":
+            versions_to_try = ("v2", "v1")
+        for ver in versions_to_try:
+            payload = self._signing_payload_for(ver)
+            parent_ok = verify(self.parent_id.verify_key(), payload, self.signature_parent)
+            child_ok = verify(self.child_id.verify_key(), payload, self.signature_child)
+            if parent_ok and child_ok:
+                return  # belt-and-braces; verify() above should have caught this
+            if parent_ok and not child_ok:
+                # Parent sig fine on this version but child failed — child is the fault.
+                raise ManifestError(
+                    f"manifest child signature invalid for {self.child_id.short()}"
+                )
+            if child_ok and not parent_ok:
+                raise ManifestError(
+                    f"manifest parent signature invalid for {self.parent_id.short()}"
+                )
+        # Neither side verified under any supported version. Default to
+        # reporting parent (matches pre-upgrade behavior — verify_or_raise
+        # historically checked parent first).
+        raise ManifestError(
+            f"manifest parent signature invalid for {self.parent_id.short()}"
+        )
 
 
 def ensure_birth_path(value: str) -> Literal["D1", "D2", "D3", "D4", "D5"]:

@@ -43,6 +43,11 @@ from vacant.protocol import (
 )
 from vacant.protocol.envelope import from_a2a_jsonrpc
 from vacant.protocol.replay_protect import PairKey, ReplayState
+from vacant.reputation.blinded_review import (
+    BLINDED_COMMITMENT_SCHEME,
+    BlindedReviewBatch,
+    RevealEnvelope,
+)
 from vacant.runtime.self_growth import verify_review_signature
 from vacant.core.types import EMPTY_PREV_HASH
 
@@ -53,6 +58,11 @@ __all__ = [
 ]
 
 _REVIEW_DIMS = ("factual", "logical", "relevance")
+_BLINDED_BATCH_MIN_REVEAL = 3
+"""Default batch threshold for the blinded-review path. THEORY_V5
+§3.9 #4 doesn't pin a number; 3 matches the auto-spawn streak so a
+single tit-for-tat reviewer can't unblind themselves by also
+submitting two complicit reviews."""
 
 
 BehaviorFn = Callable[[VacantEnvelope], Awaitable[A2AMessage]]
@@ -153,6 +163,116 @@ def build_serve_app(
             "state": form.runtime_state.value,
             "name": name,
         }
+
+    # --- Blinded peer review (THEORY_V5 §3.9 #4) ----------------------
+    # In-memory accumulator + spent-commitment set, scoped to this
+    # build_serve_app instance. The set defends against an attacker
+    # who tries to re-ingest a commitment to inflate the batch toward
+    # the reveal threshold; once a commitment has been seen, further
+    # ingestions of the same commitment are rejected as duplicates.
+    blinded_batch = BlindedReviewBatch(min_reveal_size=_BLINDED_BATCH_MIN_REVEAL)
+    spent_commitments: set[str] = set()
+
+    @app.post("/reviews/blinded_ingest")
+    async def ingest_blinded_review(request: Request) -> JSONResponse:
+        """Accept a `(blinded_record, reveal_envelope)` pair for this
+        vacant. The blinded record carries `reviewer_commitment` in
+        place of `reviewer`; the envelope carries the commitment's
+        preimage but is **buffered** until the batch reaches
+        `_BLINDED_BATCH_MIN_REVEAL`, at which point all buffered pairs
+        are unblinded together and the unblinded rows are appended to
+        `reviews_received.jsonl`.
+
+        Threat model: the buffering defeats real-time tit-for-tat —
+        Bob's grow loop can't see Alice's identity from Alice's
+        blinded review until at least N-1 *other* reviewers have also
+        committed, by which time the immediate retaliation window
+        has closed. Replay protection: a commitment may only be
+        ingested once across the lifetime of this server process.
+        """
+        try:
+            body = await request.json()
+        except Exception as exc:
+            return JSONResponse({"ok": False, "error": f"bad_json: {exc}"}, status_code=400)
+        if not isinstance(body, dict) or "record" not in body or "reveal" not in body:
+            return JSONResponse(
+                {"ok": False, "error": "expected {record:..., reveal:...}"},
+                status_code=400,
+            )
+        record = body["record"]
+        reveal_dict = body["reveal"]
+        if not isinstance(record, dict) or not isinstance(reveal_dict, dict):
+            return JSONResponse(
+                {"ok": False, "error": "record/reveal must be objects"}, status_code=400
+            )
+        if record.get("commitment_scheme") != BLINDED_COMMITMENT_SCHEME:
+            return JSONResponse(
+                {"ok": False, "error": f"wrong commitment_scheme; expected {BLINDED_COMMITMENT_SCHEME}"},
+                status_code=400,
+            )
+        if record.get("target") != vid.hex():
+            return JSONResponse(
+                {"ok": False, "error": "target_mismatch", "self": vid.hex()},
+                status_code=422,
+            )
+        dims = record.get("dimensions")
+        if not isinstance(dims, dict) or set(dims).intersection(_REVIEW_DIMS) != set(_REVIEW_DIMS):
+            return JSONResponse({"ok": False, "error": "dimensions_missing_FLR"}, status_code=422)
+        for k in _REVIEW_DIMS:
+            v = dims.get(k)
+            if not isinstance(v, (int, float)) or not (0.0 <= float(v) <= 1.0):
+                return JSONResponse(
+                    {"ok": False, "error": f"dimension_out_of_range:{k}"}, status_code=422
+                )
+        commitment_hex = record.get("reviewer_commitment")
+        if not isinstance(commitment_hex, str) or len(commitment_hex) != 64:
+            return JSONResponse(
+                {"ok": False, "error": "reviewer_commitment_invalid"}, status_code=422
+            )
+        if commitment_hex in spent_commitments:
+            return JSONResponse(
+                {"ok": False, "error": "commitment_already_spent", "commitment": commitment_hex},
+                status_code=409,
+            )
+        try:
+            envelope = RevealEnvelope.from_dict(reveal_dict)
+        except (KeyError, ValueError) as exc:
+            return JSONResponse(
+                {"ok": False, "error": f"reveal_envelope_invalid: {exc}"}, status_code=422
+            )
+
+        try:
+            blinded_batch.add(record, envelope)
+        except ValueError as exc:
+            return JSONResponse(
+                {"ok": False, "error": f"batch_add_rejected: {exc}"}, status_code=422
+            )
+        spent_commitments.add(commitment_hex)
+
+        flushed: list[dict[str, object]] = []
+        if blinded_batch.is_ready_to_reveal():
+            unblinded_rows = blinded_batch.flush_reveals()
+            if unblinded_rows:
+                home_dir_local = (home if home is not None else ls.vacant_home()) / name
+                home_dir_local.mkdir(parents=True, exist_ok=True)
+                jsonl_local = home_dir_local / "reviews_received.jsonl"
+                with jsonl_local.open("a", encoding="utf-8") as f:
+                    for row in unblinded_rows:
+                        f.write(json.dumps(row, sort_keys=True) + "\n")
+                flushed = unblinded_rows
+            # If flush_reveals returned [] (verification failure), the
+            # buffer is preserved for audit; we leave the spent set as-is
+            # so a malicious operator can't replay the bad pair.
+
+        return JSONResponse(
+            {
+                "ok": True,
+                "buffered": blinded_batch.pending_count,
+                "threshold": _BLINDED_BATCH_MIN_REVEAL,
+                "flushed_count": len(flushed),
+                "commitment": commitment_hex,
+            }
+        )
 
     @app.post("/a2a/chain/reset")
     async def chain_reset(request: Request) -> JSONResponse:
