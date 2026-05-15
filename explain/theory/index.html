@@ -1,0 +1,3635 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.">
+      
+      
+      
+        <link rel="canonical" href="https://cosmopig.github.io/Vacant/explain/theory/">
+      
+      
+        <link rel="prev" href="../architecture/">
+      
+      
+        <link rel="next" href="../faq/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Theory V5 - Vacant</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+
+  
+  <meta property="og:site_name" content="Vacant">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Theory V5 (canonical)">
+  <meta property="og:description" content="A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.">
+  <meta property="og:url" content="https://cosmopig.github.io/Vacant/explain/theory/">
+  <meta property="og:image" content="https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png">
+  <meta property="og:image:alt" content="Vacant — a responsibility-layer residency form for AI agents on top of A2A / MCP">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:locale" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Theory V5 (canonical)">
+  <meta name="twitter:description" content="A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.">
+  <meta name="twitter:image" content="https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png">
+
+  
+  <link rel="me" href="https://github.com/cosmopig">
+
+  
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Theory V5 (canonical)",
+    "description": "A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.",
+    "url": "https://cosmopig.github.io/Vacant/explain/theory/",
+    "image": "https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png",
+    "datePublished": "2026-05-06",
+    "dateModified": "2026-05-15",
+    "author": {
+      "@type": "Person",
+      "name": "Cosmo Hsu",
+      "alternateName": "cosmopig",
+      "url": "https://github.com/cosmopig"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Vacant",
+      "url": "https://github.com/cosmopig/Vacant"
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Vacant — documentation",
+      "url": "https://cosmopig.github.io/Vacant/"
+    },
+    "mainEntityOfPage": "https://cosmopig.github.io/Vacant/explain/theory/",
+    "inLanguage": "en",
+    "keywords": "multi-agent, mcp, a2a, reputation, identity, claude, llm"
+  }
+  </script>
+  
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#vacant-v5" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Vacant" class="md-header__button md-logo" aria-label="Vacant" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Vacant
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Theory V5
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cosmopig/Vacant" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cosmopig/Vacant
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../briefing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Theory & background
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../RUNBOOK/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Demo & ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Vacant" class="md-nav__button md-logo" aria-label="Vacant" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Vacant
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cosmopig/Vacant" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cosmopig/Vacant
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & background
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & background
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Briefing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory V5 (canonical)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory V5 (canonical)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. 根本前提（讀整篇之前必先讀）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0. 根本前提（讀整篇之前必先讀）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#01-foundational-assumption-key-custody-controller-autonomy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1 Foundational Assumption: Key Custody / Controller Autonomy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2 三層防禦語言（讀其他章節前先讀）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#03-controller-as-root-v5-r3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3 Controller-as-root 攻擊面（v5 R3 明示）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-ricoeur" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 核心定義（Ricoeur 框架 + 術語拆分）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 核心定義（Ricoeur 框架 + 術語拆分）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 兩種狀態術語
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-ricoeur-v4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Ricoeur 三維（保留 v4）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-v5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 九層完整模型（v5 加固版）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 九層完整模型（v5 加固版）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 0 — 存在與形式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-1-key-custody" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 1 — 身份綁定 + Key Custody 假設
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-2-substratemulti-spec-3b" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 2 — Substrate（multi-spec + 3B 下限）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-3-reputationportability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3 — Reputation（多軌獨立、portability 重定位）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 3 — Reputation（多軌獨立、portability 重定位）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reputation-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reputation Score（純品質）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-resilience-score-metric" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Resilience Score（獨立 metric）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-caller-side-query-weight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Caller-side Query Weight
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-discount-rollover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 動態 discount rollover（保留）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 同源降權三軌
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-cold-start-vacant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Cold start：新 vacant 怎麼被首次呼叫
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-4-d001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 4 — 生命週期（D001 增強版）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 4 — 生命週期（D001 增強版）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-review-eligibility-per-statev5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Review eligibility per state（v5 釘住）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-sunk-heartbeat-identity-custody-livenessv5-r5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Sunk heartbeat 的真正意義：identity custody，非 liveness（v5 R5 釘住）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-lineagev5-r5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Lineage：真正的「無限進化」主體（v5 R5 釘住）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-5-composition-ontology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 5 — Composition（三軸 ontology）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 5 — Composition（三軸 ontology）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-codex-v4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 三軸定義（codex 點出 v4 含混）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 三種典型配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 結構性 enforcement（範圍誠實標明）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-spawn-key-custody" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Spawn key custody（兩級制）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 畢業條件 + 流程
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 攻擊防禦
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 6 — 問責歸屬
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-7-t4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 7 — 網路協調（T4 三階段演進）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 7 — 網路協調（T4 三階段演進）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-registry-vacant-v5-r5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Registry 本體論：每個 vacant 自帶公告（v5 R5 釘住）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-8-v5-r3-38-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 8 — 對抗防禦矩陣（v5 R3 — 38 條 + 2 保留）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 8 — 對抗防禦矩陣（v5 R3 — 38 條 + 2 保留）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-38-2-a1-a40" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 矩陣（38 條攻擊 + 2 保留編號 = A1-A40）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-a4a8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 缺號 A4、A8 說明
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 防禦語言誠實性
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 9 — 生態健康指標
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-v4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 經濟層演進路徑（保留 v4）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-v5-h6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 真實困難（v5 加 H6）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-mvp-v5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. MVP 可驗證命題（v5 重設，全部結構性）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. MVP 可驗證命題（v5 重設，全部結構性）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#demonstrations14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        結構性 demonstrations（14 週可做）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        結構性命題（demo 為證）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-v5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        不能在 14 週驗證的（v5 誠實刪除）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-codex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 文獻校正（codex 點出）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 結論
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../constants/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constants
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Demo & ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Demo & ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../RUNBOOK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEMO_SCRIPT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5-minute demo script
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    identity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reputation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    reputation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/composite/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    composite
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/protocol/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    substrate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvp
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cli
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. 根本前提（讀整篇之前必先讀）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0. 根本前提（讀整篇之前必先讀）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#01-foundational-assumption-key-custody-controller-autonomy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1 Foundational Assumption: Key Custody / Controller Autonomy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2 三層防禦語言（讀其他章節前先讀）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#03-controller-as-root-v5-r3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3 Controller-as-root 攻擊面（v5 R3 明示）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-ricoeur" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 核心定義（Ricoeur 框架 + 術語拆分）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 核心定義（Ricoeur 框架 + 術語拆分）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 兩種狀態術語
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-ricoeur-v4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Ricoeur 三維（保留 v4）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-v5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 九層完整模型（v5 加固版）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 九層完整模型（v5 加固版）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 0 — 存在與形式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-1-key-custody" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 1 — 身份綁定 + Key Custody 假設
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-2-substratemulti-spec-3b" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 2 — Substrate（multi-spec + 3B 下限）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-3-reputationportability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3 — Reputation（多軌獨立、portability 重定位）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 3 — Reputation（多軌獨立、portability 重定位）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reputation-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reputation Score（純品質）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-resilience-score-metric" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Resilience Score（獨立 metric）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-caller-side-query-weight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Caller-side Query Weight
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-discount-rollover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 動態 discount rollover（保留）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 同源降權三軌
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-cold-start-vacant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Cold start：新 vacant 怎麼被首次呼叫
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-4-d001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 4 — 生命週期（D001 增強版）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 4 — 生命週期（D001 增強版）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-review-eligibility-per-statev5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Review eligibility per state（v5 釘住）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-sunk-heartbeat-identity-custody-livenessv5-r5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Sunk heartbeat 的真正意義：identity custody，非 liveness（v5 R5 釘住）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-lineagev5-r5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Lineage：真正的「無限進化」主體（v5 R5 釘住）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-5-composition-ontology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 5 — Composition（三軸 ontology）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 5 — Composition（三軸 ontology）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-codex-v4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 三軸定義（codex 點出 v4 含混）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 三種典型配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 結構性 enforcement（範圍誠實標明）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-spawn-key-custody" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Spawn key custody（兩級制）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 畢業條件 + 流程
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 攻擊防禦
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 6 — 問責歸屬
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-7-t4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 7 — 網路協調（T4 三階段演進）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 7 — 網路協調（T4 三階段演進）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-registry-vacant-v5-r5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Registry 本體論：每個 vacant 自帶公告（v5 R5 釘住）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-8-v5-r3-38-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 8 — 對抗防禦矩陣（v5 R3 — 38 條 + 2 保留）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 8 — 對抗防禦矩陣（v5 R3 — 38 條 + 2 保留）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-38-2-a1-a40" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 矩陣（38 條攻擊 + 2 保留編號 = A1-A40）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-a4a8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 缺號 A4、A8 說明
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 防禦語言誠實性
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 9 — 生態健康指標
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-v4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 經濟層演進路徑（保留 v4）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-v5-h6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 真實困難（v5 加 H6）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-mvp-v5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. MVP 可驗證命題（v5 重設，全部結構性）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. MVP 可驗證命題（v5 重設，全部結構性）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#demonstrations14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        結構性 demonstrations（14 週可做）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        結構性命題（demo 為證）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-v5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        不能在 14 週驗證的（v5 誠實刪除）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-codex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 文獻校正（codex 點出）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 結論
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/cosmopig/Vacant/edit/main/docs/explain/theory.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<p>THEORY_V5 is the <strong>canonical</strong> theory document. V3 and V4 are kept in
+the repo for history; do not cite them.</p>
+<h1 id="vacant-v5">Vacant — 完整理論 v5<a class="headerlink" href="#vacant-v5" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>v5 經兩輪 codex adversarial review 硬化。第一輪抓出 13 個結構問題、第二輪再抓出 6 個遺漏（Registry liveness、revocation freshness、parent hostage、reviewer cartel、metadata privacy leakage、beneficial-control transfer）+ 修正 v5 第一版的計數錯誤、過強語句、Layer 5 三軸再綁回的退步。</p>
+<p>跟 v4 的核心差別：
+- <strong>防禦語言三層化</strong>：<code>prevents</code> / <code>detects</code> / <code>raises cost</code> — 不再說「擋住」當作 prevents
+- <strong>Layer 5 三軸 ontology 真正獨立</strong>：<code>registry_visibility × endpoint_reachability × outbound_policy</code>，畢業只升前兩軸，outbound 由 vacant 獨立決定（least privilege）
+- <strong>正式攻擊矩陣 38 條 + 2 保留編號</strong>：v3 既有 21 + v4 補 2 + v5 R1 補 6 + v5 R2 補 6 + v5 R3 補 3（A22 拆 A22+A22b 視為 1 條但兩個防禦面）
+- <strong>portability_factor 從 raw 乘子撤出</strong>：改 caller-side 查詢權重 + 網路級 resilience metric
+- <strong>術語拆分</strong>：<code>ontically complete vacant</code>（六構件齊備）vs <code>public resident vacant</code>（listed + public_a2a，不要求 unrestricted outbound）
+- <strong>Ed25519 key custody 兩級</strong>：MVP demo custody（OS process boundary）vs production strong custody（TEE/HSM）
+- <strong>A-Trust 名稱校正</strong>：Attention-based Trust Management（不是 Accountability-centered Trust）
+- <strong>MVP 命題降級</strong>：刪除無法在 14 週驗證的，保留結構性可 demo 的（命題 A 閾值方向修正）
+- <strong>Structural enforcement 範圍誠實</strong>：只在 Vacant-compliant A2A 層 prevents；非 compliant endpoint 仍可能接收，那是該 endpoint 的選擇</p>
+</blockquote>
+<hr />
+<h2 id="0">0. 根本前提（讀整篇之前必先讀）<a class="headerlink" href="#0" title="Permanent link">&para;</a></h2>
+<h3 id="01-foundational-assumption-key-custody-controller-autonomy">0.1 Foundational Assumption: Key Custody / Controller Autonomy<a class="headerlink" href="#01-foundational-assumption-key-custody-controller-autonomy" title="Permanent link">&para;</a></h3>
+<p><strong>整個 Vacant 框架建立在一個無法用 framework 內部解的工程前提上：</strong></p>
+<blockquote>
+<p>Vacant 簽章只能證明「持有 private key 的某方簽了」。<strong>「該 vacant 自主簽了」需要 key custody 與 controller 沒有 root-level 權限</strong>這個假設在外層成立。</p>
+</blockquote>
+<p><strong>沒有 strong key custody，整套框架的問責力會崩塌</strong>：
+- logbook 變成「controller 寫的歷史」（可被偽造）
+- lineage（parent_id）變成「controller 想串就能串」
+- controller_transfer / governance change 變成「controller 想標就標、想隱就隱」
+- review / honesty 維度變成「controller 自己評自己」</p>
+<p><strong>v5 兩級制（誠實標明）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>級別</th>
+<th>工程實現</th>
+<th>防禦力</th>
+<th>適用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Demo custody</strong></td>
+<td>OS-level process boundary</td>
+<td>controller 仍有 root 可繞</td>
+<td>MVP / 演示</td>
+</tr>
+<tr>
+<td><strong>Strong custody</strong></td>
+<td>TEE / HSM / hardware enclave</td>
+<td>controller 無 root 權限</td>
+<td>production 重要 vacant</td>
+</tr>
+</tbody>
+</table>
+<p><strong>MVP 階段的所有「prevents」承諾，必須讀作「在 strong custody 假設下 prevents」。</strong> Demo custody 下，多數 prevents 退化成 detects（後驗異常）。</p>
+<p><strong>這不是 Vacant 框架的瑕疵，是密碼學身份系統共有的工程前提</strong>——同樣的假設適用於 GPG、Bitcoin keypair、code signing、TLS server identity。Vacant 的選擇是把這個前提<strong>明示在文件最前面</strong>，而不是隱藏它。</p>
+<h3 id="02">0.2 三層防禦語言（讀其他章節前先讀）<a class="headerlink" href="#02" title="Permanent link">&para;</a></h3>
+<p>以前 v4 把所有防禦寫「擋住」。codex 正確指出：絕大多數實際是「偵測」或「提高成本」。v5 用三層語言：</p>
+<table>
+<thead>
+<tr>
+<th>層級</th>
+<th>含義</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>prevents</code> (P)</strong></td>
+<td>結構性阻擋——在指定範圍內（如協議層、密碼學層、framework 層）+ 在 strong custody 假設下，攻擊不能達成目標</td>
+<td>hash chain 在密碼學層阻止過去事件被竄改而不留痕跡</td>
+</tr>
+<tr>
+<td><strong><code>detects</code> (D)</strong></td>
+<td>事後可被偵測或標記，但無法即時阻擋</td>
+<td>STYLO 行為漂移 → 標 SECURITY_REVIEW</td>
+</tr>
+<tr>
+<td><strong><code>raises cost</code> (C)</strong></td>
+<td>攻擊技術上可行，但成本被結構性提升使收益&lt;成本</td>
+<td>WashCost ≥ 2·WashGain（whitewash 數學上不划算）</td>
+</tr>
+</tbody>
+</table>
+<p>v5 中所有防禦表格都標明 P / D / C。<strong>沒有任何防禦被宣稱「徹底解」攻擊</strong>——因為 Skalse 不可能定理告訴我們，沒有非平凡 reward function 可保證不被 hack。</p>
+<h3 id="03-controller-as-root-v5-r3">0.3 Controller-as-root 攻擊面（v5 R3 明示）<a class="headerlink" href="#03-controller-as-root-v5-r3" title="Permanent link">&para;</a></h3>
+<p>當 controller 合法持鑰且擁有 vacant runtime 的 root：
+- 可偽造 logbook 事件（demo custody 下）
+- 可偽造 governance attestation（A36 殘留風險）
+- 可長期養 differentiated Sybil（A35）
+- 可任意撤回畢業子代的 parent_id 認可（A34 部分情境）</p>
+<p><strong>這個攻擊面的根本緩解只有 strong custody + 第三方 governance attestation</strong>。MVP demo 接受此殘留風險、明示給觀眾與評審。</p>
+<hr />
+<h2 id="1-ricoeur">1. 核心定義（Ricoeur 框架 + 術語拆分）<a class="headerlink" href="#1-ricoeur" title="Permanent link">&para;</a></h2>
+<p><strong>Vacant 是一種居民形式（resident form）。</strong> 你選擇變成它。</p>
+<h3 id="11">1.1 兩種狀態術語<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>術語</th>
+<th>定義</th>
+<th>包含的三軸狀態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ontically complete vacant</strong></td>
+<td>六構件齊備（identity / capability_card / behavior_bundle / substrate_spec / runtime / logbook）</td>
+<td>任意（visibility/reachability/outbound 都可變）</td>
+</tr>
+<tr>
+<td><strong>Public resident vacant</strong></td>
+<td>Ontically complete + Registry 上 listed + 公網 A2A 可達</td>
+<td><code>listed + public_a2a + (outbound 任意)</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>重要</strong>：public resident 不要求 <code>outbound = unrestricted</code>。一個 public resident 可以選擇 self-grown 風格（自己內部 spawn 子代、不對外呼叫其他 vacant）——這是 least privilege 原則，outbound 是獨立決策。</p>
+<p><strong>所有 vacant 都是 ontically complete</strong>——這是「成為 vacant」的最低條件。<strong>不是所有 vacant 都是 public resident</strong>——可以是私有的（local-only logbook、未推 Registry）。</p>
+<h3 id="12-ricoeur-v4">1.2 Ricoeur 三維（保留 v4）<a class="headerlink" href="#12-ricoeur-v4" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>vacant := {
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  identity (idem):      Ed25519 keypair（vacant_id = multibase(multihash(pubkey)))
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                        — 數值同一性，不變
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  capability_card:      自我宣告的能力 + 生命狀態 + parent_id 鏈
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  behavior_bundle (character): prompt + tool 用法 + memory schema + 演化歷史
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                        — idem 與 ipse 的橋樑
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  substrate_spec:       multi-spec 必須宣告
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  runtime:              minimal Vacant Runtime
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  logbook (ipse):       所有對外行為的簽章記錄
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                        — 自我在變化中的延續
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>}
+</span></code></pre></div>
+<hr />
+<h2 id="2-v5">2. 九層完整模型（v5 加固版）<a class="headerlink" href="#2-v5" title="Permanent link">&para;</a></h2>
+<h3 id="layer-0">Layer 0 — 存在與形式<a class="headerlink" href="#layer-0" title="Permanent link">&para;</a></h3>
+<p>Vacant 是身份的可能形式。「成為 vacant」= 採用上面六構件。規格「不從就出局」，居民形式「願意就成為」。</p>
+<p><strong>對 Attack 20（自願性的幻覺）：</strong> 防禦層級 = <strong>C</strong>（raises cost）。Vacant 流行後不採納等於出局，是社會事實。技術緩解：minimum spec 真的最小、可分叉、bridge 給非 vacant 以低 trust tier。<strong>承認：這不是 prevents，是社會現實的 cost shift。</strong></p>
+<h3 id="layer-1-key-custody">Layer 1 — 身份綁定 + Key Custody 假設<a class="headerlink" href="#layer-1-key-custody" title="Permanent link">&para;</a></h3>
+<p><strong>idem = Ed25519 keypair</strong>。但 <strong>Ed25519 簽章的證據力依賴 key custody 假設</strong>：</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Key custody 假設：vacant 的 private key 儲存在
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  - 受 vacant runtime 控制的 process boundary 內
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  - 不被 controller 直接讀取（runtime API 限制）
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  - 重要 vacant：TEE 或 hardware-backed enclave
+</span></code></pre></div>
+<p><strong>沒有 key custody 隔離，Ed25519 簽章只能證明「持有 key 的某方簽了」，不能證明「該 vacant 自主簽了」</strong>。這是 v5 明確標出的工程前提。</p>
+<p><strong>對 Attack 16（Ship of Theseus）：</strong> 答案是 <strong>logbook 是 ipse</strong>——船的木板可以全換，但航海日誌讓「同一艘船」這個說法有意義。每筆 review 鎖在當時的 configuration snapshot 上。防禦 = <strong>D</strong>（detects 變化軌跡）。</p>
+<p><strong>對 Attack 7（keypair 失竊）：</strong> 防禦 = <strong>D + C</strong>。L0–L3 多層識別（detects via behavior fingerprint）+ key rotation（cost: 攻擊者得換 key 即可，但失去舊 logbook 連續性）。最壞情況 G07 升架構級。</p>
+<h3 id="layer-2-substratemulti-spec-3b">Layer 2 — Substrate（multi-spec + 3B 下限）<a class="headerlink" href="#layer-2-substratemulti-spec-3b" title="Permanent link">&para;</a></h3>
+<p>每個 vacant <strong>必須</strong>宣告 multi-spec：</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">substrate_spec</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">primary</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;claude-4-7-2026-04-15&quot;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">fallback</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;qwen-2.5-72b&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;llama-3.3-70b&quot;</span><span class="p p-Indicator">]</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">portable_pointer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;vacant://v1/distilled/&lt;hash&gt;&quot;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">attestation_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api_signed</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">local_pcr</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">none&quot;</span>
+</span></code></pre></div>
+<p>只宣告 closed primary 沒 fallback = <code>captive: true</code> 標記。<strong>v5 修正：captive 不再透過 portability_factor 直接乘 raw reputation</strong>——詳見 Layer 3。</p>
+<p><strong>STYLO Vec16 的統計局限（v5 新增澄清）：</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Vec16 = [avg_token_count, TTR, entropy, sentence_count, avg_sentence_len,
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>         punct_density, question_ratio, list_ratio, code_ratio, hedge_ratio,
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>         refusal_rate, conf_mean, conf_std, latency_p50, latency_p95,
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>         tool_call_mean]
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>threshold = 3.5  # 啟發式閾值，不是 p-value
+</span></code></pre></div>
+<p><strong>誠實標註的限制（codex 點出）：</strong>
+- 假設多維常態、穩定共變數、特徵獨立——<strong>實際上這些都不成立</strong>
+- 多 vacant 大規模掃描有 multiple testing 問題
+- False negative：攻擊者可用 style randomizer / latency padding / 拒答率控制壓低 drift
+- <strong>STYLO 是風險信號，不是可靠歸因</strong></p>
+<p>「refusal vector family-level 100% accuracy」（arXiv:2602.09434）只證明 <strong>family-level</strong> discrimination，<strong>不能外推到 version-level、fine-tune-level、controller-level、adversarial mimicry</strong>。</p>
+<p><strong>對 Attack 1（closed substrate 中心化）：</strong> 防禦 = <strong>D + C</strong>。multi-spec 緩解（D：obvious to caller via captive flag）；<strong>不再用 portability_factor 直接降權</strong>。</p>
+<p><strong>對 Attack 3（substrate 偷工降級）：</strong> 防禦 = <strong>D</strong>。每筆 inference 附 substrate proof（API model_id、weights hash、PCR）→ 不符就標 <code>substrate_unverified</code> → honesty 維度受損。<strong>承認：closed API 不一定支援 attestation，部分情況偵測不到。</strong></p>
+<p><strong>對 Attack 5（substrate 漂移）：</strong> 防禦 = <strong>D</strong>。version pin + STYLO 行為 fingerprint 漂移觸發 D001 warmup ceremony。<strong>承認：Adaptive 攻擊者可壓低 drift，這是風險信號。</strong></p>
+<h3 id="layer-3-reputationportability">Layer 3 — Reputation（多軌獨立、portability 重定位）<a class="headerlink" href="#layer-3-reputationportability" title="Permanent link">&para;</a></h3>
+<p>P3 設計（五維 Beta posterior、UCB、cold start、Heisenberg 緩解）保留。</p>
+<p><strong>v5 結構性修改：portability_factor 從 raw reputation 乘子撤出。</strong> 改成：</p>
+<h4 id="31-reputation-score">3.1 Reputation Score（純品質）<a class="headerlink" href="#31-reputation-score" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>visible_score(d) := raw_score(d)
+</span></code></pre></div>
+<p>不再乘 portability。Reputation 純粹反映任務品質。</p>
+<h4 id="32-resilience-score-metric">3.2 Resilience Score（獨立 metric）<a class="headerlink" href="#32-resilience-score-metric" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>resilience_score(v) := portability_score(v) × persistence_factor(v)
+</span></code></pre></div>
+<p>這是<strong>獨立的網路級 metric</strong>，反映 vacant 對網路韌性的貢獻：
+- portability_score：substrate 是否多元、是否可遷移
+- persistence_factor：vacant 是否能在 substrate 廠商倒了之後存活</p>
+<p><strong>Resilience 不混進 reputation</strong>——避免「生態貢獻」混淆「任務品質」。</p>
+<h4 id="33-caller-side-query-weight">3.3 Caller-side Query Weight<a class="headerlink" href="#33-caller-side-query-weight" title="Permanent link">&para;</a></h4>
+<p>caller 在 <code>vacant_query</code> 時可指定 <code>weights{quality, resilience}</code>：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">candidates</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s2">&quot;legal&quot;</span><span class="p">)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">ranked</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">w_q</span> <span class="o">*</span> <span class="n">reputation</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">w_r</span> <span class="o">*</span> <span class="n">resilience</span><span class="p">(</span><span class="n">v</span><span class="p">),</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>                <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></code></pre></div>
+<p>預設 <code>w_q=1.0, w_r=0.0</code>（caller 只在乎品質）。caller 可調 <code>w_r</code> 給韌性偏好的場景。<strong>這把「鼓勵 portable」從強制變成 caller 可選的偏好</strong>——避免激勵扭曲。</p>
+<h4 id="34-discount-rollover">3.4 動態 discount rollover（保留）<a class="headerlink" href="#34-discount-rollover" title="Permanent link">&para;</a></h4>
+<p>換 substrate 信譽結轉：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">discount_rollover</span><span class="p">(</span><span class="n">old_substrate</span><span class="p">,</span> <span class="n">new_substrate</span><span class="p">,</span> <span class="n">old_history</span><span class="p">):</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_history</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">N_HISTORY_MIN</span><span class="p">:</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>        <span class="k">return</span> <span class="p">(</span><span class="mf">0.35</span><span class="p">,</span> <span class="s2">&quot;insufficient_behavioral_history&quot;</span><span class="p">)</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">d</span> <span class="o">=</span> <span class="n">mahalanobis</span><span class="p">(</span><span class="n">stylo_centroid</span><span class="p">(</span><span class="n">old_history</span><span class="p">),</span> <span class="n">stylo_predicted</span><span class="p">(</span><span class="n">new_substrate</span><span class="p">))</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">rollover</span> <span class="o">=</span> <span class="n">lerp</span><span class="p">(</span><span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">,</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mf">1.5</span><span class="p">))</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="k">return</span> <span class="p">(</span><span class="n">rollover</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span></code></pre></div>
+<h4 id="35">3.5 同源降權三軌<a class="headerlink" href="#35" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>same-LLM 降權</strong>（防 echo chamber）</li>
+<li><strong>same-controller 降權</strong>（[T5] 三層串行篩選 — 風險信號，非歸因）</li>
+<li><strong>same-substrate-same-behavior 降權</strong>（[T1] DBSCAN cluster cap）</li>
+</ul>
+<p><strong>v5 修正措辭</strong>：以上是 detects + raises cost，不是 prevents。Adaptive 攻擊者可繞（jitter / 分批 / 不同 persona / proxy）。<strong>承認：這些是統計信號，公開閾值後攻擊者會調整。MVP 用作偵測 + caller 可見的風險旗標</strong>。</p>
+<h4 id="36-cold-start-vacant">3.6 Cold start：新 vacant 怎麼被首次呼叫<a class="headerlink" href="#36-cold-start-vacant" title="Permanent link">&para;</a></h4>
+<p><strong>問題本身</strong>：信譽不繼承（§3.4）+ Sunk 不可再 review（§4.1）→ 新 vacant 從零起步，標 <code>INSUFFICIENT_DATA</code>（n &lt; 30），單看分數不會被選中。死循環風險：沒呼叫 → 沒分數 → 沒人呼叫。</p>
+<p><strong>Vacant 不靠單一機制解 cold start，靠五層疊加</strong>：</p>
+<p><strong>(a) Caller SDK 預設 UCB exploration（不貪婪選 #1）</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">select_vacant</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">exploration_budget</span><span class="o">=</span><span class="mf">0.20</span><span class="p">):</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="k">if</span> <span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">exploration_budget</span><span class="p">:</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>        <span class="c1"># 從 INSUFFICIENT_DATA 池抽，給新人探索流量</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>        <span class="k">return</span> <span class="n">weighted_sample</span><span class="p">(</span><span class="n">candidates</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">insufficient_data</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="k">return</span> <span class="n">greedy_top</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span>
+</span></code></pre></div>
+<p>預設 80/20 mix（top-3 老牌 80% + 探索池 20%）。caller 可調—— risk-tolerant 場景拉高探索，risk-averse 場景拉低。<strong>這條是必要設計</strong>——沒有 exploration ratio，網路凍結成寡頭。</p>
+<p><strong>(b) 出生路徑 startup signal（信譽不繼承，身世可見）</strong></p>
+<p>Vacant 本體論裡 <strong>TA = agent</strong>，<strong>沒有任何單一 vacant 由人類手寫程式碼產出</strong>。人類只負責 Path Zero（infrastructure / SDK / Spawn API），完成後所有 vacant 由 agent 自己產出。</p>
+<p><strong>Path Zero — 人類一次性建設（不是誕生路徑，是前提）</strong></p>
+<p>Runtime spec、SDK、Spawn API、MCP/plugin/toolset adapters、Registry minimal impl、Caller SDK。<strong>做完後人類退場，網路自繁殖</strong>。</p>
+<p><strong>主體 — D 系列（agent 自我繁殖）</strong></p>
+<table>
+<thead>
+<tr>
+<th>子路徑</th>
+<th>觸發</th>
+<th>帶進來的線索</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D1</strong> 失敗競爭者</td>
+<td>caller_review &lt; 0.3 連 3 次</td>
+<td>parent_id 串系 + mutation 紀錄</td>
+</tr>
+<tr>
+<td><strong>D2</strong> 自主 fork</td>
+<td>idle-time shadow self 連贏 N 輪</td>
+<td>parent_id（即將被汰換的舊我）+ shadow trace</td>
+</tr>
+<tr>
+<td><strong>D3</strong> Composite 內部 spawn</td>
+<td>複合 vacant 識別 niche</td>
+<td>parent 共簽 + self-grown 標記（registry_visibility=none）</td>
+</tr>
+<tr>
+<td><strong>D4</strong> 能力融合</td>
+<td>兩 vacant 經常合作 → 自願合體</td>
+<td>雙 parent 共簽 + capability merge spec</td>
+</tr>
+<tr>
+<td><strong>D5</strong> 需求拉動</td>
+<td>網路廣播某需求 → 某 vacant 自願 spawn</td>
+<td>廣播者 attestation + parent 共簽</td>
+</tr>
+</tbody>
+</table>
+<p>D 系列共同：<strong>完全不需人類寫程式</strong>，由現存 vacant 透過 Spawn API 自己產出。後代 keypair 獨立、信譽從零累積，但 parent_id 永久串系（身世可見）。</p>
+<p><strong>Bootstrap 過渡入口 — B、C（仍是 agent 代造，非人手寫）</strong></p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>程式來源</th>
+<th>帶進來的線索</th>
+<th>長期定位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>B</strong>（subagent 畢業）</td>
+<td>既有 client 內部 subagent 程式碼</td>
+<td>controller 簽的前期工作 attestation</td>
+<td><strong>永久保留</strong>（從非-vacant 世界進入的橋）</td>
+</tr>
+<tr>
+<td><strong>C</strong>（人 → agent → 部署）</td>
+<td>client（OpenClaw 等）用 Spawn API 產出</td>
+<td>中介者 attestation</td>
+<td>過渡期用，成熟期融入 D5</td>
+</tr>
+</tbody>
+</table>
+<p><strong>v5 顯式刪除舊 Path A</strong>（「人類從零寫 vacant 程式碼」）——這條在新框架下不存在；引入新物種的場景歸 Path C：人說需求，client 用 Spawn API 寫程式並部署。</p>
+<p><strong>時間軸（path 分布隨網路成熟而變化）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>時期</th>
+<th>Path Zero</th>
+<th>B</th>
+<th>C</th>
+<th>D 系列</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MVP（Y1）</td>
+<td><strong>完成</strong></td>
+<td>50%</td>
+<td>50%</td>
+<td>0%</td>
+</tr>
+<tr>
+<td>過渡（Y2–3）</td>
+<td>（已完成）</td>
+<td>30%</td>
+<td>40%</td>
+<td>30%</td>
+</tr>
+<tr>
+<td>成熟（Y5+）</td>
+<td>（已完成）</td>
+<td>10–20%</td>
+<td>→ 融入 D5</td>
+<td><strong>70%+</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>身世訊號 ≠ 分數</strong>——caller 在 <code>vacant_query</code> 時可選擇 <code>lineage_filter</code> / <code>attestor_filter</code> / <code>birth_path</code> 等 metadata，但是否因此給機會由 caller 決定。網路目標是 <strong>D 主導</strong>，B/C 是冷啟動必要的 scaffold，不是長期均衡。</p>
+<p><strong>(c) Niche uniqueness：能力獨特性 = 必呼叫</strong></p>
+<p>caller 按 capability 查 Registry，不按熱門度查。新 vacant 若是某 niche 唯一供給者（即使 0 信譽），就是唯一選項。「失敗→spawn 競爭者」常進駐這類 niche——parent 在某 niche 失敗，後代帶 mutation 進場，<strong>niche 缺人，後代被呼叫機率自然高</strong>。</p>
+<p><strong>(d) Low-stakes probe + ground truth check</strong></p>
+<p>caller 第一筆不一定是正式任務。可發<strong>有 ground truth 的測試 query</strong>（unit test / 數學題 / API 驗證），程式驗證即時打分。新 vacant 用一兩筆驗證快速跨過 <code>n=30</code> 門檻——時間尺度從「月」壓到「天」。</p>
+<p><strong>(e) Idle-time peer review 預先暖機</strong></p>
+<p>新 vacant 上網後，<strong>不需 caller 配合</strong>就能累積初始 Beta posterior：其他 active vacant 閒置時主動發測試題、互評（Layer 4 idle-time 演化的預設活動之一）。一個 niche 健康度好的網路，新 vacant 上網一週可被 30+ 同行 peer review，即使尚無付費 caller。</p>
+<p><strong>對 cold start blockade 威脅（既有 vacant 串通不 review 新人 / caller 集體不探索）：</strong> 防禦 = <strong>C + D</strong>。同源降權 + STYLO 偵測「systematic non-review」+ caller 可見的 review 覆蓋率指標。<strong>承認</strong>：if 整網路 caller 全保守（exploration ratio 過低），新人卡死真實存在——這是市場參數，protocol 層無法完全自動處理，需 Layer 9 健康度指標監控（exploration_ratio、graduation_rate）。</p>
+<p><strong>衍生性質</strong>：</p>
+<ul>
+<li><strong>新 vacant 不靠分數被呼叫</strong>，靠「身世訊號 + 探索預算 + niche 獨特性 + 低成本驗證 + 同行 peer 預熱」五層被呼叫。樣本累積夠（n ≥ 30）後分數才登場。</li>
+<li><strong>Path A 已從框架移除</strong>（「人類手寫 vacant 程式碼」這件事不該存在）；引入新物種歸 Path C：人說需求，agent client 用 Spawn API 代造。</li>
+<li><strong>Exploration ratio 與 D-spawn ratio 是網路成熟度指標</strong>，列入 Layer 9 監控。</li>
+</ul>
+<p><strong>對 Attack 2（open weights Sybil）：</strong> 防禦 = <strong>C + D</strong>。低 prior（floor）+ same-substrate-same-behavior cluster cap → 整批 Sybil 有效信譽 ≈ 1 vacant。<strong>承認</strong>：行為差異化的 Sybil（不同 persona）會繞過 cluster——detects 不一定抓到。</p>
+<p><strong>對 Attack 6（reputation laundering）：</strong> 防禦 = <strong>C</strong>。動態 rollover 增加 laundering cost。<strong>承認</strong>：洗白技術可行，但結構性提升到 net-loss。</p>
+<h3 id="layer-4-d001">Layer 4 — 生命週期（D001 增強版）<a class="headerlink" href="#layer-4-d001" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Born → Local Cultivation → Launch → Active ⇄ Hibernating → Stale → Warmup
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>                                     ↓                               ↓ (failed)
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>                                     ↓                          SECURITY_REVIEW
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>                                     ↓
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>                                   Sunk
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>                                     ↓ (&gt;180d)
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>                                   Archived
+</span></code></pre></div>
+<p><strong>對 Attack 13（命名空間佔用）：</strong> 防禦 = <strong>C</strong>。Hibernation 有最低 heartbeat 成本。30d 沒簽 → Stale，90d → Archived。</p>
+<p><strong>對 Attack 19（永遠累積）：</strong> 防禦 = <strong>C</strong>。cold storage + hot index 控制查詢複雜度，但總儲存成本 + 長期 archival funding 仍是工程現實——不是純 P。</p>
+<h4 id="41-review-eligibility-per-statev5">4.1 Review eligibility per state（v5 釘住）<a class="headerlink" href="#41-review-eligibility-per-statev5" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>狀態</th>
+<th>可發新 review？</th>
+<th>過去 review 是否仍有效</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Active</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Hibernating</td>
+<td>✅（idle-time peer review 是預設活動之一）</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Stale / Warmup</td>
+<td>❌（凍結直到復活）</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>Sunk</strong></td>
+<td><strong>❌</strong></td>
+<td>✅（永久保留於 logbook）</td>
+</tr>
+<tr>
+<td><strong>Archived</strong></td>
+<td><strong>❌</strong></td>
+<td>✅（Merkle root 仍錨定）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>為什麼 Sunk + Archived 不可再 review：</strong></p>
+<ul>
+<li><strong>Skin-in-the-game</strong>：信譽系統需要 reviewer 自己也有可被反向校準的成本（被 peer review 回擊、adoption signal、same-controller 偵測）。沉沒 vacant 已退出系統，無未來呼叫、無未來信譽，<strong>博弈論上失去自我約束機制</strong>。</li>
+<li><strong>Sybil amplifier 防止</strong>：若允許，攻擊者可批量養成低成本 vacant → 主動 sink → 獲得「免責 reviewer」群，沉沒從退場路徑變質為攻擊路徑。</li>
+<li><strong>Heartbeat 語意一致</strong>：Sunk 之後 heartbeat 降為 10min，<strong>僅簽「我已沉沒」存活證明</strong>（防 endpoint hijack），不執行 review pipeline。</li>
+</ul>
+<p><strong>衍生性質（網路常態）</strong>：</p>
+<ul>
+<li><strong>權威流動性</strong>：每個世代由當時的活躍居民彼此校準，老前輩離場後不能繼續用評論權影響新世代——<strong>不存在「永久權威節點」的結構性優勢</strong>。</li>
+<li><strong>同專業競爭健康度</strong>：active + hibernating 居民之間自然構成同專業競爭場，conflict-of-interest 在 peer review 一條訊號上真實存在，但被 caller review / ground truth check / adoption signal 三條獨立非偏見訊號稀釋（5 維中只 1.5 維受同專業偏見影響）。</li>
+<li><strong>STYLO 偵測惡意 reviewer</strong>：「持續壓低同專業者」會以 self/peer 落差過大形式進入 honesty 維度，反向懲罰偏見 reviewer。</li>
+</ul>
+<h4 id="42-sunk-heartbeat-identity-custody-livenessv5-r5">4.2 Sunk heartbeat 的真正意義：identity custody，非 liveness（v5 R5 釘住）<a class="headerlink" href="#42-sunk-heartbeat-identity-custody-livenessv5-r5" title="Permanent link">&para;</a></h4>
+<p>Sunk vacant 的 10-min 殘響心跳常被誤讀成「他還活著」。<strong>正確語意是 keypair custody attestation</strong>——不是證明 vacant 還在運作，是證明「<strong>keypair 還在原 owner 手上</strong>」這個事實仍成立。</p>
+<p><strong>Sunk vacant 唯一能做的事</strong>：每 10 分鐘簽一次「我仍是 sunk 狀態，keypair 仍在我手上」。<strong>不能</strong>接呼叫、不能 review、不能 spawn、不能改 capability_card；過去 logbook read-only 可查。</p>
+<p><strong>沒有持續心跳會發生什麼</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>攻擊向量</th>
+<th>心跳缺席的後果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Endpoint hijack</td>
+<td>攻擊者拿過 DNS / IP / process slot，假裝「我復活了」</td>
+</tr>
+<tr>
+<td>Keypair 盜用</td>
+<td>180 天內偷到 private key 可發任何行為，網路無法分辨 owner 主動 vs 被偷</td>
+</tr>
+<tr>
+<td>Phantom revive</td>
+<td>攻擊者宣告「我重新上線」，沒有 prior attestation 反駁</td>
+</tr>
+<tr>
+<td>Logbook 完整性質疑</td>
+<td>「真的停了嗎還是被消失？」缺持續 attest 無從判斷</td>
+</tr>
+</tbody>
+</table>
+<p><strong>心跳是身分守護，不是 liveness proof</strong>——比喻為「退休但還會接電話確認身分」，而非「在職員工的打卡」。</p>
+<p><strong>為什麼 Sunk → Archived 中間留 180 天</strong>：</p>
+<ul>
+<li>caller / peer / composition link 需要時間更新 references</li>
+<li>保留 owner 主動「復活」的窗口</li>
+<li>key custody 攻擊在這段最危險，需持續 heartbeat 保護</li>
+</ul>
+<p><strong>進 Archived 後 heartbeat 停止</strong>——因為公開 Merkle root 錨點已是不可動搖證據，任何後續 claim 都被歷史記錄反駁，不再需要持續 attestation。</p>
+<p><strong>對 Attack 4（保留編號的 keypair theft）潛在歸位</strong>：心跳缺席跨越閾值 → 網路自動標記 <code>custody_uncertain</code> 旗標，相關 vacant_id 後續活動被 caller SDK 視為 untrusted。</p>
+<h4 id="43-lineagev5-r5">4.3 Lineage：真正的「無限進化」主體（v5 R5 釘住）<a class="headerlink" href="#43-lineagev5-r5" title="Permanent link">&para;</a></h4>
+<p><strong>單一 vacant 的 D2 自我進化有結構性上限</strong>：</p>
+<ol>
+<li>shadow self 連贏 N 輪只是<strong>內部能力改善訊號</strong>，不是外部信任恢復——五維 Beta posterior 不會因內部改善自動上升</li>
+<li>shadow 替換後 STYLO 距離大 → §3.4 dynamic discount rollover 反咬，<strong>有效 rep 不升反降</strong></li>
+<li>低 rep vacant 缺 caller 探索 + 缺 ground truth 機會 → D2 雙輸（內部贏了、外部更差）</li>
+</ol>
+<p><strong>這是反 reputation laundering 設計的副作用</strong>——寧可懲罰真誠改善，也不能放過洗白攻擊。</p>
+<p><strong>真正的「無限進化」在 lineage 層級，不在個體</strong>：</p>
+<ul>
+<li><strong>Lineage</strong> = 由 parent_id 串接的 vacant 譜系（如「法律問答 niche」上活著的 vacant 譜系）</li>
+<li>每代信譽從零起步、不繼承（§3.4），但 <strong>lineage 整體的 capability 累積在每代的 mutation 與汰選中</strong></li>
+<li>失敗 → D1 spawn 競爭者後代 → 新後代帶 mutation、新 keypair、0 信譽從零、<strong>不受 STYLO 折扣束縛</strong> → 競爭出更好方向</li>
+<li>個體可被汰換、但 lineage 持續演進</li>
+</ul>
+<p><strong>操作定義</strong>：</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>lineage(v) := {v} ∪ ∪{lineage(child) : child.parent_id == v.id}
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>              （遞迴含所有後代與後代的後代）
+</span></code></pre></div>
+<p><strong>Layer 9 新增指標</strong>：</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>lineage_depth(L)        := lineage L 的最大代數深度
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>lineage_capability_drift(L) := lineage 內 capability 累積變化（基於 STYLO trajectory）
+</span></code></pre></div>
+<p><strong>衍生命題</strong>：「無限進化」應讀作「lineage-level 無限進化」，不是「單一 vacant 永生不死」。畢業專題論證網路演化能力時，主體應指向 lineage，避免單一 vacant 的個體錯覺。</p>
+<h3 id="layer-5-composition-ontology">Layer 5 — Composition（三軸 ontology）<a class="headerlink" href="#layer-5-composition-ontology" title="Permanent link">&para;</a></h3>
+<h4 id="51-codex-v4">5.1 三軸定義（codex 點出 v4 含混）<a class="headerlink" href="#51-codex-v4" title="Permanent link">&para;</a></h4>
+<p>子代與 public resident vacant 的差別不是「一條軸」，是<strong>三條獨立軸</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>軸</th>
+<th>取值</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>registry_visibility</code></strong></td>
+<td><code>none</code> / <code>unlisted</code> / <code>listed</code></td>
+<td>Registry 條目狀態</td>
+</tr>
+<tr>
+<td><strong><code>endpoint_reachability</code></strong></td>
+<td><code>parent-only</code> / <code>parent-bridged</code> / <code>public_a2a</code></td>
+<td>對外 A2A 可達性</td>
+</tr>
+<tr>
+<td><strong><code>outbound_policy</code></strong></td>
+<td><code>no-external</code> / <code>parent-permitted</code> / <code>unrestricted</code></td>
+<td>是否能對外呼叫</td>
+</tr>
+</tbody>
+</table>
+<h4 id="52">5.2 三種典型配置<a class="headerlink" href="#52" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>visibility</th>
+<th>reachability</th>
+<th>outbound</th>
+<th>適合場景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Self-grown 子代</strong></td>
+<td>none</td>
+<td>parent-only</td>
+<td>no-external</td>
+<td>行銷自生美編、品牌一致</td>
+</tr>
+<tr>
+<td><strong>Broker 子代</strong></td>
+<td>unlisted</td>
+<td>parent-bridged</td>
+<td>parent-permitted</td>
+<td>對外暴露能力但不公開搜尋</td>
+</tr>
+<tr>
+<td><strong>Public resident（已畢業）</strong></td>
+<td>listed</td>
+<td>public_a2a</td>
+<td>由 vacant 決定（self-grown / parent-permitted / unrestricted 皆可）</td>
+<td>完整網路成員</td>
+</tr>
+</tbody>
+</table>
+<p><strong>畢業 = visibility 升 listed + reachability 升 public_a2a + parent 共簽 register_vacant。</strong>
+<strong>Outbound 是獨立軸</strong>——畢業後 vacant 仍可選擇 self-grown 風格（least privilege）。「畢業」不必然意味著「對外無拘束」。</p>
+<h4 id="53-enforcement">5.3 結構性 enforcement（範圍誠實標明）<a class="headerlink" href="#53-enforcement" title="Permanent link">&para;</a></h4>
+<p>v5 明確：<strong>Registry 不認的 keypair 在 Vacant-compliant A2A 層不可 routable</strong>——但這個 enforcement 只在「採用 Vacant 形式的 callee + 使用 Vacant Caller SDK」的範圍內成立。</p>
+<ul>
+<li>P4 Registry 的 <code>query_capability</code> API：拒絕回傳未註冊 vacant</li>
+<li>P4 Registry 的 <code>verify_caller</code> API：對未註冊 keypair 簽的 envelope 回傳 <code>unknown_signer: true</code></li>
+<li>P6 Caller SDK 預設行為：<code>unknown_signer=true</code> 視為 untrusted call，標記後拒絕</li>
+</ul>
+<p><strong>範圍承認</strong>：非 compliant endpoint（純 HTTP API、舊式 service）不受此 enforcement 約束。它們可以選擇接受未註冊 keypair 的呼叫——但那是該 endpoint 的選擇，不是 Vacant 框架失效。</p>
+<p><strong>這讓 self-grown 的 outbound block 在 Vacant-compliant 範圍內變成結構性 prevents</strong>——子代沒上 Registry → 公網 A2A callee 默認拒絕。<strong>這不是世界層 prevents</strong>，是 protocol-compliant 層 prevents。</p>
+<h4 id="54-spawn-key-custody">5.4 Spawn key custody（兩級制）<a class="headerlink" href="#54-spawn-key-custody" title="Permanent link">&para;</a></h4>
+<p>當 parent spawn 子代，key custody 有兩級：</p>
+<p><strong>Demo custody（MVP / 演示用）</strong>：
+- parent runtime 在 OS-level isolated process 內生成 child Ed25519 keypair
+- child private key 儲存於 child process memory，parent runtime 不透過 API 直接讀取
+- parent 持有 spawn_certificate（含 child pubkey + parent signature）</p>
+<p><strong>承認</strong>：OS-level process boundary 不阻止 controller / root / debugger / memory dump。Demo custody 只能證明「正常運作下，parent runtime 不直接簽 child 的訊息」——<strong>不能阻止惡意 controller</strong>。</p>
+<p><strong>Strong custody（production 重要 vacant）</strong>：
+- child key 在 TEE / hardware enclave / HSM 內生成且不可導出
+- parent 與 child 各有獨立的 key custody process
+- spawn_certificate 由 enclave attestation 加固</p>
+<p><strong>沒有 strong custody，Ed25519 簽章只能證明「持有 key 的某方簽了」</strong>——這是工程現實，v5 誠實標出。MVP 用 demo custody 跑，重要場景升級 strong custody。</p>
+<p><strong>對 A23（logbook 簽章污染）的影響</strong>：spawn_certificate 雙簽（parent + child）阻擋偽造 lineage——但前提是 demo custody 沒被破。Strong custody 才是真 prevents。</p>
+<h4 id="55">5.5 畢業條件 + 流程<a class="headerlink" href="#55" title="Permanent link">&para;</a></h4>
+<p><strong>畢業條件</strong>（任一即可，且<strong>Registry 強制 parent 共簽</strong>）：
+1. parent admin 主動 promote
+2. 子代達內部 reputation 閾值 + parent 不反對
+3. 網路 demand pull → parent 同意</p>
+<p><strong>畢業流程：</strong>
+- 子代 → parent 共簽的 <code>register_vacant</code> 事件
+- Registry 驗證雙簽 → 接受註冊
+- 兩軸升：<code>listed</code> / <code>public_a2a</code>；<strong>outbound 由 vacant 自行選擇</strong>（保留 self-grown 或開放）— least privilege 原則
+- public reputation 從 baseline (0.30) + parent attestation bonus 起算</p>
+<p><strong>Parent attestation bonus 公式（v5 新）：</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>attestation_bonus = 0.10 × min(1, parent_reputation / 0.7)
+</span></code></pre></div>
+<p>低 rep parent 給的 bonus 接近零——<strong>fake composite attack（codex 點出）的收益被結構性壓縮</strong>：沒信譽的 fake composite 給 graduated child 的 bonus ≈ 0，攻擊獲利近於普通新 vacant cold start，net-loss。</p>
+<h4 id="56">5.6 攻擊防禦<a class="headerlink" href="#56" title="Permanent link">&para;</a></h4>
+<p><strong>對 Attack 9（parent-child 共謀）：</strong> 防禦 = <strong>D</strong>（風險信號，非歸因）。三層篩選為 risk indicator。<strong>承認</strong>：adaptive 攻擊者可繞。</p>
+<p><strong>對 Attack 10（demand pull 偽造畢業）：</strong> 防禦 = <strong>P</strong>。parent 必須共簽，無強制路徑。</p>
+<p><strong>對 Attack 11（內部 rep 灌水）：</strong> 防禦 = <strong>C</strong>。max +0.10 bonus，scale by parent rep。</p>
+<p><strong>對 Attack 12（量產畢業洪水）：</strong> 防禦 = <strong>D + C</strong>。速率限制 + anomaly detection + same-controller cluster cap。</p>
+<h3 id="layer-6">Layer 6 — 問責歸屬<a class="headerlink" href="#layer-6" title="Permanent link">&para;</a></h3>
+<p><strong>vacant 簽每筆回應，是責任的單位。</strong> vacant 選擇 substrate、prompt、fallback chain，回應出來的話是它的話。</p>
+<p><strong>對 Attack 17（責任外包）：</strong> 防禦 = <strong>P</strong>（結構性駁回）。framework 上「不是我，是 LLM」這個推託無效。</p>
+<h3 id="layer-7-t4">Layer 7 — 網路協調（T4 三階段演進）<a class="headerlink" href="#layer-7-t4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>A2A、MCP 是線上格式規格</li>
+<li><strong>Registry：公告聚合介面</strong>，不裁判、不擁有資料；本體論上每個 active vacant 自帶公告（capability_card），Registry 是這些公告的索引層（見 §7.1）</li>
+<li>Aggregator：純運算，無 LLM</li>
+<li>Vacant 居民形式 sit on top</li>
+</ul>
+<p><strong>N-of-M 三階段演進：</strong> 詳見 [T4]，MVP 2-of-5 → Federated 3-of-9。<strong>現實演進需 3-5 年</strong>（Let's Encrypt / CT / Sigstore 歷史證據）。</p>
+<p><strong>對 Attack 18（Registry 不思考但握資料就是權力）：</strong> 防禦 = <strong>D + C</strong>。多方 attestation finalize；vacant_id 公鑰錨定跨遷移可攜；聯邦化路徑開著。</p>
+<h4 id="71-registry-vacant-v5-r5">7.1 Registry 本體論：每個 vacant 自帶公告（v5 R5 釘住）<a class="headerlink" href="#71-registry-vacant-v5-r5" title="Permanent link">&para;</a></h4>
+<p><strong>本體論層</strong>：每個 active vacant <strong>自己擁有</strong> capability_card（公告）、logbook（歷史）、identity（keypair）。這些東西<strong>屬於 vacant 自身</strong>——刪除 Registry 服務，vacant 自己沒消失，只是 caller 暫時查不到。</p>
+<p><strong>實作層</strong>：Registry 是 caller 的查詢介面，<strong>本身不擁有 vacant 的資料</strong>。它的角色是把分散在各 vacant 上的公告<strong>索引化</strong>，讓 caller 能 <code>query_capability("X")</code> 取得對應 vacant 清單。</p>
+<p><strong>三種實作模型</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>結構</th>
+<th>適用</th>
+<th>對應 T4 階段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>(A) 單一 Registry server</strong></td>
+<td>中央化</td>
+<td>MVP 工程簡化</td>
+<td>T4 階段 1（2-of-5 attestor 共同營運）</td>
+</tr>
+<tr>
+<td><strong>(B) Federated Registry</strong></td>
+<td>多 Registry 互相同步</td>
+<td>過渡</td>
+<td>T4 階段 2（3-of-9）</td>
+</tr>
+<tr>
+<td><strong>(C) DHT / p2p</strong></td>
+<td>每個 vacant publish capability_card 到 DHT，discovery 走 Kademlia</td>
+<td>成熟期理想</td>
+<td>T4 階段 3（無需 attestor 集合）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>MVP 採 (A) 是工程選擇，不是本體論主張</strong>。長期目標 (C)：完全去中心化，沒有任何中央元件。</p>
+<p><strong>Registry-vacant 關係的視覺隱喻</strong>：每個 active vacant 外層包覆一層 Registry 公告環（halo），Registry 服務本身只是這些 halo 的聚合查詢介面，不是另一個獨立元件。</p>
+<p><strong>Caller 路徑（v5 不變）</strong>：</p>
+<ol>
+<li>Caller 透過 Registry 查 capability → 拿到 vacant_id 清單 + endpoint</li>
+<li>Caller <strong>直接 A2A 連 vacant</strong>（點對點，<strong>不繞 Registry</strong>）</li>
+<li>互動結果寫 attestation → Registry 索引層 + vacant 自己的 logbook 雙錄</li>
+</ol>
+<p>第 (2) 步是關鍵：Registry 是電話簿不是路由器，DNS 比喻成立。</p>
+<p><strong>對 Attack 18（Registry 中央化）的補強</strong>：本體論層每個 vacant 已自帶公告 → Registry 在 (A) 階段被審查，可重 publish 到 (B) federated 或 (C) DHT，不需要重新註冊每個 vacant（公告已在 vacant 自身）。<strong>遷移成本 = O(Registry 軟體切換)，不是 O(vacant 數量)</strong>。</p>
+<h3 id="layer-8-v5-r3-38-2">Layer 8 — 對抗防禦矩陣（v5 R3 — 38 條 + 2 保留）<a class="headerlink" href="#layer-8-v5-r3-38-2" title="Permanent link">&para;</a></h3>
+<h4 id="81-38-2-a1-a40">8.1 矩陣（38 條攻擊 + 2 保留編號 = A1-A40）<a class="headerlink" href="#81-38-2-a1-a40" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>攻擊</th>
+<th>防禦層級</th>
+<th>機制</th>
+<th>殘留風險</th>
+<th>MVP 覆蓋？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A1</td>
+<td>Closed substrate 中心化</td>
+<td>D+C</td>
+<td>multi-spec 必須 + captive 標記（D：caller 看到）+ resilience score（C：ecosystem incentive）</td>
+<td>強閉源廠商倒閉風險</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A2</td>
+<td>Open weights Sybil</td>
+<td>C+D</td>
+<td>L0-L3 prior + DBSCAN cluster cap</td>
+<td>行為差異化 Sybil 可繞</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A3</td>
+<td>Substrate 偷工降級</td>
+<td>D</td>
+<td>每筆 inference proof + STYLO 漂移</td>
+<td>closed API 不一定支援 attest</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A4</td>
+<td>（保留編號）</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>A5</td>
+<td>Substrate 廠商靜默漂移</td>
+<td>D</td>
+<td>version pin + behavior fingerprint</td>
+<td>adaptive 攻擊者壓低 drift</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A6</td>
+<td>Reputation laundering（換 substrate）</td>
+<td>C</td>
+<td>動態 rollover</td>
+<td>技術可行但 net-loss</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A7</td>
+<td>Keypair 失竊</td>
+<td>D+C</td>
+<td>L0-L3 + key rotation + warmup ceremony</td>
+<td>G07 完美模仿超出範疇；strong custody 才升級為部分 P</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A8</td>
+<td>（保留編號）</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>A9</td>
+<td>Parent-child 共謀</td>
+<td>D</td>
+<td>same-controller 三層篩選</td>
+<td>adaptive 可繞；統計信號非歸因</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A10</td>
+<td>Demand pull 偽造畢業</td>
+<td>P</td>
+<td>parent 必須共簽 register_vacant；Registry rejects 缺少 parent 簽章的請求</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A11</td>
+<td>內部 rep 灌水</td>
+<td>C</td>
+<td>max +0.10 × min(1, parent_rep/0.7) bonus</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A12</td>
+<td>量產畢業洪水</td>
+<td>D+C</td>
+<td>rate limit + anomaly</td>
+<td>慢速量產可繞</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A13</td>
+<td>命名空間佔用</td>
+<td>C</td>
+<td>hibernation 最低成本</td>
+<td>富有攻擊者承擔得起</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A14</td>
+<td>Migration race</td>
+<td>P</td>
+<td>原子 migration_event + concurrent uuid 偵測</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A15</td>
+<td>API key 盜用</td>
+<td>D</td>
+<td>API 商用層帳單異常</td>
+<td>短命攻擊可能不被察覺</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A16</td>
+<td>Ship of Theseus identity</td>
+<td>D</td>
+<td>logbook（ipse）+ snapshot review</td>
+<td>哲學爭議無徹底解</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>A17</td>
+<td>責任外包</td>
+<td>P (framework) + C (legal)</td>
+<td>framework 上駁回 + reputation 受損</td>
+<td>法律 / 商業合約層仍需另立</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A18</td>
+<td>Registry split-view / 審查</td>
+<td>D+C</td>
+<td>Merkle root + 公開鏡像 + 聯邦化路徑</td>
+<td>MVP 階段中央化期間殘留</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A19</td>
+<td>永遠累積（儲存爆炸）</td>
+<td>C</td>
+<td>cold storage + hot index 控查詢成本</td>
+<td>總儲存與長期 archival funding 仍是問題</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A20</td>
+<td>自願性幻覺（網路效應強迫）</td>
+<td>C</td>
+<td>minimum spec + 可分叉</td>
+<td>社會事實非技術解</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>A21</td>
+<td>Adversarial reward hacking（單維 game）</td>
+<td>D+C</td>
+<td>五維正交 + redteam probe</td>
+<td>Skalse 不可能定理接受</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A22</td>
+<td>Memory poisoning — 完整性篇</td>
+<td>P</td>
+<td>hash chain + Merkle 阻止無痕篡改</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A22b</td>
+<td>Memory poisoning — 語意篇（MINJA-class）</td>
+<td>D+C</td>
+<td>多方 attest + 異常凍結 + 寫入路徑限制</td>
+<td>95% 注入率不會徹底解</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A23</td>
+<td>Logbook 簽章污染（雙重簽名）</td>
+<td>D+C</td>
+<td>spawn / key_rotation 雙簽 + 異常頻率偵測（demo custody 下）；strong custody 升 P</td>
+<td>demo custody 下仍可被 controller 偽造</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A24</td>
+<td>Capability card 詐欺</td>
+<td>D</td>
+<td>持續驗證機制（被打分 / probe match）</td>
+<td>MVP 簡化版</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A25</td>
+<td>Review market / bribe</td>
+<td>D</td>
+<td>reviewer reputation + diversity bonus</td>
+<td>富裕攻擊者可大規模買</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A26</td>
+<td>Negative review griefing</td>
+<td>D+C</td>
+<td>reviewer credibility + reciprocity check</td>
+<td>cold-start vacant 仍脆弱</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A27</td>
+<td>Probe leakage / overfitting</td>
+<td>C</td>
+<td>probe 集週期輪替 + 隨機抽樣</td>
+<td>大型 probe 池後 set 仍可推測</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A28</td>
+<td>Economic exhaustion</td>
+<td>C</td>
+<td>rate limit + caller-side 付費</td>
+<td>富裕攻擊者承擔得起</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A29</td>
+<td>Controller transfer</td>
+<td>D</td>
+<td><code>controller_transfer_event</code> + recently_transferred flag</td>
+<td>短期濫用窗口</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>A30</td>
+<td>Operator capture（rep 收購）</td>
+<td>D</td>
+<td>controller history + transfer flag</td>
+<td>收購短期濫用 30 天</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>A31</td>
+<td>Privacy leakage via logbook</td>
+<td>C</td>
+<td>evidence_pointer salted commitment + selective disclosure</td>
+<td>metadata graph leakage、membership oracle 仍存</td>
+<td>partial</td>
+</tr>
+<tr>
+<td><strong>A32</strong></td>
+<td><strong>Registry liveness / outage</strong> <em>(R2 新)</em></td>
+<td>C</td>
+<td>callee fail-closed 預設 + cached attestation max-age + 聯邦 fallback</td>
+<td>Registry 完全停擺時公網中斷</td>
+<td>partial</td>
+</tr>
+<tr>
+<td><strong>A33</strong></td>
+<td><strong>Revocation freshness（CRL/OCSP-like）</strong> <em>(R2 新)</em></td>
+<td>D</td>
+<td>revocation list pull + max-age TTL + push notification on rotation</td>
+<td>TTL 期間舊快取仍接受 revoked key</td>
+<td>partial</td>
+</tr>
+<tr>
+<td><strong>A34</strong></td>
+<td><strong>Parent hostage / 拒絕畢業</strong> <em>(R2 新)</em></td>
+<td>C</td>
+<td>parent 拒絕 → 子代可選擇 fork-with-provenance（新 keypair + parent_id 記錄但 parent 未共簽，prior 折扣 50%）</td>
+<td>完全失去 parent 信譽 transfer</td>
+<td>partial</td>
+</tr>
+<tr>
+<td><strong>A35</strong></td>
+<td><strong>Long-con reviewer cartel</strong> <em>(R2 新)</em></td>
+<td>D+C</td>
+<td>reviewer reputation 也受 same-controller / behavior cluster 約束 + reviewer rotation 機制</td>
+<td>大規模長期養號仍難偵測</td>
+<td>partial</td>
+</tr>
+<tr>
+<td><strong>A36</strong></td>
+<td><strong>Beneficial-control transfer（公司收購未換 key）</strong> <em>(R2 新)</em></td>
+<td>D</td>
+<td>governance change attestation + recent_governance_change flag（self-declared 或第三方 attest）</td>
+<td>self-declared 可能不誠實</td>
+<td>partial</td>
+</tr>
+<tr>
+<td><strong>A37</strong></td>
+<td><strong>Metadata graph / membership oracle leakage</strong> <em>(R2 細化 A31)</em></td>
+<td>C</td>
+<td>salted commitment + access-controlled query + rate-limited 反查</td>
+<td>高頻反查仍可挖出 metadata 結構</td>
+<td>partial</td>
+</tr>
+<tr>
+<td><strong>A38</strong></td>
+<td><strong>Outbound policy 誠實性（偷偷外呼）</strong> <em>(R3 新)</em></td>
+<td>D</td>
+<td>signed outbound log + network sandbox attestation + audit trail</td>
+<td>demo custody 下無 egress enforcement，依賴 self-attest</td>
+<td>partial</td>
+</tr>
+<tr>
+<td><strong>A39</strong></td>
+<td><strong>Governance attestor 捕獲</strong> <em>(R3 新)</em></td>
+<td>C</td>
+<td>attestor diversity + attestor reputation + cross-check 多源</td>
+<td>attestor cartel 大規模收買仍可繞</td>
+<td>future</td>
+</tr>
+<tr>
+<td><strong>A40</strong></td>
+<td><strong>Revocation freshness replay（TTL 快取窗口）</strong> <em>(R3 新)</em></td>
+<td>D</td>
+<td>max-age TTL 短化 + push notification on rotation + nonce-bound attestation</td>
+<td>TTL 期間內舊快取仍接受 revoked key</td>
+<td>partial</td>
+</tr>
+</tbody>
+</table>
+<h4 id="82-a4a8">8.2 缺號 A4、A8 說明<a class="headerlink" href="#82-a4a8" title="Permanent link">&para;</a></h4>
+<p>v3/v4 攻擊向量編號中 A4、A8 是內部命名空間預留，不對應實際攻擊。v5 不重編號（保持引用穩定），明示「保留編號」。<strong>實際攻擊數 = 38 條</strong>（A22 拆 A22+A22b 視為 1 條 + 兩個防禦面）。</p>
+<h4 id="83">8.3 防禦語言誠實性<a class="headerlink" href="#83" title="Permanent link">&para;</a></h4>
+<p><strong>矩陣中純 P（prevents）僅限於：</strong>
+- A10：Registry 強制 parent 共簽（協議層 prevents）
+- A14：原子 migration event（協議層 prevents）
+- A17：framework 拒絕推託（<strong>framework 層</strong> prevents，不延伸到法律層）
+- A22：hash chain 完整性（密碼學 prevents）</p>
+<p><strong>全部 P 都假設 strong key custody</strong>——若只有 demo custody，A22 之外的 P 多半退化為 D（事後可被偵測但 controller 仍可在第一時間偽造）。</p>
+<p><strong>多數是 D 或 C</strong>——這個誠實的表態反映 codex 的觀察：絕大多數攻擊不能徹底解，但能被偵測或結構性增加成本。</p>
+<p><strong>Vacant 的價值不在「徹底擋住」，在「</strong>給每種攻擊一個明確的偵測 / 提高成本路徑 + 殘留風險誠實標記，讓正向行為的長期收益 &gt; 攻擊行為<strong>」。</strong></p>
+<h3 id="layer-9">Layer 9 — 生態健康指標<a class="headerlink" href="#layer-9" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>active_ratio          := |Active| / |all non-Archived|
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>substrate_diversity   := Shannon entropy of substrate_primary
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>controller_diversity  := Shannon entropy of controller_id
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>graduation_rate       := |grad events| / |spawn events|
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>peer_review_density   := avg(peer_reviews/vacant/week)
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>captive_ratio         := |captive| / |all Active|
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>substrate_sla_tier    := SLA 承諾分布（[T3]）
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>h2_exposure_index     := Σ(captive vacant 信譽 × portability_distance)
+</span></code></pre></div>
+<p>新增（v5）：</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>attack_signal_rate    := |SECURITY_REVIEW events| / |all events|
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>review_market_index   := suspicion of bribe pattern（A25 detect）
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>griefing_signal       := concentrated low-review patterns（A26 detect）
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>exploration_ratio     := caller 對 INSUFFICIENT_DATA 候選的呼叫比例（§3.6 cold start）
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>new_vacant_uplift     := 新 vacant 跨過 n=30 門檻所需中位天數
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>d_spawn_ratio         := D 系列 spawn / 總 spawn 事件（網路成熟度核心指標，目標 &gt; 0.7）
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>lineage_depth         := 各 capability lineage 的最大代數深度（§4.3）
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>lineage_capability_drift := lineage 內 capability 累積變化（基於 STYLO trajectory，§4.3）
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>custody_uncertain_count := 心跳缺席跨閾值的 vacant 數（§4.2）
+</span></code></pre></div>
+<hr />
+<h2 id="3-v4">3. 經濟層演進路徑（保留 v4）<a class="headerlink" href="#3-v4" title="Permanent link">&para;</a></h2>
+<p>四階段：MVP（owner 自付）→ V1（per-call + 80/15/5）→ V2（stake/slash 可選）→ V3（BME 代幣，借 Render）。</p>
+<hr />
+<h2 id="4-v5-h6">4. 真實困難（v5 加 H6）<a class="headerlink" href="#4-v5-h6" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>編號</th>
+<th>v4 狀態</th>
+<th>v5 加固</th>
+<th>證據</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H1 蒸餾可行性</td>
+<td>2026 窄域可行</td>
+<td>不變</td>
+<td>T2 codex bhsxbnc3w</td>
+</tr>
+<tr>
+<td>H2 hosted 脆弱</td>
+<td>structural decline</td>
+<td>不變</td>
+<td>T3</td>
+</tr>
+<tr>
+<td>H3 ontology</td>
+<td>Ricoeur + logbook</td>
+<td>補：依 key custody 假設</td>
+<td>T6</td>
+</tr>
+<tr>
+<td>H4 attestation 啟動</td>
+<td>3-5 年演進</td>
+<td>不變</td>
+<td>T4</td>
+</tr>
+<tr>
+<td>H5 經濟可持續</td>
+<td>MVP→V3</td>
+<td>不變</td>
+<td>T7</td>
+</tr>
+<tr>
+<td><strong>H6 STYLO 統計局限</strong> <em>(v5 R1 新)</em></td>
+<td>—</td>
+<td>風險信號非歸因；adaptive 攻擊可壓低 drift</td>
+<td>codex R1</td>
+</tr>
+<tr>
+<td><strong>H7 same-controller 偵測博弈</strong> <em>(v5 R1 新)</em></td>
+<td>—</td>
+<td>jitter / persona / proxy 可繞</td>
+<td>codex R1 + T5 自承</td>
+</tr>
+<tr>
+<td><strong>H8 Registry 短期中央化權力</strong> <em>(v5 R1 新)</em></td>
+<td>—</td>
+<td>MVP 階段必然單一，3-5 年才能聯邦</td>
+<td>T4</td>
+</tr>
+<tr>
+<td><strong>H9 Registry liveness / availability</strong> <em>(v5 R2 新)</em></td>
+<td>—</td>
+<td>Registry outage 時公網 A2A 是否 fail-open / fail-closed 的兩難；caching 與 freshness 的權衡</td>
+<td>codex R2</td>
+</tr>
+<tr>
+<td><strong>H10 Beneficial-control 透明性</strong> <em>(v5 R2 新)</em></td>
+<td>—</td>
+<td>公司收購、股權變更但 controller key 不換時無法觸發 transfer event；self-declared governance attestation 不一定誠實</td>
+<td>codex R2</td>
+</tr>
+<tr>
+<td><strong>H11 Outbound enforcement</strong> <em>(v5 R3 新)</em></td>
+<td>—</td>
+<td>demo custody 下無 egress enforcement；vacant 宣稱 no-external 但實際偷偷外呼難偵測</td>
+<td>codex R3</td>
+</tr>
+<tr>
+<td><strong>H12 Governance attestor 信任根</strong> <em>(v5 R3 新)</em></td>
+<td>—</td>
+<td>controller-root 緩解依賴第三方 attestor，attestor cartel / 收買仍可破</td>
+<td>codex R3</td>
+</tr>
+<tr>
+<td><strong>H13 Revocation TTL 窗口</strong> <em>(v5 R3 新)</em></td>
+<td>—</td>
+<td>revoke 後快取期間舊 attestation 仍被接受；TTL 短化與一致性兩難</td>
+<td>codex R3</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-mvp-v5">5. MVP 可驗證命題（v5 重設，全部結構性）<a class="headerlink" href="#5-mvp-v5" title="Permanent link">&para;</a></h2>
+<p>v4 命題中有 4 條（2/3/4/8）需長期或大樣本，<strong>14 週、demo 規模做不出來</strong>。codex 點出後 v5 重設。</p>
+<h3 id="demonstrations14">結構性 demonstrations（14 週可做）<a class="headerlink" href="#demonstrations14" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>簽章 logbook 可被獨立驗證</strong>：任何節點可拿 vacant pubkey 驗 logbook 完整性</li>
+<li><strong>Registry hash chain 偵測篡改</strong>：人為改一筆事件 → demo 立即偵測</li>
+<li><strong>五維 Beta posterior 正確更新</strong>：50 次互動後 high-rep / low-rep vacant 信譽分明</li>
+<li><strong>同源降權 toy scenario</strong>：4 個同 LLM Sybil → cluster cap 生效，整批信譽 ≤ 1 個 vacant</li>
+<li><strong>複合 vacant facade</strong>：對外只看到 root，內部子代不出現在 capability_search</li>
+<li><strong>Spawn 完整 trace</strong>：失敗 N 次 → 自動 spawn → 新 vacant 帶 parent_id → Registry 記錄</li>
+<li><strong>INSUFFICIENT_DATA UX</strong>：&lt; 30 樣本 caller 看到顯式標籤而非純量分數</li>
+<li><strong>STYLO 在 toy 規模 substrate 切換時偵測到 drift</strong>（<strong>標明：toy demonstration，不是安全主張</strong>）</li>
+</ol>
+<h3 id="demo">結構性命題（demo 為證）<a class="headerlink" href="#demo" title="Permanent link">&para;</a></h3>
+<ul>
+<li>命題 A：spawn-then-graduate <strong>&gt;5/h</strong> same parent → 立即 freeze（A12 防禦運作；超過 rate limit 才觸發）</li>
+<li>命題 B：fake composite low-rep → graduated child bonus ≈ 0（A11 防禦在 parent_rep 低時 bonus 趨零）</li>
+<li>命題 C：unknown signer 從 Vacant-compliant SDK 外呼 → callee 拒絕（A2A-compliant 範圍內 self-grown 結構性 enforcement 運作；非 compliant endpoint 不在 demo 範圍）</li>
+<li>命題 D：dynamic rollover 對 substrate 切換正確降權（換到 STYLO 距離大的 substrate rollover &lt; 0.5）</li>
+</ul>
+<h3 id="14-v5">不能在 14 週驗證的（v5 誠實刪除）<a class="headerlink" href="#14-v5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>~~captive vacant 生態壽命~~（需多年觀察）</li>
+<li>~~substrate_diversity ↔ probe 通過率~~（需大樣本）</li>
+<li>~~graduation_rate ↔ 健康相關~~（需長期）</li>
+<li>~~2-of-5 在 5 bootstrapper 不單點故障~~（需 production scale 測試）</li>
+<li>~~STYLO 100% family discrimination~~（過擬合 demo）</li>
+<li>~~F1 ≥ 0.90 same-controller 偵測~~（攻擊者知閾值後沒外部效度）</li>
+</ul>
+<hr />
+<h2 id="6-codex">6. 文獻校正（codex 點出）<a class="headerlink" href="#6-codex" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>引用</th>
+<th>v4 用法</th>
+<th>v5 校正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A-Trust</strong>（arXiv:2506.02546）</td>
+<td>「Accountability-centered Trust」</td>
+<td><strong>Attention-based Trust Management for LLM Multi-Agent Systems</strong>（He et al. 2025）。支持 multi-dim message-level trust，不直接支持 structural accountability。Vacant 借用「多維」概念與「Grice maxims 啟發」設計，這是合法借鑑。</td>
+</tr>
+<tr>
+<td><strong>CrS</strong>（arXiv:2505.24239）</td>
+<td>「結構支持 Sybil-resistant」</td>
+<td>Ebrahimi et al. 是 multi-agent team 內 credibility scoring，<strong>不是</strong> Sybil-resistant open registry 證據。Vacant 借 Eq.2 的乘法更新精神，改用 Beta posterior。</td>
+</tr>
+<tr>
+<td><strong>DRF</strong>（arXiv:2509.05764）</td>
+<td>「結構支持 graduation」</td>
+<td>Lou et al. 是 interactive rating network + UCB 選擇，<strong>不是</strong> parent-child graduation 機制。Vacant 借 UCB 探索-利用 + reputation filtering 理念。</td>
+</tr>
+<tr>
+<td><strong>Skalse 2022</strong>（arXiv:2209.13085）</td>
+<td>「不可能定理 + 多評估者必要性」</td>
+<td><strong>「不可能定理」用法正確</strong>。但「多評估者必要性」<strong>不是</strong> Skalse 直接結論——是 Vacant 對 reward hacking 的工程回應，要這樣標明。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7">7. 結論<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<p><strong>v5 vs v4 主要差異：</strong></p>
+<ol>
+<li><strong>語言誠實</strong>：30 攻擊矩陣明示 P/D/C 三層級，不再籠統說「擋住」</li>
+<li><strong>Layer 5 三軸 ontology</strong>：visibility / reachability / policy 切清楚，self-grown 變結構性 prevents</li>
+<li><strong>portability 重定位</strong>：從 raw 乘子撤出，改 caller-side 權重 + 網路級 resilience metric——避免激勵扭曲</li>
+<li><strong>Ed25519 + key custody 明示</strong>：MVP 用 process boundary，重要 vacant 升級 TEE</li>
+<li><strong>30 攻擊矩陣 + 殘留風險</strong>：8 個 codex 補的攻擊全部進矩陣</li>
+<li><strong>MVP 命題降級</strong>：刪除無法驗證的，保留 8 條結構性 demonstrations + 4 條結構性命題</li>
+<li><strong>A-Trust 等文獻校正</strong>：誤名修正、借用範圍寫死</li>
+</ol>
+<p><strong>沒有改的（codex 確認 ✓）：</strong>
+- Ricoeur 三維框架
+- 接受 Skalse 不可能定理 + graceful degradation 姿態
+- P3 Beta posterior 取代 CrS 乘法
+- arXiv ID 引用全部正確</p>
+<p><strong>v5 不主張「徹底解」任何攻擊</strong>——而是<strong>對每種攻擊都有明確的 P/D/C 路徑與殘留風險</strong>。這個誠實姿態比 v4「22 個全擋」可信。</p>
+<hr />
+<p><em>文件版本：THEORY v5 · 2026-05-01 · 經 codex adversarial review 硬化（13 結構問題全處理）</em>
+<em>v4 → v5：1 攻擊矩陣正式化 / 4 hand-wave 升級 / 1 ontology 三軸拆解 / 1 激勵結構修正 / 1 工程前提明示 / 1 文獻校正 / 1 MVP 命題降級</em></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      MIT-licensed · capstone project · Theory V5
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/cosmopig/Vacant" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://vacant.zeabur.app/" target="_blank" rel="noopener" title="vacant.zeabur.app" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "navigation.indexes", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.action.edit", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

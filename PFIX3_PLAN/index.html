@@ -1,0 +1,1781 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.">
+      
+      
+      
+        <link rel="canonical" href="https://cosmopig.github.io/Vacant/PFIX3_PLAN/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Pfix3 — Codex round-3 review response - Vacant</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+
+  
+  <meta property="og:site_name" content="Vacant">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Pfix3 — Codex round-3 review response">
+  <meta property="og:description" content="A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.">
+  <meta property="og:url" content="https://cosmopig.github.io/Vacant/PFIX3_PLAN/">
+  <meta property="og:image" content="https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png">
+  <meta property="og:image:alt" content="Vacant — a responsibility-layer residency form for AI agents on top of A2A / MCP">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:locale" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pfix3 — Codex round-3 review response">
+  <meta name="twitter:description" content="A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.">
+  <meta name="twitter:image" content="https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png">
+
+  
+  <link rel="me" href="https://github.com/cosmopig">
+
+  
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Pfix3 — Codex round-3 review response",
+    "description": "A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.",
+    "url": "https://cosmopig.github.io/Vacant/PFIX3_PLAN/",
+    "image": "https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png",
+    "datePublished": "2026-05-06",
+    "dateModified": "2026-05-15",
+    "author": {
+      "@type": "Person",
+      "name": "Cosmo Hsu",
+      "alternateName": "cosmopig",
+      "url": "https://github.com/cosmopig"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Vacant",
+      "url": "https://github.com/cosmopig/Vacant"
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Vacant — documentation",
+      "url": "https://cosmopig.github.io/Vacant/"
+    },
+    "mainEntityOfPage": "https://cosmopig.github.io/Vacant/PFIX3_PLAN/",
+    "inLanguage": "en",
+    "keywords": "multi-agent, mcp, a2a, reputation, identity, claude, llm"
+  }
+  </script>
+  
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pfix3-codex-round-3-review-response" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Vacant" class="md-header__button md-logo" aria-label="Vacant" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Vacant
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Pfix3 — Codex round-3 review response
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cosmopig/Vacant" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cosmopig/Vacant
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../explain/briefing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Theory & background
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../RUNBOOK/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Demo & ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Vacant" class="md-nav__button md-logo" aria-label="Vacant" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Vacant
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cosmopig/Vacant" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cosmopig/Vacant
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & background
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & background
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Briefing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/theory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory V5 (canonical)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/constants/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constants
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Demo & ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Demo & ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RUNBOOK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEMO_SCRIPT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5-minute demo script
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    identity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/reputation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    reputation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/composite/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    composite
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/protocol/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    substrate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvp
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cli
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#issue-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue inventory
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Issue inventory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-alembic-migration-cannot-reach-head" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #1 — Alembic migration cannot reach head
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-a2a-response-validation-incomplete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #2 — A2A response validation incomplete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-cli-second-call-to-same-target-replayed-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #3 — CLI second call to same target replayed-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-mcp-vacant_call_with_sampling-bypasses-responsibility-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #4 — MCP vacant_call_with_sampling bypasses responsibility chain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-readme-http-mcp-claim-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #5 — README HTTP /mcp claim wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-publish_halo-republish-doesnt-update-the-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #6 — publish_halo republish doesn't update the card
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-record_review-not-atomic-audit-silent-skip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #7 — record_review not atomic; audit silent-skip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-version-typed-metadata-plugin-manifest-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        #8 — Version + typed metadata + plugin manifest drift
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-batches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution batches
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decisions-deferred-to-user-now-resolved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decisions deferred to user, now resolved
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#out-of-scope-for-pfix3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Out of scope for Pfix3
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outcome-closed-2026-05-08" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outcome (closed 2026-05-08)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-review-fixes-f1f4-follow-ups-2026-05-08" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-review fixes (F1–F4 + follow-ups, 2026-05-08)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/cosmopig/Vacant/edit/main/docs/PFIX3_PLAN.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="pfix3-codex-round-3-review-response">Pfix3 — Codex round-3 review response<a class="headerlink" href="#pfix3-codex-round-3-review-response" title="Permanent link">&para;</a></h1>
+<p><strong>Date opened:</strong> 2026-05-08
+<strong>Trigger:</strong> Codex round-3 review identified 8 substantive issues despite green CI, mypy, ruff, bandit, pip-audit, full test suite (854 passed, 90.80% coverage). Issues span deployment correctness, responsibility-chain integrity, and external-facing claims.
+<strong>Scope:</strong> Implementation repo (<code>cosmopig/Vacant</code>). Thesis-side documentation untouched unless an issue claim mismatches THEORY V5.
+<strong>Strategy:</strong> Land issues batch-by-batch. Each batch ends with <code>ruff check</code> + <code>ruff format --check</code> + <code>mypy src</code> + <code>pytest</code> (incl. <code>-m slow</code>) + a single conventional commit. No batch starts until the previous one is green.</p>
+<p>This document is <strong>the source of truth for what we decided and why</strong> — not the commit messages.</p>
+<hr />
+<h2 id="issue-inventory">Issue inventory<a class="headerlink" href="#issue-inventory" title="Permanent link">&para;</a></h2>
+<h3 id="1-alembic-migration-cannot-reach-head">#1 — Alembic migration cannot reach <code>head</code><a class="headerlink" href="#1-alembic-migration-cannot-reach-head" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cited:</strong> <code>alembic/versions/0001_initial_p4_tables.py:29</code>, <code>alembic/versions/0002_event_actor_seq_unique.py:33</code></li>
+<li><strong>Finding:</strong> <code>0001</code> uses <code>SQLModel.metadata.create_all()</code> (not the alembic way) which already creates the <code>uq_event_actor_seq</code> unique constraint via the model definition. <code>0002</code> then tries to add the same constraint via <code>op.create_unique_constraint()</code>. SQLite rejects: <code>No support for ALTER of constraints in SQLite dialect</code>. So <code>alembic upgrade head</code> fails on a fresh SQLite database.</li>
+<li><strong>Decision:</strong></li>
+<li>Rewrite <code>0001</code> to use explicit <code>op.create_table(...)</code> calls for every model in <code>vacant/registry/models.py</code>. Generate the schema by reading the SQLModel metadata once, snapshotted into the migration file. The migration becomes a fixed schema artifact, not a live <code>metadata.create_all()</code> redirect.</li>
+<li>Rewrite <code>0002</code> to use <code>with op.batch_alter_table("event") as batch_op: batch_op.create_unique_constraint(...)</code> so the SQLite recreate path is taken.</li>
+<li><strong>Verification:</strong> Add a fast CI step (or a <code>tests/migration/test_alembic_upgrade_head.py</code>) that runs <code>alembic upgrade head</code> against an in-memory SQLite and asserts it returns non-zero only on real failure.</li>
+</ul>
+<h3 id="2-a2a-response-validation-incomplete">#2 — A2A response validation incomplete<a class="headerlink" href="#2-a2a-response-validation-incomplete" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cited:</strong> <code>src/vacant/protocol/dispatch.py:197</code>–<code>198</code></li>
+<li><strong>Finding:</strong> After <code>from_a2a_jsonrpc(wrapped)</code> returns a <code>VacantEnvelope</code>, only <code>verify_or_raise(target_card.vacant_id.verify_key())</code> is called. Three things missing:</li>
+<li><code>response_env.from_vacant_id == target_card.vacant_id</code> — caller-side: response really comes from the vacant we called.</li>
+<li><code>response_env.to_vacant_id == requester.identity</code> — caller-side: response is addressed to us.</li>
+<li>Caller-side response replay store — duplicate response envelopes (same <code>(actor, seq)</code> or same <code>envelope_id</code>) must be rejected.</li>
+<li><strong>Decision:</strong></li>
+<li>Add the two identity checks unconditionally before <code>return DispatchResult(...)</code>. Failure raises <code>EnvelopeFormatError</code> (mismatched routing) or a new <code>ResponseSpoofingError</code> if we want a tighter taxonomy. Pick <code>EnvelopeFormatError</code> — it already exists and the meaning fits.</li>
+<li>Add an optional <code>caller_replay_store: ReplayStore | None = None</code> parameter to <code>call_local()</code> (default <code>None</code> keeps existing unit tests green). When provided, the response envelope is checked against it before return; on success the seq is recorded.</li>
+<li>The CLI passes a file-backed replay store keyed by <code>(target_vid)</code>.</li>
+<li><strong>Trade-off:</strong> Default-<code>None</code> rather than mandatory because lots of unit tests pass synthetic transports. CLI/server paths inject the real store.</li>
+</ul>
+<h3 id="3-cli-second-call-to-same-target-replayed-out">#3 — CLI second call to same target replayed-out<a class="headerlink" href="#3-cli-second-call-to-same-target-replayed-out" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cited:</strong> <code>src/vacant/cli/commands.py:519</code> (call site of <code>call_local</code>)</li>
+<li><strong>Finding:</strong> <code>call_local()</code> defaults <code>sequence_no=1</code> and <code>prev_envelope_hash=EMPTY_PREV_HASH</code>. The CLI never reads or writes per-pair chain state. Server-side replay store advances after first call → second CLI call to same target is rejected as replay. This is a smoke-test-passes-once-then-fails footgun.</li>
+<li><strong>Decision:</strong></li>
+<li>Add a single sidecar file <code>~/.vacant/&lt;name&gt;/envelope_state.json</code> (codex's suggestion — one file per local vacant, keyed by target). Schema:
+    <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;&lt;target_vid_hex&gt;&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&quot;request&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;last_seq&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;last_envelope_id_hex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">},</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">&quot;response&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;last_seq&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;last_envelope_id_hex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">}</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">}</span>
+</span></code></pre></div></li>
+<li><code>call_cmd</code> flow: load → derive next request seq + prev hash → call → on success, update both <code>request</code> and <code>response</code> blocks → atomic write (<code>tempfile + os.replace</code>).</li>
+<li>Encapsulate as <code>cli/local_store.py::load_envelope_state(name)</code> / <code>save_envelope_state(name, state)</code>.</li>
+<li>The same file backs the caller-side response replay store from #2 — single source of truth.</li>
+<li><strong>Trade-off vs. per-pair files:</strong> Single file is simpler, and CLI calls aren't concurrent in practice. If the user later needs concurrency we move to SQLite; the JSON shape above maps trivially.</li>
+</ul>
+<h3 id="4-mcp-vacant_call_with_sampling-bypasses-responsibility-chain">#4 — MCP <code>vacant_call_with_sampling</code> bypasses responsibility chain<a class="headerlink" href="#4-mcp-vacant_call_with_sampling-bypasses-responsibility-chain" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cited:</strong> <code>src/vacant/cli/mcp_server.py:131</code></li>
+<li><strong>Finding:</strong> Tool accepts <code>user_prompt: str</code> + <code>caller_vacant_id_hex: str</code> directly. No signed envelope. No envelope verification. No logbook append. No response signing. README claims "the vacant signs the resulting logbook entry" — code does not.</li>
+<li><strong>Decision:</strong> Take the <strong>fallback path</strong> (not the <code>BehaviorHandler</code> ctx-injection refactor we considered).</li>
+<li>Tool signature changes to: <code>vacant_call_with_sampling(envelope: dict[str, Any], model_hint: str = "client-default", max_tokens: int = 256)</code>.</li>
+<li>Server flow per call:<ol>
+<li>Parse + verify the inbound envelope under the <em>caller's</em> pubkey (extracted from <code>envelope.from</code>). Replay-check via the existing <code>replay_store</code>.</li>
+<li>Treat the envelope's payload text as the user prompt. Run sampling via <code>ctx.session.create_message()</code>.</li>
+<li>Wrap the inference through <code>ClientInheritedSubstrate</code> so the substrate identity becomes <code>client-inherited:&lt;caller_vid&gt;:&lt;model_hint&gt;</code>.</li>
+<li>Append a signed <code>INFERENCE_EVENT</code> (kind: <code>"INFERENCE_EVENT"</code>) to the vacant's logbook with payload <code>{ "caller": &lt;hex&gt;, "substrate": "...", "model_id": "...", "prompt_hash": "...", "response_hash": "...", "proof": "..." }</code>. Also emit a <code>SUBSTRATE_BORROWED</code> companion event so external auditors can index borrows independently.</li>
+<li>Build a <em>signed response envelope</em> and return it as the tool result (mirrors <code>vacant_call</code>'s return shape).</li>
+</ol>
+</li>
+<li><code>caller_vacant_id_hex</code> parameter is <strong>removed</strong> — caller identity comes from the verified envelope, not from a self-declared string.</li>
+<li><strong>Why fallback, not the clean refactor:</strong> Folding sampling into the regular <code>vacant_call</code> path requires <code>BehaviorHandler</code> to take a per-call <code>Context</code>. Doable but reaches into many tests and into the HTTP path which never had a ctx. The fallback gets the responsibility-chain claim honest with a much smaller blast radius.</li>
+<li><strong>README impact:</strong> §"For non-MCP deployments" wording stands; no change beyond #5.</li>
+<li><strong>Test impact:</strong> <code>tests/integration/test_mcp_external_client.py</code> needs to construct + sign an envelope before calling the tool. Update the fixture, not the assertion.</li>
+</ul>
+<h3 id="5-readme-http-mcp-claim-wrong">#5 — README HTTP <code>/mcp</code> claim wrong<a class="headerlink" href="#5-readme-http-mcp-claim-wrong" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cited:</strong> <code>README.md:183</code></li>
+<li><strong>Finding:</strong> README tells users to point Claude Desktop at <code>http://localhost:8443/mcp</code>. Implementation only spawns a stdio MCP thread. No <code>/mcp</code> route on the FastAPI app.</li>
+<li><strong>Decision:</strong> Fix the README. Do <strong>not</strong> add an HTTP <code>/mcp</code> route — sampling callbacks over HTTP would mean implementing the streamable-http MCP transport and that's out of scope.</li>
+<li>Replace the <code>http://localhost:8443/mcp</code> paragraph with a stdio config example (<code>command/args</code> mcp.json snippet pointing at <code>vacant mcp</code> or <code>vacant serve --mcp</code>).</li>
+<li>Cross-reference the existing plugin manifest section at <code>README.md:99-104</code> as the recommended path for Claude Desktop users.</li>
+<li>Also update <code>README.zh-TW.md</code> to match.</li>
+</ul>
+<h3 id="6-publish_halo-republish-doesnt-update-the-card">#6 — <code>publish_halo</code> republish doesn't update the card<a class="headerlink" href="#6-publish_halo-republish-doesnt-update-the-card" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cited:</strong> <code>src/vacant/registry/halo.py:60-168</code> and <code>src/vacant/registry/store.py::submit_register_event_atomic</code></li>
+<li><strong>Finding:</strong> When <code>existing is not None</code>, <code>publish_halo()</code> builds <code>vacant_to_insert = None</code> and only passes <code>new_visibility</code> to <code>submit_register_event_atomic</code>. The audit event captures the new <code>card_hash</code>, but the registry row keeps the old <code>capability_card_hash/sig/blob</code>, old <code>declared_capabilities_json</code>, old <code>version</code>, old <code>base_model</code>. Lookups serve stale cards while the audit chain claims fresh.</li>
+<li><strong>Decision:</strong> Allow republish; overwrite all card-derived fields. Reject only on identity-violating changes.</li>
+<li>Extend <code>submit_register_event_atomic</code> with <code>vacant_field_updates: Mapping[str, Any] | None = None</code>. When non-<code>None</code> and <code>vacant_id_to_update</code> is set, the in-transaction update path applies these fields onto the existing row.</li>
+<li><code>publish_halo</code> and <code>publish_halo_signed</code> populate <code>vacant_field_updates</code> from the <em>new</em> card on the existing-vacant branch. Fields written: <code>capability_card_hash</code>, <code>capability_card_sig</code>, <code>capability_card_blob</code>, <code>declared_capabilities_json</code>, <code>base_model</code>, <code>base_model_family</code>, <code>owner_org</code>, <code>version</code>, <code>visibility</code>.</li>
+<li>Three invariants enforced (raise <code>RegistryWriteError</code> on violation, before submitting the event):<ol>
+<li><strong><code>parent_id</code> is immutable.</strong> If the new card carries a different <code>parent_id</code>, reject. Identity custody.</li>
+<li><strong><code>halo_version</code> monotonic.</strong> New <code>card.halo_version</code> must be ≥ existing. Prevents accidental replay of an older signed card.</li>
+<li><strong>Public key match.</strong> <code>card.vacant_id.pubkey_bytes == existing.public_key</code>. Theoretically tautological since <code>vacant_id</code> is derived from the pubkey, but cheap defense in depth.</li>
+</ol>
+</li>
+<li><strong>Why no <code>--republish</code> flag:</strong> The audit chain already records the change as a new <code>register</code> event with new <code>card_hash</code> and a new <code>actor_seq</code>. That is the explicit history. Adding a flag is API surface without a security gain.</li>
+</ul>
+<h3 id="7-record_review-not-atomic-audit-silent-skip">#7 — <code>record_review</code> not atomic; audit silent-skip<a class="headerlink" href="#7-record_review-not-atomic-audit-silent-skip" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cited:</strong> <code>src/vacant/reputation/aggregator.py:248</code> (audit append) vs <code>:271</code> (rate-limit check)</li>
+<li><strong>Finding (a):</strong> Audit append runs before rate-limit check. If rate-limit fires, the reviewer's logbook has a <code>REVIEW_EVENT</code> but no posterior change. Logbook diverges from observable reputation state.</li>
+<li><strong>Finding (b):</strong> Lines 246–248 say the audit step is mandatory only on mutation; line 248 silently skips the append when audit isn't registered. README says "record_review first appends signed REVIEW_EVENT". Code disagrees.</li>
+<li><strong>Decision:</strong></li>
+<li><strong>Reorder under one lock.</strong> New sequence inside a single <code>async with self._lock:</code>:<ol>
+<li>Validate (reviewer/target/source/dim/range).</li>
+<li>Rate-limit check + tentative timestamp append.</li>
+<li>Signed <code>REVIEW_EVENT</code> append. On failure, pop the timestamp.</li>
+<li>Posterior update.</li>
+</ol>
+</li>
+<li><strong>Fail-closed audit on mutation.</strong> If <code>_audit_enabled_for(reviewer)</code> is <code>False</code> and we're in <code>record_review</code> (mutation), raise a new <code>MisconfiguredAuditError</code>. Read paths (<code>get_reputation</code>, <code>score</code>, <code>get_ranked</code>) keep tolerating missing registration.</li>
+<li>Update test fixtures that relied on silent-skip to call <code>register_audit(reviewer, logbook=lb, signing_key=sk)</code> first. Initial grep: 7 test files reference <code>record_review</code>. If updates exceed ~10 fixture sites, pause and raise.</li>
+<li><strong>Note on README claim alignment:</strong> Once these land, the README's "record_review first appends signed REVIEW_EVENT" is technically accurate again, modulo "first" being ambiguous. The aggregator docstring will spell out the new ordering.</li>
+</ul>
+<h3 id="8-version-typed-metadata-plugin-manifest-drift">#8 — Version + typed metadata + plugin manifest drift<a class="headerlink" href="#8-version-typed-metadata-plugin-manifest-drift" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cited:</strong> <code>pyproject.toml:11</code> (0.3.0) vs <code>src/vacant/__init__.py:3</code> (0.2.0). <code>pyproject.toml:29</code> declares <code>Typing :: Typed</code> but no <code>src/vacant/py.typed</code> marker. Codex also flagged <code>.claude-plugin/plugin.json</code> (v0.1.0) and <code>.github/workflows/publish.yml:42</code>'s <code>getattr(vacant, '__version__', '0.2.0')</code> fallback.</li>
+<li><strong>Decision:</strong></li>
+<li><code>src/vacant/__init__.py</code>: <code>__version__ = "0.3.0"</code>.</li>
+<li>Create empty file <code>src/vacant/py.typed</code>.</li>
+<li><code>.claude-plugin/plugin.json</code>: bump <code>version</code> to <code>0.3.0</code>. Verify <code>manifest-validation.yml</code> still passes.</li>
+<li><code>.github/workflows/publish.yml:42</code>: drop the <code>'0.2.0'</code> fallback. If <code>__version__</code> is missing on a published wheel, that's a bug worth surfacing — do <code>getattr(vacant, '__version__')</code> or <code>vacant.__version__</code> and let it AttributeError.</li>
+</ul>
+<hr />
+<h2 id="execution-batches">Execution batches<a class="headerlink" href="#execution-batches" title="Permanent link">&para;</a></h2>
+<p>Order is risk-ascending and dependency-respecting.</p>
+<table>
+<thead>
+<tr>
+<th>Batch</th>
+<th>Issues</th>
+<th>Touches</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>B1</strong> Metadata sync</td>
+<td>#8</td>
+<td><code>__init__.py</code>, <code>py.typed</code>, <code>plugin.json</code>, <code>publish.yml</code></td>
+<td>None — verifiable by string match</td>
+</tr>
+<tr>
+<td><strong>B2</strong> README correction</td>
+<td>#5</td>
+<td><code>README.md</code>, <code>README.zh-TW.md</code></td>
+<td>None — non-code</td>
+</tr>
+<tr>
+<td><strong>B3</strong> Alembic</td>
+<td>#1</td>
+<td><code>alembic/versions/0001</code>, <code>0002</code>, optional <code>tests/migration/</code></td>
+<td>Low — verify with fresh sqlite</td>
+</tr>
+<tr>
+<td><strong>B4</strong> Reputation atomicity</td>
+<td>#7</td>
+<td><code>aggregator.py</code>, ~7 test files</td>
+<td>Medium — test fixture surgery</td>
+</tr>
+<tr>
+<td><strong>B5</strong> Halo republish</td>
+<td>#6</td>
+<td><code>halo.py</code>, <code>store.py</code>, new tests</td>
+<td>Medium — new invariants</td>
+</tr>
+<tr>
+<td><strong>B6</strong> Response validation + CLI chain state</td>
+<td>#2, #3</td>
+<td><code>dispatch.py</code>, <code>commands.py</code>, <code>local_store.py</code>, integration tests</td>
+<td>Medium-high — paired change</td>
+</tr>
+<tr>
+<td><strong>B7</strong> MCP sampling responsibility chain</td>
+<td>#4</td>
+<td><code>mcp_server.py</code>, <code>client_inherited.py</code> (maybe), <code>tests/integration/test_mcp_external_client.py</code></td>
+<td>Highest — surgery near "嫁接到客戶端" claim</td>
+</tr>
+</tbody>
+</table>
+<p>Each batch:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>format<span class="w"> </span>--check<span class="w"> </span>.
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>uv<span class="w"> </span>run<span class="w"> </span>mypy<span class="w"> </span>src
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w">                </span><span class="c1"># full + slow</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>git<span class="w"> </span>commit<span class="w">                   </span><span class="c1"># conventional commit, single batch</span>
+</span></code></pre></div>
+<p>If <code>pytest</code> regressions exceed the per-batch budget noted above, stop and document instead of pushing through.</p>
+<hr />
+<h2 id="decisions-deferred-to-user-now-resolved">Decisions deferred to user, now resolved<a class="headerlink" href="#decisions-deferred-to-user-now-resolved" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Batch 5: silent overwrite + invariants vs. explicit <code>--republish</code> flag?</td>
+<td><strong>Silent overwrite + 3 invariants</strong> (parent_id immutable, halo_version monotonic, pubkey match). Audit chain is the explicit history.</td>
+</tr>
+<tr>
+<td>Batch 4: fail-closed audit on missing registration?</td>
+<td><strong>Yes, fail-closed on mutation.</strong> Read paths still tolerant. Up to ~10 fixture updates accepted; over that, pause.</td>
+</tr>
+<tr>
+<td>Batch 7: refactor <code>BehaviorHandler</code> to take <code>ctx</code>, vs. keep <code>vacant_call_with_sampling</code> and put envelope verification + INFERENCE_EVENT logbook inside it?</td>
+<td><strong>Fallback path: keep the separate tool but make it require a signed envelope, append <code>INFERENCE_EVENT</code> + <code>SUBSTRATE_BORROWED</code> events, and return a signed response envelope.</strong> Don't refactor <code>BehaviorHandler</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="out-of-scope-for-pfix3">Out of scope for Pfix3<a class="headerlink" href="#out-of-scope-for-pfix3" title="Permanent link">&para;</a></h2>
+<p>These are real concerns but distinct from the codex round-3 list:</p>
+<ul>
+<li>True HTTP/SSE/streamable MCP route at <code>/mcp</code> (would let README <code>http://localhost:8443/mcp</code> claim be re-instated). Defer.</li>
+<li>Behavior-side ctx injection so sampling can ride the standard <code>vacant_call</code> envelope path. Defer; revisit if/when a second sampling-shaped tool is added.</li>
+<li>Reputation: <code>audit_enabled_for</code> symmetry on read paths (currently tolerant, will stay tolerant).</li>
+<li>THEORY V5 has no claim that conflicts with the fallback path chosen for #4 — INFERENCE_EVENT + SUBSTRATE_BORROWED in the logbook is consistent with §responsibility chain wording.</li>
+</ul>
+<hr />
+<h2 id="outcome-closed-2026-05-08">Outcome (closed 2026-05-08)<a class="headerlink" href="#outcome-closed-2026-05-08" title="Permanent link">&para;</a></h2>
+<p>All seven batches landed.</p>
+<table>
+<thead>
+<tr>
+<th>Batch</th>
+<th>Commit</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>docs</td>
+<td><code>cb16170</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>B1 metadata</td>
+<td><code>1346741</code></td>
+<td>854 (no test changes)</td>
+</tr>
+<tr>
+<td>B2 README</td>
+<td><code>c4b2cd0</code></td>
+<td>854 (no code changes)</td>
+</tr>
+<tr>
+<td>B3 alembic</td>
+<td><code>1bc106b</code></td>
+<td>+1 → 855</td>
+</tr>
+<tr>
+<td>B4 reputation</td>
+<td><code>71b99b9</code></td>
+<td>+3 → 858</td>
+</tr>
+<tr>
+<td>B5 halo republish</td>
+<td><code>bfb0410</code></td>
+<td>+3 → 861</td>
+</tr>
+<tr>
+<td>B6 dispatch + CLI</td>
+<td><code>5c9c2d8</code></td>
+<td>+6 → 867</td>
+</tr>
+<tr>
+<td>B7 MCP sampling</td>
+<td><code>da8eca9</code></td>
+<td>867 (rewrote 1 integration test, contract change)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Final state:</strong> 867 tests pass (52 slow); ruff + ruff format + mypy strict on <code>src/</code> all green.</p>
+<p><strong>Carry-over decisions to remember:</strong></p>
+<ul>
+<li>The aggregator's "audit-aware mode" latch is one-way. Once any reviewer registers, every subsequent <code>record_review</code> requires audit registration. If a future caller wants to opt back out, they must construct a fresh aggregator. (Marked <code>ONE-WAY LATCH</code> in the source after F4.)</li>
+<li>Halo republish <code>parent_id</code> immutability uses <strong>None-as-preserve</strong> semantics (after F2 follow-up): a caller passing <code>parent_id=None</code> (or omitting the field) on republish leaves the existing column untouched; a caller passing a <em>different non-None</em> parent_id is rejected. To genuinely unset a parent, callers need an explicit revoke flow (out of scope).</li>
+<li>CLI <code>envelope_state.json</code> lives alongside the keypair; deleting it forces seq=1 / EMPTY on the next call, which the server will reject as replay until the server's replay store also forgets the pair. Document this as part of the "rotate identity" workflow if/when that ships.</li>
+<li>The fallback path for #4 means <code>vacant_call_with_sampling</code> and <code>vacant_call</code> share envelope semantics but diverge in one place: sampling's response carries <code>substrate</code> + <code>model_id</code> + <code>proof</code> <em>alongside</em> the signed <code>message</code>. Clients that consume the sampling tool need to read both keys.</li>
+</ul>
+<hr />
+<h2 id="self-review-fixes-f1f4-follow-ups-2026-05-08">Self-review fixes (F1–F4 + follow-ups, 2026-05-08)<a class="headerlink" href="#self-review-fixes-f1f4-follow-ups-2026-05-08" title="Permanent link">&para;</a></h2>
+<p>After Pfix3 landed, a PR-style self-review surfaced four risks that
+hadn't broken tests but were either smells or latent footguns. Two
+also turned out to have residual bugs at adjacent layers, caught on
+re-review and fixed.</p>
+<table>
+<thead>
+<tr>
+<th>Fix</th>
+<th>Commit</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1</td>
+<td><code>5d6f193</code></td>
+<td><code>InMemoryReplayStore.seed()</code> public method; CLI no longer pokes <code>_state</code></td>
+</tr>
+<tr>
+<td>F2 (core)</td>
+<td><code>5d6f193</code></td>
+<td><code>publish_halo[_signed]</code> kwargs use <code>None</code> defaults; partial-update on republish</td>
+</tr>
+<tr>
+<td>F2 (rpc)</td>
+<td><code>f43dbee</code></td>
+<td><code>HaloPublishRequest</code> schema also uses <code>None</code> defaults so HTTP path is consistent</td>
+</tr>
+<tr>
+<td>F2 (parent_id)</td>
+<td><code>210d10d</code></td>
+<td><code>parent_id</code> invariant treats <code>None</code> as "preserve" (was firing on legitimate omit-on-republish)</td>
+</tr>
+<tr>
+<td>F2 (cli)</td>
+<td><code>4e97515</code></td>
+<td><code>vacant publish</code> typer flags use <code>None</code> defaults + omit from JSON when unset</td>
+</tr>
+<tr>
+<td>F3 + F4</td>
+<td><code>5d6f193</code></td>
+<td>Drop dead <code>lb is not None</code> guard in MCP sampling tool; strengthen audit-mode latch docstring</td>
+</tr>
+<tr>
+<td>Test coverage</td>
+<td><code>f72f454</code></td>
+<td><code>seed()</code> unit tests; HTTP republish-preserves; parent_id-preserves</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Final test count:</strong> 872 passed (52 slow). All ruff / format / mypy strict checks green.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      MIT-licensed · capstone project · Theory V5
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/cosmopig/Vacant" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://vacant.zeabur.app/" target="_blank" rel="noopener" title="vacant.zeabur.app" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "navigation.indexes", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.action.edit", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

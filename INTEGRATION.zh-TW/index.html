@@ -1,0 +1,2175 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.">
+      
+      
+      
+        <link rel="canonical" href="https://cosmopig.github.io/Vacant/INTEGRATION.zh-TW/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>把 Vacant 嫁接到你的客戶端 - Vacant</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  
+
+  
+  <meta property="og:site_name" content="Vacant">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="把 Vacant 嫁接到你的客戶端">
+  <meta property="og:description" content="A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.">
+  <meta property="og:url" content="https://cosmopig.github.io/Vacant/INTEGRATION.zh-TW/">
+  <meta property="og:image" content="https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png">
+  <meta property="og:image:alt" content="Vacant — a responsibility-layer residency form for AI agents on top of A2A / MCP">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:locale" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="把 Vacant 嫁接到你的客戶端">
+  <meta name="twitter:description" content="A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.">
+  <meta name="twitter:image" content="https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png">
+
+  
+  <link rel="me" href="https://github.com/cosmopig">
+
+  
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "把 Vacant 嫁接到你的客戶端",
+    "description": "A responsibility-layer residency form for AI agents on top of A2A / MCP — API reference, theory, and demo runbook.",
+    "url": "https://cosmopig.github.io/Vacant/INTEGRATION.zh-TW/",
+    "image": "https://github.com/cosmopig/Vacant/raw/main/assets/social-preview.png",
+    "datePublished": "2026-05-06",
+    "dateModified": "2026-05-15",
+    "author": {
+      "@type": "Person",
+      "name": "Cosmo Hsu",
+      "alternateName": "cosmopig",
+      "url": "https://github.com/cosmopig"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Vacant",
+      "url": "https://github.com/cosmopig/Vacant"
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Vacant — documentation",
+      "url": "https://cosmopig.github.io/Vacant/"
+    },
+    "mainEntityOfPage": "https://cosmopig.github.io/Vacant/INTEGRATION.zh-TW/",
+    "inLanguage": "en",
+    "keywords": "multi-agent, mcp, a2a, reputation, identity, claude, llm"
+  }
+  </script>
+  
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#vacant" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Vacant" class="md-header__button md-logo" aria-label="Vacant" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Vacant
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              把 Vacant 嫁接到你的客戶端
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cosmopig/Vacant" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cosmopig/Vacant
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../explain/briefing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Theory & background
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../RUNBOOK/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Demo & ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Vacant" class="md-nav__button md-logo" aria-label="Vacant" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Vacant
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cosmopig/Vacant" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cosmopig/Vacant
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & background
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & background
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Briefing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/theory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory V5 (canonical)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/constants/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constants
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Demo & ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Demo & ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RUNBOOK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEMO_SCRIPT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5-minute demo script
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    identity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/reputation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    reputation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/composite/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    composite
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/protocol/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    substrate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/mvp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mvp
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cli
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-claude-code-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0 · Claude Code plugin（一條指令裝好）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0 · Claude Code plugin（一條指令裝好）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1 安裝
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#02" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2 確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#03" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3 穩定身份（可選）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#04-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.4 Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1 · 先決條件
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1 · 先決條件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mcp-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP client 相容性
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-5-quickstart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2 · 5 分鐘 Quickstart
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2 · 5 分鐘 Quickstart">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-local-vacant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 開一個 local vacant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-halo-local-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2（可選）發布 halo 到 local registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-vacant-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 把 vacant 跑成 server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-mcp-claude-desktop-cursor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 透過 MCP 接到 Claude Desktop / Cursor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-mcp-inspector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5（加碼）用 MCP Inspector 直接驅動
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-clientinheritedsubstrate-client-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 · ClientInheritedSubstrate — 借用 client 的 LLM
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3 · ClientInheritedSubstrate — 借用 client 的 LLM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        為什麼這樣設計
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        線協議流程
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-python-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        用 mcp Python SDK 呼叫
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reputation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reputation 怎麼算
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-openclaw-plugin-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4 · OpenClaw plugin bundle 安裝
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4 · OpenClaw plugin bundle 安裝">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安裝
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        先決條件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        驗證
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clientpaste-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        其他 client（paste-config 食譜）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-vacant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5 · 兩台 vacant 互呼（真實網路）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6 · Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6 · Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-port-8443-address-already-in-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --port 8443 上 address already in use
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-client-vacant_call_with_sampling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP client 看不到 vacant_call_with_sampling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#envelopesignatureerror-response-envelope-did-not-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EnvelopeSignatureError: response envelope did not verify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-greenlet-library-is-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        the greenlet library is required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vacant-init-name-already-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vacant init &lt;name&gt; 說 "already exists"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sampling-callback-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sampling callback 有打到，但工具回傳 text 是空的
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP server 啟動時看似卡住
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        接下來
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/cosmopig/Vacant/edit/main/docs/INTEGRATION.zh-TW.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="vacant">把 Vacant 嫁接到你的客戶端<a class="headerlink" href="#vacant" title="Permanent link">&para;</a></h1>
+<p><a href="../INTEGRATION/">English</a> · <a href="./">繁體中文</a></p>
+<p>實戰教學：把一個 vacant 真的接到 MCP-aware client（Claude Desktop、
+Cursor、Zed、<code>@modelcontextprotocol/inspector</code>，或任何會講 MCP 線協議
+的東西）。<strong>5 分鐘內</strong> 跑完第一次呼叫；<strong>再花 10 分鐘</strong> 弄懂
+<code>ClientInheritedSubstrate</code> — 讓 vacant <strong>不需要自帶 API key</strong>、透過
+MCP <code>sampling/createMessage</code> 借用呼叫端 LLM 的那個 substrate。</p>
+<p>只想看理論的話請讀
+<a href="../architecture/THEORY_V5.md"><code>architecture/THEORY_V5.md</code></a>。
+這份文件純操作。</p>
+<hr />
+<h2 id="0-claude-code-plugin">0 · Claude Code plugin（一條指令裝好）<a class="headerlink" href="#0-claude-code-plugin" title="Permanent link">&para;</a></h2>
+<p>如果你的客戶端是 <a href="https://claude.com/claude-code">Claude Code</a>，第
+一次接觸的話請直接走 plugin 流程、跳過底下大半的手動 config。Plugin
+manifest 透過 <code>uvx</code> spawn <code>vacant mcp</code> 走 stdio，跑出來的 MCP tool
+跟 §2.4 手動設定 <code>mcp.json</code> 之後看到的 <code>vacant_describe</code> /
+<code>vacant_call</code> 完全一樣 — 但你不用寫一行 config。</p>
+<h3 id="01">0.1 安裝<a class="headerlink" href="#01" title="Permanent link">&para;</a></h3>
+<p>在任何 Claude Code session 裡：</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>/plugin marketplace add cosmopig/Vacant
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>/plugin install vacant@cosmopig-vacant
+</span></code></pre></div>
+<p>之後 restart session（關掉重開、或 <code>/restart</code>），讓 Claude Code
+load 新的 MCP server。</p>
+<h3 id="02">0.2 確認<a class="headerlink" href="#02" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>/mcp
+</span></code></pre></div>
+<p>你應該會看到一個 <code>vacant</code> MCP server，狀態 <code>connected</code>。沒看到的話
+跳到 §0.4 troubleshoot。</p>
+<p>接著用自然語言跟 Claude 說：</p>
+<blockquote>
+<p><em>用 vacant_describe tool 給我看一下本地 vacant 的身份。</em></p>
+</blockquote>
+<p>Claude 會 call <code>vacant_describe</code>；回傳是一個 JSON dict，含 <code>vacant_id</code>、
+<code>capability_text</code>，如果你跑過 <code>vacant init</code> 也會帶 on-disk halo
+metadata。如果還沒 <code>vacant init</code>，回傳會是 <em>ephemeral</em> 身份 — 每
+launch 重新 keygen — server 的 stderr 會出現一行 <code>WARN:</code> 告訴你。</p>
+<h3 id="03">0.3 穩定身份（可選）<a class="headerlink" href="#03" title="Permanent link">&para;</a></h3>
+<p>Ephemeral 身份夠你做「這東西能跑嗎」的測試，但每次 Claude Code
+restart plugin 的 MCP subprocess 就會換一把 key。要永久身份的話：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>vacant<span class="w">   </span><span class="c1"># 或：brew install uv ; uvx pip install vacant</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>vacant<span class="w"> </span>init<span class="w"> </span>alice<span class="w">        </span><span class="c1"># 建 ~/.vacant/alice/ + 把 seed 存進 OS keyring</span>
+</span></code></pre></div>
+<p>下次 Claude Code restart plugin 時，<code>vacant mcp</code> 會自動撿
+<code>~/.vacant/alice/</code> — 同一個身份、同一份 logbook、跨 session 持續。
+Threat model 見 <a href="../SECURITY.md"><code>SECURITY.md</code></a> §"Local key storage"
+（keyring 對 <code>--insecure-demo</code> 的取捨）。</p>
+<h3 id="04-troubleshooting">0.4 Troubleshooting<a class="headerlink" href="#04-troubleshooting" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>/mcp</code> 沒列出 <code>vacant</code>。</strong> 先確認 Claude Code 的 shell environment
+  裡 <code>$PATH</code> 找得到 <code>uvx</code>（GUI 啟動的 client 有時不繼承 interactive
+  shell 的 path）。看 Claude Code 的 session log，最常見錯誤是
+  <code>uvx: command not found</code>。修法：裝 <a href="https://docs.astral.sh/uv/">uv</a>
+  然後 <code>/plugin reload vacant</code>。</li>
+<li><strong><code>vacant mcp</code> 第一次起來卡住。</strong> 第一次 <code>uvx</code> 會從 PyPI 解所有
+  dependency，慢的網路 20–60 秒。之後 uv cache 過了就秒開。</li>
+<li><strong>看到 <code>WARN: no local vacant on disk</code>。</strong> 這是預期行為 — 見上面
+  §0.3。要消掉這 WARN，跑一次 <code>vacant init &lt;name&gt;</code>，下次 plugin
+  reload 就會撿到。</li>
+<li><strong>想用自己的 MCP client（不是 Claude Code）call vacant。</strong> 跳過
+  plugin，直接看 §2.4 手動 <code>mcp.json</code> 範例。</li>
+</ul>
+<hr />
+<h2 id="1">1 · 先決條件<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python</td>
+<td>≥ 3.12</td>
+<td>專案 requires-python</td>
+</tr>
+<tr>
+<td><a href="https://docs.astral.sh/uv/"><code>uv</code></a></td>
+<td>最新</td>
+<td>相依 / venv 管理</td>
+</tr>
+<tr>
+<td>一個 MCP-aware client</td>
+<td>任意</td>
+<td>Claude Desktop / Cursor / Zed / MCP Inspector / 你自己用 SDK 寫的</td>
+</tr>
+</tbody>
+</table>
+<p>clone + 安裝：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/cosmopig/Vacant.git
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">cd</span><span class="w"> </span>Vacant
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>uv<span class="w"> </span>sync<span class="w"> </span>--all-extras
+</span></code></pre></div>
+<p>煙霧測試：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>--help<span class="w">            </span><span class="c1"># Typer help；列出所有 subcommand</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>serve<span class="w"> </span>--help<span class="w">      </span><span class="c1"># 確認 serve 命令掛上了</span>
+</span></code></pre></div>
+<h3 id="mcp-client">MCP client 相容性<a class="headerlink" href="#mcp-client" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Client</th>
+<th>stdio</th>
+<th>sampling/createMessage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Desktop</td>
+<td>✓</td>
+<td>✓（≥ 1.x 版本）</td>
+</tr>
+<tr>
+<td>Cursor</td>
+<td>✓</td>
+<td>✓（近期版本）</td>
+</tr>
+<tr>
+<td>Zed</td>
+<td>✓</td>
+<td>✗（純消費端）</td>
+</tr>
+<tr>
+<td><code>@modelcontextprotocol/inspector</code></td>
+<td>✓</td>
+<td>✓（直接 pass-through）</td>
+</tr>
+<tr>
+<td><code>mcp</code> Python SDK（<code>ClientSession</code>）</td>
+<td>✓</td>
+<td>✓（用 <code>sampling_callback=</code>）</td>
+</tr>
+</tbody>
+</table>
+<p><code>ClientInheritedSubstrate</code> 唯一需要的就是 sampling 反向通道。沒有
+sampling 的 client 還是能呼叫 <code>vacant_describe</code> 跟 <code>vacant_call</code>，
+但 <code>vacant_call_with_sampling</code> 會壞掉。</p>
+<hr />
+<h2 id="2-5-quickstart">2 · 5 分鐘 Quickstart<a class="headerlink" href="#2-5-quickstart" title="Permanent link">&para;</a></h2>
+<h3 id="21-local-vacant">2.1 開一個 local vacant<a class="headerlink" href="#21-local-vacant" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.vacant
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>init<span class="w"> </span>alice
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># {&quot;name&quot;: &quot;alice&quot;, &quot;vacant_id&quot;: &quot;&lt;64-hex&gt;&quot;}</span>
+</span></code></pre></div>
+<p>這會寫 <code>~/.vacant/alice/{key.json,logbook.jsonl,meta.json}</code>，
+key 檔案是 0600。</p>
+<h3 id="22-halo-local-registry">2.2（可選）發布 halo 到 local registry<a class="headerlink" href="#22-halo-local-registry" title="Permanent link">&para;</a></h3>
+<p>只想接 MCP 的話可以跳過。要把 alice 推到 registry：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 一個終端：跑 registry server（P4 — 細節見 RUNBOOK.md）</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>uv<span class="w"> </span>run<span class="w"> </span>uvicorn<span class="w"> </span>vacant.registry.rpc:build_app<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># 另一個終端：</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">VACANT_REGISTRY_URL</span><span class="o">=</span>http://127.0.0.1:8080
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>publish<span class="w"> </span>--capability<span class="w"> </span><span class="s2">&quot;echo&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span>--endpoint<span class="w"> </span>http://127.0.0.1:8443/a2a/message/send
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>status
+</span></code></pre></div>
+<h3 id="23-vacant-server">2.3 把 vacant 跑成 server<a class="headerlink" href="#23-vacant-server" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>serve<span class="w"> </span>--name<span class="w"> </span>alice<span class="w"> </span>--port<span class="w"> </span><span class="m">8443</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># {&quot;name&quot;:&quot;alice&quot;,&quot;vacant_id&quot;:&quot;&lt;hex&gt;&quot;,&quot;host&quot;:&quot;127.0.0.1&quot;,&quot;port&quot;:8443,&quot;mcp&quot;:false}</span>
+</span></code></pre></div>
+<p>確認跑起來：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:8443/health
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># {&quot;vacant_id&quot;:&quot;&lt;hex&gt;&quot;,&quot;state&quot;:&quot;LOCAL&quot;,&quot;name&quot;:&quot;alice&quot;}</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:8443/card<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># capability_card_blob_hex + halo_version</span>
+</span></code></pre></div>
+<h3 id="24-mcp-claude-desktop-cursor">2.4 透過 MCP 接到 Claude Desktop / Cursor<a class="headerlink" href="#24-mcp-claude-desktop-cursor" title="Permanent link">&para;</a></h3>
+<p>把 vacant 寫進 client 的 MCP config。Claude Desktop 在
+<code>~/Library/Application Support/Claude/claude_desktop_config.json</code>：</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">&quot;vacant-alice&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uv&quot;</span><span class="p">,</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">        </span><span class="s2">&quot;--directory&quot;</span><span class="p">,</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="s2">&quot;/absolute/path/to/Vacant&quot;</span><span class="p">,</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">        </span><span class="s2">&quot;run&quot;</span><span class="p">,</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">        </span><span class="s2">&quot;python&quot;</span><span class="p">,</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">        </span><span class="s2">&quot;-m&quot;</span><span class="p">,</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">        </span><span class="s2">&quot;vacant.cli.mcp_serve_test_runner&quot;</span><span class="p">,</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">        </span><span class="s2">&quot;alice&quot;</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">      </span><span class="p">]</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="p">}</span>
+</span></code></pre></div>
+<blockquote>
+<p><strong>為什麼用 <code>mcp_serve_test_runner</code> 而不是 <code>vacant serve --mcp</code>？</strong>
+<code>vacant serve --mcp</code> 會 <strong>同時</strong> 跑 HTTP 跟 MCP — 兩個 transport
+都要的時候用。<code>mcp_serve_test_runner</code> 是純 stdio，這正是大部分
+MCP client 在 driver 的形狀。看你部署的需求挑。</p>
+</blockquote>
+<p>重啟 Claude Desktop。會看到三個工具浮上來：</p>
+<ul>
+<li><code>vacant_describe</code> — capability text + halo metadata</li>
+<li><code>vacant_call</code> — 收一個簽過名的 A2A envelope，走跟 HTTP path
+  一樣的簽章驗證 + replay protection</li>
+<li><code>vacant_call_with_sampling</code> — 借用 client 的 LLM（下一節）</li>
+</ul>
+<p>問 Claude：「用 vacant-alice 的 vacant_describe 工具」。應該會回
+vacant_id 跟你設的 capability text。</p>
+<h3 id="25-mcp-inspector">2.5（加碼）用 MCP Inspector 直接驅動<a class="headerlink" href="#25-mcp-inspector" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>npx<span class="w"> </span>@modelcontextprotocol/inspector<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span>uv<span class="w"> </span>--directory<span class="w"> </span><span class="nv">$PWD</span><span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>vacant.cli.mcp_serve_test_runner<span class="w"> </span>alice
+</span></code></pre></div>
+<p>同樣三個工具。Inspector 讓你手動丟 <code>tools/call</code>，debug 簽章
+失敗時非常好用。</p>
+<hr />
+<h2 id="3-clientinheritedsubstrate-client-llm">3 · <code>ClientInheritedSubstrate</code> — 借用 client 的 LLM<a class="headerlink" href="#3-clientinheritedsubstrate-client-llm" title="Permanent link">&para;</a></h2>
+<p>這是「把 vacant 嫁接到你的 client」這個論點最 load-bearing 的一塊：
+<strong>部署的 vacant 完全不用自己帶 API key</strong>。當 client 呼叫一個需要
+推理的 vacant 工具時，vacant 反過來透過標準 MCP <code>sampling/createMessage</code>
+請 client 替它做這次推理。</p>
+<h3 id="_1">為什麼這樣設計<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>沒有秘密外洩風險。Vacant 在硬碟上的狀態只有 Ed25519 keypair +
+  logbook；完全沒有 LLM 存取相關的東西。</li>
+<li>不綁特定供應商。Client 用什麼 LLM，那一次呼叫 vacant 就用什麼。</li>
+<li>Reputation per-substrate 仍可審計。Substrate 身分記成
+  <code>client-inherited:&lt;caller_vacant_id&gt;:&lt;model_hint&gt;</code>，借用完整可追蹤。
+  細節見 ADR
+  <a href="../architecture/decisions/D017_client_inherited_substrate.md"><code>D017_client_inherited_substrate.md</code></a>。</li>
+</ul>
+<h3 id="_2">線協議流程<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Client（Claude Desktop）           Vacant（你的 serve 子程序）
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>       │                                              │
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>       │── tools/call vacant_call_with_sampling ──────▶│
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>       │     { user_prompt, system_prompt,            │
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>       │       model_hint, caller_vacant_id_hex }     │
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>       │                                              │
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>       │                         ┌────────────────────┤
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>       │                         │ 構造               │
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>       │                         │ ClientInherited    │
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>       │                         │ Substrate(cb=...)  │
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>       │                         └────────────────────┤
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>       │                                              │
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>       │◀──── sampling/createMessage(messages, …) ────│
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>       │                                              │
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>       │── createMessage 結果（你的 LLM 跑出來）─────▶│
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>       │                                              │
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>       │                         ┌────────────────────┤
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>       │                         │ 包成               │
+</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>       │                         │ SubstrateResponse  │
+</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>       │                         │（substrate name +  │
+</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>       │                         │  proof）           │
+</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>       │                         └────────────────────┤
+</span><span id="__span-11-23"><a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>       │                                              │
+</span><span id="__span-11-24"><a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>       │◀── tools/call result { text, substrate, …} ──│
+</span></code></pre></div>
+<p>Vacant 在 logbook 寫的那條 entry 會帶 substrate name
+（<code>client-inherited:&lt;caller&gt;:&lt;model&gt;</code>）— 借用這件事完全可被任何讀
+chain 的人事後審計。</p>
+<h3 id="mcp-python-sdk">用 <code>mcp</code> Python SDK 呼叫<a class="headerlink" href="#mcp-python-sdk" title="Permanent link">&para;</a></h3>
+<p>這是標準寫法，也正是
+<a href="../tests/integration/test_mcp_sampling.py"><code>tests/integration/test_mcp_sampling.py</code></a>
+在驗證的：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClientSession</span><span class="p">,</span> <span class="n">StdioServerParameters</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mcp.client.stdio</span><span class="w"> </span><span class="kn">import</span> <span class="n">stdio_client</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mcp.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="n">CreateMessageRequestParams</span><span class="p">,</span> <span class="n">CreateMessageResult</span><span class="p">,</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="n">SamplingCapability</span><span class="p">,</span> <span class="n">TextContent</span><span class="p">,</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="p">)</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">my_sampling_cb</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">CreateMessageRequestParams</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CreateMessageResult</span><span class="p">:</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    <span class="n">user_text</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>        <span class="n">m</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">messages</span>
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="n">TextContent</span><span class="p">)</span>
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>    <span class="p">)</span>
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>    <span class="c1"># 換成你真的 LLM call。</span>
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>    <span class="n">answer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">my_llm</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">systemPrompt</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user_text</span><span class="p">)</span>
+</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>    <span class="k">return</span> <span class="n">CreateMessageResult</span><span class="p">(</span>
+</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>        <span class="n">role</span><span class="o">=</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span>
+</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>        <span class="n">content</span><span class="o">=</span><span class="n">TextContent</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">answer</span><span class="p">),</span>
+</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>        <span class="n">model</span><span class="o">=</span><span class="s2">&quot;claude-sonnet-4-6&quot;</span><span class="p">,</span>
+</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>        <span class="n">stopReason</span><span class="o">=</span><span class="s2">&quot;endTurn&quot;</span><span class="p">,</span>
+</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>    <span class="p">)</span>
+</span><span id="__span-12-21"><a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a>
+</span><span id="__span-12-22"><a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="n">params</span> <span class="o">=</span> <span class="n">StdioServerParameters</span><span class="p">(</span>
+</span><span id="__span-12-23"><a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a>    <span class="n">command</span><span class="o">=</span><span class="s2">&quot;uv&quot;</span><span class="p">,</span>
+</span><span id="__span-12-24"><a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a>    <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--directory&quot;</span><span class="p">,</span> <span class="n">PROJECT_ROOT</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+</span><span id="__span-12-25"><a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a>          <span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;vacant.cli.mcp_serve_test_runner&quot;</span><span class="p">,</span> <span class="s2">&quot;alice&quot;</span><span class="p">],</span>
+</span><span id="__span-12-26"><a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a><span class="p">)</span>
+</span><span id="__span-12-27"><a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a><span class="k">async</span> <span class="k">with</span> <span class="n">stdio_client</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+</span><span id="__span-12-28"><a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">ClientSession</span><span class="p">(</span>
+</span><span id="__span-12-29"><a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a>        <span class="n">r</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span>
+</span><span id="__span-12-30"><a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a>        <span class="n">sampling_callback</span><span class="o">=</span><span class="n">my_sampling_cb</span><span class="p">,</span>
+</span><span id="__span-12-31"><a id="__codelineno-12-31" name="__codelineno-12-31" href="#__codelineno-12-31"></a>        <span class="n">sampling_capabilities</span><span class="o">=</span><span class="n">SamplingCapability</span><span class="p">(),</span>
+</span><span id="__span-12-32"><a id="__codelineno-12-32" name="__codelineno-12-32" href="#__codelineno-12-32"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+</span><span id="__span-12-33"><a id="__codelineno-12-33" name="__codelineno-12-33" href="#__codelineno-12-33"></a>        <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+</span><span id="__span-12-34"><a id="__codelineno-12-34" name="__codelineno-12-34" href="#__codelineno-12-34"></a>        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">call_tool</span><span class="p">(</span>
+</span><span id="__span-12-35"><a id="__codelineno-12-35" name="__codelineno-12-35" href="#__codelineno-12-35"></a>            <span class="s2">&quot;vacant_call_with_sampling&quot;</span><span class="p">,</span>
+</span><span id="__span-12-36"><a id="__codelineno-12-36" name="__codelineno-12-36" href="#__codelineno-12-36"></a>            <span class="n">arguments</span><span class="o">=</span><span class="p">{</span>
+</span><span id="__span-12-37"><a id="__codelineno-12-37" name="__codelineno-12-37" href="#__codelineno-12-37"></a>                <span class="s2">&quot;user_prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;2 加 2 是多少？&quot;</span><span class="p">,</span>
+</span><span id="__span-12-38"><a id="__codelineno-12-38" name="__codelineno-12-38" href="#__codelineno-12-38"></a>                <span class="s2">&quot;system_prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;簡短回答。&quot;</span><span class="p">,</span>
+</span><span id="__span-12-39"><a id="__codelineno-12-39" name="__codelineno-12-39" href="#__codelineno-12-39"></a>                <span class="s2">&quot;model_hint&quot;</span><span class="p">:</span> <span class="s2">&quot;claude-sonnet-4-6&quot;</span><span class="p">,</span>
+</span><span id="__span-12-40"><a id="__codelineno-12-40" name="__codelineno-12-40" href="#__codelineno-12-40"></a>                <span class="s2">&quot;caller_vacant_id_hex&quot;</span><span class="p">:</span> <span class="n">MY_CALLER_VID_HEX</span><span class="p">,</span>
+</span><span id="__span-12-41"><a id="__codelineno-12-41" name="__codelineno-12-41" href="#__codelineno-12-41"></a>            <span class="p">},</span>
+</span><span id="__span-12-42"><a id="__codelineno-12-42" name="__codelineno-12-42" href="#__codelineno-12-42"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<p><code>result.content[0].text</code> 是一個 JSON 字串，裡面有 <code>text</code>（LLM
+回的內容）、<code>substrate</code>（可審計的身分字串）、<code>proof</code>（借用的
+metadata）。</p>
+<h3 id="reputation">Reputation 怎麼算<a class="headerlink" href="#reputation" title="Permanent link">&para;</a></h3>
+<p>借來的 substrate 跑出來的這次推理在貢獻 reputation 更新時，會
+進到 <code>client-inherited:*</code> bucket — <strong>不會</strong> 算到 vacant 自己內建
+substrate 的分數上。所以一個一直跑在 Claude 之上的 vacant，它的
+紀錄被歸成「借 Claude 跑」，之後改用 Mistral 來借時，比較仍然
+有意義。</p>
+<hr />
+<h2 id="4-openclaw-plugin-bundle">4 · OpenClaw plugin bundle 安裝<a class="headerlink" href="#4-openclaw-plugin-bundle" title="Permanent link">&para;</a></h2>
+<p>Drop-in plugin bundle 給 <a href="https://docs.openclaw.ai/">OpenClaw</a>，照
+<a href="https://docs.openclaw.ai/plugins/bundles"><code>.claude-plugin/</code></a> 格式
+寫 — 這個格式 OpenClaw 跟 Claude Code、Cursor、Windsurf 共用。
+完整 bundle 在 <a href="../examples/openclaw/"><code>examples/openclaw/</code></a>，這節
+講安裝。</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>examples/openclaw/
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>├── .claude-plugin/plugin.json     # bundle manifest
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>├── .mcp.json                      # MCP server 註冊
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>├── skills/vacant-call/SKILL.md    # 告訴 agent 何時叫哪個工具
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>└── README.md
+</span></code></pre></div>
+<h3 id="_3">安裝<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/cosmopig/Vacant.git
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nb">cd</span><span class="w"> </span>Vacant
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>openclaw<span class="w"> </span>plugins<span class="w"> </span>install<span class="w"> </span>./examples/openclaw<span class="w">   </span><span class="c1"># 本地資料夾安裝</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>openclaw<span class="w"> </span>plugins<span class="w"> </span>list<span class="w">                          </span><span class="c1"># 確認 &quot;vacant&quot; 啟用</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>openclaw<span class="w"> </span>gateway<span class="w"> </span>restart
+</span></code></pre></div>
+<p>或者直接從 GitHub 裝：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>openclaw<span class="w"> </span>plugins<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span>https://github.com/cosmopig/Vacant.git#main:examples/openclaw
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>openclaw<span class="w"> </span>gateway<span class="w"> </span>restart
+</span></code></pre></div>
+<h3 id="_4">先決條件<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>Bundle 需要一個 local vacant 來 host。先建一次：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>uvx<span class="w"> </span>--from<span class="w"> </span>git+https://github.com/cosmopig/Vacant.git<span class="w"> </span>vacant<span class="w"> </span>init<span class="w"> </span>alice
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">VACANT_NAME</span><span class="o">=</span>alice
+</span></code></pre></div>
+<p>Bundle env 預設 <code>VACANT_NAME=default</code>，這個變數選 MCP server 要 host
+哪一個 vacant。Bundle 命令 <code>uvx --from git+... vacant mcp</code> 會跑 stdio
+MCP server，用 <code>~/.vacant/$VACANT_NAME/</code> 底下那個 vacant。</p>
+<h3 id="_5">驗證<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>在 OpenClaw 裡問：</p>
+<blockquote>
+<p><em>「用 vacant plugin 的 vacant_describe 工具」</em></p>
+</blockquote>
+<p>預期：JSON 物件含 <code>vacant_id</code>、<code>capability_text</code>、<code>halo_version</code>。
+Bundle 裡的 <code>vacant-call</code> skill 會教 agent 哪種使用者意圖該配哪個工具。</p>
+<h3 id="clientpaste-config">其他 client（paste-config 食譜）<a class="headerlink" href="#clientpaste-config" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Client</th>
+<th>食譜</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Desktop</td>
+<td><a href="../examples/claude-desktop/"><code>examples/claude-desktop/</code></a></td>
+</tr>
+<tr>
+<td>Cursor</td>
+<td><a href="../examples/cursor/"><code>examples/cursor/</code></a></td>
+</tr>
+<tr>
+<td>Windsurf</td>
+<td><a href="../examples/windsurf/"><code>examples/windsurf/</code></a></td>
+</tr>
+<tr>
+<td>Nous Hermes</td>
+<td><a href="../examples/hermes/"><code>examples/hermes/</code></a></td>
+</tr>
+</tbody>
+</table>
+<p>這四個是 paste-config 不是完整 bundle — 把 JSON（或 Hermes 的 TOML）
+貼到 client 的 MCP config 重啟就好。同一條 canonical 命令、同樣三個
+工具。</p>
+<hr />
+<h2 id="5-vacant">5 · 兩台 vacant 互呼（真實網路）<a class="headerlink" href="#5-vacant" title="Permanent link">&para;</a></h2>
+<p>只想接 MCP 的話可以跳過這節。這是 live A2A path 的示範。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Terminal 1</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>init<span class="w"> </span>alice
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>serve<span class="w"> </span>--name<span class="w"> </span>alice<span class="w"> </span>--port<span class="w"> </span><span class="m">8443</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">  </span>--endpoint<span class="w"> </span>http://127.0.0.1:8443/a2a/message/send
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="c1"># Terminal 2</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>init<span class="w"> </span>bob
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="c1"># 用 vacant.cli.server.build_serve_app 拿到 bob 的 signing key，</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="c1"># 或透過 dispatch helper 跟 alice 講話：</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span><span class="s">&lt;&lt;&#39;PY&#39;</span>
+</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a><span class="s">import asyncio, httpx</span>
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="s">from vacant.cli.server import build_serve_app</span>
+</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="s">from vacant.protocol import (</span>
+</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="s">    A2AMessage, A2APart, call_local, make_httpx_transport,</span>
+</span><span id="__span-17-16"><a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="s">)</span>
+</span><span id="__span-17-17"><a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="s">from vacant.protocol.capability_card import deserialize as deserialize_card</span>
+</span><span id="__span-17-18"><a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>
+</span><span id="__span-17-19"><a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="s">async def main():</span>
+</span><span id="__span-17-20"><a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="s">    bob = build_serve_app(&quot;bob&quot;)  # bob 在這裡沒在跑 server，</span>
+</span><span id="__span-17-21"><a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a><span class="s">                                  # 我們只是要拿 bob 的 keypair。</span>
+</span><span id="__span-17-22"><a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="s">    async with httpx.AsyncClient() as c:</span>
+</span><span id="__span-17-23"><a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a><span class="s">        r = await c.get(&quot;http://127.0.0.1:8443/card&quot;)</span>
+</span><span id="__span-17-24"><a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a><span class="s">    alice_card = deserialize_card(bytes.fromhex(r.json()[&quot;capability_card_blob_hex&quot;]))</span>
+</span><span id="__span-17-25"><a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a><span class="s">    transport = make_httpx_transport(timeout=5.0)</span>
+</span><span id="__span-17-26"><a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a><span class="s">    result = await call_local(</span>
+</span><span id="__span-17-27"><a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a><span class="s">        target_card=alice_card,</span>
+</span><span id="__span-17-28"><a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a><span class="s">        requester=bob.form,</span>
+</span><span id="__span-17-29"><a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a><span class="s">        requester_signing_key=bob.signing_key,</span>
+</span><span id="__span-17-30"><a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a><span class="s">        payload=A2AMessage(role=&quot;ROLE_USER&quot;, parts=[A2APart(text=&quot;嗨 alice&quot;)]),</span>
+</span><span id="__span-17-31"><a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a><span class="s">        transport=transport,</span>
+</span><span id="__span-17-32"><a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a><span class="s">    )</span>
+</span><span id="__span-17-33"><a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a><span class="s">    print(&quot;response:&quot;, result.response_envelope.payload.parts[0].text)</span>
+</span><span id="__span-17-34"><a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a><span class="s">    print(&quot;通過 alice 公鑰驗證:&quot;,</span>
+</span><span id="__span-17-35"><a id="__codelineno-17-35" name="__codelineno-17-35" href="#__codelineno-17-35"></a><span class="s">          result.response_envelope.verify(alice_card.vacant_id.verify_key()))</span>
+</span><span id="__span-17-36"><a id="__codelineno-17-36" name="__codelineno-17-36" href="#__codelineno-17-36"></a>
+</span><span id="__span-17-37"><a id="__codelineno-17-37" name="__codelineno-17-37" href="#__codelineno-17-37"></a><span class="s">asyncio.run(main())</span>
+</span><span id="__span-17-38"><a id="__codelineno-17-38" name="__codelineno-17-38" href="#__codelineno-17-38"></a><span class="s">PY</span>
+</span></code></pre></div>
+<p>真的簽過名的 envelope round-trip；alice 的回應通過她硬碟上的
+Ed25519 公鑰驗證。這就是
+<a href="../tests/integration/test_live_two_vacants.py"><code>tests/integration/test_live_two_vacants.py</code></a>
+裡那條 live-network 測試濃縮成你能手動跑的 script。</p>
+<hr />
+<h2 id="6-troubleshooting">6 · Troubleshooting<a class="headerlink" href="#6-troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="-port-8443-address-already-in-use"><code>--port 8443</code> 上 <code>address already in use</code><a class="headerlink" href="#-port-8443-address-already-in-use" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># 找出占用 port 的 process</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:8443
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="c1"># 或乾脆換一個 port</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>uv<span class="w"> </span>run<span class="w"> </span>vacant<span class="w"> </span>serve<span class="w"> </span>--name<span class="w"> </span>alice<span class="w"> </span>--port<span class="w"> </span><span class="m">8444</span>
+</span></code></pre></div>
+<h3 id="mcp-client-vacant_call_with_sampling">MCP client 看不到 <code>vacant_call_with_sampling</code><a class="headerlink" href="#mcp-client-vacant_call_with_sampling" title="Permanent link">&para;</a></h3>
+<p>要嘛 client 沒宣告 sampling capability，要嘛它默默把 schema
+裡參考 <code>Context</code> 的工具濾掉了。</p>
+<ul>
+<li><strong>Claude Desktop</strong>：確認版本夠新；舊版本不會 pass-through
+  <code>sampling/createMessage</code>。</li>
+<li><strong>MCP Inspector</strong>：開箱即用。</li>
+<li><strong>Cursor / Zed</strong>：看 release notes — sampling 支援是逐步上線中。</li>
+</ul>
+<h3 id="envelopesignatureerror-response-envelope-did-not-verify"><code>EnvelopeSignatureError: response envelope did not verify</code><a class="headerlink" href="#envelopesignatureerror-response-envelope-did-not-verify" title="Permanent link">&para;</a></h3>
+<p>對方 vacant 的回應不是用你預期那把 key 簽的。常見原因：</p>
+<ol>
+<li>你拿到的 card 過時了 — 重新 fetch <code>/card</code>。</li>
+<li>對方 vacant rotate 了 key 但沒更新 card。</li>
+<li>你呼到錯的 endpoint（例如 proxy 把 metadata block 砍掉了）。</li>
+</ol>
+<p>對 <code>/card</code> 裡的 <code>vacant_id</code> 跟 response envelope 裡的
+<code>from_vacant_id</code> — 必須一致。</p>
+<h3 id="the-greenlet-library-is-required"><code>the greenlet library is required</code><a class="headerlink" href="#the-greenlet-library-is-required" title="Permanent link">&para;</a></h3>
+<p>我們有 explicit pin <code>greenlet</code>。看到這個錯代表你的 <code>uv sync</code> 跑在
+舊 lockfile 上。pull 後跑 <code>uv sync --all-extras</code>。</p>
+<h3 id="vacant-init-name-already-exists"><code>vacant init &lt;name&gt;</code> 說 "already exists"<a class="headerlink" href="#vacant-init-name-already-exists" title="Permanent link">&para;</a></h3>
+<p>每個 name 對應 <code>~/.vacant/</code> 底下一個資料夾。換個 name 或者
+<code>rm -rf ~/.vacant/&lt;name&gt;</code>（這會把 keypair 砍掉，不可逆）。</p>
+<h3 id="sampling-callback-text">Sampling callback 有打到，但工具回傳 text 是空的<a class="headerlink" href="#sampling-callback-text" title="Permanent link">&para;</a></h3>
+<p>確認你的 callback 回的 <code>CreateMessageResult</code> 的 <code>content</code> 是
+<code>TextContent</code>（不是 <code>ImageContent</code> 或 <code>ResourceLinkContent</code>）。
+Vacant 只知道怎麼從 sampling 回應裡讀 text。</p>
+<h3 id="mcp-server">MCP server 啟動時看似卡住<a class="headerlink" href="#mcp-server" title="Permanent link">&para;</a></h3>
+<p>Vacant 的 stdio MCP server 在 client 還沒 initialize 之前不會
+emit 任何輸出。檢查：</p>
+<ul>
+<li>Client 真的有送 <code>initialize</code>（Inspector 有 "Reconnect" 按鈕）。</li>
+<li>如果你跑在 <code>~/.vacant</code> 之外，記得設 <code>VACANT_HOME</code>。</li>
+<li>那個名字的 vacant 真的存在（<code>vacant status</code>）。</li>
+</ul>
+<hr />
+<h2 id="_6">接下來<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../RUNBOOK/"><code>docs/RUNBOOK.md</code></a> — 跑 scenarios 跟 dashboard</li>
+<li><a href="../DEMO_SCRIPT/"><code>docs/DEMO_SCRIPT.md</code></a> — 答辯 / talk 用的 5 分鐘走法</li>
+<li><a href="../architecture/THEORY_V5.md"><code>architecture/THEORY_V5.md</code></a> — 完整理論</li>
+<li><a href="../architecture/decisions/D017_client_inherited_substrate.md"><code>architecture/decisions/D017_client_inherited_substrate.md</code></a>
+  — 借用 substrate 的安全模型</li>
+</ul>
+<p>做了什麼東西的話歡迎開 issue 或 PR — 各種範例跟 client 專屬
+recipe 都歡迎進來。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      MIT-licensed · capstone project · Theory V5
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/cosmopig/Vacant" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://vacant.zeabur.app/" target="_blank" rel="noopener" title="vacant.zeabur.app" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "navigation.indexes", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.action.edit", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
