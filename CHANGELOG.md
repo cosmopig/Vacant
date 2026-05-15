@@ -4,6 +4,42 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Pre-1.0 means breaking changes can land in any minor bump.
 
+## [0.6.0](https://github.com/cosmopig/Vacant/compare/v0.5.0...v0.6.0) (2026-05-15)
+
+
+### Features
+
+* 3-PR operator UX — `vacant grow` (local) + `vacant peer` (network) + `serve --public --tls` ([d0881c8](https://github.com/cosmopig/Vacant/commit/d0881c85f5056893eba40774d423f527f823214a))
+* close all remaining technical.html gaps (A1-A6, B7-B8, C9-C10) ([a825a45](https://github.com/cosmopig/Vacant/commit/a825a45af73fd9a2bb06248edf9ed8c815e4994f))
+* close technical.html follow-ups — CLI surface, adoption indexer, federated backend, dashboard page ([bfcc0c0](https://github.com/cosmopig/Vacant/commit/bfcc0c032873268824fde5b10e103aedeba5f9fb))
+* **examples/agent:** model-agnostic Vacant route for non-tool-capable LLMs ([1230e66](https://github.com/cosmopig/Vacant/commit/1230e667b5dfb75bf162d214ce24d07aa7328b7b))
+* **grow:** LLM-driven 5D scorer + --substrate flag on serve/grow (Pfix9 Phase 2) ([03a6e12](https://github.com/cosmopig/Vacant/commit/03a6e12f5bc3e42107ae67cd4e5257c173cfdd4c))
+* **grow:** self-growth loop — ingest reviews + drift + auto-spawn (Pfix9 Phase 3) ([78c9e82](https://github.com/cosmopig/Vacant/commit/78c9e82b9006cb5354910689c5fff2bd309da68a))
+* **mcp:** auto-spawn competitor on 3 consecutive sub-0.3 reviews (Pfix8 P8.6) ([41e33fe](https://github.com/cosmopig/Vacant/commit/41e33fedc1654bf47f2c76fc0207f90e92822111))
+* **mcp:** vacant_caller_review + 5D reputation in list_children (Pfix8 P8.2/P8.4) ([fc33cce](https://github.com/cosmopig/Vacant/commit/fc33cce937a281ec571801a39d470decf1ad0ab2))
+* **mcp:** vacant_delegate_a2a — vacant-to-vacant over real A2A HTTP (Pfix8 P8.1) ([1fe46c1](https://github.com/cosmopig/Vacant/commit/1fe46c143e90c9eae53a6967e88d21ccbc4350a9))
+* **mcp:** vacant_list_children + vacant_delegate (Pfix7) ([f798a77](https://github.com/cosmopig/Vacant/commit/f798a7760c411a4e818469d600613b5345294cab))
+* **mcp:** vacant_spawn — client-driven D1 lineage growth (Pfix6) ([80965b8](https://github.com/cosmopig/Vacant/commit/80965b8c07e5a717ec31c12bf0c8c85a86dd82ea))
+* **p1+p3:** composite 3-axis ontology + blinded peer review ([d0214c4](https://github.com/cosmopig/Vacant/commit/d0214c4dc5ed11332aeac08c399c50f629e674f3))
+* **p2:** close Layer 9 metrics gap — add 7 missing health indicators ([6f97ec8](https://github.com/cosmopig/Vacant/commit/6f97ec8854f5cde95572af011ebae07de276ae0b))
+* **p2p:** /reviews/ingest endpoint — make peer-review actually cross-machine ([0ee659a](https://github.com/cosmopig/Vacant/commit/0ee659ac960f7b7d35b8a3471b1b26401f333c08))
+* **p2p:** self-recovering replay chain — eager advance + reset endpoint ([8b1c5cc](https://github.com/cosmopig/Vacant/commit/8b1c5cc2df9f9e968595281c66ba0e127ae630f0))
+* **registry:** decentralised trust — Git anchor + OpenTimestamps + N-of-M witness cosignatures ([b27b1f8](https://github.com/cosmopig/Vacant/commit/b27b1f846889983938db328c825aa4d683e7530a))
+* **runtime:** peer_review_tick — idle sibling probe + 5D scoring (Pfix8 P8.5) ([c8df7ed](https://github.com/cosmopig/Vacant/commit/c8df7ed0b09c834d831e33d52111933a82c8df3b))
+* **spec-align:** close 4 codex-review-2 findings + audit-fix attack matrix ([b1c7710](https://github.com/cosmopig/Vacant/commit/b1c77109722260a412c5daf6518ffee5a9c36193))
+* universal install + vacant route for any LLM (Pfix6+) ([3fe66f6](https://github.com/cosmopig/Vacant/commit/3fe66f661e38341d2957207db7d37bf3f7ff41ed))
+
+
+### Bug Fixes
+
+* **grow:** per-pair outbound chain so multi-tick peer review actually works (Pfix9 Bug A) ([0f68d0d](https://github.com/cosmopig/Vacant/commit/0f68d0dd420eb8c352479295c8b33d0f3544498e))
+* **grow:** spec-align peer-review scorer to F/L/R only + add --review-all-per-tick ([713c8fb](https://github.com/cosmopig/Vacant/commit/713c8fb8f7867f8b03fc0d7458d3aa0c76d69f47))
+* **install:** openclaw `--link` install is incompatible with `--force` ([92eae93](https://github.com/cosmopig/Vacant/commit/92eae93df4e1a6bd2ec28e7a70fbd351b6fb1e21))
+* **mcp:** single-Logbook invariant for sampling + spawn coexistence ([3276399](https://github.com/cosmopig/Vacant/commit/3276399cf64245bb3e4ebbfeb4bf99d9b37735e9))
+* **openclaw:** align bundle VACANT_NAME default with Pfix5 alice contract ([4d4204d](https://github.com/cosmopig/Vacant/commit/4d4204d526c3db7669a15e0f81c75811839930aa))
+* **spec-align:** close codex-review-3 critical findings ([b4e0890](https://github.com/cosmopig/Vacant/commit/b4e0890d2847897a47ebd1a6fa3f60993c6f9a73))
+* **spec-align:** close codex-review-3 round-2 — Lock, bounded cache, Sybil docs ([771b8c2](https://github.com/cosmopig/Vacant/commit/771b8c2df7c19b2ae679a9b509b3f89d94730370))
+
 ## [0.5.0](https://github.com/cosmopig/Vacant/compare/v0.4.0...v0.5.0) (2026-05-11)
 
 
