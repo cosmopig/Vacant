@@ -14,7 +14,17 @@
           "path": "pyproject.toml",
           "jsonpath": "$.project.version"
         },
-        "src/vacant/__init__.py"
+        "src/vacant/__init__.py",
+        {
+          "type": "json",
+          "path": ".claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": ".claude-plugin/marketplace.json",
+          "jsonpath": "$.plugins[0].version"
+        }
       ]
     }
   },

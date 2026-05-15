@@ -9,7 +9,7 @@
       "name": "vacant",
       "source": "./",
       "description": "嫁接到 Claude Code 的 responsibility-layer agent",
-      "version": "0.3.0",
+      "version": "0.6.0",
       "category": "agent-network"
     }
   ]
