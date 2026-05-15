@@ -382,10 +382,16 @@ class BlindedReviewBatch:
     - same-stylo behaviour clustering (V5 §3.5)
     - cold-start prior discount (V5 §3.6)
 
-    The aggregator applies those signals when it ingests the
-    unblinded rows this batch emits. Blinding only defeats the
-    *immediate-reciprocity* attack channel, which is a strictly
-    weaker class than full-Sybil collusion.
+    The aggregator is *designed* to apply those signals when it
+    ingests the unblinded rows this batch emits — `record_review`
+    accepts a `same_signals` parameter that the caller is expected
+    to populate from the detectors above. The Sybil detectors
+    themselves are not yet auto-wired into the live ingest pipeline
+    (a follow-up); calling code that needs full Sybil protection
+    must compute the signals before passing reviews to the
+    aggregator. Blinding only defeats the *immediate-reciprocity*
+    attack channel, which is a strictly weaker class than
+    full-Sybil collusion.
     """
 
     min_reveal_size: int = 3

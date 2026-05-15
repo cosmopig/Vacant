@@ -183,7 +183,10 @@ class MigrationEventStore:
     """
 
     seen_pks_max: int = _SEEN_PKS_DEFAULT_CAP
-    """Upper bound on the seen-PK cache. FIFO eviction once full."""
+    """Upper bound on the seen-PK cache. FIFO eviction once full.
+    Must be >= 1; values <= 0 are rejected at `__post_init__` time
+    because they would silently disable replay protection (every
+    insert is immediately evicted)."""
 
     _seen_pks: "OrderedDict[tuple[str, str], None]" = field(default_factory=OrderedDict)
     """Insertion-ordered set of every (vacant_id, concurrency_uuid)
@@ -196,6 +199,13 @@ class MigrationEventStore:
     _lock: threading.Lock = field(default_factory=threading.Lock)
     """Per-store mutex. Held across `record` / `clear` / read paths so
     concurrent threads see a consistent in-flight + seen-PK view."""
+
+    def __post_init__(self) -> None:
+        if self.seen_pks_max <= 0:
+            raise ValueError(
+                f"MigrationEventStore.seen_pks_max must be >= 1, got {self.seen_pks_max}; "
+                f"values <= 0 silently disable replay protection"
+            )
 
     def record(self, event: MigrationEvent) -> None:
         """Atomically register a migration. Raises

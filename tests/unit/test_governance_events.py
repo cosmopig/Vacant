@@ -137,6 +137,15 @@ def test_migration_event_store_rejects_unsigned_event() -> None:
         store.record(forged)
 
 
+def test_migration_event_store_rejects_zero_seen_pks_max() -> None:
+    """`seen_pks_max <= 0` would silently disable replay protection
+    (every insert is immediately evicted) — reject at construction."""
+    with pytest.raises(ValueError, match="must be >= 1"):
+        MigrationEventStore(seen_pks_max=0)
+    with pytest.raises(ValueError, match="must be >= 1"):
+        MigrationEventStore(seen_pks_max=-1)
+
+
 def test_migration_event_store_seen_pks_bounded_with_fifo_eviction() -> None:
     """`seen_pks_max` bounds the replay-rejection cache; FIFO
     eviction once full so a long-running store doesn't leak memory.
