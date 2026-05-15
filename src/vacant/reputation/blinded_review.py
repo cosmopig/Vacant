@@ -349,25 +349,38 @@ def unblind_record(
 class BlindedReviewBatch:
     """Operator-side accumulator: buffer blinded reviews + their
     paired reveal envelopes; emit unblinded rows in a batch once
-    `min_reveal_size` have accumulated.
+    `min_reveal_size` *distinct* reviewers have committed.
 
     Per V5 §3.9 #4: tit-for-tat retaliation is structurally broken
     because Bob (the target) cannot resolve Alice's commitment back
     to her pubkey until enough other reviewers have also committed —
     by which time the immediate retaliation window has closed.
 
-    This is a *correctness* primitive, not a *liveness* one: if not
-    enough reviewers ever commit, the batch never reveals and the
-    aggregator never picks the reviews up. That trade-off is
-    deliberate (V5 lists it as an explicit cost of the protection).
+    Threshold is by *distinct reviewer pubkey*, not by row count.
+    Without that, a single attacker could submit `min_reveal_size`
+    blinded reviews with different nonces and unblind themselves
+    (the reveal envelopes ARE signed by the reviewer's real key, so
+    the unblind step resolves all of them back to the attacker —
+    defeating the protection).
+
+    Poison-pill recovery: if one (record, envelope) pair fails
+    `unblind_record`, `flush_reveals` drops *that pair* from the
+    buffer (writing an audit warning) and keeps the rest queued.
+    Earlier behavior preserved the whole buffer indefinitely, which
+    let a single bad submission stall the entire batch.
     """
 
     min_reveal_size: int = 3
-    """Number of blinded records to accumulate before any reveal
-    becomes valid. V5 doesn't pin a number; 3 is a reasonable demo
-    default (matches the unblinded path's spawn-trigger streak)."""
+    """Number of *distinct reviewer pubkeys* to accumulate before
+    reveal is allowed. V5 doesn't pin a number; 3 matches the
+    unblinded path's spawn-trigger streak."""
 
     _pending: list[tuple[dict[str, Any], RevealEnvelope]] = field(default_factory=list)
+
+    dropped_pairs_count: int = 0
+    """Number of (record, envelope) pairs `flush_reveals` has dropped
+    due to verification failure. An operator polling this counter can
+    detect ongoing tampering attempts."""
 
     def add(self, record: dict[str, Any], envelope: RevealEnvelope) -> None:
         """Buffer one (blinded_record, reveal_envelope) pair."""
@@ -388,23 +401,34 @@ class BlindedReviewBatch:
     def pending_count(self) -> int:
         return len(self._pending)
 
+    @property
+    def distinct_reviewers(self) -> int:
+        """How many *distinct* reviewer pubkeys are committed in the
+        current buffer. This is what `is_ready_to_reveal` checks
+        against `min_reveal_size`."""
+        return len({env.reviewer_pubkey_hex for _, env in self._pending})
+
     def is_ready_to_reveal(self) -> bool:
-        return len(self._pending) >= self.min_reveal_size
+        return self.distinct_reviewers >= self.min_reveal_size
 
     def flush_reveals(self) -> list[dict[str, Any]]:
-        """If the batch is ready, return unblinded rows for ALL pending
-        records and clear the buffer. Returns an empty list when not
-        ready or when verification of any pair fails (in which case
-        the buffer is preserved so the operator can audit)."""
+        """If the batch is ready, unblind every pending pair, drop
+        any that fail verification, and clear the rest.
+
+        Returns the unblinded rows. Drops bad pairs as a side effect
+        and bumps `dropped_pairs_count`. An operator inspecting that
+        counter can spot ongoing tampering without the batch ever
+        deadlocking.
+        """
         if not self.is_ready_to_reveal():
             return []
         unblinded: list[dict[str, Any]] = []
         for record, envelope in self._pending:
             row = unblind_record(record, envelope)
             if row is None:
-                # One bad pair invalidates the whole flush — preserve
-                # buffer for audit.
-                return []
+                # Drop just this pair; do NOT stall the rest of the batch.
+                self.dropped_pairs_count += 1
+                continue
             unblinded.append(row)
         self._pending.clear()
         return unblinded

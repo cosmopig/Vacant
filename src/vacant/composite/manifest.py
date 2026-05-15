@@ -204,53 +204,40 @@ class ChildManifest(BaseModel):
         return True
 
     def verify(self) -> bool:
-        """True iff *both* signatures verify under their respective keys.
+        """True iff *both* signatures verify under the manifest's own
+        `schema_version`.
 
-        Tries the manifest's own `schema_version` first; if that fails
-        and `schema_version == "v2"`, falls back to `v1` so manifests
-        persisted by pre-upgrade code still load. The fallback is
-        one-way (v2 → v1 only) to avoid silently accepting tampered v2
-        manifests as v1."""
-        if self._verify_against(self.schema_version):
-            return True
-        if self.schema_version == "v2":
-            return self._verify_against("v1")
-        return False
+        We deliberately do NOT fall back across versions. The earlier
+        v2→v1 fallback was a downgrade-attack surface: an attacker who
+        observed a legitimately-signed v1 manifest could append
+        attacker-chosen axis fields and present it as v2; v2
+        verification would fail (axes weren't in the original sig),
+        the fallback to v1 would strip the axes and re-verify against
+        the original payload, and the consumer would then read the
+        attacker's chosen axis values as if they were authenticated.
+
+        Callers loading pre-upgrade persisted manifests must set
+        `schema_version="v1"` explicitly so the signing payload
+        matches what was originally signed.
+        """
+        return self._verify_against(self.schema_version)
 
     def verify_or_raise(self) -> None:
         if not self.signature_parent:
             raise ManifestError("manifest missing parent signature")
         if not self.signature_child:
             raise ManifestError("manifest missing child signature")
-        if self.verify():
+        payload = self._signing_payload_for(self.schema_version)
+        parent_ok = verify(self.parent_id.verify_key(), payload, self.signature_parent)
+        child_ok = verify(self.child_id.verify_key(), payload, self.signature_child)
+        if parent_ok and child_ok:
             return
-        # Diagnostic: figure out which side's signature is the bad one so
-        # the error message can point the operator to the actual fault.
-        # We try every supported version per-side, ordered "current-then-
-        # fallback", and report on the last one that failed.
-        versions_to_try = (self.schema_version,)
-        if self.schema_version == "v2":
-            versions_to_try = ("v2", "v1")
-        for ver in versions_to_try:
-            payload = self._signing_payload_for(ver)
-            parent_ok = verify(self.parent_id.verify_key(), payload, self.signature_parent)
-            child_ok = verify(self.child_id.verify_key(), payload, self.signature_child)
-            if parent_ok and child_ok:
-                return  # belt-and-braces; verify() above should have caught this
-            if parent_ok and not child_ok:
-                # Parent sig fine on this version but child failed — child is the fault.
-                raise ManifestError(
-                    f"manifest child signature invalid for {self.child_id.short()}"
-                )
-            if child_ok and not parent_ok:
-                raise ManifestError(
-                    f"manifest parent signature invalid for {self.parent_id.short()}"
-                )
-        # Neither side verified under any supported version. Default to
-        # reporting parent (matches pre-upgrade behavior — verify_or_raise
-        # historically checked parent first).
+        if not parent_ok:
+            raise ManifestError(
+                f"manifest parent signature invalid for {self.parent_id.short()}"
+            )
         raise ManifestError(
-            f"manifest parent signature invalid for {self.parent_id.short()}"
+            f"manifest child signature invalid for {self.child_id.short()}"
         )
 
 

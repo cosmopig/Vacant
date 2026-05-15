@@ -23,6 +23,8 @@ from vacant.identity.governance import (
     ControllerTransferEvent,
     GovernanceChangeEvent,
     MigrationEvent,
+    MigrationEventStore,
+    MigrationRaceError,
     recently_transferred,
     score_attestor_set,
 )
@@ -105,6 +107,8 @@ __all__ = [
     "L3TEEIdentity",
     "LayerPromotionError",
     "MigrationEvent",
+    "MigrationEventStore",
+    "MigrationRaceError",
     "PeerAttestation",
     "RootSet",
     "RootSetHistory",

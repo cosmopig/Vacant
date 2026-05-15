@@ -13,6 +13,8 @@ from vacant.identity.governance import (
     ControllerTransferEvent,
     GovernanceChangeEvent,
     MigrationEvent,
+    MigrationEventStore,
+    MigrationRaceError,
     recently_transferred,
     score_attestor_set,
 )
@@ -57,6 +59,82 @@ def test_migration_event_signature_tied_to_concurrency_uuid() -> None:
         signature=ev.signature,
     )
     assert tampered.verify() is False
+
+
+def test_migration_event_store_first_write_wins() -> None:
+    """V5 §8.1 A14: atomic migration_event. Two concurrent writers
+    submitting events for the same vacant collide at the store's
+    PK level — the loser raises `MigrationRaceError` and must abort
+    or retry. This is the actual atomic claim the spec rests on; the
+    UUID-uniqueness of `MigrationEvent.new()` alone doesn't deliver it."""
+    sk, vid = _vid_pair()
+    store = MigrationEventStore()
+
+    winner = MigrationEvent.new(
+        vacant_id=vid, from_endpoint="a", to_endpoint="b", signing_key=sk
+    )
+    store.record(winner)
+
+    # Concurrent loser: different concurrency_uuid (so PK doesn't collide
+    # directly), but same vacant_id — the store still rejects.
+    loser = MigrationEvent.new(
+        vacant_id=vid, from_endpoint="a", to_endpoint="c", signing_key=sk
+    )
+    with pytest.raises(MigrationRaceError, match="already has an in-flight migration"):
+        store.record(loser)
+
+    # The winner is what the store reports.
+    assert store.get(vid) == winner
+
+
+def test_migration_event_store_duplicate_pk_rejected() -> None:
+    """An attempt to record the exact same event twice (same PK)
+    is also rejected — defends against accidental retry-without-clear."""
+    sk, vid = _vid_pair()
+    store = MigrationEventStore()
+    ev = MigrationEvent.new(
+        vacant_id=vid, from_endpoint="a", to_endpoint="b", signing_key=sk
+    )
+    store.record(ev)
+    store.clear(vid)
+    # After clear, re-recording the SAME event still hits PK uniqueness.
+    with pytest.raises(MigrationRaceError, match="duplicate PK"):
+        store.record(ev)
+
+
+def test_migration_event_store_clear_allows_new_migration() -> None:
+    """Once an in-flight migration is finalised (`store.clear`), a
+    fresh migration for the same vacant succeeds. Models the
+    "migration committed, next one can start" lifecycle."""
+    sk, vid = _vid_pair()
+    store = MigrationEventStore()
+    first = MigrationEvent.new(
+        vacant_id=vid, from_endpoint="a", to_endpoint="b", signing_key=sk
+    )
+    store.record(first)
+    store.clear(vid)
+    second = MigrationEvent.new(
+        vacant_id=vid, from_endpoint="b", to_endpoint="c", signing_key=sk
+    )
+    store.record(second)
+    assert store.get(vid) == second
+
+
+def test_migration_event_store_rejects_unsigned_event() -> None:
+    """Store refuses to record an event whose Ed25519 signature
+    doesn't verify under the claimed vacant_id."""
+    sk, vid = _vid_pair()
+    store = MigrationEventStore()
+    forged = MigrationEvent(
+        vacant_id=vid,
+        from_endpoint="a",
+        to_endpoint="b",
+        concurrency_uuid="00000000-0000-4000-8000-000000000000",
+        issued_at_ms=1,
+        signature=bytes(64),
+    )
+    with pytest.raises(MigrationRaceError, match="signature did not verify"):
+        store.record(forged)
 
 
 def test_migration_event_concurrent_writers_get_distinct_uuids() -> None:

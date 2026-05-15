@@ -52,8 +52,19 @@ __all__ = [
     "ControllerTransferEvent",
     "GovernanceChangeEvent",
     "MigrationEvent",
+    "MigrationEventStore",
+    "MigrationRaceError",
     "score_attestor_set",
 ]
+
+
+class MigrationRaceError(Exception):
+    """Raised by `MigrationEventStore.record` on a duplicate
+    `(vacant_id, concurrency_uuid)` insert. The semantics match
+    V5 §8.1 A14's "first-write-wins" claim — the loser MUST treat
+    this exception as an indication that another migration won the
+    race and act accordingly (abort, retry with a fresh event, etc.).
+    """
 
 
 # --- A14: atomic migration event ----------------------------------------
@@ -127,6 +138,81 @@ class MigrationEvent:
             issued_at_ms=self.issued_at_ms,
         )
         return verify(self.vacant_id.verify_key(), payload, self.signature)
+
+
+@dataclass
+class MigrationEventStore:
+    """In-memory store that gives `MigrationEvent` the first-write-wins
+    semantics V5 §8.1 A14 promises.
+
+    Three invariants:
+
+    1. **PK uniqueness (replay protection)**: every
+       `(vacant_id_hex, concurrency_uuid)` ever observed remains in
+       the `_seen_pks` set permanently; re-submitting the same event
+       after `clear()` still raises `MigrationRaceError`.
+    2. **At-most-one-in-flight per vacant (race protection)**: while a
+       migration for `vacant_id` is in-flight, a second event for
+       the same `vacant_id` (different concurrency_uuid) is rejected.
+       The loser learns deterministically that another writer won.
+    3. **Lifecycle clear**: `clear(vacant_id)` releases the in-flight
+       slot (registry calls this once the migration is finalised /
+       aborted) but does NOT clear the seen-PK history — old PKs
+       remain replay-rejected for the lifetime of the store.
+
+    This is the in-memory reference implementation. Production should
+    swap in a SQLAlchemy-backed store with the same PK and the same
+    seen-set semantic so the DB wins the race.
+    """
+
+    _seen_pks: set[tuple[str, str]] = field(default_factory=set)
+    """Permanent record of every (vacant_id, concurrency_uuid) ever
+    accepted. Used for replay rejection regardless of in-flight state."""
+
+    _by_vacant: dict[str, MigrationEvent] = field(default_factory=dict)
+    """In-flight events keyed by vacant_id. Cleared by `clear()` once
+    the migration is finalised."""
+
+    def record(self, event: MigrationEvent) -> None:
+        """Atomically register a migration. Raises
+        `MigrationRaceError` if either (a) the
+        `(vacant_id, concurrency_uuid)` has *ever* been seen by this
+        store (replay protection — see `_seen_pks`), or (b) another
+        in-flight migration for the same `vacant_id` exists
+        (race-loser case — V5 §8.1 A14)."""
+        if not event.verify():
+            raise MigrationRaceError(
+                f"MigrationEventStore.record: event signature did not verify "
+                f"for vacant_id={event.vacant_id.short()}"
+            )
+        key = (event.vacant_id.hex(), event.concurrency_uuid)
+        if key in self._seen_pks:
+            raise MigrationRaceError(
+                f"MigrationEventStore.record: duplicate PK "
+                f"({event.vacant_id.short()}, {event.concurrency_uuid})"
+            )
+        existing_for_vid = self._by_vacant.get(event.vacant_id.hex())
+        if existing_for_vid is not None:
+            raise MigrationRaceError(
+                f"MigrationEventStore.record: vacant {event.vacant_id.short()} "
+                f"already has an in-flight migration "
+                f"(concurrency_uuid={existing_for_vid.concurrency_uuid}); "
+                f"loser must abort or wait for current to resolve"
+            )
+        self._seen_pks.add(key)
+        self._by_vacant[event.vacant_id.hex()] = event
+
+    def get(self, vacant_id: VacantId) -> MigrationEvent | None:
+        """Return the currently in-flight migration for `vacant_id`,
+        or None when no migration is in-flight."""
+        return self._by_vacant.get(vacant_id.hex())
+
+    def clear(self, vacant_id: VacantId) -> None:
+        """Release the in-flight slot for `vacant_id`. Called by the
+        registry once the migration is finalised (or aborted).
+        Idempotent. Does NOT clear `_seen_pks` — old PKs remain
+        replay-rejected permanently."""
+        self._by_vacant.pop(vacant_id.hex(), None)
 
 
 def _migration_payload_bytes(

@@ -314,9 +314,10 @@ def test_batch_rejects_add_with_mismatched_envelope() -> None:
         batch.add(record_1, env_2)
 
 
-def test_batch_returns_empty_on_any_invalid_pair() -> None:
-    """If even one pair fails verification at flush time, the whole
-    flush returns empty and the buffer is preserved (audit)."""
+def test_batch_drops_bad_pair_and_keeps_good_rows() -> None:
+    """A single bad (record, envelope) pair must NOT stall the batch.
+    `flush_reveals` drops the bad pair, bumps `dropped_pairs_count`,
+    and returns the good rows."""
     target_hex = bytes(SigningKey.generate().verify_key).hex()
     batch = BlindedReviewBatch(min_reveal_size=2)
 
@@ -354,6 +355,73 @@ def test_batch_returns_empty_on_any_invalid_pair() -> None:
     batch.add(r2, bad_e2)
 
     assert batch.is_ready_to_reveal() is True
+    unblinded = batch.flush_reveals()
+    assert len(unblinded) == 1
+    assert unblinded[0]["reviewer"] == bytes(sk1.verify_key).hex()
+    assert batch.dropped_pairs_count == 1
+    # Buffer cleared after flush (good rows emitted, bad ones dropped).
+    assert batch.pending_count == 0
+
+
+def test_batch_requires_distinct_reviewers_not_just_distinct_commitments() -> None:
+    """A single attacker submitting `min_reveal_size` commitments with
+    different nonces must NOT be able to flush themselves alone.
+
+    Threshold is by distinct reviewer pubkey, not by row count.
+    """
+    target_hex = bytes(SigningKey.generate().verify_key).hex()
+    batch = BlindedReviewBatch(min_reveal_size=3)
+
+    # ONE reviewer producing three commitments (different nonces).
+    sk = SigningKey.generate()
+    for i in range(3):
+        rec, env = make_blinded_review_record(
+            reviewer_signing_key=sk,
+            target_vid_hex=target_hex,
+            dimensions={"factual": 0.5, "logical": 0.5, "relevance": 0.5},
+            substrate="peer-review:heuristic",
+            call_envelope_id_hex=f"{i:02x}" * 32,
+            claim=f"row-{i}",
+            issued_at_iso=_now(),
+        )
+        batch.add(rec, env)
+
+    assert batch.pending_count == 3
+    assert batch.distinct_reviewers == 1
+    # NOT ready: only one distinct reviewer.
+    assert batch.is_ready_to_reveal() is False
     assert batch.flush_reveals() == []
-    # Buffer preserved
-    assert batch.pending_count == 2
+    assert batch.pending_count == 3  # nothing was flushed
+
+    # Add one more distinct reviewer → still 2 distinct, not enough.
+    sk2 = SigningKey.generate()
+    rec2, env2 = make_blinded_review_record(
+        reviewer_signing_key=sk2,
+        target_vid_hex=target_hex,
+        dimensions={"factual": 0.5, "logical": 0.5, "relevance": 0.5},
+        substrate="peer-review:heuristic",
+        call_envelope_id_hex="ff" * 32,
+        claim="row-extra",
+        issued_at_iso=_now(),
+    )
+    batch.add(rec2, env2)
+    assert batch.distinct_reviewers == 2
+    assert batch.is_ready_to_reveal() is False
+
+    # Add a third distinct reviewer → now ready.
+    sk3 = SigningKey.generate()
+    rec3, env3 = make_blinded_review_record(
+        reviewer_signing_key=sk3,
+        target_vid_hex=target_hex,
+        dimensions={"factual": 0.5, "logical": 0.5, "relevance": 0.5},
+        substrate="peer-review:heuristic",
+        call_envelope_id_hex="fe" * 32,
+        claim="row-extra2",
+        issued_at_iso=_now(),
+    )
+    batch.add(rec3, env3)
+    assert batch.distinct_reviewers == 3
+    assert batch.is_ready_to_reveal() is True
+    unblinded = batch.flush_reveals()
+    # All 5 rows unblind (3 from sk + sk2 + sk3).
+    assert len(unblinded) == 5
