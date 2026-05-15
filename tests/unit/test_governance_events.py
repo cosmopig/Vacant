@@ -137,6 +137,63 @@ def test_migration_event_store_rejects_unsigned_event() -> None:
         store.record(forged)
 
 
+def test_migration_event_store_seen_pks_bounded_with_fifo_eviction() -> None:
+    """`seen_pks_max` bounds the replay-rejection cache; FIFO
+    eviction once full so a long-running store doesn't leak memory.
+    The oldest evicted PKs are no longer replay-rejected — that's
+    the documented trade-off."""
+    sk, vid = _vid_pair()
+    # Tight cap so we can exercise eviction in a small loop.
+    store = MigrationEventStore(seen_pks_max=3)
+    events = []
+    for _ in range(5):
+        ev = MigrationEvent.new(
+            vacant_id=vid, from_endpoint="a", to_endpoint="b", signing_key=sk
+        )
+        store.record(ev)
+        store.clear(vid)
+        events.append(ev)
+    # Cache holds only the last 3 PKs.
+    assert len(store._seen_pks) == 3
+    # The two oldest events have been evicted — re-recording them
+    # is allowed again. Newer events are still replay-rejected.
+    store.record(events[0])  # evicted, OK
+    store.clear(vid)
+    with pytest.raises(MigrationRaceError, match="duplicate PK"):
+        store.record(events[-1])  # still in cache, rejected
+
+
+def test_migration_event_store_thread_safe_under_concurrent_record() -> None:
+    """Two threads racing to record for the same vacant: exactly one
+    succeeds, the other raises `MigrationRaceError`. The internal
+    `threading.Lock` is what makes this deterministic; without it,
+    both threads could race past the in-flight check."""
+    import threading as _t
+
+    sk, vid = _vid_pair()
+    store = MigrationEventStore()
+    results: list[str] = []
+
+    def attempt(label: str) -> None:
+        ev = MigrationEvent.new(
+            vacant_id=vid, from_endpoint=label, to_endpoint="b", signing_key=sk
+        )
+        try:
+            store.record(ev)
+            results.append(f"{label}:ok")
+        except MigrationRaceError:
+            results.append(f"{label}:race")
+
+    t1 = _t.Thread(target=attempt, args=("a",))
+    t2 = _t.Thread(target=attempt, args=("b",))
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+    # Exactly one winner; exactly one race-loser.
+    assert sorted([r.split(":")[1] for r in results]) == ["ok", "race"]
+
+
 def test_migration_event_concurrent_writers_get_distinct_uuids() -> None:
     """Two simultaneous migrations of the same vacant produce distinct
     `concurrency_uuid`s, which is the primary-key collision V5 §8.1 A14

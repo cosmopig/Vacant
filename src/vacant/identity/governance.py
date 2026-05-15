@@ -38,14 +38,23 @@ Tests in `tests/unit/test_governance_events.py`.
 from __future__ import annotations
 
 import math
+import threading
 import time
 import uuid
+from collections import OrderedDict
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Literal
 
 from vacant.core.crypto import SigningKey, sign, verify
 from vacant.core.types import VacantId
+
+
+_SEEN_PKS_DEFAULT_CAP = 100_000
+"""Default upper bound for `MigrationEventStore._seen_pks`. Once
+reached, the oldest entry is evicted FIFO. Set high enough that a
+realistic MVP / demo won't notice; tune up via the store's
+constructor for production."""
 
 __all__ = [
     "AttestorDiversity",
@@ -142,77 +151,98 @@ class MigrationEvent:
 
 @dataclass
 class MigrationEventStore:
-    """In-memory store that gives `MigrationEvent` the first-write-wins
-    semantics V5 §8.1 A14 promises.
+    """In-memory store that gives `MigrationEvent` first-write-wins
+    semantics for V5 §8.1 A14.
 
     Three invariants:
 
     1. **PK uniqueness (replay protection)**: every
        `(vacant_id_hex, concurrency_uuid)` ever observed remains in
-       the `_seen_pks` set permanently; re-submitting the same event
-       after `clear()` still raises `MigrationRaceError`.
-    2. **At-most-one-in-flight per vacant (race protection)**: while a
-       migration for `vacant_id` is in-flight, a second event for
+       the bounded `_seen_pks` cache; re-submitting the same event
+       after `clear()` still raises `MigrationRaceError`. The cache
+       is bounded by `seen_pks_max` (default 100k) — once full, the
+       oldest entry is evicted FIFO so the store never leaks memory.
+    2. **At-most-one-in-flight per vacant (race protection)**: while
+       a migration for `vacant_id` is in-flight, a second event for
        the same `vacant_id` (different concurrency_uuid) is rejected.
        The loser learns deterministically that another writer won.
     3. **Lifecycle clear**: `clear(vacant_id)` releases the in-flight
        slot (registry calls this once the migration is finalised /
-       aborted) but does NOT clear the seen-PK history — old PKs
-       remain replay-rejected for the lifetime of the store.
+       aborted) but does NOT clear the seen-PK history within the
+       cache window.
 
-    This is the in-memory reference implementation. Production should
-    swap in a SQLAlchemy-backed store with the same PK and the same
-    seen-set semantic so the DB wins the race.
+    All mutating methods take an internal `threading.Lock` so the
+    store is safe under multi-thread access (the dataclass default
+    factory was a non-locked dict, which raced on concurrent writers
+    — codex round 3 finding).
+
+    This is the in-memory reference implementation; "first-write-wins"
+    here means single-process. Production should swap in a SQLAlchemy-
+    backed store with the same PK + seen-set semantic so the DB wins
+    cross-process races.
     """
 
-    _seen_pks: set[tuple[str, str]] = field(default_factory=set)
-    """Permanent record of every (vacant_id, concurrency_uuid) ever
-    accepted. Used for replay rejection regardless of in-flight state."""
+    seen_pks_max: int = _SEEN_PKS_DEFAULT_CAP
+    """Upper bound on the seen-PK cache. FIFO eviction once full."""
+
+    _seen_pks: "OrderedDict[tuple[str, str], None]" = field(default_factory=OrderedDict)
+    """Insertion-ordered set of every (vacant_id, concurrency_uuid)
+    ever accepted. Bounded by `seen_pks_max`; oldest evicted FIFO."""
 
     _by_vacant: dict[str, MigrationEvent] = field(default_factory=dict)
     """In-flight events keyed by vacant_id. Cleared by `clear()` once
     the migration is finalised."""
 
+    _lock: threading.Lock = field(default_factory=threading.Lock)
+    """Per-store mutex. Held across `record` / `clear` / read paths so
+    concurrent threads see a consistent in-flight + seen-PK view."""
+
     def record(self, event: MigrationEvent) -> None:
         """Atomically register a migration. Raises
         `MigrationRaceError` if either (a) the
-        `(vacant_id, concurrency_uuid)` has *ever* been seen by this
-        store (replay protection — see `_seen_pks`), or (b) another
-        in-flight migration for the same `vacant_id` exists
-        (race-loser case — V5 §8.1 A14)."""
+        `(vacant_id, concurrency_uuid)` has been seen within the
+        cache window (replay protection), or (b) another in-flight
+        migration for the same `vacant_id` exists (race-loser case
+        — V5 §8.1 A14)."""
         if not event.verify():
             raise MigrationRaceError(
                 f"MigrationEventStore.record: event signature did not verify "
                 f"for vacant_id={event.vacant_id.short()}"
             )
         key = (event.vacant_id.hex(), event.concurrency_uuid)
-        if key in self._seen_pks:
-            raise MigrationRaceError(
-                f"MigrationEventStore.record: duplicate PK "
-                f"({event.vacant_id.short()}, {event.concurrency_uuid})"
-            )
-        existing_for_vid = self._by_vacant.get(event.vacant_id.hex())
-        if existing_for_vid is not None:
-            raise MigrationRaceError(
-                f"MigrationEventStore.record: vacant {event.vacant_id.short()} "
-                f"already has an in-flight migration "
-                f"(concurrency_uuid={existing_for_vid.concurrency_uuid}); "
-                f"loser must abort or wait for current to resolve"
-            )
-        self._seen_pks.add(key)
-        self._by_vacant[event.vacant_id.hex()] = event
+        with self._lock:
+            if key in self._seen_pks:
+                raise MigrationRaceError(
+                    f"MigrationEventStore.record: duplicate PK "
+                    f"({event.vacant_id.short()}, {event.concurrency_uuid})"
+                )
+            existing_for_vid = self._by_vacant.get(event.vacant_id.hex())
+            if existing_for_vid is not None:
+                raise MigrationRaceError(
+                    f"MigrationEventStore.record: vacant {event.vacant_id.short()} "
+                    f"already has an in-flight migration "
+                    f"(concurrency_uuid={existing_for_vid.concurrency_uuid}); "
+                    f"loser must abort or wait for current to resolve"
+                )
+            self._seen_pks[key] = None
+            # FIFO eviction once the cache exceeds its bound.
+            while len(self._seen_pks) > self.seen_pks_max:
+                self._seen_pks.popitem(last=False)
+            self._by_vacant[event.vacant_id.hex()] = event
 
     def get(self, vacant_id: VacantId) -> MigrationEvent | None:
         """Return the currently in-flight migration for `vacant_id`,
         or None when no migration is in-flight."""
-        return self._by_vacant.get(vacant_id.hex())
+        with self._lock:
+            return self._by_vacant.get(vacant_id.hex())
 
     def clear(self, vacant_id: VacantId) -> None:
         """Release the in-flight slot for `vacant_id`. Called by the
         registry once the migration is finalised (or aborted).
         Idempotent. Does NOT clear `_seen_pks` — old PKs remain
-        replay-rejected permanently."""
-        self._by_vacant.pop(vacant_id.hex(), None)
+        replay-rejected for as long as they sit in the cache window."""
+        with self._lock:
+            self._by_vacant.pop(vacant_id.hex(), None)
 
 
 def _migration_payload_bytes(

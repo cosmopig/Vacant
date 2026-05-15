@@ -365,9 +365,27 @@ class BlindedReviewBatch:
 
     Poison-pill recovery: if one (record, envelope) pair fails
     `unblind_record`, `flush_reveals` drops *that pair* from the
-    buffer (writing an audit warning) and keeps the rest queued.
-    Earlier behavior preserved the whole buffer indefinitely, which
-    let a single bad submission stall the entire batch.
+    buffer (bumping `dropped_pairs_count`) and keeps the rest. Earlier
+    behavior preserved the whole buffer indefinitely, which let a
+    single bad submission stall the entire batch.
+
+    **Layered Sybil defence (deliberate scope cut).** "Distinct
+    pubkey" is a structural check, not a Sybil-resistance check.
+    A determined attacker holding N independent keypairs can still
+    fill the batch from their N keypairs alone and reach the
+    distinct-reviewer threshold. That's NOT this primitive's job
+    to defend against — V5's layered defence assigns Sybil-resistance
+    to:
+
+    - `same_controller` heuristic (V5 §3.5 / T5 three-layer pipeline)
+    - `same_substrate` cluster cap (V5 §3.5)
+    - same-stylo behaviour clustering (V5 §3.5)
+    - cold-start prior discount (V5 §3.6)
+
+    The aggregator applies those signals when it ingests the
+    unblinded rows this batch emits. Blinding only defeats the
+    *immediate-reciprocity* attack channel, which is a strictly
+    weaker class than full-Sybil collusion.
     """
 
     min_reveal_size: int = 3
