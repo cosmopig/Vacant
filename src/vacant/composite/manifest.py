@@ -13,11 +13,28 @@ is rejected by `verify_or_raise`.
 The manifest is held by the composite parent's runtime (`CompositeRuntime`);
 it is *not* serialised to the public registry, so externally a composite
 vacant exposes only its own halo (P5 §3.3 black-box principle).
+
+Three-axis ontology (THEORY_V5 §5.1):
+
+| Axis                    | Values                                       |
+|-------------------------|----------------------------------------------|
+| `registry_visibility`   | NONE / UNLISTED / PUBLIC (in `registry.visibility`)|
+| `endpoint_reachability` | PARENT_ONLY / PARENT_BRIDGED / PUBLIC_A2A    |
+| `outbound_policy`       | NO_EXTERNAL / PARENT_PERMITTED / UNRESTRICTED|
+
+`closed_by_default` predates the 3-axis split and remains as a coarse
+visibility shorthand. The two new enums let callers express the three
+canonical configurations cleanly:
+- Self-grown: visibility=NONE, reachability=PARENT_ONLY, outbound=NO_EXTERNAL
+- Broker:     visibility=UNLISTED, reachability=PARENT_BRIDGED, outbound=PARENT_PERMITTED
+- Public resident (graduated): visibility=PUBLIC, reachability=PUBLIC_A2A,
+                               outbound=any-of-the-three (least-privilege per V5 §5.2)
 """
 
 from __future__ import annotations
 
 import json
+from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -29,11 +46,54 @@ from vacant.core.types import VacantId
 __all__ = [
     "BIRTH_PATHS",
     "ChildManifest",
+    "OutboundPolicy",
+    "Reachability",
     "ensure_birth_path",
 ]
 
 
 BIRTH_PATHS = ("D1", "D2", "D3", "D4", "D5")
+
+
+class Reachability(StrEnum):
+    """The 2nd axis of THEORY_V5 §5.1's composite ontology — *how* a
+    peer can route an A2A envelope to this vacant."""
+
+    PARENT_ONLY = "parent-only"
+    """Reachable only via the parent runtime (no own HTTP endpoint
+    exposed). Canonical for self-grown children. The parent forwards
+    relevant calls inwardly via the orchestrator."""
+
+    PARENT_BRIDGED = "parent-bridged"
+    """Parent exposes a bridged route on its own endpoint. The child's
+    halo lists the parent's endpoint with a routing hint (e.g. a path
+    suffix) so a caller can reach the child *through* the parent.
+    Canonical for broker children."""
+
+    PUBLIC_A2A = "public_a2a"
+    """Child runs its own HTTP A2A endpoint, addressable by anyone
+    holding its capability_card. Canonical for graduated vacants."""
+
+
+class OutboundPolicy(StrEnum):
+    """The 3rd axis of THEORY_V5 §5.1's composite ontology — what
+    *this vacant* is allowed to do toward the outside world.
+
+    Independent of reachability per V5 §5.2 (a graduated, listed
+    vacant can still choose `NO_EXTERNAL` as a least-privilege
+    posture)."""
+
+    NO_EXTERNAL = "no-external"
+    """Never opens an outbound A2A call. Used by self-grown
+    children that purely answer inbound work."""
+
+    PARENT_PERMITTED = "parent-permitted"
+    """Outbound calls allowed only to peers attested by the parent
+    (in the parent's allowlist). Canonical for broker children."""
+
+    UNRESTRICTED = "unrestricted"
+    """Outbound calls to any peer that the registry resolves.
+    Required for top-level public residents that act as callers."""
 
 
 class ChildManifest(BaseModel):
@@ -54,6 +114,11 @@ class ChildManifest(BaseModel):
     tool_whitelist_inherited: list[str] = Field(default_factory=list)
     tool_whitelist_added: list[str] = Field(default_factory=list)
     tool_whitelist_removed: list[str] = Field(default_factory=list)
+    # --- THEORY_V5 §5.1 three-axis ontology ---------------------------------
+    # Defaults match the canonical D2 self-grown configuration so existing
+    # callers that don't set these get the historically-implied semantics.
+    endpoint_reachability: Reachability = Reachability.PARENT_ONLY
+    outbound_policy: OutboundPolicy = OutboundPolicy.NO_EXTERNAL
     signature_parent: bytes = b""
     signature_child: bytes = b""
 
@@ -61,7 +126,11 @@ class ChildManifest(BaseModel):
         """Canonical dict over which both parent and child sign.
 
         Excludes the two signature fields. Tool-whitelist lists are
-        sorted so `["a","b"]` and `["b","a"]` produce the same payload."""
+        sorted so `["a","b"]` and `["b","a"]` produce the same payload.
+        `endpoint_reachability` and `outbound_policy` are serialised as
+        their string values so older verifiers (that don't know the
+        enum classes) can still re-derive the canonical bytes from
+        the stored manifest JSON."""
         return {
             "parent_id": self.parent_id.hex(),
             "child_id": self.child_id.hex(),
@@ -70,6 +139,8 @@ class ChildManifest(BaseModel):
             "tool_whitelist_inherited": sorted(self.tool_whitelist_inherited),
             "tool_whitelist_added": sorted(self.tool_whitelist_added),
             "tool_whitelist_removed": sorted(self.tool_whitelist_removed),
+            "endpoint_reachability": str(self.endpoint_reachability),
+            "outbound_policy": str(self.outbound_policy),
         }
 
     def signing_payload(self) -> bytes:

@@ -121,6 +121,40 @@ async def test_graduate_all_three_conditions_met() -> None:
 
 
 @pytest.mark.asyncio
+async def test_graduation_flips_reachability_to_public_a2a() -> None:
+    """V5 §5.5: graduation flips registry_visibility AND
+    endpoint_reachability. The third axis (outbound_policy) is
+    independent and stays as-is — least-privilege rule."""
+    from vacant.composite import OutboundPolicy, Reachability
+
+    runtime, sk_p, p_id, _p_form, sk_c, c_id, _c_form = _build_runtime_with_child()
+    # Verify the pre-graduation manifest is self-grown (default for D2).
+    pre = runtime.manifest_for(c_id)
+    assert pre.endpoint_reachability == Reachability.PARENT_ONLY
+    assert pre.outbound_policy == OutboundPolicy.NO_EXTERNAL
+
+    service = GraduationService(detector=CompositeStubDetector())
+    req = make_graduation_request(
+        parent_id=p_id,
+        parent_signing_key=sk_p,
+        child_id=c_id,
+        child_signing_key=sk_c,
+        capability_text="x",
+    )
+    outcome = await service.graduate(runtime=runtime, request=req)
+    new_m = outcome.new_manifest
+
+    # Visibility axis: NONE → PUBLIC (via closed_by_default flip)
+    assert new_m.closed_by_default is False
+    # Reachability axis: PARENT_ONLY → PUBLIC_A2A (forced by graduation)
+    assert new_m.endpoint_reachability == Reachability.PUBLIC_A2A
+    # Outbound axis: NO_EXTERNAL preserved (least privilege per V5 §5.2)
+    assert new_m.outbound_policy == OutboundPolicy.NO_EXTERNAL
+    # Sigs still verify over the new (axis-bearing) payload.
+    assert new_m.verify() is True
+
+
+@pytest.mark.asyncio
 async def test_graduation_preserves_logbook_continuity() -> None:
     """Post-graduation logbook is an EXTENSION of pre's, not a fork."""
     runtime, sk_p, p_id, _p_form, sk_c, c_id, c_form = _build_runtime_with_child()

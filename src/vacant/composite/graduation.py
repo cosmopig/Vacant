@@ -269,7 +269,19 @@ class GraduationService:
 
     @staticmethod
     def _rebuild_manifest(old: ChildManifest) -> ChildManifest:
-        """Strip old signatures + flip closed_by_default."""
+        """Strip old signatures + flip the two graduation-controlled
+        axes of V5 §5.1's ontology.
+
+        Per V5 §5.5: graduation flips `registry_visibility` (here
+        encoded by `closed_by_default=False`) and `endpoint_reachability`
+        (PARENT_ONLY/PARENT_BRIDGED → PUBLIC_A2A). The third axis,
+        `outbound_policy`, stays as-is — V5 §5.2's least-privilege
+        rule says a freshly-graduated vacant can still choose
+        self-grown semantics for outbound calls and let the operator
+        relax it later by a separate ceremony.
+        """
+        from vacant.composite.manifest import Reachability
+
         return ChildManifest(
             parent_id=old.parent_id,
             child_id=old.child_id,
@@ -278,6 +290,8 @@ class GraduationService:
             tool_whitelist_inherited=list(old.tool_whitelist_inherited),
             tool_whitelist_added=list(old.tool_whitelist_added),
             tool_whitelist_removed=list(old.tool_whitelist_removed),
+            endpoint_reachability=Reachability.PUBLIC_A2A,
+            outbound_policy=old.outbound_policy,  # independent axis, preserved
         )
 
 

@@ -4,7 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from vacant.composite import ChildManifest, ManifestError, ensure_birth_path
+from vacant.composite import (
+    ChildManifest,
+    ManifestError,
+    OutboundPolicy,
+    Reachability,
+    ensure_birth_path,
+)
 from vacant.core.crypto import keygen
 from vacant.core.types import VacantId
 
@@ -126,3 +132,68 @@ def test_manifest_default_closed_by_default_is_true() -> None:
     _sk_p, p_id, _sk_c, c_id = _ids()
     m = ChildManifest(parent_id=p_id, child_id=c_id, birth_path="D2")
     assert m.closed_by_default is True
+
+
+# --- THEORY_V5 §5.1 three-axis ontology ---------------------------------
+
+
+def test_manifest_default_axes_match_self_grown_config() -> None:
+    """A D2 subagent-bud with no axis overrides should match the V5
+    canonical self-grown configuration: NONE visibility (encoded by
+    closed_by_default=True) + PARENT_ONLY reachability + NO_EXTERNAL
+    outbound."""
+    _sk_p, p_id, _sk_c, c_id = _ids()
+    m = ChildManifest(parent_id=p_id, child_id=c_id, birth_path="D2")
+    assert m.closed_by_default is True
+    assert m.endpoint_reachability == Reachability.PARENT_ONLY
+    assert m.outbound_policy == OutboundPolicy.NO_EXTERNAL
+
+
+def test_manifest_signing_payload_changes_when_axes_change() -> None:
+    """Both signatures cover the axis fields, so tampering with them
+    after signing must invalidate the manifest."""
+    sk_p, p_id, sk_c, c_id = _ids()
+    base = _draft(parent_id=p_id, child_id=c_id)
+    signed = base.signed_by_parent(sk_p).signed_by_child(sk_c)
+    assert signed.verify() is True
+    # Recreate with a different reachability axis but keep the old sigs.
+    tampered = signed.model_copy(
+        update={"endpoint_reachability": Reachability.PUBLIC_A2A}
+    )
+    assert tampered.verify() is False
+
+
+def test_manifest_broker_config_round_trips() -> None:
+    """The 'broker' configuration of V5 §5.2 must be expressible as
+    a dual-signed manifest end-to-end."""
+    sk_p, p_id, sk_c, c_id = _ids()
+    m = ChildManifest(
+        parent_id=p_id,
+        child_id=c_id,
+        birth_path="D2",
+        closed_by_default=False,  # unlisted, not NONE
+        endpoint_reachability=Reachability.PARENT_BRIDGED,
+        outbound_policy=OutboundPolicy.PARENT_PERMITTED,
+    )
+    signed = m.signed_by_parent(sk_p).signed_by_child(sk_c)
+    signed.verify_or_raise()
+    sd = signed.signing_dict()
+    assert sd["endpoint_reachability"] == "parent-bridged"
+    assert sd["outbound_policy"] == "parent-permitted"
+
+
+def test_manifest_public_resident_least_privilege_outbound_no_external() -> None:
+    """V5 §5.2 explicitly: a graduated vacant can still choose
+    NO_EXTERNAL outbound (least privilege) — outbound is independent
+    of the visibility/reachability axes."""
+    sk_p, p_id, sk_c, c_id = _ids()
+    m = ChildManifest(
+        parent_id=p_id,
+        child_id=c_id,
+        birth_path="D2",
+        closed_by_default=False,  # graduated
+        endpoint_reachability=Reachability.PUBLIC_A2A,
+        outbound_policy=OutboundPolicy.NO_EXTERNAL,  # still no outbound
+    )
+    signed = m.signed_by_parent(sk_p).signed_by_child(sk_c)
+    assert signed.verify() is True

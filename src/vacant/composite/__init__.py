@@ -26,6 +26,8 @@ from vacant.composite.graduation import (
 from vacant.composite.manifest import (
     BIRTH_PATHS,
     ChildManifest,
+    OutboundPolicy,
+    Reachability,
     ensure_birth_path,
 )
 from vacant.composite.orchestrator import (
@@ -66,6 +68,8 @@ __all__ = [
     "GraduationRequest",
     "GraduationService",
     "ManifestError",
+    "OutboundPolicy",
+    "Reachability",
     "TreeOnlyViolationError",
     "default_detector",
     "ensure_birth_path",
