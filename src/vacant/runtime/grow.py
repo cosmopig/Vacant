@@ -90,9 +90,33 @@ class GrowStats:
     spawns_emitted: int = 0
     """Number of D1 child spawns triggered by consecutive sub-threshold
     reviews on me. Each carries the parent_id back to this vacant."""
+    chain_resets: int = 0
+    """Number of times we detected a per-pair chain mismatch with a peer
+    and successfully posted a /a2a/chain/reset to recover. High counts
+    indicate flaky network or peers restarting often."""
     # --------------------------------------------------------------------
     last_tick_at_ms: int = 0
     last_error: str | None = None
+    """Most recent error detail (back-compat surface). Use `last_errors`
+    for the recent-history ring buffer."""
+    last_errors: list[dict[str, Any]] = field(default_factory=list)
+    """Ring buffer (capped) of recent errors. Each entry:
+    `{"ts": ISO, "kind": "peer_review|ingest|chain_reset|...", "detail": "..."}`.
+    Bounded by `MAX_RECENT_ERRORS` so the dataclass stays serialisable."""
+
+    MAX_RECENT_ERRORS = 5
+
+    def record_error(self, kind: str, detail: str) -> None:
+        """Append an error entry to the ring buffer and update last_error."""
+        from datetime import UTC, datetime as _dt
+
+        entry = {"ts": _dt.now(UTC).isoformat(), "kind": kind, "detail": str(detail)[:400]}
+        self.last_errors.append(entry)
+        # Trim from the front so the list stays bounded.
+        excess = len(self.last_errors) - self.MAX_RECENT_ERRORS
+        if excess > 0:
+            del self.last_errors[:excess]
+        self.last_error = entry["detail"]
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -107,8 +131,10 @@ class GrowStats:
             "reviews_rejected": self.reviews_rejected,
             "drift_events": self.drift_events,
             "spawns_emitted": self.spawns_emitted,
+            "chain_resets": self.chain_resets,
             "last_tick_at_ms": self.last_tick_at_ms,
             "last_error": self.last_error,
+            "last_errors": list(self.last_errors),
         }
 
 
@@ -405,6 +431,79 @@ class GrowLoop:
         except Exception as exc:
             self.stats.last_error = f"heartbeat: {exc!r}"
 
+    async def _try_chain_recovery(self, peer_name: str, peer_meta: Any, error: str) -> bool:
+        """If `error` looks like a per-pair replay-chain mismatch, POST a
+        signed RESET_CHAIN envelope to the peer's `/a2a/chain/reset` and
+        seed our local outbound store back to (0, EMPTY) for this pair.
+
+        Returns True iff a reset was both warranted by the error AND
+        accepted by the peer. The caller's next tick will then send
+        seq=1 / prev=EMPTY which matches the peer's fresh state.
+
+        Implements the recovery path called out in §P2P-review-ingest:
+        "the per-pair chain mechanism must be self-recovering — without
+        a recovery protocol any single drift permanently breaks the link".
+        """
+        chain_markers = ("non-monotonic", "prev_envelope_hash mismatch", "replay/out-of-order")
+        if not any(m in error for m in chain_markers):
+            return False
+        from datetime import UTC, datetime as _dt
+        from vacant.core.types import EMPTY_PREV_HASH, VacantId
+        from vacant.protocol.envelope import (
+            A2AMessage, A2APart, VacantEnvelope, to_a2a_jsonrpc,
+        )
+        from vacant.protocol.replay_protect import PairKey, ReplayState
+
+        peer_vid = VacantId(pubkey_bytes=bytes.fromhex(peer_meta.vacant_id_hex))
+        reset_env = VacantEnvelope(
+            from_vacant_id=self.self_form.identity,
+            to_vacant_id=peer_vid,
+            sequence_no=1,
+            timestamp=_dt.now(UTC),
+            prev_envelope_hash=EMPTY_PREV_HASH,
+            payload=A2AMessage(role="ROLE_USER", parts=[A2APart(text="RESET_CHAIN")]),
+            idempotency_key=f"chain-reset-{int(_dt.now(UTC).timestamp() * 1000)}",
+        ).signed(self.self_signing_key)
+        wire = to_a2a_jsonrpc(reset_env)
+        url = f"{peer_meta.endpoint.rstrip('/')}/a2a/chain/reset"
+        post = self.http_post or _default_http_post
+        try:
+            status, body = await post(url, wire)
+        except Exception as exc:
+            self.stats.record_error("chain_reset_http", f"to={peer_name}: {exc!r}")
+            return False
+        if status != 200 or not (isinstance(body, dict) and body.get("ok") is True):
+            self.stats.record_error(
+                "chain_reset_rejected",
+                f"to={peer_name} status={status} body={str(body)[:200]}",
+            )
+            return False
+        # Seed our local outbound store so the next tick uses (1, EMPTY).
+        store = self._ensure_outbound_replay()
+        fresh = ReplayState(last_sequence_no=0, chain_tip=EMPTY_PREV_HASH)
+        store.seed(PairKey(from_vid=self.self_form.identity, to_vid=peer_vid), fresh)
+        store.seed(PairKey(from_vid=peer_vid, to_vid=self.self_form.identity), fresh)
+        self.stats.chain_resets += 1
+        # Append a logbook event so the operator can audit recovery actions.
+        try:
+            name = self._self_name_or_none()
+            if name is not None:
+                lb = ls.load_logbook(name)
+                lb.append(
+                    "chain_reset",
+                    payload={
+                        "peer_vacant_id": peer_vid.hex(),
+                        "peer_name": peer_name,
+                        "ts_ms": int(_dt.now(UTC).timestamp() * 1000),
+                        "reason_excerpt": error[:200],
+                    },
+                    signing_key=self.self_signing_key,
+                )
+                ls.save_logbook(name, lb)
+        except Exception as exc:  # pragma: no cover -- logbook is best-effort
+            self.stats.record_error("chain_reset_logbook", f"{exc!r}")
+        return True
+
     async def _do_peer_review(self) -> PeerReviewTickResult:
         """One peer-review pass.
 
@@ -436,6 +535,23 @@ class GrowLoop:
                 self.stats.peer_reviews_skipped += 1
             elif result.error:
                 self.stats.peer_reviews_failed += 1
+                self.stats.record_error(
+                    "peer_review",
+                    f"to={result.target_vacant_id_hex or 'unknown'}: {result.error}",
+                )
+                # Self-recovery for chain drift (rotation-mode path).
+                if result.target_vacant_id_hex:
+                    home = self.home or ls.vacant_home()
+                    for entry in home.iterdir() if home.exists() else []:
+                        if not entry.is_dir() or not (entry / "meta.json").exists():
+                            continue
+                        try:
+                            meta = ls.load_meta(entry.name)
+                        except ls.LocalVacantError:
+                            continue
+                        if meta.vacant_id_hex == result.target_vacant_id_hex and meta.endpoint:
+                            await self._try_chain_recovery(entry.name, meta, result.error)
+                            break
             elif result.dimensions:
                 self.stats.peer_reviews_sent += 1
             return result
@@ -480,6 +596,15 @@ class GrowLoop:
                 self.stats.peer_reviews_skipped += 1
             elif result.error:
                 self.stats.peer_reviews_failed += 1
+                self.stats.record_error("peer_review", f"to={target}: {result.error}")
+                # Self-recovery: if the error indicates a chain mismatch,
+                # ask the peer to reset its replay state for our pair.
+                try:
+                    peer_meta = ls.load_meta(target)
+                    if peer_meta.endpoint:
+                        await self._try_chain_recovery(target, peer_meta, result.error)
+                except ls.LocalVacantError:
+                    pass
             elif result.dimensions:
                 self.stats.peer_reviews_sent += 1
             last_result = result

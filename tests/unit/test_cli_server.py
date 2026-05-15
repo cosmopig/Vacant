@@ -204,6 +204,153 @@ def test_reviews_ingest_rejects_missing_dimensions() -> None:
     asyncio.run(_go())
 
 
+def test_chain_reset_accepts_signed_request_and_clears_pair() -> None:
+    """P1b: A peer that drifted out of sync can POST a signed
+    RESET_CHAIN envelope to /a2a/chain/reset; the server verifies the
+    signature, checks freshness, and seeds the replay store back to
+    (0, EMPTY) for that pair so the next probe with seq=1 is accepted."""
+    from datetime import UTC, datetime
+
+    from vacant.core.types import EMPTY_PREV_HASH, VacantId
+    from vacant.protocol.envelope import (
+        A2AMessage,
+        A2APart,
+        VacantEnvelope,
+        to_a2a_jsonrpc,
+    )
+    from vacant.protocol.replay_protect import PairKey, ReplayState
+
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    alice_bundle = build_serve_app("alice")
+    bob_meta = ls.load_meta("bob")
+    bob_sk = ls.load_signing_key("bob")
+    bob_vid = VacantId(pubkey_bytes=bytes.fromhex(bob_meta.vacant_id_hex))
+
+    # Pre-poison alice's replay store: pretend (bob → alice) is already
+    # at seq=42 so any naive probe from bob with seq=1 would be rejected.
+    alice_bundle.replay_store.seed(
+        PairKey(from_vid=bob_vid, to_vid=alice_bundle.form.identity),
+        ReplayState(last_sequence_no=42, chain_tip=b"\xab" * 32),
+    )
+
+    reset_env = VacantEnvelope(
+        from_vacant_id=bob_vid,
+        to_vacant_id=alice_bundle.form.identity,
+        sequence_no=1,
+        timestamp=datetime.now(UTC),
+        prev_envelope_hash=EMPTY_PREV_HASH,
+        payload=A2AMessage(role="ROLE_USER", parts=[A2APart(text="RESET_CHAIN")]),
+        idempotency_key="reset-test-1",
+    ).signed(bob_sk)
+    wire = to_a2a_jsonrpc(reset_env)
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=alice_bundle.app), base_url="http://test"
+        ) as ac:
+            r = await ac.post("/a2a/chain/reset", json=wire)
+            assert r.status_code == 200, r.text
+            data = r.json()
+            assert data["ok"] is True
+            assert data["reset_for_peer"] == bob_vid.hex()
+
+    asyncio.run(_go())
+
+    # The pair state must now be (0, EMPTY).
+    import asyncio as _asyncio
+
+    state = _asyncio.run(
+        alice_bundle.replay_store.get(
+            PairKey(from_vid=bob_vid, to_vid=alice_bundle.form.identity)
+        )
+    )
+    assert state.last_sequence_no == 0
+    assert state.chain_tip == EMPTY_PREV_HASH
+
+
+def test_chain_reset_rejects_wrong_payload_text() -> None:
+    """/a2a/chain/reset must NOT accept arbitrary signed envelopes —
+    only those whose payload is exactly 'RESET_CHAIN'. Otherwise any
+    captured A2A envelope could be replayed as a reset."""
+    from datetime import UTC, datetime
+
+    from vacant.core.types import EMPTY_PREV_HASH, VacantId
+    from vacant.protocol.envelope import (
+        A2AMessage,
+        A2APart,
+        VacantEnvelope,
+        to_a2a_jsonrpc,
+    )
+
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    alice_bundle = build_serve_app("alice")
+    bob_sk = ls.load_signing_key("bob")
+    bob_vid = VacantId(pubkey_bytes=bytes.fromhex(ls.load_meta("bob").vacant_id_hex))
+
+    bad_env = VacantEnvelope(
+        from_vacant_id=bob_vid,
+        to_vacant_id=alice_bundle.form.identity,
+        sequence_no=1,
+        timestamp=datetime.now(UTC),
+        prev_envelope_hash=EMPTY_PREV_HASH,
+        payload=A2AMessage(role="ROLE_USER", parts=[A2APart(text="please reset")]),
+        idempotency_key="bad-reset-1",
+    ).signed(bob_sk)
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=alice_bundle.app), base_url="http://test"
+        ) as ac:
+            r = await ac.post("/a2a/chain/reset", json=to_a2a_jsonrpc(bad_env))
+            assert r.status_code == 400
+            assert r.json()["error"] == "payload_not_reset_chain"
+
+    asyncio.run(_go())
+
+
+def test_chain_reset_rejects_stale_request() -> None:
+    """Anti-replay: a reset envelope older than 5 minutes is rejected
+    so attackers can't replay an old captured RESET_CHAIN."""
+    from datetime import UTC, datetime, timedelta
+
+    from vacant.core.types import EMPTY_PREV_HASH, VacantId
+    from vacant.protocol.envelope import (
+        A2AMessage,
+        A2APart,
+        VacantEnvelope,
+        to_a2a_jsonrpc,
+    )
+
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    alice_bundle = build_serve_app("alice")
+    bob_sk = ls.load_signing_key("bob")
+    bob_vid = VacantId(pubkey_bytes=bytes.fromhex(ls.load_meta("bob").vacant_id_hex))
+
+    old_ts = datetime.now(UTC) - timedelta(minutes=10)
+    stale_env = VacantEnvelope(
+        from_vacant_id=bob_vid,
+        to_vacant_id=alice_bundle.form.identity,
+        sequence_no=1,
+        timestamp=old_ts,
+        prev_envelope_hash=EMPTY_PREV_HASH,
+        payload=A2AMessage(role="ROLE_USER", parts=[A2APart(text="RESET_CHAIN")]),
+        idempotency_key="stale-reset-1",
+    ).signed(bob_sk)
+
+    async def _go() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=alice_bundle.app), base_url="http://test"
+        ) as ac:
+            r = await ac.post("/a2a/chain/reset", json=to_a2a_jsonrpc(stale_env))
+            assert r.status_code == 400
+            assert "stale_reset_request" in r.json()["error"]
+
+    asyncio.run(_go())
+
+
 def test_build_serve_app_endpoint_override() -> None:
     ls.init_vacant("alice")
     bundle = build_serve_app("alice", endpoint="https://override.test/a2a")

@@ -547,3 +547,123 @@ def test_grow_stats_as_dict_is_json_serialisable() -> None:
     json.dumps(out)  # must not raise
     assert out["peer_reviews_sent"] == 4
     assert out["last_error"] is None
+    assert out["last_errors"] == []
+    assert out["chain_resets"] == 0
+
+
+def test_grow_stats_record_error_keeps_ring_buffer_bounded() -> None:
+    """P3: record_error appends to a ring buffer capped at
+    MAX_RECENT_ERRORS so an operator inspecting /grow/stats sees the
+    recent failure history without paginating through hundreds of rows."""
+    stats = GrowStats()
+    for i in range(stats.MAX_RECENT_ERRORS + 3):
+        stats.record_error("peer_review", f"to=bob: failure #{i}")
+    assert len(stats.last_errors) == stats.MAX_RECENT_ERRORS
+    # Oldest entries should have been pushed out.
+    details = [e["detail"] for e in stats.last_errors]
+    assert all("failure #" in d for d in details)
+    assert details[0].endswith("failure #3")  # first 3 dropped
+    assert details[-1].endswith(f"failure #{stats.MAX_RECENT_ERRORS + 2}")
+    # last_error mirrors the newest entry for back-compat.
+    assert stats.last_error == details[-1]
+
+
+@pytest.mark.asyncio
+async def test_chain_drift_auto_recovers_via_reset_endpoint(_vacant_home: Path) -> None:
+    """P1c: when peer_review_tick fails with a chain-mismatch error,
+    GrowLoop POSTs a signed RESET_CHAIN to the peer and seeds its local
+    outbound store, so the next tick re-establishes the chain from
+    seq=1. This is the recovery path that prevents permanently-broken
+    peer-review links after a single drift event."""
+    from datetime import UTC, datetime
+
+    from vacant.core.types import EMPTY_PREV_HASH
+    from vacant.protocol.envelope import (
+        A2AMessage,
+        A2APart,
+        VacantEnvelope,
+        from_a2a_jsonrpc,
+        to_a2a_jsonrpc,
+    )
+    from vacant.protocol.replay_protect import InMemoryReplayStore, PairKey, ReplayState
+
+    ls.init_vacant("alice")
+    ls.init_vacant("bob")
+    bob_meta = ls.load_meta("bob")
+    bob_meta.endpoint = "http://127.0.0.1:9999"
+    ls.save_meta("bob", bob_meta)
+    bob_vid = VacantId(pubkey_bytes=bytes.fromhex(bob_meta.vacant_id_hex))
+    bob_sk = ls.load_signing_key("bob")
+    alice_meta = ls.load_meta("alice")
+    alice_vid = VacantId(pubkey_bytes=bytes.fromhex(alice_meta.vacant_id_hex))
+    alice_sk = ls.load_signing_key("alice")
+
+    reset_envelopes: list[VacantEnvelope] = []
+
+    async def _fake_post(url: str, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        if url.endswith("/a2a/chain/reset"):
+            # Capture the reset envelope so the test can verify it's signed
+            # and contains the RESET_CHAIN sentinel.
+            reset_envelopes.append(from_a2a_jsonrpc(body))
+            return 200, {"ok": True, "reset_for_peer": alice_vid.hex()}
+        if url.endswith("/reviews/ingest"):
+            return 200, {"ok": True, "duplicate": False}
+        # First probe: simulate a drifted peer rejecting our envelope with
+        # the canonical chain-mismatch error string the recovery logic
+        # looks for. Probes after the reset succeed.
+        if not reset_envelopes:
+            return 409, {"detail": "non-monotonic sequence_no: expected 5, got 1"}
+        # Post-reset: return a signed response so the loop proceeds normally.
+        env = from_a2a_jsonrpc(body)
+        response_env = VacantEnvelope(
+            from_vacant_id=bob_vid,
+            to_vacant_id=alice_vid,
+            sequence_no=env.sequence_no,
+            timestamp=datetime.now(UTC),
+            prev_envelope_hash=EMPTY_PREV_HASH,
+            payload=A2AMessage(role="ROLE_AGENT", parts=[A2APart(text="echo back: probe")]),
+            idempotency_key=f"rsp-{env.sequence_no}",
+        ).signed(bob_sk)
+        return 200, {
+            "jsonrpc": "2.0",
+            "id": "rsp",
+            "result": {"message": to_a2a_jsonrpc(response_env)["params"]["message"]},
+        }
+
+    loop = GrowLoop(
+        self_form=_make_form(alice_vid),
+        self_signing_key=alice_sk,
+        redteam_every_n_ticks=0,
+        heartbeat_every_n_ticks=0,
+        enable_self_reputation_ingest=False,
+        enable_auto_spawn=False,
+        http_post=_fake_post,
+    )
+    # Pre-poison: pretend alice's outbound to bob is already at seq=99 so
+    # the first probe goes out with a "wrong" seq, triggering the simulated
+    # remote rejection.
+    store = loop._ensure_outbound_replay()
+    store.seed(
+        PairKey(from_vid=alice_vid, to_vid=bob_vid),
+        ReplayState(last_sequence_no=99, chain_tip=b"\x11" * 32),
+    )
+
+    await loop.tick()
+
+    # Tick 1: probe fails with chain mismatch → recovery POSTs reset.
+    assert loop.stats.peer_reviews_failed == 1
+    assert loop.stats.chain_resets == 1
+    assert len(reset_envelopes) == 1
+    reset = reset_envelopes[0]
+    assert " ".join(p.text for p in reset.payload.parts) == "RESET_CHAIN"
+    assert reset.from_vacant_id.hex() == alice_vid.hex()
+    # And alice's local outbound store for (alice, bob) is back to (0, EMPTY).
+    state = await store.get(PairKey(from_vid=alice_vid, to_vid=bob_vid))
+    assert state.last_sequence_no == 0
+    assert state.chain_tip == EMPTY_PREV_HASH
+    # last_errors ring buffer captured the underlying chain error too.
+    assert any("non-monotonic" in e["detail"] for e in loop.stats.last_errors)
+
+    await loop.tick()
+    # Tick 2: probe now uses seq=1, mock returns success → sent counter bumps.
+    assert loop.stats.peer_reviews_sent >= 1

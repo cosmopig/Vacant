@@ -41,7 +41,10 @@ from vacant.protocol import (
     VacantEnvelope,
     build_a2a_app,
 )
+from vacant.protocol.envelope import from_a2a_jsonrpc
+from vacant.protocol.replay_protect import PairKey, ReplayState
 from vacant.runtime.self_growth import verify_review_signature
+from vacant.core.types import EMPTY_PREV_HASH
 
 __all__ = [
     "ServeBundle",
@@ -150,6 +153,64 @@ def build_serve_app(
             "state": form.runtime_state.value,
             "name": name,
         }
+
+    @app.post("/a2a/chain/reset")
+    async def chain_reset(request: Request) -> JSONResponse:
+        """Allow a peer to ask us to forget our replay-store state for
+        the (peer, self) pair so they can re-establish the chain from
+        seq=1 / prev=EMPTY.
+
+        Without this, once a peer's outbound chain drifts out of sync
+        with ours (lost ACKs, peer restart, etc.), every subsequent
+        probe is rejected as non-monotonic and the link is permanently
+        broken with no recovery path.
+
+        Request body: full A2A JSON-RPC envelope wire format. The
+        payload text MUST be exactly "RESET_CHAIN". We verify the
+        envelope signature against the claimed `from_vacant_id` and
+        require timestamp within ±5 minutes of now (anti-replay of an
+        old reset). We then `seed()` our replay store to a fresh
+        ReplayState(0, EMPTY_PREV_HASH) for that pair.
+        """
+        from datetime import datetime, UTC
+
+        try:
+            wire = await request.json()
+            env = from_a2a_jsonrpc(wire)
+        except Exception as exc:
+            return JSONResponse({"ok": False, "error": f"bad_envelope: {exc}"}, status_code=400)
+        # Verify the requester's signature on their reset envelope.
+        try:
+            env.verify_or_raise(env.from_vacant_id.verify_key())
+        except Exception as exc:
+            return JSONResponse({"ok": False, "error": f"signature_invalid: {exc}"}, status_code=401)
+        # Payload must be the literal RESET_CHAIN sentinel — we don't want
+        # a generic /a2a/message/send envelope to accidentally count as a reset.
+        payload_text = " ".join(p.text for p in env.payload.parts).strip()
+        if payload_text != "RESET_CHAIN":
+            return JSONResponse({"ok": False, "error": "payload_not_reset_chain"}, status_code=400)
+        # Anti-replay: timestamp must be fresh.
+        age_s = abs((datetime.now(UTC) - env.timestamp).total_seconds())
+        if age_s > 300:
+            return JSONResponse(
+                {"ok": False, "error": f"stale_reset_request: age={age_s:.0f}s"},
+                status_code=400,
+            )
+        # Verify the reset envelope is addressed to us.
+        if env.to_vacant_id.hex() != vid.hex():
+            return JSONResponse({"ok": False, "error": "not_addressed_to_self"}, status_code=422)
+        # Reset BOTH directions for this pair — defensive.
+        peer_vid = env.from_vacant_id
+        fresh = ReplayState(last_sequence_no=0, chain_tip=EMPTY_PREV_HASH)
+        replay_store.seed(PairKey(from_vid=peer_vid, to_vid=vid), fresh)
+        replay_store.seed(PairKey(from_vid=vid, to_vid=peer_vid), fresh)
+        return JSONResponse(
+            {
+                "ok": True,
+                "reset_for_peer": peer_vid.hex(),
+                "reset_at": datetime.now(UTC).isoformat(),
+            }
+        )
 
     @app.post("/reviews/ingest")
     async def ingest_review(request: Request) -> JSONResponse:

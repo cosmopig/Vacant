@@ -339,12 +339,36 @@ async def peer_review_tick(
             error=f"probe_http_failed: {exc}",
         )
     if status != 200 or "result" not in body or "message" not in body.get("result", {}):
+        # The probe envelope's chain position depends on what dave actually
+        # did with it. status != 200 doesn't tell us — dave's replay store
+        # may have advanced (the rejection could be from later validation)
+        # or not (rejection at replay check). We surface the error and let
+        # the grow loop's chain-recovery logic decide; it'll inspect the
+        # detail and either reset or just count the failure.
+        body_detail = (body or {}).get("detail", "") if isinstance(body, dict) else ""
         return PeerReviewTickResult(
             reviewer_vacant_id_hex=self_hex,
             target_vacant_id_hex=peer_vid.hex(),
             probe_envelope_id_hex=probe_id_hex,
-            error=f"probe_bad_response: status={status}",
+            error=f"probe_bad_response: status={status} detail={body_detail}",
         )
+
+    # Eager outbound chain advance: dave just accepted the probe (status=200
+    # means his replay store ran check_and_advance successfully and moved
+    # forward to seq=next_seq, chain_tip=hash(probe_env)). If we DON'T advance
+    # ours now and a downstream step (sig verify / scoring / ingest) fails,
+    # next tick would re-use the same seq+prev_hash — dave would reject as
+    # non-monotonic. Advancing here keeps both sides in lockstep.
+    if outbound_replay_store is not None:
+        try:
+            await outbound_replay_store.check_and_advance(probe_env)
+        except Exception as exc:
+            return PeerReviewTickResult(
+                reviewer_vacant_id_hex=self_hex,
+                target_vacant_id_hex=peer_vid.hex(),
+                probe_envelope_id_hex=probe_id_hex,
+                error=f"local_chain_advance_failed: {exc}",
+            )
 
     try:
         response_env = from_a2a_jsonrpc(
@@ -426,11 +450,8 @@ async def peer_review_tick(
             error=f"ingest_rejected: status={ingest_status} body={ingest_body}",
         )
 
-    # Advance the outbound chain so the next tick uses seq+1 / prev=this.hash.
-    # Doing it AFTER successful ingest keeps the chain state monotonic
-    # with the peer-side evidence — a partial failure leaves both untouched.
-    if outbound_replay_store is not None:
-        await outbound_replay_store.check_and_advance(probe_env)
+    # Note: outbound chain was advanced *eagerly* after the probe 200 (above).
+    # If we got here, both the probe round-trip AND the review ingest landed.
 
     return PeerReviewTickResult(
         reviewer_vacant_id_hex=self_hex,
