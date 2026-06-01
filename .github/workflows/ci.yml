@@ -86,7 +86,7 @@ jobs:
       - name: Bandit (SAST on src/)
         run: uv run --with bandit bandit -r src/ -ll -ii
       - name: Detect secrets in tree
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
