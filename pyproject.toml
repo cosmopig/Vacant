@@ -1,164 +1,27 @@
 [project]
-# PyPI distribution name. The Python module name is still `vacant` (see
-# `[tool.hatch.build.targets.wheel] packages` below), so:
-#   pip install vacant-network    ← distribution name
-#   import vacant                 ← module name (unchanged)
-#   vacant demo law_firm          ← console_script (unchanged)
-# The unqualified `vacant` name on PyPI was already taken (a Rust
-# domain-checker bindings package) at the time this project went public.
-# Same pattern as `python-dotenv`/`dotenv`, `discord.py`/`discord`.
-name = "vacant-network"
-version = "0.6.0"
-description = "Responsibility-layer residency form for AI agents (atop A2A / MCP)."
+name = "vacant"
+version = "0.1.0"
+description = "Vacant — 站在 AI agent『之間那條線』上的信任層。Phase 1：信任 + 持久/復活（可究責、可依信譽路由、專家可被復活再呼叫）。"
 readme = "README.md"
-requires-python = ">=3.12"
-license = "MIT"
-license-files = ["LICENSE"]
-authors = [{ name = "cosmopig" }]
-keywords = ["ai-agents", "agent-network", "a2a", "mcp", "reputation", "responsibility-layer", "ed25519", "multi-agent"]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Operating System :: OS Independent",
-    "Typing :: Typed",
-]
+requires-python = ">=3.11"
 dependencies = [
-    "pydantic>=2.13.3",
-    "pynacl>=1.5",
-    "cryptography>=42.0",
-    "httpx>=0.28.1",
-    "fastapi>=0.136.1",
-    "sqlmodel>=0.0.38",
-    "aiosqlite>=0.22.1",
-    "alembic>=1.18.4",
-    "structlog>=25.5.0",
-    "anthropic>=0.99.0",
-    "typer>=0.25.1",
-    "python-dotenv>=1.2.2",
-    "mcp>=1.10",
-    "uvicorn>=0.30",
-    "greenlet>=3.5.0",
-    "keyring>=24",
-    "pyyaml>=6.0",
+    "cryptography>=42",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=8.0",
-    "pytest-asyncio>=0.23",
-    "pytest-cov>=5.0",
-    "hypothesis>=6.100",
-    "ruff>=0.5",
-    "mypy>=1.10",
-    "pre-commit>=3.7",
-    "pip-audit>=2.7",
-    "bandit>=1.7",
-    "twine>=5.0",
-    "types-PyYAML>=6.0",
-]
-demo = [
-    "streamlit>=1.57.0",
-    "pandas>=3.0.2",
-    "plotly>=6.7.0",
-    # API reference site (mkdocs build → gh-pages). Not a runtime dep.
-    "mkdocs>=1.6",
-    "mkdocs-material>=9.5",
-    "mkdocstrings[python]>=0.26",
-]
+dev = ["pytest>=8"]
 
 [project.scripts]
 vacant = "vacant.cli:main"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/vacant"]
-
-[tool.ruff]
-line-length = 100
-target-version = "py312"
-src = ["src", "tests"]
-extend-exclude = ["alembic/versions"]
-
-[tool.ruff.lint]
-select = [
-    "E", "F", "W", "I",
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
-    "S",   # flake8-bandit
-    "RUF", # ruff-specific
-]
-ignore = [
-    "E501",  # line length handled by formatter
-    "S101",  # asserts are fine in tests
-]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S101", "S311", "S105", "S106"]
-# Dashboard + scenarios use 繁體中文 UI text and seeded RNG for reproducible
-# demos; RUF001 flags fullwidth CJK punctuation, S311 flags non-crypto RNG.
-"src/vacant/mvp/dashboard.py" = ["RUF001"]
-"src/vacant/mvp/scenarios/**/*.py" = ["S311", "RUF001"]
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-
-[tool.mypy]
-python_version = "3.12"
-strict = true
-disallow_any_generics = true
-warn_return_any = true
-warn_unused_ignores = true
-warn_redundant_casts = true
-warn_unreachable = true
-no_implicit_reexport = true
-plugins = ["pydantic.mypy"]
-
-[[tool.mypy.overrides]]
-module = ["nacl.*", "dotenv"]
-ignore_missing_imports = true
+[tool.setuptools]
+packages = ["vacant"]
 
 [tool.pytest.ini_options]
-minversion = "8.0"
-addopts = "-ra -q --strict-markers"
 testpaths = ["tests"]
-markers = [
-    "slow: integration scenarios that spin up multiple vacants in-process",
-]
-asyncio_mode = "auto"
-
-[tool.coverage.run]
-source = ["src/vacant"]
-branch = true
-omit = [
-    # Streamlit UI app — exercised manually / visually, not unit-tested.
-    # Boot is verified via `import vacant.mvp.dashboard` in CI smoke step.
-    "src/vacant/mvp/dashboard.py",
-    # CLI module entrypoint — runs only when invoked as `python -m vacant.cli`.
-    "src/vacant/cli/__main__.py",
-    # Substrate stubs (no real impl yet — covered when the actual integration
-    # lands in a follow-up). Fully covered by their own __init__ smoke tests.
-    "src/vacant/substrate/hermes.py",
-    "src/vacant/substrate/openclaw.py",
-]
-
-[tool.coverage.report]
-show_missing = true
-skip_covered = false
-exclude_lines = [
-    "pragma: no cover",
-    "if __name__ == .__main__.:",
-    "raise NotImplementedError",
-    "if TYPE_CHECKING:",
-    # Protocol method bodies are `...` and never execute at runtime.
-    '^\s*\.\.\.\s*$',
-]
+addopts = "-q"
+pythonpath = ["."]

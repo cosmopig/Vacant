@@ -1,548 +1,162 @@
-<div align="center">
+# Vacant — Phase 1 實作（信任 + 持久/復活）
 
-<img src="assets/hero.svg" alt="Vacant — a residency form for AI agents on top of A2A / MCP" width="100%">
+站在獨立 AI agent「**之間那條線**」上的信任層。它不碰 agent 內部，卻給每個 agent
+一個**可持久、可究責、可被信譽篩選、可被復活再呼叫**的身份。
 
-<a href="assets/vacant-promo.mp4">
-  <img src="assets/vacant-promo.gif" alt="Vacant — 30-second promo video" width="100%">
-</a>
-
-<sub><em>30-second promo · five scenes · narrated · <a href="assets/vacant-promo.mp4">click for mp4 with sound</a> · <a href="docs/DEMO_RECORDING_SCRIPT.md">storyboard</a></em></sub>
-
-# Vacant
-
-[English](README.md) · [繁體中文](README.zh-TW.md)
-
-[![CI](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml/badge.svg)](https://github.com/cosmopig/Vacant/actions/workflows/ci.yml)
-[![release](https://img.shields.io/github/v/release/cosmopig/Vacant?display_name=tag&sort=semver&color=blue)](https://github.com/cosmopig/Vacant/releases/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/release/python-3120/)
-[![uv](https://img.shields.io/badge/managed%20by-uv-261230)](https://docs.astral.sh/uv/)
-[![tests: 854](https://img.shields.io/badge/tests-854%20passing-brightgreen.svg)](#testing)
-[![coverage: 91%](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](#testing)
-[![mypy: strict](https://img.shields.io/badge/mypy-strict-blue.svg)](https://mypy.readthedocs.io/)
-[![api docs](https://img.shields.io/badge/api%20docs-cosmopig.github.io-indigo.svg)](https://cosmopig.github.io/Vacant/)
-[![narrative](https://img.shields.io/badge/narrative-vacant.zeabur.app-blueviolet.svg)](https://vacant.zeabur.app/)
-[![Discussions](https://img.shields.io/github/discussions/cosmopig/Vacant)](https://github.com/cosmopig/Vacant/discussions)
-
-</div>
-
-A **responsibility-layer residency form** for AI agents on top of A2A / MCP. Gives agents identity, history, reputation, and consequences.
-
-> 一個讓 AI agent 變成「能扛責任的居民」的居民形式，疊在 A2A / MCP 之上補「責任」這一層。
-
-Capstone project · 2026 · Theory V5 · v0.2.0 · 854 tests · 91% coverage · 6 rounds of codex sign-off.
+> 這個套件實作《[Vacant 架構總規格（單一文件）v1](../共識會議_2026-06/Vacant_架構總規格_單一文件_v1.md)》的 **Phase 1**，
+> 並把它做成在**這台 Intel Mac（無 GPU）上就跑得起、驗得了**的「A 層機制模擬」
+> ——純 CPU、零 GPU、零 API。上機（RTX 3090 + vLLM + Hermes）只需把一個
+> `Substrate` 實作換掉，其餘信任/持久/路由邏輯原封不動。
 
 ---
 
-## Why does this exist?
+## 為什麼是這樣切
 
-Today's agents are fluent but **unaccountable**. When an LLM-driven agent gives you wrong answer, who pays? When two agents collude to game a benchmark, what does the network do? When an agent persists across sessions, how do you know the next session is the same agent? The existing stack — A2A (agent-to-agent transport), MCP (model context protocol) — only covers *how agents talk*. It says nothing about *who's accountable for what they say*.
+規格把驗證分兩層（共識定案 §5、總規格 §11）：
 
-**Vacant fills that gap.** It's not another agent framework. It's a *form an agent chooses to take* — like the difference between "a person on the street" and "a registered citizen with a passport, a credit history, and consequences." The agent doesn't have to become a vacant. But once it does, it carries identity (Ed25519 keypair), history (signed append-only logbook), and a reputation that costs real exploration cycles to build and can be lost.
+- **A 層機制模擬**（免費、CPU）：把信任 + 持久/復活 + 信譽路由整條迴圈跑起來、驗收。
+- **B 層系統消融**（本機 GPU、過夜）：把腦換成真 Hermes/vLLM，量學習曲線。
 
-The core claim:
-
-> Without a responsibility layer, multi-agent networks degrade into adversarial unaccountable LLM calls. Vacant is one possible responsibility layer — designed cost-aware (Skalse 2022 impossibility theorem assumed true), with quantified defense levels (P/D/C), 38 attack vectors enumerated, and a 14-week MVP that demonstrates the core mechanics.
-
----
-
-## The big picture
-
-```
-                   ┌──────────────────────────────────────┐
-                   │  Human / Operator                    │
-                   └─────────────────┬────────────────────┘
-                                     │
-                   ┌─────────────────▼────────────────────┐
-                   │  Client (OpenClaw / Hermes / Claude  │  ← parallel species,
-                   │   Code / your own A2A-aware tool)    │    not a vacant host
-                   └─────────────────┬────────────────────┘
-                                     │  A2A v0.4 / MCP v1.0
-                                     │  (transport, no responsibility)
-─────────────────────────────────────┼──────────────────────────────────
-                                     │
-                   ┌─────────────────▼────────────────────┐
-                   │       VACANT — responsibility layer  │
-                   │                                       │
-                   │   ┌──────────┐    ┌──────────┐       │
-                   │   │ vacant_A │←──→│ vacant_B │  …    │  ← residents on
-                   │   │  halo    │    │  halo    │       │    the network
-                   │   └──────────┘    └──────────┘       │
-                   │                                       │
-                   │   discovery via halo aggregation      │
-                   │   (per-vacant, not central)           │
-                   └─────────────────┬────────────────────┘
-                                     │
-                   ┌─────────────────▼────────────────────┐
-                   │  Substrate (LLM, tool, physical actuator,    │
-                   │   another vacant — multi-spec + swappable)   │
-                   └──────────────────────────────────────┘
-```
-
-Three load-bearing decisions:
-
-1. **Vacant is parallel to the client, not nested in it.** OpenClaw / Hermes are the *clients* humans use to enter the network. Vacants are *residents on the network*. They communicate via A2A or MCP.
-2. **Identity is cryptographic, not session-based.** A vacant's `idem` (numerical sameness) is its Ed25519 keypair. Substrate (which LLM is doing the thinking right now) is **swappable** without changing identity.
-3. **Registry is per-vacant, not central.** Each vacant carries its own *halo* (a self-published signed `capability_card`). The "Registry" is an aggregation/index over halos — three implementation models exist (central MVP / federated / DHT). It is never a routed-through component.
+本機（2018 Intel MBP）跑不動 GPU（見自動記憶 `machine_intel_mac_ml_limits`），
+所以這裡**完整實作 A 層**：用 `EchoSubstrate`（確定性 CPU「腦」，會真的把學到的
+skill 寫回 HERMES_HOME）把 G2–G7 全部跑通。B 層只差把 `EchoSubstrate` 換成
+`HermesACPSubstrate`（已附 file:line 整合說明，待 G1 上機接通）。
 
 ---
 
-## For Claude Code users (one command)
-
-If you already use [Claude Code](https://claude.com/claude-code), the
-fastest way to get a vacant is to install it as a plugin:
-
-```text
-/plugin marketplace add cosmopig/Vacant
-/plugin install vacant@cosmopig-vacant
-```
-
-Restart your session and Claude Code can call the new
-**`vacant_describe`** and **`vacant_call`** MCP tools directly. The
-plugin manifest spawns
-[`uvx --from git+https://github.com/cosmopig/Vacant vacant mcp`](.claude-plugin/plugin.json)
-under the hood — nothing else to install.
-
-> No local vacant on disk yet? `vacant mcp` boots an *ephemeral* demo
-> identity (fresh keypair per launch, never persisted) so the plugin
-> works the moment you install it. Run `vacant init <name>` later for
-> a stable identity. See [`docs/INTEGRATION.md`](docs/INTEGRATION.md) §0
-> for the verification flow (`/mcp`, `vacant_describe`, …).
-
----
-
-## For other clients (one command, any client)
-
-Vacant rides on top of an MCP-aware client. **One unified
-installer**, regardless of which one you use:
+## 快速開始
 
 ```bash
-uvx --from vacant-network vacant install <client>
+cd vacant
+PYTHONPATH=. python3 -m pytest tests -q          # 跑全部驗收測試（對應 G2–G7）
+PYTHONPATH=. python3 -m vacant.cli selftest      # 端到端冒煙測試
+PYTHONPATH=. python3 -m vacant.cli demo          # 跑 §11 C0/C1/C2/C3 對照實驗
+
+# 手動把玩
+PYTHONPATH=. python3 -m vacant.cli init alice                          # 鑄一個 requester
+PYTHONPATH=. python3 -m vacant.cli init bob --niche reverse --niche caesar3   # 鑄一個 expert
+PYTHONPATH=. python3 -m vacant.cli call alice reverse --input hello    # 發一次 a2a_call
+PYTHONPATH=. python3 -m vacant.cli info bob                            # 看 bob 的 logbook / skills / 鏈驗
 ```
 
-`<client>` is one of `claude-desktop`, `cursor`, `windsurf`,
-`openclaw`, `hermes`, `claude-code`. The command does two things:
+（或 `pip install -e .` 後直接用 `vacant …`。唯一相依：`cryptography`。）
 
-1. **Bootstraps your identity** at `~/.vacant/<name>/` if it doesn't
-   already exist. By default the Ed25519 seed is stored in your **OS
-   keyring** (macOS Keychain / Linux Secret Service / Windows
-   Credential Manager) — pass `--insecure-demo` to opt into a
-   plaintext `key.json` (for demos / CI hosts without a keyring).
-2. **Registers vacant** with the client: writes the right shape into
-   the right config file (JSON for Claude Desktop / Cursor /
-   Windsurf, YAML's `mcp_servers` key for Hermes), shells out to
-   `openclaw plugins install` for OpenClaw, or prints the slash-
-   command flow for Claude Code.
+`demo` 的輸出長這樣（完全確定性、可重現）：
 
-Idempotent — re-running with no flags is a no-op when the identity
-and config entry both exist.
-
-```bash
-# Examples
-uvx --from vacant-network vacant install claude-desktop
-uvx --from vacant-network vacant install cursor --name research
-uvx --from vacant-network vacant install hermes --insecure-demo   # CI / Linux without keyring
-uvx --from vacant-network vacant install hermes --dry-run         # preview, don't write
-uvx --from vacant-network vacant install openclaw                 # needs `openclaw` CLI on PATH
-uvx --from vacant-network vacant install claude-desktop --skip-init  # bring your own identity
 ```
+【信任性質】§10 prevents / detects（key custody 假設下）
+  冒名被拒（簽章）/ replay 被拒（seq 單調）/ 竄改被抓（hash chain）/ 動作可歸屬   ✓✓✓✓
 
-**Flags**: `--name <vid>` (which identity; default `alice`) ·
-`--force` (overwrite an existing client config entry) ·
-`--insecure-demo` (allow plaintext key when keyring isn't available) ·
-`--skip-init` (don't touch `~/.vacant/<name>/`; advanced) ·
-`--config-path <path>` (override the client's default config-file
-location) · `--dry-run` (print what would change).
-
-If you'd rather edit configs by hand, the raw per-client commands
-and config-file paths live in
-[`docs/INTEGRATION.md`](docs/INTEGRATION.md) §1–4.
-
-> The runtime command `vacant mcp --name <name>` is **strict**: if
-> `~/.vacant/<name>/` is missing it exits with code 2 + a clear
-> message rather than silently falling back to an ephemeral
-> identity. Silent fallback would mean clients think they have a
-> persistent vacant but every spawn is a fresh keypair — the audit
-> chain claim would silently collapse. `vacant install` is the
-> setup command that gets you to a valid state.
+【學習曲線】等算力對照
+  條件                    前1/3  後1/3  整體
+  C0 裸 substrate 單次     32%   42%   35%     ← 無累積，平
+  C1 naive（隨機+無累積）  38%   38%   40%     ← 同上
+  C2 +累積（隨機路由）     48%   85%   69%     ← AutoHarness 引擎貢獻
+  C3 +Vacant 信任組合      52%  100%   84%     ← 再加信任層
+  C3 − C2（後 1/3）= 信任層淨貢獻 ≈ +15%
+```
 
 ---
 
-## Try it without Claude Code
+## 程式對應規格分層（總規格 §3）
 
-The same code works without the plugin. Three paths:
-
-```bash
-# 1. pip / uv — published on PyPI as `vacant-network`; module name is still `vacant`
-pip install vacant-network
-vacant demo law_firm
-```
-
-```bash
-# 2. curl + script (clones into ~/Vacant for full repo access — dashboard, fixtures, etc.)
-curl -LsSf https://raw.githubusercontent.com/cosmopig/Vacant/main/install.sh | bash
-cd ~/Vacant
-
-# Run a demo scenario (deterministic mock substrate, no API key needed)
-uv run vacant demo law_firm                       # composite + sub-vacants
-uv run vacant demo self_replication --seed=314    # D-series lineage tree
-uv run vacant demo code_review                    # parallel reviewers, reputation diverges
-uv run vacant demo multilingual_translation       # cross-substrate dispatch
-
-# Launch the interactive Streamlit dashboard
-uv run streamlit run src/vacant/mvp/dashboard.py
-```
-
-```bash
-# 3. uvx — no install at all
-uvx --from vacant-network vacant demo law_firm
-uvx --from vacant-network vacant mcp              # raw stdio MCP server
-```
-
-**With a real LLM — substrate matrix** (substrate is swappable; see THEORY_V5 §2 — the LLM is a *resource*, not the *identity*):
-
-```bash
-uv run vacant demo law_firm --substrate=mock           # default, deterministic, no key
-uv run vacant demo law_firm --substrate=anthropic      # ANTHROPIC_API_KEY (Claude)
-uv run vacant demo law_firm --substrate=openai         # OPENAI_API_KEY (also any OAI-compat
-                                                       #   endpoint via OPENAI_BASE_URL —
-                                                       #   Together / Fireworks / Groq /
-                                                       #   vLLM / LMStudio / llama.cpp …)
-uv run vacant demo law_firm --substrate=gemini         # GOOGLE_API_KEY (Gemini)
-uv run vacant demo law_firm --substrate=mistral        # MISTRAL_API_KEY
-uv run vacant demo law_firm --substrate=ollama         # local Ollama, no key
-# hermes / openclaw are stubs in D1; the load-bearing client integration
-# is `--substrate=client-inherited` (D2): vacant served via MCP uses the
-# calling client's LLM via sampling/createMessage, no key on the vacant.
-```
-
-Copy `.env.example` → `.env` and fill in only the keys you actually use.
-
----
-
-## Hosting a vacant under your client
-
-Vacant runs as a network resident, not as part of your agent client.
-The intended deployment is: **`vacant serve --mcp` exposes A2A + MCP
-transports**; your client (Claude Desktop, OpenClaw, Hermes, any
-MCP-aware tool) connects, the vacant lists its capabilities via
-`tools/list`, and *the calling client supplies the LLM* via MCP
-`sampling/createMessage`. The vacant signs the resulting logbook
-entry; the client's LLM is the substrate; **no API key is needed on
-the vacant side**.
-
-```bash
-# Terminal — start a vacant
-vacant init alice
-# Either: stdio MCP only (recommended for clients that spawn the server)
-vacant mcp --name alice
-# Or: HTTP A2A + stdio MCP from a single process (the MCP side is still
-# stdio — the --port flag exposes the A2A FastAPI app, not a /mcp route)
-vacant serve --mcp --port 8443 --name alice
-```
-
-The MCP transport is **stdio** — the easiest way to wire it into a
-client is the plugin manifest above (`.claude-plugin/plugin.json`),
-which already pins `"type": "stdio"` and the `vacant mcp` command. For
-clients that read `mcp.json` directly, the equivalent entry is:
-
-```json
-{
-  "mcpServers": {
-    "vacant-alice": {
-      "type": "stdio",
-      "command": "vacant",
-      "args": ["mcp", "--name", "alice"]
-    }
-  }
-}
-```
-
-Once connected, alice's `substrate_spec.allowed_substrates` includes
-`client-inherited`; the recorded substrate identity is
-`client-inherited:<caller_vid>:<model>`, so per-substrate reputation
-works the same way it does for any other backend.
-
-> A streamable-HTTP / SSE `/mcp` route is **not** mounted on the
-> FastAPI app today — `--port 8443` exposes only A2A + `/card` +
-> `/health`. If your client cannot speak stdio, run the inspector
-> bridge (`npx @modelcontextprotocol/inspector vacant mcp ...`) which
-> gives you an HTTP endpoint to point at.
-
-Verify the wiring externally with `npx @modelcontextprotocol/inspector`
-or the `mcp` Python SDK's client. The integration test pinning this
-flow is `tests/integration/test_mcp_external_client.py`. ADR
-`architecture/decisions/D017_client_inherited_substrate.md` documents
-the security model: the vacant trusts the caller's LLM output, but
-signs its own logbook entry, and the substrate identity is recorded
-so reputation per-substrate still works.
-
-For non-MCP deployments, pick any substrate that has a key
-(`anthropic`, `openai`, `gemini`, `mistral`, `ollama`) — see
-`docs/RUNBOOK.md` for the full matrix.
-
----
-
-## What is a *vacant*?
-
-A vacant is a *resident form* — an agent that has voluntarily adopted six components, in exchange for being addressable, reviewable, and persistent on the network:
-
-| # | Component | Purpose | Provenance |
-|---|---|---|---|
-| 1 | `identity` | Ed25519 keypair; the *idem* (numerical sameness) | P2 |
-| 2 | `logbook` | Append-only signed history of actions; the *ipse* (continuity through change) | P2 |
-| 3 | `behavior_bundle` | System prompt + policy DSL + tool whitelist; the bridge between idem and ipse | P0 |
-| 4 | `substrate_spec` | Declared list of acceptable substrates (LLMs / tools / actuators) | P0 |
-| 5 | `runtime` | Minimal lifecycle process — heartbeat, state machine, shadow-self drift detection | P1 |
-| 6 | `capability_card` | Self-published signed announcement (the *halo*) — what this vacant offers | P4 / P6 |
-
-Identity is *cryptographic*, not session-based. Continuity is *signed and verifiable*, not a wet-finger claim. Capability is *self-declared*, peer-reviewed, and reputation-weighted. The agent **chooses** to become a vacant. Anyone can put a vacant on the network — there is no resume, no access control, no central authority.
-
----
-
-## The four demo scenarios
-
-Each scenario is a runnable script that exercises a different cross-component flow. All four use deterministic seeds for reproducibility.
-
-### `law_firm` (seed=42) — composite + sub-vacants
-
-1 composite parent ("法律問答") delegates to 2 closed sub-vacants ("專利查詢", "條款草擬"). Demonstrates: child sealing (Tree-Only protocol), cross-vacant logbook attestation, composite reputation accruing to the parent while sub-reputations also build independently. After 30 calls, parent factual μ ≥ 0.7, both subs remain `LOCAL` (closed-by-default).
-
-### `code_review` (seed=137) — parallel reviewers, divergent reputation
-
-5 ACTIVE vacants race to review the same PR-shaped query. Top-3 by UCB get `caller_review` credit; bottom-2 get `peer_review` only. After 100 queries, reputation distribution stabilizes — top 2 vacants μ_F ≥ 0.8, bottom 1 ≤ 0.4. Same-controller detection fires on a seeded colluding pair. Reviewer credibility from that pair is downweighted by ≥ 0.5.
-
-### `multilingual_translation` (seed=271) — cross-substrate dispatch
-
-6 translator vacants, each declaring different `substrate_spec.allowed_substrates`. 40 queries across en→{zh,ja,es,fr}. Demonstrates: substrate-aware dispatch, separate posteriors per `(vacant, substrate)`, `portability_factor` bonus for vacants successfully serving multiple substrates.
-
-### `self_replication` (seed=314) — D-series lineage
-
-1 root vacant spawns over 200 ticks: D1 (clone-with-mutation), D2 (subagent-bud), D3 (capability-fork), D5 (cross-substrate respawn). Demonstrates: parent_id chain, identical-keypair-through-graduation (D2 child graduates from `LOCAL` → `ACTIVE`, **same keypair preserved**), STYLO discount stalls individual-vacant evolution after epoch 5 while a new D1 spawn resets the lineage clock — the load-bearing §4.3 mechanism that lets *lineages* evolve infinitely while *individuals* mortal.
-
-Each scenario emits structured JSON to stdout **and** writes per-event records into a SQLite event store at `var/demo.db`. The Streamlit dashboard reads from that store, so opening the dashboard after a `vacant demo` run replays exactly what happened — no recompute, no cache invalidation. `vacant demo --tail` streams the same events live for terminal-only visualization.
-
----
-
-## How it works — key mechanisms
-
-| Mechanism | What it does | Where it lives |
+| 層 | 檔案 | 做什麼 |
 |---|---|---|
-| **5-dim Beta posterior** | Reputation per `(vacant, substrate)` across factual / logical / relevance / honesty / adoption. Recursive trust weighting; STYLO-distance-based discount rollover. | `src/vacant/reputation/posterior.py` |
-| **UCB exploration** | New vacants get exploration bonus; converges to exploitation as `n_eff` grows. Cold-start §3.6 mechanism: birth-path startup signals + niche uniqueness + low-stakes probes + idle peer review. | `src/vacant/reputation/ucb.py` |
-| **Same-* detection (3 lines)** | Same-controller (timing/IP/ASN), same-substrate (LLM fingerprints), same-stylo (behavioral). All three are **cost-raising, not preventing** — they downweight reviews from suspected clusters. | `src/vacant/reputation/same_detect.py` |
-| **Halo aggregation** | Each active vacant self-publishes a signed capability_card. Discovery is over halos, not a routed-through registry. | `src/vacant/registry/halo.py` |
-| **5-state lifecycle** | `ACTIVE` / `LOCAL` / `HIBERNATING` / `STALE` / `SUNK` / `ARCHIVED`. State-event transition table; `can_review` / `can_be_called` enforced at the API surface. | `src/vacant/runtime/state_machine.py` |
-| **Sunk = identity custody attestation** | A Sunk vacant's heartbeat is **not** a liveness claim. It's a signed proof that the keypair is still in trusted custody — load-bearing for lineage attribution after death. Sunk vacants **cannot review** (§4.1). | `src/vacant/runtime/heartbeat.py` |
-| **Lineage as evolution subject** | Individual vacants accumulate STYLO drift discount (self-evolution stalls). Lineage (parent_id chain) does not — new D-series spawns reset the clock. **Lineages evolve infinitely; individuals are mortal.** (§4.3) | `src/vacant/runtime/spawn.py` |
-| **Closed children + graduation** | Composite parents' children are `LOCAL` by default (cannot be discovered or called by strangers). They can graduate to `ACTIVE` via parent consent + rate limit + 3-layer collusion check. **Same keypair, same logbook through graduation.** | `src/vacant/composite/graduation.py` |
-| **Direct A2A dispatch** | After halo lookup, vacants call each other directly. Registry is **never** a routed-through component. Per-pair envelope chain prevents replay. | `src/vacant/protocol/dispatch.py` |
-| **Signed review events** | `record_review` first appends a signed REVIEW_EVENT to a logbook, then atomic-updates the posterior. Reputation is always traceable to auditable history (no drift). | `src/vacant/reputation/aggregator.py` |
-
-For the full mechanism set with derivations, see [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md). For attack-defense matrix (38 attacks × P/D/C defense levels), see THEORY_V5 §6.
+| L0 腦 | `substrate.py` | `EchoSubstrate`（CPU 模擬）/ `HermesACPSubstrate`（3090 stub，附 file:line） |
+| L1 身體 | `identity.py` `logbook.py` `reputation.py` `body.py` | keypair+vacant_id、簽章 hash chain、五維 Beta 信譽、信任庫+能力庫綁定 |
+| L2 閘道 | `envelope.py` `gateway.py` | 簽章信封、ingress（驗章→防replay→信譽把關→喚醒）、egress（路由→簽→送→評審） |
+| L3 host/waker | `waker.py` `host.py` | vacant_id→HERMES_HOME 映射、喚醒對的身體+resume+寫回（**復活**） |
+| L4 網路 | `registry.py` | halo 發現 + 信譽路由索引（UCB），非中央路由器 |
+| 真值錨 | `verifier.py` `tasks.py` | 可檢查任務 → 環境真值簽 review（非循環 oracle） |
 
 ---
 
-## What this is **NOT**
+## 里程碑對應（總規格 §12 G1–G8）
 
-Common confusions, deliberately addressed:
-
-- **Not a plugin inside OpenClaw / Hermes / Claude Code.** Those are *clients* humans use to enter the network. Vacants are *peers* on the network those clients call (over A2A or MCP). From the client's perspective vacants feel plugin-like (more capability becomes addressable), but architecturally it's the inverse of "plugin in".
-- **Not a wrapper / middleware around an existing agent.** The runtime *is* the vacant — a wrapper layer would let "the underlying agent" change identity by changing its base model, which violates the keypair-as-identity decision. See `architecture/components/P1_runtime.md` §D1.
-- **Not a protocol.** A2A and MCP are protocols (mandatory format on the wire). Vacant is a *residency form* — voluntary. You can talk to a vacant using bare A2A/MCP without becoming one yourself.
-- **Not a token / blockchain project.** No on-chain anything. Stake is a reputation-bonus input (§3.7), not a payment system. Designed for a "token-free future" assumption (3+ years out) where inference is cheap and the network can cycle continuously.
-- **Not "anti-LLM."** Vacants thrive on LLMs. The point is making the LLM-using *agent* accountable, not abolishing the LLM.
-- **Not a central judge / oracle / arbiter.** There is no central LLM that decides who's right. Verification happens via signed logbooks + peer review + reputation + redteam probes.
-
----
-
-## Status
-
-| Aspect | State |
-|---|---|
-| **Theory** | V5 final; hardened through **3 rounds of codex adversarial review** with `no fatal issues remain`. See [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md) (45KB, 8 layers, 38-attack matrix, 13 honest open questions). |
-| **Releases** | [v0.2.0](https://github.com/cosmopig/Vacant/releases/tag/v0.2.0) (current) — Claude Code one-command plugin, OpenClaw bundle, 4 paste-config recipes, conventional-commit-driven auto-release. [v0.1.0](https://github.com/cosmopig/Vacant/releases/tag/v0.1.0) — capstone-defense MVP. Auto-changelog via release-please. |
-| **Implementation** | All 8 components (P0–P7) merged. 5 Padv adversarial review passes (P2/P3/P4/P5/P6). 6 rounds of independent codex review (3 theory + 1 OSS-readiness + 1 production-blockers + 1 sign-off post-v0.2.0). 4 production-grade blockers fixed (F-A halo TOCTOU, F-B/F-C race conditions, F-D plaintext key default → OS keyring). |
-| **Test suite** | **854 tests passing** (802 unit/property + 52 slow integration). 91% line coverage (gate: 90%). mypy `--strict` clean. ruff lint+format clean. |
-| **Demo readiness** | All 4 scenarios run deterministically on `MockSubstrate`; six real-LLM substrates (Anthropic / OpenAI + OAI-compat / Gemini / Mistral / Ollama / client-inherited via MCP `sampling/createMessage`). Streamlit dashboard with Network / Lineage / Scenarios / Metrics / Adversarial pages. |
-| **Client integrations** | Claude Code (one-command plugin · `/plugin marketplace add cosmopig/Vacant`), Claude Desktop / Cursor / Windsurf (paste-config), Hermes Agent (YAML), OpenClaw (plugin bundle). See [docs/INTEGRATION.md](docs/INTEGRATION.md). |
-| **CI / supply chain** | ubuntu+macos × py3.12+3.13 matrix, wheel-build smoke-install, pip-audit, Bandit, gitleaks, Codecov, conventional-commits PR-title lint, auto-label, manifest schema validation, mkdocs auto-deploy. Branch protection on `main`: 7 required status checks + linear history + no force-push + no deletion. |
-| **API docs** | https://cosmopig.github.io/Vacant/ — auto-generated from docstrings via mkdocstrings. |
-| **Narrative site** | https://vacant.zeabur.app/ — landing, 7-chapter explainer, interactive technical version, ecology simulator, document reader. |
-
----
-
-## Adversarial review provenance
-
-This project's correctness claim rests on a multi-round adversarial review history. Skipping any one of these rounds would let a meaningful class of bug through:
-
-1. **Theory hardening (3× codex)** — V3 → V4 → V5 across late April / early May 2026. Each round: codex generated 38-attack matrix, identified inconsistencies, drafted impossibility / honesty proofs. V5 reached `no fatal issues remain` with 13 honest open questions (H1–H13) explicitly marked.
-2. **Per-component implementation review (8× cloud Claude Code)** — P0 through P7 each a separate session with isolated context, opening one PR each. Failure-isolation: a stuck P3 didn't block P5's progress.
-3. **Per-sensitive-component adversarial review (5× Padv)** — after P2 / P3 / P4 / P5 / P6 merged, dedicated sessions ran attack tests in `tests/adversarial/`. Each session enumerated ≥ 3 attacks per surface, wrote them as `pytest` tests, and patched residual vulnerabilities found.
-4. **Integration review (human + codex)** — after merging all 13 branches into main, three integration-level bugs were caught (per-target rate limit semantics, duplicate constants, demo scenario rate limit). Codex was then re-spawned for an independent post-merge review and found 5 more (theory-invariant violations + cross-module contract gaps + demo fidelity issues — see ADR D015).
-
-Total ADRs in `architecture/decisions/`: 15. Total adversarial test files in `tests/adversarial/`: 23. All findings have either been fixed-with-test or documented as residual risk in an ADR.
-
----
-
-## Manual install / development
-
-If you'd rather drive every step yourself:
-
-```bash
-git clone https://github.com/cosmopig/Vacant.git && cd Vacant
-uv sync --all-extras                  # install runtime + dev deps
-uv run vacant --help                  # CLI command tree
-uv run pytest                         # 711 unit + property tests
-uv run pytest -m slow                 # 25 slow integration tests
-uv run pytest --cov=vacant            # with coverage report
-uv run ruff check . && uv run ruff format --check .
-uv run mypy src/                      # strict typecheck
-```
-
-For LLM substrates, copy `.env.example` → `.env` and fill in `ANTHROPIC_API_KEY` (Claude) and/or run a local Ollama server (`ollama serve`).
-
----
-
-## Repository layout
-
-```
-Vacant/
-├── architecture/               ← spec docs (the contract for the implementation)
-│   ├── THEORY_V5.md            ← canonical theory, 8 layers, 38-attack matrix
-│   ├── ARCHITECTURE.md         ← component navigation
-│   ├── BRIEFING.md             ← original research brief (V1, kept for history)
-│   ├── FAQ.md                  ← 50-question Q&A
-│   ├── CONSTANTS.md            ← single source of truth for every numeric threshold
-│   ├── components/  P1-P7      ← per-component specs (~25KB each)
-│   ├── research/    T1-T7 + P2/P4 ← supporting research (STYLO, distillation, etc.)
-│   ├── decisions/   D001-D015  ← ADRs (immutable record of design choices)
-│   └── tasks/       P1-P8      ← implementation roadmap
-│
-├── dispatch/                   ← prompts for cloud Claude Code dispatches
-│   ├── README.md               ← DAG + parallelism table
-│   ├── MASTER.md               ← per-stage starter prompts
-│   ├── HOW_TO_DISPATCH.md      ← three dispatch modes
-│   ├── Padv_review.md          ← adversarial review protocol
-│   ├── P7_demo_seed.md         ← reproducible demo seeds + expected invariants
-│   └── P0..P7_*.md             ← one prompt per implementation stage
-│
-├── src/vacant/                 ← the implementation
-│   ├── core/        types.py constants.py crypto.py errors.py
-│   ├── identity/    keys + L0-L3 layered ID + wash cost + federation
-│   ├── runtime/     5-state machine + heartbeat + shadow_self + D1-D5 spawn
-│   ├── reputation/  Beta5D + UCB + STYLO discount + cold start + same-* detect
-│   ├── registry/    SQLite schema (13 tables) + 25 RPC + halo aggregation
-│   ├── composite/   ChildManifest + Tree-Only + graduation
-│   ├── protocol/    A2A/MCP envelope + dispatch + replay protect + MCP bridge
-│   ├── substrate/   abstract backend + Mock/Deterministic/Anthropic/Ollama/OpenAI/Gemini/Mistral/Hermes-stub/OpenClaw-stub
-│   ├── mvp/         scenarios + dashboard + demo CLI + metrics
-│   └── cli.py       `vacant` console-script entrypoint
-│
-├── tests/                      ← 736 tests
-│   ├── unit/                   ← per-module (≥90% coverage on core paths)
-│   ├── property/               ← hypothesis-based (chains, state machines)
-│   ├── adversarial/            ← Padv attack tests (one folder per Padv-P*)
-│   └── integration/            ← multi-vacant scenarios (`pytest -m slow`)
-│
-├── docs/                       ← runtime / demo docs
-│   ├── RUNBOOK.md              ← demo operator manual
-│   └── DEMO_SCRIPT.md          ← 5-minute demo walk-through
-│
-├── alembic/                    ← DB migrations
-├── install.sh                  ← one-line installer (curl|bash)
-├── pyproject.toml              ← uv-managed Python project
-└── CLAUDE.md                   ← Claude Code working guide (per-session context)
-```
-
----
-
-## Theory invariants (load-bearing — do not silently reverse)
-
-These eight decisions have been hardened through three rounds of codex adversarial review and are encoded as both code-level enforcement and explicit ADRs. Reversing one without an ADR breaks the chain of correctness claims.
-
-1. **D-series self-replication is the primary birth path.** Path A (human-written vacant) is deprecated and not implemented. Path Zero / B / C exist for bootstrap but are secondary.
-2. **Registry is per-vacant, not central.** Each vacant carries its own `capability_card`. The Registry is an aggregation layer with three implementation models (central MVP / federated / DHT).
-3. **Sunk-state heartbeat is identity custody attestation, not liveness.** A Sunk vacant cannot review. Its heartbeat proves keypair custody, which is load-bearing for lineage attribution.
-4. **Lineage, not individual vacants, is the subject of "infinite evolution."** Individuals stall via STYLO discount; lineages reset the clock with each D-series spawn.
-5. **Same-*  detection raises cost, doesn't prevent.** Frame as adaptive evasion acknowledged. With floor `SAME_SIGNAL_DISCOUNT_FLOOR = 0.1` so `strength=1.0` still preserves *some* contribution.
-6. **Reputation = 5-dim Beta posterior, per-substrate, with STYLO discount, with portability_factor.** Recursive trust weighting terminates at L0 root weights.
-7. **Closed children + graduation = visibility flag, not entity upgrade.** Same keypair, same logbook through graduation. Parent consent + rate limit + 3-layer collusion check required.
-8. **No central LLM, no central judge.** Verification happens via signed logbooks + peer review + reputation + redteam probes. Skalse 2022 impossibility theorem assumed true; defenses are cost-raising with quantified bounds.
-
-Full list with citations to enforcement points: [`CLAUDE.md`](CLAUDE.md) §"Load-bearing theory decisions".
-
----
-
-## Documentation
-
-The full **API reference + theory + runbook** is auto-built from this
-repo on every push to `main` and served at:
-
-> **<https://cosmopig.github.io/Vacant/>**
-
-The same site embeds:
-
-- 10 module pages of API reference (`vacant.core`, `vacant.identity`,
-  …, `vacant.cli`) auto-generated from the source docstrings via
-  [mkdocstrings](https://mkdocstrings.github.io/).
-- The full theory: `BRIEFING`, `ARCHITECTURE`, `THEORY_V5`, `FAQ`,
-  `CONSTANTS`.
-- The demo / ops material: `RUNBOOK.md` and the 5-minute
-  `DEMO_SCRIPT.md`.
-
-If you'd rather walk the repo directly, here's the entry table:
-
-| Audience | Read | Time |
+| G | 內容 | 狀態 |
 |---|---|---|
-| **Quick demo / evaluator** | This README + run `vacant demo law_firm` | 10 min |
-| **Demo presenter / 答辯** | [`architecture/THEORY_V5.md`](architecture/THEORY_V5.md) §0–§4 + [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | 45 min |
-| **Implementer / contributor** | [`CLAUDE.md`](CLAUDE.md) + [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) + the relevant `components/P*.md` + the [API reference](https://cosmopig.github.io/Vacant/api/) | 2 hours |
-| **Adversarial reviewer** | THEORY_V5 §6 + `tests/adversarial/` + `architecture/decisions/D*.md` | 4 hours |
-| **Curious public — narrative** | https://vacant.zeabur.app/ — diagrams + walkthrough | 5–30 min |
+| G1 | 裝 Hermes、`hermes -z` 指 3090 vLLM | ⏳ 上機（B 層）；整合點已在 `HermesACPSubstrate` 文件化 |
+| **G2** | 閘道骨架：keypair + 簽/驗 Envelope + logbook(hash chain) | ✅ `crypto/identity/logbook/envelope` + `test_primitives.py`；registry 身份綁定 + ingress 收件人檢查已補（見下「Codex 審查」） |
+| **G3** | waker：vacant_id→HOME + 綁 HOME + resume（復活帶回累積） | 🟡 **A 層模擬**：確實從硬碟載回（`test_revive.py` 用 p_base=0 證明），但仍是同程序內呼叫 `Substrate.run`；規格的「獨立 spawn `hermes-acp` + 精確 session resume」待 B 層接通 |
+| **G4** | Ingress 把關（驗章→收件人→replay→信譽）接 waker | ✅ `gateway.ingress` + `test_gateway.py`（replay 為 per-process，跨重啟限制見下） |
+| **G5** | Egress `a2a_call` + 唯一出口 | 🟡 **部分**：egress 路由/簽章/記帳邏輯在 `gateway.call`；但**尚未**包成 MCP `a2a_call` 工具、**也無**容器 egress allowlist（皆屬上機部署層） |
+| **G6** | Registry + 信譽路由 + 自動 verifier | 🟡 **大致**：`registry.py` UCB 信譽路由 ✅；`verifier.py` 用環境真值評分 ✅，但 review 由 caller 端記/簽（非獨立 verifier 身份）；同源降權只實作 controller（substrate/behavior 未做） |
+| **G7** | 2–3 vacant 跑「有閘道 vs 沒閘道」A/B | 🟡 **機制演示**：`experiment.py` 跑得出 C0/C1/C2/C3 對照表與信任性質；但曲線分離是 `EchoSubstrate` 的確定性機制**設計使然**，只證明「管線接對了」，**不**構成「真模型也會分離」的證據——那要 B 層（見下） |
+| G8 | Composer 多輪（Phase 2 起點） | ⬜ Phase 2，尚未做（界線見總規格 §9） |
+
+**誠實版圖**：G2/G4 在本機名實相符且測試守住；G3/G6/G7 是忠實的 **A 層機制模擬**
+（接對了、跑得動、可驗收「機制成立」），但「獨立 spawn／獨立 verifier 身份／真模型學習曲線」
+等仍待 B 層（3090）；G5 的 MCP 工具與 egress allowlist、G1、G8 也待上機。**不宣稱 A 層數字＝實測。**
 
 ---
 
-## Testing
+## 誠實邊界（總規格 §10，照搬不藏）
 
-```bash
-uv run pytest                                 # 711 unit + property (~30s)
-uv run pytest -m slow                         # 25 integration (~60s)
-uv run pytest --cov=vacant --cov-report=term  # 91% line coverage
-uv run pytest tests/adversarial/              # 23 attack tests
-uv run pytest tests/integration/test_mvp_full.py  # all 4 scenarios end-to-end
+- **prevents（密碼學，key custody 假設下）**：冒名/竄改/replay —— Ed25519 + hash chain
+  + seq 單調 + 協議拒收。
+- **detects**：行為漂移/偷工 —— 信譽下降、後驗異常。
+- **raises-cost**：同源刷分 —— 同源降權（地板 0.1）；公開閾值可被繞，**誠實標明**。
+- **A 層模擬非模型實測**：`demo` 的數字是 `EchoSubstrate`（確定性 CPU 模型）下的結果，
+  用來證明**機制成立、曲線可分離**；絕對值待 B 層（3090）以真模型校準（§12 M2）。
+- **egress allowlist 是部署層**：規格要求容器 egress 只放行「閘道 + model」（A38）。
+  本套件在程式層已強制「substrate 不持有對外通道、對外一律經 gateway」；真正的網路
+  封鎖（擋 5 類繞過工具）屬上機部署，不在本 CPU 模擬內。
+- **可檢查任務 scope**：自動 verifier 的「便宜非循環真值」只在任務可檢查時成立；
+  模糊任務仍回到互批的 oracle 問題（MVP 刻意把 scope 釘在可檢查任務）。
+- **AI 自產自評風險**：本實作由 AI 產出，關鍵主張請人工終審（見自動記憶
+  `vacant_critique_2026-06`）。已修掉舊 repo 的 `seq` 永遠=1 bug（`test_primitives.py` 守住）。
+
+### 已知 Phase-1 限制（經對抗式審查標出，刻意留待上機/Phase-2）
+
+- **閘道 channel-guard 是 per-process（記憶體內）**：replay 防護的 `seq/prev_hash`
+  狀態活在 host 程序裡。**單一程序內 replay = prevents**；但 host 重啟後 guard 歸零，
+  跨重啟的 replay 退化為 **detects**（重放的舊信封仍會留下可究責的 logbook/簽章痕跡，
+  且 ts_ms 異常可偵測）。production 要把 ingress guard 隨信任庫持久化（`trust/channel_guard.json`）。
+- **`home/` 與 `trust/` 寫入非原子**：`substrate.run()` 先寫 `home/`（skills/memory），
+  `body.persist()` 後寫 `trust/`（logbook）。單程序 demo 不會中途崩；但若兩者之間崩潰，
+  可能 skill 已落地而該次 INFERENCE 未入鏈（**不損壞既有鏈、僅缺一筆紀錄**）。production
+  需把「意圖先入鏈、完成後補 SUCCESS」或加 fsync 同步點。
+- **單一 waker / vacant_id**：一個 vacant 的身體在同一時刻只能由一個 waker 喚醒
+  （`Host` 保證每程序一個 waker）。多 waker 並發喚醒同一身體會互相覆蓋——屬 §4.4
+  「同一 vacant 並發預設序列化」的範圍，未在本機模擬並發。
+- **禁止經閘道自呼**：`gateway.call` 對 `callee==caller` 直接拒絕（避免同一身體被
+  caller 與 waker 同時載入造成覆蓋）；自我子任務應走 in-process。
+- **同源降權只實作 controller**：`registry._same_signal` 只比對 controller 標籤；
+  same-substrate / same-behavior（同款式）尚未實作。符合總規格「raises-cost 非 prevents、
+  公開閾值可被繞」的誠實框定，但 Sybil 換 controller 字串即可繞過，待 Phase 2 補。
+- **冷啟動可被當 Sybil 管道**：新身份（obs<3）一律過信譽把關（這是給新人探索流量的
+  刻意設計）；配合上一條，等於「狂開新身份」能繞把關——已知，屬同源/Sybil 議題範圍。
+
+### 兩輪獨立審查與修補（對「AI 自產自評」的對策）
+
+本實作刻意過了**兩道獨立審查**，不只自評：
+
+1. **Claude 對抗式 workflow**（5 維、22 agents）：修了 try/finally 持久化、self-call 防護、
+   信譽把關改 substrate-specific、`observations` min→avg、same-signal 語義、UCB 常數具名等。
+2. **Codex（GPT-5 級）獨立驗證**：抓到並已修的**真 bug**——
+   - **Bug 1 registry 未驗身份綁定**（可用「別人 vacant_id + 自己 pubkey」污染 registry 冒名）
+     → `registry.announce` 現在重算 `multibase(multihash(pubkey))` 比對，不符即拒（`test_registry_rejects_forged_identity_binding`）。
+   - **Bug 2 ingress 未驗收件人** → 現在拒絕 `env.to != self.vacant_id`（`test_ingress_rejects_wrong_recipient`）。
+   - **Bug 3 未簽 task 旁路** → ingress 改為**只**依已簽章的 `env.body` 建構執行輸入，移除旁路。
+   - **demo 衛生**：改寫進暫存目錄，不再 `rmtree` 使用者的 `~/.vacant`。
+   Codex 另指出的 overclaim（G5/G7/verifier 措辭）已在上方里程碑表更正為 🟡。
+   *（Codex 報告中「`experiments/experiment.py` 不存在」是路徑誤判：檔案在 `vacant/experiment.py`、可正常執行。）*
+
+---
+
+## 上機（B 層）怎麼接
+
+唯一要改的是注入的 substrate：
+
+```python
+from vacant.host import Host
+from vacant.substrate import HermesACPSubstrate
+
+host = Host(root, substrate=HermesACPSubstrate(
+    base_url="http://localhost:8000/v1",   # 3090 上的 vLLM
+    model="hermes-3-8b",
+))
 ```
 
-CI (`.github/workflows/ci.yml`) runs ruff + ruff format + mypy --strict + pytest with `--cov-fail-under=90` on every push and PR. Branch protection on `main` enforces PR review + CI green before merge.
-
----
-
-## Citation
-
-If you reference this work in academic writing:
-
-```bibtex
-@misc{vacant2026,
-  title  = {Vacant: A Responsibility-Layer Residency Form for AI Agents},
-  author = {cosmopig},
-  year   = {2026},
-  note   = {Capstone project. Theory V5, 14-week MVP.},
-  url    = {https://github.com/cosmopig/Vacant}
-}
-```
-
----
-
-## Acknowledgements
-
-- **Theory adversarial review**: 3 rounds with codex (OpenAI), each producing concrete attack scenarios that hardened V3 → V4 → V5.
-- **Implementation dispatch**: 13 cloud Claude Code sessions across 14 weeks, one per component + one per Padv adversarial review.
-- **Independent post-merge review**: codex (round 4) found 5 cross-module integration findings that no per-PR review could have caught.
-- **Reference works**: CrS / DRF / A-Trust (literature gap analysis in `資料/文獻探勘`); Skalse et al. 2022 (impossibility framing); STYLO Vec16 + PROBE (T1 behavioral fingerprint research).
-- **Stack**: Python 3.12 · uv (Astral) · FastAPI · SQLModel · pynacl · pytest + hypothesis · ruff + mypy --strict · Streamlit · Anthropic Claude · Ollama.
-
----
-
-## License
-
-[MIT](LICENSE).
+`HermesACPSubstrate.run` 的整合點（ACP stdio、`HERMES_HOME` 綁定、resume、反代攔截）
+已在 `substrate.py` 內以 file:line 文件化；待 G1 在測試機上接通與上機驗證（§10 的 14 項）。

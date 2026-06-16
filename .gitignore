@@ -1,54 +1,15 @@
-# Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
 *.egg-info/
-.eggs/
-
-# uv / virtualenvs
-.venv/
-venv/
-env/
-
-# Testing & coverage
 .pytest_cache/
+.venv/
+build/
+dist/
+# vacant runtime state (bodies live outside the repo)
+.vacant/
+.DS_Store
 .coverage
 .coverage.*
 htmlcov/
-.hypothesis/
-.mypy_cache/
-.ruff_cache/
-
-# Build artifacts
-build/
-dist/
-*.egg
-
-# mkdocs build output (CI deploys via gh-deploy; site/ is never checked in)
-/site/
-
-# Secrets & local config
-.env
-.env.*
-!.env.example
-
-# Databases (the demo SQLite goes in var/)
 *.db
-*.sqlite
-*.sqlite3
 var/
-
-# OS / editor
-.DS_Store
-.idea/
-.vscode/
-*.swp
-
-# Streamlit
-.streamlit/secrets.toml
-
-# Logs
-*.log
-logs/

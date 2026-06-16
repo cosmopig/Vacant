@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: 💬 Discussion / question
-    url: https://github.com/cosmopig/Vacant/discussions
-    about: For questions, ideas, or anything that isn't a confirmed bug or feature request.
-  - name: 🔒 Security report
-    url: https://github.com/cosmopig/Vacant/security/policy
-    about: Sensitive vulnerabilities — see SECURITY.md for the private reporting channel.
