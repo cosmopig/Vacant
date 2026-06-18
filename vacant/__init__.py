@@ -14,7 +14,10 @@ vLLM + Hermes）只需把 EchoSubstrate 換成 HermesACPSubstrate。
      host                              一台機器的常駐組裝
 """
 
+from .agent import SolveResult, Vacant, checkable_cases
 from .body import CapabilityCard, VacantBody
+from .brains import Brain, HermesBrain, LMStudioBrain, OpenAIBrain
+from .composer import ComposeResult, Composer
 from .gateway import BadSignature, CallOutcome, Gateway, ReputationRejected
 from .host import Host
 from .identity import Identity, PublicIdentity
@@ -28,6 +31,15 @@ from .waker import Waker, WakeResult
 __version__ = "0.1.0"
 
 __all__ = [
+    "Vacant",
+    "SolveResult",
+    "checkable_cases",
+    "Brain",
+    "LMStudioBrain",
+    "OpenAIBrain",
+    "HermesBrain",
+    "Composer",
+    "ComposeResult",
     "Host",
     "VacantBody",
     "CapabilityCard",

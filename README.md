@@ -10,6 +10,40 @@
 
 ---
 
+## ✨ 讓你的 agent 變更好（產品用法）
+
+vacant 把你 agent 的「腦」（任何 LLM / Hermes / OpenAI 相容端點）包一層，把**單次、常出錯、無法究責**的呼叫，變成 **verify-fix 組合（更準）＋ 簽章 logbook（可究責）**。實測：同一顆 gemma-12b 在可檢查任務上 **67% → 83%（+17%）**。
+
+```bash
+pip install -e .          # 或 pip install git+https://github.com/cosmopig/Vacant.git
+```
+
+```python
+from vacant import Vacant, LMStudioBrain
+
+# 1) 指向你的腦（LM Studio / 任何 OpenAI 相容端點 / Hermes）
+brain = LMStudioBrain("http://localhost:1234", "your-model")   # api="openai" 給非 reasoning 模型
+
+# 2) 包成 vacant —— 多了 verify-fix（更準）+ 簽章究責
+v = Vacant(brain, k=3)
+r = v.solve("Reverse the string: hello", verifier=lambda a: a == "olleh")
+print(r)        # 'olleh' [✓verified, 1 calls, ✓accountable, brain=lmstudio:your-model]
+```
+
+**在你自己的模型上證明它更好**（plain vs vacant，開箱即用的可檢查任務）：
+```bash
+vacant bench --base http://localhost:1234 --model your-model --api responses -n 12 -k 3
+#   plain（無 vacant）   正確率 67%   算力 1.0 次/題
+#   vacant（verify-fix） 正確率 83%   算力 1.3 次/題
+#   → vacant 讓你的模型 +16%（簽章鏈究責：True）
+```
+
+> **誠實邊界**：accuracy 增益只在「答案可被檢查」（你能寫出 `verifier(answer)->bool`：跑測試、驗證格式、比對約束…）時成立。不可檢查的主觀任務，vacant 仍給「可究責」，但不保證更準（規格 §10 oracle 問題）。`verifier` 是你提供的；能力上限仍是模型本身（它根本不會的，vacant 不會無中生有）。
+
+腦選擇：`LMStudioBrain`（reasoning 模型走 `/api/v1`、一般走 `/v1`）、`OpenAIBrain`（任何 OpenAI 相容）、`HermesBrain`（本機 Hermes Agent 當腦，Hermes 自己調模型）。也可自訂：任何有 `.name` 與 `.generate(prompt)->str` 的物件。
+
+---
+
 ## 為什麼是這樣切
 
 規格把驗證分兩層（共識定案 §5、總規格 §11）：

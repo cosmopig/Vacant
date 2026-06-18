@@ -156,7 +156,38 @@ def build_parser() -> argparse.ArgumentParser:
 
     ps = sub.add_parser("selftest", help="端到端冒煙測試（暫存目錄）")
     ps.set_defaults(func=cmd_selftest)
+
+    pb = sub.add_parser("bench", help="在你自己的模型上量 plain vs vacant（verify-fix）的效果")
+    pb.add_argument("--base", default="http://localhost:1234", help="LM Studio / OpenAI 相容端點（預設 http://localhost:1234）")
+    pb.add_argument("--model", required=True, help="模型 id（如 your-model）")
+    pb.add_argument("--api", default="responses", choices=["responses", "openai"],
+                    help="responses=/api/v1/chat（reasoning 模型）；openai=/v1/chat/completions")
+    pb.add_argument("--brain", default="lmstudio", choices=["lmstudio", "openai", "hermes"])
+    pb.add_argument("-n", type=int, default=12, help="題數")
+    pb.add_argument("-k", type=int, default=3, help="verify-fix 最大嘗試")
+    pb.set_defaults(func=cmd_bench)
     return p
+
+
+def cmd_bench(args: argparse.Namespace) -> int:
+    from .agent import Vacant, checkable_cases
+    from .brains import HermesBrain, LMStudioBrain, OpenAIBrain
+    if args.brain == "hermes":
+        brain = HermesBrain(model=args.model, base_url=args.base + "/v1")
+    elif args.brain == "openai":
+        brain = OpenAIBrain(args.base, args.model)
+    else:
+        brain = LMStudioBrain(args.base, args.model, api=args.api)
+    print(f"brain={brain.name}  n={args.n}  k={args.k}  （在可檢查任務上量 plain vs vacant verify-fix）", flush=True)
+    v = Vacant(brain, k=args.k)
+    rep = v.bench(checkable_cases(args.n), k=args.k)
+    for prompt, pv, vv, calls in rep["rows"]:
+        print(f"  {('OK' if vv else 'x'):2} (plain {'OK' if pv else 'x '}) {calls}calls  {prompt}")
+    print("\n================ 結果 ================")
+    print(f"  plain（無 vacant）   正確率 {rep['plain_acc']*100:3.0f}%   算力 {rep['plain_calls_per']:.1f} 次/題")
+    print(f"  vacant（verify-fix） 正確率 {rep['vacant_acc']*100:3.0f}%   算力 {rep['vacant_calls_per']:.1f} 次/題")
+    print(f"  → vacant 讓你的模型 {rep['gain']*100:+.0f}%（簽章鏈究責：{v.verify_chain()}）")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
