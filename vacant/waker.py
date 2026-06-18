@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
+from .atomic import file_lock
 from .body import VacantBody
 from .substrate import Substrate, SubstrateResult
 
@@ -88,43 +89,41 @@ class Waker:
             raise KeyError(f"未註冊的 vacant：{vacant_id[:16]}…（host 沒有它的 HOME 映射）")
         home = self._table[vacant_id]
 
-        # 復活：從硬碟「綁」新程序到持久身體（不靠任何 in-RAM 殘留）。
-        body = VacantBody.load(home.name, self.root)
-        home.state = "Active"
-        home.wake_count += 1
-        # revived = 這份身體載入時「已帶有過去」（logbook 非空）。
-        # 用磁碟事實判斷，跨 host 重啟仍成立——不靠本 waker 實例的計數。
-        revived = len(body.logbook) > 0
+        # 並發鎖：整個 load→改→persist 週期序列化，杜絕兩個程序同時喚醒同一身體造成
+        # lost-update / 半截寫入（規格 §4.4 同一 vacant 序列化）。
+        with file_lock(self.root / home.name / ".lock"):
+            # 復活：從硬碟「綁」新程序到持久身體（不靠任何 in-RAM 殘留）。
+            body = VacantBody.load(home.name, self.root)
+            home.state = "Active"
+            home.wake_count += 1
+            # revived = 這份身體載入時「已帶有過去」（logbook 非空）。
+            revived = len(body.logbook) > 0
 
-        for etype, payload in pre_events:
-            body.log(etype, payload)
+            for etype, payload in pre_events:
+                body.log(etype, payload)
 
-        # resume / new_session（同一 HOME）
-        home.last_session_id += 1
-        session_id = home.last_session_id
-        body.log("WAKE", {"session_id": session_id, "prompt": prompt[:80], "resume": revived})
+            home.last_session_id += 1
+            session_id = home.last_session_id
+            body.log("WAKE", {"session_id": session_id, "prompt": prompt[:80], "resume": revived})
 
-        # substrate 在這份 HOME 上跑，並自己把 skills/memory 落地回 home。
-        # 已知 Phase-1 限制（見 README）：home/ 寫入與下方 trust/ 的 persist 非原子；
-        # 單程序 demo 不會中途崩，但 production 需加同步點（意圖先入鏈/fsync）。
-        result = self.substrate.run(body.home_dir, prompt, task)
+            # substrate 在這份 HOME 上跑，並自己把 skills/memory 落地回 home。
+            result = self.substrate.run(body.home_dir, prompt, task)
 
-        body.log(
-            "INFERENCE",
-            {
-                "session_id": session_id,
-                "task_id": (task or {}).get("task_id"),
-                "substrate": result.substrate_id,
-                "learned_skill": result.learned_skill,
-                "output_sha256": hashlib.sha256(result.output.encode("utf-8")).hexdigest()[:16],
-            },
-        )
+            body.log(
+                "INFERENCE",
+                {
+                    "session_id": session_id,
+                    "task_id": (task or {}).get("task_id"),
+                    "substrate": result.substrate_id,
+                    "learned_skill": result.learned_skill,
+                    "output_sha256": hashlib.sha256(result.output.encode("utf-8")).hexdigest()[:16],
+                },
+            )
 
-        for etype, payload in post_events:
-            body.log(etype, payload)
+            for etype, payload in post_events:
+                body.log(etype, payload)
 
-        # 寫回硬碟 → vacant 回睡（狀態已落地，安全收掉程序）。
-        body.persist()
-        home.state = "Dormant"
+            body.persist()  # 全檔原子寫入（見 body.persist / atomic.py）
+            home.state = "Dormant"
 
         return WakeResult(body=body, result=result, session_id=session_id, revived=revived)

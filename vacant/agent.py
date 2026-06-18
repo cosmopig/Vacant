@@ -60,7 +60,14 @@ class Vacant:
         return self._identity.vacant_id if self._identity else None
 
     def _gen(self, prompt: str) -> str:
-        ans = self.brain.generate(prompt)
+        # production 硬化：腦呼叫(網路/逾時/畸形)失敗絕不讓 solve 崩 —— 視為一次失敗嘗試，
+        # verify-fix 會自然重試或誠實回報未通過。
+        try:
+            ans = self.brain.generate(prompt)
+            if not isinstance(ans, str):
+                ans = str(ans)
+        except Exception as e:
+            ans = f"[brain-error:{type(e).__name__}]"
         if self._identity is not None:
             self.logbook.append(
                 "INFERENCE",

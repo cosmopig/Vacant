@@ -67,16 +67,22 @@ def verify(pub: Ed25519PublicKey, message: bytes, signature: bytes) -> bool:
 
 
 # --- 序列化（存檔 / 線上）----------------------------------------------------
-def priv_to_pem(sk: Ed25519PrivateKey) -> bytes:
+def priv_to_pem(sk: Ed25519PrivateKey, *, passphrase: bytes | None = None) -> bytes:
+    # passphrase 給定 → 加密私鑰（production 金鑰保護，靜態加密）。
+    enc = (
+        serialization.BestAvailableEncryption(passphrase)
+        if passphrase
+        else serialization.NoEncryption()
+    )
     return sk.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption(),
+        encryption_algorithm=enc,
     )
 
 
-def priv_from_pem(pem: bytes) -> Ed25519PrivateKey:
-    key = serialization.load_pem_private_key(pem, password=None)
+def priv_from_pem(pem: bytes, *, passphrase: bytes | None = None) -> Ed25519PrivateKey:
+    key = serialization.load_pem_private_key(pem, password=passphrase)
     if not isinstance(key, Ed25519PrivateKey):
         raise TypeError("not an Ed25519 private key")
     return key

@@ -17,6 +17,8 @@ from .identity import Identity, PublicIdentity
 
 PROTOCOL_VERSION = 1
 EMPTY_PREV_HASH = "0" * 64
+MAX_BODY_BYTES = 256 * 1024  # production：拒收過大 body（防 DoS/濫用）
+_HEX64 = frozenset("0123456789abcdef")
 
 Kind = str  # "call" | "result" | "review"
 
@@ -96,16 +98,32 @@ class Envelope:
 
     @classmethod
     def from_json(cls, d: dict[str, Any]) -> "Envelope":
+        """從不可信來源解析 + **驗證結構**（型別/必填/界線）。壞資料 → ValueError，
+        絕不讓畸形輸入往下游崩潰（production 硬化：不可信邊界）。"""
+        if not isinstance(d, dict):
+            raise ValueError("envelope 必須是物件")
+        for k in ("v", "from", "to", "seq", "prev_hash", "ts_ms", "kind", "body", "sig"):
+            if k not in d:
+                raise ValueError(f"envelope 缺欄位：{k}")
+        if not isinstance(d["v"], int) or not isinstance(d["seq"], int) or not isinstance(d["ts_ms"], int):
+            raise ValueError("v/seq/ts_ms 必須是整數")
+        if d["seq"] < 1:
+            raise ValueError("seq 必須 >= 1")
+        for k in ("from", "to", "kind", "prev_hash", "sig"):
+            if not isinstance(d[k], str):
+                raise ValueError(f"{k} 必須是字串")
+        ph = d["prev_hash"]
+        if len(ph) != 64 or not set(ph.lower()) <= _HEX64:
+            raise ValueError("prev_hash 必須是 64 字 hex")
+        try:
+            bytes.fromhex(d["sig"])
+        except ValueError:
+            raise ValueError("sig 必須是 hex")
+        if len(canonical_bytes(d["body"])) > MAX_BODY_BYTES:
+            raise ValueError(f"body 超過上限 {MAX_BODY_BYTES} bytes")
         return cls(
-            v=d["v"],
-            frm=d["from"],
-            to=d["to"],
-            seq=d["seq"],
-            prev_hash=d["prev_hash"],
-            ts_ms=d["ts_ms"],
-            kind=d["kind"],
-            body=d["body"],
-            sig=d["sig"],
+            v=d["v"], frm=d["from"], to=d["to"], seq=d["seq"], prev_hash=ph,
+            ts_ms=d["ts_ms"], kind=d["kind"], body=d["body"], sig=d["sig"],
         )
 
 
@@ -148,3 +166,14 @@ class ChannelGuard:
     def record_sent(self, env: Envelope) -> None:
         self._last_seq[env.to] = env.seq
         self._last_hash[env.to] = env.hash()
+
+    # --- 持久化（production：跨程序/重啟仍防 replay）-----------------------
+    def to_json(self) -> dict[str, Any]:
+        return {"seq": self._last_seq, "hash": self._last_hash}
+
+    @classmethod
+    def from_json(cls, d: dict[str, Any]) -> "ChannelGuard":
+        g = cls()
+        g._last_seq = {str(k): int(v) for k, v in (d.get("seq") or {}).items()}
+        g._last_hash = {str(k): str(v) for k, v in (d.get("hash") or {}).items()}
+        return g

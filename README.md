@@ -140,21 +140,31 @@ PYTHONPATH=. python3 -m vacant.cli info bob                            # 看 bob
 - **AI 自產自評風險**：本實作由 AI 產出，關鍵主張請人工終審（見自動記憶
   `vacant_critique_2026-06`）。已修掉舊 repo 的 `seq` 永遠=1 bug（`test_primitives.py` 守住）。
 
-### 已知 Phase-1 限制（經對抗式審查標出，刻意留待上機/Phase-2）
+### Production 硬化（2026-06-18，已做、有測試 `tests/test_hardening.py`）
 
-- **閘道 channel-guard 是 per-process（記憶體內）**：replay 防護的 `seq/prev_hash`
-  狀態活在 host 程序裡。**單一程序內 replay = prevents**；但 host 重啟後 guard 歸零，
-  跨重啟的 replay 退化為 **detects**（重放的舊信封仍會留下可究責的 logbook/簽章痕跡，
-  且 ts_ms 異常可偵測）。production 要把 ingress guard 隨信任庫持久化（`trust/channel_guard.json`）。
-- **`home/` 與 `trust/` 寫入非原子**：`substrate.run()` 先寫 `home/`（skills/memory），
-  `body.persist()` 後寫 `trust/`（logbook）。單程序 demo 不會中途崩；但若兩者之間崩潰，
-  可能 skill 已落地而該次 INFERENCE 未入鏈（**不損壞既有鏈、僅缺一筆紀錄**）。production
-  需把「意圖先入鏈、完成後補 SUCCESS」或加 fsync 同步點。
-- **單一 waker / vacant_id**：一個 vacant 的身體在同一時刻只能由一個 waker 喚醒
-  （`Host` 保證每程序一個 waker）。多 waker 並發喚醒同一身體會互相覆蓋——屬 §4.4
-  「同一 vacant 並發預設序列化」的範圍，未在本機模擬並發。
-- **禁止經閘道自呼**：`gateway.call` 對 `callee==caller` 直接拒絕（避免同一身體被
-  caller 與 waker 同時載入造成覆蓋）；自我子任務應走 in-process。
+- **原子寫入**：identity / logbook / reputation / capability_card / ingress_guard 全走
+  `atomic.py`（tmp + fsync + `os.replace`）→ 崩潰只會留下「舊的或新的完整檔」，不會半截壞鏈。
+- **並發鎖**：`waker.wake` 的整個 load→改→persist 週期由 `file_lock`（POSIX flock）序列化
+  → 杜絕同一身體被並發喚醒造成 lost-update。
+- **跨重啟防 replay**：ingress `ChannelGuard` 持久化到 `trust/ingress_guard.json`、啟動載回
+  → **host 重啟後仍 prevents replay**（不再退化為 detects）。
+- **不可信邊界輸入驗證**：`Envelope.from_json` 驗型別/必填/`prev_hash` 64-hex/`sig` hex，
+  並限 body ≤256KB；logbook 單筆 payload ≤64KB → 畸形/超大輸入乾淨拒收，不往下游崩。
+- **金鑰靜態加密（選用）**：`Identity.save(passphrase=...)` 用 PKCS8 加密私鑰；私鑰檔 0600、目錄 0700。
+- **產品路徑容錯**：`Vacant.solve` 對腦（網路/逾時/畸形）失敗永不崩 —— 視為一次失敗嘗試，
+  verify-fix 自然重試或誠實回報未通過；即使腦全崩，簽章鏈仍完整可驗。
+
+### 仍未做（誠實，多屬硬體/部署/研究層）
+
+- **root 級 custody → 需 TEE/HSM（硬體）**：單人開發機上 controller 有 root，仍可繞過軟體層
+  （demo custody）。passphrase 加密擋得住偷檔，擋不住 root。production 上 HSM/TEE 才是 prevents。
+- **容器 egress allowlist**：規格 §6 的「只放行閘道+model」屬部署層（iptables/namespace），未做。
+- **substrate 自身的 `home/` 寫入原子性**：`trust/` 已原子化；`home/`（skills/memory）由 substrate
+  擁有，其原子性是 substrate 的責任（真 Hermes 用 state.db WAL）。
+- **同源降權只實作 controller**：same-substrate/behavior 未做（規格框定為 raises-cost、可繞）。
+- **冷啟動 Sybil**：新身份（obs<3）一律過把關（給新人探索流量的刻意設計）。
+- **不可檢查任務的 oracle 問題**：verify-fix 的客觀真值只在可檢查任務成立（規格 §10）。
+- **禁止經閘道自呼**：`gateway.call` 對 `callee==caller` 直接拒絕（避免同一身體被同時載入覆蓋）。
 - **同源降權只實作 controller**：`registry._same_signal` 只比對 controller 標籤；
   same-substrate / same-behavior（同款式）尚未實作。符合總規格「raises-cost 非 prevents、
   公開閾值可被繞」的誠實框定，但 Sybil 換 controller 字串即可繞過，待 Phase 2 補。

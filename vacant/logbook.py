@@ -16,11 +16,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .atomic import atomic_write_bytes
 from .canonical import canonical_bytes
 from .identity import Identity, PublicIdentity
 
 # 創世 prev_hash（全零）；對應 EMPTY_PREV_HASH。
 EMPTY_PREV_HASH = "0" * 64
+# production 硬化：單筆 payload 上限（防失控/濫用塞爆 logbook）。
+MAX_PAYLOAD_BYTES = 64 * 1024
 
 
 def _entry_hash(seq: int, prev_hash: str, ts_ms: int, etype: str, payload: Any) -> str:
@@ -83,6 +86,8 @@ class Logbook:
     # --- 寫 ----------------------------------------------------------------
     def append(self, etype: str, payload: Any, identity: Identity, *, ts_ms: int) -> LogEntry:
         """簽一筆並接上鏈尾。seq = 上一筆 + 1（真正單調）。"""
+        if len(canonical_bytes(payload)) > MAX_PAYLOAD_BYTES:
+            raise ValueError(f"logbook payload 超過上限 {MAX_PAYLOAD_BYTES} bytes")
         if self.entries:
             last = self.entries[-1]
             seq = last.seq + 1
@@ -116,10 +121,9 @@ class Logbook:
 
     # --- 持久化 ------------------------------------------------------------
     def save(self, path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w", encoding="utf-8") as f:
-            for e in self.entries:
-                f.write(canonical_bytes(e.to_json()).decode("utf-8") + "\n")
+        # 原子寫入：崩潰也只會留下舊的或新的完整 ndjson，不會半截壞鏈。
+        blob = b"".join(canonical_bytes(e.to_json()) + b"\n" for e in self.entries)
+        atomic_write_bytes(path, blob)
 
     @classmethod
     def load(cls, path: Path) -> "Logbook":

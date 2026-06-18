@@ -26,6 +26,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from .atomic import atomic_write_text
 from .identity import Identity, PublicIdentity
 from .logbook import Logbook
 from .reputation import Reputation
@@ -140,16 +141,19 @@ class VacantBody:
         )
         return cls(name, root, identity, logbook, reputation, card)
 
+    @property
+    def lock_path(self) -> Path:
+        """並發鎖檔：序列化同一身體的 load→改→persist（見 atomic.file_lock）。"""
+        return self.dir / ".lock"
+
     def persist(self) -> None:
-        """把活著時的狀態寫回硬碟（vacant 回睡）。"""
+        """把活著時的狀態寫回硬碟（vacant 回睡）。所有檔案原子寫入（防崩潰半截）。"""
         self.identity.save(self.trust_dir)
         self.logbook.save(self.trust_dir / "logbook.ndjson")
-        (self.trust_dir / "reputation.json").write_text(
-            json.dumps(self.reputation.to_json(), ensure_ascii=False), encoding="utf-8"
-        )
-        (self.trust_dir / "capability_card.json").write_text(
-            json.dumps(self.card.to_json(), ensure_ascii=False), encoding="utf-8"
-        )
+        atomic_write_text(self.trust_dir / "reputation.json",
+                          json.dumps(self.reputation.to_json(), ensure_ascii=False))
+        atomic_write_text(self.trust_dir / "capability_card.json",
+                          json.dumps(self.card.to_json(), ensure_ascii=False))
 
     # --- 便利 --------------------------------------------------------------
     def public_identity(self) -> PublicIdentity:
