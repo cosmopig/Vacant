@@ -117,10 +117,12 @@ def test_ingress_rejects_low_reputation_caller(tmp_path):
     h = _host(tmp_path)
     req = h.mint("requester", niches=[])
     expert = h.mint("expert", niches=["reverse"])
-    # 人為把 requester（當作 target）打成 known-bad，超過把關觀測門檻
+    # 人為把 requester（當作 target）打成 known-bad，超過把關觀測門檻。
+    # （改動3 後 record_review 只收簽章 ReviewEnvelope；這裡測的是「把關」不是
+    # review 驗收，直接灌內部 reputation 當測試 seeding。）
     for _ in range(5):
-        h.registry.record_review(
-            "verifier", h.vacant_id("requester"), EchoSubstrate().substrate_id,
+        h.registry._rep.record_review(
+            h.vacant_id("requester"), EchoSubstrate().substrate_id,
             {"factual": 0.0, "logical": 0.0, "relevance": 0.0, "honesty": 0.0, "adoption": 0.0},
         )
     task = make_task(0, "reverse")
@@ -142,9 +144,10 @@ def test_caller_body_persisted_even_when_ingress_fails(tmp_path):
     req = h.mint("requester", niches=[])
     expert = h.mint("expert", niches=["reverse"])
     # 把 requester 打成 known-bad → 對端 ingress 會丟 ReputationRejected
+    # （直接灌內部 reputation 當測試 seeding，見上一測試的註解）
     for _ in range(5):
-        h.registry.record_review(
-            "verifier", h.vacant_id("requester"), EchoSubstrate().substrate_id,
+        h.registry._rep.record_review(
+            h.vacant_id("requester"), EchoSubstrate().substrate_id,
             {"factual": 0.0, "logical": 0.0, "relevance": 0.0, "honesty": 0.0, "adoption": 0.0},
         )
     with pytest.raises(ReputationRejected):
@@ -163,11 +166,12 @@ def test_ingress_gate_is_substrate_specific(tmp_path):
     rid = h.vacant_id("requester")
     cur = EchoSubstrate().substrate_id  # 當前這顆腦
     # 在「別顆腦」上刷一堆好評（足以拉高跨腦平均），但當前這顆腦上是 known-bad
+    # （直接灌內部 reputation 當測試 seeding，見上面的註解）
     for _ in range(8):
-        h.registry.record_review("v", rid, "other-brain", {d: 1.0 for d in (
+        h.registry._rep.record_review(rid, "other-brain", {d: 1.0 for d in (
             "factual", "logical", "relevance", "honesty", "adoption")})
     for _ in range(5):
-        h.registry.record_review("v", rid, cur, {d: 0.0 for d in (
+        h.registry._rep.record_review(rid, cur, {d: 0.0 for d in (
             "factual", "logical", "relevance", "honesty", "adoption")})
     # 跨腦平均會放行，但 substrate-specific 口徑應擋下
     with pytest.raises(ReputationRejected):

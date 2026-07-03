@@ -131,6 +131,112 @@ class ReplayError(Exception):
     """seq 未前進或 prev_hash 不接 → 重放 / 亂序攻擊。"""
 
 
+# --- ReviewEnvelope（credit-memory v1 改動3）---------------------------------
+#
+# review 從「無簽章的 in-process 函式呼叫」升級為簽章物件：reviewer 用自己的
+# Identity 簽 canonical {reviewer_id, target_id, target_stream_id, branch_id,
+# target_head, task_id, substrate, scores, ts_ms}。
+#   - 簽章覆蓋 target_stream_id/branch_id/target_head → 舊 review 簽章搬到新
+#     stream / 新 head 必驗失敗（擋簽章搬移，by design）。
+#   - demo 期一身一 stream → target_stream_id ≡ 由該 vacant logbook 創世 hash
+#     衍生（見 logbook.stream_id()）；vacant_id 仍是信譽索引的 key（改動2 後推）。
+
+_REVIEW_FIELDS = (
+    "reviewer_id", "target_id", "target_stream_id", "branch_id",
+    "target_head", "task_id", "substrate", "scores", "ts_ms",
+)
+
+
+@dataclass
+class ReviewEnvelope:
+    reviewer_id: str
+    target_id: str          # 被評者 vacant_id（信譽索引 key）
+    target_stream_id: str   # 被評 memory stream（創世 hash；空鏈時＝vacant_id）
+    branch_id: str
+    target_head: str        # 評的是「這個鏈頭為止」的歷史 → head 新鮮性檢查用
+    task_id: str
+    substrate: str
+    scores: dict[str, float]
+    ts_ms: int
+    sig: str  # hex
+
+    def _core(self) -> dict[str, Any]:
+        return {k: getattr(self, k) for k in _REVIEW_FIELDS}
+
+    @classmethod
+    def create(
+        cls,
+        reviewer: Identity,
+        *,
+        target_id: str,
+        target_stream_id: str,
+        branch_id: str,
+        target_head: str,
+        task_id: str,
+        substrate: str,
+        scores: dict[str, float],
+        ts_ms: int,
+    ) -> "ReviewEnvelope":
+        env = cls(
+            reviewer_id=reviewer.vacant_id,
+            target_id=target_id,
+            target_stream_id=target_stream_id,
+            branch_id=branch_id,
+            target_head=target_head,
+            task_id=task_id,
+            substrate=substrate,
+            scores=dict(scores),
+            ts_ms=ts_ms,
+            sig="",
+        )
+        env.sig = reviewer.sign(canonical_bytes(env._core())).hex()
+        return env
+
+    def verify_sig(self, who: PublicIdentity) -> bool:
+        if who.vacant_id != self.reviewer_id:
+            return False
+        try:
+            raw = bytes.fromhex(self.sig)
+        except ValueError:
+            return False
+        return who.verify(canonical_bytes(self._core()), raw)
+
+    def to_json(self) -> dict[str, Any]:
+        d = self._core()
+        d["sig"] = self.sig
+        return d
+
+    @classmethod
+    def from_json(cls, d: dict[str, Any]) -> "ReviewEnvelope":
+        """從不可信來源解析＋驗證結構（型別/必填/界線）。壞資料 → ValueError。"""
+        if not isinstance(d, dict):
+            raise ValueError("review envelope 必須是物件")
+        for k in (*_REVIEW_FIELDS, "sig"):
+            if k not in d:
+                raise ValueError(f"review envelope 缺欄位：{k}")
+        for k in ("reviewer_id", "target_id", "target_stream_id", "branch_id",
+                  "target_head", "task_id", "substrate", "sig"):
+            if not isinstance(d[k], str):
+                raise ValueError(f"{k} 必須是字串")
+        if not isinstance(d["ts_ms"], int):
+            raise ValueError("ts_ms 必須是整數")
+        if not isinstance(d["scores"], dict):
+            raise ValueError("scores 必須是物件")
+        scores: dict[str, float] = {}
+        for dim, v in d["scores"].items():
+            if not isinstance(dim, str) or not isinstance(v, (int, float)) or isinstance(v, bool):
+                raise ValueError("scores 必須是 {維度: 數值}")
+            if not 0.0 <= float(v) <= 1.0:
+                raise ValueError(f"score {dim}={v} 超出 [0,1]")
+            scores[dim] = float(v)
+        return cls(
+            reviewer_id=d["reviewer_id"], target_id=d["target_id"],
+            target_stream_id=d["target_stream_id"], branch_id=d["branch_id"],
+            target_head=d["target_head"], task_id=d["task_id"],
+            substrate=d["substrate"], scores=scores, ts_ms=d["ts_ms"], sig=d["sig"],
+        )
+
+
 class ChannelGuard:
     """接收端的 per-sender 重放防護：記住每個 from 的最後 (seq, hash)。
 

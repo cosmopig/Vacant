@@ -19,7 +19,7 @@ from typing import Any
 
 from .atomic import atomic_write_text
 from .body import VacantBody, now_ms
-from .envelope import ChannelGuard, Envelope
+from .envelope import ChannelGuard, Envelope, ReviewEnvelope
 from .identity import PublicIdentity
 from .registry import Registry
 from .verifier import is_correct, verify_checkable
@@ -133,10 +133,30 @@ class Gateway:
             answer = result_env.body["answer"]
             substrate = result_env.body["substrate"]
 
-            # 自動 verify（可檢查任務）→ 簽 REVIEW → 餵信譽索引（非循環真值）
+            # 自動 verify（可檢查任務）→ 簽 ReviewEnvelope → 餵信譽索引（非循環真值）。
+            # credit-memory v1 改動3：review 是綁 (stream, branch, head) 的簽章物件，
+            # registry 只收驗簽＋head 新鮮＋去重；weight 由 registry 內生。
+            stream_id = result_env.body.get("stream_id") or callee_id
+            chain_head = result_env.body.get("chain_head", "")
+            branch_id = result_env.body.get("branch_id", "main")
+            self.registry.note_head(callee_id, stream_id, chain_head)
             scores = verify_checkable(task, answer)
-            body.log("REVIEW", {"target": callee_id[:16], "task_id": task["task_id"], "scores": scores})
-            self.registry.record_review(self.vacant_id, callee_id, substrate, scores)
+            review = ReviewEnvelope.create(
+                body.identity,
+                target_id=callee_id,
+                target_stream_id=stream_id,
+                branch_id=branch_id,
+                target_head=chain_head,
+                task_id=task["task_id"],
+                substrate=substrate,
+                scores=scores,
+                ts_ms=now_ms(),
+            )
+            body.log("REVIEW", {
+                "target": callee_id[:16], "task_id": task["task_id"], "scores": scores,
+                "target_head": chain_head[:16], "review_sig": review.sig[:16],
+            })
+            self.registry.record_review(review)
         finally:
             body.persist()  # 呼叫方一次 load/persist 週期：A2A_OUT（恆）+ REVIEW（成功時）
 
@@ -198,6 +218,7 @@ class Gateway:
         )
 
         # 5. 用喚醒後（已寫回）的 body 身份簽 result（identity 穩定不變）
+        lb = wake.body.logbook
         result_env = Envelope.create(
             wake.body.identity,
             to=env.frm,
@@ -205,7 +226,16 @@ class Gateway:
             prev_hash=rprev,
             ts_ms=now_ms(),
             kind="result",
-            body={"task_id": env.body.get("task_id"), "answer": wake.result.output, "substrate": wake.result.substrate_id},
+            body={
+                "task_id": env.body.get("task_id"),
+                "answer": wake.result.output,
+                "substrate": wake.result.substrate_id,
+                # 改動3 的 head 新鮮性錨點：交付時附上自己的 stream 身份與鏈頭，
+                # caller 的 ReviewEnvelope 就綁著「這個 head 為止的歷史」。
+                "stream_id": lb.stream_id() or self.vacant_id,
+                "branch_id": lb.branch_id(),
+                "chain_head": lb.head(),
+            },
         )
         self.egress_guard.record_sent(result_env)
         return result_env

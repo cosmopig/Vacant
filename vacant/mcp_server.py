@@ -50,17 +50,8 @@ def get_reputation(capability: str) -> str:
     board = _host.registry.leaderboard(capability, _SID)
     return "; ".join(f"…{v[-8:]}={s:.2f}" for v, s in board) or "no reputation data yet"
 
-@mcp.tool()
-def submit_review(vacant_id_suffix: str, capability: str, score: float) -> str:
-    """Submit a 5-dim review (score 0..1) about a vacant expert for a capability; recorded as a signed, accountable review feeding reputation."""
-    target = next((c.vacant_id for c in _host.registry.discover(capability)
-                   if c.vacant_id.endswith(vacant_id_suffix)), None)
-    if not target:
-        return f"no expert ending …{vacant_id_suffix} for {capability}"
-    s = max(0.0, min(1.0, float(score)))
-    _host.registry.record_review(_host.vacant_id("hermes_caller"), target, _SID,
-                                 {d: s for d in ("factual","logical","relevance","honesty","adoption")})
-    return f"review recorded for …{target[-8:]} ({capability}={s:.2f})"
+# submit_review 已廢止對外（credit-memory v1 改動3）：無驗簽 review 是洞。
+# review 只能由 delegate/a2a_call 內部的簽章 ReviewEnvelope 通道產生。
 
 @mcp.tool()
 def verify_fix(prompt: str, check: dict, draft: str = "", k: int = 3) -> str:

@@ -16,7 +16,20 @@ from typing import Any
 
 from . import crypto
 from .body import CapabilityCard
-from .reputation import DIMS, Reputation, ucb_score
+from .envelope import ReviewEnvelope
+from .identity import PublicIdentity
+from .reputation import DIMS, SAME_SIGNAL_FLOOR, Reputation, ucb_score
+
+# weight 內生（credit-memory v1 改動3.3）：reviewer 自身信譽 × 觀測飽和度。
+#   - 全新 Sybil reviewer（obs=0）→ weight ≈ REVIEWER_WEIGHT_FLOOR（近零）。
+#   - 冷啟動不死鎖：地板讓初期 review 仍有微小貢獻（raises-cost，非 prevents——
+#     地板是常數優勢，配非線性同源降權後同一 controller 的總貢獻只有 log 級成長）。
+REVIEWER_WEIGHT_FLOOR = 0.05
+REVIEWER_SATURATION_OBS = 5.0  # obs/(obs+此值)：約 5 筆被審觀測後 weight 才接近自身信譽
+
+
+class ReviewRejected(Exception):
+    """ReviewEnvelope 未過驗收（驗簽 / head 新鮮 / 重放）→ 整筆拒收。"""
 
 
 @dataclass
@@ -30,6 +43,10 @@ class Registry:
     def __init__(self) -> None:
         self._cards: dict[str, CapabilityCard] = {}
         self._rep = Reputation()  # 聚合：per (target, substrate) 的網路級信譽
+        # 改動3 狀態：目標鏈頭（head 新鮮性）、review 去重、同源計數（非線性降權）
+        self._heads: dict[str, tuple[str, str]] = {}       # target_id → (stream_id, head)
+        self._seen_reviews: set[tuple[str, str, str]] = set()  # (reviewer, stream, head)
+        self._same_source_k: dict[tuple[str, str], int] = {}   # (controller, target) → 次數
 
     # --- halo：公告 / 發現 -------------------------------------------------
     def announce(self, card: CapabilityCard) -> None:
@@ -65,17 +82,63 @@ class Registry:
             return True
         return False
 
-    def record_review(
-        self,
-        reviewer_id: str,
-        target_id: str,
-        substrate: str,
-        scores: dict[str, float],
-        *,
-        weight: float = 1.0,
-    ) -> None:
-        same = self._same_signal(reviewer_id, target_id)
-        self._rep.record_review(target_id, substrate, scores, weight=weight, same_signal=same)
+    def note_head(self, target_id: str, stream_id: str, head: str) -> None:
+        """記下對某 target 最新觀察到的 (stream_id, chain head)。
+
+        head 新鮮性檢查的比對基準：in-process 模擬裡由 gateway 在收到簽章 result
+        時回報（上機後即 result envelope 附帶的 chain_head）。"""
+        self._heads[target_id] = (stream_id, head)
+
+    def _reviewer_weight(self, reviewer_id: str, substrate: str) -> float:
+        """weight 內生：reviewer 自身信譽 × 觀測飽和 → 不接受外部注入。"""
+        score, obs = self.standing(reviewer_id, substrate)
+        saturation = obs / (obs + REVIEWER_SATURATION_OBS)
+        return max(REVIEWER_WEIGHT_FLOOR, score * saturation)
+
+    def record_review(self, env: ReviewEnvelope) -> float:
+        """只收已驗簽的 ReviewEnvelope（credit-memory v1 改動3）。回傳實際採計權重。
+
+        驗收順序：①驗簽（reviewer halo 公告的 pub_hex）→ ②head 新鮮（target_head
+        必須等於最新觀察到的鏈頭）→ ③(reviewer, stream, head) 去重防重放 →
+        ④weight 內生 ＋ 同源非線性降權（第 k 筆 ~ floor/k，總貢獻 log 級）→ 寫入。
+        任一步失敗 raise ReviewRejected，reputation 完全不動。
+        """
+        # ① 驗簽：reviewer 必須已在 halo 公告（announce 已驗身份綁定）
+        rcard = self._cards.get(env.reviewer_id)
+        if rcard is None or not rcard.pub_hex:
+            raise ReviewRejected(f"reviewer 未在 halo 公告：{env.reviewer_id[:16]}…")
+        reviewer_pub = PublicIdentity.from_hex(env.reviewer_id, rcard.pub_hex)
+        if not env.verify_sig(reviewer_pub):
+            raise ReviewRejected(f"review 驗簽失敗：reviewer {env.reviewer_id[:16]}…")
+
+        # ② head 新鮮：評的必須是「目標當前鏈頭為止」的歷史
+        known = self._heads.get(env.target_id)
+        if known is None:
+            raise ReviewRejected(
+                f"無 {env.target_id[:16]}… 的已知鏈頭（須先觀察到其簽章交付）"
+            )
+        known_stream, known_head = known
+        if env.target_stream_id != known_stream or env.target_head != known_head:
+            raise ReviewRejected(
+                f"target_head 不新鮮：got {env.target_head[:12]} want {known_head[:12]}"
+            )
+
+        # ③ 去重防重放
+        dedup_key = (env.reviewer_id, env.target_stream_id, env.target_head)
+        if dedup_key in self._seen_reviews:
+            raise ReviewRejected(f"重複 review：{env.reviewer_id[:12]}…@head {env.target_head[:12]}")
+        self._seen_reviews.add(dedup_key)
+
+        # ④ weight 內生 ＋ 同源非線性降權（floor/k 取代純地板，v1 改動3.4）
+        weight = self._reviewer_weight(env.reviewer_id, env.substrate)
+        if self._same_signal(env.reviewer_id, env.target_id):
+            controller = self._cards[env.reviewer_id].controller
+            k = self._same_source_k.get((controller, env.target_id), 0) + 1
+            self._same_source_k[(controller, env.target_id)] = k
+            weight = min(weight, SAME_SIGNAL_FLOOR / k)
+
+        self._rep.record_review(env.target_id, env.substrate, env.scores, weight=weight)
+        return weight
 
     def reputation_of(self, target_id: str, substrate: str) -> float:
         return self._rep.score(target_id, substrate)
