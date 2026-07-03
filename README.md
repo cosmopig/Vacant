@@ -44,6 +44,48 @@ vacant bench --base http://localhost:1234 --model your-model --api responses -n 
 
 ---
 
+## 讓 Hermes（或任何 agent）用 vacant 強化「自己」（MCP）
+
+不改 agent 一行碼，只在它的 MCP 設定掛上 vacant，agent 的 LLM 就多出工具：
+
+- **`verify_fix(prompt, check, draft, k)`** — agent 把「可客觀檢查的子任務」交給 vacant：vacant 在本地模型上跑 verify-fix（generate→check→錯就帶回饋重試→對才收），回傳通過的答案 ＋ 一張可攜簽章 attestation。`draft` 給定且已通過 → **0 額外算力**。這條就是「agent 用 vacant 強化它自己」。
+- `a2a_call` / `get_reputation` / `submit_review` — 把子任務外包給信譽路由到的可究責專家。
+
+`check` 是可序列化的 **check-spec**（因為 MCP 傳不了 Python lambda，得把「怎麼檢查」表達成 JSON）：
+
+```jsonc
+{"type":"equals","value":"olleh"}
+{"type":"regex","pattern":"^\\d{4}$"}
+{"type":"json_schema","schema":{"type":"object","required":["name"]}}
+{"type":"run_python","code":"assert solve('ab')=='ba'"}   // 跑測試 ＝ 最強的客觀檢查
+```
+
+啟用（在 vacant MCP server 端設環境變數指向你的模型）：
+```bash
+VACANT_MCP_MODEL=your-model VACANT_MCP_BASE=http://localhost:1234 python -m vacant.mcp_server
+```
+
+> **防「AI 自產自評」**：最強的 check 是 `run_python`（跑測試）/`json_schema`/`equals` —— 客觀、可執行，不是「再問一次 LLM 對不對」。`run_python` 是受限沙箱（`python -I` ＋ 逾時 ＋ CPU rlimit ＋ 暫存 cwd），對「模型自己寫的測試」夠用，但**不是對抗惡意程式碼的安全邊界**（要跑不可信程式請用容器）。
+
+### 可攜的簽章憑證（attestation）＋ 對外究責
+
+`v.solve(...)` 與 `verify_fix` 都回一張 attestation：「答案 X（雜湊）在 T 時通過了檢查 C，由身分 K 產生」。任何人**不必信任送方**即可獨立驗：
+
+```bash
+vacant verify-att att.json --answer "olleh"   # ✓ VALID（vacant_id 由 pub 重算、簽章覆蓋整票、答案雜湊對得上）
+vacant audit <name>                           # 重驗某 vacant 的 logbook 簽章鏈（PASS/FAIL）
+```
+
+### 在「真實 code 任務」上量（不只玩具題）
+
+```bash
+vacant bench --suite code --base http://localhost:1234 --model your-model -n 12 -k 3
+```
+
+`--suite code` 用 12 題真 code generation、**跑測試當 verifier**（self-repair 的經典適用領域）。實測觀察見〈誠實邊界〉。
+
+---
+
 ## 為什麼是這樣切
 
 規格把驗證分兩層（共識定案 §5、總規格 §11）：
@@ -113,7 +155,7 @@ PYTHONPATH=. python3 -m vacant.cli info bob                            # 看 bob
 | **G2** | 閘道骨架：keypair + 簽/驗 Envelope + logbook(hash chain) | ✅ `crypto/identity/logbook/envelope` + `test_primitives.py`；registry 身份綁定 + ingress 收件人檢查已補（見下「Codex 審查」） |
 | **G3** | waker：vacant_id→HOME + 綁 HOME + resume（復活帶回累積） | 🟡 **A 層模擬**：確實從硬碟載回（`test_revive.py` 用 p_base=0 證明），但仍是同程序內呼叫 `Substrate.run`；規格的「獨立 spawn `hermes-acp` + 精確 session resume」待 B 層接通 |
 | **G4** | Ingress 把關（驗章→收件人→replay→信譽）接 waker | ✅ `gateway.ingress` + `test_gateway.py`（replay 為 per-process，跨重啟限制見下） |
-| **G5** | Egress `a2a_call` + 唯一出口 | 🟡 **部分**：egress 路由/簽章/記帳邏輯在 `gateway.call`；但**尚未**包成 MCP `a2a_call` 工具、**也無**容器 egress allowlist（皆屬上機部署層） |
+| **G5** | Egress `a2a_call` + 唯一出口 | ✅ **MCP 工具已包**：`mcp_server.py` 暴露 `a2a_call`／`verify_fix`（Hermes 直接叫 vacant 強化自己）／`get_reputation`／`submit_review`；egress 路由/簽章/記帳在 `gateway.call`。**仍未做**：容器 egress allowlist（部署層） |
 | **G6** | Registry + 信譽路由 + 自動 verifier | 🟡 **大致**：`registry.py` UCB 信譽路由 ✅；`verifier.py` 用環境真值評分 ✅，但 review 由 caller 端記/簽（非獨立 verifier 身份）；同源降權只實作 controller（substrate/behavior 未做） |
 | **G7** | 2–3 vacant 跑「有閘道 vs 沒閘道」A/B | 🟡 **機制演示**：`experiment.py` 跑得出 C0/C1/C2/C3 對照表與信任性質；但曲線分離是 `EchoSubstrate` 的確定性機制**設計使然**，只證明「管線接對了」，**不**構成「真模型也會分離」的證據——那要 B 層（見下） |
 | G8 | Composer 多輪（Phase 2 起點） | ⬜ Phase 2，尚未做（界線見總規格 §9） |
@@ -137,6 +179,13 @@ PYTHONPATH=. python3 -m vacant.cli info bob                            # 看 bob
   封鎖（擋 5 類繞過工具）屬上機部署，不在本 CPU 模擬內。
 - **可檢查任務 scope**：自動 verifier 的「便宜非循環真值」只在任務可檢查時成立；
   模糊任務仍回到互批的 oracle 問題（MVP 刻意把 scope 釘在可檢查任務）。
+- **verify-fix 增益 ＝ recoverable-error（實測，2026-06-18 `--suite code`，跑測試當 verifier）**：
+  強 coder 模型（gemma-12b-coder）這些題第一次幾乎全對 → verify-fix 鮮少觸發（算力 ~1.0/題）
+  → 88%→100% 的差落在**非決定性雜訊**，不可歸功迴圈；較弱模型（qwen3.6-35b-a3b）會犯可修正
+  的錯 → verify-fix **真的開火**（算力 1.2/題、可見 `plain x → 2calls` 的回收）→ 75%→100%（+25%）。
+  **強模型上 vacant 的價值是 attestation（可究責）而非準確率**；準確率增益集中在「模型會犯、
+  且可修正的錯」。看 `calls`：=1 的勝出是變異、≥2 才是 verify-fix。詳見
+  `實驗記錄/實驗筆記_verify-fix真有效於agent_2026-06-18.md`。
 - **AI 自產自評風險**：本實作由 AI 產出，關鍵主張請人工終審（見自動記憶
   `vacant_critique_2026-06`）。已修掉舊 repo 的 `seq` 永遠=1 bug（`test_primitives.py` 守住）。
 

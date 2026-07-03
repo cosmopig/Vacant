@@ -22,6 +22,7 @@ import hashlib
 from dataclasses import dataclass, field
 from typing import Callable
 
+from .attest import make_attestation
 from .body import now_ms
 from .brains import Brain
 from .composer import Composer
@@ -39,6 +40,7 @@ class SolveResult:
     strategy: str
     accountable: bool       # 簽章 logbook 鏈可驗（究責）
     brain: str
+    attestation: dict | None = None  # 可攜的簽章通過憑證（離開 vacant 仍可獨立驗）
 
     def __str__(self) -> str:
         v = "✓verified" if self.verified else "✗unverified"
@@ -83,12 +85,22 @@ class Vacant:
             return False
         return self.logbook.verify_chain(PublicIdentity(self._identity.vacant_id, self._identity.pub))
 
+    def attest(self, prompt: str, answer: str, *, check_desc: str, verified: bool) -> dict | None:
+        """對一個（prompt, answer, 是否通過）產生可攜簽章憑證；未簽章身分則 None。"""
+        if self._identity is None:
+            return None
+        return make_attestation(self._identity, prompt=prompt, answer=answer,
+                                check=check_desc, verified=verified, ts_ms=now_ms())
+
     # --- 核心：vacant 加值（verify-fix）-----------------------------------
-    def solve(self, prompt: str, verifier: Verifier, *, k: int | None = None) -> SolveResult:
+    def solve(self, prompt: str, verifier: Verifier, *, k: int | None = None,
+              check_desc: str = "custom-verifier",
+              on_step: Callable[[int, str, bool], None] | None = None) -> SolveResult:
         k = k or self.k
-        r = Composer(lambda fb: self._gen(prompt + fb), verifier).vacant(k)
+        r = Composer(lambda fb: self._gen(prompt + fb), verifier).vacant(k, on_step=on_step)
+        att = self.attest(prompt, r.answer, check_desc=check_desc, verified=r.correct)
         return SolveResult(r.answer, r.correct, r.calls, "vacant-verifyfix",
-                           self.verify_chain(), self.brain.name)
+                           self.verify_chain(), self.brain.name, att)
 
     # --- 對照：裸單次（沒有 vacant 組合）---------------------------------
     def plain(self, prompt: str, verifier: Verifier) -> SolveResult:

@@ -15,8 +15,11 @@ vLLM + Hermes）只需把 EchoSubstrate 換成 HermesACPSubstrate。
 """
 
 from .agent import SolveResult, Vacant, checkable_cases
+from .attest import make_attestation, verify_attestation
 from .body import CapabilityCard, VacantBody
 from .brains import Brain, HermesBrain, LMStudioBrain, OpenAIBrain
+from .checks import compile_check, extract_code
+from .codebench import code_cases
 from .composer import ComposeResult, Composer
 from .gateway import BadSignature, CallOutcome, Gateway, ReputationRejected
 from .host import Host
@@ -34,6 +37,11 @@ __all__ = [
     "Vacant",
     "SolveResult",
     "checkable_cases",
+    "code_cases",
+    "compile_check",
+    "extract_code",
+    "make_attestation",
+    "verify_attestation",
     "Brain",
     "LMStudioBrain",
     "OpenAIBrain",

@@ -163,30 +163,171 @@ def build_parser() -> argparse.ArgumentParser:
     pb.add_argument("--api", default="responses", choices=["responses", "openai"],
                     help="responses=/api/v1/chat（reasoning 模型）；openai=/v1/chat/completions")
     pb.add_argument("--brain", default="lmstudio", choices=["lmstudio", "openai", "hermes"])
+    pb.add_argument("--suite", default="niche", choices=["niche", "code"],
+                    help="niche=內建玩具可檢查任務；code=真實 code generation（跑測試當 verifier）")
+    pb.add_argument("--max-tokens", type=int, default=0, help="0=依 suite 自動（niche 256 / code 1024）")
     pb.add_argument("-n", type=int, default=12, help="題數")
     pb.add_argument("-k", type=int, default=3, help="verify-fix 最大嘗試")
     pb.set_defaults(func=cmd_bench)
+
+    pa = sub.add_parser("audit", help="重驗一個 vacant 的 logbook 簽章鏈（對外究責）")
+    pa.add_argument("name")
+    pa.set_defaults(func=cmd_audit)
+
+    pv = sub.add_parser("verify-att", help="獨立驗一張 attestation 通過憑證（JSON 檔）")
+    pv.add_argument("file")
+    pv.add_argument("--answer", default=None, help="把實際答案餵進來，額外要求雜湊對得上")
+    pv.set_defaults(func=cmd_verify_att)
+
+    pt = sub.add_parser("trace", help="把 MCP tee-proxy 的 wire log 渲染成可讀的 Hermes↔vacant 時間軸")
+    pt.add_argument("file")
+    pt.set_defaults(func=cmd_trace)
     return p
 
 
 def cmd_bench(args: argparse.Namespace) -> int:
     from .agent import Vacant, checkable_cases
     from .brains import HermesBrain, LMStudioBrain, OpenAIBrain
+    from .codebench import code_cases, code_system_prompt
+
+    is_code = args.suite == "code"
+    max_tokens = args.max_tokens or (1024 if is_code else 256)
+    system = code_system_prompt() if is_code else "Output only the answer, nothing else."
     if args.brain == "hermes":
         brain = HermesBrain(model=args.model, base_url=args.base + "/v1")
     elif args.brain == "openai":
-        brain = OpenAIBrain(args.base, args.model)
+        brain = OpenAIBrain(args.base, args.model, max_tokens=max_tokens, system=system)
     else:
-        brain = LMStudioBrain(args.base, args.model, api=args.api)
-    print(f"brain={brain.name}  n={args.n}  k={args.k}  （在可檢查任務上量 plain vs vacant verify-fix）", flush=True)
+        brain = LMStudioBrain(args.base, args.model, api=args.api, max_tokens=max_tokens, system=system)
+    cases = code_cases(args.n) if is_code else checkable_cases(args.n)
+    print(f"brain={brain.name}  suite={args.suite}  n={args.n}  k={args.k}  （量 plain vs vacant verify-fix）", flush=True)
     v = Vacant(brain, k=args.k)
-    rep = v.bench(checkable_cases(args.n), k=args.k)
+    rep = v.bench(cases, k=args.k)
     for prompt, pv, vv, calls in rep["rows"]:
         print(f"  {('OK' if vv else 'x'):2} (plain {'OK' if pv else 'x '}) {calls}calls  {prompt}")
     print("\n================ 結果 ================")
     print(f"  plain（無 vacant）   正確率 {rep['plain_acc']*100:3.0f}%   算力 {rep['plain_calls_per']:.1f} 次/題")
     print(f"  vacant（verify-fix） 正確率 {rep['vacant_acc']*100:3.0f}%   算力 {rep['vacant_calls_per']:.1f} 次/題")
     print(f"  → vacant 讓你的模型 {rep['gain']*100:+.0f}%（簽章鏈究責：{v.verify_chain()}）")
+    return 0
+
+
+def cmd_audit(args: argparse.Namespace) -> int:
+    """重驗一個 vacant 的 logbook 簽章鏈 —— 把『可究責』變成對外可跑的命令。"""
+    root = Path(args.root)
+    try:
+        body = VacantBody.load(args.name, root)
+    except FileNotFoundError:
+        print(f"找不到：{args.name}（root={root}）", file=sys.stderr)
+        return 1
+    ok = body.logbook.verify_chain(body.public_identity())
+    kinds: dict[str, int] = {}
+    for e in body.logbook.entries:
+        kinds[e.type] = kinds.get(e.type, 0) + 1
+    print(f"vacant     : {args.name}  (…{body.identity.vacant_id[-12:]})")
+    print(f"logbook    : {len(body.logbook)} 筆  事件分布 {kinds or '（空）'}")
+    print(f"簽章鏈究責 : {'✓ PASS（seq 連續、prev_hash 串對、每筆簽章過）' if ok else '✗ FAIL（鏈被竄改或不完整）'}")
+    return 0 if ok else 1
+
+
+def cmd_verify_att(args: argparse.Namespace) -> int:
+    """獨立驗一張 attestation 憑證 —— 不必信任送方，只靠票上的 pub + 簽章。"""
+    import json
+
+    from .attest import verify_attestation
+
+    att = json.loads(Path(args.file).read_text(encoding="utf-8"))
+    ok = verify_attestation(att, answer=args.answer)
+    print(f"attestation: …{str(att.get('vacant_id',''))[-12:]}  check={att.get('check')!r}  "
+          f"verified={att.get('verified')}")
+    if args.answer is not None:
+        print(f"答案雜湊比對: {'（已要求）' if ok else '不符或驗章失敗'}")
+    print(f"獨立驗章   : {'✓ VALID（vacant_id 由 pub 重算、簽章覆蓋整票）' if ok else '✗ INVALID'}")
+    return 0 if ok else 1
+
+
+_VACANT_TOOLS = ("verify_fix", "a2a_call", "get_reputation", "submit_review")
+
+
+def _short(v, n: int = 140) -> str:
+    import json as _j
+
+    s = v if isinstance(v, str) else _j.dumps(v, ensure_ascii=False)
+    s = s.replace("\n", "\\n")
+    return s if len(s) <= n else s[:n] + "…"
+
+
+def _tool_text(result) -> str:
+    """從 MCP tools/call 結果取出文字內容（content[0].text）。"""
+    import json as _j
+
+    if isinstance(result, dict):
+        c = result.get("content")
+        if isinstance(c, list) and c and isinstance(c[0], dict):
+            return c[0].get("text", "")
+        return _j.dumps(result, ensure_ascii=False)
+    return result if isinstance(result, str) else _j.dumps(result, ensure_ascii=False)
+
+
+def cmd_trace(args: argparse.Namespace) -> int:
+    """把 tee-proxy 側錄的 MCP JSON-RPC 渲染成「Hermes ↔ vacant」可讀時間軸。"""
+    import json
+
+    path = Path(args.file)
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        print(f"找不到 trace 檔：{path}", file=sys.stderr)
+        return 1
+    print(f"== MCP trace: {path} ==  (★=對 vacant 工具的呼叫/回覆)")
+    pending: dict = {}      # JSON-RPC id → 工具名（標記回覆）
+    n_calls = 0
+    for ln in lines:
+        ln = ln.strip()
+        if not ln:
+            continue
+        try:
+            rec = json.loads(ln)
+        except Exception:
+            continue
+        t = rec.get("t", "--:--:--")
+        # A 層：verify_fix 自記的迴圈追蹤
+        if rec.get("tool") == "verify_fix":
+            steps = rec.get("attempts", []) or []
+            seq = " ".join(f"#{s.get('attempt')}{'✓' if s.get('passed') else '✗'}" for s in steps)
+            seq = seq or ("draft✓" if rec.get("draft_used") else "—")
+            print(f"  [{t}] (vacant 內) verify_fix check={rec.get('check')} 迴圈:[{seq}]"
+                  f" → verified={rec.get('verified')} calls={rec.get('calls')}")
+            continue
+        d, msg = rec.get("dir"), rec.get("msg")
+        if d == "proxy":
+            print(f"  [{t}] · proxy {rec.get('raw', '')}")
+            continue
+        if not isinstance(msg, dict):
+            continue
+        method, mid = msg.get("method"), msg.get("id")
+        if method:
+            if method == "tools/call":
+                params = msg.get("params", {}) or {}
+                name = params.get("name", "")
+                is_vac = any(v in name for v in _VACANT_TOOLS)
+                n_calls += int(is_vac)
+                arg_s = ", ".join(f"{k}={_short(v, 80)}" for k, v in (params.get("arguments", {}) or {}).items())
+                print(f"{'★' if is_vac else ' '} [{t}] → Hermes 呼叫 {name}({arg_s})")
+                if mid is not None:
+                    pending[mid] = name
+            elif method == "initialize":
+                print(f"  [{t}] · MCP 握手 initialize")
+            elif method == "tools/list":
+                print(f"  [{t}] · Hermes 列工具 tools/list")
+        elif mid is not None and ("result" in msg or "error" in msg):
+            name = pending.pop(mid, None)
+            if "error" in msg:
+                print(f"  [{t}] ← error (id={mid}): {_short(msg.get('error'))}")
+            elif name and any(v in name for v in _VACANT_TOOLS):
+                print(f"★ [{t}] ← vacant 回覆 [{name}]: {_short(_tool_text(msg.get('result')), 320)}")
+    print(f"\n結論：此 trace 中 Hermes 對 vacant 工具的呼叫 = {n_calls} 次"
+          f"{'（✓ Hermes 確實用到 vacant）' if n_calls else '（未偵測到 vacant 呼叫）'}")
     return 0
 
 

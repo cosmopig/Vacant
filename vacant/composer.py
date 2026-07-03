@@ -53,7 +53,8 @@ class Composer:
         return ComposeResult(a, self._check(a), k, "naive-majority")
 
     # --- C3：vacant verify-fix（互查迴圈：錯了就帶回饋重試，驗證過即收）--
-    def vacant(self, k: int) -> ComposeResult:
+    def vacant(self, k: int, on_step: Callable[[int, str, bool], None] | None = None) -> ComposeResult:
+        """on_step(attempt, answer, passed)：每次「生成→檢查」後回呼（可觀測迴圈，不改行為）。"""
         tried: list[str] = []
         for i in range(k):
             if not tried:
@@ -64,7 +65,13 @@ class Composer:
                 fb = (f" Your previous answer(s) {shown} were WRONG. "
                       f"Reconsider carefully and give a DIFFERENT, correct answer.")
             a = self._generate(fb)
-            if self._check(a):
+            ok = self._check(a)
+            if on_step is not None:
+                try:
+                    on_step(i + 1, a, ok)
+                except Exception:
+                    pass  # 觀測不得影響解題
+            if ok:
                 return ComposeResult(a, True, i + 1, "vacant-verifyfix")
             tried.append(a)
         return ComposeResult(tried[-1], False, k, "vacant-verifyfix")

@@ -60,7 +60,8 @@ class LMStudioBrain:
     /v1 的 content 對 reasoning 模型常為空）。非 reasoning 模型用 api='openai' 即可。"""
 
     def __init__(self, base_url: str, model: str, *, api: str = "responses",
-                 timeout: int = 120, system: str = "Output only the answer, nothing else."):
+                 timeout: int = 120, max_tokens: int = 256,
+                 system: str = "Output only the answer, nothing else."):
         # base_url 給 http://host:1234（含/不含 /v1 都行）
         b = base_url.rstrip("/")
         if b.endswith("/v1"):
@@ -69,9 +70,10 @@ class LMStudioBrain:
         self.model = model
         self.api = api          # 'responses' (/api/v1/chat) | 'openai' (/v1/chat/completions)
         self.timeout = timeout
+        self.max_tokens = max_tokens
         self.system = system
         self.name = f"lmstudio:{model}"
-        self._openai = OpenAIBrain(b + "/v1", model, timeout=timeout, system=system)
+        self._openai = OpenAIBrain(b + "/v1", model, timeout=timeout, max_tokens=max_tokens, system=system)
 
     def generate(self, prompt: str) -> str:
         if self.api == "openai":
