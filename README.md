@@ -134,6 +134,30 @@ PYTHONPATH=. python3 -m vacant.cli info bob                            # 看 bob
 
 ---
 
+## 實驗模式（2026-07：credit-memory 改動1/3 ＋ W1 基建）
+
+repo 已按 `專題/Vacant_最新成果彙整_2026-07-03` 的裁決（15 號）升級為實驗可用：
+
+- **改動1**：logbook 綁 `stream_id/branch_id`（stream_id＝創世事件 hash）＋真 `head()`。
+  ⚠️ wire-format break：舊 `~/.vacant-mcp` 等資料須清掉重鑄。
+- **改動3**：review 升級為簽章 `ReviewEnvelope`；registry 只收驗簽＋head 新鮮＋去重，
+  weight 內生（Sybil reviewer ≈ 0）、同源降權非線性 `floor/k`；MCP 的無驗簽
+  `submit_review` 已廢止。
+- **W1 基建**：`auditor.py`（確定性稽核）、`router.py`（trust on/off 單開關）、
+  `memory.py`（MemoryStream＋M0/M1/M2 記憶政策＝X1 的實驗處理）、
+  `batch.py`（斷點續跑＋端點看門狗）、`x1.py`（任務族＋三臂迴圈）。
+
+```bash
+# X1 遷移 pilot（oracle-lesson 一票否決判準，10 §4.2）——先開 LM Studio 端點
+python examples/x1_pilot.py --base http://192.168.56.1:8765 \
+    --model qwen3.6-35b-a3b --arm M2 --oracle --seed s0
+# 三臂配對：--arm M0 / M1 / M2 各跑一次（同 seed；斷點續跑自動跳過已完成格）
+```
+
+鐵律與後推項見 `CLAUDE.md`（KS-1 防呆、A4 教訓洩漏防呆都是可執行的，違反即 raise）。
+
+---
+
 ## 程式對應規格分層（總規格 §3）
 
 | 層 | 檔案 | 做什麼 |
