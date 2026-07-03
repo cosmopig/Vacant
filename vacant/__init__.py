@@ -28,7 +28,7 @@ from .logbook import ChainError, Logbook
 from .envelope import ChannelGuard, Envelope, ReplayError
 from .registry import Registry
 from .reputation import Reputation
-from .substrate import EchoSubstrate, HermesACPSubstrate, Substrate
+from .substrate import EchoSubstrate, HermesACPSubstrate, LMStudioSubstrate, Substrate, SubstrateResult
 from .waker import Waker, WakeResult
 
 __version__ = "0.1.0"
@@ -65,8 +65,10 @@ __all__ = [
     "Registry",
     "Reputation",
     "Substrate",
+    "SubstrateResult",
     "EchoSubstrate",
     "HermesACPSubstrate",
+    "LMStudioSubstrate",
     "Waker",
     "WakeResult",
 ]
