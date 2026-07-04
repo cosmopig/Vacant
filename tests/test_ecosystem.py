@@ -212,3 +212,77 @@ def test_ledger_is_replayable(tmp_path):
         assert "ts_ms" in rec and isinstance(rec["ts_ms"], int)
         assert "type" in rec and isinstance(rec["type"], str)
         assert "trust_on" in rec
+
+
+# === code-review 修復的回歸測試（2026-07-04 第二輪 review）======================
+
+def test_state_persists_across_restart(tmp_path):
+    """磁碟就是真相：信譽/probation/信任狀跨行程續存（review finding [3][4]）。"""
+    roster = {"good_1": "good", "good_2": "good", "sab": "saboteur"}
+    eco1 = Ecosystem(tmp_path, FakeBrain(), roster=roster, k_reviewers=2)
+    tid = None
+    for i in range(4):
+        tid = eco1.delegate(_task(i), REVERSE_CHECK)["task_id"]
+    snapshot = {r["name"]: (r["credit"], r["n_obs"], r["deliveries"]) for r in eco1.roster()}
+    assert any(obs > 0 for (_, obs, _) in snapshot.values())
+
+    # 重啟＝新行程重建 Ecosystem（同 root）
+    eco2 = Ecosystem(tmp_path, FakeBrain(), roster=roster, k_reviewers=2)
+    restored = {r["name"]: (r["credit"], r["n_obs"], r["deliveries"]) for r in eco2.roster()}
+    assert restored == snapshot                      # 信譽與 probation 計數完整回來
+    assert eco2.trust_card(tid) is not None          # 信任狀憑 task_id 從磁碟取回
+    assert eco2.report(tid, "FAIL")["ack"] is True   # 事後仲裁在重啟後仍可作用
+
+
+def test_off_mode_does_not_burn_probation(tmp_path):
+    """off＝無後果：不得燒掉見習期（review finding [2]）。"""
+    eco = Ecosystem(tmp_path, FakeBrain(), roster={"solo": "good"}, probation_m=3)
+    eco.toggle(False)
+    for i in range(5):
+        eco.delegate(_task(i), REVERSE_CHECK)
+    assert eco.residents["solo"].deliveries == 0
+    eco.toggle(True)
+    eco.delegate(_task(99), REVERSE_CHECK)
+    audits = [e for e in _ledger(eco) if e["type"] == "AUDIT"]
+    assert audits[-1]["forced"] is True  # on 模式第一筆仍在強制稽核窗內
+
+
+def test_m2_lesson_written_and_injected(tmp_path):
+    """M2 記憶通道活著：被稽核 episode 有蒸餾教訓、後續注入非空（finding [5]）。"""
+    eco = Ecosystem(tmp_path, FakeBrain(), roster={"solo": "good"}, k_reviewers=1)
+    eco.delegate(_task(0), REVERSE_CHECK)
+    r = eco.residents["solo"]
+    eps = r.stream.episodes()
+    assert eps and eps[0].lesson  # 0-呼叫確定性蒸餾
+    assert r.manager.inject(r.stream, _task(1)) != ""
+
+
+def test_trust_card_full_sig_verifies(tmp_path):
+    """信任狀簽章全文可獨立驗證；竄改即失敗（finding [1]）。"""
+    from vacant.trustcard import verify_trust_card
+    eco = Ecosystem(tmp_path, FakeBrain(), roster={"a": "good", "b": "good"}, k_reviewers=1)
+    card = eco.delegate(_task(0), REVERSE_CHECK)["trust_card"]
+    assert len(card["host_sig"]) == 128  # Ed25519 64 bytes 全文
+    assert verify_trust_card(card)
+    forged = dict(card)
+    forged["deliverer"] = {**card["deliverer"],
+                           "credit": {"score": 0.99, "n_obs": 999, "flags": []}}
+    assert not verify_trust_card(forged)
+
+
+def test_report_rejects_unknown_task(tmp_path):
+    """無驗簽仲裁通道的下界防線：不存在的交付不受理、不產生 SLASH（finding [6]）。"""
+    eco = Ecosystem(tmp_path, FakeBrain(), roster={"solo": "good"})
+    out = eco.report("deadbeef0000", "FAULT")
+    assert out["ack"] is False
+    assert not [e for e in _ledger(eco) if e["type"] == "SLASH"]
+
+
+def test_cli_up_dashboard_wiring(tmp_path, monkeypatch):
+    """`vacant up` 的 make_dashboard 呼叫簽名正確（finding [0]）。"""
+    import http.server
+    from vacant import cli
+    monkeypatch.setattr(http.server.ThreadingHTTPServer, "serve_forever",
+                        lambda self, poll_interval=0.5: None)
+    rc = cli.main(["up", "--root", str(tmp_path), "--port", "0"])
+    assert rc == 0

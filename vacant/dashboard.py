@@ -231,6 +231,7 @@ class _Handler(BaseHTTPRequestHandler):
         ledger: Path = self._ctx.ledger_path
         pos = 0
         srv = self.server
+        idle = 0
         while getattr(srv, "_vacant_running", True):
             if ledger.exists():
                 with ledger.open("r", encoding="utf-8") as f:
@@ -241,7 +242,17 @@ class _Handler(BaseHTTPRequestHandler):
                             continue
                         # 一律走預設 message 事件；type 由 body JSON 內帶（前端解析）
                         self.wfile.write(f"data: {line}\n\n".encode("utf-8"))
-                    pos = f.tell()
+                    new_pos = f.tell()
+                if new_pos != pos:
+                    idle = 0
+                pos = new_pos
+                self.wfile.flush()
+            # 無新事件時定期送 SSE 註解 keepalive：讓斷線的客戶端在下一次寫入
+            # 觸發 BrokenPipe → 執行緒收工（否則 handler 對死連線永遠空轉）。
+            idle += 1
+            if idle * _POLL_S >= 10.0:
+                idle = 0
+                self.wfile.write(b": keepalive\n\n")
                 self.wfile.flush()
             time.sleep(_POLL_S)
 

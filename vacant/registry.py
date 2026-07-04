@@ -140,6 +140,25 @@ class Registry:
         self._rep.record_review(env.target_id, env.substrate, env.scores, weight=weight)
         return weight
 
+    # --- 狀態持久化（信譽/鏈頭/去重/同源計數；halo 卡由呼叫端重新 announce）------
+    def state_to_json(self) -> dict[str, Any]:
+        return {
+            "rep": self._rep.to_json(),
+            "heads": {t: list(v) for t, v in self._heads.items()},
+            "seen_reviews": [list(k) for k in self._seen_reviews],
+            "same_source_k": {f"{c}␟{t}": v for (c, t), v in self._same_source_k.items()},
+        }
+
+    def state_from_json(self, d: dict[str, Any]) -> None:
+        from .reputation import Reputation
+        self._rep = Reputation.from_json(d.get("rep", {}))
+        self._heads = {t: (v[0], v[1]) for t, v in d.get("heads", {}).items()}
+        self._seen_reviews = {tuple(k) for k in d.get("seen_reviews", [])}
+        self._same_source_k = {}
+        for key, v in d.get("same_source_k", {}).items():
+            c, t = key.split("␟", 1)
+            self._same_source_k[(c, t)] = int(v)
+
     def forget_target(self, target_id: str) -> None:
         """wipe demo 用（12 §7 時刻 4）：抹掉某 target 的全部信譽格與鏈頭記錄。
 

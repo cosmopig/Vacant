@@ -43,8 +43,9 @@ def build_trust_card(
                        "flags": flags},   # 風險欄位必有（可為空 list，不可缺鍵）
         },
         "reviews": [
+            # 簽章存全文（可驗）；顯示層才截斷。截斷過的簽章驗不了＝形同無簽。
             {"reviewer": r["reviewer"], "verdict": r["verdict"],
-             "weight": r["weight"], "sig": r["sig"][:24]}
+             "weight": r["weight"], "sig": r["sig"]}
             for r in reviews
         ],
         "audit": {"performed": bool(audit and audit.get("ran")),
@@ -53,10 +54,30 @@ def build_trust_card(
         "ts_ms": now_ms(),
     }
     # host 簽章：由交付居民自己的 key 簽整張卡（demo 期閘道與居民同 host；
-    # 分離的 gateway keypair 屬上機工項，誠實標注簽者身份）。
+    # 分離的 gateway keypair 屬上機工項，誠實標注簽者身份）。簽章存全文——
+    # 截斷過的簽章驗不了＝形同無簽（顯示層才截斷）。
     card["signed_by"] = "deliverer"
-    card["host_sig"] = deliverer.body.identity.sign(canonical_bytes(card)).hex()[:32]
+    card["signer_pub_hex"] = deliverer.body.card.pub_hex  # 驗卡所需（halo 亦可查）
+    card["host_sig"] = deliverer.body.identity.sign(canonical_bytes(card)).hex()
     return card
+
+
+def verify_trust_card(card: dict[str, Any], pub_hex: str | None = None) -> bool:
+    """獨立驗卡：不必信任送方。用 signer 公鑰重驗 host_sig 覆蓋的 canonical 內容。
+
+    pub_hex 未給 → 用卡上自帶的 signer_pub_hex（此時驗的是「卡內部自洽」；
+    要驗「簽者真是該居民」請傳 halo/registry 查到的 pub_hex）。"""
+    from . import crypto
+    d = dict(card)
+    sig_hex = d.pop("host_sig", "")
+    pub = pub_hex or d.get("signer_pub_hex", "")
+    if not sig_hex or not pub:
+        return False
+    try:
+        return crypto.verify(crypto.pub_from_hex(pub),
+                             canonical_bytes(d), bytes.fromhex(sig_hex))
+    except Exception:
+        return False
 
 
 def render_trust_card(card: dict[str, Any]) -> str:

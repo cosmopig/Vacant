@@ -109,8 +109,7 @@ def cmd_eco_up(args: argparse.Namespace) -> int:
         print(f"無法載入 vacant.dashboard（{e}）；可先用 `vacant up --no-dashboard`",
               file=sys.stderr)
         return 1
-    server = make_dashboard(roster_fn=eco.roster, scoreboard_fn=eco.scoreboard,
-                            ledger_path=eco.ledger_path, port=args.port)
+    server = make_dashboard(eco.root, eco.roster, eco.scoreboard, port=args.port)
     print(f"dashboard → http://127.0.0.1:{args.port}   (Ctrl-C 退出)")
     try:
         server.serve_forever()

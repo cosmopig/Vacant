@@ -81,9 +81,15 @@ def test_scoreboard_impl(tmp_path, monkeypatch):
 def test_report_impl(tmp_path, monkeypatch):
     eco = _fake_eco(tmp_path)
     monkeypatch.setattr(mcp_server, "_eco", lambda: eco)
-    ack = json.loads(mcp_server._report_impl("sometask", "FAIL", evidence="bad"))
+    # 真交付的 task_id → 受理
+    out = mcp_server._delegate_impl("reverse", TESTS)
+    tid = out.rsplit("task_id=", 1)[-1].strip()
+    ack = json.loads(mcp_server._report_impl(tid, "FAIL", evidence="bad"))
     assert ack["ack"] is True
     assert ack["verdict"] == "FAIL"
+    # 不存在的 task_id → 拒收（無驗簽仲裁通道的下界防線：不受理無中生有的指控）
+    rej = json.loads(mcp_server._report_impl("deadbeef0000", "FAULT"))
+    assert rej["ack"] is False and "error" in rej
 
 
 def test_delegate_error_path_without_model(tmp_path, monkeypatch):

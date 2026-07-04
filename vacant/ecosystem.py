@@ -92,6 +92,18 @@ def _digest(x: Any) -> str:
                           .encode()).hexdigest()[:16]
 
 
+def _distill_lesson(task: str, audit_passed: bool) -> str:
+    """確定性 0-呼叫蒸餾 v0：教訓由管線事實（任務描述＋稽核結論）生成。
+
+    坑型層級抽象、零逐字測資（A4）、零責任修辭（KS-1）；模型蒸餾屬 X1 的
+    distill hook（+1 呼叫、離線），不在 delegate 路徑。"""
+    head = " ".join(task.split())[:80]
+    if audit_passed:
+        return f"「{head}」型任務：先前交付通過稽核；同型解法可沿用，邊界輸入的處理方式保留。"
+    return (f"「{head}」型任務：先前交付未通過稽核；重作同型任務前，"
+            f"先列出空輸入、單一元素、邊界長度三種情況的期望輸出再實作。")
+
+
 @dataclass
 class Resident:
     name: str
@@ -139,6 +151,10 @@ class Ecosystem:
         self.scoreboard_path = self.root / "scoreboard.json"
         self._cards: dict[str, dict] = {}      # task_id → trust_card json
 
+        # KS-1 可執行防呆涵蓋 tier 種植文字（品質操弄可以、責任修辭不行）
+        for style in TIER_STYLE.values():
+            assert_ks1_clean(style)
+
         self.residents: dict[str, Resident] = {}
         for name, tier in (roster or DEFAULT_ROSTER).items():
             rdir = self.root / "residents"
@@ -152,6 +168,33 @@ class Ecosystem:
                 manager=MemoryManager("M2", budget_tokens=b_memory),
             )
         self._by_id = {r.vacant_id: r for r in self.residents.values()}
+        # 磁碟就是真相：載回信譽/鏈頭/去重/probation 計數（跨行程/重啟續存）
+        self._load_state()
+
+    # --- 生態狀態持久化（信譽/probation 跨行程續存——磁碟就是真相）--------------
+    def _registry_state_path(self) -> Path:
+        return self.root / "registry_state.json"
+
+    def _save_state(self) -> None:
+        state = {
+            "registry": self.registry.state_to_json(),
+            "deliveries": {r.name: r.deliveries for r in self.residents.values()},
+        }
+        self._registry_state_path().write_text(
+            json.dumps(state, ensure_ascii=False), encoding="utf-8")
+
+    def _load_state(self) -> None:
+        p = self._registry_state_path()
+        if not p.exists():
+            return
+        try:
+            state = json.loads(p.read_text(encoding="utf-8"))
+        except ValueError:
+            return  # 壞檔不阻擋啟動；信譽從零重長（誠實：事件流仍在 ledger）
+        self.registry.state_from_json(state.get("registry", {}))
+        for name, n in state.get("deliveries", {}).items():
+            if name in self.residents:
+                self.residents[name].deliveries = int(n)
 
     # --- trust 開關（持久化；12 的單開關）------------------------------------
     def _state_path(self) -> Path:
@@ -198,18 +241,23 @@ class Ecosystem:
         self._emit("ROUTE", task_id=tid, to=deliverer.name, tier=deliverer.tier,
                    mode="ucb" if trust else "random")
 
-        # 2) 生成（on：M2 記憶注入；off：無記憶——模板逐字相同）
+        # 2) 生成（on：M2 記憶注入；off：無記憶——模板逐字相同）。
+        #    KS-1 防呆檢查「最終送出的完整 prompt」（含 tier 種植文字，不留旁路）。
         memory_block = deliverer.manager.inject(deliverer.stream, task) if trust else ""
-        prompt = assert_ks1_clean(DELEGATE_TEMPLATE.format(memory=memory_block, task=task))
+        prompt = DELEGATE_TEMPLATE.format(memory=memory_block, task=task)
         style = TIER_STYLE[deliverer.tier]
-        answer = self.brain.generate((style + "\n\n" + prompt) if style else prompt)
+        full_prompt = assert_ks1_clean((style + "\n\n" + prompt) if style else prompt)
+        answer = self.brain.generate(full_prompt)
         calls += 1
         passed = bool(verifier(answer))
 
         # 交付事件上鏈（居民自簽）：head 因此前進，review 綁的就是這個新鏈頭
         deliverer.body.log("DELIVER", {"task_id": tid, "answer_digest": _digest(answer),
                                        "self_check": passed})
-        deliverer.deliveries += 1
+        if trust:
+            # probation 計數只屬於「有後果的世界」：off 模式＝無後果，不得燒掉
+            # 見習期（否則先在 off 暖身即可躲過強制稽核窗）。
+            deliverer.deliveries += 1
         deliverer.body.persist()
 
         # 3) K=3 簽章互審（off 模式不審）
@@ -237,27 +285,39 @@ class Ecosystem:
                 self._emit("SLASH", task_id=tid, target=deliverer.name,
                            reason="audit fail 而交付方/互審宣稱通過")
 
-        # 5) 記憶回寫（只有 on；episode 簽章上鏈）
+        # 5) 記憶回寫（只有 on；episode 簽章上鏈）。被稽核的 episode 走確定性
+        #    0-呼叫蒸餾 v0（教訓由管線事實生成，非手寫勸善文——KS-1/A4 皆過防呆；
+        #    模型蒸餾＝每被審 episode +1 呼叫屬 X1 的 distill hook，離線執行，
+        #    絕不塞進 delegate 回應路徑——MCP 逾時，裁決 B1）。
         if trust:
+            lesson = None
+            if audit_json and audit_json.get("ran"):
+                lesson = _distill_lesson(task, bool(audit_json.get("passed")))
             deliverer.manager.record(
                 deliverer.stream,
                 task_id=tid, spec_digest=_digest(task), answer_digest=_digest(answer),
                 reviews=[{k: r[k] for k in ("reviewer", "verdict", "weight")} for r in reviews],
                 audit=audit_json, outcome="pass" if passed else "fail",
-                lesson=None, check=tests, ts_ms=now_ms(),
+                lesson=lesson, check=tests, ts_ms=now_ms(),
             )
             deliverer.body.persist()
 
         # 6) scoreboard（off/on 配對累計＋成本——每次使用都是一筆試次）
         self._score(trust, passed, calls)
 
-        # 7) 信任狀
+        # 7) 信任狀（落盤：交付後任何時間、任何行程都要能憑 task_id 取回——
+        #    事後究責的物件不能只活在行程記憶體裡）
         from .trustcard import build_trust_card
         tc = build_trust_card(
             ecosystem=self, task_id=tid, spec_digest=_digest(task),
             deliverer=deliverer, reviews=reviews, audit=audit_json,
         )
         self._cards[tid] = tc
+        cards_dir = self.root / "cards"
+        cards_dir.mkdir(parents=True, exist_ok=True)
+        (cards_dir / f"{tid}.json").write_text(
+            json.dumps(tc, ensure_ascii=False), encoding="utf-8")
+        self._save_state()  # 信譽/probation 跨行程續存
         self._emit("DELIVERED", task_id=tid, target=deliverer.name,
                    passed=passed, calls=calls)
         return {"answer": answer, "trust_card": tc, "task_id": tid}
@@ -319,6 +379,8 @@ class Ecosystem:
         self.scoreboard_path.write_text(json.dumps(sb, ensure_ascii=False))
 
     def scoreboard(self) -> dict[str, Any]:
+        """off/on 累計。誠實註記：paired_delta 是兩池通過率之差（池化差），
+        不是同題配對統計——正式配對檢定（McNemar）屬 batch 模式的 research.py。"""
         if self.scoreboard_path.exists():
             sb = json.loads(self.scoreboard_path.read_text())
         else:
@@ -358,13 +420,34 @@ class Ecosystem:
         return out
 
     def trust_card(self, task_id: str) -> dict[str, Any] | None:
-        return self._cards.get(task_id)
+        card = self._cards.get(task_id)
+        if card is not None:
+            return card
+        p = self.root / "cards" / f"{task_id}.json"  # 跨行程：落盤的卡也要找得回
+        if p.exists():
+            try:
+                return json.loads(p.read_text(encoding="utf-8"))
+            except ValueError:
+                return None
+        return None
 
     def report(self, task_id: str, verdict: str, evidence: str = "") -> dict[str, Any]:
-        """人類/入口仲裁回灌（12 §3）：最強標籤，記帳＋事件；provable fault → slash 事件。"""
-        self._emit("HUMAN_REPORT", task_id=task_id, verdict=verdict, evidence=evidence[:500])
+        """人類/入口仲裁回灌（12 §3）：最強標籤，記帳＋事件；fault → slash 事件。
+
+        誠實邊界：此通道的呼叫者簽章認證屬上機工項；本版的下界防線是
+        **只接受確實存在的交付**（task_id 必須對得到信任狀）——對不存在的
+        task_id 一律拒收、不產生 SLASH，堵住「無中生有的指控灌進 ledger」。"""
+        card = self.trust_card(task_id)
+        if card is None:
+            self._emit("HUMAN_REPORT_REJECTED", task_id=task_id,
+                       reason="unknown task_id（查無此交付的信任狀）")
+            return {"ack": False, "task_id": task_id,
+                    "error": "unknown task_id：查無此交付，不受理仲裁"}
+        target = card.get("deliverer", {}).get("name", "?")
+        self._emit("HUMAN_REPORT", task_id=task_id, verdict=verdict,
+                   target=target, evidence=evidence[:500])
         if verdict.upper() in ("FAIL", "FAULT", "REJECT"):
-            self._emit("SLASH", task_id=task_id, target="(by human report)",
+            self._emit("SLASH", task_id=task_id, target=target,
                        reason=f"human verdict={verdict}")
         return {"ack": True, "task_id": task_id, "verdict": verdict}
 
@@ -380,5 +463,6 @@ class Ecosystem:
         r.body.persist()
         r.deliveries = 0
         self.registry.forget_target(r.vacant_id)  # 信用歸零（demo 的 wipe 語意）
+        self._save_state()
         self._emit("WIPE", target=name)
         return {"name": name, "vacant_id": r.vacant_id[-12:], "flags": self.flags(r)}
