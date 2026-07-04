@@ -158,6 +158,7 @@ class Lesson:
     task_id: str
     verdict: str          # 稽核結論（"audit_pass"/"audit_fail"）——「被審」的印記
     ts_ms: int
+    idx: int = 0          # 在 episode 序列中的位置——decay 的時間單位是「筆數」不是牆鐘
 
 
 class MemoryManager:
@@ -215,10 +216,10 @@ class MemoryManager:
         lessons = self.lessons(stream)
         if not lessons:
             return ""
-        now_ts = max(l.ts_ms for l in lessons)
+        newest = max(l.idx for l in lessons)
         scored = sorted(
             lessons,
-            key=lambda l: -self._relevance(l.text, task_prompt) * self._decay(l.ts_ms, now_ts),
+            key=lambda l: -self._relevance(l.text, task_prompt) * self._decay(l.idx, newest),
         )
         picked = scored[: self.k]
         lines = [f"- [{l.verdict}] {l.text}" for l in picked]
@@ -227,10 +228,10 @@ class MemoryManager:
     def lessons(self, stream: MemoryStream) -> list[Lesson]:
         """M2 的原料：只有被稽核過的 episode 的蒸餾教訓（「被審」是資格線）。"""
         out = []
-        for e in stream.episodes():
+        for i, e in enumerate(stream.episodes()):
             if e.lesson and e.audited_ok:
                 verdict = "audit_pass" if e.audit.get("passed") else "audit_fail"
-                out.append(Lesson(e.lesson, e.task_id, verdict, e.ts_ms))
+                out.append(Lesson(e.lesson, e.task_id, verdict, e.ts_ms, idx=i))
         return out
 
     # -- 檢索 / decay / 預算 ----------------------------------------------------
@@ -243,9 +244,12 @@ class MemoryManager:
             return 0.0
         return len(a & b) / len(a | b) + 1e-6  # +ε：全無重疊時仍保序穩定
 
-    def _decay(self, ts_ms: int, now_ts: int) -> float:
-        """half-life 型 decay（以 episode 距今的「筆數時間」近似——ts 單調即可）。"""
-        age = max(0, now_ts - ts_ms)
+    def _decay(self, idx: int, newest_idx: int) -> float:
+        """half-life 型 decay，時間單位＝**episode 筆數**（12 §6 decay_halflife=200 事件）。
+
+        不可用牆鐘時間：真跑一題數十秒～數分鐘，用 ms 當單位會讓所有舊教訓
+        瞬間衰減到 ~0，相關性排序退化成「只看最新一筆」。"""
+        age = max(0, newest_idx - idx)
         return 0.5 ** (age / max(1, self.decay_halflife))
 
     def _truncate(self, block: str) -> str:

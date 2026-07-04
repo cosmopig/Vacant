@@ -206,12 +206,17 @@ def run_x1(
     distill: Callable[[X1Task, str, bool], str | None] | None = None,  # 正式：+1 呼叫蒸餾
     trace_path: Path | None = None,
     retries: int = 4,
+    retry_backoff_s: float = 2.0,
     now_ms: Callable[[], int] = lambda: time.time_ns() // 1_000_000,
+    _sleep: Callable[[float], None] = time.sleep,
 ) -> list[dict[str, Any]]:
     """一條臂跑完整任務流。回傳逐題記錄（全 I/O 落盤到 trace_path）。
 
-    X1 紀律：稽核率 100%（forced）；retry×4 後仍 infra 錯 → outcome=infra_void
-    （09 §3.5）；斷點續跑靠 ledger 以 (policy, task_id, seed) 跳過已完成格。
+    X1 紀律：稽核率 100%（forced）；retry×4（指數 backoff）後仍 infra 錯 →
+    outcome=infra_void 且**不記入 ledger**（下次 resume 自動重試——瞬斷不留永久洞）；
+    斷點續跑靠 ledger 以 (policy, task_id, seed) 跳過已完成格，並把已完成格的
+    episode **重播回 MemoryStream**（否則 resume 後 M1/M2 臂帶著殘缺記憶跑，
+    整條臂的記憶→品質訊號作廢）。
     """
     manager = manager or MemoryManager(policy)
     auditor = auditor or Auditor(rate=1.0)
@@ -220,7 +225,23 @@ def run_x1(
 
     for task in tasks:
         if ledger is not None and ledger.is_done(policy, task.task_id, seed):
-            records.append(ledger.result(policy, task.task_id, seed))  # type: ignore[arg-type]
+            done = ledger.result(policy, task.task_id, seed) or {}
+            # resume 重播：把已完成格的 episode 依 ledger 記錄重建進 stream，
+            # 讓後續任務的記憶注入與未中斷的 run 完全一致（確定性重建）。
+            if done.get("outcome") in ("pass", "fail"):
+                manager.record(
+                    stream,
+                    task_id=task.task_id,
+                    spec_digest=done.get("spec_digest", ""),
+                    answer_digest=done.get("answer_digest", ""),
+                    reviews=[],
+                    audit=done.get("audit"),
+                    outcome=done["outcome"],
+                    lesson=done.get("lesson"),
+                    check=task.check,
+                    ts_ms=done.get("ts_ms", 0),
+                )
+            records.append(done)
             continue
 
         memory_block = manager.inject(stream, task.prompt)
@@ -232,8 +253,10 @@ def run_x1(
                 answer = brain.generate(prompt)
                 infra_error = None
                 break
-            except Exception as e:  # 端點瞬斷等 infra 錯：retry×4
+            except Exception as e:  # 端點瞬斷等 infra 錯：retry×4＋指數 backoff
                 infra_error = f"{type(e).__name__}: {e}"
+                if attempt < retries - 1 and retry_backoff_s > 0:
+                    _sleep(retry_backoff_s * (2 ** attempt))
         ts = now_ms()
 
         if infra_error is not None:
@@ -275,13 +298,17 @@ def run_x1(
             "audit": (audit_rec.to_json() if audit_rec else None),
             "memory_tokens": len(memory_block) // 4,
             "lesson_written": bool(lesson), "infra_error": infra_error, "ts_ms": ts,
+            # resume 重播 episode 所需（見迴圈開頭）：
+            "spec_digest": _digest(task.prompt), "answer_digest": _digest(answer),
+            "lesson": lesson,
         }
         if trace_path:
             trace_path.parent.mkdir(parents=True, exist_ok=True)
             with trace_path.open("a", encoding="utf-8") as f:
                 f.write(json.dumps({**rec, "prompt_sha": _digest(prompt),
                                     "answer": answer}, ensure_ascii=False) + "\n")
-        if ledger is not None:
+        # infra_void 不記入 ledger：瞬斷的格子下次 resume 重試，不留永久洞。
+        if ledger is not None and outcome != "infra_void":
             ledger.mark_done(policy, task.task_id, seed, rec)
         records.append(rec)
     return records

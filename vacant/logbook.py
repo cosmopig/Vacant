@@ -131,9 +131,13 @@ class Logbook:
     # --- 寫 ----------------------------------------------------------------
     def append(
         self, etype: str, payload: Any, identity: Identity, *, ts_ms: int,
-        branch_id: str = BRANCH_MAIN,
+        branch_id: str | None = None,
     ) -> LogEntry:
-        """簽一筆並接上鏈尾。seq = 上一筆 + 1（真正單調）。"""
+        """簽一筆並接上鏈尾。seq = 上一筆 + 1（真正單調）。
+
+        branch_id：None＝沿用本鏈 branch（創世時＝main）。單一鏈內 branch 一致，
+        fork 是另一條 Logbook——明示不同 branch 直接拒絕而非靜默改寫（否則呼叫方
+        以為 fork 成功、實際落在原 branch）。"""
         if len(canonical_bytes(payload)) > MAX_PAYLOAD_BYTES:
             raise ValueError(f"logbook payload 超過上限 {MAX_PAYLOAD_BYTES} bytes")
         if self.entries:
@@ -141,11 +145,18 @@ class Logbook:
             seq = last.seq + 1
             prev_hash = last.hash()
             stream_id = self.entries[0].hash()
-            branch_id = self.entries[0].branch_id  # 單一鏈內 branch 一致；fork 是另一條鏈
+            chain_branch = self.entries[0].branch_id
+            if branch_id is not None and branch_id != chain_branch:
+                raise ValueError(
+                    f"branch 不符：此鏈是 {chain_branch!r}，"
+                    f"fork 到 {branch_id!r} 請另開一條 Logbook"
+                )
+            branch_id = chain_branch
         else:
             seq = 1
             prev_hash = EMPTY_PREV_HASH
             stream_id = GENESIS_STREAM_ID
+            branch_id = branch_id or BRANCH_MAIN
         sig = identity.sign(
             _signed_bytes(stream_id, branch_id, seq, prev_hash, ts_ms, etype, payload)
         ).hex()

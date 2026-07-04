@@ -249,6 +249,101 @@ def test_x1_infra_void_on_persistent_failure(tmp_path):
             raise ConnectionError("端點掛了")
 
     tasks = make_family_sequence("string_edge", 1)
-    recs = run_x1(DeadBrain(), "M0", tasks, stream=_stream())
+    led = RunLedger(tmp_path / "l.jsonl")
+    recs = run_x1(DeadBrain(), "M0", tasks, stream=_stream(),
+                  ledger=led, retry_backoff_s=0)
     assert recs[0]["outcome"] == "infra_void"
     assert recs[0]["infra_error"]
+    # infra_void 不入 ledger：瞬斷的格子在下次 resume 必須重試，不留永久洞
+    assert not led.is_done("M0", tasks[0].task_id, "s0")
+
+
+def test_x1_resume_replays_memory(tmp_path):
+    """resume 後 M2 臂的記憶必須與未中斷的 run 一致（episode 重播回 stream）。"""
+    from vacant.x1 import make_family_sequence
+    tasks = [t for t in make_family_sequence("string_edge", 15)
+             if t.variant_params["variant"] == 0]  # 3 題同變體
+    # 第一段：只跑第 1 題（模擬跑到一半崩潰）
+    led = RunLedger(tmp_path / "l.jsonl")
+    st1 = _stream()
+    run_x1(OracleFollowerBrain(), "M2", tasks[:1], stream=st1, oracle=True, ledger=led)
+    # 重啟：新行程＝新 stream，跑完整任務清單
+    st2 = _stream()
+    recs = run_x1(OracleFollowerBrain(), "M2", tasks, stream=st2, oracle=True,
+                  ledger=RunLedger(tmp_path / "l.jsonl"))
+    # 第 1 題被跳過但其 episode 已重播 → 第 2 題注入到教訓、答對
+    assert len(st2.episodes()) == len(tasks)
+    assert recs[1]["passed"] is True
+    assert recs[1]["memory_tokens"] > 0
+
+
+def test_x1_retry_backoff_then_success(tmp_path):
+    """瞬斷（第一次失敗、第二次成功）不得被記成 infra_void；backoff 有被執行。"""
+    from vacant.x1 import make_family_sequence
+
+    class FlakyBrain:
+        def __init__(self):
+            self.n = 0
+        def generate(self, prompt):
+            self.n += 1
+            if self.n == 1:
+                raise ConnectionError("blip")
+            return "```python\ndef solve(s):\n    return s\n```"
+
+    slept = []
+    tasks = make_family_sequence("string_edge", 1)
+    recs = run_x1(FlakyBrain(), "M0", tasks, stream=_stream(),
+                  retry_backoff_s=1.0, _sleep=slept.append)
+    assert recs[0]["outcome"] in ("pass", "fail")  # 有真的答案，不是 infra_void
+    assert slept == [1.0]  # 指數 backoff 的第一階
+
+
+def test_m2_decay_counts_episodes_not_wallclock():
+    """decay 的時間單位是筆數：真實牆鐘 ts（相隔數十秒）不得把舊教訓衰減到 0。"""
+    st = _stream()
+    m2 = MemoryManager("M2", decay_halflife=200, k=5)
+    base = 1_783_000_000_000  # 真實 epoch ms
+    for i in range(3):
+        m2.record(st, **{**_ep(i, lesson=f"教訓 boundary {i}"), "ts_ms": base + i * 60_000})
+    block = m2.inject(st, "boundary task")
+    for i in range(3):
+        assert f"教訓 boundary {i}" in block  # 相隔 3 筆內，全部都該活著
+
+
+def test_run_ledger_tolerates_non_dict_line(tmp_path):
+    p = tmp_path / "runs.jsonl"
+    RunLedger(p).mark_done("M2", "t1", 0, {"passed": True})
+    with p.open("a") as f:
+        f.write("42\n")          # 合法 JSON 但不是物件
+        f.write('["x"]\n')
+    led = RunLedger(p)
+    assert led.is_done("M2", "t1", 0) and led.corrupt_lines == 2
+
+
+def test_logbook_branch_mismatch_raises():
+    from vacant.logbook import Logbook
+    idn = Identity.generate()
+    lb = Logbook()
+    lb.append("BIRTH", {}, idn, ts_ms=1)
+    lb.append("WORK", {}, idn, ts_ms=2)               # 預設沿用本鏈 branch
+    with pytest.raises(ValueError):
+        lb.append("WORK", {}, idn, ts_ms=3, branch_id="fork1")  # 明示不符 → 拒絕
+
+
+def test_gateway_survives_rejected_review(tmp_path):
+    """review 被拒（如去重）不得毀掉已成功、已驗章的交付。"""
+    h = Host(tmp_path, substrate=EchoSubstrate(p_base=1.0))
+    req = h.mint("requester", niches=[])
+    h.mint("expert", niches=["reverse"])
+    task = {"task_id": "t1", "niche": "reverse", "input": "abc", "expected": "cba",
+            "prompt": "[reverse] abc", "check": lambda a: str(a) == "cba"}
+    oc = req.call("reverse", task)
+    # 人為把 registry 的去重鍵塞滿，模擬下一筆 review 必被拒
+    h.registry._seen_reviews = {(h.vacant_id("requester"), s, hd)
+                                for (s, hd) in [h.registry._heads[oc.callee_id]]}
+    # 再呼叫一次：即使 review 撞去重/head 競態，call 仍應回答案
+    task2 = {**task, "task_id": "t2"}
+    oc2 = req.call("reverse", task2)
+    assert oc2.answer == "cba"
+    body = h.body("requester")
+    assert body.logbook.verify_chain(body.public_identity())

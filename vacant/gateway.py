@@ -21,7 +21,7 @@ from .atomic import atomic_write_text
 from .body import VacantBody, now_ms
 from .envelope import ChannelGuard, Envelope, ReviewEnvelope
 from .identity import PublicIdentity
-from .registry import Registry
+from .registry import Registry, ReviewRejected
 from .verifier import is_correct, verify_checkable
 from .waker import Waker
 
@@ -156,7 +156,14 @@ class Gateway:
                 "target": callee_id[:16], "task_id": task["task_id"], "scores": scores,
                 "target_head": chain_head[:16], "review_sig": review.sig[:16],
             })
-            self.registry.record_review(review)
+            # review 被拒（去重/head 競態）不可毀掉一次已成功、已驗章的交付——
+            # 交付與評審是兩件事：前者已完成，後者失敗只記帳不擲回呼叫方。
+            try:
+                self.registry.record_review(review)
+            except ReviewRejected as e:
+                body.log("REVIEW_REJECTED", {
+                    "target": callee_id[:16], "task_id": task["task_id"], "reason": str(e)[:200],
+                })
         finally:
             body.persist()  # 呼叫方一次 load/persist 週期：A2A_OUT（恆）+ REVIEW（成功時）
 

@@ -37,9 +37,11 @@ class RunLedger:
                         continue
                     try:
                         rec = json.loads(line)
+                        if not isinstance(rec, dict):
+                            raise ValueError("ledger 行必須是物件")
                         key = (str(rec["worker"]), str(rec["task"]), str(rec["seed"]))
-                    except (ValueError, KeyError):
-                        self.corrupt_lines += 1  # 崩潰截斷的尾行：如實計數、不吞
+                    except (ValueError, KeyError, TypeError):
+                        self.corrupt_lines += 1  # 崩潰截斷/畸形的行：如實計數、不吞
                         continue
                     self._done[key] = rec
 

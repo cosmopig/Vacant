@@ -186,7 +186,7 @@ def _extract_message(d: dict[str, Any]) -> str:
     out = d.get("output")
     if isinstance(out, list):
         msgs = [
-            o.get("content", "")
+            _content_to_text(o.get("content", ""))
             for o in out
             if isinstance(o, dict) and o.get("type") == "message"
         ]
@@ -194,10 +194,27 @@ def _extract_message(d: dict[str, Any]) -> str:
             return msgs[-1]
     choices = d.get("choices")
     if isinstance(choices, list) and choices:
-        content = ((choices[-1] or {}).get("message") or {}).get("content")
+        content = _content_to_text(((choices[-1] or {}).get("message") or {}).get("content"))
         if content:
             return content
     raise ValueError("回應中找不到 message 內容")
+
+
+def _content_to_text(content: Any) -> str:
+    """content 可能是純字串，也可能是結構化 content-block list（[{type:'text',text:…}]）。
+    一律壓平成字串——否則 list 流出 call() 後，run() 的 _strip_think regex 會
+    TypeError 崩掉整個 run（而非被當成一次可 retry 的失敗）。"""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for b in content:
+            if isinstance(b, dict):
+                parts.append(str(b.get("text") or b.get("content") or ""))
+            elif isinstance(b, str):
+                parts.append(b)
+        return "".join(parts)
+    return "" if content is None else str(content)
 
 
 class _InfraVoid(Exception):
