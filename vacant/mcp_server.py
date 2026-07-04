@@ -1,57 +1,205 @@
-"""Vacant MCP server（架構規格 §5 egress）。
+"""Vacant MCP server — 工具面 v2（12 §3：把信任閘道生態暴露成 MCP 工具）。
 
-Hermes 在 ~/.hermes/config.yaml 把這支註冊成 mcp_server。於是 Hermes 的 LLM 要對外
-調用時，看到的工具是 mcp_vacant_a2a_call —— 呼叫即「穿過 vacant 的責任閘道」：
-簽章信封 → 信譽路由 → 對端 ingress 驗章/把關 → 跑 → 簽 result 回 → 寫 logbook。
-這讓 Hermes「有」vacant：不改 Hermes 一行碼，只靠設定連上。
+入口 agent（Hermes / Claude / 任一 MCP client）在自己的 config 把這支註冊成
+mcp_server，於是它「有」了 vacant：不改一行碼，只靠設定連上一個更好+可究責的腦。
+
+工具面 v2（12 §3）：
+  - delegate    ：主工具。把有客觀 check 的 coding 子任務交給信任生態，回答案＋信任狀。
+  - trust_card  ：取某次 delegate 的完整信任狀 JSON。
+  - residents   ：名冊（信用/觀測/flags，INSUFFICIENT_DATA/PROBATION 如實顯示）。
+  - report      ：人類仲裁回灌（最強標籤）。
+  - scoreboard  ：trust off/on 配對＋成本（每次使用都是一筆試次）。
+  - verify_fix  ：保留（單腦 verify-fix，不經生態；見其 docstring）。
+
+廢止（12 §3，工具面 v2 取代）：a2a_call / get_reputation / submit_review 與 EchoSubstrate
+玩具 host 整段移除——舊面把「路由到玩具 expert」當賣點，v2 直接暴露真閘道 delegate；
+無驗簽的 submit_review 是洞（credit-memory v1 改動3），review 只能由 delegate 內部的
+簽章 ReviewEnvelope 通道產生。
+
+誠實邊界：delegate 需要真模型（VACANT_MCP_MODEL）；未設時回 error，絕不靜默退回假腦。
+頂層 import 不建 Ecosystem（lazy `_eco()`），避免 import 副作用炸測試/炸 client 啟動。
 """
 from __future__ import annotations
-import hashlib, json, os, time
+
+import hashlib
+import json
+import os
+import time
 from pathlib import Path
+
 from mcp.server.fastmcp import FastMCP
-from vacant.host import Host
-from vacant.substrate import EchoSubstrate
-from vacant.tasks import NICHE_SOLVERS, NICHES
 
-ROOT = Path(os.path.expanduser("~/.vacant-mcp"))
-_SID = EchoSubstrate().substrate_id
-_host = Host(ROOT, substrate=EchoSubstrate(p_base=1.0))  # expert 確定解對，聚焦在閘道/信任
-
-def _ensure(name, niches):
-    if (ROOT / name / "trust" / "vacant_id").exists():
-        _host.adopt(name)
-    else:
-        _host.mint(name, niches=niches)
-
-_ensure("hermes_caller", [])          # Hermes 的對外身份
-_ensure("expert_a", list(NICHES))     # 被路由到的持久專家
-_ensure("expert_b", list(NICHES))
-
-def _task(niche, inp):
-    expected = str(NICHE_SOLVERS[niche](inp))
-    tid = hashlib.sha256(f"{niche}:{inp}".encode()).hexdigest()[:12]
-    return {"task_id": tid, "niche": niche, "input": inp, "expected": expected,
-            "prompt": f"[{niche}] {inp}", "check": lambda a, _e=expected: str(a) == _e}
+from vacant.trustcard import render_trust_card, card_json
 
 mcp = FastMCP("vacant")
 
+# --- lazy singleton：延遲到第一次工具呼叫才建生態（避免 import 副作用）----------
+_ECO = None
+
+
+def _eco():
+    """回傳進程內唯一的 Ecosystem（root=~/.vacant-mcp，VACANT_MCP_ROOT 可覆寫）。
+
+    需要真模型：有 VACANT_MCP_MODEL → LMStudioBrain；沒設 → 拋 RuntimeError
+    （由各工具的 try/except 轉成 error 字串）。不靜默用假腦。
+    """
+    global _ECO
+    if _ECO is not None:
+        return _ECO
+    model = os.environ.get("VACANT_MCP_MODEL")
+    if not model:
+        raise RuntimeError(
+            "delegate/residents/scoreboard 需要真模型：請在 vacant MCP server 上設 "
+            "VACANT_MCP_MODEL（並可選 VACANT_MCP_BASE、VACANT_MCP_API）"
+        )
+    base = os.environ.get("VACANT_MCP_BASE", "http://192.168.56.1:8765")
+    api = os.environ.get("VACANT_MCP_API", "responses")
+    from vacant.brains import LMStudioBrain
+    from vacant.ecosystem import Ecosystem
+
+    brain = LMStudioBrain(base, model, api=api, timeout=600)
+    root = Path(os.path.expanduser(os.environ.get("VACANT_MCP_ROOT", "~/.vacant-mcp")))
+    _ECO = Ecosystem(root, brain)
+    return _ECO
+
+
+def _err(where: str, e: Exception) -> str:
+    return json.dumps({"error": f"{where}: {type(e).__name__}: {e}"}, ensure_ascii=False)
+
+
+# --- 純函式實作（工具薄包這些，測試直接呼叫純函式）------------------------------
+def _delegate_impl(task: str, tests: dict, risk: str = "normal") -> str:
+    try:
+        eco = _eco()
+        r = eco.delegate(task, tests, risk=risk)
+    except Exception as e:  # MCP 工具不可拋——例外轉 JSON error 字串
+        return _err("delegate failed", e)
+    return (
+        f"{r['answer']}\n\n"
+        f"── trust card ──\n"
+        f"{render_trust_card(r['trust_card'])}\n\n"
+        f"task_id={r['task_id']}"
+    )
+
+
+def _trust_card_impl(task_id: str) -> str:
+    try:
+        eco = _eco()
+        card = eco.trust_card(task_id)
+    except Exception as e:
+        return _err("trust_card failed", e)
+    if card is None:
+        return json.dumps({"error": f"no trust card for task_id={task_id}"},
+                          ensure_ascii=False)
+    return card_json(card)
+
+
+def _residents_impl() -> str:
+    try:
+        eco = _eco()
+        rows = eco.roster()
+    except Exception as e:
+        return _err("residents failed", e)
+    lines = [
+        f"{'name':<12} {'tier':<9} {'credit':>7} {'n_obs':>6} {'deliv':>6} "
+        f"{'eps':>4} chain flags",
+    ]
+    for r in rows:
+        flags = "，".join(r["flags"]) if r["flags"] else "-"
+        lines.append(
+            f"{r['name']:<12} {r['tier']:<9} {r['credit']:>7.3f} {r['n_obs']:>6.1f} "
+            f"{r['deliveries']:>6} {r['episodes']:>4} "
+            f"{'ok' if r['chain_ok'] else 'BAD':<5} {flags}"
+        )
+    return "\n".join(lines)
+
+
+def _report_impl(task_id: str, verdict: str, evidence: str = "") -> str:
+    try:
+        eco = _eco()
+        ack = eco.report(task_id, verdict, evidence=evidence)
+    except Exception as e:
+        return _err("report failed", e)
+    return json.dumps(ack, ensure_ascii=False)
+
+
+def _scoreboard_impl() -> str:
+    try:
+        eco = _eco()
+        sb = eco.scoreboard()
+    except Exception as e:
+        return _err("scoreboard failed", e)
+
+    def _rate(b):
+        return f"{b['pass']}/{b['n']}" + (f" ({b['pass'] / b['n']:.0%})" if b["n"] else "")
+
+    off, on = sb["off"], sb["on"]
+    return (
+        f"trust OFF: pass {_rate(off)}｜calls {off['calls']}\n"
+        f"trust ON : pass {_rate(on)}｜calls {on['calls']}\n"
+        f"paired_delta (on−off pass-rate): {sb['paired_delta']}"
+    )
+
+
+# --- MCP 工具（薄包純函式）------------------------------------------------------
 @mcp.tool()
-def a2a_call(capability: str, input: str) -> str:
-    """Delegate a task to a trusted, accountable vacant expert through the Vacant responsibility gateway (the call is cryptographically signed, reputation-routed, and logged). capability must be one of: reverse, caesar3, sort_chars, sum_digits, vowel_count. Returns the expert's answer plus provenance."""
-    if capability not in NICHE_SOLVERS:
-        return f"unknown capability '{capability}'. valid: {list(NICHES)}"
-    oc = _host.gateway("hermes_caller").call(capability, _task(capability, input))
-    return (f"answer={oc.answer} | served by vacant …{oc.callee_id[-8:]} on substrate={oc.substrate} "
-            f"| signed+logged, verifier_correct={oc.correct}")
+def delegate(task: str, tests: dict, risk: str = "normal") -> str:
+    """THE PREFERRED PATH for any coding subtask with an objective check. Instead of
+    writing the code yourself, hand it to Vacant's trusted, accountable resident
+    ecosystem: the task is routed (by reputation) to a resident, generated on Vacant's
+    local model with relevant memory injected, cross-reviewed by K signed peer
+    reviewers, probabilistically audited, and delivered WITH a trust card (who
+    delivered, their credit/observations/flags, who reviewed, audit status, chain
+    head, signature). Use this whenever correctness is objectively checkable — you get
+    a better answer AND accountable provenance you can show.
+
+    `tests` is a CHECK-SPEC (the objective bar the answer must clear), ONE of:
+      {"type":"equals","value":"<exact answer>"}
+      {"type":"contains","value":"<substring>","ignore_case":true}
+      {"type":"regex","pattern":"<regex>"}
+      {"type":"json_schema","schema":{...}}
+      {"type":"run_python","code":"assert solve('ab')=='ba'"}   # code must define solve(...)
+    (`run_python` example: the resident must return code defining `solve`, and your
+    asserts call it — the delivered answer is the code that passes.)
+
+    `risk` is a hint ("normal"/"high") for downstream policy; defaults to "normal".
+
+    Returns: the answer, then a three-line rendered trust card, then task_id (use it
+    with trust_card / report). On any failure returns a JSON error string (never raises).
+    """
+    return _delegate_impl(task, tests, risk)
+
 
 @mcp.tool()
-def get_reputation(capability: str) -> str:
-    """Look up the reputation leaderboard of vacant experts for a capability (one of: reverse, caesar3, sort_chars, sum_digits, vowel_count)."""
-    board = _host.registry.leaderboard(capability, _SID)
-    return "; ".join(f"…{v[-8:]}={s:.2f}" for v, s in board) or "no reputation data yet"
+def trust_card(task_id: str) -> str:
+    """Fetch the FULL trust card JSON for a prior delegate call (by its task_id):
+    deliverer identity + credit/observations/flags, every signed peer review, audit
+    status, chain head, and host signature. Returns a JSON error string if unknown."""
+    return _trust_card_impl(task_id)
 
-# submit_review 已廢止對外（credit-memory v1 改動3）：無驗簽 review 是洞。
-# review 只能由 delegate/a2a_call 內部的簽章 ReviewEnvelope 通道產生。
+
+@mcp.tool()
+def residents() -> str:
+    """Show the resident roster: each resident's tier, credit score, observation count,
+    deliveries, episodes, chain integrity, and flags. Flags render honestly —
+    INSUFFICIENT_DATA (n<30 observations) and PROBATION are shown as-is, never hidden."""
+    return _residents_impl()
+
+
+@mcp.tool()
+def report(task_id: str, verdict: str, evidence: str = "") -> str:
+    """Human arbitration feed-back (the strongest label): report the real outcome of a
+    delegated task by task_id. verdict e.g. "PASS"/"FAIL"/"FAULT"; a fault verdict
+    emits a slash event. Returns a JSON ack."""
+    return _report_impl(task_id, verdict, evidence)
+
+
+@mcp.tool()
+def scoreboard() -> str:
+    """Paired trust OFF vs ON evidence: pass counts, call counts (cost), and the paired
+    pass-rate delta. Every delegate call — trust on or off — is one trial recorded here."""
+    return _scoreboard_impl()
+
 
 @mcp.tool()
 def verify_fix(prompt: str, check: dict, draft: str = "", k: int = 3) -> str:
@@ -111,6 +259,7 @@ def verify_fix(prompt: str, check: dict, draft: str = "", k: int = 3) -> str:
         return _emit(draft, True, 0, v.attest(prompt, draft, check_desc=cd, verified=True))
     r = v.solve(prompt, verifier, check_desc=cd, on_step=_sink)
     return _emit(r.answer, r.verified, r.calls, r.attestation)
+
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

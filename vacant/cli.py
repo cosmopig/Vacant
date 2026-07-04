@@ -7,6 +7,17 @@
     vacant selftest                                           # 端到端冒煙測試（暫存目錄）
 
 預設 root = ~/.vacant（信任庫 + HERMES_HOME 都在此；睡著的 vacant 就是這包檔）。
+
+生態子命令（12 §5；MCP 信任閘道的整個居民生態變成可跑 CLI，預設 root=~/.vacant-mcp）：
+    vacant up [--port 7777] [--no-dashboard]   # 建 6 居民生態 ＋ 前景 dashboard
+    vacant toggle on|off                       # 翻 state.json 的 trust 開關
+    vacant status                              # trust 開關 ＋ roster 表格
+    vacant scoreboard                          # off/on n/pass/成本 ＋ paired_delta
+    vacant resident inspect <name>             # 居民條目 ＋ 最近 5 episode
+    vacant resident wipe <name>                # 抹記憶不抹 key
+    vacant verify <name>                       # 重驗居民 logbook 簽章鏈
+    vacant ledger tail [-n 20]                 # 印最後 n 行事件
+腦：VACANT_MCP_MODEL/VACANT_MCP_BASE 都設 → LMStudioBrain；否則內建離線確定性假腦。
 """
 
 from __future__ import annotations
@@ -31,6 +42,198 @@ def _load_host_with_existing(root: Path) -> Host:
     for d in sorted(p for p in root.iterdir() if (p / "trust" / "vacant_id").exists()):
         h.adopt(d.name)
     return h
+
+
+# --- 生態子命令（12 §5：把信任閘道的整個生態變成可跑的 CLI）------------------
+# 生態預設 root（與單體 vacant 的 ~/.vacant 分開；MCP 閘道的居民住這）。
+def _eco_default_root() -> Path:
+    return Path.home() / ".vacant-mcp"
+
+
+class EchoLikeBrain:
+    """離線用的內建確定性假腦（未設模型端點時的 fallback）。
+
+    誠實邊界：這**不是**推理模型，只是把輸入反轉包成 `solve`，讓 delegate 全迴圈
+    離線可跑、可驗、可上鏈——用來看信任機制（路由/互審/稽核/信譽），不是看腦力。"""
+
+    name = "echo-like(offline)"
+
+    def generate(self, prompt: str) -> str:  # noqa: D401
+        return "```python\ndef solve(s):\n    return s[::-1]\n```"
+
+
+def _build_brain():
+    """VACANT_MCP_MODEL/VACANT_MCP_BASE 兩者都設 → LMStudioBrain；否則離線假腦。"""
+    import os
+
+    base = os.environ.get("VACANT_MCP_BASE")
+    model = os.environ.get("VACANT_MCP_MODEL")
+    if base and model:
+        from .brains import LMStudioBrain
+
+        return LMStudioBrain(base, model)
+    print("offline brain：未設 VACANT_MCP_MODEL/VACANT_MCP_BASE，改用內建確定性假腦"
+          "（只驗信任機制，非腦力）", file=sys.stderr)
+    return EchoLikeBrain()
+
+
+def _build_eco(root: Path):
+    """所有生態子命令都用 Ecosystem(root, brain) 重建——磁碟就是真相。"""
+    from .ecosystem import Ecosystem
+
+    return Ecosystem(root, _build_brain())
+
+
+def _print_roster(rows: list) -> None:
+    hdr = f"{'name':12} {'tier':9} {'credit':>7} {'n_obs':>6} {'deliv':>5} {'eps':>4} {'chain':>5}  flags"
+    print(hdr)
+    print("-" * len(hdr))
+    for e in rows:
+        print(f"{e['name']:12} {e['tier']:9} {e['credit']:>7} {e['n_obs']:>6} "
+              f"{e['deliveries']:>5} {e['episodes']:>4} "
+              f"{'ok' if e['chain_ok'] else 'BAD':>5}  {','.join(e['flags']) or '-'}")
+
+
+def cmd_eco_up(args: argparse.Namespace) -> int:
+    """建生態（6 預設居民）＋前景起 dashboard；Ctrl-C 優雅退出。"""
+    root = Path(args.eco_root)
+    eco = _build_eco(root)
+    print(f"生態就緒：root={root}  trust={'on' if eco.trust_on else 'off'}  "
+          f"居民={len(eco.residents)}")
+    if args.no_dashboard:
+        print("（--no-dashboard：只建生態、不起 dashboard）")
+        return 0
+    try:
+        from .dashboard import make_dashboard
+    except Exception as e:  # dashboard 模組另有工序提供；缺了就講清楚
+        print(f"無法載入 vacant.dashboard（{e}）；可先用 `vacant up --no-dashboard`",
+              file=sys.stderr)
+        return 1
+    server = make_dashboard(roster_fn=eco.roster, scoreboard_fn=eco.scoreboard,
+                            ledger_path=eco.ledger_path, port=args.port)
+    print(f"dashboard → http://127.0.0.1:{args.port}   (Ctrl-C 退出)")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n收到 Ctrl-C，優雅退出。")
+        try:
+            server.shutdown()
+        except Exception:
+            pass
+    return 0
+
+
+def cmd_eco_toggle(args: argparse.Namespace) -> int:
+    """翻 root/state.json 的 trust_on（不必起整個生態，直接讀寫布林）。"""
+    import json
+
+    root = Path(args.eco_root)
+    root.mkdir(parents=True, exist_ok=True)
+    on = args.state == "on"
+    (root / "state.json").write_text(json.dumps({"trust_on": on}), encoding="utf-8")
+    print(f"trust → {'on' if on else 'off'}   (root={root})")
+    return 0
+
+
+def cmd_eco_status(args: argparse.Namespace) -> int:
+    """trust 開關 ＋ roster 表格。"""
+    root = Path(args.eco_root)
+    eco = _build_eco(root)
+    print(f"root  : {root}")
+    print(f"trust : {'on' if eco.trust_on else 'off'}")
+    print(f"substrate: {eco.substrate_id}")
+    _print_roster(eco.roster())
+    return 0
+
+
+def cmd_eco_scoreboard(args: argparse.Namespace) -> int:
+    """off/on 兩桶的 n/pass/成本 ＋ paired_delta。"""
+    eco = _build_eco(Path(args.eco_root))
+    sb = eco.scoreboard()
+    for k in ("off", "on"):
+        b = sb[k]
+        acc = (b["pass"] / b["n"] * 100) if b["n"] else 0.0
+        per = (b["calls"] / b["n"]) if b["n"] else 0.0
+        print(f"  trust {k:3}: n={b['n']:4}  pass={b['pass']:4} ({acc:5.1f}%)  "
+              f"calls={b['calls']:5} ({per:.2f}/題)")
+    pd = sb.get("paired_delta")
+    print(f"  paired_delta（on 正確率 − off 正確率）: "
+          f"{pd if pd is not None else '—（尚缺配對資料）'}")
+    return 0
+
+
+def cmd_eco_resident_inspect(args: argparse.Namespace) -> int:
+    """該居民 roster 條目 ＋ 最近 5 個 episode 摘要。"""
+    eco = _build_eco(Path(args.eco_root))
+    if args.name not in eco.residents:
+        print(f"找不到居民：{args.name}（居民：{', '.join(eco.residents)}）", file=sys.stderr)
+        return 1
+    entry = next(e for e in eco.roster() if e["name"] == args.name)
+    print(f"居民 : {entry['name']}  (…{entry['vacant_id']})  tier={entry['tier']}")
+    print(f"信用 : {entry['credit']}  觀測={entry['n_obs']}  交付={entry['deliveries']}  "
+          f"episode={entry['episodes']}  鏈={'ok' if entry['chain_ok'] else 'BAD'}")
+    print(f"旗標 : {', '.join(entry['flags']) or '（無）'}")
+    eps = eco.residents[args.name].stream.episodes()[-5:]
+    print(f"最近 {len(eps)} 個 episode：")
+    if not eps:
+        print("  （無）")
+    for ep in eps:
+        au = ep.audit or {}
+        au_txt = ("audit " + ("✓" if au.get("passed") else "✗")) if au.get("ran") else "no-audit"
+        print(f"  · task=…{ep.task_id[-8:]}  outcome={ep.outcome or '-':4}  "
+              f"reviews={len(ep.reviews)}  {au_txt}")
+    return 0
+
+
+def cmd_eco_resident_wipe(args: argparse.Namespace) -> int:
+    """eco.wipe：抹記憶不抹 key。"""
+    eco = _build_eco(Path(args.eco_root))
+    if args.name not in eco.residents:
+        print(f"找不到居民：{args.name}（居民：{', '.join(eco.residents)}）", file=sys.stderr)
+        return 1
+    res = eco.wipe(args.name)
+    print(f"已抹記憶（key 保留）：{res['name']}  (…{res['vacant_id']})  "
+          f"旗標={', '.join(res['flags']) or '（無）'}")
+    return 0
+
+
+def cmd_eco_verify(args: argparse.Namespace) -> int:
+    """重驗該居民 logbook 簽章鏈（PASS/FAIL、entry 數）。"""
+    eco = _build_eco(Path(args.eco_root))
+    if args.name not in eco.residents:
+        print(f"找不到居民：{args.name}（居民：{', '.join(eco.residents)}）", file=sys.stderr)
+        return 1
+    body = eco.residents[args.name].body
+    ok = body.logbook.verify_chain(body.public_identity())
+    print(f"居民 : {args.name}  (…{eco.residents[args.name].vacant_id[-12:]})")
+    print(f"logbook: {len(body.logbook)} 筆")
+    print(f"鏈驗 : {'✓ PASS' if ok else '✗ FAIL'}")
+    return 0 if ok else 1
+
+
+def cmd_eco_ledger_tail(args: argparse.Namespace) -> int:
+    """印 ledger 最後 n 行事件。"""
+    import json
+
+    eco = _build_eco(Path(args.eco_root))
+    p = eco.ledger_path
+    if not p.exists():
+        print("（ledger 為空）")
+        return 0
+    lines = [ln for ln in p.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    tail = lines[-args.n:] if args.n > 0 else lines
+    for ln in tail:
+        try:
+            rec = json.loads(ln)
+        except Exception:
+            print(ln)
+            continue
+        ts = rec.pop("ts_ms", "?")
+        et = rec.pop("type", "?")
+        rec.pop("trust_on", None)
+        rest = "  ".join(f"{k}={v}" for k, v in rec.items())
+        print(f"  [{ts}] {et:16} {rest}")
+    return 0
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -182,6 +385,55 @@ def build_parser() -> argparse.ArgumentParser:
     pt = sub.add_parser("trace", help="把 MCP tee-proxy 的 wire log 渲染成可讀的 Hermes↔vacant 時間軸")
     pt.add_argument("file")
     pt.set_defaults(func=cmd_trace)
+
+    # --- 生態子命令（12 §5）：每個都有自己的 --root（dest=eco_root，預設 ~/.vacant-mcp）
+    eco_default = str(_eco_default_root())
+
+    def _add_eco_root(pp: argparse.ArgumentParser) -> None:
+        pp.add_argument("--root", dest="eco_root", default=eco_default,
+                        help="生態根目錄（預設 ~/.vacant-mcp）")
+
+    pup = sub.add_parser("up", help="建生態（6 居民）＋前景起 dashboard")
+    _add_eco_root(pup)
+    pup.add_argument("--port", type=int, default=7777, help="dashboard 埠（預設 7777）")
+    pup.add_argument("--no-dashboard", action="store_true", help="只建生態、不起 dashboard")
+    pup.set_defaults(func=cmd_eco_up)
+
+    ptg = sub.add_parser("toggle", help="翻 root/state.json 的 trust 開關")
+    _add_eco_root(ptg)
+    ptg.add_argument("state", choices=["on", "off"])
+    ptg.set_defaults(func=cmd_eco_toggle)
+
+    pst = sub.add_parser("status", help="trust 開關 ＋ roster 表格")
+    _add_eco_root(pst)
+    pst.set_defaults(func=cmd_eco_status)
+
+    psc = sub.add_parser("scoreboard", help="off/on 的 n/pass/成本 ＋ paired_delta")
+    _add_eco_root(psc)
+    psc.set_defaults(func=cmd_eco_scoreboard)
+
+    pres = sub.add_parser("resident", help="居民操作（inspect / wipe）")
+    rsub = pres.add_subparsers(dest="resident_cmd", required=True)
+    pri = rsub.add_parser("inspect", help="roster 條目 ＋ 最近 5 episode")
+    _add_eco_root(pri)
+    pri.add_argument("name")
+    pri.set_defaults(func=cmd_eco_resident_inspect)
+    prw = rsub.add_parser("wipe", help="抹記憶不抹 key")
+    _add_eco_root(prw)
+    prw.add_argument("name")
+    prw.set_defaults(func=cmd_eco_resident_wipe)
+
+    pver = sub.add_parser("verify", help="重驗某居民的 logbook 簽章鏈")
+    _add_eco_root(pver)
+    pver.add_argument("name")
+    pver.set_defaults(func=cmd_eco_verify)
+
+    pled = sub.add_parser("ledger", help="ledger 操作（tail）")
+    lsub = pled.add_subparsers(dest="ledger_cmd", required=True)
+    plt = lsub.add_parser("tail", help="印最後 n 行事件")
+    _add_eco_root(plt)
+    plt.add_argument("-n", type=int, default=20, help="行數（預設 20）")
+    plt.set_defaults(func=cmd_eco_ledger_tail)
     return p
 
 

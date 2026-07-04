@@ -140,6 +140,18 @@ class Registry:
         self._rep.record_review(env.target_id, env.substrate, env.scores, weight=weight)
         return weight
 
+    def forget_target(self, target_id: str) -> None:
+        """wipe demo 用（12 §7 時刻 4）：抹掉某 target 的全部信譽格與鏈頭記錄。
+
+        語意＝「同一把 key、信用歸零」：歸屬（idem）在 keypair 續存，值得被託付
+        的那部分（被審歷史的聚合）隨記憶抹除一起消失。只供 demo/測試；
+        正式實驗的信用不可抹（那是 X4 攻防的前提）。"""
+        self._rep._cells = {k: v for k, v in self._rep._cells.items() if k[0] != target_id}
+        old = self._heads.pop(target_id, None)
+        if old is not None:  # 去重鍵以 stream 為軸；抹掉舊 stream 的（新 stream＝新創世，不撞）
+            old_stream = old[0]
+            self._seen_reviews = {k for k in self._seen_reviews if k[1] != old_stream}
+
     def reputation_of(self, target_id: str, substrate: str) -> float:
         return self._rep.score(target_id, substrate)
 
