@@ -109,7 +109,17 @@ def cmd_eco_up(args: argparse.Namespace) -> int:
         print(f"無法載入 vacant.dashboard（{e}）；可先用 `vacant up --no-dashboard`",
               file=sys.stderr)
         return 1
-    server = make_dashboard(eco.root, eco.roster, eco.scoreboard, port=args.port)
+    # dashboard 與 MCP server 是兩個行程、共用同一 root（磁碟即真相）。roster/
+    # scoreboard 每次被讀前先從磁碟 reload 信譽/probation 狀態，讓面板即時反映
+    # MCP server 每筆 delegate 的寫入（不只事件流即時，居民卡片也即時）。
+    def _live_roster() -> list:
+        eco._load_state()
+        return eco.roster()
+
+    def _live_scoreboard() -> dict:
+        return eco.scoreboard()  # 本就每次讀 scoreboard.json，天然即時
+
+    server = make_dashboard(eco.root, _live_roster, _live_scoreboard, port=args.port)
     print(f"dashboard → http://127.0.0.1:{args.port}   (Ctrl-C 退出)")
     try:
         server.serve_forever()
