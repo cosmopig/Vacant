@@ -395,6 +395,16 @@ def build_parser() -> argparse.ArgumentParser:
     pt.add_argument("file")
     pt.set_defaults(func=cmd_trace)
 
+    # record：一次 run 的最小證據包（17 §P0-2；docs/RECORD_SPEC.md）
+    prec = sub.add_parser("record", help="run 證據包：pack（打包）／check（核對）")
+    recsub = prec.add_subparsers(dest="record_cmd", required=True)
+    prp = recsub.add_parser("pack", help="就地整理成 RECORD_SPEC 佈局＋SHA256SUMS")
+    prp.add_argument("dir")
+    prp.set_defaults(func=cmd_record_pack)
+    prc = recsub.add_parser("check", help="對照 RECORD_SPEC 核對（失敗 exit 非 0）")
+    prc.add_argument("dir")
+    prc.set_defaults(func=cmd_record_check)
+
     # --- 生態子命令（12 §5）：每個都有自己的 --root（dest=eco_root，預設 ~/.vacant-mcp）
     eco_default = str(_eco_default_root())
 
@@ -444,6 +454,36 @@ def build_parser() -> argparse.ArgumentParser:
     plt.add_argument("-n", type=int, default=20, help="行數（預設 20）")
     plt.set_defaults(func=cmd_eco_ledger_tail)
     return p
+
+
+def cmd_record_pack(args: argparse.Namespace) -> int:
+    """就地把 run 目錄整理成 RECORD_SPEC 佈局（manifest＋驗證輸出＋SHA256SUMS）。"""
+    from .record import pack
+
+    manifest = pack(Path(args.dir))
+    print(f"已打包證據包：{args.dir}")
+    print(f"  repo_commit : {manifest['repo_commit']}")
+    print(f"  python/os   : {manifest['python']} / {manifest['os']}")
+    print(f"  pip_freeze  : {len(manifest['pip_freeze'])} 筆")
+    miss = manifest.get("missing", {})
+    print(f"  missing     : {', '.join(sorted(miss)) if miss else '（無缺項）'}")
+    print("（誠實邊界：pack 只保證包完整自洽，內容真實性由簽章鏈與稽核承擔）")
+    return 0
+
+
+def cmd_record_check(args: argparse.Namespace) -> int:
+    """對照 RECORD_SPEC 核對 run 目錄；有問題逐條印出、exit code 非 0。"""
+    from .record import check
+
+    ok, problems = check(Path(args.dir))
+    if ok:
+        print(f"✓ PASS：{args.dir} 符合 RECORD_SPEC（必要項齊、雜湊自洽、驗證輸出無 FAIL）")
+        return 0
+    print(f"✗ FAIL：{args.dir} 未過 RECORD_SPEC（記錄層 infra_void，不得進統計）",
+          file=sys.stderr)
+    for p in problems:
+        print(f"  · {p}", file=sys.stderr)
+    return 1
 
 
 def cmd_bench(args: argparse.Namespace) -> int:
