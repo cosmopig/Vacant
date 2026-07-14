@@ -343,6 +343,13 @@ class EvalPlusMBPPLoader(TaskLoader):
             "目前請用 BuiltinSampleLoader（freeze_subset/pilot_tasks 預設值）。"
         )
 
+    def load(self) -> list[dict[str, Any]]:  # pragma: no cover - stub，無真資料可測
+        """回傳完整任務清單的 stub——與 iter_tasks() 同為 NotImplementedError。"""
+        raise NotImplementedError(
+            "EvalPlusMBPPLoader.load() 尚未接上真資料；"
+            "目前請用 BuiltinSampleLoader（freeze_subset/pilot_tasks 預設值）。"
+        )
+
 
 def pilot_tasks(seed: Any = "pilot", n: int = 12, *, loader: TaskLoader | None = None) -> list[dict[str, Any]]:
     """pilot 用：不要求 n>=215，快速取一批任務（各族輪流出現）。"""
