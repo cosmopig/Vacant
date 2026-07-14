@@ -83,3 +83,162 @@ def test_trace_renderer_detects_vacant_call(tmp_path, capsys):
     assert "verify_fix" in out
     assert "= 1 次" in out          # 偵測到 1 次 vacant 呼叫
     assert "#1✗ #2✓" in out         # 迴圈逐步：第1次失敗、第2次通過
+
+
+# ---------------------------------------------------------------------------
+# Adoption-state classifier unit tests (HERMES-observability)
+# ---------------------------------------------------------------------------
+
+from vacant.mcp_trace import analyze_adoption
+
+
+def _mk(dir_: str, method: str, mid: int | None = None, params: dict | None = None,
+        result: dict | None = None, error: dict | None = None) -> dict:
+    """建立一條 trace record（簡化版，不含時間戳）。"""
+    rec: dict = {"dir": dir_, "msg": {"jsonrpc": "2.0", "method": method}}
+    if mid is not None:
+        rec["msg"]["id"] = mid
+    if params is not None:
+        rec["msg"]["params"] = params
+    if result is not None:
+        rec["msg"]["result"] = result
+    if error is not None:
+        rec["msg"]["error"] = error
+    return rec
+
+
+# 1. infra_void：空記錄
+def test_adoption_infra_void_empty():
+    r = analyze_adoption([])
+    assert r["state"] == "infra_void"
+    assert r["consideration"] == "unobservable"
+    assert r["evidence"]["discovery"] == []
+
+
+# 2. infra_void：所有行都是無效 JSON（以 dict 表示，msg 不存在）
+def test_adoption_infra_void_all_invalid():
+    records = [{"dir": "hermes->vacant"}, {"raw": "garbage"}]
+    r = analyze_adoption(records)
+    assert r["state"] == "infra_void"
+
+
+# 3. not_observed：只有 initialize handshake，沒有 tools/list（initialize 不算 discovery）
+def test_adoption_not_observed_no_discovery():
+    records = [
+        _mk("hermes->vacant", "initialize", mid=0),
+        _mk("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "not_observed"
+    # discovery 應為空（只有 initialize，沒有 tools/list）
+    assert r["evidence"]["discovery"] == []
+
+
+# 4. discovered_not_selected：有 tools/list + reply，但沒有 vacant tools/call
+def test_adoption_discovered_not_selected():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={
+            "tools": [{"name": "verify_fix"}, {"name": "a2a_call"}]
+        }),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "discovered_not_selected"
+
+
+# 5. selected_failed：有 tools/call，但回覆是 error
+def test_adoption_selected_failed_with_error():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1, params={"name": "list"}),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}]}),
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=2, error={"code": -32603, "message": "internal error"}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "selected_failed"
+
+
+# 6. selected_failed：有 tools/call，但完全沒有回覆（missing reply）
+def test_adoption_selected_failed_no_reply():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}]}),
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "a2a_call", "arguments": {}}),
+        # 沒有 vacant->hermes 回覆 id=2
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "selected_failed"
+
+
+# 7. adopted：有 tools/call + 成功 result
+def test_adoption_adopted():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}]}),
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=2, result={
+            "content": [{"type": "text", "text": '{"verified": true}'}]
+        }),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "adopted"
+
+
+# 8. adopted：多個 tools/call 都有成功回覆
+def test_adoption_adopted_multiple():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}, {"name": "get_reputation"}]}),
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=2, result={"content": [{"type": "text", "text": "ok"}]}),
+        _mk("hermes->vacant", "tools/call", mid=3, params={"name": "get_reputation", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=3, result={"content": [{"type": "text", "text": "score: 5"}]}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "adopted"
+
+
+# 9. evidence 包含正確的索引
+def test_adoption_evidence_indices():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),       # idx 0
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": []}),  # idx 1
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix"}),  # idx 2
+        _mk("vacant->hermes", "tools/call", mid=2, result={"content": []}),  # idx 3
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "adopted"
+    assert r["evidence"]["discovery"] == [0]
+    assert r["evidence"]["selection"] == [2]
+    assert r["evidence"]["reply_ok"] == [3]
+
+
+# 10. consideration 固定為 unobservable
+def test_adoption_consideration_unobservable():
+    records = [_mk("hermes->vacant", "tools/list", mid=1)]
+    r = analyze_adoption(records)
+    assert r["consideration"] == "unobservable"
+
+
+# 11. 非 vacant 工具不應被視為 selection
+def test_adoption_non_vacant_tool_ignored():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}, {"name": "external_api"}]}),
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "external_api", "arguments": {}}),  # 非 vacant
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "discovered_not_selected"
+
+
+# 12. tools/list 回覆中沒有 vacant 工具，但 Hermes 仍呼叫了 vacant tool（edge case）
+def test_adoption_tools_list_no_vacant_but_call_exists():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "other_tool"}]}),
+        # Hermes 仍然呼叫了 verify_fix（可能 tools/list 結果有延遲或不同來源）
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=2, result={"content": [{"type": "text", "text": "ok"}]}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "adopted"  # 只要有 tools/call + reply，就是 adopted
