@@ -199,10 +199,14 @@ def _ensure_anomalies(run_dir: Path) -> None:
         p.write_text("# anomalies\n\n" + ANOMALIES_EMPTY_NOTE, encoding="utf-8")
 
 
+# 私鑰檔案名稱白名單——這些檔絕不能進入 pack（安全修補 P0-private-key-pack）
+_PRIVATE_KEY_NAMES = frozenset(("identity.key",))
+
+
 def _iter_pack_files(run_dir: Path):
-    """遞迴列出 run_dir 下所有一般檔，排除 SHA256SUMS 自身。"""
+    """遞迴列出 run_dir 下所有一般檔，排除 SHA256SUMS 自身與私鑰檔案。"""
     for p in sorted(run_dir.rglob("*")):
-        if p.is_file() and p.name != SUMS_NAME:
+        if p.is_file() and p.name != SUMS_NAME and p.name not in _PRIVATE_KEY_NAMES:
             yield p
 
 

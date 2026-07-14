@@ -193,3 +193,38 @@ def test_cli_pack_and_check_exit_codes(tmp_path):
 
 def test_cli_check_missing_dir_exit_nonzero(tmp_path):
     assert cli.main(["record", "check", str(tmp_path / "nope")]) == 1
+
+
+# --- 私鑰排除負向測試（P0-private-key-pack）-----------------------------------
+
+def test_pack_excludes_identity_key(tmp_path):
+    """pack 不應將 identity.key 納入 SHA256SUMS。"""
+    run = tmp_path / "r"
+    _make_full_run(run)
+    # 模擬居民目錄下存在私鑰檔（實際環境中此檔應為 0o600，但 pack 不該碰它）
+    resident_dir = run / "residents" / "good_1" / "trust"
+    (resident_dir / "identity.key").write_text("FAKE_PRIVATE_KEY", encoding="utf-8")
+    manifest = pack(run, dict(_EXTRA))
+    # SHA256SUMS 中不得出現 identity.key
+    sums_text = (run / "SHA256SUMS").read_text(encoding="utf-8")
+    assert "identity.key" not in sums_text, f"私鑰 identity.key 出現在 pack 結果：\n{sums_text}"
+
+
+def test_pack_search_no_private_keys(tmp_path):
+    """打包後搜尋所有涵蓋檔，確認無任何私鑰檔案名稱。"""
+    run = tmp_path / "r"
+    _make_full_run(run)
+    # 在多個位置放置假私鑰檔
+    (run / "identity.key").write_text("FAKE", encoding="utf-8")
+    resident_dir = run / "residents" / "good_1" / "trust"
+    (resident_dir / "identity.key").write_text("FAKE2", encoding="utf-8")
+    manifest = pack(run, dict(_EXTRA))
+    # 讀取 SHA256SUMS，檢查每一行
+    sums_text = (run / "SHA256SUMS").read_text(encoding="utf-8")
+    for line in sums_text.splitlines():
+        if not line.strip():
+            continue
+        parts = line.split("  ", 1)
+        if len(parts) == 2:
+            relpath = parts[1].strip()
+            assert "identity.key" not in relpath, f"私鑰檔出現在 pack：{relpath}"
