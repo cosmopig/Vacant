@@ -120,7 +120,7 @@ def analyze_adoption(records: list[dict]) -> dict:
             "consideration": "unobservable",
         }
 
-    parseable = [i for i, r in enumerate(records) if isinstance(r.get("msg"), dict)]
+    parseable = [i for i, r in enumerate(records) if isinstance(r, dict) and isinstance(r.get("msg"), dict)]
     if not parseable:
         return {
             "state": "infra_void",

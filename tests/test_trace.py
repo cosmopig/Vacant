@@ -242,3 +242,93 @@ def test_adoption_tools_list_no_vacant_but_call_exists():
     ]
     r = analyze_adoption(records)
     assert r["state"] == "adopted"  # 只要有 tools/call + reply，就是 adopted
+
+
+# 13. empty tools list：tools/list 回覆空清單 → discovered_not_selected（有 discovery 但無 vacant tool）
+def test_adoption_empty_tools_list():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": []}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "discovered_not_selected"
+
+
+# 14. mixed parseable/unparseable：部分 record 是 raw string，部分是有效 dict → 不 crash
+def test_adoption_mixed_parseable_unparseable():
+    records = [
+        {"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "tools/list", "id": 1}},  # idx 0, parseable
+        "this is raw garbage not a dict at all",  # idx 1, non-dict → should be skipped safely
+        {"dir": "vacant->hermes", "msg": {"jsonrpc": "2.0", "id": 1, "result": {"tools": [{"name": "verify_fix"}]}}},  # idx 2, parseable
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "discovered_not_selected"
+
+
+# 15. tools/call without prior discovery：有 tools/call 但沒有 tools/list → not_observed
+def test_adoption_call_without_discovery():
+    records = [
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=2, result={"content": [{"type": "text", "text": "ok"}]}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "not_observed"
+
+
+# 16. initialize-only：只有 initialize handshake，沒有 tools/list → not_observed（簡化版）
+def test_adoption_initialize_only():
+    records = [
+        _mk("hermes->vacant", "initialize", mid=0),
+        _mk("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "not_observed"
+
+
+# 17. raw garbage only：所有行都是非 dict → infra_void
+def test_adoption_raw_garbage_only():
+    records = ["garbage line 1", "another bad line", {"raw": "partial"}]
+    r = analyze_adoption(records)
+    assert r["state"] == "infra_void"
+
+
+# 18. mixed parseable + raw garbage → 不 crash，正確分類為 discovered_not_selected
+def test_adoption_mixed_with_garbage():
+    records = [
+        {"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "tools/list", "id": 1}},  # idx 0
+        "corrupted data here",  # idx 1, non-dict
+        {"dir": "vacant->hermes", "raw": "also corrupted"},  # idx 2, dict but no msg → not parseable
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}]}),  # idx 3
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "discovered_not_selected"
+
+
+# 19. selected_failed：部分 selection 成功、部分失敗 → selected_failed（任一失敗即為 failed）
+def test_adoption_mixed_success_failure():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}, {"name": "a2a_call"}]}),
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=2, result={"content": [{"type": "text", "text": "ok"}]}),  # ok
+        _mk("hermes->vacant", "tools/call", mid=3, params={"name": "a2a_call", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=3, error={"code": -32603, "message": "fail"}),  # err
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "selected_failed"
+
+
+# 20. evidence indices with mixed garbage：確認索引正確跳過非 parseable record
+def test_adoption_evidence_with_garbage():
+    records = [
+        {"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "tools/list", "id": 1}},  # idx 0, discovery
+        "garbage",  # idx 1, skipped
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix"}),  # idx 2, selection
+        {"dir": "vacant->hermes"},  # idx 3, dict but no msg → not parseable
+        _mk("vacant->hermes", "tools/call", mid=2, result={"content": []}),  # idx 4, reply_ok
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "adopted"
+    assert r["evidence"]["discovery"] == [0]
+    assert r["evidence"]["selection"] == [2]
+    assert r["evidence"]["reply_ok"] == [4]
