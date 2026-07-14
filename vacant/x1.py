@@ -227,6 +227,7 @@ def run_x1(
     distill: Callable[[X1Task, str, bool], str | None] | None = None,  # 正式：+1 呼叫蒸餾
     trace_path: Path | None = None,
     retries: int = 4,
+    trust_config: TrustConfig | None = None,   # trust on/off、central、cost-aligned 開關
     retry_backoff_s: float = 2.0,
     now_ms: Callable[[], int] = lambda: time.time_ns() // 1_000_000,
     _sleep: Callable[[float], None] = time.sleep,
@@ -242,6 +243,16 @@ def run_x1(
     manager = manager or MemoryManager(policy)
     auditor = auditor or Auditor(rate=1.0)
     assert_ks1_clean(PROMPT_TEMPLATE)
+    # --- trust / cost tracking ---------------------------------------------------
+    _tc = trust_config or TrustConfig()  # default: on/central/cost-aligned
+    cost_tracking: dict[str, Any] = {
+        "trust_mode": _tc.mode,
+        "central": _tc.central,
+        "cost_aligned": _tc.cost_aligned,
+        "total_cost_tokens": 0,
+        "audit_count": 0,
+        "oracle_lessons_written": 0,
+    }
     records: list[dict[str, Any]] = []
 
     for task in tasks:
@@ -331,6 +342,13 @@ def run_x1(
         # infra_void 不記入 ledger：瞬斷的格子下次 resume 重試，不留永久洞。
         if ledger is not None and outcome != "infra_void":
             ledger.mark_done(policy, task.task_id, seed, rec)
+        # --- cost tracking ---------------------------------------------------------
+        cost_tracking["total_cost_tokens"] += len(memory_block) // 4 + len(prompt) // 4
+        if audit_rec is not None and audit_rec.ran:
+            cost_tracking["audit_count"] += 1
+        if lesson is not None:
+            cost_tracking["oracle_lessons_written"] += 1
+
         records.append(rec)
     return records
 
