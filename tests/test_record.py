@@ -228,3 +228,39 @@ def test_pack_search_no_private_keys(tmp_path):
         if len(parts) == 2:
             relpath = parts[1].strip()
             assert "identity.key" not in relpath, f"私鑰檔出現在 pack：{relpath}"
+
+
+def test_iter_pack_files_excludes_identity_key_deep(tmp_path):
+    """_iter_pack_files 在任意子目錄層級都應排除 identity.key。"""
+    from vacant.record import _iter_pack_files
+
+    run = tmp_path / "r"
+    run.mkdir()
+    # 建立多層巢狀目錄並在各層放置 identity.key
+    deep_dir = run / "a" / "b" / "c" / "d"
+    deep_dir.mkdir(parents=True)
+    (run / "identity.key").write_text("ROOT", encoding="utf-8")
+    (deep_dir / "identity.key").write_text("DEEP", encoding="utf-8")
+    # 放一個正常檔確保迭代器有東西可產出
+    (run / "normal.txt").write_text("OK", encoding="utf-8")
+
+    files = list(_iter_pack_files(run))
+    names = {p.name for p in files}
+    assert "identity.key" not in names, f"_iter_pack_files 產出了 identity.key：{names}"
+    assert "normal.txt" in names, "正常檔應被包含"
+
+
+def test_pack_manifest_no_private_key_ref(tmp_path):
+    """pack 回傳的 manifest 不應包含任何指向私鑰的路徑或名稱。"""
+    run = tmp_path / "r"
+    _make_full_run(run)
+    # 在多個位置放置假私鑰檔
+    (run / "identity.key").write_text("FAKE", encoding="utf-8")
+    resident_dir = run / "residents" / "good_1" / "trust"
+    (resident_dir / "identity.key").write_text("FAKE2", encoding="utf-8")
+
+    manifest = pack(run, dict(_EXTRA))
+    # 將 manifest 序列化為字串並搜尋私鑰名稱
+    import json as _json
+    manifest_str = _json.dumps(manifest)
+    assert "identity.key" not in manifest_str, f"manifest 引用了 identity.key：{manifest_str}"
