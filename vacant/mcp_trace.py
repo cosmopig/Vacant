@@ -80,8 +80,8 @@ _VACANT_TOOLS = ("verify_fix", "a2a_call", "get_reputation", "submit_review")
 
 
 def _is_vacant_tool(name: str) -> bool:
-    """判斷工具名是否屬於 vacant 生態系。"""
-    return any(v in name for v in _VACANT_TOOLS)
+    """判斷工具名是否屬於 vacant 生態系（精確匹配）。"""
+    return name in _VACANT_TOOLS
 
 
 def analyze_adoption(records: list[dict]) -> dict:
