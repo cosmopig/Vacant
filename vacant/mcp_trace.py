@@ -166,6 +166,34 @@ def analyze_adoption(records: list[dict]) -> dict:
                         reply_ok_ids[mid] = idx
                         evidence["reply_ok"].append(idx)
 
+    # --- validate discovery replies -----------------------------------------
+    # An empty tools list in any discovery reply means no capabilities were
+    # advertised; treat as infra_void rather than silently proceeding to
+    # selection classification.
+    for d_idx in discovery_indices:
+        req = records[d_idx]
+        mid_req = req.get("msg", {}).get("id")
+        if mid_req is None:
+            continue
+        # Find the corresponding reply (same id, vacant->hermes direction)
+        for r_idx in parseable:
+            rec = records[r_idx]
+            msg_r = rec.get("msg", {})
+            if (rec.get("dir") == "vacant->hermes"
+                    and msg_r.get("id") == mid_req
+                    and ("result" in msg_r or "error" in msg_r)):
+                result = msg_r.get("result", {})
+                tools = result.get("tools", None) if isinstance(result, dict) else None
+                if tools is not None and len(tools) == 0:
+                    return {
+                        "state": "infra_void",
+                        "evidence": evidence,
+                        "consideration": (
+                            f"discovery reply at idx {r_idx} returned empty tools list"
+                        ),
+                    }
+                break
+
     # --- classify -----------------------------------------------------------
     # 1. not_observed：沒有 discovery 證據
     if not discovery_indices:

@@ -202,12 +202,12 @@ def test_adoption_adopted_multiple():
 def test_adoption_evidence_indices():
     records = [
         _mk("hermes->vacant", "tools/list", mid=1),       # idx 0
-        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": []}),  # idx 1
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": []}),  # idx 1: empty discovery
         _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix"}),  # idx 2
         _mk("vacant->hermes", "tools/call", mid=2, result={"content": []}),  # idx 3
     ]
     r = analyze_adoption(records)
-    assert r["state"] == "adopted"
+    assert r["state"] == "infra_void"  # empty tools list → infra_void
     assert r["evidence"]["discovery"] == [0]
     assert r["evidence"]["selection"] == [2]
     assert r["evidence"]["reply_ok"] == [3]
@@ -244,14 +244,14 @@ def test_adoption_tools_list_no_vacant_but_call_exists():
     assert r["state"] == "adopted"  # 只要有 tools/call + reply，就是 adopted
 
 
-# 13. empty tools list：tools/list 回覆空清單 → discovered_not_selected（有 discovery 但無 vacant tool）
+# 13. empty tools list：tools/list 回覆空清單 → infra_void（無可用工具）
 def test_adoption_empty_tools_list():
     records = [
         _mk("hermes->vacant", "tools/list", mid=1),
         _mk("vacant->hermes", "tools/list", mid=1, result={"tools": []}),
     ]
     r = analyze_adoption(records)
-    assert r["state"] == "discovered_not_selected"
+    assert r["state"] == "infra_void"  # empty tools list → infra_void (no capabilities advertised)
 
 
 # 14. mixed parseable/unparseable：部分 record 是 raw string，部分是有效 dict → 不 crash
