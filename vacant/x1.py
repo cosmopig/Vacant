@@ -33,6 +33,27 @@ from .batch import RunLedger
 from .checks import compile_check
 from .memory import MemoryManager, MemoryStream, assert_ks1_clean
 
+# --- TrustConfig：信任前緣的 minimal 設定 -------------------------------------
+
+@dataclass(frozen=True)
+class TrustConfig:
+    """X1 實驗的信任模式開關。
+
+    mode        : "on" | "off" — 是否啟用信任管線（稽核結論注入記憶）
+    central     : bool         — 是否走集中式 trust hub（True＝hub 仲裁，False＝peer review）
+    cost_aligned: bool         — 是否以成本為優先選擇 reviewer（True＝選最便宜合格者）
+
+    此資料類別僅定義實驗設定，不宣稱任何 effect。
+    """
+    mode: str = "on"
+    central: bool = True
+    cost_aligned: bool = True
+
+    def __post_init__(self) -> None:
+        if self.mode not in ("on", "off"):
+            raise ValueError(f"TrustConfig.mode 必須是 'on' 或 'off'，收到 {self.mode!r}")
+
+
 # --- 三臂逐字相同的 prompt 模板（KS-1 承重點）---------------------------------
 
 PROMPT_TEMPLATE = """{memory}
