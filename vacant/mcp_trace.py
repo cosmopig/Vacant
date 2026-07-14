@@ -15,6 +15,7 @@ Hermes 用 stdio（newline-delimited JSON-RPC）跟 MCP server 講話。把這�
 from __future__ import annotations
 
 import json
+import random
 import subprocess
 import sys
 import threading
@@ -233,6 +234,124 @@ def analyze_adoption(records: list[dict]) -> dict:
         "evidence": evidence,
         "consideration": "unobservable",
     }
+
+
+# ---------------------------------------------------------------------------
+# Trace generator for reproducible adoption experiments
+# ---------------------------------------------------------------------------
+
+
+def generate_wire_traces(
+    scenario: str = "default",
+    seed: int | None = None,
+) -> list[dict]:
+    """產生可重現的 MCP wire trace，模擬 Hermes 對 vacant tools 的採用決策。
+
+    Parameters
+    ----------
+    scenario : str
+        要產生的情境：
+        ``"adopted"``       — Hermes 發現並成功呼叫 vacant tool
+        ``"discovered_not_selected"`` — Hermes 發現但沒有選擇 vacant tool
+        ``"selected_failed"`` — Hermes 嘗試呼叫但回覆 error
+        ``"not_observed"``   — 只有 initialize handshake，無 tools/list
+        ``"default"``        — 預設為 "adopted"（確定性輸出）
+
+    seed : int or None
+        隨機種子。固定 seed 可重現相同 trace；None 則使用獨立 Random instance。
+
+    Returns
+    -------
+    list[dict]
+        Trace records，格式符合 ``analyze_adoption()`` 的輸入需求（每筆含 "dir"、"msg"）。
+    """
+    rng = random.Random(seed) if seed is not None else random.Random()
+
+    _scenarios = ["adopted", "discovered_not_selected", "selected_failed", "not_observed"]
+
+    if scenario == "default":
+        # Deterministic default: the most representative adoption scenario.
+        # Randomization only occurs when an explicit seed is provided.
+        scenario = "adopted"
+
+    # --- helper: build a minimal JSON-RPC record ---------------------------
+    def _rec(direction: str, method: str, mid: int | None = None,
+             params: dict | None = None, result: dict | None = None,
+             error: dict | None = None) -> dict:
+        msg: dict = {"jsonrpc": "2.0", "method": method}
+        if mid is not None:
+            msg["id"] = mid
+        if params is not None:
+            msg["params"] = params
+        if result is not None:
+            msg["result"] = result
+        if error is not None:
+            msg["error"] = error
+        return {"dir": direction, "msg": msg}
+
+    # --- scenario builders --------------------------------------------------
+    def _adopted() -> list[dict]:
+        """Hermes discovers vacant tools and successfully calls one."""
+        return [
+            _rec("hermes->vacant", "initialize", mid=0),
+            _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+            _rec("hermes->vacant", "tools/list", mid=1),
+            _rec("vacant->hermes", "tools/list", mid=1, result={
+                "tools": [{"name": "verify_fix"}, {"name": "a2a_call"}]
+            }),
+            _rec("hermes->vacant", "tools/call", mid=2, params={
+                "name": "verify_fix",
+                "arguments": {"prompt": "reverse hello", "check": {"type": "equals", "value": "olleh"}}
+            }),
+            _rec("vacant->hermes", "tools/call", mid=2, result={
+                "content": [{"type": "text", "text": '{"verified": true}'}]
+            }),
+        ]
+
+    def _discovered_not_selected() -> list[dict]:
+        """Hermes discovers vacant tools but does not call any."""
+        return [
+            _rec("hermes->vacant", "initialize", mid=0),
+            _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+            _rec("hermes->vacant", "tools/list", mid=1),
+            _rec("vacant->hermes", "tools/list", mid=1, result={
+                "tools": [{"name": "verify_fix"}, {"name": "get_reputation"}]
+            }),
+        ]
+
+    def _selected_failed() -> list[dict]:
+        """Hermes discovers and calls a vacant tool but gets an error reply."""
+        return [
+            _rec("hermes->vacant", "initialize", mid=0),
+            _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+            _rec("hermes->vacant", "tools/list", mid=1),
+            _rec("vacant->hermes", "tools/list", mid=1, result={
+                "tools": [{"name": "verify_fix"}]
+            }),
+            _rec("hermes->vacant", "tools/call", mid=2, params={
+                "name": "a2a_call",
+                "arguments": {"target": "agent-x", "message": "hello"}
+            }),
+            _rec("vacant->hermes", "tools/call", mid=2, error={
+                "code": -32603, "message": "internal error: target unreachable"
+            }),
+        ]
+
+    def _not_observed() -> list[dict]:
+        """Only initialize handshake; no tools/list means not observed."""
+        return [
+            _rec("hermes->vacant", "initialize", mid=0),
+            _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+        ]
+
+    builders = {
+        "adopted": _adopted,
+        "discovered_not_selected": _discovered_not_selected,
+        "selected_failed": _selected_failed,
+        "not_observed": _not_observed,
+    }
+
+    return builders[scenario]()
 
 
 if __name__ == "__main__":
