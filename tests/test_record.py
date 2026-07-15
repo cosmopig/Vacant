@@ -259,6 +259,10 @@ def test_pack_manifest_no_private_key_ref(tmp_path):
     resident_dir = run / "residents" / "good_1" / "trust"
     (resident_dir / "identity.key").write_text("FAKE2", encoding="utf-8")
     manifest = pack(run, dict(_EXTRA))
+    # 將 manifest 序列化為 JSON 字串，確認不含任何私鑰引用
+    manifest_json = json.dumps(manifest, ensure_ascii=False)
+    assert "identity.key" not in manifest_json, f"manifest 包含私鑰引用：\n{manifest_json}"
+    manifest = pack(run, dict(_EXTRA))
     # manifest 內容（遞迴搜尋所有字串值）不得包含 identity.key
     raw = json.dumps(manifest, ensure_ascii=False)
     assert "identity.key" not in raw, f"manifest 引用了私鑰路徑：{raw}"
