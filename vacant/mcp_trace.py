@@ -244,6 +244,7 @@ def analyze_adoption(records: list[dict]) -> dict:
 def generate_wire_traces(
     scenario: str = "default",
     seed: int | None = None,
+    trust_config: dict | None = None,   # {"mode": "on"|"off", ...} 信任模式開關
 ) -> list[dict]:
     """產生可重現的 MCP wire trace，模擬 Hermes 對 vacant tools 的採用決策。
 
@@ -260,12 +261,17 @@ def generate_wire_traces(
     seed : int or None
         隨機種子。固定 seed 可重現相同 trace；None 則使用獨立 Random instance。
 
+    trust_config : dict or None
+        信任模式設定，含 ``mode`` key（"on"/"off"）。若提供，每筆 trace record
+        會附加 ``"_trust_mode"`` 欄位以支援配對實驗的臂識別。
+
     Returns
     -------
     list[dict]
         Trace records，格式符合 ``analyze_adoption()`` 的輸入需求（每筆含 "dir"、"msg"）。
     """
     rng = random.Random(seed) if seed is not None else random.Random()
+    _trust_mode: str | None = (trust_config or {}).get("mode") if trust_config else None
 
     _scenarios = ["adopted", "discovered_not_selected", "selected_failed", "not_observed"]
 
@@ -287,7 +293,11 @@ def generate_wire_traces(
             msg["result"] = result
         if error is not None:
             msg["error"] = error
-        return {"dir": direction, "msg": msg}
+        rec: dict = {"dir": direction, "msg": msg}
+        # 若提供 trust_config，附加 _trust_mode 供配對實驗臂識別（不影響 analyze_adoption）
+        if _trust_mode is not None:
+            rec["_trust_mode"] = _trust_mode
+        return rec
 
     # --- scenario builders --------------------------------------------------
     def _adopted() -> list[dict]:

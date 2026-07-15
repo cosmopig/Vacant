@@ -332,3 +332,59 @@ def test_adoption_evidence_with_garbage():
     assert r["evidence"]["discovery"] == [0]
     assert r["evidence"]["selection"] == [2]
     assert r["evidence"]["reply_ok"] == [4]
+
+
+# ---------------------------------------------------------------------------
+# Paired adoption design: trust_mode wiring & deterministic seed pairing
+# ---------------------------------------------------------------------------
+
+from vacant.mcp_trace import generate_wire_traces
+
+
+def test_paired_adoption_design():
+    """配對實驗設計驗證：
+
+    1. trust_config.mode 會寫入每筆 trace record 的 ``_trust_mode`` 欄位。
+    2. 同 seed + 同 scenario → 兩臂（on/off）產生結構相同的 trace，僅 _trust_mode 不同。
+    3. analyze_adoption() 忽略 _trust_mode，分類結果一致。
+    """
+    scenarios = ["adopted", "discovered_not_selected", "selected_failed", "not_observed"]
+
+    for scenario in scenarios:
+        # --- 產生兩臂 trace（同 seed、不同 trust mode）-------------------------
+        traces_on = generate_wire_traces(scenario, seed=42, trust_config={"mode": "on"})
+        traces_off = generate_wire_traces(scenario, seed=42, trust_config={"mode": "off"})
+
+        # 1. 每筆 trace 都含 _trust_mode，且值正確
+        for rec in traces_on:
+            assert "_trust_mode" in rec, f"{scenario}: on-arm record missing _trust_mode"
+            assert rec["_trust_mode"] == "on", f"{scenario}: expected 'on', got {rec['_trust_mode']!r}"
+
+        for rec in traces_off:
+            assert "_trust_mode" in rec, f"{scenario}: off-arm record missing _trust_mode"
+            assert rec["_trust_mode"] == "off", f"{scenario}: expected 'off', got {rec['_trust_mode']!r}"
+
+        # 2. 移除 _trust_mode 後兩臂 trace 結構相同（配對基礎）
+        def _strip_trust(traces: list[dict]) -> list[dict]:
+            return [{k: v for k, v in rec.items() if k != "_trust_mode"} for rec in traces]
+
+        assert _strip_trust(traces_on) == _strip_trust(traces_off), (
+            f"{scenario}: on/off arms differ beyond _trust_mode"
+        )
+
+        # 3. analyze_adoption 忽略 _trust_mode，分類一致
+        result_on = analyze_adoption(traces_on)
+        result_off = analyze_adoption(traces_off)
+        assert result_on["state"] == result_off["state"], (
+            f"{scenario}: adoption state differs between on/off arms"
+        )
+
+    # 4. 無 trust_config → 不附加 _trust_mode（向後相容）
+    traces_no_cfg = generate_wire_traces("adopted", seed=1)
+    for rec in traces_no_cfg:
+        assert "_trust_mode" not in rec, "without trust_config should not add _trust_mode"
+
+    # 5. 不同 seed → 結構相同但內容可能因隨機而異（僅驗證不 crash）
+    traces_s1 = generate_wire_traces("adopted", seed=1)
+    traces_s2 = generate_wire_traces("adopted", seed=2)
+    assert len(traces_s1) == len(traces_s2), "different seeds should produce same length"
