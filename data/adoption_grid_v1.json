@@ -1,0 +1,45 @@
+{
+  "grid_id": "adoption_grid_v1",
+  "version": "1.0",
+  "frozen_parameters": {
+    "prompt": "verify_fix",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "prompt": {"type": "string"},
+        "check": {"type": "object"}
+      },
+      "required": ["prompt"]
+    },
+    "tool_count": 6,
+    "tool_names": ["delegate", "trust_card", "residents", "report", "scoreboard", "verify_fix"],
+    "discovery_timing": "post_initialize",
+    "seed_rule": "fixed_42",
+    "session_rule": "one_session_per_scenario",
+    "infra_void_exclusion": {
+      "empty_records": true,
+      "all_unparseable": true,
+      "anomaly_in_discovery": true
+    }
+  },
+  "scenarios": {
+    "adopted": {
+      "description": "Hermes discovers vacant tools and successfully calls them",
+      "expected_state": "adopted",
+      "trace_pattern": "tools/list -> tools/list(reply) -> tools/call -> tools/call(reply_ok)"
+    },
+    "discovered_not_selected": {
+      "description": "Hermes discovers vacant tools but never calls them",
+      "expected_state": "discovered_not_selected",
+      "trace_pattern": "tools/list -> tools/list(reply)"
+    },
+    "selected_failed": {
+      "description": "Hermes calls vacant tool but receives error",
+      "expected_state": "selected_failed",
+      "trace_pattern": "tools/list -> tools/list(reply) -> tools/call -> tools/call(reply_err)"
+    },
+    "not_observed": {
+      "description": "No discovery evidence (no tools/list)",
+      "expected_state": "not_observed",
+      "trace_pattern": "initialize -> initialize(reply)"
+    },
