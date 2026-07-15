@@ -621,3 +621,100 @@ def test_real_wire_20260709_delegate_chain_is_adopted():
         "selection": [6], "reply_ok": [7], "reply_err": [], "anomaly": [],
     }
     assert r["consideration"] == "unobservable"
+
+
+def _session(tool="verify_fix", call_id=2, include_reply=True, prompts=False):
+    rows = [
+        {"dir": "proxy", "msg": {}},
+        _mk("hermes->vacant", "initialize", mid=0),
+        _mk("vacant->hermes", "initialize", mid=0, result={"protocolVersion": "x"}),
+        _mk("hermes->vacant", "notifications/initialized"),
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1,
+            result={"tools": [{"name": tool}]}),
+    ]
+    if prompts:
+        rows.extend([
+            _mk("hermes->vacant", "prompts/list", mid=9),
+            _mk("vacant->hermes", "prompts/list", mid=9, result={"prompts": []}),
+        ])
+    rows.append(_mk("hermes->vacant", "tools/call", mid=call_id,
+                    params={"name": tool, "arguments": {}}))
+    if include_reply:
+        rows.append(_mk("vacant->hermes", "tools/call", mid=call_id,
+                        result={"isError": False, "content": []}))
+    return rows
+
+
+def test_batch_two_adopted_sessions_keep_separate_same_ids():
+    from vacant.mcp_trace import analyze_adoption_sessions
+
+    first = _session("delegate")
+    second = _session("scoreboard")
+    reports = analyze_adoption_sessions(first + second)
+    assert [r["state"] for r in reports] == ["adopted", "adopted"]
+    assert reports[0]["source_range"] == [0, 7]
+    assert reports[1]["source_range"] == [8, 15]
+    assert reports[0]["evidence"]["selection"] == [6]
+    assert reports[1]["evidence"]["selection"] == [14]
+
+
+def test_split_uses_repeated_initialize_without_proxy():
+    from vacant.mcp_trace import analyze_adoption_sessions
+
+    first = _session()[1:]
+    second = _session("trust_card")[1:]
+    reports = analyze_adoption_sessions(first + second)
+    assert [r["source_range"] for r in reports] == [[0, 6], [7, 13]]
+    assert [r["state"] for r in reports] == ["adopted", "adopted"]
+
+
+def test_batch_does_not_pair_reply_across_session_boundary():
+    from vacant.mcp_trace import analyze_adoption_sessions
+
+    first = _session(include_reply=False)
+    second = _session()[:-2]
+    second.append(_mk("vacant->hermes", "tools/call", mid=2,
+                      result={"isError": False, "content": []}))
+    reports = analyze_adoption_sessions(first + second)
+    assert reports[0]["state"] == "selected_failed"
+    assert reports[0]["evidence"]["reply_ok"] == []
+    assert reports[1]["state"] == "discovered_not_selected"
+
+
+def test_batch_truncated_tail_is_its_own_infra_void_session():
+    from vacant.mcp_trace import analyze_adoption_sessions
+
+    tail = [
+        {"dir": "proxy", "msg": {}},
+        _mk("hermes->vacant", "initialize", mid=0),
+        _mk("hermes->vacant", "tools/list", mid=1),
+    ]
+    reports = analyze_adoption_sessions(_session() + tail)
+    assert [r["state"] for r in reports] == ["adopted", "infra_void"]
+    assert reports[1]["source_range"] == [8, 10]
+
+
+def test_split_ignores_garbage_before_first_proxy():
+    from vacant.mcp_trace import analyze_adoption_sessions
+
+    reports = analyze_adoption_sessions([{"junk": True}, "bad"] + _session())
+    assert len(reports) == 1
+    assert reports[0]["source_range"] == [2, 9]
+    assert reports[0]["state"] == "adopted"
+
+
+def test_batch_allows_prompts_list_inside_session():
+    from vacant.mcp_trace import analyze_adoption_sessions
+
+    reports = analyze_adoption_sessions(_session("verify_fix", prompts=True))
+    assert reports[0]["state"] == "adopted"
+    assert reports[0]["evidence"]["selection"] == [8]
+    assert reports[0]["evidence"]["reply_ok"] == [9]
+
+
+def test_split_empty_input_returns_no_sessions():
+    from vacant.mcp_trace import analyze_adoption_sessions, split_mcp_sessions
+
+    assert split_mcp_sessions([]) == []
+    assert analyze_adoption_sessions([]) == []

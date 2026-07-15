@@ -326,6 +326,79 @@ def analyze_adoption(records: list[dict]) -> dict:
     }
 
 
+def split_mcp_sessions(records: list[dict]) -> list[dict]:
+    """依 proxy／initialize 邊界切開連續 wire log。
+
+    每個項目包含原始 0-based ``start``／``end``（含端點）與 ``records``。
+    邊界前的垃圾資料忽略；完全沒有邊界時保留整份輸入作單一 session，
+    讓既有單 session trace 仍可分析。
+    """
+    if not records:
+        return []
+
+    ranges: list[tuple[int, int]] = []
+    start: int | None = None
+    has_initialize = False
+    has_message = False
+
+    for idx, record in enumerate(records):
+        msg = record.get("msg") if isinstance(record, dict) else None
+        direction = record.get("dir") if isinstance(record, dict) else None
+        is_proxy = direction == "proxy"
+        is_initialize = (
+            direction == "hermes->vacant"
+            and isinstance(msg, dict)
+            and msg.get("method") == "initialize"
+        )
+
+        if is_proxy:
+            if start is not None and has_message:
+                ranges.append((start, idx - 1))
+            start = idx
+            has_initialize = False
+            has_message = False
+            continue
+
+        if is_initialize:
+            if start is None:
+                start = idx
+            elif has_initialize:
+                ranges.append((start, idx - 1))
+                start = idx
+                has_message = False
+            has_initialize = True
+
+        if start is not None and isinstance(msg, dict):
+            has_message = True
+
+    if start is None:
+        start = 0
+    ranges.append((start, len(records) - 1))
+    return [
+        {"start": lo, "end": hi, "records": records[lo:hi + 1]}
+        for lo, hi in ranges
+    ]
+
+
+def analyze_adoption_sessions(records: list[dict]) -> list[dict]:
+    """逐 session 分類，並把 evidence index 映回原始連續 log。"""
+    reports: list[dict] = []
+    for session in split_mcp_sessions(records):
+        start = int(session["start"])
+        result = analyze_adoption(session["records"])
+        evidence = {
+            key: [start + int(index) for index in indexes]
+            for key, indexes in result["evidence"].items()
+        }
+        reports.append({
+            "source_range": [start, int(session["end"])],
+            "state": result["state"],
+            "evidence": evidence,
+            "consideration": "unobservable",
+        })
+    return reports
+
+
 # ---------------------------------------------------------------------------
 # Trace generator for reproducible adoption experiments
 # ---------------------------------------------------------------------------
