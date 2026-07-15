@@ -474,3 +474,115 @@ def test_discovery_full_success_has_six_evidence_groups():
         "discovery_request": [0], "discovery_reply": [1],
         "selection": [2], "reply_ok": [3], "reply_err": [], "anomaly": [],
     }
+
+
+# ---------------------------------------------------------------------------
+# Strict selection / execution contract
+# ---------------------------------------------------------------------------
+
+def _valid_discovery() -> list[dict]:
+    return [
+        _mk("hermes->vacant", "tools/list", mid=101),
+        _mk("vacant->hermes", "tools/list", mid=101, result={
+            "tools": [{"name": "verify_fix"}, {"name": "mcp_vacant_a2a_call"}],
+        }),
+    ]
+
+
+def test_selection_rejects_arbitrary_vacant_substring():
+    records = _valid_discovery() + [
+        _mk("hermes->vacant", "tools/call", mid=102,
+            params={"name": "prefix_verify_fix_suffix"}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "discovered_not_selected"
+    assert r["evidence"]["selection"] == []
+
+
+def test_selection_accepts_mcp_vacant_prefix_with_exact_suffix():
+    records = _valid_discovery() + [
+        _mk("hermes->vacant", "tools/call", mid=102,
+            params={"name": "mcp_vacant_verify_fix"}),
+        _mk("vacant->hermes", "tools/call", mid=102, result={"content": []}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "adopted"
+    assert r["evidence"]["selection"] == [2]
+    assert r["evidence"]["reply_ok"] == [3]
+
+
+def test_selection_rejects_slash_and_dot_aliases():
+    for alias in ("vacant/verify_fix", "vacant.verify_fix", "mcp_vacant_verify_fix_extra"):
+        records = _valid_discovery() + [
+            _mk("hermes->vacant", "tools/call", mid=102, params={"name": alias}),
+        ]
+        r = analyze_adoption(records)
+        assert r["state"] == "discovered_not_selected", alias
+        assert r["evidence"]["selection"] == []
+
+
+def test_execution_jsonrpc_error_is_selected_failed():
+    records = _valid_discovery() + [
+        _mk("hermes->vacant", "tools/call", mid=102, params={"name": "verify_fix"}),
+        _mk("vacant->hermes", "tools/call", mid=102,
+            error={"code": -32603, "message": "failure"}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "selected_failed"
+    assert r["evidence"]["reply_err"] == [3]
+
+
+def test_execution_missing_reply_is_selected_failed_and_anomalous():
+    records = _valid_discovery() + [
+        _mk("hermes->vacant", "tools/call", mid=102, params={"name": "verify_fix"}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "selected_failed"
+    assert r["evidence"]["anomaly"] == [2]
+
+
+def test_execution_result_is_error_true_is_selected_failed():
+    records = _valid_discovery() + [
+        _mk("hermes->vacant", "tools/call", mid=102, params={"name": "verify_fix"}),
+        _mk("vacant->hermes", "tools/call", mid=102,
+            result={"isError": True, "content": [{"type": "text", "text": "failed"}]}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "selected_failed"
+    assert r["evidence"]["reply_err"] == [3]
+    assert r["evidence"]["reply_ok"] == []
+
+
+def test_execution_wrong_direction_reply_is_selected_failed():
+    records = _valid_discovery() + [
+        _mk("hermes->vacant", "tools/call", mid=102, params={"name": "verify_fix"}),
+        _mk("hermes->vacant", "tools/call", mid=102, result={"content": []}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "selected_failed"
+    assert r["evidence"]["anomaly"] == [2]
+
+
+def test_execution_malformed_result_is_selected_failed_and_anomalous():
+    records = _valid_discovery() + [
+        _mk("hermes->vacant", "tools/call", mid=102, params={"name": "verify_fix"}),
+        _mk("vacant->hermes", "tools/call", mid=102, result="malformed"),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "selected_failed"
+    assert r["evidence"]["reply_err"] == [3]
+    assert r["evidence"]["anomaly"] == [3]
+
+
+def test_execution_success_requires_same_id_correct_direction_result():
+    records = _valid_discovery() + [
+        _mk("hermes->vacant", "tools/call", mid=102, params={"name": "verify_fix"}),
+        _mk("vacant->hermes", "tools/call", mid=999, result={"content": []}),
+        _mk("vacant->hermes", "tools/call", mid=102,
+            result={"isError": False, "content": []}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "adopted"
+    assert r["evidence"]["reply_ok"] == [4]
+    assert r["evidence"]["reply_err"] == []
+    assert r["evidence"]["anomaly"] == []

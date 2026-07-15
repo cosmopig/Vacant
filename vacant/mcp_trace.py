@@ -129,9 +129,14 @@ def main(argv: list[str]) -> int:
 _VACANT_TOOLS = ("verify_fix", "a2a_call", "get_reputation", "submit_review")
 
 
-def _is_vacant_tool(name: str) -> bool:
-    """判斷工具名是否屬於 vacant 生態系（精確匹配）。"""
-    return name in _VACANT_TOOLS
+def _is_vacant_tool(name: object) -> bool:
+    """接受精確 base name，或 mcp_vacant_ 加精確 base suffix。"""
+    if not isinstance(name, str):
+        return False
+    if name in _VACANT_TOOLS:
+        return True
+    prefix = "mcp_vacant_"
+    return name.startswith(prefix) and name[len(prefix):] in _VACANT_TOOLS
 
 
 def analyze_adoption(records: list[dict]) -> dict:
@@ -186,6 +191,7 @@ def analyze_adoption(records: list[dict]) -> dict:
     selection_ids: dict[object, int] = {}
     reply_ok_ids: dict[object, int] = {}
     reply_err_ids: dict[object, int] = {}
+    reply_malformed_ids: dict[object, int] = {}
 
     for idx in parseable:
         rec = records[idx]
@@ -216,8 +222,17 @@ def analyze_adoption(records: list[dict]) -> dict:
             reply_err_ids[mid] = idx
             evidence["reply_err"].append(idx)
         elif "result" in msg:
-            reply_ok_ids[mid] = idx
-            evidence["reply_ok"].append(idx)
+            result = msg.get("result")
+            if not isinstance(result, dict):
+                reply_err_ids[mid] = idx
+                reply_malformed_ids[mid] = idx
+                evidence["reply_err"].append(idx)
+            elif result.get("isError") is True:
+                reply_err_ids[mid] = idx
+                evidence["reply_err"].append(idx)
+            else:
+                reply_ok_ids[mid] = idx
+                evidence["reply_ok"].append(idx)
 
     # --- validate every discovery request ----------------------------------
     # A valid discovery chain requires a same-id response in the correct
@@ -280,21 +295,25 @@ def analyze_adoption(records: list[dict]) -> dict:
             "consideration": "unobservable",
         }
 
-    # 3. selected_failed vs adopted：檢查每個 selection id 的回覆狀態
-    for mid, sel_idx in selection_ids.items():
-        if mid in reply_err_ids:
-            return {
-                "state": "selected_failed",
-                "evidence": evidence,
-                "consideration": "unobservable",
-            }
-        # 沒有回覆（既無 result 也無 error）也算 failed
-        if mid not in reply_ok_ids and mid not in reply_err_ids:
-            return {
-                "state": "selected_failed",
-                "evidence": evidence,
-                "consideration": "unobservable",
-            }
+    # 3. selected_failed vs adopted：每個 selection 都要有同 id、正確方向
+    # 的成功 result；JSON-RPC error、result.isError=true、malformed 或缺回覆
+    # 都是 selected_failed。缺失／malformed 同時留下 anomaly 索引。
+    failed = False
+    for mid, selection_idx in selection_ids.items():
+        if mid in reply_malformed_ids:
+            evidence["anomaly"].append(reply_malformed_ids[mid])
+            failed = True
+        elif mid in reply_err_ids:
+            failed = True
+        elif mid not in reply_ok_ids:
+            evidence["anomaly"].append(selection_idx)
+            failed = True
+    if failed:
+        return {
+            "state": "selected_failed",
+            "evidence": evidence,
+            "consideration": "unobservable",
+        }
 
     # 4. adopted：所有 selection 都有成功回覆
     return {
