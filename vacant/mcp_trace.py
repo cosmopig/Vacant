@@ -48,6 +48,56 @@ def _pump(src, dst, logf, direction: str, lock: threading.Lock) -> None:
 
 
 def main(argv: list[str]) -> int:
+    # --- verify-pairing mode --------------------------------------------------
+    if argv and argv[0] == "--verify-pairing":
+        _expected = {
+            "adopted": "adopted",
+            "discovered_not_selected": "discovered_not_selected",
+            "selected_failed": "selected_failed",
+            "not_observed": "not_observed",
+        }
+        all_ok = True
+        for scenario, expected_state in _expected.items():
+            trace = generate_wire_traces(scenario)
+            result = analyze_adoption(trace)
+            actual = result["state"]
+            status = "OK" if actual == expected_state else "FAIL"
+            print(f"{scenario:30s} -> {actual:30s} (expected {expected_state}) [{status}]")
+            if actual != expected_state:
+                all_ok = False
+        # Also verify default scenario resolves to adopted
+        trace_default = generate_wire_traces("default")
+        result_default = analyze_adoption(trace_default)
+        status_d = "OK" if result_default["state"] == "adopted" else "FAIL"
+        print(f"{'default':30s} -> {result_default['state']:30s} (expected adopted) [{status_d}]")
+        if result_default["state"] != "adopted":
+            all_ok = False
+        # Verify trust_config mode is propagated
+        trace_trust = generate_wire_traces("adopted", seed=42, trust_config={"mode": "on"})
+        has_trust = any("_trust_mode" in rec for rec in trace_trust)
+        status_t = "OK" if has_trust else "FAIL"
+        print(f"{'trust_config propagation':30s} -> {'present' if has_trust else 'missing':30s} [{status_t}]")
+        if not has_trust:
+            all_ok = False
+        # Verify empty trace returns infra_void (no records at all → infra_void)
+        result_empty = analyze_adoption([])
+        status_e = "OK" if result_empty["state"] == "infra_void" else "FAIL"
+        print(f"{'empty_trace':30s} -> {result_empty['state']:30s} (expected infra_void) [{status_e}]")
+        if result_empty["state"] != "infra_void":
+            all_ok = False
+        # Verify single-record trace returns not_observed
+        result_single = analyze_adoption([{"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0"}}])
+        status_s = "OK" if result_single["state"] == "not_observed" else "FAIL"
+        print(f"{'single_record':30s} -> {result_single['state']:30s} (expected not_observed) [{status_s}]")
+        if result_single["state"] != "not_observed":
+            all_ok = False
+        if all_ok:
+            print("\nOK")
+            return 0
+        else:
+            print("\nFAIL", file=sys.stderr)
+            return 1
+
     if len(argv) < 3 or argv[1] != "--":
         print("usage: python -m vacant.mcp_trace <logfile> -- <cmd> [args...]", file=sys.stderr)
         return 2
