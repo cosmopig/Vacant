@@ -156,11 +156,13 @@ def analyze_adoption(records: list[dict]) -> dict:
     注意：本函式只分析 wire trace；Hermes 內部的 consideration / decision
     永遠標示為 unobservable，不得推論。
     """
-    evidence: dict = {
-        "discovery": [],       # hermes->vacant 的 discovery 事件索引
-        "selection": [],       # hermes->vacant tools/call to vacant tool 索引
-        "reply_ok": [],        # vacant->hermes 成功回覆索引
-        "reply_err": [],       # vacant->hermes error 回覆索引
+    evidence: dict[str, list[int]] = {
+        "discovery_request": [],
+        "discovery_reply": [],
+        "selection": [],
+        "reply_ok": [],
+        "reply_err": [],
+        "anomaly": [],
     }
 
     # --- infra_void check ---------------------------------------------------
@@ -179,11 +181,11 @@ def analyze_adoption(records: list[dict]) -> dict:
             "consideration": "unobservable",
         }
 
-    # --- collect events by direction & method -------------------------------
-    discovery_indices: list[int] = []   # hermes->vacant initialize / tools/list
-    selection_ids: dict[int, int] = {}  # id -> event index (hermes->vacant tools/call to vacant)
-    reply_ok_ids: dict[int, int] = {}   # id -> event index (result)
-    reply_err_ids: dict[int, int] = {}  # id -> event index (error)
+    # --- collect requests and calls -----------------------------------------
+    discovery_requests: list[int] = []
+    selection_ids: dict[object, int] = {}
+    reply_ok_ids: dict[object, int] = {}
+    reply_err_ids: dict[object, int] = {}
 
     for idx in parseable:
         rec = records[idx]
@@ -193,61 +195,77 @@ def analyze_adoption(records: list[dict]) -> dict:
         mid = msg.get("id")
 
         if direction == "hermes->vacant":
-            # discovery: only tools/list proves Hermes discovered vacant's capabilities.
-            # initialize is just a connection handshake, not capability discovery.
             if method == "tools/list":
-                discovery_indices.append(idx)
-                evidence["discovery"].append(idx)
-            # selection: tools/call to a vacant tool
+                discovery_requests.append(idx)
+                evidence["discovery_request"].append(idx)
             elif method == "tools/call" and mid is not None:
                 name = (msg.get("params") or {}).get("name", "")
                 if _is_vacant_tool(name):
                     selection_ids[mid] = idx
                     evidence["selection"].append(idx)
 
-        elif direction == "vacant->hermes":
-            # Only count replies for tools/call methods (not initialize/tools/list)
-            if mid is not None and ("result" in msg or "error" in msg):
-                # Check if this id corresponds to a selection (tools/call) we tracked
-                if mid in selection_ids:
-                    if "error" in msg:
-                        reply_err_ids[mid] = idx
-                        evidence["reply_err"].append(idx)
-                    else:
-                        reply_ok_ids[mid] = idx
-                        evidence["reply_ok"].append(idx)
-
-    # --- validate discovery replies -----------------------------------------
-    # An empty tools list in any discovery reply means no capabilities were
-    # advertised; treat as infra_void rather than silently proceeding to
-    # selection classification.
-    for d_idx in discovery_indices:
-        req = records[d_idx]
-        mid_req = req.get("msg", {}).get("id")
-        if mid_req is None:
+    # Collect execution replies in a second pass so ordering cannot hide a
+    # same-id reply. Discovery replies are validated separately below.
+    for idx in parseable:
+        rec = records[idx]
+        msg = rec.get("msg", {})
+        mid = msg.get("id")
+        if rec.get("dir") != "vacant->hermes" or mid not in selection_ids:
             continue
-        # Find the corresponding reply (same id, vacant->hermes direction)
-        for r_idx in parseable:
-            rec = records[r_idx]
-            msg_r = rec.get("msg", {})
-            if (rec.get("dir") == "vacant->hermes"
-                    and msg_r.get("id") == mid_req
-                    and ("result" in msg_r or "error" in msg_r)):
-                result = msg_r.get("result", {})
-                tools = result.get("tools", None) if isinstance(result, dict) else None
-                if tools is not None and len(tools) == 0:
-                    return {
-                        "state": "infra_void",
-                        "evidence": evidence,
-                        "consideration": (
-                            f"discovery reply at idx {r_idx} returned empty tools list"
-                        ),
-                    }
-                break
+        if "error" in msg:
+            reply_err_ids[mid] = idx
+            evidence["reply_err"].append(idx)
+        elif "result" in msg:
+            reply_ok_ids[mid] = idx
+            evidence["reply_ok"].append(idx)
+
+    # --- validate every discovery request ----------------------------------
+    # A valid discovery chain requires a same-id response in the correct
+    # direction, a dict result, a list of tool descriptors, and at least one
+    # exact Vacant tool name. We scan every request before classifying so the
+    # anomaly evidence is complete rather than first-error-only.
+    for request_idx in discovery_requests:
+        request_id = records[request_idx].get("msg", {}).get("id")
+        if request_id is None:
+            evidence["anomaly"].append(request_idx)
+            continue
+        reply_idx = next((
+            idx for idx in parseable
+            if records[idx].get("dir") == "vacant->hermes"
+            and records[idx].get("msg", {}).get("id") == request_id
+            and ("result" in records[idx].get("msg", {})
+                 or "error" in records[idx].get("msg", {}))
+        ), None)
+        if reply_idx is None:
+            evidence["anomaly"].append(request_idx)
+            continue
+        evidence["discovery_reply"].append(reply_idx)
+        reply = records[reply_idx].get("msg", {})
+        result = reply.get("result")
+        if not isinstance(result, dict):
+            evidence["anomaly"].append(reply_idx)
+            continue
+        tools = result.get("tools")
+        if not isinstance(tools, list):
+            evidence["anomaly"].append(reply_idx)
+            continue
+        names = [
+            item.get("name") for item in tools
+            if isinstance(item, dict) and isinstance(item.get("name"), str)
+        ]
+        if not any(_is_vacant_tool(name) for name in names):
+            evidence["anomaly"].append(reply_idx)
+
+    if evidence["anomaly"]:
+        return {
+            "state": "infra_void",
+            "evidence": evidence,
+            "consideration": "unobservable",
+        }
 
     # --- classify -----------------------------------------------------------
     # 1. not_observed：沒有 discovery 證據
-    if not discovery_indices:
+    if not discovery_requests:
         return {
             "state": "not_observed",
             "evidence": evidence,

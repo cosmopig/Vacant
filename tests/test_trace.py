@@ -112,7 +112,7 @@ def test_adoption_infra_void_empty():
     r = analyze_adoption([])
     assert r["state"] == "infra_void"
     assert r["consideration"] == "unobservable"
-    assert r["evidence"]["discovery"] == []
+    assert r["evidence"]["discovery_request"] == []
 
 
 # 2. infra_void：所有行都是無效 JSON（以 dict 表示，msg 不存在）
@@ -131,7 +131,7 @@ def test_adoption_not_observed_no_discovery():
     r = analyze_adoption(records)
     assert r["state"] == "not_observed"
     # discovery 應為空（只有 initialize，沒有 tools/list）
-    assert r["evidence"]["discovery"] == []
+    assert r["evidence"]["discovery_request"] == []
 
 
 # 4. discovered_not_selected：有 tools/list + reply，但沒有 vacant tools/call
@@ -208,9 +208,12 @@ def test_adoption_evidence_indices():
     ]
     r = analyze_adoption(records)
     assert r["state"] == "infra_void"  # empty tools list → infra_void
-    assert r["evidence"]["discovery"] == [0]
+    assert r["evidence"]["discovery_request"] == [0]
+    assert r["evidence"]["discovery_reply"] == [1]
     assert r["evidence"]["selection"] == [2]
     assert r["evidence"]["reply_ok"] == [3]
+    assert r["evidence"]["anomaly"] == [1]
+    assert r["consideration"] == "unobservable"
 
 
 # 10. consideration 固定為 unobservable
@@ -241,7 +244,7 @@ def test_adoption_tools_list_no_vacant_but_call_exists():
         _mk("vacant->hermes", "tools/call", mid=2, result={"content": [{"type": "text", "text": "ok"}]}),
     ]
     r = analyze_adoption(records)
-    assert r["state"] == "adopted"  # 只要有 tools/call + reply，就是 adopted
+    assert r["state"] == "infra_void"  # discovery 未公告精確 Vacant tool，證據鏈無效
 
 
 # 13. empty tools list：tools/list 回覆空清單 → infra_void（無可用工具）
@@ -323,15 +326,17 @@ def test_adoption_evidence_with_garbage():
     records = [
         {"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "tools/list", "id": 1}},  # idx 0, discovery
         "garbage",  # idx 1, skipped
-        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix"}),  # idx 2, selection
-        {"dir": "vacant->hermes"},  # idx 3, dict but no msg → not parseable
-        _mk("vacant->hermes", "tools/call", mid=2, result={"content": []}),  # idx 4, reply_ok
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}]}),  # idx 2
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix"}),  # idx 3, selection
+        {"dir": "vacant->hermes"},  # idx 4, dict but no msg → not parseable
+        _mk("vacant->hermes", "tools/call", mid=2, result={"content": []}),  # idx 5, reply_ok
     ]
     r = analyze_adoption(records)
     assert r["state"] == "adopted"
-    assert r["evidence"]["discovery"] == [0]
-    assert r["evidence"]["selection"] == [2]
-    assert r["evidence"]["reply_ok"] == [4]
+    assert r["evidence"]["discovery_request"] == [0]
+    assert r["evidence"]["discovery_reply"] == [2]
+    assert r["evidence"]["selection"] == [3]
+    assert r["evidence"]["reply_ok"] == [5]
 
 
 # ---------------------------------------------------------------------------
@@ -388,3 +393,84 @@ def test_paired_adoption_design():
     traces_s1 = generate_wire_traces("adopted", seed=1)
     traces_s2 = generate_wire_traces("adopted", seed=2)
     assert len(traces_s1) == len(traces_s2), "different seeds should produce same length"
+
+
+# ---------------------------------------------------------------------------
+# Strict discovery evidence contract
+# ---------------------------------------------------------------------------
+
+def test_discovery_missing_reply_is_infra_void():
+    r = analyze_adoption([_mk("hermes->vacant", "tools/list", mid=7)])
+    assert r["state"] == "infra_void"
+    assert r["evidence"]["discovery_request"] == [0]
+    assert r["evidence"]["discovery_reply"] == []
+    assert r["evidence"]["anomaly"] == [0]
+    assert r["consideration"] == "unobservable"
+
+
+def test_discovery_reply_in_wrong_direction_is_infra_void():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=7),
+        {"dir": "hermes->vacant", "msg": {
+            "jsonrpc": "2.0", "id": 7,
+            "result": {"tools": [{"name": "verify_fix"}]},
+        }},
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "infra_void"
+    assert r["evidence"]["anomaly"] == [0]
+
+
+def test_discovery_result_must_be_dict():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=7),
+        _mk("vacant->hermes", "tools/list", mid=7, result="malformed"),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "infra_void"
+    assert r["evidence"]["discovery_reply"] == [1]
+    assert r["evidence"]["anomaly"] == [1]
+
+
+def test_discovery_tools_must_be_list():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=7),
+        _mk("vacant->hermes", "tools/list", mid=7, result={"tools": "verify_fix"}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "infra_void"
+    assert r["evidence"]["anomaly"] == [1]
+
+
+def test_discovery_requires_exact_vacant_tool():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=7),
+        _mk("vacant->hermes", "tools/list", mid=7, result={
+            "tools": [{"name": "prefix_verify_fix_suffix"}, {"name": "other_tool"}],
+        }),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "infra_void"
+    assert r["evidence"]["anomaly"] == [1]
+
+
+def test_discovery_full_success_has_six_evidence_groups():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=7),
+        _mk("vacant->hermes", "tools/list", mid=7, result={
+            "tools": [{"name": "verify_fix"}, {"name": "other_tool"}],
+        }),
+        _mk("hermes->vacant", "tools/call", mid=8, params={"name": "verify_fix"}),
+        _mk("vacant->hermes", "tools/call", mid=8, result={"content": []}),
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "adopted"
+    assert r["consideration"] == "unobservable"
+    assert set(r["evidence"]) == {
+        "discovery_request", "discovery_reply", "selection",
+        "reply_ok", "reply_err", "anomaly",
+    }
+    assert r["evidence"] == {
+        "discovery_request": [0], "discovery_reply": [1],
+        "selection": [2], "reply_ok": [3], "reply_err": [], "anomaly": [],
+    }
