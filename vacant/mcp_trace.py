@@ -126,7 +126,10 @@ def main(argv: list[str]) -> int:
 # Adoption-state classifier for MCP wire traces (engineering, audit-only)
 # ---------------------------------------------------------------------------
 
-_VACANT_TOOLS = ("verify_fix", "a2a_call", "get_reputation", "submit_review")
+# Keep this interface in lockstep with @mcp.tool definitions in mcp_server.py.
+_VACANT_TOOLS = (
+    "delegate", "trust_card", "residents", "report", "scoreboard", "verify_fix",
+)
 
 
 def _is_vacant_tool(name: object) -> bool:
@@ -394,7 +397,7 @@ def generate_wire_traces(
             _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
             _rec("hermes->vacant", "tools/list", mid=1),
             _rec("vacant->hermes", "tools/list", mid=1, result={
-                "tools": [{"name": "verify_fix"}, {"name": "a2a_call"}]
+                "tools": [{"name": "verify_fix"}, {"name": "delegate"}]
             }),
             _rec("hermes->vacant", "tools/call", mid=2, params={
                 "name": "verify_fix",
@@ -412,7 +415,7 @@ def generate_wire_traces(
             _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
             _rec("hermes->vacant", "tools/list", mid=1),
             _rec("vacant->hermes", "tools/list", mid=1, result={
-                "tools": [{"name": "verify_fix"}, {"name": "get_reputation"}]
+                "tools": [{"name": "verify_fix"}, {"name": "trust_card"}]
             }),
         ]
 
@@ -426,7 +429,7 @@ def generate_wire_traces(
                 "tools": [{"name": "verify_fix"}]
             }),
             _rec("hermes->vacant", "tools/call", mid=2, params={
-                "name": "a2a_call",
+                "name": "delegate",
                 "arguments": {"target": "agent-x", "message": "hello"}
             }),
             _rec("vacant->hermes", "tools/call", mid=2, error={

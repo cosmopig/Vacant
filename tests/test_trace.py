@@ -139,7 +139,7 @@ def test_adoption_discovered_not_selected():
     records = [
         _mk("hermes->vacant", "tools/list", mid=1),
         _mk("vacant->hermes", "tools/list", mid=1, result={
-            "tools": [{"name": "verify_fix"}, {"name": "a2a_call"}]
+            "tools": [{"name": "verify_fix"}, {"name": "delegate"}]
         }),
     ]
     r = analyze_adoption(records)
@@ -163,7 +163,7 @@ def test_adoption_selected_failed_no_reply():
     records = [
         _mk("hermes->vacant", "tools/list", mid=1),
         _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}]}),
-        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "a2a_call", "arguments": {}}),
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "delegate", "arguments": {}}),
         # 沒有 vacant->hermes 回覆 id=2
     ]
     r = analyze_adoption(records)
@@ -188,10 +188,10 @@ def test_adoption_adopted():
 def test_adoption_adopted_multiple():
     records = [
         _mk("hermes->vacant", "tools/list", mid=1),
-        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}, {"name": "get_reputation"}]}),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}, {"name": "trust_card"}]}),
         _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
         _mk("vacant->hermes", "tools/call", mid=2, result={"content": [{"type": "text", "text": "ok"}]}),
-        _mk("hermes->vacant", "tools/call", mid=3, params={"name": "get_reputation", "arguments": {}}),
+        _mk("hermes->vacant", "tools/call", mid=3, params={"name": "trust_card", "arguments": {}}),
         _mk("vacant->hermes", "tools/call", mid=3, result={"content": [{"type": "text", "text": "score: 5"}]}),
     ]
     r = analyze_adoption(records)
@@ -311,10 +311,10 @@ def test_adoption_mixed_with_garbage():
 def test_adoption_mixed_success_failure():
     records = [
         _mk("hermes->vacant", "tools/list", mid=1),
-        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}, {"name": "a2a_call"}]}),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}, {"name": "delegate"}]}),
         _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
         _mk("vacant->hermes", "tools/call", mid=2, result={"content": [{"type": "text", "text": "ok"}]}),  # ok
-        _mk("hermes->vacant", "tools/call", mid=3, params={"name": "a2a_call", "arguments": {}}),
+        _mk("hermes->vacant", "tools/call", mid=3, params={"name": "delegate", "arguments": {}}),
         _mk("vacant->hermes", "tools/call", mid=3, error={"code": -32603, "message": "fail"}),  # err
     ]
     r = analyze_adoption(records)
@@ -484,7 +484,7 @@ def _valid_discovery() -> list[dict]:
     return [
         _mk("hermes->vacant", "tools/list", mid=101),
         _mk("vacant->hermes", "tools/list", mid=101, result={
-            "tools": [{"name": "verify_fix"}, {"name": "mcp_vacant_a2a_call"}],
+            "tools": [{"name": "verify_fix"}, {"name": "mcp_vacant_delegate"}],
         }),
     ]
 
@@ -586,3 +586,38 @@ def test_execution_success_requires_same_id_correct_direction_result():
     assert r["evidence"]["reply_ok"] == [4]
     assert r["evidence"]["reply_err"] == []
     assert r["evidence"]["anomaly"] == []
+
+
+def test_real_wire_20260709_delegate_chain_is_adopted():
+    """去敏後保留真實 wire.jsonl 的方向、method、id、tools 與 envelope。"""
+    records = [
+        {"dir": "proxy", "msg": {}},
+        _mk("hermes->vacant", "initialize", mid=0),
+        {"dir": "vacant->hermes", "msg": {
+            "jsonrpc": "2.0", "id": 0, "result": {"protocolVersion": "2024-11-05"},
+        }},
+        {"dir": "hermes->vacant", "msg": {
+            "jsonrpc": "2.0", "method": "notifications/initialized",
+        }},
+        _mk("hermes->vacant", "tools/list", mid=1),
+        {"dir": "vacant->hermes", "msg": {
+            "jsonrpc": "2.0", "id": 1, "result": {"tools": [
+                {"name": "delegate"}, {"name": "trust_card"},
+                {"name": "residents"}, {"name": "report"},
+                {"name": "scoreboard"}, {"name": "verify_fix"},
+            ]},
+        }},
+        _mk("hermes->vacant", "tools/call", mid=2,
+            params={"name": "delegate", "arguments": {}}),
+        {"dir": "vacant->hermes", "msg": {
+            "jsonrpc": "2.0", "id": 2,
+            "result": {"isError": False, "content": [{"type": "text"}]},
+        }},
+    ]
+    r = analyze_adoption(records)
+    assert r["state"] == "adopted"
+    assert r["evidence"] == {
+        "discovery_request": [4], "discovery_reply": [5],
+        "selection": [6], "reply_ok": [7], "reply_err": [], "anomaly": [],
+    }
+    assert r["consideration"] == "unobservable"
