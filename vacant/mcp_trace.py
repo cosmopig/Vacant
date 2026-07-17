@@ -123,67 +123,6 @@ def main(argv: list[str]) -> int:
 
 
 # ---------------------------------------------------------------------------
-# Wire trace generator for verify-pairing mode (engineering, no real I/O)
-# ---------------------------------------------------------------------------
-
-def generate_wire_traces(scenario: str, seed: int | None = None,
-                         trust_config: dict | None = None) -> list[dict]:
-    """產生模擬的 MCP wire trace（不含真實 I/O），供 verify-pairing mode 使用。
-
-    參數：
-        scenario      : str – one of {adopted, discovered_not_selected,
-                          selected_failed, not_observed, infra_void, default}
-        seed          : int | None – 固定 seed 用於可重現性
-        trust_config  : dict | None – 若提供則在 trace 中加入 _trust_mode 欄位
-
-    回傳：
-        list[dict] – 模擬的 trace records
-    """
-    if seed is not None:
-        random.seed(seed)
-
-    records: list[dict] = []
-
-    if scenario == "adopted":
-        # tools/list -> reply -> tools/call -> reply_ok
-        records.append({"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "tools/list", "id": 1}})
-        trust_field = {"_trust_mode": trust_config["mode"]} if trust_config else {}
-        records.append({"dir": "vacant->hermes", "msg": {"jsonrpc": "2.0", "id": 1, "result": {"tools": [{"name": "verify_fix"}, {"name": "delegate"}], **trust_field}}})
-        records.append({"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "tools/call", "id": 2, "params": {"name": "verify_fix", "arguments": {}}}})
-        records.append({"dir": "vacant->hermes", "msg": {"jsonrpc": "2.0", "id": 2, "result": {"content": [{"type": "text", "text": '{"verified": true}'}]}}})
-
-    elif scenario == "discovered_not_selected":
-        # tools/list -> reply (no call)
-        records.append({"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "tools/list", "id": 1}})
-        records.append({"dir": "vacant->hermes", "msg": {"jsonrpc": "2.0", "id": 1, "result": {"tools": [{"name": "verify_fix"}]}}})
-
-    elif scenario == "selected_failed":
-        # tools/list -> reply -> tools/call -> reply_err
-        records.append({"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "tools/list", "id": 1}})
-        records.append({"dir": "vacant->hermes", "msg": {"jsonrpc": "2.0", "id": 1, "result": {"tools": [{"name": "verify_fix"}]}}})
-        records.append({"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "tools/call", "id": 2, "params": {"name": "verify_fix", "arguments": {}}}})
-        records.append({"dir": "vacant->hermes", "msg": {"jsonrpc": "2.0", "id": 2, "error": {"code": -32603, "message": "internal error"}}})
-
-    elif scenario == "not_observed":
-        # initialize only (no tools/list)
-        records.append({"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0", "method": "initialize", "id": 0}})
-        records.append({"dir": "vacant->hermes", "msg": {"jsonrpc": "2.0", "id": 0, "result": {"protocolVersion": 1}}})
-
-    elif scenario == "infra_void":
-        # empty or unparseable
-        records = []
-
-    elif scenario == "default":
-        # default to adopted
-        records = generate_wire_traces("adopted", seed=seed, trust_config=trust_config)
-
-    else:
-        raise ValueError(f"unknown scenario: {scenario}")
-
-    return records
-
-
-# ---------------------------------------------------------------------------
 # Adoption-state classifier for MCP wire traces (engineering, audit-only)
 # ---------------------------------------------------------------------------
 
