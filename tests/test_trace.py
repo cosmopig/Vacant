@@ -718,3 +718,150 @@ def test_split_empty_input_returns_no_sessions():
 
     assert split_mcp_sessions([]) == []
     assert analyze_adoption_sessions([]) == []
+
+
+# ---------------------------------------------------------------------------
+# Friction taxonomy v2 (HERMES-adoption-friction-v2)：把 analyze_adoption()
+# 的粗粒度 state 分解成 discovery / selection / argument_construction /
+# execution / task_outcome 五個獨立階段。只依賴 wire trace 的結構性證據，
+# 不解析或推論訊息內容的語意正確性（不窺看答案）。Phase-1 20/20 的
+# state / evidence / consideration 判準凍結不變——本節測試只驗證新增的
+# stages 分解視圖，並確認它不會覆寫既有分類。
+# ---------------------------------------------------------------------------
+
+from vacant.mcp_trace import analyze_friction, propose_v2_interventions
+
+
+def test_friction_discovered_not_selected_stage_breakdown():
+    """implicit 風格 T05/T06 固定案例：發現成功、未選用。"""
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={
+            "tools": [{"name": "verify_fix"}, {"name": "delegate"}]
+        }),
+    ]
+    r = analyze_friction(records)
+    assert r["state"] == "discovered_not_selected"          # Phase-1 判準不變
+    assert r["stages"] == {
+        "discovery": "valid",
+        "selection": "absent",
+        "argument_construction": "not_applicable",
+        "execution": "not_applicable",
+        "task_outcome": "unobservable",
+    }
+    assert r["consideration"] == "unobservable"
+
+
+def test_friction_selected_failed_one_error_one_success_stage_breakdown():
+    """explicit 風格 T08 固定案例：一錯一成功呼叫，state 仍保留 selected_failed。"""
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={
+            "tools": [{"name": "verify_fix"}, {"name": "delegate"}]
+        }),
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=2, result={"content": [{"type": "text", "text": "ok"}]}),
+        _mk("hermes->vacant", "tools/call", mid=3, params={"name": "delegate", "arguments": {}}),
+        _mk("vacant->hermes", "tools/call", mid=3, error={"code": -32603, "message": "fail"}),
+    ]
+    r = analyze_friction(records)
+    assert r["state"] == "selected_failed"                  # 凍結判準：一錯一成功仍為 selected_failed
+    assert r["stages"]["discovery"] == "valid"
+    assert r["stages"]["selection"] == "made"
+    assert r["stages"]["argument_construction"] == "empty"
+    assert r["stages"]["execution"] == "error"
+    assert r["stages"]["task_outcome"] == "unobservable"
+
+
+def test_friction_adopted_with_arguments_present():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}]}),
+        _mk("hermes->vacant", "tools/call", mid=2, params={
+            "name": "verify_fix",
+            "arguments": {"prompt": "reverse hello"},
+        }),
+        _mk("vacant->hermes", "tools/call", mid=2, result={"content": []}),
+    ]
+    r = analyze_friction(records)
+    assert r["state"] == "adopted"
+    assert r["stages"] == {
+        "discovery": "valid",
+        "selection": "made",
+        "argument_construction": "present",
+        "execution": "ok",
+        "task_outcome": "unobservable",
+    }
+
+
+def test_friction_not_observed_discovery_absent():
+    records = [
+        _mk("hermes->vacant", "initialize", mid=0),
+        _mk("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+    ]
+    r = analyze_friction(records)
+    assert r["state"] == "not_observed"
+    assert r["stages"]["discovery"] == "absent"
+    assert r["stages"]["selection"] == "not_applicable"
+    assert r["stages"]["execution"] == "not_applicable"
+    assert r["stages"]["task_outcome"] == "unobservable"
+
+
+def test_friction_infra_void_discovery_invalid_when_empty_tools():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": []}),
+    ]
+    r = analyze_friction(records)
+    assert r["state"] == "infra_void"
+    assert r["stages"]["discovery"] == "invalid"
+    assert r["stages"]["selection"] == "not_applicable"
+
+
+def test_friction_execution_missing_reply_stage():
+    records = [
+        _mk("hermes->vacant", "tools/list", mid=1),
+        _mk("vacant->hermes", "tools/list", mid=1, result={"tools": [{"name": "verify_fix"}]}),
+        _mk("hermes->vacant", "tools/call", mid=2, params={"name": "verify_fix", "arguments": {}}),
+        # 沒有回覆
+    ]
+    r = analyze_friction(records)
+    assert r["state"] == "selected_failed"
+    assert r["stages"]["execution"] == "missing_reply"
+
+
+def test_friction_does_not_widen_or_override_frozen_state():
+    """analyze_friction() 的 state/evidence/consideration 必須與 analyze_adoption()
+    完全一致，只是疊加新的 stages 分解視圖——不得重跑或改寫 Phase-1 判準。"""
+    scenarios = ["adopted", "discovered_not_selected", "selected_failed", "not_observed"]
+    for scenario in scenarios:
+        trace = generate_wire_traces(scenario, seed=7)
+        base = analyze_adoption(trace)
+        friction = analyze_friction(trace)
+        assert friction["state"] == base["state"]
+        assert friction["evidence"] == base["evidence"]
+        assert friction["consideration"] == base["consideration"]
+        assert set(friction["stages"]) == {
+            "discovery", "selection", "argument_construction",
+            "execution", "task_outcome",
+        }
+
+
+def test_v2_interventions_are_preregistration_schema_only():
+    """v2 介入清單必須是聲明式、尚未執行、非因果宣稱的 schema——
+    不得把 Phase-1 explicit/implicit 的描述差（如 +10pp）當作因果 effect。"""
+    proposals = propose_v2_interventions()
+    assert isinstance(proposals, list) and len(proposals) > 0
+    valid_stages = {"discovery", "selection", "argument_construction", "execution", "task_outcome"}
+    seen_ids = set()
+    for item in proposals:
+        assert set(item) == {"id", "stage", "hypothesis", "preregistered", "executed", "claim_level"}
+        assert item["stage"] in valid_stages
+        assert item["preregistered"] is False
+        assert item["executed"] is False
+        assert item["claim_level"] == "descriptive"
+        assert isinstance(item["hypothesis"], str) and item["hypothesis"]
+        assert item["id"] not in seen_ids
+        seen_ids.add(item["id"])
+        assert "effect" not in item
+        assert "delta" not in item

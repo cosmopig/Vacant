@@ -527,5 +527,159 @@ def generate_wire_traces(
     return builders[scenario]()
 
 
+# ---------------------------------------------------------------------------
+# Friction taxonomy v2 (HERMES-adoption-friction-v2, engineering, audit-only)
+# ---------------------------------------------------------------------------
+#
+# analyze_adoption() 的五個粗粒度 state 混合了「有沒有發現」「有沒有選用」
+# 「參數怎麼構造」「呼叫有沒有成功」四種完全不同的摩擦來源。這裡把它們拆成
+# 獨立、可反駁的階段，且每個階段只依賴 wire trace 的結構性證據（存在與否、
+# 方向是否正確、id 是否配對）——絕不解析或推論訊息內容的語意正確性
+# （不窺看答案）。task_outcome 永遠標示為 unobservable，因為 wire trace
+# 無法反駁 Hermes 內部是否認定任務成功。
+#
+# 本函式疊加在既有 analyze_adoption() 之上，state / evidence / consideration
+# 與 Phase-1 凍結判準完全一致，不得重跑或改寫既有分類。
+
+
+def analyze_friction(records: list[dict]) -> dict:
+    """把 analyze_adoption() 的 state 分解成 discovery / selection /
+    argument_construction / execution / task_outcome 五個獨立階段。
+
+    回傳 dict 除了 state / evidence / consideration（與 analyze_adoption()
+    完全一致）之外，另外附加：
+        stages : dict[str, str]
+            discovery              : "absent" | "invalid" | "valid"
+            selection              : "not_applicable" | "absent" | "made"
+            argument_construction  : "not_applicable" | "empty" | "present"
+            execution              : "not_applicable" | "missing_reply"
+                                      | "error" | "ok"
+            task_outcome           : "unobservable"（固定，不可推論）
+    """
+    base = analyze_adoption(records)
+    state = base["state"]
+    evidence = base["evidence"]
+
+    # --- discovery stage --------------------------------------------------
+    if state == "infra_void" and not evidence["discovery_request"]:
+        discovery_stage = "absent"
+    elif evidence["anomaly"] and any(
+        idx in evidence["discovery_request"] or idx in evidence["discovery_reply"]
+        for idx in evidence["anomaly"]
+    ):
+        discovery_stage = "invalid"
+    elif evidence["discovery_request"] and evidence["discovery_reply"]:
+        discovery_stage = "valid"
+    elif evidence["discovery_request"]:
+        discovery_stage = "invalid"
+    else:
+        discovery_stage = "absent"
+
+    # --- selection stage ----------------------------------------------------
+    if discovery_stage != "valid":
+        selection_stage = "not_applicable"
+    elif evidence["selection"]:
+        selection_stage = "made"
+    else:
+        selection_stage = "absent"
+
+    # --- argument_construction stage -----------------------------------------
+    if selection_stage != "made":
+        argument_stage = "not_applicable"
+    else:
+        has_args = False
+        for idx in evidence["selection"]:
+            msg = records[idx].get("msg", {})
+            params = msg.get("params") or {}
+            arguments = params.get("arguments")
+            if isinstance(arguments, dict) and arguments:
+                has_args = True
+                break
+        argument_stage = "present" if has_args else "empty"
+
+    # --- execution stage ------------------------------------------------------
+    if selection_stage != "made":
+        execution_stage = "not_applicable"
+    elif evidence["reply_ok"] and not evidence["reply_err"]:
+        execution_stage = "ok"
+    elif evidence["reply_err"]:
+        execution_stage = "error"
+    else:
+        execution_stage = "missing_reply"
+
+    return {
+        "state": state,
+        "evidence": evidence,
+        "consideration": base["consideration"],
+        "stages": {
+            "discovery": discovery_stage,
+            "selection": selection_stage,
+            "argument_construction": argument_stage,
+            "execution": execution_stage,
+            "task_outcome": "unobservable",
+        },
+    }
+
+
+# ---------------------------------------------------------------------------
+# v2 preregistration schema (proposal only — not executed, not causal)
+# ---------------------------------------------------------------------------
+#
+# 下一階段可預註冊、但尚未執行的介入候選清單。純聲明式資料：不執行任何
+# 介入、不計算任何 effect size、不得把 Phase-1 explicit/implicit 的描述差
+# （例如 +10pp）當作因果 effect 引用。
+
+
+def propose_v2_interventions() -> list[dict]:
+    """回傳可預註冊但尚未執行的 v2 介入候選清單。
+
+    每個項目：
+        id            : str  – 介入代號
+        stage         : str  – 對應 analyze_friction() 的階段名稱
+        hypothesis    : str  – 可證偽的假設敘述（不含因果宣稱）
+        preregistered : bool – 固定 False（清單本身是預註冊草案，尚未提交）
+        executed      : bool – 固定 False（本函式不執行任何介入）
+        claim_level   : str  – 固定 "descriptive"
+    """
+    return [
+        {
+            "id": "v2-schema-explicit-recall-prompt",
+            "stage": "selection",
+            "hypothesis": (
+                "在 tools/list 回覆後加入一次結構化 recall 提示，是否改變 "
+                "selection 階段從 absent 轉為 made 的比例——此假設尚待預註冊"
+                "實驗驗證，本清單不主張任何因果 effect。"
+            ),
+            "preregistered": False,
+            "executed": False,
+            "claim_level": "descriptive",
+        },
+        {
+            "id": "v2-schema-argument-scaffold",
+            "stage": "argument_construction",
+            "hypothesis": (
+                "提供最小可行的 arguments schema 範例，是否降低 "
+                "argument_construction 階段落在 empty 的比例——此假設尚待"
+                "預註冊實驗驗證，本清單不主張任何因果 effect。"
+            ),
+            "preregistered": False,
+            "executed": False,
+            "claim_level": "descriptive",
+        },
+        {
+            "id": "v2-schema-retry-timing",
+            "stage": "execution",
+            "hypothesis": (
+                "execution 階段收到 error 後，介入固定延遲的重試視窗，是否"
+                "改變 selected_failed 轉為 adopted 的比例——此假設尚待預註冊"
+                "實驗驗證，本清單不主張任何因果 effect。"
+            ),
+            "preregistered": False,
+            "executed": False,
+            "claim_level": "descriptive",
+        },
+    ]
+
+
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
