@@ -26,6 +26,7 @@ from __future__ import annotations
 import math
 import random
 from dataclasses import dataclass, field
+from itertools import product
 from typing import Callable
 
 from .composer import Composer
@@ -171,6 +172,219 @@ def boot_ci(results, stat: Callable[[list], float], *, n_boot=2000, seed=0,
 def _vprec(sample, arm) -> float:
     asserted = [r[arm] for r in sample if r[arm].asserted]
     return _mean([1.0 if it.passed_gt else 0.0 for it in asserted]) if asserted else 0.0
+
+
+# === 統計擴充：Holm / 配對 TOST / Wilcoxon exact / McNemar power（零 scipy）====
+def holm_adjust(pvalues: list[float]) -> list[float]:
+    """Holm-Bonferroni 逐步下降校正（族錯誤率控制），零 scipy。
+
+    對排序後 p_(1)<=...<=p_(n) 依序算 min(1,(n-i+1)*p_(i))，再取累積最大值
+    保證單調不減，最後映回原始順序。空輸入回傳空列表；任一 p 不在 [0,1]
+    內即拋 ValueError。
+    """
+    n = len(pvalues)
+    if n == 0:
+        return []
+    for p in pvalues:
+        if not (0.0 <= p <= 1.0):
+            raise ValueError("p-values must be in [0,1]")
+    order = sorted(range(n), key=lambda i: pvalues[i])
+    adjusted = [0.0] * n
+    running_max = 0.0
+    for rank, idx in enumerate(order):
+        factor = n - rank
+        val = min(1.0, factor * pvalues[idx])
+        running_max = max(running_max, val)
+        adjusted[idx] = running_max
+    return adjusted
+
+
+def _binom_upper_tail(k: int, n: int, p: float = 0.5) -> float:
+    """P(K >= k)，K ~ Binomial(n, p)；k<=0 回 1.0，k>n 回 0.0。"""
+    if k <= 0:
+        return 1.0
+    if k > n:
+        return 0.0
+    return sum(math.comb(n, i) * (p ** i) * ((1 - p) ** (n - i)) for i in range(k, n + 1))
+
+
+def paired_tost(x: list[float], y: list[float], low: float, high: float, *,
+                 alpha: float = 0.05) -> dict:
+    """配對等效性 TOST（Two One-Sided Tests），符號檢定版、零 scipy、精確二項檢定。
+
+    對差值 d_i = x_i - y_i：
+      下側檢定 H0: median(d) <= low  vs  Ha: median(d) > low
+        統計量 k_lo = #{d_i > low}（d_i == low 的配對整對剔除），
+        p_lower = P(K >= k_lo)，K~Binomial(n_lo, 0.5)。
+      上側檢定 H0: median(d) >= high vs  Ha: median(d) < high
+        統計量 k_hi = #{d_i < high}（d_i == high 的配對整對剔除），
+        p_upper = P(K >= k_hi)，K~Binomial(n_hi, 0.5)。
+      p_tost = max(p_lower, p_upper)；p_tost < alpha 判定等效（d 落在 (low, high) 內）。
+
+    邊界情境明確處理：
+      - 若某側全部配對都被剔除（n_lo=0 或 n_hi=0），該側 p 設為 1.0（保守，不宣稱等效）。
+      - low>=high 或 alpha 不在 (0,1) 或 x/y 長度不一或為空 → ValueError。
+    """
+    if low >= high:
+        raise ValueError("low must be < high")
+    if not (0.0 < alpha < 1.0):
+        raise ValueError("alpha must be in (0,1)")
+    if len(x) != len(y):
+        raise ValueError("x and y must have equal length")
+    if len(x) == 0:
+        raise ValueError("empty input")
+    d = [xi - yi for xi, yi in zip(x, y)]
+
+    d_lo = [v for v in d if v != low]
+    n_lo = len(d_lo)
+    if n_lo == 0:
+        p_lo = 1.0
+    else:
+        k_lo = sum(1 for v in d_lo if v > low)
+        p_lo = _binom_upper_tail(k_lo, n_lo, 0.5)
+
+    d_hi = [v for v in d if v != high]
+    n_hi = len(d_hi)
+    if n_hi == 0:
+        p_hi = 1.0
+    else:
+        k_hi = sum(1 for v in d_hi if v < high)
+        p_hi = _binom_upper_tail(k_hi, n_hi, 0.5)
+
+    p_tost = max(p_lo, p_hi)
+    return dict(p_lower=p_lo, p_upper=p_hi, p_tost=p_tost,
+                equivalent=p_tost < alpha, n=len(d))
+
+
+def wilcoxon_exact(x: list[float], y: list[float] | None = None) -> dict:
+    """配對 Wilcoxon 符號等級精確檢定（零 scipy，2^m 完整枚舉零假設分布）。
+
+    y=None 時 x 視為差值 d；否則逐配對算 d = x-y。
+    規則：
+      - d_i == 0 的配對整對剔除（zero-drop，Wilcoxon 慣例）。
+      - |d_i| 同分用平均等級（midrank）；此設計使「精確」枚舉建立在等級值上，
+        與無 tie 時的教科書精確分布一致，屬標準取捨、非隱藏近似。
+      - 非零配對數 m==0 → p_two_sided=1.0（無資訊）。
+      - m>20 → ValueError（2^m 枚舉爆炸，非本模組適用範圍）。
+      - 空輸入或 x/y 長度不一 → ValueError。
+    """
+    if y is not None:
+        if len(x) != len(y):
+            raise ValueError("x and y must have equal length")
+        d = [xi - yi for xi, yi in zip(x, y)]
+    else:
+        d = list(x)
+    if len(d) == 0:
+        raise ValueError("empty input")
+    d_nz = [v for v in d if v != 0]
+    m = len(d_nz)
+    if m == 0:
+        return dict(W_plus=0.0, W_minus=0.0, n_nonzero=0, p_two_sided=1.0)
+    if m > 20:
+        raise ValueError("n_nonzero too large for exact enumeration (>20)")
+
+    abs_d = [abs(v) for v in d_nz]
+    order = sorted(range(m), key=lambda i: abs_d[i])
+    ranks = [0.0] * m
+    i = 0
+    while i < m:
+        j = i
+        while j + 1 < m and abs_d[order[j + 1]] == abs_d[order[i]]:
+            j += 1
+        avg_rank = (i + 1 + j + 1) / 2.0
+        for t in range(i, j + 1):
+            ranks[order[t]] = avg_rank
+        i = j + 1
+
+    w_plus = sum(r for r, v in zip(ranks, d_nz) if v > 0)
+    w_minus = sum(r for r, v in zip(ranks, d_nz) if v < 0)
+    total = w_plus + w_minus
+    obs_min = min(w_plus, w_minus)
+
+    count_le = 0
+    total_patterns = 2 ** m
+    for signs in product((1, -1), repeat=m):
+        s = sum(r for r, sgn in zip(ranks, signs) if sgn > 0)
+        if s <= obs_min + 1e-9:
+            count_le += 1
+    p = min(1.0, 2.0 * count_le / total_patterns)
+    return dict(W_plus=w_plus, W_minus=w_minus, n_nonzero=m, p_two_sided=p)
+
+
+def _norm_cdf(z: float) -> float:
+    """標準常態分布 CDF（用 math.erf，零 scipy）。"""
+    return 0.5 * (1.0 + math.erf(z / math.sqrt(2.0)))
+
+
+def _norm_ppf(p: float) -> float:
+    """標準常態分布分位數（Acklam 有理逼近，|誤差|<1.15e-9，零 scipy）。"""
+    if not (0.0 < p < 1.0):
+        raise ValueError("p must be in (0,1)")
+    a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+         1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00]
+    b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+         6.680131188771972e+01, -1.328068155288572e+01]
+    c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+         -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00]
+    d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00,
+         3.754408661907416e+00]
+    p_low = 0.02425
+    p_high = 1.0 - p_low
+    if p < p_low:
+        q = math.sqrt(-2.0 * math.log(p))
+        return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / \
+               ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1.0)
+    if p <= p_high:
+        q = p - 0.5
+        r = q * q
+        return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / \
+               (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1.0)
+    q = math.sqrt(-2.0 * math.log(1.0 - p))
+    return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / \
+           ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1.0)
+
+
+def mcnemar_power(n: int, p_disc: float, delta: float, *, alpha: float = 0.05) -> float:
+    """McNemar 檢定的漸近檢定力（常態近似，Connor 1987），零 scipy。
+
+    n：配對樣本數；p_disc=p10+p01（不一致比例）；delta=p10-p01（配對效應）。
+      z_beta = (|delta|*sqrt(n) - z_{alpha/2}*sqrt(p_disc)) / sqrt(p_disc - delta^2)
+      power  = Phi(z_beta)
+    封閉解檢查：delta=0 時 z_beta = -z_{alpha/2}，故 power == alpha/2（與 n、p_disc
+    無關），可手算核對。
+    """
+    if n <= 0:
+        raise ValueError("n must be positive")
+    if not (0.0 < p_disc <= 1.0):
+        raise ValueError("p_disc must be in (0,1]")
+    if not (0.0 < alpha < 1.0):
+        raise ValueError("alpha must be in (0,1)")
+    if abs(delta) >= p_disc:
+        raise ValueError("abs(delta) must be < p_disc")
+    var_term = p_disc - delta * delta
+    z_a = _norm_ppf(1.0 - alpha / 2.0)
+    z_beta = (abs(delta) * math.sqrt(n) - z_a * math.sqrt(p_disc)) / math.sqrt(var_term)
+    return _norm_cdf(z_beta)
+
+
+def mcnemar_sample_size(p_disc: float, delta: float, *, alpha: float = 0.05,
+                          power: float = 0.8) -> int:
+    """達到目標 power 所需最小配對樣本數（Connor 1987 常態近似，向上取整），零 scipy。"""
+    if not (0.0 < p_disc <= 1.0):
+        raise ValueError("p_disc must be in (0,1]")
+    if delta == 0:
+        raise ValueError("delta must be nonzero")
+    if abs(delta) >= p_disc:
+        raise ValueError("abs(delta) must be < p_disc")
+    if not (0.0 < alpha < 1.0):
+        raise ValueError("alpha must be in (0,1)")
+    if not (0.0 < power < 1.0):
+        raise ValueError("power must be in (0,1)")
+    var_term = p_disc - delta * delta
+    z_a = _norm_ppf(1.0 - alpha / 2.0)
+    z_b = _norm_ppf(power)
+    n = ((z_a * math.sqrt(p_disc) + z_b * math.sqrt(var_term)) / abs(delta)) ** 2
+    return math.ceil(n)
 
 
 # === 報表 ===================================================================
