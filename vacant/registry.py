@@ -26,6 +26,14 @@ from .reputation import DIMS, SAME_SIGNAL_FLOOR, Reputation, ucb_score
 #     地板是常數優勢，配非線性同源降權後同一 controller 的總貢獻只有 log 級成長）。
 REVIEWER_WEIGHT_FLOOR = 0.05
 REVIEWER_SATURATION_OBS = 5.0  # obs/(obs+此值)：約 5 筆被審觀測後 weight 才接近自身信譽
+# 牙齒·probation 路由端（12 §4.2；17 §P4）：見習期（前 m 筆交付）的 UCB 上限——
+# 洗白者換 key 重生後不能立刻壓過已證明的老手（重賺成本，raises-cost 非 prevents）。
+# 兩條安全閥（缺任一機制就卡死，誠實標明）：
+#   ①全員見習時不蓋——否則新生態所有候選同分、第一個居民壟斷路由（冷啟動陷阱）；
+#   ②每 PROBATION_EXPLORE_EVERY 筆路由保留見習配額——否則已證明老手的生態裡
+#     見習生永遠選不到、m 筆強制稽核永遠不發生（永久流放陷阱，冷啟動 C1 死亡）。
+PROBATION_SCORE_CAP = 0.55
+PROBATION_EXPLORE_EVERY = 10
 
 
 class ReviewRejected(Exception):
@@ -49,6 +57,8 @@ class Registry:
         self._heads: dict[str, tuple[str, str, str]] = {}
         self._seen_reviews: set[tuple[str, str, str]] = set()  # (reviewer, stream, head)
         self._same_source_k: dict[tuple[str, str], int] = {}   # (controller, target) → 次數
+        self._probation: set[str] = set()  # 見習中的 target_id（路由端權重上限的對象）
+        self._route_seq = 0                # 路由計次（見習配額的確定性時脈）
 
     # --- halo：公告 / 發現 -------------------------------------------------
     def announce(self, card: CapabilityCard) -> None:
@@ -96,6 +106,34 @@ class Registry:
         """vacant_id → 當前 (stream_id, branch_id)；未觀察過其鏈頭 → None。"""
         h = self._heads.get(target_id)
         return (h[0], h[1]) if h else None
+
+    # --- 牙齒（12 §4.2；17 §P4）-----------------------------------------------
+    def set_probation(self, target_id: str, on: bool) -> None:
+        """標記/解除見習（由 ecosystem 依 deliveries≤m 同步；wipe 後重新見習）。"""
+        if on:
+            self._probation.add(target_id)
+        else:
+            self._probation.discard(target_id)
+
+    def in_probation(self, target_id: str) -> bool:
+        return target_id in self._probation
+
+    def apply_slash(
+        self,
+        target_id: str,
+        substrate: str,
+        factor: float,
+        *,
+        dims: tuple[str, ...] | None = None,
+    ) -> bool:
+        """對 target **當前 stream** 執行 slash（稽核錨的後果）。回是否命中。
+
+        解析不到當前 stream → False（無法扣減看不到的帳——如實回，不靜默）。"""
+        resolved = self._resolve(target_id)
+        if resolved is None:
+            return False
+        self._rep.slash(resolved[0], resolved[1], substrate, factor, dims=dims)
+        return True
 
     def _reviewer_weight(self, reviewer_id: str, substrate: str) -> float:
         """weight 內生：reviewer 自身信譽 × 觀測飽和 → 不接受外部注入。"""
@@ -157,6 +195,7 @@ class Registry:
             "heads": {t: list(v) for t, v in self._heads.items()},
             "seen_reviews": [list(k) for k in self._seen_reviews],
             "same_source_k": {f"{c}␟{t}": v for (c, t), v in self._same_source_k.items()},
+            "probation": sorted(self._probation),
         }
 
     def state_from_json(self, d: dict[str, Any]) -> None:
@@ -173,6 +212,7 @@ class Registry:
         for key, v in d.get("same_source_k", {}).items():
             c, t = key.split("␟", 1)
             self._same_source_k[(c, t)] = int(v)
+        self._probation = set(d.get("probation", []))
 
     def forget_target(self, target_id: str) -> None:
         """wipe demo 用（12 §7 時刻 4）：抹掉某 target 當前 stream 的信譽格與鏈頭記錄。
@@ -233,15 +273,32 @@ class Registry:
     def route(
         self, niche: str, substrate: str, *, explore_c: float = 0.3
     ) -> CapabilityCard | None:
-        """在能解此 niche 的候選裡，用 UCB 挑一個（rep + 探索額）。"""
+        """在能解此 niche 的候選裡，用 UCB 挑一個（rep + 探索額）。
+
+        牙齒·probation：有非見習候選在場時，見習生 UCB 蓋到 PROBATION_SCORE_CAP
+        （洗白重賺成本）；每 PROBATION_EXPLORE_EVERY 筆路由留一筆見習配額
+        （讓 m 筆強制稽核真的會發生，見常數區誠實邊界）。"""
         cands = self.discover(niche)
         if not cands:
             return None
+        self._route_seq += 1
         total_obs = sum(self._score_obs(c.vacant_id, substrate)[1] for c in cands)
+        probies = [c for c in cands if c.vacant_id in self._probation]
+        cap_active = len(probies) < len(cands)  # 全員見習 → 不蓋（冷啟動保護）
 
-        def key(c: CapabilityCard) -> float:
+        def raw_ucb(c: CapabilityCard) -> float:
             rep, obs = self._score_obs(c.vacant_id, substrate)
             return ucb_score(rep, obs, total_obs, c=explore_c)
+
+        # 見習配額：每 N 筆路由從見習生裡挑 UCB 最高者（組內不蓋）
+        if probies and cap_active and self._route_seq % PROBATION_EXPLORE_EVERY == 0:
+            return max(probies, key=raw_ucb)
+
+        def key(c: CapabilityCard) -> float:
+            u = raw_ucb(c)
+            if cap_active and c.vacant_id in self._probation:
+                u = min(u, PROBATION_SCORE_CAP)
+            return u
 
         return max(cands, key=key)
 

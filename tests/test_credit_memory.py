@@ -265,7 +265,8 @@ def test_reputation_json_roundtrip_triple_key():
     rep.record_review("s1", "main", "echo", GOOD, weight=1.0)
     rep.record_review("s1", "fork", "echo", {d: 0.0 for d in DIMS}, weight=1.0)
     d = rep.to_json()
-    assert set(d) == {"s1␟main␟echo", "s1␟fork␟echo"}
+    assert d["event_seq"] == 2  # 兩筆 review 推進全局事件序（decay 時間軸）
+    assert set(d["cells"]) == {"s1␟main␟echo", "s1␟fork␟echo"}
     rep2 = Reputation.from_json(d)
     assert rep2.score("s1", "main", "echo") > 0.5
     assert rep2.score("s1", "fork", "echo") < 0.5
