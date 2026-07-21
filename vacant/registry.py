@@ -59,6 +59,10 @@ class Registry:
         self._same_source_k: dict[tuple[str, str], int] = {}   # (controller, target) → 次數
         self._probation: set[str] = set()  # 見習中的 target_id（路由端權重上限的對象）
         self._route_seq = 0                # 路由計次（見習配額的確定性時脈）
+        # 行為推斷同源（15 §3-A2；17 §P4）：投票相關性偵測，**承重路徑零 controller_id
+        # 讀取**——X4 的 Sybil 攻防不能依賴攻擊者自報的身份欄位（套套邏輯地雷）。
+        self._task_votes: dict[str, dict[str, bool]] = {}   # task_id → {reviewer: 通過與否}
+        self._behavior_same_k: dict[tuple[str, str], int] = {}  # (reviewer, target) → 已降權次數
 
     # --- halo：公告 / 發現 -------------------------------------------------
     def announce(self, card: CapabilityCard) -> None:
@@ -86,13 +90,60 @@ class Registry:
         return self._cards.get(vacant_id)
 
     # --- 信譽索引 ----------------------------------------------------------
+    # 行為同源判準（15 §3-A2；B 層情境②）：與任一其他 reviewer 的共審任務 ≥5 題
+    # 且一致率 ≥0.9 → 視為同源（投票相關／恆同意）。閾值公開＝raises-cost 非 prevents。
+    BEHAVIOR_MIN_SHARED = 5
+    BEHAVIOR_AGREE_RATE = 0.9
+    _TASK_VOTES_CAP = 2000  # 投票記憶上限（先進先出；B 層／demo 規模綽綽有餘）
+
     def _same_signal(self, reviewer_id: str, target_id: str) -> bool:
-        """同源偵測：同一 controller 互評 → 降權（raises-cost，閾值公開可被繞）。"""
+        """同源偵測（誠實條件化版）：同一 controller 互評 → 降權。
+
+        誠實邊界：controller 欄位是**自報**的，攻擊者可匿——此路徑只供 demo／
+        誠實模式；X4 承重用 `_behavior_same_source`（行為推斷，15 §3-A2）。"""
         rc = self._cards.get(reviewer_id)
         tc = self._cards.get(target_id)
         if rc and tc and rc.controller and rc.controller == tc.controller:
             return True
         return False
+
+    def _behavior_same_source(self, reviewer_id: str) -> bool:
+        """行為推斷同源（零 controller_id）：與任一其他 reviewer 的投票序列
+        高度相關 → 視為同一控制者的克隆票。
+
+        判準只在**有鑑別力的題**（全體投票有分歧的任務）上算一致率：確定性
+        互審（重跑同一客觀 check）下所有 reviewer 天然全票一致，那是「同一個
+        環境真值」不是「同一個控制者」；克隆的指紋是**連分歧題都同進同退**。
+        共審鑑別題 <BEHAVIOR_MIN_SHARED → 證據不足，沉默（誠實：不硬判）。
+        誠實邊界（15 §3-A2）：這是行為證據不是身份證據；B 層情境②以「隨機
+        獨立 reviewer 不被誤判、克隆必被抓」雙側鎖住此判準。"""
+        mine: dict[str, bool] = {}
+        others: dict[str, dict[str, bool]] = {}
+        for task_id, votes in self._task_votes.items():
+            for rid, v in votes.items():
+                if rid == reviewer_id:
+                    mine[task_id] = v
+                else:
+                    others.setdefault(rid, {})[task_id] = v
+        for rid, theirs in others.items():
+            informative = [
+                t for t in mine
+                if t in theirs and len(set(self._task_votes[t].values())) > 1
+            ]
+            if len(informative) < self.BEHAVIOR_MIN_SHARED:
+                continue
+            agree = sum(1 for t in informative if mine[t] == theirs[t]) / len(informative)
+            if agree >= self.BEHAVIOR_AGREE_RATE:
+                return True
+        return False
+
+    def _note_vote(self, task_id: str, reviewer_id: str, scores: dict[str, float]) -> None:
+        """記一票（供行為推斷）；verdict＝五維均分 ≥0.5。"""
+        if len(self._task_votes) >= self._TASK_VOTES_CAP:
+            for old in list(self._task_votes)[: self._TASK_VOTES_CAP // 2]:
+                del self._task_votes[old]
+        verdict = (sum(scores.values()) / len(scores)) >= 0.5 if scores else False
+        self._task_votes.setdefault(task_id, {})[reviewer_id] = verdict
 
     def note_head(self, target_id: str, stream_id: str, branch_id: str, head: str) -> None:
         """記下對某 target 最新觀察到的 (stream_id, branch_id, chain head)。
@@ -176,12 +227,20 @@ class Registry:
         self._seen_reviews.add(dedup_key)
 
         # ④ weight 內生 ＋ 同源非線性降權（floor/k 取代純地板，v1 改動3.4）
+        #    雙通道：誠實條件化（controller，demo）＋行為推斷（投票相關，X4 承重）
         weight = self._reviewer_weight(env.reviewer_id, env.substrate)
         if self._same_signal(env.reviewer_id, env.target_id):
             controller = self._cards[env.reviewer_id].controller
             k = self._same_source_k.get((controller, env.target_id), 0) + 1
             self._same_source_k[(controller, env.target_id)] = k
             weight = min(weight, SAME_SIGNAL_FLOOR / k)
+        elif self._behavior_same_source(env.reviewer_id):
+            k = self._behavior_same_k.get((env.reviewer_id, env.target_id), 0) + 1
+            self._behavior_same_k[(env.reviewer_id, env.target_id)] = k
+            weight = min(weight, SAME_SIGNAL_FLOOR / k)
+
+        # 記票（行為推斷的原料；先判後記，本票不參與自己的同源判定）
+        self._note_vote(env.task_id, env.reviewer_id, env.scores)
 
         # 改動2：信譽寫進被評者的 stream 三元組（credit 跟記憶走，不跟身體走）
         self._rep.record_review(
@@ -196,6 +255,7 @@ class Registry:
             "seen_reviews": [list(k) for k in self._seen_reviews],
             "same_source_k": {f"{c}␟{t}": v for (c, t), v in self._same_source_k.items()},
             "probation": sorted(self._probation),
+            "behavior_same_k": {f"{r}␟{t}": v for (r, t), v in self._behavior_same_k.items()},
         }
 
     def state_from_json(self, d: dict[str, Any]) -> None:
@@ -213,6 +273,10 @@ class Registry:
             c, t = key.split("␟", 1)
             self._same_source_k[(c, t)] = int(v)
         self._probation = set(d.get("probation", []))
+        self._behavior_same_k = {}
+        for key, v in d.get("behavior_same_k", {}).items():
+            r, t = key.split("␟", 1)
+            self._behavior_same_k[(r, t)] = int(v)
 
     def forget_target(self, target_id: str) -> None:
         """wipe demo 用（12 §7 時刻 4）：抹掉某 target 當前 stream 的信譽格與鏈頭記錄。

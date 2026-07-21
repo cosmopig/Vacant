@@ -75,7 +75,7 @@
 | B（記憶預算） | 2000 tokens（暫定） | 15 §1 |
 | retry | 4（指數 backoff） | 09 §3.5 |
 | decay 半衰期 | 200 事件（向先驗回歸） | 12 §4.2 |
-| slash 不對稱係數 | 誤放行 : 誤攔（交付方 0.5／reviewer-honesty 0.5／誤攔 0.8） | 本檔凍結 |
+| slash 不對稱係數 | 交付方 0.5 全維／reviewer 誤放行 0.5 全維（其 PASS 對五維皆假陳述）／reviewer 誤攔 0.8 honesty | 本檔凍結 |
 | 稽核率 | X1 100%；demo 1.0；X3 p 掃描 | 各節 |
 | R1 | 正式實驗一律開思考（no_think=False、max_tokens=None） | 07-06 |
 

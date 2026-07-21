@@ -84,7 +84,7 @@ INSUFFICIENT_DATA_N = 30  # THEORY_V5 §5 demo 7：n<30 顯式標注
 
 # 牙齒·slash 不對稱係數（PREREG v2 §6 凍結；12 §4.2：誤放行罰重於誤攔）
 SLASH_FACTOR_DELIVERER = 0.5    # 交付方 provable fault（誤放行）：全五維乘法扣減
-SLASH_FACTOR_REVIEWER = 0.5     # reviewer 誤放行（投 PASS 但稽核 fail）：honesty 扣減
+SLASH_FACTOR_REVIEWER = 0.5     # reviewer 誤放行：全五維扣減（其 PASS 對五維皆假陳述）
 SLASH_FACTOR_FALSE_BLOCK = 0.8  # reviewer 誤攔（投 FAIL 但稽核 pass）：honesty 輕扣
 
 
@@ -301,15 +301,15 @@ class Ecosystem:
                             r["reviewer_id"], self.substrate_id,
                             SLASH_FACTOR_FALSE_BLOCK, dims=("honesty",))
             if rec.provable_fault:
-                # 牙齒·誤放行（重罰）：交付方全維 ×0.5；投 PASS 的 reviewer
-                # honesty ×0.5（audit-anchored reviewer slash——15 §3-A2 的真金）。
+                # 牙齒·誤放行（重罰）：交付方全維 ×0.5；投 PASS 的 reviewer 全維
+                # ×0.5——其 PASS 對五維皆為假陳述（audit-anchored reviewer slash，
+                # 15 §3-A2 的真金；B 層情境④的預期下墜曲線依此計算）。
                 self.registry.apply_slash(
                     deliverer.vacant_id, self.substrate_id, SLASH_FACTOR_DELIVERER)
                 for r in reviews:
                     if r["verdict"] == "PASS":
                         self.registry.apply_slash(
-                            r["reviewer_id"], self.substrate_id,
-                            SLASH_FACTOR_REVIEWER, dims=("honesty",))
+                            r["reviewer_id"], self.substrate_id, SLASH_FACTOR_REVIEWER)
                 self._emit("SLASH", task_id=tid, target=deliverer.name,
                            reason="audit fail 而交付方/互審宣稱通過")
 
