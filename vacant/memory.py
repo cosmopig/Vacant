@@ -178,7 +178,7 @@ class MemoryManager:
         self,
         policy: str,
         *,
-        budget_tokens: int = 1500,
+        budget_tokens: int = 2000,   # 15 §1 裁決 B=2000（暫定待實驗覆寫）
         k: int = 5,
         decay_halflife: int = 200,
     ) -> None:

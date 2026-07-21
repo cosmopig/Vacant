@@ -139,7 +139,7 @@ class Gateway:
             stream_id = result_env.body.get("stream_id") or callee_id
             chain_head = result_env.body.get("chain_head", "")
             branch_id = result_env.body.get("branch_id", "main")
-            self.registry.note_head(callee_id, stream_id, chain_head)
+            self.registry.note_head(callee_id, stream_id, branch_id, chain_head)
             scores = verify_checkable(task, answer)
             review = ReviewEnvelope.create(
                 body.identity,

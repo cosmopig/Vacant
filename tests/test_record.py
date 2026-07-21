@@ -191,5 +191,46 @@ def test_cli_pack_and_check_exit_codes(tmp_path):
     assert cli.main(["record", "check", str(run)]) == 1
 
 
+# --- 私鑰排除（RECORD_SPEC §7；T5）-------------------------------------------
+def test_pack_excludes_private_key(tmp_path):
+    """pack：identity.key 不進 SHA256SUMS、路徑進 manifest 聲明；check 仍 PASS。"""
+    run = tmp_path / "runs" / "x1" / "r_key"
+    _make_full_run(run)
+    assert (run / "residents" / "good_1" / "trust" / "identity.key").exists()
+    manifest = pack(run, dict(_EXTRA))
+    sums = (run / "SHA256SUMS").read_text(encoding="utf-8")
+    assert "identity.key" not in sums                      # 私鑰不入雜湊清單
+    declared = manifest["excluded_private_keys"]
+    assert declared == ["residents/good_1/trust/identity.key"]
+    ok, problems = check(run)
+    assert ok, problems
+
+
+def test_private_key_in_sums_flagged(tmp_path):
+    """SHA256SUMS 被人加入私鑰行 → check 點名私鑰。"""
+    run = tmp_path / "runs" / "x1" / "r_key2"
+    _make_full_run(run)
+    pack(run, dict(_EXTRA))
+    with (run / "SHA256SUMS").open("a", encoding="utf-8") as f:
+        f.write("deadbeef  residents/good_1/trust/identity.key\n")
+    ok, problems = check(run)
+    assert not ok
+    assert any("私鑰" in p and "identity.key" in p for p in problems)
+
+
+def test_undeclared_private_key_flagged(tmp_path):
+    """私鑰存在但 manifest 未聲明排除（如舊版 pack 產物）→ check 點名。"""
+    run = tmp_path / "runs" / "x1" / "r_key3"
+    _make_full_run(run)
+    pack(run, dict(_EXTRA))
+    mpath = run / "manifest.json"
+    manifest = json.loads(mpath.read_text(encoding="utf-8"))
+    manifest["excluded_private_keys"] = []                 # 模擬未聲明
+    mpath.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    ok, problems = check(run)
+    assert not ok
+    assert any("excluded_private_keys" in p for p in problems)
+
+
 def test_cli_check_missing_dir_exit_nonzero(tmp_path):
     assert cli.main(["record", "check", str(tmp_path / "nope")]) == 1

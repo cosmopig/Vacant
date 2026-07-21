@@ -62,6 +62,17 @@ ANOMALIES_EMPTY_NOTE = (
     "（未登記異常——若 run 有異常而此檔為空，屬記錄違規）\n"
 )
 
+# 私鑰排除（07-09 實錄教訓 §4.4 → RECORD_SPEC §7）：證據包**不得攜帶居民私鑰**。
+# 證據包的用途是離線複核（驗鏈用 identity.pub 即足夠）；私鑰入包＝任何拿到包的
+# 人都能偽造該居民未來的簽章——把「可複核」擴大成「可冒名」就毀了問責根基。
+# 誠實邊界：這是 prevents 級（密碼學核心）——不打包私鑰，冒名才真正不可能。
+PRIVATE_KEY_NAME = "identity.key"
+EXCLUDED_MANIFEST_FIELD = "excluded_private_keys"
+
+
+def _is_private_key(p: Path) -> bool:
+    return p.name == PRIVATE_KEY_NAME
+
 
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -200,9 +211,9 @@ def _ensure_anomalies(run_dir: Path) -> None:
 
 
 def _iter_pack_files(run_dir: Path):
-    """遞迴列出 run_dir 下所有一般檔，排除 SHA256SUMS 自身。"""
+    """遞迴列出 run_dir 下所有一般檔，排除 SHA256SUMS 自身與私鑰（SPEC §7）。"""
     for p in sorted(run_dir.rglob("*")):
-        if p.is_file() and p.name != SUMS_NAME:
+        if p.is_file() and p.name != SUMS_NAME and not _is_private_key(p):
             yield p
 
 
@@ -303,6 +314,13 @@ def pack(run_dir: str | Path, extra_meta: dict | None = None, *,
             missing.setdefault(opt, "本 run 未產出此檔（可缺項）")
 
     manifest["missing"] = missing
+    # 私鑰排除聲明（SPEC §7）：包內存在的 identity.key 逐一路徑列出——「我們知道
+    # 它在這、且刻意不打包」是明白斷言，不是靜默省略。
+    manifest[EXCLUDED_MANIFEST_FIELD] = [
+        p.relative_to(run_dir).as_posix()
+        for p in sorted(run_dir.rglob("*"))
+        if p.is_file() and _is_private_key(p)
+    ]
     (run_dir / MANIFEST_NAME).write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -360,6 +378,10 @@ def check(run_dir: str | Path) -> tuple[bool, list[str]]:
         listed_paths = set()
         for want_hex, rel in listed:
             listed_paths.add(rel)
+            if Path(rel).name == PRIVATE_KEY_NAME:
+                problems.append(
+                    f"SHA256SUMS 含私鑰 {rel}（SPEC §7：私鑰不得入證據包雜湊清單）"
+                )
             fp = run_dir / rel
             if not fp.exists():
                 problems.append(f"SHA256SUMS 列了 {rel} 但檔案不存在")
@@ -389,5 +411,17 @@ def check(run_dir: str | Path) -> tuple[bool, list[str]]:
             problems.append(f"{CARD_VERIFY_NAME} 為空（有卡卻無驗證輸出）")
         elif "FAIL" in txt:
             problems.append(f"{CARD_VERIFY_NAME} 含 FAIL（有信任狀驗不過）")
+
+    # 8) 私鑰排除（SPEC §7）：存在的 identity.key 必須已在 manifest 聲明排除
+    declared = manifest.get(EXCLUDED_MANIFEST_FIELD, [])
+    declared_set = set(declared) if isinstance(declared, list) else set()
+    for p in sorted(run_dir.rglob("*")):
+        if p.is_file() and _is_private_key(p):
+            rel = p.relative_to(run_dir).as_posix()
+            if rel not in declared_set:
+                problems.append(
+                    f"私鑰 {rel} 存在但 manifest.{EXCLUDED_MANIFEST_FIELD} 未聲明"
+                    "（缺席須有理由，私鑰尤甚）"
+                )
 
     return (not problems), problems

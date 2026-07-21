@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -21,6 +22,43 @@ from pathlib import Path
 from typing import Any, Callable
 
 _POLL_S = 0.5  # SSE 輪詢新行的節奏
+
+_LEDGER_GENESIS = "0" * 64  # ledger head 滾動雜湊的創世值
+
+
+def ledger_head(ledger_path: Path) -> tuple[int, str]:
+    """重算 ledger 的 (事件數, 滾動 head 雜湊)——/api/snapshot 的唯一真相來源。
+
+    head = sha256(head_prev + 該行原文) 逐行滾動（創世 64 個 '0'）：與 logbook
+    的 hash-chain 同構，任何一行被竄改/重排/刪除都會改變 head。這是「面板快照
+    可被事後對帳」的錨：快照時刻的 ledger_seq 與 head 落盤後，事後重算不符
+    即知 ledger 動過——**面板不是信任來源，以 ledger 為準**（本檔 docstring）。
+    """
+    head = _LEDGER_GENESIS
+    seq = 0
+    if ledger_path.exists():
+        with ledger_path.open("r", encoding="utf-8") as f:
+            for line in f:
+                line = line.rstrip("\n")
+                if not line:
+                    continue
+                head = hashlib.sha256((head + line).encode("utf-8")).hexdigest()
+                seq += 1
+    return seq, head
+
+
+def build_snapshot(ledger_path: Path, roster_fn: Callable[[], Any],
+                   scoreboard_fn: Callable[[], Any]) -> dict[str, Any]:
+    """GET /api/snapshot 的 payload（17 §P0-3）：{roster, scoreboard, ts_ms,
+    ledger_seq, ledger_head_hash}。給外部監看一個可對帳的唯讀切面。"""
+    seq, head = ledger_head(ledger_path)
+    return {
+        "roster": roster_fn(),
+        "scoreboard": scoreboard_fn(),
+        "ts_ms": time.time_ns() // 1_000_000,
+        "ledger_seq": seq,
+        "ledger_head_hash": head,
+    }
 
 
 # --- 內嵌單頁（無框架 / 無 CDN；居民卡片＋信用曲線＋路由流＋SLASH＋on/off）------
@@ -159,7 +197,8 @@ function onEvent(ev){
     $('#slash').appendChild(f);
     setTimeout(()=>f.remove(), 6000);
     refresh();
-  } else if(d.type==='DELIVERED' || d.type==='HUMAN_REPORT' || d.type==='WIPE'){
+  } else if(d.type==='DELIVERED' || d.type==='HUMAN_REPORT' || d.type==='WIPE'
+            || d.type==='CHECKPOINT'){
     refresh();
   }
 }
@@ -211,6 +250,9 @@ class _Handler(BaseHTTPRequestHandler):
                 self._send_json(self._ctx.roster_fn())
             elif path == "/api/scoreboard":
                 self._send_json(self._ctx.scoreboard_fn())
+            elif path == "/api/snapshot":
+                self._send_json(build_snapshot(
+                    self._ctx.ledger_path, self._ctx.roster_fn, self._ctx.scoreboard_fn))
             elif path == "/events":
                 self._stream_events()
             else:

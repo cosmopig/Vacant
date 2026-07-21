@@ -1,12 +1,12 @@
-import sys, tempfile, urllib.request
+import os, sys, tempfile, urllib.request
 print("A start", flush=True)
-url = None
-for ip in ["192.168.76.1", "172.25.16.1", "172.17.119.12"]:
-    try:
-        urllib.request.urlopen(f"http://{ip}:1234/v1/models", timeout=4).read()
-        url = f"http://{ip}:1234/v1"; print(f"B url={url}", flush=True); break
-    except Exception as e:
-        print(f"B {ip} fail {type(e).__name__}", flush=True)
+# 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
+url = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/") + "/v1"
+try:
+    urllib.request.urlopen(f"{url}/models", timeout=4).read()
+    print(f"B url={url}", flush=True)
+except Exception as e:
+    print(f"B {url} fail {type(e).__name__}", flush=True)
 print("C import vacant", flush=True)
 from vacant.host import Host
 from vacant.openai_substrate import OpenAISubstrate

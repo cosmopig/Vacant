@@ -45,6 +45,7 @@ class CapabilityCard:
     endpoint: str = "in-process"
     pub_hex: str = ""
     controller: str = ""   # 同源降權用：同一 controller 的 vacant 互評降權
+    stream_id: str = ""    # 當前 memory stream（創世 hash；改動2 的公示錨，空鏈＝""）
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -53,6 +54,7 @@ class CapabilityCard:
             "endpoint": self.endpoint,
             "pub_hex": self.pub_hex,
             "controller": self.controller,
+            "stream_id": self.stream_id,
         }
 
     @classmethod
@@ -63,6 +65,7 @@ class CapabilityCard:
             endpoint=d.get("endpoint", "in-process"),
             pub_hex=d.get("pub_hex", ""),
             controller=d.get("controller", ""),
+            stream_id=d.get("stream_id", ""),
         )
 
 
@@ -150,6 +153,8 @@ class VacantBody:
         """把活著時的狀態寫回硬碟（vacant 回睡）。所有檔案原子寫入（防崩潰半截）。"""
         self.identity.save(self.trust_dir)
         self.logbook.save(self.trust_dir / "logbook.ndjson")
+        # 改動2：能力卡同步公示當前 stream（創世 hash；空鏈維持 ""）
+        self.card.stream_id = self.logbook.stream_id() or ""
         atomic_write_text(self.trust_dir / "reputation.json",
                           json.dumps(self.reputation.to_json(), ensure_ascii=False))
         atomic_write_text(self.trust_dir / "capability_card.json",

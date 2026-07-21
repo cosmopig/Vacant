@@ -1,9 +1,12 @@
+import os
+
 from vacant import Vacant, HermesBrain
 
 # 腦 = 真 Hermes Agent（自己調 qwopus），vacant 在外層包 verify-fix + 簽章究責
+# 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
 brain = HermesBrain(
     model="qwopus3.6-27b-coder-mtp-nvfp4",
-    base_url="http://192.168.76.1:1234/v1",
+    base_url=os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/") + "/v1",
     timeout=220,
 )
 v = Vacant(brain, k=2)

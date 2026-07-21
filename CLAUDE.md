@@ -20,15 +20,29 @@ W1 實驗基建。規劃與理論的正典在
 - `vacant/logbook.py` — 簽章 hash-chain；stream_id＝創世 hash、真 head()（改動1）
 - `vacant/envelope.py` — Envelope＋**ReviewEnvelope**（改動3 的簽章 review）
 - `vacant/registry.py` — record_review 只收驗簽＋head 新鮮＋去重；weight 內生；
-  同源非線性降權 floor/k
+  同源非線性降權 floor/k＋**行為推斷同源降權**（鑑別題一致率，零 controller_id）
+- `vacant/reputation.py` — 五維 Beta；**改動2 三元組 key**(stream,branch,substrate)＋
+  牙齒（decay 半衰期 200 事件向先驗回歸、slash 乘法扣減）
 - `vacant/memory.py` — MemoryStream（episode 上鏈）＋MemoryManager M0/M1/M2
   （X1 的實驗處理本身）＋KS-1／A4 可執行防呆
 - `vacant/auditor.py` — 確定性稽核（sha256 抽樣、checks.py 沙箱、provable-fault）
-- `vacant/router.py` — trust on/off 單開關（on＝UCB、off＝確定性隨機）
+- `vacant/router.py` — trust on/off 單開關（on＝UCB、off＝確定性隨機）；
+  probation 路由端牙齒（蓋 0.55＋每 10 筆見習配額）
 - `vacant/batch.py` — RunLedger 斷點續跑＋Watchdog（裁決 B4）
-- `vacant/x1.py` — X1 任務族＋run_x1 三臂迴圈＋transfer_curve
-- `vacant/research.py` — M1–M6＋McNemar＋bootstrap（統計端）
-- `examples/x1_pilot.py` — 遷移 pilot 進入點（oracle-lesson 一票否決判準）
+- `vacant/x1.py` — X1 任務族＋run_x1 三臂迴圈＋transfer_curve＋pilot_report
+  （一票否決）＋finalize_run_package（RECORD_SPEC 合格包）＋require_usage 成本紀律
+- `vacant/codebench.py` — 六坑型族程序生成＋**EvalPlusMBPPLoader**（378 題
+  sha256 釘死、V/GT 分離、fail-closed）
+- `vacant/research.py` — M1–M6＋McNemar＋bootstrap＋**預註冊四函式**
+  （holm_bonferroni／tost_equiv_boot／wilcoxon_signed_rank_exact／mcnemar_power）
+- `vacant/record.py` — RECORD_SPEC pack/check（紀錄紅線：不 pack＝沒跑過；
+  私鑰 identity.key 排除，SPEC §7）
+- `vacant/blayer.py` — B 層機制驗收六情境（0→70% 步進 × on/off 雙組，判準寫死）
+- `vacant/checkpoint.py` — V1 存檔點認證＋回溯稽核（18 §2；存檔點自身成鏈）
+- `vacant/dashboard.py` — 觀測台＋/api/roster/scoreboard/**snapshot**（面板非信任來源）
+- `examples/x1_pilot.py` — 遷移 pilot 進入點（--loader x1|builtin|evalplus、--stub 閘門）
+- `examples/b_layer.py` — B 層六情境掃描 runner（預設每格 1000 seeds）
+- `docs/PREREG_V2.md` — 預註冊凍結總表（草稿待人類簽字＋ledger 簽入）
 
 ## 鐵律（違反＝run 作廢）
 
@@ -43,9 +57,20 @@ W1 實驗基建。規劃與理論的正典在
 
 ## 後推項（不要提前做）
 
-改動2（reputation key 三元組 rename）、reputation 牙齒（decay/slash/probation
-的路由端）、Thompson 路由、工具面 v2（delegate/信任狀/scoreboard）、dashboard
-——依 15 §3-B/§3-C 排在 W2＋。
+~~改動2~~、~~牙齒~~、~~B 層六情境~~、~~V1 存檔點~~——**已於 2026-07-21 落地**
+（feat/complete-vacant-p0-p1-p4 分支，經人類裁決提前 P4）。仍後推：
+Thompson 路由、工具面 v2 再擴、V0 離線重放（掛 P7）、V2 +retro 臂
+（條件：V0 正訊號＋B 層全過＋投稿軌）、X2/X3/X4 主跑、THEORY_V5 回灌＋
+網站改版（P7/P8）。
+
+## 已完成缺口（2026-07-21 對帳 19 號圖 G1–G12）
+
+G1 EvalPlus loader ✓（整合門在本機 skip——官方包在 VM）· G7 統計四函式 ✓ ·
+G8 舊 wire-format ✓（本機 tar 備份於 ~/vacant-mcp-backup-2026-07-21.tgz 後清掉）·
+G9 死碼 ✓ · G10 硬編 IP ✓（VACANT_ENDPOINT 單一真相）· P0-3 /api/snapshot ✓ ·
+T5 record 排私鑰 ✓ · G5 PREREG v2 草稿 ✓（**待人類簽字凍結**）。
+未動（機時／人類事項）：P1-0 思考探針、X1 pilot 真跑（harness 已就緒）、
+G12 行政（教授簽字、倫理遞件、AAMAS 死線、文獻直驗、機時裁決）。
 
 ## 慣例
 

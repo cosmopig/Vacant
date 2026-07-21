@@ -1,6 +1,7 @@
-import json, urllib.request, time
+import json, os, urllib.request, time
 M = "gemma-4-12b-coder-fable5-composer2.5-v1"
-URL = "http://192.168.76.1:1234/api/v1/chat"
+# 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
+URL = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/") + "/api/v1/chat"
 outs = []
 for i in range(2):
     body = json.dumps({"model": M, "system_prompt": "Output ONLY the answer.",

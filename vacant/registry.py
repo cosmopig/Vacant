@@ -26,6 +26,14 @@ from .reputation import DIMS, SAME_SIGNAL_FLOOR, Reputation, ucb_score
 #     地板是常數優勢，配非線性同源降權後同一 controller 的總貢獻只有 log 級成長）。
 REVIEWER_WEIGHT_FLOOR = 0.05
 REVIEWER_SATURATION_OBS = 5.0  # obs/(obs+此值)：約 5 筆被審觀測後 weight 才接近自身信譽
+# 牙齒·probation 路由端（12 §4.2；17 §P4）：見習期（前 m 筆交付）的 UCB 上限——
+# 洗白者換 key 重生後不能立刻壓過已證明的老手（重賺成本，raises-cost 非 prevents）。
+# 兩條安全閥（缺任一機制就卡死，誠實標明）：
+#   ①全員見習時不蓋——否則新生態所有候選同分、第一個居民壟斷路由（冷啟動陷阱）；
+#   ②每 PROBATION_EXPLORE_EVERY 筆路由保留見習配額——否則已證明老手的生態裡
+#     見習生永遠選不到、m 筆強制稽核永遠不發生（永久流放陷阱，冷啟動 C1 死亡）。
+PROBATION_SCORE_CAP = 0.55
+PROBATION_EXPLORE_EVERY = 10
 
 
 class ReviewRejected(Exception):
@@ -42,11 +50,19 @@ class Registry:
 
     def __init__(self) -> None:
         self._cards: dict[str, CapabilityCard] = {}
-        self._rep = Reputation()  # 聚合：per (target, substrate) 的網路級信譽
+        self._rep = Reputation()  # 聚合：per (stream_id, branch_id, substrate) 的網路級信譽（改動2）
         # 改動3 狀態：目標鏈頭（head 新鮮性）、review 去重、同源計數（非線性降權）
-        self._heads: dict[str, tuple[str, str]] = {}       # target_id → (stream_id, head)
+        # target_id → (stream_id, branch_id, head)：vacant_id 只是「現在指向哪條
+        # stream」的解析表；信譽本體掛在 stream 三元組上（credit 跟記憶走）。
+        self._heads: dict[str, tuple[str, str, str]] = {}
         self._seen_reviews: set[tuple[str, str, str]] = set()  # (reviewer, stream, head)
         self._same_source_k: dict[tuple[str, str], int] = {}   # (controller, target) → 次數
+        self._probation: set[str] = set()  # 見習中的 target_id（路由端權重上限的對象）
+        self._route_seq = 0                # 路由計次（見習配額的確定性時脈）
+        # 行為推斷同源（15 §3-A2；17 §P4）：投票相關性偵測，**承重路徑零 controller_id
+        # 讀取**——X4 的 Sybil 攻防不能依賴攻擊者自報的身份欄位（套套邏輯地雷）。
+        self._task_votes: dict[str, dict[str, bool]] = {}   # task_id → {reviewer: 通過與否}
+        self._behavior_same_k: dict[tuple[str, str], int] = {}  # (reviewer, target) → 已降權次數
 
     # --- halo：公告 / 發現 -------------------------------------------------
     def announce(self, card: CapabilityCard) -> None:
@@ -74,20 +90,101 @@ class Registry:
         return self._cards.get(vacant_id)
 
     # --- 信譽索引 ----------------------------------------------------------
+    # 行為同源判準（15 §3-A2；B 層情境②）：與任一其他 reviewer 的共審任務 ≥5 題
+    # 且一致率 ≥0.9 → 視為同源（投票相關／恆同意）。閾值公開＝raises-cost 非 prevents。
+    BEHAVIOR_MIN_SHARED = 5
+    BEHAVIOR_AGREE_RATE = 0.9
+    _TASK_VOTES_CAP = 2000  # 投票記憶上限（先進先出；B 層／demo 規模綽綽有餘）
+
     def _same_signal(self, reviewer_id: str, target_id: str) -> bool:
-        """同源偵測：同一 controller 互評 → 降權（raises-cost，閾值公開可被繞）。"""
+        """同源偵測（誠實條件化版）：同一 controller 互評 → 降權。
+
+        誠實邊界：controller 欄位是**自報**的，攻擊者可匿——此路徑只供 demo／
+        誠實模式；X4 承重用 `_behavior_same_source`（行為推斷，15 §3-A2）。"""
         rc = self._cards.get(reviewer_id)
         tc = self._cards.get(target_id)
         if rc and tc and rc.controller and rc.controller == tc.controller:
             return True
         return False
 
-    def note_head(self, target_id: str, stream_id: str, head: str) -> None:
-        """記下對某 target 最新觀察到的 (stream_id, chain head)。
+    def _behavior_same_source(self, reviewer_id: str) -> bool:
+        """行為推斷同源（零 controller_id）：與任一其他 reviewer 的投票序列
+        高度相關 → 視為同一控制者的克隆票。
+
+        判準只在**有鑑別力的題**（全體投票有分歧的任務）上算一致率：確定性
+        互審（重跑同一客觀 check）下所有 reviewer 天然全票一致，那是「同一個
+        環境真值」不是「同一個控制者」；克隆的指紋是**連分歧題都同進同退**。
+        共審鑑別題 <BEHAVIOR_MIN_SHARED → 證據不足，沉默（誠實：不硬判）。
+        誠實邊界（15 §3-A2）：這是行為證據不是身份證據；B 層情境②以「隨機
+        獨立 reviewer 不被誤判、克隆必被抓」雙側鎖住此判準。"""
+        mine: dict[str, bool] = {}
+        others: dict[str, dict[str, bool]] = {}
+        for task_id, votes in self._task_votes.items():
+            for rid, v in votes.items():
+                if rid == reviewer_id:
+                    mine[task_id] = v
+                else:
+                    others.setdefault(rid, {})[task_id] = v
+        for rid, theirs in others.items():
+            informative = [
+                t for t in mine
+                if t in theirs and len(set(self._task_votes[t].values())) > 1
+            ]
+            if len(informative) < self.BEHAVIOR_MIN_SHARED:
+                continue
+            agree = sum(1 for t in informative if mine[t] == theirs[t]) / len(informative)
+            if agree >= self.BEHAVIOR_AGREE_RATE:
+                return True
+        return False
+
+    def _note_vote(self, task_id: str, reviewer_id: str, scores: dict[str, float]) -> None:
+        """記一票（供行為推斷）；verdict＝五維均分 ≥0.5。"""
+        if len(self._task_votes) >= self._TASK_VOTES_CAP:
+            for old in list(self._task_votes)[: self._TASK_VOTES_CAP // 2]:
+                del self._task_votes[old]
+        verdict = (sum(scores.values()) / len(scores)) >= 0.5 if scores else False
+        self._task_votes.setdefault(task_id, {})[reviewer_id] = verdict
+
+    def note_head(self, target_id: str, stream_id: str, branch_id: str, head: str) -> None:
+        """記下對某 target 最新觀察到的 (stream_id, branch_id, chain head)。
 
         head 新鮮性檢查的比對基準：in-process 模擬裡由 gateway 在收到簽章 result
-        時回報（上機後即 result envelope 附帶的 chain_head）。"""
-        self._heads[target_id] = (stream_id, head)
+        時回報（上機後即 result envelope 附帶的 chain_head）。改動2：這筆記錄同時
+        是 vacant_id → 當前 stream 三元組的**唯一解析表**（信譽查找都經它）。"""
+        self._heads[target_id] = (stream_id, branch_id, head)
+
+    def _resolve(self, target_id: str) -> tuple[str, str] | None:
+        """vacant_id → 當前 (stream_id, branch_id)；未觀察過其鏈頭 → None。"""
+        h = self._heads.get(target_id)
+        return (h[0], h[1]) if h else None
+
+    # --- 牙齒（12 §4.2；17 §P4）-----------------------------------------------
+    def set_probation(self, target_id: str, on: bool) -> None:
+        """標記/解除見習（由 ecosystem 依 deliveries≤m 同步；wipe 後重新見習）。"""
+        if on:
+            self._probation.add(target_id)
+        else:
+            self._probation.discard(target_id)
+
+    def in_probation(self, target_id: str) -> bool:
+        return target_id in self._probation
+
+    def apply_slash(
+        self,
+        target_id: str,
+        substrate: str,
+        factor: float,
+        *,
+        dims: tuple[str, ...] | None = None,
+    ) -> bool:
+        """對 target **當前 stream** 執行 slash（稽核錨的後果）。回是否命中。
+
+        解析不到當前 stream → False（無法扣減看不到的帳——如實回，不靜默）。"""
+        resolved = self._resolve(target_id)
+        if resolved is None:
+            return False
+        self._rep.slash(resolved[0], resolved[1], substrate, factor, dims=dims)
+        return True
 
     def _reviewer_weight(self, reviewer_id: str, substrate: str) -> float:
         """weight 內生：reviewer 自身信譽 × 觀測飽和 → 不接受外部注入。"""
@@ -117,7 +214,7 @@ class Registry:
             raise ReviewRejected(
                 f"無 {env.target_id[:16]}… 的已知鏈頭（須先觀察到其簽章交付）"
             )
-        known_stream, known_head = known
+        known_stream, known_branch, known_head = known
         if env.target_stream_id != known_stream or env.target_head != known_head:
             raise ReviewRejected(
                 f"target_head 不新鮮：got {env.target_head[:12]} want {known_head[:12]}"
@@ -130,14 +227,24 @@ class Registry:
         self._seen_reviews.add(dedup_key)
 
         # ④ weight 內生 ＋ 同源非線性降權（floor/k 取代純地板，v1 改動3.4）
+        #    雙通道：誠實條件化（controller，demo）＋行為推斷（投票相關，X4 承重）
         weight = self._reviewer_weight(env.reviewer_id, env.substrate)
         if self._same_signal(env.reviewer_id, env.target_id):
             controller = self._cards[env.reviewer_id].controller
             k = self._same_source_k.get((controller, env.target_id), 0) + 1
             self._same_source_k[(controller, env.target_id)] = k
             weight = min(weight, SAME_SIGNAL_FLOOR / k)
+        elif self._behavior_same_source(env.reviewer_id):
+            k = self._behavior_same_k.get((env.reviewer_id, env.target_id), 0) + 1
+            self._behavior_same_k[(env.reviewer_id, env.target_id)] = k
+            weight = min(weight, SAME_SIGNAL_FLOOR / k)
 
-        self._rep.record_review(env.target_id, env.substrate, env.scores, weight=weight)
+        # 記票（行為推斷的原料；先判後記，本票不參與自己的同源判定）
+        self._note_vote(env.task_id, env.reviewer_id, env.scores)
+
+        # 改動2：信譽寫進被評者的 stream 三元組（credit 跟記憶走，不跟身體走）
+        self._rep.record_review(
+            env.target_stream_id, env.branch_id, env.substrate, env.scores, weight=weight)
         return weight
 
     # --- 狀態持久化（信譽/鏈頭/去重/同源計數；halo 卡由呼叫端重新 announce）------
@@ -147,67 +254,115 @@ class Registry:
             "heads": {t: list(v) for t, v in self._heads.items()},
             "seen_reviews": [list(k) for k in self._seen_reviews],
             "same_source_k": {f"{c}␟{t}": v for (c, t), v in self._same_source_k.items()},
+            "probation": sorted(self._probation),
+            "behavior_same_k": {f"{r}␟{t}": v for (r, t), v in self._behavior_same_k.items()},
         }
 
     def state_from_json(self, d: dict[str, Any]) -> None:
         from .reputation import Reputation
         self._rep = Reputation.from_json(d.get("rep", {}))
-        self._heads = {t: (v[0], v[1]) for t, v in d.get("heads", {}).items()}
+        self._heads = {}
+        for t, v in d.get("heads", {}).items():
+            if len(v) == 2:  # 改動2 前的 (stream, head) 舊檔 → branch 補 "main"
+                self._heads[t] = (v[0], "main", v[1])
+            else:
+                self._heads[t] = (v[0], v[1], v[2])
         self._seen_reviews = {tuple(k) for k in d.get("seen_reviews", [])}
         self._same_source_k = {}
         for key, v in d.get("same_source_k", {}).items():
             c, t = key.split("␟", 1)
             self._same_source_k[(c, t)] = int(v)
+        self._probation = set(d.get("probation", []))
+        self._behavior_same_k = {}
+        for key, v in d.get("behavior_same_k", {}).items():
+            r, t = key.split("␟", 1)
+            self._behavior_same_k[(r, t)] = int(v)
 
     def forget_target(self, target_id: str) -> None:
-        """wipe demo 用（12 §7 時刻 4）：抹掉某 target 的全部信譽格與鏈頭記錄。
+        """wipe demo 用（12 §7 時刻 4）：抹掉某 target 當前 stream 的信譽格與鏈頭記錄。
 
         語意＝「同一把 key、信用歸零」：歸屬（idem）在 keypair 續存，值得被託付
-        的那部分（被審歷史的聚合）隨記憶抹除一起消失。只供 demo/測試；
-        正式實驗的信用不可抹（那是 X4 攻防的前提）。"""
-        self._rep._cells = {k: v for k, v in self._rep._cells.items() if k[0] != target_id}
+        的那部分（被審歷史的聚合）隨記憶抹除一起消失。改動2 之後這個語意大部分
+        由 key 結構自然達成（新創世＝新三元組＝空格）；這裡清掉舊格與解析表避免
+        孤兒資料殘留。只供 demo/測試；正式實驗的信用不可抹（那是 X4 攻防的前提）。"""
         old = self._heads.pop(target_id, None)
-        if old is not None:  # 去重鍵以 stream 為軸；抹掉舊 stream 的（新 stream＝新創世，不撞）
-            old_stream = old[0]
+        if old is not None:
+            old_stream, old_branch = old[0], old[1]
+            self._rep._cells = {
+                k: v for k, v in self._rep._cells.items()
+                if not (k[0] == old_stream and k[1] == old_branch)
+            }
             self._seen_reviews = {k for k in self._seen_reviews if k[1] != old_stream}
 
     def reputation_of(self, target_id: str, substrate: str) -> float:
-        return self._rep.score(target_id, substrate)
+        """某 vacant 當前 stream 的信譽分（改動2）；未觀察過其鏈 → 中性 0.5。"""
+        resolved = self._resolve(target_id)
+        if resolved is None:
+            return 0.5
+        return self._rep.score(resolved[0], resolved[1], substrate)
 
     def standing(self, vacant_id: str, substrate: str | None = None) -> tuple[float, float]:
-        """某 vacant 的信譽：(score, observations)。
+        """某 vacant **當前 stream** 的信譽：(score, observations)（改動2）。
 
         供 ingress 信譽把關用（被呼叫方判斷要不要接這個 caller 的活）。
           - 給 substrate → 只看「在這顆腦上」的信譽（與 egress 路由同口徑；避免在腦 A
             上爛、卻靠腦 B 的好成績矇混過關）。
           - 不給 → 跨 substrate 平均（較寬鬆，僅供概覽）。
-        無任何觀測 → 回 (中性 0.5, 0)，讓新人靠探索通過（不誤殺冷啟動）。
+        未觀察過鏈頭／該 stream 無任何觀測 → 回 (中性 0.5, 0)，讓新人靠探索通過。
         """
+        resolved = self._resolve(vacant_id)
+        if resolved is None:
+            return 0.5, 0.0
+        stream_id, branch_id = resolved
         cells = [
-            (t, s)
-            for (t, s) in self._rep._cells
-            if t == vacant_id and (substrate is None or s == substrate)
+            (st, su)
+            for (st, br, su) in self._rep._cells
+            if st == stream_id and br == branch_id and (substrate is None or su == substrate)
         ]
         if not cells:
             return 0.5, 0.0
-        scores = [self._rep.score(t, s) for (t, s) in cells]
-        obs = sum(self._rep.observations(t, s) for (t, s) in cells)
+        scores = [self._rep.score(st, branch_id, su) for (st, su) in cells]
+        obs = sum(self._rep.observations(st, branch_id, su) for (st, su) in cells)
         return sum(scores) / len(scores), obs
 
     # --- 路由（UCB）-------------------------------------------------------
+    def _score_obs(self, target_id: str, substrate: str) -> tuple[float, float]:
+        """路由用：vacant_id → 當前 stream 的 (rep_score, obs)；未知 → (0.5, 0)。"""
+        resolved = self._resolve(target_id)
+        if resolved is None:
+            return 0.5, 0.0
+        return (self._rep.score(resolved[0], resolved[1], substrate),
+                self._rep.observations(resolved[0], resolved[1], substrate))
+
     def route(
         self, niche: str, substrate: str, *, explore_c: float = 0.3
     ) -> CapabilityCard | None:
-        """在能解此 niche 的候選裡，用 UCB 挑一個（rep + 探索額）。"""
+        """在能解此 niche 的候選裡，用 UCB 挑一個（rep + 探索額）。
+
+        牙齒·probation：有非見習候選在場時，見習生 UCB 蓋到 PROBATION_SCORE_CAP
+        （洗白重賺成本）；每 PROBATION_EXPLORE_EVERY 筆路由留一筆見習配額
+        （讓 m 筆強制稽核真的會發生，見常數區誠實邊界）。"""
         cands = self.discover(niche)
         if not cands:
             return None
-        total_obs = sum(self._rep.observations(c.vacant_id, substrate) for c in cands)
+        self._route_seq += 1
+        total_obs = sum(self._score_obs(c.vacant_id, substrate)[1] for c in cands)
+        probies = [c for c in cands if c.vacant_id in self._probation]
+        cap_active = len(probies) < len(cands)  # 全員見習 → 不蓋（冷啟動保護）
+
+        def raw_ucb(c: CapabilityCard) -> float:
+            rep, obs = self._score_obs(c.vacant_id, substrate)
+            return ucb_score(rep, obs, total_obs, c=explore_c)
+
+        # 見習配額：每 N 筆路由從見習生裡挑 UCB 最高者（組內不蓋）
+        if probies and cap_active and self._route_seq % PROBATION_EXPLORE_EVERY == 0:
+            return max(probies, key=raw_ucb)
 
         def key(c: CapabilityCard) -> float:
-            rep = self._rep.score(c.vacant_id, substrate)
-            obs = self._rep.observations(c.vacant_id, substrate)
-            return ucb_score(rep, obs, total_obs, c=explore_c)
+            u = raw_ucb(c)
+            if cap_active and c.vacant_id in self._probation:
+                u = min(u, PROBATION_SCORE_CAP)
+            return u
 
         return max(cands, key=key)
 
@@ -222,6 +377,6 @@ class Registry:
     def leaderboard(self, niche: str, substrate: str) -> list[tuple[str, float]]:
         cands = self.discover(niche)
         return sorted(
-            ((c.vacant_id, self._rep.score(c.vacant_id, substrate)) for c in cands),
+            ((c.vacant_id, self._score_obs(c.vacant_id, substrate)[0]) for c in cands),
             key=lambda x: -x[1],
         )

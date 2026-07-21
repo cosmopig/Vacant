@@ -279,11 +279,11 @@ def test_sandbox_timeout_on_generated_task_does_not_hang():
     assert time.monotonic() - t0 < 5
 
 
-def test_evalplus_loader_is_an_honest_stub_not_silently_wrong():
-    """真 EvalPlus 資料尚未接上：呼叫即報 NotImplementedError，不能悄悄回假資料。"""
-    loader = EvalPlusMBPPLoader("/nonexistent/mbppplus.jsonl", expected_sha256="deadbeef")
-    with pytest.raises(NotImplementedError):
-        loader.iter_tasks("any-seed")
+def test_evalplus_loader_fail_closed_without_pack():
+    """真 EvalPlus loader 已接上（G1）：官方包缺席＝建構即 fail-closed，
+    不能悄悄回假資料（詳盡驗證見 tests/test_evalplus_loader.py）。"""
+    with pytest.raises(FileNotFoundError):
+        EvalPlusMBPPLoader("/nonexistent/mbppplus.jsonl", expected_sha256="deadbeef")
 
 
 def test_builtin_loader_is_a_task_loader():

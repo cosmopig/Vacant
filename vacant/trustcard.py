@@ -50,6 +50,10 @@ def build_trust_card(
         ],
         "audit": {"performed": bool(audit and audit.get("ran")),
                   "passed": (audit or {}).get("passed")},
+        # V1（18 §2）：事後補稽狀態。交付當下恆為 null（尚未回溯）；存檔點補稽
+        # 後由 Ecosystem.trust_card 升級為 {checkpoint_seq, passed}——鍵恆在，
+        # 「仍待回溯」是被斷言的，不是被省略的（風險欄的時間維度）。
+        "retro_audit": None,
         "chain_head": deliverer.body.logbook.head()[-16:],
         "ts_ms": now_ms(),
     }

@@ -114,22 +114,25 @@ def test_channel_guard_send_side_chains():
 
 # --- reputation --------------------------------------------------------------
 def test_reputation_good_beats_bad():
+    """改動2：信譽格 key＝(stream_id, branch_id, substrate) 三元組。"""
     rep = Reputation()
     for _ in range(10):
-        rep.record_review("good", "echo", {d: 1.0 for d in ("factual", "logical", "relevance", "honesty", "adoption")})
-        rep.record_review("bad", "echo", {d: 0.0 for d in ("factual", "logical", "relevance", "honesty", "adoption")})
-    assert rep.score("good", "echo") > 0.8
-    assert rep.score("bad", "echo") < 0.2
+        rep.record_review("good-stream", "main", "echo", {d: 1.0 for d in ("factual", "logical", "relevance", "honesty", "adoption")})
+        rep.record_review("bad-stream", "main", "echo", {d: 0.0 for d in ("factual", "logical", "relevance", "honesty", "adoption")})
+    assert rep.score("good-stream", "main", "echo") > 0.8
+    assert rep.score("bad-stream", "main", "echo") < 0.2
+    # credit 跟記憶走：同一把 key 換新 stream（wipe）→ 信用自然歸零（中性 0.5）
+    assert rep.score("good-stream-v2", "main", "echo") == 0.5
 
 
 def test_same_signal_discount_raises_cost():
     plain, sybil = Reputation(), Reputation()
     good = {d: 1.0 for d in ("factual", "logical", "relevance", "honesty", "adoption")}
     for _ in range(5):
-        plain.record_review("t", "echo", good, weight=1.0, same_signal=False)
-        sybil.record_review("t", "echo", good, weight=1.0, same_signal=True)
+        plain.record_review("t", "main", "echo", good, weight=1.0, same_signal=False)
+        sybil.record_review("t", "main", "echo", good, weight=1.0, same_signal=True)
     # 同源刷分被降權 → 觀測累積遠較慢（raises-cost，非 prevents）
-    assert sybil.observations("t", "echo") < plain.observations("t", "echo")
+    assert sybil.observations("t", "main", "echo") < plain.observations("t", "main", "echo")
 
 
 def test_ucb_gives_newcomers_exploration():

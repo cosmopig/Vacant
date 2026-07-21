@@ -139,7 +139,8 @@ class ReplayError(Exception):
 #   - 簽章覆蓋 target_stream_id/branch_id/target_head → 舊 review 簽章搬到新
 #     stream / 新 head 必驗失敗（擋簽章搬移，by design）。
 #   - demo 期一身一 stream → target_stream_id ≡ 由該 vacant logbook 創世 hash
-#     衍生（見 logbook.stream_id()）；vacant_id 仍是信譽索引的 key（改動2 後推）。
+#     衍生（見 logbook.stream_id()）；信譽索引的 key 是 stream 三元組
+#     (stream_id, branch_id, substrate)——改動2 已落地，vacant_id 只是解析表。
 
 _REVIEW_FIELDS = (
     "reviewer_id", "target_id", "target_stream_id", "branch_id",

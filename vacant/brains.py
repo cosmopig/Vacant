@@ -24,6 +24,15 @@ class Brain(Protocol):
     def generate(self, prompt: str) -> str: ...
 
 
+class UsageMixin:
+    """真實成本落盤（17 §P1／lab P0-real-cost-ledger 同規）：每次 generate 後
+    `self.last_usage` 放端點實回的 usage dict（prompt/completion/total tokens 等），
+    拿不到 → None。X1 正式 run 以 require_usage=True 把「缺 usage」判 infra_void，
+    禁止用 len(text)//4 之類字數代理混進正式成本分母。"""
+
+    last_usage: dict | None = None
+
+
 def _post(url: str, payload: dict, timeout: int) -> dict:
     req = urllib.request.Request(
         url, data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"}
@@ -32,7 +41,7 @@ def _post(url: str, payload: dict, timeout: int) -> dict:
         return json.load(r)
 
 
-class OpenAIBrain:
+class OpenAIBrain(UsageMixin):
     """任何 OpenAI 相容端點（/v1/chat/completions）。base_url 例：http://host:1234/v1"""
 
     def __init__(self, base_url: str, model: str, *, temperature: float = 0.0,
@@ -52,10 +61,12 @@ class OpenAIBrain:
             "model": self.model, "temperature": self.temperature, "max_tokens": self.max_tokens,
             "messages": [{"role": "system", "content": self.system}, {"role": "user", "content": prompt}],
         }, self.timeout)
+        u = d.get("usage")
+        self.last_usage = dict(u) if isinstance(u, dict) else None
         return (d["choices"][0]["message"].get("content") or "").strip()
 
 
-class LMStudioBrain:
+class LMStudioBrain(UsageMixin):
     """LM Studio。預設走 /api/v1/chat（reasoning 模型在這裡才拿得到最終答案；
     /v1 的 content 對 reasoning 模型常為空）。非 reasoning 模型用 api='openai' 即可。"""
 
@@ -77,10 +88,25 @@ class LMStudioBrain:
 
     def generate(self, prompt: str) -> str:
         if self.api == "openai":
-            return self._openai.generate(prompt)
+            out = self._openai.generate(prompt)
+            self.last_usage = self._openai.last_usage
+            return out
         d = _post(self.base + "/api/v1/chat", {
             "model": self.model, "system_prompt": self.system, "input": prompt,
         }, self.timeout)
+        # LM Studio /api/v1/chat 的 usage 在 stats 區塊（prompt/completion tokens）
+        stats = d.get("stats")
+        if isinstance(stats, dict):
+            self.last_usage = {
+                "prompt_tokens": stats.get("prompt_tokens"),
+                "completion_tokens": stats.get("predicted_tokens"),
+                "total_tokens": stats.get("total_tokens"),
+                **{k: v for k, v in stats.items()
+                   if k not in ("prompt_tokens", "predicted_tokens", "total_tokens")},
+            }
+        else:
+            u = d.get("usage")
+            self.last_usage = dict(u) if isinstance(u, dict) else None
         msgs = [o.get("content", "") for o in d.get("output", []) if o.get("type") == "message"]
         return (msgs[-1] if msgs else "").strip()
 
