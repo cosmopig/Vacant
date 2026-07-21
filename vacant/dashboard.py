@@ -197,7 +197,8 @@ function onEvent(ev){
     $('#slash').appendChild(f);
     setTimeout(()=>f.remove(), 6000);
     refresh();
-  } else if(d.type==='DELIVERED' || d.type==='HUMAN_REPORT' || d.type==='WIPE'){
+  } else if(d.type==='DELIVERED' || d.type==='HUMAN_REPORT' || d.type==='WIPE'
+            || d.type==='CHECKPOINT'){
     refresh();
   }
 }

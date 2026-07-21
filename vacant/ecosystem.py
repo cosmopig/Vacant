@@ -156,6 +156,8 @@ class Ecosystem:
         self.auditor = Auditor(rate=audit_rate)
         self.ledger_path = self.root / "ledger" / "events.jsonl"
         self.scoreboard_path = self.root / "scoreboard.json"
+        self.artifacts_path = self.root / "artifacts.jsonl"  # 交付物留檔（V1 回溯稽核原料）
+        self.checkpoints_dir = self.root / "checkpoints"     # V1 存檔點鏈（18 §2）
         self._cards: dict[str, dict] = {}      # task_id → trust_card json
 
         # KS-1 可執行防呆涵蓋 tier 種植文字（品質操弄可以、責任修辭不行）
@@ -329,6 +331,13 @@ class Ecosystem:
                 lesson=lesson, check=tests, ts_ms=now_ms(),
             )
             deliverer.body.persist()
+            # V1（18 §2）：交付物留檔——回溯稽核的原料（答案＋check）。
+            # 注意這是信任臂專屬：off 臂無後果世界，沒有可回溯的帳。
+            with self.artifacts_path.open("a", encoding="utf-8") as f:
+                f.write(json.dumps({
+                    "task_id": tid, "deliverer": deliverer.name,
+                    "answer": answer, "tests": tests, "ts_ms": now_ms(),
+                }, ensure_ascii=False) + "\n")
 
         # 6) scoreboard（off/on 配對累計＋成本——每次使用都是一筆試次）
         self._score(trust, passed, calls)
@@ -454,17 +463,93 @@ class Ecosystem:
             })
         return out
 
+    # --- V1 存檔點（18 §2；離線／週期作業，不進 delegate 同步路徑）--------------
+    def _artifacts_for(self, name: str) -> tuple[dict[str, str], dict[str, dict]]:
+        """該居民的 (task_id→answer, task_id→check)——回溯稽核的原料。"""
+        answers: dict[str, str] = {}
+        checks: dict[str, dict] = {}
+        if self.artifacts_path.exists():
+            for line in self.artifacts_path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                rec = json.loads(line)
+                if rec.get("deliverer") == name:
+                    answers[rec["task_id"]] = rec["answer"]
+                    checks[rec["task_id"]] = rec["tests"]
+        return answers, checks
+
+    def _checkpoints_of(self, name: str) -> list[tuple[int, dict]]:
+        """載回該居民的存檔點鏈 [(seq, ckpt), ...]（依序）。"""
+        d = self.checkpoints_dir / name
+        out = []
+        if d.is_dir():
+            for p in sorted(d.glob("ckpt_*.json")):
+                try:
+                    out.append((int(p.stem.split("_")[1]), json.loads(
+                        p.read_text(encoding="utf-8"))))
+                except (ValueError, KeyError):
+                    continue
+        return out
+
+    def issue_checkpoint(self, name: str, *, force: bool = False) -> dict[str, Any] | None:
+        """對居民的 episode 鏈簽發下一枚存檔點（滿窗才簽；force＝wipe 收尾允許未滿窗）。
+
+        離線／週期作業（18 §2）：絕不從 delegate 呼叫——同步路徑的 60s 預算
+        不為回溯稽核服務（16 §B1）。回存檔點 dict；未滿窗回 None。"""
+        from .checkpoint import (
+            DEFAULT_WINDOW_EPISODES, issue_checkpoint as _issue, retro_audit_window,
+        )
+        r = self.residents[name]
+        episodes = [e for e in r.body.logbook.entries if e.type == "EPISODE"]
+        issued = self._checkpoints_of(name)
+        start = len(issued) * DEFAULT_WINDOW_EPISODES
+        remaining = episodes[start:]
+        if len(remaining) < DEFAULT_WINDOW_EPISODES and not (force and remaining):
+            return None
+        window_eps = remaining[:DEFAULT_WINDOW_EPISODES]
+        answers, checks = self._artifacts_for(name)
+        audits, missing = retro_audit_window(window_eps, answers, checks)
+        ckpt = _issue(
+            r.body.logbook, r.body.identity,
+            window=(window_eps[0].seq, window_eps[-1].seq),
+            retro_audits=audits, retro_missing=missing,
+            prev_checkpoint=(issued[-1][1] if issued else None),
+            ts_ms=now_ms(),
+        )
+        k = len(issued) + 1
+        d = self.checkpoints_dir / name
+        d.mkdir(parents=True, exist_ok=True)
+        (d / f"ckpt_{k:04d}.json").write_text(
+            json.dumps(ckpt, ensure_ascii=False, indent=2), encoding="utf-8")
+        self._emit("CHECKPOINT", target=name, seq=k, window=ckpt["window"],
+                   retro_audited=len(audits), retro_missing=len(missing))
+        return ckpt
+
+    def _retro_lookup(self, task_id: str) -> dict[str, Any] | None:
+        """task_id 的事後補稽狀態（信任狀升級：「存檔點 #k 回溯已驗 ✓」）。"""
+        for name in self.residents:
+            for k, ckpt in self._checkpoints_of(name):
+                if task_id in ckpt.get("retro_audits", {}):
+                    return {"checkpoint_seq": k, "passed": ckpt["retro_audits"][task_id]}
+        return None
+
     def trust_card(self, task_id: str) -> dict[str, Any] | None:
         card = self._cards.get(task_id)
+        if card is None:
+            p = self.root / "cards" / f"{task_id}.json"  # 跨行程：落盤的卡也要找得回
+            if p.exists():
+                try:
+                    card = json.loads(p.read_text(encoding="utf-8"))
+                except ValueError:
+                    return None
         if card is not None:
-            return card
-        p = self.root / "cards" / f"{task_id}.json"  # 跨行程：落盤的卡也要找得回
-        if p.exists():
-            try:
-                return json.loads(p.read_text(encoding="utf-8"))
-            except ValueError:
-                return None
-        return None
+            # V1 事後升級（18 §2）：交付時簽出的卡（retro_audit=null）**不可改**
+            # ——改了 host_sig 即失效。這裡回傳的是副本：retro_audit 由存檔點鏈
+            # 查得；該欄位的驗證路徑是 verify_checkpoint（存檔點鏈），不是
+            # verify_trust_card（原卡）——兩層各自獨立可驗，誠實分流。
+            card = dict(card)
+            card["retro_audit"] = self._retro_lookup(task_id)
+        return card
 
     def report(self, task_id: str, verdict: str, evidence: str = "") -> dict[str, Any]:
         """人類/入口仲裁回灌（12 §3）：最強標籤，記帳＋事件；fault → slash 事件。
@@ -490,8 +575,17 @@ class Ecosystem:
         """抹記憶不抹 key（12 §7 時刻 4）：同一把 key、信用歸零、PROBATION。
 
         工程語意（11 §1）：歸屬（idem/key）續存；「值得被託付的那個人」（ipse）＝
-        被審歷史，抹掉後 stream 從新創世重長，信用歸零、重新見習。"""
+        被審歷史，抹掉後 stream 從新創世重長，信用歸零、重新見習。
+
+        V1（18 §2）：wipe 前對舊 stream 簽發最終存檔點（force 允許未滿窗）並
+        歸檔舊鏈——「記憶沒了，帳還在」：存檔點鏈跨 wipe 延續、仍可離線驗證。"""
         r = self.residents[name]
+        self.issue_checkpoint(name, force=True)   # 舊 stream 的收尾認證（無料則略）
+        old_lb_path = r.body.trust_dir / "logbook.ndjson"
+        old_stream = r.body.logbook.stream_id()
+        if old_lb_path.exists() and old_stream:
+            archive = old_lb_path.with_name(f"logbook.archive-{old_stream[:12]}.ndjson")
+            archive.write_bytes(old_lb_path.read_bytes())
         from .logbook import Logbook
         r.body.logbook = Logbook()               # 新鏈＝新 stream（key 不變）
         r.body.log("REBIRTH", {"note": "memory wiped; same key, credit reset"})
