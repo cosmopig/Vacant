@@ -1,7 +1,7 @@
 """B 層機制驗收六情境 runner（13 §3；17 §P4；15 §2 畢業軌必要項）。
 
 正式掃描（每格 ≥1000 seeds，六情境 × 8 格 × on/off）：
-    python examples/b_layer.py --out ~/Library/Mobile\ Documents/com~apple~CloudDocs/專題/實驗記錄/驗收_B層/
+    python examples/b_layer.py --out runs/blayer_1000
 
 快速 smoke（開發用，數字不作歸檔）：
     python examples/b_layer.py --smoke
