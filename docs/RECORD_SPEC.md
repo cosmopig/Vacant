@@ -87,3 +87,17 @@ runs/<experiment>/<run_id>/
 vacant record pack  runs/x1/run_0007      # 就地整理成本規格佈局、產出 manifest 與 SHA256SUMS
 vacant record check runs/x1/run_0007      # 逐項核對；有問題逐條印出、exit code 非 0
 ```
+
+## 7. 私鑰排除（07-09 實錄教訓 §4.4；prevents 級紀律）
+
+證據包**不得攜帶居民私鑰**（`residents/*/trust/identity.key`）。證據包的用途是
+離線複核——驗簽章鏈用同目錄的 `identity.pub`＋`vacant_id` 即足夠；私鑰入包＝
+任何拿到包的人都能偽造該居民未來的簽章，把「可複核」擴大成「可冒名」，問責
+根基即毀。規則：
+
+- `pack`：私鑰**不進** `SHA256SUMS`，且把包內存在的私鑰路徑逐一寫進
+  `manifest.excluded_private_keys`——「知道它在、刻意不打包」是明白斷言，
+  不是靜默省略（與 §2「缺席須有理由」同紀律，私鑰尤甚）。
+- `check`：①`SHA256SUMS` 出現私鑰路徑 → FAIL；②磁碟上存在私鑰但
+  `manifest.excluded_private_keys` 未聲明 → FAIL。
+- 複核者需要驗鏈時使用 `identity.pub`（公鑰本就設計為可公開）。

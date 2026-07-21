@@ -12,8 +12,10 @@ from __future__ import annotations
 
 import hashlib
 import itertools
+import json
 import random
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator
 
 from .checks import compile_check
@@ -318,30 +320,220 @@ class BuiltinSampleLoader(TaskLoader):
         yield from _iter_pool(seed)
 
 
+# ============================================================================
+# G1／P1-1：真 EvalPlus MBPP+ 載入 —— 釘版、驗雜湊、V/GT 分離
+# ============================================================================
+#
+# 資料紀律（17 §P1-1 ＋ 24h-lab backlog P0-evalplus-loader-v1 同規）：
+#   - 官方包：EvalPlus MBPP+ v0.2.0（378 題），gzip jsonl，SHA-256 釘死在本檔
+#     常數；預設建構**必須**驗證此雜湊，禁止以 None 靜默略過（fail-closed）。
+#   - V/GT 分離：public projection 只含 {task_id, family, prompt, entry_point}
+#     ＋ visible_check（base inputs）；canonical_solution／plus_input／contract／
+#     assertion 是 GT，只進 hidden_check（verifier 側），永不進 prompt——
+#     GT 隔離的逐路徑負向測試在 tests/test_x1_evalplus.py。
+#   - family 是**規則啟發式標籤**（17 §P1-2「可規則化」），供分族抽樣與
+#     教訓檢索；它是表面關鍵詞歸類、不是語意真相，誠實標明。
+
+EVALPLUS_MBPP_PLUS_SHA256 = "af43697e8791c4c149bdfd6b489d8b5412507551ac20e28a439f650b8225db63"
+EVALPLUS_MBPP_PLUS_COUNT = 378
+EVALPLUS_DEFAULT_PATH = ".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz"
+
+# 必要欄位與型別（v0.2.0 schema；plus_input 容忍 list／dict 差異——官方包實測
+# 有兩種形態，dict 視為「單一位置參數＝該 dict」，見 _norm_inputs）。
+_EVALPLUS_SCHEMA = {
+    "task_id": str,
+    "prompt": str,
+    "entry_point": str,
+    "canonical_solution": str,
+    "base_input": list,
+    "plus_input": (list, dict),
+}
+
+_FAMILY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("empty_input", ("empty", "whitespace", "blank")),
+    ("off_by_one", ("index", "first", "last", "kth", "nth", "position")),
+    ("boundary", ("max", "min", "largest", "smallest", "edge", "corner")),
+    ("duplicate_values", ("duplicate", "unique", "distinct")),
+    ("negative_numbers", ("negative", "absolute")),
+    ("type_coercion", ("convert", "parse", "string to", "cast")),
+)
+
+
+def _label_family(prompt: str, entry_point: str) -> str:
+    """規則啟發式分族（P1-2）：表面關鍵詞比對，命中即用；全不命中＝general。
+
+    誠實邊界：這是抽樣組織標籤，不是「這題真的考什麼坑」的語意判定；
+    X1 的遷移判準不建立在標籤正確性上（族內遷移由任務序列實測）。"""
+    text = (prompt + " " + entry_point).lower()
+    for fam, keys in _FAMILY_RULES:
+        if any(k in text for k in keys):
+            return fam
+    return "general"
+
+
+def _norm_inputs(raw: Any) -> list[list[Any]]:
+    """把一個 input 區塊正規化成 list-of-positional-args 的 list。
+
+    list 形：每個元素本身就是一組位置參數（list of lists）。
+    dict 形（官方包實測存在的 schema 差異）：整塊視為一次呼叫的單一位置參數。
+    """
+    if isinstance(raw, dict):
+        return [[raw]]
+    out: list[list[Any]] = []
+    for case in raw:
+        out.append(case if isinstance(case, list) else [case])
+    return out
+
+
+def _check_code(entry_point: str, canonical: str, inputs: list[list[Any]], atol: float | None) -> str:
+    """產生 run_python 測試碼：期望值由內嵌 canonical 當場算出（不預算答案進碼）。
+
+    canonical 用 exec 進獨立命名空間，避免與候選的同名 entry_point 互踩。
+    atol 給定時浮點（含巢狀 list/tuple）以 ≤atol 判等。"""
+    lines = [
+        "def __aeq(a, b, atol):",
+        "    if atol and (isinstance(a, float) or isinstance(b, float)):",
+        "        try:",
+        "            return abs(a - b) <= atol",
+        "        except TypeError:",
+        "            return False",
+        "    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):",
+        "        return len(a) == len(b) and all(__aeq(x, y, atol) for x, y in zip(a, b))",
+        "    return a == b",
+        "",
+        f"__ns: dict = {{}}",
+        f"exec({canonical!r}, __ns)",
+        f"__canon = __ns[{entry_point!r}]",
+        "",
+    ]
+    for inp in inputs:
+        call = f"{entry_point}(*{inp!r})"
+        lines.append(f"assert __aeq({call}, __canon(*{inp!r}), {atol!r})")
+    return "\n".join(lines)
+
+
 class EvalPlusMBPPLoader(TaskLoader):
-    """TODO(NW-2)：真 EvalPlus MBPP+ 資料載入（尚未實作——目前環境無法連網下載）。
+    """真 EvalPlus MBPP+ v0.2.0 載入（G1／17 §P1-1）。
 
-    預期流程（换資料時照著填）：
-      1) 離線下載 evalplus 釋出的 MBPPPlus 資料集（jsonl），釘住版本號；
-      2) 用 sha256 驗證檔案完整性（比對 expected_sha256，資料被竄改/版本飄移即拒收）；
-      3) 逐題轉成 {task_id, family, prompt, visible_check, hidden_check}——
-         family 依題目性質分類（邊界/off-by-one/空輸入…，可規則化或人工標）；
-         visible_check 用題目自帶的 base tests，hidden_check 用 plus 擴增 tests。
+    建構即 fail-closed 驗證：檔案存在 → sha256 符合釘值 → gzip/jsonl 可解析 →
+    恰 expected_count 題 → task_id 唯一 → schema 型別全對。任何一步不符即
+    raise，**不產生半殘題庫**（壞資料跑實驗比沒資料更糟）。
 
-    目前 iter_tasks() 只丟 NotImplementedError，避免有人誤以為這裡已經接了真
-    資料（沙箱/family/freeze_subset 的正確性用 BuiltinSampleLoader 測，換資料
-    後行為不變——這是本樁存在的意義）。
+    參數：
+      path            官方 gzip jsonl（預設 EVALPLUS_DEFAULT_PATH；可用
+                      VACANT_EVALPLUS_PATH 環境變數覆寫）。
+      expected_sha256 預設＝官方釘值，**不可傳 None 略過**；測試 fixture 必須
+                      顯式傳入 fixture 自身的 sha256（這是唯一的合法覆寫）。
+      expected_count  預設 378；fixture 同理顯式覆寫。
     """
 
-    def __init__(self, path: str, *, expected_sha256: str | None = None) -> None:
-        self.path = path
+    def __init__(
+        self,
+        path: str | None = None,
+        *,
+        expected_sha256: str | None = None,
+        expected_count: int = EVALPLUS_MBPP_PLUS_COUNT,
+    ) -> None:
+        import os
+        self.path = path or os.environ.get("VACANT_EVALPLUS_PATH", EVALPLUS_DEFAULT_PATH)
+        if expected_sha256 is None and self.path == EVALPLUS_DEFAULT_PATH:
+            expected_sha256 = EVALPLUS_MBPP_PLUS_SHA256
+        if expected_sha256 is None:
+            raise ValueError(
+                "expected_sha256 不可為 None（fail-closed：官方包用預設釘值，"
+                "測試 fixture 須顯式傳入其自身 sha256）"
+            )
         self.expected_sha256 = expected_sha256
+        self.expected_count = expected_count
+        self._records = self._load_verified()
 
-    def iter_tasks(self, seed: Any) -> Iterator[dict[str, Any]]:  # pragma: no cover - 無真資料可測
-        raise NotImplementedError(
-            "EvalPlusMBPPLoader 尚未接上真資料（見 class docstring 的換資料流程）；"
-            "目前請用 BuiltinSampleLoader（freeze_subset/pilot_tasks 預設值）。"
+    # -- 驗證載入（建構時一次做完）---------------------------------------------
+    def _load_verified(self) -> list[dict[str, Any]]:
+        import gzip
+        p = Path(self.path)
+        if not p.exists():
+            raise FileNotFoundError(
+                f"EvalPlus 官方包不存在：{p}（下載 MBPP+ v0.2.0 並放到 "
+                f"{EVALPLUS_DEFAULT_PATH}，或設 VACANT_EVALPLUS_PATH；"
+                "無真資料時請用 BuiltinSampleLoader 並如實標注）"
+            )
+        got = hashlib.sha256(p.read_bytes()).hexdigest()
+        if got != self.expected_sha256:
+            raise ValueError(
+                f"EvalPlus 包 sha256 不符：got {got} want {self.expected_sha256}"
+                "（版本飄移或檔案受損，拒收）"
+            )
+        records: list[dict[str, Any]] = []
+        opener = gzip.open if p.suffix == ".gz" else open
+        with opener(p, "rt", encoding="utf-8") as f:  # type: ignore[arg-type]
+            for ln, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except ValueError as e:
+                    raise ValueError(f"第 {ln} 行不是合法 JSON：{e}") from e
+                self._validate_record(rec, ln)
+                records.append(rec)
+        if len(records) != self.expected_count:
+            raise ValueError(
+                f"題數不符：got {len(records)} want {self.expected_count}（非官方 v0.2.0 包？）"
+            )
+        ids = [r["task_id"] for r in records]
+        if len(set(ids)) != len(ids):
+            raise ValueError("task_id 有重複（資料污染，拒收）")
+        return records
+
+    @staticmethod
+    def _validate_record(rec: Any, ln: int) -> None:
+        if not isinstance(rec, dict):
+            raise ValueError(f"第 {ln} 行不是 JSON object")
+        for field_name, types in _EVALPLUS_SCHEMA.items():
+            if field_name not in rec:
+                raise ValueError(f"第 {ln} 行缺欄位 {field_name}")
+            if not isinstance(rec[field_name], types):
+                raise ValueError(
+                    f"第 {ln} 行欄位 {field_name} 型別錯（want {types}）"
+                )
+
+    # -- TaskLoader 介面 ---------------------------------------------------------
+    def iter_tasks(self, seed: Any) -> Iterator[dict[str, Any]]:
+        """依 seed 決定性排序吐出全部 378 題（sha256(seed:task_id) 排序，可重放）。
+
+        有限池：378 題用完即止（freeze_subset n≤378 適用；要無限變體請用
+        BuiltinSampleLoader）。GT 只進 hidden_check；public_view() 是 prompt 側
+        唯一合法投影。"""
+        ordered = sorted(
+            self._records,
+            key=lambda r: hashlib.sha256(f"{seed}:{r['task_id']}".encode()).hexdigest(),
         )
+        for rec in ordered:
+            base = _norm_inputs(rec["base_input"])
+            plus = _norm_inputs(rec["plus_input"])
+            atol = rec.get("atol")
+            atol = float(atol) if isinstance(atol, (int, float)) else None
+            yield {
+                "task_id": f"mbppplus_{rec['task_id']}",
+                "family": _label_family(rec["prompt"], rec["entry_point"]),
+                "prompt": rec["prompt"],
+                "entry_point": rec["entry_point"],
+                "visible_check": {
+                    "type": "run_python",
+                    "code": _check_code(rec["entry_point"], rec["canonical_solution"], base, atol),
+                    "timeout": 8,
+                },
+                "hidden_check": {
+                    "type": "run_python",
+                    "code": _check_code(rec["entry_point"], rec["canonical_solution"], base + plus, atol),
+                    "timeout": 8,
+                },
+            }
+
+    @staticmethod
+    def public_view(task: dict[str, Any]) -> dict[str, Any]:
+        """prompt 側唯一合法投影：task_id／family／prompt／entry_point（無任何 GT）。"""
+        return {k: task[k] for k in ("task_id", "family", "prompt", "entry_point")}
 
 
 def pilot_tasks(seed: Any = "pilot", n: int = 12, *, loader: TaskLoader | None = None) -> list[dict[str, Any]]:
