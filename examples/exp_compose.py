@@ -9,14 +9,15 @@
 或 hermes(Hermes Agent 當腦)。用法：exp_compose.py [N=20] [K=3] [openai|hermes] [model]
 """
 from __future__ import annotations
-import sys, tempfile, time, json, urllib.request
+import os, sys, tempfile, time, json, urllib.request
 from pathlib import Path
 from vacant.host import Host
 from vacant.composer import Composer
 from vacant.verifier import is_correct
 from vacant.tasks import task_stream, NICHES
 
-CANDS = ["192.168.76.1", "172.25.16.1", "172.17.119.12"]; PORT = 1234
+# 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
+CAND = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/")
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 20
 K = int(sys.argv[2]) if len(sys.argv) > 2 else 3
 WHICH = sys.argv[3] if len(sys.argv) > 3 else "openai"
@@ -24,13 +25,11 @@ MODEL = sys.argv[4] if len(sys.argv) > 4 else "google/gemma-4-e4b"
 TEMP = 0.7
 
 def pick_url():
-    for ip in CANDS:
-        u = f"http://{ip}:{PORT}/v1"
-        try:
-            urllib.request.urlopen(u + "/models", timeout=4).read(); return u
-        except Exception:
-            continue
-    return None
+    u = CAND + "/v1"
+    try:
+        urllib.request.urlopen(u + "/models", timeout=4).read(); return u
+    except Exception:
+        return None
 
 url = pick_url()
 if not url:

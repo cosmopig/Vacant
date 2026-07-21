@@ -5,7 +5,9 @@ from vacant.openai_substrate import OpenAISubstrate, HINTS
 from vacant.substrate import SubstrateResult
 from vacant.tasks import make_task, NICHES
 
-URL = "http://192.168.76.1:1234/v1"; MODEL = "google/gemma-4-e4b"; N = 24
+# 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
+URL = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/") + "/v1"
+MODEL = "google/gemma-4-e4b"; N = 24
 
 class QualitySub(OpenAISubstrate):
     def run(self, home, prompt, task):

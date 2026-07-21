@@ -1,6 +1,9 @@
+import os
+
 from vacant import Vacant, LMStudioBrain
 
-BASE = "http://192.168.76.1:1234"
+# 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
+BASE = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/")
 MODEL = "gemma-4-12b-coder-fable5-composer2.5-v1"
 
 brain = LMStudioBrain(BASE, MODEL, api="responses")

@@ -1,8 +1,8 @@
 """X1 遷移 pilot 進入點（10 §4.2 一票否決 pilot；裁決 W1 並行項）。
 
-用法（VM LM Studio 端點照 08 筆記）：
-    python examples/x1_pilot.py --base http://192.168.56.1:8765 \
-        --model qwen3.6-35b-a3b --arm M2 --oracle --seed s0
+用法（端點以 VACANT_ENDPOINT 或 --base 指定，不寫死機器 IP——G10）：
+    VACANT_ENDPOINT=http://<vm-host>:1234 \
+        python examples/x1_pilot.py --model qwen3.6-35b-a3b --arm M2 --oracle --seed s0
 
 跑什麼：3 個任務族 × 17 題族內序列（~51 題）。--oracle 時每題稽核後直接把
 該族的正確教訓寫入 episode（oracle-lesson 條件：連這樣都測不到遷移 → 任務集
@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 from vacant.batch import RunLedger, Watchdog
@@ -30,7 +31,7 @@ from vacant.x1 import make_pilot_tasks, run_x1, transfer_curve
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="X1 遷移 pilot（oracle-lesson 一票否決判準）")
-    ap.add_argument("--base", default="http://192.168.56.1:8765")
+    ap.add_argument("--base", default=os.environ.get("VACANT_ENDPOINT", "http://localhost:1234"))
     ap.add_argument("--model", default="qwen3.6-35b-a3b")
     ap.add_argument("--api", default="responses",
                     help="'responses'(/api/v1/chat，reasoning 模型) 或 'openai'(/v1)")

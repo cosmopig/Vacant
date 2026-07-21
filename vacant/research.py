@@ -173,6 +173,212 @@ def _vprec(sample, arm) -> float:
     return _mean([1.0 if it.passed_gt else 0.0 for it in asserted]) if asserted else 0.0
 
 
+# === 預註冊統計四函式（17 §P0-6／G7；16 號 wp5 規格）============================
+# 硬約束：零 scipy（runtime 依賴只有 cryptography 的鐵律不破）——全部純 Python
+# 精確／枚舉／bootstrap 實作。X1 主檢定（H-A1/H-A2，Holm 家族）與 X3 的 H2
+# 等效檢定（TOST）都從這裡出數字；每函式在 tests/test_research.py 有 ≥3 個
+# 手算對照測試（對照值寫進測試註解）。
+
+def holm_bonferroni(pvals: list[float]) -> list[float]:
+    """Holm–Bonferroni step-down 調整後 p 值（回傳順序與輸入相同）。
+
+    家族內 m 個假設：最小 p 乘 m、次小乘 m−1…，並對序列取累積最大值保單調。
+    X1 的 H-A1＋H-A2 與消融屬同一家族（19 號圖 L5：McNemar p<.05，Holm）。
+    """
+    m = len(pvals)
+    if m == 0:
+        return []
+    for p in pvals:
+        if not 0.0 <= p <= 1.0:
+            raise ValueError(f"p 值必須在 [0,1]：{p}")
+    order = sorted(range(m), key=lambda i: (pvals[i], i))
+    adjusted_sorted: list[float] = []
+    running = 0.0
+    for rank, i in enumerate(order):
+        adj = min(1.0, (m - rank) * pvals[i])
+        running = max(running, adj)
+        adjusted_sorted.append(running)
+    out = [0.0] * m
+    for rank, i in enumerate(order):
+        out[i] = adjusted_sorted[rank]
+    return out
+
+
+def tost_equiv_boot(
+    diffs: list[float],
+    delta: float,
+    *,
+    alpha: float = 0.05,
+    n_boot: int = 2000,
+    seed: int = 0,
+) -> dict[str, float | bool]:
+    """配對 TOST 等效檢定（bootstrap 版）：X3 H2「p=1.0 時兩臂無差」的檢定。
+
+    對配對差 diffs 的均值建 (1−2α) bootstrap 百分位 CI（TOST 與 CI 的標準
+    對應：兩個單邊 α 檢定 ≡ 一條 (1−2α) CI）。CI 整條落進 [−δ, +δ] → 等效成立。
+    誠實邊界：bootstrap CI 在小樣本偏窄，n<20 時結論保守解讀；δ 是預註冊的
+    最小在乎效應（X3 H2 的 5pp），不是事後挑的。
+    """
+    if delta <= 0:
+        raise ValueError(f"等效界 δ 必須為正：{delta}")
+    n = len(diffs)
+    if n == 0:
+        raise ValueError("diffs 不可為空（無配對差無法檢定）")
+    rng = random.Random(seed)
+    vals: list[float] = []
+    for _ in range(n_boot):
+        vals.append(_mean([diffs[rng.randrange(n)] for _ in range(n)]))
+    vals.sort()
+
+    def pct(p: float) -> float:
+        i = min(len(vals) - 1, max(0, int(round(p / 100.0 * (len(vals) - 1)))))
+        return vals[i]
+
+    lo, hi = pct(100 * alpha), pct(100 * (1.0 - alpha))
+    return {
+        "mean": _mean(diffs), "ci_lo": lo, "ci_hi": hi, "delta": delta,
+        "equivalent": bool(lo >= -delta and hi <= delta),
+    }
+
+
+def wilcoxon_signed_rank_exact(diffs: list[float], *, alpha: float = 0.05) -> dict[str, float]:
+    """Wilcoxon signed-rank 精確檢定（雙尾）：配對差是否系統性偏離 0。
+
+    去零 → 對 |diff| 排 midrank（ties 取平均秩）→ W+＝正差秩和。n≤24 時
+    2^n 全枚舉精確 p；n>24 用帶 ties 變異數修正的常態近似（精確枚舉 2^25
+    以上不值得，近似誤差 O(1/n²)，誠實標明 method 欄）。
+    """
+    pairs = [abs(d) for d in diffs if d != 0]
+    signs = [1 if d > 0 else -1 for d in diffs if d != 0]
+    n = len(pairs)
+    if n == 0:
+        raise ValueError("全部配對差為 0：無秩可排（H0 無法被拒絕）")
+    # midrank：同 |d| 群平分秩次（1..n）
+    order = sorted(range(n), key=lambda i: pairs[i])
+    ranks = [0.0] * n
+    i = 0
+    while i < n:
+        j = i
+        while j + 1 < n and pairs[order[j + 1]] == pairs[order[i]]:
+            j += 1
+        mid = (i + j) / 2.0 + 1.0
+        for t in range(i, j + 1):
+            ranks[order[t]] = mid
+        i = j + 1
+    w_plus = sum(r for r, s in zip(ranks, signs) if s > 0)
+    total = sum(ranks)  # = n(n+1)/2（ties 平分後總和不變）
+    mean_w = total / 2.0
+
+    if n <= 24:
+        # 全枚舉 2^n 個符號指派（以值帶重複的秩為單位）
+        counts: dict[float, int] = {}
+
+        def rec(k: int, acc: float) -> None:
+            if k == n:
+                counts[acc] = counts.get(acc, 0) + 1
+                return
+            rec(k + 1, acc + ranks[k])
+            rec(k + 1, acc)
+
+        rec(0, 0.0)
+        dev = abs(w_plus - mean_w)
+        extreme = sum(c for w, c in counts.items() if abs(w - mean_w) >= dev - 1e-12)
+        p = extreme / (2 ** n)
+        method = "exact"
+    else:
+        # 常態近似：Var = (Σ r² − Σ(t³−t)/12 修正) —— ties 修正項
+        var = sum(r * r for r in ranks) / 4.0
+        tie_sizes: dict[float, int] = {}
+        for v in pairs:
+            tie_sizes[v] = tie_sizes.get(v, 0) + 1
+        tie_corr = sum(t ** 3 - t for t in tie_sizes.values() if t > 1) / 48.0
+        var -= tie_corr
+        z = (abs(w_plus - mean_w) - 0.5) / math.sqrt(var)  # 連續性修正
+        p = 2.0 * (1.0 - _norm_cdf(z))
+        method = "normal_approx"
+    return {"w_plus": w_plus, "n": float(n), "p": p, "method": method, "alpha": alpha,
+            "reject": bool(p < alpha)}
+
+
+def _norm_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+
+
+def _binom_pmf(n: int, k: int, p: float) -> float:
+    if k < 0 or k > n:
+        return 0.0
+    if p <= 0.0:
+        return 1.0 if k == 0 else 0.0
+    if p >= 1.0:
+        return 1.0 if k == n else 0.0
+    # log 域計算，n 到數千仍穩
+    return math.exp(
+        math.lgamma(n + 1) - math.lgamma(k + 1) - math.lgamma(n - k + 1)
+        + k * math.log(p) + (n - k) * math.log(1.0 - p)
+    )
+
+
+def _mcnemar_reject_region(k: int, alpha: float) -> tuple[int, int]:
+    """k 個不一致對時，McNemar 精確雙尾 α 的拒絕域：b ≤ lo 或 b ≥ hi（b+c=k）。"""
+    if k == 0:
+        return (1, -1)  # 空拒絕域
+    lo = -1
+    for b in range(0, k // 2 + 1):
+        tail = sum(_binom_pmf(k, i, 0.5) for i in range(0, b + 1))
+        if 2.0 * min(1.0, tail) <= alpha:
+            lo = b
+        else:
+            break
+    if lo < 0:
+        return (1, -1)
+    return (lo, k - lo)
+
+
+def mcnemar_power(n: int, p_disc: float, psi: float, *, alpha: float = 0.05) -> float:
+    """McNemar 精確檢定的檢定力（17 §P1-3 的 ψ 估計 → T 的依據）。
+
+    模型：n 對配對中 K~Binomial(n, p_disc) 個不一致對；每個不一致對以機率
+    ψ 落在 b 方向（M2 對 M0 錯），B~Binomial(K, ψ)。檢定力＝精確雙尾 α
+    檢定拒絕 H0 的總機率（對 K 與 B 全枚舉加權，無近似）。
+    ψ=0.5 時回傳檢定的 size（≤α，精確檢定保守）——可用作自我對帳。
+    """
+    if n < 0:
+        raise ValueError(f"n 必須非負：{n}")
+    if not 0.0 <= p_disc <= 1.0 or not 0.0 <= psi <= 1.0:
+        raise ValueError("p_disc 與 ψ 必須在 [0,1]")
+    power = 0.0
+    for k in range(0, n + 1):
+        pk = _binom_pmf(n, k, p_disc)
+        if pk == 0.0:
+            continue
+        lo, hi = _mcnemar_reject_region(k, alpha)
+        if lo > hi:
+            continue
+        p_rej = sum(_binom_pmf(k, b, psi) for b in range(0, lo + 1))
+        p_rej += sum(_binom_pmf(k, b, psi) for b in range(hi, k + 1))
+        power += pk * p_rej
+    return power
+
+
+def mcnemar_n_required(
+    p_disc: float,
+    psi: float,
+    *,
+    alpha: float = 0.05,
+    power: float = 0.85,
+    n_max: int = 20000,
+) -> int:
+    """達到目標檢定力的最小 n（線性掃描；pilot 後 ψ 餵這裡決定 T，17 §P1-3）。"""
+    if not 0.0 < power <= 1.0:
+        raise ValueError(f"目標 power 必須在 (0,1]：{power}")
+    if psi == 0.5:
+        raise ValueError("ψ=0.5 是 H0：任何 n 都達不到目標 power")
+    for n in range(1, n_max + 1):
+        if mcnemar_power(n, p_disc, psi, alpha=alpha) >= power:
+            return n
+    raise ValueError(f"n≤{n_max} 內達不到 power={power}（p_disc={p_disc}, ψ={psi}）")
+
+
 # === 報表 ===================================================================
 def render_report(tasks: list[Task], brain_generate: Callable[[str], str], *,
                   k: int = 3, seed: int = 0, title: str = "") -> str:

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import urllib.error
 import urllib.request
@@ -163,8 +164,11 @@ class HermesACPSubstrate(Substrate):
 # --- NW-1 · LMStudioSubstrate（真模型腦，接 qwen3.6 @ LM Studio）--------------
 #
 # 為何存在：X1/X3/demo 全要真模型自己算，EchoSubstrate 只是假腦。這是所有實驗的
-# 地基。真跑在 VM（http://192.168.56.1:8765）上；本檔用 monkeypatch mock HTTP 做
-# 單元測試，無 VM 亦可 import 與測通。
+# 地基。端點不寫死（G10／17 §P0-7）：全 repo 唯一的預設在 DEFAULT_ENDPOINT，
+# 以 VACANT_ENDPOINT 環境變數覆寫；真跑端點見 08 筆記，部署時顯式設 env。
+# 本檔用 monkeypatch mock HTTP 做單元測試，無 VM 亦可 import 與測通。
+
+DEFAULT_ENDPOINT = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234")
 
 _THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
 
@@ -241,7 +245,7 @@ class LMStudioSubstrate(Substrate):
 
     def __init__(
         self,
-        base: str = "http://192.168.56.1:8765",
+        base: str | None = None,
         model: str = "qwen/qwen3.6-35b-a3b",
         api: str = "/api/v1/chat",
         max_tokens: int | None = None,
@@ -251,7 +255,7 @@ class LMStudioSubstrate(Substrate):
         no_think: bool = True,
         system: str = "Output only the final answer. No explanation.",
     ) -> None:
-        self.base = base.rstrip("/")
+        self.base = (base or DEFAULT_ENDPOINT).rstrip("/")
         self.model = model
         self.api = "/" + api.lstrip("/")     # 正規化成單一前導斜線
         self.max_tokens = max_tokens

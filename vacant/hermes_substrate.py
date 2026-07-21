@@ -13,7 +13,11 @@ from .tasks import NICHE_SOLVERS
 
 HERMES_DIR = Path(os.path.expanduser("~/hermes-agent"))
 HERMES_BIN = HERMES_DIR / "venv/bin/hermes"
-BASE_URL = os.environ.get("VACANT_LMS_URL", "http://192.168.76.1:1234/v1")
+# 端點不寫死（G10）：VACANT_LMS_URL 優先，其次全域 VACANT_ENDPOINT，預設本機。
+BASE_URL = os.environ.get(
+    "VACANT_LMS_URL",
+    os.environ.get("VACANT_ENDPOINT", "http://localhost:1234") + "/v1",
+)
 
 NICHE_INSTR = {
   "reverse": "Reverse the order of the characters in the given string.",

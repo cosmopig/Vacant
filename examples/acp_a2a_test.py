@@ -33,7 +33,9 @@ class Drv(Client):
 
 async def main():
     drv = Drv()
-    env = dict(os.environ); env["HERMES_HOME"] = os.path.expanduser("~/.hermes"); env["CUSTOM_BASE_URL"]="http://192.168.76.1:1234/v1"
+    env = dict(os.environ); env["HERMES_HOME"] = os.path.expanduser("~/.hermes")
+    # 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
+    env["CUSTOM_BASE_URL"] = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/") + "/v1"
     pv = getattr(acp, "PROTOCOL_VERSION", 1)
     async with spawn_agent_process(lambda agent: drv, os.path.expanduser("~/hermes-agent/venv/bin/hermes-acp"),
                                    env=env, cwd=os.path.expanduser("~/hermes-agent"), use_unstable_protocol=True) as (conn, proc):

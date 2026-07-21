@@ -53,7 +53,7 @@ def _eco():
             "VACANT_MCP_MODEL（並可選 VACANT_MCP_BASE、VACANT_MCP_API）"
         )
     # 與 verify_fix 用同一個預設（單一事實：VACANT_MCP_BASE 未設＝本機 LM Studio）。
-    # 部署到 VM/遠端一律顯式設 env（如 http://192.168.56.1:8765），不寫死機器 IP。
+    # 部署到 VM/遠端一律顯式設 env，不寫死機器 IP（G10／17 §P0-7）。
     base = os.environ.get("VACANT_MCP_BASE", "http://localhost:1234")
     api = os.environ.get("VACANT_MCP_API", "responses")
     from vacant.brains import LMStudioBrain

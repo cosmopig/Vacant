@@ -102,3 +102,49 @@ def test_missing_ledger_is_tolerated(tmp_path):
     finally:
         server.shutdown()
         server.server_close()
+
+
+# --- GET /api/snapshot（17 §P0-3）---------------------------------------------
+from vacant.dashboard import build_snapshot, ledger_head
+
+
+def test_snapshot_shape_and_ledger_seq(tmp_path):
+    """snapshot 五鍵齊、ledger_seq 與實際事件數一致。"""
+    events = [{"ts_ms": i, "type": "ROUTE"} for i in range(5)]
+    _write_events(tmp_path, events)
+    roster = [{"name": "alice"}]
+    sb = {"on": {"n": 1}, "off": {"n": 2}}
+    server = make_dashboard(tmp_path, lambda: roster, lambda: sb, port=0)
+    _serve(server)
+    try:
+        got = json.loads(urllib.request.urlopen(_url(server, "/api/snapshot"), timeout=5).read())
+        assert got["roster"] == roster
+        assert got["scoreboard"] == sb
+        assert got["ledger_seq"] == 5           # 與實際事件數一致
+        assert len(got["ledger_head_hash"]) == 64
+        assert got["ts_ms"] > 0
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_snapshot_head_recompute_consistent(tmp_path):
+    """head hash 重算一致；加一筆事件 → seq+1、head 改變（竄改可偵測）。"""
+    _write_events(tmp_path, [{"ts_ms": 1, "type": "ROUTE"}])
+    ledger = tmp_path / "ledger" / "events.jsonl"
+    seq1, head1 = ledger_head(ledger)
+    assert seq1 == 1
+    snap = build_snapshot(ledger, list, dict)
+    assert snap["ledger_seq"] == seq1 and snap["ledger_head_hash"] == head1
+
+    _write_events(tmp_path, [{"ts_ms": 2, "type": "AUDIT"}])
+    seq2, head2 = ledger_head(ledger)
+    assert seq2 == 2
+    assert head2 != head1  # 追加改變 head（對帳錨）
+
+
+def test_snapshot_empty_ledger(tmp_path):
+    """無 ledger：seq=0、head＝創世值（明白的初始狀態，非錯誤）。"""
+    seq, head = ledger_head(tmp_path / "ledger" / "events.jsonl")
+    assert seq == 0
+    assert head == "0" * 64

@@ -1,4 +1,4 @@
-import tempfile
+import os, tempfile
 from pathlib import Path
 from vacant.host import Host
 from vacant.composer import Composer
@@ -6,7 +6,8 @@ from vacant.verifier import is_correct
 from vacant.tasks import task_stream, NICHES
 from vacant.openai_substrate import ResponsesSubstrate
 
-URL = "http://192.168.76.1:1234/v1"
+# 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
+URL = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/") + "/v1"
 MODEL = "gemma-4-12b-coder-fable5-composer2.5-v1"
 N, K = 6, 2
 sub = ResponsesSubstrate(URL, model=MODEL, timeout=75, learn=False)
