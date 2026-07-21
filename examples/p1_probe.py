@@ -57,6 +57,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="P1-0 思考模式探針（17 §P1-0）")
     ap.add_argument("--base", default=os.environ.get("VACANT_ENDPOINT", "http://localhost:1234"))
     ap.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
+    ap.add_argument("--api", default="openai",
+                    help="'openai'(/v1/chat/completions) 或 'responses'(/api/v1/chat)")
     ap.add_argument("--n-think", type=int, default=20)
     ap.add_argument("--n-compare", type=int, default=10)
     ap.add_argument("--out", default=None)
@@ -68,8 +70,9 @@ def main() -> None:
     wd = Watchdog(args.base, on_down=lambda m: print(f"[watchdog] {m}"))
     if not wd.wait_alive(retries=3, interval=5):
         raise SystemExit(f"端點 {args.base} 不可用")
-    # R1：responses 路徑不送 max_tokens（無上限）、不加 /no_think（思考開）
-    brain = LMStudioBrain(args.base, args.model, api="responses", timeout=900)
+    # R1：不送 max_tokens（無上限）、不加 /no_think（思考開）
+    brain = LMStudioBrain(args.base, args.model, api=args.api,
+                          timeout=900, max_tokens=None)
     tasks = make_pilot_tasks(7)  # 3 族 × 7＝21 題
     think_tasks = tasks[: args.n_think]
     cmp_tasks = tasks[: args.n_compare]

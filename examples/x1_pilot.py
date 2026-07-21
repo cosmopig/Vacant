@@ -98,9 +98,10 @@ def main() -> None:
         wd = Watchdog(args.base, on_down=lambda m: print(f"[watchdog] {m}"))
         if not wd.wait_alive(retries=3, interval=5):
             raise SystemExit(f"端點 {args.base} 不可用；先開 LM Studio 再跑")
-        # 批次實驗不設 max_tokens 上限（R1／裁決 B5：demo 才有界）——'responses' 路徑
-        # 本就不送 max_tokens；timeout 拉到批次等級（單呼叫可達數分鐘，裁決 B1）。
-        brain = LMStudioBrain(args.base, args.model, api=args.api, timeout=600)
+        # 批次實驗不設 max_tokens 上限（R1／裁決 B5：demo 才有界）；
+        # timeout 拉到批次等級（單呼叫可達數分鐘，裁決 B1）。
+        brain = LMStudioBrain(args.base, args.model, api=args.api,
+                              timeout=600, max_tokens=None)
 
     tasks = _build_tasks(args)
     stream = MemoryStream(Logbook(), Identity.generate())  # 每臂新 stream（不跨臂共享）

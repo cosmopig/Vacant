@@ -42,10 +42,13 @@ def _post(url: str, payload: dict, timeout: int) -> dict:
 
 
 class OpenAIBrain(UsageMixin):
-    """任何 OpenAI 相容端點（/v1/chat/completions）。base_url 例：http://host:1234/v1"""
+    """任何 OpenAI 相容端點（/v1/chat/completions）。base_url 例：http://host:1234/v1
+
+    max_tokens=None → **不送該欄**（R1：正式實驗不設上限——reasoning 模型被
+    砍在思考途中會 content 空，06-30 教訓）。"""
 
     def __init__(self, base_url: str, model: str, *, temperature: float = 0.0,
-                 max_tokens: int = 256, timeout: int = 120, system: str = "You are a precise assistant. Output only the answer."):
+                 max_tokens: int | None = 256, timeout: int = 120, system: str = "You are a precise assistant. Output only the answer."):
         self.base_url = base_url.rstrip("/")
         if not self.base_url.endswith("/v1"):
             self.base_url += "/v1"
@@ -57,10 +60,13 @@ class OpenAIBrain(UsageMixin):
         self.name = f"openai:{model}"
 
     def generate(self, prompt: str) -> str:
-        d = _post(self.base_url + "/chat/completions", {
-            "model": self.model, "temperature": self.temperature, "max_tokens": self.max_tokens,
+        payload = {
+            "model": self.model, "temperature": self.temperature,
             "messages": [{"role": "system", "content": self.system}, {"role": "user", "content": prompt}],
-        }, self.timeout)
+        }
+        if self.max_tokens is not None:
+            payload["max_tokens"] = self.max_tokens
+        d = _post(self.base_url + "/chat/completions", payload, self.timeout)
         u = d.get("usage")
         self.last_usage = dict(u) if isinstance(u, dict) else None
         return (d["choices"][0]["message"].get("content") or "").strip()
@@ -71,7 +77,7 @@ class LMStudioBrain(UsageMixin):
     /v1 的 content 對 reasoning 模型常為空）。非 reasoning 模型用 api='openai' 即可。"""
 
     def __init__(self, base_url: str, model: str, *, api: str = "responses",
-                 timeout: int = 120, max_tokens: int = 256,
+                 timeout: int = 120, max_tokens: int | None = 256,
                  system: str = "Output only the answer, nothing else."):
         # base_url 給 http://host:1234（含/不含 /v1 都行）
         b = base_url.rstrip("/")
