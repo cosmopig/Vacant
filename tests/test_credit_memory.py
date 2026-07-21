@@ -137,8 +137,9 @@ def _eco(tmp_path):
 
 def test_gateway_review_is_signed_and_recorded(tmp_path):
     h, req, oc = _eco(tmp_path)
-    # 交付後 reputation 有觀測（review 走了簽章通道且被收）
-    assert h.registry._rep.observations(oc.callee_id, oc.substrate) > 0
+    # 交付後 reputation 有觀測（review 走了簽章通道且被收；改動2：三元組查找）
+    _st, _br, _hd = h.registry._heads[oc.callee_id]
+    assert h.registry._rep.observations(_st, _br, oc.substrate) > 0
     # result envelope 附了 stream 身份與鏈頭
     assert oc.result_env.body["chain_head"]
     assert oc.result_env.body["stream_id"]
@@ -147,7 +148,7 @@ def test_gateway_review_is_signed_and_recorded(tmp_path):
 def test_unannounced_reviewer_rejected(tmp_path):
     h, req, oc = _eco(tmp_path)
     ghost = _idn()  # 沒 announce 過的身份
-    stream, head = h.registry._heads[oc.callee_id]
+    stream, _br, head = h.registry._heads[oc.callee_id]
     env = _review(ghost, target_id=oc.callee_id, stream=stream, head=head,
                   substrate=oc.substrate)
     with pytest.raises(ReviewRejected):
@@ -156,7 +157,7 @@ def test_unannounced_reviewer_rejected(tmp_path):
 
 def test_bad_signature_rejected(tmp_path):
     h, req, oc = _eco(tmp_path)
-    stream, head = h.registry._heads[oc.callee_id]
+    stream, _br, head = h.registry._heads[oc.callee_id]
     reviewer = h.body("requester").identity
     env = _review(reviewer, target_id=oc.callee_id, stream=stream, head=head,
                   substrate=oc.substrate, task_id="t2")
@@ -167,7 +168,7 @@ def test_bad_signature_rejected(tmp_path):
 
 def test_stale_head_rejected(tmp_path):
     h, req, oc = _eco(tmp_path)
-    stream, _head = h.registry._heads[oc.callee_id]
+    stream, _br, _head = h.registry._heads[oc.callee_id]
     reviewer = h.body("requester").identity
     env = _review(reviewer, target_id=oc.callee_id, stream=stream, head="0" * 64,
                   substrate=oc.substrate, task_id="t2")
@@ -178,7 +179,7 @@ def test_stale_head_rejected(tmp_path):
 def test_duplicate_review_rejected(tmp_path):
     """(reviewer, stream, head) 去重防重放。"""
     h, req, oc = _eco(tmp_path)
-    stream, head = h.registry._heads[oc.callee_id]
+    stream, _br, head = h.registry._heads[oc.callee_id]
     reviewer = h.body("requester").identity
     env = _review(reviewer, target_id=oc.callee_id, stream=stream, head=head,
                   substrate=oc.substrate, task_id="t2")
@@ -192,9 +193,9 @@ def test_weight_is_endogenous_new_reviewer_near_zero(tmp_path):
     # sybil 有公告（拿得到身份）但零被審歷史
     h.mint("sybil", niches=[])
     sybil = h.body("sybil").identity
-    stream, head = h.registry._heads[oc.callee_id]
+    stream, _br, head = h.registry._heads[oc.callee_id]
     # 讓 head 前進一筆，避開 gateway 已記的去重鍵
-    h.registry.note_head(oc.callee_id, stream, "e" * 64)
+    h.registry.note_head(oc.callee_id, stream, _br, "e" * 64)
     env = _review(sybil, target_id=oc.callee_id, stream=stream, head="e" * 64,
                   substrate=oc.substrate, task_id="t3")
     w = h.registry.record_review(env)
@@ -206,15 +207,65 @@ def test_same_source_nonlinear_downweight(tmp_path):
     h = Host(tmp_path, substrate=EchoSubstrate(p_base=1.0))
     h.mint("target", niches=["reverse"], controller="mallory")
     tid = h.vacant_id("target")
-    h.registry.note_head(tid, "s" * 64, "h" * 64)
+    h.registry.note_head(tid, "s" * 64, "main", "h" * 64)
     weights = []
     for i in range(3):
         h.mint(f"shill_{i}", niches=[], controller="mallory")
         shill = h.body(f"shill_{i}").identity
-        h.registry.note_head(tid, "s" * 64, f"{i}{'h' * 63}")
+        h.registry.note_head(tid, "s" * 64, "main", f"{i}{'h' * 63}")
         env = _review(shill, target_id=tid, stream="s" * 64, head=f"{i}{'h' * 63}",
                       substrate="echo", task_id=f"t{i}")
         weights.append(h.registry.record_review(env))
     assert weights[0] <= SAME_SIGNAL_FLOOR
     assert weights[1] <= SAME_SIGNAL_FLOOR / 2
     assert weights[2] <= SAME_SIGNAL_FLOOR / 3
+
+
+# === 改動2：reputation key＝(stream_id, branch_id, substrate) =================
+
+def test_credit_follows_stream_not_body(tmp_path):
+    """改動2 承重語意：credit 跟著記憶走，不跟身體走。
+
+    同一把 key（同一 vacant_id）：stream A 攢的信用，在解析表切到新 stream B
+    （＝wipe 後的新創世）後**自然歸零**——不需要任何抹除動作，這正是 key 換成
+    三元組要達成的行為（06 §2；15 §1 B8）。"""
+    h = Host(tmp_path, substrate=EchoSubstrate(p_base=1.0))
+    h.mint("worker", niches=["reverse"])
+    vid = h.vacant_id("worker")
+    reviewer = _idn()
+    # stream A 上攢 5 筆好評（head 每筆前進以免去重）
+    for i in range(5):
+        h.registry.note_head(vid, "streamA", "main", f"{i}{'a' * 63}")
+        env = _review(reviewer, target_id=vid, stream="streamA", head=f"{i}{'a' * 63}",
+                      substrate="echo", task_id=f"tA{i}")
+        # reviewer 未公告 → 拒收；先公告一張卡
+        if i == 0:
+            from vacant.body import CapabilityCard
+            from vacant import crypto
+            h.registry.announce(CapabilityCard(
+                vacant_id=reviewer.vacant_id, niches=[],
+                pub_hex=crypto.pub_to_hex(reviewer.pub)))
+        h.registry.record_review(env)
+    score_a, obs_a = h.registry.standing(vid, "echo")
+    assert obs_a > 0 and score_a > 0.5  # stream A 有信用
+
+    # wipe：同一把 key、新創世 → 解析表切到 stream B
+    h.registry.note_head(vid, "streamB", "main", "b" * 64)
+    score_b, obs_b = h.registry.standing(vid, "echo")
+    assert (score_b, obs_b) == (0.5, 0.0)  # 信用歸零（新三元組＝空格）
+
+    # 舊 stream A 的格子還在（歷史不滅），但不再被解析到——帳在、信用不續
+    assert h.registry._rep.observations("streamA", "main", "echo") > 0
+
+
+def test_reputation_json_roundtrip_triple_key():
+    """三元組序列化 round-trip（␟ 分隔；改動2 後的線材格式）。"""
+    from vacant.reputation import Reputation
+    rep = Reputation()
+    rep.record_review("s1", "main", "echo", GOOD, weight=1.0)
+    rep.record_review("s1", "fork", "echo", {d: 0.0 for d in DIMS}, weight=1.0)
+    d = rep.to_json()
+    assert set(d) == {"s1␟main␟echo", "s1␟fork␟echo"}
+    rep2 = Reputation.from_json(d)
+    assert rep2.score("s1", "main", "echo") > 0.5
+    assert rep2.score("s1", "fork", "echo") < 0.5

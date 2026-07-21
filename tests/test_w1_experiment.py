@@ -340,7 +340,7 @@ def test_gateway_survives_rejected_review(tmp_path):
     oc = req.call("reverse", task)
     # 人為把 registry 的去重鍵塞滿，模擬下一筆 review 必被拒
     h.registry._seen_reviews = {(h.vacant_id("requester"), s, hd)
-                                for (s, hd) in [h.registry._heads[oc.callee_id]]}
+                                for (s, _br, hd) in [h.registry._heads[oc.callee_id]]}
     # 再呼叫一次：即使 review 撞去重/head 競態，call 仍應回答案
     task2 = {**task, "task_id": "t2"}
     oc2 = req.call("reverse", task2)

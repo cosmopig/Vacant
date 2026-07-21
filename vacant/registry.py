@@ -42,9 +42,11 @@ class Registry:
 
     def __init__(self) -> None:
         self._cards: dict[str, CapabilityCard] = {}
-        self._rep = Reputation()  # 聚合：per (target, substrate) 的網路級信譽
+        self._rep = Reputation()  # 聚合：per (stream_id, branch_id, substrate) 的網路級信譽（改動2）
         # 改動3 狀態：目標鏈頭（head 新鮮性）、review 去重、同源計數（非線性降權）
-        self._heads: dict[str, tuple[str, str]] = {}       # target_id → (stream_id, head)
+        # target_id → (stream_id, branch_id, head)：vacant_id 只是「現在指向哪條
+        # stream」的解析表；信譽本體掛在 stream 三元組上（credit 跟記憶走）。
+        self._heads: dict[str, tuple[str, str, str]] = {}
         self._seen_reviews: set[tuple[str, str, str]] = set()  # (reviewer, stream, head)
         self._same_source_k: dict[tuple[str, str], int] = {}   # (controller, target) → 次數
 
@@ -82,12 +84,18 @@ class Registry:
             return True
         return False
 
-    def note_head(self, target_id: str, stream_id: str, head: str) -> None:
-        """記下對某 target 最新觀察到的 (stream_id, chain head)。
+    def note_head(self, target_id: str, stream_id: str, branch_id: str, head: str) -> None:
+        """記下對某 target 最新觀察到的 (stream_id, branch_id, chain head)。
 
         head 新鮮性檢查的比對基準：in-process 模擬裡由 gateway 在收到簽章 result
-        時回報（上機後即 result envelope 附帶的 chain_head）。"""
-        self._heads[target_id] = (stream_id, head)
+        時回報（上機後即 result envelope 附帶的 chain_head）。改動2：這筆記錄同時
+        是 vacant_id → 當前 stream 三元組的**唯一解析表**（信譽查找都經它）。"""
+        self._heads[target_id] = (stream_id, branch_id, head)
+
+    def _resolve(self, target_id: str) -> tuple[str, str] | None:
+        """vacant_id → 當前 (stream_id, branch_id)；未觀察過其鏈頭 → None。"""
+        h = self._heads.get(target_id)
+        return (h[0], h[1]) if h else None
 
     def _reviewer_weight(self, reviewer_id: str, substrate: str) -> float:
         """weight 內生：reviewer 自身信譽 × 觀測飽和 → 不接受外部注入。"""
@@ -117,7 +125,7 @@ class Registry:
             raise ReviewRejected(
                 f"無 {env.target_id[:16]}… 的已知鏈頭（須先觀察到其簽章交付）"
             )
-        known_stream, known_head = known
+        known_stream, known_branch, known_head = known
         if env.target_stream_id != known_stream or env.target_head != known_head:
             raise ReviewRejected(
                 f"target_head 不新鮮：got {env.target_head[:12]} want {known_head[:12]}"
@@ -137,7 +145,9 @@ class Registry:
             self._same_source_k[(controller, env.target_id)] = k
             weight = min(weight, SAME_SIGNAL_FLOOR / k)
 
-        self._rep.record_review(env.target_id, env.substrate, env.scores, weight=weight)
+        # 改動2：信譽寫進被評者的 stream 三元組（credit 跟記憶走，不跟身體走）
+        self._rep.record_review(
+            env.target_stream_id, env.branch_id, env.substrate, env.scores, weight=weight)
         return weight
 
     # --- 狀態持久化（信譽/鏈頭/去重/同源計數；halo 卡由呼叫端重新 announce）------
@@ -152,7 +162,12 @@ class Registry:
     def state_from_json(self, d: dict[str, Any]) -> None:
         from .reputation import Reputation
         self._rep = Reputation.from_json(d.get("rep", {}))
-        self._heads = {t: (v[0], v[1]) for t, v in d.get("heads", {}).items()}
+        self._heads = {}
+        for t, v in d.get("heads", {}).items():
+            if len(v) == 2:  # 改動2 前的 (stream, head) 舊檔 → branch 補 "main"
+                self._heads[t] = (v[0], "main", v[1])
+            else:
+                self._heads[t] = (v[0], v[1], v[2])
         self._seen_reviews = {tuple(k) for k in d.get("seen_reviews", [])}
         self._same_source_k = {}
         for key, v in d.get("same_source_k", {}).items():
@@ -160,41 +175,61 @@ class Registry:
             self._same_source_k[(c, t)] = int(v)
 
     def forget_target(self, target_id: str) -> None:
-        """wipe demo 用（12 §7 時刻 4）：抹掉某 target 的全部信譽格與鏈頭記錄。
+        """wipe demo 用（12 §7 時刻 4）：抹掉某 target 當前 stream 的信譽格與鏈頭記錄。
 
         語意＝「同一把 key、信用歸零」：歸屬（idem）在 keypair 續存，值得被託付
-        的那部分（被審歷史的聚合）隨記憶抹除一起消失。只供 demo/測試；
-        正式實驗的信用不可抹（那是 X4 攻防的前提）。"""
-        self._rep._cells = {k: v for k, v in self._rep._cells.items() if k[0] != target_id}
+        的那部分（被審歷史的聚合）隨記憶抹除一起消失。改動2 之後這個語意大部分
+        由 key 結構自然達成（新創世＝新三元組＝空格）；這裡清掉舊格與解析表避免
+        孤兒資料殘留。只供 demo/測試；正式實驗的信用不可抹（那是 X4 攻防的前提）。"""
         old = self._heads.pop(target_id, None)
-        if old is not None:  # 去重鍵以 stream 為軸；抹掉舊 stream 的（新 stream＝新創世，不撞）
-            old_stream = old[0]
+        if old is not None:
+            old_stream, old_branch = old[0], old[1]
+            self._rep._cells = {
+                k: v for k, v in self._rep._cells.items()
+                if not (k[0] == old_stream and k[1] == old_branch)
+            }
             self._seen_reviews = {k for k in self._seen_reviews if k[1] != old_stream}
 
     def reputation_of(self, target_id: str, substrate: str) -> float:
-        return self._rep.score(target_id, substrate)
+        """某 vacant 當前 stream 的信譽分（改動2）；未觀察過其鏈 → 中性 0.5。"""
+        resolved = self._resolve(target_id)
+        if resolved is None:
+            return 0.5
+        return self._rep.score(resolved[0], resolved[1], substrate)
 
     def standing(self, vacant_id: str, substrate: str | None = None) -> tuple[float, float]:
-        """某 vacant 的信譽：(score, observations)。
+        """某 vacant **當前 stream** 的信譽：(score, observations)（改動2）。
 
         供 ingress 信譽把關用（被呼叫方判斷要不要接這個 caller 的活）。
           - 給 substrate → 只看「在這顆腦上」的信譽（與 egress 路由同口徑；避免在腦 A
             上爛、卻靠腦 B 的好成績矇混過關）。
           - 不給 → 跨 substrate 平均（較寬鬆，僅供概覽）。
-        無任何觀測 → 回 (中性 0.5, 0)，讓新人靠探索通過（不誤殺冷啟動）。
+        未觀察過鏈頭／該 stream 無任何觀測 → 回 (中性 0.5, 0)，讓新人靠探索通過。
         """
+        resolved = self._resolve(vacant_id)
+        if resolved is None:
+            return 0.5, 0.0
+        stream_id, branch_id = resolved
         cells = [
-            (t, s)
-            for (t, s) in self._rep._cells
-            if t == vacant_id and (substrate is None or s == substrate)
+            (st, su)
+            for (st, br, su) in self._rep._cells
+            if st == stream_id and br == branch_id and (substrate is None or su == substrate)
         ]
         if not cells:
             return 0.5, 0.0
-        scores = [self._rep.score(t, s) for (t, s) in cells]
-        obs = sum(self._rep.observations(t, s) for (t, s) in cells)
+        scores = [self._rep.score(st, branch_id, su) for (st, su) in cells]
+        obs = sum(self._rep.observations(st, branch_id, su) for (st, su) in cells)
         return sum(scores) / len(scores), obs
 
     # --- 路由（UCB）-------------------------------------------------------
+    def _score_obs(self, target_id: str, substrate: str) -> tuple[float, float]:
+        """路由用：vacant_id → 當前 stream 的 (rep_score, obs)；未知 → (0.5, 0)。"""
+        resolved = self._resolve(target_id)
+        if resolved is None:
+            return 0.5, 0.0
+        return (self._rep.score(resolved[0], resolved[1], substrate),
+                self._rep.observations(resolved[0], resolved[1], substrate))
+
     def route(
         self, niche: str, substrate: str, *, explore_c: float = 0.3
     ) -> CapabilityCard | None:
@@ -202,11 +237,10 @@ class Registry:
         cands = self.discover(niche)
         if not cands:
             return None
-        total_obs = sum(self._rep.observations(c.vacant_id, substrate) for c in cands)
+        total_obs = sum(self._score_obs(c.vacant_id, substrate)[1] for c in cands)
 
         def key(c: CapabilityCard) -> float:
-            rep = self._rep.score(c.vacant_id, substrate)
-            obs = self._rep.observations(c.vacant_id, substrate)
+            rep, obs = self._score_obs(c.vacant_id, substrate)
             return ucb_score(rep, obs, total_obs, c=explore_c)
 
         return max(cands, key=key)
@@ -222,6 +256,6 @@ class Registry:
     def leaderboard(self, niche: str, substrate: str) -> list[tuple[str, float]]:
         cands = self.discover(niche)
         return sorted(
-            ((c.vacant_id, self._rep.score(c.vacant_id, substrate)) for c in cands),
+            ((c.vacant_id, self._score_obs(c.vacant_id, substrate)[0]) for c in cands),
             key=lambda x: -x[1],
         )

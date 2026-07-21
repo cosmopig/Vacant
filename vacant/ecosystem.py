@@ -332,7 +332,8 @@ class Ecosystem:
         reviewers = pool[: self.k_reviewers]
         head = deliverer.body.logbook.head()
         stream = deliverer.body.logbook.stream_id() or deliverer.vacant_id
-        self.registry.note_head(deliverer.vacant_id, stream, head)
+        self.registry.note_head(
+            deliverer.vacant_id, stream, deliverer.body.logbook.branch_id(), head)
 
         out: list[dict[str, Any]] = []
         calls = 0
@@ -362,6 +363,12 @@ class Ecosystem:
             rv.body.log("REVIEW", {"target": deliverer.name, "task_id": tid,
                                    "verdict": "PASS" if ok else "FAIL"})
             rv.body.persist()
+            # 改動2：reviewer 自己的鏈頭也要讓 registry 觀察到——weight 內生
+            # （reviewer 信譽×飽和度）以「reviewer 當前 stream」查找，缺這筆
+            # 所有人的 weight 都塌回地板。
+            self.registry.note_head(
+                rv.vacant_id, rv.body.logbook.stream_id() or rv.vacant_id,
+                rv.body.logbook.branch_id(), rv.body.logbook.head())
             out.append({"reviewer": rv.name, "reviewer_id": rv.vacant_id,
                         "verdict": "PASS" if ok else "FAIL", "weight": round(w, 4),
                         "sig": env.sig})
