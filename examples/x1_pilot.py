@@ -2,7 +2,7 @@
 
 用法（端點以 VACANT_ENDPOINT 或 --base 指定，不寫死機器 IP——G10）：
     VACANT_ENDPOINT=http://<vm-host>:1234 \
-        python examples/x1_pilot.py --model qwen3.6-35b-a3b --arm M2 --oracle --seed s0
+        python examples/x1_pilot.py --model qwen/qwen3.6-35b-a3b --arm M2 --oracle --seed s0
 
 離線乾跑（工程閘門，無端點也產合格包）：
     python examples/x1_pilot.py --stub --arm M2 --oracle
@@ -72,7 +72,7 @@ def _build_tasks(args):
 def main() -> None:
     ap = argparse.ArgumentParser(description="X1 遷移 pilot（oracle-lesson 一票否決判準）")
     ap.add_argument("--base", default=os.environ.get("VACANT_ENDPOINT", "http://localhost:1234"))
-    ap.add_argument("--model", default="qwen3.6-35b-a3b")
+    ap.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
     ap.add_argument("--api", default="responses",
                     help="'responses'(/api/v1/chat，reasoning 模型) 或 'openai'(/v1)")
     ap.add_argument("--loader", choices=["x1", "builtin", "evalplus"], default="x1")
