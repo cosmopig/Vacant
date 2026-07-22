@@ -173,3 +173,25 @@ def test_up_no_dashboard(tmp_path, capsys):
     rc, out, _ = _run(capsys, ["up", "--no-dashboard", "--root", str(root)])
     assert rc == 0
     assert "生態就緒" in out
+    assert (root / "residents" / "resident_1").is_dir()
+    assert not (root / "residents" / "saboteur_1").exists()
+
+
+def test_up_demo_roster_is_explicit(tmp_path, capsys):
+    root = tmp_path / "demo"
+    rc, _, _ = _run(capsys, [
+        "up", "--no-dashboard", "--demo-roster", "--root", str(root),
+    ])
+    assert rc == 0
+    assert (root / "residents" / "saboteur_1").is_dir()
+
+
+def test_demo_roster_cannot_contaminate_product_root(tmp_path, capsys):
+    root = tmp_path / "product"
+    rc, _, _ = _run(capsys, ["up", "--no-dashboard", "--root", str(root)])
+    assert rc == 0
+    rc, _, err = _run(capsys, [
+        "up", "--no-dashboard", "--demo-roster", "--root", str(root),
+    ])
+    assert rc == 1
+    assert "不可" in err and "~/.vacant-demo" in err

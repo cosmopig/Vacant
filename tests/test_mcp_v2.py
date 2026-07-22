@@ -9,6 +9,7 @@ import json
 
 from vacant import mcp_server
 from vacant.ecosystem import Ecosystem
+from vacant.receipt import sha256_canonical
 
 
 class FakeBrain:
@@ -16,6 +17,13 @@ class FakeBrain:
 
     def generate(self, prompt: str) -> str:
         return "```python\ndef solve(s):\n    return s[::-1]\n```"
+
+
+class WrongBrain:
+    name = "wrong"
+
+    def generate(self, prompt: str) -> str:
+        return "def solve(s):\n    return s"
 
 
 # run_python check：solve 必須把字串反轉
@@ -54,6 +62,33 @@ def test_trust_card_impl_full_json(tmp_path, monkeypatch):
 
     missing = json.loads(mcp_server._trust_card_impl("deadbeef0000"))
     assert "error" in missing
+
+
+def test_receipt_impl_full_json(tmp_path, monkeypatch):
+    eco = _fake_eco(tmp_path)
+    monkeypatch.setattr(mcp_server, "_eco", lambda: eco)
+    out = mcp_server._delegate_impl("reverse", TESTS)
+    request_id = out.split("signed_receipt=", 1)[1].splitlines()[0]
+    bundle = json.loads(mcp_server._receipt_impl(request_id))
+    receipt = bundle["receipt"]
+    assert receipt["request_id"] == request_id
+    assert receipt["verified"] is True
+    assert "answer_sha256" in receipt and "sig" in receipt
+    assert bundle["trust_card"]["task_id"] == receipt["task_id"]
+    assert "error" in json.loads(mcp_server._receipt_impl("../../identity.key"))
+
+
+def test_receipt_lookup_keeps_request_specific_card_for_repeated_task(tmp_path, monkeypatch):
+    eco = _fake_eco(tmp_path)
+    monkeypatch.setattr(mcp_server, "_eco", lambda: eco)
+    first = mcp_server._delegate_impl("same reverse task", TESTS)
+    first_id = first.split("signed_receipt=", 1)[1].splitlines()[0]
+    second = mcp_server._delegate_impl("same reverse task", TESTS)
+    second_id = second.split("signed_receipt=", 1)[1].splitlines()[0]
+    assert first_id != second_id
+    first_bundle = json.loads(mcp_server._receipt_impl(first_id))
+    assert sha256_canonical(first_bundle["trust_card"]) == \
+        first_bundle["receipt"]["trust_card_sha256"]
 
 
 def test_residents_impl_shows_flags(tmp_path, monkeypatch):
@@ -100,6 +135,21 @@ def test_delegate_error_path_without_model(tmp_path, monkeypatch):
     err = json.loads(out)
     assert "error" in err
     assert "VACANT_MCP_MODEL" in err["error"]
+
+
+def test_delegate_is_fail_closed_when_all_attempts_fail(tmp_path, monkeypatch):
+    eco = Ecosystem(tmp_path / "eco", WrongBrain())
+    monkeypatch.setattr(mcp_server, "_eco", lambda: eco)
+    out = json.loads(mcp_server._delegate_impl("reverse", TESTS, attempts=2))
+    assert "error" in out
+    assert "did not pass" in out["error"]
+
+
+def test_fastmcp_registers_product_tools_and_attempt_schema():
+    tools = {tool.name: tool for tool in mcp_server.mcp._tool_manager.list_tools()}
+    assert {"delegate", "trust_card", "receipt", "residents", "report", "scoreboard"} <= set(tools)
+    attempts = tools["delegate"].parameters["properties"]["attempts"]
+    assert attempts["default"] == 3 and attempts["type"] == "integer"
 
 
 def test_residents_error_path_without_model(monkeypatch):

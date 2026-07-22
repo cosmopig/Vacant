@@ -6,6 +6,7 @@ mcp_server，於是它「有」了 vacant：不改一行碼，只靠設定連上
 工具面 v2（12 §3）：
   - delegate    ：主工具。把有客觀 check 的 coding 子任務交給信任生態，回答案＋信任狀。
   - trust_card  ：取某次 delegate 的完整信任狀 JSON。
+  - receipt     ：取某次 delegate 的 task/check/answer 綁定簽章收據。
   - residents   ：名冊（信用/觀測/flags，INSUFFICIENT_DATA/PROBATION 如實顯示）。
   - report      ：人類仲裁回灌（最強標籤）。
   - scoreboard  ：trust off/on 配對＋成本（每次使用都是一筆試次）。
@@ -56,12 +57,21 @@ def _eco():
     # 部署到 VM/遠端一律顯式設 env，不寫死機器 IP（G10／17 §P0-7）。
     base = os.environ.get("VACANT_MCP_BASE", "http://localhost:1234")
     api = os.environ.get("VACANT_MCP_API", "responses")
+    if api not in ("responses", "openai"):
+        raise RuntimeError("VACANT_MCP_API must be 'responses' or 'openai'")
+    api_key = os.environ.get("VACANT_MCP_API_KEY") or os.environ.get("VACANT_API_KEY")
     from vacant.brains import LMStudioBrain
-    from vacant.ecosystem import Ecosystem
+    from vacant.ecosystem import Ecosystem, PRODUCT_ROSTER, assert_product_root
+    from vacant.atomic import file_lock
 
-    brain = LMStudioBrain(base, model, api=api, timeout=600, max_tokens=None)
+    brain = LMStudioBrain(
+        base, model, api=api, timeout=600, max_tokens=None, api_key=api_key)
     root = Path(os.path.expanduser(os.environ.get("VACANT_MCP_ROOT", "~/.vacant-mcp")))
-    _ECO = Ecosystem(root, brain)
+    with file_lock(root / "controller" / "bootstrap.lock", timeout=30):
+        assert_product_root(root)
+        _ECO = Ecosystem(
+            root, brain, roster=PRODUCT_ROSTER, k_reviewers=2,
+            persist_artifacts=False, root_mode="product")
     return _ECO
 
 
@@ -70,17 +80,25 @@ def _err(where: str, e: Exception) -> str:
 
 
 # --- 純函式實作（工具薄包這些，測試直接呼叫純函式）------------------------------
-def _delegate_impl(task: str, tests: dict, risk: str = "normal") -> str:
+def _delegate_impl(task: str, tests: dict, risk: str = "normal", attempts: int = 3) -> str:
+    global _ECO
     try:
         eco = _eco()
-        r = eco.delegate(task, tests, risk=risk)
+        from vacant.controller import GatePolicy, VacantFirstController
+
+        controller = VacantFirstController(
+            eco, policy=GatePolicy(max_attempts=int(attempts)))
+        guarded = controller.delegate_then_run(
+            task=task, tests=tests, risk=risk, launch=None)
+        _ECO = controller.ecosystem
     except Exception as e:  # MCP 工具不可拋——例外轉 JSON error 字串
         return _err("delegate failed", e)
     return (
-        f"{r['answer']}\n\n"
+        f"{guarded.answer}\n\n"
         f"── trust card ──\n"
-        f"{render_trust_card(r['trust_card'])}\n\n"
-        f"task_id={r['task_id']}"
+        f"{render_trust_card(guarded.trust_card)}\n\n"
+        f"signed_receipt={guarded.request_id}\n"
+        f"task_id={guarded.task_id}"
     )
 
 
@@ -94,6 +112,19 @@ def _trust_card_impl(task_id: str) -> str:
         return json.dumps({"error": f"no trust card for task_id={task_id}"},
                           ensure_ascii=False)
     return card_json(card)
+
+
+def _receipt_impl(request_id: str) -> str:
+    try:
+        eco = _eco()
+        value = eco.delegation_receipt(request_id)
+        card = eco.delegation_card(request_id)
+    except Exception as e:
+        return _err("receipt failed", e)
+    if value is None or card is None:
+        return json.dumps({"error": f"no receipt for request_id={request_id}"},
+                          ensure_ascii=False)
+    return json.dumps({"receipt": value, "trust_card": card}, ensure_ascii=False, indent=2)
 
 
 def _residents_impl() -> str:
@@ -117,9 +148,15 @@ def _residents_impl() -> str:
 
 
 def _report_impl(task_id: str, verdict: str, evidence: str = "") -> str:
+    global _ECO
     try:
         eco = _eco()
-        ack = eco.report(task_id, verdict, evidence=evidence)
+        from vacant.atomic import file_lock
+
+        with file_lock(eco.root / "controller" / "controller.lock", timeout=30):
+            eco = eco.fresh()
+            ack = eco.report(task_id, verdict, evidence=evidence)
+            _ECO = eco
     except Exception as e:
         return _err("report failed", e)
     return json.dumps(ack, ensure_ascii=False)
@@ -145,7 +182,7 @@ def _scoreboard_impl() -> str:
 
 # --- MCP 工具（薄包純函式）------------------------------------------------------
 @mcp.tool()
-def delegate(task: str, tests: dict, risk: str = "normal") -> str:
+def delegate(task: str, tests: dict, risk: str = "normal", attempts: int = 3) -> str:
     """THE PREFERRED PATH for any coding subtask with an objective check. Instead of
     writing the code yourself, hand it to Vacant's trusted, accountable resident
     ecosystem: the task is routed (by reputation) to a resident, generated on Vacant's
@@ -165,11 +202,12 @@ def delegate(task: str, tests: dict, risk: str = "normal") -> str:
     asserts call it — the delivered answer is the code that passes.)
 
     `risk` is a hint ("normal"/"high") for downstream policy; defaults to "normal".
+    `attempts` is the objective verify-fix budget (1-10, default 3).
 
-    Returns: the answer, then a three-line rendered trust card, then task_id (use it
-    with trust_card / report). On any failure returns a JSON error string (never raises).
+    Returns: the answer, a three-line trust card, a signed receipt id, then task_id
+    (use it with trust_card / report). On failure returns JSON error text (never raises).
     """
-    return _delegate_impl(task, tests, risk)
+    return _delegate_impl(task, tests, risk, attempts)
 
 
 @mcp.tool()
@@ -178,6 +216,15 @@ def trust_card(task_id: str) -> str:
     deliverer identity + credit/observations/flags, every signed peer review, audit
     status, chain head, and host signature. Returns a JSON error string if unknown."""
     return _trust_card_impl(task_id)
+
+
+@mcp.tool()
+def receipt(request_id: str) -> str:
+    """Fetch the full signed delegation receipt and its exact immutable trust card by
+    request_id. The receipt binds the
+    request, objective check, risk, delivered answer, trust card, resident identity,
+    stream and chain head. Returns JSON error text when unknown."""
+    return _receipt_impl(request_id)
 
 
 @mcp.tool()
@@ -230,7 +277,8 @@ def verify_fix(prompt: str, check: dict, draft: str = "", k: int = 3) -> str:
         return json.dumps({"error": f"bad check spec: {type(e).__name__}: {e}"})
     base = os.environ.get("VACANT_MCP_BASE", "http://localhost:1234")
     api = os.environ.get("VACANT_MCP_API", "responses")
-    brain = LMStudioBrain(base, model, api=api, max_tokens=1024)
+    api_key = os.environ.get("VACANT_MCP_API_KEY") or os.environ.get("VACANT_API_KEY")
+    brain = LMStudioBrain(base, model, api=api, max_tokens=1024, api_key=api_key)
     v = Vacant(brain, k=int(k))
     cd = str(check.get("type", "custom"))
 

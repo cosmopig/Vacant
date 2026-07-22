@@ -247,6 +247,29 @@ def test_off_mode_does_not_burn_probation(tmp_path):
     assert audits[-1]["forced"] is True  # on 模式第一筆仍在強制稽核窗內
 
 
+def test_corrupt_trust_state_fails_closed(tmp_path):
+    (tmp_path / "state.json").write_text("{truncated", encoding="utf-8")
+    eco = Ecosystem(tmp_path, FakeBrain(), roster={"solo": "good"})
+    assert eco.trust_on is False
+
+
+@pytest.mark.parametrize("payload", [
+    '{"trust_on":"false"}', '{"trust_on":"off"}', '{}', '{"trust_on":1}',
+])
+def test_non_boolean_trust_state_fails_closed(tmp_path, payload):
+    (tmp_path / "state.json").write_text(payload, encoding="utf-8")
+    eco = Ecosystem(tmp_path, FakeBrain(), roster={"solo": "good"})
+    assert eco.trust_on is False
+
+
+def test_corrupt_registry_state_refuses_to_reset_history(tmp_path):
+    state = tmp_path / "registry_state.json"
+    state.write_text("{truncated", encoding="utf-8")
+    with pytest.raises(ValueError, match="refusing to reset trust history"):
+        Ecosystem(tmp_path, FakeBrain(), roster={"solo": "good"})
+    assert state.read_text(encoding="utf-8") == "{truncated"
+
+
 def test_m2_lesson_written_and_injected(tmp_path):
     """M2 記憶通道活著：被稽核 episode 有蒸餾教訓、後續注入非空（finding [5]）。"""
     eco = Ecosystem(tmp_path, FakeBrain(), roster={"solo": "good"}, k_reviewers=1)

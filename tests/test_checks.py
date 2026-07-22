@@ -39,6 +39,29 @@ def test_json_schema_pass_fail():
     assert not f("not json at all")
 
 
+def test_json_schema_min_length_without_optional_dependency(monkeypatch):
+    import builtins
+
+    real_import = builtins.__import__
+
+    def without_jsonschema(name, *args, **kwargs):
+        if name == "jsonschema":
+            raise ImportError
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", without_jsonschema)
+    f = compile_check({
+        "type": "json_schema",
+        "schema": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {"name": {"type": "string", "minLength": 1}},
+        },
+    })
+    assert f('{"name":"Vacant"}')
+    assert not f('{"name":""}')
+
+
 def test_run_python_pass_fenced():
     f = compile_check({"type": "run_python", "code": "assert solve('ab') == 'ba'"})
     assert f("```python\ndef solve(s):\n    return s[::-1]\n```")
@@ -86,6 +109,95 @@ def test_run_python_check_fail_wrong_answer():
 
 def test_run_python_check_fail_syntax_error():
     assert not run_python_check("this is not python at all !!", "assert True")
+
+
+def test_run_python_check_rejects_exit_zero_bypass():
+    bypass = "import os\nos._exit(0)\ndef solve(x): return 'forged'"
+    assert not run_python_check(bypass, "assert solve('x') == 'expected'")
+
+
+def test_run_python_check_rejects_candidate_file_read_used_to_probe_hidden_tests():
+    probe = """def solve(x):
+    try:
+        text = open(__file__, encoding='utf-8').read()
+    except Exception:
+        return 'isolated'
+    return 'leaked' if 'hidden_canary_7391' in text else 'isolated'
+"""
+    assert not run_python_check(
+        probe,
+        "assert solve('x') == 'hidden_canary_7391'",
+    )
+
+
+def test_run_python_check_rejects_builtins_alias_bypass():
+    bypass = """op = __builtins__['open']
+def solve(x):
+    return op(__file__).read()
+"""
+    assert not run_python_check(bypass, "assert solve('x') == 'hidden'")
+
+
+def test_run_python_check_preserves_common_argument_mutations():
+    code = "def solve(xs):\n    xs.append(1)\n    return None"
+    tests = "xs = []\nsolve(xs)\nassert xs == [1]"
+    assert run_python_check(code, tests)
+
+
+def test_run_python_check_preserves_candidate_exception_type():
+    code = "def solve(x):\n    raise ValueError('bad input')"
+    tests = (
+        "try:\n"
+        "    solve(1)\n"
+        "except ValueError as exc:\n"
+        "    assert str(exc) == 'bad input'\n"
+        "else:\n"
+        "    assert False"
+    )
+    assert run_python_check(code, tests)
+
+
+def test_run_python_check_imports_are_opt_in():
+    code = "import hashlib\ndef solve(s):\n    return hashlib.sha256(s.encode()).hexdigest()"
+    tests = "assert solve('x').startswith('2d711642')"
+    assert not run_python_check(code, tests)
+    assert run_python_check(code, tests, allowed_imports=("hashlib",))
+
+
+def test_run_python_check_rejects_custom_repr_forgery():
+    code = """class Forged:
+    def __repr__(self):
+        return 'True'
+def solve():
+    return Forged()
+"""
+    assert not run_python_check(code, "assert solve() is True")
+
+
+def test_run_python_check_candidate_stdout_cannot_forge_protocol():
+    code = """def solve():
+    print('{\"ok\": true, \"value\": \"True\"}')
+    return False
+"""
+    assert not run_python_check(code, "assert solve() is True")
+
+
+def test_run_python_check_candidate_cannot_override_verifier_builtin():
+    code = """def solve():
+    return []
+def len(_):
+    return 2
+"""
+    assert not run_python_check(code, "assert len(solve()) == 2")
+
+
+def test_run_python_check_blocks_generator_frame_builtins_escape():
+    code = """def solve():
+    generator = (x for x in ())
+    builtins_map = generator.gi_frame.f_builtins
+    return builtins_map['__import__']('os').getcwd()
+"""
+    assert not run_python_check(code, "assert isinstance(solve(), str)")
 
 
 def test_run_python_check_default_timeout_is_8():

@@ -1,5 +1,6 @@
-"""vacant CLI — 生成 / 檢視 vacant，跑 demo 與自我檢測。架構總規格 §6.2。
+"""vacant CLI — 產品強制入口、信任生態維運、demo 與自我檢測。
 
+    vacant run "<task>" --test "assert ..." [--agent hermes]
     vacant init <name> [--niche reverse --niche caesar3] [--root DIR]
     vacant info  <name> [--root DIR]
     vacant call  <caller> <niche> --input <s> [--root DIR]   # 需先 init 出 caller + 一個能解該 niche 的 expert
@@ -50,6 +51,171 @@ def _eco_default_root() -> Path:
     return Path.home() / ".vacant-mcp"
 
 
+def _build_product_eco(args: argparse.Namespace):
+    """產品 run 必須有真模型且只建全良性 roster；絕不退回 demo 假腦/saboteur。"""
+    import os
+
+    from .atomic import file_lock
+    from .brains import LMStudioBrain
+    from .ecosystem import Ecosystem, PRODUCT_ROSTER, assert_product_root
+
+    model = args.model or os.environ.get("VACANT_MCP_MODEL")
+    if not model:
+        raise ValueError("缺模型：請傳 --model 或設定 VACANT_MCP_MODEL")
+    base = args.base or os.environ.get("VACANT_MCP_BASE", "http://localhost:1234")
+    api = args.api or os.environ.get("VACANT_MCP_API", "responses")
+    if api not in ("responses", "openai"):
+        raise ValueError("VACANT_MCP_API 必須是 responses 或 openai")
+    if args.model_timeout <= 0:
+        raise ValueError("--model-timeout 必須大於 0")
+    api_key = os.environ.get("VACANT_MCP_API_KEY") or os.environ.get("VACANT_API_KEY")
+    brain = LMStudioBrain(
+        base, model, api=api, timeout=args.model_timeout,
+        max_tokens=None, api_key=api_key)
+    root = Path(args.eco_root)
+    with file_lock(root / "controller" / "bootstrap.lock", timeout=30):
+        assert_product_root(root)
+        return Ecosystem(
+            root, brain, roster=PRODUCT_ROSTER,
+            k_reviewers=2, audit_rate=1.0, persist_artifacts=False,
+            root_mode="product",
+        )
+
+
+def _run_task(args: argparse.Namespace) -> str:
+    if args.task and args.task_file:
+        raise ValueError("task 與 --task-file 只能擇一")
+    if args.task_file:
+        return Path(args.task_file).read_text(encoding="utf-8").strip()
+    if args.task:
+        return args.task.strip()
+    raise ValueError("請提供 task 或 --task-file")
+
+
+def _run_check(args: argparse.Namespace) -> dict:
+    import json
+
+    if args.check_file:
+        spec = json.loads(Path(args.check_file).read_text(encoding="utf-8"))
+    elif args.check_json:
+        spec = json.loads(args.check_json)
+    elif args.test:
+        spec = {"type": "run_python", "code": "\n".join(args.test)}
+    elif args.test_file:
+        spec = {"type": "run_python", "code": Path(args.test_file).read_text(encoding="utf-8")}
+    elif args.expect is not None:
+        spec = {"type": "equals", "value": args.expect}
+    elif args.contains is not None:
+        spec = {"type": "contains", "value": args.contains}
+    elif args.regex is not None:
+        spec = {"type": "regex", "pattern": args.regex}
+    elif args.schema is not None:
+        spec = {"type": "json_schema", "schema": json.loads(args.schema)}
+    else:  # argparse 的 required group 正常不會走到這裡
+        raise ValueError("缺少客觀 check")
+    if not isinstance(spec, dict):
+        raise ValueError("check 必須是 JSON object")
+    return spec
+
+
+def _run_launch(args: argparse.Namespace):
+    import json
+
+    from .controller import ArgvTemplate, hermes_argv
+
+    custom = None
+    if args.agent_argv and args.agent_argv_file:
+        raise ValueError("--agent-argv 與 --agent-argv-file 只能擇一")
+    if args.agent_argv:
+        custom = json.loads(args.agent_argv)
+    elif args.agent_argv_file:
+        custom = json.loads(Path(args.agent_argv_file).read_text(encoding="utf-8"))
+    if custom is not None:
+        if args.agent != "none":
+            raise ValueError("自訂 argv 時不要同時指定 --agent")
+        if not isinstance(custom, list) or not all(isinstance(x, str) for x in custom):
+            raise ValueError("agent argv 必須是 JSON 字串陣列")
+        return ArgvTemplate(tuple(custom))
+    if args.agent == "hermes":
+        return hermes_argv(args.hermes_bin)
+    return None
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    """產品主入口：controller 直接委派，gate 過後才可啟動 agent。"""
+    import json
+
+    from .controller import (
+        AgentEvidenceError, AgentRunFailed, GatePolicy, GateRejected, VacantFirstController,
+    )
+    from .trustcard import render_trust_card
+
+    try:
+        task = _run_task(args)
+        tests = _run_check(args)
+        launch = _run_launch(args)
+        eco = _build_product_eco(args)
+        controller = VacantFirstController(
+            eco,
+            policy=GatePolicy(
+                max_attempts=args.attempts,
+                min_reviews=args.min_reviews,
+            ),
+        )
+        result = controller.delegate_then_run(
+            task=task,
+            tests=tests,
+            risk=args.risk,
+            launch=launch,
+            cwd=args.cwd,
+            timeout=args.agent_timeout,
+        )
+    except AgentEvidenceError as exc:
+        result = exc.result
+        print(f"VACANT_AGENT_RAN_EVIDENCE_FAILED：{exc}", file=sys.stderr)
+        print("下游 agent 已執行；請先檢查工作區，勿直接重跑。", file=sys.stderr)
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        return 4
+    except AgentRunFailed as exc:
+        result = exc.result
+        print(f"VACANT_AGENT_FAILED：{exc}", file=sys.stderr)
+        print(f"receipt：{result.receipt_path}", file=sys.stderr)
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        return 3
+    except (GateRejected, ValueError, OSError, json.JSONDecodeError) as exc:
+        print(f"VACANT_GATE_REJECTED：{exc}", file=sys.stderr)
+        print("外部 agent 未啟動。", file=sys.stderr)
+        return 2
+
+    if args.json_output:
+        print(json.dumps({
+            "request_id": result.request_id,
+            "task_id": result.task_id,
+            "answer": result.answer,
+            "receipt_path": str(result.receipt_path),
+            "context_path": str(result.context_path),
+            "agent": {
+                "ran": result.agent_argv is not None,
+                "returncode": result.returncode,
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+            },
+        }, ensure_ascii=False, indent=2))
+        return 0
+
+    print(f"✓ Vacant-first gate 通過｜task_id={result.task_id}｜"
+          f"attempts={result.receipt['attempts']}")
+    print(render_trust_card(result.trust_card))
+    print(f"receipt：{result.receipt_path}")
+    print("\n── agent output ──" if result.agent_argv else "\n── verified delivery ──")
+    print(result.stdout.rstrip() if result.agent_argv else result.answer)
+    if result.stderr:
+        print(result.stderr, file=sys.stderr)
+    return 0
+
+
 class EchoLikeBrain:
     """離線用的內建確定性假腦（未設模型端點時的 fallback）。
 
@@ -77,11 +243,18 @@ def _build_brain():
     return EchoLikeBrain()
 
 
-def _build_eco(root: Path):
-    """所有生態子命令都用 Ecosystem(root, brain) 重建——磁碟就是真相。"""
-    from .ecosystem import Ecosystem
+def _build_eco(root: Path, *, demo: bool = False):
+    """依磁碟既有 roster 重建；新產品 root 不再默認建立人工 saboteur。"""
+    from .ecosystem import DEFAULT_ROSTER, PRODUCT_ROSTER, Ecosystem, ensure_root_mode
 
-    return Ecosystem(root, _build_brain())
+    residents = root / "residents"
+    has_product = (residents / "resident_1" / "trust" / "vacant_id").exists()
+    has_demo = (residents / "good_1" / "trust" / "vacant_id").exists()
+    roster = DEFAULT_ROSTER if demo or (has_demo and not has_product) else PRODUCT_ROSTER
+    mode = "demo" if roster is DEFAULT_ROSTER else "product"
+    ensure_root_mode(root, mode)
+    return Ecosystem(root, _build_brain(), roster=roster,
+                     k_reviewers=min(3, max(0, len(roster) - 1)), root_mode=mode)
 
 
 def _print_roster(rows: list) -> None:
@@ -95,9 +268,17 @@ def _print_roster(rows: list) -> None:
 
 
 def cmd_eco_up(args: argparse.Namespace) -> int:
-    """建生態（6 預設居民）＋前景起 dashboard；Ctrl-C 優雅退出。"""
+    """建生態＋前景 dashboard；產品 roster 為預設，demo roster 必須顯式要求。"""
     root = Path(args.eco_root)
-    eco = _build_eco(root)
+    if args.demo_roster and (root / "residents" / "resident_1").exists():
+        print("demo roster 不可與 product residents 共用 root；請改用 --root ~/.vacant-demo",
+              file=sys.stderr)
+        return 1
+    try:
+        eco = _build_eco(root, demo=args.demo_roster)
+    except ValueError as exc:
+        print(f"無法建立生態：{exc}", file=sys.stderr)
+        return 1
     print(f"生態就緒：root={root}  trust={'on' if eco.trust_on else 'off'}  "
           f"居民={len(eco.residents)}")
     if args.no_dashboard:
@@ -136,10 +317,13 @@ def cmd_eco_toggle(args: argparse.Namespace) -> int:
     """翻 root/state.json 的 trust_on（不必起整個生態，直接讀寫布林）。"""
     import json
 
+    from .atomic import atomic_write_text, file_lock
+
     root = Path(args.eco_root)
-    root.mkdir(parents=True, exist_ok=True)
-    on = args.state == "on"
-    (root / "state.json").write_text(json.dumps({"trust_on": on}), encoding="utf-8")
+    with file_lock(root / "controller" / "controller.lock", timeout=30):
+        root.mkdir(parents=True, exist_ok=True)
+        on = args.state == "on"
+        atomic_write_text(root / "state.json", json.dumps({"trust_on": on}))
     print(f"trust → {'on' if on else 'off'}   (root={root})")
     return 0
 
@@ -196,11 +380,15 @@ def cmd_eco_resident_inspect(args: argparse.Namespace) -> int:
 
 def cmd_eco_resident_wipe(args: argparse.Namespace) -> int:
     """eco.wipe：抹記憶不抹 key。"""
-    eco = _build_eco(Path(args.eco_root))
-    if args.name not in eco.residents:
-        print(f"找不到居民：{args.name}（居民：{', '.join(eco.residents)}）", file=sys.stderr)
-        return 1
-    res = eco.wipe(args.name)
+    from .atomic import file_lock
+
+    root = Path(args.eco_root)
+    with file_lock(root / "controller" / "controller.lock", timeout=30):
+        eco = _build_eco(root)
+        if args.name not in eco.residents:
+            print(f"找不到居民：{args.name}（居民：{', '.join(eco.residents)}）", file=sys.stderr)
+            return 1
+        res = eco.wipe(args.name)
     print(f"已抹記憶（key 保留）：{res['name']}  (…{res['vacant_id']})  "
           f"旗標={', '.join(res['flags']) or '（無）'}")
     return 0
@@ -342,7 +530,10 @@ def cmd_selftest(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="vacant", description="Vacant — AI agent 之間的信任層（Phase 1）")
+    p = argparse.ArgumentParser(
+        prog="vacant",
+        description="Vacant — 先驗證交付，再啟動 AI agent",
+    )
     p.add_argument("--root", default=str(_default_root()), help="vacant 身體根目錄（預設 ~/.vacant）")
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -368,6 +559,54 @@ def build_parser() -> argparse.ArgumentParser:
 
     ps = sub.add_parser("selftest", help="端到端冒煙測試（暫存目錄）")
     ps.set_defaults(func=cmd_selftest)
+
+    # 產品主入口：Vacant 自己先 delegate，簽章 gate 過後才啟動外部 agent。
+    prun = sub.add_parser(
+        "run",
+        help="Vacant-first 強制入口：先驗證交付，再啟動 Hermes／任意 CLI agent",
+    )
+    prun.add_argument("task", nargs="?", help="任務文字；長任務可改用 --task-file")
+    prun.add_argument("--task-file", help="UTF-8 任務檔")
+    prun.add_argument("--root", dest="eco_root", default=str(_eco_default_root()),
+                      help="產品信任生態目錄（預設 ~/.vacant-mcp）")
+    prun.add_argument("--base", default=None,
+                      help="模型端點；預設 VACANT_MCP_BASE 或 http://localhost:1234")
+    prun.add_argument("--model", default=None,
+                      help="模型 id；預設 VACANT_MCP_MODEL（未提供則 fail-closed）")
+    prun.add_argument("--api", choices=["responses", "openai"], default=None,
+                      help="預設 VACANT_MCP_API 或 responses")
+    prun.add_argument("--model-timeout", type=int, default=900,
+                      help="單次模型呼叫逾時秒數（預設 900）")
+    prun.add_argument("--attempts", type=int, default=3,
+                      help="客觀 verify-fix 最大嘗試次數（1-10，預設 3）")
+    prun.add_argument("--min-reviews", type=int, default=1,
+                      help="啟動 agent 前至少需要的簽章 peer review 數（預設 1）")
+    prun.add_argument("--risk", choices=["normal", "high"], default="normal")
+
+    checks = prun.add_mutually_exclusive_group(required=True)
+    checks.add_argument("--check-file", help="完整 check-spec JSON 檔")
+    checks.add_argument("--check-json", help="行內完整 check-spec JSON")
+    checks.add_argument("--test", action="append",
+                        help="Python assert；可重複，會組成 run_python check")
+    checks.add_argument("--test-file", help="Python assert 測試檔")
+    checks.add_argument("--expect", help="答案必須精確等於此值")
+    checks.add_argument("--contains", help="答案必須包含此字串")
+    checks.add_argument("--regex", help="答案必須符合此正則")
+    checks.add_argument("--schema", help="答案必須符合此 JSON Schema（行內 JSON）")
+
+    prun.add_argument("--agent", choices=["none", "hermes"], default="none",
+                      help="gate 後啟動的內建 adapter（預設只回 Vacant 交付）")
+    prun.add_argument("--hermes-bin", default="hermes",
+                      help="Hermes 執行檔（預設 hermes）")
+    prun.add_argument("--agent-argv",
+                      help="自訂 shell-free argv JSON 陣列；須含 {answer} 或 {context_path}")
+    prun.add_argument("--agent-argv-file", help="自訂 argv JSON 陣列檔")
+    prun.add_argument("--agent-timeout", type=float, default=900,
+                      help="下游 agent 逾時秒數（預設 900）")
+    prun.add_argument("--cwd", default=None, help="下游 agent 工作目錄（預設目前目錄）")
+    prun.add_argument("--json", dest="json_output", action="store_true",
+                      help="輸出機器可讀 JSON")
+    prun.set_defaults(func=cmd_run)
 
     pb = sub.add_parser("bench", help="在你自己的模型上量 plain vs vacant（verify-fix）的效果")
     pb.add_argument("--base", default="http://localhost:1234", help="LM Studio / OpenAI 相容端點（預設 http://localhost:1234）")
@@ -412,10 +651,12 @@ def build_parser() -> argparse.ArgumentParser:
         pp.add_argument("--root", dest="eco_root", default=eco_default,
                         help="生態根目錄（預設 ~/.vacant-mcp）")
 
-    pup = sub.add_parser("up", help="建生態（6 居民）＋前景起 dashboard")
+    pup = sub.add_parser("up", help="建產品生態＋前景 dashboard")
     _add_eco_root(pup)
     pup.add_argument("--port", type=int, default=7777, help="dashboard 埠（預設 7777）")
     pup.add_argument("--no-dashboard", action="store_true", help="只建生態、不起 dashboard")
+    pup.add_argument("--demo-roster", action="store_true",
+                     help="研究展示才用：建立含人工 saboteur 的 6-resident roster")
     pup.set_defaults(func=cmd_eco_up)
 
     ptg = sub.add_parser("toggle", help="翻 root/state.json 的 trust 開關")
@@ -547,7 +788,9 @@ def cmd_verify_att(args: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
-_VACANT_TOOLS = ("verify_fix", "a2a_call", "get_reputation", "submit_review")
+_VACANT_TOOLS = (
+    "delegate", "trust_card", "receipt", "residents", "report", "scoreboard", "verify_fix",
+)
 
 
 def _short(v, n: int = 140) -> str:

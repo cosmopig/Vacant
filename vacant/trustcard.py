@@ -43,9 +43,11 @@ def build_trust_card(
                        "flags": flags},   # 風險欄位必有（可為空 list，不可缺鍵）
         },
         "reviews": [
-            # 簽章存全文（可驗）；顯示層才截斷。截斷過的簽章驗不了＝形同無簽。
+            # envelope＋reviewer pub 都存全文，讓 controller 可獨立重驗，不只信 deliverer。
             {"reviewer": r["reviewer"], "verdict": r["verdict"],
-             "weight": r["weight"], "sig": r["sig"]}
+             "weight": r["weight"], "sig": r["sig"],
+             "reviewer_pub_hex": r["reviewer_pub_hex"],
+             "envelope": r["envelope"]}
             for r in reviews
         ],
         "audit": {"performed": bool(audit and audit.get("ran")),

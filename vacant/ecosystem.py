@@ -29,14 +29,17 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import time
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
+from .atomic import atomic_write_text
 from .auditor import Auditor
 from .body import VacantBody, now_ms
-from .checks import compile_check, extract_code
+from .checks import compile_check, extract_code, project_checked_answer
 from .envelope import ReviewEnvelope
 from .memory import MemoryManager, MemoryStream, assert_ks1_clean
 from .registry import Registry, ReviewRejected
@@ -66,6 +69,23 @@ Write a Python function that solves the task below. Output only code
 {task}
 """
 
+GENERAL_DELEGATE_TEMPLATE = """{memory}
+
+Complete the task below. Return only the requested final artifact. Do not add an
+explanation unless the task explicitly asks for one.
+
+{task}
+"""
+
+REPAIR_SUFFIX = """
+
+The previous candidate below did not pass the objective check. Produce a different,
+corrected final artifact. The check itself is hidden and must not be guessed or quoted.
+
+Previous candidate:
+{answer}
+"""
+
 # tier 種植（誠實標注：demo 用品質操弄，非責任修辭）。附加在 system 側。
 TIER_STYLE = {
     "good": "",
@@ -79,6 +99,58 @@ DEFAULT_ROSTER = {  # 12 §6
     "mediocre_1": "mediocre",
     "saboteur_1": "saboteur", "saboteur_2": "saboteur",
 }
+
+# 產品入口絕不能沿用 demo 的人工 saboteur。三個同規 resident 仍有獨立 key/logbook，
+# 讓信譽、互審、稽核與記憶生效，但不刻意要求任何 resident 製造錯誤。
+PRODUCT_ROSTER = {
+    "resident_1": "good",
+    "resident_2": "good",
+    "resident_3": "good",
+}
+ROOT_MODE_FILE = ".vacant-root-mode"
+
+
+def ensure_root_mode(root: Path, mode: str) -> None:
+    """持久宣告 root 用途；product/demo 不得在後續行程互換。"""
+    if mode not in ("product", "demo"):
+        raise ValueError(f"unknown root mode: {mode}")
+    root = Path(root)
+    marker = root / ROOT_MODE_FILE
+    root.mkdir(parents=True, exist_ok=True)
+    try:
+        fd = os.open(marker, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        try:
+            current = marker.read_text(encoding="utf-8").strip()
+        except OSError as exc:
+            raise ValueError(f"cannot read root mode marker: {marker}") from exc
+        if current != mode:
+            raise ValueError(f"root {root} is {current!r}, not {mode!r}")
+        return
+    try:
+        os.write(fd, (mode + "\n").encode("utf-8"))
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def assert_product_root(root: Path) -> None:
+    """產品與人工 saboteur 的持久資料不可共用 root。"""
+    root = Path(root)
+    residents = root / "residents"
+    foreign = sorted(
+        path.name for path in residents.iterdir()
+        if path.is_dir() and path.name not in PRODUCT_ROSTER
+        and (path / "trust" / "vacant_id").exists()
+    ) if residents.is_dir() else []
+    if foreign:
+        raise ValueError(
+            f"product root {root} contains non-product residents {foreign}; "
+            "use a clean root or ~/.vacant-demo")
+    if (root / "artifacts.jsonl").exists():
+        raise ValueError(
+            f"product root {root} contains legacy artifacts with checks; use a clean product root")
+    ensure_root_mode(root, "product")
 
 INSUFFICIENT_DATA_N = 30  # THEORY_V5 §5 demo 7：n<30 顯式標注
 
@@ -143,6 +215,8 @@ class Ecosystem:
         b_memory: int = 2000,                  # 15 §1 裁決 B=2000
         review_mode: str = "deterministic",    # "deterministic"(demo) | "model"(批次噪音審)
         substrate_id: str | None = None,
+        persist_artifacts: bool = True,         # 產品 child 同帳號時不落 hidden check
+        root_mode: str | None = None,
     ) -> None:
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
@@ -151,6 +225,12 @@ class Ecosystem:
         self.probation_m = probation_m
         self.review_mode = review_mode
         self.substrate_id = substrate_id or getattr(brain, "name", "brain")
+        self.persist_artifacts = persist_artifacts
+        self.root_mode = root_mode
+        if root_mode is not None:
+            ensure_root_mode(self.root, root_mode)
+        self._roster_spec = dict(roster or DEFAULT_ROSTER)
+        self._b_memory = b_memory
         self.registry = Registry()
         self.router = Router(self.registry, trust_on=self._load_trust_state())
         self.auditor = Auditor(rate=audit_rate)
@@ -165,7 +245,7 @@ class Ecosystem:
             assert_ks1_clean(style)
 
         self.residents: dict[str, Resident] = {}
-        for name, tier in (roster or DEFAULT_ROSTER).items():
+        for name, tier in self._roster_spec.items():
             rdir = self.root / "residents"
             if (rdir / name / "trust" / "vacant_id").exists():
                 body = VacantBody.load(name, rdir)
@@ -181,6 +261,29 @@ class Ecosystem:
         self._load_state()
         self._sync_probation()
 
+    def fresh(self) -> "Ecosystem":
+        """在跨程序鎖內從磁碟重建，避免使用鎖外載入的舊 logbook/registry state。"""
+        if self.root_mode == "product":
+            assert_product_root(self.root)
+        elif self.root_mode is not None:
+            ensure_root_mode(self.root, self.root_mode)
+        return Ecosystem(
+            self.root,
+            self.brain,
+            roster=self._roster_spec,
+            k_reviewers=self.k_reviewers,
+            audit_rate=self.auditor.rate,
+            probation_m=self.probation_m,
+            b_memory=self._b_memory,
+            review_mode=self.review_mode,
+            substrate_id=self.substrate_id,
+            persist_artifacts=self.persist_artifacts,
+            root_mode=self.root_mode,
+        )
+
+    def resident_by_id(self, vacant_id: str) -> Resident | None:
+        return self._by_id.get(vacant_id)
+
     def _sync_probation(self) -> None:
         """把居民的見習狀態同步進 registry（牙齒·路由端權重上限的依據）。"""
         for r in self.residents.values():
@@ -195,8 +298,8 @@ class Ecosystem:
             "registry": self.registry.state_to_json(),
             "deliveries": {r.name: r.deliveries for r in self.residents.values()},
         }
-        self._registry_state_path().write_text(
-            json.dumps(state, ensure_ascii=False), encoding="utf-8")
+        atomic_write_text(
+            self._registry_state_path(), json.dumps(state, ensure_ascii=False))
 
     def _load_state(self) -> None:
         p = self._registry_state_path()
@@ -204,12 +307,17 @@ class Ecosystem:
             return
         try:
             state = json.loads(p.read_text(encoding="utf-8"))
-        except ValueError:
-            return  # 壞檔不阻擋啟動；信譽從零重長（誠實：事件流仍在 ledger）
-        self.registry.state_from_json(state.get("registry", {}))
-        for name, n in state.get("deliveries", {}).items():
-            if name in self.residents:
-                self.residents[name].deliveries = int(n)
+            if not isinstance(state, dict) \
+                    or not isinstance(state.get("registry"), dict) \
+                    or not isinstance(state.get("deliveries"), dict):
+                raise ValueError("registry state schema mismatch")
+            self.registry.state_from_json(state["registry"])
+            for name, n in state["deliveries"].items():
+                if name in self.residents:
+                    self.residents[name].deliveries = int(n)
+        except (OSError, TypeError, ValueError, IndexError, KeyError) as exc:
+            raise ValueError(
+                f"registry state is corrupt; refusing to reset trust history: {p}") from exc
 
     # --- trust 開關（持久化；12 的單開關）------------------------------------
     def _state_path(self) -> Path:
@@ -219,14 +327,15 @@ class Ecosystem:
         p = self._state_path()
         if p.exists():
             try:
-                return bool(json.loads(p.read_text()).get("trust_on", True))
-            except ValueError:
-                pass
+                value = json.loads(p.read_text()).get("trust_on")
+                return value if type(value) is bool else False
+            except (OSError, ValueError):
+                return False  # 有狀態檔卻讀不懂＝fail-closed，不猜成 trust on
         return True
 
     def toggle(self, on: bool) -> None:
         self.router.toggle(on)
-        self._state_path().write_text(json.dumps({"trust_on": on}))
+        atomic_write_text(self._state_path(), json.dumps({"trust_on": on}))
 
     @property
     def trust_on(self) -> bool:
@@ -241,9 +350,49 @@ class Ecosystem:
             f.flush()
 
     # --- 主迴圈 ---------------------------------------------------------------
-    def delegate(self, task: str, tests: dict, risk: str = "normal") -> dict[str, Any]:
-        """工具面 v2 的主工具（12 §3）。回 {answer, trust_card, task_id}。"""
+    def delegate(
+        self,
+        task: str,
+        tests: dict,
+        risk: str = "normal",
+        *,
+        max_attempts: int = 1,
+        issue_receipt: bool = False,
+        request_id: str | None = None,
+        output_mode: str = "python",
+    ) -> dict[str, Any]:
+        """工具面 v2 主工具；產品入口可選 verify-fix 與完整綁定的簽章 receipt。
+
+        預設值維持原實驗語意（單次、Python solve、不簽產品 receipt）。產品 controller
+        顯式使用 max_attempts=3、output_mode="auto"、issue_receipt=True，避免改動 X1/demo
+        的呼叫數與 prompt。output_mode="auto" 只在 run_python check 要求 Python solve，
+        其他 check 則使用一般交付模板。
+        """
         verifier = compile_check(tests)  # 壞 spec 早爆，不浪費模型呼叫
+        if not isinstance(max_attempts, int) or isinstance(max_attempts, bool) \
+                or not 1 <= max_attempts <= 10:
+            raise ValueError("max_attempts must be between 1 and 10")
+        if output_mode not in ("python", "general", "auto"):
+            raise ValueError("output_mode must be 'python', 'general', or 'auto'")
+        if issue_receipt:
+            request_id = request_id or uuid.uuid4().hex
+            if not isinstance(request_id, str) or not request_id \
+                    or len(request_id) > 128 \
+                    or any(not (c.isalnum() or c in "-_") for c in request_id):
+                raise ValueError("request_id must contain only letters, digits, '-' or '_'")
+            receipts_dir = self.root / "receipts"
+            receipts_dir.mkdir(parents=True, exist_ok=True)
+            claim_path = receipts_dir / f".{request_id}.claim"
+            try:
+                claim_fd = os.open(
+                    claim_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            except FileExistsError as exc:
+                raise ValueError(f"request_id has already been used: {request_id}") from exc
+            try:
+                os.write(claim_fd, (request_id + "\n").encode("utf-8"))
+                os.fsync(claim_fd)
+            finally:
+                os.close(claim_fd)
         tid = _task_id(task, tests)
         trust = self.trust_on
         calls = 0
@@ -260,16 +409,57 @@ class Ecosystem:
         # 2) 生成（on：M2 記憶注入；off：無記憶——模板逐字相同）。
         #    KS-1 防呆檢查「最終送出的完整 prompt」（含 tier 種植文字，不留旁路）。
         memory_block = deliverer.manager.inject(deliverer.stream, task) if trust else ""
-        prompt = DELEGATE_TEMPLATE.format(memory=memory_block, task=task)
+        mode = ("python" if tests.get("type") == "run_python" else "general") \
+            if output_mode == "auto" else output_mode
+        template = DELEGATE_TEMPLATE if mode == "python" else GENERAL_DELEGATE_TEMPLATE
+        prompt = template.format(memory=memory_block, task=task)
         style = TIER_STYLE[deliverer.tier]
-        full_prompt = assert_ks1_clean((style + "\n\n" + prompt) if style else prompt)
-        answer = self.brain.generate(full_prompt)
-        calls += 1
-        passed = bool(verifier(answer))
+        answer = ""
+        passed = False
+        attempts_used = 0
+        had_attempt = False
+        for attempt in range(1, max_attempts + 1):
+            attempt_prompt = prompt
+            if had_attempt:
+                attempt_prompt += REPAIR_SUFFIX.format(
+                    answer=(answer[-12000:] if answer else "<empty or unavailable candidate>"))
+            full_prompt = assert_ks1_clean(
+                (style + "\n\n" + attempt_prompt) if style else attempt_prompt)
+            calls += 1
+            attempts_used = attempt
+            had_attempt = True
+            try:
+                answer = self.brain.generate(full_prompt)
+            except Exception as exc:
+                self._emit(
+                    "ATTEMPT", task_id=tid, target=deliverer.name,
+                    attempt=attempt, passed=False,
+                    infra_error=f"{type(exc).__name__}: {exc}"[:240],
+                )
+                if attempt == max_attempts:
+                    raise
+                continue
+            passed = bool(verifier(answer))
+            if passed:
+                try:
+                    projected = project_checked_answer(answer, tests)
+                    passed = bool(verifier(projected))
+                except Exception:
+                    passed = False
+                if passed:
+                    answer = projected
+            self._emit("ATTEMPT", task_id=tid, target=deliverer.name,
+                       attempt=attempt, passed=passed)
+            if passed:
+                break
 
         # 交付事件上鏈（居民自簽）：head 因此前進，review 綁的就是這個新鏈頭
-        deliverer.body.log("DELIVER", {"task_id": tid, "answer_digest": _digest(answer),
-                                       "self_check": passed})
+        deliverer.body.log("DELIVER", {
+            "task_id": tid,
+            "answer_digest": _digest(answer),
+            "answer_sha256": hashlib.sha256(answer.encode("utf-8")).hexdigest(),
+            "self_check": passed,
+        })
         if trust:
             # probation 計數只屬於「有後果的世界」：off 模式＝無後果，不得燒掉
             # 見習期（否則先在 off 暖身即可躲過強制稽核窗）。
@@ -333,11 +523,12 @@ class Ecosystem:
             deliverer.body.persist()
             # V1（18 §2）：交付物留檔——回溯稽核的原料（答案＋check）。
             # 注意這是信任臂專屬：off 臂無後果世界，沒有可回溯的帳。
-            with self.artifacts_path.open("a", encoding="utf-8") as f:
-                f.write(json.dumps({
-                    "task_id": tid, "deliverer": deliverer.name,
-                    "answer": answer, "tests": tests, "ts_ms": now_ms(),
-                }, ensure_ascii=False) + "\n")
+            if self.persist_artifacts:
+                with self.artifacts_path.open("a", encoding="utf-8") as f:
+                    f.write(json.dumps({
+                        "task_id": tid, "deliverer": deliverer.name,
+                        "answer": answer, "tests": tests, "ts_ms": now_ms(),
+                    }, ensure_ascii=False) + "\n")
 
         # 6) scoreboard（off/on 配對累計＋成本——每次使用都是一筆試次）
         self._score(trust, passed, calls)
@@ -352,12 +543,45 @@ class Ecosystem:
         self._cards[tid] = tc
         cards_dir = self.root / "cards"
         cards_dir.mkdir(parents=True, exist_ok=True)
-        (cards_dir / f"{tid}.json").write_text(
-            json.dumps(tc, ensure_ascii=False), encoding="utf-8")
+        atomic_write_text(cards_dir / f"{tid}.json", json.dumps(tc, ensure_ascii=False))
+
+        receipt = None
+        if issue_receipt:
+            from .receipt import make_delegation_receipt
+
+            receipt = make_delegation_receipt(
+                deliverer.body.identity,
+                request_id=request_id or "",
+                task=task,
+                tests=tests,
+                risk=risk,
+                task_id=tid,
+                answer=answer,
+                trust_card=tc,
+                verified=passed,
+                attempts=attempts_used,
+                stream_id=deliverer.body.logbook.stream_id() or deliverer.vacant_id,
+                branch_id=deliverer.body.logbook.branch_id(),
+                chain_head=deliverer.body.logbook.head(),
+                substrate=self.substrate_id,
+                ts_ms=now_ms(),
+            )
+            atomic_write_text(
+                receipts_dir / f"{request_id}.json",
+                json.dumps(receipt, ensure_ascii=False),
+            )
+            atomic_write_text(
+                receipts_dir / f"{request_id}.trust-card.json",
+                json.dumps(tc, ensure_ascii=False),
+            )
         self._save_state()  # 信譽/probation 跨行程續存
         self._emit("DELIVERED", task_id=tid, target=deliverer.name,
-                   passed=passed, calls=calls)
-        return {"answer": answer, "trust_card": tc, "task_id": tid}
+                   passed=passed, calls=calls, attempts=attempts_used,
+                   request_id=request_id if issue_receipt else None)
+        out = {"answer": answer, "trust_card": tc, "task_id": tid}
+        if receipt is not None:
+            out["receipt"] = receipt
+        return out
 
     def _peer_review(
         self, deliverer: Resident, tid: str, task: str, answer: str, verifier,
@@ -406,9 +630,15 @@ class Ecosystem:
             self.registry.note_head(
                 rv.vacant_id, rv.body.logbook.stream_id() or rv.vacant_id,
                 rv.body.logbook.branch_id(), rv.body.logbook.head())
-            out.append({"reviewer": rv.name, "reviewer_id": rv.vacant_id,
-                        "verdict": "PASS" if ok else "FAIL", "weight": round(w, 4),
-                        "sig": env.sig})
+            out.append({
+                "reviewer": rv.name,
+                "reviewer_id": rv.vacant_id,
+                "reviewer_pub_hex": rv.body.card.pub_hex,
+                "verdict": "PASS" if ok else "FAIL",
+                "weight": round(w, 4),
+                "sig": env.sig,
+                "envelope": env.to_json(),
+            })
             self._emit("REVIEW", task_id=tid, reviewer=rv.name, target=deliverer.name,
                        verdict="PASS" if ok else "FAIL", weight=round(w, 4))
         return out, calls
@@ -420,7 +650,7 @@ class Ecosystem:
         bucket["n"] += 1
         bucket["pass"] += int(passed)
         bucket["calls"] += calls
-        self.scoreboard_path.write_text(json.dumps(sb, ensure_ascii=False))
+        atomic_write_text(self.scoreboard_path, json.dumps(sb, ensure_ascii=False))
 
     def scoreboard(self) -> dict[str, Any]:
         """off/on 累計。誠實註記：paired_delta 是兩池通過率之差（池化差），
@@ -550,6 +780,34 @@ class Ecosystem:
             card = dict(card)
             card["retro_audit"] = self._retro_lookup(task_id)
         return card
+
+    def delegation_receipt(self, request_id: str) -> dict[str, Any] | None:
+        """依 request_id 取回不可變的產品 receipt；拒絕任何路徑字元。"""
+        if not isinstance(request_id, str) or not request_id or len(request_id) > 128 \
+                or any(not (c.isalnum() or c in "-_") for c in request_id):
+            return None
+        path = self.root / "receipts" / f"{request_id}.json"
+        if not path.exists():
+            return None
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        return value if isinstance(value, dict) else None
+
+    def delegation_card(self, request_id: str) -> dict[str, Any] | None:
+        """取回與 request-specific receipt 同批落盤、雜湊完全對應的 immutable card。"""
+        if not isinstance(request_id, str) or not request_id or len(request_id) > 128 \
+                or any(not (c.isalnum() or c in "-_") for c in request_id):
+            return None
+        path = self.root / "receipts" / f"{request_id}.trust-card.json"
+        if not path.exists():
+            return None
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        return value if isinstance(value, dict) else None
 
     def report(self, task_id: str, verdict: str, evidence: str = "") -> dict[str, Any]:
         """人類/入口仲裁回灌（12 §3）：最強標籤，記帳＋事件；fault → slash 事件。

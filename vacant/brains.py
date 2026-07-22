@@ -33,9 +33,12 @@ class UsageMixin:
     last_usage: dict | None = None
 
 
-def _post(url: str, payload: dict, timeout: int) -> dict:
+def _post(url: str, payload: dict, timeout: int, *, api_key: str | None = None) -> dict:
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
     req = urllib.request.Request(
-        url, data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"}
+        url, data=json.dumps(payload).encode(), headers=headers
     )
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.load(r)
@@ -48,7 +51,9 @@ class OpenAIBrain(UsageMixin):
     砍在思考途中會 content 空，06-30 教訓）。"""
 
     def __init__(self, base_url: str, model: str, *, temperature: float = 0.0,
-                 max_tokens: int | None = 256, timeout: int = 120, system: str = "You are a precise assistant. Output only the answer."):
+                 max_tokens: int | None = 256, timeout: int = 120,
+                 system: str = "You are a precise assistant. Output only the answer.",
+                 api_key: str | None = None):
         self.base_url = base_url.rstrip("/")
         if not self.base_url.endswith("/v1"):
             self.base_url += "/v1"
@@ -57,6 +62,7 @@ class OpenAIBrain(UsageMixin):
         self.max_tokens = max_tokens
         self.timeout = timeout
         self.system = system
+        self.api_key = api_key
         self.name = f"openai:{model}"
 
     def generate(self, prompt: str) -> str:
@@ -66,7 +72,9 @@ class OpenAIBrain(UsageMixin):
         }
         if self.max_tokens is not None:
             payload["max_tokens"] = self.max_tokens
-        d = _post(self.base_url + "/chat/completions", payload, self.timeout)
+        d = _post(
+            self.base_url + "/chat/completions", payload, self.timeout,
+            api_key=self.api_key)
         u = d.get("usage")
         self.last_usage = dict(u) if isinstance(u, dict) else None
         return (d["choices"][0]["message"].get("content") or "").strip()
@@ -77,8 +85,9 @@ class LMStudioBrain(UsageMixin):
     /v1 的 content 對 reasoning 模型常為空）。非 reasoning 模型用 api='openai' 即可。"""
 
     def __init__(self, base_url: str, model: str, *, api: str = "responses",
-                 timeout: int = 120, max_tokens: int | None = 256,
-                 system: str = "Output only the answer, nothing else."):
+                  timeout: int = 120, max_tokens: int | None = 256,
+                  system: str = "Output only the answer, nothing else.",
+                  api_key: str | None = None):
         # base_url 給 http://host:1234（含/不含 /v1 都行）
         b = base_url.rstrip("/")
         if b.endswith("/v1"):
@@ -89,8 +98,11 @@ class LMStudioBrain(UsageMixin):
         self.timeout = timeout
         self.max_tokens = max_tokens
         self.system = system
+        self.api_key = api_key
         self.name = f"lmstudio:{model}"
-        self._openai = OpenAIBrain(b + "/v1", model, timeout=timeout, max_tokens=max_tokens, system=system)
+        self._openai = OpenAIBrain(
+            b + "/v1", model, timeout=timeout, max_tokens=max_tokens,
+            system=system, api_key=api_key)
 
     def generate(self, prompt: str) -> str:
         if self.api == "openai":
@@ -99,7 +111,7 @@ class LMStudioBrain(UsageMixin):
             return out
         d = _post(self.base + "/api/v1/chat", {
             "model": self.model, "system_prompt": self.system, "input": prompt,
-        }, self.timeout)
+        }, self.timeout, api_key=self.api_key)
         # LM Studio /api/v1/chat 的 usage 在 stats 區塊（prompt/completion tokens）
         stats = d.get("stats")
         if isinstance(stats, dict):
