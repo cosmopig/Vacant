@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
+import time
 
 import pytest
 
@@ -17,6 +19,7 @@ from vacant.controller import (
     hermes_argv,
     verify_delivery,
 )
+from vacant.controller import _run_agent_process
 from vacant import crypto
 from vacant.canonical import canonical_bytes
 from vacant.envelope import ReviewEnvelope
@@ -472,6 +475,24 @@ def test_from_endpoint_uses_product_roster_only(tmp_path):
         "resident_1", "resident_2", "resident_3",
     }
     assert all(r.tier == "good" for r in controller.ecosystem.residents.values())
+
+
+def test_default_runner_does_not_wait_for_descendant_stdout_eof(tmp_path):
+    parent = tmp_path / "parent.py"
+    parent.write_text(
+        """import subprocess, sys
+subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(2)'])
+print('parent done')
+""",
+        encoding="utf-8",
+    )
+    started = time.monotonic()
+    result = _run_agent_process(
+        [sys.executable, str(parent)], cwd=str(tmp_path), env=None,
+        capture_output=True, text=True, timeout=5, shell=False)
+    elapsed = time.monotonic() - started
+    assert result.returncode == 0 and result.stdout.strip() == "parent done"
+    assert elapsed < 1.5
 
 
 @pytest.mark.parametrize("argv", [

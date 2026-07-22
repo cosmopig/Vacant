@@ -12,8 +12,11 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import string
 import subprocess
+import tempfile
+import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -167,6 +170,55 @@ class ControllerResult:
 Runner = Callable[..., subprocess.CompletedProcess[str]]
 
 
+def _run_agent_process(
+    argv: Sequence[str],
+    *,
+    cwd: str | None,
+    env: Mapping[str, str] | None,
+    capture_output: bool,
+    text: bool,
+    timeout: float,
+    shell: bool,
+) -> subprocess.CompletedProcess[str]:
+    """等主 agent 行程，不等後代持有的 stdout pipe EOF；子孫不繼承 controller stdio。"""
+    if shell or not capture_output or not text:
+        raise ValueError("agent runner requires shell=False, capture_output=True, text=True")
+    with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as stdout_file, \
+            tempfile.TemporaryFile(mode="w+", encoding="utf-8") as stderr_file:
+        process = subprocess.Popen(
+            list(argv),
+            cwd=cwd,
+            env=(dict(env) if env is not None else None),
+            stdin=subprocess.DEVNULL,
+            stdout=stdout_file,
+            stderr=stderr_file,
+            text=True,
+            shell=False,
+            start_new_session=(os.name == "posix"),
+        )
+        try:
+            returncode = process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired as exc:
+            if os.name == "posix":
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            else:  # pragma: no cover - Windows
+                process.kill()
+            process.wait()
+            stdout_file.seek(0)
+            stderr_file.seek(0)
+            raise subprocess.TimeoutExpired(
+                list(argv), timeout,
+                output=stdout_file.read(), stderr=stderr_file.read()) from exc
+        stdout_file.seek(0)
+        stderr_file.seek(0)
+        return subprocess.CompletedProcess(
+            list(argv), returncode,
+            stdout=stdout_file.read(), stderr=stderr_file.read())
+
+
 def verify_delivery(
     ecosystem,
     result: dict[str, Any],
@@ -257,7 +309,7 @@ class VacantFirstController:
         ecosystem,
         *,
         policy: GatePolicy | None = None,
-        runner: Runner = subprocess.run,
+        runner: Runner = _run_agent_process,
         refresh_before_delegate: bool = True,
     ) -> None:
         self.ecosystem = ecosystem
@@ -277,7 +329,7 @@ class VacantFirstController:
         api_key: str | None = None,
         model_timeout: int = 900,
         policy: GatePolicy | None = None,
-        runner: Runner = subprocess.run,
+        runner: Runner = _run_agent_process,
     ) -> "VacantFirstController":
         """以 OpenAI-compatible／LM Studio 端點建立全良性的產品 controller。"""
         if api not in ("responses", "openai"):
@@ -306,7 +358,11 @@ class VacantFirstController:
     def _emit(self, event: str, **payload: Any) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
         with (self.root / "events.jsonl").open("a", encoding="utf-8") as f:
-            f.write(json.dumps({"event": event, **payload}, ensure_ascii=False) + "\n")
+            f.write(json.dumps({
+                "ts_ms": time.time_ns() // 1_000_000,
+                "event": event,
+                **payload,
+            }, ensure_ascii=False) + "\n")
             f.flush()
 
     @staticmethod
