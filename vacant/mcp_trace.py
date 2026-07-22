@@ -15,6 +15,7 @@ Hermes 用 stdio（newline-delimited JSON-RPC）跟 MCP server 講話。把這�
 from __future__ import annotations
 
 import json
+import random
 import subprocess
 import sys
 import threading
@@ -47,6 +48,56 @@ def _pump(src, dst, logf, direction: str, lock: threading.Lock) -> None:
 
 
 def main(argv: list[str]) -> int:
+    # --- verify-pairing mode --------------------------------------------------
+    if argv and argv[0] == "--verify-pairing":
+        _expected = {
+            "adopted": "adopted",
+            "discovered_not_selected": "discovered_not_selected",
+            "selected_failed": "selected_failed",
+            "not_observed": "not_observed",
+        }
+        all_ok = True
+        for scenario, expected_state in _expected.items():
+            trace = generate_wire_traces(scenario)
+            result = analyze_adoption(trace)
+            actual = result["state"]
+            status = "OK" if actual == expected_state else "FAIL"
+            print(f"{scenario:30s} -> {actual:30s} (expected {expected_state}) [{status}]")
+            if actual != expected_state:
+                all_ok = False
+        # Also verify default scenario resolves to adopted
+        trace_default = generate_wire_traces("default")
+        result_default = analyze_adoption(trace_default)
+        status_d = "OK" if result_default["state"] == "adopted" else "FAIL"
+        print(f"{'default':30s} -> {result_default['state']:30s} (expected adopted) [{status_d}]")
+        if result_default["state"] != "adopted":
+            all_ok = False
+        # Verify trust_config mode is propagated
+        trace_trust = generate_wire_traces("adopted", seed=42, trust_config={"mode": "on"})
+        has_trust = any("_trust_mode" in rec for rec in trace_trust)
+        status_t = "OK" if has_trust else "FAIL"
+        print(f"{'trust_config propagation':30s} -> {'present' if has_trust else 'missing':30s} [{status_t}]")
+        if not has_trust:
+            all_ok = False
+        # Verify empty trace returns infra_void (no records at all → infra_void)
+        result_empty = analyze_adoption([])
+        status_e = "OK" if result_empty["state"] == "infra_void" else "FAIL"
+        print(f"{'empty_trace':30s} -> {result_empty['state']:30s} (expected infra_void) [{status_e}]")
+        if result_empty["state"] != "infra_void":
+            all_ok = False
+        # Verify single-record trace returns not_observed
+        result_single = analyze_adoption([{"dir": "hermes->vacant", "msg": {"jsonrpc": "2.0"}}])
+        status_s = "OK" if result_single["state"] == "not_observed" else "FAIL"
+        print(f"{'single_record':30s} -> {result_single['state']:30s} (expected not_observed) [{status_s}]")
+        if result_single["state"] != "not_observed":
+            all_ok = False
+        if all_ok:
+            print("\nOK")
+            return 0
+        else:
+            print("\nFAIL", file=sys.stderr)
+            return 1
+
     if len(argv) < 3 or argv[1] != "--":
         print("usage: python -m vacant.mcp_trace <logfile> -- <cmd> [args...]", file=sys.stderr)
         return 2
@@ -69,6 +120,565 @@ def main(argv: list[str]) -> int:
         rc = proc.wait()
         t_out.join(timeout=2)
     return rc
+
+
+# ---------------------------------------------------------------------------
+# Adoption-state classifier for MCP wire traces (engineering, audit-only)
+# ---------------------------------------------------------------------------
+
+# Keep this interface in lockstep with @mcp.tool definitions in mcp_server.py.
+_VACANT_TOOLS = (
+    "delegate", "trust_card", "residents", "report", "scoreboard", "verify_fix",
+)
+
+
+def _is_vacant_tool(name: object) -> bool:
+    """接受精確 base name，或 mcp_vacant_ 加精確 base suffix。"""
+    if not isinstance(name, str):
+        return False
+    if name in _VACANT_TOOLS:
+        return True
+    prefix = "mcp_vacant_"
+    return name.startswith(prefix) and name[len(prefix):] in _VACANT_TOOLS
+
+
+def analyze_adoption(records: list[dict]) -> dict:
+    """把 tee-proxy 側錄的 JSON-RPC trace 分類成 Hermes adoption state。
+
+    回傳 dict：
+        state       : str  – one of {not_observed, discovered_not_selected,
+                          selected_failed, adopted, infra_void}
+        evidence    : dict – 每個判斷點引用的事件索引（0-based）
+        consideration: str – 固定為 "unobservable"
+
+    分類邏輯（由粗到細）：
+      1. infra_void   ：所有行都無法解析成 JSON，或 records 完全為空。
+      2. not_observed ：沒有 discovery 證據（hermes->vacant 方向無 tools/list
+         或 initialize）。
+      3. discovered_not_selected：有 tools/list + reply 顯示 vacant 工具在清單中，
+         但沒有對任何 vacant tool 的 tools/call。
+      4. selected_failed：有 tools/call 到 vacant tool，但對應回覆是 error 或
+         完全沒有回覆。
+      5. adopted      ：有 tools/call 到 vacant tool 且有成功 result 回覆。
+
+    注意：本函式只分析 wire trace；Hermes 內部的 consideration / decision
+    永遠標示為 unobservable，不得推論。
+    """
+    evidence: dict[str, list[int]] = {
+        "discovery_request": [],
+        "discovery_reply": [],
+        "selection": [],
+        "reply_ok": [],
+        "reply_err": [],
+        "anomaly": [],
+    }
+
+    # --- infra_void check ---------------------------------------------------
+    if not records:
+        return {
+            "state": "infra_void",
+            "evidence": evidence,
+            "consideration": "unobservable",
+        }
+
+    parseable = [i for i, r in enumerate(records) if isinstance(r, dict) and isinstance(r.get("msg"), dict)]
+    if not parseable:
+        return {
+            "state": "infra_void",
+            "evidence": evidence,
+            "consideration": "unobservable",
+        }
+
+    # --- collect requests and calls -----------------------------------------
+    discovery_requests: list[int] = []
+    selection_ids: dict[object, int] = {}
+    reply_ok_ids: dict[object, int] = {}
+    reply_err_ids: dict[object, int] = {}
+    reply_malformed_ids: dict[object, int] = {}
+
+    for idx in parseable:
+        rec = records[idx]
+        msg = rec.get("msg", {})
+        direction = rec.get("dir", "")
+        method = msg.get("method")
+        mid = msg.get("id")
+
+        if direction == "hermes->vacant":
+            if method == "tools/list":
+                discovery_requests.append(idx)
+                evidence["discovery_request"].append(idx)
+            elif method == "tools/call" and mid is not None:
+                name = (msg.get("params") or {}).get("name", "")
+                if _is_vacant_tool(name):
+                    selection_ids[mid] = idx
+                    evidence["selection"].append(idx)
+
+    # Collect execution replies in a second pass so ordering cannot hide a
+    # same-id reply. Discovery replies are validated separately below.
+    for idx in parseable:
+        rec = records[idx]
+        msg = rec.get("msg", {})
+        mid = msg.get("id")
+        if rec.get("dir") != "vacant->hermes" or mid not in selection_ids:
+            continue
+        if "error" in msg:
+            reply_err_ids[mid] = idx
+            evidence["reply_err"].append(idx)
+        elif "result" in msg:
+            result = msg.get("result")
+            if not isinstance(result, dict):
+                reply_err_ids[mid] = idx
+                reply_malformed_ids[mid] = idx
+                evidence["reply_err"].append(idx)
+            elif result.get("isError") is True:
+                reply_err_ids[mid] = idx
+                evidence["reply_err"].append(idx)
+            else:
+                reply_ok_ids[mid] = idx
+                evidence["reply_ok"].append(idx)
+
+    # --- validate every discovery request ----------------------------------
+    # A valid discovery chain requires a same-id response in the correct
+    # direction, a dict result, a list of tool descriptors, and at least one
+    # exact Vacant tool name. We scan every request before classifying so the
+    # anomaly evidence is complete rather than first-error-only.
+    for request_idx in discovery_requests:
+        request_id = records[request_idx].get("msg", {}).get("id")
+        if request_id is None:
+            evidence["anomaly"].append(request_idx)
+            continue
+        reply_idx = next((
+            idx for idx in parseable
+            if records[idx].get("dir") == "vacant->hermes"
+            and records[idx].get("msg", {}).get("id") == request_id
+            and ("result" in records[idx].get("msg", {})
+                 or "error" in records[idx].get("msg", {}))
+        ), None)
+        if reply_idx is None:
+            evidence["anomaly"].append(request_idx)
+            continue
+        evidence["discovery_reply"].append(reply_idx)
+        reply = records[reply_idx].get("msg", {})
+        result = reply.get("result")
+        if not isinstance(result, dict):
+            evidence["anomaly"].append(reply_idx)
+            continue
+        tools = result.get("tools")
+        if not isinstance(tools, list):
+            evidence["anomaly"].append(reply_idx)
+            continue
+        names = [
+            item.get("name") for item in tools
+            if isinstance(item, dict) and isinstance(item.get("name"), str)
+        ]
+        if not any(_is_vacant_tool(name) for name in names):
+            evidence["anomaly"].append(reply_idx)
+
+    if evidence["anomaly"]:
+        return {
+            "state": "infra_void",
+            "evidence": evidence,
+            "consideration": "unobservable",
+        }
+
+    # --- classify -----------------------------------------------------------
+    # 1. not_observed：沒有 discovery 證據
+    if not discovery_requests:
+        return {
+            "state": "not_observed",
+            "evidence": evidence,
+            "consideration": "unobservable",
+        }
+
+    # 2. discovered_not_selected：有 discovery 但沒有 vacant selection
+    if not selection_ids:
+        return {
+            "state": "discovered_not_selected",
+            "evidence": evidence,
+            "consideration": "unobservable",
+        }
+
+    # 3. selected_failed vs adopted：每個 selection 都要有同 id、正確方向
+    # 的成功 result；JSON-RPC error、result.isError=true、malformed 或缺回覆
+    # 都是 selected_failed。缺失／malformed 同時留下 anomaly 索引。
+    failed = False
+    for mid, selection_idx in selection_ids.items():
+        if mid in reply_malformed_ids:
+            evidence["anomaly"].append(reply_malformed_ids[mid])
+            failed = True
+        elif mid in reply_err_ids:
+            failed = True
+        elif mid not in reply_ok_ids:
+            evidence["anomaly"].append(selection_idx)
+            failed = True
+    if failed:
+        return {
+            "state": "selected_failed",
+            "evidence": evidence,
+            "consideration": "unobservable",
+        }
+
+    # 4. adopted：所有 selection 都有成功回覆
+    return {
+        "state": "adopted",
+        "evidence": evidence,
+        "consideration": "unobservable",
+    }
+
+
+def split_mcp_sessions(records: list[dict]) -> list[dict]:
+    """依 proxy／initialize 邊界切開連續 wire log。
+
+    每個項目包含原始 0-based ``start``／``end``（含端點）與 ``records``。
+    邊界前的垃圾資料忽略；完全沒有邊界時保留整份輸入作單一 session，
+    讓既有單 session trace 仍可分析。
+    """
+    if not records:
+        return []
+
+    ranges: list[tuple[int, int]] = []
+    start: int | None = None
+    has_initialize = False
+    has_message = False
+
+    for idx, record in enumerate(records):
+        msg = record.get("msg") if isinstance(record, dict) else None
+        direction = record.get("dir") if isinstance(record, dict) else None
+        is_proxy = direction == "proxy"
+        is_initialize = (
+            direction == "hermes->vacant"
+            and isinstance(msg, dict)
+            and msg.get("method") == "initialize"
+        )
+
+        if is_proxy:
+            if start is not None and has_message:
+                ranges.append((start, idx - 1))
+            start = idx
+            has_initialize = False
+            has_message = False
+            continue
+
+        if is_initialize:
+            if start is None:
+                start = idx
+            elif has_initialize:
+                ranges.append((start, idx - 1))
+                start = idx
+                has_message = False
+            has_initialize = True
+
+        if start is not None and isinstance(msg, dict):
+            has_message = True
+
+    if start is None:
+        start = 0
+    ranges.append((start, len(records) - 1))
+    return [
+        {"start": lo, "end": hi, "records": records[lo:hi + 1]}
+        for lo, hi in ranges
+    ]
+
+
+def analyze_adoption_sessions(records: list[dict]) -> list[dict]:
+    """逐 session 分類，並把 evidence index 映回原始連續 log。"""
+    reports: list[dict] = []
+    for session in split_mcp_sessions(records):
+        start = int(session["start"])
+        result = analyze_adoption(session["records"])
+        evidence = {
+            key: [start + int(index) for index in indexes]
+            for key, indexes in result["evidence"].items()
+        }
+        reports.append({
+            "source_range": [start, int(session["end"])],
+            "state": result["state"],
+            "evidence": evidence,
+            "consideration": "unobservable",
+        })
+    return reports
+
+
+# ---------------------------------------------------------------------------
+# Trace generator for reproducible adoption experiments
+# ---------------------------------------------------------------------------
+
+
+def generate_wire_traces(
+    scenario: str = "default",
+    seed: int | None = None,
+    trust_config: dict | None = None,   # {"mode": "on"|"off", ...} 信任模式開關
+) -> list[dict]:
+    """產生可重現的 MCP wire trace，模擬 Hermes 對 vacant tools 的採用決策。
+
+    Parameters
+    ----------
+    scenario : str
+        要產生的情境：
+        ``"adopted"``       — Hermes 發現並成功呼叫 vacant tool
+        ``"discovered_not_selected"`` — Hermes 發現但沒有選擇 vacant tool
+        ``"selected_failed"`` — Hermes 嘗試呼叫但回覆 error
+        ``"not_observed"``   — 只有 initialize handshake，無 tools/list
+        ``"default"``        — 預設為 "adopted"（確定性輸出）
+
+    seed : int or None
+        隨機種子。固定 seed 可重現相同 trace；None 則使用獨立 Random instance。
+
+    trust_config : dict or None
+        信任模式設定，含 ``mode`` key（"on"/"off"）。若提供，每筆 trace record
+        會附加 ``"_trust_mode"`` 欄位以支援配對實驗的臂識別。
+
+    Returns
+    -------
+    list[dict]
+        Trace records，格式符合 ``analyze_adoption()`` 的輸入需求（每筆含 "dir"、"msg"）。
+    """
+    rng = random.Random(seed) if seed is not None else random.Random()
+    _trust_mode: str | None = (trust_config or {}).get("mode") if trust_config else None
+
+    _scenarios = ["adopted", "discovered_not_selected", "selected_failed", "not_observed"]
+
+    if scenario == "default":
+        # Deterministic default: the most representative adoption scenario.
+        # Randomization only occurs when an explicit seed is provided.
+        scenario = "adopted"
+
+    # --- helper: build a minimal JSON-RPC record ---------------------------
+    def _rec(direction: str, method: str, mid: int | None = None,
+             params: dict | None = None, result: dict | None = None,
+             error: dict | None = None) -> dict:
+        msg: dict = {"jsonrpc": "2.0", "method": method}
+        if mid is not None:
+            msg["id"] = mid
+        if params is not None:
+            msg["params"] = params
+        if result is not None:
+            msg["result"] = result
+        if error is not None:
+            msg["error"] = error
+        rec: dict = {"dir": direction, "msg": msg}
+        # 若提供 trust_config，附加 _trust_mode 供配對實驗臂識別（不影響 analyze_adoption）
+        if _trust_mode is not None:
+            rec["_trust_mode"] = _trust_mode
+        return rec
+
+    # --- scenario builders --------------------------------------------------
+    def _adopted() -> list[dict]:
+        """Hermes discovers vacant tools and successfully calls one."""
+        return [
+            _rec("hermes->vacant", "initialize", mid=0),
+            _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+            _rec("hermes->vacant", "tools/list", mid=1),
+            _rec("vacant->hermes", "tools/list", mid=1, result={
+                "tools": [{"name": "verify_fix"}, {"name": "delegate"}]
+            }),
+            _rec("hermes->vacant", "tools/call", mid=2, params={
+                "name": "verify_fix",
+                "arguments": {"prompt": "reverse hello", "check": {"type": "equals", "value": "olleh"}}
+            }),
+            _rec("vacant->hermes", "tools/call", mid=2, result={
+                "content": [{"type": "text", "text": '{"verified": true}'}]
+            }),
+        ]
+
+    def _discovered_not_selected() -> list[dict]:
+        """Hermes discovers vacant tools but does not call any."""
+        return [
+            _rec("hermes->vacant", "initialize", mid=0),
+            _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+            _rec("hermes->vacant", "tools/list", mid=1),
+            _rec("vacant->hermes", "tools/list", mid=1, result={
+                "tools": [{"name": "verify_fix"}, {"name": "trust_card"}]
+            }),
+        ]
+
+    def _selected_failed() -> list[dict]:
+        """Hermes discovers and calls a vacant tool but gets an error reply."""
+        return [
+            _rec("hermes->vacant", "initialize", mid=0),
+            _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+            _rec("hermes->vacant", "tools/list", mid=1),
+            _rec("vacant->hermes", "tools/list", mid=1, result={
+                "tools": [{"name": "verify_fix"}]
+            }),
+            _rec("hermes->vacant", "tools/call", mid=2, params={
+                "name": "delegate",
+                "arguments": {"target": "agent-x", "message": "hello"}
+            }),
+            _rec("vacant->hermes", "tools/call", mid=2, error={
+                "code": -32603, "message": "internal error: target unreachable"
+            }),
+        ]
+
+    def _not_observed() -> list[dict]:
+        """Only initialize handshake; no tools/list means not observed."""
+        return [
+            _rec("hermes->vacant", "initialize", mid=0),
+            _rec("vacant->hermes", "initialize", mid=0, result={"protocolVersion": 1}),
+        ]
+
+    builders = {
+        "adopted": _adopted,
+        "discovered_not_selected": _discovered_not_selected,
+        "selected_failed": _selected_failed,
+        "not_observed": _not_observed,
+    }
+
+    return builders[scenario]()
+
+
+# ---------------------------------------------------------------------------
+# Friction taxonomy v2 (HERMES-adoption-friction-v2, engineering, audit-only)
+# ---------------------------------------------------------------------------
+#
+# analyze_adoption() 的五個粗粒度 state 混合了「有沒有發現」「有沒有選用」
+# 「參數怎麼構造」「呼叫有沒有成功」四種完全不同的摩擦來源。這裡把它們拆成
+# 獨立、可反駁的階段，且每個階段只依賴 wire trace 的結構性證據（存在與否、
+# 方向是否正確、id 是否配對）——絕不解析或推論訊息內容的語意正確性
+# （不窺看答案）。task_outcome 永遠標示為 unobservable，因為 wire trace
+# 無法反駁 Hermes 內部是否認定任務成功。
+#
+# 本函式疊加在既有 analyze_adoption() 之上，state / evidence / consideration
+# 與 Phase-1 凍結判準完全一致，不得重跑或改寫既有分類。
+
+
+def analyze_friction(records: list[dict]) -> dict:
+    """把 analyze_adoption() 的 state 分解成 discovery / selection /
+    argument_construction / execution / task_outcome 五個獨立階段。
+
+    回傳 dict 除了 state / evidence / consideration（與 analyze_adoption()
+    完全一致）之外，另外附加：
+        stages : dict[str, str]
+            discovery              : "absent" | "invalid" | "valid"
+            selection              : "not_applicable" | "absent" | "made"
+            argument_construction  : "not_applicable" | "empty" | "present"
+            execution              : "not_applicable" | "missing_reply"
+                                      | "error" | "ok"
+            task_outcome           : "unobservable"（固定，不可推論）
+    """
+    base = analyze_adoption(records)
+    state = base["state"]
+    evidence = base["evidence"]
+
+    # --- discovery stage --------------------------------------------------
+    if state == "infra_void" and not evidence["discovery_request"]:
+        discovery_stage = "absent"
+    elif evidence["anomaly"] and any(
+        idx in evidence["discovery_request"] or idx in evidence["discovery_reply"]
+        for idx in evidence["anomaly"]
+    ):
+        discovery_stage = "invalid"
+    elif evidence["discovery_request"] and evidence["discovery_reply"]:
+        discovery_stage = "valid"
+    elif evidence["discovery_request"]:
+        discovery_stage = "invalid"
+    else:
+        discovery_stage = "absent"
+
+    # --- selection stage ----------------------------------------------------
+    if discovery_stage != "valid":
+        selection_stage = "not_applicable"
+    elif evidence["selection"]:
+        selection_stage = "made"
+    else:
+        selection_stage = "absent"
+
+    # --- argument_construction stage -----------------------------------------
+    if selection_stage != "made":
+        argument_stage = "not_applicable"
+    else:
+        has_args = False
+        for idx in evidence["selection"]:
+            msg = records[idx].get("msg", {})
+            params = msg.get("params") or {}
+            arguments = params.get("arguments")
+            if isinstance(arguments, dict) and arguments:
+                has_args = True
+                break
+        argument_stage = "present" if has_args else "empty"
+
+    # --- execution stage ------------------------------------------------------
+    if selection_stage != "made":
+        execution_stage = "not_applicable"
+    elif evidence["reply_ok"] and not evidence["reply_err"]:
+        execution_stage = "ok"
+    elif evidence["reply_err"]:
+        execution_stage = "error"
+    else:
+        execution_stage = "missing_reply"
+
+    return {
+        "state": state,
+        "evidence": evidence,
+        "consideration": base["consideration"],
+        "stages": {
+            "discovery": discovery_stage,
+            "selection": selection_stage,
+            "argument_construction": argument_stage,
+            "execution": execution_stage,
+            "task_outcome": "unobservable",
+        },
+    }
+
+
+# ---------------------------------------------------------------------------
+# v2 preregistration schema (proposal only — not executed, not causal)
+# ---------------------------------------------------------------------------
+#
+# 下一階段可預註冊、但尚未執行的介入候選清單。純聲明式資料：不執行任何
+# 介入、不計算任何 effect size、不得把 Phase-1 explicit/implicit 的描述差
+# （例如 +10pp）當作因果 effect 引用。
+
+
+def propose_v2_interventions() -> list[dict]:
+    """回傳可預註冊但尚未執行的 v2 介入候選清單。
+
+    每個項目：
+        id            : str  – 介入代號
+        stage         : str  – 對應 analyze_friction() 的階段名稱
+        hypothesis    : str  – 可證偽的假設敘述（不含因果宣稱）
+        preregistered : bool – 固定 False（清單本身是預註冊草案，尚未提交）
+        executed      : bool – 固定 False（本函式不執行任何介入）
+        claim_level   : str  – 固定 "descriptive"
+    """
+    return [
+        {
+            "id": "v2-schema-explicit-recall-prompt",
+            "stage": "selection",
+            "hypothesis": (
+                "在 tools/list 回覆後加入一次結構化 recall 提示，是否改變 "
+                "selection 階段從 absent 轉為 made 的比例——此假設尚待預註冊"
+                "實驗驗證，本清單不主張任何因果 effect。"
+            ),
+            "preregistered": False,
+            "executed": False,
+            "claim_level": "descriptive",
+        },
+        {
+            "id": "v2-schema-argument-scaffold",
+            "stage": "argument_construction",
+            "hypothesis": (
+                "提供最小可行的 arguments schema 範例，是否降低 "
+                "argument_construction 階段落在 empty 的比例——此假設尚待"
+                "預註冊實驗驗證，本清單不主張任何因果 effect。"
+            ),
+            "preregistered": False,
+            "executed": False,
+            "claim_level": "descriptive",
+        },
+        {
+            "id": "v2-schema-retry-timing",
+            "stage": "execution",
+            "hypothesis": (
+                "execution 階段收到 error 後，介入固定延遲的重試視窗，是否"
+                "改變 selected_failed 轉為 adopted 的比例——此假設尚待預註冊"
+                "實驗驗證，本清單不主張任何因果 effect。"
+            ),
+            "preregistered": False,
+            "executed": False,
+            "claim_level": "descriptive",
+        },
+    ]
 
 
 if __name__ == "__main__":

@@ -33,6 +33,27 @@ from .batch import RunLedger
 from .checks import compile_check
 from .memory import MemoryManager, MemoryStream, assert_ks1_clean
 
+# --- TrustConfig：信任前緣的 minimal 設定 -------------------------------------
+
+@dataclass(frozen=True)
+class TrustConfig:
+    """X1 實驗的信任模式開關。
+
+    mode        : "on" | "off" — 是否啟用信任管線（稽核結論注入記憶）
+    central     : bool         — 是否走集中式 trust hub（True＝hub 仲裁，False＝peer review）
+    cost_aligned: bool         — 是否以成本為優先選擇 reviewer（True＝選最便宜合格者）
+
+    此資料類別僅定義實驗設定，不宣稱任何 effect。
+    """
+    mode: str = "on"
+    central: bool = True
+    cost_aligned: bool = True
+
+    def __post_init__(self) -> None:
+        if self.mode not in ("on", "off"):
+            raise ValueError(f"TrustConfig.mode 必須是 'on' 或 'off'，收到 {self.mode!r}")
+
+
 # --- 三臂逐字相同的 prompt 模板（KS-1 承重點）---------------------------------
 
 PROMPT_TEMPLATE = """{memory}
@@ -237,6 +258,7 @@ def run_x1(
     distill: Callable[[X1Task, str, bool], str | None] | None = None,  # 正式：+1 呼叫蒸餾
     trace_path: Path | None = None,
     retries: int = 4,
+    trust_config: TrustConfig | None = None,   # trust on/off、central、cost-aligned 開關
     retry_backoff_s: float = 2.0,
     require_usage: bool = False,  # 正式 run：缺端點 usage → infra_void（測量層紀律）
     now_ms: Callable[[], int] = lambda: time.time_ns() // 1_000_000,
@@ -253,6 +275,16 @@ def run_x1(
     manager = manager or MemoryManager(policy)
     auditor = auditor or Auditor(rate=1.0)
     assert_ks1_clean(PROMPT_TEMPLATE)
+    # --- trust / cost tracking ---------------------------------------------------
+    _tc = trust_config or TrustConfig()  # default: on/central/cost-aligned
+    cost_tracking: dict[str, Any] = {
+        "trust_mode": _tc.mode,
+        "central": _tc.central,
+        "cost_aligned": _tc.cost_aligned,
+        "total_cost_tokens": 0,
+        "audit_count": 0,
+        "oracle_lessons_written": 0,
+    }
     records: list[dict[str, Any]] = []
 
     for task in tasks:
@@ -354,6 +386,13 @@ def run_x1(
         # infra_void 不記入 ledger：瞬斷的格子下次 resume 重試，不留永久洞。
         if ledger is not None and outcome != "infra_void":
             ledger.mark_done(policy, task.task_id, seed, rec)
+        # --- cost tracking ---------------------------------------------------------
+        cost_tracking["total_cost_tokens"] += len(memory_block) // 4 + len(prompt) // 4
+        if audit_rec is not None and audit_rec.ran:
+            cost_tracking["audit_count"] += 1
+        if lesson is not None:
+            cost_tracking["oracle_lessons_written"] += 1
+
         records.append(rec)
     return records
 
