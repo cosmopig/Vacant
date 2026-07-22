@@ -59,7 +59,7 @@ def _eco():
     from vacant.brains import LMStudioBrain
     from vacant.ecosystem import Ecosystem
 
-    brain = LMStudioBrain(base, model, api=api, timeout=600)
+    brain = LMStudioBrain(base, model, api=api, timeout=600, max_tokens=None)
     root = Path(os.path.expanduser(os.environ.get("VACANT_MCP_ROOT", "~/.vacant-mcp")))
     _ECO = Ecosystem(root, brain)
     return _ECO
