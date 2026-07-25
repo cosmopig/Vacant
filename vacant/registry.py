@@ -18,7 +18,8 @@ from . import crypto
 from .body import CapabilityCard
 from .envelope import ReviewEnvelope
 from .identity import PublicIdentity
-from .reputation import DIMS, SAME_SIGNAL_FLOOR, Reputation, ucb_score
+from .logbook import verify_genesis
+from .reputation import SAME_SIGNAL_FLOOR, Reputation, ucb_score
 
 # weight 內生（credit-memory v1 改動3.3）：reviewer 自身信譽 × 觀測飽和度。
 #   - 全新 Sybil reviewer（obs=0）→ weight ≈ REVIEWER_WEIGHT_FLOOR（近零）。
@@ -34,6 +35,17 @@ REVIEWER_SATURATION_OBS = 5.0  # obs/(obs+此值)：約 5 筆被審觀測後 wei
 #     見習生永遠選不到、m 筆強制稽核永遠不發生（永久流放陷阱，冷啟動 C1 死亡）。
 PROBATION_SCORE_CAP = 0.55
 PROBATION_EXPLORE_EVERY = 10
+# 見習的**內生**判準（2026-07-26 獨立審查 P1-5）：原本只看 ecosystem 傳進來的
+# _probation 集合，於是任何直接 announce 的外部身分永遠不在集合內、永遠不被蓋——
+# 而零觀測候選的 UCB 是天文數字（實測 20380.9 vs 已證明專家 1.04），等於外人
+# 必然搶走所有路由。改為「自身有效觀測 < 此值 → 視為見習」，外部集合仍可疊加。
+PROBATION_MIN_OBS = 1.0
+# 未證明評審的邊際遞減（獨立審查 P1-3）：沒有自身track record 的 reviewer 與
+# Sybil 在資訊上不可區分，因此**同一個 target 的第 k 位未證明評審**權重上限為
+# SAME_SIGNAL_FLOOR/k → 總貢獻 0.1·H(N) ≈ log 級。原本每人都拿常數地板 0.05，
+# 200 個匿名 sybil 各投一票即累積 10.0 的權重（線性）。
+# 排名一經指定就跟著該 reviewer（重複評不同交付不會被反覆懲罰）。
+UNPROVEN_REVIEWER_OBS = REVIEWER_SATURATION_OBS
 
 
 class ReviewRejected(Exception):
@@ -59,28 +71,80 @@ class Registry:
         self._same_source_k: dict[tuple[str, str], int] = {}   # (controller, target) → 次數
         self._probation: set[str] = set()  # 見習中的 target_id（路由端權重上限的對象）
         self._route_seq = 0                # 路由計次（見習配額的確定性時脈）
+        self.probation_enabled = True      # B 層反事實臂用的機制總開關（見 in_probation）
         # 行為推斷同源（15 §3-A2；17 §P4）：投票相關性偵測，**承重路徑零 controller_id
         # 讀取**——X4 的 Sybil 攻防不能依賴攻擊者自報的身份欄位（套套邏輯地雷）。
         self._task_votes: dict[str, dict[str, bool]] = {}   # task_id → {reviewer: 通過與否}
         self._behavior_same_k: dict[tuple[str, str], int] = {}  # (reviewer, target) → 已降權次數
+        # 身份綁定（獨立審查 P0-2）：stream_id → 擁有它的 vacant_id。
+        # 一條 memory stream 只能屬於一個身體；先來先占，能力卡附創世事件即為密碼學證明。
+        self._stream_owner: dict[str, str] = {}
+        self._proven_streams: set[str] = set()  # 已用創世簽章證明過擁有權的 stream
+        # 交付時觀察到的 substrate（reviewer 不得自己發明；見 record_review ②）
+        self._head_substrate: dict[str, str] = {}
+        # 每條 (stream, branch) 看過的鏈頭順序 → 偵測回滾（把鏈頭指回舊狀態）
+        self._head_seen: dict[tuple[str, str], dict[str, int]] = {}
+        # 未證明評審的邊際遞減排名：(target_stream, reviewer_id) → k、以及每個
+        # target_stream 已指派到第幾號（排名一經指定就跟著該 reviewer）
+        self._unproven_rank: dict[tuple[str, str], int] = {}
+        self._unproven_n: dict[str, int] = {}
 
     # --- halo：公告 / 發現 -------------------------------------------------
     def announce(self, card: CapabilityCard) -> None:
         """登錄一張能力卡（halo 公告）。**先驗身份綁定再收**。
 
-        vacant_id = multibase(multihash(pubkey)) 是密碼學綁定。若不在此重算驗證，
-        攻擊者可公告「別人的 vacant_id + 自己的 pubkey」污染 registry → 因為 ingress
-        正是用 registry 的 pub_hex 驗章（gateway.py），等於開了冒名後門。
-        （Codex 獨立審查抓到的 Bug 1，已修。）
+        兩道綁定，缺一不可（第二道是 2026-07-26 獨立審查 P0-2 補上的）：
+
+        ① 身體 ↔ 鑰匙：vacant_id = multibase(multihash(pubkey))，在此重算比對。
+           若不驗，攻擊者可公告「別人的 vacant_id + 自己的 pubkey」污染 registry
+           → ingress 正是用 registry 的 pub_hex 驗章，等於開冒名後門。
+           （Codex 獨立審查 Bug 1，早已修。）
+        ② 身體 ↔ 記憶：能力卡自稱的 stream_id 必須由**該身體簽出的創世事件**
+           推導而來。原本這一格完全沒驗，於是任何人都能宣稱他人的 stream_id 而
+           直接繼承其信譽（實測 0.5 → 0.7417），或把負評導進他人的帳。改動2 的
+           「credit 跟記憶走」在補上這道之前，跟的是一個誰都能喊的字串。
+
+        附創世事件（card.genesis）＝密碼學證明；只填 stream_id 不附證明 → 拒收。
+        不填 stream_id ＝ 不主張任何記憶鏈（空鏈居民），仍可公告，但其 stream
+        擁有權只能靠 note_head 的先占（TOFU），強度較低、如實標明。
         """
         if not card.pub_hex:
             raise ValueError("公告缺 pub_hex，無法驗證身份綁定")
-        derived = crypto.vacant_id_from_pubkey(crypto.pub_from_hex(card.pub_hex))
+        pub = crypto.pub_from_hex(card.pub_hex)
+        derived = crypto.vacant_id_from_pubkey(pub)
         if derived != card.vacant_id:
             raise ValueError(
                 f"身份綁定不符：pubkey 推導出 {derived[:16]}…，公告卻自稱 {card.vacant_id[:16]}…"
             )
+        if card.stream_id:
+            if not card.genesis:
+                raise ValueError(
+                    f"能力卡自稱 stream {card.stream_id[:16]}… 卻未附創世證明："
+                    "記憶鏈的擁有權必須可被第三方驗證"
+                )
+            proven = verify_genesis(card.genesis, PublicIdentity(card.vacant_id, pub))
+            if proven != card.stream_id:
+                raise ValueError(
+                    f"記憶綁定不符：創世證明推導出 {str(proven)[:16]}…，"
+                    f"能力卡卻自稱 {card.stream_id[:16]}…"
+                )
+            self._claim_stream(card.vacant_id, card.stream_id, proven=True)
         self._cards[card.vacant_id] = card
+
+    def _claim_stream(self, vacant_id: str, stream_id: str, *, proven: bool) -> None:
+        """主張某條 memory stream 屬於某個身體。一條 stream 只能有一個主人。
+
+        已被密碼學證明的擁有權不可被 TOFU 先占覆蓋（proven > 先來後到）。"""
+        owner = self._stream_owner.get(stream_id)
+        if owner is not None and owner != vacant_id:
+            raise ReviewRejected(
+                f"stream {stream_id[:16]}… 已屬於 {owner[:16]}…，"
+                f"{vacant_id[:16]}… 不得冒領"
+            )
+        if owner is None:
+            self._stream_owner[stream_id] = vacant_id
+        if proven:
+            self._proven_streams.add(stream_id)
 
     def discover(self, niche: str) -> list[CapabilityCard]:
         """按能力匹配（MVP：niche 標籤精確比對；規模大再上 embedding 最近鄰）。"""
@@ -145,13 +209,34 @@ class Registry:
         verdict = (sum(scores.values()) / len(scores)) >= 0.5 if scores else False
         self._task_votes.setdefault(task_id, {})[reviewer_id] = verdict
 
-    def note_head(self, target_id: str, stream_id: str, branch_id: str, head: str) -> None:
+    def note_head(
+        self, target_id: str, stream_id: str, branch_id: str, head: str,
+        *, substrate: str = "",
+    ) -> None:
         """記下對某 target 最新觀察到的 (stream_id, branch_id, chain head)。
 
         head 新鮮性檢查的比對基準：in-process 模擬裡由 gateway 在收到簽章 result
         時回報（上機後即 result envelope 附帶的 chain_head）。改動2：這筆記錄同時
-        是 vacant_id → 當前 stream 三元組的**唯一解析表**（信譽查找都經它）。"""
+        是 vacant_id → 當前 stream 三元組的**唯一解析表**（信譽查找都經它）。
+
+        兩道防線（獨立審查 P0-2）：
+        ① **擁有權**：這條 stream 若已屬於別人，拒收。這使「宣稱他人 stream_id
+           以繼承其信譽」與「把負評寫進他人的帳」兩個攻擊都失效。
+        ② **不可回滾**：同一條 (stream, branch) 上，鏈頭只能往前。把 head 指回
+           看過的舊值＝隱藏後續歷史（挑最有利的版本呈現），拒收。
+           鏈自身驗不出後綴截斷（截斷後的前綴完全自洽），所以這道必須在此攔。
+        """
+        self._claim_stream(target_id, stream_id, proven=False)
+        seen = self._head_seen.setdefault((stream_id, branch_id), {})
+        if head in seen and seen[head] < len(seen) - 1:
+            raise ReviewRejected(
+                f"鏈頭回滾：{head[:12]}… 是 {target_id[:12]}… 已經走過的舊狀態"
+            )
+        if head not in seen:
+            seen[head] = len(seen)
         self._heads[target_id] = (stream_id, branch_id, head)
+        if substrate:
+            self._head_substrate[target_id] = substrate
 
     def _resolve(self, target_id: str) -> tuple[str, str] | None:
         """vacant_id → 當前 (stream_id, branch_id)；未觀察過其鏈頭 → None。"""
@@ -166,8 +251,24 @@ class Registry:
         else:
             self._probation.discard(target_id)
 
-    def in_probation(self, target_id: str) -> bool:
-        return target_id in self._probation
+    def in_probation(self, target_id: str, substrate: str | None = None) -> bool:
+        """見習中？外部標記（ecosystem 的交付數）**或**自身觀測不足皆算。
+
+        `probation_enabled=False` 直接關閉整個機制——這是 B 層反事實臂用的開關。
+        原本 off 臂靠「不標記任何人」表達「拆掉機制」，但見習判準內生化之後，
+        不標記已經不等於沒機制，反事實會失真（實測 on/off 兩臂同為 0.10）。
+        機制要能被**明確拆掉**，「拆掉它數字沒變＝裝飾」這條驗收才驗得到東西。
+
+        內生判準是必要的（獨立審查 P1-5）：只看外部集合時，任何直接 announce
+        的身分永遠不在集合裡、永遠不被蓋頂，而零觀測候選的 UCB 是天文數字
+        （實測 20380.9 vs 已證明專家 1.04）→ 外人必然搶走全部路由，見習制度
+        形同虛設。改成「沒有足夠自身觀測就是見習」後，這個身分是誰、由誰登記，
+        都不影響它必須先賺出紀錄才能被信任。"""
+        if not self.probation_enabled:
+            return False
+        if target_id in self._probation:
+            return True
+        return self._score_obs(target_id, substrate or "")[1] < PROBATION_MIN_OBS
 
     def apply_slash(
         self,
@@ -192,12 +293,41 @@ class Registry:
         saturation = obs / (obs + REVIEWER_SATURATION_OBS)
         return max(REVIEWER_WEIGHT_FLOOR, score * saturation)
 
+    def _unproven_cap(self, reviewer_id: str, target_stream: str, substrate: str) -> float:
+        """未證明評審的邊際遞減上限：同一 target 的第 k 位未證明評審 → FLOOR/k。
+
+        為什麼需要（獨立審查 P1-3）：weight 地板 0.05 是**每人一份**的常數，
+        於是 N 個匿名身分各投一票就累積 0.05·N（實測 N=200 → 總權重 10.0，
+        足以把任意目標推到 0.89）。沒有自身 track record 的評審，在資訊上與
+        Sybil 不可區分，所以它們的**集體**貢獻必須有 log 級上界，而不是每人
+        一份常數。第 k 位拿 FLOOR/k → 總和 0.1·H(N) ≈ 0.1·ln N。
+
+        排名一經指定就綁著該 reviewer（不隨它評第幾筆而變）：誠實的冷啟動評審
+        重複評不同交付不會被反覆懲罰，只有「換一個新身分」才會拿到更差的名次。
+        已證明的評審（自身觀測 ≥ UNPROVEN_REVIEWER_OBS）完全不受此限。
+
+        代價誠實標明：新生態的初期信譽累積會變慢——這是「身分免費」的真實成本，
+        不是可以用參數調掉的。要讓它變快，需要的是身分的入場成本（見審查 §5），
+        或用確定性稽核當錨（本來就是設計裡信譽的主要來源）。
+        """
+        _score, obs = self.standing(reviewer_id, substrate)
+        if obs >= UNPROVEN_REVIEWER_OBS:
+            return float("inf")
+        key = (target_stream, reviewer_id)
+        k = self._unproven_rank.get(key)
+        if k is None:
+            k = self._unproven_n.get(target_stream, 0) + 1
+            self._unproven_n[target_stream] = k
+            self._unproven_rank[key] = k
+        return SAME_SIGNAL_FLOOR / k
+
     def record_review(self, env: ReviewEnvelope) -> float:
         """只收已驗簽的 ReviewEnvelope（credit-memory v1 改動3）。回傳實際採計權重。
 
-        驗收順序：①驗簽（reviewer halo 公告的 pub_hex）→ ②head 新鮮（target_head
-        必須等於最新觀察到的鏈頭）→ ③(reviewer, stream, head) 去重防重放 →
-        ④weight 內生 ＋ 同源非線性降權（第 k 筆 ~ floor/k，總貢獻 log 級）→ 寫入。
+        驗收順序：①驗簽（reviewer halo 公告的 pub_hex）→ ①b 不得自評 →
+        ②座標一致（stream / branch / substrate / head 都必須等於交付時觀察到的值）
+        → ③(reviewer, stream, head, task) 去重防重放 → ④weight 內生 ＋
+        非線性降權（同源、以及未證明評審的邊際遞減）→ 寫入。
         任一步失敗 raise ReviewRejected，reputation 完全不動。
         """
         # ① 驗簽：reviewer 必須已在 halo 公告（announce 已驗身份綁定）
@@ -207,6 +337,11 @@ class Registry:
         reviewer_pub = PublicIdentity.from_hex(env.reviewer_id, rcard.pub_hex)
         if not env.verify_sig(reviewer_pub):
             raise ReviewRejected(f"review 驗簽失敗：reviewer {env.reviewer_id[:16]}…")
+
+        # ①b 自評不計（獨立審查 P1-1）：ecosystem/gateway/receipt 三處都擋自評，
+        #    唯獨承重的這一層沒擋——縱深防禦的順序反了，補在最內層。
+        if env.reviewer_id == env.target_id:
+            raise ReviewRejected(f"自評不計入信譽：{env.reviewer_id[:16]}…")
 
         # ② head 新鮮：評的必須是「目標當前鏈頭為止」的歷史
         known = self._heads.get(env.target_id)
@@ -219,15 +354,35 @@ class Registry:
             raise ReviewRejected(
                 f"target_head 不新鮮：got {env.target_head[:12]} want {known_head[:12]}"
             )
+        # branch 與 substrate 也必須對得上交付時觀察到的座標（獨立審查 P1-2）。
+        # 原本 known_branch 被解包卻從未比對、substrate 完全未驗 → reviewer 可把
+        # 評分寫進任意 (branch, substrate) 格，「substrate 進 key 堵住跨腦洗白」
+        # 這條防線形同虛設。
+        # 誠實邊界：substrate 標籤仍由被評者在交付時自報，本檢查保證的是
+        # 「reviewer 不能自己發明一顆腦」，不是「被評者不能謊報自己用了哪顆腦」。
+        if env.branch_id != known_branch:
+            raise ReviewRejected(
+                f"branch 不符：got {env.branch_id!r} want {known_branch!r}"
+            )
+        known_substrate = self._head_substrate.get(env.target_id)
+        if known_substrate is not None and env.substrate != known_substrate:
+            raise ReviewRejected(
+                f"substrate 不符：got {env.substrate!r} want {known_substrate!r}"
+            )
 
-        # ③ 去重防重放
+        # ③ 去重防重放：一位 reviewer、一次交付（鏈頭）、一票。
+        # 審查曾建議把 task_id 併進 key（理由：同一鏈頭的不同任務被靜默吃掉）。
+        # 實作時否決了這個建議——鏈頭每次交付都會前進，所以「同鏈頭、不同 task_id」
+        # 不是合法的兩筆證據，而是同一次交付被灌多票的入口。訊號流失的疑慮
+        # 用 gateway 端如實記帳處理，不能用放寬去重換。
         dedup_key = (env.reviewer_id, env.target_stream_id, env.target_head)
         if dedup_key in self._seen_reviews:
             raise ReviewRejected(f"重複 review：{env.reviewer_id[:12]}…@head {env.target_head[:12]}")
         self._seen_reviews.add(dedup_key)
 
-        # ④ weight 內生 ＋ 同源非線性降權（floor/k 取代純地板，v1 改動3.4）
-        #    雙通道：誠實條件化（controller，demo）＋行為推斷（投票相關，X4 承重）
+        # ④ weight 內生 ＋ 非線性降權（floor/k 取代純地板，v1 改動3.4）
+        #    三通道，取最嚴：誠實條件化（controller，demo）／行為推斷（投票相關，
+        #    X4 承重）／未證明評審的邊際遞減（獨立審查 P1-3）。
         weight = self._reviewer_weight(env.reviewer_id, env.substrate)
         if self._same_signal(env.reviewer_id, env.target_id):
             controller = self._cards[env.reviewer_id].controller
@@ -238,6 +393,8 @@ class Registry:
             k = self._behavior_same_k.get((env.reviewer_id, env.target_id), 0) + 1
             self._behavior_same_k[(env.reviewer_id, env.target_id)] = k
             weight = min(weight, SAME_SIGNAL_FLOOR / k)
+        weight = min(weight, self._unproven_cap(env.reviewer_id, env.target_stream_id,
+                                                env.substrate))
 
         # 記票（行為推斷的原料；先判後記，本票不參與自己的同源判定）
         self._note_vote(env.task_id, env.reviewer_id, env.scores)
@@ -256,6 +413,16 @@ class Registry:
             "same_source_k": {f"{c}␟{t}": v for (c, t), v in self._same_source_k.items()},
             "probation": sorted(self._probation),
             "behavior_same_k": {f"{r}␟{t}": v for (r, t), v in self._behavior_same_k.items()},
+            # 身份綁定與降權排名必須跨行程續存，否則重啟即可洗掉「這條 stream
+            # 已經有主人」與「你是第幾位未證明評審」（獨立審查 P0-2 / P1-3 的
+            # 持久化面；_route_seq 同理——見習配額時脈歸零可被誘發重啟操縱）。
+            "stream_owner": dict(self._stream_owner),
+            "proven_streams": sorted(self._proven_streams),
+            "head_substrate": dict(self._head_substrate),
+            "head_seen": {f"{s}␟{b}": v for (s, b), v in self._head_seen.items()},
+            "unproven_rank": {f"{s}␟{r}": v for (s, r), v in self._unproven_rank.items()},
+            "unproven_n": dict(self._unproven_n),
+            "route_seq": self._route_seq,
         }
 
     def state_from_json(self, d: dict[str, Any]) -> None:
@@ -277,6 +444,23 @@ class Registry:
         for key, v in d.get("behavior_same_k", {}).items():
             r, t = key.split("␟", 1)
             self._behavior_same_k[(r, t)] = int(v)
+        self._stream_owner = dict(d.get("stream_owner", {}))
+        self._proven_streams = set(d.get("proven_streams", []))
+        self._head_substrate = dict(d.get("head_substrate", {}))
+        self._head_seen = {}
+        for key, v in (d.get("head_seen") or {}).items():
+            s, b = key.split("␟", 1)
+            self._head_seen[(s, b)] = {h: int(i) for h, i in v.items()}
+        self._unproven_rank = {}
+        for key, v in (d.get("unproven_rank") or {}).items():
+            s, r = key.split("␟", 1)
+            self._unproven_rank[(s, r)] = int(v)
+        self._unproven_n = {k: int(v) for k, v in (d.get("unproven_n") or {}).items()}
+        self._route_seq = int(d.get("route_seq", 0))
+        # 舊狀態檔沒有 stream_owner：由 heads 回填（TOFU），避免重啟後整批 stream
+        # 變成無主而可被冒領。
+        for t, (st, _br, _hd) in self._heads.items():
+            self._stream_owner.setdefault(st, t)
 
     def forget_target(self, target_id: str) -> None:
         """wipe demo 用（12 §7 時刻 4）：抹掉某 target 當前 stream 的信譽格與鏈頭記錄。
@@ -347,7 +531,7 @@ class Registry:
             return None
         self._route_seq += 1
         total_obs = sum(self._score_obs(c.vacant_id, substrate)[1] for c in cands)
-        probies = [c for c in cands if c.vacant_id in self._probation]
+        probies = [c for c in cands if self.in_probation(c.vacant_id, substrate)]
         cap_active = len(probies) < len(cands)  # 全員見習 → 不蓋（冷啟動保護）
 
         def raw_ucb(c: CapabilityCard) -> float:
@@ -358,9 +542,11 @@ class Registry:
         if probies and cap_active and self._route_seq % PROBATION_EXPLORE_EVERY == 0:
             return max(probies, key=raw_ucb)
 
+        probie_ids = {c.vacant_id for c in probies}
+
         def key(c: CapabilityCard) -> float:
             u = raw_ucb(c)
-            if cap_active and c.vacant_id in self._probation:
+            if cap_active and c.vacant_id in probie_ids:
                 u = min(u, PROBATION_SCORE_CAP)
             return u
 

@@ -56,15 +56,29 @@ class Beta:
         self.last_event = now
 
     def slash(self, factor: float, now: int, halflife: float = DECAY_HALFLIFE_EVENTS) -> None:
-        """牙齒·slash（12 §4.2）：provable fault → 乘法扣減（向先驗縮 factor）。
+        """牙齒·slash（12 §4.2）：provable fault → 後驗均值乘以 factor。
 
-        先物化 decay 再扣：α'=1+(α−1)·factor、β'=1+(β−1)·factor——高信譽者
-        一次 slash 可觀測下墜，低信譽者不被誤殺到負（先驗是地板）。"""
+        **實作＝注入負面證據**，不是把 α、β 一起往先驗縮。要 mean 變成 factor 倍，
+        解 α/(α+β+Δ) = factor·α/(α+β) 得 Δ = (α+β)·(1/factor − 1)，即 β += Δ。
+
+        為什麼不是原本的「α、β 同乘 factor」（2026-07-26 獨立審查 P0-1）：
+        同乘會嚴格保持證據比 (α−1)/(β−1)，所以它不是懲罰、是**證據折現**，
+        數學上與「老化一個半衰期」是同一個算子。後果實測：
+          - 連 60 筆 0 分的破壞者，每 slash 一次 mean 反而上升（0.016→0.105）；
+          - 高信譽者 slash 後 n 減半 → UCB 探索項變大 → **被懲罰者更常被派工**。
+        改成注入負面證據後三個性質同時成立：mean 單調下降、n 上升使 UCB 下降、
+        兩次 0.5 等於一次 0.25（可疊加）。α 不動 → 已賺到的好評不被抹掉，
+        懲罰是「多了一筆很重的壞紀錄」而不是「大家一起忘記」。
+
+        誠實邊界：mean 可被壓到先驗 0.5 以下（原版做不到）。這是刻意的——
+        懲罰若打不穿新人基準，換 key 重生就永遠不虧，probation 也就守著一扇
+        沒人需要走的門。相對地，這使「洗白的相對誘因」變成真問題，由 probation
+        與身份成本設計承接（見審查意見書 §5）。
+        """
         if not 0.0 < factor <= 1.0:
             raise ValueError(f"slash factor 必須在 (0,1]：{factor}")
         self.commit_decay(now, halflife)
-        self.alpha = 1.0 + (self.alpha - 1.0) * factor
-        self.beta = 1.0 + (self.beta - 1.0) * factor
+        self.beta += (self.alpha + self.beta) * (1.0 / factor - 1.0)
 
     @property
     def mean(self) -> float:
@@ -138,17 +152,39 @@ class Reputation:
 
     key = (stream_id, branch_id, substrate)。空鏈時 stream_id 以 vacant_id 頂替
     （與 ReviewEnvelope 的 target_stream_id 慣例一致，見 envelope.py）。
-    event_seq 是全帳本的 review 序號——decay 的時間軸（12 §4.2，向先驗回歸）。"""
+
+    **decay 的時間軸是「該 stream 自己的 review 序」**，不是全帳本序
+    （2026-07-26 獨立審查 P0-3）。原本用全域 event_seq 有兩個後果：
+      - 任何人灌 1500 筆針對他人的 review，全網高信譽者被重置回先驗、
+        有效觀測數歸零（實測 0.788/obs 2.71 → 0.504/obs 0.01）。信用可以被
+        與自己無關的網路活動蒸發，這使「信用要一直賺」變成「信用會被別人燒掉」。
+      - 半衰期 200 事件在 6 人 demo 約等於 67 次交付，在 100 人生態可能只是
+        幾分鐘——同一個常數在不同規模下語意完全不同。
+    改成 per-stream 後：第三方活動對我的帳零影響，而「自己的舊證據隨自己的
+    新事件老化」這個原意完全保留（見 tests/test_audit_findings.py 的雙向判準）。
+    """
 
     def __init__(self) -> None:
         self._cells: dict[tuple[str, str, str], ReputationCell] = {}
-        self.event_seq = 0
+        self._stream_seq: dict[str, int] = {}  # stream_id → 該 stream 自己的事件序
+        self.event_seq = 0  # 全帳本累計（僅供報表/觀測，不再是 decay 時間軸）
+
+    def _now(self, stream_id: str) -> int:
+        """該 stream 的當前事件序（decay 的時間座標）。"""
+        return self._stream_seq.get(stream_id, 0)
 
     def cell(self, stream_id: str, branch_id: str, substrate: str) -> ReputationCell:
         key = (stream_id, branch_id, substrate)
         if key not in self._cells:
             self._cells[key] = ReputationCell()
         return self._cells[key]
+
+    def peek(self, stream_id: str, branch_id: str, substrate: str) -> ReputationCell | None:
+        """唯讀查詢：不存在就回 None，**不創造 cell**。
+
+        `cell()` 的建立副作用曾經是狀態膨脹向量——任何人查詢任意 stream_id
+        即可灌大 registry_state.json（獨立審查 P2）。"""
+        return self._cells.get((stream_id, branch_id, substrate))
 
     def record_review(
         self,
@@ -169,7 +205,9 @@ class Reputation:
         """
         w = min(weight, SAME_SIGNAL_FLOOR) if same_signal else weight
         self.event_seq += 1
-        self.cell(stream_id, branch_id, substrate).update(scores, w, self.event_seq)
+        now = self._stream_seq.get(stream_id, 0) + 1
+        self._stream_seq[stream_id] = now
+        self.cell(stream_id, branch_id, substrate).update(scores, w, now)
 
     def slash(
         self,
@@ -183,19 +221,26 @@ class Reputation:
         """牙齒·slash：對某三元組的指定維（預設全維）乘法扣減（12 §4.2）。
 
         誤放行罰重於誤攔是不對稱係數的落點（PREREG v2 §6 凍結值）；
-        本函式只執行扣減，誰該被扣由呼叫端（ecosystem 的稽核錨）判定。"""
-        self.cell(stream_id, branch_id, substrate).slash(factor, dims, self.event_seq)
+        本函式只執行扣減，誰該被扣由呼叫端（ecosystem 的稽核錨）判定。
+
+        不推進 stream 時鐘：懲罰與「又過了一段時間」是兩件事，混在一起會讓
+        手算對照失去意義（slash 的效果會被同一步的 decay 汙染）。"""
+        self.cell(stream_id, branch_id, substrate).slash(
+            factor, dims, self._stream_seq.get(stream_id, 0))
 
     def score(self, stream_id: str, branch_id: str, substrate: str) -> float:
-        return self.cell(stream_id, branch_id, substrate).score(self.event_seq)
+        c = self.peek(stream_id, branch_id, substrate)
+        return 0.5 if c is None else c.score(self._now(stream_id))
 
     def observations(self, stream_id: str, branch_id: str, substrate: str) -> float:
-        return self.cell(stream_id, branch_id, substrate).observations(self.event_seq)
+        c = self.peek(stream_id, branch_id, substrate)
+        return 0.0 if c is None else c.observations(self._now(stream_id))
 
     # --- 持久化 ------------------------------------------------------------
     def to_json(self) -> dict[str, Any]:
         return {
             "event_seq": self.event_seq,
+            "stream_seq": dict(self._stream_seq),
             "cells": {f"{st}␟{br}␟{su}": c.to_json() for (st, br, su), c in self._cells.items()},
         }
 
@@ -204,10 +249,20 @@ class Reputation:
         rep = cls()
         if "cells" in d:
             rep.event_seq = int(d.get("event_seq", 0))
+            rep._stream_seq = {k: int(v) for k, v in (d.get("stream_seq") or {}).items()}
             d = d["cells"]
         for key, cell in d.items():
             st, br, su = key.split("␟", 2)
             rep._cells[(st, br, su)] = ReputationCell.from_json(cell)
+        # 舊格式（全域 event_seq 時代）沒有 stream_seq：由各 stream 自己 cell 的
+        # last_event 取最大值回填，讓 decay 的相對次序在遷移後仍然合理。
+        for (st, _br, _su), cell in rep._cells.items():
+            if st not in rep._stream_seq:
+                rep._stream_seq[st] = max(b.last_event for b in cell.dims.values())
+            else:
+                rep._stream_seq[st] = max(
+                    rep._stream_seq[st], max(b.last_event for b in cell.dims.values())
+                )
         return rep
 
 

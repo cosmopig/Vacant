@@ -194,6 +194,14 @@ class Logbook:
             expected_seq += 1
         return True
 
+    def genesis_proof(self) -> dict[str, Any] | None:
+        """回傳可公示的創世事件（JSON）——記憶鏈擁有權的可攜證明。
+
+        創世事件是公開資訊（它只宣告「這條鏈開始了」），但它由本身體的私鑰簽過，
+        且 stream_id ＝ 它自己的 hash。因此任何第三方拿到 (pubkey, 創世事件) 就能
+        獨立驗證「這條 stream 屬於這個身體」，不需要信任 registry。"""
+        return self.entries[0].to_json() if self.entries else None
+
     # --- 持久化 ------------------------------------------------------------
     def save(self, path: Path) -> None:
         # 原子寫入：崩潰也只會留下舊的或新的完整 ndjson，不會半截壞鏈。
@@ -216,3 +224,32 @@ class Logbook:
 
     def __len__(self) -> int:
         return len(self.entries)
+
+
+def verify_genesis(entry_json: dict[str, Any], who: PublicIdentity) -> str | None:
+    """驗證一筆創世事件，回傳它所定義的 stream_id；不合格回 None。
+
+    這是「身體 ↔ 記憶」綁定的驗證端（獨立審查 P0-2）。合格條件：
+      - seq == 1、stream_id 是創世 sentinel、prev_hash 是空鏈 sentinel
+      - 簽章由 `who` 的公鑰驗過（＝這條鏈確實由這個身體開啟）
+    回傳值 ＝ entry.hash() ＝ 該 stream 的 stream_id。
+
+    誠實邊界：本函式證明的是「這個身體開了這條鏈」，不是「這個身體只有這條鏈」。
+    一把 key 開多條鏈（equivocation）需要由 registry 的擁有權表與存檔點鏈承接。
+    """
+    try:
+        e = LogEntry.from_json(entry_json)
+    except (KeyError, TypeError, ValueError):
+        return None
+    if e.seq != 1 or e.stream_id != GENESIS_STREAM_ID or e.prev_hash != EMPTY_PREV_HASH:
+        return None
+    try:
+        sig = bytes.fromhex(e.sig)
+    except ValueError:
+        return None
+    if not who.verify(
+        _signed_bytes(e.stream_id, e.branch_id, e.seq, e.prev_hash, e.ts_ms, e.type, e.payload),
+        sig,
+    ):
+        return None
+    return e.hash()

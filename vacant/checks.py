@@ -38,6 +38,21 @@ from typing import Any, Callable
 
 Verifier = Callable[[str], bool]
 
+
+class CheckInfraError(Exception):
+    """稽核**基建**失敗（沙箱起不來），不是候選碼的錯。
+
+    為什麼要有這個型別（獨立審查 P1-7）：`run_python` 對一切失敗一律 fail-closed
+    回 False，於是「程式碼寫錯」與「子行程起不來」在稽核端不可區分，而後者在
+    claimed_pass=True 時會直接變成 provable fault → 錯誤 slash ＋ 永久進 ledger。
+    本次審查實跑 330 項測試就觀察到一次與程式碼正確性無關的沙箱翻轉。
+
+    誠實邊界：目前只有「連 harness 都無法啟動」（OSError from Popen：fd 耗盡、
+    ENOMEM、exec 失敗）會拋這個型別。候選碼自己把 worker 弄掛（語法錯、import
+    時 crash）仍然算候選碼的錯——否則作惡者可以故意搞掛 worker 來換取 void。
+    """
+
+
 # 從模型輸出抽出程式碼（優先 ```python fenced；無 fence 則視整段為碼）。
 _FENCE = re.compile(r"```(?:python|py)?\s*\n?(.*?)```", re.DOTALL | re.IGNORECASE)
 
@@ -447,13 +462,21 @@ def run_python_check(
         env = {"PATH": os.environ.get("PATH", ""), "HOME": test_dir, "TMPDIR": test_dir}
         proc = None
         try:
-            proc = subprocess.Popen(
-                [sys.executable, "-I", runner_path],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                text=True, cwd=test_dir, env=env,
-                preexec_fn=(lambda: _cpu_limits(int(timeout) + 1)) if os.name == "posix" else None,
-                start_new_session=(os.name == "posix"),
-            )
+            try:
+                proc = subprocess.Popen(
+                    [sys.executable, "-I", runner_path],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    text=True, cwd=test_dir, env=env,
+                    preexec_fn=(
+                        (lambda: _cpu_limits(int(timeout) + 1)) if os.name == "posix" else None
+                    ),
+                    start_new_session=(os.name == "posix"),
+                )
+            except OSError as e:
+                # 連 harness 都起不來（fd 耗盡 / ENOMEM / exec 失敗）——這不是候選碼
+                # 的錯，不可 fail-closed 成 False。稽核端會把它記成 infra_void
+                # 而非 provable fault（獨立審查 P1-7；CLAUDE.md 鐵律 3）。
+                raise CheckInfraError(f"沙箱 harness 無法啟動：{e}") from e
             proc.communicate(timeout=timeout)
             return proc.returncode == 0
         except subprocess.TimeoutExpired:
@@ -467,6 +490,8 @@ def run_python_check(
                     proc.kill()
                 proc.communicate()
             return False
+        except CheckInfraError:
+            raise
         except Exception:
             if proc is not None and proc.poll() is None:
                 proc.kill()

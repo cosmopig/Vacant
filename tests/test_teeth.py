@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import pytest
 
+from vacant import registry as registry_mod
 from vacant.body import CapabilityCard
 from vacant.registry import PROBATION_SCORE_CAP, Registry
-from vacant.reputation import DIMS, Beta, Reputation, ucb_score
+from vacant.reputation import DIMS, Beta, Reputation
 
 GOOD = {d: 1.0 for d in DIMS}
 KEY = ("streamX", "main", "echo")
@@ -20,29 +21,45 @@ KEY = ("streamX", "main", "echo")
 # --- decay：半衰期 200 事件、向先驗回歸 ----------------------------------------
 class TestDecay:
     def test_halflife_200_hand_computed(self):
-        """手算：1 筆全好評後 α=2,β=1（mean 2/3）；200 事件後 f=0.5 →
-        α=1.5,β=1 → mean=1.5/2.5=0.6；再 200 事件 f=0.25 → α=1.25 → 1.25/2.25≈0.5556。"""
+        """手算：1 筆全好評後 α=2,β=1（mean 2/3）；老化 200 事件 f=0.5 →
+        α=1.5,β=1 → mean=1.5/2.5=0.6；再 200 事件 f=0.25 → α=1.25 → 1.25/2.25≈0.5556。
+
+        時間軸是**該 stream 自己的事件序**（獨立審查 P0-3 後的語意），所以
+        半衰期算術直接對 Beta 驗；Reputation 層的時鐘歸屬另由下一支測試釘死。"""
+        b = Beta()
+        b.update(1.0, 1.0)
+        assert b.mean == pytest.approx(2 / 3)
+        b.commit_decay(now=200)
+        assert b.mean == pytest.approx(0.6)
+        b.commit_decay(now=400)
+        assert b.mean == pytest.approx(1.25 / 2.25)
+
+    def test_decay_clock_is_per_stream_not_global(self):
+        """別人的活動不得推進我的 decay 時鐘（獨立審查 P0-3）。
+
+        改動前：event_seq 是全帳本共用，任何人灌票都會把全網信譽拉回先驗、
+        把有效觀測數清成 0（實測 0.788/obs 2.71 → 0.504/obs 0.01）。"""
         rep = Reputation()
         rep.record_review(*KEY, GOOD, weight=1.0)
-        assert rep.score(*KEY) == pytest.approx(2 / 3)
-        for _ in range(200):  # 別處的 200 筆 review（本格不被更新）
+        before = (rep.score(*KEY), rep.observations(*KEY))
+        for _ in range(400):  # 別處的 400 筆 review
             rep.record_review("other", "main", "echo", GOOD, weight=1.0)
-        assert rep.score(*KEY) == pytest.approx(0.6)
-        for _ in range(200):
-            rep.record_review("other", "main", "echo", GOOD, weight=1.0)
-        assert rep.score(*KEY) == pytest.approx(1.25 / 2.25)
+        assert (rep.score(*KEY), rep.observations(*KEY)) == before
 
     def test_decay_toward_prior_not_zero(self):
-        """壞評也往 0.5 回歸（先驗是吸引子）；觀測數同步衰減（UCB 探索回溫）。"""
+        """壞評也往 0.5 回歸（先驗是吸引子）；觀測數同步衰減（UCB 探索回溫）。
+
+        「一直賺」的語意保留在自己的時間軸上：用本 stream 自己的後續事件推進。"""
         rep = Reputation()
         for _ in range(10):
             rep.record_review(*KEY, {d: 0.0 for d in DIMS}, weight=1.0)
         low = rep.score(*KEY)
+        low_obs = rep.observations(*KEY)
         assert low < 0.2
-        for _ in range(200):
-            rep.record_review("other", "main", "echo", GOOD, weight=1.0)
-        assert rep.score(*KEY) > low          # 往先驗回升
-        assert rep.observations(*KEY) < 10    # 觀測衰減：舊帳的「確定度」也在消退
+        for _ in range(200):  # 本 stream 自己的後續事件（極小權重，只推時鐘）
+            rep.record_review(*KEY, {d: 0.5 for d in DIMS}, weight=1e-6)
+        assert rep.score(*KEY) > low            # 往先驗回升
+        assert rep.observations(*KEY) < low_obs  # 觀測衰減：舊帳的「確定度」也在消退
 
     def test_beta_slash_validation(self):
         with pytest.raises(ValueError):
@@ -54,16 +71,36 @@ class TestDecay:
 # --- slash：乘法扣減、誤放行罰重於誤攔 ------------------------------------------
 class TestSlash:
     def test_deliverer_multiplicative_hand_computed(self):
-        """手算：單筆 weight=10 好評 → α=11,β=1（mean 11/12≈0.9167；單事件內
-        decay=0，排除事件序 decay 對算術的干擾）。
-        slash×0.5 → α=6,β=1 → 6/7≈0.8571；再一次 → α=3.5,β=1 → 3.5/4.5≈0.7778。"""
+        """手算：單筆 weight=10 好評 → α=11,β=1（mean 11/12≈0.9167；slash 不推進
+        時鐘，排除 decay 對算術的干擾）。
+
+        slash 的語意是「把後驗均值乘以 factor」，實作＝注入負面證據
+        β += (α+β)(1/factor−1)（獨立審查 P0-1；舊版 α、β 同乘會保持證據比不變，
+        對低分者反而是加分）：
+          第一次 ×0.5 → β += 12 → 11/24 ≈ 0.4583（＝ 11/12 的一半）
+          第二次 ×0.5 → β += 24 → 11/48 ≈ 0.2292（＝ 11/12 的四分之一）"""
         rep = Reputation()
         rep.record_review(*KEY, GOOD, weight=10.0)
         assert rep.score(*KEY) == pytest.approx(11 / 12)
         rep.slash(*KEY, 0.5)
-        assert rep.score(*KEY) == pytest.approx(6 / 7)
+        assert rep.score(*KEY) == pytest.approx(11 / 24)
         rep.slash(*KEY, 0.5)
-        assert rep.score(*KEY) == pytest.approx(3.5 / 4.5)
+        assert rep.score(*KEY) == pytest.approx(11 / 48)
+
+    def test_slash_punishes_monotonically(self):
+        """對任何起始狀態，slash 都必須讓分數下降——包含已經很低的那些。
+
+        舊實作對 60 筆 0 分的破壞者 slash 三次，分數是 0.016→0.031→0.059→0.105
+        （越罰越高）。這條是那個缺陷的守門測試。"""
+        rep = Reputation()
+        for _ in range(60):
+            rep.record_review(*KEY, {d: 0.0 for d in DIMS}, weight=1.0)
+        prev = rep.score(*KEY)
+        for _ in range(3):
+            rep.slash(*KEY, 0.5)
+            now = rep.score(*KEY)
+            assert now < prev, f"slash 讓低分者上升：{prev} -> {now}"
+            prev = now
 
     def test_dims_scoped_slash(self):
         """reviewer 入押只扣 honesty：其他維不動（預期曲線的單元級）。"""
@@ -90,16 +127,32 @@ class TestProbationTeeth:
             reg._rep.record_review("sV", "main", "echo", GOOD, weight=1.0)
         return reg, "veteran", "newbie"
 
-    def test_probation_caps_ucb_so_veteran_wins(self):
+    def test_probation_caps_ucb_so_veteran_wins(self, monkeypatch):
         """見習生 UCB 被蓋到 0.55：沒這個蓋子，obs=0 的探索額會讓新人必贏。
-        （route_seq 未滿 10 → 見習配額不觸發，測的是蓋子本身。）"""
+        （route_seq 未滿 10 → 見習配額不觸發，測的是蓋子本身。）
+
+        見習判準現在是**內生**的（獨立審查 P1-5）：自身觀測 < PROBATION_MIN_OBS
+        即為見習，不再只看外部集合——否則任何直接 announce 的身分都不受約束。
+        因此反事實要靠把內生門檻降到 0 來表達，而不是清空外部集合。"""
         reg, vet, new = self._registry_with_two()
-        # 無 probation：新人靠探索額贏（驗證反事實——蓋子確實是承重件）
+        # 反事實：拆掉蓋子（內生門檻歸零＋不在外部集合）→ 新人靠探索額必贏
+        monkeypatch.setattr(registry_mod, "PROBATION_MIN_OBS", 0.0)
         assert reg.route("code", "echo").vacant_id == new
+        monkeypatch.undo()
+        assert reg.route("code", "echo").vacant_id == vet  # 內生見習判準即生效
         reg.set_probation(new, True)
-        assert reg.route("code", "echo").vacant_id == vet  # 牙齒生效
-        reg.set_probation(new, False)
-        assert reg.route("code", "echo").vacant_id == new  # 出見習即恢復探索
+        assert reg.route("code", "echo").vacant_id == vet  # 外部標記可疊加
+
+    def test_probation_is_intrinsic_for_unregistered_outsiders(self):
+        """未經 ecosystem 名冊、直接 announce 的零觀測身分同樣被蓋。
+
+        改動前：_probation 只由 ecosystem 依交付數同步，外部身分永遠不在集合裡，
+        而零觀測候選 UCB 是天文數字（實測 20380.9 vs 已證明專家 1.04）。"""
+        reg, vet, _new = self._registry_with_two()
+        reg._cards["outsider"] = CapabilityCard(
+            vacant_id="outsider", niches=["code"], pub_hex="")
+        assert reg.in_probation("outsider", "echo") is True
+        assert reg.route("code", "echo").vacant_id == vet
 
     def test_probation_quota_every_10th_route(self):
         """見習配額（防永久流放）：veteran 壟斷 9 筆，第 10 筆路由留給見習生——

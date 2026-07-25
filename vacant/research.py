@@ -286,13 +286,14 @@ def wilcoxon_signed_rank_exact(diffs: list[float], *, alpha: float = 0.05) -> di
         p = extreme / (2 ** n)
         method = "exact"
     else:
-        # 常態近似：Var = (Σ r² − Σ(t³−t)/12 修正) —— ties 修正項
+        # 常態近似：Var(W+) = Σ r²/4，其中 r 是 midrank。
+        # **不可再扣 tie 修正**：教科書寫成 n(n+1)(2n+1)/24 − Σ(t³−t)/48 是在
+        # 「秩為 1..n」的前提下展開的等價式；改用 midrank 直接算 Σr²/4 時，tie
+        # 修正已經內含在 midrank 裡（代數上兩式相等）。再減一次＝變異數低估、
+        # z 膨脹、p 偏小（反保守）。X1 的配對差是 0/±1 全 tie 型態，此路徑常走：
+        # n=30、20 正 10 負時錯誤地回 p=0.029 判顯著，精確值是 0.099。
+        # （2026-07-26 獨立審查 P0-4；判準見 tests/test_audit_findings.py）
         var = sum(r * r for r in ranks) / 4.0
-        tie_sizes: dict[float, int] = {}
-        for v in pairs:
-            tie_sizes[v] = tie_sizes.get(v, 0) + 1
-        tie_corr = sum(t ** 3 - t for t in tie_sizes.values() if t > 1) / 48.0
-        var -= tie_corr
         z = (abs(w_plus - mean_w) - 0.5) / math.sqrt(var)  # 連續性修正
         p = 2.0 * (1.0 - _norm_cdf(z))
         method = "normal_approx"

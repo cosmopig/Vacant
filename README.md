@@ -294,8 +294,18 @@ trust card，不受後續同題委派覆寫影響。
   egress policy 強制。
 - **key custody 是部署假設。** 同一 OS 使用者或 root 可讀 resident 私鑰時，軟體層無法
   prevents 偽造；production 應把信任庫放在獨立服務帳號、HSM 或 TEE。
-- **同源／Sybil 防護是 raises-cost，不是 prevents。** 行為相關降權、probation 與 slash
-  會提高洗白成本，但公開門檻仍可被針對。
+- **同源／Sybil 防護是 raises-cost，不是 prevents。** 未證明評審的集體權重有 log 級
+  上界（第 k 位拿 floor/k）、行為相關降權、probation 與 slash 會提高洗白成本，但
+  公開門檻仍可被針對。**製造一個新身分本身目前沒有成本**——這是機制的地界，不是
+  可以用參數調掉的：要讓洗白真的變貴，需要身分的入場成本（stake／背書／邀請制），
+  該設計尚未定案。
+- **身分綁定驗到記憶鏈為止。** 能力卡附創世事件簽章，任何第三方可獨立驗證
+  「這條 memory stream 由這個身體開啟」，且一條 stream 只能有一個主人、鏈頭不可
+  回退。**驗不到的是**「這個身體只有這條鏈」——一把 key 開多條鏈並挑最有利的呈現，
+  需要存檔點鏈與外部觀察者才能發現。
+- **substrate 標籤由被評者自報。** 三元組 key 保留了跨 substrate 分離的能力，
+  evaluator 不能自己發明一顆腦（座標必須與交付時觀察到的一致），但被評者謊報自己
+  用了哪顆腦，軟體層擋不住。
 
 ## 產品與 Demo 隔離
 

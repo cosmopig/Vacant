@@ -16,6 +16,7 @@ bootstrap 95% CI、每情境 ≤30 分、產出 JSONL＋一頁結果。各情境
 
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 from dataclasses import dataclass, field
@@ -67,8 +68,13 @@ def _sweep(
                 for i in range(n_seeds)
             ]
             mean = sum(vals) / len(vals)
-            lo, hi = boot_ci(vals, lambda s: sum(s) / len(s), n_boot=500,
-                             seed=hash((name, ratio, on)) & 0xFFFF)
+            # 種子用 sha256 不用 hash()：str 的 hash() 受 PYTHONHASHSEED 鹽化，
+            # 每個行程不同 → 歸檔的 cells.jsonl 之 ci_lo/ci_hi 無法重放對帳
+            # （獨立審查 P2；value 可重現、CI 不行，determinism 測試剛好沒測到）。
+            boot_seed = int(
+                hashlib.sha256(f"{name}:{ratio}:{on}".encode()).hexdigest()[:8], 16
+            )
+            lo, hi = boot_ci(vals, lambda s: sum(s) / len(s), n_boot=500, seed=boot_seed)
             cells.append(Cell(name, ratio, n_seeds, mean, lo, hi))
         if on:
             rep.on_cells = cells
@@ -196,6 +202,9 @@ def _probation_whitewash(ratio: float, rng: random.Random, on: bool) -> float:
     from .reputation import DIMS
 
     reg = Registry()
+    # off 臂＝**機制被拆掉**（不是「沒人被標記」）。見習判準內生化後，只清空
+    # 外部集合已經不等於沒有見習制度，反事實會失真——必須顯式關掉整個機制。
+    reg.probation_enabled = on
     for i in range(3):  # 老手：10 筆好評
         vid = f"veteran{i}"
         reg._cards[vid] = CapabilityCard(vacant_id=vid, niches=["code"])

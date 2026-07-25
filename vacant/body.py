@@ -46,6 +46,10 @@ class CapabilityCard:
     pub_hex: str = ""
     controller: str = ""   # 同源降權用：同一 controller 的 vacant 互評降權
     stream_id: str = ""    # 當前 memory stream（創世 hash；改動2 的公示錨，空鏈＝""）
+    # 創世事件本體（JSON）＝ stream_id 擁有權的可攜證明。registry.announce 會用
+    # 它驗「這條記憶鏈確實由這個身體開啟」；填了 stream_id 卻不附 genesis → 拒收。
+    # 沒有這一格時，stream_id 只是一個誰都能喊的字串（獨立審查 P0-2）。
+    genesis: dict[str, Any] | None = None
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -55,6 +59,7 @@ class CapabilityCard:
             "pub_hex": self.pub_hex,
             "controller": self.controller,
             "stream_id": self.stream_id,
+            "genesis": self.genesis,
         }
 
     @classmethod
@@ -66,6 +71,7 @@ class CapabilityCard:
             pub_hex=d.get("pub_hex", ""),
             controller=d.get("controller", ""),
             stream_id=d.get("stream_id", ""),
+            genesis=d.get("genesis"),
         )
 
 
@@ -153,8 +159,11 @@ class VacantBody:
         """把活著時的狀態寫回硬碟（vacant 回睡）。所有檔案原子寫入（防崩潰半截）。"""
         self.identity.save(self.trust_dir)
         self.logbook.save(self.trust_dir / "logbook.ndjson")
-        # 改動2：能力卡同步公示當前 stream（創世 hash；空鏈維持 ""）
+        # 改動2：能力卡同步公示當前 stream（創世 hash；空鏈維持 ""），
+        # 並附上創世事件本體 —— 這是「這條記憶鏈屬於這個身體」的可攜證明，
+        # 讓 registry.announce 能獨立驗證而不必信任公告者（獨立審查 P0-2）。
         self.card.stream_id = self.logbook.stream_id() or ""
+        self.card.genesis = self.logbook.genesis_proof()
         atomic_write_text(self.trust_dir / "reputation.json",
                           json.dumps(self.reputation.to_json(), ensure_ascii=False))
         atomic_write_text(self.trust_dir / "capability_card.json",

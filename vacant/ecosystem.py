@@ -30,6 +30,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import secrets
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -211,6 +212,7 @@ class Ecosystem:
         roster: dict[str, str] | None = None,
         k_reviewers: int = 3,
         audit_rate: float = 1.0,               # demo B3；批次由 batch 模式掃描
+        audit_seed: str | None = None,         # None＝每個生態一組新種子（見下）
         probation_m: int = 2,                  # 15 §1 裁決 m=2（暫定待實驗覆寫）
         b_memory: int = 2000,                  # 15 §1 裁決 B=2000
         review_mode: str = "deterministic",    # "deterministic"(demo) | "model"(批次噪音審)
@@ -233,7 +235,10 @@ class Ecosystem:
         self._b_memory = b_memory
         self.registry = Registry()
         self.router = Router(self.registry, trust_on=self._load_trust_state())
-        self.auditor = Auditor(rate=audit_rate)
+        # 稽核抽樣種子：預設 per-ecosystem 隨機。硬編公開常數會讓「哪些題永遠
+        # 不被稽核」可被交付前算出、且盲區跨 run 永久固定（獨立審查 P1-6）。
+        # 種子落進 vacant.toml（見 _persist_config）→ 可重放性完整保留。
+        self.auditor = Auditor(rate=audit_rate, seed=audit_seed or self._load_audit_seed())
         self.ledger_path = self.root / "ledger" / "events.jsonl"
         self.scoreboard_path = self.root / "scoreboard.json"
         self.artifacts_path = self.root / "artifacts.jsonl"  # 交付物留檔（V1 回溯稽核原料）
@@ -273,6 +278,7 @@ class Ecosystem:
             roster=self._roster_spec,
             k_reviewers=self.k_reviewers,
             audit_rate=self.auditor.rate,
+            audit_seed=self.auditor.seed,
             probation_m=self.probation_m,
             b_memory=self._b_memory,
             review_mode=self.review_mode,
@@ -318,6 +324,30 @@ class Ecosystem:
         except (OSError, TypeError, ValueError, IndexError, KeyError) as exc:
             raise ValueError(
                 f"registry state is corrupt; refusing to reset trust history: {p}") from exc
+
+    # --- 稽核抽樣種子（per-root，持久化；獨立審查 P1-6）------------------------
+    def _audit_seed_path(self) -> Path:
+        return self.root / "audit_seed.json"
+
+    def _load_audit_seed(self) -> str:
+        """讀取本 root 的稽核種子；沒有就生一組並落盤。
+
+        兩個需求同時滿足：**跨 root/跨 run 不可預測**（攻擊者無法事先算出哪些
+        任務永遠不會被稽核），**同 root 完全可重放**（種子在檔案裡，證據包帶走
+        即可重算整組抽樣）。獨立成檔而不塞 state.json——toggle 會整份覆寫該檔。
+        """
+        p = self._audit_seed_path()
+        if p.exists():
+            try:
+                seed = json.loads(p.read_text()).get("audit_seed")
+                if isinstance(seed, str) and seed:
+                    return seed
+            except (OSError, ValueError):
+                pass  # 壞檔＝重生一組；抽樣不可重放會由 record check 抓出來
+        seed = secrets.token_hex(16)
+        self.root.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(p, json.dumps({"audit_seed": seed}))
+        return seed
 
     # --- trust 開關（持久化；12 的單開關）------------------------------------
     def _state_path(self) -> Path:
