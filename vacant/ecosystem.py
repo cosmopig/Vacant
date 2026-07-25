@@ -854,10 +854,28 @@ class Ecosystem:
         target = card.get("deliverer", {}).get("name", "?")
         self._emit("HUMAN_REPORT", task_id=task_id, verdict=verdict,
                    target=target, evidence=evidence[:500])
+        applied = False
         if verdict.upper() in ("FAIL", "FAULT", "REJECT"):
+            # 只有在**確定性稽核已獨立佐證**這筆交付失敗時，才真的扣信用。
+            #
+            # 兩個理由必須同時成立才動信譽（裁決 B3「抓到的功勞歸確定性 auditor」）：
+            #   ① 誠實：原本這裡只發 SLASH 事件、從不呼叫 apply_slash，而 demo 對
+            #      人類印的是「記帳並下墜信用」——說了卻沒做（獨立審查 P2）。
+            #   ② 防濫用：本通道的呼叫者簽章認證屬上機工項，若讓未認證的指控
+            #      直接扣分，任何人都能毀掉任一居民的信譽。改為「人類仲裁只能
+            #      對稽核已經抓到的事情追加後果」，指控本身就無法無中生有。
+            # 未被稽核佐證的 FAIL 仍然如實入帳（事件留存、可被追查），但不動信譽。
+            audit = card.get("audit") or {}
+            corroborated = bool(audit.get("performed")) and audit.get("passed") is False
+            resident = self.residents.get(target)
+            if corroborated and resident is not None:
+                applied = self.registry.apply_slash(
+                    resident.vacant_id, self.substrate_id, SLASH_FACTOR_DELIVERER)
             self._emit("SLASH", task_id=task_id, target=target,
-                       reason=f"human verdict={verdict}")
-        return {"ack": True, "task_id": task_id, "verdict": verdict}
+                       reason=f"human verdict={verdict}",
+                       audit_corroborated=corroborated, credit_applied=applied)
+        return {"ack": True, "task_id": task_id, "verdict": verdict,
+                "credit_applied": applied}
 
     def wipe(self, name: str) -> dict[str, Any]:
         """抹記憶不抹 key（12 §7 時刻 4）：同一把 key、信用歸零、PROBATION。

@@ -426,3 +426,50 @@ class TestWilcoxonNormalApprox:
         res = wilcoxon_signed_rank_exact(diffs)
         assert res["method"] == "normal_approx"
         assert res["p"] < 0.001  # 全正、量值互異 → 極顯著
+
+
+# ---------------------------------------------------------------------------
+# P2 人類仲裁：說了就要做，但不能無中生有
+# ---------------------------------------------------------------------------
+class TestHumanArbitrationHasTeeth:
+    """審查實測：report(FAIL) 只發 SLASH 事件、從不呼叫 apply_slash，
+    而 demo 對人類印的是「記帳並下墜信用」——說了卻沒做。"""
+
+    def _eco(self, tmp_path):
+        from vacant.ecosystem import DemoBrain, Ecosystem
+        eco = Ecosystem(tmp_path, DemoBrain(), root_mode="demo")
+        eco.toggle(True)
+        r = eco.delegate("寫 solve(nums)", {
+            "type": "run_python", "code": "assert solve([1]) == 1", "timeout": 8})
+        return eco, r
+
+    def test_corroborated_fail_actually_moves_credit(self, tmp_path):
+        eco, r = self._eco(tmp_path)
+        card = r["trust_card"]
+        assert card["audit"]["performed"] and card["audit"]["passed"] is False, (
+            "前提：這筆交付已被確定性稽核抓到"
+        )
+        name = card["deliverer"]["name"]
+        vid = eco.residents[name].vacant_id
+        before = eco.registry.standing(vid, eco.substrate_id)[0]
+        out = eco.report(r["task_id"], "FAIL", evidence="objective check failed at audit")
+        assert out["credit_applied"] is True
+        assert eco.registry.standing(vid, eco.substrate_id)[0] < before
+
+    def test_uncorroborated_accusation_cannot_move_credit(self, tmp_path):
+        """稽核沒抓到的指控不得扣分——否則未認證的通道就是毀人信譽的入口。"""
+        eco, r = self._eco(tmp_path)
+        card = r["trust_card"]
+        card["audit"] = {"performed": True, "passed": True}  # 假裝這筆通過了稽核
+        eco._cards[r["task_id"]] = card
+        name = card["deliverer"]["name"]
+        vid = eco.residents[name].vacant_id
+        before = eco.registry.standing(vid, eco.substrate_id)[0]
+        out = eco.report(r["task_id"], "FAIL", evidence="我說他錯了")
+        assert out["credit_applied"] is False
+        assert eco.registry.standing(vid, eco.substrate_id)[0] == before
+
+    def test_unknown_task_still_rejected(self, tmp_path):
+        eco, _r = self._eco(tmp_path)
+        out = eco.report("deadbeef", "FAIL")
+        assert out["ack"] is False
