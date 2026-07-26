@@ -159,6 +159,7 @@ def E10_trust_toggle(brain, tasks, out: Path, seed: str) -> dict:
     以 Ecosystem 跑真迴圈（路由→生成→互審→稽核→信譽回寫），trust off 時
     走確定性隨機路由、不注入記憶、不互審、不回寫。
     """
+    from vacant.checks import compile_check
     from vacant.ecosystem import Ecosystem
 
     res = {}
@@ -175,9 +176,16 @@ def E10_trust_toggle(brain, tasks, out: Path, seed: str) -> dict:
             try:
                 r = eco.delegate(t.prompt, t.check)
                 card = r["trust_card"]
+                # **品質必須由臂外的檢查判定，不能讀信任狀的稽核欄。**
+                # trust off 依設計就不稽核（audit.passed 恆為 None），照著讀會把
+                # off 臂的每一筆都算成失敗，做出一個漂亮但完全虛假的組間差。
+                # 這個錯誤在 2026-07-26 的實跑中真的發生過：off 臂顯示 0/11、
+                # on 臂 5/10，而兩臂的答案其實一模一樣且都正確。
+                passed = bool(compile_check(t.check)(r.get("answer", "")))
                 rows.append({
                     "i": i, "task_id": r["task_id"], "arm": arm,
-                    "passed": bool((card.get("audit") or {}).get("passed")),
+                    "passed": passed,
+                    "audit_performed": bool((card.get("audit") or {}).get("performed")),
                     "deliverer": card["deliverer"]["name"],
                     "credit": card["deliverer"]["credit"]["score"],
                     "reviews": len(card.get("reviews") or []),
