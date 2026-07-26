@@ -81,12 +81,35 @@ def _make_distill(oracle_families: bool):
     誠實邊界：這使 M2 的上限被蒸餾器的表達力限制住——它測不到
     「更好的蒸餾器會不會更有用」。
     """
+    from vacant.memory import lesson_leaks_test_data
+
+    def _headline(prompt: str) -> str:
+        """取題目敘述的第一句，且**砍掉任何範例／斷言之後的內容**。
+
+        EvalPlus 的題目敘述本身就內嵌 assert 範例（例如
+        `assert sum_list([10,20,30],[15,25,35])==[25,45,65]`），逐字抄進教訓
+        就是 A4 違規——實跑時 A4 防呆確實擋下並中止了整條臂。
+        """
+        text = " ".join(prompt.replace('"""', " ").split())
+        for cut in ("assert ", "Example", "example:", ">>>"):
+            i = text.find(cut)
+            if i > 0:
+                text = text[:i]
+        return text.strip()[:80]
+
     def distill(task, answer, audit_passed):
-        head = " ".join(task.prompt.split())[:90]
+        head = _headline(task.prompt)
         if audit_passed:
-            return f"「{head}」型任務：先前交付通過稽核；同型解法可沿用。"
-        return (f"「{head}」型任務：先前交付未通過稽核；重作同型任務前，"
-                f"先列出空輸入、單一元素、邊界值三種情況的期望輸出再實作。")
+            lesson = f"「{head}」型任務：先前交付通過稽核；同型解法可沿用。"
+        else:
+            lesson = (f"「{head}」型任務：先前交付未通過稽核；重作同型任務前，"
+                      f"先列出空輸入、單一元素、邊界值三種情況的期望輸出再實作。")
+        # 蒸餾器自己先過 A4，不合格就降級為不含任何題目文字的通用教訓。
+        # 讓防呆在寫入點才炸，等於一整夜的 run 會因為一題而全毀（實跑遇到過）。
+        if lesson_leaks_test_data(lesson, task.check):
+            return ("先前同類任務未通過稽核；重作前先列出空輸入、單一元素、"
+                    "邊界值三種情況的期望輸出再實作。") if not audit_passed else None
+        return lesson
     return distill
 
 
