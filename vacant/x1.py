@@ -182,13 +182,23 @@ def task_from_dict(d: dict[str, Any]) -> X1Task:
         compile_check／auditor／A4 洩漏防呆消費，run_x1 的 prompt／episode／
         trace／ledger 一律不序列化它（canary 負向測試見 tests/test_x1_evalplus.py）。
     """
+    # 進入點名稱必須進 prompt。EvalPlus 每題各有自己的 entry_point，而模板寫死
+    # 「函式名必須是 solve」——不補這一句，模型會照模板寫 solve、隱藏檢查卻呼叫
+    # 別的名字，於是**每一臂都是 0% 通過**，而且看起來像「模型不行」或「記憶無效」。
+    # （2026-07-26 真模型實跑發現：三臂 0/3，追 trace 才看出 entry_point 不符。
+    #   G1 loader 當時已整合，但整合門在本機 skip，這條路徑從沒端到端跑過。）
+    # 這句話對三臂逐字相同，屬於任務內容而非模板，不動 KS-1 的模板凍結。
+    entry = d.get("entry_point", "solve")
+    prompt = d["prompt"]
+    if entry and entry != "solve":
+        prompt = f"{prompt}\n\n（本題的函式名必須是 `{entry}`，不是 solve。）"
     return X1Task(
         task_id=d["task_id"],
         family=d.get("family", "general"),
         pitfall=d.get("family", "general"),
-        prompt=d["prompt"],
+        prompt=prompt,
         check=d["hidden_check"],
-        variant_params={"source": "evalplus", "entry_point": d.get("entry_point", "solve")},
+        variant_params={"source": "evalplus", "entry_point": entry},
     )
 
 

@@ -13,3 +13,6 @@ dist/
 htmlcov/
 *.db
 var/
+
+# 私有實驗資料（EvalPlus 官方題庫等）：不進版控
+.vacant-private/
