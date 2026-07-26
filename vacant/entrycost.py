@@ -88,6 +88,16 @@ class SimConfig:
     # 系統性偏誤且會偏好同源生成，實際值遠低於 1.0——這是本模擬最重要的
     # 敏感度參數，預設保守設為 0.7 而非 1.0。
     reviewer_accuracy: float = 0.7
+    # 攻擊者人數（先前全部只有 1 個，等於攻擊者佔比 1/6 ~ 17%）。
+    n_attackers: int = 1
+    # 評審錯誤的相關性 ρ∈[0,1]：0＝三位評審獨立判斷（先前的假設，過於樂觀）；
+    # 1＝三位評審同進同退（同源模型的極端情況）。LLM-as-judge 文獻顯示
+    # 同源模型的錯誤高度相關，所以獨立性假設會系統性高估防禦力。
+    reviewer_correlation: float = 0.0
+    # 高價值任務的比例，以及攻擊者是否只在高價值任務上作惡。
+    # 「平時乾淨、只在高價值任務上作惡」是最像真實威脅的姿態，先前未建模。
+    high_value_ratio: float = 0.2
+    selective: bool = False
     # patient 策略：先做 build_rounds 筆乾淨的，再開始作惡
     build_rounds: int = 10
     seed: str = "e1"
@@ -139,13 +149,15 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
     # 誠實居民先賺出可背書的紀錄（否則 endorse 政策在第 0 輪無人可背書）
     _warmup(reg, honest, rng)
 
-    attacker = _spawn_attacker(reg, honest, cfg, gen=0)
-    attackers = [attacker]
+    attackers = [_spawn_attacker(reg, honest, cfg, gen=g)
+                 for g in range(max(1, cfg.n_attackers))]
+    attacker = attackers[0]
 
     log_f = log_path.open("w", encoding="utf-8") if log_path else None
     stats = {"accepted_bad": 0, "caught": 0, "clean_paid": 0,
-             "identities": 1, "routed_to_attacker": 0, "rounds_routable": 0,
-             "blocked_no_endorser": 0}
+             "identities": max(1, cfg.n_attackers), "routed_to_attacker": 0,
+             "rounds_routable": 0, "blocked_no_endorser": 0,
+             "high_value_hits": 0}
     honest_start = {h.name: reg.standing(h.vid, "sim")[0] for h in honest}
 
     try:
@@ -161,8 +173,16 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
             if is_attacker:
                 stats["routed_to_attacker"] += 1
 
+            # 任務價值：由 (seed, 輪次) 的雜湊決定——確定性可重放，但**跨 seed
+            # 去相關**。先前只用輪次，而見習配額正好每 10 輪把任務丟給攻擊者
+            # 一次，於是「價值」與「誰被路由」在所有 seed 上同步相關，做出
+            # 「無差別攻擊者的高價值得手恆為 0」這種不可能的結果。
+            hv = int(hashlib.sha256(f"{cfg.seed}:hv:{rnd}".encode()).hexdigest()[:8], 16)
+            high_value = (hv % 10_000) / 10_000.0 < cfg.high_value_ratio
             # 攻擊者依策略決定這一筆要不要作惡；誠實居民恆交付好的。
             bad = is_attacker and _should_defect(who, cfg, stats)
+            if bad and cfg.selective and not high_value:
+                bad = False          # 選擇性：低價值任務照做，不浪費身份
             head = who.deliver()
             reg.note_head(who.vid, who.card.stream_id, "main", head, substrate="sim")
 
@@ -175,13 +195,16 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
 
             if bad and not caught:
                 stats["accepted_bad"] += 1
+                if high_value:
+                    stats["high_value_hits"] += 1
             if not bad and is_attacker:
                 stats["clean_paid"] += 1
                 who.clean_paid += 1
 
             # 同儕評審：稽核抓到就是 FAIL，否則依交付好壞給分（確定性）
             _peer_reviews(reg, honest, who, head, task_id, good=not bad, rng=rng,
-                          accuracy=cfg.reviewer_accuracy)
+                          accuracy=cfg.reviewer_accuracy,
+                          correlation=cfg.reviewer_correlation)
 
             if caught:
                 stats["caught"] += 1
@@ -238,14 +261,25 @@ def _warmup(reg: Registry, honest: list[_Agent], rng: random.Random) -> None:
 
 
 def _peer_reviews(reg, honest, target, head, task_id, *, good: bool,
-                  rng: random.Random, accuracy: float = 1.0) -> None:
-    """K=3 位評審。壞交付時，每位評審**各自**以 accuracy 的機率抓到；
-    沒抓到就投 PASS——這才是「評審不是 oracle」的正確建模。"""
+                  rng: random.Random, accuracy: float = 1.0,
+                  correlation: float = 0.0) -> None:
+    """K=3 位評審。壞交付時每位評審以 accuracy 的機率抓到，沒抓到就投 PASS。
+
+    correlation ρ 控制錯誤的相關性：以機率 ρ 三位評審共用同一次判定
+    （同源模型同進同退），以 1−ρ 各自獨立判定。ρ=0 是先前的假設，
+    它假設三位評審的錯誤互相獨立——而同源模型並非如此，因此 ρ=0 會
+    系統性高估「多找幾個評審」的防禦力。
+    """
+    shared = None
+    if not good and correlation > 0.0 and rng.random() < correlation:
+        shared = rng.random() < accuracy      # 同進同退：一次判定，三人共用
     for b in honest[:3]:
         if b.vid == target.vid:
             continue
         if good:
             score = 1.0
+        elif shared is not None:
+            score = 0.0 if shared else 1.0
         else:
             score = 0.0 if rng.random() < accuracy else 1.0
         _try_review(reg, b, target, head, task_id, score)
@@ -314,6 +348,7 @@ def _summarise(cfg: SimConfig, s: dict) -> dict[str, Any]:
         "clean_paid": s["clean_paid"],
         "identities_used": s["identities"],
         "blocked_no_endorser": s["blocked_no_endorser"],
+        "high_value_hits": s.get("high_value_hits", 0),
         # 附帶損害：誠實居民因連坐而損失的信譽總量。任何入場設計都要付代價，
         # 只報攻擊者 ROI 不報這一欄，等於只報好處不報成本。
         "honest_damage": s.get("honest_damage", 0.0),

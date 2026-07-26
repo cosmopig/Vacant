@@ -170,9 +170,21 @@ def E10_trust_toggle(brain, tasks, out: Path, seed: str) -> dict:
         eco = Ecosystem(armdir / "root", brain, root_mode="demo",
                         audit_rate=1.0, audit_seed=f"E10-{arm}-{seed}")
         eco.toggle(on)
+        # 斷點續跑：大 N 的跑動輒數小時，中斷不該從頭再來。
+        # 以 (arm, i) 為鍵跳過已完成的格；未完成的照原順序補齊。
+        rows_path = armdir / "rows.jsonl"
+        done: dict[int, dict] = {}
+        if rows_path.exists():
+            for line in rows_path.read_text(encoding="utf-8").splitlines():
+                if line.strip():
+                    r = json.loads(line)
+                    done[r["i"]] = r
         rows = []
         t0 = time.time()
         for i, t in enumerate(tasks):
+            if i in done:
+                rows.append(done[i])
+                continue
             try:
                 r = eco.delegate(t.prompt, t.check)
                 card = r["trust_card"]
@@ -193,6 +205,9 @@ def E10_trust_toggle(brain, tasks, out: Path, seed: str) -> dict:
             except Exception as e:                # noqa: BLE001 — 如實記錄後續跑
                 rows.append({"i": i, "arm": arm, "error": repr(e)[:200]})
             print(f"    [{arm}] {i + 1}/{len(tasks)}", end="\r", flush=True)
+            # 逐筆落盤（不是跑完才寫）——中斷時已完成的部分要留得住
+            with rows_path.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(rows[-1], ensure_ascii=False) + "\n")
         (armdir / "rows.jsonl").write_text(
             "\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n",
             encoding="utf-8")
@@ -204,12 +219,47 @@ def E10_trust_toggle(brain, tasks, out: Path, seed: str) -> dict:
                     "elapsed_s": round(time.time() - t0, 1),
                     "counters": eco.counters(), "cost": eco.cost()}
         print(f"  {arm}: {ok}/{len(valid)} 通過，耗時 {res[arm]['elapsed_s']}s", flush=True)
+    # ── 配對分析（兩臂跑的是同一批題目，所以配對檢定才是正確的分析）──
+    from vacant.research import boot_ci, mcnemar_exact
+    on_by_i = {r["i"]: r for r in _read_rows(out / "E10" / "on" / "rows.jsonl")
+               if "error" not in r}
+    off_by_i = {r["i"]: r for r in _read_rows(out / "E10" / "off" / "rows.jsonl")
+                if "error" not in r}
+    both = sorted(set(on_by_i) & set(off_by_i))
+    pairs = [(bool(on_by_i[i]["passed"]), bool(off_by_i[i]["passed"])) for i in both]
+    b = sum(1 for o, f in pairs if o and not f)      # on 過、off 沒過
+    c = sum(1 for o, f in pairs if f and not o)      # off 過、on 沒過
+    paired = None
+    if pairs:
+        deltas = [(1 if o else 0) - (1 if f else 0) for o, f in pairs]
+        lo, hi = boot_ci(deltas, lambda s: sum(s) / len(s), n_boot=2000, seed=7)
+        paired = {
+            "n_pairs": len(pairs),
+            "b_on_only": b, "c_off_only": c,
+            "discordant": b + c,
+            "delta": round(sum(deltas) / len(deltas), 4),
+            "ci95": [round(lo, 4), round(hi, 4)],
+            "mcnemar_p": round(mcnemar_exact(b, c), 4),
+        }
+
     return {
         "question": "同一批任務、同一顆腦，信任層開關造成的差別？",
         "arms": res,
-        "note": "池化差，非同題配對統計；n 遠低於任何判準。"
-                "這一支測的是**管線在真模型上跑得起來**，不是效果。",
+        "paired": paired,
+        "note": "兩臂跑同一批題目，因此**配對檢定（McNemar）才是正確的分析**；"
+                "arms 裡的通過率只是描述用。品質由臂外的檢查獨立判定，"
+                "不讀信任狀的稽核欄（2026-07-26 的量測錯誤即由此而來）。"
+                "生態使用 demo roster（含 2 個人工植入的 saboteur），"
+                "所以這一支測的是「路由能不能避開被刻意做壞的代理」，"
+                "**不是自然品質差異**——後者只由 X 系列承擔。",
     }
+
+
+def _read_rows(p: Path) -> list[dict]:
+    if not p.exists():
+        return []
+    return [json.loads(line) for line in p.read_text(encoding="utf-8").splitlines()
+            if line.strip()]
 
 
 def main() -> int:

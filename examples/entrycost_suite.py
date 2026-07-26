@@ -72,6 +72,7 @@ def _cell(out: Path, exp: str, label: str, cfgs: list[SimConfig]) -> dict:
         "roi": agg("roi"),
         "honest_damage": agg("honest_damage"),
         "blocked_no_endorser": agg("blocked_no_endorser"),
+        "high_value_hits": agg("high_value_hits"),
         # 攻擊者一次都沒得手的 seed 佔比——比平均值更能說明「守住了沒有」
         "shutout_rate": round(
             sum(1 for r in results if r["accepted_bad"] == 0) / len(results), 3),
@@ -231,8 +232,60 @@ def E13(out: Path, ns: int) -> dict:
             "axis": "policy×reviewer_accuracy", "cells": cells}
 
 
+def E14(out: Path, ns: int) -> dict:
+    """攻擊者佔比：先前每一格都只有 1 個攻擊者（約佔 1/6）。
+
+    這是先前效度威脅清單的第一條：攻擊者佔比從未被掃描過。
+    """
+    cells = []
+    for n in (1, 2, 3, 5, 8):
+        cells.append(_cell(out, "E14", f"攻擊者 {n}/{n + 5}", [
+            SimConfig(rounds=400, n_attackers=n, audit_rate=0.05,
+                      strategy="patient", build_rounds=15, seed=s)
+            for s in _seeds(ns, f"E14n{n}")]))
+    return {"question": "攻擊者佔比拉高，防禦還守得住嗎？",
+            "axis": "n_attackers", "cells": cells}
+
+
+def E15(out: Path, ns: int) -> dict:
+    """最像真實威脅的姿態：平時乾淨，只在高價值任務上作惡。
+
+    這是先前效度威脅清單裡明寫「尚未被建模」的那一種。重點指標不是總得手數
+    （選擇性攻擊者的總數必然較低），而是**高價值任務上的得手數**。
+    """
+    cells = []
+    for sel in (False, True):
+        for p in (0.05, 0.2):
+            label = ("選擇性" if sel else "無差別") + f"/p={p}"
+            cells.append(_cell(out, "E15", label, [
+                SimConfig(rounds=400, audit_rate=p, selective=sel,
+                          high_value_ratio=0.2, strategy="patient",
+                          build_rounds=15, seed=s)
+                for s in _seeds(ns, f"E15{sel}{p}")]))
+    return {"question": "只在高價值任務上作惡的攻擊者，抓得到嗎？",
+            "axis": "selective×audit_rate", "cells": cells}
+
+
+def E16(out: Path, ns: int) -> dict:
+    """評審錯誤的相關性：先前假設三位評審獨立判斷，那對同源模型是錯的。
+
+    ρ=0 是先前所有格子的隱含假設；ρ=1 是三位評審同進同退。
+    LLM-as-judge 文獻顯示同源模型的錯誤高度相關，真值靠近右側。
+    """
+    cells = []
+    for rho in (0.0, 0.3, 0.6, 0.9, 1.0):
+        cells.append(_cell(out, "E16", f"ρ={rho}", [
+            SimConfig(rounds=400, audit_rate=0.05, reviewer_accuracy=0.7,
+                      reviewer_correlation=rho, strategy="patient",
+                      build_rounds=15, seed=s)
+            for s in _seeds(ns, f"E16r{rho}")]))
+    return {"question": "三位評審的錯誤如果是相關的（同源模型），防禦剩多少？",
+            "axis": "reviewer_correlation", "cells": cells}
+
+
 EXPERIMENTS = {"E1": E1, "E2": E2, "E3": E3, "E4": E4, "E5": E5,
-               "E6": E6, "E7": E7, "E8": E8, "E9": E9, "E12": E12, "E13": E13}
+               "E6": E6, "E7": E7, "E8": E8, "E9": E9, "E12": E12, "E13": E13,
+               "E14": E14, "E15": E15, "E16": E16}
 
 
 def main() -> int:
