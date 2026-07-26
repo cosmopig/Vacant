@@ -11,7 +11,9 @@
 """
 import json
 import pathlib
+import random
 import subprocess
+import sys
 import time
 
 EC = pathlib.Path("/Users/cosmopig/Library/Mobile Documents/com~apple~CloudDocs/專題/實驗記錄/入場成本_2026-07-26")
@@ -60,8 +62,71 @@ if tr.exists():
         for r in rows if r["attacker"]
     ]
 # 真模型（可能未完成）
+#
+# E10 的 paired 區塊由 realmodel_suite 在收尾時寫出，但只帶 b/c 兩格
+# discordant 資訊，湊不出完整 2×2；而且長跑期間 E10.json 還是上一輪的
+# 舊檔。所以這裡一律直接從 rows.jsonl 重算——資料源頭是逐列原始紀錄，
+# 誰先寫完都不影響發布出去的數字。
+def _e10_from_rows() -> dict | None:
+    arms: dict[str, dict] = {}
+    per_task: dict[str, dict[str, bool]] = {}
+    for arm in ("on", "off"):
+        p = RM / "E10" / arm / "rows.jsonl"
+        if not p.exists():
+            continue
+        rows = [json.loads(l) for l in p.open() if l.strip()]
+        if not rows:
+            continue
+        ok = sum(1 for r in rows if r.get("passed"))
+        arms[arm] = {"passed": ok, "valid": len(rows),
+                     "pass_rate": round(ok / len(rows), 4)}
+        for r in rows:
+            per_task.setdefault(str(r["task_id"]), {})[arm] = bool(r.get("passed"))
+    if not arms:
+        return None
+    out: dict = {"arms": arms}
+    # 只有兩臂都跑到的題目才能配對
+    pairs = [(v["on"], v["off"]) for v in per_task.values()
+             if "on" in v and "off" in v]
+    if pairs:
+        a = sum(1 for on, off in pairs if on and off)          # 兩臂都過
+        b = sum(1 for on, off in pairs if on and not off)      # 只有 ON 過
+        c = sum(1 for on, off in pairs if off and not on)      # 只有 OFF 過
+        dd = sum(1 for on, off in pairs if not on and not off)  # 兩臂都沒過
+        n = len(pairs)
+        blk = {"n_pairs": n, "a_both_pass": a, "b_on_only": b,
+               "c_off_only": c, "d_both_fail": dd, "discordant": b + c,
+               "delta": round((b - c) / n, 4)}
+        try:
+            sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+            from vacant.research import mcnemar_exact
+            blk["mcnemar_p"] = round(mcnemar_exact(b, c), 6)
+        except Exception:
+            pass
+        # delta 的 bootstrap 區間：對「配對」重抽樣。種子寫死，
+        # 重複發布得到同一個區間（紀錄要可重現）。
+        rng = random.Random(20260726)
+        diffs = [(1 if on and not off else -1 if off and not on else 0)
+                 for on, off in pairs]
+        boot = []
+        for _ in range(5000):
+            s = sum(diffs[rng.randrange(n)] for _ in range(n))
+            boot.append(s / n)
+        boot.sort()
+        blk["ci95"] = [round(boot[int(0.025 * len(boot))], 4),
+                       round(boot[int(0.975 * len(boot)) - 1], 4)]
+        blk["boot"] = 5000
+        out["paired"] = blk
+    tot = sum(v["valid"] for v in arms.values())
+    out["tasks"] = max(v["valid"] for v in arms.values())
+    out["in_progress"] = tot < 120
+    return out
+
 e10 = RM / "E10.json"
-if e10.exists():
+_live = _e10_from_rows()
+if _live:
+    data["realmodel_toggle"] = _live
+elif e10.exists():
     data["realmodel_toggle"] = json.loads(e10.read_text())
 e11 = RM / "E11.json"
 if e11.exists():
