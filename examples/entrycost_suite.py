@@ -274,14 +274,24 @@ def main() -> int:
         (out / f"{name}.json").write_text(
             json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    # 分批跑（--only）時必須**併入**既有摘要，不可覆寫——否則第二次執行會把
+    # 第一次的結果從摘要裡抹掉，而原始檔還在，造成摘要與原始資料不一致。
+    summary_path = out / "summary.json"
+    merged = {}
+    if summary_path.exists():
+        try:
+            merged = json.loads(summary_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            merged = {}
     summary = {k: {"question": v["question"], "axis": v["axis"],
                    "cells": [{kk: c[kk] for kk in
                               ("label", "accepted_bad", "roi", "shutout_rate",
                                "honest_damage", "clean_paid", "identities_used")}
                              for c in v["cells"]]}
                for k, v in all_results.items()}
-    (out / "summary.json").write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    merged.update(summary)
+    summary_path.write_text(
+        json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n完成。原始逐輪紀錄在 {out}/*/logs/，摘要在 {out}/summary.json")
     return 0
 

@@ -60,7 +60,36 @@ def _test_counts(run_tests: bool) -> dict[str, object]:
     return out
 
 
-def build_status(root: Path, *, run_tests: bool = False) -> dict[str, object]:
+def _experiments(dirs: list[Path]) -> list[dict[str, object]]:
+    """把實驗記錄目錄的 summary.json 收進狀態檔，讓網站顯示實驗進度。
+
+    只收**已經寫出 summary 的**實驗——跑到一半的不顯示，因為半套結果
+    比沒有結果更容易誤導。"""
+    out = []
+    for d in dirs:
+        summ = d / "summary.json"
+        man = d / "manifest.json"
+        if not summ.exists():
+            continue
+        try:
+            data = json.loads(summ.read_text(encoding="utf-8"))
+            meta = json.loads(man.read_text(encoding="utf-8")) if man.exists() else {}
+        except (OSError, ValueError):
+            continue
+        out.append({
+            "name": d.name,
+            "suite": meta.get("suite"),
+            "commit": meta.get("commit"),
+            "started_iso": meta.get("started_iso"),
+            "n_experiments": len(data) if isinstance(data, dict) else None,
+            "questions": [v.get("question") for v in data.values()
+                          if isinstance(v, dict) and v.get("question")][:20],
+        })
+    return out
+
+
+def build_status(root: Path, *, run_tests: bool = False,
+                 experiment_dirs: list[Path] | None = None) -> dict[str, object]:
     from vacant.cli import EchoLikeBrain
     from vacant.ecosystem import Ecosystem
 
@@ -69,6 +98,7 @@ def build_status(root: Path, *, run_tests: bool = False) -> dict[str, object]:
         "commit": _git("rev-parse", "--short", "HEAD"),
         "branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
         "tests": _test_counts(run_tests),
+        "experiments": _experiments(experiment_dirs or []),
         "ecosystem": None,
     }
 
@@ -106,11 +136,14 @@ def main() -> int:
     ap.add_argument("--root", type=Path, default=Path.home() / ".vacant-mcp",
                     help="信任生態的 root（沒有就只輸出 repo 層級狀態）")
     ap.add_argument("--out", type=Path, required=True, help="輸出的 status.json 路徑")
+    ap.add_argument("--experiments", type=Path, nargs="*", default=[],
+                    help="實驗記錄目錄（含 summary.json）；可給多個")
     ap.add_argument("--run-tests", action="store_true",
                     help="跑一次完整測試套件並把數字寫進去（較慢）")
     args = ap.parse_args()
 
-    payload = build_status(args.root, run_tests=args.run_tests)
+    payload = build_status(args.root, run_tests=args.run_tests,
+                           experiment_dirs=list(args.experiments))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"寫出 {args.out}")
