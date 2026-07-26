@@ -58,6 +58,9 @@ if tr.exists():
         for r in rows if r["attacker"]
     ]
 # 真模型（可能未完成）
+e10 = RM / "E10.json"
+if e10.exists():
+    data["realmodel_toggle"] = json.loads(e10.read_text())
 e11 = RM / "E11.json"
 if e11.exists():
     data["realmodel"] = json.loads(e11.read_text())

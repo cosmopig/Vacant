@@ -473,3 +473,51 @@ class TestHumanArbitrationHasTeeth:
         eco, _r = self._eco(tmp_path)
         out = eco.report("deadbeef", "FAIL")
         assert out["ack"] is False
+
+
+# ---------------------------------------------------------------------------
+# 真模型實跑發現：蒸餾器引用題目 → A4 防呆讓整筆交付失敗
+# ---------------------------------------------------------------------------
+class TestDistillerSelfChecksA4:
+    """標準題庫的題目敘述本身內嵌範例斷言，逐字引用就是逐字測資。
+
+    A4 防呆在寫入點 raise 是對的，但蒸餾器產出違規內容是蒸餾器的問題——
+    不該讓整筆 delegate 呼叫失敗。防呆不放寬，改由蒸餾器自檢並降級。
+    （2026-07-26 真模型實跑：12 題有 2 題因此中止。）
+    """
+
+    TASK = ('"""\nWrite a function that takes two lists and returns their sums.\n'
+            'assert sum_list([10,20,30],[15,25,35])==[25,45,65]\n"""')
+    CHECK = {"type": "run_python",
+             "code": "assert sum_list([10,20,30],[15,25,35])==[25,45,65]"}
+
+    def test_lesson_does_not_leak_when_task_embeds_assertions(self):
+        from vacant.ecosystem import _distill_lesson
+        from vacant.memory import lesson_leaks_test_data
+        for audit_passed in (True, False):
+            lesson = _distill_lesson(self.TASK, audit_passed, self.CHECK)
+            assert not lesson_leaks_test_data(lesson, self.CHECK), lesson
+
+    def test_headline_stops_at_the_example(self):
+        from vacant.ecosystem import _task_headline
+        head = _task_headline(self.TASK)
+        assert "sum_list([10,20,30]" not in head
+        assert "returns their sums" in head
+
+    def test_still_works_without_a_check(self):
+        """沒給 check 時維持原行為——這是既有呼叫端的相容性。"""
+        from vacant.ecosystem import _distill_lesson
+        assert _distill_lesson(self.TASK, True).startswith("「")
+
+    def test_delegate_survives_a_task_whose_text_embeds_a_check(self):
+        """端到端：這種任務不可以讓交付整個失敗。"""
+        import tempfile
+        from pathlib import Path
+
+        from vacant.cli import EchoLikeBrain
+        from vacant.ecosystem import Ecosystem
+        eco = Ecosystem(Path(tempfile.mkdtemp()), EchoLikeBrain(), root_mode="demo")
+        eco.toggle(True)
+        r = eco.delegate(self.TASK, {"type": "run_python",
+                                     "code": "assert solve('ab') == 'ba'", "timeout": 8})
+        assert r["task_id"]

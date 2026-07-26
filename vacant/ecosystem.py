@@ -42,7 +42,9 @@ from .auditor import Auditor
 from .body import VacantBody, now_ms
 from .checks import compile_check, extract_code, project_checked_answer
 from .envelope import ReviewEnvelope
-from .memory import MemoryManager, MemoryStream, assert_ks1_clean
+from .memory import (
+    MemoryManager, MemoryStream, assert_ks1_clean, lesson_leaks_test_data,
+)
 from .registry import Registry, ReviewRejected
 from .reputation import DIMS
 from .router import Router
@@ -172,16 +174,48 @@ def _digest(x: Any) -> str:
                           .encode()).hexdigest()[:16]
 
 
-def _distill_lesson(task: str, audit_passed: bool) -> str:
+# 任務敘述裡的範例／斷言之後的內容一律不引用——那是測資，不是題意。
+_EXAMPLE_MARKERS = ("assert ", "Example", "example:", ">>>", "For example")
+
+
+def _task_headline(task: str) -> str:
+    """取任務敘述的第一段，砍掉任何範例／斷言之後的內容。
+
+    為什麼需要（2026-07-26 真模型實跑發現）：標準題庫（EvalPlus MBPP+）的
+    題目敘述本身就內嵌範例斷言，例如
+    `assert sum_list([10,20,30],[15,25,35])==[25,45,65]`。
+    逐字引用題目就構成 A4 違規（教訓含逐字測資），而 A4 防呆在寫入點 raise，
+    於是**整筆 delegate 呼叫直接失敗**——這條路徑產品入口也走得到。
+    """
+    text = " ".join(task.replace('"""', " ").split())
+    for marker in _EXAMPLE_MARKERS:
+        i = text.find(marker)
+        if i > 0:
+            text = text[:i]
+    return text.strip()[:80]
+
+
+def _distill_lesson(task: str, audit_passed: bool, check: dict | None = None) -> str:
     """確定性 0-呼叫蒸餾 v0：教訓由管線事實（任務描述＋稽核結論）生成。
 
     坑型層級抽象、零逐字測資（A4）、零責任修辭（KS-1）；模型蒸餾屬 X1 的
-    distill hook（+1 呼叫、離線），不在 delegate 路徑。"""
-    head = " ".join(task.split())[:80]
+    distill hook（+1 呼叫、離線），不在 delegate 路徑。
+
+    給了 check 就**自己先過一次 A4**，不合格則降級為不含任何題目文字的通用
+    教訓。理由：防呆在寫入點 raise 會讓整筆交付失敗，而蒸餾器產出違規內容是
+    蒸餾器的問題，不該由呼叫端承擔——**防呆本身維持不變，不放寬**。
+    """
+    head = _task_headline(task)
     if audit_passed:
-        return f"「{head}」型任務：先前交付通過稽核；同型解法可沿用，邊界輸入的處理方式保留。"
-    return (f"「{head}」型任務：先前交付未通過稽核；重作同型任務前，"
-            f"先列出空輸入、單一元素、邊界長度三種情況的期望輸出再實作。")
+        lesson = f"「{head}」型任務：先前交付通過稽核；同型解法可沿用，邊界輸入的處理方式保留。"
+    else:
+        lesson = (f"「{head}」型任務：先前交付未通過稽核；重作同型任務前，"
+                  f"先列出空輸入、單一元素、邊界長度三種情況的期望輸出再實作。")
+    if check is not None and lesson_leaks_test_data(lesson, check):
+        return ("先前同型任務通過稽核；同型解法可沿用。" if audit_passed else
+                "先前同型任務未通過稽核；重作前先列出空輸入、單一元素、"
+                "邊界長度三種情況的期望輸出再實作。")
+    return lesson
 
 
 @dataclass
@@ -567,7 +601,7 @@ class Ecosystem:
         if trust:
             lesson = None
             if audit_json and audit_json.get("ran"):
-                lesson = _distill_lesson(task, bool(audit_json.get("passed")))
+                lesson = _distill_lesson(task, bool(audit_json.get("passed")), tests)
             deliverer.manager.record(
                 deliverer.stream,
                 task_id=tid, spec_digest=_digest(task), answer_digest=_digest(answer),
