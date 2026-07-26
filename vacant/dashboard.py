@@ -268,6 +268,14 @@ class _Handler(BaseHTTPRequestHandler):
                     self.send_error(404, "unknown identity")
                 else:
                     self._send_json(detail)
+            elif path == "/api/task":
+                tid = (query.get("id") or [""])[0]
+                fn = self._ctx.providers.get("trust_card")
+                card = fn(tid) if fn else None
+                if card is None:
+                    self.send_error(404, "unknown task")
+                else:
+                    self._send_json(card)
             elif path == "/events":
                 self._stream_events()
             else:

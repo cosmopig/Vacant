@@ -317,6 +317,7 @@ def cmd_eco_up(args: argparse.Namespace) -> int:
             "counters": _live("counters"),
             "system_info": _live("system_info"),
             "cost": _live("cost"),
+            "trust_card": _live("trust_card"),
         },
     )
     print(f"dashboard → http://127.0.0.1:{args.port}   (Ctrl-C 退出)")

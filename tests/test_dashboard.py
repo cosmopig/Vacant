@@ -266,3 +266,26 @@ def test_cost_reports_per_pass_not_just_totals(tmp_path):
     assert c["off"]["deliveries"] == 0
     assert c["off"]["calls_per_delivery"] is None
     assert c["off"]["calls_per_pass"] is None
+
+
+def test_task_endpoint_serves_the_trust_card_itself(tmp_path):
+    """活動列要能點進信任狀本體——那是「做了什麼」的最終證物。"""
+    card = {"task_id": "abc", "trust_on": True,
+            "deliverer": {"name": "alice", "credit": {"score": 0.9, "flags": []}},
+            "reviews": [{"reviewer": "bob", "verdict": "PASS", "weight": 0.5, "sig": "ff"}],
+            "audit": {"performed": True, "passed": True}, "chain_head": "h" * 64}
+    providers = {"trust_card": lambda t: card if t == "abc" else None}
+    server = make_dashboard(tmp_path, lambda: [], lambda: {}, port=0, providers=providers)
+    _serve(server)
+    try:
+        got = json.loads(urllib.request.urlopen(_url(server, "/api/task?id=abc")).read())
+        try:
+            urllib.request.urlopen(_url(server, "/api/task?id=zzz"))
+            missing = 200
+        except urllib.error.HTTPError as e:
+            missing = e.code
+    finally:
+        server.shutdown()
+    assert got["task_id"] == "abc"
+    assert got["reviews"][0]["sig"] == "ff"   # 簽章存全文，讓第三方可獨立重驗
+    assert missing == 404

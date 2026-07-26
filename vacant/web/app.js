@@ -144,7 +144,7 @@ function renderIdentities() {
 function renderActivity() {
   $('#nav-acts').textContent = state.acts.length;
   $('#act-rows').innerHTML = state.acts.map((a) => `
-    <tr>
+    <tr class="clickable" data-task="${esc(a.task_id)}">
       <td class="mono" style="color:var(--ink-3)">${esc(clock(a.ts_ms))}</td>
       <td>${hash(a.task_id, 6, 4)}</td>
       <td>${esc(a.deliverer || '—')}</td>
@@ -366,6 +366,86 @@ async function openIdentity(vid) {
   $('#drawer').classList.add('open');
   $('#scrim').classList.add('open');
 }
+/** 信任狀本體：這是「做了什麼」的最終證物，介面必須讓人看得到全文。
+ *  卡上的每個欄位都能被第三方獨立重驗（簽章、公鑰、鏈頭都存全文）。 */
+async function openTask(taskId) {
+  const card = await api(`/api/task?id=${encodeURIComponent(taskId)}`);
+  if (!card) return;
+  const d = card.deliverer || {};
+  const audit = card.audit || {};
+  const reviews = card.reviews || [];
+
+  $('#dw-title').textContent = `交付 ${String(taskId).slice(0, 10)}`;
+  $('#dw-badges').innerHTML =
+    (card.trust_on ? '<span class="badge ok">trust ON</span>'
+                   : '<span class="badge idle">trust OFF</span>') +
+    (audit.performed
+      ? (audit.passed ? '<span class="badge ok">稽核通過</span>'
+                      : '<span class="badge bad">稽核未通過</span>')
+      : '<span class="badge idle">未稽核</span>') +
+    (card.retro_audit ? '<span class="badge ok">已回溯</span>'
+                      : '<span class="badge idle">待回溯</span>');
+
+  const reviewRows = reviews.map((r) => `
+    <div class="ev">
+      <span class="t">${esc(String(r.reviewer || '').slice(0, 8))}</span>
+      <span class="ty" style="color:${r.verdict === 'PASS' ? 'var(--ok)' : 'var(--bad)'}">
+        ${esc(r.verdict || '?')}</span>
+      <span class="d">weight ${esc(r.weight)} · sig ${esc(String(r.sig || '').slice(0, 12))}…</span>
+    </div>`).join('') || '<div class="empty">未互審（trust off 時不互審）</div>';
+
+  const flags = (d.credit && d.credit.flags) || [];
+  $('#dw-body').innerHTML = `
+    <div class="sec">
+      <div class="sec-head"><h2>交付者</h2></div>
+      <dl class="kv">
+        <dt>名稱</dt><dd>${esc(d.name)}</dd>
+        <dt>vacant_id</dt><dd>${esc(d.vacant_id)}</dd>
+        <dt>記憶鏈</dt><dd>${esc(d.stream_id)}</dd>
+        <dt>交付時信用</dt><dd>${esc((d.credit || {}).score)} · n=${esc((d.credit || {}).n_obs)}</dd>
+        <dt>風險欄</dt><dd>${flags.length ? flags.map(esc).join('、') : '無旗標'}</dd>
+      </dl>
+      <div style="margin-top:var(--s3);font-size:0.76rem;color:var(--ink-3)">
+        風險欄是被斷言的內容，不是可省略的欄位——沒有旗標時會明說「無旗標」，
+        而不是留白。
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><h2>同儕互審</h2>
+        <span class="note">每筆都是簽章物件，可獨立重驗</span></div>
+      <div class="card"><div class="stream">${reviewRows}</div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><h2>稽核</h2>
+        <span class="note">沙箱重跑客觀檢查，非再問一次模型</span></div>
+      <div class="card"><div class="card-body">
+        ${audit.performed
+          ? tri(audit.passed)
+          : '<span class="tri none"><i class="mark"></i>本件未被抽中稽核</span>'}
+        ${card.retro_audit
+          ? `<div style="margin-top:var(--s3);font-size:0.78rem;color:var(--ink-2)">
+               存檔點 #${esc(card.retro_audit.checkpoint_seq)} 回溯：
+               ${card.retro_audit.passed ? '通過' : '未通過'}</div>`
+          : `<div style="margin-top:var(--s3);font-size:0.78rem;color:var(--ink-3)">
+               尚未回溯稽核（此欄恆在，「仍待回溯」是被斷言的，不是被省略的）</div>`}
+      </div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><h2>鏈錨</h2></div>
+      <dl class="kv">
+        <dt>交付時鏈頭</dt><dd>${esc(card.chain_head)}</dd>
+        <dt>spec digest</dt><dd>${esc(card.spec_digest)}</dd>
+        <dt>簽章</dt><dd style="word-break:break-all">${esc(String(card.host_sig || '').slice(0, 96))}…</dd>
+      </dl>
+    </div>`;
+  $('#drawer').classList.add('open');
+  $('#scrim').classList.add('open');
+}
+$('#act-rows').addEventListener('click', (e) => {
+  const tr = e.target.closest('tr[data-task]');
+  if (tr && !e.target.closest('.hash')) openTask(tr.dataset.task);
+});
+
 function closeDrawer() {
   $('#drawer').classList.remove('open');
   $('#scrim').classList.remove('open');
