@@ -295,6 +295,29 @@ class Ecosystem:
         for r in self.residents.values():
             self.registry.set_probation(r.vacant_id, r.deliveries <= self.probation_m)
 
+    def _sync_identities(self) -> None:
+        """記憶鏈誕生／更換後，重新公告能力卡，讓擁有權從先占升級為密碼學證明。
+
+        居民建立時鏈還是空的（stream_id=""），第一次寫入才誕生創世事件——所以
+        建構期那次 announce 帶不出創世證明，registry 只能先占（TOFU）。wipe 之後
+        同理：新創世、新 stream，卡上的證明要跟著換。這裡在每次交付前後補一次同步，
+        讓「這條記憶鏈屬於這個身體」在生態內部也是**可被第三方獨立驗證**的，
+        而不只是 registry 自己記得（獨立審查 P0-2）。
+        """
+        for r in self.residents.values():
+            card = r.body.card
+            live_stream = r.body.logbook.stream_id() or ""
+            if live_stream and (card.stream_id != live_stream or not card.genesis):
+                card.stream_id = live_stream
+                card.genesis = r.body.logbook.genesis_proof()
+            if card.stream_id and card.genesis:
+                try:
+                    self.registry.announce(card)
+                except (ValueError, ReviewRejected):
+                    # 卡與鏈對不起來（或該 stream 已屬他人）→ 不靜默升級，
+                    # 保持先占狀態並讓 genesis_proven 如實顯示 false。
+                    pass
+
     # --- 生態狀態持久化（信譽/probation 跨行程續存——磁碟就是真相）--------------
     def _registry_state_path(self) -> Path:
         return self.root / "registry_state.json"
@@ -427,8 +450,10 @@ class Ecosystem:
         trust = self.trust_on
         calls = 0
 
-        # 1) 路由（先同步見習狀態：probation 權重上限是路由端真後果）
+        # 1) 路由（先同步見習狀態：probation 權重上限是路由端真後果；
+        #    並把已誕生的記憶鏈升級為密碼學證明的擁有權）
         self._sync_probation()
+        self._sync_identities()
         card = self.router.pick(NICHE, self.substrate_id, seed=tid)
         if card is None:
             raise LookupError("生態裡沒有可路由的居民")
@@ -792,6 +817,217 @@ class Ecosystem:
                 if task_id in ckpt.get("retro_audits", {}):
                     return {"checkpoint_seq": k, "passed": ckpt["retro_audits"][task_id]}
         return None
+
+    # --- 觀測面（儀表板的資料供給；純唯讀，不改任何狀態）----------------------
+    def identities(self) -> list[dict[str, Any]]:
+        """每個身份的完整可觀測切面。
+
+        `roster()` 是 demo 期的精簡版（名字、信用、旗標）；儀表板需要的是
+        「這個身份**是誰**」——密碼學身份、它擁有的記憶鏈、鏈是否可驗、
+        創世擁有權是否被證明過、五維各自的後驗、以及它累積了多少被審歷史。
+        身份是這套系統的主體，介面就該讓它成為主體。
+        """
+        out = []
+        for r in self.residents.values():
+            body = r.body
+            lb = body.logbook
+            stream_id = lb.stream_id() or r.vacant_id
+            branch = lb.branch_id()
+            score, obs = self.standing(r)
+            cell = self.registry._rep.peek(stream_id, branch, self.substrate_id)
+            dims = (
+                {d: round(b.mean, 4) for d, b in cell.dims.items()} if cell else
+                {d: 0.5 for d in DIMS}
+            )
+            dim_obs = (
+                {d: round(b.n, 2) for d, b in cell.dims.items()} if cell else
+                {d: 0.0 for d in DIMS}
+            )
+            # 同一條記憶鏈在**其他 substrate** 上的觀測（改動2 的三元組 key）。
+            # 不揭露這個，面板會把「這顆腦上還沒有紀錄」顯示成「沒有信譽」——
+            # 兩者差很多，後者會讓觀察者以為這個身份是全新的。
+            other = [
+                {"substrate": su, "branch": br,
+                 "score": round(self.registry._rep.score(st, br, su), 3),
+                 "n_obs": round(self.registry._rep.observations(st, br, su), 1)}
+                for (st, br, su) in self.registry._rep._cells
+                if st == stream_id and su != self.substrate_id
+            ]
+            out.append({
+                "name": r.name,
+                "tier": r.tier,
+                "vacant_id": r.vacant_id,
+                "substrate": self.substrate_id,
+                "other_substrates": other,
+                "stream_id": stream_id,
+                "branch_id": branch,
+                "chain_head": lb.head(),
+                "chain_len": len(lb),
+                "chain_ok": lb.verify_chain(body.public_identity()),
+                # 「這條記憶鏈屬於這個身體」是否已被密碼學證明過（非只是先占）
+                "genesis_proven": bool(
+                    body.card.genesis
+                    and stream_id in getattr(self.registry, "_proven_streams", set())
+                ),
+                "credit": round(score, 3),
+                "n_obs": round(obs, 1),
+                "dims": dims,
+                "dim_obs": dim_obs,
+                "flags": self.flags(r),
+                "probation": self.registry.in_probation(r.vacant_id, self.substrate_id),
+                "deliveries": r.deliveries,
+                "episodes": len(r.stream.episodes()),
+                "checkpoints": len(self._checkpoints_of(r.name)),
+            })
+        return out
+
+    def identity_detail(self, vacant_id: str) -> dict[str, Any] | None:
+        """單一身份的深潛：它的 logbook 事件、收到的評審、稽核結果、存檔點鏈。"""
+        resident = next(
+            (r for r in self.residents.values()
+             if r.vacant_id == vacant_id or r.vacant_id.endswith(vacant_id)
+             or r.name == vacant_id),
+            None,
+        )
+        if resident is None:
+            return None
+        base = next((i for i in self.identities() if i["name"] == resident.name), {})
+        entries = [
+            {"seq": e.seq, "type": e.type, "ts_ms": e.ts_ms,
+             "hash": e.hash(), "prev_hash": e.prev_hash,
+             "payload": e.payload}
+            for e in resident.body.logbook.entries
+        ]
+        tasks = [c for c in self._all_cards()
+                 if c.get("deliverer", {}).get("name") == resident.name]
+        checkpoints = [
+            {"seq": k, "window": c.get("window"), "entries_hash": c.get("entries_hash", "")[:16],
+             "retro_audits": c.get("retro_audits", {}),
+             "retro_missing": c.get("retro_missing", []),
+             "sig": c.get("sig", "")[:16]}
+            for k, c in self._checkpoints_of(resident.name)
+        ]
+        return {**base, "entries": entries, "tasks": tasks, "checkpoint_chain": checkpoints}
+
+    def _all_cards(self) -> list[dict[str, Any]]:
+        """記憶體內＋落盤的信任狀（跨行程重啟後仍看得到歷史）。"""
+        cards: dict[str, dict[str, Any]] = {}
+        card_dir = self.root / "cards"
+        if card_dir.is_dir():
+            for p in sorted(card_dir.glob("*.json")):
+                try:
+                    c = json.loads(p.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    continue
+                if isinstance(c, dict) and c.get("task_id"):
+                    cards[c["task_id"]] = c
+        cards.update(self._cards)
+        return sorted(cards.values(), key=lambda c: c.get("ts_ms", 0))
+
+    def activity(self, limit: int = 100) -> list[dict[str, Any]]:
+        """近期交付的摘要列（儀表板的 Activity 視圖）。"""
+        rows = []
+        for c in self._all_cards()[-limit:]:
+            reviews = c.get("reviews", [])
+            audit = c.get("audit") or {}
+            rows.append({
+                "task_id": c.get("task_id"),
+                "ts_ms": c.get("ts_ms"),
+                "trust_on": c.get("trust_on"),
+                "deliverer": c.get("deliverer", {}).get("name"),
+                "credit": c.get("deliverer", {}).get("credit", {}),
+                "reviews_total": len(reviews),
+                "reviews_pass": sum(1 for r in reviews if r.get("verdict") == "PASS"),
+                "review_weight": round(sum(float(r.get("weight", 0)) for r in reviews), 3),
+                "audit_performed": bool(audit.get("performed")),
+                "audit_passed": audit.get("passed"),
+                "retro_audit": self._retro_lookup(c.get("task_id", "")),
+                "chain_head": c.get("chain_head"),
+            })
+        return list(reversed(rows))
+
+    def integrity(self) -> dict[str, Any]:
+        """鏈完整性總覽——面板上唯一可以被當作「可信性」的那一欄。
+
+        誠實邊界（沿用本檔開頭）：面板不是信任來源。這裡回的是**可被獨立重算**
+        的量（ledger 滾動雜湊、每條 logbook 的驗鏈結果、存檔點鏈長度），
+        任何人拿 root 目錄重算即可對帳；面板與 ledger 不符時以 ledger 為準。
+        """
+        from .dashboard import ledger_head
+        seq, head = ledger_head(self.ledger_path)
+        chains = []
+        for r in self.residents.values():
+            ok = r.body.logbook.verify_chain(r.body.public_identity())
+            chains.append({"name": r.name, "chain_ok": ok,
+                           "len": len(r.body.logbook),
+                           "head": r.body.logbook.head()})
+        return {
+            "ledger_seq": seq,
+            "ledger_head": head,
+            "chains": chains,
+            "all_chains_ok": all(c["chain_ok"] for c in chains) if chains else True,
+        }
+
+    def counters(self) -> dict[str, int]:
+        """ledger 事件的分型計數（面板的數字都要帶得出分母）。"""
+        counts: dict[str, int] = {}
+        if self.ledger_path.exists():
+            for line in self.ledger_path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    etype = json.loads(line).get("type", "?")
+                except ValueError:
+                    continue
+                counts[etype] = counts.get(etype, 0) + 1
+        return counts
+
+    def cost(self) -> dict[str, Any]:
+        """成本切面：信任層不是免費的，介面必須把代價與收益放在一起看。
+
+        以 ledger 的 DELIVERED 事件為準（每筆帶 calls），拆 on/off 兩臂算
+        「每次交付的平均呼叫數」與「每次**通過**的平均呼叫數」。後者才是
+        11 §2 講的 L3（單位成本品質）的可觀測代理量。
+        """
+        arms = {"on": {"deliveries": 0, "passed": 0, "calls": 0},
+                "off": {"deliveries": 0, "passed": 0, "calls": 0}}
+        if self.ledger_path.exists():
+            for line in self.ledger_path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    e = json.loads(line)
+                except ValueError:
+                    continue
+                if e.get("type") != "DELIVERED":
+                    continue
+                arm = arms["on" if e.get("trust_on") else "off"]
+                arm["deliveries"] += 1
+                arm["calls"] += int(e.get("calls", 0) or 0)
+                if e.get("passed"):
+                    arm["passed"] += 1
+        for a in arms.values():
+            a["calls_per_delivery"] = (
+                round(a["calls"] / a["deliveries"], 2) if a["deliveries"] else None)
+            a["calls_per_pass"] = (
+                round(a["calls"] / a["passed"], 2) if a["passed"] else None)
+        return arms
+
+    def system_info(self) -> dict[str, Any]:
+        """這個生態的組態（讓觀察者知道自己在看什麼設定下的數字）。"""
+        return {
+            "root": str(self.root),
+            "root_mode": self.root_mode,
+            "trust_on": self.trust_on,
+            "substrate": self.substrate_id,
+            "brain": getattr(self.brain, "name", type(self.brain).__name__),
+            "k_reviewers": self.k_reviewers,
+            "audit_rate": self.auditor.rate,
+            "review_mode": self.review_mode,
+            "probation_m": self.probation_m,
+            "b_memory": self._b_memory,
+            "n_identities": len(self.residents),
+        }
 
     def trust_card(self, task_id: str) -> dict[str, Any] | None:
         card = self._cards.get(task_id)

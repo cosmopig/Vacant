@@ -20,6 +20,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable
+from urllib.parse import parse_qs
 
 _POLL_S = 0.5  # SSE 輪詢新行的節奏
 
@@ -242,10 +243,14 @@ class _Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self) -> None:  # noqa: N802 (stdlib 介面命名)
-        path = self.path.split("?", 1)[0]
+        raw = self.path
+        path = raw.split("?", 1)[0]
+        query = parse_qs(raw.split("?", 1)[1]) if "?" in raw else {}
         try:
             if path == "/":
-                self._send_html(_PAGE)
+                self._send_static("app.html", fallback_html=_PAGE)
+            elif path.startswith("/static/"):
+                self._send_static(path[len("/static/"):])
             elif path == "/api/roster":
                 self._send_json(self._ctx.roster_fn())
             elif path == "/api/scoreboard":
@@ -253,12 +258,63 @@ class _Handler(BaseHTTPRequestHandler):
             elif path == "/api/snapshot":
                 self._send_json(build_snapshot(
                     self._ctx.ledger_path, self._ctx.roster_fn, self._ctx.scoreboard_fn))
+            elif path == "/api/state":
+                self._send_json(self._state())
+            elif path == "/api/identity":
+                ident = (query.get("id") or [""])[0]
+                fn = self._ctx.providers.get("identity_detail")
+                detail = fn(ident) if fn else None
+                if detail is None:
+                    self.send_error(404, "unknown identity")
+                else:
+                    self._send_json(detail)
             elif path == "/events":
                 self._stream_events()
             else:
                 self.send_error(404, "not found")
         except (BrokenPipeError, ConnectionResetError):
             pass  # 客戶端斷線（SSE 常見）——安靜收工
+
+    def _state(self) -> dict[str, Any]:
+        """/api/state：面板首屏的全景。缺席的 provider 一律回 None／空集合，
+        面板據此降級顯示，而不是假裝有資料。"""
+        p = self._ctx.providers
+        integrity = p["integrity"]() if "integrity" in p else {}
+        scoreboard = self._ctx.scoreboard_fn()
+        root = getattr(self.server, "_vacant_root", None)
+        return {
+            "system": p["system_info"]() if "system_info" in p else None,
+            "identities": p["identities"]() if "identities" in p else [],
+            "activity": p["activity"]() if "activity" in p else [],
+            "counters": p["counters"]() if "counters" in p else {},
+            "cost": p["cost"]() if "cost" in p else None,
+            "integrity": integrity,
+            "scoreboard": scoreboard,
+            "claim_ladder": claim_ladder(
+                integrity=integrity, scoreboard=scoreboard,
+                b_layer_summary=(Path(root) / "b_layer" / "summary.md") if root else None),
+            "ts_ms": time.time_ns() // 1_000_000,
+        }
+
+    def _send_static(self, name: str, fallback_html: str | None = None) -> None:
+        """送出 vacant/web/ 下的靜態檔（路徑穿越一律拒絕）。"""
+        if not name or "/" in name or "\\" in name or name.startswith("."):
+            self.send_error(404, "not found")
+            return
+        f = _static_dir() / name
+        if not f.is_file():
+            if fallback_html is not None:
+                self._send_html(fallback_html)
+            else:
+                self.send_error(404, "not found")
+            return
+        body = f.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", _MIME.get(f.suffix, "application/octet-stream"))
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
 
     # -- SSE：先重放既有行，再輪詢新行 --------------------------------------
     def _stream_events(self) -> None:
@@ -303,10 +359,81 @@ class _Ctx:
     """注入給 handler 的執行脈絡（避免用全域）。"""
 
     def __init__(self, ledger_path: Path, roster_fn: Callable[[], Any],
-                 scoreboard_fn: Callable[[], Any]) -> None:
+                 scoreboard_fn: Callable[[], Any],
+                 providers: dict[str, Callable[..., Any]] | None = None) -> None:
         self.ledger_path = ledger_path
         self.roster_fn = roster_fn
         self.scoreboard_fn = scoreboard_fn
+        # 觀測面的取數 callable（identities / activity / integrity / counters /
+        # system_info / identity_detail）。缺席時對應端點回 404，面板自動降級。
+        self.providers = providers or {}
+
+
+def claim_ladder(*, integrity: dict[str, Any], scoreboard: dict[str, Any],
+                 b_layer_summary: Path | None = None) -> list[dict[str, Any]]:
+    """算出「目前的證據支持到哪一階」（13 §宣稱階梯的可執行版）。
+
+    這一頁是面板上最重要的誠實裝置：它把「這個系統現在**不能**說什麼」變成
+    被斷言的內容，而不是靠使用者自己推論。每一階的 met 都由可機檢的條件決定，
+    機檢不到的（例如需要人工歸檔的驗收）一律回 met=False 並寫明缺什麼——
+    **寧可顯示未達，不可預設已達**。
+    """
+    on = scoreboard.get("on", {}) or {}
+    off = scoreboard.get("off", {}) or {}
+    n_on, n_off = int(on.get("n", 0) or 0), int(off.get("n", 0) or 0)
+    chains_ok = bool(integrity.get("all_chains_ok")) and integrity.get("ledger_seq", 0) > 0
+
+    return [
+        {
+            "step": "A",
+            "claim": "系統能跑、每一步可被獨立重放",
+            "evidence": (
+                f"ledger {integrity.get('ledger_seq', 0)} 筆事件、"
+                f"{len(integrity.get('chains', []))} 條簽章鏈全部可離線驗證"
+                if chains_ok else
+                "需要：至少一筆事件，且所有居民的簽章鏈驗證通過"
+            ),
+            "met": chains_ok,
+        },
+        {
+            "step": "B",
+            "claim": "各機制真的承重（拆掉它，數字會變）",
+            "evidence": (
+                "已歸檔 B 層六情境掃描結果"
+                if b_layer_summary and b_layer_summary.exists() else
+                "需要：examples/b_layer.py 的六情境掃描結果歸檔到本 root；"
+                "本面板不代跑、不代宣稱"
+            ),
+            "met": bool(b_layer_summary and b_layer_summary.exists()),
+        },
+        {
+            "step": "C-1",
+            "claim": "在這個生態「看得到」提升",
+            "evidence": (
+                f"需要：≥60 對配對任務且 bootstrap CI 下界 >0。"
+                f"目前 on {n_on} 筆 / off {n_off} 筆，"
+                "且本面板的池化差不是配對統計——這一階不能由面板判定"
+            ),
+            "met": False,
+        },
+        {
+            "step": "C-3",
+            "claim": "在預註冊條件下量到提升",
+            "evidence": (
+                "需要：預註冊凍結簽入 ledger ＋ 批次 run 的 RECORD_SPEC 合格包 ＋ "
+                "事前寫死的判準。面板不承載此階宣稱"
+            ),
+            "met": False,
+        },
+    ]
+
+
+def _static_dir() -> Path:
+    return Path(__file__).resolve().parent / "web"
+
+
+_MIME = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
+         ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml"}
 
 
 def make_dashboard(
@@ -314,17 +441,21 @@ def make_dashboard(
     roster_fn: Callable[[], Any],
     scoreboard_fn: Callable[[], Any],
     port: int = 7777,
+    providers: dict[str, Callable[..., Any]] | None = None,
 ) -> ThreadingHTTPServer:
     """組出 dashboard server（呼叫端自行 serve_forever / shutdown）。
 
     root：生態根（讀 root/ledger/events.jsonl 當 SSE 源）。
     roster_fn / scoreboard_fn：注入的取數 callable（不 import ecosystem，斷循環）。
+    providers：觀測面的其餘取數 callable，同樣用注入避免循環 import。
     port=0 → 隨機埠（測試用；真埠見 server.server_address[1]）。
     """
     ledger_path = Path(root) / "ledger" / "events.jsonl"
     server = ThreadingHTTPServer(("127.0.0.1", port), _Handler)
     server.daemon_threads = True  # shutdown 時不被掛住的 SSE 執行緒卡死
-    server._vacant_ctx = _Ctx(ledger_path, roster_fn, scoreboard_fn)  # type: ignore[attr-defined]
+    server._vacant_ctx = _Ctx(  # type: ignore[attr-defined]
+        ledger_path, roster_fn, scoreboard_fn, providers)
+    server._vacant_root = Path(root)  # type: ignore[attr-defined]
     server._vacant_running = True  # type: ignore[attr-defined]
 
     # 包住 shutdown：先掀旗讓 SSE 迴圈自然收工，再走原本流程

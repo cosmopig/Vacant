@@ -9,6 +9,8 @@ import json
 import threading
 import urllib.request
 
+import pytest
+
 from vacant.dashboard import make_dashboard
 
 
@@ -39,12 +41,16 @@ def test_index_and_json_api(tmp_path):
     server = make_dashboard(tmp_path, lambda: roster, lambda: sb, port=0)
     _serve(server)
     try:
-        # GET / → 自足 HTML 單頁（無 CDN、無框架標記）
+        # GET / → 自足 HTML 單頁（無 CDN、無框架標記）。
+        # 腳本／樣式改由 /static/ 供應（同源、隨套件安裝），SSE 客戶端在 app.js。
         html = urllib.request.urlopen(_url(server, "/"), timeout=5).read().decode()
         assert "<!doctype html>" in html.lower()
-        assert "EventSource('/events')" in html
+        assert "/static/app.js" in html
         assert "cdn" not in html.lower()  # 無外部 CDN 依賴
         assert "信任觀測台" in html
+        js = urllib.request.urlopen(_url(server, "/static/app.js"), timeout=5).read().decode()
+        assert "EventSource('/events')" in js
+        assert "//" not in js.split("EventSource")[0].split("\n")[-1]  # 非註解掉的死碼
 
         # GET /api/roster → 注入的名冊
         got = json.loads(urllib.request.urlopen(_url(server, "/api/roster"), timeout=5).read())
@@ -148,3 +154,115 @@ def test_snapshot_empty_ledger(tmp_path):
     seq, head = ledger_head(tmp_path / "ledger" / "events.jsonl")
     assert seq == 0
     assert head == "0" * 64
+
+
+# --- 觀測面：身份／全景／宣稱階梯（2026-07-26 儀表板改版）--------------------
+def test_state_endpoint_returns_full_panorama(tmp_path):
+    """/api/state 是首屏的唯一取數點：缺席的 provider 要降級成空集合，
+    不可讓面板拿到半殘資料卻以為是真的。"""
+    _write_events(tmp_path, [{"type": "ROUTE", "ts_ms": 1, "task_id": "t1"}])
+    sb = {"off": {"n": 0, "pass": 0, "calls": 0}, "on": {"n": 0, "pass": 0, "calls": 0}}
+    server = make_dashboard(tmp_path, lambda: [], lambda: sb, port=0)
+    _serve(server)
+    try:
+        d = json.loads(urllib.request.urlopen(_url(server, "/api/state")).read())
+    finally:
+        server.shutdown()
+    assert d["identities"] == [] and d["activity"] == []
+    assert d["system"] is None            # provider 缺席 → None，不是假物件
+    assert d["counters"] == {}
+    assert [r["step"] for r in d["claim_ladder"]] == ["A", "B", "C-1", "C-3"]
+
+
+def test_state_uses_injected_providers(tmp_path):
+    ident = {"name": "alice", "vacant_id": "zQmAlice", "stream_id": "s1",
+             "chain_ok": True, "genesis_proven": True, "credit": 0.9, "n_obs": 4.0,
+             "dims": {}, "dim_obs": {}, "flags": [], "probation": False,
+             "deliveries": 3, "episodes": 2, "checkpoints": 0}
+    providers = {
+        "identities": lambda: [ident],
+        "identity_detail": lambda i: {**ident, "entries": [], "tasks": [],
+                                      "checkpoint_chain": []} if i == "zQmAlice" else None,
+        "activity": lambda: [{"task_id": "t1", "deliverer": "alice"}],
+        "counters": lambda: {"ROUTE": 1},
+        "integrity": lambda: {"ledger_seq": 1, "ledger_head": "h", "chains": [],
+                              "all_chains_ok": True},
+        "system_info": lambda: {"trust_on": True, "n_identities": 1},
+    }
+    sb = {"off": {"n": 0, "pass": 0}, "on": {"n": 0, "pass": 0}}
+    server = make_dashboard(tmp_path, lambda: [], lambda: sb, port=0, providers=providers)
+    _serve(server)
+    try:
+        d = json.loads(urllib.request.urlopen(_url(server, "/api/state")).read())
+        detail = json.loads(urllib.request.urlopen(
+            _url(server, "/api/identity?id=zQmAlice")).read())
+        try:
+            urllib.request.urlopen(_url(server, "/api/identity?id=nobody"))
+            unknown_status = 200
+        except urllib.error.HTTPError as e:
+            unknown_status = e.code
+    finally:
+        server.shutdown()
+    assert d["identities"][0]["vacant_id"] == "zQmAlice"
+    assert d["system"]["n_identities"] == 1
+    assert detail["name"] == "alice"
+    assert unknown_status == 404  # 查無此身份必須是 404，不可回空物件裝作有
+
+
+def test_static_assets_and_no_path_traversal(tmp_path):
+    server = make_dashboard(tmp_path, lambda: [], lambda: {}, port=0)
+    _serve(server)
+    try:
+        css = urllib.request.urlopen(_url(server, "/static/app.css"))
+        assert css.status == 200 and b"--accent" in css.read()
+        for bad in ("/static/../ecosystem.py", "/static/..%2Fecosystem.py", "/static/.env"):
+            try:
+                urllib.request.urlopen(_url(server, bad))
+                got = 200
+            except urllib.error.HTTPError as e:
+                got = e.code
+            assert got == 404, f"路徑穿越未被擋：{bad}"
+    finally:
+        server.shutdown()
+
+
+def test_claim_ladder_never_defaults_to_met():
+    """宣稱階梯的預設必須是「未達」——寧可顯示未達，不可預設已達。"""
+    from vacant.dashboard import claim_ladder
+    empty = claim_ladder(integrity={}, scoreboard={})
+    assert all(r["met"] is False for r in empty)
+
+    # A 階只在「有事件且所有鏈可驗」時才成立
+    ok = claim_ladder(
+        integrity={"ledger_seq": 5, "all_chains_ok": True, "chains": [{"name": "a"}]},
+        scoreboard={})
+    assert ok[0]["met"] is True
+    broken = claim_ladder(
+        integrity={"ledger_seq": 5, "all_chains_ok": False, "chains": [{"name": "a"}]},
+        scoreboard={})
+    assert broken[0]["met"] is False
+
+    # C-1／C-3 不可由面板判定為已達，無論資料多好看
+    rich = claim_ladder(
+        integrity={"ledger_seq": 999, "all_chains_ok": True, "chains": []},
+        scoreboard={"on": {"n": 500, "pass": 500}, "off": {"n": 500, "pass": 1}})
+    assert rich[2]["met"] is False and rich[3]["met"] is False
+
+
+def test_cost_reports_per_pass_not_just_totals(tmp_path):
+    """成本切面必須算得出「每次通過的呼叫數」——只報總量會讓信任層的代價隱形。"""
+    from vacant.cli import EchoLikeBrain
+    from vacant.ecosystem import Ecosystem
+    eco = Ecosystem(tmp_path, EchoLikeBrain(), root_mode="demo")
+    eco.toggle(True)
+    for i in range(3):
+        eco.delegate(f"reverse {i}",
+                     {"type": "run_python", "code": "assert solve('ab') == 'ba'", "timeout": 8})
+    c = eco.cost()
+    assert c["on"]["deliveries"] == 3
+    assert c["on"]["calls"] >= 3
+    assert c["on"]["calls_per_delivery"] == pytest.approx(c["on"]["calls"] / 3)
+    # 沒有 off 臂資料時回 None，不可回 0（0 會被讀成「不用錢」）
+    assert c["off"]["deliveries"] == 0
+    assert c["off"]["calls_per_delivery"] is None
+    assert c["off"]["calls_per_pass"] is None

@@ -300,7 +300,25 @@ def cmd_eco_up(args: argparse.Namespace) -> int:
     def _live_scoreboard() -> dict:
         return eco.scoreboard()  # 本就每次讀 scoreboard.json，天然即時
 
-    server = make_dashboard(eco.root, _live_roster, _live_scoreboard, port=args.port)
+    def _live(fn_name: str):
+        """每次取數前先重載狀態——面板要反映磁碟真相，不是行程啟動時的快照。"""
+        def _call(*a: object) -> object:
+            eco._load_state()
+            return getattr(eco, fn_name)(*a)
+        return _call
+
+    server = make_dashboard(
+        eco.root, _live_roster, _live_scoreboard, port=args.port,
+        providers={
+            "identities": _live("identities"),
+            "identity_detail": _live("identity_detail"),
+            "activity": _live("activity"),
+            "integrity": _live("integrity"),
+            "counters": _live("counters"),
+            "system_info": _live("system_info"),
+            "cost": _live("cost"),
+        },
+    )
     print(f"dashboard → http://127.0.0.1:{args.port}   (Ctrl-C 退出)")
     try:
         server.serve_forever()

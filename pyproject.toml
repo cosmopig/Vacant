@@ -22,6 +22,10 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["vacant"]
 
+[tool.setuptools.package-data]
+# 觀測台的靜態資產隨套件安裝（無 build step；dashboard 由 /static/ 供應）
+vacant = ["web/*.html", "web/*.css", "web/*.js"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
