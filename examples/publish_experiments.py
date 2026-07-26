@@ -67,6 +67,8 @@ if tr.exists():
 # discordant 資訊，湊不出完整 2×2；而且長跑期間 E10.json 還是上一輪的
 # 舊檔。所以這裡一律直接從 rows.jsonl 重算——資料源頭是逐列原始紀錄，
 # 誰先寫完都不影響發布出去的數字。
+e10_path = RM / "E10.json"
+
 def _e10_from_rows() -> dict | None:
     arms: dict[str, dict] = {}
     per_task: dict[str, dict[str, bool]] = {}
@@ -117,17 +119,22 @@ def _e10_from_rows() -> dict | None:
                        round(boot[int(0.975 * len(boot)) - 1], 4)]
         blk["boot"] = 5000
         out["paired"] = blk
-    tot = sum(v["valid"] for v in arms.values())
     out["tasks"] = max(v["valid"] for v in arms.values())
-    out["in_progress"] = tot < 120
+    # 完成訊號用 E10.json 是否比逐列紀錄新——它只在 realmodel_suite 收尾時
+    # 才寫。用「總列數是否到 120」判斷不可靠：只要有幾筆 infra_void 收在
+    # 118，頁面就會永遠顯示「進行中」。
+    newest = max((p.stat().st_mtime for arm in ("on", "off")
+                  if (p := RM / "E10" / arm / "rows.jsonl").exists()),
+                 default=0.0)
+    done = e10_path.exists() and e10_path.stat().st_mtime >= newest
+    out["in_progress"] = not done
     return out
 
-e10 = RM / "E10.json"
 _live = _e10_from_rows()
 if _live:
     data["realmodel_toggle"] = _live
-elif e10.exists():
-    data["realmodel_toggle"] = json.loads(e10.read_text())
+elif e10_path.exists():
+    data["realmodel_toggle"] = json.loads(e10_path.read_text())
 e11 = RM / "E11.json"
 if e11.exists():
     data["realmodel"] = json.loads(e11.read_text())
