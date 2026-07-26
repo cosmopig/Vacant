@@ -69,6 +69,12 @@ if tr.exists():
 # 誰先寫完都不影響發布出去的數字。
 e10_path = RM / "E10.json"
 
+def _e10_done() -> bool:
+    """E10 是否已正常收尾（E10.json 比逐列紀錄新）。"""
+    newest = max((q.stat().st_mtime for a in ("on", "off")
+                  if (q := RM / "E10" / a / "rows.jsonl").exists()), default=0.0)
+    return e10_path.exists() and e10_path.stat().st_mtime >= newest
+
 def _e10_from_rows() -> dict | None:
     arms: dict[str, dict] = {}
     per_task: dict[str, dict[str, bool]] = {}
@@ -131,16 +137,45 @@ def _e10_from_rows() -> dict | None:
         blk["boot"] = 5000
         if misaligned:
             blk["index_misaligned"] = misaligned
+        # 檢定力：不寫「只有相當大的效果才抓得到」這種模糊句，直接給數字。
+        # ψ＝不一致對落在 ON 側的機率，delta＝(2ψ−1)×不一致率。
+        #
+        # mcnemar_power 是全枚舉（無近似），成本約 O(n³)：n=60 要 0.01 秒、
+        # n=400 要 3.2 秒。所以「要多少對才有 80% 檢定力」只在跑完之後算一次，
+        # 而且用有上限的二分搜尋——這支腳本在實驗進行中會被反覆呼叫。
+        try:
+            from vacant.research import mcnemar_power
+            disc_rate = (b + c) / n
+            if b + c:
+                psi_obs = b / (b + c)
+                blk["power_observed"] = round(mcnemar_power(n, disc_rate, psi_obs), 3)
+            # 這個 n 下，80% 檢定力對應的最小可偵測差異
+            for step in range(50, 101):
+                psi = step / 100
+                if mcnemar_power(n, disc_rate, psi) >= 0.8:
+                    blk["mde80_delta"] = round((2 * psi - 1) * disc_rate, 4)
+                    break
+            if b + c and _e10_done() and 0.5 < psi_obs < 1.0:
+                CAP = 400
+                lo_n, hi_n, found = n, CAP, None
+                if mcnemar_power(CAP, disc_rate, psi_obs) >= 0.8:
+                    while lo_n <= hi_n:                     # 二分：約 9 步
+                        mid = (lo_n + hi_n) // 2
+                        if mcnemar_power(mid, disc_rate, psi_obs) >= 0.8:
+                            found, hi_n = mid, mid - 1
+                        else:
+                            lo_n = mid + 1
+                    blk["n_for_80"] = found
+                else:
+                    blk["n_for_80_over"] = CAP              # 超出上限，如實說
+        except Exception:
+            pass
         out["paired"] = blk
     out["tasks"] = max(v["valid"] for v in arms.values())
     # 完成訊號用 E10.json 是否比逐列紀錄新——它只在 realmodel_suite 收尾時
     # 才寫。用「總列數是否到 120」判斷不可靠：只要有幾筆 infra_void 收在
     # 118，頁面就會永遠顯示「進行中」。
-    newest = max((p.stat().st_mtime for arm in ("on", "off")
-                  if (p := RM / "E10" / arm / "rows.jsonl").exists()),
-                 default=0.0)
-    done = e10_path.exists() and e10_path.stat().st_mtime >= newest
-    out["in_progress"] = not done
+    out["in_progress"] = not _e10_done()
     return out
 
 _live = _e10_from_rows()
