@@ -29,6 +29,7 @@ def cells(name):
             "bad": c["accepted_bad"]["mean"], "bad_sd": c["accepted_bad"].get("sd", 0),
             "bad_min": c["accepted_bad"].get("min"), "bad_max": c["accepted_bad"].get("max"),
             "shutout": c["shutout_rate"],
+            "hv": (c.get("high_value_hits") or {}).get("mean"),
             "roi": c["roi"]["mean"] if c["roi"]["n"] else None,
             "harm": c["honest_damage"]["mean"],
             "ids": c["identities_used"]["mean"],
@@ -39,7 +40,8 @@ def cells(name):
 data = {
     "generated_iso": time.strftime("%Y-%m-%d %H:%M"),
     "commit": subprocess.run(["git","rev-parse","--short","HEAD"],capture_output=True,text=True).stdout.strip(),
-    "entrycost": {n: cells(n) for n in ["E1","E2","E3","E4","E5","E6","E7","E8","E9","E12","E13"]},
+    "entrycost": {n: cells(n) for n in ["E1","E2","E3","E4","E5","E6","E7","E8","E9",
+                              "E12","E13","E14","E15","E16"]},
     "realmodel": None,
 }
 # 逐輪紀錄總量
