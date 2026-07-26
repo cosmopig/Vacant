@@ -83,13 +83,24 @@ def _e10_from_rows() -> dict | None:
         arms[arm] = {"passed": ok, "valid": len(rows),
                      "pass_rate": round(ok / len(rows), 4)}
         for r in rows:
-            per_task.setdefault(str(r["task_id"]), {})[arm] = bool(r.get("passed"))
+            if "task_id" not in r:      # 這一格是 error 列，沒跑成
+                continue
+            per_task.setdefault(str(r["task_id"]), {})[arm] = {
+                "passed": bool(r.get("passed")), "i": r.get("i")}
     if not arms:
         return None
     out: dict = {"arms": arms}
-    # 只有兩臂都跑到的題目才能配對
-    pairs = [(v["on"], v["off"]) for v in per_task.values()
-             if "on" in v and "off" in v]
+    # 只有兩臂都跑到的題目才能配對。
+    #
+    # 用 task_id 而不是列的順序來配：task_id 是 sha256(prompt+tests) 的內容
+    # 雜湊（ecosystem._task_id），同一題在兩臂必然相同。用索引配的話，萬一
+    # 兩臂的題目集不一樣（例如中途改過 --tasks 又續跑），會靜默把不相干的
+    # 兩題配在一起，做出一個看起來正常的假結果。
+    both = [(v["on"], v["off"]) for v in per_task.values()
+            if "on" in v and "off" in v]
+    pairs = [(o["passed"], f["passed"]) for o, f in both]
+    # 保險：內容雜湊相同的兩筆，索引也該相同。不同就如實記下來，不吞掉。
+    misaligned = sum(1 for o, f in both if o["i"] != f["i"])
     if pairs:
         a = sum(1 for on, off in pairs if on and off)          # 兩臂都過
         b = sum(1 for on, off in pairs if on and not off)      # 只有 ON 過
@@ -118,6 +129,8 @@ def _e10_from_rows() -> dict | None:
         blk["ci95"] = [round(boot[int(0.025 * len(boot))], 4),
                        round(boot[int(0.975 * len(boot)) - 1], 4)]
         blk["boot"] = 5000
+        if misaligned:
+            blk["index_misaligned"] = misaligned
         out["paired"] = blk
     out["tasks"] = max(v["valid"] for v in arms.values())
     # 完成訊號用 E10.json 是否比逐列紀錄新——它只在 realmodel_suite 收尾時
