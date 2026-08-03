@@ -53,6 +53,12 @@ COST_PER_KEYGEN = 0.0
 
 SLASH_FACTOR = 0.5  # 與 ecosystem 的交付方 provable fault 係數一致
 
+# 2026-07-26 之後才加進 SimConfig 的欄位。維持預設值時不進 config digest，
+# 否則「加一個選用參數」就會改變亂數種子，讓所有既有實驗的數字無故位移。
+# 詳見 SimConfig.digest 的說明。
+_LATER_FIELDS = ("pulse_burst", "pulse_recover", "audit_accuracy",
+                 "blindspot", "defect_budget")
+
 
 @dataclass
 class EntryPolicy:
@@ -82,7 +88,17 @@ class SimConfig:
     audit_rate: float = 0.2
     probation_m: int = 2
     entry: EntryPolicy = field(default_factory=EntryPolicy)
-    strategy: str = "whitewash"   # whitewash | patient | sybil
+    strategy: str = "whitewash"   # whitewash | patient | sybil | pulse
+    # ── 脈衝攻擊（2026-08-03 新增）────────────────────────────────────
+    # 定義：交替於兩個相位——
+    #   放電 burst 筆連續作惡 → 蓄積 recover 筆乾淨交付 → 重複。
+    # 它不是「更兇的攻擊」，而是**利用防禦的反應延遲**：稽核是抽樣的、
+    # 扣分只在被抓到時發生、而信譽會隨時間向先驗衰減。所以先把信譽養高
+    # （養高就被路由得更頻繁），再在系統來不及反應的窗口內集中提領。
+    # 既有三種策略是這個參數空間的特例：
+    #   burst=∞ ≈ whitewash（一直作惡）  burst=1,recover 大 ≈ 稀疏的 patient
+    pulse_burst: int = 3
+    pulse_recover: int = 10
     # 同儕評審抓到壞交付的機率。1.0＝評審是 oracle（會嚴重高估系統防禦力：
     # 稽核之所以存在，正是因為評審不可信）。LLM-as-judge 文獻顯示評審有
     # 系統性偏誤且會偏好同源生成，實際值遠低於 1.0——這是本模擬最重要的
@@ -100,10 +116,43 @@ class SimConfig:
     selective: bool = False
     # patient 策略：先做 build_rounds 筆乾淨的，再開始作惡
     build_rounds: int = 10
+    # ── 稽核不是 oracle（2026-08-03 新增）──────────────────────────────
+    # 先前 caught = bad ∧ audit_ran，等於假設「只要抽中就一定抓到」。
+    # 對**確定性重跑**的稽核（現行設計：sandbox 重跑單元測試）那是對的，
+    # 所以預設維持 accuracy=1.0、blindspot=0.0，不改變既有結論。
+    # 但如果驗收標準本身是模型寫的、或任務沒有客觀檢查，稽核就退化成
+    # 「另一個模型在看」——此時它與同源評審共享盲區：
+    #   blindspot = 落在「同源檢查者都看不到」的錯誤比例。落在盲區內的
+    #     壞交付，評審與稽核**同時**放行，加更多檢查者也沒有用。
+    #   audit_accuracy = 盲區外、抽中時稽核抓到的機率。
+    # 這一組參數回答的是「若稽核也是模型會怎樣」，不是對現行設計的描述。
+    audit_accuracy: float = 1.0
+    blindspot: float = 0.0
+    # 攻擊預算上限：整場最多作惡幾筆。等預算對照用——把「作惡總量」固定住，
+    # 才能把「時機」與「數量」分開，否則脈衝的優勢會跟攻擊次數混在一起。
+    defect_budget: int | None = None
     seed: str = "e1"
 
     def digest(self) -> str:
-        blob = json.dumps(asdict(self), sort_keys=True, ensure_ascii=False)
+        """設定摘要。**只涵蓋非預設值的欄位**——這一點很重要。
+
+        這個摘要同時是亂數種子（`random.Random(f"{seed}:{digest()}")`）。
+        如果它涵蓋全部欄位，那麼「為了新實驗而加一個選用參數」就會改變
+        digest、進而改變整條隨機序列，讓所有**既有**設定的結果全部位移——
+        已發表的 E1–E16 會在下次重跑時對不上，而程式邏輯根本沒動。
+        2026-08-03 加入脈衝與盲區參數時就踩到了這個坑。
+
+        做法：**後加的欄位在維持預設值時不進摘要**，其餘欄位照舊全進。
+        於是沒有用到新功能的設定會算出與 2026-07-26 完全相同的摘要與
+        隨機序列，E1–E16 的數字得以逐位重現；用到新功能的設定則自然
+        落在不同的序列上。以後再加參數，把欄位名補進 _LATER_FIELDS 即可。
+        """
+        d = asdict(self)
+        base = asdict(SimConfig())
+        for k in _LATER_FIELDS:
+            if k in d and d[k] == base[k]:
+                del d[k]
+        blob = json.dumps(d, sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(blob.encode()).hexdigest()[:12]
 
 
@@ -125,6 +174,9 @@ class _Agent:
         self.deliveries = 0
         self.clean_paid = 0     # stake 政策下已繳的乾淨交付數
         self.endorser: str | None = None
+        # 脈衝相位：本週期已放電幾筆、已蓄積幾筆
+        self.phase_bad = 0
+        self.phase_clean = 0
 
     @property
     def vid(self) -> str:
@@ -157,7 +209,10 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
     stats = {"accepted_bad": 0, "caught": 0, "clean_paid": 0,
              "identities": max(1, cfg.n_attackers), "routed_to_attacker": 0,
              "rounds_routable": 0, "blocked_no_endorser": 0,
-             "high_value_hits": 0}
+             "high_value_hits": 0, "defected": 0, "blind_passes": 0,
+             # 反應延遲：每一次放電記一筆 {第一次作惡的輪次, 這波得手數,
+             # 第一次被抓的輪次}。脈衝之所以有效，機制就在這個間隔裡。
+             "bursts": []}
     honest_start = {h.name: reg.standing(h.vid, "sim")[0] for h in honest}
 
     try:
@@ -183,15 +238,39 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
             bad = is_attacker and _should_defect(who, cfg, stats)
             if bad and cfg.selective and not high_value:
                 bad = False          # 選擇性：低價值任務照做，不浪費身份
+            if bad and cfg.defect_budget is not None and stats["defected"] >= cfg.defect_budget:
+                bad = False          # 預算用完：等預算對照時把總量鎖住
             head = who.deliver()
             reg.note_head(who.vid, who.card.stream_id, "main", head, substrate="sim")
 
-            # 交付方一律宣稱通過（誤放行正是被測的行為），所以「稽核抽中壞交付」
-            # 就等於 provable fault，不需要另外傳 claimed_pass。
+            # 這一筆錯誤是否落在「同源檢查者共同的盲區」。確定性、由 (seed, 輪次)
+            # 決定，與誰被路由無關——盲區是**錯誤的性質**，不是攻擊者的選擇。
+            in_blind = bad and _h01(f"{cfg.seed}:blind:{rnd}") < cfg.blindspot
+
+            # 交付方一律宣稱通過（誤放行正是被測的行為），所以「稽核抽中壞交付
+            # 且看得出來」就等於 provable fault。
             task_id = f"{cfg.seed}-t{rnd}"
             audit_ran = auditor.should_audit(
                 task_id, forced=who.deliveries <= cfg.probation_m)
-            caught = bool(bad and audit_ran)
+            # 稽核看得出來嗎：落在盲區就看不出來；否則以 audit_accuracy 抓到。
+            audit_sees = (not in_blind) and _h01(f"{cfg.seed}:adet:{rnd}") < cfg.audit_accuracy
+            caught = bool(bad and audit_ran and audit_sees)
+            if bad and audit_ran and in_blind:
+                stats["blind_passes"] += 1
+
+            if bad:
+                stats["defected"] += 1
+                # 放電相位的儀器：這一波從哪一輪開始、得手幾筆、何時第一次被抓
+                if not stats["bursts"] or stats["bursts"][-1]["closed"]:
+                    stats["bursts"].append({"start": rnd, "hits": 0,
+                                            "first_catch": None, "closed": False})
+                b = stats["bursts"][-1]
+                if not caught:
+                    b["hits"] += 1
+                elif b["first_catch"] is None:
+                    b["first_catch"] = rnd
+            elif is_attacker and stats["bursts"] and not stats["bursts"][-1]["closed"]:
+                stats["bursts"][-1]["closed"] = True   # 轉入蓄積＝這一波結束
 
             if bad and not caught:
                 stats["accepted_bad"] += 1
@@ -201,10 +280,22 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
                 stats["clean_paid"] += 1
                 who.clean_paid += 1
 
-            # 同儕評審：稽核抓到就是 FAIL，否則依交付好壞給分（確定性）
+            # 脈衝相位機：依這一輪的**最終** bad 值推進（selective / 預算可能把
+            # 原本要作惡的一筆改成乾淨，那就該算進蓄積，不能算成放電）
+            if is_attacker and cfg.strategy == "pulse":
+                if bad:
+                    who.phase_bad += 1
+                else:
+                    who.phase_clean += 1
+                if who.phase_bad >= cfg.pulse_burst and who.phase_clean >= cfg.pulse_recover:
+                    who.phase_bad = 0
+                    who.phase_clean = 0
+
+            # 同儕評審：落在盲區的壞交付，三位評審一律看不出來（同源共同盲區）
             _peer_reviews(reg, honest, who, head, task_id, good=not bad, rng=rng,
                           accuracy=cfg.reviewer_accuracy,
-                          correlation=cfg.reviewer_correlation)
+                          correlation=cfg.reviewer_correlation,
+                          blind=in_blind)
 
             if caught:
                 stats["caught"] += 1
@@ -260,9 +351,15 @@ def _warmup(reg: Registry, honest: list[_Agent], rng: random.Random) -> None:
                 _try_review(reg, b, a, head, f"warm-{r}-{a.name}", 1.0)
 
 
+def _h01(s: str) -> float:
+    """把字串雜湊成 [0,1)。確定性、跨 seed 去相關——不要用 rng，
+    否則同一組參數在不同 seed 下的抽樣順序會與別的隨機事件糾纏。"""
+    return int(hashlib.sha256(s.encode()).hexdigest()[:8], 16) / 0x1_0000_0000
+
+
 def _peer_reviews(reg, honest, target, head, task_id, *, good: bool,
                   rng: random.Random, accuracy: float = 1.0,
-                  correlation: float = 0.0) -> None:
+                  correlation: float = 0.0, blind: bool = False) -> None:
     """K=3 位評審。壞交付時每位評審以 accuracy 的機率抓到，沒抓到就投 PASS。
 
     correlation ρ 控制錯誤的相關性：以機率 ρ 三位評審共用同一次判定
@@ -276,7 +373,10 @@ def _peer_reviews(reg, honest, target, head, task_id, *, good: bool,
     for b in honest[:3]:
         if b.vid == target.vid:
             continue
-        if good:
+        if good or blind:
+            # blind：這個錯誤落在同源檢查者的共同盲區，三位評審都看不出來。
+            # 這與 correlation 不同——correlation 是「有時會一起錯」，
+            # blind 是「這一類錯誤他們必然一起錯，加人也沒用」。
             score = 1.0
         elif shared is not None:
             score = 0.0 if shared else 1.0
@@ -329,6 +429,12 @@ def _should_defect(who: _Agent, cfg: SimConfig, stats: dict) -> bool:
     if cfg.strategy == "patient":
         # 熬過見習期＋build_rounds 筆乾淨紀錄才開始作惡
         return who.deliveries > max(cfg.build_rounds, cfg.probation_m)
+    if cfg.strategy == "pulse":
+        # 見習期內強制稽核，這時候作惡等於送分——先熬過去。
+        if who.deliveries <= cfg.probation_m:
+            return False
+        # 放電中就繼續放電；放完就轉蓄積（相位機在主迴圈推進）
+        return who.phase_bad < cfg.pulse_burst
     return True                           # whitewash / sybil：能作惡就作惡
 
 
@@ -336,6 +442,18 @@ def _summarise(cfg: SimConfig, s: dict) -> dict[str, Any]:
     cost = (s["clean_paid"] * COST_PER_CLEAN_DELIVERY
             + s["identities"] * COST_PER_KEYGEN)
     gain = s["accepted_bad"] * GAIN_PER_ACCEPTED_BAD
+
+    # ── 反應延遲 ──────────────────────────────────────────────────────
+    # 脈衝攻擊的機制就在這裡：從一波開始作惡，到系統第一次抓到，中間
+    # 有幾筆已經進去了？這個數字若大於 1，代表「抓到」這件事本身來不及
+    # 阻止當下這一波——防禦是事後的，不是即時的。
+    bursts = s.get("bursts", [])
+    lags, per_burst_hits = [], []
+    for b in bursts:
+        per_burst_hits.append(b["hits"])
+        if b["first_catch"] is not None:
+            lags.append(b["first_catch"] - b["start"])
+    n_b = len(bursts)
     return {
         "config": asdict(cfg),
         "config_digest": cfg.digest(),
@@ -349,6 +467,17 @@ def _summarise(cfg: SimConfig, s: dict) -> dict[str, Any]:
         "identities_used": s["identities"],
         "blocked_no_endorser": s["blocked_no_endorser"],
         "high_value_hits": s.get("high_value_hits", 0),
+        # 作惡總筆數（含被抓到的）。與 accepted_bad 的差＝被擋下來的。
+        "defected": s.get("defected", 0),
+        # 落在同源盲區、抽中了也看不出來的筆數
+        "blind_passes": s.get("blind_passes", 0),
+        # 放電波次與反應延遲
+        "n_bursts": n_b,
+        "hits_per_burst": (round(sum(per_burst_hits) / n_b, 3) if n_b else None),
+        "max_burst_hits": (max(per_burst_hits) if per_burst_hits else 0),
+        # 一波裡「第一次作惡」到「第一次被抓」相隔幾輪；沒被抓過的波不計入
+        "react_lag_mean": (round(sum(lags) / len(lags), 3) if lags else None),
+        "bursts_never_caught": sum(1 for b in bursts if b["first_catch"] is None),
         # 附帶損害：誠實居民因連坐而損失的信譽總量。任何入場設計都要付代價，
         # 只報攻擊者 ROI 不報這一欄，等於只報好處不報成本。
         "honest_damage": s.get("honest_damage", 0.0),
