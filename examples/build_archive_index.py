@@ -6,7 +6,7 @@
 agent 要回答「支持結論 X 的原始資料在哪、欄位是什麼意思、有沒有被動過」
 時，若沒有索引就只能全盤掃描——那既慢又容易看漏。
 
-所以這支產生**四份機器可讀的檔**，放在 `實驗記錄/_index/`：
+所以這支產生**五份機器可讀的檔**，放在 `實驗記錄/_index/`：
 
   catalog.json    單一進入點。輪次 → 實驗 → 格 → 指標 → 原始檔的完整樹。
                   agent 讀完這一份就知道有什麼、在哪裡、代表什麼，不需要
@@ -17,6 +17,9 @@ agent 要回答「支持結論 X 的原始資料在哪、欄位是什麼意思�
                   沒有這份，agent 只能猜 `obs` 或 `bad` 是什麼意思。
   claims.json     結論 → 支撐它的檔案、欄位與數值。這一份是可究責性用在
                   檔案庫自己身上：任何一句結論都指得出它的原始依據。
+  methods.json    每一種測試的實際步驟、什麼是真機制什麼是模擬的、控制了
+                  什麼、沒控制什麼、以及已經踩過的量測陷阱。agent 光有資料
+                  不夠，還要能判斷這份資料可不可信。
 
 ## 紀律
 
@@ -88,6 +91,87 @@ SCHEMA: dict[str, Any] = {
         "描述": "每一次模型呼叫的輸入輸出（E11 的 model_io.jsonl）",
         "欄位": {},
         "註": "E10 走記帳閘道（port 8765），呼叫紀錄在閘道端不在這裡",
+    },
+}
+
+# ── 測試方法 ────────────────────────────────────────────────────────
+# agent 光有資料還不夠：它要能判斷這份資料**可不可信**、以及怎麼重跑。
+# 所以把每一種測試的實際步驟、控制了什麼、沒控制什麼，都寫成機器可讀。
+METHODS: dict[str, Any] = {
+    "mechanism_sim": {
+        "名稱": "機制模擬（E1–E9, E12–E24）",
+        "回答什麼": "在這套規則下，某個攻擊策略或機制參數值多少",
+        "步驟": [
+            "1. 建 5 個誠實居民，每個都是真的 Identity（Ed25519）+ 真的 Logbook + 真的能力卡",
+            "2. 暖身 8 輪：誠實居民互相給好評，讓生態有可背書的紀錄",
+            "3. 依 EntryPolicy 生成攻擊者身份",
+            "4. 每一輪：Registry.route 選人 → 該身份交付 → Auditor 抽樣稽核 →"
+            "   三位同儕評審 → 抓到就 Reputation.slash → 落一行 JSONL",
+            "5. 依策略決定是否丟棄身份重生（whitewash/sybil）",
+            "6. 每格跑 N 個 seed，聚合成 mean/sd/min/max + shutout_rate",
+        ],
+        "什麼是真的": [
+            "路由：真的 Registry.route（UCB + 見習期上限 0.55 + 每 10 輪見習配額）",
+            "稽核：真的 Auditor（sha256(seed:task_id) 確定性抽樣）",
+            "信譽：真的 Reputation（五維 Beta、乘法 slash、per-stream 半衰期 200 事件）",
+            "簽章：真的 Ed25519 與 hash-chain",
+        ],
+        "什麼是模擬的": "只有「這一筆交付是好是壞」——那本來就是實驗處理，不是機制",
+        "控制了什麼": [
+            "全確定性：rng 種子 = f'{seed}:{config_digest}'，同參數必得同結果",
+            "跨 seed 去相關：任務價值用 sha256(seed:hv:round)，不用輪次（曾因此做出假結果）",
+            "config_digest 只涵蓋非預設欄位，新增選用參數不會擾動既有實驗的隨機序列",
+        ],
+        "沒控制什麼": [
+            "攻擊者策略空間是寫死的三～四種；真實攻擊者可能更強",
+            "單一攻擊者 + 5 誠實居民的固定生態規模",
+            "blindspot 的真實值未知（沒有外生錨定）",
+        ],
+        "重跑": "python examples/pulse_suite.py --out <DIR>",
+    },
+    "real_model": {
+        "名稱": "真模型實驗（E10 信任開關、E11 記憶三臂）",
+        "回答什麼": "整條管線在真模型上跑得起來嗎；開關信任層有沒有可測差異",
+        "步驟": [
+            "1. 從 EvalPlus MBPP+ v0.2.0（378 題、sha256 釘死）取樣 N 題",
+            "2. 每一臂各跑同一批題；三臂的 prompt 模板逐字相同（KS-1）",
+            "3. 交付後用**臂外的** compile_check(t.check)(answer) 獨立判定品質",
+            "4. 逐題落 rows.jsonl；模型呼叫走記帳閘道（port 8765）",
+            "5. 以 task_id（sha256(prompt+tests)，跨臂穩定）配對，算 2×2 + McNemar 精確檢定"
+            " + 固定種子 bootstrap 95% CI + 檢定力",
+        ],
+        "控制了什麼": [
+            "配對設計：兩臂跑同一批題，消掉「這題本來就難」的共同因素",
+            "品質判定與臂無關：不讀稽核欄（off 臂依設計不稽核）",
+            "斷點續跑以 (arm, i) 為鍵，中斷不用從頭",
+        ],
+        "已知踩過的坑": "第一次量測讀了 audit.passed 當品質判準，而 off 臂依設計恆為 None，"
+                        "做出 off 0/11 vs on 5/10 的假結果。修正後為 off 7/12 vs on 5/10（差異消失）。",
+        "重跑": "python examples/realmodel_suite.py --out <DIR> --tasks 60",
+    },
+    "regression_tests": {
+        "名稱": "迴歸判準（pytest）",
+        "回答什麼": "機制本身有沒有退回去",
+        "步驟": ["先寫會失敗的判準，再改機制（先紅後綠）",
+                 "每支判準的說明記錄「當時的錯誤數字」，讓退化無法無聲發生"],
+        "產物": "_index/testruns/pytest-*.xml（junit）與 pytest_summary.json",
+        "重跑": ".venv/bin/python -m pytest tests/ -q",
+    },
+    "web_audit": {
+        "名稱": "網站稽核（對比度／功能／響應式）",
+        "回答什麼": "公開網站是否可讀、互動是否正確、有無水平溢出",
+        "步驟": [
+            "對比度：iframe 探針走訪每個可見元素，取 computed style，"
+            "把半透明前景與有效背景合成後算 WCAG 比值（文字 4.5:1、大字與 UI 邊框 3:1）",
+            "功能：以 JS 驅動點擊走完互動流程，比對 DOM 狀態與指紋是否真的重算",
+            "響應式：iframe 固定寬度量 scrollWidth vs clientWidth",
+        ],
+        "量測陷阱（已踩過）": [
+            "headless Chrome 視窗寬度有下限（約 500px）：量 375px 必須用 iframe 探針，"
+            "直接 --window-size=375 會拍到夾寬後裁切的假象",
+            "headless 虛擬時間不推進 CSS transition：有轉場的東西只能讀 computed style，"
+            "看截圖會拍到中間狀態誤判成 bug",
+        ],
     },
 }
 
@@ -317,6 +401,8 @@ def main() -> None:
                           "不需要再掃檔案系統。",
             "2_要欄位語意": "schema.json。不要從欄位名猜——例如 accepted_bad 是**累計值**不是本輪值。",
             "3_要找某句結論的依據": "claims.json。每條宣稱都指出檔案、欄位、數值與重算方式。",
+            "3b_要知道資料怎麼被測出來": "methods.json。每種測試的步驟、控制了什麼、"
+                                        "沒控制什麼、以及已經踩過的量測陷阱。",
             "4_要逐檔中繼資料": "files.jsonl 串流讀（每檔一行：路徑/型別/行數/sha256）。",
             "5_要驗檔案沒被動過": "比對 files.jsonl 的 sha256。",
         },
@@ -338,6 +424,9 @@ def main() -> None:
         json.dumps(catalog, ensure_ascii=False, indent=1), encoding="utf-8")
     (OUT / "schema.json").write_text(
         json.dumps(SCHEMA, ensure_ascii=False, indent=1), encoding="utf-8")
+    (OUT / "methods.json").write_text(
+        json.dumps({"note": "每一種測試的實際步驟、控制了什麼、沒控制什麼、踩過的坑",
+                    "methods": METHODS}, ensure_ascii=False, indent=1), encoding="utf-8")
     (OUT / "claims.json").write_text(
         json.dumps({"note": "每條對外宣稱 → 支撐它的檔案、欄位、數值、重算方式",
                     "claims": CLAIMS}, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -346,6 +435,7 @@ def main() -> None:
     print(f"files.jsonl   {n_files} 檔、{total_rows:,} 行、{total_bytes/1e6:.1f} MB")
     print(f"schema.json   {len(SCHEMA)} 種紀錄型別")
     print(f"claims.json   {len(CLAIMS)} 條宣稱")
+    print(f"methods.json  {len(METHODS)} 種測試方法")
     print(f"→ {OUT}")
 
 
