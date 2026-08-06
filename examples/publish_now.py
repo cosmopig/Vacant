@@ -667,6 +667,412 @@ PLAIN_REFUTED = {
     },
 }
 
+# ── 二之外：外部已確立的知識 ────────────────────────────────────────────
+#
+# 這一組不是我們做的，是文獻已經確立、而且**我們自己開檔逐字核對過**的。
+# 每一條都指得出備份路徑（參考文獻/_引用備份/MANIFEST.json 有 sha256）。
+# 沒有全文的一律標明，因為「讀過摘要」與「讀過全文」是兩種強度的證據。
+EXTERNAL_KNOWLEDGE = [
+    {
+        "id": "ext.trust-excludes-monitoring",
+        "plain": {"zh": "「不靠監督」被寫進了信任的定義裡——所以我們做的不是信任",
+                  "en": "Classic definitions build 'without monitoring' into trust itself"},
+        "how": {"zh": "Gambetta 1988 與 Mayer 1995 兩個不同學科的經典，"
+                      "都把「在能監督之前、或不依賴監督能力」寫成信任的必要條件。"
+                      "而監督正是這個系統的全部價值。",
+                "en": "Gambetta 1988 and Mayer 1995, from two different disciplines, both make "
+                      "'before or irrespective of the ability to monitor' part of the definition "
+                      "of trust. Monitoring is exactly what this system is."},
+        "detail": {"zh": "Gambetta p.217 原文把 before 與 and 排成斜體："
+                         "「both *before* he can monitor such action (or independently of his "
+                         "capacity ever to be able to monitor it) *and* in a context in which it "
+                         "affects *his own* action」。二手引用通常略掉那個強調。"
+                         "\n\nMayer et al. 1995 p.712：「irrespective of the ability to monitor "
+                         "or control that other party」。"
+                         "\n\n這決定了對外口徑：我們做到的是**可究責性**，不是信任。"
+                         "建議的說法是「讓依賴變得有根據」（warranted reliance）。"
+                         "\n\n證據強度：Gambetta 全文在手但無文字層，實際讀的那一頁已渲染成影像"
+                         "存檔；Mayer 原件在 AMR 付費牆後，該句是經 Körber 2018 p.3 的逐字轉引"
+                         "核對的——**引用時必須標明轉引**。",
+                   "en": "Gambetta p.217 italicises 'before' and 'and' in the original. Mayer et "
+                         "al. 1995 p.712 says 'irrespective of the ability to monitor or control "
+                         "that other party'. Hence the wording we should use is warranted "
+                         "reliance, not trust. Evidence strength: the Gambetta scan has no text "
+                         "layer, so the page actually read is archived as an image; the Mayer "
+                         "original is paywalled and the sentence was verified through Korber "
+                         "2018 p.3, which quotes it verbatim with the page number — any citation "
+                         "must say it is quoted at second hand."},
+        "sources": ["參考文獻/_引用備份/verification.jsonl · gambetta1988 / mayer1995_via_koerber2018",
+                    "參考文獻/_引用備份/rendered/1988_Gambetta_can-we-trust-trust_p5-05.png",
+                    "參考文獻/2026-08-06_信任定義/pdf/2018_Koerber_questionnaire-trust-in-automation.pdf"],
+    },
+    {
+        "id": "ext.correlated-errors",
+        "plain": {"zh": "AI 檢查者會一起錯，而且越準的模型錯得越像",
+                  "en": "AI checkers fail together, and more accurate models fail more alike"},
+        "how": {"zh": "350 個以上的模型裡，兩個模型都答錯時有 60% 錯在同一個答案"
+                      "（隨機的話只有 33%）。十個同款 AI 一起投票，只抵得上 1.4 個獨立的人。",
+                "en": "Across 350+ models, when two are both wrong they give the same wrong "
+                      "answer 60% of the time (chance is 33%). Ten same-family agents voting are "
+                      "worth 1.4 independent ones."},
+        "detail": {"zh": "Kim 2025（ICML）：同答案率 HELM 0.600（隨機 1/3）、HuggingFace 0.423"
+                         "（隨機 0.127）；**越準的模型錯得越像**，跨架構跨供應商亦然。"
+                         "\nBegin 2026：偏好對齊造成同源相關 ρ=0.70，N=10 的有效獨立數 1.38，"
+                         "加到 40 個幾乎不變。"
+                         "\nKrumdick 2025：GPT-4o 當評審，在**它自己也答不出來**的題目上"
+                         " Cohen κ 從 0.86 掉到 0.16——所以盲區不是常數，會挑題的攻擊者能把它推高。"
+                         "\n\n這三條推翻了我們原本寫的「盲區沒有外部依據」。但要分清楚："
+                         "它們量的是「錯得像不像」與「有效獨立數」，**不是**我們模擬裡那個 β，"
+                         "換算要對單一評審漏檢率做未驗證的假設。**我們自己的系統上仍未量過。**",
+                   "en": "Kim 2025 (ICML): same-wrong-answer 0.600 on HELM (chance 1/3) and 0.423 "
+                         "on HuggingFace (chance 0.127), with more accurate models erring more "
+                         "alike even across architectures and providers. Begin 2026: rho=0.70, "
+                         "effective independent count 1.38 at N=10. Krumdick 2025: GPT-4o judge "
+                         "kappa falls 0.86 to 0.16 on questions it cannot answer itself, so the "
+                         "blind spot is not a constant. These refuted our earlier claim that no "
+                         "external anchor existed — but they measure error similarity, not our "
+                         "beta, and we have still never measured it on our own system."},
+        "sources": ["參考文獻/_引用備份/verification.jsonl · kim2025 / krumdick2025 / begin2026",
+                    "參考文獻/2026-08-06_agent信任/PRIOR_ART.md · 二"],
+    },
+    {
+        "id": "ext.peer-review-unreliable",
+        "plain": {"zh": "同儕評審在人類專家身上，信度接近零",
+                  "en": "Peer review among human experts has near-zero reliability"},
+        "how": {"zh": "三個獨立來源：19,443 篇稿件的統合分析算出評審一致度 κ=.17；"
+                      "NeurIPS 送兩個委員會的實驗有 26% 決定不一致；"
+                      "真實 NIH 評審重評已獲資助案，整體評分的一致度是 0。",
+                "en": "Three independent sources: a meta-analysis over 19,443 manuscripts gives "
+                      "kappa = .17; the NeurIPS two-committee experiment found 26% of decisions "
+                      "inconsistent; real NIH reviewers re-scoring funded grants produced an ICC "
+                      "of zero."},
+        "detail": {"zh": "Bornmann 2010（PLoS ONE，48 篇研究、70 個係數、19,443 篇稿件）："
+                         "平均 ICC/r²=.34、平均 κ=.17。元迴歸還顯示**涵蓋稿件越多的研究，"
+                         "回報的信度越低**。"
+                         "\nCortes & Lawrence 2021：NeurIPS 2014 的 166 篇送兩個獨立委員會，"
+                         "43 篇（26%）決定不一致；接受率 23%，等於**約一半的被接受論文"
+                         "換個委員會就會被拒**。評分變異中 50% 是主觀來源。"
+                         "\nPier 2018（PNAS）：整體評分 ICC=0（95% CI 0–0.14）。"
+                         "\n\n這對我們是地基問題：整套機制的第一道關就是同儕評審，而模擬裡"
+                         "`reviewer_accuracy=0.7` 這個預設**沒有依據**。它應該是要量的東西，"
+                         "不是要設的參數。"
+                         "\n\nCicchetti 的補充有救：評審在**拒絕**上的一致度顯著高於接受。"
+                         "這與我們 E10 的發現一致——系統擅長的是避開持續失敗者，不是排序好的。",
+                   "en": "Bornmann 2010 (PLoS ONE, 48 studies, 19,443 manuscripts): mean ICC/r^2 "
+                         "= .34, mean kappa = .17, and studies covering more manuscripts report "
+                         "lower reliability. Cortes & Lawrence 2021: 43 of 166 NeurIPS papers "
+                         "(26%) got inconsistent decisions across two committees; with a 23% "
+                         "acceptance rate, roughly half of accepted papers would be rejected by "
+                         "the other committee. Pier 2018 (PNAS): ICC = 0. This is a foundation "
+                         "problem for us — peer review is our first gate, and the simulation's "
+                         "reviewer_accuracy=0.7 has no basis. Cicchetti's qualifier helps: "
+                         "reviewers agree far more on rejection than acceptance, which matches "
+                         "what E10 found."},
+        "sources": ["參考文獻/2026-08-06_人類運作邏輯/HUMAN_MECHANISMS.md · 4",
+                    "參考文獻/2026-08-06_人類運作邏輯/index.json"],
+    },
+    {
+        "id": "ext.entry-fee-known-2001",
+        "plain": {"zh": "入場費沒用，2001 年就證明過了",
+                  "en": "The entry-fee result was already proved in 2001"},
+        "how": {"zh": "Friedman & Resnick 2001 證明：身分可以免費重造時，"
+                      "對新人課稅只是把無效率換一種形式，不會消除它。"
+                      "我們 2026-07 那一輪是重新發現它。",
+                "en": "Friedman & Resnick 2001 proved that when identities are free to recreate, "
+                      "taxing newcomers only changes the form of the inefficiency. Our 2026-07 "
+                      "round rediscovered it."},
+        "detail": {"zh": "重現既有結果本身有價值——我們是在一個不同的機制組態裡量的。"
+                         "問題在於把它**當成新發現寫出去**，而我們差一點。"
+                         "已在報告與 claims.json 補上歸屬。",
+                   "en": "Reproducing a known result has value — ours was measured in a different "
+                         "mechanism configuration. The problem would have been presenting it as "
+                         "new, which we nearly did. Attribution has been added to the report and "
+                         "to claims.json."},
+        "sources": ["參考文獻/2026-08-06_agent信任/pdf/2001_Friedman_cheap-pseudonyms.pdf",
+                    "參考文獻/2026-08-06_agent信任/PRIOR_ART.md · 三"],
+    },
+    {
+        "id": "ext.oscillation-2005",
+        "plain": {"zh": "脈衝攻擊不是我們發現的，2005 年就有名字",
+                  "en": "The pulse attack is not ours; it was named in 2005"},
+        "how": {"zh": "Srivatsa 2005 原文寫著「oscillate between building and milking "
+                      "reputation」，他的 model I 就是我們的參數化。"
+                      "2009 年進了 ACM Computing Surveys 的攻擊分類表。",
+                "en": "Srivatsa 2005 writes 'oscillate between building and milking reputation'; "
+                      "his model I is our parameterisation. It entered the ACM Computing Surveys "
+                      "attack taxonomy in 2009."},
+        "detail": {"zh": "連我們的頭條也被搶先：Srivatsa 量過四種震盪模型的攻擊者成本比"
+                         " 1 : 2.28 : 2.08 : 1.36，並證明知道記憶窗 maxH 者的最佳策略是"
+                         "以週期＝maxH 震盪。我們的「1.81 倍」既較舊也較弱，"
+                         "而且我們自己已判定那是雜訊。"
+                         "\n\n保守地說，可能仍是新的只有：四道防禦同時在跑的組態、"
+                         "把盲區當第二軸量交互作用、以及扣分機制關閉自己赦免通道的病理。",
+                   "en": "Even our headline was pre-empted: Srivatsa measured attacker-cost ratios "
+                         "of 1 : 2.28 : 2.08 : 1.36 across four oscillation models and proved the "
+                         "optimum for an attacker who knows the memory window. Our 1.81x is both "
+                         "older and weaker, and we had already judged it noise."},
+        "sources": ["參考文獻/_引用備份/verification.jsonl · srivatsa2005",
+                    "參考文獻/2026-08-06_agent信任/PRIOR_ART.md · 一"],
+    },
+]
+
+# ── 二：已知研究方向與結果 ──────────────────────────────────────────────
+DIRECTIONS_DONE = [
+    {"id": "dir.ext.reputation-attacks", "side": "external",
+     "name": {"zh": "信譽系統的攻防與不可能性", "en": "Reputation-system attacks and impossibility"},
+     "result": {"zh": "20 年的成熟文獻。whitewash／sybil／oscillation 都已命名並分類；"
+                      "而且有不可能性結果——對稱的信譽函數不可能同時是 sybilproof 的"
+                      "（Cheng & Friedman 2005）。所以「抗 Sybil」這個措辭我們不能用。",
+                "en": "Two decades of mature work. Whitewashing, sybil and oscillation attacks "
+                      "are all named and classified, and there are impossibility results: a "
+                      "symmetric reputation function cannot be sybilproof (Cheng & Friedman "
+                      "2005). So we cannot describe our system as sybil-resistant."},
+     "sources": ["參考文獻/2026-08-06_agent信任/pdf/2009_Hoffman_survey-attack-defense-reputation-systems.pdf",
+                 "參考文獻/2026-08-06_agent信任/pdf/2005_Cheng_sybilproof-reputation-mechanisms.pdf"]},
+    {"id": "dir.ext.verifiable", "side": "external",
+     "name": {"zh": "可驗證計算（不靠信譽，靠證明）", "en": "Verifiable computation (proof, not reputation)"},
+     "result": {"zh": "競爭路線，而且比我們強在一個關鍵點上：它給的是**結構性保證**，"
+                      "我們給的是機率性保證（抽中才發現）。Figuera 2026 直指"
+                      "「產生日誌的實體就是被記錄的實體」是結構性缺陷——"
+                      "而我們的 Envelope 正是交付者自簽。這一點必須主動寫出來。",
+                "en": "A competing route, and stronger on one key point: it gives structural "
+                      "guarantees where ours are probabilistic (you only find out if you sample). "
+                      "Figuera 2026 names the flaw directly — the entity producing the log is the "
+                      "entity being logged — and our Envelope is signed by the deliverer."},
+     "sources": ["參考文獻/2026-08-06_agent信任/pdf/2026_Figuera_notarized-agents-receiver-attested-receipts.pdf",
+                 "參考文獻/2026-08-06_agent信任/pdf/2019_Teutsch_truebit-scalable-verification-solution.pdf"]},
+    {"id": "dir.ext.channels", "side": "external",
+     "name": {"zh": "人類制度怎麼同時滿足三個互相衝突的要求",
+              "en": "How human institutions satisfy three conflicting requirements at once"},
+     "result": {"zh": "找對專家要**集中**資訊、不被影響要**切斷**資訊、守住邊界要**拒絕權**"
+                      "——三者的最佳解互相衝突。人類的解法是把不同種類的資訊"
+                      "**分開在不同通道傳**：Delphi 傳論證不傳立場，核對表傳角色不傳評價。"
+                      "而 Lorenz 2011 證明光是給**平均值**就足以摧毀獨立性。",
+                "en": "Locating expertise needs information concentrated; independence needs it "
+                      "cut off; scope boundaries need a right to refuse. Human institutions "
+                      "satisfy all three by separating what travels on which channel: Delphi "
+                      "passes arguments but not positions. Lorenz 2011 showed that merely showing "
+                      "the average destroys independence."},
+     "sources": ["參考文獻/2026-08-06_人類運作邏輯/HUMAN_MECHANISMS.md · 0、2"]},
+    {"id": "dir.ext.audit-backfires", "side": "external",
+     "name": {"zh": "究責機制什麼時候會反效果", "en": "When accountability backfires"},
+     "result": {"zh": "Power 的 decoupling：組織會長出可稽核的**表面**——文件、流程紀錄——"
+                      "滿足稽核者，底下照舊，於是**稽核驗證的是自己的影子**。"
+                      "Campbell's law 把腐化歸因於指標所承載的**決策權重**。"
+                      "\n這反過來說明沙箱重跑為什麼強：跑不過就是跑不過，做不出表面。",
+                "en": "Power's decoupling: organisations grow an auditable surface — documents, "
+                      "process records — that satisfies the auditor while the substance goes on "
+                      "unchanged, so the audit verifies its own shadow. Campbell's law puts the "
+                      "corruption pressure on the decision weight a metric carries. This is "
+                      "precisely why sandboxed re-execution is strong: you cannot fake passing."},
+     "sources": ["參考文獻/2026-08-06_人類運作邏輯/HUMAN_MECHANISMS.md · 4"]},
+    {"id": "dir.int.entrycost", "side": "internal",
+     "name": {"zh": "入場成本這條路（E1–E16，2026-07-26）",
+              "en": "The entry-cost line (E1-E16, 2026-07-26)"},
+     "result": {"zh": "外生入場費無效，設太低還反過來幫攻擊者熬過見習期。"
+                      "真正的綁定約束是**同儕評審的準確率**。"
+                      "\n（事後才知道 Friedman & Resnick 2001 已經證明過主結論。）",
+                "en": "An exogenous entry fee does not work, and setting it too low actively helps "
+                      "the attacker survive probation. The binding constraint is reviewer "
+                      "accuracy. We later learned Friedman & Resnick 2001 had already proved the "
+                      "main result."},
+     "sources": [f"專題/實驗記錄/{ENTRY}/E4.json、E12.json"]},
+    {"id": "dir.int.pulse", "side": "internal",
+     "name": {"zh": "脈衝攻擊與稽核盲區（E17–E24，2026-08-03）",
+              "en": "Pulse attack and audit blind spot (E17-E24, 2026-08-03)"},
+     "result": {"zh": "偵測是一個乘積 (1−盲區)×抽樣率×準確率，三個因子同軸、可互相替換。"
+                      "時間結構的效應被「曝光 × 效率」的反向抵消藏起來了——"
+                      "總數只差 1.81 倍，攻擊效率其實差 8.45 倍。"
+                      "\n六條主要結論送對抗式複驗，**三條被推翻、三條說得太滿，"
+                      "沒有一條完好**。",
+                "en": "Detection is a single product of (1 - blind) x sample rate x accuracy; the "
+                      "three factors are on one axis and substitute for each other. The effect of "
+                      "timing structure was hidden by exposure and efficiency cancelling out: the "
+                      "total spans 1.81x while attack efficiency spans 8.45x. Six headline "
+                      "conclusions went to adversarial review; three were refuted and three "
+                      "overstated — none survived intact."},
+     "sources": [f"專題/實驗記錄/{PULSE}/報告_脈衝攻擊與稽核盲區.md",
+                 "專題/實驗記錄/_index/claims.json"]},
+    {"id": "dir.int.realmodel", "side": "internal",
+     "name": {"zh": "真模型信任開關（E10，2026-07-26）",
+              "en": "Trust switch on a real model (E10, 2026-07-26)"},
+     "result": {"zh": "60 題配對：開 36、關 31，差 +8.3%，**McNemar p=0.332 不顯著**。"
+                      "\n2026-08-06 的再分析發現量錯了地方：換成中介變數（有沒有被路由給"
+                      "破壞者）是 33.3% 對 18.3%、p=0.093；而且機制要學——前 20 題兩臂"
+                      "完全一樣（30% 對 30%），最後 20 題是 25% 對 5%。"
+                      "\n**那是事後分析，不是結論**：燒機期是看過曲線才切的。"
+                      "已公布的 p=0.332 不撤。",
+                "en": "60 paired tasks: 36 with the layer on, 31 off, +8.3%, McNemar p=0.332 — not "
+                      "significant. A 2026-08-06 re-analysis found we measured the wrong thing: "
+                      "the mediator (was the job routed to a saboteur) gives 33.3% vs 18.3%, "
+                      "p=0.093, and the mechanism has to learn — the first 20 tasks are identical "
+                      "across arms (30% vs 30%) while the last 20 are 25% vs 5%. That is a "
+                      "post-hoc diagnostic, not a result: the burn-in was chosen after seeing the "
+                      "curve. The published p=0.332 stands."},
+     "sources": [f"專題/實驗記錄/{REAL}/E10.json", "examples/e10_mediator.py"]},
+]
+
+# ── 三：未來研究方向 ────────────────────────────────────────────────────
+#
+# **每一條的「結果」欄位一律是「尚未執行」。** 這裡寫的是試驗的設計與判準，
+# 不是它會得到什麼——沒跑就是沒跑，這一頁最不該做的事就是把計畫寫得像結果。
+FUTURE = [
+    {
+        "id": "fut.channel-separation",
+        "name": {"zh": "通道分離：評審看不看得到彼此",
+                 "en": "Channel separation: can reviewers see each other"},
+        "why": {"zh": "人類制度靠「不同資訊走不同通道」同時滿足三個衝突的要求，"
+                      "而 Vacant 現在只有一條通道。所以我們量到的共同盲區，"
+                      "可能有一部分是自己的架構造成的，不全是模型的性質。",
+                "en": "Human institutions satisfy three conflicting requirements by separating "
+                      "what travels on which channel; Vacant has only one channel. So part of the "
+                      "blind spot we measure may be produced by our own architecture rather than "
+                      "by the model."},
+        "mvt": {"zh": "把評審改成 commit-reveal：第一輪只把 sha256(評語‖nonce) 上鏈，"
+                      "面板關閉後才揭露。同一批 seed 跑「密封／不密封」兩臂，"
+                      "量殘餘的評審相關性。logbook 的 hash-chain 幾乎免費就能做。",
+                "en": "Make reviews commit-reveal: round one publishes only sha256(review||nonce) "
+                      "to the chain, revealed after the panel closes. Run sealed and unsealed arms "
+                      "on the same seeds and measure residual reviewer correlation."},
+        "criterion": {"zh": "密封後相關性顯著下降 → 我們量到的盲區有架構成分，"
+                            "而且殘餘相關性從此才真的可歸因於同源。",
+                      "en": "If correlation drops significantly under sealing, part of the blind "
+                            "spot is architectural — and residual correlation becomes genuinely "
+                            "attributable to shared provenance."},
+        "cost": {"zh": "低。現有模擬框架加一個布林參數。", "en": "Low: one boolean in the existing sim."},
+    },
+    {
+        "id": "fut.expertise-profile",
+        "name": {"zh": "專長分格：把「好」跟「擅長這個」分開",
+                 "en": "Expertise profiles: separate 'good' from 'good at this'"},
+        "why": {"zh": "現在的信譽是一個純量。人類組織解路由問題靠的是「誰會什麼」的目錄，"
+                      "而文獻顯示光是把那張表交出去就能複製共同受訓的全部效益。",
+                "en": "Reputation is currently a scalar. Human organisations solve routing with a "
+                      "directory of who knows what, and the literature shows that simply handing "
+                      "over that directory reproduces the full benefit of training together."},
+        "mvt": {"zh": "把信譽的 key 從 (stream, branch, substrate) 擴一維加入坑型——"
+                      "codebench 的六個坑型是現成切分。同一批 seed 跑擴／不擴兩臂。",
+                "en": "Extend the reputation key with the pit type; codebench's six types are an "
+                      "existing partition. Run both arms on the same seeds."},
+        "criterion": {"zh": "路由到「擅長這個坑型」的比例上升，且總交付品質不變差。",
+                      "en": "The share of jobs routed to agents strong on that pit type rises, "
+                            "with no loss in overall delivery quality."},
+        "cost": {"zh": "低。改 key 的形狀，六坑型已存在。", "en": "Low: reshape the key."},
+    },
+    {
+        "id": "fut.slash-shape",
+        "name": {"zh": "讓懲罰不要關掉自己的赦免通道",
+                 "en": "Stop the penalty from closing its own path back"},
+        "why": {"zh": "現行 slash 做 β += (α+β)，同時把均值砍半**並把 n 加倍**，"
+                      "而 n 是回歸時間的指數係數。結果是資深者更難翻身"
+                      "（觀測 48 要約 1e66 次觀測才回得來）。",
+                "en": "Today slash does beta += (alpha+beta), halving the mean while doubling n — "
+                      "and n is the exponent in the return time. Seniority therefore makes "
+                      "recovery harder: at 48 observations it takes on the order of 1e66."},
+        "mvt": {"zh": "改成只動均值不動 n，量被扣分後的回歸輪數分布，"
+                      "並用 B 層六情境確認牙齒沒有變鈍。",
+                "en": "Change it to move the mean without changing n, measure the distribution of "
+                      "rounds-to-return, and re-run the six B-layer scenarios to confirm the "
+                      "teeth are still sharp."},
+        "criterion": {"zh": "資深者的回歸時間不再爆炸，**且**六情境的判準全部仍然通過。"
+                            "任一情境掉了就退回。",
+                      "en": "Return time for senior agents stops exploding AND all six scenario "
+                            "criteria still pass. If any fails, revert."},
+        "cost": {"zh": "低（改一行），但**要先預註冊**——這會改變牙齒的形狀。",
+                 "en": "Low (one line) but must be pre-registered: it changes the teeth."},
+    },
+    {
+        "id": "fut.attribution",
+        "name": {"zh": "產出到底是模型定義的還是帳本定義的",
+                 "en": "Is the output defined by the model or by the ledger"},
+        "why": {"zh": "這個系統包在一顆凍結的模型外面。四條通道裡三條是選擇，"
+                      "只有「記憶注入」真的進到生成。那到底有多少貢獻是我們的？",
+                "en": "The system wraps a frozen model. Three of its four channels are selection; "
+                      "only memory injection reaches generation. So how much of the result is "
+                      "ours?"},
+        "mvt": {"zh": "讓一條記憶流在模型 A 上累積 N 次交付，然後整條搬到模型 B，"
+                      "看表現跟著模型走還是跟著記憶走。信譽的三元組 key"
+                      "（stream, branch, substrate）本來就是為這件事設計的。",
+                "en": "Let one memory stream accumulate N deliveries on model A, move it to model "
+                      "B, and see whether performance follows the model or the stream. The "
+                      "reputation key was designed for exactly this."},
+        "criterion": {"zh": "變異數分解：Var(基質) 對 Var(記憶) 的比例。"
+                            "不論倒向哪邊都是可發表的——若記憶不可攜，那是一個誠實的負面結果。",
+                      "en": "A variance decomposition of substrate versus memory. Either direction "
+                            "is publishable; if memory does not transfer, that is an honest "
+                            "negative result."},
+        "cost": {"zh": "中。要兩顆模型的機時。", "en": "Medium: needs compute on two models."},
+    },
+    {
+        "id": "fut.measure-reviewer",
+        "name": {"zh": "量我們自己的評審信度，不要再用 0.7",
+                 "en": "Measure our own reviewer reliability instead of assuming 0.7"},
+        "why": {"zh": "模擬用 reviewer_accuracy=0.7 當預設，那個數字**沒有依據**。"
+                      "而人類專家的同儕評審信度接近零（κ=.17、ICC=0），"
+                      "沒有理由假設 agent 評審更好。",
+                "en": "The simulation defaults to reviewer_accuracy=0.7 with no basis, while human "
+                      "expert peer review has near-zero reliability (kappa .17, ICC 0). There is "
+                      "no reason to assume agent reviewers do better."},
+        "mvt": {"zh": "同一批交付送給多組評審，算組間 ICC 與 κ；"
+                      "並分開算「拒絕」與「接受」的一致度。",
+                "en": "Send the same deliveries to multiple reviewer panels, compute ICC and kappa "
+                      "between panels, and compute agreement separately for rejection and "
+                      "acceptance."},
+        "criterion": {"zh": "拿到我們自己系統上的數字去取代 0.7。"
+                            "若「拒絕」的一致度顯著高於「接受」，那就只宣稱前者——"
+                            "E10 的結果已經指向這個方向。",
+                      "en": "Replace 0.7 with a number measured on our own system. If agreement on "
+                            "rejection is much higher than on acceptance, claim only the former — "
+                            "E10 already points that way."},
+        "cost": {"zh": "中。要重複評審，模型呼叫數乘上組數。",
+                 "en": "Medium: multiplies review calls by the number of panels."},
+    },
+    {
+        "id": "fut.adversarial-realmodel",
+        "name": {"zh": "真模型 × 真的會作惡的 agent",
+                 "en": "Real model against an agent that actually defects"},
+        "why": {"zh": "我們最大的效果全部出現在有攻擊者的模擬裡，而真模型那一輪跑的是"
+                      "乾淨任務——正好是稽核有 oracle、篩選沒什麼可篩的區域。"
+                      "這一支從來沒跑過。",
+                "en": "Our largest effects all come from simulations with an attacker, while the "
+                      "real-model round ran clean tasks — exactly the regime where the auditor is "
+                      "an oracle and there is little to filter. This has never been run."},
+        "mvt": {"zh": "roster 放進真的會作惡的 agent（而不是模擬的壞交付），"
+                      "跑信任層開／關，主要終點用**中介變數**（路由給作惡者的比例），"
+                      "燒機期與連續評分**事前寫進預註冊**。",
+                "en": "Put a genuinely defecting agent in the roster, run the layer on and off, "
+                      "use the mediator (share of jobs routed to the defector) as the primary "
+                      "endpoint, and pre-register the burn-in and the continuous score."},
+        "criterion": {"zh": "預註冊之後的中介變數差異。這一支的重點是**先把終點定死**，"
+                            "因為 E10 的教訓就是量測選擇能讓效果量差好幾倍。",
+                      "en": "The pre-registered mediator difference. The point is to fix the "
+                            "endpoint first: E10 showed that measurement choices move the effect "
+                            "size several-fold."},
+        "cost": {"zh": "高。真模型機時。", "en": "High: real-model compute."},
+    },
+    {
+        "id": "fut.rescore-e10",
+        "name": {"zh": "把已經跑過的答案重新評分（零機時）",
+                 "en": "Re-score answers we already have (no compute)"},
+        "why": {"zh": "E10 的品質被壓成一個布林值，但題目來自 EvalPlus，每題有大量測試斷言。"
+                      "而 207 筆交付的完整回應都在閘道歸檔裡。",
+                "en": "E10 collapsed quality to a boolean, but the tasks come from EvalPlus where "
+                      "each problem has many assertions — and all 207 full responses are in the "
+                      "gateway archive."},
+        "mvt": {"zh": "用歸檔的答案重跑測試，改成「通過的斷言比例」，配對 Wilcoxon。"
+                      "**不呼叫任何模型。**",
+                "en": "Re-run the tests against the archived answers, score the fraction of "
+                      "assertions passed, and use a paired Wilcoxon. No model calls at all."},
+        "criterion": {"zh": "同樣 60 對下的檢定力變化。"
+                            "**必須標為次要分析**——這是對已收集資料的再分析，"
+                            "在下一輪預註冊之前不能當主結果。",
+                      "en": "The change in power at the same 60 pairs. It must be reported as a "
+                            "secondary analysis: this is a re-analysis of already-collected data "
+                            "and cannot be a primary result before the next pre-registration."},
+        "cost": {"zh": "零機時。", "en": "Zero compute."},
+    },
+]
+
 REFUTED_ORDER = [
     "pulse.audit_cannot_close_blindspot",
     "pulse.crossover",
@@ -746,9 +1152,11 @@ def main() -> None:
                   "get rarer?",
         },
         "subhead": {
-            "zh": "這一頁只講三件事：目前確定的、還不確定的、以及我們自己弄錯的。",
-            "en": "This page covers three things: what is settled, what is not, and what we got "
-                  "wrong ourselves.",
+            "zh": "分三類：現在知道的、已經走過的路（別人的與我們的）、"
+                  "以及還沒走的路——最後那一類只有計畫，沒有結果，沒做就是沒做。",
+            "en": "Three parts: what we know now, the ground already covered (theirs and ours), "
+                  "and the ground not yet covered — that last part is plans only. Nothing there "
+                  "has been run, and nothing there is reported as a result.",
         },
         "counts": {
             "facts": len(facts),
@@ -761,8 +1169,24 @@ def main() -> None:
             "rounds": len(catalog["輪次"]),
             "files": catalog["統計"]["檔案數"],
             "rows": catalog["統計"]["總行數"],
+            "external_knowledge": len(EXTERNAL_KNOWLEDGE),
+            "directions_external": sum(1 for d in DIRECTIONS_DONE if d["side"] == "external"),
+            "directions_internal": sum(1 for d in DIRECTIONS_DONE if d["side"] == "internal"),
+            "future": len(FUTURE),
+            "future_run": 0,   # 未來方向裡已經跑過的：零。這個數字寫在資料裡，
+                               # 因為頁面上「計畫」與「結果」不能長得一樣。
         },
         "facts": facts,
+        "external_knowledge": EXTERNAL_KNOWLEDGE,
+        "directions_done": DIRECTIONS_DONE,
+        "future": FUTURE,
+        "future_note": {
+            "zh": "下面每一條都**還沒有執行**，所以沒有結果可以報。列出來的是試驗的設計、"
+                  "判準與成本——把計畫寫得像結果，是這一頁最不該做的事。",
+            "en": "None of these has been run, so there are no results to report. What is listed "
+                  "is the design, the decision criterion and the cost. Presenting a plan as a "
+                  "result is the one thing this page must never do.",
+        },
         "unknowns": unknowns,
         "refuted": refuted,
         "source_files": [
@@ -781,7 +1205,11 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"寫出 {out} {out.stat().st_size} bytes")
-    print(f"  已確定 {len(facts)}、還不確定 {len(unknowns)}、已被推翻 {len(refuted)}")
+    print(f"  現有知識：內部 {len(facts)}、外部 {len(EXTERNAL_KNOWLEDGE)}")
+    print(f"  已知方向：外部 {sum(1 for d in DIRECTIONS_DONE if d['side']=='external')}、"
+          f"內部 {sum(1 for d in DIRECTIONS_DONE if d['side']=='internal')}")
+    print(f"  未來方向：{len(FUTURE)}（已執行 0——沒做就是沒做）")
+    print(f"  還不確定 {len(unknowns)}、已被推翻 {len(refuted)}")
     print(f"  宣稱 {len(archive_claims)}（推翻 {n_ref}、誇大 {n_over}）")
     print(f"  資料時間 {data['generated_at']}")
 
