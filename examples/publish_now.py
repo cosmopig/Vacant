@@ -411,29 +411,68 @@ def build_unknowns(claims: list[dict], honesty: list[str]) -> list[dict]:
             ],
         },
         {
+            # 2026-08-06 更正：原本這一條寫「沒有任何外部量測可以對」。文獻調研證明
+            # 那句話是錯的——別人量過相鄰的量，只是沒人量過我們這個參數本身。
             "id": "blindspot-unanchored",
             "status": "unknown",
             "plain": {
-                "zh": "真實系統裡「大家一起看不見」的錯有多少，我們沒有依據",
-                "en": "We have no outside anchor for how much everyone misses in practice",
+                "zh": "「大家一起看不見」的錯有多少，別人量過相近的，我們自己還沒量",
+                "en": "Others have measured something close to our blind-spot number; we have not measured ours",
             },
             "how": {
-                "zh": "模擬裡這個比例是我們自己轉的旋鈕，從 0 轉到 1。"
-                      "真實系統是 0.1 還是 0.6，目前沒有任何外部量測可以對。",
-                "en": "In the simulation it is a dial we turn from 0 to 1 ourselves. Whether a "
-                      "real system sits at 0.1 or 0.6, nothing outside the simulation tells us.",
+                "zh": "檢查的人如果是 AI，它們會一起錯——這件事有人量過："
+                      "350 個以上的模型裡，兩個模型都答錯時有 60% 錯在同一個答案"
+                      "（隨機的話只有 33%）；十個同款 AI 一起投票，只抵得上 1.4 個獨立的人。"
+                      "但那些量的不是我們這個旋鈕，要換算得先做假設，而我們自己的系統上還沒量過。",
+                "en": "If the checkers are AI, they fail together — and that has been measured: "
+                      "across 350+ models, when two models are both wrong they pick the same "
+                      "wrong answer 60% of the time (chance would be 33%); ten same-family "
+                      "agents voting are worth only 1.4 independent ones. But those are not our "
+                      "dial. Converting needs assumptions, and we have never measured it on our "
+                      "own system.",
             },
             "detail": {
-                "zh": honesty[1] if len(honesty) > 1 else "",
-                "en": "Anything reported at a blind fraction above 0 describes a design variant "
-                      "in which the auditor is itself a model. The current design audits by "
-                      "deterministically re-running tests in a sandbox, which corresponds to a "
-                      "blind fraction of 0 for tasks that have an objective check. Measuring the "
-                      "real number needs a real-model experiment — that is the next round.",
+                "zh": "更正紀錄：這一條原本寫的是「目前沒有任何外部量測可以對」，2026-08-06 的"
+                      "文獻調研證明那句話站不住。已知的外部量測有四組——"
+                      "Kim 2025（ICML，350+ 模型）：兩模型都錯時的同答案率 HELM 0.600（隨機 1/3）、"
+                      "HuggingFace 0.423（隨機 0.127），且**越準的模型錯得越像**，跨架構跨供應商亦然；"
+                      "Begin 2026：偏好對齊造成同源相關 ρ=0.70，十個 agent 的有效獨立數只有 1.38；"
+                      "Bugaud 2026（17 個視覺語言模型／8 家族）：相關的多數錯誤把正確答案投掉，"
+                      "佔題目 1.5–6.5%；Krumdick 2025：GPT-4o 當評審時，在**它自己也答不出來**的"
+                      "題目上 Cohen κ 從 0.86 掉到 0.16。"
+                      "\n\n但要誠實區分兩件事：這些量的是「錯得像不像」與「有效獨立數」，"
+                      "不是我們模擬裡那個 β（一筆壞交付被整個檢查團一起放行的機率）。"
+                      "換算過去需要假設單一評審的漏檢率，那個假設本身沒有被驗證。"
+                      "\n\n還有一層分別：稽核層在現行設計是沙箱裡確定性重跑測試，對有客觀檢查的"
+                      "任務 β≈0 仍然成立；但**評審層本來就是模型**，所以上面那些數字對評審層"
+                      "永遠適用，不只是「若稽核也是模型」的設計變體。"
+                      "\n\nKrumdick 那條還說明 β 不是常數：它集中在「評審自己也不會做」的那類"
+                      "任務上，所以會挑題的攻擊者可以把有效 β 推高。",
+                "en": "Correction log: this item used to say no external measurement existed. A "
+                      "2026-08-06 literature review showed that is false. Four anchors: Kim 2025 "
+                      "(ICML, 350+ models) — same-wrong-answer rate 0.600 on HELM (chance 1/3) and "
+                      "0.423 on HuggingFace (chance 0.127), with more accurate models erring more "
+                      "alike even across architectures and providers; Begin 2026 — preference "
+                      "optimization drives same-family correlation to rho=0.70, so ten agents are "
+                      "worth 1.38 independent ones; Bugaud 2026 (17 VLMs, 8 families) — correlated "
+                      "majority errors outvote the correct answer on 1.5-6.5% of items; Krumdick "
+                      "2025 — GPT-4o as judge drops from Cohen's kappa 0.86 to 0.16 on questions it "
+                      "could not answer itself. These measure error similarity and effective "
+                      "independence, not our beta (the chance a bad delivery clears the whole "
+                      "checking panel); converting requires an unvalidated assumption about the "
+                      "single-reviewer miss rate. Note also that the audit layer re-runs tests "
+                      "deterministically in a sandbox, so beta is still near 0 there for tasks with "
+                      "an objective check — but the review layer is always a model, so these "
+                      "anchors always apply to it. Krumdick further shows beta is not constant: it "
+                      "concentrates on tasks the judge cannot do itself, so an attacker who picks "
+                      "its targets can push the effective beta up.",
             },
             "sources": [
-                "_index/catalog.json · 誠實邊界[1]",
-                f"{PULSE}/報告_脈衝攻擊與稽核盲區.md · 六、誠實邊界",
+                "參考文獻/2026-08-06_agent信任/PRIOR_ART.md · 二、共同盲區有人形式化過嗎",
+                "參考文獻/2026-08-06_agent信任/pdf/2025_Kim_correlated-errors-in-llms.pdf",
+                "參考文獻/2026-08-06_agent信任/pdf/2026_Begin_preference-optimization-monoculture-prediction-markets.pdf",
+                "參考文獻/2026-08-06_agent信任/pdf/2025_Krumdick_no-free-labels-llm-judge.pdf",
+                f"{PULSE}/報告_脈衝攻擊與稽核盲區.md · 七、誠實邊界",
             ],
         },
         {

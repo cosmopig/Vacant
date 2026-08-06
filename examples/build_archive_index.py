@@ -202,6 +202,27 @@ CLAIMS: list[dict[str, Any]] = [
         "型別": "定義",
         "依據": {"程式": "vacant/entrycost.py::_should_defect 的 pulse 分支",
                  "判準": "tests/test_pulse.py::test_pulse_with_zero_recover_is_continuous"},
+        # 2026-08-06 文獻調研：這個攻擊不是本專題提出的，2005 年就有名字。
+        # 定義本身站得住，站不住的是隱含的新穎性——索引必須把這件事講出來，
+        # 否則讀它的 agent 會以為這是我們的貢獻。
+        "先行研究": {
+            "結論": "不是新的。2005 年即為 strategic oscillation，2009 年進 ACM Computing "
+                    "Surveys 的攻擊分類表，命名為 oscillation attack。",
+            "出處": ["Srivatsa et al. 2005 (TrustGuard) §2：『Or it could oscillate between "
+                     "building and milking reputation.』其 model I（固定週期方波）即本專題的 "
+                     "(B,R) 參數化；model II–IV（指數間隔／隨機好度／正弦漸變）本專題未掃",
+                     "Hoffman et al. 2009, ACM Computing Surveys §5.4：列為命名類別，"
+                     "歸功 Srivatsa 2005；其版本含多身分輪班，比本專題的單一攻擊者更強"],
+            "連我們的頭條也被搶先": "Srivatsa 量過四種震盪模型的攻擊者成本比 1 : 2.28 : 2.08 : "
+                                    "1.36，並證明知道記憶窗 maxH 者的最佳策略是以週期＝maxH 震盪。"
+                                    "本專題的『1.81 倍』既較舊也較弱，且已自判為雜訊"
+                                    "（permutation p=0.115、檢定力 25%）。",
+            "可能仍是新的（保守）": ["四道防禦同時在跑的組態下量它",
+                                      "把盲區當第二軸並量它與時間結構的交互作用（η²=0.264）"
+                                      "——盲區文獻不路由不扣分，信譽攻防文獻無盲區參數",
+                                      "slash 的 β += (α+β) 關閉自己赦免通道的病理"],
+            "檔案": "參考文獻/2026-08-06_agent信任/PRIOR_ART.md 第一節",
+        },
     },
     {
         "id": "pulse.timing_minor",
