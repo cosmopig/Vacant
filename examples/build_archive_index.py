@@ -35,6 +35,9 @@ import time
 from pathlib import Path
 from typing import Any
 
+# 裁決的單一真相來源——網頁與這份索引共用同一份，否則兩邊會漂開。
+from verdicts import verdict_for
+
 ROOT = Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/專題/實驗記錄"
 OUT = ROOT / "_index"
 
@@ -427,14 +430,24 @@ def main() -> None:
     (OUT / "methods.json").write_text(
         json.dumps({"note": "每一種測試的實際步驟、控制了什麼、沒控制什麼、踩過的坑",
                     "methods": METHODS}, ensure_ascii=False, indent=1), encoding="utf-8")
+    # 裁決一定要跟宣稱寫在一起。少了它，這份索引會告訴讀它的 agent
+    # 「這 12 條都成立」，而其中 6 條我們自己已經知道有問題——索引的全部價值
+    # 就在於它不會說謊，而讀索引的 agent 沒有網頁可以對照。
+    claims_out = [{**c, **verdict_for(c["id"])} for c in CLAIMS]
+    n_bad = sum(1 for c in claims_out if c["verdict"] in ("refuted", "overstated"))
     (OUT / "claims.json").write_text(
-        json.dumps({"note": "每條對外宣稱 → 支撐它的檔案、欄位、數值、重算方式",
-                    "claims": CLAIMS}, ensure_ascii=False, indent=1), encoding="utf-8")
+        json.dumps({"note": "每條對外宣稱 → 支撐它的檔案、欄位、數值、重算方式，"
+                            "以及對抗式複驗的裁決。"
+                            f"verdict=未複驗 代表還沒有人試過推翻它，不代表它通過了。",
+                    "裁決值": {"refuted": "宣稱是錯的，正確說法在「更正後」",
+                               "overstated": "核心站得住但說得太滿，或原始證據／機制解釋有問題",
+                               "未複驗": "尚未送複驗——不等於通過"},
+                    "claims": claims_out}, ensure_ascii=False, indent=1), encoding="utf-8")
 
     print(f"catalog.json  輪次 {len(rounds_meta)}")
     print(f"files.jsonl   {n_files} 檔、{total_rows:,} 行、{total_bytes/1e6:.1f} MB")
     print(f"schema.json   {len(SCHEMA)} 種紀錄型別")
-    print(f"claims.json   {len(CLAIMS)} 條宣稱")
+    print(f"claims.json   {len(CLAIMS)} 條宣稱（其中 {n_bad} 條被推翻或判定說得太滿）")
     print(f"methods.json  {len(METHODS)} 種測試方法")
     print(f"→ {OUT}")
 
