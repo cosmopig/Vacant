@@ -229,6 +229,40 @@ def test_lambda_changes_obs_at_slash_but_not_score_at_slash():
     assert a["routes_after_slash"] == 74 and b["routes_after_slash"] == 0
 
 
+# ── 4. 早停必須是同一場模擬的前綴 ────────────────────────────────────
+@pytest.mark.parametrize("strategy,kw", [
+    ("whitewash", {}), ("patient", {"build_rounds": 10}),
+    ("pulse", {"pulse_burst": 3, "pulse_recover": 10})])
+@pytest.mark.parametrize("budget", [1, 3])
+def test_early_stop_is_a_strict_prefix(strategy, kw, budget):
+    """`stop_when_budget_spent` 不准改變等預算比較要用的任何一個量。
+
+    它買的是機時，不是別的實驗：預算用完之後 `bad` 恆為 False，所以
+    `defected`、`accepted_bad`、`caught` 在那一刻就已經定案。早停只是不再
+    模擬之後那幾百輪的乾淨交付——而那幾百輪正是成本所在（攻擊者會被路由
+    90 次以上，每次帶三筆評審，同源推斷是歷史長度的二次式）。
+
+    實測（600 輪、blindspot=0.5、seed=p0）：whitewash budget=1 從 23.2s 掉到
+    1.4s、pulse budget=1 從 20.6s 掉到 2.0s，四個結果欄位逐位相同。
+
+    **代價**：`routed_to_attacker` 只算到停跑點（whitewash budget=1：
+    全長 91、早停 1），所以早停格的曝光不可拿去跟別段比。這一條也在判準裡。
+    """
+    base = dict(rounds=600, seed="p0", blindspot=0.5, defect_budget=budget,
+                strategy=strategy, **kw)
+    full = simulate(SimConfig(**base))
+    early = simulate(SimConfig(stop_when_budget_spent=True, **base))
+    for k in ("defected", "accepted_bad", "caught", "high_value_hits",
+              "blind_passes", "config_digest"):
+        assert full[k] == early[k], (
+            f"{strategy}/budget={budget} 的 {k} 被早停改變了："
+            f"{early[k]} != {full[k]}——早停就不再是同一場模擬的前綴")
+    assert early["stopped_early_at"] is not None
+    assert full["stopped_early_at"] is None
+    assert early["routed_to_attacker"] <= full["routed_to_attacker"], (
+        "早停的曝光不該超過全長——若超過代表停跑點算錯了")
+
+
 def test_slash_factor_is_honoured_by_the_simulation():
     """`slash_factor` 真的走進 `Registry.apply_slash`——否則整條 f 軸是裝飾。
 

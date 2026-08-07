@@ -106,6 +106,9 @@ S1_ARMS = {
 # ── S2 ───────────────────────────────────────────────────────────────────
 S2_ROUNDS = 600
 S2_BUDGETS = (1, 2, 3, 4, 6, 12)
+# 全長重跑用的預算（S2F）。篩選掃描開早停，**這一組不開**——曝光、身份數、
+# 「到第幾輪還在接單」這些機制解釋只有跑滿才算得出來。
+S2F_BUDGETS = (1, 2)
 S2_STRATEGIES = {
     "whitewash": dict(strategy="whitewash"),
     "patient": dict(strategy="patient", build_rounds=10),
@@ -221,32 +224,62 @@ def s1b(out: Path, n_seeds: int) -> list[dict]:
 
 
 # ═══ S2 預算窗口 ═════════════════════════════════════════════════════════
-def s2(out: Path, workers: int) -> list[dict]:
+def _s2_sweep(out: Path, workers: int, name: str, budgets, early: bool) -> list[dict]:
     cells = []
-    d = out / "S2"
+    d = out / name
     d.mkdir(parents=True, exist_ok=True)
     with (d / "rows.jsonl").open("w", encoding="utf-8") as rows, \
             (d / "cells.jsonl").open("w", encoding="utf-8") as cf:
-        for budget in S2_BUDGETS:
-            for name, kw in S2_STRATEGIES.items():
-                label = f"budget={budget}·{name}"
+        for budget in budgets:
+            for strat, kw in S2_STRATEGIES.items():
+                label = f"budget={budget}·{strat}"
                 cfgs = [SimConfig(rounds=S2_ROUNDS, seed=s, blindspot=0.5,
-                                  defect_budget=budget, **kw) for s in SEEDS]
+                                  defect_budget=budget,
+                                  stop_when_budget_spent=early, **kw) for s in SEEDS]
                 c = run_cell(label, cfgs, logdir=d / "logs", workers=workers,
-                             params={"budget": budget, "strategy": name},
+                             params={"budget": budget, "strategy": strat,
+                                     "early_stop": early},
                              budget=budget, rows_out=rows, cells_out=cf)
                 cells.append(c)
+                expo = ("（早停，不可比）" if early
+                        else f"{c['routed_to_attacker']['mean']:>7}")
                 print(f"  {label:<24} 用滿 {c['budget_bound_rate']:>6}"
                       f"  作惡 {c['defected']['mean']:>6}"
                       f"  得手 {c['accepted_bad']['mean']:>6}"
-                      f"  曝光 {c['routed_to_attacker']['mean']:>7}", flush=True)
+                      f"  曝光 {expo}", flush=True)
+    return cells
+
+
+def s2(out: Path, workers: int) -> list[dict]:
+    """篩選掃描：找出每一臂都用得完的預算窗口（開早停，機時便宜）。"""
+    cells = _s2_sweep(out, workers, "S2", S2_BUDGETS, early=True)
     _dump(out, "S2", cells,
-          note=f"預算窗口：budget ∈ {S2_BUDGETS} × 5 策略 × 30 seeds × {S2_ROUNDS} 輪、"
-               "blindspot=0.5（沿用原 E19 的操作點）。判準是 defected == BUDGET "
-               "（budget_bound_rate），不是 <= BUDGET——上界恆成立，抓不到"
-               "「這一臂根本沒被綁住」。",
+          note=f"預算窗口篩選：budget ∈ {S2_BUDGETS} × 5 策略 × 30 seeds × "
+               f"{S2_ROUNDS} 輪、blindspot=0.5（沿用原 E19 的操作點）。"
+               "判準是 defected == BUDGET（budget_bound_rate），不是 <= BUDGET"
+               "——上界恆成立，抓不到「這一臂根本沒被綁住」。"
+               "**本段開了 stop_when_budget_spent**：defected 與 accepted_bad "
+               "在預算用完那一刻就定案，所以這兩個量與跑滿完全相同（判準逐位驗過）；"
+               "代價是 routed_to_attacker 只算到停跑點，不可與別段比曝光。"
+               "曝光與身份數看 S2F（全長重跑）。",
           rounds=S2_ROUNDS,
-          extra={"budgets": list(S2_BUDGETS),
+          extra={"budgets": list(S2_BUDGETS), "early_stop": True,
+                 "strategies": {k: v for k, v in S2_STRATEGIES.items()}})
+    return cells
+
+
+def s2f(out: Path, workers: int) -> list[dict]:
+    """在綁得住的預算上全長重跑：曝光、身份數、續航只有跑滿才算得出來。"""
+    cells = _s2_sweep(out, workers, "S2F", S2F_BUDGETS, early=False)
+    _dump(out, "S2F", cells,
+          note=f"等預算比較（全長）：budget ∈ {S2F_BUDGETS} × 5 策略 × 30 seeds × "
+               f"{S2_ROUNDS} 輪、blindspot=0.5，**不開早停**。"
+               "S2 篩出窗口、S2F 在窗口內做真正的比較——複驗指出 whitewash 的優勢"
+               "來自免費換身份重新取得路由權（用掉 4.7 個身份、到第 542 輪還在接單，"
+               "而 pulse 第 160 輪就被餓死），那是入場成本問題，"
+               "要看 identities_used 與 routed_to_attacker 才看得到。",
+          rounds=S2_ROUNDS,
+          extra={"budgets": list(S2F_BUDGETS), "early_stop": False,
                  "strategies": {k: v for k, v in S2_STRATEGIES.items()}})
     return cells
 
@@ -285,7 +318,7 @@ def s3(out: Path, workers: int) -> list[dict]:
     return cells
 
 
-STAGES = {"S1": s1, "S1B": s1b, "S2": s2, "S3": s3}
+STAGES = {"S1": s1, "S1B": s1b, "S2": s2, "S2F": s2f, "S3": s3}
 
 
 def main() -> None:

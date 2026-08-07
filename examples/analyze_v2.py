@@ -161,6 +161,9 @@ def analyse_s2(rows: list[dict]) -> dict[str, Any]:
                 "mean_routed": _mean([r["routed_to_attacker"] for r in rs]),
                 "mean_identities": _mean([r["identities_used"] for r in rs]),
                 "n_effective_bad": len({r["accepted_bad"] for r in rs}),
+                # 早停格的曝光只算到停跑點，不可與別段比（在表上就標出來）
+                "early_stop": bool(rs and rs[0].get("early_stop")),
+                "mean_stopped_at": _mean([r.get("stopped_early_at") for r in rs]),
             })
 
     # 窗口：所有臂的 budget_bound_rate 都 ≥ 門檻的預算

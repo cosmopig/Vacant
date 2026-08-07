@@ -69,7 +69,7 @@ _LATER_FIELDS = ("pulse_burst", "pulse_recover", "audit_accuracy",
 #
 # 代價：兩個只差懲罰參數的設定會算出**相同的 digest**。所以 digest 不能再
 # 拿來當「這兩格是不是同一個設定」的判準——那件事用 run_key()（涵蓋全欄位）。
-_SEED_EXEMPT_FIELDS = ("slash_n_factor", "slash_factor")
+_SEED_EXEMPT_FIELDS = ("slash_n_factor", "slash_factor", "stop_when_budget_spent")
 
 
 @dataclass
@@ -148,6 +148,18 @@ class SimConfig:
     # 攻擊預算上限：整場最多作惡幾筆。等預算對照用——把「作惡總量」固定住，
     # 才能把「時機」與「數量」分開，否則脈衝的優勢會跟攻擊次數混在一起。
     defect_budget: int | None = None
+    # 預算用完就收工（2026-08-07）。**這不是換一個實驗，是同一場模擬的前綴。**
+    #   `defected` 與 `accepted_bad` 在預算用完的那一刻就已經定案（之後 bad 恆為
+    #   False），所以等預算比較要的兩個量完全不受影響——判準
+    #   `test_early_stop_is_a_strict_prefix` 逐位驗證這件事。
+    #   買到的是機時：預算用完之後的攻擊者會一路乾淨交付、被路由 90 次以上，
+    #   而每次路由帶三筆評審、評審的同源推斷是歷史長度的二次式。實測 S2 的
+    #   一格（30 seeds）從約 7 分鐘掉到不到 1 分鐘。
+    #   **代價要誠實標明**：`routed_to_attacker`（曝光）只算到停跑點為止，
+    #   所以 S2 的曝光欄不能拿去跟 S1／S3／基線比。
+    #   停跑條件刻意也包含「攻擊者已經沒有身份可用」以外的情形都不停——
+    #   只認預算，其他理由停跑會讓「這一臂被餓死」跟「這一臂跑完了」混掉。
+    stop_when_budget_spent: bool = False
     # ── slash 的取捨參數 λ（2026-08-07 新增）────────────────────────────
     # 見 reputation.Beta.slash。λ 把「均值下降幅度」與「n 上升幅度」解耦：
     # 均值一律變 SLASH_FACTOR 倍（與 λ 無關），n 只上升 λ·Δ。
@@ -407,6 +419,13 @@ def _simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]
                 stats["identities"] += 1
                 if cfg.entry.kind == "endorse" and attacker.endorser is None:
                     stats["blocked_no_endorser"] += 1
+
+            # 預算用完就收工（只在明確要求時）。放在迴圈**尾端**：這一輪
+            # 該做的事全部做完才停，所以停跑前的每一步與不早停時逐位相同。
+            if (cfg.stop_when_budget_spent and cfg.defect_budget is not None
+                    and stats["defected"] >= cfg.defect_budget):
+                stats["stopped_early_at"] = rnd
+                break
     finally:
         if log_f:
             log_f.close()
@@ -584,6 +603,8 @@ def _summarise(cfg: SimConfig, s: dict) -> dict[str, Any]:
         # 被 slash 之後還剩幾輪可用來翻身（右設限的分母，報「沒回來」時必須一起報）
         "rounds_after_slash": (cfg.rounds - s["first_slash_round"]
                                if s.get("first_slash_round") is not None else None),
+        # 早停在第幾輪（None＝跑滿）。曝光欄只到這一輪為止，讀表的人要看得到。
+        "stopped_early_at": s.get("stopped_early_at"),
         # 附帶損害：誠實居民因連坐而損失的信譽總量。任何入場設計都要付代價，
         # 只報攻擊者 ROI 不報這一欄，等於只報好處不報成本。
         "honest_damage": s.get("honest_damage", 0.0),

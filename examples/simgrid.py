@@ -44,7 +44,7 @@ NUMERIC_KEYS = (
     # slash 之後（排除軸／贖回軸）
     "first_slash_round", "routes_after_slash", "accepted_bad_after_slash",
     "rounds_to_next_route", "score_at_slash", "obs_at_slash",
-    "score_final", "obs_final", "rounds_after_slash",
+    "score_final", "obs_final", "rounds_after_slash", "stopped_early_at",
 )
 
 DEFAULT_WORKERS = max(1, min(10, (os.cpu_count() or 4) - 2))
