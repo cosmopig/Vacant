@@ -151,6 +151,8 @@ def analyse_s2(rows: list[dict]) -> dict[str, Any]:
     for bud in budgets:
         for s in strategies:
             rs = by[(bud, s)]
+            if not rs:
+                continue      # 跑到一半：這一格還沒有資料，如實跳過不要編數字
             bound = [r for r in rs if r["defected"] == bud]
             table.append({
                 "budget": bud, "strategy": s, "n_seeds": len(rs),
@@ -167,9 +169,13 @@ def analyse_s2(rows: list[dict]) -> dict[str, Any]:
             })
 
     # 窗口：所有臂的 budget_bound_rate 都 ≥ 門檻的預算
-    windows = {}
+    # 只有五臂都跑完的預算才算數——跑到一半的預算不能因為「缺的那臂還沒回報」
+    # 就被算成全臂通過。這是紀律 4 的同一個念頭：不要讓「沒量到」偽裝成「合格」。
+    complete = [b for b in budgets
+                if len({t["strategy"] for t in table if t["budget"] == b}) == len(strategies)]
+    windows = {"budgets_with_all_arms_measured": complete}
     for thr in (1.0, 0.9, 0.8):
-        ok = [b for b in budgets
+        ok = [b for b in complete
               if all(t["budget_bound_rate"] >= thr for t in table if t["budget"] == b)]
         windows[f"all_arms_bound_rate_ge_{thr}"] = ok
 
