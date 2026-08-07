@@ -100,11 +100,13 @@ BLINDSPOTS = (0.0, 0.5, 0.7, 0.3, 0.15)
 
 # ── S1 ───────────────────────────────────────────────────────────────────
 S1_ROUNDS = 600
-S1_LAMBDAS = (0.0, 0.25, 0.5, 0.75, 1.0)
-# f=0.5 是現行操作點（在那裡光是均值下降就足以永久排除，λ 量不到東西）；
-# f=0.9 是複驗觀測到「slash 0.9 在 177 輪回歸」的可翻身區。兩個點就足以
-# 說明「λ 有沒有效取決於 f」——那正是這一段最重要的一句話。
-S1_FACTORS = (0.5, 0.9)
+# 掃描範圍由 4.1 的解析解決定，不是拍腦袋決定的：
+#   - f 是主旋鈕（f 0.5→0.9 讓回歸需求從 1e12 掉到 1e0.95），所以 f 掃三個點
+#   - λ 只在「n 很小的時候被抓」那個角落有分辨力，而且是二選一的性質
+#     （到得了／到不了），中間值不會多出新的行為，所以 λ 只掃兩個端點
+# 把機時花在 f=0.5 的大 n 區沒有意義——那裡 λ=0 與 λ=1 都到不了。
+S1_LAMBDAS = (0.0, 1.0)
+S1_FACTORS = (0.5, 0.7, 0.9)
 S1_ARMS = {
     # 排除軸：被 slash 之後繼續作惡、不換身份
     "頑固者": dict(strategy="patient", build_rounds=0),
@@ -207,12 +209,20 @@ def analytic_return_table() -> list[dict]:
 
 
 # ═══ S1B B 層六情境（每個候選 λ）═══════════════════════════════════════
-def s1b(out: Path, n_seeds: int) -> list[dict]:
+def s1b(out: Path, n_seeds: int, lambdas: tuple[float, ...] | None = None) -> list[dict]:
+    """只驗**要建議的操作點**，不全掃。
+
+    六情境裡只有 ④reviewer_stake 與 ⑤decay_slash 會呼叫 slash，其餘四個
+    （簽章歸屬、同源降權、probation 洗白、M2 記憶）程式路徑上完全不碰它，
+    所以它們對 λ 是結構性不變，不需要為每個 λ 各跑一次來「證明」。
+    仍然六個都跑，是因為驗收的意思是「這個操作點上整套牙齒還成立」，
+    不是「λ 有沒有動到某兩個情境」。
+    """
     from vacant.blayer import run_all
     d = out / "S1B"
     d.mkdir(parents=True, exist_ok=True)
     res = []
-    for lam in S1_LAMBDAS:
+    for lam in (lambdas or S1_LAMBDAS):
         t0 = time.time()
         reports = run_all(n_seeds=n_seeds, out_dir=d / f"lam{lam}",
                           slash_n_factor=lam)
@@ -340,6 +350,8 @@ def main() -> None:
                          "λ 篩選用較小值時報告必須標明（判準是門檻不是檢定）")
     ap.add_argument("--seeds", type=int, default=None,
                     help="覆寫 seed 數（只給冒煙測試用；正式跑不要給）")
+    ap.add_argument("--blayer-lambdas", nargs="*", type=float, default=None,
+                    help="S1B 只驗這幾個 λ（建議操作點）；不給＝掃 S1_LAMBDAS")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     if a.seeds:
@@ -351,7 +363,8 @@ def main() -> None:
         t0 = time.time()
         print(f"── {name} ──", flush=True)
         if name == "S1B":
-            STAGES[name](a.out, a.blayer_seeds)
+            STAGES[name](a.out, a.blayer_seeds,
+                         tuple(a.blayer_lambdas) if a.blayer_lambdas else None)
         else:
             STAGES[name](a.out, a.workers)
         print(f"   （{round(time.time() - t0, 1)}s）", flush=True)

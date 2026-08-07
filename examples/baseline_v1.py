@@ -48,7 +48,7 @@ SEEDS = [f"p{i}" for i in range(30)]
 # 貴到會吃掉整輪機時：它每輪丟一個身份，600 輪後 registry 有 601 張卡，
 # 路由的成本是 O(輪數 × 卡數 × cell 數)。三個點已經夠當對照組（單調性看得到、
 # 端點沒有塌），要跑滿五個點用 --blindspots 0 0.15 0.3 0.5 0.7。
-BLINDSPOTS = (0.0, 0.3, 0.7)
+BLINDSPOTS = (0.0, 0.3, 0.6)
 BLINDSPOTS_FULL = (0.0, 0.15, 0.3, 0.5, 0.7)
 STRATEGIES: dict[str, dict] = {
     "whitewash": dict(strategy="whitewash"),
