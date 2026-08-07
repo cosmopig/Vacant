@@ -90,12 +90,21 @@ from simgrid import DEFAULT_WORKERS, run_cell, write_manifest
 from vacant.entrycost import SimConfig
 
 SEEDS = [f"p{i}" for i in range(30)]
-BLINDSPOTS = (0.0, 0.15, 0.3, 0.5, 0.7)      # 不含 1.0（退化端點）
+# 不含 1.0（退化端點）。**順序是刻意的**：機時被四個 agent 分著用，跑不完的
+# 機率是實質風險，所以把資訊量最大的三個點排前面——
+#   0.0  現行設計（sandbox 確定性重跑）
+#   0.5  原 E24 十五格全部跑在這裡，也就是被推翻那條結論的操作點
+#   0.7  高盲區端（但不是退化端點）
+# 0.3 / 0.15 是補密度用的，跑得到就跑。
+BLINDSPOTS = (0.0, 0.5, 0.7, 0.3, 0.15)
 
 # ── S1 ───────────────────────────────────────────────────────────────────
-S1_ROUNDS = 800
+S1_ROUNDS = 600
 S1_LAMBDAS = (0.0, 0.25, 0.5, 0.75, 1.0)
-S1_FACTORS = (0.5, 0.7, 0.85, 0.95)
+# f=0.5 是現行操作點（在那裡光是均值下降就足以永久排除，λ 量不到東西）；
+# f=0.9 是複驗觀測到「slash 0.9 在 177 輪回歸」的可翻身區。兩個點就足以
+# 說明「λ 有沒有效取決於 f」——那正是這一段最重要的一句話。
+S1_FACTORS = (0.5, 0.9)
 S1_ARMS = {
     # 排除軸：被 slash 之後繼續作惡、不換身份
     "頑固者": dict(strategy="patient", build_rounds=0),
@@ -184,7 +193,7 @@ def analytic_return_table() -> list[dict]:
     rows = []
     c, target, m = 0.3, 0.95, 0.9
     for n0 in (1.0, 3.0, 10.0, 48.0):
-        for f in S1_FACTORS:
+        for f in (0.5, 0.7, 0.85, 0.9, 0.95):
             delta = (n0 + 2.0) * (1.0 / f - 1.0)   # Δ=(α+β)(1/f−1)，α+β=n+2
             for lam in S1_LAMBDAS:
                 n1 = n0 + lam * delta
