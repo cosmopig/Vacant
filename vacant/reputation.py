@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import math
 from dataclasses import dataclass, field
 from typing import Any
@@ -25,6 +26,47 @@ DIMS = ("factual", "logical", "relevance", "honesty", "adoption")
 SAME_SIGNAL_FLOOR = 0.1  # 同源降權地板（同源評審權重壓到至多此值）
 UCB_EPSILON = 1e-9       # UCB 探索項的 pseudocount 下限，防 n=0 除零
 DECAY_HALFLIFE_EVENTS = 200  # 12 §4.2 牙齒：decay 半衰期 200 事件（向先驗回歸）
+
+# ── slash 的取捨參數 λ（2026-08-07 新增；見 Beta.slash 的說明）─────────────
+# 「擋住壞人繼續拿工作」與「讓他有機會翻身」是同一個機制的兩面，而 2026-07-26
+# 的 P0-1 修正（α 不動、β += (α+β)(1/f−1)）把這兩件事綁死在一起：它同時把均值
+# 砍成 factor 倍**並且**把有效觀測數 n 加大 Δ，而 n 是回歸時間的指數係數。
+# λ 把兩者解耦：均值一律變成 factor 倍（不受 λ 影響），n 只上升 λ·Δ。
+#   λ=1.0  現行行為（逐位相同，走 fast path）
+#   λ=0.0  只動均值不動 n
+# 這是模組層預設而不是純參數，因為 slash 的呼叫鏈上有多個不帶此參數的既有
+# 呼叫端（Registry.apply_slash、blayer 六情境、ecosystem 的稽核錨），
+# 為了掃描一個尚未選定的操作點去改動那條鏈並不划算。
+#
+# 誠實邊界：這個全域是**行程層級**的，不是 thread-local。掃描時請用
+# 多行程（每個 λ 一個行程）或在單執行緒內用 slash_n_factor() 包住整段，
+# 不要在多執行緒裡同時跑不同 λ。
+DEFAULT_SLASH_N_FACTOR = 1.0
+_slash_n_factor: float = DEFAULT_SLASH_N_FACTOR
+
+
+def get_slash_n_factor() -> float:
+    """目前生效的 λ。"""
+    return _slash_n_factor
+
+
+def set_slash_n_factor(value: float) -> None:
+    """設定行程層級的 λ（見模組常數區的誠實邊界）。"""
+    global _slash_n_factor
+    if not 0.0 <= value <= 1.0:
+        raise ValueError(f"slash_n_factor 必須在 [0,1]：{value}")
+    _slash_n_factor = value
+
+
+@contextlib.contextmanager
+def slash_n_factor(value: float):
+    """暫時把 λ 換掉，離開時還原（掃描取捨曲線用）。"""
+    old = get_slash_n_factor()
+    set_slash_n_factor(value)
+    try:
+        yield value
+    finally:
+        set_slash_n_factor(old)
 
 
 @dataclass
@@ -55,7 +97,8 @@ class Beta:
         self.alpha, self.beta = self.decayed(now, halflife)
         self.last_event = now
 
-    def slash(self, factor: float, now: int, halflife: float = DECAY_HALFLIFE_EVENTS) -> None:
+    def slash(self, factor: float, now: int, halflife: float = DECAY_HALFLIFE_EVENTS,
+              n_factor: float | None = None) -> None:
         """牙齒·slash（12 §4.2）：provable fault → 後驗均值乘以 factor。
 
         **實作＝注入負面證據**，不是把 α、β 一起往先驗縮。要 mean 變成 factor 倍，
@@ -74,11 +117,47 @@ class Beta:
         懲罰若打不穿新人基準，換 key 重生就永遠不虧，probation 也就守著一扇
         沒人需要走的門。相對地，這使「洗白的相對誘因」變成真問題，由 probation
         與身份成本設計承接（見審查意見書 §5）。
+
+        ## n_factor（λ）：把「罰得重」與「赦得回」解耦（2026-08-07）
+
+        2026-08-03 的對抗式複驗指出上面那個修正的另一面：`β += (α+β)(1/f−1)`
+        同時把 n 加大 Δ=(α+β)(1/f−1)，而 n 是回歸時間的**指數係數**——
+        觀測數 3.4 時要 ~1e8 次觀測才回得到原位、觀測數 48 時要 ~1e66。
+        **懲罰把自己的赦免通道一起關小了**，而且資深者關得更小。
+
+        λ∈[0,1] 把兩個軸拆開。令 S=α+β、m=α/S、Δ=S(1/f−1)：
+
+            S' = S + λ·Δ          有效觀測數 n' = n + λ·Δ
+            α' = f·m·S'           後驗均值 m' = α'/S' = f·m   （與 λ 無關）
+            β' = S' − α'
+
+          λ=1  ⇒ S'=S/f、α'=α  ⇒ 完全等同現行行為（走 fast path，逐位相同）
+          λ=0  ⇒ S'=S、α'=f·α  ⇒ n 完全不動，只把質量從 α 搬到 β
+
+        三個既有性質在所有 λ 下都保留：mean 單調下降、可疊加（兩次 0.5 ＝
+        一次 0.25，因為 m'=f·m 與 λ 無關）、decay 仍把 α、β 一起拉回先驗。
+
+        **λ<1 的代價要誠實講**：現行版本「α 不動 → 已賺到的好評不被抹掉」的
+        語意會消失——λ=0 時 α 被乘上 f，等於把過去的好評連同壞紀錄一起打折。
+        換到的是 n 不上升、UCB 探索項不縮、赦免通道維持原寬。這是一個
+        **取捨**，不是一個 bug fix；哪個點對系統較好要靠 `examples/iterate_v2.py
+        --only S1` 掃出來的曲線決定，不能靠這段 docstring 決定。
         """
         if not 0.0 < factor <= 1.0:
             raise ValueError(f"slash factor 必須在 (0,1]：{factor}")
+        lam = get_slash_n_factor() if n_factor is None else n_factor
+        if not 0.0 <= lam <= 1.0:
+            raise ValueError(f"slash n_factor 必須在 [0,1]：{lam}")
         self.commit_decay(now, halflife)
-        self.beta += (self.alpha + self.beta) * (1.0 / factor - 1.0)
+        if lam == 1.0:
+            # fast path：與 2026-07-26 P0-1 之後的實作**逐位相同**。不要改寫成
+            # 下面的通式——f*(S/f) 的浮點結果不保證等於 S，既有凍結數字會位移。
+            self.beta += (self.alpha + self.beta) * (1.0 / factor - 1.0)
+            return
+        s = self.alpha + self.beta
+        s2 = s + lam * s * (1.0 / factor - 1.0)
+        a2 = factor * self.alpha * s2 / s
+        self.alpha, self.beta = a2, s2 - a2
 
     @property
     def mean(self) -> float:
@@ -89,6 +168,8 @@ class Beta:
         """有效觀測數（α+β 扣掉 Beta(1,1) 先驗）。
 
         update() 只增不減、decay 向先驗收斂 → 理論上不會為負；仍夾 max(0) 防呆。
+        slash 的 λ<1 會把質量從 α 搬到 β（α 可低於先驗 1.0），但 α+β 只增不減，
+        所以 n 仍然單調——λ 動的是「n 上升多少」，不是「n 會不會下降」。
         """
         return max(0.0, (self.alpha - 1.0) + (self.beta - 1.0))
 
@@ -105,11 +186,12 @@ class ReputationCell:
                 self.dims[d].commit_decay(now)
                 self.dims[d].update(s, weight)
 
-    def slash(self, factor: float, dims: tuple[str, ...] | None = None, now: int = 0) -> None:
-        """對指定維（預設全五維）乘法扣減。"""
+    def slash(self, factor: float, dims: tuple[str, ...] | None = None, now: int = 0,
+              n_factor: float | None = None) -> None:
+        """對指定維（預設全五維）乘法扣減。n_factor＝λ，None → 模組層預設。"""
         for d in (dims or DIMS):
             if d in self.dims:
-                self.dims[d].slash(factor, now)
+                self.dims[d].slash(factor, now, n_factor=n_factor)
 
     def score(self, now: int | None = None) -> float:
         """rep_score = 五維 mean 的平均。給 now → 先看 decay 後的值（牙齒）。"""
@@ -217,6 +299,7 @@ class Reputation:
         factor: float,
         *,
         dims: tuple[str, ...] | None = None,
+        n_factor: float | None = None,
     ) -> None:
         """牙齒·slash：對某三元組的指定維（預設全維）乘法扣減（12 §4.2）。
 
@@ -226,7 +309,7 @@ class Reputation:
         不推進 stream 時鐘：懲罰與「又過了一段時間」是兩件事，混在一起會讓
         手算對照失去意義（slash 的效果會被同一步的 decay 汙染）。"""
         self.cell(stream_id, branch_id, substrate).slash(
-            factor, dims, self._stream_seq.get(stream_id, 0))
+            factor, dims, self._stream_seq.get(stream_id, 0), n_factor=n_factor)
 
     def score(self, stream_id: str, branch_id: str, substrate: str) -> float:
         c = self.peek(stream_id, branch_id, substrate)

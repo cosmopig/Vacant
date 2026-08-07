@@ -42,7 +42,7 @@ from .envelope import ReviewEnvelope
 from .identity import Identity
 from .logbook import Logbook
 from .registry import Registry, ReviewRejected
-from .reputation import DIMS
+from .reputation import DIMS, slash_n_factor
 
 # 攻擊者作惡一次成功（未被抓到）的收益，單位任意但固定——ROI 的分子。
 GAIN_PER_ACCEPTED_BAD = 1.0
@@ -58,6 +58,18 @@ SLASH_FACTOR = 0.5  # 與 ecosystem 的交付方 provable fault 係數一致
 # 詳見 SimConfig.digest 的說明。
 _LATER_FIELDS = ("pulse_burst", "pulse_recover", "audit_accuracy",
                  "blindspot", "defect_budget")
+
+# 亂數種子的**豁免欄位**：這幾個永遠不進 digest（＝不進亂數種子）。
+#
+# 為什麼（2026-08-07）：digest() 同時是亂數種子，而 `_peer_reviews` 的
+# 「這位評審有沒有看出來」是從那條序列抽的。於是掃描懲罰參數時，每換一個值
+# 就同時換掉整個隨機世界——量到的差異會混著「懲罰參數的效果」與「換了一組
+# 評審運氣」，配對比較直接失效。懲罰參數只影響**被抓之後**怎麼罰，不影響
+# 世界怎麼生成，所以把它們釘在同一條序列上是對的。
+#
+# 代價：兩個只差懲罰參數的設定會算出**相同的 digest**。所以 digest 不能再
+# 拿來當「這兩格是不是同一個設定」的判準——那件事用 run_key()（涵蓋全欄位）。
+_SEED_EXEMPT_FIELDS = ("slash_n_factor", "slash_factor")
 
 
 @dataclass
@@ -88,7 +100,12 @@ class SimConfig:
     audit_rate: float = 0.2
     probation_m: int = 2
     entry: EntryPolicy = field(default_factory=EntryPolicy)
-    strategy: str = "whitewash"   # whitewash | patient | sybil | pulse
+    # whitewash | patient | sybil | pulse | repent
+    #   repent（2026-08-07 新增）＝**悔改者臂**：熬過見習期後開始作惡，第一次被
+    #   稽核抓到（＝吃到一次 slash）之後永久只交好貨，而且**不換身份**。
+    #   沒有這一臂就只量得到「排除效果」，量不到「贖回可能」——而 slash 的
+    #   λ 取捨曲線的另一個軸正是贖回。它不是攻擊策略，是量測探針。
+    strategy: str = "whitewash"
     # ── 脈衝攻擊（2026-08-03 新增）────────────────────────────────────
     # 定義：交替於兩個相位——
     #   放電 burst 筆連續作惡 → 蓄積 recover 筆乾淨交付 → 重複。
@@ -131,6 +148,20 @@ class SimConfig:
     # 攻擊預算上限：整場最多作惡幾筆。等預算對照用——把「作惡總量」固定住，
     # 才能把「時機」與「數量」分開，否則脈衝的優勢會跟攻擊次數混在一起。
     defect_budget: int | None = None
+    # ── slash 的取捨參數 λ（2026-08-07 新增）────────────────────────────
+    # 見 reputation.Beta.slash。λ 把「均值下降幅度」與「n 上升幅度」解耦：
+    # 均值一律變 SLASH_FACTOR 倍（與 λ 無關），n 只上升 λ·Δ。
+    #   1.0＝現行行為（罰得重、但赦免通道也一起關小）
+    #   0.0＝只動均值不動 n（赦免通道維持原寬）
+    # 這是**取捨參數不是修正**，操作點由 examples/iterate_v2.py --only S1 決定。
+    slash_n_factor: float = 1.0
+    # provable fault 的扣減係數（原本是模組常數 SLASH_FACTOR=0.5）。
+    # 提成設定欄位是因為取捨曲線在 factor 這一軸上才看得到：factor=0.5 時
+    # 光是均值下降就足以永久排除，λ 動不動 n 都一樣——曲線是平的。
+    # 複驗觀測到 slash 0.9 在 177 輪回歸、0.8 在 520 輪回歸，所以有分辨力的
+    # 區間在 0.7–0.95，掃描必須涵蓋它，否則會在一個效應為零的點上量效應
+    # （分析紀律 2 的同一個坑，換一個軸）。
+    slash_factor: float = SLASH_FACTOR
     seed: str = "e1"
 
     def digest(self) -> str:
@@ -149,10 +180,23 @@ class SimConfig:
         """
         d = asdict(self)
         base = asdict(SimConfig())
+        for k in _SEED_EXEMPT_FIELDS:
+            d.pop(k, None)          # 懲罰參數永遠不進種子（見 _SEED_EXEMPT_FIELDS）
         for k in _LATER_FIELDS:
             if k in d and d[k] == base[k]:
                 del d[k]
         blob = json.dumps(d, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(blob.encode()).hexdigest()[:12]
+
+    def run_key(self) -> str:
+        """涵蓋**全部**欄位的設定指紋。
+
+        `digest()` 是亂數種子，它刻意豁免懲罰參數，所以兩個不同的懲罰設定會
+        算出同一個 digest。要回答「這兩格是不是同一個設定」只能問 run_key()。
+        manifest 兩個都寫——digest 用來對「隨機世界一不一樣」，run_key 用來對
+        「設定一不一樣」。
+        """
+        blob = json.dumps(asdict(self), sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(blob.encode()).hexdigest()[:12]
 
 
@@ -177,6 +221,8 @@ class _Agent:
         # 脈衝相位：本週期已放電幾筆、已蓄積幾筆
         self.phase_bad = 0
         self.phase_clean = 0
+        # 這個身份有沒有吃過 slash（repent 臂的轉折點；也供贖回儀器定位）
+        self.slashed = False
 
     @property
     def vid(self) -> str:
@@ -190,7 +236,16 @@ class _Agent:
 
 
 def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
-    """跑一次模擬，回傳摘要；每輪的原始紀錄寫進 log_path（若給）。"""
+    """跑一次模擬，回傳摘要；每輪的原始紀錄寫進 log_path（若給）。
+
+    `cfg.slash_n_factor` 在整場模擬期間生效（reputation 的模組層 λ）。它是
+    行程層級的全域，所以掃描 λ 請用多行程；同一個行程裡不要並行跑不同 λ。
+    """
+    with slash_n_factor(cfg.slash_n_factor):
+        return _simulate(cfg, log_path=log_path)
+
+
+def _simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
     rng = random.Random(f"{cfg.seed}:{cfg.digest()}")
     reg = Registry()
     auditor = Auditor(rate=cfg.audit_rate, seed=f"audit:{cfg.seed}")
@@ -210,6 +265,15 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
              "identities": max(1, cfg.n_attackers), "routed_to_attacker": 0,
              "rounds_routable": 0, "blocked_no_endorser": 0,
              "high_value_hits": 0, "defected": 0, "blind_passes": 0,
+             # ── slash 之後（2026-08-07；1.1 的兩個軸都從這裡讀）────────────
+             # 排除軸：被 slash 的那個身份之後還拿到多少工作、還得手多少。
+             # 贖回軸：距離下一次被路由要等幾輪（None＝在本場輪數內沒回來）。
+             # 只認**第一次**被 slash 的身份：換身份重生是另一條路（whitewash），
+             # 混在一起就分不出「這個身份翻不了身」與「他換了個身份」。
+             "first_slash_round": None, "slashed_vid": None,
+             "routes_after_slash": 0, "accepted_bad_after_slash": 0,
+             "first_route_after_slash": None,
+             "score_at_slash": None, "obs_at_slash": None,
              # 反應延遲：每一次放電記一筆 {第一次作惡的輪次, 這波得手數,
              # 第一次被抓的輪次}。脈衝之所以有效，機制就在這個間隔裡。
              "bursts": []}
@@ -227,6 +291,11 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
             is_attacker = who.malicious
             if is_attacker:
                 stats["routed_to_attacker"] += 1
+            # 贖回／排除的儀器：被 slash 的那個身份，之後還被派到幾次工作
+            if stats["slashed_vid"] == who.vid and rnd > stats["first_slash_round"]:
+                stats["routes_after_slash"] += 1
+                if stats["first_route_after_slash"] is None:
+                    stats["first_route_after_slash"] = rnd
 
             # 任務價值：由 (seed, 輪次) 的雜湊決定——確定性可重放，但**跨 seed
             # 去相關**。先前只用輪次，而見習配額正好每 10 輪把任務丟給攻擊者
@@ -276,6 +345,8 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
                 stats["accepted_bad"] += 1
                 if high_value:
                     stats["high_value_hits"] += 1
+                if stats["slashed_vid"] == who.vid:
+                    stats["accepted_bad_after_slash"] += 1
             if not bad and is_attacker:
                 stats["clean_paid"] += 1
                 who.clean_paid += 1
@@ -299,7 +370,14 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
 
             if caught:
                 stats["caught"] += 1
-                reg.apply_slash(who.vid, "sim", SLASH_FACTOR)
+                reg.apply_slash(who.vid, "sim", cfg.slash_factor)
+                who.slashed = True
+                if stats["slashed_vid"] is None:
+                    stats["slashed_vid"] = who.vid
+                    stats["first_slash_round"] = rnd
+                    sc0, ob0 = reg.standing(who.vid, "sim")
+                    stats["score_at_slash"] = round(sc0, 4)
+                    stats["obs_at_slash"] = round(ob0, 4)
                 if cfg.entry.kind == "endorse" and who.endorser:
                     # 背書連坐：讓「替誰背書」變成有代價的決定
                     reg.apply_slash(who.endorser, "sim", cfg.entry.endorse_liability)
@@ -335,6 +413,9 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
 
     stats["honest_damage"] = round(sum(
         max(0.0, honest_start[h.name] - reg.standing(h.vid, "sim")[0]) for h in honest), 4)
+    if stats["slashed_vid"] is not None:
+        sc, ob = reg.standing(stats["slashed_vid"], "sim")
+        stats["score_final"], stats["obs_final"] = round(sc, 4), round(ob, 4)
     return _summarise(cfg, stats)
 
 
@@ -435,6 +516,12 @@ def _should_defect(who: _Agent, cfg: SimConfig, stats: dict) -> bool:
             return False
         # 放電中就繼續放電；放完就轉蓄積（相位機在主迴圈推進）
         return who.phase_bad < cfg.pulse_burst
+    if cfg.strategy == "repent":
+        # 悔改者：熬過見習期就開始作惡，被抓一次之後**永久**只交好貨。
+        # 它量的不是攻擊力，是「真的改邪歸正的 agent 要多少輪才回得到路由」。
+        if who.slashed:
+            return False
+        return who.deliveries > cfg.probation_m
     return True                           # whitewash / sybil：能作惡就作惡
 
 
@@ -478,6 +565,25 @@ def _summarise(cfg: SimConfig, s: dict) -> dict[str, Any]:
         # 一波裡「第一次作惡」到「第一次被抓」相隔幾輪；沒被抓過的波不計入
         "react_lag_mean": (round(sum(lags) / len(lags), 3) if lags else None),
         "bursts_never_caught": sum(1 for b in bursts if b["first_catch"] is None),
+        # ── slash 之後（2026-08-07）：排除軸與贖回軸 ───────────────────────
+        # 沒有任何身份被 slash 過 → 全部 None／0，聚合時要**排掉**這些 seed
+        # 而不是當 0 算（「沒被抓過」與「被抓了但沒回來」是兩回事）。
+        "first_slash_round": s.get("first_slash_round"),
+        "routes_after_slash": s.get("routes_after_slash", 0),
+        "accepted_bad_after_slash": s.get("accepted_bad_after_slash", 0),
+        # 距離下一次被路由要等幾輪。None＝在本場輪數內沒有再被路由過（右設限）。
+        "rounds_to_next_route": (
+            s["first_route_after_slash"] - s["first_slash_round"]
+            if s.get("first_route_after_slash") is not None else None),
+        # 被 slash 那一刻／整場結束時，該身份的信譽分與有效觀測數。
+        # obs 是回歸時間的指數係數，所以 obs_at_slash 就是 λ 這條軸的直接讀數。
+        "score_at_slash": s.get("score_at_slash"),
+        "obs_at_slash": s.get("obs_at_slash"),
+        "score_final": s.get("score_final"),
+        "obs_final": s.get("obs_final"),
+        # 被 slash 之後還剩幾輪可用來翻身（右設限的分母，報「沒回來」時必須一起報）
+        "rounds_after_slash": (cfg.rounds - s["first_slash_round"]
+                               if s.get("first_slash_round") is not None else None),
         # 附帶損害：誠實居民因連坐而損失的信譽總量。任何入場設計都要付代價，
         # 只報攻擊者 ROI 不報這一欄，等於只報好處不報成本。
         "honest_damage": s.get("honest_damage", 0.0),

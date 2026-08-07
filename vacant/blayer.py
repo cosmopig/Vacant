@@ -16,6 +16,7 @@ bootstrap 95% CI、每情境 ≤30 分、產出 JSONL＋一頁結果。各情境
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import random
@@ -388,16 +389,29 @@ def run_all(
     base_seed: str = "blayer-v1",
     out_dir: Path | None = None,
     only: tuple[str, ...] | None = None,
+    slash_n_factor: float | None = None,
 ) -> dict[str, ScenarioReport]:
     """跑六情境（on＋off 雙組），回 {name: ScenarioReport}；給 out_dir 則落盤
-    cells.jsonl＋summary.md（一頁結果，17 §P4 歸檔格式）。"""
+    cells.jsonl＋summary.md（一頁結果，17 §P4 歸檔格式）。
+
+    `slash_n_factor`（λ，2026-08-07）：掃描 slash 取捨曲線時用來檢查
+    **候選操作點會不會把六情境的判準弄掉**。情境 ④reviewer_stake 與
+    ⑤decay_slash 直接吃 slash，是 λ 的承重面；任一情境判準掉了，該 λ
+    就標記為不可用——曲線再好看也不能選一個讓牙齒失效的點。
+    None＝沿用模組層預設（1.0，現行行為）。
+    """
+    from .reputation import slash_n_factor as _lam_ctx
+
     reports: dict[str, ScenarioReport] = {}
-    for name, (fn, metric) in SCENARIOS.items():
-        if only and name not in only:
-            continue
-        rep = _sweep(name, metric, fn, n_seeds=n_seeds, base_seed=base_seed)
-        rep.verdict, rep.detail = _verdict(name, rep)
-        reports[name] = rep
+    ctx = (_lam_ctx(slash_n_factor) if slash_n_factor is not None
+           else contextlib.nullcontext())
+    with ctx:
+        for name, (fn, metric) in SCENARIOS.items():
+            if only and name not in only:
+                continue
+            rep = _sweep(name, metric, fn, n_seeds=n_seeds, base_seed=base_seed)
+            rep.verdict, rep.detail = _verdict(name, rep)
+            reports[name] = rep
 
     if out_dir is not None:
         out_dir = Path(out_dir)
