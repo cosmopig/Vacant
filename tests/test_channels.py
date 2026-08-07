@@ -274,8 +274,14 @@ class TestSpecialtyRouting:
         assert off["expert_rate"] is None and on["expert_rate"] is None
         assert abs(on["quality"] - off["quality"]) < 0.01
 
-    def test_evidence_is_split_not_created(self):
-        """誠實邊界的可執行版：分族只是把同一批證據切細，總量不變。"""
+    def test_evidence_per_cell_is_diluted(self):
+        """誠實邊界的可執行版：分族讓**每格**的證據變少（格數上升、每格觀測下降）。
+
+        注意這裡**不**主張「總觀測數不變」——實測是分族臂的總觀測數更**高**
+        （5 seeds、600 輪：373.6 vs 249.7）。原因是分族路由把工作交給更擅長的人
+        → 成功率更高 → 正評更多 → 信譽累積更快。證據總量不是外生固定的，
+        它有一部分是路由品質的函數。承重的代價是**每格**樣本變少（UCB 更抖、
+        早期收斂更慢），不是總量變少。"""
         off = self._run(profile_on=False)
         on = self._run(profile_on=True)
         assert on["n_cells"] > off["n_cells"]
