@@ -106,7 +106,9 @@ S1_ROUNDS = 600
 #     （到得了／到不了），中間值不會多出新的行為，所以 λ 只掃兩個端點
 # 把機時花在 f=0.5 的大 n 區沒有意義——那裡 λ=0 與 λ=1 都到不了。
 S1_LAMBDAS = (0.0, 1.0)
-S1_FACTORS = (0.5, 0.7, 0.9)
+# 順序＝資訊量優先（跑不完時手上要剩下能下結論的東西）：
+# 0.5 是現行操作點、0.9 是解析解說 λ 可能有分辨力的區、0.7 是中間點。
+S1_FACTORS = (0.5, 0.9, 0.7)
 S1_ARMS = {
     # 排除軸：被 slash 之後繼續作惡、不換身份
     "頑固者": dict(strategy="patient", build_rounds=0),
@@ -151,9 +153,12 @@ def s1(out: Path, workers: int) -> list[dict]:
     d.mkdir(parents=True, exist_ok=True)
     with (d / "rows.jsonl").open("w", encoding="utf-8") as rows, \
             (d / "cells.jsonl").open("w", encoding="utf-8") as cf:
-        for arm, kw in S1_ARMS.items():
-            for fac in S1_FACTORS:
-                for lam in S1_LAMBDAS:
+        # 迴圈順序：f → λ → arm。**兩臂相鄰**，因為排除軸與贖回軸要並排看才有
+        # 意義；把 arm 放最外層會讓前半段只有排除、沒有贖回，跑不完就等於
+        # 沒有取捨曲線可言。
+        for fac in S1_FACTORS:
+            for lam in S1_LAMBDAS:
+                for arm, kw in S1_ARMS.items():
                     label = f"{arm}·f={fac}·λ={lam}"
                     cfgs = [SimConfig(rounds=S1_ROUNDS, seed=s, blindspot=0.0,
                                       slash_factor=fac, slash_n_factor=lam, **kw)
