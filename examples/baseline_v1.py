@@ -38,7 +38,7 @@ import json
 import time
 from pathlib import Path
 
-from simgrid import DEFAULT_WORKERS, run_cell, write_manifest
+from simgrid import DEFAULT_WORKERS, log_root, run_cell, write_manifest
 from vacant.entrycost import SimConfig
 
 ROUNDS = 600
@@ -69,7 +69,7 @@ def main() -> None:
                          "不要放 1.0（退化端點）")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
-    logdir = a.out / "logs"
+    logdir = log_root(a.out) / "logs"
     global SEEDS, BLINDSPOTS
     if a.blindspots:
         if any(b >= 1.0 for b in a.blindspots):

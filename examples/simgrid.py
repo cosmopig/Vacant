@@ -49,6 +49,27 @@ NUMERIC_KEYS = (
 
 DEFAULT_WORKERS = max(1, min(10, (os.cpu_count() or 4) - 2))
 
+# 逐輪紀錄的落腳處（2026-08-07）。可用 VACANT_LOG_ROOT 移到本機磁碟。
+#
+# 起因：跑到一半發現 fileproviderd 吃 55% CPU、nsurlsessiond 37%、磁碟 1955 tps，
+# 看起來像是 iCloud 同步把機時吃掉了（logs/ 在 ~/Library/Mobile Documents/ 底下，
+# 一格 30 個檔案 × 600 行）。
+#
+# **但實測只差 16%**（同樣 4 個 600 輪的 run：iCloud 123.75s、本機 104.1s），
+# 不是原本猜的 2–3 倍。真正的瓶頸是同一台機器上另外三個 agent 的 CPU 競爭。
+# 這個常數留著是因為 16% 也是 16%，而且它讓「紀錄寫哪裡」變成可控的；
+# 但**不要**拿它當效能解方——那個假設已經被自己的量測推翻了。
+#
+# 鐵律 3（全 I/O JSONL 落盤）要的是「落盤」不是「落在 iCloud」，所以移到本機
+# 不違反紀律；manifest 會記下實際路徑（`log_root` 欄位）。
+LOG_ROOT_ENV = "VACANT_LOG_ROOT"
+
+
+def log_root(default: Path) -> Path:
+    """逐輪紀錄的根目錄：有 VACANT_LOG_ROOT 就用它，否則跟著輸出目錄走。"""
+    v = os.environ.get(LOG_ROOT_ENV)
+    return Path(v) if v else default
+
 
 def _run_one(job: tuple[SimConfig, str | None]) -> dict[str, Any]:
     cfg, lp = job
@@ -157,6 +178,8 @@ def write_manifest(out: Path, *, note: str, rounds: int, seeds: list[str],
         "seeds": seeds,
         "note": note,
         "defaults": asdict(SimConfig()),
+        # 逐輪紀錄實際寫在哪（可能不在這個目錄底下——見 log_root 的說明）
+        "log_root": os.environ.get(LOG_ROOT_ENV),
         "digests": {c["label"]: c["config_digest"] for c in cells},
         "run_keys": {c["label"]: c.get("run_key") for c in cells},
         **(extra or {}),

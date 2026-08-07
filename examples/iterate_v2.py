@@ -86,7 +86,7 @@ import math
 import time
 from pathlib import Path
 
-from simgrid import DEFAULT_WORKERS, run_cell, write_manifest
+from simgrid import DEFAULT_WORKERS, log_root, run_cell, write_manifest
 from vacant.entrycost import SimConfig
 
 SEEDS = [f"p{i}" for i in range(30)]
@@ -163,7 +163,7 @@ def s1(out: Path, workers: int) -> list[dict]:
                     cfgs = [SimConfig(rounds=S1_ROUNDS, seed=s, blindspot=0.0,
                                       slash_factor=fac, slash_n_factor=lam, **kw)
                             for s in SEEDS]
-                    c = run_cell(label, cfgs, logdir=d / "logs", workers=workers,
+                    c = run_cell(label, cfgs, logdir=log_root(d) / "logs", workers=workers,
                                  params={"arm": arm, "slash_factor": fac,
                                          "slash_n_factor": lam},
                                  rows_out=rows, cells_out=cf)
@@ -260,7 +260,7 @@ def _s2_sweep(out: Path, workers: int, name: str, budgets, early: bool) -> list[
                 cfgs = [SimConfig(rounds=S2_ROUNDS, seed=s, blindspot=0.5,
                                   defect_budget=budget,
                                   stop_when_budget_spent=early, **kw) for s in SEEDS]
-                c = run_cell(label, cfgs, logdir=d / "logs", workers=workers,
+                c = run_cell(label, cfgs, logdir=log_root(d) / "logs", workers=workers,
                              params={"budget": budget, "strategy": strat,
                                      "early_stop": early},
                              budget=budget, rows_out=rows, cells_out=cf)
@@ -322,7 +322,7 @@ def s3(out: Path, workers: int) -> list[dict]:
                     cfgs = [SimConfig(rounds=S3_ROUNDS, seed=s, strategy="pulse",
                                       pulse_burst=b, pulse_recover=r,
                                       blindspot=blind) for s in SEEDS]
-                    c = run_cell(label, cfgs, logdir=d / "logs", workers=workers,
+                    c = run_cell(label, cfgs, logdir=log_root(d) / "logs", workers=workers,
                                  params={"blindspot": blind, "burst": b, "recover": r},
                                  rows_out=rows, cells_out=cf)
                     cells.append(c)
