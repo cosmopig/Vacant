@@ -881,10 +881,10 @@ class Ecosystem:
             # 不揭露這個，面板會把「這顆腦上還沒有紀錄」顯示成「沒有信譽」——
             # 兩者差很多，後者會讓觀察者以為這個身份是全新的。
             other = [
-                {"substrate": su, "branch": br,
-                 "score": round(self.registry._rep.score(st, br, su), 3),
-                 "n_obs": round(self.registry._rep.observations(st, br, su), 1)}
-                for (st, br, su) in self.registry._rep._cells
+                {"substrate": su, "branch": br, **({"family": fam} if fam else {}),
+                 "score": round(self.registry._rep.score(st, br, su, fam), 3),
+                 "n_obs": round(self.registry._rep.observations(st, br, su, fam), 1)}
+                for (st, br, su, fam) in self.registry._rep._cells
                 if st == stream_id and su != self.substrate_id
             ]
             out.append({

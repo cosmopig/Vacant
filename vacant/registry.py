@@ -82,6 +82,15 @@ class Registry:
         self._proven_streams: set[str] = set()  # 已用創世簽章證明過擁有權的 stream
         # 交付時觀察到的 substrate（reviewer 不得自己發明；見 record_review ②）
         self._head_substrate: dict[str, str] = {}
+        # 交付時觀察到的 family／坑型（通道分離 3.1）。同 substrate 的理由：
+        # reviewer 不得自己挑要把評分寫進哪一族的格子，否則「專長」這條通道
+        # 立刻退化成可自選的標籤。未宣告＝""＝不分族的總通道（既有行為）。
+        self._head_family: dict[str, str] = {}
+        # ── commit-reveal 面板（通道分離 3.2）────────────────────────────
+        # sealed_reviews=False 時整套機制不啟動，record_review 逐位維持既有行為。
+        self.sealed_reviews = False
+        self._panel_commit: dict[str, dict[str, str]] = {}  # task_id → {reviewer: 承諾}
+        self._panel_closed: set[str] = set()                # 已關閉、可揭露的面板
         # 每條 (stream, branch) 看過的鏈頭順序 → 偵測回滾（把鏈頭指回舊狀態）
         self._head_seen: dict[tuple[str, str], dict[str, int]] = {}
         # 未證明評審的邊際遞減排名：(target_stream, reviewer_id) → k、以及每個
@@ -211,7 +220,7 @@ class Registry:
 
     def note_head(
         self, target_id: str, stream_id: str, branch_id: str, head: str,
-        *, substrate: str = "",
+        *, substrate: str = "", family: str = "",
     ) -> None:
         """記下對某 target 最新觀察到的 (stream_id, branch_id, chain head)。
 
@@ -237,6 +246,9 @@ class Registry:
         self._heads[target_id] = (stream_id, branch_id, head)
         if substrate:
             self._head_substrate[target_id] = substrate
+        # family 無條件覆寫（含 ""）：它是**這一次交付**的坑型，不是身份屬性。
+        # 若沿用上一次的值，換族交付時 reviewer 會被要求掛在錯的族上。
+        self._head_family[target_id] = family
 
     def _resolve(self, target_id: str) -> tuple[str, str] | None:
         """vacant_id → 當前 (stream_id, branch_id)；未觀察過其鏈頭 → None。"""
@@ -280,12 +292,61 @@ class Registry:
     ) -> bool:
         """對 target **當前 stream** 執行 slash（稽核錨的後果）。回是否命中。
 
-        解析不到當前 stream → False（無法扣減看不到的帳——如實回，不靜默）。"""
+        解析不到當前 stream → False（無法扣減看不到的帳——如實回，不靜默）。
+
+        通道分離 3.1：**扣所有任務族的格**，不只扣他當時被派到的那一族。
+        provable fault 是身份層級的事實（「這個東西交了假貨」），不是坑型層級的
+        專長不足；只扣一族等於發明一條「在別族洗白」的路徑，與 substrate 進 key
+        要堵的是同一個洞。沒有任何分族紀錄時退化成單格，行為與改動前相同。"""
         resolved = self._resolve(target_id)
         if resolved is None:
             return False
-        self._rep.slash(resolved[0], resolved[1], substrate, factor, dims=dims)
+        fams = self._rep.families(resolved[0], resolved[1], substrate) or [""]
+        for fam in fams:
+            self._rep.slash(resolved[0], resolved[1], substrate, factor,
+                            dims=dims, family=fam)
         return True
+
+    # --- commit-reveal 面板（通道分離 3.2）------------------------------------
+    def open_panel(self, task_id: str) -> None:
+        """開一個密封評審面板。開啟期間 `visible_votes` 一律回空。"""
+        self._panel_commit.setdefault(task_id, {})
+        self._panel_closed.discard(task_id)
+
+    def commit_review(self, reviewer_id: str, task_id: str, commitment: str) -> None:
+        """第一輪：只收 sha256(評語 ‖ nonce)，不收內容。
+
+        一位 reviewer 一個面板只能承諾一次——允許改承諾等於允許看完別人再改，
+        密封就白做了。面板關閉後不再收承諾（遲到者不得在看過揭露後補票）。"""
+        if task_id in self._panel_closed:
+            raise ReviewRejected(f"面板已關閉，不再收承諾：task={task_id}")
+        panel = self._panel_commit.setdefault(task_id, {})
+        if reviewer_id in panel:
+            raise ReviewRejected(
+                f"重複承諾：{reviewer_id[:12]}…@{task_id}（改承諾＝密封失效）")
+        panel[reviewer_id] = commitment
+
+    def close_panel(self, task_id: str) -> None:
+        """關閉面板 → 進入揭露階段。"""
+        self._panel_commit.setdefault(task_id, {})
+        self._panel_closed.add(task_id)
+
+    def panel_open(self, task_id: str) -> bool:
+        return task_id in self._panel_commit and task_id not in self._panel_closed
+
+    def visible_votes(self, task_id: str) -> dict[str, bool]:
+        """**同儕在做判斷時能看到什麼**——瀑布通道的唯一入口。
+
+        面板開啟中 → 空 dict：承諾在鏈上、內容不在，所以「前面的人怎麼投」
+        在資訊上不存在。這就是 Anderson & Holt 的瀑布由建構關閉的地方。
+        沒有面板（未密封）→ 回目前已記錄的票，順序效應照舊發生。
+
+        誠實邊界：這只關掉**本系統提供的**那條通道。若 reviewer 之間另有側通道
+        （共用的 controller、共用的上游模型），相關性仍會出現——那正是密封之後
+        還留下來的殘餘，也正是我們想量的東西。"""
+        if self.panel_open(task_id):
+            return {}
+        return dict(self._task_votes.get(task_id, {}))
 
     def _reviewer_weight(self, reviewer_id: str, substrate: str) -> float:
         """weight 內生：reviewer 自身信譽 × 觀測飽和 → 不接受外部注入。"""
@@ -321,14 +382,16 @@ class Registry:
             self._unproven_rank[key] = k
         return SAME_SIGNAL_FLOOR / k
 
-    def record_review(self, env: ReviewEnvelope) -> float:
+    def record_review(self, env: ReviewEnvelope, *, nonce: str | None = None) -> float:
         """只收已驗簽的 ReviewEnvelope（credit-memory v1 改動3）。回傳實際採計權重。
 
         驗收順序：①驗簽（reviewer halo 公告的 pub_hex）→ ①b 不得自評 →
-        ②座標一致（stream / branch / substrate / head 都必須等於交付時觀察到的值）
-        → ③(reviewer, stream, head, task) 去重防重放 → ④weight 內生 ＋
-        非線性降權（同源、以及未證明評審的邊際遞減）→ 寫入。
-        任一步失敗 raise ReviewRejected，reputation 完全不動。
+        ②座標一致（stream / branch / substrate / family / head 都必須等於交付時
+        觀察到的值）→ ②b 密封揭露（sealed_reviews 時）→ ③(reviewer, stream, head)
+        去重防重放 → ④weight 內生 ＋ 非線性降權（同源、以及未證明評審的邊際遞減）
+        → 寫入。任一步失敗 raise ReviewRejected，reputation 完全不動。
+
+        `nonce` 只在 `sealed_reviews=True` 時有意義（揭露階段用來驗承諾）。
         """
         # ① 驗簽：reviewer 必須已在 halo 公告（announce 已驗身份綁定）
         rcard = self._cards.get(env.reviewer_id)
@@ -369,6 +432,21 @@ class Registry:
             raise ReviewRejected(
                 f"substrate 不符：got {env.substrate!r} want {known_substrate!r}"
             )
+        # family 同理（通道分離 3.1）：坑型由交付端在 note_head 宣告，reviewer
+        # 只能照著填。差別是這裡**無條件比對**（含 ""）——substrate 有 None 這個
+        # 「沒觀察到」狀態，family 沒有：未宣告就是總通道 ""，不是自由格。
+        known_family = self._head_family.get(env.target_id, "")
+        if env.family != known_family:
+            raise ReviewRejected(
+                f"family 不符：got {env.family!r} want {known_family!r}"
+                "（坑型由交付時觀察決定，reviewer 不得自選要落在哪一格）"
+            )
+
+        # ②b 密封揭露（通道分離 3.2）：sealed_reviews 開啟時，一筆 review 必須
+        #    先在面板開啟期間承諾過、面板已關閉、且揭露內容雜湊得回原承諾。
+        #    這三條缺一，「第一輪看不到別人」就不成立。
+        if self.sealed_reviews:
+            self._check_reveal(env, nonce)
 
         # ③ 去重防重放：一位 reviewer、一次交付（鏈頭）、一票。
         # 審查曾建議把 task_id 併進 key（理由：同一鏈頭的不同任務被靜默吃掉）。
@@ -400,9 +478,36 @@ class Registry:
         self._note_vote(env.task_id, env.reviewer_id, env.scores)
 
         # 改動2：信譽寫進被評者的 stream 三元組（credit 跟記憶走，不跟身體走）
+        # 通道分離 3.1：再加一維 family——「他好」與「他擅長這個」分開記帳。
         self._rep.record_review(
-            env.target_stream_id, env.branch_id, env.substrate, env.scores, weight=weight)
+            env.target_stream_id, env.branch_id, env.substrate, env.scores,
+            weight=weight, family=env.family)
         return weight
+
+    def _check_reveal(self, env: ReviewEnvelope, nonce: str | None) -> None:
+        """密封揭露的三道檢查（通道分離 3.2）。任一不過 → 整筆拒收。"""
+        from .logbook import review_commitment
+
+        if nonce is None:
+            raise ReviewRejected("密封模式下揭露必須附 nonce")
+        panel = self._panel_commit.get(env.task_id)
+        if panel is None:
+            raise ReviewRejected(f"密封模式下無此面板：task={env.task_id}")
+        if env.task_id not in self._panel_closed:
+            raise ReviewRejected(
+                f"面板尚未關閉，不得揭露：task={env.task_id}"
+                "（先揭露者會變成後面所有人的錨，密封就白做了）"
+            )
+        commitment = panel.get(env.reviewer_id)
+        if commitment is None:
+            raise ReviewRejected(
+                f"未承諾即揭露：{env.reviewer_id[:12]}…@{env.task_id}"
+                "（看完別人再補票正是要擋的行為）"
+            )
+        if review_commitment(env.to_json(), nonce) != commitment:
+            raise ReviewRejected(
+                f"揭露與承諾不符：{env.reviewer_id[:12]}…@{env.task_id}"
+            )
 
     # --- 狀態持久化（信譽/鏈頭/去重/同源計數；halo 卡由呼叫端重新 announce）------
     def state_to_json(self) -> dict[str, Any]:
@@ -419,6 +524,15 @@ class Registry:
             "stream_owner": dict(self._stream_owner),
             "proven_streams": sorted(self._proven_streams),
             "head_substrate": dict(self._head_substrate),
+            # 通道分離：坑型宣告與面板承諾都必須跨行程續存——否則重啟即可
+            # 「換一族改掛」或「丟掉承諾後重投」，兩道檢查都會被繞過。
+            # 只在非預設時寫出，讓沒用到通道分離的 state 檔逐位不變。
+            **({"head_family": {k: v for k, v in self._head_family.items() if v}}
+               if any(self._head_family.values()) else {}),
+            **({"sealed_reviews": True} if self.sealed_reviews else {}),
+            **({"panel_commit": {t: dict(p) for t, p in self._panel_commit.items()},
+                "panel_closed": sorted(self._panel_closed)}
+               if self._panel_commit else {}),
             "head_seen": {f"{s}␟{b}": v for (s, b), v in self._head_seen.items()},
             "unproven_rank": {f"{s}␟{r}": v for (s, r), v in self._unproven_rank.items()},
             "unproven_n": dict(self._unproven_n),
@@ -447,6 +561,10 @@ class Registry:
         self._stream_owner = dict(d.get("stream_owner", {}))
         self._proven_streams = set(d.get("proven_streams", []))
         self._head_substrate = dict(d.get("head_substrate", {}))
+        self._head_family = dict(d.get("head_family", {}))
+        self.sealed_reviews = bool(d.get("sealed_reviews", False))
+        self._panel_commit = {t: dict(p) for t, p in (d.get("panel_commit") or {}).items()}
+        self._panel_closed = set(d.get("panel_closed", []))
         self._head_seen = {}
         for key, v in (d.get("head_seen") or {}).items():
             s, b = key.split("␟", 1)
@@ -478,14 +596,16 @@ class Registry:
             }
             self._seen_reviews = {k for k in self._seen_reviews if k[1] != old_stream}
 
-    def reputation_of(self, target_id: str, substrate: str) -> float:
+    def reputation_of(self, target_id: str, substrate: str, family: str = "") -> float:
         """某 vacant 當前 stream 的信譽分（改動2）；未觀察過其鏈 → 中性 0.5。"""
         resolved = self._resolve(target_id)
         if resolved is None:
             return 0.5
-        return self._rep.score(resolved[0], resolved[1], substrate)
+        return self._rep.score(resolved[0], resolved[1], substrate, family)
 
-    def standing(self, vacant_id: str, substrate: str | None = None) -> tuple[float, float]:
+    def standing(
+        self, vacant_id: str, substrate: str | None = None, *, family: str | None = None,
+    ) -> tuple[float, float]:
         """某 vacant **當前 stream** 的信譽：(score, observations)（改動2）。
 
         供 ingress 信譽把關用（被呼叫方判斷要不要接這個 caller 的活）。
@@ -493,49 +613,81 @@ class Registry:
             上爛、卻靠腦 B 的好成績矇混過關）。
           - 不給 → 跨 substrate 平均（較寬鬆，僅供概覽）。
         未觀察過鏈頭／該 stream 無任何觀測 → 回 (中性 0.5, 0)，讓新人靠探索通過。
+
+        通道分離 3.1：不給 family → **跨任務族聚合**（score 取平均、obs 取總和），
+        與跨 substrate 的既有語意一致。這一點很重要：weight 內生、見習判定、
+        未證明評審的邊際遞減三處用的都是「這個身份整體有多少紀錄」，那是身份
+        層級的問題，不該因為換了一個沒做過的坑型就把人重新當新人看。
+        只有一個 family（含全部是 ""）時，聚合等於原本的單格查詢，數字不變。
         """
         resolved = self._resolve(vacant_id)
         if resolved is None:
             return 0.5, 0.0
         stream_id, branch_id = resolved
         cells = [
-            (st, su)
-            for (st, br, su) in self._rep._cells
+            (st, su, fam)
+            for (st, br, su, fam) in self._rep._cells
             if st == stream_id and br == branch_id and (substrate is None or su == substrate)
+            and (family is None or fam == family)
         ]
         if not cells:
             return 0.5, 0.0
-        scores = [self._rep.score(st, branch_id, su) for (st, su) in cells]
-        obs = sum(self._rep.observations(st, branch_id, su) for (st, su) in cells)
+        scores = [self._rep.score(st, branch_id, su, fam) for (st, su, fam) in cells]
+        obs = sum(self._rep.observations(st, branch_id, su, fam) for (st, su, fam) in cells)
         return sum(scores) / len(scores), obs
 
     # --- 路由（UCB）-------------------------------------------------------
-    def _score_obs(self, target_id: str, substrate: str) -> tuple[float, float]:
-        """路由用：vacant_id → 當前 stream 的 (rep_score, obs)；未知 → (0.5, 0)。"""
+    def _score_obs(
+        self, target_id: str, substrate: str, family: str | None = None,
+    ) -> tuple[float, float]:
+        """路由用：vacant_id → 當前 stream 的 (rep_score, obs)；未知 → (0.5, 0)。
+
+        family=None → 跨族聚合（＝改動前的行為，因為當時只有一格）；
+        family=<坑型> → 只看「他在這一族的紀錄」（通道分離 3.1 的路由面）。"""
         resolved = self._resolve(target_id)
         if resolved is None:
             return 0.5, 0.0
-        return (self._rep.score(resolved[0], resolved[1], substrate),
-                self._rep.observations(resolved[0], resolved[1], substrate))
+        if family is None:
+            fams = self._rep.families(resolved[0], resolved[1], substrate)
+            if len(fams) <= 1:
+                fam = fams[0] if fams else ""
+                return (self._rep.score(resolved[0], resolved[1], substrate, fam),
+                        self._rep.observations(resolved[0], resolved[1], substrate, fam))
+            scores = [self._rep.score(resolved[0], resolved[1], substrate, f) for f in fams]
+            obs = sum(self._rep.observations(resolved[0], resolved[1], substrate, f)
+                      for f in fams)
+            return sum(scores) / len(scores), obs
+        return (self._rep.score(resolved[0], resolved[1], substrate, family),
+                self._rep.observations(resolved[0], resolved[1], substrate, family))
 
     def route(
-        self, niche: str, substrate: str, *, explore_c: float = 0.3
+        self, niche: str, substrate: str, *, family: str | None = None,
+        explore_c: float = 0.3,
     ) -> CapabilityCard | None:
         """在能解此 niche 的候選裡，用 UCB 挑一個（rep + 探索額）。
 
         牙齒·probation：有非見習候選在場時，見習生 UCB 蓋到 PROBATION_SCORE_CAP
         （洗白重賺成本）；每 PROBATION_EXPLORE_EVERY 筆路由留一筆見習配額
-        （讓 m 筆強制稽核真的會發生，見常數區誠實邊界）。"""
+        （讓 m 筆強制稽核真的會發生，見常數區誠實邊界）。
+
+        通道分離 3.1：給 family → UCB 打在 **(agent, 任務族) 的格子**上，
+        「總體好的人」與「擅長這個坑型的人」不再是同一個數字。見習判定刻意
+        **不**跟著分族（見 in_probation）：換一個沒做過的坑型不該讓一個已證明的
+        身份重新被當成新人，那會讓見習制度退化成「每換一族就再蓋一次頂」。
+
+        誠實邊界：分族只是把同一批證據切細，不會憑空生出證據。每格的觀測數約降為
+        1/族數 ⇒ UCB 探索項變大、早期路由更抖。這個代價在 `vacant/channels.py`
+        的前後半段收斂率上量得到，不是可以用參數調掉的。"""
         cands = self.discover(niche)
         if not cands:
             return None
         self._route_seq += 1
-        total_obs = sum(self._score_obs(c.vacant_id, substrate)[1] for c in cands)
+        total_obs = sum(self._score_obs(c.vacant_id, substrate, family)[1] for c in cands)
         probies = [c for c in cands if self.in_probation(c.vacant_id, substrate)]
         cap_active = len(probies) < len(cands)  # 全員見習 → 不蓋（冷啟動保護）
 
         def raw_ucb(c: CapabilityCard) -> float:
-            rep, obs = self._score_obs(c.vacant_id, substrate)
+            rep, obs = self._score_obs(c.vacant_id, substrate, family)
             return ucb_score(rep, obs, total_obs, c=explore_c)
 
         # 見習配額：每 N 筆路由從見習生裡挑 UCB 最高者（組內不蓋）
@@ -560,9 +712,13 @@ class Registry:
         idx = int(hashlib.sha256(f"{niche}:{seed}".encode()).hexdigest(), 16) % len(cands)
         return sorted(cands, key=lambda c: c.vacant_id)[idx]
 
-    def leaderboard(self, niche: str, substrate: str) -> list[tuple[str, float]]:
+    def leaderboard(
+        self, niche: str, substrate: str, *, family: str | None = None,
+    ) -> list[tuple[str, float]]:
+        """給 family → 「這一族的排行榜」（通道分離 3.1）；不給 → 跨族總榜。"""
         cands = self.discover(niche)
         return sorted(
-            ((c.vacant_id, self._score_obs(c.vacant_id, substrate)[0]) for c in cands),
+            ((c.vacant_id, self._score_obs(c.vacant_id, substrate, family)[0])
+             for c in cands),
             key=lambda x: -x[1],
         )

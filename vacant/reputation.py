@@ -1,4 +1,4 @@
-"""L1 reputation — 五維信譽（Beta posterior），per (stream_id, branch_id, substrate)。
+"""L1 reputation — 五維信譽（Beta posterior），per (stream_id, branch_id, substrate, family)。
 
 架構總規格 §8；credit-memory v1 **改動2**（06 §2；15 §1 B8 覆核通過）：
   - 信譽的會計單位是 **memory stream 三元組 (stream_id, branch_id, substrate)**，
@@ -13,6 +13,24 @@
   - 同源降權：same-controller/substrate/behavior → 權重打折（地板 0.1）。
     *raises-cost，非 prevents*：公開閾值可被繞，誠實標明。
   - 路由：rep_score + UCB 探索額（給新人冷啟動流量）。
+
+**通道分離 3.1（2026-08-07）：key 擴成四元組，末位是 `family`（任務族／坑型）。**
+理由來自人類制度的 transactive memory（Lewis 2003 三因子裡的 specialisation）：
+「這個人好」與「這個人擅長這一類」是**兩種資訊**，人類制度把它們分在不同通道傳
+（TMS 傳「誰會什麼」但不傳「他覺得答案是什麼」）。Vacant 原本只有一條通道，
+所有東西都走同一條——純量信譽把兩者壓成一個數字，於是路由只能挑「總體好的人」，
+挑不出「擅長這個坑型的人」。
+
+**相容性是硬需求**：`family` 預設 `""`＝「不分族的總通道」，所有既有呼叫端
+（三參數）都落在 `""` 格，數字逐位不變；序列化在 family=="" 時仍寫三段 key，
+既有 state 檔與判準（`tests/test_credit_memory.py`）不受擾動。這是與
+`entrycost.SimConfig.digest()` 的 `_LATER_FIELDS` 同一招：**後加的維度維持
+預設時，不改變任何既有位元**。上一輪就是沒守住這條，害所有數字無聲位移。
+
+誠實邊界：分族**不會**讓總證據變多，只會把同樣的證據切成 N 份。每格的有效
+觀測數約降為 1/N ⇒ UCB 探索項變大、分數更抖。decay 的時鐘是 per-stream 不是
+per-cell，所以「證據老化的總量」兩邊相同（實測：分族與不分族的累積 decay 因子
+都是 0.5^(Δstream/200)），差別只在每格看到的樣本數。
 """
 
 from __future__ import annotations
@@ -95,7 +113,7 @@ class Beta:
 
 @dataclass
 class ReputationCell:
-    """單一 (stream_id, branch_id, substrate) 三元組下的五維（改動2）。"""
+    """單一 (stream_id, branch_id, substrate, family) 格下的五維（改動2＋通道分離 3.1）。"""
 
     dims: dict[str, Beta] = field(default_factory=lambda: {d: Beta() for d in DIMS})
 
@@ -165,7 +183,7 @@ class Reputation:
     """
 
     def __init__(self) -> None:
-        self._cells: dict[tuple[str, str, str], ReputationCell] = {}
+        self._cells: dict[tuple[str, str, str, str], ReputationCell] = {}
         self._stream_seq: dict[str, int] = {}  # stream_id → 該 stream 自己的事件序
         self.event_seq = 0  # 全帳本累計（僅供報表/觀測，不再是 decay 時間軸）
 
@@ -173,18 +191,32 @@ class Reputation:
         """該 stream 的當前事件序（decay 的時間座標）。"""
         return self._stream_seq.get(stream_id, 0)
 
-    def cell(self, stream_id: str, branch_id: str, substrate: str) -> ReputationCell:
-        key = (stream_id, branch_id, substrate)
+    def cell(
+        self, stream_id: str, branch_id: str, substrate: str, family: str = "",
+    ) -> ReputationCell:
+        key = (stream_id, branch_id, substrate, family)
         if key not in self._cells:
             self._cells[key] = ReputationCell()
         return self._cells[key]
 
-    def peek(self, stream_id: str, branch_id: str, substrate: str) -> ReputationCell | None:
+    def peek(
+        self, stream_id: str, branch_id: str, substrate: str, family: str = "",
+    ) -> ReputationCell | None:
         """唯讀查詢：不存在就回 None，**不創造 cell**。
 
         `cell()` 的建立副作用曾經是狀態膨脹向量——任何人查詢任意 stream_id
         即可灌大 registry_state.json（獨立審查 P2）。"""
-        return self._cells.get((stream_id, branch_id, substrate))
+        return self._cells.get((stream_id, branch_id, substrate, family))
+
+    def families(self, stream_id: str, branch_id: str, substrate: str) -> list[str]:
+        """某 (stream, branch, substrate) 下已有紀錄的任務族（排序，確定性）。
+
+        供「身份層級」的操作（slash、聚合查詢）枚舉要動哪些格：provable fault
+        是**身份**的性質不是坑型的性質，扣分不該只扣他當時被派到的那一族。"""
+        return sorted(
+            k[3] for k in self._cells
+            if k[0] == stream_id and k[1] == branch_id and k[2] == substrate
+        )
 
     def record_review(
         self,
@@ -195,6 +227,7 @@ class Reputation:
         *,
         weight: float = 1.0,
         same_signal: bool = False,
+        family: str = "",
     ) -> None:
         """記一筆評審（推進全局事件序）。same_signal=True → 同源降權。
 
@@ -202,12 +235,16 @@ class Reputation:
           - 一般情況 weight=1.0 → 0.1（同源刷分被狠狠打折，raises-cost 非 prevents）。
           - 若呼叫端本就傳了 <0.1 的小權重（如部分分），尊重之、不反而抬高。
         地板的意義是「同源評審不會被完全抹成 0」，但也不準超過 0.1。
+
+        family（通道分離 3.1）＝這一筆交付所屬的任務族／坑型；`""`＝不分族的
+        總通道（既有行為）。時鐘仍是 per-stream 而非 per-cell：證據老化的是
+        「這條記憶鏈又活了多久」，不是「這一族又被評了幾次」。
         """
         w = min(weight, SAME_SIGNAL_FLOOR) if same_signal else weight
         self.event_seq += 1
         now = self._stream_seq.get(stream_id, 0) + 1
         self._stream_seq[stream_id] = now
-        self.cell(stream_id, branch_id, substrate).update(scores, w, now)
+        self.cell(stream_id, branch_id, substrate, family).update(scores, w, now)
 
     def slash(
         self,
@@ -217,6 +254,7 @@ class Reputation:
         factor: float,
         *,
         dims: tuple[str, ...] | None = None,
+        family: str = "",
     ) -> None:
         """牙齒·slash：對某三元組的指定維（預設全維）乘法扣減（12 §4.2）。
 
@@ -225,23 +263,34 @@ class Reputation:
 
         不推進 stream 時鐘：懲罰與「又過了一段時間」是兩件事，混在一起會讓
         手算對照失去意義（slash 的效果會被同一步的 decay 汙染）。"""
-        self.cell(stream_id, branch_id, substrate).slash(
+        self.cell(stream_id, branch_id, substrate, family).slash(
             factor, dims, self._stream_seq.get(stream_id, 0))
 
-    def score(self, stream_id: str, branch_id: str, substrate: str) -> float:
-        c = self.peek(stream_id, branch_id, substrate)
+    def score(
+        self, stream_id: str, branch_id: str, substrate: str, family: str = "",
+    ) -> float:
+        c = self.peek(stream_id, branch_id, substrate, family)
         return 0.5 if c is None else c.score(self._now(stream_id))
 
-    def observations(self, stream_id: str, branch_id: str, substrate: str) -> float:
-        c = self.peek(stream_id, branch_id, substrate)
+    def observations(
+        self, stream_id: str, branch_id: str, substrate: str, family: str = "",
+    ) -> float:
+        c = self.peek(stream_id, branch_id, substrate, family)
         return 0.0 if c is None else c.observations(self._now(stream_id))
 
     # --- 持久化 ------------------------------------------------------------
     def to_json(self) -> dict[str, Any]:
+        """線材格式：family=="" 時仍寫**三段** key。
+
+        通道分離 3.1 的相容性承諾：沒有用到任務族的部署，state 檔逐位元不變。
+        用到的才寫四段。解析端兩種都吃（見 from_json）。"""
         return {
             "event_seq": self.event_seq,
             "stream_seq": dict(self._stream_seq),
-            "cells": {f"{st}␟{br}␟{su}": c.to_json() for (st, br, su), c in self._cells.items()},
+            "cells": {
+                (f"{st}␟{br}␟{su}" if not fam else f"{st}␟{br}␟{su}␟{fam}"): c.to_json()
+                for (st, br, su, fam), c in self._cells.items()
+            },
         }
 
     @classmethod
@@ -252,11 +301,13 @@ class Reputation:
             rep._stream_seq = {k: int(v) for k, v in (d.get("stream_seq") or {}).items()}
             d = d["cells"]
         for key, cell in d.items():
-            st, br, su = key.split("␟", 2)
-            rep._cells[(st, br, su)] = ReputationCell.from_json(cell)
+            parts = key.split("␟", 3)
+            st, br, su = parts[0], parts[1], parts[2]
+            fam = parts[3] if len(parts) > 3 else ""   # 三段舊 key → 總通道
+            rep._cells[(st, br, su, fam)] = ReputationCell.from_json(cell)
         # 舊格式（全域 event_seq 時代）沒有 stream_seq：由各 stream 自己 cell 的
         # last_event 取最大值回填，讓 decay 的相對次序在遷移後仍然合理。
-        for (st, _br, _su), cell in rep._cells.items():
+        for (st, _br, _su, _fam), cell in rep._cells.items():
             if st not in rep._stream_seq:
                 rep._stream_seq[st] = max(b.last_event for b in cell.dims.values())
             else:
