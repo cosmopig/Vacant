@@ -20,6 +20,10 @@
 
 原始紀錄只寫每格第一個 seed（rows.jsonl 是給人看軌跡用的，不是聚合來源）；
 聚合一律讀 *_cells.jsonl。
+
+**落盤順序**：每跑完一格就 append 進 *_cells.jsonl 並 flush，不累積到最後。
+2026-08-07 的四支 agent 都在寫報告前被 session 限制砍掉，跑完的格子因為還沒
+落盤而全部丟失——「不 pack ＝ 沒跑過」在中途被砍時是字面意義上的真。
 """
 from __future__ import annotations
 
@@ -68,7 +72,17 @@ def _agg(rows: list[dict], key: str) -> dict[str, float | None]:
     }
 
 
+def _append(path: Path, row: dict) -> None:
+    """一格一行、立刻 flush。中途被砍時已跑完的格子必須已經在盤上。"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        f.flush()
+
+
 def run_spec(out: Path, rounds: int) -> list[dict]:
+    sink = out / "spec_cells.jsonl"
+    sink.unlink(missing_ok=True)
     cells = []
     for label, specialists, acc in SPEC_CELLS:
         for profile_on in (False, True):
@@ -85,6 +99,7 @@ def run_spec(out: Path, rounds: int) -> list[dict]:
                 r["cell_label"] = label
                 r["seed"] = seed
                 per_seed.append(r)
+                _append(sink, r)
                 print(f"  spec {label:8s} {arm:11s} {seed}  "
                       f"expert={r['expert_rate']} q={r['quality']}", flush=True)
             cells.extend(per_seed)
@@ -92,6 +107,8 @@ def run_spec(out: Path, rounds: int) -> list[dict]:
 
 
 def run_seal(out: Path, rounds: int) -> list[dict]:
+    sink = out / "seal_cells.jsonl"
+    sink.unlink(missing_ok=True)
     cells = []
     for label, n_clones, herd in SEAL_CELLS:
         for sealed in (False, True):
@@ -107,6 +124,7 @@ def run_seal(out: Path, rounds: int) -> list[dict]:
                 r["cell_label"] = label
                 r["seed"] = seed
                 cells.append(r)
+                _append(sink, r)
                 print(f"  seal {label:14s} {arm:6s} {seed}  "
                       f"indep={r['agree_indep_indep']} raw={r['agree_indep_indep_raw']} "
                       f"tp={r['true_positives']}/{r['n_clones']} inf={r['n_informative']}",
@@ -224,15 +242,7 @@ def main() -> int:
     spec = run_spec(out, args.spec_rounds) if args.only != "seal" else []
     seal = run_seal(out, args.seal_rounds) if args.only != "spec" else []
 
-    if spec:
-        with (out / "spec_cells.jsonl").open("w", encoding="utf-8") as f:
-            for r in spec:
-                f.write(json.dumps(r, ensure_ascii=False) + "\n")
-    if seal:
-        with (out / "seal_cells.jsonl").open("w", encoding="utf-8") as f:
-            for r in seal:
-                f.write(json.dumps(r, ensure_ascii=False) + "\n")
-
+    # *_cells.jsonl 已在每格跑完時 append 過了，這裡不再重寫。
     if spec and seal:
         summary = {
             "generated": "channel_suite.py",
