@@ -226,6 +226,46 @@ class Logbook:
         return len(self.entries)
 
 
+# --- 密封承諾（commit-reveal；通道分離 3.2）----------------------------------
+#
+# 為什麼掛在 logbook：commit-reveal 需要的東西 hash-chain 已經全部有了——
+# 一個**不可否認、不可事後修改、有時間次序**的承諾位置。第一輪只把
+# sha256(評語 ‖ nonce) append 上鏈，面板關閉後才揭露原文並驗雜湊。
+#
+# 這不只是防作弊，它**改變推論地位**（Anderson & Holt 1997）：資訊瀑布的相關性
+# 不需要共謀就會出現，所以未密封時 `registry._behavior_same_source` 量到的相關性
+# 混雜了「同源」與「順序」兩個來源，無法分離。密封後沒有可觀察的行動歷史，
+# 瀑布通道**由建構關閉**，殘餘的相關性才真的可歸因於同源。
+COMMIT_TYPE = "REVIEW_COMMIT"
+# 承諾與 nonce 之間的分隔位元組：沒有它，(payload, nonce) 的切點可被移動，
+# 兩組不同的 (payload, nonce) 會算出同一個承諾（長度延展式的歧義）。
+_COMMIT_SEP = b"\x1f"
+MIN_NONCE_BYTES = 16
+
+
+def review_commitment(payload: Any, nonce: str) -> str:
+    """sha256(canonical(payload) ‖ 0x1f ‖ nonce) —— 密封評審的承諾值。
+
+    **誠實邊界（這條不能省）：hiding 完全由 nonce 提供，不是由雜湊提供。**
+    評語的可能取值空間極小（五維各取 0/1 就只有 32 種），沒有 nonce 的承諾
+    幾秒內就能窮舉還原。所以 nonce 必須是高熵、每筆獨立、揭露前不外流；
+    `MIN_NONCE_BYTES` 是最低要求，呼叫端用 `secrets.token_hex` 產生。
+    binding 那一半由 sha256 的抗碰撞性提供，這部分是標準假設。
+
+    另一條邊界：本函式只保證「揭露的內容與承諾一致」。它**不**保證評審在承諾
+    當下沒有用側通道交換立場——commit-reveal 關掉的是**面板這條通道**，不是
+    全世界的通道。所以它是 raises-cost 而非 prevents。
+    """
+    if len(nonce) < MIN_NONCE_BYTES:
+        raise ValueError(
+            f"nonce 太短（{len(nonce)} < {MIN_NONCE_BYTES}）："
+            "承諾的 hiding 全靠 nonce 的熵，評語空間本身小到可以窮舉"
+        )
+    return hashlib.sha256(
+        canonical_bytes(payload) + _COMMIT_SEP + nonce.encode("utf-8")
+    ).hexdigest()
+
+
 def verify_genesis(entry_json: dict[str, Any], who: PublicIdentity) -> str | None:
     """驗證一筆創世事件，回傳它所定義的 stream_id；不合格回 None。
 
