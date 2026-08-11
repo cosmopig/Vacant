@@ -53,6 +53,43 @@ class ReviewRejected(Exception):
 
 
 @dataclass
+class ReviewDefenses:
+    """評審端防禦的**逐層拆解開關**（2026-08-07 攻擊面那一輪加的）。
+
+    為什麼需要：`registry.py` 宣稱有三～四層防禦擋 ballot-stuffing／slandering，
+    但在 2026-08-07 之前**沒有一層被真的攻擊過**，也就無法回答「哪一層在承重、
+    哪一層是裝飾」。`blayer.py` 的既有紀律是「機制要能被明確拆掉，
+    『拆掉它數字沒變＝裝飾』這條驗收才驗得到東西」——這個 dataclass 就是那個
+    拆法在評審端的落點。
+
+    預設全 True ＝現行設計，行為與加這個開關之前逐位相同。
+
+      endogenous_weight    `_reviewer_weight`：評審自身信譽 × 觀測飽和。
+                           關掉 → 每票權重 1.0（＝「誰投都一樣重」的天真設計）。
+      same_controller      自報 controller 相同 → floor/k 非線性降權。
+                           **誠實邊界：controller 是自報的**，共謀者只要各報
+                           不同的 controller 這一層就完全不會觸發——所以它在
+                           零 controller_id 的攻擊下先驗上就是裝飾，實驗要驗的
+                           是「它在自報同源時是否至少有用」。
+      behavior_same_source 行為推斷同源（鑑別題一致率 ≥0.9 且共審 ≥5 題）→ floor/k。
+      unproven_decay       未證明評審（自身觀測 < UNPROVEN_REVIEWER_OBS）的
+                           第 k 位拿 FLOOR/k。
+    """
+
+    endogenous_weight: bool = True
+    same_controller: bool = True
+    behavior_same_source: bool = True
+    unproven_decay: bool = True
+
+    def label(self) -> str:
+        off = [n for n, v in (("W", self.endogenous_weight),
+                              ("S", self.same_controller),
+                              ("B", self.behavior_same_source),
+                              ("U", self.unproven_decay)) if not v]
+        return "全開" if not off else "關:" + "".join(off)
+
+
+@dataclass
 class Announcement:
     card: CapabilityCard
 
@@ -60,7 +97,22 @@ class Announcement:
 class Registry:
     """halo 聚合 + 信譽索引。純查詢，不持有流量。"""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        probation_cap: float = PROBATION_SCORE_CAP,
+        probation_every: int = PROBATION_EXPLORE_EVERY,
+        defenses: ReviewDefenses | None = None,
+    ) -> None:
+        # 見習期的兩個參數原本是寫死的模組常數；改成可注入是為了能量它們各自
+        # 承重多少（2.3 見習期正面對決）。**預設值就是模組常數**，不改行為。
+        self.probation_cap = probation_cap
+        self.probation_every = max(1, int(probation_every))
+        self.defenses = defenses or ReviewDefenses()
+        # 承重量測：哪一層降權真的動到了權重、動了幾次、動到誰。
+        # 沒有這個計數器就只能看終局信譽，分不出「這層沒觸發」與「觸發了沒用」。
+        self.downweight_hits: dict[str, int] = {
+            "same_controller": 0, "behavior": 0, "unproven": 0}
         self._cards: dict[str, CapabilityCard] = {}
         self._rep = Reputation()  # 聚合：per (stream_id, branch_id, substrate) 的網路級信譽（改動2）
         # 改動3 狀態：目標鏈頭（head 新鮮性）、review 去重、同源計數（非線性降權）
@@ -349,7 +401,12 @@ class Registry:
         return dict(self._task_votes.get(task_id, {}))
 
     def _reviewer_weight(self, reviewer_id: str, substrate: str) -> float:
-        """weight 內生：reviewer 自身信譽 × 觀測飽和 → 不接受外部注入。"""
+        """weight 內生：reviewer 自身信譽 × 觀測飽和 → 不接受外部注入。
+
+        `defenses.endogenous_weight=False` → 回 1.0（天真設計：誰投都一樣重）。
+        這是反事實臂，不是可用組態。"""
+        if not self.defenses.endogenous_weight:
+            return 1.0
         score, obs = self.standing(reviewer_id, substrate)
         saturation = obs / (obs + REVIEWER_SATURATION_OBS)
         return max(REVIEWER_WEIGHT_FLOOR, score * saturation)
@@ -371,6 +428,8 @@ class Registry:
         不是可以用參數調掉的。要讓它變快，需要的是身分的入場成本（見審查 §5），
         或用確定性稽核當錨（本來就是設計裡信譽的主要來源）。
         """
+        if not self.defenses.unproven_decay:
+            return float("inf")
         _score, obs = self.standing(reviewer_id, substrate)
         if obs >= UNPROVEN_REVIEWER_OBS:
             return float("inf")
@@ -462,17 +521,26 @@ class Registry:
         #    三通道，取最嚴：誠實條件化（controller，demo）／行為推斷（投票相關，
         #    X4 承重）／未證明評審的邊際遞減（獨立審查 P1-3）。
         weight = self._reviewer_weight(env.reviewer_id, env.substrate)
-        if self._same_signal(env.reviewer_id, env.target_id):
+        if self.defenses.same_controller and self._same_signal(env.reviewer_id,
+                                                               env.target_id):
             controller = self._cards[env.reviewer_id].controller
             k = self._same_source_k.get((controller, env.target_id), 0) + 1
             self._same_source_k[(controller, env.target_id)] = k
-            weight = min(weight, SAME_SIGNAL_FLOOR / k)
-        elif self._behavior_same_source(env.reviewer_id):
+            before, weight = weight, min(weight, SAME_SIGNAL_FLOOR / k)
+            if weight < before:
+                self.downweight_hits["same_controller"] += 1
+        elif self.defenses.behavior_same_source and self._behavior_same_source(
+                env.reviewer_id):
             k = self._behavior_same_k.get((env.reviewer_id, env.target_id), 0) + 1
             self._behavior_same_k[(env.reviewer_id, env.target_id)] = k
-            weight = min(weight, SAME_SIGNAL_FLOOR / k)
+            before, weight = weight, min(weight, SAME_SIGNAL_FLOOR / k)
+            if weight < before:
+                self.downweight_hits["behavior"] += 1
+        before = weight
         weight = min(weight, self._unproven_cap(env.reviewer_id, env.target_stream_id,
                                                 env.substrate))
+        if weight < before:
+            self.downweight_hits["unproven"] += 1
 
         # 記票（行為推斷的原料；先判後記，本票不參與自己的同源判定）
         self._note_vote(env.task_id, env.reviewer_id, env.scores)
@@ -691,7 +759,7 @@ class Registry:
             return ucb_score(rep, obs, total_obs, c=explore_c)
 
         # 見習配額：每 N 筆路由從見習生裡挑 UCB 最高者（組內不蓋）
-        if probies and cap_active and self._route_seq % PROBATION_EXPLORE_EVERY == 0:
+        if probies and cap_active and self._route_seq % self.probation_every == 0:
             return max(probies, key=raw_ucb)
 
         probie_ids = {c.vacant_id for c in probies}
@@ -699,7 +767,7 @@ class Registry:
         def key(c: CapabilityCard) -> float:
             u = raw_ucb(c)
             if cap_active and c.vacant_id in probie_ids:
-                u = min(u, PROBATION_SCORE_CAP)
+                u = min(u, self.probation_cap)
             return u
 
         return max(cands, key=key)

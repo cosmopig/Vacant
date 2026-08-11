@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import random
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -53,11 +54,24 @@ COST_PER_KEYGEN = 0.0
 
 SLASH_FACTOR = 0.5  # 與 ecosystem 的交付方 provable fault 係數一致
 
+# 合法的攻擊策略。**打錯字必須爆掉**：`_should_defect` 的最後一行是
+# `return True`（whitewash/sybil 的語意），所以任何拼錯的策略名都會靜默
+# 退化成「一直作惡」，做出一份看起來很正常、其實整組跑錯的資料。
+# 2026-08-07 加 model II–IV 時差點踩到，補成 fail-closed。
+KNOWN_STRATEGIES = ("whitewash", "patient", "sybil", "pulse",
+                    "osc_exp", "osc_random", "osc_sine",
+                    # repent 不是攻擊策略，是量測探針（贖回軸）。它跟白名單同時
+                    # 落地在兩條並行的分支上，合併時差點被擋掉——白名單是好東西，
+                    # 但它讓「新增策略」變成兩處改動，加策略時記得回來加這裡。
+                    "repent")
+
 # 2026-07-26 之後才加進 SimConfig 的欄位。維持預設值時不進 config digest，
 # 否則「加一個選用參數」就會改變亂數種子，讓所有既有實驗的數字無故位移。
 # 詳見 SimConfig.digest 的說明。
 _LATER_FIELDS = ("pulse_burst", "pulse_recover", "audit_accuracy",
-                 "blindspot", "defect_budget")
+                 "blindspot", "defect_budget",
+                 # 2026-08-07 攻擊面那一輪加的（Srivatsa model II–IV ＋ 見習期掃描）
+                 "identity_cost", "probation_cap", "probation_every")
 
 # 亂數種子的**豁免欄位**：這幾個永遠不進 digest（＝不進亂數種子）。
 #
@@ -100,11 +114,13 @@ class SimConfig:
     audit_rate: float = 0.2
     probation_m: int = 2
     entry: EntryPolicy = field(default_factory=EntryPolicy)
-    # whitewash | patient | sybil | pulse | repent
+    # whitewash | patient | sybil | pulse | repent | osc_exp | osc_random | osc_sine
     #   repent（2026-08-07 新增）＝**悔改者臂**：熬過見習期後開始作惡，第一次被
     #   稽核抓到（＝吃到一次 slash）之後永久只交好貨，而且**不換身份**。
     #   沒有這一臂就只量得到「排除效果」，量不到「贖回可能」——而 slash 的
     #   λ 取捨曲線的另一個軸正是贖回。它不是攻擊策略，是量測探針。
+    #   osc_exp / osc_random / osc_sine ＝ Srivatsa 2005 §6.1 的 model II / III / IV
+    #   （pulse 本身是他的 model I；見 _should_defect）。
     strategy: str = "whitewash"
     # ── 脈衝攻擊（2026-08-03 新增）────────────────────────────────────
     # 定義：交替於兩個相位——
@@ -174,6 +190,18 @@ class SimConfig:
     # 區間在 0.7–0.95，掃描必須涵蓋它，否則會在一個效應為零的點上量效應
     # （分析紀律 2 的同一個坑，換一個軸）。
     slash_factor: float = SLASH_FACTOR
+    # ── 見習期正面對決（2026-08-07 新增）──────────────────────────────
+    # 這三個原本是寫死的模組常數，於是「見習期到底承重多少」量不到——
+    # 只能整組開或整組關。拆成參數才做得出「拆掉這一格數字有沒有變」。
+    #   identity_cost   造一個新身份的外生成本（0＝現行設計：身份免費）。
+    #                   ROI 的分母之一，用來找「身份要多貴，見習期才守得住」。
+    #   probation_cap   見習生的 UCB 上限（registry.PROBATION_SCORE_CAP）。
+    #                   設 1.0 等於拆掉這道蓋子。
+    #   probation_every 每幾筆路由留一個見習配額（registry.PROBATION_EXPLORE_EVERY）。
+    #                   設很大等於拆掉配額（見習生永遠選不到＝永久流放）。
+    identity_cost: float = 0.0
+    probation_cap: float = 0.55
+    probation_every: int = 10
     seed: str = "e1"
 
     def digest(self) -> str:
@@ -235,6 +263,12 @@ class _Agent:
         self.phase_clean = 0
         # 這個身份有沒有吃過 slash（repent 臂的轉折點；也供贖回儀器定位）
         self.slashed = False
+        # Srivatsa model II–IV 的相位狀態（見 _should_defect）
+        self.osc_draws = 0        # 已抽過幾次亂數（確定性抽樣的計數器）
+        self.osc_phase = ""       # model II：目前在 "bad" 還是 "good" 相位
+        self.osc_left = 0         # model II/III：本相位還剩幾筆
+        self.osc_level = 1.0      # model III：本段的「好度」g∈[0,1]
+        self.osc_t = 0            # model IV：正弦的時間座標（＝第幾次被路由）
 
     @property
     def vid(self) -> str:
@@ -253,13 +287,18 @@ def simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
     `cfg.slash_n_factor` 在整場模擬期間生效（reputation 的模組層 λ）。它是
     行程層級的全域，所以掃描 λ 請用多行程；同一個行程裡不要並行跑不同 λ。
     """
+    if cfg.strategy not in KNOWN_STRATEGIES:
+        raise ValueError(
+            f"未知策略 {cfg.strategy!r}；合法值：{KNOWN_STRATEGIES}。"
+            "（不擋的話會靜默退化成 whitewash，整組資料看起來正常但是錯的）")
     with slash_n_factor(cfg.slash_n_factor):
         return _simulate(cfg, log_path=log_path)
 
 
 def _simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]:
     rng = random.Random(f"{cfg.seed}:{cfg.digest()}")
-    reg = Registry()
+    reg = Registry(probation_cap=cfg.probation_cap,
+                   probation_every=cfg.probation_every)
     auditor = Auditor(rate=cfg.audit_rate, seed=f"audit:{cfg.seed}")
 
     honest = [_Agent(f"honest_{i}", malicious=False) for i in range(cfg.n_honest)]
@@ -288,7 +327,15 @@ def _simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]
              "score_at_slash": None, "obs_at_slash": None,
              # 反應延遲：每一次放電記一筆 {第一次作惡的輪次, 這波得手數,
              # 第一次被抓的輪次}。脈衝之所以有效，機制就在這個間隔裡。
-             "bursts": []}
+             "bursts": [],
+             # ── Srivatsa 成本積分（2026-08-07）────────────────────────
+             # 原文 Eq.1：cost(b) = lim (1/t)∫(BH_b(x) − TV_b(x))dx，
+             # 並拆成 X_n＝max(TV−BH,0)（濫用幅度：系統信任高於真實行為）
+             # 與 Y_n＝max(BH−TV,0)（養信譽付出的工）。攻擊者要**最小化** cost。
+             # 這是紀律 1 的直接應用：成本是聚合量，先分解再談大小。
+             # 時間軸取「攻擊者被路由的那些輪」——那是它唯一有行為的時刻。
+             "bh_sum": 0.0, "tv_sum": 0.0, "misuse_sum": 0.0,
+             "build_sum": 0.0, "tv_n": 0}
     honest_start = {h.name: reg.standing(h.vid, "sim")[0] for h in honest}
 
     try:
@@ -395,6 +442,14 @@ def _simulate(cfg: SimConfig, *, log_path: Path | None = None) -> dict[str, Any]
                     reg.apply_slash(who.endorser, "sim", cfg.entry.endorse_liability)
 
             score, obs = reg.standing(who.vid, "sim")
+            if is_attacker:
+                # BH∈{0,1}＝這一筆的真實行為；TV＝系統當下給它的信任值。
+                bh = 0.0 if bad else 1.0
+                stats["bh_sum"] += bh
+                stats["tv_sum"] += score
+                stats["misuse_sum"] += max(score - bh, 0.0)   # X_n
+                stats["build_sum"] += max(bh - score, 0.0)    # Y_n
+                stats["tv_n"] += 1
             if log_f:
                 log_f.write(json.dumps({
                     "round": rnd, "to": who.name, "attacker": is_attacker,
@@ -516,23 +571,77 @@ def _find(agents: list[_Agent], vid: str) -> _Agent | None:
     return next((a for a in agents if a.vid == vid), None)
 
 
+def _osc_draw(who: _Agent, cfg: SimConfig) -> float:
+    """model II–IV 的亂數源。用 `_h01` 而非 `rng`——與 `_h01` 的理由相同：
+    攻擊者的相位不該與評審抽樣糾纏在同一條隨機序列上，否則「換一個評審
+    準確率」會連帶換掉攻擊者的節奏，兩個因子就分不開了。"""
+    u = _h01(f"{cfg.seed}:osc:{who.name}:{who.osc_draws}")
+    who.osc_draws += 1
+    return u
+
+
+def _geom(u: float, mean: float) -> int:
+    """幾何分佈取樣（指數分佈的離散版），期望值 ≈ mean，最小 1。
+
+    Srivatsa 的 model II/III 用的是連續的指數分佈間隔；我們的時間軸是
+    「第幾次被路由」這個離散量，所以取它的離散對應。**mean ≤ 1 時恆回 1**
+    ——這是誠實邊界：`pulse_recover=0`（連續作惡）在 model II 下退化不到
+    「完全不休息」，最短相位仍是 1 筆。"""
+    m = max(1.0, float(mean))
+    if m <= 1.0:
+        return 1
+    p = 1.0 / m
+    return max(1, int(math.ceil(math.log(max(1e-12, 1.0 - u)) / math.log(1.0 - p))))
+
+
 def _should_defect(who: _Agent, cfg: SimConfig, stats: dict) -> bool:
     """攻擊者的策略：決定這一筆要不要交付壞東西。
 
-    三種策略對應三種真實的攻擊姿態：
+    前三種對應三種真實的攻擊姿態：
       whitewash — 立刻作惡，被抓就換身份重來（賭稽核抽不中）
       patient   — 先熬過見習期並累積紀錄，再開始作惡（賭「已證明」的身份被抽查得少）
       sybil     — 每個身份只交付一次就丟棄（賭數量）
+
+    後四種是 **Srivatsa, Xiong & Liu (WWW 2005, TrustGuard) §6.1 的四個
+    strategic oscillation 模型**。原文逐字定義（§6.1）：
+
+      model I   「the malicious nodes oscillate from good to bad behavior at
+                  intervals of regular time periods」──就是我們既有的 `pulse`，
+                  `(pulse_burst, pulse_recover)` ＝方波的兩個半週期。
+      model II  「oscillate between good and bad behaviors at exponentially
+                  distributed intervals」──`osc_exp`：相位長度服從指數分佈，
+                  期望值分別 = pulse_burst（壞）／pulse_recover（好）。
+      model III 「choose a random level of goodness and stay that level for an
+                  exponentially distributed duration of time」──`osc_random`：
+                  每段抽一個好度 g~U[0,1]，維持指數分佈的時長，每筆以 1−g
+                  的機率作惡。**好壞不再是二元的**，這是它與 I/II 的差別。
+      model IV  「shows a sinusoidal change in its behavior ... steadily and
+                  continuously changes its behavior unlike models I, II and III
+                  which show sudden fluctuations」──`osc_sine`：
+                  BH(t) = (1+sin(2πt/P))/2，P = pulse_burst + pulse_recover，
+                  每筆以 1−BH(t) 的機率作惡。**沒有相位邊界**。
+
+    Srivatsa 量到的攻擊者成本比是 I : II : III : IV = 1 : 2.28 : 2.08 : 1.36
+    （成本越低對攻擊者越好 ⇒ **model I 最划算**）。他的防禦是單一個 PID 式
+    信任模型；我們的是四道同時跑，所以這個比值在我們的組態下不必相同——
+    這正是要量的東西。
+
+    誠實邊界：時間軸不同。Srivatsa 的 t 是牆鐘時間（節點隨時可交易）；
+    我們的 t 是「第幾次被路由」，而被路由的頻率本身就受信譽影響。
+    也就是說在我們的系統裡，攻擊者的相位時鐘會被防禦拖慢——這是組態差異
+    的一部分，不是實作瑕疵，但比較 II/III/IV 的週期時要記得。
     """
     if cfg.entry.kind == "stake" and who.clean_paid < cfg.entry.stake_deliveries:
         return False                      # 還在繳入場費
     if cfg.strategy == "patient":
         # 熬過見習期＋build_rounds 筆乾淨紀錄才開始作惡
         return who.deliveries > max(cfg.build_rounds, cfg.probation_m)
-    if cfg.strategy == "pulse":
+    if cfg.strategy in ("pulse", "osc_exp", "osc_random", "osc_sine"):
         # 見習期內強制稽核，這時候作惡等於送分——先熬過去。
+        # 四個模型共用這一條，否則比的就不只是時間結構了。
         if who.deliveries <= cfg.probation_m:
             return False
+    if cfg.strategy == "pulse":
         # 放電中就繼續放電；放完就轉蓄積（相位機在主迴圈推進）
         return who.phase_bad < cfg.pulse_burst
     if cfg.strategy == "repent":
@@ -541,13 +650,34 @@ def _should_defect(who: _Agent, cfg: SimConfig, stats: dict) -> bool:
         if who.slashed:
             return False
         return who.deliveries > cfg.probation_m
+    if cfg.strategy == "osc_exp":               # model II
+        if who.osc_left <= 0:
+            who.osc_phase = "good" if who.osc_phase == "bad" else "bad"
+            mean = cfg.pulse_burst if who.osc_phase == "bad" else cfg.pulse_recover
+            who.osc_left = _geom(_osc_draw(who, cfg), mean)
+        who.osc_left -= 1
+        return who.osc_phase == "bad"
+    if cfg.strategy == "osc_random":            # model III
+        if who.osc_left <= 0:
+            who.osc_level = _osc_draw(who, cfg)          # 好度 g ~ U[0,1]
+            who.osc_left = _geom(_osc_draw(who, cfg),
+                                 cfg.pulse_burst + cfg.pulse_recover)
+        who.osc_left -= 1
+        return _osc_draw(who, cfg) >= who.osc_level      # 以 1−g 作惡
+    if cfg.strategy == "osc_sine":              # model IV
+        period = max(2, cfg.pulse_burst + cfg.pulse_recover)
+        bh = 0.5 * (1.0 + math.sin(2.0 * math.pi * who.osc_t / period))
+        who.osc_t += 1
+        return _osc_draw(who, cfg) >= bh                 # 以 1−BH(t) 作惡
     return True                           # whitewash / sybil：能作惡就作惡
 
 
 def _summarise(cfg: SimConfig, s: dict) -> dict[str, Any]:
-    cost = (s["clean_paid"] * COST_PER_CLEAN_DELIVERY
-            + s["identities"] * COST_PER_KEYGEN)
+    # identity_cost 覆蓋 COST_PER_KEYGEN（預設 0.0＝現行設計：造 key 免費）。
+    keygen = cfg.identity_cost if cfg.identity_cost else COST_PER_KEYGEN
+    cost = (s["clean_paid"] * COST_PER_CLEAN_DELIVERY + s["identities"] * keygen)
     gain = s["accepted_bad"] * GAIN_PER_ACCEPTED_BAD
+    n_tv = s.get("tv_n", 0)
 
     # ── 反應延遲 ──────────────────────────────────────────────────────
     # 脈衝攻擊的機制就在這裡：從一波開始作惡，到系統第一次抓到，中間
@@ -608,6 +738,16 @@ def _summarise(cfg: SimConfig, s: dict) -> dict[str, Any]:
         # 附帶損害：誠實居民因連坐而損失的信譽總量。任何入場設計都要付代價，
         # 只報攻擊者 ROI 不報這一欄，等於只報好處不報成本。
         "honest_damage": s.get("honest_damage", 0.0),
+        # ── Srivatsa Eq.1 的成本與它的兩個分量（越低對攻擊者越好）──────
+        # srivatsa_cost = mean(BH − TV) = build_y − misuse_x。
+        # **只報 cost 不報分量＝違反紀律 1**：兩個不同的攻擊可以有同一個 cost
+        # 卻在「濫用多少」與「付出多少」上完全不同。
+        "srivatsa_cost": (round((s["bh_sum"] - s["tv_sum"]) / n_tv, 4)
+                          if n_tv else None),
+        "misuse_x": round(s["misuse_sum"] / n_tv, 4) if n_tv else None,
+        "build_y": round(s["build_sum"] / n_tv, 4) if n_tv else None,
+        "mean_tv": round(s["tv_sum"] / n_tv, 4) if n_tv else None,
+        "mean_bh": round(s["bh_sum"] / n_tv, 4) if n_tv else None,
         "gain": gain,
         "cost": cost,
         # ROI：每付出一單位成本能換到幾次成功作惡。cost=0 時回 None——
