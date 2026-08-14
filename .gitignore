@@ -16,3 +16,9 @@ var/
 
 # 私有實驗資料（EvalPlus 官方題庫等）：不進版控
 .vacant-private/
+
+# session/agent 工作目錄
+.claude/
+
+# 外部生圖工具產物（素材本體不進 repo）
+higgsfield_output/
