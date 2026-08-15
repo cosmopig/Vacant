@@ -80,7 +80,24 @@ def running():
     return bool(sh("pgrep -f 'loop.sh' | head -1"))
 
 
-def md_light(text, limit=6000):
+def last_rounds(text, n=2):
+    """只留最後 n 輪。
+
+    STATE.md 是往後 append 的，最新一輪永遠在檔尾。原本是截前 6000 字，
+    結果這一頁**只看得到最舊的那幾輪，而且沒有任何地方說它被截掉了**——
+    「現在在做什麼」的頁面顯示的是最早的事，正好反過來。
+    按字數截也不行：一輪的紀錄本身就可能超過那個上限，最新那一輪會整段消失
+    （2026-08-15 第 4 輪就是這樣，寫完之後頁面上一個字都沒有）。
+    所以按**輪**切，不按字數切。"""
+    parts = text.split("\n## ")
+    if len(parts) <= n + 1:
+        return text
+    head = parts[0].split("\n")[0]
+    keep = "\n## ".join([""] + parts[-n:])
+    return f"{head}\n\n（較舊的輪次已略去，完整內容見 STATE.md）\n{keep}"
+
+
+def md_light(text, limit=60000):
     """極簡 markdown：標題、粗體、程式碼、清單。不引入相依。"""
     t = html.escape(text[:limit])
     t = re.sub(r"^### (.+)$", r"<h4>\1</h4>", t, flags=re.M)
@@ -187,7 +204,7 @@ font-family:var(--mono);font-size:.72rem;color:var(--dim);line-height:1.9}}
 {warn}
 
 <h2>現在在做什麼</h2>
-<div class="card">{md_light(state)}</div>
+<div class="card">{md_light(last_rounds(state))}</div>
 
 <h2>進度大綱</h2>
 <div class="card">{md_light(prog)}</div>
