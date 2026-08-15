@@ -48,9 +48,11 @@ while true; do
   done
 
   start=$(date +%s)
+  # < /dev/null 是必要的：無人值守時沒有 stdin，claude -p 會先等 3 秒才放棄。
+  # 那 3 秒本身無害，但「在等一個永遠不會來的輸入」在別的情境會變成整輪卡住。
   timeout "${MAX_MIN}m" "$CLAUDE" -p "$(cat "$PROMPT")" \
       --dangerously-skip-permissions \
-      > "$ilog" 2>&1
+      < /dev/null > "$ilog" 2>&1
   rc=$?
   dur=$(( $(date +%s) - start ))
 
