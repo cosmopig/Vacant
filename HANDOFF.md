@@ -2,10 +2,16 @@
 
 2026-08-15 起，**這台機器執行，Mac 端只做稽核。** Mac 會關機，這台不會。
 
-工作根目錄 **`/d/vacant-work`**（C 槽只剩 29G，94% 滿，什麼都不要放 C）。
+工作根目錄 **`/d/vacant`**（Windows 路徑 `D:\vacant`）——C 槽只剩 29G，94% 滿，
+什麼都不要放 C。
+
+> **為什麼是 `D:\vacant` 而不是原本的 `D:\vacant-work`：** 那台的 session 是
+> Remote Control session，**`/add-dir` 在裡面不能用**（那是終端對話框指令）。
+> 所以三個 repo 必須直接放在 session 的工作目錄底下，否則檔案工具碰不到。
+> 同目錄下的 `cdp`／`hm`／`probe.py` 等是舊的臨時工作區，與這三個 repo 無關。
 
 ```
-/d/vacant-work/
+/d/vacant/
   Vacant/            feat/v2-four-stages   ← 程式本體、實驗基建
   vacant_hm/         main                  ← 人類動物園
   vacant-docs-web/   feat/capstone-site    ← 專題官網（注意是這個分支，不是 main）
@@ -50,7 +56,7 @@
 圖會留在 `~/.codex/generated_images/<session>/exec-*.png`，
 **而 codex 會回報「已完成」**。
 
-> **一律用 `/d/vacant-work/bin/genimg.sh <輸出檔> <提示詞>`。**
+> **一律用 `/d/vacant/bin/genimg.sh <輸出檔> <提示詞>`。**
 > 它做差集找出新生的檔、搬到目標路徑、驗 PNG 魔數與寬度，
 > 驗不過就 exit 1。不要繞過它直接叫 codex 生圖。
 
