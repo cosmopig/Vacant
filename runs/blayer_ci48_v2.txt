@@ -1,0 +1,55 @@
+探針自驗（已知答案）：
+  ✅ 已知重疊（同一個區間跟自己比）: disjoint((0.0, 0.0),(0.0, 0.0)) = False（要 False）
+  ✅ 已知重疊（部分交疊）: disjoint((0.0, 3.0),(2.5, 7.0)) = False（要 False）
+  ✅ 已知不重疊: disjoint((0.0, 0.0),(5.0, 7.0)) = True（要 True）
+  ✅ 已知不重疊（反向）: disjoint((5.0, 7.0),(0.0, 0.0)) = True（要 True）
+  ✅ 端點相接＝重疊: disjoint((0.0, 2.0),(2.0, 4.0)) = False（要 False）
+  ✅ 已知一致（同一份跟自己比）: xcheck = True（要 True）
+  ✅ 已知不一致（value 差 1e-6）: xcheck = False（要 False）
+  ✅ 已知缺格（右邊是空的）: xcheck = False（要 False）
+  ✅ 已知全部分得開: pair_scan = {'sep': 48}（要 {'sep': 48}）
+  ✅ 已知全部分不開: pair_scan = {'ovl': 48}（要 {'ovl': 48}）
+  ✅ 已知混合（事先算好）: pair_scan = {'sep': 5, 'sep*': 3, 'ovl': 2, 'same': 4}（要 {'sep': 5, 'sep*': 3, 'ovl': 2, 'same': 4}）
+  ✅ 已知缺格: pair_scan = 'miss'（要 'miss'）
+  ✅ 兩邊都答對
+
+B-CI（on／off 的 95% CI 不重疊，格子照 _verdict 引用的那一格）：
+  ✅ sig_attribution        r=0.7  on 0.0000 [0.0000,0.0000]  off 7.0000 [7.0000,7.0000]  gap=+7.0000
+  ✅ same_source            r=0.7  on 0.0405 [0.0400,0.0410]  off 3.0361 [3.0361,3.0361]  gap=+2.9951
+  ✅ probation_whitewash    r=0.7  on 0.1000 [0.1000,0.1000]  off 1.0000 [1.0000,1.0000]  gap=+0.9000
+  ✅ reviewer_stake         r=0.7  on 0.0898 [0.0877,0.0922]  off 1.0000 [1.0000,1.0000]  gap=+0.9078
+  ✅ decay_slash            r=0.7  on 0.0002 [0.0001,0.0002]  off 0.8635 [0.8630,0.8641]  gap=+0.8628
+  ✅ memory_wipe            r=0.5  on 0.9000 [0.9000,0.9000]  off -0.1000 [-0.1000,-0.1000]  gap=+1.0000
+
+B-CI-48（全部 48 對；**描述不是閘門**——ratio=0 沒注入攻擊，on/off 本來就該一樣）：
+         0.0   0.1   0.2   0.3   0.4   0.5   0.6   0.7
+  sig_attribution         same  sep*  sep*  sep*  sep*  sep*  sep*  sep*
+  same_source             same   n/m   n/m   n/m   n/m  sep*  sep*  sep*
+  probation_whitewash     same  sep*  sep*  sep*  sep*  sep*  sep*  sep*
+  reviewer_stake          same  sep*  sep*  sep*  sep*  sep*  sep*  sep*
+  decay_slash             same   sep   sep   sep   sep   sep   sep   sep
+  memory_wipe             same  sep*  sep*  sep*  sep*  sep*  sep*  sep*
+  合計 48 對：sep=7、sep*=31、ovl=0、same=10、miss=0
+     sep   分得開（兩邊 CI 都有寬度）
+     sep*  分得開，但至少一邊 CI 寬度為 0（見 rule of three 註）
+     same  完全相同（點值與兩端點都一樣 ⇒ 這一格 on/off 沒有任何差別）
+
+Q-ZERO（ratio=0 的 6 對必須分不開）：✅ 全部分不開
+
+Q-DEGEN／Q-PRED（ratio≥0.1 的 42 對；**分母照事先預測寫死**）：分得開 38 對，其中 31 對靠零寬 CI（sep*）；分不開 4 對
+     ⚠ 其中 4 對**根本沒跑機制**（情境函式早退回 0，見 NOT_MEASURED）：same_source@0.1、same_source@0.2、same_source@0.3、same_source@0.4
+       ⇒ 真正量過的是 38 對，38 對分得開。**Q-PRED 仍以事先寫死的 42 對為準**（38/42）；換分母只會讓數字變好看，不採用。
+       ⇒ 真正的後果是**覆蓋率**：這張網格看起來掃了 0→70%，same_source 實際只有 3 個操作點有資料。
+     ⚠ 零寬 CI 的 rule-of-three 保守上界 ≈ 3/1000 = 0.0030，不是 0。**sep* 是最弱的那種分得開。**
+     ⚠ CI 重疊 ≠ 沒有差異（差值的 CI 才是對的問法）；48 對＝48 次比較，本輪未做多重比較校正 ⇒ 這張表是探索性描述，不是 48 個檢定。
+
+B-N（每格 seeds ＝ 17 §P4 的 ≥1000）：
+  ✅ 96 格，n_seeds 全部 = 1000
+
+P-XCHK（cells.jsonl 與 ledger_events.jsonl 對同一格說同一件事）：
+  ✅ ledger CELL 96 筆／cells.jsonl 96 行；arm {'on': 48, 'off': 48}；重複鍵 0
+
+B-PACK（CLAUDE.md 紀錄紅線：不 pack ＝ 沒跑過）：
+  ✅ ok=True problems=[]
+
+總判：全過 ✅
