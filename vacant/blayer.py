@@ -29,6 +29,7 @@ from typing import Any, Callable
 RATIOS: tuple[float, ...] = tuple(i / 10 for i in range(8))  # 0.0 … 0.7 步進 10%
 DEFAULT_N_SEEDS = 1000  # 17 §P4：每格 ≥1000 seeds（測試用小種子數，正式用預設）
 LEDGER_NAME = "ledger_events.jsonl"  # RECORD_SPEC §2 必要項（缺＝記錄層 infra_void）
+SAMPLES_NAME = "samples.jsonl"  # 每格 n_seeds 個原始值（差值統計的唯一可重算來源）
 
 
 def _now_ms() -> int:
@@ -37,18 +38,32 @@ def _now_ms() -> int:
 
 @dataclass
 class Cell:
-    """一格（scenario × ratio）的量測結果。"""
+    """一格（scenario × ratio）的量測結果。
+
+    `sd`／`n_unique`／`vmin`／`vmax` 是**離散度描述欄**（2026-08-16 加）：
+    只存 95% 端點的歸檔分不出「CI 窄」與「CI 塌成一點」——全同值樣本上
+    bootstrap 每次重抽都拿到同一個數，`ci_lo == ci_hi`，而那**不是
+    「不確定性為 0」**（0/1000 的真 95% 上界約 3/1000）。第 38 輪要靠回頭
+    讀原始碼才知道哪些格是這種退化；有 `n_unique==1` 就看得見。
+    這四欄純由 `vals` 算出，不進亂數流、不改任何既有欄位的值。
+    """
     scenario: str
     ratio: float
     n_seeds: int
     value: float
     ci_lo: float
     ci_hi: float
+    sd: float = 0.0
+    n_unique: int = 0
+    vmin: float = 0.0
+    vmax: float = 0.0
 
     def to_json(self) -> dict[str, Any]:
         return {"scenario": self.scenario, "ratio": self.ratio, "n_seeds": self.n_seeds,
                 "value": round(self.value, 6), "ci_lo": round(self.ci_lo, 6),
-                "ci_hi": round(self.ci_hi, 6)}
+                "ci_hi": round(self.ci_hi, 6), "sd": round(self.sd, 6),
+                "n_unique": self.n_unique, "vmin": round(self.vmin, 6),
+                "vmax": round(self.vmax, 6)}
 
 
 @dataclass
@@ -72,6 +87,7 @@ def _cell_row(arm: str, c: Cell) -> dict[str, Any]:
 def _sweep(
     name: str, metric: str, fn: Callable[[float, random.Random, bool], float],
     *, n_seeds: int, base_seed: str, emit: Callable[[dict[str, Any]], None] | None = None,
+    sink: Callable[[str, Cell, list[float]], None] | None = None,
 ) -> ScenarioReport:
     """對一個情境跑 on/off × 8 格，bootstrap CI（research.boot_ci 同源）。
 
@@ -79,6 +95,10 @@ def _sweep(
     給的是 callback 不是「跑完回傳一包讓呼叫端轉寫」——事後由結果轉寫出來的
     東西是摘要重排成 log，跑掛了就什麼都沒有，那正是「不 pack＝沒跑過」
     那條紅線要防的事（RECORD_SPEC §2）。
+
+    `sink`：把該格的 **1000 個原始值**交出去（run_all 用來寫 samples.jsonl）。
+    只存 mean 與兩個 CI 端點，等於把「還能問什麼問題」在落盤那一刻就鎖死——
+    第 38 輪想算差值的 CI，就因為原始值沒留而必須整組重跑 224s。
     """
     from .research import boot_ci
     rep = ScenarioReport(name=name, metric=metric)
@@ -97,11 +117,16 @@ def _sweep(
                 hashlib.sha256(f"{name}:{ratio}:{on}".encode()).hexdigest()[:8], 16
             )
             lo, hi = boot_ci(vals, lambda s: sum(s) / len(s), n_boot=500, seed=boot_seed)
-            c = Cell(name, ratio, n_seeds, mean, lo, hi)
+            var = sum((v - mean) ** 2 for v in vals) / max(1, len(vals) - 1)
+            c = Cell(name, ratio, n_seeds, mean, lo, hi,
+                     sd=var ** 0.5, n_unique=len(set(vals)),
+                     vmin=min(vals), vmax=max(vals))
             cells.append(c)
+            arm = "on" if on else "off"
             if emit is not None:
-                emit({"type": "B_LAYER_CELL", "metric": metric,
-                      **_cell_row("on" if on else "off", c)})
+                emit({"type": "B_LAYER_CELL", "metric": metric, **_cell_row(arm, c)})
+            if sink is not None:
+                sink(arm, c, vals)
         if on:
             rep.on_cells = cells
         else:
@@ -418,7 +443,7 @@ def run_all(
 ) -> dict[str, ScenarioReport]:
     """跑六情境（on＋off 雙組），回 {name: ScenarioReport}；給 out_dir 則落盤
     cells.jsonl＋summary.md（一頁結果，17 §P4 歸檔格式）＋
-    ledger_events.jsonl（RECORD_SPEC §2 必要項）。
+    ledger_events.jsonl（RECORD_SPEC §2 必要項）＋samples.jsonl（每格原始值）。
 
     **事件帳是邊跑邊寫的**（每格算完立刻 write＋flush），不是跑完由 reports
     轉寫。差別在跑掛的時候：邊跑邊寫留下「跑到哪、算出什麼」，事後轉寫留下
@@ -452,8 +477,20 @@ def run_all(
                 lf.write(json.dumps({"ts_ms": _now_ms(), **ev},
                                     ensure_ascii=False) + "\n")
                 lf.flush()
+            sf = stack.enter_context(
+                (out_dir / SAMPLES_NAME).open("w", encoding="utf-8"))
+
+            def sink(arm: str, c: Cell, vals: list[float]) -> None:
+                # 與事件帳同樣邊跑邊寫：跑掛了留下的是「已經量到的原始值」，
+                # 不是零。`scenario/arm/ratio` 三欄與 cells.jsonl 是同一組鍵。
+                sf.write(json.dumps(
+                    {"scenario": c.scenario, "arm": arm, "ratio": c.ratio,
+                     "n_seeds": c.n_seeds, "values": [round(v, 9) for v in vals]},
+                    ensure_ascii=False) + "\n")
+                sf.flush()
         else:
             emit = None  # type: ignore[assignment]
+            sink = None  # type: ignore[assignment]
 
         if emit is not None:
             emit({"type": "B_LAYER_RUN_START", "base_seed": base_seed,
@@ -463,7 +500,7 @@ def run_all(
             for name in todo:
                 fn, metric = SCENARIOS[name]
                 rep = _sweep(name, metric, fn, n_seeds=n_seeds,
-                             base_seed=base_seed, emit=emit)
+                             base_seed=base_seed, emit=emit, sink=sink)
                 rep.verdict, rep.detail = _verdict(name, rep)
                 reports[name] = rep
                 if emit is not None:
