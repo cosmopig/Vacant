@@ -251,6 +251,36 @@ def main() -> None:
     n_ci = sum(1 for x in rows if x["ci_excludes_0"])
     print(f"\nHolm 後顯著 {n_sig}/{len(rows)}（其中 {n_degen_sig} 對兩邊皆常數＝退化）；"
           f"差值 CI 不含 0 者 {n_ci}/{len(rows)}")
+
+    # --- 變異結構三分（D-DEGEN）------------------------------------------------
+    # 第 38 輪的 `sep*` ＝「**至少一邊**零寬」，這裡的 `degenerate` ＝「**兩邊皆**常數」
+    # ——兩個定義不同，31 與 21 不能互換著讀。所以三種都印出來，並把換算寫明。
+    def _cls(x: dict) -> str:
+        a, b = x["n_unique_on"] == 1, x["n_unique_off"] == 1
+        return "both" if a and b else ("one" if a != b else "neither")
+
+    buckets = {"both": [], "one": [], "neither": []}
+    for x in rows:
+        buckets[_cls(x)].append(x)
+    print("\n變異結構三分（`sd`／`n_unique` 這次才存進歸檔，第 38 輪只能回頭讀原始碼）：")
+    for k, label in (("both", "兩邊皆常數"), ("one", "恰一邊常數"),
+                     ("neither", "兩邊都有變異")):
+        b = buckets[k]
+        print(f"  {label:6s} {len(b):2d} 對（其中顯著 {sum(1 for x in b if x['sig'])}）")
+    at_least_one_sig = sum(1 for x in rows if x["sig"] and _cls(x) in ("both", "one"))
+    print(f"  ⇒ 顯著的 {n_sig} 對裡「至少一邊零寬」＝ {at_least_one_sig} 對"
+          f"（這才是可以跟第 38 輪那個 31 直接比的數）")
+
+    print("\n=== 逐對明細（48 列）===")
+    print(f"  {'scenario':20s} {'r':>4s} {'diff':>10s} {'ci_lo':>10s} {'ci_hi':>10s} "
+          f"{'adj_p':>7s} {'uniq on/off':>12s}  結論")
+    for x in rows:
+        tag = ("沒量" if x["not_measured"] else
+               ("顯著" if x["sig"] else "不顯著")
+               + ("（兩邊皆常數）" if x["sig"] and x["degenerate"] else ""))
+        print(f"  {x['scenario']:20s} {x['ratio']:4.1f} {x['diff']:10.4f} "
+              f"{x['ci_lo']:10.4f} {x['ci_hi']:10.4f} {x['p_adj']:7.4f} "
+              f"{x['n_unique_on']:5d}/{x['n_unique_off']:<6d} {tag}")
     print(f"單一 p 的解析度下限 1/{args.n_perm + 1} = {1 / (args.n_perm + 1):.5f}；"
           f"Holm 後下限 {len(rows) / (args.n_perm + 1):.5f}"
           f"（{'<' if len(rows) / (args.n_perm + 1) < args.alpha else '≥'} α={args.alpha}）")

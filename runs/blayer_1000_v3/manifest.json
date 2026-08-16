@@ -1,0 +1,52 @@
+{
+  "repo_commit": "cb64bf5ecc53e5fbbd367fd72f82ec1b3cda5f0b",
+  "repo_dirty": false,
+  "repo_dirty_paths": [],
+  "pip_freeze": [],
+  "os": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "model_id": null,
+  "endpoint": null,
+  "no_think": null,
+  "seeds": [
+    "blayer-v1"
+  ],
+  "machine": "user1 x86_64",
+  "utc_start": "2026-08-16T04:36:23.278580+00:00",
+  "utc_end": "2026-08-16T04:40:17.460387+00:00",
+  "trust_arm": "on+off",
+  "scripts": {
+    "examples/b_layer.py": "81d89b4034f96159233508c526ca11a0d7099362676645c871cc07af5f4a01e8",
+    "vacant/blayer.py": "b368a7e1eefd11d3c8b3df087ae49af7a7e7c89873efbb905bf4f752fbdde53f"
+  },
+  "n_seeds_per_cell": 1000,
+  "n_cells": 96,
+  "scenarios": [
+    "decay_slash",
+    "memory_wipe",
+    "probation_whitewash",
+    "reviewer_stake",
+    "same_source",
+    "sig_attribution"
+  ],
+  "verdicts": {
+    "sig_attribution": true,
+    "same_source": true,
+    "probation_whitewash": true,
+    "reviewer_stake": true,
+    "decay_slash": true,
+    "memory_wipe": true
+  },
+  "slash_n_factor": null,
+  "elapsed_s": 234.2,
+  "trust_arm_note": "同一 run 內跑 on／off 雙組反事實；鐵律 4（記憶不跨臂共享）由各情境每臂各建獨立假腦保證，兩臂之間無共用狀態。",
+  "missing": {
+    "model_id": "本 run 不呼叫任何模型（六情境是確定性離線機制模擬，用假腦）",
+    "endpoint": "同上：無模型端點（純行程內計算）",
+    "no_think": "同上：無 reasoning 開關可言",
+    "wire.jsonl": "無 MCP 連線可側錄（離線行程內模擬）",
+    "model_io.jsonl": "無模型呼叫可側錄（同 model_id）",
+    "pip_freeze": "pip freeze 失敗（無 pip 或逾時）"
+  },
+  "excluded_private_keys": []
+}
