@@ -1,0 +1,7 @@
+── S1B ──
+  λ=0.0  可用  ✅sig_attribution ✅same_source ✅probation_whitewash ✅reviewer_stake ✅decay_slash ✅memory_wipe
+  λ=0.25  可用  ✅sig_attribution ✅same_source ✅probation_whitewash ✅reviewer_stake ✅decay_slash ✅memory_wipe
+  λ=0.5  可用  ✅sig_attribution ✅same_source ✅probation_whitewash ✅reviewer_stake ✅decay_slash ✅memory_wipe
+  λ=0.75  可用  ✅sig_attribution ✅same_source ✅probation_whitewash ✅reviewer_stake ✅decay_slash ✅memory_wipe
+  λ=1.0  可用  ✅sig_attribution ✅same_source ✅probation_whitewash ✅reviewer_stake ✅decay_slash ✅memory_wipe
+   （1167.5s）
