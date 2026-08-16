@@ -1,0 +1,122 @@
+{
+ "generated": "2026-08-16 22:14:41",
+ "git_rev": "9950abb671bc14116bbf79901f3a6b8796784053",
+ "rounds": 600,
+ "seeds": [
+  "p0",
+  "p1",
+  "p2",
+  "p3",
+  "p4",
+  "p5",
+  "p6",
+  "p7",
+  "p8",
+  "p9",
+  "p10",
+  "p11",
+  "p12",
+  "p13",
+  "p14",
+  "p15",
+  "p16",
+  "p17",
+  "p18",
+  "p19",
+  "p20",
+  "p21",
+  "p22",
+  "p23",
+  "p24",
+  "p25",
+  "p26",
+  "p27",
+  "p28",
+  "p29"
+ ],
+ "note": "等預算比較（全長）：budget ∈ (1, 2) × 5 策略 × 30 seeds × 600 輪、blindspot=0.5，**不開早停**。S2 篩出窗口、S2F 在窗口內做真正的比較——複驗指出 whitewash 的優勢來自免費換身份重新取得路由權（用掉 4.7 個身份、到第 542 輪還在接單，而 pulse 第 160 輪就被餓死），那是入場成本問題，要看 identities_used 與 routed_to_attacker 才看得到。",
+ "defaults": {
+  "rounds": 300,
+  "n_honest": 5,
+  "audit_rate": 0.2,
+  "probation_m": 2,
+  "entry": {
+   "kind": "free",
+   "stake_deliveries": 0,
+   "endorse_min_obs": 1.0,
+   "endorse_liability": 0.7
+  },
+  "strategy": "whitewash",
+  "pulse_burst": 3,
+  "pulse_recover": 10,
+  "reviewer_accuracy": 0.7,
+  "n_attackers": 1,
+  "reviewer_correlation": 0.0,
+  "high_value_ratio": 0.2,
+  "selective": false,
+  "build_rounds": 10,
+  "audit_accuracy": 1.0,
+  "blindspot": 0.0,
+  "defect_budget": null,
+  "stop_when_budget_spent": false,
+  "slash_n_factor": 1.0,
+  "slash_factor": 0.5,
+  "identity_cost": 0.0,
+  "probation_cap": 0.55,
+  "probation_every": 10,
+  "seed": "e1"
+ },
+ "log_root": null,
+ "digests": {
+  "budget=1·whitewash": "794c54f7d6c8",
+  "budget=1·patient": "6a1dc318724c",
+  "budget=1·sybil": "4c82c44b7fb1",
+  "budget=1·pulse(3,10)": "ce4d80aac76d",
+  "budget=1·pulse(5,20)": "b6e4189f6a7b",
+  "budget=2·whitewash": "3b02b63fc188",
+  "budget=2·patient": "c610e77b5de3",
+  "budget=2·sybil": "3d6a022eb68d",
+  "budget=2·pulse(3,10)": "a4f3f4b556e1",
+  "budget=2·pulse(5,20)": "abc67f18cfa9"
+ },
+ "run_keys": {
+  "budget=1·whitewash": "aaa8d67be4e0",
+  "budget=1·patient": "7e56f9628d19",
+  "budget=1·sybil": "0bb92a70a248",
+  "budget=1·pulse(3,10)": "170853ca78b8",
+  "budget=1·pulse(5,20)": "0b13e71da04d",
+  "budget=2·whitewash": "e7dab15bf700",
+  "budget=2·patient": "cd68fbd7cd26",
+  "budget=2·sybil": "d87d665e471a",
+  "budget=2·pulse(3,10)": "ff12b6b6c2f4",
+  "budget=2·pulse(5,20)": "265cdd085a3d"
+ },
+ "budgets": [
+  1,
+  2
+ ],
+ "early_stop": false,
+ "strategies": {
+  "whitewash": {
+   "strategy": "whitewash"
+  },
+  "patient": {
+   "strategy": "patient",
+   "build_rounds": 10
+  },
+  "sybil": {
+   "strategy": "sybil"
+  },
+  "pulse(3,10)": {
+   "strategy": "pulse",
+   "pulse_burst": 3,
+   "pulse_recover": 10
+  },
+  "pulse(5,20)": {
+   "strategy": "pulse",
+   "pulse_burst": 5,
+   "pulse_recover": 20
+  }
+ },
+ "complete": true
+}
