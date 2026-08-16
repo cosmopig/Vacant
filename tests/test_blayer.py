@@ -8,6 +8,7 @@ seeds（`examples/b_layer.py`）；這裡用 8 seeds 的 smoke 格鎖行為不�
 from __future__ import annotations
 
 import json
+from collections import Counter
 
 from vacant.blayer import RATIOS, SCENARIOS, run_all
 
@@ -55,6 +56,29 @@ def test_output_artifacts_written(tmp_path):
     assert "B 層機制驗收六情境" in summary
     for name in reports:
         assert name in summary
+
+
+def test_arm_label_is_not_value_equality(tmp_path):
+    """`arm` 要真的分得出兩組——行數對、欄位在，都還不算數。
+
+    上面那條只驗了「96 行」與「有 arm 這個 key」，**兩個都是前提**；
+    實際寫出來的標籤對不對沒有人在問。原本的寫法是
+    `"on" if c in rep.on_cells else "off"`，而 `Cell` 是 dataclass ⇒ `in` 走
+    **值相等**：只要某格的 off 值與 on 值一樣，那個 off 就被寫成 "on"。
+    1000 seeds 的正式掃描實測寫成 **on 58／off 38**、10 個重複鍵。
+
+    ⚠ 會被標錯的正好是「**拆掉機制、數字沒變**」的格（ratio=0；
+      same_source 的 ratio<0.5 依定義回 0）——而那是 13 §3 唯一用來判
+      「該機制在該格是裝飾」的證據。標反的方向是**系統性偏向 on**。
+    """
+    _run(tmp_path)
+    rows = [json.loads(l) for l in
+            (tmp_path / "cells.jsonl").read_text(encoding="utf-8").splitlines()]
+    arms = Counter(r["arm"] for r in rows)
+    assert arms == {"on": 6 * 8, "off": 6 * 8}, f"arm 標籤不對稱：{dict(arms)}"
+    keys = Counter((r["scenario"], r["arm"], r["ratio"]) for r in rows)
+    dup = {k: v for k, v in keys.items() if v > 1}
+    assert not dup, f"(scenario,arm,ratio) 重複鍵 {len(dup)} 個：{sorted(dup)[:5]}"
 
 
 def test_deterministic_same_seed_same_result(tmp_path):

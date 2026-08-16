@@ -1,0 +1,32 @@
+{
+  "repo_commit": "abbc957105d46c7f27070e0992f21dfba38afbe3",
+  "pip_freeze": [],
+  "os": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "model_id": null,
+  "endpoint": null,
+  "no_think": null,
+  "seeds": null,
+  "machine": "user1 x86_64",
+  "utc_start": "2026-08-16T03:43:59.861524+00:00",
+  "utc_end": "2026-08-16T03:43:59.861524+00:00",
+  "trust_arm": null,
+  "scripts": {},
+  "run": "blayer six-scenario acceptance",
+  "n_seeds": 1000,
+  "base_seed": "blayer-v1",
+  "spec": "17 §P4 / 13 §3",
+  "missing": {
+    "pip_freeze": "pip freeze 失敗（無 pip 或逾時）",
+    "utc_start": "extra_meta 未提供 run 起始時間，退用 pack 時刻",
+    "model_id": "extra_meta 未提供",
+    "endpoint": "extra_meta 未提供",
+    "no_think": "extra_meta 未提供",
+    "seeds": "extra_meta 未提供",
+    "trust_arm": "extra_meta 未提供",
+    "scripts": "extra_meta 未提供產生本 run 的腳本清單",
+    "wire.jsonl": "本 run 未產出此檔（可缺項）",
+    "model_io.jsonl": "本 run 未產出此檔（可缺項）"
+  },
+  "excluded_private_keys": []
+}

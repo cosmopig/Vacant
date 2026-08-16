@@ -416,11 +416,18 @@ def run_all(
     if out_dir is not None:
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
+        # ⚠ `arm` 不准用 `c in rep.on_cells` 判：`Cell` 是 dataclass ⇒ `in` 走**值
+        #   相等**。off 值與 on 值一樣的那些格會被寫成 "on"，而那些格**正好就是
+        #   「拆掉機制、數字沒變」的格**（ratio=0；same_source 的 ratio<0.5 定義回 0）
+        #   ⇒ 歸檔檔案系統性地把「該機制在該格是裝飾」（13 §3）的唯一證據標反。
+        #   實測：96 行寫成 on 58／off 38，10 個 (scenario,arm,ratio) 重複鍵。
+        #   `_verdict` 讀的是記憶體裡的兩個 list，不受影響——所以判準全過而歸檔是錯的。
         with (out_dir / "cells.jsonl").open("w", encoding="utf-8") as f:
             for rep in reports.values():
-                for c in rep.on_cells + rep.off_cells:
-                    f.write(json.dumps({**c.to_json(), "arm": ("on" if c in rep.on_cells else "off")},
-                                       ensure_ascii=False) + "\n")
+                for arm, cells in (("on", rep.on_cells), ("off", rep.off_cells)):
+                    for c in cells:
+                        f.write(json.dumps({**c.to_json(), "arm": arm},
+                                           ensure_ascii=False) + "\n")
         lines = ["# B 層機制驗收六情境 — 一頁結果", ""]
         for name, rep in reports.items():
             mark = "✅" if rep.verdict else "❌"
