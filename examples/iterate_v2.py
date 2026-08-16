@@ -76,6 +76,25 @@
 
 盲區刻意不含 1.0（紀律 2：30 個 seed 塌成同一條軌跡、有效 n=1）。
 
+## S4 — 拉長 rounds 買不買得到相位週期
+
+S3 跑完之後量到 35/75 格的 `(burst, recover)` 根本沒被實現：相位鐘走在
+「第幾次被路由」上，而防禦把 600 輪裡的曝光壓到 6.10–51.77 次，跑不完一個週期。
+要跟 Srivatsa 的 I:II:III:IV = 1:2.28:2.08:1.36 比，得先讓每格至少跑完 3 個週期。
+
+修法有兩條：**拉長 `rounds`**，或改用「輪次」推進相位。後者要動
+`_should_defect` 的模型語意（那支的 docstring 明寫時間軸的選擇是組態差異、
+不是實作瑕疵），不在本段範圍。本段只量第一條到底行不行。
+
+⚠ **`rounds` 進 digest**（不在 `_LATER_FIELDS` 也不在 `_SEED_EXEMPT_FIELDS`）
+⇒ 換一個 rounds 就是換一整個隨機世界，**沒有前綴性質、不是配對比較**。
+好處是它給了一個逐位可驗的已知答案：`rounds=600` 那幾格必須與 S3 完全相等。
+
+`(0,10)` 是**對照組不是攻擊者**：pulse 的 `_should_defect` 回
+`phase_bad < pulse_burst` ⇒ `0 < 0` 恆假 ⇒ 一次都不作惡、從不被抓、從不被 slash。
+它把「曝光飽和是因為防禦」與「曝光飽和是因為路由器本來就不隨輪數放大」分開。
+**沒有它，量到飽和也不知道是誰造成的。**
+
 ## 誠實邊界
 
 這是**機制模擬**不是生態效果。它回答「在這套規則下，這個設定值多少」，
@@ -152,6 +171,14 @@ S2_STRATEGIES = {
 S3_ROUNDS = 600
 S3_BURSTS = (1, 2, 3, 5, 8)
 S3_RECOVERS = (3, 10, 20)
+
+# ── S4 ───────────────────────────────────────────────────────────────────
+# 順序＝資訊量優先：600 先跑（它是對 S3 的逐位錨點，跑不完也要有它）。
+S4_ROUNDS = (600, 1200, 2400, 4800, 9600)
+S4_BLINDSPOTS = (0.0, 0.5)
+# (0,10) 是對照組（恆不作惡），(3,10) 是 E24／S3 的正規格，
+# (8,3) 是 S3 那 7 格未解（burst≥5 且 recover=3 實測低於 nominal）的家族成員。
+S4_PULSES = ((0, 10), (3, 10), (8, 3))
 
 
 def _dump(out: Path, name: str, cells: list[dict], note: str, rounds: int,
@@ -360,7 +387,54 @@ def s3(out: Path, workers: int) -> list[dict]:
     return cells
 
 
-STAGES = {"S1": s1, "S1B": s1b, "S2": s2, "S2F": s2f, "S3": s3}
+# ═══ S4 rounds × blindspot × (burst, recover) ════════════════════════════
+def s4(out: Path, workers: int) -> list[dict]:
+    cells = []
+    d = out / "S4"
+    d.mkdir(parents=True, exist_ok=True)
+    with (d / "rows.jsonl").open("w", encoding="utf-8") as rows, \
+            (d / "cells.jsonl").open("w", encoding="utf-8") as cf:
+        for rnds in S4_ROUNDS:
+            for blind in S4_BLINDSPOTS:
+                for b, r in S4_PULSES:
+                    label = f"rounds={rnds}·blind={blind}·({b},{r})"
+                    cfgs = [SimConfig(rounds=rnds, seed=s, strategy="pulse",
+                                      pulse_burst=b, pulse_recover=r,
+                                      blindspot=blind) for s in SEEDS]
+                    c = run_cell(label, cfgs, logdir=log_root(d) / "logs", workers=workers,
+                                 params={"rounds_n": rnds, "blindspot": blind,
+                                         "burst": b, "recover": r,
+                                         "control": b == 0},
+                                 rows_out=rows, cells_out=cf)
+                    cells.append(c)
+                    expo = c["routed_to_attacker"]["mean"]
+                    # cycles 用 S3 第 93 輪的同一個定義（曝光 / (b+r)），不重新發明
+                    cyc = round(expo / (b + r), 2)
+                    print(f"  {label:<32} 曝光 {expo:>8}  週期 {cyc:>6}"
+                          f"  作惡 {c['defected']['mean']:>7}"
+                          f"  得手 {c['accepted_bad']['mean']:>7}"
+                          f"  有效n {c['routed_to_attacker']['n_effective']:>3}",
+                          flush=True)
+    _dump(out, "S4", cells,
+          note=f"rounds ∈ {S4_ROUNDS} × blindspot ∈ {S4_BLINDSPOTS} × "
+               f"(burst,recover) ∈ {S4_PULSES} × 30 seeds ＝ "
+               f"{len(S4_ROUNDS) * len(S4_BLINDSPOTS) * len(S4_PULSES)} 格。"
+               "問題：S3 量到 35/75 格的 (b,r) 沒被實現（曝光跑不完一個週期），"
+               "拉長 rounds 買不買得到週期？"
+               "⚠ rounds 進 digest ⇒ 每個 rounds 是不同的隨機世界，"
+               "**只能做組間比較**（與 S3 的 P4 同一條紀律）。"
+               "(0,10) 是恆不作惡的對照組，用來分開「防禦造成的飽和」與"
+               "「路由器本身不隨輪數放大」。",
+          rounds=max(S4_ROUNDS),
+          extra={"rounds_sweep": list(S4_ROUNDS),
+                 "blindspots": list(S4_BLINDSPOTS),
+                 "pulses": [list(p) for p in S4_PULSES],
+                 "control_pulse": [0, 10],
+                 "cycles_def": "routed_to_attacker / (burst + recover)"})
+    return cells
+
+
+STAGES = {"S1": s1, "S1B": s1b, "S2": s2, "S2F": s2f, "S3": s3, "S4": s4}
 
 
 def main() -> None:
