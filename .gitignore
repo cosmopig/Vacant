@@ -22,3 +22,6 @@ var/
 
 # 外部生圖工具產物（素材本體不進 repo）
 higgsfield_output/
+
+# 逐輪模擬日誌（每格 30–300 個檔）：體積 44M/437M，不進版控
+runs/**/logs/
