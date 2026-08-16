@@ -18,6 +18,7 @@ import argparse
 import hashlib
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 # 照 vacant/blayer.py `_verdict` 抄的：每個情境的判準自己引用哪一格。
@@ -52,16 +53,73 @@ def selftest() -> bool:
         if got != want:
             ok = False
         print(f"  {mark} {label}: disjoint({a},{b}) = {got}（要 {want}）")
+
+    # xcheck 的已知答案：一定一致的、一定不一致的、一定缺格的
+    base = {("s", "on", 0.0): {"n_seeds": 8, "value": 1.0, "ci_lo": 0.9, "ci_hi": 1.1}}
+    drift = {("s", "on", 0.0): {"n_seeds": 8, "value": 1.000001, "ci_lo": 0.9, "ci_hi": 1.1}}
+    for label, a, b, want in [
+        ("已知一致（同一份跟自己比）", base, base, True),
+        ("已知不一致（value 差 1e-6）", base, drift, False),
+        ("已知缺格（右邊是空的）", base, {}, False),
+    ]:
+        got = xcheck(a, b)[0]
+        mark = "✅" if got == want else "❌"
+        if got != want:
+            ok = False
+        print(f"  {mark} {label}: xcheck = {got}（要 {want}）")
     return ok
 
 
+def _index(rows: list[dict], label: str) -> tuple[dict[tuple, dict], list[str]]:
+    """照 (scenario, arm, ratio) 建索引。**重複鍵要點名**——直接塞 dict 會
+    靜默吃掉重複，而「重複鍵」正是第 36 輪 arm 標錯時的可見症狀。"""
+    out: dict[tuple, dict] = {}
+    dup: list[str] = []
+    for c in rows:
+        k = (c["scenario"], c["arm"], round(c["ratio"], 6))
+        if k in out:
+            dup.append(f"{label} 重複鍵 {k}")
+        out[k] = c
+    return out, dup
+
+
 def load_cells(run_dir: Path) -> dict[tuple[str, str, float], dict]:
-    out = {}
-    with (run_dir / "cells.jsonl").open(encoding="utf-8") as f:
-        for line in f:
-            c = json.loads(line)
-            out[(c["scenario"], c["arm"], round(c["ratio"], 6))] = c
-    return out
+    rows = [json.loads(l) for l in
+            (run_dir / "cells.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    return _index(rows, "cells.jsonl")[0]
+
+
+def load_ledger_cells(run_dir: Path) -> list[dict]:
+    """事件帳裡的 CELL 事件（RUN_START／VERDICT／RUN_END 不算格子）。"""
+    rows = [json.loads(l) for l in
+            (run_dir / "ledger_events.jsonl").read_text(encoding="utf-8").splitlines()
+            if l.strip()]
+    return [r for r in rows if r.get("type") == "B_LAYER_CELL"]
+
+
+# 兩份歸檔對同一格必須說同一件事的欄位。
+XCHK_FIELDS = ("n_seeds", "value", "ci_lo", "ci_hi")
+
+
+def xcheck(a: dict[tuple, dict], b: dict[tuple, dict]) -> tuple[bool, list[str]]:
+    """P-XCHK：`cells.jsonl` 與 `ledger_events.jsonl` 對同一格說的話一致嗎？
+
+    為什麼要問：這是兩條**各自寫檔**的路徑（一條跑完寫、一條邊跑邊寫）。
+    HANDOFF §8 最後一條——兩份程式各自被正確地修改了不同次數，漂移就發生了，
+    不需要有人犯錯。第 36 輪的 arm 標錯就是這個形狀。
+    """
+    problems = []
+    only_a, only_b = sorted(set(a) - set(b)), sorted(set(b) - set(a))
+    if only_a:
+        problems.append(f"cells.jsonl 有而 ledger 沒有的格 {len(only_a)}：{only_a[:3]}")
+    if only_b:
+        problems.append(f"ledger 有而 cells.jsonl 沒有的格 {len(only_b)}：{only_b[:3]}")
+    for k in sorted(set(a) & set(b)):
+        diff = {f: (a[k].get(f), b[k].get(f))
+                for f in XCHK_FIELDS if a[k].get(f) != b[k].get(f)}
+        if diff:
+            problems.append(f"{k} 兩份不一致：{diff}")
+    return (not problems), problems
 
 
 def main() -> None:
@@ -109,6 +167,18 @@ def main() -> None:
     print(f"  {'✅' if n_ok else '❌'} {len(cells)} 格，n_seeds "
           f"{'全部 = ' + str(args.expect_seeds) if n_ok else '出現 ' + str(bad)}")
 
+    print("\nP-XCHK（cells.jsonl 與 ledger_events.jsonl 對同一格說同一件事）：")
+    led_rows = load_ledger_cells(run_dir)
+    led, dup = _index(led_rows, "ledger")
+    arms = Counter(k[1] for k in led)
+    x_ok, x_problems = xcheck(cells, led)
+    x_ok = x_ok and not dup
+    ok = ok and x_ok
+    print(f"  {'✅' if x_ok else '❌'} ledger CELL {len(led_rows)} 筆／"
+          f"cells.jsonl {len(cells)} 行；arm {dict(arms)}；重複鍵 {len(dup)}")
+    for p in x_problems + dup:
+        print(f"     ❌ {p}")
+
     if args.replica:
         print("\nB-DET（同 base-seed 重跑，cells.jsonl sha256 逐字元相同）：")
         h1 = hashlib.sha256((run_dir / "cells.jsonl").read_bytes()).hexdigest()
@@ -116,6 +186,21 @@ def main() -> None:
         d_ok = h1 == h2
         ok = ok and d_ok
         print(f"  {'✅' if d_ok else '❌'} {h1}\n     {'' if d_ok else '≠ '}{h2}")
+
+        print("\nP-DET-LEDGER（事件帳去掉 ts_ms 後逐字元相同）：")
+        # ts_ms 是真的牆鐘時間、本來就不會一樣——事件帳的時間欄位是紀錄不是
+        # 計算結果。去掉它之後**其餘全部**必須可重放，否則 CI/value 就漂了。
+        def _strip(d: Path) -> str:
+            rows = [json.loads(l) for l in
+                    (d / "ledger_events.jsonl").read_text(encoding="utf-8").splitlines()
+                    if l.strip()]
+            body = [json.dumps({k: v for k, v in r.items() if k != "ts_ms"},
+                               ensure_ascii=False, sort_keys=True) for r in rows]
+            return hashlib.sha256("\n".join(body).encode()).hexdigest()
+        g1, g2 = _strip(run_dir), _strip(Path(args.replica))
+        l_ok = g1 == g2
+        ok = ok and l_ok
+        print(f"  {'✅' if l_ok else '❌'} {g1}\n     {'' if l_ok else '≠ '}{g2}")
 
     print("\nB-PACK（CLAUDE.md 紀錄紅線：不 pack ＝ 沒跑過）：")
     from vacant.record import check

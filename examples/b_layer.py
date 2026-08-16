@@ -18,7 +18,7 @@ import argparse
 import time
 from pathlib import Path
 
-from vacant.blayer import DEFAULT_N_SEEDS, SCENARIOS, run_all
+from vacant.blayer import DEFAULT_N_SEEDS, SCENARIOS, finalize_run_package, run_all
 
 
 def main() -> None:
@@ -26,20 +26,35 @@ def main() -> None:
     ap.add_argument("--n-seeds", type=int, default=DEFAULT_N_SEEDS)
     ap.add_argument("--smoke", action="store_true", help="每格 16 seeds 快速掃描")
     ap.add_argument("--base-seed", default="blayer-v1")
-    ap.add_argument("--out", default=None, help="歸檔目錄（cells.jsonl＋summary.md）")
+    ap.add_argument("--out", default=None,
+                    help="歸檔目錄（cells.jsonl＋summary.md＋ledger_events.jsonl）")
     ap.add_argument("--only", nargs="*", choices=sorted(SCENARIOS), default=None)
+    ap.add_argument("--no-pack", action="store_true",
+                    help="不做 RECORD_SPEC pack/check（給 --out 時預設會做；"
+                         "紀錄紅線：不 pack ＝ 沒跑過）")
     args = ap.parse_args()
 
     n = 16 if args.smoke else args.n_seeds
     t0 = time.time()
     reports = run_all(n_seeds=n, base_seed=args.base_seed,
                       out_dir=args.out, only=tuple(args.only) if args.only else None)
+    elapsed = time.time() - t0
     ok = True
-    print(f"B 層六情境（每格 {n} seeds，耗時 {time.time() - t0:.0f}s）")
+    print(f"B 層六情境（每格 {n} seeds，耗時 {elapsed:.0f}s）")
     for name, rep in reports.items():
         print(f"  {'✅' if rep.verdict else '❌'} {name:22s} {rep.detail}")
         ok = ok and rep.verdict
     print(f"總判：{'全過 ✅' if ok else '有失敗 ❌——對應機制依 13 §3 降級為裝飾、從主張移除'}")
+
+    # 紀錄紅線（CLAUDE.md）：不 pack ＝ 沒跑過。判準過但包不合格，這個 run
+    # 進不了任何主張——所以 pack/check 的結果併入退出碼，不是附註。
+    if args.out and not args.no_pack:
+        p_ok, problems = finalize_run_package(
+            args.out, reports, n_seeds=n, base_seed=args.base_seed,
+            elapsed_s=elapsed)
+        print(f"RECORD_SPEC：{'✅ check ok' if p_ok else '❌ check 不合格'}"
+              + ("" if p_ok else f" problems={problems}"))
+        ok = ok and p_ok
     raise SystemExit(0 if ok else 1)
 
 

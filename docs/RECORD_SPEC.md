@@ -42,6 +42,8 @@ runs/<experiment>/<run_id>/
 | 欄位 | 型別 | 說明 |
 |------|------|------|
 | `repo_commit` | str | `git rev-parse HEAD`；抓不到寫 `"unknown"` 並記入 `missing` |
+| `repo_dirty` | bool\|null | 工作區相對 HEAD 有無未提交的**已追蹤**改動（`git status --porcelain -uno`）；抓不到寫 null 並記入 `missing` |
+| `repo_dirty_paths` | list[str] | 髒檔清單（上限 50 筆）；乾淨時為空 |
 | `pip_freeze` | list[str] | `python -m pip freeze` 逐行 |
 | `os` | str | `platform.platform()` |
 | `python` | str | 直譯器版本 |
@@ -70,6 +72,11 @@ runs/<experiment>/<run_id>/
 - `SHA256SUMS` 偵測（detects）落盤後的竄改，不預防（not prevents）；它證明的是
   「check 當下這些檔與 pack 當下一致」，不證明 pack 當下的內容未被作者本人捏造——
   後者由簽章鏈的不可偽造性承擔。
+- `repo_commit` **不等於「照這個 commit 就重現得出這個 run」**。工作區髒的時候，
+  照它 checkout 拿到的是另一份程式；`repo_dirty` / `repo_dirty_paths` 就是為了讓
+  這件事被斷言而不是被腦補。`repo_dirty=true` **不判不合格**（開發中跑 run 是正常的），
+  但它必須寫在包裡——紅線是「缺席須有理由」，不是「不准在開發中跑」。
+  已知盲區：`-uno` ⇒ **未追蹤的新原始碼檔偵測不到**。
 
 ## 5. infra_void / retry×4 / parse_void 規律（引 09 §3.5；CLAUDE.md 鐵律 3）
 
