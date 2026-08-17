@@ -71,11 +71,18 @@ _COMMENT = re.compile(r"<!--.*?-->", re.S)
 _TAG = re.compile(r"<[^>]+>")
 
 
+def dom_text(html: str) -> str:
+    """DOM 純文字，**空白全部去掉**。去空白是為了讓「一句話中間夾著標籤」
+    （`五個檢查者用的是<strong>同一款 AI</strong>`）仍然比對得到——
+    標籤被換成空白之後，去空白就把兩半接回原句。"""
+    s = _COMMENT.sub(" ", _SCRIPT_STYLE.sub(" ", html))
+    return re.sub(r"\s+", "", _TAG.sub(" ", s))
+
+
 def dom_text_len(html: str) -> int:
     """DOM 純文字長度。判準要看的是這個數字，不是位元組數
     （位元組會被 style 屬性、class 名撐大，那些觀眾看不到）。"""
-    s = _COMMENT.sub(" ", _SCRIPT_STYLE.sub(" ", html))
-    return len(re.sub(r"\s+", "", _TAG.sub(" ", s)))
+    return len(dom_text(html))
 
 
 class Driver:
@@ -103,13 +110,15 @@ class Driver:
                           "awaitPromise": True})
         return r.get("result", {}).get("value")
 
-    def dump(self, name: str, note: str) -> dict:
+    def dump(self, name: str, note: str, probe: dict | None = None) -> dict:
         html = self.js("document.documentElement.outerHTML")
         if not isinstance(html, str):
             html = ""
         (self.out / f"{name}.html").write_text(html, encoding="utf-8")
         st = {"state": name, "note": note, "bytes": len(html),
               "text_len": dom_text_len(html)}
+        if probe:
+            st["probe"] = probe
         self.states.append(st)
         print(f"  {name:<26} bytes={st['bytes']:<7} text={st['text_len']}")
         return st
@@ -227,6 +236,149 @@ def phonehurt(d: Driver) -> None:
     print("  [phonehurt] 前 39 個 id 沒有一個在 hurt 狀態 —— 照實記")
 
 
+# ══ 第 100 輪：官網（vacant-docs-web）的互動狀態 ════════════════════════
+#
+# 為什麼要補這一支：第 97 輪掃的是原始碼、第 98 輪掃的 rendered DOM **只涵蓋
+# `vacant_hm`**。官網 `js/main.js` 有六組互動（十秒找 bug、共同盲區揭曉、
+# 收據逐項組裝、路由開關、宣稱卡翻面、全站目錄），那些字全是點下去之後才進 DOM。
+# 而原始碼路徑看到的是「七個獨立的字串陣列」，看不到它們在畫面上**相鄰**之後
+# 長什麼樣——第 98 輪已經證明過跨元素的因果鏈句級掃描結構上看不到。
+WEB = "/vacant-docs-web/index.html"
+
+# D3：每一格「只有互動後才存在」的字。**這是驗後果不驗前提**——
+# 不問「main.js 載入了嗎」，問「那句只有點下去才會被寫進 DOM 的字在不在」。
+WEB_EXPECT = {
+    "web_game_found": "你點到了真的錯誤",
+    "web_game_timeout": "沒有人找得到",
+    "web_blindspot": "五個檢查者用的是",
+    "web_receipt": "後面每一筆的雜湊都對不上",
+    "web_route_on": "有可究責層",
+}
+# 目錄那一格**不能用字比對**：`<dialog>` 的內容在關閉狀態下就已經在 DOM 裡，
+# 拿它的字當「互動後才存在」會是一個必過的假判準。事前登記寫的是
+# 「目錄對話框 `open`」——照登記走，驗 `open` 這個後果。
+
+
+def sweep_web(d: Driver) -> None:
+    """官網：兩次載入。第一次專門搶在十秒倒數之前點中 bug（`found` 分支），
+    第二次讓它逾時（`timeout` 分支），然後在同一頁上把其餘互動疊上去。
+
+    疊在同一頁是刻意的：後面每個狀態都是前一個的超集合，掃描只會多看不會少看，
+    而 D3 仍逐格檢查「該格自己那句話」在不在。"""
+    # ── 第一次載入：game 的 found 分支（要搶在 10 秒倒數之前）──
+    d.goto(WEB, 3.0)
+    tokens = d.js("document.querySelectorAll('.code-token').length")
+    print(f"  [D2] .code-token = {tokens}（靜態 HTML 裡是 0；216 才代表 main.js 真的跑了）")
+    d.dump("web_load", "官網初始渲染（尚未互動）", probe={"code_tokens": tokens})
+    d.js("document.querySelector('[data-game-choice=\"bug\"]').click()")
+    time.sleep(1.2)
+    d.dump("web_game_found", "點中第 143 格的 `=` ⇒ 『你是少數』那一屏")
+
+    # ── 第二次載入：逾時分支，再把其餘互動疊上去 ──
+    d.goto(WEB, 1.5)
+    time.sleep(11.0)                      # 倒數 10.0 秒 ＋ 緩衝
+    d.dump("web_game_timeout", "十秒到了沒點中 ⇒ 『沒關係，沒有人找得到』")
+
+    d.js("document.querySelector('[data-blindspot-choice]').click()")
+    time.sleep(1.0)
+    d.dump("web_blindspot", "共同盲區揭曉（60% 錯在同一個答案）")
+
+    d.js("document.querySelector('[data-receipt]').click()")
+    time.sleep(3.2)                       # 七列 × 310ms，等組裝完最後一列
+    d.dump("web_receipt", "收據七列組裝完（第 06 列『有沒有被抽查』與第 07 列相鄰）")
+
+    d.js("document.querySelector('[data-route-switch]').click()")
+    time.sleep(1.0)
+    counter = d.js("document.querySelector('[data-route-counter]').textContent")
+    print(f"  [D3b] 畫面顯示：{counter!r}")
+    d.dump("web_route_on", "可究責層打開（E10 真模型實測序列）",
+           probe={"route_counter": counter})
+
+    d.js("document.querySelector('.team-member').click()")
+    time.sleep(0.8)
+    d.dump("web_team", "點了團隊物件（讀值被帶到旁邊）")
+
+    d.js("document.querySelector('[data-map-open]').click()")
+    time.sleep(0.8)
+    is_open = d.js("document.querySelector('[data-site-map]').open === true")
+    print(f"  [D3] 目錄對話框 open = {is_open}")
+    d.dump("web_sitemap", "全站目錄對話框打開", probe={"dialog_open": is_open})
+
+    # 宣稱卡翻面：正面與背面在 DOM 裡本來就都存在（翻面只換 CSS），
+    # 所以它不是「互動後才存在」的字——照實記，不假裝多驗了一格。
+    flipped = d.js("(() => {const c=document.querySelectorAll('.claim-card');"
+                   "c.forEach(x=>x.click());return c.length;})()")
+    time.sleep(0.6)
+    d.dump("web_claims_flipped", f"{flipped} 張宣稱卡全部翻面（背面本來就在 DOM）")
+
+
+def canary_web(d: Driver) -> None:
+    """D1：同一條管線、同一個官網頁面，只差「有沒有點下去」。"""
+    d.goto(WEB, 3.0)
+    d.dump("canaryweb_before_click", "注入已掛好，但還沒有人點 ⇒ 句子不該存在")
+    d.js("document.body.click()")
+    time.sleep(1.5)
+    d.dump("canaryweb_after_click", "點了 ⇒ 句子必須在")
+
+
+def _on_sequence_from_source() -> str:
+    """D3b 的另一條路徑：**不經瀏覽器**，直接從 `js/main.js` 把 on 序列讀出來。
+
+    兩條路徑算同一個數字才算數。共用同一份來源、不同的求值方式——
+    畫面是 JS 執行的結果，這裡是正則讀字面量。"""
+    src = (HOME / "vacant" / "vacant-docs-web" / "js" / "main.js").read_text(
+        encoding="utf-8")
+    m = re.search(r"on:\s*\{[^}]*sequence:\s*'([.X]+)'", src)
+    if not m:
+        raise SystemExit("D3b：在 main.js 裡找不到 on 序列——判準無法評，停手")
+    return m.group(1)
+
+
+def check_web(out: Path) -> int:
+    """D2／D3／D3b 的離線判定：只讀已落盤的 *.html 與 states.json。"""
+    states = json.loads((out / "states.json").read_text(encoding="utf-8"))
+    by_name = {s["state"]: s for s in states}
+    fails = []
+
+    print("── D2 頁面真的跑起來了（後果，不是前提）──")
+    tokens = by_name.get("web_load", {}).get("probe", {}).get("code_tokens")
+    ok = tokens == 216
+    print(f"  .code-token = {tokens}（判準 =216）{'PASS' if ok else 'FAIL'}")
+    fails += [] if ok else ["D2 tokens"]
+    short = [s["state"] for s in states if s["text_len"] <= 3000]
+    print(f"  text_len ≤3000 的狀態：{short or '無'} "
+          f"（min={min(s['text_len'] for s in states)}）"
+          f"{' PASS' if not short else ' FAIL'}")
+    fails += [] if not short else ["D2 text_len"]
+
+    print("── D3 互動真的改變了 DOM ──")
+    for name, phrase in WEB_EXPECT.items():
+        p = out / f"{name}.html"
+        got = p.exists() and phrase.replace(" ", "") in dom_text(
+            p.read_text(encoding="utf-8"))
+        print(f"  {name:<20} 「{phrase}」 {'HIT ' if got else 'MISS'}")
+        fails += [] if got else [f"D3 {name}"]
+    dlg = by_name.get("web_sitemap", {}).get("probe", {}).get("dialog_open")
+    print(f"  {'web_sitemap':<20} dialog.open = {dlg} "
+          f"{'HIT ' if dlg is True else 'MISS'}")
+    fails += [] if dlg is True else ["D3 web_sitemap"]
+
+    print("── D3b 交叉算數（畫面 vs 直接讀 main.js）──")
+    seq = _on_sequence_from_source()
+    want = seq.count("X")
+    shown = by_name.get("web_route_on", {}).get("probe", {}).get("route_counter", "")
+    m = re.search(r"(\d+)", shown or "")
+    got = int(m.group(1)) if m else None
+    print(f"  main.js 序列長度 {len(seq)} · X 數 = {want}")
+    print(f"  畫面顯示 {shown!r} ⇒ {got}")
+    ok = got == want
+    print(f"  兩邊{'相等' if ok else '不相等'} {'PASS' if ok else 'FAIL'}")
+    fails += [] if ok else ["D3b"]
+
+    print(f"\n結果：{'全過' if not fails else 'FAIL ' + str(fails)}")
+    return 0 if not fails else 1
+
+
 def canary(d: Driver) -> None:
     """Q1：同一條管線、同一個頁面，只差「有沒有點下去」。"""
     d.goto(f"{HM}?scene=2&hold=1", 4.0)
@@ -242,8 +394,14 @@ def main() -> int:
     ap.add_argument("--canary", type=Path)
     ap.add_argument("--findbad", type=Path)
     ap.add_argument("--phonehurt", type=Path)
+    ap.add_argument("--sweep-web", type=Path, help="官網互動狀態（第 100 輪）")
+    ap.add_argument("--canary-web", type=Path, help="官網那條管線的 D1 自驗")
+    ap.add_argument("--check-web", type=Path,
+                    help="離線判定 D2／D3／D3b（只讀已落盤的產物）")
     a = ap.parse_args()
-    out = a.sweep or a.canary or a.findbad or a.phonehurt
+    if a.check_web:
+        return check_web(a.check_web)
+    out = a.sweep or a.canary or a.findbad or a.phonehurt or a.sweep_web or a.canary_web
     if not out:
         ap.print_help()
         return 2
@@ -259,9 +417,10 @@ def main() -> int:
     base = f"http://127.0.0.1:{HTTP_PORT}"
     d = None
     try:
-        d = Driver(out, base, inject=bool(a.canary))
-        (canary if a.canary else findbad if a.findbad
-         else phonehurt if a.phonehurt else sweep)(d)
+        d = Driver(out, base, inject=bool(a.canary or a.canary_web))
+        (canary if a.canary else canary_web if a.canary_web
+         else findbad if a.findbad else phonehurt if a.phonehurt
+         else sweep_web if a.sweep_web else sweep)(d)
     finally:
         if d:
             states = d.states
