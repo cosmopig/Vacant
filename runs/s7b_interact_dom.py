@@ -86,6 +86,10 @@ def dom_text_len(html: str) -> int:
 
 
 class Driver:
+    """`base` 是 URL 前綴。第 100 輪之前它一定是本檔起的 `http.server`；
+    第 101 輪起也可以是**別人起的伺服器**（觀測台 dashboard 自己就是 HTTP
+    server，靜態檔路徑餵不出資料）。Driver 本身不管伺服器是誰起的。"""
+
     def __init__(self, out: Path, base: str, inject: bool):
         self.out = out
         self.base = base
@@ -379,6 +383,291 @@ def check_web(out: Path) -> int:
     return 0 if not fails else 1
 
 
+# ══ 第 101 輪：觀測台（Vacant/vacant/web/app.html）的**活體** DOM ═══════
+#
+# 為什麼要補這一支：S7 的 SCOPE（`s7_claim_audit.py:33`）對 Vacant 只含
+# `vacant/web/app.html` 與 `app.js`。但觀測台畫面上絕大多數的字**不在那兩個檔
+# 裡**——磚、名冊、活動列、鏈完整性、成本表、事件流全是 API 生的，而
+# 〈宣稱階梯〉那五段（「這套系統現在可以說什麼」）住在
+# `vacant/dashboard.py:claim_ladder()`。**原始碼路徑與 DOM 路徑兩條都沒看過它。**
+#
+# 它也不能用靜態 http 掃：`file://`／`python -m http.server` 下 `/api/state`
+# 是 404，整頁只剩骨架 ⇒ **假的乾淨**（第 97 輪對 hm 實測過 21 倍差距）。
+# 所以本輪起一台真的 dashboard（`vacant up`，產品入口本身），資料用離線假腦。
+#
+# ⚠ 資料標籤：下面灌進去的 40 筆交付是**機制模擬**（`FakeBrain` 確定性假腦），
+#   **不是真模型實測**。本輪要量的是文案會不會渲染出來，不是品質。
+APP_PORT = 8752
+APP_DELIVERIES = 40
+
+# E2：**要有活的伺服器才存在**的字。這四句在靜態 `app.html`／`app.js` 裡
+# 一個字都沒有——「擁有權」「待回溯」「簽章鏈可驗」由 `app.js` 的模板生，
+# 「在預註冊條件下量到提升」則整句只存在於 `dashboard.py`。
+APP_LIVE_EXPECT = ["擁有權", "待回溯", "簽章鏈可驗", "在預註冊條件下量到提升"]
+
+# E3：**真的要點下去才存在**的字。
+# 分頁切換（`app.js:77 show()`）只翻 `hidden`，五個 section 的靜態字載入當下
+# 就都在 DOM 裡；`#id-rows`/`#act-rows`/`#ladder` 也是 `refresh()` 在載入時
+# 填好的。**拿分頁切換當「互動後才存在」會是必過的假判準**（第 100 輪的
+# `<dialog>` 形狀）。所以真正互動後才生出來的只有抽屜與暫停鍵。
+APP_CLICK_EXPECT = {
+    "app_drawer_identity": "五維信用",
+    "app_drawer_task": "同儕互審",
+    "app_pause": "▶ 繼續",
+}
+# E3x：記錄用，**不列入判準**。`app.js:36` 寫明拿不到剪貼簿就靜默略過，
+# headless 的剪貼簿權限是環境性質不是文案性質。
+APP_COPY_EXPECT = ("app_copy", "已複製")
+
+_REVERSE_CHECK = {
+    "type": "run_python",
+    "code": ("assert solve('hello') == 'olleh'\n"
+             "assert solve('abc') == 'cba'\n"
+             "assert solve('a') == 'a'\n"),
+}
+
+
+class _FakeBrain:
+    """離線假腦（與 `tests/test_ecosystem.py` 同一顆）：看到 saboteur 的植入字
+    就回一個 off-by-one 的 solve，否則回正確的。**零機時、確定性、可重放。**"""
+
+    name = "fake-offline"
+
+    def generate(self, prompt: str) -> str:
+        if "Include one subtle off-by-one" in prompt:
+            return "```python\ndef solve(s):\n    return s[::-1][:-1]\n```"
+        return "```python\ndef solve(s):\n    return s[::-1]\n```"
+
+
+def seed_app_root(root: Path, n: int = APP_DELIVERIES) -> dict:
+    """把展示資料灌進一個全新的 root，讓觀測台**有東西可以顯示**。
+
+    這一步是 E0 的前置：沒有資料的面板每一格都是「尚無…」，掃出來會是
+    假的乾淨。on/off 兩段都跑，才會有 scoreboard 與成本表兩欄。
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from vacant.ecosystem import DEFAULT_ROSTER, Ecosystem, ensure_root_mode
+
+    ensure_root_mode(root, "demo")
+    eco = Ecosystem(root, _FakeBrain(), roster=DEFAULT_ROSTER,
+                    k_reviewers=3, root_mode="demo")
+    n_on = n * 7 // 10
+    eco.toggle(True)
+    for i in range(n_on):
+        eco.delegate(f"Reverse the input string (item {i}).", _REVERSE_CHECK)
+    eco.toggle(False)
+    for i in range(n_on, n):
+        eco.delegate(f"Reverse the input string (item {i}).", _REVERSE_CHECK)
+    eco.toggle(True)  # 面板停在 trust on，展場預設的那一邊
+
+    # ── 事後加的一步（第 101 輪掃完第一次才發現）──────────────────────
+    # 第一次 sweep 的 SLASH 計數是 0，於是 `app.js:105` 那一格的副標走的是
+    # 「尚未發生」那一支，而**另一支「信用已被扣減」從沒進過 DOM**。
+    # 那句是觀測台全站唯一直接講「後果」的文案，也就是 S7 紅線的待測物本身——
+    # 漏掉它，本輪等於掃了一個不含待測物的樣本（同第 98 輪 `findbad` 的形狀）。
+    #
+    # SLASH 只在「確定性稽核已獨立佐證此筆失敗」時才會扣信用
+    # （`ecosystem.py:1127`），所以這裡挑一筆**稽核實跑且未通過**的交付去仲裁，
+    # 不是隨便造一筆。挑不到就照實印，不假裝有。
+    slashed = None
+    for act in eco.activity():
+        if act.get("audit_performed") and act.get("audit_passed") is False:
+            # ⚠ evidence 這串字**會被原封不動印在觀測台的事件流上**
+            # （`app.js:272 evNode()` 把 payload 每個欄位攤平成畫面文字）。
+            # 第一次跑時這裡寫了含「稽核」的句子，於是 9 個狀態各生一條候選，
+            # **全部是探針自己的字**——樣本被量測工具汙染了。
+            # 所以這串字必須避開 `s7_claim_audit.CATCH`／`EXCLUDE_CLAIM` 的所有詞。
+            slashed = eco.report(act["task_id"], "FAIL",
+                                 evidence="s7e fixture: render the tile branch")
+            break
+    print(f"  [seed] SLASH 仲裁：{slashed or '沒有任何一筆稽核未通過 —— 照實記'}")
+
+    info = {"counters": eco.counters(), "n_identities": len(eco.identities()),
+            "n_activity": len(eco.activity()), "ledger_seq": eco.integrity()["ledger_seq"]}
+    print(f"  [seed] {info}")
+    return info
+
+
+def delivered_from_ledger(root: Path) -> int:
+    """E3b 的另一條路徑：**不經瀏覽器、不經 Ecosystem**，直接數 ledger 行。
+
+    兩條路徑算同一個數字才算數。面板那格走的是
+    `counters()` → `/api/state` → `renderTiles()`；這裡只是讀檔數字串。
+    """
+    p = root / "ledger" / "events.jsonl"
+    n = 0
+    for line in p.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            if json.loads(line).get("type") == "DELIVERED":
+                n += 1
+        except ValueError:
+            continue
+    return n
+
+
+def sweep_app(d: Driver) -> None:
+    """觀測台：載入 → 五個分頁 → 身份抽屜 → 交付抽屜 → 暫停 → 複製雜湊。
+
+    `?nolive=1` **不能用**：那會關掉 SSE，而事件流那一欄的字正是活體才有的。
+    但 SSE 是永不結束的連線，所以每一拍都用固定 sleep，不等 load 事件。
+    """
+    d.goto("/", 4.0)
+    probe = {
+        "id_rows": d.js("document.querySelectorAll('#id-rows tr[data-id]').length"),
+        "act_rows": d.js("document.querySelectorAll('#act-rows tr[data-task]').length"),
+        "chip_head": d.js("document.querySelector('#chip-head b')?.textContent"),
+        "tile_delivered": d.js(
+            "[...document.querySelectorAll('#tiles .tile')]"
+            ".find(t=>t.querySelector('.label')?.textContent==='交付')"
+            "?.querySelector('.value')?.textContent"),
+        "ladder_rungs": d.js("document.querySelectorAll('#ladder .rung').length"),
+        "stream_rows": d.js("document.querySelectorAll('#stream .ev').length"),
+    }
+    print(f"  [E0/E3b] {probe}")
+    d.dump("app_load", "觀測台載入完（磚／名冊／活動／階梯全部由 API 填）",
+           probe=probe)
+
+    for view in ("identities", "activity", "chain", "claims"):
+        d.js(f"document.querySelector('#nav button[data-view=\"{view}\"]').click()")
+        time.sleep(0.8)
+        d.dump(f"app_view_{view}", f"分頁「{view}」（只翻 hidden，不新增文字）")
+
+    # ── 身份抽屜：fetch /api/identity → dw-body，這才是互動後才存在的字 ──
+    d.js("document.querySelector('#nav button[data-view=\"identities\"]').click()")
+    time.sleep(0.5)
+    d.js("document.querySelector('#id-rows tr[data-id]').click()")
+    time.sleep(1.5)
+    d.dump("app_drawer_identity", "點名冊一列 ⇒ 五維信用／記憶鏈／存檔點鏈抽屜")
+    d.js("document.getElementById('dw-close').click()")
+    time.sleep(0.5)
+
+    # ── 交付抽屜：fetch /api/task → 信任狀全文（風險欄、互審、稽核、鏈錨）──
+    d.js("document.querySelector('#nav button[data-view=\"activity\"]').click()")
+    time.sleep(0.5)
+    d.js("document.querySelector('#act-rows tr[data-task]').click()")
+    time.sleep(1.5)
+    d.dump("app_drawer_task", "點交付一列 ⇒ 信任狀抽屜（觀眾看『這一件發生什麼』）")
+    d.js("document.getElementById('dw-close').click()")
+    time.sleep(0.5)
+
+    # ── 暫停鍵：文字整個換掉，且緩衝計數是另一句 ──
+    d.js("document.querySelector('#nav button[data-view=\"overview\"]').click()")
+    time.sleep(0.4)
+    d.js("document.getElementById('pause').click()")
+    time.sleep(1.2)
+    d.dump("app_pause", "暫停事件流 ⇒ 「▶ 繼續」＋「N 筆新事件」")
+    d.js("document.getElementById('pause').click()")
+    time.sleep(0.6)
+
+    # ── E3x：雜湊複製。中不中都照記，不改判準。 ──
+    d.js("document.querySelector('.hash[data-copy]')?.click()")
+    time.sleep(0.6)
+    d.dump("app_copy", "點雜湊複製（headless 可能沒有剪貼簿權限 ⇒ E3x 記錄用）")
+
+
+def canary_app(d: Driver) -> None:
+    """E1：同一條管線、同一個觀測台頁面，只差「有沒有點下去」。"""
+    d.goto("/", 4.0)
+    d.dump("canaryapp_before_click", "注入已掛好，但還沒有人點 ⇒ 句子不該存在")
+    d.js("document.body.click()")
+    time.sleep(1.5)
+    d.dump("canaryapp_after_click", "點了 ⇒ 句子必須在")
+
+
+def check_app(out: Path) -> int:
+    """E0／E2／E3／E3b 的離線判定：只讀已落盤的 *.html 與 states.json。"""
+    states = json.loads((out / "states.json").read_text(encoding="utf-8"))
+    by_name = {s["state"]: s for s in states}
+    load = by_name.get("app_load", {})
+    pr = load.get("probe", {})
+    fails = []
+
+    print("── E0 資料是真的，不是空面板 ──")
+    for key, label, want, ok in (
+            ("id_rows", "#id-rows tr[data-id]", "=6", pr.get("id_rows") == 6),
+            ("act_rows", "#act-rows tr[data-task]", "≥20", (pr.get("act_rows") or 0) >= 20)):
+        print(f"  {label:<26} {pr.get(key)}（判準 {want}）{'PASS' if ok else 'FAIL'}")
+        fails += [] if ok else [f"E0 {key}"]
+    head = (pr.get("chip_head") or "").strip()
+    ok = head not in ("", "—") and len(head.replace(" ", "")) >= 8
+    print(f"  {'#chip-head b':<26} {head!r}（判準 ≠「—」且≥8 字）{'PASS' if ok else 'FAIL'}")
+    fails += [] if ok else ["E0 chip_head"]
+    short = [s["state"] for s in states if s["text_len"] <= 1500]
+    print(f"  text_len ≤1500 的狀態：{short or '無'} "
+          f"（min={min(s['text_len'] for s in states)}）{'PASS' if not short else 'FAIL'}")
+    fails += [] if not short else ["E0 text_len"]
+
+    print("── E2 要有活的伺服器才存在的字 ──")
+    live = dom_text((out / "app_load.html").read_text(encoding="utf-8"))
+    static = "".join((Path(__file__).resolve().parents[1] / "vacant" / "web" / f)
+                     .read_text(encoding="utf-8") for f in ("app.html", "app.js"))
+    static_flat = re.sub(r"\s+", "", static)
+    for phrase in APP_LIVE_EXPECT:
+        flat = phrase.replace(" ", "")
+        in_live, in_static = flat in live, flat in static_flat
+        ok = in_live and not in_static
+        print(f"  「{phrase}」 活體={'有' if in_live else '無'} "
+              f"靜態檔={'有 ⇒ 這句不算活體專屬' if in_static else '無'} "
+              f"{'PASS' if ok else 'FAIL'}")
+        fails += [] if ok else [f"E2 {phrase}"]
+
+    print("── E3 真的要點下去才存在的字 ──")
+    for name, phrase in APP_CLICK_EXPECT.items():
+        p = out / f"{name}.html"
+        got = p.exists() and phrase.replace(" ", "") in dom_text(
+            p.read_text(encoding="utf-8"))
+        print(f"  {name:<22} 「{phrase}」 {'HIT ' if got else 'MISS'}")
+        fails += [] if got else [f"E3 {name}"]
+    name, phrase = APP_COPY_EXPECT
+    p = out / f"{name}.html"
+    got = p.exists() and phrase.replace(" ", "") in dom_text(p.read_text(encoding="utf-8"))
+    print(f"  {name:<22} 「{phrase}」 {'HIT ' if got else 'MISS'}  ← E3x 記錄用，不列入判準")
+
+    print("── E3b 交叉算數（畫面〈交付〉磚 vs 直接數 ledger）──")
+    root = Path((out / "root.txt").read_text(encoding="utf-8").strip())
+    want = delivered_from_ledger(root)
+    shown = pr.get("tile_delivered")
+    m = re.search(r"(\d+)", str(shown or ""))
+    got = int(m.group(1)) if m else None
+    print(f"  ledger 直接數 \"type\":\"DELIVERED\" = {want}")
+    print(f"  畫面〈交付〉磚顯示 {shown!r} ⇒ {got}")
+    ok = got == want
+    print(f"  兩邊{'相等' if ok else '不相等'} {'PASS' if ok else 'FAIL'}")
+    fails += [] if ok else ["E3b"]
+
+    print(f"\n結果：{'全過' if not fails else 'FAIL ' + str(fails)}")
+    return 0 if not fails else 1
+
+
+def freq(dom_dir: Path | None, files: list[str]) -> int:
+    """E4d：**不經候選邏輯**，直接數〈抓到類〉〈排除類〉各出現幾次。
+
+    候選邏輯要求兩類同句才算，所以「候選 0 條」有兩種完全不同的意思：
+    寫對了歸因，或**根本沒講後果**。第 100 輪對官網量到的是後者。
+    這支就是用來分開這兩件事的——它沒有判準，是描述性的。
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import s7_claim_audit as sca  # 詞族只有一份，不在這裡重抄一遍
+
+    def count(label: str, text: str) -> None:
+        c = {w: text.count(w) for w in sca.CATCH if text.count(w)}
+        e = {w: text.count(w) for w in sca.EXCLUDE_CLAIM if text.count(w)}
+        print(f"  {label}（{len(text)} 字）")
+        print(f"    〈抓到類〉{sum(c.values()):>4} 次  {c or '無'}")
+        print(f"    〈排除類〉{sum(e.values()):>4} 次  {e or '無'}")
+
+    if dom_dir:
+        blob = "".join(dom_text(p.read_text(encoding="utf-8"))
+                       for p in sorted(dom_dir.glob("*.html")))
+        count(f"DOM {dom_dir}（{len(list(dom_dir.glob('*.html')))} 個狀態）", blob)
+    for f in files:
+        p = Path(__file__).resolve().parents[1] / f
+        count(f, p.read_text(encoding="utf-8"))
+    return 0
+
+
 def canary(d: Driver) -> None:
     """Q1：同一條管線、同一個頁面，只差「有沒有點下去」。"""
     d.goto(f"{HM}?scene=2&hold=1", 4.0)
@@ -398,10 +687,22 @@ def main() -> int:
     ap.add_argument("--canary-web", type=Path, help="官網那條管線的 D1 自驗")
     ap.add_argument("--check-web", type=Path,
                     help="離線判定 D2／D3／D3b（只讀已落盤的產物）")
+    ap.add_argument("--sweep-app", type=Path, help="觀測台活體互動狀態（第 101 輪）")
+    ap.add_argument("--canary-app", type=Path, help="觀測台那條管線的 E1 自驗")
+    ap.add_argument("--check-app", type=Path,
+                    help="離線判定 E0／E2／E3／E3b（只讀已落盤的產物）")
+    ap.add_argument("--freq", type=Path, help="E4d：DOM 目錄的獨立詞頻（無判準）")
+    ap.add_argument("--freq-file", action="append", default=[],
+                    help="E4d：另外對這些原始檔數同一組詞（可重複）")
     a = ap.parse_args()
     if a.check_web:
         return check_web(a.check_web)
-    out = a.sweep or a.canary or a.findbad or a.phonehurt or a.sweep_web or a.canary_web
+    if a.check_app:
+        return check_app(a.check_app)
+    if a.freq or a.freq_file:
+        return freq(a.freq, a.freq_file)
+    out = (a.sweep or a.canary or a.findbad or a.phonehurt or a.sweep_web
+           or a.canary_web or a.sweep_app or a.canary_app)
     if not out:
         ap.print_help()
         return 2
@@ -409,16 +710,33 @@ def main() -> int:
     for old in out.glob("*.html"):
         old.unlink()
 
-    srv = subprocess.Popen(
-        [sys.executable, "-m", "http.server", str(HTTP_PORT), "--bind", "127.0.0.1"],
-        cwd=str(HOME / "vacant"),
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(1.5)
-    base = f"http://127.0.0.1:{HTTP_PORT}"
+    app_mode = bool(a.sweep_app or a.canary_app)
+    if app_mode:
+        # 觀測台不能用靜態 http 掃（`/api/state` 會 404 ⇒ 假的乾淨）。
+        # 起的是**產品入口本身**（`vacant up`）——不另寫一份 provider 接線，
+        # 否則快速版與完整版會各自漂移（HANDOFF §8）。
+        root = Path(tempfile.mkdtemp(prefix="s7e-app-")) / "eco"
+        seed_app_root(root)
+        (out / "root.txt").write_text(str(root), encoding="utf-8")
+        srv = subprocess.Popen(
+            [sys.executable, "-m", "vacant.cli", "up", "--demo-roster",
+             "--root", str(root), "--port", str(APP_PORT)],
+            cwd=str(Path(__file__).resolve().parents[1]),
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(3.0)
+        base = f"http://127.0.0.1:{APP_PORT}"
+    else:
+        srv = subprocess.Popen(
+            [sys.executable, "-m", "http.server", str(HTTP_PORT), "--bind", "127.0.0.1"],
+            cwd=str(HOME / "vacant"),
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(1.5)
+        base = f"http://127.0.0.1:{HTTP_PORT}"
     d = None
     try:
-        d = Driver(out, base, inject=bool(a.canary or a.canary_web))
+        d = Driver(out, base, inject=bool(a.canary or a.canary_web or a.canary_app))
         (canary if a.canary else canary_web if a.canary_web
+         else canary_app if a.canary_app else sweep_app if a.sweep_app
          else findbad if a.findbad else phonehurt if a.phonehurt
          else sweep_web if a.sweep_web else sweep)(d)
     finally:
