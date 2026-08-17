@@ -883,19 +883,29 @@ def _neg_context(text: str, at: int, length: int) -> bool:
 
 def diction_scan(origin: str, label: str, frags: list[tuple[int, str]]
                  ) -> tuple[list[dict], dict[str, int]]:
-    """回傳（逐條命中, 獨立計數）。
+    """紅線 B 的詞族掃描。實作在 `family_scan()`，B 與 C 共用同一個決策函式。"""
+    return family_scan(origin, label, frags, DICTION_FAMILIES)
+
+
+def _fam_counts(text: str, fams) -> dict[str, int]:
+    return {name: len(rx.findall(text)) for name, rx in fams}
+
+
+def family_scan(origin: str, label: str, frags: list[tuple[int, str]], fams
+                ) -> tuple[list[dict], dict[str, int]]:
+    """回傳（逐條命中, 獨立計數）。紅線 B 與 C 共用這一條路。
 
     兩條路徑刻意不同：逐條命中**走 `sentences()` 切句**（跟紅線 A 同一條路），
     獨立計數**不切句**，直接對片段 `findall`。兩邊對不上就代表切句把命中吃掉了
     ——那正是「量尺跟待測物要分開」在這裡的形狀。
     """
     rows: list[dict] = []
-    counts = {name: 0 for name, _ in DICTION_FAMILIES}
+    counts = {name: 0 for name, _ in fams}
     for ln, frag in frags:
-        for name, rx in DICTION_FAMILIES:
+        for name, rx in fams:
             counts[name] += len(rx.findall(frag))
         for sent in sentences(frag):
-            for name, rx in DICTION_FAMILIES:
+            for name, rx in fams:
                 for m in rx.finditer(sent):
                     rows.append({
                         "origin": origin, "file": label, "line": ln,
@@ -906,15 +916,12 @@ def diction_scan(origin: str, label: str, frags: list[tuple[int, str]]
     return rows, counts
 
 
-def _fam_counts(text: str, fams) -> dict[str, int]:
-    return {name: len(rx.findall(text)) for name, rx in fams}
-
-
-def diction_audit() -> int:
+def family_audit(fams, neighbors, title: str, note: str) -> int:
+    """紅線 B／C 共用的掃描主體。差別只有詞族表與抬頭。"""
     rows: list[dict] = []
-    corpus: dict[str, int] = {n: 0 for n, _ in DICTION_FAMILIES}
-    raw: dict[str, int] = {n: 0 for n, _ in DICTION_FAMILIES}
-    neigh: dict[str, int] = {n: 0 for n, _ in DICTION_NEIGHBORS}
+    corpus: dict[str, int] = {n: 0 for n, _ in fams}
+    raw: dict[str, int] = {n: 0 for n, _ in fams}
+    neigh: dict[str, int] = {n: 0 for n, _ in neighbors}
     per_file: list[tuple[str, dict[str, int], dict[str, int]]] = []
     doc_rows: list[dict] = []
     for repo, pats in SCOPE:
@@ -924,30 +931,30 @@ def diction_audit() -> int:
                     continue
                 label = f"{repo}/{p.relative_to(ROOT / repo)}"
                 src = p.read_text(encoding="utf-8", errors="replace")
-                r, c = diction_scan("src", label, extract(p, src))
+                r, c = family_scan("src", label, extract(p, src), fams)
                 rows += r
-                rc = _fam_counts(src, DICTION_FAMILIES)      # 原始檔（含註解與識別字）
+                rc = _fam_counts(src, fams)        # 原始檔（含註解與識別字）
                 for k in corpus:
                     corpus[k] += c[k]
                     raw[k] += rc[k]
                 blob = "".join(f for _, f in extract(p, src))
-                for k, v in _fam_counts(blob, DICTION_NEIGHBORS).items():
+                for k, v in _fam_counts(blob, neighbors).items():
                     neigh[k] += v
                 if any(c.values()) or any(rc.values()):
                     per_file.append((label, c, rc))
                 if p.suffix.lower() == ".py":
-                    dr, _ = diction_scan("doc", label, py_docstrings(src))
+                    dr, _ = family_scan("doc", label, py_docstrings(src), fams)
                     doc_rows += dr
 
-    print("紅線 B（口徑）：觀眾文案不准出現「信任」——用「可究責」「讓依賴有根據」")
-    print("這支只產生候選、不下判定；〈否定脈絡〉是提示不是判準。\n")
+    print(title)
+    print(note + "\n")
     print(f"{'詞族':<12}{'語料':>6}{'原始檔':>8}   （原始檔＝含註解與識別字，語料＝抽取後的文案）")
-    for name, _ in DICTION_FAMILIES:
+    for name, _ in fams:
         print(f"{name:<14}{corpus[name]:>5}{raw[name]:>8}")
     print(f"\n逐條列出 {len(rows)} 條（含 docstring 外的全部 src 命中）")
 
-    # B3a：切句路徑與不切句路徑必須逐字相同。
-    listed = {n: 0 for n, _ in DICTION_FAMILIES}
+    # 切句路徑與不切句路徑必須逐字相同。
+    listed = {n: 0 for n, _ in fams}
     for r in rows:
         listed[r["family"]] += 1
     bad = [n for n in listed if listed[n] != corpus[n]]
@@ -957,7 +964,7 @@ def diction_audit() -> int:
     print("\n── 逐檔分佈（語料／原始檔）──")
     for label, c, rc in per_file:
         cells = " · ".join(f"{n.split()[1]} {c[n]}/{rc[n]}"
-                           for n, _ in DICTION_FAMILIES if c[n] or rc[n])
+                           for n, _ in fams if c[n] or rc[n])
         print(f"  {label}: {cells}")
 
     print("\n── 逐條命中 ──")
@@ -970,13 +977,116 @@ def diction_audit() -> int:
           f"（機器提示，人類逐條判定）")
 
     print(f"\n── 刻意排除的鄰近詞（考慮過而排除，不是沒想到）──")
-    print("   " + " · ".join(f"{n} {neigh[n]}" for n, _ in DICTION_NEIGHBORS))
+    print("   " + " · ".join(f"{n} {neigh[n]}" for n, _ in neighbors))
     if doc_rows:
         print(f"\n── 刻意排除：.py 的 docstring（工作紀錄，不是觀眾文案）{len(doc_rows)} 條 ──")
         for r in doc_rows:
             print(f"   {r['file']}:{r['line']} {r['family']}「{r['word']}」 "
                   f"| {r['sent'][:90]}")
     return 0 if not bad else 1
+
+
+def _family_test(fixture, fams, label: str) -> int:
+    ok = 0
+    for key, rel, src, want, want_neg in fixture:
+        p = Path(rel)
+        rows, counts = family_scan("fix", rel, extract(p, src), fams)
+        got = {n: v for n, v in counts.items() if v}
+        bad = []
+        if got != want:
+            bad.append(f"詞族數 want={want} got={got}")
+        listed = {n: sum(1 for r in rows if r['family'] == n) for n in got}
+        if listed != got:
+            bad.append(f"切句後 {listed} ≠ 不切句 {got}")
+        if want_neg is not None:
+            negs = [r["neg"] for r in rows]
+            if negs != [want_neg] * len(negs) or not negs:
+                bad.append(f"否定脈絡 want={want_neg} got={negs}")
+        ok += not bad
+        print(f"{'OK  ' if not bad else 'FAIL'} {key}")
+        for b in bad:
+            print(f"       {b}")
+    print(f"\n{label} fixture: {ok}/{len(fixture)}")
+    return 0 if ok == len(fixture) else 1
+
+
+# ── 紅線 C（宣稱強度）：不准宣稱「保證正確」或「防止」作惡，─────────────
+# 只能說提高作惡成本、留下改不掉的紀錄。
+#
+# 形狀跟紅線 B 一樣是單詞族掃描，所以**共用同一份 SCOPE、`extract()`、
+# `sentences()` 與 `_neg_context()`**——不另開腳本（HANDOFF §八：快速版與完整版
+# 必須呼叫同一個決策函式，否則只要各自被正確地修改了不同次數就會漂移）。
+#
+# 但它跟 B 有一個方向相反的地方，這決定了〈否定脈絡〉在這裡怎麼讀：
+# 紅線 B 命中「信任」多半是**踩線**（把詞當招牌）；紅線 C 命中「防止」
+# 有可能是**守線**（「提高成本，不是防止作惡」正是誠實邊界句本身）。
+# 同一個提示欄位，兩條紅線要反過來讀——所以機器一樣只給提示，不下判定。
+STRENGTH_FAMILIES = [
+    ("C1 保證", re.compile("保證")),
+    ("C2 確保", re.compile("確保")),
+    ("C3 防止", re.compile("防止|防範|阻止|擋住|擋下")),
+    ("C4 杜絕", re.compile("杜絕|根除|萬無一失")),
+    ("C5 絕對", re.compile("絕對|絕不|必定|百分之百")),
+    ("C6 EN", re.compile("guarantee|ensure|prevent|absolutely|foolproof", re.I)),
+]
+# 刻意**不**收進詞族的鄰近詞。`確定性` 是本專案自己的機制名（`auditor.py` 的
+# 確定性稽核），誤收會讓紅線 C 對整個稽核系列文案誤報——形狀跟紅線 B 的
+# `信譽` 一模一樣。其餘四個是通用副詞，不是強宣稱本身。
+STRENGTH_NEIGHBORS = [
+    ("確定性", re.compile("確定性")),
+    ("一定", re.compile("一定")),
+    ("一律", re.compile("一律")),
+    ("完全", re.compile("完全")),
+    ("永遠", re.compile("永遠")),
+]
+
+
+def strength_audit() -> int:
+    return family_audit(
+        STRENGTH_FAMILIES, STRENGTH_NEIGHBORS,
+        "紅線 C（宣稱強度）：不准宣稱「保證正確」或「防止」作惡"
+        "——只能說提高作惡成本、留下改不掉的紀錄",
+        "這支只產生候選、不下判定。注意方向跟紅線 B 相反："
+        "〈否定脈絡〉在這裡多半代表**守線**（誠實邊界句本身），不是踩線。")
+
+
+# 宣稱強度探針的已知答案格。負向半（`確定性` 等五個鄰近詞不得進詞族）比正向半
+# 更擋事：`確定性` 在 SCOPE 裡出現 27 次，誤收會讓紅線 C 對整個稽核系列文案誤報。
+STRENGTH_FIXTURE = [
+    ("S1 肯定強宣稱", "index.html",
+     "<p>本系統保證每一件工作都正確</p>", {"C1 保證": 1}, False),
+    ("S2 誠實邊界句是否定脈絡", "index.html",
+     "<p>這提高作惡成本，不保證正確</p>", {"C1 保證": 1}, True),
+    ("S3 防止族五個寫法都收", "js/main.js",
+     'const s = "防止、防範、阻止、擋住、擋下";', {"C3 防止": 5}, None),
+    ("S4 確定性不得進詞族", "vacant/dashboard.py",
+     's = "確定性稽核抽樣"', {}, None),
+    ("S5 一定／一律／完全／永遠不得進詞族", "js/main.js",
+     'const s = "一定要一律完全永遠";', {}, None),
+    ("S6 英文不分大小寫", "js/main.js",
+     'const s = "Prevent and ENSURE";', {"C6 EN": 2}, None),
+    ("S7 preventDefault 是識別字不是文案", "js/main.js",
+     "e.preventDefault();", {}, None),
+    ("S8 `#` 註解裡的保證不算文案", "vacant/dashboard.py",
+     '# 這一段講保證\nx = "提高成本"', {}, None),
+    ("S9 切句不准吃掉命中", "js/main.js",
+     'const s = "保證。保證；保證";', {"C1 保證": 3}, None),
+    ("S10 杜絕族與絕對族各自成族", "js/main.js",
+     'const s = "杜絕、根除、萬無一失、絕對、絕不、必定、百分之百";',
+     {"C4 杜絕": 3, "C5 絕對": 4}, None),
+]
+
+
+def strength_test() -> int:
+    """C1：宣稱強度探針。沒過就不准拿去量未知的。"""
+    return _family_test(STRENGTH_FIXTURE, STRENGTH_FAMILIES, "C1 宣稱強度探針")
+
+
+def diction_audit() -> int:
+    return family_audit(
+        DICTION_FAMILIES, DICTION_NEIGHBORS,
+        "紅線 B（口徑）：觀眾文案不准出現「信任」——用「可究責」「讓依賴有根據」",
+        "這支只產生候選、不下判定；〈否定脈絡〉是提示不是判準。")
 
 
 # 口徑探針的已知答案格。兩個方向都要答對——尤其「不准抽到」那半：
@@ -1007,27 +1117,7 @@ DICTION_FIXTURE = [
 
 def diction_test() -> int:
     """B1：口徑探針。沒過就不准拿去量未知的。"""
-    ok = 0
-    for key, rel, src, want, want_neg in DICTION_FIXTURE:
-        p = Path(rel)
-        rows, counts = diction_scan("fix", rel, extract(p, src))
-        got = {n: v for n, v in counts.items() if v}
-        bad = []
-        if got != want:
-            bad.append(f"詞族數 want={want} got={got}")
-        listed = {n: sum(1 for r in rows if r['family'] == n) for n in got}
-        if listed != got:
-            bad.append(f"切句後 {listed} ≠ 不切句 {got}")
-        if want_neg is not None:
-            negs = [r["neg"] for r in rows]
-            if negs != [want_neg] * len(negs) or not negs:
-                bad.append(f"否定脈絡 want={want_neg} got={negs}")
-        ok += not bad
-        print(f"{'OK  ' if not bad else 'FAIL'} {key}")
-        for b in bad:
-            print(f"       {b}")
-    print(f"\nB1 口徑探針 fixture: {ok}/{len(DICTION_FIXTURE)}")
-    return 0 if ok == len(DICTION_FIXTURE) else 1
+    return _family_test(DICTION_FIXTURE, DICTION_FAMILIES, "B1 口徑探針")
 
 
 def main() -> int:
@@ -1047,6 +1137,10 @@ def main() -> int:
                     help="紅線 B：口徑掃描——觀眾文案有沒有出現「信任」")
     ap.add_argument("--diction-test", action="store_true",
                     help="B1：口徑探針已知答案格（含『不准抽到』那半）")
+    ap.add_argument("--strength", action="store_true",
+                    help="紅線 C：宣稱強度掃描——有沒有說「保證」「防止」")
+    ap.add_argument("--strength-test", action="store_true",
+                    help="C1：宣稱強度探針已知答案格（含『不准抽到』那半）")
     ap.add_argument("--scan", action="store_true")
     ap.add_argument("--dom", type=Path, default=None)
     ap.add_argument("--json", type=Path, default=None)
@@ -1062,6 +1156,15 @@ def main() -> int:
         rc = py_yardstick_test()       # 量尺沒過就不准往下量
         print()
         return py_test() or rc
+    if a.strength_test:
+        return strength_test()
+    if a.strength:
+        rc = strength_test()           # 探針沒過就不准往下量
+        print()
+        if rc:
+            print("C1 探針沒過 ⇒ 不往下掃。先修探針。")
+            return rc
+        return strength_audit()
     if a.diction_test:
         return diction_test()
     if a.diction:
