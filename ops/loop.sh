@@ -11,6 +11,7 @@ set -u
 ROOT="$HOME/vacant"
 LOGS="$ROOT/logs"
 CLAUDE="$HOME/.local/bin/claude"     # 寫死路徑：非互動 shell 的 PATH 沒有它
+MODEL="${LOOP_MODEL:-sonnet}"        # 2026-08-17 人類指定 Sonnet 5（原本吃預設的 Opus 5）
 PROMPT="$ROOT/LOOP_PROMPT.md"
 STOP="$ROOT/STOP"
 GAP=${LOOP_GAP:-90}                  # 每輪之間的間隔（秒）
@@ -27,7 +28,7 @@ say() { printf '%s  %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" | tee -a "$main_lo
 n=$(ls "$LOGS"/iter-*.log 2>/dev/null | sed 's/.*iter-\([0-9]*\)\.log/\1/' | sort -n | tail -1)
 n=${n:-0}
 
-say "迴圈啟動（pid $$，從第 $((10#$n + 1)) 輪繼續，間隔 ${GAP}s，單輪上限 ${MAX_MIN}min）"
+say "迴圈啟動（pid $$，從第 $((10#$n + 1)) 輪繼續，模型 ${MODEL}，間隔 ${GAP}s，單輪上限 ${MAX_MIN}min）"
 
 while true; do
   if [ -f "$STOP" ]; then
@@ -51,6 +52,7 @@ while true; do
   # < /dev/null 是必要的：無人值守時沒有 stdin，claude -p 會先等 3 秒才放棄。
   # 那 3 秒本身無害，但「在等一個永遠不會來的輸入」在別的情境會變成整輪卡住。
   timeout "${MAX_MIN}m" "$CLAUDE" -p "$(cat "$PROMPT")" \
+      --model "$MODEL" \
       --dangerously-skip-permissions \
       < /dev/null > "$ilog" 2>&1
   rc=$?
