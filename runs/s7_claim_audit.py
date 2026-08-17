@@ -841,6 +841,195 @@ def cjk_audit(legacy: bool, verbose: bool) -> int:
     return 0 if miss == 0 else 1
 
 
+# ── 紅線 B（口徑）：觀眾文案不准出現「信任」。────────────────────────────
+#
+# S7 全系列到第 102 輪為止掃的都是**紅線 A**（把「排除」歸因給「被抓到」）。
+# 誠實邊界的另一條——「不准用『信任』，用『可究責』『讓依賴有根據』」——
+# 從來沒有任何自動檢查。理由見 CLAUDE.md §5：經典定義（Gambetta 1988、
+# Mayer 1995）把「不依賴監督」寫進信任的必要條件，而監督正是本系統的全部。
+#
+# **這支跟紅線 A 共用 SCOPE 與 `extract()`，不另開腳本**（HANDOFF §八：
+# 快速版與完整版必須呼叫同一個決策函式，否則兩份程式各自被正確地修改了
+# 不同次數就會漂移）。
+#
+# 一樣**只產生候選、不下判定**：「面板不是信任來源」是在否定信任，
+# 跟 `<title>Vacant — 信任觀測台` 當招牌用不是同一件事。機器只給
+# 〈否定脈絡〉提示，判定與改文案留給人類。
+DICTION_FAMILIES = [
+    ("F1 信任", re.compile("信任")),
+    ("F2 信賴", re.compile("信賴")),
+    ("F3 可信", re.compile("可信")),
+    ("F4 互信", re.compile("互信")),
+    ("F5 trust", re.compile("trust", re.I)),   # trusted／trustworthy／distrust 都收
+]
+# 刻意**不**收進詞族的鄰近詞：`信譽` 是本專案自己的機制名（五維 Beta 的那個），
+# `信用`／`自信`／`相信` 不是紅線 B 講的那件事。另外印出來，
+# 是為了證明「考慮過而排除」不等於「沒想到」。
+DICTION_NEIGHBORS = [
+    ("信譽", re.compile("信譽")),
+    ("信用", re.compile("信用")),
+    ("自信", re.compile("自信")),
+    ("相信", re.compile("相信")),
+]
+# 否定脈絡只是**提示**不是判準：命中前後 12 字內有沒有否定詞。
+_NEG_MARKERS = ("不", "非", "未", "別", "沒", "無", "not", "n't", "never")
+_NEG_WINDOW = 12
+
+
+def _neg_context(text: str, at: int, length: int) -> bool:
+    seg = text[max(0, at - _NEG_WINDOW):at + length + _NEG_WINDOW].lower()
+    return any(m in seg for m in _NEG_MARKERS)
+
+
+def diction_scan(origin: str, label: str, frags: list[tuple[int, str]]
+                 ) -> tuple[list[dict], dict[str, int]]:
+    """回傳（逐條命中, 獨立計數）。
+
+    兩條路徑刻意不同：逐條命中**走 `sentences()` 切句**（跟紅線 A 同一條路），
+    獨立計數**不切句**，直接對片段 `findall`。兩邊對不上就代表切句把命中吃掉了
+    ——那正是「量尺跟待測物要分開」在這裡的形狀。
+    """
+    rows: list[dict] = []
+    counts = {name: 0 for name, _ in DICTION_FAMILIES}
+    for ln, frag in frags:
+        for name, rx in DICTION_FAMILIES:
+            counts[name] += len(rx.findall(frag))
+        for sent in sentences(frag):
+            for name, rx in DICTION_FAMILIES:
+                for m in rx.finditer(sent):
+                    rows.append({
+                        "origin": origin, "file": label, "line": ln,
+                        "family": name, "word": m.group(0),
+                        "neg": _neg_context(sent, m.start(), len(m.group(0))),
+                        "sent": sent[:200],
+                    })
+    return rows, counts
+
+
+def _fam_counts(text: str, fams) -> dict[str, int]:
+    return {name: len(rx.findall(text)) for name, rx in fams}
+
+
+def diction_audit() -> int:
+    rows: list[dict] = []
+    corpus: dict[str, int] = {n: 0 for n, _ in DICTION_FAMILIES}
+    raw: dict[str, int] = {n: 0 for n, _ in DICTION_FAMILIES}
+    neigh: dict[str, int] = {n: 0 for n, _ in DICTION_NEIGHBORS}
+    per_file: list[tuple[str, dict[str, int], dict[str, int]]] = []
+    doc_rows: list[dict] = []
+    for repo, pats in SCOPE:
+        for pat in pats:
+            for p in sorted((ROOT / repo).glob(pat)):
+                if not p.is_file() or not in_scope(p):
+                    continue
+                label = f"{repo}/{p.relative_to(ROOT / repo)}"
+                src = p.read_text(encoding="utf-8", errors="replace")
+                r, c = diction_scan("src", label, extract(p, src))
+                rows += r
+                rc = _fam_counts(src, DICTION_FAMILIES)      # 原始檔（含註解與識別字）
+                for k in corpus:
+                    corpus[k] += c[k]
+                    raw[k] += rc[k]
+                blob = "".join(f for _, f in extract(p, src))
+                for k, v in _fam_counts(blob, DICTION_NEIGHBORS).items():
+                    neigh[k] += v
+                if any(c.values()) or any(rc.values()):
+                    per_file.append((label, c, rc))
+                if p.suffix.lower() == ".py":
+                    dr, _ = diction_scan("doc", label, py_docstrings(src))
+                    doc_rows += dr
+
+    print("紅線 B（口徑）：觀眾文案不准出現「信任」——用「可究責」「讓依賴有根據」")
+    print("這支只產生候選、不下判定；〈否定脈絡〉是提示不是判準。\n")
+    print(f"{'詞族':<12}{'語料':>6}{'原始檔':>8}   （原始檔＝含註解與識別字，語料＝抽取後的文案）")
+    for name, _ in DICTION_FAMILIES:
+        print(f"{name:<14}{corpus[name]:>5}{raw[name]:>8}")
+    print(f"\n逐條列出 {len(rows)} 條（含 docstring 外的全部 src 命中）")
+
+    # B3a：切句路徑與不切句路徑必須逐字相同。
+    listed = {n: 0 for n, _ in DICTION_FAMILIES}
+    for r in rows:
+        listed[r["family"]] += 1
+    bad = [n for n in listed if listed[n] != corpus[n]]
+    print(f"獨立計數器對帳（切句 vs 不切句）："
+          f"{'一致' if not bad else '不一致 ' + str([(n, listed[n], corpus[n]) for n in bad])}")
+
+    print("\n── 逐檔分佈（語料／原始檔）──")
+    for label, c, rc in per_file:
+        cells = " · ".join(f"{n.split()[1]} {c[n]}/{rc[n]}"
+                           for n, _ in DICTION_FAMILIES if c[n] or rc[n])
+        print(f"  {label}: {cells}")
+
+    print("\n── 逐條命中 ──")
+    for i, r in enumerate(rows, 1):
+        tag = "否定脈絡" if r["neg"] else "肯定用法"
+        print(f"[{i:02d}] {r['file']}:{r['line']}  {r['family']}「{r['word']}」 [{tag}]")
+        print(f"     {r['sent']}")
+    neg_n = sum(1 for r in rows if r["neg"])
+    print(f"\n〈否定脈絡〉{neg_n} 條 · 〈肯定用法〉{len(rows) - neg_n} 條"
+          f"（機器提示，人類逐條判定）")
+
+    print(f"\n── 刻意排除的鄰近詞（考慮過而排除，不是沒想到）──")
+    print("   " + " · ".join(f"{n} {neigh[n]}" for n, _ in DICTION_NEIGHBORS))
+    if doc_rows:
+        print(f"\n── 刻意排除：.py 的 docstring（工作紀錄，不是觀眾文案）{len(doc_rows)} 條 ──")
+        for r in doc_rows:
+            print(f"   {r['file']}:{r['line']} {r['family']}「{r['word']}」 "
+                  f"| {r['sent'][:90]}")
+    return 0 if not bad else 1
+
+
+# 口徑探針的已知答案格。兩個方向都要答對——尤其「不准抽到」那半：
+# `信譽` 是本專案的機制名，誤收進來會讓紅線 B 變成永遠在鬼叫的警報器。
+DICTION_FIXTURE = [
+    # D1 的 want_neg 我第一次寫成 True，探針當場打回來（8/9）。
+    # 「這是信任觀測台」裡一個否定詞都沒有 ⇒ 已知答案本來就是 False。
+    # **改的是 fixture 不是程式碼**——這格的答案是客觀可判的，記在 S7G 報告第二節。
+    ("D1 一般文案", "index.html", "<p>這是信任觀測台</p>", {"F1 信任": 1}, False),
+    ("D2 信譽不得進詞族", "js/main.js", 'const s = "信譽路由三層漏斗";', {}, None),
+    ("D3 信用／自信／相信不得進詞族", "js/main.js",
+     'const s = "信用已被扣減，我相信自己有自信";', {}, None),
+    ("D4 英文 trust 不分大小寫", "js/main.js",
+     'const s = "Trust is not a claim";', {"F5 trust": 1}, None),
+    ("D5 否定脈絡認得出來", "index.html",
+     "<p>本面板不是信任來源</p>", {"F1 信任": 1}, True),
+    ("D6 招牌用法不是否定脈絡", "index.html",
+     "<title>Vacant — 信任觀測台</title>", {"F1 信任": 1}, False),
+    ("D7 `#` 註解裡的信任不算文案", "vacant/dashboard.py",
+     '# 這一段在講信任\nx = "可究責"', {}, None),
+    ("D8 三個小詞族各自成族", "js/main.js",
+     'const s = "可信、信賴、互信";',
+     {"F2 信賴": 1, "F3 可信": 1, "F4 互信": 1}, None),
+    ("D9 切句不准吃掉命中", "js/main.js",
+     'const s = "信任。信任；信任";', {"F1 信任": 3}, None),
+]
+
+
+def diction_test() -> int:
+    """B1：口徑探針。沒過就不准拿去量未知的。"""
+    ok = 0
+    for key, rel, src, want, want_neg in DICTION_FIXTURE:
+        p = Path(rel)
+        rows, counts = diction_scan("fix", rel, extract(p, src))
+        got = {n: v for n, v in counts.items() if v}
+        bad = []
+        if got != want:
+            bad.append(f"詞族數 want={want} got={got}")
+        listed = {n: sum(1 for r in rows if r['family'] == n) for n in got}
+        if listed != got:
+            bad.append(f"切句後 {listed} ≠ 不切句 {got}")
+        if want_neg is not None:
+            negs = [r["neg"] for r in rows]
+            if negs != [want_neg] * len(negs) or not negs:
+                bad.append(f"否定脈絡 want={want_neg} got={negs}")
+        ok += not bad
+        print(f"{'OK  ' if not bad else 'FAIL'} {key}")
+        for b in bad:
+            print(f"       {b}")
+    print(f"\nB1 口徑探針 fixture: {ok}/{len(DICTION_FIXTURE)}")
+    return 0 if ok == len(DICTION_FIXTURE) else 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--self-test", action="store_true")
@@ -854,6 +1043,10 @@ def main() -> int:
                     help="--cjk-audit 印出被判為註解而排除的每一段")
     ap.add_argument("--py-test", action="store_true",
                     help="P7：Python 抽取器已知答案探針（含量尺與 js 對照）")
+    ap.add_argument("--diction", action="store_true",
+                    help="紅線 B：口徑掃描——觀眾文案有沒有出現「信任」")
+    ap.add_argument("--diction-test", action="store_true",
+                    help="B1：口徑探針已知答案格（含『不准抽到』那半）")
     ap.add_argument("--scan", action="store_true")
     ap.add_argument("--dom", type=Path, default=None)
     ap.add_argument("--json", type=Path, default=None)
@@ -869,6 +1062,15 @@ def main() -> int:
         rc = py_yardstick_test()       # 量尺沒過就不准往下量
         print()
         return py_test() or rc
+    if a.diction_test:
+        return diction_test()
+    if a.diction:
+        rc = diction_test()            # 探針沒過就不准往下量
+        print()
+        if rc:
+            print("B1 探針沒過 ⇒ 不往下掃。先修探針。")
+            return rc
+        return diction_audit()
     if a.cjk_audit:
         return cjk_audit(a.legacy, a.show_skipped)
     if a.self_test:
