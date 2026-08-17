@@ -18,19 +18,28 @@ S6（第 96 輪）量到的是：把作惡者擠出路由的主要動力是「�
 from __future__ import annotations
 
 import argparse
+import ast
+import io
 import json
 import re
 import sys
+import tokenize
 from pathlib import Path
 
 ROOT = Path.home() / "vacant"
 
 # ── 範圍：觀眾看得到的檔。probe/ styles/ *FINDINGS.md 是工作紀錄，不是文案。──
+#
+# ⚠ 第 102 輪加入 `vacant/dashboard.py`：第 101 輪量到**宣稱階梯那四階
+# （`dashboard.py:394–436` 的 claim／evidence）是全站唯一沒被任何掃描路徑
+# 涵蓋過的觀眾文案**——它由伺服器端組好、經 `/api/*` 送到面板上，
+# `app.html`／`app.js` 的原始碼裡一個字都沒有。
+# 加檔會改動所有既往輪次的分母，所以獨立登記一輪（S7f）。
 SCOPE = [
     ("vacant-docs-web", ["index.html", "js/main.js"]),
     ("vacant_hm", ["index.html", "js/*.js", "world/*.html", "world/js/*.js",
                    "world/js/clay/*.js"]),
-    ("Vacant", ["vacant/web/app.html", "vacant/web/app.js"]),
+    ("Vacant", ["vacant/web/app.html", "vacant/web/app.js", "vacant/dashboard.py"]),
 ]
 EXCLUDE_PARTS = ("probe", "styles", "vendor", "node_modules")
 
@@ -305,9 +314,132 @@ def extract_js_legacy(src: str) -> list[tuple[int, str]]:
     return out
 
 
+# ── Python 文案抽取（第 102 輪新增）──────────────────────────────────────
+#
+# **為什麼不能把 .py 丟進 `js_strings`**：舊的 `extract()` 對任何非 HTML 檔
+# 一律走 JS tokenizer。Python 的 `#` 註解在 JS 裡不是註解（`# 被抓到就排除`
+# 會被當成文案抽出來）、三引號在 JS 裡是三個空字串加一段錯位、中文識別字
+# （`被抓到的次數 = 1`）在 JS 眼裡也不是文案。用錯的抽取器會**同時**多抽
+# 註解、少抽真文案——兩個方向都錯，而候選數看起來還是「有在動」。
+# `--py-test` 的 P7b 那一欄就是把這件事量出來（見該處輸出）。
+#
+# **docstring 不算觀眾文案**（事前登記，第 102 輪）：它跟 `probe/`、`styles/`、
+# `*FINDINGS.md` 同性質，是寫給改碼的人看的工作紀錄，觀眾走到展場前面看不到它。
+# 但**不准靜靜丟掉**：`scan_sources` 會把 docstring 另外掃一遍並印出段數，
+# 若 docstring 裡出現候選句也照樣印。`--cjk-audit` 把它列成第三類。
+
+
+def _py_docstring_nodes(tree: ast.AST) -> list[ast.Constant]:
+    """模組／類別／函式的第一個字串陳述式 ＝ docstring。"""
+    out: list[ast.Constant] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.Module, ast.ClassDef,
+                                 ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        body = getattr(node, "body", None)
+        if (body and isinstance(body[0], ast.Expr)
+                and isinstance(body[0].value, ast.Constant)
+                and isinstance(body[0].value.value, str)):
+            out.append(body[0].value)
+    return out
+
+
+def extract_py(src: str) -> list[tuple[int, str]]:
+    """回傳 (行號, 文案片段)。走 `ast`，所以註解天然不在裡面。
+
+    f-string 比照 JS 模板字面量處理：`{...}` 用 `HOLE` 頂掉，句子才不會被切斷；
+    洞裡的字串本身也是文案（`f"{'不合格' if bad else '通過'}"` 兩個分支都要抽）。
+    相鄰字串隱式相接由 `ast` 在解析時就併好了——`dashboard.py` 的 evidence
+    正是那個形狀，逐 token 抽取會把一句話切成三段、同句掃描就看不到它。
+    """
+    out: list[tuple[int, str]] = []
+    tree = ast.parse(src)
+    doc_ids = {id(n) for n in _py_docstring_nodes(tree)}
+
+    def emit(ln: int, s: str) -> None:
+        if s.strip():
+            out.append((ln, s))
+
+    def visit(node: ast.AST) -> None:
+        if isinstance(node, ast.JoinedStr):
+            buf: list[str] = []
+            for v in node.values:
+                if isinstance(v, ast.Constant) and isinstance(v.value, str):
+                    buf.append(v.value)
+                elif isinstance(v, ast.FormattedValue):
+                    buf.append(HOLE)
+                    visit(v.value)      # 洞內的字串也是文案
+            emit(node.lineno, "".join(buf))
+            return
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, str) and id(node) not in doc_ids:
+                emit(node.lineno, node.value)
+            return
+        for child in ast.iter_child_nodes(node):
+            visit(child)
+
+    visit(tree)
+    return out
+
+
+def py_docstrings(src: str) -> list[tuple[int, str]]:
+    """被刻意排除的那一類。分開回傳，才數得出來丟了多少。"""
+    return [(n.lineno, n.value) for n in _py_docstring_nodes(ast.parse(src))]
+
+
+def comment_spans_py(src: str) -> list[tuple[int, int]]:
+    """`.py` 的註解字元區間——量尺用，走 `tokenize` 不走 `ast`。
+
+    誠實邊界：這比 JS 那組量尺**不那麼獨立**。JS 那邊量尺（`comment_spans`）
+    是另外手寫一份掃描器，跟 `js_strings` 沒有共用程式；這邊 `tokenize` 與
+    `ast` 雖是兩支不同的實作（詞法器 vs C 解析器），但同屬 CPython 自己的
+    剖析路徑。所以「兩邊一起錯」的機率不是零，只是比共用同一份函式低。
+    照記，不假裝它跟 JS 那組同級。
+    """
+    lines = src.splitlines(keepends=True)
+    starts, off = [], 0
+    for ln in lines:
+        starts.append(off)
+        off += len(ln)
+
+    def pos(row: int, col: int) -> int:
+        return starts[row - 1] + col if 1 <= row <= len(starts) else len(src)
+
+    spans: list[tuple[int, int]] = []
+    try:
+        for tok in tokenize.generate_tokens(io.StringIO(src).readline):
+            if tok.type == tokenize.COMMENT:
+                spans.append((pos(*tok.start), pos(*tok.end)))
+    except (tokenize.TokenError, IndentationError, SyntaxError):
+        pass
+    return spans
+
+
+def docstring_spans_py(src: str) -> list[tuple[int, int]]:
+    """docstring 的字元區間——量尺的第三類，不准併進「漏失」也不准消失。"""
+    lines = src.splitlines(keepends=True)
+    starts, off = [], 0
+    for ln in lines:
+        starts.append(off)
+        off += len(ln)
+
+    def pos(row: int, col: int) -> int:
+        return starts[row - 1] + col if 1 <= row <= len(starts) else len(src)
+
+    out: list[tuple[int, int]] = []
+    for n in _py_docstring_nodes(ast.parse(src)):
+        if n.end_lineno is None:
+            continue
+        out.append((pos(n.lineno, n.col_offset),
+                    pos(n.end_lineno, n.end_col_offset)))
+    return out
+
+
 def extract(path: Path, src: str) -> list[tuple[int, str]]:
     if path.suffix.lower() in (".html", ".htm"):
         return extract_html(src)
+    if path.suffix.lower() == ".py":
+        return extract_py(src)
     return extract_js(src)
 
 
@@ -333,6 +465,9 @@ def scan_text(origin: str, path_label: str, frags: list[tuple[int, str]]) -> tup
     return cands, chars
 
 
+DOC_DROPPED: list[dict] = []   # 被當成工作紀錄排除的 docstring——數得出來才不算靜靜丟掉
+
+
 def scan_sources() -> tuple[list[dict], int, list[str]]:
     cands: list[dict] = []
     total = 0
@@ -348,6 +483,15 @@ def scan_sources() -> tuple[list[dict], int, list[str]]:
                 cands += c
                 total += n
                 files.append(label)
+                if p.suffix.lower() == ".py":
+                    # 排除的那一類要能被數：段數、字元數，以及**排除掉的東西
+                    # 裡面有沒有候選句**。有的話照樣印，由人判定該不該收回來。
+                    docs = py_docstrings(src)
+                    keep = len(SOLO)
+                    dc, dn = scan_text("doc", label, docs)
+                    del SOLO[keep:]     # docstring 的 SOLO 不進診斷分母
+                    DOC_DROPPED.append({"file": label, "segs": len(docs),
+                                        "chars": dn, "cands": dc})
     return cands, total, files
 
 
@@ -544,9 +688,107 @@ def yardstick_test() -> int:
     return 0 if ok == len(YARDSTICK_FIXTURE) else 1
 
 
+# ── P7：Python 抽取器探針。兩個方向都要答對，而且要跟現行 JS 路徑對照。──
+# 「不准抽到」那半是重點：`#` 註解、docstring、中文識別字。
+# 這三樣在 JS tokenizer 眼裡分別是「文案」「錯位的三段」「不存在」。
+PY_FIXTURE = [
+    ("PY1 一般字串",
+     'x = "被稽核抓到就排除"', ["被稽核抓到就排除"], []),
+    ("PY2 `#` 註解不算文案",
+     '# 註解：被稽核抓到就排除\nx = "真文案甲"',
+     ["真文案甲"], ["被稽核抓到就排除"]),
+    ("PY3 模組 docstring 不算文案",
+     '"""模組說明：被抓到就排除"""\nx = "真文案乙"',
+     ["真文案乙"], ["模組說明：被抓到就排除"]),
+    ("PY4 f-string 的洞不切斷句子",
+     'x = f"牠{who}被抓到了"', ["牠▮被抓到了"], []),
+    ("PY5 洞內兩個分支都要抽到",
+     "x = f\"{'不合格' if bad else '通過'}\"", ["不合格", "通過"], []),
+    ("PY6 註解裡的撇號不准讓後面錯位",
+     '# don\'t 這行是註解\ny = "撇號之後的文案"',
+     ["撇號之後的文案"], ["這行是註解"]),
+    ("PY7 非 docstring 的三引號是文案",
+     'x = """多行文案甲\n多行文案乙"""', ["多行文案甲", "多行文案乙"], []),
+    ("PY8 中文識別字不是文案",
+     '被抓到的次數 = 1\nz = "識別字之後的文案"',
+     ["識別字之後的文案"], ["被抓到的次數"]),
+    ("PY9 函式 docstring 排除、函式內字串保留",
+     'def f():\n    """這是 docstring 不算文案"""\n    return "這是回傳的文案"',
+     ["這是回傳的文案"], ["這是 docstring 不算文案"]),
+    ("PY10 相鄰字串隱式相接要併成一句",
+     'x = ("需要：預註冊凍結簽入 ledger ＋ "\n     "事前寫死的判準")',
+     ["需要：預註冊凍結簽入 ledger ＋ 事前寫死的判準"], []),
+    ("PY11 f-string 與一般字串混排相接（dashboard.py evidence 的形狀）",
+     'x = (f"目前 on {n} 筆，"\n     "且本面板不承載此階宣稱")',
+     ["目前 on ▮ 筆，且本面板不承載此階宣稱"], []),
+]
+
+PY_YARDSTICK_FIXTURE = [
+    ("YP1 行註解",
+     'x = "文案甲"  # 註解甲\ny = "文案乙"', ["註解甲"], ["文案甲", "文案乙"]),
+    ("YP2 字串裡的 # 不是註解",
+     'x = "含有#的文案"\ny = "後面的文案"', [], ["後面的文案", "含有#的文案"]),
+    ("YP3 docstring 裡的 # 不是註解",
+     '"""說明 # 井字號"""\nx = "之後的文案"', [], ["之後的文案", "說明 # 井字號"]),
+    ("YP4 docstring 區間認得出來（第三類，另計）",
+     '"""這是 docstring"""\nx = "這是文案"', [], []),
+]
+
+
+def py_test() -> int:
+    """P7a：新抽取器全對。P7b：同一組 fixture 交給現行 `js_strings` 會錯幾格。"""
+    ok = js_ok = 0
+    for key, src, must, mustnot in PY_FIXTURE:
+        blob = "".join(f for _, f in extract_py(src))
+        miss = [m for m in must if m not in blob]
+        leak = [m for m in mustnot if m in blob]
+        good = not miss and not leak
+        ok += good
+        jblob = "".join(f for _, f in js_strings(src))
+        jgood = (not [m for m in must if m not in jblob]
+                 and not [m for m in mustnot if m in jblob])
+        js_ok += jgood
+        print(f"{'OK  ' if good else 'FAIL'} {key}   [現行 js_strings: "
+              f"{'也對' if jgood else '答錯'}]")
+        if not good:
+            print(f"       缺 {miss} · 不該有卻有 {leak}")
+            print(f"       實際抽到 {[f for _, f in extract_py(src)]}")
+    n = len(PY_FIXTURE)
+    print(f"\nP7a Python 抽取器 fixture: {ok}/{n}")
+    print(f"P7b 同一組交給現行 js_strings: {js_ok}/{n} 對 · "
+          f"答錯 {n - js_ok} 格（判準：答錯 ≥3，否則不該多寫這支）")
+    return 0 if (ok == n and n - js_ok >= 3) else 1
+
+
+def py_yardstick_test() -> int:
+    """P7c：`.py` 量尺。沒過就不准拿它去量 `--cjk-audit`。"""
+    ok = 0
+    for key, src, in_cmt, out_cmt in PY_YARDSTICK_FIXTURE:
+        spans = comment_spans_py(src)
+        docs = docstring_spans_py(src)
+
+        def covered(sub: str, rs: list[tuple[int, int]]) -> bool:
+            k = src.find(sub)
+            return k >= 0 and any(a <= k < b for a, b in rs)
+
+        bad = [s for s in in_cmt if not covered(s, spans)] + \
+              [s for s in out_cmt if covered(s, spans)]
+        if key.startswith("YP4"):
+            if not covered("這是 docstring", docs):
+                bad.append("docstring 區間沒認出來")
+            if covered("這是文案", docs):
+                bad.append("把真文案算成 docstring")
+        ok += not bad
+        print(f"{'OK  ' if not bad else 'FAIL'} {key}")
+        if bad:
+            print(f"       判錯的：{bad} · 註解 spans={spans} · doc spans={docs}")
+    print(f"\nP7c .py 量尺 fixture: {ok}/{len(PY_YARDSTICK_FIXTURE)}")
+    return 0 if ok == len(PY_YARDSTICK_FIXTURE) else 1
+
+
 def cjk_audit(legacy: bool, verbose: bool) -> int:
     fn = extract_js_legacy if legacy else js_strings
-    tot = miss = skipped = 0
+    tot = miss = skipped = docskip = 0
     misses: list[str] = []
     skips: list[str] = []
     for repo, pats in SCOPE:
@@ -555,6 +797,7 @@ def cjk_audit(legacy: bool, verbose: bool) -> int:
                 if not p.is_file() or not in_scope(p):
                     continue
                 src = p.read_text(encoding="utf-8", errors="replace")
+                is_py = p.suffix.lower() == ".py"
                 if p.suffix.lower() in (".html", ".htm"):
                     blocks = [(m.start(1), m.group(1)) for m in re.finditer(
                         r"<script\b[^>]*>(.*?)</script>", src, re.S | re.I)]
@@ -563,13 +806,21 @@ def cjk_audit(legacy: bool, verbose: bool) -> int:
                 label = f"{repo}/{p.relative_to(ROOT / repo)}"
                 for off, body in blocks:
                     base = src[:off].count("\n") + 1
-                    got = "".join(f for _, f in fn(body))
-                    cmts = comment_spans(body)
+                    # `.py` 一律走 `extract_py`；`--legacy` 是拿第 97 輪那支
+                    # 壞掉的 JS 抽取器重現「修之前」數字用的，套到 Python 沒有意義。
+                    got = "".join(f for _, f in (
+                        extract_py(body) if is_py else fn(body)))
+                    cmts = comment_spans_py(body) if is_py else comment_spans(body)
+                    docs = docstring_spans_py(body) if is_py else []
                     for m in _CJK.finditer(body):
                         ln = body.count("\n", 0, m.start())
                         if any(a <= m.start() < b for a, b in cmts):
                             skipped += 1
                             skips.append(f"{label}:{base + ln} {m.group(0)[:30]}")
+                            continue
+                        if any(a <= m.start() < b for a, b in docs):
+                            docskip += 1
+                            skips.append(f"{label}:{base + ln} [doc] {m.group(0)[:30]}")
                             continue
                         tot += 1
                         if m.group(0) not in got:
@@ -578,7 +829,8 @@ def cjk_audit(legacy: bool, verbose: bool) -> int:
     rate = 100.0 * miss / tot if tot else 0.0
     print(f"量尺＝去註解後長度≥4 的中日韓字元段（{'legacy 壞版' if legacy else '修後'}）")
     print(f"待測中文段 {tot} 段 · 抽不到 {miss} 段 · 漏失率 {rate:.1f}%")
-    print(f"（判為註解而排除在分母外：{skipped} 段）")
+    print(f"（判為註解而排除在分母外：{skipped} 段 · "
+          f"判為 docstring 而排除在分母外：{docskip} 段）")
     for s in misses[:40]:
         print(f"  [漏] {s}")
     if len(misses) > 40:
@@ -600,6 +852,8 @@ def main() -> int:
                     help="--cjk-audit 用第 97 輪那支壞的抽取器（重現修前數字）")
     ap.add_argument("--show-skipped", action="store_true",
                     help="--cjk-audit 印出被判為註解而排除的每一段")
+    ap.add_argument("--py-test", action="store_true",
+                    help="P7：Python 抽取器已知答案探針（含量尺與 js 對照）")
     ap.add_argument("--scan", action="store_true")
     ap.add_argument("--dom", type=Path, default=None)
     ap.add_argument("--json", type=Path, default=None)
@@ -611,6 +865,10 @@ def main() -> int:
         rc = yardstick_test()          # 量尺沒過就不准往下量
         print()
         return tok_test() or rc
+    if a.py_test:
+        rc = py_yardstick_test()       # 量尺沒過就不准往下量
+        print()
+        return py_test() or rc
     if a.cjk_audit:
         return cjk_audit(a.legacy, a.show_skipped)
     if a.self_test:
@@ -635,6 +893,17 @@ def main() -> int:
         print(f"[{i:02d}] ({c['origin']}) {c['file']}:{c['line']}")
         print(f"     抓到類={c['catch']} 排除類={c['exclude']}")
         print(f"     {c['sent']}")
+    if DOC_DROPPED:
+        tot_seg = sum(d["segs"] for d in DOC_DROPPED)
+        tot_chr = sum(d["chars"] for d in DOC_DROPPED)
+        tot_cand = sum(len(d["cands"]) for d in DOC_DROPPED)
+        print(f"\n── 刻意排除：.py 的 docstring（工作紀錄，不是觀眾文案）──")
+        print(f"   {tot_seg} 段 · {tot_chr} 字元 · 其中候選句 {tot_cand} 條"
+              f"（>0 就要逐條看該不該收回來）")
+        for d in DOC_DROPPED:
+            print(f"   {d['file']}: {d['segs']} 段 / {d['chars']} 字元")
+            for c in d["cands"]:
+                print(f"     [docstring 候選] :{c['line']} {c['sent'][:120]}")
     if a.diag:
         conly = [s for s in SOLO if s["catch"]]
         eonly = [s for s in SOLO if s["exclude"]]
