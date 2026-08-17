@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vacant — 信任觀測台</title>
+<title>Vacant — 可究責觀測台</title>
 <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   <aside class="rail">
     <div class="brand">
       <div class="brand-mark"><span class="pip"></span>VACANT</div>
-      <div class="brand-sub">Trust Observatory</div>
+      <div class="brand-sub">Accountability Observatory</div>
     </div>
     <nav class="nav" id="nav">
       <button data-view="overview" aria-current="true">總覽</button>
@@ -32,7 +32,7 @@
     <header class="topbar">
       <h1 id="view-title">總覽</h1>
       <div class="spacer"></div>
-      <span class="chip" id="chip-trust">trust <b>—</b></span>
+      <span class="chip" id="chip-trust">可究責層 <b>—</b></span>
       <span class="chip" id="chip-chain">chain <b>—</b></span>
       <span class="chip mono" id="chip-head" title="ledger 滾動雜湊：任一行被竄改／重排／刪除都會改變它">head <b>—</b></span>
     </header>
@@ -59,7 +59,7 @@
           </div>
         </div>
         <div class="sec">
-          <div class="sec-head"><h2>信任開關對照</h2>
+          <div class="sec-head"><h2>可究責層 開／關 對照</h2>
             <span class="note">池化差，非同題配對統計</span></div>
           <div class="card"><div class="card-body" id="scoreboard"></div></div>
         </div>
@@ -67,7 +67,7 @@
 
       <div class="sec">
         <div class="sec-head"><h2>成本</h2>
-          <span class="note">信任層要花錢；品質與代價必須放在一起看</span></div>
+          <span class="note">可究責層要花錢；品質與代價必須放在一起看</span></div>
         <div class="card" id="cost"></div>
       </div>
 
@@ -97,7 +97,7 @@
     <section class="view" id="view-activity" hidden>
       <div class="sec">
         <div class="sec-head"><h2>交付紀錄</h2>
-          <span class="note">每一筆都可回到它的信任狀與簽章鏈頭</span></div>
+          <span class="note">每一筆都可回到它的交付憑據與簽章鏈頭</span></div>
         <div class="card"><table>
           <thead><tr>
             <th>時間</th><th>task</th><th>交付者</th><th>互審</th>
@@ -112,7 +112,7 @@
     <section class="view" id="view-chain" hidden>
       <div class="sec">
         <div class="sec-head"><h2>可被獨立重算的部分</h2>
-          <span class="note">面板不是信任來源；以 ledger 與各自的簽章鏈為準</span></div>
+          <span class="note">面板不是究責依據；以 ledger 與各自的簽章鏈為準</span></div>
         <div class="warnbox" style="margin-bottom:var(--s4)">
           <b>怎麼自己驗：</b> 這一頁的每個數字都能用 root 目錄重算。
           ledger head 是逐行滾動的 sha256；每條 logbook 可用該身份的公鑰離線驗簽。
@@ -135,7 +135,7 @@
         <div class="sec-head"><h2>這套系統現在可以說什麼</h2>
           <span class="note">每一階都要有對應證據才准往上走</span></div>
         <div class="warnbox" style="margin-bottom:var(--s4)">
-          <b>為什麼要有這一頁：</b> 面板好看不代表系統可信。
+          <b>為什麼要有這一頁：</b> 面板好看不代表依賴它就有根據。
           這裡列出的是「目前的證據支持到哪一階」，以及還缺什麼。
           未達的階級一律顯示為未達，<b>不美化、不留白</b>。
         </div>
@@ -157,9 +157,9 @@
   <div class="drawer-body" id="dw-body"></div>
 </aside>
 
-<!-- 常駐誠實聲明：面板是唯讀視圖，不是信任來源。這句話留在畫面上是刻意的。 -->
+<!-- 常駐誠實聲明：面板是唯讀視圖，不是究責依據。這句話留在畫面上是刻意的。 -->
 <footer class="disclaimer">
-  此面板為唯讀視圖，<b>不是信任來源</b>。一切以簽章事件鏈與 ledger 為準；
+  此面板為唯讀視圖，<b>不是究責依據</b>。一切以簽章事件鏈與 ledger 為準；
   面板與重算結果不符時，以重算為準。
 </footer>
 

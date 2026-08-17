@@ -47,7 +47,7 @@ def test_index_and_json_api(tmp_path):
         assert "<!doctype html>" in html.lower()
         assert "/static/app.js" in html
         assert "cdn" not in html.lower()  # 無外部 CDN 依賴
-        assert "信任觀測台" in html
+        assert "可究責觀測台" in html
         js = urllib.request.urlopen(_url(server, "/static/app.js"), timeout=5).read().decode()
         assert "EventSource('/events')" in js
         assert "//" not in js.split("EventSource")[0].split("\n")[-1]  # 非註解掉的死碼
