@@ -467,6 +467,12 @@ def scan_text(origin: str, path_label: str, frags: list[tuple[int, str]]) -> tup
 
 DOC_DROPPED: list[dict] = []   # 被當成工作紀錄排除的 docstring——數得出來才不算靜靜丟掉
 
+# 逐檔語料字元數。`--scan` 只印總和，但總表要的是**分母**：
+# 三個展件並排時 `0` 有兩種意思（有講而且守線／根本沒講），
+# 沒有分母欄的總表會把「沒講」讀成「乾淨」。填在這裡而不另走一次 glob，
+# 是因為分母必須跟被除數走同一條路（HANDOFF §八）。
+FILE_CHARS: dict[str, int] = {}
+
 
 def scan_sources() -> tuple[list[dict], int, list[str]]:
     cands: list[dict] = []
@@ -483,6 +489,7 @@ def scan_sources() -> tuple[list[dict], int, list[str]]:
                 cands += c
                 total += n
                 files.append(label)
+                FILE_CHARS[label] = n
                 if p.suffix.lower() == ".py":
                     # 排除的那一類要能被數：段數、字元數，以及**排除掉的東西
                     # 裡面有沒有候選句**。有的話照樣印，由人判定該不該收回來。
@@ -916,13 +923,19 @@ def family_scan(origin: str, label: str, frags: list[tuple[int, str]], fams
     return rows, counts
 
 
-def family_audit(fams, neighbors, title: str, note: str) -> int:
-    """紅線 B／C 共用的掃描主體。差別只有詞族表與抬頭。"""
+def family_collect(fams, neighbors) -> dict:
+    """跑一遍 SCOPE，把紅線 B／C 要的數字**收集起來但不印**。
+
+    抽出來是因為 `--summary` 需要同一份數字的另一種排法。總表若自己再掃一次，
+    兩份實作會各自被正確地修改不同次數然後漂移（HANDOFF §八）——
+    所以總表跟 `--diction`／`--strength` 必須是同一次掃描的兩個出口。
+    """
     rows: list[dict] = []
     corpus: dict[str, int] = {n: 0 for n, _ in fams}
     raw: dict[str, int] = {n: 0 for n, _ in fams}
     neigh: dict[str, int] = {n: 0 for n, _ in neighbors}
     per_file: list[tuple[str, dict[str, int], dict[str, int]]] = []
+    per_file_neigh: dict[str, dict[str, int]] = {}
     doc_rows: list[dict] = []
     for repo, pats in SCOPE:
         for pat in pats:
@@ -938,13 +951,25 @@ def family_audit(fams, neighbors, title: str, note: str) -> int:
                     corpus[k] += c[k]
                     raw[k] += rc[k]
                 blob = "".join(f for _, f in extract(p, src))
-                for k, v in _fam_counts(blob, neighbors).items():
+                fn = _fam_counts(blob, neighbors)
+                per_file_neigh[label] = fn
+                for k, v in fn.items():
                     neigh[k] += v
                 if any(c.values()) or any(rc.values()):
                     per_file.append((label, c, rc))
                 if p.suffix.lower() == ".py":
                     dr, _ = family_scan("doc", label, py_docstrings(src), fams)
                     doc_rows += dr
+    return {"rows": rows, "corpus": corpus, "raw": raw, "neigh": neigh,
+            "per_file": per_file, "per_file_neigh": per_file_neigh,
+            "doc_rows": doc_rows}
+
+
+def family_audit(fams, neighbors, title: str, note: str) -> int:
+    """紅線 B／C 共用的掃描主體。差別只有詞族表與抬頭。"""
+    got = family_collect(fams, neighbors)
+    rows, corpus, raw = got["rows"], got["corpus"], got["raw"]
+    neigh, per_file, doc_rows = got["neigh"], got["per_file"], got["doc_rows"]
 
     print(title)
     print(note + "\n")
@@ -1120,6 +1145,209 @@ def diction_test() -> int:
     return _family_test(DICTION_FIXTURE, DICTION_FAMILIES, "B1 口徑探針")
 
 
+# ── S7 系列總表：三個展件 × 三條紅線 ──────────────────────────────
+#
+# 這一節**不做任何新掃描**。它是 `scan_sources()`／`family_collect()` 同一份結果
+# 的另一種排法。總表若自己再掃一次，兩份實作會各自被正確地修改不同次數然後漂移。
+#
+# ⚠ 總表最容易造成的傷害不是算錯，是**把「沒講」讀成「乾淨」**。
+# 三個展件並排之後 `0` 有兩種意思。第 100 輪已經踩過一次：官網沒踩到紅線 A，
+# 不是因為歸因寫對，是因為它沒講「後果」。所以每一條紅線都配一個**分母**——
+# 「你本來該說的那句話」出現幾次。三條紅線的分母各自是：
+#   A（歸因）  → SOLO 單邊命中（只講抓到、或只講後果，沒把兩者連起來）
+#   B（口徑）  → 可究責族（B 要求的替代詞）
+#   C（宣稱）  → 被允許的強度講法（提高成本／留下紀錄／改不掉）
+# 分母 0 ＋ 命中 0 ＝ 沒講；分母 >0 ＋ 命中 0 ＝ 有講而且守線。這兩件事必須分得開。
+EXHIBITS = [
+    ("vacant-docs-web", "官網"),
+    ("vacant_hm", "人類動物園"),
+    ("Vacant", "觀測台"),
+]
+
+# 紅線 B 的分母：B 說「不准講信任，要講可究責／讓依賴有根據」——所以分母就是替代詞。
+EVID_B = [
+    ("R1 可究責", re.compile(r"可究責|究責|問責|accountab", re.I)),
+    ("R2 有根據", re.compile(r"有根據|有憑據|有依據|站得住")),
+]
+# 紅線 C 的分母：C 說「不准講保證／防止，只能講提高成本、留下改不掉的紀錄」。
+EVID_C = [
+    ("R3 提高成本", re.compile(r"(提高|抬高|拉高|增加)[^。！？；\n]{0,6}成本"
+                              r"|成本[^。！？；\n]{0,4}(提高|變高|上升)|raise[sd]?[- ]cost", re.I)),
+    ("R4 留下紀錄", re.compile(r"留下[^。！？；\n]{0,6}(紀錄|記錄|痕跡)|會留下|留得下|上鏈|寫進帳")),
+    # ⚠ `竄改` 原本只收「不可竄改｜竄改不了」，漏掉 `app.html:37`
+    # 「任一行被**竄改**／重排／刪除都會改變它」——那是全站最正宗的「改不掉」宣稱。
+    # 是拿本輪結果去對第 104 輪紀錄（觀測台 C 分母該是 8，機器給 0）才照出來的。
+    ("R5 改不掉", re.compile(r"改不掉|刪不掉|抹不掉|賴不掉|竄改|事後改")),
+]
+
+# 分母詞族的已知答案格。**分母本身也是量尺，一樣要先驗兩個方向。**
+# 「不准抽到」那半直接取自觀測台的面板欄位名：第 104 輪的事後診斷用裸關鍵字
+# 數出「app.js 提高成本 2 · 留下紀錄 3」，但那 5 個全是「尚無成本資料」
+# 「交付紀錄」這類欄位標籤，**不是在講「提高作惡成本」**。
+# 裸關鍵字計數會把 UI 標籤算成「有在講」，於是分母虛高、`0` 被讀成「守線」。
+EVID_FIXTURE = [
+    ("E1 提高作惡成本", "index.html", "<p>它只提高作惡的成本</p>", {"R3 提高成本": 1}, None),
+    ("E2 留下紀錄", "index.html", "<p>做過什麼會留下紀錄</p>", {"R4 留下紀錄": 1}, None),
+    ("E3 竄改會被看出來", "index.html",
+     "<p>任一行被竄改／重排／刪除都會改變它</p>", {"R5 改不掉": 1}, None),
+    ("E4 欄位標籤不算有在講（成本）", "js/main.js",
+     'const s = "尚無成本資料";', {}, None),
+    ("E5 欄位標籤不算有在講（紀錄）", "js/main.js",
+     'const s = "交付紀錄。尚無稽核紀錄";', {}, None),
+    ("E6 單位成本代理量不是強度宣稱", "js/main.js",
+     'const s = "是單位成本品質的可觀測代理量";', {}, None),
+]
+EVID_B_FIXTURE = [
+    ("E7 可究責", "index.html", "<p>這是可究責層</p>", {"R1 可究責": 1}, None),
+    ("E8 讓依賴有根據", "index.html", "<p>讓依賴有根據</p>", {"R2 有根據": 1}, None),
+    ("E9 信譽不算可究責族", "js/main.js", 'const s = "信譽路由";', {}, None),
+]
+
+
+def evid_test() -> int:
+    """G2：分母探針。分母沒驗過，`0` 就不准被讀成「守線」。"""
+    rc = _family_test(EVID_FIXTURE, EVID_C, "G2a C 分母探針")
+    print()
+    return _family_test(EVID_B_FIXTURE, EVID_B, "G2b B 分母探針") or rc
+
+
+def exhibit_of(label: str) -> str:
+    """`vacant_hm/world/js/main.js` → `vacant_hm`。"""
+    return label.split("/", 1)[0]
+
+
+def by_exhibit(rows: list[dict], field: str = "file") -> dict[str, int]:
+    """把逐條命中按展件分組。**純函式**——吃 rows 出計數，才能餵已知答案給它。
+
+    落在 EXHIBITS 之外的 label 不會被靜靜丟掉，而是自己成一格印出來
+    （總表最不能有的就是無聲截斷）。
+    """
+    out: dict[str, int] = {repo: 0 for repo, _ in EXHIBITS}
+    for r in rows:
+        k = exhibit_of(r[field])
+        out[k] = out.get(k, 0) + 1
+    return out
+
+
+def _denominator_a() -> dict[str, int]:
+    """紅線 A 的分母：只中一邊的句子（有在講這件事，只是沒把兩頭連起來）。"""
+    return by_exhibit(SOLO)
+
+
+def summary_audit() -> int:
+    cands, chars, files = scan_sources()
+    b = family_collect(DICTION_FAMILIES, DICTION_NEIGHBORS)
+    c = family_collect(STRENGTH_FAMILIES, STRENGTH_NEIGHBORS)
+    eb = family_collect(EVID_B, [])
+    ec = family_collect(EVID_C, [])
+
+    a_hit, b_hit, c_hit = by_exhibit(cands), by_exhibit(b["rows"]), by_exhibit(c["rows"])
+    a_den, b_den, c_den = _denominator_a(), by_exhibit(eb["rows"]), by_exhibit(ec["rows"])
+    nfile: dict[str, int] = {r: 0 for r, _ in EXHIBITS}
+    nchar: dict[str, int] = {r: 0 for r, _ in EXHIBITS}
+    for label, n in FILE_CHARS.items():
+        nfile[exhibit_of(label)] = nfile.get(exhibit_of(label), 0) + 1
+        nchar[exhibit_of(label)] = nchar.get(exhibit_of(label), 0) + n
+
+    print("S7 系列總表：三個展件 × 三條誠實邊界")
+    print("**不是新掃描**——是 --scan／--diction／--strength 同一份結果的重新分組。")
+    print("這支只產生候選、不下判定。\n")
+    print("紅線 A＝歸因（把「抓到」與「後果」連成因果）· "
+          "B＝口徑（不准出現「信任」）· C＝宣稱強度（不准說「保證」「防止」）\n")
+
+    head = f"{'展件':<12}{'檔':>4}{'語料字元':>9}  │{'紅線A':>7}{'紅線B':>7}{'紅線C':>7}"
+    print(head)
+    print("─" * 55)
+    for repo, name in EXHIBITS:
+        print(f"{name:<13}{nfile[repo]:>3}{nchar[repo]:>9}  │"
+              f"{a_hit[repo]:>6}{b_hit[repo]:>6}{c_hit[repo]:>6}")
+    print("─" * 55)
+    print(f"{'小計':<13}{sum(nfile.values()):>3}{sum(nchar.values()):>9}  │"
+          f"{sum(a_hit.values()):>6}{sum(b_hit.values()):>6}{sum(c_hit.values()):>6}")
+
+    print("\n── 分母：「本來該說的那句話」出現幾次 ──")
+    print("   命中 0 ＋ 分母 0 ＝ **根本沒講**；命中 0 ＋ 分母 >0 ＝ **有講而且守線**。")
+    print(f"\n{'展件':<12}{'A 單邊句':>9}{'B 可究責':>9}{'C 允許講法':>11}   讀法")
+    # ⚠ A 欄跟 B／C 欄的三態**不一樣**，不能共用同一句讀法。
+    # B／C 的分母是「該說的替代詞」⇒ 分母 >0 ＋ 命中 0 真的是守線。
+    # A 的分母是 SOLO **單邊句**（只講「抓到」或只講「後果」，沒把兩頭連起來）
+    # ⇒ 分母 >0 ＋ 命中 0 只代表**講了一半**，那既不是踩線也不是守線。
+    # 第一版我把它一起寫成「守線」——為了防「沒講被讀成乾淨」而加的分母，
+    # 自己又把「講了一半」讀成了乾淨。同一個病往上爬了一層。
+    for repo, name in EXHIBITS:
+        reads = [f"A=" + ("命中" if a_hit[repo] else
+                          ("單邊" if a_den[repo] else "沒講"))]
+        for tag, h, d in (("B", b_hit[repo], b_den[repo]),
+                          ("C", c_hit[repo], c_den[repo])):
+            reads.append(f"{tag}=" + ("命中" if h else ("守線" if d else "沒講")))
+        print(f"{name:<13}{a_den[repo]:>7}{b_den[repo]:>9}{c_den[repo]:>10}   "
+              + " · ".join(reads))
+    print("\n   A 的「單邊」＝只講「抓到」或只講「後果」，沒把兩頭連成因果"
+          "——不是守線，是講了一半。")
+
+    print("\n── 對帳：總表列小計必須等於各單掃描的既往總數 ──")
+    checks = [
+        ("A 候選數", sum(a_hit.values()), len(cands)),
+        ("A 檔數", sum(nfile.values()), len(files)),
+        ("A 語料字元", sum(nchar.values()), chars),
+        ("B 逐條命中", sum(b_hit.values()), len(b["rows"])),
+        ("C 逐條命中", sum(c_hit.values()), len(c["rows"])),
+    ]
+    bad = [n for n, x, y in checks if x != y]
+    for n, x, y in checks:
+        print(f"   {n:<12} 總表 {x:>6} vs 單掃描 {y:>6}   {'一致' if x == y else '不一致'}")
+
+    print("\n── 逐檔（只印有命中的）──")
+    per_b = {label: cc for label, cc, _ in b["per_file"]}
+    per_c = {label: cc for label, cc, _ in c["per_file"]}
+    for label in sorted(set(per_b) | set(per_c)):
+        cells = []
+        for tag, d in (("B", per_b.get(label, {})), ("C", per_c.get(label, {}))):
+            for k, v in d.items():
+                if v:
+                    cells.append(f"{tag}:{k.split()[1]} {v}")
+        if cells:
+            print(f"   {label}: " + " · ".join(cells))
+    return 0 if not bad else 1
+
+
+# 分組探針的已知答案格。總表本身是一個量測工具 ⇒ 先餵它一定知道答案的輸入。
+SUMMARY_FIXTURE = [
+    ("G1 三展件各自分對",
+     [{"file": "vacant_hm/index.html"}, {"file": "vacant_hm/js/a.js"},
+      {"file": "vacant_hm/world/js/clay/b.js"}, {"file": "vacant-docs-web/index.html"}],
+     {"vacant-docs-web": 1, "vacant_hm": 3, "Vacant": 0}),
+    ("G2 空輸入三格全 0",
+     [], {"vacant-docs-web": 0, "vacant_hm": 0, "Vacant": 0}),
+    ("G3 只落在觀測台",
+     [{"file": "Vacant/vacant/dashboard.py"}, {"file": "Vacant/vacant/web/app.js"}],
+     {"vacant-docs-web": 0, "vacant_hm": 0, "Vacant": 2}),
+    # 這一格是「不准靜靜丟掉」那半：SCOPE 之外的 label 必須自己冒出來，
+    # 不能被吞進三格裡任何一格，也不能消失（消失了小計就會對不上總數）。
+    ("G4 未知展件不得被靜靜丟掉",
+     [{"file": "some-other-repo/x.html"}, {"file": "vacant_hm/index.html"}],
+     {"vacant-docs-web": 0, "vacant_hm": 1, "Vacant": 0, "some-other-repo": 1}),
+]
+
+
+def summary_test() -> int:
+    """G1：分組探針。沒過就不准拿去排總表。"""
+    ok = 0
+    for key, rows, want in SUMMARY_FIXTURE:
+        got = by_exhibit(rows)
+        bad = []
+        if got != want:
+            bad.append(f"分組 want={want} got={got}")
+        if sum(got.values()) != len(rows):
+            bad.append(f"小計 {sum(got.values())} ≠ 總數 {len(rows)}（有條目被丟掉）")
+        ok += not bad
+        print(f"{'OK  ' if not bad else 'FAIL'} {key}")
+        for x in bad:
+            print(f"       {x}")
+    print(f"\nG1 分組探針 fixture: {ok}/{len(SUMMARY_FIXTURE)}")
+    return 0 if ok == len(SUMMARY_FIXTURE) else 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--self-test", action="store_true")
@@ -1141,6 +1369,10 @@ def main() -> int:
                     help="紅線 C：宣稱強度掃描——有沒有說「保證」「防止」")
     ap.add_argument("--strength-test", action="store_true",
                     help="C1：宣稱強度探針已知答案格（含『不准抽到』那半）")
+    ap.add_argument("--summary", action="store_true",
+                    help="S7 總表：三個展件 × 紅線 A／B／C（重新分組，不新掃描）")
+    ap.add_argument("--summary-test", action="store_true",
+                    help="G1：分組探針已知答案格（含『不准靜靜丟掉』那半）")
     ap.add_argument("--scan", action="store_true")
     ap.add_argument("--dom", type=Path, default=None)
     ap.add_argument("--json", type=Path, default=None)
@@ -1156,6 +1388,19 @@ def main() -> int:
         rc = py_yardstick_test()       # 量尺沒過就不准往下量
         print()
         return py_test() or rc
+    if a.summary_test:
+        rc = evid_test()               # 分母沒驗過就不准拿去讀「守線」
+        print()
+        return summary_test() or rc
+    if a.summary:
+        rc = evid_test()
+        print()
+        rc = summary_test() or rc      # 探針沒過就不准往下排表
+        print()
+        if rc:
+            print("G1 探針沒過 ⇒ 不往下排總表。先修探針。")
+            return rc
+        return summary_audit()
     if a.strength_test:
         return strength_test()
     if a.strength:
