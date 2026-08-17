@@ -6,14 +6,24 @@
 再從 DOM 讀 `#act` 的文字。順帶收 console 的錯誤——這台沒有 node，
 `main.js` 改完之後**能不能 parse** 只有瀏覽器答得出來。
 
-判準（三個都要過）：
+判準（四個都要過）：
   V1  console 沒有任何 error（含 SyntaxError ⇒ 證明 main.js parse 得過）
   V2  `#act` 的文字**不含**舊句「它保證做過什麼會留下來」
   V3  `#act` 的文字**含**新句「留得住的也只有一部分」
+  V0  `#act` 在**畫面上真的看得到**（computed opacity ≥ 0.9、非 hidden/none、有高度）
+
+⚠ `V0` 是第 117 輪補的，補的是這一支自己的漏洞。第 115 輪它只讀 `textContent`，
+而 `?shot=layeron` 那條路上 `#act` 有 66 個字、`.act{opacity:0}`——
+**畫面上一個字都看不到，這一支照樣判 PASS**（第 116 輪量出來的）。
+「DOM 裡有」不等於「觀眾讀得到」，而觀眾只買後者。
+`--negctl` 是這個閘門的負控制：先確認頁面可見、再用 CDP 拔掉 `.on` 讓它變隱形，
+**V0 必須因此 FAIL**。閘門沒有負控制就等於沒驗過它會不會擋人。
 
 同一套也驗首頁 `index.html` 的兩處（紅線 B 那句 ＋ 揭示那句）。
 
-用法：python3 runs/s10_copy_verify.py
+用法：
+  python3 runs/s10_copy_verify.py            # V0–V7
+  python3 runs/s10_copy_verify.py --negctl   # 只跑 V0 的負控制（必須判 FAIL 才算對）
 """
 from __future__ import annotations
 
@@ -40,6 +50,29 @@ OLD_B = "可不可信是不知道的"
 NEW_B = "你沒辦法自己查證它做了什麼"
 
 
+def act_visible(ch):
+    """V0 的量具：回報 `#act` 在**畫面上**的可見狀態，不是它在 DOM 裡的存在。
+
+    讀 computed opacity 而不是 class——class 只是原因，`opacity:0` 才是
+    觀眾看不到的那件事本身。`#act` 的 opacity 是漸入的，所以呼叫端要先等它穩。
+    """
+    r = ch.call("Runtime.evaluate", {
+        "expression": """JSON.stringify((() => {
+          const e = document.getElementById('act');
+          if (!e) return {exists:false};
+          const cs = getComputedStyle(e), b = e.getBoundingClientRect();
+          return {exists:true, on:e.classList.contains('on'),
+                  opacity:parseFloat(cs.opacity), vis:cs.visibility,
+                  disp:cs.display, h:Math.round(b.height)};
+        })())""",
+        "returnByValue": True})
+    s = json.loads(r["result"]["value"])
+    s["visible"] = bool(s.get("exists") and s.get("opacity", 0) >= 0.9
+                        and s.get("vis") != "hidden" and s.get("disp") != "none"
+                        and s.get("h", 0) > 4)
+    return s
+
+
 def grab(ch, url, sel, wait):
     ch.call("Runtime.evaluate", {"expression": "window.__errs = [];"})
     ch.call("Page.navigate", {"url": url})
@@ -53,6 +86,7 @@ def grab(ch, url, sel, wait):
 
 
 def main() -> int:
+    neg_ctl = "--negctl" in sys.argv
     srv = subprocess.Popen(
         [sys.executable, "-m", "http.server", str(HTTP_PORT),
          "--bind", "127.0.0.1", "--directory", str(HM_ROOT)],
@@ -91,6 +125,29 @@ def main() -> int:
         print("── world/?shot=layeron · 沿路看到的每一拍 ──")
         for s in seen:
             print("   · " + s.replace("\n", " ")[:110])
+
+        # ── V0：畫面上真的看得到嗎 ──
+        # 等 2.5 秒讓 `.act` 的漸入走完，否則會把「正在淡入」讀成「隱形」。
+        time.sleep(2.5)
+        av = act_visible(ch)
+        print(f"V0 可見性：opacity={av.get('opacity')} on={av.get('on')} "
+              f"高度={av.get('h')}px ⇒ 畫面上{'讀得到' if av['visible'] else '**一個字都看不到**'}")
+        if neg_ctl:
+            # 負控制：把可見的頁面弄成隱形，V0 必須因此 FAIL。
+            ch.call("Runtime.evaluate",
+                    {"expression": "document.getElementById('act').classList.remove('on')"})
+            time.sleep(1.2)
+            nv = act_visible(ch)
+            print(f"   負控制（拔掉 .on）：opacity={nv.get('opacity')} "
+                  f"⇒ visible={nv['visible']}")
+            ok = av["visible"] and not nv["visible"]
+            print("\n" + ("PASS V0 閘門兩邊都答對：可見判可見、隱形判隱形"
+                          if ok else
+                          "FAIL V0 閘門分不出可見與隱形 ⇒ 這個閘門擋不住人"))
+            return 0 if ok else 1
+        if not av["visible"]:
+            fails.append(f"V0 大螢幕：字在 DOM 裡但畫面上看不到（{av}）")
+
         errs = [e for e in ch.drain_events("Runtime.exceptionThrown")] if hasattr(ch, "drain_events") else []
         if OLD_C in w["txt"]:
             fails.append("V2 大螢幕：舊句還在")
@@ -133,7 +190,8 @@ def main() -> int:
         for f in fails:
             print("FAIL " + f)
         return 1
-    print("PASS 三處文案在真的跑起來的頁面上都是新的，舊句一個字都讀不到")
+    print("PASS 三處文案在真的跑起來的頁面上都是新的、舊句一個字都讀不到，"
+          "且大螢幕那句在畫面上真的可見（V0）")
     return 0
 
 

@@ -32,3 +32,9 @@ runs/**/logs/
 runs/s11_shots/*_s1.png
 runs/s11_shots/*_s2.png
 runs/s11_shots/*_s3.png
+
+# S12 深連結可見性量測的全解析度原始截圖（第 117 輪）：同 S11 的理由，
+# 跑一次就重生，不進版控。**進版控的是 640 那兩張**——展場距離才是判準作用的尺寸。
+runs/s12_shots/*_s1.png
+runs/s12_shots/*_s2.png
+runs/s12_shots/*_s3.png

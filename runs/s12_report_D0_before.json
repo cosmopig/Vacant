@@ -1,0 +1,78 @@
+{
+ "selftest": {
+  "P1a": {
+   "shot": "openworld",
+   "on": true,
+   "opacity": 1,
+   "vis": "visible",
+   "disp": "block",
+   "h": 89,
+   "w": 960,
+   "txt": "這個世界沒有可究責層。每一件交出去的東西，都被收下了。沒有人檢查，出事也沒有後果。",
+   "exists": true
+  },
+  "P1b": {
+   "shot": "openworld",
+   "on": false,
+   "opacity": 0.258789,
+   "vis": "visible",
+   "disp": "block",
+   "h": 89,
+   "w": 960,
+   "txt": "這個世界沒有可究責層。每一件交出去的東西，都被收下了。沒有人檢查，出事也沒有後果。",
+   "exists": true
+  }
+ },
+ "openreveal": {
+  "on": false,
+  "opacity": 0,
+  "h": 89,
+  "visible": false,
+  "txt_len": 71,
+  "txt": "剛才這 0 件有問題的東西，全部被收下了。它們來自 0 個居民，而且一直都在畫面上——你看不出來是哪幾個，因為那個世界裡沒有任何一步會告訴你。"
+ },
+ "layeron": {
+  "on": false,
+  "opacity": 0,
+  "h": 89,
+  "visible": false,
+  "txt_len": 66,
+  "txt": "現在把可究責層打開。同一批居民、同一批工作。它不保證每次都對，留得住的也只有一部分——它留下的那些指得出是誰做的，而指認到會有後果。",
+  "has_new_c": true
+ },
+ "D2": {
+  "skipped": "深連結隱形 ⇒ 沒有墨可量（這本身就是結果）"
+ },
+ "D3": {
+  "noise_floor": 3.0,
+  "ink_T": 10,
+  "n_bands": 1,
+  "band_heights": [
+   7
+  ],
+  "band_h": 7,
+  "n_ink_px": 1164,
+  "contrast": 0.233,
+  "contrast_p90": 0.4,
+  "void": false,
+  "tag": "D3_natural_sub",
+  "sel": "#act .sub",
+  "font_px": 16,
+  "chars": 56,
+  "rect": [
+   480,
+   925,
+   960,
+   27
+  ],
+  "crop": [
+   480,
+   924,
+   960,
+   30
+  ],
+  "color": "rgba(233, 237, 242, 0.52)",
+  "C1": false,
+  "C2": false
+ }
+}
