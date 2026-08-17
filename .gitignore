@@ -38,3 +38,12 @@ runs/s11_shots/*_s3.png
 runs/s12_shots/*_s1.png
 runs/s12_shots/*_s2.png
 runs/s12_shots/*_s3.png
+
+# S13 容差量測的全解析度原始截圖（第 118 輪）：同 S11/S12 的理由，跑一次就重生，
+# 不進版控。**進版控的是縮到展場距離的 640 那張**——判準真正作用的尺寸。
+runs/s13_shots/*_s1.png
+runs/s13_shots/*_s2.png
+runs/s13_shots/*_s3.png
+runs/s13_main.log
+runs/s13_selftest.log
+runs/s13_reload.log
