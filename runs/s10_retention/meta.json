@@ -1,0 +1,16 @@
+{
+  "seeds": [
+    "W1",
+    "W2",
+    "W3"
+  ],
+  "warm": 12000,
+  "equiv": [
+    {
+      "seed": "W1",
+      "same": true
+    }
+  ],
+  "phone_list": 6,
+  "cap": 10
+}
