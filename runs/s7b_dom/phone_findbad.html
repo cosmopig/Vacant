@@ -1,0 +1,66 @@
+<html lang="zh-Hant"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<title>我的居民 · 人類動物園</title>
+<link rel="stylesheet" href="css/phone.css">
+</head>
+<body>
+
+<main class="ph">
+
+  <!-- ① 我的居民：近距離、活的 -->
+  <section class="me">
+    <canvas id="me-canvas" width="340" height="340"></canvas>
+    <div class="me-id">
+      <span id="me-code" class="me-code">DOK-29</span>
+      <span id="me-spec" class="me-spec">規劃行程</span>
+    </div>
+    <div class="me-stage"><span id="me-stage-tag" class="tag node">節點</span>
+      <span id="me-rep" class="me-rep">信譽 0.94</span></div>
+  </section>
+
+  <!-- ② 牠現在在做什麼 -->
+  <section class="now">
+    <div class="lbl">現在</div>
+    <div id="me-now" class="now-txt">牠是<b>節點</b>：別人的工作會流向牠，牠的評語也算數。</div>
+  </section>
+
+  <!-- ③ 牠的紀錄 -->
+  <section class="rec">
+    <div class="lbl">紀錄</div>
+    <div class="rec-grid">
+      <div><b id="r-done">40</b><span>接過的工作</span></div>
+      <div><b id="r-rej">2</b><span>被退回</span></div>
+      <div><b id="r-aud">18</b><span>被抽查</span></div>
+      <div><b id="r-caught" class="bad">0</b><span>被抓到</span></div>
+    </div>
+  </section>
+
+  <!-- ④ 指認 -->
+  <section class="flag">
+    <div class="lbl">牠交出去、而且被收下的東西</div>
+    <p class="hint">你不必看得懂它做了什麼。<b>你只要指出一個地方，機器會當場重跑給你看。</b></p>
+    <ul id="deliveries" class="dl"><li data-i="0"><span class="k">T11897</span><span class="w">RIL-56 請牠做的</span><span class="go">指認 ›</span></li><li data-i="1"><span class="k">T11623</span><span class="w">ZAK-40 請牠做的</span><span class="go">指認 ›</span></li><li data-i="2"><span class="k">T10931</span><span class="w">DOL-78 請牠做的</span><span class="go">指認 ›</span></li><li data-i="3"><span class="k">T10863</span><span class="w">VUV-60 請牠做的</span><span class="go">指認 ›</span></li><li data-i="4"><span class="k">T10748</span><span class="w">ZER-45 請牠做的</span><span class="go">指認 ›</span></li><li data-i="5"><span class="k">T10665</span><span class="w">ZUS-38 請牠做的</span><span class="go">指認 ›</span></li></ul>
+  </section>
+
+</main>
+
+<!-- 重跑 → 結果 → 漣漪 -->
+<div id="sheet" class="sheet">
+  <div class="sheet-in">
+    <div class="sheet-head"><span id="sheet-title">確定性沙箱重跑</span>
+      <button id="sheet-close" class="x" aria-label="關閉">✕</button></div>
+    <pre id="rerun" class="rerun"></pre>
+    <div id="ripple" class="ripple"></div>
+  </div>
+</div>
+
+<footer class="disclose">
+  <span class="dot"></span>
+  <span id="disclose-txt">機制模擬　·　<b>同一套規則、同一個世界的種子</b>　·　假 persona</span>
+</footer>
+
+<script type="module" src="js/phone.js"></script>
+
+
+</body></html>

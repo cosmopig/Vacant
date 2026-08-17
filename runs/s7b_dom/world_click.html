@@ -1,0 +1,40 @@
+<html lang="zh-Hant"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>人類動物園 · 世界</title>
+<link rel="stylesheet" href="css/world.css">
+</head>
+<body>
+
+<canvas id="stage" width="1400" height="900" style="width: 1400px; height: 900px;"></canvas>
+
+<!-- 近看每個光點是一個居民 -->
+<div id="focus" class="focus" style="opacity: 0;">
+  <i class="focus-lead" id="focus-lead"></i>
+  <span class="focus-box" id="focus-box"></span>
+</div>
+
+<!-- 密度就是展期。這件事要展示，不要遮掩。 -->
+<div id="meta" class="meta">第 <b>30</b> 天　·　<b>466</b> 位居民　·　18 個街區</div>
+
+<!-- 外層可讀性：這個世界現在在幹嘛，兩秒看懂 -->
+<div id="ledger" class="ledger"></div>
+
+<!-- 開場字幕：先讓觀眾看見損失，再讓機制進場 -->
+<div id="act" class="act"></div>
+
+<!-- 事件流：光是情緒，字是理解。只播系統知道的事。 -->
+<div id="events" class="events"></div>
+
+<!-- 持續揭露：現在畫面上到底是什麼 -->
+<div class="disclose">
+  <span class="dot"></span>
+  <span>視覺原型　·　居民由<b>程序生成的假 persona</b> 產生　·　<b>尚未接上機制模擬</b></span>
+</div>
+
+<div id="fps" class="fps"></div>
+
+<script type="module" src="js/main.js"></script>
+
+
+</body></html>

@@ -1,0 +1,98 @@
+[
+ {
+  "state": "hm_s0_hero",
+  "note": "場景 0 主視覺（E10 真資料兩行）",
+  "bytes": 13230,
+  "text_len": 789
+ },
+ {
+  "state": "hm_s1_worlds_early",
+  "note": "場景 1 漏斗剛開始跑",
+  "bytes": 26460,
+  "text_len": 780
+ },
+ {
+  "state": "hm_s1_worlds_late",
+  "note": "場景 1 跑久之後（reveal 文案已填）",
+  "bytes": 36697,
+  "text_len": 847
+ },
+ {
+  "state": "hm_s2_idle",
+  "note": "場景 2 抽樣格已排好、還沒有人按",
+  "bytes": 13333,
+  "text_len": 957
+ },
+ {
+  "state": "hm_s2_rerun_mid",
+  "note": "點下去 3 秒：沙箱重跑逐行吐字中",
+  "bytes": 14094,
+  "text_len": 1072
+ },
+ {
+  "state": "hm_s2_consequence",
+  "note": "重跑完＋信譽/評審條圖＋hint 改寫",
+  "bytes": 21123,
+  "text_len": 1187
+ },
+ {
+  "state": "hm_s2_ripple",
+  "note": "漣漪揭曉：rp-wall／rp-bound（${outcome} 拼進去的那句）",
+  "bytes": 21123,
+  "text_len": 1187
+ },
+ {
+  "state": "hm_s2b_clean_consequence",
+  "note": "未標記格的分支：hint 走另一句",
+  "bytes": 21005,
+  "text_len": 1176
+ },
+ {
+  "state": "hm_s2b_clean_ripple",
+  "note": "未標記格的漣漪文案",
+  "bytes": 21005,
+  "text_len": 1176
+ },
+ {
+  "state": "world_t0",
+  "note": "/vacant_hm/world/index.html 載入後 4s",
+  "bytes": 1055,
+  "text_len": 57
+ },
+ {
+  "state": "world_t1",
+  "note": "/vacant_hm/world/index.html 累計 16s",
+  "bytes": 1055,
+  "text_len": 57
+ },
+ {
+  "state": "world_t2",
+  "note": "/vacant_hm/world/index.html 累計 30s",
+  "bytes": 1055,
+  "text_len": 57
+ },
+ {
+  "state": "world_click",
+  "note": "/vacant_hm/world/index.html 點一下之後",
+  "bytes": 1055,
+  "text_len": 57
+ },
+ {
+  "state": "phone_t0",
+  "note": "/vacant_hm/world/phone.html 載入後 4s",
+  "bytes": 2584,
+  "text_len": 269
+ },
+ {
+  "state": "phone_t1",
+  "note": "/vacant_hm/world/phone.html 累計 16s",
+  "bytes": 2584,
+  "text_len": 269
+ },
+ {
+  "state": "phone_click",
+  "note": "/vacant_hm/world/phone.html 點一下之後",
+  "bytes": 2584,
+  "text_len": 269
+ }
+]
