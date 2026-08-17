@@ -1,0 +1,2367 @@
+<!doctype html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="60">
+<title>Vacant 執行端 · user1-2</title>
+<style>
+:root{--bg:#0f1216;--panel:#161a20;--ink:#dee3e9;--ink2:#aab2bc;--dim:#7d8691;
+--rule:#272d36;--good:#5fa87c;--bad:#cf7466;--warn:#c0a04a;
+--mono:ui-monospace,"DejaVu Sans Mono",Menlo,Consolas,monospace;
+--sans:-apple-system,"Noto Sans CJK TC","PingFang TC",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+font-size:15px;line-height:1.7}
+.wrap{max-width:60rem;margin:0 auto;padding:1.6rem 1rem 5rem}
+h1{font-size:1.5rem;margin:0 0 .3rem;font-weight:600}
+h2{font-size:1.15rem;margin:2.4rem 0 .8rem;font-weight:600;
+border-bottom:1px solid var(--rule);padding-bottom:.4rem}
+h3{font-size:1rem;margin:1.2rem 0 .4rem}
+h4{font-size:.92rem;margin:1rem 0 .3rem;color:var(--ink2)}
+.dim{color:var(--dim)}
+.bar{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;
+font-family:var(--mono);font-size:.8rem;color:var(--dim);margin-bottom:1.6rem}
+.pill{padding:.16rem .6rem;border:1px solid var(--rule);border-radius:99px}
+.good{color:var(--good);border-color:var(--good)}
+.bad{color:var(--bad);border-color:var(--bad)}
+.card{background:var(--panel);border:1px solid var(--rule);
+padding:1rem 1.15rem;margin-bottom:1rem;border-radius:3px}
+.warn{background:#241f14;border:1px solid var(--warn);color:#e6d9a8;
+padding:.8rem 1rem;margin-bottom:1rem;border-radius:3px;font-size:.9rem}
+pre{background:#0b0e12;border:1px solid var(--rule);padding:.8rem;
+overflow-x:auto;font-family:var(--mono);font-size:.76rem;line-height:1.55;
+white-space:pre-wrap;word-break:break-word;margin:.5rem 0 0}
+code{font-family:var(--mono);font-size:.85em;background:#0b0e12;
+padding:.1em .35em;border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+td{padding:.35rem .5rem;border-bottom:1px solid var(--rule);vertical-align:top}
+td:nth-child(1){white-space:nowrap}
+td:nth-child(2),td:nth-child(3){white-space:nowrap;font-size:.8rem}
+details{border-bottom:1px solid var(--rule);padding:.5rem 0}
+summary{cursor:pointer;font-size:.9rem}
+summary::marker{color:var(--dim)}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);
+font-family:var(--mono);font-size:.72rem;color:var(--dim);line-height:1.9}
+</style></head><body><div class="wrap">
+
+<h1>Vacant 執行端</h1>
+<div class="bar">
+  <span class="pill good">運作中</span>
+  <span class="pill">共 40 輪</span>
+  <span class="pill">user1-2</span>
+  <span>up 1 day, 14 hours, 27 minutes</span>
+  <span>6.7G 可用 / 63% 已用</span>
+  <span>更新於 08-17 01:19:09</span>
+</div>
+
+
+
+<h2>現在在做什麼</h2>
+<div class="card"><h2>STATE — 執行端連續性檔案</h2>
+
+（較舊的輪次已略去，完整內容見 STATE.md）
+
+<h3>第 103 輪 · 2026-08-17 01:11 UTC 【事前登記】（動手之前寫的，之後一個字不改）</h3>
+
+<b>要做什麼</b>：做<b>紅線 B（口徑）掃描</b>（第 102 輪下一步 1）。誠實邊界那條
+「不准出現『信任』，用『可究責』『讓依賴有根據』」從來沒有任何自動檢查——
+S7 全系列掃的都是紅線 A（把「排除」歸因給「被抓到」）。第 102 輪事後隨手 grep
+就數到語料裡有 11 個「信任」，含 <code>&lt;title&gt;Vacant — 信任觀測台</code>。
+<b>做法</b>：在 <code>runs/s7_claim_audit.py</code> 加 <code>--diction</code>，**共用同一份 SCOPE 與
+<code>extract()</code>**（HANDOFF §八：快速版與完整版必須呼叫同一個決策函式，否則會漂移），
+不另開一支腳本。
+
+<b>這支一樣只產生候選、不下判定。</b> 「面板不是信任來源」是在否定信任，
+跟 <code>&lt;title&gt;</code> 當標題用不是同一件事；機器給的是〈否定脈絡〉提示，判定留給人。
+<b>本輪一個字的觀眾文案都不改</b>——改文案是人類的事（規則七）。
+
+<b>詞族（事前定死，之後不准加不准減）</b>
+<code>F1 信任</code>／<code>F2 信賴</code>／<code>F3 可信</code>／<code>F4 互信</code>／<code>F5 英文 trust（不分大小寫，
+含 trusted／trustworthy／untrusted／distrust）</code>。
+<b>刻意不收</b>：<code>信譽</code>（本專案自己的機制名）、<code>信用</code>、<code>自信</code>、<code>相信</code>——
+這四個另外當〈鄰近詞〉診斷印出來，證明是「考慮過而排除」不是「沒想到」。
+
+<b>判準</b>（先寫，之後一個字不改）
+
+| 格 | 判準 |
+|---|---|
+| B1 | <code>--diction-test</code>：口徑探針 fixture <b>全過</b>，含「不准抽到」那半（信譽／信用／自信／相信不得進 F1–F5） |
+| B2 | 已知答案重現：全 SCOPE 語料 F1「信任」總數 = <b>11</b>，分佈 <code>app.html 6</code>／<code>app.js 2</code>／<code>dashboard.py 3</code>（不含 docstring）。不符即記 FAIL 並定位差異來源 |
+| B3a | <b>獨立計數器</b>（直接對抽取片段 <code>re.findall</code>，不走 <code>sentences()</code> 切句）與逐條列出的命中數<b>逐字相同</b>。這格擋的是「切句把命中吃掉」 |
+| B3b | 原始檔 raw grep 數 <b>≥</b> 語料數，差額逐檔印出來（不要求 0；差額＝註解與識別字，本來就不是文案） |
+| B4 | 既有四支 fixture 不退步：<code>--self-test</code> 7/7、<code>--tok-test</code> 13/13、量尺 4/4、<code>--py-test</code> 11/11 |
+| B5 | 紅線 A 既往輸出<b>一個數字都不變</b>：<code>--scan</code> 候選數 = 2、覆蓋 = 35226 字元、檔數 = 50 |
+| B6 | 三個 repo 的觀眾文案檔 <code>git diff --numstat</code> = <b>0 行</b> |
+| B7 | 機時 0（不叫真模型）、生圖 0 |
+
+<b>判準引原文一律從檔案複製，不默寫</b>（第 101/102 輪連兩輪栽在默寫上，G5、E0c 同一個形狀）。
+
+<b>事前預測</b>（記下來對帳，錯了照記）
+• <code>C1301</code>：F1 = 11，分佈 6／2／3 —— 即 B2 本身。這是我<b>期待</b>成真的答案，
+  所以真正擋事的是 B3a（切句漏失）與 B1 負向半（誤收信譽）。
+• <code>C1302</code>：F5 英文 trust 族在<b>語料</b>裡 = 0，但 raw grep <b>&gt; 0</b>
+  （<code>trust_on</code>／<code>--trust</code> 這類識別字在程式碼裡）。
+• <code>C1303</code>：F2／F3／F4 合計 ≤ 2。
+• <code>C1304</code>：11 條裡落在〈否定脈絡〉的 <b>≤ 4</b> 條，其餘是當標題／開關名稱用——
+  也就是說紅線 B 真正的問題不在說錯話，在<b>把「信任」當招牌</b>。
+
+---
+
+<h3>第 103 輪 · 2026-08-17 01:11–01:31 UTC 【事後】（時間照本機 <code>date -u</code>）</h3>
+
+<b>做了</b>：做了<b>紅線 B（口徑）掃描</b>（第 102 輪下一步 1）——誠實邊界「不准出現
+『信任』」到今天為止<b>從來沒有被任何自動路徑檢查過</b>。在 <code>s7_claim_audit.py</code> 加
+<code>--diction</code>／<code>--diction-test</code>，<b>共用同一份 SCOPE 與 <code>extract()</code></b>（不另開腳本）。
+第一次掃就在觀眾語料裡數到 <b>11 個「信任」＋16 個英文 <code>trust</code></b>，
+<b>29 條裡 28 條在觀測台</b>。
+
+<b>驗證方法</b>（判準寫在上面【事前登記】，一個字沒改）
+``<code>
+python3 runs/s7_claim_audit.py --diction-test                 # B1
+python3 runs/s7_claim_audit.py --diction | tee runs/s7g_diction.txt  # B2/B3a/B3b
+python3 runs/s7_claim_audit.py --self-test / --tok-test / --py-test  # B4
+python3 runs/s7_claim_audit.py --scan | head -4               # B5
+git diff --numstat（三個 repo）                                # B6
+grep -n 信任 vacant_hm/js/hero.js                              # B3b 差額定位
+</code>`<code>
+
+<b>驗證結果</b>
+</code>`<code>
+B1  口徑探針 fixture            9/9（第一次 8/9，見下）        PASS
+B2  F1「信任」語料總數          11                             PASS
+    分佈                        app.html 6 · app.js 2 · dashboard.py 3
+                                （＝第 102 輪手工 grep 的數，逐字相同）
+B3a 切句 vs 不切句對帳          29 = 29 · 一致                 PASS
+B3b 原始檔 ≥ 語料              F1 11≤20 · F3 2≤4 · F5 16≤20   PASS
+    差額定位                    全是註解／docstring（正確排除）
+B4  --self-test 7/7 · --tok-test 13/13 · 量尺 4/4 · --py-test 11/11 · js 對照 4/11   PASS
+B5  --scan 候選 2 · 35226 字元 · 50 檔（一個數字都沒變）        PASS
+B6  三 repo 觀眾文案 diff        0 行                           PASS
+B7  機時 0 · 生圖 0                                            PASS
+</code>`<code>
+詞族全表：</code>F1 信任 11/20<code>、</code>F2 信賴 0/0<code>、</code>F3 可信 2/4<code>、</code>F4 互信 0/0<code>、
+</code>F5 trust 16/20<code>（語料／原始檔）。〈否定脈絡〉6 條 ·〈肯定用法〉23 條。
+鄰近詞（刻意不收）：信譽 8 · 信用 7 · 自信 0 · 相信 0。
+
+<b>探針當場打回我一格（B1 第一次 8/9）</b>
+</code>D1<code> 我把「這是信任觀測台」的〈否定脈絡〉期望值寫成 </code>True<code>，但那句裡一個否定詞
+都沒有 ⇒ 已知答案本來就是 </code>False<code>。<b>改的是 fixture 不是程式碼</b>（這格客觀可判），
+改完 9/9。記下來是因為被打回的那格正是「我對自己工具的預期有偏差」的位置。
+這跟第 101/102 輪那種「默寫原文導致判準錯」不同——那兩輪錯在判準，這輪錯在探針。
+
+<b>本輪最實際的發現：同一條紀律，一個展件做了，另一個一次都沒做</b>
+</code>vacant_hm/js/hero.js<code> 原始檔有 3 個「信任」、<b>語料 0 個</b>——三個全在註解裡，
+內容是「標籤刻意不寫『信任層』…對不懂的觀眾講『信任』是騙人。改成『可究責層』」。
+<b>動物園那邊早就照紅線 B 做了，而且把理由寫在自己的註解裡</b>；觀測台一次都沒做。
+不是兩份程式漂移，是<b>紀律只覆蓋寫著它的那一支</b>（HANDOFF §八 的另一個形狀）。
+另：</code>dashboard.py:66<code> 的 </code>_PAGE<code> fallback（第 102 輪發現的第二個觀測台）也在名單裡
+——展場離線時觀眾實際看到的標題，最壞情況下也是「信任觀測台」。
+
+<b>預測對帳（四條錯一條，錯的那條錯得徹底）</b>
+• </code>C1301<code> <b>對</b>：F1 = 11、分佈 6／2／3。這是我<b>期待</b>成真的答案，
+  所以真正擋事的是 B1 負向半（信譽沒被誤收）與 B3a（切句沒吃掉命中）。
+• </code>C1302<code> <b>錯</b>：我預測英文 </code>trust<code> 在語料 = 0、只在識別字裡；實際 <b>16</b>，
+  而且 </code>Trust Observatory<code> 是印在畫面上的英文副標。**紅線 B 講「信任」，
+  我就只找中文**——這是我事前沒想到的漏法。
+• </code>C1303<code> <b>對</b>：F2／F3／F4 合計 2（全是 F3）。
+• </code>C1304<code> <b>對</b>：11 條 F1 裡否定脈絡 3 條（預測 ≤4）。紅線 B 真正的問題
+  不在說錯話，在<b>把「信任」當招牌</b>。
+
+<b>commit</b>：</code>1571198<code> Vacant（feat/v2-four-stages）· 已 push，
+</code>git rev-parse HEAD origin/feat/v2-four-stages<code> 兩個 sha 逐字元相同
+（</code>1571198829d317f3121f95219706cce1ee13e0f3<code>）。
+新增 </code>runs/s7g_v1_DICTION.md<code> ＋ </code>runs/s7g_diction.txt<code> 存證。
+
+<b>下一步</b>
+1. <b>紅線 C（宣稱強度）還是沒人掃</b>：誠實邊界第三條「不准說『保證正確』
+   『防止』作惡，只能說提高成本、留下改不掉的紀錄」。形狀跟紅線 B 一樣是<b>單詞族</b>
+   （保證／確保／防止／杜絕／absolutely／prevent／guarantee），
+   所以會被同一個理由漏掉（太簡單所以沒人做）。詞族與 fixture 都可比照 B 直接寫。
+   <b>獨立登記一輪，執行端可以自己做。</b>
+2. <b>S7 系列總表</b> </code>runs/s7_v1_SUMMARY.md<code>（第 101 輪下一步 2，連續第三輪沒接）：
+   官網（100 輪）／</code>vacant_hm<code>（98 輪）／觀測台（101–103 輪）三個展件並排，
+   現在多了紅線 A／B 兩欄。<b>執行端可以自己做。</b>
+3. </code>s7_claim_audit.py:598/809<code> 那兩個看不見的 U+0001（第 102 輪下一步 4）仍沒動——
+   會改動 </code>--tok-test<code>／</code>--cjk-audit<code> 既往輸出，要獨立登記一輪。執行端可以自己做。
+4. <b>等人類</b>（本輪新增三條，材料在 </code>runs/s7g_v1_DICTION.md<code> 第五節）：
+   (a) 觀測台要不要改名（「信任觀測台」在 </code>&lt;title&gt;<code>／</code>&lt;h1&gt;<code>／英文副標三處，
+   是這個展件的名字，改名是敘事決定）；(b) </code>trust on/off<code> 這個機制名要不要一起換
+   （它同時是 </code>router.py<code> 的開關名、CSS 選擇器、程式識別字）；(c) 否定類那 6 條
+   怎麼換詞（「面板不是信任來源」直接刪會失去誠實聲明，需要人寫）。
+5. 第 102 輪下一步 2（</code>_PAGE<code> 要不要納入展場可運作定義）、第 101 輪下一步 3／4、
+   第 98 輪下一步 2／3 仍等人類。
+6. 第 97 輪下一步 2／4／5、第 96 輪下一步 2–5、第 95 輪下一步 2／3、
+   第 94 輪下一步 1、第 93 輪下一步 1b／1c、第 91 輪下一步 1／2、
+   第 89 輪下一步 1–4 仍未接。
+
+<b>卡住</b>
+• 優先序第 1 項（黏土剪影五選一）<b>連續第四十五輪</b>等人類作答。本輪沒有碰它，
+  一像素沒動；</code>DECISION_SILHOUETTE.md<code> 一個字沒改。
+• 優先序第 2 項（交付狀態機剩兩格）第 69 輪已判定其修法是視覺決定，同受規則七擋。
+• 「永久排除是否可接受」仍是純價值判斷，執行端不選。
+• </code>~/vacant<code> 不是 git repo：</code>STATE.md<code>／</code>PROGRESS.md<code> 無版本控制、無異地備份
+  （<b>連續第四十五輪</b>）。
+• </code>Vacant/HANDOFF.md<code> 的機器識別段仍在講 Windows 那台（</code>/d/vacant<code>、</code>w401c-16<code>）；
+  本機實測 </code>hostname<code>＝<b></code>user1<code></b>（不是提示詞寫的 </code>user1-2<code>）、
+  tailscale </code>100.124.254.83<code>（<b>連續第四十五輪</b>）。本輪照提示詞的判準
+  （</code>HANDOFF.md<code> 存在 ⇒ 機器正確）繼續，沒有停手。
+• 本機沒有 </code>.venv<code>；用系統 </code>python3<code> 3.11+ 可以跑。
+• </code>runs/s1_smoke/<code>（第 90 輪）仍 untracked，本輪一樣刻意沒動。
+• </code>vacant_hm<code> 那三個未提交檔（</code>M styles/probe/shoot.sh<code>／</code>?? styles/probe/b64/<code>／
+  </code>?? styles/probe/sh_src.py<code>）本輪一樣沒動——本輪完全沒碰那個 repo
+  （B6 的 numstat 有它，是前幾輪留下的，不是本輪改的；</code>styles/<code> 不在 SCOPE 內）。
+• 前幾輪那些仍等人類：剪影六選一 · 顏色能不能當居民身分線索 · 07 段措辭豁免 ·
+  60%／86%／95.4% 來源類別 · 首頁大標壓行 · </code>.code-token<code> 觸控目標 ·
+  </code>scrollY=8250<code> 半屏空黑 · </code>ARCHIVE_LEVEL_H<code> 二選一 · </code>?tilt<code> 預設 ·
+  開場遊戲 2.4 秒空檔 · persona 資料邊界 · HUD 要不要留 fps ·
+  第 67 輪那 48 張 </code>hl_*.png` 要不要補進 repo · 「知識只寫在一處」要不要列成紀律。
+</div>
+
+<h2>進度大綱</h2>
+<div class="card"><h2>PROGRESS — 三個目標現在到哪</h2>
+
+給人看的大綱，不是日誌。逐輪紀錄在 <code>STATE.md</code>。
+<b>唯一交付物：畢業專題 ＝ 實體場地展覽。不寫論文，不投稿。</b>
+判斷任何事要不要做：觀眾走到展場前面時，這件事有沒有差別。
+
+---
+
+<h3>0 · 這份紀錄本身可不可信（2026-08-16 第 26 輪新增）</h3>
+
+<b>已知曾經失效一次，已抓出、已更正、證據已落盤。</b>
+
+第 25 輪的紀錄寫著「commit：3e6b9c5（已 push）」，那個 hash <b>不存在</b>於任何
+ref、reflog 或遠端；那一輪的產物真的做出來了，但從來沒有被 commit。
+第 26 輪開場對帳抓到，<b>沒有安靜補一個 commit 蓋過去</b>，而是先把判準凍結、
+獨立重跑整套驗收（<b>PASS 227／FAIL 21，與第 25 輪宣稱值逐字相同</b>，
+R9／R11／R12／Q8 全部重現），確認結論站得住之後才收進 <code>082b283</code>。
+第 25 輪那一行原文保留、加更正註記——留著讓人看見錯的形狀。
+
+這對展覽是有意義的，不只是內務：<b>展件的整個主張就是「留下改不掉的紀錄」。</b>
+如果做這件事的過程自己有一筆假紀錄而沒人發現，那個主張在展場站不住。
+每輪無記憶這件事在這裡第一次付出了紅利——<b>重跑的人不是原作者</b>。
+
+<b>制度上的後果（已寫進 STATE.md）</b>：收尾「commit + push」唯一算數的證據是
+<b>遠端 sha 與本地 sha 逐字元相同</b>；<code>git push</code> 印什麼、記得自己做過什麼，都不算。
+
+⚠ <b>仍然開著的同型風險</b>：<code>~/vacant</code> 本身不是 git repo，<code>STATE.md</code>／<code>PROGRESS.md</code>
+只存在於這台機器，沒有版本控制也沒有異地備份——第 25 輪那個失效模式對這兩個
+檔案是永遠成立的。要不要納管牽涉既有結構，<b>等人類決定</b>。
+
+<h4>✅ 第 62 輪：拍板那一頁的數字，出處查過了</h4>
+
+<code>DECISION_SILHOUETTE.md</code> 的 148 條數字全部來自六支 <code>ss_*.py</code>，而那六支的
+<b>唯一輸入</b>是第 44 輪落盤的 <code>sl_</code> 那 49 張 640px PNG。「那 49 張是哪一棵
+原始碼樹渲的」由 <code>srcman_sl.json</code> 記著——第 62 輪開場一跑，<b>是紅的</b>：
+<code>world/js/clay/main.js</code> 在量完之後被改過。依 <code>srcman.py</code> 自己寫死的規則
+（「對不上就代表量完之後又改過，那一整輪的數字不算數」），
+<b>人類要據以拍板的那一頁，148 條全部不算數。</b>
+
+肇事的改動看得出來是給 <code>main.js</code> 加的 <code>?fov=</code>（opt-in、不帶參數走原本那條
+常數 34，而 <code>sl_</code> 從來不帶）⇒ <b>看起來</b>是空操作。但那是讀前提。
+所以改成驗後果：<b>用現在這棵樹走同一份 <code>ss_solo.sh</code> 重渲染那 49 張，逐位元比。</b>
+
+&gt; <b>挖掉 HUD 四列之後，49/49 全部 0 px</b>（每張比 227,840 個像素）。
+&gt; 全圖 sha256 有 28 張不同，差<b>全部</b>落在 HUD 裡那個活的 fps 計數器。
+&gt; 那一頁另外兩個輸入也一起驗了：<code>ss_world_640.png</code>（那六支唯一用到的
+&gt; <code>ss_</code> 批次圖，只拿來取 HUD 列）逐位元 0 px、量出的列仍是 <code>[4,5,6,7]</code>；
+&gt; <code>sl_dump.json</code> 裡 <code>ss_arch.py</code> 真正讀的 <code>heights</code> 逐位元相同，
+&gt; 只有四個牆鐘計數器不同（沒有任何 <code>ss_*</code> 數字讀它們）。
+
+⇒ <b>那 148 條站得住，而且這是量到的，不是講道理講出來的。人類可以放心拍板。</b>
+
+<b>這件事對展覽本身是有意義的，不只是內務</b>：展件的整個主張就是
+「留下改不掉的紀錄」。所以第 62 輪<b>沒有</b>把紅燈改綠——那 49 張確實是舊樹渲的，
+改 hash 會讓燈變綠、代價是把歷史寫成假的。做法是 hash 一位元不動（<b>仍然紅</b>），
+把查證結論掛成 <code>note</code>，<code>srcman.py</code> 紅燈時把它印出來。**紅還是紅，只是紅得會
+自己解釋。** 這是這個專案第二次在自己的紀錄上遇到「可以安靜蓋過去」的岔路
+（第一次是第 25／26 輪那個不存在的 commit hash），兩次都沒有蓋。
+
+<h4>✅ 第 63 輪：交付狀態機那一批的出處也查過了（這次紅的是「挑 t 的規則」）</h4>
+
+第 62 輪查的是拍板那一頁；第 63 輪查的是<b>展件優先序第 2 項</b>——交付狀態機
+四段在展場距離分不分得開（<code>stagevis.py</code>）。它的全部輸入是 <code>stage.sh</code> 落盤的
+兩批各 6 張圖 ＋ <code>t.json</code> ＋ <code>dump.json</code>，而兩支 srcman 都是紅的。
+
+<b>這一批的紅燈跟上一批不同性質，所以不能沿用上一輪的講法。</b> <code>sl_</code> 那批只紅在
+<code>main.js</code> 的 <code>?fov=</code>（opt-in），還講得通「看起來是空操作」。這一批多紅一支
+<code>stprobe.js</code>，而 <code>stprobe.js</code> 決定的是 <code>t</code>（凍結時刻，<code>stage.sh</code> 第 ① 步就靠它挑）
+——<b>那不是參數，是規則；規則變了整個場景就不同。</b> 只能驗後果。
+
+&gt; 用 HEAD 這棵樹走<b>同一份</b> <code>stage.sh</code>（只換前綴 <code>stv_</code>／<code>s2v_</code>）重渲染：
+&gt; <b>T 沒動</b>（12 與 69.5，後者非 fallback）；兩批共 12 張挖掉 HUD 四列後
+&gt; <b>逐位元 0 px</b>（每張比 227,840 個像素）；<code>t.json</code> 舊葉節點 0 改值 0 缺，
+&gt; <code>st_</code> 只多出 <code>full</code>（<code>pickFull</code> 是<b>新增</b>的，<code>pick()</code> 一個字沒動）；
+&gt; <code>dump.json</code> 只有 4／5 個牆鐘計數器不同。
+
+⇒ <b>那一組數字站得住。</b> 紅燈同樣沒有改綠（hash 一位元不動、<code>check</code> 仍 exit 1），
+查證結論掛成 <code>note</code>。四把尺（srcman／門檻差分／嚴格逐位元／<code>frozen_diff</code>）
+<b>各自先答已知答案</b>才拿去量未知的，A/P 類 32/32 全過。
+
+<b>本輪自己抓到的兩件</b>：①「sha 有差」與「量具讀得到差」是兩件事——門檻尺
+（ΔLuma≥8）讀 0 但 2/6 張 sha256 不同，中間那段原本會掉進沉默；補上全圖
+<b>逐位元</b>那一把才看得到真數字是 47／48 px，且<b>全部落在 HUD 四列</b>。
+② 事先寫死的六條預測錯一條：我押「同場景截兩次差 10 px」是從 commit message
+讀來的，<b>歸檔的數字記著 0</b>。押註前該讀的是歸檔，不是敘述。
+
+⚠ <b>還有三支 srcman 是紅的、還沒查</b>：<code>srcman</code>（<code>shoot.sh</code>／<code>verdict.py</code> ＝
+剪影驗收主量測台，25 張圖，紅在 <b>6 個檔</b>，其中 <code>review.js</code>／<code>scene.js</code>／<code>lit.js</code>
+是渲染程式、<b>不是 opt-in 參數，很可能真的改變了畫面</b>）、<code>srcman_so</code>、<code>srcman_ss</code>。
+建議下一輪做 <code>srcman</code> 那一支——它若沒過，結論就是「那一批數字要重跑」，
+那同樣是有價值的結論。⚠ <code>shoot.sh</code> 目前<b>沒有</b> <code>PRE</code> 參數，要照 <code>stage.sh</code>
+第 34 輪的做法<b>加參數而不是複製一份</b>（複製兩份會各自被正確地修改不同次數然後漂移）。
+
+⚠ <b>第 64 輪開工了但沒跑完</b>（<code>shoot.sh</code> 已改未驗未 commit、<code>b64/</code> 只有 43／130
+個產物、<code>sh_src.json</code> 從未產生）。第 65 輪不接手也不收拾，但逐位元證明沒碰到它。
+<b>它現在有外部代價</b>：<code>ss_opts.py</code> 的 <code>P0_untouched</code> 因它而 FAIL ⇒ 給人類拍板
+那一頁的主數字被那一頁自己的規矩降級。<b>下一輪應先決定它的去留。</b>
+
+<h4>✅ 第 65 輪：那張選項表上「未量」的選項 5 量出來了，而且它寫錯了</h4>
+
+<code>DECISION_SILHOUETTE.md</code> 請人類從五個選項挑一個，但<b>選項 4、5 都寫著「未量」</b>，
+其中選項 5（改 <code>ARCH</code> 那 30 個數字）是唯一被標成「<b>直接動得了</b>」那 47 對硬核的。
+⇒ <b>人類正被要求在一個沒有數字的格子上拍板。</b> 第 65 輪去量它。
+（量一個候選 ≠ 採用它。採用哪一組仍是視覺決定＝規則七，<code>world/</code> 預設值沒改。）
+
+&gt; 那一頁原本的推論是：硬核 70% 是同型 ∧ 同型難分是生成器的天花板
+&gt; ⇒ 改生成器就動得了。<b>前半對，後半不成立。</b>
+
+做法：<code>clay.js</code> 加 opt-in <code>?arch=</code>（6 列 × 5 欄 CSV），候選由<b>機械規則</b>產生
+（每欄對均值做 affine、K=2.0，＝劑量表同一個形狀，只是作用在生成器上），
+重渲 44 人再走<b>同一條</b>分析管線（決策函式一個都不重寫）。K 故意選激進。
+
+| | 現況 | 候選（K=2.0） |
+|---|---|---|
+| 解析身高 span | 1.9628 倍 | <b>4.291 倍</b> |
+| 難分對（946 對中） | 365 | <b>154</b> |
+| ├ 異型 | 270 | <b>60</b> |
+| └ <b>同型</b> | 95 | <b>94</b> |
+| 那 33 對<b>同型硬核</b>救起 | — | <b>0 對</b> |
+
+⇒ <b>異型難分掉了 77%，同型幾乎沒動，那 33 對同型硬核一對都沒救起</b>
+（IoU 中位還往更難分的方向走了 +0.0065）。原因是結構性的：一列之內
+<code>legH</code>／<code>legW</code>／<code>shoulderW</code>／<code>headD</code> <b>全部只由那一列決定</b>，per-key 只有 ±4%
+整體縮放 ⇒ <b>改 <code>ARCH</code> 是把同型的兩個人一起縮放</b>。
+桌上因此多了一個新方向：<b>per-resident 連續體型參數</b>（那一頁上稱「選項 6」，
+＝五個編號選項之外新增的那一個；**不要跟第 59 輪那段把「輪廓線」順口叫成
+「第六個選項」的舊講法混起來——輪廓線是表上的選項 4<b>）。</b>執行端不挑**，
+而且照實寫了它有代價（<code>clay.js</code> 註解記著當初選離散的理由）。
+
+<b>這一輪最該記住的不是結論，是判準本身錯了一次。</b>
+事先寫死的承重判準 <code>A2_optin</code>（不帶參數時 49 張與歸檔<b>逐位元相同</b>）
+<b>FAIL：15/49</b>——而且<b>它從一開始就達不到</b>：同一次 run、同一個 URL 截兩次
+就差 8–12 px，<b>這台機器的渲染不是逐位元決定性的</b>。
+救回這一輪的是<b>計畫外的對照組</b>：把改動 stash 掉再渲一批，
+<code>sl_×sb_</code> 與 <code>sl_×sc_對照</code> 的距離同一個數量級（max 38 vs 38）
+⇒ 差異不是改動造成的，<b>門檻由對照組訂，不是我挑的</b>。
+真正承重的是<b>後果</b>檢查：三批獨立渲染算出的難分對數都是 365，<b>極差 0</b>。
+
+&gt; ⚠ <b>這對第 62／63 輪有回溯影響</b>：那兩輪用的正是「重渲染逐位元比」，
+&gt; 當時那些批次剛好讀到 0 px——<b>那是那幾批的性質，不是這台機器的性質</b>。
+&gt; 日後再用這個方法，要<b>先驗「渲染是不是逐位元決定性的」這個前提</b>。
+
+順帶抓到兩個會<b>靜靜</b>給錯答案的東西：<code>ss_hard.json</code> 的 <code>fi</code>／<code>fj</code> 是<b>樓層</b>
+不是 figure index（拿它當索引，同型硬核會從 33 變成 18 而沒有任何東西報錯）；
+<code>git status --porcelain</code> 前加 <code>.strip()</code> 只吃掉<b>第一行</b>的前導空白
+（真正的違規若排在第一行會被讀成別的路徑）。
+
+<h4>⚠ 第 66 輪：想量「展件的誠實聲明有沒有到達觀眾」，量到的是這台渲不出中文</h4>
+
+要問的是一條<b>鐵律</b>、不是一個偏好：CLAUDE.md 寫死「展件跑機制模擬 ⇒ 畫面上
+必須明講『這是機制模擬』」。那句話現在在 <code>clay.html</code> 的 HUD 裡，<code>font:11px</code>。
+<b>「畫面上有那句話」是前提，「觀眾讀得到」才是後果。</b> 第 66 輪去量後果。
+
+問法沒有美感自由度：把那句話換成另外五句完全不同的話（各恰 11 字、前 4 字
+bold ⇒ 等寬下版面相同），展場距離（縮到 640px 寬）下<b>分不分得出來</b>。
+分不出來 ⇒ 換成一句相反的話觀眾也不會發現。
+
+<b>答案是：這一輪沒有答案。而擋住錯誤答案的，是事先寫死的對照組。</b>
+
+事先寫死的 <code>P2</code>（一定看得見：44px 下兩句話該差 ≥200 px）讀到 <b>0 px</b>。查下去：
+
+• 六串<b>語意完全不同</b>的中文，8 個字級下<b>逐位元同一個檔案</b>
+• 同樣走 <code>shot()</code> 的<b>拉丁對照組有差異</b> ⇒ 不是差分器壞、不是參數沒到
+• 把 44px 那張印成 ASCII art：一排<b>空心方框</b>（tofu）
+• 這台沒有 fontconfig、<code>find / -name &#x27;*.ttf&#x27;</code> 只有 DejaVu，<b>一顆中日韓字型都沒有</b>
+
+⇒ <b>這個 repo 至今每一張 headless 截圖裡的每一個中文字，都是同一個空心方框。</b>
+<code>F1</code> 對帳把它釘死：量具那一頁的預設渲染，與歸檔的<b>兩張真</b> <code>clay.html</code> 截圖
+在 HUD 前綴那一塊<b>逐像素 0 px</b>——所以歸檔那批也是方框。
+
+<b>有沒有汙染既有的承重數字？查過了，沒有</b>（查的，不是假設的）：那些分析全部
+<code>import stagevis.hud_rows_of</code>（<b>單一實作</b>）按<b>整列</b>挖掉 HUD，方框照樣有墨跡
+⇒ 挖掉的範圍不會變小；3D 場景裡沒有任何文字（<code>TextGeometry</code>／<code>fillText</code>／
+<code>Sprite</code> 全部零命中）。<code>DECISION_SILHOUETTE.md</code> 那 148 條、<code>stagevis.json</code>、
+第 65 輪那批<b>都不受影響</b>。
+
+&gt; <b>這一輪最該記住的</b>：ladder 印出來是 <b>0/15</b>——那<b>正是我事先害怕的數字</b>。
+&gt; 一台渲不出中文的機器，與「那句話真的太小讀不出來」，會給出<b>一模一樣的 0</b>。
+&gt; 沒有 <code>P2</code>，我會把「展件的誠實聲明沒有到達觀眾」當成量到的事實寫進這一頁。
+&gt; 另一件同型的：<code>P5_layout</code>（版面沒位移）顯示 <b>ok=True</b>，那是<b>退化通過</b>
+&gt; ——六張圖逐位元相同，當然沒有位移。**因輸入退化而通過的檢查，長得跟真的
+&gt; 通過一模一樣。** 兩格都照原樣留著，另立 <code>P5_layout_degenerate</code> 記。
+
+<b>仍然沒有答案的那一題</b>：那句話在展場距離下讀不讀得出來，<b>一次都沒量過</b>。
+下一輪要做的是把一顆開源中日韓字型裝進使用者層（不需 sudo、不是規則七），
+落 sha256 與來源，重跑一次；<code>P2</code>／<code>P6</code> 過了才准看 ladder。
+⚠ 裝的字型<b>不等於</b>展場機器上的字型，結論要寫成「在某某字型下」。
+
+---
+
+<h4>⚠ 第 67 輪：字型裝好了、尺活過來了，那一題<b>還是沒有答案</b>——這次擋路的是我的問法</h4>
+
+&gt; ⚠ <b>第 86 輪的更正</b>：下面 <code>G1 = 1562px</code>、<code>P6</code> 6/6、<code>P2 = 1312px</code> 這三個數字
+&gt; <b>都無法從 repo 重算</b>——第 67 輪重截的那 48 張 <code>hl_*.png</code>（以及
+&gt; <code>hl_*_r2.png</code>、<code>hl_real*.png</code>）<b>從來沒有被 commit</b>，repo 裡躺的仍是第 66 輪
+&gt; 那批空心方框版（拿它們重算 <code>P6</code> 逐格 match 第 66 輪的 1/6）。
+&gt; 結論本身沒有被推翻（字型檔實際在 <code>~/.local/share/fonts/</code>），
+&gt; 但<b>它現在只靠一份 <code>.json</code> 自證</b>。要不要補截 ⇒ 等人類決定。
+&gt; 細節：<code>vacant_hm/styles/probe/HUD_AUDIT.md</code> 第 86 輪那一節。
+
+第 66 輪的環境障礙解掉了：<code>NotoSansMonoCJKtc-Regular.otf</code> 裝進使用者層
+（不需 sudo；來源 URL／sha256／位元組數落在 <code>styles/probe/fonts/FONT_MANIFEST.json</code>，
+二進位檔不進 repo）。<b>尺這次是活的</b>：
+
+• <code>G1</code>（現截真頁面 vs 歸檔方框版，同一塊 HUD rect）＝ <b>1562 px</b> ⇒ 字型真的生效。
+  這是<b>後果</b>檢查——<code>fc-list</code> 至今仍不存在，前提檢查在這台根本問不了。
+• <code>P6</code> 六串中文在<b>每個</b>字級都是 6 個相異檔案（第 66 輪是 1 個）
+• <code>P2</code> 一定看得見（44px）＝ <b>1312 px</b>（第 66 輪是 0）
+• <code>P5</code> 版面<b>非退化</b>通過：x 幅寬全部 126、墨點 754/728/680/532/720/376
+  ⇒ 版面相同、字形不同，這才是它本來該通過的方式
+
+<b>但這一輪一樣不出結論，而第二個理由比第一個嚴重。</b>
+
+1. 事先寫死的 <code>P3</code>（一定看不見：2px 下該差 ≤2 px）讀到 <b>3 px</b> ⇒ 探針沒全過。
+   事後補量的噪聲底 <code>P7</code>（同一個 query 截兩次）＝ <b>0 px</b> ⇒ 那 3px 是<b>真訊號</b>
+   不是雜訊，是我門檻定得太緊。<code>P7</code> 標了 <code>post_hoc: true</code>／
+   <code>must_not_rescue_this_round: true</code>——<b>它是看到 P3 沒過之後才加的。</b>
+
+2. <b>「差分器分得出兩張圖」不等於「觀眾讀得到那句話」。</b> ladder 說 11px 下
+   <b>15/15</b> 分得出來（最小差 83 px），照第 66 輪寫死的判準這該讀成
+   「我的懷疑錯了」。<b>但那條判準本身踩到了反向推論</b>：
+   分不出來 ⇒ 一定讀不到（成立）；<b>分得出來 ⇒ 什麼都不能推</b>（不成立）。
+   83 px 散在 640×360 裡，人眼什麼都不是。直接證據——把 640 那張的墨跡印出來：
+
+   ``<code>
+   11px 在 640 寬（展場距離）：墨跡高  4 列、墨點  142   ← 畫面上真的那個值
+   25px 在 640 寬：            墨跡高  9 列、墨點  551
+   44px 在 640 寬：            墨跡高 15 列、墨點 1253
+   </code>`<code>
+   <b>4 列像素不是「小字」，是一條糊掉的橫線。</b>
+   並排 PNG：</code>vacant_hm/styles/probe/hl67_ladder_640.png<code>。
+
+&gt; <b>這一輪最該記住的</b>：第 66 輪是「我怕的事」與「壞掉的工具」給出同一個 0；
+&gt; 這一輪反過來——工具修好了，吐出一組<b>看起來像答案</b>的數字（15/15、
+&gt; 最小可讀字級＝11），而它們<b>否定</b>我事先害怕的事。舒服的方向一樣要擋。
+&gt; 擋住它的是 </code>P3<code> 沒過，加上上面那段單向推論——不是我的自覺。
+&gt; </code>hudleg67.json<code> 裡那兩個數字<b>記錄了但不認證</b>。
+
+<b>仍然沒有答案的那一題</b>（連續第二輪）：那句話在展場距離下讀不讀得到。
+下一輪要把問題換成量得到的那個：<b>墨跡列數</b>（已有 11/25/44 三點 ＝ 4/9/15 列），
+但「幾列才可能被讀」的判準<b>必須有外部來源並落盤引用</b>，不能自己挑一個剛好會過的。
+
+---
+
+<h3>1 · 人類動物園（現在的主戰場）</h3>
+
+<h4>✅ 第 99 輪：第 98 輪寫下的病因是錯的——照它去修會修一個不存在的 bug（commit </code>3d173cb<code>）</h4>
+
+<b>現在到哪</b>：第 98 輪順帶抓到「文案抽取器漏掉四成」，並把病因記成
+<b>「正則的分支順序」</b>。本輪動手前先重現，發現<b>那個診斷不成立</b>：正則的交替
+只在<b>同一個起始位置</b>比先後，單引號與反引號不可能從同一個字元開始，
+調換順序不會改變任何一個 match。真因是反引號分支的內容類別 </code><code> [^</code>\\] `<code>
+<b>不准含反斜線</b>——第一條含 </code>\n<code> 的模板配不起來，掃描指標落進模板內部，
+之後每個反引號都跟錯的另一半配對，抽出來的是模板<b>之間的程式碼</b>。
+單點錯配<b>連鎖到檔尾</b>，所以越後面的文案越抽不到。改成逐字元 tokenizer。
+
+<b>量出來的</b>：非註解中文段漏失 <b>12.5% → 0%</b>（392 段）。拆開看更清楚——
+抓到的<b>文案</b>中文 <b>2240 → 2648（+18%）</b>、誤抓進來的<b>註解</b>中文
+<b>2944 → 107（−96%）</b>。也就是說第 97 輪那個「53652 字元」的覆蓋量閘門，
+<b>讀進去的東西裡註解比文案還多</b>，該報告已加註記標為作廢（判定結論一條沒少）。
+候選 1 → 2：新的那條正是 </code>phone.js:256<code>，**第 98 輪要靠 rendered DOM 才看得到，
+現在原始碼路徑自己就看得到**——這是「修好了沒有」的外部佐證，不是 fixture 自說自話。
+
+<b>兩個探針各先錯一次，而兩次的錯都會讓結果更好看</b>：tokenizer fixture 第一次
+11/12，FAIL 那格是<b>探針斷言錯</b>（要求模板不准含自己的 </code>class=&quot;cap&quot;<code>，等於要求
+程式做錯事）；量尺第一版逐行判註解，對續行不加 </code>*<code> 的區塊註解全漏判，
+給了 legacy 一個誇大的 <b>84.7%</b> 漏失率（真值 12.5%）——那個方向剛好讓
+「我修好了」顯得更有功勞。<b>84.7% 作廢。</b>
+
+<b>兩格判準照 FAIL 記</b>（</code>Q2a<code> 修前漏失 &gt;20%、</code>Q4a<code> 字元數 &gt;53652）：都是<b>口徑寫錯</b>
+——41% 是 </code>phone.js<code> 單檔的數字被當成全範圍期望；補回文案的同時也**停止把程式碼
+當字串抽**，總字元數本來就會降。逐條寫在 </code>Vacant/runs/s7c_v1_EXTRACTOR_FIX.md<code>。
+
+<b>還差什麼</b>：</code>vacant-docs-web<code> 與 </code>Vacant/vacant/web/<code> 的<b>互動狀態還沒掃</b>
+（同一支工具可掃，零機時，執行端可自己做）。</code>phone.js:256<code>／</code>125<code> 兩句的
+<b>換詞方向仍等人類</b>。
+
+<h4>✅ 第 98 輪：觀眾最專心那一秒的文案，把「拿不到工作」整條掛在「重跑抓到」上（commit </code>4dc65ba<code>）</h4>
+
+<b>現在到哪</b>：第 97 輪自己留下的洞——DOM 那條路只涵蓋初始渲染，「互動後才拼出來
+的字」兩條路都沒看過。本輪驅動 </code>chrome-headless-shell<code> 走 <b>21 個互動狀態</b>掃完，
+找到的比預期重：
+
+</code>`<code>
+vacant_hm/world/js/phone.js:256   （渲染於 ?id=findbad&amp;flag=bad）
+  「重跑抓到了，牠的光會暗下去、一段時間拿不到工作。」
+vacant_hm/world/js/phone.js:125–126
+  「牠剛剛被抽查到交了不合格的東西……接下來一段時間，工作不會交到牠手上。」
+</code>`<code>
+
+第一條〈抓到〉與〈拿不到工作〉在<b>同一句</b>，是 S7 這條紅線最乾淨的一個例子。
+第二條同形狀但跨兩句，<b>句級掃描結構上看不到</b>，是人工讀 </code>hurt<code> 全文讀出來的。
+兩條都在觀眾的「我的居民」那一屏——他們剛按下指認、正在讀後果。
+
+<b>要人類定兩項</b>：</code>world/phone.html:35–37<code> 的記分板「被退回／被抽查／<b>被抓到</b>」
+把計分放在弱通道上（版面決定）；</code>sampler.js:90→113<code> 的同屏因果鏈
+（判定不通過 → 被扣分了）。反方向的配重<b>已經在展件裡而且很強</b>
+（</code>rp-bound<code>「它不會讓成果變好」「那個交付者早就被系統降權了」）
+——問題不是講錯，是<b>重心</b>：因果鏈用大字演，配重用小字寫。
+
+<b>這一輪最貴的是「樣本裡沒有待測物」</b>：事前登記那 16 格抓完，
+「被扣分了」「判定：不通過」<b>一次都沒進過 DOM</b>——因為
+</code>flagged<code> ＝ </code>ev.residual<code>（機器說「我檢查不了」）<b>不等於</b> </code>ev.bad<code>，
+60 格裡 6 格 flagged 全走乾淨分支。逐格試到 <b>cell[10]</b> 才是 bad。
+</code>phone.html<code> 的 </code>hurt<code> 屏同理，</code>?id=1..39<code> 一個都沒有。
+⇒ <b>不補這兩格，本輪會拿到一個乾淨的 0，而 0 正是我原本預期的答案。</b>
+
+<b>順帶抓到一個工具 bug，它回頭限制第 97 輪的結論</b>：</code>s7_claim_audit.py<code> 的
+</code>_JS_STR<code> 把 </code>&#x27;…&#x27;<code>／</code>&quot;…&quot;<code> 排在反引號分支前面，模板字面量裡的 </code>class=&quot;cap&quot;<code>
+會先配對，<b>把整段文案吃掉</b>。量化：範圍內含 ≥4 漢字的模板字面量 79 條，
+<b>抽不到 32 條 = 41%</b>。第 97 輪「原始碼 53652 字元」的覆蓋量閘門過了，
+但<b>讀進去的文案少四成</b>——字元數不等於文案覆蓋。
+
+<b>還差什麼</b>：①<b>修 </code>_JS_STR<code> 並重跑第 97 輪的掃描</b>（零機時，執行端可自己做）；
+②</code>phone.js<code> 那兩句換成什麼，<b>等人類</b>；③記分板版面，<b>等人類</b>；
+④</code>vacant-docs-web<code> 與 </code>Vacant/vacant/web/<code> 的互動狀態同一支工具可掃，還沒掃。
+<b>改了才算——本輪一個字沒改，展場並沒有因此變正確。</b>
+
+<h4>✅ 第 97 輪：右屏的三詞總結把機制的牙齒歸給了稽核——而 S6 說牙齒在評審（commit </code>41bae6c<code>）</h4>
+
+<b>現在到哪</b>：S6（第 96 輪）量到擠出作惡者的主要動力是「被評審看見」不是
+「被稽核抓到」。本輪把它當紅線掃過三個 repo 的觀眾文案，找到一條踩到的：
+
+</code>`<code>
+vacant_hm/index.html:111
+  &lt;p class=&quot;w-desc mono&quot;&gt;信譽路由　·　三層漏斗　·　抽到就扣分&lt;/p&gt;
+</code>`<code>
+
+這是右屏「有可究責層的世界」的一句話總結，<b>三個詞就是觀眾對這套機制的第一印象</b>。
+第三個詞把「產生後果」歸因給稽核抽到——<b>字面為真</b>（抽中確實會 slash），
+<b>但它把弱的那條通道講成了機制的牙齒</b>。同一頁下一屏就有正確的東西：
+「第 2 層　密封評審　·　異源三人　·　評審期間互相看不見」。
+<b>問題不是頁面缺了評審通道，是那句三詞總結挑錯了代表。</b>
+
+順帶把第 73 輪留下的缺口補了一半：</code>PROGRESS.md:1672<code> 當時寫明「vacant_hm 展件與
+Vacant 本體的措辭<b>沒量</b>」——本輪量了，而且兩個站的 rendered DOM「信任」仍是 0 次。
+
+<b>還差什麼</b>：<b>改了才算。本輪只是指出來，展場並沒有因此變正確。</b>
+換成什麼是敘事決定（規則七），三個方向與代價寫在 </code>runs/s7_v1_CLAIM_AUDIT.md<code> 第二節，
+<b>等人類</b>。另外互動後才拼出來的字（</code>sampler.js<code>／</code>phone.js<code> 那兩屏）本輪沒走 DOM 這條路，
+覆蓋度低於初始畫面——<b>第 98 輪補了，而且那裡才是踩得最重的地方</b>。
+
+<b>這一輪真正的工作量不在「掃」，在「證明探針找得到」</b>：第一次跑出來就是
+<b>0 個候選</b>，而 0 正是我希望看到的答案——壞掉的探針也回報 0，
+<b>並且同時關掉我去複查的動機</b>。兩個「看起來成功」的故障因此被逼出來：
+
+1. <b></code>file://<code> 下 ES module 被 CORS 擋掉、頁面根本沒跑，</code>--dump-dom<code> 照樣回傳 HTML。</b>
+   </code>deliveries.html<code> 的 DOM <b>351 → 7375 位元組（21 倍）</b>。照 </code>file://<code> 的結果掃，
+   會拿一份幾乎空的 DOM 得出「乾淨」。⇒ <b>這台以後任何 dump-dom 都要走 http。</b>
+2. <b>行號整體偏 4 行</b>（工具報 107、真值 111）——挖掉 </code>&lt;script&gt;<code> 時把換行也挖了。
+   報告會把人送到錯的一行，<b>而那一行看起來也像是差不多的地方，不會有人發現</b>。
+
+<b>事前登記的詞表漏了「抽到」</b>：照那份清單跑，<b>本輪唯一的發現會漏掉</b>；
+照出它的 </code>--diag<code> 也是事後加的。兩項都是放寬召回不是放寬判準，判準的數字一個字沒改。
+
+<b>附帶</b>：誠實邊界第 1 條「不准出現『信任』」在 </code>Vacant/vacant/web/<code> 觀測台 UI 有 5 處。
+算不算數取決於<b>觀測台會不會上展場螢幕</b>——範圍問題，不拍板，等人類。
+
+<h4>✅ 第 89 輪：把第 88 輪抓到的 6 條「頁面說沒做、其實做了」改掉 4 條——另外 2 條在別台機器的交接文件裡，等人類（commit </code>6f0d328<code>）</h4>
+
+<b>現在到哪</b>：第 88 輪列全 234 句、抓到 6 條 </code>STALE<code>，但<b>刻意一句沒改</b>。
+本輪改掉其中 4 條，並且先做那份稽核自己指出的前置條件：把 key 從 </code>file:line<code>
+改成內容定址 </code>file#sha8@k<code>。這兩件是同一件事——舊的 key 一被編輯就當場作廢
+（第 88 輪自己撞到兩次，覆蓋率掉到 41.5%），不先換 key，改完就驗不動。
+
+| 量 | 改之前 | 改之後 |
+|---|---|---|
+| 掃到的句子 | 234 | 239 |
+| 覆蓋率（工具驗的） | 100% | 100% |
+| 證據重跑通過 | 234 / 234 | 239 / 239 |
+| </code>STALE<code>（頁面說沒做、其實做了） | 6 | <b>2</b> |
+| </code>TRUE_GAP<code> / </code>HUMAN<code> / </code>NOT_A_GAP<code> | 16 / 4 / 208 | 19 / 5 / 213 |
+
+<b>改掉的 4 條</b>（另 2 條在 </code>Vacant/HANDOFF.md<code>，規則七邊界，等人類）
+
+1. </code>DECISION_SILHOUETTE.md<code> — 原本寫「選項 4 <b>與 5</b> 的救起對數是空的，因為沒量過」。
+   選項 5 早就量過（同頁的表：211/365，K=2.0 實測）。<b>人類要拍板的就是這一頁</b>，
+   而它對要拍板的人說那一格也是空的 ⇒ 最合理的反應就是不作答、等量測。
+2. </code>world/README.md<code> — 原本寫「沒跑過小時級（記憶體會不會漲沒測）」。括號裡那半句是假的：
+   第 81 輪量了四個計數器 3000 幀並照報 </code>jsHeap<code>。<b>「沒跑過小時級」仍為真</b>。
+3. </code>PROGRESS.md<code> — 寫死的「連續二十六輪」。改成指向 </code>STATE.md<code> 最新一輪的「卡住」，
+   <b>不是換一個新數字</b>：換數字只會讓同一句在下一輪再過期一次。
+4. </code>PROGRESS.md<code> — 「仍未量：每格同型佔比（</code>cells<code> 沒存配對清單）」，兩個半句都過期。
+
+<b>兩條這一輪才學到的</b>
+
+• <b>修好一個缺口會生出新的假陽性。</b> 更正註記要逐字引述被改掉的原句，
+  而原句裡就有標記詞 ⇒ 這一頁的密度<b>不會因為修好而下降</b>。
+  4 條改動生出 8 句新的（5 句更正註記判 </code>NOT_A_GAP<code>、2 句 </code>TRUE_GAP<code>、1 句 </code>HUMAN<code>）。
+• <b>第 88 輪那條判決自己有一處不準</b>：它說 </code>cells<code> 存了三份配對清單，
+  實測 </code>degen_pairs<code> 是<b>整數計數</b>不是清單（</code>rescued_pairs<code>／</code>rescued_clean_pairs<code>
+  才是，18 格逐格核對長度相符）。更正文字照實測寫。
+
+<b>擋住「用刪字讓稽核變綠」的三道</b>：</code>numguard.py<code>（既有數字一個都不准少，
+自驗含 </code>0.5574<code>→</code>0.5575<code> 必須 FAIL）· 剩下的 2 條 </code>STALE<code> 必須<b>還在</b> ·
+每條改動的改前／改後全文都在 </code>git diff<code> 與 </code>STATE.md<code> 裡。
+
+<h4>✅ 第 88 輪：歸檔裡「自承還沒做」的句子全掃 234 句——6 條是假的，最貴的兩條在每輪必讀的 HANDOFF.md（commit </code>ec6fd57<code>）</h4>
+
+<b>現在到哪</b>：第 86、87 兩輪各自<b>偶然</b>撞到一句「頁面寫著還沒做、其實早就做了」。
+第 87 輪那一句卡住人類 27 輪。兩次都是撞到的，不是找出來的 ⇒ 這一族缺陷沒有清單。
+本輪不再找第三個個案，是把這一族列全：</code>styles/probe/gapaudit.py<code> 掃固定檔案集
+（9 份 </code>.md<code> ＋ </code>PROGRESS.md<code> ＋ </code>Vacant/HANDOFF.md<code> ＋ 全部 probe </code>.py<code> 的模組
+docstring），逐句判、逐條附證據並<b>重跑證據</b>。產物 </code>GAP_AUDIT.md<code> 一句一行。
+
+| 量 | 值 |
+|---|---|
+| 掃到的句子 | <b>234</b> |
+| 覆蓋率（工具驗的） | <b>100%</b> |
+| 證據重跑通過 | <b>234 / 234</b> |
+| 逐句手判 / 規則判 | <b>121 / 113</b> |
+| <b>STALE</b>（頁面說沒做、其實做了） | <b>6</b> |
+| TRUE_GAP（真的沒做） | 16 |
+| HUMAN（等人類） | 4 |
+| NOT_A_GAP（正則誤中） | 208 |
+
+<b>6 條 STALE，逐條可查</b>（每條在 </code>GAP_AUDIT.md<code> 都有正證據 </code>file:line<code>）：
+
+| 在哪 | 說了什麼 | 證據 |
+|---|---|---|
+| </code>Vacant/HANDOFF.md:43<code> | 「六種風格提案…<b>等人類選一個</b>」 | </code>PROGRESS.md:1181<code>：2026-08-15 已選定黏土定格 |
+| </code>Vacant/HANDOFF.md:42<code> | 「未跑：…<b>B 層六情境驗收</b>…」 | </code>PROGRESS.md:2012<code>：B 層六情境 ✅（commit </code>0fb0b57<code>）|
+| </code>DECISION_SILHOUETTE.md:322<code> | 「選項 4 與 5 的救起對數是空的，因為<b>沒量過</b>」 | 同頁 </code>:48<code>：選項 5 ＝ <b>211/365（K=2.0 實測）</b> |
+| </code>world/README.md:614<code> | 「記憶體會不會漲<b>沒測</b>」 | </code>SOAK_FINDINGS.md:97<code>：第 81 輪量過（前半句「沒跑過小時級」仍為真）|
+| </code>PROGRESS.md:2217<code> | 「連續<b>二十六</b>輪等人類」 | </code>STATE.md<code>：第 87 輪已是「連續第二十八輪」 |
+| </code>PROGRESS.md:2530<code> | 「仍未量：每格同型佔比…</code>cells<code> 沒存配對清單」 | </code>DECISION_SILHOUETTE.md:318<code>：第 61 輪已補上 |
+
+<b>這一輪真正的發現不是 6 這個數字，是它們長在哪</b>：</code>Vacant/HANDOFF.md<code> 只有 4 句
+被掃到，其中 <b>2 句過期（50%，全檔案最高密度）</b>——而它是**開場清單第 2 項，
+每一輪都會被讀**。</code>PROGRESS.md<code> 146 句只有 2 句過期（1.4%）。
+⇒ <b>staleness 的成本 ＝ 錯誤程度 × 被讀的次數</b>，而前 87 輪的稽核只看前者。
+最短、最常被讀的那份文件，從來沒有人查過。
+<b>執行端本輪開場就被 </code>HANDOFF.md:43<code> 誤導了一次</b>（以為視覺風格還沒選定）。
+
+<b>工具的重點是它會說「不過」</b>：自驗 T1–T6 先答已知答案（T4/T5/T6 專測檢查器會不會
+拒絕）；另外在<b>真資料</b>上做了變異測試——把一條真 STALE 的證據行號 +1，整支 FAIL
+且 </code>exit 1<code>。負證據第一版寫錯過一次：拿主題詞 grep 去證「沒做過人眼量測」，命中的
+是 </code>ss_opts.py:357<code>「<b>不是</b>觀眾實測」——<b>宣告缺口的那句話本身</b>。
+⇒ 負證據必須是<b>做了才會存在的簽名</b>，不是這件事被談論時會出現的詞。
+
+<b>⚠ 自指</b>：第一次跑完是 <b>220</b> 句；把這一則紀錄寫進本檔之後重跑變 <b>234</b>
+（+14 全部來自這一則自己，落在日誌區）。<b>這份稽核的報告本身會增加它所稽核的語料。</b>
+
+<b>還差什麼</b>：(a) 本輪<b>一句原文都沒改</b>（改字是下一輪的事，一次改一批會讓「改了
+什麼」不可查）；(b) 標記表會漏——</code>HANDOFF.md:97<code>「視覺風格（<b>六選一</b>）」也已作廢，
+但那一行<b>一個標記詞都沒有</b>，是人手撞到的 ⇒ <b>234 不是上界</b>；(c) 113 句（本檔日誌區）
+是<b>規則判</b>的，沒有逐句查證，</code>GAP_AUDIT.md<code> 逐條標了 </code>[規則判]<code>；
+(d) 事前六格押注<b>中 1 錯 5</b>，其中 NOT_A_GAP 佔比 88.9% <b>超過事前寫死的 70% 紅旗</b>
+⇒ 照規定報告紅旗已觸發，那一類該被抽查，不解釋掉。
+
+
+<h4>✅ 第 87 輪：那一頁自己寫著「展場距離還沒量」——查證是假的，而它可能就是卡了 27 輪的原因（commit </code>91db113<code> ＋ </code>f95b394<code>）</h4>
+
+<b>現在到哪</b>：</code>DECISION_SILHOUETTE.md<code>（五選一，人類未作答第 27 輪）末段
+「這一頁沒有回答什麼」第 1 條原本寫著「縮到 640px 的實拍對照還沒做」。
+查證：</code>stagevis.py:44<code> 是 </code>W, H = 640, 360  # 展場距離：1920×1080 的 1/3<code>，
+那一頁四份上游歸檔的 </code>W,H<code> <b>全部是 640,360</b>、讀的檔全部是 </code>sl_f*_640.png<code>
+⇒ <b>那一頁每一個數字本來就是在展場距離量的</b>。那半句已刪。
+
+這件事的形狀值得記住：<b>「沒量過」與「量過但頁面說沒量」，在歸檔裡長得一模一樣</b>，
+而後者會讓看的人合理地決定「等那個量測再說」。第 86 輪是「限定詞被讀成結果」，
+這一輪是反向的同一個病。
+
+<b>新的一欄：距離要價多少</b>（</code>ssdist.py<code>，同一把尺在 1920 重跑，零渲染）
+
+| | 640（展場距離） | 1920（貼臉看） |
+|---|---|---|
+| 遮罩面積 px 中位 | 85.5 | 693.5 |
+| bbox 高 px 中位 | 13.5 | 40.5 |
+| IOU_SPEC（桿子） | 0.5574 | 0.5279 |
+| 難分對數 / 946 | <b>365</b> | <b>364</b> |
+
+看起來距離不要錢——<b>是假的</b>。這把尺的桿子自己跟著解析度移動。桿子釘住再問：
+1920 的 IoU 用 640 的桿子判 ⇒ <b>310</b>/946（不是 364）；
+640 的 IoU 用 1920 的桿子判 ⇒ <b>442</b>/946（不是 365）。
+⇒ <b>距離要價 55–78 對</b>，而「365」是相對於同一解析度的數字，不是距離無關的事實。
+Spearman ρ ＝ 0.9592 ⇒ 動的是桿子與絕對值，配對的<b>排序</b>幾乎不受距離影響。
+
+<b>那 47 對硬核在 1920 仍然 47/47 難分</b> ⇒ 它是幾何，不是低解析度的量化雜訊。
+順帶擺上桌一件那一頁沒寫的事：展場距離下一個居民只有 <b>13.5 px 高、85.5 px 面積</b>
+（中位）。那 47 對硬核是在這麼大的色塊上量出來的。
+
+<b>還差什麼</b>：仍然沒有人量過「<b>觀眾</b>分不分得出來」——那要真人，本輪一樣沒有，
+第 1 條的<b>前半句</b>留著。五選一仍然等人類（第 27 輪）。
+
+<b>這一輪押錯三格，照報</b>：押「距離會吃掉一大塊」（1920 難分 250–340、翻面 ≥40、
+面積比 9–13），實際是 364、34、8.038。<b>我押的方向整個錯了</b>，而「幾乎沒動」
+正是我事前寫下最怕的那個乾淨結論——擋住它的是 </code>T2<code>（面積比必須 ≥5，
+~1.0 就是我兩次讀到同一張圖）與 </code>T3<code>（尺寸從 IHDR 讀），不是任何一個主數字。
+
+<h4>✅ 第 86 輪：「整檔 sha256 的比較不在盤點範圍內」——那句限定詞被當成結果讀了兩輪（commit </code>b09ba58<code> ＋ </code>6dcfd91<code>）</h4>
+
+第 84 輪的盤點器在自己的 docstring 裡把邊界寫清楚：**只掃 </code>diff_mask<code>，
+整檔 sha256 那一族不在內**，並點名了兩個站點。那半句是誠實的。
+被後面兩輪讀成「所以大概就那兩個」的另外半句，<b>從來沒有人查過</b>。
+
+數出來：<b>38 個站點、10 支檔案</b>（不是 2 支），比 PNG 的 16 個，
+承重（pass/fail 會被讀成結論）<b>5 行</b>，其中比 PNG 的 2 行。
+
+<b>兩件會改變我們相信什麼的事：</b>
+
+1. <b></code>A2_optin<code> 的「沒過」100% 是畫面上那個 fps 讀數。</b>
+   整檔 sha256 相同 15/49（就是落盤且判 FAIL 的那個數）；挖掉 HUD 之後
+   逐位元相同 <b>49/49</b>。判準與門檻<b>一個字沒改、照樣照報沒過</b>，但它沒過的
+   理由現在知道了——那 34 張的差異一個像素都不在場景裡。
+   ⇒ </code>DECISION_SILHOUETTE.md<code>（人類正卡著的那一頁）的出處保證<b>變強</b>。
+
+2. <b>第 67 輪的證據 </code>.png<code> 從沒進 repo</b>（撞到的，不是想到的）。
+   </code>hudleg.py:180<code> 是一個從來沒被盤點過的承重 PNG-sha 判準；它<b>不是</b>污染
+   （比的是純文字頁，rAF／Date／fps／random 全 0），但拿 repo 裡那 48 張重算，
+   逐格 match 第 66 輪、對不上第 67 輪。詳見上面第 67 輪那段的更正框。
+   **</code>.json<code> 進了 repo、它算所依據的 </code>.png<code> 沒進——這一對在歸檔裡跟「都進了」
+   長得一模一樣。**
+
+<b>事前押的七格中四錯三</b>（押注一個字沒改，錯的照報）。押錯的 </code>P4<code>
+（「承重 PNG-sha 恰好 1 個」，實際 2 行）<b>反而是這一輪的引信</b>：正因為多出
+一行，</code>hudleg.py:180<code> 才被逼著看一眼，第 2 條才會被撞到。
+
+<b>還抓到自己寫了一個會自我餵飽的判準</b>：</code>P6<code>「沒寫理由的站點數」由執行端
+手寫的分類表決定 ⇒ 只要一直往表裡加東西它就會過。它報 0 <b>不算證據</b>。
+⇒ 新的一條：<b>寫判準時要先問「這一格我能不能自己讓它過」。</b>
+
+<b>工具自己在兩次跑之間被抓到兩個假陽性</b>（站點 42 → 38），第二個
+（巢狀 </code>def<code> 讓 </code>sys.exit(main())<code> 被算成站點）<b>剛好就在本輪最重要的那個檔案裡</b>。
+
+<b>收尾時還自己撞到一次自指</b>（</code>6dcfd91<code>）：改 </code>hudaudit.py<code> 的 docstring 指回新工具，
+就把被分類的那一行從 318 推到 324，剛落盤的分類表當場過期。跟第 85 輪的
+</code>A8_scope<code> 同形——<b>稽核工具的產物與它稽核的對象在同一棵樹裡</b>。
+這次壞的方向是「變成未分類」（吵的），不是「靜靜指到別行」（安靜的）；
+<b>是運氣好在方向，不是設計對。</b>
+
+<h4>✅ 第 85 輪：承重判準修完<b>沒翻</b>，但它過關的理由整個換掉了（commit </code>10f85c5<code>）</h4>
+
+第 84 輪靜態盤點點名 </code>sa_arch.py<code> 兩處 </code>diff_mask<code> 沒挖 HUD，於是
+</code>max<code>／</code>med<code>／</code>sum<code>／「噪底」四個數字全都在量畫面上那個活的 fps 讀數——
+而<b>承重</b>判準 </code>A2p_vs_control<code> 比的正是 </code>max<code>。這一輪修掉並重跑
+（<b>零重渲、零機時</b>，四批 PNG 就是原來那批，整支 18 秒）。
+
+| 量 | 不挖 HUD（＝已落盤的舊值） | 挖掉 HUD | HUD 佔比 |
+|---|---|---|---|
+| </code>sl_×sb_<code> max / med / 總和 | 38 / 7 / 390 | <b>0 / 0 / 0</b> | 100% |
+| </code>sl_×sc_<code> max / med / 總和 | 38 / 5 / 328 | <b>0 / 0 / 0</b> | 100% |
+| </code>sb_×sc_<code> max / med / 總和 | 38 / 7 / 323 | <b>0 / 0 / 0</b> | 100% |
+| 噪底 </code>base<code> vs </code>base2<code>（四批） | 12 / 8 / 11 / 0 | <b>0 / 0 / 0 / 0</b> | 100% |
+
+⇒ 那四個數字 <b>100% 是 HUD</b>，一個像素都不是場景。事前押的七格全中，
+包含兩格<b>從沒量過</b>的（</code>sl_×sc_<code>、</code>sb_×sc_<code> 挖後為 0）。
+
+<b>這一輪最該記住的形狀：綠燈不會告訴你它是被什麼點亮的。</b>
+</code>A2p_vs_control<code> 修前修後都 PASS，所以從「過了沒」完全看不出發生了什麼事：
+
+• 修<b>之前</b>：</code>38 &lt;= 38<code> ⇒ 過。比的是<b>兩個 fps 計數器的位數</b>。
+• 修<b>之後</b>：</code>0 &lt;= 0<code> ⇒ 過。比的是**三棵樹（歸檔／我的樹／改動還原的對照樹）
+  在 HUD 以外逐位元相同**。
+
+判準的字一個沒改，內容從幾乎是空的變成很硬。
+⇒ <b>「這一格過了」本身不是資訊，要問它是靠什麼過的。</b>
+
+<b>事前最怕的事，以及擋住它的東西</b>：本輪押的主數字是 <b>0</b>，而「0」正是
+遮罩把整張圖吃掉、或比對器瞎了會給的答案——它會同時關掉複查的動機。
+擋住它的不是主數字，是 </code>T1<code>：HUD <b>之外</b>一個已知恰好 12 px 的方塊，
+挖完仍要讀到 12（實測 12→12）；</code>T2<code> 是 HUD <b>之內</b>同樣 12 px 要被挖成 0
+（實測 12→0）。另加 </code>T6<code>（<b>凍結判準之後才加、方向只會更嚴</b>）：不挖的重算值
+必須逐字接回舊值，否則「修好之後變 0」可能只是換了一把尺。
+
+<b>影響範圍</b>：</code>sa_arch.json<code> 570 個葉節點只有 <b>14 個</b>動，12 個在
+</code>reproducibility<code>，另 2 個是顯示字串與計數註記。<b>配對表與 A5/A6 一個數字沒動</b>
+（難分 365、候選 154、同型救起 0、異型救起 5）——因為取剪影那一段本來就挖了 HUD。
+</code>ast<code> 重新盤點：沒帶 </code>hud=<code> 的呼叫點 <b>4 → 2</b>，剩下兩格是檔案裡寫了理由的刻意例外。
+
+<b>順帶抓到（撞到的，不是想到的）</b>：</code>A8_scope<code> 這個範圍稽核**把自己的產物
+算進了它稽核的範圍**——</code>sa_arch.py<code> 沒辦法在同一次 run 裡既重生成 </code>sa_arch.json<code>
+又讓 </code>A8_scope<code> 過（寫檔本身就把樹弄髒了）。它只在 <b>commit 與 commit 之間</b>收斂。
+<b>本輪不改它</b>：加一行白名單看起來明顯是對的，但那是<b>看過資料之後動承重判準</b>，
+跟移動球門同一個形狀。記成下一輪的工作單。
+
+<b>也更正了上一輪自己的一個估計</b>：第 84 輪寫「要重跑整批，而那要機時」——
+四份 </code>.sha<code> 其實全在、單次差分 0.05 秒。<b>成本估計錯了，代價跟量錯數字一樣大</b>：
+它讓一件 18 秒的事白擱了一輪。
+
+<h4>✅ 第 84 輪：第 83 輪查到病灶，這一輪量了後果——</code>A2_optin<code> 挖掉 HUD 之後 49/49 差 0 px（commit </code>4fdba15<code>）</h4>
+
+第 65 輪把「逐位元相同」判成<b>在構造上就達不到</b>，並把這句話寫進了
+</code>sa_arch.py<code> 的碼裡。第 83 輪查明病灶是 HUD 上那個活的 fps 讀數。
+這一輪量後果，<b>零機時、不重渲</b>，只讀已歸檔的位元組（</code>sl_<code> 49 張 × </code>sb_<code> 49 張）：
+
+| # | 量什麼 | 事前預測 → 實測 |
+|---|---|---|
+| </code>M1<code> | 不挖 HUD、整檔 sha256 相同 | 15 → <b>15</b>／49　對 |
+| </code>M2<code> | <b>挖掉 HUD 4 列之後差 0 px</b> | 49 → <b>49</b>／49　對 |
+| </code>M3<code> | 有差異的<b>列</b> ⊆ HUD 列 | 49 → <b>49</b>／49　對 |
+| </code>M4<code> | 不挖 HUD 的最大差異像素 | 1–200 → <b>38</b>　對 |
+
+四條全中。</code>M1<code>＝15 逐字接回第 65 輪報的數字 ⇒ 磁碟上這批位元組確實是當年那一批。
+⇒ <b></code>A2_optin<code> 不是達不到，是被一個診斷用的讀數擋住的。</b> 這對人類正要拍板的
+</code>DECISION_SILHOUETTE.md<code> 有份量：那 148 條數字的出處保證靠的就是
+「同一棵樹渲兩批一不一致」，而它現在從「本來就達不到」回到「達得到、也達到了」。
+
+<b>⚠ 但凍結的閘門先沒過一格，而那一格比主數字值得記。</b>
+</code>H2<code>（</code>sl_base<code> vs </code>sl_world<code> 挖 HUD 後 &gt; 10000）實測 <b>386</b>。沒翻的原因**不是
+比對器壞了，是我的計畫寫錯了前提**：</code>sl_<code> 不是「完整場景的基線」，它是
+</code>hide=shell,furn,fig*<code> 的<b>獨自一人批</b>——非背景像素只有 <b>0.5%</b>、
+單人剪影 <b>36–157 px</b>；同一格在真正的全景批 </code>ss_<code> 上是 <b>46192</b>。
+我是照著 </code>sa_arch.py:53<code> 那句只寫「基線那 49 張」的註解寫判準的。
+
+&gt; ⇒ <b>一句不完整的註解，下一輪就會長出一個錯的判準。</b>
+&gt; 這是 HANDOFF §8「兩份實作會漂」的孿生：
+&gt; <b>一份知識只長在一份實作上，讀註解的人就會自己重新發明一個錯的前提。</b>
+&gt; <b>連兩輪撞到同一族</b>——第 83 輪是 </code>silscene.sh<code> 沒有 </code>stagevis<code> 那份 HUD 知識，
+&gt; 於是重新發明了「渲染器不決定性」；第 84 輪是註解缺一個限定詞。
+
+處理照第 43 輪先例，<b>沒有事後放寬</b>：</code>H2<code> 門檻與原文一個字不改、照報沒過；
+另立 </code>H2b_visible<code>，刻意<b>不含任何挑選常數</b>（44/44 都看得見一個人）。
+主數字因此標成 </code>VERDICT_TOOL_B<code>，並在交付物第 1 條誠實邊界寫明
+<b>它的保證比「事前全部翻掉」弱一級</b>。
+
+<b>擋住錯誤結論的是 </code>H3<code>／</code>H4<code>，不是 </code>H2<code>。</b> 我押的答案是「挖掉之後 0」，
+而「0」也正是「比對器瞎了」會給的答案。</code>H3<code>＝HUD <b>之外</b>一個已知<b>恰好 12 px</b>
+的方塊要讀到 12（證明這把尺解析得到 fps 假象那個數量級）、</code>H4<code>＝同一個方塊放進
+HUD 列要被挖成 0（證明遮罩挖對地方）。兩格都翻了 ⇒ 這次是<b>假說對、尺也對</b>，
+與第 83 輪（尺對、假說錯）分開記。
+
+<b>順帶盤點（靜態、未重量）</b>：</code>diff_mask<code> 的 <b>35</b> 個真實呼叫點裡 <b>4</b> 個沒帶
+</code>hud=<code>——2 個是真的污染且都在 </code>sa_arch.py<code>（</code>dist()<code> 的 </code>max<code> 正是承重判準
+</code>A2p_vs_control<code> 比的那個數；</code>noise<code> 那格就是第 65 輪錯解釋的出處），
+另 2 個是 </code>stagevis<code> 刻意保留的原始差異診斷、檔案裡逐字寫了理由。
+
+<b>兩個量具坑（撞到的不是想到的，都留在碼裡）</b>
+1. 盤點第一版用 <b>regex</b>，把 </code>ss_src.py<code> docstring 裡<b>引用的一行文字</b>報成
+   呼叫點。改用 </code>ast<code> 後從 37/5 變成 35/4。假陽性在工作單上會讓人去改一段不存在的碼。
+2. md 的分類表第一版用 <b></code>(檔名, 行號)<code> 當 key</b>。我在 </code>sa_arch.py<code> 加了幾行註解，
+   136/162 就漂成 156/162，兩格當場掉進「未分類」。⇒ 改用<b>呼叫那行的變數名</b>當 key。
+
+交付物 </code>styles/probe/HUD_AUDIT.md<code>（數字從 JSON 插入，不手打）。
+重跑：</code>bash styles/probe/hudaudit.sh<code>（零機時，可隨時對帳）。
+</code>sa_arch.py<code> 只加更正註解與缺失的限定詞，<b>判準／門檻／邏輯一個字沒改</b>；
+</code>world/<code> 零修改。
+
+<b>還差什麼</b>：</code>sa_arch.py<code> 那兩格真的污染要修，但修了會動到承重判準
+</code>A2p_vs_control<code> 的值 ⇒ 要重跑整支，而它需要 </code>/tmp/b65/*.sha<code>（已不存在）
+與四批 PNG。<b>先盤點重跑成本再動。</b>
+
+<h4>✅ 第 83 輪：第 65 輪那句「這台機器的渲染不是逐位元決定性的」是錯的，該撤回（commit </code>4b83b4e<code> ＋ 更正 </code>845b561<code>）</h4>
+
+第 65 輪量到「同一次 run、同一個 URL、同一個 </code>freeze=20<code>，</code>ss_base<code> 與
+</code>ss_base2<code> 差 8–12 px」，結論寫成 <b>「這台機器的渲染不是逐位元決定性的」</b>，
+並據此（一）把 </code>A2_optin<code>（49 張逐位元相同）判成「判準本身從一開始就達不到」，
+（二）<b>回頭對第 62／63 輪投下懷疑</b>（「那兩輪剛好讀到 0 px，是那幾批的性質，
+不是這台機器的性質」）。
+
+<b>兩條都不成立，而且方向剛好相反。</b> 差異像素<b>全部</b>是 HUD 上那個活的
+fps 讀數：兩種擷取機制、30 個配對，差異落在 </code>(1282,17)-(1326,26)<code> ＝
+45×10 px（佔畫面 <b>0.0217%</b>）；<b>挖掉 HUD 那 40 列之後，30 個配對剩 0 個像素在動。</b>
+</code>K5<code> 用 </code>Range.getBoundingClientRect<code> 把座標換成字元——命中的是
+</code>1 0 ␠ f p s<code>，也就是 </code>main.js<code> 那行 HUD 的最後一段 </code>繪製 ${fps} fps<code>。
+HUD 上其他每個數字都是 </code>t<code> 的純函數，</code>freeze=20<code> 之下逐次相同；<b>只有 fps 是量出來的</b>。
+
+⚠ <b>這個病灶不是第 83 輪發現的</b>——第 16、33／34、43、<b>62</b> 輪都寫下過，
+第 62 輪甚至已經量過同一件事（挖掉 HUD 四列之後 <b>49/49 全部 0 px</b>）。
+本輪新的是三件：（1）第 62 輪量的是 640px 批次，本輪在 <b>1920×1080</b> 上同樣結果；
+（2）<b>第二種、獨立的擷取機制</b>（CDP ＋ 真實 wall-clock 等待）也一樣，
+而且差異<b>更大</b>（213 vs 45 px）、全部仍在 HUD 裡 ⇒ 「渲染器不決定性」與
+「拍在畫格中間」<b>兩個解釋都被排除</b>；（3）字元級指認取代像素座標指認。
+
+⇒ <b></code>A2_optin<code> 不是達不到</b>，是被一個診斷用的讀數擋住的；
+<b>第 65 輪加在第 62／63 輪身上的警語應該撤掉。</b>
+這對人類正要拍板的那一頁有份量：</code>DECISION_SILHOUETTE.md<code> 那 **148 條數字的
+出處保證，正是第 62 輪用「重渲染逐位元比」做的**。
+
+<b>這一輪押錯了，而擋住錯誤結論的是事前寫死的已知答案。</b> 五條預測<b>三條錯</b>，
+包括我押的那一條（</code>M3<code>：CDP 拍出來會逐位元全同 → 實測 6 張裡 3 個相異 sha）。
+停在那裡的結論會是「渲染器也在抖」，<b>那也是錯的</b>。救回來的是先問
+<b>差異在哪</b>、再問<b>差異是什麼</b>。尺的五側已知答案裡最關鍵的是 </code>W6b<code>：
+fixture 的 4×4 scissor ＝ 已知 16 px 的差異，<b>就在 8–12 px 這個數量級上</b>
+⇒ 證明比對鏈解析得到那個尺度。沒有它，「全同」可以只是比對器瞎了，
+而「全同」正是我押的答案，也就是我最沒有動機複查的方向。
+
+<b>量具坑（留在碼裡）</b>：</code>K4<code> 連載 4 次讀 HUD 字串<b>全同</b>（fps 都是 11），
+看起來像在打臉 fps 假說；但 </code>K5<code> 那一趟讀到的是 </code>1 0<code>（fps=10）。
+⇒ 欄位確實會變，</code>K4<code> 的 N=4 不足以抓到。<b>不准把「K4 沒抓到」寫成「fps 是穩定的」。</b>
+
+<b>交付物</b>：</code>vacant_hm/styles/probe/GL_FINDINGS.md<code>（由 </code>glnoise_md.py<code> 從
+</code>glnoise.json<code>＋</code>glnoise_k.json<code> 產生，數字不手打）。
+入口：</code>bash styles/probe/glnoise.sh<code> → </code>bash styles/probe/glnoise_k.sh<code>。
+</code>cdp.py<code> 是 </code>vacant-docs-web/probe/cdp.py<code> 的逐位元組複本，sha256 由 </code>W4<code> 釘死。
+<b></code>world/<code> 零修改、既有量測腳本零修改</b>；移除或凍結 HUD 的 fps 讀數是**畫面上的
+決定**（規則七），不自己拍板。
+
+<h4>✅ 第 81 輪：無人值守長跑第一次被量——四個計數器 3000 幀不動（commit </code>3f67e06<code>）</h4>
+
+<b>展場是無人值守的，而這種失效在任何單幀截圖裡都不會出現。</b> 黏土場景量過
+剪影、色盤、遮擋、判決、四段可見性，「跑久了會怎樣」一次都沒量過；
+</code>world/DEPLOY.md<code> 那節實機效能量的是<b>舊世界</b>（</code>?day=30<code>，466 隻），不是這一支。
+
+</code>clay.html<code> 跑 <b>600 幀（45.9 秒）與 3000 幀（230 秒）</b>，
+</code>geometries<code>／</code>textures<code>／</code>programs<code>／</code>meshes<code> 四個計數器 <b>Δ 全 0</b>
+（450／2／4／566）。同趟旁證顯示世界確實在動（</code>courierShown 14→17<code>、
+</code>onTable 12→9<code>、模擬時鐘 230 秒），不是畫面凍住所以什麼都不長。
+
+⚠ <b>只能讀成「這兩個窗內沒有量到成長」，不等於「不會漏」</b>——檢定力聲明是
+跑之前寫死的。展期是八小時，窗長只有 230 秒。
+
+<b>事前預測先被自己的 pilot 打翻一次</b>：押 Δ=0，60 幀那趟量到 <b>+79</b>。
+攤開三段曲線才看得出那是<b>暖機</b>不是洩漏——
+</code>60 幀 297→333→376<code>（還在爬）、</code>600 幀起一路平在 450<code>。
+⚠ 事中登記的斜率規則在成長全 0 時<b>退化</b>（兩條同時成立），照實記「規則沒用上」。
+
+<b>量具兩側都翻了才採信</b>：洩漏側（每幀 new BoxGeometry 不 dispose）+500、
+乾淨側 0/0。只驗乾淨那一側不夠——一個永遠回報 0 的壞取樣器會通過，
+而 0 正好是事前押的答案。
+
+<b>還差什麼</b>：
+• <b>「夠不夠快」沒有答案</b>，那是無人值守的另一半。要在展場那台（RTX 3090）
+  跑同一支腳本；</code>DEPLOY.md<code> 已寫明現在那台顯存被 llama-server／VMware 佔著。
+  <b>機時／人類事項，不是程式問題。</b>
+• 更硬的窗：</code>FRAMES=50000<code> 過夜跑一趟，同一支腳本只改一個環境變數，零額外程式。
+
+<b>順帶量到三個量具事實</b>（下一輪任何用 headless chrome 的量測都會踩到）：
+① </code>--virtual-time-budget<code> 底下，<b>沒有重計時器的頁面一幀 rAF 都不會被服務</b>
+（</code>reachedFrame: 0<code>，同趟 </code>setInterval<code> 跑了 600 次）。
+② 拿掉虛擬時間之後 </code>--dump-dom<code> 會在載完當下就走 ⇒ 改成頁面 POST 回本機收件口。
+③ </code>posePerSecWall<code> 在 </code>perfSec=0<code> 時是 Infinity，</code>JSON.stringify<code> 寫成 </code>null<code>
+⇒ <b>那一欄的型別會跳</b>，跑四次沒抽到。
+
+
+**狀態：黏土定格視覺施工中。交付狀態機四段（</code>carrying<code>／</code>review<code>／</code>audit<code>／
+結局）現在全部在畫面上，判決是機制那一份算的，**每一次換檯面都是看得到的
+過程**（audit 的抽走、以及判決之後送去歸檔架／退回台），而紙一旦放下就
+不再移動。**
+
+✅ <b>第 63 輪起，交付狀態機那一組數字的出處是量過的</b>（不是講道理的）：
+兩批各 6 張用 HEAD 這棵樹重渲染逐位元比，</code>T<code> 沒動、挖掉 HUD 後 0 px。
+細節見最上面第 63 輪那一段。
+
+⚠ <b>「剪影站住了」這句在第 43 輪被切成兩半，要分開讀</b>：在展場距離
+（640px 寬）的<b>全景</b>裡真的判過了——<b>剪影的「差異」站住了</b>（同層比值
+2.0–3.2、世界身高與畫面高的等級相關 0.52–0.99，N2／N3 過），
+但<b>絕對尺寸沒站住</b>（N4 ✗：畫面 bbox 高中位數 13.5 px＜門檻 15、
+最小 3 px＜門檻 8）。<b>觀眾分得出誰是誰的前提是先看得到人。</b>
+怎麼修是視覺風格方向 ⇒ 規則七，等人類（見最下面「卡住」段）。
+
+⚠ <b>第 47 輪把 N4 拆成兩個獨立的問題，兩個的答案相反</b>（三個 fov 各 49 張
+真的截出來量的，不是算的）：<b>中位數是尺度問題，縮 fov 就修得好</b>
+（30.769° 量到 15.0、27.694° 量到 16.5，與投影幾何算的差 0.0／0.24 px，
+建築一個角都沒被裁）；<b>最小值是遮擋問題，縮 fov 修不好</b>——3 → 2 → 2，
+放大之後反而更小，而且全場最小的一直是同一個人 </code>f1r9<code>（世界身高 <b>1.81</b>，
+全場最高那一群，被樓板切成 2–4 塊，只剩 2 px）。
+⇒ 要人類決定的不再是「fov 要不要縮」，是「一個 1.81 的人只剩 2 px 該接受，
+還是要動遮擋」。
+
+⚠ <b>第 48 輪去找「是誰在擋」，把兩個最像的嫌犯都排除了——選項從四個砍到兩個。</b>
+兩支新探針把切口從像素講成世界座標（</code>ss_cut.py<code> 世界 y／</code>ss_cutx.py<code> 世界 x），
+零渲染成本，用第 47 輪已落盤的三個 fov 各 49 張。<b>兩條跑之前寫死的預測都錯：</b>
+• <b>不是樓板。</b> 只有第 3 層的樓板前緣擋得到（純幾何算的掠射線 y=11.705，
+  擋掉腳上方 0.135 個世界單位），第 0–2 層相機在樓板上方，<b>擋不到</b>。
+  8 個列空隙有 6 個確實跨到那條線——但那 6 個全在第 3 層，其餘樓層的切口
+  樓板一個都解釋不了。順帶更正上面第 47 輪那句「</code>f1r9<code> 被<b>樓板</b>切成 2–4 塊」：
+  </code>f1r9<code> 在<b>第 1 層</b>，樓板對它不適用，它那兩個切口不是樓板造成的。
+• <b>不是樓梯。</b> 原始碼裡最像的嫌犯（</code>STAIR_X=[roomX(3),roomX(9)]<code>、</code>STAIR_RUN=2.1<code>、
+  站在 </code>CORRIDOR_Z=2.55<code> ＝ 居民前面）：r3/r9 那 8 人有切口比例 <b>1/8 = 0.12</b>，
+  其他 11 欄 <b>4/36 = 0.11</b>——<b>沒有富集</b>。7 個欄空隙只有 1 個落在樓梯範圍內。
+
+量到的是 <b>0.12–0.75 個世界單位的碎邊</b>，散在 r0–r3；</code>hide=shell,furn<code> 那組
+15/15 個切口全部消失 ⇒ 建築／家具，不是人擋人（此條偏差方向對它有利，弱證據）。
+⇒ <b>N4_min 目前沒有單一參數的解。</b> 剩下的選項只有兩類，都是規則七：
+(a) 改 N4_min 這條門檻本身（接受少數人在展場距離只剩 2–3 px）；
+(b) 把居民站位往前挪（</code>CELL_Z<code> 0.75 → 靠近 </code>CORRIDOR_Z<code>），一次減少所有前方碎邊。
+(b) 可以先用純投影幾何<b>算</b>出效果，不必動 render 也不必截圖。
+
+⚠ <b>第 48 輪同時記下自己的兩個限制</b>（免得下一輪把它讀成已解決）：
+兩支探針事先寫死的閘門<b>沒有全過</b>（</code>R1_srcman<code>：</code>ss_<code> 那組的來源 manifest
+落後兩輪；</code>A3<code>：y 軸的反向已知答案不夠力，量出這把尺只能把深度框到 <b>±6</b>；
+</code>A4/A5/B4/B5<code>：三格配對只有 6 與 4，少於事先寫的 8）⇒ **上面每一個數字都是
+「照報」，不是「判定通過」。** 另外，44 人裡 </code>nComp&gt;1<code> 有 21 個，而列空隙只抓到
+7 人、欄空隙 5 人 ⇒ <b>多數碎裂既不是乾淨的橫帶也不是乾淨的直帶</b>，
+現有兩把尺對它們仍是瞎的。
+
+⚠ <b>第 51 輪換了問題：八輪都在量「看不看得見」，沒人量過「彼此分不分得出來」。</b>
+第 43–50 輪連續八輪量的是<b>遮擋</b>（一個居民剩幾 px），而優先序第一順位寫的是
+<b>剪影差異</b>。兩件事不一樣：44 個人都清楚可見、但長得一模一樣，展場一樣是失敗的。
+零渲染（用第 44 輪落盤、第 49 輪已驗過是純本體的 </code>sl_<code> 那批）。
+
+<b>讓規格自己定門檻，不要挑</b>：把「身高差 1.6 倍」翻譯成尺上的一個數
+（腳底對齊放大 1.6 倍後的 IoU，44 人取中位 ⇒ <b>IOU_SPEC = 0.3237</b>）。
+比它高的配對，就是<b>比規格下限還難分</b>。
+
+<b>結果（E/Q 類全過的第一、第三階段才算數）</b>：
+
+| 量到的 | 值 |
+|---|---|
+| </code>worldH<code> max/min | <b>2.419</b>（規格要 1.6 ⇒ <b>早就超標</b>；跑之前預測「沒達標」，<b>預測錯了</b>） |
+| 946 對 IoU 中位 | <b>0.516</b> &gt; IOU_SPEC <b>0.3237</b> |
+| 比「身高差 1.6 倍」還難分的配對 | <b>818/946 ＝ 86.5%</b> |
+| 最難分的一對 | </code>f0r10<code> × </code>f2r8<code>　IoU=<b>0.9556</b>（兩個都 stand，不同層） |
+| 同層相鄰（觀眾最容易並排比較） | 40 對裡 <b>37 對</b>比規格下限難分 |
+| 展場距離下的剪影高 </code>bbH<code> | min 9／中位 13.5／max 21 px |
+
+⇒ <b>第一順位「剪影差異」沒有達成，但瓶頸不是身高的範圍</b>（範圍 2.419 倍，
+夠寬），<b>是典型配對的差距</b>：946 對的身高比中位只有 <b>1.246</b>，
+只有 <b>14.0%</b> 的配對達到規格的 1.6 倍。</code>max/min<code> 是極值統計，不是觀眾的體驗。
+往哪個方向補（身高改雙峰？加胖瘦／頭身比／肩寬？）是視覺方向 ⇒ <b>規則七</b>。
+
+<b>兩次被自己寫的判準擋下來，兩次都沒有事後放寬</b>——這是這一輪最該留下的形狀：
+1. 第一階段 E 類 5/5 全過，但 <b>C13（專門寫來擋「什麼都說一樣」的壞尺）爆了</b>
+   ⇒ 86.5% 當下有嫌疑，不能就這樣用，先去查尺。
+2. 第二階段 <b>Q4（反向已知答案）爆了</b>，原因是<b>判準被錨錯量</b>（0.02 錨在
+   「站×站−跨姿」的 0.0159，卻拿去量「同姿−跨姿」的 0.0328）。
+   照規矩 C14／C15 照報但<b>不算數</b>。<b>把 Q4 改成 0.05 會剛好過 ⇒ 不做。</b>
+3. 第三階段不放寬門檻，改問一個<b>跑之前不知道答案</b>的更難的問題：置換檢定。
+   隨機重排 44 人的 pose 標籤 200 次（固定 seed，個數不變），
+   真實落差 <b>0.1093</b>、置換 q95=0.0403、<b>0/200 達到</b>、<b>p=0.005</b>
+   ⇒ <b>尺看得見坐站</b>，C13 的失敗是被組內身高變異蓋掉的，不是尺壞了。
+
+<b>誠實邊界（都寫在對自己不利的方向）</b>：腳底對齊拿掉了位置線索，實際場景
+位置也幫忙分辨 ⇒ <b>86.5% 高估了難分程度</b>；這把尺量的是<b>整體剪影</b>，
+答得出「分不分得出來」，<b>答不出「是哪一項不夠」</b>（下一輪拆四個維度）。
+
+⚠ **第 52 輪拆掉了那把尺，答案有一半跟直覺相反：寬度的變異已經比身高大，
+卻換不到分辨度。** 零渲染，3.3 秒（</code>styles/probe/ss_dim.py<code>，commit </code>627dab8<code>）。
+不用「分別量身高變異與寬度變異」——不同單位比不了——改用<b>反事實抹除</b>：
+把 j 垂直縮放到與 i 同高再對齊，IoU 上升多少，就是<b>身高目前貢獻了多少分辨度</b>。
+
+<b>探針自驗 8/8</b>（D3 純身高差必須被身高那一項吃掉、D4 換一軸必須換答案、
+D5 bbox 已相同時正規化必須完全不動、D1b 逐字重現第一階段的 0.51595）：
+
+| 抹掉哪一項 | IoU 上升 | 意思 |
+|---|---|---|
+| 身高 | <b>+0.120</b> | 目前撐「分得出來」的主力 |
+| 寬度 | <b>+0.033</b> | 只有身高的 <b>1/3.6</b> |
+| 兩軸都抹（</code>noHW<code>） | +0.213 → 剩 <b>0.735</b> | 輪廓＋姿勢＋頭身比合起來只剩 <b>0.265</b> |
+
+<b>這一條會改變「該補哪一項」的答案</b>：世界的寬度變異範圍<b>其實比身高大</b>
+（</code>bbW<code> 4–15 px＝3.75 倍；</code>bbH<code> 9–21 px＝2.333 倍），卻只換到 1/3.6。
+⇒ <b>「寬度沒在做事」不等於「寬度變異不夠」</b>——變異已經在那裡，是在**中位 9 px
+的寬度上換不到剪影差異<b>（1–2 px 的差在展場距離不存在）。</b>「加胖瘦」不是自動的
+解法**，把胖瘦拉到 5 倍可能仍然換不到東西。⇒ 選項不是「身高／胖瘦／頭身比三選一」，
+是「<b>動身高的分佈形狀 / 動絕對尺寸 / 接受</b>」。仍是視覺方向 ⇒ <b>規則七</b>。
+（頭身比與肩寬在 13.5 px 的剪影上<b>沒有可靠量法</b>——頭只佔 2–3 列——
+所以它們混在 0.265 的殘差裡，<b>不單獨宣稱</b>。）
+
+順帶：第 51 輪因 Q4 爆掉而「形式上不算數」的 <b>C14 重驗過了</b>，數字逐字相同
+（配對身高比中位 <b>1.246</b>、達 1.6 倍的 <b>14.0%</b>）。
+
+⚠⚠ <b>第 53 輪把上面第 51 輪那個 86.5% 打掉了——那個數字是「尺」造出來的。</b>
+零渲染，3.9 秒（</code>styles/probe/ss_dose.py<code>，commit </code>aa141d3<code>）。
+第 51／52 輪的縮放器（逆映射）<b>不保證「達成尺寸 ＝ 目標尺寸」</b>：叫它做出 10 px，
+實測會落成 9／10／11。換成<b>索引精確重映射</b>（</code>K7<code>：44×8×2 格達成＝目標，全中）
+之後，用<b>同一條規格規則</b>（身高剛好差 1.6 倍）重算「規格下限」：
+
+| | 第 51 輪（逆映射＋補洞） | 第 53 輪（尺寸精確） |
+|---|---|---|
+| IOU_SPEC（規格下限） | 0.3237 | <b>0.5574</b> |
+| 比規格下限還難分的配對 | 86.5% | <b>38.6%</b>（365/946） |
+| 世界的配對 IoU 中位 | 0.5159 | 0.5159（同一個數，兩輪都是） |
+
+⇒ <b>配對中位 0.5159 已經在規格下限以內。「典型的兩個居民分不出來」這個前提不成立。</b>
+旁證是<b>解析上界</b>：垂直拉 1.6 倍、腳底對齊，<b>矩形</b>的 IoU 上界就是 </code>1/1.6 = 0.625<code>；
+0.5574 剛好在上界之下（實心剪影該有的樣子），0.3237 遠在上界之下——那要求放大後的
+剪影帶了約兩倍不該有的面積。（誠實邊界：<b>沒有</b>重跑第 51 輪那支去隔離它，
+「0.3237 是錯的」是推論不是直接證明。）
+
+<b>同一輪也把上面「寬度換不到東西」那句修正了一半</b>：那是 </code>gain<code>（抹除法）的說法，
+它答「現在貢獻多少」，不答「加大會多有效」。把變異當<b>劑量</b>掃出來的結果是——
+<b>寬度加得動</b>：m=4.0 把配對 IoU 中位從 0.5159 壓到 <b>0.2609</b>。
+但<b>代價是真的</b>：W m=1.5 就有 1 人被壓成 1 px 寬，m=4.0 有 7 人。
+同劑量下身高比較划算（H m=2.0 → 0.3915、<b>沒有人被壓扁</b>；W m=2.0 → 0.4070、5 人 1 px）。
+完整 24 格（含被 clamp 人數、遮罩整個空掉的退化人數、worldH 近似範圍）在
+</code>styles/probe/ss_dose.json<code>。
+
+<b>第 53 輪也拿精確的尺去推翻第 52 輪的「寬度只有身高 1/3.6」，推不倒</b>（C24 錯）：
+比值只從 3.60 動到 3.00，而反向的對照（身高不該被換尺改掉）對了（差 0.002）。
+⇒ 上面那張抹除表<b>仍然成立</b>。（形式上該階段的自驗 V2／V3 沒過 ⇒ <b>不算數</b>，
+而它指向的是「第 52 輪站得住」，是保守方向。）
+
+<b>第 53 輪一輪之內寫出三條數學上為假的判準</b>（K3 要求縮小時另一軸尺寸不變、
+K4b 的奇偶推導漏了 </code>t−1<code>、V2／V3 要求有損縮小可逆）。處理方式：
+<b>兩條靠把「工具」變精確而收回原本更嚴的判準，一條沒辦法收緊就讓它 FAIL 留在紀錄裡</b>
+（第三階段照報但不算數）。<b>判準一次都沒有事後放寬。</b>
+
+<b>第三次被自己寫的判準擋下來，第三次沒有事後放寬</b>：D6（決定性）第一次跑 FAIL。
+<b>先查再修</b>——查出來是<b>比較器</b>壞了不是量測壞了（拿 </code>round(round(x,6),4)<code> 比
+</code>round(x,4)<code>，946 對裡 5 對踩到雙重進位邊界；量測本身 946/946 未 round 的 float
+逐位元相等）。修法是把比較改成<b>未經 round 的 float 逐位元相等</b>，
+<b>比原本的判準更嚴，不是放寬</b>；門檻一個字沒動。
+
+⚠⚠ <b>第 54 輪去驗第 53 輪那張劑量表自己的前提，前提對 12.9% 的配對是假的。</b>
+零渲染，2.9 秒（</code>styles/probe/ss_hard.py<code>，commit </code>3220160<code>，探針自驗五條全過）。
+那張表隱含「加劑量就會把難分的配對推開」。但劑量是保均值的
+</code>t = mean + m×(size − mean)<code>，作用在 <b>bbox 尺寸相對均值的偏差</b>上——
+<b>兩個 bbox 幾乎相同的人偏差幾乎相同 ⇒ 任何 m 都縮放到幾乎相同的目標 ⇒ 近乎恆等。</b>
+18 格（H／W／HW × m=1.0…4.0）跑完 365 對難分配對：
+
+| | 對數 | 佔 HARD |
+|---|---|---|
+| 一格都救不起來（<b>劑量無效區</b>） | <b>47</b> | 12.9% |
+| 只有靠「把人壓成 1 px」才救得起來 | 5 | 1.4% |
+| 不靠 1 px 也救得起來 | 313 | 85.8% |
+
+<b>機制證據不是外推</b>：無效區的 </code>|Δw|+|Δh|<code> 中位 <b>1 px</b>（Q3=2、max=4，其中 6 對
+<b>完全相同</b>），救得起來的是 <b>4 px</b>（Q3=5、max=8）。⇒ **問題不是「劑量夠不夠大」，
+是「劑量作用的那個量本身是不是相同」。** 無效區有 31/47 是 stand×stand，37/47 跨層。
+
+<b>同一輪改掉了該怎麼讀第 53 輪那張表——它少了一欄</b>：
+扣掉「靠把人壓成 1 px 換來的救起」之後，<b>劑量不是越大越好</b>：
+H 的峰在 <b>m=2.5（198 對）</b>不是 m=4.0（142 對）；HW 的峰在 <b>m=2.5（241 對）</b>。
+再往上是在<b>毀剪影</b>不是在補差異。第 53 輪報的「W m=4.0 → 中位 0.1538」在這個讀法下
+會誤導——那個數字有一半來自把 11 個人壓成 1 px。<b>而 HW m≥2.5 起有居民整個消失</b>
+（</code>k=12<code> 空遮罩，m=4.0 是三人）；展場上「居民不見了」不能當成分辨度的進步。
+
+<b>跑之前寫死的三條預測，錯一條照報</b>：C30 我預測無效區 ≥ 55 對（15%），
+實際 <b>47 對（12.9%）</b>——錯的方向是保守的（劑量比我以為的有用一點）。
+C31（機制解釋）與 C32（雙軸勝單軸）對。<b>判準沒有事後放寬。</b>
+誠實邊界：「救得了」<b>不等於</b>「展場上分得出來」，只代表「至少和身高差 1.6 倍一樣好分」，
+而 <b>1.6 倍這根桿子對不對本身仍是規則七</b>；「無效」嚴格說是「在這 18 格裡無效」。
+
+⚠⚠ <b>第 55 輪排除掉「那 47 對是同一個模型換了顏色」——形狀差異已經在畫面上了。</b>
+零渲染（</code>styles/probe/ss_prof.py<code>，commit </code>97c388d<code>，探針自驗七條全過、重跑逐位元一致）。
+第 54 輪證明劑量對那 47 對近乎恆等 ⇒ 剩下唯一能動的是<b>同尺寸 bbox 內的像素分佈</b>
+＝形狀。而那有兩種可能，<b>指向完全不同的施工</b>：剖面也相同 ⇒ 得重做體型網格；
+剖面差得不少 ⇒ 資訊已在畫面上，槓桿是讓它更醒目。<b>量出來是後者。</b>
+
+尺是<b>列寬剖面</b>：bbox 切 8 段（用 </code>ss_dose.remap<code> 同一條整除映射），每段 ＝ 段內
+各列填充像素數的平均 ÷ bbox 寬；距離 ＝ 8 段平均絕對差。**兩軸都正規化 ⇒ 這把尺
+對劑量恆等**，它量的正是劑量碰不到的那個量。
+
+| | n | 剖面距離中位 | 對全體 |
+|---|---|---|---|
+| 全部配對 | 946 | 0.1469 | 1.00 |
+| 救得起來 | 318 | 0.1134 | 0.77 |
+| <b>劑量無效區</b> | <b>47</b> | <b>0.0966</b> | <b>0.66</b> |
+
+<b>關鍵是三條而不是那個中位數</b>：(1) 47 對裡 <b>一對都不是 0</b>，最相似的
+（</code>f0r2<code>×</code>f2r1<code>）也有 0.0312；(2) 尺的<b>雜訊地板</b>（同一個人被拉高 1.6 倍後剖面的
+殘差）中位 0.0201、max 0.0637 ⇒ <b>47/47 在地板中位之上、35/47 在地板最大值之上</b>；
+(3) 連 bbox <b>嚴格相同</b>那 6 對，剖面距離都是 <b>0.0312–0.1597</b>。
+⇒ <b>第 51–54 輪那條「難分」量的一直是 bbox 的難分</b>，形狀那一項從來沒進過那把尺
+（兩人肩寬差 bbox 寬的 11%，在 bbox 對齊的 IoU 上只值幾個像素）。
+
+<b>而且形狀信號的位置是可直接施工的資訊</b>：無效區 |Δ| 最大的兩段是 **b=2（肩／上胸，
+0.111）<b> 與 </b>b=6（小腿／腳踝，0.111）**，最小的是 b=3–4（腰腹，0.050／0.049）；
+救得起來那批在 b=4 的 |Δ| 中位<b>恰為 0.000</b>（過半配對腰腹寬度逐像素相同）。
+⇒ 若用輪廓線／硬影強化形狀，<b>該打在肩線與腳踝，不是腰</b>。
+
+<b>四條預測（C40–C43）跑之前寫死，這次四條都對</b>——但 C40（≥0.05，實測 0.0966）與
+C42（≤6，實測 0）<b>事後看門檻偏鬆</b>，「全對」帶的資訊比 FAIL 少，下一輪同類預測要押更緊。
+探針自驗有<b>解析已知答案</b>（實心 8×8 對階梯 ＝ 28/64 ＝ 0.4375，逐位元命中）。
+誠實邊界，全部寫在對自己不利的方向：**剖面對左右翻轉恆為 0（44/44 實測，
+同一批 IoU 中位只有 0.8466）⇒ 這些數字是形狀差異的下界<b>；pdist 是</b>逐對正規化後**
+的量，觀眾看的是未正規化的畫面 ⇒ 本輪答的是「資訊在不在」<b>不是「看不看得見」</b>；
+0.0966 只有雜訊地板的 4.8 倍，<b>不是大得無疑</b>；第二把尺（remap 到 16×8）給比值
+1.14 對第一把尺 1.17，同向，但兩把尺共用同一份遮罩與 bbox 定義，<b>不是獨立的</b>。
+
+⚠⚠ **第 56 輪去問「居民的體型是從哪來的」——是 </code>clay.js<code> 寫死的六列，
+而那 47 對「救不了」有 70% 是同一型。難分的天花板在生成器，不在渲染。**
+零渲染（</code>styles/probe/ss_arch.py<code>，commit </code>69aa9ab<code>）。
+<b>✅ 這批數字現在算數了</b>——第 56 輪跑的時候探針自驗沒全過（</code>P3_label_h<code> FAIL）
+所以整批掛著「照報但不算數」；**第 57 輪把門修對後，同一批數字自己合格，
+而且一格都沒被重算**（28 個輸出欄位逐位元相同，由獨立比對器驗，見下面第 57 輪）。
+
+第 51–55 輪一路把「難分」歸因到尺、到劑量、到形狀，五輪都沒問過體型的來源。
+而 </code>ss_solo.json<code> 從第 44 輪起每一列都帶著 </code>arch<code> 欄，<b>十一輪一次都沒被讀過</b>。
+</code>world/js/clay/clay.js<code> 的 </code>ARCH<code> 是<b>寫死的六列</b>（身高／胖瘦／頭身比／肩寬／
+腿長佔比）⇒ 44 人抽 6 型，946 對裡 <b>150 對（15.86%）本來就同型</b>。
+
+| 子集 | 同型/總數 | 同型率 | 富集 |
+|---|---|---|---|
+| 全體 | 150/946 | 15.86% | 1.00× |
+| HARD（&gt;SPEC） | 95/365 | 26.03% | 1.64× |
+| 救得起來 | 62/318 | 19.50% | 1.23× |
+| <b>劑量無效區</b> | <b>33/47</b> | <b>70.21%</b> | <b>4.43×</b> |
+
+⇒ 第 54 輪那個硬核<b>大半不是渲染或縮放的問題</b>，是生成器只有六種身體。
+
+<b>六型在剪影上塌成兩群</b>（站姿 351 對的 6×6 混淆矩陣，可混淆 ⇔ 該格 IoU 中位
+&gt; IOU_SPEC 0.5574）：非對角 15 格有 <b>5 格</b>比「身高差 1.6 倍」還難分，
+<b>有效可分型數 ＝ 2</b>（</code>tall_thin+tall_broad<code> ｜ </code>mid+stout+short_round+child<code>），
+六個對角格 <b>6/6</b> 全部型內難分。最像的一對是 </code>stout×short_round<code>（0.6782）。
+原因是解析的：相鄰型身高比只有 <b>1.07–1.20</b>，遠低於 1.6。
+<b>⚠ 這個「2」只贏 0.0018</b>——</code>tall_thin×mid<code> ＝ 0.5557 對 0.5574，一格翻面就是 1。
+<b>⚠ 而且 sit×sit 層別切出來的元件內容不同</b>（</code>child<code> ｜ 其餘五型）⇒ 分群本身不穩，
+只有「不是 6」是硬的。第二把尺（形狀剖面 pdist）與 IoU 的 Spearman <b>−0.7786</b>，同向。
+
+<b>反方向的好消息，而且它是先前沒被驗過的一個隱含前提</b>：畫面像素高對世界身高的
+<b>R² ＝ 0.9790</b>、px/world 比值極差只有 <b>1.18×</b> ⇒ 畫面上的大小幾乎全是體型，
+不是站的位置。若透視壓過體型，第 51–55 輪的逐對 IoU 全部要打折——它沒有。
+
+<b>這替規則七加上第五個選項</b>：改 </code>ARCH<code> 那 <b>6×5 ＝ 30 個數字</b>。它比重做體型網格、
+比加輪廓線都便宜，而且現在有數字支撐。<b>但它是視覺風格方向 ⇒ 不拍板。</b>
+
+<b>P 類失敗照規矩處理，門檻一個字沒放寬</b>：</code>P3_label_h<code> 的 CV 門檻 0.10 <b>沒有分姿勢</b>
+（坐姿世界 bbox 高比站姿矮約兩成）⇒ 池化 CV 被姿勢撐大到 0.1407。這是探針設計錯，
+不是資料問題：</code>P3b_diag<code>（</code>judged=False<code>，<b>不救門</b>）顯示分層後 maxCV ＝ 0.0682。
+標籤本身另有兩條獨立證據——型間排序與解析序<b>逐一相同</b>、兩個獨立來源
+（</code>ss_solo.json<code> 與 </code>sl_dump.json[&#x27;heights&#x27;][k]<code>）的 key/arch/pose <b>44/44 相同</b>。
+探針自驗另有<b>雙向已知答案</b>：同一型切奇偶兩半必判可混淆（0.7273）、
+</code>remap<code> 到 1.0 倍必判可混淆（恰 1.0000）、到 2.5 倍必判可分（0.2829），三條都命中。
+<b>預測 C51 錯了照報</b>：預測有效可分型數恰為 1，實際 2（錯的方向對我不利）。
+
+
+⚠ **第 57 輪只做一件小事：把第 56 輪那個門修對，讓那批數字算數——
+而且證明主數字一格都沒動。** 零渲染（commit </code>1b8439a<code>）。
+
+第 56 輪 FAIL 的原因是<b>我的門檻設計錯</b>不是資料錯：CV 沒分姿勢，而坐姿的世界
+bbox 高比站姿矮約兩成 ⇒ 池化 CV 被姿勢撐大到 0.1407。第 57 輪把 CV 改成
+<b>每個 (型,姿勢) 格分別算</b>，分層 maxCV ＝ <b>0.0682</b> ⇒ PASS，<b>EXIT=0</b>。
+</code>P3_cv<code> 一個字沒放寬（仍是 0.10），變的是<b>拿什麼去比它</b>。
+順帶補上兩條原本沒有的：每型至少要有一格判得到、stand 層的型間排序也要等於解析序。
+
+<b>這一輪真正的產物是那支比對器，不是那個 PASS。</b>「只修門檻」與「順手把主數字
+調成好看的」在人眼看終端輸出時<b>長得一模一樣</b>——兩邊都是一片 PASS。
+</code>styles/probe/ss_cmp57.py<code> 讓這兩者分得開：新舊 </code>ss_arch.json<code> 除
+</code>thresholds<code>／</code>probe_ok<code>／</code>cases<code> 三個 key 外，其餘 <b>28 個 key 逐位元相同</b>、
+不准新增欄位、<b>C51 的 FAIL 必須留著</b>。7/7 全過。往後任何一次「只修探針不動結論」
+都可以直接沿用。
+
+<b>兩把工具都用已知答案雙向驗過</b>（規則三：探針本身要先驗）：
+比對器對 8 種擾動（動主數字 1e-12、偷加／偷刪欄位、放寬 </code>P3_cv<code>、把 C51 的 FAIL
+改成 PASS…）各自<b>只觸發該觸發的那一格</b>，對唯一該放行的兩種放行；
+門本身在 </code>P3_cv=0.05<code> 與 </code>P3_cv_n=5<code> 兩種收緊下都 EXIT=1（跑完復原並 </code>cmp<code>）。
+
+<b>R2 撞出一個反直覺的東西，是實測到不是想到的</b>：把「一格要幾個人才判」從 2
+提到 5 時，maxCV <b>反而從 0.0682 降到 0.0488</b>（人少的格被剔掉了）——
+<b>若只有 CV 那一條，收緊人數門檻會讓門變鬆</b>。擋下它的是「每型至少一格」那條。
+⇒ 用平均數／變異係數當門檻時，樣本數門檻與嚴格程度<b>不同向</b>。
+
+<b>照實記兩條對自己不利的</b>：(a) 判準 </code>A6<code> 我自己寫錯了——寫「</code>git diff<code> 只准動
+</code>ss_arch.py<code> 一個檔」，但 </code>ss_arch.json<code> 是被版控的產物必然跟著動，照字面讀 A6 FAIL
+（實質要驗的有過，且 json 的變動範圍由 A2–A4 逐鍵驗得更嚴）。
+(b) 本輪<b>沒有產生任何新的視覺知識</b>，對展場畫面零直接貢獻；
+</code>short_round/sit<code> 與 </code>child/sit<code> 兩格因各只有 1 人<b>沒被驗到</b>（是「沒驗到」
+不是「驗過合格」）。
+
+
+⚠ <b>第 58 輪把拖了四輪的那件事做完：五個選項終於在同一張桌子上</b>
+（</code>vacant_hm/DECISION_SILHOUETTE.md<code>，commit </code>1775931<code>，零渲染）。
+細節與那張同型佔比表在最下面「卡住／需要人類決定」段的 0-a 項底下。
+
+<b>這一輪最該留下的三條</b>：
+
+1. <b>給人類的頁面必須是產生的，不能是手打的。</b> 68 條數字散在五份歸檔裡，
+   手打一次就會漂——而漂掉的那一頁<b>看起來跟正確的一模一樣</b>。
+   </code>ss_opts.py<code> 讓「頁面上的數字」與「歸檔裡的數字」在機制上不可能分家。
+2. <b>「劑量越大越好」是假的，而且是實測反證不是推論</b>（</code>HW4.0<code> 273 &lt; </code>HW3.0<code> 284；
+   H 聯集 256 &gt; </code>H4.0<code> 238，恰 18 對）。<b>前四輪的表單看救起那一欄會讀成單調遞增。</b>
+3. <b>執行端把自己的錯誤預測寫進了給人類的那一頁。</b> 三族同型率
+   （19.14 → 14.81 → 62.50 → 70.21）看起來像單調趨勢但中間那格反了；
+   只貼數字不說「這裡不單調」，讀者會自己補一條不存在的趨勢線。
+
+<b>照實記三條對自己不利的</b>：
+(a) <b>判準 </code>A3<code> 照字面讀是 FAIL</b>——寫「重跑兩次都 </code>cmp<code> 逐位元相同」，
+但第一次 vs 第二次 </code>ss_opts.json<code> 差<b>一個欄位</b>（</code>P6c_predrift<code> 的 </code>got<code> 從
+「首次產生」變「與生成結果相同」，</code>diff<code> 只有 4 行）。那是手改偵測器<b>依設計</b>
+會有的一次性暫態，run2 起逐位元穩定。<b>判準沒有事後改，是我寫得不精確。</b>
+(b) <b></code>P6b<code> 那條自驗第一版是壞的，而且是它自己抓到的</b>：原本用「claim 字串在不在
+檔案裡」判分，而 </code>33<code> 這個值在頁面上出現兩次 ⇒ 改掉其中一個抓不到（實測
+</code>mutated=False<code>）。改成逐位元後，68 條各改一位數全部會咬。
+<b>若沒寫那條自驗，這支會回報一片 PASS 而它的核心保證是空的。</b>
+(c) <b>零渲染、零新視覺知識</b>，對展場畫面的直接貢獻是零——它解的是<b>流程</b>上的
+堵塞（人類挑不了 ⇒ 後面全部卡住）。另：「H 族 ＝ 被某個 H 格救起」這個等式
+<b>依賴 </code>ss_hard.py<code> 的迭代序</b>，若有人改那個順序，這一族的語意會<b>無聲地</b>變掉，
+而 P3 只驗總和與互斥性，<b>擋不住這件事</b>。
+
+
+⚠⚠ **第 59 輪先驗尺再花機時，結果擋下了一個會產出假空結果的實驗：
+第 51–58 輪那把剪影尺，對「畫在剪影內部的線」是結構性失明的。**
+零渲染（</code>styles/probe/ss_luma.py<code>，commit </code>cd324a1<code>，探針自驗九條全過、
+重跑逐位元一致、四份既有歸檔重跑後逐位元不動）。
+
+第 58 輪排的下一步是「渲染加輪廓線／硬影 vs 不加，量同一把 </code>pdist<code>／</code>IoU<code>」。
+照那樣做<b>必然量到 0</b>，而那個 0 會被讀成「輪廓線沒有用」：
+</code>diff_mask<code> 是<b>二值遮罩</b>，畫在剪影<b>內部</b>的線（肩線、手臂壓在軀幹上那條、
+硬影的邊）其像素<b>本來就已經在遮罩裡</b> ⇒ 在建構上不可能改變遮罩，
+而 </code>pdist<code>／</code>IoU<code> 只吃遮罩。<b>那個 0 不是「沒有效果」，是「這把尺看不到」。</b>
+
+<b>釘死的方式是雙向已知答案</b>（規則三：探針本身要先驗）：把<b>最大對比內緣環</b>
+（對背景的 |Δluma| ≥ 127 ⇒ 一條人眼一定看得見的白／黑線）畫進 44 個剪影，
+<b>全圖重算</b>遮罩，不抄捷徑——
+
+| | 一定看得見的那條線 |
+|---|---|
+| 尺 A（</code>pdist<code>／遮罩） | <b>44/44 逐元素相同、max\|Δpdist\| = 0.0</b> ← 看不見 |
+| 尺 B（</code>ldist_flat<code>） | <b>44/44 都 &gt; 0.02，中位 0.1645</b> ← 看得見 |
+
+尺 B 與尺 A <b>共用同一組 </code>bin_spans<code>、同一條 </code>Σ|Δ|/8<code></b>，只把被量的量從
+「這一列填了幾格」換成「這一列多亮」；</code>ldist_raw<code> 含黏土本色、
+</code>ldist_flat<code> 先減掉該人自己的平均 ⇒ <b>色盤與明暗被一個減法切開</b>。
+
+| 組別 | n | </code>pdist<code>（剪影） | </code>ldist_raw<code>（含色） | </code>ldist_flat<code>（明暗） |
+|---|---|---|---|---|
+| 全部 | 946 | 0.1469 | 0.0848 | 0.0702 |
+| <b>硬核（劑量無效）</b> | <b>47</b> | <b>0.0966</b> | <b>0.0713</b> | <b>0.0597</b> |
+| 救得起來 | 318 | 0.1134 | 0.0822 | 0.0669 |
+
+<b>兩條會改變下一步的結論</b>：
+1. <b>明暗是一條尺 A 丟掉的、獨立的通道</b>——</code>pdist × ldist_flat<code> 的 Spearman
+   只有 <b>0.383</b>（這條押在對自己不利的方向：相關性高就等於本輪白做）。
+2. <b>硬核那 47 對在明暗上沒有跟著剪影一起塌掉</b>（比值 0.89，剪影那邊是 0.85）
+   ⇒ 對展場而言硬核不是「同一個模型換顏色」的死路，
+   <b>「改 ARCH／重做體型網格」不是唯一出路</b>。
+
+順帶兩條硬接縫，讓尺 B 的數字不是自說自話：本支自寫的陣列版差分對
+</code>stagevis.diff_mask<code> <b>逐元素相同 44/44</b>；三組 </code>pdist<code> 中位與 </code>ss_prof.json<code>
+<b>逐位元相同</b>（0.1469／0.0966／0.1134）——兩條獨立路徑量到同一個數。
+
+<b>誠實邊界，全部寫在對自己不利的方向</b>：
+(a) <b>本輪沒有渲染任何輪廓線</b>——</code>T_in<code>／</code>T_out<code> 是在 luma 陣列上合成的環，
+證明的是<b>尺的能力</b>不是輪廓線的效果；真的輪廓線還會畫在部件交界上，
+合成環畫不出來 ⇒ 對尺 B 而言它是<b>下界</b>。
+(b) <b>尺 B 一樣對左右翻轉失明</b>，數字也是下界。
+(c) </code>ldist_raw<code> 把顏色算進來了，而 </code>raw × flat<code> 的 Spearman 高達 <b>0.809</b>
+⇒ 這兩個版本<b>彼此不獨立</b>，別當兩份證據。
+(d) <b>本支不回答「觀眾分不分得出來」</b>，只回答「哪一把尺帶得動這個資訊」；
+</code>0.0597<code> 沒有對應到任何人眼判準，把它當展場門檻是空過。
+(e) <b>判準 </code>P5_analytic<code> 的比較方式被執行端改過</b>：原寫「必須恰為 50/255」，
+實測尺自己那條算法與 50/255 差 <b>1 ulp</b>，逐位元相等測的是 IEEE 捨入次序不是尺
+⇒ 放寬成 </code>&lt;= 1e-15<code>。<b>改是在主數字算出來之前做的</b>，逐位元結果（</code>False<code>）
+印在探針輸出裡沒有藏——但它仍然是一次判準被改。
+(f) 四條預測 C70–C73 <b>全中</b>，這是本輪最該打折扣的地方：全對通常表示<b>押得太鬆</b>。
+(g) </code>DECISION_SILHOUETTE.md<code> <b>沒有更新</b>（本輪判準要求零既有檔修改），
+所以人類那一頁上<b>還沒有</b>這條「尺會失明」的警告。
+　　→ <b>第 60 輪補上了</b>，見下一段。
+(h) 「渲染輪廓線／硬影對照」<b>連續五輪未做</b>——本輪是刻意不做並給了量到的理由，
+不是又一次被環境擋住，但它仍然沒有做。
+
+
+⚠ <b>第 60 輪：那把失明的尺現在寫在人類拍板的那一頁上了。</b>
+（</code>vacant_hm/DECISION_SILHOUETTE.md<code>，commit </code>166d643<code>＋</code>975f950<code>，零渲染、零新量測。）
+
+第 59 輪的發現<b>還沒有到人類手上</b>——而那一頁當時同時做著兩件互相矛盾的事：
+
+• 它用<b>尺 A</b> 的剖面告訴人類「若要用輪廓線／硬影強化，<b>該打在肩線與腳踝</b>」；
+• 它<b>沒有說</b>尺 A 在建構上<b>量不出那條線的效果</b>。
+
+後果是可預期的：人類照那一頁挑了選項 4 ⇒ 執行端去渲染 ⇒ 用同一把尺量 ⇒ 得到 0
+⇒ 把「這把尺看不見」讀成「輪廓線沒有用」⇒ <b>擋掉一個真的槓桿</b>。
+第 60 輪只做這件事：把已經量到的接上去，<b>一個新數字都沒量</b>。
+
+那一頁人類看得到的差別：
+1. 選項 4 多一個引言方塊，明寫尺 A 為何<b>必然</b>回報 0（44/44 遮罩逐元素零變化、
+   </code>max|Δpdist|<code> = 0.0），以及一句 <b>「請不要把選項 4 未來的量測結果 0 讀成它失敗」</b>。
+2. 同一方塊給出替代的尺與它量到的：</code>ldist_flat<code> 對同一條線 44/44 都看得見
+   （中位 0.1645、最小 0.0899），與尺 A 的 Spearman 只有 0.3828。
+3. 新一節「<b>這一頁的數字是用哪把尺量的</b>」：兩把尺各看得見／看不見什麼，
+   並逐一寫出對五個選項的後果——選項 1／2／3 不受影響、<b>選項 4 要換尺</b>、
+   選項 5 的「前面所有量測要重跑」現在還要加上尺 B 那些。
+4. 「沒回答什麼」從 5 條加到 8 條。最重要的第 6 條：**</code>ldist_flat<code> 沒有對應到
+   任何人眼判準**——沒有人看過任何一張圖然後說「這個值以上就分得出來」，
+   把它當展場門檻是空過。第 8 條寫明輪廓線是否屬於選定方向本頁不知道（規則七）。
+
+<b>「往那一頁加話」與「順手改了一個主數字」在人眼看 diff 時長得幾乎一樣</b>，
+而那一頁有 68 個內嵌數字 ⇒ 新造凍結比對器 </code>styles/probe/ss_cmp60.py<code> 護著：
+除四個自驗欄位外的 top-level key 逐位元相同、舊門檻 0 刪 0 改值、舊 case 四欄
+不准漂、<b></code>page_claims<code> 的舊 key 一個都不准改值或消失</b>（新增的 26 條逐一列出，
+不是「有一些」）。實測 <b>7/7、0 改值 0 消失、68 → 94 條</b>。
+
+<b>這把尺自己先驗過</b>（規則三，雙向已知答案）：改一個 top-level 值、改一條 claim
+一位數、刪一條 claim、把 </code>C62<code> 從 FAIL 翻成 PASS——四個都必須被咬到；原樣與
+「只新增一條 claim」兩個必須放行。<b>六個全對才准拿去比主結果。</b>
+
+<b>誠實邊界</b>：
+(a) <b>本輪一個新數字都沒量</b>，頁面上的明暗數字全是第 59 輪的搬運；
+搬運由新增的 </code>P8_luma_seam<code> 接縫檢查護著，但<b>它們的效力不會因為被印在頁面上而變高</b>。
+(b) <b>把一個沒有人眼門檻的數字（</code>ldist_flat<code>）放進人類的決策頁，本身就是誤讀風險</b>
+——即使加了第 6 點警告。這是本輪最該被質疑的一步。
+(c) <b>試跑過一次才 commit</b>：</code>P0_untouched<code> 要求 </code>styles/probe/<code> 的 git diff 是空的，
+而本輪改的正是那支產生器 ⇒ 順序是「試跑 → 還原輸出 → commit 產生器 → 乾淨跑」。
+試跑那次 EXIT=1（P0 FAIL）<b>是預期的</b>，其餘 15 格與正式跑逐字相同。
+<b>放寬 P0 本來是更省事的做法，沒有做。</b>
+(d) <b></code>ss_cmp60.py<code> 是第二把凍結比對器</b>（第一把 </code>ss_cmp57.py<code> 寫死給 </code>ss_arch.json<code>，
+餵 </code>ss_opts.json<code> 會 KeyError）。兩支<b>沒有</b>共用決策函式，理由寫在 docstring 裡
+——這是講明白的分開，但<b>確實是第二份要維護的東西</b>，第三支出現時就該抽共用層。
+(e) 預測四條錯一條：claim 條數押 75–85，實際 <b>94</b>；而且我把基準記成 63（實際 68），
+是目測數頁面而沒去讀 </code>page_claims<code> 的長度。**判準「&gt; 63」照樣過，但它過得太鬆是因為
+我把基準記錯了，不是因為我押得準。**
+(f) <b></code>SPEC_CLAY.md<code> 本輪沒有重讀</b>——頁面第 8 條「輪廓線沒有明文」是沿用第 59 輪的紀錄。
+(g) 「渲染輪廓線／硬影對照」<b>連續六輪未做</b>。這輪同樣沒做，理由是規則七。
+
+
+⚠ <b>第 61 輪：選項 3 從「挑一族」補到「挑一格」——那一頁自己承認算不出來的那一欄。</b>
+（</code>vacant_hm/DECISION_SILHOUETTE.md<code>，commit </code>d3ceed3<code>→</code>2404e8a<code>，零渲染、零新量測。）
+
+第 58–60 輪那一頁給的同型率是<b>軸族</b>的三個數，但選項 3 的實際動作是<b>挑一格</b>。
+族 H 的 256 對是 6 個 H 格的<b>聯集</b>，H 軸最好的單格（</code>H4.0<code>）只救得起 <b>238／256</b>
+⇒ <b>人類看到的 19.14%，不是他實際要挑的那一格的數字。</b> 而「救起一對同型的」
+意思是把同一種身體拉成兩個尺寸——那不是兩個人，是一個人的大小號。
+</code>ss_hard.py<code> 每格多存 </code>rescued_pairs<code>，同型的計算走 </code>ss_opts.py<code> 那個
+<b>已被雙向已知答案驗過</b>的 </code>same_arch()<code>（不另寫第二個計數器）。15 格全在表上：
+
+| | 1.5 | 2.0 | 2.5 | 3.0 | 4.0 |
+|---|---|---|---|---|---|
+| <b>H</b> 同型率 | 20.21% | 15.65% | 17.73% | 16.67% | 18.07% |
+| <b>W</b> 同型率 | <b>5.06%</b> | <b>6.38%</b> | <b>9.52%</b> | <b>11.76%</b> | <b>14.10%</b> |
+| <b>HW</b> 同型率 | 15.03% | 12.90% | 13.79% | 15.85% | 16.48% |
+
+⚠ <b>執行端跑之前寫死的三條機制解釋，實測打掉兩條</b>（已寫進那一頁）：
+「單格相對於族會被稀釋」<b>對</b>（</code>H2.0<code> 15.65% ＜族 19.14%）；
+「劑量越大越咬得動同型對」<b>錯</b>（</code>H4.0<code> 18.07% ＜ </code>H1.5<code> 20.21%）；
+「同型率最高的一格在雙軸」<b>錯</b>（最高的是 </code>H1.5<code>，18 格沒一格是 HW）。
+<b>表上最清楚的那件事三條都沒押到</b>：</code>W<code> 軸整條被同型對<b>掏空</b>（5.06–14.10%），
+明顯低於 H 與 HW——與第 58 輪 </code>C62<code> FAIL 同向，兩輪用不同切法問同一題，
+都指向「W 救起來的東西特別乾淨」。⇒ 那一頁加了
+「<b>請不要把上面那些『為什麼』當成可以外推的機制</b>」。
+
+<b>這一輪最值得記的不是那張表，是判準先寫害我自己 FAIL 的那一格</b>：
+</code>A4<code>（重跑逐位元相同）第一次沒過——新加的凍結檢查 </code>P5_frozen<code> 把
+「相對上一版新增了 36 個欄位」寫進了 </code>ss_hard.json<code>，而它的基準是 </code>git HEAD<code>
+⇒ commit 之後同一份程式對同一批圖跑出「新增 0 個」，**歸檔不再是
+(圖 + 程式) 的純函數**，還連鎖絆倒 </code>ss_opts.py<code> 的 </code>P0_untouched<code>。
+修法是把凍結類移出歸檔（照樣判分、照樣擋 EXIT，不進 </code>cases<code>）——
+<b>「這一版相對上一版動了什麼」是轉變的性質，不是量測的性質。</b>
+把 </code>A4<code> 放寬成「除了那行 note 以外相同」更省事，<b>沒有做</b>。
+同一輪還抓到 </code>probe_ok<code> 那行原本是靠運氣對的（</code>if c[&#x27;judged&#x27;]<code> 之所以沒把
+從第 54 輪起就 FAIL 的 </code>C30<code> 算進去，只是因為當時 </code>CASES<code> 裡碰巧只有 P 類）。
+
+<b>誠實邊界</b>：(a) 本輪<b>一個新的量測都沒有</b>——18 格 sweep 是重跑既有的，
+11 個主數字對 HEAD 逐位元相同；(b) 同型率仍然只回答「資訊在不在畫面上」，
+不回答「觀眾在展場距離下分不分得出來」（那一格連續第十輪為零）；
+(c) <b>畫面上一個像素都沒動</b>，連續第七輪沒碰 render 層，理由仍是規則七；
+(d) 各格數字<b>不可以相加</b>（同一對可被多格救起），「兩格併用」表上讀不出來
+——已寫進那一頁的「沒回答什麼」第 4 條；
+(e) 共用層 </code>frozen_diff<code> 寫出來了，但 </code>ss_cmp57<code>／</code>ss_cmp60<code> <b>沒有回頭遷移</b>，
+兩支舊的仍各自實作 ⇒ 債還在，只是不再增加。
+
+
+⚠ <b>第 50 輪去指認「擋人的是誰」，答案是擋人的不是人——是在途交付物。</b>
+第 49 輪把 </code>f1r9<code> 那個 3 px 的人歸給「同層前排的另一個居民」。這一輪照判準
+逐像素歸因，結果是 <b>0/139</b>：139 個被吃掉的本體像素，一個都歸不到任何其他
+居民身上（到<b>任何</b>別人 solo 像素的曼哈頓距離 13–29 px）。
+
+零是很特別的數字 ⇒ 先懷疑工具，而工具沒壞，<b>壞的是前提</b>。兩批圖的 query
+參數本來就不同（第 44 輪兩支 shoot script 各寫各的，沒有人比對過）：
+
+</code>`<code>
+so_ (ss_occl.sh)  hide=shell,furn                  couriersOn=True  reviewOn=True
+sl_ (ss_solo.sh)  freeze=20&amp;couriers=0&amp;review=0&amp;…  couriersOn=False reviewOn=False
+</code>`<code>
+
+⇒ 兩件事，都照報：
+
+1. <b>第 44 輪那個「人擋人份額 ＝ bbH_solo − bbH_noarch」不是純的人擋人</b>，
+   裡面混了 13 個在途交付物與 review 模式。這是對一個<b>已落盤數字的更正</b>。
+2. <b>讓居民在展場距離下看不見的，是在途交付物。</b> 建築第 44 輪已否決、
+   別的居民第 50 輪否決。</code>f1r9<code> 獨自 14 px、有交付物時 3 px；
+   站在他前面的是 CR15／CR23，不是人。
+
+零渲染釘死的方式（</code>ss_cour.py<code>）：交付物世界座標取自第 44 輪就落盤的
+</code>so_dump.json<code>，相機用 </code>ss_proj.Cam<code> 本人（重算 three.js 自己投影的 89 點
+uv 誤差 5.0e-5；反向把 fov 灌成 68° 立刻壞掉 0.299）。交付物<b>寬度取 0</b>，
+投影成線段不是框——讓相交變難的方向，對自己的假設保守。
+跑之前寫死的正負兩組：</code>lost&gt;0<code> 的 5 人 <b>5/5</b> 前面有交付物、</code>lost=0<code> 的
+39 人 <b>1/39</b>。第三把尺交叉檢查：7 條命中<b>全部 dz&gt;0</b>（交付物離相機更近）。
+
+⚠ <b>這組數字依本輪自己寫死的規矩「照報但不算數」</b>：探針的 Q2 沒過——
+我假設 13 個交付物在同一條輸送帶上（同 z），實際有 2.55／2.359／0.969 三種。
+錯的是我對資料的假設，不是量具（Q0／Q1 都過）；<b>判準不事後放寬</b>，
+而且正因為 Q2 失敗才補上了那條深度交叉檢查。
+
+⇒ 新的規則七項目：**交付物的軌道深度／尺寸現在確定是「居民看不看得見」的
+主要槓桿。** 要不要為了讓居民看得見而動交付物，是視覺方向的決定，等人類。
+
+⚠ **第 49 輪先驗第 48 輪下一步的前提，前提不成立：那些「切口」大部分不是遮擋，
+是量到了居民自己的影子。** 第 48 輪的下一步 (b) 預設「切口下面那塊碎片是本體被
+擋掉之後剩的一段」。用第 43／44 輪已落盤的三批圖（</code>ss_<code> 完整世界／</code>so_<code>
+</code>hide=shell,furn<code>／</code>sl_<code> <b>獨自一人</b>）交叉判——</code>sl_<code> 那批沒有任何東西接得住影子，
+所以它的 mask ＝ <b>純本體剪影</b>，碎片落在它外面就不是本體。零渲染、一張都沒重截：
+
+</code>`<code>
+連通塊 &gt;1 的人數    ss_ 21/44      so_ 1/44      sl_ 0/44
+mask 像素中位數     ss_ 123.5      so_ 83.5      sl_ 85.5     ← 完整世界多 45%
+最大塊落在本體框內   中位 0.853、最小 0.588、26/44 低於 0.9
+34 塊非最大碎片      判成本體 9、<b>判成不是本體 25</b>
+</code>`<code>
+
+⇒ <b>「21/44 的 mask 被切成多塊」這句話，主詞不是人。</b> 差分是「這個人在／不在」，
+所以他投在建築上的影子整片都算進他的 mask；</code>bbH<code> 量的是「本體 ∪ 沾在身上的影子」
+的最大連通塊，不是人的剪影。第 43 輪起 N4 就是量在這個混合物上的。
+
+跑之前寫死的兩條預測，<b>一條成立一條被自己的資料打掉</b>（方向相反，所以
+「永遠說在外面」的壞判別器不可能兩條都過；判別器也確實對 9 塊碎片說了「是本體」）：
+• <b>C5 成立 6/6</b>：第 3 層那六個切口下面的碎片（全部在畫面第 145 列、高 1 px、
+  面積 4–9）在本體框<b>外面</b> ⇒ 不是本體。那六個切口的世界 y 在第 48 輪逐字元相同
+  （11.2425–11.615）也就有解釋了：它是影子的邊，不是人的邊。
+• <b>C6 錯了 0/7</b>：我預測欄空隙（左右分家）是真的遮擋（≥4/7 是本體），
+  量到 <b>0/7</b>。左右分家的碎片同樣不是本體。
+
+⇒ 對 N4_min 的後果（<b>壞消息與好消息各一，都照報</b>）：</code>f1r9<code> 那個 3 px 的人，
+獨自站在空畫面裡是 <b>14 px</b>，而 </code>hide=shell,furn<code>（其他人還在）仍然是 <b>3 px</b>
+⇒ 他被擋住的部分是<b>人擋人</b>，不是建築。三批的 bbH 最小值 <b>ss 3／so 3／sl 9</b>。
+⇒ <b></code>CELL_Z<code> 往前挪（第 48 輪的選項 b）救不到他</b>——擋他的是同層前排的另一個居民，
+站位整排一起往前移，相對關係不變。選項 (b) 這一輪起降級，不是被否決，是**沒有
+證據支持**；要動就得先量「人擋人」那一份。
+
+&gt; <b>第 50 輪更正（原文保留，留著讓人看見錯的形狀）</b>：上面那句「擋他的是同層
+&gt; 前排的<b>另一個居民</b>」<b>不成立</b>。逐像素歸因 0/139，擋他的是<b>在途交付物</b>
+&gt; CR15／CR23。結論「(b) 救不到他」不變，理由換了——交付物不在站位表上，
+&gt; 移站位一樣救不到。
+
+⚠ <b>第 44 輪把「為什麼太小」量出來了，而答案推翻第 43 輪的推論</b>：
+第 43 輪說最小的那幾個是「被<b>建築</b>擋住」。正面量之後——藏掉整組牆／樓板／
+桌凳，中位數 13.5 → <b>13.0</b>（增幅中位 <b>0.0 px</b>）；再讓每個人**獨自站在
+空畫面裡<b>，中位數 </b>13.5 px<b>、最小 3 → </b>9 px<b>。⇒ </b>遮擋解釋的是極端值，
+不是中位數。<b> 最小的 k17 從 3 px 變 14 px，但那 +11 全部來自</b>人擋人**
+（建築 +0）；一半的居民一格都沒動。**連獨自站在空畫面裡都只有 13.5 px
+＜門檻 15<b> ⇒ </b>是尺度／鏡位的問題，不是遮擋的問題**。
+能動中位數的只有尺度（</code>SCENE_SCALE<code>／相機距離／改成局部視角），
+而改樓層開口或鏡位角度<b>救不了中位數</b>——這句話現在是量到的，不是猜的。
+順帶更正第 43 輪另一句：N3 第 0 層那個偏低的 0.516 <b>不是剪影不分明</b>，
+沒有東西擋的時候同一層是 <b>0.984</b>（四層 0.984／0.996／0.991／0.984）。
+
+⚠ <b>第 45 輪用第二把獨立的尺確認了 13.5 px，並推翻第 44 輪寫下的那句取捨</b>：
+到第 44 輪為止，所有數字都出自同一條管線（截圖相減 → 連通塊 → bbox 高），
+九條探針驗的全是那條管線<b>內部</b>的一致性，共模偏差抓不到。第 45 輪加了
+</code>styles/probe/ss_proj.py<code>——<b>不經過像素差</b>，由相機參數與每個人的世界高度
+直接算他該有多高。量具自己先驗過五條：對 <b>three.js 自己的投影矩陣</b> 89 個
+world→uv 點，max|Δuv| = 5.0e-5（640 寬下 <b>0.03 px</b>）；反向已知答案（fov 灌成
+68°）必須失敗，實得 0.30；假設的 wide 機位對<b>畫出來的建築</b>四邊 0.2／0.8／
+0.8／0.0 px。主結果是<b>零自由度</b>的（</code>geom.js:501<code> 把居民的 z 寫死成
+</code>CELL_Z=0.75<code>，不必反解）：逐人比腳、頭、畫面高，<b>44/44 全部在 ±2 px</b>，
+中位 −0.14／−0.37／+0.23，最大 1.36 px ⇒ **13.5 px 是相機的必然結果，
+不是量具的產物。**
+<b>而第 44 輪那句「放大 1.11 倍會犧牲一次看到四層樓 44 個人」是錯的</b>：
+畫出來的世界只佔 640×360 的第 62–577 欄、109–239 列，<b>左右各留 258 px 空白</b>。
+在建築完全不出框的前提下還能放大 <b>1.240 倍</b>（fov 34°→27.7°），而達到門檻
+只需要 <b>1.111 倍</b>（fov→30.8°，那時最小的人 10.0 px &gt; N4_min=8）。
+⇒ <b>餘裕來自畫面四周的空白，不是來自全景；不必取捨。</b>（要不要改仍是規則七。）
+照報一條 FAIL：預註冊的「反解出的 z 要落在建築裡」41/44——第 2 層的腳只在
+眼高之下 0.65，幾乎壓在地平線上，</code>|dz/px|<code> 中位 <b>14.9</b>（其他層 1.1／2.0／2.8）
+⇒ 那是<b>反解方法</b>的病態，不是相機模型錯（同一台相機零自由度下 44/44 全過）。
+
+| 項目 | 到哪了 |
+|---|---|
+| 風格方向 | ✅ 2026-08-15 人類選定「黏土定格」，不再是待決事項 |
+| 12fps 步進定格 | ✅ 姿態 12fps、畫面 60fps，是真實時間的純函數 |
+| 硬邊陰影／單一主光 | ✅ 低角度側射，光進得了每一層 |
+| 指紋壓痕法線 | ✅ 程序生成，零外部請求 |
+| 格狀布局（一格一人） | ✅ 4 層 × 13 房、空格不放裝飾（空格＝曾經有人） |
+| <b>人形剪影差異（量測台）</b> | ✅ 六種體型 archetype，剪影高度差 <b>2.51 倍</b>（舊版 1.17 倍） |
+| <b>人形剪影差異（真的畫面上）</b> | ⚠ <b>第 43 輪第一次真的判定了，而唯一沒過的是「太小」。</b> 2.51 是在 </code>silhouette.html<code> 量測台量的——正交排開、scale=1.0、互不遮擋、3840px 寬，那是<b>前提</b>（「模型有能力長出不同剪影」）。觀眾看到的是 </code>clay.html<code> 全景：縮到 0.66、四層樓、有透視、彼此遮擋、整張圖 640px。逐一居民 </code>hide=fig&lt;k&gt;<code> 對 baseline 做像素差（44 人 × 一張圖）。<b>判定結果：N1 可見 44/44 ✓、N2 同層比值 2.222／6.667／3.167／2.000（4/4 層 ≥1.6）✓、N3 同層 Spearman(世界身高, 畫面高) 0.516／0.689／0.737／0.993（3/4 層 ≥0.6）✓、</b>N4 尺寸 ✗<b>（畫面 bbox 高中位數 13.5 &lt; 門檻 15、最小 3 &lt; 門檻 8、26/44 不到 15 px）。</b>⇒ <b>剪影差異本身在展場距離下活下來了；撐不住的是絕對尺寸與遮擋</b>（21/44 的 mask 被切成多塊）。⚠ 第 1 層那個 6.667 是<b>假的好看</b>——分母是 k17（</code>f1r9<code>，世界身高 1.809 ＝ 偏高的人）在畫面上的 3 px，一個<b>被擋住</b>的人不是一個矮的人 ⇒ <b>遮擋在同一個數字裡同時灌大比值、壓垮尺寸</b>。⚠ <b>判得成是因為先修了量具，而修的人已看過數字</b>：第 41 輪寫的探針門檻有兩條<b>本來就不可能過</b>（P1 要 </code>hide=world<code> 差異 ≥100000 px，但整張圖「不等於背景色」的像素只有 <b>63949</b>；P3_det_sha 要整張圖逐位元組相同，但 HUD 裡有活的 fps 計數器 ⇒ 依設計不可能），所以第 42 輪 N1–N4 一條都沒判。第 43 輪換成<b>不含任何挑選常數</b>的結構性判準（</code>∪(每人 mask) ⊆ mask(藏全世界)<code>、</code>差異列 ⊆ HUD 列<code>），八條探針全過。<b>非盲，但方向對自己不利</b>：重寫的唯一後果是把「都不判」變成「N4 正式沒過」；圖利的改法長相相反（放寬 N4 或讓探針繼續卡住）⇒ <b>N1–N3 的過只當記錄，N4 的沒過照收</b>。回歸：N1–N4 的數字與第 42 輪照報的<b>逐字相同</b> ⇒ 改門檻沒漏進主量測。⚠ <b>「太小」正是動手前就寫在擔心清單上的那件事</b>，所以另跑 </code>ss_dlsens.py<code> 把 ΔLuma 門檻從 8 降到 1 重量：一般居民（k=0/5/12/40）<b>一格不動</b>，最小的三個只長 <b>+1～+2 px</b> ⇒ <b>不是量具削的，那三個是真的被建築擋住</b>。旁證量具沒歸錯人：P4 可加性對稱差 <b>0.0</b>、P5 樓層中位數 234/203/172/141 間距 <b>31/31/31</b> 完全分離 |
+| 剪影量測台（量具） | ✅ </code>world/silhouette.html<code> ＋ 已知答案校準塊，探針正反都驗過 |
+| 坐姿／站姿 | ⚠ 站坐分得出來（寬高比 1.34×），但短腿體型的高度比 0.819 未達 0.80 |
+| 量具（可稽核性） | ✅ 每一組數字之前都先過自己的自驗，而且<b>兩個方向都有已知答案</b>（<b>第 24 輪學到最貴的一條：驗量具的東西不可以跟量具同源</b>——凸包 </code>hull<code> 與拿來驗它的 </code>shell<code> 是同一支函數生的，於是變異「只回上表面四角（＝根本沒修）」讓 J1–J8 十五題、Q1(a)、Q1(b)、Q2、Q4 <b>全部通過</b>：兩個壞掉的東西一起退化就一起自洽，而那個自洽的結論剛好是我那一輪想要的「修好了」。補上「底面必須真的貢獻 4 個相異點」才擋得住，而且它是<b>唯一</b>擋得住的一條。同一個變異的另一趟還打出第二個洞：某趟 dump 拿到 <b>0 張紙</b>，於是每一條逐張計數都是 0、</code>ok<code> 變成 True——<b>量一個空集合永遠會過</b>，⇒ 張數本身要當判準，而且變異台的場景時刻要跟正式量測釘同一個 freeze。兩個洞都不是想出來的，是變異台打出來的）（第 23 輪把這條推到量具的<b>結論方向</b>上：溯源那組八個變異裡有兩個是專門朝「我這一輪想得到的結論」作弊的——「不讀 1920」會讓溯源退化成被明令禁止的路線、「分群改成 8-連通」會把碎片併成整塊而正好讀成漏掉的幾何；兩個都被擋下，結論才算數。另一條：合成自驗的縮圖走<b>真正在跑的那段平均碼</b>，變異成自己寫的四捨五入版就會讓手算的 211 變 212 而沒過）（第 18 輪新增：min-channel 中位數探針，六題含<b>中位數本身的兩個方向</b>——只驗「多數是白 →255」的話，一個永遠回最大值的壞中位數會通過）：位子分配器（視窗版 vs 整段暴力排序，n≤836 不一致 0；rank 是不是排列：重複 0／跳號 0；第 9 輪換了排序鍵之後重跑，仍然 0）／draw call 四校準／位移取樣器（靜止 0、已知 2.0）／像素差（同圖 0、塗 24×18＝432）／剪影台（1.60、1.00）／review 計數器（已知為空 ＝0、視窗 vs 暴力列舉 601 點不一致 0）／強紅像素（純白 0、已知紅 600、差 1 個單位的近似色 0、<b>房間最紅的真實像素 0</b>）／判決交叉驗證（801 件走 sim-bridge 真狀態機，最終狀態不一致 0）／<b>連續性探針（</code>?haul=0<code>／</code>?seats=0<code>／</code>?file=0<code> ＝已知有瞬移那一邊必須抓到，量到 42 次／8.40 單位、1202 次／3.83 單位、246 次／11.44 單位）</b>。第 8 輪多學到一條：像素判準的<b>取樣矩形</b>也要有靠山——它由常數＋相機投影算出來，而且<b>先量一次改動前的基線</b>；第一版矩形算錯（拿到全景相機）時，正是「改動前後都量到 0」才看得出是矩形錯了，不是實作壞了 |
+| <b>效能（與硬體無關的部分）</b> | ✅ draw call 1038 → 246；加了送件人、評審、桌上文件、判決層與兩段搬運之後 <b>376–389</b>（預算 445）、三角形 161352、GPU 貼圖 2 |
+| <b>效能（fps）</b> | ⚠ 在這台<b>量不到</b>（無硬體 GL），只能等有 GPU 的機器 |
+| draw call 量具 | ✅ </code>world/drawcalls.html<code> 五個已知答案的整數場景，含「已知看不見」那一邊 |
+| 走廊／樓梯／中央評審室 | ✅ 樓板加深成走廊、左右兩座 zigzag 樓梯、fl=1 三格打通成評審室 |
+| <b>交付狀態機 · </code>carrying<code></b> | ✅ 送件人抱著紙疊從格子走進評審室。在途 15.5 件、時長全部落在 </code>PHASES.carrying<code>、幾何違規 0、瞬移 0 |
+| <b>交付狀態機 · </code>review<code></b> | ✅ 桌上的文件疊多高<b>就是</b>當下在評審的件數（平均 10.7 件，與 λ×時長 自洽到 0.03%）；三位評審拿放大鏡／印章／紅筆，<b>桌上沒東西時動作幅度為 0</b> |
+| <b>交付狀態機 · </code>audit<code></b> | ✅ 被抽查的文件離開大桌、出現在稽核台上，稽核者的動作綁在檯面件數上（空的時候幅度 0）。平均同時 1.28 件、時長全部落在 </code>PHASES.audit<code> |
+| <b>audit 的「抽走」（過程）</b> | ✅ 紙從<b>它在大桌上的那個位子</b>被抬起、沿桌前空道滑到<b>它接下來要坐的那個位子</b>，端點誤差 0、瞬移 0（對照組 </code>?haul=0<code> 同一支探針抓到 42 次、最大 8.40 單位）。速度 6.2 u/s ＜ 場上最快的送件人 10.04。⚠ <b>沒有畫人走過去拿</b>（同時最多 3 份在搬，一個人分身乏術），紙是自己滑的 |
+| <b>交付狀態機 · 判決與結局</b> | ✅ accepted 蓋章進歸檔架／rejected 紅標攤在退回台／caught 紅標留在稽核台。<b>判決是 </code>sim-bridge.js<code> 的 </code>reviewOutcome<code>／</code>shouldAudit<code> 算的，clay 這邊一行規則都沒有</b>；801 件與該檔真正的 </code>advance()<code> 狀態機逐件比對，不一致 0 |
+| <b>結局的「過程」</b> | ✅ </code>accepted→歸檔架<code>／</code>rejected→退回台<code> 也走過去了：紙從<b>它在大桌／稽核台上的那個位子</b>被抬起，沿桌後空道橫移、升到櫃頂之上、越過櫃體、從<b>正面</b>水平滑進格位（這條路是算出來的——從上面降會穿過每一層層板、從後面滑會穿進櫃體）。端點誤差 <b>0</b>、瞬移 <b>0</b>（對照組 </code>?file=0<code> 同一支探針抓到 246 次、最大 <b>11.44 單位</b>）。速度 3.0–9.3 u/s ⊂ 送件人實測帶。<b>還沒畫的</b>：rejected 的「退回原本的格子」回程、caught 的「紀錄卡被劃記」（紀錄卡牆不存在）。⚠ 一樣<b>沒有畫人走過去拿</b> |
+| 架上的停留時間有沒有被搬運吃掉 | ✅ <b>沒有</b>。做法是延長 </code>gone<code>（＝ file1 ＋ SHOW）而不是從 SHOW 裡切一段：切下去等於拿「架上看得到文件」去換「看得到文件被送過去」。代價是容量，解法是位子<b>落地才佔</b>（rank 的排序鍵從判決時刻換成落地時刻，FIFO 論證原封不動）⇒ 架上佔用峰值沒漲（15/24、5/8），平均仍是 rate×SHOW |
+| 紙在檯面上會不會「跳」 | ✅ <b>歸檔架與退回台的位子一旦分配就不再變</b>（純函數版分配器：到達序 mod 位子數）。整段展示期間的最大位移 <b>0</b>（對照組 </code>?seats=0<code> ＝舊行為，同一支探針抓到 1527 次、最大 <b>2.62 單位</b>）。碰撞 0，而且不只是論證：同一檯面上展示時長相同 ⇒ 離場序＝到達序 ⇒ 在檯上的那幾件 rank 連續 ⇒ mod 位子數不會撞，判準另外直接數過。⚠ <b>稽核台仍然會遞補</b>（它不是 FIFO，那個證明對它不成立），第 7 輪已改 1 欄 ⇒ 只掉 0.085 |
+| 歸檔架的形狀 | ✅ 加了 7 片層板變成真的架子。<b>位子固定的代價</b>：底下幾層會空著，沒有板子那一疊會浮在空中（舊版是靠下面那張紙撐的）。層板進靜物那一桶合併 ⇒ draw call 一個都沒多。可見度量過：歸檔架矩形內 1720 px ＝ 改動前的 <b>86%</b>（門檻 70%） |
+| 歸檔架讀到的是什麼 | ⚠ <b>讀到「架子」不是「累積」</b>。舊版是桌上一疊愈疊愈厚的白色，一眼就是累積；新版是架上某幾層有文件。這是固定位子的結構後果，不是參數問題。判準只問了「看不看得見」，沒問「讀到的是不是同一件事」——⇒ 下一步要人類看圖決定。<b>第 31 輪查到它有一個算得出來的物理原因</b>：層高 </code>ARCHIVE_LEVEL_H = 0.155<code>，扣掉層板 0.04 與紙 0.08，紙上面只剩 <b>0.035</b> 的縫 ⇒ 這個俯角看進去，每張紙只露出最前面一小條，看得到的紙面平均只有 <b>45.7%</b>（頭上沒有板子的最上層是 <b>99.2%</b>）。⇒ 「讀成架子不是累積」與「展場距離讀不出紙」是<b>同一個原因</b>，而且不是參數問題也不是燈的問題，是<b>層高</b>。改層高是視覺決定（整座櫃子會長高，而 </code>geom.js:341<code> 記著空道往下的下界是硬的）⇒ 仍然等人類 |
+| <b>髮色（色盤）</b> | ✅ 修好了。舊版在<b>打包成整數的 RGB 上做加法</b>（</code>0x2E2420 + floor(rand*0x201810)<code>）⇒ G/B 各自跑滿 0–255：窮舉 200000 點，<b>99.4% 落在棕色值域外</b>，畫面上就是滿頭綠髮。改成單調斜坡（同一個 u 讓三通道一起走）⇒ R46–78 G36–60 B32–48、</code>R&gt;G&gt;B<code> 恆成立、相異髮色仍有 34 種。⚠ 三通道各自獨立抽會長出橄欖綠（R&lt;G），所以那不是「加三次」就好 |
+| 色盤有沒有人在問（量具） | ⚠ <b>人形問了，靜物還沒</b>。前九輪每張近景截圖裡都有綠頭而所有判準都過，因為沒有任何一條判準在問顏色。現在三層都有量具、每層都有「已知會壞」的對照世界（</code>?hairbug=1<code> 保留舊公式）：算式（新 0／舊 198878 出界）、<b>頂點色</b>（80 個人形 476 個 mesh 的 buffer，違規唯一色 0；對照世界 52 種）、像素（強綠 0；對照世界 12440、6 塊）。<b>沒掃到的</b>：房間／家具／道具／紙那些不走 vertex color 的材質 |
+| 紅色只有一個意思（SPEC §四） | ✅ 用第 6 輪<b>結束時就凍結</b>的修正定義（R≥170 且 min(R−G,R−B)≥105）重量：沒有紅標的時刻 <b>0 px</b>（舊定義 1281）、有 2 個紅標時 105 px。連紙帶道具全關的世界也是 0 ⇒ 舊定義量到的本來就是房間的暖色調不是退件紅。探針多一個已知答案：房間最紅的像素 (187,105,77) 必須算成 0 |
+| <b>在路上的紙讀不讀得成一條線</b> | ✅ 不再是線。原因量出來了：歸檔那條路在<b>單一高度</b>上的兩段佔全長 53%（近）到 81%（遠）⇒ 任何時刻一半以上的紙恰好等高（第 10 輪十張裡九張 y＝5.950）。改成 </code>ARCHIVE_OVER_Y + 1.00·frac(n·φ)<code> 一疊錯開的空道——用 φ 不用亂數，因為要的是「<b>同時</b>在路上的那十幾件彼此散開」，而雜湊會成群。最大同高群 13 → <b>3</b>（投影像素上 8 → 2）。⚠ 不能改成斜著飛上去：那條斜線整段掃過評審的頭 |
+| 在路上的紙<b>還讀不讀得出是紙</b> | ⚠ <b>目視第一次成立了，但事先訂的三條數值判準仍然沒過 ⇒ 預設維持關，等人類看圖定奪</b>。第 12 輪的做法瞄錯了對象：它讓紙轉 15° 對準<b>相機</b>，把 N·V 湊到 cos15° 就停手，<b>完全沒有問 N·L（亮度）</b>——所以轉回來的是沒被照亮的那一面（亮面像素最好的一張只有 489，門檻 2500）。第 15 輪改瞄 <b>主光與相機的半向量</b> θ*=(φ_L+φ_V)/2，也就是讓 (N·L)(N·V) 取最大：純幾何，不加燈、不加自發光、不動空道，所以沒有擦到「只有一盞主光」那條人類定的方向。量到的：前縮因子 0.238→<b>0.470–0.992</b>、投影四角 5300→<b>10012–26129 px</b>、亮面像素 0–489→<b>323–17373 px</b>、640px 空道帶 2601→<b>7049</b>。逐張角度與<b>動手前寫進 STATE.md 的預測表</b>相符到 0.05°。<b>目視（</code>tl_on_640.png<code> vs </code>fl_on_640.png<code>）</b>：平放是一排細碎白屑，傾斜是<b>明確的矩形白紙浮在空中</b>——「那是紙」在展場距離第一次成立。<b>但 B3／B4／B6 仍然沒過</b>（0.019／323／0.019），沒過的<b>原因換了</b>：不再是「整批太暗」，而是<b>亮度張張不同</b>（最好的 0.810 已貼到天花板 0.83，最差的 0.019）。角度那一半解決了，剩下的全是<b>陰影分佈</b>。第 16 輪把「吃不吃得到主光」從手算的點判定換成<b>對上表面 7×7 取樣、朝主光射線去問場景裡真的會投影的那 388 個 mesh</b>（＝陰影貼圖用的同一組），同一組紙同一組像素只換預測器 ⇒ Pearson r <b>0.636 → 0.887</b>、殘差中位數 0.049。<b>第二個遮擋物因此被指認出來了，而且不是猜的</b>：撞擊點座標分成兩群，y=7.53 那群是樓板，y≈5.9–6.8 那群是<b>在路上的紙自己互相遮</b>（71.57° 的紙近乎直立＝一面 0.9 單位高的擋板）與<b>站著的稽核者的頭</b>。手列遮擋物清單永遠列不到這一項。第 17 輪把同一組取樣點<b>朝相機再射一次</b>（「那張紙在相機這一側被誰擋住」，背景控制圖扣不掉的第二個機制）：遮擋<b>確實存在</b>（最差那張 34/49 看得到），<b>但它解釋不了殘差</b>——最差那張的預測 0.510→0.510 一動也沒動，因為被相機擋住的取樣點恰好就是本來就在影子裡的那些（同一張紙同時擋光也擋視線）。⇒ <b>第 16 輪對殘差來源的診斷被自己的判準否掉了</b>。第 18 輪換下一個假設（受光但偏暗：分類器要 min-ch ≥200，「照得到」≠「畫出來夠白」），<b>同樣被自己事先寫死的裁決規則否掉</b>（成立 ⟺ N1 且 N2；N2 沒過）。<b>但這一輪量出了殘差真正的來源，而且是可查證的數字</b>：把同一組 49 個取樣點投影到畫面上讀真實 min-channel 之後發現，殘差最大那張紙 25 個「預測白」取樣點的值<b>全部恰好 196</b>（門檻 200，IQR 0）——整片受光白區以差 4 個階被整片拒收，它自己該貢獻 0 個亮面像素；可是量到 1834 個。查下去：<b>那 1834 個像素 100.0% 落在排在它前面那張紙的四角內</b>。四角在畫面上互相重疊，9 張裡 7 張有重疊、最高 71.6%，另外兩張的「亮面」同樣 100% 是別張的。⇒ <b>殘差不是遮蔽機制也不是亮度機制，是量測把別張紙的像素記到這張頭上</b>（背景控制圖 file=0 裡一張在路上的紙都沒有 ⇒ 這一項扣不掉，跟第 17 輪相機側遮擋同一個形狀的漏）。<b>連帶的後果是通過的判準也失效</b>：T2（r=0.887）／T3／U2／U3 全部算在同一份被污染的 ratio 上，它們「通過」只代表預測器與一個記錯帳的量測剛好對得上。⇒ 「紙互相遮」不只是佈局取捨（那一半仍等人類），它同時是<b>量測有效性 bug</b>，那一半不必等。⚠ 事先寫死不當判準的乘積版本（white×visFrac）反而好看（r 0.9178、最大殘差 0.201，會讓判準過），但它是<b>偏差修正冒充機制</b>：預測器系統性高估 14.2%，而平均 visFrac 是 0.891，兩個數字剛好互相抵掉 —— 沒有事先決定判哪一個的話，這一輪會以「通過」收場。<b>第 19 輪照第 18 輪的處方修了「扣掉別張紙的像素」，結果沒有用</b>：T3b／U4 0.3272 → 0.3272 一個字沒動，T3／U3 中位數反而變差（0.049 → 0.116），而第 18 輪訂的 O1 是<b>空過</b>（目標那張被扣 0 px，0.019 在改之前就已 ≤0.02 —— 門檻訂在已量到的值之上，不可能失敗）。原因查明且有像素證據：深度序用<b>中心距</b>，兩張只差 0.143 而紙帶傾角 ⇒ 深度區間重疊，排不出先後；四角內非亮面像素 (217,209,196)＝min-ch 196 與 dimpx 獨立量到的 196 一字不差，被算成亮面的是 (230,225,213)＝隔壁那張的表面色 ⇒ <b>「更遠」那張其實畫在前面</b>。<b>並查出第三個污染源</b>：四角裡大量像素既不是這張紙也不是別張紙 —— y=6.2944 的四角 19889px 只有 16.2% 是紙色，其餘是建築暗色（y=6.0584 是 48%）；</code>ratio<code> 的分母假設整個四角都在看這張紙，而它大部分不是。<b>第 20 輪把深度序換成逐像素平面 z-test（1/w 對畫面座標仿射，四角擬平面），事先訂的判準過了</b>：目標那張被扣掉 <b>3183 px</b>（中心距那版 0，門檻 1500），而且扣得<b>乾淨</b>——自己的表面色 4820 px 全留、隔壁那張的 1818 px 全扣，程式沒有拿到任何顏色資訊。九張裡五張與中心距答案不同。<b>但殘差變差（T3b/U4 0.327 → 0.510、r 0.887 → 0.782，中位數 0.116 → 0.049）</b>，原因具體：扣乾淨後目標那張實測 0.000，因為<b>它自己的表面是 min-ch 196、而門檻 MIN_CH＝200</b>——當初推 200 用的「172 與 211 之間整段是空的」不成立。⇒ 剩下的是<b>門檻本身</b>，而它必須先寫進判準表再動。<b>第 21 輪照那條規矩做了：規則 R21 在看直方圖之前凍結</b>（背景 W ＝ z-test own 座標讀 </code>fl_off<code>；紙面 P ＝ own 裡 on≠off 的眾數色；門檻 ＝ 兩者中點；五個拒絕分支）<b>，算出來是 184</b>（Wmax=172、最暗的紙面 196、gap 24）。量具先過 12 題已知答案再被<b>六個變異</b>打過（其中兩個第一次被誤讀成「擋得住」——一個其實是崩潰、一個是題目真的有洞，補了 D7 才擋得住）。<b>證據是逐張表不是殘差</b>：換到 184 之後九張裡<b>只有目標那一張動</b>（ratio 0.000→0.498），其餘八張最多動 0.002 ⇒ 184 落在一段真的空著的區間，是外科手術不是全面放寬；若是「渲染讓紙普遍偏暗、調門檻只是掩蓋」，每一張都會一起抬。六個數字全部變好（T3b 0.510→0.174、r 0.782→0.974）<b>但那不是證據</b>，換門檻本來就會這樣，這是事先寫在判準表裡的。⚠ <b>預設仍是 200，因為事先訂的 M11 沒過</b>：已知沒有在路上的紙那張圖的同一條帶 1908 → 2450 px（門檻 +500，超出 42）。查下去那 542 個全在帶的下緣，混著中性紙色與暖牆色 ⇒ <b>很可能是控制區本身訂錯了</b>（</code>fl_off<code> 沒有「在路上」的紙，但桌上／架上的紙還在）——<b>但這個解釋是看到沒過之後才想到的，所以不拿它改判準也不拿它換預設</b>，下一輪先把控制區訂乾淨再重跑。⚠ 另外量到：九張裡<b>四張的「表面色」根本是建築不是紙</b>（min-ch 52/56/62），＝第 19 輪查出、仍未動的第三個污染源（</code>ratio<code> 的分母）。剩下與門檻無關的最大單張殘差是 y=6.4059 的 0.153（表面 213 夠白、預測 0.510、量到 0.357）。<b>第 22 輪照第 21 輪事先寫下的定義把 M11 的控制區訂乾淨</b>（帶內、且不在任何一張可見紙的投影四角內；為此 JS 端補了 </code>allPx<code>——</code>filePx<code> 對休息中的紙只記 </code>restTiltMax<code> 就跳過，那 29 張的四角在 dump 裡從來沒出現過）。<b>閘門 K1 沒過（651 px，門檻 ≤100，差 6.5 倍）⇒ 依事先訂的 K6，MIN_CH 維持 200，184 仍未被授權。</b> ⚠ <b>但沒過的原因不是「牆會被吃進來」</b>：事先寫下的擔心是「R21 的 Wmax=172 只是道路那一帶的偏差樣本」，而 K4 量到 212 <b>看起來完全確認了它</b>——正因如此才去查那 651 px 的顏色，前三名 524 個（80%）是 (230,224,212)／(229,223,211)，就是 </code>paperpx.py<code> 檔頭寫死的「被照亮的紙上表面」；膨脹掃描 651→223→122→40 單調無平台 ⇒ 是 640 縮圖的混色邊，不是漏掉的幾何。<b>所以 K1/K4 沒過不是 184 的反證，對立假設 (b) 這一輪既沒被證實也沒被排除。</b>真正的 (b) 候選是 [184,200) 裡那群偏暖像素（min-ch 186–191），它們一個都不在 651 裡。<b>第 23 輪照第 22 輪凍結的路線 (i) 拿 1920 原圖去驗那個「縮圖混色邊」的解釋，把它推翻了，而且是反的。</b></code>shrink.py<code> 是精確的 3×3 箱型平均（逐像素驗過差 0 px，用 </code>--thr 0<code> 不是預設容差 16），所以 640 的每個像素<b>確定</b>是 1920 那 9 個的平均 ⇒ 源塊裡一張紙都沒有，它的亮就跟紙無關。分帳出來 <b>genuine 553／bleed 98</b>：那 651 個裡<b>只有 98 個真的沾到紙</b>。形狀直接否掉「邊緣」：553 px ＝ <b>10 個 4-連通塊、單像素塊 0 個</b>（最大 195 px 與 136 px 的細長橫條），而反鋸齒邊會是幾百個貼著 29 張紙輪廓的碎片。位置逐塊對得上 archive 疊層的<b>接縫</b>（y137–138／y145／y160–163）與 table 兩疊的<b>側邊</b>（x201–209／x496–503），顏色在 1920 上是純的 (230,224,212)。<b>根因在 </code>main.js:421 sheetCorners()<code>：四角全部取 </code>y = SHEET_HT<code>，只有上表面</b>；紙是 1.16×0.075×0.90 的盒子，四個側面（厚度那圈）不在任何 quad 裡，而 </code>main.js:496<code> 自己的註解就寫著「一張紙厚 0.075 單位 ≈ 4 px」，與量到的塊高 2–4 px 相符。⇒ <b>P3 閘門 553 ≤ 100 沒過、P6 K4′ 212 &lt; 184 沒過，MIN_CH 維持 200</b>；K4′ 讀到的仍然是紙（側邊）不是牆，所以 <b>(b) 連兩輪既沒被證實也沒被排除</b>。<b>膨脹掃描為什麼給錯答案也清楚了</b>：640 上膨脹 1 ＝ 1920 上膨脹 3，帶內扣掉的 1462 px 裡有 953 px 源塊裡一張紙都沒有 ⇒ 它在啃這些塊的邊，不是在削反鋸齒。<b>第 22 輪「漏掉的幾何會撐出一個平台」那個判別法本身是錯的</b>——教訓是<b>看形狀，不要只看總數怎麼衰減</b>，兩個相反的原因可以長出一模一樣的衰減曲線。<b>第 24 輪把側邊補進覆蓋，閘門三輪來第一次過：genuine 553 → 47（門檻 ≤100）。</b>修法是<b>八個角投影後的 2D 凸包</b>，不是「上表面往下長 4 px」——後者有一個可以事後調的自由度，而擴大覆蓋一定讓 genuine 下降，所以覆蓋的形狀如果有任何參數，這個結果就是自己挑出來的。</code>quad<code> 一個字沒動（新增 </code>hull<code> 欄位），所以 </code>ratio<code>／M 系列／R21 的 </code>Wmax<code> <b>不可能</b>漂，逐值對帳 0 差。<b>但 184 仍未被授權</b>：Q8 的 99.9 百分位 194 ≥ 184，依事先寫死的 Q11，MIN_CH 維持 200（連續三輪）。⚠ <b>擋路的東西換人了</b>——194 現在讀到的不再是紙的側邊，是 </code>(227,212,191)<code>／</code>(224,208,186)<code> 那群偏暖像素（min-ch 186–191），也就是第 22 輪點名、第 23 輪列進下一步而兩輪都沒動的那一群；<b>現在控制區第一次真的不含紙，所以第 21 輪的對立假設 (b)（牆比想像中亮）第一次有了乾淨的問法</b>。剩下的 47 px 是單一一塊 x[201,209] y[168,179]，1920 上是灰綠的 </code>(201,203,200)<code>、min-ch 恰好卡在門檻 200 上，<b>不是紙白</b>——第 23 輪把它歸給「table 左疊側邊」的解釋這一輪被否掉了（側邊已補進覆蓋，它還在），它是什麼還沒查。<b>第 25 輪用光線指認探針把這兩群都問清楚了</b>（從 review 分身相機對每個像素射 9 條子射線，讀撞到那一面的頂點色；只指認、不動門檻）：偏暖那 315 px ＝ <b>稽核者的皮膚</b>（</code>fig47<code> 295／</code>fig44<code> 16／</code>fig45<code> 4，頂點色 </code>skin5<code>），那 47 px ＝ <b></code>fig44<code> 手上放大鏡的鏡片</b>（</code>prop_lens<code> 47/47）。⇒ <b>第 21 輪的對立假設 (b)（牆比想像中亮）被否掉了：擋住 184 的是前景的人，不是背景的牆。</b> 獨立第二條路（投影包圍盒）違反 0；後果雙向對照 R11 藏掉它 295/295 變、R12 藏掉別人 0 變。<b>第 26 輪由非原作者重跑整套，227／21 與所有指認數字逐字重現。</b> ⚠ <b>但 184 仍未被授權（連續五輪）</b>：Q8 ＝ 194 ≥ 184，MIN_CH 維持 200。⚠ <b>而且問題本身可能問錯了</b>——第 26 輪重跑順手量到的跟亮度無關的網格樣本顯示，</code>paper_rv<code> min-ch <b>p50 152／max 212</b>、皮膚 p50 189、</code>wall` max 171：<b>紙的中位數比皮膚還暗，紙的上界比皮膚還亮</b>，兩者在 min-ch 上根本不可分。⇒ 下一輪要問的不是「184 還是 200」，是**一條全域色度門檻到底分不分得開</div>
+
+<h2>留下的東西</h2>
+<p class="dim" style="font-size:.85rem;margin:0 0 .6rem">
+這一欄是唯一能證明某一輪真的做了事的東西——其餘全部是自述。</p>
+<table><tbody><tr><td><code>1571198</code></td><td class="dim">08-17 01:16</td><td class="dim">Vacant</td><td>tool(S7g): 紅線 B 從來沒被檢查過——第一次掃就有 11 個「信任」，而動物園那邊早就不這樣寫了</td></tr><tr><td><code>f3a55e5</code></td><td class="dim">08-17 01:07</td><td class="dim">Vacant</td><td>tool(S7f): 宣稱階梯那四階從來沒被掃過，而錯的抽取器會同時多抽註解、少抽真文案</td></tr><tr><td><code>b8ec0c5</code></td><td class="dim">08-17 00:51</td><td class="dim">Vacant</td><td>data(S7e): 觀測台把「抓到」和「後果」都放上畫面了，但沒有一句話把它們連起來</td></tr><tr><td><code>4f567b6</code></td><td class="dim">08-17 00:34</td><td class="dim">Vacant</td><td>data(S7d): 官網沒踩到紅線，不是因為歸因寫對，是因為它沒講「後果」</td></tr><tr><td><code>3d173cb</code></td><td class="dim">08-17 00:22</td><td class="dim">Vacant</td><td>fix(S7c): 第 98 輪把病因寫成「分支順序」——重現之後那個診斷是錯的</td></tr><tr><td><code>fa53bd2</code></td><td class="dim">08-17 00:09</td><td class="dim">Vacant</td><td>fix(S7b): Q6 我寫的是估的 75 分，量出來是 17 分——判準表不准放估計值</td></tr><tr><td><code>4dc65ba</code></td><td class="dim">08-17 00:07</td><td class="dim">Vacant</td><td>data(S7b): 觀眾最專心那一秒的文案，把「拿不到工作」整條掛在「重跑抓到」上</td></tr><tr><td><code>41bae6c</code></td><td class="dim">08-16 23:46</td><td class="dim">Vacant</td><td>data(S7): 展場文案把牙齒歸給了稽核——而 S6 說牙齒在評審</td></tr><tr><td><code>fed8173</code></td><td class="dim">08-16 21:15</td><td class="dim">vacant_hm</td><td>chore(gapaudit): 把「寫這一輪的紀錄」本身也判完——順帶關掉會把判決覆寫回舊 key 的那支</td></tr><tr><td><code>6f0d328</code></td><td class="dim">08-16 21:12</td><td class="dim">vacant_hm</td><td>fix(gapaudit): 改掉 4 條「頁面說沒做、其實做了」——順帶把稽核的 key 從行號改成內容，否則改完就驗不動了</td></tr><tr><td><code>6f031a8</code></td><td class="dim">08-16 20:57</td><td class="dim">vacant_hm</td><td>data(gapaudit): 把本輪紀錄寫進 PROGRESS.md 之後重跑——語料 220→234，因為報告自己也進了被稽核的集合</td></tr><tr><td><code>ec6fd57</code></td><td class="dim">08-16 20:53</td><td class="dim">vacant_hm</td><td>feat(gapaudit): 自承缺口全掃 220 句——抓到 6 條「頁面說沒做、其實做了」，最貴的兩條在每輪必讀的 HANDOFF.md</td></tr><tr><td><code>f95b394</code></td><td class="dim">08-16 20:34</td><td class="dim">vacant_hm</td><td>data(decision): 重生那一頁——刪掉「640 對照還沒做」那半句，補上「距離要價 55–78 對」；既有 166 條 claim 逐條沒動</td></tr><tr><td><code>91db113</code></td><td class="dim">08-16 20:33</td><td class="dim">vacant_hm</td><td>feat(ssdist): 那一頁自承「展場距離沒量過」是假的——每個數字本來就是 640 量的，而距離真正要價 55–78 對</td></tr><tr><td><code>6dcfd91</code></td><td class="dim">08-16 20:17</td><td class="dim">vacant_hm</td><td>fix(shaaudit): 我自己改 hudaudit.py 的 docstring，就把自己落盤的分類表打成過期</td></tr><tr><td><code>b09ba58</code></td><td class="dim">08-16 20:14</td><td class="dim">vacant_hm</td><td>probe(shaaudit): 整檔 sha256 那一族第一次被數過——邊界註記說 2 個站點，實際 38 個</td></tr><tr><td><code>2c7300b</code></td><td class="dim">08-16 18:51</td><td class="dim">vacant-docs-web</td><td>probe(cdp): 第 80 輪推薦「最穩、什麼都不要改」的那一組，40 張裡只有 1 張拍對</td></tr><tr><td><code>b33150a</code></td><td class="dim">08-16 17:54</td><td class="dim">vacant-docs-web</td><td>probe(shot): 想修尺 B 那張壞畫格，量到的是「直覺的那個修法讓它爛 15 倍」</td></tr><tr><td><code>3181197</code></td><td class="dim">08-16 17:27</td><td class="dim">vacant-docs-web</td><td>probe(scroll): 那 29 格「量不到」全部是活的——而第一次跑的綠燈是我自己的門檻公式撐出來的</td></tr><tr><td><code>5706915</code></td><td class="dim">08-16 16:08</td><td class="dim">vacant-docs-web</td><td>probe(interact): 回算自檢第 6 條——五輪的「點過 262 個」有 215 次不可能有效果</td></tr></tbody></table>
+
+<h2>每一輪</h2>
+<details><summary><b>第 153 輪</b><span class="dim"> · 08-17 01:19 · 3KB</span></summary><pre>```
+B1  口徑探針 fixture       9/9（第一次 8/9）          PASS
+B2  「信任」語料總數        11 · app.html 6/app.js 2/dashboard.py 3   PASS
+    （＝第 102 輪手工 grep 的數，逐字相同）
+B3a 切句 vs 不切句對帳      29 = 29 · 一致             PASS
+B3b 原始檔 ≥ 語料          11≤20 · 2≤4 · 16≤20        PASS（差額全是註解）
+B4  既有四支探針           7/7 · 13/13 · 4/4 · 11/11  PASS
+B5  紅線 A 既往數字        候選 2 · 35226 字元 · 50 檔（一個沒變）  PASS
+B6  觀眾文案 diff          0 行                        PASS
+```
+
+**探針當場打回我一格**：`D1` 我把「這是信任觀測台」的〈否定脈絡〉期望值寫成 `True`，但那句裡一個否定詞都沒有 ⇒ 已知答案本來就是 `False`。改的是 fixture 不是程式碼。
+
+## 量到什麼
+
+語料裡 **11 個「信任」＋16 個英文 `trust`**，29 條裡 **28 條在觀測台**；肯定用法 23 條、否定脈絡 6 條。最重的是招牌類：`&lt;title&gt;Vacant — 信任觀測台`、`Trust Observatory`、「信任開關對照」。
+
+**最實際的發現**：`vacant_hm/js/hero.js` 原始檔有 3 個「信任」、畫面 0 個——三個全在註解裡，內容是「對不懂的觀眾講『信任』是騙人。改成『可究責層』」。動物園那邊早就照紅線 B 做了，而且把理由寫在自己的註解裡，所以理由從來沒有傳到觀測台。不是兩份程式漂移，是紀律只覆蓋寫著它的那一支。
+
+預測四條錯一條，錯得徹底：我預測英文 `trust` 在語料裡是 0（只在識別字裡），實際 16，而 `Trust Observatory` 是印在畫面上的英文副標——**紅線 B 講「信任」，我就只找中文**。
+
+## 收尾
+
+- commit `1571198`（Vacant / feat/v2-four-stages），已 push，`git rev-parse HEAD origin/…` 兩個 sha 逐字元相同
+- STATE.md 第 103 輪事前登記＋事後、PROGRESS.md（誠實邊界回算表、Vacant 本體、卡住三條新決定）都已更新
+- **本輪一個字的觀眾文案都沒改**——觀測台要不要改名是敘事決定，寫進〈卡住〉等人類
+
+**下一步**：紅線 C（「保證正確」「防止」「杜絕」）同樣是單詞族、同樣沒人掃，會被同一個理由漏掉（太簡單所以沒人做），詞族與 fixture 可比照 B 直接寫，執行端可以自己做。
+
+**卡住**（都沿續前輪）：黏土剪影五選一連續第四十五輪等人類；`~/vacant` 不是 git repo，STATE/PROGRESS 無版本控制無異地備份；`HANDOFF.md` 機器識別段仍寫 Windows 那台（本機實測 `hostname`＝`user1`）。
+</pre></details><details><summary><b>第 152 輪</b><span class="dim"> · 08-17 01:08 · 2KB</span></summary><pre>it.SCOPE`（第 101 輪的下一步 1）。這不是加一行 glob——舊的 `extract()` 對任何非 HTML 檔一律走 JS tokenizer，所以要新寫 Python 抽取器（走 `ast`）＋獨立的 `.py` 量尺（走 `tokenize`）。
+
+## 驗證結果（判準事前寫在 STATE.md，跑完一個字沒改）
+
+| 格 | 判準 | 實測 | |
+|---|---|---|---|
+| P7a | 新抽取器 fixture 全過 | 11/11 | PASS |
+| P7b | 同組給現行 `js_strings` 答錯 ≥3 | 4/11 對，**答錯 7 格** | PASS |
+| P7c | `.py` 量尺 fixture | 4/4 | PASS |
+| G1 | 加入前 2 條候選消失數 = 0 | 消失 0 · 新增 0（2→2） | PASS |
+| G2 | 覆蓋字元增加 | 27179 → **35226** (+8047) | PASS |
+| G3 | `dashboard.py` 漏失率 0% | 待測 29 段 · 漏 0 · 0.0% | PASS |
+| G4 | 既有 fixture 不退步 | 7/7 · 13/13 · 4/4 | PASS |
+| G5 | 宣稱階梯的字進了語料 | **2/3** | **FAIL — 判準我寫錯** |
+| G6/G7 | 機時 0 · 文案 diff 0 行 | 0 · 0 | PASS |
+
+**G5 FAIL 是我把判準裡的原文默寫錯**（寫成「**本**面板不承載此階宣稱」，原文沒有「本」）。照 FAIL 記；事後用原文重查全部命中，但那是 post-hoc 不計入。這是連續第二輪同一形狀（101 輪 E0c／E2）。
+
+**預測三條錯兩條**：唯一猜對的那條正是我事前期待的答案。
+
+## 兩個順帶量到、跟展場有關的
+
+1. **`dashboard.py:66` 有第二個觀測台**——`_PAGE` 是整頁內嵌 HTML，`:251` 當 `app.html` 讀不到時的 fallback 送出。離線、無人值守、少一個檔就會踩到它，而它從沒被任何掃描看過。
+2. **S7 從來沒查過誠實邊界第二條**：事後直接數抽取語料裡的「信任」＝ **11 次**（`app.html` 6、`app.js` 2、`dashboard.py` 3，含 `&lt;title&gt;Vacant — 信任觀測台`）。`app.html` 全程在 SCOPE 裡卻沒被標出來，因為 S7 掃的是紅線 A（歸因），紅線 B（口徑）沒有任何自動檢查。這正是第 72 輪自己寫下「這個 0 不准擴出去」所預留的那一格。**改文案是文案決定，本輪一個字沒改。**
+
+## 收尾
+
+- commit `f3a55e5` Vacant（feat/v2-four-stages），已 push，`git rev-parse HEAD origin/…` 兩個 sha 逐字元相同。
+- STATE.md、PROGRESS.md 已更新（`~/vacant` 不是 git repo，仍無版本控制——連續第四十四輪的卡住項）。
+- 黏土剪影五選一**連續第四十四輪**等人類作答，本輪一像素沒動。
+</pre></details><details><summary><b>第 151 輪</b><span class="dim"> · 08-17 00:54 · 3KB</span></summary><pre>ll to skip, or wait longer.
+第 101 輪完成。一輪一件，判準先寫、驗完才收尾。
+
+## 做了什麼
+
+掃了**觀測台（`Vacant/vacant/web/app.html`）的活體 DOM**——第 100 輪明確登記「本輪沒做」的後半，也是最後一個沒被掃過的展件。起真的 dashboard（`vacant up`，產品入口本身）＋離線假腦 40 筆交付，九個狀態，餵給 S7 紅線掃描。
+
+## 量到的東西
+
+**三個展件的形狀量齊了，三種都不一樣：**
+
+| 展件 | 講「抓到」 | 講「後果」 | 同句連起來 |
+|---|---|---|---|
+| 官網（第 100 輪） | 91 次 | **0 次** | 0 |
+| `vacant_hm`（第 98 輪） | 有 | 有 | **2 條**（紅線風險） |
+| **觀測台（本輪）** | 216 次 | 27 次 | **0** |
+
+官網是「根本沒講後果」，觀測台是「**兩邊都放上畫面了，但分開在不同格子**」——稽核通過率一格、SLASH／信用已被扣減另一格，中間沒有因果句。要不要連起來寫成一句是敘事決定，等人類。
+
+## 本輪最該報的不是那個 0，是四件錯的
+
+- **兩個判準是我自己寫錯的，照記 FAIL。** E0c 拿 `#chip-head b` 驗渲染，但渲染成功時那個 `&lt;b&gt;` 會被換掉 ⇒ 那是「越成功越不會過」的反向判準。E2 我宣稱四句只有活體才掃得到，實際三句就是 `app.js` 的模板字面量——**活體才掃得到的只有宣稱階梯一類**（住在 `dashboard.py`，掃描範圍從沒收過它）。抓到這個高估的是判準裡「且靜態檔必須 0 次」那半條；沒有它，這格會四句全中而結論是錯的。
+- **樣本裡本來不含待測物**：SLASH 沒發生 ⇒「信用已被扣減」從沒進過 DOM。補了一筆稽核已佐證的仲裁才渲染出來。
+- **量測工具汙染了樣本**：我塞進 ledger 的 evidence 含「稽核」，被事件流原封不動印上畫面，一度產生 9 條候選，全部是探針自己的字。這同時是展場的事實——**事件流是把資料直接變成畫面文字的通道，原始碼掃描結構上看不到它**。
+
+五條預測全中，所以我在報告裡寫了警戒：預測全中的那一輪正是最不會複查工具的那一輪，而本輪真正擋住錯誤結論的那條判準是 FAIL。
+
+## 收尾
+
+- **commit**：`b8ec0c5`（Vacant / feat/v2-four-stages），已 push，本地與遠端 sha 逐字元相同
+- `STATE.md` 第 101 輪【事前登記】＋【事後】、`PROGRESS.md` 第 3 節與「卡住」段都更新了
+- 零機時、零生圖、文案 diff 三個 repo 皆 0 行、11 分鐘
+
+**下一步**（兩件執行端可自己做）：把 `vacant/dashboard.py` 收進掃描範圍（會改動既往分母，該獨立登記一輪）；做 S7 三輪的並排總表。
+
+**卡住**：黏土剪影五選一連續第四十三輪等人類。另外首次記下——本機沒有 `.venv`，`CLAUDE.md` 寫的 `.venv/bin/python -m pytest` 跑不了，用系統 `python3` 可以。
+</pre></details><details><summary><b>第 150 輪</b><span class="dim"> · 08-17 00:36 · 2KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+第 100 輪完成（00:28–00:35 UTC，7 分鐘）。
+
+## 做了什麼
+
+接第 99 輪的下一步：掃**專題官網的互動後 DOM**——第 97 輪掃的是原始碼、第 98 輪掃的 rendered DOM 只涵蓋 `vacant_hm`，官網那六組互動的字（十秒找 bug、共同盲區揭曉、收據組裝、路由開關、團隊、目錄）**兩條路都沒看過**。
+
+## 結果
+
+先寫判準再做事，全部照登記跑：
+
+| 判準 | 結果 |
+|---|---|
+| D1 探針雙向自驗（canary 點擊前／後、decoy） | 0 / 1 / 0 **PASS** |
+| D2 頁面真的跑了（`.code-token` = 216，靜態 HTML 是 0） | 216 **PASS** |
+| D3 六格「互動後才存在」的字 | 6/6 HIT |
+| D3b 畫面「11 件」 vs 直接讀 `main.js` 數 X | 11 = 11 **PASS** |
+| D4 新候選 | **0 條**（既有候選 0 條消失，覆蓋量 84911） |
+| D5 文案 diff（三個 repo） | 0 / 0 / 0 行 |
+
+**比那個 0 更有資訊的一條**：另寫一段獨立詞頻計數（不經候選邏輯）——官網全站含互動後 DOM，〈排除類〉14 個詞**一次都沒出現**，〈抓到類〉中文卻有 91 次。所以官網沒踩到 S6 紅線，**不是因為歸因寫對了，是因為它從頭到尾沒講「後果」那一段**。要不要補是敘事決定（規則七），不拍板；但「抽查」已講 91 次，後果句一旦接上去，最順的接法就是錯的那個。
+
+## 兩件照實記的
+
+- 實作時我原本把「目錄」那格寫成字比對——`&lt;dialog&gt;` 的內容**關閉狀態下就在 DOM 裡**，那會是個**必過的假判準**。改回事前登記寫的 `dialog.open`。同形狀還有宣稱卡背面（翻面只換 CSS）。
+- 預測 `C1002`（「若有新候選則來自跨元素拼接」）**前件不成立，不算猜中**。`C1001`／`C1003`／`C1004` 對。
+
+## 沒做的
+
+`Vacant/vacant/web/app.html`（觀測台）的互動狀態**明確沒掃**——它要活的 dashboard 伺服器才有資料，靜態 http 下整頁是空的、掃出來是假的乾淨。一輪一件，不併；做法與判準已寫進下一步。
+
+**commit** `4f567b6`（Vacant / feat/v2-four-stages，已 push，本地與遠端 sha 逐字元相同）。STATE.md、PROGRESS.md 已更新。
+
+黏土剪影五選一**連續第四十二輪**等人類作答，本輪一像素沒動。
+</pre></details><details><summary><b>第 149 輪</b><span class="dim"> · 08-17 00:24 · 3KB</span></summary><pre>自己做」的那項：修 S7 文案抽取器，重跑第 97/98 輪的掃描。
+
+**最重要的發現是：第 98 輪寫下的病因是錯的。** 那一輪把病因記成「正則分支順序」（`&#x27;…&#x27;`／`&quot;…&quot;` 排在反引號前面）。動手前先重現，發現那不成立——正則的交替只在**同一個起始位置**比先後，單引號與反引號不可能從同一個字元開始，調換順序不改變任何一個 match。照那個診斷去修，會得到一支改過而且沒有變好的程式。
+
+真因是**配對錯位的連鎖**：反引號分支的內容類別 `` [^`\\] `` 不准含反斜線，第一條含 `\n` 的模板配不起來，掃描指標落進模板內部，之後每個反引號都跟錯的另一半配對——抽出來的是模板**之間的程式碼**。單點錯配連鎖到檔尾，這也解釋了為什麼 `phone.js` 壞最凶（那批文案在檔案後半）。改成逐字元 tokenizer。
+
+## 量出來的數字
+
+| | 修前 | 修後 |
+|---|---|---|
+| 非註解中文段漏失（392 段） | 12.5% | **0%** |
+| 抓到的**文案**中文字 | 2240 | **2648（+18%）** |
+| 誤抓進來的**註解**中文字 | **2944** | 107（−96%） |
+| 候選（含 21 份 DOM） | 14 | 15（消失 0 條） |
+
+第 97 輪那個「53652 字元」覆蓋量閘門，**讀進去的註解比文案還多**，已在該報告加註標為作廢——判定結論一條都沒消失。新增的候選正是 `phone.js:256`，第 98 輪要靠 rendered DOM 才看得到，現在原始碼路徑自己就看得到，這是修好了的外部佐證。
+
+## 照實記的兩格 FAIL 與兩次探針出錯
+
+`Q2a`（修前漏失 &gt;20%）實測 12.5%、`Q4a`（字元數 &gt;53652）實測 27179，**兩格都 FAIL**。兩格都是我判準口徑寫錯，不是修壞了：41% 是 `phone.js` 單檔數字被我當成全範圍期望；補回文案的同時也停止把程式碼當字串抽，總量本來就會降。Q2a FAIL 後照事前登記停下來查量尺，逐檔拆開（phone.js 49%、其餘 12 檔 0%）確認量尺沒問題。
+
+兩個探針各先錯一次，**而兩次的錯都會讓結果更好看**：tokenizer fixture 第一次 11/12，FAIL 那格是探針斷言錯（要求模板不准含自己的 `class=&quot;cap&quot;`，等於要求程式做錯事）；量尺第一版逐行判註解，對續行不加 `*` 的區塊註解全漏判，給了 legacy 一個誇大的 84.7% 漏失率——那個方向剛好讓「我修好了」顯得更有功勞。84.7% 作廢，真值 12.5%。
+
+**文案一個字沒改**（規則七），三個 repo 文案 diff 皆 0 行。commit `3d173cb`，已 push 且遠端 sha 逐字元相同。
+
+**下一步**：`vacant-docs-web` 與 `Vacant/vacant/web/` 的互動狀態還沒掃，同一支工具可掃、零機時，執行端可自己做。
+
+**卡住**（連續第四十一輪）：黏土剪影五選一等人類作答，本輪一像素沒動；`~/vacant` 仍不是 git repo，`STATE.md`／`PROGRESS.md` 無版本控制無異地備份。
+</pre></details><details><summary><b>第 148 輪</b><span class="dim"> · 08-17 00:10 · 2KB</span></summary><pre> a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+第 98 輪完成。做的是第 97 輪唯一標明「執行端可自己做」的那一項。
+
+## 做了
+掃「互動之後才存在的文案」——第 97 輪的 DOM 掃描只涵蓋初始渲染，那些字兩條路都沒看過。用 `probe/cdp.py` 驅動 `chrome-headless-shell` 走 21 個互動狀態。
+
+## 找到的（比預期重）
+- **踩到·強形式** `vacant_hm/world/js/phone.js:256` → 畫面實際渲染「**重跑抓到了**，牠的光會暗下去、**一段時間拿不到工作**」——〈抓到〉與〈拿不到工作〉在同一句。S6 量到的重心是「評審看得見」，沒被抓的作惡者一樣只拿到守規矩者的 1%。
+- **踩到·跨句** `phone.js:125–126`「被抽查到…工作不會交到牠手上」——句級掃描結構上看不到，人工讀出來的。
+- **要人類定**：`phone.html:35–37` 記分板「被退回／被抽查／**被抓到**」、`sampler.js:90→113` 同屏因果鏈。文案一個字沒改（規則七）。
+
+## 這輪最貴的一件事
+事前登記那 16 格**樣本裡沒有待測物**：`flagged` ＝ `residual`，不等於 `bad`，60 格裡 6 格 flagged 全走乾淨分支，「被扣分了」「判定：不通過」一次都沒進過 DOM。逐格試到 cell[10] 才是 bad；phone 的 `hurt` 屏 `?id=1..39` 一個都沒有。**不補這兩格，本輪會拿到一個乾淨的 0，而 0 正是我原本預期的答案。**
+
+## 順帶抓到工具 bug，回頭限制第 97 輪
+`s7_claim_audit.py` 的 `_JS_STR` 把 `&#x27;…&#x27;`／`&quot;…&quot;` 排在反引號前面，模板字面量裡的 `class=&quot;cap&quot;` 會先配對、把整段文案吃掉。**79 條文案字面量抽不到 32 條 = 41%**。第 97 輪覆蓋量閘門過了，但讀進去的文案少四成。
+
+## 判準對帳（沒過的照記）
+`Q1` canary 3/3 · `Q2a` 247&gt;200 · **`Q2b` FAIL**（world/phone 本來就幾乎沒文字，改逐字人工讀完）· **`Q3` 勉強**（事前 16 格 14495 沒過，擴充到 21 格 20336 才過）· `Q4` 三 repo 文案 diff 0 行 · `Q6` 17 分。預測 **C983 錯**：新候選不在我預測的 `rp-bound`，在沒預測到的 `phone.js` hurt 屏。
+
+**commit**：`4dc65ba` ＋ `fa53bd2`（Vacant / feat/v2-four-stages，已 push，sha 逐字元對上）。第二個 commit 是自我更正——判準表的時間那格我填的是估計值 75 分，量出來是 17 分。
+
+**下一步**：修 `_JS_STR` 並重跑第 97 輪掃描（零機時，可自己做）。**卡住**：`phone.js` 那兩句的換詞方向與記分板版面等人類；黏土剪影五選一連續第四十輪等作答。
+</pre></details><details><summary><b>第 147 輪</b><span class="dim"> · 08-16 23:48 · 2KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+第 97 輪完成。
+
+**做的事**：接第 96 輪「下一步 1」的零風險那一半——把 S6 的結論（把作惡者擠出路由的主要動力是**被評審看見**，不是**被稽核抓到**）當成紅線，掃過三個 repo 的觀眾文案。**一個字的文案都沒改**（換詞是敘事決定，規則七）。
+
+**掃到的唯一一條**：`vacant_hm/index.html:111` 右屏三詞總結「信譽路由 · 三層漏斗 · **抽到就扣分**」。字面為真（抽中稽核確實會 slash），但它把弱的那條通道講成機制的牙齒——而同一頁下一屏的「第 2 層 密封評審」才是 S6 量到的強通道。問題不是頁面缺了評審通道,是那句三詞總結挑錯了代表。
+
+**這一輪的工作量幾乎不在「掃」，在「證明探針找得到」**——第一次跑出來就是 0 個候選,而 0 正是我希望看到的答案。兩個「看起來成功」的故障因此被逼出來：
+
+1. `file://` 下 ES module 被 CORS 擋掉、頁面根本沒跑，而 `--dump-dom` 照樣回傳 HTML。`deliveries.html` 的 DOM **351 → 7375 位元組（21 倍）**。照 `file://` 掃會拿一份幾乎空的 DOM 得出「乾淨」。
+2. 挖掉 `&lt;script&gt;` 時把換行一起挖了，行號整體偏 4 行（工具報 107、真值 111）。報告會把人送到錯的一行，而那一行看起來也像是差不多的地方。
+
+**照標不藏的兩件**：事前登記的 `CATCH` 詞族漏了「抽到」——照那份清單跑，本輪唯一的發現會漏掉；照出它的 `--diag` 也是事後加的。兩項都是放寬召回不是放寬判準，判準的數字一個字沒改。另外互動後才拼出來的字沒走 DOM 這條路，覆蓋度低於初始畫面。
+
+**驗證數字**：P1 fixture 7/7 · P2 canary 原始碼與 DOM 兩條路各自獨立確認（DOM canary 用拼接字串，原始碼路徑看不見它）· P3 覆蓋量 80330 字元 · P5 兩個文案 repo `git diff` 0 行、`vacant/` 0 行 · 零機時零生圖。
+
+**commit** `41bae6c`（Vacant / feat/v2-four-stages），已 push，本地與遠端 sha 逐字元相同。STATE.md、PROGRESS.md 已更新。
+
+**兩個新的等人類項**：①那句換成什麼（三個方向與代價已列）；②觀測台算不算展場螢幕——`Vacant/vacant/web/` 的 UI 有 5 處「信任」，踩到誠實邊界第 1 條，但只有在它會上展場螢幕時才算數。兩個站的 rendered DOM 仍是 0 次。
+
+需要說清楚的一點：**本輪只是把要改的地方指出來，展場並沒有因此變正確。改了才算。**
+</pre></details><details><summary><b>第 146 輪</b><span class="dim"> · 08-16 23:37 · 3KB</span></summary><pre>由**：`in_blind` 由 `sha256(seed, 輪次)` 指派（`entrycost.py:376`），與行為、與誰被路由都正交;而 `_peer_reviews(blind=True)` 讓三位評審一律投 1.0，與乾淨交付逐位相同。同一個攻擊者的作惡輪次在資料裡**已經被現成地隨機切成兩半**——同樣作惡、同樣沒被抓,只差評審看不看得見。
+
+限 215 個 `caught==0` 的 seed（那裡 `apply_slash` 從未執行）：
+
+| 這一輪的交付 | n | Δscore 均值 | Δ&lt;0 佔比 |
+|---|---:|---:|---:|
+| 乾淨交付 | 1668 | +0.02963 | 0.0% |
+| 作惡·落在盲區 | 425 | **+0.02915** | 0.0% |
+| 作惡·評審看得見 | 793 | **−0.04469** | 87.1% |
+
+盲區作惡與乾淨交付差 0.00048。**作惡本身不扣分，被看見才扣分。**
+
+兩個會殺掉這個結論的東西都除掉了：decay 混淆（固定路由間隔 1/7/10 輪後差仍在）、反向因果（同一 seed 內配對 **110/110** 全部同向）。餓死發生在第 152–387 輪（佔 9600 的 1.6–4.0%），對照組同期 9596 輪。
+
+## 探針 P4 擋掉的是一個假發現
+
+第一次跑 P4 是 ✘：報 515 而非 215。**錯的是我自己的腳本**——把「從沒被抓的作惡 seed」寫成 `caught == 0`，漏了 `and not control`，而恆不作惡的對照組 300 行 `caught` 當然也是 0。它同時污染了乾淨輪那一格：修正前 n=153168、Δ 均值 +0.00121，99% 來自早已飽和的對照組，把 +0.02963 **稀釋 24 倍**。沒有 P4，這輪會拿被稀釋的基準線去比，得出「盲區作惡比乾淨交付還加分」——而那看起來會很像發現。修的是腳本,判準一個字沒改。
+
+事前押九格中 8（B4 第一次 ✘、修腳本後 ✔）。commit `4c58186`，已 push，HEAD 與 remote 兩個 sha 逐字元相同。
+
+## 下一步與卡住
+
+**下一步**：展場講法要從「被抓到才會被排除」改成「排除的主要動力是被看見，被抓只是把它提早一半發生」——**但這是敘事決定，規則七，執行端不拍板**；先掃現有文案哪裡踩到是零風險的準備。另外這條通道只在一組參數點量過（`reviewer_accuracy=0.7`、`correlation=0.0`、K=3），補網格**要花機時**。
+
+**卡住**（都照舊記在 STATE.md）：黏土剪影五選一連續第三十八輪等人類；`~/vacant` 仍非 git repo，STATE/PROGRESS 無版本控制無異地備份；`HANDOFF.md` 機器識別段仍在講 Windows 那台，本機 `hostname` 是 `user1` 不是提示詞寫的 `user1-2`。
+
+還有一件本輪讓它**變難**的：「永久排除是否可接受」——現在知道排除的動力是「被同儕看見」，而看見與否有 27% 盲區，也就是**排除的準確度上限不由稽核決定，由評審的能見度決定**。仍純粹是價值判斷。
+</pre></details><details><summary><b>第 145 輪</b><span class="dim"> · 08-16 23:23 · 2KB</span></summary><pre>piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+第 95 輪完成。
+
+## 做了什麼
+
+接手第 94 輪的下一步 3（「曝光的分母值得單獨拆」）。**零額外機時**——只重讀已落盤的 900 行，`vacant/` 一行沒改。先在 STATE.md 寫死判準與七個事前押注，再動手。
+
+## 主要結果
+
+**擋住攻擊者的主要不是「抓到它」。** 215 個**從沒被抓過**的作惡 seed，作惡 1218 次全部得手、零次被抓，在 9600 輪裡卻只拿到 7.3–23.8 次工作 = 恆不作惡對照組（1290 次）的 **0.57–1.84%**，而且不隨輪數放大（S_C 0.99–1.11 vs 對照組 14.33）。存在一條不需要 slash 的排除通道，被抓只是把排除提早一半發生。
+
+**我押錯了一格，而且錯的方向跟第 94 輪一樣。** 第 94 輪說剩餘曝光「全部」來自沒被 slash 的 seed，我事前照著押 ≥80%。實測是兩群各出一半（C 佔 39.5–53.5%），另一半是被 slash 者**在被抓之前**就拿走的——那一塊 slash 完全碰不到。兩輪都往「slash 很有效、漏網的才是問題」這個比較好聽的方向錯，所以寫進正文不是附註。
+
+**順帶補上第 94 輪沒查的洞**：`stopped_early_at` 0/900，對照組曝光逐格精確落在 `rounds/7.5+10`（300 行零違反）⇒ 9600 輪真的跑滿，S4 的「16 倍」不是早停假象。
+
+**讀碼時發現的範圍問題**：`routes_after_slash` 只數第一個被 slash 的身分（`entrycost.py:354`，註解寫明是刻意取捨），所以第 94 輪「回來過的 seed 全 0」就儀器而言是關於身分的斷言。實測 `identities_used` 全 900 行 ==1 ⇒ 這組設定下成立，但不可外推（S2F 同欄位 max=601）。
+
+## 驗證
+
+五條探針各驗兩個方向全過，含負對照（把 C 故意打 0.9 折，必須抓到不符 → 30/30 格）與已知答案錨點（S2F 分佈 `{1:201,2:33,3:6,601:60}` 逐字命中）。
+
+## 誠實邊界（已寫進 FINDINGS）
+
+第二條通道**量到的是效果，沒有指認機制**；**反向因果沒有排除**（唯一旁證是未被抓者曝光 14.0 高於被抓者被抓前的 7.05）；「餓死」只到 9600 輪。
+
+**commit** `d22bda0`（`feat/v2-four-stages`，已 push，本地與遠端 sha 逐字元相同）。STATE.md、PROGRESS.md 已更新。
+
+**下一步**：`runs/s4_v1/S4/logs/` 已有逐輪 `score`，拉那 215 個 seed 的信譽軌跡就能指認第二條通道並嘗試排除反向因果——仍是零模擬機時。
+
+**卡住**：優先序 1（黏土剪影五選一）連續第三十七輪等人類作答，本輪一像素沒動。「永久排除是否可接受」這題本輪變得**更難**——排除的範圍比原本以為的大（沒被抓的也拿不到工作）。
+</pre></details><details><summary><b>第 144 輪</b><span class="dim"> · 08-16 23:11 · 2KB</span></summary><pre>licitly: &lt; /dev/null to skip, or wait longer.
+Round 94 complete.
+
+## 做了 · S4：拉長 `rounds` 買不買得到相位週期？**買不到**
+
+S3（上一輪）留下的洞是 35/75 格的 `(burst, recover)` 根本沒被實現——相位鐘走在「第幾次被路由」上，防禦把曝光壓到個位數。修法有兩條，我量了不需要人類裁決的那條。
+
+**答案不是勉強不行，是完全飽和。** 輪數 ×16，四個攻擊者格的曝光只多 0–6%（S＝1.00／1.03／1.01／1.06；事前寫死的判死門檻是 S≤4）。最高週期數 1.18 個。
+
+真正撐住這個結論的是對照組 `(0,10)`——pulse 判定式回 `0 &lt; 0` 恆假，它一次都不作惡、從不被 slash，曝光是 **14.33 倍**（線性上限 16）。只跑攻擊者格的話，量到飽和分不出是「防禦造成的」還是「路由器本來就不隨輪數放大任何人」，而那是兩個相反的結論。
+
+**零額外機時的追加**：飽和的成因是第一次 slash 一次切斷。被 slash 在第 67–217 輪，之後還剩 9383–9524 輪可用，而 `routes_after_slash` 在 20 個攻擊者格上**全部是 0.000**、回來過的 seed 全 0。這把 S1 的「600 輪內 0/368 回來」延長到 9600 輪 ⇒ 「也許只是還沒等夠久」這個讀法關掉了。誠實邊界照留：λ=0 時是 214/368，回來的通道存在，是 λ=1 把它關上的；執行端不建議 λ/f 該設多少。
+
+**押的六格中 4 錯 1，另一格無從檢驗——而那格最重要。** R5 本來要拿「固定 (b,r) 只動 rounds」這個獨立軸去檢驗上一輪的機制解釋（那個解釋是在 (b,r) 軸上量的，而 (b,r) 同時決定 nominal，解釋與被解釋物共軸）。沒有一格跑到 3 週期 ⇒ 檢驗沒有發生 ⇒ **上一輪那個機制解釋到現在仍未被獨立驗證過**。這件事寫進了三個檔案，因為下一輪很容易把它當成已驗證的結論用。
+
+探針自己的缺陷也照報：P4 事前沒預見對照組照定義就會違反它，攻擊者 20 格與對照組 10 格分開報，沒合併成一個好看的通過率。
+
+驗證：P1–P4 全過（P1 的「rounds=600 那 120 行對 S3 逐位相同」0 行不同）· cells 30/30 · rows 900/900 · wall 980.3s · SHA256SUMS 5 檔全 OK。`vacant/` 一行沒改（`git diff --name-only -- vacant/` ＝ 0）。
+
+**commit** `e10a8a3`，HEAD == origin。STATE.md、PROGRESS.md 已更新。
+
+**下一步**：model II–IV 的盲區主跑現在沒有可辯護的 `rounds` 值，只剩「接受在 &lt;1.2 個週期下比較（報告要寫明比的不是 Srivatsa 的穩態成本比）」或「等人類裁決時間軸」兩條——前者執行端可以做。
+
+**卡住**：黏土剪影五選一連續第三十六輪等人類；`~/vacant` 仍非 git repo；`vacant_hm` 那三個未提交檔本輪一樣沒動。
+</pre></details><details><summary><b>第 143 輪</b><span class="dim"> · 08-16 22:40 · 2KB</span></summary><pre>icitly: &lt; /dev/null to skip, or wait longer.
+第 93 輪完成。
+
+## 做了什麼
+
+跑了 **S3 — E24 的 `(burst, recover) × blindspot` 完整網格**（`iterate_v2.py` 四段裡唯一一次都沒跑過的一段）。75 格 × 30 seeds × 600 輪，wall 216.8s。
+
+先寫判準再動手：五條探針、四項主判準、六個事前押注全部寫進 STATE.md 之後才跑第一行。
+
+## 結果
+
+**推翻的是這一輪自己的動機。** 排這個網格的理由是懷疑 E24「時間結構只差 1.81 倍」量在效應為零的交叉點（盲區 0.5）。跑完五個盲區值，得手數的跨格比值是 **1.40 / 1.83 / 1.47 / 1.81 / 2.48** — 沒有一個盲區讓時間結構顯形，0.5 甚至不是最小的。押的 R2（至少一個 &gt;3.0）錯了。
+
+但工作不白做：三層分解（得手＝曝光×作惡率×逃脫率）顯示每個盲區上曝光比值 4.0–6.1、作惡率比值 6.0–11.0 都遠大於得手比值 — **兩個大效應反向抵消**，不是這個維度不存在。再把 `defected` 總量單獨拉出來，跨 15 種節奏只差 1.49–2.49 倍 ⇒ 被綁住的是「總共還能作惡幾次」，不是「多久作惡一次」。
+
+**R5 錯得最有用，而且反咬 E24**：押作惡率 ≈ `b/(b+r)`，實測最大偏 148.7%。相位時鐘跑在「第幾次被路由」上，而防禦把曝光壓到 6.10–51.77 次（總輪數 600）— 75 格裡 **35 格連一個週期都跑不完**。E24 那 15 格全在盲區 0.5，該列有 6 格跑不完 ⇒ 那 6 格的 `(b,r)` 在軌跡上根本沒被實現。
+
+兩處誠實邊界照留：那個機制解釋只中 28/35，7 個例外沒量出原因 → 記成未解、不編故事；「盲區是主軸」這句順口話被自己的表推翻（兩軸同量級 2.73 vs 2.48 倍）。
+
+## 驗證
+
+五條探針全過，每條兩個方向。關鍵的是 P1 用了已知答案 —`(3,10)·blind=0.0` 三參數全預設，digest 必須等於裸 pulse（30/30 行），而其餘 74 格必須全異（0 撞上）。P2 驗後果不驗前提：`blind=0.0` 的 450 行 `blind_passes` 全 0（`_h01∈[0,1)` 不可能 `&lt;0.0`），合併 mean 嚴格遞增 0.000→0.976。`vacant/` 一行沒改 — 這正是 P1 成立的前提。
+
+## 收尾
+
+- **commit** `6e5b0b2` Vacant（feat/v2-four-stages），已 push，HEAD == origin
+- STATE.md 事前登記＋事後紀錄、PROGRESS.md 第 3 節更新（含「四段全部跑完，下一步不再是哪一格沒跑」）
+- 順帶登記一件之前沒人記的：`vacant_hm` 有三個未提交的檔案，mtime 是今天 11:02–11:06 UTC（本輪 22:25 才開始），本輪一次都沒進那個 repo。只登記不處理
+
+優先序第 1、2 項（黏土剪影、交付狀態機）仍受規則七擋，連續第三十五輪等人類作答，本輪一像素沒動。
+</pre></details><details><summary><b>第 142 輪</b><span class="dim"> · 08-16 22:21 · 2KB</span></summary><pre>完成。
+
+## 做了什麼
+
+優先序第 1、2 項都卡在人類決定（剪影五選一連續第 34 輪、狀態機剩兩格第 69 輪判定受規則七擋），所以接第 91 輪的下一步 3：**跑從來沒跑過的 S2／S2F（預算窗口）**。
+
+**先寫判準再動手**——事前登記寫進 STATE.md 後一字未改，包含四個雙向探針、窗口的閾值（五臂取最小 ≥0.9）、六個事前押注。
+
+## 結果
+
+**窗口只有一格寬。** 六個預算值裡只有 budget=1 讓五臂全部真的用滿額度，下一格就掉到 0.8667。舊判準 `defected &lt;= BUDGET` 在 30/30 格全部 =1.0——零分辨力，這回是可執行的證明。
+
+**而在那唯一有效的比較點上，E19 的結論反過來**：whitewash 每次作惡得手率 0.5333，是最低的一群；pulse 0.9000。原本的 2.5 倍優勢來自作惡次數不相等。
+
+機制是從 `blind_passes` 逐 seed 驗出來的，不是推論：見習期強制稽核。換身份兩臂作惡時人在見習期內，得手 16/16 全部來自盲區；等待型三臂已出見習期，26 筆得手裡 21 筆是稽核根本沒抽到。順帶一個交叉證據——whitewash 與 sybil 的 `config_digest` 不同（兩個隨機世界）卻逐 seed 30/30 相同，因為 `in_blind` 只吃 (seed, 輪次)。
+
+**這條對展場是兩面的，兩面都寫進 FINDINGS 了**：正面是見習期強制稽核有效、洗掉紀錄等於把自己送回強制稽核區；代價面是等待划算——先交 10 筆乾淨的再作惡，得手率 0.533→0.900。
+
+## 事前押的六格中 5 錯 1
+
+錯的那格是本輪第二個新東西：複驗那句「whitewash 用掉 4.7 個身份」**只在窗口外面成立**，budget=1 時它只用掉 1.47 個。「免費換身份」這條解釋要作惡很多次才顯形，而那正是等預算比較失效的區間——兩件事互斥，它至今沒在一個有效比較上被驗過。
+
+## 收尾
+
+- **commit** `3fa7219`（feat/v2-four-stages），已 push，HEAD == origin
+- 探針 P1 300/300 逐位相同、P1′ 268/300 必須不同、P2 30/30 與 11 個相異值、P3 兩向；SHA256SUMS 7 檔全 OK；wall 69.7s
+- 順帶獨立重現 E19 原始數字當錨點：budget=12 的 `defected` 11.9667 對 4.8667
+- STATE.md、PROGRESS.md 已更新
+
+**下一步**：S3 盲區網格（本輪事前登記寫明不做）。本輪 P3 順帶量到一件寫 S3 時必須標的事——`blindspot` 與 `pulse_burst/recover` 都在 `_LATER_FIELDS`，所以 S3 每一格都是不同的隨機世界，是組間比較不是配對。
+
+**新增的卡住**：`HANDOFF.md:42` 那條 STALE 又更舊了——它列的「未跑」清單裡現在 S1、S1B、S2 都跑完了，只剩 Stage 0 基線、A3、E24。要不要由執行端改仍未答（第 89 輪提的）。`runs/s1_smoke/` 一樣刻意沒動。
+</pre></details><details><summary><b>第 141 輪</b><span class="dim"> · 08-16 22:08 · 2KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+Round 91 complete.
+
+## 做了
+
+**S1B — 五個候選 λ 全數過 B 層六情境**（接第 90 輪的下一步 1）。第 90 輪量出了 slash 的取捨曲線，本輪回答「哪些 λ 不能選」。答案是 **沒有不能選的**。
+
+判準寫在 STATE.md 裡，**動手之前**，一個字沒改。
+
+## 驗證結果（真的數字）
+
+**探針四個方向全過**（主結果是「全過」，而「全過」與「λ 根本沒接到 B 層」在歸檔裡長得一模一樣——所以先驗尺）：
+- 被 slash 的 Beta：Δn = 11.6594（必須不同 ✔）、Δmean = 0.00e+00（必須相同 ✔）
+- 沒被 slash 的 Beta：兩個 λ 下逐位元相同 ✔
+- 情境層：不吃 slash 的四個相同、吃 slash 的兩個不同 ✔
+- 回歸：`vacant/` 自 `cb64bf5` 零改動 ⇒ λ=1.0 的 96 格對 `blayer_1000_v3` **比 96 格、不同 0 格** ✔
+
+**主結果**：5 λ × 6 情境 = 30 格全過，1000 seeds，wall 1167.5s。而且不是勉強過——④reviewer_stake 最差格 0.0898 對判準線 0.7，⑤decay_slash 最差格 0.0044 對判準線 0.65。
+
+**事前押六格中 5 錯 1，錯的那格是本輪最值得留的東西**：我押「λ 越小＝罰得越深」，把它當單向旋鈕。實測兩個承重情境**方向相反**——λ 越大 ④ 罰得越輕（n 漲讓權重飽和項抵銷均值下降），λ 越大 ⑤ 罰得越重（n 漲讓後來的好評推不動均值）。「調大 λ ＝加重懲罰」是錯的說法。⑤ 的敏感度幾乎全在 λ∈[0,0.25]，補點要補在那裡。
+
+**commit** `9950abb`（feat/v2-four-stages），遠端／本地 sha 逐字元相同。
+
+## 對人類
+
+「永久排除是否可接受」兩邊的數字現在都齊了——取捨曲線 `runs/s1_v1/FINDINGS.md`、機制驗收 `runs/s1b_v1/FINDINGS.md`。**這一條現在純粹是價值判斷，不再缺數字。執行端不建議操作點（規則七）。**
+
+黏土剪影五選一**連續第三十二輪**等作答，本輪一像素沒動。`~/vacant` 仍不是 git repo（STATE.md/PROGRESS.md 無版控、無異地備份，連續第三十三輪）。
+
+**誠實邊界**：這是機制模擬，不是真模型實測。而且「邊際大」只代表判準線離現況很遠，不代表機制強——那六條判準線是 2026-07 訂的，本輪沒有檢討它們訂得鬆不鬆。那是下一輪。
+</pre></details><details><summary><b>第 140 輪</b><span class="dim"> · 08-16 21:39 · 3KB</span></summary><pre>grees with simulation.&quot; It didn&#x27;t — I&#x27;d fed it fixed `n_before` values instead of realized ones. Re-fed with measured inputs, the same formula separates returners from non-returners 239/240.
+- The 0 is right-censored at 600 rounds: 32/40 of those seeds had more rounds left than the longest observed wait (489), but 8/40 genuinely can&#x27;t be told apart from &quot;didn&#x27;t run long enough.&quot;
+- Found a live error: the two arms aren&#x27;t paired with each other (`strategy` enters `digest()`, so they run in different random worlds — 42/180 seed-groups differ). The axes can be read side by side but not subtracted per seed.
+
+Two things went beyond the pre-registration and are labelled as such: a 300-seed rerun (bets still judged on the registered 30-seed run) and two comment edits, after which a 2-seed rerun was bit-identical.
+
+**commit** `46a02c4` on `feat/v2-four-stages`, pushed. Per-round logs (44M/437M) stayed out of version control per the blayer precedent, pinned by `SHA256SUMS`.
+
+**Next round should take S1B** — running the six B-layer scenarios against each candidate λ. A pretty curve doesn&#x27;t authorize an operating point that disables the teeth, and scenarios ④/⑤ call `slash` directly. S2 and S3 are also unrun, same script, same low cost.
+
+Still blocked on you, unchanged: the clay silhouette five-way choice (31st round), and now the λ/f operating point — which finally has numbers behind it.
+</pre></details><details><summary><b>第 139 輪</b><span class="dim"> · 08-16 21:17 · 2KB</span></summary><pre>: &lt; /dev/null to skip, or wait longer.
+第 89 輪完成。
+
+## 做了什麼
+
+接第 88 輪的「下一步」：把它抓到的 6 條 `STALE`（**歸檔頁面說「還沒做」、其實早就做了**）改掉 4 條，並在改之前先做那份稽核自己指出的前置條件——把 key 從 `file:line` 換成內容定址 `file#sha8@k`，否則改完的當下稽核就作廢。
+
+最重要的一句在**人類要拍板的那一頁**：`DECISION_SILHOUETTE.md` 原本寫「選項 4 **與 5** 的救起對數是空的，因為沒量過」，而同一頁的表寫著選項 5 ＝ 211/365（K=2.0 實測）。讀到「兩格都沒量」，最合理的反應就是不作答、等量測——剪影五選一已經卡了三十輪。
+
+`Vacant/HANDOFF.md` 的 2 條**沒改**：那是另一台機器的交接文件，規則七邊界，寫進「卡住」等人類。
+
+## 驗證結果（不是「通過」，是數字）
+
+- **T7_keyshift**（本輪改動的全部理由）：真語料插一行 ⇒ 新 key 不變 **239/239**、舊 key 不變 **0/239**
+- **換 key 後、改字前的平行對照**：234 句 / 100% / 234 條證據，判決分佈與第 88 輪逐格相同，且 234/234 條逐條回推舊 id 對得上
+- **改完**：239 句 / 100% / 239 條證據重跑 / `STALE` **6 → 2**，剩下那 2 條**還在**（如果我是靠刪字變綠的，它們也會不見）
+- **numguard**（新寫的數字護欄，自驗含 `0.5574→0.5575` 必須 FAIL）：三個檔案既有數字**一個都沒少**
+- **真資料兩側變異**：插 5 行 ⇒ 仍 100%；改一個詞 ⇒ 覆蓋率 99.6%、`ok=False`
+
+事前押的六格中 5 錯 1（Q6 貼線）。
+
+## 兩件比主線更值得記的
+
+1. **第 88 輪那條判決自己有一處不準**——它說 `cells` 存了三份配對清單，實測 `degen_pairs` 是整數計數不是清單。⇒ 更正一條 STALE 之前要自己重驗，不能因為它附了證據就照抄。
+2. **修好一個缺口會生出新的假陽性**：更正註記必須引述原句，原句裡就有標記詞 ⇒ 掃出來的句數不會因為修好而下降（4 條改動生出 8 句新的）。
+
+## 照報的代價
+
+- `T4_evblind` **放鬆了一格**：正證據的「錯的行」從 FAIL 改成 PASS。換來編輯不會讓稽核作廢，付出「同一字串出現在別的上下文也算數」。
+- `mkverdicts.py` 現在**預設關掉**（要 `--force-legacy`）：它仍以行號當 key，直接跑會把判決整份覆寫回舊 key，而且會印「寫出 N 條判決」看起來完全成功。⇒ verdicts 目前手維護，是一筆明講的債。
+- 本輪**零機時**，剪影本身一像素沒動。
+
+**commit**：`6f0d328` ＋ `fed8173`（vacant_hm/main，HEAD == origin/main）
+**下一輪第一件**：`HANDOFF.md` 那 2 條要不要由執行端改——這是要問人類的一句話。
+</pre></details><details><summary><b>第 138 輪</b><span class="dim"> · 08-16 20:58 · 3KB</span></summary><pre>收**」 | `PROGRESS.md:2012` — ✅ commit `0fb0b57` |
+| `DECISION_SILHOUETTE.md:322` | 「選項 4 與 5 的救起對數是空的，因為沒量過」 | 同頁 `:48` — 選項 5 ＝ **211/365（K=2.0 實測）** |
+
+`HANDOFF.md` 被掃到 4 句、2 句過期（50%，全檔最高），而它是**開場清單第 2 項，每一輪都會讀**。**我自己這一輪開場就被它誤導了一次**，以為風格還沒選定。`PROGRESS.md` 146 句才 2 句過期（1.4%）。
+
+⇒ staleness 的成本 ＝ 錯誤程度 **×被讀的次數**，而前 87 輪只看前者。最短、最常被讀的那份，從來沒人查過。
+
+而 `DECISION_SILHOUETTE.md` 那條在人類拍板的那一頁上、**跟第 87 輪同一節**：第 87 輪拿掉一條，這輪在同一節又找到一條。
+
+## 照實報的
+
+- **事前六格押注中 1 錯 5。** 我事前寫死「NOT_A_GAP &gt;70% ＝ 我在倒垃圾」，實際 **88.9%（只算手判 78.5%）——紅旗響了**。另一個讀法（這 repo 的散文本來就被「沒／未」灌滿）我寫下來但**不拿它取消紅旗**，那一類該被抽查。
+- **標記表會漏，漏的正是最重要的一條。** `HANDOFF.md:97`「視覺風格（**六選一**）」也已作廢，但那行**一個標記詞都沒有**，是我讀上下文用手撞到的。**234 不是上界。**
+- **113 句是規則判的**（PROGRESS.md 日誌區），沒逐句查證，逐條標了 `[規則判]`。
+- **負證據第一版寫錯過。** 拿主題詞 grep 證「沒做過人眼量測」，命中的是 `ss_opts.py:357`「**不是**觀眾實測」——宣告缺口的那句話本身。是檢查器把我打回來的。
+- `T1` 事前押 272 行、實際 271。查了原文才改常數，並同時加上「起點對映」不變式 —— 光改常數不算數。
+
+驗證除了自驗 T1–T6，還在**真資料**上做了變異測試：把一條真 STALE 的證據行號 +1 ⇒ 整支 FAIL、`exit 1`。
+
+**commit**：`ec6fd57`、`6f031a8`（vacant_hm/main，已 push，HEAD == origin/main）。本輪**一句原文都沒改**。
+
+## 兩件要你決定的
+
+1. **這 6 條要不要改？** `HANDOFF.md` 是別台機器的交接文件，前 29 輪的立場是「不自己改」——但那立場是針對**機器識別段**。`:42`/`:43`/`:97` 是**專案狀態**，而且已經誤導執行端一次。我建議改，但沒有自己動。
+2. `DECISION_SILHOUETTE.md:322` 可以單獨立刻改（它正在對你說選項 5 沒量過），改法沿用第 87 輪的 `ss_cmp60.py` 護欄。
+
+另外照記一個保存期限問題：這版用行號當證據指標，寫這輪紀錄時就失效了兩次（`check` 都當場抓到，沒有假成功）。下一輪接手前該把 key 改成句子 sha —— **現在這版不要當長期資產用**。
+
+黏土剪影仍是**連續第二十九輪**等你作答五選一。
+</pre></details><details><summary><b>第 137 輪</b><span class="dim"> · 08-16 20:36 · 2KB</span></summary><pre> I didn&#x27;t touch; HEAD and origin/main match.
+
+## 做了
+
+`DECISION_SILHOUETTE.md` — 人類卡了 27 輪沒作答的五選一 — 在末段自己寫著「縮到 640px 的實拍對照還沒做」。**那半句是假的。** `stagevis.py:44` 是 `W, H = 640, 360  # 展場距離：1920×1080 的 1/3`，那一頁四份上游歸檔的 `W,H` 全部是 640,360、讀的檔全部是 `sl_f*_640.png`。整頁的數字本來就是在展場距離量的。
+
+那句話已刪，並補上那一頁從來沒有的一欄。
+
+## 主數字
+
+| | 640（展場距離） | 1920（貼臉看） |
+|---|---|---|
+| 遮罩面積 px 中位 | 85.5 | 693.5 |
+| IOU_SPEC（桿子） | 0.5574 | 0.5279 |
+| 難分對數 / 946 | 365 | 364 |
+
+看起來距離不要錢 — 是假的。這把尺的桿子自己跟著解析度移動。桿子釘住再問：1920 的 IoU 用 640 的桿子判 ⇒ **310**/946；640 的 IoU 用 1920 的桿子判 ⇒ **442**/946。**距離要價 55–78 對**，而「365」是相對於同一解析度的數字。ρ=0.9592 ⇒ 動的是桿子與絕對值，不是排序。
+
+那 47 對硬核在 1920 **47/47 仍然難分** ⇒ 是幾何，不是低解析度的量化雜訊。
+
+## 驗證
+
+自驗全過，關鍵兩格：`T1b` 我的萃取器與 `stagevis.diff_mask+ss_dim.big_comp` 在 640 上**集合相等**（44/44）；`T1` 逐位元接回 `ss_hard.json` 的 `0.5574387947269304 / 365 / 0.51595`。改頁面則由 `ss_cmp60.py` 判：既有 **166 條 claim 0 改值 0 消失**，`diff` 舊頁新頁刪掉的只有 2 行。
+
+**六格押注錯三格**：我押「距離會吃掉一大塊」（1920 難分 250–340、翻面 ≥40、面積比 9–13），實際 364、34、8.038 — 方向整個錯了。而「幾乎沒動」正是我事前寫下最怕的那個乾淨結論，擋住它的是 `T2`（面積比必須 ≥5，~1.0 就是我兩次讀到同一張圖）與 `T3`，不是任何主數字。
+
+**一格沒過照報**：`A4_cases` FAIL，變的是 `P0_untouched` 的 got — `ss_opts.py` 的 P0 監看 `styles/probe/`，而它自己的輸出就在裡面，會在 commit 前後兩個值之間振盪、永遠不可能乾淨。沒有去改 `CASE_EXEMPT` 讓它過。
+
+commit `91db113` + `f95b394`（vacant_hm/main）。
+
+## 兩件要你決定的
+
+1. **五選一仍然等你**（第 28 輪）。差別是：擋住作答的那句話已經拿掉，並且多了「距離要價 55–78 對」與「硬核是幾何」兩欄。
+2. 「**觀眾**分不分得出來」仍然一次都沒量過 — 那要真人，第 1 條的前半句我一個字沒動。這是這條線上執行端做不到的部分。
+</pre></details><details><summary><b>第 136 輪</b><span class="dim"> · 08-16 20:18 · 2KB</span></summary><pre>low command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+第 86 輪收尾完成。
+
+## 做了
+
+接手第 85 輪的「下一步」第 2 項：**整檔 sha256 那一族的第一次盤點**。第 84 輪的盤點器在自己的 docstring 裡把邊界寫死成「只掃 `diff_mask`，整檔 sha256 不在內」並點名兩個站點——那半句是誠實的，被後兩輪讀成「所以大概就那兩個」的另外半句從沒查過。
+
+新增 `styles/probe/shaaudit.py`（ast 掃描 + 手動角色分類 + 重問），零機時。
+
+## 驗證結果（真的數字）
+
+自驗 S1–S8 八格全過（`tool_ok=True`）。盤點：**38 個站點、10 支檔案**（不是 2 支），比 PNG 的 16 個，承重 5 行。
+
+兩件會改變我們相信什麼的事：
+
+1. **`A2_optin` 的「沒過」100% 是那個 fps 讀數。** 整檔 sha256 相同 15/49（就是落盤且判 FAIL 的那個數）；挖掉 HUD 後逐位元相同 **49/49**。判準與門檻一個字沒改、照樣照報沒過，但那 34 張的差異一個像素都不在場景裡 ⇒ `DECISION_SILHOUETTE.md` 的出處保證變強。
+
+2. **第 67 輪的證據 `.png` 從沒進 repo**（撞到的，不是想到的）。`hudleg.py:180` 是個從沒被盤點過的承重 PNG-sha 判準，它不是污染，但拿 repo 那 48 張重算：逐格 match 第 66 輪、對不上第 67 輪。`git log --follow` 只有 `b977bf6` 一個 commit。⇒ 照現在的 repo 跑 `hudleg.py`，那格會得到相反的答案。不是說第 67 輪錯了（字型檔實際在 `~/.local/share/fonts/`），是**它只剩一份 `.json` 自證**。
+
+事前押的七格**中四錯三**，押注一個字沒改。押錯的 P4 反而是引信——正因為多出一行，`hudleg.py:180` 才被逼著看一眼。另外抓到我自己寫了一個**會自我餵飽的判準**（P6 由我手寫的分類表決定），它報 0 不算證據。
+
+## commit
+
+`b09ba58`（本體）＋ `6dcfd91`（自指訂正）· vacant_hm main · 遠端 sha 逐字元相同。
+
+收尾時自己撞到一次自指：改 `hudaudit.py` 的 docstring 就把被分類的那一行從 318 推到 324，剛落盤的表當場過期。跟第 85 輪的 `A8_scope` 同形。不 amend、不改寫歷史，訂正記在 `LINE_FIXES`。
+
+## 卡住
+
+- **新增一條要人類決定**：那 48 張要不要補進 repo（補＝機時＋動到「歸檔」的定義；不補＝那個承重判準永遠只能自證）。事實已查完，取捨不自己拍板。
+- 優先序第 1 項（黏土剪影）**連續第二十七輪**等人類作答。本輪做的仍是稽核，**連續第四輪**——但這輪的產物不只是尺，它改了兩件我們相信的事。**執行端能自己推進的工作已經幾乎只剩稽核既有歸檔了**，這件事值得你知道。
+</pre></details><details><summary><b>第 135 輪</b><span class="dim"> · 08-16 19:56 · 2KB</span></summary><pre>d, `10f85c5` = `origin/main` byte-for-byte.
+
+## 做了一件事：修掉 `sa_arch.py` 那兩處真的 HUD 污染，並重跑
+
+**判準是動手前寫進 STATE.md 的**（七個 P + 五個 T），跑完照抄實測值對照。
+
+**結果：那四個被污染的數字 100% 是 HUD 上那個活的 fps 讀數**，一個像素都不是場景。
+
+| 量 | 不挖 HUD（落盤舊值） | 挖掉 HUD |
+|---|---|---|
+| `sl_×sb_` max/med/總和 | 38 / 7 / 390 | **0 / 0 / 0** |
+| `sl_×sc_` max/med/總和 | 38 / 5 / 328 | **0 / 0 / 0** |
+| `sb_×sc_` max/med/總和 | 38 / 7 / 323 | **0 / 0 / 0** |
+| 噪底（四批） | 12 / 8 / 11 / 0 | **全 0** |
+
+事前押的七格全中，含兩格從沒量過的（`sl_×sc_`、`sb_×sc_`）。`sa_arch.json` 570 個葉節點只有 14 個動，12 個在 `reproducibility` — 配對表與 A5/A6 一個數字沒動。AST 盤點：沒帶 `hud=` 的呼叫點 4 → 2，剩下兩格是檔案裡寫了理由的刻意例外。
+
+## 三件值得你知道的
+
+**1. 承重判準沒翻，但它過關的理由整個換掉了。** 修之前 `38 &lt;= 38` 過 — 比的是兩個 fps 計數器的位數；修之後 `0 &lt;= 0` 過 — 比的是三棵樹在 HUD 以外逐位元相同。判準的字一個沒改，內容從幾乎是空的變成很硬。**綠燈不會告訴你它是被什麼點亮的。**
+
+**2. 我押的主數字是 0，而「0」也正是量具壞掉會給的答案。** 擋住它的不是主數字本身，是 `T1`（HUD 之外一個已知恰好 12 px 的方塊，挖完仍要讀到 12 → 實測 12→12）。另加 `T6`（凍結判準之後才加、方向只會更嚴）：不挖的重算值要逐字接回舊值，否則「修好之後變 0」可能只是換了一把尺。
+
+**3. 撞到一個結構性的東西：`A8_scope` 把自己的產物算進了它稽核的範圍。** `sa_arch.py` 沒辦法在同一次 run 裡既重生成 `sa_arch.json` 又通過 — 寫檔本身就把樹弄髒。**沒改它**：加一行白名單看起來明顯是對的，但那是看過資料之後動承重判準，跟移動球門同一個形狀。留成下一輪的工作單。
+
+同時更正上一輪的估計：第 84 輪寫「要機時」是錯的 — 四份 `.sha` 全在，單次差分 0.05 秒，整支 18 秒。**成本估計錯了，代價跟量錯數字一樣大**，它讓一件 18 秒的事白擱了一輪。
+
+## 兩件擋著的
+
+- **黏土剪影（優先序第 1）連續第二十六輪沒前進** — 等你看 `vacant_hm/styles/probe/ss_eyes.png` 六選一。交付狀態機（第 2）剩兩格是視覺決定，受規則七擋。
+- 因此**連續三輪交的都是量具**。量具有用（那把尺擋著第 1、2 項的像素問題），但這個比例本身是訊號：執行端能自己推進的工作快用完了。已寫進 PROGRESS.md 的卡住段。
+</pre></details><details><summary><b>第 134 輪</b><span class="dim"> · 08-16 19:41 · 3KB</span></summary><pre>tin` 不是達不到，是被一個診斷用的讀數擋住的。這對人類正要拍板的 `DECISION_SILHOUETTE.md` 有份量——那 148 條數字的出處保證回到「達得到、也達到了」。
+
+## 但有一格閘門沒過，我照報了
+
+`H2`（`sl_base` vs `sl_world` 挖 HUD 後 &gt; 10000）**實測 386**。查下去，沒翻的原因**不是比對器壞了，是我的計畫寫錯了前提**：`sl_` 不是「完整場景的基線」，它是 `hide=shell,furn,fig*` 的**獨自一人批**（非背景像素 0.5%、單人剪影 36–157 px）。我是照著 `sa_arch.py:53` 那句只寫「基線那 49 張」的註解寫判準的。
+
+門檻**一個字沒改**、照報沒過；另立不含任何挑選常數的 `H2b`（44/44 都看得見一個人）。主數字因此標成 `VERDICT_TOOL_B`，並在交付物第一條誠實邊界寫明**它的保證弱一級**。
+
+擋住錯誤結論的是 `H3`／`H4` 而不是 `H2`：HUD 之外一個已知**恰好 12 px** 的方塊要讀到 12，同一個方塊放進 HUD 列要被挖成 0。兩格都翻了 ⇒ 這次是假說對、尺也對（與第 83 輪的「尺對、假說錯」分開記）。
+
+## 順帶的盤點與兩個坑
+
+`diff_mask` 的 35 個真實呼叫點裡 4 個沒帶 `hud=`：**2 個是真的污染，都在 `sa_arch.py`**（`dist()` 的 `max` 正是承重判準 `A2p_vs_control` 比的那個數；`noise` 那格就是第 65 輪錯解釋的出處），另 2 個是 `stagevis` 刻意保留、檔案裡寫了理由的。
+
+坑一：盤點第一版用 regex，把 docstring 裡引用的一行報成呼叫點 → 改用 `ast`。坑二：分類表用 `(檔名, 行號)` 當 key，我加了幾行註解行號就漂，兩格掉進「未分類」 → 改用變數名當 key。
+
+**commit** `4fdba15` vacant_hm（main），遠端 sha 逐字元相同。重跑 `bash styles/probe/hudaudit.sh` 產出的兩份產物與 committed 的**逐位元相同**。`world/` 零修改。
+
+## 給你的兩個問題（我沒有自己拍板）
+
+1. **「知識只寫在一處」要不要列成紀律。** 連兩輪撞到同一族：第 83 輪 `silscene.sh` 少了 `stagevis` 那份 HUD 知識 ⇒ 重新發明了一個錯的解釋；本輪是註解少一個限定詞 ⇒ 我寫出一個前提錯的閘門。HANDOFF §8 只寫了「兩份**實作**會漂」。
+2. 第 33 輪那條「把讀 `PROGRESS.md` 卡住／環境段加進開場清單」——**本輪讀了，而且它直接幫上忙**（正是那段裡的 fps 計數器與「按列挖」兩條，讓我一開始就把 `hud=` 放進判準）。這條對策現在有一次正面證據了。
+
+**下一步**（已寫進 STATE.md）：修 `sa_arch.py` 那兩格真的污染。但它會動到承重判準 `A2p_vs_control` 的值，要重跑整支，而它依賴已不存在的 `/tmp/b65/*.sha` ⇒ **先盤點重跑成本再動**。
+</pre></details><details><summary><b>第 133 輪</b><span class="dim"> · 08-16 19:22 · 3KB</span></summary><pre>ebGL 的「8–12 px run 間噪聲」。優先序第 1、2 項都卡在規則七（等人類作答），所以做的是**擋在它們前面的量具**——剪影那條展場硬需求（身高差 1.6 倍）是拿截圖量的，而那把尺有一個成因不明的底噪。
+
+**動手前先在 `STATE.md` 寫死了 8 個閘門 ＋ 5 條預測**，然後才寫第一行程式。
+
+## 結果：我押錯了
+
+五條預測**三條錯**，包括我押的主結論（「用 CDP ＋ 真實等待去拍就會逐位元全同」→ 實測 6 張裡 3 個相異 sha，最大差異 213 px，比既有那條路的 45 px **還大**）。
+
+停在那裡的結論會是「渲染器也在抖」——**那也是錯的**。救回來的是先問差異**在哪**再問**是什麼**：
+
+- 兩種擷取機制、30 個配對，差異像素**全部**落在 45×10 px（畫面的 0.0217%）
+- 挖掉 HUD 那 40 列之後，30 個配對**剩 0 個像素在動**
+- `Range.getBoundingClientRect` 指認出那幾個字元是 `1 0ˍf p s` ＝ `繪製 ${fps} fps`
+
+擋住錯誤結論的是事前那五側已知答案，特別是 `W6b`（fixture 的 4×4 scissor ＝ 已知 16 px，就在 8–12 px 那個數量級）——沒有它，「全同」可以只是比對器瞎了，而「全同」正是我押的答案。
+
+## 真正有份量的那一格
+
+第 65 輪不只寫錯，還**回頭對第 62／63 輪投下懷疑**。方向剛好相反：第 62 輪是對的（它挖了 HUD，量到 49/49 全 0 px），第 65 輪那個沒挖 HUD 的量法在測 fps。⇒ **那個警語該撤掉**，而它壓著的正是 `DECISION_SILHOUETTE.md` 那 148 條數字的出處保證——人類正要拍板的那一頁。
+
+## 兩次自我更正（都留在紀錄裡）
+
+1. 初版 commit 訊息把功勞寫大了（病灶第 16／33／34／43／**62** 輪都寫下過，本輪沒發現它）。**不改寫已推送的歷史**，用第二個 commit `845b561` 更正。
+2. 我在 commit 之前先把一個**憑空的 hash** 寫進 `STATE.md`——那正是第 25 輪的失效模式。當場對帳抓到，改成實際值並把這件事本身寫下來。
+
+## 收尾
+
+- **commit**：`4b83b4e` ＋ `845b561`（vacant_hm / main），遠端 sha 逐字元相同
+- `world/` 零修改、既有量測腳本零修改（`shoot.sh` 的 `M` 是第 64 輪遺留，沒 commit）
+- `STATE.md`／`PROGRESS.md` 已更新
+
+## 需要你決定的兩件（沒有自己拍板）
+
+1. **展件正式跑的時候，HUD 要不要留 fps？** 它是病灶，但也是除錯資訊——這是畫面上的決定。（量測端不需要你決定就能修：挖 HUD 列即可。）
+2. **把「讀 `PROGRESS.md` 的卡住／環境段」加進每輪開場的清單。** 這條對策第 33 輪就寫下了，五十輪沒被採用，因為它要改的是提示詞不是程式碼。代價已經量得到：第 33 輪踩到、第 65 輪踩到並寫出錯結論、**這一輪我自己開場也沒讀**。
+</pre></details><details><summary><b>第 132 輪</b><span class="dim"> · 08-16 18:53 · 3KB</span></summary><pre>0` is *stably capturing the wrong frame* — the one where the token grid is still lying over「沒關係，沒有人找得到。」. The compositor flag round 80 called &quot;the new noise source&quot; is the one that lands correctly. I did **not** switch configs: instability is 15× worse there, both facts have to be read together, and switching means rerunning every archive.
+
+All four pre-registered predictions hit — which is exactly the shape that should make me distrust the tool, so the three known-answer sides are what this result rests on. Two instrument bugs got hit and both are left in the code with comments: my `W4` grep matched itself, and `n_diff_px == 0` is falsy, so the byte-identical frame was briefly judged &quot;new state S5&quot; (same shape as HANDOFF §8&#x27;s `parseInt(&#x27;KER-12&#x27;)→NaN→0`). That second one was only caught because the answer looked *odd*; had it landed in the direction I was betting on, I&#x27;d have had no motive to recheck.
+
+**commit** `2c7300b` vacant-docs-web, remote sha verified character-for-character. STATE.md and PROGRESS.md updated.
+
+Priority 1 (clay silhouette) did not advance — it&#x27;s on its 23rd round waiting for a human to answer `styles/probe/ss_eyes.png`, and priority 2&#x27;s two remaining cells were ruled rule-7 visual decisions back in round 69. I worked the ruler under priority 3 on round 80&#x27;s own reasoning (&quot;先修尺，再量東西&quot;), since that ruler gates the fine-pixel questions in items 1 and 2 too.
+</pre></details><details><summary><b>第 131 輪</b><span class="dim"> · 08-16 18:28 · 2KB</span></summary><pre>ceived in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+Round 81 complete. All four closing steps done.
+
+## 第 81 輪 · 2026-08-16
+
+**做了**：黏土世界的**無人值守長跑**第一次被量 — `clay.html` 跑 600 幀（45.9 秒）與 3000 幀（230 秒），四個資源計數器一個都沒動。
+
+**為什麼是這一件**：優先序第 1 項（剪影六選一）連續二十二輪卡在人類作答，第 2 項（四段可分辨）第 33/34 輪已診斷完、修法屬規則七。而 `HANDOFF.md` §一第 2 條的「無人值守」從沒被量過 — `DEPLOY.md` 那節實機效能量的是**舊世界**（`?day=30`，466 隻），不是黏土這一支。這種失效在任何單幀截圖裡都不會出現，前 80 輪的量法在結構上看不到它。本輪零視覺決定。
+
+**驗證結果**（貼真的）：
+```
+VERDICT = PASS
+  Z1 洩漏側 Δgeometries ≥ +50   實測 500     ← 兩側都翻了才採信
+  Z2 乾淨側 Δgeo=0 ∧ Δtex=0     實測 0 / 0
+  Z3 有效性  Z4 取樣器只有一份  R13 差異 4 欄、超出允許集合 0 欄
+  clay Δgeometries 450→450 · Δtextures 2→2 · Δprograms 4→4 · Δmeshes 566→566
+```
+3000 幀那趟逐項相同。旁證顯示世界確實在動（`courierShown 14→17`、模擬時鐘 230 s），不是畫面凍住所以什麼都不長。
+
+**最該記住的一格 — 事前預測先被自己的 pilot 打翻**：我押 Δ=0，60 幀那趟量到 **+79**。先寫下兩個競爭解釋才跑長窗，攤開三段曲線（`60 幀 297→333→376`、`600 幀起一路平在 450`）才看得出那是**暖機**不是洩漏。而事中登記的斜率規則在成長全 0 時**退化**（兩條同時成立）— 規則沒用上就寫沒用上。
+
+**三個量具事實**（下一輪用 headless chrome 都會踩到）：`--virtual-time-budget` 底下沒有重計時器的頁面**一幀 rAF 都不會被服務**（`reachedFrame: 0`）；拿掉虛擬時間後 `--dump-dom` 會在載完當下就走；以及我自己的比對器把 ` [type]` 註記黏在路徑上比，誤報過一次 R13 FAIL（修的是比對器不是判準）。
+
+**commit**：`3f67e06` vacant_hm，遠端 sha 逐字元相同。STATE.md／PROGRESS.md 已更新。
+
+**卡住**：「夠不夠快」仍沒答案 — 那要展場那台 RTX 3090 的乾淨機時，這台只有 swiftshader（13 fps，不可外推）。腳本已就緒。剪影六選一等人類看 `styles/probe/ss_eyes.png` 作答（連續第二十二輪）。
+</pre></details><details><summary><b>第 130 輪</b><span class="dim"> · 08-16 17:56 · 2KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+Round 80 complete. Summary:
+
+## 做了什麼
+
+接第 79 輪自己指名的「`probe/` 底下最該先解掉的量具問題」——尺 B 那張壞畫格。**先修尺，再量東西**，因為接下來的優先序第 2 項（交付狀態機四段在畫面上）全是細緻的像素問題。
+
+**事前假說被自己的量測推翻，而且是反方向的。**
+
+| 配置 | 併三次跑（n=120） |
+|---|---|
+| `C0` 現行協定 | 偏離眾數 **1/120** |
+| `C1` ＋`--run-all-compositor-stages-before-draw`（chrome 專治此病的旗標） | **1/8** |
+| `C2` 較小 budget | 1/60 |
+| `C3` C2＋合成器旗標 | 1/8.6 |
+
+那個「應該是解藥」的旗標讓它**爛 15 倍**。四組沒有一組是決定性的。
+
+順帶修正第 79 輪的說法：那張「壞掉的參考畫格」沒有壞。四個狀態的第一個差異點都在 `[627,117]`，面板平均亮度 33.93 / 28.38 / 10.32 單調排開 ⇒ 它們是**同一段淡入的不同時刻**。
+
+## 三件比數字更該留下的
+
+1. **N=40 跑一次會給出乾淨、好寫、而且錯的結論。** 頭兩次都是 40/40 同一個雜湊，第三次才 39/1。事前寫死的檢定力聲明（p=1/44 時只有 0.60）擋住了「沒抓到 ⇒ 不會壞」。
+2. **真實時間對照組是全場最穩的一組（8/8 逐位元相同）——而它是一張純白。** `--timeout` 在 chrome-headless-shell 152 不是「拍照前等 N 毫秒」。已標 `VOID`。**「哪一個畫格才是觀眾會看到的」本輪沒有答案**——現行協定的穩定只證明「穩定」，不證明「對」。
+3. **逐位元不同 ≠ 看得出來不同。** 判準沒有事後放寬，改成兩個數字分開放上桌。
+
+## 收尾
+
+- **commit** `b33150a` vacant-docs-web，遠端 sha 逐字元相同：`b33150a7006696f870918bd2bb05f66fb8182c3c`
+- 交付物 `probe/SHOT_FINDINGS.md`（單次）＋ `probe/SHOT_POOLED.md`（併三次）；既有量測腳本一個位元組沒動
+- STATE.md 第 80 輪、PROGRESS.md 已更新
+
+**下一步**：用 CDP（`Page.captureScreenshot` ＋ 真的延遲）回答 `H2` 留下的洞——本輪已證明加旗標無效。這題直接關係到展場：開場那個面板若在觀眾眼裡長期停在 `S1`，「沒關係，沒有人找得到。」那句話是壓在 token 網格上讀的。
+</pre></details><details><summary><b>第 129 輪</b><span class="dim"> · 08-16 17:29 · 3KB</span></summary><pre> in `probe/sc_run1/`, not overwritten.
+
+Two other things I&#x27;d rather you hear from me than find later:
+
+- I inferred from a screenshot that CSS animations don&#x27;t advance on this machine. **I measured it and I was wrong** (`.keyboard-hint` opacity: 1 at 2 s, 0 at 8 s). Why that screenshot froze mid-transition is still unexplained — I left it unexplained rather than reusing a wrong story.
+- My pre-registered prediction P1 (≥24 cells move) got **23**. Reported as wrong. The cause was my measuring position, not the site, but rewriting it as &quot;actually correct&quot; is the exact move this loop exists to prevent.
+- `write_md()` assembled the whole deliverable and never wrote the file, while printing `VERDICT = PASS`. Caught by `ls`-ing the artifact.
+
+**Commit** `3181197` (vacant-docs-web) — remote sha verified character-for-character. `STATE.md`/`PROGRESS.md` updated.
+
+**Carried forward as blocked:** the corrupt-frame mechanism is unresolved, and any future screenshot-based measurement of *fine* differences will hit it — I&#x27;d make that the next tooling fix. Round 77&#x27;s 3 flapping K5 cells are still open, though this round narrows them: all three are stable under the scroll ruler, so what flips is the residual geometry the fingerprint sees, not the scrolling. The silhouette six-way choice is still waiting on you (20th round) — `styles/probe/ss_eyes.png`, view at 100%, then check `EYES_KEY.md`.
+</pre></details><details><summary><b>第 128 輪</b><span class="dim"> · 08-16 16:58 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 127 輪</b><span class="dim"> · 08-16 16:57 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 126 輪</b><span class="dim"> · 08-16 16:55 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 125 輪</b><span class="dim"> · 08-16 16:53 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 124 輪</b><span class="dim"> · 08-16 16:52 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 123 輪</b><span class="dim"> · 08-16 16:50 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 122 輪</b><span class="dim"> · 08-16 16:49 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 121 輪</b><span class="dim"> · 08-16 16:47 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 120 輪</b><span class="dim"> · 08-16 16:45 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 119 輪</b><span class="dim"> · 08-16 16:44 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 118 輪</b><span class="dim"> · 08-16 16:42 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 117 輪</b><span class="dim"> · 08-16 16:40 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 116 輪</b><span class="dim"> · 08-16 16:39 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 115 輪</b><span class="dim"> · 08-16 16:37 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details><details><summary><b>第 114 輪</b><span class="dim"> · 08-16 16:36 · 0KB</span></summary><pre>Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: &lt; /dev/null to skip, or wait longer.
+You&#x27;ve hit your session limit · resets 5pm (UTC)
+</pre></details>
+
+<h2>迴圈日誌</h2>
+<pre>（1029s）
+進度頁已更新 /home/user1/vacant/public/index.html（137KB，40 輪，20 筆 commit）
+2026-08-16 19:43:08  ── 第 135 輪開始 → iter-0135.log
+2026-08-16 19:56:26    第 135 輪結束（795s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，40 輪，20 筆 commit）
+2026-08-16 19:57:56  ── 第 136 輪開始 → iter-0136.log
+2026-08-16 20:18:22    第 136 輪結束（1224s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-16 20:19:52  ── 第 137 輪開始 → iter-0137.log
+2026-08-16 20:36:29    第 137 輪結束（995s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-16 20:37:59  ── 第 138 輪開始 → iter-0138.log
+2026-08-16 20:58:21    第 138 輪結束（1220s）
+進度頁已更新 /home/user1/vacant/public/index.html（122KB，40 輪，20 筆 commit）
+2026-08-16 20:59:51  ── 第 139 輪開始 → iter-0139.log
+2026-08-16 21:17:41    第 139 輪結束（1068s）
+進度頁已更新 /home/user1/vacant/public/index.html（122KB，40 輪，20 筆 commit）
+2026-08-16 21:19:11  ── 第 140 輪開始 → iter-0140.log
+2026-08-16 21:39:25    第 140 輪結束（1212s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-16 21:40:55  ── 第 141 輪開始 → iter-0141.log
+2026-08-16 22:08:34    第 141 輪結束（1657s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，40 輪，20 筆 commit）
+2026-08-16 22:10:05  ── 第 142 輪開始 → iter-0142.log
+2026-08-16 22:21:37    第 142 輪結束（690s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-16 22:23:07  ── 第 143 輪開始 → iter-0143.log
+2026-08-16 22:40:16    第 143 輪結束（1026s）
+進度頁已更新 /home/user1/vacant/public/index.html（122KB，40 輪，20 筆 commit）
+2026-08-16 22:41:46  ── 第 144 輪開始 → iter-0144.log
+2026-08-16 23:11:40    第 144 輪結束（1792s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，20 筆 commit）
+2026-08-16 23:13:10  ── 第 145 輪開始 → iter-0145.log
+2026-08-16 23:23:47    第 145 輪結束（634s）
+進度頁已更新 /home/user1/vacant/public/index.html（123KB，40 輪，20 筆 commit）
+2026-08-16 23:25:17  ── 第 146 輪開始 → iter-0146.log
+2026-08-16 23:37:12    第 146 輪結束（713s）
+進度頁已更新 /home/user1/vacant/public/index.html（123KB，40 輪，20 筆 commit）
+2026-08-16 23:38:42  ── 第 147 輪開始 → iter-0147.log
+2026-08-16 23:48:47    第 147 輪結束（603s）
+進度頁已更新 /home/user1/vacant/public/index.html（119KB，40 輪，20 筆 commit）
+2026-08-16 23:50:17  ── 第 148 輪開始 → iter-0148.log
+2026-08-17 00:10:39    第 148 輪結束（1219s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-17 00:12:09  ── 第 149 輪開始 → iter-0149.log
+2026-08-17 00:24:20    第 149 輪結束（729s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，20 筆 commit）
+2026-08-17 00:25:50  ── 第 150 輪開始 → iter-0150.log
+2026-08-17 00:36:15    第 150 輪結束（622s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，20 筆 commit）
+2026-08-17 00:37:45  ── 第 151 輪開始 → iter-0151.log
+2026-08-17 00:54:41    第 151 輪結束（1014s）
+進度頁已更新 /home/user1/vacant/public/index.html（129KB，40 輪，20 筆 commit）
+2026-08-17 00:56:11  ── 第 152 輪開始 → iter-0152.log
+2026-08-17 01:08:48    第 152 輪結束（755s）
+進度頁已更新 /home/user1/vacant/public/index.html（126KB，40 輪，20 筆 commit）
+2026-08-17 01:10:18  ── 第 153 輪開始 → iter-0153.log
+2026-08-17 01:19:09    第 153 輪結束（529s）
+</pre>
+
+<footer>
+每 60 秒自動重新整理。頁面由 <code>bin/progress.py</code> 在每一輪結束後產生。<br>
+停止迴圈：<code>touch ~/vacant/STOP</code>（當輪跑完才停，不要用 kill）。
+</footer>
+
+</div></body></html>

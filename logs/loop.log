@@ -1,0 +1,461 @@
+2026-08-15 12:00:20  迴圈啟動（pid 8545，從第 1 輪繼續，間隔 90s，單輪上限 45min）
+2026-08-15 12:00:20  ── 第 1 輪開始 → iter-0001.log
+2026-08-15 12:18:37    第 1 輪結束（1091s）
+進度頁已更新 /home/user1/vacant/public/index.html（14KB，1 輪，17 筆 commit）
+2026-08-15 12:20:07  ── 第 2 輪開始 → iter-0002.log
+2026-08-15 12:36:17    第 2 輪結束（968s）
+進度頁已更新 /home/user1/vacant/public/index.html（17KB，2 輪，17 筆 commit）
+2026-08-15 12:37:47  ── 第 3 輪開始 → iter-0003.log
+2026-08-15 13:05:55    第 3 輪結束（1686s）
+進度頁已更新 /home/user1/vacant/public/index.html（26KB，3 輪，17 筆 commit）
+2026-08-15 13:07:25  ── 第 4 輪開始 → iter-0004.log
+2026-08-15 13:43:49    第 4 輪結束（2181s）
+進度頁已更新 /home/user1/vacant/public/index.html（31KB，4 輪，17 筆 commit）
+2026-08-15 13:45:19  ── 第 5 輪開始 → iter-0005.log
+2026-08-15 14:19:00    第 5 輪結束（2018s）
+進度頁已更新 /home/user1/vacant/public/index.html（37KB，5 輪，17 筆 commit）
+2026-08-15 14:20:30  ── 第 6 輪開始 → iter-0006.log
+2026-08-15 15:04:49    第 6 輪結束（2656s）
+進度頁已更新 /home/user1/vacant/public/index.html（40KB，6 輪，17 筆 commit）
+2026-08-15 15:06:19  ── 第 7 輪開始 → iter-0007.log
+2026-08-15 15:43:50    第 7 輪結束（2248s）
+進度頁已更新 /home/user1/vacant/public/index.html（41KB，7 輪，17 筆 commit）
+2026-08-15 15:45:20  ── 第 8 輪開始 → iter-0008.log
+2026-08-15 16:18:44    第 8 輪結束（2002s）
+進度頁已更新 /home/user1/vacant/public/index.html（44KB，8 輪，17 筆 commit）
+2026-08-15 16:20:14  ── 第 9 輪開始 → iter-0009.log
+2026-08-15 16:39:42    第 9 輪結束（1165s）
+進度頁已更新 /home/user1/vacant/public/index.html（44KB，9 輪，17 筆 commit）
+2026-08-15 16:41:12  ── 第 10 輪開始 → iter-0010.log
+2026-08-15 17:14:44    第 10 輪結束（2010s）
+進度頁已更新 /home/user1/vacant/public/index.html（46KB，10 輪，17 筆 commit）
+2026-08-15 17:16:14  ── 第 11 輪開始 → iter-0011.log
+2026-08-15 18:01:17    第 11 輪逾時被中止（45min）——那一輪多半沒收尾
+進度頁已更新 /home/user1/vacant/public/index.html（44KB，11 輪，17 筆 commit）
+2026-08-15 18:02:47  ── 第 12 輪開始 → iter-0012.log
+2026-08-15 18:05:32    第 12 輪結束（163s）
+進度頁已更新 /home/user1/vacant/public/index.html（37KB，12 輪，17 筆 commit）
+2026-08-15 18:07:02  ── 第 13 輪開始 → iter-0013.log
+2026-08-15 18:20:52    第 13 輪結束（827s）
+進度頁已更新 /home/user1/vacant/public/index.html（41KB，13 輪，17 筆 commit）
+2026-08-15 18:22:23  ── 第 14 輪開始 → iter-0014.log
+2026-08-15 18:51:06    第 14 輪結束（1721s）
+進度頁已更新 /home/user1/vacant/public/index.html（52KB，14 輪，17 筆 commit）
+2026-08-15 18:52:36  ── 第 15 輪開始 → iter-0015.log
+2026-08-15 19:17:46    第 15 輪結束（1507s）
+進度頁已更新 /home/user1/vacant/public/index.html（58KB，15 輪，17 筆 commit）
+2026-08-15 19:19:16  ── 第 16 輪開始 → iter-0016.log
+2026-08-15 19:50:46    第 16 輪結束（1888s）
+進度頁已更新 /home/user1/vacant/public/index.html（59KB，16 輪，17 筆 commit）
+2026-08-15 19:52:17  ── 第 17 輪開始 → iter-0017.log
+2026-08-15 20:23:49    第 17 輪結束（1890s）
+進度頁已更新 /home/user1/vacant/public/index.html（61KB，17 輪，17 筆 commit）
+2026-08-15 20:25:19  ── 第 18 輪開始 → iter-0018.log
+2026-08-15 20:46:54    第 18 輪結束（1292s）
+進度頁已更新 /home/user1/vacant/public/index.html（65KB，18 輪，17 筆 commit）
+2026-08-15 20:48:24  ── 第 19 輪開始 → iter-0019.log
+2026-08-15 21:19:17    第 19 輪結束（1850s）
+進度頁已更新 /home/user1/vacant/public/index.html（72KB，19 輪，17 筆 commit）
+2026-08-15 21:20:47  ── 第 20 輪開始 → iter-0020.log
+2026-08-15 21:43:45    第 20 輪結束（1376s）
+進度頁已更新 /home/user1/vacant/public/index.html（78KB，20 輪，17 筆 commit）
+2026-08-15 21:45:16  ── 第 21 輪開始 → iter-0021.log
+2026-08-15 22:12:26    第 21 輪結束（1628s）
+進度頁已更新 /home/user1/vacant/public/index.html（81KB，21 輪，17 筆 commit）
+2026-08-15 22:13:56  ── 第 22 輪開始 → iter-0022.log
+2026-08-15 22:49:18    第 22 輪結束（2119s）
+進度頁已更新 /home/user1/vacant/public/index.html（84KB，22 輪，17 筆 commit）
+2026-08-15 22:50:48  ── 第 23 輪開始 → iter-0023.log
+2026-08-15 23:23:41    第 23 輪結束（1971s）
+進度頁已更新 /home/user1/vacant/public/index.html（86KB，23 輪，17 筆 commit）
+2026-08-15 23:25:11  ── 第 24 輪開始 → iter-0024.log
+2026-08-16 00:10:14    第 24 輪逾時被中止（45min）——那一輪多半沒收尾
+進度頁已更新 /home/user1/vacant/public/index.html（79KB，24 輪，17 筆 commit）
+2026-08-16 00:11:44  ── 第 25 輪開始 → iter-0025.log
+2026-08-16 00:31:08    第 25 輪結束（1162s）
+進度頁已更新 /home/user1/vacant/public/index.html（75KB，25 輪，17 筆 commit）
+2026-08-16 00:32:38  ── 第 26 輪開始 → iter-0026.log
+2026-08-16 00:43:58    第 26 輪結束（678s）
+進度頁已更新 /home/user1/vacant/public/index.html（78KB，26 輪，17 筆 commit）
+2026-08-16 00:45:28  ── 第 27 輪開始 → iter-0027.log
+2026-08-16 01:03:53    第 27 輪結束（1103s）
+進度頁已更新 /home/user1/vacant/public/index.html（84KB，27 輪，17 筆 commit）
+2026-08-16 01:05:23  ── 第 28 輪開始 → iter-0028.log
+2026-08-16 01:19:19    第 28 輪結束（834s）
+進度頁已更新 /home/user1/vacant/public/index.html（91KB，28 輪，17 筆 commit）
+2026-08-16 01:20:49  ── 第 29 輪開始 → iter-0029.log
+2026-08-16 01:44:28    第 29 輪結束（1416s）
+進度頁已更新 /home/user1/vacant/public/index.html（101KB，29 輪，17 筆 commit）
+2026-08-16 01:45:58  ── 第 30 輪開始 → iter-0030.log
+2026-08-16 02:05:41    第 30 輪結束（1181s）
+進度頁已更新 /home/user1/vacant/public/index.html（106KB，30 輪，17 筆 commit）
+2026-08-16 02:07:12  ── 第 31 輪開始 → iter-0031.log
+2026-08-16 02:22:04    第 31 輪結束（890s）
+進度頁已更新 /home/user1/vacant/public/index.html（105KB，31 輪，17 筆 commit）
+2026-08-16 02:23:34  ── 第 32 輪開始 → iter-0032.log
+2026-08-16 02:43:50    第 32 輪結束（1214s）
+進度頁已更新 /home/user1/vacant/public/index.html（106KB，32 輪，17 筆 commit）
+2026-08-16 02:45:20  ── 第 33 輪開始 → iter-0033.log
+2026-08-16 03:02:10    第 33 輪結束（1007s）
+進度頁已更新 /home/user1/vacant/public/index.html（109KB，33 輪，17 筆 commit）
+2026-08-16 03:03:40  ── 第 34 輪開始 → iter-0034.log
+2026-08-16 03:21:58    第 34 輪結束（1096s）
+進度頁已更新 /home/user1/vacant/public/index.html（111KB，34 輪，17 筆 commit）
+2026-08-16 03:23:29  ── 第 35 輪開始 → iter-0035.log
+2026-08-16 03:48:39    第 35 輪結束（1508s）
+進度頁已更新 /home/user1/vacant/public/index.html（115KB，35 輪，17 筆 commit）
+2026-08-16 03:50:10  ── 第 36 輪開始 → iter-0036.log
+2026-08-16 04:17:38    第 36 輪結束（1646s）
+進度頁已更新 /home/user1/vacant/public/index.html（116KB，36 輪，17 筆 commit）
+2026-08-16 04:19:09  ── 第 37 輪開始 → iter-0037.log
+2026-08-16 04:27:59    第 37 輪結束（528s）
+進度頁已更新 /home/user1/vacant/public/index.html（116KB，37 輪，17 筆 commit）
+2026-08-16 04:29:30  ── 第 38 輪開始 → iter-0038.log
+2026-08-16 04:52:35    第 38 輪結束（1383s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，38 輪，17 筆 commit）
+2026-08-16 04:54:05  ── 第 39 輪開始 → iter-0039.log
+2026-08-16 05:09:37    第 39 輪結束（929s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，39 輪，17 筆 commit）
+2026-08-16 05:11:07  ── 第 40 輪開始 → iter-0040.log
+2026-08-16 05:22:38    第 40 輪結束（689s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，40 輪，17 筆 commit）
+2026-08-16 05:24:08  ── 第 41 輪開始 → iter-0041.log
+2026-08-16 05:40:45    第 41 輪結束（994s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，40 輪，17 筆 commit）
+2026-08-16 05:42:15  ── 第 42 輪開始 → iter-0042.log
+2026-08-16 05:49:34    第 42 輪結束（437s）
+進度頁已更新 /home/user1/vacant/public/index.html（125KB，40 輪，17 筆 commit）
+2026-08-16 05:51:04  ── 第 43 輪開始 → iter-0043.log
+2026-08-16 06:13:13    第 43 輪結束（1326s）
+進度頁已更新 /home/user1/vacant/public/index.html（128KB，40 輪，17 筆 commit）
+2026-08-16 06:14:43  ── 第 44 輪開始 → iter-0044.log
+2026-08-16 06:29:56    第 44 輪結束（911s）
+進度頁已更新 /home/user1/vacant/public/index.html（131KB，40 輪，17 筆 commit）
+2026-08-16 06:31:26  ── 第 45 輪開始 → iter-0045.log
+2026-08-16 06:43:17    第 45 輪結束（709s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，17 筆 commit）
+2026-08-16 06:44:48  ── 第 46 輪開始 → iter-0046.log
+2026-08-16 07:11:29    第 46 輪結束（1599s）
+進度頁已更新 /home/user1/vacant/public/index.html（123KB，40 輪，17 筆 commit）
+2026-08-16 07:12:59  ── 第 47 輪開始 → iter-0047.log
+2026-08-16 07:28:42    第 47 輪結束（940s）
+進度頁已更新 /home/user1/vacant/public/index.html（130KB，40 輪，17 筆 commit）
+2026-08-16 07:30:12  ── 第 48 輪開始 → iter-0048.log
+2026-08-16 07:42:51    第 48 輪結束（756s）
+進度頁已更新 /home/user1/vacant/public/index.html（132KB，40 輪，17 筆 commit）
+2026-08-16 07:44:22  ── 第 49 輪開始 → iter-0049.log
+2026-08-16 07:57:20    第 49 輪結束（776s）
+進度頁已更新 /home/user1/vacant/public/index.html（135KB，40 輪，17 筆 commit）
+2026-08-16 07:58:50  ── 第 50 輪開始 → iter-0050.log
+2026-08-16 08:10:09    第 50 輪結束（677s）
+進度頁已更新 /home/user1/vacant/public/index.html（140KB，40 輪，17 筆 commit）
+2026-08-16 08:11:39  ── 第 51 輪開始 → iter-0051.log
+2026-08-16 08:21:07    第 51 輪結束（565s）
+進度頁已更新 /home/user1/vacant/public/index.html（143KB，40 輪，17 筆 commit）
+2026-08-16 08:22:37  ── 第 52 輪開始 → iter-0052.log
+2026-08-16 08:40:38    第 52 輪結束（1079s）
+進度頁已更新 /home/user1/vacant/public/index.html（149KB，40 輪，17 筆 commit）
+2026-08-16 08:42:08  ── 第 53 輪開始 → iter-0053.log
+2026-08-16 08:50:54    第 53 輪結束（524s）
+進度頁已更新 /home/user1/vacant/public/index.html（149KB，40 輪，17 筆 commit）
+2026-08-16 08:52:24  ── 第 54 輪開始 → iter-0054.log
+2026-08-16 09:00:23    第 54 輪結束（477s）
+進度頁已更新 /home/user1/vacant/public/index.html（145KB，40 輪，17 筆 commit）
+2026-08-16 09:01:53  ── 第 55 輪開始 → iter-0055.log
+2026-08-16 09:14:46    第 55 輪結束（770s）
+進度頁已更新 /home/user1/vacant/public/index.html（151KB，40 輪，17 筆 commit）
+2026-08-16 09:16:16  ── 第 56 輪開始 → iter-0056.log
+2026-08-16 09:24:59    第 56 輪結束（520s）
+進度頁已更新 /home/user1/vacant/public/index.html（152KB，40 輪，17 筆 commit）
+2026-08-16 09:26:29  ── 第 57 輪開始 → iter-0057.log
+2026-08-16 09:39:01    第 57 輪結束（749s）
+進度頁已更新 /home/user1/vacant/public/index.html（152KB，40 輪，17 筆 commit）
+2026-08-16 09:40:31  ── 第 58 輪開始 → iter-0058.log
+2026-08-16 09:52:28    第 58 輪結束（714s）
+進度頁已更新 /home/user1/vacant/public/index.html（155KB，40 輪，17 筆 commit）
+2026-08-16 09:53:58  ── 第 59 輪開始 → iter-0059.log
+2026-08-16 10:04:50    第 59 輪結束（649s）
+進度頁已更新 /home/user1/vacant/public/index.html（154KB，40 輪，17 筆 commit）
+2026-08-16 10:06:20  ── 第 60 輪開始 → iter-0060.log
+2026-08-16 10:21:44    第 60 輪結束（922s）
+進度頁已更新 /home/user1/vacant/public/index.html（154KB，40 輪，17 筆 commit）
+2026-08-16 10:23:14  ── 第 61 輪開始 → iter-0061.log
+2026-08-16 10:39:53    第 61 輪結束（997s）
+進度頁已更新 /home/user1/vacant/public/index.html（155KB，40 輪，17 筆 commit）
+2026-08-16 10:41:23  ── 第 62 輪開始 → iter-0062.log
+2026-08-16 10:55:02    第 62 輪結束（817s）
+進度頁已更新 /home/user1/vacant/public/index.html（155KB，40 輪，17 筆 commit）
+2026-08-16 10:56:32  ── 第 63 輪開始 → iter-0063.log
+2026-08-16 11:06:50    第 63 輪結束（616s）
+進度頁已更新 /home/user1/vacant/public/index.html（151KB，40 輪，17 筆 commit）
+2026-08-16 11:08:20  ── 第 64 輪開始 → iter-0064.log
+2026-08-16 11:10:21    第 64 輪異常結束 rc=1（119s）
+進度頁已更新 /home/user1/vacant/public/index.html（152KB，40 輪，17 筆 commit）
+2026-08-16 11:11:51  ── 第 65 輪開始 → iter-0065.log
+2026-08-16 11:11:59    第 65 輪異常結束 rc=1（6s）
+進度頁已更新 /home/user1/vacant/public/index.html（150KB，40 輪，17 筆 commit）
+2026-08-16 11:13:29  ── 第 66 輪開始 → iter-0066.log
+2026-08-16 11:13:36    第 66 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（149KB，40 輪，17 筆 commit）
+2026-08-16 11:15:06  ── 第 67 輪開始 → iter-0067.log
+2026-08-16 11:15:14    第 67 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（148KB，40 輪，17 筆 commit）
+2026-08-16 11:16:44  ── 第 68 輪開始 → iter-0068.log
+2026-08-16 11:16:51    第 68 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（147KB，40 輪，17 筆 commit）
+2026-08-16 11:18:22  ── 第 69 輪開始 → iter-0069.log
+2026-08-16 11:18:29    第 69 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（146KB，40 輪，17 筆 commit）
+2026-08-16 11:19:59  ── 第 70 輪開始 → iter-0070.log
+2026-08-16 11:20:07    第 70 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（145KB，40 輪，17 筆 commit）
+2026-08-16 11:21:37  ── 第 71 輪開始 → iter-0071.log
+2026-08-16 11:21:44    第 71 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（143KB，40 輪，17 筆 commit）
+2026-08-16 11:23:14  ── 第 72 輪開始 → iter-0072.log
+2026-08-16 11:23:22    第 72 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（142KB，40 輪，17 筆 commit）
+2026-08-16 11:24:52  ── 第 73 輪開始 → iter-0073.log
+2026-08-16 11:24:59    第 73 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（141KB，40 輪，17 筆 commit）
+2026-08-16 11:26:29  ── 第 74 輪開始 → iter-0074.log
+2026-08-16 11:26:37    第 74 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（140KB，40 輪，17 筆 commit）
+2026-08-16 11:28:07  ── 第 75 輪開始 → iter-0075.log
+2026-08-16 11:28:14    第 75 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（139KB，40 輪，17 筆 commit）
+2026-08-16 11:29:44  ── 第 76 輪開始 → iter-0076.log
+2026-08-16 11:29:52    第 76 輪異常結束 rc=1（6s）
+進度頁已更新 /home/user1/vacant/public/index.html（137KB，40 輪，17 筆 commit）
+2026-08-16 11:31:22  ── 第 77 輪開始 → iter-0077.log
+2026-08-16 11:31:29    第 77 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（136KB，40 輪，17 筆 commit）
+2026-08-16 11:32:59  ── 第 78 輪開始 → iter-0078.log
+2026-08-16 11:33:06    第 78 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（135KB，40 輪，17 筆 commit）
+2026-08-16 11:34:36  ── 第 79 輪開始 → iter-0079.log
+2026-08-16 11:34:44    第 79 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（134KB，40 輪，17 筆 commit）
+2026-08-16 11:36:14  ── 第 80 輪開始 → iter-0080.log
+2026-08-16 11:36:21    第 80 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（133KB，40 輪，17 筆 commit）
+2026-08-16 11:37:51  ── 第 81 輪開始 → iter-0081.log
+2026-08-16 11:37:58    第 81 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（132KB，40 輪，17 筆 commit）
+2026-08-16 11:39:29  ── 第 82 輪開始 → iter-0082.log
+2026-08-16 11:39:36    第 82 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（130KB，40 輪，17 筆 commit）
+2026-08-16 11:41:06  ── 第 83 輪開始 → iter-0083.log
+2026-08-16 11:41:13    第 83 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（129KB，40 輪，17 筆 commit）
+2026-08-16 11:42:43  ── 第 84 輪開始 → iter-0084.log
+2026-08-16 11:42:51    第 84 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（128KB，40 輪，17 筆 commit）
+2026-08-16 11:44:21  ── 第 85 輪開始 → iter-0085.log
+2026-08-16 11:44:28    第 85 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（127KB，40 輪，17 筆 commit）
+2026-08-16 11:45:58  ── 第 86 輪開始 → iter-0086.log
+2026-08-16 11:46:06    第 86 輪異常結束 rc=1（6s）
+進度頁已更新 /home/user1/vacant/public/index.html（126KB，40 輪，17 筆 commit）
+2026-08-16 11:47:36  ── 第 87 輪開始 → iter-0087.log
+2026-08-16 11:47:43    第 87 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（125KB，40 輪，17 筆 commit）
+2026-08-16 11:49:13  ── 第 88 輪開始 → iter-0088.log
+2026-08-16 11:49:21    第 88 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，17 筆 commit）
+2026-08-16 11:50:51  ── 第 89 輪開始 → iter-0089.log
+2026-08-16 11:50:58    第 89 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（122KB，40 輪，17 筆 commit）
+2026-08-16 11:52:28  ── 第 90 輪開始 → iter-0090.log
+2026-08-16 11:52:36    第 90 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，17 筆 commit）
+2026-08-16 11:54:06  ── 第 91 輪開始 → iter-0091.log
+2026-08-16 11:54:13    第 91 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，40 輪，17 筆 commit）
+2026-08-16 11:55:43  ── 第 92 輪開始 → iter-0092.log
+2026-08-16 11:55:51    第 92 輪異常結束 rc=1（4s）
+進度頁已更新 /home/user1/vacant/public/index.html（119KB，40 輪，17 筆 commit）
+2026-08-16 11:57:21  ── 第 93 輪開始 → iter-0093.log
+2026-08-16 11:57:28    第 93 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，17 筆 commit）
+2026-08-16 11:58:58  ── 第 94 輪開始 → iter-0094.log
+2026-08-16 11:59:05    第 94 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（117KB，40 輪，17 筆 commit）
+2026-08-16 12:00:35  ── 第 95 輪開始 → iter-0095.log
+2026-08-16 12:30:44    第 95 輪結束（1806s）
+進度頁已更新 /home/user1/vacant/public/index.html（117KB，40 輪，17 筆 commit）
+2026-08-16 12:32:14  ── 第 96 輪開始 → iter-0096.log
+2026-08-16 12:51:50    第 96 輪結束（1174s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，17 筆 commit）
+2026-08-16 12:53:20  ── 第 97 輪開始 → iter-0097.log
+2026-08-16 13:08:38    第 97 輪結束（916s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，40 輪，17 筆 commit）
+2026-08-16 13:10:08  ── 第 98 輪開始 → iter-0098.log
+2026-08-16 13:22:08    第 98 輪結束（718s）
+進度頁已更新 /home/user1/vacant/public/index.html（117KB，40 輪，18 筆 commit）
+2026-08-16 13:23:38  ── 第 99 輪開始 → iter-0099.log
+2026-08-16 13:37:07    第 99 輪結束（807s）
+進度頁已更新 /home/user1/vacant/public/index.html（117KB，40 輪，19 筆 commit）
+2026-08-16 13:38:37  ── 第 100 輪開始 → iter-0100.log
+2026-08-16 13:50:32    第 100 輪結束（713s）
+進度頁已更新 /home/user1/vacant/public/index.html（116KB，40 輪，20 筆 commit）
+2026-08-16 13:52:02  ── 第 101 輪開始 → iter-0101.log
+2026-08-16 14:04:32    第 101 輪結束（747s）
+進度頁已更新 /home/user1/vacant/public/index.html（113KB，40 輪，20 筆 commit）
+2026-08-16 14:06:02  ── 第 102 輪開始 → iter-0102.log
+2026-08-16 14:15:51    第 102 輪結束（586s）
+進度頁已更新 /home/user1/vacant/public/index.html（115KB，40 輪，20 筆 commit）
+2026-08-16 14:17:22  ── 第 103 輪開始 → iter-0103.log
+2026-08-16 14:30:52    第 103 輪結束（808s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，20 筆 commit）
+2026-08-16 14:32:22  ── 第 104 輪開始 → iter-0104.log
+2026-08-16 14:52:44    第 104 輪結束（1219s）
+進度頁已更新 /home/user1/vacant/public/index.html（137KB，40 輪，20 筆 commit）
+2026-08-16 14:54:14  ── 第 105 輪開始 → iter-0105.log
+2026-08-16 15:11:55    第 105 輪結束（1058s）
+進度頁已更新 /home/user1/vacant/public/index.html（151KB，40 輪，20 筆 commit）
+2026-08-16 15:13:25  ── 第 106 輪開始 → iter-0106.log
+2026-08-16 15:30:24    第 106 輪結束（1017s）
+進度頁已更新 /home/user1/vacant/public/index.html（168KB，40 輪，20 筆 commit）
+2026-08-16 15:31:54  ── 第 107 輪開始 → iter-0107.log
+2026-08-16 16:10:56    第 107 輪結束（2339s）
+進度頁已更新 /home/user1/vacant/public/index.html（170KB，40 輪，20 筆 commit）
+2026-08-16 16:12:26  ── 第 108 輪開始 → iter-0108.log
+2026-08-16 16:26:17    第 108 輪異常結束 rc=1（828s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:27:48  ── 第 109 輪開始 → iter-0109.log
+2026-08-16 16:27:56    第 109 輪異常結束 rc=1（6s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:29:26  ── 第 110 輪開始 → iter-0110.log
+2026-08-16 16:29:33    第 110 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:31:03  ── 第 111 輪開始 → iter-0111.log
+2026-08-16 16:31:11    第 111 輪異常結束 rc=1（6s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:32:41  ── 第 112 輪開始 → iter-0112.log
+2026-08-16 16:32:49    第 112 輪異常結束 rc=1（6s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:34:19  ── 第 113 輪開始 → iter-0113.log
+2026-08-16 16:34:26    第 113 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:35:56  ── 第 114 輪開始 → iter-0114.log
+2026-08-16 16:36:03    第 114 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:37:33  ── 第 115 輪開始 → iter-0115.log
+2026-08-16 16:37:41    第 115 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:39:11  ── 第 116 輪開始 → iter-0116.log
+2026-08-16 16:39:18    第 116 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:40:48  ── 第 117 輪開始 → iter-0117.log
+2026-08-16 16:40:56    第 117 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:42:26  ── 第 118 輪開始 → iter-0118.log
+2026-08-16 16:42:33    第 118 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:44:03  ── 第 119 輪開始 → iter-0119.log
+2026-08-16 16:44:11    第 119 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:45:41  ── 第 120 輪開始 → iter-0120.log
+2026-08-16 16:45:48    第 120 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:47:18  ── 第 121 輪開始 → iter-0121.log
+2026-08-16 16:47:26    第 121 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:48:56  ── 第 122 輪開始 → iter-0122.log
+2026-08-16 16:49:03    第 122 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:50:33  ── 第 123 輪開始 → iter-0123.log
+2026-08-16 16:50:41    第 123 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:52:11  ── 第 124 輪開始 → iter-0124.log
+2026-08-16 16:52:18    第 124 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:53:48  ── 第 125 輪開始 → iter-0125.log
+2026-08-16 16:53:56    第 125 輪異常結束 rc=1（6s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:55:26  ── 第 126 輪開始 → iter-0126.log
+2026-08-16 16:55:33    第 126 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:57:03  ── 第 127 輪開始 → iter-0127.log
+2026-08-16 16:57:10    第 127 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 16:58:40  ── 第 128 輪開始 → iter-0128.log
+2026-08-16 16:58:48    第 128 輪異常結束 rc=1（5s）
+進度頁已更新 /home/user1/vacant/public/index.html（118KB，40 輪，20 筆 commit）
+2026-08-16 17:00:18  ── 第 129 輪開始 → iter-0129.log
+2026-08-16 17:29:16    第 129 輪結束（1736s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，40 輪，20 筆 commit）
+2026-08-16 17:30:46  ── 第 130 輪開始 → iter-0130.log
+2026-08-16 17:56:40    第 130 輪結束（1552s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，20 筆 commit）
+2026-08-16 17:58:10  ── 第 131 輪開始 → iter-0131.log
+2026-08-16 18:28:21    第 131 輪結束（1809s）
+進度頁已更新 /home/user1/vacant/public/index.html（126KB，40 輪，20 筆 commit）
+2026-08-16 18:29:51  ── 第 132 輪開始 → iter-0132.log
+2026-08-16 18:53:48    第 132 輪結束（1434s）
+進度頁已更新 /home/user1/vacant/public/index.html（128KB，40 輪，20 筆 commit）
+2026-08-16 18:55:18  ── 第 133 輪開始 → iter-0133.log
+2026-08-16 19:22:56    第 133 輪結束（1656s）
+進度頁已更新 /home/user1/vacant/public/index.html（133KB，40 輪，20 筆 commit）
+2026-08-16 19:24:26  ── 第 134 輪開始 → iter-0134.log
+2026-08-16 19:41:38    第 134 輪結束（1029s）
+進度頁已更新 /home/user1/vacant/public/index.html（137KB，40 輪，20 筆 commit）
+2026-08-16 19:43:08  ── 第 135 輪開始 → iter-0135.log
+2026-08-16 19:56:26    第 135 輪結束（795s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，40 輪，20 筆 commit）
+2026-08-16 19:57:56  ── 第 136 輪開始 → iter-0136.log
+2026-08-16 20:18:22    第 136 輪結束（1224s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-16 20:19:52  ── 第 137 輪開始 → iter-0137.log
+2026-08-16 20:36:29    第 137 輪結束（995s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-16 20:37:59  ── 第 138 輪開始 → iter-0138.log
+2026-08-16 20:58:21    第 138 輪結束（1220s）
+進度頁已更新 /home/user1/vacant/public/index.html（122KB，40 輪，20 筆 commit）
+2026-08-16 20:59:51  ── 第 139 輪開始 → iter-0139.log
+2026-08-16 21:17:41    第 139 輪結束（1068s）
+進度頁已更新 /home/user1/vacant/public/index.html（122KB，40 輪，20 筆 commit）
+2026-08-16 21:19:11  ── 第 140 輪開始 → iter-0140.log
+2026-08-16 21:39:25    第 140 輪結束（1212s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-16 21:40:55  ── 第 141 輪開始 → iter-0141.log
+2026-08-16 22:08:34    第 141 輪結束（1657s）
+進度頁已更新 /home/user1/vacant/public/index.html（120KB，40 輪，20 筆 commit）
+2026-08-16 22:10:05  ── 第 142 輪開始 → iter-0142.log
+2026-08-16 22:21:37    第 142 輪結束（690s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-16 22:23:07  ── 第 143 輪開始 → iter-0143.log
+2026-08-16 22:40:16    第 143 輪結束（1026s）
+進度頁已更新 /home/user1/vacant/public/index.html（122KB，40 輪，20 筆 commit）
+2026-08-16 22:41:46  ── 第 144 輪開始 → iter-0144.log
+2026-08-16 23:11:40    第 144 輪結束（1792s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，20 筆 commit）
+2026-08-16 23:13:10  ── 第 145 輪開始 → iter-0145.log
+2026-08-16 23:23:47    第 145 輪結束（634s）
+進度頁已更新 /home/user1/vacant/public/index.html（123KB，40 輪，20 筆 commit）
+2026-08-16 23:25:17  ── 第 146 輪開始 → iter-0146.log
+2026-08-16 23:37:12    第 146 輪結束（713s）
+進度頁已更新 /home/user1/vacant/public/index.html（123KB，40 輪，20 筆 commit）
+2026-08-16 23:38:42  ── 第 147 輪開始 → iter-0147.log
+2026-08-16 23:48:47    第 147 輪結束（603s）
+進度頁已更新 /home/user1/vacant/public/index.html（119KB，40 輪，20 筆 commit）
+2026-08-16 23:50:17  ── 第 148 輪開始 → iter-0148.log
+2026-08-17 00:10:39    第 148 輪結束（1219s）
+進度頁已更新 /home/user1/vacant/public/index.html（121KB，40 輪，20 筆 commit）
+2026-08-17 00:12:09  ── 第 149 輪開始 → iter-0149.log
+2026-08-17 00:24:20    第 149 輪結束（729s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，20 筆 commit）
+2026-08-17 00:25:50  ── 第 150 輪開始 → iter-0150.log
+2026-08-17 00:36:15    第 150 輪結束（622s）
+進度頁已更新 /home/user1/vacant/public/index.html（124KB，40 輪，20 筆 commit）
+2026-08-17 00:37:45  ── 第 151 輪開始 → iter-0151.log
+2026-08-17 00:54:41    第 151 輪結束（1014s）
+進度頁已更新 /home/user1/vacant/public/index.html（129KB，40 輪，20 筆 commit）
+2026-08-17 00:56:11  ── 第 152 輪開始 → iter-0152.log
+2026-08-17 01:08:48    第 152 輪結束（755s）
+進度頁已更新 /home/user1/vacant/public/index.html（126KB，40 輪，20 筆 commit）
+2026-08-17 01:10:18  ── 第 153 輪開始 → iter-0153.log
+2026-08-17 01:19:09    第 153 輪結束（529s）
+進度頁已更新 /home/user1/vacant/public/index.html（127KB，40 輪，20 筆 commit）
+2026-08-17 01:20:39  ── 第 154 輪開始 → iter-0154.log
