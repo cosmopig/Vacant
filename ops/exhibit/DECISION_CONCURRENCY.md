@@ -61,3 +61,22 @@ round 同時瓜分（14 個 `codex exec` process 同時掛著，符合 PLAN.md
   的），需要把 `~/.codex/generated_images` 換成每個呼叫獨立的池子
   （例如傳一個 session 專屬子目錄給 codex），而不是共用同一個目錄，
   否則 flock 只是把平行變成排隊，沒有真正平行。
+
+## 追加觀察（同一輪，06:46）——病因比原本記的更嚴重
+
+flock 修法上線後幾分鐘，`ps` 再撈一次發現**同一台 VM 上有三份**
+`timeout 45m claude -p` 在跑（PID 629972 起於 06:34、634919 起於 06:37、
+645758 起於 06:46，且 645758 的 ppid 是 634618——跟另外兩個不同源，
+代表至少有兩個獨立的派工者在對這台 VM 派工，不是同一個排程器連續派兩次
+那麼單純）。本輪撞到時，629972（本輪自己）跟一個更早、已經孤兒化的
+`/tmp/g_floor2.sh`（父行程已死，PID 628750 起於 06:33）同時在對
+`floor_lower.png` 呼叫 `genimg.sh`——本輪選擇**主動 kill 掉自己剛起的
+並發呼叫**，等孤兒行程單獨跑完，而不是兩邊搶，這是 flock 上線前的
+過渡期土法（flock 保護不到已經在跑的舊行程，DECISION 本文已經寫了）。
+
+**這比原記錄嚴重的地方**：三份以上同時活著意味著 codex 容量、
+`~/.codex/generated_images` 池子、以及 `vacant_hm` 這個 git repo 的
+push 序，同時被三份 round 競爭。flock 只解決「撿錯圖」，解決不了
+「三份 round 各自 commit 然後互相 rebase／conflict」──這件事本輪
+用「commit 前一律先 `git pull`」土法應對，但**真正的修法還是同一句：
+需要人類去改派工端，確認同一時間只派一份 round 到這台 VM**。
