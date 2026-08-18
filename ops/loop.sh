@@ -18,6 +18,18 @@ GAP=${LOOP_GAP:-90}                  # 每輪之間的間隔（秒）
 MAX_MIN=${LOOP_MAX_MIN:-45}          # 單輪上限，避免一輪卡死拖垮迴圈
 
 mkdir -p "$LOGS"
+
+# 同一時間只准一份。實測踩到的：`setsid --fork loop.sh` 起了兩份之後，
+# 兩份的 `git pull` 撞在一起，git 回
+# `fatal: Cannot fast-forward to multiple branches` ——那個訊息看起來
+# 完全像分支設定壞了，而手動跑同一行是好的。查了三輪才發現是併發。
+LOCK="$ROOT/.loop.lock"
+exec 9>"$LOCK"
+if ! flock -n 9; then
+  echo "已經有一份迴圈在跑（$LOCK 被鎖住），這一份不啟動" >&2
+  exit 0
+fi
+echo $$ >&9
 [ -x "$CLAUDE" ] || { echo "找不到 claude：$CLAUDE" >&2; exit 2; }
 [ -f "$PROMPT" ] || { echo "找不到指令檔：$PROMPT" >&2; exit 2; }
 
