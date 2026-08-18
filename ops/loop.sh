@@ -43,9 +43,18 @@ while true; do
   say "── 第 ${n} 輪開始 → $(basename "$ilog")"
 
   # 每輪先同步：這台可能落後好幾輪，也可能有別人推的東西
+  # ⚠ 一定要指明 remote 與**當前分支**。裸 `git pull --ff-only` 在
+  #   remote 有多個追蹤分支時會失敗（`Cannot fast-forward to multiple
+  #   branches`），而且錯誤訊息完全不像真正的原因——實測時它讓我以為
+  #   是「本地有未提交改動」，三個 repo 每輪都靜默拿不到新東西。
   for r in Vacant vacant_hm vacant-docs-web; do
-    git -C "$ROOT/$r" pull -q --ff-only 2>>"$main_log" \
-      || say "  警告：$r pull 失敗（多半是本地有未提交改動）"
+    br=$(git -C "$ROOT/$r" branch --show-current 2>/dev/null)
+    if [ -z "${br}" ]; then
+      say "  警告：$r 不在任何分支上（detached HEAD？），跳過 pull"
+      continue
+    fi
+    git -C "$ROOT/$r" pull -q --ff-only origin "${br}" 2>>"$main_log" \
+      || say "  警告：$r（${br}）pull 失敗——看 $main_log 的真正原因，不要猜"
   done
 
   start=$(date +%s)
