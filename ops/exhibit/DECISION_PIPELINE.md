@@ -56,3 +56,45 @@
 - **切鏡頭在展場實測讓觀眾看不懂交付的移動** ⇒ 連續推拉是硬需求，回到 A 或 C。
 - **排圖生成的良率太低**（`floor_lower` 這次就生歪了，給了孤零零一個角色）
   ⇒ 若多次重試仍不穩，改回「單層 ＋ 全部靠角色貼圖」。
+
+## 追記，2026-08-18（把 composite.py 從 /tmp 移進版控）
+
+**開場撞到的事**：這輪開場 `ps aux` 就查到上一輪已經用背景非阻塞方式排了
+三個 `genimg.sh` 呼叫（`floor_archive.png`／`floor_review2.png`／
+`sp_carry2.png`），三個都在 flock 佇列裡（`floor_archive.png` 那個
+codex exec 在跑第 3 次嘗試，另外兩個還在等鎖）。**這三個剛好就是這輪任務
+清單的第一件、第二件要做的東西**，重複排隊只會讓佇列更長，判斷不排新的，
+改用 `Monitor` 背景輪詢等它們落地，同時做這輪能做、不依賴佇列的事。
+
+**做了什麼**：`DECISION_B2_STAGE.md` 已經寫了「`floor_review.png` 落地
+⇒ 用 `composite.py`（純標準庫像素合成）換背景、重新量 `DOOR_X`／`DESK_X`」
+這個觸發條件，但 `composite.py` 本身**只存在於 `/tmp/b2test/`**，從沒進過
+版控。這是連續好幾輪靠著 VM 沒重開機才活下來的單點失敗——`/tmp` 不保證
+存活，而這支工具是被明確點名要在下一步重複使用的（不是一次性測試腳本）。
+移進 `ops/exhibit/composite.py`，跑一次 smoke test 確認搬過來後行為不變：
+
+```
+$ python3 ops/exhibit/composite.py ~/vacant/design/raw/floor_upper.png \
+    ~/vacant/design/sprites/sp_carry.png /tmp/composite_smoketest.png 260 970 720
+/tmp/composite_smoketest.png  sprite 390x260 @ cx=970 feet_y=720
+```
+
+輸出檔案存在、尺寸符合預期（依 260px 目標高度等比縮放後寬 390px）。
+`draw_check.py`／`draw_stamp.py`（同一個 `/tmp/b2test/` 目錄裡另外兩支
+畫勾號／印章的實驗腳本）**沒有一起搬**——b2.html 現在的蓋章效果是內嵌
+SVG（`b2.html` 的 `APPROVE_SVG`／`REJECT_SVG`），這兩支已經被繞過，是
+死路實驗不是要重用的工具，繼續留在 `/tmp` 當歷史紀錄即可。
+
+**判斷（不是量測）**：只把「決策文件明確點名要重複使用」的工具搬進版控，
+不是把整個 `/tmp/b2test/` 都搬進來——後者會把大量一次性測試截圖（`test1.png`
+…`test_submit_640.png` 等）也混進 repo，違反先前輪次「測試產物留在 /tmp，
+不進版控」的慣例。
+
+## 什麼情況下這條追記該被推翻
+
+- **`floor_review.png` 或 `floor_review2.png` 落地** ⇒ 立刻用
+  `ops/exhibit/composite.py`（不必再去 `/tmp` 找）換背景，這是它被搬進
+  版控的直接原因。
+- **composite.py 後續被大改**（例如換成真正的 alpha-aware 高品質縮放，
+  取代目前的最近鄰縮放）⇒ 這條追記只記錄「搬家」本身，實作细節的優劣
+  留給下一輪視實際貼圖品質判斷。
