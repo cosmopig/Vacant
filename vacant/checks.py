@@ -156,10 +156,15 @@ def project_checked_answer(answer: str, spec: dict) -> str:
 
 
 # --- run_python 受限沙箱 ------------------------------------------------------
-def _cpu_limits(seconds: int) -> None:  # pragma: no cover - 在子行程裡跑
+def _cpu_limits(seconds: int, memory_bytes: int = 128 * 1024 * 1024) -> None:  # pragma: no cover
     try:
         import resource
         resource.setrlimit(resource.RLIMIT_CPU, (seconds, seconds))
+        # RLIMIT_DATA constrains heap growth without invalidating macOS's large virtual
+        # address mappings. Linux additionally gets the stronger address-space cap.
+        resource.setrlimit(resource.RLIMIT_DATA, (memory_bytes, memory_bytes))
+        if sys.platform.startswith("linux"):
+            resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
     except Exception:
         pass
 
@@ -181,6 +186,7 @@ _FORBIDDEN_ATTRS = {
 
 def _candidate_functions(
     candidate_code: str, *, allowed_imports: tuple[str, ...] = (),
+    allowed_entry_points: tuple[str, ...] = (),
 ) -> list[str] | None:
     """擋明顯 process/file 旁路並回傳可由 verifier proxy 呼叫的頂層函式。"""
     try:
@@ -218,15 +224,20 @@ def _candidate_functions(
         "ast", "builtins", "json", "os", "selectors", "subprocess", "sys", "time",
         "_protocol", "_selector", "_vacant_call", "_worker",
     }
+    allowed_entries = set(allowed_entry_points)
     return list(dict.fromkeys(
-        name for name in functions if name.isidentifier() and name not in reserved
+        name for name in functions
+        if name.isidentifier() and (name not in reserved or name in allowed_entries)
     )) or None
 
 
 def _worker_source() -> str:
     return r'''import ast
+import collections
 import json
+import math
 import os
+import re
 import sys
 
 candidate_path, protocol_fd, nonce = sys.argv[1], int(sys.argv[2]), sys.argv[3]
@@ -237,10 +248,39 @@ safe_exec = exec
 safe_repr = repr
 safe_type = type
 literal_eval = ast.literal_eval
-scalar_types = (type(None), bool, int, float, str, bytes)
+scalar_types = (type(None), bool, int, float, complex, str, bytes)
 container_types = (list, tuple, set, frozenset)
+wire_tag = "__VACANT_WIRE_FLOAT__"
+
+def wire_encode(value):
+    value_type = safe_type(value)
+    if value_type is float and not math.isfinite(value):
+        label = "nan" if math.isnan(value) else ("-inf" if value < 0 else "inf")
+        return (wire_tag, label)
+    if value_type is complex and (not math.isfinite(value.real) or not math.isfinite(value.imag)):
+        return (wire_tag, "complex", wire_encode(value.real), wire_encode(value.imag))
+    if value_type in (list, tuple, set, frozenset):
+        return value_type(wire_encode(item) for item in value)
+    if value_type is dict or isinstance(value, collections.Counter):
+        return {wire_encode(key): wire_encode(item) for key, item in value.items()}
+    return value
+
+def wire_decode(value):
+    if isinstance(value, tuple) and len(value) >= 2 and value[0] == wire_tag:
+        if value[1] == "nan": return float("nan")
+        if value[1] == "inf": return float("inf")
+        if value[1] == "-inf": return float("-inf")
+        if value[1] == "complex": return complex(wire_decode(value[2]), wire_decode(value[3]))
+    value_type = safe_type(value)
+    if value_type in (list, tuple, set, frozenset):
+        return value_type(wire_decode(item) for item in value)
+    if value_type is dict:
+        return {wire_decode(key): wire_decode(item) for key, item in value.items()}
+    return value
 
 def literal_repr(value):
+    if isinstance(value, re.Match):
+        return safe_repr(bool(value))
     value_type = safe_type(value)
     if value_type in scalar_types:
         rendered = safe_repr(value)
@@ -278,16 +318,16 @@ emit({"ready": True})
 for line in sys.stdin:
     try:
         request = json.loads(line)
-        args, kwargs = ast.literal_eval(request["call"])
+        args, kwargs = wire_decode(ast.literal_eval(request["call"]))
         function = namespace[request["function"]]
         if not callable(function):
             raise TypeError("candidate entry point is not callable")
         value = function(*args, **kwargs)
         payload = {
             "ok": True,
-            "value": literal_repr(value),
-            "args": literal_repr(args),
-            "kwargs": literal_repr(kwargs),
+            "value": literal_repr(wire_encode(value)),
+            "args": literal_repr(wire_encode(args)),
+            "kwargs": literal_repr(wire_encode(kwargs)),
         }
     except BaseException as exc:
         payload = {"ok": False, "error": safe_type(exc).__name__, "message": str(exc)[:500]}
@@ -307,6 +347,7 @@ def _test_runner_source(
     return f'''import ast
 import builtins
 import json
+import math
 import os
 import selectors
 import subprocess
@@ -314,6 +355,34 @@ import sys
 import time
 
 _nonce = {nonce!r}
+_wire_tag = "__VACANT_WIRE_FLOAT__"
+
+def _wire_encode(value):
+    value_type = type(value)
+    if value_type is float and not math.isfinite(value):
+        label = "nan" if math.isnan(value) else ("-inf" if value < 0 else "inf")
+        return (_wire_tag, label)
+    if value_type is complex and (not math.isfinite(value.real) or not math.isfinite(value.imag)):
+        return (_wire_tag, "complex", _wire_encode(value.real), _wire_encode(value.imag))
+    if value_type in (list, tuple, set, frozenset):
+        return value_type(_wire_encode(item) for item in value)
+    if value_type is dict:
+        return {{_wire_encode(key): _wire_encode(item) for key, item in value.items()}}
+    return value
+
+def _wire_decode(value):
+    if isinstance(value, tuple) and len(value) >= 2 and value[0] == _wire_tag:
+        if value[1] == "nan": return float("nan")
+        if value[1] == "inf": return float("inf")
+        if value[1] == "-inf": return float("-inf")
+        if value[1] == "complex": return complex(_wire_decode(value[2]), _wire_decode(value[3]))
+    value_type = type(value)
+    if value_type in (list, tuple, set, frozenset):
+        return value_type(_wire_decode(item) for item in value)
+    if value_type is dict:
+        return {{_wire_decode(key): _wire_decode(item) for key, item in value.items()}}
+    return value
+
 _worker_env = {{"PATH": os.environ.get("PATH", ""), "HOME": {worker_cwd!r}, "TMPDIR": {worker_cwd!r}}}
 if os.name == "posix":
     _read_fd, _write_fd = os.pipe()
@@ -353,7 +422,7 @@ def _vacant_call(function, *args, **kwargs):
     if _worker.poll() is not None:
         raise RuntimeError("candidate worker exited")
     try:
-        call_repr = repr((args, kwargs))
+        call_repr = repr(_wire_encode((args, kwargs)))
         ast.literal_eval(call_repr)
     except Exception as exc:
         raise TypeError("solve arguments must be Python literals") from exc
@@ -378,9 +447,9 @@ def _vacant_call(function, *args, **kwargs):
                 error_type = RuntimeError
             raise error_type(response.get("message", "candidate solve failed"))
         try:
-            value = ast.literal_eval(response["value"])
-            changed_args = ast.literal_eval(response["args"])
-            changed_kwargs = ast.literal_eval(response["kwargs"])
+            value = _wire_decode(ast.literal_eval(response["value"]))
+            changed_args = _wire_decode(ast.literal_eval(response["args"]))
+            changed_kwargs = _wire_decode(ast.literal_eval(response["kwargs"]))
         except Exception as exc:
             raise TypeError("solve result must be a Python literal") from exc
         for original, changed in zip(args, changed_args):
@@ -422,6 +491,7 @@ def run_python_check(
     *,
     timeout: float = 8,
     allowed_imports: tuple[str, ...] = (),
+    allowed_entry_points: tuple[str, ...] = (),
 ) -> bool:
     """NW-2a：hidden tests 與候選碼分行程，透過 literal-only function proxy 驗證。
 
@@ -436,7 +506,13 @@ def run_python_check(
     """
     if any(not isinstance(name, str) or not name.isidentifier() for name in allowed_imports):
         return False
-    function_names = _candidate_functions(candidate_code, allowed_imports=allowed_imports)
+    if any(not isinstance(name, str) or not name.isidentifier()
+           for name in allowed_entry_points):
+        return False
+    function_names = _candidate_functions(
+        candidate_code, allowed_imports=allowed_imports,
+        allowed_entry_points=allowed_entry_points,
+    )
     if timeout <= 0 or not function_names:
         return False
     with tempfile.TemporaryDirectory() as test_dir, tempfile.TemporaryDirectory() as worker_dir:

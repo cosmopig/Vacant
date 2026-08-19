@@ -144,6 +144,22 @@ def test_run_python_check_preserves_common_argument_mutations():
     assert run_python_check(code, tests)
 
 
+def test_run_python_check_transports_nonfinite_floats_and_counter():
+    floats = "def solve(x):\n    return x"
+    assert run_python_check(
+        floats,
+        "assert solve(float('inf')) == float('inf')\n"
+        "assert str(solve(float('nan'))) == 'nan'",
+    )
+    counter = "import collections\ndef solve(xs): return collections.Counter(xs)"
+    assert run_python_check(
+        counter, "assert solve(['a', 'a']) == {'a': 2}",
+        allowed_imports=("collections",),
+    )
+    complex_value = "def solve(): return (1 + 2j)"
+    assert run_python_check(complex_value, "assert solve() == (1 + 2j)")
+
+
 def test_run_python_check_preserves_candidate_exception_type():
     code = "def solve(x):\n    raise ValueError('bad input')"
     tests = (
@@ -189,6 +205,14 @@ def len(_):
     return 2
 """
     assert not run_python_check(code, "assert len(solve()) == 2")
+
+
+def test_run_python_check_can_explicitly_allow_builtin_named_entrypoint():
+    code = "def sum(a, b): return a + b"
+    assert not run_python_check(code, "assert sum(1, 2) == 3")
+    assert run_python_check(
+        code, "assert sum(1, 2) == 3", allowed_entry_points=("sum",)
+    )
 
 
 def test_run_python_check_blocks_generator_frame_builtins_escape():

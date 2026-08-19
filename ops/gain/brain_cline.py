@@ -20,6 +20,7 @@ import json
 import os
 import pathlib
 import time
+import urllib.error
 import urllib.request
 
 API = "https://api.cline.bot/api/v1/chat/completions"
@@ -49,6 +50,7 @@ class ClineBrain:
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
         self.calls = 0
         self.cost = 0.0
+        self.market_cost = 0.0
 
     # ── 落盤 ────────────────────────────────────────────────────────
     def _log(self, rec: dict) -> None:
@@ -59,10 +61,11 @@ class ClineBrain:
 
     # ── 呼叫 ────────────────────────────────────────────────────────
     def generate(self, prompt: str, *, role: str = "gen",
-                 meta: dict | None = None) -> str:
+                 meta: dict | None = None, system: str | None = None) -> str:
+        effective_system = system or self.system
         body = json.dumps({
             "model": self.model,
-            "messages": [{"role": "system", "content": self.system},
+            "messages": [{"role": "system", "content": effective_system},
                          {"role": "user", "content": prompt}],
             "temperature": self.temperature,
             "stream": False,
@@ -82,9 +85,14 @@ class ClineBrain:
                 choice = d["choices"][0]["message"]
                 text = choice["content"]
                 gw = choice.get("provider_metadata", {}).get("gateway", {})
-                cost = float(gw.get("cost") or 0)
+                usage = d.get("usage") or {}
+                cost = float(usage.get("cost") or gw.get("cost") or 0)
+                # BYOK calls may bill $0 at the Cline gateway while still consuming paid
+                # provider inference. market_cost preserves equal-cost comparisons.
+                market_cost = float(usage.get("market_cost") or cost)
                 self.calls += 1
                 self.cost += cost
+                self.market_cost += market_cost
                 self._log({
                     "ts_ms": int(time.time() * 1000),
                     "agent_id": self.agent_id, "role": role,
@@ -92,8 +100,9 @@ class ClineBrain:
                     "attempt": attempt, "ok": True,
                     "latency_ms": int((time.time() - t0) * 1000),
                     "cost_usd": cost,
-                    "usage": d.get("usage"),
-                    "system": self.system,
+                    "market_cost_usd": market_cost,
+                    "usage": usage,
+                    "system": effective_system,
                     "prompt": prompt,          # 全文
                     "response": text,          # 全文
                     "meta": meta or {},
@@ -104,12 +113,19 @@ class ClineBrain:
                 self._log({
                     "ts_ms": int(time.time() * 1000),
                     "agent_id": self.agent_id, "role": role,
+                    "model": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": False,
                     "latency_ms": int((time.time() - t0) * 1000),
                     "error": last_err,
+                    "system": effective_system,
                     "prompt": prompt,
                     "meta": meta or {},
                 })
+                non_retryable = isinstance(e, urllib.error.HTTPError) and e.code in {
+                    400, 401, 402, 403, 404,
+                }
+                if non_retryable:
+                    break
                 if attempt < self.retries:
                     time.sleep(self.backoff_s * (2 ** (attempt - 1)))
 
@@ -118,9 +134,20 @@ class ClineBrain:
 
 def load_keys(path: str | None = None) -> list[str]:
     p = pathlib.Path(path or os.environ.get("CLINE_KEYS", "~/.cline-keys")).expanduser()
-    ks = [l.strip() for l in p.read_text().splitlines() if l.strip()]
+    ks = [line.strip() for line in p.read_text().splitlines() if line.strip()]
     if not ks:
         raise SystemExit(f"{p} 裡沒有金鑰")
+    slots = os.environ.get("CLINE_KEY_INDICES", "").strip()
+    if slots:
+        try:
+            indices = [int(item.strip()) for item in slots.split(",")]
+            if not indices or any(index < 0 or index >= len(ks) for index in indices):
+                raise ValueError
+        except ValueError as exc:
+            raise SystemExit(
+                "CLINE_KEY_INDICES 必須是現有 key 的零起算索引，例如 0,2,4"
+            ) from exc
+        ks = [ks[index] for index in indices]
     return ks
 
 
@@ -145,7 +172,25 @@ POOL = [
 ]
 
 REVIEWER_SYSTEM = (
-    "你是一位程式碼審查者。你會看到一個題目與一份候選解答。"
-    "判斷這份解答是否**完全滿足題目要求**，特別注意邊界情況。"
-    "只回覆一個字：通過 或 不通過。不要解釋。"
+    "你是一位獨立程式碼審查者。你會看到題目與候選解答。"
+    "找出會讓解答不符合題意的具體反例；不要因為程式看起來合理就通過。"
+    "第一行必須且只能是 VERDICT: PASS 或 VERDICT: FAIL。"
+    "第二行以 CONCERN: 開頭，寫最重要的一個問題或『none』。"
+    "若判 FAIL，第三行必須是 TEST_ARGS: 加上一個 Python literal list，表示呼叫"
+    "目標函式的 positional arguments；第四行必須是 EXPECTED: 加上預期回傳值的"
+    "Python literal。例：TEST_ARGS: [[-1, 0, 2]] 與 EXPECTED: 1。"
+    "若判 PASS，第三、四行分別寫 TEST_ARGS: NONE 與 EXPECTED: NONE。"
+    "反例會由系統實際執行；無法解析或沒有推翻候選解答的 FAIL 不會計票。"
+    "不要重寫完整答案，也不要在這四行之外輸出文字。"
 )
+
+# 同一模型家族仍有共同盲區；這些 lens 只能讓「當下做的事」不同，不能假裝成
+# 模型家族異質化。實驗必須繼續單報 reviewer accuracy 與錯誤相關性。
+REVIEW_LENSES = {
+    "careful-1": "你的審查視角：邊界值、空輸入、重複值與負數。",
+    "careful-2": "你的審查視角：逐條對照題目契約，找遺漏條件。",
+    "plain-1": "你的審查視角：用最小反例推翻候選解答。",
+    "plain-2": "你的審查視角：函式簽名、回傳型別、例外與副作用。",
+    "hasty-1": "你的審查視角：語法、名稱、匯入與能否實際執行。",
+    "hasty-2": "你的審查視角：複雜度、極端輸入與隱含假設。",
+}
