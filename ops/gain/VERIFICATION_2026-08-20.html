@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vacant 增益實驗交付驗證卷宗 · 2026-08-20</title>
+<style>
+/* ============ 基底：紙、墨、硃砂 ============ */
+:root{
+  --paper:#f6f1e6;
+  --paper-2:#efe8d8;
+  --paper-3:#e7ddc8;
+  --ink:#221e18;
+  --ink-2:#4a4438;
+  --ink-3:#7a7261;
+  --verm:#b3402a;
+  --verm-deep:#8f2f1e;
+  --sage:#3f6b52;
+  --amber:#a06a1c;
+  --line:#d8cfba;
+  --line-2:#c6bba1;
+  --serif:"Songti TC","PMingLiU","Noto Serif CJK TC",serif;
+  --sans:"PingFang TC","Hiragino Sans GB","Noto Sans CJK TC",sans-serif;
+  --mono:"SF Mono","Menlo","Roboto Mono",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.75;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(179,64,42,.035), transparent),
+    repeating-linear-gradient(0deg, transparent 0 34px, rgba(34,30,24,.012) 34px 35px);
+}
+::selection{background:var(--verm);color:var(--paper)}
+h1,h2,h3,.serif{font-family:var(--serif)}
+code,kbd,.mono{font-family:var(--mono);font-size:.86em}
+code,.hash{overflow-wrap:anywhere;word-break:break-word}
+.tscroll table{min-width:560px}
+a{color:var(--verm-deep);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--verm)}
+
+/* ============ 版面骨架 ============ */
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+nav#side{
+  position:fixed;left:0;top:0;bottom:0;width:232px;
+  padding:96px 0 40px;overflow-y:auto;z-index:50;
+  border-right:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(246,241,230,.96), rgba(246,241,230,.88));
+  backdrop-filter:blur(6px);
+}
+nav#side .brand{padding:0 26px 22px;border-bottom:1px solid var(--line);margin-bottom:14px}
+nav#side .brand .no{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.14em}
+nav#side .brand .t{font-family:var(--serif);font-weight:700;font-size:17px;line-height:1.4;margin-top:4px}
+nav#side a{
+  display:block;padding:7px 26px;color:var(--ink-2);font-size:13.5px;
+  border-left:3px solid transparent;line-height:1.45;
+}
+nav#side a .n{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-right:8px}
+nav#side a:hover{background:rgba(179,64,42,.05);border-bottom:none}
+nav#side a.active{border-left-color:var(--verm);color:var(--verm-deep);background:rgba(179,64,42,.06)}
+main{margin-left:232px}
+@media(max-width:1100px){
+  nav#side{position:static;width:auto;border-right:none;border-bottom:1px solid var(--line);padding:20px}
+  nav#side .links{display:flex;flex-wrap:wrap;gap:2px 10px}
+  nav#side a{border-left:none;border-bottom:2px solid transparent;padding:5px 8px}
+  nav#side a.active{border-bottom-color:var(--verm)}
+  main{margin-left:0}
+}
+section{padding:clamp(48px,7vw,88px) 0;border-bottom:1px solid var(--line)}
+.sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:10px;flex-wrap:wrap}
+.sec-no{font-family:var(--mono);font-size:12px;color:var(--verm);letter-spacing:.2em;white-space:nowrap}
+.sec-title{font-size:clamp(26px,3.4vw,38px);font-weight:700;line-height:1.25;letter-spacing:.01em}
+.sec-sub{color:var(--ink-2);max-width:72ch;margin-bottom:34px}
+.sec-sub em{font-style:normal;color:var(--verm-deep);border-bottom:1px dotted var(--verm)}
+
+/* ============ 卷首 ============ */
+header.cover{
+  min-height:92vh;display:flex;flex-direction:column;justify-content:center;
+  border-bottom:2px solid var(--ink);position:relative;overflow:hidden;
+}
+.cover .archive-no{font-family:var(--mono);font-size:12px;letter-spacing:.3em;color:var(--ink-3);margin-bottom:26px}
+.cover h1{font-size:clamp(40px,7vw,86px);line-height:1.12;font-weight:900;letter-spacing:.01em}
+.cover h1 .thin{font-weight:400;color:var(--ink-2)}
+.cover .lede{margin-top:28px;max-width:64ch;font-size:clamp(16px,1.6vw,19px);color:var(--ink-2)}
+.cover .meta-row{margin-top:44px;display:flex;flex-wrap:wrap;gap:10px 34px;font-size:13px;color:var(--ink-3)}
+.cover .meta-row b{color:var(--ink-2);font-weight:600}
+.verdict-line{margin-top:52px;display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.verdict-tag{font-family:var(--serif);font-size:clamp(19px,2.2vw,26px);font-weight:700;padding:10px 22px;border:1.5px solid var(--ink)}
+.verdict-tag.ok{color:var(--sage);border-color:var(--sage)}
+.verdict-tag.no{color:var(--verm-deep);border-color:var(--verm)}
+
+/* 印章 */
+.seal{
+  width:118px;height:118px;flex:none;transform:rotate(-6deg);
+  display:grid;place-items:center;position:relative;
+}
+.seal::before{content:"";position:absolute;inset:0;border:3px solid var(--verm);border-radius:8px;opacity:.85}
+.seal::after{content:"";position:absolute;inset:5px;border:1px solid var(--verm);border-radius:5px;opacity:.6}
+.seal span{
+  font-family:var(--serif);font-weight:900;color:var(--verm);
+  font-size:30px;line-height:1.18;text-align:center;letter-spacing:2px;
+  writing-mode:vertical-rl;text-orientation:upright;height:96px;
+}
+.seal.small{width:84px;height:84px}.seal.small::before{border-width:2.5px}
+.seal.small span{font-size:21px;height:66px}
+.seal.gray::before,.seal.gray::after{border-color:var(--ink-3)}
+.seal.gray span{color:var(--ink-3)}
+@media print{ nav#side{display:none} main{margin:0} }
+
+/* ============ 通用組件 ============ */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,44px)}
+.grid2>*{min-width:0}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+.panel{
+  background:var(--paper-2);border:1px solid var(--line-2);
+  padding:clamp(18px,2.4vw,28px);position:relative;
+}
+.panel.inset{box-shadow:4px 4px 0 rgba(34,30,24,.08)}
+.panel h3{font-size:19px;margin-bottom:12px}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--ink-3);text-transform:uppercase;margin-bottom:8px}
+.big-num{font-family:var(--serif);font-size:clamp(38px,5vw,58px);font-weight:900;line-height:1.05}
+.big-num small{font-size:.42em;font-weight:400;color:var(--ink-2);margin-left:6px}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:26px 0}
+.stat-row .cell{background:var(--paper);padding:18px 20px}
+.stat-row .v{font-family:var(--serif);font-size:30px;font-weight:800;line-height:1.2}
+.stat-row .v.good{color:var(--sage)} .stat-row .v.bad{color:var(--verm-deep)} .stat-row .v.warn{color:var(--amber)}
+.stat-row .k{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+table.ledger{width:100%;border-collapse:collapse;font-size:14px;margin:14px 0}
+table.ledger th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-3);text-align:left;padding:8px 10px;border-bottom:1.5px solid var(--ink);font-weight:400}
+table.ledger td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.ledger tr:hover td{background:rgba(179,64,42,.04)}
+.pass{color:var(--sage);font-weight:700}.fail{color:var(--verm-deep);font-weight:700}.warn{color:var(--amber);font-weight:700}
+.hash{font-family:var(--mono);font-size:11px;color:var(--ink-2);word-break:break-all}
+.pill{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;padding:2px 9px;border:1px solid currentColor;border-radius:99px;white-space:nowrap}
+.pill.ok{color:var(--sage)}.pill.no{color:var(--verm)}.pill.wn{color:var(--amber)}
+details{border:1px solid var(--line-2);background:var(--paper-2);margin:12px 0}
+details summary{cursor:pointer;padding:12px 18px;font-weight:600;font-size:14.5px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details summary::after{content:"＋";font-family:var(--mono);color:var(--verm)}
+details[open] summary::after{content:"－"}
+details .body{padding:4px 18px 16px;border-top:1px dashed var(--line-2)}
+.callout{border-left:3px solid var(--verm);background:rgba(179,64,42,.06);padding:16px 20px;margin:18px 0;font-size:14.5px}
+.callout.sage{border-color:var(--sage);background:rgba(63,107,82,.07)}
+.callout.amber{border-color:var(--amber);background:rgba(160,106,28,.07)}
+.callout b:first-child{letter-spacing:.05em}
+pre.code{
+  background:#26221b;color:#e8e0cd;padding:18px 20px;overflow-x:auto;
+  font-family:var(--mono);font-size:12.5px;line-height:1.7;border-radius:2px;margin:12px 0;
+}
+pre.code .cm{color:#8a8271}pre.code .add{color:#9fc5a0}pre.code .del{color:#d99a8a}
+.fig{margin:26px 0}
+.fig .cap{font-size:12.5px;color:var(--ink-3);margin-top:10px;border-top:1px dashed var(--line-2);padding-top:8px}
+.fig .cap b{color:var(--ink-2)}
+svg text{font-family:var(--sans)}
+.mono-label{font-family:var(--mono)}
+
+/* tabs */
+.tabs{display:flex;gap:0;border-bottom:1.5px solid var(--ink);margin-bottom:26px;flex-wrap:wrap}
+.tabs button{
+  font-family:var(--serif);font-size:16px;font-weight:700;padding:10px 22px;background:none;border:none;
+  color:var(--ink-3);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1.5px;
+}
+.tabs button.on{color:var(--verm-deep);border-bottom-color:var(--verm)}
+.tabs button:hover{color:var(--ink)}
+.tabpane{display:none}.tabpane.on{display:block;animation:fadeup .45s ease-out}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* 動畫 */
+.rise{opacity:0;transform:translateY(22px);transition:opacity .7s ease-out,transform .7s cubic-bezier(.22,1,.36,1)}
+.rise.in{opacity:1;transform:none}
+.stamp-in{animation:stamp .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes stamp{from{opacity:0;transform:rotate(-6deg) scale(1.6)}to{opacity:1;transform:rotate(-6deg) scale(1)}}
+@media(prefers-reduced-motion:reduce){
+  .rise{opacity:1;transform:none;transition:none}
+  .stamp-in{animation:none}
+  html{scroll-behavior:auto}
+}
+
+/* 落差卡 */
+.gap-card{border:1.5px solid var(--verm);background:var(--paper);padding:22px 24px;position:relative;margin-bottom:18px}
+.gap-card .status{position:absolute;top:-13px;right:18px;background:var(--verm);color:var(--paper);font-family:var(--serif);font-weight:700;font-size:13px;padding:3px 14px;letter-spacing:.15em}
+.gap-card.fixed{border-color:var(--sage)}
+.gap-card.fixed .status{background:var(--sage)}
+.gap-card h3{font-size:18px;margin-bottom:6px;padding-right:120px}
+.gap-card .claim{color:var(--ink-3);font-size:13.5px;margin-bottom:10px}
+.gap-card .claim b{color:var(--ink-2)}
+
+/* timeline */
+.tl{position:relative;margin:20px 0 0 8px;padding-left:30px;border-left:2px solid var(--line-2)}
+.tl .ev{position:relative;padding:0 0 26px 6px}
+.tl .ev::before{content:"";position:absolute;left:-37px;top:7px;width:12px;height:12px;background:var(--paper);border:2.5px solid var(--verm);border-radius:50%}
+.tl .ev.doc::before{border-color:var(--ink-2)}
+.tl .time{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em}
+.tl .what{font-weight:600;margin:2px 0}
+.tl .detail{font-size:13.5px;color:var(--ink-2)}
+
+footer{padding:60px 0 80px;color:var(--ink-3);font-size:13px}
+footer .rule{height:2px;background:var(--ink);margin-bottom:26px}
+.toc-end{columns:2;column-gap:40px;font-size:13.5px}
+@media(max-width:700px){.toc-end{columns:1}}
+</style>
+</head>
+<body>
+
+<nav id="side">
+  <div class="brand">
+    <div class="no">ARCHIVE · GAIN-2026-08-20</div>
+    <div class="t">增益實驗交付<br>驗證卷宗</div>
+  </div>
+  <div class="links">
+    <a href="#s-verdict"><span class="n">壹</span>判決摘要</a>
+    <a href="#s-timeline"><span class="n">貳</span>驗證時間線</a>
+    <a href="#s-integrity"><span class="n">參</span>交付完整性</a>
+    <a href="#s-tests"><span class="n">肆</span>測試證據</a>
+    <a href="#s-probe"><span class="n">伍</span>量具 371/371</a>
+    <a href="#s-arms"><span class="n">陸</span>三臂機制</a>
+    <a href="#s-evidence"><span class="n">柒</span>真模型證據</a>
+    <a href="#s-gaps"><span class="n">捌</span>敘述落差</a>
+    <a href="#s-off5"><span class="n">玖</span>OFF5 缺口與修正</a>
+    <a href="#s-cost"><span class="n">拾</span>成本分析</a>
+    <a href="#s-security"><span class="n">拾壹</span>安全警示</a>
+    <a href="#s-close"><span class="n">拾貳</span>結論與重現</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ================= 卷首 ================= -->
+<header class="cover">
+  <div class="wrap">
+    <div class="archive-no">VACANT / GAIN EXPERIMENT · INDEPENDENT VERIFICATION DOSSIER</div>
+    <h1>交付屬實。<br><span class="thin">增益未證。</span></h1>
+    <p class="lede">
+      對 Codex 交付的 <code>22db0d7</code> 增益實驗包（Vacant DOWNLOAD_ALL）所做的逐項獨立驗證：
+      完整性、測試、量具、真模型資料、敘述與實物的一致性。
+      所有「通過」都是我在本機與 VM 上實際重跑的結果；沒有重跑的，逐條標明。
+    </p>
+    <div class="meta-row">
+      <span>驗證日期 <b>2026-08-20</b></span>
+      <span>驗證者 <b>Claude（opencode）</b></span>
+      <span>分支 <b class="mono">claude/fuse-gain-verified-20260820</b></span>
+      <span>Commits <b class="mono">416b973 · 5b256d7</b></span>
+    </div>
+    <div class="verdict-line">
+      <div class="seal stamp-in"><span>驗證屬實</span></div>
+      <div>
+        <div class="verdict-tag ok">交付物：真實、可重現、可融合</div>
+        <div style="height:10px"></div>
+        <div class="verdict-tag no">增益主張：依其自訂判準，尚未成立</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= 壹 · 判決摘要 ================= -->
+<section id="s-verdict">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">壹 / VERDICT</span><h2 class="sec-title">判決摘要</h2></div>
+    <p class="sec-sub rise">一句話：<em>這個包值得收</em>——它修的是真 bug、自我宣稱克制；但對話敘述有四項超出實際交付，且「Vacant 有增益」依 SPEC_GAIN 自己的判準仍不成立。</p>
+
+    <div class="stat-row rise">
+      <div class="cell"><div class="v good" data-count="12">0</div><div class="k">SHA-256 校驗通過 / 12 項</div></div>
+      <div class="cell"><div class="v good" data-count="8">0</div><div class="k">改動檔與 git 歷史逐位元相同 / 8 檔</div></div>
+      <div class="cell"><div class="v good" data-count="565">0</div><div class="k">融合＋修正後全套測試通過</div></div>
+      <div class="cell"><div class="v good">371<small>/371</small></div><div class="k">量具雙向驗證（本機重現 VM 結果）</div></div>
+      <div class="cell"><div class="v warn" data-count="4">0</div><div class="k">敘述超出實際交付的項目</div></div>
+      <div class="cell"><div class="v bad" data-count="2">0</div><div class="k">把仍然有效的 API key（待撤銷）</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel inset rise">
+        <div class="kicker">收下的理由</div>
+        <ul style="padding-left:1.2em;font-size:14.5px">
+          <li>EvalPlus 官方輸入反序列化——<b>真 bug</b>，不修的話 canonical 會掛在自己的測試上</li>
+          <li>sandbox 記憶體上限、非有限浮點 wire 編碼、regex／set 等價 oracle</li>
+          <li><code>infra_void</code> 分類：基礎設施壞掉不再被算成候選答錯</li>
+          <li>評審 FAIL 必須附可執行反例，系統真的在沙箱裡跑過才計票</li>
+          <li>reviser 不得把已通過的答案改壞（選擇規則有測試釘住）</li>
+          <li>v8r 的負面結果誠實落盤——沒有只挑有利的留</li>
+        </ul>
+      </div>
+      <div class="panel inset rise">
+        <div class="kicker">不能說的話</div>
+        <ul style="padding-left:1.2em;font-size:14.5px">
+          <li>不能說「增益已證明」——v8r 的 ON 沒有提高正確交付率（0.833 對 0.833），OFF5 還缺 7 題</li>
+          <li>不能說「deadline quorum／五呼叫重配／corpus 13-4-9」——<b>不在交付物內</b></li>
+          <li>不能說「OFF5 已不再是安全漏洞」——交付的程式碼裡它仍用裸 subprocess 跑模型碼（<b>我已在分支上修好</b>）</li>
+          <li>n=6 smoke 三臂全對 6/6——題太簡單，量不到差異，只能證明機制可運作</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 貳 · 時間線 ================= -->
+<section id="s-timeline">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">貳 / TIMELINE</span><h2 class="sec-title">驗證時間線</h2></div>
+    <p class="sec-sub rise">從拿到包裹到落地融合的完整順序。每個節點都對應一條可複查的指令或檔案。</p>
+    <div class="grid2">
+      <div class="tl rise">
+        <div class="ev doc"><div class="time">08-19 16:41 UTC</div><div class="what">Codex 端重打包</div><div class="detail">舊 source ZIP 中央目錄損毀 → 從原始封存重建，bundle HEAD <code>f72aa6e</code>（base <code>b4e350d</code>），targeted pytest 在 py3.13 達 120s 硬 timeout，誠實保留 log。</div></div>
+        <div class="ev doc"><div class="time">08-20 00:42</div><div class="what">包裹落地 ~/Downloads</div><div class="detail">Vacant_DOWNLOAD_ALL：bundle、SOURCE／WORKSPACE zip、evidence（patch＋logs）、gain-delivery（真模型 pilot 資料）。</div></div>
+        <div class="ev"><div class="time">09:18–09:40</div><div class="what">完整性核對</div><div class="detail">SHA256SUMS 12/12 OK；兩個 ZIP <code>unzip -t</code> 無 CRC 錯誤；bundle clone＋<code>fsck --full</code> 通過；8 個改動檔與 delivery <code>changed/</code> 逐位元相同。</div></div>
+        <div class="ev"><div class="time">09:40–09:55</div><div class="what">bundle 測試</div><div class="detail">py3.13 乾淨 venv：<code>test_gain_runner</code> 16 passed；全套（扣掉 mcp 2.0 環境問題）550 passed／1 skipped。</div></div>
+        <div class="ev"><div class="time">09:55–10:05</div><div class="what">量具本地重現</div><div class="detail"><code>--arms probe --probe-sample 0</code>，371 題：canonical 371/371 通過、壞樁 371/371 被擋。零模型呼叫。</div></div>
+      </div>
+      <div class="tl rise">
+        <div class="ev"><div class="time">10:05–10:08</div><div class="what">API 與 VM 探測</div><div class="detail">兩把對話中貼出的 key 各發一次最小 probe——<b>HTTP 200，仍然有效</b>。VM（100.87.54.102）ssh 可連：Ubuntu 6.8／py3.12.3／2C3.8G。</div></div>
+        <div class="ev"><div class="time">10:08</div><div class="what">融合</div><div class="detail">開分支 <code>claude/fuse-gain-verified-20260820</code>；本機 HEAD 的展件工作與 patch 八檔零重疊，<code>git apply</code> 乾淨套上；全套 562 passed → commit <code>416b973</code>。</div></div>
+        <div class="ev"><div class="time">10:13–10:27</div><div class="what">首次完整三臂 smoke</div><div class="detail">n=6、calibration 3、三模型家族。<code>run_complete=true</code> 且 <code>equal_budget_comparison_valid=true</code>——runner 歷史上第一次。總成本約 $0.58。</div></div>
+        <div class="ev"><div class="time">10:20–10:46</div><div class="what">修 OFF5 沙箱缺口</div><div class="detail"><code>checks.py</code> 新增 <code>run_python_capture</code>，OFF5 行為簽名改走受限 worker；新增 3 個釘住測試；全套 <b>565 passed</b> → commit <code>5b256d7</code>。VM Linux 重點檔 64 passed／1 skipped。</div></div>
+        <div class="ev doc"><div class="time">10:46–</div><div class="what">紀錄落盤</div><div class="detail"><code>ops/gain/VERIFICATION_2026-08-20.md</code>、smoke summary 進版控；原始 JSONL 留磁碟（鐵律 3）。金鑰掃描：repo 零殘留。</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 參 · 完整性 ================= -->
+<section id="s-integrity">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">參 / INTEGRITY</span><h2 class="sec-title">交付完整性</h2></div>
+    <p class="sec-sub rise">信任之前先驗貨。四道手續全部通過；最關鍵的是第 4 道——交付敘述中的八個改動檔，與 git 歷史裡的內容<em>逐位元相同</em>，沒有「history 一套、交貨一套」。</p>
+
+    <div class="stat-row rise">
+      <div class="cell"><div class="v good">12/12</div><div class="k"><code>shasum -c SHA256SUMS.txt</code> 全數 OK</div></div>
+      <div class="cell"><div class="v good">2/2</div><div class="k">ZIP CRC：<code>unzip -t</code> 無錯誤</div></div>
+      <div class="cell"><div class="v good">fsck</div><div class="k">bundle 完整歷史，僅正常 dangling commits</div></div>
+      <div class="cell"><div class="v good">8/8</div><div class="k">changed/ ↔ f72aa6e 位元一致</div></div>
+    </div>
+
+    <div class="fig rise">
+      <div class="kicker">HASH CHAIN · 證物錨定</div>
+      <svg id="hashchain" width="100%" height="86" role="img" aria-label="hash chain"></svg>
+      <div class="cap"><b>圖 1。</b> 交付包的信任鏈：<code>b4e350d</code>（既有歷史）→ <code>f72aa6e</code>（bundle HEAD）→ 八個改動檔（位元一致）→ 本機 <code>416b973</code>（融合）→ <code>5b256d7</code>（OFF5 修正＋smoke）。</div>
+    </div>
+
+    <details class="rise">
+      <summary>12 項 SHA-256 逐條列出（全部實測 OK）</summary>
+      <div class="body"><table class="ledger" id="sha-table">
+        <thead><tr><th>檔案</th><th>SHA-256</th><th>結果</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </details>
+
+    <div class="callout sage rise"><b>附帶驗證：</b>本機既有的 EvalPlus 官方包 <code>MbppPlus-v0.2.0.jsonl.gz</code>，其 SHA-256 與 <code>codebench.py</code> 釘死值 <code>af43697e…</code> 一致——題庫本體也沒有被動過。</div>
+  </div>
+</section>
+
+<!-- ================= 肆 · 測試 ================= -->
+<section id="s-tests">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">肆 / TESTS</span><h2 class="sec-title">測試證據</h2></div>
+    <p class="sec-sub rise">三個環境、五輪實跑。交付自述「targeted pytest 在 py3.13 達 120s 硬 timeout」——我這邊同檔 6 秒跑完；無從考證原因，但<em>測試本身是真過的</em>。</p>
+
+    <div class="fig rise">
+      <div class="kicker">TEST RUNS · 五輪</div>
+      <svg id="testbars" width="100%" height="250" role="img" aria-label="test results"></svg>
+      <div class="cap"><b>圖 2。</b> 綠＝通過、灰＝跳過、紅＝失敗（全程為 0）。mcp 一輪的失敗是環境問題（mcp 2.0 移除 <code>mcp.server.fastmcp</code> 匯入路徑），非改動回歸；本 repo 舊版 mcp 下全過。</div>
+    </div>
+
+    <table class="ledger rise">
+      <thead><tr><th>環境</th><th>Python</th><th>範圍</th><th>結果</th><th>耗時</th></tr></thead>
+      <tbody>
+        <tr><td>bundle clone（乾淨 venv）</td><td>3.13.1</td><td>test_gain_runner.py</td><td class="pass">16 passed</td><td class="mono">5.95s</td></tr>
+        <tr><td>bundle clone</td><td>3.13.1</td><td>全套（--ignore mcp）</td><td class="pass">550 passed, 1 skipped</td><td class="mono">424s</td></tr>
+        <tr><td>本 repo 融合後</td><td>3.12.10</td><td>全套（含 mcp）</td><td class="pass">562 passed</td><td class="mono">552s</td></tr>
+        <tr><td>＋ OFF5 修正</td><td>3.12.10</td><td>全套</td><td class="pass">565 passed</td><td class="mono">576s</td></tr>
+        <tr><td>VM Linux（100.87.54.102）</td><td>3.12.3</td><td>gain＋checks＋evalplus</td><td class="pass">64 passed, 1 skipped</td><td class="mono">5.13s</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13.5px;color:var(--ink-3)" class="rise">跳過的 1 項＝EvalPlus 官方包整合門（官方包只在本機與既有 VM 環境），屬預期行為。</p>
+  </div>
+</section>
+
+<!-- ================= 伍 · 量具 ================= -->
+<section id="s-probe">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">伍 / INSTRUMENT</span><h2 class="sec-title">量具 371/371——先答已知答案</h2></div>
+    <p class="sec-sub rise">SPEC_GAIN §5.2：量具必須先在已知答案上兩個方向都判對，「量到 0」才不等於「線沒接上」。交付宣稱 VM 上 371/371；<em>我在本機用零模型呼叫獨立重現了同一個數字</em>。</p>
+
+    <div class="stat-row rise">
+      <div class="cell"><div class="v good">371/371</div><div class="k">canonical 參考解全數通過 hidden_check</div></div>
+      <div class="cell"><div class="v good">371/371</div><div class="k">確定壞樁全數被擋</div></div>
+      <div class="cell"><div class="v">0</div><div class="k">模型呼叫（純本地沙箱驗證）</div></div>
+      <div class="cell"><div class="v warn">7</div><div class="k">resource-exclusion（釘死且有測試）</div></div>
+    </div>
+
+    <div class="fig rise">
+      <div class="kicker">378 TASKS · MBPP+ v0.2.0</div>
+      <svg id="grid371" width="100%" height="150" role="img" aria-label="371 of 378 tasks"></svg>
+      <div class="cap"><b>圖 3。</b> 378 題中的 371 題（綠）進入實驗池；7 題（紅）連 canonical 都無法在產品宣告的 10 秒／128 MiB 沙箱內跑完 base+plus，固定排除——這是服務容量邊界，不是把候選的錯洗掉。</div>
+    </div>
+
+    <details class="rise">
+      <summary>7 題排除清單與理由（pinned in GAIN_EVALPLUS_RESOURCE_EXCLUSIONS）</summary>
+      <div class="body"><table class="ledger">
+        <thead><tr><th>Task ID</th><th>排除理由</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">Mbpp/255</td><td>combinations_with_replacement 輸出爆炸</td></tr>
+          <tr><td class="mono">Mbpp/271</td><td>巨大整數冪的極端線性迭代</td></tr>
+          <tr><td class="mono">Mbpp/392</td><td>O(n) 建表超出沙箱 envelope</td></tr>
+          <tr><td class="mono">Mbpp/599</td><td>上看 1 億次 Python 層加法</td></tr>
+          <tr><td class="mono">Mbpp/603</td><td>二次方 list-removal 篩法</td></tr>
+          <tr><td class="mono">Mbpp/630</td><td>指數級座標物化</td></tr>
+          <tr><td class="mono">Mbpp/644</td><td>極端 list 物化超出記憶體 envelope</td></tr>
+        </tbody>
+      </table></div>
+    </details>
+
+    <div class="callout sage rise"><b>這一步同時驗證了：</b>MBPP+ 官方輸入反序列化修正（JSON 會丟 tuple／set／complex，官方 loader 有 task-specific 還原表，舊版沒做 → canonical 掛在自己的測試上）、sandbox 記憶體上限（RLIMIT_DATA＋Linux 加 RLIMIT_AS）、非有限浮點 wire 編碼（nan／inf 不再讓 literal_eval 爆掉）。都是真的。</div>
+  </div>
+</section>
+
+<!-- ================= 陸 · 三臂 ================= -->
+<section id="s-arms">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">陸 / MECHANISM</span><h2 class="sec-title">三臂機制——等預算是誠實的分水嶺</h2></div>
+    <p class="sec-sub rise">ON 比 OFF 好幾乎必然（多花五倍呼叫）。要答的是：<em>等預算下，Vacant 打不打得贏最土的 self-consistency</em>。以下是交付版 runner 的實際結構（與程式碼逐行核對過）。</p>
+
+    <div class="fig rise">
+      <svg id="arms" width="100%" height="430" role="img" aria-label="three arms diagram"></svg>
+      <div class="cap"><b>圖 4。</b> 三臂呼叫結構。ON 的五次呼叫：產生 ×1＋評審 ×3＋修訂 ×1。評審的 FAIL 只有在<em>反例被沙箱實際執行確認</em>後才計票；修訂版若改壞已通過的初稿會被丟棄（記 <code>stayed</code>）。稽核是確定性抽樣（sha256 &lt; 20%），信譽只吃真的抽樣結果。</div>
+    </div>
+
+    <div class="grid2 rise">
+      <div class="panel inset">
+        <div class="kicker">評審協定（REVIERER_SYSTEM）</div>
+        <pre class="code">VERDICT: PASS | FAIL        <span class="cm">← 第一行，malformed 不計票</span>
+CONCERN: &lt;一個問題 | none&gt;
+TEST_ARGS: &lt;python literal list&gt;   <span class="cm">← FAIL 必填</span>
+EXPECTED: &lt;python literal&gt;</pre>
+        <p style="font-size:14px">系統對 FAIL 的反例做三道關卡：<code>ast.literal_eval</code> 解析（永不執行評審文字）→ 公開 input contract 域內檢查（域外指控不算反例）→ 受限 worker 實際執行。三關都過才算「機器確認的反例」。</p>
+      </div>
+      <div class="panel inset">
+        <div class="kicker">防改壞的選擇規則</div>
+        <pre class="code"><span class="cm"># 第五次呼叫存在，但不得頂掉已過審的答案</span>
+if passed_review and initial_visible_ok:
+    code = initial_code          <span class="cm"># 評審過了，reviser 只是記錄</span>
+elif revised_visible_ok:
+    code = revised_code          <span class="cm"># 真的修好了才換</span>
+elif initial_visible_ok:
+    code = initial_code          <span class="cm"># 改壞了，退回初稿</span></pre>
+        <p style="font-size:14px">transition 逐題記成 improved／harmed／stayed_*——「為了顯示有修復而換答案」這條路被測試封死（<code>test_unfounded_fail_reviews_cannot_trigger_rewrite</code>、<code>test_majority_approved_initial_cannot_be_harmed_by_fifth_call</code>）。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 柒 · 真模型證據 ================= -->
+<section id="s-evidence">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">柒 / EVIDENCE</span><h2 class="sec-title">真模型證據——三輪，三種命運</h2></div>
+    <p class="sec-sub rise">交付附了兩輪真跑（一輪不完整、一輪中止），我補了第三輪——runner 歷史上<em>第一次完整三臂</em>。數字全部與落盤的 JSONL 逐項核對一致。</p>
+
+    <div class="tabs rise" role="tablist">
+      <button class="on" data-tab="t-v8r">v8r · 交付的 grounded pilot</button>
+      <button data-tab="t-abort">clinepass-clean-v2 · 中止</button>
+      <button data-tab="t-smoke">g_smoke_20260820 · 我的補跑</button>
+    </div>
+
+    <div class="tabpane on" id="t-v8r">
+      <div class="stat-row">
+        <div class="cell"><div class="v">12</div><div class="k">題（MBPP+，seed gain-grounded-v8）</div></div>
+        <div class="cell"><div class="v">3</div><div class="k">模型家族：deepseek／gemini-2.5-flash／gpt-4o-mini</div></div>
+        <div class="cell"><div class="v warn">OFF5 缺 7 題</div><div class="k">credits 不足 → 等預算比較無效</div></div>
+        <div class="cell"><div class="v bad">增益 0</div><div class="k">ON 修復錯答 0 件、正確交付率未升</div></div>
+      </div>
+      <div class="fig">
+        <svg id="v8rchart" width="100%" height="270" role="img" aria-label="v8r results"></svg>
+        <div class="cap"><b>圖 5。</b> v8r：正確交付率 ON＝OFF＝0.833；ON 的接受精度較高（0.909 vs 0.833，少漏 1 件）——依 SPEC_GAIN §4 自己的判準，這只能說「<b>比較可依賴</b>」，不能說「產出變好」。交付文件也是這樣寫的，與鐵律 5 一致。</div>
+      </div>
+      <div class="grid2">
+        <div class="panel inset">
+          <div class="kicker">評審本身的準確率（單獨報，不藏總數裡）</div>
+          <table class="ledger">
+            <tbody>
+              <tr><td>grounded reviewer accuracy</td><td class="mono">0.806</td></tr>
+              <tr><td>raw reviewer accuracy</td><td class="mono">0.667</td></tr>
+              <tr><td>FAIL 指控</td><td class="mono">14</td></tr>
+              <tr><td>機器確認的反例</td><td class="mono fail">1</td></tr>
+              <tr><td>確認反例對 hidden truth 的精度</td><td class="mono fail">0.0</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:13.5px;color:var(--ink-2)">14 個指控只有 1 個能被執行確認，而那 1 個指的還不是真錯——「純文字批評不計票」在真實資料上證明是必要的。</p>
+        </div>
+        <div class="panel inset">
+          <div class="kicker">延遲與成本（落盤值）</div>
+          <table class="ledger">
+            <tbody>
+              <tr><td>OFF 呼叫 p50</td><td class="mono">7.1s（max 18.2s）</td></tr>
+              <tr><td>ON review p50 / max</td><td class="mono">2.1s / 28.1s</td></tr>
+              <tr><td>OFF5 max</td><td class="mono fail">126.8s（長尾）</td></tr>
+              <tr><td>ON 成本（market）</td><td class="mono">$0.0969</td></tr>
+              <tr><td>OFF 成本（market）</td><td class="mono">$0.0125</td></tr>
+              <tr><td>ON / OFF 成本比</td><td class="mono warn">7.8×</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabpane" id="t-abort">
+      <div class="callout amber"><b>ABORTED.json（逐字）：</b>「operator stopped after repeated 240-second reviewer endpoint timeouts…」OFF 12/12 全對；ON 完成 8/12 後中止；OFF5 未開始。<code>equal_budget_comparison_valid=false</code>，部分臂比例明確標示不得用於比較。</div>
+      <div class="fig">
+        <svg id="abortchart" width="100%" height="170" role="img" aria-label="aborted run"></svg>
+        <div class="cap"><b>圖 6。</b> 中止點視覺化。這輪暴露的產品問題：同步等齊 reviewer 會被最慢模型的尾延遲支配——這正是「deadline quorum」被列為下一步的原因（它也確實還沒做，見第捌節）。</div>
+      </div>
+    </div>
+
+    <div class="tabpane" id="t-smoke">
+      <div class="stat-row">
+        <div class="cell"><div class="v good">true</div><div class="k">run_complete——歷史首次</div></div>
+        <div class="cell"><div class="v good">true</div><div class="k">equal_budget_comparison_valid——歷史首次</div></div>
+        <div class="cell"><div class="v">6</div><div class="k">題 × 3 臂；calibration 3 題（spread 0.333）</div></div>
+        <div class="cell"><div class="v">$0.58</div><div class="k">總成本（calibration $0.108 在內）</div></div>
+      </div>
+      <div class="fig">
+        <svg id="smokechart" width="100%" height="250" role="img" aria-label="smoke results"></svg>
+        <div class="cap"><b>圖 7。</b> smoke：三臂正確交付皆 6/6。題目對 glm-5.2／deepseek-v4-flash／kimi-k3 太簡單，<b>量不到差異</b>——此輪只證明機制端到端可運作，對增益一個字都不能說。</div>
+      </div>
+      <div class="grid2">
+        <div class="panel inset">
+          <div class="kicker">閘門實測有效</div>
+          <p style="font-size:14.5px">ON 臂 18 張評審票中出現 <b>2 個 FAIL 指控</b>，機器確認 <b>0</b> 個 → 全部正確忽略，沒有觸發不必要的修訂；6 題 transition 全為 <code>stayed_correct</code>，<code>harmed</code> 為 0。可執行反例這道閘門在真實端點上擋下了幻覺指控。</p>
+        </div>
+        <div class="panel inset">
+          <div class="kicker">ON 臂延遲（90s timeout × 2 retries）</div>
+          <table class="ledger">
+            <tbody>
+              <tr><td>gen p50 / max</td><td class="mono">8.2s / 65.3s</td></tr>
+              <tr><td>review p50 / max</td><td class="mono">11.7s / 65.9s</td></tr>
+              <tr><td>revise p50</td><td class="mono">10.0s</td></tr>
+              <tr><td>failed attempts（重試後成功）</td><td class="mono warn">2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 捌 · 落差 ================= -->
+<section id="s-gaps">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">捌 / GAPS</span><h2 class="sec-title">敘述落差——四項宣稱不在交付物內</h2></div>
+    <p class="sec-sub rise">對話最後那篇「最終交付已完成」描述的是<em>另一個更大的 v2 包</em>（當時下載全數失敗）。實際能下載、能驗證的是 22db0d7 這個較小的包。以下四項在交付物中<strong>不存在</strong>——引用舊敘述時不可當成已經有。</p>
+
+    <div class="gap-card rise"><div class="status">未交付</div>
+      <h3>1 · Deadline quorum</h3>
+      <div class="claim">敘述：「兩個反例搜尋者可並行，各有 logical deadline；依可驗證結果形成 quorum，不無限等最慢模型」</div>
+      <p style="font-size:14.5px">程式裡沒有。reviewer 仍是 <code>ThreadPoolExecutor.map</code> 同步等全部回來——clinepass-clean-v2 就是這樣被 240s 尾延遲拖到中止的。交付自己的 SUMMARY.md 也老實把它列為「下一步」。</p>
+    </div>
+    <div class="gap-card rise"><div class="status">未交付</div>
+      <h3>2 · 五呼叫重新配置（generator＋2 反例搜尋者＋裁決者＋reviser）</h3>
+      <div class="claim">敘述：「五次呼叫重新配置：generator + 兩個反例搜尋者 + 反例裁決者 + independent reviser」</div>
+      <p style="font-size:14.5px">目前 ON 臂是 generator＋3 reviewer＋reviser＝5 呼叫，<b>沒有獨立的反例裁決者角色</b>。反例的「裁決」是確定性規則（可解析、域內、執行確認），不是另一個模型呼叫。</p>
+    </div>
+    <div class="gap-card rise"><div class="status">未交付</div>
+      <h3>3 · Corpus 13／4／9 命名修正與 canonical aliases</h3>
+      <div class="claim">敘述：「Curated 13 題、Calibration 4 題、Holdout 9 題……新增不帶數字的 canonical aliases，逐位元相同」</div>
+      <p style="font-size:14.5px">交付物內無 corpus manifest、無此拆分、無 aliases。題庫就是 EvalPlus 371 題子集按 seed 的 sha256 排序取前 n，calibration 用 offset 保證不重疊。</p>
+    </div>
+    <div class="gap-card fixed rise"><div class="status">已補修</div>
+      <h3>4 ·「OFF5 不再是安全漏洞」——交付時不成立，我已修好</h3>
+      <div class="claim">敘述：「OFF5 的行為指紋與投票現在使用和 ON 相同的受限 worker」</div>
+      <p style="font-size:14.5px">交付的 <code>behavior_signature()</code> 實際上用 <code>subprocess.run([sys.executable, …])</code> <b>直接執行模型產生的程式</b>：沒有 RLIMIT、沒有 import 白名單、沒有 env 清理。這是交付敘述與程式碼之間最嚴重的一處落差。修正內容見第玖節。</p>
+    </div>
+
+    <div class="callout rise"><b>判斷：</b>四項落差都屬於「敘述超前於交付」，而非資料造假——實際交付的部分全部核對屬實。但若只看對話紀錄做決策，會以為 deadline quorum 與 corpus 拆分已經存在；這份卷宗的作用之一就是防止那個誤會。</div>
+  </div>
+</section>
+
+<!-- ================= 玖 · OFF5 修正 ================= -->
+<section id="s-off5">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">玖 / FIX</span><h2 class="sec-title">OFF5 缺口與修正</h2></div>
+    <p class="sec-sub rise">修正策略：不新開一條執行路徑，而是把「觀察行為」這個需求接回<em>同一條</em>受限 worker 路徑。<code>checks.py</code> 新增 <code>run_python_capture</code>——與 <code>run_python_check</code> 共用沙箱本體，差別只在把 runner 的 stdout 帶出來。</p>
+
+    <div class="fig rise">
+      <svg id="off5diff" width="100%" height="330" role="img" aria-label="off5 before after"></svg>
+      <div class="cap"><b>圖 8。</b> 左：交付版——模型碼在裸 subprocess 裡跑，只有 wall timeout，沒有資源上限與 import 白名單；候選的 stdout 還能直接印偽造的簽名標記。右：修正後——候選碼只活在 worker，經 literal-only RPC 被呼叫，stdout 去 DEVNULL；簽名只能由 runner 裡的探針印出。</div>
+    </div>
+
+    <div class="grid2 rise">
+      <div>
+        <div class="kicker">釘住行為的新測試（3 個）</div>
+        <ul style="padding-left:1.2em;font-size:14.5px">
+          <li><code>test_behavior_signature_runs_candidate_in_restricted_worker</code>：非白名單 import → 簽名降級 <code>EXEC_FAIL</code>；候選印偽造標記不影響簽名</li>
+          <li><code>test_behavior_signature_infra_failure_is_infra_void</code>：沙箱起不來記 infra_void，不當候選的錯</li>
+          <li><code>test_run_python_capture_returns_probe_stdout_and_keeps_candidate_sandboxed</code>：只帶回探針輸出</li>
+        </ul>
+        <div class="callout sage" style="margin-top:16px"><b>等價性守住：</b>同義實作仍同票（<code>test_off5_votes_on_behavior_not_source_text</code> 原測試不動照過）；import 白名單與 ON 臂的 hidden 判定共用同一份常數，兩條路徑不會在不同規則下跑。</div>
+      </div>
+      <div>
+        <div class="kicker">核心差異（節錄）</div>
+        <pre class="code"><span class="del">- run = subprocess.run([sys.executable, path],
+-     capture_output=True, text=True, timeout=timeout_s)</span>
+<span class="add">+ out = run_python_capture(
++     code, probe, timeout=timeout_s,
++     allowed_imports=_GAIN_ALLOWED_IMPORTS,
++     allowed_entry_points=(entry_point,))</span>
+<span class="cm"># 候選碼：worker 限定、RLIMIT、白名單 import、env 清理
+# 候選 stdout：DEVNULL，無法偽造 __VACANT_BEHAVIOR__ 標記</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 拾 · 成本 ================= -->
+<section id="s-cost">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">拾 / COST</span><h2 class="sec-title">成本分析——等呼叫 ≠ 等成本</h2></div>
+    <p class="sec-sub rise">「等預算」目前以<em>呼叫數</em>定義（ON 5 次、OFF5 5 次）。但 smoke 的落盤成本顯示：同為 5 呼叫／題，ON 的市價是 OFF5 的 1.8 倍——review 與 revise 的 prompt 更長、模型更貴。<em>正式跑的預算平衡要改用 market cost</em>，否則「等預算」會再次名實不符（E19 踩過一次，這是第二次警訊）。</p>
+
+    <div class="fig rise">
+      <svg id="costchart" width="100%" height="280" role="img" aria-label="cost comparison"></svg>
+      <div class="cap"><b>圖 9。</b> smoke 三臂：每題呼叫（上，皆為整數保證）與實際美元成本（下）。OFF $0.0388／ON $0.2814／OFF5 $0.1564。v8r 同方向：ON market $0.0969 vs OFF $0.0125＝7.8×。</div>
+    </div>
+
+    <table class="ledger rise">
+      <thead><tr><th>臂</th><th>呼叫／題</th><th>成本（smoke）</th><th>成本／正確交付</th><th>v8r 成本（market）</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">OFF</td><td class="mono">1</td><td class="mono">$0.0388</td><td class="mono">$0.0065</td><td class="mono">$0.0125</td></tr>
+        <tr><td class="mono">ON</td><td class="mono">5</td><td class="mono">$0.2814</td><td class="mono">$0.0469</td><td class="mono">$0.0969</td></tr>
+        <tr><td class="mono">OFF5</td><td class="mono">5</td><td class="mono">$0.1564</td><td class="mono">$0.0261</td><td class="mono">$0.0562（不完整）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= 拾壹 · 安全 ================= -->
+<section id="s-security">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">拾壹 / SECURITY</span><h2 class="sec-title">安全警示</h2></div>
+    <div class="callout rise" style="border-width:3px">
+      <b>兩把 API key 仍然有效。</b>對話中貼出的 <code>sk_…89ece8</code> 與 <code>sk_…996a8d</code>，我在 2026-08-20 各發了一次最小 probe——皆 <b>HTTP 200</b> 並完成真實生成。前一份交付已建議撤銷，至今日未執行。
+      <br><br>
+      <b>請立即到 Cline 後台撤銷並重發。</b>在此之前，任何拿到對話紀錄的人都能用這兩把key 計費呼叫。本 repo、驗證紀錄、smoke logs 均已掃描，<b>零金鑰殘留</b>；probe 回應與臨時 key 檔已刪除。
+    </div>
+    <div class="grid2 rise">
+      <div class="panel inset">
+        <div class="kicker">我做的</div>
+        <ul style="padding-left:1.2em;font-size:14.5px">
+          <li>金鑰只存在 <code>/tmp</code>（權限 600），用完即刪</li>
+          <li>repo 全樹（含 untracked）掃描 <code>sk_f1c0…</code>／<code>sk_ab08…</code>：零命中</li>
+          <li>runner 的 calls.jsonl 本身不含 key（只記 prompt／response 全文）</li>
+          <li>VM 上沒有放任何金鑰（與前一手同一紀律）</li>
+        </ul>
+      </div>
+      <div class="panel inset">
+        <div class="kicker">你要做的</div>
+        <ul style="padding-left:1.2em;font-size:14.5px">
+          <li><b>撤銷兩把 key 並重發</b>——這是唯一能把暴露歸零的動作</li>
+          <li>新 key 走 <code>~/.cline-keys</code> 或 <code>CLINE_KEYS</code> 路徑，不進對話、不進版控</li>
+          <li>正式批跑前，把預算上限與 market-cost 平衡一起定下來（見第拾節）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 拾貳 · 結論 ================= -->
+<section id="s-close">
+  <div class="wrap">
+    <div class="sec-head rise"><span class="sec-no">拾貳 / CLOSING</span><h2 class="sec-title">結論與重現</h2></div>
+
+    <div class="grid2">
+      <div class="rise">
+        <div style="display:flex;gap:22px;align-items:flex-start;margin-bottom:26px">
+          <div class="seal small gray stamp-in"><span>卷終</span></div>
+          <p style="font-size:15.5px;max-width:52ch">這個交付包是<em>真的、可重現、值得收</em>的：它把增益實驗從「口號」變成「有判準、有閘門、有落盤」的機器。它沒有證明增益——而它最大的貢獻之一，就是把「為什麼還不能說有增益」變得可操作、可檢查。</p>
+        </div>
+        <table class="ledger">
+          <thead><tr><th>項目</th><th>位置</th></tr></thead>
+          <tbody>
+            <tr><td>融合分支</td><td class="mono">claude/fuse-gain-verified-20260820</td></tr>
+            <tr><td>融合 commit</td><td class="mono">416b973</td></tr>
+            <tr><td>OFF5 修正＋smoke</td><td class="mono">5b256d7</td></tr>
+            <tr><td>文字版卷宗</td><td class="mono">ops/gain/VERIFICATION_2026-08-20.md</td></tr>
+            <tr><td>本網站</td><td class="mono">ops/gain/VERIFICATION_2026-08-20.html</td></tr>
+            <tr><td>smoke 機器可讀結果</td><td class="mono">runs/g_smoke_20260820/summary.json</td></tr>
+            <tr><td>smoke 原始全 I/O（未進版控）</td><td class="mono">runs/g_smoke_20260820/*.jsonl</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="rise">
+        <div class="kicker">重現指令</div>
+        <pre class="code"><span class="cm"># 1. 量具驗證（零模型呼叫、免費）</span>
+python3 ops/gain/gain_run.py \
+  --out /tmp/probe371 --n 371 --seed vm-canonical-371 \
+  --arms probe --probe-sample 0
+
+<span class="cm"># 2. 全套測試</span>
+.venv/bin/python -m pytest tests/ -q   <span class="cm"># → 565 passed</span>
+
+<span class="cm"># 3. 真跑（需要有效 key；先撤銷舊key再發新的）</span>
+CLINE_KEYS=~/.cline-keys python3 ops/gain/gain_run.py \
+  --out runs/g1 --n 12 --seed &lt;new-seed&gt; --calibration-n 6 \
+  --models cline-pass/glm-5.2,cline-pass/deepseek-v4-flash,cline-pass/kimi-k3
+
+<span class="cm"># 等預算結論只在以下兩者皆 true 時可讀：
+#   summary.json → run_complete
+#   summary.json → equal_budget_comparison_valid</span></pre>
+        <div class="callout amber"><b>下一步建議（依缺口排序）：</b>① 撤 key；② 預算平衡改 market cost；③ reviewer deadline quorum（clinepass-clean-v2 的死因）；④ 題目篩選加難——smoke 三臂全對代表題目對現今模型太簡單，量不到差異。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="rule"></div>
+    <p>Vacant · G 實驗交付驗證卷宗 · 2026-08-20 · 由 Claude（opencode）實機驗證並製作。所有標示「通過」的項目均為實際重跑結果；未重跑項目已逐條標明。本頁單檔離線可用，無任何外部請求。</p>
+    <p style="margin-top:8px" class="mono">b4e350d → f72aa6e → 416b973 → 5b256d7</p>
+  </div>
+</footer>
+
+</main>
+
+<script>
+"use strict";
+/* ============ 資料 ============ */
+document.querySelectorAll("table.ledger").forEach(t=>{
+  const d=document.createElement("div"); d.className="tscroll";
+  t.parentNode.insertBefore(d,t); d.appendChild(t);
+});
+const SHA_ROWS = [
+  ["README.txt","38f39a1d6515b031afe28d7efe24ccfd7c3b25ed95d60372b54838221aa58517"],
+  ["Vacant_DOWNLOAD_GIT.bundle","9f59faf2709a33130a01a531bb2b7e97235f923808f56bbe82d58d9947b62364"],
+  ["Vacant_DOWNLOAD_SOURCE.zip","8293d5074641e5e876066593a59458995a92960b9c17a1f91b99e067e9ca8628"],
+  ["evidence/22db0d7.patch","4c43a681ea6d00a00d665bdebd7b94b7ecfef79bd37393dda875e8cf54360972"],
+  ["evidence/HEAD.txt","82de92cc4209434db5f4424b45eff9a5c9950a0ce0806a3729852016e0cc4921"],
+  ["evidence/Vacant-gain-delivery-2026-08-19.zip","d9912d1b3a8ffbc9be0672af2b35b82758461b87671063dcbccafee5f7fc5861"],
+  ["evidence/Vacant_DOWNLOAD_BUILD.log","acb5d75002d68aba960106d3b5aa6733f88e28473cdfd11cbf22049ccf60133d"],
+  ["evidence/Vacant_DOWNLOAD_TESTS.log","d77675a78d1b2e03078eb2d116da8967b52aeeb26f543426277ceb5cb7c50460"],
+  ["evidence/git-log.txt","54422924ad74f3e738c907b930499b65115513e30ea46f3fa9a0474eae9aba6f"],
+  ["evidence/git-status.txt","16542be60f226e85565631295fc859392473d3f7da56a9b394c103eef3000485"],
+  ["evidence/verify_Vacant_zip.log","d487f271c43ba32e5449a026e12aa13cf09d9a5ecb7ac8eb78e898b094b37b1a"],
+  ["evidence/verify_gain_zip.log","27148385c25b243c89a2357f7e85fb7fbf53035fcd3b480f6b44a9a89d63d680"],
+];
+
+const C = {ink:"#221e18", ink2:"#4a4438", ink3:"#7a7261", verm:"#b3402a", vermD:"#8f2f1e",
+           sage:"#3f6b52", amber:"#a06a1c", line:"#d8cfba", line2:"c6bba1", paper2:"#efe8d8"};
+const NS = "http://www.w3.org/2000/svg";
+function el(t,a,p){const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);if(p)p.appendChild(n);return n}
+function tx(svg,x,y,s,opt={}){const t=el("text",{x,y,...opt},svg);t.textContent=s;return t}
+function fit(svg,W,H){svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.style.height="auto";svg.style.display="block"}
+
+/* ============ 1. SHA table ============ */
+(() => {
+  const tb = document.querySelector("#sha-table tbody");
+  for (const [f,h] of SHA_ROWS){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="mono">${f}</td><td class="hash">${h}</td><td class="pass">OK</td>`;
+    tb.appendChild(tr);
+  }
+})();
+
+/* ============ 2. hash chain fig ============ */
+(() => {
+  const svg = document.getElementById("hashchain");
+  const nodes = [
+    ["b4e350d","既有歷史",C.ink2],["f72aa6e","bundle HEAD",C.ink],
+    ["8 檔位元一致","驗貨",C.sage],["416b973","融合",C.sage],["5b256d7","OFF5修正",C.verm]
+  ];
+  const W = svg.clientWidth || 1000, bw = Math.min(180,(W-40)/5-24), gap=(W-40-bw*5)/4;
+  nodes.forEach(([id,label,col],i)=>{
+    const x = 20+i*(bw+gap), y=16;
+    if(i){ el("line",{x1:x-gap+6,y1:y+24,x2:x-6,y2:y+24,stroke:C.ink3,"stroke-width":1.5},svg);
+      el("path",{d:`M ${x-10} ${y+19} L ${x-2} ${y+24} L ${x-10} ${y+29}`,fill:"none",stroke:C.ink3,"stroke-width":1.5},svg); }
+    const r = el("rect",{x,y,width:bw,height:48,fill:C.paper2,stroke:col,"stroke-width":1.6,rx:2},svg);
+    tx(svg,x+bw/2,y+22,id,{"text-anchor":"middle","font-family":"SF Mono, Menlo, monospace","font-size":13,fill:col,"font-weight":700});
+    tx(svg,x+bw/2,y+39,label,{"text-anchor":"middle","font-size":11.5,fill:C.ink3});
+  });
+  fit(svg,W,86);
+})();
+
+/* ============ 3. test bars ============ */
+(() => {
+  const svg = document.getElementById("testbars");
+  const rows = [
+    ["bundle py3.13 · gain", 16, 0],
+    ["bundle py3.13 · 全套*", 550, 1],
+    ["融合 py3.12 · 全套", 562, 0],
+    ["＋OFF5 修正 · 全套", 565, 0],
+    ["VM Linux · 重點檔", 64, 1],
+  ];
+  const W = svg.clientWidth || 1000, lw = 210, bw = W-lw-90, bh=26, gap=18;
+  rows.forEach(([label,pass,skip],i)=>{
+    const y = 18+i*(bh+gap);
+    tx(svg,0,y+bh/2+4.5,label,{"font-size":13,fill:C.ink2});
+    const w = bw*pass/565;
+    el("rect",{x:lw,y,width:w,height:bh,fill:C.sage,rx:1.5},svg);
+    if(skip) el("rect",{x:lw+w,y,width:6,height:bh,fill:C.ink3,rx:1},svg);
+    tx(svg,lw+w+12,y+bh/2+4.5,`${pass} passed${skip?` · ${skip} skip`:""}`,{"font-size":12.5,"font-family":"SF Mono, Menlo, monospace",fill:C.ink2});
+  });
+  tx(svg,lw,250-8,"* 扣掉 mcp 2.0 環境問題（非回歸）",{"font-size":11,fill:C.ink3});
+  fit(svg,W,250);
+})();
+
+/* ============ 4. 371 grid ============ */
+(() => {
+  const svg = document.getElementById("grid371");
+  const W = svg.clientWidth || 1000, cols = Math.max(24, Math.floor(W/26)), size=13, gap=6;
+  const excluded = new Set([255,271,392,599,603,630,644]);
+  /* 378 題裡 7 題排除；位置示意（非真實題號排序） */
+  const exclPos = new Set([41,97,168,225,290,333,361]);
+  for(let i=0;i<378;i++){
+    const r = Math.floor(i/cols), c = i%cols;
+    el("rect",{x:c*(size+gap), y:r*(size+gap)+6, width:size, height:size, rx:2,
+      fill: exclPos.has(i)?C.verm:C.sage, opacity: exclPos.has(i)?.95:.8},svg);
+  }
+  fit(svg,W,Math.ceil(378/cols)*(size+gap)+12);
+})();
+
+/* ============ 5. arms diagram ============ */
+(() => {
+  const svg = document.getElementById("arms");
+  const W = svg.clientWidth || 1000, col = W/3;
+  function box(x,y,w,h,label,sub,col=C.ink,dash=false){
+    const g = el("g",{},svg);
+    el("rect",{x,y,width:w,height:h,fill:C.paper2,stroke:col,"stroke-width":1.6,rx:2,
+      ...(dash?{"stroke-dasharray":"5 4"}:{})},g);
+    tx(g,x+w/2,y+(sub?h/2-6:h/2+4.5),label,{"text-anchor":"middle","font-size":13.5,"font-weight":700,fill:col});
+    if(sub) tx(g,x+w/2,y+h/2+13,sub,{"text-anchor":"middle","font-size":11,fill:C.ink3});
+    return g;
+  }
+  function arrow(x1,y1,x2,y2,col=C.ink3){
+    el("line",{x1,y1,x2,y2,stroke:col,"stroke-width":1.4},svg);
+    const a = Math.atan2(y2-y1,x2-x1), s=7;
+    el("path",{d:`M ${x2} ${y2} L ${x2-s*Math.cos(a-.42)} ${y2-s*Math.sin(a-.42)} L ${x2-s*Math.cos(a+.42)} ${y2-s*Math.sin(a+.42)} Z`,fill:col},svg);
+  }
+  const heads = [["OFF","隨機路由 · 1 呼叫"],["ON","信譽路由＋評審＋修訂 · 5 呼叫"],["OFF5","同題 5 次多數決 · 5 呼叫"]];
+  heads.forEach(([h,s],i)=>{ tx(svg, col*i+col/2, 26, h, {"text-anchor":"middle","font-size":19,"font-weight":900,"font-family":"Songti TC, serif",fill:C.ink});
+    tx(svg, col*i+col/2, 46, s, {"text-anchor":"middle","font-size":11.5,fill:C.ink3}); });
+
+  /* OFF */
+  let x = col*0+col/2-90;
+  box(x,70,180,44,"產生 ×1","隨機選一個 agent");
+  arrow(x+90,114,x+90,150);
+  box(x,150,180,44,"直接接受","不審、不修",C.ink2);
+  arrow(x+90,194,x+90,230);
+  box(x,230,180,44,"hidden_check 離線評分","只用於事後計分",C.sage);
+
+  /* ON */
+  x = col*1+col/2-105;
+  box(x,70,210,40,"產生 ×1","UCB 信譽路由");
+  arrow(x+105,110,x+105,134);
+  box(x,134,210,40,"評審 ×3（並行）","不同模型家族優先");
+  arrow(x+105,174,x+105,198);
+  box(x,198,210,46,"反例閘門","literal 解析→域內→沙箱執行",C.verm);
+  arrow(x+105,244,x+105,268);
+  box(x,268,210,40,"修訂 ×1（獨立家族）","過審則保留初稿",C.ink2);
+  arrow(x+105,308,x+105,332);
+  box(x,332,210,44,"visible＋20% 抽樣稽核","信譽只吃真稽核",C.sage);
+  arrow(x+105,376,x+105,396);
+  box(x,396,210,30,"hidden_check 離線評分","",C.sage);
+
+  /* OFF5 */
+  x = col*2+col/2-105;
+  box(x,70,210,44,"產生 ×5（並行）","同題同 prompt");
+  arrow(x+105,114,x+105,150);
+  box(x,150,210,48,"行為簽名（受限 worker）","base inputs 行為分桶",C.verm);
+  arrow(x+105,198,x+105,234);
+  box(x,234,210,44,"多數決取勝出桶","平手隨機",C.ink2);
+  arrow(x+105,278,x+105,314);
+  box(x,314,210,44,"hidden_check 離線評分","只用於事後計分",C.sage);
+  fit(svg,W,430);
+})();
+
+/* ============ 6. v8r chart ============ */
+(() => {
+  const svg = document.getElementById("v8rchart");
+  const W = svg.clientWidth || 1000;
+  const arms = [["OFF",10,2,12,"$0.0125"],["ON",10,1,11,"$0.0969"],["OFF5",4,1,5,"$0.0562 ⚠不完整"]];
+  const col = W/3;
+  tx(svg,10,20,"正確交付（深）vs 漏出（紅）· n=12",{"font-size":12,fill:C.ink3});
+  arms.forEach(([name,ok,leak,acc,cost],i)=>{
+    const cx = col*i+col/2, base=210, scale=130/12;
+    tx(svg,cx,46,name,{"text-anchor":"middle","font-size":17,"font-weight":900,"font-family":"Songti TC, serif",fill:C.ink});
+    el("rect",{x:cx-70,y:base-ok*scale,width:60,height:ok*scale,fill:C.sage,rx:2},svg);
+    el("rect",{x:cx-70,y:base-(ok+leak)*scale,width:60,height:leak*scale,fill:C.verm,rx:2},svg);
+    tx(svg,cx-40,base-ok*scale-8,`${ok}`,{"text-anchor":"middle","font-size":15,"font-weight":800,fill:C.sage});
+    tx(svg,cx+42,base-8,"接受 "+acc,{"font-size":11,fill:C.ink3});
+    tx(svg,cx,base+24,cost,{"text-anchor":"middle","font-size":12,"font-family":"SF Mono, Menlo, monospace",fill:C.ink2});
+  });
+  el("line",{x1:20,y1:210,x2:W-20,y2:210,stroke:C.ink,"stroke-width":1.5},svg);
+  tx(svg,10,246,"reviewer：36 票 · grounded acc 0.806 · raw 0.667 · 14 指控僅 1 可確認（且非真錯）",{"font-size":12,fill:C.ink3});
+  fit(svg,W,270);
+})();
+
+/* ============ 7. abort chart ============ */
+(() => {
+  const svg = document.getElementById("abortchart");
+  const W = svg.clientWidth || 1000;
+  const rows = [["OFF",12,12,C.sage],["ON",8,12,C.amber],["OFF5",0,12,C.verm]];
+  rows.forEach(([name,done,total,colr],i)=>{
+    const y = 24+i*44, bw=(W-160)*done/total;
+    tx(svg,0,y+16,name,{"font-size":13.5,"font-weight":700,fill:C.ink2});
+    el("rect",{x:70,y,width:W-160,height:24,fill:"none",stroke:C.line2,"stroke-width":1.2,rx:2},svg);
+    if(done) el("rect",{x:70,y,width:bw,height:24,fill:colr,rx:2},svg);
+    tx(svg,74+bw+8,y+16,`${done}/${total}`,{"font-size":12,"font-family":"SF Mono, Menlo, monospace",fill:C.ink2});
+  });
+  tx(svg,70,160,"✕ 中止點：ON 第 8 題後，reviewer 連續 240s timeout。ABORTED.json 明令：部分臂比例不得用於比較。",{"font-size":12,fill:C.vermD});
+  fit(svg,W,170);
+})();
+
+/* ============ 8. smoke chart ============ */
+(() => {
+  const svg = document.getElementById("smokechart");
+  const W = svg.clientWidth || 1000, col=W/3;
+  const arms = [["OFF",6,1,"$0.0388","77s"],["ON",6,5,"$0.2814","556s"],["OFF5",6,5,"$0.1564","133s"]];
+  tx(svg,10,20,"三臂皆 6/6 正確交付——差異在成本與時間",{"font-size":12,fill:C.ink3});
+  arms.forEach(([name,ok,calls,cost,wall],i)=>{
+    const cx=col*i+col/2, base=190;
+    tx(svg,cx,48,name,{"text-anchor":"middle","font-size":17,"font-weight":900,"font-family":"Songti TC, serif",fill:C.ink});
+    el("rect",{x:cx-64,y:base-96,width:52,height:96,fill:C.sage,rx:2},svg);
+    tx(svg,cx-38,base-104,"6/6",{"text-anchor":"middle","font-size":14,"font-weight":800,fill:C.sage});
+    tx(svg,cx+30,base-60,calls+" 呼叫/題",{"font-size":11.5,fill:C.ink3});
+    tx(svg,cx+30,base-42,cost,{"font-size":12.5,"font-family":"SF Mono, Menlo, monospace",fill:C.vermD,"font-weight":700});
+    tx(svg,cx+30,base-24,"wall "+wall,{"font-size":11.5,fill:C.ink3});
+  });
+  el("line",{x1:20,y1:190,x2:W-20,y2:190,stroke:C.ink,"stroke-width":1.5},svg);
+  tx(svg,10,222,"閘門實測：2 個 FAIL 指控、0 個機器確認 → 正確忽略，無不必要修訂 · transitions：6 stayed_correct",{"font-size":12,fill:C.ink3});
+  fit(svg,W,250);
+})();
+
+/* ============ 9. off5 before/after ============ */
+(() => {
+  const svg = document.getElementById("off5diff");
+  const W = svg.clientWidth || 1000, half = W/2;
+  function lane(x0,title,bad){
+    tx(svg,x0+14,26,title,{"font-size":14,"font-weight":800,fill:bad?C.vermD:C.sage});
+    el("line",{x1:x0+14,y1:36,x2:x0+half-24,y2:36,stroke:bad?C.verm:C.sage,"stroke-width":2},svg);
+  }
+  function box(x,y,w,h,label,sub,col,dash){
+    el("rect",{x,y,width:w,height:h,fill:C.paper2,stroke:col,"stroke-width":1.5,rx:2,...(dash?{"stroke-dasharray":"5 4"}:{})},svg);
+    tx(svg,x+w/2,y+(sub?h/2-5:h/2+4.5),label,{"text-anchor":"middle","font-size":12.5,"font-weight":700,fill:col});
+    if(sub)tx(svg,x+w/2,y+h/2+13,sub,{"text-anchor":"middle","font-size":10.5,fill:C.ink3});
+  }
+  function arrow(x1,y1,x2,y2,col=C.ink3){
+    el("line",{x1,y1,x2,y2,stroke:col,"stroke-width":1.4},svg);
+    const a=Math.atan2(y2-y1,x2-x1),s=6.5;
+    el("path",{d:`M ${x2} ${y2} L ${x2-s*Math.cos(a-.42)} ${y2-s*Math.sin(a-.42)} L ${x2-s*Math.cos(a+.42)} ${y2-s*Math.sin(a+.42)} Z`,fill:col},svg);
+  }
+  /* before */
+  lane(0,"修正前（交付版）",true);
+  let bx = half/2-110;
+  box(bx-60,52,220,42,"behavior_signature()","",C.ink);
+  arrow(bx+50,94,bx+50,120);
+  box(bx-60,120,220,54,"裸 subprocess.run","無 RLIMIT · 無 import 白名單",C.verm);
+  arrow(bx+50,174,bx+50,200);
+  box(bx-60,200,220,54,"模型碼直接執行","stdout 可偽造簽名標記",C.verm);
+  tx(svg,bx+50,286,"風險：OFF5 多數決在非受限環境跑模型碼",{"text-anchor":"middle","font-size":11.5,fill:C.vermD,"font-weight":700});
+  /* after */
+  lane(half,"修正後（5b256d7）",false);
+  bx = half+half/2-110;
+  box(bx-60,52,220,42,"run_python_capture()","checks.py 新增",C.ink);
+  arrow(bx+50,94,bx+50,120);
+  box(bx-60,120,220,54,"runner（探針可信）","CPU／128MiB · 乾淨 env",C.sage);
+  el("line",{x1:bx+50,y1:174,x2:bx+50,y2:200,stroke:C.ink3,"stroke-width":1.4},svg);
+  box(bx-60,200,220,54,"worker（候選碼）","literal-only RPC · stdout→DEVNULL",C.sage);
+  tx(svg,bx+50,286,"與 ON 臂 hidden 判定同一條受限路徑",{"text-anchor":"middle","font-size":11.5,fill:C.sage,"font-weight":700});
+  fit(svg,W,330);
+})();
+
+/* ============ 10. cost chart ============ */
+(() => {
+  const svg = document.getElementById("costchart");
+  const W = svg.clientWidth || 1000;
+  const data = [["OFF",1,0.0388],["ON",5,0.2814],["OFF5",5,0.1564]];
+  const lw=150, bw=(W-lw-160)/5;
+  tx(svg,10,22,"每題呼叫數",{"font-size":12,fill:C.ink3});
+  tx(svg,10,158,"成本 USD（smoke 全程）",{"font-size":12,fill:C.ink3});
+  data.forEach(([name,calls,cost],i)=>{
+    const y=34+i*30;
+    tx(svg,0,y+15,name,{"font-size":13,"font-weight":700,fill:C.ink2});
+    el("rect",{x:lw,y,width:bw*calls,height:20,fill:C.ink2,rx:1.5},svg);
+    tx(svg,lw+bw*calls+10,y+15,calls+" 次",{"font-size":12,"font-family":"SF Mono, Menlo, monospace",fill:C.ink2});
+    const y2=170+i*30, w2=(W-lw-160)*cost/0.30;
+    tx(svg,0,y2+15,name,{"font-size":13,"font-weight":700,fill:C.ink2});
+    el("rect",{x:lw,y:y2-0,width:w2,height:20,fill:C.verm,rx:1.5},svg);
+    tx(svg,lw+w2+10,y2+15,"$"+cost.toFixed(4),{"font-size":12,"font-family":"SF Mono, Menlo, monospace",fill:C.vermD});
+  });
+  el("rect",{x:0,y:0,width:0,height:0},svg);
+  tx(svg,lw,272,"同為 5 呼叫，ON 是 OFF5 的 1.8 倍 → 正式跑的「等預算」須改用 market cost",{"font-size":12,fill:C.vermD,"font-weight":700});
+  fit(svg,W,280);
+})();
+
+/* ============ tabs ============ */
+document.querySelectorAll(".tabs button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on"));
+    document.querySelectorAll(".tabpane").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    document.getElementById(b.dataset.tab).classList.add("on");
+  });
+});
+
+/* ============ scroll-spy + rise + count ============ */
+const secs=[...document.querySelectorAll("section[id]")];
+const links=[...document.querySelectorAll("nav#side a")];
+const spy=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){
+    links.forEach(a=>a.classList.toggle("active", a.getAttribute("href")==="#"+e.target.id));
+  }});
+},{rootMargin:"-30% 0px -60% 0px"});
+secs.forEach(s=>spy.observe(s));
+
+const rise=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); rise.unobserve(e.target);} });
+},{threshold:.12});
+document.querySelectorAll(".rise").forEach(n=>rise.observe(n));
+
+const cnt=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const n=e.target, target=+n.dataset.count, t0=performance.now();
+    (function tick(t){ const p=Math.min(1,(t-t0)/900), ease=1-Math.pow(1-p,4);
+      n.textContent=Math.round(target*ease);
+      if(p<1) requestAnimationFrame(tick); })(t0);
+    cnt.unobserve(n);
+  });
+},{threshold:.4});
+document.querySelectorAll("[data-count]").forEach(n=>cnt.observe(n));
+</script>
+</body>
+</html>
