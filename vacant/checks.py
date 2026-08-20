@@ -485,36 +485,30 @@ finally:
 '''
 
 
-def run_python_check(
+def _run_sandboxed(
     candidate_code: str,
     test_code: str,
     *,
-    timeout: float = 8,
-    allowed_imports: tuple[str, ...] = (),
-    allowed_entry_points: tuple[str, ...] = (),
-) -> bool:
-    """NW-2a：hidden tests 與候選碼分行程，透過 literal-only function proxy 驗證。
+    timeout: float,
+    allowed_imports: tuple[str, ...],
+    allowed_entry_points: tuple[str, ...],
+) -> tuple[int | None, str]:
+    """共用的沙箱執行體：回傳 (returncode, runner stdout)；失敗／逾時回 (None, "")。
 
-    verifier runner 持有 hidden tests；candidate worker 只持有候選碼。測試裡的 entry-point
-    呼叫經 stdin/stdout RPC 送到 worker，回值必須可由 `ast.literal_eval` 還原。這會擋住
-    `os._exit(0)` 提前把 verifier 偽裝成成功、候選碼直接讀同檔 hidden tests，以及常見
-    process/file API。整個 process group 受 `python -I`、乾淨 env/cwd、CPU limit 與 wall
-    timeout 約束；任何初始化、RPC、assert、例外或逾時失敗一律回 False。
-
-    誠實邊界：AST allowlist 與 process separation 是應用層 hardening，不是惡意程式碼的
-    完整 OS sandbox。高風險第三方碼仍應使用 container、gVisor 或獨立 VM。
+    語意與 run_python_check 完全相同，差別只在把 runner 的 stdout 也交出來，
+    讓「觀察候選行為」（不只判對錯）的用途可以複用同一條受限路徑。
     """
     if any(not isinstance(name, str) or not name.isidentifier() for name in allowed_imports):
-        return False
+        return None, ""
     if any(not isinstance(name, str) or not name.isidentifier()
            for name in allowed_entry_points):
-        return False
+        return None, ""
     function_names = _candidate_functions(
         candidate_code, allowed_imports=allowed_imports,
         allowed_entry_points=allowed_entry_points,
     )
     if timeout <= 0 or not function_names:
-        return False
+        return None, ""
     with tempfile.TemporaryDirectory() as test_dir, tempfile.TemporaryDirectory() as worker_dir:
         candidate_path = os.path.join(worker_dir, "candidate.py")
         worker_path = os.path.join(worker_dir, "worker.py")
@@ -553,8 +547,8 @@ def run_python_check(
                 # 的錯，不可 fail-closed 成 False。稽核端會把它記成 infra_void
                 # 而非 provable fault（獨立審查 P1-7；CLAUDE.md 鐵律 3）。
                 raise CheckInfraError(f"沙箱 harness 無法啟動：{e}") from e
-            proc.communicate(timeout=timeout)
-            return proc.returncode == 0
+            out, _ = proc.communicate(timeout=timeout)
+            return proc.returncode, out
         except subprocess.TimeoutExpired:
             if proc is not None:
                 if os.name == "posix":
@@ -565,14 +559,62 @@ def run_python_check(
                 else:  # pragma: no cover - Windows
                     proc.kill()
                 proc.communicate()
-            return False
+            return None, ""
         except CheckInfraError:
             raise
         except Exception:
             if proc is not None and proc.poll() is None:
                 proc.kill()
                 proc.communicate()
-            return False
+            return None, ""
+
+
+def run_python_check(
+    candidate_code: str,
+    test_code: str,
+    *,
+    timeout: float = 8,
+    allowed_imports: tuple[str, ...] = (),
+    allowed_entry_points: tuple[str, ...] = (),
+) -> bool:
+    """NW-2a：hidden tests 與候選碼分行程，透過 literal-only function proxy 驗證。
+
+    verifier runner 持有 hidden tests；candidate worker 只持有候選碼。測試裡的 entry-point
+    呼叫經 stdin/stdout RPC 送到 worker，回值必須可由 `ast.literal_eval` 還原。這會擋住
+    `os._exit(0)` 提前把 verifier 偽裝成成功、候選碼直接讀同檔 hidden tests，以及常見
+    process/file API。整個 process group 受 `python -I`、乾淨 env/cwd、CPU limit 與 wall
+    timeout 約束；任何初始化、RPC、assert、例外或逾時失敗一律回 False。
+
+    誠實邊界：AST allowlist 與 process separation 是應用層 hardening，不是惡意程式碼的
+    完整 OS sandbox。高風險第三方碼仍應使用 container、gVisor 或獨立 VM。
+    """
+    rc, _ = _run_sandboxed(
+        candidate_code, test_code, timeout=timeout,
+        allowed_imports=allowed_imports, allowed_entry_points=allowed_entry_points,
+    )
+    return rc == 0
+
+
+def run_python_capture(
+    candidate_code: str,
+    probe_code: str,
+    *,
+    timeout: float = 8,
+    allowed_imports: tuple[str, ...] = (),
+    allowed_entry_points: tuple[str, ...] = (),
+) -> str | None:
+    """與 run_python_check 同一條受限路徑，但回傳 runner 的 stdout（rc!=0 回 None）。
+
+    用途是「觀察候選行為」而不是判對錯——例如 OFF5 的行為簽名：probe_code 是
+    實驗端自己寫的（可信），候選碼仍然只活在 worker 裡、經 literal-only proxy
+    被呼叫。probe_code 印在 stdout 的東西才會被帶出來；候選碼自己的輸出留在
+    worker，不會混進回傳值。
+    """
+    rc, out = _run_sandboxed(
+        candidate_code, probe_code, timeout=timeout,
+        allowed_imports=allowed_imports, allowed_entry_points=allowed_entry_points,
+    )
+    return out if rc == 0 else None
 
 
 # --- 公開：compile_check ------------------------------------------------------

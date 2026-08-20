@@ -84,3 +84,29 @@ sandbox 記憶體上限與非有限浮點 wire 編碼都是真的。
   非有限浮點、infra_void 分類、可執行反例、reviser 不改壞），且自我宣稱克制。
   但它**不是**「增益已證明」：v8r 是 n=12 pilot 且 OFF5 不完整；
   依 SPEC_GAIN §7 與鐵律 5，展場只能說「可靠性訊號」，不能說增益。
+
+## 八、我補的修正（同分支，2026-08-20）
+
+**OFF5 沙箱缺口已修。** `vacant/checks.py` 新增 `run_python_capture`
+（與 `run_python_check` 共用同一條受限路徑，差別只在帶回 runner stdout）；
+`gain_run.behavior_signature` 改走它。候選碼從此只在 worker 裡經
+literal-only proxy 被呼叫；候選自己的 stdout 留在 worker（DEVNULL），
+無法偽造簽名。釘住行為的測試：
+`test_behavior_signature_runs_candidate_in_restricted_worker`、
+`test_run_python_capture_returns_probe_stdout_and_keeps_candidate_sandboxed`。
+修正後全套測試 **565 passed**（py3.12 本機）；VM Linux 重點檔 64 passed／1 skipped。
+
+## 九、第一次完整三臂（operational smoke，不是增益證據）
+
+`runs/g_smoke_20260820/`：n=6、calibration-n=3、三模型家族
+（glm-5.2／deepseek-v4-flash／kimi-k3）、90s timeout×2 retries。
+
+- `run_complete=true`、`equal_budget_comparison_valid=true`——
+  這是 runner 歷史上第一個完整三臂（v8r 的 OFF5 缺 7 題、clean-v2 中止）。
+- 三臂 correct delivery 皆 6/6：題目對這三個模型太簡單，**量不到差異**；
+  這個 run 只證明機制端到端可運作，對「增益」一個字都不能說（鐵律 5）。
+- 等「呼叫」≠等「成本」：ON $0.2814 vs OFF5 $0.1564（同為 5 呼叫／題）。
+  之後正式跑的預算平衡要用 market cost 而不是呼叫數。
+- 評審閘門實測有效：2 個 FAIL 指控、0 個機器確認 → 正確地被忽略，
+  沒有觸發不必要的修訂。
+- 總成本約 $0.58。使用的兩把 key 仍有效，**請立即撤銷重發**。

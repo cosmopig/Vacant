@@ -69,6 +69,12 @@
 - `examples/x1_pilot.py` — 遷移 pilot 進入點（--loader x1|builtin|evalplus、--stub 閘門）
 - `examples/b_layer.py` — B 層六情境掃描 runner（預設每格 1000 seeds）
 - `docs/PREREG_V2.md` — 預註冊凍結總表（草稿待人類簽字＋ledger 簽入）
+- `ops/gain/gain_run.py`＋`ops/gain/brain_cline.py` — G 實驗（SPEC_GAIN.md，
+  2026-08-17 定調為主張本身）三臂等預算 runner 與 Cline 後端；
+  OFF5 多數決走與 ON 相同的受限 worker（2026-08-20 修正）。
+  `ops/gain/VERIFICATION_2026-08-20.md`＝外部交付包 22db0d7 的獨立驗證紀錄，
+  含「敘述超出實際交付」清單（deadline quorum、五呼叫重配、corpus 13/4/9
+  都不在交付物內，引用時不可當成已存在）
 
 ### 展件可直接複用的（實體場地，秒級互動）
 

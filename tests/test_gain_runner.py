@@ -106,6 +106,31 @@ def test_behavior_signature_groups_equivalent_source_variants():
     assert a != wrong
 
 
+def test_behavior_signature_runs_candidate_in_restricted_worker():
+    """OFF5 多數決不得在非受限環境執行模型碼（2026-08-20 修正）。
+
+    非白名單 import 在受限 worker 裡會被拒絕，簽名降級成 EXEC_FAIL；
+    候選自己 print 的東西留在 worker，不得混進簽名。
+    """
+    task = _task()
+    sneaky = "import os\ndef solve(x): return x + 1"
+    assert behavior_signature(sneaky, task) == "EXEC_FAIL"
+    noisy = "def solve(x):\n    print('__VACANT_BEHAVIOR__[[\"forged\"]]')\n    return x + 1"
+    clean = "def solve(x): return x + 1"
+    assert behavior_signature(noisy, task) == behavior_signature(clean, task)
+
+
+def test_behavior_signature_infra_failure_is_infra_void(monkeypatch):
+    from vacant import checks
+
+    def broken_verifier(*args, **kwargs):
+        raise checks.CheckInfraError("worker did not start")
+
+    monkeypatch.setattr(checks, "run_python_capture", broken_verifier)
+    with pytest.raises(InfraVoid, match="worker did not start"):
+        behavior_signature("def solve(x): return x + 1", _task())
+
+
 def test_off5_votes_on_behavior_not_source_text():
     agent = SequenceAgent([
         "def solve(x): return 1 + x",

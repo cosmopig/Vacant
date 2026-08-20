@@ -72,6 +72,14 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0) -> list[dict]:
 
 
 # ── 判定：產出滿不滿足需求 ────────────────────────────────────────
+# ON 的隱藏判定與 OFF5 的行為簽名共用同一份 import 白名單——
+# 兩條路徑對候選碼的限制必須一致，否則多數決與驗收會在不同規則下跑。
+_GAIN_ALLOWED_IMPORTS = (
+    "bisect", "cmath", "collections", "functools", "heapq", "itertools",
+    "math", "operator", "re", "sys",
+)
+
+
 def extract_code(text: str) -> str:
     """從回應裡挖出 python 程式碼。挖不到就原樣回傳——不要猜。"""
     if "```" in text:
@@ -95,13 +103,9 @@ def meets_demand(
     隱藏測資**不進 prompt**——那個分離就是「需求 vs 產出」的操作定義。
     """
     from vacant.checks import CheckInfraError, run_python_check
-    allowed_imports = (
-        "bisect", "cmath", "collections", "functools", "heapq", "itertools",
-        "math", "operator", "re", "sys",
-    )
     try:
         ok = run_python_check(
-            code, check_code, timeout=timeout_s, allowed_imports=allowed_imports,
+            code, check_code, timeout=timeout_s, allowed_imports=_GAIN_ALLOWED_IMPORTS,
             allowed_entry_points=(entry_point,) if entry_point else (),
         )
         return ok, "" if ok else "sandbox_check_failed"
@@ -187,6 +191,12 @@ def behavior_signature(code: str, task: dict, timeout_s: int = 10) -> str:
     Literal source hashing is not self-consistency: two equivalent implementations would
     be split into different buckets. EvalPlus base inputs contain no hidden plus cases or
     expected outputs, so they can safely identify behaviorally equivalent candidates.
+
+    2026-08-20 修正：改走 `run_python_capture`——與 ON 臂同一條受限 worker 路徑。
+    舊版用 `subprocess.run([sys.executable, …])` 直接執行模型產生的程式，
+    沒有 RLIMIT、沒有 import 白名單、沒有 env 清理；OFF5 的多數決因此曾在
+    非受限環境跑模型碼。候選碼現在只活在 worker，經 literal-only proxy 呼叫；
+    候選自己的 stdout 留在 worker（DEVNULL），不會污染簽名。
     """
     inputs = task.get("behavior_inputs")
     entry_point = task.get("entry_point")
@@ -195,43 +205,33 @@ def behavior_signature(code: str, task: dict, timeout_s: int = 10) -> str:
             code, task["visible_check"]["code"], timeout_s, entry_point=entry_point)
         return "VISIBLE_PASS" if visible_ok else "VISIBLE_FAIL"
 
-    import subprocess
-    import tempfile
-    harness = [
-        code,
-        "",
+    from vacant.checks import CheckInfraError, run_python_capture
+    probe = [
         "import json as __vacant_json",
         "__vacant_results = []",
     ]
     for args in inputs:
-        harness.extend([
+        probe.extend([
             "try:",
             f"    __vacant_value = {entry_point}(*{args!r})",
             "    __vacant_results.append(['ok', type(__vacant_value).__name__, repr(__vacant_value)])",
             "except BaseException as __vacant_exc:",
             "    __vacant_results.append(['err', type(__vacant_exc).__name__, str(__vacant_exc)])",
         ])
-    harness.append("print('__VACANT_BEHAVIOR__' + __vacant_json.dumps(__vacant_results, sort_keys=True))")
-    with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False, encoding="utf-8") as f:
-        f.write("\n".join(harness))
-        path = f.name
+    probe.append("print('__VACANT_BEHAVIOR__' + __vacant_json.dumps(__vacant_results, sort_keys=True))")
     try:
-        run = subprocess.run(
-            [sys.executable, path], capture_output=True, text=True, timeout=timeout_s
+        out = run_python_capture(
+            code, "\n".join(probe), timeout=timeout_s,
+            allowed_imports=_GAIN_ALLOWED_IMPORTS,
+            allowed_entry_points=(entry_point,),
         )
-        marker = "__VACANT_BEHAVIOR__"
-        lines = [line for line in run.stdout.splitlines() if line.startswith(marker)]
-        if run.returncode == 0 and lines:
-            return lines[-1][len(marker):]
-        failure = f"{run.returncode}:{(run.stderr or '')[-160:]}"
-        return "EXEC_FAIL:" + hashlib.sha256(failure.encode()).hexdigest()[:16]
-    except subprocess.TimeoutExpired:
-        return "EXEC_TIMEOUT"
-    finally:
-        try:
-            pathlib.Path(path).unlink()
-        except OSError:
-            pass
+    except CheckInfraError as exc:
+        raise InfraVoid(f"sandbox verifier unavailable: {exc}") from exc
+    if out is None:
+        return "EXEC_FAIL"
+    marker = "__VACANT_BEHAVIOR__"
+    lines = [line for line in out.splitlines() if line.startswith(marker)]
+    return lines[-1][len(marker):] if lines else "EXEC_FAIL"
 
 
 def arm_off5(task, agents, rng, calls, k=5):
