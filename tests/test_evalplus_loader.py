@@ -19,6 +19,8 @@ from vacant.codebench import (
     EVALPLUS_MBPP_PLUS_COUNT,
     EVALPLUS_MBPP_PLUS_SHA256,
     EvalPlusMBPPLoader,
+    _check_code,
+    _norm_inputs,
 )
 
 # --- 合成 fixture -------------------------------------------------------------
@@ -58,7 +60,7 @@ _REC3 = {
         "    return len(s.split())"
     ),
     "base_input": [["a b"]],
-    "plus_input": {"kwargs_style": True},   # 官方包實測存在的 dict 形 plus_input
+    "plus_input": {},   # Mbpp/793 uses an empty mapping to mean no plus cases
     "atol": None, "contract": "", "assertion": "",
 }
 
@@ -99,6 +101,31 @@ def test_loads_and_yields_tasks(tmp_path):
     assert fams["add"] == "general"
 
 
+def test_environment_override_keeps_official_sha_pin(tmp_path, monkeypatch):
+    """VACANT_EVALPLUS_PATH changes location, not the official expected bytes."""
+    p = tmp_path / "official-at-custom-location.jsonl"
+    sha = _write_pack(p, [_REC1, _REC2, _REC3])
+    monkeypatch.setenv("VACANT_EVALPLUS_PATH", str(p))
+    monkeypatch.setattr("vacant.codebench.EVALPLUS_MBPP_PLUS_SHA256", sha)
+    loader = EvalPlusMBPPLoader(expected_count=3)
+    assert len(list(loader.iter_tasks("env"))) == 3
+
+
+def test_gain_mode_exposes_input_contract_but_not_ground_truth(tmp_path):
+    rec = dict(_REC1, contract=(
+        "assert isinstance(a, int) # $_CONTRACT_$\n"
+        "assert isinstance(b, int) # $_CONTRACT_$"
+    ))
+    loader = _loader(tmp_path, [rec], expose_contract=True)
+    task = next(loader.iter_tasks("contract"))
+    assert "Formal input contract" in task["prompt"]
+    assert task["input_contract"]
+    assert task["input_parameters"] == ["a", "b"]
+    assert "isinstance(a, int)" in task["prompt"]
+    assert rec["canonical_solution"] not in task["prompt"]
+    assert repr(rec["plus_input"]) not in task["prompt"]
+
+
 def test_deterministic_order_per_seed(tmp_path):
     loader = _loader(tmp_path)
     a = [t["task_id"] for t in loader.iter_tasks("s0")]
@@ -119,8 +146,8 @@ def test_check_code_actually_verifies(tmp_path):
     assert run_python_check(good, t["visible_check"]["code"]) is True
 
 
-def test_dict_plus_input_normalized(tmp_path):
-    """dict 形 plus_input（官方包實測差異）不炸、被正規化成單一位置參數。"""
+def test_empty_dict_plus_input_means_no_cases(tmp_path):
+    """The official pack's sole dict plus_input is an empty test set, not one arg."""
     loader = _loader(tmp_path)
     tasks = {t["entry_point"]: t for t in loader.iter_tasks("s0")}
     t = tasks["count_words"]
@@ -130,6 +157,15 @@ def test_dict_plus_input_normalized(tmp_path):
         "        return len(s)\n"
         "    return len(s.split())",
         t["hidden_check"]["code"]) is True
+
+
+def test_mbpp_json_inputs_restore_official_runtime_types():
+    assert _norm_inputs([[[1, 2], [3, 4]]], "Mbpp/106") == [
+        [[1, 2], (3, 4)]
+    ]
+    assert _norm_inputs([["0", "1j"]], "Mbpp/124") == [[0.0, 1j]]
+    assert _norm_inputs([[[1, [2, 3]]]], "Mbpp/580") == [[(1, (2, 3))]]
+    assert _norm_inputs({}, "Mbpp/793") == []
 
 
 def test_public_view_has_no_gt(tmp_path):
@@ -200,6 +236,30 @@ def test_bad_json_rejected(tmp_path):
     sha = hashlib.sha256(p.read_bytes()).hexdigest()
     with pytest.raises(ValueError, match="JSON"):
         EvalPlusMBPPLoader(str(p), expected_sha256=sha, expected_count=1)
+
+
+def test_float_tolerance_treats_matching_infinities_as_equal():
+    check = _check_code(
+        "f", "def f(n): return float('inf')", [[1]], 0.0001
+    )
+    namespace = {"f": lambda _n: float("inf")}
+    exec(check, namespace)
+
+
+def test_regex_match_outputs_compare_by_predicate_truth_value():
+    canonical = "import re\ndef f(s): return re.search(r'^a', s)"
+    check = _check_code("f", canonical, [["annie"], ["bob"]], 0.0)
+    namespace = {"f": lambda s: s.startswith("a")}
+    exec(check, namespace)
+
+
+def test_official_set_equivalence_ignores_unordered_tuple_order():
+    canonical = "def similar_elements(a, b): return tuple(set(a) & set(b))"
+    check = _check_code(
+        "similar_elements", canonical, [[(1, 2), (2, 1)]], 0.0
+    )
+    namespace = {"similar_elements": lambda _a, _b: (2, 1)}
+    exec(check, namespace)
 
 
 # --- 官方包整合門（在場才驗；缺席＝skip，不假裝）---------------------------------

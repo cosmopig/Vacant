@@ -328,8 +328,9 @@ class BuiltinSampleLoader(TaskLoader):
 #   - 官方包：EvalPlus MBPP+ v0.2.0（378 題），gzip jsonl，SHA-256 釘死在本檔
 #     常數；預設建構**必須**驗證此雜湊，禁止以 None 靜默略過（fail-closed）。
 #   - V/GT 分離：public projection 只含 {task_id, family, prompt, entry_point}
-#     ＋ visible_check（base inputs）；canonical_solution／plus_input／contract／
-#     assertion 是 GT，只進 hidden_check（verifier 側），永不進 prompt——
+#     ＋ visible_check（base inputs）。canonical_solution／plus_input／assertion 是 GT，
+#     永不進 prompt。contract 只有輸入前提、沒有 expected output；G 實驗可選擇
+#     公開它，讓「需求」不是一份模型從未看過的隱藏契約。
 #     GT 隔離的逐路徑負向測試在 tests/test_x1_evalplus.py。
 #   - family 是**規則啟發式標籤**（17 §P1-2「可規則化」），供分族抽樣與
 #     教訓檢索；它是表面關鍵詞歸類、不是語意真相，誠實標明。
@@ -339,7 +340,7 @@ EVALPLUS_MBPP_PLUS_COUNT = 378
 EVALPLUS_DEFAULT_PATH = ".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz"
 
 # 必要欄位與型別（v0.2.0 schema；plus_input 容忍 list／dict 差異——官方包實測
-# 有兩種形態，dict 視為「單一位置參數＝該 dict」，見 _norm_inputs）。
+# 有兩種形態；v0.2.0 唯一的 dict 是 Mbpp/793 的空 plus-input 集。
 _EVALPLUS_SCHEMA = {
     "task_id": str,
     "prompt": str,
@@ -371,18 +372,105 @@ def _label_family(prompt: str, entry_point: str) -> str:
     return "general"
 
 
-def _norm_inputs(raw: Any) -> list[list[Any]]:
-    """把一個 input 區塊正規化成 list-of-positional-args 的 list。
+def _norm_inputs(raw: Any, task_id: str = "") -> list[list[Any]]:
+    """Deserialize MBPP's JSON inputs exactly enough for v0.2.0 evaluation.
 
-    list 形：每個元素本身就是一組位置參數（list of lists）。
-    dict 形（官方包實測存在的 schema 差異）：整塊視為一次呼叫的單一位置參數。
+    JSON loses tuples, sets and complex numbers. EvalPlus restores them with a
+    task-specific ``mbpp_deserialize_inputs`` registry before evaluation; omitting that
+    step makes canonical solutions fail their own tests. The cases below mirror the
+    official v0.2.0 loader.
     """
     if isinstance(raw, dict):
-        return [[raw]]
+        return [] if not raw else [[raw]]
     out: list[list[Any]] = []
     for case in raw:
         out.append(case if isinstance(case, list) else [case])
+    try:
+        tid = int(task_id.split("/")[-1])
+    except (TypeError, ValueError):
+        return out
+    tuple_args = {
+        2, 116, 132, 143, 222, 261, 273, 394, 399, 421, 424, 429, 470,
+        560, 579, 596, 616, 630, 726, 740, 744, 809,
+    }
+    nested_tuple_args = {
+        63, 64, 70, 94, 120, 237, 272, 299, 400, 409, 417, 438, 473, 614, 780,
+    }
+    if tid in tuple_args:
+        return [[tuple(item) for item in inp] for inp in out]
+    if tid in nested_tuple_args:
+        return [[[tuple(item) for item in group] for group in inp] for inp in out]
+    if tid in {75, 413, 444, 753}:
+        return [[[tuple(item) for item in inp[0]], inp[1]] for inp in out]
+    if tid in {106, 750}:
+        return [[inp[0], tuple(inp[1])] for inp in out]
+    if tid == 115:
+        return [[[
+            set(item) if isinstance(item, list) and item else {}
+            for item in inp[0]
+        ]] for inp in out]
+    if tid == 124:
+        return [[float(inp[0]), complex(inp[1])] for inp in out]
+    if tid in {250, 405, 446, 617, 720, 763, 808}:
+        return [[tuple(inp[0]), inp[1]] for inp in out]
+    if tid in {259, 401, 445}:
+        return [[tuple(group) for group in inp] for inp in out]
+    if tid == 278:
+        return [[tuple(item) if isinstance(item, list) else item for item in inp]
+                for inp in out]
+    if tid == 307:
+        return [[tuple(inp[0]), inp[1], inp[2]] for inp in out]
+    if tid == 722:
+        return [[{key: tuple(value) for key, value in inp[0].items()}, *inp[1:]]
+                for inp in out]
+    if tid == 252:
+        return [[complex(inp[0])] for inp in out]
+    if tid in {580, 615, 791}:
+        def all_tuples(value):
+            return tuple(all_tuples(item) for item in value) if isinstance(value, list) else value
+        return [list(all_tuples(inp)) for inp in out]
     return out
+
+
+def _python_expr(value: Any) -> str:
+    """Return an executable literal expression, including NaN and infinities."""
+    import math
+    if isinstance(value, float):
+        if math.isnan(value):
+            return "float('nan')"
+        if math.isinf(value):
+            return "float('-inf')" if value < 0 else "float('inf')"
+    if isinstance(value, list):
+        return "[" + ", ".join(_python_expr(item) for item in value) + "]"
+    if isinstance(value, tuple):
+        body = ", ".join(_python_expr(item) for item in value)
+        return "(" + body + ("," if len(value) == 1 else "") + ")"
+    if isinstance(value, dict):
+        return "{" + ", ".join(
+            f"{_python_expr(key)}: {_python_expr(item)}" for key, item in value.items()
+        ) + "}"
+    if isinstance(value, set):
+        return "set()" if not value else "{" + ", ".join(
+            _python_expr(item) for item in value
+        ) + "}"
+    return repr(value)
+
+
+def _entry_parameters(canonical: str, entry_point: str) -> list[str]:
+    """Project only the public positional signature from the hidden implementation."""
+    import ast
+    import warnings
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", SyntaxWarning)
+            tree = ast.parse(canonical)
+    except SyntaxError:
+        return []
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                and node.name == entry_point:
+            return [arg.arg for arg in (*node.args.posonlyargs, *node.args.args)]
+    return []
 
 
 def _check_code(entry_point: str, canonical: str, inputs: list[list[Any]], atol: float | None) -> str:
@@ -390,8 +478,30 @@ def _check_code(entry_point: str, canonical: str, inputs: list[list[Any]], atol:
 
     canonical 用 exec 進獨立命名空間，避免與候選的同名 entry_point 互踩。
     atol 給定時浮點（含巢狀 list/tuple）以 ≤atol 判等。"""
+    regex_predicate = "re.search(" in canonical or "re.match(" in canonical
+    set_equivalent = entry_point in {
+        "similar_elements", "find_char_long", "common_in_nested_lists",
+        "extract_singly", "larg_nnum", "intersection_array", "find_dissimilar", "Diff",
+    }
     lines = [
+        "import re as __vacant_re",
+        f"__vacant_regex_predicate = {regex_predicate!r}",
+        f"__vacant_set_equivalent = {set_equivalent!r}",
         "def __aeq(a, b, atol):",
+        "    if __vacant_set_equivalent:",
+        "        try:",
+        "            return set(a) == set(b)",
+        "        except TypeError:",
+        "            return False",
+        "    if __vacant_regex_predicate:",
+        "        allowed = (bool, type(None), __vacant_re.Match)",
+        "        if isinstance(a, allowed) and isinstance(b, allowed):",
+        "            return bool(a) == bool(b)",
+        "    try:",
+        "        if a == b:",
+        "            return True",
+        "    except (TypeError, ValueError):",
+        "        pass",
         "    if atol and (isinstance(a, float) or isinstance(b, float)):",
         "        try:",
         "            return abs(a - b) <= atol",
@@ -401,14 +511,15 @@ def _check_code(entry_point: str, canonical: str, inputs: list[list[Any]], atol:
         "        return len(a) == len(b) and all(__aeq(x, y, atol) for x, y in zip(a, b))",
         "    return a == b",
         "",
-        f"__ns: dict = {{}}",
+        "__ns: dict = {}",
         f"exec({canonical!r}, __ns)",
         f"__canon = __ns[{entry_point!r}]",
         "",
     ]
     for inp in inputs:
-        call = f"{entry_point}(*{inp!r})"
-        lines.append(f"assert __aeq({call}, __canon(*{inp!r}), {atol!r})")
+        inp_expr = _python_expr(inp)
+        call = f"{entry_point}(*{inp_expr})"
+        lines.append(f"assert __aeq({call}, __canon(*{inp_expr}), {atol!r})")
     return "\n".join(lines)
 
 
@@ -433,10 +544,13 @@ class EvalPlusMBPPLoader(TaskLoader):
         *,
         expected_sha256: str | None = None,
         expected_count: int = EVALPLUS_MBPP_PLUS_COUNT,
+        expose_contract: bool = False,
     ) -> None:
         import os
         self.path = path or os.environ.get("VACANT_EVALPLUS_PATH", EVALPLUS_DEFAULT_PATH)
-        if expected_sha256 is None and self.path == EVALPLUS_DEFAULT_PATH:
+        # path=None means "official pack", whether it lives at the default relative path
+        # or at VACANT_EVALPLUS_PATH. The override changes location, never the pinned bytes.
+        if expected_sha256 is None and path is None:
             expected_sha256 = EVALPLUS_MBPP_PLUS_SHA256
         if expected_sha256 is None:
             raise ValueError(
@@ -445,6 +559,7 @@ class EvalPlusMBPPLoader(TaskLoader):
             )
         self.expected_sha256 = expected_sha256
         self.expected_count = expected_count
+        self.expose_contract = expose_contract
         self._records = self._load_verified()
 
     # -- 驗證載入（建構時一次做完）---------------------------------------------
@@ -509,15 +624,32 @@ class EvalPlusMBPPLoader(TaskLoader):
             key=lambda r: hashlib.sha256(f"{seed}:{r['task_id']}".encode()).hexdigest(),
         )
         for rec in ordered:
-            base = _norm_inputs(rec["base_input"])
-            plus = _norm_inputs(rec["plus_input"])
+            base = _norm_inputs(rec["base_input"], rec["task_id"])
+            plus = _norm_inputs(rec["plus_input"], rec["task_id"])
             atol = rec.get("atol")
             atol = float(atol) if isinstance(atol, (int, float)) else None
+            public_prompt = rec["prompt"]
+            contract = rec.get("contract", "").replace("# $_CONTRACT_$", "").strip()
+            if self.expose_contract and contract:
+                public_prompt += (
+                    "\n\nFormal input contract (authoritative preconditions):\n"
+                    f"```python\n{contract}\n```"
+                )
             yield {
                 "task_id": f"mbppplus_{rec['task_id']}",
                 "family": _label_family(rec["prompt"], rec["entry_point"]),
-                "prompt": rec["prompt"],
+                "prompt": public_prompt,
                 "entry_point": rec["entry_point"],
+                # OFF-5x 只用這些 base inputs 比較候選程式的行為是否相同；
+                # 沒有 canonical output、plus inputs 或其他 GT，因此不會偷看 hidden。
+                "behavior_inputs": base,
+                # Public preconditions only (no expected outputs or plus inputs). Gain's
+                # evidence gate uses this to reject reviewer tests outside the domain.
+                "input_contract": contract if self.expose_contract else "",
+                "input_parameters": (
+                    _entry_parameters(rec["canonical_solution"], rec["entry_point"])
+                    if self.expose_contract else []
+                ),
                 "visible_check": {
                     "type": "run_python",
                     "code": _check_code(rec["entry_point"], rec["canonical_solution"], base, atol),
