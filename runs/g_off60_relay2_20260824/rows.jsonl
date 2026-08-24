@@ -1,0 +1,1 @@
+{"arm": "OFF", "seed": "g-smoke-20260820", "i": 1, "task_id": "mbppplus_Mbpp/450", "family": "general", "entry_point": "extract_string", "worker": "careful-1", "involved": ["careful-1"], "meets_demand": true, "err": "", "accepted": true, "calls_used": 1, "calls_so_far": 1, "votes": null}
