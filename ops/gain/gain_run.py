@@ -27,7 +27,6 @@ import json
 import pathlib
 import random
 import sys
-import threading
 import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
@@ -241,17 +240,20 @@ def arm_off5(task, agents, rng, calls, k=5):
     結果字串相同的視為同一票。這比字面比對公平（同義寫法不該被拆票）。
     """
     assigned = [rng.choice(agents) for _ in range(k)]
-    counter_lock = threading.Lock()
 
     def generate_one(a):
         txt = a.generate(task["prompt"], role="gen",
                          meta={"arm": "OFF5", "task_id": task["task_id"]})
-        with counter_lock:
-            calls[0] += 1
+        calls[0] += 1
         return extract_code(txt), a.agent_id
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=k) as pool:
-        outs = list(pool.map(generate_one, assigned))
+    # 依序送出，不用 ThreadPoolExecutor 併發：round22/23 量到 3-way 併發
+    # review 打同一個中轉端點時，排隊延遲會把個別請求推過 timeout（後端很可能
+    # 是單一 GPU/LM Studio 實例，client 併發不會換來真正的平行運算，只會讓
+    # 每個請求各自的 timeout 時鐘在排隊等待時空轉）。這裡的 k=5 generate 面臨
+    # 同一種風險，尚未實測到失敗（OFF5 在 ON 之後才跑），依同一機制理由預先改掉，
+    # 見 DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md。
+    outs = [generate_one(a) for a in assigned]
     # 行為簽名：同義實作投同一票；只看 base inputs，不碰 hidden plus cases。
     buckets: dict[str, list[tuple[str, str]]] = {}
     for code, aid in outs:
@@ -441,7 +443,6 @@ def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3,
     votes = []
     rprompt = (f"題目：\n{task['prompt']}\n\n候選解答：\n"
                f"```python\n{initial_code}\n```\n")
-    counter_lock = threading.Lock()
 
     def review_one(r):
         v = r.generate(rprompt, role="review",
@@ -449,12 +450,19 @@ def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3,
                              "target": worker.agent_id},
                        system=f"{REVIEWER_SYSTEM}\n{REVIEW_LENSES.get(r.agent_id, '')}",
                        timeout_s=review_timeout_s, retries=review_retries)
-        with counter_lock:
-            calls[0] += 1
+        calls[0] += 1
         return r.agent_id, v
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=len(reviewers)) as pool:
-        raw_reviews = list(pool.map(review_one, reviewers))
+    # 依序送出，不用 ThreadPoolExecutor 併發：round22 量到 3 個 reviewer 同時
+    # 送出時，即使成功的呼叫延遲也普遍 100-241s，逼近甚至超過 review_timeout_s；
+    # round23 補量到 review 呼叫失敗率 17/30=57%、平均分布在 5/6 個 agent（不是
+    # 單一 agent 的問題）⇒ 併發搶佔同一個中轉端點（後端很可能是單一 GPU/LM
+    # Studio 實例，client 端「併發」換不到真正的平行運算，只會讓排隊中的請求
+    # 各自的 timeout 時鐘持續空轉，越後面送出的請求越可能撞牆）。序列送出讓
+    # 每個請求的 timeout 從它真正開始處理時起算，總耗時不會顯著變多（後端本來
+    # 就是排隊處理），但可以避免這種人為的逾時。見
+    # DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md。
+    raw_reviews = [review_one(r) for r in reviewers]
     review_evidence = []
     for aid, review in raw_reviews:
         raw_pass = _review_vote(review)
