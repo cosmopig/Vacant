@@ -114,3 +114,6 @@ ON 臂的任何增益都不是機制帶來的。
   才把 `run_complete` 設為 true。
 - endpoint timeout、重試與 backoff 是實驗條件，必須跟結果一起落盤。研究可容忍長
   deadline；互動產品應用較短 deadline fail fast，但兩種設定的結果不可混算。
+- 評審呼叫使用獨立的較短 deadline（預設 60s×2 次嘗試），與產生／修訂的
+  deadline 分開落盤：clinepass-clean-v2 證明 reviewer 跟著全域長 deadline 走，
+  單題評審最壞會拖到 16 分鐘、整條臂被尾延遲支配。
