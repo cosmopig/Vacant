@@ -26,6 +26,20 @@ import urllib.request
 API = "https://api.cline.bot/api/v1/chat/completions"
 DEFAULT_MODEL = "cline-pass/kimi-k3"
 
+# SPEC_GAIN §6 要宣稱「任何 agent platform」，而那需要**兩個後端同號**——
+# 只跑一個後端就宣稱平台無關，是把「沒試過別的」講成「別的也一樣」。
+# 所以端點必須可換。換掉之後**端點身分要跟結果一起落盤**：它是實驗條件，
+# 不是實作細節；兩個後端的數字混在一起看不出來，就等於沒有第二個後端。
+#
+# 用法：VACANT_GAIN_API=http://127.0.0.1:1234/v1/chat/completions
+# 本地端點通常不驗證；金鑰為空字串時不送 Authorization 標頭。
+def endpoint() -> str:
+    return os.environ.get("VACANT_GAIN_API", "").strip() or API
+
+
+class EmptyResponse(RuntimeError):
+    """端點回 200 但 content 是空的。當成可重試的端點狀況，不是錯答案。"""
+
 
 class InfraVoid(RuntimeError):
     """端點連不上／重試用盡。呼叫端必須把這一格記成 infra_void，不可當成錯誤答案。"""
@@ -41,6 +55,7 @@ class ClineBrain:
         self.agent_id = agent_id
         self.system = system
         self.key = key
+        self.api = endpoint()
         self.model = model
         self.temperature = temperature
         self.retries = retries
@@ -61,8 +76,17 @@ class ClineBrain:
 
     # ── 呼叫 ────────────────────────────────────────────────────────
     def generate(self, prompt: str, *, role: str = "gen",
-                 meta: dict | None = None, system: str | None = None) -> str:
+                 meta: dict | None = None, system: str | None = None,
+                 timeout_s: int | None = None, retries: int | None = None) -> str:
+        """timeout_s／retries 為 None 時用實例預設；評審等短 deadline 角色可單次覆蓋。
+
+        覆蓋值會寫進落盤紀錄（SPEC_GAIN §7：timeout／retry 是實驗條件）。
+        """
         effective_system = system or self.system
+        effective_timeout = self.timeout_s if timeout_s is None else timeout_s
+        effective_retries = self.retries if retries is None else retries
+        if effective_timeout <= 0 or effective_retries <= 0:
+            raise ValueError("timeout_s／retries 必須為正數")
         body = json.dumps({
             "model": self.model,
             "messages": [{"role": "system", "content": effective_system},
@@ -72,18 +96,28 @@ class ClineBrain:
         }).encode()
 
         last_err = ""
-        for attempt in range(1, self.retries + 1):
+        for attempt in range(1, effective_retries + 1):
             t0 = time.time()
-            req = urllib.request.Request(
-                API, data=body,
-                headers={"Authorization": f"Bearer {self.key}",
-                         "Content-Type": "application/json"})
+            headers = {"Content-Type": "application/json"}
+            if self.key:                      # 本地端點沒有金鑰，不要送空的 Bearer
+                headers["Authorization"] = f"Bearer {self.key}"
+            req = urllib.request.Request(self.api, data=body, headers=headers)
             try:
-                with urllib.request.urlopen(req, timeout=self.timeout_s) as r:
+                with urllib.request.urlopen(req, timeout=effective_timeout) as r:
                     payload = json.load(r)
                 d = payload.get("data", payload)
                 choice = d["choices"][0]["message"]
-                text = choice["content"]
+                text = choice.get("content") or ""
+                # ⚠ 推理模型（實測 qwen3.6-35b-a3b）把思考放進 reasoning_content，
+                #   答案放 content。token 預算被思考吃光時 content 會是**空字串**，
+                #   而空字串進 extract_code 之後會被記成「答錯」——
+                #   那是端點狀況冒充能力上限，正好是 infra_void 要擋的東西。
+                #   空回應在這裡走重試；重試用盡才記 infra_void（不算成功也不算失敗）。
+                if not text.strip():
+                    raise EmptyResponse(
+                        f"content 為空（finish_reason="
+                        f"{d['choices'][0].get('finish_reason')}，"
+                        f"reasoning {len(choice.get('reasoning_content') or '')} 字）")
                 gw = choice.get("provider_metadata", {}).get("gateway", {})
                 usage = d.get("usage") or {}
                 cost = float(usage.get("cost") or gw.get("cost") or 0)
@@ -96,8 +130,10 @@ class ClineBrain:
                 self._log({
                     "ts_ms": int(time.time() * 1000),
                     "agent_id": self.agent_id, "role": role,
+                    "api": self.api,
                     "model": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": True,
+                    "timeout_s": effective_timeout, "retries_max": effective_retries,
                     "latency_ms": int((time.time() - t0) * 1000),
                     "cost_usd": cost,
                     "market_cost_usd": market_cost,
@@ -113,8 +149,10 @@ class ClineBrain:
                 self._log({
                     "ts_ms": int(time.time() * 1000),
                     "agent_id": self.agent_id, "role": role,
+                    "api": self.api,
                     "model": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": False,
+                    "timeout_s": effective_timeout, "retries_max": effective_retries,
                     "latency_ms": int((time.time() - t0) * 1000),
                     "error": last_err,
                     "system": effective_system,
@@ -126,14 +164,19 @@ class ClineBrain:
                 }
                 if non_retryable:
                     break
-                if attempt < self.retries:
+                if attempt < effective_retries:
                     time.sleep(self.backoff_s * (2 ** (attempt - 1)))
 
-        raise InfraVoid(f"{self.agent_id} 重試 {self.retries} 次仍失敗：{last_err}")
+        raise InfraVoid(f"{self.agent_id} 重試 {effective_retries} 次仍失敗：{last_err}")
 
 
 def load_keys(path: str | None = None) -> list[str]:
     p = pathlib.Path(path or os.environ.get("CLINE_KEYS", "~/.cline-keys")).expanduser()
+    if endpoint() != API and not p.exists():
+        # 換到本地／自架端點且沒有金鑰檔：回一把空金鑰，不送 Authorization。
+        # 只在**端點確實被換掉**時才允許——否則打正式端點缺金鑰會靜默變成 401
+        # 全滅，而那在 summary 裡長得跟「題目太難」一模一樣。
+        return [""]
     ks = [line.strip() for line in p.read_text().splitlines() if line.strip()]
     if not ks:
         raise SystemExit(f"{p} 裡沒有金鑰")

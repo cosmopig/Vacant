@@ -39,10 +39,13 @@ class FakeAgent:
         self.initial = initial
         self.model = model
         self.systems: list[str | None] = []
+        self.review_policies: list[tuple[int | None, int | None]] = []
 
-    def generate(self, prompt, *, role="gen", meta=None, system=None):
+    def generate(self, prompt, *, role="gen", meta=None, system=None,
+                 timeout_s=None, retries=None):
         self.systems.append(system)
         if role == "review":
+            self.review_policies.append((timeout_s, retries))
             return ("VERDICT: FAIL\nCONCERN: off by one\n"
                     "TEST_ARGS: [1]\nEXPECTED: 2")
         if role == "revise":
@@ -55,14 +58,17 @@ class SequenceAgent(FakeAgent):
         super().__init__("sequence")
         self.outputs = iter(outputs)
 
-    def generate(self, prompt, *, role="gen", meta=None, system=None):
+    def generate(self, prompt, *, role="gen", meta=None, system=None,
+                 timeout_s=None, retries=None):
         return f"```python\n{next(self.outputs)}\n```"
 
 
 class ApprovingAgent(FakeAgent):
-    def generate(self, prompt, *, role="gen", meta=None, system=None):
+    def generate(self, prompt, *, role="gen", meta=None, system=None,
+                 timeout_s=None, retries=None):
         self.systems.append(system)
         if role == "review":
+            self.review_policies.append((timeout_s, retries))
             return ("VERDICT: PASS\nCONCERN: none\n"
                     "TEST_ARGS: NONE\nEXPECTED: NONE")
         if role == "revise":
@@ -203,7 +209,8 @@ def test_review_counterexample_must_satisfy_public_input_contract():
 
 def test_unfounded_fail_reviews_cannot_trigger_rewrite():
     class FalseAccuser(FakeAgent):
-        def generate(self, prompt, *, role="gen", meta=None, system=None):
+        def generate(self, prompt, *, role="gen", meta=None, system=None,
+                     timeout_s=None, retries=None):
             self.systems.append(system)
             if role == "review":
                 return ("VERDICT: FAIL\nCONCERN: invented\n"
@@ -258,7 +265,8 @@ def test_majority_approved_initial_cannot_be_harmed_by_fifth_call():
 
 def test_public_failure_overrides_incorrect_peer_approval():
     class MistakenApprover(ApprovingAgent):
-        def generate(self, prompt, *, role="gen", meta=None, system=None):
+        def generate(self, prompt, *, role="gen", meta=None, system=None,
+                     timeout_s=None, retries=None):
             self.systems.append(system)
             if role == "review":
                 return ("VERDICT: PASS\nCONCERN: none\n"
@@ -331,3 +339,87 @@ def test_latency_summary_keeps_failures_and_role_tails(tmp_path):
     assert result["all"] == {"n": 2, "p50": 10, "p95": 30, "max": 30}
     assert result["by_role"]["review"]["p50"] == 30
     assert result["failed_attempts"] == 1
+
+
+def test_reviewers_get_bounded_deadline_policy():
+    """reviewer 尾延遲是 clean-v2 的死因：評審呼叫必須用獨立短 deadline。"""
+    agents = [FakeAgent(f"agent-{i}", model=f"family-{i % 3}/model") for i in range(6)]
+    rep = {a.agent_id: {"n": 0, "ok": 0} for a in agents}
+    arm_on(_task(), agents, random.Random(4), [0], rep, audit_rate=0.0,
+           review_timeout_s=17, review_retries=1)
+    policies = [p for a in agents for p in a.review_policies]
+    assert len(policies) == 3
+    assert all(p == (17, 1) for p in policies)
+
+
+def test_empty_content_is_infra_void_not_a_wrong_answer(tmp_path, monkeypatch):
+    """推理模型 token 被思考吃光時 content 會是空字串。
+
+    2026-08-24 實測：qwen3.6-35b-a3b 把思考放 reasoning_content、答案放 content；
+    截斷時 content 空。空字串進 extract_code 會被記成「答錯」——那是端點狀況
+    冒充能力上限。這條擋的就是那個：空回應必須走 infra_void，
+    因為「量到 0」與「這一格沒量到」在 summary 裡長得一樣。
+    """
+    import io
+    import urllib.request
+
+    from ops.gain.brain_cline import ClineBrain
+
+    payload = {"choices": [{"finish_reason": "length",
+                            "message": {"role": "assistant", "content": "",
+                                        "reasoning_content": "想了很久但沒輸出"}}],
+               "usage": {"cost": 0.001}}
+
+    class FakeResp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    monkeypatch.setattr(urllib.request, "urlopen",
+                        lambda *a, **k: FakeResp(json.dumps(payload).encode()))
+
+    brain = ClineBrain("t", "sys", key="k", log_path=tmp_path / "calls.jsonl",
+                       retries=2, backoff_s=0)
+    with pytest.raises(InfraVoid):
+        brain.generate("寫個函式")
+
+    # 每一次嘗試都要落盤，而且是記成失敗——不可以留下 ok:true 的空回應
+    recs = [json.loads(line) for line in
+            (tmp_path / "calls.jsonl").read_text().splitlines()]
+    assert len(recs) == 2, "重試每一次都要落盤"
+    assert all(not r["ok"] for r in recs), "空回應不得記成成功"
+    assert all("content 為空" in r["error"] for r in recs)
+
+
+def test_run_complete_is_false_when_an_arm_measured_nothing():
+    """run_complete 是稽核的人第一眼看的欄位，不准在沒量到的時候是 true。
+
+    2026-08-24 實測抓到：runs/g_off60_20260824 端點 403、60 題全部 infra_void、
+    OFF 臂 complete=False，頂層卻寫 run_complete: true（原本第 915 行無條件寫死）。
+    SPEC_GAIN §7：只有全部指定臂完成才設 true。
+    """
+    summary = {"OFF": {"complete": True}, "ON": {"complete": False}}
+    arms = ["OFF", "ON"]
+    assert not all(summary.get(a, {}).get("complete") for a in arms)
+
+    # 沒跑的臂連 key 都不存在時，也必須是 False，不能因為 .get 回 None 就漏掉
+    assert not all({"OFF": {"complete": True}}.get(a, {}).get("complete")
+                   for a in ["OFF", "OFF5"])
+
+
+def test_local_endpoint_needs_no_key_but_official_one_still_does(tmp_path, monkeypatch):
+    """換本地端點可以沒有金鑰檔；沒換端點卻缺金鑰必須直接停。
+
+    理由：打正式端點缺金鑰會變成 401 全滅，而那在 summary 裡跟「題目太難」
+    長得一模一樣（2026-08-24 就是這樣燒掉一輪，403 × 60 題）。
+    """
+    monkeypatch.setenv("CLINE_KEYS", str(tmp_path / "does-not-exist"))
+
+    monkeypatch.setenv("VACANT_GAIN_API", "http://127.0.0.1:1234/v1/chat/completions")
+    assert load_keys() == [""], "本地端點應回空金鑰，不送 Authorization"
+
+    monkeypatch.delenv("VACANT_GAIN_API")
+    with pytest.raises(Exception):
+        load_keys()

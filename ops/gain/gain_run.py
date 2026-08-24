@@ -417,11 +417,16 @@ def _independent_reviser(agents, worker, rep, rng):
     return _route_agent(eligible, rep, rng)
 
 
-def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3):
+def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3,
+           review_timeout_s: int = 60, review_retries: int = 2):
     """信譽路由＋K=3 審查＋一次修訂＋確定性抽樣稽核（恰好五次呼叫）。
 
     路由用 rep 的分數；評審用**同一個池**——所以共同盲區是真的存在，
     不是被假設掉。評審準確率會被單獨記錄（SPEC_GAIN §5.1）。
+
+    評審呼叫用獨立的較短 deadline（預設 60s×2）：clinepass-clean-v2 的死因就是
+    reviewer 跟著全域 240s×4 走，尾延遲支配整條臂。bounded deadline 讓單題
+    評審階段最壞 ~2 分鐘封頂；用盡仍失敗依舊記 infra_void，不當候選的錯。
     """
     worker = _route_agent(agents, rep, rng)
     txt = worker.generate(task["prompt"], role="gen",
@@ -442,7 +447,8 @@ def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3):
         v = r.generate(rprompt, role="review",
                        meta={"arm": "ON", "task_id": task["task_id"],
                              "target": worker.agent_id},
-                       system=f"{REVIEWER_SYSTEM}\n{REVIEW_LENSES.get(r.agent_id, '')}")
+                       system=f"{REVIEWER_SYSTEM}\n{REVIEW_LENSES.get(r.agent_id, '')}",
+                       timeout_s=review_timeout_s, retries=review_retries)
         with counter_lock:
             calls[0] += 1
         return r.agent_id, v
@@ -662,12 +668,21 @@ def main() -> None:
         help="per-endpoint-attempt deadline; lower this for interactive/product pilots",
     )
     ap.add_argument(
+        "--review-timeout-s", type=int, default=60,
+        help="bounded deadline per reviewer attempt（clinepass-clean-v2 的死因修復）",
+    )
+    ap.add_argument(
+        "--review-retries", type=int, default=2,
+        help="reviewer attempts before the task is recorded as infra_void",
+    )
+    ap.add_argument(
         "--retries", type=int, default=4,
         help="endpoint attempts before the task is recorded as infra_void",
     )
     ap.add_argument("--retry-backoff-s", type=float, default=2.0)
     args = ap.parse_args()
     if (args.request_timeout_s <= 0 or args.retries <= 0
+            or args.review_timeout_s <= 0 or args.review_retries <= 0
             or args.retry_backoff_s < 0 or args.probe_sample < 0):
         raise SystemExit(
             "timeout/retries 必須為正數，backoff 與 probe-sample 不得為負"
@@ -763,6 +778,8 @@ def main() -> None:
                     "timeout_s": args.request_timeout_s,
                     "retries": args.retries,
                     "backoff_s": args.retry_backoff_s,
+                    "review_timeout_s": args.review_timeout_s,
+                    "review_retries": args.review_retries,
                 },
                 "pool": [
                     {"agent_id": a.agent_id, "model": a.model} for a in agents
@@ -803,7 +820,9 @@ def main() -> None:
                     accepted, extra = True, {}
                 else:
                     code, worker, involved, extra = arm_on(
-                        t, agents, rng, calls, rep, audit_rate=args.audit_rate)
+                        t, agents, rng, calls, rep, audit_rate=args.audit_rate,
+                        review_timeout_s=args.review_timeout_s,
+                        review_retries=args.review_retries)
                     accepted = extra["accepted"]
             except InfraVoid as e:
                 n_void += 1
@@ -893,7 +912,17 @@ def main() -> None:
         write_summary(run_complete=False)
         print(f"── {arm}: {json.dumps(summary[arm], ensure_ascii=False)}")
 
-    write_summary(run_complete=True)
+    # ⚠ 2026-08-24 實測抓到：這裡原本無條件寫 True。runs/g_off60_20260824 那一輪
+    #   端點 403、60 題全部 infra_void、每臂 complete=False，頂層卻是
+    #   run_complete: true。SPEC_GAIN §7 寫的是「只有全部指定臂完成才設 true」。
+    #   幾個月後翻歸檔 JSONL 的人第一眼看的就是這個欄位——它說跑完了，
+    #   而那一輪其實一格都沒量到。
+    all_arms_complete = all(summary.get(a, {}).get("complete") for a in arms)
+    write_summary(run_complete=all_arms_complete)
+    if not all_arms_complete:
+        incomplete = [a for a in arms if not summary.get(a, {}).get("complete")]
+        print(f"⚠ run_complete=False——這些臂沒跑完：{', '.join(incomplete)}。"
+              f"這一輪的比例不得拿去比較（SPEC_GAIN §7）。")
     print(f"\n寫出 {out/'summary.json'}")
     print("⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。")
 
