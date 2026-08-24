@@ -549,3 +549,29 @@ def test_model_id_alternates_on_404_and_lands_the_one_actually_sent(tmp_path, mo
     assert recs[1]["model"] == "qwen_qwen3.6-35b-a3b" and recs[1]["ok"]
     assert all(r["model_configured"] == "qwen/qwen3.6-35b-a3b" for r in recs), \
         "設定值要另外留著，才分得出實際服務的是哪個命名"
+
+
+def test_dead_model_kills_exactly_half_the_pool_deterministically():
+    """agent 分配是 `models[i % len(models)]`——決定性，不是隨機。
+
+    2026-08-24 燒掉兩輪才看清楚：傳兩個模型而其中一個不可達時，
+    index 為奇數的 agent（POOL 裡所有 `-2` 尾碼）保證 100% 失敗。
+    runs/g_off60_relay_20260824 因此拿到 18/60 infra_void（30%，接近一半），
+    超過判決表寫死的 10% 擋門，整輪 f 作廢。
+
+    這條把那個結構釘住：不是「運氣不好抽到壞模型」，是**一半的池子必死**。
+    所以預檢必須零容忍——一個 model 答不出來就停，不要跑完一小時才知道。
+    """
+    from ops.gain.brain_cline import POOL
+
+    models = ["alive-model", "dead-model"]
+    assigned = [(aid, models[i % len(models)]) for i, (aid, _) in enumerate(POOL)]
+    dead = [aid for aid, m in assigned if m == "dead-model"]
+
+    assert len(dead) == len(POOL) // 2, "剛好一半的 agent 分到死掉的模型"
+    assert dead == ["careful-2", "plain-2", "hasty-2"], \
+        f"而且是固定那三個，不是隨機的：{dead}"
+
+    # 單一模型時所有 agent 拿到同一個，不會有保證失敗的半邊
+    one = ["only-model"]
+    assert {one[i % len(one)] for i in range(len(POOL))} == {"only-model"}

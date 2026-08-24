@@ -735,6 +735,36 @@ def main() -> None:
               for i, (aid, sys_p) in enumerate(POOL)]
     print(f"── 模型池：{len(agents)} 個 agent／{len(set(models))} 個模型家族")
 
+    # ── 模型池預檢：每個設定的 model 先問一句，答不出來就停 ──────────────
+    #
+    # 為什麼要有這一步（2026-08-24 燒掉兩輪換來的）：
+    # agent 分配是 `models[i % len(models)]`，**決定性**不是隨機。傳兩個模型
+    # 而其中一個不可達時，index 為奇數的 agent（POOL 裡所有 `-2` 尾碼）
+    # 保證 100% 失敗——不管跑幾題都是那一半。runs/g_off60_relay_20260824
+    # 就是這樣拿到 18/60 infra_void（30%，接近一半），超過判決表的 10% 擋門，
+    # 整輪 f 作廢；當時中轉根本沒有服務 nemotron，而我們跑了 55 分鐘才知道。
+    #
+    # 這跟既有的「量具要先答已知答案」是同一條紀律：**在壞尺上跑實驗等於沒跑**，
+    # 在死掉的模型上跑實驗也一樣。差別只是量具驗的是判定邏輯，這裡驗的是後端。
+    # 成本是每個 model 一次呼叫；省下的是一整輪。
+    print("── 模型池預檢（每個 model 問一句，零容忍）")
+    for model_id in dict.fromkeys(models):          # 去重但保留順序
+        probe = ClineBrain("preflight", "You are a helpful assistant.",
+                           key=keys[0], log_path=calls_log, model=model_id,
+                           timeout_s=min(args.request_timeout_s, 120), retries=2,
+                           backoff_s=args.retry_backoff_s)
+        try:
+            reply = probe.generate("Reply with exactly: OK",
+                                   role="preflight", meta={"model": model_id})
+        except InfraVoid as exc:
+            raise SystemExit(
+                f"模型 {model_id} 預檢失敗：{exc}\n"
+                f"  這個 model 分到的 agent 會 100% 失敗（分配是 i % len(models)，"
+                f"決定性不是隨機）。\n"
+                f"  先確認端點真的服務這個 model，或把它從 --models 拿掉。"
+            ) from exc
+        print(f"   {model_id}　回 {len(reply)} 字　✓")
+
     calibration = None
     if args.calibration_n:
         calibration_tasks = load_tasks(
