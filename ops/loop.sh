@@ -11,7 +11,8 @@ set -u
 ROOT="$HOME/vacant"
 LOGS="$ROOT/logs"
 CLAUDE="$HOME/.local/bin/claude"     # 寫死路徑：非互動 shell 的 PATH 沒有它
-MODEL="${LOOP_MODEL:-sonnet}"        # 2026-08-17 人類指定 Sonnet 5（原本吃預設的 Opus 5）
+DEFAULT_MODEL="${LOOP_MODEL:-sonnet}"  # 預設 Sonnet 5；每輪可被 NEXT_MODEL 覆蓋一次
+NEXT_MODEL="$ROOT/NEXT_MODEL"          # 上一輪寫的建議，讀完就消耗掉（見 pick_model）
 PROMPT="$ROOT/LOOP_PROMPT.md"
 STOP="$ROOT/STOP"
 GAP=${LOOP_GAP:-90}                  # 每輪之間的間隔（秒）
@@ -40,7 +41,7 @@ say() { printf '%s  %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" | tee -a "$main_lo
 n=$(ls "$LOGS"/iter-*.log 2>/dev/null | sed 's/.*iter-\([0-9]*\)\.log/\1/' | sort -n | tail -1)
 n=${n:-0}
 
-say "迴圈啟動（pid $$，從第 $((10#$n + 1)) 輪繼續，模型 ${MODEL}，間隔 ${GAP}s，單輪上限 ${MAX_MIN}min）"
+say "迴圈啟動（pid $$，從第 $((10#$n + 1)) 輪繼續，預設模型 ${DEFAULT_MODEL}，間隔 ${GAP}s，單輪上限 ${MAX_MIN}min）"
 
 while true; do
   if [ -f "$STOP" ]; then
@@ -69,18 +70,34 @@ while true; do
       || say "  警告：$r（${br}）pull 失敗——看 $main_log 的真正原因，不要猜"
   done
 
+    # 2026-08-24 人類：「要要求他聰明切換模型 opus5 sonnet5」。
+  # 寫在指令裡只是建議，沒有機制就不會發生——所以做成一個一次性的交接檔：
+  # 上一輪在自己判斷「下一輪該用什麼」之後 `echo opus > ~/vacant/NEXT_MODEL`，
+  # 這裡讀出來用一次就刪掉。刪掉是關鍵：不刪的話一輪寫了 opus 會黏住，
+  # 之後每一輪都用 opus 收數字，那正是要避免的浪費。
+  model="$DEFAULT_MODEL"
+  if [ -f "$NEXT_MODEL" ]; then
+    want=$(tr -d "[:space:]" < "$NEXT_MODEL" | tr "[:upper:]" "[:lower:]")
+    rm -f "$NEXT_MODEL"
+    case "$want" in
+      opus|sonnet) model="$want"; say "  上一輪指定模型：$model" ;;
+      "")          say "  NEXT_MODEL 是空的，用預設 $model" ;;
+      *)           say "  NEXT_MODEL 寫著「$want」，不是 opus/sonnet，用預設 $model" ;;
+    esac
+  fi
+
   start=$(date +%s)
   # < /dev/null 是必要的：無人值守時沒有 stdin，claude -p 會先等 3 秒才放棄。
   # 那 3 秒本身無害，但「在等一個永遠不會來的輸入」在別的情境會變成整輪卡住。
   timeout "${MAX_MIN}m" "$CLAUDE" -p "$(cat "$PROMPT")" \
-      --model "$MODEL" \
+      --model "$model" \
       --dangerously-skip-permissions \
       < /dev/null > "$ilog" 2>&1
   rc=$?
   dur=$(( $(date +%s) - start ))
 
   case $rc in
-    0)   say "  第 ${n} 輪結束（${dur}s）" ;;
+    0)   say "  第 ${n} 輪結束（${dur}s，模型 ${model}）" ;;
     124) say "  第 ${n} 輪逾時被中止（${MAX_MIN}min）——那一輪多半沒收尾" ;;
     *)   say "  第 ${n} 輪異常結束 rc=$rc（${dur}s）" ;;
   esac
