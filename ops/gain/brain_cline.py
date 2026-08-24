@@ -91,16 +91,32 @@ class ClineBrain:
         effective_retries = self.retries if retries is None else retries
         if effective_timeout <= 0 or effective_retries <= 0:
             raise ValueError("timeout_s／retries 必須為正數")
-        body = json.dumps({
-            "model": self.model,
-            "messages": [{"role": "system", "content": effective_system},
-                         {"role": "user", "content": prompt}],
-            "temperature": self.temperature,
-            "stream": False,
-        }).encode()
+        # 8765 中轉的不同節點對同一個模型用不同命名：`qwen/qwen3.6-35b-a3b`
+        # 與 `qwen_qwen3.6-35b-a3b`。節點一換，舊寫法就 404。只重試沒有用——
+        # 停在新節點的話四次都是 404。所以 404 時輪替兩種寫法。
+        #
+        # ⚠ **實際用了哪一個 ID 要逐次落盤**（`model` 欄位寫的是該次送出的值）。
+        #   模型身分是實驗條件；若某些題走 slash、某些題走 underscore 而紀錄
+        #   只留設定值，事後就分不出那是不是同一個後端在服務。
+        variants = [self.model]
+        if "/" in self.model:
+            variants.append(self.model.replace("/", "_", 1))
+        elif "_" in self.model:
+            variants.append(self.model.replace("_", "/", 1))
+
+        def make_body(model_id: str) -> bytes:
+            return json.dumps({
+                "model": model_id,
+                "messages": [{"role": "system", "content": effective_system},
+                             {"role": "user", "content": prompt}],
+                "temperature": self.temperature,
+                "stream": False,
+            }).encode()
 
         last_err = ""
         for attempt in range(1, effective_retries + 1):
+            model_id = variants[(attempt - 1) % len(variants)]
+            body = make_body(model_id)
             t0 = time.time()
             headers = {"Content-Type": "application/json"}
             if self.key:                      # 本地端點沒有金鑰，不要送空的 Bearer
@@ -142,7 +158,8 @@ class ClineBrain:
                     "ts_ms": int(time.time() * 1000),
                     "agent_id": self.agent_id, "role": role,
                     "api": self.api,
-                    "model": self.model, "temperature": self.temperature,
+                    "model": model_id,
+                    "model_configured": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": True,
                     "timeout_s": effective_timeout, "retries_max": effective_retries,
                     "latency_ms": int((time.time() - t0) * 1000),
@@ -161,7 +178,8 @@ class ClineBrain:
                     "ts_ms": int(time.time() * 1000),
                     "agent_id": self.agent_id, "role": role,
                     "api": self.api,
-                    "model": self.model, "temperature": self.temperature,
+                    "model": model_id,
+                    "model_configured": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": False,
                     "timeout_s": effective_timeout, "retries_max": effective_retries,
                     "latency_ms": int((time.time() - t0) * 1000),
@@ -170,8 +188,18 @@ class ClineBrain:
                     "prompt": prompt,
                     "meta": meta or {},
                 })
+                # 404 為什麼從「不重試」移出來（2026-08-24 實測）：
+                # runs/g_off60_relay_20260824 有 18 格 infra_void，**17 格是 404**。
+                # 原因不是模型 ID 打錯——是 8765 算力中轉在 run 跑到一半換了節點，
+                # 新節點的模型 ID 命名不同（`qwen/xxx` → `qwen_xxx`），舊 ID 短暫
+                # 解析不到。同一輪的延遲也從前半中位 40s 跳到後半 107s，佐證換了節點。
+                #
+                # 對**固定端點**而言 404 是永久錯誤，不該重試；對**負載平衡的中轉**
+                # 而言它可能是暫時的。這裡的代價不對稱：誤判成永久 ⇒ 白丟 17 格；
+                # 誤判成暫時 ⇒ 多花四次重試後仍記 infra_void，結果一樣只是慢一點。
+                # 所以 404 走重試。
                 non_retryable = isinstance(e, urllib.error.HTTPError) and e.code in {
-                    400, 401, 402, 403, 404,
+                    400, 401, 402, 403,
                 }
                 if non_retryable:
                     break

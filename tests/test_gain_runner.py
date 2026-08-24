@@ -459,3 +459,93 @@ def test_relay_200_with_error_body_is_retried_not_scored(tmp_path, monkeypatch):
     assert all("terminated" in r["error"] for r in recs), \
         "落盤訊息要看得出是端點回的錯誤，不是 KeyError"
     assert not any("KeyError" in r["error"] for r in recs)
+
+
+def test_404_is_retried_because_the_relay_swaps_nodes(tmp_path, monkeypatch):
+    """404 從「不重試」移出來：中轉換節點時舊模型 ID 會短暫 404。
+
+    2026-08-24 實測：runs/g_off60_relay_20260824 有 18 格 infra_void，
+    17 格是 404。不是模型 ID 打錯——是 8765 中轉在 run 跑到一半換了節點，
+    新節點命名不同（qwen/xxx → qwen_xxx）。同一輪延遲從前半中位 40s
+    跳到後半 107s，佐證換了節點。
+
+    代價不對稱：誤判成永久錯誤白丟 17 格；誤判成暫時只是多重試幾次。
+    401/403 仍然不重試——那是憑證問題，重試一百次也一樣。
+    """
+    import urllib.error
+    import urllib.request
+
+    from ops.gain.brain_cline import ClineBrain
+
+    calls = {"n": 0}
+
+    def raise_http(code):
+        def _f(*a, **k):
+            calls["n"] += 1
+            raise urllib.error.HTTPError("u", code, "boom", {}, None)
+        return _f
+
+    monkeypatch.setattr(urllib.request, "urlopen", raise_http(404))
+    brain = ClineBrain("t", "sys", key="k", log_path=tmp_path / "a.jsonl",
+                       retries=3, backoff_s=0)
+    with pytest.raises(InfraVoid):
+        brain.generate("x")
+    assert calls["n"] == 3, "404 要用滿重試次數"
+
+    calls["n"] = 0
+    monkeypatch.setattr(urllib.request, "urlopen", raise_http(403))
+    brain2 = ClineBrain("t", "sys", key="k", log_path=tmp_path / "b.jsonl",
+                        retries=3, backoff_s=0)
+    with pytest.raises(InfraVoid):
+        brain2.generate("x")
+    assert calls["n"] == 1, "403 是憑證問題，不該重試"
+
+
+def test_model_id_alternates_on_404_and_lands_the_one_actually_sent(tmp_path, monkeypatch):
+    """中轉不同節點對同一模型用不同命名；404 時要換另一種寫法再試。
+
+    2026-08-24：runs/g_off60_relay_20260824 有 17 格 404，因為 8765 中轉
+    在 run 中途換節點，`qwen/xxx` 變成 `qwen_xxx`。單純重試救不了——
+    停在新節點的話四次都是 404。
+
+    落盤要分開記「這次送出的 model」與「設定的 model_configured」：
+    模型身分是實驗條件，若某些題走 slash、某些走 underscore 而紀錄只留
+    設定值，事後分不出是不是同一個後端在服務。
+    """
+    import io
+    import urllib.error
+    import urllib.request
+
+    from ops.gain.brain_cline import ClineBrain
+
+    sent = []
+
+    class FakeResp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_urlopen(req, *a, **k):
+        model = json.loads(req.data)["model"]
+        sent.append(model)
+        if "/" in model:                       # 舊命名 → 這個節點不認得
+            raise urllib.error.HTTPError("u", 404, "not found", {}, None)
+        return FakeResp(json.dumps({
+            "choices": [{"message": {"content": "```python\npass\n```"}}],
+            "usage": {"cost": 0.0},
+        }).encode())
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    brain = ClineBrain("t", "sys", key="k", log_path=tmp_path / "c.jsonl",
+                       model="qwen/qwen3.6-35b-a3b", retries=4, backoff_s=0)
+    out = brain.generate("x")
+    assert "pass" in out
+    assert sent == ["qwen/qwen3.6-35b-a3b", "qwen_qwen3.6-35b-a3b"], sent
+
+    recs = [json.loads(line) for line in (tmp_path / "c.jsonl").read_text().splitlines()]
+    assert recs[0]["model"] == "qwen/qwen3.6-35b-a3b" and not recs[0]["ok"]
+    assert recs[1]["model"] == "qwen_qwen3.6-35b-a3b" and recs[1]["ok"]
+    assert all(r["model_configured"] == "qwen/qwen3.6-35b-a3b" for r in recs), \
+        "設定值要另外留著，才分得出實際服務的是哪個命名"
