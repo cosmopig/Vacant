@@ -41,6 +41,36 @@ OFF5  呼叫 30  需求=產出 6/6 = 100%
 
 **先量 OFF 的失敗率，那個數字決定後面所有事。** 別的都先不要動。
 
+## 長跑的實驗不要綁在這一輪裡（2026-08-24 實測）
+
+後端已換成 **win1003 的 LM Studio**（`http://100.119.113.56:1234/v1/chat/completions`，
+$0，Cline 訂閱已失效見 `DECISION_20260824_BACKEND_SWITCH.md`）。指令長這樣：
+
+```bash
+VACANT_EVALPLUS_PATH=.vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz \
+VACANT_GAIN_API=http://100.119.113.56:1234/v1/chat/completions \
+CLINE_KEYS=/nonexistent \
+python3 ops/gain/gain_run.py --out runs/<名字> ... \
+  --models qwen/qwen3.6-35b-a3b,nvidia/nemotron-3-nano-omni --request-timeout-s 600
+```
+
+**本地推理每題約 82–120 秒**（兩個家族會換載，慢 2.4 倍）。所以：
+
+- 60 題 OFF ≈ 2 小時，ON／OFF5 各 ≈ 7 小時——**都超過單輪 45 分鐘上限**。
+- 長跑一律 `setsid nohup ... &`，**跑在這一輪之外**。這一輪的工作是
+  「啟動它」或「分析它已經產出的東西」，不是「等它跑完」。
+
+⚠ **開跑之前先確認沒有別的 gain_run 在跑**：
+
+```bash
+pgrep -af "gain_run.py --out" | grep -v grep
+```
+
+有的話就不要再開一個。兩個 run 同時打同一個 LM Studio 會互相拖慢，
+而**延遲是實驗條件**（SPEC_GAIN §7）——被污染的延遲數字看起來跟
+「模型就是這麼慢」一模一樣。同一個輸出目錄有 runner 的擋門，
+**不同目錄沒有**，那要靠這一步。
+
 ## 三條不准違反的
 
 1. **OFF5 是誠實與否的分水嶺。** ON 比 OFF 好幾乎必然（多花五倍呼叫）。
