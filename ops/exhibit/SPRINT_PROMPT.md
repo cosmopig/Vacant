@@ -65,8 +65,18 @@ python3 ops/gain/gain_run.py --out runs/<名字> ... \
 ⚠ **開跑之前先確認沒有別的 gain_run 在跑**：
 
 ```bash
-pgrep -af "gain_run.py --out" | grep -v grep
+ps -eo cmd | grep -c "^python3 ops/gain/gain_run\.py"
 ```
+
+⚠ **不要用 `pgrep -f "gain_run.py"`。** 2026-08-24 這個坑踩了三次：
+`pgrep -f` 比對的是**整條命令列**，而你自己那條指令的字串裡就有
+`gain_run.py`（連這份指令檔的內容也在你的命令列裡），所以它會匹配到自己，
+回報「已經有一個在跑」——然後你什麼都不做，白費一輪。
+同一個坑也毀掉過迴圈的重啟守候：它用 `pgrep -f "bin/loop.sh"` 等迴圈結束，
+結果永遠匹配到自己，等了一小時二十分鐘都沒觸發。
+
+**要錨定到行首**（`^python3 ...`），或用 `[g]ain_run` 這種括號寫法——
+但括號寫法在這裡**也不夠**，因為匹配到的是別的進程的命令列而不是自己。
 
 有的話就不要再開一個。兩個 run 同時打同一個 LM Studio 會互相拖慢，
 而**延遲是實驗條件**（SPEC_GAIN §7）——被污染的延遲數字看起來跟
