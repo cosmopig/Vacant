@@ -423,3 +423,39 @@ def test_local_endpoint_needs_no_key_but_official_one_still_does(tmp_path, monke
     monkeypatch.delenv("VACANT_GAIN_API")
     with pytest.raises(Exception):
         load_keys()
+
+
+def test_relay_200_with_error_body_is_retried_not_scored(tmp_path, monkeypatch):
+    """算力中轉（8765）會回 HTTP 200 但 body 是 {"error": "terminated"}。
+
+    2026-08-24 實測抓到一筆。不擋的話會在 d["choices"] 變成 KeyError——
+    重試行為一樣，但落盤訊息看不出是端點掐掉還是回應結構變了。
+    8 筆連續呼叫 0 失敗，所以這是瞬斷不是常態；正因為罕見才更要
+    留下看得懂的訊息，事後才查得出來。
+    """
+    import io
+    import urllib.request
+
+    from ops.gain.brain_cline import ClineBrain
+
+    class FakeResp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    monkeypatch.setattr(urllib.request, "urlopen",
+                        lambda *a, **k: FakeResp(b'{"error": "terminated"}'))
+
+    brain = ClineBrain("t", "sys", key="k", log_path=tmp_path / "calls.jsonl",
+                       retries=2, backoff_s=0)
+    with pytest.raises(InfraVoid):
+        brain.generate("寫個函式")
+
+    recs = [json.loads(line) for line in
+            (tmp_path / "calls.jsonl").read_text().splitlines()]
+    assert len(recs) == 2
+    assert all("terminated" in r["error"] for r in recs), \
+        "落盤訊息要看得出是端點回的錯誤，不是 KeyError"
+    assert not any("KeyError" in r["error"] for r in recs)

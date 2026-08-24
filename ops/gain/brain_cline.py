@@ -37,6 +37,10 @@ def endpoint() -> str:
     return os.environ.get("VACANT_GAIN_API", "").strip() or API
 
 
+class RelayError(RuntimeError):
+    """端點回 HTTP 200 但 body 是錯誤物件。可重試，不是錯答案。"""
+
+
 class EmptyResponse(RuntimeError):
     """端點回 200 但 content 是空的。當成可重試的端點狀況，不是錯答案。"""
 
@@ -106,6 +110,13 @@ class ClineBrain:
                 with urllib.request.urlopen(req, timeout=effective_timeout) as r:
                     payload = json.load(r)
                 d = payload.get("data", payload)
+                # ⚠ 算力中轉（8765）會回 **HTTP 200 但 body 是 {"error": "terminated"}**。
+                #   不擋的話會在下一行變成 KeyError: 'choices'——行為仍然是重試，
+                #   但落盤的錯誤訊息看不出是端點掐掉的還是回應結構變了。
+                #   實測 2026-08-24：8 筆連續呼叫 0 失敗，這是瞬斷不是常態；
+                #   正因為罕見才更要留下看得懂的訊息，事後才查得出來。
+                if isinstance(d, dict) and "choices" not in d and d.get("error"):
+                    raise RelayError(f"端點回 200 但 body 是錯誤：{d['error']!r}")
                 choice = d["choices"][0]["message"]
                 text = choice.get("content") or ""
                 # ⚠ 推理模型（實測 qwen3.6-35b-a3b）把思考放進 reasoning_content，
