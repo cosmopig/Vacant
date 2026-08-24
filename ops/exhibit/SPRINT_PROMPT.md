@@ -43,20 +43,22 @@ OFF5  呼叫 30  需求=產出 6/6 = 100%
 
 ## 長跑的實驗不要綁在這一輪裡（2026-08-24 實測）
 
-後端已換成 **win1003 的 LM Studio**（`http://100.119.113.56:1234/v1/chat/completions`，
+後端是 **8765 算力中轉**（兩台電腦的算力匯集；**不要直接打 1234**，
+那是 LM Studio 自己的埠，繞過中轉會跟它的派工撞在同一張卡上）（`http://100.119.113.56:8765/v1/chat/completions`，
 $0，Cline 訂閱已失效見 `DECISION_20260824_BACKEND_SWITCH.md`）。指令長這樣：
 
 ```bash
 VACANT_EVALPLUS_PATH=.vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz \
-VACANT_GAIN_API=http://100.119.113.56:1234/v1/chat/completions \
+VACANT_GAIN_API=http://100.119.113.56:8765/v1/chat/completions \
 CLINE_KEYS=/nonexistent \
 python3 ops/gain/gain_run.py --out runs/<名字> ... \
   --models qwen/qwen3.6-35b-a3b,nvidia/nemotron-3-nano-omni --request-timeout-s 600
 ```
 
-**本地推理每題約 82–120 秒**（兩個家族會換載，慢 2.4 倍）。所以：
+**暖機後每筆約 10 秒**（實測 8 筆連續 0 失敗）。**第一筆會是 146 秒的冷啟動**
+——不要拿第一筆去估速度，那會讓你得出「中轉比較慢」的錯誤結論。
 
-- 60 題 OFF ≈ 2 小時，ON／OFF5 各 ≈ 7 小時——**都超過單輪 45 分鐘上限**。
+- 60 題 OFF ≈ 15 分鐘，ON／OFF5 各 ≈ 1 小時——**ON／OFF5 仍超過單輪上限**。
 - 長跑一律 `setsid nohup ... &`，**跑在這一輪之外**。這一輪的工作是
   「啟動它」或「分析它已經產出的東西」，不是「等它跑完」。
 
