@@ -1,0 +1,52 @@
+{
+  "run_dir": "runs/g_off371_20260825",
+  "void_counts_by_reason": {
+    "length": 1,
+    "http_error": 2,
+    "other": 0
+  },
+  "n_measured": 56,
+  "length_type_comparison": {
+    "n_void": 1,
+    "n_void_matched": 1,
+    "n_measured_matched": 56,
+    "missing_from_dataset": [],
+    "per_metric": {
+      "prompt_len": {
+        "measured_median": 143.0,
+        "void_values": [
+          109
+        ],
+        "void_percentile_ranks": [
+          0.125
+        ],
+        "void_mean_percentile_rank": 0.125
+      },
+      "hidden_test_count": {
+        "measured_median": 108.0,
+        "void_values": [
+          105
+        ],
+        "void_percentile_ranks": [
+          0.125
+        ],
+        "void_mean_percentile_rank": 0.125
+      },
+      "canonical_lines": {
+        "measured_median": 2.0,
+        "void_values": [
+          6
+        ],
+        "void_percentile_ranks": [
+          0.8214285714285714
+        ],
+        "void_mean_percentile_rank": 0.8214285714285714
+      }
+    },
+    "n_above_p75_checks": 1,
+    "total_checks": 3,
+    "verdict": "insufficient_data",
+    "verdict_reason": "length 型 void 只有 1 題（含資料集比對成功者），< 門檻 5，不做「顯著更難／沒差」判斷，照實寫證據不足，等 run 跑更多之後再檢查一次。"
+  },
+  "http_error_note": "2 題是 HTTPError（探測事故，非模型難度行為），已排除在難度比較之外，見本檔 docstring。"
+}
