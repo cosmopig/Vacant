@@ -332,3 +332,49 @@
   [OFF 328/371] 需求符合=False 接受=True 累計呼叫=324
   [OFF 329/371] 需求符合=True 接受=True 累計呼叫=325
   [OFF 330/371] 需求符合=True 接受=True 累計呼叫=326
+  [OFF 331/371] 需求符合=True 接受=True 累計呼叫=327
+  [OFF 332/371] 需求符合=False 接受=True 累計呼叫=328
+  [OFF 333/371] 需求符合=True 接受=True 累計呼叫=329
+  [OFF 334/371] 需求符合=True 接受=True 累計呼叫=330
+  [OFF 335/371] 需求符合=True 接受=True 累計呼叫=331
+  [OFF 336/371] 需求符合=False 接受=True 累計呼叫=332
+  [OFF 337/371] 需求符合=True 接受=True 累計呼叫=333
+  [OFF 338/371] 需求符合=True 接受=True 累計呼叫=334
+  [OFF 339/371] 需求符合=True 接受=True 累計呼叫=335
+  [OFF 340/371] 需求符合=True 接受=True 累計呼叫=336
+  [OFF 341/371] 需求符合=True 接受=True 累計呼叫=337
+  [OFF 342/371] 需求符合=True 接受=True 累計呼叫=338
+  [OFF 343/371] 需求符合=True 接受=True 累計呼叫=339
+  [OFF 344/371] 需求符合=True 接受=True 累計呼叫=340
+  [OFF 345/371] 需求符合=True 接受=True 累計呼叫=341
+  [OFF 346/371] 需求符合=True 接受=True 累計呼叫=342
+  [OFF 347/371] 需求符合=True 接受=True 累計呼叫=343
+  [OFF 348/371] 需求符合=False 接受=True 累計呼叫=344
+  [OFF 349/371] 需求符合=False 接受=True 累計呼叫=345
+  [OFF 350/371] 需求符合=True 接受=True 累計呼叫=346
+  [OFF 351/371] 需求符合=False 接受=True 累計呼叫=347
+  [OFF 352/371] 需求符合=True 接受=True 累計呼叫=348
+  [OFF 353/371] 需求符合=False 接受=True 累計呼叫=349
+  [OFF 354/371] 需求符合=True 接受=True 累計呼叫=350
+  [OFF 355/371] 需求符合=True 接受=True 累計呼叫=351
+  [OFF 356/371] 需求符合=True 接受=True 累計呼叫=352
+  [OFF 357/371] 需求符合=True 接受=True 累計呼叫=353
+  [OFF 358/371] 需求符合=True 接受=True 累計呼叫=354
+  [OFF 359/371] 需求符合=True 接受=True 累計呼叫=355
+  [OFF 360/371] 需求符合=True 接受=True 累計呼叫=356
+  [OFF 361/371] 需求符合=True 接受=True 累計呼叫=357
+  [OFF 362/371] 需求符合=True 接受=True 累計呼叫=358
+  [OFF 363/371] 需求符合=True 接受=True 累計呼叫=359
+  [OFF 364/371] 需求符合=True 接受=True 累計呼叫=360
+  [OFF 365/371] 需求符合=True 接受=True 累計呼叫=361
+  [OFF 366/371] 需求符合=True 接受=True 累計呼叫=362
+  [OFF 367/371] 需求符合=True 接受=True 累計呼叫=363
+  [OFF 368/371] 需求符合=False 接受=True 累計呼叫=364
+  [OFF 369/371] 需求符合=True 接受=True 累計呼叫=365
+  [OFF 370/371] 需求符合=False 接受=True 累計呼叫=366
+  [OFF 371/371] 需求符合=False 接受=True 累計呼叫=367
+── OFF: {"tasks": 371, "calls": 367, "infra_void": 4, "complete": false, "accepted": 367, "accepted_and_meets_demand": 288, "demand_equals_output_rate": 0.784741144414169, "coverage": 1.0, "correct_delivery_rate": 0.784741144414169, "raw_final_accuracy": 0.784741144414169, "calls_per_task": 1.0, "calls_per_correct_delivery": 1.2743055555555556, "leaked": 79, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "endpoint_latency_ms": {"all": {"n": 367, "p50": 45062, "p95": 106365, "max": 166292}, "by_role": {"gen": {"n": 367, "p50": 45062, "p95": 106365, "max": 166292}}, "failed_attempts": 12}, "wall_s": 20632.3, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+⚠ run_complete=False——這些臂沒跑完：OFF。這一輪的比例不得拿去比較（SPEC_GAIN §7）。
+
+寫出 runs/g_off371_20260825/summary.json
+⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。

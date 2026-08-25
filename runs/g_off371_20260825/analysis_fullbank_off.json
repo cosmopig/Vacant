@@ -1,0 +1,26 @@
+{
+  "run_dir": "runs/g_off371_20260825",
+  "seed": "g-smoke-20260820",
+  "n_planned": 371,
+  "n_measured": 367,
+  "n_void": 4,
+  "is_partial": true,
+  "void_gate": {
+    "n_measured": 367,
+    "n_void": 4,
+    "void_ratio": 0.01078167115902965,
+    "gate_exceeded": false,
+    "gate_threshold": 0.1
+  },
+  "n_correct": 288,
+  "failure_rate": 0.21525885558583102,
+  "classification": {
+    "route": "B_necessary",
+    "failure_rate": 0.21525885558583102,
+    "reason": "失敗率 0.2153 < 0.25 ⇒ 現行 worker 池太強，B 成為必要而非選項"
+  },
+  "retest_noise_floor": {
+    "broken": true,
+    "reason": "前60題題序不同（mbppplus_Mbpp/600 vs mbppplus_Mbpp/765）⇒ offset/seed 假設錯"
+  }
+}

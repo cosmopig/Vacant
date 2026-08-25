@@ -2269,50 +2269,6 @@
     ]
   },
   "calibration": null,
-  "arms": {
-    "OFF": {
-      "tasks": 371,
-      "calls": 367,
-      "infra_void": 4,
-      "complete": false,
-      "accepted": 367,
-      "accepted_and_meets_demand": 288,
-      "demand_equals_output_rate": 0.784741144414169,
-      "coverage": 1.0,
-      "correct_delivery_rate": 0.784741144414169,
-      "raw_final_accuracy": 0.784741144414169,
-      "calls_per_task": 1.0,
-      "calls_per_correct_delivery": 1.2743055555555556,
-      "leaked": 79,
-      "reviewer_accuracy": null,
-      "raw_reviewer_accuracy": null,
-      "reviewer_votes": 0,
-      "review_fail_claims": 0,
-      "machine_confirmed_counterexamples": 0,
-      "confirmed_counterexample_precision_against_hidden_truth": null,
-      "revision_transitions": null,
-      "endpoint_latency_ms": {
-        "all": {
-          "n": 367,
-          "p50": 45062,
-          "p95": 106365,
-          "max": 166292
-        },
-        "by_role": {
-          "gen": {
-            "n": 367,
-            "p50": 45062,
-            "p95": 106365,
-            "max": 166292
-          }
-        },
-        "failed_attempts": 12
-      },
-      "wall_s": 20632.3,
-      "cost_usd": 0.0,
-      "market_cost_usd": 0.0,
-      "market_cost_per_correct_delivery": 0.0
-    }
-  },
+  "arms": {},
   "equal_budget_comparison_valid": false
 }
