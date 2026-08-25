@@ -53,3 +53,8 @@
 {"arm": "ON", "task_id": "mbppplus_Mbpp/755", "infra_void": "hasty-2 重試 2 次仍失敗：TimeoutError: timed out"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/631", "infra_void": "plain-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/759", "infra_void": "hasty-2 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/138", "infra_void": "careful-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/637", "infra_void": "hasty-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/9", "infra_void": "hasty-2 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/252", "infra_void": "careful-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/286", "infra_void": "hasty-1 重試 4 次仍失敗：EmptyResponse: content 為空（finish_reason=length，reasoning 24843 字）"}
