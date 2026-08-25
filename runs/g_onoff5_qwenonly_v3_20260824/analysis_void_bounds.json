@@ -1,0 +1,116 @@
+{
+  "rule": "round77 pre-registered: A=void-proof bounds, B=paired McNemar on common subset",
+  "run_dir": "runs/g_onoff5_qwenonly_v3_20260824",
+  "off_baseline": "runs/g_off60_qwenonly_20260824",
+  "seed": "g-smoke-20260820",
+  "task_ids_identical_across_arms": true,
+  "arms": {
+    "OFF": {
+      "arm": "OFF",
+      "tasks_total": 60,
+      "measured": 60,
+      "infra_void": 0,
+      "void_task_ids": [],
+      "correct_measured": 47,
+      "point_estimate_on_measured": 0.7833333333333333,
+      "lower_bound": 0.7833333333333333,
+      "upper_bound": 0.7833333333333333
+    },
+    "ON": {
+      "arm": "ON",
+      "tasks_total": 60,
+      "measured": 59,
+      "infra_void": 1,
+      "void_task_ids": [
+        "mbppplus_Mbpp/223"
+      ],
+      "correct_measured": 42,
+      "point_estimate_on_measured": 0.711864406779661,
+      "lower_bound": 0.7,
+      "upper_bound": 0.7166666666666667
+    },
+    "OFF5": {
+      "arm": "OFF5",
+      "tasks_total": 60,
+      "measured": 57,
+      "infra_void": 3,
+      "void_task_ids": [
+        "mbppplus_Mbpp/297",
+        "mbppplus_Mbpp/232",
+        "mbppplus_Mbpp/744"
+      ],
+      "correct_measured": 41,
+      "point_estimate_on_measured": 0.7192982456140351,
+      "lower_bound": 0.6833333333333333,
+      "upper_bound": 0.7333333333333333
+    }
+  },
+  "rule_A_bounds_ordering": [
+    {
+      "pair": "OFF > ON",
+      "resolved": true,
+      "margin_pp": 6.666666666666665
+    },
+    {
+      "pair": "OFF > OFF5",
+      "resolved": true,
+      "margin_pp": 5.000000000000004
+    },
+    {
+      "pair": "ON vs OFF5",
+      "resolved": false,
+      "reason": "區間重疊 ⇒ 以區間法不可判定"
+    }
+  ],
+  "rule_B_paired_common_subset": [
+    {
+      "pair": "OFF vs ON",
+      "n_common": 56,
+      "OFF_only_correct": 6,
+      "ON_only_correct": 1,
+      "both_correct": 38,
+      "neither": 11,
+      "mcnemar_exact_p": 0.125,
+      "significant_at_0.05": false,
+      "diff_pp": 8.928571428571429,
+      "ci95_pp": [
+        -0.031244400516171333,
+        17.888387257659026
+      ],
+      "required_n_for_80pct_power_posthoc": 120.68538683970971
+    },
+    {
+      "pair": "OFF vs OFF5",
+      "n_common": 56,
+      "OFF_only_correct": 5,
+      "OFF5_only_correct": 2,
+      "both_correct": 39,
+      "neither": 10,
+      "mcnemar_exact_p": 0.453125,
+      "significant_at_0.05": false,
+      "diff_pp": 5.357142857142857,
+      "ci95_pp": [
+        -3.7958987721381128,
+        14.510184486423828
+      ],
+      "required_n_for_80pct_power_posthoc": 339.49486548989796
+    },
+    {
+      "pair": "ON vs OFF5",
+      "n_common": 56,
+      "ON_only_correct": 4,
+      "OFF5_only_correct": 6,
+      "both_correct": 35,
+      "neither": 11,
+      "mcnemar_exact_p": 0.75390625,
+      "significant_at_0.05": false,
+      "diff_pp": -3.571428571428571,
+      "ci95_pp": [
+        -14.59959842514027,
+        7.4567412822831285
+      ],
+      "required_n_for_80pct_power_posthoc": 1096.482333395744
+    }
+  ],
+  "n_common_all_three": 56
+}
