@@ -49,3 +49,4 @@
 {"arm": "ON", "task_id": "mbppplus_Mbpp/590", "infra_void": "plain-2 重試 2 次仍失敗：TimeoutError: timed out"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/311", "infra_void": "careful-2 重試 2 次仍失敗：TimeoutError: timed out"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/414", "infra_void": "plain-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/787", "infra_void": "careful-2 重試 2 次仍失敗：TimeoutError: timed out"}
