@@ -5,48 +5,48 @@
     "http_error": 2,
     "other": 0
   },
-  "n_measured": 311,
+  "n_measured": 326,
   "length_type_comparison": {
     "n_void": 2,
     "n_void_matched": 2,
-    "n_measured_matched": 311,
+    "n_measured_matched": 326,
     "missing_from_dataset": [],
     "per_metric": {
       "prompt_len": {
-        "measured_median": 145,
+        "measured_median": 144.5,
         "void_values": [
           109,
           89
         ],
         "void_percentile_ranks": [
-          0.12540192926045016,
-          0.012861736334405145
+          0.12576687116564417,
+          0.012269938650306749
         ],
-        "void_mean_percentile_rank": 0.06913183279742766
+        "void_mean_percentile_rank": 0.06901840490797546
       },
       "hidden_test_count": {
-        "measured_median": 108,
+        "measured_median": 108.0,
         "void_values": [
           105,
           106
         ],
         "void_percentile_ranks": [
-          0.12861736334405144,
-          0.22508038585209003
+          0.12883435582822086,
+          0.22699386503067484
         ],
-        "void_mean_percentile_rank": 0.17684887459807075
+        "void_mean_percentile_rank": 0.17791411042944785
       },
       "canonical_lines": {
-        "measured_median": 2,
+        "measured_median": 2.0,
         "void_values": [
           6,
           6
         ],
         "void_percentile_ranks": [
-          0.8102893890675241,
-          0.8102893890675241
+          0.8098159509202454,
+          0.8098159509202454
         ],
-        "void_mean_percentile_rank": 0.8102893890675241
+        "void_mean_percentile_rank": 0.8098159509202454
       }
     },
     "n_above_p75_checks": 2,
