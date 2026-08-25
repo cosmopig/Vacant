@@ -14,3 +14,5 @@
 {"arm": "ON", "task_id": "mbppplus_Mbpp/765", "infra_void": "plain-2 重試 2 次仍失敗：TimeoutError: timed out"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/593", "infra_void": "plain-1 重試 2 次仍失敗：TimeoutError: timed out"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/398", "infra_void": "plain-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/235", "infra_void": "plain-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/773", "infra_void": "plain-2 重試 2 次仍失敗：TimeoutError: timed out"}
