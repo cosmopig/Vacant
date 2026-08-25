@@ -2,3 +2,4 @@
 {"arm": "OFF", "task_id": "mbppplus_Mbpp/765", "infra_void": "plain-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
 {"arm": "OFF", "task_id": "mbppplus_Mbpp/593", "infra_void": "hasty-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
 {"arm": "OFF", "task_id": "mbppplus_Mbpp/235", "infra_void": "plain-2 重試 4 次仍失敗：EmptyResponse: content 為空（finish_reason=length，reasoning 25307 字）"}
+{"arm": "OFF", "task_id": "mbppplus_Mbpp/264", "infra_void": "careful-2 重試 4 次仍失敗：EmptyResponse: content 為空（finish_reason=length，reasoning 25358 字）"}
