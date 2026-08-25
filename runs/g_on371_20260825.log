@@ -8,3 +8,11 @@
    qwen/qwen3.6-35b-a3b　回 4 字　✓
   [ON 1/371] 需求符合=True 接受=True 累計呼叫=5
   [ON 2/371] 需求符合=True 接受=True 累計呼叫=10
+  [ON 4/371] 需求符合=False 接受=False 累計呼叫=18
+  [ON 5/371] 需求符合=True 接受=True 累計呼叫=23
+  [ON 8/371] 需求符合=True 接受=True 累計呼叫=29
+  [ON 9/371] 需求符合=False 接受=True 累計呼叫=34
+  [ON 10/371] 需求符合=False 接受=False 累計呼叫=39
+  [ON 11/371] 需求符合=True 接受=True 累計呼叫=44
+  [ON 12/371] 需求符合=True 接受=True 累計呼叫=49
+  [ON 13/371] 需求符合=True 接受=True 累計呼叫=54
