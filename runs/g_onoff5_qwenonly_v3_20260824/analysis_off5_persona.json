@@ -1,0 +1,1615 @@
+{
+  "run_dir": "runs/g_onoff5_qwenonly_v3_20260824",
+  "seed": "g-smoke-20260820",
+  "n_tasks_requested": 60,
+  "off5_gen_calls_total": 298,
+  "off5_gen_calls_scored": 288,
+  "skipped_unknown_task": 0,
+  "skipped_failed_call": 10,
+  "tasks_covered": 58,
+  "min_n_per_agent": 40,
+  "sample_adequate": true,
+  "per_agent": {
+    "careful-1": {
+      "n": 40,
+      "ok": 18,
+      "rate": 0.45
+    },
+    "careful-2": {
+      "n": 53,
+      "ok": 37,
+      "rate": 0.6981132075471698
+    },
+    "hasty-1": {
+      "n": 57,
+      "ok": 47,
+      "rate": 0.8245614035087719
+    },
+    "hasty-2": {
+      "n": 42,
+      "ok": 31,
+      "rate": 0.7380952380952381
+    },
+    "plain-1": {
+      "n": 51,
+      "ok": 45,
+      "rate": 0.8823529411764706
+    },
+    "plain-2": {
+      "n": 45,
+      "ok": 33,
+      "rate": 0.7333333333333333
+    }
+  },
+  "per_task": {
+    "mbppplus_Mbpp/450": [
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/133": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/283": [
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/111": [
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/80": [
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/463": [
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/734": [
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/456": [
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/790": [
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/726": [
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/394": [
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/567": [
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/57": [
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/559": [
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/739": [
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/309": [
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/98": [
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/742": [
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/62": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/58": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/75": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/807": [
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/4": [
+      {
+        "agent_id": "plain-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/780": [
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/624": [
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/441": [
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/227": [
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/777": [
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/419": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/643": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/223": [
+      {
+        "agent_id": "plain-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/390": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/477": [
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/792": [
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/760": [
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/297": [
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/61": [
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/765": [
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/593": [
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/600": [
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/95": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/805": [
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/754": [
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/398": [
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/235": [
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/641": [
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/770": [
+      {
+        "agent_id": "careful-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/104": [
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/168": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/764": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/773": [
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/96": [
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/605": [
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/568": [
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-1",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/558": [
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/804": [
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": true,
+        "err": ""
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": true,
+        "err": ""
+      }
+    ],
+    "mbppplus_Mbpp/300": [
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "plain-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ],
+    "mbppplus_Mbpp/430": [
+      {
+        "agent_id": "plain-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-1",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "careful-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      },
+      {
+        "agent_id": "hasty-2",
+        "ok": false,
+        "err": "sandbox_check_failed"
+      }
+    ]
+  },
+  "persona_spread": {
+    "worst_agent": "careful-1",
+    "worst": "18/40",
+    "worst_rate": 0.45,
+    "best_agent": "plain-1",
+    "best": "45/51",
+    "best_rate": 0.8823529411764706,
+    "best_minus_worst_pp": 43.23529411764706,
+    "rest": "193/248",
+    "rest_rate": 0.7782258064516129,
+    "fisher_two_sided_p_worst_vs_rest": 6.340065880813924e-05
+  },
+  "round61_reversal_condition_met": true
+}

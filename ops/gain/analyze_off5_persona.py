@@ -59,7 +59,13 @@ def collect(run_dir: pathlib.Path, seed: str, n: int) -> dict:
     per_agent: dict[str, dict] = collections.defaultdict(lambda: {"n": 0, "ok": 0})
     per_task: dict[str, list] = collections.defaultdict(list)
     skipped_unknown_task = 0
+    skipped_failed_call = 0
     for c in gen_calls:
+        if not c.get("ok"):
+            # 重試中失敗的呼叫沒有 response（有 error）——不是這個 persona
+            # 交的稿子，是端點層失敗，略過並算清楚跳了幾筆。
+            skipped_failed_call += 1
+            continue
         task_id = c["meta"]["task_id"]
         task = tasks_by_id.get(task_id)
         if task is None:
@@ -116,6 +122,7 @@ def collect(run_dir: pathlib.Path, seed: str, n: int) -> dict:
         "off5_gen_calls_total": len(gen_calls),
         "off5_gen_calls_scored": total_n,
         "skipped_unknown_task": skipped_unknown_task,
+        "skipped_failed_call": skipped_failed_call,
         "tasks_covered": len(per_task),
         "min_n_per_agent": min_n_per_agent,
         "sample_adequate": min_n_per_agent >= 10,
@@ -138,7 +145,8 @@ def main() -> None:
 
     print("== OFF5 逐 persona 品質（每份候選碼各自的隱藏測資結果，非多數決結果）==")
     print(f"gen 呼叫共 {res['off5_gen_calls_total']} 通，"
-          f"可判 {res['off5_gen_calls_scored']} 通（跳過未知題 {res['skipped_unknown_task']} 通），"
+          f"可判 {res['off5_gen_calls_scored']} 通（跳過未知題 {res['skipped_unknown_task']} 通、"
+          f"跳過失敗呼叫 {res['skipped_failed_call']} 通），"
           f"涵蓋 {res['tasks_covered']} 題")
     if not res["sample_adequate"]:
         print(f"⚠ 樣本仍薄：min n/persona = {res['min_n_per_agent']}（<10），"
