@@ -1,0 +1,57 @@
+{
+  "a": {
+    "run": "runs/g_on371_20260825",
+    "arm": "ON",
+    "n_rows": 167
+  },
+  "b": {
+    "run": "runs/g_off371_20260825",
+    "arm": "OFF",
+    "n_rows": 367
+  },
+  "conditions": {
+    "pool": {
+      "a": "bd6a00a936bb02e9",
+      "b": "bd6a00a936bb02e9",
+      "same": true
+    },
+    "instrument": {
+      "a": "e78f185fedd93b43",
+      "b": "e78f185fedd93b43",
+      "same": true
+    },
+    "calibration": {
+      "a": "74234e98afe7498f",
+      "b": "74234e98afe7498f",
+      "same": true
+    },
+    "request_policy": {
+      "a": "88dfc0972c0232f6",
+      "b": "88dfc0972c0232f6",
+      "same": true
+    }
+  },
+  "conditions_all_same": true,
+  "n_paired": 167,
+  "a_meets_demand": 148,
+  "b_meets_demand": 140,
+  "a_rate": 0.8862275449101796,
+  "b_rate": 0.8383233532934131,
+  "a_rate_ci95": [
+    0.8291414239196273,
+    0.9259439885326091
+  ],
+  "b_rate_ci95": [
+    0.774987681277589,
+    0.8864437265294088
+  ],
+  "discordant_a_only": 11,
+  "discordant_b_only": 3,
+  "n_discordant": 14,
+  "mcnemar_exact_p_two_sided": 0.057373046875,
+  "a_calls_total": 835,
+  "b_calls_total": 167,
+  "a_calls_per_correct": 5.641891891891892,
+  "b_calls_per_correct": 1.1928571428571428,
+  "equal_budget": false
+}
