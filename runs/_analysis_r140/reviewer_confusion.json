@@ -1,0 +1,14 @@
+{
+  "n_votes": 1095,
+  "vote_pass": 1093,
+  "TP": 890,
+  "FP": 203,
+  "FN": 1,
+  "TN": 1,
+  "accuracy": 0.8136986301369863,
+  "always_pass_accuracy": 0.8136986301369863,
+  "always_fail_accuracy": 0.1863013698630137,
+  "reviewer_minus_best_trivial": 0.0,
+  "recall_on_wrong_drafts": 0.004901960784313725,
+  "precision_of_fail_votes": 0.5
+}

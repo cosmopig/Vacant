@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "n": 1095,
+    "fail": 56,
+    "TP": 870,
+    "FP": 169,
+    "FN": 21,
+    "TN": 35,
+    "acc": 0.8264840182648402,
+    "base": 0.8136986301369863,
+    "delta": 0.012785388127853903
+  },
+  "grounded": {
+    "n": 1095,
+    "fail": 2,
+    "TP": 890,
+    "FP": 203,
+    "FN": 1,
+    "TN": 1,
+    "acc": 0.8136986301369863,
+    "base": 0.8136986301369863,
+    "delta": 0.0
+  },
+  "status": {
+    "review_not_fail": 1039,
+    "outside_input_contract": 53,
+    "counterexample_confirmed": 2,
+    "unparseable_claim": 1
+  },
+  "selected_version": {
+    "initial": 343,
+    "revised_both_visible_fail": 17,
+    "revised": 5
+  },
+  "passed_review": {
+    "True": 365
+  },
+  "improved_tasks": [
+    {
+      "task_id": "mbppplus_Mbpp/631",
+      "passed_review": true,
+      "selected_version": "revised"
+    },
+    {
+      "task_id": "mbppplus_Mbpp/264",
+      "passed_review": true,
+      "selected_version": "revised"
+    },
+    {
+      "task_id": "mbppplus_Mbpp/424",
+      "passed_review": true,
+      "selected_version": "revised"
+    },
+    {
+      "task_id": "mbppplus_Mbpp/65",
+      "passed_review": true,
+      "selected_version": "revised"
+    }
+  ]
+}

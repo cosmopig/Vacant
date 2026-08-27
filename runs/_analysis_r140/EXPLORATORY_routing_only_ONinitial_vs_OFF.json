@@ -1,0 +1,23 @@
+{
+  "label": "EXPLORATORY_post_hoc_not_prereg",
+  "comparison": "ON.initial_meets_demand (reputation-routed, 1 call) vs OFF (uniform random, 1 call)",
+  "equal_budget": true,
+  "n_paired": 362,
+  "a_ok": 296,
+  "b_ok": 287,
+  "a_rate": 0.8176795580110497,
+  "b_rate": 0.7928176795580111,
+  "a_rate_ci95": [
+    0.7746376230932567,
+    0.8540497651097251
+  ],
+  "b_rate_ci95": [
+    0.7480982015564794,
+    0.8313875649610516
+  ],
+  "discordant_a_only": 22,
+  "discordant_b_only": 13,
+  "n_discordant": 35,
+  "mcnemar_exact_p_two_sided": 0.17546524899080396,
+  "caveat": "cross-run; request_policy differs only in review_timeout_s which cannot affect the initial gen call (it precedes any review call and uses timeout_s=600, identical in both runs). Residual coupling: a task voided during review never updates rep (3 infra_voids observed)."
+}
