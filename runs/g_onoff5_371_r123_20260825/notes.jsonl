@@ -2,3 +2,9 @@
 {"arm": "ON", "task_id": "mbppplus_Mbpp/223", "infra_void": "careful-2 重試 2 次仍失敗：EmptyResponse: content 為空（finish_reason=length，reasoning 23451 字）"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/235", "infra_void": "plain-2 重試 4 次仍失敗：EmptyResponse: content 為空（finish_reason=length，reasoning 24791 字）"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/597", "infra_void": "careful-2 重試 2 次仍失敗：EmptyResponse: content 為空（finish_reason=length，reasoning 18451 字）"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/286", "infra_void": "plain-1 重試 2 次仍失敗：EmptyResponse: content 為空（finish_reason=length，reasoning 20087 字）"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/468", "infra_void": "careful-1 重試 2 次仍失敗：EmptyResponse: content 為空（finish_reason=length，reasoning 23378 字）"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/160", "infra_void": "careful-2 重試 2 次仍失敗：EmptyResponse: content 為空（finish_reason=length，reasoning 20917 字）"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/638", "infra_void": "plain-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/63", "infra_void": "hasty-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/610", "infra_void": "careful-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
