@@ -7,3 +7,12 @@
 ── 模型池預檢（每個 model 問一句，零容忍）
    qwen/qwen3.6-35b-a3b　回 4 字　✓
   [ONR 1/371] 需求符合=False 接受=False 累計呼叫=1
+  [ONR 2/371] 需求符合=True 接受=True 累計呼叫=2
+  [ONR 3/371] 需求符合=True 接受=True 累計呼叫=3
+  [ONR 4/371] 需求符合=False 接受=False 累計呼叫=4
+  [ONR 5/371] 需求符合=True 接受=True 累計呼叫=5
+  [ONR 6/371] 需求符合=True 接受=True 累計呼叫=6
+  [ONR 7/371] 需求符合=True 接受=True 累計呼叫=7
+  [ONR 8/371] 需求符合=False 接受=False 累計呼叫=8
+  [ONR 9/371] 需求符合=True 接受=True 累計呼叫=9
+  [ONR 10/371] 需求符合=False 接受=True 累計呼叫=10
