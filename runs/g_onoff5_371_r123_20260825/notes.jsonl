@@ -8,3 +8,15 @@
 {"arm": "OFF5", "task_id": "mbppplus_Mbpp/638", "infra_void": "plain-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
 {"arm": "OFF5", "task_id": "mbppplus_Mbpp/63", "infra_void": "hasty-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
 {"arm": "OFF5", "task_id": "mbppplus_Mbpp/610", "infra_void": "careful-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/731", "infra_void": "hasty-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/629", "infra_void": "careful-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/161", "infra_void": "plain-1 重試 4 次仍失敗：HTTPError: HTTP Error 404: Not Found"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/287", "infra_void": "plain-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/608", "infra_void": "plain-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/240", "infra_void": "careful-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/722", "infra_void": "hasty-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/119", "infra_void": "hasty-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/71", "infra_void": "plain-2 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/253", "infra_void": "careful-2 重試 4 次仍失敗：HTTPError: HTTP Error 404: Not Found"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/581", "infra_void": "careful-1 重試 4 次仍失敗：HTTPError: HTTP Error 404: Not Found"}
+{"arm": "OFF5", "task_id": "mbppplus_Mbpp/426", "infra_void": "plain-2 重試 4 次仍失敗：HTTPError: HTTP Error 404: Not Found"}
