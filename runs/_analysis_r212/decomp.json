@@ -1,0 +1,25 @@
+{
+  "A_routing": {
+    "n_paired": 362,
+    "b": 22,
+    "c": 13,
+    "discordant": 35,
+    "p": 0.17546524899080396,
+    "a_rate": 0.8176795580110497,
+    "b_rate": 0.7928176795580111
+  },
+  "B_review_revise": {
+    "n_paired": 365,
+    "b": 4,
+    "c": 0,
+    "discordant": 4,
+    "p": 0.125,
+    "a_rate": 0.8246575342465754,
+    "b_rate": 0.8136986301369863
+  },
+  "transitions": {
+    "stayed_correct": 297,
+    "stayed_wrong": 64,
+    "improved": 4
+  }
+}

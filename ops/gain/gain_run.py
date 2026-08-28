@@ -556,6 +556,45 @@ def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3,
     }
 
 
+def arm_onr(task, agents, rng, calls, rep, *, audit_rate=0.2):
+    """ON 的路由段單獨成臂：UCB 路由 + 1 次呼叫，沒有審查、沒有修訂。
+
+    round212 新增。目的是把 `arm_on` 的第 1 次呼叫抽出來當一個獨立的臂，
+    和 `arm_off`（均勻隨機挑 agent + 1 次呼叫）做**等預算**對比 ⇒ 唯一的
+    差別是「挑誰來做」。round212 的離線拆解量到 ON_initial 81.77% vs
+    OFF 79.28%（b/c=22/13, p=0.1755），方向為正但判別力不足；那次是跨兩個
+    不同 run 配對的，這個臂讓同一個 run 內就能配對。
+
+    刻意與 `arm_on` 共用同一條聲譽迴路：`_route_agent` 路由、只有真的抽到的
+    hidden audit 才更新聲譽（`apply_audit_reputation`），抽樣規則
+    `sha256("audit:"+task_id)` 與 `arm_on` 逐字元相同 ⇒ 同一題在兩個臂被
+    抽到稽核與否是一致的，不是新的隨機來源。
+    """
+    worker = _route_agent(agents, rep, rng)
+    txt = worker.generate(
+        task["prompt"], role="gen",
+        meta={"arm": "ONR", "task_id": task["task_id"]},
+    )
+    calls[0] += 1
+    code = extract_code(txt)
+    visible_ok, _ = meets_demand(
+        code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+    h = int(hashlib.sha256(f"audit:{task['task_id']}".encode()).hexdigest()[:8], 16)
+    audited = (h / 0xFFFFFFFF) < audit_rate
+    audit_ok = None
+    if audited:
+        audit_ok, _ = meets_demand(
+            code, task["hidden_check"]["code"], entry_point=task.get("entry_point"))
+    accepted = visible_ok and (audit_ok is not False)
+    return code, worker.agent_id, [worker.agent_id], {
+        "responsible_agent": worker.agent_id,
+        "visible_ok": visible_ok,
+        "audited": audited,
+        "audit_ok": audit_ok,
+        "accepted": accepted,
+    }
+
+
 def calibrate_pool(tasks, agents, rows_path: pathlib.Path) -> dict:
     """Measure pool heterogeneity on a disjoint set; never feed results into routing."""
     by_agent = {
@@ -689,6 +728,16 @@ def main() -> None:
     )
     ap.add_argument("--retry-backoff-s", type=float, default=2.0)
     args = ap.parse_args()
+    # round212：`--arms` 以前沒有 choices，dispatch 的 else 會把任何不認得的
+    # 名字當成 ON 跑掉（打錯字＝安靜跑錯臂）。檢查放在 preflight 之前，
+    # 打錯字不該先燒掉模型呼叫。
+    KNOWN_ARMS = {"OFF", "OFF5", "ON", "ONR"}
+    if args.arms.strip() != "probe":
+        _unknown = [a.strip() for a in args.arms.split(",")
+                    if a.strip() and a.strip() not in KNOWN_ARMS]
+        if _unknown:
+            raise SystemExit(
+                f"未知的臂 {_unknown}；可用：{sorted(KNOWN_ARMS)}（或 --arms probe）")
     if (args.request_timeout_s <= 0 or args.retries <= 0
             or args.review_timeout_s <= 0 or args.review_retries <= 0
             or args.retry_backoff_s < 0 or args.probe_sample < 0):
@@ -856,7 +905,11 @@ def main() -> None:
                 elif arm == "OFF5":
                     code, worker, involved = arm_off5(t, agents, rng, calls)
                     accepted, extra = True, {}
-                else:
+                elif arm == "ONR":
+                    code, worker, involved, extra = arm_onr(
+                        t, agents, rng, calls, rep, audit_rate=args.audit_rate)
+                    accepted = extra["accepted"]
+                elif arm == "ON":
                     code, worker, involved, extra = arm_on(
                         t, agents, rng, calls, rep, audit_rate=args.audit_rate,
                         review_timeout_s=args.review_timeout_s,
@@ -870,6 +923,10 @@ def main() -> None:
             truth, err = meets_demand(
                 code, t["hidden_check"]["code"], entry_point=t.get("entry_point"))
             raw_correct += int(truth)
+            if arm == "ONR":
+                # 與 ON 同一條聲譽迴路：只有真的抽到的 audit 能更新，truth 不回餵。
+                apply_audit_reputation(
+                    rep, extra["responsible_agent"], extra["audit_ok"])
             if arm == "ON":
                 # truth 是離線評分，不能餵回產品；路由只吃真的抽樣 audit。
                 apply_audit_reputation(
