@@ -80,20 +80,33 @@ while true; do
     want=$(tr -d "[:space:]" < "$NEXT_MODEL" | tr "[:upper:]" "[:lower:]")
     rm -f "$NEXT_MODEL"
     case "$want" in
-      opus|sonnet) model="$want"; say "  上一輪指定模型：$model" ;;
+      opus|sonnet|local) model="$want"; say "  上一輪指定模型：$model" ;;
       "")          say "  NEXT_MODEL 是空的，用預設 $model" ;;
-      *)           say "  NEXT_MODEL 寫著「$want」，不是 opus/sonnet，用預設 $model" ;;
+      *)           say "  NEXT_MODEL 寫著「$want」，不是 opus/sonnet/local，用預設 $model" ;;
     esac
   fi
 
   start=$(date +%s)
-  # < /dev/null 是必要的：無人值守時沒有 stdin，claude -p 會先等 3 秒才放棄。
-  # 那 3 秒本身無害，但「在等一個永遠不會來的輸入」在別的情境會變成整輪卡住。
-  timeout "${MAX_MIN}m" "$CLAUDE" -p "$(cat "$PROMPT")" \
-      --model "$model" \
-      --dangerously-skip-permissions \
-      < /dev/null > "$ilog" 2>&1
-  rc=$?
+  if [ "$model" = "local" ]; then
+    # 本地模型走自己的工具迴圈（ops/localagent.py），不經過 claude。
+    # 2026-08-28 人類：「不用讓他進入 claude code，你可以讓 claude 用 API
+    # harness 去做他的控制」——省掉 Anthropic↔OpenAI 的協定轉換層，
+    # 那層本身就是一個會壞、會要維護的東西。本地推理 $0。
+    timeout "${MAX_MIN}m" python3 "$ROOT/bin/localagent.py" \
+        --prompt-file "$PROMPT" --cwd "$ROOT/Vacant" \
+        --log "$LOGS/localagent-${iter}.jsonl" \
+        --max-minutes "$((MAX_MIN - 3))" \
+        < /dev/null > "$ilog" 2>&1
+    rc=$?
+  else
+    # < /dev/null 是必要的：無人值守時沒有 stdin，claude -p 會先等 3 秒才放棄。
+    # 那 3 秒本身無害，但「在等一個永遠不會來的輸入」在別的情境會變成整輪卡住。
+    timeout "${MAX_MIN}m" "$CLAUDE" -p "$(cat "$PROMPT")" \
+        --model "$model" \
+        --dangerously-skip-permissions \
+        < /dev/null > "$ilog" 2>&1
+    rc=$?
+  fi
   dur=$(( $(date +%s) - start ))
 
   case $rc in
@@ -101,6 +114,13 @@ while true; do
     124) say "  第 ${n} 輪逾時被中止（${MAX_MIN}min）——那一輪多半沒收尾" ;;
     *)   say "  第 ${n} 輪異常結束 rc=$rc（${dur}s）" ;;
   esac
+
+  # 本地模型比 Sonnet 弱得多，撞牆是預期內的。一輪失敗就把下一輪退回 sonnet，
+  # 不要連續空轉——省 token 的前提是那一輪真的有做事。
+  if [ "$model" = "local" ] && [ "$rc" -ne 0 ]; then
+    echo sonnet > "$NEXT_MODEL"
+    say "  本地輪次 rc=$rc，下一輪退回 sonnet"
+  fi
 
   # 這一輪有沒有留下產物？只數 commit，不看返回值。
   for r in Vacant vacant_hm vacant-docs-web; do
