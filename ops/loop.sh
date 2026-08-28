@@ -92,19 +92,24 @@ while true; do
     # 2026-08-28 人類：「不用讓他進入 claude code，你可以讓 claude 用 API
     # harness 去做他的控制」——省掉 Anthropic↔OpenAI 的協定轉換層，
     # 那層本身就是一個會壞、會要維護的東西。本地推理 $0。
+    # 9>&- 關掉繼承來的鎖 fd：不關的話這一輪的子行程會一路握著
+    # .loop.lock 的 flock，就算 loop.sh 本身死了／被重啟，鎖仍卡著
+    # （round188/189 實測踩到：重啟監督程序時新 loop.sh flock -n 失敗，
+    # `fuser` 一查，握著鎖的是還在跑的那一輪 timeout/claude，不是舊監督）。
     timeout "${MAX_MIN}m" python3 "$ROOT/bin/localagent.py" \
         --prompt-file "$PROMPT" --cwd "$ROOT/Vacant" \
         --log "$LOGS/localagent-${iter}.jsonl" \
         --max-minutes "$((MAX_MIN - 3))" \
-        < /dev/null > "$ilog" 2>&1
+        < /dev/null > "$ilog" 2>&1 9>&-
     rc=$?
   else
     # < /dev/null 是必要的：無人值守時沒有 stdin，claude -p 會先等 3 秒才放棄。
     # 那 3 秒本身無害，但「在等一個永遠不會來的輸入」在別的情境會變成整輪卡住。
+    # 9>&- 理由同上（local 分支）。
     timeout "${MAX_MIN}m" "$CLAUDE" -p "$(cat "$PROMPT")" \
         --model "$model" \
         --dangerously-skip-permissions \
-        < /dev/null > "$ilog" 2>&1
+        < /dev/null > "$ilog" 2>&1 9>&-
     rc=$?
   fi
   dur=$(( $(date +%s) - start ))
