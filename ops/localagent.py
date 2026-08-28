@@ -44,7 +44,7 @@ import urllib.error
 import urllib.request
 
 DEFAULT_API = "http://100.119.113.56:8765/v1/chat/completions"
-DEFAULT_MODEL = "qwen/qwen3.8-27b"
+DEFAULT_MODEL = "qwen/qwen3.6-35b-a3b"   # 2026-08-28 人類停掉 3.8，改跟實驗同一顆
 
 # 不可逆或會毀掉稽核鏈的動作。指令文字裡也寫了，但那是勸導；這裡是擋門。
 # 每一條都對應一個真的會發生的壞結果，不是想像出來的：
