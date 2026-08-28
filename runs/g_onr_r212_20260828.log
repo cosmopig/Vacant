@@ -7,3 +7,11 @@
 ── 模型池預檢（每個 model 問一句，零容忍）
    qwen/qwen3.6-35b-a3b　回 4 字　✓
   [OFF 1/371] 需求符合=True 接受=True 累計呼叫=1
+  [OFF 2/371] 需求符合=True 接受=True 累計呼叫=2
+  [OFF 3/371] 需求符合=True 接受=True 累計呼叫=3
+  [OFF 4/371] 需求符合=False 接受=True 累計呼叫=4
+  [OFF 5/371] 需求符合=True 接受=True 累計呼叫=5
+  [OFF 6/371] 需求符合=True 接受=True 累計呼叫=6
+  [OFF 9/371] 需求符合=True 接受=True 累計呼叫=7
+  [OFF 10/371] 需求符合=False 接受=True 累計呼叫=8
+  [OFF 11/371] 需求符合=True 接受=True 累計呼叫=9
