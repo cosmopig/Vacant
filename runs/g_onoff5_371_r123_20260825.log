@@ -723,3 +723,12 @@
   [OFF5 365/371] 需求符合=True 接受=True 累計呼叫=1740
   [OFF5 366/371] 需求符合=True 接受=True 累計呼叫=1745
   [OFF5 367/371] 需求符合=True 接受=True 累計呼叫=1750
+  [OFF5 368/371] 需求符合=False 接受=True 累計呼叫=1755
+  [OFF5 369/371] 需求符合=True 接受=True 累計呼叫=1760
+  [OFF5 370/371] 需求符合=False 接受=True 累計呼叫=1765
+  [OFF5 371/371] 需求符合=False 接受=True 累計呼叫=1770
+── OFF5: {"tasks": 371, "calls": 1770, "infra_void": 18, "complete": false, "accepted": 353, "accepted_and_meets_demand": 291, "demand_equals_output_rate": 0.8243626062322946, "coverage": 1.0, "correct_delivery_rate": 0.8243626062322946, "raw_final_accuracy": 0.8243626062322946, "calls_per_task": 5.014164305949008, "calls_per_correct_delivery": 6.082474226804123, "leaked": 62, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "endpoint_latency_ms": {"all": {"n": 1770, "p50": 53389, "p95": 164859, "max": 382568}, "by_role": {"gen": {"n": 1770, "p50": 53389, "p95": 164859, "max": 382568}}, "failed_attempts": 56}, "wall_s": 125280.9, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+⚠ run_complete=False——這些臂沒跑完：ON, OFF5。這一輪的比例不得拿去比較（SPEC_GAIN §7）。
+
+寫出 runs/g_onoff5_371_r123_20260825/summary.json
+⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。
