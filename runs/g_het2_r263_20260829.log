@@ -15,3 +15,20 @@
   [CALIBRATION 5/12] 完成 6 個 agent
   [CALIBRATION 6/12] 完成 6 個 agent
   [CALIBRATION 7/12] 完成 6 個 agent
+  [CALIBRATION 8/12] 完成 6 個 agent
+  [CALIBRATION 9/12] 完成 6 個 agent
+  [CALIBRATION 10/12] 完成 6 個 agent
+  [CALIBRATION 11/12] 完成 6 個 agent
+  [CALIBRATION 12/12] 完成 6 個 agent
+── calibration spread: 0.25
+  [OFF 1/179] 需求符合=True 接受=True 累計呼叫=1
+  [OFF 2/179] 需求符合=True 接受=True 累計呼叫=2
+  [OFF 3/179] 需求符合=True 接受=True 累計呼叫=3
+  [OFF 4/179] 需求符合=False 接受=True 累計呼叫=4
+  [OFF 5/179] 需求符合=True 接受=True 累計呼叫=5
+  [OFF 6/179] 需求符合=True 接受=True 累計呼叫=6
+  [OFF 7/179] 需求符合=True 接受=True 累計呼叫=7
+  [OFF 8/179] 需求符合=False 接受=True 累計呼叫=8
+  [OFF 9/179] 需求符合=False 接受=True 累計呼叫=9
+  [OFF 10/179] 需求符合=False 接受=True 累計呼叫=10
+  [OFF 11/179] 需求符合=False 接受=True 累計呼叫=11
