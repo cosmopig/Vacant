@@ -1171,79 +1171,79 @@
   "arms": {
     "ON": {
       "tasks": 179,
-      "calls": 106,
+      "calls": 111,
       "infra_void": 17,
       "complete": false,
-      "processed": 36,
-      "accepted": 16,
-      "accepted_and_meets_demand": 14,
-      "demand_equals_output_rate": 0.875,
-      "coverage": 0.8421052631578947,
-      "correct_delivery_rate": 0.7368421052631579,
-      "raw_final_accuracy": 0.7368421052631579,
-      "calls_per_task": 5.578947368421052,
-      "calls_per_correct_delivery": 7.571428571428571,
+      "processed": 37,
+      "accepted": 17,
+      "accepted_and_meets_demand": 15,
+      "demand_equals_output_rate": 0.8823529411764706,
+      "coverage": 0.85,
+      "correct_delivery_rate": 0.75,
+      "raw_final_accuracy": 0.75,
+      "calls_per_task": 5.55,
+      "calls_per_correct_delivery": 7.4,
       "leaked": 2,
-      "reviewer_accuracy": 0.7368421052631579,
-      "raw_reviewer_accuracy": 0.7017543859649122,
-      "reviewer_votes": 57,
-      "review_fail_claims": 18,
+      "reviewer_accuracy": 0.75,
+      "raw_reviewer_accuracy": 0.6833333333333333,
+      "reviewer_votes": 60,
+      "review_fail_claims": 20,
       "machine_confirmed_counterexamples": 0,
       "confirmed_counterexample_precision_against_hidden_truth": null,
       "revision_transitions": {
         "improved": 0,
         "harmed": 0,
-        "stayed_correct": 14,
+        "stayed_correct": 15,
         "stayed_wrong": 5
       },
       "endpoint_latency_ms": {
         "all": {
-          "n": 106,
+          "n": 111,
           "p50": 39276,
           "p95": 265055,
           "max": 420359
         },
         "by_role": {
           "gen": {
-            "n": 27,
+            "n": 28,
             "p50": 85375,
             "p95": 386160,
             "max": 420359
           },
           "review": {
-            "n": 60,
+            "n": 63,
             "p50": 19500,
             "p95": 243455,
             "max": 359738
           },
           "revise": {
-            "n": 19,
-            "p50": 7773,
-            "p95": 179822,
+            "n": 20,
+            "p50": 6238,
+            "p95": 171144,
             "max": 179822
           }
         },
-        "failed_attempts": 22
+        "failed_attempts": 23
       },
-      "wall_s": 10349.2,
+      "wall_s": 11065.1,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0
     },
     "OFF5": {
       "tasks": 179,
-      "calls": 108,
+      "calls": 113,
       "infra_void": 16,
       "complete": false,
-      "processed": 36,
-      "accepted": 20,
-      "accepted_and_meets_demand": 16,
-      "demand_equals_output_rate": 0.8,
+      "processed": 37,
+      "accepted": 21,
+      "accepted_and_meets_demand": 17,
+      "demand_equals_output_rate": 0.8095238095238095,
       "coverage": 1.0,
-      "correct_delivery_rate": 0.8,
-      "raw_final_accuracy": 0.8,
-      "calls_per_task": 5.4,
-      "calls_per_correct_delivery": 6.75,
+      "correct_delivery_rate": 0.8095238095238095,
+      "raw_final_accuracy": 0.8095238095238095,
+      "calls_per_task": 5.380952380952381,
+      "calls_per_correct_delivery": 6.647058823529412,
       "leaked": 4,
       "reviewer_accuracy": null,
       "raw_reviewer_accuracy": null,
@@ -1254,22 +1254,22 @@
       "revision_transitions": null,
       "endpoint_latency_ms": {
         "all": {
-          "n": 108,
-          "p50": 20719,
-          "p95": 195015,
-          "max": 274448
+          "n": 113,
+          "p50": 22019,
+          "p95": 198450,
+          "max": 284168
         },
         "by_role": {
           "gen": {
-            "n": 108,
-            "p50": 20719,
-            "p95": 195015,
-            "max": 274448
+            "n": 113,
+            "p50": 22019,
+            "p95": 198450,
+            "max": 284168
           }
         },
         "failed_attempts": 18
       },
-      "wall_s": 6829.8,
+      "wall_s": 7820.9,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0
