@@ -1,0 +1,14 @@
+<unknown>:5: SyntaxWarning: invalid escape sequence '\w'
+<unknown>:4: SyntaxWarning: invalid escape sequence '\.'
+179 題（evalplus）　輸出 runs/g_het2_r271_20260829
+── 量具驗證（先答已知答案）
+   參考解通過 179/179　壞解被擋 179/179
+── 模型池：6 個 agent／2 個模型家族
+── 模型池預檢（每個 model 問一句，零容忍）
+   qwen/qwen3.6-35b-a3b　回 4 字　✓
+   gemma-4-12b-it-qat　回 2 字　✓
+── Agent calibration：12 題，結果不餵回路由
+  [CALIBRATION 1/12] 完成 6 個 agent
+  [CALIBRATION 2/12] 完成 6 個 agent
+  [CALIBRATION 3/12] 完成 6 個 agent
+  [CALIBRATION 4/12] 完成 6 個 agent
