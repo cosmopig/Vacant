@@ -23,3 +23,7 @@
 ── calibration spread: 0.25
   [ON 1/179] 需求符合=True 接受=True 累計呼叫=5
   [ON 2/179] 需求符合=True 接受=True 累計呼叫=10
+  [ON 3/179] 需求符合=True 接受=True 累計呼叫=15
+  [ON 4/179] 需求符合=False 接受=False 累計呼叫=20
+  [ON 5/179] 需求符合=True 接受=True 累計呼叫=25
+  [ON 6/179] 需求符合=True 接受=True 累計呼叫=30
