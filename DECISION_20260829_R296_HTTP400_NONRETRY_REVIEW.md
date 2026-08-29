@@ -79,3 +79,14 @@ qwen family 評審"，見 round274 的分析）在這幾題上可能被削弱。
 - 沒有把這個發現當成 `DECISION_20260829_R278_INTERLEAVE_ARMS.md` 的
   推翻條件觸發——該文件寫的是「逾時率」，本輪量到的逾時率（1.2%）
   沒有超標，超標的是另一個判準沒設過的類別。
+
+## round297 修正（2026-08-29 UTC ~18:08）
+
+本文件上面「全部 7 個非 timeout 的失敗都來自 `gemma-4-12b-it-qat`」這句
+**不準確**（且該句本身跟前段算的「8 個 HTTP400」對不上——7 vs 8 是本文件
+自己的筆誤）。round297 重新逐筆核對 `calls.jsonl`：9 個 never-ok review
+slot 沒有變化（仍是 8 個 HTTP400 + 1 個 timeout），但 8 個 HTTP400 裡
+**7 個是 gemma-4-12b-it-qat、1 個是 qwen/qwen3.6-35b-a3b**
+（agent_id=plain-1，task=mbppplus_Mbpp/267，ts_ms=1788008822259）。
+「這個模型專屬」的因果假設方向因此弱化，但**現象本身（HTTP400 不重試、
+數量沒有隨時間增加）與本文件的決定（不動 `brain_cline.py`）都不受影響**。
