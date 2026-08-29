@@ -157,3 +157,37 @@ D n_needed 單調遞增 ✓ 194 / 783 / 4904；p_b=0.60 需 194（文獻量級 ~
   最近 5 個 = bbbbb  同向最多 5/5  單尾 p = 0.0312
   觸發的推翻條件：['T1']  ⇒ 判定：signal_worth_following   ✓ 會叫
 ```
+
+---
+
+## 8. 補充（00:18 UTC）：下一輪要用的 model ID 跟人類指令寫的**不一樣**
+
+用 `/v1/models` 查中轉（純列表查詢、不是推論呼叫 ⇒ 不會污染在跑的 run 的延遲）：
+
+```
+$ curl -s http://100.119.113.56:8765/v1/models
+中轉服務的 model 共 4 個：
+   qwen_qwen3.6-35b-a3b
+   qwen/qwen3.8-27b
+   gemma-4-12b-it-qat
+   text-embedding-nomic-embed-text-v1.5
+```
+
+⛔ **`nvidia/nemotron-3-nano-omni` 不在服務清單裡。** 人類 2026-08-24 的指令範例
+寫了這個 model，若下一輪照抄，`gain_run.py:821` 的 preflight 會直接
+`SystemExit`（會大聲失敗、不會靜默跑錯，這點是好的），但整輪會白費。
+
+**修正後的候選池**（能力異質，非 persona 異質）：
+- `qwen/qwen3.6-35b-a3b`（現行基準，35b）
+- `qwen/qwen3.8-27b`（27b，不同世代）
+- `gemma-4-12b-it-qat`（12b 且 QAT 量化 ⇒ **先驗上最可能明顯較弱**，
+  這是異質性最可能來自的地方）
+- `text-embedding-*` 是 embedding model，不能當 worker。
+
+⚠ 兩個還沒解決、下一輪必須先處理的事：
+1. **ID 字串大小寫／分隔符不一致**：清單印的是 `qwen_qwen3.6-35b-a3b`（底線），
+   但在跑的 run 用的是 `qwen/qwen3.6-35b-a3b`（斜線）且**確實跑得動** ⇒ 中轉
+   應該有做正規化，但**不要假設**，下一輪開跑前要對每個候選 ID 各發一次
+   preflight（`gain_run.py` 本來就會做）。
+2. **「gemma-4-12b 比較弱」是判斷不是量測。** 照 §6 的規格，先量 per-model
+   命中率 + 置換檢定證明池子真的異質，才跑正式三臂。
