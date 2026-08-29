@@ -887,22 +887,84 @@ def main() -> None:
     # Keep validated preflight metadata even if an endpoint or operator stops the
     # run before the first arm finishes.
     write_summary(run_complete=False)
-    for arm in arms:
-        rng = random.Random(f"{args.seed}:{arm}")
-        rep = {a.agent_id: {"n": 0, "ok": 0} for a in agents}
-        calls = [0]
-        n_acc = n_acc_ok = n_void = 0
-        rv_correct = rv_total = 0
-        rv_raw_correct = 0
-        fail_claims = confirmed_claims = confirmed_on_wrong = 0
-        raw_correct = 0
-        transitions = {"improved": 0, "harmed": 0,
-                       "stayed_correct": 0, "stayed_wrong": 0}
-        cost_before = sum(a.cost for a in agents)
-        market_cost_before = sum(a.market_cost for a in agents)
-        t0 = time.time()
-        for i, t in enumerate(tasks, 1):
+    # round278：arm 順序改交錯（`for task: for arm:`）。round138 已經驗證過這是
+    # 統計上免費的：`tasks` 在 arm 迴圈之外只建一次 ⇒ 兩臂題序相同；
+    # `rng`/`rep`/`calls` 每臂各一份；`grep -n "random\." | grep -v rng` 為空
+    # ⇒ 沒有共用的全域亂數狀態。每臂的抽樣序列只取決於「該臂依題序處理的順序」，
+    # 交錯不改變它 ⇒ 每一格 (arm, task) 的抽樣與循序版逐字元相同。
+    #
+    # 為什麼要改：循序版是 `for arm: for task:` ⇒ ON 全部 179 題跑完才碰第一題
+    # OFF5。r274 實測 ON 6.7 分/列 ⇒ **第一筆 OFF5 要等 20 小時**，而 OFF5 是
+    # 唯一能回答「等預算誰贏」的臂（判準 3）。跑了 20 小時以內被中斷 ⇒ OFF5 = 0。
+    # 這不是假想：r271 在 1h49m 被中止、g_onoff5_371_r123 也是中途停的。
+    st = {
+        arm: {
+            "rng": random.Random(f"{args.seed}:{arm}"),
+            "rep": {a.agent_id: {"n": 0, "ok": 0} for a in agents},
+            "calls": [0],
+            "n_acc": 0, "n_acc_ok": 0, "n_void": 0,
+            "rv_correct": 0, "rv_total": 0, "rv_raw_correct": 0,
+            "fail_claims": 0, "confirmed_claims": 0, "confirmed_on_wrong": 0,
+            "raw_correct": 0, "processed": 0,
+            "transitions": {"improved": 0, "harmed": 0,
+                            "stayed_correct": 0, "stayed_wrong": 0},
+            # 交錯之後「臂的 wall time」不能再用 t_end - t_start（兩臂在時間上
+            # 交纏）。改成逐格累加該格實際耗時＝該臂的作用時間。循序版這兩個數字
+            # 幾乎相同；交錯版只有累加版有意義。
+            "wall_s": 0.0, "cost": 0.0, "market_cost": 0.0,
+        }
+        for arm in arms
+    }
+
+    def finalize(arm: str) -> dict:
+        s = st[arm]
+        measured = s["processed"] - s["n_void"]
+        n_acc, n_acc_ok, calls_n = s["n_acc"], s["n_acc_ok"], s["calls"][0]
+        rv_total = s["rv_total"]
+        return {
+            "tasks": len(tasks), "calls": calls_n, "infra_void": s["n_void"],
+            # ⚠ 循序版寫 `n_void == 0` 就夠，因為 summary[arm] 只在該臂整個題目
+            #   迴圈跑完之後才寫一次。交錯版每一格都會寫 summary ⇒ 一個才跑到
+            #   第 3 題、還沒遇到 void 的臂會被寫成 complete=True。必須連
+            #   `processed == len(tasks)` 一起要求，否則就是 round224 那個
+            #   「run_complete 說跑完了、其實一格都沒量到」的同型錯誤。
+            "complete": s["n_void"] == 0 and s["processed"] == len(tasks),
+            "processed": s["processed"],
+            "accepted": n_acc, "accepted_and_meets_demand": n_acc_ok,
+            "demand_equals_output_rate": (n_acc_ok / n_acc) if n_acc else None,
+            "coverage": (n_acc / measured) if measured else None,
+            "correct_delivery_rate": (n_acc_ok / measured) if measured else None,
+            "raw_final_accuracy": (s["raw_correct"] / measured) if measured else None,
+            "calls_per_task": (calls_n / measured) if measured else None,
+            "calls_per_correct_delivery": (calls_n / n_acc_ok) if n_acc_ok else None,
+            "leaked": n_acc - n_acc_ok,
+            "reviewer_accuracy": (s["rv_correct"] / rv_total) if rv_total else None,
+            "raw_reviewer_accuracy": (
+                s["rv_raw_correct"] / rv_total if rv_total else None),
+            "reviewer_votes": rv_total,
+            "review_fail_claims": s["fail_claims"],
+            "machine_confirmed_counterexamples": s["confirmed_claims"],
+            "confirmed_counterexample_precision_against_hidden_truth": (
+                s["confirmed_on_wrong"] / s["confirmed_claims"]
+                if s["confirmed_claims"] else None),
+            "revision_transitions": s["transitions"] if arm == "ON" else None,
+            "endpoint_latency_ms": latency_summary(calls_log, arm),
+            "wall_s": round(s["wall_s"], 1),
+            "cost_usd": round(s["cost"], 4),
+            "market_cost_usd": round(s["market_cost"], 4),
+            "market_cost_per_correct_delivery": (
+                round(s["market_cost"] / n_acc_ok, 6) if n_acc_ok else None),
+        }
+
+    for i, t in enumerate(tasks, 1):
+        for arm in arms:
+            s = st[arm]
+            rng, rep, calls = s["rng"], s["rep"], s["calls"]
             calls_before = calls[0]
+            cell_t0 = time.time()
+            cost_before = sum(a.cost for a in agents)
+            market_cost_before = sum(a.market_cost for a in agents)
+            s["processed"] += 1
             try:
                 if arm == "OFF":
                     code, worker, involved = arm_off(t, agents, rng, calls)
@@ -921,13 +983,17 @@ def main() -> None:
                         review_retries=args.review_retries)
                     accepted = extra["accepted"]
             except InfraVoid as e:
-                n_void += 1
+                s["n_void"] += 1
+                s["wall_s"] += time.time() - cell_t0
+                s["cost"] += sum(a.cost for a in agents) - cost_before
+                s["market_cost"] += (
+                    sum(a.market_cost for a in agents) - market_cost_before)
                 note({"arm": arm, "task_id": t["task_id"], "infra_void": str(e)})
                 continue
 
             truth, err = meets_demand(
                 code, t["hidden_check"]["code"], entry_point=t.get("entry_point"))
-            raw_correct += int(truth)
+            s["raw_correct"] += int(truth)
             if arm == "ONR":
                 # 與 ON 同一條聲譽迴路：只有真的抽到的 audit 能更新，truth 不回餵。
                 apply_audit_reputation(
@@ -944,23 +1010,28 @@ def main() -> None:
                     "harmed" if initial_truth and not truth else
                     "stayed_correct" if initial_truth else "stayed_wrong"
                 )
-                transitions[transition] += 1
+                s["transitions"][transition] += 1
                 extra["initial_meets_demand"] = initial_truth
                 extra["revision_transition"] = transition
                 # 評審看的是 initial_code，不能拿修訂後 final truth 幫它算對。
                 for _, v in extra["votes"]:
-                    rv_total += 1
-                    rv_correct += int(v == initial_truth)
+                    s["rv_total"] += 1
+                    s["rv_correct"] += int(v == initial_truth)
                 for evidence in extra["review_evidence"]:
-                    rv_raw_correct += int(evidence["raw_pass"] == initial_truth)
+                    s["rv_raw_correct"] += int(evidence["raw_pass"] == initial_truth)
                     if not evidence["raw_pass"]:
-                        fail_claims += 1
+                        s["fail_claims"] += 1
                     if evidence["counterexample_confirmed"]:
-                        confirmed_claims += 1
-                        confirmed_on_wrong += int(not initial_truth)
+                        s["confirmed_claims"] += 1
+                        s["confirmed_on_wrong"] += int(not initial_truth)
             if accepted:
-                n_acc += 1
-                n_acc_ok += int(truth)
+                s["n_acc"] += 1
+                s["n_acc_ok"] += int(truth)
+
+            s["wall_s"] += time.time() - cell_t0
+            s["cost"] += sum(a.cost for a in agents) - cost_before
+            s["market_cost"] += (
+                sum(a.market_cost for a in agents) - market_cost_before)
 
             with rows_path.open("a", encoding="utf-8") as f:
                 f.write(json.dumps({
@@ -977,39 +1048,13 @@ def main() -> None:
             print(f"  [{arm} {i}/{len(tasks)}] 需求符合={truth} 接受={accepted} "
                   f"累計呼叫={calls[0]}", flush=True)
 
-        measured = len(tasks) - n_void
-        billed_cost = sum(a.cost for a in agents) - cost_before
-        market_cost = sum(a.market_cost for a in agents) - market_cost_before
-        summary[arm] = {
-            "tasks": len(tasks), "calls": calls[0], "infra_void": n_void,
-            "complete": n_void == 0,
-            "accepted": n_acc, "accepted_and_meets_demand": n_acc_ok,
-            "demand_equals_output_rate": (n_acc_ok / n_acc) if n_acc else None,
-            "coverage": (n_acc / measured) if measured else None,
-            "correct_delivery_rate": (n_acc_ok / measured) if measured else None,
-            "raw_final_accuracy": (raw_correct / measured) if measured else None,
-            "calls_per_task": (calls[0] / measured) if measured else None,
-            "calls_per_correct_delivery": (calls[0] / n_acc_ok) if n_acc_ok else None,
-            "leaked": n_acc - n_acc_ok,
-            "reviewer_accuracy": (rv_correct / rv_total) if rv_total else None,
-            "raw_reviewer_accuracy": (
-                rv_raw_correct / rv_total if rv_total else None),
-            "reviewer_votes": rv_total,
-            "review_fail_claims": fail_claims,
-            "machine_confirmed_counterexamples": confirmed_claims,
-            "confirmed_counterexample_precision_against_hidden_truth": (
-                confirmed_on_wrong / confirmed_claims if confirmed_claims else None),
-            "revision_transitions": transitions if arm == "ON" else None,
-            "endpoint_latency_ms": latency_summary(calls_log, arm),
-            "wall_s": round(time.time() - t0, 1),
-            "cost_usd": round(billed_cost, 4),
-            "market_cost_usd": round(market_cost, 4),
-            "market_cost_per_correct_delivery": (
-                round(market_cost / n_acc_ok, 6) if n_acc_ok else None),
-        }
-        # A completed arm survives a later crash, but comparisons remain invalid
-        # until every requested arm has finished.
+        # 交錯的重點就在這裡：每跑完一題的所有臂就把 summary 全部重寫一次，
+        # 中斷在任何時刻都會留下**兩臂格數相等**的可分析資料。
+        for arm in arms:
+            summary[arm] = finalize(arm)
         write_summary(run_complete=False)
+
+    for arm in arms:
         print(f"── {arm}: {json.dumps(summary[arm], ensure_ascii=False)}")
 
     # ⚠ 2026-08-24 實測抓到：這裡原本無條件寫 True。runs/g_off60_20260824 那一輪
