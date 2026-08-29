@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import ast
-import concurrent.futures
 import hashlib
 import json
 import pathlib
@@ -617,8 +616,14 @@ def calibrate_pool(tasks, agents, rows_path: pathlib.Path) -> dict:
             except InfraVoid as exc:
                 return agent, None, "", str(exc)
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=len(agents)) as pool:
-            results = list(pool.map(run_one, agents))
+        # 依序送出，不用 ThreadPoolExecutor 併發：round22/23 已經在 arm_on／
+        # arm_off5 量到對同一中轉端點併發送出多個請求會觸發 HTTP 500／逾時
+        # （DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md），但 calibrate_pool
+        # 是後來才加的，沒有套用那次修復。round210 用這支函式的併發版本卡死
+        # 39 分鐘沒跑完第 1 題，round211 診斷成「qwen3.8-27b 這個 model 掛了」；
+        # round262 重測發現連對**同一個** model 併發 3 筆都會炸（2 筆立即 500、
+        # 1 筆逾時）——是併發本身觸發後端 contention，不是特定 model 死掉。
+        results = [run_one(agent) for agent in agents]
         for agent, truth, err, void in results:
             stat = by_agent[agent.agent_id]
             if void is not None:
