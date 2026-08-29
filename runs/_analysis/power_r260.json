@@ -1,0 +1,39 @@
+{
+  "n_paired_now": 149,
+  "arrival_sequence": "bbccbbcccbbb",
+  "b_only": 7,
+  "c_only": 5,
+  "mcnemar_exact_p_two_sided": 0.7744140625,
+  "tail_test_5": {
+    "k": 5,
+    "available": true,
+    "tail": "ccbbb",
+    "majority": 3,
+    "p_one_sided": 0.5
+  },
+  "tail_test_8": {
+    "k": 8,
+    "available": true,
+    "tail": "bbcccbbb",
+    "majority": 5,
+    "p_one_sided": 0.36328125
+  },
+  "triggered": [],
+  "verdict": "noise",
+  "discordant_rate": 0.08053691275167785,
+  "n_cap": 179,
+  "mde_at_cap": {
+    "n_disc_expected": 14,
+    "min_gap": 10,
+    "min_split": [
+      12,
+      2
+    ],
+    "mde_pp": 5.58659217877095
+  },
+  "observed_p_b": 0.5833333333333334,
+  "disc_pairs_needed_80pct_power": 281,
+  "paired_tasks_needed_80pct_power": 3490,
+  "bench_size": 378,
+  "reachable_with_bench": false
+}
