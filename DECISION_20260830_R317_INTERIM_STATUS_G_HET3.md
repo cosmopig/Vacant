@@ -412,3 +412,46 @@ processed 93.3%（167/179），剩 **12 題**（每臂）——若吞吐量維�
 接下來 1-2 輪內跑到 179/179，屆時應開
 `DECISION_*_R278_ENDPOINT_VERDICT.md` 正式終點裁決，不要用中期
 數字硬升級。
+
+## round340 更新（2026-08-30 UTC ~09:55-10:35，Sonnet 5）
+
+開場量測與 round339 收尾逐字元相同（n=84、b=3、c=11、p=0.0574、
+processed=167/179）——round339 與 round340 之間沒有新進度。本輪做
+四次回合內阻塞等待（前景 `timeout 560 tail --pid=2188524 -f
+/dev/null`，皆 rc=124，process 全程存活，`etimes` 從 85408 一路增至
+87154+）：
+
+- 等待1後：processed 167→170/179；n 仍 84（新增的 3 個 processed
+  是 infra_void 或未配對，非 discordant，b/c/p 逐字元不變）
+- 等待2後：processed 持平 170/170（本次 560s 窗口完全沒有新
+  completion），但 `calls.jsonl` 仍在成長（1355→1361，+6）——確認
+  process 沒有卡死，只是單筆呼叫延遲長（查最後一筆 call：
+  `latency_ms=189567`、`completion_tokens=6942`，reasoning 模型單題
+  可以吃掉 3 分鐘以上，屬正常）
+- 等待3同一窗口內完全沒有新 processed（170→170），calls 也沒有明顯
+  增量，判斷是取樣時間點恰好落在多個長請求同時 in-flight 的空窗
+- 等待4後：processed 170→172/179；n 84→85（+1，新配對非 discordant，
+  b/c/p 三度逐字元不變：3/11/0.0574）——**這是連續第 7 次量測 p 值
+  完全不動**（round334 起）
+- 最終點估計：ON 75.29%（64/85）、OFF5 84.71%（72/85），差距
+  9.42pp；總呼叫 ON=425=OFF5=425（等預算：True）；`run_complete`
+  仍 `false`
+- 錯誤分布：`calls=1373 HTTP400=128 Timeout=21 HTTP500=11`（與
+  round339 前後同量級，無新錯誤類型）
+
+**這代表什麼**：p=0.0574 現在連續 7 輪（334 起）維持不動，證據單位
+（14）自 round334 首次移動後再沒變過。本輪新增的 5 個
+processed（167→172）裡只有 1 個真正配對成功且非 discordant，其餘
+落在 infra_void 或跨臂未同步完成。不觸發推翻條件，方向不變
+（OFF5 領先 ON）。
+
+三條「有成效」判準現況不變：
+1. 訊號有：OFF 臂基準 27.68% ✓
+2. 三臂有差異：ON（75.29%）／OFF5（84.71%）都遠高於 OFF 基準 ✓；
+   p=0.0574 仍未跨 0.05，連續 7 輪未再移動
+3. 等預算答案：方向持續指向 OFF5 贏 ON，顯著性仍未跨過，不提前停 run
+
+processed 96.1%（172/179），剩 **7 題**（每臂）——距離
+`run_complete=true` 非常接近，下一輪大機率可以開
+`DECISION_*_R278_ENDPOINT_VERDICT.md` 正式終點裁決。若下一輪
+`run_complete` 仍是 false，繼續monitoring，不要用中期數字硬升級。
