@@ -179,7 +179,16 @@ class Session:
                           "latency_ms": int((time.time() - t0) * 1000),
                           "error": last, "request_messages": messages})
                 if attempt < retries:
-                    time.sleep(2.0 * (2 ** (attempt - 1)))
+                    # 2026-08-30 實測：中轉的 LM Studio 後端在跟決定性 run
+                    # （同時吃兩顆模型 qwen3.6-35b-a3b／gemma-4-12b-it-qat）
+                    # 搶記憶體時會把這支的模型換出，回 HTTP 200 但
+                    # body={"error":"Model unloaded."}——換頁到重新載入
+                    # 35B 量化模型的時間遠超過原本 2/4/8s 的指數退避，
+                    # 一律重試到底、不會等到它換回來。這種情況給固定 30s。
+                    if "unloaded" in last.lower():
+                        time.sleep(30.0)
+                    else:
+                        time.sleep(2.0 * (2 ** (attempt - 1)))
         raise SystemExit(f"模型連續 {retries} 次失敗：{last}")
 
     # ── 工具 ────────────────────────────────────────────────────────
