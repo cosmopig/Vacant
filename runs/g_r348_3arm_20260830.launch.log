@@ -1,0 +1,10 @@
+<unknown>:5: SyntaxWarning: invalid escape sequence '\w'
+<unknown>:4: SyntaxWarning: invalid escape sequence '\.'
+179 題（evalplus）　輸出 runs/g_r348_3arm_20260830
+── 量具驗證（先答已知答案）
+   參考解通過 179/179　壞解被擋 179/179
+── 模型池：6 個 agent／2 個模型家族
+── 模型池預檢（每個 model 問一句，零容忍）
+   qwen/qwen3.6-35b-a3b　回 4 字　✓
+   gemma-4-12b-it-qat　回 2 字　✓
+  [OFF 1/179] 需求符合=False 接受=True 累計呼叫=1
