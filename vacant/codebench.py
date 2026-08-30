@@ -14,6 +14,7 @@ import hashlib
 import itertools
 import json
 import random
+import textwrap
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator
@@ -629,7 +630,17 @@ class EvalPlusMBPPLoader(TaskLoader):
             atol = rec.get("atol")
             atol = float(atol) if isinstance(atol, (int, float)) else None
             public_prompt = rec["prompt"]
-            contract = rec.get("contract", "").replace("# $_CONTRACT_$", "").strip()
+            # EvalPlus stores each contract line pre-indented for splicing into a
+            # function body (`    assert ...`). A whole-string .strip() only trims
+            # the outer edges, so line 2+ of any multi-assert contract kept its
+            # leading 4 spaces and produced a SyntaxError (`unexpected indent`)
+            # wherever this text was later spliced into top-level check code
+            # (verify_review_counterexample) -- silently mislabeling every such
+            # counterexample as outside_input_contract regardless of the actual
+            # argument values. dedent() removes the shared indent from all lines.
+            contract = textwrap.dedent(
+                rec.get("contract", "").replace("# $_CONTRACT_$", "")
+            ).strip()
             if self.expose_contract and contract:
                 public_prompt += (
                     "\n\nFormal input contract (authoritative preconditions):\n"

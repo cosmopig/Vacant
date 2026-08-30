@@ -126,6 +126,25 @@ def test_gain_mode_exposes_input_contract_but_not_ground_truth(tmp_path):
     assert repr(rec["plus_input"]) not in task["prompt"]
 
 
+def test_multiline_contract_dedents_to_valid_standalone_code(tmp_path):
+    """Real EvalPlus records store each contract line pre-indented for splicing
+    into a function body (`    assert ...\\n    assert ...`). Round347: a bare
+    ``.strip()`` only trims the string's outer edges, so line 2+ kept its
+    leading 4 spaces -- `input_contract` compiled fine standalone but raised
+    ``unexpected indent`` the moment `verify_review_counterexample` spliced it
+    after a top-level assignment, silently mislabeling every counterexample
+    against a multi-assert contract as outside_input_contract regardless of
+    the actual argument values (378-task pack: 77.2% of contracts have >=2
+    asserts). This must produce syntactically valid top-level code."""
+    rec = dict(_REC1, contract=(
+        "\n    assert isinstance(a, int), \"invalid inputs\" # $_CONTRACT_$"
+        "\n    assert isinstance(b, int), \"invalid inputs\" # $_CONTRACT_$\n"
+    ))
+    loader = _loader(tmp_path, [rec], expose_contract=True)
+    task = next(loader.iter_tasks("contract"))
+    compile(f"a = 1\nb = 2\n{task['input_contract']}\n", "<test>", "exec")
+
+
 def test_deterministic_order_per_seed(tmp_path):
     loader = _loader(tmp_path)
     a = [t["task_id"] for t in loader.iter_tasks("s0")]

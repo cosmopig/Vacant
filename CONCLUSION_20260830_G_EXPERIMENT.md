@@ -144,6 +144,25 @@ ON 的任何增益都不能單獨歸功於評審機制。而本結論的重點�
 prompt 或 gate 的設計缺陷。細節見 `DECISION_20260830_R345_REVIEWER_SPECIFICITY.md`
 的「round346 補充」一節。
 
+**round347 修正上一段的比例**：`outside_input_contract` 的判定本身在
+`vacant/codebench.py` 有一個字串處理 bug（多 assert 的 contract 沒有正確
+dedent，拼進頂層檢查程式碼保證 `SyntaxError`，跟反例引數值無關），378 題
+裡 77.2% 的 contract 有 ≥2 條 assert、全部踩到這個保證觸發的路徑。用修好
+之後的關卡對三個 run 原本 99 筆 `outside_input_contract`（arity 對得上的
+子集）重算：**38 筆（38.4%）其實是 reviewer 找到的真反例，原本被這個 bug
+吃掉、`grounded_pass` 因此被錯記成同意通過**；20 筆（20.2%）維持「反例不
+成立」不受影響；41 筆（41.4%）修好之後依然是真的域外。上一段「壓倒性
+多數是 reviewer 舉錯」下修為「大約四成是 bug 造成、四成才是 reviewer
+真的舉錯」——**round346 那條「模型能力層級落差」的解釋沒有整個錯，但
+只解釋了其中一部分；另一部分（尤其 R278 的 47.3%）是量具本身的 bug**，
+且這個 bug 直接餵進 runtime 的 `grounded_pass`／`passed_review`
+多數決（不只是離線診斷分類），代表 ON 臂的審核→修訂自我修正機制對
+77.2% 的題目從一開始就被打了折扣。bug 已在 round347 修好（`textwrap.
+dedent`），但目前所有已完成與進行中的 run（含決定性 3-arm run）都是在
+bug 修好前的版本下產生的資料，修好之後有沒有讓 ON 打贏 OFF5 需要新的
+一輪決定性 run 才能回答，尚未驗證。細節見
+`DECISION_20260830_R347_CONTRACT_DEDENT_BUG.md`。
+
 ## 原始證據
 
 - `runs/g_onoff5_371_r123_20260825`、`runs/g_off371_20260825`、
