@@ -11,11 +11,21 @@
   - 分母只含「兩臂都量到的格子」。`err='sandbox_check_failed'` 是**候選碼答錯**，
     算失敗、留在分母；真正的 InfraVoid 根本不會進 rows.jsonl（runner 直接 continue）。
   - 用 McNemar **精確二項**檢定，不用卡方近似——discordant 常常 <25。
+
+round357 補（見 DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md「沒做的事」第2點）：
+  - 本工具的配對分母**本來就**只含兩臂都量到的格子，跟
+    `analyze_fullbank_off.py`／`analyze_off5_gate_counterfactual.py` 那種單臂比例
+    分析的判準邏輯不同，所以這裡**不套用**同一條 10% 硬閘門去擋輸出。
+  - 但如果 void 率高，`common` 集合排除的題目變多，若 void 與正確性相關
+    （round77 規則 B 自己的警告），discordant pair 的估計會有選擇偏誤。
+    這裡只**印警告＋把每臂的 void 率放進輸出 JSON**，不擋、不改判定。
 """
 import argparse
 import json
 import math
 import pathlib
+
+VOID_GATE = 0.10  # 只用來決定要不要印警告，SPEC_GAIN §7 同一條規則的數值
 
 
 def load_rows(d: pathlib.Path) -> list[dict]:
@@ -45,6 +55,22 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
 
 def arm_rows(rows: list[dict], arm: str) -> dict[str, dict]:
     return {r["task_id"]: r for r in rows if r.get("arm") == arm}
+
+
+def load_notes(d: pathlib.Path) -> list[dict]:
+    p = d / "notes.jsonl"
+    if not p.exists():
+        return []
+    return [json.loads(l) for l in p.open(encoding="utf-8") if l.strip()]
+
+
+def arm_void_ratio(notes: list[dict], n_measured: int, arm: str) -> dict:
+    """跟 analyze_off5_gate_counterfactual.py 的 arm_void_ratio 同一條算法。"""
+    n_void = sum(1 for nt in notes if nt.get("arm") == arm and "infra_void" in nt)
+    total = n_measured + n_void
+    ratio = (n_void / total) if total else 0.0
+    return {"n_measured": n_measured, "n_void": n_void, "ratio": ratio,
+            "gate_exceeded": ratio > VOID_GATE}
 
 
 def main() -> int:
@@ -79,6 +105,10 @@ def main() -> int:
     a_calls = sum(A[t]["calls_used"] for t in common)
     b_calls = sum(B[t]["calls_used"] for t in common)
 
+    a_void = arm_void_ratio(load_notes(a_dir), len(A), args.a_arm)
+    b_void = arm_void_ratio(load_notes(b_dir), len(B), args.b_arm)
+    void_gate_warning = a_void["gate_exceeded"] or b_void["gate_exceeded"]
+
     out = {
         "a": {"run": str(a_dir), "arm": args.a_arm, "n_rows": len(A)},
         "b": {"run": str(b_dir), "arm": args.b_arm, "n_rows": len(B)},
@@ -100,6 +130,9 @@ def main() -> int:
         "a_calls_per_correct": a_calls / a_ok if a_ok else None,
         "b_calls_per_correct": b_calls / b_ok if b_ok else None,
         "equal_budget": a_calls == b_calls,
+        "a_void": a_void,
+        "b_void": b_void,
+        "void_gate_warning": void_gate_warning,
     }
 
     lbl_a, lbl_b = args.a_arm, args.b_arm
@@ -121,6 +154,15 @@ def main() -> int:
     print(f"總呼叫  {lbl_a}={a_calls}  {lbl_b}={b_calls}   等預算：{out['equal_budget']}")
     if a_ok and b_ok:
         print(f"每個正確交付的呼叫數  {lbl_a}={a_calls/a_ok:.2f}  {lbl_b}={b_calls/b_ok:.2f}")
+    print()
+    print(f"void 率（分母＝該臂該 run 的 measured+void，不是 n_paired）"
+          f"  {lbl_a}={100*a_void['ratio']:.1f}% ({a_void['n_void']}/{a_void['n_measured']+a_void['n_void']})"
+          f"  {lbl_b}={100*b_void['ratio']:.1f}% ({b_void['n_void']}/{b_void['n_measured']+b_void['n_void']})")
+    if void_gate_warning:
+        print("⚠ VOID-GATE-WARNING：至少一臂 void 率超過 SPEC_GAIN §7 的 10% 閘門。"
+              "本工具的配對分母本來就只含兩臂都量到的格子（不套用硬擋），但若 void"
+              "與正確性相關，上面的 discordant pair／McNemar 結果可能有選擇偏誤——"
+              "見 DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md。")
 
     if args.json:
         pathlib.Path(args.json).write_text(
