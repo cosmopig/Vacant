@@ -1117,6 +1117,156 @@
     ]
   },
   "calibration": null,
-  "arms": {},
+  "arms": {
+    "OFF": {
+      "tasks": 179,
+      "calls": 5,
+      "infra_void": 0,
+      "complete": false,
+      "processed": 5,
+      "accepted": 5,
+      "accepted_and_meets_demand": 3,
+      "demand_equals_output_rate": 0.6,
+      "coverage": 1.0,
+      "correct_delivery_rate": 0.6,
+      "raw_final_accuracy": 0.6,
+      "calls_per_task": 1.0,
+      "calls_per_correct_delivery": 1.6666666666666667,
+      "leaked": 2,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 5,
+          "p50": 9961,
+          "p95": 115008,
+          "max": 115008
+        },
+        "by_role": {
+          "gen": {
+            "n": 5,
+            "p50": 9961,
+            "p95": 115008,
+            "max": 115008
+          }
+        },
+        "failed_attempts": 0
+      },
+      "wall_s": 151.8,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    },
+    "ON": {
+      "tasks": 179,
+      "calls": 25,
+      "infra_void": 0,
+      "complete": false,
+      "processed": 5,
+      "accepted": 4,
+      "accepted_and_meets_demand": 4,
+      "demand_equals_output_rate": 1.0,
+      "coverage": 0.8,
+      "correct_delivery_rate": 0.8,
+      "raw_final_accuracy": 0.8,
+      "calls_per_task": 5.0,
+      "calls_per_correct_delivery": 6.25,
+      "leaked": 0,
+      "reviewer_accuracy": 0.8,
+      "raw_reviewer_accuracy": 0.8666666666666667,
+      "reviewer_votes": 15,
+      "review_fail_claims": 1,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": {
+        "improved": 0,
+        "harmed": 0,
+        "stayed_correct": 4,
+        "stayed_wrong": 1
+      },
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 25,
+          "p50": 52124,
+          "p95": 195306,
+          "max": 233601
+        },
+        "by_role": {
+          "gen": {
+            "n": 5,
+            "p50": 9043,
+            "p95": 81558,
+            "max": 81558
+          },
+          "review": {
+            "n": 15,
+            "p50": 52124,
+            "p95": 233601,
+            "max": 233601
+          },
+          "revise": {
+            "n": 5,
+            "p50": 80123,
+            "p95": 105511,
+            "max": 105511
+          }
+        },
+        "failed_attempts": 1
+      },
+      "wall_s": 1973.5,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    },
+    "OFF5": {
+      "tasks": 179,
+      "calls": 21,
+      "infra_void": 1,
+      "complete": false,
+      "processed": 5,
+      "accepted": 4,
+      "accepted_and_meets_demand": 3,
+      "demand_equals_output_rate": 0.75,
+      "coverage": 1.0,
+      "correct_delivery_rate": 0.75,
+      "raw_final_accuracy": 0.75,
+      "calls_per_task": 5.25,
+      "calls_per_correct_delivery": 7.0,
+      "leaked": 1,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 21,
+          "p50": 10268,
+          "p95": 216162,
+          "max": 230943
+        },
+        "by_role": {
+          "gen": {
+            "n": 21,
+            "p50": 10268,
+            "p95": 216162,
+            "max": 230943
+          }
+        },
+        "failed_attempts": 1
+      },
+      "wall_s": 966.6,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    }
+  },
   "equal_budget_comparison_valid": false
 }

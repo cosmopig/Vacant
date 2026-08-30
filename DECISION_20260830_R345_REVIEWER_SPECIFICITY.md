@@ -88,3 +88,93 @@ passed_review = sum(1 for _, ok in votes) >= (len(votes)+1)//2   # ops/gain/gain
 - 讀 review prompt，確認 reviewer 有沒有被要求主動找反例（若沒有，
   這是一個可以在不動實驗設計的情況下改進系統的具體切入點，但改了
   就是新的實驗條件，要另開一輪、另寫決策記錄）。
+
+## round346 補充：上面那條「下一輪可以做的」已經回答，而且答案推翻了它預期的方向
+
+**Prompt 本身已經要求主動找反例，而且要求機器可執行驗證。**
+`REVIEWER_SYSTEM`（`ops/gain/brain_cline.py:256`）逐字寫著：「找出會讓解答
+不符合題意的**具體反例**；不要因為程式看起來合理就通過」，並強制第一行
+`VERDICT: PASS/FAIL`＋FAIL 必須附 `TEST_ARGS`／`EXPECTED`（會被系統實際執行）。
+`REVIEW_LENSES` 六種視角裡至少三種（`plain-1`「用最小反例推翻候選解答」、
+`careful-1`「邊界值、空輸入、重複值與負數」、`hasty-2`「極端輸入」）直接
+要求對抗性挑錯。**「prompt 沒要求找反例」這個推翻條件不成立，可以劃掉。**
+
+### 但這揭露了一個更精確的機制層級瓶頸：關卡在丟什麼
+
+用既有的 `verify_review_counterexample`（`gain_run.py:310-369`）邏輯離線
+重跑三個 run 的 `raw_pass` vs `grounded_pass`（新寫的
+`ops/gain/analyze_review_gate.py` 早就在，這次才第一次真的拿來對照用）：
+
+| run | raw FAIL 率 | raw TN（抓到錯初稿）| grounded FAIL 率 | grounded TN |
+|---|---|---|---|---|
+| g_het3_r278 (n=318) | 25.79% | 32.26% | 1.57% | 4.30% |
+| g_on371 (n=501) | 1.20% | 7.58% | 0.20% | 1.52% |
+| g_onoff5_371_r123 (n=1095) | 5.11% | 17.16% | 0.18% | 0.49% |
+
+**Reviewer 的原始判斷（raw_pass）遠不是「幾乎全過」**——三個 run 都在
+1.2%-25.8% 投 FAIL，且抓到 7.6%-32.3% 的錯誤初稿，遠高於 grounded 層級的
+0.5%-4.3%。round345 量到的「98.6% 個別投票說過」是**grounded**層級（跟
+`passed_review` 一致），不是 reviewer 真正的判斷；真正判斷被
+`verify_review_counterexample` 的執行驗證關卡幾乎全部丟棄。
+
+新寫 `ops/gain/analyze_contract_reject_split.py`（純離線、讀已落盤的
+`calls.jsonl`／`rows.jsonl`，不重跑實驗、不動 runtime），把丟棄的主因
+`outside_input_contract` 拆成兩種：
+
+1. `arity_mismatch`——TEST_ARGS 參數個數就對不上函式簽名（reviewer 自己
+   格式錯）
+2. `domain_violation`——參數個數對，但值不滿足題目的 `input_contract`
+   前置條件（reviewer 的「反例」本來就在合法輸入域外）
+
+三個 run 結果：R278 55/59=93.2% domain_violation；g_on371 5/5=100%；
+g_onoff5_371_r123 39/53=73.6%（+9/53=17.0% arity_mismatch、5 筆缺資料）。
+**壓倒性主因是 domain_violation，不是 reviewer 打錯格式。**
+
+### 這代表什麼——關卡本身沒有 bug，是被設計成擋住這個東西，而它真的擋住了
+
+`verify_review_counterexample` 的註解本來就寫明意圖：「Out-of-domain
+examples are not counterexamples; the candidate worker cannot see this
+test code.」（`gain_run.py:345-346`）——不能因為 worker 沒被要求處理的
+輸入而懲罰它，這是公平性設計，不是誤判。**量到的現象跟設計意圖完全吻合：
+關卡正在做它被造出來要做的事。**
+
+但這解釋了 TN=0 的具體機制：reviewer 對「這份解答有問題」的原始直覺
+（raw TN 7.6%-32.3%，遠高於 grounded 的 0.5%-4.3%）**經常是對的方向、
+錯的落點**——它們常常懷疑合法域內的解答有問題，但舉出的「證據」卻落在
+文件明訂的合法輸入域外，因此被（正確地）判定為不算數的抗辯。也就是說，
+LLM reviewer 擅長「聞到」不對勁，但不擅長在題目自己畫的邊界之內精準
+定位出一個真的會讓程式掛掉的合法輸入。
+
+### 這對主結論的影響
+
+**不推翻**任何判準（三條達成狀態不變）。這是對「機制沒有加值」的
+**再下一層機制解釋**：不是評審不主動找碴（找了，且找的方向有部分道理），
+不是關卡設計錯誤（關卡照設計意圖運作），是**評審擅長懷疑、不擅長在合法
+定義域內精準舉證**——這是模型能力層級的落差，不是 prompt 或 gate 的
+設計缺陷。改 prompt 要求更精準的域內反例，屬於改實驗條件，本輪不做，
+留給下一輪判斷要不要另開一輪測。
+
+### 驗證
+
+- `analyze_review_gate.py` 是既有工具（round140 就寫了），本輪第一次
+  真的拿 raw vs grounded 的對照數字寫進交接檔——不是新邏輯，是舊工具
+  沒被用滿。
+- `analyze_contract_reject_split.py` 全新、純離線唯讀，用跟 runtime
+  相同的 `parse_review_claim`／AST 簽名推導邏輯（直接 import
+  `ops.gain.gain_run` 裡的函式，不是重新猜規則），三個 run 分開跑、
+  結果同向（domain_violation 都是壓倒性多數），不是單一 run 巧合。
+- 已知誤差：腳本用 AST 解析 `initial_code` 的函式簽名來推算參數個數，
+  跟 runtime 真正用的 `input_parameters`（若題目有提供）可能不完全
+  一致（兩者理論上該一致，但沒有逐題交叉驗證）——`g_onoff5_371_r123`
+  有 5 筆因缺 call log 落在 `unknown_signature`/`missing_call_log`，
+  照實計入分母外，沒有假裝那 5 筆有答案。
+
+### 下一輪可以做的
+
+- 若要往上游查「reviewer 為什麼常舉出域外反例」，可以挑幾個
+  `domain_violation` 樣本（上面表格已附 task_id/agent_id），讀 review
+  原始文字，看是真的沒看懂 input_contract，還是題目本身的 contract
+  寫得不直觀（這是判斷，不是本輪的量測範圍）。
+- `arity_mismatch` 比例雖是次要（7-17%），但 `g_onoff5_371_r123` 那組
+  9 筆都可以進一步問「是不是特定 lens（如 careful-1）系統性搞錯簽名」，
+  樣本數還太小，不到能下結論的門檻。
