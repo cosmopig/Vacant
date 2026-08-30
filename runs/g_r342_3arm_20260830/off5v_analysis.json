@@ -1,0 +1,40 @@
+{
+  "run": "runs/g_r342_3arm_20260830",
+  "main_criterion": {
+    "off5_arm": "OFF5",
+    "on_arm": "ON",
+    "n_paired": 1,
+    "on_leaked": 0,
+    "off5v_leaked": 0,
+    "on_leak_rate": 0.0,
+    "off5v_leak_rate": 0.0,
+    "on_leak_rate_ci95": [
+      0.0,
+      0.7934567085261071
+    ],
+    "off5v_leak_rate_ci95": [
+      0.0,
+      0.7934567085261071
+    ],
+    "discordant_on_only": 0,
+    "discordant_off5v_only": 0,
+    "n_discordant": 0,
+    "mcnemar_exact_p_two_sided": 1.0,
+    "gap_pp_off5v_minus_on": 0.0,
+    "verdict": "insufficient_n（n=1<30，只能报点估计，不能宣称无加值）"
+  },
+  "secondary_criterion": {
+    "n_rows": 1,
+    "off5_delivered_correct": 1,
+    "off5v_delivered_correct": 1,
+    "off5_delivery_rate": 1.0,
+    "off5v_delivery_rate": 1.0,
+    "off5_leaked": 0,
+    "off5v_leaked": 0,
+    "off5_leak_rate": 0.0,
+    "off5v_leak_rate": 0.0,
+    "false_rejects_of_correct_answers": 0,
+    "false_reject_task_ids": []
+  },
+  "excluded_off5_rows_missing_visible_ok": 0
+}

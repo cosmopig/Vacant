@@ -8,3 +8,9 @@
    qwen/qwen3.6-35b-a3b　回 4 字　✓
    gemma-4-12b-it-qat　回 2 字　✓
   [OFF 1/179] 需求符合=True 接受=True 累計呼叫=1
+  [ON 1/179] 需求符合=True 接受=True 累計呼叫=5
+  [OFF5 1/179] 需求符合=True 接受=True 累計呼叫=5
+  [OFF 2/179] 需求符合=True 接受=True 累計呼叫=2
+  [OFF 4/179] 需求符合=False 接受=True 累計呼叫=3
+  [ON 4/179] 需求符合=False 接受=False 累計呼叫=11
+  [OFF5 5/179] 需求符合=True 接受=True 累計呼叫=11
