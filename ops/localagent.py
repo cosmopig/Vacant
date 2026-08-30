@@ -94,6 +94,35 @@ def deny_reason(command: str) -> str | None:
     return None
 
 
+def git_rev(cwd: pathlib.Path, ref: str = "HEAD") -> str | None:
+    try:
+        r = subprocess.run(["git", "-C", str(cwd), "rev-parse", ref],
+                            capture_output=True, text=True, timeout=15)
+        return r.stdout.strip() if r.returncode == 0 else None
+    except Exception:                                    # noqa: BLE001
+        return None
+
+
+def git_branch(cwd: pathlib.Path) -> str | None:
+    try:
+        r = subprocess.run(["git", "-C", str(cwd), "rev-parse", "--abbrev-ref", "HEAD"],
+                            capture_output=True, text=True, timeout=15)
+        return r.stdout.strip() if r.returncode == 0 else None
+    except Exception:                                    # noqa: BLE001
+        return None
+
+
+def git_remote_rev(cwd: pathlib.Path, remote: str, branch: str) -> str | None:
+    try:
+        r = subprocess.run(["git", "-C", str(cwd), "ls-remote", remote, branch],
+                            capture_output=True, text=True, timeout=30)
+        if r.returncode == 0 and r.stdout.strip():
+            return r.stdout.split()[0]
+    except Exception:                                    # noqa: BLE001
+        pass
+    return None
+
+
 class Session:
     def __init__(self, *, cwd: pathlib.Path, log_path: pathlib.Path,
                  api: str, model: str, timeout_s: int) -> None:
@@ -192,12 +221,31 @@ def main() -> None:
     ap.add_argument("--max-steps", type=int, default=40)
     ap.add_argument("--max-minutes", type=int, default=40)
     ap.add_argument("--request-timeout-s", type=int, default=600)
+    ap.add_argument("--require-commit-push", action="store_true", default=True)
+    ap.add_argument("--no-require-commit-push", dest="require_commit_push",
+                     action="store_false")
+    ap.add_argument("--remote", default="origin")
     args = ap.parse_args()
 
+    cwd = pathlib.Path(args.cwd)
     prompt = pathlib.Path(args.prompt_file).read_text(encoding="utf-8")
-    s = Session(cwd=pathlib.Path(args.cwd), log_path=pathlib.Path(args.log),
+    s = Session(cwd=cwd, log_path=pathlib.Path(args.log),
                 api=args.api, model=args.model, timeout_s=args.request_timeout_s)
 
+    start_head = git_rev(cwd)
+    branch = git_branch(cwd)
+
+    commit_clause = (
+        "\nHard, code-enforced requirement (not just advice): before you stop, you must "
+        "have created a new git commit AND pushed it, such that `git rev-parse HEAD` "
+        f"equals `git ls-remote {args.remote} {branch or '<branch>'}`. This script checks "
+        "that itself after you finish — it does not trust your summary. If your task "
+        "doesn't otherwise produce a code change, still update the handoff file "
+        "(e.g. GAIN_STATE.md) with what you did and commit+push that. Finishing without a "
+        "verified commit+push makes this whole round count as failed, even if every "
+        "command you ran succeeded.\n"
+        if args.require_commit_push else ""
+    )
     system = (
         "You are an autonomous engineer working in a git repository on a Linux VM. "
         "You have exactly one tool: run_bash. Use it for everything — reading files "
@@ -206,7 +254,8 @@ def main() -> None:
         "Work in small verified steps: run a command, read its real output, then decide. "
         "Never claim something succeeded without having seen the output that proves it.\n"
         "Some commands are blocked by a hard guard and will return BLOCKED with a reason. "
-        "Do not try to work around a block; write the reason down instead.\n"
+        "Do not try to work around a block; write the reason down instead."
+        + commit_clause +
         "When you are finished, reply with a short plain-text summary and no tool call."
     )
     messages = [{"role": "system", "content": system},
@@ -249,12 +298,25 @@ def main() -> None:
                              "content": result})
 
     dur = int(time.time() - t0)
+    end_head = git_rev(cwd)
+    remote_head = git_remote_rev(cwd, args.remote, branch) if branch else None
+    committed = bool(end_head) and end_head != start_head
+    pushed = bool(remote_head) and remote_head == end_head
     s.log({"kind": "end", "steps": step, "wall_s": dur,
            "tool_calls": s.tool_calls, "blocked": s.blocked,
            "prompt_tokens": s.prompt_tokens,
-           "completion_tokens": s.completion_tokens})
+           "completion_tokens": s.completion_tokens,
+           "start_head": start_head, "end_head": end_head,
+           "remote_head": remote_head, "committed": committed, "pushed": pushed})
     print(f"── 結束：{step} 步、{s.tool_calls} 次工具呼叫、{s.blocked} 次被擋、"
           f"{dur}s、本地 token {s.prompt_tokens}+{s.completion_tokens}（$0）", flush=True)
+    print(f"── 收尾驗證：commit {'✓' if committed else '✗'}（{start_head}→{end_head}）　"
+          f"push {'✓' if pushed else '✗'}（remote={remote_head}）", flush=True)
+    if args.require_commit_push and not (committed and pushed):
+        print("── 沒有驗證到新的 commit+push，判定這一輪失敗（rc=1），"
+              "讓呼叫端退回較強的模型，不要用「模型自認完成」當通過標準。",
+              flush=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
