@@ -13,13 +13,30 @@ from math import comb
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 RUNS_DIR = REPO_ROOT / "runs"
 
+VOID_GATE = 0.10  # SPEC_GAIN §7，與 analyze_fullbank_off.py／
+                   # analyze_off5_gate_counterfactual.py 同一條規則（round357 補上）
+
 DEFAULT_RUNS = [
     ("g_het3_r278_20260829", "pre_fix"),
     ("g_het2_r274_20260829", "pre_fix"),
     ("g_r342_3arm_20260830", "pre_fix"),
     ("g_r345_3arm_20260830", "pre_fix"),
     ("g_r348_3arm_20260830", "post_fix"),  # round347 修 contract-dedent bug 之後
+    # ⚠ round356：g_r342/g_r345/g_r348 全部因 400-非重試 bug 被判定
+    # void-gate-disqualified（DECISION_20260830_R356_HTTP400_RETRY_REVERSAL.md）。
 ]
+
+
+def load_notes(run):
+    path = RUNS_DIR / run / "notes.jsonl"
+    if not path.exists():
+        return []
+    return [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+
+
+def on_void_ratio(notes):
+    n_void = sum(1 for nt in notes if nt.get("arm") == "ON" and "infra_void" in nt)
+    return n_void  # 分母（n_measured）由呼叫端算，這裡只回傳分子避免重複讀 rows
 
 
 def agent_model(agent_id):
@@ -58,6 +75,8 @@ def main(run_names=None):
     runs = DEFAULT_RUNS if not run_names else [(r, "custom") for r in run_names]
 
     per_run = {}
+    per_run_void = {}
+    any_gate_exceeded = False
     mismatch = 0
     total_votes_checked = 0
     pooled = {}
@@ -72,6 +91,12 @@ def main(run_names=None):
         except FileNotFoundError:
             print(f"  (skip {run}: no rows.jsonl)")
             continue
+        n_on_total = sum(1 for l in lines if l.strip() and json.loads(l).get("arm") == "ON")
+        n_void = on_void_ratio(load_notes(run))
+        ratio = n_void / (n_on_total + n_void) if (n_on_total + n_void) else 0.0
+        gate_exceeded = ratio > VOID_GATE
+        any_gate_exceeded = any_gate_exceeded or gate_exceeded
+        per_run_void[run] = (n_on_total, n_void, ratio, gate_exceeded)
         n_rows = 0
         for line in lines:
             if not line.strip():
@@ -110,13 +135,21 @@ def main(run_names=None):
                         pooled[bucket][key][1] += 1
         per_run[run] = n_rows
 
-    print("=== 逐 run ON 列數（含 worker 與 initial_meets_demand 都非空）===")
+    print("=== 逐 run ON 列數（含 worker 與 initial_meets_demand 都非空）"
+          "| void率 = infra_void/(ON rows+infra_void) ===")
     for r, n in per_run.items():
-        print(f"  {r}: {n}")
+        n_on_total, n_void, ratio, gate_exceeded = per_run_void.get(r, (0, 0, 0.0, False))
+        flag = "  ⚠ VOID-GATE-DISQUALIFIED" if gate_exceeded else ""
+        print(f"  {r}: {n}  |  void率={ratio:.1%}({n_void}/{n_on_total + n_void}){flag}")
     print()
     print(f"=== 交叉驗證 i%2 推導 vs reviewer_models 欄位：{total_votes_checked} 票，"
           f"不一致 {mismatch} 票 ===")
     print()
+    if any_gate_exceeded:
+        print("  ⛔ 至少一個 run 的 ON 臂 void 率 > 10%（SPEC_GAIN §7 閘門）——下面每個"
+              "  bucket 的準確率/p 值仍會印出，但屬於探索性數字，不得引用為結論性判讀"
+              "（round357，見 DECISION_20260830_R356_HTTP400_RETRY_REVERSAL.md）。")
+        print()
 
     for bucket, data in pooled_overall.items():
         print(f"--- {bucket} ---")
