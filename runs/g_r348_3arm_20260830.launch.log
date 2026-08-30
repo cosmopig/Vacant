@@ -32,3 +32,7 @@
   [OFF 18/179] 需求符合=True 接受=True 累計呼叫=11
   [ON 18/179] 需求符合=True 接受=True 累計呼叫=41
   [OFF5 18/179] 需求符合=True 接受=True 累計呼叫=49
+  [OFF 19/179] 需求符合=False 接受=True 累計呼叫=12
+  [OFF 21/179] 需求符合=True 接受=True 累計呼叫=13
+  [ON 21/179] 需求符合=False 接受=False 累計呼叫=48
+  [OFF 22/179] 需求符合=True 接受=True 累計呼叫=14
