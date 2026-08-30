@@ -180,7 +180,15 @@ def arm_off(task, agents, rng, calls):
     txt = a.generate(task["prompt"], role="gen",
                      meta={"arm": "OFF", "task_id": task["task_id"]})
     calls[0] += 1
-    return extract_code(txt), a.agent_id, [a.agent_id]
+    code = extract_code(txt)
+    # round342：只是**記錄**可見測試結果，不改變本臂的 accepted 語意（仍恆為 True）。
+    # 零模型呼叫、不抽 rng ⇒ 本臂的抽樣與產出逐位元不變，只是多一個落盤欄位。
+    # 用途見 CONCLUSION_20260830_G_EXPERIMENT.md「推翻條件 1」：
+    # 有了這個欄位，「OFF + 免費可見測試閘」的對照可以**離線**從同一個 run 算出來，
+    # 不必新增一條會在抽樣上分岔的臂。
+    visible_ok, _ = meets_demand(
+        code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+    return code, a.agent_id, [a.agent_id], {"visible_ok": visible_ok}
 
 
 def behavior_signature(code: str, task: dict, timeout_s: int = 10) -> str:
@@ -262,7 +270,14 @@ def arm_off5(task, agents, rng, calls, k=5):
     tied = [v for v in buckets.values() if len(v) == max_votes]
     win = rng.choice(tied)
     chosen = rng.choice(win)
-    return chosen[0], chosen[1], [a for _, a in outs]
+    # round342：同 arm_off——只記錄，不改 accepted 語意。rng 已經抽完，這行不動它。
+    # `behavior_signature` 本來就已經把每個候選跑過可見測資，所以這道閘在資訊上
+    # 是免費的（零額外模型呼叫）；記下來才能離線算 OFF5+閘門的對照。
+    visible_ok, _ = meets_demand(
+        chosen[0], task["visible_check"]["code"], entry_point=task.get("entry_point"))
+    n_agree = max_votes
+    return chosen[0], chosen[1], [a for _, a in outs], {
+        "visible_ok": visible_ok, "vote_agreement": n_agree, "n_buckets": len(buckets)}
 
 
 def _review_vote(text: str) -> bool:
@@ -967,11 +982,11 @@ def main() -> None:
             s["processed"] += 1
             try:
                 if arm == "OFF":
-                    code, worker, involved = arm_off(t, agents, rng, calls)
-                    accepted, extra = True, {}
+                    code, worker, involved, extra = arm_off(t, agents, rng, calls)
+                    accepted = True
                 elif arm == "OFF5":
-                    code, worker, involved = arm_off5(t, agents, rng, calls)
-                    accepted, extra = True, {}
+                    code, worker, involved, extra = arm_off5(t, agents, rng, calls)
+                    accepted = True
                 elif arm == "ONR":
                     code, worker, involved, extra = arm_onr(
                         t, agents, rng, calls, rep, audit_rate=args.audit_rate)
