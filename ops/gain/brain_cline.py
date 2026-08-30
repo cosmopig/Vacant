@@ -198,8 +198,24 @@ class ClineBrain:
                 # 而言它可能是暫時的。這裡的代價不對稱：誤判成永久 ⇒ 白丟 17 格；
                 # 誤判成暫時 ⇒ 多花四次重試後仍記 infra_void，結果一樣只是慢一點。
                 # 所以 404 走重試。
+                #
+                # 400 為什麼也移出「不重試」（round356，2026-08-30 實測，推翻
+                # round296 的「記錄不修」）：round296 定的重啟條件是「同一
+                # (agent,task) 重試後會成功」，本輪的證據是它的等價形式——
+                # `g_r342/g_r345/g_r348` 三個 run 合併，29 個曾經 400-void 的
+                # task_id 裡 24 個在同一個 run 的另一臂成功過（不是模型對這題
+                # 內容穩定拒答）；且 56 個 400 錯誤裡 51 個在 attempt=1 就
+                # `break`（`InfraVoid` 訊息裡的「重試 N 次仍失敗」是印
+                # `effective_retries` 設定值，不是實際嘗試次數，從沒真的重試
+                # 過）。同一時間 400 造成的 void 率把三個 post-fix run 的
+                # 每一臂都推到 30-65%，遠超 SPEC 的 10% 閘門（見
+                # `DECISION_20260830_R356_HTTP400_RETRY_REVERSAL.md`）。
+                # round296 把範圍限定在「review 角色」，但 OFF5 臂的 400
+                # 全部發生在 gen 角色（OFF5 不叫 review）——前提不成立，
+                # 改成不分角色。401/402/403（認證／額度）維持不重試，
+                # 語意上不像暫時性路由問題。
                 non_retryable = isinstance(e, urllib.error.HTTPError) and e.code in {
-                    400, 401, 402, 403,
+                    401, 402, 403,
                 }
                 if non_retryable:
                     break
