@@ -1171,79 +1171,79 @@
   "arms": {
     "ON": {
       "tasks": 179,
-      "calls": 443,
+      "calls": 453,
       "infra_void": 58,
       "complete": false,
-      "processed": 139,
-      "accepted": 65,
-      "accepted_and_meets_demand": 60,
-      "demand_equals_output_rate": 0.9230769230769231,
-      "coverage": 0.8024691358024691,
-      "correct_delivery_rate": 0.7407407407407407,
-      "raw_final_accuracy": 0.7407407407407407,
-      "calls_per_task": 5.469135802469136,
-      "calls_per_correct_delivery": 7.383333333333334,
+      "processed": 141,
+      "accepted": 67,
+      "accepted_and_meets_demand": 62,
+      "demand_equals_output_rate": 0.9253731343283582,
+      "coverage": 0.8072289156626506,
+      "correct_delivery_rate": 0.7469879518072289,
+      "raw_final_accuracy": 0.7469879518072289,
+      "calls_per_task": 5.457831325301205,
+      "calls_per_correct_delivery": 7.306451612903226,
       "leaked": 5,
-      "reviewer_accuracy": 0.7366255144032922,
-      "raw_reviewer_accuracy": 0.6460905349794238,
-      "reviewer_votes": 243,
-      "review_fail_claims": 68,
+      "reviewer_accuracy": 0.7429718875502008,
+      "raw_reviewer_accuracy": 0.6506024096385542,
+      "reviewer_votes": 249,
+      "review_fail_claims": 69,
       "machine_confirmed_counterexamples": 4,
       "confirmed_counterexample_precision_against_hidden_truth": 0.75,
       "revision_transitions": {
         "improved": 1,
         "harmed": 0,
-        "stayed_correct": 59,
+        "stayed_correct": 61,
         "stayed_wrong": 21
       },
       "endpoint_latency_ms": {
         "all": {
-          "n": 443,
-          "p50": 28431,
+          "n": 453,
+          "p50": 26903,
           "p95": 243455,
           "max": 445309
         },
         "by_role": {
           "gen": {
-            "n": 105,
+            "n": 107,
             "p50": 98934,
             "p95": 305334,
             "max": 445309
           },
           "review": {
-            "n": 257,
-            "p50": 12351,
-            "p95": 217985,
+            "n": 263,
+            "p50": 12632,
+            "p95": 197741,
             "max": 359738
           },
           "revise": {
-            "n": 81,
-            "p50": 7885,
+            "n": 83,
+            "p50": 8142,
             "p95": 93523,
             "max": 179822
           }
         },
         "failed_attempts": 75
       },
-      "wall_s": 35568.5,
+      "wall_s": 36126.4,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0
     },
     "OFF5": {
       "tasks": 179,
-      "calls": 459,
+      "calls": 469,
       "infra_void": 52,
       "complete": false,
-      "processed": 139,
-      "accepted": 87,
-      "accepted_and_meets_demand": 73,
-      "demand_equals_output_rate": 0.8390804597701149,
+      "processed": 141,
+      "accepted": 89,
+      "accepted_and_meets_demand": 75,
+      "demand_equals_output_rate": 0.8426966292134831,
       "coverage": 1.0,
-      "correct_delivery_rate": 0.8390804597701149,
-      "raw_final_accuracy": 0.8390804597701149,
-      "calls_per_task": 5.275862068965517,
-      "calls_per_correct_delivery": 6.287671232876712,
+      "correct_delivery_rate": 0.8426966292134831,
+      "raw_final_accuracy": 0.8426966292134831,
+      "calls_per_task": 5.269662921348314,
+      "calls_per_correct_delivery": 6.253333333333333,
       "leaked": 14,
       "reviewer_accuracy": null,
       "raw_reviewer_accuracy": null,
@@ -1254,14 +1254,14 @@
       "revision_transitions": null,
       "endpoint_latency_ms": {
         "all": {
-          "n": 459,
+          "n": 469,
           "p50": 20730,
           "p95": 209992,
           "max": 397766
         },
         "by_role": {
           "gen": {
-            "n": 459,
+            "n": 469,
             "p50": 20730,
             "p95": 209992,
             "max": 397766
@@ -1269,7 +1269,7 @@
         },
         "failed_attempts": 58
       },
-      "wall_s": 31603.1,
+      "wall_s": 32199.5,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0
