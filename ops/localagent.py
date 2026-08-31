@@ -293,6 +293,15 @@ def main() -> None:
            "cwd": args.cwd, "prompt_bytes": len(prompt.encode())})
     print(f"── 本地模型輪次　{args.model} @ {args.api}", flush=True)
 
+    # 2026-08-31 round406 實測（iter-4741）：模型在預算內（33/40 步、
+    # 29.8/40 分鐘，兩者都還沒到頂）自己判斷「做完了」、吐出純文字摘要
+    # 收尾，但從頭到尾沒有執行過任何一次 git commit——是「模型自認完成」
+    # 不是「真的完成」，而 require_commit_push 的驗證只在事後才抓到，
+    # 已經浪費掉整輪 1788s。與其事後才發現，在模型交回純文字（沒有再要
+    # 工具）的當下先檢查有沒有真的 commit 過，沒有就用一句話逼它現在就
+    # 執行 git 指令，而不是接受它的「完成」宣稱——最多逼問
+    # `nudge_budget` 次，避免模型死不聽話時無限迴圈。
+    nudge_budget = 2
     for step in range(1, args.max_steps + 1):
         if time.time() - t0 > args.max_minutes * 60:
             print(f"── 到達 {args.max_minutes} 分鐘上限，收尾", flush=True)
@@ -307,6 +316,22 @@ def main() -> None:
         if text:
             print(f"[{step}] {text[:400]}", flush=True)
         if not calls:
+            if (args.require_commit_push and nudge_budget > 0
+                    and git_rev(cwd) == start_head):
+                nudge_budget -= 1
+                print(f"── 模型交回純文字但還沒 commit，逼問一次"
+                      f"（剩 {nudge_budget} 次額度）", flush=True)
+                messages.append({
+                    "role": "user",
+                    "content": (
+                        "You have not created any git commit yet "
+                        f"(HEAD is still {start_head}). Stop analyzing further "
+                        "and run the actual `git add`/`git commit`/`git push` "
+                        "commands right now, using whatever you have already "
+                        "found. This is a hard requirement, not a suggestion."
+                    ),
+                })
+                continue
             print("── 模型沒有再要工具，結束", flush=True)
             break
         for c in calls:
