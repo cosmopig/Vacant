@@ -1,0 +1,14 @@
+配對任務數 n = 46  （A=48 列, B=58 列）
+條件一致：True
+
+ON    需求=產出  32/46 = 69.57%  CI95 [55.2, 80.9]
+OFF   需求=產出  32/46 = 69.57%  CI95 [55.2, 80.9]
+
+discordant pair：只有 ON 對 b=5，只有 OFF 對 c=5  （證據單位 = 10）
+McNemar 精確雙尾 p = 1.0000
+
+總呼叫  ON=230  OFF=46   等預算：False
+每個正確交付的呼叫數  ON=7.19  OFF=1.44
+
+void 率（分母＝該臂該 run 的 measured+void，不是 n_paired）  ON=20.0% (12/60)  OFF=3.3% (2/60)
+⚠ VOID-GATE-WARNING：至少一臂 void 率超過 SPEC_GAIN §7 的 10% 閘門。本工具的配對分母本來就只含兩臂都量到的格子（不套用硬擋），但若 void與正確性相關，上面的 discordant pair／McNemar 結果可能有選擇偏誤——見 DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md。
