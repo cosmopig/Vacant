@@ -72,9 +72,21 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0) -> list[dict]:
 # ── 判定：產出滿不滿足需求 ────────────────────────────────────────
 # ON 的隱藏判定與 OFF5 的行為簽名共用同一份 import 白名單——
 # 兩條路徑對候選碼的限制必須一致，否則多數決與驗收會在不同規則下跑。
+#
+# round393：加入 "typing"。它零執行期副作用（純型別標註，不碰 I/O／檔案／
+# 網路），被漏掉純屬白名單疏漏，不是刻意的安全邊界。round393 逐題查證
+# off5va 剩下 2 個 discordant（736/790）發現：ON 對這兩題的 initial 與
+# revised 都因為 `from typing import List/Union` 被這道白名單擋下
+# （sandbox_check_failed，跟邏輯對不對無關），而 OFF5 的多數決剛好落在
+# 沒用 typing 的樣本上才躲過去。全域掃描：ON 的 visible_ok=False 裡
+# 6/7（86%）是這個 typing 阻擋，OFF 是 2/7（29%），OFF5 是 2/6（33%）——
+# ON 被這道白名單漏洞打得結構性地重，因為它只有 initial+revision 兩次
+# 真正的機會，OFF5 有 5 個獨立樣本多數決，撞上白名單漏洞的機率天然更低。
+# 這不是「哪個模型比較會寫程式」的證據，是量具本身的偏誤。
+# 見 `ops/gain/DECISION_20260831_R393_TYPING_IMPORT_WHITELIST_BUG.md`。
 _GAIN_ALLOWED_IMPORTS = (
     "bisect", "cmath", "collections", "functools", "heapq", "itertools",
-    "math", "operator", "re", "sys",
+    "math", "operator", "re", "sys", "typing",
 )
 
 
