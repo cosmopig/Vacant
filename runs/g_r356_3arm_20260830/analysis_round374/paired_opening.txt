@@ -1,0 +1,3 @@
+usage: analyze_paired.py [-h] --a-run A_RUN --a-arm A_ARM --b-run B_RUN
+                         --b-arm B_ARM [--json JSON]
+analyze_paired.py: error: the following arguments are required: --a-run, --a-arm, --b-run, --b-arm
