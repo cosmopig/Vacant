@@ -145,7 +145,7 @@ class Session:
             os.fsync(f.fileno())          # 中途被砍也要留得住
 
     # ── 模型 ────────────────────────────────────────────────────────
-    def complete(self, messages: list[dict], *, retries: int = 4) -> dict:
+    def complete(self, messages: list[dict], *, retries: int = 6) -> dict:
         body = json.dumps({
             "model": self.model,
             "messages": messages,
@@ -179,6 +179,14 @@ class Session:
                           "latency_ms": int((time.time() - t0) * 1000),
                           "error": last, "request_messages": messages})
                 if attempt < retries:
+                    # 2026-08-31 round396/397 實測：8765 中轉偶發整批 400
+                    # Bad Request 風暴（19s、30s 兩次），與決定性 run
+                    # PID 2266603 自己的 calls.jsonl 同時間戳也在噴 400
+                    # ——是後端整體風暴不是這支專屬，決定性 run 有
+                    # retries=4 撐得過去，這支原本 retries=4（2/4/8s＝
+                    # 14s 退避）撐不過 19-30s 的風暴而整輪失敗。
+                    # retries 提到 6（2/4/8/16/32s＝62s 累積退避）。
+                    #
                     # 2026-08-30 實測：中轉的 LM Studio 後端在跟決定性 run
                     # （同時吃兩顆模型 qwen3.6-35b-a3b／gemma-4-12b-it-qat）
                     # 搶記憶體時會把這支的模型換出，回 HTTP 200 但
