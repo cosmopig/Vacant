@@ -49,7 +49,12 @@ def analyze(run_dir: Path, arm: str) -> dict:
 
     tasks = arm_summary["tasks"]
     infra_void = arm_summary["infra_void"]
-    measured = tasks - infra_void
+    # measured 要跟 gain_run.py 的 finalize() 定義一致（`s["processed"] - s["n_void"]`，
+    # 見 ops/gain/gain_run.py:948）——用 processed 不是 tasks。run 未跑完時
+    # processed<tasks，用 tasks 算會虛高分母，Wilson CI 會比真實該有的更窄
+    # （round415 發現，本輪修）。processed 缺失（舊格式 summary）才退回 tasks。
+    processed = arm_summary.get("processed", tasks)
+    measured = processed - infra_void
     cdr = arm_summary.get("correct_delivery_rate")
 
     gate_blocked = infra_void > 6
@@ -57,6 +62,7 @@ def analyze(run_dir: Path, arm: str) -> dict:
         "ok": True,
         "arm": arm,
         "tasks": tasks,
+        "processed": processed,
         "infra_void": infra_void,
         "measured": measured,
         "gate_blocked_infra_void_gt_6": gate_blocked,
