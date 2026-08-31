@@ -1,0 +1,40 @@
+{
+  "run": "runs/g_r356_3arm_20260830",
+  "main_criterion": {
+    "off5_arm": "OFF5",
+    "on_arm": "ON",
+    "n_paired": 61,
+    "on_leaked": 7,
+    "off5v_leaked": 12,
+    "on_leak_rate": 0.11475409836065574,
+    "off5v_leak_rate": 0.19672131147540983,
+    "on_leak_rate_ci95": [
+      0.0567113064337431,
+      0.2184453830989026
+    ],
+    "off5v_leak_rate_ci95": [
+      0.11627688559536849,
+      0.3131017848877781
+    ],
+    "discordant_on_only": 0,
+    "discordant_off5v_only": 5,
+    "n_discordant": 5,
+    "mcnemar_exact_p_two_sided": 0.0625,
+    "gap_pp_off5v_minus_on": 8.19672131147541,
+    "verdict": "other（p=0.0625, gap=8.19672131147541）— 照实报，不套用预设话术"
+  },
+  "secondary_criterion": {
+    "n_rows": 78,
+    "off5_delivered_correct": 60,
+    "off5v_delivered_correct": 60,
+    "off5_delivery_rate": 0.7692307692307693,
+    "off5v_delivery_rate": 0.7692307692307693,
+    "off5_leaked": 18,
+    "off5v_leaked": 13,
+    "off5_leak_rate": 0.23076923076923078,
+    "off5v_leak_rate": 0.16666666666666666,
+    "false_rejects_of_correct_answers": 0,
+    "false_reject_task_ids": []
+  },
+  "excluded_off5_rows_missing_visible_ok": 0
+}
