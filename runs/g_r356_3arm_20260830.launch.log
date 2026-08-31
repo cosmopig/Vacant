@@ -109,3 +109,34 @@
   [OFF 38/179] 需求符合=True 接受=True 累計呼叫=36
   [OFF5 38/179] 需求符合=True 接受=True 累計呼叫=176
   [OFF 39/179] 需求符合=True 接受=True 累計呼叫=37
+  [OFF5 39/179] 需求符合=True 接受=True 累計呼叫=181
+  [OFF 40/179] 需求符合=False 接受=True 累計呼叫=38
+  [ON 40/179] 需求符合=False 接受=False 累計呼叫=169
+  [OFF5 40/179] 需求符合=False 接受=True 累計呼叫=186
+  [OFF 41/179] 需求符合=True 接受=True 累計呼叫=39
+  [ON 41/179] 需求符合=True 接受=True 累計呼叫=174
+  [OFF5 41/179] 需求符合=True 接受=True 累計呼叫=191
+  [OFF 42/179] 需求符合=True 接受=True 累計呼叫=40
+  [ON 42/179] 需求符合=True 接受=True 累計呼叫=179
+  [OFF5 42/179] 需求符合=True 接受=True 累計呼叫=196
+  [OFF 43/179] 需求符合=True 接受=True 累計呼叫=41
+  [ON 43/179] 需求符合=False 接受=False 累計呼叫=184
+  [OFF5 43/179] 需求符合=True 接受=True 累計呼叫=201
+  [OFF 44/179] 需求符合=True 接受=True 累計呼叫=42
+  [OFF5 44/179] 需求符合=True 接受=True 累計呼叫=206
+  [OFF 45/179] 需求符合=False 接受=True 累計呼叫=43
+  [ON 45/179] 需求符合=False 接受=False 累計呼叫=192
+  [OFF5 45/179] 需求符合=False 接受=True 累計呼叫=211
+  [OFF 46/179] 需求符合=True 接受=True 累計呼叫=44
+  [ON 46/179] 需求符合=True 接受=True 累計呼叫=197
+  [OFF5 46/179] 需求符合=True 接受=True 累計呼叫=216
+  [OFF 47/179] 需求符合=True 接受=True 累計呼叫=45
+  [ON 47/179] 需求符合=True 接受=True 累計呼叫=202
+  [OFF5 47/179] 需求符合=True 接受=True 累計呼叫=221
+  [OFF 48/179] 需求符合=True 接受=True 累計呼叫=46
+  [ON 48/179] 需求符合=True 接受=True 累計呼叫=207
+  [OFF5 48/179] 需求符合=True 接受=True 累計呼叫=226
+  [OFF 49/179] 需求符合=True 接受=True 累計呼叫=47
+  [ON 49/179] 需求符合=True 接受=True 累計呼叫=212
+  [OFF5 49/179] 需求符合=True 接受=True 累計呼叫=231
+  [OFF 50/179] 需求符合=True 接受=True 累計呼叫=48
