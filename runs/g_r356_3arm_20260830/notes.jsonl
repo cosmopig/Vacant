@@ -33,3 +33,5 @@
 {"arm": "ON", "task_id": "mbppplus_Mbpp/63", "infra_void": "plain-2 重試 2 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/557", "infra_void": "careful-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/287", "infra_void": "plain-2 重試 2 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/591", "infra_void": "careful-2 重試 2 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "OFF", "task_id": "mbppplus_Mbpp/142", "infra_void": "hasty-1 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}

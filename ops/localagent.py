@@ -145,7 +145,7 @@ class Session:
             os.fsync(f.fileno())          # 中途被砍也要留得住
 
     # ── 模型 ────────────────────────────────────────────────────────
-    def complete(self, messages: list[dict], *, retries: int = 6) -> dict:
+    def complete(self, messages: list[dict], *, retries: int = 9) -> dict:
         body = json.dumps({
             "model": self.model,
             "messages": messages,
@@ -187,6 +187,16 @@ class Session:
                     # 14s 退避）撐不過 19-30s 的風暴而整輪失敗。
                     # retries 提到 6（2/4/8/16/32s＝62s 累積退避）。
                     #
+                    # 2026-08-31 round398 實測：retries=6 的同步本身確認
+                    # 生效（localagent-4726.jsonl 真的看到 attempt 1-6），
+                    # 但這次風暴從 attempt1 起算到 attempt6 結束跨了約
+                    # 180s（attempt6 本身的請求就掛了 88.7s 才回 400，不是
+                    # 秒退的快速失敗）——62s 累積退避撐不過去。這是連續
+                    # 第二次「上一輪抓到的風暴時長，這一輪就被更長的蓋過」
+                    # ，不再逐次照觀測到的時長微調，改成 retries 提到 9
+                    # 且退避封頂在 32s（2/4/8/16/32/32/32/32＝158s 累積），
+                    # 用「更寬的固定預算」取代「跟著上一次風暴長度微調」。
+                    #
                     # 2026-08-30 實測：中轉的 LM Studio 後端在跟決定性 run
                     # （同時吃兩顆模型 qwen3.6-35b-a3b／gemma-4-12b-it-qat）
                     # 搶記憶體時會把這支的模型換出，回 HTTP 200 但
@@ -196,7 +206,7 @@ class Session:
                     if "unloaded" in last.lower():
                         time.sleep(30.0)
                     else:
-                        time.sleep(2.0 * (2 ** (attempt - 1)))
+                        time.sleep(min(2.0 * (2 ** (attempt - 1)), 32.0))
         raise SystemExit(f"模型連續 {retries} 次失敗：{last}")
 
     # ── 工具 ────────────────────────────────────────────────────────
