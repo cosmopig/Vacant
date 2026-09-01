@@ -6,8 +6,8 @@
     "timeout_s": 600,
     "retries": 4,
     "backoff_s": 2.0,
-    "review_timeout_s": 380,
-    "review_retries": 6
+    "review_timeout_s": 60,
+    "review_retries": 2
   },
   "pool": [
     {
@@ -16,7 +16,7 @@
     },
     {
       "agent_id": "careful-2",
-      "model": "gemma-4-12b-it-qat"
+      "model": "qwen/qwen3.6-35b-a3b"
     },
     {
       "agent_id": "plain-1",
@@ -24,7 +24,7 @@
     },
     {
       "agent_id": "plain-2",
-      "model": "gemma-4-12b-it-qat"
+      "model": "qwen/qwen3.6-35b-a3b"
     },
     {
       "agent_id": "hasty-1",
@@ -32,7 +32,7 @@
     },
     {
       "agent_id": "hasty-2",
-      "model": "gemma-4-12b-it-qat"
+      "model": "qwen/qwen3.6-35b-a3b"
     }
   ],
   "instrument": {
@@ -116,63 +116,46 @@
   },
   "calibration": null,
   "arms": {
-    "ON": {
+    "OFF": {
       "tasks": 60,
-      "calls": 57,
-      "infra_void": 2,
+      "calls": 5,
+      "infra_void": 1,
       "complete": false,
-      "processed": 13,
-      "accepted": 11,
-      "accepted_and_meets_demand": 8,
-      "demand_equals_output_rate": 0.7272727272727273,
+      "processed": 6,
+      "accepted": 5,
+      "accepted_and_meets_demand": 4,
+      "demand_equals_output_rate": 0.8,
       "coverage": 1.0,
-      "correct_delivery_rate": 0.7272727272727273,
-      "raw_final_accuracy": 0.7272727272727273,
-      "calls_per_task": 5.181818181818182,
-      "calls_per_correct_delivery": 7.125,
-      "leaked": 3,
-      "reviewer_accuracy": 0.6363636363636364,
-      "raw_reviewer_accuracy": 0.696969696969697,
-      "reviewer_votes": 33,
-      "review_fail_claims": 18,
-      "machine_confirmed_counterexamples": 8,
-      "confirmed_counterexample_precision_against_hidden_truth": 0.5,
-      "revision_transitions": {
-        "improved": 2,
-        "harmed": 1,
-        "stayed_correct": 6,
-        "stayed_wrong": 2
-      },
+      "correct_delivery_rate": 0.8,
+      "raw_final_accuracy": 0.8,
+      "calls_per_task": 1.0,
+      "calls_per_correct_delivery": 1.25,
+      "leaked": 1,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
       "endpoint_latency_ms": {
         "all": {
-          "n": 57,
-          "p50": 15025,
-          "p95": 326532,
-          "max": 370257
+          "n": 5,
+          "p50": 136057,
+          "p95": 228431,
+          "max": 228431
         },
         "by_role": {
           "gen": {
-            "n": 12,
-            "p50": 11522,
-            "p95": 107139,
-            "max": 107139
-          },
-          "review": {
-            "n": 34,
-            "p50": 8225,
-            "p95": 330101,
-            "max": 370257
-          },
-          "revise": {
-            "n": 11,
-            "p50": 197932,
-            "p95": 294313,
-            "max": 294313
+            "n": 5,
+            "p50": 136057,
+            "p95": 228431,
+            "max": 228431
           }
         },
-        "failed_attempts": 58
+        "failed_attempts": 6
       },
-      "wall_s": 7561.3,
+      "wall_s": 707.3,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0

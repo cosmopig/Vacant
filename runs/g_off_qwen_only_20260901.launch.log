@@ -1,0 +1,12 @@
+<unknown>:5: SyntaxWarning: invalid escape sequence '\w'
+60 題（evalplus）　輸出 runs/g_off_qwen_only_20260901
+── 量具驗證（先答已知答案）
+   參考解通過 12/12　壞解被擋 12/12
+── 模型池：6 個 agent／1 個模型家族
+── 模型池預檢（每個 model 問一句，零容忍）
+   qwen/qwen3.6-35b-a3b　回 4 字　✓
+  [OFF 1/60] 需求符合=True 接受=True 累計呼叫=1
+  [OFF 2/60] 需求符合=True 接受=True 累計呼叫=2
+  [OFF 4/60] 需求符合=False 接受=True 累計呼叫=3
+  [OFF 5/60] 需求符合=True 接受=True 累計呼叫=4
+  [OFF 6/60] 需求符合=True 接受=True 累計呼叫=5
