@@ -364,7 +364,19 @@ def verify_review_counterexample(
             code, contract_check, timeout_s, entry_point=entry_point)
         if not in_domain:
             return False, "outside_input_contract"
-    check = f"""
+    check = counterexample_check(entry_point, args, expected)
+    matches, err = meets_demand(code, check, timeout_s, entry_point=entry_point)
+    return not matches, "counterexample_confirmed" if not matches else "candidate_passed_claim"
+
+
+def counterexample_check(entry_point: str, args: list, expected) -> str:
+    """一份可重放的斷言字串：`entry_point(*args) == expected`。
+
+    round439 抽出這支：revise 選擇邏輯需要拿同一份反例斷言重新跑在
+    `revised_code` 上（見 `arm_on`），不能只跟 `verify_review_counterexample`
+    內部耦合，否則沒有管道驗證修訂版真的修掉了被指控的那個反例。
+    """
+    return f"""
 import math as __vacant_math
 def __vacant_equal(a, b):
     if isinstance(a, (int, float)) and isinstance(b, (int, float)):
@@ -377,8 +389,6 @@ def __vacant_equal(a, b):
 __vacant_actual = {entry_point}(*{args!r})
 assert __vacant_equal(__vacant_actual, {expected!r}), (__vacant_actual, {expected!r})
 """
-    matches, err = meets_demand(code, check, timeout_s, entry_point=entry_point)
-    return not matches, "counterexample_confirmed" if not matches else "candidate_passed_claim"
 
 
 def _route_agent(agents, rep, rng, *, exclude=()):
@@ -490,6 +500,7 @@ def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3,
     # DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md。
     raw_reviews = [review_one(r) for r in reviewers]
     review_evidence = []
+    confirmed_checks = []
     for aid, review in raw_reviews:
         raw_pass = _review_vote(review)
         confirmed, evidence_status = verify_review_counterexample(
@@ -507,6 +518,17 @@ def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3,
             "counterexample_confirmed": confirmed,
             "status": evidence_status,
         })
+        if confirmed:
+            # round439: keep the exact assertion that falsified the initial candidate so the
+            # revision can be checked against what was actually wrong, not just re-run against
+            # the same sparse visible suite it may already have passed or failed independent of
+            # the complaint. See DECISION_20260901_R439_REVISE_SELECTION_COUNTEREXAMPLE_CHECK.md.
+            claim = parse_review_claim(review)
+            if claim is not None:
+                claim_args, claim_expected = claim
+                confirmed_checks.append(
+                    counterexample_check(task.get("entry_point"), claim_args, claim_expected)
+                )
 
     passed_review = sum(1 for _, ok in votes if ok) >= (len(votes) + 1) // 2
 
@@ -540,17 +562,35 @@ def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3,
         initial_code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
     revised_visible_ok, _ = meets_demand(
         revised_code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+    # round439: re-running the same visible suite on revised_code proves nothing about
+    # whether it fixed the specific counterexample(s) that triggered the revision in the
+    # first place (that's usually why a grounded FAIL exists despite initial_visible_ok, or
+    # why passed_review is False even when initial already clears the sparse visible suite).
+    # DECISION_20260901_R438 measured discarded_win=0/113 on the prior selection rule; this
+    # gives the selector evidence to actually score a revision instead of rubber-stamping it.
+    revised_fixes_counterexamples = all(
+        meets_demand(revised_code, chk, entry_point=task.get("entry_point"))[0]
+        for chk in confirmed_checks
+    ) if confirmed_checks else True
     if passed_review and initial_visible_ok:
         # The fifth call keeps the equal budget, but an unrequested rewrite must not replace
         # an answer that peers approved. Its output remains logged for offline analysis.
         code = initial_code
         selected_version = "initial"
-    elif revised_visible_ok:
+    elif revised_visible_ok and revised_fixes_counterexamples:
         code = revised_code
         selected_version = "revised"
     elif initial_visible_ok:
         code = initial_code
         selected_version = "initial_fallback"
+    elif revised_visible_ok:
+        # Revised clears the sparse visible suite but does not fix the specific
+        # counterexample a reviewer proved against initial; neither candidate is verified
+        # against the actual complaint. Revised is still the least-bad fallback since
+        # initial fails the same visible suite outright. Kept distinct from
+        # "revised_both_visible_fail" so offline analysis can tell the two apart.
+        code = revised_code
+        selected_version = "revised_unconfirmed_fallback"
     else:
         code = revised_code
         selected_version = "revised_both_visible_fail"
@@ -575,6 +615,8 @@ def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3,
         "reviser": reviser.agent_id, "reviser_model": reviser.model,
         "initial_visible_ok": initial_visible_ok,
         "revised_visible_ok": revised_visible_ok,
+        "confirmed_counterexample_count": len(confirmed_checks),
+        "revised_fixes_counterexamples": revised_fixes_counterexamples,
         "selected_version": selected_version,
         "responsible_agent": responsible_agent,
         "visible_ok": visible_ok, "audited": audited,
