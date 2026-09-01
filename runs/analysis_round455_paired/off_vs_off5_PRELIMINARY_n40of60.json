@@ -1,0 +1,70 @@
+{
+  "a": {
+    "run": "runs/g_off_qwen_only_20260901",
+    "arm": "OFF",
+    "n_rows": 57
+  },
+  "b": {
+    "run": "runs/g_off5_qwen_only_20260901",
+    "arm": "OFF5",
+    "n_rows": 43
+  },
+  "conditions": {
+    "pool": {
+      "a": "bd6a00a936bb02e9",
+      "b": "bd6a00a936bb02e9",
+      "same": true
+    },
+    "instrument": {
+      "a": "fd5706c2fd5bf3e6",
+      "b": "fd5706c2fd5bf3e6",
+      "same": true
+    },
+    "calibration": {
+      "a": "74234e98afe7498f",
+      "b": "74234e98afe7498f",
+      "same": true
+    },
+    "request_policy": {
+      "a": "88dfc0972c0232f6",
+      "b": "88dfc0972c0232f6",
+      "same": true
+    }
+  },
+  "conditions_all_same": true,
+  "n_paired": 40,
+  "a_meets_demand": 32,
+  "b_meets_demand": 33,
+  "a_rate": 0.8,
+  "b_rate": 0.825,
+  "a_rate_ci95": [
+    0.6524239261814333,
+    0.8950013502683314
+  ],
+  "b_rate_ci95": [
+    0.6804970794560755,
+    0.9125469700311694
+  ],
+  "discordant_a_only": 1,
+  "discordant_b_only": 2,
+  "n_discordant": 3,
+  "mcnemar_exact_p_two_sided": 1.0,
+  "a_calls_total": 40,
+  "b_calls_total": 200,
+  "a_calls_per_correct": 1.25,
+  "b_calls_per_correct": 6.0606060606060606,
+  "equal_budget": false,
+  "a_void": {
+    "n_measured": 57,
+    "n_void": 3,
+    "ratio": 0.05,
+    "gate_exceeded": false
+  },
+  "b_void": {
+    "n_measured": 43,
+    "n_void": 4,
+    "ratio": 0.0851063829787234,
+    "gate_exceeded": false
+  },
+  "void_gate_warning": false
+}
