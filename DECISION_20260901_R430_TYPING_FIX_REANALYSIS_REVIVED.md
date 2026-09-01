@@ -141,3 +141,37 @@ gap      +2.70pp → +3.26pp
 - 若 `mbppplus_Mbpp/572` 之外出現第二個 OFF5 bucket-reconstruction
   不吻合的案例 ⇒ tie-break 近似的誤差可能比目前認為的大，typing 修正版
   的 OFF5 數字需要打折扣看待
+
+## 追記（round433，2026-09-01 UTC ~03:20-03:50，Sonnet 5）：p 值沒有繼續下降，
+## 卡在 0.4531 三個檢查點——「還在收斂」的敘事本輪需要收回
+
+round430（n_paired=92）與 round432（重跑但配對集合未被新資料觸及，
+仍是 n=92）都是 discordant b=5,c=2、p=0.4531。本輪用逐題 `detail`
+（修改一份 `reanalyze_typing_fix_r393.py` 的臨時副本，在既有的
+`detail` dict 後面加一行 dump 成 JSON，跑完即刪除，未改動原始腳本）
+重算，n_paired 已經長到 95（ON 105→106 行、OFF5 137→138 行，交集
+新增 3 題），但 **discordant 數字完全沒變（b=5, c=2）**，p 值原樣是
+0.4531，gap 從 +3.26pp 微降到 +3.16pp。
+
+```
+n_paired=95
+ON new_truth 80/95=84.21%   OFF5 new_truth 77/95=81.05%
+discordant b(ON only)=5 c(OFF5 only)=2
+McNemar exact p=0.4531   gap(ON-OFF5)=+3.16pp
+```
+
+新加入的 3 題全部落在「兩臂一致（都對或都錯）」，沒有貢獻新的
+discordant pair。round430 描述的「p 值 4 個檢查點單調下降
+（0.6875→0.453）」在那之後（round430→432→433）**沒有延續**——
+連續 3 個檢查點 b/c/p 完全不變，這比「持續收斂」更像「暫時卡在一個
+穩定值，等更多新題進來才會再動」。**不推翻 round430 的核心發現**
+（typing 修正後方向翻成 ON 領先，兩版本都不顯著），但「單調收斂中，
+可能會在 run_complete 時跨過顯著」這句預測性措辭本輪沒有得到新證據
+支持，下一輪引用時不要延續「快要顯著了」的敘事，除非真的看到 b/c
+或 p 再次變動。
+
+推翻條件檢查：`flip_to_false` 對 OFF/ON 本輪仍是 0（OFF: n=160,
+flip_to_true=4, flip_to_false=0；ON: n=105→106 尚未取新副本重跑
+flip 計數，但上一次完整 run 是 flip_to_false=0）——「純白名單擴充只會
+變好或不變」的方向保證未被打破。`mbppplus_Mbpp/572` 仍是唯一一個
+bucket-reconstruction 不吻合案例，未新增同類。
