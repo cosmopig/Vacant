@@ -1,0 +1,165 @@
+{
+  "seed": "g-r212-route-20260828",
+  "n": 60,
+  "run_complete": false,
+  "request_policy": {
+    "timeout_s": 600,
+    "retries": 4,
+    "backoff_s": 2.0,
+    "review_timeout_s": 60,
+    "review_retries": 2
+  },
+  "pool": [
+    {
+      "agent_id": "careful-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "careful-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "plain-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "plain-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "hasty-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "hasty-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    }
+  ],
+  "instrument": {
+    "n": 12,
+    "ref_pass": 12,
+    "broken_rejected": 12,
+    "detail": [
+      {
+        "task_id": "mbppplus_Mbpp/554",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/296",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/123",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/305",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/70",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/425",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/418",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/615",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/773",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/267",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/473",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/283",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      }
+    ]
+  },
+  "calibration": null,
+  "arms": {
+    "OFF5": {
+      "tasks": 60,
+      "calls": 10,
+      "infra_void": 0,
+      "complete": false,
+      "processed": 2,
+      "accepted": 2,
+      "accepted_and_meets_demand": 2,
+      "demand_equals_output_rate": 1.0,
+      "coverage": 1.0,
+      "correct_delivery_rate": 1.0,
+      "raw_final_accuracy": 1.0,
+      "calls_per_task": 5.0,
+      "calls_per_correct_delivery": 5.0,
+      "leaked": 0,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 10,
+          "p50": 38446,
+          "p95": 235809,
+          "max": 235809
+        },
+        "by_role": {
+          "gen": {
+            "n": 10,
+            "p50": 38446,
+            "p95": 235809,
+            "max": 235809
+          }
+        },
+        "failed_attempts": 0
+      },
+      "wall_s": 794.9,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    }
+  },
+  "equal_budget_comparison_valid": false
+}
