@@ -10,3 +10,16 @@
   [OFF 4/60] 需求符合=False 接受=True 累計呼叫=3
   [OFF 5/60] 需求符合=True 接受=True 累計呼叫=4
   [OFF 6/60] 需求符合=True 接受=True 累計呼叫=5
+  [OFF 7/60] 需求符合=True 接受=True 累計呼叫=6
+  [OFF 8/60] 需求符合=False 接受=True 累計呼叫=7
+  [OFF 10/60] 需求符合=False 接受=True 累計呼叫=8
+  [OFF 11/60] 需求符合=True 接受=True 累計呼叫=9
+  [OFF 12/60] 需求符合=True 接受=True 累計呼叫=10
+  [OFF 13/60] 需求符合=True 接受=True 累計呼叫=11
+  [OFF 14/60] 需求符合=True 接受=True 累計呼叫=12
+  [OFF 15/60] 需求符合=False 接受=True 累計呼叫=13
+  [OFF 16/60] 需求符合=True 接受=True 累計呼叫=14
+  [OFF 17/60] 需求符合=True 接受=True 累計呼叫=15
+  [OFF 18/60] 需求符合=True 接受=True 累計呼叫=16
+  [OFF 19/60] 需求符合=False 接受=True 累計呼叫=17
+  [OFF 20/60] 需求符合=True 接受=True 累計呼叫=18
