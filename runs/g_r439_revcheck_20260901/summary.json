@@ -115,6 +115,156 @@
     ]
   },
   "calibration": null,
-  "arms": {},
+  "arms": {
+    "OFF": {
+      "tasks": 179,
+      "calls": 9,
+      "infra_void": 0,
+      "complete": false,
+      "processed": 9,
+      "accepted": 9,
+      "accepted_and_meets_demand": 5,
+      "demand_equals_output_rate": 0.5555555555555556,
+      "coverage": 1.0,
+      "correct_delivery_rate": 0.5555555555555556,
+      "raw_final_accuracy": 0.5555555555555556,
+      "calls_per_task": 1.0,
+      "calls_per_correct_delivery": 1.8,
+      "leaked": 4,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 9,
+          "p50": 13868,
+          "p95": 370662,
+          "max": 370662
+        },
+        "by_role": {
+          "gen": {
+            "n": 9,
+            "p50": 13868,
+            "p95": 370662,
+            "max": 370662
+          }
+        },
+        "failed_attempts": 4
+      },
+      "wall_s": 1809.4,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    },
+    "ON": {
+      "tasks": 179,
+      "calls": 22,
+      "infra_void": 8,
+      "complete": false,
+      "processed": 9,
+      "accepted": 1,
+      "accepted_and_meets_demand": 0,
+      "demand_equals_output_rate": 0.0,
+      "coverage": 1.0,
+      "correct_delivery_rate": 0.0,
+      "raw_final_accuracy": 0.0,
+      "calls_per_task": 22.0,
+      "calls_per_correct_delivery": null,
+      "leaked": 1,
+      "reviewer_accuracy": 0.3333333333333333,
+      "raw_reviewer_accuracy": 1.0,
+      "reviewer_votes": 3,
+      "review_fail_claims": 3,
+      "machine_confirmed_counterexamples": 1,
+      "confirmed_counterexample_precision_against_hidden_truth": 1.0,
+      "revision_transitions": {
+        "improved": 0,
+        "harmed": 0,
+        "stayed_correct": 0,
+        "stayed_wrong": 1
+      },
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 22,
+          "p50": 75642,
+          "p95": 300989,
+          "max": 346977
+        },
+        "by_role": {
+          "gen": {
+            "n": 9,
+            "p50": 62631,
+            "p95": 300989,
+            "max": 300989
+          },
+          "review": {
+            "n": 12,
+            "p50": 79640,
+            "p95": 346977,
+            "max": 346977
+          },
+          "revise": {
+            "n": 1,
+            "p50": 58137,
+            "p95": 58137,
+            "max": 58137
+          }
+        },
+        "failed_attempts": 23
+      },
+      "wall_s": 3114.3,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": null
+    },
+    "OFF5": {
+      "tasks": 179,
+      "calls": 42,
+      "infra_void": 1,
+      "complete": false,
+      "processed": 9,
+      "accepted": 8,
+      "accepted_and_meets_demand": 5,
+      "demand_equals_output_rate": 0.625,
+      "coverage": 1.0,
+      "correct_delivery_rate": 0.625,
+      "raw_final_accuracy": 0.625,
+      "calls_per_task": 5.25,
+      "calls_per_correct_delivery": 8.4,
+      "leaked": 3,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 42,
+          "p50": 15317,
+          "p95": 238922,
+          "max": 400401
+        },
+        "by_role": {
+          "gen": {
+            "n": 42,
+            "p50": 15317,
+            "p95": 238922,
+            "max": 400401
+          }
+        },
+        "failed_attempts": 25
+      },
+      "wall_s": 2928.0,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    }
+  },
   "equal_budget_comparison_valid": false
 }

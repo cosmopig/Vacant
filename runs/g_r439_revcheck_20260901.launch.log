@@ -7,3 +7,21 @@
    qwen/qwen3.6-35b-a3b　回 4 字　✓
    gemma-4-12b-it-qat　回 2 字　✓
   [OFF 1/179] 需求符合=True 接受=True 累計呼叫=1
+  [OFF5 1/179] 需求符合=True 接受=True 累計呼叫=5
+  [OFF 2/179] 需求符合=True 接受=True 累計呼叫=2
+  [OFF5 2/179] 需求符合=True 接受=True 累計呼叫=10
+  [OFF 3/179] 需求符合=False 接受=True 累計呼叫=3
+  [OFF5 3/179] 需求符合=True 接受=True 累計呼叫=15
+  [OFF 4/179] 需求符合=False 接受=True 累計呼叫=4
+  [OFF5 4/179] 需求符合=False 接受=True 累計呼叫=20
+  [OFF 5/179] 需求符合=True 接受=True 累計呼叫=5
+  [OFF5 5/179] 需求符合=True 接受=True 累計呼叫=25
+  [OFF 6/179] 需求符合=True 接受=True 累計呼叫=6
+  [OFF5 6/179] 需求符合=True 接受=True 累計呼叫=30
+  [OFF 7/179] 需求符合=True 接受=True 累計呼叫=7
+  [OFF 8/179] 需求符合=False 接受=True 累計呼叫=8
+  [OFF5 8/179] 需求符合=False 接受=True 累計呼叫=37
+  [OFF 9/179] 需求符合=False 接受=True 累計呼叫=9
+  [ON 9/179] 需求符合=False 接受=True 累計呼叫=22
+  [OFF5 9/179] 需求符合=False 接受=True 累計呼叫=42
+  [OFF 10/179] 需求符合=False 接受=True 累計呼叫=10

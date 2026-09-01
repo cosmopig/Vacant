@@ -131,7 +131,12 @@ def meets_demand(
 
 
 # ── 量具驗證：先答已知答案 ────────────────────────────────────────
-def _canonical_solutions(path: str | None = None) -> dict[str, str]:
+LCB_PROBE_SOLUTIONS_PATH = (
+    pathlib.Path(__file__).resolve().parent / "data" / "lcb_probe_solutions.json"
+)
+
+
+def _canonical_solutions(bank: str = "evalplus", path: str | None = None) -> dict[str, str]:
     """只給量具驗證用的官方參考解。
 
     ⚠ 為什麼要另外讀：`EvalPlusMBPPLoader` **刻意不把 `canonical_solution`
@@ -142,7 +147,20 @@ def _canonical_solutions(path: str | None = None) -> dict[str, str]:
       這個 dict 只餵給 `meets_demand`，**不進任何 prompt**。
       如果哪天有人把它接進 agent 那條路，V/GT 分離就破了——所以它只在
       `probe_instrument` 裡被用到，不要擴大使用範圍。
+
+    ⚠ round441：LCB bank 的原始資料**沒有**官方參考解欄位（`_lcb_check_code`
+      的註解自己寫「LCB 的 GT 是 dataset 的 expected output，無 canonical」）
+      ——`bank="lcb"` 這條分支讀的是 `lcb_probe_solutions.json`，**手寫並在
+      本機用真的 hidden_check 逐題驗證過**（round441 的 DECISION 檔記過程與
+      驗證輸出），不是官方資料的一部分，只給量具用。`separateSquares`
+      （lcb_3763）刻意不收進來——該題 dataset 的 expected 只到小數 5 位，
+      跟檢查式 `abs(a-b)<=1e-6` 的容忍度矛盾，連精確解都會被判錯，
+      見 DECISION_20260901_R441。
     """
+    if bank == "lcb":
+        p = pathlib.Path(path) if path else LCB_PROBE_SOLUTIONS_PATH
+        with p.open(encoding="utf-8") as f:
+            return json.load(f)
     import gzip
     import os
     from vacant.codebench import EVALPLUS_DEFAULT_PATH
@@ -157,25 +175,29 @@ def _canonical_solutions(path: str | None = None) -> dict[str, str]:
     return out
 
 
-def probe_instrument(tasks, log, *, sample=12) -> dict:
+def probe_instrument(tasks, log, *, sample=12, bank: str = "evalplus") -> dict:
     """SPEC_GAIN §5.2：餵一份**確定正確**與一份**確定錯誤**，兩邊都要判對。
 
     沒有這一步的話，「量到 0」與「線根本沒接上」在報告裡長得一模一樣。
 
-    正確那份用 MBPP+ 自己的 `canonical_solution`（官方參考解）。
-    錯誤那份用一個一定跑不過的樁。**兩個方向都過才算量具可用**——
-    只驗正向會漏掉「什麼都判通過」，只驗反向會漏掉「什麼都判失敗」。
+    正確那份用官方（或 round441 手驗）參考解。錯誤那份用一個一定跑不過的樁。
+    **兩個方向都過才算量具可用**——只驗正向會漏掉「什麼都判通過」，
+    只驗反向會漏掉「什麼都判失敗」。
+
+    round441：抽樣改成**先篩有參考解的題目、再取前 `sample` 個**，不是
+    「取前 `sample` 個題目、沒參考解的跳過」——後者在 lcb bank 上會因為
+    seed 排序把有解的題目排到抽樣窗外，量到 n=0 但看起來像是資料沒接上
+    （實際發生過，見 DECISION_20260901_R441）。
     """
     try:
-        refs = _canonical_solutions()
+        refs = _canonical_solutions(bank)
     except Exception as e:                                   # noqa: BLE001
         raise SystemExit(f"讀不到官方參考解，量具無法驗證：{e}")
     good = bad = 0
     detail = []
-    for t in tasks[:sample]:
-        ref = refs.get(t["task_id"])
-        if not ref:
-            continue
+    covered = [t for t in tasks if refs.get(t["task_id"])][:sample]
+    for t in covered:
+        ref = refs[t["task_id"]]
         hidden = t["hidden_check"]["code"]
         ok_good, msg_g = meets_demand(ref, hidden, entry_point=t.get("entry_point"))
         ok_bad, _ = meets_demand(
@@ -849,7 +871,7 @@ def main() -> None:
     # ── 先驗量具 ──
     print("── 量具驗證（先答已知答案）")
     probe_sample = len(tasks) if args.probe_sample == 0 else args.probe_sample
-    pr = probe_instrument(tasks, note, sample=probe_sample)
+    pr = probe_instrument(tasks, note, sample=probe_sample, bank=args.bank)
     print(f"   參考解通過 {pr['ref_pass']}/{pr['n']}　"
           f"壞解被擋 {pr['broken_rejected']}/{pr['n']}")
     if pr["n"] == 0:
