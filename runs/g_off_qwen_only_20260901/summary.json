@@ -118,19 +118,19 @@
   "arms": {
     "OFF": {
       "tasks": 60,
-      "calls": 18,
+      "calls": 29,
       "infra_void": 2,
       "complete": false,
-      "processed": 20,
-      "accepted": 18,
-      "accepted_and_meets_demand": 13,
-      "demand_equals_output_rate": 0.7222222222222222,
+      "processed": 31,
+      "accepted": 29,
+      "accepted_and_meets_demand": 22,
+      "demand_equals_output_rate": 0.7586206896551724,
       "coverage": 1.0,
-      "correct_delivery_rate": 0.7222222222222222,
-      "raw_final_accuracy": 0.7222222222222222,
+      "correct_delivery_rate": 0.7586206896551724,
+      "raw_final_accuracy": 0.7586206896551724,
       "calls_per_task": 1.0,
-      "calls_per_correct_delivery": 1.3846153846153846,
-      "leaked": 5,
+      "calls_per_correct_delivery": 1.3181818181818181,
+      "leaked": 7,
       "reviewer_accuracy": null,
       "raw_reviewer_accuracy": null,
       "reviewer_votes": 0,
@@ -140,22 +140,22 @@
       "revision_transitions": null,
       "endpoint_latency_ms": {
         "all": {
-          "n": 18,
-          "p50": 80458,
-          "p95": 327201,
+          "n": 29,
+          "p50": 69457,
+          "p95": 245592,
           "max": 327201
         },
         "by_role": {
           "gen": {
-            "n": 18,
-            "p50": 80458,
-            "p95": 327201,
+            "n": 29,
+            "p50": 69457,
+            "p95": 245592,
             "max": 327201
           }
         },
         "failed_attempts": 12
       },
-      "wall_s": 2131.7,
+      "wall_s": 3288.8,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0
