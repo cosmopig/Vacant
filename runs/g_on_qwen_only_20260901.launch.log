@@ -6,3 +6,14 @@
 ── 模型池預檢（每個 model 問一句，零容忍）
    qwen/qwen3.6-35b-a3b　回 4 字　✓
   [ON 1/60] 需求符合=True 接受=True 累計呼叫=5
+  [ON 5/60] 需求符合=True 接受=True 累計呼叫=14
+  [ON 6/60] 需求符合=True 接受=True 累計呼叫=19
+  [ON 7/60] 需求符合=True 接受=True 累計呼叫=24
+  [ON 10/60] 需求符合=False 接受=True 累計呼叫=31
+  [ON 13/60] 需求符合=True 接受=True 累計呼叫=39
+  [ON 14/60] 需求符合=True 接受=True 累計呼叫=44
+  [ON 15/60] 需求符合=False 接受=False 累計呼叫=49
+  [ON 16/60] 需求符合=True 接受=True 累計呼叫=54
+  [ON 17/60] 需求符合=True 接受=True 累計呼叫=59
+  [ON 19/60] 需求符合=False 接受=True 累計呼叫=66
+  [ON 21/60] 需求符合=True 接受=True 累計呼叫=73
