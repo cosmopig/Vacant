@@ -118,61 +118,61 @@
   "arms": {
     "ON": {
       "tasks": 60,
-      "calls": 73,
-      "infra_void": 9,
+      "calls": 193,
+      "infra_void": 19,
       "complete": false,
-      "processed": 21,
-      "accepted": 11,
-      "accepted_and_meets_demand": 9,
-      "demand_equals_output_rate": 0.8181818181818182,
-      "coverage": 0.9166666666666666,
-      "correct_delivery_rate": 0.75,
-      "raw_final_accuracy": 0.75,
-      "calls_per_task": 6.083333333333333,
-      "calls_per_correct_delivery": 8.11111111111111,
-      "leaked": 2,
-      "reviewer_accuracy": 0.75,
-      "raw_reviewer_accuracy": 0.75,
-      "reviewer_votes": 36,
-      "review_fail_claims": 0,
+      "processed": 52,
+      "accepted": 32,
+      "accepted_and_meets_demand": 29,
+      "demand_equals_output_rate": 0.90625,
+      "coverage": 0.9696969696969697,
+      "correct_delivery_rate": 0.8787878787878788,
+      "raw_final_accuracy": 0.8787878787878788,
+      "calls_per_task": 5.848484848484849,
+      "calls_per_correct_delivery": 6.655172413793103,
+      "leaked": 3,
+      "reviewer_accuracy": 0.8484848484848485,
+      "raw_reviewer_accuracy": 0.8585858585858586,
+      "reviewer_votes": 99,
+      "review_fail_claims": 5,
       "machine_confirmed_counterexamples": 0,
       "confirmed_counterexample_precision_against_hidden_truth": null,
       "revision_transitions": {
-        "improved": 0,
+        "improved": 1,
         "harmed": 0,
-        "stayed_correct": 9,
-        "stayed_wrong": 3
+        "stayed_correct": 28,
+        "stayed_wrong": 4
       },
       "endpoint_latency_ms": {
         "all": {
-          "n": 73,
-          "p50": 41789,
-          "p95": 127102,
+          "n": 193,
+          "p50": 38298,
+          "p95": 89084,
           "max": 151724
         },
         "by_role": {
           "gen": {
-            "n": 20,
-            "p50": 58962,
-            "p95": 137571,
+            "n": 51,
+            "p50": 49584,
+            "p95": 131369,
             "max": 151724
           },
           "review": {
-            "n": 41,
-            "p50": 36669,
-            "p95": 54968,
+            "n": 109,
+            "p50": 32705,
+            "p95": 54385,
             "max": 59638
           },
           "revise": {
-            "n": 12,
-            "p50": 46048,
+            "n": 33,
+            "p50": 42970,
             "p95": 74041,
-            "max": 74041
+            "max": 98913
           }
         },
-        "failed_attempts": 24
+        "failed_attempts": 54
       },
-      "wall_s": 4712.5,
+      "wall_s": 10589.5,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0
