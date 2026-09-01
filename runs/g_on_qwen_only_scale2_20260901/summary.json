@@ -1,5 +1,5 @@
 {
-  "seed": "g-r212-route-20260828",
+  "seed": "g-r454-scale2-20260901",
   "n": 60,
   "run_complete": false,
   "request_policy": {
@@ -41,73 +41,73 @@
     "broken_rejected": 12,
     "detail": [
       {
-        "task_id": "mbppplus_Mbpp/554",
+        "task_id": "mbppplus_Mbpp/436",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/296",
+        "task_id": "mbppplus_Mbpp/238",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/123",
+        "task_id": "mbppplus_Mbpp/572",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/305",
+        "task_id": "mbppplus_Mbpp/9",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/70",
+        "task_id": "mbppplus_Mbpp/465",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/425",
+        "task_id": "mbppplus_Mbpp/20",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/418",
+        "task_id": "mbppplus_Mbpp/56",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/615",
+        "task_id": "mbppplus_Mbpp/19",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/773",
+        "task_id": "mbppplus_Mbpp/309",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/267",
+        "task_id": "mbppplus_Mbpp/412",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/473",
+        "task_id": "mbppplus_Mbpp/59",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/283",
+        "task_id": "mbppplus_Mbpp/108",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
@@ -116,46 +116,63 @@
   },
   "calibration": null,
   "arms": {
-    "OFF5": {
+    "ON": {
       "tasks": 60,
-      "calls": 286,
-      "infra_void": 5,
+      "calls": 5,
+      "infra_void": 0,
       "complete": false,
-      "processed": 60,
-      "accepted": 55,
-      "accepted_and_meets_demand": 45,
-      "demand_equals_output_rate": 0.8181818181818182,
+      "processed": 1,
+      "accepted": 1,
+      "accepted_and_meets_demand": 1,
+      "demand_equals_output_rate": 1.0,
       "coverage": 1.0,
-      "correct_delivery_rate": 0.8181818181818182,
-      "raw_final_accuracy": 0.8181818181818182,
-      "calls_per_task": 5.2,
-      "calls_per_correct_delivery": 6.355555555555555,
-      "leaked": 10,
-      "reviewer_accuracy": null,
-      "raw_reviewer_accuracy": null,
-      "reviewer_votes": 0,
+      "correct_delivery_rate": 1.0,
+      "raw_final_accuracy": 1.0,
+      "calls_per_task": 5.0,
+      "calls_per_correct_delivery": 5.0,
+      "leaked": 0,
+      "reviewer_accuracy": 1.0,
+      "raw_reviewer_accuracy": 1.0,
+      "reviewer_votes": 3,
       "review_fail_claims": 0,
       "machine_confirmed_counterexamples": 0,
       "confirmed_counterexample_precision_against_hidden_truth": null,
-      "revision_transitions": null,
+      "revision_transitions": {
+        "improved": 0,
+        "harmed": 0,
+        "stayed_correct": 1,
+        "stayed_wrong": 0
+      },
       "endpoint_latency_ms": {
         "all": {
-          "n": 286,
-          "p50": 51961,
-          "p95": 129223,
-          "max": 432402
+          "n": 5,
+          "p50": 32517,
+          "p95": 50589,
+          "max": 50589
         },
         "by_role": {
           "gen": {
-            "n": 286,
-            "p50": 51961,
-            "p95": 129223,
-            "max": 432402
+            "n": 1,
+            "p50": 37602,
+            "p95": 37602,
+            "max": 37602
+          },
+          "review": {
+            "n": 3,
+            "p50": 22816,
+            "p95": 32517,
+            "max": 32517
+          },
+          "revise": {
+            "n": 1,
+            "p50": 50589,
+            "p95": 50589,
+            "max": 50589
           }
         },
-        "failed_attempts": 28
+        "failed_attempts": 0
       },
-      "wall_s": 19850.6,
+      "wall_s": 164.8,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0
