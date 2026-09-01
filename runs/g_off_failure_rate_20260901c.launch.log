@@ -1,0 +1,22 @@
+60 題（evalplus）　輸出 runs/g_off_failure_rate_20260901c
+── 量具驗證（先答已知答案）
+   參考解通過 12/12　壞解被擋 12/12
+── 模型池：6 個 agent／1 個模型家族
+── 模型池預檢（每個 model 問一句，零容忍）
+   qwen/qwen3.6-35b-a3b　回 4 字　✓
+  [OFF 1/60] 需求符合=True 接受=True 累計呼叫=1
+  [OFF 2/60] 需求符合=True 接受=True 累計呼叫=2
+  [OFF 3/60] 需求符合=True 接受=True 累計呼叫=3
+  [OFF 4/60] 需求符合=False 接受=True 累計呼叫=4
+  [OFF 5/60] 需求符合=True 接受=True 累計呼叫=5
+  [OFF 6/60] 需求符合=False 接受=True 累計呼叫=6
+  [OFF 7/60] 需求符合=True 接受=True 累計呼叫=7
+  [OFF 8/60] 需求符合=True 接受=True 累計呼叫=8
+  [OFF 9/60] 需求符合=True 接受=True 累計呼叫=9
+  [OFF 10/60] 需求符合=False 接受=True 累計呼叫=10
+  [OFF 11/60] 需求符合=True 接受=True 累計呼叫=11
+  [OFF 12/60] 需求符合=True 接受=True 累計呼叫=12
+  [OFF 13/60] 需求符合=False 接受=True 累計呼叫=13
+  [OFF 14/60] 需求符合=False 接受=True 累計呼叫=14
+  [OFF 15/60] 需求符合=True 接受=True 累計呼叫=15
+  [OFF 16/60] 需求符合=False 接受=True 累計呼叫=16

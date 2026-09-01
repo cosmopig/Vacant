@@ -7,3 +7,11 @@
 {"arm": "ON", "task_id": "mbppplus_Mbpp/309", "infra_void": "plain-1 重試 2 次仍失敗：TimeoutError: timed out"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/412", "infra_void": "hasty-1 重試 2 次仍失敗：TimeoutError: timed out"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/59", "infra_void": "plain-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/137", "infra_void": "plain-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/766", "infra_void": "plain-2 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/790", "infra_void": "careful-2 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/457", "infra_void": "hasty-2 重試 2 次仍失敗：HTTPError: HTTP Error 400: Bad Request"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/639", "infra_void": "careful-2 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/128", "infra_void": "hasty-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/265", "infra_void": "careful-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/433", "infra_void": "plain-1 重試 2 次仍失敗：TimeoutError: timed out"}

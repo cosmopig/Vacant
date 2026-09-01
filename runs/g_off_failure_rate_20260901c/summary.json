@@ -1,5 +1,5 @@
 {
-  "seed": "g-r454-scale2-20260901",
+  "seed": "g-off-failure-rate-20260901",
   "n": 60,
   "run_complete": false,
   "request_policy": {
@@ -41,73 +41,73 @@
     "broken_rejected": 12,
     "detail": [
       {
-        "task_id": "mbppplus_Mbpp/436",
+        "task_id": "mbppplus_Mbpp/413",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/238",
+        "task_id": "mbppplus_Mbpp/100",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/572",
+        "task_id": "mbppplus_Mbpp/142",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/9",
+        "task_id": "mbppplus_Mbpp/777",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/465",
+        "task_id": "mbppplus_Mbpp/757",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/20",
+        "task_id": "mbppplus_Mbpp/310",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/56",
+        "task_id": "mbppplus_Mbpp/578",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/19",
+        "task_id": "mbppplus_Mbpp/744",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/309",
+        "task_id": "mbppplus_Mbpp/799",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/412",
+        "task_id": "mbppplus_Mbpp/301",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/59",
+        "task_id": "mbppplus_Mbpp/281",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
       },
       {
-        "task_id": "mbppplus_Mbpp/108",
+        "task_id": "mbppplus_Mbpp/474",
         "ref_pass": true,
         "broken_rejected": true,
         "err": ""
@@ -116,63 +116,46 @@
   },
   "calibration": null,
   "arms": {
-    "ON": {
+    "OFF": {
       "tasks": 60,
-      "calls": 60,
-      "infra_void": 16,
+      "calls": 16,
+      "infra_void": 0,
       "complete": false,
-      "processed": 23,
-      "accepted": 7,
-      "accepted_and_meets_demand": 7,
-      "demand_equals_output_rate": 1.0,
+      "processed": 16,
+      "accepted": 16,
+      "accepted_and_meets_demand": 10,
+      "demand_equals_output_rate": 0.625,
       "coverage": 1.0,
-      "correct_delivery_rate": 1.0,
-      "raw_final_accuracy": 1.0,
-      "calls_per_task": 8.571428571428571,
-      "calls_per_correct_delivery": 8.571428571428571,
-      "leaked": 0,
-      "reviewer_accuracy": 0.9047619047619048,
-      "raw_reviewer_accuracy": 1.0,
-      "reviewer_votes": 21,
-      "review_fail_claims": 3,
-      "machine_confirmed_counterexamples": 1,
-      "confirmed_counterexample_precision_against_hidden_truth": 1.0,
-      "revision_transitions": {
-        "improved": 1,
-        "harmed": 0,
-        "stayed_correct": 6,
-        "stayed_wrong": 0
-      },
+      "correct_delivery_rate": 0.625,
+      "raw_final_accuracy": 0.625,
+      "calls_per_task": 1.0,
+      "calls_per_correct_delivery": 1.6,
+      "leaked": 6,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
       "endpoint_latency_ms": {
         "all": {
-          "n": 60,
-          "p50": 49523,
-          "p95": 184644,
-          "max": 416281
+          "n": 16,
+          "p50": 98920,
+          "p95": 324821,
+          "max": 324821
         },
         "by_role": {
           "gen": {
-            "n": 23,
-            "p50": 82116,
-            "p95": 411741,
-            "max": 416281
-          },
-          "review": {
-            "n": 30,
-            "p50": 36313,
-            "p95": 57863,
-            "max": 58857
-          },
-          "revise": {
-            "n": 7,
-            "p50": 44013,
-            "p95": 63611,
-            "max": 63611
+            "n": 16,
+            "p50": 98920,
+            "p95": 324821,
+            "max": 324821
           }
         },
-        "failed_attempts": 42
+        "failed_attempts": 3
       },
-      "wall_s": 6474.8,
+      "wall_s": 2089.0,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0
