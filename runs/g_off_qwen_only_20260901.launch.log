@@ -34,3 +34,36 @@
   [OFF 29/60] 需求符合=True 接受=True 累計呼叫=27
   [OFF 30/60] 需求符合=True 接受=True 累計呼叫=28
   [OFF 31/60] 需求符合=True 接受=True 累計呼叫=29
+  [OFF 32/60] 需求符合=False 接受=True 累計呼叫=30
+  [OFF 33/60] 需求符合=True 接受=True 累計呼叫=31
+  [OFF 34/60] 需求符合=True 接受=True 累計呼叫=32
+  [OFF 35/60] 需求符合=True 接受=True 累計呼叫=33
+  [OFF 36/60] 需求符合=True 接受=True 累計呼叫=34
+  [OFF 37/60] 需求符合=True 接受=True 累計呼叫=35
+  [OFF 38/60] 需求符合=True 接受=True 累計呼叫=36
+  [OFF 39/60] 需求符合=True 接受=True 累計呼叫=37
+  [OFF 40/60] 需求符合=False 接受=True 累計呼叫=38
+  [OFF 41/60] 需求符合=True 接受=True 累計呼叫=39
+  [OFF 42/60] 需求符合=True 接受=True 累計呼叫=40
+  [OFF 43/60] 需求符合=True 接受=True 累計呼叫=41
+  [OFF 44/60] 需求符合=True 接受=True 累計呼叫=42
+  [OFF 46/60] 需求符合=True 接受=True 累計呼叫=43
+  [OFF 47/60] 需求符合=True 接受=True 累計呼叫=44
+  [OFF 48/60] 需求符合=True 接受=True 累計呼叫=45
+  [OFF 49/60] 需求符合=True 接受=True 累計呼叫=46
+  [OFF 50/60] 需求符合=True 接受=True 累計呼叫=47
+  [OFF 51/60] 需求符合=True 接受=True 累計呼叫=48
+  [OFF 52/60] 需求符合=False 接受=True 累計呼叫=49
+  [OFF 53/60] 需求符合=True 接受=True 累計呼叫=50
+  [OFF 54/60] 需求符合=True 接受=True 累計呼叫=51
+  [OFF 55/60] 需求符合=True 接受=True 累計呼叫=52
+  [OFF 56/60] 需求符合=True 接受=True 累計呼叫=53
+  [OFF 57/60] 需求符合=True 接受=True 累計呼叫=54
+  [OFF 58/60] 需求符合=True 接受=True 累計呼叫=55
+  [OFF 59/60] 需求符合=False 接受=True 累計呼叫=56
+  [OFF 60/60] 需求符合=True 接受=True 累計呼叫=57
+── OFF: {"tasks": 60, "calls": 57, "infra_void": 3, "complete": false, "processed": 60, "accepted": 57, "accepted_and_meets_demand": 46, "demand_equals_output_rate": 0.8070175438596491, "coverage": 1.0, "correct_delivery_rate": 0.8070175438596491, "raw_final_accuracy": 0.8070175438596491, "calls_per_task": 1.0, "calls_per_correct_delivery": 1.2391304347826086, "leaked": 11, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "endpoint_latency_ms": {"all": {"n": 57, "p50": 56685, "p95": 245592, "max": 327201}, "by_role": {"gen": {"n": 57, "p50": 56685, "p95": 245592, "max": 327201}}, "failed_attempts": 17}, "wall_s": 6034.3, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+⚠ run_complete=False——這些臂沒跑完：OFF。這一輪的比例不得拿去比較（SPEC_GAIN §7）。
+
+寫出 runs/g_off_qwen_only_20260901/summary.json
+⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。
