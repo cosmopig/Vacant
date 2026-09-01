@@ -47,3 +47,9 @@ runs/s13_shots/*_s3.png
 runs/s13_main.log
 runs/s13_selftest.log
 runs/s13_reload.log
+
+# G 增益實驗交接檔：正本在 ~/vacant/GAIN_STATE.md（repo 外，不進版控）。
+# round431（2026-09-01）曾把它誤寫到 repo 內相對路徑並 commit 進去，
+# round432 修復並在此明確排除，避免下次 `git add -A` 又撿到。
+GAIN_STATE.md
+NEXT_MODEL
