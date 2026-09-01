@@ -8,3 +8,4 @@
    gemma-4-12b-it-qat　回 2 字　✓
   [ON 1/60] 需求符合=True 接受=True 累計呼叫=5
   [ON 2/60] 需求符合=True 接受=True 累計呼叫=10
+  [ON 3/60] 需求符合=True 接受=True 累計呼叫=15
