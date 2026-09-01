@@ -7,3 +7,11 @@
    qwen/qwen3.6-35b-a3b　回 4 字　✓
   [OFF5 1/60] 需求符合=True 接受=True 累計呼叫=5
   [OFF5 2/60] 需求符合=True 接受=True 累計呼叫=10
+  [OFF5 3/60] 需求符合=True 接受=True 累計呼叫=15
+  [OFF5 4/60] 需求符合=False 接受=True 累計呼叫=20
+  [OFF5 5/60] 需求符合=True 接受=True 累計呼叫=25
+  [OFF5 6/60] 需求符合=True 接受=True 累計呼叫=30
+  [OFF5 8/60] 需求符合=False 接受=True 累計呼叫=38
+  [OFF5 9/60] 需求符合=False 接受=True 累計呼叫=43
+  [OFF5 10/60] 需求符合=False 接受=True 累計呼叫=48
+  [OFF5 11/60] 需求符合=True 接受=True 累計呼叫=53
