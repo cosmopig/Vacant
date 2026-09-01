@@ -4,3 +4,6 @@
 {"arm": "ON", "task_id": "mbppplus_Mbpp/465", "infra_void": "hasty-1 重試 2 次仍失敗：TimeoutError: timed out"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/56", "infra_void": "hasty-2 重試 2 次仍失敗：TimeoutError: timed out"}
 {"arm": "ON", "task_id": "mbppplus_Mbpp/19", "infra_void": "hasty-2 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/309", "infra_void": "plain-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/412", "infra_void": "hasty-1 重試 2 次仍失敗：TimeoutError: timed out"}
+{"arm": "ON", "task_id": "mbppplus_Mbpp/59", "infra_void": "plain-1 重試 2 次仍失敗：TimeoutError: timed out"}
