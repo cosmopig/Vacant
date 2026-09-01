@@ -706,3 +706,143 @@ def freeze_subset(
         if len(out) >= n:
             break
     return out
+
+
+# ============================================================================
+# LiveCodeBench bank（R440，人類指令 2026-09-01：「題目可能過於簡單」）
+# ============================================================================
+
+LCB_BANK_DEFAULT_PATH = "ops/gain/data/lcb_bank_v1.jsonl"
+# 釘值由 build_lcb_bank.py 產出時印出，寫死在這裡（EvalPlus 同款紀律）。
+LCB_BANK_V1_SHA256 = "eb2a58760818d54b0a0141aa37e1603f875c53ccc76a2d87a6bf044b39a6c659"
+LCB_BANK_V1_COUNT = 91
+
+_LCB_SCHEMA = {
+    "task_id": str, "entry_point": str, "difficulty": str, "platform": str,
+    "prompt": str, "visible_tests": list, "hidden_tests": list,
+}
+
+
+def _lcb_check_code(entry_point: str, tests: list[dict[str, Any]]) -> str:
+    """期望值直接內嵌（LCB 的 GT 是 dataset 的 expected output，無 canonical）。
+
+    比較語義沿用 _check_code 的寬容遞迴判等（list/tuple 逐元素），但不做
+    set-equivalent／regex 白名單——LCB 題的期望值就是唯一正解。"""
+    lines = [
+        "def __aeq(a, b):",
+        "    try:",
+        "        if a == b:",
+        "            return True",
+        "    except (TypeError, ValueError):",
+        "        pass",
+        "    if isinstance(a, bool) != isinstance(b, bool):",
+        "        return False",
+        "    if isinstance(a, (int, float)) and isinstance(b, (int, float)):",
+        "        return abs(a - b) <= 1e-6",
+        "    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):",
+        "        return len(a) == len(b) and all(__aeq(x, y) for x, y in zip(a, b))",
+        "    return a == b",
+        "",
+        f"__tests = {tests!r}",
+        "for __t in __tests:",
+        f"    __got = {entry_point}(*__t['args'])",
+        "    assert __aeq(__got, __t['expected']), (",
+        "        f\"args={__t['args']!r} got={__got!r} want={__t['expected']!r}\")",
+    ]
+    return "\n".join(lines)
+
+
+class LiveCodeBenchLoader(TaskLoader):
+    """LiveCodeBench code_generation_lite（Jain et al. 2024, arXiv:2403.07974）
+    functional×(medium+hard) 子集的 fail-closed 載入器。
+
+    公正性依據：比賽題有發布日期戳（本 bank 收錄 contest_date 皆為 2024-08 之後
+    的視窗），難度標籤由平台原生給定，不是我們自己挑的。誠實邊界：無法保證
+    晚於本實驗 worker 模型的訓練截止（模型卡未公開精確 cutoff），本 bank 只能
+    宣稱「MBPP+ 之外、更難、附日期戳」，不能宣稱零污染——見 DECISION_20260901_R440。
+
+    紀律與 EvalPlusMBPPLoader 相同：sha256 釘死、題數釘死、schema 全驗、
+    重複 task_id 拒收；GT（hidden_tests）只進 hidden_check。"""
+
+    def __init__(
+        self,
+        path: str | None = None,
+        *,
+        expected_sha256: str | None = None,
+        expected_count: int = LCB_BANK_V1_COUNT,
+    ) -> None:
+        import os
+        self.path = path or os.environ.get("VACANT_LCB_PATH", LCB_BANK_DEFAULT_PATH)
+        if expected_sha256 is None and path is None:
+            expected_sha256 = LCB_BANK_V1_SHA256
+        if expected_sha256 is None:
+            raise ValueError("expected_sha256 不可為 None（fail-closed）")
+        self.expected_sha256 = expected_sha256
+        self.expected_count = expected_count
+        self._records = self._load_verified()
+
+    def _load_verified(self) -> list[dict[str, Any]]:
+        p = Path(self.path)
+        if not p.exists():
+            raise FileNotFoundError(
+                f"LCB bank 不存在：{p}（用 ops/gain/build_lcb_bank.py 產生，"
+                "或設 VACANT_LCB_PATH）"
+            )
+        got = hashlib.sha256(p.read_bytes()).hexdigest()
+        if got != self.expected_sha256:
+            raise ValueError(
+                f"LCB bank sha256 不符：got {got} want {self.expected_sha256}（拒收）"
+            )
+        records: list[dict[str, Any]] = []
+        with open(p, encoding="utf-8") as f:
+            for ln, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                rec = json.loads(line)
+                for field_name, typ in _LCB_SCHEMA.items():
+                    if not isinstance(rec.get(field_name), typ):
+                        raise ValueError(f"第 {ln} 行欄位 {field_name} 缺或型別錯")
+                records.append(rec)
+        if len(records) != self.expected_count:
+            raise ValueError(
+                f"題數不符：got {len(records)} want {self.expected_count}"
+            )
+        ids = [r["task_id"] for r in records]
+        if len(set(ids)) != len(ids):
+            raise ValueError("task_id 重複（拒收）")
+        return records
+
+    def iter_tasks(self, seed: Any) -> Iterator[dict[str, Any]]:
+        """seed 決定性排序；visible=公開測資、hidden=公開＋私有（超集，同 EvalPlus
+        base/base+plus 的關係）。behavior_inputs 只含公開測資的 args。"""
+        ordered = sorted(
+            self._records,
+            key=lambda r: hashlib.sha256(f"{seed}:{r['task_id']}".encode()).hexdigest(),
+        )
+        for rec in ordered:
+            visible = rec["visible_tests"]
+            full = visible + rec["hidden_tests"]
+            yield {
+                "task_id": rec["task_id"],
+                "family": f"lcb_{rec['platform']}_{rec['difficulty']}",
+                "prompt": rec["prompt"],
+                "entry_point": rec["entry_point"],
+                "behavior_inputs": [t["args"] for t in visible],
+                "input_contract": "",
+                "input_parameters": [],
+                "visible_check": {
+                    "type": "run_python",
+                    "code": _lcb_check_code(rec["entry_point"], visible),
+                    "timeout": 8,
+                },
+                "hidden_check": {
+                    "type": "run_python",
+                    "code": _lcb_check_code(rec["entry_point"], full),
+                    "timeout": 8,
+                },
+            }
+
+    @staticmethod
+    def public_view(task: dict[str, Any]) -> dict[str, Any]:
+        return {k: task[k] for k in ("task_id", "family", "prompt", "entry_point")}

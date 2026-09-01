@@ -59,12 +59,17 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0) -> list[dict]:
         正式跑分前必須換成真 EvalPlus 資料」。
       拿它跑增益實驗會把「題目其實都一樣」誤讀成「機制沒有差別」。
     """
-    loader = (EvalPlusMBPPLoader(expose_contract=True)
-              if bank == "evalplus" else BuiltinSampleLoader())
+    if bank == "evalplus":
+        loader = EvalPlusMBPPLoader(expose_contract=True)
+    elif bank == "lcb":
+        from vacant.codebench import LiveCodeBenchLoader
+        loader = LiveCodeBenchLoader()          # sha256/題數釘死，fail-closed
+    else:
+        loader = BuiltinSampleLoader()
     ts = list(loader.iter_tasks(seed))
     if bank == "evalplus":
         ts = [t for t in ts if t["task_id"] not in GAIN_EVALPLUS_RESOURCE_EXCLUSIONS]
-    if bank != "evalplus":
+    if bank == "builtin":
         print("⚠ 用的是合成題庫，結論不可外推（見 load_tasks docstring）")
     return ts[offset:offset + n] if n else ts[offset:]
 
@@ -770,7 +775,7 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=40)
     ap.add_argument("--seed", default="g1")
     ap.add_argument("--arms", default="OFF,ON,OFF5")
-    ap.add_argument("--bank", default="evalplus", choices=["evalplus", "builtin"])
+    ap.add_argument("--bank", default="evalplus", choices=["evalplus", "builtin", "lcb"])
     ap.add_argument("--audit-rate", type=float, default=0.2)
     ap.add_argument(
         "--calibration-n", type=int, default=0,
