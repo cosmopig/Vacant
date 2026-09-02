@@ -118,61 +118,61 @@
   "arms": {
     "ON": {
       "tasks": 60,
-      "calls": 111,
-      "infra_void": 43,
+      "calls": 123,
+      "infra_void": 48,
       "complete": false,
-      "processed": 54,
-      "accepted": 11,
-      "accepted_and_meets_demand": 11,
+      "processed": 60,
+      "accepted": 12,
+      "accepted_and_meets_demand": 12,
       "demand_equals_output_rate": 1.0,
       "coverage": 1.0,
       "correct_delivery_rate": 1.0,
       "raw_final_accuracy": 1.0,
-      "calls_per_task": 10.090909090909092,
-      "calls_per_correct_delivery": 10.090909090909092,
+      "calls_per_task": 10.25,
+      "calls_per_correct_delivery": 10.25,
       "leaked": 0,
-      "reviewer_accuracy": 0.9393939393939394,
+      "reviewer_accuracy": 0.9444444444444444,
       "raw_reviewer_accuracy": 1.0,
-      "reviewer_votes": 33,
+      "reviewer_votes": 36,
       "review_fail_claims": 3,
       "machine_confirmed_counterexamples": 1,
       "confirmed_counterexample_precision_against_hidden_truth": 1.0,
       "revision_transitions": {
         "improved": 1,
         "harmed": 0,
-        "stayed_correct": 10,
+        "stayed_correct": 11,
         "stayed_wrong": 0
       },
       "endpoint_latency_ms": {
         "all": {
-          "n": 111,
+          "n": 123,
           "p50": 57505,
-          "p95": 257612,
+          "p95": 268719,
           "max": 416281
         },
         "by_role": {
           "gen": {
-            "n": 52,
-            "p50": 103659,
+            "n": 58,
+            "p50": 108183,
             "p95": 352410,
             "max": 416281
           },
           "review": {
-            "n": 48,
+            "n": 53,
             "p50": 41948,
             "p95": 58857,
             "max": 59612
           },
           "revise": {
-            "n": 11,
-            "p50": 44013,
+            "n": 12,
+            "p50": 42721,
             "p95": 114702,
             "max": 114702
           }
         },
-        "failed_attempts": 105
+        "failed_attempts": 118
       },
-      "wall_s": 15040.1,
+      "wall_s": 17239.3,
       "cost_usd": 0.0,
       "market_cost_usd": 0.0,
       "market_cost_per_correct_delivery": 0.0
