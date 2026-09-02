@@ -60,3 +60,21 @@ round 編號 → `~/vacant/logs/launch_e1.log`（若存在）→ R440E §四／R
 放行過的：唯讀 ssh 探測、`touch ~/vacant/STOP`＋TERM 第 4909 輪（local）＋起新 loop.sh、
 git commit／push、本機閘門驗證。分界線看起來是「對 1004 的模型狀態」與「在遠端起長時間
 背景 run／殺 run」兩類要人類，其餘可自主。
+
+## 七、05:15–09:21 UTC 補記（Mac 關機前最後一次更新，17:2x CST）
+
+- **E1 第一次發射（05:15）死於 preflight**：迴圈 local 輪叫 qwen3.6，1004 JIT 把 gemma 擠掉。
+  事故時間線、根因兩層、重發條件在 **R440E §八**（新名 `runs/g_r441_gemma_only_mbpp_b`，
+  發射前 1004 必須：Eject qwen → Load gemma → **關 JIT**）。**尚未重發**。
+- **迴圈已重啟為 round440k 版**（PID 2548763，05:39:44），第一輪 log 印出
+  `指令檔：/home/user1/vacant/Vacant/ops/LOOP_PROMPT.md（254 行）`——迴圈終於在讀 repo 的
+  prompt（R440L：內容＝8/28 G 優先本體＋政策節）。`~/vacant/bin/localagent.py` DEFAULT_MODEL
+  仍是哨兵值（local 輪會 404 快速失敗退回 sonnet），E1 收官後可從 `.bak_r440j` 還原。
+- **迴圈 05:39–09:20 UTC 每輪 2 秒 rc=1**（第 4916–5055 輪）：claude session 上限
+  「resets 9:20am UTC」；09:20 重置後第 5056 輪正常開始。這段沒有任何產物，不是迴圈壞掉。
+- **1004 又回到 `qwen/qwen3.8-27b`**（09:21 UTC 讀到）；gemma 未載。人類的三件事
+  （kill local 輪已不需要——該輪 05:38 自然結束；1004 GUI Eject→Load gemma→關 JIT；發射 `_b`）
+  **只剩後兩件**。發射一行：
+  `cd ~/vacant/Vacant && E1_OUT=runs/g_r441_gemma_only_mbpp_b GEMMA_CTX=262144 bash ops/gain/launch_e1.sh all`
+  （若 gemma 以其他 context 載入，把 GEMMA_CTX 改成實際值即可，prep 會驗）。
+- 本 session 隨 Mac 於 10:00 UTC 下線；之後只剩迴圈。
