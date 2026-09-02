@@ -1,0 +1,128 @@
+{
+  "n_votes": 3388,
+  "C1_qwen": {
+    "k": 20,
+    "n": 108,
+    "A": 0.18518518518518517,
+    "wilson": [
+      0.12319953823545507,
+      0.26879694754069705
+    ],
+    "expected": [
+      20,
+      108
+    ],
+    "pass": true
+  },
+  "C1p_gemma": {
+    "k": 163,
+    "n": 306,
+    "A": 0.5326797385620915,
+    "wilson": [
+      0.4767186597955868,
+      0.5878304811618784
+    ],
+    "expected": [
+      162,
+      305
+    ],
+    "pass": false
+  },
+  "C2": {
+    "n_diff": 2,
+    "n_r522": 3388,
+    "diffs": [
+      {
+        "kind": "harness",
+        "run": "g_het3_r278_20260829",
+        "task_id": "mbppplus_Mbpp/722",
+        "agent_id": "hasty-2",
+        "model": "gemma-4-12b-it-qat",
+        "r522": {
+          "parseable": true,
+          "harness": false
+        },
+        "r523": {
+          "parseable": true,
+          "harness": true,
+          "exc": null,
+          "actual": "{'Cierra Vega': (6.2, 71)}",
+          "expected": "{'Cierra Vega': (6.2, 71)}"
+        }
+      },
+      {
+        "kind": "parse",
+        "run": "g_r441_gemma_only_mbpp_b",
+        "task_id": "mbppplus_Mbpp/165",
+        "agent_id": "hasty-2",
+        "model": "gemma-4-12b-it-qat",
+        "r522": {
+          "parseable": false,
+          "harness": null
+        },
+        "r523": {
+          "parseable": true,
+          "harness": false,
+          "exc": null,
+          "actual": "5",
+          "expected": "0"
+        }
+      }
+    ],
+    "pass": false
+  },
+  "C3": {
+    "wilson_upper_qwen": 0.26879694754069705,
+    "pass": true
+  },
+  "C4": {
+    "n_qwen": 2421,
+    "pass_rate_first_nonempty": 0.9545642296571665,
+    "pass_rate_r522style": 0.9545642296571665,
+    "r522_claimed": 0.9545642296571665,
+    "pass": true
+  },
+  "C5": {
+    "qwen_in_rows": {
+      "k": 15,
+      "n": 100,
+      "A": 0.15,
+      "wilson": [
+        0.09305985282608238,
+        0.23283559593051173
+      ]
+    },
+    "qwen_vote_PASS": {
+      "k": 0,
+      "n": 0,
+      "A": null
+    },
+    "qwen_vote_nonPASS": {
+      "k": 20,
+      "n": 108,
+      "A": 0.18518518518518517
+    },
+    "gemma_in_rows": {
+      "k": 158,
+      "n": 293,
+      "A": 0.5392491467576792,
+      "wilson": [
+        0.4820349542006341,
+        0.5954474840384036
+      ]
+    },
+    "votes_with_multiple_TEST_ARGS_lines": {
+      "gemma-4-12b-it-qat": 3
+    },
+    "qwen_ref_exceptions": {
+      "TypeError": 60,
+      "AttributeError": 6,
+      "ValueError": 2,
+      "IndexError": 1
+    }
+  },
+  "fingerprints": {
+    "ds_sha8": "af43697e",
+    "votes_r522_sha8": "bbccb6d9"
+  }
+}

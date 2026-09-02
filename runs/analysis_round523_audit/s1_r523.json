@@ -1,0 +1,78 @@
+{
+  "qwen/qwen3.6-35b-a3b": {
+    "n": 108,
+    "A_asis": {
+      "k": 20,
+      "A": 0.18518518518518517,
+      "wilson": [
+        0.12319953823545507,
+        0.26879694754069705
+      ]
+    },
+    "A_repacked": {
+      "k": 72,
+      "A": 0.6666666666666666,
+      "wilson": [
+        0.5733891672893803,
+        0.7484950461232449
+      ]
+    },
+    "n_retried": 60,
+    "transitions(asis->repacked)": {
+      "exc->ok": 52,
+      "exc->wrong": 8
+    },
+    "runtime_status_by_asis": {
+      "ok|outside_input_contract": 10,
+      "exc|outside_input_contract": 67,
+      "ok|candidate_passed_claim": 1,
+      "exc|None": 1,
+      "ok|counterexample_confirmed": 4,
+      "ok|None": 5,
+      "wrong|outside_input_contract": 14,
+      "wrong|counterexample_confirmed": 3,
+      "wrong|None": 2,
+      "exc|counterexample_confirmed": 1
+    }
+  },
+  "gemma-4-12b-it-qat": {
+    "n": 305,
+    "A_asis": {
+      "k": 162,
+      "A": 0.5311475409836065,
+      "wilson": [
+        0.4751035407038299,
+        0.5864166971309487
+      ]
+    },
+    "A_repacked": {
+      "k": 162,
+      "A": 0.5311475409836065,
+      "wilson": [
+        0.4751035407038299,
+        0.5864166971309487
+      ]
+    },
+    "n_retried": 4,
+    "transitions(asis->repacked)": {
+      "exc->exc": 4
+    },
+    "runtime_status_by_asis": {
+      "wrong|None": 8,
+      "wrong|outside_input_contract": 35,
+      "exc|outside_input_contract": 29,
+      "ok|outside_input_contract": 40,
+      "ok|None": 5,
+      "wrong|counterexample_confirmed": 54,
+      "ok|candidate_passed_claim": 87,
+      "ok|counterexample_confirmed": 30,
+      "exc|counterexample_confirmed": 11,
+      "exc|candidate_passed_claim": 1,
+      "wrong|candidate_passed_claim": 5
+    }
+  },
+  "S1_gate": {
+    "qwen_repacked_wilson_upper": 0.7484950461232449,
+    "downgrade": false
+  }
+}
