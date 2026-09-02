@@ -1,0 +1,78 @@
+{
+  "seed": "42",
+  "n": 5,
+  "run_complete": false,
+  "request_policy": {
+    "timeout_s": 600,
+    "retries": 4,
+    "backoff_s": 2.0,
+    "review_timeout_s": 60,
+    "review_retries": 2
+  },
+  "pool": [
+    {
+      "agent_id": "careful-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "careful-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "plain-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "plain-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "hasty-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "hasty-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    }
+  ],
+  "instrument": {
+    "n": 5,
+    "ref_pass": 5,
+    "broken_rejected": 5,
+    "detail": [
+      {
+        "task_id": "mbppplus_Mbpp/3",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/474",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/432",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/65",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/743",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      }
+    ]
+  },
+  "calibration": null,
+  "arms": {},
+  "equal_budget_comparison_valid": false
+}
