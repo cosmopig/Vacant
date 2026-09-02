@@ -78,3 +78,23 @@ git commit／push、本機閘門驗證。分界線看起來是「對 1004 的模
   `cd ~/vacant/Vacant && E1_OUT=runs/g_r441_gemma_only_mbpp_b GEMMA_CTX=262144 bash ops/gain/launch_e1.sh all`
   （若 gemma 以其他 context 載入，把 GEMMA_CTX 改成實際值即可，prep 會驗）。
 - 本 session 隨 Mac 於 10:00 UTC 下線；之後只剩迴圈。
+
+## 八、E1 已發射（09:33 UTC，本 session 09:35 獨立驗證）——取代 §七「等人類」
+
+- 人類在 1004 把 gemma 設為唯一常駐（09:35 讀到：`gemma-4-12b-it-qat` ctx 262144 parallel 4，無其他實例）。
+- peer session 依人類指示發射：`E1_OUT=runs/g_r441_gemma_only_mbpp_b GEMMA_CTX=262144 bash ops/gain/launch_e1.sh all`
+  → prep `resident_non_gemma=[]`、探針 3/3、閘門通過（R440E 授權 `_b`）、量具 179/179、
+  preflight ✓（09:33:46）、**`E1_LAUNCH_RESULT=launched pid=2572085`**（09:32:52 起）。
+- 09:35 UTC：rows 5（OFF 2／ON 2／OFF5 1，全 meets_demand）、void 0、calls 22、
+  後端快照 `runs/g_r441_gemma_only_mbpp_b.backend.json`＝gemma@262144 單獨。
+- **迴圈接手（TASKS_OVERNIGHT A2/A3）**：每 60 題檢查點；第一個 20 題就看 ON void 是否 <35%
+  （R440C P0）；任一臂 infra_void >20% 立刻停手寫 DECISION；≥90 題 `echo fable > NEXT_MODEL`。
+  數字附 rows.jsonl 行數＋sha256 前 8 碼。**`runs/g_r441_gemma_only_mbpp/`（無 _b）是 05:16 的
+  事故目錄，不是本 run。**
+- 注意：vacant-dev 上有一個人類早先卡在密碼提示的舊行程 `2542866`
+  （`ssh user1@100.124.254.83 P=$(pgrep -f "gain_run.py …` ），指令文字含 `gain_run.py`——
+  用 `pgrep -f gain_run` 會多數到它；總綱的錨行首檢查 `grep -c "^python3 ops/gain/gain_run\.py"`
+  不受影響。無害，人類可 `kill 2542866`。
+- **JIT 仍是關鍵**：w1004（100.118.96.3）會定期向 hub 要 qwen3.8；若 1004 的 JIT 沒關，它的下一次
+  請求會把 gemma 擠掉、E1 再死一次。迴圈每個檢查點順手看 `curl 8766/api/models` 的 `loaded_on`
+  是否仍只有 gemma。
