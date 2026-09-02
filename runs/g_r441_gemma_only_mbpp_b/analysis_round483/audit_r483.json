@@ -1,0 +1,149 @@
+{
+  "snapshot": {
+    "rows_lines": 301,
+    "rows_sha256_8": "eb324b06",
+    "notes_lines": 4,
+    "calls_lines": 1128
+  },
+  "arms": {
+    "OFF": {
+      "n": 102,
+      "meets": 68,
+      "rate": 0.6667,
+      "fail_rate": 0.3333,
+      "void": 0,
+      "void_rate": 0.0,
+      "calls": 102
+    },
+    "ON": {
+      "n": 98,
+      "meets": 74,
+      "rate": 0.7551,
+      "fail_rate": 0.2449,
+      "void": 3,
+      "void_rate": 0.0297,
+      "calls": 490
+    },
+    "OFF5": {
+      "n": 101,
+      "meets": 72,
+      "rate": 0.7129,
+      "fail_rate": 0.2871,
+      "void": 0,
+      "void_rate": 0.0,
+      "calls": 505
+    }
+  },
+  "paired": {
+    "ON_vs_OFF5": {
+      "common": 98,
+      "b": 8,
+      "c": 5,
+      "p_exact": 0.5811,
+      "paired_gap_pp": 3.06
+    },
+    "ON_vs_OFF": {
+      "common": 98,
+      "b": 11,
+      "c": 3,
+      "p_exact": 0.0574,
+      "paired_gap_pp": 8.16
+    },
+    "OFF5_vs_OFF": {
+      "common": 101,
+      "b": 6,
+      "c": 2,
+      "p_exact": 0.2891,
+      "paired_gap_pp": 3.96
+    }
+  },
+  "review_E1": {
+    "label": "E1 g_r441_gemma_only_mbpp_b (gemma reviewers on gemma drafts)",
+    "n_tasks": 98,
+    "raw_pass": {
+      "votes": 294,
+      "TP": 147,
+      "FP": 20,
+      "FN": 63,
+      "TN": 64,
+      "accuracy": 0.7177,
+      "always_pass_baseline": 0.7143,
+      "diff_pp": 0.34,
+      "cluster_bootstrap_95ci_pp": [
+        -12.59,
+        13.27
+      ],
+      "fail_vote_precision": 0.504,
+      "binom_one_sided_p_vs_no_info": 1.82e-07
+    },
+    "grounded_pass": {
+      "votes": 294,
+      "TP": 199,
+      "FP": 55,
+      "FN": 11,
+      "TN": 29,
+      "accuracy": 0.7755,
+      "always_pass_baseline": 0.7143,
+      "diff_pp": 6.12,
+      "cluster_bootstrap_95ci_pp": [
+        0.0,
+        12.59
+      ],
+      "fail_vote_precision": 0.725,
+      "binom_one_sided_p_vs_no_info": 1.11e-08
+    }
+  },
+  "review_r356_all": {
+    "label": "r356 mixed pool (R438 CONCLUSION source)",
+    "n_tasks": 113,
+    "raw_pass": {
+      "votes": 339,
+      "TP": 220,
+      "FP": 56,
+      "FN": 35,
+      "TN": 28,
+      "accuracy": 0.7316,
+      "always_pass_baseline": 0.7522,
+      "diff_pp": -2.06,
+      "cluster_bootstrap_95ci_pp": [
+        -7.96,
+        4.13
+      ],
+      "fail_vote_precision": 0.444,
+      "binom_one_sided_p_vs_no_info": 0.000519
+    },
+    "grounded_pass": {
+      "votes": 339,
+      "TP": 244,
+      "FP": 72,
+      "FN": 11,
+      "TN": 12,
+      "accuracy": 0.7552,
+      "always_pass_baseline": 0.7522,
+      "diff_pp": 0.29,
+      "cluster_bootstrap_95ci_pp": [
+        -2.95,
+        3.54
+      ],
+      "fail_vote_precision": 0.522,
+      "binom_one_sided_p_vs_no_info": 0.0043
+    }
+  },
+  "review_r356_by_reviewer_family": {
+    "gemma": {
+      "votes": 168,
+      "TN_grounded": 11,
+      "FN_grounded": 11,
+      "raw_fail": 54,
+      "grounded_diff_pp": 0.0
+    },
+    "qwen": {
+      "votes": 171,
+      "TN_grounded": 1,
+      "FN_grounded": 0,
+      "raw_fail": 9,
+      "grounded_diff_pp": 0.58
+    }
+  },
+  "r356_rows_sha256_8": "b3354c65"
+}

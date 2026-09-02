@@ -1,0 +1,77 @@
+{
+  "run": "/dev/shm/r483",
+  "n_on_rows": 98,
+  "raw": {
+    "n": 294,
+    "fail_votes": 127,
+    "fail_vote_rate": 0.43197278911564624,
+    "TP": 147,
+    "FP": 20,
+    "FN": 63,
+    "TN": 64,
+    "accuracy": 0.717687074829932,
+    "always_pass_baseline": 0.7142857142857143,
+    "accuracy_minus_baseline": 0.003401360544217691,
+    "recall_on_wrong_drafts": 0.7619047619047619,
+    "precision_of_fail_votes": 0.5039370078740157
+  },
+  "grounded": {
+    "n": 294,
+    "fail_votes": 40,
+    "fail_vote_rate": 0.1360544217687075,
+    "TP": 199,
+    "FP": 55,
+    "FN": 11,
+    "TN": 29,
+    "accuracy": 0.7755102040816326,
+    "always_pass_baseline": 0.7142857142857143,
+    "accuracy_minus_baseline": 0.061224489795918324,
+    "recall_on_wrong_drafts": 0.34523809523809523,
+    "precision_of_fail_votes": 0.725
+  },
+  "status": {
+    "review_not_fail": 167,
+    "counterexample_confirmed": 40,
+    "candidate_passed_claim": 46,
+    "unparseable_claim": 25,
+    "outside_input_contract": 16
+  },
+  "selected_version": {
+    "initial": 76,
+    "revised_both_visible_fail": 12,
+    "revised_unconfirmed_fallback": 1,
+    "revised": 6,
+    "initial_fallback": 3
+  },
+  "passed_review": {
+    "True": 86,
+    "False": 12
+  },
+  "revision_transition": {
+    "stayed_correct": 70,
+    "stayed_wrong": 24,
+    "improved": 4
+  },
+  "improved_tasks": [
+    {
+      "task_id": "mbppplus_Mbpp/259",
+      "passed_review": false,
+      "selected_version": "revised_unconfirmed_fallback"
+    },
+    {
+      "task_id": "mbppplus_Mbpp/7",
+      "passed_review": false,
+      "selected_version": "revised"
+    },
+    {
+      "task_id": "mbppplus_Mbpp/462",
+      "passed_review": true,
+      "selected_version": "revised"
+    },
+    {
+      "task_id": "mbppplus_Mbpp/781",
+      "passed_review": false,
+      "selected_version": "revised"
+    }
+  ]
+}
