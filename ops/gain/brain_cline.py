@@ -159,6 +159,12 @@ class ClineBrain:
                     "agent_id": self.agent_id, "role": role,
                     "api": self.api,
                     "model": model_id,
+                    # 伺服端在回應本體裡自己報的 model 欄（OpenAI 相容格式的頂層
+                    # "model" 鍵）——`model`/`model_configured` 只驗得到請求端
+                    # 送出的值沒被換掉，驗不到 1004／中轉那端服務的是不是同一個
+                    # 模型（R483 §5、R516 §8 的落盤缺口）。沒有就是 None，
+                    # 不假裝有值。
+                    "server_model": d.get("model") if isinstance(d, dict) else None,
                     "model_configured": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": True,
                     "timeout_s": effective_timeout, "retries_max": effective_retries,

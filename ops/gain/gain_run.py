@@ -970,11 +970,19 @@ def main() -> None:
             and summary.get("ON", {}).get("calls_per_task") == 5
             and summary.get("OFF5", {}).get("calls_per_task") == 5
         )
+        # `run_complete` 要求零 void（比例才可信），有 void 的 run 永遠是 False——
+        # R516 §8 抓到的是下游拿它當「這輪跑完了沒」的訊號會永遠等不到 True。
+        # `run_terminal` 只回答「迴圈是不是把每個 task 都跑到底了」，
+        # 不管中途有沒有 void；兩個訊號分開才不會互相冒充。
+        run_terminal = bool(arms) and all(
+            summary.get(a, {}).get("terminal") for a in arms
+        )
         (out / "summary.json").write_text(
             json.dumps({
                 "seed": args.seed,
                 "n": args.n,
                 "run_complete": run_complete,
+                "run_terminal": run_terminal,
                 "request_policy": {
                     "timeout_s": args.request_timeout_s,
                     "retries": args.retries,
@@ -1038,6 +1046,11 @@ def main() -> None:
             #   `processed == len(tasks)` 一起要求，否則就是 round224 那個
             #   「run_complete 說跑完了、其實一格都沒量到」的同型錯誤。
             "complete": s["n_void"] == 0 and s["processed"] == len(tasks),
+            # `complete` 綁死零 void，是「比例可不可信」的判準，不是「跑完了沒」——
+            # 只要這一輪有任何 void（infra_void 規則本來就預期會有）它就永遠 False，
+            # 下游拿 complete 當收官訊號會永遠等不到（R516 §8）。`terminal` 只問
+            # 迴圈有沒有把每個 task 都處理過一次，void 不影響它。
+            "terminal": s["processed"] == len(tasks),
             "processed": s["processed"],
             "accepted": n_acc, "accepted_and_meets_demand": n_acc_ok,
             "demand_equals_output_rate": (n_acc_ok / n_acc) if n_acc else None,

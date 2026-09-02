@@ -409,6 +409,51 @@ def test_run_complete_is_false_when_an_arm_measured_nothing():
                    for a in ["OFF", "OFF5"])
 
 
+def test_run_terminal_stays_true_when_a_run_has_voids(tmp_path):
+    """R516 §8 的落盤缺口：`complete` 綁死零 void，有 void 的 run 永遠 False，
+
+    下游拿它當「這輪跑完了沒」的收官訊號會永遠等不到 True（E1 就是這樣，
+    12 個 void、`run_complete` 結構上不可能變 true，只能靠人讀 commit 訊息
+    才知道收官）。`terminal` 只問「迴圈有沒有把每個 task 處理過一次」，
+    不管中途有沒有 void；兩個訊號要分得開，不能互相冒充。
+
+    這裡照 `gain_run.py:finalize()`／`write_summary()` 裡的公式手算，
+    跟 `test_run_complete_is_false_when_an_arm_measured_nothing` 同一種寫法：
+    先不打補丁重算一次 complete 用的舊公式，證明它在有 void 時永遠是
+    False，再算新加的 terminal 公式，證明它跟 void 無關只跟
+    processed==tasks 有關。
+    """
+    tasks_n = 179
+    arms = ["OFF", "ON", "OFF5"]
+
+    # ON 臂跑完全部 179 題、其中 12 個 void（E1 的實際形狀）
+    s_on = {"processed": 179, "n_void": 12}
+    s_off = {"processed": 179, "n_void": 0}
+    s_off5 = {"processed": 179, "n_void": 0}
+
+    def terminal(s):
+        return s["processed"] == tasks_n
+
+    def complete(s):
+        return s["n_void"] == 0 and s["processed"] == tasks_n
+
+    summary = {
+        "OFF": {"complete": complete(s_off), "terminal": terminal(s_off)},
+        "ON": {"complete": complete(s_on), "terminal": terminal(s_on)},
+        "OFF5": {"complete": complete(s_off5), "terminal": terminal(s_off5)},
+    }
+
+    # 舊訊號：ON 有 void ⇒ 全跑完了 run_complete 依然是 False，且永遠不會變 True
+    assert not all(summary[a]["complete"] for a in arms)
+    # 新訊號：三臂都把 179 題處理過一次 ⇒ run_terminal 是 True，不受 void 拖累
+    assert all(summary[a]["terminal"] for a in arms)
+
+    # 還沒跑完的中途快照：terminal 也要是 False，不能因為之後會補上就先寫 True
+    s_on_partial = {"processed": 3, "n_void": 0}
+    assert not terminal(s_on_partial)
+    assert not complete(s_on_partial)
+
+
 def test_local_endpoint_needs_no_key_but_official_one_still_does(tmp_path, monkeypatch):
     """換本地端點可以沒有金鑰檔；沒換端點卻缺金鑰必須直接停。
 
@@ -459,6 +504,60 @@ def test_relay_200_with_error_body_is_retried_not_scored(tmp_path, monkeypatch):
     assert all("terminated" in r["error"] for r in recs), \
         "落盤訊息要看得出是端點回的錯誤，不是 KeyError"
     assert not any("KeyError" in r["error"] for r in recs)
+
+
+def test_server_reported_model_is_captured_on_every_success(tmp_path, monkeypatch):
+    """R483 §5／R516 §8 的落盤缺口：`model`/`model_configured` 只驗得到
+
+    請求端送出的值沒被換掉，驗不到 1004／中轉那端**實際服務**的是不是
+    同一個模型——那個資訊在 OpenAI 相容回應本體的頂層 "model" 欄，
+    這支之前從沒讀過它。現在每一筆成功呼叫都要落盤 `server_model`；
+    伺服端沒回這個欄位時要是 None，不能整個 key 消失（消失會讓
+    "這個版本有沒有修過" 只能用 try/except KeyError 猜）。
+    """
+    import io
+    import urllib.request
+
+    from ops.gain.brain_cline import ClineBrain
+
+    def make_resp(body: dict) -> "io.BytesIO":
+        class FakeResp(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+        return FakeResp(json.dumps(body).encode())
+
+    # 伺服端報的名字跟請求端送的名字不同——這正是要抓的「無聲替換」情境
+    monkeypatch.setattr(
+        urllib.request, "urlopen",
+        lambda *a, **k: make_resp({
+            "model": "gemma-4-12b-it-qat@node-b",
+            "choices": [{"message": {"content": "```python\npass\n```"}}],
+            "usage": {"cost": 0.0},
+        }))
+    brain = ClineBrain("t", "sys", key="k", log_path=tmp_path / "a.jsonl",
+                       model="gemma-4-12b-it-qat", retries=1, backoff_s=0)
+    brain.generate("x")
+    rec = json.loads((tmp_path / "a.jsonl").read_text().splitlines()[0])
+    assert "server_model" in rec, "缺這個欄位就驗不到伺服端有沒有換模型"
+    assert rec["server_model"] == "gemma-4-12b-it-qat@node-b"
+    assert rec["model_configured"] == "gemma-4-12b-it-qat", \
+        "設定值仍要留著，伺服端回報值是另外一欄，不是取代它"
+
+    # 伺服端沒回 model 欄時要是 None，不是整筆記錄少一個 key
+    monkeypatch.setattr(
+        urllib.request, "urlopen",
+        lambda *a, **k: make_resp({
+            "choices": [{"message": {"content": "```python\npass\n```"}}],
+            "usage": {"cost": 0.0},
+        }))
+    brain2 = ClineBrain("t", "sys", key="k", log_path=tmp_path / "b.jsonl",
+                        model="gemma-4-12b-it-qat", retries=1, backoff_s=0)
+    brain2.generate("x")
+    rec2 = json.loads((tmp_path / "b.jsonl").read_text().splitlines()[0])
+    assert "server_model" in rec2 and rec2["server_model"] is None
 
 
 def test_404_is_retried_because_the_relay_swaps_nodes(tmp_path, monkeypatch):
