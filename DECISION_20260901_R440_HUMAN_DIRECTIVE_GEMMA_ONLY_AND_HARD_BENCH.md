@@ -94,15 +94,18 @@ E1 先跑（最便宜、與決定性 run 直接可比）。每條約 35h（E2/E3
 ```
 # E1（先跑；與決定性 run 唯一差異＝--models）
 python3 ops/gain/gain_run.py --out runs/g_r441_gemma_only_mbpp --n 179 \
-  --seed g-r212-route-20260828 --models gemma-4-12b-it-qat
+  --seed g-r212-route-20260828 --models gemma-4-12b-it-qat \
+  --decision DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md
 
 # E2（E1 收完再上）
 python3 ops/gain/gain_run.py --out runs/g_r442_mixed_lcb --n 91 \
-  --seed g-r442-lcb --bank lcb
+  --seed g-r442-lcb --bank lcb \
+  --decision DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md
 
 # E3（E1/E2 皆有訊號才上）
 python3 ops/gain/gain_run.py --out runs/g_r443_gemma_lcb --n 91 \
-  --seed g-r442-lcb --bank lcb --models gemma-4-12b-it-qat
+  --seed g-r442-lcb --bank lcb --models gemma-4-12b-it-qat \
+  --decision DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md
 ```
 
 r439 驗證 run 仍在端點上時**不得**發射（§7）。

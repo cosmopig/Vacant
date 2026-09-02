@@ -229,3 +229,11 @@ zoo 曾經檢查 `sim.js` 有沒有載入（前提），而該檢查的是 `warm
      不論臂**。R440D 已裁決「infra 未修前不再起 qwen run」；第 4910 輪 04:44 UTC 起的
      `g_e2q_off_lcb_qwenonly_20260902` 沒有預註冊、違反 R440D（R440F）。「做別的事」
      指 TASKS_OVERNIGHT 的 B 項或展件，不是另起實驗。
+
+
+## R440G 預註冊閘門（機制）
+
+`gain_run.py` 現在**必須**帶 `--decision <DECISION 檔>`，且該檔內文要寫到 `--out` 的
+run 目錄名，否則直接拒絕啟動。這不是建議，是 harness。要跑新 run 的正確順序：
+先寫 DECISION（含 run 名、預測、中止準則）→ commit → 才能發射。
+沒有 DECISION 的 run 不會存在，也就不會出現「跑了才補文件」。

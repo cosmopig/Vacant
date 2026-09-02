@@ -115,6 +115,7 @@ launch() {
   VACANT_EVALPLUS_PATH=.vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz \
   VACANT_GAIN_API="$HUB" CLINE_KEYS=/nonexistent \
   setsid nohup python3 ops/gain/gain_run.py --out "$OUT" --n 179 \
+    --decision DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md \
     --seed g-r212-route-20260828 --models "$GEMMA" \
     --request-timeout-s 600 --review-timeout-s 380 --probe-sample 0 \
     >>"$OUT.launch.log" 2>&1 < /dev/null 9>&- &
