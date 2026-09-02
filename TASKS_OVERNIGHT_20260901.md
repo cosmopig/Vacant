@@ -7,6 +7,23 @@
 ## A. G 實驗（feat/v2-four-stages）
 - [ ] A1 E1 發射狀態：依 R440E 人類三選一的結果，記錄實際發生的（載入結果、探針 3/3、
       發射時間、PID）。人類未決前**不動 1004**。
+      **round466 (2026-09-02 ~04:45 UTC) 複查：仍未決。** 1004 現況
+      （`curl .../api/v1/models`）：`qwen_qwen3.6-35b-a3b` 已載入
+      （非 R440E 記錄的 qwen3.8——已換過一次，但同樣不是 gemma）、
+      `qwen/qwen3.8-27b` 與 `gemma-4-12b-it-qat` 均未載入。gemma 未載入
+      ⇒ E1（以及同樣需要 gemma 的 E2/E3）都還沒能發射。round466 沒有對
+      1004 做任何載入/卸載嘗試（遵守「1004 只能人類動」）。改跑不需要
+      gemma 的 E2q（qwen-only + LCB bank）先答 H-B 半題，見
+      `DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md`。
+      **round467 (2026-09-02 ~04:49-05:0x UTC) 更新：round466 收尾沒做完
+      （沒 commit/push），peer session（Fable，round440f）透過遠端只看
+      到「無 DECISION 的孤兒 run」，正確地依當時可見資訊判定違規並要求
+      處置。round467 核對後：E2q 的實測延遲（289秒/呼叫）是 round466
+      估計（10秒/呼叫）的 29 倍，91 題 ETA 從「15-25 分鐘」變成
+      「~7.3 小時」——且它佔用的正是 1004 上擋住 gemma 的那個模型實例。
+      **已 `kill -TERM` 終止**（1/91 題已寫入，目錄保留未刪）。1004 仍是
+      `qwen_qwen3.6-35b-a3b` 已載入、gemma 未載入，仍在等人類三選一。
+      詳見 `DECISION_20260902_R467_RECONCILE_R440F_AND_TERMINATE_E2Q.md`。
 - [ ] A2 E1 每 60 題一個檢查點（sonnet）：OFF 失敗率、void 率、ON/OFF5 配對 b/c、
       評審準確率−almost-PASS；void>20% 立刻停手寫 DECISION（R440 中止準則）。
 - [ ] A3 E1 ≥90 題時起一次 **fable 稽核輪**：重算配對表、核 rows.jsonl 行數＋sha256 前 8 碼、
