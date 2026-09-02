@@ -75,6 +75,17 @@ while true; do
   # 上一輪在自己判斷「下一輪該用什麼」之後 `echo opus > ~/vacant/NEXT_MODEL`，
   # 這裡讀出來用一次就刪掉。刪掉是關鍵：不刪的話一輪寫了 opus 會黏住，
   # 之後每一輪都用 opus 收數字，那正是要避免的浪費。
+  # 2026-09-02（R440J 教訓）：迴圈一直在讀 ~/vacant/LOOP_PROMPT.md 的 8/28 副本，
+  # repo 裡 ops/LOOP_PROMPT.md 寫的模型政策、平行規則、E1 視窗規則一條都沒生效。
+  # 從此每輪 pull 之後直接讀 repo 檔；副本只當 repo 檔不存在時的後備。
+  if [ -f "$ROOT/Vacant/ops/LOOP_PROMPT.md" ]; then
+    PROMPT="$ROOT/Vacant/ops/LOOP_PROMPT.md"
+  else
+    PROMPT="$ROOT/LOOP_PROMPT.md"
+    say "  警告：repo 沒有 ops/LOOP_PROMPT.md，退回副本 $PROMPT"
+  fi
+  say "  指令檔：$PROMPT（$(wc -l < "$PROMPT") 行）"
+
   model="$DEFAULT_MODEL"
   if [ -f "$NEXT_MODEL" ]; then
     want=$(tr -d "[:space:]" < "$NEXT_MODEL" | tr "[:upper:]" "[:lower:]")
