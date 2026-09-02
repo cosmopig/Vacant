@@ -833,6 +833,15 @@ def main() -> None:
     )
     ap.add_argument("--retry-backoff-s", type=float, default=2.0)
     args = ap.parse_args()
+    # ── R440G 預註冊閘門（在任何 mkdir/落盤之前：被拒的啟動不得留下空目錄）──
+    _dec = pathlib.Path(args.decision)
+    _run_name = pathlib.Path(args.out).name
+    if not _dec.exists():
+        raise SystemExit(f"拒絕啟動：DECISION 檔不存在 {_dec}（每個 run 都要先預註冊）")
+    if _run_name not in _dec.read_text(encoding="utf-8", errors="replace"):
+        raise SystemExit(f"拒絕啟動：{_dec.name} 內文沒有寫到 run 名字「{_run_name}」"
+                         "——先把 run 名字與預測寫進 DECISION 再跑")
+    print(f"預註冊閘門通過：{_dec.name} 授權 {_run_name}", flush=True)
     # round212：`--arms` 以前沒有 choices，dispatch 的 else 會把任何不認得的
     # 名字當成 ON 跑掉（打錯字＝安靜跑錯臂）。檢查放在 preflight 之前，
     # 打錯字不該先燒掉模型呼叫。
@@ -869,15 +878,6 @@ def main() -> None:
         with (out / "notes.jsonl").open("a", encoding="utf-8") as f:
             f.write(json.dumps(obj, ensure_ascii=False, default=str) + "\n")
 
-    # ── R440G 預註冊閘門 ──
-    _dec = pathlib.Path(args.decision)
-    _run_name = pathlib.Path(args.out).name
-    if not _dec.exists():
-        raise SystemExit(f"拒絕啟動：DECISION 檔不存在 {_dec}（每個 run 都要先預註冊）")
-    if _run_name not in _dec.read_text(encoding="utf-8", errors="replace"):
-        raise SystemExit(f"拒絕啟動：{_dec.name} 內文沒有寫到 run 名字「{_run_name}」"
-                         "——先把 run 名字與預測寫進 DECISION 再跑")
-    print(f"預註冊閘門通過：{_dec.name} 授權 {_run_name}", flush=True)
     tasks = load_tasks(args.bank, args.seed, args.n)
     print(f"{len(tasks)} 題（{args.bank}）　輸出 {out}")
 
