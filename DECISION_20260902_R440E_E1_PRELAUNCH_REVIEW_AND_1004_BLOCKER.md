@@ -105,3 +105,19 @@ context_length=32768；快照存 `runs/g_r441_gemma_only_mbpp.backend.json`。
   L1–L5 全部凍結直到 1004 換配置。
 - 若卸掉 3.8 後 gemma@32768 仍回「paging file too small」，問題在 Windows 分頁檔
   而非常駐模型，需要人到 1004 前面調（本 session 無 SSH）。
+
+## 七、發射時的實際後端條件（2026-09-02 05:14 UTC 補記，發射前寫定）
+
+- 人類約 05:13 UTC 在 1004 卸掉 qwen3.8；本 session 的唯讀探針隨即觸發 JIT，gemma 以
+  LM Studio 預設 **context_length=262144** 載入（不是 §五寫的 32768），hub 探針回 200、
+  內容 "OK"。1004 上此刻只有 gemma 一個實例（R440C P0 的「單獨載入」條件成立）。
+- **決定：接受 262144，不再卸載重載成 32768。** 理由：(1) 32768 的原意是為了跟 qwen
+  並存時塞得下 VRAM，現在卡上只有 gemma，這個理由消失；(2) 決定性 run 的 gemma 從沒
+  記錄 context，當時也是 JIT 預設，262144 反而更接近決定性 run 的真實條件；
+  (3) 再做一次 unload/load 是對 1004 的額外狀態變更，收益只有「數字跟 §五一致」。
+- 這是判斷不是量測。**推翻條件**：若 E1 第一個 20 題檢查點 ON 臂 void 率 >35%
+  （R440C P0 失敗），先懷疑 262k 的 KV 預留把 gemma 推到慢速路徑，屆時才值得重載成
+  32768 重跑（新 run 名，本 run 保留）。
+- 發射指令：`GEMMA_CTX=262144 bash ops/gain/launch_e1.sh all`（prep 會驗到 ctx==262144
+  放行；`--probe-sample 0`、`--decision` 指向本文件）。後端快照存
+  `runs/g_r441_gemma_only_mbpp.backend.json`。
