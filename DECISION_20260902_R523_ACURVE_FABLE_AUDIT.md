@@ -53,3 +53,21 @@ parser 與參考解執行器（`exec` 逐字取用），所以它的 G1 只證�
 ## 六、量測結果
 
 （量完補。）
+
+## 六之前的追加預註冊：S1（寫在 22:40 UTC，S1 的任何 A 都還沒算）
+
+C1/C2/C3/C4 已跑（結果見 §六），過程中看到一個 R522 沒拆的數字：**qwen 108 張可解析票裡 69 張是參考解拋例外
+（TypeError 60）**，而評審 prompt 的範例是 `TEST_ARGS: [[-1, 0, 2]]`。用「最後一個 TEST_ARGS」（runtime 慣例）
+數形狀：qwen 108 張裡 **95 張是「單一 list 再包一層」**（`[[2]]`、`[["abc"]]`），其中 68 張拋例外。
+這是**格式慣例**（照抄範例的雙括號），不是「算不出正確答案」。R522 §七 只在**不可解析**那一側查了
+「解析器對 qwen 不友善」，**可解析但包錯層**這一側沒查。以下判準在算之前寫死：
+
+- **S1 規則（兩個模型對稱套用）**：parser 用 runtime 慣例（最後一個 TEST_ARGS／EXPECTED）。先以 `fn(*args)` 跑參考解；
+  **若且唯若**拋 `TypeError` 且 `len(args)==1` 且 `args[0]` 是 list/tuple，改以 `fn(*args[0])` 重跑一次（只解一層，不再遞迴）。
+  其他例外不重試。
+- **報**：A_repacked（qwen、gemma）＋ Wilson95、以及 exc→ok／exc→wrong／exc→exc 的票數。
+- **閘門 S1**：A_qwen(repacked) 的 **Wilson95 上界 ≥ 0.80 ⇒ R522 §九-4 裁決降級為「懸而未決」**，CONCLUSION 追補段要改。
+  上界 < 0.80 ⇒ R522 裁決維持，但 CONCLUSION 的「qwen 每 120 張票才一個有用反對」與 0.185 這兩個數字**要加註**
+  「含 N 張格式包錯層的票；解層後 A=…」——因為 0.185 這個數字混了格式與能力。
+- **不管 S1 落哪邊都要另報**：runtime `verify_review_counterexample` 把 TypeError 歸成哪一類——這決定 qwen ON 臂的
+  revise 有沒有被格式假象觸發。這一項不是本輪閘門，是給下一輪的線索。
