@@ -81,8 +81,12 @@ while true; do
     rm -f "$NEXT_MODEL"
     case "$want" in
       opus|sonnet|local) model="$want"; say "  上一輪指定模型：$model" ;;
+      # 2026-09-01 人類：「使用 fable 5.1 但要讓他聰明選擇模型，主要做到稽核」
+      # ——fable 是稽核／裁決層：寫 DECISION、判 run 收官、每 10 輪一次總稽核。
+      # 日常監控仍是 sonnet，設計 opus，探針 local（見 LOOP_PROMPT 模型政策）。
+      fable)       model="claude-fable-5-1"; say "  上一輪指定模型：fable（稽核輪）" ;;
       "")          say "  NEXT_MODEL 是空的，用預設 $model" ;;
-      *)           say "  NEXT_MODEL 寫著「$want」，不是 opus/sonnet/local，用預設 $model" ;;
+      *)           say "  NEXT_MODEL 寫著「$want」，不是 opus/sonnet/local/fable，用預設 $model" ;;
     esac
   fi
 
