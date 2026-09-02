@@ -1,0 +1,800 @@
+{
+  "votes": 501,
+  "parseable": 156,
+  "no_ref": 0,
+  "A_k": 95,
+  "A_n": 156,
+  "A": 0.6089743589743589,
+  "wilson": [
+    0.5306592105723498,
+    0.682051372905293
+  ],
+  "by_vote": {
+    "False": [
+      95,
+      156
+    ]
+  },
+  "detail": [
+    {
+      "task_id": "mbppplus_Mbpp/296",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/123",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/123",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/123",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/305",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/305",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/305",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/773",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/773",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/473",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/473",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/473",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/283",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/283",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/283",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/259",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/259",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/259",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/593",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/84",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/84",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/84",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/7",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/7",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/7",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/308",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/735",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/735",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/735",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/736",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/475",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/261",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/261",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/261",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/306",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/306",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/743",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/116",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/116",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/116",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/739",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/739",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/739",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/242",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/242",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/563",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/563",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/109",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/109",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/109",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/167",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/167",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/167",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/67",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/389",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/389",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/389",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/462",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/462",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/462",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/620",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/620",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/620",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/409",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/58",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/58",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/58",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/622",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/622",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/622",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/623",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/623",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/227",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/227",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/256",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/256",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/256",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/614",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/614",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/614",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/580",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/580",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/580",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/577",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/577",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/577",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/294",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/138",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/244",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/244",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/427",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/427",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/427",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/781",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/781",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/781",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/125",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/125",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/724",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/724",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/63",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/63",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/472",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/472",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/472",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/142",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/142",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/142",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/564",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/223",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/223",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/223",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/769",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/769",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/589",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/589",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/602",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/602",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/602",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/16",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/16",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/245",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/245",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/803",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/803",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/260",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/260",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/260",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/787",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/441",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/573",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/573",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/573",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/792",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/792",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/792",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/20",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/755",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/755",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/79",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/79",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/79",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/608",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/608",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/608",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/626",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/454",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/129",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/129",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/567",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/128",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/128",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/237",
+      "said_pass": false,
+      "expected_correct": false
+    },
+    {
+      "task_id": "mbppplus_Mbpp/237",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/237",
+      "said_pass": false,
+      "expected_correct": true
+    },
+    {
+      "task_id": "mbppplus_Mbpp/619",
+      "said_pass": false,
+      "expected_correct": false
+    }
+  ]
+}
