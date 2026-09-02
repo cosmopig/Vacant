@@ -121,3 +121,40 @@ context_length=32768；快照存 `runs/g_r441_gemma_only_mbpp.backend.json`。
 - 發射指令：`GEMMA_CTX=262144 bash ops/gain/launch_e1.sh all`（prep 會驗到 ctx==262144
   放行；`--probe-sample 0`、`--decision` 指向本文件）。後端快照存
   `runs/g_r441_gemma_only_mbpp.backend.json`。
+
+## 八、第一次發射失敗的事故紀錄與重發條件（2026-09-02 05:35 UTC 補記）
+
+**時間線（hub `/api/events`＋`/api/requests`，UTC）**
+- 05:13:35 人類在 1004 卸 qwen3.8；05:13:45 本 session 探針觸發 JIT，gemma 載入（ctx 262144）
+- 05:15:23–24 `launch_e1.sh` 探針 3/3 → 200；05:15:27 E1 起跑（PID 2544160），量具 179/179 過
+- **05:15:50 vacant-dev（100.124.254.83）向 hub 要 `qwen_qwen3.6-35b-a3b`** → JIT 載 22 GB，
+  **05:15:52 gemma 被卸**；05:16:09/05:16:14 E1 preflight 對 gemma → 400 → E1 退出（exited_early）
+- 05:16:18 起 vacant-dev 每幾秒打一次 qwen3.6：`ss -tnp` 指到 **迴圈第 4915 輪的 localagent**
+  （PID 2544682）。同時 05:12:40 **w1004（100.118.96.3）** 也在向 hub 要 qwen3.8。
+
+**根因兩層**
+1. 1004 的 LM Studio **JIT 開著且會為了載新模型卸掉現有模型**：任何人向 hub 要非 gemma
+   的模型，gemma 就死。這就是 R440E §一表格第 2 條（審查者的高嚴重度發現）。
+2. 迴圈實際讀的 prompt 是 `~/vacant/LOOP_PROMPT.md`（Aug 28 版，195 行），**不是** repo 的
+   `ops/LOOP_PROMPT.md`——round440b 的模型政策、平行規則、本 session 的 E1 視窗六條，
+   迴圈一條都沒讀到。第 4914 輪（sonnet）照舊版 prompt 寫了 `local`，第 4915 輪就去叫 qwen。
+
+**已做（vacant-dev，人類授權）**：把 repo prompt 的「模型政策／平行實驗規則／E1 視窗」三節
+追加到 `~/vacant/LOOP_PROMPT.md`（備份 `.bak_r440j`）；`~/vacant/bin/localagent.py`
+`DEFAULT_MODEL` 改為哨兵值 `disabled-during-E1-see-R440J`（備份同名 .bak），hub
+`strict_model` 會回 404 讓 local 輪快速失敗退回 sonnet；`NEXT_MODEL=sonnet`。
+**未做（分類器擋）**：終止第 4915 輪的 localagent（PID 2544681/2544682）。
+
+**重發條件（缺一不可，人類在 1004 GUI 做）**
+1. 終止正在打 qwen 的 local 輪：`ssh user1@100.124.254.83 'kill 2544681'`
+2. 1004 LM Studio：Eject `qwen_qwen3.6-35b-a3b` → Load `gemma-4-12b-it-qat`（context 任意，
+   預設 262144 即可）→ **關掉 Just-in-Time model loading**（設定裡的 JIT 開關）。
+   JIT 關掉後，任何人要 qwen 都只會拿到 404，不會再把 gemma 擠掉；這是唯一能撐 35 小時的狀態。
+3. 重發用新名字（原目錄已有失敗 preflight 的 calls/notes，鐵律不刪）：
+   `runs/g_r441_gemma_only_mbpp_b` —— 本段文字即為閘門所需的預註冊。
+   ```
+   cd ~/vacant/Vacant && git pull -q --ff-only origin feat/v2-four-stages && \
+   E1_OUT=runs/g_r441_gemma_only_mbpp_b GEMMA_CTX=262144 bash ops/gain/launch_e1.sh all
+   ```
+   預測、request_policy、`--probe-sample 0` 全部沿用 §五／§七；`runs/g_r441_gemma_only_mbpp/`
+   保留為事故證據（1 筆量具 note＋2 筆 preflight 400）。

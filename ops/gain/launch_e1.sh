@@ -22,7 +22,7 @@ LMS="http://100.86.226.21:1234"                       # 1004：hub 唯一 reacha
 HUB="http://100.119.113.56:8765/v1/chat/completions"
 GEMMA="gemma-4-12b-it-qat"
 GEMMA_CTX="${GEMMA_CTX:-32768}"
-OUT="runs/g_r441_gemma_only_mbpp"                     # R440 預註冊的名字，不改
+OUT="${E1_OUT:-runs/g_r441_gemma_only_mbpp}"          # R440 預註冊的名字；重發時用 E1_OUT 指定 _b 等後綴（DECISION 內文必須含新名字，閘門會驗）
 
 mkdir -p "$ROOT/logs"
 say()    { printf '%s  %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$*" | tee -a "$LOG"; }
