@@ -49,3 +49,14 @@ round 編號 → `~/vacant/logs/launch_e1.log`（若存在）→ R440E §四／R
 - 不對 1004 發任何 load／unload（分類器擋，且是人類的決定）。
 - 不殺任何 run、不 touch STOP、不改實驗碼。
 - 不再改 LOOP_PROMPT（六條夠了；再多是噪音）。
+
+## 六、本 session 被權限分類器擋下的確切指令（彙整，供明早一次看完）
+
+1. `scp ops/gain/queue_e1_after_scale2.sh user1@100.124.254.83:~/vacant/bin/`（R440D §五）
+2. `ssh user1@100.124.254.83 'setsid nohup bash ~/vacant/bin/queue_e1_after_scale2.sh 2513538 …'`（R440D §五）
+3. `curl -X POST http://100.86.226.21:1234/api/v1/models/load -d '{"model":"gemma-4-12b-it-qat","context_length":32768}'`（R440E §四，連與 3.8 並存的零擾動嘗試都擋）
+4. `ssh user1@100.124.254.83 'kill -TERM <pid of gain_run.py --out runs/g_e2q_off_lcb_qwenonly_20260902>'`（R440F §三；後來第 4911 輪自己終止了）
+
+放行過的：唯讀 ssh 探測、`touch ~/vacant/STOP`＋TERM 第 4909 輪（local）＋起新 loop.sh、
+git commit／push、本機閘門驗證。分界線看起來是「對 1004 的模型狀態」與「在遠端起長時間
+背景 run／殺 run」兩類要人類，其餘可自主。
