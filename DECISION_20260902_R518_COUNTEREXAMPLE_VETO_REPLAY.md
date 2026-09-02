@@ -1,0 +1,123 @@
+# R518：階梯下一格的選擇——先用 E1 的落盤資料做「反例否決」的**精確重放**，再決定造 L1 還是 L2
+
+（2026-09-02 UTC ~21:20 起，Opus 5。round517 把決定權留給 opus 輪：
+「修 runner 落盤缺口」或「決定 R440B 梯子下一格 L1／L2」。本文件是**判準先寫、
+量測後補**的預註冊；**判準寫在任何重放數字產生之前**。）
+
+## 一、為什麼不直接照梯子順序跑 L1
+
+R440B 的梯子寫 L0→L1→L2，L1 是「有反例才修（R439 的方向）」。但 R439 **已經在
+round439 落地了**（`revised_fixes_counterexamples` 進選擇邏輯），E1 就是帶著它跑的。
+所以梯子上那格 L1 的字面內容已經被吃掉了一半，剩下的「只在有反例時才呼叫 revise」
+會讓 `calls_per_task` 變成非固定值、打破等預算框架（R439 §「沒有改變的」已經
+判斷過這件事的代價）。**照字面跑 L1 會得到一個沒有等預算意義的 run。**
+
+所以這一輪先問一個更前面的問題：**E1 的資料裡，反例這條路到底有多少可作用面積？**
+
+## 二、開場在 E1 上量到的（這一段是**觀察**，不是本文件的判準）
+
+`runs/g_r441_gemma_only_mbpp_b` ON 臂 n=167，逐行讀 rows.jsonl：
+
+```
+review_evidence 逐票（501 票）
+  review_not_fail          312  62.28%
+  candidate_passed_claim    64  12.77%   （指控了，但機器跑出來初稿其實過）
+  counterexample_confirmed  61  12.18%   ← 機器執行確認的真反例
+  unparseable_claim         33   6.59%
+  outside_input_contract    31   6.19%
+
+每題的 confirmed_counterexample_count
+  0 → 130 題（77.84%）   1 → 20   2 → 10   3 → 7      ⇒ 有反例的 37 題（22.2%）
+
+37 題裡：passed_review=True（**反例被多數決蓋過**）20 題、False 17 題
+其中 6 題是「機器已證明初稿壞掉、多數決仍放行、而初稿真的沒過 hidden_check」
+```
+
+**這是一個機制上的矛盾**：`counterexample_confirmed` 是**執行結果**（沙箱真的跑過那個
+反例並確認初稿不通過），`passed_review` 是**三票多數決**。現在的碼讓意見蓋過執行。
+R438 說「評審≈常數函數」是對的，但推論「所以審查這條路沒東西可用」是**過度概括**——
+12.18% 的票帶著可執行的鐵證，只是被投票稀釋掉了。
+
+⚠ **這個假說是從 E1 的資料裡挖出來的**（先看了交叉表才想到否決規則）。所以下面的
+重放**是探索性的、不是驗證性的**；它只能決定「值不值得造」，不能當成「有效」的證據。
+確認性的證據只能來自新 run（記憶規則：照某個量挑出來的樣本不能拿回去驗那個量）。
+
+## 三、要重放的政策（L1v：反例否決）
+
+`ops/gain/gain_run.py:602` 現況：
+
+```python
+if passed_review and initial_visible_ok:
+```
+
+L1v 只改這一行：
+
+```python
+if passed_review and initial_visible_ok and not confirmed_checks:
+```
+
+其餘四個分支、revise 的 prompt、呼叫次數**一律不動**。`calls_per_task` 仍是 5，
+等預算框架不受影響。這是**單旋鈕、零新參數**的改動。
+
+## 四、為什麼這次是「重放」不是「模擬」
+
+（記憶規則：模擬比量測危險。）revise 在 E1 裡是**無條件呼叫**的，所以每一題的
+`revised_code` 都已經在 `calls.jsonl`（`role="revise"`，168 筆）裡了。L1v 不改變
+任何一次模型呼叫的輸入，只改變「兩份已經存在的字串交哪一份出去」。因此重放是
+**逐位精確**的，不需要任何新的 API 呼叫，也沒有任何被模擬出來的內容。
+
+選擇分支的四個輸入（`passed_review`、`initial_visible_ok`、`revised_visible_ok`、
+`revised_fixes_counterexamples`、`confirmed_counterexample_count`）**全部已在
+rows.jsonl**；唯一要重算的是**改判到 revised 的那些題的 `revised_code` 對
+hidden_check 的真值**，用 `meets_demand` 現場跑（沙箱在本機，零 API）。
+
+## 五、判準（**寫在任何重放數字產生之前**）
+
+**守恆量（先驗，必須為 0，否則整個重放作廢）**
+
+- G1：`confirmed_counterexample_count == 0` 的每一題，L1v 重算出來的
+  `selected_version` 必須與 rows.jsonl 記錄的**逐字元相同**，交付真值也相同。
+  不同的題數必須 **= 0**。
+- G2：用 rows 的五個欄位重跑**現行**（未改）分支邏輯，重建出來的
+  `selected_version` 必須與 rows 記錄的逐字元相同，全 167 題。不同 **= 0**。
+  （G2 先做；G2 不過就是我對選擇邏輯的理解錯了，後面都不用看。）
+
+**決策規則**
+
+令 b = L1v 交付正確而 E1 實際交付錯誤的題數，c = 反向。n=167 配對。
+
+| 條件 | 決定 |
+|---|---|
+| G1 或 G2 ≠ 0 | 重放作廢，本輪不選格，照實寫 |
+| b ≤ c | **否決 L1v**，梯子下一格改走 **L2（異質評審）** |
+| b > c 且 (b−c)/167 < +2.0pp | 面積太小，**不為它單開 run**；下一格走 L2，L1v 只當 L2 run 裡順帶開啟的旗標 |
+| b > c 且 (b−c)/167 ≥ +2.0pp | **造 L1v**，下一格＝L1v 的新 run，本文件的預測欄要在跑前填好 |
+
+McNemar exact p **要報但不當閘門**——n=167、b+c 預期只有個位數，這是設計篩選不是
+確認性檢定，拿 p 當門檻會把一個零成本的改動擋在雜訊裡。
+
+**一定要一起報的（不管結論往哪邊）**
+
+1. churn：`selected_version` 被改動的題數（分子分母都要）。
+2. harm：E1 對、L1v 錯的逐題 task_id（不是只報數字）。
+3. 反例精度：61 張 confirmed 票裡，初稿真的沒過 hidden_check 的比例
+   （summary.json 的 `confirmed_on_wrong / confirmed_claims`）——**若這個比例
+   明顯低於 1.0，否決規則本身就有偽陽性成本**，要寫進結論。
+
+## 六、推翻條件
+
+- 若 G2 不為 0：我對 `arm_on` 選擇邏輯的理解是錯的，§三那一行的改法連帶作廢。
+- 若反例精度 < 0.85：`counterexample_confirmed` 不是我以為的「鐵證」，
+  否決規則會把正確的初稿踢掉，L1v 要改成「否決但要求 revised 真的修好才換」
+  （那已經是現行第二分支，等於 L1v 退化成無操作）——那就直接走 L2。
+- 若 37 題有反例的題目在新 run 裡掉到 <10%（模型／題庫換了），面積論證作廢。
+
+## 七、本輪不做的
+
+- 不起任何 gain_run（R440G 閘門：本文件目前**不授權**任何 run 名）。
+- 不對 1004 載卸模型（R440E：那是人類的決定）。
+- 不改 `ops/gain/gain_run.py`（改碼要等這份重放的結論；本輪只讀不寫實驗碼）。
+
+## 八、量測結果
+
+（待填——本節在 commit 預註冊時是空的，量完才補。）
