@@ -5,7 +5,7 @@
 裁決/稽核 fable、改碼 opus。
 
 ## A. G 實驗（feat/v2-four-stages）
-- [ ] A1 E1 發射狀態：依 R440E 人類三選一的結果，記錄實際發生的（載入結果、探針 3/3、
+- [x] A1 E1 發射狀態：依 R440E 人類三選一的結果，記錄實際發生的（載入結果、探針 3/3、
       發射時間、PID）。人類未決前**不動 1004**。
       **round466 (2026-09-02 ~04:45 UTC) 複查：仍未決。** 1004 現況
       （`curl .../api/v1/models`）：`qwen_qwen3.6-35b-a3b` 已載入
@@ -30,18 +30,31 @@
       `ops/LOOP_PROMPT.md`（第 6 點：人類決定落地前 8765 上不得起任何
       gain_run），且新增了 `--decision` 硬閘門到 `gain_run.py`。本輪
       未起任何 run、未動 1004。**
-- [ ] A2 E1 每 60 題一個檢查點（sonnet）：OFF 失敗率、void 率、ON/OFF5 配對 b/c、
+      **round472 (09:33 UTC) 更新：人類已完成三選一，1004 切成 gemma-only，
+      E1（`runs/g_r441_gemma_only_mbpp_b`，PID 2572085）成功發射。**
+- [x] A2 E1 每 60 題一個檢查點（sonnet）：OFF 失敗率、void 率、ON/OFF5 配對 b/c、
       評審準確率−almost-PASS；void>20% 立刻停手寫 DECISION（R440 中止準則）。
+      **round473-481：9 次淺層同步（複製 summary.json 數字）。round482：第一次
+      完整檢查點——OFF 失敗率 33.0%（在窗口內）、ON void 3.1%（遠低於中止線）、
+      ON/OFF5 配對 b=8/c=5/p=0.5811、評審準確率(grounded) 0.7708 vs 基線
+      0.7083（差 +6.25pp，數字見 GAIN_STATE.md round482）。**
 - [ ] A3 E1 ≥90 題時起一次 **fable 稽核輪**：重算配對表、核 rows.jsonl 行數＋sha256 前 8 碼、
       對照 R440 的 P1–P4 逐條打分。
-- [ ] A4 07:00（台北）寫 `MORNING_20260902.md`：一頁摘要——E1 進度、階梯下一階建議、
+      **round482 複查：295 行早過 90 題門檻，但至今零次由 fable 執行。
+      本輪（sonnet）不越權代做判斷，已把 `下一輪模型` 設為 fable。仍未完成，
+      不打勾。**
+- [x] A4 07:00（台北）寫 `MORNING_20260902.md`：一頁摘要——E1 進度、階梯下一階建議、
       被擋的指令清單（如有）。
+      **round482 更新：round466 版內容已過期（寫於 E1 發射前），本輪重寫反映
+      E1 已發射且健康的現況。**
 
-- [ ] A5 **兩個 Mac session（本單作者與「vacant」稽核 session）都在 18:00（台北）隨 Mac 下線；
+- [x] A5 **兩個 Mac session（本單作者與「vacant」稽核 session）都在 18:00（台北）隨 Mac 下線；
       過夜只有迴圈。** 迴圈在**下線後的下一個 07:00（台北）**寫 `MORNING_<當天 YYYYMMDD>.md`
       （日期用 vacant-dev 本機 `date +%Y%m%d` 換算台北時間，不要猜），格式同 A4，
       **每個數字附 rows.jsonl 行數＋sha256 前 8 碼**；E1 若已由人類發射，A2/A3 由迴圈執行
       （fable 層、閘門、E1 視窗規則六條都已就位）。人類未發射則寫「E1 未發射，等 1004 決定」。
+      **round482：MORNING 檔已補寫（見上），數字附 rows.jsonl 行數(295)＋sha256
+      前 8 碼(59a35fd6)。A3 仍待 fable 執行，見上。**
 
 ## B. 展覽產線（vacant_hm，win1003 自立收割）
 - [ ] B1 win1003 會把 A14B 場景 loop 推到 `vacant_hm` 分支 `night-scene-20260901`
