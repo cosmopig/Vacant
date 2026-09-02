@@ -107,6 +107,8 @@ launch() {
   probe
   n=$(ps -eo cmd | grep -c "^python3 ops/gain/gain_run\.py")
   [ "$n" -eq 0 ] || { say "ABORT: $n gain_run.py running at launch time"; finish abort_other_run_at_launch; }
+  # R440G 閘門在 mkdir 之後才檢查：被拒絕的啟動會留下空目錄，那不是實驗產物，清掉即可
+  [ -d "$OUT" ] && [ -z "$(ls -A "$OUT" 2>/dev/null)" ] && rmdir "$OUT" && say "removed empty $OUT left by a rejected launch"
   [ -e "$OUT" ] && { say "ABORT: $OUT exists"; finish abort_dir_exists; }
   [ -e "$OUT.launch.log" ] && { say "ABORT: $OUT.launch.log exists (previous attempt's evidence; not overwriting)"; finish abort_launchlog_exists; }
   cp "$ROOT/logs/launch_e1_models_after.json" "$OUT.backend.json" 2>/dev/null || models_json > "$OUT.backend.json"
