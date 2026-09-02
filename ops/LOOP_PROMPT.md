@@ -213,3 +213,15 @@ zoo 曾經檢查 `sim.js` 有沒有載入（前提），而該檢查的是 `warm
 - win1003 的 GPU 同時服務 ComfyUI（展覽影片夜班）：`/d/lock_scene` 或
   `/d/lock_night14` 存在時 **不要**在 1234 起 LLM——兩邊都會慢到沒意義。
 - 小模型堆疊階梯見 `DECISION_20260901_R440B_SMALL_MODEL_STACKING_LADDER.md`。
+- **E1 視窗（2026-09-02 起；只要 `ps -eo cmd | grep -c "^python3 ops/gain/gain_run\.py"`
+  數到 `--out runs/g_r441_gemma_only_mbpp` 那支在跑）**：
+  1. **不要寫 `local` 到 NEXT_MODEL**——localagent 預設叫 qwen，1004 的 JIT 會重載
+     22 GB 的 qwen 把 gemma 擠掉，E1 直接作廢（R440E 審查發現 #2）。同步進度用 sonnet。
+  2. 不要起任何 gain_run（§7 一端點一 run）。
+  3. **不要殺 E1**——它不是孤兒，是 R440／R440C／R440E 預註冊的 run；round460 的
+     孤兒邏輯只適用於「未記錄的 run」。
+  4. 每輪收數字照 R440B 格式：OFF 失敗率、配對 b/c/p、評審準確率−基線、void 率、
+     rows.jsonl 行數＋sha256 前 8 碼；任一臂 infra_void >20% 就寫進 STATE 並升級 fable。
+  5. **E1 的發射不歸迴圈**：不要自己跑 `queue_e1_after_scale2.sh`（已停用）或
+     `launch_e1.sh`——1004 上載卸模型是人類的決定（R440E）。迴圈只在 E1 已經在跑時
+     同步數字；E1 還沒起就寫「等待人類處理 1004」然後做別的事。
