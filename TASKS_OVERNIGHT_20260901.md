@@ -31,6 +31,12 @@
 - [ ] A4 07:00（台北）寫 `MORNING_20260902.md`：一頁摘要——E1 進度、階梯下一階建議、
       被擋的指令清單（如有）。
 
+- [ ] A5 **兩個 Mac session（本單作者與「vacant」稽核 session）都在 18:00（台北）隨 Mac 下線；
+      過夜只有迴圈。** 迴圈在**下線後的下一個 07:00（台北）**寫 `MORNING_<當天 YYYYMMDD>.md`
+      （日期用 vacant-dev 本機 `date +%Y%m%d` 換算台北時間，不要猜），格式同 A4，
+      **每個數字附 rows.jsonl 行數＋sha256 前 8 碼**；E1 若已由人類發射，A2/A3 由迴圈執行
+      （fable 層、閘門、E1 視窗規則六條都已就位）。人類未發射則寫「E1 未發射，等 1004 決定」。
+
 ## B. 展覽產線（vacant_hm，win1003 自立收割）
 - [ ] B1 win1003 會把 A14B 場景 loop 推到 `vacant_hm` 分支 `night-scene-20260901`
       （含 world3/scenes/MANIFEST.json）。迴圈只做**唯讀驗證**：`git ls-remote` 看到分支後，
