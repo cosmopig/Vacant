@@ -24,6 +24,12 @@
       **已 `kill -TERM` 終止**（1/91 題已寫入，目錄保留未刪）。1004 仍是
       `qwen_qwen3.6-35b-a3b` 已載入、gemma 未載入，仍在等人類三選一。
       詳見 `DECISION_20260902_R467_RECONCILE_R440F_AND_TERMINATE_E2Q.md`。
+      **round468 (~05:04-05:1x UTC) 複查：1004 狀態不變，仍在等人類。
+      同時讀到 peer session（Fable）又推的三個 commit
+      （round440e/f/g/g-fix/h）：E1 發射不歸迴圈已明文寫進
+      `ops/LOOP_PROMPT.md`（第 6 點：人類決定落地前 8765 上不得起任何
+      gain_run），且新增了 `--decision` 硬閘門到 `gain_run.py`。本輪
+      未起任何 run、未動 1004。**
 - [ ] A2 E1 每 60 題一個檢查點（sonnet）：OFF 失敗率、void 率、ON/OFF5 配對 b/c、
       評審準確率−almost-PASS；void>20% 立刻停手寫 DECISION（R440 中止準則）。
 - [ ] A3 E1 ≥90 題時起一次 **fable 稽核輪**：重算配對表、核 rows.jsonl 行數＋sha256 前 8 碼、
