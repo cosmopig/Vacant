@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import random
+import re
 
 import pytest
 
@@ -194,6 +195,21 @@ def test_review_claim_is_literal_only_and_counterexample_is_executed():
     malicious = ("VERDICT: FAIL\nCONCERN: nope\n"
                  "TEST_ARGS: [__import__('os').getcwd()]\nEXPECTED: 1")
     assert parse_review_claim(malicious) is None
+
+
+def test_reviewer_prompt_example_test_args_length_matches_stated_arity():
+    """P-R523-1: the old single-arg example (TEST_ARGS: [[-1, 0, 2]]) was read by
+    qwen3.6-35b as "wrap every argument list in another list" -- round523 measured
+    60/108 parseable claims following that misreading. The prompt now gives a
+    two-argument example so TEST_ARGS length equals arity, not arity + 1."""
+    match = re.search(r"TEST_ARGS: (\[.*?\]) 與 EXPECTED: (\S+?)。", REVIEWER_SYSTEM)
+    assert match is not None, "REVIEWER_SYSTEM must still contain a worked TEST_ARGS example"
+    example = ("VERDICT: FAIL\nCONCERN: example\n"
+               f"TEST_ARGS: {match.group(1)}\nEXPECTED: {match.group(2)}")
+    claim = parse_review_claim(example)
+    assert claim is not None
+    args, _expected = claim
+    assert len(args) == 2, "example must be multi-arg so a single-arg function can't be mistaken for the 'wrap in another list' pattern"
 
 
 def test_review_counterexample_must_satisfy_public_input_contract():
