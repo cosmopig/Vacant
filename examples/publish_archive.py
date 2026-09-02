@@ -76,6 +76,9 @@ def main() -> None:
     OUT.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     n_ref = sum(1 for c in data["claims"] if c.get("verdict") == "refuted")
     n_over = sum(1 for c in data["claims"] if c.get("verdict") == "overstated")
+    n_held = sum(1 for c in data["claims"] if c.get("verdict") == "held")
+    n_null = sum(1 for c in data["claims"] if c.get("verdict") == "no_effect")
+    print(f"  裁決：held {n_held}、no_effect {n_null}")
     print(f"寫出 {OUT} {OUT.stat().st_size} bytes")
     print(f"  輪次 {len(rounds)}、宣稱 {len(data['claims'])}"
           f"（被推翻 {n_ref}、誇大 {n_over}）")

@@ -324,6 +324,54 @@ CLAIMS: list[dict[str, Any]] = [
         "依據": {"程式": "examples/realmodel_suite.py 的註解（該處保留了錯誤的完整說明）",
                  "正確做法": "用臂外的 compile_check(t.check)(answer) 獨立判定"},
     },
+    {
+        "id": "gain.signal_exists",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "量具有訊號：無信任層（OFF）時失敗率 26.44%，落在事前訂的 20–60% 窗內",
+        "型別": "量測（事前判準 1）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260901_R437_DECISIVE_RUN_COMPLETE_FINAL.md",
+                 "數值": {"OFF processed": 179, "OFF infra_void": 5, "measured": 174,
+                          "失敗率": 0.2644, "Wilson CI95": [0.204, 0.334]}},
+    },
+    {
+        "id": "gain.arms_differ",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "三臂（OFF／ON／OFF5）的交付品質有可分辨的差異",
+        "型別": "量測（事前判準 2，配對 McNemar）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260901_R437_DECISIVE_RUN_COMPLETE_FINAL.md",
+                 "數值": {"raw ON vs OFF5": {"n": 101, "ON": 0.7525, "OFF5": 0.7723, "b": 6, "c": 8, "p": 0.7905},
+                          "typing 修正版": {"n": 101, "ON": 0.8416, "OFF5": 0.8119, "b": 5, "c": 2, "p": 0.4531}},
+                 "解釋": "兩種口徑都不顯著，且點估計方向會因為修一個無關的 typing 白名單 bug 而翻轉"},
+    },
+    {
+        "id": "gain.equal_budget_on_beats_off5",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "等預算下，Vacant（ON）打得贏同題跑五次取多數決（OFF5）",
+        "型別": "量測（事前判準 3）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260901_R438_HARD_SUBSET_AND_REVISE_MECHANISM.md",
+                 "數值": {"完整配對": {"n": 101, "p": 0.4531},
+                          "難題子集（OFF 失敗集合）": {"n": 21, "ON": 0.2857, "OFF5": 0.2857, "b": 1, "c": 1, "p": 1.0}}},
+    },
+    {
+        "id": "gain.mechanism",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "打不贏的機制：評審票幾乎是常數函數，修訂幾乎不產生淨修正",
+        "型別": "機制分析（在完整 179 題資料上重算）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260901_R438_HARD_SUBSET_AND_REVISE_MECHANISM.md",
+                 "數值": {"生效評審票準確率": 0.7552, "almost-PASS 基線": 0.7522, "差": 0.0029,
+                          "revise 反事實 no_opportunity": "93/113", "盲目採用 revised 的 hidden 通過率": "82.3%→78.8%",
+                          "discarded_win": "0/113", "revision_transition=improved": "1/113"}},
+    },
+    {
+        "id": "gain.clean_dataset",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "決定性 run 是第一個乾淨的完整資料集：無已知 bug 污染、void 率在窗口內",
+        "型別": "資料品質宣稱",
+        "依據": {"檔案": "增益實驗_2026-08-30/g_r356_3arm_summary.json",
+                 "數值": {"ON infra_void": "66/179", "OFF5 infra_void": "30/179", "OFF infra_void": "5/179",
+                          "R437 自記": "void率 ON=36.2% OFF5=16.9% ⚠VOID-GATE-WARNING",
+                          "equal_budget_comparison_valid（summary 欄位）": False}},
+    },
 ]
 
 
@@ -368,6 +416,11 @@ ROUNDS = [
      "問題": ["脈衝攻擊是怎樣的攻擊？", "它的具體影響是什麼？", "稽核若也是模型會怎樣？"],
      "報告": "報告_脈衝攻擊與稽核盲區.md",
      "實驗": ["E17", "E18", "E19", "E20", "E21", "E22", "E23", "E24"]},
+    {"id": "gain-2026-08-30", "dir": "增益實驗_2026-08-30",
+     "問題": ["加了 Vacant，產出有沒有更接近需求？", "等預算下打不打得贏最土的 self-consistency？",
+              "打不贏的話，機制上為什麼？"],
+     "報告": "CONCLUSION_20260830_G_EXPERIMENT.md",
+     "實驗": ["E25"]},
 ]
 
 
@@ -476,6 +529,8 @@ def main() -> None:
                             f"verdict=未複驗 代表還沒有人試過推翻它，不代表它通過了。",
                     "裁決值": {"refuted": "宣稱是錯的，正確說法在「更正後」",
                                "overstated": "核心站得住但說得太滿，或原始證據／機制解釋有問題",
+                               "held": "事前訂的判準通過（預註冊、跑完對答案）",
+                               "no_effect": "量到沒有可分辨的效應——這本身就是答案，不是沒測完",
                                "未複驗": "尚未送複驗——不等於通過"},
                     "claims": claims_out}, ensure_ascii=False, indent=1), encoding="utf-8")
 

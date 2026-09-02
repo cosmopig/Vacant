@@ -15,6 +15,8 @@
 裁決值：
   refuted     宣稱是錯的，更正後的說法在「更正後」
   overstated  核心站得住但說得太滿，或原始證據／機制解釋有問題
+  held        事前訂的判準通過（預註冊、跑完對答案；2026-09-01 為 G 實驗新增）
+  no_effect   量到沒有可分辨的效應——這本身就是答案，不是沒測完
   （沒有條目）  尚未送複驗——**不等於通過**，索引裡標成 `未複驗`
 """
 from __future__ import annotations
@@ -84,6 +86,38 @@ VERDICTS: dict[str, dict[str, str]] = {
                   "配對 p=0.0015）。whitewash 的優勢來自免費換身份重新取得路由權——"
                   "它用掉 4.7 個身份、到第 542 輪還在接單，而 pulse 第 160 輪就被餓死。"
                   "那是入場成本問題，與脈衝的時機結構無關。",
+    },
+    # ── G 實驗（增益實驗_2026-08-30，事前三判準；round437/438 裁決；2026-09-01）──
+    "gain.signal_exists": {
+        "verdict": "held",
+        "一句話": "OFF 失敗率 26.44%（n=174 有效、CI [20.4%, 33.4%]），窗內",
+    },
+    "gain.arms_differ": {
+        "verdict": "no_effect",
+        "一句話": "raw p=0.79、typing 修正 p=0.45；點估計方向隨一個無關 bug 翻轉——無實質差異",
+        "更正後": "「三臂有差異」不成立。在這個 worker 池（qwen3.6-35b＋gemma-4-12b）與 MBPP+ 上，"
+                  "ON 與 OFF5 的交付品質量不出可分辨差異。",
+    },
+    "gain.equal_budget_on_beats_off5": {
+        "verdict": "refuted",
+        "一句話": "等預算下打不贏：完整配對 p=0.45，難題子集 ON=OFF5=28.57%（p=1.0）",
+        "推翻了什麼": "「多花五倍呼叫的審查關卡＋修訂會比最土的多數決更接近需求」——在本條件下沒有。",
+        "更正後": "ON 比 self-consistency 多做的事（評審＋單輪修訂）在這批 worker 與題目上"
+                  "沒有交付可量測的價值；邊界：換更強評審、換「有反例才修」觸發、換題庫都可能翻盤，"
+                  "那是新實驗（R440/R440B 階梯）。",
+    },
+    "gain.mechanism": {
+        "verdict": "held",
+        "一句話": "評審票準確率 0.7552 vs 全判可基線 0.7522（+0.29pp）；revise 盲採淨 -3.5pp、真修正 1/113",
+    },
+    "gain.clean_dataset": {
+        "verdict": "overstated",
+        "一句話": "「void 率在窗口內」說得太滿：ON 臂 infra_void 66/179＝36.9%，R437 自己標了 VOID-GATE-WARNING",
+        "推翻了什麼": "「第一個乾淨的完整資料集」中的「乾淨」——三臂 processed 都是 179，"
+                      "但 ON 臂三成七是 infra_void；summary.json 的 equal_budget_comparison_valid 也是 False。",
+        "更正後": "配對分析用的是三臂皆非 void 的 n=101 題，統計結論不受 void 直接影響；"
+                  "但「乾淨」應改成「無已知 bug 污染、配對子集 n=101」，void 率要照實列出。"
+                  "round459/R440D 之後的 qwen-only run void 79% 已另案判為不可用。",
     },
 }
 
