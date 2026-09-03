@@ -110,6 +110,22 @@ VERDICTS: dict[str, dict[str, str]] = {
         "verdict": "held",
         "一句話": "評審票準確率 0.7552 vs 全判可基線 0.7522（+0.29pp）；revise 盲採淨 -3.5pp、真修正 1/113",
     },
+    "gain.ceiling_hypothesis": {
+        "verdict": "refuted",
+        "一句話": "換成 12b 單模型後 OFF 失敗率升到 31.8%，但 ON vs OFF5 p=1.0——天花板不是原因",
+        "推翻了什麼": "「量不到增益是因為 worker 太強」。弱 worker 讓失敗變多了，增益仍然沒有出現。",
+        "更正後": "在這個機制設計下，worker 強弱不是綁定約束。",
+    },
+    "gain.hard_bench_hypothesis": {
+        "verdict": "refuted",
+        "一句話": "LCB 難題把 OFF 失敗率推到 48.4%，ON vs OFF5 仍 p=0.4244",
+        "推翻了什麼": "「量不到增益是因為題目太簡單」。題目確實變難了（+16.6pp），增益仍然沒有出現。",
+        "更正後": "三個乾淨 run、兩個模型家族、兩個題庫、兩種難度，答案一致：等預算下這個機制打不贏 self-consistency。",
+    },
+    "gain.reviewer_tracks_difficulty": {
+        "verdict": "held",
+        "一句話": "MBPP+ 上近乎一律 PASS、LCB 上 89.7% 主張 FAIL，兩邊都貼著常數基線（−2.99pp／+0.77pp）",
+    },
     "gain.clean_dataset": {
         "verdict": "overstated",
         "一句話": "「void 率在窗口內」說得太滿：ON 臂 infra_void 66/179＝36.9%，R437 自己標了 VOID-GATE-WARNING",
