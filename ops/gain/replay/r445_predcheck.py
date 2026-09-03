@@ -337,6 +337,9 @@ def main() -> int:
         print("WARNING: run 未收官 ⇒ 以上是中途快照，不是結論")
 
     if args.json:
+        # round682：--json 的目標目錄不存在就建起來（round680 在 pool_precheck 修過的同一個坑：
+        # 判決印對了、退出碼卻是 1，收官會讀成「尺壞了」）。不改任何輸出位元組。
+        pathlib.Path(args.json).parent.mkdir(parents=True, exist_ok=True)
         pathlib.Path(args.json).write_text(
             json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return rc

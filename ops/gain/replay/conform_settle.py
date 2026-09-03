@@ -329,6 +329,9 @@ def main() -> int:
     except Broken as e:
         print(f"BROKEN: {e}")
         if args.json:
+            # round682：--json 的目標目錄不存在就建起來（round680 在 pool_precheck 修過的同一個坑：
+            # 判決印對了、退出碼卻是 1，收官會讀成「尺壞了」）。不改任何輸出位元組。
+            pathlib.Path(args.json).parent.mkdir(parents=True, exist_ok=True)
             pathlib.Path(args.json).write_text(
                 json.dumps({"status": "BROKEN", "reason": str(e)}, ensure_ascii=False, indent=2),
                 encoding="utf-8")
@@ -355,6 +358,9 @@ def main() -> int:
           "  （exact＝逐位相同；bounded＝該臂有 void，改用碼蘊含的上下界）")
     print(json.dumps(out["verdicts"], ensure_ascii=False, indent=2))
     if args.json:
+        # round682：--json 的目標目錄不存在就建起來（round680 在 pool_precheck 修過的同一個坑：
+        # 判決印對了、退出碼卻是 1，收官會讀成「尺壞了」）。不改任何輸出位元組。
+        pathlib.Path(args.json).parent.mkdir(parents=True, exist_ok=True)
         pathlib.Path(args.json).write_text(json.dumps(out, ensure_ascii=False, indent=2),
                                            encoding="utf-8")
     return 0
