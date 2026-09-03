@@ -34,6 +34,7 @@ from ops.gain.brain_cline import (DEFAULT_MODEL, POOL, REVIEWER_SYSTEM,  # noqa:
                                   REVIEW_LENSES, ClineBrain, InfraVoid,
                                   load_keys)
 from vacant.codebench import BuiltinSampleLoader, EvalPlusMBPPLoader  # noqa: E402
+from vacant.crypto import pub_to_hex  # noqa: E402
 from vacant.identity import Identity  # noqa: E402
 from vacant.logbook import Logbook  # noqa: E402
 
@@ -422,6 +423,38 @@ def conform_failure_detail(code: str, task: dict, *, timeout_s: int = 10) -> dic
             hi = mid
     return {"n_visible_tests": n, "first_failing_test": lo, "loads_ok": True,
             "detail_reason": None}
+
+
+def save_receipts(out: pathlib.Path, st: dict) -> list[str]:
+    """把每臂的收據鏈 entries **與公鑰**落盤。回傳實際寫出的檔名。
+
+    為什麼需要（round666，`CRITERION_20260903_R666_RECEIPT_CHAIN_UNVERIFIABLE.md`）：
+    `arm_conform` 每次嘗試都簽進 hash chain，但在此之前 `gain_run.py` 一處都沒呼叫
+    `Logbook.save`，公鑰也沒寫出去 ⇒ 收官後 run 目錄裡既無 entries 也無公鑰，
+    `Logbook.verify_chain(who)` **在結構上跑不起來**。R440R 的 P-C4 要的正是
+    「該臂的鏈 verify_chain 為真」——沒有這一步，那一條永遠只能寫「不可結算」。
+    r444 已量到就是這個狀態（chain_verifiable=UNVERIFIABLE，三項結構性判準都 OK）。
+
+    **私鑰仍然不落盤**（RECORD_SPEC §7 排除 identity.key），所以這條鏈能證明的是
+    「事後沒被改過」（要改就得重簽，而私鑰隨行程消失），**不是**「這是誰簽的」——
+    身份是一次性的匿名身份。收據的究責宣稱只能講到這裡，不准講成可歸屬到某個主體。
+
+    純儀器：不改任何臂的行為、不多一次模型呼叫、不碰 rng。空鏈的臂不寫檔
+    （OFF／OFF5／ON 都不用這條路徑）；「有 CONFORM 列卻沒有鏈檔」由
+    `ops/gain/replay/receipt_chain_audit.py` 判 BROKEN，不會安靜漏掉。
+    """
+    written: list[str] = []
+    for arm_name, s_ in st.items():
+        book, ident = s_.get("book"), s_.get("ident")
+        if book is None or ident is None or not len(book):
+            continue
+        book.save(out / f"receipts_{arm_name}.ndjson")
+        (out / f"receipts_{arm_name}.pub.json").write_text(
+            json.dumps({"vacant_id": ident.vacant_id,
+                        "pub_hex": pub_to_hex(ident.pub)}, ensure_ascii=False) + "\n",
+            encoding="utf-8")
+        written += [f"receipts_{arm_name}.ndjson", f"receipts_{arm_name}.pub.json"]
+    return written
 
 
 def arm_conform(task, agents, rng, calls, book, ident, k=5):
@@ -1364,6 +1397,7 @@ def main() -> None:
         for arm in arms:
             summary[arm] = finalize(arm)
         write_summary(run_complete=False)
+        save_receipts(out, st)
 
     for arm in arms:
         print(f"── {arm}: {json.dumps(summary[arm], ensure_ascii=False)}")
@@ -1375,6 +1409,7 @@ def main() -> None:
     #   而那一輪其實一格都沒量到。
     all_arms_complete = all(summary.get(a, {}).get("complete") for a in arms)
     write_summary(run_complete=all_arms_complete)
+    save_receipts(out, st)
     if not all_arms_complete:
         incomplete = [a for a in arms if not summary.get(a, {}).get("complete")]
         print(f"⚠ run_complete=False——這些臂沒跑完：{', '.join(incomplete)}。"
