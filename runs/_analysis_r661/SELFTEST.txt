@@ -1,0 +1,6 @@
+=== 乾淨（必須 PASS） === PASS
+=== 突變體 V1（預期被 P-B1 抓到） === FAIL: P-B1
+=== 突變體 V2（預期被 P-C 抓到） === FAIL: P-C
+=== 突變體 V3（預期被 P-C/P-D 抓到） === FAIL: P-C
+
+SELFTEST PASS  caught={"V1": ["P-B1"], "V2": ["P-C"], "V3": ["P-C"]}
