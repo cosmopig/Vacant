@@ -1,0 +1,211 @@
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/111", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/116", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/116", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/123", "idx": 0, "variant": "raw", "visible_pass": 3, "visible_total": 3, "sig": "[[\"ok\", \"int\", \"504\"], [\"ok\", \"int\", \"31626\"], [\"ok\", \"int\", \"0\"]]", "visible_ok": true, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/123", "idx": 1, "variant": "raw", "visible_pass": 3, "visible_total": 3, "sig": "[[\"ok\", \"int\", \"504\"], [\"ok\", \"int\", \"31626\"], [\"ok\", \"int\", \"0\"]]", "visible_ok": true, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/123", "idx": 2, "variant": "raw", "visible_pass": 3, "visible_total": 3, "sig": "[[\"ok\", \"int\", \"504\"], [\"ok\", \"int\", \"31626\"], [\"ok\", \"int\", \"0\"]]", "visible_ok": true, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/123", "idx": 3, "variant": "raw", "visible_pass": 3, "visible_total": 3, "sig": "[[\"ok\", \"int\", \"504\"], [\"ok\", \"int\", \"31626\"], [\"ok\", \"int\", \"0\"]]", "visible_ok": true, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/123", "idx": 4, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/125", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/125", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/126", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/126", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/126", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/126", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/126", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/129", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/129", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/135", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/138", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/138", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/138", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/138", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/138", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/140", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/16", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/16", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/16", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/16", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/20", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/20", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/20", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/20", "idx": 2, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/237", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/237", "idx": 0, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/237", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/237", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/242", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/245", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/245", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/256", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/259", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/259", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/260", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/260", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/260", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "[[\"err\", \"TimeoutError\", \"candidate solve timed out\"], [\"err\", \"RuntimeError\", \"candidate worker closed stdout\"], [\"err\", \"RuntimeError\", \"candidate worker exited\"]]", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/260", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/260", "idx": 4, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/294", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/294", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/305", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/305", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/306", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/306", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/306", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/389", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/422", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/427", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/441", "idx": 4, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/445", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/445", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/462", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/462", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/462", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/462", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/462", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/473", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/473", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/473", "idx": 3, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/473", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/473", "idx": 4, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/555", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/555", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/557", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/56", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/565", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/565", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/565", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/565", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/576", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/576", "idx": 4, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/59", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/59", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/59", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/59", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/59", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/602", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/614", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/614", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/614", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/615", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/615", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/615", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/615", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/615", "idx": 4, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/622", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/626", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/626", "idx": 0, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/626", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/626", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/626", "idx": 2, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/626", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/626", "idx": 3, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/626", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/626", "idx": 4, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/63", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/63", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/63", "idx": 1, "variant": "norm", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/63", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/63", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/720", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/722", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/722", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/735", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 5, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/749", "idx": 4, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/75", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/752", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/752", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 4, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/754", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/755", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/762", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/769", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/769", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/769", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/769", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/77", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/77", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/77", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/771", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/773", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/773", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/773", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/781", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/781", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/781", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/79", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/792", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/792", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/792", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/792", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/792", "idx": 3, "variant": "norm", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/792", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/8", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/800", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/805", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/84", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/84", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/84", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/84", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r441_gemma_only_mbpp_b", "task_id": "mbppplus_Mbpp/89", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/109", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/111", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/111", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/123", "idx": 0, "variant": "raw", "visible_pass": 3, "visible_total": 3, "sig": "[[\"ok\", \"int\", \"504\"], [\"ok\", \"int\", \"31626\"], [\"ok\", \"int\", \"0\"]]", "visible_ok": true, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/123", "idx": 4, "variant": "raw", "visible_pass": 3, "visible_total": 3, "sig": "[[\"ok\", \"int\", \"504\"], [\"ok\", \"int\", \"31626\"], [\"ok\", \"int\", \"0\"]]", "visible_ok": true, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/125", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/125", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/125", "idx": 4, "variant": "norm", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/140", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/16", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/16", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/16", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/16", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/20", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/222", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/259", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/294", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/294", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/306", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/427", "idx": 4, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/462", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/462", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/473", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/557", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/567", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/580", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/59", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/59", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/59", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/606", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/614", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/615", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/615", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/615", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/615", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/615", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/620", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/626", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/63", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/63", "idx": 1, "variant": "norm", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/63", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/67", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/67", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/749", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/749", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/752", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 4, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/755", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/755", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/758", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/758", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/758", "idx": 4, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/773", "idx": 1, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/787", "idx": 3, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/79", "idx": 3, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/796", "idx": 0, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/805", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/805", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/805", "idx": 2, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/84", "idx": 0, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/84", "idx": 1, "variant": "raw", "visible_pass": 0, "visible_total": 3, "sig": "EXEC_FAIL", "visible_ok": false, "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/84", "idx": 2, "variant": "raw", "hidden_ok": false}
+{"run": "g_r356_3arm_20260830", "task_id": "mbppplus_Mbpp/92", "idx": 4, "variant": "raw", "hidden_ok": false}
