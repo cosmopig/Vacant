@@ -26,7 +26,7 @@ os.environ.setdefault(
 )
 
 from ops.gain.gain_run import extract_code, meets_demand  # noqa: E402
-from vacant.codebench import EvalPlusMBPPLoader  # noqa: E402
+from vacant.codebench import EvalPlusMBPPLoader, LiveCodeBenchLoader  # noqa: E402
 
 OUT = pathlib.Path(__file__).resolve().parent
 
@@ -56,9 +56,11 @@ def mcnemar(pairs):
     return len(pairs), b, c, min(1.0, 2 * tail / 2 ** n)
 
 
-def main(run: str, workers: int = 6) -> None:
+def main(run: str, workers: int = 6, bank: str = "evalplus") -> None:
     root = pathlib.Path("runs") / run
-    tasks = {t["task_id"]: t for t in EvalPlusMBPPLoader(expose_contract=True).iter_tasks("x")}
+    loader = (LiveCodeBenchLoader() if bank == "lcb"
+              else EvalPlusMBPPLoader(expose_contract=True))
+    tasks = {t["task_id"]: t for t in loader.iter_tasks("x")}
 
     rows = [json.loads(l) for l in (root / "rows.jsonl").open()]
     shipped = {
@@ -172,4 +174,6 @@ def main(run: str, workers: int = 6) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 6)
+    main(sys.argv[1],
+         int(sys.argv[2]) if len(sys.argv) > 2 else 6,
+         sys.argv[3] if len(sys.argv) > 3 else "evalplus")
