@@ -321,6 +321,109 @@ def arm_off5(task, agents, rng, calls, k=5):
         "visible_ok": visible_ok, "vote_agreement": n_agree, "n_buckets": len(buckets)}
 
 
+def _visible_test_slicer(check_code: str):
+    """回傳 `(n, make_prefix)`；`make_prefix(i)` ＝「只保留前 i 條驗收」的同一份 check code。
+
+    為什麼要這個：`meets_demand` 只回 bool，失敗時的訊息是**常數字串**
+    `"sandbox_check_failed"`（`meets_demand` 內文寫死），所以收據的 `err` 欄位
+    對每一個失敗候選都一模一樣、資訊量為零。R440P §六 對外那句
+    「收據上照樣列出那五個人各自卡在第幾條」靠的就是這個欄位——沒有本函式它是空頭支票。
+
+    做法：切前綴、再交給**同一個** `meets_demand` 跑。「第 i 條沒過」因此和出貨閘門
+    共用同一個執行器，不會多出第二套判準、也不會跟閘門漂移。
+
+    `vacant/codebench.py` 產生兩種形狀：
+      A 扁平：尾端一串 top-level `assert ...`（`_check_code`，evalplus/MBPP+）
+      B 迴圈：`__tests = [...]` 之後一個 for 迴圈（`_lcb_check_code`，LCB）
+    認不出來就回 `None`，收據寫 null ＋ 理由——**不猜**。產生器改了形狀，
+    `conform_receipt_selftest.py` 的形狀測試會 FAIL，不會安靜變成一片 null。
+    """
+    try:
+        tree = ast.parse(check_code)
+    except SyntaxError:
+        return None
+    lines = check_code.splitlines()
+
+    for node in tree.body:  # B：`__tests = <list literal>`
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name)
+                and node.targets[0].id == "__tests"):
+            try:
+                tests = ast.literal_eval(node.value)
+            except (ValueError, SyntaxError, TypeError):
+                return None
+            if not isinstance(tests, list):
+                return None
+            lo, hi = node.lineno - 1, node.end_lineno
+
+            def make_prefix_b(i, _lo=lo, _hi=hi, _tests=tests):
+                return "\n".join(
+                    lines[:_lo] + [f"__tests = {_tests[:i]!r}"] + lines[_hi:])
+
+            return len(tests), make_prefix_b
+
+    asserts = [nd for nd in tree.body if isinstance(nd, ast.Assert)]  # A：扁平
+    if not asserts:
+        return None
+    # 必須是**尾端連續**的一段。否則「切掉後面」會順手切掉 assert 之間的別的語句，
+    # 那就不是同一份 check code 的前綴，判出來的條號會是錯的。
+    if tree.body[-len(asserts):] != asserts:
+        return None
+
+    def make_prefix_a(i, _asserts=asserts):
+        end = (_asserts[0].lineno - 1) if i <= 0 else _asserts[i - 1].end_lineno
+        return "\n".join(lines[:end])
+
+    return len(asserts), make_prefix_a
+
+
+def conform_failure_detail(code: str, task: dict, *, timeout_s: int = 10) -> dict:
+    """已知這份候選沒通過可見驗收 ⇒ 算出「第一條沒過的是第幾條」。零模型呼叫。
+
+    前綴單調（第 j 條失敗 ⇒ 任何 i≥j 的前綴都失敗，因為 assert 一失敗就中止整份
+    check），所以可以二分：⌈log2 n⌉+2 次沙箱執行。
+
+    三個欄位刻意分開，不准合併成一個數字：
+    - `loads_ok=False`：前綴 0（一條驗收都不跑）就失敗 ⇒ 候選連載入都不成。
+      那不是「第 1 條沒過」，收據不准把兩件事寫成同一件。
+    - `first_failing_test`：真正的條號（1-based）。
+    - `detail_reason="prefix_full_disagrees"`：前綴 n 應該等價於原本的 check code；
+      它若通過而原本失敗，代表切片器有 bug ⇒ **照實記下來**，不要讓收據講一個編出來
+      的條號。這是本函式自帶的一致性檢查，不是外部測試。
+    """
+    sl = _visible_test_slicer(task["visible_check"]["code"])
+    if sl is None:
+        return {"n_visible_tests": None, "first_failing_test": None,
+                "loads_ok": None, "detail_reason": "check_code_shape_unrecognised"}
+    n, make_prefix = sl
+    ep = task.get("entry_point")
+
+    def run_prefix(i: int) -> bool:
+        src = make_prefix(i)
+        # 空程式在 sandbox 裡 rc≠0（實測 `meets_demand(code, "")` ＝ False），
+        # 那會把「跑了零條驗收」誤讀成「候選載入失敗」。`pass` 才是
+        # 「零條驗收、沒有任何失敗」。扁平形狀且 assert 從第 1 行開始時
+        # 前綴 0 就是空字串——2026-09-03 round639 的自我驗證實測抓到。
+        return meets_demand(
+            code, src if src.strip() else "pass", timeout_s, entry_point=ep)[0]
+
+    if not run_prefix(0):
+        return {"n_visible_tests": n, "first_failing_test": None, "loads_ok": False,
+                "detail_reason": "fails_before_any_test"}
+    if run_prefix(n):
+        return {"n_visible_tests": n, "first_failing_test": None, "loads_ok": True,
+                "detail_reason": "prefix_full_disagrees"}
+    lo, hi = 1, n  # 不變式：prefix(hi) 失敗、prefix(lo-1) 通過
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if run_prefix(mid):
+            lo = mid + 1
+        else:
+            hi = mid
+    return {"n_visible_tests": n, "first_failing_test": lo, "loads_ok": True,
+            "detail_reason": None}
+
+
 def arm_conform(task, agents, rng, calls, book, ident, k=5):
     """驗收閘門（CONFORM）：跑客戶自己的驗收測資，不開評審會。
 
@@ -359,16 +462,20 @@ def arm_conform(task, agents, rng, calls, book, ident, k=5):
         # 只用 visible：hidden 是計分用的，選擇時碰它＝V/GT 分離破功（SPEC §5.3）。
         vis_ok, vis_err = meets_demand(
             code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+        # `vis_err` 對每個失敗候選都是同一個常數字串（見 `meets_demand`），
+        # 所以「卡在第幾條」要另外算——零模型呼叫，只在失敗時才算。
+        detail = ({} if vis_ok else
+                  conform_failure_detail(code, task))
+        rec = {"task_id": task["task_id"], "attempt": idx, "worker": a.agent_id,
+               "visible_ok": bool(vis_ok), "err": vis_err[:120],
+               "code_sha256": hashlib.sha256(code.encode("utf-8")).hexdigest(),
+               **detail}
         entry = book.append(
-            "conform_attempt",
-            {"task_id": task["task_id"], "attempt": idx, "worker": a.agent_id,
-             "visible_ok": bool(vis_ok), "err": vis_err[:120],
-             "code_sha256": hashlib.sha256(code.encode("utf-8")).hexdigest()},
-            ident, ts_ms=int(time.time() * 1000),
+            "conform_attempt", rec, ident, ts_ms=int(time.time() * 1000),
         )
         attempts.append({"attempt": idx, "worker": a.agent_id,
                          "visible_ok": bool(vis_ok), "err": vis_err[:120],
-                         "entry_hash": entry.hash()})
+                         **detail, "entry_hash": entry.hash()})
         if vis_ok:
             chosen = (code, a.agent_id)
             break

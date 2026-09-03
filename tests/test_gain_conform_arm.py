@@ -93,3 +93,26 @@ def test_budget_never_exceeds_k(task):
     for codes in ([BAD] * 5, [GOOD] * 5, [BAD, GOOD, BAD, BAD, BAD]):
         _extra, calls, _w, _b, _i = _run(task, codes)
         assert calls <= 5, "CONFORM 的呼叫上限必須與 OFF5 相同"
+
+
+# round639：收據要說得出「卡在第幾條驗收」。`meets_demand` 的 err 是常數字串
+# （每個失敗候選都是 "sandbox_check_failed"），所以這個欄位若壞掉會**安靜地**
+# 退化成一片相同的訊息，而 R440P §六 對外那句話正是靠它。這裡釘死條號。
+_STALL_AT_3 = ("def similar_elements(a, b):\n"
+               "    if 11 in a: return ()\n"
+               "    return tuple(sorted(set(a) & set(b)))\n")
+_STALL_AT_2 = ("def similar_elements(a, b):\n"
+               "    if 1 in a: return ()\n"
+               "    return tuple(sorted(set(a) & set(b)))\n")
+
+
+def test_receipt_names_which_acceptance_test_each_worker_stalled_on(task):
+    extra, calls, worker, _book, _ident = _run(
+        task, [_STALL_AT_3, _STALL_AT_2, GOOD], k=3)
+    a = extra["conform_attempts"]
+    assert extra["accepted"] and worker == "w2" and calls == 3
+    assert [x["first_failing_test"] for x in a[:2]] == [3, 2], a
+    assert all(x["n_visible_tests"] == 3 and x["loads_ok"] for x in a[:2]), a
+    assert all(x["detail_reason"] is None for x in a[:2]), a
+    # 通過者不算條號（省沙箱執行），所以不該有這些欄位
+    assert "first_failing_test" not in a[2], a[2]
