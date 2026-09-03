@@ -1,0 +1,144 @@
+{
+  "run": "/dev/shm/r667/snap",
+  "rows_source": "/dev/shm/r667/snap/rows.jsonl",
+  "rows_sha256_8": "2a64a91b",
+  "n_rows": 376,
+  "declared_n": 179,
+  "run_terminal": false,
+  "settlement_ready": false,
+  "arms": {
+    "OFF5": {
+      "rows": 125,
+      "accepted": 125,
+      "meets_demand": 89,
+      "deliv": 89,
+      "leaked": 36,
+      "meets_demand_and_not_accepted": 0,
+      "refused": 0,
+      "refusal_rate": 0.0,
+      "rate_deliv": 0.712,
+      "rate_meets_demand": 0.712,
+      "rate_demand_equals_output": 0.712,
+      "calls_used_sum": 625,
+      "calls_per_task_recomputed": 5.0
+    },
+    "CONFORM": {
+      "rows": 125,
+      "accepted": 118,
+      "meets_demand": 93,
+      "deliv": 93,
+      "leaked": 25,
+      "meets_demand_and_not_accepted": 0,
+      "refused": 7,
+      "refusal_rate": 0.056,
+      "rate_deliv": 0.744,
+      "rate_meets_demand": 0.744,
+      "rate_demand_equals_output": 0.788135593220339,
+      "calls_used_sum": 182,
+      "calls_per_task_recomputed": 1.456
+    },
+    "OFF": {
+      "rows": 126,
+      "accepted": 126,
+      "meets_demand": 89,
+      "deliv": 89,
+      "leaked": 37,
+      "meets_demand_and_not_accepted": 0,
+      "refused": 0,
+      "refusal_rate": 0.0,
+      "rate_deliv": 0.7063492063492064,
+      "rate_meets_demand": 0.7063492063492064,
+      "rate_demand_equals_output": 0.7063492063492064,
+      "calls_used_sum": 126,
+      "calls_per_task_recomputed": 1.0
+    }
+  },
+  "paired_test_vs_baseline": {
+    "test": "CONFORM",
+    "baseline": "OFF5",
+    "by": {
+      "deliv": {
+        "paired_n": 125,
+        "a_only_in_a": [],
+        "unpaired_a": 0,
+        "unpaired_b": 0,
+        "a_ok": 93,
+        "b_ok": 89,
+        "rate_a": 0.744,
+        "rate_b": 0.712,
+        "delta_pp": 3.2,
+        "b": 8,
+        "c": 4,
+        "p": 0.3876953125
+      },
+      "meets_demand": {
+        "paired_n": 125,
+        "a_only_in_a": [],
+        "unpaired_a": 0,
+        "unpaired_b": 0,
+        "a_ok": 93,
+        "b_ok": 89,
+        "rate_a": 0.744,
+        "rate_b": 0.712,
+        "delta_pp": 3.2,
+        "b": 8,
+        "c": 4,
+        "p": 0.3876953125
+      }
+    }
+  },
+  "void": {
+    "OFF5": {
+      "n_measured": 125,
+      "n_void": 0,
+      "ratio": 0.0,
+      "over_20pct_abort": false,
+      "over_10pct_warn": false
+    },
+    "CONFORM": {
+      "n_measured": 125,
+      "n_void": 0,
+      "ratio": 0.0,
+      "over_20pct_abort": false,
+      "over_10pct_warn": false
+    },
+    "OFF": {
+      "n_measured": 126,
+      "n_void": 0,
+      "ratio": 0.0,
+      "over_20pct_abort": false,
+      "over_10pct_warn": false
+    }
+  },
+  "live_snapshot_skew": [
+    "OFF 的 leaked summary=36 vs 逐列覆算=37"
+  ],
+  "verdicts": {
+    "P-C1_delta_pp": 3.2,
+    "P-C1_band_3_to_6pp": true,
+    "P-C1b_p": 0.3876953125,
+    "P-C1b_band_0.02_to_0.20": false,
+    "P-C2_calls_per_task": 1.456,
+    "P-C2_le_2.0": true,
+    "P-C2_abort_gt_4.5": false,
+    "P-C3a_refusal_rate": 0.056,
+    "P-C3a_band_3_to_10pct": true,
+    "P-C3b_leaked": {
+      "OFF5": 36,
+      "CONFORM": 25,
+      "OFF": 37
+    },
+    "P-C3b_verdict": "REPORTED_ONLY（R440R 未給門檻，判準 §三 降級）",
+    "P-C4": "前半只看 receipt_head 齊備（round666）；鏈為 UNVERIFIABLE，不是中止條件",
+    "P-C5_void_ratio": {
+      "OFF5": 0.0,
+      "CONFORM": 0.0,
+      "OFF": 0.0
+    },
+    "P-C5_any_abort": false,
+    "WARNING": "run 未收官（terminal=false）⇒ 以上是中途快照，不是結論",
+    "live_snapshot_skew": [
+      "OFF 的 leaked summary=36 vs 逐列覆算=37"
+    ]
+  }
+}

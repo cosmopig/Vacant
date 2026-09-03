@@ -1,0 +1,35 @@
+=== /dev/shm/r667/snap  rows=376 sha8=2a64a91b terminal=False ===
+arm          n  acc  refus   deliv%   meets%     d=o%  leak  md&!acc  c/task
+OFF5       125  125      0   71.20   71.20    71.20    36        0    5.00
+CONFORM    125  118      7   74.40   74.40    78.81    25        0    1.46
+OFF        126  126      0   70.63   70.63    70.63    37        0    1.00
+paired[deliv       ] n=125 Δ= +3.20pp b=8   c=4   p=0.3877  <= P-C1 用這個
+paired[meets_demand] n=125 Δ= +3.20pp b=8   c=4   p=0.3877  （analyze_paired 報的是這個）
+{
+  "P-C1_delta_pp": 3.2,
+  "P-C1_band_3_to_6pp": true,
+  "P-C1b_p": 0.3876953125,
+  "P-C1b_band_0.02_to_0.20": false,
+  "P-C2_calls_per_task": 1.456,
+  "P-C2_le_2.0": true,
+  "P-C2_abort_gt_4.5": false,
+  "P-C3a_refusal_rate": 0.056,
+  "P-C3a_band_3_to_10pct": true,
+  "P-C3b_leaked": {
+    "OFF5": 36,
+    "CONFORM": 25,
+    "OFF": 37
+  },
+  "P-C3b_verdict": "REPORTED_ONLY（R440R 未給門檻，判準 §三 降級）",
+  "P-C4": "前半只看 receipt_head 齊備（round666）；鏈為 UNVERIFIABLE，不是中止條件",
+  "P-C5_void_ratio": {
+    "OFF5": 0.0,
+    "CONFORM": 0.0,
+    "OFF": 0.0
+  },
+  "P-C5_any_abort": false,
+  "WARNING": "run 未收官（terminal=false）⇒ 以上是中途快照，不是結論",
+  "live_snapshot_skew": [
+    "OFF 的 leaked summary=36 vs 逐列覆算=37"
+  ]
+}

@@ -1,0 +1,18 @@
+=== _r667_snap === arms=['OFF', 'OFF5'] paired n=125
+config                         calls  ship  good  leak  lost    cov  selacc  good/n
+OFF   as run      (no gate)        1   125    89    36     0  1.000  0.7120  0.7120
+OFF   + visible gate               1   107    89    18     0  0.856  0.8318  0.7120
+OFF5  as run      (no gate)        5   125    89    36     0  1.000  0.7120  0.7120
+OFF5  + visible gate               5   108    89    19     0  0.864  0.8241  0.7120
+
+paired McNemar (b = first-only, c = second-only):
+Traceback (most recent call last):
+  File "/home/user1/vacant/Vacant/ops/gain/replay/paired_gates.py", line 93, in <module>
+    main(r); print()
+    ^^^^^^^
+  File "/home/user1/vacant/Vacant/ops/gain/replay/paired_gates.py", line 84, in main
+    paired("ON    as run (visible+audit)", "OFF5  + visible gate       ", what)
+  File "/home/user1/vacant/Vacant/ops/gain/replay/paired_gates.py", line 71, in paired
+    A, B = cells[a], cells[b]
+           ~~~~~^^^
+KeyError: 'ON    as run (visible+audit)'
