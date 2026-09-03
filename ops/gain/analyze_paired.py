@@ -80,7 +80,12 @@ def main() -> int:
     ap.add_argument("--b-run", required=True, help="B 臂的 run 目錄")
     ap.add_argument("--b-arm", required=True)
     ap.add_argument("--json", help="把結果寫成 JSON 到這個檔")
+    ap.add_argument("--exclude-task-ids", default="",
+                     help="逗號分隔的 task_id，事前排除（例：R440T 的 lcb_3613,lcb_3763）。"
+                          "分子分母同時移除，比照 infra_void 鐵律 2。留空＝不排除，"
+                          "用來跟排除後那次跑的結果對照，兩次都要貼出來。")
     args = ap.parse_args()
+    exclude = {t.strip() for t in args.exclude_task_ids.split(",") if t.strip()}
 
     a_dir, b_dir = pathlib.Path(args.a_run), pathlib.Path(args.b_run)
     A = arm_rows(load_rows(a_dir), args.a_arm)
@@ -96,7 +101,10 @@ def main() -> int:
         ha, hb = h(a_dir), h(b_dir)
         cond[key] = {"a": ha, "b": hb, "same": ha == hb}
 
-    common = sorted(set(A) & set(B))
+    common_all = sorted(set(A) & set(B))
+    common = [t for t in common_all if t not in exclude]
+    excluded_present = sorted(exclude & set(common_all))
+    excluded_missing = sorted(exclude - set(common_all))
     a_ok = sum(1 for t in common if A[t]["meets_demand"])
     b_ok = sum(1 for t in common if B[t]["meets_demand"])
     disc_b = sum(1 for t in common if A[t]["meets_demand"] and not B[t]["meets_demand"])
@@ -112,6 +120,10 @@ def main() -> int:
     out = {
         "a": {"run": str(a_dir), "arm": args.a_arm, "n_rows": len(A)},
         "b": {"run": str(b_dir), "arm": args.b_arm, "n_rows": len(B)},
+        "exclude_requested": sorted(exclude),
+        "exclude_applied": excluded_present,
+        "exclude_not_in_common": excluded_missing,
+        "n_paired_before_exclude": len(common_all),
         "conditions": cond,
         "conditions_all_same": all(v["same"] for v in cond.values()),
         "n_paired": len(common),
@@ -136,6 +148,11 @@ def main() -> int:
     }
 
     lbl_a, lbl_b = args.a_arm, args.b_arm
+    if exclude:
+        print(f"事前排除 {sorted(exclude)}：套用於 common 的 {len(excluded_present)} 個"
+              f"（{excluded_present}），不在 common 裡的 {len(excluded_missing)} 個"
+              f"（{excluded_missing}）")
+        print(f"排除前配對任務數 n = {len(common_all)} → 排除後 n = {len(common)}")
     print(f"配對任務數 n = {len(common)}  （A={len(A)} 列, B={len(B)} 列）")
     print(f"條件一致：{out['conditions_all_same']}")
     for k, v in cond.items():
