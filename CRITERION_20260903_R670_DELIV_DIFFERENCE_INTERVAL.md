@@ -71,3 +71,53 @@ R440R 的 P-C1 是一個**有方向的帶狀預測**（+3 到 +6pp）。中途�
 - 若收官時 `md&!acc` 仍為 0 ⇒ 本輪的修**不改變 r444 的任何數字**，
   必須照實寫成「這輪補的是 deliv 缺區間這個洞，兩指標在這份資料上恰好同值」，
   **不准**寫成「本輪的修救了 r444 的結論」。
+
+---
+
+## 六、事後（同輪）：**§二 被我自己的檢查推翻**，§三 不受影響
+
+§二 主張「deliv 與 meets_demand 現在同值只是 `md&!acc=0` 的資料巧合，收官時可能會斷」。
+寫完之後去讀 bank 的建構處，發現**那不是巧合，是構造**：
+
+```
+vacant/codebench.py:664-673
+  visible_check = _check_code(entry_point, canonical, base,        atol)
+  hidden_check  = _check_code(entry_point, canonical, base + plus, atol)
+```
+
+同一個 `entry_point`／`canonical`／`atol`，測資清單 `hidden = base + plus ⊇ base = visible`，
+且 `_check_code` 要求**全部**測資通過 ⇒ **通過 hidden ⇒ 必然通過 visible**
+⇒ 逆否：可見沒過（＝CONFORM 拒交的條件）⇒ 隱藏必然沒過 ⇒ `meets_demand=false`
+⇒ **`md&!acc ≡ 0` 在構造上成立，而不是這批資料剛好如此。**
+⇒ 對 CONFORM，`deliv ≡ meets_demand`；對 OFF／OFF5，`accepted` 恆真也使兩者相等。
+
+LCB 呢？round440Q 的 `check_lcb_visible_subset.py` 早就問過同一件事，本輪重跑：
+
+```
+[承重層] 生成的 check code n=91
+  hidden 的測資清單以 visible 開頭 : 91      沒包住（關係真的不同）: 0
+結論：LCB 的 hidden 在構造上就是 visible 的超集（與 MBPP+ 同款）
+      唯一還活著的違反管道是候選程式碼自身的非決定性（亂數／時間／逾時）
+```
+
+**⇒ 本專案現有的兩個題庫，兩個指標都不可能分家。** 判準 §五 第二條因此觸發，
+而且是比原本更強的理由：本輪的修**不改變 r444 的任何數字**，
+`paired_ci.py --a-arm CONFORM` 本來就會給出與 deliv 逐位相同的區間。
+
+### 這對三件事的影響（照實寫，不修飾）
+
+1. **§三 的收官判定表不受影響**，本輪的主要貢獻也不受影響：
+   結算 P-C1 的那支工具**沒有區間**是事實，而 null 宣稱要有區間是 r656 立的硬規則。
+   區間該補，與兩個指標是否同值無關。
+2. **P-R670-A 仍是有效的工具行為測試，但它測的是這兩個題庫到不了的狀態。**
+   交棒時不准把它講成「防住了一個會發生的錯」——它防的是換題庫之後才會發生的錯。
+3. **順帶推翻的不只是我這一輪**：round667 造 `conform_settle.py` 的動機之一是
+   「`meets_demand` 對 CONFORM 是原始正確率、不是交付率」。那個**概念上正確**，
+   但在 visible ⊆ hidden 的題庫上**兩個數字可證相等** ⇒ 那支工具是防禦性的，
+   不是「換了正確指標所以數字才對」。收官文字**不准**寫成「我們用了正確的交付指標所以…」。
+
+### 這條性質什麼時候會失效（給未來的自己）
+
+- 換到 visible ⊄ hidden 的題庫（要先用 `check_lcb_visible_subset.py` 同款檢查證明）。
+- 候選程式自身非決定性（亂數／時間／逾時）——這條**現在就活著**，
+  所以 `md&!acc` 這一欄要繼續印、收官時不是 0 就要當訊號查，不能因為「構造上是 0」就不看。
