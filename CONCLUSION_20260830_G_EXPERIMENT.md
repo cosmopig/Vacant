@@ -355,3 +355,42 @@ bug 修好前的版本下產生的資料，修好之後有沒有讓 ON 打贏 OF
 - 事前判準：`DECISION_20260830_R342_VOID_REVIEW_PREREG.md`
 - R278 終點裁決：`DECISION_20260830_R278_ENDPOINT_VERDICT.md`
 - R146-S 終點裁決：`DECISION_20260828_R146S_ENDPOINT_VERDICT.md`
+
+## 追記（round528，2026-09-03）：confirmed 這一桶是異質的；等預算的答案經得起「拿掉共通地板」
+
+`DECISION_20260903_R528_CONFIRMED_STATUS_CRASH_SPLIT.md`。零 API、零 run，
+用的是 `runs/g_r441_gemma_only_mbpp_b`（rows 525 行 sha8 `440d973c`／
+calls 1986 行 sha8 `3d24b73d`，與 R518/R519/R522 同一份）。
+
+**1. R518 的「`counterexample_confirmed` 是逆向選擇器」要收窄。** 把 61 張
+confirmed 票依「初稿在宣稱 args 上發生什麼」拆開（R519 的逐票 A 與本輪分類
+join 125/125 全中）：
+
+| 子類 | 票數 | A（評審宣稱的 EXPECTED 對不對） |
+|---|---|---|
+| `draft_value_differs` | 42 | 10/42 = **0.238** |
+| `draft_raised` | 7 | 3/7 = 0.429 |
+| `no_entry`（初稿沒定義題目要求的函式名） | 12 | 8/12 = **0.667** |
+| 合計 | 61 | 21/61 = 0.344（= R519 逐位重現） |
+
+逆向選擇幾乎全部住在 `draft_value_differs`；`no_entry` 那 12 票的 A 跟全體
+0.609 分不出來——它不是「評審算錯」，是初稿把函式取錯名字、任何呼叫都失敗。
+
+**2. 梯子不動。** 排除 `no_entry` 後全體 A = 87/144 = **0.6042**，Wilson 上界
+**0.6803**，仍遠低於 R518 §十一 事前定的 0.80。R519 §八 說要翻盤得再多約 13 票
+從錯變對，`no_entry` 剛好是 12 票、量級接近，所以非查不可——查完是不翻。
+
+**3. 三臂共通的 5.7% 地板：worker 取錯函式名。** 用 runtime 自己的
+`extract_code` 量每臂初稿有沒有定義 `entry_point`：OFF 10/179＝5.6%、
+ON 10/167＝6.0%、OFF5 50/895＝5.6%。三臂幾乎一樣 ⇒ 是 worker 模型的行為，
+不是任何一臂的機制造成的。ON 那 10 題全部初稿就錯，拿到系統確認過的反例後
+只救回 1 題。
+
+**4. 等預算的答案不因此改變（本追記唯一與主結論有關的一句）。** 排除任一臂
+出現 naming miss／語法錯的 30 題後重算（基準口徑先複核，與 R516/R519 逐位相同）：
+ON 110/137＝80.29%、OFF5 118/149＝79.19%、OFF 112/149＝75.17%；
+**ON vs OFF5 b=5 c=4 p=1.0000**（原本 b=11 c=12 p=1.0000）。
+**「等預算下 Vacant 打不贏 self-consistency」不是被一層共通雜訊地板壓出來的
+假平手**——拿掉地板兩臂還是分不出來。這是加固，不是推翻。
+（ON vs OFF、OFF5 vs OFF 的 p 值方向有變動，但 discordant pair 只有 10 與 8 對，
+不足以支撐新陳述，不寫進結論。）
