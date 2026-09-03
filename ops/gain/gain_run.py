@@ -198,20 +198,38 @@ def probe_instrument(tasks, log, *, sample=12, bank: str = "evalplus") -> dict:
         raise SystemExit(f"讀不到官方參考解，量具無法驗證：{e}")
     good = bad = 0
     detail = []
+    # round671（落地 round648／R440W 的提案）：`visible_check` 對 OFF／ON／OFF5 只是
+    # 落盤欄位，但對 CONFORM 是**出貨閘門**（arm_conform 通過就早停、全不通過就拒交），
+    # 直接決定 P-C1 通過率／P-C2 calls_per_task／P-C3 拒交率。決策量具沒驗過，
+    # 「閘門根本沒有閘」會長得跟「機制很便宜」一模一樣。所以在同一批 covered 題目上
+    # 用同一組正／反樣本再驗一次；合格線不是新旋鈕，與 hidden 側同一條（全對才過）。
+    vis_cov = vis_good = vis_bad = 0
+    vis_detail = []
     covered = [t for t in tasks if refs.get(t["task_id"])][:sample]
     for t in covered:
         ref = refs[t["task_id"]]
+        stub = f"def {t.get('entry_point','_f')}(*a, **k):\n    return None\n"
         hidden = t["hidden_check"]["code"]
         ok_good, msg_g = meets_demand(ref, hidden, entry_point=t.get("entry_point"))
-        ok_bad, _ = meets_demand(
-            f"def {t.get('entry_point','_f')}(*a, **k):\n    return None\n", hidden,
-            entry_point=t.get("entry_point"))
+        ok_bad, _ = meets_demand(stub, hidden, entry_point=t.get("entry_point"))
         good += int(ok_good)
         bad += int(not ok_bad)
         detail.append({"task_id": t["task_id"], "ref_pass": ok_good,
                        "broken_rejected": not ok_bad, "err": msg_g[:160]})
+        vis = (t.get("visible_check") or {}).get("code") or ""
+        if not vis:
+            continue
+        vis_cov += 1
+        v_good, v_msg = meets_demand(ref, vis, entry_point=t.get("entry_point"))
+        v_bad, _ = meets_demand(stub, vis, entry_point=t.get("entry_point"))
+        vis_good += int(v_good)
+        vis_bad += int(not v_bad)
+        vis_detail.append({"task_id": t["task_id"], "ref_pass": v_good,
+                           "stub_rejected": not v_bad, "err": v_msg[:160]})
     res = {"n": len(detail), "ref_pass": good, "broken_rejected": bad,
-           "detail": detail}
+           "detail": detail,
+           "visible_n": vis_cov, "visible_ref_pass": vis_good,
+           "visible_stub_rejected": vis_bad, "visible_detail": vis_detail}
     log(res)
     return res
 
@@ -1105,6 +1123,22 @@ def main() -> None:
         raise SystemExit("量具驗證一題都沒驗到——這不是通過，是沒接上。停。")
     if pr["ref_pass"] < pr["n"] or pr["broken_rejected"] < pr["n"]:
         raise SystemExit("量具沒有兩個方向都答對——在壞尺上跑實驗等於沒跑。停。")
+    # round671：可見閘門的數字**無條件量、無條件印**（--arms probe 也看得到），
+    # 但只有 CONFORM 拿它做決策，所以只在 CONFORM 在場時硬擋——擋掉合法的
+    # OFF/ON/OFF5 run 是過嚴。
+    print(f"   可見閘門（CONFORM 決策量具）參考解通過 {pr['visible_ref_pass']}/{pr['visible_n']}　"
+          f"樁被擋 {pr['visible_stub_rejected']}/{pr['visible_n']}　"
+          f"覆蓋 {pr['visible_n']}/{pr['n']}")
+    if "CONFORM" in {a.strip() for a in args.arms.split(",")}:
+        if pr["visible_n"] < pr["n"]:
+            raise SystemExit(
+                f"CONFORM 的決策量具覆蓋率不足：visible {pr['visible_n']}/{pr['n']}"
+                "——量不到不是通過，是沒接上。停。")
+        if (pr["visible_ref_pass"] < pr["visible_n"]
+                or pr["visible_stub_rejected"] < pr["visible_n"]):
+            raise SystemExit(
+                "CONFORM 的決策量具沒有兩個方向都答對——出貨閘門是壞的，"
+                "拒交率／calls_per_task／通過率三個預註冊預測都會是假數字。停。")
     if args.arms.strip() == "probe":
         return
 
