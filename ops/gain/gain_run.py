@@ -34,6 +34,8 @@ from ops.gain.brain_cline import (DEFAULT_MODEL, POOL, REVIEWER_SYSTEM,  # noqa:
                                   REVIEW_LENSES, ClineBrain, InfraVoid,
                                   load_keys)
 from vacant.codebench import BuiltinSampleLoader, EvalPlusMBPPLoader  # noqa: E402
+from vacant.identity import Identity  # noqa: E402
+from vacant.logbook import Logbook  # noqa: E402
 
 
 # The official no-extreme concept applied to this runner's declared product envelope:
@@ -317,6 +319,78 @@ def arm_off5(task, agents, rng, calls, k=5):
     n_agree = max_votes
     return chosen[0], chosen[1], [a for _, a in outs], {
         "visible_ok": visible_ok, "vote_agreement": n_agree, "n_buckets": len(buckets)}
+
+
+def arm_conform(task, agents, rng, calls, book, ident, k=5):
+    """驗收閘門（CONFORM）：跑客戶自己的驗收測資，不開評審會。
+
+    這支在架構裡承重什麼（DECISION_20260903_R440P §四）：
+    R438/R516 量到「評審票近乎常數函數」，R518 量到反例精確度上界 <0.80，
+    E1 的 revise 在 167 題裡 improved 6 / harmed 0——**委員會那三通呼叫買不到東西**。
+    但同一批資料也量到：ON 的拒交閘門比任何從 5 個樣本導出的信心值都校準得好，
+    而「跑一次可見驗收」是零模型呼叫（`arm_off5` 的 behavior_signature 早就在跑）。
+    所以把 ON 從委員會改成閘門：**執行取代意見，收據取代投票**。
+
+    與 OFF5 的差別只有兩個，其餘（同一個 agent 池、同一個 k 上限）完全相同：
+      1. 不投票，而是逐一執行 `visible_check`；
+      2. 通過就停（早停），全不通過就**拒交**。
+
+    誠實邊界（R440P §五，改碼不得刪）：
+    - 這一切建立在「需求可以編譯成可執行的驗收測資」。需求跑不起來時本機制沒有
+      免費裁判，會退化成「問一個模型」，而那正是量出來很差的東西。
+    - 「可見篩選不會誤丟正確解」在 MBPP+ 上量到 0/1630，但那**部分是題庫性質**
+      （hidden ＝ base＋plus，可見沒過結構上蘊含隱藏沒過）。驗收測資不是真需求
+      子集的部署裡，拒交會殺掉好答案。
+
+    收據：每一次嘗試都簽進 hash-chain（`vacant/logbook.py`），事後可獨立驗鏈。
+    回傳的 `receipt_head` 是鏈頭 hash，`attempts` 是逐次的具名紀錄。
+    """
+    assigned = [rng.choice(agents) for _ in range(k)]
+    attempts: list[dict] = []
+    chosen: tuple[str, str] | None = None
+    last: tuple[str, str] | None = None
+
+    for idx, a in enumerate(assigned, 1):
+        txt = a.generate(task["prompt"], role="gen",
+                         meta={"arm": "CONFORM", "task_id": task["task_id"]})
+        calls[0] += 1
+        code = extract_code(txt)
+        last = (code, a.agent_id)
+        # 只用 visible：hidden 是計分用的，選擇時碰它＝V/GT 分離破功（SPEC §5.3）。
+        vis_ok, vis_err = meets_demand(
+            code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+        entry = book.append(
+            "conform_attempt",
+            {"task_id": task["task_id"], "attempt": idx, "worker": a.agent_id,
+             "visible_ok": bool(vis_ok), "err": vis_err[:120],
+             "code_sha256": hashlib.sha256(code.encode("utf-8")).hexdigest()},
+            ident, ts_ms=int(time.time() * 1000),
+        )
+        attempts.append({"attempt": idx, "worker": a.agent_id,
+                         "visible_ok": bool(vis_ok), "err": vis_err[:120],
+                         "entry_hash": entry.hash()})
+        if vis_ok:
+            chosen = (code, a.agent_id)
+            break
+
+    accepted = chosen is not None
+    # 拒交時仍然要回傳一份程式碼——dispatch 端無條件用 hidden_check 計分，
+    # 那是**離線評分**不是出貨。`accepted=False` 才是「沒有交出去」的語意，
+    # 與 ON 一致（leaked = accepted and not truth）。
+    code, worker = chosen if accepted else last
+    book.append(
+        "conform_verdict",
+        {"task_id": task["task_id"], "accepted": accepted,
+         "attempts": len(attempts), "worker": worker},
+        ident, ts_ms=int(time.time() * 1000),
+    )
+    return code, worker, [a.agent_id for a in assigned[:len(attempts)]], {
+        "accepted": accepted,
+        "visible_ok": accepted,
+        "conform_attempts": attempts,
+        "conform_calls": len(attempts),
+        "receipt_head": book.head(),
+    }
 
 
 def _review_vote(text: str) -> bool:
@@ -845,7 +919,7 @@ def main() -> None:
     # round212：`--arms` 以前沒有 choices，dispatch 的 else 會把任何不認得的
     # 名字當成 ON 跑掉（打錯字＝安靜跑錯臂）。檢查放在 preflight 之前，
     # 打錯字不該先燒掉模型呼叫。
-    KNOWN_ARMS = {"OFF", "OFF5", "ON", "ONR"}
+    KNOWN_ARMS = {"OFF", "OFF5", "ON", "ONR", "CONFORM"}
     if args.arms.strip() != "probe":
         _unknown = [a.strip() for a in args.arms.split(",")
                     if a.strip() and a.strip() not in KNOWN_ARMS]
@@ -1018,6 +1092,10 @@ def main() -> None:
         arm: {
             "rng": random.Random(f"{args.seed}:{arm}"),
             "rep": {a.agent_id: {"n": 0, "ok": 0} for a in agents},
+            # CONFORM 的收據鏈：每臂一條，簽章身份只在本 run 內存活
+            # （私鑰不落盤——RECORD_SPEC §7 排除 identity.key）。
+            "book": Logbook(),
+            "ident": Identity.generate(),
             "calls": [0],
             "n_acc": 0, "n_acc_ok": 0, "n_void": 0,
             "rv_correct": 0, "rv_total": 0, "rv_raw_correct": 0,
@@ -1097,6 +1175,10 @@ def main() -> None:
                 elif arm == "ONR":
                     code, worker, involved, extra = arm_onr(
                         t, agents, rng, calls, rep, audit_rate=args.audit_rate)
+                    accepted = extra["accepted"]
+                elif arm == "CONFORM":
+                    code, worker, involved, extra = arm_conform(
+                        t, agents, rng, calls, s["book"], s["ident"])
                     accepted = extra["accepted"]
                 elif arm == "ON":
                     code, worker, involved, extra = arm_on(
