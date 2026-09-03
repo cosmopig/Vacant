@@ -1,0 +1,189 @@
+{
+  "strata": [
+    {
+      "label": "S1",
+      "group": "A",
+      "dir": "runs/g_r441_gemma_only_mbpp_b",
+      "start": "2026-09-02 09:33",
+      "policy_era": "post",
+      "rows": 525,
+      "rows_sha256_16": "440d973c4003b3c6",
+      "void_total": 12,
+      "by_arm": {
+        "ON": {
+          "TIMEOUT": 10,
+          "HTTP_400": 2
+        }
+      },
+      "total_by_class": {
+        "TIMEOUT": 10,
+        "HTTP_400": 2
+      },
+      "recoverable": 10,
+      "recoverable_rate": 0.8333333333333334,
+      "http400_attempt_hist": {
+        "1": 4,
+        "2": 2
+      }
+    },
+    {
+      "label": "S2",
+      "group": "A",
+      "dir": "runs/g_r443_gemma_lcb",
+      "start": "2026-09-03",
+      "policy_era": "post",
+      "rows": 269,
+      "rows_sha256_16": "4720d64d3db34bf1",
+      "void_total": 4,
+      "by_arm": {
+        "ON": {
+          "TIMEOUT": 4
+        }
+      },
+      "total_by_class": {
+        "TIMEOUT": 4
+      },
+      "recoverable": 3,
+      "recoverable_rate": 0.75,
+      "http400_attempt_hist": {
+        "1": 7
+      }
+    },
+    {
+      "label": "S3",
+      "group": "B",
+      "dir": "runs/g_onoff5_qwenonly_v3_20260824",
+      "start": "2026-08-24 11:28",
+      "policy_era": "pre",
+      "rows": 116,
+      "rows_sha256_16": "84999096018a82eb",
+      "void_total": 4,
+      "by_arm": {
+        "ON": {
+          "TIMEOUT": 1
+        },
+        "OFF5": {
+          "HTTP_400": 3
+        }
+      },
+      "total_by_class": {
+        "TIMEOUT": 1,
+        "HTTP_400": 3
+      },
+      "recoverable": 3,
+      "recoverable_rate": 0.75,
+      "http400_attempt_hist": {
+        "1": 3
+      }
+    },
+    {
+      "label": "S4",
+      "group": "B",
+      "dir": "runs/g_onoff5_371_r123_20260825",
+      "start": "2026-08-25 22:43",
+      "policy_era": "pre",
+      "rows": 718,
+      "rows_sha256_16": "5dcae2a6488cca25",
+      "void_total": 24,
+      "by_arm": {
+        "ON": {
+          "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 234": 1,
+          "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 247": 1,
+          "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 184": 1,
+          "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 200": 1,
+          "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 233": 1,
+          "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 209": 1
+        },
+        "OFF5": {
+          "HTTP_400": 11,
+          "HTTP_404": 5,
+          "HTTP_502": 1,
+          "TIMEOUT": 1
+        }
+      },
+      "total_by_class": {
+        "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 234": 1,
+        "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 247": 1,
+        "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 184": 1,
+        "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 200": 1,
+        "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 233": 1,
+        "OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 209": 1,
+        "HTTP_400": 11,
+        "HTTP_404": 5,
+        "HTTP_502": 1,
+        "TIMEOUT": 1
+      },
+      "recoverable": 16,
+      "recoverable_rate": 0.6666666666666666,
+      "http400_attempt_hist": {
+        "1": 10,
+        "4": 1
+      }
+    },
+    {
+      "label": "S5",
+      "group": "B",
+      "dir": "runs/g_het3_r278_20260829",
+      "start": "2026-08-29 10:23",
+      "policy_era": "pre",
+      "rows": 221,
+      "rows_sha256_16": "c957c78dafeb1a18",
+      "void_total": 137,
+      "by_arm": {
+        "ON": {
+          "HTTP_400": 69,
+          "TIMEOUT": 4
+        },
+        "OFF5": {
+          "HTTP_400": 64
+        }
+      },
+      "total_by_class": {
+        "HTTP_400": 133,
+        "TIMEOUT": 4
+      },
+      "recoverable": 32,
+      "recoverable_rate": 0.23357664233576642,
+      "http400_attempt_hist": {
+        "1": 125,
+        "4": 1,
+        "2": 7
+      }
+    },
+    {
+      "label": "S6",
+      "group": "B",
+      "dir": "runs/g_r356_3arm_20260830",
+      "start": "2026-08-30 17:53",
+      "policy_era": "post(+58s)",
+      "rows": 432,
+      "rows_sha256_16": "b3354c655a1316fe",
+      "void_total": 99,
+      "by_arm": {
+        "OFF5": {
+          "HTTP_400": 30
+        },
+        "ON": {
+          "HTTP_400": 63,
+          "TIMEOUT": 1
+        },
+        "OFF": {
+          "HTTP_400": 5
+        }
+      },
+      "total_by_class": {
+        "HTTP_400": 98,
+        "TIMEOUT": 1
+      },
+      "recoverable": 69,
+      "recoverable_rate": 0.696969696969697,
+      "http400_attempt_hist": {
+        "1": 226,
+        "2": 167,
+        "3": 82,
+        "4": 42
+      }
+    }
+  ],
+  "unparsed_total": 0
+}

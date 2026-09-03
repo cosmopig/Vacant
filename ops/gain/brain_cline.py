@@ -179,7 +179,22 @@ class ClineBrain:
                 })
                 return text
             except Exception as e:                      # noqa: BLE001
-                last_err = f"{type(e).__name__}: {e}"
+                # round662：`str(HTTPError)` 只給「HTTP Error 400: Bad Request」，
+                # 伺服器解釋錯誤原因的**回應本體被丟掉**。實測後果：
+                # `g_het3_r278` 的 133 筆與 `g_r356_3arm` 的 517 筆 400 訊息
+                # 逐字完全相同，事後無法從 log 追根因——而 400 正是 Group B
+                # 92.8% 的 infra_void 主因。`e.read()` 拿得到本體，補上它。
+                # ⚠ 純儀器：不改控制流、不改重試判定、不改 void 的定義。
+                body = ""
+                if isinstance(e, urllib.error.HTTPError):
+                    try:
+                        raw = e.read()
+                        if raw:
+                            body = " | body=" + raw.decode(
+                                "utf-8", "replace")[:2000]
+                    except Exception:               # noqa: BLE001
+                        body = " | body=<讀取失敗>"
+                last_err = f"{type(e).__name__}: {e}{body}"
                 self._log({
                     "ts_ms": int(time.time() * 1000),
                     "agent_id": self.agent_id, "role": role,
