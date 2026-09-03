@@ -116,3 +116,47 @@ def test_receipt_names_which_acceptance_test_each_worker_stalled_on(task):
     assert all(x["detail_reason"] is None for x in a[:2]), a
     # 通過者不算條號（省沙箱執行），所以不該有這些欄位
     assert "first_failing_test" not in a[2], a[2]
+
+
+# ── round639 的收據細節（「卡在第幾條」）——釘住，別再退回常數字串 ──────────
+#
+# R440P §六 對外那句「收據列出各自卡在第幾條」原本沒有實作支撐：
+# `meets_demand` 失敗一律回同一個常數 "sandbox_check_failed"。round639 補上切片器。
+# 這幾個測試是那句話的**實作證據**，不是裝飾——它們一旦失敗，那句對外宣稱就不能講。
+
+_BASE = "def similar_elements(a, b):\n    r = tuple(sorted(set(a) & set(b)))\n"
+
+
+def _first_fail(task, src):
+    extra, _c, _w, _b, _i = _run(task, [src], k=1)
+    return extra["conform_attempts"][0]
+
+
+def test_receipt_reports_which_visible_test_failed(task):
+    """索引必須真的隨「哪一條先失敗」而變，不是恆為 1。"""
+    # 三條可見測資的交集分別含 5 / 含 3 / 最大值 14
+    got = [
+        _first_fail(task, _BASE + "    return () if 5 in r else r\n")["first_failing_test"],
+        _first_fail(task, _BASE + "    return () if 3 in r else r\n")["first_failing_test"],
+        _first_fail(task, _BASE + "    return () if r and max(r) > 10 else r\n")["first_failing_test"],
+    ]
+    assert got == [1, 2, 3], f"收據的失敗索引沒有隨測資變：{got}"
+
+
+def test_receipt_separates_load_failure_from_test_failure(task):
+    """載都載不進去，跟跑到第幾條才錯，是兩種不同的事，收據要分得開。"""
+    broken = _first_fail(task, "def similar_elements(a, b)\n    return ()\n")   # 語法錯
+    assert broken["loads_ok"] is False
+    assert broken["first_failing_test"] is None
+    assert broken["detail_reason"] == "fails_before_any_test"
+
+    wrong = _first_fail(task, _BASE + "    return ()\n")
+    assert wrong["loads_ok"] is True and wrong["first_failing_test"] == 1
+
+
+def test_receipt_stays_quiet_when_the_draft_conforms(task):
+    """通過的候選不該被算失敗細節——那是多餘的沙箱執行。"""
+    ok = _first_fail(task, _BASE + "    return r\n")
+    assert ok["visible_ok"] is True
+    # 通過時整組失敗細節根本不寫進收據（不是寫成 None）——省掉的是沙箱執行
+    assert "first_failing_test" not in ok and "n_visible_tests" not in ok
