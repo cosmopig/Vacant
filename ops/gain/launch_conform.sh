@@ -14,7 +14,14 @@ HUB="http://100.119.113.56:8765/v1/chat/completions"
 MODEL="gemma-4-12b-it-qat"
 OUT="runs/g_r444_conform_mbpp"
 DEC="DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md"
-WAIT_PAT="gain_run.py --out runs/g_r443_gemma_lcb"
+# ⚠ 一定要錨行首。未錨版 `ps -eo cmd | grep -q "gain_run.py --out runs/..."`
+#   會匹配到 **grep 自己的命令列**（它就長成 `grep -q gain_run.py --out runs/...`），
+#   於是條件恆為真、這個迴圈永遠不會結束＝排程器安靜地永遠不發射。
+#   2026-09-03 round639 實測：未錨版對「不存在的 run」300/300 為真；
+#   錨行首版對不存在的 run 0/100、對真的在跑的 E3 100/100。
+#   這正是 LOOP_PROMPT 記過的同一個坑（pgrep -f 匹配到自己），
+#   本檔下方 `n=$(ps -eo cmd | grep -c "^python3 ...")` 已經錨了，這一行漏掉。
+WAIT_PAT="^python3 ops/gain/gain_run\.py --out runs/g_r443_gemma_lcb"
 
 mkdir -p "$ROOT/logs"
 say()    { printf '%s  %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$*" | tee -a "$LOG"; }
