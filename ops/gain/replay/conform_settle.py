@@ -105,6 +105,7 @@ def arm_block(idx: dict[str, dict]) -> dict:
         "rate_meets_demand": md / n,
         "rate_demand_equals_output": (deliv / acc) if acc else None,
         "calls_used_sum": calls,
+        "calls_used_max": max(int(r["calls_used"]) for r in idx.values()),
         "calls_per_task_recomputed": calls / n,
     }
 
@@ -162,20 +163,65 @@ def settle(run_dir: pathlib.Path, rows_path: pathlib.Path, test_arm: str,
     #   summary.json 是每題重寫一次，快照必然差到一題。所以 terminal=False 時
     #   降級成「照實報 skew」，terminal=True 時（＝收官結算，唯一會被引用的那次）硬擋。
     skew = []
+
+    def flag(msg: str) -> None:
+        if terminal:
+            raise Broken(msg)
+        skew.append(msg)
+
+    # round669：原本這裡對 `calls_per_task` 做 exact 比對並在 terminal 時硬擋。
+    # **那條 exact equality 不被碼蘊含**（CRITERION_20260903_R669 §二）：
+    #   `calls[0]` 逐格累加，`except InfraVoid` 只做 `n_void += 1; continue`，
+    #   **不回捲**（gain_run.py:1329-1337），而 InfraVoid 由 `a.generate` 重試耗盡
+    #   （brain_cline.py:246）或沙箱不可用（gain_run.py:133,277）丟出——OFF5／CONFORM
+    #   是**依序**抽 k 份，第 5 份才炸的話前 4 次呼叫已經計進 `calls[0]` 卻沒有列。
+    # ⇒ 只要 n_void>0，健康的 run 也會讓 summary.calls ≠ 逐列和 ⇒ 收官誤報 BROKEN。
+    # 修法不是放寬，是**換成碼真正蘊含的不變量**，並補三條對 void 免疫的 exact 檢查。
+    calls_check: dict[str, str] = {}
     for a in arms:
-        s_cpt = summary["arms"][a].get("calls_per_task")
-        r_cpt = blocks[a]["calls_per_task_recomputed"]
-        if s_cpt is not None and abs(s_cpt - r_cpt) > 1e-6:
-            msg = f"{a} 的 calls_per_task summary={s_cpt} vs 逐列覆算={r_cpt}——對不起來"
-            if terminal:
-                raise Broken(msg)
-            skew.append(msg)
-        s_leaked = summary["arms"][a].get("leaked")
-        if s_leaked is not None and s_leaked != blocks[a]["leaked"]:
-            msg = f"{a} 的 leaked summary={s_leaked} vs 逐列覆算={blocks[a]['leaked']}"
-            if terminal:
-                raise Broken(msg)
-            skew.append(msg)
+        sa, blk = summary["arms"][a], blocks[a]
+        # `gain_run.py:1260-1280` 無條件寫出下列每一個欄位 ⇒ 少了任何一個就是
+        # 「安靜量不到」，必須 BROKEN，不准當成 None 跳過（那會讓 M5 型的竄改溜走）。
+        for field in ("infra_void", "calls", "processed",
+                      "accepted", "accepted_and_meets_demand", "leaked"):
+            if sa.get(field) is None:
+                raise Broken(f"summary.json 的 {a} 臂沒有 {field} 欄位"
+                             f"——這不是通過，是量不到")
+        n_void = sa["infra_void"]
+        # n_void 取自 summary，跟 `calls` 同一個產出者＝like-for-like；
+        # notes 那份獨立計數另外報在 out["void"]（P-C5 用的就是它）。
+        if not isinstance(n_void, int):
+            raise Broken(f"summary.json 的 {a} 臂 infra_void={n_void!r} 不是整數")
+
+        # (1) 對 void 免疫、且碼精確蘊含的 exact 檢查——牙齒在這裡，不准降級
+        for field, recomputed in (("accepted", blk["accepted"]),
+                                  ("accepted_and_meets_demand", blk["deliv"]),
+                                  ("leaked", blk["leaked"])):
+            if sa[field] != recomputed:
+                flag(f"{a}.{field}：summary={sa[field]} vs 逐列覆算={recomputed}")
+
+        # (2) processed == 列數 + n_void：抓「列不見了」。現行工具沒有這條。
+        if sa["processed"] != blk["rows"] + n_void:
+            flag(f"{a}.processed：summary={sa['processed']} vs 列數{blk['rows']}"
+                 f"+void{n_void}={blk['rows'] + n_void}——有列不見了")
+
+        # (3) calls：n_void==0 才 exact；n_void>0 換成碼蘊含的兩條界
+        s_calls, rows_calls = sa["calls"], blk["calls_used_sum"]
+        if n_void == 0:
+            calls_check[a] = "exact"
+            if s_calls != rows_calls:
+                flag(f"{a}.calls：summary={s_calls} vs 逐列和={rows_calls}"
+                     f"（n_void=0 ⇒ 必須逐位相同）")
+        else:
+            cap = blk["calls_used_max"]          # 單格上限由資料導出，零新旋鈕
+            calls_check[a] = f"bounded(n_void={n_void},cap={cap})"
+            excess = s_calls - rows_calls
+            if excess < 0:
+                flag(f"{a}.calls：summary={s_calls} < 逐列和={rows_calls}"
+                     f"——void 只可能往上加，不可能扣掉")
+            elif excess > n_void * cap:
+                flag(f"{a}.calls：summary−逐列和={excess} 超過 {n_void} 個 void 格子"
+                     f"最多可能吃掉的 {n_void}×{cap}={n_void * cap}")
 
     keys = {
         "deliv": lambda r: _bool(r, "accepted") and _bool(r, "meets_demand"),
@@ -193,6 +239,7 @@ def settle(run_dir: pathlib.Path, rows_path: pathlib.Path, test_arm: str,
         "paired_test_vs_baseline": {"test": test_arm, "baseline": baseline, **{"by": pairs}},
         "void": {a: void_block(notes, a, blocks[a]["rows"]) for a in arms},
         "live_snapshot_skew": skew,
+        "calls_check_mode": calls_check,
     }
 
     # P-C1 只由 deliv 結算（判準 §三）
@@ -255,6 +302,8 @@ def main() -> int:
         mark = "  <= P-C1 用這個" if k == "deliv" else "  （analyze_paired 報的是這個）"
         print(f"paired[{k:12s}] n={p['paired_n']:>3d} Δ={p['delta_pp']:+6.2f}pp "
               f"b={p['b']:<3d} c={p['c']:<3d} p={p['p']:.4f}{mark}")
+    print(f"calls 檢查層級：{out['calls_check_mode']}"
+          "  （exact＝逐位相同；bounded＝該臂有 void，改用碼蘊含的上下界）")
     print(json.dumps(out["verdicts"], ensure_ascii=False, indent=2))
     if args.json:
         pathlib.Path(args.json).write_text(json.dumps(out, ensure_ascii=False, indent=2),

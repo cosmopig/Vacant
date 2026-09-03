@@ -1,0 +1,71 @@
+{
+  "snapshot": {
+    "n_rows_raw": 401,
+    "n_rows_kept": 399,
+    "dropped_after_last_summary": {
+      "OFF": 1,
+      "CONFORM": 1,
+      "OFF5": 0
+    },
+    "partial_line_dropped": 0,
+    "rows_sha256_8": "d126af71",
+    "summary_sha256_8": "df1528c5"
+  },
+  "fixture": {
+    "victim_task_id": "mbppplus_Mbpp/588",
+    "victim_arm": "CONFORM",
+    "victim_calls_used": 1,
+    "victim_accepted": true,
+    "victim_meets_demand": true
+  },
+  "results": {
+    "A": {
+      "conform_settle.py": {
+        "rc": 0,
+        "broken": null,
+        "tail": "}"
+      },
+      "leak_decomp.py": {
+        "rc": 0,
+        "broken": null,
+        "tail": "(c) 反事實 forced_leak=34 vs OFF5=38  等覆蓋率差距=4（原始差距=12）  閘門選得較準？True"
+      }
+    },
+    "B": {
+      "conform_settle.py": {
+        "rc": 2,
+        "broken": "BROKEN: CONFORM 的 calls_per_task summary=1.4848484848484849 vs 逐列覆算=1.4772727272727273——對不起來",
+        "tail": "BROKEN: CONFORM 的 calls_per_task summary=1.4848484848484849 vs 逐列覆算=1.4772727272727273——對不起來"
+      },
+      "leak_decomp.py": {
+        "rc": 0,
+        "broken": null,
+        "tail": "(c) 反事實 forced_leak=34 vs OFF5=38  等覆蓋率差距=4（原始差距=12）  閘門選得較準？True"
+      }
+    },
+    "C": {
+      "conform_settle.py": {
+        "rc": 2,
+        "broken": "BROKEN: CONFORM 的 calls_per_task summary=1.8636363636363635 vs 逐列覆算=1.4772727272727273——對不起來",
+        "tail": "BROKEN: CONFORM 的 calls_per_task summary=1.8636363636363635 vs 逐列覆算=1.4772727272727273——對不起來"
+      },
+      "leak_decomp.py": {
+        "rc": 0,
+        "broken": null,
+        "tail": "(c) 反事實 forced_leak=34 vs OFF5=38  等覆蓋率差距=4（原始差距=12）  閘門選得較準？True"
+      }
+    },
+    "D": {
+      "conform_settle.py": {
+        "rc": 2,
+        "broken": "BROKEN: CONFORM 的 calls_per_task summary=1.4736842105263157 vs 逐列覆算=1.4772727272727273——對不起來",
+        "tail": "BROKEN: CONFORM 的 calls_per_task summary=1.4736842105263157 vs 逐列覆算=1.4772727272727273——對不起來"
+      },
+      "leak_decomp.py": {
+        "rc": 2,
+        "broken": "BROKEN: CONFORM.accepted：summary=125 vs 逐列覆算=124（收官結算時兩個獨立產出者必須逐位相同）",
+        "tail": "BROKEN: CONFORM.accepted：summary=125 vs 逐列覆算=124（收官結算時兩個獨立產出者必須逐位相同）"
+      }
+    }
+  }
+}
