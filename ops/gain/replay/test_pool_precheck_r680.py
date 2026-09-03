@@ -207,6 +207,29 @@ check("T19 runner_git 存在但 sha=None ⇒ 仍算沒記錄（不是 C2=HIT）"
       rc == 2 and "沒有記錄自己跑在哪個 commit" in o and "C2_code=HIT" not in o,
       f"rc={rc} {o.strip()[:80]}")
 
+# ── T20 `--json` 指到還不存在的目錄（收官指令就是這個形狀）─────────────
+import subprocess as _sp
+d, c, a = fixture()
+tgt = WORK / "not_yet" / "deep" / "out.json"
+_p = _sp.run([sys.executable, str(TOOL), "--runs", *d, "--criterion", c,
+              "--code-attest", a, "--json", str(tgt)],
+             capture_output=True, text=True, cwd=ROOT)
+check("T20 --json 目錄不存在 ⇒ 仍 rc=0 且 JSON 真的寫出來（不是印完判決才崩）",
+      _p.returncode == 0 and tgt.exists()
+      and json.loads(tgt.read_text())["verdict"] == "POOLABLE",
+      f"rc={_p.returncode} 檔存在={tgt.exists()}")
+
+# BROKEN 路徑也要能落盤（否則失敗那次反而沒有證據）
+d, c, a = fixture(mut_overlap)
+tgt2 = WORK / "not_yet2" / "out.json"
+_p = _sp.run([sys.executable, str(TOOL), "--runs", *d, "--criterion", c,
+              "--code-attest", a, "--json", str(tgt2)],
+             capture_output=True, text=True, cwd=ROOT)
+check("T21 BROKEN 路徑同樣落盤（失敗那次更需要證據）",
+      _p.returncode == 2 and tgt2.exists()
+      and json.loads(tgt2.read_text())["verdict"] == "BROKEN",
+      f"rc={_p.returncode} 檔存在={tgt2.exists()}")
+
 # ── T18 真 run 目錄唯讀 ────────────────────────────────────────────
 sha = {p.name: __import__("hashlib").sha256((p / "summary.json").read_bytes())
        .hexdigest()[:8] for p in REAL}

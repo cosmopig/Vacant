@@ -10,13 +10,15 @@ PASS T9 題庫不同 ⇒ BROKEN 指名 `bank_witness`　rc=2 BROKEN：執行參�
 PASS T10 兩邊 pool 都空 ⇒ BROKEN（空清單＝空清單不算相同）　rc=2 BROKEN：pool 是空的 ⇒ 模型清單量不到（空清單與空清單「相同」是假綠燈）
 PASS T11 判準檔缺 Q4 列 ⇒ BROKEN「門檻 parse 不到」（工具裡沒有預設值）　rc=2 BROKEN：crit.md：找不到唯一的 Q4 那一列（找到 0 列）⇒ 門檻 parse 不到。不沿用預設值。
 PASS T12 同一份資料（void 3.28pp）：判準 5pp ⇒ 過、判準 1pp ⇒ BROKEN　5pp:rc=0 1pp:rc=2
-PASS T13 policy 不同且 void 率跨過 5pp 門檻 ⇒ BROKEN「差異有可觀測後果」　rc=2 BROKEN：request_policy 不同、且 void 率差 7.69pp ≥ 5.0pp ⇒ 差異有可觀測後果，併庫要揭露
+PASS T13 policy 不同且 void 率跨過 5pp 門檻 ⇒ BROKEN「差異有可觀測後果」　rc=2 BROKEN：request_policy 不同、且 void 率差 7.14pp ≥ 5.0pp ⇒ 差異有可觀測後果，併庫要揭露
 PASS T14 背書檔沒提到 r445 ⇒ BROKEN 指名該 run　rc=2 BROKEN：attest.md 內文沒有提到這些 run：['g_r445_conform_mbpp_ext'] ⇒ 這份證據不是在講它們（與 R440G 的 --decisio
 PASS T15 沒有背書檔 ⇒ BROKEN「沒有記錄自己跑在哪個 commit」（安靜量不到）　rc=2 BROKEN：這些 run 沒有記錄自己跑在哪個 commit：['g_r444_conform_mbpp', 'g_r445_conform_mbpp_ext
 PASS T16 兩 run 都記了同一個 sha ⇒ C2=HIT 且不需背書　rc=0 POOLABLE　C1_disjoint=HIT　C3_config=HIT　C4_void=HIT　C2_code=HIT
   題目：179+192 = 37
 PASS T17 兩 run 記了不同 sha 且無背書 ⇒ BROKEN「碼版本不同」　rc=2 BROKEN：碼版本不同且沒有附 --code-attest 的逐函式比對證據
 PASS T19 runner_git 存在但 sha=None ⇒ 仍算沒記錄（不是 C2=HIT）　rc=2 BROKEN：這些 run 沒有記錄自己跑在哪個 commit：['g_r444_conform_mbpp', 'g_r445_conform_mbpp_ext
-PASS T18 真 run 目錄未被本測試寫過（summary sha256[:8] 記錄在案）　{"g_r444_conform_mbpp": "d51ae816", "g_r445_conform_mbpp_ext": "00522b2d"}
+PASS T20 --json 目錄不存在 ⇒ 仍 rc=0 且 JSON 真的寫出來（不是印完判決才崩）　rc=0 檔存在=True
+PASS T21 BROKEN 路徑同樣落盤（失敗那次更需要證據）　rc=2 檔存在=True
+PASS T18 真 run 目錄未被本測試寫過（summary sha256[:8] 記錄在案）　{"g_r444_conform_mbpp": "d51ae816", "g_r445_conform_mbpp_ext": "2cd02f35"}
 
-19/19 PASS
+21/21 PASS

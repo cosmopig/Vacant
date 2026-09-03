@@ -100,6 +100,20 @@ def void_rate(s: dict, arm: str) -> tuple[float, int, int]:
     return (100.0 * a["infra_void"] / tot if tot else 0.0), int(a["infra_void"]), tot
 
 
+def write_json(path: str | None, obj: dict) -> None:
+    """`--json` 的目標目錄不存在就建起來。
+
+    round680 實測到的坑：收官指令寫成 `--json runs/_analysis_r445/...`，
+    而那個目錄要到收官那一輪才會存在 ⇒ 工具**印完 POOLABLE 之後才崩**，
+    rc=1。判決是對的、退出碼是錯的，收官會看成「前提尺壞了」。
+    """
+    if not path:
+        return
+    p = pathlib.Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", nargs="+", required=True)
@@ -228,9 +242,7 @@ def main() -> int:
         out["verdict"] = "BROKEN"
         out["reason"] = str(e)
         print(f"BROKEN：{e}")
-        if args.json:
-            pathlib.Path(args.json).write_text(
-                json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+        write_json(args.json, out)
         return RC_BROKEN
 
     out["verdict"] = "POOLABLE"
@@ -247,9 +259,7 @@ def main() -> int:
     if out["checks"]["C2_code"]["verdict"] != "HIT":
         print(f"  ⚠ 碼版本：{out['checks']['C2_code']['verdict']}"
               f"，由 {out['checks']['C2_code'].get('attested_by')} 背書")
-    if args.json:
-        pathlib.Path(args.json).write_text(
-            json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_json(args.json, out)
     return RC_OK
 
 
