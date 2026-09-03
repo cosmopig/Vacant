@@ -1,0 +1,11 @@
+重建快照：落盤 437 列 → 截到 435 列 （summary 之後多出來的：{'OFF': 1, 'CONFORM': 1, 'OFF5': 0}，寫一半的列：0）
+  rows sha8=b309a155  summary sha8=63301721
+被改成 void 的那一格：CONFORM/mbppplus_Mbpp/239 calls_used=1 accepted=True meets_demand=True
+fixture     conform_settle    leak_decomp   說明
+A                rc=0 PASS      rc=0 PASS   健康收官（terminal=true）
+B                rc=0 PASS      rc=0 PASS   健康但有吃掉呼叫的 void
+C              rc=2 BROKEN      rc=0 PASS   真竄改：calls 灌大 50
+D              rc=2 BROKEN    rc=2 BROKEN   列不見了、summary 不動
+  [C/conform_settle.py] BROKEN: CONFORM.calls：summary−逐列和=51 超過 1 個 void 格子最多可能吃掉的 1×5=5
+  [D/conform_settle.py] BROKEN: CONFORM.accepted：summary=137 vs 逐列覆算=136
+  [D/leak_decomp.py] BROKEN: CONFORM.accepted：summary=137 vs 逐列覆算=136（收官結算時兩個獨立產出者必須逐位相同）

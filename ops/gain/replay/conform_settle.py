@@ -26,6 +26,11 @@ import math
 import pathlib
 import sys
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+# round670：差值區間**不另寫一套**，直接用 paired_ci 的 diff_ci／verdict 與它的常數
+# （ALPHA=0.05、PRACTICAL_PP=5.0 皆為既有慣例，本輪新增旋鈕 = 0）。
+import paired_ci as _pci  # noqa: E402
+
 REQUIRED_ROW_FIELDS = ("arm", "task_id", "accepted", "meets_demand", "calls_used")
 
 
@@ -118,6 +123,27 @@ def paired(a: dict[str, dict], b: dict[str, dict], key) -> dict:
     bk = sum(1 for t in common if key(b[t]))
     disc_b = sum(1 for t in common if key(a[t]) and not key(b[t]))
     disc_c = sum(1 for t in common if key(b[t]) and not key(a[t]))
+    pval = exact_mcnemar_p(disc_b, disc_c)
+    _r = _pci.diff_ci(disc_b, disc_c, len(common))
+    lo_pp, hi_pp = 100.0 * _r["lo"], 100.0 * _r["hi"]
+    # P-R670-C：區間與檢定同一條條件化 ⇒ 「排除 0」必須等價於「精確 p<0.05」。
+    # 不等價代表兩者不是同一個模型算出來的，那時給數字是誤導 ⇒ BROKEN。
+    # 另外兩條**碼精確蘊含**的界（零新旋鈕，專抓映射寫錯）：
+    #   delta=(b-c)/n 且 |b-c| <= n_d ⇒ 區間必須落在 ±100*n_d/n 之內；
+    #   CP 區間含點估計 pi_hat=b/n_d，而映射是單調線性 ⇒ 區間必須含 delta_pp。
+    _cap = 100.0 * (disc_b + disc_c) / len(common)
+    delta_pp = 100.0 * (ak - bk) / len(common)
+    if lo_pp < -_cap - 1e-9 or hi_pp > _cap + 1e-9:
+        raise Broken(
+            f"區間 [{lo_pp:+.2f},{hi_pp:+.2f}]pp 超出 discordant 能容許的 ±{_cap:.2f}pp"
+            f"（b={disc_b} c={disc_c} n={len(common)}）——映射漏乘 n_d/n 會長這樣")
+    if not (lo_pp - 1e-9 <= delta_pp <= hi_pp + 1e-9):
+        raise Broken(
+            f"區間 [{lo_pp:+.2f},{hi_pp:+.2f}]pp 不含點估計 Δ={delta_pp:+.2f}pp")
+    if ((lo_pp > 0.0) or (hi_pp < 0.0)) != (pval < 0.05):
+        raise Broken(
+            f"區間與 p 值不一致：[{lo_pp:+.2f},{hi_pp:+.2f}]pp 對 p={pval:.4f}"
+            f"（b={disc_b} c={disc_c} n={len(common)}）——同一條條件化不該給出相反的話")
     return {
         "paired_n": len(common),
         "a_only_in_a": sorted(set(a) - set(b))[:5],
@@ -125,7 +151,14 @@ def paired(a: dict[str, dict], b: dict[str, dict], key) -> dict:
         "a_ok": ak, "b_ok": bk,
         "rate_a": ak / len(common), "rate_b": bk / len(common),
         "delta_pp": 100.0 * (ak - bk) / len(common),
-        "b": disc_b, "c": disc_c, "p": exact_mcnemar_p(disc_b, disc_c),
+        "b": disc_b, "c": disc_c, "p": pval,
+        # round670：null 宣稱（「沒打贏」）沒有差值區間就不准當結論（r656 立的硬規則）。
+        # 配對集合 common 只由 task_id 決定，**與 key 無關** ⇒ deliv 與 meets_demand
+        # 配的是同一組題，拒交只改變「該格算不算對」，不改變配對關係
+        # （判準 §五 第一條：由構造成立，不另設恆等式假檢查）。
+        "ci_lo_pp": lo_pp, "ci_hi_pp": hi_pp,
+        "ci_verdict": _pci.verdict(lo_pp, hi_pp),
+        "ci_alpha": _pci.ALPHA, "ci_practical_pp": _pci.PRACTICAL_PP,
     }
 
 
@@ -135,6 +168,16 @@ def void_block(notes: list[dict], arm: str, measured: int) -> dict:
     ratio = (n_void / total) if total else 0.0
     return {"n_measured": measured, "n_void": n_void, "ratio": ratio,
             "over_20pct_abort": ratio > 0.20, "over_10pct_warn": ratio > 0.10}
+
+
+# CRITERION_20260903_R670 §三：收官文字只准照這張表寫，且這張表在最終數字落地前就 commit 了。
+_SETTLEMENT_TEXT = {
+    "ON_WINS": "可以寫「打贏」；R440R 的 +3~+6pp 帶中不中另外單獨報，不改判定",
+    "RULED_OUT": "可以寫「排除了 ≥5pp 的實務增益」＝準確率上沒買到東西（這是一個真答案）",
+    "UNINFORMATIVE": "禁止對 P-C1 下任何結論；必須寫「n=179 檢定力不足，這個 run 答不出 P-C1」",
+    "NON_INFERIOR_BUT_UNRESOLVED":
+        "只能寫「沒測出劣化，也沒測出 ≥5pp 的增益」；不准寫成「打贏」或「打不贏」",
+}
 
 
 def settle(run_dir: pathlib.Path, rows_path: pathlib.Path, test_arm: str,
@@ -247,6 +290,10 @@ def settle(run_dir: pathlib.Path, rows_path: pathlib.Path, test_arm: str,
     out["verdicts"] = {
         "P-C1_delta_pp": d["delta_pp"],
         "P-C1_band_3_to_6pp": (3.0 <= d["delta_pp"] <= 6.0),
+        # 帶是 R440R 的**預測**；下面的區間判定才是 R670 §三 的**判定**。兩者分開報。
+        "P-C1_ci_pp": [d["ci_lo_pp"], d["ci_hi_pp"]],
+        "P-C1_ci_verdict": d["ci_verdict"],
+        "P-C1_settlement_rule": _SETTLEMENT_TEXT[d["ci_verdict"]],
         "P-C1b_p": d["p"], "P-C1b_band_0.02_to_0.20": (0.02 <= d["p"] <= 0.20),
         "P-C2_calls_per_task": blocks[test_arm]["calls_per_task_recomputed"],
         "P-C2_le_2.0": blocks[test_arm]["calls_per_task_recomputed"] <= 2.0,
@@ -301,7 +348,9 @@ def main() -> int:
     for k, p in out["paired_test_vs_baseline"]["by"].items():
         mark = "  <= P-C1 用這個" if k == "deliv" else "  （analyze_paired 報的是這個）"
         print(f"paired[{k:12s}] n={p['paired_n']:>3d} Δ={p['delta_pp']:+6.2f}pp "
-              f"b={p['b']:<3d} c={p['c']:<3d} p={p['p']:.4f}{mark}")
+              f"b={p['b']:<3d} c={p['c']:<3d} p={p['p']:.4f}  "
+              f"95%CI=[{p['ci_lo_pp']:+.2f},{p['ci_hi_pp']:+.2f}]pp "
+              f"{p['ci_verdict']}{mark}")
     print(f"calls 檢查層級：{out['calls_check_mode']}"
           "  （exact＝逐位相同；bounded＝該臂有 void，改用碼蘊含的上下界）")
     print(json.dumps(out["verdicts"], ensure_ascii=False, indent=2))

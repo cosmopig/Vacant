@@ -1,0 +1,53 @@
+CLEAN            rc=0  OK
+M1 抽掉一列 accepted             rc=2  BROKEN OK  BROKEN: 列 task_id='t0' arm='CONFORM' 缺欄位 ['accepted']
+M2 CONFORM 零列                rc=2  BROKEN OK  BROKEN: CONFORM 臂一列都沒有
+M3 CONFORM task_id 重複        rc=2  BROKEN OK  BROKEN: CONFORM 臂的 task_id='t0' 出現兩次——字典會安靜蓋掉一筆
+M4 meets_demand 是字串          rc=2  BROKEN OK  BROKEN: task 't0' 的 meets_demand='False' 型別是 str 不是 bool（bool('False') 是 True，這種列不准安靜通過）
+M5 summary 與逐列對不起來           rc=2  BROKEN OK  BROKEN: CONFORM.calls：summary=40 vs 逐列和=137（n_void=0 ⇒ 必須逐位相同）
+M6 未收官的 skew 要照實報            rc=0  OK
+M7 summary 缺 calls 欄位        rc=2  BROKEN OK  BROKEN: summary.json 的 CONFORM 臂沒有 calls 欄位——這不是通過，是量不到
+M8 健康的 void 不准誤報             rc=0  OK(不誤報)
+M9 void 掩護下灌大 calls          rc=2  BROKEN OK  BROKEN: CONFORM.calls：summary−逐列和=52 超過 1 個 void 格子最多可能吃掉的 1×2=2
+M10 列不見了、summary 不動          rc=2  BROKEN OK  BROKEN: CONFORM.accepted：summary=16 vs 逐列覆算=15
+
+=== 乾淨輸出 ===
+=== /dev/shm/r667/fix/clean  rows=60 sha8=39df53ae terminal=True ===
+arm          n  acc  refus   deliv%   meets%     d=o%  leak  md&!acc  c/task
+OFF5        20   20      0   75.00   75.00    75.00     5        0    5.00
+CONFORM     20   16      4   60.00   70.00    75.00     4        2    2.00
+OFF         20   20      0   65.00   65.00    65.00     7        0    1.00
+paired[deliv       ] n= 20 Δ=-15.00pp b=3   c=6   p=0.5078  95%CI=[-38.26,+18.06]pp UNINFORMATIVE  <= P-C1 用這個
+paired[meets_demand] n= 20 Δ= -5.00pp b=4   c=5   p=1.0000  95%CI=[-32.67,+25.92]pp UNINFORMATIVE  （analyze_paired 報的是這個）
+calls 檢查層級：{'OFF5': 'exact', 'CONFORM': 'exact', 'OFF': 'exact'}  （exact＝逐位相同；bounded＝該臂有 void，改用碼蘊含的上下界）
+{
+  "P-C1_delta_pp": -15.0,
+  "P-C1_band_3_to_6pp": false,
+  "P-C1_ci_pp": [
+    -38.26308317222773,
+    18.063444941231367
+  ],
+  "P-C1_ci_verdict": "UNINFORMATIVE",
+  "P-C1_settlement_rule": "禁止對 P-C1 下任何結論；必須寫「n=179 檢定力不足，這個 run 答不出 P-C1」",
+  "P-C1b_p": 0.5078125,
+  "P-C1b_band_0.02_to_0.20": false,
+  "P-C2_calls_per_task": 2.0,
+  "P-C2_le_2.0": true,
+  "P-C2_abort_gt_4.5": false,
+  "P-C3a_refusal_rate": 0.2,
+  "P-C3a_band_3_to_10pct": false,
+  "P-C3b_leaked": {
+    "OFF5": 5,
+    "CONFORM": 4,
+    "OFF": 7
+  },
+  "P-C3b_verdict": "REPORTED_ONLY（R440R 未給門檻，判準 §三 降級）",
+  "P-C4": "前半只看 receipt_head 齊備（round666）；鏈為 UNVERIFIABLE，不是中止條件",
+  "P-C5_void_ratio": {
+    "OFF5": 0.0,
+    "CONFORM": 0.0,
+    "OFF": 0.0
+  },
+  "P-C5_any_abort": false
+}
+
+SELFTEST: PASS
