@@ -43,7 +43,7 @@ def key_of(rec, mutant):
     return (rec.get("agent_id"), rec.get("role"), h, rec.get("api"))
 
 
-def analyse(calls_path, era, mutant=None, plant=False):
+def analyse(calls_path, era, mutant=None, plant=False, mode="v1"):
     codes = set() if mutant == "N4" else ERA_NON_RETRYABLE[era]
     recs = load(calls_path)
     out = {"n_records": len(recs), "era": era}
@@ -93,10 +93,36 @@ def analyse(calls_path, era, mutant=None, plant=False):
         out["status"] = "BROKEN"; out["reason"] = f"孤兒 attempt {orphan}/{n_ge2} >1%"
         return out
 
+    # ---- v2：組內照檔案順序切序列（CRITERION_v2.md）----
+    # 機制：gain_run.py:298,700,896 三處明寫依序送出、無併發 ⇒ 檔案順序即真實時序，
+    # 同一邏輯呼叫的 attempt 嚴格遞增；attempt 不再遞增就是新的邏輯呼叫。
+    if mode == "v2":
+        seqs = []
+        for rs in groups.values():                 # rs 保持檔案順序（append 而來）
+            cur = []
+            for r in rs:
+                if cur and r["attempt"] <= cur[-1]["attempt"]:
+                    seqs.append(cur); cur = []
+                cur.append(r)
+            if cur:
+                seqs.append(cur)
+        # P-R665-6 自檢：每條序列必須從 attempt=1 開始且連續
+        bad = sum(1 for sq in seqs
+                  if [x["attempt"] for x in sq] != list(range(1, len(sq) + 1)))
+        out["v2_seqs"] = len(seqs)
+        out["v2_noncontiguous_seqs"] = bad
+        if seqs and bad > 0.01 * len(seqs):
+            out["status"] = "BROKEN"
+            out["reason"] = f"v2 序列不連續 {bad}/{len(seqs)} >1%"
+            return out
+        units = seqs
+    else:
+        units = list(groups.values())
+
     # ---- 逐序列：review 的失敗序列與真提早停 ----
     def seq_stat(role_filter):
         fail_seq = short_seq = 0
-        for rs in groups.values():
+        for rs in units:
             if not role_filter(rs[0]):
                 continue
             last = max(rs, key=lambda x: x["attempt"])
@@ -115,7 +141,7 @@ def analyse(calls_path, era, mutant=None, plant=False):
 
     # ---- P-R665-1：round664 逐列標記的「提早停」有多少其實有後繼列 ----
     r664_flagged = has_succ = 0
-    for rs in groups.values():
+    for rs in units:
         if rs[0].get("role") != "review":
             continue
         ats = set(x["attempt"] for x in rs)
@@ -132,7 +158,7 @@ def analyse(calls_path, era, mutant=None, plant=False):
 
     # ---- P-R665-4：逐序列數 ON 臂 review 的 void 序列 ----
     on_rev_void = 0
-    for rs in groups.values():
+    for rs in units:
         if rs[0].get("role") != "review":
             continue
         if (rs[0].get("meta") or {}).get("arm") != "ON":
@@ -147,7 +173,16 @@ def analyse(calls_path, era, mutant=None, plant=False):
     # ---- P-R665-3：review 的 retries_max 組態 ----
     out["review_retries_max_cfg"] = sorted(
         {r.get("retries_max") for r in work if r.get("role") == "review"})
-    out["status"] = "AMBIGUOUS" if dup_groups else "OK"
+    if mode == "v2":
+        # 建構上組內不可能有重複 attempt（自檢：P-R665-9）
+        dup_in_units = sum(1 for sq in units
+                           if len(set(x["attempt"] for x in sq)) != len(sq))
+        out["v2_dup_attempt_units"] = dup_in_units
+        out["status"] = "BROKEN" if dup_in_units else "OK"
+        if dup_in_units:
+            out["reason"] = "v2 序列內仍有重複 attempt（切法錯）"
+    else:
+        out["status"] = "AMBIGUOUS" if dup_groups else "OK"
     return out
 
 
@@ -155,6 +190,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", nargs="+", required=True, help="層名=run目錄=世代")
     ap.add_argument("--mutant", default=None, choices=["N1", "N2", "N3", "N4"])
+    ap.add_argument("--mode", default="v1", choices=["v1", "v2"],
+                    help="v1=分組鍵當序列（CRITERION.md）；v2=組內照檔案順序切序列（CRITERION_v2.md）")
     ap.add_argument("--json", default=None)
     a = ap.parse_args()
     res = {}
@@ -166,7 +203,7 @@ def main():
             calls = d / "__empty_r665__.jsonl"
             calls.write_text("")
         try:
-            res[name] = analyse(calls, int(era), a.mutant, plant=(a.mutant == "N2"))
+            res[name] = analyse(calls, int(era), a.mutant, plant=(a.mutant == "N2"), mode=a.mode)
         finally:
             if a.mutant == "N3" and calls.exists():
                 calls.unlink()

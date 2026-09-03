@@ -1,0 +1,43 @@
+=== round664 量具雙向驗證 ===
+
+[乾淨] 守恆恆等式殘差（必須全 0）
+   S1 era=3 non_retryable=[401, 402, 403] residuals={'2': 0} conserved=True
+   S2 era=3 non_retryable=[401, 402, 403] residuals={'2': 0, '3': 0} conserved=True
+   S3 era=1 non_retryable=[400, 401, 402, 403, 404] residuals={'2': 0, '3': 0, '4': 0} conserved=True
+   S4 era=2 non_retryable=[400, 401, 402, 403] residuals={'2': 0, '3': 0, '4': 0} conserved=True
+   S5 era=2 non_retryable=[400, 401, 402, 403] residuals={'2': 0, '3': 0, '4': 0} conserved=True
+   S6 era=3 non_retryable=[401, 402, 403] residuals={'2': 0, '3': 0, '4': 0} conserved=True
+   ⇒ 全部守恆
+
+M1 回復率改用全體 ok 比例（非逐 k）：守恆失敗層=['S1', 'S2', 'S3', 'S4', 'S5', 'S6']  ⇒ 抓到
+
+M2 void 放寬成所有失敗列：ON void 乾淨→M2
+   S1: 12 -> 55
+   S2: 4 -> 22
+   S3: 1 -> 6
+   S4: 6 -> 27
+   S5: 73 -> 93
+   S6: 64 -> 170
+   ⇒ 抓到
+
+M3 拿掉 role 過濾：review_void_on 乾淨→M3
+   S1: 12 -> 12
+   S2: 4 -> 4
+   S3: 1 -> 1
+   S4: 5 -> 6
+   S5: 29 -> 73
+   S6: 57 -> 64
+   ⇒ 抓到（S1-S3 相等是因為那幾層 ON void 本來就全是 review）
+
+M4 空層必須 BROKEN：
+   S1: OK -> BROKEN
+   S2: OK -> BROKEN
+   S3: OK -> BROKEN
+   S4: OK -> BROKEN
+   S5: OK -> BROKEN
+   S6: OK -> BROKEN
+   ⇒ 抓到
+
+[反向] 故意指派錯世代 ⇒ 殘差 ≠0（見 RESULT.md，已另跑）
+
+完整性 P-R664-5：缺欄位列數 = [('S1', 0), ('S2', 0), ('S3', 0), ('S4', 0), ('S5', 0), ('S6', 0)]（全 0 ⇒ 非 BROKEN）

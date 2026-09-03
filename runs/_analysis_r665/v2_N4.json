@@ -1,0 +1,134 @@
+{
+  "S1": {
+    "n_records": 1986,
+    "era": 3,
+    "groups": 1488,
+    "dup_attempt_groups": 353,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 43,
+    "v2_seqs": 1942,
+    "v2_noncontiguous_seqs": 0,
+    "review_fail_seqs": 12,
+    "review_true_shortstop_seqs": 0,
+    "review_shortstop_rate": 0.0,
+    "r664_rowwise_flagged": 42,
+    "of_which_have_successor": 42,
+    "successor_rate": 1.0,
+    "on_review_void_seqs": 12,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "v2_dup_attempt_units": 0,
+    "status": "OK"
+  },
+  "S2": {
+    "n_records": 1025,
+    "era": 3,
+    "groups": 754,
+    "dup_attempt_groups": 181,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 31,
+    "v2_seqs": 993,
+    "v2_noncontiguous_seqs": 0,
+    "review_fail_seqs": 4,
+    "review_true_shortstop_seqs": 0,
+    "review_shortstop_rate": 0.0,
+    "r664_rowwise_flagged": 18,
+    "of_which_have_successor": 18,
+    "successor_rate": 1.0,
+    "on_review_void_seqs": 4,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "v2_dup_attempt_units": 0,
+    "status": "OK"
+  },
+  "S3": {
+    "n_records": 603,
+    "era": 1,
+    "groups": 473,
+    "dup_attempt_groups": 83,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 12,
+    "v2_seqs": 590,
+    "v2_noncontiguous_seqs": 0,
+    "review_fail_seqs": 1,
+    "review_true_shortstop_seqs": 0,
+    "review_shortstop_rate": 0.0,
+    "r664_rowwise_flagged": 5,
+    "of_which_have_successor": 5,
+    "successor_rate": 1.0,
+    "on_review_void_seqs": 1,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "v2_dup_attempt_units": 0,
+    "status": "OK"
+  },
+  "S4": {
+    "n_records": 3688,
+    "era": 2,
+    "groups": 2923,
+    "dup_attempt_groups": 530,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 59,
+    "v2_seqs": 3628,
+    "v2_noncontiguous_seqs": 0,
+    "review_fail_seqs": 5,
+    "review_true_shortstop_seqs": 0,
+    "review_shortstop_rate": 0.0,
+    "r664_rowwise_flagged": 14,
+    "of_which_have_successor": 14,
+    "successor_rate": 1.0,
+    "on_review_void_seqs": 5,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "v2_dup_attempt_units": 0,
+    "status": "OK"
+  },
+  "S5": {
+    "n_records": 1427,
+    "era": 2,
+    "groups": 1139,
+    "dup_attempt_groups": 208,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 29,
+    "v2_seqs": 1396,
+    "v2_noncontiguous_seqs": 0,
+    "review_fail_seqs": 29,
+    "review_true_shortstop_seqs": 25,
+    "review_shortstop_rate": 0.8620689655172413,
+    "r664_rowwise_flagged": 37,
+    "of_which_have_successor": 12,
+    "successor_rate": 0.32432432432432434,
+    "on_review_void_seqs": 4,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "v2_dup_attempt_units": 0,
+    "status": "OK"
+  },
+  "S6": {
+    "n_records": 2162,
+    "era": 3,
+    "groups": 1286,
+    "dup_attempt_groups": 329,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 435,
+    "v2_seqs": 1725,
+    "v2_noncontiguous_seqs": 0,
+    "review_fail_seqs": 57,
+    "review_true_shortstop_seqs": 0,
+    "review_shortstop_rate": 0.0,
+    "r664_rowwise_flagged": 60,
+    "of_which_have_successor": 60,
+    "successor_rate": 1.0,
+    "on_review_void_seqs": 57,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "v2_dup_attempt_units": 0,
+    "status": "OK"
+  }
+}
