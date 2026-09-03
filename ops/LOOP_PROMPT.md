@@ -240,8 +240,10 @@ echo local  > ~/vacant/NEXT_MODEL     # 或 sonnet / opus
   5. **E1 的發射不歸迴圈**：不要自己跑 `queue_e1_after_scale2.sh`（已停用）或
      `launch_e1.sh`——1004 上載卸模型是人類的決定（R440E）。迴圈只在 E1 已經在跑時
      同步數字；E1 還沒起就寫「等待人類處理 1004」然後做別的事。
-  6. **R440E 的人類決定落地前，8765 上不得起任何 gain_run——不論模型、不論 bank、
-     不論臂**。R440D 已裁決「infra 未修前不再起 qwen run」；第 4910 輪 04:44 UTC 起的
+  6. **2026-09-03 更新：E1 已收官（R516／R440N），E3 已發射（R440O，`runs/g_r443_gemma_lcb`）。
+     E1 視窗規則的 1–5 點原樣適用於 E3**（不寫 local、不起別的 run、不殺 E3、收數字格式、
+     發射不歸迴圈）。發射前不得起任何 gain_run 的原始條文（下段）已由人類決定落地而解除，
+     但 R440G 閘門仍在：任何 run 都要有一份寫著它名字的 DECISION。R440D 已裁決「infra 未修前不再起 qwen run」；第 4910 輪 04:44 UTC 起的
      `g_e2q_off_lcb_qwenonly_20260902` 沒有預註冊、違反 R440D（R440F）。「做別的事」
      指 TASKS_OVERNIGHT 的 B 項或展件，不是另起實驗。
 
