@@ -1031,6 +1031,11 @@ def main() -> None:
     ap.add_argument("--decision", required=True,
         help="預註冊 DECISION 檔路徑；檔案必須存在且內文含 --out 的目錄名，否則不跑")
     ap.add_argument("--n", type=int, default=40)
+    ap.add_argument(
+        "--offset", type=int, default=0,
+        help="跳過題序前 offset 題（load_tasks 是 seed 決定性前綴 ts[offset:offset+n]）。"
+             "用來跑與既有 run 不重疊的剩餘題目再併庫分析，見 R445。",
+    )
     ap.add_argument("--seed", default="g1")
     ap.add_argument("--arms", default="OFF,ON,OFF5")
     ap.add_argument("--bank", default="evalplus", choices=["evalplus", "builtin", "lcb"])
@@ -1090,6 +1095,9 @@ def main() -> None:
         raise SystemExit(
             "timeout/retries 必須為正數，backoff 與 probe-sample 不得為負"
         )
+    # R445 M2：負 offset 在 python 是「從尾巴切」，會安靜取到完全不同的題目。
+    if args.offset < 0:
+        raise SystemExit(f"--offset 不得為負（收到 {args.offset}）")
 
     out = pathlib.Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -1110,8 +1118,20 @@ def main() -> None:
         with (out / "notes.jsonl").open("a", encoding="utf-8") as f:
             f.write(json.dumps(obj, ensure_ascii=False, default=str) + "\n")
 
-    tasks = load_tasks(args.bank, args.seed, args.n)
-    print(f"{len(tasks)} 題（{args.bank}）　輸出 {out}")
+    tasks = load_tasks(args.bank, args.seed, args.n, offset=args.offset)
+    # R445 M3/M4：offset 過頭是「安靜量不到」的兩型——
+    #   M3 一題都取不到 ⇒ 這不是通過，是沒接上，直接停；
+    #   M4 取到的比要求的少 ⇒ 不准安靜縮水，顯式印出實際題數與缺口。
+    if not tasks:
+        raise SystemExit(
+            f"一題都沒載到（bank={args.bank} offset={args.offset} n={args.n}）"
+            "——offset 可能已經超過題庫尾端。這不是通過，是沒接上。停。"
+        )
+    print(f"{len(tasks)} 題（{args.bank}　offset={args.offset}　"
+          f"題序 [{args.offset}, {args.offset + len(tasks)})）　輸出 {out}")
+    if args.n and len(tasks) < args.n:
+        print(f"⚠ 只載到 {len(tasks)} 題，比 --n {args.n} 少 {args.n - len(tasks)} 題"
+              f"（offset={args.offset} 已接近題庫尾端）——分母用實際題數。")
 
     # ── 先驗量具 ──
     print("── 量具驗證（先答已知答案）")
@@ -1229,6 +1249,8 @@ def main() -> None:
             json.dumps({
                 "seed": args.seed,
                 "n": args.n,
+                "offset": args.offset,
+                "n_tasks_loaded": len(tasks),
                 "run_complete": run_complete,
                 "run_terminal": run_terminal,
                 "request_policy": {
