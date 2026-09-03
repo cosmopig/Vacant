@@ -106,6 +106,13 @@ def analyse(calls_path, summary_path, era, mutant=None):
     review_voids = [r for r in on_voids if role_filter(r)]
 
     # 推翻條件：review 失敗大量停在 attempt < retries_max 且非 401/402/403
+    # ⚠ round665 實測：**這兩個欄位是逐列判斷，量不到「提早停」**。
+    #   重試迴圈每個 attempt 各落一列（brain_cline.py:117-252），所以一個
+    #   「重試到底」的失敗序列，它的中間列必然滿足下面這個條件。
+    #   round665 逐序列重算（ops/gain/replay/seq_shortstop.py --mode v2）：
+    #   被這裡標到的 42/18/5/14/12/60 列 **100% 都有 attempt+1 的後繼列**，
+    #   真提早停率 0/108 = 0.00%。⇒ 這兩個欄位**不可用來判推翻條件**，
+    #   要判就用 seq_shortstop.py。此處保留原樣只為讓 round664 的數字可重現。
     rev_fail = [r for r in work if r["role"] == "review" and not r.get("ok")]
     rev_short = [r for r in rev_fail
                  if r["attempt"] < (r.get("retries_max") or 0) and not is_early_break(r, codes)]
