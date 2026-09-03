@@ -38,11 +38,15 @@
       完整檢查點——OFF 失敗率 33.0%（在窗口內）、ON void 3.1%（遠低於中止線）、
       ON/OFF5 配對 b=8/c=5/p=0.5811、評審準確率(grounded) 0.7708 vs 基線
       0.7083（差 +6.25pp，數字見 GAIN_STATE.md round482）。**
-- [ ] A3 E1 ≥90 題時起一次 **fable 稽核輪**：重算配對表、核 rows.jsonl 行數＋sha256 前 8 碼、
+- [x] A3 E1 ≥90 題時起一次 **fable 稽核輪**：重算配對表、核 rows.jsonl 行數＋sha256 前 8 碼、
       對照 R440 的 P1–P4 逐條打分。
       **round482 複查：295 行早過 90 題門檻，但至今零次由 fable 執行。
       本輪（sonnet）不越權代做判斷，已把 `下一輪模型` 設為 fable。仍未完成，
       不打勾。**
+      **round516（Fable 5.1，21:00 UTC）補做：`DECISION_20260902_R516_E1_FINAL_WRAPUP.md`。
+      E1 終態（179/167/179，ON void 6.70%≤10%）套用 R483 §3d 判準：grounded 評審
+      bootstrap 下界=0.00（不>0）、ON vs OFF5 McNemar p=1.0000（不贏 self-consistency）
+      ⇒ CONCLUSION 不動。round529 補打勾（此前漏更新）。**
 - [x] A4 07:00（台北）寫 `MORNING_20260902.md`：一頁摘要——E1 進度、階梯下一階建議、
       被擋的指令清單（如有）。
       **round482 更新：round466 版內容已過期（寫於 E1 發射前），本輪重寫反映
