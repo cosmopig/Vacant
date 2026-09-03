@@ -1,0 +1,8 @@
+PASS W1 summary 的 dict literal 含 runner_git　鍵=['seed', 'n', 'offset', 'runner_git', 'n_tasks_loaded', 'run_complete', 'run_terminal', 'request_policy', 'pool', 'instrument', 'calibration', 'arms', 'equal_budget_comparison_valid']
+PASS W2 拿掉那一行後 W1 會翻面 ⇒ W1 有牙齒是實測的　突變體的鍵少了 runner_git
+PASS W3 既有 12 個鍵一個都沒少（round672/677/678 引用過那些鍵）　缺=無
+PASS W4 RUNNER_GIT 是模組級常數、只算一次　模組級 assign 數=1
+PASS W5 匯入 gain_run.py 成功且 RUNNER_GIT 已求值　rc=0 out=f684aa4c feat/v2-four-stages
+PASS W6 RUNNER_GIT.sha 與 git rev-parse HEAD 相符　f684aa4c vs f684aa4c
+
+6/6 PASS

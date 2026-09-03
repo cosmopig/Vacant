@@ -1,0 +1,88 @@
+{
+  "runs": [
+    "runs/g_r444_conform_mbpp",
+    "runs/g_r445_conform_mbpp_ext"
+  ],
+  "checks": {
+    "C1_disjoint": {
+      "per_run": {
+        "g_r444_conform_mbpp": 179,
+        "g_r445_conform_mbpp_ext": 192
+      },
+      "union": 371,
+      "sum_n": 371,
+      "verdict": "HIT"
+    },
+    "C3_config": {
+      "verdict": "HIT",
+      "signature": {
+        "seed": "g-r212-route-20260828",
+        "arms": [
+          "CONFORM",
+          "OFF",
+          "OFF5"
+        ],
+        "pool": [
+          "careful-1=gemma-4-12b-it-qat",
+          "careful-2=gemma-4-12b-it-qat",
+          "hasty-1=gemma-4-12b-it-qat",
+          "hasty-2=gemma-4-12b-it-qat",
+          "plain-1=gemma-4-12b-it-qat",
+          "plain-2=gemma-4-12b-it-qat"
+        ],
+        "bank_witness": "mbppplus"
+      }
+    },
+    "C4_void": {
+      "policy_identical": true,
+      "threshold_pp": 5.0,
+      "void_spread_pp": 0.0,
+      "rates": {
+        "g_r444_conform_mbpp/CONFORM": {
+          "pct": 0.0,
+          "void": 0,
+          "n": 170
+        },
+        "g_r444_conform_mbpp/OFF": {
+          "pct": 0.0,
+          "void": 0,
+          "n": 179
+        },
+        "g_r444_conform_mbpp/OFF5": {
+          "pct": 0.0,
+          "void": 0,
+          "n": 179
+        },
+        "g_r445_conform_mbpp_ext/CONFORM": {
+          "pct": 0.0,
+          "void": 0,
+          "n": 64
+        },
+        "g_r445_conform_mbpp_ext/OFF": {
+          "pct": 0.0,
+          "void": 0,
+          "n": 68
+        },
+        "g_r445_conform_mbpp_ext/OFF5": {
+          "pct": 0.0,
+          "void": 0,
+          "n": 68
+        }
+      },
+      "verdict": "HIT"
+    },
+    "C2_code": {
+      "runner_git": {
+        "g_r444_conform_mbpp": null,
+        "g_r445_conform_mbpp_ext": null
+      },
+      "verdict": "UNVERIFIABLE_NO_CODE_VERSION",
+      "missing": [
+        "g_r444_conform_mbpp",
+        "g_r445_conform_mbpp_ext"
+      ],
+      "attested_by": "runs/_analysis_r680/CODE_ATTEST.md"
+    }
+  },
+  "verdict": "POOLABLE"
+}

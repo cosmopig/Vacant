@@ -25,6 +25,7 @@ import hashlib
 import json
 import pathlib
 import random
+import subprocess
 import sys
 import time
 
@@ -441,6 +442,37 @@ def conform_failure_detail(code: str, task: dict, *, timeout_s: int = 10) -> dic
             hi = mid
     return {"n_visible_tests": n, "first_failing_test": lo, "loads_ok": True,
             "detail_reason": None}
+
+
+def runner_git_info() -> dict:
+    """記下這個 run 跑在哪個 commit、工作區乾不乾淨。
+
+    為什麼需要（round680，`CRITERION_20260903_R680_POOL_PRECONDITIONS.md`）：
+    r444 與 r445 要併成 371 題一起分析，而「兩個 run 是不是同一個實驗」
+    在 run 的產物裡**沒有任何欄位可以驗**——`summary.json` 一處都沒有記碼版本。
+    round680 只能靠事後逐函式 sha 比對 + 一份書面背書來補
+    （`runs/_analysis_r680/CODE_ATTEST.md`）。那是人工的、不會自己保持正確。
+
+    實測差異就在眼前：r444 載入 `7330f74` 版、r445 載入 `17215c1` 版，
+    中間 `gain_run.py` 改過三次、`brain_cline.py` 改過一次。
+    這次四個臂的碼逐位元相同所以無妨，**下次不一定**。
+
+    純儀器：只讀 git、不影響任何臂。取不到就記 `sha=None`
+    （`pool_precheck.py` 把 `sha=None` 當成「沒記錄」，不是「相同」）。
+    """
+    def _git(*a: str) -> str | None:
+        try:
+            r = subprocess.run(("git", *a), cwd=pathlib.Path(__file__).resolve().parents[2],
+                               capture_output=True, text=True, timeout=10)
+        except Exception:                                    # noqa: BLE001
+            return None
+        return r.stdout.strip() if r.returncode == 0 else None
+
+    sha = _git("rev-parse", "HEAD")
+    status = _git("status", "--porcelain")
+    return {"sha": sha,
+            "dirty": None if status is None else bool(status.strip()),
+            "branch": _git("rev-parse", "--abbrev-ref", "HEAD")}
 
 
 def save_receipts(out: pathlib.Path, st: dict) -> list[str]:
@@ -1023,6 +1055,9 @@ def latency_summary(calls_path: pathlib.Path, arm: str) -> dict:
     }
 
 
+RUNNER_GIT = runner_git_info()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
@@ -1250,6 +1285,7 @@ def main() -> None:
                 "seed": args.seed,
                 "n": args.n,
                 "offset": args.offset,
+                "runner_git": RUNNER_GIT,
                 "n_tasks_loaded": len(tasks),
                 "run_complete": run_complete,
                 "run_terminal": run_terminal,
