@@ -61,12 +61,22 @@
       前 8 碼(59a35fd6)。A3 仍待 fable 執行，見上。**
 
 ## B. 展覽產線（vacant_hm，win1003 自立收割）
-- [ ] B1 win1003 會把 A14B 場景 loop 推到 `vacant_hm` 分支 `night-scene-20260901`
+- [x] B1 win1003 會把 A14B 場景 loop 推到 `vacant_hm` 分支 `night-scene-20260901`
       （含 world3/scenes/MANIFEST.json）。迴圈只做**唯讀驗證**：`git ls-remote` 看到分支後，
       pull 到暫存目錄，核 MANIFEST 的 ok 數／幀數，寫進 MORNING 摘要。**不 merge、不改 main**
       （目檢是 Mac 早上的事）。
-- [ ] B2 若 09-02 05:00 前分支仍未出現，記「win1003 產線可能卡住」＋
+      **round535 (2026-09-03 ~05:4x UTC) 完成：round470（09-02 09:2x UTC）當時查無此分支，
+      本輪 `git ls-remote origin` 首次看到 `refs/heads/night-scene-20260901`
+      （`33f0ac6`，commit 時間 2026-09-03 11:53:41 +0800＝03:53:41 UTC，訊息「A14B 場景
+      loop 收割（自動，待 Mac 目檢後 merge）」）。從 GitHub 唯讀 clone 到 `/dev/shm/b1_check/`
+      核對 `world3/scenes/MANIFEST.json`：**24 個場景檔全數 ok=true，frames 全部=81**
+      （無異常值、無 ok=false）。未 merge、未改動 main，暫存目錄留在 /dev/shm（重開機會清）。**
+- [x] B2 若 09-02 05:00 前分支仍未出現，記「win1003 產線可能卡住」＋
       `D:/wan_out/night_scene.log` 最後幾行（用 ssh w401-win 看，唯讀）。
+      **round470 等已記錄 09-02 05:00 前分支確實未出現（ssh w401-win 從本 session 無法解析
+      主機名，記錄為被擋，未繞）。round535 補記結局：分支最終在 2026-09-03 03:53 UTC 出現，
+      比 B2 的 09-02 05:00 觀察窗晚了約 22.9 小時，但最終**沒有卡住**——B1 的 MANIFEST 核對
+      顯示產線正常收工。B2 的「產線可能卡住」擔憂沒有成立，不需要再查 w401-win log。**
 
 ## C. 邊界（重申）
 - 不碰 8766；1004 的 load/unload 只在人類決定後由人類或其指定腳本執行。
