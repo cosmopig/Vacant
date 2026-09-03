@@ -147,11 +147,44 @@ def test_off5_votes_on_behavior_not_source_text():
         "def solve(x): return x - 1",
     ])
     calls = [0]
-    code, _, _ = arm_off5(_task(), [agent], random.Random(2), calls)
+    code, _, _, _ = arm_off5(_task(), [agent], random.Random(2), calls)
     namespace = {}
     exec(code, namespace)
     assert namespace["solve"](5) == 6
     assert calls[0] == 5
+
+
+def test_off5_behavior_vote_beats_a_literal_duplicate_majority():
+    """round646：上面那個測試在 seed=2 下**分不出**行為投票與字面投票。
+
+    原因：它那五份候選字面上兩兩不同 ⇒ 字面投票會得到 5 個一票的桶，
+    `arm_off5` 以 `rng.choice(tied)` 隨機破平手，而五份裡有三份是對的
+    ⇒ 植入「簽名＝原始碼字面」這個缺陷之後，它仍有 3/5 機率通過
+    （seed=2 就是通過的那一支）。名字宣稱的性質其實沒被驗到。
+
+    這一支把平手拿掉：正解有三種**寫法各異**的拼法（字面 3 個單票桶），
+    錯解則是**字面完全相同**的兩份（字面 1 個雙票桶）。
+      - 字面投票 ⇒ 雙票的錯解贏（任何 seed 都一樣）
+      - 行為投票 ⇒ 三份正解同簽名、3 票贏
+    兩種語意給出相反的答案，所以它對任何 seed 都有牙齒。
+    """
+    wrong = "def solve(x): return x - 1"
+    drafts = [
+        "def solve(x): return 1 + x",
+        "def solve(x):\n    y = x + 1\n    return y",
+        "def solve(x): return x + (2 - 1)",
+        wrong,
+        wrong,
+    ]
+    for seed in range(6):
+        agent = SequenceAgent(list(drafts))   # SequenceAgent 吃的是 iter，每個 seed 要新的
+        calls = [0]
+        code, _, _, extra = arm_off5(_task(), [agent], random.Random(seed), calls)
+        namespace = {}
+        exec(code, namespace)
+        assert namespace["solve"](5) == 6, f"seed={seed} 選到了字面多數的錯解"
+        assert calls[0] == 5
+        assert extra["vote_agreement"] == 3, f"seed={seed} 行為桶沒有合併成 3 票"
 
 
 def test_on_uses_three_reviews_and_revision_for_equal_five_call_budget():
