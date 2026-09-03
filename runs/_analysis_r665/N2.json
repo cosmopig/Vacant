@@ -1,0 +1,122 @@
+{
+  "S1": {
+    "n_records": 1986,
+    "era": 3,
+    "planted_group": "('plain-1', 'review', '6b3167c053dbe411', 'http://100.119.113.56:8765/v1/chat/completions')",
+    "groups": 1488,
+    "dup_attempt_groups": 353,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 42,
+    "review_fail_seqs": 12,
+    "review_true_shortstop_seqs": 1,
+    "review_shortstop_rate": 0.08333333333333333,
+    "r664_rowwise_flagged": 42,
+    "of_which_have_successor": 41,
+    "successor_rate": 0.9761904761904762,
+    "on_review_void_seqs": 11,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "status": "AMBIGUOUS"
+  },
+  "S2": {
+    "n_records": 1025,
+    "era": 3,
+    "planted_group": "('careful-1', 'review', '948ba11d63df6830', 'http://100.119.113.56:8765/v1/chat/completions')",
+    "groups": 754,
+    "dup_attempt_groups": 181,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 30,
+    "review_fail_seqs": 4,
+    "review_true_shortstop_seqs": 1,
+    "review_shortstop_rate": 0.25,
+    "r664_rowwise_flagged": 18,
+    "of_which_have_successor": 17,
+    "successor_rate": 0.9444444444444444,
+    "on_review_void_seqs": 3,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "status": "AMBIGUOUS"
+  },
+  "S3": {
+    "n_records": 603,
+    "era": 1,
+    "planted_group": "('careful-1', 'review', '31fa0e4d23a483af', 'http://100.119.113.56:8765/v1/chat/completions')",
+    "groups": 473,
+    "dup_attempt_groups": 83,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 11,
+    "review_fail_seqs": 1,
+    "review_true_shortstop_seqs": 1,
+    "review_shortstop_rate": 1.0,
+    "r664_rowwise_flagged": 5,
+    "of_which_have_successor": 4,
+    "successor_rate": 0.8,
+    "on_review_void_seqs": 0,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "status": "AMBIGUOUS"
+  },
+  "S4": {
+    "n_records": 3688,
+    "era": 2,
+    "planted_group": "('careful-2', 'review', '5150c34f0f0a3759', 'http://100.119.113.56:8765/v1/chat/completions')",
+    "groups": 2923,
+    "dup_attempt_groups": 530,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 58,
+    "review_fail_seqs": 5,
+    "review_true_shortstop_seqs": 1,
+    "review_shortstop_rate": 0.2,
+    "r664_rowwise_flagged": 14,
+    "of_which_have_successor": 13,
+    "successor_rate": 0.9285714285714286,
+    "on_review_void_seqs": 4,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "status": "AMBIGUOUS"
+  },
+  "S5": {
+    "n_records": 1427,
+    "era": 2,
+    "planted_group": "('hasty-2', 'review', '2d5e6664857cb7de', 'http://100.119.113.56:8765/v1/chat/completions')",
+    "groups": 1139,
+    "dup_attempt_groups": 208,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 28,
+    "review_fail_seqs": 29,
+    "review_true_shortstop_seqs": 1,
+    "review_shortstop_rate": 0.034482758620689655,
+    "r664_rowwise_flagged": 12,
+    "of_which_have_successor": 11,
+    "successor_rate": 0.9166666666666666,
+    "on_review_void_seqs": 28,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "status": "AMBIGUOUS"
+  },
+  "S6": {
+    "n_records": 2162,
+    "era": 3,
+    "planted_group": "('plain-2', 'review', '77c26133e224b9a9', 'http://100.119.113.56:8765/v1/chat/completions')",
+    "groups": 1286,
+    "dup_attempt_groups": 329,
+    "orphan_attempts": 0,
+    "records_attempt_ge2": 434,
+    "review_fail_seqs": 57,
+    "review_true_shortstop_seqs": 1,
+    "review_shortstop_rate": 0.017543859649122806,
+    "r664_rowwise_flagged": 60,
+    "of_which_have_successor": 59,
+    "successor_rate": 0.9833333333333333,
+    "on_review_void_seqs": 56,
+    "review_retries_max_cfg": [
+      2
+    ],
+    "status": "AMBIGUOUS"
+  }
+}
