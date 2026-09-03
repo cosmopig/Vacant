@@ -1,0 +1,1259 @@
+{
+  "seed": "g-r212-route-20260828",
+  "n": 179,
+  "run_complete": false,
+  "run_terminal": false,
+  "request_policy": {
+    "timeout_s": 600,
+    "retries": 4,
+    "backoff_s": 2.0,
+    "review_timeout_s": 380,
+    "review_retries": 2
+  },
+  "pool": [
+    {
+      "agent_id": "careful-1",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "careful-2",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "plain-1",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "plain-2",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "hasty-1",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "hasty-2",
+      "model": "gemma-4-12b-it-qat"
+    }
+  ],
+  "instrument": {
+    "n": 179,
+    "ref_pass": 179,
+    "broken_rejected": 179,
+    "detail": [
+      {
+        "task_id": "mbppplus_Mbpp/554",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/296",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/123",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/305",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/70",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/425",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/418",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/615",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/773",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/267",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/473",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/283",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/259",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/75",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/593",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/84",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/578",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/309",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/7",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/308",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/4",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/82",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/59",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/752",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/98",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/77",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/735",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/736",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/475",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/805",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/406",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/770",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/261",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/95",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/731",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/397",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/306",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/743",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/799",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/790",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/585",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/90",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/766",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/116",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/739",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/635",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/242",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/720",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/565",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/791",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/563",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/109",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/105",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/140",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/167",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/67",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/758",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/389",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/462",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/266",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/555",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/620",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/409",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/808",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/58",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/300",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/222",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/66",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/135",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/622",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/623",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/227",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/256",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/614",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/612",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/580",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/421",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/270",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/92",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/577",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/414",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/18",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/165",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/405",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/294",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/606",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/138",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/139",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/244",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/749",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/427",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/781",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/455",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/447",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/80",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/572",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/125",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/724",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/63",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/470",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/557",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/287",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/450",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/472",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/591",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/142",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/564",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/598",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/57",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/583",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/223",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/769",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/226",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/804",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/637",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/453",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/589",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/602",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/457",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/16",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/762",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/629",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/69",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/126",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/722",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/245",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/586",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/19",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/610",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/558",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/803",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/260",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/588",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/754",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/436",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/141",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/800",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/576",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/459",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/787",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/560",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/798",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/262",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/445",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/239",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/56",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/441",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/166",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/573",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/14",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/784",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/8",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/433",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/111",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/792",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/240",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/20",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/755",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/79",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/608",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/428",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/422",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/626",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/454",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/89",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/771",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/628",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/129",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/567",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/796",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/247",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/128",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/420",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/237",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/619",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/108",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/97",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/276",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/728",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      }
+    ]
+  },
+  "calibration": null,
+  "arms": {
+    "OFF": {
+      "tasks": 179,
+      "calls": 131,
+      "infra_void": 0,
+      "complete": false,
+      "terminal": false,
+      "processed": 131,
+      "accepted": 131,
+      "accepted_and_meets_demand": 93,
+      "demand_equals_output_rate": 0.7099236641221374,
+      "coverage": 1.0,
+      "correct_delivery_rate": 0.7099236641221374,
+      "raw_final_accuracy": 0.7099236641221374,
+      "calls_per_task": 1.0,
+      "calls_per_correct_delivery": 1.4086021505376345,
+      "leaked": 38,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 131,
+          "p50": 4697,
+          "p95": 15860,
+          "max": 136174
+        },
+        "by_role": {
+          "gen": {
+            "n": 131,
+            "p50": 4697,
+            "p95": 15860,
+            "max": 136174
+          }
+        },
+        "failed_attempts": 0
+      },
+      "wall_s": 956.6,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    },
+    "CONFORM": {
+      "tasks": 179,
+      "calls": 190,
+      "infra_void": 0,
+      "complete": false,
+      "terminal": false,
+      "processed": 131,
+      "accepted": 124,
+      "accepted_and_meets_demand": 98,
+      "demand_equals_output_rate": 0.7903225806451613,
+      "coverage": 0.9465648854961832,
+      "correct_delivery_rate": 0.7480916030534351,
+      "raw_final_accuracy": 0.7480916030534351,
+      "calls_per_task": 1.450381679389313,
+      "calls_per_correct_delivery": 1.9387755102040816,
+      "leaked": 26,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 190,
+          "p50": 6101,
+          "p95": 16032,
+          "max": 26302
+        },
+        "by_role": {
+          "gen": {
+            "n": 190,
+            "p50": 6101,
+            "p95": 16032,
+            "max": 26302
+          }
+        },
+        "failed_attempts": 1
+      },
+      "wall_s": 1390.2,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    },
+    "OFF5": {
+      "tasks": 179,
+      "calls": 655,
+      "infra_void": 0,
+      "complete": false,
+      "terminal": false,
+      "processed": 131,
+      "accepted": 131,
+      "accepted_and_meets_demand": 94,
+      "demand_equals_output_rate": 0.7175572519083969,
+      "coverage": 1.0,
+      "correct_delivery_rate": 0.7175572519083969,
+      "raw_final_accuracy": 0.7175572519083969,
+      "calls_per_task": 5.0,
+      "calls_per_correct_delivery": 6.968085106382978,
+      "leaked": 37,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 655,
+          "p50": 6624,
+          "p95": 15285,
+          "max": 85305
+        },
+        "by_role": {
+          "gen": {
+            "n": 655,
+            "p50": 6624,
+            "p95": 15285,
+            "max": 85305
+          }
+        },
+        "failed_attempts": 0
+      },
+      "wall_s": 4744.7,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    }
+  },
+  "equal_budget_comparison_valid": false
+}

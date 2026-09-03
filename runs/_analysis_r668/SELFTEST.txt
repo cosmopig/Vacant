@@ -1,0 +1,11 @@
+OK   CLEAN  乾淨快照（未收官）: rc=0（要 0）  
+OK   M1  summary.leaked 被竄改 + terminal=True: rc=2（要 2）  BROKEN: CONFORM.leaked：summary=29 vs 逐列覆算=26（收官結算時兩個獨立產出者必須逐位相同）
+OK   M2  一列 CONFORM 抽掉 accepted 欄位: rc=2（要 2）  BROKEN: 列 task_id='mbppplus_Mbpp/554' arm='CONFORM' 缺欄位 ['accepted']
+OK   M3  accepted 變成字串 'False'（bool('False') 是 True）: rc=2（要 2）  BROKEN: task 'mbppplus_Mbpp/554' 的 accepted='False' 型別是 str 不是 bool（bool('False') 是 True，這種列不准安靜通過）
+OK   M4  CONFORM 的 task_id 重複（字典會安靜蓋掉）: rc=2（要 2）  BROKEN: CONFORM 臂的 task_id='mbppplus_Mbpp/554' 出現兩次——字典會安靜蓋掉一筆
+OK   M5  CONFORM 一列都沒有（安靜量不到）: rc=2（要 2）  BROKEN: CONFORM 臂一列都沒有
+OK   M6  summary.arms 少了受測臂: rc=2（要 2）  BROKEN: summary.json 的 arms 沒有 'CONFORM'（有的是 ['OFF', 'OFF5']）
+OK   M7  rows 翻一列 meets_demand + terminal=True（跨來源該抓到）: rc=2（要 2）  BROKEN: CONFORM.leaked：summary=26 vs 逐列覆算=27（收官結算時兩個獨立產出者必須逐位相同）
+OK   M8  summary 少 accepted_and_meets_demand 欄位: rc=2（要 2）  BROKEN: summary.json 的 CONFORM 臂沒有 accepted_and_meets_demand 欄位——不准安靜跳過
+OK   M9（反向）翻掉 meets_demand 但 terminal=False：rc=0（要 0）⇒ 單源恆等式**沒有**抓到 ⇒ P-R668-1 是恆等式不是檢定
+SELFTEST PASS
