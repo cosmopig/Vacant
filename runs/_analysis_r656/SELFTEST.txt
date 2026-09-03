@@ -1,0 +1,21 @@
+round656 量具雙向驗證（ops/gain/replay/paired_ci.py，純標準庫、零 API）
+
+乾淨資料                                             → SELFTEST PASS  rc=0
+  A b=c ⇒ Δ̂=0 且區間跨 0                             ✓
+  B b=20,c=0 ⇒ 下界離開 0                            ✓
+  C 「區間排除0」⟺「McNemar 精確 p<0.05」676 格逐格一致 ✓
+  D 點估計在區間內，且區間 ⊆ [−n_d/n, +n_d/n]         ✓
+  E n_needed 與 diff_ci 自洽（m 達標、m−1 不達標）      ✓
+
+突變體 M1（Clopper–Pearson 換成常態近似）
+  → SELFTEST FAIL: C: 區間/檢定不一致 64 格，例：[(0,1,True,False),(0,2,...),(0,3,...)]   rc=1
+突變體 M2（忘記乘 n_d/n 的縮放）
+  → SELFTEST FAIL: D: 區間超出 ±n_d/n b=14 c=10 cap=0.2963 [-0.2671,0.5578]; …
+     SELFTEST FAIL: E: n_needed 找不到解                                                  rc=1
+
+兩個突變體分別被事前指定的那一條抓到（M1→C、M2→D）⇒ 綠燈有牙齒，不是恆真。
+
+過程中量具自己出過一個真的 bug（照實記）：n_needed 把 π→Δ 的映射半寬少算了一個
+因子 2（Δ=(2π−1)·scale 的導數是 2·scale），第一版吐出 123 題、真值 480 題。
+是「補充量與主區間對不起來」看出來的，修法是讓 n_needed 直接呼叫 diff_ci 走同一條映射，
+並補上自檢條 E（m 達標、m−1 不達標）——那條 E 會抓到同一個 bug。

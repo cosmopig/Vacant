@@ -1,0 +1,7 @@
+run=/dev/shm/r656/snap  OFF5 vs OFF  n_paired=85  第三類=0
+  OFF5 對 53/85=62.35%   OFF 對 43/85=50.59%
+  discordant: b(只有OFF5對)=19  c(只有OFF對)=9  n_d=28
+  Δ = +11.76pp    95% 精確條件區間 [-1.55, +22.48]pp
+  McNemar 精確 p = 0.0872   （區間排除0 <=> p<0.05，自檢條 C）
+  判定（CRITERION 事前表，門檻 ±5.0pp）：NON_INFERIOR_BUT_UNRESOLVED
+  [補充，非判定量] 要把半寬壓到 ±5.0pp 需配對題 ≈ 538

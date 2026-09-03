@@ -1,0 +1,31 @@
+{
+  "run": "/dev/shm/r656/snap",
+  "a_arm": "ON",
+  "b_arm": "OFF",
+  "n_paired": 82,
+  "third_category_missing_meets_demand": [],
+  "a_ok": 55,
+  "b_ok": 41,
+  "b_discordant_a_only": 18,
+  "c_discordant_b_only": 4,
+  "n_discordant": 22,
+  "delta_pp": 17.073170731707318,
+  "ci95_lo_pp": 5.213153103138576,
+  "ci95_hi_pp": 24.04614491494241,
+  "pi_hat": 0.8181818181818182,
+  "pi_ci95": [
+    0.597154216922128,
+    0.9481327006875631
+  ],
+  "p_mcnemar_exact": 0.004343509674072266,
+  "practical_pp": 5.0,
+  "verdict": "ON_WINS",
+  "broken_reasons": [],
+  "conditions_sha": {
+    "pool": "08e36c8e6171cffb",
+    "instrument": "66a9a6d7ca6d6214",
+    "calibration": "74234e98afe7498f",
+    "request_policy": "b009f7f91286d44a"
+  },
+  "supplement_n_needed_for_halfwidth_5pp": 441
+}
