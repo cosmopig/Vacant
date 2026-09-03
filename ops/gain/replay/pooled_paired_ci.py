@@ -32,6 +32,19 @@ from ops.gain.analyze_paired import arm_rows
 HET_ALPHA = 0.05   # 異質性擋門（既有慣例，非本輪新訂旋鈕）
 MIN_PAIRED = 60    # 沿用 paired_ci 的 BROKEN 門檻
 
+# round675：量哪一個「成功」——定義逐字取自 conform_settle.py:269-272，不是本輪新訂。
+#   deliv        = accepted ∧ meets_demand  ← round670 §三 裁定 P-C1 只由這個結算
+#   meets_demand = meets_demand             ← round658 原本寫死的那個（預設，保回歸相容）
+# 拒交臂（CONFORM）上 meets_demand 不是交付率：拒交的那格 meets_demand 可能為真，
+# 但東西沒交出去。MBPP+ 上兩者同值是**構造**（round670 §六），不是可以依賴的巧合
+# ⇒ 判準指名哪個量就量哪個量，並讓工具**驗證**這個巧合。
+KEYS: dict[str, tuple[tuple[str, ...], object]] = {
+    "meets_demand": (("meets_demand",),
+                     lambda r: bool(r.get("meets_demand"))),
+    "deliv": (("accepted", "meets_demand"),
+              lambda r: bool(r.get("accepted")) and bool(r.get("meets_demand"))),
+}
+
 
 def fisher_exact_2x2(t) -> float:
     """雙尾 Fisher 精確檢定，純標準庫。t = [[a,b],[c,d]]。"""
@@ -98,25 +111,58 @@ def het_gate(strata: list[dict]):
     return fisher_exact_2x2([[ga["b"], ga["c"]], [gb["b"], gb["c"]]]), None
 
 
-def stratum_from_run(d: pathlib.Path, a_arm: str, b_arm: str) -> dict:
+def stratum_from_run(d: pathlib.Path, a_arm: str, b_arm: str, key: str = "meets_demand") -> dict:
+    fields, ok = KEYS[key]
+    if MUTANT == "M6":                       # 突變點：--key 是裝飾品，永遠量 meets_demand
+        fields, ok = KEYS["meets_demand"]
     rows = [json.loads(l) for l in (d / "rows.jsonl").open(encoding="utf-8") if l.strip()]
     A, Bm = arm_rows(rows, a_arm), arm_rows(rows, b_arm)
     common = sorted(set(A) & set(Bm))
-    missing = [t for t in common if "meets_demand" not in A[t] or "meets_demand" not in Bm[t]]
+    # round675：缺欄位不准當 False 算過去（「安靜量不到」型一）。少一個 `accepted`
+    # 會被讀成「拒交」＝方向性偏誤，而不是雜訊。
+    if MUTANT == "M7":                       # 突變點：缺欄位靜靜當 False
+        missing = []
+    else:
+        missing = [t for t in common
+                   if any(f not in A[t] or f not in Bm[t] for f in fields)]
     common = [t for t in common if t not in set(missing)]
-    b = sum(1 for t in common if A[t]["meets_demand"] and not Bm[t]["meets_demand"])
-    c = sum(1 for t in common if Bm[t]["meets_demand"] and not A[t]["meets_demand"])
+    b = sum(1 for t in common if ok(A[t]) and not ok(Bm[t]))
+    c = sum(1 for t in common if ok(Bm[t]) and not ok(A[t]))
     summ = json.load((d / "summary.json").open(encoding="utf-8"))
     cond = {k: hashlib.sha256(json.dumps(summ.get(k), sort_keys=True).encode()).hexdigest()[:16]
             for k in ("pool", "instrument", "calibration", "request_policy")}
+    # round675 §六：本工具的 docstring 早就宣告了納入規則（「量具必須是修好之後的尺」），
+    # 但從來只印 conditions_sha、由人眼判斷。而 sha 一定會因為**題目清單不同**而不同
+    # （各層本來就跑不同題），所以 sha 不等 ⇒ 既不是問題也不是保證，**它什麼都沒說**。
+    # 換成機制導出的判別量：量具在該層上必須雙向滿分（參考解全過、壞解全擋）。
+    # 零新旋鈕——合格線是 `== n`，n 由該層自己的量具紀錄導出。
+    inst = summ.get("instrument")
+    if inst is None:
+        two_way = {"ok": False, "why": "summary.json 沒有 instrument 區塊——這不是通過，是量不到"}
+    else:
+        n_i, rp, br = inst.get("n"), inst.get("ref_pass"), inst.get("broken_rejected")
+        inst_missing = [k for k, v in (("n", n_i), ("ref_pass", rp), ("broken_rejected", br))
+                        if v is None]
+        if inst_missing:
+            two_way = {"ok": False, "n": n_i, "ref_pass": rp, "broken_rejected": br,
+                       "why": f"instrument 缺 {'/'.join(inst_missing)} 欄位——這不是通過，是量不到"}
+        else:
+            inst_ok = (rp == n_i and br == n_i and n_i > 0)
+            if MUTANT == "M9":                   # 突變點：量具沒滿分也放行
+                inst_ok = True
+            two_way = {"ok": inst_ok, "n": n_i, "ref_pass": rp, "broken_rejected": br,
+                       "why": "" if inst_ok
+                              else f"量具沒有雙向滿分：參考解 {rp}/{n_i}、壞解擋 {br}/{n_i}"}
     rr = diff_ci(b, c, len(common))
     return {
         "dir": str(d), "n": len(common), "b": b, "c": c,
-        "a_ok": sum(1 for t in common if A[t]["meets_demand"]),
-        "b_ok": sum(1 for t in common if Bm[t]["meets_demand"]),
-        "third_category_missing_meets_demand": missing,
+        "a_ok": sum(1 for t in common if ok(A[t])),
+        "b_ok": sum(1 for t in common if ok(Bm[t])),
+        "key": key,
+        "third_category_missing_fields": missing,
         "delta_pp": rr["delta"] * 100, "ci95_lo_pp": rr["lo"] * 100, "ci95_hi_pp": rr["hi"] * 100,
         "n_discordant": rr["n_discordant"], "conditions_sha": cond,
+        "instrument_two_way": two_way,
         "rows_sha256_16": hashlib.sha256((d / "rows.jsonl").read_bytes()).hexdigest()[:16],
         "rows_lines": sum(1 for _ in (d / "rows.jsonl").open(encoding="utf-8")),
     }
@@ -186,6 +232,8 @@ def main() -> int:
     ap.add_argument("--stratum", action="append", default=[], help="LABEL=dir")
     ap.add_argument("--a-arm", default="ON")
     ap.add_argument("--b-arm", default="OFF5")
+    ap.add_argument("--key", default="meets_demand", choices=sorted(KEYS),
+                    help="量哪一個成功；拒交臂請用 deliv（round670 §三）。預設保回歸相容")
     ap.add_argument("--json")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()
@@ -198,7 +246,7 @@ def main() -> int:
     for spec in args.stratum:
         label, _, path = spec.partition("=")
         label, _, group = label.partition(":")
-        st = stratum_from_run(pathlib.Path(path), args.a_arm, args.b_arm)
+        st = stratum_from_run(pathlib.Path(path), args.a_arm, args.b_arm, args.key)
         strata.append({"label": label, "group": group or None, **st})
 
     p_het, gate_err = het_gate(strata)
@@ -211,8 +259,18 @@ def main() -> int:
     if pooled["N"] < MIN_PAIRED:
         broken.append(f"N_pooled={pooled['N']} < {MIN_PAIRED}")
     for s in strata:
-        if s["third_category_missing_meets_demand"]:
-            broken.append(f"{s['label']}: 第三類 {len(s['third_category_missing_meets_demand'])} 題缺 meets_demand")
+        if s["third_category_missing_fields"]:
+            broken.append(f"{s['label']}: 第三類 {len(s['third_category_missing_fields'])} 題缺 "
+                          f"{'/'.join(KEYS[s['key']][0])} 欄位——這不是通過，是量不到")
+        # round675（「安靜量不到」型二）：MIN_PAIRED 只擋 pooled **總數**，
+        # 一個 n=0 的層會被另一層蓋過去 ⇒ 「某個 run 掛了」會被偽裝成「樣本數夠」。
+        # 這裡不新增旋鈕：0 是退化情形，不是門檻。
+        if not s["instrument_two_way"]["ok"]:
+            broken.append(f"{s['label']}: {s['instrument_two_way']['why']}"
+                          f"——不合格的尺量出來的層不准併進來")
+        if MUTANT != "M8" and s["n"] == 0:
+            broken.append(f"{s['label']}: 配對數 n=0（{args.a_arm}／{args.b_arm} 在這一層沒有共同題目）"
+                          f"——這一層一題都沒量到，不是「沒有差異」")
 
     if p_het is None:
         het = "GATE_NOT_RUN"          # round660：擋門沒跑成功就不准說「未拒絕同質」
@@ -222,6 +280,7 @@ def main() -> int:
         het = "HOMOGENEOUS_NOT_REJECTED"
     signs = {(1 if s["b"] > s["c"] else -1 if s["c"] > s["b"] else 0) for s in strata}
     out = {
+        "key": args.key,
         "strata": strata,
         "p_het_fisher": p_het, "het_alpha": HET_ALPHA, "het_verdict": het,
         "pooled": {"B": pooled["B"], "C": pooled["C"], "N": pooled["N"],

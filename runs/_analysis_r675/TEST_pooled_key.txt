@@ -1,0 +1,30 @@
+PASS  P1 預設 key 逐位元不變（只差 key 欄位＋一個改名）
+      新增=['.key', '.strata[0].instrument_two_way.broken_rejected', '.strata[0].instrument_two_way.n', '.strata[0].instrument_two_way.ok', '.strata[0].instrument_two_way.ref_pass', '.strata[0].instrument_two_way.why', '.strata[0].key', '.strata[0].third_category_missing_fields', '.strata[1].instrument_two_way.broken_rejected', '.strata[1].instrument_two_way.n', '.strata[1].instrument_two_way.ok', '.strata[1].instrument_two_way.ref_pass', '.strata[1].instrument_two_way.why', '.strata[1].key', '.strata[1].third_category_missing_fields'] 消失=['.strata[0].third_category_missing_meets_demand', '.strata[1].third_category_missing_meets_demand'] 值變了=[]
+PASS  P2 兩半併起來 == 單層跑全部（逐位元）
+      halves={'B': 9, 'C': 4, 'N': 179, 'n_discordant': 13, 'delta_pp': 2.793296089385475, 'ci95_lo_pp': -1.6596665952616365, 'ci95_hi_pp': 5.941938402863404} whole={'B': 9, 'C': 4, 'N': 179, 'n_discordant': 13, 'delta_pp': 2.793296089385475, 'ci95_lo_pp': -1.6596665952616365, 'ci95_hi_pp': 5.941938402863404}
+PASS  P3 --key 有牙齒（造 6 格「符合需求但被拒交」）
+      meets_demand b/c=9/4 deliv b/c=9/10
+PASS  P3/M6 突變（--key 是裝飾品）被偵測器抓到
+      M6 deliv b/c=9/4（== meets_demand ⇒ 該叫）
+PASS  P4 缺 accepted 欄位 ⇒ BROKEN（不准當 False）
+      rc=1 broken=['N_pooled=0 < 60', 'A: 第三類 179 題缺 accepted/meets_demand 欄位——這不是通過，是量不到', 'A: 配對數 n=0（CONFORM／OFF5 在這一層沒有共同題目）——這一層一題都沒量到，不是「沒有差異」', 'B: 配對數 n=0（CONFORM／OFF5 在這一層沒有共同題目）——這一層一題都沒量到，不是「沒有差異」']
+PASS  P4/M7 突變（缺欄位靜靜當 False）被偵測器抓到
+      M7 rc=1 broken=['B: 配對數 n=0（CONFORM／OFF5 在這一層沒有共同題目）——這一層一題都沒量到，不是「沒有差異」']（缺欄位訊息消失 ⇒ 該叫）
+PASS  P5 n=0 的層 ⇒ BROKEN（不准被另一層蓋過去）
+      rc=1 broken=['Z: 配對數 n=0（CONFORM／OFF5 在這一層沒有共同題目）——這一層一題都沒量到，不是「沒有差異」']
+PASS  P5/M8 突變（空層放行）被偵測器抓到
+      M8 rc=0 broken=[]
+PASS  P6 r444 真資料上 deliv == meets_demand（預期，非發現）
+      md={'B': 9, 'C': 4, 'N': 179, 'n_discordant': 13, 'delta_pp': 2.793296089385475, 'ci95_lo_pp': -1.6596665952616365, 'ci95_hi_pp': 5.941938402863404} deliv={'B': 9, 'C': 4, 'N': 179, 'n_discordant': 13, 'delta_pp': 2.793296089385475, 'ci95_lo_pp': -1.6596665952616365, 'ci95_hi_pp': 5.941938402863404}
+PASS  P7 量具沒雙向滿分的層 ⇒ BROKEN
+      rc=1 broken=['A: 量具沒有雙向滿分：參考解 178/179、壞解擋 179/179——不合格的尺量出來的層不准併進來']
+PASS  P7/M9 突變（量具不滿分照樣放行）被偵測器抓到
+      M9 rc=0 broken=[]
+PASS  P8 summary 沒有 instrument 區塊 ⇒ BROKEN（不准當通過）
+      rc=1 broken=['A: summary.json 沒有 instrument 區塊——這不是通過，是量不到——不合格的尺量出來的層不准併進來']
+PASS  P9 r444 真資料量具雙向滿分
+      [('A', {'ok': True, 'n': 179, 'ref_pass': 179, 'broken_rejected': 179, 'why': ''}), ('B', {'ok': True, 'n': 179, 'ref_pass': 179, 'broken_rejected': 179, 'why': ''})]
+PASS  既有 selftest（round658/660 的 P1–P7b）仍 PASS
+      SELFTEST PASS (MUTANT=none)
+
+14/14 PASS
