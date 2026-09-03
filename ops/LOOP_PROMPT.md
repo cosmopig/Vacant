@@ -224,7 +224,7 @@ echo local  > ~/vacant/NEXT_MODEL     # 或 sonnet / opus
 
 - 同一個推理端點同時只跑一個 run（SPEC_GAIN §7，延遲資料互相污染）。
 - 不同端點可平行：`8765` 中轉池（qwen3.6-35b + gemma-4-12b）與 win1003 本機
-  LM Studio `1234`（要先 `lms load`，JIT 已關）。**8766 永遠不碰。**
+  LM Studio `1234`（要先 `lms load`，JIT 已關）。**8766：唯讀可以看（/api/models、/api/status 等），絕不關閉、卸載、改設定（人類 2026-09-02 18:00 更正：「8766可以看啊，只是不要關掉」）。**
 - win1003 的 GPU 同時服務 ComfyUI（展覽影片夜班）：`/d/lock_scene` 或
   `/d/lock_night14` 存在時 **不要**在 1234 起 LLM——兩邊都會慢到沒意義。
 - 小模型堆疊階梯見 `DECISION_20260901_R440B_SMALL_MODEL_STACKING_LADDER.md`。
