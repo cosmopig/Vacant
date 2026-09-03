@@ -161,7 +161,8 @@ ps -eo cmd | grep -c "^python3 ops/gain/gain_run\.py"
 
 ## 模型要聰明切換（人類 2026-08-24 指定）
 
-**這一輪結束前，你必須決定下一輪用什麼模型，並寫進交接檔：**
+**預設是 Opus 5（人類 2026-09-03 指定）。不寫 NEXT_MODEL 就是 Opus 5。**
+只有要**偏離預設**時才寫（例如純對帳想省 token → sonnet／local；收官裁決 → fable）：
 
 ```bash
 echo local  > ~/vacant/NEXT_MODEL     # 或 sonnet / opus
@@ -179,8 +180,8 @@ echo local  > ~/vacant/NEXT_MODEL     # 或 sonnet / opus
 
 本地輪次若失敗（rc≠0），`loop.sh` 會自動把下一輪退回 sonnet。
 
-`loop.sh` 下一輪會讀它、用一次、然後**刪掉**（不刪的話 opus 會黏住，
-之後每輪都用 opus 收數字，那正是要避免的浪費）。**不寫就是 sonnet。**
+`loop.sh` 下一輪會讀它、用一次、然後**刪掉**。**不寫就是 Opus 5。**
+（2026-09-03 前的舊政策是「預設 sonnet、要 opus 才寫」，已被人類推翻。）
 
 判準：
 
@@ -191,8 +192,9 @@ echo local  > ~/vacant/NEXT_MODEL     # 或 sonnet / opus
 | 寫結論、判斷證據夠不夠 | 整理落盤資料、產報表 |
 | 前一輪推翻了自己，要重新判斷 | 重複性的驗證與對帳 |
 
-**預設用 Sonnet。** 只有上面左欄那幾種情況才值得 Opus——
-它貴而且慢，用在收數字上是浪費。
+**預設用 Opus 5（人類 2026-09-03 指定「遠端的模型改成 opus5」）。**
+上表右欄那些純機械的工作，若你判斷這一輪只是收數字對帳，可以主動寫
+`sonnet` 或 `local` 省 token——但那是你的選擇，不是預設。
 
 **同時在 `GAIN_STATE.md` 寫一行**：`下一輪模型：opus／sonnet ＋ 一句理由`——
 檔案是給機器讀的，這一行是給稽核端看的，兩個都要有才對得起帳。
@@ -213,8 +215,8 @@ echo local  > ~/vacant/NEXT_MODEL     # 或 sonnet / opus
 | `fable` | Fable 5.1 | **稽核與裁決**：run 收官時對三條判準裁決、寫 DECISION/CONCLUSION、
 |  |  | 質疑上一輪 sonnet 的數字（重算一次）、每 10 輪一次總稽核（對帳 rows/notes/summary、
 |  |  | 檢查有沒有無聲空替換與半殘資料）。不用 fable 收例行數字。 |
-| `opus` | Opus 5 | 實驗設計、架構改動、新 loader/新臂的實作 |
-| `sonnet` | Sonnet 5 | 監控檢查點、跑既定指令、產報表（預設） |
+| `opus` | Opus 5 | **預設**（2026-09-03 起）：實驗設計、架構改動、新 loader/新臂的實作、日常也走這層 |
+| `sonnet` | Sonnet 5 | 監控檢查點、跑既定指令、產報表（要省 token 時自己指定） |
 | `local` | 本地 qwen | 純探針／對帳／複製貼上級工作 |
 
 **稽核輪的產物必須可驗**：每個數字附 rows.jsonl 的行數與 sha256 前 8 碼；
