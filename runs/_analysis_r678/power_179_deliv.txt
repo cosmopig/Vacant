@@ -1,0 +1,13 @@
+配對數（目前）n = 179
+discordant 到達序列（13 個）：bcbbcbccbbbbb
+  b（只有 CONFORM 對）=9   c（只有 OFF5 對）=4
+  全序列 McNemar 精確雙尾 p = 0.2668
+
+  最近 5 個 = bbbbb  同向最多 5/5  單尾 p = 0.0312
+  最近 8 個 = bccbbbbb  同向最多 6/8  單尾 p = 0.1445
+觸發的推翻條件：['T1']  ⇒ 判定：signal_worth_following
+
+discordant rate = 7.26%
+n=179 時預期 discordant≈13，要 p<0.05 最少要 11:2 （|b-c|≥9）⇒ MDE = 5.03 pp
+若真實效果＝觀測值（p_b=0.692），80% power 需要 51 個 discordant pair ⇒ 約 703 個配對任務
+題庫只有 378 題 ⇒ 可達？ False

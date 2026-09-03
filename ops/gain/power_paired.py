@@ -22,6 +22,20 @@ import math
 import pathlib
 
 
+# round678：量哪一個「成功」——定義逐字取自 conform_settle.py:269-272，
+# 與 pooled_paired_ci.py:41-47 同一份表，不是本輪新訂的旋鈕。
+#   deliv        = accepted ∧ meets_demand  ← round670 §三 裁定拒交臂只由這個結算
+#   meets_demand = meets_demand             ← round260 原本寫死的那個（預設，保回歸相容）
+# 拒交臂（CONFORM）上 meets_demand 不是交付率：拒交的那格 meets_demand 可能為真，
+# 但東西沒交出去。MBPP+ 上兩者同值是**構造**（round670 §六），不是可以依賴的巧合。
+KEYS: dict[str, tuple[tuple[str, ...], object]] = {
+    "meets_demand": (("meets_demand",),
+                     lambda r: bool(r.get("meets_demand"))),
+    "deliv": (("accepted", "meets_demand"),
+              lambda r: bool(r.get("accepted")) and bool(r.get("meets_demand"))),
+}
+
+
 def exact_mcnemar_p(b: int, c: int) -> float:
     n = b + c
     if n == 0:
@@ -83,11 +97,27 @@ def main() -> int:
     ap.add_argument("--n-cap", type=int, required=True,
                     help="配對上限（通常是先跑完那一臂的列數）")
     ap.add_argument("--bench-size", type=int, default=378, help="題庫總題數")
+    ap.add_argument("--key", default="meets_demand", choices=sorted(KEYS),
+                    help="量哪一個成功；拒交臂請用 deliv（round670 §三）。預設保回歸相容")
     ap.add_argument("--json")
     args = ap.parse_args()
 
+    fields, ok = KEYS[args.key]
+
     A = {r["task_id"]: r for r in load_arm(pathlib.Path(args.a_run), args.a_arm)}
     b_rows = load_arm(pathlib.Path(args.b_run), args.b_arm)  # 保持行序 = 到達順序
+
+    # 安靜量不到・型一：判準指名的欄位根本不在列上 ⇒ .get() 會一路回 None＝全部判成
+    # 失敗，數字照印。要 BROKEN，不是 0。
+    for label, sample in ((args.a_arm, next(iter(A.values()), None)),
+                          (args.b_arm, b_rows[0] if b_rows else None)):
+        if sample is None:
+            raise SystemExit(f"BROKEN：{label} 一列都沒有——這不是通過，是量不到")
+        missing = [f for f in fields if f not in sample]
+        if missing:
+            raise SystemExit(
+                f"BROKEN：{label} 的列缺 {'/'.join(missing)} 欄位"
+                f"（--key {args.key} 需要 {'/'.join(fields)}）——這不是通過，是量不到")
 
     seq = []          # 到達順序的 discordant 事件
     n_paired = 0
@@ -96,7 +126,7 @@ def main() -> int:
         if t not in A:
             continue
         n_paired += 1
-        a_ok, b_ok = bool(A[t]["meets_demand"]), bool(r["meets_demand"])
+        a_ok, b_ok = ok(A[t]), ok(r)
         if a_ok and not b_ok:
             seq.append(("b", t))
         elif b_ok and not a_ok:
@@ -126,6 +156,14 @@ def main() -> int:
     if p_all < 0.05:
         triggered.append("T3")
 
+    # 安靜量不到・型二：兩臂一列都配不起來（臂名打錯／task_id 空間不同）
+    # ⇒ 舊碼會安靜印 disc_rate=0.00%、MDE=None，看起來像「沒有訊號」。
+    if n_paired == 0:
+        raise SystemExit(
+            f"BROKEN：{args.a_arm} 與 {args.b_arm} 配對數 = 0"
+            f"（A 臂 {len(A)} 列、B 臂 {len(b_rows)} 列，task_id 完全不重疊）"
+            "——這不是「沒有訊號」，是沒接上")
+
     disc_rate = (nb + nc) / n_paired if n_paired else 0.0
     mde = mde_at_n(args.n_cap, disc_rate)
     p_b_obs = nb / (nb + nc) if (nb + nc) else 0.5
@@ -134,6 +172,8 @@ def main() -> int:
                    else -1)
 
     out = {
+        "key": args.key,
+        "key_fields": list(fields),
         "n_paired_now": n_paired,
         "arrival_sequence": letters,
         "b_only": nb, "c_only": nc,
