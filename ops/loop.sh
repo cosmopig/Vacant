@@ -11,7 +11,7 @@ set -u
 ROOT="$HOME/vacant"
 LOGS="$ROOT/logs"
 CLAUDE="$HOME/.local/bin/claude"     # 寫死路徑：非互動 shell 的 PATH 沒有它
-DEFAULT_MODEL="${LOOP_MODEL:-sonnet}"  # 預設 Sonnet 5；每輪可被 NEXT_MODEL 覆蓋一次
+DEFAULT_MODEL="${LOOP_MODEL:-opus}"   # 預設 Opus 5（人類 2026-09-03 指定「遠端的模型改成 opus5」）；每輪可被 NEXT_MODEL 覆蓋一次
 NEXT_MODEL="$ROOT/NEXT_MODEL"          # 上一輪寫的建議，讀完就消耗掉（見 pick_model）
 PROMPT="$ROOT/LOOP_PROMPT.md"
 STOP="$ROOT/STOP"
