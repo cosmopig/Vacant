@@ -1,0 +1,17 @@
+=== clean ===
+SELFTEST PASS (MUTANT=none)
+rc=0
+=== MUTANT=M3 ===
+FAIL: P2: 合併 Δ=-0.050000 不等於 Σ(b−c)/Σn=0.072727
+SELFTEST FAIL (MUTANT=M3)
+rc=1
+=== MUTANT=M4 ===
+FAIL: P4: [[20,0],[0,20]] 的 p_het=1.0000 沒有 <0.05 ⇒ 檢定沒牙齒
+FAIL: P5: 兩 group 方向完全相反，p_het=1.0 沒有 <0.05 ⇒ 擋門在層數!=2 時沒牙齒（round658 的安靜失效）
+SELFTEST FAIL (MUTANT=M4)
+rc=1
+=== MUTANT=M5 ===
+FAIL: P5: 兩 group 方向完全相反，p_het=None 沒有 <0.05 ⇒ 擋門在層數!=2 時沒牙齒（round658 的安靜失效）
+FAIL: P7: 三層無 group 竟然放行（p_het=None, err=None）⇒ 擋門安靜失效
+SELFTEST FAIL (MUTANT=M5)
+rc=1

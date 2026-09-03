@@ -64,6 +64,40 @@ def pool(strata: list[dict]) -> dict:
     return {"B": B, "C": C, "N": N, **r}
 
 
+def group_totals(strata: list[dict]) -> dict:
+    """依 group 標籤加總 b/c/n。沒帶 group 的層，group 就是它自己的 label
+    （⇒ 兩層無標籤時退化成 round658 的逐層 2x2，逐位元相容）。"""
+    out: dict = {}
+    for s in strata:
+        g = s.get("group") or s["label"]
+        t = out.setdefault(g, {"b": 0, "c": 0, "n": 0, "labels": []})
+        t["b"] += s["b"]; t["c"] += s["c"]; t["n"] += s["n"]; t["labels"].append(s["label"])
+    return out
+
+
+def het_gate(strata: list[dict]):
+    """round660：修掉「層數≠2 時擋門安靜失效」。
+
+    round658 寫的是 `if len(strata)==2 else None`，於是六層進來 p_het=None
+    ⇒ 判 HOMOGENEOUS_NOT_REJECTED ⇒ pooled_usable_as_headline=True，
+    **擋門根本沒跑卻放行**。修法不新增估計量也不新增旋鈕：
+    Fisher 2x2 改跑在**兩個 group 的加總 (B,C)** 上，同一個 fisher_exact_2x2、
+    同一個 HET_ALPHA。group 數 ≠ 2 就回報 BROKEN，不准安靜放行。
+
+    回傳 (p_het, broken_reason_or_None)。
+    """
+    if MUTANT == "M5":                       # 突變點：退回 round658 的安靜失效版
+        p = fisher_exact_2x2([[strata[0]["b"], strata[0]["c"]],
+                              [strata[1]["b"], strata[1]["c"]]]) if len(strata) == 2 else None
+        return p, None
+    groups = group_totals(strata)
+    if len(groups) != 2:
+        return None, (f"異質性擋門跑不了：需要恰好 2 個 group，實得 {len(groups)} 個 "
+                      f"（層數={len(strata)}）。層數>2 時必須用 --stratum LABEL:GROUP=dir 指定分組。")
+    (ga, gb) = [groups[k] for k in sorted(groups)]
+    return fisher_exact_2x2([[ga["b"], ga["c"]], [gb["b"], gb["c"]]]), None
+
+
 def stratum_from_run(d: pathlib.Path, a_arm: str, b_arm: str) -> dict:
     rows = [json.loads(l) for l in (d / "rows.jsonl").open(encoding="utf-8") if l.strip()]
     A, Bm = arm_rows(rows, a_arm), arm_rows(rows, b_arm)
@@ -113,6 +147,34 @@ def selftest() -> int:
     p_opp = fisher_exact_2x2([[20, 0], [0, 20]])
     if not (p_opp < HET_ALPHA):
         fails.append(f"P4: [[20,0],[0,20]] 的 p_het={p_opp:.4f} 沒有 <{HET_ALPHA} ⇒ 檢定沒牙齒")
+    # ---- round660 新增：擋門在層數 != 2 時不准安靜失效 ----
+    def _st(label, group, b, c, n):
+        return {"label": label, "group": group, "b": b, "c": c, "n": n}
+
+    # P5：六層兩 group、兩 group 方向完全相反 ⇒ 必須判 HETEROGENEOUS
+    opp = [_st("S1", "A", 10, 0, 60), _st("S2", "A", 10, 0, 60),
+           _st("S3", "B", 0, 10, 60), _st("S4", "B", 0, 10, 60),
+           _st("S5", "B", 0, 5, 60), _st("S6", "B", 0, 5, 60)]
+    p_opp6, err6 = het_gate(opp)
+    if err6 is not None:
+        fails.append(f"P5: 六層兩 group 卻回報擋門跑不了：{err6}")
+    elif p_opp6 is None or not (p_opp6 < HET_ALPHA):
+        fails.append(f"P5: 兩 group 方向完全相反，p_het={p_opp6} 沒有 <{HET_ALPHA} "
+                     f"⇒ 擋門在層數!=2 時沒牙齒（round658 的安靜失效）")
+
+    # P7：層數 >2 但沒帶 group（⇒ group 數 != 2）必須回報 BROKEN，不准安靜放行
+    nogrp = [_st("S1", None, 10, 0, 60), _st("S2", None, 10, 0, 60), _st("S3", None, 0, 10, 60)]
+    p_ng, err_ng = het_gate(nogrp)
+    if err_ng is None or p_ng is not None:
+        fails.append(f"P7: 三層無 group 竟然放行（p_het={p_ng}, err={err_ng}）⇒ 擋門安靜失效")
+
+    # P7b：兩層無 group 必須與 round658 逐位元相容（退化成逐層 2x2）
+    two = [_st("S1", None, 14, 10, 82), _st("S2", None, 11, 12, 167)]
+    p_two, err_two = het_gate(two)
+    ref = fisher_exact_2x2([[14, 10], [11, 12]])
+    if err_two is not None or p_two is None or abs(p_two - ref) > 1e-12:
+        fails.append(f"P7b: 兩層無 group 的 p_het={p_two} 與 round658 的 {ref} 不逐位元相同")
+
     for f in fails:
         print("FAIL:", f)
     print("SELFTEST", "FAIL" if fails else "PASS", f"(MUTANT={MUTANT or 'none'})")
@@ -135,22 +197,29 @@ def main() -> int:
     strata = []
     for spec in args.stratum:
         label, _, path = spec.partition("=")
+        label, _, group = label.partition(":")
         st = stratum_from_run(pathlib.Path(path), args.a_arm, args.b_arm)
-        strata.append({"label": label, **st})
+        strata.append({"label": label, "group": group or None, **st})
 
-    p_het = fisher_exact_2x2([[strata[0]["b"], strata[0]["c"]],
-                              [strata[1]["b"], strata[1]["c"]]]) if len(strata) == 2 else None
+    p_het, gate_err = het_gate(strata)
     pooled = pool(strata)
     lo_pp, hi_pp, d_pp = pooled["lo"] * 100, pooled["hi"] * 100, pooled["delta"] * 100
 
     broken = []
+    if gate_err:
+        broken.append(gate_err)
     if pooled["N"] < MIN_PAIRED:
         broken.append(f"N_pooled={pooled['N']} < {MIN_PAIRED}")
     for s in strata:
         if s["third_category_missing_meets_demand"]:
             broken.append(f"{s['label']}: 第三類 {len(s['third_category_missing_meets_demand'])} 題缺 meets_demand")
 
-    het = "HETEROGENEOUS" if (p_het is not None and p_het < HET_ALPHA) else "HOMOGENEOUS_NOT_REJECTED"
+    if p_het is None:
+        het = "GATE_NOT_RUN"          # round660：擋門沒跑成功就不准說「未拒絕同質」
+    elif p_het < HET_ALPHA:
+        het = "HETEROGENEOUS"
+    else:
+        het = "HOMOGENEOUS_NOT_REJECTED"
     signs = {(1 if s["b"] > s["c"] else -1 if s["c"] > s["b"] else 0) for s in strata}
     out = {
         "strata": strata,
@@ -160,7 +229,8 @@ def main() -> int:
                    "delta_pp": d_pp, "ci95_lo_pp": lo_pp, "ci95_hi_pp": hi_pp,
                    "pi_ci95": [pooled["pi_lo"], pooled["pi_hi"]]},
         "verdict_pooled": verdict(lo_pp, hi_pp),
-        "pooled_usable_as_headline": het != "HETEROGENEOUS",
+        "pooled_usable_as_headline": het == "HOMOGENEOUS_NOT_REJECTED" and not broken,
+        "groups": group_totals(strata),
         "opposite_direction_strata": len(signs - {0}) > 1,
         "practical_pp": PRACTICAL_PP,
         "supplement_n_needed_for_halfwidth_5pp": n_needed(pooled["n_discordant"], pooled["N"]),
