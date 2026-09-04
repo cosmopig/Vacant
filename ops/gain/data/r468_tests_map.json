@@ -1,0 +1,697 @@
+{
+ "modules": 45,
+ "module_verdicts": {
+  "PASS": 37,
+  "FAIL": 3,
+  "UNSUPPORTED": 3,
+  "IMPORT_ERROR": 2
+ },
+ "green_modules": 37,
+ "collected": 581,
+ "passed": 540,
+ "failed": 15,
+ "errored": 26,
+ "skipped": 0,
+ "zero_collected_modules": 2,
+ "class_counts": {
+  "SHIM": 31,
+  "STALE": 1,
+  "ENV": 3,
+  "UNCLASSIFIED": 8
+ },
+ "coverage_check": {
+  "classified": 41,
+  "expected": 41,
+  "ok": true
+ },
+ "per_module": [
+  {
+   "module": "tests/test_agent.py",
+   "verdict": "PASS",
+   "n": 5,
+   "pass": 5,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_archive_index.py",
+   "verdict": "FAIL",
+   "n": 5,
+   "pass": 1,
+   "fail": 4,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_attack_surface.py",
+   "verdict": "PASS",
+   "n": 25,
+   "pass": 25,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_attest.py",
+   "verdict": "PASS",
+   "n": 5,
+   "pass": 5,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_audit_findings.py",
+   "verdict": "PASS",
+   "n": 33,
+   "pass": 33,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_blayer.py",
+   "verdict": "PASS",
+   "n": 9,
+   "pass": 9,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_brains_auth.py",
+   "verdict": "PASS",
+   "n": 2,
+   "pass": 2,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_channels.py",
+   "verdict": "PASS",
+   "n": 25,
+   "pass": 25,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_checkpoint.py",
+   "verdict": "PASS",
+   "n": 5,
+   "pass": 5,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_checks.py",
+   "verdict": "PASS",
+   "n": 29,
+   "pass": 29,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_citation_archive.py",
+   "verdict": "FAIL",
+   "n": 5,
+   "pass": 2,
+   "fail": 3,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "verdict": "FAIL",
+   "n": 22,
+   "pass": 1,
+   "fail": 8,
+   "error": 13,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_cli_run.py",
+   "verdict": "UNSUPPORTED",
+   "n": 4,
+   "pass": 0,
+   "fail": 0,
+   "error": 4,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_codebench.py",
+   "verdict": "PASS",
+   "n": 14,
+   "pass": 14,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_composer.py",
+   "verdict": "PASS",
+   "n": 3,
+   "pass": 3,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_controller.py",
+   "verdict": "PASS",
+   "n": 32,
+   "pass": 32,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_credit_memory.py",
+   "verdict": "PASS",
+   "n": 17,
+   "pass": 17,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_dashboard.py",
+   "verdict": "PASS",
+   "n": 12,
+   "pass": 12,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_ecosystem.py",
+   "verdict": "PASS",
+   "n": 18,
+   "pass": 18,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_entrycost.py",
+   "verdict": "PASS",
+   "n": 9,
+   "pass": 9,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_environment.py",
+   "verdict": "PASS",
+   "n": 15,
+   "pass": 15,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_equal_budget_rules_r446.py",
+   "verdict": "IMPORT_ERROR",
+   "n": 0,
+   "pass": 0,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_evalplus_loader.py",
+   "verdict": "PASS",
+   "n": 22,
+   "pass": 22,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_gain_conform_arm.py",
+   "verdict": "PASS",
+   "n": 9,
+   "pass": 9,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_gain_eq5_arm.py",
+   "verdict": "PASS",
+   "n": 6,
+   "pass": 6,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_gain_receipt_persistence.py",
+   "verdict": "PASS",
+   "n": 4,
+   "pass": 4,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_gain_runner.py",
+   "verdict": "PASS",
+   "n": 30,
+   "pass": 30,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_gateway.py",
+   "verdict": "PASS",
+   "n": 11,
+   "pass": 11,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_hardening.py",
+   "verdict": "PASS",
+   "n": 10,
+   "pass": 10,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_lcb_bank_v2.py",
+   "verdict": "PASS",
+   "n": 13,
+   "pass": 13,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_mcp_v2.py",
+   "verdict": "IMPORT_ERROR",
+   "n": 0,
+   "pass": 0,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_multiway.py",
+   "verdict": "PASS",
+   "n": 11,
+   "pass": 11,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_packaging.py",
+   "verdict": "PASS",
+   "n": 1,
+   "pass": 1,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_primitives.py",
+   "verdict": "PASS",
+   "n": 12,
+   "pass": 12,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_pulse.py",
+   "verdict": "PASS",
+   "n": 17,
+   "pass": 17,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_receipt.py",
+   "verdict": "PASS",
+   "n": 11,
+   "pass": 11,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_record.py",
+   "verdict": "PASS",
+   "n": 14,
+   "pass": 14,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_research.py",
+   "verdict": "PASS",
+   "n": 24,
+   "pass": 24,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_revive.py",
+   "verdict": "PASS",
+   "n": 2,
+   "pass": 2,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_slash_tradeoff.py",
+   "verdict": "UNSUPPORTED",
+   "n": 31,
+   "pass": 23,
+   "fail": 0,
+   "error": 8,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_substrate_lmstudio.py",
+   "verdict": "PASS",
+   "n": 14,
+   "pass": 14,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_teeth.py",
+   "verdict": "PASS",
+   "n": 14,
+   "pass": 14,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_trace.py",
+   "verdict": "UNSUPPORTED",
+   "n": 3,
+   "pass": 2,
+   "fail": 0,
+   "error": 1,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_w1_experiment.py",
+   "verdict": "PASS",
+   "n": 23,
+   "pass": 23,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  },
+  {
+   "module": "tests/test_x1_evalplus.py",
+   "verdict": "PASS",
+   "n": 5,
+   "pass": 5,
+   "fail": 0,
+   "error": 0,
+   "skip": 0
+  }
+ ],
+ "entries": [
+  {
+   "module": "tests/test_archive_index.py",
+   "test": "test_every_claim_carries_a_verdict",
+   "cls": "SHIM",
+   "why": "§三：TypeError 且最深 frame 在替身內（fixture 吃 fixture）"
+  },
+  {
+   "module": "tests/test_archive_index.py",
+   "test": "test_every_verdict_points_at_a_real_claim",
+   "cls": "SHIM",
+   "why": "§三：TypeError 且最深 frame 在替身內（fixture 吃 fixture）"
+  },
+  {
+   "module": "tests/test_archive_index.py",
+   "test": "test_refuted_count_is_pinned",
+   "cls": "SHIM",
+   "why": "§三：TypeError 且最深 frame 在替身內（fixture 吃 fixture）"
+  },
+  {
+   "module": "tests/test_archive_index.py",
+   "test": "test_refuted_verdicts_carry_the_correction",
+   "cls": "STALE",
+   "evidence": "cfe882b",
+   "why": "測試斷言 verdict ∈ (refuted, overstated)；commit cfe882b 標題明說『held/no_effect 兩個新裁決值』＝產品契約在測試最後一次修改（8344805）之後被有意擴充，測試沒跟上。gain.signal_exists 的 verdict 是 held。"
+  },
+  {
+   "module": "tests/test_citation_archive.py",
+   "test": "test_fulltext_hashes_are_recorded",
+   "cls": "ENV",
+   "why": "§三 ENV：需要 Mac iCloud 路徑 /home/user1/Library/Mobile Documents/com~apple~CloudDocs/專題/…（這台是 Linux）"
+  },
+  {
+   "module": "tests/test_citation_archive.py",
+   "test": "test_manifest_covers_every_indexed_source",
+   "cls": "ENV",
+   "why": "§三 ENV：需要 Mac iCloud 路徑 /home/user1/Library/Mobile Documents/com~apple~CloudDocs/專題/…（這台是 Linux）"
+  },
+  {
+   "module": "tests/test_citation_archive.py",
+   "test": "test_verified_quotes_point_at_files_we_hold",
+   "cls": "ENV",
+   "why": "§三 ENV：需要 Mac iCloud 路徑 /home/user1/Library/Mobile Documents/com~apple~CloudDocs/專題/…（這台是 Linux）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_demo_roster_cannot_contaminate_product_root",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_ledger_tail",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_ledger_tail_empty",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_offline_brain_fallback",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_resident_inspect",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_resident_wipe",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_scoreboard",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_status",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_toggle_writes_state",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_up_demo_roster_is_explicit",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_up_no_dashboard",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_verify",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_verify_unknown_resident",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_help_does_not_crash[0]",
+   "cls": "UNCLASSIFIED",
+   "why": "替身 parametrize 對 list 值參數綁錯：綁 'up' 而非 ['up','--help']，argparse 逐字元走字串 ⇒ 測試內拋 AssertionError。最小重現：parametrize('argv', [['up','--help']]) ⇒ 綁到的是 'up'。照 §三 字面會判成 REAL；這是判準缺的一類，不當場補判準。"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_help_does_not_crash[1]",
+   "cls": "UNCLASSIFIED",
+   "why": "替身 parametrize 對 list 值參數綁錯：綁 'up' 而非 ['up','--help']，argparse 逐字元走字串 ⇒ 測試內拋 AssertionError。最小重現：parametrize('argv', [['up','--help']]) ⇒ 綁到的是 'up'。照 §三 字面會判成 REAL；這是判準缺的一類，不當場補判準。"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_help_does_not_crash[2]",
+   "cls": "UNCLASSIFIED",
+   "why": "替身 parametrize 對 list 值參數綁錯：綁 'up' 而非 ['up','--help']，argparse 逐字元走字串 ⇒ 測試內拋 AssertionError。最小重現：parametrize('argv', [['up','--help']]) ⇒ 綁到的是 'up'。照 §三 字面會判成 REAL；這是判準缺的一類，不當場補判準。"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_help_does_not_crash[3]",
+   "cls": "UNCLASSIFIED",
+   "why": "替身 parametrize 對 list 值參數綁錯：綁 'up' 而非 ['up','--help']，argparse 逐字元走字串 ⇒ 測試內拋 AssertionError。最小重現：parametrize('argv', [['up','--help']]) ⇒ 綁到的是 'up'。照 §三 字面會判成 REAL；這是判準缺的一類，不當場補判準。"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_help_does_not_crash[4]",
+   "cls": "UNCLASSIFIED",
+   "why": "替身 parametrize 對 list 值參數綁錯：綁 'up' 而非 ['up','--help']，argparse 逐字元走字串 ⇒ 測試內拋 AssertionError。最小重現：parametrize('argv', [['up','--help']]) ⇒ 綁到的是 'up'。照 §三 字面會判成 REAL；這是判準缺的一類，不當場補判準。"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_help_does_not_crash[5]",
+   "cls": "UNCLASSIFIED",
+   "why": "替身 parametrize 對 list 值參數綁錯：綁 'up' 而非 ['up','--help']，argparse 逐字元走字串 ⇒ 測試內拋 AssertionError。最小重現：parametrize('argv', [['up','--help']]) ⇒ 綁到的是 'up'。照 §三 字面會判成 REAL；這是判準缺的一類，不當場補判準。"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_help_does_not_crash[6]",
+   "cls": "UNCLASSIFIED",
+   "why": "替身 parametrize 對 list 值參數綁錯：綁 'up' 而非 ['up','--help']，argparse 逐字元走字串 ⇒ 測試內拋 AssertionError。最小重現：parametrize('argv', [['up','--help']]) ⇒ 綁到的是 'up'。照 §三 字面會判成 REAL；這是判準缺的一類，不當場補判準。"
+  },
+  {
+   "module": "tests/test_cli_eco.py",
+   "test": "test_help_does_not_crash[7]",
+   "cls": "UNCLASSIFIED",
+   "why": "替身 parametrize 對 list 值參數綁錯：綁 'up' 而非 ['up','--help']，argparse 逐字元走字串 ⇒ 測試內拋 AssertionError。最小重現：parametrize('argv', [['up','--help']]) ⇒ 綁到的是 'up'。照 §三 字面會判成 REAL；這是判準缺的一類，不當場補判準。"
+  },
+  {
+   "module": "tests/test_cli_run.py",
+   "test": "test_cli_run_bad_delivery_cannot_create_agent_marker",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_run.py",
+   "test": "test_cli_run_json_without_agent",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_run.py",
+   "test": "test_cli_run_launches_custom_agent_only_after_gate",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_cli_run.py",
+   "test": "test_cli_run_without_real_model_fails_closed",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_equal_budget_rules_r446.py",
+   "test": "<import>",
+   "cls": "SHIM",
+   "why": "§三：替身未支援 pytest.importorskip",
+   "module_level": true
+  },
+  {
+   "module": "tests/test_mcp_v2.py",
+   "test": "<import>",
+   "cls": "SHIM",
+   "why": "§三：缺第三方套件 mcp",
+   "module_level": true
+  },
+  {
+   "module": "tests/test_slash_tradeoff.py",
+   "test": "test_early_stop_is_a_strict_prefix[0]",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['budget']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_slash_tradeoff.py",
+   "test": "test_early_stop_is_a_strict_prefix[1]",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['budget']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_slash_tradeoff.py",
+   "test": "test_early_stop_is_a_strict_prefix[2]",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['budget']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_slash_tradeoff.py",
+   "test": "test_mean_drop_is_lambda_invariant[0]",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['factor']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_slash_tradeoff.py",
+   "test": "test_mean_drop_is_lambda_invariant[1]",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['factor']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_slash_tradeoff.py",
+   "test": "test_mean_drop_is_lambda_invariant[2]",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['factor']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_slash_tradeoff.py",
+   "test": "test_mean_drop_is_lambda_invariant[3]",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['factor']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_slash_tradeoff.py",
+   "test": "test_mean_drop_is_lambda_invariant[4]",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['factor']（用真 pytest 跑）"
+  },
+  {
+   "module": "tests/test_trace.py",
+   "test": "test_trace_renderer_detects_vacant_call",
+   "cls": "SHIM",
+   "why": "替身缺 fixture ['capsys']（用真 pytest 跑）"
+  }
+ ]
+}

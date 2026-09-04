@@ -1,0 +1,362 @@
+[
+ {
+  "module": "tests/test_agent.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.4,
+  "stdout": "############ tests/test_agent.py\nPASS  test_bench_report_shape\nPASS  test_cannot_invent_when_impossible\nPASS  test_checkable_cases_builds_pairs\nPASS  test_vacant_beats_plain\nPASS  test_vacant_is_accountable\n\ntests/test_agent.py: 5/5 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_archive_index.py",
+  "rc": 1,
+  "timeout": false,
+  "secs": 0.0,
+  "stdout": "############ tests/test_archive_index.py\nFAIL  test_every_claim_carries_a_verdict\nFAIL  test_every_verdict_points_at_a_real_claim\nFAIL  test_refuted_count_is_pinned\nFAIL  test_refuted_verdicts_carry_the_correction\nPASS  test_unreviewed_is_not_a_pass\n\ntests/test_archive_index.py: 1/5 pass, 4 fail, 0 error, 0 skip => FAIL\n",
+  "stderr": "Traceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 294, in run_module\n    args.append(built[p] if p in built else fixtures[p]())\n                                            ^^^^^^^^^^^^^\nTypeError: index() missing 1 required positional argument: 'verdicts'\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 294, in run_module\n    args.append(built[p] if p in built else fixtures[p]())\n                                            ^^^^^^^^^^^^^\nTypeError: index() missing 1 required positional argument: 'verdicts'\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 294, in run_module\n    args.append(built[p] if p in built else fixtures[p]())\n                                            ^^^^^^^^^^^^^\nTypeError: index() missing 1 required positional argument: 'verdicts'\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/tests/test_archive_index.py\", line 79, in test_refuted_verdicts_carry_the_correction\n    assert v[\"verdict\"] in (\"refuted\", \"overstated\"), f\"{cid} 的裁決值不合法\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: gain.signal_exists 的裁決值不合法\n"
+ },
+ {
+  "module": "tests/test_attack_surface.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 11.4,
+  "stdout": "############ tests/test_attack_surface.py\nPASS  test_collusion_is_deterministic\nPASS  test_control_arm_has_no_routing_skew\nPASS  test_default_probation_params_do_not_shift_frozen_numbers\nPASS  test_defect_budget_actually_binds[0]\nPASS  test_defect_budget_actually_binds[1]\nPASS  test_defect_budget_actually_binds[2]\nPASS  test_defect_budget_actually_binds[3]\nPASS  test_defense_switches_are_really_switches\nPASS  test_downweight_counter_only_counts_real_reductions\nPASS  test_four_models_are_actually_different\nPASS  test_four_models_share_the_same_duty_cycle[0]\nPASS  test_four_models_share_the_same_duty_cycle[1]\nPASS  test_four_models_share_the_same_duty_cycle[2]\nPASS  test_four_models_share_the_same_duty_cycle[3]\nPASS  test_geom_mean_is_near_target\nPASS  test_osc_models_are_deterministic[0]\nPASS  test_osc_models_are_deterministic[1]\nPASS  test_osc_models_are_deterministic[2]\nPASS  test_osc_models_are_deterministic[3]\nPASS  test_probation_knobs_change_outcomes\nPASS  test_probation_params_reach_the_registry\nPASS  test_slander_actually_depresses_honest_reputation\nPASS  test_srivatsa_cost_decomposes\nPASS  test_unknown_strategy_fails_closed\nPASS  test_zero_strength_equals_control\n\ntests/test_attack_surface.py: 25/25 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_attest.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_attest.py\nPASS  test_attestation_roundtrip_and_answer_binding\nPASS  test_impersonation_by_pub_swap_fails\nPASS  test_no_attestation_without_signing_identity\nPASS  test_solve_emits_independently_verifiable_attestation\nPASS  test_tamper_on_claim_or_sig_detected\n\ntests/test_attest.py: 5/5 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_audit_findings.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 2.1,
+  "stdout": "############ tests/test_audit_findings.py\nPASS  TestAuditAnchor::test_infra_failure_is_not_a_provable_fault\nPASS  TestAuditAnchor::test_sampling_is_replayable_given_the_seed\nPASS  TestAuditAnchor::test_sampling_seed_is_not_a_public_constant\nPASS  TestDecayClockIsPerStream::test_own_history_still_decays\nPASS  TestDecayClockIsPerStream::test_pure_query_does_not_create_cells\nPASS  TestDecayClockIsPerStream::test_third_party_activity_does_not_erase_my_credit\nPASS  TestDistillerSelfChecksA4::test_delegate_survives_a_task_whose_text_embeds_a_check\nPASS  TestDistillerSelfChecksA4::test_headline_stops_at_the_example\nPASS  TestDistillerSelfChecksA4::test_lesson_does_not_leak_when_task_embeds_assertions\nPASS  TestDistillerSelfChecksA4::test_still_works_without_a_check\nPASS  TestHumanArbitrationHasTeeth::test_corroborated_fail_actually_moves_credit\nPASS  TestHumanArbitrationHasTeeth::test_uncorroborated_accusation_cannot_move_credit\nPASS  TestHumanArbitrationHasTeeth::test_unknown_task_still_rejected\nPASS  TestProbationIsIntrinsic::test_unobserved_outsider_cannot_outrank_proven_expert\nPASS  TestReviewHygiene::test_branch_must_match_observed_head\nPASS  TestReviewHygiene::test_self_review_is_rejected\nPASS  TestReviewHygiene::test_substrate_must_match_observed_delivery\nPASS  TestSlashDirection::test_slash_does_not_raise_routing_score\nPASS  TestSlashDirection::test_slash_hurts_a_high_scorer_observably\nPASS  TestSlashDirection::test_slash_is_composable\nPASS  TestSlashDirection::test_slash_is_not_merely_decay\nPASS  TestSlashDirection::test_slash_keeps_posterior_valid\nPASS  TestSlashDirection::test_slash_never_raises_a_low_scorer\nPASS  TestStreamOwnership::test_announced_stream_id_must_match_a_real_chain\nPASS  TestStreamOwnership::test_cannot_claim_another_agents_stream\nPASS  TestStreamOwnership::test_cannot_poison_another_agents_stream\nPASS  TestStreamOwnership::test_head_cannot_go_backwards\nPASS  TestStreamOwnership::test_transplanted_reputation_is_not_inherited\nPASS  TestSybilBounded::test_anonymous_sybil_gain_is_sublinear[0]\nPASS  TestSybilBounded::test_anonymous_sybil_gain_is_sublinear[1]\nPASS  TestWilcoxonNormalApprox::test_all_tied_magnitudes_is_not_falsely_significant\nPASS  TestWilcoxonNormalApprox::test_matches_sign_test_when_all_magnitudes_tie\nPASS  TestWilcoxonNormalApprox::test_no_ties_branch_unaffected\n\ntests/test_audit_findings.py: 33/33 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_blayer.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 13.2,
+  "stdout": "############ tests/test_blayer.py\nPASS  test_all_six_scenarios_pass\nPASS  test_arm_label_is_not_value_equality\nPASS  test_deterministic_same_seed_same_result\nPASS  test_eight_ratios_and_both_arms\nPASS  test_ledger_and_cells_agree_cell_by_cell\nPASS  test_ledger_is_written_while_running_not_after\nPASS  test_mechanism_removed_numbers_must_change\nPASS  test_output_artifacts_written\nPASS  test_pack_check_passes_and_absences_have_real_reasons\n\ntests/test_blayer.py: 9/9 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_brains_auth.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_brains_auth.py\nPASS  test_lmstudio_openai_path_forwards_api_key\nPASS  test_openai_brain_passes_api_key_as_authorization\n\ntests/test_brains_auth.py: 2/2 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_channels.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 5.5,
+  "stdout": "############ tests/test_channels.py\nPASS  TestBackwardCompatible::test_existing_review_signature_still_verifies\nPASS  TestBackwardCompatible::test_old_three_part_keys_still_load\nPASS  TestBackwardCompatible::test_three_arg_calls_land_in_the_same_cell\nPASS  TestBackwardCompatible::test_wire_format_unchanged_when_family_default\nPASS  TestFamilyIsObserved::test_reviewer_cannot_invent_a_family\nPASS  TestFamilyIsObserved::test_slash_hits_every_family\nPASS  TestFamilyIsObserved::test_standing_aggregates_across_families\nPASS  TestFamilyIsObserved::test_unlabelled_delivery_is_the_general_channel_not_a_free_slot\nPASS  TestSealCorrelation::test_cascade_masks_real_same_source\nPASS  TestSealCorrelation::test_degenerate_endpoint_reports_none_not_a_number\nPASS  TestSealCorrelation::test_informative_filter_is_load_bearing\nPASS  TestSealCorrelation::test_open_panel_manufactures_correlation_with_zero_same_source\nPASS  TestSealCorrelation::test_sealed_arm_is_invariant_to_herding\nPASS  TestSealedPanel::test_cannot_change_commitment\nPASS  TestSealedPanel::test_open_panel_hides_votes\nPASS  TestSealedPanel::test_reveal_before_close_rejected\nPASS  TestSealedPanel::test_reveal_mismatch_rejected\nPASS  TestSealedPanel::test_reveal_without_commit_rejected\nPASS  TestSealedPanel::test_sealed_off_is_bit_identical_path\nPASS  TestSealedPanel::test_short_nonce_refused\nPASS  TestSealedPanel::test_state_survives_restart\nPASS  TestSealedPanel::test_unused_channel_features_leave_state_bit_identical\nPASS  TestSpecialtyRouting::test_evidence_per_cell_is_diluted\nPASS  TestSpecialtyRouting::test_expert_rate_up_and_quality_not_worse\nPASS  TestSpecialtyRouting::test_null_control_no_gain_without_real_specialisation\n\ntests/test_channels.py: 25/25 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_checkpoint.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 6.1,
+  "stdout": "############ tests/test_checkpoint.py\nPASS  test_checkpoint_chain_break_detected\nPASS  test_checkpoint_upgrades_trust_card_and_survives_wipe\nPASS  test_delegate_never_issues_checkpoint_in_sync_path\nPASS  test_issue_and_verify_offline\nPASS  test_tampered_episode_in_window_fails\n\ntests/test_checkpoint.py: 5/5 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_checks.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 4.1,
+  "stdout": "############ tests/test_checks.py\nPASS  test_contains_ignore_case\nPASS  test_equals_normalizes\nPASS  test_extract_code\nPASS  test_json_schema_min_length_without_optional_dependency\nPASS  test_json_schema_pass_fail\nPASS  test_regex\nPASS  test_run_python_capture_returns_probe_stdout_and_keeps_candidate_sandboxed\nPASS  test_run_python_check_blocks_generator_frame_builtins_escape\nPASS  test_run_python_check_can_explicitly_allow_builtin_named_entrypoint\nPASS  test_run_python_check_candidate_cannot_override_verifier_builtin\nPASS  test_run_python_check_candidate_stdout_cannot_forge_protocol\nPASS  test_run_python_check_default_timeout_is_8\nPASS  test_run_python_check_fail_syntax_error\nPASS  test_run_python_check_fail_wrong_answer\nPASS  test_run_python_check_imports_are_opt_in\nPASS  test_run_python_check_pass\nPASS  test_run_python_check_preserves_candidate_exception_type\nPASS  test_run_python_check_preserves_common_argument_mutations\nPASS  test_run_python_check_rejects_builtins_alias_bypass\nPASS  test_run_python_check_rejects_candidate_file_read_used_to_probe_hidden_tests\nPASS  test_run_python_check_rejects_custom_repr_forgery\nPASS  test_run_python_check_rejects_exit_zero_bypass\nPASS  test_run_python_check_timeout_returns_false_and_does_not_hang\nPASS  test_run_python_check_transports_nonfinite_floats_and_counter\nPASS  test_run_python_fail_wrong_answer\nPASS  test_run_python_pass_fenced\nPASS  test_run_python_syntax_error_is_false\nPASS  test_run_python_timeout\nPASS  test_unknown_type_raises\n\ntests/test_checks.py: 29/29 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_citation_archive.py",
+  "rc": 1,
+  "timeout": false,
+  "secs": 0.0,
+  "stdout": "############ tests/test_citation_archive.py\nFAIL  test_fulltext_hashes_are_recorded\nPASS  test_fulltext_true_means_the_file_is_actually_there\nFAIL  test_manifest_covers_every_indexed_source\nPASS  test_no_fulltext_entries_explain_themselves\nFAIL  test_verified_quotes_point_at_files_we_hold\n\ntests/test_citation_archive.py: 2/5 pass, 3 fail, 0 error, 0 skip => FAIL\n",
+  "stderr": "Traceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/tests/test_citation_archive.py\", line 104, in test_fulltext_hashes_are_recorded\n    man = json.load((BACKUP / \"MANIFEST.json\").open())\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1015, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/home/user1/Library/Mobile Documents/com~apple~CloudDocs/專題/參考文獻/_引用備份/MANIFEST.json'\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/tests/test_citation_archive.py\", line 91, in test_manifest_covers_every_indexed_source\n    man = json.load((BACKUP / \"MANIFEST.json\").open())\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1015, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/home/user1/Library/Mobile Documents/com~apple~CloudDocs/專題/參考文獻/_引用備份/MANIFEST.json'\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/tests/test_citation_archive.py\", line 118, in test_verified_quotes_point_at_files_we_hold\n    rows = [json.loads(l) for l in (BACKUP / \"verification.jsonl\").open() if l.strip()]\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1015, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/home/user1/Library/Mobile Documents/com~apple~CloudDocs/專題/參考文獻/_引用備份/verification.jsonl'\n"
+ },
+ {
+  "module": "tests/test_cli_eco.py",
+  "rc": 1,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_cli_eco.py\nERROR test_demo_roster_cannot_contaminate_product_root: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nFAIL  test_help_does_not_crash[0]\nFAIL  test_help_does_not_crash[1]\nFAIL  test_help_does_not_crash[2]\nFAIL  test_help_does_not_crash[3]\nFAIL  test_help_does_not_crash[4]\nFAIL  test_help_does_not_crash[5]\nFAIL  test_help_does_not_crash[6]\nFAIL  test_help_does_not_crash[7]\nERROR test_ledger_tail: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_ledger_tail_empty: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nPASS  test_lmstudio_brain_from_env\nERROR test_offline_brain_fallback: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_resident_inspect: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_resident_wipe: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_scoreboard: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_status: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_toggle_writes_state: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_up_demo_roster_is_explicit: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_up_no_dashboard: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_verify: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_verify_unknown_resident: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\n\ntests/test_cli_eco.py: 1/22 pass, 8 fail, 13 error, 0 skip => FAIL\n",
+  "stderr": "usage: vacant [-h] [--root ROOT]\n              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}\n              ...\nvacant: error: argument cmd: invalid choice: 'u' (choose from 'init', 'info', 'call', 'demo', 'selftest', 'run', 'bench', 'audit', 'verify-att', 'trace', 'record', 'up', 'toggle', 'status', 'scoreboard', 'resident', 'verify', 'ledger')\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 247, in <lambda>\n    (lambda c=call, kw=kw: lambda *a: c(*a, **kw))(), rest))\n                                      ^^^^^^^^^^^\n  File \"/home/user1/vacant/Vacant/tests/test_cli_eco.py\", line 167, in test_help_does_not_crash\n    assert ei.value.code == 0\n           ^^^^^^^^^^^^^^^^^^\nAssertionError\nusage: vacant [-h] [--root ROOT]\n              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}\n              ...\nvacant: error: argument cmd: invalid choice: 't' (choose from 'init', 'info', 'call', 'demo', 'selftest', 'run', 'bench', 'audit', 'verify-att', 'trace', 'record', 'up', 'toggle', 'status', 'scoreboard', 'resident', 'verify', 'ledger')\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 247, in <lambda>\n    (lambda c=call, kw=kw: lambda *a: c(*a, **kw))(), rest))\n                                      ^^^^^^^^^^^\n  File \"/home/user1/vacant/Vacant/tests/test_cli_eco.py\", line 167, in test_help_does_not_crash\n    assert ei.value.code == 0\n           ^^^^^^^^^^^^^^^^^^\nAssertionError\nusage: vacant [-h] [--root ROOT]\n              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}\n              ...\nvacant: error: argument cmd: invalid choice: 's' (choose from 'init', 'info', 'call', 'demo', 'selftest', 'run', 'bench', 'audit', 'verify-att', 'trace', 'record', 'up', 'toggle', 'status', 'scoreboard', 'resident', 'verify', 'ledger')\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 247, in <lambda>\n    (lambda c=call, kw=kw: lambda *a: c(*a, **kw))(), rest))\n                                      ^^^^^^^^^^^\n  File \"/home/user1/vacant/Vacant/tests/test_cli_eco.py\", line 167, in test_help_does_not_crash\n    assert ei.value.code == 0\n           ^^^^^^^^^^^^^^^^^^\nAssertionError\nusage: vacant [-h] [--root ROOT]\n              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}\n              ...\nvacant: error: argument cmd: invalid choice: 's' (choose from 'init', 'info', 'call', 'demo', 'selftest', 'run', 'bench', 'audit', 'verify-att', 'trace', 'record', 'up', 'toggle', 'status', 'scoreboard', 'resident', 'verify', 'ledger')\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 247, in <lambda>\n    (lambda c=call, kw=kw: lambda *a: c(*a, **kw))(), rest))\n                                      ^^^^^^^^^^^\n  File \"/home/user1/vacant/Vacant/tests/test_cli_eco.py\", line 167, in test_help_does_not_crash\n    assert ei.value.code == 0\n           ^^^^^^^^^^^^^^^^^^\nAssertionError\nusage: vacant [-h] [--root ROOT]\n              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}\n              ...\nvacant: error: argument cmd: invalid choice: 'r' (choose from 'init', 'info', 'call', 'demo', 'selftest', 'run', 'bench', 'audit', 'verify-att', 'trace', 'record', 'up', 'toggle', 'status', 'scoreboard', 'resident', 'verify', 'ledger')\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 247, in <lambda>\n    (lambda c=call, kw=kw: lambda *a: c(*a, **kw))(), rest))\n                                      ^^^^^^^^^^^\n  File \"/home/user1/vacant/Vacant/tests/test_cli_eco.py\", line 167, in test_help_does_not_crash\n    assert ei.value.code == 0\n           ^^^^^^^^^^^^^^^^^^\nAssertionError\nusage: vacant [-h] [--root ROOT]\n              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}\n              ...\nvacant: error: argument cmd: invalid choice: 'r' (choose from 'init', 'info', 'call', 'demo', 'selftest', 'run', 'bench', 'audit', 'verify-att', 'trace', 'record', 'up', 'toggle', 'status', 'scoreboard', 'resident', 'verify', 'ledger')\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 247, in <lambda>\n    (lambda c=call, kw=kw: lambda *a: c(*a, **kw))(), rest))\n                                      ^^^^^^^^^^^\n  File \"/home/user1/vacant/Vacant/tests/test_cli_eco.py\", line 167, in test_help_does_not_crash\n    assert ei.value.code == 0\n           ^^^^^^^^^^^^^^^^^^\nAssertionError\nusage: vacant [-h] [--root ROOT]\n              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}\n              ...\nvacant: error: argument cmd: invalid choice: 'l' (choose from 'init', 'info', 'call', 'demo', 'selftest', 'run', 'bench', 'audit', 'verify-att', 'trace', 'record', 'up', 'toggle', 'status', 'scoreboard', 'resident', 'verify', 'ledger')\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 247, in <lambda>\n    (lambda c=call, kw=kw: lambda *a: c(*a, **kw))(), rest))\n                                      ^^^^^^^^^^^\n  File \"/home/user1/vacant/Vacant/tests/test_cli_eco.py\", line 167, in test_help_does_not_crash\n    assert ei.value.code == 0\n           ^^^^^^^^^^^^^^^^^^\nAssertionError\nusage: vacant [-h] [--root ROOT]\n              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}\n              ...\nvacant: error: argument cmd: invalid choice: 'v' (choose from 'init', 'info', 'call', 'demo', 'selftest', 'run', 'bench', 'audit', 'verify-att', 'trace', 'record', 'up', 'toggle', 'status', 'scoreboard', 'resident', 'verify', 'ledger')\nTraceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 295, in run_module\n    fn(*args)\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 247, in <lambda>\n    (lambda c=call, kw=kw: lambda *a: c(*a, **kw))(), rest))\n                                      ^^^^^^^^^^^\n  File \"/home/user1/vacant/Vacant/tests/test_cli_eco.py\", line 167, in test_help_does_not_crash\n    assert ei.value.code == 0\n           ^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+ },
+ {
+  "module": "tests/test_cli_run.py",
+  "rc": 1,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_cli_run.py\nERROR test_cli_run_bad_delivery_cannot_create_agent_marker: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_cli_run_json_without_agent: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_cli_run_launches_custom_agent_only_after_gate: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\nERROR test_cli_run_without_real_model_fails_closed: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\n\ntests/test_cli_run.py: 0/4 pass, 0 fail, 4 error, 0 skip => UNSUPPORTED\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_codebench.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 10.0,
+  "stdout": "############ tests/test_codebench.py\nPASS  test_bad_code_fails_hidden_for_every_family_multiple_variants\nPASS  test_builtin_loader_is_a_task_loader\nPASS  test_code_cases_shape\nPASS  test_different_seed_gives_different_task_ids\nPASS  test_evalplus_loader_fail_closed_without_pack\nPASS  test_every_problem_has_a_passing_reference_and_rejects_garbage\nPASS  test_families_rotate_round_robin\nPASS  test_freeze_subset_excludes_by_task_id_and_family\nPASS  test_freeze_subset_respects_n_and_is_reproducible\nPASS  test_good_code_passes_visible_and_hidden_for_every_family_multiple_variants\nPASS  test_pilot_tasks_reproducible_given_same_seed\nPASS  test_sandbox_timeout_on_generated_task_does_not_hang\nPASS  test_task_loader_is_abstract\nPASS  test_task_shape_has_required_keys\n\ntests/test_codebench.py: 14/14 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_composer.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_composer.py\nPASS  test_vacant_cannot_invent_when_impossible\nPASS  test_vacant_never_worse_when_solvable\nPASS  test_verifyfix_beats_plain\n\ntests/test_composer.py: 3/3 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_controller.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 5.3,
+  "stdout": "############ tests/test_controller.py\nPASS  test_agent_does_not_inherit_vacant_api_keys\nPASS  test_agent_receives_only_verified_code_projection\nPASS  test_agent_receives_only_verified_json_projection\nPASS  test_agent_timeout_reports_possible_workspace_side_effects\nPASS  test_argv_template_rejects_bypass_shapes[0]\nPASS  test_argv_template_rejects_bypass_shapes[1]\nPASS  test_argv_template_rejects_bypass_shapes[2]\nPASS  test_argv_template_rejects_bypass_shapes[3]\nPASS  test_argv_template_rejects_bypass_shapes[4]\nPASS  test_argv_template_rejects_bypass_shapes[5]\nPASS  test_argv_template_rejects_bypass_shapes[6]\nPASS  test_argv_template_rejects_bypass_shapes[7]\nPASS  test_argv_template_rejects_bypass_shapes[8]\nPASS  test_argv_template_rejects_bypass_shapes[9]\nPASS  test_bad_delivery_never_reaches_runner\nPASS  test_controller_happy_path_and_event_order\nPASS  test_current_chain_must_still_match_receipt\nPASS  test_default_runner_does_not_wait_for_descendant_stdout_eof\nPASS  test_delegate_exception_never_reaches_runner\nPASS  test_evidence_write_failure_never_reaches_runner\nPASS  test_from_endpoint_uses_product_roster_only\nPASS  test_hermes_adapter_receives_verified_delivery\nPASS  test_hostile_answer_stays_one_argv_element\nPASS  test_nonzero_agent_exit_preserves_receipt_and_raises\nPASS  test_post_spawn_evidence_failure_reports_agent_already_ran\nPASS  test_product_controller_rechecks_root_isolation_on_refresh\nPASS  test_reviewers_must_be_independently_anchored_in_registry\nPASS  test_stale_controller_reloads_inside_cross_process_lock\nPASS  test_tampered_receipt_never_reaches_runner\nPASS  test_transient_delegate_error_uses_remaining_attempt\nPASS  test_trust_off_rejected_before_delegate_or_runner\nPASS  test_weak_check_cannot_authorize_agent_launch\n\ntests/test_controller.py: 32/32 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_credit_memory.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_credit_memory.py\nPASS  test_bad_signature_rejected\nPASS  test_branch_tamper_detected\nPASS  test_credit_follows_stream_not_body\nPASS  test_duplicate_review_rejected\nPASS  test_gateway_review_is_signed_and_recorded\nPASS  test_old_wire_format_rejected\nPASS  test_reputation_json_roundtrip_triple_key\nPASS  test_review_from_json_validates\nPASS  test_review_sig_covers_stream_head_task\nPASS  test_review_sig_verifies_and_binds_reviewer\nPASS  test_roundtrip_save_load_verifies\nPASS  test_same_source_nonlinear_downweight\nPASS  test_signature_covers_stream_and_branch\nPASS  test_stale_head_rejected\nPASS  test_stream_id_is_genesis_hash_and_head_advances\nPASS  test_unannounced_reviewer_rejected\nPASS  test_weight_is_endogenous_new_reviewer_near_zero\n\ntests/test_credit_memory.py: 17/17 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_dashboard.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 4.5,
+  "stdout": "############ tests/test_dashboard.py\nPASS  test_claim_ladder_never_defaults_to_met\nPASS  test_cost_reports_per_pass_not_just_totals\nPASS  test_index_and_json_api\nPASS  test_missing_ledger_is_tolerated\nPASS  test_snapshot_empty_ledger\nPASS  test_snapshot_head_recompute_consistent\nPASS  test_snapshot_shape_and_ledger_seq\nPASS  test_sse_replays_existing_events\nPASS  test_state_endpoint_returns_full_panorama\nPASS  test_state_uses_injected_providers\nPASS  test_static_assets_and_no_path_traversal\nPASS  test_task_endpoint_serves_the_trust_card_itself\n\ntests/test_dashboard.py: 12/12 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_ecosystem.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 9.6,
+  "stdout": "############ tests/test_ecosystem.py\n生態就緒：root=/dev/shm/nopytest-j9pv41ko  trust=on  居民=3\ndashboard → http://127.0.0.1:0   (Ctrl-C 退出)\nPASS  test_cli_up_dashboard_wiring\nPASS  test_corrupt_registry_state_refuses_to_reset_history\nPASS  test_corrupt_trust_state_fails_closed\nPASS  test_episode_and_deliver_on_chain\nPASS  test_ledger_is_replayable\nPASS  test_m2_lesson_written_and_injected\nPASS  test_non_boolean_trust_state_fails_closed[0]\nPASS  test_non_boolean_trust_state_fails_closed[1]\nPASS  test_non_boolean_trust_state_fails_closed[2]\nPASS  test_non_boolean_trust_state_fails_closed[3]\nPASS  test_off_mode_does_not_burn_probation\nPASS  test_probation_forces_audit\nPASS  test_report_rejects_unknown_task\nPASS  test_state_persists_across_restart\nPASS  test_trust_card_full_sig_verifies\nPASS  test_trust_off_no_review_no_audit\nPASS  test_trust_on_full_loop\nPASS  test_wipe_resets_credit_keeps_key\n\ntests/test_ecosystem.py: 18/18 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": "offline brain：未設 VACANT_MCP_MODEL/VACANT_MCP_BASE，改用內建確定性假腦（只驗信任機制，非腦力）\n"
+ },
+ {
+  "module": "tests/test_entrycost.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 2.8,
+  "stdout": "############ tests/test_entrycost.py\nPASS  test_endorse_liability_damages_honest_endorsers\nPASS  test_full_audit_blocks_every_defection\nPASS  test_probation_forced_audit_blocks_whitewash\nPASS  test_reviewer_accuracy_is_load_bearing\nPASS  test_reviewer_correlation_does_not_help_the_defender\nPASS  test_roi_is_none_when_cost_is_zero\nPASS  test_selective_attacker_concentrates_on_high_value\nPASS  test_simulation_is_deterministic\nPASS  test_task_value_decorrelates_across_seeds\n\ntests/test_entrycost.py: 9/9 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_environment.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_environment.py\nPASS  test_calibration_refuses_degenerate_endpoints\nPASS  test_channel_without_reason_is_refused\nPASS  test_consult_reply_may_not_carry_a_verdict\nPASS  test_consulted_agent_may_not_review_the_same_task\nPASS  test_decline_reason_must_be_a_structural_code\nPASS  test_every_channel_answers_the_question\nPASS  test_human_flag_carries_no_verdict\nPASS  test_naive_calibration_is_gamed_by_over_declining\nPASS  test_only_human_writes_intervention\nPASS  test_peer_cannot_read_declination\nPASS  test_peer_cannot_read_reputation_before_closed\nPASS  test_phase_cannot_go_backwards\nPASS  test_rejected_channels_are_not_postable\nPASS  test_reveal_detects_after_the_fact_editing\nPASS  test_review_is_invisible_until_reveal\n\ntests/test_environment.py: 15/15 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_equal_budget_rules_r446.py",
+  "rc": 1,
+  "timeout": false,
+  "secs": 0.0,
+  "stdout": "############ tests/test_equal_budget_rules_r446.py\n\ntests/test_equal_budget_rules_r446.py: IMPORT_ERROR\n",
+  "stderr": "Traceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 271, in run_module\n    T = importlib.import_module(mod_name)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\nAttributeError: module 'pytest' has no attribute 'importorskip'\n"
+ },
+ {
+  "module": "tests/test_evalplus_loader.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.6,
+  "stdout": "############ tests/test_evalplus_loader.py\nPASS  test_bad_json_rejected\nPASS  test_check_code_actually_verifies\nPASS  test_deterministic_order_per_seed\nPASS  test_duplicate_ids_rejected\nPASS  test_empty_dict_plus_input_means_no_cases\nPASS  test_environment_override_keeps_official_sha_pin\nPASS  test_float_tolerance_treats_matching_infinities_as_equal\nPASS  test_gain_mode_exposes_input_contract_but_not_ground_truth\nPASS  test_gzip_pack_supported\nPASS  test_loads_and_yields_tasks\nPASS  test_mbpp_json_inputs_restore_official_runtime_types\nPASS  test_missing_field_rejected\nPASS  test_missing_file_rejected\nPASS  test_multiline_contract_dedents_to_valid_standalone_code\nPASS  test_none_sha_rejected_on_nondefault_path\nPASS  test_official_pack_gate\nPASS  test_official_set_equivalence_ignores_unordered_tuple_order\nPASS  test_public_view_has_no_gt\nPASS  test_regex_match_outputs_compare_by_predicate_truth_value\nPASS  test_sha_mismatch_rejected\nPASS  test_wrong_count_rejected\nPASS  test_wrong_type_rejected\n\ntests/test_evalplus_loader.py: 22/22 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_gain_conform_arm.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 9.4,
+  "stdout": "############ tests/test_gain_conform_arm.py\nPASS  test_budget_never_exceeds_k\nPASS  test_early_stop_on_first_conforming_draft\nPASS  test_receipt_chain_detects_tampering\nPASS  test_receipt_names_which_acceptance_test_each_worker_stalled_on\nPASS  test_receipt_reports_which_visible_test_failed\nPASS  test_receipt_separates_load_failure_from_test_failure\nPASS  test_receipt_stays_quiet_when_the_draft_conforms\nPASS  test_refuses_when_no_draft_conforms\nPASS  test_skips_non_conforming_and_names_who_failed\n\ntests/test_gain_conform_arm.py: 9/9 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_gain_eq5_arm.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 13.0,
+  "stdout": "############ tests/test_gain_eq5_arm.py\nPASS  test_budget_is_always_k_even_when_first_draft_conforms\nPASS  test_gate_selection_is_identical_to_arm_conform\nPASS  test_receipt_chain_verifies_and_names_every_attempt\nPASS  test_refuses_when_no_draft_conforms_but_vote_still_ships\nPASS  test_two_rules_can_disagree_on_the_same_candidates\nPASS  test_vote_selection_is_identical_to_arm_off5\n\ntests/test_gain_eq5_arm.py: 6/6 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_gain_receipt_persistence.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_gain_receipt_persistence.py\nPASS  test_dropped_entry_fails_verification\nPASS  test_saves_chain_and_pubkey_and_verifies\nPASS  test_tampered_payload_fails_verification\nPASS  test_wrong_pubkey_fails_verification\n\ntests/test_gain_receipt_persistence.py: 4/4 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_gain_runner.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 5.6,
+  "stdout": "############ tests/test_gain_runner.py\nPASS  test_404_is_retried_because_the_relay_swaps_nodes\nPASS  test_behavior_signature_groups_equivalent_source_variants\nPASS  test_behavior_signature_infra_failure_is_infra_void\nPASS  test_behavior_signature_runs_candidate_in_restricted_worker\n  [CALIBRATION 1/1] 完成 2 個 agent\nPASS  test_calibration_measures_but_does_not_route\nPASS  test_calibration_preflight_rejects_void_or_homogeneous_pool\nPASS  test_dead_model_kills_exactly_half_the_pool_deterministically\nPASS  test_empty_content_is_infra_void_not_a_wrong_answer\nPASS  test_hidden_reputation_updates_only_from_sampled_audit\nPASS  test_key_slots_select_existing_secrets_without_copying\nPASS  test_latency_summary_keeps_failures_and_role_tails\nPASS  test_local_endpoint_needs_no_key_but_official_one_still_does\nPASS  test_majority_approved_initial_cannot_be_harmed_by_fifth_call\nPASS  test_model_id_alternates_on_404_and_lands_the_one_actually_sent\nPASS  test_off5_behavior_vote_beats_a_literal_duplicate_majority\nPASS  test_off5_votes_on_behavior_not_source_text\nPASS  test_on_uses_three_reviews_and_revision_for_equal_five_call_budget\nPASS  test_public_failure_overrides_incorrect_peer_approval\nPASS  test_relay_200_with_error_body_is_retried_not_scored\nPASS  test_resource_exclusion_set_is_pinned_and_narrow\nPASS  test_review_claim_is_literal_only_and_counterexample_is_executed\nPASS  test_review_counterexample_must_satisfy_public_input_contract\nPASS  test_reviewer_prompt_example_test_args_length_matches_stated_arity\nPASS  test_reviewers_get_bounded_deadline_policy\nPASS  test_run_complete_is_false_when_an_arm_measured_nothing\nPASS  test_run_terminal_stays_true_when_a_run_has_voids\nPASS  test_server_reported_model_is_captured_on_every_success\nPASS  test_two_executed_counterexamples_can_trigger_revision\nPASS  test_unfounded_fail_reviews_cannot_trigger_rewrite\nPASS  test_verifier_infrastructure_failure_is_not_scored_as_wrong\n\ntests/test_gain_runner.py: 30/30 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_gateway.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.3,
+  "stdout": "############ tests/test_gateway.py\nPASS  test_caller_body_persisted_even_when_ingress_fails\nPASS  test_full_call_loop_correct\nPASS  test_ingress_gate_is_substrate_specific\nPASS  test_ingress_rejects_impersonation\nPASS  test_ingress_rejects_low_reputation_caller\nPASS  test_ingress_rejects_replay\nPASS  test_ingress_rejects_unknown_sender\nPASS  test_ingress_rejects_wrong_recipient\nPASS  test_registry_rejects_forged_identity_binding\nPASS  test_reputation_routing_prefers_proven_expert\nPASS  test_self_call_rejected\n\ntests/test_gateway.py: 11/11 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_hardening.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_hardening.py\nPASS  test_atomic_write_bytes\nPASS  test_atomic_write_roundtrip_no_tmp_left\nPASS  test_envelope_from_json_accepts_good\nPASS  test_envelope_from_json_rejects_malformed\nPASS  test_file_lock_acquire_release\nPASS  test_logbook_atomic_save_still_verifies\nPASS  test_logbook_payload_cap\nPASS  test_private_key_passphrase_encryption\nPASS  test_replay_guard_persists_across_restart\nPASS  test_vacant_solve_survives_crashing_brain\n\ntests/test_hardening.py: 10/10 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_lcb_bank_v2.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.4,
+  "stdout": "############ tests/test_lcb_bank_v2.py\nPASS  test_default_loader_still_v1\nPASS  test_env_path_alone_cannot_smuggle_v2_under_v1_pins\nPASS  test_tampered_v2_rejected\nPASS  test_truncated_v2_rejected_on_count\nPASS  test_unknown_version_rejected\nPASS  test_v1_pins_are_literally_unchanged\nPASS  test_v2_arity_matches_signature_for_every_task\nPASS  test_v2_entry_point_matches_prompt_signature\nPASS  test_v2_hidden_check_embeds_every_visible_case\nPASS  test_v2_is_superset_of_v1_and_reuses_v1_records_verbatim\nPASS  test_v2_probe_coverage_at_least_twelve\nPASS  test_v2_registered_and_pinned\nPASS  test_v2_selectable_by_env\n\ntests/test_lcb_bank_v2.py: 13/13 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_mcp_v2.py",
+  "rc": 1,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_mcp_v2.py\n\ntests/test_mcp_v2.py: IMPORT_ERROR\n",
+  "stderr": "Traceback (most recent call last):\n  File \"/home/user1/vacant/Vacant/ops/run_tests_nopytest.py\", line 271, in run_module\n    T = importlib.import_module(mod_name)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\nModuleNotFoundError: No module named 'mcp'\n"
+ },
+ {
+  "module": "tests/test_multiway.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 14.4,
+  "stdout": "############ tests/test_multiway.py\nPASS  test_architecture_manufactures_co_blindness\nPASS  test_blindspot_is_not_reachable_by_channel_separation\nPASS  test_channel_strength_zero_equals_multiway\nPASS  test_cherrypicker_is_not_caught_by_calibration\nPASS  test_declination_costs_coverage\nPASS  test_intervention_budget_is_hard\nPASS  test_matches_independent_theory_when_channels_are_closed\nPASS  test_midcourse_halt_blocks_before_acceptance\nPASS  test_rows_land_on_disk\nPASS  test_sealing_alone_does_not_change_the_marginal_much\nPASS  test_simulation_is_deterministic\n\ntests/test_multiway.py: 11/11 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_packaging.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.0,
+  "stdout": "############ tests/test_packaging.py\nPASS  test_runtime_dependencies_cover_imported_mcp_sdk\n\ntests/test_packaging.py: 1/1 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_primitives.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_primitives.py\nPASS  test_channel_guard_send_side_chains\nPASS  test_envelope_impersonation_rejected\nPASS  test_envelope_replay_and_reorder_rejected\nPASS  test_logbook_roundtrip\nPASS  test_logbook_seq_monotonic_not_stuck_at_one\nPASS  test_logbook_tamper_detected\nPASS  test_logbook_wrong_signer_detected\nPASS  test_reputation_good_beats_bad\nPASS  test_same_signal_discount_raises_cost\nPASS  test_sign_verify_and_tamper\nPASS  test_ucb_gives_newcomers_exploration\nPASS  test_vacant_id_deterministic_and_multibase\n\ntests/test_primitives.py: 12/12 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_pulse.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 16.6,
+  "stdout": "############ tests/test_pulse.py\nPASS  test_blindspot_is_monotone_in_hits\nPASS  test_blindspot_one_means_never_caught\nPASS  test_blindspot_zero_keeps_audit_oracle\nPASS  test_burst_instrumentation_shape\nPASS  test_defect_budget_actually_binds[0]\nPASS  test_defect_budget_actually_binds[1]\nPASS  test_defect_budget_actually_binds[2]\nPASS  test_defect_budget_caps_total_defections[0]\nPASS  test_defect_budget_caps_total_defections[1]\nPASS  test_defect_budget_caps_total_defections[2]\nPASS  test_existing_strategies_reproduce_pre_change_numbers[0]\nPASS  test_existing_strategies_reproduce_pre_change_numbers[1]\nPASS  test_existing_strategies_reproduce_pre_change_numbers[2]\nPASS  test_pulse_burst_bounds_consecutive_defections\nPASS  test_pulse_is_deterministic\nPASS  test_pulse_with_zero_recover_is_continuous\nPASS  test_selective_downgrade_counts_as_recovery_not_burst\n\ntests/test_pulse.py: 17/17 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_receipt.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 2.7,
+  "stdout": "############ tests/test_receipt.py\nPASS  test_receipt_rejects_every_binding_tamper[0]\nPASS  test_receipt_rejects_every_binding_tamper[1]\nPASS  test_receipt_rejects_every_binding_tamper[2]\nPASS  test_receipt_rejects_every_binding_tamper[3]\nPASS  test_receipt_rejects_every_binding_tamper[4]\nPASS  test_receipt_rejects_every_binding_tamper[5]\nPASS  test_receipt_rejects_every_binding_tamper[6]\nPASS  test_receipt_rejects_every_binding_tamper[7]\nPASS  test_receipt_roundtrip_is_task_and_answer_bound\nPASS  test_receipt_schema_is_strict\nPASS  test_request_id_cannot_be_reissued\n\ntests/test_receipt.py: 11/11 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_record.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.4,
+  "stdout": "############ tests/test_record.py\nPASS  test_card_present_without_card_verify_flagged\nPASS  test_card_verify_fail_flagged\nPASS  test_chain_verify_fail_flagged\nPASS  test_cli_check_missing_dir_exit_nonzero\n已打包證據包：/dev/shm/nopytest-v79rqz1p/r\n  repo_commit : unknown\n  python/os   : 3.12.3 / Linux-6.8.0-137-generic-x86_64-with-glibc2.39\n  pip_freeze  : 0 筆\n  missing     : endpoint, model_id, no_think, pip_freeze, repo_commit, repo_dirty, scripts, seeds, trust_arm, utc_start\n（誠實邊界：pack 只保證包完整自洽，內容真實性由簽章鏈與稽核承擔）\n✓ PASS：/dev/shm/nopytest-v79rqz1p/r 符合 RECORD_SPEC（必要項齊、雜湊自洽、驗證輸出無 FAIL）\nPASS  test_cli_pack_and_check_exit_codes\nPASS  test_dirty_worktree_is_declared_not_silently_attributed\nPASS  test_empty_run_dir_pack_skeleton\nPASS  test_missing_manifest_named\nPASS  test_optional_missing_without_reason_flagged\nPASS  test_pack_excludes_private_key\nPASS  test_pack_then_check_pass\nPASS  test_private_key_in_sums_flagged\nPASS  test_tamper_file_detected_by_sums\nPASS  test_undeclared_private_key_flagged\n\ntests/test_record.py: 14/14 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": "✗ FAIL：/dev/shm/nopytest-yj2akq7c/nope 未過 RECORD_SPEC（記錄層 infra_void，不得進統計）\n  · run 目錄不存在：/dev/shm/nopytest-yj2akq7c/nope\n✗ FAIL：/dev/shm/nopytest-v79rqz1p/r 未過 RECORD_SPEC（記錄層 infra_void，不得進統計）\n  · SHA256SUMS 不符：ledger_events.jsonl（落盤後被竄改或內容變動）\n"
+ },
+ {
+  "module": "tests/test_research.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 2.6,
+  "stdout": "############ tests/test_research.py\nPASS  TestHolmBonferroni::test_empty_and_invalid\nPASS  TestHolmBonferroni::test_single_and_monotone_cap\nPASS  TestHolmBonferroni::test_stepdown_running_max\nPASS  TestHolmBonferroni::test_three_hypotheses_hand_computed\nPASS  TestMcNemarPower::test_half_discordance_exact_value\nPASS  TestMcNemarPower::test_n5_always_pass_never_rejects\nPASS  TestMcNemarPower::test_n6_perfect_direction_always_rejects\nPASS  TestMcNemarPower::test_n_required_hand_computed\nPASS  TestMcNemarPower::test_null_size_bounded_by_alpha\nPASS  TestMcNemarPower::test_x1_magnitude_replicates_power_table\nPASS  TestTostEquivBoot::test_invalid_inputs\nPASS  TestTostEquivBoot::test_large_diffs_not_equivalent\nPASS  TestTostEquivBoot::test_small_noise_equivalent\nPASS  TestTostEquivBoot::test_zero_diffs_equivalent\nPASS  TestWilcoxonExact::test_all_positive_n3\nPASS  TestWilcoxonExact::test_all_zero_raises\nPASS  TestWilcoxonExact::test_mixed_signs\nPASS  TestWilcoxonExact::test_ties_midrank\nPASS  TestWilcoxonExact::test_zeros_dropped_and_symmetric_cancel\nPASS  test_arm_accuracy_ladder\nPASS  test_equal_compute_calls\nPASS  test_h0_decomposition\nPASS  test_h1_discordance_and_mcnemar\nPASS  test_h3_honest_accountability\n\ntests/test_research.py: 24/24 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_revive.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_revive.py\nPASS  test_revive_brings_back_learned_skill\nPASS  test_revive_preserves_logbook_chain\n\ntests/test_revive.py: 2/2 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_slash_tradeoff.py",
+  "rc": 1,
+  "timeout": false,
+  "secs": 4.3,
+  "stdout": "############ tests/test_slash_tradeoff.py\nPASS  test_default_config_digest_unchanged_by_new_fields\nERROR test_early_stop_is_a_strict_prefix[0]: 需要這支撐不住的 ['budget']（用真 pytest 跑）\nERROR test_early_stop_is_a_strict_prefix[1]: 需要這支撐不住的 ['budget']（用真 pytest 跑）\nERROR test_early_stop_is_a_strict_prefix[2]: 需要這支撐不住的 ['budget']（用真 pytest 跑）\nPASS  test_lambda_changes_obs_at_slash_but_not_score_at_slash\nPASS  test_lambda_one_is_bit_identical_to_current_implementation\nPASS  test_lambda_zero_erases_some_earned_credit\nERROR test_mean_drop_is_lambda_invariant[0]: 需要這支撐不住的 ['factor']（用真 pytest 跑）\nERROR test_mean_drop_is_lambda_invariant[1]: 需要這支撐不住的 ['factor']（用真 pytest 跑）\nERROR test_mean_drop_is_lambda_invariant[2]: 需要這支撐不住的 ['factor']（用真 pytest 跑）\nERROR test_mean_drop_is_lambda_invariant[3]: 需要這支撐不住的 ['factor']（用真 pytest 跑）\nERROR test_mean_drop_is_lambda_invariant[4]: 需要這支撐不住的 ['factor']（用真 pytest 跑）\nPASS  test_module_level_lambda_is_restored_after_context\nPASS  test_n_is_monotone_under_slash[0]\nPASS  test_n_is_monotone_under_slash[1]\nPASS  test_n_is_monotone_under_slash[2]\nPASS  test_n_is_monotone_under_slash[3]\nPASS  test_n_is_monotone_under_slash[4]\nPASS  test_n_rise_is_exactly_lambda_times_delta[0]\nPASS  test_n_rise_is_exactly_lambda_times_delta[1]\nPASS  test_n_rise_is_exactly_lambda_times_delta[2]\nPASS  test_n_rise_is_exactly_lambda_times_delta[3]\nPASS  test_n_rise_is_exactly_lambda_times_delta[4]\nPASS  test_never_caught_is_not_the_same_as_never_returned\nPASS  test_punishment_params_do_not_perturb_the_random_world\nPASS  test_repent_and_persist_are_identical_before_the_first_slash\nPASS  test_repent_stops_defecting_after_the_first_slash\nPASS  test_slash_factor_is_honoured_by_the_simulation\nPASS  test_slash_stays_composable[0]\nPASS  test_slash_stays_composable[1]\nPASS  test_slash_stays_composable[2]\n\ntests/test_slash_tradeoff.py: 23/31 pass, 0 fail, 8 error, 0 skip => UNSUPPORTED\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_substrate_lmstudio.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.1,
+  "stdout": "############ tests/test_substrate_lmstudio.py\nPASS  test_endpoint_and_body_basics\nPASS  test_extract_ignores_reasoning_object\nPASS  test_feedback_appended_to_input\nPASS  test_import_without_vm\nPASS  test_infra_void_on_all_failures\nPASS  test_malformed_response_counts_as_failure\nPASS  test_max_tokens_field_present_when_set\nPASS  test_no_max_tokens_field_by_default\nPASS  test_no_think_absent_when_disabled\nPASS  test_no_think_injected_by_default\nPASS  test_retry_respects_custom_count\nPASS  test_retry_then_success\nPASS  test_strip_think_and_take_last_message\nPASS  test_substrate_id_default\n\ntests/test_substrate_lmstudio.py: 14/14 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_teeth.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 1.0,
+  "stdout": "############ tests/test_teeth.py\nPASS  TestDecay::test_beta_slash_validation\nPASS  TestDecay::test_decay_clock_is_per_stream_not_global\nPASS  TestDecay::test_decay_toward_prior_not_zero\nPASS  TestDecay::test_halflife_200_hand_computed\nPASS  TestEcosystemTeeth::test_provable_fault_slashes_deliverer_and_pass_reviewer\nPASS  TestProbationTeeth::test_all_probation_no_cap_cold_start\nPASS  TestProbationTeeth::test_cap_value_is_prereg_constant\nPASS  TestProbationTeeth::test_probation_caps_ucb_so_veteran_wins\nPASS  TestProbationTeeth::test_probation_is_intrinsic_for_unregistered_outsiders\nPASS  TestProbationTeeth::test_probation_quota_every_10th_route\nPASS  TestSlash::test_deliverer_multiplicative_hand_computed\nPASS  TestSlash::test_dims_scoped_slash\nPASS  TestSlash::test_slash_punishes_monotonically\nPASS  TestSlashRouting::test_apply_slash_hits_current_stream\n\ntests/test_teeth.py: 14/14 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_trace.py",
+  "rc": 1,
+  "timeout": false,
+  "secs": 0.2,
+  "stdout": "############ tests/test_trace.py\nPASS  test_on_step_fires_fail_then_pass\nPASS  test_tee_proxy_relays_and_logs_both_directions\nERROR test_trace_renderer_detects_vacant_call: 需要這支撐不住的 ['capsys']（用真 pytest 跑）\n\ntests/test_trace.py: 2/3 pass, 0 fail, 1 error, 0 skip => UNSUPPORTED\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_w1_experiment.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 1.5,
+  "stdout": "############ tests/test_w1_experiment.py\nPASS  test_a4_lesson_leak_guard\nPASS  test_auditor_deterministic_sampling\nPASS  test_auditor_provable_fault\nPASS  test_gateway_survives_rejected_review\nPASS  test_ks1_guard\nPASS  test_logbook_branch_mismatch_raises\nPASS  test_m0_injects_nothing_m1_injects_raw\nPASS  test_m2_budget_caps_block\nPASS  test_m2_decay_counts_episodes_not_wallclock\nPASS  test_m2_only_uses_audited_lessons\nPASS  test_memory_episodes_are_signed_on_chain\nPASS  test_router_toggle\nPASS  test_run_ledger_resume\nPASS  test_run_ledger_tolerates_non_dict_line\nPASS  test_run_ledger_tolerates_truncated_tail\nPASS  test_watchdog_down_and_recover\nPASS  test_x1_infra_void_on_persistent_failure\nPASS  test_x1_m0_arm_never_gets_memory\nPASS  test_x1_oracle_lesson_transfer\nPASS  test_x1_pilot_tasks_deterministic\nPASS  test_x1_resume_replays_memory\nPASS  test_x1_resume_skips_done\nPASS  test_x1_retry_backoff_then_success\n\ntests/test_w1_experiment.py: 23/23 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ },
+ {
+  "module": "tests/test_x1_evalplus.py",
+  "rc": 0,
+  "timeout": false,
+  "secs": 0.7,
+  "stdout": "############ tests/test_x1_evalplus.py\nPASS  test_finalize_run_package_passes_record_check\nPASS  test_gt_canary_never_leaks_to_model_side\nPASS  test_pilot_report_veto_arithmetic\nPASS  test_require_usage_missing_becomes_infra_void\nPASS  test_require_usage_records_real_cost\n\ntests/test_x1_evalplus.py: 5/5 pass, 0 fail, 0 error, 0 skip => PASS\n",
+  "stderr": ""
+ }
+]
