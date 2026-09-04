@@ -1,0 +1,16 @@
+{
+ "n_rows": 189,
+ "expected_n": 189,
+ "n_void": 0,
+ "void_pct": 0.0,
+ "n_scored": 189,
+ "n_meets_demand": 128,
+ "fail_pct": 32.28,
+ "verdict": "GATE_MARGINAL",
+ "demonstrated": 128,
+ "undemonstrated": 61,
+ "undemonstrated_pct": 32.28,
+ "gauge_note": "undemonstrated 是量具假象的上界不是缺陷數；OFF 單臂看不出「別的臂會不會過」⇒ 主 run 跑完要重算",
+ "run": "runs/g_r461_off_gate_lcb3",
+ "decision_source": "判準檔與工具門檻一致"
+}
