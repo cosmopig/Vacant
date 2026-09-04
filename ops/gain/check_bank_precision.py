@@ -85,12 +85,20 @@ def audit(bank: str, seed: str, n: int) -> dict:
 
 
 # R440T：人眼確認過的「精確解也會被判錯」名單。修好題庫才准從這裡拿掉。
-KNOWN_BAD = {"lcb": {"lcb_3613", "lcb_3763"}}
+# lcb2（v2 題庫，2026-09-04）沿用同兩題——**不是新的人眼確認**：v2 是 v1 的嚴格
+# 超集，這兩筆紀錄與 v1 逐欄相同（`ops/gain/verify_lcb_bank.py --version v2
+# --compare v1` 的 overlap_records_identical=true 證明），所以 R440T 的確認直接
+# 適用。test4 視窗新增的 29 題**沒有**任何一題被旗標，若將來冒出新的，這支照樣
+# FAIL——名單是白名單不是消音器。
+KNOWN_BAD = {"lcb": {"lcb_3613", "lcb_3763"},
+             "lcb2": {"lcb_3613", "lcb_3763"}}
 
 if __name__ == "__main__":
     bank = sys.argv[1] if len(sys.argv) > 1 else "lcb"
     seed = sys.argv[2] if len(sys.argv) > 2 else "g-r442-lcb"
-    n = int(sys.argv[3]) if len(sys.argv) > 3 else 91
+    # round440y：預設 n 原本寫死 91，對 120 題的 lcb2 會截掉後 29 題，KNOWN_BAD 兩題落在
+    # 截掉的那段就「沒被抓到」——尺沒鈍，是尺只量了一半。0 = 全題庫（load_tasks 的語意）。
+    n = int(sys.argv[3]) if len(sys.argv) > 3 else 0
     r = audit(bank, seed, n)
     cov = len(r["decisive_ok"]) + len(r["decisive_bad"])
     print(f"bank={r['bank']} n={r['n']}")

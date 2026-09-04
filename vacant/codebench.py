@@ -717,6 +717,23 @@ LCB_BANK_DEFAULT_PATH = "ops/gain/data/lcb_bank_v1.jsonl"
 LCB_BANK_V1_SHA256 = "eb2a58760818d54b0a0141aa37e1603f875c53ccc76a2d87a6bf044b39a6c659"
 LCB_BANK_V1_COUNT = 91
 
+# v2（2026-09-04）：**同一份 recipe**（`ops/gain/build_lcb_bank.py`，一個字沒改）
+# 多吃一個 test4 視窗 ⇒ test4+test5+test6。v1 的三個常數在上面一個字都沒動，
+# 預設仍是 v1——E3（`runs/g_r443_gemma_lcb`）與 R440O/R440T 的裁決全部釘在 v1 上，
+# 換掉預設等於讓 repo 說的跟已經跑完的實驗不一致。
+# v2 是 v1 的嚴格超集（同 recipe 在增量檔上跑，LCB 的 testN 檔彼此不重疊）。
+LCB_BANK_V2_PATH = "ops/gain/data/lcb_bank_v2.jsonl"
+LCB_BANK_V2_SHA256 = "b98f027213e2469a0a41bed813d99f029d3d6e2fac64e0fa18887c42c865b9ba"
+LCB_BANK_V2_COUNT = 120        # v1 的 91 題 ＋ test4 視窗新增 29 題
+
+LCB_BANKS: dict[str, dict[str, Any]] = {
+    "v1": {"path": LCB_BANK_DEFAULT_PATH, "sha256": LCB_BANK_V1_SHA256,
+           "count": LCB_BANK_V1_COUNT},
+    "v2": {"path": LCB_BANK_V2_PATH, "sha256": LCB_BANK_V2_SHA256,
+           "count": LCB_BANK_V2_COUNT},
+}
+LCB_BANK_DEFAULT_VERSION = "v1"
+
 _LCB_SCHEMA = {
     "task_id": str, "entry_point": str, "difficulty": str, "platform": str,
     "prompt": str, "visible_tests": list, "hidden_tests": list,
@@ -756,10 +773,17 @@ class LiveCodeBenchLoader(TaskLoader):
     """LiveCodeBench code_generation_lite（Jain et al. 2024, arXiv:2403.07974）
     functional×(medium+hard) 子集的 fail-closed 載入器。
 
-    公正性依據：比賽題有發布日期戳（本 bank 收錄 contest_date 皆為 2024-08 之後
-    的視窗），難度標籤由平台原生給定，不是我們自己挑的。誠實邊界：無法保證
-    晚於本實驗 worker 模型的訓練截止（模型卡未公開精確 cutoff），本 bank 只能
-    宣稱「MBPP+ 之外、更難、附日期戳」，不能宣稱零污染——見 DECISION_20260901_R440。
+    公正性依據：比賽題有發布日期戳，難度標籤由平台原生給定，不是我們自己挑的。
+    日期視窗（實測，非宣稱）：
+      v1（91 題，test5+test6）  2024-10-12 → 2025-04-05，全部晚於 2024-08。
+      v2（120 題，＋test4）     2023-08-26 → 2025-04-05；新增的 29 題裡 **28 題**
+                                落在 2024-08→2024-10，**只有 `lcb_3026` 是
+                                2023-08-26**——它比 v1 的整個視窗早一年多，
+                                要主張「晚於訓練截止」的分析必須把它另外列出，
+                                不能用「本 bank 都在 2024-08 之後」一句帶過。
+    誠實邊界：無法保證晚於本實驗 worker 模型的訓練截止（模型卡未公開精確
+    cutoff），本 bank 只能宣稱「MBPP+ 之外、更難、附日期戳」，不能宣稱零污染
+    ——見 DECISION_20260901_R440。
 
     紀律與 EvalPlusMBPPLoader 相同：sha256 釘死、題數釘死、schema 全驗、
     重複 task_id 拒收；GT（hidden_tests）只進 hidden_check。"""
@@ -768,17 +792,32 @@ class LiveCodeBenchLoader(TaskLoader):
         self,
         path: str | None = None,
         *,
+        version: str | None = None,
         expected_sha256: str | None = None,
-        expected_count: int = LCB_BANK_V1_COUNT,
+        expected_count: int | None = None,
     ) -> None:
+        """version 選 bank 版本（v1 預設／v2 加了 test4 視窗）。
+
+        選版順序：明給的 `version` 引數 > 環境變數 `VACANT_LCB_VERSION` > `v1`。
+        **不給任何東西時的行為與 v2 落地前逐字相同**（v1 路徑、v1 sha、91 題），
+        因為 E3 與其上的裁決都釘在 v1。`VACANT_LCB_PATH` 仍然只換路徑、不換釘值
+        ——拿 v2 的檔案配 v1 的釘值會當場被 sha 擋下（fail-closed，不是靜默通過）。
+        """
         import os
-        self.path = path or os.environ.get("VACANT_LCB_PATH", LCB_BANK_DEFAULT_PATH)
+        version = version or os.environ.get(
+            "VACANT_LCB_VERSION", LCB_BANK_DEFAULT_VERSION)
+        if version not in LCB_BANKS:
+            raise ValueError(
+                f"未知的 LCB bank 版本：{version}（可用：{sorted(LCB_BANKS)}）")
+        spec = LCB_BANKS[version]
+        self.version = version
+        self.path = path or os.environ.get("VACANT_LCB_PATH", spec["path"])
         if expected_sha256 is None and path is None:
-            expected_sha256 = LCB_BANK_V1_SHA256
+            expected_sha256 = spec["sha256"]
         if expected_sha256 is None:
             raise ValueError("expected_sha256 不可為 None（fail-closed）")
         self.expected_sha256 = expected_sha256
-        self.expected_count = expected_count
+        self.expected_count = spec["count"] if expected_count is None else expected_count
         self._records = self._load_verified()
 
     def _load_verified(self) -> list[dict[str, Any]]:

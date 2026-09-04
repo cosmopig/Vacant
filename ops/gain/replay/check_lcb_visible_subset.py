@@ -114,16 +114,20 @@ def selftest() -> int:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--selftest", action="store_true")
+    # v2（2026-09-04）：同 recipe 多吃 test4 視窗。預設仍是 v1——R440Q 的結論
+    # 釘在 v1 上，換掉預設會讓這支說的跟那份裁決不是同一個題庫。
+    ap.add_argument("--version", default="v1")
     args = ap.parse_args()
     if args.selftest:
         return selftest()
 
-    loader = LiveCodeBenchLoader()
+    loader = LiveCodeBenchLoader(version=args.version)
     records = loader._records
     r = audit(records)
 
-    print(f"LCB bank 題數 = {r['n']}（門檻 MIN_TASKS={MIN_TASKS}）")
-    if r["n"] < MIN_TASKS:
+    min_tasks = loader.expected_count       # v1 時等於 MIN_TASKS=91
+    print(f"LCB bank({args.version}) 題數 = {r['n']}（門檻 {min_tasks}）")
+    if r["n"] < min_tasks:
         print("BROKEN：題數少於釘死值，安靜漏題")
         return 2
     print(f"  visible 是 full 的前綴        : {len(r['prefix'])}")
@@ -133,7 +137,7 @@ def main() -> int:
         print("    樣本:", r["not_subset"][:8])
 
     # ── 承重層：讀 loader 真正生成的 check code（非循環）
-    e = embed_check(LiveCodeBenchLoader().iter_tasks("x"))
+    e = embed_check(LiveCodeBenchLoader(version=args.version).iter_tasks("x"))
     print(f"\n[承重層] 生成的 check code n={e['n']}")
     print(f"  hidden 的測資清單以 visible 開頭 : {e['embed_ok']}")
     print(f"  沒包住（關係真的不同）          : {len(e['embed_bad'])}", e["embed_bad"][:8])
