@@ -244,3 +244,77 @@ python3 ops/gain/replay/pooled_paired_ci.py --stratum lcb3=runs/g_r461_lcb3_thre
 窗口 40–60／30–40／<30／>60、事前預測 38–52%（點估計 45%）、三條假說的 MDE（8.47／8.99／7.41／5.50pp）、
 預測區間 [+3,+20]／[+8,+28]pp、`p<0.05` 的 α、void 門檻 20%、n=189、seed、worker、端點、bank。
 **一個數字都沒有動。**
+
+---
+
+# 附錄 C（round731 / R463 追加）：**附錄 B 的收官指令跑不起來**——改指到單 run 尺
+
+**合法性前提**：與附錄 B 相同的自證見 `DECISION_20260904_R463_PAIRED_CI_KEY_GAP.md` §〇
+（P-R461-1／2／3 的估計量本輪零讀取；只看了 OFF 臂第 1 列與逐臂列數）。
+**§三／§四／附錄 B 原文一字未改，本附錄是加法式的。**
+
+## C.1 缺陷
+
+附錄 B 寫的兩條收官指令用 `pooled_paired_ci.py`，但那支是**多層合併**版，
+`:242` 硬性要求 `len(--stratum) >= 2`。R461 是**單一題庫的複製**，只有 `lcb3` 一層：
+
+```
+$ python3 ops/gain/replay/pooled_paired_ci.py --stratum lcb3=runs/g_r461_lcb3_three_arm \
+      --a-arm CONFORM --b-arm OFF --key deliv
+需要至少兩個 --stratum LABEL=dir，或 --selftest
+rc=2
+```
+
+⇒ 附錄 B 產不出 `verdict_pooled`，P-R461-1／2 的第三個合取項**照字面仍然沒有仲裁者**。
+附錄 B 修好了「判決名沒有 emitter」，卻換成「指令跑不起來」——**同型缺陷的復發**。
+
+## C.2 修正（**只換工具與旗標，門檻與判決名對應表一字不改**）
+
+改用單 run 尺 `ops/gain/replay/paired_ci.py`（R462 普查的 `paired_ci.verdict` 詞彙表本來就出自它）。
+它原本**沒有** `--key`、寫死 `meets_demand`；R463（`ec5bb5c`）已加法式補上 `--key`，預設維持舊語意。
+
+```bash
+# P-R461-1
+python3 ops/gain/replay/paired_ci.py --run runs/g_r461_lcb3_three_arm \
+    --a-arm OFF5    --b-arm OFF --key deliv
+# P-R461-2
+python3 ops/gain/replay/paired_ci.py --run runs/g_r461_lcb3_three_arm \
+    --a-arm CONFORM --b-arm OFF --key deliv
+```
+
+| 附錄 B 寫的 | 附錄 C 改讀成 |
+|---|---|
+| `pooled_paired_ci.py … --stratum lcb3=…` 的 `verdict_pooled == "ON_WINS"` | `paired_ci.py --run …` 的 **`verdict == "ON_WINS"`** |
+
+`ON_WINS` 的語意不變：**「a-arm 贏」，不是 ON 臂**。散文一律寫「OFF5 − OFF 的 CI 完全在 0 以上」。
+`PRACTICAL_PP = 5.0`、`MIN_PAIRED = 60`、α、n、seed、worker、端點、bank、
+§三 的窗口、§四 的 MDE 與預測區間——**一個數字都沒有動**。
+
+## C.3 為什麼 `--key deliv` 在這裡是實質的、不是形式的
+
+`deliv = accepted ∧ meets_demand`。`OFF`／`OFF5` 臂 `accepted` 恆真 ⇒ **P-R461-1 兩口徑恆等**。
+`CONFORM` 會拒交，而 `gain_run.py:588` 拒交時回退到最後一份候選、`:1586` 無條件對它評分
+⇒ `accepted=False ∧ meets_demand=True` **可達**：東西沒交出去，卻被舊口徑算成一次交付。
+⇒ **P-R461-2 用舊口徑會高估 CONFORM，方向偏向本實驗想證的假說。**
+
+## C.4 這兩條指令**已經原樣跑過**（R463 §一 C-1 新訂通則）
+
+**通則：預註冊裡的收官指令，寫進判準檔之前必須先原樣跑一次**（可在別的 run 上跑）。
+附錄 B 就是沒跑過才寫錯。本附錄在**已收官的** `runs/g_r447_conform_lcb2` 上驗過兩種形狀，
+兩條 `rc=0`，且**逐字重現 R459 已發表的收官數字**：
+
+```
+CONFORM vs OFF  n=120  b=31 c=8   Δ=+19.17pp  CI[+8.80,+26.46]  p=0.0003  ON_WINS
+OFF5    vs OFF  n=120  b=22 c=7   Δ=+12.50pp  CI[+3.12,+19.19]  p=0.0081  ON_WINS
+```
+
+⚠ **r447 上 `--key deliv` 與 `--key meets_demand` 同值**（該 run 的分歧格實測為空：
+7 個拒交格全部 `meets_demand=False`）⇒ 這是**回歸對照**，**不是** `--key` 有效的證明。
+有效性的證明是 R463 的合成夾具 T1 ＋ 具名突變體 M_KEY（`ops/gain/replay/r463_key_teeth_test.py`）。
+
+## C.5 收官時要一起報的（不報＝隱瞞口徑）
+
+1. 產物自己記的 `"key"` 欄位必須是 `"deliv"`（旗標預設是舊語意，忘了帶會安靜翻判決且 rc=0）。
+2. `runs/g_r461_lcb3_three_arm` 的 CONFORM 臂 `accepted=False ∧ meets_demand=True` 的**格數**
+   （＝ P-R463-3，事前預測 ≥1、基準率約 40–70%）。**0 格也要寫**——那代表兩口徑同值，
+   要照實說「本 run 上這個修正沒有改變數字」，不准因此宣稱修正是多餘的。
