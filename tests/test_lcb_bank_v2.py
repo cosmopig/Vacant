@@ -77,8 +77,14 @@ def test_v2_selectable_by_env(monkeypatch):
 
 
 def test_unknown_version_rejected():
+    # round735（R467）：原本這裡寫的是 `version="v3"`——那是 v3 還不存在時寫的。
+    # round728 把 v3 建成真的 bank 之後，這條測試就**過期**了（測試過期 ≠ 真缺陷）：
+    # 它從 round728 起一直是紅的，而 `tests/` 在這台沒有 pytest、長期沒被真的跑過。
+    # 意圖（未知版本要被拒收）原樣保留，改用一個真的不存在的版本；
+    # 同時把「v3 現在是合法的」這件事也釘住，免得下次又靠一條過期的紅燈來記錄它。
     with pytest.raises(ValueError):
-        LiveCodeBenchLoader(version="v3")
+        LiveCodeBenchLoader(version="v99")
+    assert LiveCodeBenchLoader(version="v3").version == "v3"
 
 
 def test_v2_is_superset_of_v1_and_reuses_v1_records_verbatim():

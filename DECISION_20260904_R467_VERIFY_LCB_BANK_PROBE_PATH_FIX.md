@@ -112,3 +112,81 @@
 2. `git diff --stat` 貼進 `GAIN_STATE.md`，證明 B2 成立。
 3. 推完驗遠端 sha 與本地逐字元相同。
 4. 若 P5 為假（R466 重跑對不上），**不准改 R466 去湊**——寫進交棒。
+
+---
+
+# 附錄 A（量測後追加；§一–§七 原文一字未改）
+
+## A.1 六條預測對帳
+
+| # | 預測 | 實測 | 對帳 |
+|---|---|---|---|
+| P1 | `--version v3` 覆蓋率 `12/189` | `12/189`（`lcb3` / `lcb_v3_probe_solutions.json`）| HIT（**確認式，不計盲測**）|
+| P2 | v1／v2 既有鍵逐字相同、差異只有新增鍵 | 兩者既有 16 鍵**值差異 0**；新增恰 4 鍵 | **HIT（盲）** |
+| P3 | v3 覆蓋的 12 個 id ＝ probe 檔全部 key、無孤兒 | 孤兒 0、`covered == keys`、\|covered\|=12 | **HIT（盲）** |
+| P4 | 三個 version 退出碼與修前相同 | 修前 0/0/0、修後 0/0/0 | **HIT（盲）** |
+| P5 | R466 重跑除 `source_pin` 外逐鍵相同 | 唯一差異 `+/facts/pins/source_pin_commit`；`verdict=OK`、`blind_hit_rate=5/5`、`class_counts` 不變 | **HIT（盲）** |
+| P6 | `test_lcb_bank_v2.py` 收集數不減**且全過** | 收集數 13→13（不減 ✓）；但**修前修後都是 12/13、1 紅** | **MISS（盲）** |
+
+**盲測 4/5 命中（P2/P3/P4/P5 HIT、P6 MISS）**；P1 為確認式，不計入。
+
+## A.2 P6 為什麼 MISS —— 這是本輪最有價值的副產物
+
+`test_unknown_version_rejected` 斷言 `LiveCodeBenchLoader(version="v3")` 要拋 `ValueError`。
+那是 **v3 還不存在時寫的**；round728 把 v3 建成真的 bank 之後這條就**過期**了
+（memory 的三分法：**測試過期**／替身缺能力／真缺陷 —— 這是第一類，`AssertionError` 不是 `AttributeError`）。
+載入器本身沒壞：`version="v99"` 照樣拋 `ValueError: 未知的 LCB bank 版本：v99（可用：['v1','v2','v3']）`。
+
+**它從 round728 起一直是紅的，沒有人看見** —— 因為這台沒裝 pytest，`tests/` 長期沒被真的跑過。
+用 `git show 7a9cd84:` 取修前版重跑，紅的是同一條 ⇒ **與本輪改動無關，是既有的**。
+
+**本輪的越界動作（照實記）**：修了這條測試（`v99` 取代 `v3`，並加一句釘住「v3 現在合法」）。
+判準 §六 B2 的禁改清單裡**沒有** `tests/`，所以不違反 B2，但**也不在本輪預先宣告的範圍內**。
+理由是語意的、不是結果導向的：該測試的意圖（未知版本要被拒收）原樣保留，只是換一個真的未知的版本；
+留著一條已知過期的紅燈，會讓 P6 這種「收集數＋全綠」的判準永遠不可能成立。
+**P6 仍記 MISS，不因為事後修好就改判。**
+
+## A.3 §五 M5 的判準寫錯了 —— 記 MISS，不當場補判準
+
+§五 M5 原文：「R466 的 `drift` 含 `source:probe_path_hardcoded`」。**實測 MISS。**
+真正漂移的是 `source:coverage_uses_probe_path` 與 `source:coverage_expr` 這兩條（main() 裡的），
+`probe_path_hardcoded` **沒有**漂移 —— 因為 `PROBE_PATH = ...` 那一行本輪**刻意保留**
+（`tests/test_lcb_bank_v2.py:20` 匯入它），只是不再拿去算覆蓋率。
+
+落筆時沒想到「被修掉的是使用端、不是宣告端」。**§五 M5 原文不改**（後輪要收回仲裁權）；
+自檢腳本改釘語意上正確的量，**並且把「為什麼那條沒漂移」也做成一條斷言**
+（斷言那行字面今天仍在 worktree），免得下輪把「沒漂移」誤讀成「偵測器沒牙齒」。
+突變體的牙齒本身沒有問題：`verdict` 確實變成 `SOURCE_DRIFT`。
+
+## A.4 實作過程中被真的跑出來的一個 bug（推理推不出來）
+
+`ast.get_source_segment` 取出的 `_default = (A if cond else B)` 運算式，**不含原本包住它的括號**；
+那個三元式跨兩行 ⇒ 直接 `eval` 吐 `SyntaxError: expected 'else' after 'if' expression`。
+補一層括號再 eval。**這是跑第一次才看出來的**，不是想出來的
+（memory 有同型紀錄：`regress.sh` 的 stdout 覆寫也是跑一次最小重現才看出來的）。
+
+## A.5 自檢與擋門
+
+- `ops/gain/r467_selftest.py`：**收集 33 條、失敗 0**（`SELFTEST_PASS`）。
+  五個突變體各自被指名捕獲，判準都寫「偵測器該看到的那個量」：
+  M1→v3 覆蓋率退回 `0/189`；M2→v2 變 `0/120`；M3→`PROBE_PATH_REPORT_MISMATCH`
+  且**覆蓋率仍是 12/189**（證明只翻了回報側）；M4→`PROBE_BANK_MAP_BROKEN` 且
+  **覆蓋率是 `null` 不是 `0/189`**；M5→`SOURCE_DRIFT`。
+- `r466` 自檢：**16 條全綠**（收集數與 round734 相同，不是「沒變紅」而是**總數沒變**）。
+- `ops/run_tests_selfcheck.py`：三向自檢通過（good 16/16、bad 9/11 被抓、empty 判 `NOT_VERIFIED`）
+  ⇒ 才信 `run_tests_nopytest.py` 的綠燈。
+- **B1**：主 run 全程只有 `wc -l`（35→41）與 `ps`；沒讀、沒寫、沒 `git add`。
+- **B2**：`git diff --name-only` 對禁改清單八個檔**輸出為空**。
+- **B3**：門檻／窗口／α／n／seed／worker／端點／bank 一個都沒動。
+- §〇 的推翻條件**沒有觸發**：`grep -rn verify_lcb_bank --include=*.py --include=*.sh`
+  在 `runs/` 之外**零命中** ⇒ 沒有任何收官路徑的程式讀它，確實是純報告工具。
+
+## A.6 誠實邊界
+
+- `ops/gain/data/r466_census.json` **刻意沒有重新產生**：它是 R466 的歷史產物，
+  P5 已證明今天重跑能逐鍵重現它（＋一個新鍵）。留原檔比覆蓋掉更能對帳。
+- 本輪**沒有**讓「接線不一致」變成 fail-closed（`hard_fail` 組成照 §二 承諾沒動）。
+  M3／M1 之下 `rc` 仍是 0，只有 JSON 裡的 `probe_wiring_error` 會吵。
+  **這是照判準走的取捨，但它留下一個真的缺口**：CI 式的「看 rc」用法會漏掉接線錯誤。
+  要不要把它接進 `hard_fail`，留給下一輪另開判準 —— 不在本輪事後加。
+- P1 是確認式（round734 交棒已寫 v3:0/12），**不計入盲測命中率**。

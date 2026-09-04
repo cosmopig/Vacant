@@ -24,6 +24,14 @@ LAST_FAILS: list[str] = []
 PREREG = ROOT / "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
 R461_PREREG_COMMIT = "a3036573ce529a62f9b77793b0f0961a0cf61a67"   # 預測落筆當時（DECISION §二.1）
 FORBIDDEN_RUN = "g_r461_lcb3_three_arm"                          # B3
+# ── round735（R467）：`SOURCE_CLAIMS` 的原始碼字面**釘在這支普查所稽核的那個 commit**，
+#   不是 HEAD。理由：R467 修掉了 `verify_lcb_bank.py` 的 `PROBE_PATH` 寫死，
+#   若這裡繼續讀 worktree，這份**已收官的歷史普查**重跑就會吐 `SOURCE_DRIFT`
+#   ——那是「被稽核的東西後來被改了」，不是「當初的稽核記錯了」。
+#   memory：加法性對照要釘改動前的 commit，不是釘 HEAD（釘 HEAD＝拿自己比自己）。
+#   ⚠ 只有 SOURCE_CLAIMS 走這個釘；bank 檔／判準檔／`vacant/codebench.py` 的
+#   「今天」那條仍讀 worktree（它們問的是現在的事實）。
+R466_SOURCE_COMMIT = "952f883f798744e32158bb11bdf67b940f51a8db"   # R466 量測 commit
 TWIN_RUN = ROOT / "runs" / "g_r447_conform_lcb2"                  # 已收官的結構孿生（S6-2 用）
 
 # ── 釘死的判準檔字面（B2）。每一條都要在 R461 原文裡逐字找得到。
@@ -71,8 +79,23 @@ def _safe_read(p: pathlib.Path) -> str:
     return p.read_text(encoding="utf-8")
 
 
+def _source_read(relpath: str) -> str:
+    """SOURCE_CLAIMS 專用：從釘死的 commit 取檔，不讀 worktree。"""
+    if FORBIDDEN_RUN in relpath:
+        raise RuntimeError(f"B3 違規：本輪不准讀 {FORBIDDEN_RUN}（{relpath}）")
+    if MUTANT == "M7_drop_source_pin":
+        return _safe_read(ROOT / relpath)                 # 退回讀 worktree
+    r = subprocess.run(["git", "-C", str(ROOT), "show", f"{R466_SOURCE_COMMIT}:{relpath}"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        raise RuntimeError(
+            f"SOURCE_PIN_UNREADABLE: git show {R466_SOURCE_COMMIT[:8]}:{relpath} 失敗"
+            f"（{r.stderr.strip()[:200]}）——讀不到釘死的來源要吵，不准悄悄退回讀 HEAD")
+    return r.stdout
+
+
 def _func_src(relpath: str, funcname: str) -> str:
-    src = _safe_read(ROOT / relpath)
+    src = _source_read(relpath)
     tree = ast.parse(src)
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == funcname:
@@ -95,12 +118,14 @@ def check_pins() -> dict:
             drift.append(f"prereg:{k}")
     src_ok = {}
     for k, (rel, fn, lit) in SOURCE_CLAIMS.items():
-        seg = _func_src(rel, fn) if fn else _safe_read(ROOT / rel)
+        seg = _func_src(rel, fn) if fn else _source_read(rel)
         ok = lit in seg
         src_ok[k] = ok
         if not ok:
             drift.append(f"source:{k}")
-    return {"prereg_pins": pin_ok, "source_pins": src_ok, "drift": drift}
+    return {"prereg_pins": pin_ok, "source_pins": src_ok, "drift": drift,
+            "source_pin_commit": (None if MUTANT == "M7_drop_source_pin"
+                                  else R466_SOURCE_COMMIT)}
 
 
 # ---------------------------------------------------------------- 事實蒐集
