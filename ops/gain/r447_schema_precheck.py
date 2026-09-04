@@ -103,7 +103,9 @@ def check(rows, summary, calls, files) -> dict:
     # P-Z5b 離線重建的前置條件：calls.jsonl 的每通 gen 都帶 meta.arm/meta.task_id，
     # 且每題 CONFORM 的通數 == 該列的 conform_calls。對不上 ⇒ 重建不可信。
     per_task: dict[str, int] = {}
+    per_task_ok: dict[str, int] = {}
     untagged = 0
+    failed_gen = 0
     for c in calls:
         m = c.get("meta") or {}
         if c.get("role") != "gen":
@@ -113,7 +115,14 @@ def check(rows, summary, calls, files) -> dict:
             continue
         if m["arm"] == "CONFORM":
             per_task[m["task_id"]] = per_task.get(m["task_id"], 0) + 1
+            # R457：`ok is False` ＝明確失敗（`resp_len=0`，結構上不可能攜帶候選）
+            # ⇒ 不屬於重建的母體。`ok` 不存在視為成功（夾具不寫 ok）。
+            if c.get("ok") is False:
+                failed_gen += 1
+            else:
+                per_task_ok[m["task_id"]] = per_task_ok.get(m["task_id"], 0) + 1
     mism = []
+    mism_ok = []
     for r in rows:
         if r.get("arm") != "CONFORM":
             continue
@@ -121,12 +130,33 @@ def check(rows, summary, calls, files) -> dict:
         got = per_task.get(r.get("task_id"), 0)
         if want != got:
             mism.append({"task_id": r.get("task_id"), "conform_calls": want, "calls_jsonl": got})
+        got_ok = per_task_ok.get(r.get("task_id"), 0)
+        if MUTANT == "X12_ok_only_ignores_failed":
+            got_ok = per_task.get(r.get("task_id"), 0)
+        if want != got_ok:
+            mism_ok.append({"task_id": r.get("task_id"), "conform_calls": want,
+                            "calls_jsonl_ok": got_ok})
     out["reconstruct_untagged_gen_calls"] = untagged
     out["reconstruct_mismatch_n"] = len(mism)
     out["reconstruct_mismatch_sample"] = mism[:5]
     out["pz5b_reconstruction_feasible"] = (untagged == 0 and not mism and bool(per_task))
     if MUTANT == "X2_ignore_reconstruct":
         out["pz5b_reconstruction_feasible"] = True
+
+    # ── R457（加法）：舊鍵公式與值原封不動；以下只增不改。
+    # 舊鍵數的是 calls.jsonl 的**物理請求數**，`conform_calls` 是**邏輯呼叫數**
+    # （重試在 generate() 內被吞掉）⇒ 一有重試就分岔。收官應引用 `_ok_only`。
+    out["reconstruct_failed_gen_calls"] = failed_gen
+    out["reconstruct_mismatch_ok_only_n"] = len(mism_ok)
+    out["reconstruct_mismatch_ok_only_sample"] = mism_ok[:5]
+    feasible_ok = (untagged == 0 and not mism_ok and bool(per_task_ok))
+    if MUTANT == "X13_ok_only_always_true":
+        feasible_ok = True
+    out["pz5b_reconstruction_feasible_ok_only"] = feasible_ok
+    explained = bool(mism) and not mism_ok and untagged == 0
+    if MUTANT == "X14_explained_ignores_ok_mismatch":
+        explained = bool(mism)
+    out["pz5b_mismatch_explained_by_failed_calls"] = explained
 
     # 事前註冊文件本身不准動
     out["decision_sha256_ok"] = files.get("decision_sha") == DECISION_SHA256
@@ -222,6 +252,49 @@ def selftest() -> int:
     o = check(rows, _fx_summary(), c, _fx_files())
     ck("X7 conform_calls 與 calls.jsonl 對不上 ⇒ 重建不可行",
        o["pz5b_reconstruction_feasible"] is False and o["reconstruct_mismatch_n"] == 1)
+
+    # ── R457：重試（ok=False）與真遺失必須分得開
+    # 夾具規矩：`_fx_calls` 把通數**從 `conform_calls` 導出** ⇒ 兩邊天生一致，
+    # 那樣的夾具看不見任何不一致。以下三格一律**只動其中一邊**（r695 的教訓）。
+
+    # X12 真資料的形狀：多一通 ok=False ⇒ 舊旗紅（不動），新旗綠、且判定為「由失敗通解釋」
+    c = list(_fx_calls(rows))
+    c.append({"role": "gen", "ok": False, "error": "TimeoutError: timed out",
+              "response": "", "meta": {"arm": "CONFORM", "task_id": "lcb_x0"}})
+    o = check(rows, _fx_summary(), c, _fx_files())
+    ck("X12 多一通失敗的 gen ⇒ 舊旗紅、新旗綠、explained=True",
+       o["pz5b_reconstruction_feasible"] is False
+       and o["reconstruct_mismatch_n"] == 1
+       and o["pz5b_reconstruction_feasible_ok_only"] is True
+       and o["reconstruct_mismatch_ok_only_n"] == 0
+       and o["reconstruct_failed_gen_calls"] == 1
+       and o["pz5b_mismatch_explained_by_failed_calls"] is True,
+       f"old={o['pz5b_reconstruction_feasible']} new={o['pz5b_reconstruction_feasible_ok_only']}")
+
+    # X13 牙齒：少一通**成功**的 gen ⇒ 新旗也必須紅（修正不得對真遺失變瞎）
+    c = [x for x in _fx_calls(rows) if not (x["meta"].get("arm") == "CONFORM"
+                                            and x["meta"].get("task_id") == "lcb_x0")][:]
+    c += [{"role": "gen", "meta": {"arm": "CONFORM", "task_id": "lcb_x0"}}]  # 還原 1 通，少 1 通
+    o = check(rows, _fx_summary(), c, _fx_files())
+    ck("X13 少一通成功的 gen ⇒ 新旗也是 False、explained=False",
+       o["pz5b_reconstruction_feasible_ok_only"] is False
+       and o["reconstruct_mismatch_ok_only_n"] == 1
+       and o["pz5b_mismatch_explained_by_failed_calls"] is False,
+       f"new={o['pz5b_reconstruction_feasible_ok_only']} mism_ok={o['reconstruct_mismatch_ok_only_n']}")
+
+    # X14 舊旗的假綠：少一通成功 ＋ 多一通失敗 ⇒ 物理總數巧合相等
+    #     ⇒ 舊旗**綠**（漏抓）而新旗紅。這格證明新旗有舊旗沒有的牙齒。
+    c = [x for x in _fx_calls(rows) if not (x["meta"].get("arm") == "CONFORM"
+                                            and x["meta"].get("task_id") == "lcb_x0")]
+    c += [{"role": "gen", "meta": {"arm": "CONFORM", "task_id": "lcb_x0"}},
+          {"role": "gen", "ok": False, "error": "TimeoutError: timed out", "response": "",
+           "meta": {"arm": "CONFORM", "task_id": "lcb_x0"}}]
+    o = check(rows, _fx_summary(), c, _fx_files())
+    ck("X14 少一成功＋多一失敗 ⇒ 舊旗假綠、新旗紅",
+       o["pz5b_reconstruction_feasible"] is True
+       and o["pz5b_reconstruction_feasible_ok_only"] is False
+       and o["pz5b_mismatch_explained_by_failed_calls"] is False,
+       f"old={o['pz5b_reconstruction_feasible']} new={o['pz5b_reconstruction_feasible_ok_only']}")
 
     f = _fx_files(); f["decision_sha"] = "0" * 64
     ck("X8 事前註冊文件被改 ⇒ BROKEN",

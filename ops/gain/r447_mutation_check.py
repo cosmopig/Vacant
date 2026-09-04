@@ -17,6 +17,7 @@ from ops.gain import analyze_r447 as A  # noqa: E402
 from ops.gain import r447_reject_reconstruct as R  # noqa: E402
 from ops.gain import r447_eq5_offline as Q  # noqa: E402
 from ops.gain import prereg_falsifiability_census as C  # noqa: E402
+from ops.gain import r447_schema_precheck as P  # noqa: E402
 
 # 突變體 → 一定要紅的那一條的標籤前綴
 EXPECT = {
@@ -76,6 +77,21 @@ EXPECT_CENSUS = {
 }
 
 
+# `r447_schema_precheck.py` 的突變體 → 一定要紅的那一條
+# R457 接線：這支尺一直有 MUTANT 鉤子（X1/X2/X3/X10）卻**從來沒被這裡跑過**
+# ⇒ 那些鉤子等同不存在。本輪一併接進來（加法，不動既有四張表）。
+EXPECT_SCHEMA = {
+    "X1_ignore_absent":                "X1 缺欄位 ⇒ BROKEN",
+    "X2_ignore_reconstruct":           "X6 gen 呼叫沒標 arm ⇒ 重建不可行",
+    "X3_ignore_decision_sha":          "X8 事前註冊文件被改 ⇒ BROKEN",
+    "X10_contract_hardcoded":          "X0b 契約常數從 analyzer 原始碼取得",
+    # R457 新增的三格
+    "X12_ok_only_ignores_failed":      "X12 多一通失敗的 gen",
+    "X13_ok_only_always_true":         "X13 少一通成功的 gen",
+    "X14_explained_ignores_ok_mismatch": "X13 少一通成功的 gen",
+}
+
+
 def run(mutant: str, mod=A) -> tuple[int, list[str]]:
     mod.MUTANT = mutant
     buf = io.StringIO()
@@ -96,7 +112,8 @@ def main() -> int:
     for mod, table, label in ((A, EXPECT, "analyze_r447"),
                               (R, EXPECT_RECON, "reject_reconstruct"),
                               (Q, EXPECT_EQ5OFF, "eq5_offline"),
-                              (C, EXPECT_CENSUS, "prereg_census")):
+                              (C, EXPECT_CENSUS, "prereg_census"),
+                              (P, EXPECT_SCHEMA, "schema_precheck")):
         rc0, f0 = run("", mod)
         if rc0 != 0 or f0:
             print(f"BASELINE FAIL [{label}] rc={rc0} fails={f0}")
