@@ -318,3 +318,62 @@ OFF5    vs OFF  n=120  b=22 c=7   Δ=+12.50pp  CI[+3.12,+19.19]  p=0.0081  ON_WI
 2. `runs/g_r461_lcb3_three_arm` 的 CONFORM 臂 `accepted=False ∧ meets_demand=True` 的**格數**
    （＝ P-R463-3，事前預測 ≥1、基準率約 40–70%）。**0 格也要寫**——那代表兩口徑同值，
    要照實說「本 run 上這個修正沒有改變數字」，不准因此宣稱修正是多餘的。
+
+---
+
+# 附錄 D（round732 / R464 追加）：**P-R461-3 的收官指令從來沒有被寫下來**——補上，並照通則先跑過一次
+
+**合法性前提**：與附錄 B／C 相同的自證見 `DECISION_20260904_R464_EQ5_BANK_FLAG_GAP.md` §〇
+（含一次非預期讀取的誠實揭露）。**本輪對 `runs/g_r461_lcb3_three_arm` 沒有跑過任何分析工具。**
+**§三／§四／附錄 B／附錄 C 原文一字未改，本附錄是加法式的。**
+
+## D.1 缺口
+
+§四 給了 P-R461-3 名字、MDE 與「事前就判 `UNRESOLVED`」，但**沒有寫用哪支工具、帶什麼旗標**。
+這與附錄 C 抓到的 C-1 是同一型缺陷（預測有名字、沒有可執行的仲裁者）。
+
+## D.2 收官指令（**已原樣跑過**，見 D.4）
+
+```bash
+python3 ops/gain/r447_eq5_offline.py \
+    --run runs/g_r461_lcb3_three_arm --bank lcb3 \
+    --json ops/gain/data/r461_eq5_offline_terminal.json
+```
+
+**⚠ `--bank lcb3` 不能忘。** `--seed`／`--n` 取自 run 自己的 `summary.json`（R458 修過），
+但 **`bank` 沒有這條退路**：全庫 41 份 `summary.json` **沒有任何一份記 `bank`**（R464 實測），
+旗標預設是 **`lcb2`**＝舊題庫。這正是 memory 鐵律那個形狀：
+**旗標預設值是舊語意 ⇒ 忘了帶就安靜翻掉判決且 rc=0。**
+
+## D.3 收官時要一起驗的三件（不驗＝隱瞞口徑）
+
+1. **產物自己記的 `sampling` 必須是 `{"bank":"lcb3","seed":"g-r461-lcb3","n":189,"offset":0}`。**
+   （與附錄 C.5 第 1 點同型：不要相信自己下的指令，要驗產物自己記的來源。）
+2. **`verdict` 必須是 `RECONSTRUCTED` 才准讀任何數字。**
+   ⚠ R464 實測：**BROKEN 時 `rule_rates` 仍會印出一整塊全是 0 的數字**
+   （`n_processed=0, gate_deliv_correct=0, vote_deliv_correct=0`）。
+   那些 0 **不是**「閘門 0 分、多數決 0 分」，是「一格都沒量到」。
+   `paired_gate_vs_vote` 那時是 `null`（E11 生效，不吐 Δ）——**判 BROKEN 要看 `verdict`，不要看有沒有數字。**
+3. **Δ 旁邊必須同時寫 `power.mde_at_n_pp` 與 `power.n_needed_for_5pp`**（R452 §五 W4）。
+   §四 事前已把 P-R461-3 判成 `UNRESOLVED`＝**「沒量出來」而不是「沒有差異」**，
+   收官不准把它讀成「等預算打不贏」。
+
+## D.4 這條指令已經原樣跑過（R463 §一 C-1 新訂通則）
+
+在**已收官的** `runs/g_r447_conform_lcb2` 上跑過**兩個方向**（R464，本輪實測）：
+
+| 方向 | 指令 | 結果 |
+|---|---|---|
+| 正確 bank（回歸） | `--run runs/g_r447_conform_lcb2 --bank lcb2` | `rc=0`、`RECONSTRUCTED`，**逐字重現 R458 落盤的十個數字**：校準 54/54、gate 81／vote 76、b=14／c=9、Δ=+4.1667pp、rows 360、sha `cfed36ff71b871f0` |
+| **錯的 bank**（陷阱） | `--run runs/g_r447_conform_lcb2 --bank lcb3` | `rc=0`、**`BROKEN`**、`paired_gate_vs_vote=null`、`broken` 列出 **120 條具名 `task_not_in_bank:<id>`**，且 `sampling.bank` 誠實記著 `"lcb3"` |
+
+⇒ **給錯 bank 會大聲壞掉，不會安靜吐一個假的 Δ。** 這條擋門（`r447_eq5_offline.py:145`）
+原本**不在 `selftest()` 的任何一條具名 `ck` 裡**，本附錄是它第一次被演練。
+前提事實：`lcb2` 與 `lcb3` 的 `task_id` 集合**交集為 0**（R464 實測 120／189／0）
+——若兩庫有交集，上面那個測試只是部分覆蓋。
+
+## D.5 本附錄**沒有**動的東西
+
+`PRACTICAL_PP`、`MIN_PAIRED`、α、n、seed、worker、端點、bank、§三 的窗口、
+§四 的 MDE 與預測區間、P-R461-3 事前的 `UNRESOLVED` 判決——**一個數字都沒有動**。
+也**沒有**改 `r447_eq5_offline.py` 一行（本輪只是跑它、驗它）。
