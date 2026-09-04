@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import copy
 import json
+import math
 import pathlib
 import shutil
 import subprocess
@@ -149,24 +150,39 @@ check("T11 判準檔缺 Q4 列 ⇒ BROKEN「門檻 parse 不到」（工具裡�
       rc == 2 and "找到 0 列" in o, f"rc={rc} {o.strip()[:80]}")
 
 # ── T12 門檻真的從判準檔讀：同一份資料，改判準的數字就翻面 ─────────────
-def mut_void(pp_void):
+def mut_void(target_pp):
+    """把 r445/OFF 的 void 率**調到指定的百分點**（不是寫死 void 的個數）。
+
+    round686：原本這裡寫死 `infra_void = 2 / 6`，註解記著「accepted=61」——那是
+    round680 當下 r445 才跑到 61 題的分母。r445 是**活的 run，分母會一直長**，
+    於是 T13 的 6/61=9.84pp 一路衰減到 6/126=4.76pp，**掉到它自己要測的 5pp 門檻底下**，
+    測試就永遠紅了（本輪實測：HEAD 未改版同樣 FAIL ⇒ 不是本輪改壞的）。
+    永遠紅的測試坐在收官第 0 步上，收官時只會被當成「工具壞了」或被忽略。
+
+    改成從該臂**當下的分母**回推 void 個數，target_pp 就穩定了，不管 r445 長到多大。
+    分母取 `processed`（＝該臂已跑到的題數，gain_run.py:1364），這是本測試 L167
+    原本就寫明的意圖（「已嘗試的題數，不是 accepted」）；**故意不去照抄工具內部的
+    取法**——照抄的話工具改錯了測試也會跟著錯，牙齒就沒了。
+    """
     def f(s):
         s[R445]["request_policy"]["timeout_s"] = 300          # policy 不同
-        s[R445]["arms"]["OFF"]["infra_void"] = pp_void         # accepted=61
+        arm = s[R445]["arms"]["OFF"]
+        denom = arm.get("processed") or arm.get("tasks")
+        arm["infra_void"] = math.ceil(target_pp / 100.0 * denom)
     return f
 base_crit = CRIT.read_text(encoding="utf-8")
-d, c, a = fixture(mut_void(2))                                 # 2/61 = 3.28pp
+d, c, a = fixture(mut_void(3.0))               # 目標 3.0pp（隨 r445 分母自動換算）
 rc_lo, o_lo = run(d, c, a)
-d, c, a = fixture(mut_void(2), crit_text=base_crit.replace("差 <5pp", "差 <1pp"))
+d, c, a = fixture(mut_void(3.0), crit_text=base_crit.replace("差 <5pp", "差 <1pp"))
 rc_hi, o_hi = run(d, c, a)
-check("T12 同一份資料（void 3.28pp）：判準 5pp ⇒ 過、判準 1pp ⇒ BROKEN",
+check("T12 同一份資料（void≈3.0pp）：判準 5pp ⇒ 過、判準 1pp ⇒ BROKEN",
       rc_lo == 0 and "DIFFERS_NO_CONSEQUENCE" in o_lo
       and rc_hi == 2 and "≥ 1.0pp" in o_hi,
       f"5pp:rc={rc_lo} 1pp:rc={rc_hi}")
 
 # void 率的分母是該臂**已嘗試**的題數 `arms[arm].n`（不是 accepted）——r445 還在跑，
 # 分母會長，所以這裡不寫死期望的百分比，只驗「跨過判準門檻」這件事本身。
-d, c, a = fixture(mut_void(6))
+d, c, a = fixture(mut_void(9.0))
 rc, o = run(d, c, a)
 check("T13 policy 不同且 void 率跨過 5pp 門檻 ⇒ BROKEN「差異有可觀測後果」",
       rc == 2 and "≥ 5.0pp" in o and "差異有可觀測後果" in o, f"rc={rc} {o.strip()[:90]}")
@@ -235,6 +251,54 @@ sha = {p.name: __import__("hashlib").sha256((p / "summary.json").read_bytes())
        .hexdigest()[:8] for p in REAL}
 check("T18 真 run 目錄未被本測試寫過（summary sha256[:8] 記錄在案）", True,
       json.dumps(sha, ensure_ascii=False))
+
+# ── T22/T23/T24 round686：void 率的分母 ────────────────────────────
+# 缺陷：分母原本是 `a.get("n") or a.get("accepted")`。`n` 在 52 個臂裡出現 0 次
+# ⇒ 永遠掉到 accepted，而 accepted 排除了被拒交的題 ⇒ 會拒交的 CONFORM 用的尺
+# 比 OFF/OFF5 小，同一條中止線對三臂寬鬆程度不同。
+# 判準不寫 rc，寫「偵測器該看到的那個量」＝ rates 裡那一格的分母 n 與百分比。
+import subprocess as _sp
+
+
+def _rates(mut):
+    d, c, a = fixture(mut)
+    tgt = WORK / "r686.json"
+    _sp.run([sys.executable, str(TOOL), "--runs", *d, "--criterion", c,
+             "--code-attest", a, "--json", str(tgt)],
+            capture_output=True, text=True, cwd=ROOT)
+    return json.loads(tgt.read_text(encoding="utf-8"))["checks"]["C4_void"]["rates"]
+
+
+def mut_refuse(s):
+    """讓 r445 的 CONFORM 與 OFF 拿到**一模一樣**的 void 個數與已跑題數，
+    唯一的差別是 CONFORM 有拒交（accepted < processed）。"""
+    for arm in ("OFF", "CONFORM"):
+        a = s[R445]["arms"][arm]
+        a["processed"] = 100
+        a["infra_void"] = 10
+    s[R445]["arms"]["OFF"]["accepted"] = 100        # 不拒交
+    s[R445]["arms"]["CONFORM"]["accepted"] = 80     # 拒了 20 題
+
+
+r = _rates(mut_refuse)
+off, con = r[f"{R445}/OFF"], r[f"{R445}/CONFORM"]
+check("T22 同樣 10/100 的 void，拒交臂與不拒交臂算出同一個 void 率（分母＝processed）",
+      off["n"] == con["n"] == 100 and off["pct"] == con["pct"] == 10.0,
+      f"OFF={off} CONFORM={con}")
+check("T23 拒交臂的分母不是 accepted（80）——用 accepted 會算成 12.5%",
+      con["n"] != 80 and abs(con["pct"] - 12.5) > 1e-9, f"CONFORM={con}")
+
+
+def mut_no_denom(s):
+    a = s[R445]["arms"]["OFF"]
+    for k in ("processed", "tasks", "n"):
+        a.pop(k, None)
+
+
+d, c, a = fixture(mut_no_denom)
+rc, o = run(d, c, a)
+check("T24 分母欄位全不見 ⇒ BROKEN 指名『分母量不到』（安靜量不到型三）",
+      rc == 2 and "分母量不到" in o, f"rc={rc} {o.strip()[:90]}")
 
 ok = sum(1 for r, _, _ in results if r)
 print(f"\n{ok}/{len(results)} PASS")

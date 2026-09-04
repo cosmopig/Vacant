@@ -104,6 +104,18 @@ def _pooled(ctx, path):
     if ctx["pooled"] is None:
         raise NotEvaluated("尚未提供併庫結果（--pooled-json，"
                            "由 pooled_paired_ci.py --key deliv 產生）")
+    # round686：併庫 JSON 必須是用 `--key deliv` 算的。`pooled_paired_ci.py` 的 `--key`
+    # 預設是 `meets_demand`（為了回歸相容），忘了帶旗標就會安靜地產出另一種語意的併庫結果
+    # ——而 P-E2/P-E3 照吃不誤、rc=0、沒有任何警告。實測：同一個 run、同一行指令，
+    # 只換併庫產物的 key，P-E3 就從 HIT（n_d=30）翻成 MISS（n_d=80）。
+    # `deliv` 是事前文件寫死的口徑（CRITERION_20260903_R667 §40、R445 DECISION:8），
+    # 不是這裡新開的旋鈕——同一個字面值本檔 L106/L116/L284 早就有。
+    got = ctx["pooled"].get("key")
+    if got != "deliv":
+        raise Broken(
+            f"併庫 JSON 的 key 是 {got!r}，不是 'deliv'——這不是通過，是量錯了東西。"
+            "重跑 pooled_paired_ci.py 時要帶 --key deliv"
+            "（口徑見 CRITERION_20260903_R667_CONFORM_SETTLEMENT_ARITHMETIC.md §40）")
     cur = ctx["pooled"]
     for part in path.split("."):
         if not isinstance(cur, dict) or part not in cur:

@@ -95,7 +95,20 @@ def void_rate(s: dict, arm: str) -> tuple[float, int, int]:
         raise Broken(f"summary.arms.{arm} 不存在 ⇒ void 率量不到")
     if "infra_void" not in a:
         raise Broken(f"summary.arms.{arm} 沒有 infra_void 欄位 ⇒ void 率量不到")
-    n = a.get("n") or a.get("accepted") or 0
+    # round686：void 率的分母原本是 `a.get("n") or a.get("accepted")`。`n` 這個欄位
+    # 在 52 個臂裡出現 0 次（gain_run.py:1352-1365 寫的是 tasks/processed/accepted）
+    # ⇒ 第一順位是死碼，實際永遠掉到 `accepted`。而 `accepted` 同時排除了「被拒交的題」
+    # 與「void 掉的題」：CONFORM 會拒交（r444 accepted=170 vs processed=179、
+    # r445 108 vs 119）⇒ 同一條 20% 中止線，CONFORM 用的分母比 OFF/OFF5 小，
+    # 三臂不同尺。正確的分母是這一臂實際跑到的題數 processed（gain_run.py:1364）。
+    # 量不到就 Broken，不准再靜靜換一個分母算下去。
+    for k in ("processed", "tasks", "n"):
+        if k in a:
+            n = a[k]
+            break
+    else:
+        raise Broken(f"summary.arms.{arm} 沒有 processed/tasks/n 任何一個欄位"
+                     f"（只有 {sorted(a)}）⇒ void 率的分母量不到")
     tot = max(int(n), int(a["infra_void"]))
     return (100.0 * a["infra_void"] / tot if tot else 0.0), int(a["infra_void"]), tot
 

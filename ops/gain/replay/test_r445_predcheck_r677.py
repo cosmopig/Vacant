@@ -231,6 +231,30 @@ def main() -> int:
         ok("Q7c 併庫接上 ⇒ 八條全判得出來", False,
            f"pooled_paired_ci 沒產出 JSON：rc={pp.returncode} {pp.stdout[-300:]}")
 
+    # ── Q9 round686：併庫 JSON 的 key 必須是 deliv ────────────────────
+    # 缺陷：`pooled_paired_ci.py --key` 的預設是 `meets_demand`（回歸相容），
+    # 忘了帶旗標就會產出另一種語意的併庫結果，而 P-E2/P-E3 照吃不誤、rc=0、零警告。
+    # `meets_demand` 單獨算會把 CONFORM **拒交掉**、但其實會通過的題也算成功
+    # ⇒ 系統性高估拒交臂。事前口徑是 deliv（CRITERION_20260903_R667 §40）。
+    # 判準不只寫 rc：要看到 P-E2/P-E3 兩條都被標成 BROKEN。
+    wrong_json = WORK / "pooled_WRONGKEY.json"
+    subprocess.run(
+        [sys.executable, str(HERE / "pooled_paired_ci.py"),
+         "--stratum", f"r444={R444}", "--stratum", f"r445={term}",
+         "--a-arm", "CONFORM", "--b-arm", "OFF5",      # 故意不帶 --key
+         "--json", str(wrong_json)],
+        capture_output=True, text=True, cwd=str(REPO))
+    wk = json.loads(wrong_json.read_text(encoding="utf-8"))["key"]
+    rc9, out9 = run(["--run", str(term), "--decision", str(DECISION),
+                     "--final", "--pooled-json", str(wrong_json)])
+    broken = [i for i in (2, 3) if status_of(out9, f"P-E{i}") == "BROKEN"]
+    ok("Q9a 併庫 JSON 的 key 不是 deliv ⇒ P-E2/P-E3 都 BROKEN 且 rc≠0（不是安靜換一個量）",
+       wk == "meets_demand" and broken == [2, 3] and rc9 != 0,
+       f"產物 key={wk} BROKEN={broken} rc={rc9}")
+    ok("Q9b BROKEN 訊息指名量錯了什麼，不只說失敗",
+       "不是 'deliv'" in out9 and "量錯了東西" in out9,
+       out9.strip()[:100])
+
     # ── Q8 r444 口徑的鍵要明講不適用，且鍵名真的存在於 conform_settle ────
     real = _cs.settle(R445, live / "rows.jsonl", "CONFORM", "OFF5", "OFF")["verdicts"]
     import r445_predcheck as _pc
