@@ -34,6 +34,7 @@ from ops.gain.analyze_r447 import _deliv                                # noqa: 
 from ops.gain.power_paired import exact_mcnemar_p                       # noqa: E402
 from ops.gain.r447_eq5_offline import bank_gate_headroom                # noqa: E402
 from ops.gain import r447_reject_reconstruct as RR                      # noqa: E402
+from ops.gain import r447_gauge_capability as GC                        # noqa: E402
 
 MUTANT = ""
 LAST_FAILS: list[str] = []
@@ -147,6 +148,12 @@ def per_task(rows: list[dict]) -> list[dict]:
             "off5_deliv": _deliv(d["OFF5"]),
             "conform_accepted": bool(d["CONFORM"].get("accepted")),
             "conform_calls": float(d["CONFORM"].get("calls_used") or 0),
+            # ── R454 加法式新增（既有欄位一個未動；R453 的記錄不讀這兩個鍵）
+            "conform_correct": bool(d["CONFORM"].get("meets_demand")),
+            "off5_correct": bool(d["OFF5"].get("meets_demand")),
+            "demonstrated": bool(d["OFF"].get("meets_demand")
+                                 or d["CONFORM"].get("meets_demand")
+                                 or d["OFF5"].get("meets_demand")),
         })
     return out
 
@@ -168,6 +175,8 @@ def _stat(pt: list[dict], name: str) -> float | None:
     if name == "P-Z3":
         return 100.0 * (sum(p["conform_deliv"] for p in pt)
                         - sum(p["off5_deliv"] for p in pt)) / n
+    if name == "R450-6-1":                                    # R454，加法式
+        return 100.0 * sum(1 for p in pt if not p["demonstrated"]) / n
     raise KeyError(name)
 
 
@@ -224,6 +233,195 @@ def classify(identity: bool, witnesses: int, *, forced_on_parsed: bool = False) 
     if identity:
         return "FORCED_ON_PARSED" if forced_on_parsed else "FORCED_GREEN"
     return "UNRESOLVED"
+
+
+# ──────────────────────────────────────────────────────────────────────
+# R454：把普查延伸到 R450（DECISION_20260904_R454_R450_FALSIFIABILITY_EXTENSION.md）
+# 加法式：不改 R453 既有 12 筆記錄的任何值，只新增鍵。
+# ──────────────────────────────────────────────────────────────────────
+R450_DOC = ROOT / "DECISION_20260904_R450_GAUGE_CAPABILITY_CENSUS.md"
+
+# §三 事前預測表（R454 §三）。量完照實對帳，**錯了不准回頭改**。
+R454_PREDICTIONS = {
+    "R450-§三-bc":  ("FORCED_GREEN", "evidence"),
+    "R450-§六-2":   ("FORCED_GREEN", "evidence"),
+    "R450-§六-1":   ("EVALUABLE",    "evidence"),
+    "R450-§五-2":   ("FORCED_GREEN", "guard"),
+    "R450-§四":     ("EVALUABLE",    "evidence"),
+}
+
+
+def _func_node(rel: str, fname: str):
+    src = (ROOT / rel).read_text(encoding="utf-8")
+    fn = next((n for n in ast.walk(ast.parse(src))
+               if isinstance(n, ast.FunctionDef) and n.name == fname), None)
+    return src, fn
+
+
+def _deliv_expr_literal() -> str:
+    """逐字取 analyze_r447._deliv 的正式 return 運算式。
+    ⚠ ast.walk 是 BFS ⇒ 取「最後一個 return」必須按 (lineno, col_offset) 排序（r-記憶鐵律）。"""
+    src, fn = _func_node("ops/gain/analyze_r447.py", "_deliv")
+    if fn is None:
+        return ""
+    rets = sorted((n for n in ast.walk(fn) if isinstance(n, ast.Return)),
+                  key=lambda n: (n.lineno, n.col_offset))
+    return ast.get_source_segment(src, rets[-1].value) if rets else ""
+
+
+def _bc_cond_literals() -> list[str]:
+    """逐字取 r447_gauge_capability._mcnemar_bc 裡 b/c 兩個生成式的 if 條件。"""
+    src, fn = _func_node("ops/gain/r447_gauge_capability.py", "_mcnemar_bc")
+    if fn is None:
+        return []
+    gens = sorted((n for n in ast.walk(fn) if isinstance(n, ast.GeneratorExp)),
+                  key=lambda n: (n.lineno, n.col_offset))
+    return [ast.get_source_segment(src, g.generators[0].ifs[0])
+            for g in gens if g.generators and g.generators[0].ifs]
+
+
+def prove_deliv_false_if_not_demonstrated() -> dict:
+    """恆等式一半：undemonstrated ⇒ 每臂 meets_demand 假 ⇒ _deliv 恆假。
+    **窮舉**（accepted 兩種取值），不是抽樣。運算式從原始碼逐字取，不自己改寫一份。"""
+    expr = _deliv_expr_literal()
+    if MUTANT == "Y11_bc_identity_dropped":
+        return {"holds": False, "expr": expr, "cases": [], "note": "MUTANT"}
+    cases = []
+    for acc in (True, False):
+        r = {"accepted": acc, "meets_demand": False}
+        cases.append({"accepted": acc, "meets_demand": False,
+                      "deliv": bool(eval(expr, {"bool": bool}, {"r": r}))})
+    return {"holds": bool(expr) and all(not c["deliv"] for c in cases),
+            "expr": expr, "cases": cases,
+            "exhaustive_over": "meets_demand=False × accepted∈{True,False}（2/2 窮舉）"}
+
+
+def prove_bc_ignores_concordant() -> dict:
+    """恆等式另一半：b/c 只數不一致對 ⇒ (False,False) 對兩者各貢獻 0。四種組合窮舉。"""
+    conds = _bc_cond_literals()
+    cases = []
+    for a in (True, False):
+        for bb in (True, False):
+            env = {"A": {"k": a}, "B": {"k": bb}, "t": "k"}
+            cases.append({"A": a, "B": bb,
+                          "contrib": [bool(eval(c, {}, env)) for c in conds]})
+    conc = [c for c in cases if c["A"] == c["B"]]
+    return {"holds": len(conds) == 2 and all(not any(c["contrib"]) for c in conc),
+            "exprs": conds, "cases": cases,
+            "exhaustive_over": "(A[t],B[t]) 四種組合窮舉"}
+
+
+def prove_dead_clause_v53() -> dict:
+    """**校準正對照**（R454 §五-C）：R450 §五-3「_deliv 為真且 meets_demand 為假」
+    是**已知**的恆假死碼（R450 §八 已證並刪除）。用**現行原始碼**的 _deliv 運算式
+    重建它，四種組合窮舉。分類器分不出這個已知答案 ⇒ 尺沒牙齒 ⇒ §六-3 降級。"""
+    expr = _deliv_expr_literal()
+    op = "or" if MUTANT == "Y15_calibration_positive_control_broken" else "and"
+    clause = f"({expr}) {op} not bool(r.get('meets_demand'))"
+    cases = []
+    for acc in (True, False):
+        for md in (True, False):
+            r = {"accepted": acc, "meets_demand": md}
+            cases.append({"accepted": acc, "meets_demand": md,
+                          "fires": bool(eval(clause, {"bool": bool}, {"r": r}))})
+    return {"holds": bool(expr) and not any(c["fires"] for c in cases),
+            "clause": clause, "cases": cases,
+            "known_answer": "FORCED_GREEN（R450 §八 已證）"}
+
+
+def r450_records(rows: list[dict], pt: list[dict]) -> dict:
+    """R454：對 R450 的五條子句做同一套三格分類。回傳 {records, proofs, broken, ...}。"""
+    gc = GC.census(rows)
+    p1 = prove_deliv_false_if_not_demonstrated()
+    p2 = prove_bc_ignores_concordant()
+    cal = prove_dead_clause_v53()
+    bc_identity = bool(p1["holds"] and p2["holds"])
+    broken: list[str] = []
+
+    # 兩份獨立實作的「三臂齊的題」必須一致（census.per_task vs gauge_capability.census）
+    if gc["n_tasks_complete"] != len(pt):
+        broken.append(f"complete_disagree:{gc['n_tasks_complete']}!={len(pt)}")
+
+    undem = set(gc["undemonstrated_task_ids"])
+    demon = {p["task_id"] for p in pt if p["demonstrated"]}
+    scan = demon if MUTANT == "Y12_undem_witness_scans_demonstrated" else undem
+    w_rows = sorted({r["task_id"] for r in rows if r["task_id"] in scan and _deliv(r)})
+    w_bc = len(gc.get("bc_mismatch", [])) + len(w_rows)
+
+    ident_txt = ("undemonstrated ⇒ 每臂 meets_demand 假 ⇒ _deliv 恆假 ⇒ 該題在任一對臂上"
+                 "都是 (False,False)＝concordant ⇒ 對 b 與 c 各貢獻 0 ⇒ 移除它們 b/c 逐數不變")
+    rec: dict = {}
+    rec["R450-§三-bc"] = {
+        "clause": "排除 undemonstrated 後 b/c 與全量逐數相同（R450 §三 的真資料對照）",
+        "falsifier": "某一對臂的 b 或 c 改變（工具吐 BROKEN_BC_MISMATCH）",
+        "identity": ident_txt if bc_identity else None,
+        "witnesses": w_bc,
+        "witness_task_ids": w_rows[:10],
+        "observed": {"bc_cross_check": gc["bc_cross_check"], "gc_verdict": gc["verdict"]},
+        "class": classify(bc_identity, w_bc)}
+
+    rec["R450-§六-2"] = {
+        "clause": "推翻條件：若 b/c 對照不相同 ⇒ R450 §三 立即作廢",
+        "falsifier": "同一事件（對照不相同）",
+        "identity": ident_txt if bc_identity else None,
+        "witnesses": w_bc,
+        "subevent_of": "R450-§三-bc（同一事件，不是獨立證據）",
+        "class": classify(bc_identity, w_bc)}
+
+    hi = 20.0 if MUTANT == "Y14_window_doubt_threshold_relaxed" else 50.0
+    jk = jackknife_escapes(pt, "R450-6-1", -math.inf, hi)
+    rec["R450-§六-1"] = {
+        "clause": f"undemonstrated 佔比 ≤ {hi}%（超過就要質疑量測窗口本身）",
+        "falsifier": f"佔比 > {hi}%",
+        "identity": None, "witnesses": jk["n_outside_window"], "jackknife": jk,
+        "observed": {"pct_undemonstrated": gc["pct_undemonstrated"],
+                     "window_doubt_triggered": gc["window_doubt_triggered"]},
+        "class": classify(False, jk["n_outside_window"])}
+
+    w52 = 1 if gc["n_tasks_complete"] == 0 else 0
+    rec["R450-§五-2"] = {
+        "clause": "三臂齊的題數 > 0（否則 BROKEN_NO_COMPLETE_TASKS）",
+        "falsifier": "題數＝0",
+        "identity": None,                      # 資料相關，寫不出與模型行為無關的恆等式
+        "witnesses": w52,
+        "observed": {"n_tasks_complete": gc["n_tasks_complete"]},
+        "class": classify(False, w52)}
+
+    # §四：區間 [pz1_demonstrated_only, pz1_raw] 是否整段落在 40–60
+    lo_e = gc["pz1_demonstrated_only_NOT_ARBITER"]
+    hi_e = gc["pz1_raw_NOT_ARBITER"]
+    n_dem = sum(1 for p in pt if p["demonstrated"])
+    chk_raw = round(100.0 * sum(1 for p in pt if not p["off_deliv"]) / len(pt), 3) if pt else None
+    chk_dem = (round(100.0 * sum(1 for p in pt if p["demonstrated"] and not p["off_deliv"])
+                     / n_dem, 3) if n_dem else None)
+    if chk_raw != hi_e or chk_dem != lo_e:
+        broken.append(f"pz1_interval_disagree:gc=({lo_e},{hi_e}) local=({chk_dem},{chk_raw})")
+    ends = [] if MUTANT == "Y13_pz1_interval_uses_raw_only" else [lo_e]
+    ends = ends + [hi_e]
+    w4 = sum(1 for v in ends if v is not None and (v < 40.0 or v > 60.0))
+    rec["R450-§四"] = {
+        "clause": "區間 [pz1_demonstrated_only, pz1_raw] 整段落在 40–60（P-Z1 的窗口）",
+        "falsifier": "區間任一端跨出 40–60 ⇒ 收官必須加但書",
+        "identity": None, "witnesses": w4,
+        "observed": {"interval": [lo_e, hi_e], "endpoints_checked": ends,
+                     "n_demonstrated": n_dem, "n_complete": len(pt)},
+        "class": classify(False, w4)}
+
+    # §六-3 校準失敗 ⇒ **只降級本輪（R450-*）的 FORCED_GREEN**，不動 R453 既有記錄
+    if not cal["holds"]:
+        for v in rec.values():
+            if v["class"] in ("FORCED_GREEN", "FORCED_ON_PARSED"):
+                v["class"] = "UNRESOLVED_CALIBRATION_FAILED"
+
+    ledger = {}
+    for k, (pred, intent) in R454_PREDICTIONS.items():
+        got = rec[k]["class"]
+        rec[k]["intent"] = intent
+        ledger[k] = {"predicted": pred, "observed": got, "hit": pred == got, "intent": intent}
+    return {"records": rec, "broken": broken, "prediction_ledger": ledger,
+            "calibration_positive_control": cal,
+            "proofs": {"deliv_false_if_not_demonstrated": p1, "bc_ignores_concordant": p2},
+            "n_predictions_hit": sum(1 for v in ledger.values() if v["hit"])}
 
 
 def census(rows, calls, tasks, runs_dir=None, *, recon=None, windows=None) -> dict:
@@ -373,6 +571,14 @@ def census(rows, calls, tasks, runs_dir=None, *, recon=None, windows=None) -> di
                 "範圍歧義（全部 vs 只有 CONFORM）不是本尺能裁的，留給收官。",
         "class": classify(False, sum(1 for r in rows if "receipt_head" not in r))}
 
+    # ── R454：R450 的五條子句（加法式；上面 12 筆一個值都不動）
+    r450 = r450_records(rows, pt)
+    out["records"].update(r450["records"])
+    out["broken"].extend(r450["broken"])
+    out["R454_prediction_ledger"] = r450["prediction_ledger"]
+    out["R454_identity_proofs"] = r450["proofs"]
+    out["R454_calibration_positive_control"] = r450["calibration_positive_control"]
+
     contradictions = [k for k, v in out["records"].items() if v["class"] == "CONTRADICTION"]
     if contradictions:
         out["broken"].append(f"contradiction:{contradictions}")   # DECISION §六.1
@@ -406,6 +612,7 @@ def _fixture(mode="clean"):
       contradiction  子集世界（恆等式成立）卻出現 ¬V∧H 的列（給 Y2 看）
       cand_only      非子集世界、witness **只在候選層**、rows 層沒有（給 Y3 看）
       unparsed       子集世界但有一題的 check 形狀認不出（給 Y1 看，B2 降級）
+      undem_mid      undemonstrated 佔比 30%（20<x≤50）⇒ 乾淨 UNRESOLVED、Y14 才會變 EVALUABLE
     """
     n = 30
     off_ok_n = {"borderline": 12, "no_escape": 15}.get(mode)
@@ -425,6 +632,12 @@ def _fixture(mode="clean"):
             {"task_id": tid, "arm": "OFF5", "meets_demand": off_ok or (i % 7 == 0),
              "accepted": True, "visible_ok": True, "calls_used": 5},
         ]
+    if mode == "undem_mid":
+        # R454／給 Y14 看：把前 9 題（9/30＝30%）打成三臂全滅 ⇒ 佔比落在 20% 與 50% 之間。
+        # 乾淨門檻 50 ⇒ UNRESOLVED；Y14 把門檻放寬成 20 ⇒ EVALUABLE。
+        for r in rows:
+            if int(r["task_id"][1:]) < 9:
+                r["meets_demand"] = False
     n_rej = sum(1 for r in rows if r["arm"] == "CONFORM" and not r["accepted"])
     n_bad = sum(1 for r in rows if r["arm"] == "CONFORM"
                 and not r["visible_ok"] and r["meets_demand"])
@@ -582,6 +795,40 @@ def selftest() -> int:
 
     print("[B] 擋門")
     o3 = census(r0[:6], c0, t0, recon=k0)
+    # ── R454：R450 五條子句的指名夾具（DECISION §五-B/C/D）
+    print("[Z] R454：R450 子句（每個突變體都要有看得見它的夾具）")
+    ck("Z0 校準正對照：已知的恆假死碼（R450 §五-3）判得出來",
+       prove_dead_clause_v53()["holds"], str(prove_dead_clause_v53()["cases"]))
+    ck("Z0b 校準負對照：自由統計量 P-Z1 沒有被判成 FORCED（分類器不是什麼都判 FORCED）",
+       o["records"]["P-Z1"]["class"] == "EVALUABLE", str(o["records"]["P-Z1"]["class"]))
+    ck("Z1 Y11 的夾具：恆等式兩半都成立且 witness=0 ⇒ R450-§三-bc＝FORCED_GREEN",
+       o["records"]["R450-§三-bc"]["class"] == "FORCED_GREEN",
+       str(o["records"]["R450-§三-bc"]["class"]))
+    ck("Z2 Y12 的夾具：witness 只掃 undemonstrated（掃錯集合會變 CONTRADICTION）",
+       o["records"]["R450-§三-bc"]["witnesses"] == 0
+       and o["records"]["R450-§三-bc"]["class"] != "CONTRADICTION",
+       str(o["records"]["R450-§三-bc"]["witnesses"]))
+    o_ne = census(*_fixture("no_escape")[:3], recon=_fixture("no_escape")[3])
+    ck("Z3 Y13 的夾具：區間下端 37.5 在窗外 ⇒ R450-§四＝EVALUABLE（丟掉下端就看不見）",
+       o_ne["records"]["R450-§四"]["class"] == "EVALUABLE"
+       and o_ne["records"]["R450-§四"]["witnesses"] >= 1,
+       str(o_ne["records"]["R450-§四"]["observed"]))
+    o_um = census(*_fixture("undem_mid")[:3], recon=_fixture("undem_mid")[3])
+    ck("Z4 Y14 的夾具：佔比 30% 在 50% 門檻內 ⇒ UNRESOLVED（門檻被放寬成 20 才會變 EVALUABLE）",
+       o_um["records"]["R450-§六-1"]["class"] == "UNRESOLVED"
+       and 20.0 < o_um["records"]["R450-§六-1"]["jackknife"]["full"] <= 50.0,
+       str(o_um["records"]["R450-§六-1"]["jackknife"]["full"]))
+    ck("Z5 Y15 的夾具：校準通過時 FORCED_GREEN 不被降級",
+       o["records"]["R450-§六-2"]["class"] == "FORCED_GREEN"
+       and o["R454_calibration_positive_control"]["holds"],
+       str(o["records"]["R450-§六-2"]["class"]))
+    ck("Z6 §六-1 的 UNRESOLVED 附了『離邊界／擾動』比值（記憶鐵律：留一法只是 1/n 擾動）",
+       isinstance(o["records"]["R450-§六-1"]["jackknife"]
+                  ["instrument_resolution_NOT_ARBITER"]["boundary_over_perturbation"], float))
+    ck("Z7 事前預測表逐條對帳過（HIT/MISS 都要有，不准只留 HIT）",
+       set(o["R454_prediction_ledger"]) == set(R454_PREDICTIONS)
+       and all("hit" in v for v in o["R454_prediction_ledger"].values()))
+
     ck("B4 完整題目 < MIN_TASKS ⇒ UNCALIBRATED 且不吐分類",
        o3["verdict"] == "UNCALIBRATED" and "records" not in o3 or not o3.get("records"),
        str(o3.get("verdict")))

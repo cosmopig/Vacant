@@ -67,6 +67,12 @@ EXPECT_CENSUS = {
     "Y8_window_check_toothless":        "X5 Y8 的夾具",
     "Y9_resolution_ignores_perturbation": "S1 Y9 的夾具",
     "Y10_void_scan_silent_when_empty":  "V1 Y10 的夾具",
+    # R454：R450 五條子句（每個突變體都要有看得見它的夾具）
+    "Y11_bc_identity_dropped":            "Z1 Y11 的夾具",
+    "Y12_undem_witness_scans_demonstrated": "Z2 Y12 的夾具",
+    "Y13_pz1_interval_uses_raw_only":     "Z3 Y13 的夾具",
+    "Y14_window_doubt_threshold_relaxed": "Z4 Y14 的夾具",
+    "Y15_calibration_positive_control_broken": "Z5 Y15 的夾具",
 }
 
 
