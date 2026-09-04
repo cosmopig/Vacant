@@ -10,7 +10,7 @@ runs/_analysis_r656/CRITERION.md（先 commit 才開始量）。
 所以「區間排除 0」必然等價於「精確 p < 0.05」——這一致性是自檢條 C。
 """
 from __future__ import annotations
-import argparse, json, math, pathlib, sys
+import argparse, json, math, os, pathlib, sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from analyze_paired import load_rows, arm_rows, exact_mcnemar_p  # noqa: E402
@@ -18,6 +18,30 @@ from analyze_paired import load_rows, arm_rows, exact_mcnemar_p  # noqa: E402
 ALPHA = 0.05          # 95%，沿用專案既有慣例，非本輪新旋鈕
 PRACTICAL_PP = 5.0    # 借用 R440B L2 / round483 的實務門檻，見 CRITERION.md
 MIN_PAIRED = 60       # BROKEN 門檻
+
+# round731（R463）：量哪一個「成功」。**定義逐字照抄 pooled_paired_ci.py:42-46**，
+# 不是本輪新訂口徑。這支單 run 尺一直寫死 meets_demand（r675 修了 pooled、r678 補了
+# power_paired，唯獨漏掉這裡 ⇒ 同一個坑第三次）。
+#   deliv        = accepted ∧ meets_demand  ← round670 §三 裁定拒交臂只由這個結算
+#   meets_demand = meets_demand             ← 舊語意，**保留為預設以維持回歸相容**
+# 拒交臂（CONFORM）上 meets_demand 不是交付率：gain_run.py:588 在閘門拒交時回退到
+# 最後一份候選、:1586 無條件對它評分 ⇒ accepted=False ∧ meets_demand=True 可達，
+# 那一格東西根本沒交出去，算成交付會**高估拒交臂**。
+KEYS: dict[str, tuple[tuple[str, ...], object]] = {
+    "meets_demand": (("meets_demand",),
+                     lambda r: bool(r.get("meets_demand"))),
+    "deliv": (("accepted", "meets_demand"),
+              lambda r: bool(r.get("accepted")) and bool(r.get("meets_demand"))),
+}
+
+
+def _resolve_key(key: str):
+    """突變點必須在被測函式**內部**、且 env 在呼叫時才讀（模組層讀 ⇒ 永遠不生效，
+    長得跟「偵測條沒牙齒」一模一樣，memory 記過）。"""
+    fields, ok = KEYS[key]
+    if os.environ.get("MUTANT") == "M_KEY":   # 突變點：--key 是裝飾品，永遠量 meets_demand
+        fields, ok = KEYS["meets_demand"]
+    return fields, ok
 
 
 def _binom_cdf(k: int, n: int, p: float) -> float:
@@ -192,6 +216,9 @@ def main() -> int:
     ap.add_argument("--a-arm", default="ON")
     ap.add_argument("--b-arm", default="OFF5")
     ap.add_argument("--json")
+    ap.add_argument("--key", default="meets_demand", choices=sorted(KEYS),
+                    help="量哪一個成功；拒交臂（CONFORM）請用 deliv（round670 §三）。"
+                         "預設 meets_demand 保回歸相容")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()
     if args.selftest:
@@ -204,8 +231,10 @@ def main() -> int:
     A, B = arm_rows(rows, args.a_arm), arm_rows(rows, args.b_arm)
     common = sorted(set(A) & set(B))
 
-    # 第三類：缺 meets_demand 的 row 照實計、不進分母
-    missing = [t for t in common if "meets_demand" not in A[t] or "meets_demand" not in B[t]]
+    fields, ok = _resolve_key(args.key)
+    # 第三類：缺欄位的 row 照實計、不進分母（缺 accepted 會被讀成「拒交」＝方向性偏誤）
+    missing = [t for t in common
+               if any(f not in A[t] or f not in B[t] for f in fields)]
     common = [t for t in common if t not in set(missing)]
     n = len(common)
 
@@ -217,8 +246,8 @@ def main() -> int:
     # 同一個 run 內兩臂共用 summary 的四項條件 => 恆同；照實記出處
     conditions_all_same = True
 
-    b = sum(1 for t in common if A[t]["meets_demand"] and not B[t]["meets_demand"])
-    c = sum(1 for t in common if B[t]["meets_demand"] and not A[t]["meets_demand"])
+    b = sum(1 for t in common if ok(A[t]) and not ok(B[t]))
+    c = sum(1 for t in common if ok(B[t]) and not ok(A[t]))
     r = diff_ci(b, c, n)
     lo_pp, hi_pp, d_pp = r["lo"] * 100, r["hi"] * 100, r["delta"] * 100
 
@@ -230,9 +259,10 @@ def main() -> int:
 
     out = {
         "run": str(d), "a_arm": args.a_arm, "b_arm": args.b_arm,
+        "key": args.key,
         "n_paired": n, "third_category_missing_meets_demand": missing,
-        "a_ok": sum(1 for t in common if A[t]["meets_demand"]),
-        "b_ok": sum(1 for t in common if B[t]["meets_demand"]),
+        "a_ok": sum(1 for t in common if ok(A[t])),
+        "b_ok": sum(1 for t in common if ok(B[t])),
         "b_discordant_a_only": b, "c_discordant_b_only": c,
         "n_discordant": r["n_discordant"],
         "delta_pp": d_pp, "ci95_lo_pp": lo_pp, "ci95_hi_pp": hi_pp,
