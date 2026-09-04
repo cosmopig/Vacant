@@ -65,9 +65,13 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0) -> list[dict]:
     """
     if bank == "evalplus":
         loader = EvalPlusMBPPLoader(expose_contract=True)
-    elif bank == "lcb":
+    elif bank in ("lcb", "lcb2"):
         from vacant.codebench import LiveCodeBenchLoader
-        loader = LiveCodeBenchLoader()          # sha256/題數釘死，fail-closed
+        # lcb2＝v2（同 recipe 多吃 test4 視窗，120 題）。分成兩個 bank 名而不是靠環境變數，
+        # 讓 rows/summary 裡 `bank` 一眼看得出用的是哪一版；兩版 sha256/題數都釘死、fail-closed。
+        # round440y：這三段接線原本被誤放進一個後來丟掉的 commit，導致 `lcb2` 掉進 builtin
+        # 的無限產生器（n=0 時 list() 永遠不回來）——這裡的 elif 就是那個坑的修補。
+        loader = LiveCodeBenchLoader(version="v1" if bank == "lcb" else "v2")
     else:
         loader = BuiltinSampleLoader()
     ts = list(loader.iter_tasks(seed))
@@ -161,7 +165,7 @@ def _canonical_solutions(bank: str = "evalplus", path: str | None = None) -> dic
       跟檢查式 `abs(a-b)<=1e-6` 的容忍度矛盾，連精確解都會被判錯，
       見 DECISION_20260901_R441。
     """
-    if bank == "lcb":
+    if bank in ("lcb", "lcb2"):
         p = pathlib.Path(path) if path else LCB_PROBE_SOLUTIONS_PATH
         with p.open(encoding="utf-8") as f:
             return json.load(f)
@@ -1187,7 +1191,8 @@ def main() -> None:
     )
     ap.add_argument("--seed", default="g1")
     ap.add_argument("--arms", default="OFF,ON,OFF5")
-    ap.add_argument("--bank", default="evalplus", choices=["evalplus", "builtin", "lcb"])
+    ap.add_argument("--bank", default="evalplus",
+                    choices=["evalplus", "builtin", "lcb", "lcb2"])
     ap.add_argument("--audit-rate", type=float, default=0.2)
     ap.add_argument(
         "--calibration-n", type=int, default=0,
