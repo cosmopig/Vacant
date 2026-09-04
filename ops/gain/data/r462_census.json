@@ -1,0 +1,288 @@
+{
+ "source_pins": {
+  "claims": {
+   "mcnemar_two_sided": {
+    "file": "ops/gain/power_paired.py",
+    "func": "exact_mcnemar_p",
+    "literal": "min(1.0, 2 * tail)",
+    "found": true
+   },
+   "mcnemar_symmetric": {
+    "file": "ops/gain/power_paired.py",
+    "func": "exact_mcnemar_p",
+    "literal": "min(b, c)",
+    "found": true
+   }
+  },
+  "drift": []
+ },
+ "prereg_pins": {
+  "pins": {
+   "X1": {
+    "pin": "Δ ∈ [+3, +20]pp、p<0.05、判 `OFF5_WINS`",
+    "found": true
+   },
+   "X2": {
+    "pin": "Δ ∈ [+8, +28]pp、p<0.05、判 `CONFORM_WINS`",
+    "found": true
+   },
+   "X3": {
+    "pin": "- P-R461-1 若 `p ≥ 0.05` 或 `c ≥ b`：",
+    "found": true
+   },
+   "X4": {
+    "pin": "**事前就判 `UNRESOLVED`**",
+    "found": true
+   },
+   "X5": {
+    "pin": "**事前預測：失敗率 38–52%（點估計 45%），判 `GATE_PASS` 或 `GATE_MARGINAL`。**",
+    "found": true
+   },
+   "X6": {
+    "pin": "- 任一臂 `infra_void` > 20%：整份判 `UNSCANNED`，不是判「沒有差異」。",
+    "found": true
+   },
+   "X7": {
+    "pin": "worker `gemma-4-12b-it-qat`",
+    "found": true
+   }
+  },
+  "drift": []
+ },
+ "items": [
+  {
+   "code": "X1",
+   "intent": "evidence",
+   "class": "UNRESOLVED",
+   "why": "`OFF5_WINS` 既不在 `paired_ci.verdict` 的詞彙表 ['NON_INFERIOR_BUT_UNRESOLVED', 'ON_WINS', 'RULED_OUT', 'UNINFORMATIVE']，也沒有任何 ops/gain 工具吐得出來 ⇒ 這個合取項**沒有仲裁者**，照字面永遠判不出真假（不是綠燈也不是紅燈）",
+   "vocabulary": [
+    "NON_INFERIOR_BUT_UNRESOLVED",
+    "ON_WINS",
+    "RULED_OUT",
+    "UNINFORMATIVE"
+   ],
+   "literal": "OFF5_WINS",
+   "emitters": []
+  },
+  {
+   "code": "X2",
+   "intent": "evidence",
+   "class": "UNRESOLVED",
+   "why": "`CONFORM_WINS` 既不在 `paired_ci.verdict` 的詞彙表 ['NON_INFERIOR_BUT_UNRESOLVED', 'ON_WINS', 'RULED_OUT', 'UNINFORMATIVE']，也沒有任何 ops/gain 工具吐得出來 ⇒ 這個合取項**沒有仲裁者**，照字面永遠判不出真假（不是綠燈也不是紅燈）",
+   "vocabulary": [
+    "NON_INFERIOR_BUT_UNRESOLVED",
+    "ON_WINS",
+    "RULED_OUT",
+    "UNINFORMATIVE"
+   ],
+   "literal": "CONFORM_WINS",
+   "emitters": []
+  },
+  {
+   "code": "X3",
+   "intent": "guard",
+   "class": "EVALUABLE",
+   "why": "`c ≥ b` **不是**死碼：exact_mcnemar_p 是雙尾且對 (b,c) 對稱 ⇒ 反方向也可能顯著，那時只有第二個析取項擋得住",
+   "pairs_enumerated": 18145,
+   "witnesses": [
+    {
+     "b": 0,
+     "c": 6,
+     "p": 0.03125
+    },
+    {
+     "b": 0,
+     "c": 7,
+     "p": 0.015625
+    },
+    {
+     "b": 0,
+     "c": 8,
+     "p": 0.007812
+    },
+    {
+     "b": 1,
+     "c": 8,
+     "p": 0.039062
+    },
+    {
+     "b": 0,
+     "c": 9,
+     "p": 0.003906
+    }
+   ],
+   "n_witness_pairs": 7279
+  },
+  {
+   "code": "X4",
+   "intent": "evidence",
+   "class": "EVALUABLE",
+   "why": "「事前就判 UNRESOLVED」可以為假（新資料顯著就推翻它）⇒ 帶資訊，但基準率高 ⇒ 命中不強",
+   "assumed_from_r447": {
+    "n": 120,
+    "disc_rate": 0.1917,
+    "n_disc": 23,
+    "b": 14,
+    "c": 9,
+    "pi": 0.6087,
+    "effect_pp": 4.17
+   },
+   "falsification_prob_at_n189": 0.2055,
+   "greenlight_base_rate": 0.7945
+  },
+  {
+   "code": "X5",
+   "intent": "evidence",
+   "class": "EVALUABLE",
+   "why": "兩個預測都可能為假 ⇒ 帶資訊；但**判決級比數字級寬**，收官只准報數字級那個，否則等於事後挑寬的那條",
+   "grid_pts": 1001,
+   "base_rate_verdict_level": 0.3007,
+   "base_rate_number_level": 0.1409,
+   "conflict_pp_width": 16.0,
+   "conflict_ranges": "[30.0,38.0) ∪ (52.0,60.0]"
+  },
+  {
+   "code": "X6",
+   "intent": "guard",
+   "class": "EVALUABLE",
+   "why": "歷史上真的出現過 >20% 的臂 ⇒ 這條擋門不是強制綠燈",
+   "runs_scanned": 29,
+   "max_void_pct": 100.0,
+   "over": [
+    {
+     "run": "g_het3_r278_20260829",
+     "arm": "ON",
+     "infra_void": 73,
+     "processed": 179,
+     "pct": 40.78
+    },
+    {
+     "run": "g_het3_r278_20260829",
+     "arm": "OFF5",
+     "infra_void": 64,
+     "processed": 179,
+     "pct": 35.75
+    },
+    {
+     "run": "g_off60_20260824",
+     "arm": "OFF",
+     "infra_void": 60,
+     "processed": 60,
+     "pct": 100.0
+    },
+    {
+     "run": "g_off60_relay_20260824",
+     "arm": "OFF",
+     "infra_void": 18,
+     "processed": 60,
+     "pct": 30.0
+    },
+    {
+     "run": "g_on_qwen_only_20260901",
+     "arm": "ON",
+     "infra_void": 21,
+     "processed": 60,
+     "pct": 35.0
+    },
+    {
+     "run": "g_on_qwen_only_scale2_20260901",
+     "arm": "ON",
+     "infra_void": 48,
+     "processed": 60,
+     "pct": 80.0
+    },
+    {
+     "run": "g_r342_3arm_20260830",
+     "arm": "OFF",
+     "infra_void": 2,
+     "processed": 9,
+     "pct": 22.22
+    },
+    {
+     "run": "g_r342_3arm_20260830",
+     "arm": "ON",
+     "infra_void": 7,
+     "processed": 9,
+     "pct": 77.78
+    },
+    {
+     "run": "g_r342_3arm_20260830",
+     "arm": "OFF5",
+     "infra_void": 7,
+     "processed": 9,
+     "pct": 77.78
+    },
+    {
+     "run": "g_r348_3arm_20260830",
+     "arm": "OFF",
+     "infra_void": 9,
+     "processed": 23,
+     "pct": 39.13
+    },
+    {
+     "run": "g_r348_3arm_20260830",
+     "arm": "ON",
+     "infra_void": 14,
+     "processed": 23,
+     "pct": 60.87
+    },
+    {
+     "run": "g_r348_3arm_20260830",
+     "arm": "OFF5",
+     "infra_void": 15,
+     "processed": 23,
+     "pct": 65.22
+    },
+    {
+     "run": "g_r356_3arm_20260830",
+     "arm": "ON",
+     "infra_void": 66,
+     "processed": 179,
+     "pct": 36.87
+    },
+    {
+     "run": "g_r439_revcheck_20260901",
+     "arm": "ON",
+     "infra_void": 11,
+     "processed": 12,
+     "pct": 91.67
+    },
+    {
+     "run": "g_r439_revcheck_20260901",
+     "arm": "OFF5",
+     "infra_void": 3,
+     "processed": 12,
+     "pct": 25.0
+    }
+   ]
+  },
+  {
+   "code": "X7",
+   "intent": "guard",
+   "class": "EVALUABLE",
+   "why": "§四 引用的名字都存在",
+   "names": {
+    "power_paired.mde_at_n": true,
+    "arm:OFF": true,
+    "arm:CONFORM": true,
+    "arm:OFF5": true,
+    "bank:lcb3@codebench": false,
+    "bank:lcb3@gain_run": true,
+    "bank:lcb3": true,
+    "bank_file:lcb_bank_v3.jsonl": true,
+    "worker:gemma-4-12b-it-qat": true
+   },
+   "missing": [],
+   "lcb3_locator_note": "事前預測對帳時 `bank:lcb3@codebench` 判 False ⇒ X7 記 MISS；查證後那是本量具的定位錯誤（dispatch 在 gain_run.py），**MISS 照實留在帳上**，見 GAIN_STATE round729"
+  }
+ ],
+ "counts": {
+  "EVALUABLE": 5,
+  "FORCED_GREEN": 0,
+  "UNRESOLVED": 2,
+  "UNSCANNED": 0
+ },
+ "forced_green_evidence": [],
+ "verdict": "OK",
+ "why": "沒有 intent=evidence 的強制綠燈"
+}
