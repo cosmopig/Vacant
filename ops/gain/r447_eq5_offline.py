@@ -60,8 +60,14 @@ def off5_candidates(calls: list[dict]) -> dict[str, list[tuple[str, str]]]:
     return out
 
 
-def _tests_literal(check_code: str):
-    """從 check code 取出 `__tests = [...]` 的字面值；認不出形狀就回 None（不猜）。"""
+def _test_items(check_code: str):
+    """把一份 check code 拆成「一條驗收」的清單；認不出形狀就回 None（不猜）。
+
+    兩種形狀（`vacant/codebench.py` 產生器的兩支）：
+      A 扁平：尾端一串 top-level `assert ...`（`_check_code`，evalplus/MBPP+）
+      B 迴圈：`__tests = [...]` 之後一個 for 迴圈（`_lcb_check_code`，LCB）
+    A 的每一條用 `ast.get_source_segment` **逐字**取出（記憶鐵律：不准自己改寫一份）。
+    """
     try:
         tree = ast.parse(check_code)
     except SyntaxError:
@@ -69,9 +75,13 @@ def _tests_literal(check_code: str):
     for node in tree.body:
         if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", "") == "__tests":
             try:
-                return ast.literal_eval(node.value)
+                return [repr(x) for x in ast.literal_eval(node.value)]
             except ValueError:
                 return None
+    asserts = [ast.get_source_segment(check_code, n) for n in tree.body
+               if isinstance(n, ast.Assert)]
+    if asserts and all(a is not None for a in asserts):
+        return asserts
     return None
 
 
@@ -84,8 +94,8 @@ def bank_gate_headroom(tasks) -> dict:
     """
     n = sub = unparsed = 0
     for t in tasks:
-        v = _tests_literal((t.get("visible_check") or {}).get("code", ""))
-        h = _tests_literal((t.get("hidden_check") or {}).get("code", ""))
+        v = _test_items((t.get("visible_check") or {}).get("code", ""))
+        h = _test_items((t.get("hidden_check") or {}).get("code", ""))
         if v is None or h is None:
             unparsed += 1
             continue
@@ -374,7 +384,18 @@ def selftest() -> int:
                                    " {'args': [9], 'expected': 9}]"}}
     hn = {"visible_check": {"code": "__tests = [{'args': [7], 'expected': 7}]"},
           "hidden_check": {"code": "__tests = [{'args': [1], 'expected': 2}]"}}
-    hu = {"visible_check": {"code": "assert f(1) == 2"}, "hidden_check": {"code": "assert f(1) == 2"}}
+    hu = {"visible_check": {"code": "x = 1"}, "hidden_check": {"code": "x = 1"}}
+    hf = {"visible_check": {"code": "assert f(1) == 2"},
+          "hidden_check": {"code": "assert f(1) == 2\nassert f(3) == 4"}}
+    hfn = {"visible_check": {"code": "assert f(5) == 6"},
+           "hidden_check": {"code": "assert f(1) == 2"}}
+    ck("E16 扁平形狀（MBPP+）也逐字拆得出 assert，且子集關係判得對",
+       bank_gate_headroom([hf])["forced_zero"] is True
+       and bank_gate_headroom([hfn])["n_visible_subset_of_hidden"] == 0,
+       f"{bank_gate_headroom([hf])} / {bank_gate_headroom([hfn])}")
+    ck("E16b 認不出形狀的照實計數，不猜",
+       bank_gate_headroom([hu]) ["n_unparsed_shape"] == 1
+       and bank_gate_headroom([hu])["n_parsed"] == 0, str(bank_gate_headroom([hu])))
     ck("E15 基準率：可見⊆隱藏 逐題用 AST 比對（1 子集／1 不是／1 認不出形狀）",
        bank_gate_headroom([hb, hn, hu]) == {
            "n_parsed": 2, "n_visible_subset_of_hidden": 1, "n_unparsed_shape": 1,
@@ -461,23 +482,41 @@ def main() -> int:
     ap.add_argument("--run")
     ap.add_argument("--json")
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--headroom-only", action="store_true",
+                    help="只算題庫基準率（可見⊆隱藏），不需要 run 目錄")
     ap.add_argument("--bank", default="lcb2")
     ap.add_argument("--n", type=int, default=120)
     ap.add_argument("--seed", default="g-r440-lcb2")
     a = ap.parse_args()
     if a.selftest:
         return selftest()
+    if a.headroom_only:
+        tasks = load_tasks(a.bank, a.seed, a.n)
+        out = {"bank": a.bank, "n": a.n, "seed": a.seed,
+               "bank_gate_headroom": bank_gate_headroom(tasks)}
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        return 0
     if not a.run:
-        ap.error("--run 或 --selftest 擇一")
-    d = pathlib.Path(a.run)
-    rows = [json.loads(l) for l in (d / "rows.jsonl").read_text().splitlines() if l.strip()]
-    calls = [json.loads(l) for l in (d / "calls.jsonl").read_text().splitlines() if l.strip()]
-    tasks = load_tasks(bank=a.bank, n=a.n, seed=a.seed)
-    res = reconstruct(rows, calls, tasks)
+        ap.error("--run／--headroom-only／--selftest 擇一")
     import hashlib
+    d = pathlib.Path(a.run)
+    # run 活著時 rows.jsonl 一直在長：收據的 sha 必須**就是分析用的那份 bytes**，
+    # 不能事後再讀一次（會得到一個指不到任何分析內容的 sha）。與 r447_reject_reconstruct
+    # 同一種寫法。
+    raw = (d / "rows.jsonl").read_bytes()
+    rows = [json.loads(l) for l in raw.decode("utf-8").splitlines() if l.strip()]
+    calls = [json.loads(l) for l in
+             (d / "calls.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    summary = json.loads((d / "summary.json").read_text(encoding="utf-8"))
+    # 抽樣是 seed 決定性前綴（`ts[offset:offset+n]`）⇒ 參數取自 run 自己的 summary，
+    # 不用旗標預設值（旗標只是 summary 缺鍵時的退路），否則題序會安靜漂掉。
+    tasks = load_tasks(a.bank, summary.get("seed", a.seed), summary.get("n", a.n),
+                       offset=summary.get("offset", 0))
+    res = reconstruct(rows, calls, tasks)
     res["rows_lines"] = len(rows)
-    res["rows_sha256_16"] = hashlib.sha256(
-        (d / "rows.jsonl").read_bytes()).hexdigest()[:16]
+    res["rows_sha256_16"] = hashlib.sha256(raw).hexdigest()[:16]
+    res["sampling"] = {"bank": a.bank, "seed": summary.get("seed"), "n": summary.get("n"),
+                       "offset": summary.get("offset", 0)}
     res["run"] = a.run
     txt = json.dumps(res, ensure_ascii=False, indent=2)
     if a.json:

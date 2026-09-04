@@ -1,0 +1,1869 @@
+{
+  "broken": [],
+  "per_task": [
+    {
+      "task_id": "lcb_3634",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3563",
+      "visible": [
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3771",
+      "visible": [
+        false,
+        true,
+        false,
+        true,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3659",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3552",
+      "visible": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": null,
+      "gate_deliv": false,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3789",
+      "visible": [
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3722",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3777",
+      "visible": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3770",
+      "visible": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3739",
+      "visible": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3591",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3518",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3763",
+      "visible": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": null,
+      "gate_deliv": false,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3776",
+      "visible": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3805",
+      "visible": [
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        false,
+        false,
+        false,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3647",
+      "visible": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "hidden": [
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3688",
+      "visible": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3779",
+      "visible": [
+        false,
+        true,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        true,
+        false,
+        true,
+        true
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3627",
+      "visible": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "hidden": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3801",
+      "visible": [
+        true,
+        true,
+        true,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3607",
+      "visible": [
+        true,
+        true,
+        true,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3593",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3744",
+      "visible": [
+        false,
+        true,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        true,
+        false,
+        true,
+        true
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3551",
+      "visible": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "hidden": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3502",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3682",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3648",
+      "visible": [
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3653",
+      "visible": [
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "hidden": [
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3764",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3750",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3583",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3580",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3531",
+      "visible": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3809",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3748",
+      "visible": [
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "hidden": [
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3639",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3570",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3715",
+      "visible": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3677",
+      "visible": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3522",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3540",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3485",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3681",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3737",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3760",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3622",
+      "visible": [
+        true,
+        true,
+        false,
+        false,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3697",
+      "visible": [
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "gate_idx": 2,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3765",
+      "visible": [
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 2,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3658",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3686",
+      "visible": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3487",
+      "visible": [
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "gate_idx": 3,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3594",
+      "visible": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "hidden": [
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3638",
+      "visible": [
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3558",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3579",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3587",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3629",
+      "visible": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3716",
+      "visible": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": null,
+      "gate_deliv": false,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3613",
+      "visible": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3674",
+      "visible": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": null,
+      "gate_deliv": false,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3575",
+      "visible": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": null,
+      "gate_deliv": false,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3573",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3655",
+      "visible": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "hidden": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3604",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3743",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3725",
+      "visible": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "hidden": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3603",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3717",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3794",
+      "visible": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3720",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3026",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3510",
+      "visible": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3550",
+      "visible": [
+        true,
+        false,
+        false,
+        false,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3781",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3620",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3560",
+      "visible": [
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3687",
+      "visible": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": null,
+      "gate_deliv": false,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3562",
+      "visible": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "gate_idx": null,
+      "gate_deliv": false,
+      "gate_ok": false,
+      "vote_ok": false,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3699",
+      "visible": [
+        false,
+        true,
+        false,
+        true,
+        false
+      ],
+      "hidden": [
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "gate_idx": 1,
+      "gate_deliv": true,
+      "gate_ok": false,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3534",
+      "visible": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3649",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    },
+    {
+      "task_id": "lcb_3785",
+      "visible": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "gate_idx": 0,
+      "gate_deliv": true,
+      "gate_ok": true,
+      "vote_ok": true,
+      "vote_accepted": true
+    }
+  ],
+  "calibration": {
+    "n": 35,
+    "agree": 35,
+    "rate_pct": 100.0,
+    "min_required": 20
+  },
+  "rule_rates": {
+    "n_processed": 82,
+    "gate_deliv_correct": 53,
+    "vote_deliv_correct": 52,
+    "gate_reject_n": 7,
+    "gate_reject_pct": 8.536585365853659,
+    "gate_reject_window_W2": "2–14%（DECISION §五 W2）",
+    "denominator": "processed（DECISION §三 事前指定的主判分母）"
+  },
+  "secondary_accepted_subset_NOT_ARBITER": {
+    "n": 75,
+    "gate_correct_pct": 70.66666666666667,
+    "vote_correct_pct": 69.33333333333333
+  },
+  "exploratory": {
+    "oracle_any_candidate_correct": 63,
+    "oracle_pct": 76.82926829268293,
+    "gate_rejected_but_some_candidate_correct": 0,
+    "gate_rejected_but_some_candidate_correct_ids": [],
+    "candidates_visible_fail_hidden_ok": 0,
+    "bank_gate_headroom_BASERATE": {
+      "n_parsed": 120,
+      "n_visible_subset_of_hidden": 120,
+      "n_unparsed_shape": 0,
+      "forced_zero": true,
+      "note": "forced_zero=True ⇒ 下面 exploratory 的 `candidates_visible_fail_hidden_ok` 與 `gate_rejected_but_some_candidate_correct` 只可能是 0，**不是**閘門無損的證據。"
+    },
+    "note": "非事前註冊、探索性；不改 R440Z 任何一條 P-Z 的判決。上面兩個「殺掉好答案」的計數要**配著 bank_gate_headroom_BASERATE 讀**。"
+  },
+  "paired_gate_vs_vote": {
+    "b_gate_only": 8,
+    "c_vote_only": 7,
+    "n_discordant": 15,
+    "delta_pp": 1.2195121951219512,
+    "ci_lo_pp": -8.566048270339131,
+    "ci_hi_pp": 10.512192822464346,
+    "p_mcnemar": 1.0,
+    "window_W3": "0 到 +12pp，方向為正；p 很可能 > 0.05（DECISION §五 W3）"
+  },
+  "power": {
+    "mde_at_n_pp": 10.975609756097562,
+    "n_disc_expected": 15,
+    "n_needed_for_5pp": 307
+  },
+  "verdict": "RECONSTRUCTED",
+  "rows_lines": 246,
+  "rows_sha256_16": "cf0774b1017911d8",
+  "sampling": {
+    "bank": "lcb2",
+    "seed": "g-r440-lcb2",
+    "n": 120,
+    "offset": 0
+  },
+  "run": "runs/g_r447_conform_lcb2"
+}
