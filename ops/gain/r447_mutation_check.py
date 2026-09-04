@@ -16,6 +16,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from ops.gain import analyze_r447 as A  # noqa: E402
 from ops.gain import r447_reject_reconstruct as R  # noqa: E402
 from ops.gain import r447_eq5_offline as Q  # noqa: E402
+from ops.gain import prereg_falsifiability_census as C  # noqa: E402
 
 # 突變體 → 一定要紅的那一條的標籤前綴
 EXPECT = {
@@ -55,6 +56,18 @@ EXPECT_EQ5OFF = {
 }
 
 
+# `prereg_falsifiability_census.py`（R453）的突變體 → 一定要紅的那一條
+EXPECT_CENSUS = {
+    "Y1_ignore_unparsed_shape":         "U1 Y1 的夾具",
+    "Y2_witness_ignored":               "X1 Y2 的夾具",
+    "Y3_pz5b_witness_from_rows_only":   "X2 Y3 的夾具",
+    "Y4_jackknife_no_leaveout":         "X3 Y4 的夾具",
+    "Y5_paraphrase_instead_of_source":  "X4 Y5 的夾具",
+    "Y7_receipt_any_return_counts":     "X6 Y7 的夾具",
+    "Y8_window_check_toothless":        "X5 Y8 的夾具",
+}
+
+
 def run(mutant: str, mod=A) -> tuple[int, list[str]]:
     mod.MUTANT = mutant
     buf = io.StringIO()
@@ -74,7 +87,8 @@ def main() -> int:
     marks = []
     for mod, table, label in ((A, EXPECT, "analyze_r447"),
                               (R, EXPECT_RECON, "reject_reconstruct"),
-                              (Q, EXPECT_EQ5OFF, "eq5_offline")):
+                              (Q, EXPECT_EQ5OFF, "eq5_offline"),
+                              (C, EXPECT_CENSUS, "prereg_census")):
         rc0, f0 = run("", mod)
         if rc0 != 0 or f0:
             print(f"BASELINE FAIL [{label}] rc={rc0} fails={f0}")
