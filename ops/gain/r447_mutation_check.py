@@ -38,6 +38,8 @@ EXPECT = {
 EXPECT_RECON = {
     "M1_skip_calibration":     "R7 校準對不上 ⇒ BROKEN",
     "M3_count_all_candidates": "R5 被丟掉的候選數＝可見沒過的候選數",
+    # R457：失敗的 gen 被當成候選 ⇒ 幽靈空字串候選（會灌水 all_candidates_wrong）
+    "M4_count_failed_calls_as_candidates": "R12 多一通失敗的 gen",
 }
 
 

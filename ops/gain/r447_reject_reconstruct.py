@@ -39,13 +39,27 @@ LAST_FAILS: list[str] = []
 
 
 def conform_candidates(calls: list[dict]) -> dict[str, list[str]]:
-    """task_id -> 按 calls.jsonl 檔序排好的 CONFORM 候選回應全文。"""
+    """task_id -> 按 calls.jsonl 檔序排好的 CONFORM 候選回應全文。
+
+    R457：**明確失敗（`ok is False`）的 gen 不是候選**，一律不收。
+    理由是語意而非結果數字：失敗通的 `response` 是空字串，它不是模型交出來的候選。
+    收了它只有兩種下場——(a) 撞上 `candidate_count_mismatch`（本輪 lcb_3762 就是），
+    或 (b) 數量剛好對得上時，混進一個空字串候選、被 scorer 判為錯
+    ⇒ **`all_candidates_wrong` 被灌水、P-Z5b 的分子直接偏高**。
+    (b) 才是非修不可的理由：那會污染頭條數字，與綠不綠燈無關。
+    `ok` 不存在視為成功（夾具不寫 `ok`；真 runner 每通都寫）。
+    """
     out: dict[str, list[str]] = {}
+    dropped = 0
     for c in calls:
         m = c.get("meta") or {}
         if c.get("role") != "gen" or m.get("arm") != "CONFORM":
             continue
+        if c.get("ok") is False and MUTANT != "M4_count_failed_calls_as_candidates":
+            dropped += 1
+            continue
         out.setdefault(m["task_id"], []).append(c.get("response") or "")
+    conform_candidates.last_dropped = dropped        # 只給呼叫端記帳用，不參與判斷
     return out
 
 
@@ -58,7 +72,8 @@ def reconstruct(rows, calls, tasks, *, scorer=None) -> dict:
             return bool(ok)
     by_task = {t["task_id"]: t for t in tasks}
     cands = conform_candidates(calls)
-    out: dict = {"broken": [], "per_task": []}
+    out: dict = {"broken": [], "per_task": [],
+                 "dropped_failed_gen_calls": getattr(conform_candidates, "last_dropped", 0)}
 
     crows = [r for r in rows if r.get("arm") == "CONFORM"]
     if not crows:
@@ -214,6 +229,38 @@ def selftest() -> int:
     r5 = [dict(rows[0])]
     o5 = reconstruct(r5, calls, tasks, scorer=sc)
     ck("R11 沒有拒交題 ⇒ pz5b.pct 是 None 不是 100", o5["pz5b"]["pct"] is None, str(o5["pz5b"]))
+
+    # ── R457：失敗的 gen 不是候選
+    # R12 多一通 ok=False ⇒ 候選數不變、判決不變、丟棄數記帳
+    cf = list(calls) + [{"role": "gen", "ok": False, "error": "TimeoutError: timed out",
+                         "response": "", "meta": {"arm": "CONFORM", "task_id": "lcb_f0"}}]
+    o6 = reconstruct(rows, cf, tasks, scorer=sc)
+    ck("R12 多一通失敗的 gen ⇒ 不算候選、判決與乾淨夾具相同",
+       o6["verdict"] == o["verdict"] and not any(
+           x.startswith("candidate_count_mismatch") for x in o6["broken"])
+       and o6["dropped_failed_gen_calls"] == 1,
+       f"verdict={o6['verdict']} dropped={o6['dropped_failed_gen_calls']} broken={o6['broken']}")
+
+    # R13 幽靈候選：少一通成功 ＋ 多一通失敗 ⇒ 物理數量巧合對上。
+    #     收失敗通的舊寫法會**安靜**混進一個空字串候選（被判為錯 ⇒ 灌水
+    #     all_candidates_wrong ⇒ P-Z5b 分子偏高）；正確行為是候選數對不上 ⇒ BROKEN。
+    # ⚠ 這裡**只准拿掉一通**。用 `"0" in response` 篩會連 task_id 裡的 "0" 一起匹配
+    #   （lcb_f0 三通全中 ⇒ 0!=3），那樣 M4 底下數量一樣對不上＝這條測試沒有牙齒。
+    _f0 = [i for i, x in enumerate(calls)
+           if x["meta"]["task_id"] == "lcb_f0" and x["meta"]["arm"] == "CONFORM"]
+    assert len(_f0) == 3, f"夾具前提變了：lcb_f0 有 {len(_f0)} 通"
+    c7 = [x for i, x in enumerate(calls) if i != _f0[-1]]
+    c7 = c7 + [{"role": "gen", "ok": False, "error": "TimeoutError: timed out",
+                "response": "", "meta": {"arm": "CONFORM", "task_id": "lcb_f0"}}]
+    # 夾具的 `sc` 對不到候選就 raise ⇒ M4 底下會**crash 收場**（crash 不算偵測到）。
+    # 這裡用一層「空碼一律判錯」的包裝，讓 M4 底下走完流程、由判準本身吐 FAIL。
+    def _sc_empty_ok(code, task):
+        return False if not (code or "").strip() else sc(code, task)
+    o7 = reconstruct(rows, c7, tasks, scorer=_sc_empty_ok)
+    ck("R13 少一成功＋多一失敗 ⇒ BROKEN（不准用空字串幽靈候選補位）",
+       o7["verdict"] == "BROKEN"
+       and any(x.startswith("candidate_count_mismatch") for x in o7["broken"]),
+       str(o7["broken"]))
 
     print(f"SELFTEST {'PASS' if not fails else 'FAIL'} ({len(fails)} failed) MUTANT={MUTANT or 'none'}")
     return 1 if fails else 0
