@@ -41,8 +41,11 @@ empty = run("tests/shim_selfcheck/empty.py")
 
 allok = True
 # 正向：全過，而且收集數不准掉（掉了＝有能力被安靜漏收）
+# R469：新增 11 條夾具（F1 parametrize 單 argname ×5、反向護欄 ×2、
+# F2 importorskip ×2、F3 capsys ×2）⇒ n 從 16 升到 27。
+# ⚠ 這個 n 是「收集數不准掉」的擋門：加了夾具而 n 沒跟著漲＝夾具被安靜漏收，判 BAD。
 allok &= check("good  每個能力的正確用法", good,
-               {"fail": 0, "err": 0, "verdict": "PASS", "rc": 0, "n": 16, "ok": 16})
+               {"fail": 0, "err": 0, "verdict": "PASS", "rc": 0, "n": 27, "ok": 27})
 # 反向：植入的 9 個缺陷一個都不准漏；parametrize 那兩個該過的仍要過
 allok &= check("bad   植入缺陷必須被抓到", bad,
                {"fail": 9, "err": 0, "ok": 2, "n": 11, "verdict": "FAIL", "rc": 1})

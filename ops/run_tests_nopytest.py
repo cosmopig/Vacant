@@ -28,7 +28,7 @@ round642 版只支援「module 層級 test_* 函式 ＋ 無參數 fixture」，�
 與 skip 之外一律當 no-op）。撐不住的會 **ERROR 出來，不會安靜跳過**——
 安靜跳過才是這支存在的理由的反面。
 """
-import sys, types, traceback, importlib, inspect, os, shutil, tempfile, pathlib, contextlib
+import sys, types, traceback, importlib, inspect, os, shutil, tempfile, pathlib, contextlib, io, collections
 
 # ── 最小 pytest 替身 ─────────────────────────────────────────────
 pt = types.ModuleType("pytest")
@@ -48,6 +48,22 @@ def fixture(*a, **k):
 pt.fixture = fixture
 pt.skip = lambda msg="": (_ for _ in ()).throw(Skipped(msg))
 pt.fail = lambda msg="": (_ for _ in ()).throw(AssertionError(msg))
+
+
+def importorskip(modname, minversion=None, reason=None):
+    """R469/F2：匯入得到就回 module，匯不到就 SKIP（不是 ERROR、更不是收集 0）。
+
+    沒有這支的時候，`pytest.importorskip` 在 import 期就 AttributeError，
+    整個模組變 IMPORT_ERROR ⇒ `tests/test_equal_budget_rules_r446.py`
+    （鐵律 1 唯一的單元測試）在這台**收集到 0 個**、從來沒有被執行過。
+    """
+    try:
+        return importlib.import_module(modname)
+    except ImportError as e:
+        raise Skipped(reason or f"匯不到 {modname!r}：{e}")
+
+
+pt.importorskip = importorskip
 
 
 class _Raises:
@@ -202,13 +218,30 @@ class _MonkeyPatch:
             self._undo.pop()()
 
 
-BUILTIN = {"tmp_path", "monkeypatch", "tmpdir"}
+class _CapSys:
+    """R469/F3：capsys 的最小版。`readouterr()` 回 `(out, err)` 並清空緩衝，
+    語意同真 pytest（讀過的不會再讀到一次）。function scope。"""
+
+    _Result = collections.namedtuple("CaptureResult", "out err")
+
+    def __init__(self):
+        self.out_buf, self.err_buf = io.StringIO(), io.StringIO()
+
+    def readouterr(self):
+        o, e = self.out_buf.getvalue(), self.err_buf.getvalue()
+        for b in (self.out_buf, self.err_buf):
+            b.seek(0)
+            b.truncate(0)
+        return self._Result(o, e)
+
+
+BUILTIN = {"tmp_path", "monkeypatch", "tmpdir", "capsys"}
 
 
 @contextlib.contextmanager
 def _builtin_fixtures(names):
     """每個測試拿到全新的 tmp_path / monkeypatch，跑完拆掉（pytest 的 function scope）。"""
-    made, tmpdir, mp = {}, None, None
+    made, tmpdir, mp, redirect = {}, None, None, None
     try:
         if "tmp_path" in names or "tmpdir" in names:
             tmpdir = tempfile.mkdtemp(prefix="nopytest-")
@@ -216,8 +249,18 @@ def _builtin_fixtures(names):
         if "monkeypatch" in names:
             mp = _MonkeyPatch()
             made["monkeypatch"] = mp
+        if "capsys" in names:
+            cap = _CapSys()
+            made["capsys"] = cap
+            # 只在測試本體執行期間接管；替身自己印 PASS/FAIL 的那幾行在 with 之外，
+            # 不會被吃掉（run_module 的 print 都在 with 結束之後）。
+            redirect = contextlib.ExitStack()
+            redirect.enter_context(contextlib.redirect_stdout(cap.out_buf))
+            redirect.enter_context(contextlib.redirect_stderr(cap.err_buf))
         yield made
     finally:
+        if redirect is not None:
+            redirect.close()
         if mp is not None:
             mp.undo()
         if tmpdir:
@@ -240,7 +283,10 @@ def collect(T):
             return
         pnames, pvals = pm
         for i, vals in enumerate(pvals):
-            vals = vals if isinstance(vals, (tuple, list)) else (vals,)
+            # R469/F1：真 pytest 的規則是「看 argnames 有幾個」，不是「看值是不是序列」。
+            # 單一 argname ⇒ 整個值原樣綁定：`["up","--help"]` 是一個 list 參數，
+            # 不是兩個參數。舊版用 isinstance 判，把它 zip 成 argv="up" ⇒ 偽紅。
+            vals = (vals,) if len(pnames) == 1 else tuple(vals)
             kw = dict(zip(pnames, vals))
             rest = [p for p in params if p not in kw]
             items.append((f"{name}[{i}]",
@@ -269,6 +315,12 @@ def run_module(mod_path):
     mod_name = mod_path.replace("/", ".").removesuffix(".py")
     try:
         T = importlib.import_module(mod_name)
+    except Skipped as e:
+        # R469/F2：模組層 importorskip 匯不到相依 ⇒ 這是「整個模組被跳過」，
+        # 跟「import 壞掉」必須分得開。但零收集一樣不准印成綠的（rc 仍為 1）。
+        print(f"\n{mod_path}: SKIPPED_MODULE（{e}）")
+        return {"pass": 0, "fail": 0, "error": 0, "skip": 1, "n": 0,
+                "verdict": "SKIPPED_MODULE"}
     except Exception:
         traceback.print_exc(limit=6)
         print(f"\n{mod_path}: IMPORT_ERROR")
