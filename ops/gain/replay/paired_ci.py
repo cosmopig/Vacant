@@ -155,6 +155,68 @@ def n_needed(nd: int, n: int, target_pp: float = PRACTICAL_PP) -> int:
 
 
 # ---------------------------------------------------------------- selftest
+_FIXTURE_RUN = "runs/g_r447_conform_lcb2"      # 已 commit、凍結；G 只讀它，不碰活著的 run
+
+
+def _selftest_broken_gate() -> list[str]:
+    """條 G（R471）：用真資料子集夾住 MIN_PAIRED 門檻，驗 main() 那一行擋門。
+
+    59 → 必須 BROKEN 且理由指名 n_paired；61 → 必須不是 BROKEN 且理由為空。
+    夾具 run 不存在時回報 FAIL，**不准安靜跳過**（「安靜量不到」＝BROKEN 不是 PASS）。
+    """
+    import shutil, tempfile
+    root = pathlib.Path(__file__).resolve().parents[3]
+    src = root / _FIXTURE_RUN
+    if not (src / "rows.jsonl").exists() or not (src / "summary.json").exists():
+        return [f"夾具 run 不存在或不完整：{src}（不是跳過，是量不到）"]
+    rows = [json.loads(l) for l in (src / "rows.jsonl").open(encoding="utf-8") if l.strip()]
+    a_arm, b_arm = "CONFORM", "OFF"
+    A = {r["task_id"] for r in rows if r.get("arm") == a_arm}
+    B = {r["task_id"] for r in rows if r.get("arm") == b_arm}
+    common = sorted(A & B)
+    msgs = []
+    for k, want_broken in ((MIN_PAIRED - 1, True), (MIN_PAIRED + 1, False)):
+        if len(common) < k:
+            msgs.append(f"夾具只有 {len(common)} 個共同題，湊不出 {k}")
+            continue
+        keep = set(common[:k])
+        tmp = pathlib.Path(tempfile.mkdtemp(prefix="paired_ci_g_"))
+        try:
+            with (tmp / "rows.jsonl").open("w", encoding="utf-8") as fh:
+                for r in rows:                      # 欄位一個字不改，只做子集
+                    if r.get("arm") in (a_arm, b_arm) and r.get("task_id") in keep:
+                        fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+            shutil.copyfile(src / "summary.json", tmp / "summary.json")
+            jp = tmp / "out.json"
+            argv = sys.argv
+            try:
+                sys.argv = ["paired_ci.py", "--run", str(tmp), "--a-arm", a_arm,
+                            "--b-arm", b_arm, "--key", "deliv", "--json", str(jp)]
+                import io, contextlib
+                with contextlib.redirect_stdout(io.StringIO()):
+                    rc = main()
+            finally:
+                sys.argv = argv
+            if rc != 0 or not jp.exists():
+                msgs.append(f"n={k}: main() rc={rc} 或沒有產物")
+                continue
+            got = json.loads(jp.read_text(encoding="utf-8"))
+            if got.get("n_paired") != k:            # 夾具安靜衰減的擋門
+                msgs.append(f"n={k}: 夾具沒給到預期配對數，n_paired={got.get('n_paired')}")
+                continue
+            is_broken = got.get("verdict") == "BROKEN"
+            if is_broken != want_broken:
+                msgs.append(f"n={k}（門檻 {MIN_PAIRED}）: verdict={got.get('verdict')}，"
+                            f"應該{'' if want_broken else '不'}是 BROKEN")
+            if want_broken and not any(f"n_paired={k}" in x for x in got.get("broken_reasons", [])):
+                msgs.append(f"n={k}: broken_reasons 沒指名 n_paired={k} -> {got.get('broken_reasons')}")
+            if not want_broken and got.get("broken_reasons"):
+                msgs.append(f"n={k}: 不該有 broken_reasons -> {got.get('broken_reasons')}")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+    return msgs
+
+
 def selftest() -> int:
     fails = []
     # A: b=c => 點估計 0 且區間跨 0
@@ -202,11 +264,40 @@ def selftest() -> int:
             fails.append(f"E: n_needed={m} 但半寬 {half_at(m):.3f}pp 仍 > {PRACTICAL_PP}")
         if m > 1 and half_at(m - 1) <= PRACTICAL_PP + 1e-9:
             fails.append(f"E: n_needed={m} 不是最小值，m-1 半寬 {half_at(m-1):.3f}pp 也達標")
+    # F: verdict() 的判決表（R471）。期望值**手寫字面字串**，不由 verdict() 自己導出——
+    #    兩種語意給出相反答案才有牙齒。判準 DECISION_20260904_R471_...PREREG.md §二。
+    #    ⚠ 刻意**沒有** lo_pp == 0.0 的列：M4（`> 0` → `>= 0`）只在該點分得開，而
+    #    Clopper-Pearson 下界恰為 0 在真資料上不可達（R470 量到 0/2697 格）＝等價突變體。
+    for lo_pp, hi_pp, want in [
+        (+8.80, +26.46, "ON_WINS"),                    # R459 CONFORM vs OFF 真值
+        (+3.12, +19.19, "ON_WINS"),                    # R459 OFF5 vs OFF 真值
+        (+0.19, +6.78, "ON_WINS"),                     # r445 併庫真值
+        (-2.78, +4.28, "RULED_OUT"),                   # r445 OFF5-OFF：整段區間 <= 5pp
+        (-20.0, -1.0, "RULED_OUT"),                    # 全負
+        (-10.0, +5.0, "RULED_OUT"),                    # 規則序：hi<=5 先於 lo<-5
+        (-7.82, +16.33, "UNINFORMATIVE"),              # r656 E3 真值
+        (-5.01, +10.0, "UNINFORMATIVE"),               # 剛跨過 -5
+        (-1.66, +5.94, "NON_INFERIOR_BUT_UNRESOLVED"), # r444 真值；M5 在這列變 ON_WINS
+        (-5.00, +10.0, "NON_INFERIOR_BUT_UNRESOLVED"), # lo 恰為 -5：不算 UNINFORMATIVE
+        (-4.99, +5.01, "NON_INFERIOR_BUT_UNRESOLVED"), # 兩側都剛好落在窗內
+    ]:
+        got = verdict(lo_pp, hi_pp)
+        if got != want:
+            fails.append(f"F: verdict({lo_pp:+.2f},{hi_pp:+.2f}) = {got}，應為 {want}")
+
+    # G: main() 裡 `n < MIN_PAIRED` 那一行 BROKEN 擋門的**接線**（R471）。
+    #    驗的是那一行本身，不是某個函式：造真 schema 的 run（rows 逐欄取自已凍結的
+    #    runs/g_r447_conform_lcb2、一個字不改）再呼叫 main()，讀 --json 產物。
+    #    夾具不由本模組的 helper 生成（r699：自產夾具驗不到真 schema）。
+    for msg in _selftest_broken_gate():
+        fails.append("G: " + msg)
+
     for f in fails:
         print("SELFTEST FAIL:", f)
     if fails:
         return 1
-    print("SELFTEST PASS: A(跨0) B(離開0) C(與McNemar逐格一致 676 格) D(點估計在內+上限) E(n_needed 與 diff_ci 自洽)")
+    print("SELFTEST PASS: A(跨0) B(離開0) C(與McNemar逐格一致 676 格) D(點估計在內+上限) "
+          "E(n_needed 與 diff_ci 自洽) F(verdict 判決表 11 列) G(MIN_PAIRED 擋門接線 59/61)")
     return 0
 
 
