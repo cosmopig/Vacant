@@ -34,7 +34,7 @@ MUTANTS = {
         '            seg = ast.get_source_segment(src, node.value)',
         '            seg = "f\\"def {t.get(\'entry_point\',\'_f\')}(*a, **k):'
         '\\\\n    return None\\\\n\\""',
-        "H_stub_wiring"),
+        "I_stub_tracks_source"),
     # 負對照：語法壞掉 ⇒ BROKEN，不算 caught
     "N1_syntax": ("def selftest() -> int:", "def selftest( -> int:", None),
 }

@@ -1,0 +1,2665 @@
+{
+  "stub_expr": "f\"def {t.get('entry_point','_f')}(*a, **k):\\n    return None\\n\"",
+  "timeout_s": 10,
+  "n_tasks": 189,
+  "counts": {
+    "hidden_check": {
+      "STUB_REJECTED": 189
+    },
+    "visible_check": {
+      "STUB_REJECTED": 189
+    }
+  },
+  "rows": [
+    {
+      "task_id": "lcb_3210",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3210",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.1
+    },
+    {
+      "task_id": "lcb_3478",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.11
+    },
+    {
+      "task_id": "lcb_3478",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3230",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3230",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2779",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.114
+    },
+    {
+      "task_id": "lcb_2779",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3299",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.1
+    },
+    {
+      "task_id": "lcb_3299",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2915",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2915",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2887",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_2887",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3437",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3437",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3413",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3413",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3354",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3354",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2810",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2810",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2920",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2920",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2877",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_2877",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3240",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3240",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3327",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.113
+    },
+    {
+      "task_id": "lcb_3327",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2867",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_2867",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2953",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2953",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3384",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3384",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2952",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_2952",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2884",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2884",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2757",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.108
+    },
+    {
+      "task_id": "lcb_2757",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2888",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2888",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3046",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3046",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3364",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.109
+    },
+    {
+      "task_id": "lcb_3364",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3225",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3225",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3388",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.107
+    },
+    {
+      "task_id": "lcb_3388",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3262",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3262",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3362",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.108
+    },
+    {
+      "task_id": "lcb_3362",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2921",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2921",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.108
+    },
+    {
+      "task_id": "lcb_3494",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3494",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3166",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3166",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2730",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2730",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2979",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2979",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2837",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2837",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3475",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.107
+    },
+    {
+      "task_id": "lcb_3475",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3192",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3192",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3517",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.124
+    },
+    {
+      "task_id": "lcb_3517",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.1
+    },
+    {
+      "task_id": "lcb_3313",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3313",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2832",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2832",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3507",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3507",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3200",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3200",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2848",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_2848",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3080",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3080",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3345",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3345",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3025",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3025",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3267",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.111
+    },
+    {
+      "task_id": "lcb_3267",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3114",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3114",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3047",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.1
+    },
+    {
+      "task_id": "lcb_3047",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3229",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3229",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3422",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3422",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3482",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3482",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.107
+    },
+    {
+      "task_id": "lcb_3211",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3211",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3532",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.125
+    },
+    {
+      "task_id": "lcb_3532",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3395",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3395",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2792",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2792",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3243",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3243",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_2873",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2873",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2856",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.109
+    },
+    {
+      "task_id": "lcb_2856",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2728",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.111
+    },
+    {
+      "task_id": "lcb_2728",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.108
+    },
+    {
+      "task_id": "lcb_3329",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3329",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.133
+    },
+    {
+      "task_id": "lcb_2754",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2754",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3453",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.114
+    },
+    {
+      "task_id": "lcb_3453",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3017",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3017",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.11
+    },
+    {
+      "task_id": "lcb_2784",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.107
+    },
+    {
+      "task_id": "lcb_2784",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3203",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3203",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3394",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3394",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3461",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3461",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3498",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3498",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3308",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3308",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3195",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3195",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3383",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3383",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3264",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.107
+    },
+    {
+      "task_id": "lcb_3264",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3356",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.112
+    },
+    {
+      "task_id": "lcb_3356",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3411",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3411",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3360",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3360",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3403",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3403",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3219",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3219",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2916",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2916",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3228",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3228",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3351",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.108
+    },
+    {
+      "task_id": "lcb_3351",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3526",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3526",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3234",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3234",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2802",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2802",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3224",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3224",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3196",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3196",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3279",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3279",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3527",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3527",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3464",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3464",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3306",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.117
+    },
+    {
+      "task_id": "lcb_3306",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2786",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2786",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3032",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3032",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3436",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3436",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3104",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3104",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2854",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2854",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3374",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3374",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_2872",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2872",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3414",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3414",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2879",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2879",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2893",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_2893",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3466",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3466",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2845",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2845",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3455",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3455",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3346",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3346",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.108
+    },
+    {
+      "task_id": "lcb_3184",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3184",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3081",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3081",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3245",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3245",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3492",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3492",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3382",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3382",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2849",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.107
+    },
+    {
+      "task_id": "lcb_2849",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3261",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3261",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_2828",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.108
+    },
+    {
+      "task_id": "lcb_2828",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3373",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3373",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3292",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3292",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.107
+    },
+    {
+      "task_id": "lcb_3153",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3153",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3406",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3406",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.107
+    },
+    {
+      "task_id": "lcb_3375",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3375",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3454",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.115
+    },
+    {
+      "task_id": "lcb_3454",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3223",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3223",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3337",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3337",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3298",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3298",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3291",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3291",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3244",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3244",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3355",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3355",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2954",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2954",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2882",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2882",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2808",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_2808",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3402",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3402",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3000",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.107
+    },
+    {
+      "task_id": "lcb_3000",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3535",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.119
+    },
+    {
+      "task_id": "lcb_3535",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3150",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3150",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2878",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2878",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3456",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3456",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3151",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3151",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3420",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.115
+    },
+    {
+      "task_id": "lcb_3420",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3438",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3438",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2891",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2891",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3094",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3094",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3490",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3490",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3031",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.112
+    },
+    {
+      "task_id": "lcb_3031",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3328",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3328",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2919",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2919",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3190",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3190",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3231",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3231",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3442",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.115
+    },
+    {
+      "task_id": "lcb_3442",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3033",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3033",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3106",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3106",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3018",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3018",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3479",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3479",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3439",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.124
+    },
+    {
+      "task_id": "lcb_3439",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3141",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3141",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2869",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2869",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2827",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_2827",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3462",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3462",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.108
+    },
+    {
+      "task_id": "lcb_2850",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2850",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2817",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2817",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3233",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3233",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3451",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3451",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3316",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3316",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2834",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2834",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3239",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3239",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3265",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3265",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3416",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3416",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3387",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_3387",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3235",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3235",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3317",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3317",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3423",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.12
+    },
+    {
+      "task_id": "lcb_3423",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3430",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3430",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2855",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2855",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.1
+    },
+    {
+      "task_id": "lcb_3209",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3209",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3269",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3269",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3493",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.1
+    },
+    {
+      "task_id": "lcb_3493",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3091",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3091",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3171",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3171",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3024",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3024",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2868",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2868",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3174",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3174",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3297",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3297",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2833",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.106
+    },
+    {
+      "task_id": "lcb_2833",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2755",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_2755",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3344",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3344",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3460",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.108
+    },
+    {
+      "task_id": "lcb_3460",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2811",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2811",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_3249",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3249",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3376",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3376",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3213",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.105
+    },
+    {
+      "task_id": "lcb_3213",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_2839",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_2839",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.101
+    },
+    {
+      "task_id": "lcb_3363",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3363",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.103
+    },
+    {
+      "task_id": "lcb_3212",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.104
+    },
+    {
+      "task_id": "lcb_3212",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2883",
+      "which": "hidden_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    },
+    {
+      "task_id": "lcb_2883",
+      "which": "visible_check",
+      "cls": "STUB_REJECTED",
+      "msg": "sandbox_check_failed",
+      "elapsed_s": 0.102
+    }
+  ],
+  "bank": "lcb3",
+  "seed": "g-r461-lcb3",
+  "probe_covered": 12,
+  "verdict": "REVERSE_DIRECTION_FULL"
+}
