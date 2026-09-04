@@ -583,6 +583,114 @@ def arm_conform(task, agents, rng, calls, book, ident, k=5):
     }
 
 
+def arm_eq5(task, agents, rng, calls, book, ident, k=5):
+    """等預算臂（EQ5）：同樣花 5 次呼叫，同一組候選上比兩條**選擇規則**。
+
+    為什麼要有這一支（LOOP_PROMPT 鐵律 1，數百輪來沒有任何 run 回答過）：
+    鐵律 1 問的是「**等預算**下 Vacant 打不打得贏 self-consistency」。r444/r445 的
+    CONFORM vs OFF5 是 1.51 vs 5.00 calls/task ⇒ **不是等預算**（r445 收官 §六 已
+    照四格表寫死「不准寫等預算下打贏」）。要答字面問題，兩邊的呼叫數必須相同。
+
+    做法：**一次生成 5 份候選（不早停 ⇒ calls_per_task 恆為 5.00），
+    然後把同一組候選餵給兩條選擇規則**：
+
+      - 閘門（Vacant）：依序跑 `visible_check`，第一個通過的出貨；全不通過就**拒交**
+        （語意與 `arm_conform` 逐字相同，差別只在不早停——早停不影響「選到誰」，
+        只影響花幾次呼叫）。
+      - 多數決（self-consistency）：`behavior_signature` 分桶、取最大票、平手
+        `rng.choice`，與 `arm_off5` 逐行相同；**永不拒交**。
+
+    這比「再跑一條獨立的 OFF5」強在哪（也是本設計的估計量宣稱）：
+    兩條規則看到的是**同一組候選**，所以生成的隨機性被完全消掉，配對差異只剩下
+    「選擇規則」本身。它回答的是「**給定同一組候選，哪條規則交付得多**」；
+    它**不**回答「兩個各自獨立抽樣的系統誰贏」（那是 r445 的估計量）。
+    兩個都是正當的問題，寫結論時要說清楚是哪一個——見
+    DECISION_20260904_R446_EQUAL_BUDGET_ARM.md §三。
+
+    落盤：本臂的 row 記閘門的判決（`accepted`／`meets_demand`），多數決的反事實
+    放在 `vote_*` 欄位（`vote_meets_demand` 由 dispatch 端離線計分，與 ON 臂的
+    `initial_meets_demand` 同一條既有路徑）。**選擇時一處都沒碰 hidden**
+    （V/GT 分離，SPEC §5.3）。
+
+    收據：與 CONFORM 同一條 hash-chain，每次嘗試與最終判決都簽章；零額外呼叫。
+    """
+    assigned = [rng.choice(agents) for _ in range(k)]
+
+    # ── 1. 生成全部 k 份（不早停：等預算的定義就在這一行）──────────────
+    cands: list[tuple[str, str]] = []
+    for a in assigned:
+        txt = a.generate(task["prompt"], role="gen",
+                         meta={"arm": "EQ5", "task_id": task["task_id"]})
+        calls[0] += 1
+        cands.append((extract_code(txt), a.agent_id))
+
+    # ── 2. 閘門規則（arm_conform 的選擇語意，逐一驗收、第一個過的出貨）──
+    attempts: list[dict] = []
+    chosen: tuple[str, str] | None = None
+    for idx, (code_i, aid_i) in enumerate(cands, 1):
+        vis_ok, vis_err = meets_demand(
+            code_i, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+        detail = {} if vis_ok else conform_failure_detail(code_i, task)
+        rec = {"task_id": task["task_id"], "attempt": idx, "worker": aid_i,
+               "visible_ok": bool(vis_ok), "err": vis_err[:120],
+               "code_sha256": hashlib.sha256(code_i.encode("utf-8")).hexdigest(),
+               **detail}
+        entry = book.append(
+            "eq5_attempt", rec, ident, ts_ms=int(time.time() * 1000))
+        attempts.append({"attempt": idx, "worker": aid_i,
+                         "visible_ok": bool(vis_ok), "err": vis_err[:120],
+                         **detail, "entry_hash": entry.hash()})
+        if vis_ok and chosen is None:
+            chosen = (code_i, aid_i)
+            # 不 break：後面幾份候選**已經生成了**（呼叫早就花掉），多數決那條
+            # 規則需要看到全部 k 份。繼續跑驗收是零模型呼叫。
+
+    accepted = chosen is not None
+    gate_code, gate_worker = chosen if accepted else cands[-1]
+
+    # ── 3. 多數決規則（arm_off5 的選擇語意，同一組候選）─────────────────
+    buckets: dict[str, list[tuple[str, str]]] = {}
+    for code_i, aid_i in cands:
+        buckets.setdefault(behavior_signature(code_i, task), []).append((code_i, aid_i))
+    max_votes = max(len(v) for v in buckets.values())
+    tied = [v for v in buckets.values() if len(v) == max_votes]
+    win = rng.choice(tied)
+    vote_code, vote_worker = rng.choice(win)
+    vote_visible_ok, _ = meets_demand(
+        vote_code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+
+    book.append(
+        "eq5_verdict",
+        {"task_id": task["task_id"], "accepted": accepted,
+         "attempts": len(attempts), "worker": gate_worker,
+         "vote_worker": vote_worker,
+         "vote_code_sha256": hashlib.sha256(vote_code.encode("utf-8")).hexdigest()},
+        ident, ts_ms=int(time.time() * 1000),
+    )
+    return gate_code, gate_worker, [a.agent_id for a in assigned], {
+        "accepted": accepted,
+        "visible_ok": accepted,
+        "conform_attempts": attempts,
+        "conform_calls": len(cands),
+        # 若閘門早停過，它會花幾次呼叫——只是紀錄，不是本臂的預算（本臂恆 k）。
+        "gate_calls_if_early_stopped": (
+            next(i for i, a_ in enumerate(attempts, 1) if a_["visible_ok"])
+            if accepted else len(cands)),
+        "receipt_head": book.head(),
+        # 多數決反事實（同一組候選、同樣 k 次呼叫、永不拒交）
+        "vote_code": vote_code,
+        "vote_worker": vote_worker,
+        "vote_accepted": True,
+        "vote_visible_ok": bool(vote_visible_ok),
+        "vote_n_agree": max_votes,
+        "vote_n_buckets": len(buckets),
+        "vote_tie_broken": len(tied) > 1,
+        "vote_code_sha256": hashlib.sha256(vote_code.encode("utf-8")).hexdigest(),
+        "gate_code_sha256": hashlib.sha256(gate_code.encode("utf-8")).hexdigest(),
+        "same_choice": gate_code == vote_code,
+    }
+
+
 def _review_vote(text: str) -> bool:
     """Parse fail-closed: malformed reviewer output is not an approval."""
     first = text.strip().splitlines()[0].strip().upper() if text.strip() else ""
@@ -1117,7 +1225,7 @@ def main() -> None:
     # round212：`--arms` 以前沒有 choices，dispatch 的 else 會把任何不認得的
     # 名字當成 ON 跑掉（打錯字＝安靜跑錯臂）。檢查放在 preflight 之前，
     # 打錯字不該先燒掉模型呼叫。
-    KNOWN_ARMS = {"OFF", "OFF5", "ON", "ONR", "CONFORM"}
+    KNOWN_ARMS = {"OFF", "OFF5", "ON", "ONR", "CONFORM", "EQ5"}
     if args.arms.strip() != "probe":
         _unknown = [a.strip() for a in args.arms.split(",")
                     if a.strip() and a.strip() not in KNOWN_ARMS]
@@ -1184,15 +1292,20 @@ def main() -> None:
     print(f"   可見閘門（CONFORM 決策量具）參考解通過 {pr['visible_ref_pass']}/{pr['visible_n']}　"
           f"樁被擋 {pr['visible_stub_rejected']}/{pr['visible_n']}　"
           f"覆蓋 {pr['visible_n']}/{pr['n']}")
-    if "CONFORM" in {a.strip() for a in args.arms.split(",")}:
+    # round689：EQ5 用同一個 `visible_check` 當出貨閘門（`arm_eq5` 步驟 2），
+    # 所以同一條硬擋要一起適用——否則 EQ5 會在沒驗過的決策量具上跑，
+    # 「閘門沒有閘」會長得跟「等預算下機制有效」一模一樣。
+    _gate_arms = {"CONFORM", "EQ5"} & {a.strip() for a in args.arms.split(",")}
+    if _gate_arms:
+        _who = "／".join(sorted(_gate_arms))
         if pr["visible_n"] < pr["n"]:
             raise SystemExit(
-                f"CONFORM 的決策量具覆蓋率不足：visible {pr['visible_n']}/{pr['n']}"
+                f"{_who} 的決策量具覆蓋率不足：visible {pr['visible_n']}/{pr['n']}"
                 "——量不到不是通過，是沒接上。停。")
         if (pr["visible_ref_pass"] < pr["visible_n"]
                 or pr["visible_stub_rejected"] < pr["visible_n"]):
             raise SystemExit(
-                "CONFORM 的決策量具沒有兩個方向都答對——出貨閘門是壞的，"
+                f"{_who} 的決策量具沒有兩個方向都答對——出貨閘門是壞的，"
                 "拒交率／calls_per_task／通過率三個預註冊預測都會是假數字。停。")
     if args.arms.strip() == "probe":
         return
@@ -1333,6 +1446,7 @@ def main() -> None:
             "rv_correct": 0, "rv_total": 0, "rv_raw_correct": 0,
             "fail_claims": 0, "confirmed_claims": 0, "confirmed_on_wrong": 0,
             "raw_correct": 0, "processed": 0,
+            "eq5_vote_ok": 0, "eq5_gate_ok": 0, "eq5_same_choice": 0,
             "transitions": {"improved": 0, "harmed": 0,
                             "stayed_correct": 0, "stayed_wrong": 0},
             # 交錯之後「臂的 wall time」不能再用 t_end - t_start（兩臂在時間上
@@ -1380,6 +1494,14 @@ def main() -> None:
                 s["confirmed_on_wrong"] / s["confirmed_claims"]
                 if s["confirmed_claims"] else None),
             "revision_transitions": s["transitions"] if arm == "ON" else None,
+            # EQ5 專屬：同一組候選、同樣 5 次呼叫的兩條選擇規則。
+            # 分母是 measured（＝processed − void），與 correct_delivery_rate 同一個。
+            "eq5_gate_delivery_rate": (
+                (s["eq5_gate_ok"] / measured) if arm == "EQ5" and measured else None),
+            "eq5_vote_delivery_rate": (
+                (s["eq5_vote_ok"] / measured) if arm == "EQ5" and measured else None),
+            "eq5_same_choice_rate": (
+                (s["eq5_same_choice"] / measured) if arm == "EQ5" and measured else None),
             "endpoint_latency_ms": latency_summary(calls_log, arm),
             "wall_s": round(s["wall_s"], 1),
             "cost_usd": round(s["cost"], 4),
@@ -1412,6 +1534,10 @@ def main() -> None:
                     code, worker, involved, extra = arm_conform(
                         t, agents, rng, calls, s["book"], s["ident"])
                     accepted = extra["accepted"]
+                elif arm == "EQ5":
+                    code, worker, involved, extra = arm_eq5(
+                        t, agents, rng, calls, s["book"], s["ident"])
+                    accepted = extra["accepted"]
                 elif arm == "ON":
                     code, worker, involved, extra = arm_on(
                         t, agents, rng, calls, rep, audit_rate=args.audit_rate,
@@ -1434,6 +1560,21 @@ def main() -> None:
                 # 與 ON 同一條聲譽迴路：只有真的抽到的 audit 能更新，truth 不回餵。
                 apply_audit_reputation(
                     rep, extra["responsible_agent"], extra["audit_ok"])
+            if arm == "EQ5":
+                # 反事實的離線計分：與 ON 臂的 `initial_meets_demand` 同一條路徑
+                # （事後評分，不回餵任何選擇）。EQ5 的 row 因此同時帶著
+                # 「閘門交了什麼」與「多數決會交什麼」，兩者花的是同一組 5 次呼叫。
+                vote_truth, _ = meets_demand(
+                    extra["vote_code"], t["hidden_check"]["code"],
+                    entry_point=t.get("entry_point"))
+                extra["vote_meets_demand"] = vote_truth
+                # deliv 口徑（R667 :40 凍結）＝accepted ∧ meets_demand。
+                # 多數決永不拒交 ⇒ vote_accepted 恆 True。
+                extra["vote_deliv"] = bool(vote_truth)
+                extra["gate_deliv"] = bool(accepted and truth)
+                s["eq5_vote_ok"] += int(vote_truth)
+                s["eq5_gate_ok"] += int(accepted and truth)
+                s["eq5_same_choice"] += int(extra["same_choice"])
             if arm == "ON":
                 # truth 是離線評分，不能餵回產品；路由只吃真的抽樣 audit。
                 apply_audit_reputation(
@@ -1478,7 +1619,8 @@ def main() -> None:
                     "accepted": accepted, "calls_used": calls[0] - calls_before,
                     "calls_so_far": calls[0],
                     **{k: v for k, v in extra.items()
-                       if k not in {"votes", "raw_reviews", "initial_code"}},
+                       if k not in {"votes", "raw_reviews", "initial_code",
+                                    "vote_code"}},
                     "votes": extra.get("votes"),
                 }, ensure_ascii=False) + "\n")
             print(f"  [{arm} {i}/{len(tasks)}] 需求符合={truth} 接受={accepted} "
