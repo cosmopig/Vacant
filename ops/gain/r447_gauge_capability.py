@@ -8,7 +8,7 @@
   python3 ops/gain/r447_gauge_capability.py --selftest
 """
 from __future__ import annotations
-import ast, json, os, pathlib, sys
+import ast, json, os, pathlib, sys, tempfile
 
 REQUIRED = ("arm", "task_id", "meets_demand", "accepted")
 
@@ -138,6 +138,80 @@ def census(rows: list[dict]) -> dict:
     return out
 
 
+# ── run 目錄邊界的擋門（R472）────────────────────────────────────────────
+# 判準：DECISION_20260904_R472_GAUGE_CAPABILITY_RUNDIR_GATES_PREREG.md（量測前寫定）。
+# 缺口：本尺原本只吃 rows.jsonl，從不讀 summary.json ⇒ 對半截 run 會吐 verdict="OK"
+# 加一整組可被引用的數字（R461 附錄 E.3 第 1 點已具名、R465 Y5 已量過、沒有人修）。
+# 兄弟工具 analyze_r447.py 在同一組輸入上有 row_accounting 與 run_not_terminal 兩道，本尺一道都沒有。
+# 三道擋門的資料**全部**取自 summary.json，**新增可調參數 0**。
+
+
+def _read_summary(run_dir: pathlib.Path) -> tuple[dict | None, str | None]:
+    """回傳 (summary, err)。**「讀不到」與「沒落盤」必須分得開**（r705）：
+    讀不到一律回 err，不准當成空 summary 往下走。"""
+    p = run_dir / "summary.json"
+    try:
+        return json.loads(p.read_text()), None
+    except FileNotFoundError:
+        return None, f"summary.json 不存在：{p}"
+    except Exception as e:                     # JSON 壞掉／權限／半截檔
+        return None, f"summary.json 讀不到：{type(e).__name__}: {e}"
+
+
+def run_dir_gates(rows: list[dict], summary: dict | None,
+                  summary_err: str | None) -> tuple[str | None, dict]:
+    """G0/G1/G2。回傳 (verdict 或 None, 證據)。None＝三道都過，可以往下算能力數字。"""
+    if summary is None:
+        return "BROKEN_NO_SUMMARY", {"summary_error": summary_err}
+
+    ev: dict = {"run_terminal": bool(summary.get("run_terminal")),
+                "run_complete": bool(summary.get("run_complete"))}
+
+    n_by_arm: dict[str, int] = {}
+    for r in rows:
+        n_by_arm[r.get("arm")] = n_by_arm.get(r.get("arm"), 0) + 1
+    recon, bad = {}, []
+    for a, sa in sorted((summary.get("arms") or {}).items()):
+        nr = n_by_arm.get(a, 0)
+        void = int(sa.get("infra_void") or 0)
+        proc = int(sa.get("processed") or 0)
+        ok = nr + void == proc
+        recon[a] = {"rows": nr, "infra_void": void, "processed": proc, "ok": ok}
+        if not ok:
+            bad.append(f"{a}:{nr}+{void}!={proc}")
+    ev["row_accounting"] = recon
+
+    # G1：期中資料不是收官資料
+    if not ev["run_terminal"]:
+        return "BROKEN_RUN_NOT_TERMINAL", ev
+    # G2：型二「量到的數量掉下來」（rows 被截斷／run 半途死掉但 summary 說 terminal）
+    if bad:
+        ev["row_accounting_mismatch"] = bad
+        return "BROKEN_ROW_ACCOUNTING", ev
+    return None, ev
+
+
+def analyze_run_dir(run_dir: pathlib.Path) -> dict:
+    """讀 run 目錄 → 三道擋門 → census。擋門觸發時**不吐能力數字**：
+    BROKEN 時照印數字，下一輪就會有人把那些數字當結論引用（R464 D.3.2 的形狀）。"""
+    rows = [json.loads(l) for l in (run_dir / "rows.jsonl").open() if l.strip()]
+    summary, summary_err = _read_summary(run_dir)
+    drift = deliv_contract_drift(pathlib.Path(__file__).with_name("analyze_r447.py"))
+    gate, ev = run_dir_gates(rows, summary, summary_err)
+    if gate is not None:
+        out = {"verdict": gate, "NOT_ARBITER": True}
+        out.update(ev)
+    else:
+        out = census(rows)
+        if drift:
+            out["verdict"] = "BROKEN_CONTRACT_DRIFT"
+    out["deliv_contract_drift"] = drift
+    out["rows_file_lines"] = len(rows)
+    if gate is None:
+        out.update(ev)          # 加法：既有鍵一個都不動，新鍵放最後
+    return out
+
+
 # ── selftest ─────────────────────────────────────────────────────────────
 def _row(arm, tid, md, acc):
     """夾具自己造原始列，不共用被測檔的 helper（r699）。"""
@@ -162,6 +236,25 @@ def _fixture() -> list[dict]:
     # T8：只跑了兩臂 ⇒ 必須排除（M1 會把它算成 undemonstrated）
     rows += [_row("CONFORM", "T8", False, False), _row("OFF", "T8", False, False)]
     return rows
+
+
+def _summary_for(rows, terminal=True, complete=True, void=0, processed=None):
+    """夾具自己數每臂列數（不呼叫被測檔的任何 helper，r699）。"""
+    cnt = {}
+    for r in rows:
+        cnt[r["arm"]] = cnt.get(r["arm"], 0) + 1
+    arms = {a: {"processed": (n + void) if processed is None else processed,
+                "infra_void": void} for a, n in cnt.items()}
+    return {"run_terminal": terminal, "run_complete": complete, "arms": arms}
+
+
+def _mkrun(d, rows, summary):
+    d = pathlib.Path(d)
+    d.mkdir(parents=True, exist_ok=True)
+    d.joinpath("rows.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    if summary is not None:
+        d.joinpath("summary.json").write_text(json.dumps(summary))
+    return d
 
 
 def selftest() -> int:
@@ -216,6 +309,42 @@ def selftest() -> int:
     bad_schema = run([{"arm": "OFF", "task_id": "T1", "meets_demand": True}])
     ck("M6 缺鍵 ⇒ BROKEN_SCHEMA", bad_schema["verdict"] == "BROKEN_SCHEMA", bad_schema["verdict"])
 
+    print("[R472 run 目錄擋門：驗的是 main() 走的那條路 analyze_run_dir，不是 census 本身]")
+    with tempfile.TemporaryDirectory() as td:
+        td = pathlib.Path(td)
+        # <R472-I>
+        d_nt = _mkrun(td / "notterm", rows, _summary_for(rows, terminal=False, complete=False))
+        o_nt = analyze_run_dir(d_nt)
+        ck("I run_terminal=False ⇒ BROKEN_RUN_NOT_TERMINAL 且不吐能力數字",
+           o_nt["verdict"] == "BROKEN_RUN_NOT_TERMINAL" and "n_undemonstrated" not in o_nt,
+           f'{o_nt["verdict"]} / keys={sorted(o_nt)}')
+        # </R472-I>
+        # <R472-J>
+        d_ns = _mkrun(td / "nosum", rows, None)
+        o_ns = analyze_run_dir(d_ns)
+        ck("J 沒有 summary.json ⇒ BROKEN_NO_SUMMARY（『讀不到』≠『沒落盤』，不准併成 NOT_TERMINAL）",
+           o_ns["verdict"] == "BROKEN_NO_SUMMARY" and "n_undemonstrated" not in o_ns,
+           o_ns["verdict"])
+        # </R472-J>
+        # <R472-K>
+        d_tr = _mkrun(td / "trunc", rows,
+                      _summary_for(rows, terminal=True, complete=True, processed=189))
+        o_tr = analyze_run_dir(d_tr)
+        ck("K rows 被截斷（帳對不上）但 summary 說 terminal ⇒ BROKEN_ROW_ACCOUNTING",
+           o_tr["verdict"] == "BROKEN_ROW_ACCOUNTING" and "n_undemonstrated" not in o_tr,
+           o_tr["verdict"])
+        # </R472-K>
+        # <R472-L>
+        d_ok = _mkrun(td / "ok", rows, _summary_for(rows))
+        o_ok = analyze_run_dir(d_ok)
+        base = census(rows)
+        same = all(k in o_ok and o_ok[k] == v for k, v in base.items())
+        ck("L 乾淨 terminal run：三道擋門全過，且 census 的每個鍵逐值不變（加法性）",
+           o_ok["verdict"] == "OK" and same
+           and o_ok["run_terminal"] is True and "row_accounting" in o_ok,
+           f'{o_ok["verdict"]} / additive={same}')
+        # </R472-L>
+
     print("[契約]")
     drift = deliv_contract_drift(pathlib.Path(__file__).with_name("analyze_r447.py"))
     ck("H analyze_r447._deliv 口徑未漂移", drift is None, drift or "")
@@ -228,13 +357,7 @@ def main() -> int:
     if "--selftest" in sys.argv:
         return selftest()
     run_dir = pathlib.Path(sys.argv[1])
-    drift = deliv_contract_drift(pathlib.Path(__file__).with_name("analyze_r447.py"))
-    rows = [json.loads(l) for l in (run_dir / "rows.jsonl").open() if l.strip()]
-    out = census(rows)
-    out["deliv_contract_drift"] = drift
-    if drift:
-        out["verdict"] = "BROKEN_CONTRACT_DRIFT"
-    out["rows_file_lines"] = len(rows)
+    out = analyze_run_dir(run_dir)
     print(json.dumps(out, ensure_ascii=False, indent=2))
     if "--json" in sys.argv:
         pathlib.Path(sys.argv[sys.argv.index("--json") + 1]).write_text(
