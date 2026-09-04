@@ -37,7 +37,10 @@ from ops.gain.power_paired import mde_at_n, n_needed_for_power        # noqa: E4
 
 MUTANT = ""
 
-REQUIRED = ("gate_deliv", "vote_deliv", "calls_used", "same_choice", "accepted")
+# AMEND-1：`gate_code_sha256`/`vote_code_sha256` 是 same_choice_effective 的離線重算
+# 輸入。突變體 M8 就是「少了它們也照跑，退回 raw」——那是安靜量錯東西。
+REQUIRED = ("gate_deliv", "vote_deliv", "calls_used", "same_choice", "accepted",
+            "gate_code_sha256", "vote_code_sha256")
 
 # DECISION_20260904_R446_EQUAL_BUDGET_ARM.md §四 的事前窗口，逐條照抄。
 # 這些數字的仲裁者是那份 DECISION，不是本檔；改這裡等於改事前註冊 ⇒ 不准。
@@ -46,7 +49,7 @@ PREREG = {
     "P-R446-2": ("閘門拒交率 1-coverage (%)", 3.0, 13.0),
     "P-R446-3": ("閘門 deliv%（分母 measured）", 68.0, 84.0),
     "P-R446-4": ("多數決 deliv%（分母 measured）", 64.0, 80.0),
-    "P-R446-5": ("same_choice_rate (%)", 40.0, 95.0),
+    "P-R446-5": ("same_choice_effective_rate (%)（AMEND-1 起的仲裁量）", 40.0, 95.0),
     "P-R446-7": ("discordant pair 數 n_d", 15.0, float("inf")),
     "P-R446-8": ("infra_void 率 (%)", 0.0, 5.0),
 }
@@ -70,17 +73,19 @@ def four_cell(lo_pp: float, hi_pp: float) -> str:
 def analyze(rows: list[dict], summary: dict, rows_meta: dict | None = None) -> dict:
     eq5 = [r for r in rows if r.get("arm") == "EQ5"]
     broken: list[str] = []
+    required = (tuple(f for f in REQUIRED if not f.endswith("_code_sha256"))
+                if MUTANT == "M8" else REQUIRED)
 
     # ── 「安靜量不到」型一：缺欄位不准當 False ────────────────────────────
     if MUTANT == "M4":
         missing = []
     else:
         missing = [r.get("task_id") for r in eq5
-                   if any(f not in r for f in REQUIRED)]
+                   if any(f not in r for f in required)]
     if missing:
-        broken.append(f"{len(missing)} 列缺 {'/'.join(REQUIRED)} 其中之一"
+        broken.append(f"{len(missing)} 列缺 {'/'.join(required)} 其中之一"
                       f"（例：{missing[:3]}）——這不是通過，是量不到")
-    eq5 = [r for r in eq5 if all(f in r for f in REQUIRED)]
+    eq5 = [r for r in eq5 if all(f in r for f in required)]
 
     measured = len(eq5)
     arm_summ = (summary.get("arms") or {}).get("EQ5", {})
@@ -129,8 +134,31 @@ def analyze(rows: list[dict], summary: dict, rows_meta: dict | None = None) -> d
     hi_pp = r["hi"] * 100 if r else None
     d_pp = r["delta"] * 100 if r else None
 
-    same_choice_rate = (100.0 * sum(1 for x in eq5 if x["same_choice"]) / measured
-                        if measured else None)
+    # ── same_choice：raw 與 effective 兩個都算（AMEND-1；raw 保留、不是仲裁者）──
+    n_same_raw = sum(1 for x in eq5 if x["same_choice"])
+    same_choice_rate = (100.0 * n_same_raw / measured) if measured else None
+    def _sha_eq(x):
+        return x.get("gate_code_sha256") == x.get("vote_code_sha256")
+
+    if MUTANT == "M7":
+        # 退回 AMEND-1 之前：拒交格的 fallback 相同也算「選到同一份」
+        eff_flags = [bool(x["same_choice"]) for x in eq5]
+    else:
+        eff_flags = [bool(x["accepted"]) and _sha_eq(x) for x in eq5]
+    same_choice_eff_rate = (100.0 * sum(eff_flags) / measured) if measured else None
+    false_same_choice_n = sum(1 for x in eq5
+                              if (not x["accepted"]) and x["same_choice"])
+    # raw 欄位自己也要對得上 sha（擋掉「same_choice 與兩份 sha 互相矛盾」的漂移）
+    drift = [x["task_id"] for x in eq5 if bool(x["same_choice"]) != _sha_eq(x)]
+    if drift:
+        broken.append(f"same_choice 與 gate/vote sha 不一致 {len(drift)} 筆：{drift[:5]}")
+    # 未來的 run 會自己落盤 same_choice_effective；有就必須與重算逐筆相同（AMEND-1 §七）
+    landed = [(x, f) for x, f in zip(eq5, eff_flags) if "same_choice_effective" in x]
+    if MUTANT != "M9":
+        bad_eff = [x["task_id"] for x, f in landed if bool(x["same_choice_effective"]) != f]
+        if bad_eff:
+            broken.append("落盤的 same_choice_effective 與離線重算不一致 "
+                          f"{len(bad_eff)} 筆：{bad_eff[:5]}（AMEND-1 §七：不准取其一）")
     gate_deliv_pp = 100.0 * sum(gate_ok) / measured if measured else None
     gate_deliv_accepted_pp = (100.0 * sum(gate_ok) / n_accepted) if n_accepted else None
     vote_deliv_pp = 100.0 * sum(vote_ok) / measured if measured else None
@@ -142,7 +170,7 @@ def analyze(rows: list[dict], summary: dict, rows_meta: dict | None = None) -> d
         "P-R446-2": (100.0 - coverage_pp) if coverage_pp is not None else None,
         "P-R446-3": gate_deliv_pp,
         "P-R446-4": vote_deliv_pp,
-        "P-R446-5": same_choice_rate,
+        "P-R446-5": same_choice_eff_rate,
         "P-R446-7": float(r["n_discordant"]) if r else None,
         "P-R446-8": void_rate,
     }
@@ -152,6 +180,13 @@ def analyze(rows: list[dict], summary: dict, rows_meta: dict | None = None) -> d
         preds[k] = {"what": what, "window": [lo, hi], "observed": v,
                     "verdict": "NOT_MEASURED" if v is None
                     else ("HIT" if lo - 1e-9 <= v <= hi + 1e-9 else "MISS")}
+    # P-R446-5-raw：AMEND-1 之後不是仲裁者，但無條件印、無條件判，
+    # 讓後輪能不重跑就自行改判（AMEND-1 §五-2）。
+    preds["P-R446-5-raw"] = {
+        "what": "same_choice_rate (%)（raw；AMEND-1 之後不是仲裁者）",
+        "window": [40.0, 95.0], "observed": same_choice_rate,
+        "verdict": "NOT_MEASURED" if same_choice_rate is None
+        else ("HIT" if 40.0 <= same_choice_rate <= 95.0 else "MISS")}
     # P-R446-6 是方向預測（點估計 > 0），不是窗口
     preds["P-R446-6"] = {"what": "Δ = 閘門 − 多數決 的點估計 > 0", "window": None,
                          "observed": d_pp,
@@ -160,9 +195,15 @@ def analyze(rows: list[dict], summary: dict, rows_meta: dict | None = None) -> d
 
     # ── DECISION §六 的推翻條件（事前寫，觸發就照實寫、不當場補判準） ─────
     overturned = []
-    if same_choice_rate is not None and same_choice_rate > 95.0:
-        overturned.append("§六-1 same_choice_rate>95% ⇒ 兩條規則幾乎等價，"
+    if same_choice_eff_rate is not None and same_choice_eff_rate > 95.0:
+        overturned.append("§六-1 same_choice_effective_rate>95% ⇒ 兩條規則幾乎等價，"
                           "結論只准寫「測不出來」，不准寫「等預算下打平」")
+    if (same_choice_rate is not None and same_choice_eff_rate is not None
+            and same_choice_rate > 95.0 >= same_choice_eff_rate):
+        overturned.append("§六-1 raw 與 effective 給出相反判決（raw "
+                          f"{same_choice_rate:.2f}% > 95 ≥ effective "
+                          f"{same_choice_eff_rate:.2f}%）⇒ AMEND-1 §七：兩個判決都寫進"
+                          "結論，該信哪個留給人類，本輪不代答")
     if r and r["n_discordant"] < 15:
         overturned.append("§六-2 n_d<15 ⇒ 檢定力不足，寫 UNRESOLVED 並**同時**報 MDE／N₈₀"
                           "（round678：UNRESOLVED 是「沒量出來」不是「沒有差異」）")
@@ -185,6 +226,8 @@ def analyze(rows: list[dict], summary: dict, rows_meta: dict | None = None) -> d
                  "deliv_pp_denom_accepted": gate_deliv_accepted_pp},
         "vote": {"deliv_n": sum(vote_ok), "deliv_pp_denom_measured": vote_deliv_pp},
         "same_choice_rate_pp": same_choice_rate,
+        "same_choice_effective_rate_pp": same_choice_eff_rate,
+        "false_same_choice_n": false_same_choice_n,
         "paired": {"b_gate_only": b, "c_vote_only": c,
                    "n_discordant": r["n_discordant"] if r else None,
                    "delta_pp": d_pp, "ci95_lo_pp": lo_pp, "ci95_hi_pp": hi_pp,
@@ -211,13 +254,25 @@ def analyze(rows: list[dict], summary: dict, rows_meta: dict | None = None) -> d
 
 # ------------------------------------------------------------------ selftest
 def _row(gate, vote, **kw):
+    same = kw.pop("same", gate == vote)
     d = {"arm": "EQ5", "task_id": kw.pop("tid", "t"), "calls_used": 5,
-         "same_choice": kw.pop("same", gate == vote),
+         "same_choice": same,
          "accepted": kw.pop("accepted", True),
          "meets_demand": kw.pop("meets_demand", gate),
+         # sha 由 same 導出，raw 欄位與 sha 永遠自洽（漂移擋門測的是別的東西）
+         "gate_code_sha256": "aa" * 32,
+         "vote_code_sha256": ("aa" if same else "bb") * 32,
          "gate_deliv": gate, "vote_deliv": vote}
     d.update(kw)
     return d
+
+
+def _set_same(row, val: bool):
+    """夾具用：同時改 `same_choice` 與兩份 sha，讓 raw 欄位與 sha 保持自洽。
+    （漂移擋門測的是「欄位與 sha 打架」，不該被別條自檢的夾具誤觸發。）"""
+    row["same_choice"] = val
+    row["vote_code_sha256"] = ("aa" if val else "bb") * 32
+    return row
 
 
 def _fx(n_bb, n_bc, n_cb, n_cc, void=0, **kw):
@@ -313,7 +368,7 @@ def selftest() -> int:
     # G：推翻條件 §六-1（same_choice>95%）要觸發
     rows, summ = _fx(96, 1, 1, 2)
     for x in rows:
-        x["same_choice"] = True
+        _set_same(x, True)
     a = analyze(rows, summ)
     if not any("§六-1" in x for x in a["overturn_conditions_triggered"]):
         fails.append(f"G: same_choice=100% 沒觸發 §六-1 -> {a['overturn_conditions_triggered']}")
@@ -329,7 +384,7 @@ def selftest() -> int:
     # I：事前窗口逐條判——造一組全部落在窗內的夾具
     rows, summ = _fx(58, 16, 8, 18)        # gate 74%, vote 66%, n_d=24
     for i, x in enumerate(rows):
-        x["same_choice"] = i % 2 == 0      # 50%
+        _set_same(x, i % 2 == 0)           # 50%
         if i >= 92:                        # 8% 拒交（挑本來 gate 就沒交付的 cc 格，
             x["accepted"] = False          # 拒交不改變 b/c，只改 coverage）
     a = analyze(rows, summ)
@@ -346,10 +401,57 @@ def selftest() -> int:
     if not any("terminal" in x for x in a["broken_reasons"]) or a["verdict_four_cell"] != "BROKEN":
         fails.append(f"J: terminal=False 竟然放行 -> {a['broken_reasons']}")
 
+    # K：AMEND-1 的本體——拒交格的 fallback 相同**不算**「選到同一份」。
+    #    夾具刻意讓 raw 與 effective 給出相反的 §六-1 判決（raw 96% > 95 ≥ eff 86%），
+    #    否則 M7（退回 raw）在對稱夾具上看不見。
+    rows, summ = _fx(96, 1, 1, 2)
+    for i, x in enumerate(rows):             # 96 筆 raw 同選、4 筆不同選 ⇒ raw = 96%
+        _set_same(x, i < 96)
+    for x in rows[:10]:                      # 其中 10 筆是拒交（fallback 撞上同一份 sha）
+        x["accepted"] = False                # ⇒ effective = 86%，與 raw 跨過 95 的兩邊
+        x["gate_deliv"] = False
+    a = analyze(rows, summ)
+    if a["broken_reasons"]:
+        fails.append(f"K: 乾淨夾具卻 BROKEN -> {a['broken_reasons']}")
+    if a["false_same_choice_n"] != 10:
+        fails.append(f"K: 偽同選筆數手算 10 -> {a['false_same_choice_n']}")
+    if abs((a["same_choice_effective_rate_pp"] or -1) - 86.0) > 1e-9:
+        fails.append(f"K: effective 手算 86.0 -> {a['same_choice_effective_rate_pp']}")
+    if abs((a["same_choice_rate_pp"] or -1) - 96.0) > 1e-9:
+        fails.append(f"K: raw 手算 96.0 -> {a['same_choice_rate_pp']}")
+    if any("effective_rate>95%" in x for x in a["overturn_conditions_triggered"]):
+        fails.append(f"K: eff=86% 竟觸發 §六-1 -> {a['overturn_conditions_triggered']}")
+    if not any("相反判決" in x for x in a["overturn_conditions_triggered"]):
+        fails.append(f"K: raw>95≥eff 沒寫出「兩個判決都要寫」 -> "
+                     f"{a['overturn_conditions_triggered']}")
+    if a["prereg"]["P-R446-5"]["observed"] != a["same_choice_effective_rate_pp"]:
+        fails.append("K: P-R446-5 的仲裁量不是 effective（AMEND-1 §五）")
+    if a["prereg"]["P-R446-5-raw"]["observed"] != a["same_choice_rate_pp"]:
+        fails.append("K: raw 沒有無條件留在 prereg 裡（AMEND-1 §五-2）")
+
+    # L：少了 sha 欄位 ⇒ BROKEN（安靜量不到 型一，AMEND-1 的重算輸入不見了）
+    rows, summ = _fx(30, 10, 5, 15)
+    for x in rows[:3]:
+        x.pop("vote_code_sha256")
+    a = analyze(rows, summ)
+    if not a["third_category_missing_fields"] or a["verdict_four_cell"] != "BROKEN":
+        fails.append(f"L: 缺 vote_code_sha256 竟然放行 -> "
+                     f"{a['third_category_missing_fields']}／{a['verdict_four_cell']}")
+
+    # M：未來 run 落盤的 same_choice_effective 與離線重算打架 ⇒ BROKEN（不准取其一）
+    rows, summ = _fx(30, 10, 5, 15)
+    for x in rows:
+        x["same_choice_effective"] = bool(x["accepted"]) and x["same_choice"]
+    rows[7]["same_choice_effective"] = not rows[7]["same_choice_effective"]
+    a = analyze(rows, summ)
+    if not any("離線重算不一致" in x for x in a["broken_reasons"]):
+        fails.append(f"M: 落盤欄位與重算打架竟然放行 -> {a['broken_reasons']}")
+
     for f in fails:
         print("SELFTEST FAIL:", f)
     print("SELFTEST", "FAIL" if fails else "PASS",
-          f"(A手算 V四格同構 B_void C帳 D缺欄位 E_deliv口徑 F預算 G§六-1 H§六-2 I事前窗 J未跑完)"
+          f"(A手算 V四格同構 B_void C帳 D缺欄位 E_deliv口徑 F預算 G§六-1 H§六-2 I事前窗 J未跑完"
+          f" K偽同選 L缺sha M落盤打架)"
           f" MUTANT={MUTANT or 'none'}")
     return 1 if fails else 0
 

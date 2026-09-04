@@ -687,7 +687,13 @@ def arm_eq5(task, agents, rng, calls, book, ident, k=5):
         "vote_tie_broken": len(tied) > 1,
         "vote_code_sha256": hashlib.sha256(vote_code.encode("utf-8")).hexdigest(),
         "gate_code_sha256": hashlib.sha256(gate_code.encode("utf-8")).hexdigest(),
+        # `same_choice` 是**原始欄位，保留原語意**（拒交時 gate_code 是 cands[-1]
+        # 這個 fallback，兩份剛好相同就會回報 True）——r446 的 rows 已經帶著它，
+        # 改值會製造出處漂移。DECISION_20260904_R446_AMEND1_SAME_CHOICE.md。
         "same_choice": gate_code == vote_code,
+        # 閘門拒交＝**什麼都沒交**，那不是「兩條規則選到同一份」，那是這個比較
+        # 最有對比的一格。DECISION §六-1 那句話的忠實實作是下面這個量。
+        "same_choice_effective": bool(accepted) and gate_code == vote_code,
     }
 
 
@@ -1447,6 +1453,7 @@ def main() -> None:
             "fail_claims": 0, "confirmed_claims": 0, "confirmed_on_wrong": 0,
             "raw_correct": 0, "processed": 0,
             "eq5_vote_ok": 0, "eq5_gate_ok": 0, "eq5_same_choice": 0,
+            "eq5_same_choice_eff": 0,
             "transitions": {"improved": 0, "harmed": 0,
                             "stayed_correct": 0, "stayed_wrong": 0},
             # 交錯之後「臂的 wall time」不能再用 t_end - t_start（兩臂在時間上
@@ -1502,6 +1509,10 @@ def main() -> None:
                 (s["eq5_vote_ok"] / measured) if arm == "EQ5" and measured else None),
             "eq5_same_choice_rate": (
                 (s["eq5_same_choice"] / measured) if arm == "EQ5" and measured else None),
+            # AMEND-1：§六-1 的仲裁量（拒交格不算「選到同一份」）。
+            "eq5_same_choice_effective_rate": (
+                (s["eq5_same_choice_eff"] / measured)
+                if arm == "EQ5" and measured else None),
             "endpoint_latency_ms": latency_summary(calls_log, arm),
             "wall_s": round(s["wall_s"], 1),
             "cost_usd": round(s["cost"], 4),
@@ -1575,6 +1586,7 @@ def main() -> None:
                 s["eq5_vote_ok"] += int(vote_truth)
                 s["eq5_gate_ok"] += int(accepted and truth)
                 s["eq5_same_choice"] += int(extra["same_choice"])
+                s["eq5_same_choice_eff"] += int(extra["same_choice_effective"])
             if arm == "ON":
                 # truth 是離線評分，不能餵回產品；路由只吃真的抽樣 audit。
                 apply_audit_reputation(

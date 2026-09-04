@@ -18,6 +18,10 @@ MUTANTS = {
     "M4": ("D", "缺欄位靜靜當 False（安靜量不到 型一）"),
     "M5": ("C", "rows 行數與 processed 對不上時不擋（安靜量不到 型二）"),
     "M6": ("J", "run 還沒跑完（terminal=False）也放行 ⇒ 半截 run 被當收官資料"),
+    # round692 AMEND-1（same_choice 在拒交格量錯東西）
+    "M7": ("K", "退回 AMEND-1 之前：拒交格的 fallback 相同也算「選到同一份」"),
+    "M8": ("L", "少了 gate/vote sha 也照跑、退回 raw（AMEND-1 的重算輸入安靜消失）"),
+    "M9": ("M", "落盤的 same_choice_effective 與離線重算打架時不擋（安靜取其一）"),
 }
 
 
