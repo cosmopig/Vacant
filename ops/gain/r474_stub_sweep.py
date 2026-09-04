@@ -61,9 +61,14 @@ def _gain_run():
     return mod
 
 
-def stub_expr_source() -> str:
-    """從 `probe_instrument` 逐字取出 `stub = ...` 的右手邊，不自己重寫一份。"""
-    src = _GAIN_RUN.read_text()
+def stub_expr_source(path: pathlib.Path = _GAIN_RUN) -> str:
+    """從 `probe_instrument` 逐字取出 `stub = ...` 的右手邊，不自己重寫一份。
+
+    ⚠ `path` 參數存在的唯一理由是自檢條 I：把這支指到一份**樁被改過**的
+      `probe_instrument` 副本，取出來的字串必須跟著變。沒有這一條的話，
+      「自己重寫一份寫死的樁」會安靜通過（round744 實測 M3 = MISSED）。
+    """
+    src = pathlib.Path(path).read_text()
     tree = ast.parse(src)
     fns = [n for n in ast.walk(tree)
            if isinstance(n, ast.FunctionDef) and n.name == "probe_instrument"]
@@ -171,6 +176,18 @@ def selftest() -> int:
     if c.get(REJECTED) != 1 or c.get(ACCEPTED) != 1 or c.get(UNUSABLE) != 1:
         failed.append(f"G_counts_not_merged: {c}")
     print(f"  G_counts_not_merged        {c}")
+
+    # I 接線是真的追著來源跑，不是寫死一份（M3 專用；只翻來源、不翻別的）
+    import tempfile
+    mutated = _GAIN_RUN.read_text().replace("    return None\\n", "    return 0\\n", 1)
+    with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as fh:
+        fh.write(mutated)
+        tmp = pathlib.Path(fh.name)
+    tracked = stub_expr_source(tmp)
+    tmp.unlink()
+    if "return 0" not in tracked:
+        failed.append(f"I_stub_tracks_source: 來源改了但取到的樁沒變：{tracked!r}")
+    print(f"  I_stub_tracks_source       {tracked!r}")
 
     # H 接線：樁字面必須真的來自 probe_instrument（漂移要吵，不要安靜錯）
     if "return None" not in stub_src or "entry_point" not in stub_src:
