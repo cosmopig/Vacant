@@ -101,3 +101,43 @@ round712 又量到：要在 ±5pp 解析度上分出 CONFORM 與 OFF5 需要 ≈
 
 `ops/gain/r447_eq5_offline.py`（`--selftest` / `--mutation` / `--run <dir> --json <out>`）。
 **判準（本檔）與程式碼分開 commit。**
+
+---
+
+## 九、附記（round714 量完之後補；**判準沒有改，這是提案不是判決**）
+
+§五 W1–W4 全部命中，數字見 GAIN_STATE round714 與
+`ops/gain/data/r452_eq5_offline_round714.json`。過程中量到一件**沒有預期到**的事，
+照 §六「觸發了照實寫、不准當場補判準去修」的規則記在這裡：
+
+**探索性那兩個「閘門殺掉好答案」的 0 是結構強制的，不是證據。**
+`bank_gate_headroom` 逐題用 AST 把 check code 拆成單條驗收再比對，量到：
+
+```
+lcb2      n_parsed 120／可見⊆隱藏 120／認不出形狀 0 ⇒ forced_zero=True
+evalplus  n_parsed 371／可見⊆隱藏 371／認不出形狀 0 ⇒ forced_zero=True
+```
+
+隱藏測資是可見測資的**超集**（`vacant/codebench.py:LiveCodeBenchLoader`
+「visible=公開測資、hidden=公開＋私有（超集）」；MBPP+ 側同理）⇒
+「可見沒過但 hidden 其實對」在**定義上不可能發生**（除非非決定性／逾時）。因此：
+
+- 我這把尺的 `candidates_visible_fail_hidden_ok=0`（390 個候選）、
+- `r447_reject_reconstruct` 的候選層無損性 `0/58`、
+- `arm_conform` docstring 引用的 MBPP+ **0/1630**（它自己寫「**部分**是題庫性質」——
+  現在量出來是**全部**，兩個題庫都 100%），
+- 以及 **R440Z 的 P-Z6**（rows 裡沒有 `visible_ok=False ∧ meets_demand=True`）
+
+四者都是同一個恆等式的不同投影，**沒有任何一個可以當成「閘門無損」的證據**。
+（記憶鐵律：沒有基準率的「支持」可能結構性不可能有反例＝空洞綠燈。）
+
+**這件事為什麼重要**：R440Z §四 把「本階足夠有效」定義成 **P-Z2 成立且 P-Z6 成立**。
+其中 P-Z6 在這個題庫家族上**不可能不成立** ⇒ 那一半的合取項不帶資訊。
+
+**提案 P-R452-1（給收官／稽核輪，不是本輪的判決）**：收官寫 P-Z6 = HIT 時，
+必須同一段寫上 `forced_zero=True` 與上面兩行基準率，並改寫成
+「P-Z6 在本題庫上不可證偽」。**本輪不改 R440Z 任何條文、不改 P-Z6 的判決、
+也不動 `analyze_r447.py` 的 tripwire 鍵集合**——凍結的判準只有稽核輪能動。
+
+**推翻本附記的條件**：找到任一題 `n_visible_subset_of_hidden` 不成立（本尺會報
+`n_parsed` 與子集數，逐題可查），或量到非決定性／逾時造成的真實 P-Z6 反例。
