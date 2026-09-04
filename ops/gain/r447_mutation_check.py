@@ -28,6 +28,7 @@ EXPECT = {
     "M8_pz5b_pass":                 "K P-Z5b",
     "M9_drop_overturn":             "F2 P-Z6 反例 ⇒ 觸發推翻條件",
     "M10_widen_windows":            "J3 P-Z4 2.21 是 MISS",
+    "M11_power_off5_uses_off_pair": "P2 OFF5 那格的 MDE 餵的是 OFF5 自己的配對",
 }
 
 # `r447_reject_reconstruct.py` 的突變體 → 一定要紅的那一條

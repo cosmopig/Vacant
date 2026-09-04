@@ -282,6 +282,16 @@ def analyze(rows: list[dict], summary: dict) -> dict:
             "mde_at_n": mde_at_n(p2["n_common"], p2["n_discordant"] / p2["n_common"]),
             "n_needed_for_5pp": n_needed(p2["n_discordant"], p2["n_common"]),
         }
+    # R451：UNINFORMATIVE 是 UNRESOLVED 家族裡最寬的一格，最需要 MDE 陪著落地
+    # ——沒有它，「沒量出來」下一輪會被引用成「打不贏」（r678 踩過的坑）。
+    # 餵的是 p3（CONFORM vs OFF5）；餵成 p2 是最像的那個 bug，
+    # 由 M11 + 夾具分岔（_fixture(o5_flip_tail=...)）看著。
+    pp = p3 if MUTANT != "M11_power_off5_uses_off_pair" else p2
+    if pp is not None and pp["n_common"]:
+        out["power_conform_vs_off5"] = {
+            "mde_at_n": mde_at_n(pp["n_common"], pp["n_discordant"] / pp["n_common"]),
+            "n_needed_for_5pp": n_needed(pp["n_discordant"], pp["n_common"]),
+        }
     return out
 
 
@@ -304,9 +314,17 @@ def _summary(counts: dict[str, tuple[int, int]], terminal=True):
             "arms": {a: {"processed": p, "infra_void": v} for a, (p, v) in counts.items()}}
 
 
-def _fixture(n=100, b_only=20, c_only=2, both=40):
-    """CONFORM 贏 b_only 格、OFF 贏 c_only 格、both 格兩邊都對，其餘兩邊都錯。"""
+def _fixture(n=100, b_only=20, c_only=2, both=40, o5_flip_tail=0):
+    """CONFORM 贏 b_only 格、OFF 贏 c_only 格、both 格兩邊都對，其餘兩邊都錯。
+
+    `o5_flip_tail=k`（R451）：把「兩臂都錯」尾段的 k 題翻成 **OFF5 交付成功**，
+    讓 CONFORM-vs-OFF5 的 b/c 與 CONFORM-vs-OFF **分岔**。預設 0 ＝ OFF5 照抄 OFF
+    ＝ 完全維持 R451 之前的行為（既有夾具一個數字都不動）。
+    需要它的理由是結構性的：預設夾具上兩個比較的 b/c 恆等，
+    「新區塊餵成 p2」這個 bug 在那裡不可能被任何一條看見。
+    """
     rows = []
+    flip_from = n - o5_flip_tail
     for i in range(n):
         t = f"t{i:03d}"
         if i < b_only:
@@ -317,9 +335,13 @@ def _fixture(n=100, b_only=20, c_only=2, both=40):
             cd, od = True, True
         else:
             cd, od = False, False
+        o5d = od
+        if o5_flip_tail and i >= flip_from:
+            assert not cd and not od, "o5_flip_tail 只准翻『兩臂都錯』的尾段"
+            o5d = True
         rows.append(_r("CONFORM", t, deliv=cd, calls=2))
         rows.append(_r("OFF", t, deliv=od, calls=1))
-        rows.append(_r("OFF5", t, deliv=od, calls=5))
+        rows.append(_r("OFF5", t, deliv=o5d, calls=5))
     return rows, _summary({"CONFORM": (n, 0), "OFF": (n, 0), "OFF5": (n, 0)})
 
 
@@ -471,6 +493,32 @@ def selftest() -> int:
        and not any(x.startswith("bank_too_hard") for x in
                    tripwire(n9b)["overturn_conditions_triggered"]))
 
+    # ── P（R451）CONFORM vs OFF5 也要有 MDE／N₈₀，而且算的是**自己那組** b/c
+    ck("P power_conform_vs_off5 存在（UNINFORMATIVE 不准裸著落地）",
+       a.get("power_conform_vs_off5") is not None)
+    # 夾具先分岔——預設夾具上 OFF5 照抄 OFF，兩個比較的 b/c 恆等，
+    # 「餵成 p2」在那裡結構上看不見。這一條先證明分岔真的發生了。
+    d5 = analyze(*_fixture(o5_flip_tail=6))
+    _po, _p5 = d5["paired_conform_vs_off"], d5["paired_conform_vs_off5"]
+    ck("P1 夾具分岔生效（前置條件：兩個比較的 n_discordant 不同）",
+       _po["n_discordant"] == 22 and _p5["n_discordant"] == 28,
+       f"off={_po['n_discordant']} off5={_p5['n_discordant']}")
+    ck("P2 OFF5 那格的 MDE 餵的是 OFF5 自己的配對（不是 OFF 的）",
+       d5["power_conform_vs_off5"]["mde_at_n"]["n_disc_expected"] == _p5["n_discordant"],
+       f"n_disc_expected={d5['power_conform_vs_off5']['mde_at_n']['n_disc_expected']}"
+       f" 應為 {_p5['n_discordant']}（OFF 那格是 {_po['n_discordant']}）")
+    ck("P3 兩格 N₈₀ 不共用同一個數（分岔夾具上必須不同）",
+       d5["power_conform_vs_off5"]["n_needed_for_5pp"]
+       != d5["power_conform_vs_off"]["n_needed_for_5pp"],
+       f"off5={d5['power_conform_vs_off5']['n_needed_for_5pp']}"
+       f" off={d5['power_conform_vs_off']['n_needed_for_5pp']}")
+    ck("P4 新鍵擋在 tripwire 之外（它是 b/c 導出的比率資訊）",
+       "power_conform_vs_off5" not in tripwire(d5)
+       and "power_conform_vs_off5" in TRIPWIRE_FORBIDDEN)
+    ck("P5 o5_flip_tail 預設 0 ⇒ 既有夾具行為零改動",
+       [r for r in _fixture()[0] if r["arm"] == "OFF5"]
+       == [_r("OFF5", f"t{i:03d}", deliv=(20 <= i < 62), calls=5) for i in range(100)])
+
     print(f"SELFTEST {'PASS' if not fails else 'FAIL'} ({len(fails)} failed) MUTANT={MUTANT or 'none'}")
     return 1 if fails else 0
 
@@ -485,7 +533,8 @@ TRIPWIRE_KEYS = ("deferred_to_collapse", "pz6_violations", "pz6_holds", "pz7a_ma
 TRIPWIRE_FORBIDDEN = ("paired_conform_vs_off", "paired_conform_vs_off5", "per_arm",
                       "pz1_off_fail_pct", "prereg_hits", "verdict_stage", "pz2_holds",
                       "pz5_reject_pct", "verdict_four_cell_conform_vs_off",
-                      "verdict_four_cell_conform_vs_off5", "power_conform_vs_off")
+                      "verdict_four_cell_conform_vs_off5", "power_conform_vs_off",
+                      "power_conform_vs_off5")
 
 
 # 期中**不評估**的推翻條件，連「有沒有觸發」都不准漏（觸發與否本身就是比率的訊息）。
