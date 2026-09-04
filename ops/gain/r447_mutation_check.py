@@ -51,6 +51,7 @@ EXPECT_EQ5OFF = {
     "X8_deliv_ignores_accepted":     "E9 規則 B 讀 rows 的 accepted",
     "X9_include_failed_calls":       "E2b 失敗的請求不算候選",
     "X10_ignore_missing_fields":     "E1 缺欄位 ⇒ BROKEN",
+    "X11_headroom_assumes_independent": "E15b 全部是子集 ⇒ forced_zero=True",
 }
 
 

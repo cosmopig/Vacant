@@ -60,6 +60,49 @@ def off5_candidates(calls: list[dict]) -> dict[str, list[tuple[str, str]]]:
     return out
 
 
+def _tests_literal(check_code: str):
+    """從 check code 取出 `__tests = [...]` 的字面值；認不出形狀就回 None（不猜）。"""
+    try:
+        tree = ast.parse(check_code)
+    except SyntaxError:
+        return None
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", "") == "__tests":
+            try:
+                return ast.literal_eval(node.value)
+            except ValueError:
+                return None
+    return None
+
+
+def bank_gate_headroom(tasks) -> dict:
+    """基準率：可見測資是不是隱藏測資的**子集**？
+
+    是子集 ⇒「可見沒過但 hidden 其實對」在**定義上不可能發生** ⇒ 探索性那兩個 0
+    是結構強制的，不是「閘門在這個題庫上沒殺過好答案」的證據（記憶鐵律：沒有基準率的
+    「支持」可能結構性不可能有反例＝空洞綠燈）。認不出形狀的題目照實計數，不猜。
+    """
+    n = sub = unparsed = 0
+    for t in tasks:
+        v = _tests_literal((t.get("visible_check") or {}).get("code", ""))
+        h = _tests_literal((t.get("hidden_check") or {}).get("code", ""))
+        if v is None or h is None:
+            unparsed += 1
+            continue
+        n += 1
+        is_sub = all(x in h for x in v)
+        if MUTANT == "X11_headroom_assumes_independent":
+            is_sub = False
+        if is_sub:
+            sub += 1
+    return {"n_parsed": n, "n_visible_subset_of_hidden": sub, "n_unparsed_shape": unparsed,
+            "forced_zero": bool(n and sub == n),
+            "note": ("forced_zero=True ⇒ 下面 exploratory 的 "
+                     "`candidates_visible_fail_hidden_ok` 與 "
+                     "`gate_rejected_but_some_candidate_correct` 只可能是 0，"
+                     "**不是**閘門無損的證據。")}
+
+
 def reconstruct(rows, calls, tasks, *, vis=None, hid=None) -> dict:
     if vis is None:
         def vis(code, task):
@@ -171,6 +214,7 @@ def reconstruct(rows, calls, tasks, *, vis=None, hid=None) -> dict:
     }
 
     # 探索性（非事前註冊）：任何選擇規則的天花板，以及閘門有沒有殺掉好答案
+    headroom = bank_gate_headroom(tasks)
     oracle = sum(1 for p in per if any(p["hidden"]))
     killed = [p["task_id"] for p in per if not p["gate_deliv"] and any(p["hidden"])]
     out["exploratory"] = {
@@ -180,7 +224,9 @@ def reconstruct(rows, calls, tasks, *, vis=None, hid=None) -> dict:
         "gate_rejected_but_some_candidate_correct_ids": killed,
         "candidates_visible_fail_hidden_ok": sum(
             1 for p in per for v, h in zip(p["visible"], p["hidden"]) if h and not v),
-        "note": "非事前註冊、探索性；不改 R440Z 任何一條 P-Z 的判決。",
+        "bank_gate_headroom_BASERATE": headroom,
+        "note": ("非事前註冊、探索性；不改 R440Z 任何一條 P-Z 的判決。"
+                 "上面兩個「殺掉好答案」的計數要**配著 bank_gate_headroom_BASERATE 讀**。"),
     }
 
     ok_to_report = not broken and not out["calibration"].get("under_min")
@@ -322,6 +368,21 @@ def selftest() -> int:
        res["verdict"] == "UNCALIBRATED" and res["calibration"]["n"] == 5, str(res["calibration"]))
     ck("E11 UNCALIBRATED 時不吐 Δ／檢定力",
        res["paired_gate_vs_vote"] is None and res["power"] is None, str(res["verdict"]))
+
+    hb = {"visible_check": {"code": "__tests = [{'args': [1], 'expected': 2}]"},
+          "hidden_check": {"code": "__tests = [{'args': [1], 'expected': 2},"
+                                   " {'args': [9], 'expected': 9}]"}}
+    hn = {"visible_check": {"code": "__tests = [{'args': [7], 'expected': 7}]"},
+          "hidden_check": {"code": "__tests = [{'args': [1], 'expected': 2}]"}}
+    hu = {"visible_check": {"code": "assert f(1) == 2"}, "hidden_check": {"code": "assert f(1) == 2"}}
+    ck("E15 基準率：可見⊆隱藏 逐題用 AST 比對（1 子集／1 不是／1 認不出形狀）",
+       bank_gate_headroom([hb, hn, hu]) == {
+           "n_parsed": 2, "n_visible_subset_of_hidden": 1, "n_unparsed_shape": 1,
+           "forced_zero": False,
+           "note": bank_gate_headroom([hb])["note"]},
+       str(bank_gate_headroom([hb, hn, hu])))
+    ck("E15b 全部是子集 ⇒ forced_zero=True（那兩個 0 是空綠燈）",
+       bank_gate_headroom([hb])["forced_zero"] is True, str(bank_gate_headroom([hb])))
 
     # 校準真的會叫：把 t0 的 rows 值翻掉（只翻 rows，不動候選）
     rows2, calls2, tasks2, vis2, hid2 = _fx()
