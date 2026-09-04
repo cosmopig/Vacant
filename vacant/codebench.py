@@ -726,11 +726,26 @@ LCB_BANK_V2_PATH = "ops/gain/data/lcb_bank_v2.jsonl"
 LCB_BANK_V2_SHA256 = "b98f027213e2469a0a41bed813d99f029d3d6e2fac64e0fa18887c42c865b9ba"
 LCB_BANK_V2_COUNT = 120        # v1 的 91 題 ＋ test4 視窗新增 29 題
 
+# v3（2026-09-04，R461）：**同一份 recipe**（`build_lcb_bank.py` 一個字沒改），吃的是
+# R460 量出來、從未被任何 run 用過的三個視窗 test+test2+test3 ⇒ 189 題。
+# ⚠ **v3 不是 v2 的超集**（v1⊂v2 那個關係在這裡不成立）：v3 與 v2 的 task_id
+# **零交集**（實測 overlap=0、union=309），它是刻意造出來的樣本外複製集
+# ——把 v2 的 120 題混進來會讓 r447 看過的資料變成序貫加樣本（見 R461 §二）。
+# 日期範圍 2023-05-07 → 2024-08-10，**189 題全部不晚於 2024-08-10**
+# （其中 184 題早於 2024-08）⇒ 上面 v1/v2 docstring 那句「本 bank 都在 2024-08
+# 之後」對 v3 **為假**，R460 C3 已判定；v3 只能宣稱「更難、附日期戳」，
+# **不能**宣稱晚於訓練截止，污染風險比 v1/v2 高，任何用 v3 的分析都要寫這一句。
+LCB_BANK_V3_PATH = "ops/gain/data/lcb_bank_v3.jsonl"
+LCB_BANK_V3_SHA256 = "bd3dffebb1b16bc7c92ead59c82753597a8197f9927d4f758d42e6c28b129293"
+LCB_BANK_V3_COUNT = 189        # medium 135／hard 54；test/test2/test3 各 119/37/33
+
 LCB_BANKS: dict[str, dict[str, Any]] = {
     "v1": {"path": LCB_BANK_DEFAULT_PATH, "sha256": LCB_BANK_V1_SHA256,
            "count": LCB_BANK_V1_COUNT},
     "v2": {"path": LCB_BANK_V2_PATH, "sha256": LCB_BANK_V2_SHA256,
            "count": LCB_BANK_V2_COUNT},
+    "v3": {"path": LCB_BANK_V3_PATH, "sha256": LCB_BANK_V3_SHA256,
+           "count": LCB_BANK_V3_COUNT},
 }
 LCB_BANK_DEFAULT_VERSION = "v1"
 
@@ -781,6 +796,9 @@ class LiveCodeBenchLoader(TaskLoader):
                                 2023-08-26**——它比 v1 的整個視窗早一年多，
                                 要主張「晚於訓練截止」的分析必須把它另外列出，
                                 不能用「本 bank 都在 2024-08 之後」一句帶過。
+      v3（189 題，test+test2+test3）2023-05-07 → 2024-08-10，**與 v2 零交集、
+                                不是超集**；189 題**全部不晚於 2024-08-10**
+                                ⇒ 上面那句「都在 2024-08 之後」對 v3 為假。
     誠實邊界：無法保證晚於本實驗 worker 模型的訓練截止（模型卡未公開精確
     cutoff），本 bank 只能宣稱「MBPP+ 之外、更難、附日期戳」，不能宣稱零污染
     ——見 DECISION_20260901_R440。

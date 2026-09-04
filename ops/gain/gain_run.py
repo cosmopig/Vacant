@@ -65,13 +65,16 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0) -> list[dict]:
     """
     if bank == "evalplus":
         loader = EvalPlusMBPPLoader(expose_contract=True)
-    elif bank in ("lcb", "lcb2"):
+    elif bank in ("lcb", "lcb2", "lcb3"):
         from vacant.codebench import LiveCodeBenchLoader
         # lcb2＝v2（同 recipe 多吃 test4 視窗，120 題）。分成兩個 bank 名而不是靠環境變數，
         # 讓 rows/summary 裡 `bank` 一眼看得出用的是哪一版；兩版 sha256/題數都釘死、fail-closed。
         # round440y：這三段接線原本被誤放進一個後來丟掉的 commit，導致 `lcb2` 掉進 builtin
         # 的無限產生器（n=0 時 list() 永遠不回來）——這裡的 elif 就是那個坑的修補。
-        loader = LiveCodeBenchLoader(version="v1" if bank == "lcb" else "v2")
+        # round728（R461）：加 lcb3＝v3（189 題新題，與 v2 零交集）。映射改成明表，
+        # 免得再出現「不是 lcb 就是 v2」這種會把新 bank 名默默導到舊 bank 的三元式。
+        loader = LiveCodeBenchLoader(
+            version={"lcb": "v1", "lcb2": "v2", "lcb3": "v3"}[bank])
     else:
         loader = BuiltinSampleLoader()
     ts = list(loader.iter_tasks(seed))
@@ -142,6 +145,12 @@ def meets_demand(
 LCB_PROBE_SOLUTIONS_PATH = (
     pathlib.Path(__file__).resolve().parent / "data" / "lcb_probe_solutions.json"
 )
+# round728（R461）：v3 的手寫解另存一個檔，**不合併進上面那個**。
+# 合併雖然不會改 v1/v2 的 covered 集合（task_id 零交集），但會改動一個
+# E3／r447 都引用過的檔案內容；分檔的話 v1/v2 那條路徑逐位元不變。
+LCB_V3_PROBE_SOLUTIONS_PATH = (
+    pathlib.Path(__file__).resolve().parent / "data" / "lcb_v3_probe_solutions.json"
+)
 
 
 def _canonical_solutions(bank: str = "evalplus", path: str | None = None) -> dict[str, str]:
@@ -165,8 +174,13 @@ def _canonical_solutions(bank: str = "evalplus", path: str | None = None) -> dic
       跟檢查式 `abs(a-b)<=1e-6` 的容忍度矛盾，連精確解都會被判錯，
       見 DECISION_20260901_R441。
     """
-    if bank in ("lcb", "lcb2"):
-        p = pathlib.Path(path) if path else LCB_PROBE_SOLUTIONS_PATH
+    if bank in ("lcb", "lcb2", "lcb3"):
+        # round728：漏掉 lcb3 的話會掉進下面的 EvalPlus 分支，讀 mbppplus_* 的
+        # 參考解去配 lcb_* 的 task_id ⇒ covered 恆為空 ⇒ 錯誤訊息會變成
+        # 「讀不到官方參考解」或 n==0，把「這個 bank 沒有手寫解」講成「線沒接上」。
+        _default = (LCB_V3_PROBE_SOLUTIONS_PATH if bank == "lcb3"
+                    else LCB_PROBE_SOLUTIONS_PATH)
+        p = pathlib.Path(path) if path else _default
         with p.open(encoding="utf-8") as f:
             return json.load(f)
     import gzip
@@ -1192,7 +1206,7 @@ def main() -> None:
     ap.add_argument("--seed", default="g1")
     ap.add_argument("--arms", default="OFF,ON,OFF5")
     ap.add_argument("--bank", default="evalplus",
-                    choices=["evalplus", "builtin", "lcb", "lcb2"])
+                    choices=["evalplus", "builtin", "lcb", "lcb2", "lcb3"])
     ap.add_argument("--audit-rate", type=float, default=0.2)
     ap.add_argument(
         "--calibration-n", type=int, default=0,
