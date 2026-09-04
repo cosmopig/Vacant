@@ -1,0 +1,58 @@
+{
+  "target_sha256": "9db4dee4778f8e834310f2ee4f78edf097d1a87a73d857cbebdfe1ccec9efe9a",
+  "p6": {
+    "M1": {
+      "rc": 1,
+      "f_fail": false,
+      "g_fail": false,
+      "fail_lines": [
+        "SELFTEST FAIL: C: 區間/檢定不一致 64 格，例：[(0, 1, True, False), (0, 2, True, False), (0, 3, True, False)]"
+      ],
+      "p6_ok": true
+    },
+    "M2": {
+      "rc": 1,
+      "f_fail": false,
+      "g_fail": false,
+      "fail_lines": [
+        "SELFTEST FAIL: D: 區間超出 ±n_d/n b=14 c=10 cap=0.2963 [-0.2671,0.5578]; 區間超出 ±n_d/n b=3 c=1 cap=0.0494 [-0.6118,0.9874]; 點估計不在區間內 b=30 c=5; 區間超出 ±n_d/n b=30 c=5 ca",
+        "SELFTEST FAIL: E: n_needed 找不到解"
+      ],
+      "p6_ok": true
+    },
+    "M7": {
+      "rc": 0,
+      "f_fail": false,
+      "g_fail": false,
+      "fail_lines": [],
+      "p6_ok": true
+    },
+    "M8": {
+      "rc": 0,
+      "f_fail": false,
+      "g_fail": false,
+      "fail_lines": [],
+      "p6_ok": true
+    }
+  },
+  "p8": {
+    "X-F": {
+      "mutant": "M5",
+      "clean_rc": 0,
+      "mut_rc": 0,
+      "back_to_missed": true,
+      "broken": false,
+      "p8_ok": true
+    },
+    "X-G": {
+      "mutant": "M6",
+      "clean_rc": 0,
+      "mut_rc": 0,
+      "back_to_missed": true,
+      "broken": false,
+      "p8_ok": true
+    }
+  },
+  "p6_all_ok": true,
+  "p8_all_ok": true
+}
