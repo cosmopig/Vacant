@@ -59,3 +59,35 @@
 
 - **不打 1234、不改 8766 任何設定、不重跑那通**（run 還活著；SPEC_GAIN §7 一端點一 run）。
 - 結論若是 H-B／H-D 二選一分不開，就寫「narrowed to {H-B, H-D}」，**不准挑一個當結論**。
+
+---
+
+## 七、量測中途冒出來的第五個假說 H-E（判準寫在算它之前）
+
+§四 跑完得到 `STATIC_CEILING_REFUTED_BY_MAX` ＋ `PREFLIGHT_REFUTED` 之後，
+8766 的**唯讀**明細（`/api/requests`、`/api/events`，本輪才發現這兩個端點存在）冒出兩件
+§二 完全沒列的事實：
+
+1. `/api/events`：gemma **每小時被 unload／load 一次**（1004 上的排程，我們不控制）。
+   ⇒ 一個 run 橫跨多個「載入世代」。
+2. `/api/requests?only_errors=true`：24h 內有 **21 通** `Context size has been exceeded`，
+   而 r447 的 `calls.jsonl` 只記到 1 通。
+
+⇒ **H-E：每請求的有效 context 不是 262144，而是隨「載入世代」變動**（例如某次
+load 用了較小的 context）。這是 §五 講的「冒出來就照實加寫一節、不當場改上面的判準」。
+§四 R1/R5/R6 的判決**不因本節改變**。
+
+### 判準（在跑之前寫死）
+
+把 `/api/events` 相鄰兩個 `loaded` 之間切成世代；每個世代算兩件事：
+`max_ok_total` ＝ 我們成功 gen 通的 `usage.total_tokens` 最大值；`n_ctx400` ＝ 該世代的 400 通數。
+
+- **E-KILL**：若存在**任一世代**同時有 (a) 一通 context-exceeded 400 且
+  (b) 一通成功且 `total_tokens > T_fail_hi`（21791）⇒ **H-E 被推翻**，
+  因為同一個載入世代不可能既容得下 21791 又在 15850 就爆。
+- **E-SUPPORT**：若所有出現 400 的世代其 `max_ok_total` 都 `< T_fail_hi`，
+  且至少一個沒出 400 的世代 `max_ok_total > T_fail_hi` ⇒ **H-E 得到支持（不是證實）**。
+- 其餘 ⇒ `E-INCONCLUSIVE`。
+
+**先驗風險自曝**：世代切割用的 `/api/events` 只有 100 筆上限，蓋不到的時段一律標
+`epoch_unknown` 並排除，**排除幾通要具名寫出來**，不准安靜丟。
