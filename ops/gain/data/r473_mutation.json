@@ -1,0 +1,287 @@
+{
+  "tool": "mutation_test_r473_r466_census",
+  "prereg": "DECISION_20260904_R473_R466_CENSUS_MUTATION_PREREG.md",
+  "rel": "ops/gain/r466_r461_sec2_sec6_census.py",
+  "worktree": "/home/user1/vacant/wt_r473",
+  "baseline": {
+    "d1": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "failed": []
+    },
+    "d2": {
+      "rc": 0,
+      "red": false,
+      "broken": false
+    },
+    "d3": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "changed": [],
+      "added": [
+        "/facts/pins/pred_pins",
+        "/facts/pins/prereg_pin_commit",
+        "/facts/pins/source_pin_commit"
+      ],
+      "removed": [],
+      "blind_hit_rate": "5/5",
+      "forced_green_evidence_items": [
+        "S2-2",
+        "S6-1"
+      ],
+      "class_counts": {
+        "EVALUABLE": 4,
+        "FORCED_GREEN": 2,
+        "NOT_A_PREDICTION": 1
+      }
+    }
+  },
+  "mutants": {
+    "X1_drop_suppression": {
+      "verdict": "DETECTED",
+      "named": [
+        "J"
+      ],
+      "red_tokens": [
+        "J"
+      ],
+      "d1_failed": [
+        "J B6 抑制式（逐字取自 census 原始碼）真的把 FORCED_GREEN 換成 SUPPRESSED"
+      ],
+      "d2_red": false,
+      "d3_changed": [],
+      "d3_blind_hit_rate": "5/5",
+      "d3_forced_green_evidence_items": [
+        "S2-2",
+        "S6-1"
+      ],
+      "why": "B6 抑制式拿掉：CONTRADICTION 之下仍吐 FORCED_GREEN"
+    },
+    "X2_pred_drift": {
+      "verdict": "DETECTED",
+      "named": [
+        "I"
+      ],
+      "red_tokens": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "M2",
+        "M3",
+        "I"
+      ],
+      "d1_failed": [
+        "A 乾淨跑 verdict==OK",
+        "B 七筆都在",
+        "C 雙向校準通過",
+        "D 正對照＝FORCED_GREEN",
+        "E 負對照＝EVALUABLE",
+        "M2 全判 FORCED 會被負對照擋住（UNCALIBRATED）",
+        "M3 正對照壞掉 ⇒ UNCALIBRATED",
+        "I 事前預測三表（PRED／INTENT／BLIND）與判準檔逐鍵相同"
+      ],
+      "d2_red": false,
+      "d3_changed": [
+        "/facts/pins/drift",
+        "/verdict"
+      ],
+      "d3_blind_hit_rate": null,
+      "d3_forced_green_evidence_items": null,
+      "why": "事前預測被改寫：blind_hit_rate 安靜變成強制命中"
+    },
+    "X3_intent_drift": {
+      "verdict": "DETECTED",
+      "named": [
+        "I"
+      ],
+      "red_tokens": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "M2",
+        "M3",
+        "I"
+      ],
+      "d1_failed": [
+        "A 乾淨跑 verdict==OK",
+        "B 七筆都在",
+        "C 雙向校準通過",
+        "D 正對照＝FORCED_GREEN",
+        "E 負對照＝EVALUABLE",
+        "M2 全判 FORCED 會被負對照擋住（UNCALIBRATED）",
+        "M3 正對照壞掉 ⇒ UNCALIBRATED",
+        "I 事前預測三表（PRED／INTENT／BLIND）與判準檔逐鍵相同"
+      ],
+      "d2_red": false,
+      "d3_changed": [
+        "/facts/pins/drift",
+        "/verdict"
+      ],
+      "d3_blind_hit_rate": null,
+      "d3_forced_green_evidence_items": null,
+      "why": "intent 被改寫：evidence 級強制綠燈的警告安靜少一筆"
+    },
+    "X4_drop_source_pin": {
+      "verdict": "DETECTED",
+      "named": [
+        "K"
+      ],
+      "red_tokens": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "G",
+        "M2",
+        "M3",
+        "K"
+      ],
+      "d1_failed": [
+        "A 乾淨跑 verdict==OK",
+        "B 七筆都在",
+        "C 雙向校準通過",
+        "D 正對照＝FORCED_GREEN",
+        "E 負對照＝EVALUABLE",
+        "G 原始碼四條字面全對得上",
+        "M2 全判 FORCED 會被負對照擋住（UNCALIBRATED）",
+        "M3 正對照壞掉 ⇒ UNCALIBRATED",
+        "K 來源釘生效（讀的是釘死 commit 而不是 worktree；見證＝兩版今天確實不同）"
+      ],
+      "d2_red": false,
+      "d3_changed": [
+        "/facts/pins/drift",
+        "/facts/pins/source_pins/coverage_expr",
+        "/facts/pins/source_pins/coverage_uses_probe_path",
+        "/verdict"
+      ],
+      "d3_blind_hit_rate": null,
+      "d3_forced_green_evidence_items": null,
+      "why": "來源釘退回讀 worktree：稽核的是今天的碼、不是被稽核的那個 commit"
+    },
+    "P1_pin_noop": {
+      "verdict": "DETECTED",
+      "named": [
+        "M4"
+      ],
+      "red_tokens": [
+        "M4",
+        "M4"
+      ],
+      "d1_failed": [
+        "M4 判準字面漂移 ⇒ SOURCE_DRIFT",
+        "M4 漂移之下不吐任何分類"
+      ],
+      "d2_red": false,
+      "d3_changed": [],
+      "d3_blind_hit_rate": "5/5",
+      "d3_forced_green_evidence_items": [
+        "S2-2",
+        "S6-1"
+      ],
+      "why": "正對照：判準字面比對變成恆真"
+    },
+    "P2_b3_off": {
+      "verdict": "DETECTED",
+      "named": [
+        "H"
+      ],
+      "red_tokens": [
+        "H"
+      ],
+      "d1_failed": [
+        "H B3 擋門會擋主 run"
+      ],
+      "d2_red": false,
+      "d3_changed": [],
+      "d3_blind_hit_rate": "5/5",
+      "d3_forced_green_evidence_items": [
+        "S2-2",
+        "S6-1"
+      ],
+      "why": "正對照：B3 主 run 擋門拿掉"
+    },
+    "N1_syntax": {
+      "verdict": "BROKEN",
+      "named": [],
+      "red_tokens": [],
+      "d1_failed": [],
+      "d2_red": false,
+      "d3_changed": null,
+      "d3_blind_hit_rate": null,
+      "d3_forced_green_evidence_items": null,
+      "why": "負對照：語法壞掉 ⇒ 必須記 BROKEN，不准記 caught"
+    }
+  },
+  "loadbearing": {
+    "X-J@X1_drop_suppression": {
+      "verdict": "MISSED",
+      "failed": []
+    },
+    "X-I@X2_pred_drift": {
+      "verdict": "RED_ELSEWHERE",
+      "failed": [
+        "A 乾淨跑 verdict==OK",
+        "B 七筆都在",
+        "C 雙向校準通過",
+        "D 正對照＝FORCED_GREEN",
+        "E 負對照＝EVALUABLE",
+        "M2 全判 FORCED 會被負對照擋住（UNCALIBRATED）",
+        "M3 正對照壞掉 ⇒ UNCALIBRATED"
+      ]
+    },
+    "X-I@X3_intent_drift": {
+      "verdict": "RED_ELSEWHERE",
+      "failed": [
+        "A 乾淨跑 verdict==OK",
+        "B 七筆都在",
+        "C 雙向校準通過",
+        "D 正對照＝FORCED_GREEN",
+        "E 負對照＝EVALUABLE",
+        "M2 全判 FORCED 會被負對照擋住（UNCALIBRATED）",
+        "M3 正對照壞掉 ⇒ UNCALIBRATED"
+      ]
+    },
+    "X-K@X4_drop_source_pin": {
+      "verdict": "RED_ELSEWHERE",
+      "failed": [
+        "A 乾淨跑 verdict==OK",
+        "B 七筆都在",
+        "C 雙向校準通過",
+        "D 正對照＝FORCED_GREEN",
+        "E 負對照＝EVALUABLE",
+        "G 原始碼四條字面全對得上",
+        "M2 全判 FORCED 會被負對照擋住（UNCALIBRATED）",
+        "M3 正對照壞掉 ⇒ UNCALIBRATED"
+      ]
+    }
+  },
+  "loadbearing_prod": {
+    "X2-I@X2_pred_drift": {
+      "verdict": "RED_ELSEWHERE",
+      "failed": [],
+      "d3_changed": [
+        "/blind_hit_rate",
+        "/prediction_reconciliation/S2-1/predicted",
+        "/prediction_reconciliation/S2-1/verdict"
+      ],
+      "d3_blind_hit_rate": "4/5"
+    },
+    "X2-I@X3_intent_drift": {
+      "verdict": "RED_ELSEWHERE",
+      "failed": [],
+      "d3_changed": [
+        "/forced_green_evidence_items",
+        "/items/S2-2/intent"
+      ],
+      "d3_blind_hit_rate": "5/5"
+    }
+  },
+  "baseline_clean": true
+}

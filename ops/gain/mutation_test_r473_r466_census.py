@@ -66,6 +66,25 @@ MUTANTS = [
 LOADBEARING = [("X1_drop_suppression", "J"), ("X2_pred_drift", "I"),
                ("X3_intent_drift", "I"), ("X4_drop_source_pin", "K")]
 
+# ── 事後追加（不算進判準 §三 的 P4／P5 計數）：條 I 的承重牆之所以沒退回 MISSED，
+#   是因為同一份檢查被接進**正式路徑**（`check_pins` → SOURCE_DRIFT），不是只寫在自檢裡。
+#   要問「這份檢查整體有沒有承重」，就得把正式區塊與自檢條**一起**拿掉。
+PRODBLOCK_I_OLD = """    # ── R473：事前預測三表要與判準檔逐鍵相同，否則 SOURCE_DRIFT（且不吐任何分類）
+    tbl = prereg_prediction_tables()
+    pred_ok = {}
+    for label, want, got in (("PRED", PRED, tbl["pred"]),
+                             ("INTENT", INTENT, tbl["intent"]),
+                             ("BLIND", BLIND, tbl["blind"])):
+        for k in sorted(want):
+            same = (k in got) and (got[k] == want[k])
+            pred_ok[f"{label}:{k}"] = same
+            if not same:
+                drift.append(f"pred:{label}:{k}")
+"""
+PRODBLOCK_I_NEW = "    pred_ok = {}\n"
+LOADBEARING2 = [("X2_pred_drift", "I", PRODBLOCK_I_OLD, PRODBLOCK_I_NEW),
+                ("X3_intent_drift", "I", PRODBLOCK_I_OLD, PRODBLOCK_I_NEW)]
+
 BROKEN_MARKS = ("SyntaxError", "Traceback (most recent call last)",
                 "ImportError", "IndentationError")
 
@@ -225,6 +244,25 @@ def main() -> int:
         lb[f"X-{tok}@{name}"] = {"verdict": v, "failed": r1["failed"]}
         print(f"  X-{tok}@{name}: {v}（刪掉條 {tok} 之後）")
     res["loadbearing"] = lb
+
+    lb2 = {}
+    for name, tok, pold, pnew in LOADBEARING2:
+        restore()
+        src = target.read_text(encoding="utf-8")
+        if src.count(pold) != 1:
+            lb2[f"X2-{tok}@{name}"] = {"verdict": "BROKEN_PATCH", "occurrences": src.count(pold)}
+            print(f"  X2-{tok}@{name}: BROKEN_PATCH（正式區塊出現 {src.count(pold)} 次）")
+            continue
+        src = strip_condition(src, tok).replace(pold, pnew)
+        old_m, new_m = next((o, n) for nm, o, n, _, _ in MUTANTS if nm == name)
+        target.write_text(src.replace(old_m, new_m), encoding="utf-8")
+        r1, r3 = d1(wt), d3(wt)
+        v = verdict_for([tok], r1, r3)
+        lb2[f"X2-{tok}@{name}"] = {"verdict": v, "failed": r1["failed"],
+                                   "d3_changed": r3.get("changed"),
+                                   "d3_blind_hit_rate": r3.get("blind_hit_rate")}
+        print(f"  X2-{tok}@{name}: {v}（自檢條 {tok} ＋正式區塊一起刪掉）")
+    res["loadbearing_prod"] = lb2
 
     restore()
     ok = (not b1["red"] and not b2["red"] and not b3["red"]
