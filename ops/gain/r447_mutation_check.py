@@ -15,6 +15,7 @@ import io, contextlib, pathlib, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from ops.gain import analyze_r447 as A  # noqa: E402
 from ops.gain import r447_reject_reconstruct as R  # noqa: E402
+from ops.gain import r447_eq5_offline as Q  # noqa: E402
 
 # 突變體 → 一定要紅的那一條的標籤前綴
 EXPECT = {
@@ -38,6 +39,21 @@ EXPECT_RECON = {
 }
 
 
+# `r447_eq5_offline.py`（R452）的突變體 → 一定要紅的那一條
+EXPECT_EQ5OFF = {
+    "X1_gate_takes_last":            "E7 規則 A 取第一個可見通過的",
+    "X2_gate_reject_counts_as_deliv": "E8 五份全不過 ⇒ 拒交",
+    "X3_skip_order_check":           "E3 候選順序與 involved 不符 ⇒ BROKEN",
+    "X4_skip_calibration":           "E4 校準對不上 ⇒ BROKEN",
+    "X5_skip_min_calib":             "E5 UNCALIBRATED",
+    "X6_emit_delta_when_broken":     "E11 UNCALIBRATED 時不吐 Δ",
+    "X7_skip_candidate_count":       "E2 候選數不是 5 ⇒ BROKEN",
+    "X8_deliv_ignores_accepted":     "E9 規則 B 讀 rows 的 accepted",
+    "X9_include_failed_calls":       "E2b 失敗的請求不算候選",
+    "X10_ignore_missing_fields":     "E1 缺欄位 ⇒ BROKEN",
+}
+
+
 def run(mutant: str, mod=A) -> tuple[int, list[str]]:
     mod.MUTANT = mutant
     buf = io.StringIO()
@@ -55,7 +71,9 @@ def run(mutant: str, mod=A) -> tuple[int, list[str]]:
 def main() -> int:
     bad = []
     marks = []
-    for mod, table, label in ((A, EXPECT, "analyze_r447"), (R, EXPECT_RECON, "reject_reconstruct")):
+    for mod, table, label in ((A, EXPECT, "analyze_r447"),
+                              (R, EXPECT_RECON, "reject_reconstruct"),
+                              (Q, EXPECT_EQ5OFF, "eq5_offline")):
         rc0, f0 = run("", mod)
         if rc0 != 0 or f0:
             print(f"BASELINE FAIL [{label}] rc={rc0} fails={f0}")
