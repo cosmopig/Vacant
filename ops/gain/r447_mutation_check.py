@@ -65,6 +65,8 @@ EXPECT_CENSUS = {
     "Y5_paraphrase_instead_of_source":  "X4 Y5 的夾具",
     "Y7_receipt_any_return_counts":     "X6 Y7 的夾具",
     "Y8_window_check_toothless":        "X5 Y8 的夾具",
+    "Y9_resolution_ignores_perturbation": "S1 Y9 的夾具",
+    "Y10_void_scan_silent_when_empty":  "V1 Y10 的夾具",
 }
 
 

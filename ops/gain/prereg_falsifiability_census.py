@@ -25,7 +25,7 @@ MDE／N₈₀（DECISION §二）。兩者不准互相冒充。
       --json ops/gain/data/r453_census.json
 """
 from __future__ import annotations
-import argparse, ast, hashlib, json, pathlib, sys
+import argparse, ast, hashlib, json, math, pathlib, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -180,9 +180,28 @@ def jackknife_escapes(pt: list[dict], name: str, lo: float, hi: float) -> dict:
         if v is not None:
             vals.append(v)
     esc = [v for v in vals if v < lo or v > hi]
-    return {"full": _stat(pt, name), "n_replicates": len(vals),
+    full = _stat(pt, name)
+    # ── 解析度（**非仲裁者**，additive，不改任何分類）
+    # 留一法只是 1/n 擾動 ⇒ 只有當點估計落在窗口邊界「一個擾動」以內時才可能逃出去。
+    # 沒有這個數字，UNRESOLVED 會被下一輪讀成「這個窗口不可證偽」——而它其實只是
+    # 「這把尺沒有解析度」。與 R451 對 UNINFORMATIVE 要求附 MDE／N₈₀ 是同一條紀律。
+    pert = max((abs(v - full) for v in vals), default=None) if full is not None else None
+    dist = min(full - lo, hi - full) if full is not None else None
+    if MUTANT == "Y9_resolution_ignores_perturbation":
+        pert = dist                       # 比值恆為 1 ⇒ 永遠看起來「剛好有解析度」
+    return {"full": full, "n_replicates": len(vals),
             "min": min(vals) if vals else None, "max": max(vals) if vals else None,
-            "n_outside_window": len(esc), "reachable": bool(esc)}
+            "n_outside_window": len(esc), "reachable": bool(esc),
+            "instrument_resolution_NOT_ARBITER": {
+                "max_loo_perturbation": pert,
+                "distance_to_nearest_boundary": dist,
+                # pert==0（留一法完全不動）⇒ 比值定義成 inf／0，不吐 None：
+                # None 會讓下游的比較 crash，而 crash 收場不算偵測到（r699）。
+                "boundary_over_perturbation": (
+                    (dist / pert) if pert else (math.inf if (dist or 0) > 0 else 0.0)),
+                "note": ("比值 ≫1 ⇒ 本輪的 UNRESOLVED 是「留一法沒有解析度」，"
+                         "**不是**「這個窗口不可證偽」。距離為負＝點估計已經在窗外"
+                         "（證偽事件已實現），那不是解析度問題。不改任何分類。")}}
 
 
 def paired_bc(pt: list[dict], a: str, b: str) -> tuple[int, int]:
@@ -299,22 +318,30 @@ def census(rows, calls, tasks, runs_dir=None, *, recon=None, windows=None) -> di
 
     # ── P-Z7：本 run void 恆 0 ⇒ 去別的 run 找 witness（跨 run 才判得出可及性）
     void_w = []
+    n_scanned = 0
     if runs_dir is not None:
-        for s in sorted(pathlib.Path(runs_dir).glob("*/summary.json")):
+        for sp in sorted(pathlib.Path(runs_dir).glob("*/summary.json")):
             try:
-                sm = json.loads(s.read_text(encoding="utf-8"))
+                sm = json.loads(sp.read_text(encoding="utf-8"))
             except Exception:
                 continue
+            n_scanned += 1
             for arm, v in (sm.get("arms") or {}).items():
                 if isinstance(v, dict) and (v.get("infra_void") or 0) > 0:
-                    void_w.append({"run": s.parent.name, "arm": arm,
+                    void_w.append({"run": sp.parent.name, "arm": arm,
                                    "infra_void": v["infra_void"], "tasks": v.get("tasks")})
+    # ⚠ 「掃過 N 個 run、都沒有 void」與「一個 run 都沒掃到」是兩件事，長得一模一樣。
+    #   後者是安靜量不到 ⇒ 記 UNSCANNED，不准當成 UNRESOLVED 混過去。
+    #   （這條是跑在凍結快照上時真的踩到的：快照目錄沒有兄弟 run，witness 從 30 掉到 0。）
+    if MUTANT == "Y10_void_scan_silent_when_empty":
+        n_scanned = max(n_scanned, 1)
     out["records"]["P-Z7"] = {
         "clause": "任一臂 void < 20%；CONFORM 臂 void < 5%",
         "falsifier": "void 超標", "identity": None,
         "witnesses": len(void_w), "witness_sample": void_w[:5],
+        "runs_scanned": n_scanned,
         "note": "本 run void 恆 0 ⇒ 可及性只能跨 run 判；跨 run 的 witness 不是本 run 的證偽",
-        "class": classify(False, len(void_w))}
+        "class": ("UNSCANNED" if n_scanned == 0 else classify(False, len(void_w)))}
 
     # ── P-Z8 前半：receipt_head 是不是無條件字面鍵
     # ⚠ 這一條的恆等式（`arm_conform` 的 return dict）與它的 witness（別臂的列缺鍵）
@@ -522,6 +549,37 @@ def selftest() -> int:
        and ou["bank_gate_headroom_BASERATE"]["n_unparsed_shape"] == 1,
        str(ou["records"]["P-Z6"]["class"]))
 
+    print("[S] 解析度（非仲裁者，但 UNRESOLVED 沒有它就會被下一輪誤讀）")
+    # 兩個世界都要**在窗內**才比得了解析度：點估計已經在窗外時距離是負的（＝證偽事件
+    # 已經實現），那不是「解析度不足」。故拿 no_escape（50%，離邊界 10pp）對 borderline
+    # （60.0%，貼著上緣）比。
+    jr_clean = o2["records"]["P-Z1"]["jackknife"]["instrument_resolution_NOT_ARBITER"]
+    jr_bord = ob["records"]["P-Z1"]["jackknife"]["instrument_resolution_NOT_ARBITER"]
+    jk_clean = o2["records"]["P-Z1"]["jackknife"]
+    exp_pert = max(abs(jk_clean["min"] - jk_clean["full"]),
+                   abs(jk_clean["max"] - jk_clean["full"]))
+    ck("S1 Y9 的夾具：擾動用的是**留一法真的動了多少**，不是拿距離冒充",
+       abs((jr_clean["max_loo_perturbation"] or 0) - exp_pert) < 1e-9,
+       f"got={jr_clean['max_loo_perturbation']} expected={exp_pert}")
+    ck("S1b 邊界世界的比值 < 窗內有餘裕世界的比值（比值真的在動）",
+       jr_bord["boundary_over_perturbation"] < jr_clean["boundary_over_perturbation"],
+       f"borderline={jr_bord} clean={jr_clean}")
+    ck("S2 邊界世界（60.0% 貼著上緣）比值 ≤ 1 ⇒ 留一法逃得出去，與 reachable 一致",
+       jr_bord["boundary_over_perturbation"] <= 1.0
+       and ob["records"]["P-Z1"]["jackknife"]["reachable"] is True, str(jr_bord))
+    ck("S3 解析度欄位不改任何分類（乾淨版分類與加欄位前逐一相同）",
+       o["records"]["P-Z1"]["class"] == "EVALUABLE"
+       and o2["records"]["P-Z1"]["class"] == "UNRESOLVED")
+
+    ck("V1 Y10 的夾具：一個 run 都沒掃到 ⇒ UNSCANNED，不准報成 UNRESOLVED",
+       census(r0, c0, t0, runs_dir=pathlib.Path("/dev/shm/_r453_no_such_dir"),
+              recon=k0)["records"]["P-Z7"]["class"] == "UNSCANNED",
+       str(census(r0, c0, t0, runs_dir=pathlib.Path("/dev/shm/_r453_no_such_dir"),
+                  recon=k0)["records"]["P-Z7"]))
+    ck("V2 掃得到 run 時照常分類（runs_scanned 有記）",
+       census(r0, c0, t0, runs_dir=ROOT / "runs",
+              recon=k0)["records"]["P-Z7"]["runs_scanned"] > 0)
+
     print("[B] 擋門")
     o3 = census(r0[:6], c0, t0, recon=k0)
     ck("B4 完整題目 < MIN_TASKS ⇒ UNCALIBRATED 且不吐分類",
@@ -537,6 +595,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run")
     ap.add_argument("--json")
+    ap.add_argument("--runs-dir", default=None,
+                    help="跨 run 找 P-Z7 的 witness；預設是 --run 的上一層")
     ap.add_argument("--bank", default="lcb2")
     ap.add_argument("--seed", default="g-r440-lcb2")
     ap.add_argument("--n", type=int, default=120)
@@ -561,7 +621,8 @@ def main() -> int:
                           "reason": "reject_reconstruct broken", "detail": recon["broken"][:5]},
                          ensure_ascii=False, indent=2))
         return 1
-    res = census(rows, calls, tasks, runs_dir=d.parent, recon=recon)
+    res = census(rows, calls, tasks,
+                 runs_dir=pathlib.Path(a.runs_dir) if a.runs_dir else d.parent, recon=recon)
     res["rows_lines"] = len(rows)
     res["rows_sha256_16"] = hashlib.sha256(raw).hexdigest()[:16]
     res["sampling"] = {"bank": a.bank, "seed": summary.get("seed"), "n": summary.get("n"),
