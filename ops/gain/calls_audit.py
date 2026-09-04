@@ -28,6 +28,12 @@ round704 在 r447 抓到兩通 `ok:False` 的 gen 呼叫（皆 OFF5、皆第二�
 
 **欄位白名單**：本尺只讀 infra 欄位，結構上碰不到任何結果欄位
 （meets_demand／accepted／visible_ok 一律不讀），所以期中跑它不構成序貫決策污染。
+
+⚠ round705 抓到的量具假影（P-R447-AUDIT-1，本輪修）：`error` 原本不在白名單上，
+被 `main()` 在進 `audit()` 之前剝掉 ⇒ `reason_recorded` 恆為 False ⇒ 本尺把
+「**讀不到**失敗原因」報成「失敗原因**沒落盤**」。r447 的原始 `calls.jsonl` 兩通
+失敗都寫了 `error`（brain_cline.py:181-207 保證），是本尺自己看不見。
+`error` 是 infra 字串（例外類別＋HTTP body），不是結果欄位，加進白名單不影響 F8。
 """
 from __future__ import annotations
 import argparse, collections, hashlib, json, os, pathlib, sys
@@ -36,7 +42,7 @@ MUTANT = ""
 
 # 只讀這些。結果欄位（meets_demand/accepted/visible_ok/...）刻意不在名單上。
 CALL_FIELDS = frozenset({"ts_ms", "role", "attempt", "ok", "timeout_s",
-                         "latency_ms", "meta"})
+                         "latency_ms", "meta", "error"})
 ROW_FIELDS = frozenset({"arm", "task_id", "calls_used"})
 BANNED_ROW_FIELDS = frozenset({"meets_demand", "accepted", "visible_ok",
                                "conform_attempts", "receipt_head"})
@@ -52,6 +58,24 @@ MIN_PAIRS = 10          # 少於這個數就不是「乾淨」，是「沒量到
 # 舊的量無條件保留在輸出（`untagged_calls_incl_nonexperimental`），
 # 後輪要收回仲裁權隨時可以。名單外的任何 role 沒標籤，一律照舊 BROKEN。
 NON_EXPERIMENTAL_ROLES = frozenset({"preflight"})
+
+
+def _project_call(c: dict) -> dict:
+    """白名單投影。**唯一的一份**——`main()` 與 selftest 夾具都得走這裡，
+    否則夾具驗的是「原始 calls」而真資料進 audit() 前已被投影過，
+    投影本身的缺陷（正是 P-R447-AUDIT-1 那個）結構上沒有夾具看得見（r699）。
+
+    `response` 刻意**不**進白名單：它是模型輸出＝結果內容，整包帶進來會讓
+    「期中跑它不構成序貫決策污染」失效。但「失敗通有沒有留下回應」仍要答 ⇒
+    只帶一個 bool（`has_response`），不帶內容。
+    """
+    p = {k: v for k, v in c.items() if k in CALL_FIELDS}
+    if MUTANT == "whitelist_strips_error":          # M6：r447 真的發生過的那個缺陷
+        p.pop("error", None)
+    if MUTANT == "whitelist_strips_response_flag":  # M7：把第二個子句弄死
+        return p
+    p["has_response"] = c.get("response") is not None
+    return p
 
 
 def _key(meta: dict) -> tuple | None:
@@ -106,8 +130,13 @@ def audit(rows: list[dict], calls: list[dict]) -> dict:
                           "task_id": k[-1], "role": c.get("role"),
                           "attempt": att, "timeout_s": c.get("timeout_s"),
                           "latency_ms": c.get("latency_ms"),
-                          # 失敗通有沒有留下「為什麼」——r447 的答案是沒有
-                          "reason_recorded": bool(c.get("error") or c.get("response"))})
+                          # 失敗通有沒有留下「為什麼」。兩個子句都是活的：
+                          #   error        ── brain_cline 失敗通寫的例外字串（在白名單上）
+                          #   has_response ── _project_call 投影出的 bool（response 本身不進來）
+                          "reason_recorded": bool(c.get("error") or c.get("has_response")),
+                          "reason": (str(c.get("error"))[:200] if c.get("error")
+                                     else ("<response present, no error>"
+                                           if c.get("has_response") else None))})
 
     common = sorted(k for k in used if k in logged)
     sum_used = sum(used[k] or 0 for k in common)
@@ -172,8 +201,16 @@ def _build_rows(n, per_task_calls):
             for i in range(n)]
 
 
-def _build_calls(n, per_task_calls, retry_on=(), untag=()):
-    """只造 calls。不讀 rows，重試數由參數獨立指定。"""
+def _build_calls(n, per_task_calls, retry_on=(), untag=(), fail_style="bare"):
+    """只造 calls。不讀 rows，重試數由參數獨立指定。
+
+    `fail_style` 決定那通失敗留下什麼：
+      "bare"     什麼都沒留（round704 以為 r447 是這樣）
+      "error"    留 error 字串（r447 的真實情況）
+      "response" 沒有 error 但有 response（只有第二個子句救得了它）
+
+    **回傳的是投影後的 calls**——夾具與真資料走同一條 `_project_call`。
+    """
     out = []
     for i in range(n):
         for j in range(per_task_calls):
@@ -184,11 +221,16 @@ def _build_calls(n, per_task_calls, retry_on=(), untag=()):
                         "ok": True, "timeout_s": 600, "latency_ms": 20000,
                         "meta": meta})
             if i in retry_on and j == 0:
-                out[-1] = dict(out[-1], ok=False, latency_ms=600000)
+                failed = dict(out[-1], ok=False, latency_ms=600000)
+                if fail_style == "error":
+                    failed["error"] = f"TimeoutError: timed out (t{i})"
+                elif fail_style == "response":
+                    failed["response"] = "half-written answer"
+                out[-1] = failed
                 out.append({"ts_ms": 1001 + i, "role": "gen", "attempt": 2,
                             "ok": True, "timeout_s": 600, "latency_ms": 30000,
                             "meta": meta})
-    return out
+    return [_project_call(c) for c in out]
 
 
 def selftest() -> int:
@@ -218,9 +260,9 @@ def selftest() -> int:
 
     # F3 真的對不上：calls 端多一通 attempt=1（不是重試）⇒ 必須 MISMATCH
     bad = _build_calls(30, 5)
-    bad.append({"ts_ms": 9999, "role": "gen", "attempt": 1, "ok": True,
-                "timeout_s": 600, "latency_ms": 1000,
-                "meta": {"arm": "OFF5", "task_id": "t3"}})
+    bad.append(_project_call({"ts_ms": 9999, "role": "gen", "attempt": 1, "ok": True,
+                              "timeout_s": 600, "latency_ms": 1000,
+                              "meta": {"arm": "OFF5", "task_id": "t3"}}))
     a3 = audit(_build_rows(30, 5), bad)
     ck("F3 多一通未計帳 → ACCOUNTING_MISMATCH", a3["verdict"] == "ACCOUNTING_MISMATCH", a3["verdict"])
     ck("F3b 指得出是哪一格", a3["n_per_pair_mismatches"] == 1, str(a3["n_per_pair_mismatches"]))
@@ -240,13 +282,29 @@ def selftest() -> int:
        a6["verdict"] == "ACCOUNTING_CONSISTENT", a6["verdict"])
     ck("F6b 交集數 = rows 數", a6["pairs_matched"] == 30)
 
-    # F7 失敗通有沒有留下原因——r447 的真實答案是「沒有」，這條把它變成可量的
-    ck("F7 失敗原因未落盤時記為 0", a2["failures_with_reason_recorded"] == 0,
+    # F7 失敗通有沒有留下原因。**雙向**：沒留 ⇒ 0；留了 k 通 ⇒ 恰 k。
+    # round704 只有前半，而且把「0」寫成預期值 ⇒ 測試在守護錯誤（P-R447-AUDIT-1）。
+    ck("F7a 失敗通真的沒留原因 → 0", a2["failures_with_reason_recorded"] == 0,
        str(a2["failures_with_reason_recorded"]))
+    a7 = audit(_build_rows(30, 5), _build_calls(30, 5, retry_on=(3, 7), fail_style="error"))
+    ck("F7b 失敗通留了 error → 恰 2（不是 0）",
+       a7["failures_with_reason_recorded"] == 2, str(a7["failures_with_reason_recorded"]))
+    ck("F7b2 分母沒跟著變（仍是 2 通失敗）", a7["failed_calls"] == 2, str(a7["failed_calls"]))
+    ck("F7c reason 直接印得出原因字串（收官不必手翻 calls.jsonl）",
+       str(a7["failure_detail"][0]["reason"]).startswith("TimeoutError: timed out"),
+       str(a7["failure_detail"][0]["reason"]))
+    # F7d 第二個子句（has_response）是活的：沒有 error、只有 response 的失敗通也算留了原因。
+    # 沒有這條，`error or has_response` 的後半就是死碼（r675 型）。
+    a7r = audit(_build_rows(30, 5), _build_calls(30, 5, retry_on=(3, 7), fail_style="response"))
+    ck("F7d 只有 response 沒有 error → 仍算留了原因（第二子句非死碼）",
+       a7r["failures_with_reason_recorded"] == 2, str(a7r["failures_with_reason_recorded"]))
+    ck("F7e 投影只帶 bool，不帶 response 內容",
+       all("response" not in c for c in _build_calls(2, 1, retry_on=(0,), fail_style="response")))
 
     # F9 preflight 豁免：沒標籤但 role 在名單上 ⇒ 不算漏，但舊量必須照樣印出來
-    pf = _build_calls(30, 5) + [{"ts_ms": 1, "role": "preflight", "attempt": 1,
-                                 "ok": True, "meta": {"model": "m"}}]
+    pf = _build_calls(30, 5) + [_project_call(
+        {"ts_ms": 1, "role": "preflight", "attempt": 1,
+         "ok": True, "meta": {"model": "m"}})]
     a9 = audit(_build_rows(30, 5), pf)
     ck("F9 preflight 不算 schema 漂掉 → CONSISTENT", a9["verdict"] == "ACCOUNTING_CONSISTENT", a9["verdict"])
     ck("F9b 舊語意的量無條件保留", a9["untagged_calls_incl_nonexperimental"] == 1)
@@ -255,8 +313,9 @@ def selftest() -> int:
 
     # F9d 這條才是重點：名單**外**的 role 沒標籤，一律照舊 BROKEN。
     # 沒有它，F9 的豁免就等於「任何沒標籤的都放行」。
-    unk = _build_calls(30, 5) + [{"ts_ms": 1, "role": "gen", "attempt": 1,
-                                  "ok": True, "meta": {"model": "m"}}]
+    unk = _build_calls(30, 5) + [_project_call(
+        {"ts_ms": 1, "role": "gen", "attempt": 1,
+         "ok": True, "meta": {"model": "m"}})]
     ck("F9d 名單外的 role 沒標籤仍 BROKEN",
        audit(_build_rows(30, 5), unk)["verdict"] == "BROKEN")
 
@@ -290,6 +349,25 @@ def selftest() -> int:
         ck(f"{label} 乾淨版應為 {want_clean}", base == want_clean, base)
         ck(f"{label} 突變後必須改判（有牙齒）", got != base, f"仍是 {got}")
 
+    # ── M6/M7：投影層的突變體。判準是 **F7 那個數字**，不是 verdict ────────
+    # verdict 在這兩個突變下**不會變**（帳目恆等式跟失敗原因無關），所以
+    # 若沿用上面那個「verdict 必須改判」的判法，這兩條就是沒牙齒的假測試。
+    # M6 重演的正是 r447 真的發生過的缺陷：白名單把 error 剝掉。
+    for name, style, label in (
+            ("whitelist_strips_error", "error", "M6 白名單剝掉 error"),
+            ("whitelist_strips_response_flag", "response", "M7 白名單剝掉 response 旗標")):
+        MUTANT = ""
+        clean = audit(_build_rows(30, 5), _build_calls(30, 5, retry_on=(3, 7), fail_style=style))
+        MUTANT = name
+        mut = audit(_build_rows(30, 5), _build_calls(30, 5, retry_on=(3, 7), fail_style=style))
+        MUTANT = ""
+        ck(f"{label} 乾淨版數到 2", clean["failures_with_reason_recorded"] == 2,
+           str(clean["failures_with_reason_recorded"]))
+        ck(f"{label} 突變後掉到 0（有牙齒）", mut["failures_with_reason_recorded"] == 0,
+           str(mut["failures_with_reason_recorded"]))
+        ck(f"{label} 突變後 verdict 不變 ⇒ 證明用 verdict 判會漏掉它",
+           mut["verdict"] == clean["verdict"], f"{mut['verdict']} vs {clean['verdict']}")
+
     print(("SELFTEST OK" if ok else "SELFTEST FAILED ") + ("" if ok else str(LAST_FAILS)))
     return 0 if ok else 1
 
@@ -311,8 +389,9 @@ def main() -> int:
     rows = [json.loads(l) for l in raw.decode("utf-8").splitlines() if l.strip()]
     calls = [json.loads(l) for l in (d / "calls.jsonl").read_text(encoding="utf-8").splitlines()
              if l.strip()]
-    # 只留白名單欄位再送進 audit()：白名單是結構性的，不靠 audit() 自律
-    calls = [{k: v for k, v in c.items() if k in CALL_FIELDS} for c in calls]
+    # 只留白名單欄位再送進 audit()：白名單是結構性的，不靠 audit() 自律。
+    # 與 selftest 夾具共用 `_project_call`（r699：夾具不走同一條就驗不到投影本身）
+    calls = [_project_call(c) for c in calls]
     rows = [{k: v for k, v in r.items() if k in ROW_FIELDS} for r in rows]
     out = audit(rows, calls)
     out["rows_lines"] = len(rows)

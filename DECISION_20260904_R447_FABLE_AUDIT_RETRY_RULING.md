@@ -98,3 +98,52 @@ round704 寫：「失敗通的 `response` 是 `None`，也沒有任何 `error` �
 - 失敗的 task 在**其他臂**也出現失敗 ⇒ 題目相關，§二(b) 收回。
 - `Q1_endpoint` 變 UNSTABLE ⇒ §二(a) 收回。
 - 修好 `calls_audit.py` 後 r447 的 `failures_with_reason_recorded ≠ failed_calls` ⇒ §三 的根因歸錯了，重查。
+
+---
+
+## 六、P-R447-AUDIT-1 實作完成（round706，Opus 5；稽核輪提案 → opus 輪動手）
+
+提案四點全數落地，另補兩點（下方標 ＋）：
+
+| 提案 | 做法 | 驗收 |
+|---|---|---|
+| `CALL_FIELDS` 加 `"error"` | 已加；F8「拿掉結果欄位輸出逐鍵相同」仍 PASS | selftest F8 PASS |
+| F7 改雙向 | F7a 無 error→0；F7b 夾具塞 2 通帶 error→恰 2；F7b2 分母沒跟著變 | PASS |
+| 突變體 M6「白名單剝掉 error」 | 判準是 **F7 那個數字 2→0**，不是 rc≠0、不是 verdict | PASS |
+| r447 驗收 | `failures_with_reason_recorded == failed_calls`（快照時 2==2） | PASS |
+| `failure_detail[].reason` | 直接印 error 前 200 字 | 見下 |
+
+＋ **`_project_call()`：投影只有一份，`main()` 與 selftest 夾具共用。**
+原本夾具造的是「原始 calls」，而真資料進 `audit()` 前已被 `main()` 投影過 ⇒
+**投影本身的缺陷（正是這一個）結構上沒有任何夾具看得見**（r699 那型）。不共用同一條，
+M6 就只是「假裝有這個 bug」而不是「重演這個 bug」。
+
+＋ **`c.get("response")` 那半個子句原本是死碼**（`response` 也不在白名單上，恆為 None）。
+沒有一起處理的話，修完 `error` 之後它仍是死碼（r675 型）。做法不是把 `response` 加進白名單
+（那是模型輸出＝結果內容，整包帶進來會讓「期中跑不構成序貫決策污染」失效），而是投影時
+**只帶一個 bool `has_response`、不帶內容**；F7d 用「只有 response 沒有 error」的夾具證明它是活的，
+F7e 證明投影裡沒有 `response` 本身，M7 是它的突變體。
+
+**真資料上重演，不只夾具**（這條比 selftest 硬）：
+
+```
+乾淨      failures_with_reason_recorded 2   failed_calls 2   verdict ACCOUNTING_CONSISTENT
+MUTANT=whitelist_strips_error  →  failures_with_reason_recorded 0   failed_calls 2   verdict 不變
+```
+
+`0` 逐字重現 round704／705 觀察到的那個數字 ⇒ 根因鏈（白名單剝掉 → `get("error")` 恆 False →
+恆報 0 → F7 把 0 寫成預期值）是量出來的，不是推論的。
+
+**⚠ verdict 在 M6/M7 下都不變**（帳目恆等式與失敗原因無關）⇒ 若沿用既有突變體迴圈的
+「verdict 必須改判」判法，這兩條會是乾淨 PASS ／植入缺陷仍 PASS 的假測試。已各加一條
+`突變後 verdict 不變` 把這件事釘成可見的。
+
+**這支尺不碰結果欄位，本次修改不改變 r447 的任何實驗數字**——它改變的是收官報告能不能
+具名寫出「兩通失敗各自為什麼」。DECISION §四 第 1 條（每臂失敗數＋原因逐字）現在有機器來源：
+
+```
+OFF5 lcb_3776 gen lat_ms=600059 | TimeoutError: timed out
+OFF5 lcb_3779 gen lat_ms=292574 | HTTPError: HTTP Error 400: Bad Request | body={"error":"Context size has been exceeded."}
+```
+
+§五 開放問題「400 來源未歸因」**維持開放**（本輪沒查，也不猜）。
