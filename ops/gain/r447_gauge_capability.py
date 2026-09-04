@@ -339,10 +339,12 @@ def selftest() -> int:
         o_ok = analyze_run_dir(d_ok)
         base = census(rows)
         same = all(k in o_ok and o_ok[k] == v for k, v in base.items())
+        # 一律用 .get()：偵測器**不准 crash 收場**——KeyError 跟「偵測到」在輸出上分不開，
+        # 而 crash 依判準記 BROKEN 不記 caught（R472 事後探測 M10 暴露的）。
         ck("L 乾淨 terminal run：三道擋門全過，且 census 的每個鍵逐值不變（加法性）",
-           o_ok["verdict"] == "OK" and same
-           and o_ok["run_terminal"] is True and "row_accounting" in o_ok,
-           f'{o_ok["verdict"]} / additive={same}')
+           o_ok.get("verdict") == "OK" and same
+           and o_ok.get("run_terminal") is True and "row_accounting" in o_ok,
+           f'{o_ok.get("verdict")} / additive={same}')
         # </R472-L>
 
     print("[契約]")
