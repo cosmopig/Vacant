@@ -79,10 +79,34 @@ def test_off5_replay_is_plain_majority_ignoring_visible():
 
 
 def test_unknown_signature_does_not_merge_buckets():
+    """未知簽名（`sig is None`）每個各自成桶，不併成同一桶。
+
+    ⚠ 下面第一個例子**分辨不出兩種語意**（R738 實測：把 `_buckets` 改成併桶，
+    這一條照樣綠）——併桶後未知桶只有 2 票，本來就贏不了 `s` 的 3 票。
+    留著它是因為它仍是一個正確的回歸釘子，但**承重的是後面三個 witness**：
+    要看得見併桶，必須讓合併後的未知桶**自己變成多數**，而且它的最小 index **不是 0**
+    （否則跟「平手取抽樣序最前者」同一個答案，一樣分辨不出來）。
+    """
     view = [V(True, None, 3), V(True, None, 3), V(True, "s", 3),
             V(True, "s", 3), V(True, "s", 3)]
-    # 兩個 None 若被併成同一桶會變成 2 票；不併桶時 s 的 3 票才是多數。
     assert ebr._pick(view, "FILTER_VOTE") == (2, False)
+
+    # W1：五個各自成桶 ⇒ 全平手 ⇒ 取最前者 0。若併桶，未知桶 {1,3} 兩票獨大 ⇒ 會變成 1。
+    w1 = [V(True, "a", 3), V(True, None, 3), V(True, "b", 3),
+          V(True, None, 3), V(True, "c", 3)]
+    assert ebr._pick(w1, "FILTER_VOTE") == (0, False)
+    assert ebr._pick(w1, "OFF5_REPLAY") == (0, False)
+
+    # W2：`a` 桶 2 票是多數 ⇒ 0。若併桶，未知桶 {2,3,4} 三票反超 ⇒ 會變成 2。
+    w2 = [V(True, "a", 3), V(True, "a", 3), V(True, None, 3),
+          V(True, None, 3), V(True, None, 3)]
+    assert ebr._pick(w2, "FILTER_VOTE") == (0, False)
+
+    # W3：換一個出口函式再看一次同一件事——分佈而不是單一贏家。
+    # 不併桶＝五桶全平手，每人 1/5；併桶＝只有未知桶贏，index 1、3 各 1/2。
+    d = dict(ebr._vote_dist(w1, list(range(5))))
+    assert set(d) == {0, 1, 2, 3, 4}
+    assert all(pytest.approx(p) == 0.2 for p in d.values())
 
 
 def test_vote_dist_matches_arm_off5_two_stage_uniform():

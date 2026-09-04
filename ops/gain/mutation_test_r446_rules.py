@@ -94,6 +94,11 @@ M = [
  ("M13",'            return -(10 ** 9) if d is None else d',
         '            return (10 ** 9) if d is None else d   # MUTANT None 變最好',
         [], "MISSED"),
+ # 壞掉對照（R739）：語法錯 ⇒ 收集數掉到 0 ⇒ 必須判 BROKEN，不准判 DETECTED。
+ # 沒有它，「期望收集數改成從乾淨基線衍生」有沒有在擋東西是看不出來的。
+ ("B1", 'def _buckets(view: list[dict], idxs: list[int]) -> list[list[int]]:',
+        'def _buckets(view: list[dict], idxs: list[int]) -> list[list[int]]:\n    ((( # MUTANT 語法錯',
+        [], "BROKEN"),
 ]
 
 def run():
@@ -110,6 +115,16 @@ def run():
     summ = re.search(r"(\d+)/(\d+) pass, (\d+) fail, (\d+) error, (\d+) skip => (\w+)", out)
     return p.returncode, res, (summ.groups() if summ else None), out
 
+# 期望收集數來自**乾淨基線的實測**，不是寫死的常數：測試檔增減一條時，
+# 寫死的 12 會讓 15 個對照全部安靜變成 BROKEN（＝「安靜量不到」）。
+_rc0, _res0, _summ0, _out0 = run()
+if _summ0 is None or int(_summ0[1]) == 0:
+    sys.exit("乾淨基線收集不到測試，中止：\n" + _out0[-2000:])
+EXPECT_COLLECTED = int(_summ0[1])
+BASELINE_OK = _summ0[5] == "PASS" and int(_summ0[0]) == EXPECT_COLLECTED
+print(f"乾淨基線: collected={EXPECT_COLLECTED} {' '.join(_summ0)} "
+      f"=> {'OK' if BASELINE_OK else '⚠ 基線就沒全過'}")
+
 rows = []
 for mid, old, new, named, pred in M:
     n_occ = CLEAN.count(old)
@@ -125,7 +140,7 @@ for mid, old, new, named, pred in M:
     assert back == CLEAN_SHA, f"{mid} 還原失敗 {back}"
     collected = int(summ[1]) if summ else 0
     red = sorted(k for k, v in res.items() if v in ("FAIL", "ERROR"))
-    if summ is None or collected != 12:
+    if summ is None or collected != EXPECT_COLLECTED:
         v = "BROKEN"
     elif named and all(t in red for t in named):
         v = "DETECTED"
@@ -138,6 +153,9 @@ for mid, old, new, named, pred in M:
     print(f"{mid:4} pred={pred:8} => {v:20} collected={collected} rc={rc} red={red}")
 
 print()
+_agree = sum(1 for r in rows if r.get("verdict") == r.get("pred"))
+print(f"事前預測相符 {_agree}/{len(rows)}；基線 collected={EXPECT_COLLECTED} "
+      f"baseline_ok={BASELINE_OK}")
 print(json.dumps(rows, ensure_ascii=False, indent=1))
 final = hashlib.sha256(SRC.read_text().encode()).hexdigest()
 print("\n還原後 sha256 ==", final, "相同" if final == CLEAN_SHA else "⚠ 不同")
