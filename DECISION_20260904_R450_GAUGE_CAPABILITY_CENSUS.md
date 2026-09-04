@@ -73,3 +73,27 @@ undemonstrated 題三臂 `meets_demand` 全 False ⇒ 三臂 `_deliv`（`accepte
 - 不改 `analyze_r447.py`，不改任何 r447 判準，不影響 P-Z1..P-Z8 的 HIT/MISS。
 - 不新開 run（SPEC_GAIN §7，8765 被 r447 佔用）。
 - run 活著 ⇒ 全程不 `git add runs/g_r447_conform_lcb2/`（r671 鐵律）。
+
+---
+
+## 八、量測前修訂（2026-09-04 round710，在對 r447 真資料執行之前）
+
+寫完 §五 之後、跑真資料之前，做植入缺陷測試時發現 **§五-3 是恆假的死碼**：
+
+`_deliv ≡ accepted ∧ meets_demand`，故「`_deliv=True` 且 `meets_demand=False`」
+≡ `(X ∧ Y) ∧ ¬Y` ≡ `False`。**任何資料都觸發不了它**——這正是 r695 的「同源擋門」：
+夾具若把 B 從 A 導出，那條「檢查 A 與 B 一致」的擋門結構上不可能被任何夾具看見。
+selftest 用四種 `(meets_demand, accepted)` 組合把這件事寫成可執行的斷言，
+而不是留一條永遠 PASS 的空洞綠燈。
+
+⇒ **§五-3 刪除**。它的防護意圖改由 `deliv_contract_drift()` 承擔：用 `ast` 從
+`analyze_r447.py` 原始碼逐字取出 `_deliv` 的正式 return，與凍結口徑字串比對。
+真正的風險從來不是「資料自相矛盾」，是「`_deliv` 的口徑被改掉」，那個比對得出來。
+牙齒已驗：把 `analyze_r447.py` 複製一份改掉口徑 ⇒ 叫 `_deliv 口徑漂移`；原檔 ⇒ `None`。
+
+此修訂**不放寬任何推翻條件**（刪掉的是一條永遠不會叫的擋門，刪它只會讓工具更容易叫，
+不會更難叫），且發生在看到任何 r447 數字之前。§二／§三／§四／§六 一字未動。
+
+**另一個 bug（同樣在量測前）**：契約檢查原本用 `ast.walk` 取「最後一個 return」，
+但 `ast.walk` 是 BFS、不保證原始碼順序，在乾淨的 `analyze_r447.py` 上就誤報漂移。
+改成按 `(lineno, col_offset)` 排序後取最後一個。**是先出現假紅、才查出自己的 bug。**
