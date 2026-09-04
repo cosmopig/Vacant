@@ -22,6 +22,8 @@ MUTANTS = {
     "M7": ("K", "退回 AMEND-1 之前：拒交格的 fallback 相同也算「選到同一份」"),
     "M8": ("L", "少了 gate/vote sha 也照跑、退回 raw（AMEND-1 的重算輸入安靜消失）"),
     "M9": ("M", "落盤的 same_choice_effective 與離線重算打架時不擋（安靜取其一）"),
+    # round695：drift 擋門原本沒有任何夾具看得見（整段刪掉 M1–M9 照樣全 caught）
+    "M10": ("N", "生產端 same_choice 換了語意、sha 還是舊的 ⇒ drift 擋門不叫"),
 }
 
 

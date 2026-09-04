@@ -149,7 +149,10 @@ def analyze(rows: list[dict], summary: dict, rows_meta: dict | None = None) -> d
     false_same_choice_n = sum(1 for x in eq5
                               if (not x["accepted"]) and x["same_choice"])
     # raw 欄位自己也要對得上 sha（擋掉「same_choice 與兩份 sha 互相矛盾」的漂移）
-    drift = [x["task_id"] for x in eq5 if bool(x["same_choice"]) != _sha_eq(x)]
+    if MUTANT == "M10":
+        drift = []
+    else:
+        drift = [x["task_id"] for x in eq5 if bool(x["same_choice"]) != _sha_eq(x)]
     if drift:
         broken.append(f"same_choice 與 gate/vote sha 不一致 {len(drift)} 筆：{drift[:5]}")
     # 未來的 run 會自己落盤 same_choice_effective；有就必須與重算逐筆相同（AMEND-1 §七）
@@ -447,11 +450,25 @@ def selftest() -> int:
     if not any("離線重算不一致" in x for x in a["broken_reasons"]):
         fails.append(f"M: 落盤欄位與重算打架竟然放行 -> {a['broken_reasons']}")
 
+    # N：生產端語意漂移——`same_choice` 與兩份 sha 打架（**只翻欄位、不動 sha**）。
+    #    round695 實測：把 drift 擋門整段刪掉，selftest 與 M1–M9 全都照樣 PASS
+    #    ⇒ 它原本是一條沒有任何夾具看得見的假擋門。原因是 `_row`/`_set_same` 都由
+    #    `same` **導出** sha，兩者在夾具裡永遠自洽，結構上不可能打架。
+    #    這條擋門守的是「生產端把 same_choice 換了語意、但 sha 還是舊的」——
+    #    正是 round692 AMEND-1 動過的那一類改動，所以它必須有牙齒。
+    rows, summ = _fx(30, 10, 5, 15)
+    rows[4]["same_choice"] = not rows[4]["same_choice"]
+    a = analyze(rows, summ)
+    if not any("不一致" in x for x in a["broken_reasons"]):
+        fails.append(f"N: same_choice 與 sha 打架竟然放行 -> {a['broken_reasons']}")
+    if a["verdict_four_cell"] != "BROKEN":
+        fails.append(f"N: 打架了卻不是 BROKEN -> {a['verdict_four_cell']}")
+
     for f in fails:
         print("SELFTEST FAIL:", f)
     print("SELFTEST", "FAIL" if fails else "PASS",
           f"(A手算 V四格同構 B_void C帳 D缺欄位 E_deliv口徑 F預算 G§六-1 H§六-2 I事前窗 J未跑完"
-          f" K偽同選 L缺sha M落盤打架)"
+          f" K偽同選 L缺sha M落盤打架 N生產端漂移)"
           f" MUTANT={MUTANT or 'none'}")
     return 1 if fails else 0
 
