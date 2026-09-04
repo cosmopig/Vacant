@@ -492,3 +492,83 @@ python3 ops/gain/r447_gauge_capability.py runs/g_r461_lcb3_three_arm \
 `ops/gain/r447_gauge_capability.py`（一行未改）、任何門檻／窗口／MDE／α／n／seed／worker／端點／bank、
 `gain_run.py`、`analyze_paired.py`／`replay/paired_gates.py` 的 `--key` 缺口（R463 刻意留的，仍在）、
 §三／§四／附錄 A／B／C／D 的正文。
+
+---
+
+# 附錄 F（round734 / R466 追加）：**§二／§六 的可證偽性普查**——兩條 evidence 級強制綠燈
+
+**合法性前提**：判準見 `DECISION_20260904_R466_R461_SEC2_SEC6_FALSIFIABILITY_CENSUS.md`（`99ec6cb`，量測之前 commit）。
+**§三／§四／附錄 A／B／C／D／E 原文一字未改，本附錄是加法式的。**
+**`verify_lcb_bank.py`／`gain_run.py`／`r447_gauge_capability.py` 本輪一行都沒改。**
+
+## F.1 為什麼補這一段
+
+R462（`1c6452c`）只掃了 **§三／§四** 七筆。**§二／§六 從來沒被任何普查掃過**，
+而收官會引用它們：§二的預測帳寫在附錄 A.4（3 HIT／1 MISS），
+§六是量具效度**唯一**的替代證據來源。memory 鐵律：**普查自己的涵蓋範圍就是盲點。**
+
+工具：`ops/gain/r466_r461_sec2_sec6_census.py`（selftest 16 條全綠，
+M1／M2／M3／M4／M5／M6 六個突變體各自被指名捕獲）。輸出：`ops/gain/data/r466_census.json`。
+
+## F.2 結果（`verdict=="OK"`，盲測 **5/5**）
+
+| # | intent | 分類 | 關鍵數字 |
+|---|---|---|---|
+| S2-1 恰好 189 題 | evidence | `EVALUABLE` | 預測 189／實測 189；**同批次有兩筆被推翻**（medium／hard） |
+| S2-2 與 v2 零交集 | evidence | **`FORCED_GREEN`** | v2／v3 來源檔集合不相交 ⇒ 交集 0；母體內反例＝0 |
+| S2-3 日期範圍 | evidence | `EVALUABLE` | 實測 2023-05-07 → 2024-08-10（逐字相同） |
+| S2-4 medium 152／hard 37 | evidence | `EVALUABLE` | 實測 medium **135**／hard **54**（＝A.4 已記的 MISS） |
+| S6-1 probe 覆蓋率 0/189 | evidence | **`FORCED_GREEN`** | probe 檔 12 題**全在 v2 內**、v2∩v3=∅ ⇒ 恆為 0 |
+| S6-2 能力下界 | evidence | `EVALUABLE` | 孿生 run：complete 120／demonstrated 94／undemonstrated 26（兩個方向都出現過） |
+| S6-3 照實寫成偏離 | guard | `NOT_A_PREDICTION` | 報告義務，沒有真值 ⇒ 不進命中率 |
+
+**雙向校準通過**（B5）：正對照「今天載入成功的 v3 恰有 189 列」判 `FORCED_GREEN`、
+負對照「v3 medium＝135」判 `EVALUABLE` ⇒ 這個普查不是「什麼都判 FORCED」。
+
+## F.3 兩條強制綠燈要怎麼引用（**這是本附錄的重點**）
+
+1. **S2-2「與 v2 零交集」的 HIT 不帶資訊。** v3 的來源是 `test/test2/test3.jsonl`，
+   與 v2 的來源檔**不相交** ⇒ 建不出交集。**不能拿它當「乾淨樣本外複製」的證據**——
+   真正承重的是 §二「刻意不做成 309 題的超集」那個**設計決定**，不是這條預測的命中。
+2. **S6-1「probe 覆蓋率預期 0/189」在任何情況下都不可能為假。**
+   `verify_lcb_bank.py:36` 的 `PROBE_PATH` **寫死** `data/lcb_probe_solutions.json`，
+   :160 的 `probe_coverage` 就是拿它算的，**不隨 `--version` 改**；那 12 題又全在 v2 裡。
+   ⇒ 附錄 A 開頭那句「§六 預測……**實測命中**」**不算命中**，收官不得計入預測帳。
+   （這是 round714 P-Z5b「強制綠燈被誤寫成 HIT」的**第三次復發**。）
+
+### F.3-1 ⚠ 但**不要**把它讀成「v3 沒有量具驗證」——那是相反的錯
+
+`gain_run.py`:181 有 `_default = (LCB_V3_PROBE_SOLUTIONS_PATH if bank == "lcb3" else LCB_PROBE_SOLUTIONS_PATH)`
+⇒ **真正的 `--arms probe` 驗尺吃的是 v3 的手寫解檔**（`runs/g_r461_probe_lcb3` 在），
+:1299 的 `n==0` 硬擋門也證明它不可能是 0。實測兩個檔**完全互補**：
+
+| bank | `verify_lcb_bank` 印的覆蓋率 | 改用 `lcb_v3_probe_solutions.json` |
+|---|---|---|
+| v1 | 12 | 0 |
+| v2 | 12 | 0 |
+| **v3** | **0** | **12** |
+
+⇒ **缺陷只在「報告工具」，不在「量具本身」。** v3 的真實 probe 覆蓋率是 **12/189**。
+**收官引用覆蓋率時要寫 12/189，並註明 `verify_lcb_bank --version v3` 會印 0/189 是工具的路徑寫死。**
+
+## F.4 附錄 A.4 那張預測帳要怎麼改讀（**不改 A.4 原文**）
+
+A.4 記「3 HIT／1 MISS」。扣掉 S2-2 這條強制綠燈之後：
+**帶資訊的是 2 HIT（總數 189、日期範圍）／1 MISS（難度分項）／1 不帶資訊（零交集）。**
+加上 §六 那條被誤記的命中 ⇒ **R461 的預測帳整體要退一格**。
+判準與門檻**一個都沒動**，只動「怎麼引用」。
+
+## F.5 誠實邊界
+
+1. S6-1 標的是**確認**（落筆前已讀 `verify_lcb_bank.py:36,160`），**不計入盲測命中率**；
+   S6-2 同（落筆前已讀附錄 E.4 Y2）。**盲測 5/5 只含 S2-1／S2-2／S2-3／S2-4／S6-3。**
+2. 「forced」的判定時點是**預測落筆當時**（判準 §二.1）：`LCB_BANK_V3_COUNT`
+   在 `a3036573`（R461 判準 commit）**尚不存在**、今天存在 ⇒ S2-1 當時可證偽、今天恆真。
+   兩個時點都印在 JSON 裡（`v3_pin_existed_at_prediction_time` / `..._today`）。
+3. **本輪不修 `verify_lcb_bank.py`**（判準 §五.4）：改量具要另開判準，
+   而且 v3 已經發射，改報告工具不會改變 R461 已經發生的事。**這個缺口留給下一輪。**
+4. 本普查**只掃 §二／§六 七筆**。**還沒被任何普查掃過的是：附錄 A（除 A.4 的四列）、
+   附錄 B／C／D／E 的收官守則本身。** 下一輪要補就從那裡。
+5. 本輪**零偷看**：B3 擋門把任何含 `g_r461_lcb3_three_arm` 的讀檔路徑變成例外，
+   連 selftest 的探針都指向該目錄下**不存在**的檔名（攔到＝RuntimeError、沒攔到＝FileNotFoundError），
+   **主 run 的任何一個 byte 本輪都沒有進過記憶體**。
