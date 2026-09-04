@@ -1,0 +1,211 @@
+{
+  "verdict": "CENSUSED",
+  "broken": [],
+  "records": {
+    "R451-§四A": {
+      "clause": "加法性：既有鍵的值逐一相同，差異恰好只有 power_conform_vs_off5",
+      "falsifier": "任一既有鍵的值改變",
+      "identity": "只增不改 ∧ 只寫新鍵 ∧ 不把可變的既有輸出物件傳進呼叫",
+      "identity_holds": true,
+      "witnesses": 0,
+      "unscanned": false,
+      "proof": {
+        "holds": true,
+        "old_stmts": 56,
+        "new_stmts": 58,
+        "added_stmts": 2,
+        "new_out_keys": [
+          "power_conform_vs_off5"
+        ],
+        "bad_targets": [],
+        "bad_args_mutable_passed": [],
+        "note": "只增不改 ∧ 只寫新鍵 ∧ 不把可變的既有輸出物件傳進呼叫 ⇒ 既有鍵不可能變"
+      },
+      "scan": {
+        "keys_old": 25,
+        "keys_new": 26,
+        "differing_keys": [],
+        "new_keys": [
+          "power_conform_vs_off5"
+        ],
+        "dropped_keys": [],
+        "B7_values_withheld": "逐鍵比 sha256 摘要；輸出只有鍵名與計數",
+        "scanned": true,
+        "snapshot_sha16": "39d3b5dc50a6ba44",
+        "snapshot_lines": 229,
+        "old_source_commit": "4edb7dc"
+      },
+      "class": "FORCED_GREEN",
+      "intent": "guard"
+    },
+    "R451-§四B": {
+      "clause": "M11 讓 selftest 紅，且指名的那一條紅（crash 不算）",
+      "falsifier": "M11 沒被指名條抓到",
+      "identity": "夾具無 RNG ⇒ 結果是常數 ⇒ 證偽事件不可達",
+      "identity_holds": true,
+      "witnesses": 0,
+      "proof": {
+        "holds": true,
+        "deterministic_fixture": true,
+        "clean_baseline_ok": true,
+        "named_clause": "P2 OFF5 那格的 MDE 餵的是 OFF5 自己的配對",
+        "mutant_named_caught": true,
+        "mutant_crashed": false,
+        "note": "夾具無 RNG ⇒ 結果是常數 ⇒「M11 沒被指名條抓到」不可達"
+      },
+      "class": "FORCED_GREEN",
+      "intent": "guard"
+    },
+    "R451-§四C": {
+      "clause": "不回歸：既有突變體仍全 :Y、乾淨 selftest 仍 PASS",
+      "falsifier": "任一 :N 或 baseline selftest FAIL",
+      "identity": null,
+      "identity_holds": false,
+      "witnesses": 0,
+      "scan": {
+        "mutants_scanned": 11,
+        "marks": [
+          "M1_deliv_ignores_accepted:Y",
+          "M2_union_denominator:Y",
+          "M3_ignore_missing_fields:Y",
+          "M4_ignore_row_accounting:Y",
+          "M5_ignore_terminal:Y",
+          "M6_pz2_holds_ignores_direction:Y",
+          "M7_pz6_only_conform:Y",
+          "M8_pz5b_pass:Y",
+          "M9_drop_overturn:Y",
+          "M10_widen_windows:Y",
+          "M11_power_off5_uses_off_pair:Y"
+        ],
+        "baseline_selftest_pass": true,
+        "witnesses": 0,
+        "misses": []
+      },
+      "class": "UNRESOLVED",
+      "intent": "guard"
+    },
+    "R451-§五1": {
+      "clause": "A 對不上 ⇒ 回退這個改動",
+      "falsifier": "A 對不上卻沒回退",
+      "identity": "前提（§四A 的證偽事件）本身結構不可達 ⇒ 本條的證偽事件也不可達",
+      "identity_holds": true,
+      "witnesses": 0,
+      "derived_from": "R451-§四A（導出關係寫在 DECISION §三，由 Z10 看著）",
+      "class": "FORCED_GREEN",
+      "intent": "guard"
+    },
+    "R451-§五2": {
+      "clause": "B 沒牙齒 ⇒ 記 M11:N",
+      "falsifier": "B 沒牙齒卻沒記",
+      "identity": "前提（§四B 的證偽事件）本身結構不可達 ⇒ 本條的證偽事件也不可達",
+      "identity_holds": true,
+      "witnesses": 0,
+      "derived_from": "R451-§四B（導出關係寫在 DECISION §三，由 Z10 看著）",
+      "class": "FORCED_GREEN",
+      "intent": "guard"
+    },
+    "R451-§五3": {
+      "clause": "N₈₀ > 題庫規模 ⇒ 是結論、不准放寬 P-Z3",
+      "falsifier": "觸發了卻被拿去放寬 P-Z3 的窗口",
+      "identity": null,
+      "identity_holds": false,
+      "witnesses": 1,
+      "blocked_by_tripwire": false,
+      "why": "觸發量 n_needed_for_5pp 在 TRIPWIRE_FORBIDDEN 裡，期中不准讀（B7）⇒ 本輪是『掃不到』不是『掃到 0 個』；收官輪必須重跑本尺。",
+      "w3_n_needed_for_5pp": 332,
+      "w3_bank": "lcb2",
+      "w3_bank_size": 120,
+      "w3_trigger_fired": true,
+      "w3_docs": {
+        "checked": true,
+        "changed": [],
+        "detail": {
+          "DECISION_20260904_R440Z_LCB2_PREREG.md": {
+            "needle": "P-Z3",
+            "n_lines_r451": 3,
+            "n_lines_now": 3,
+            "same": true
+          },
+          "CRITERION_20260903_R670_DELIV_DIFFERENCE_INTERVAL.md": {
+            "needle": "UNINFORMATIVE",
+            "n_lines_r451": 1,
+            "n_lines_now": 1,
+            "same": true
+          }
+        }
+      },
+      "w3_bank_resolution": {
+        "source": "summary.json:seed 後綴",
+        "declared_in_decision": "sampling.bank（summary.json 沒有這個欄位）",
+        "on_mismatch": "UNSCANNED"
+      },
+      "class": "EVALUABLE",
+      "intent": "evidence"
+    }
+  },
+  "prediction_ledger": {
+    "R451-§四A": {
+      "predicted": "FORCED_GREEN",
+      "observed": "FORCED_GREEN",
+      "hit": true,
+      "intent": "guard"
+    },
+    "R451-§四B": {
+      "predicted": "FORCED_GREEN",
+      "observed": "FORCED_GREEN",
+      "hit": true,
+      "intent": "guard"
+    },
+    "R451-§四C": {
+      "predicted": "UNRESOLVED",
+      "observed": "UNRESOLVED",
+      "hit": true,
+      "intent": "guard"
+    },
+    "R451-§五1": {
+      "predicted": "FORCED_GREEN",
+      "observed": "FORCED_GREEN",
+      "hit": true,
+      "intent": "guard"
+    },
+    "R451-§五2": {
+      "predicted": "FORCED_GREEN",
+      "observed": "FORCED_GREEN",
+      "hit": true,
+      "intent": "guard"
+    },
+    "R451-§五3": {
+      "predicted": "UNRESOLVED",
+      "observed": "EVALUABLE",
+      "hit": false,
+      "intent": "evidence"
+    }
+  },
+  "n_predictions_hit": 5,
+  "n_predictions": 6,
+  "counts": {
+    "FORCED_GREEN": 4,
+    "UNRESOLVED": 1,
+    "EVALUABLE": 1
+  },
+  "forced_green_with_intent_evidence": [],
+  "R456_calibration_bidirectional": {
+    "holds": true,
+    "positive": {
+      "clause": "(bool(r.get(\"accepted\")) and bool(r.get(\"meets_demand\"))) and not bool(r.get('meets_demand'))",
+      "class": "FORCED_GREEN",
+      "known_answer": "FORCED_GREEN（R450 §八 已證恆假）"
+    },
+    "negative": {
+      "stat": "bool(row.meets_demand)",
+      "class": "EVALUABLE",
+      "distinct_values": [
+        false,
+        true
+      ],
+      "witnesses": 221,
+      "known_answer": "EVALUABLE（自由統計量）"
+    }
+  },
+  "decision_sha256": "a8c17f1d49ac49093925440b9d1d53acf4231cb2062d006571767ccebb55662f"
+}

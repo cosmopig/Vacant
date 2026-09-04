@@ -288,8 +288,102 @@ def calibration_bidirectional(rows: list[dict]) -> dict:
                          "known_answer": "EVALUABLE（自由統計量）"}}
 
 
+# ────────────────────────────── R458：§五3 的解封（加法式） ──────────────────────────────
+# 判準：DECISION_20260904_R458_WU3_UNBLOCK.md（本段程式碼之前 commit）。
+# 觸發量 n_needed_for_5pp 是 TRIPWIRE_FORBIDDEN 成員 ⇒ 只在 run terminal 之後才讀。
+PRE_R458_COMMIT = "6a8aa7a"   # R458 判準 commit＝本尺改動前的最後一版（C13 用，釘死不隨 HEAD 漂）
+R451_COMMIT = "113f747"          # R451 判準落地時的 commit（兩件文字證物的基準版本）
+W3_BANKS = {"lcb2": "ops/gain/data/lcb_bank_v2.jsonl",
+            "lcb1": "ops/gain/data/lcb_bank_v1.jsonl"}
+W3_DOCS = [("DECISION_20260904_R440Z_LCB2_PREREG.md", "P-Z3"),
+           ("CRITERION_20260903_R670_DELIV_DIFFERENCE_INTERVAL.md", "UNINFORMATIVE")]
+
+
+def w3_trigger(n_needed: int, bank_size: int) -> bool:
+    """R451 §五3 的觸發量：要 5pp 解析度所需的配對題數 > 題庫規模。"""
+    if MUTANT == "Y1_w3_trigger_ignores_bank":
+        return True
+    return int(n_needed) > int(bank_size)
+
+
+def _lines_with(text: str, needle: str) -> list[str]:
+    return [l for l in text.splitlines() if needle in l]
+
+
+def w3_doc_witness(pairs: list[tuple] | None = None) -> dict:
+    """證物 A／B：逐行比對 R451 落地版本與現況。pairs 只給自檢用（合成）。"""
+    if pairs is None:
+        pairs = []
+        for path, needle in W3_DOCS:
+            r = subprocess.run(["git", "show", f"{R451_COMMIT}:{path}"],
+                               cwd=ROOT, capture_output=True, text=True)
+            if r.returncode != 0:
+                return {"checked": False, "reason": f"SOURCE_DRIFT:git_show_failed:{path}"}
+            cur = ROOT / path
+            if not cur.exists():
+                return {"checked": False, "reason": f"SOURCE_DRIFT:missing_now:{path}"}
+            pairs.append((path, needle, r.stdout, cur.read_text(encoding="utf-8")))
+    changed, empty, detail = [], [], {}
+    for name, needle, old_t, new_t in pairs:
+        o, n = _lines_with(old_t, needle), _lines_with(new_t, needle)
+        if MUTANT == "Y2_w3_ignores_doc_drift":
+            o = n
+        detail[name] = {"needle": needle, "n_lines_r451": len(o),
+                        "n_lines_now": len(n), "same": o == n}
+        if not o and not n:                       # 第三型「安靜量不到」：needle 掃到 0 行
+            empty.append(name)
+        elif o != n:
+            changed.append(name)
+    if empty:
+        return {"checked": False, "reason": f"EMPTY_NEEDLE:{','.join(empty)}", "detail": detail}
+    return {"checked": True, "changed": changed, "detail": detail}
+
+
+def eval_w3(run_dir: pathlib.Path | None) -> dict:
+    """§五3 的實測。run 沒給／非 terminal／題庫對不上 ⇒ UNSCANNED（不准報成 witness=0）。"""
+    if run_dir is None:
+        return {"scanned": False, "reason": "no_run_given"}
+    sf = run_dir / "summary.json"
+    rf = run_dir / "rows.jsonl"
+    if not sf.exists() or not rf.exists():
+        return {"scanned": False, "reason": f"missing_run_files:{run_dir}"}
+    summ = json.loads(sf.read_text(encoding="utf-8"))
+    terminal = bool(summ.get("run_terminal"))
+    if MUTANT == "Y3_w3_blocked_even_when_terminal":
+        terminal = False
+    if not terminal:
+        return {"scanned": False, "reason": "run_not_terminal"}
+    # 題庫：DECISION §二 寫的是 summary.json:sampling.bank，但**該欄位不存在於 summary.json**
+    # （本輪實測）。改由 seed 後綴解析，對不上就 UNSCANNED——「不准拿另一個題庫的數字頂替」
+    # 這條判準的實質不變；來源不同這件事逐字記在 bank_resolution 裡（STATE 也記）。
+    seed = str(summ.get("seed") or "")
+    bank = next((b for b in W3_BANKS if seed.endswith("-" + b) or seed.endswith(b)), None)
+    if bank is None:
+        return {"scanned": False, "reason": f"bank_unresolved_from_seed:{seed!r}"}
+    bank_file = ROOT / W3_BANKS[bank]
+    if not bank_file.exists():
+        return {"scanned": False, "reason": f"bank_file_missing:{W3_BANKS[bank]}"}
+    bank_size = sum(1 for l in bank_file.read_text(encoding="utf-8").splitlines() if l.strip())
+    import importlib
+    A = importlib.import_module("ops.gain.analyze_r447")
+    rows = [json.loads(l) for l in rf.read_text(encoding="utf-8").splitlines() if l.strip()]
+    a = A.analyze(rows, summ)
+    pw = a.get("power_conform_vs_off5") or {}
+    if "n_needed_for_5pp" not in pw:
+        return {"scanned": False, "reason": "power_conform_vs_off5_missing"}
+    n_needed = pw["n_needed_for_5pp"]
+    docs = w3_doc_witness()
+    return {"scanned": True, "bank": bank, "bank_size": bank_size,
+            "n_needed_for_5pp": n_needed,
+            "trigger_fired": w3_trigger(n_needed, bank_size),
+            "docs": docs,
+            "bank_resolution": {"source": "summary.json:seed 後綴",
+                                "declared_in_decision": "sampling.bank（summary.json 沒有這個欄位）",
+                                "on_mismatch": "UNSCANNED"}}
+
+
 # ────────────────────────────── 主普查 ──────────────────────────────
-def census(snap: pathlib.Path, rows: list[dict]) -> dict:
+def census(snap: pathlib.Path, rows: list[dict], run_dir: pathlib.Path | None = None) -> dict:
     broken: list[str] = []
     new_src = (ROOT / "ops/gain/analyze_r447.py").read_text(encoding="utf-8")
     old = subprocess.run(["git", "show", f"{PRE_R451_COMMIT}:ops/gain/analyze_r447.py"],
@@ -355,6 +449,26 @@ def census(snap: pathlib.Path, rows: list[dict]) -> dict:
         "why": "觸發量 n_needed_for_5pp 在 TRIPWIRE_FORBIDDEN 裡，期中不准讀（B7）"
                "⇒ 本輪是『掃不到』不是『掃到 0 個』；收官輪必須重跑本尺。",
     }
+    # R458：run terminal 之後才評估（加法式——run_dir=None 時上面那 6 個鍵一字不動）
+    w3 = eval_w3(run_dir)
+    if w3.get("scanned"):
+        r3 = rec["R451-§五3"]
+        r3["blocked_by_tripwire"] = False
+        r3["witnesses"] = 1 if w3["trigger_fired"] else 0
+        r3["w3_n_needed_for_5pp"] = w3["n_needed_for_5pp"]
+        r3["w3_bank"] = w3["bank"]
+        r3["w3_bank_size"] = w3["bank_size"]
+        r3["w3_trigger_fired"] = w3["trigger_fired"]
+        r3["w3_docs"] = w3["docs"]
+        r3["w3_bank_resolution"] = w3["bank_resolution"]
+        if not w3["docs"].get("checked"):
+            broken.append(f"R458_doc_witness_unscanned:{w3['docs'].get('reason')}")
+        elif w3["docs"]["changed"] and w3["trigger_fired"]:
+            broken.append("R458_clause_violated:R451-§五3")
+        elif w3["docs"]["changed"]:
+            r3["witness_docs_changed_without_trigger"] = w3["docs"]["changed"]
+    elif w3.get("reason") != "no_run_given":
+        rec["R451-§五3"]["w3_scan"] = w3
 
     for k, v in rec.items():
         v["class"] = classify(bool(v["identity_holds"]), int(v["witnesses"]))
@@ -442,6 +556,54 @@ def _bogus_snap() -> pathlib.Path:
     return d
 
 
+def _first_diff(a, b, path="") -> str:
+    """C13 失敗時指出第一個不同的鍵路徑（診斷用，不影響判準）。"""
+    if type(a) is not type(b):
+        return f"{path}: type {type(a)} vs {type(b)}"
+    if isinstance(a, dict):
+        for k in sorted(set(a) | set(b)):
+            if k not in a or k not in b:
+                return f"{path}.{k}: 只在一邊"
+            d = _first_diff(a[k], b[k], f"{path}.{k}")
+            if d:
+                return d
+        return ""
+    return "" if a == b else f"{path}: {a!r} vs {b!r}"
+
+
+def _pre_r458_census(snap: pathlib.Path, rows: list[dict]):
+    """把 R458 改動前的本尺放回**同一個 import 環境**跑一次（C13 的加法性對照）。"""
+    import importlib.util
+    r = subprocess.run(["git", "show", f"{PRE_R458_COMMIT}:ops/gain/r456_r451_census.py"],
+                       cwd=ROOT, capture_output=True, text=True)
+    if r.returncode != 0:
+        return None, f"SOURCE_DRIFT:git_show_failed:{PRE_R458_COMMIT}"
+    tmp = ROOT / "ops/gain/_r458_pre_tmp.py"          # parents[2] == ROOT
+    tmp.write_text(r.stdout, encoding="utf-8")
+    try:
+        spec = importlib.util.spec_from_file_location("ops.gain._r458_pre_tmp", tmp)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.MUTANT = MUTANT                            # 兩邊同條件，差異才只可能來自 R458
+        return mod.census(snap, rows), None
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def _syn_terminal_run() -> pathlib.Path:
+    """合成的 terminal run（schema 用 analyze_r447 的真夾具，才不會退化成 crash 測試）。"""
+    import importlib
+    A = importlib.import_module("ops.gain.analyze_r447")
+    rows, summ = A._fixture()
+    d = pathlib.Path("/dev/shm/r458_syn_run")
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "rows.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    (d / "summary.json").write_text(
+        json.dumps(dict(summ, run_terminal=True, seed="g-syn-lcb2"), ensure_ascii=False),
+        encoding="utf-8")
+    return d
+
+
 def selftest() -> int:
     global LAST_FAILS
     fails: list[str] = []
@@ -502,6 +664,28 @@ def selftest() -> int:
        all(v["class"] != "FORCED_GREEN" for v in bog["records"].values()) and bog["broken"])
     ck("C12 §五3 標成 blocked_by_tripwire（期中掃不到，不是掃到 0）",
        bog["records"]["R451-§五3"]["blocked_by_tripwire"] is True)
+    # ── C13 R458 加法性：run_dir=None ⇒ 與改動前版本**逐鍵逐值**相同（不是比 sha）
+    pre, pre_err = _pre_r458_census(_bogus_snap(), syn_rows)
+    ck("C13 R458 加法性：run_dir=None 的輸出與改動前版本逐鍵逐值相同",
+       pre_err is None and pre == bog, str(pre_err or _first_diff(pre, bog))[:200])
+    # ── C14 觸發量真的比題庫規模（Y1 指名）
+    ck("C14 n_needed ≤ 題庫 ⇒ 不觸發；> 才觸發",
+       w3_trigger(100, 120) is False and w3_trigger(400, 120) is True,
+       f"{w3_trigger(100, 120)}/{w3_trigger(400, 120)}")
+    # ── C15 證物漂移看得見；needle 掃到 0 行要判 EMPTY_NEEDLE（Y2 指名）
+    drift = w3_doc_witness([("fakedoc", "P-Z3", "| P-Z3 | +2 到 +8pp |", "| P-Z3 | +2 到 +20pp |")])
+    same = w3_doc_witness([("fakedoc", "P-Z3", "| P-Z3 | +2 到 +8pp |", "| P-Z3 | +2 到 +8pp |")])
+    empty = w3_doc_witness([("fakedoc", "NO_SUCH_NEEDLE", "aaa", "aaa")])
+    ck("C15 證物有差異 ⇒ changed 指名；相同 ⇒ 空；needle 掃到 0 行 ⇒ EMPTY_NEEDLE",
+       drift["changed"] == ["fakedoc"] and same["changed"] == []
+       and empty["checked"] is False and str(empty["reason"]).startswith("EMPTY_NEEDLE"),
+       f"{drift.get('changed')}/{same.get('changed')}/{empty.get('reason')}")
+    # ── C16 terminal ⇒ 必須解封（Y3 指名）
+    syn = census(_bogus_snap(), syn_rows, _syn_terminal_run())
+    r3 = syn["records"]["R451-§五3"]
+    ck("C16 run terminal ⇒ §五3 解封（blocked_by_tripwire False 且有 w3_ 量）",
+       r3["blocked_by_tripwire"] is False and "w3_n_needed_for_5pp" in r3,
+       f"blocked={r3.get('blocked_by_tripwire')} keys={[k for k in r3 if k.startswith('w3_')]}")
     print(f"SELFTEST {'PASS' if not fails else 'FAIL'} ({len(fails)} failed) MUTANT={MUTANT or 'none'}")
     return 1 if fails else 0
 
@@ -514,6 +698,9 @@ EXPECT = {
     "Z9_leak_raw_values":                       "C8",
     "Z10_derived_clause_ignores_parent":        "C10",
     "Z11_unscanned_reported_as_zero":           "C9",
+    "Y1_w3_trigger_ignores_bank":               "C14",
+    "Y2_w3_ignores_doc_drift":                  "C15",
+    "Y3_w3_blocked_even_when_terminal":         "C16",
 }
 
 
@@ -566,7 +753,8 @@ def main() -> int:
     if args.run:
         raw = (pathlib.Path(args.run) / "rows.jsonl").read_bytes()
         rows = [json.loads(l) for l in raw.decode("utf-8").splitlines() if l.strip()]
-    out = census(pathlib.Path(args.snap), rows)
+    out = census(pathlib.Path(args.snap), rows,
+                 pathlib.Path(args.run) if args.run else None)
     print(json.dumps(out, ensure_ascii=False, indent=2, default=str))
     if args.json:
         pathlib.Path(args.json).write_text(
