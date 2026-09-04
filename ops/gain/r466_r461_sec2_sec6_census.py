@@ -12,7 +12,7 @@ commit）。四格分類、七筆清單、母體定義、事前預測、擋門�
   python3 ops/gain/r466_r461_sec2_sec6_census.py --json ops/gain/data/r466_census.json
 """
 from __future__ import annotations
-import argparse, ast, hashlib, json, pathlib, subprocess, sys
+import argparse, ast, hashlib, json, pathlib, re, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -32,6 +32,13 @@ FORBIDDEN_RUN = "g_r461_lcb3_three_arm"                          # B3
 #   ⚠ 只有 SOURCE_CLAIMS 走這個釘；bank 檔／判準檔／`vacant/codebench.py` 的
 #   「今天」那條仍讀 worktree（它們問的是現在的事實）。
 R466_SOURCE_COMMIT = "952f883f798744e32158bb11bdf67b940f51a8db"   # R466 量測 commit
+# ── round743（R473）：`PRED`／`INTENT`／`BLIND` 三個字典記的是**事前預測**，
+#   在此之前沒有任何東西把它們釘回判準檔 ⇒ 改一個字就能讓 `blind_hit_rate` 變成強制命中、
+#   或讓 evidence 級強制綠燈的警告安靜少一筆（R473 實測 X2／X3：D1 十九條全綠）。
+#   釘的是**預測落筆當時的 commit**，不是 HEAD（memory：判強制綠燈的時點是預測落筆當時；
+#   釘 HEAD＝拿自己比自己）。
+R466_PREREG_REL = "DECISION_20260904_R466_R461_SEC2_SEC6_FALSIFIABILITY_CENSUS.md"
+R466_PREREG_COMMIT = "99ec6cb5d6f4abf2fea91668caa6d9e224ffbc6d"   # R466 判準 commit（預測落筆）
 TWIN_RUN = ROOT / "runs" / "g_r447_conform_lcb2"                  # 已收官的結構孿生（S6-2 用）
 
 # ── 釘死的判準檔字面（B2）。每一條都要在 R461 原文裡逐字找得到。
@@ -103,6 +110,56 @@ def _func_src(relpath: str, funcname: str) -> str:
     return ""
 
 
+def prereg_prediction_tables() -> dict:
+    """從**判準落筆當時的 commit** 逐列解析 §一 的 intent 表與 §三 的預測表。
+
+    memory 鐵律：驗一份宣稱要逐字取出真來源，不准在測試裡自己改寫一份。
+    """
+    r = subprocess.run(["git", "-C", str(ROOT), "show",
+                        f"{R466_PREREG_COMMIT}:{R466_PREREG_REL}"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        raise RuntimeError(
+            f"PREREG_PIN_UNREADABLE: git show {R466_PREREG_COMMIT[:8]}:{R466_PREREG_REL} 失敗"
+            f"（{r.stderr.strip()[:200]}）——讀不到釘死的判準要吵，不准悄悄退回讀 HEAD")
+    doc = r.stdout
+
+    def section(start: str, end: str) -> str:
+        i = doc.index(start)
+        j = doc.index(end, i)
+        return doc[i:j]
+
+    sec1 = section("## 一、", "## 二、")
+    sec3 = section("## 三、", "### 三.1")
+
+    def rows(sec: str) -> dict:
+        """每個 key 的整列（含換行續行）：從 `| <key> |` 起到下一個 `|` 開頭的行。"""
+        out: dict[str, str] = {}
+        lines = sec.splitlines()
+        for i, ln in enumerate(lines):
+            m = re.match(r"^\| (S\d-\d) \|", ln)
+            if not m:
+                continue
+            buf = [ln]
+            for nxt in lines[i + 1:]:
+                if nxt.startswith("|") or not nxt.strip():
+                    break
+                buf.append(nxt)
+            out[m.group(1)] = "\n".join(buf)
+        return out
+
+    intent = {}
+    for k, row in rows(sec1).items():
+        cells = [c.strip() for c in row.split("|")]
+        intent[k] = cells[-2] if len(cells) >= 2 else ""
+    pred, blind = {}, {}
+    for k, row in rows(sec3).items():
+        m = re.search(r"`([A-Z_]+)`", row)
+        pred[k] = m.group(1) if m else ""
+        blind[k] = ("確認" not in row)
+    return {"intent": intent, "pred": pred, "blind": blind}
+
+
 def check_pins() -> dict:
     """B2：判準檔字面 ＋ 原始碼字面都要對得上，否則 SOURCE_DRIFT。"""
     doc = _safe_read(PREREG)
@@ -123,7 +180,19 @@ def check_pins() -> dict:
         src_ok[k] = ok
         if not ok:
             drift.append(f"source:{k}")
-    return {"prereg_pins": pin_ok, "source_pins": src_ok, "drift": drift,
+    # ── R473：事前預測三表要與判準檔逐鍵相同，否則 SOURCE_DRIFT（且不吐任何分類）
+    tbl = prereg_prediction_tables()
+    pred_ok = {}
+    for label, want, got in (("PRED", PRED, tbl["pred"]),
+                             ("INTENT", INTENT, tbl["intent"]),
+                             ("BLIND", BLIND, tbl["blind"])):
+        for k in sorted(want):
+            same = (k in got) and (got[k] == want[k])
+            pred_ok[f"{label}:{k}"] = same
+            if not same:
+                drift.append(f"pred:{label}:{k}")
+    return {"prereg_pins": pin_ok, "source_pins": src_ok, "pred_pins": pred_ok, "drift": drift,
+            "prereg_pin_commit": R466_PREREG_COMMIT,
             "source_pin_commit": (None if MUTANT == "M7_drop_source_pin"
                                   else R466_SOURCE_COMMIT)}
 
@@ -396,6 +465,22 @@ def census() -> dict:
 
 
 # ---------------------------------------------------------------- selftest
+def suppression_expr_src() -> str | None:
+    """逐字取出 `census()` 裡 B6 抑制式的**真運算式**（memory：不准在自檢裡改寫一份）。"""
+    src = _safe_read(pathlib.Path(__file__))
+    tree = ast.parse(src)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef,)) and node.name == "census":
+            best = None
+            for st in ast.walk(node):
+                if isinstance(st, ast.Assign):
+                    seg = ast.get_source_segment(src, st.value) or ""
+                    if "SUPPRESSED" in seg:
+                        best = seg
+            return best
+    return None
+
+
 def _ck(name: str, cond: bool) -> None:
     print(f"  [{'ok' if cond else 'FAIL'}] {name}")
     if not cond:
@@ -411,13 +496,17 @@ def selftest() -> int:
     base = census()
     _ck("A 乾淨跑 verdict==OK", base["verdict"] == "OK")
     _ck("B 七筆都在", len(base.get("items", {})) == 7)
-    _ck("C 雙向校準通過", base["calibration"]["calibrated"])
+    _cal = base.get("calibration", {})
+    _ck("C 雙向校準通過", bool(_cal.get("calibrated")))
     _ck("D 正對照＝FORCED_GREEN",
-        base["calibration"]["positive_control"]["class"] == "FORCED_GREEN")
+        _cal.get("positive_control", {}).get("class") == "FORCED_GREEN")
     _ck("E 負對照＝EVALUABLE",
-        base["calibration"]["negative_control"]["class"] == "EVALUABLE")
-    _ck("F 判準檔七條字面全找得到", all(base["facts"]["pins"]["prereg_pins"].values()))
-    _ck("G 原始碼四條字面全對得上", all(base["facts"]["pins"]["source_pins"].values()))
+        _cal.get("negative_control", {}).get("class") == "EVALUABLE")
+    _pins = base.get("facts", {}).get("pins", {})
+    _ck("F 判準檔七條字面全找得到",
+        bool(_pins.get("prereg_pins")) and all(_pins["prereg_pins"].values()))
+    _ck("G 原始碼四條字面全對得上",
+        bool(_pins.get("source_pins")) and all(_pins["source_pins"].values()))
 
     # B3：主 run 不准讀。**探針指向該目錄下一個不存在的檔名**——這樣連 selftest
     # 自己都不會把主 run 的任何 byte 讀進記憶體，而擋門有沒有攔照樣看得出來
@@ -472,6 +561,39 @@ def selftest() -> int:
         any(v["class"] == "FORCED_GREEN" for v in fake.values())
         and not any(v["class"] == "FORCED_GREEN" for v in supp.values()))
     MUTANT = ""
+
+    # --- COND I ---
+    # PRED／INTENT／BLIND 釘回**判準落筆當時**的 commit。缺這條時（R473 實測）：
+    # 改一個字 ⇒ blind_hit_rate 5/5→4/5、forced_green_evidence_items 少一筆，十九條全綠。
+    _pins_i = check_pins()
+    _ck("I 事前預測三表（PRED／INTENT／BLIND）與判準檔逐鍵相同",
+        bool(_pins_i.get("pred_pins"))
+        and not [d for d in _pins_i["drift"] if d.startswith("pred:")])
+
+    # --- COND J ---
+    # B6 抑制式：逐字取 census() 的真運算式再 eval（不准在自檢裡改寫一份）。
+    _sup = suppression_expr_src()
+    _fake_items = {"S2-2": {"class": "FORCED_GREEN"}, "X": {"class": "EVALUABLE"}}
+    try:
+        _got = eval("(" + _sup + ")", {"MUTANT": "", "items": _fake_items}) if _sup else None
+    except Exception:
+        _got = None
+    _ck("J B6 抑制式（逐字取自 census 原始碼）真的把 FORCED_GREEN 換成 SUPPRESSED",
+        isinstance(_got, dict)
+        and _got.get("S2-2", {}).get("class") == "SUPPRESSED"
+        and all(v.get("class") != "FORCED_GREEN" for v in _got.values()))
+
+    # --- COND K ---
+    # 來源釘要真的生效：讀到的必須逐字元等於釘死 commit 的版本、且**不等於** worktree。
+    # 見證（R467 改過該檔 ⇒ 兩版不同）若哪天消失，這條會**變紅**而不是安靜綠——
+    # 看到它紅要先查見證還在不在（R473 §五 R4：見證消失記 UNSCANNED，不准記 HIT）。
+    _rel_k = "ops/gain/verify_lcb_bank.py"
+    _pinned_k = subprocess.run(["git", "-C", str(ROOT), "show",
+                                f"{R466_SOURCE_COMMIT}:{_rel_k}"],
+                               capture_output=True, text=True).stdout
+    _wt_k = (ROOT / _rel_k).read_text(encoding="utf-8")
+    _ck("K 來源釘生效（讀的是釘死 commit 而不是 worktree；見證＝兩版今天確實不同）",
+        bool(_pinned_k) and _pinned_k != _wt_k and _source_read(_rel_k) == _pinned_k)
 
     print("SELFTEST_PASS" if not LAST_FAILS else f"SELFTEST_FAIL {LAST_FAILS}")
     return 0 if not LAST_FAILS else 1
