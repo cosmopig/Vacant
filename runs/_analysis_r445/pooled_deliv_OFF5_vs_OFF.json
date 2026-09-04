@@ -1,0 +1,107 @@
+{
+  "key": "deliv",
+  "strata": [
+    {
+      "label": "r444",
+      "group": null,
+      "dir": "runs/g_r444_conform_mbpp",
+      "n": 179,
+      "b": 9,
+      "c": 8,
+      "a_ok": 130,
+      "b_ok": 129,
+      "key": "deliv",
+      "third_category_missing_fields": [],
+      "delta_pp": 0.5586592178770949,
+      "ci95_lo_pp": -4.21451273114101,
+      "ci95_hi_pp": 5.131669627349903,
+      "n_discordant": 17,
+      "conditions_sha": {
+        "pool": "08e36c8e6171cffb",
+        "instrument": "c5a917995e70fa21",
+        "calibration": "74234e98afe7498f",
+        "request_policy": "b009f7f91286d44a"
+      },
+      "instrument_two_way": {
+        "ok": true,
+        "n": 179,
+        "ref_pass": 179,
+        "broken_rejected": 179,
+        "why": ""
+      },
+      "rows_sha256_16": "3f2cb9661f7a080b",
+      "rows_lines": 537
+    },
+    {
+      "label": "r445",
+      "group": null,
+      "dir": "runs/g_r445_conform_mbpp_ext",
+      "n": 192,
+      "b": 13,
+      "c": 11,
+      "a_ok": 137,
+      "b_ok": 135,
+      "key": "deliv",
+      "third_category_missing_fields": [],
+      "delta_pp": 1.0416666666666665,
+      "ci95_lo_pp": -4.2947981076205455,
+      "ci95_hi_pp": 6.111744950131342,
+      "n_discordant": 24,
+      "conditions_sha": {
+        "pool": "08e36c8e6171cffb",
+        "instrument": "a58c0330642602f8",
+        "calibration": "74234e98afe7498f",
+        "request_policy": "b009f7f91286d44a"
+      },
+      "instrument_two_way": {
+        "ok": true,
+        "n": 192,
+        "ref_pass": 192,
+        "broken_rejected": 192,
+        "why": ""
+      },
+      "rows_sha256_16": "14fa9f83bd0643c5",
+      "rows_lines": 576
+    }
+  ],
+  "p_het_fisher": 1.0,
+  "het_alpha": 0.05,
+  "het_verdict": "HOMOGENEOUS_NOT_REJECTED",
+  "pooled": {
+    "B": 22,
+    "C": 19,
+    "N": 371,
+    "n_discordant": 41,
+    "delta_pp": 0.8086253369272237,
+    "ci95_lo_pp": -2.7794147919871883,
+    "ci95_hi_pp": 4.275505796815386,
+    "pi_ci95": [
+      0.3742484283137504,
+      0.6934405671485986
+    ]
+  },
+  "verdict_pooled": "RULED_OUT",
+  "pooled_usable_as_headline": true,
+  "groups": {
+    "r444": {
+      "b": 9,
+      "c": 8,
+      "n": 179,
+      "labels": [
+        "r444"
+      ]
+    },
+    "r445": {
+      "b": 13,
+      "c": 11,
+      "n": 192,
+      "labels": [
+        "r445"
+      ]
+    }
+  },
+  "opposite_direction_strata": false,
+  "practical_pp": 5.0,
+  "supplement_n_needed_for_halfwidth_5pp": 371,
+  "broken_reasons": []
+}

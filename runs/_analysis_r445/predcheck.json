@@ -1,0 +1,91 @@
+{
+  "run": "runs/g_r445_conform_mbpp_ext",
+  "decision": "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
+  "rows_sha256_8": "14fa9f83",
+  "n_rows": 576,
+  "run_terminal": true,
+  "pooled_json": "runs/_analysis_r445/pooled_deliv.json",
+  "predictions": [
+    {
+      "id": "P-E1",
+      "what": "新 192 題 Δdeliv(CONFORM−OFF5) 點估計 (pp)",
+      "quote": "[0, +6]pp",
+      "band": "[0.0, 6.0]",
+      "value": 4.6875,
+      "status": "HIT"
+    },
+    {
+      "id": "P-E2",
+      "what": "併 371 題 95%CI 半寬 (pp)",
+      "quote": "半寬 ≤ 3.0pp",
+      "band": "≤ 3.0",
+      "value": 3.294511145176217,
+      "status": "MISS"
+    },
+    {
+      "id": "P-E3",
+      "what": "併 371 題 discordant 對數 n_d",
+      "quote": "[20, 40]",
+      "band": "[20.0, 40.0]",
+      "value": 40.0,
+      "status": "HIT"
+    },
+    {
+      "id": "P-E4",
+      "what": "新 192 題 CONFORM calls_per_task",
+      "quote": "[1.2, 1.6]",
+      "band": "[1.2, 1.6]",
+      "value": 1.5104166666666667,
+      "status": "HIT",
+      "abort_rule": "> 4.5",
+      "abort_triggered": false
+    },
+    {
+      "id": "P-E5",
+      "what": "新 192 題 CONFORM 拒交率 (%)",
+      "quote": "[3, 10]%",
+      "band": "[3.0, 10.0]",
+      "value": 8.333333333333332,
+      "status": "HIT"
+    },
+    {
+      "id": "P-E6",
+      "what": "三臂 infra_void 最大值 (%)",
+      "quote": "<5%",
+      "band": "< 5.0",
+      "value": 0.0,
+      "status": "HIT",
+      "abort_rule": "> 20.0",
+      "abort_triggered": false
+    },
+    {
+      "id": "P-E7",
+      "what": "量具雙向／可見閘門覆蓋（四個計數取最小）",
+      "quote": "192/192",
+      "band": "== 192/192",
+      "value": 192.0,
+      "status": "HIT"
+    },
+    {
+      "id": "P-E8",
+      "what": "新 192 題 OFF 失敗率 (%)",
+      "quote": "20–60%",
+      "band": "20.0–60.0",
+      "value": 29.6875,
+      "status": "HIT"
+    }
+  ],
+  "broken_reasons": [],
+  "n_hit": 7,
+  "n_miss": 1,
+  "n_abort": 0,
+  "n_broken": 0,
+  "n_not_evaluated": 0,
+  "conform_settle_keys_NOT_APPLICABLE_TO_R445": {
+    "P-C1_band_3_to_6pp": "r444 的帶是 [3,6]pp；r445 註冊的 P-E1 是 [0,+6]pp",
+    "P-C1b_band_0.02_to_0.20": "r444 的 p 值帶；r445 沒有註冊 p 值的帶",
+    "P-C2_le_2.0": "r444 的門檻是 ≤2.0；r445 註冊的 P-E4 是 [1.2,1.6]（≤2.0 會給假綠燈）",
+    "P-C1_settlement_rule": "文字寫死 n=179；r445 是 192（併庫 371），照抄會寫出字面錯誤的句子"
+  },
+  "live_snapshot_skew": []
+}
