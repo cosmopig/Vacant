@@ -346,6 +346,18 @@ def selftest() -> int:
            and o_ok.get("run_terminal") is True and "row_accounting" in o_ok,
            f'{o_ok.get("verdict")} / additive={same}')
         # </R472-L>
+        # <R472-M>
+        # gain_run.py:1414-1420 逐字寫著兩個訊號**刻意不同**：`run_complete` 要求零 void
+        # ⇒ 只要有一格 void 就永遠是 False（R516 §8：下游拿它當「跑完了沒」會永遠等不到 True）；
+        # `run_terminal` 只問「每個 task 是否都跑到底」。收官的擋門必須讀 terminal。
+        # 沒有這一條，把 G1 改讀 run_complete 是**看不見的**（事後探測 M11 實測 MISSED）。
+        d_void = _mkrun(td / "voidok", rows,
+                        _summary_for(rows, terminal=True, complete=False, void=1))
+        o_void = analyze_run_dir(d_void)
+        ck("M terminal=True 但 complete=False（有 void 的 run）⇒ 仍放行，擋門讀的是 terminal 不是 complete",
+           o_void.get("verdict") == "OK" and o_void.get("run_complete") is False,
+           f'{o_void.get("verdict")} / run_complete={o_void.get("run_complete")}')
+        # </R472-M>
 
     print("[契約]")
     drift = deliv_contract_drift(pathlib.Path(__file__).with_name("analyze_r447.py"))
