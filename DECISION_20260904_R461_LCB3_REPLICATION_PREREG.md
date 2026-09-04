@@ -377,3 +377,118 @@ python3 ops/gain/r447_eq5_offline.py \
 `PRACTICAL_PP`、`MIN_PAIRED`、α、n、seed、worker、端點、bank、§三 的窗口、
 §四 的 MDE 與預測區間、P-R461-3 事前的 `UNRESOLVED` 判決——**一個數字都沒有動**。
 也**沒有**改 `r447_eq5_offline.py` 一行（本輪只是跑它、驗它）。
+
+---
+
+# 附錄 E（round733 / R465 追加）：**§六.2 的收官義務也沒有可執行的仲裁者**——補上指令，並照通則先跑過一次
+
+**合法性前提**：與附錄 B／C／D 相同的自證見 `DECISION_20260904_R465_R461_SEC6_GAUGE_ARBITER_GAP.md` §〇。
+**§三／§四／附錄 A／B／C／D 原文一字未改，本附錄是加法式的。**
+**`ops/gain/r447_gauge_capability.py` 本輪一行都沒改。**
+
+## E.1 缺口
+
+§六.2 寫死了一條收官報告義務——「看有幾題**任一臂通過過一次**……沒被示範的題數是
+**『量具假象』的上界**……**這個數字要跟失敗率一起報**」——但**沒有寫出它的指令**。
+
+附錄 B／C 補的是 P-R461-1／2，附錄 D 補的是 P-R461-3。**§六.2 沒有任何附錄覆蓋。**
+⇒ 與 C-1／D.1 **同型缺陷的第三次復發**（預測／義務有名字，沒有可執行的仲裁者）。
+
+這一次漏掉的份量特別重：§六.3 已事前承認 v3 的 probe 覆蓋率預期 **0/189**，
+「參考解全過」那個方向**照字面不可執行**；§六.2 的能力下界是唯一的替代品。
+它沒有仲裁者 ⇒ 收官時 SPEC 的雙向驗尺規則**兩個方向都會沒有可執行的證據**。
+
+## E.2 收官指令（**已原樣跑過**，見 E.4）
+
+```bash
+python3 ops/gain/r447_gauge_capability.py runs/g_r461_lcb3_three_arm \
+    --json runs/_analysis_r461/gauge_capability.json
+```
+
+工具的 `passed()`:89-92 是 `any(bool(r.get("meets_demand")) for r in rs)`，
+**逐字就是 §六.2 的「任一臂通過過一次」**；要報的兩個數字是
+`n_undemonstrated` 與 `pct_undemonstrated`（§六.2 的「上界」），
+連同 `n_demonstrated` 與分母 `n_tasks_complete` 一起報。
+
+⚠ 這支工具**沒有** `--bank`／`--seed`／`--n` 任何旗標（`main()`:228-241 只吃 `sys.argv[1]`
+當 run 目錄）⇒ **R464 那型「旗標預設值是舊語意」的陷阱翻不了它**。這是它比附錄 D 那支安全的地方。
+
+## E.3 收官時要一起驗的五件（不驗＝隱瞞口徑）
+
+1. **`run_complete` 必須是 `true`（去 `summary.json` 讀，工具自己不看）。**
+   **這支工具沒有任何完整性擋門**——實測（E.4 Y5）把已收官 run 的 rows 截成前 23 列餵給它，
+   它吐 `rc=0`、`verdict=="OK"`、`n_tasks_complete=7`、`pct_undemonstrated=28.571`，
+   **沒有任何警告、頂層也沒有 `run_complete` 鍵**。而那個 pct 會隨 run 跑完**單調往下飄**：
+
+   | 截斷 | `n_tasks_complete` | `pct_undemonstrated` | `verdict` |
+   |---|---|---|---|
+   | 23 列 | 7 | **28.571** | OK |
+   | 180 列 | 60 | **25.0** | OK |
+   | 360 列（完整） | 120 | **21.667** | OK |
+
+   ⇒ **跑到一半讀它，會拿到一個長得完全合理、卻偏高的「量具假象上界」。**
+   這是第二型「安靜量不到」（量到的數量掉下來，卻不叫）。收官守則自己要擋。
+
+2. **`n_tasks_complete == 189` 且 `rows_file_lines == 567`。** 對不上就照實寫差多少，不准四捨五入帶過。
+
+3. **`n_tasks_partial_excluded` 要與逐臂 `infra_void` 對帳。**
+   `gain_run.py:1583` 把 void 寫進 **`notes.jsonl`**，那一臂**不產生 row**
+   ⇒ 該題變成 `len(rs)!=3` ⇒ **被 `complete` 靜靜排除、分母縮水**，
+   而 §四 的 `UNSCANNED` 規則讀的是 `summary.json` 的 `infra_void`——**兩個不同的檔案**。
+   恆等式（完整 run 上）：`n_tasks_partial_excluded == |{task_id : 任一臂 infra_void}|`。
+   **校準過，有 witness、不是零例空綠燈**：
+
+   | run | voided 題數（notes） | partial 題數（rows） | 相符 |
+   |---|---|---|---|
+   | `g_r443_gemma_lcb` | 4 | 4 | ✓ |
+   | `g_r441_gemma_only_mbpp_b` | 12 | 12 | ✓ |
+   | `g_r447_conform_lcb2`（零例） | 0 | 0 | ✓ |
+
+   ⚠ 前兩個 witness 都是 `run_complete=false` 的 run ⇒ 它們驗到的是
+   **「voided ⊆ partial」這個方向與機制**（voided 臂在 rows 裡確實缺席，兩個 run 都 True），
+   **完整恆等式在完整 run 上還沒有被驗過**。照實寫。
+
+4. **判 BROKEN 要看 `verdict`，不要看有沒有數字。**
+   與附錄 D.3 第 2 點同型：`BROKEN_BC_MISMATCH`／`BROKEN_CONTRACT_DRIFT` 之下，
+   `n_tasks_complete`／`n_demonstrated`／`pct_undemonstrated` **照樣印出一整塊看起來完全正確的數字**
+   （實測：M5 突變體在真 r447 資料上吐 `BROKEN_BC_MISMATCH` 配 `120/94/26/21.667`）。
+   只有 `verdict=="OK"` 才准引用那些數字。
+
+5. **`pz1_raw_NOT_ARBITER`／`pz1_demonstrated_only_NOT_ARBITER` 不准當成 §三 C4 的失敗率引用。**
+   它們自己標了 `NOT_ARBITER`，而且用的是 `_deliv`（交付口徑）不是 `meets_demand`（能力口徑）。
+   C4 的仲裁者是 `ops/gain/r461_gate_verdict.py`，不是這支。
+
+## E.4 這條指令已經原樣跑過（R463 §一 C-1 新訂通則）
+
+驗證 run＝`runs/g_r447_conform_lcb2`（已收官、同三臂 `OFF/CONFORM/OFF5`、同 LCB 家族、
+同 worker `gemma-4-12b-it-qat`）＝ R461 的**結構孿生**。
+
+- **Y1 `--selftest`**：`SELFTEST_PASS`、rc=0、**14 條 ck 全綠**（A–H ＋ M1／M2／M3／M4／M5／M6）。
+- **Y2 真資料**：`rc=0`、`verdict=="OK"`、`n_tasks_complete=120`、`n_tasks_partial_excluded=0`、
+  `n_demonstrated=94`、`n_undemonstrated=26`、`pct_undemonstrated=21.667`、
+  `window_doubt_triggered=false`、`deliv_contract_drift=null`、`rows_file_lines=360`。
+- **Y4 口徑一致**：`r447_gauge_capability._deliv` 與 `paired_ci.py` 的 `KEYS["deliv"]`
+  用 `ast.get_source_segment` 逐字取出來**字串相同**
+  （`bool(r.get("accepted")) and bool(r.get("meets_demand"))`），四種
+  `(accepted, meets_demand)` 組合**逐格相同**。
+  **雙向校準**：拿 `KEYS["meets_demand"]` 當負對照，它在 `accepted=False ∧ meets_demand=True`
+  那一格分歧（＝附錄 C.3 指名的同一格）⇒ **這個比對方法有牙齒，不是「什麼都判相同」**。
+  ⇒ §六.2 與 P-R461-1／2 口徑一致，**不需要**在收官時加口徑但書。
+- **Y5 完整性**：見 E.3 第 1 點的表。
+
+## E.5 誠實邊界
+
+1. **`deliv_contract_drift()` 釘的是 `analyze_r447.py` 的 `_deliv`，而 `analyze_r447.py`
+   不在 R461 的收官路徑上**（R461 用 `paired_ci.py --key deliv` 與 `r447_eq5_offline.py`）。
+   ⇒ 那條契約擋門對 R461 而言是**在驗一個 R461 不會用到的檔案**。
+   它不會誤放（Y4 已獨立證明兩支的口徑逐字相同），但它**不是**針對 R461 的保護。
+   **本輪不改它**——改工具要另開判準。
+2. 工具名字叫 `r447_*`，但它**與 run 無關**（不吃 bank／seed／n，只吃 run 目錄）⇒ 用在 R461 上合法。
+3. E.3 第 3 點的恆等式只在兩個 **不完整** 的 run 上校準過（見該點的 ⚠）。
+4. 本附錄**只補指令與收官守則，不改 §六.2 的語意，也不動 50% 的 `window_doubt` 門檻**。
+
+## E.6 本附錄**沒有**動的東西
+
+`ops/gain/r447_gauge_capability.py`（一行未改）、任何門檻／窗口／MDE／α／n／seed／worker／端點／bank、
+`gain_run.py`、`analyze_paired.py`／`replay/paired_gates.py` 的 `--key` 缺口（R463 刻意留的，仍在）、
+§三／§四／附錄 A／B／C／D 的正文。
