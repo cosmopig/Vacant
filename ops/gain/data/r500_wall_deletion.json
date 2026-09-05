@@ -1,0 +1,33 @@
+{
+  "walls": {
+    "W1": "LOAD_BEARING",
+    "W2": "LOAD_BEARING"
+  },
+  "specificity": {
+    "cut_W1_keeps_M2_FORCE_SAME": true,
+    "cut_W2_keeps_M1_ONE_POSITION": true
+  },
+  "n_broken_cut": 0,
+  "baseline_detected": {
+    "M1_ONE_POSITION": true,
+    "M2_FORCE_SAME": true
+  },
+  "verdict": "ALL_WALLS_LOAD_BEARING",
+  "baseline_raw_tail": "{\n  \"M1_ONE_POSITION\": {\n    \"detected\": true,\n    \"observed\": \"BROKEN_WINDOWS\",\n    \"n_windows\": 2,\n    \"expected\": \"verdict == BROKEN_WINDOWS\"\n  },\n  \"M2_FORCE_SAME\": {\n    \"detected\": true,\n    \"observed\": \"BROKEN_CALIBRATION\",\n    \"C_NEG\": \"NEITHER\",\n    \"expected\": \"verdict == BROKEN_CALIBRATION 且 C_NEG != N_MATTERS\"\n  }\n}\n2/2 behaved as prereg'd\n",
+  "cut_detail": {
+    "W1": {
+      "rc": 1,
+      "detected": {
+        "M1_ONE_POSITION": false,
+        "M2_FORCE_SAME": true
+      }
+    },
+    "W2": {
+      "rc": 1,
+      "detected": {
+        "M1_ONE_POSITION": true,
+        "M2_FORCE_SAME": false
+      }
+    }
+  }
+}
