@@ -1,0 +1,24 @@
+{
+  "all": {
+    "inv": {
+      "ts": 0.22291235334713597,
+      "ts_minus_lat": 0.22912353347135955,
+      "ts_plus_lat": 0.0003450655624568668
+    },
+    "n": 2899,
+    "n_pairs": 2898,
+    "verdict": "TS_IS_START"
+  },
+  "chat": {
+    "inv": {
+      "ts": 0.02038216560509554,
+      "ts_minus_lat": 0.19235668789808918,
+      "ts_plus_lat": 0.0012738853503184713
+    },
+    "n": 786,
+    "n_pairs": 785,
+    "verdict": "TS_UNRESOLVED_BY_ID"
+  },
+  "population_sensitive": true,
+  "verdict": "TS_POPULATION_SENSITIVE"
+}

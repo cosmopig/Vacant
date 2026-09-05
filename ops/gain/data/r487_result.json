@@ -1,0 +1,241 @@
+{
+  "detail": {
+    "end|tok": {
+      "ci_hi": 0.7901353807335757,
+      "ci_lo": 0.6575525497638447,
+      "e2": {
+        "ci_hi": 0.7191189278380908,
+        "ci_lo": 0.6317204132977076,
+        "n_exposed": 604,
+        "n_unexposed": 50,
+        "ratio": 0.6682183174926017,
+        "usable_cells": 4,
+        "verdict": "UNRESOLVED"
+      },
+      "exposure_rate_by_tok_bucket": {
+        "0": 0.9726027397260274,
+        "1": 0.9310344827586207,
+        "2": 0.9315068493150684,
+        "3": 0.9655172413793104,
+        "4": 0.9315068493150684
+      },
+      "finish_reason": {
+        "stop": 728
+      },
+      "hyp": "end",
+      "n_cells": 5,
+      "n_chat": 786,
+      "n_exposed": 689,
+      "n_ref": 728,
+      "n_unexposed": 39,
+      "p1": "UNRESOLVED",
+      "p2": "DURATION_BIAS_ABSENT",
+      "p3": "RELOAD_AS_CHANCE",
+      "rate_bot": 0.9726027397260274,
+      "rate_top": 0.9315068493150684,
+      "ratio": 0.7118867899383031,
+      "reload": {
+        "E": 19.878137688201704,
+        "O": 16,
+        "lam": 0.0005532347022534323,
+        "n_events": 20,
+        "p": 0.3187545609290472,
+        "ratio": 0.804904375398129,
+        "span_s": 36151.02219462395,
+        "z": -0.997020497020718
+      },
+      "strat": "tok",
+      "tok_cuts": [
+        590,
+        926,
+        1334,
+        2532
+      ],
+      "usable_cells": 3
+    },
+    "end|tok_prompt": {
+      "ci_hi": null,
+      "ci_lo": null,
+      "e2": {
+        "ci_hi": null,
+        "ci_lo": null,
+        "n_exposed": 604,
+        "n_unexposed": 50,
+        "ratio": null,
+        "usable_cells": 0,
+        "verdict": "UNSCANNED"
+      },
+      "exposure_rate_by_tok_bucket": {
+        "0": 0.9726027397260274,
+        "1": 0.9310344827586207,
+        "2": 0.9315068493150684,
+        "3": 0.9655172413793104,
+        "4": 0.9315068493150684
+      },
+      "finish_reason": {
+        "stop": 728
+      },
+      "hyp": "end",
+      "n_cells": 10,
+      "n_chat": 786,
+      "n_exposed": 689,
+      "n_ref": 728,
+      "n_unexposed": 39,
+      "p1": "UNSCANNED",
+      "p2": "DURATION_BIAS_ABSENT",
+      "p3": "RELOAD_AS_CHANCE",
+      "rate_bot": 0.9726027397260274,
+      "rate_top": 0.9315068493150684,
+      "ratio": null,
+      "reload": {
+        "E": 19.878137688201704,
+        "O": 16,
+        "lam": 0.0005532347022534323,
+        "n_events": 20,
+        "p": 0.3187545609290472,
+        "ratio": 0.804904375398129,
+        "span_s": 36151.02219462395,
+        "z": -0.997020497020718
+      },
+      "strat": "tok_prompt",
+      "tok_cuts": [
+        590,
+        926,
+        1334,
+        2532
+      ],
+      "usable_cells": 0
+    },
+    "start|tok": {
+      "ci_hi": 1.9194715268461162,
+      "ci_lo": 1.7423782845125535,
+      "e2": {
+        "ci_hi": 1.9257664706913717,
+        "ci_lo": 1.7496187154364093,
+        "n_exposed": 370,
+        "n_unexposed": 356,
+        "ratio": 1.8550972753384074,
+        "usable_cells": 5,
+        "verdict": "CONCURRENCY_TAXES"
+      },
+      "exposure_rate_by_tok_bucket": {
+        "0": 0.5958904109589042,
+        "1": 0.6344827586206897,
+        "2": 0.4178082191780822,
+        "3": 0.46206896551724136,
+        "4": 0.4520547945205479
+      },
+      "finish_reason": {
+        "stop": 728
+      },
+      "hyp": "start",
+      "n_cells": 5,
+      "n_chat": 786,
+      "n_exposed": 373,
+      "n_ref": 728,
+      "n_unexposed": 355,
+      "p1": "CONCURRENCY_TAXES",
+      "p2": "DURATION_BIAS_ABSENT",
+      "p3": "RELOAD_AS_CHANCE",
+      "rate_bot": 0.5958904109589042,
+      "rate_top": 0.4520547945205479,
+      "ratio": 1.8521532425497806,
+      "reload": {
+        "E": 18.0334290143821,
+        "O": 22,
+        "lam": 0.0004907065361910212,
+        "n_events": 16,
+        "p": 0.2836229589622039,
+        "ratio": 1.2199565585920715,
+        "span_s": 32606.046221017838,
+        "z": 1.072216148206783
+      },
+      "strat": "tok",
+      "tok_cuts": [
+        590,
+        926,
+        1334,
+        2532
+      ],
+      "usable_cells": 5
+    },
+    "start|tok_prompt": {
+      "ci_hi": 1.8998297634001504,
+      "ci_lo": 1.7234278878710958,
+      "e2": {
+        "ci_hi": 1.9007360196050045,
+        "ci_lo": 1.725499707862444,
+        "n_exposed": 370,
+        "n_unexposed": 356,
+        "ratio": 1.8333196939009877,
+        "usable_cells": 10,
+        "verdict": "CONCURRENCY_TAXES"
+      },
+      "exposure_rate_by_tok_bucket": {
+        "0": 0.5958904109589042,
+        "1": 0.6344827586206897,
+        "2": 0.4178082191780822,
+        "3": 0.46206896551724136,
+        "4": 0.4520547945205479
+      },
+      "finish_reason": {
+        "stop": 728
+      },
+      "hyp": "start",
+      "n_cells": 10,
+      "n_chat": 786,
+      "n_exposed": 373,
+      "n_ref": 728,
+      "n_unexposed": 355,
+      "p1": "CONCURRENCY_TAXES",
+      "p2": "DURATION_BIAS_ABSENT",
+      "p3": "RELOAD_AS_CHANCE",
+      "rate_bot": 0.5958904109589042,
+      "rate_top": 0.4520547945205479,
+      "ratio": 1.8302859152093383,
+      "reload": {
+        "E": 18.0334290143821,
+        "O": 22,
+        "lam": 0.0004907065361910212,
+        "n_events": 16,
+        "p": 0.2836229589622039,
+        "ratio": 1.2199565585920715,
+        "span_s": 32606.046221017838,
+        "z": 1.072216148206783
+      },
+      "strat": "tok_prompt",
+      "tok_cuts": [
+        590,
+        926,
+        1334,
+        2532
+      ],
+      "usable_cells": 10
+    }
+  },
+  "events_scanned": 500,
+  "p1": "TS_SENSITIVE",
+  "p1_raw": {
+    "end_tok": "UNRESOLVED",
+    "end_tokprompt": "UNSCANNED",
+    "start_tok": "CONCURRENCY_TAXES",
+    "start_tokprompt": "CONCURRENCY_TAXES"
+  },
+  "p2": "DURATION_BIAS_ABSENT",
+  "p2_raw": {
+    "end": "DURATION_BIAS_ABSENT",
+    "start": "DURATION_BIAS_ABSENT"
+  },
+  "p3": "RELOAD_AS_CHANCE",
+  "p3_raw": {
+    "end": "RELOAD_AS_CHANCE",
+    "start": "RELOAD_AS_CHANCE"
+  },
+  "rows_scanned": 2899,
+  "strat_sensitive": true,
+  "ts_sensitive": {
+    "p1": true,
+    "p2": false,
+    "p3": false
+  }
+}
