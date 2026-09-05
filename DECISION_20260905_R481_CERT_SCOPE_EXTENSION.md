@@ -91,3 +91,90 @@ root DECISION 的 `path == doc` ⇒ 舊格逐字不變。
 - 主 run `g_r461_lcb3_three_arm` 本輪**一個 byte 都沒讀**（G-LIVE 擋門，`live_run_reads` 為證）。
 - 本輪**不是盲測**：我在落筆前讀過 R477 §217–218 與 R478 §113 的原文，但**沒有**跑過任何
   擴張後的掃描 ⇒ P-2／P-6 的數字落筆時未知。
+
+---
+
+# 附錄 A：事後（實測；工具 commit `f521117`，判準 commit `6d59c906`）
+
+## A.1 預測帳（§三 落筆時未量）
+
+| 代號 | 預測 | 實測 | 判 |
+|---|---|---|---|
+| P-1 | `docs_scanned` 變多 | **142 → 252（+110）** | **HIT** |
+| P-2 | root DECISION 之外的認證標題 ＝ 0 | **0**（`cert_headings_new_scope=0`、`groups_new_scope=[]`） | **HIT** |
+| P-3 | 舊範圍逐鍵相同 | `counts`／`cert_headings`(8)／`docs_scanned`(142)／`rc`(1) 全同，**逐格 6/6 完全相同** | **HIT** |
+| P-4 | rc 不變 ＝ 1 | 1 → 1 | HIT（**guard；P-2＝0 之下這條不帶資訊**） |
+| P-5 | `live_run_reads` ＝ 0 | 0（`live_paths_skipped` 也 0） | HIT（**事前標為強制綠燈**） |
+| P-6 | 新範圍內含 `原樣跑過` **字面**的文件 ≥ 1 | **0**（`git ls-files '*.md'` 扣掉 root DECISION 後，110 份**一份都沒有**） | **MISS** |
+
+⚠ §三 表格把 P-1 的基準寫成「141」，那是抄上一輪 GAIN_STATE 的快照；本輪開場實測舊工具
+是 **142**（我自己剛 commit 的判準檔就是第 142 份）。判定改用**同一次實測**的 142 為基準，
+結論方向不變。**釘死的數字會過期，這是第二次踩到（R480 G.3 快照也過期）。**
+
+## A.2 推翻條件 4 觸發（照 §四 照實寫，**沒有**當場補判準）
+
+P-2 ＝ 0 ⇒ **本輪的範圍擴張在真資料上一次都沒有被行使**。
+⇒ 牙齒**只**由合成夾具與突變體證明：`F1`（非 root 檔的認證標題必須被收進來，heads 8→9、
+工具進 `distinct_tools`）、`F2`（同一份檔、標記只在散文 ⇒ 群組 0，標題行錨定沒被順手放寬）、
+`M13_ROOT_ONLY`（`docs_scanned` 252→142）、`M14_BASENAME`（見 A.3）。
+⇒ **收官不准寫「已證明沒有漏掉的認證」，只准寫「新範圍今天是空的」。**
+
+P-6 也是 0（比 P-2 更強：那 110 份文件裡連**散文**都沒提過這四個字）⇒ 認證這件事至今
+100% 集中在 root `DECISION_*.md`。**這是「今天的分佈」，不是規則**——新範圍已涵蓋
+`CONCLUSION_*.md`／`CRITERION_*.md`／`ops/**.md`，也就是**收官自己會寫的那些檔**。
+
+## A.3 §二 的 basename 缺陷是真的（不是假想）
+
+`git ls-files '*.md' | xargs -n1 basename | sort | uniq -d` ⇒ repo 內確實有同名 `.md`：
+`README.md`／`summary.md`／`CRITERION.md`／`FINDINGS.md`／`RESULT.md`／`anomalies.md`。
+今天它們都沒有認證標題，所以 M14 需要合成夾具（§五事前已寫明這一點）。實測：
+
+```
+M14_basename_fabricates_cert_commit  PASS
+  clean cert_commit=[None,None,None,None] -> M14=['a6ecb9b1','87aec70d','f5cf02db','20bf4a9f']
+```
+
+＝ 用 basename 時，子目錄裡的同名檔會**撿到 root 那份的認證時刻**（憑空生出四個認證 commit），
+然後拿它去比 blob ⇒ 判決完全是假的。相對路徑版本則老實吐 `BROKEN_NO_CERT_COMMIT`。
+
+## A.4 兩個非預期發現（事前判準沒有涵蓋，照實記）
+
+**A.4.1 ⚠ 本擋門的自檢在**改動前**就已經是紅的（19/20），而且不是本輪造成的。**
+釘 `6d59c906`（改動前）把舊工具原始碼 `git show` 出來、放回**同一個 import 環境**重跑：
+
+```
+selftest SELFTEST_FAIL 19/20      ← 唯一紅的是 B_realdata_positive_control_stale
+  B  FAIL  paired_ci=['CERT_FRESH','CERT_STALE']
+```
+
+根因：正對照寫成 `pos == ["CERT_STALE"]`，隱含「**只有一個附錄引用 `paired_ci.py`**」這個
+**文件事實**。R478 之後附錄 H 也引用它、且那一格 FRESH ⇒ 夾具安靜衰減成永遠紅
+（memory：「fixture 寫死絕對數字 ⇒ 安靜衰減成永遠紅」，這次的分母是**文件**不是 run）。
+修法是**提高解析度**、不是放寬：逐 `(附錄, 工具)` 釘死 `C→CERT_STALE`、`H→CERT_FRESH`，
+兩個方向都留著。舊寫法與新寫法的原始輸出都貼在上面，後輪可收回仲裁權。
+
+> **這條對收官有直接後果**：R461 附錄 G 的義務是「引用被認證的數字之前先跑 `cert_drift_gate.py`」。
+> 那支的 `--selftest` 自 R478 起一直是 `rc=3`。**主判決（`rc=1`、哪兩支 STALE）不受影響**
+> ——A.1 P-3 證明逐格判決一格都沒變——但「跑過而且是綠的」這句話在今天之前不成立。
+
+**A.4.2 本輪自己造出過一個回歸，被既有的 M4 抓到。**
+範圍擴張後 `M4_NO_DOCS`（第三型「掃到 0 個目標」的安全網）只歸零舊 glob，新範圍還剩 110 份
+⇒ 它從 `UNSCANNED/rc=2` 變成 `STALE/rc=1`。**安全網被我拆掉了，而且會印成綠燈那一側。**
+已修（M4 同時歸零兩邊），並把它釘成接線測試 `test_third_type_safety_net_survives_wider_scope`。
+
+## A.5 收尾證據
+
+```
+selftest SELFTEST_PASS 25/25          （改動前 19/20；新增 H_scope_extended、M13、F1、F2、M14）
+verdict STALE_CERTS_PRESENT  rc=1  docs=252  cert_headings=8
+  counts={'CERT_FRESH':3,'CERT_STALE':2,'TRIAGED_NOT_A_CERT':1}
+  legacy_counts=（同上，逐鍵相同）  docs_scanned_legacy=142  docs_new_scope=110
+  cert_headings_new_scope=0  live_run_reads=0  live_paths_skipped=0
+tests/test_cert_drift_gate_r477.py   3/3 PASS
+tests/test_cert_selfrecorded_sha_r478.py 5/5 PASS
+tests/test_cert_scope_r481.py        4/4 PASS
+  接線的植入缺陷測試：R477_MUTANT=M13_ROOT_ONLY ⇒ 2/4 FAIL（乾淨版 4/4）＝接線有牙齒
+```
+
+**今天 STALE 的仍是 `paired_ci.py`（附錄 C 那一格）與 `r447_gauge_capability.py`**
+⇒ 引用 R461 附錄 C.4／E.3／E.4 的數字前，仍要先重跑那兩支。**一個門檻都沒動。**
