@@ -124,3 +124,96 @@ R476 的實測已經先證明這兩件事必須分開：`paired_ci.py` 在附錄
 R461 的任何門檻、判決名、n、seed、worker、端點、bank；R476 的四格分類與它的 JSON 產物；
 主 run 的任何檔案。本檔**不修改** `paired_ci.py`／`r447_gauge_capability.py`／
 `r447_eq5_offline.py` 的任何一行——本輪只是**觀測**它們的 blob。
+
+---
+
+# 十、量測之後追記（round748，**§一–§九 一字未改**，預測帳照原文結算）
+
+## 10.1 事前預測結算
+
+| # | blind? | 預測 | 實測 | 判 |
+|---|---|---|---|---|
+| P1 | **blind** | 認證標題 5，全在 R461 | **6**，第 6 個是 `DECISION_...R476...md:1`（文件標題） | **MISS** |
+| P2 | **blind** | 相異工具 4，四個具名 | 4，且**逐一相同** | HIT |
+| P3 | informed | `r447_eq5_offline.py` FRESH | `CERT_FRESH`（+0 commits） | HIT（不計盲測） |
+| P4 | informed | `paired_ci.py`／`r447_gauge_capability.py` STALE | `CERT_STALE`（+1／+3） | HIT（不計盲測） |
+| P5 | **blind** | 附錄 C 含 `pooled_paired_ci.py` | 含，且判 `CERT_FRESH` | HIT |
+| P6 | **blind** | `BROKEN_*` ＝ 0 | 原始量測 **`BROKEN_NO_TOOLS` ＝ 1** | **MISS** |
+| P7 | **blind** | 新增可調參數 0／live run 讀取 0 | 模組層數值常數 **1**（`_LIVE_READS = 0`）／`live_run_reads=0` | **前半字面 MISS**、後半 HIT |
+| P8 | **blind** | ≥1 支 STALE 工具其 R476 對應格是 `REPRODUCED` | `paired_ci.py` STALE 而 R476 的 `C4_conform_vs_off`／`C4_off5_vs_off` 皆 `REPRODUCED` | HIT |
+
+**盲測：4 HIT／2 MISS（＋P7 前半字面 MISS）。沒有回頭改任何一條預測。**
+
+⚠ **P1 與 P6 其實是同一個事件被數了兩次**（都是 R476 的標題行）——
+這是 r718 記過的同型帳目缺陷（同一事件在兩條判準下各記一次），**照實記，不合併**。
+
+⚠ **P7 前半照 §四 的字面（`ast` 掃模組層數值常數）判 MISS**：那一個是計數器 `_LIVE_READS`，
+語意上不是旋鈕（沒有任何判決依它變）。**但判準寫的是字面，就照字面記 MISS**，
+不回頭改判準去讓它變成 HIT（R476 的 `SUBPROC_TIMEOUT_S` 是同一個處理方式）。
+
+## 10.2 §七.3 觸發：`BROKEN_NO_TOOLS` 的分診結果
+
+判準 §七.3 事前寫「掃出 `BROKEN_*` ⇒ 先查是不是夾具／路徑問題，查明之前不准記成
+`CERT_STALE`／`CERT_FRESH`」。查明結果：
+
+`DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md:1` 是**文件標題在引用標記**
+（`……說「已原樣跑過」，但那之後工具被改了`），該文件全篇 **0 條** `python3 ops/` 指令行
+⇒ 它不是認證段落。§二.1 的定義（標題行＋含標記）照字面收得到它。
+
+**處置（這是量測之後新增的機制，照實標記）**：**定義一個字都不改**，改用
+`ops/gain/data/r477_cert_exemptions.json` 人工分診名單，判 `TRIAGED_NOT_A_CERT`：
+
+- 條目**不刪**、仍列在輸出裡，只是換一個判決名（memory：誤報要留在名單只加註「看過＝誤報」）。
+- **原始數字永久保留**：`counts_raw` 欄位＋`ops/gain/data/r477_cert_drift_RAW_PREEXEMPT.json`
+  （豁免機制存在**之前**跑的那一次，`verdict=BROKEN`、rc=2）⇒ 後輪要收回仲裁權隨時可以。
+- **豁免只對 `BROKEN_NO_TOOLS` 生效**，碰到 `CERT_STALE` 一律拒絕並記 `exemptions_refused`
+  （自檢 M6 專門釘這條；M7 關掉名單驗原始 `BROKEN` 會回來）。
+
+## 10.3 自檢 12 條全綠（含真資料雙向校準）
+
+```
+A_realdata_negative_control_fresh   PASS  eq5_offline=['CERT_FRESH']
+B_realdata_positive_control_stale   PASS  paired_ci=['CERT_STALE'] pooled=['CERT_FRESH']
+C_not_all_one_box                   PASS  counts={'CERT_FRESH':2,'CERT_STALE':2,'TRIAGED_NOT_A_CERT':1}
+M1_prose_inflates_headings          PASS  6 -> 12
+M2_always_fresh_kills_stale         PASS  stale 2 -> 0
+M3_stale_regex_is_broken_not_clean  PASS  rc=2 counts={'BROKEN_NO_TOOLS':3,'TRIAGED_NOT_A_CERT':1}
+M4_no_docs_is_unscanned_not_ok      PASS  rc=2 verdict=UNSCANNED
+D_rc_semantics                      PASS  base rc=1 spec=1 verdict=STALE_CERTS_PRESENT
+E_no_live_reads                     PASS  live_run_reads=0
+M6_exemption_cannot_silence_stale   PASS  stale 2 -> 2, refused=5
+M7_without_exemptions_broken_returns PASS m7 rc=2 BROKEN_NO_TOOLS=1 == base counts_raw
+M5_deleting_blob_compare_goes_red   PASS  刪掉後 rc=0 CERT_STALE_present=False（乾淨版 rc=1 有 STALE）
+selftest SELFTEST_PASS 12/12
+```
+
+兩個**夾具缺陷**在路上被自己的擋門抓到，照實記：
+1. `B` 原本用 `endswith("paired_ci.py")` ⇒ **連 `pooled_paired_ci.py` 一起吃掉**（改比 basename）。
+2. `M5` 第一發 `BASELINE_BROKEN: 標記數 begin=2 end=2` ⇒ **搜尋標記的那兩行自己含有標記**
+   （memory 的「用字串比對會匹配到自己」同型）。乾淨基線擋門擋住了，沒被誤記成「沒牙齒」。
+
+## 10.4 接線（§八）與它自己的植入缺陷測試
+
+`tests/test_cert_drift_gate_r477.py`，`python3 ops/run_tests_nopytest.py tests/...`：
+**收集 3 個、3/3 PASS**（接線前該檔不存在＝收集 0）。測試裡**不寫死任何絕對數字**
+（認證格數會隨附錄增減；寫死＝安靜衰減成永遠紅），只驗「偵測器有牙齒」與「rc 語意自洽」。
+
+植入缺陷兩型，各跑一次（改的是**被測工具**，不是測試）：
+
+```
+[乾淨]        3/3 pass, 0 fail => PASS
+[缺陷1 恆綠]  2/3 pass, 1 fail => FAIL      # blob 比對改成 elif False
+[缺陷2 掃到0份] 1/3 pass, 2 fail => FAIL     # DOC_GLOB 改成掃不到 ⇒ 安靜量不到也要紅
+[還原後]      3/3 pass, 0 fail => PASS      # 還原 sha256 前 16 逐字元相同
+```
+
+## 10.5 誠實邊界（收官不准漏）
+
+1. **本擋門不取代 R476 的逐格重跑**：它只回答「該不該重跑」，不回答「重跑後數字一不一樣」。
+2. **認證時刻是用 `git log -S<標題原文>` 反推的**，不是附錄自己記的 sha。
+   ⇒ 若有人**改寫了認證標題的文字**，`-S` 會定位到改寫那次（較晚）⇒ 擋門會**低報** STALE。
+   C-1′ 第 2 條（認證段落自己記 blob sha）就是為了拔掉這個反推，**但今天的擋門還沒有讀那個欄位**
+   ——現存附錄都還沒有記 sha。**這是下一輪可做的事，不是今天已經做到的事。**
+3. 掃描範圍只有 repo 根目錄的 `DECISION_*.md`（138 份）。`ops/` 底下的說明、`GAIN_STATE.md`、
+   `SPEC_GAIN.md` 裡若有認證語句，**今天掃不到**（`docs_scanned` 有記，可事後核對）。
+4. 主 run `runs/g_r461_lcb3_three_arm` **本輪零讀取**（`live_run_reads=0`），也沒有 `git add` 它。

@@ -572,3 +572,54 @@ A.4 記「3 HIT／1 MISS」。扣掉 S2-2 這條強制綠燈之後：
 5. 本輪**零偷看**：B3 擋門把任何含 `g_r461_lcb3_three_arm` 的讀檔路徑變成例外，
    連 selftest 的探針都指向該目錄下**不存在**的檔名（攔到＝RuntimeError、沒攔到＝FileNotFoundError），
    **主 run 的任何一個 byte 本輪都沒有進過記憶體**。
+
+---
+
+# 附錄 G（round748 / R477 追加）：**認證會過期**——引用 C／D／E 的數字之前先跑擋門
+
+## G.1 缺口（R476 實測，本附錄不重證）
+
+附錄 C／D／E 各自認證了一組數字（「這條收官指令已經跑過、結果如下」）。
+R463 §一 C-1 的通則只約束「寫進判準之前要先跑一次」，**沒有任何機制在工具後來被改了時叫**。
+R476 逐格重跑，9 格裡 3 格今天不一樣（E.4 Y1 的「14 條」今天是 19 條、E.3 兩格今天改吐
+`BROKEN_ROW_ACCOUNTING` 且拒吐能力數字）⇒ **附錄原文的三句話今天為假，而沒有東西會提醒收官的人。**
+
+## G.2 通則 C-1′（R477 補；**這一條是可執行的，不是散文**）
+
+1. （C-1 原文，不動）預註冊裡的收官指令，寫進判準檔之前必須先原樣跑一次。
+2. 🆕 **認證段落要記下被認證工具當時的 blob sha**（`git rev-parse HEAD:<tool>`）。
+3. 🆕 **收官引用任何被認證的數字之前，必須先跑**：
+
+```
+python3 ops/gain/cert_drift_gate.py --json ops/gain/data/r477_cert_drift.json
+```
+
+   `rc=0` ⇒ 可以照附錄原文引用；`rc=1`（有 `CERT_STALE`）⇒ **那幾支工具要先重跑一次**
+   （R476 那種逐格重跑）才可以引用；`rc=2` ⇒ 先分診，**不准當成乾淨**。
+
+## G.3 今天（2026-09-05 01:5x UTC）它說什麼
+
+```
+verdict STALE_CERTS_PRESENT  rc=1  docs=138  cert_headings=6
+counts={'CERT_FRESH': 2, 'CERT_STALE': 2, 'TRIAGED_NOT_A_CERT': 1}
+  附錄C  cert=a6ecb9b1   ops/gain/replay/pooled_paired_ci.py   CERT_FRESH  (+0)
+                         ops/gain/replay/paired_ci.py          CERT_STALE  (+1)
+  附錄D  cert=87aec70d   ops/gain/r447_eq5_offline.py          CERT_FRESH  (+0)
+  附錄E  cert=f5cf02db   ops/gain/r447_gauge_capability.py     CERT_STALE  (+3)
+```
+
+⇒ **收官引用 C.4 與 E.4／E.3 的數字之前要先重跑那兩支**；D.4 的數字（含 `cfed36ff71b871f0`）
+blob 逐 byte 相同 ⇒ 可以照原文引用。
+
+## G.4 ⚠ `CERT_STALE` 的意思（**不准誤讀**）
+
+**`CERT_STALE` ＝「引用之前必須重跑」，不是「那個數字錯了」。**
+反證就在手邊：`paired_ci.py` 判 `CERT_STALE`，但 R476 逐格重跑後 C.4 的
+`+19.17pp`／`+12.50pp` **逐字重現**。本擋門只看 blob 有沒有動，**刻意過度警報**。
+`CERT_FRESH` 才是強的一邊：blob 逐 byte 相同 ⇒ 同輸入必得同輸出。
+
+## G.5 本附錄**沒有**動的東西
+
+`PRACTICAL_PP`、`MIN_PAIRED`、α、n、seed、worker、端點、bank、§三 的窗口、§四 的 MDE、
+A.4 的預測帳、附錄 B／C／D／E／F 的任何一行——**一個數字都沒有動**，
+本附錄只新增「引用之前先跑一次擋門」這個義務。

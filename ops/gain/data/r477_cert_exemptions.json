@@ -1,0 +1,12 @@
+{
+  "_note": "R477 人工分診名單。⚠ 只對 BROKEN_NO_TOOLS 生效（工具會拒絕消音 CERT_STALE，記 exemptions_refused）。條目不刪、仍列在輸出裡，只是換成 TRIAGED_NOT_A_CERT。",
+  "exemptions": [
+    {
+      "doc": "DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
+      "line": 1,
+      "reason": "看過＝誤報：這是文件標題在『引用』標記（說「已原樣跑過」），不是認證段落；該文件全篇 0 條 python3 ops/ 指令行。判準 §二.1 的定義（標題行＋含標記）照字面收得到它 ⇒ 定義原樣不動，只在此名單具名記錄。",
+      "triaged_by": "R477 / round748",
+      "raw_verdict": "BROKEN_NO_TOOLS"
+    }
+  ]
+}
