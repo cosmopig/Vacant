@@ -189,6 +189,29 @@ def anchors_v2(rungs):
             "ladder_ok": bool(a_ok and b_ok)}
 
 
+def gate_verdict(rung):
+    """THE gate rule (R490-B). Returns which half fired and whether the gate fires.
+
+    Two statistics that catch different failures, neither allowed to become dead code:
+      p_fires     -- the permutation p cannot separate the placebo from the real value
+                     (D1's half: the placebo distribution straddles it).
+      repro_fires -- the placebo kept at least ANCHOR_B_MIN_AGREEMENT of the real log
+                     association (A2's statistic, applied to the gate by R490-B).
+    The second half exists because a within-block permutation preserves the per-block
+    exposure multiset, so on a period-driven population the placebo is near-deterministic
+    and p resolves a practically irrelevant attenuation at 6 sd -- reproducing 98% of the
+    association while p says "significantly different". Reproduced in
+    r490b_gate_reproduction_demo.py (4915a18) before this rule was written.
+
+    decide() reads only ["fires"]; nothing else recomputes either comparison."""
+    pv, frac = rung.get("p"), rung.get("reproduction_frac")
+    p_fires = (pv is not None and pv > ALPHA) and not _mut("M12_GATE_P_OFF")
+    repro_fires = (frac is not None and frac >= ANCHOR_B_MIN_AGREEMENT) \
+        and not _mut("M11_GATE_REPRO_OFF")
+    return {"p": pv, "p_fires": p_fires, "reproduction_frac": frac,
+            "repro_fires": repro_fires, "fires": bool(p_fires or repro_fires)}
+
+
 # ------------------------------------------------------------------ the decision
 
 def decide(real, ladder, anchors, primary_block=PRIMARY_BLOCK):
@@ -206,16 +229,19 @@ def decide(real, ladder, anchors, primary_block=PRIMARY_BLOCK):
     if lo <= 1.0 <= hi:                       # R489's gate-order repair, unchanged
         return "NO_TAX" if (EQUIV_LO <= lo and hi <= EQUIV_HI) else "UNRESOLVED"
     if not ladder or any((not r.get("measurable")) or r.get("p") is None
-                         or r.get("role") is None for r in ladder):
+                         or r.get("role") is None
+                         or r.get("reproduction_frac") is None for r in ladder):
         return "LADDER_UNSCANNED"
     if not (anchors.get("anchor_a_ok") and anchors.get("anchor_b_ok")):
         return "PLACEBO_LADDER_BROKEN"
     if not _mut("M6_SKIP_POSITIVE_CONTROL_CHECK"):
         # R490-A / A2: a placebo attenuates toward 1, so an exceedance test can never
         # certify reproduction. Ask what FRACTION of the real log association it kept.
+        # `reproduction_frac is None` is NOT tested here: step 5 already returned
+        # LADDER_UNSCANNED for it, so the branch would be constant-false dead code.
+        # selftest asserts that exhaustively rather than leaving an empty green light.
         if any(r["role"] == "positive_control"
-               and (r.get("reproduction_frac") is None
-                    or r["reproduction_frac"] < ANCHOR_B_MIN_AGREEMENT) for r in ladder):
+               and r["reproduction_frac"] < ANCHOR_B_MIN_AGREEMENT for r in ladder):
             return "PLACEBO_LADDER_BROKEN"
     primary = next((r for r in ladder if r["block_s"] == primary_block), None)
     if primary is None:
@@ -227,14 +253,14 @@ def decide(real, ladder, anchors, primary_block=PRIMARY_BLOCK):
     if not _mut("M8_PRIMARY_PC_CHECK_OFF"):
         if primary["role"] == "positive_control":
             return "PRIMARY_IS_POSITIVE_CONTROL"
-    gate_fires = (primary["abs_log_max"] is not None
-                  and primary["abs_log_max"] >= real["abs_log"]) \
-        if _mut("M7_USE_OLD_MAX_GATE") else (primary["p"] > ALPHA)
-    if gate_fires:
+    fires = (primary["abs_log_max"] is not None
+             and primary["abs_log_max"] >= real["abs_log"]) \
+        if _mut("M7_USE_OLD_MAX_GATE") else gate_verdict(primary)["fires"]
+    if fires:
         return "PERIOD_CONFOUNDED"
     if lo > 1.0:
         if not _mut("M9_SCALE_DEPENDENCE_OFF"):
-            if any(r["role"] == "gate" and r["p"] > ALPHA for r in ladder):
+            if any(r["role"] == "gate" and gate_verdict(r)["fires"] for r in ladder):
                 return "SCALE_DEPENDENT_TAX"
         return "TAXES_BELOW_MARGIN" if hi <= EQUIV_HI else "CONCURRENCY_TAXES"
     if hi < 1.0:
@@ -300,6 +326,8 @@ def analyse(rows, hyp, reps=R_REPLICATES):
     ladder = assign_roles([rung(subset, sub_index, starts, lo, which, real_exp,
                                 real["abs_log"], b, reps) for b in BLOCK_LADDER])
     anc = anchors_v2(ladder)
+    for r in ladder:
+        r["gate"] = gate_verdict(r)          # reporting; decide() calls it itself
     lean = [{k: v for k, v in r.items() if k != "logs"} for r in ladder]
     verdict = decide(real, ladder, anc)
     return {"verdict": verdict, "hyp": hyp, "n_chat": len(chat), "n_subset": len(subset),
@@ -325,6 +353,16 @@ def old_rule_report(real, ladder, anc):
                                         and primary["abs_log_max"] >= real["abs_log"]),
             "implied_level_at_R20": 1.0 / (R_OLD + 1),
             "implied_level_at_R": 1.0 / (R_REPLICATES + 1)}
+
+
+def run_rows(rows, ts_verdict="TS_IS_START", reps=R_REPLICATES):
+    """The pipeline from rows in memory, so a fixture can drive it without a snapshot
+    file. run() is this plus reading and checking the file."""
+    pre = prereq_rows(rows)
+    if not pre["ok"]:
+        return "LADDER_UNSCANNED"
+    start, end = analyse(rows, "start", reps), analyse(rows, "end", reps)
+    return R489.R488.combine_hypotheses(start, end, ts_verdict)["verdict"]
 
 
 def run(path, ts_verdict, reps=R_REPLICATES):
@@ -376,7 +414,7 @@ def _planted_period(n=720, seed=11):
 
 
 def _fix_rung(block_s, p=0.001, agreement=0.0, coverage=1.0, n=200, abs_log_max=0.1,
-              measurable=True, role=None, reproduction_frac=1.0):
+              measurable=True, role=None, reproduction_frac=0.0):
     """A ladder rung built FIELD BY FIELD, deliberately NOT via rung(). Sharing the
     module's own constructor would hide a schema rename from every fixture.
 
@@ -494,14 +532,18 @@ def selftest():
     got["LADDER_UNSCANNED"] = decide(_fix_real(), [_fix_rung(60.0, measurable=False)], _fix_anc())
     got["PLACEBO_LADDER_BROKEN"] = decide(_fix_real(), _fix_ladder(), _fix_anc(a=False))
     got["PLACEBO_UNSCANNED"] = decide(
-        _fix_real(), [_fix_rung(60.0, p=0.5, agreement=0.9), _fix_rung(300.0), _fix_rung(None),
-                     _fix_rung(PRIMARY_BLOCK, coverage=0.1)], _fix_anc())
+        _fix_real(), [_fix_rung(60.0, p=0.5, agreement=0.9, reproduction_frac=0.8),
+                      _fix_rung(300.0), _fix_rung(None),
+                      _fix_rung(PRIMARY_BLOCK, coverage=0.1)], _fix_anc())
     got["PLACEBO_DEGENERATE"] = decide(
-        _fix_real(), [_fix_rung(60.0, p=0.5, agreement=0.9), _fix_rung(300.0), _fix_rung(None),
+        _fix_real(), [_fix_rung(60.0, p=0.5, agreement=0.9, reproduction_frac=0.8),
+                      _fix_rung(300.0), _fix_rung(None),
                       _fix_rung(PRIMARY_BLOCK, n=1)], _fix_anc())
     got["PRIMARY_IS_POSITIVE_CONTROL"] = decide(
-        _fix_real(), [_fix_rung(60.0, p=0.5, agreement=0.9), _fix_rung(300.0), _fix_rung(None),
-                      _fix_rung(PRIMARY_BLOCK, p=0.5, agreement=0.9)], _fix_anc())
+        _fix_real(), [_fix_rung(60.0, p=0.5, agreement=0.9, reproduction_frac=0.8),
+                      _fix_rung(300.0), _fix_rung(None),
+                      _fix_rung(PRIMARY_BLOCK, p=0.5, agreement=0.9,
+                                reproduction_frac=0.8)], _fix_anc())
     got["PERIOD_CONFOUNDED"] = decide(_fix_real(), _fix_ladder(primary_p=0.5), _fix_anc())
     got["SCALE_DEPENDENT_TAX"] = decide(_fix_real(), _fix_ladder(other_gate_p=0.9), _fix_anc())
     got["TAXES_BELOW_MARGIN"] = decide(_fix_real(ratio=1.05, lo=1.01, hi=1.10),
@@ -523,8 +565,16 @@ def selftest():
     chk("reproduction exactly at the threshold passes",
         decide(_fix_real(), _fix_ladder(pc_frac=ANCHOR_B_MIN_AGREEMENT), _fix_anc())
         == "CONCURRENCY_TAXES")
-    chk("an unmeasured reproduction fraction is a FAILURE, not a pass",
-        decide(_fix_real(), _fix_ladder(pc_frac=None), _fix_anc()) == "PLACEBO_LADDER_BROKEN")
+    chk("an unmeasured reproduction fraction is UNSCANNED, never a pass",
+        decide(_fix_real(), _fix_ladder(pc_frac=None), _fix_anc()) == "LADDER_UNSCANNED")
+    # step 7's `frac is None` branch was deleted as constant-false dead code; this is the
+    # exhaustive assertion that replaces it (every rung reaching step 7 has a fraction).
+    chk("no ladder can reach the positive-control check with an unmeasured fraction",
+        all(decide(_fix_real(),
+                   [dict(r, reproduction_frac=None) if k == j else r
+                    for k, r in enumerate(_fix_ladder())],
+                   _fix_anc()) == "LADDER_UNSCANNED"
+            for j in range(len(_fix_ladder()))))
     # A2 itself: the OLD rule judged the positive control on p. A placebo attenuates, so a
     # perfect positive control gets a TINY p -- under the old rule that broke the ladder.
     # These two say the p of a positive control now changes nothing.
@@ -537,11 +587,44 @@ def selftest():
     chk("a positive control with a large p does not fire SCALE_DEPENDENT_TAX",
         decide(_fix_real(), _fix_ladder(pc_p=0.9), _fix_anc()) != "SCALE_DEPENDENT_TAX")
 
+    # === E2. the R490-B gate: two halves, each able to fire alone =================
+    chk("gate fires on p alone", gate_verdict({"p": 0.9, "reproduction_frac": 0.0})["fires"])
+    chk("gate fires on reproduction alone",
+        gate_verdict({"p": 0.001, "reproduction_frac": 0.99})["fires"])
+    chk("gate does not fire when neither half does",
+        not gate_verdict({"p": 0.001, "reproduction_frac": 0.0})["fires"])
+    chk("gate reports WHICH half fired",
+        gate_verdict({"p": 0.9, "reproduction_frac": 0.0})["p_fires"] is True
+        and gate_verdict({"p": 0.9, "reproduction_frac": 0.0})["repro_fires"] is False
+        and gate_verdict({"p": 0.001, "reproduction_frac": 0.99})["repro_fires"] is True)
+    chk("gate: reproduction exactly at the inherited threshold fires",
+        gate_verdict({"p": 0.001, "reproduction_frac": ANCHOR_B_MIN_AGREEMENT})["fires"])
+    chk("gate: just under the threshold does not",
+        not gate_verdict({"p": 0.001,
+                          "reproduction_frac": ANCHOR_B_MIN_AGREEMENT - 1e-9})["fires"])
+    chk("gate: p exactly at ALPHA does not fire (strict >)",
+        not gate_verdict({"p": ALPHA, "reproduction_frac": 0.0})["fires"])
+    chk("gate: an unmeasured p cannot fire the p half",
+        not gate_verdict({"p": None, "reproduction_frac": 0.0})["p_fires"])
+    # and the same rule drives BOTH steps that use it
+    chk("step 11 fires PERIOD_CONFOUNDED on reproduction alone",
+        decide(_fix_real(),
+               [_fix_rung(60.0, agreement=0.9, reproduction_frac=0.8), _fix_rung(300.0),
+                _fix_rung(PRIMARY_BLOCK, p=0.001, reproduction_frac=0.99), _fix_rung(None)],
+               _fix_anc()) == "PERIOD_CONFOUNDED")
+    chk("step 12 fires SCALE_DEPENDENT_TAX on a gate rung's reproduction alone",
+        decide(_fix_real(),
+               [_fix_rung(60.0, agreement=0.9, reproduction_frac=0.8),
+                _fix_rung(300.0, p=0.001, reproduction_frac=0.99),
+                _fix_rung(PRIMARY_BLOCK), _fix_rung(None)],
+               _fix_anc()) == "SCALE_DEPENDENT_TAX")
+
     # === F. schema contract: decide()'s keys must exist on REAL objects ===========
     rows = R489._planted_bursty(n=600)
     res = analyse(rows, "start", reps=8)
     keys = _decide_reads()
-    available = set(res["real"]) | set(res["anchors"]) | set(res["ladder"][0])
+    available = (set(res["real"]) | set(res["anchors"]) | set(res["ladder"][0])
+                 | set(res["ladder"][0].get("gate") or {}))
     missing = sorted(k for k in keys if k not in available)
     chk(f"decide() reads only keys the real pipeline produces (missing={missing})", not missing)
     chk("a real rung is measurable and carries a role",
@@ -563,6 +646,29 @@ def selftest():
         next(r for r in res["ladder"] if r["block_s"] == 60.0)["role"] == "positive_control")
     chk("planted: the global rung is a gate (permutation destroys agreement)",
         next(r for r in res["ladder"] if r["block_s"] is None)["role"] == "gate")
+
+    # === H. P-12: the two synthetic populations must get OPPOSITE verdicts ========
+    # This is the regression gate for R490-B's evidence, not evidence itself (the
+    # amendment says so): a period-confounded population must be caught, a genuine
+    # pointwise effect must survive. Before R490-B BOTH answered CONCURRENCY_TAXES.
+    per = analyse(_planted_period(), "start", reps=40)
+    chk(f"P-12a period confounding is caught (got {per['verdict']})",
+        per["verdict"] == "PERIOD_CONFOUNDED")
+    pg = next(r for r in per["ladder"] if r["block_s"] == PRIMARY_BLOCK)
+    chk("P-12a fires on the reproduction half, and p alone would have missed it",
+        pg["gate"]["repro_fires"] and not pg["gate"]["p_fires"])
+    # p's floor is 1/(R+1); with R=8 (section F's cheap run) it can never clear
+    # ALPHA=0.05, so the gate is FORCED on. That is the conservative direction, but it
+    # means P-12b has to be measured at an R where the gate is able to stay silent.
+    chk("structural: R < 1/ALPHA - 1 makes the p half unable to ever stay silent",
+        all(perm_p([0.0] * R, 1.0) > ALPHA for R in range(1, 19))
+        and perm_p([0.0] * 19, 1.0) <= ALPHA)   # 1/20 == ALPHA, and the gate is strict >
+    bur = analyse(R489._planted_bursty(n=600), "start", reps=40)
+    chk(f"P-12b a genuine pointwise effect still reads as a tax (got {bur['verdict']})",
+        bur["verdict"] == "CONCURRENCY_TAXES")
+    bg = next(r for r in bur["ladder"] if r["block_s"] == PRIMARY_BLOCK)
+    chk("P-12b neither half fires on the pointwise population",
+        not bg["gate"]["fires"])
 
     print(f"selftest {len(fails)} failed" if fails else "selftest all passed")
     for f in fails:
