@@ -1,0 +1,93 @@
+{
+  "n_calls_raw": 646,
+  "n_calls": 646,
+  "n_bad_latency": 0,
+  "bad_latency_frac": 0.0,
+  "n_not_ok": 10,
+  "serial_slack_ms": 809976,
+  "ts_semantics": "end",
+  "ts_negative_gap_counts": {
+    "end": 0,
+    "start": 322
+  },
+  "busy_ms": 26977062,
+  "wall_ms": 27187210,
+  "wall_ms_both": {
+    "if_ts_is_end": 27187210,
+    "if_ts_is_start": 27319304
+  },
+  "busy_frac": 0.9923,
+  "verdict": "SERVER_BOUND",
+  "h_cpu_explanatory_ceiling": 0.0077,
+  "n_excluded_no_tokens": 10,
+  "n_speed_samples": 636,
+  "hourly": [
+    {
+      "hour": 0,
+      "n": 93,
+      "median_ms_per_tok": 27.52
+    },
+    {
+      "hour": 1,
+      "n": 68,
+      "median_ms_per_tok": 14.31
+    },
+    {
+      "hour": 2,
+      "n": 165,
+      "median_ms_per_tok": 14.96
+    },
+    {
+      "hour": 3,
+      "n": 76,
+      "median_ms_per_tok": 20.44
+    },
+    {
+      "hour": 4,
+      "n": 87,
+      "median_ms_per_tok": 27.26
+    },
+    {
+      "hour": 5,
+      "n": 60,
+      "median_ms_per_tok": 17.28
+    },
+    {
+      "hour": 6,
+      "n": 83,
+      "median_ms_per_tok": 29.65
+    },
+    {
+      "hour": 7,
+      "n": 4,
+      "median_ms_per_tok": 20.73,
+      "thin": true
+    }
+  ],
+  "thin_buckets": [
+    7
+  ],
+  "p1": {
+    "first2_ms_per_tok": 20.91,
+    "last2_ms_per_tok": 23.46,
+    "ratio": 1.122,
+    "verdict": "ENDPOINT_FLAT"
+  },
+  "p2": {
+    "window_ms": [
+      1788578551579,
+      1788580132479
+    ],
+    "n_in": 1,
+    "n_out": 635,
+    "verdict": "UNSCANNED",
+    "reason": "only 1 calls in window (< 10); NOT evidence of no effect"
+  },
+  "idle_gap_ms": {
+    "median": 3,
+    "mean": 325.8,
+    "max": 45641,
+    "n": 645
+  },
+  "run": "runs/g_r461_lcb3_three_arm"
+}
