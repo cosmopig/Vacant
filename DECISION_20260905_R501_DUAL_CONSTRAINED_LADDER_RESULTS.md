@@ -1,6 +1,6 @@
 # R501 結果：同時等被分析列數 ∧ 等跨度的視窗下，位置**仍然**翻得動梯子判決
 
-判準：`DECISION_20260905_R501_DUAL_CONSTRAINED_LADDER_PREREG.md`（commit `541c587`，**量測之前**單獨 commit）。
+判準：`DECISION_20260905_R501_DUAL_CONSTRAINED_LADDER_PREREG.md`（commit `dd3c861`，**量測之前**單獨 commit；原提交 `541c587`，被另一個 session 的 `pull --rebase` 重放成 `dd3c861`，內容逐字相同）。
 尺：`ops/gain/r501_dual_constrained_ladder.py`（selftest **21/21**）／`ops/gain/r501_mutation_check.py`。
 資料：`ops/gain/data/r501_dual_constrained_ladder.json`、`ops/gain/data/r501_mutation_check.json`。
 快照：`ops/gain/data/r486_gateway_snapshot_v2.json`（`n_rows_sorted` 依 ts 排序後、`n_analysable=728`）。

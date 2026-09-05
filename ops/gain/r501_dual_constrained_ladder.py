@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """R501：雙重約束（等被分析列數 ∧ 等跨度）視窗下，重跑 r489/r490 的梯子判決。
 
-判準先行：DECISION_20260905_R501_DUAL_CONSTRAINED_LADDER_PREREG.md（commit 541c587）。
+判準先行：DECISION_20260905_R501_DUAL_CONSTRAINED_LADDER_PREREG.md（commit dd3c861，rebase 前為 541c587）。
 
 R498 固定了被分析的 chat 列數，但跨度沒夾（極差 0.5591／0.2297）＝只是換了殘留混淆。
 R499 證明「等 n ∧ 等跨度」在這份快照上塞得下。本尺把那個設計造出來並真的跑判決。
