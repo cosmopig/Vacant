@@ -94,3 +94,77 @@ memory 的通則：「修好一支工具的坑之後要 grep 其他工具有沒�
 落筆前我讀過：`GAIN_STATE.md` round752 段（R481 §3 的描述）、
 `grep -n '== \[' ops/gain/*.py tests/*.py` 的輸出（60 行）、
 四支 selftest 的執行時間。**擾動一次都還沒跑過**，P-1..P-6 落筆時未知。
+
+---
+
+# 附錄 A（量測之後）：預測帳、推翻條件觸發、以及本工具自己的一個第二型安靜量不到
+
+## A.1 預測逐條
+
+| 代號 | intent | 結果 | 實測 |
+|---|---|---|---|
+| P-1 正／負對照 | guard | **HIT** | `_r482_pos_control` = `DECAY_PRONE`（trig `P_MD`）、`_r482_neg_control` = `INSENSITIVE`；兩者都讀真語料 |
+| P-2 真工具 ≥1 支咬 | **evidence** | **MISS** | `decay_prone=[]`、`masking=[]` ⇒ **推翻條件 1 觸發**（見 A.2） |
+| P-3 `P_TEST` 最會咬 | evidence | **不可評估** | P-2＝0 ⇒ 沒有任何擾動咬到任何真工具，這條沒有母體 |
+| P-4 多數 INSENSITIVE | evidence | HIT | 24/24＝100%（但見 A.3：這是弱證據，P-2＝0 之下它幾乎必然成立） |
+| P-5 `tools_scanned ≥ 30` | guard | **修正後 MISS** | 舊發現法 **32**（HIT）／修正後 **24**（MISS）。**兩個數都報**，見 A.3 |
+| P-6 無 `NONDETERMINISTIC` | evidence | HIT | 0 支；即沒有工具的 selftest 綠燈靠活著的 run 撐著 |
+
+## A.2 推翻條件 1 觸發 ⇒ 收官只准這樣寫
+
+**准寫**：「R481 §3 的衰減類別，在今天這 24 支自帶 `--selftest` 的量具上、用三種
+語料擾動（root `.md`／`tests/*.py`／`ops/gain/*.py`）**一支都沒有咬到**。」
+
+**不准寫**：「已證明其他量具沒有這個缺陷。」理由（判準 §六-1 事前寫好的）：
+擾動只有三種，語料還有 `runs/`（§七具名排除）、題庫（§七具名排除）、
+`design/lib`、以及**同一份文件內部長大**（R481 的實例其實是「附錄 H 加進**同一份**
+DECISION」——`P_MD` 加的是**新檔案**，並不完全復刻那個形狀）。
+⇒ **本 census 對「文件內部長大」這一型沒有解析度**，這是誠實邊界，不是結論。
+
+牙齒由**合成對照**證明（E1/E2/E3 ＋ M1/M2/M3），**不是**由今天的真資料證明——
+真資料上這把尺一次都沒被行使（與 R481 P-2＝0 同一個形狀）。
+
+## A.3 本輪最重要的發現：census 自己的第二型「安靜量不到」
+
+第一次跑（`ops/gain/data/r482_corpus_sensitivity.json`，**保留不刪**）報
+`tools_scanned=32、counts={'INSENSITIVE': 32}`。看 `clean_red` 那 7 個名字才發現：
+
+```
+$ python3 ops/gain/mutation_test_r470_paired_ci.py --selftest
+usage: mutation_test_r470_paired_ci.py [-h] --worktree WORKTREE
+mutation_test_r470_paired_ci.py: error: the following arguments are required: --worktree
+```
+
+**它們根本沒有 `--selftest` 這個旗標。** 字面出現是因為它們把 `--selftest`
+**傳給 worktree 裡的受測工具**。發現法 `"--selftest" in txt` 收了它們，
+於是每一次執行都以 argparse 的 `rc=2` 收場、三個擾動下完全一樣
+⇒ **被安靜記成 `INSENSITIVE`**。8 支裡 `eq5_analyze_mutation_check.py` 更糟：
+它 rc=0，連 `clean_red` 都不會列它，**完全無聲**。
+
+- 修法：`provides_selftest()` 用 `ast` 找 `add_argument("--selftest")` 或
+  `"--selftest" in sys.argv`；非提供者進 `mentions_selftest_but_does_not_provide`
+  **具名列出**，不是安靜丟掉。接線測試釘「受測數＋只提及數＝字面出現數」。
+- **修正方向對自己不利**：`tools_scanned` 32→24，P-5 由 HIT 變 MISS，
+  「32/32 全部 INSENSITIVE」這句話的分母縮水四分之一。照 memory 的規則
+  （對自己有利的修正才需要語意理由），這一條的方向本身就是它可信的理由；
+  但語意理由也成立：**字面比對 ≠ 提供這個旗標**（同「不得 import X 用字串比對
+  會匹配到自己」）。
+- **舊輸出無條件留著**（`r482_corpus_sensitivity.json`，32 支版），
+  新的是 `_v2.json`，後輪收得回仲裁權。
+
+⇒ **通則（值得帶去下一輪）：census 類工具的 `tools_scanned` 不是覆蓋率，
+「跑起來了」不等於「跑的是它的 selftest」。判受測目標要看它提不提供那個介面，
+不是看檔案裡有沒有那個字串。**
+
+## A.4 誠實邊界
+
+- 活著的 run `runs/g_r461_lcb3_three_arm` **本工具一個 byte 都沒讀**；擾動檔也不在
+  `runs/` 底下。開場 231 列、收尾見 GAIN_STATE。
+- 擾動檔在工作區存在的總時間約 2×4 分鐘（兩次 census），期間**別的 session 若
+  `git add -A` 會把它們收進去**——檔名自帶 `DO_NOT_COMMIT`，收尾 `git status` 已確認乾淨。
+- 24 支的 `--selftest` 今天**全綠**（`clean_red=[]`）：這是本輪順帶量到的事實，
+  但**只涵蓋自帶旗標的那 24 支**，那 8 支只提及的工具**本輪完全沒有被驗過**
+  （要驗它們得給 `--worktree`，不在本輪範圍）。
+- 本輪不是盲測（§八），且 A.3 的修正是**看過第一次結果之後**做的；
+  P-5 的兩個數字都留在帳上就是為了讓後輪自己判。
+- 一個門檻、一個窗口都沒動。
