@@ -1,5 +1,6 @@
 {
   "cert_headings": 8,
+  "cert_headings_new_scope": 0,
   "cert_sha_mismatches": [],
   "counts": {
     "CERT_FRESH": 3,
@@ -17,7 +18,9 @@
     "ops/gain/replay/paired_ci.py",
     "ops/gain/replay/pooled_paired_ci.py"
   ],
-  "docs_scanned": 141,
+  "docs_new_scope": 110,
+  "docs_scanned": 253,
+  "docs_scanned_legacy": 143,
   "exemptions": 1,
   "exemptions_refused": 0,
   "groups": [
@@ -39,6 +42,7 @@
         }
       ],
       "hi": 332,
+      "in_legacy_scope": true,
       "items": [
         {
           "blob_at_cert": "5179f45934ea98a83df308770f9193dd73ca872a",
@@ -66,6 +70,7 @@
         }
       ],
       "lo": 249,
+      "path": "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
       "recorded": {
         "ops/gain/replay/paired_ci.py": "bb146ea0925151a4c9ed093a9f70abe0c860142c",
         "ops/gain/replay/pooled_paired_ci.py": "5179f45934ea98a83df308770f9193dd73ca872a"
@@ -104,6 +109,7 @@
         }
       ],
       "hi": 399,
+      "in_legacy_scope": true,
       "items": [
         {
           "blob_at_cert": "52975b6ddeb9cdd33f8e6310eeb4468ca8bf33b9",
@@ -118,6 +124,7 @@
         }
       ],
       "lo": 332,
+      "path": "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
       "recorded": {
         "ops/gain/r447_eq5_offline.py": "52975b6ddeb9cdd33f8e6310eeb4468ca8bf33b9"
       },
@@ -154,6 +161,7 @@
         }
       ],
       "hi": 522,
+      "in_legacy_scope": true,
       "items": [
         {
           "blob_at_cert": "162d54d51e57d700b310fb9ddad1708a7fe0a1f0",
@@ -172,6 +180,7 @@
         }
       ],
       "lo": 399,
+      "path": "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
       "recorded": {
         "ops/gain/r447_gauge_capability.py": "162d54d51e57d700b310fb9ddad1708a7fe0a1f0"
       },
@@ -208,6 +217,7 @@
         }
       ],
       "hi": 810,
+      "in_legacy_scope": true,
       "items": [
         {
           "blob_at_cert": "8c0f242096e92d50aa7f26f1d9b6dff917b87caa",
@@ -222,6 +232,7 @@
         }
       ],
       "lo": 673,
+      "path": "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
       "recorded": {
         "ops/gain/r479_r461_appendix_census.py": "ec4b3393c186f1fd001f93a6df2352170d5b21f1",
         "ops/gain/replay/paired_ci.py": "8c0f242096e92d50aa7f26f1d9b6dff917b87caa"
@@ -250,6 +261,7 @@
         }
       ],
       "hi": 103,
+      "in_legacy_scope": true,
       "items": [
         {
           "tool": null,
@@ -258,16 +270,40 @@
         }
       ],
       "lo": 0,
+      "path": "DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
       "recorded": {},
       "recorded_malformed": [],
       "scope": "doc",
       "tools": []
     }
   ],
+  "groups_new_scope": [],
   "groups_with_certs": 5,
   "honesty": "CERT_STALE 只表示『引用前必須重跑』，不表示那個數字變了（判準 §三）",
+  "legacy_cert_headings": 8,
+  "legacy_counts": {
+    "CERT_FRESH": 3,
+    "CERT_STALE": 2,
+    "TRIAGED_NOT_A_CERT": 1
+  },
+  "live_paths_skipped": 0,
   "live_run_reads": 0,
+  "out_of_scope_named": [
+    {
+      "path": "~/vacant/GAIN_STATE.md",
+      "reason": "在 ROOT 之外且不在 git ⇒ 沒有 blob 可比、沒有認證時刻可反推"
+    },
+    {
+      "path": "<未追蹤的非 root-DECISION *.md>",
+      "reason": "沒有 commit 就沒有認證時刻，掃了只會吐 BROKEN_NO_CERT_COMMIT"
+    }
+  ],
   "rc": 1,
+  "scope_extended": true,
+  "scope_globs": [
+    "DECISION_*.md",
+    "*.md"
+  ],
   "slots_derived": 0,
   "slots_recorded": 5,
   "verdict": "STALE_CERTS_PRESENT"
