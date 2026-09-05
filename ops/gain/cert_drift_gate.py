@@ -24,6 +24,14 @@ LIVE = "g_r461_lcb3_three_arm"          # 主 run：本檔一個 byte 都不准�
 _LIVE_READS = 0                          # G-LIVE 計數（永遠應為 0）
 
 DOC_GLOB = "DECISION_*.md"
+LS_FILES_GLOB = "*.md"                   # R481 §一：新範圍 ＝ 舊 glob ∪ git 追蹤的所有 *.md
+# R481 §一：具名排除（不是安靜跳過）。本擋門對它們**結構上**判不了 FRESH/STALE。
+OUT_OF_SCOPE_NAMED = [
+    dict(path="~/vacant/GAIN_STATE.md",
+         reason="在 ROOT 之外且不在 git ⇒ 沒有 blob 可比、沒有認證時刻可反推"),
+    dict(path="<未追蹤的非 root-DECISION *.md>",
+         reason="沒有 commit 就沒有認證時刻，掃了只會吐 BROKEN_NO_CERT_COMMIT"),
+]
 CERT_MARK = "原樣跑過"
 HEADING_RE = re.compile(r"^#{1,6}\s")
 APPENDIX_RE = re.compile(r"^#\s*附錄\s*([A-Z])")
@@ -138,6 +146,37 @@ def blob_history(path: str) -> set[str]:
     return shas
 
 
+def docs_in_scope(doc_glob: str = DOC_GLOB, extra_docs=None) -> tuple[list, list, int]:
+    """R481 §一：回傳 (全範圍, 舊範圍, 被擋掉的主 run 路徑數)。
+
+    全範圍 ＝ 舊範圍（檔案系統 glob，含未追蹤）∪ `git ls-files '*.md'` ∪ extra_docs。
+    取**聯集**不是取代 ⇒ 新版不可能比舊版少掃，加法性由構造保證。
+    """
+    legacy = sorted(ROOT.glob(doc_glob))
+    tracked: list = []
+    live_skipped = 0
+    if _has("M4_NO_DOCS"):                 # M4 是「掃到 0 份」⇒ 新範圍也要歸零，不只舊 glob
+        legacy = []
+    if not (_has("M13_ROOT_ONLY") or _has("M4_NO_DOCS")):
+        rc, out = git("ls-files", "-z", "--", LS_FILES_GLOB)
+        if rc == 0:
+            for rel in out.split("\0"):
+                if not rel:
+                    continue
+                if LIVE in rel:            # 主 run 不讀，但也不准安靜丟：記數
+                    live_skipped += 1
+                    continue
+                tracked.append(ROOT / rel)
+    allp = list(legacy)
+    seen = {str(x.resolve()) for x in legacy}
+    for q in tracked + list(extra_docs or []):
+        r = str(q.resolve())
+        if r not in seen and q.exists():
+            seen.add(r)
+            allp.append(q)
+    return sorted(allp, key=str), legacy, live_skipped
+
+
 def scan_doc(doc: pathlib.Path) -> list[dict]:
     lines = doc.read_text(encoding="utf-8").splitlines(keepends=True)
     heads = cert_headings(lines)
@@ -153,9 +192,14 @@ def scan_doc(doc: pathlib.Path) -> list[dict]:
                 break
         g = groups.setdefault(key, dict(scope=key, lo=lo, hi=hi, heads=[]))
         g["heads"].append(dict(line=idx + 1, text=text))
+    try:
+        rel = str(doc.resolve().relative_to(ROOT))
+    except ValueError:
+        rel = str(doc)
     out = []
     for key, g in groups.items():
-        g["doc"] = doc.name
+        g["doc"] = doc.name          # 舊欄位原值不動（加法性）
+        g["path"] = rel              # R481 §二：git log 一律用相對路徑，不用 basename
         g["tools"] = tools_in(lines, g["lo"], g["hi"])
         g["recorded"], g["recorded_malformed"] = recorded_in(lines, g["lo"], g["hi"])
         out.append(g)
@@ -185,9 +229,12 @@ def blob(commit: str, path: str) -> str | None:
 
 
 def judge_group(g: dict) -> dict:
+    # R481 §二：basename 會讓兩份同名 .md 互相污染（同 endswith("paired_ci.py") 那個坑）。
+    # M14_BASENAME 把它改回 basename ⇒ 合成的同名夾具會冒出一個假的認證時刻。
+    docref = g["doc"] if _has("M14_BASENAME") else g.get("path", g["doc"])
     certs = []
     for h in g["heads"]:
-        c, ct = introducing_commit(g["doc"], h["text"])
+        c, ct = introducing_commit(docref, h["text"])
         certs.append(dict(line=h["line"], commit=c, ct=ct))
     live = [c for c in certs if c["commit"]]
     g["cert_commits"] = certs
@@ -217,7 +264,7 @@ def judge_group(g: dict) -> dict:
             if b_rec not in blob_history(t):
                 notinhist = True                       # 抄錯／編造的 sha
             elif b_derived is not None and b_rec != b_derived:
-                mismatch = dict(doc=g["doc"], scope=g["scope"], tool=t,
+                mismatch = dict(doc=g["doc"], path=g.get("path"), scope=g["scope"], tool=t,
                                 recorded=b_rec, derived=b_derived)
             b_cert_used = b_rec
         # <<< R478-M11-LOADBEARING-END
@@ -235,7 +282,7 @@ def judge_group(g: dict) -> dict:
         if notinhist:
             # 自記值不可信 ⇒ 大聲壞掉。此時**不另記 mismatch**：那會把同一個事件數兩次。
             verdict, mismatch = "BROKEN_CERT_SHA_NOT_IN_HISTORY", None
-        rc, log = git("log", "--format=%h %ct %s", f"{g['cert_commit']}..HEAD", "--", t)
+        rc, log = git("log", "--format=%h %ct %s", f"{g['cert_commit']}..HEAD", "--", t)  # noqa: E501
         items.append(dict(tool=t, verdict=verdict, blob_at_cert=b_then, blob_at_head=b_now,
                           sha_source=src, blob_at_cert_recorded=b_rec,
                           blob_at_cert_derived=b_derived, cert_sha_mismatch=mismatch,
@@ -277,14 +324,17 @@ def apply_exemptions(groups: list[dict], ex: list[dict]) -> int:
     return refused
 
 
-def audit(doc_glob: str = DOC_GLOB) -> dict:
+def audit(doc_glob: str = DOC_GLOB, extra_docs=None) -> dict:
     glob = doc_glob
     if _has("M4_NO_DOCS"):            # 安靜量不到（第三型）：掃到 0 份文件
         glob = "ZZZ_NO_SUCH_*.md"
-    docs = sorted(ROOT.glob(glob))
+    docs, legacy_docs, live_skipped = docs_in_scope(glob, extra_docs)
+    legacy_set = {str(x.resolve()) for x in legacy_docs}
     groups = []
     for d in docs:
+        in_legacy = str(d.resolve()) in legacy_set
         for g in scan_doc(d):
+            g["in_legacy_scope"] = in_legacy
             groups.append(judge_group(g))
     n_heads = sum(len(g["heads"]) for g in groups)
     items = [it for g in groups for it in g["items"]]
@@ -303,7 +353,23 @@ def audit(doc_glob: str = DOC_GLOB) -> dict:
     slots_recorded = sum(1 for it in items if it.get("sha_source") == "recorded")
     slots_derived = sum(1 for it in items if it.get("sha_source") == "derived")
     broken = sum(v for k, v in counts.items() if k.startswith("BROKEN"))
-    if not docs:
+    # R481 §六：舊範圍那一半的數字要能逐鍵對回改動前的工具（加法性對照）
+    legacy_counts: dict[str, int] = {}
+    for g in groups:
+        if g.get("in_legacy_scope"):
+            for it in g["items"]:
+                legacy_counts[it["verdict"]] = legacy_counts.get(it["verdict"], 0) + 1
+    legacy_heads = sum(len(g["heads"]) for g in groups if g.get("in_legacy_scope"))
+    new_groups = [dict(path=g.get("path"), scope=g["scope"],
+                       heads=[h["line"] for h in g["heads"]],
+                       verdicts=sorted({it["verdict"] for it in g["items"]}))
+                  for g in groups if not g.get("in_legacy_scope")]
+    # R481 §四.3：範圍擴張沒生效要大聲壞掉（M13／M4 是刻意縮回去，不算）
+    scope_extended = len(docs) > len(legacy_docs)
+    scope_check_applies = not (_has("M13_ROOT_ONLY") or _has("M4_NO_DOCS"))
+    if scope_check_applies and not scope_extended:
+        verdict, rc = "BROKEN_SCOPE_NOT_EXTENDED", 2
+    elif not docs:
         verdict, rc = "UNSCANNED", 2
     elif mismatches:
         verdict, rc = "BROKEN", 2      # 自記值與 -S 反推打架 ⇒ 大聲叫（判準 §二.4）
@@ -316,6 +382,11 @@ def audit(doc_glob: str = DOC_GLOB) -> dict:
     else:
         verdict, rc = "UNSCANNED", 2      # 掃到文件但一格都沒有 ⇒ 不准回 0
     return dict(verdict=verdict, rc=rc, counts_raw=counts_raw, exemptions=len(ex),
+                scope_globs=[doc_glob, LS_FILES_GLOB], scope_extended=scope_extended,
+                docs_scanned_legacy=len(legacy_docs), docs_new_scope=len(docs) - len(legacy_docs),
+                legacy_counts=legacy_counts, legacy_cert_headings=legacy_heads,
+                cert_headings_new_scope=n_heads - legacy_heads, groups_new_scope=new_groups,
+                out_of_scope_named=OUT_OF_SCOPE_NAMED, live_paths_skipped=live_skipped,
                 cert_sha_mismatches=mismatches, slots_recorded=slots_recorded,
                 slots_derived=slots_derived,
                 exemptions_refused=refused, docs_scanned=len(docs), cert_headings=n_heads,
@@ -325,12 +396,30 @@ def audit(doc_glob: str = DOC_GLOB) -> dict:
 
 
 # ── 自檢：雙向真資料校準 ＋ 五條突變體（判準 §五）────────────────────────
-def _with_mutant(name: str):
+def _with_mutant(name: str, extra_docs=None):
     os.environ["R477_MUTANT"] = name
     try:
-        return audit()
+        return audit(extra_docs=extra_docs)
     finally:
         os.environ.pop("R477_MUTANT", None)
+
+
+# ── R481 §五：合成夾具（真資料在新範圍是空的 ⇒ 牙齒只能由夾具證明）──────────
+FIX_HEAD = "# 附錄 Z：R481 合成夾具（這條收官指令已" + "原樣跑過" + "）\n"
+FIX_TOOL = "ops/gain/_r481_no_such_tool.py"
+FIX_BODY = f"- `python3 {FIX_TOOL}` 的輸出\n"
+FIX_PROSE = "本行是散文，裡面有「" + "原樣跑過" + "」四個字，但**不是標題** ⇒ 不准被收進來。\n"
+
+
+def _fixture_doc(rel: str, text: str) -> pathlib.Path:
+    q = ROOT / rel
+    q.parent.mkdir(parents=True, exist_ok=True)
+    q.write_text(text, encoding="utf-8")
+    return q
+
+
+def _group_for(rep_: dict, rel: str):
+    return [g for g in rep_["groups"] if g.get("path") == rel]
 
 
 def _loadbearing_delete(stem: str = "R477-M5-LOAD" + "BEARING-", tag: str = "m5",
@@ -383,11 +472,22 @@ def selftest() -> int:
                        if it["tool"] and it["tool"].rsplit("/", 1)[-1] == name})
 
     # 真資料雙向校準
+    def slot(rep_, scope, name):
+        return sorted({it["verdict"] for g in rep_["groups"] if g["scope"] == scope
+                       for it in g["items"]
+                       if it["tool"] and it["tool"].rsplit("/", 1)[-1] == name})
+
     neg = tool_verdicts(base, "r447_eq5_offline.py")
     pos = tool_verdicts(base, "paired_ci.py")
     pooled = tool_verdicts(base, "pooled_paired_ci.py")
     add("A_realdata_negative_control_fresh", neg == ["CERT_FRESH"], f"eq5_offline={neg}")
-    add("B_realdata_positive_control_stale", pos == ["CERT_STALE"], f"paired_ci={pos} pooled={pooled}")
+    # R481 §八：舊寫法 `pos == ["CERT_STALE"]` 自 R478 附錄 H 起就恆紅（改動前實測 19/20），
+    # 因為它隱含「只有一個附錄引用 paired_ci.py」。改成逐 (附錄, 工具) 釘死＝解析度更高。
+    add("B_realdata_positive_control_stale",
+        slot(base, "C", "paired_ci.py") == ["CERT_STALE"]
+        and slot(base, "H", "paired_ci.py") == ["CERT_FRESH"],
+        f"附錄C={slot(base,'C','paired_ci.py')} 附錄H={slot(base,'H','paired_ci.py')} "
+        f"（全庫 paired_ci={pos} pooled={pooled}）")
     add("C_not_all_one_box", len(set(base["counts"])) >= 2, f"counts={base['counts']}")
 
     # M1 散文誤收：認證標題數必須變多
@@ -411,6 +511,8 @@ def selftest() -> int:
         f"rc={m4['rc']} verdict={m4['verdict']}")
     # rc 語意
     def spec_rc(rep):                     # 判準 §六 的 rc 語意，逐條轉錄
+        if rep.get("verdict") == "BROKEN_SCOPE_NOT_EXTENDED":
+            return 2
         if rep["docs_scanned"] == 0:
             return 2
         if rep.get("cert_sha_mismatches"):
@@ -483,6 +585,54 @@ def selftest() -> int:
     add("G_no_mismatch_on_clean_realdata", len(base["cert_sha_mismatches"]) == 0,
         f"mismatches={len(base['cert_sha_mismatches'])} "
         f"(判準 §五 P3：這是**結構強制綠燈**，intent=guard，不准當證據)")
+
+    # ── R481（判準 §五）────────────────────────────────────────────
+    add("H_scope_extended", base["scope_extended"] and base["docs_new_scope"] > 0,
+        f"legacy={base['docs_scanned_legacy']} -> all={base['docs_scanned']} "
+        f"(+{base['docs_new_scope']})")
+    # M13 範圍縮回舊 glob ⇒ 指名的量是 docs_scanned（counts 在真資料上不會變，見判準 §五）
+    m13 = _with_mutant("M13_ROOT_ONLY")
+    add("M13_root_only_drops_docs_scanned",
+        m13["docs_scanned"] == base["docs_scanned_legacy"] < base["docs_scanned"],
+        f"docs {base['docs_scanned']} -> {m13['docs_scanned']} "
+        f"(legacy={base['docs_scanned_legacy']})")
+
+    fx_rel = "ops/gain/_r481_fixture_scope.md"
+    dup_name = "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+    dup_rel = f"ops/gain/_r481_dup/{dup_name}"
+    try:
+        # F1 正方向：非 root-DECISION 的檔、認證**標題** ⇒ 必須多出一個群組並抓到工具
+        f1doc = _fixture_doc(fx_rel, FIX_HEAD + FIX_BODY)
+        f1 = audit(extra_docs=[f1doc])
+        g1 = _group_for(f1, fx_rel)
+        add("F1_fixture_outside_root_is_scanned",
+            len(g1) == 1 and FIX_TOOL in f1["distinct_tools"]
+            and f1["cert_headings"] == base["cert_headings"] + 1,
+            f"groups={len(g1)} tool_seen={FIX_TOOL in f1['distinct_tools']} "
+            f"heads {base['cert_headings']}->{f1['cert_headings']}")
+        # F2 負對照：同一份檔，標記只在散文 ⇒ 不准產生群組（標題行錨定沒被順手放寬）
+        f2doc = _fixture_doc(fx_rel, "# 附錄 Z：R481 合成夾具（負對照）\n" + FIX_PROSE + FIX_BODY)
+        f2 = audit(extra_docs=[f2doc])
+        add("F2_prose_only_fixture_not_scanned",
+            len(_group_for(f2, fx_rel)) == 0 and f2["cert_headings"] == base["cert_headings"],
+            f"groups={len(_group_for(f2, fx_rel))} heads={f2['cert_headings']}")
+        # M14 basename 污染：同名檔在子目錄。乾淨版靠相對路徑 ⇒ 反推不到認證時刻；
+        #                    M14 用 basename ⇒ 會撿到**root 那份**的認證時刻＝假的。
+        dupdoc = _fixture_doc(dup_rel, (ROOT / dup_name).read_text(encoding="utf-8"))
+        c14 = audit(extra_docs=[dupdoc])
+        g14c = _group_for(c14, dup_rel)
+        m14 = _with_mutant("M14_BASENAME", extra_docs=[dupdoc])
+        g14m = _group_for(m14, dup_rel)
+        add("M14_basename_fabricates_cert_commit",
+            len(g14c) > 0 and len(g14m) > 0
+            and all(g["cert_commit"] is None for g in g14c)
+            and any(g["cert_commit"] is not None for g in g14m),
+            f"clean cert_commit={[g['cert_commit'] for g in g14c]} -> "
+            f"M14={[str(g['cert_commit'])[:8] for g in g14m]}")
+    finally:
+        for rel in (fx_rel, dup_rel):
+            (ROOT / rel).unlink(missing_ok=True)
+        (ROOT / dup_rel).parent.rmdir() if (ROOT / dup_rel).parent.exists() else None
 
     for n, ok, d in ck:
         print(f"  {n:38s} {'PASS' if ok else 'FAIL':4s}  {d}")
