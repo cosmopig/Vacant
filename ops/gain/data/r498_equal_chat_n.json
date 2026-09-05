@@ -1,0 +1,513 @@
+{
+  "snapshot": "ops/gain/data/r486_gateway_snapshot_v2.json",
+  "n_rows_sorted": 2899,
+  "n_events": 500,
+  "n_chat": 786,
+  "n_analysable": 728,
+  "M": [
+    364,
+    555
+  ],
+  "M_expected": [
+    364,
+    555
+  ],
+  "r496_tier_chat_counts": {
+    "1672": [
+      491,
+      482,
+      468,
+      467,
+      466,
+      364
+    ],
+    "2291": [
+      636,
+      624,
+      623,
+      620,
+      587,
+      555
+    ]
+  },
+  "n_windows": 12,
+  "tools": {
+    "r489_permutation_placebo": {
+      "full_verdict": "PLACEBO_LADDER_BROKEN",
+      "cell": "BOTH",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "by_tier": {
+          "364": [
+            "CONCURRENCY_TAXES",
+            "EXPOSURE_DEGENERATE",
+            "PLACEBO_LADDER_BROKEN",
+            "UNRESOLVED"
+          ],
+          "555": [
+            "CONCURRENCY_TAXES",
+            "PLACEBO_LADDER_BROKEN"
+          ]
+        },
+        "within_tier_varies": true,
+        "across_tier_differs": true
+      },
+      "windows": [
+        {
+          "N": 364,
+          "M": 364,
+          "i": 0,
+          "lo_row": 0,
+          "hi_row": 1225,
+          "lo_sub": 0,
+          "n_rows_total": 1225,
+          "n_chat": 382,
+          "n_sub": 364,
+          "span_s": 13015.2,
+          "events_in_window": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 2.1424554329081347,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 1,
+          "lo_row": 253,
+          "hi_row": 1437,
+          "lo_sub": 72,
+          "n_rows_total": 1184,
+          "n_chat": 388,
+          "n_sub": 364,
+          "span_s": 12259.2,
+          "events_in_window": 10,
+          "verdict": "EXPOSURE_DEGENERATE",
+          "stat": null,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 2,
+          "lo_row": 496,
+          "hi_row": 1785,
+          "lo_sub": 145,
+          "n_rows_total": 1289,
+          "n_chat": 389,
+          "n_sub": 364,
+          "span_s": 13880.0,
+          "events_in_window": 6,
+          "verdict": "UNRESOLVED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 3,
+          "lo_row": 869,
+          "hi_row": 2017,
+          "lo_sub": 218,
+          "n_rows_total": 1148,
+          "n_chat": 388,
+          "n_sub": 364,
+          "span_s": 11726.0,
+          "events_in_window": 4,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.690309111145341,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 4,
+          "lo_row": 1048,
+          "hi_row": 2372,
+          "lo_sub": 291,
+          "n_rows_total": 1324,
+          "n_chat": 389,
+          "n_sub": 364,
+          "span_s": 14420.4,
+          "events_in_window": 4,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.648015975130683,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 5,
+          "lo_row": 1227,
+          "hi_row": 2879,
+          "lo_sub": 364,
+          "n_rows_total": 1652,
+          "n_chat": 404,
+          "n_sub": 364,
+          "span_s": 19245.1,
+          "events_in_window": 6,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.5919006270805547,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 0,
+          "lo_row": 0,
+          "hi_row": 1923,
+          "lo_sub": 0,
+          "n_rows_total": 1923,
+          "n_chat": 586,
+          "n_sub": 555,
+          "span_s": 20649.2,
+          "events_in_window": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.948226320331993,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 1,
+          "lo_row": 104,
+          "hi_row": 2051,
+          "lo_sub": 34,
+          "n_rows_total": 1947,
+          "n_chat": 592,
+          "n_sub": 555,
+          "span_s": 20918.8,
+          "events_in_window": 12,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.9051991037159888,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 2,
+          "lo_row": 203,
+          "hi_row": 2263,
+          "lo_sub": 69,
+          "n_rows_total": 2060,
+          "n_chat": 598,
+          "n_sub": 555,
+          "span_s": 22557.4,
+          "events_in_window": 14,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.9286096491149962,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 3,
+          "lo_row": 358,
+          "hi_row": 2389,
+          "lo_sub": 103,
+          "n_rows_total": 2031,
+          "n_chat": 592,
+          "n_sub": 555,
+          "span_s": 22218.6,
+          "events_in_window": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.3940745591787713,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 4,
+          "lo_row": 481,
+          "hi_row": 2519,
+          "lo_sub": 138,
+          "n_rows_total": 2038,
+          "n_chat": 592,
+          "n_sub": 555,
+          "span_s": 22311.4,
+          "events_in_window": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.5091929118417426,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 5,
+          "lo_row": 609,
+          "hi_row": 2879,
+          "lo_sub": 173,
+          "n_rows_total": 2270,
+          "n_chat": 601,
+          "n_sub": 555,
+          "span_s": 25763.3,
+          "events_in_window": 8,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.639130097406952,
+          "error": null
+        }
+      ]
+    },
+    "r490_leveled_placebo": {
+      "full_verdict": "PLACEBO_LADDER_BROKEN",
+      "cell": "BOTH",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "by_tier": {
+          "364": [
+            "EXPOSURE_DEGENERATE",
+            "PLACEBO_LADDER_BROKEN",
+            "PRIMARY_IS_POSITIVE_CONTROL",
+            "UNRESOLVED"
+          ],
+          "555": [
+            "PLACEBO_LADDER_BROKEN",
+            "PRIMARY_IS_POSITIVE_CONTROL"
+          ]
+        },
+        "within_tier_varies": true,
+        "across_tier_differs": true
+      },
+      "windows": [
+        {
+          "N": 364,
+          "M": 364,
+          "i": 0,
+          "lo_row": 0,
+          "hi_row": 1225,
+          "lo_sub": 0,
+          "n_rows_total": 1225,
+          "n_chat": 382,
+          "n_sub": 364,
+          "span_s": 13015.2,
+          "events_in_window": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 0.7619525698303338,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 1,
+          "lo_row": 253,
+          "hi_row": 1437,
+          "lo_sub": 72,
+          "n_rows_total": 1184,
+          "n_chat": 388,
+          "n_sub": 364,
+          "span_s": 12259.2,
+          "events_in_window": 10,
+          "verdict": "EXPOSURE_DEGENERATE",
+          "stat": null,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 2,
+          "lo_row": 496,
+          "hi_row": 1785,
+          "lo_sub": 145,
+          "n_rows_total": 1289,
+          "n_chat": 389,
+          "n_sub": 364,
+          "span_s": 13880.0,
+          "events_in_window": 6,
+          "verdict": "UNRESOLVED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 3,
+          "lo_row": 869,
+          "hi_row": 2017,
+          "lo_sub": 218,
+          "n_rows_total": 1148,
+          "n_chat": 388,
+          "n_sub": 364,
+          "span_s": 11726.0,
+          "events_in_window": 4,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.5249114182128789,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 4,
+          "lo_row": 1048,
+          "hi_row": 2372,
+          "lo_sub": 291,
+          "n_rows_total": 1324,
+          "n_chat": 389,
+          "n_sub": 364,
+          "span_s": 14420.4,
+          "events_in_window": 4,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.499572125087556,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 5,
+          "lo_row": 1227,
+          "hi_row": 2879,
+          "lo_sub": 364,
+          "n_rows_total": 1652,
+          "n_chat": 404,
+          "n_sub": 364,
+          "span_s": 19245.1,
+          "events_in_window": 6,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.46492866529844007,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 0,
+          "lo_row": 0,
+          "hi_row": 1923,
+          "lo_sub": 0,
+          "n_rows_total": 1923,
+          "n_chat": 586,
+          "n_sub": 555,
+          "span_s": 20649.2,
+          "events_in_window": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 0.6669193793404484,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 1,
+          "lo_row": 104,
+          "hi_row": 2051,
+          "lo_sub": 34,
+          "n_rows_total": 1947,
+          "n_chat": 592,
+          "n_sub": 555,
+          "span_s": 20918.8,
+          "events_in_window": 12,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.6445865195035532,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 2,
+          "lo_row": 203,
+          "hi_row": 2263,
+          "lo_sub": 69,
+          "n_rows_total": 2060,
+          "n_chat": 598,
+          "n_sub": 555,
+          "span_s": 22557.4,
+          "events_in_window": 14,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.6567993542523229,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 3,
+          "lo_row": 358,
+          "hi_row": 2389,
+          "lo_sub": 103,
+          "n_rows_total": 2031,
+          "n_chat": 592,
+          "n_sub": 555,
+          "span_s": 22218.6,
+          "events_in_window": 10,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.33223079668905986,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 4,
+          "lo_row": 481,
+          "hi_row": 2519,
+          "lo_sub": 138,
+          "n_rows_total": 2038,
+          "n_chat": 592,
+          "n_sub": 555,
+          "span_s": 22311.4,
+          "events_in_window": 10,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.41157501246416556,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 5,
+          "lo_row": 609,
+          "hi_row": 2879,
+          "lo_sub": 173,
+          "n_rows_total": 2270,
+          "n_chat": 601,
+          "n_sub": 555,
+          "span_s": 25763.3,
+          "events_in_window": 8,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.4941656726987968,
+          "error": null
+        }
+      ]
+    }
+  },
+  "blockers": [],
+  "n_exceptions": 0,
+  "cells": {
+    "r489_permutation_placebo": "BOTH",
+    "r490_leveled_placebo": "BOTH"
+  },
+  "headlines": {
+    "r489_permutation_placebo": "POSITION_SURVIVES",
+    "r490_leveled_placebo": "POSITION_SURVIVES"
+  },
+  "span_by_tier": {
+    "364": [
+      13015.2,
+      12259.2,
+      13880.0,
+      11726.0,
+      14420.4,
+      19245.1
+    ],
+    "555": [
+      20649.2,
+      20918.8,
+      22557.4,
+      22218.6,
+      22311.4,
+      25763.3
+    ]
+  },
+  "span_spread": {
+    "364": 0.5591,
+    "555": 0.2297
+  },
+  "span_uncontrolled": true,
+  "n_rows_total_spread": 0.6277,
+  "calibration": {
+    "C_POS": "NEITHER",
+    "C_NEG": "N_MATTERS"
+  },
+  "live_reads": 0,
+  "elapsed_s": 68.9,
+  "verdict": "EQCHAT_OK"
+}
