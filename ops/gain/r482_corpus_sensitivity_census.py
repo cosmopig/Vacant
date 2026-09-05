@@ -12,6 +12,7 @@ selftest 的 rc 若因此翻掉 ⇒ 它的綠燈本來就靠語料當下的形�
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import shutil
@@ -46,9 +47,39 @@ PERTURBATIONS = {
 }
 
 
-def discover_tools(gain_dir: Path) -> list[str]:
-    """ops/gain 底下所有帶 --selftest 的 .py，排除具名清單。"""
-    out = []
+def provides_selftest(src: str) -> bool:
+    """這個檔**自己提供** --selftest 嗎？
+
+    R482 §九：`"--selftest" in src` 會多收 7 支——它們是把 `--selftest` **傳給別的工具**
+    的突變量具（`subprocess.run([..., "--selftest"])`），自己沒有這個旗標。
+    這些檔被當成受測目標時，每一次都以 argparse 的 rc=2 收場、三個擾動下完全一樣
+    ⇒ 被安靜記成 INSENSITIVE（第二型「安靜量不到」）。
+    ⇒ 判別量改成語法結構：`add_argument("--selftest")` 或 `"--selftest" in sys.argv`。
+    """
+    if os.environ.get("R482_MUTANT", "") == "M3_STRING_HEURISTIC":
+        return "--selftest" in src      # 修正之前的舊判別量
+    try:
+        tree = ast.parse(src)
+    except SyntaxError:
+        return False
+    for node in ast.walk(tree):
+        # (a) ap.add_argument("--selftest", ...)
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "add_argument" and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and node.args[0].value == "--selftest"):
+            return True
+        # (b) if "--selftest" in sys.argv:
+        if isinstance(node, ast.Compare) and node.ops and isinstance(node.ops[0], ast.In):
+            if (isinstance(node.left, ast.Constant) and node.left.value == "--selftest"
+                    and "argv" in ast.dump(node.comparators[0])):
+                return True
+    return False
+
+
+def discover_tools(gain_dir: Path) -> tuple[list[str], list[str]]:
+    """回傳 (自己提供 --selftest 的, 只是字面出現過的)。第二個是具名排除、不是安靜跳過。"""
+    out, mentions_only = [], []
     for p in sorted(gain_dir.glob("*.py")):
         if p.name in EXCLUDED:
             continue
@@ -56,9 +87,10 @@ def discover_tools(gain_dir: Path) -> list[str]:
             txt = p.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        if "--selftest" in txt:
-            out.append(p.name)
-    return out
+        if "--selftest" not in txt:
+            continue
+        (out if provides_selftest(txt) else mentions_only).append(p.name)
+    return out, mentions_only
 
 
 def run_selftest(script: Path, cwd: Path) -> int:
@@ -272,13 +304,26 @@ def selftest() -> int:
 
         # --- D 群：discover_tools 的排除與第三型「掃到 0 個目標」
         (gd / "no_selftest.py").write_text("print(1)\n", encoding="utf-8")
-        found = discover_tools(gd)
+        # R482 §九 的正對照：只把 --selftest 傳給別人，自己沒有這個旗標
+        (gd / "passer.py").write_text(
+            'import subprocess\nsubprocess.run(["python3", "x.py", "--selftest"])\n',
+            encoding="utf-8")
+        found, mentions = discover_tools(gd)
         ck("D1_discover_skips_non_selftest", "no_selftest.py" not in found, str(found))
         ck("D2_discover_finds_selftest_tools",
            {"t_flat.py", "t_decay.py"} <= set(found), str(found))
         empty = d / "empty_gain"
         empty.mkdir()
-        ck("D3_empty_dir_is_zero", discover_tools(empty) == [])
+        ck("D3_empty_dir_is_zero", discover_tools(empty) == ([], []))
+        ck("D4_passer_is_not_a_target", "passer.py" not in found, str(found))
+        ck("D5_passer_is_named_not_silent", mentions == ["passer.py"], str(mentions))
+        ck("D6_old_string_heuristic_would_overcollect",
+           "--selftest" in (gd / "passer.py").read_text(),
+           "舊判別量會收它 ⇒ 這條證明修正不是無病呻吟")
+        ck("D7_provides_via_argv_form",
+           provides_selftest('import sys\nif "--selftest" in sys.argv:\n    pass\n'))
+        ck("D8_provides_via_add_argument",
+           provides_selftest('ap.add_argument("--selftest", action="store_true")'))
 
     # --- E 群：真語料上的合成雙向對照（判準 §四）——這一段用真的 ROOT
     with tempfile.TemporaryDirectory(dir="/dev/shm") as td2:
@@ -319,7 +364,7 @@ def main() -> int:
         return selftest()
 
     gain_dir = ROOT / "ops" / "gain"
-    tools = discover_tools(gain_dir)
+    tools, mentions_only = discover_tools(gain_dir)
     if a.only:
         want = set(a.only.split(","))
         tools = [t for t in tools if t in want]
@@ -328,6 +373,7 @@ def main() -> int:
         return 2
 
     res = census(ROOT, tools, progress=a.progress)
+    res["mentions_selftest_but_does_not_provide"] = mentions_only
 
     # 合成雙向對照，跟真資料同一次跑
     with tempfile.TemporaryDirectory(dir="/dev/shm") as td:
@@ -350,10 +396,12 @@ def main() -> int:
         rc = 0
     res["rc"] = rc
 
-    print(f"verdict {res['verdict']}  rc={rc}  tools_scanned={res['tools_scanned']}")
+    print(f"verdict {res['verdict']}  rc={rc}  tools_scanned={res['tools_scanned']}"
+          f"  mentions_only={len(mentions_only)}")
     print(f"  counts={res['counts']}")
     print(f"  controls_ok={res['controls_ok']} (pos={pos_ok} neg={neg_ok})")
-    for key in ("decay_prone", "masking", "nondeterministic", "broken", "clean_red"):
+    for key in ("decay_prone", "masking", "nondeterministic", "broken", "clean_red",
+                "mentions_selftest_but_does_not_provide"):
         print(f"  {key}={res[key]}")
     if a.json:
         Path(a.json).parent.mkdir(parents=True, exist_ok=True)
