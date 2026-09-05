@@ -1,0 +1,250 @@
+{
+  "verdict": "OK",
+  "broken": [],
+  "clauses": {
+    "A4-1": {
+      "clazz": "EVALUABLE",
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "intent": "evidence",
+      "pin_found": true,
+      "witnesses": 423,
+      "population": 612,
+      "note": "builder 丟掉 423/612 筆 ⇒ 189 不是輸入行數強制"
+    },
+    "A4-2": {
+      "clazz": "FORCED_GREEN",
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "intent": "evidence",
+      "pin_found": true,
+      "witnesses": 0,
+      "population": 6,
+      "union_is_derived": true,
+      "note": "union=309 由 overlap=0 恆等式導出 ⇒ 與第一項是同一個事件"
+    },
+    "A4-3": {
+      "clazz": "EVALUABLE",
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "intent": "evidence",
+      "pin_found": true,
+      "bank_range": [
+        "2023-05-07",
+        "2024-08-10"
+      ],
+      "raw_range": [
+        "2023-05-07",
+        "2024-08-10"
+      ],
+      "matches_pinned": true
+    },
+    "A4-4": {
+      "clazz": "EVALUABLE",
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "intent": "evidence",
+      "pin_found": true,
+      "v3": [
+        135,
+        54
+      ],
+      "v2": [
+        72,
+        48
+      ],
+      "merged": [
+        207,
+        102
+      ],
+      "merged_matches_r460": true
+    },
+    "B3-1": {
+      "clazz": "EVALUABLE",
+      "executable_as_pinned": false,
+      "premise_stale": false,
+      "intent": "evidence",
+      "pin_found": true,
+      "no_emitter": true,
+      "claim": 79.45,
+      "recomputed": 79.45,
+      "delta_pp": 0.0004,
+      "reproducible": true,
+      "tolerance_pp": 0.5
+    },
+    "B3-2": {
+      "clazz": "EVALUABLE",
+      "executable_as_pinned": false,
+      "premise_stale": false,
+      "intent": "evidence",
+      "pin_found": true,
+      "no_emitter": true,
+      "readings": {
+        "num_continuous": 14.0,
+        "dec_continuous": 30.0,
+        "num_grid190": 14.210526315789474,
+        "dec_grid190": 30.0,
+        "num_grid189": 14.285714285714286,
+        "dec_grid189": 30.158730158730158,
+        "contradiction_band_pp": 16
+      },
+      "claim": [
+        14.09,
+        30.07
+      ],
+      "recomputed": [
+        14.0,
+        30.0
+      ],
+      "delta_pp": 0.09,
+      "exact_rule_match": false,
+      "reproducible": true,
+      "tolerance_pp": 0.5
+    },
+    "B3-3": {
+      "clazz": "EVALUABLE",
+      "executable_as_pinned": true,
+      "premise_stale": true,
+      "intent": "guard",
+      "pin_found": true,
+      "runs_scanned": 40,
+      "runs_excluded_live": 1,
+      "arms_over": 7,
+      "runs_over": 6,
+      "top": [
+        "g_off60_20260824",
+        "OFF",
+        60,
+        60
+      ],
+      "top_rate_pp": 100.0,
+      "arms_over_alt_den": 13,
+      "runs_over_alt_den": 7,
+      "alt_den_unresolved_arms": 13,
+      "denominator_pinned_in_prose": false
+    },
+    "G2-3": {
+      "clazz": "EVALUABLE",
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "intent": "guard",
+      "pin_found": true,
+      "rc": 1,
+      "counts": {
+        "CERT_FRESH": 3,
+        "CERT_STALE": 2,
+        "TRIAGED_NOT_A_CERT": 1
+      }
+    },
+    "G3": {
+      "clazz": "EVALUABLE",
+      "executable_as_pinned": true,
+      "premise_stale": true,
+      "intent": "guard",
+      "pin_found": true,
+      "docs_today": 141,
+      "headings_today": 8,
+      "counts_today": {
+        "CERT_FRESH": 3,
+        "CERT_STALE": 2,
+        "TRIAGED_NOT_A_CERT": 1
+      }
+    },
+    "G4": {
+      "clazz": "EVALUABLE",
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "intent": "guard",
+      "pin_found": true,
+      "stale_sites": 19,
+      "compares": 60,
+      "reads_tool_outputs": false
+    },
+    "G6": {
+      "clazz": "FORCED_GREEN",
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "intent": "guard",
+      "pin_found": true,
+      "witnesses": 0,
+      "population": 7,
+      "cert_blob_lines": 7,
+      "self_declared_forced": true,
+      "mismatch_field_present": true
+    }
+  },
+  "live_reads": 0,
+  "counts": {
+    "EVALUABLE": 9,
+    "FORCED_GREEN": 2
+  },
+  "calibration": {
+    "positive_no_witness": 0,
+    "negative_has_witness": 54,
+    "ok": true
+  },
+  "pred_hits": {
+    "class": 10,
+    "exec": 11,
+    "stale": 11,
+    "repro": 1
+  },
+  "blind": false,
+  "unresolved_arms": [],
+  "a4_raw": {
+    "v3_n": 189,
+    "v2_n": 120,
+    "raw_n": 612,
+    "builder_drops": 423,
+    "src_counter": {
+      "test.jsonl": 119,
+      "test3.jsonl": 33,
+      "test2.jsonl": 37
+    },
+    "overlap": 0,
+    "union": 309,
+    "date_min": "2023-05-07",
+    "date_max": "2024-08-10",
+    "raw_date_min": "2023-05-07",
+    "raw_date_max": "2024-08-10",
+    "v3_medium": 135,
+    "v3_hard": 54,
+    "v2_medium": 72,
+    "v2_hard": 48,
+    "merged_medium": 207,
+    "merged_hard": 102,
+    "ws_a41": {
+      "n": 612,
+      "witnesses": 423
+    },
+    "ws_a42": {
+      "n": 6,
+      "witnesses": 0
+    },
+    "pairs_scanned": 6,
+    "builder_is_1to1": false
+  },
+  "repro": {
+    "B3-1": {
+      "claim": 79.45,
+      "recomputed": 79.45,
+      "delta_pp": 0.0004,
+      "reproducible": true,
+      "tolerance_pp": 0.5
+    },
+    "B3-2": {
+      "claim": [
+        14.09,
+        30.07
+      ],
+      "recomputed": [
+        14.0,
+        30.0
+      ],
+      "delta_pp": 0.09,
+      "exact_rule_match": false,
+      "reproducible": true,
+      "tolerance_pp": 0.5
+    }
+  }
+}
