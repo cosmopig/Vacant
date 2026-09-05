@@ -100,11 +100,34 @@ def test_decision_registers_the_same_flags(dec: str) -> None:
 
 
 # ── 從 launch_lcb2.sh 繼承的守則，一條都不准掉 ─────────────────────────
-def test_wait_pattern_is_anchored_and_names_r447(sh: str) -> None:
+def test_wait_pattern_is_anchored_and_uses_prior_run(sh: str) -> None:
     pat = _var(sh, "WAIT_PAT")
     # 未錨行首會匹配到 grep 自己 ⇒ 等待條件恆為真 ⇒ 永遠不發射（R440E）。
     assert pat.startswith("^python3 ops/gain/gain_run"), pat
-    assert "runs/g_r447_conform_lcb2" in pat
+    # round448-b：等待目標從寫死的 r447 改成環境變數 PRIOR_RUN，因為 GPU
+    # 端點被誰占住會換（現在是 r461）；WAIT_PAT 必須引用這個變數而不是
+    # 再寫死任何一個 run 名字。
+    assert "$PRIOR_RUN" in pat
+
+
+def test_prior_run_is_configurable_env_var_with_r461_default(sh: str) -> None:
+    # PRIOR_RUN 要能被環境變數覆寫，預設值是現在占住端點的 r461。
+    assert 'PRIOR_RUN="${PRIOR_RUN:-runs/g_r461_lcb3_three_arm}"' in sh
+
+
+def test_terminal_check_reads_prior_run_summary(sh: str) -> None:
+    # abort_prior_not_terminal 的 terminal 檢查跟 WAIT_PAT 必須讀同一個變數，
+    # 否則等待迴圈跟中止檢查會看兩個不同的 run。
+    assert '"$PRIOR_RUN/summary.json"' in sh
+    assert "abort_prior_not_terminal" in sh
+
+
+def test_no_hardcoded_r447_run_name_outside_comments(sh: str) -> None:
+    # 舊的等待目標 runs/g_r447_conform_lcb2 不准再以字面值出現在可執行的
+    # 程式碼裡（歷史敘述留在註解裡沒關係，但邏輯必須讀 PRIOR_RUN）。
+    for line in sh.splitlines():
+        code = line.split("#", 1)[0]
+        assert "g_r447" not in code, f"g_r447 字面值漏在非註解行: {line!r}"
 
 
 def test_single_run_recheck_before_launch_is_anchored(sh: str) -> None:

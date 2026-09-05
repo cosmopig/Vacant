@@ -1,21 +1,28 @@
 #!/bin/bash
-# ops/gain/launch_eq5_seed2.sh — 等 r447（CONFORM on LCB v2）收官後發射 EQ5 的
-# **獨立重複**（R448，另一顆 seed、同一批 371 題）。
+# ops/gain/launch_eq5_seed2.sh — 等 PRIOR_RUN（原為 r447 CONFORM on LCB v2）收官後
+# 發射 EQ5 的**獨立重複**（R448，另一顆 seed、同一批 371 題）。
 #
 # 承重什麼：SPEC_GAIN §7 一端點一 run，以及 R446 §五 的推翻條件
 # 「若獨立第二批 EQ5（不同 seed）的 b/c 方向翻轉 ⇒ 本結果降為探索性」——
 # 那個條件到現在沒有資料可判，這支就是去把它變成可判。
 #
+# PRIOR_RUN（環境變數，預設 runs/g_r461_lcb3_three_arm）＝要等哪一個 run 收官
+# 才發射。2026-09 GPU 端點被 r461（LCB v3 三臂）占住，原本寫死等 r447 的版本
+# 會等錯目標；改成環境變數是因為誰佔著端點會換，腳本本體不該跟著每次端點
+# 換人就要改。**WAIT_PAT 與 abort_prior_not_terminal 的 terminal 檢查都讀
+# 這同一個變數**，只改一邊會讓等待迴圈跟中止檢查看的不是同一個 run。
+#
 # 沿用 launch_lcb2.sh 經 R440E／round639 審查修過的守則：
 #   等待迴圈**錨行首**（未錨會匹配到 grep 自己＝條件恆為真）、發射前重做單 run 檢查、
 #   探針驗 body 不只驗 200、目錄與 launch.log 已存在就停、等 preflight ✓。
 # 本支比 launch_lcb2.sh 多三道，理由都寫在該行上：
-#   (1) 前一個 run 既沒在跑、也還沒 terminal ⇒ 停（不搶端點，也不假裝它跑完了）；
+#   (1) 前一個 run（PRIOR_RUN）既沒在跑、也還沒 terminal ⇒ 停（不搶端點，也不假裝它跑完了）；
 #   (2) seed 必須與 r446 不同（抄回舊 seed＝這個 run 不是重複，是第二次同條件跑）；
 #   (3) DECISION 內文必須寫到這顆 seed（R440G 只檢查 run 名字，檢查不到 seed）。
 #
 # 用法（vacant-dev）：setsid nohup bash ops/gain/launch_eq5_seed2.sh >/dev/null 2>&1 < /dev/null &
-#            立刻發射（不等 r447）：bash ops/gain/launch_eq5_seed2.sh now
+#            立刻發射（不等 PRIOR_RUN）：bash ops/gain/launch_eq5_seed2.sh now
+#            換等待目標：PRIOR_RUN=runs/g_rXXX_foo bash ops/gain/launch_eq5_seed2.sh ...
 set -u
 ROOT="$HOME/vacant"; REPO="$ROOT/Vacant"; LOG="$ROOT/logs/launch_eq5_seed2.log"
 HUB="http://100.119.113.56:8765/v1/chat/completions"
@@ -25,8 +32,8 @@ DEC="DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md"
 SEED="g-r448-eq5-seed2"
 R446_SEED="g-r212-route-20260828"
 BANK_FILE=".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz"
-PRIOR="runs/g_r447_conform_lcb2"
-WAIT_PAT="^python3 ops/gain/gain_run\.py --out runs/g_r447_conform_lcb2"
+PRIOR_RUN="${PRIOR_RUN:-runs/g_r461_lcb3_three_arm}"
+WAIT_PAT="^python3 ops/gain/gain_run\.py --out $PRIOR_RUN"
 
 mkdir -p "$ROOT/logs"
 say()    { printf '%s  %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$*" | tee -a "$LOG"; }
@@ -38,20 +45,20 @@ cd "$REPO" || finish abort_no_repo
 
 if [ "${1:-}" != "now" ]; then
   if ps -eo cmd | grep -q "$WAIT_PAT"; then
-    say "waiting for r447 to finish ($WAIT_PAT)"
+    say "waiting for PRIOR_RUN=$PRIOR_RUN to finish ($WAIT_PAT)"
     while ps -eo cmd | grep -q "$WAIT_PAT"; do sleep 60; done
-    say "r447 gone; settling 60s"; sleep 60
+    say "PRIOR_RUN=$PRIOR_RUN gone; settling 60s"; sleep 60
   else
-    # r447 沒在跑有兩種可能：已經收官，或者還沒發射／中途死掉。
-    # 只有第一種准往下走——否則這支會在 r447 發射之前先占住端點，
+    # PRIOR_RUN 沒在跑有兩種可能：已經收官，或者還沒發射／中途死掉。
+    # 只有第一種准往下走——否則這支會在 PRIOR_RUN 發射之前先占住端點，
     # 而「誰先搶到」不是實驗設計該有的變因。
     term=$(python3 -c '
 import sys, json
 try:
     d = json.load(open(sys.argv[1])); print("yes" if d.get("run_terminal") is True else "no")
-except Exception: print("no")' "$PRIOR/summary.json")
-    [ "$term" = "yes" ] || { say "ABORT: r447 既沒在跑也還沒 terminal (run_terminal=$term)"; finish abort_prior_not_terminal; }
-    say "r447 already terminal; proceeding"
+except Exception: print("no")' "$PRIOR_RUN/summary.json")
+    [ "$term" = "yes" ] || { say "ABORT: PRIOR_RUN=$PRIOR_RUN 既沒在跑也還沒 terminal (run_terminal=$term)"; finish abort_prior_not_terminal; }
+    say "PRIOR_RUN=$PRIOR_RUN already terminal; proceeding"
   fi
 fi
 
