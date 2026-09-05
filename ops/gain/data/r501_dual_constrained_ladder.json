@@ -1,0 +1,515 @@
+{
+  "snapshot": "ops/gain/data/r486_gateway_snapshot_v2.json",
+  "n_rows_sorted": 2899,
+  "n_events": 500,
+  "n_analysable": 728,
+  "M": [
+    364,
+    555
+  ],
+  "M_expected": [
+    364,
+    555
+  ],
+  "tau": 0.1,
+  "K": 6,
+  "disp_min": 0.5,
+  "pinned_edges": {
+    "364": [
+      0,
+      49,
+      98,
+      147,
+      196,
+      248
+    ],
+    "555": [
+      0,
+      34,
+      68,
+      102,
+      136,
+      170
+    ]
+  },
+  "recomputed_edges": {
+    "364": [
+      0,
+      49,
+      98,
+      147,
+      196,
+      248
+    ],
+    "555": [
+      0,
+      34,
+      68,
+      102,
+      136,
+      170
+    ]
+  },
+  "pin_match": {
+    "364": true,
+    "555": true
+  },
+  "disp": {
+    "364": 0.6731,
+    "555": 0.9827
+  },
+  "span_by_tier": {
+    "364": [
+      13015.2,
+      12722.6,
+      12993.8,
+      13869.3,
+      13178.5,
+      13019.0
+    ],
+    "555": [
+      20649.2,
+      20918.8,
+      22541.7,
+      22148.5,
+      22207.0,
+      22705.4
+    ]
+  },
+  "span_spread": {
+    "364": 0.0901,
+    "555": 0.0996
+  },
+  "tools": {
+    "r489_permutation_placebo": {
+      "full_verdict": "PLACEBO_LADDER_BROKEN",
+      "cell": "BOTH",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "by_tier": {
+          "364": [
+            "CONCURRENCY_TAXES",
+            "EXPOSURE_DEGENERATE",
+            "PERIOD_CONFOUNDED",
+            "PLACEBO_LADDER_BROKEN",
+            "UNRESOLVED"
+          ],
+          "555": [
+            "CONCURRENCY_TAXES",
+            "PLACEBO_LADDER_BROKEN"
+          ]
+        },
+        "within_tier_varies": true,
+        "across_tier_differs": true
+      },
+      "windows": [
+        {
+          "N": 364,
+          "M": 364,
+          "i": 0,
+          "lo_sub": 0,
+          "lo_row": 0,
+          "hi_row": 1225,
+          "n_rows_total": 1225,
+          "n_sub": 364,
+          "span_s": 13015.2,
+          "events_in_window": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 2.1424554329081347,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 1,
+          "lo_sub": 49,
+          "lo_row": 145,
+          "hi_row": 1358,
+          "n_rows_total": 1213,
+          "n_sub": 364,
+          "span_s": 12722.6,
+          "events_in_window": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 2.1990779432155363,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 2,
+          "lo_sub": 98,
+          "lo_row": 343,
+          "hi_row": 1568,
+          "n_rows_total": 1225,
+          "n_sub": 364,
+          "span_s": 12993.8,
+          "events_in_window": 6,
+          "verdict": "EXPOSURE_DEGENERATE",
+          "stat": null,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 3,
+          "lo_sub": 147,
+          "lo_row": 500,
+          "hi_row": 1788,
+          "n_rows_total": 1288,
+          "n_sub": 364,
+          "span_s": 13869.3,
+          "events_in_window": 6,
+          "verdict": "UNRESOLVED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 4,
+          "lo_sub": 196,
+          "lo_row": 698,
+          "hi_row": 1934,
+          "n_rows_total": 1236,
+          "n_sub": 364,
+          "span_s": 13178.5,
+          "events_in_window": 2,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.6736223312501217,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 5,
+          "lo_sub": 248,
+          "lo_row": 959,
+          "hi_row": 2186,
+          "n_rows_total": 1227,
+          "n_sub": 364,
+          "span_s": 13019.0,
+          "events_in_window": 2,
+          "verdict": "PERIOD_CONFOUNDED",
+          "stat": 1.6836614583373715,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 0,
+          "lo_sub": 0,
+          "lo_row": 0,
+          "hi_row": 1923,
+          "n_rows_total": 1923,
+          "n_sub": 555,
+          "span_s": 20649.2,
+          "events_in_window": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.948226320331993,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 1,
+          "lo_sub": 34,
+          "lo_row": 104,
+          "hi_row": 2051,
+          "n_rows_total": 1947,
+          "n_sub": 555,
+          "span_s": 20918.8,
+          "events_in_window": 12,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.9051991037159888,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 2,
+          "lo_sub": 68,
+          "lo_row": 202,
+          "hi_row": 2261,
+          "n_rows_total": 2059,
+          "n_sub": 555,
+          "span_s": 22541.7,
+          "events_in_window": 14,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.935251297775344,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 3,
+          "lo_sub": 102,
+          "lo_row": 355,
+          "hi_row": 2381,
+          "n_rows_total": 2026,
+          "n_sub": 555,
+          "span_s": 22148.5,
+          "events_in_window": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.3911060109547717,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 4,
+          "lo_sub": 136,
+          "lo_row": 475,
+          "hi_row": 2505,
+          "n_rows_total": 2030,
+          "n_sub": 555,
+          "span_s": 22207.0,
+          "events_in_window": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.497992031426329,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 5,
+          "lo_sub": 170,
+          "lo_row": 570,
+          "hi_row": 2640,
+          "n_rows_total": 2070,
+          "n_sub": 555,
+          "span_s": 22705.4,
+          "events_in_window": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.6311860690410909,
+          "error": null
+        }
+      ]
+    },
+    "r490_leveled_placebo": {
+      "full_verdict": "PLACEBO_LADDER_BROKEN",
+      "cell": "BOTH",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "by_tier": {
+          "364": [
+            "EXPOSURE_DEGENERATE",
+            "PLACEBO_LADDER_BROKEN",
+            "PRIMARY_IS_POSITIVE_CONTROL",
+            "UNRESOLVED"
+          ],
+          "555": [
+            "PLACEBO_LADDER_BROKEN",
+            "PRIMARY_IS_POSITIVE_CONTROL"
+          ]
+        },
+        "within_tier_varies": true,
+        "across_tier_differs": true
+      },
+      "windows": [
+        {
+          "N": 364,
+          "M": 364,
+          "i": 0,
+          "lo_sub": 0,
+          "lo_row": 0,
+          "hi_row": 1225,
+          "n_rows_total": 1225,
+          "n_sub": 364,
+          "span_s": 13015.2,
+          "events_in_window": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 0.7619525698303338,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 1,
+          "lo_sub": 49,
+          "lo_row": 145,
+          "hi_row": 1358,
+          "n_rows_total": 1213,
+          "n_sub": 364,
+          "span_s": 12722.6,
+          "events_in_window": 10,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.7880381557900986,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 2,
+          "lo_sub": 98,
+          "lo_row": 343,
+          "hi_row": 1568,
+          "n_rows_total": 1225,
+          "n_sub": 364,
+          "span_s": 12993.8,
+          "events_in_window": 6,
+          "verdict": "EXPOSURE_DEGENERATE",
+          "stat": null,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 3,
+          "lo_sub": 147,
+          "lo_row": 500,
+          "hi_row": 1788,
+          "n_rows_total": 1288,
+          "n_sub": 364,
+          "span_s": 13869.3,
+          "events_in_window": 6,
+          "verdict": "UNRESOLVED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 4,
+          "lo_sub": 196,
+          "lo_row": 698,
+          "hi_row": 1934,
+          "n_rows_total": 1236,
+          "n_sub": 364,
+          "span_s": 13178.5,
+          "events_in_window": 2,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.514990338041632,
+          "error": null
+        },
+        {
+          "N": 364,
+          "M": 364,
+          "i": 5,
+          "lo_sub": 248,
+          "lo_row": 959,
+          "hi_row": 2186,
+          "n_rows_total": 1227,
+          "n_sub": 364,
+          "span_s": 13019.0,
+          "events_in_window": 2,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.5209708613685773,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 0,
+          "lo_sub": 0,
+          "lo_row": 0,
+          "hi_row": 1923,
+          "n_rows_total": 1923,
+          "n_sub": 555,
+          "span_s": 20649.2,
+          "events_in_window": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 0.6669193793404484,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 1,
+          "lo_sub": 34,
+          "lo_row": 104,
+          "hi_row": 2051,
+          "n_rows_total": 1947,
+          "n_sub": 555,
+          "span_s": 20918.8,
+          "events_in_window": 12,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.6445865195035532,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 2,
+          "lo_sub": 68,
+          "lo_row": 202,
+          "hi_row": 2261,
+          "n_rows_total": 2059,
+          "n_sub": 555,
+          "span_s": 22541.7,
+          "events_in_window": 14,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.6602371877007526,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 3,
+          "lo_sub": 102,
+          "lo_row": 355,
+          "hi_row": 2381,
+          "n_rows_total": 2026,
+          "n_sub": 555,
+          "span_s": 22148.5,
+          "events_in_window": 10,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.3300991220824425,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 4,
+          "lo_sub": 136,
+          "lo_row": 475,
+          "hi_row": 2505,
+          "n_rows_total": 2030,
+          "n_sub": 555,
+          "span_s": 22207.0,
+          "events_in_window": 10,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.40412556560579854,
+          "error": null
+        },
+        {
+          "N": 555,
+          "M": 555,
+          "i": 5,
+          "lo_sub": 170,
+          "lo_row": 570,
+          "hi_row": 2640,
+          "n_rows_total": 2070,
+          "n_sub": 555,
+          "span_s": 22705.4,
+          "events_in_window": 10,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.4893073999284291,
+          "error": null
+        }
+      ]
+    }
+  },
+  "blockers": [],
+  "n_exceptions": 0,
+  "cells": {
+    "r489_permutation_placebo": "BOTH",
+    "r490_leveled_placebo": "BOTH"
+  },
+  "headlines": {
+    "r489_permutation_placebo": "POSITION_SURVIVES",
+    "r490_leveled_placebo": "POSITION_SURVIVES"
+  },
+  "calibration": {
+    "C_POS": "NEITHER",
+    "C_NEG": "N_MATTERS"
+  },
+  "live_reads": 0,
+  "elapsed_s": 68.1,
+  "verdict": "DUALWIN_OK"
+}
