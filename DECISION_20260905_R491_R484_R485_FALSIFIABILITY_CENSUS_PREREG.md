@@ -115,3 +115,99 @@ identity ＝「邏輯上不可能為假」；empirical ＝「**這份資料**上
 - 量具 `ops/gain/r491_falsifiability_census.py`：`--selftest` 雙向校準、
   突變體在**被測函式內部**生效、判準寫「該變的是哪個量」、crash 收場算 `BROKEN` 不算偵測到。
 - **新增可調參數：1**（`MIN_WINDOWS=8`）。照實寫，不假裝是零。
+
+---
+
+# 附錄 A：結果（2026-09-05 UTC 07:1x，round763）
+
+快照：`runs/g_r461_lcb3_three_arm/calls.jsonl` 複製到 `/dev/shm/r491/calls_snapshot.jsonl`，
+**791 行**、sha256 前 8 碼 **`8ecef000`**。run **仍在跑**（`rows.jsonl` 308 列）⇒ 中途快照。
+⚠ R484／R485 當時讀的是 **646 筆**，**不是同一份資料**；本輪問的是「判準可不可能為假」，
+不是重算它們的數字。
+
+工具 `ops/gain/r491_falsifiability_census.py`：`--selftest` **全綠**；
+`ops/gain/r491_mutation_check.py` **8/8 behaved as prereg'd**。
+落盤 `ops/gain/data/r491_census.json`。切法數 `n_windows` = **92**（MIN_WINDOWS=8）。
+
+## A.1 雙向校準（B4）
+
+```
+positive control (R484 busy>wall)     -> FORCED_GREEN_IDENTITY   ✅ 必須是這格
+negative control (R485 top_task_share)-> EVALUABLE  (90 witnesses) ✅ 必須是這格
+verdict = CENSUS_OK   blockers = []
+```
+
+## A.2 逐條分類
+
+| 條 | intent | 分類 | 全量判決 | 真資料到得了 | 構造得出來 | witness |
+|---|---|---|---|---|---|---|
+| **R484 P-0** | evidence | **`FORCED_GREEN_EMPIRICAL`** | `SERVER_BOUND` | 只有 `SERVER_BOUND` | `CLIENT_GAP_BOUND`／`MIXED`／`MODEL_INVALID` 都到得了 | 0 |
+| **R484 P-1** | evidence | **`FORCED_GREEN_EMPIRICAL`** | `ENDPOINT_FLAT` | `ENDPOINT_FLAT`／`UNSCANNED` | `ENDPOINT_DEGRADING` 到得了 | 0 |
+| **R485 P-1**（人格） | evidence | **`EVALUABLE`** | `UNRESOLVED` | 含 `CONCENTRATED` | — | 1（`count4_1`） |
+| **R485 P-2**（臂） | evidence | **`FORCED_GREEN_EMPIRICAL`** | `FLAT` | `FLAT`／`UNSCANNED` | `CONCENTRATED` 到得了 | 0 |
+| **R485 P-3**（題目） | evidence | **`FORCED_GREEN_EMPIRICAL`** | `TASK_CONCENTRATED` | `TASK_CONCENTRATED`／`UNRESOLVED` | `TASK_FLAT` 到得了 | 0 |
+| **R485 P-5**（retry） | guard | **`EVALUABLE`** | `RETRIES_LOGGED` | 含 `RETRIES_NOT_LOGGED` | — | 23 |
+
+**6 條真預測：4 條 `FORCED_GREEN_EMPIRICAL`、2 條 `EVALUABLE`、0 條 `FORCED_GREEN_IDENTITY`。**
+
+## A.3 預測帳（照實記）
+
+| 預測 | intent | 結果 |
+|---|---|---|
+| C-1 正對照 `FORCED_GREEN_IDENTITY` | guard | ✅（設計如此，不計證據） |
+| C-2 負對照 `EVALUABLE` | guard | ✅（同上） |
+| **C-3 R484 P-0 ⇒ `FORCED_GREEN_EMPIRICAL`** | evidence | ✅ **盲・兌現** |
+| **C-4 R485 P-1 與 P-2 都 `EVALUABLE`** | evidence | ❌ **盲・推翻**（P-1 是，**P-2 不是**＝`FORCED_GREEN_EMPIRICAL`） |
+| C-5 至少 1 條落在 `FORCED_*` | evidence | ✅（4 條）**但由 C-3 強制，不是獨立證據** |
+| **C-6 R485 P-5 ⇒ `FORCED_*`** | evidence | ❌ **盲・推翻**（`EVALUABLE`，23 個子視窗判 `RETRIES_NOT_LOGGED`） |
+
+**獨立盲命中：C-3。獨立推翻：C-4／C-6。** C-1／C-2 是 guard，C-5 由 C-3 強制
+⇒ **這三格不得記成獨立證據**（prereg §六已事前寫明 C-3／C-5 不獨立）。
+
+## A.4 這份普查對 R484／R485 的意思（**分寸要抓好**）
+
+- `FORCED_GREEN_EMPIRICAL` **不是說那些結論錯了**，也不是說它們是恆等式。
+  它說的是：**在這份資料的 92 種切法下，沒有任何一種切得出相反判決。**
+  ⇒ 引用「`SERVER_BOUND`／`busy/wall=0.9923`」時要連這句寫：
+  **這個判決在這份資料上翻不動，它的強度來自資料尺度（伺服器延遲遠大於 client 端空檔），
+  不是來自一個能兩邊落地的檢定。**
+- 反過來，**`CLIENT_GAP_BOUND`／`MIXED`／`MODEL_INVALID` 在構造上都到得了**
+  （合成輸入實測到得了）⇒ R484 P-0 **不是**空洞判準、**不是**強制綠燈的那種假綠燈。
+  兩件事要分開講。
+- **`R485 P-5` 是本輪唯一真正兩邊都在真資料裡落地過的 evidence 級以外判準**：
+  23 個子視窗判 `RETRIES_NOT_LOGGED`。⇒ 「646 筆＝請求數不是邏輯呼叫」這條改寫**站得住**。
+
+## A.5 造量具時抓到、值得記的三件
+
+1. 🔴 **第一版把 4 條誤標成 `FORCED_GREEN_IDENTITY`**，因為我用「隨機合成輸入抽不到」
+   當成「恆等式」。被測檔**自己的** selftest 夾具（R485 的 `f8f`）明明造得出 `TASK_FLAT`。
+   ⇒ **恆等式的宣稱必須撐得住「刻意去構造反例」，不是「隨機抽樣沒抽到」。**
+   修法＝`_adversarial()` 針對每個證偽方向刻意構造；`M7_NO_ADVERSARIAL` 證明它承重
+   （關掉之後 `R485_P3` 立刻誤升回 `IDENTITY`）。
+2. 🔴 **schema 前置尺第一發就叫，而那是我自己的 bug 不是發現**：
+   我照記憶寫 `meta.persona_id` 與頂層 `arm`，真資料裡是頂層 `agent_id` 與 `meta.arm`。
+   若沒有這把尺，分層會塌成一格 ⇒ CR 恆等於 1 ⇒ 判決被 schema 強制成 `FLAT`，
+   **外觀跟「真的很平」一模一樣**，而我就會報一個關於 R485 的假發現。
+   ⇒ **對原始檔做鍵普查、不看投影輸出**（記憶鐵律）當場擋下來。
+3. **母體保真**：R485 的預測是對 `role=='gen'` 那群說的（`gen_calls` 濾掉 preflight）。
+   第一版沒套這個濾網 ⇒ 混進 preflight，`sorted()` 撞到 `None` 與 str 混排直接例外，
+   `full_verdict` 安靜變成 `None`。**用被測檔自己的過濾器**，不要自己再寫一份。
+
+## A.6 事後觀察（**不計入預測帳，不是結果**）
+
+R485 P-1 在本輪的 791 筆快照上全量判 `UNRESOLVED`，而 R485 當時在 646 筆上報的是 `FLAT`。
+⚠ **這不是普查的結果，也不足以說 R485 錯了**：不同快照、不同筆數。
+只當作「這條判準對資料量敏感」的線索，要用得先寫判準再量。
+
+## A.7 誠實邊界
+
+- **零模型呼叫**；`gain_run.py` 一個 byte 沒改；沒起／沒殺任何 run；
+  **沒有 `git add` 活著的 run 目錄**（`runs/g_r461_lcb3_three_arm/` 仍未追蹤）。
+- 沒有改 R484／R485 的判準、門檻、原始輸出；本輪只讀它們。
+- 沒碰 `world/`／`design/`／`vacant_hm`。
+- 推翻條件：1／2 未觸發；**3 未觸發**（run 仍在跑，已標「中途快照」）；4 未觸發。
+- **本輪未引用任何被認證的數字。** `cert_drift_gate.py` 照跑並取**真 rc（沒接管線）**：
+  **rc=1 `STALE_CERTS_PRESENT`**。🆕 **STALE 只剩 `r447_gauge_capability.py`（附錄E）；
+  `paired_ci.py`（附錄C／H）本輪顯示 `CERT_FRESH`**，與 round760–762 交棒寫的「兩支都 STALE」不同。
+- 本檔 §一 具名排除的 **R486／R487／R487B／R488／R489／R490 仍然未被普查掃過**。
+- 判準（`7116db6`）與結果（本附錄）**分開 commit**。
