@@ -118,7 +118,7 @@ identity ＝「邏輯上不可能為假」；empirical ＝「**這份資料**上
 
 ---
 
-# 附錄 A：結果（2026-09-05 UTC 07:1x，round763）
+# 附錄 A：結果（2026-09-05 UTC 06:3x，round763）
 
 快照：`runs/g_r461_lcb3_three_arm/calls.jsonl` 複製到 `/dev/shm/r491/calls_snapshot.jsonl`，
 **791 行**、sha256 前 8 碼 **`8ecef000`**。run **仍在跑**（`rows.jsonl` 308 列）⇒ 中途快照。
