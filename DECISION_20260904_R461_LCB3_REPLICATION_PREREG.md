@@ -668,3 +668,140 @@ G.3／G.4 的判決與誤讀警告**一個字都沒改**（今天仍是 `paired_
 `PRACTICAL_PP`、`MIN_PAIRED`、α、n、seed、worker、端點、bank、§三 的窗口、§四 的 MDE、
 A.4 的預測帳、附錄 B／C／D／E／F 的任何一行——**一個數字都沒有動**，
 本附錄只新增「引用之前先跑一次擋門」這個義務。
+
+---
+
+# 附錄 H（round750 / R479 追加）：**三條收官義務照釘死的指令量不到**——補可執行的指令，並照通則先跑過一次
+
+判準：`DECISION_20260905_R479_R461_APPENDIX_OBLIGATION_CENSUS.md`（工具與量測之前的 commit `43b1650`）。
+普查工具：`ops/gain/r479_r461_appendix_census.py`（自檢 19/19、`verdict=OK`、`live_run_reads=0`）。
+**本附錄是加法式的：§三／§四／附錄 A–G 正文一字未改，任何門檻／窗口／MDE／α／n／seed／
+worker／端點／bank 一個數字都沒有動。**
+
+## H.1 缺口（R479 普查的結果）
+
+10 條收官義務逐條分類：`EVALUABLE 8`／`FORCED_GREEN 1`／`UNRESOLVED 1`，
+**3 條 `executable_as_pinned=False`**、**1 條 `premise_stale=True`**。
+
+| id | 缺口 | 為什麼要緊 |
+|---|---|---|
+| **C5-1** | 附錄 C.2 釘死的兩條指令**沒有 `--json`**，而 `paired_ci.py` 只在 `args.json` 為真時才落盤，**stdout 六行 print 一個字都沒印 `key`** ⇒「產物自己記的 `key`」根本不存在 | 這條義務本來就是要擋「忘了帶 `--key deliv` ⇒ 安靜翻掉判決且 rc=0」，而它自己量不到 |
+| **C5-2** | `accepted=False ∧ meets_demand=True` 的格數**不在 `paired_ci.py` 的產物裡**（`meets_demand` 只出現在巢狀處） | 附錄 C.3 說這一格是 `--key deliv` 實質與否的**唯一**證據 |
+| **E3-3** | `infra_void` 頂層沒有；巢狀 `row_accounting.<臂>.infra_void` 有，但那是**逐臂整數**，給不出恆等式右邊要的**逐題集合**（E.3 正文自己寫著 void 落在 `notes.jsonl`） | 恆等式右邊沒有任何釘死的指令產得出來 |
+
+另外一條**不是不可執行、是正文過期**：
+
+- **E3-1 `premise_stale=True`**：E.3 第 1 點寫「這支工具**沒有任何完整性擋門**」並附 23／180／360 列
+  都吐 `verdict=="OK"` 的表。R472 之後 `r447_gauge_capability.py` 已有
+  `BROKEN_RUN_NOT_TERMINAL`／`BROKEN_NO_SUMMARY`／`BROKEN_ROW_ACCOUNTING` 三道擋門
+  ⇒ **那張表今天重跑不出來**。方向是變安全（洞被補了），但**正文過期本身要記**
+  ——`CERT_STALE` 的散文版。**E.3 第 1 點的正文本附錄不改**（改它要另開判準）；
+  收官讀到那句話時要知道它描述的是 R472 之前的工具。
+
+還有一條事前就標明、**不准當證據**的：
+
+- **D3-3 `FORCED_GREEN`（intent=guard）**：`power` 與 `paired_gate_vs_vote` 在
+  `r447_eq5_offline.reconstruct` 的**同一個 `if ok_to_report` / `else` 分支**被指派
+  ⇒ 命題 `(pgv is None) == (power is None)` 窮舉兩支恆真、witness＝0。
+  ⇒ 收官**不准**把「power 有印出來」當成「檢定力有被檢查過」的證據。
+
+## H.2 補上的收官指令（**已原樣跑過**，見 H.3）
+
+⚠ 三條都**只准在已收官的 run 上驗證**；本輪對 `runs/g_r461_lcb3_three_arm` **零讀取**
+（普查工具內建擋門 B3，輸出 `live_run_reads=0`）。收官時把 run 目錄換成主 run 即可。
+
+```bash
+# H-1（補 C5-1）：把 C.2 的兩條指令各加一個 --json，key 才落得了盤
+python3 ops/gain/replay/paired_ci.py --run runs/g_r461_lcb3_three_arm \
+    --a-arm OFF5    --b-arm OFF --key deliv --json runs/_analysis_r461/paired_off5_off.json
+python3 ops/gain/replay/paired_ci.py --run runs/g_r461_lcb3_three_arm \
+    --a-arm CONFORM --b-arm OFF --key deliv --json runs/_analysis_r461/paired_conform_off.json
+# 然後驗產物自己記的 key：
+python3 -c "import json,sys;d=json.load(open(sys.argv[1]));assert d['key']=='deliv',d['key']" \
+    runs/_analysis_r461/paired_conform_off.json
+
+# H-2（補 C5-2）：CONFORM 臂 accepted=False ∧ meets_demand=True 的格數
+python3 -c "
+import json
+n=t=0
+for l in open('runs/g_r461_lcb3_three_arm/rows.jsonl'):
+    r=json.loads(l)
+    if r.get('arm')!='CONFORM': continue
+    t+=1
+    if (not r.get('accepted')) and r.get('meets_demand'): n+=1
+print('CONFORM rows=',t,' accepted=False and meets_demand=True 格數=',n)"
+
+# H-3（補 E3-3）：|{task_id : 任一臂 infra_void}|，恆等式的右邊
+python3 -c "
+import json
+s=set()
+for l in open('runs/g_r461_lcb3_three_arm/notes.jsonl'):
+    d=json.loads(l)
+    if 'void' in json.dumps(d,ensure_ascii=False): s.add(d.get('task_id'))
+print('voided_tasks=',len(s))"
+```
+
+## H.3 這三條指令已經原樣跑過（R463 §一 C-1 新訂通則）
+
+**R478 自記認證 blob sha**（擋門優先讀取，`-S` 反推只當交叉檢查）：
+
+- CERT-BLOB `ops/gain/replay/paired_ci.py` = `8c0f242096e92d50aa7f26f1d9b6dff917b87caa`
+- CERT-BLOB `ops/gain/r479_r461_appendix_census.py` = `ec4b3393c186f1fd001f93a6df2352170d5b21f1`
+
+驗證 run＝`runs/g_r447_conform_lcb2`（已收官的結構孿生）與 E.3 表列的兩個 void run。
+
+**H-1 雙方向（2026-09-05，本輪實測）**
+
+| 方向 | 指令 | 產物自己記的 `key` | `verdict` | `delta_pp` |
+|---|---|---|---|---|
+| 帶 `--key deliv` | `--a-arm CONFORM --b-arm OFF --key deliv --json …` | **`deliv`** | `ON_WINS` | **+19.1667** |
+| **忘了帶**（陷阱） | `--a-arm CONFORM --b-arm OFF --json …` | **`meets_demand`** | `ON_WINS` | **+19.1667** |
+
+⇒ **兩個口徑的數字在這個 run 上一模一樣，只有產物記的 `key` 不同。**
+這正是 C.5-1 要擋的東西：**忘了帶旗標，畫面上看不出來**。
+（附帶：`paired_ci.py` 今天是 `CERT_STALE`，本輪重跑後 C.4 的 CONFORM−OFF **+19.17pp 逐字重現**
+——與 R476 的結論一致：`CERT_STALE` ＝「引用前必須重跑」，**不是**「那個數字錯了」。）
+
+**H-2（孿生 run）**：`CONFORM rows=120`、`accepted=False ∧ meets_demand=True 格數 = 0`。
+⇒ 孿生 run 上兩口徑同值（正好解釋上表兩列的 `delta_pp` 為什麼相同）。
+**這也是 C.5-2「0 格也要寫」的第一個實例**：0 不代表 `--key deliv` 是多餘的，
+只代表**這個 run 上**沒有踩到那一格。
+
+**H-3（三個 run 對照，有 witness、不是零例空綠燈）**
+
+| run | `voided_tasks`（notes） | E.3 第 3 點表列 | 相符 |
+|---|---|---|---|
+| `g_r447_conform_lcb2` | 0 | 0 | ✓ |
+| `g_r443_gemma_lcb` | 4 | 4 | ✓ |
+| `g_r441_gemma_only_mbpp_b` | 12 | 12 | ✓ |
+
+⇒ H-3 的一行指令**逐個重現 E.3 第 3 點自己列的三個數字**。
+
+## H.4 誠實邊界
+
+1. **本附錄沒有讓 E3-3 變成 `EVALUABLE`。** 它補的是恆等式**右邊量得到**；
+   `class` 仍是 `UNRESOLVED`，因為 witness 是不是 0 要等收官時的 `infra_void`。
+   **收官必須對 E3-3 重判一次**（判準 §四.2）：若 `voided_tasks == 0` 且
+   `n_tasks_partial_excluded == 0`，它退化成 `0 == 0` 的零 witness 恆等式
+   ⇒ 當時要改記 `FORCED_GREEN`，**不准**讀成「對帳通過了」。
+2. **R479 普查不是盲測**（判準 §〇.2）：落筆前已讀過三支工具的原始碼
+   ⇒ **不准宣稱 `blind_hit_rate`**。事前預測 `class` 10/10、`premise_stale` 10/10 命中，
+   `executable_as_pinned` **8/10——C5-2 與 E3-3 事前預測 `True`、實測 `False`，記 MISS**
+   （方向是「比我預期的更不可執行」，不是對自己有利的方向）。
+3. **普查工具自己踩過一次型二「安靜量不到」**：第一版的鍵抽取器只認
+   `out = {...}` 與 `out["k"] = ...`，**漏掉 `out.update(ev)`** ⇒ 一度把
+   `run_complete`／`n_tasks_complete` 報成「產物裡沒有」（假缺陷 3 個）。
+   修好之後把這個 bug 原樣留成夾具 `M11`，並補了雙向校準擋門 `B7`
+   （正：抓得到產物鍵；負：抓不到區域變數）——**B7 會自動抓到當時那個 bug**
+   （M11 之下 `verdict=BROKEN_KEYSCAN_CALIBRATION`）。
+4. `executable_as_pinned` 的判定規則只看**頂層產物鍵**；巢狀鍵另記
+   `probe_keys_nested_only`，不參與判定（規則寫在判準 §二，量測後沒有改）。
+5. 本附錄**沒有**驗 D.2 說的「全庫 41 份 `summary.json` 沒有任何一份記 `bank`」
+   ——那要掃 run 目錄，會撞到 B3。照實寫：**本輪沒有重驗那條前提**。
+
+## H.5 本附錄**沒有**動的東西
+
+`PRACTICAL_PP`、`MIN_PAIRED`、α、n、seed、worker、端點、bank、§三 的窗口、§四 的 MDE
+與預測區間、P-R461-3 事前的 `UNRESOLVED`、附錄 B 的判決名對應表、
+附錄 C.2／D.2／E.2 的原指令、E.3 第 1 點的正文（只在 H.1 標註它過期）——**一個字都沒改**。
+也沒有改 `paired_ci.py`／`r447_eq5_offline.py`／`r447_gauge_capability.py` 任何一行。
