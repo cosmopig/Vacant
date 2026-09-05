@@ -1,0 +1,147 @@
+{
+  "path": "/dev/shm/r485_calls_snapshot.jsonl",
+  "n_raw": 648,
+  "n_gen": 647,
+  "broken": [],
+  "unscanned": [],
+  "persona": {
+    "careful-1": {
+      "n": 114,
+      "sum_latency_ms": 7110899,
+      "share_calls": 0.17619783616692428,
+      "share_time": 0.25474845176587857,
+      "cr": 1.445809195548451,
+      "n_runaway": 5,
+      "n_timeout_hit": 2
+    },
+    "careful-2": {
+      "n": 96,
+      "sum_latency_ms": 3862833,
+      "share_calls": 0.14837712519319937,
+      "share_time": 0.13838626117177927,
+      "cr": 0.9326657393556375,
+      "n_runaway": 0,
+      "n_timeout_hit": 0
+    },
+    "hasty-1": {
+      "n": 108,
+      "sum_latency_ms": 4964762,
+      "share_calls": 0.16692426584234932,
+      "share_time": 0.17786294431773914,
+      "cr": 1.0655307867923816,
+      "n_runaway": 3,
+      "n_timeout_hit": 2
+    },
+    "hasty-2": {
+      "n": 89,
+      "sum_latency_ms": 2377076,
+      "share_calls": 0.1375579598145286,
+      "share_time": 0.08515891320208986,
+      "cr": 0.6190765937275522,
+      "n_runaway": 1,
+      "n_timeout_hit": 0
+    },
+    "plain-1": {
+      "n": 117,
+      "sum_latency_ms": 4799608,
+      "share_calls": 0.18083462132921174,
+      "share_time": 0.1719462907690188,
+      "cr": 0.9508482916885057,
+      "n_runaway": 2,
+      "n_timeout_hit": 1
+    },
+    "plain-2": {
+      "n": 123,
+      "sum_latency_ms": 4798236,
+      "share_calls": 0.1901081916537867,
+      "share_time": 0.17189713877349436,
+      "cr": 0.9042069007028525,
+      "n_runaway": 0,
+      "n_timeout_hit": 0
+    }
+  },
+  "arm": {
+    "CONFORM": {
+      "n": 138,
+      "sum_latency_ms": 7390741,
+      "share_calls": 0.2132921174652241,
+      "share_time": 0.2647738108996628,
+      "cr": 1.2413670699426218,
+      "n_runaway": 3,
+      "n_timeout_hit": 2
+    },
+    "OFF": {
+      "n": 86,
+      "sum_latency_ms": 4050719,
+      "share_calls": 0.13292117465224113,
+      "share_time": 0.14511729020319764,
+      "cr": 1.0917544972263822,
+      "n_runaway": 3,
+      "n_timeout_hit": 1
+    },
+    "OFF5": {
+      "n": 423,
+      "sum_latency_ms": 16471954,
+      "share_calls": 0.6537867078825348,
+      "share_time": 0.5901088988971396,
+      "cr": 0.9026015545778944,
+      "n_runaway": 5,
+      "n_timeout_hit": 2
+    }
+  },
+  "P1_verdict": "UNRESOLVED",
+  "P1_max_cr": 1.445809195548451,
+  "P2_verdict": "UNSCANNED",
+  "P2_max_cr": null,
+  "P3": {
+    "n_tasks": 84,
+    "k": 5,
+    "top_share": 0.3115515715849018,
+    "uniform_null": 0.05952380952380952,
+    "ratio": 5.234066402626351,
+    "verdict": "TASK_CONCENTRATED",
+    "top_tasks": [
+      [
+        "lcb_3224",
+        3392389,
+        10
+      ],
+      [
+        "lcb_3327",
+        1796374,
+        12
+      ],
+      [
+        "lcb_3308",
+        1423726,
+        9
+      ],
+      [
+        "lcb_3114",
+        1207946,
+        10
+      ],
+      [
+        "lcb_3211",
+        876033,
+        11
+      ]
+    ]
+  },
+  "P4_f_obs": 0.4,
+  "P4_n_runaway_tasks": 5,
+  "n_runaway": 11,
+  "n_timeout_hit": 5,
+  "P4_null_p50": 0.2,
+  "P4_null_p95": 0.4,
+  "P4_null_n": 2000,
+  "P4_verdict": "UNRESOLVED",
+  "posthoc_within_task_null_p50": 0.4,
+  "posthoc_within_task_null_p95": 0.4,
+  "P5_verdict": "RETRIES_LOGGED",
+  "P5_max_attempt": 3,
+  "n_not_ok": 12,
+  "latency_ms_p50": 24829,
+  "latency_ms_max": 600101,
+  "completion_tokens_max": 18800
+}
