@@ -983,3 +983,144 @@ verdict == "ON_WINS" 但 p >= 0.05 的格數：                0
 附錄 **B.1／B.2 的內文宣稱**（本附錄只用了 B.1 的實測結果，沒有重驗它）、**C.1／C.3**、
 **D.1／D.2**、**E.1／E.2**、**F**、**H.2**；認證段落 **C.4／D.4／E.4／H.3** 由 `cert_drift_gate.py` 覆蓋。
 **R486／R487／R487B／R488／R489／R490 六份仍然沒有被普查掃過**（R492 §〇.4 具名保留）。
+
+---
+
+# 附錄 K（round765 / R493 追加）：**附錄內文宣稱的普查**——17 條裡只有 **1 條**實質過期（E.2 的行號）
+
+判準：`DECISION_20260905_R493_R461_APPENDIX_PROSE_CENSUS.md`（量測前單獨 commit `56859a7`）。
+普查工具：`ops/gain/r493_appendix_prose_census.py`（自檢全過、`verdict=CENSUS_OK`、`live_reads=0`）。
+突變體：`ops/gain/r493_mutation_check.py`（**6/6**，五個突變體**全部是真的原始碼突變**）。
+**本附錄是加法式的：§二／§三／§四／§六、附錄 A–J 的正文一字未改，任何門檻／窗口／MDE／α／
+n／seed／worker／端點／bank 一個數字都沒有動。新增可調參數 0 個。**
+
+## K.1 缺口
+
+附錄 I.6 與 J.6 **連兩輪具名保留**：`B.1／B.2／C.1／C.3／D.1／D.2／E.1／E.2／F／H.2` 的
+**內文宣稱**從來沒有被任何普查掃過，而 `cert_drift_gate.py`（附錄 G）**只比工具的 blob sha，
+看不見散文**。這一型缺陷已現身兩次、兩次都是被普查抓到的（R479 的 `E3-1`、R480 的 `G3`）。
+
+## K.2 結果（`verdict=CENSUS_OK`，`blockers=[]`，`live_reads=0`）
+
+```
+n_claims=17  class={EVALUABLE:17, FORCED_GREEN:0, UNRESOLVED:0, UNSCANNED:0}
+premise_stale=2 ['D2-3a','E2-2']   substantive_change=0
+controls  C_POS:VERIFIED  C_NEG:REFUTED
+```
+
+15 條 `VERIFIED`。**收官會直接引用的那些全部今天仍成立**，逐條逐字：
+
+| id | 今天實測 |
+|---|---|
+| `B1-1` | `paired_ci.verdict()` 詞彙表＝`{NON_INFERIOR_BUT_UNRESOLVED, ON_WINS, RULED_OUT, UNINFORMATIVE}` |
+| `B2-1` | `paired_ci.py --key` 的 argparse default ＝ `'meets_demand'`（**舊語意，忘了帶會安靜翻判決**） |
+| `C1-1` | `pooled_paired_ci.py:242` ＝ `if len(args.stratum) < 2:`，單一 `--stratum` 實跑 **`rc=2`** |
+| `C2-1` | `PRACTICAL_PP=5.0`、`MIN_PAIRED=60` |
+| `C3-1` | `KEYS["deliv"]` ＝ `bool(r.get("accepted")) and bool(r.get("meets_demand"))` |
+| `C3-2` | `gain_run.py:588` ＝ `code, worker = chosen if accepted else last` |
+| `C3-3` | `gain_run.py:1586` ＝ `truth, err = meets_demand(` |
+| `D2-1` | `r447_eq5_offline.py --bank` default ＝ `'lcb2'`（**舊題庫，`--bank lcb3` 不能忘**） |
+| `D2-2` | `summary.get("seed")`／`summary.get("n")` 的退路還在 |
+| `D2-3b` | 40 份 `summary.json` **沒有任何一份**記 `bank`（附錄 H.4 第 5 點說「本輪沒有重驗這條前提」⇒ **本附錄補驗了**） |
+| `E2-1` | `r447_gauge_capability.py:89-92` 的 `passed()` 仍是 `any(bool(r.get("meets_demand")) for r in rs)` |
+| `H2-1` | H-2／H-3 兩段 inline 指令在孿生 run 上原樣 `rc=0`，逐字重現 `CONFORM rows=120`／`格數=0`／`voided_tasks=0` |
+
+## K.3 🔴 唯一實質過期的一條：**E.2 的 `main()`:228-241**
+
+附錄 E.2 寫「`main()`:228-241 只吃 `sys.argv[1]` 當 run 目錄」。今天：
+
+```
+r447_gauge_capability.py:228-241  = 夾具程式碼（`# T5, T6：undemonstrated（三臂全滅）` …）
+r447_gauge_capability.py:370      = def main() -> int:
+r447_gauge_capability.py:373      =     run_dir = pathlib.Path(sys.argv[1])
+```
+
+**方向與 R479 抓到的 `E3-1` 相同、成因也相同**：R472 給這支工具加了三道完整性擋門
+（`BROKEN_RUN_NOT_TERMINAL`／`BROKEN_NO_SUMMARY`／`BROKEN_ROW_ACCOUNTING`）＋夾具，
+行號整段往後推。⇒ **這是同一個檔案被同一次改動弄過期的第二處，R479 只抓到 E.3 那一處。**
+
+⚠ **但 E.2 導出的義務一個字都不用改**：`main()` 今天仍然只吃 `sys.argv[1]`，
+且 `r447_gauge_capability.py` **仍然沒有** `--bank`／`--seed`／`--n` 任何旗標
+（實測 argparse 旗標集合＝`[]`）⇒ E.2 那句「R464 那型『旗標預設值是舊語意』的陷阱翻不了它」
+**今天仍然成立**。過期的只有行號。`substantive_change=0`。
+
+## K.4 ⚠ `D2-3a` 的「過期」是**我自己的排除規則造成的**，不是真漂移
+
+正文寫「全庫 **41 份** `summary.json`」。本尺照釘死的協定**具名排除還在跑的主 run**，量到 **40**
+⇒ 照字面判 `REFUTED`。但主 run 目錄**確實有** `summary.json`（`test -f`，沒有讀內容）
+⇒ **40 + 1 = 41，與正文逐字相同**。
+
+⇒ **`D2-3a` 實質上沒有過期。** 收官引用「41 份」時照原文引用即可，只要註明它含主 run。
+**這條的 `premise_stale=True` 是協定假象，不准當成「附錄 D 過期」的證據。**
+
+## K.5 ⚠ 本尺第一版的量錯了，而且**錯在結構上**（照實記，舊量保留）
+
+`B1-2`／`B1-3` 要驗的是「全庫有沒有任何 .py **吐得出** `"OFF5_WINS"`／`"CONFORM_WINS"`」。
+**第一版把「吐得出」實作成「檔案裡出現這個字串字面」**，實測 `REFUTED`，兩支「emitter」是：
+
+```
+['ops/gain/r462_r461_census.py', 'ops/gain/r493_appendix_prose_census.py']
+```
+
+——**一支是 R462 稽核這條宣稱的工具本身**（`census_vocab("X1", "OFF5_WINS")`，字串是它的
+**搜尋參數**），**另一支是本尺自己**。⇒ 這個量**結構上自我推翻**：任何一支稽核該宣稱的工具
+都必須把該字串寫進自己的原始碼，於是它自己讓宣稱變成假的。
+**這是 memory 記過的同一型坑第三次現身**（「不得 import X 用字串比對會匹配到自己」、
+「搜尋標記的那幾行自己含有標記 ⇒ 標記數×2」）；本尺的 selftest 負對照也**當場被自己絆倒過一次**
+（負對照字串寫成字面 ⇒ 被自己掃到 ⇒ 改成 `"ZZZ_NOT_A" + "_VERDICT_R493"` 拼出來）。
+
+**修正與它的合法性**（memory：修正方向對自己有利時，理由只准是語意或合成復現、不准是結果數字）：
+
+1. 理由是**語意**：判準 §二 的字是「**吐得出**」，不是「提到」。
+2. 理由是**合成復現**（selftest 條 `H2`）：造兩個檔，一個只把判決名當搜尋參數
+   （`return census_vocab("X1", "OFF5_WINS")`），一個真的 `return "OFF5_WINS"`。
+   **舊量兩個都算 emitter；新量只算後者。** 這條合成夾具是修正的唯一依據。
+3. 新量「吐得出」逐字化成三個語法位置（`ast`，不是 grep）：`return "<L>"`／
+   `{"verdict"|"verdict_pooled": "<L>"}`／指派給 `verdict`-類名字。
+4. **舊量無條件保留並照實併報**（輸出裡的 `[舊量，非判定] mentions=…`），
+   後輪要收回仲裁權比對得到。
+
+修正後 `emitters("OFF5_WINS") = emitters("CONFORM_WINS") = []`，**附錄 B.1 的宣稱今天成立**。
+校準：同一支掃描器 `emitters("ON_WINS")` 抓到 **2** 支 ⇒ **不是「什麼都抓不到」的空綠燈**。
+
+## K.6 預測帳（判準 §三，**盲**——落筆時本輪沒讀過那五支工具任何一行）
+
+| 預測 | 結果 |
+|---|---|
+| `E2-2` `premise_stale=True` | ✅ **盲・兌現**（理由也對：R472 改過該檔 ⇒ 行號位移） |
+| `E2-1` `premise_stale=True` | ❌ **MISS**——同一個檔、同一次改動，但 `passed()` 那一段行號**沒有**位移 |
+| `D2-3a` `premise_stale=True` | ⚠ **標籤命中、理由錯**：我押的理由是「`runs/` 長到 216 個目錄」，真因是**我自己的主 run 排除規則**（K.4）⇒ **不計為證據** |
+| 其餘 14 條 `premise_stale=False` | ✅ 全中 |
+| 17 條全 `EVALUABLE`、無 `FORCED_GREEN`／`UNSCANNED` | ✅ 全中 |
+| 「最可能錯的一條：`B1-2`／`B1-3` 其實是 `FORCED_GREEN`」 | ✅ **自標為最可能錯的那一條，確實錯了**：它們是 `EVALUABLE`，校準抓得到 2 支 `ON_WINS` emitter |
+| `substantive_change` 0 條 | ✅ 中 |
+| 聚合 `2 <= n_premise_stale <= 5` | ⚠ 照釘死協定 **2 ⇒ HIT**，但**這個 HIT 不帶資訊**：兩條裡有一條（`D2-3a`）是協定假象 ⇒ **實質只有 1 條**，落在 `[2,5]` 之外 ⇒ **實質讀法是 MISS**。兩個數字都寫在這裡，收官不准只引用其中一個。 |
+
+## K.7 誠實邊界
+
+1. **主 run `g_r461_lcb3_three_arm` 本輪零分析**：G-LIVE 硬擋門（任何開檔路徑含該名字 ⇒
+   `RuntimeError`），輸出 `live_reads=0`，突變體 **M3** 證明拿掉就讀得到。
+   唯一碰到該路徑的是一次 `test -f`（存在性 stat，不讀內容，見 K.4）⇒ **盲測未被破壞**。
+2. **本輪不是對「P-R461-1／2／3 會不會命中」下判斷**，是對「附錄散文今天還是不是真的」下判斷。
+3. **`premise_stale` ≠ 結論錯了**（同 `CERT_STALE` 的誤讀警告）：E.2 過期的只有行號，
+   它導出的義務今天原樣成立（K.3）。
+4. **本尺只掃「原始碼／repo 事實」型的句子**（判準 §一）。附錄裡的**措辭約束**
+   （如「散文一律寫『OFF5 − OFF 的 CI 完全在 0 以上』」）沒有真值、**本輪沒掃**；
+   run 上的數字由 `cert_drift_gate.py` 以 blob sha 覆蓋。
+5. 五個突變體**全部是真的原始碼突變**（另存檔＋先驗 `old in src`）⇒ 沒有 r473 那條
+   「檔內旗標答不了『整段刪掉會不會紅』」的保留。每個突變體的判準都寫了**該看到的那個量**，
+   不是只寫 `rc≠0`；`M3` 用的是 selftest 正對照那一行紅不紅。
+6. 本尺自己踩過兩個坑、都照實留在紀錄裡：**自我匹配**（K.5）與
+   **`--json` 目的地寫成 `/dev/stdout` 與工具自己的 stdout 撞在一起**（`JSONDecodeError`，
+   memory 記過的同一型）。
+7. 沒起／沒殺任何 run；沒碰 `world/`／`design/`／`vacant_hm`；沒改上述五支被測工具任何一行；
+   **沒有 `git add` 活著的 run 目錄**。
+8. 判準 §四 的推翻條件 1／2／3／4／5 **全部未觸發**；條件 6 的處置見 K.6 最後一列。
+
+## K.8 還沒被普查的是誰（r718 規則，交棒必寫）
+
+- **附錄 D.1／E.1／F 的內文宣稱**本輪**沒掃**（它們是「§四／§六.2 沒有可執行仲裁者」這類
+  **關於當時文件狀態**的宣稱，不是今天可逐字驗的原始碼事實）⇒ 記 `OUT_OF_SCOPE_BY_CRITERION`，
+  **不是綠燈**。
+- **`R486／R487／R487B／R488／R489／R490` 六份仍然沒有被普查掃過**
+  （R492 §〇.4、round764、本判準 §〇.4 **連三輪**具名保留）。
