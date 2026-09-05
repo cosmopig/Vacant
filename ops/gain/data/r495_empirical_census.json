@@ -1,0 +1,1083 @@
+{
+  "snapshot": "ops/gain/data/r486_gateway_snapshot_v2.json",
+  "n_rows": 2899,
+  "n_events": 500,
+  "t0": 1788549602.65951,
+  "t1": 1788582202.044372,
+  "span_s": 32599.384862184525,
+  "n_windows": 12,
+  "fractions": [
+    0.6,
+    0.8
+  ],
+  "windows": [
+    {
+      "f": 0.6,
+      "i": 0,
+      "lo": 1788549602.65951,
+      "hi": 1788569162.2904272
+    },
+    {
+      "f": 0.6,
+      "i": 1,
+      "lo": 1788552210.6102989,
+      "hi": 1788571770.2412162
+    },
+    {
+      "f": 0.6,
+      "i": 2,
+      "lo": 1788554818.5610878,
+      "hi": 1788574378.1920052
+    },
+    {
+      "f": 0.6,
+      "i": 3,
+      "lo": 1788557426.5118768,
+      "hi": 1788576986.1427941
+    },
+    {
+      "f": 0.6,
+      "i": 4,
+      "lo": 1788560034.4626658,
+      "hi": 1788579594.093583
+    },
+    {
+      "f": 0.6,
+      "i": 5,
+      "lo": 1788562642.4134548,
+      "hi": 1788582202.044372
+    },
+    {
+      "f": 0.8,
+      "i": 0,
+      "lo": 1788549602.65951,
+      "hi": 1788575682.1673996
+    },
+    {
+      "f": 0.8,
+      "i": 1,
+      "lo": 1788550906.6349044,
+      "hi": 1788576986.1427941
+    },
+    {
+      "f": 0.8,
+      "i": 2,
+      "lo": 1788552210.6102989,
+      "hi": 1788578290.1181886
+    },
+    {
+      "f": 0.8,
+      "i": 3,
+      "lo": 1788553514.5856934,
+      "hi": 1788579594.093583
+    },
+    {
+      "f": 0.8,
+      "i": 4,
+      "lo": 1788554818.5610878,
+      "hi": 1788580898.0689776
+    },
+    {
+      "f": 0.8,
+      "i": 5,
+      "lo": 1788556122.5364823,
+      "hi": 1788582202.044372
+    }
+  ],
+  "tools": {
+    "r486_longreq_attrib": {
+      "full_verdict": "QUEUE_LIVE",
+      "full_stat": 1.0,
+      "cell": "EMPIRICAL_MOVABLE",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "verdicts_seen": [
+          "QUEUE_LIVE",
+          "UNSCANNED"
+        ],
+        "moved_to": [
+          "UNSCANNED"
+        ],
+        "stat_n": 3,
+        "stat_min": 1.0,
+        "stat_max": 1.0,
+        "stat_range": 0.0
+      },
+      "windows": [
+        {
+          "f": 0.6,
+          "i": 0,
+          "n_rows": 1818,
+          "n_events": 10,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 1,
+          "n_rows": 1823,
+          "n_events": 12,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 2,
+          "n_rows": 1801,
+          "n_events": 10,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 3,
+          "n_rows": 1792,
+          "n_events": 6,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 4,
+          "n_rows": 1786,
+          "n_events": 4,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 5,
+          "n_rows": 1672,
+          "n_events": 6,
+          "verdict": "QUEUE_LIVE",
+          "stat": 1.0,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 0,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 1,
+          "n_rows": 2379,
+          "n_events": 14,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 2,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 3,
+          "n_rows": 2354,
+          "n_events": 10,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 4,
+          "n_rows": 2325,
+          "n_events": 10,
+          "verdict": "QUEUE_LIVE",
+          "stat": 1.0,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 5,
+          "n_rows": 2291,
+          "n_events": 8,
+          "verdict": "QUEUE_LIVE",
+          "stat": 1.0,
+          "error": null
+        }
+      ]
+    },
+    "r486_events_full": {
+      "full_verdict": "QUEUE_LIVE",
+      "full_stat": 1.0,
+      "cell": "EMPIRICAL_MOVABLE",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "verdicts_seen": [
+          "QUEUE_LIVE",
+          "UNSCANNED"
+        ],
+        "moved_to": [
+          "UNSCANNED"
+        ],
+        "stat_n": 3,
+        "stat_min": 1.0,
+        "stat_max": 1.0,
+        "stat_range": 0.0
+      },
+      "windows": [
+        {
+          "f": 0.6,
+          "i": 0,
+          "n_rows": 1818,
+          "n_events": 10,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 1,
+          "n_rows": 1823,
+          "n_events": 12,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 2,
+          "n_rows": 1801,
+          "n_events": 10,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 3,
+          "n_rows": 1792,
+          "n_events": 6,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 4,
+          "n_rows": 1786,
+          "n_events": 4,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 5,
+          "n_rows": 1672,
+          "n_events": 6,
+          "verdict": "QUEUE_LIVE",
+          "stat": 1.0,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 0,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 1,
+          "n_rows": 2379,
+          "n_events": 14,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 2,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 3,
+          "n_rows": 2354,
+          "n_events": 10,
+          "verdict": "UNSCANNED",
+          "stat": null,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 4,
+          "n_rows": 2325,
+          "n_events": 10,
+          "verdict": "QUEUE_LIVE",
+          "stat": 1.0,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 5,
+          "n_rows": 2291,
+          "n_events": 8,
+          "verdict": "QUEUE_LIVE",
+          "stat": 1.0,
+          "error": null
+        }
+      ]
+    },
+    "r487_concurrency_tax": {
+      "full_verdict": "CONCURRENCY_TAXES",
+      "full_stat": 1.8521532425497806,
+      "cell": "EMPIRICAL_FIXED",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "verdicts_seen": [
+          "CONCURRENCY_TAXES"
+        ],
+        "moved_to": [],
+        "stat_n": 12,
+        "stat_min": 1.469033773544963,
+        "stat_max": 1.8362985511418872,
+        "stat_range": 0.3672647775969242
+      },
+      "windows": [
+        {
+          "f": 0.6,
+          "i": 0,
+          "n_rows": 1818,
+          "n_events": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.8191085901479174,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 1,
+          "n_rows": 1823,
+          "n_events": 12,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.469033773544963,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 2,
+          "n_rows": 1801,
+          "n_events": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.6377754247608292,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 3,
+          "n_rows": 1792,
+          "n_events": 6,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.8303169443472764,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 4,
+          "n_rows": 1786,
+          "n_events": 4,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.791251638717038,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 5,
+          "n_rows": 1672,
+          "n_events": 6,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.6873846862858608,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 0,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.835937024807565,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 1,
+          "n_rows": 2379,
+          "n_events": 14,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.8362985511418872,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 2,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.517075645798713,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 3,
+          "n_rows": 2354,
+          "n_events": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.6230615625941667,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 4,
+          "n_rows": 2325,
+          "n_events": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.720259086699727,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 5,
+          "n_rows": 2291,
+          "n_events": 8,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.79923558901356,
+          "error": null
+        }
+      ]
+    },
+    "r487_ts_semantics": {
+      "full_verdict": "TS_IS_START",
+      "full_stat": 0.0003450655624568668,
+      "cell": "EMPIRICAL_FIXED",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "verdicts_seen": [
+          "TS_IS_START"
+        ],
+        "moved_to": [],
+        "stat_n": 12,
+        "stat_min": 0.0,
+        "stat_max": 0.0005984440454817474,
+        "stat_range": 0.0005984440454817474
+      },
+      "windows": [
+        {
+          "f": 0.6,
+          "i": 0,
+          "n_rows": 1818,
+          "n_events": 10,
+          "verdict": "TS_IS_START",
+          "stat": 0.0,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 1,
+          "n_rows": 1823,
+          "n_events": 12,
+          "verdict": "TS_IS_START",
+          "stat": 0.0005488474204171241,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 2,
+          "n_rows": 1801,
+          "n_events": 10,
+          "verdict": "TS_IS_START",
+          "stat": 0.0005555555555555556,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 3,
+          "n_rows": 1792,
+          "n_events": 6,
+          "verdict": "TS_IS_START",
+          "stat": 0.0005583472920156337,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 4,
+          "n_rows": 1786,
+          "n_events": 4,
+          "verdict": "TS_IS_START",
+          "stat": 0.0005602240896358543,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 5,
+          "n_rows": 1672,
+          "n_events": 6,
+          "verdict": "TS_IS_START",
+          "stat": 0.0005984440454817474,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 0,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "TS_IS_START",
+          "stat": 0.0004185851820845542,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 1,
+          "n_rows": 2379,
+          "n_events": 14,
+          "verdict": "TS_IS_START",
+          "stat": 0.00042052144659377626,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 2,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "TS_IS_START",
+          "stat": 0.0004185851820845542,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 3,
+          "n_rows": 2354,
+          "n_events": 10,
+          "verdict": "TS_IS_START",
+          "stat": 0.00042498937526561835,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 4,
+          "n_rows": 2325,
+          "n_events": 10,
+          "verdict": "TS_IS_START",
+          "stat": 0.0004302925989672978,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 5,
+          "n_rows": 2291,
+          "n_events": 8,
+          "verdict": "TS_IS_START",
+          "stat": 0.0004366812227074236,
+          "error": null
+        }
+      ]
+    },
+    "r488_pointwise_concurrency": {
+      "full_verdict": "PLACEBO_UNSCANNED",
+      "full_stat": 1.8652213941208788,
+      "cell": "EMPIRICAL_FIXED",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "verdicts_seen": [
+          "PLACEBO_UNSCANNED"
+        ],
+        "moved_to": [],
+        "stat_n": 12,
+        "stat_min": 1.144315313221424,
+        "stat_max": 1.9850750456115835,
+        "stat_range": 0.8407597323901594
+      },
+      "windows": [
+        {
+          "f": 0.6,
+          "i": 0,
+          "n_rows": 1818,
+          "n_events": 10,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.9850750456115835,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 1,
+          "n_rows": 1823,
+          "n_events": 12,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.144315313221424,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 2,
+          "n_rows": 1801,
+          "n_events": 10,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.460722798886079,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 3,
+          "n_rows": 1792,
+          "n_events": 6,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.6942961808284034,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 4,
+          "n_rows": 1786,
+          "n_events": 4,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.7104224034265538,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 5,
+          "n_rows": 1672,
+          "n_events": 6,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.5919006270805547,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 0,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.8778156834589619,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 1,
+          "n_rows": 2379,
+          "n_events": 14,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.854011006202228,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 2,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.2165868632402086,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 3,
+          "n_rows": 2354,
+          "n_events": 10,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.4544263960779067,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 4,
+          "n_rows": 2325,
+          "n_events": 10,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.5558567999243267,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 5,
+          "n_rows": 2291,
+          "n_events": 8,
+          "verdict": "PLACEBO_UNSCANNED",
+          "stat": 1.639130097406952,
+          "error": null
+        }
+      ]
+    },
+    "r489_permutation_placebo": {
+      "full_verdict": "PLACEBO_LADDER_BROKEN",
+      "full_stat": 1.8652213941208788,
+      "cell": "EMPIRICAL_MOVABLE",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "verdicts_seen": [
+          "CONCURRENCY_TAXES",
+          "PERIOD_CONFOUNDED",
+          "PLACEBO_LADDER_BROKEN",
+          "UNRESOLVED"
+        ],
+        "moved_to": [
+          "CONCURRENCY_TAXES",
+          "PERIOD_CONFOUNDED",
+          "UNRESOLVED"
+        ],
+        "stat_n": 12,
+        "stat_min": 1.144315313221424,
+        "stat_max": 1.9850750456115835,
+        "stat_range": 0.8407597323901594
+      },
+      "windows": [
+        {
+          "f": 0.6,
+          "i": 0,
+          "n_rows": 1818,
+          "n_events": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.9850750456115835,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 1,
+          "n_rows": 1823,
+          "n_events": 12,
+          "verdict": "UNRESOLVED",
+          "stat": 1.144315313221424,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 2,
+          "n_rows": 1801,
+          "n_events": 10,
+          "verdict": "PERIOD_CONFOUNDED",
+          "stat": 1.460722798886079,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 3,
+          "n_rows": 1792,
+          "n_events": 6,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.6942961808284034,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 4,
+          "n_rows": 1786,
+          "n_events": 4,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.7104224034265538,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 5,
+          "n_rows": 1672,
+          "n_events": 6,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.5919006270805547,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 0,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.8778156834589619,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 1,
+          "n_rows": 2379,
+          "n_events": 14,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.854011006202228,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 2,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 1.2165868632402086,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 3,
+          "n_rows": 2354,
+          "n_events": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.4544263960779067,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 4,
+          "n_rows": 2325,
+          "n_events": 10,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.5558567999243267,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 5,
+          "n_rows": 2291,
+          "n_events": 8,
+          "verdict": "CONCURRENCY_TAXES",
+          "stat": 1.639130097406952,
+          "error": null
+        }
+      ]
+    },
+    "r490_leveled_placebo": {
+      "full_verdict": "PLACEBO_LADDER_BROKEN",
+      "full_stat": 0.6233797560346916,
+      "cell": "EMPIRICAL_MOVABLE",
+      "detail": {
+        "n_windows": 12,
+        "n_ok": 12,
+        "n_error": 0,
+        "exc_rate": 0.0,
+        "verdicts_seen": [
+          "PLACEBO_LADDER_BROKEN",
+          "PRIMARY_IS_POSITIVE_CONTROL",
+          "UNRESOLVED"
+        ],
+        "moved_to": [
+          "PRIMARY_IS_POSITIVE_CONTROL",
+          "UNRESOLVED"
+        ],
+        "stat_n": 12,
+        "stat_min": 0.13480647842574325,
+        "stat_max": 0.6856567197779542,
+        "stat_range": 0.550850241352211
+      },
+      "windows": [
+        {
+          "f": 0.6,
+          "i": 0,
+          "n_rows": 1818,
+          "n_events": 10,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 0.6856567197779542,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 1,
+          "n_rows": 1823,
+          "n_events": 12,
+          "verdict": "UNRESOLVED",
+          "stat": 0.13480647842574325,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 2,
+          "n_rows": 1801,
+          "n_events": 10,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.3789313809448381,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 3,
+          "n_rows": 1792,
+          "n_events": 6,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.527267422049892,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 4,
+          "n_rows": 1786,
+          "n_events": 4,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.5367403595579556,
+          "error": null
+        },
+        {
+          "f": 0.6,
+          "i": 5,
+          "n_rows": 1672,
+          "n_events": 6,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.46492866529844007,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 0,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "PLACEBO_LADDER_BROKEN",
+          "stat": 0.6301092308465,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 1,
+          "n_rows": 2379,
+          "n_events": 14,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.6173514035889488,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 2,
+          "n_rows": 2390,
+          "n_events": 14,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.1960492849176877,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 3,
+          "n_rows": 2354,
+          "n_events": 10,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.3746115933948568,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 4,
+          "n_rows": 2325,
+          "n_events": 10,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.44202639062413474,
+          "error": null
+        },
+        {
+          "f": 0.8,
+          "i": 5,
+          "n_rows": 2291,
+          "n_events": 8,
+          "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+          "stat": 0.4941656726987968,
+          "error": null
+        }
+      ]
+    }
+  },
+  "blockers": [],
+  "repro_expected": {
+    "r486_longreq_attrib": "QUEUE_LIVE",
+    "r486_events_full": "QUEUE_LIVE",
+    "r487_concurrency_tax": "CONCURRENCY_TAXES",
+    "r487_ts_semantics": "TS_IS_START",
+    "r488_pointwise_concurrency": "PLACEBO_UNSCANNED",
+    "r489_permutation_placebo": "PLACEBO_LADDER_BROKEN",
+    "r490_leveled_placebo": "PLACEBO_LADDER_BROKEN"
+  },
+  "repro_actual": {
+    "r486_longreq_attrib": "QUEUE_LIVE",
+    "r486_events_full": "QUEUE_LIVE",
+    "r487_concurrency_tax": "CONCURRENCY_TAXES",
+    "r487_ts_semantics": "TS_IS_START",
+    "r488_pointwise_concurrency": "PLACEBO_UNSCANNED",
+    "r489_permutation_placebo": "PLACEBO_LADDER_BROKEN",
+    "r490_leveled_placebo": "PLACEBO_LADDER_BROKEN"
+  },
+  "repro_ok": true,
+  "calibration": {
+    "C_POS": "EMPIRICAL_DEGENERATE",
+    "C_NEG": "EMPIRICAL_MOVABLE"
+  },
+  "calibration_detail": {
+    "C_POS": {
+      "n_windows": 12,
+      "n_ok": 12,
+      "n_error": 0,
+      "exc_rate": 0.0,
+      "verdicts_seen": [
+        "ALWAYS_SAME"
+      ],
+      "moved_to": [],
+      "stat_n": 12,
+      "stat_min": 1.0,
+      "stat_max": 1.0,
+      "stat_range": 0.0
+    },
+    "C_NEG": {
+      "n_windows": 12,
+      "n_ok": 12,
+      "n_error": 0,
+      "exc_rate": 0.0,
+      "verdicts_seen": [
+        "SUB"
+      ],
+      "moved_to": [
+        "SUB"
+      ],
+      "stat_n": 12,
+      "stat_min": 1672.0,
+      "stat_max": 2390.0,
+      "stat_range": 718.0
+    }
+  },
+  "cells": {
+    "r486_longreq_attrib": "EMPIRICAL_MOVABLE",
+    "r486_events_full": "EMPIRICAL_MOVABLE",
+    "r487_concurrency_tax": "EMPIRICAL_FIXED",
+    "r487_ts_semantics": "EMPIRICAL_FIXED",
+    "r488_pointwise_concurrency": "EMPIRICAL_FIXED",
+    "r489_permutation_placebo": "EMPIRICAL_MOVABLE",
+    "r490_leveled_placebo": "EMPIRICAL_MOVABLE"
+  },
+  "n_movable": 4,
+  "n_fixed": 3,
+  "n_degenerate": 0,
+  "n_unscanned": 0,
+  "max_exc_rate": 0.0,
+  "live_reads": 0,
+  "elapsed_s": 130.1,
+  "verdict": "CENSUS_OK"
+}
