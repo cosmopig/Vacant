@@ -1,0 +1,147 @@
+{
+  "snapshot": "ops/gain/data/r486_gateway_snapshot_v2.json",
+  "n_rows": 2899,
+  "n_chat": 786,
+  "n_analysable": 728,
+  "M": [
+    364,
+    555
+  ],
+  "M_expected": [
+    364,
+    555
+  ],
+  "r496_tier_chat_counts": {
+    "1672": [
+      491,
+      482,
+      468,
+      467,
+      466,
+      364
+    ],
+    "2291": [
+      636,
+      624,
+      623,
+      620,
+      587,
+      555
+    ]
+  },
+  "mutant": "",
+  "n_exceptions": 0,
+  "K_per_tier": 6,
+  "spread_min": 0.5,
+  "tol_headline": 0.1,
+  "tol_ladder": [
+    0.05,
+    0.1,
+    0.2,
+    0.3,
+    0.5,
+    0.75,
+    1.0,
+    2.0
+  ],
+  "tiers": {
+    "364": {
+      "n_candidates": 365,
+      "room": 364,
+      "span_min": 11417.0,
+      "span_max": 19245.1,
+      "span_median": 13120.1
+    },
+    "555": {
+      "n_candidates": 174,
+      "room": 173,
+      "span_min": 20412.4,
+      "span_max": 25763.3,
+      "span_median": 21980.4
+    }
+  },
+  "frontier": {
+    "364": {
+      "0.05": 0.7418,
+      "0.1": 0.794,
+      "0.2": 0.9835,
+      "0.3": 0.9918,
+      "0.5": 1.0,
+      "0.75": 1.0,
+      "1": 1.0,
+      "2": 1.0
+    },
+    "555": {
+      "0.05": 0.7225,
+      "0.1": 0.9827,
+      "0.2": 0.9942,
+      "0.3": 1.0,
+      "0.5": 1.0,
+      "0.75": 1.0,
+      "1": 1.0,
+      "2": 1.0
+    }
+  },
+  "rho_span_vs_pos": {
+    "364": 0.6168,
+    "555": 0.8557
+  },
+  "headline_per_tier": {
+    "364": {
+      "achievable": 0.794,
+      "detail": {
+        "band_size": 148,
+        "chosen_left_edges": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          289
+        ],
+        "spans": [
+          13015.2,
+          13042.4,
+          13053.7,
+          13078.4,
+          13079.9,
+          14265.0
+        ],
+        "spread_min_denom": 0.096,
+        "spread_median_denom": 0.0957
+      }
+    },
+    "555": {
+      "achievable": 0.9827,
+      "detail": {
+        "band_size": 154,
+        "chosen_left_edges": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          170
+        ],
+        "spans": [
+          20649.2,
+          20659.8,
+          20677.0,
+          20696.5,
+          20691.9,
+          22705.4
+        ],
+        "spread_min_denom": 0.0996,
+        "spread_median_denom": 0.0994
+      }
+    }
+  },
+  "p6_inequality_holds": true,
+  "verdict": "DUAL_FEASIBLE",
+  "live_reads": 0,
+  "calibration": {
+    "C_POS": "DUAL_FEASIBLE",
+    "C_NEG": "DUAL_INFEASIBLE"
+  },
+  "elapsed_s": 0.1
+}
