@@ -1,0 +1,730 @@
+{
+  "tools": {
+    "r486_longreq_attrib": {
+      "analyze_under": {
+        "n_declared": 0,
+        "n_reachable": 4,
+        "reachable": [
+          "BROKEN",
+          "CONCURRENT_OBSERVED",
+          "SERIAL_NO_QUEUE",
+          "UNSCANNED"
+        ],
+        "unreachable": [],
+        "unreachable_sampling_only": [],
+        "found_only_by_construction": []
+      }
+    },
+    "r487_concurrency_tax": {
+      "verdict_p1": {
+        "n_declared": 4,
+        "n_reachable": 4,
+        "reachable": [
+          "CONCURRENCY_TAXES",
+          "NO_TAX",
+          "UNRESOLVED",
+          "UNSCANNED"
+        ],
+        "unreachable": [],
+        "unreachable_sampling_only": [],
+        "found_only_by_construction": []
+      },
+      "verdict_p2": {
+        "n_declared": 3,
+        "n_reachable": 3,
+        "reachable": [
+          "DURATION_BIAS_ABSENT",
+          "DURATION_BIAS_PRESENT",
+          "UNSCANNED"
+        ],
+        "unreachable": [],
+        "unreachable_sampling_only": [],
+        "found_only_by_construction": []
+      },
+      "verdict_p3": {
+        "n_declared": 5,
+        "n_reachable": 5,
+        "reachable": [
+          "RELOAD_AS_CHANCE",
+          "RELOAD_DEFICIT",
+          "RELOAD_EXCESS",
+          "UNRESOLVED",
+          "UNSCANNED"
+        ],
+        "unreachable": [],
+        "unreachable_sampling_only": [],
+        "found_only_by_construction": []
+      }
+    },
+    "r487_ts_semantics": {
+      "decide": {
+        "n_declared": 3,
+        "n_reachable": 3,
+        "reachable": [
+          "TS_IS_END",
+          "TS_IS_START",
+          "TS_UNRESOLVED_BY_ID"
+        ],
+        "unreachable": [],
+        "unreachable_sampling_only": [],
+        "found_only_by_construction": []
+      }
+    },
+    "r488_pointwise_concurrency": {
+      "decide": {
+        "n_declared": 7,
+        "n_reachable": 7,
+        "reachable": [
+          "CONCURRENCY_TAXES",
+          "EXPOSURE_DEGENERATE",
+          "NO_TAX",
+          "PERIOD_CONFOUNDED",
+          "PLACEBO_UNSCANNED",
+          "UNRESOLVED",
+          "UNSCANNED"
+        ],
+        "unreachable": [],
+        "unreachable_sampling_only": [],
+        "found_only_by_construction": []
+      }
+    },
+    "r489_permutation_placebo": {
+      "decide": {
+        "n_declared": 11,
+        "n_reachable": 11,
+        "reachable": [
+          "CONCURRENCY_TAXES",
+          "EXPOSURE_DEGENERATE",
+          "NO_TAX",
+          "PERIOD_CONFOUNDED",
+          "PLACEBO_DEGENERATE",
+          "PLACEBO_LADDER_BROKEN",
+          "PLACEBO_UNSCANNED",
+          "SPEEDUP_ANOMALY",
+          "TAXES_BELOW_MARGIN",
+          "UNRESOLVED",
+          "UNSCANNED"
+        ],
+        "unreachable": [],
+        "unreachable_sampling_only": [],
+        "found_only_by_construction": []
+      }
+    },
+    "r490_leveled_placebo": {
+      "decide": {
+        "n_declared": 14,
+        "n_reachable": 14,
+        "reachable": [
+          "CONCURRENCY_TAXES",
+          "EXPOSURE_DEGENERATE",
+          "LADDER_UNSCANNED",
+          "NO_TAX",
+          "PERIOD_CONFOUNDED",
+          "PLACEBO_DEGENERATE",
+          "PLACEBO_LADDER_BROKEN",
+          "PLACEBO_UNSCANNED",
+          "PRIMARY_IS_POSITIVE_CONTROL",
+          "SCALE_DEPENDENT_TAX",
+          "SPEEDUP_ANOMALY",
+          "TAXES_BELOW_MARGIN",
+          "UNRESOLVED",
+          "UNSCANNED"
+        ],
+        "unreachable": [],
+        "unreachable_sampling_only": [
+          "CONCURRENCY_TAXES",
+          "SCALE_DEPENDENT_TAX",
+          "SPEEDUP_ANOMALY",
+          "TAXES_BELOW_MARGIN"
+        ],
+        "found_only_by_construction": [
+          "CONCURRENCY_TAXES",
+          "SCALE_DEPENDENT_TAX",
+          "SPEEDUP_ANOMALY",
+          "TAXES_BELOW_MARGIN"
+        ]
+      }
+    }
+  },
+  "verdicts": [
+    {
+      "tool": "r486_longreq_attrib",
+      "fn": "analyze_under",
+      "verdict": "BROKEN",
+      "cell": "REACHABLE",
+      "witness": "([{'ts': 1.0, 'latency_ms': 900000.0, 'model': 'gemma-4-12b-it-qat', 'client_ip': '10.0.0.1', 'completion_tokens': 300, 'status_code': 200, 'path': '/v1/chat/completions'}, {'ts': 2.0, 'latency_ms': 700000.0, 'model': 'gemma-4-12b-it-qat', 'client_ip': '10.0.0.1', 'completion_tokens': 10, 'status_code': 200, 'path': '/v1/chat/completions'}, {'ts': 12.0, 'latency_ms': 900000.0, 'model': 'qwen/qwen3",
+      "declared": false
+    },
+    {
+      "tool": "r486_longreq_attrib",
+      "fn": "analyze_under",
+      "verdict": "CONCURRENT_OBSERVED",
+      "cell": "REACHABLE",
+      "witness": "([{'ts': 1.0, 'latency_ms': 1000.0, 'model': 'gemma-4-12b-it-qat', 'client_ip': '10.0.0.9', 'completion_tokens': 300, 'status_code': 200, 'path': '/v1/chat/completions'}, {'ts': 401.0, 'latency_ms': 700000.0, 'model': 'qwen/qwen3.6-35b-a3b', 'client_ip': '10.0.0.1', 'completion_tokens': 300, 'status_code': 200, 'path': '/v1/chat/completions'}, {'ts': 801.0, 'latency_ms': 900000.0, 'model': 'qwen/q",
+      "declared": false
+    },
+    {
+      "tool": "r486_longreq_attrib",
+      "fn": "analyze_under",
+      "verdict": "SERIAL_NO_QUEUE",
+      "cell": "REACHABLE",
+      "witness": "([{'ts': 10.0, 'latency_ms': 1000.0, 'model': 'gemma-4-12b-it-qat', 'client_ip': '10.0.0.9', 'completion_tokens': 300, 'status_code': 200, 'path': '/v1/chat/completions'}], [{'ts': 500.0, 'event': 'loaded'}, {'ts': 500.0, 'event': 'unloaded'}, {'ts': 500.0, 'event': 'unloaded'}, {'ts': 0.0, 'event': 'unloaded'}, {'ts': 0.0, 'event': 'loaded'}, {'ts': 500.0, 'event': 'loaded'}, {'ts': 500.0, 'event",
+      "declared": false
+    },
+    {
+      "tool": "r486_longreq_attrib",
+      "fn": "analyze_under",
+      "verdict": "UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "([{'ts': 1.0, 'latency_ms': 1000.0, 'model': 'gemma-4-12b-it-qat', 'client_ip': '10.0.0.9', 'completion_tokens': 300, 'status_code': 200, 'path': '/v1/chat/completions'}, {'ts': 401.0, 'latency_ms': 700000.0, 'model': 'qwen/qwen3.6-35b-a3b', 'client_ip': '10.0.0.1', 'completion_tokens': 300, 'status_code': 200, 'path': '/v1/chat/completions'}, {'ts': 801.0, 'latency_ms': 900000.0, 'model': 'qwen/q",
+      "declared": false
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p1",
+      "verdict": "CONCURRENCY_TAXES",
+      "cell": "REACHABLE",
+      "witness": "(2.0, 1.1, None, 9, 30, 99)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p1",
+      "verdict": "NO_TAX",
+      "cell": "REACHABLE",
+      "witness": "(1.05, 0.95, 0.9, 3, 30, 30)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p1",
+      "verdict": "UNRESOLVED",
+      "cell": "REACHABLE",
+      "witness": "(0.5, 0.3, 0.95, 9, 30, 99)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p1",
+      "verdict": "UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "(None, 3.0, None, 3, 99, 0)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p2",
+      "verdict": "DURATION_BIAS_ABSENT",
+      "cell": "REACHABLE",
+      "witness": "(0.0, 0.05)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p2",
+      "verdict": "DURATION_BIAS_PRESENT",
+      "cell": "REACHABLE",
+      "witness": "(0.1, 0.0)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p2",
+      "verdict": "UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "(None, 0.1)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p3",
+      "verdict": "RELOAD_AS_CHANCE",
+      "cell": "REACHABLE",
+      "witness": "(1.0, 1.0, 0.06, 5)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p3",
+      "verdict": "RELOAD_DEFICIT",
+      "cell": "REACHABLE",
+      "witness": "(1.0, 10.0, 0.001, 50)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p3",
+      "verdict": "RELOAD_EXCESS",
+      "cell": "REACHABLE",
+      "witness": "(5.0, 1.0, 0.001, 50)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p3",
+      "verdict": "UNRESOLVED",
+      "cell": "REACHABLE",
+      "witness": "(0.0, 10.0, 0.06, 50)",
+      "declared": true
+    },
+    {
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p3",
+      "verdict": "UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "(1.0, 10.0, 0.06, 0)",
+      "declared": true
+    },
+    {
+      "tool": "r487_ts_semantics",
+      "fn": "decide",
+      "verdict": "TS_IS_END",
+      "cell": "REACHABLE",
+      "witness": "({'ts': 0.5, 'ts_plus_lat': 0.5, 'ts_minus_lat': 0.0},)",
+      "declared": true
+    },
+    {
+      "tool": "r487_ts_semantics",
+      "fn": "decide",
+      "verdict": "TS_IS_START",
+      "cell": "REACHABLE",
+      "witness": "({'ts': 0.5, 'ts_plus_lat': 0.02, 'ts_minus_lat': 0.5},)",
+      "declared": true
+    },
+    {
+      "tool": "r487_ts_semantics",
+      "fn": "decide",
+      "verdict": "TS_UNRESOLVED_BY_ID",
+      "cell": "REACHABLE",
+      "witness": "({'ts': 0.0, 'ts_plus_lat': 0.01, 'ts_minus_lat': 0.01},)",
+      "declared": true
+    },
+    {
+      "tool": "r488_pointwise_concurrency",
+      "fn": "decide",
+      "verdict": "CONCURRENCY_TAXES",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 50, 'coverage': 1.0, 'ratio': 0.8, 'ci_lo': 1.16, 'ci_hi': 1.0}, [])",
+      "declared": true
+    },
+    {
+      "tool": "r488_pointwise_concurrency",
+      "fn": "decide",
+      "verdict": "EXPOSURE_DEGENERATE",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 49, 'coverage': 0.5, 'ratio': 0.8, 'ci_lo': 1.02, 'ci_hi': 0.85}, [{'coverage': 0.5, 'ratio': None}])",
+      "declared": true
+    },
+    {
+      "tool": "r488_pointwise_concurrency",
+      "fn": "decide",
+      "verdict": "NO_TAX",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 200, 'coverage': 0.9, 'ratio': 1.0, 'ci_lo': 1.0, 'ci_hi': 0.85}, [])",
+      "declared": true
+    },
+    {
+      "tool": "r488_pointwise_concurrency",
+      "fn": "decide",
+      "verdict": "PERIOD_CONFOUNDED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 200, 'coverage': 0.5, 'ratio': 0.8, 'ci_lo': 0.3, 'ci_hi': 1.0}, [{'coverage': 0.9, 'ratio': 0.8}])",
+      "declared": true
+    },
+    {
+      "tool": "r488_pointwise_concurrency",
+      "fn": "decide",
+      "verdict": "PLACEBO_UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 200, 'coverage': 0.5, 'ratio': 1.3, 'ci_lo': 1.16, 'ci_hi': 0.95}, [{'coverage': 0.0, 'ratio': 0.5}, {'coverage': 0.0, 'ratio': 1.3}, {'coverage': 0.0, 'ratio': 0.5}])",
+      "declared": true
+    },
+    {
+      "tool": "r488_pointwise_concurrency",
+      "fn": "decide",
+      "verdict": "UNRESOLVED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 50, 'coverage': 0.9, 'ratio': None, 'ci_lo': 1.02, 'ci_hi': 1.1}, [])",
+      "declared": true
+    },
+    {
+      "tool": "r488_pointwise_concurrency",
+      "fn": "decide",
+      "verdict": "UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 200, 'coverage': 0.0, 'ratio': 2.0, 'ci_lo': 0.9, 'ci_hi': 1.02}, [{'coverage': 0.5, 'ratio': 0.8}, {'coverage': 0.9, 'ratio': 0.5}, {'coverage': 1.0, 'ratio': 0.95}])",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "CONCURRENCY_TAXES",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 50, 'coverage': 0.9, 'ratio': 1.3, 'ci_lo': 3.0, 'ci_hi': 3.0}, {'coverage': 1.0, 'n_hi': 200, 'n_lo': 200, 'abs_log_max': 0.05, 'abs_log_median': None}, True)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "EXPOSURE_DEGENERATE",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 0, 'n_lo': 200, 'coverage': 0.9, 'ratio': 0.8, 'ci_lo': 1.16, 'ci_hi': 1.16}, {'coverage': 1.0, 'n_hi': 0, 'n_lo': 200, 'abs_log_max': None, 'abs_log_median': 0.3}, False)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "NO_TAX",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 200, 'coverage': 0.9, 'ratio': 0.5, 'ci_lo': 0.95, 'ci_hi': 1.02}, {'coverage': 0.49, 'n_hi': 49, 'n_lo': 0, 'abs_log_max': 2.0, 'abs_log_median': None}, False)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "PERIOD_CONFOUNDED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 200, 'coverage': 1.0, 'ratio': 0.5, 'ci_lo': 3.0, 'ci_hi': 1.1}, {'coverage': 0.9, 'n_hi': 200, 'n_lo': 200, 'abs_log_max': 2.0, 'abs_log_median': 0.0}, True)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "PLACEBO_DEGENERATE",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 50, 'coverage': 0.5, 'ratio': 0.8, 'ci_lo': 3.0, 'ci_hi': 0.85}, {'coverage': 1.0, 'n_hi': 50, 'n_lo': 0, 'abs_log_max': 2.0, 'abs_log_median': 0.3}, True)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "PLACEBO_LADDER_BROKEN",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 200, 'coverage': 1.0, 'ratio': 2.0, 'ci_lo': 0.3, 'ci_hi': 0.9}, {'coverage': 0.9, 'n_hi': 0, 'n_lo': 0, 'abs_log_max': 0.3, 'abs_log_median': 0.05}, False)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "PLACEBO_UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 200, 'coverage': 0.5, 'ratio': 0.95, 'ci_lo': 1.02, 'ci_hi': 0.3}, {'coverage': 0.0, 'n_hi': 0, 'n_lo': 0, 'abs_log_max': None, 'abs_log_median': 0.3}, True)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "SPEEDUP_ANOMALY",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 50, 'coverage': 0.5, 'ratio': 0.95, 'ci_lo': 0.85, 'ci_hi': 0.85}, {'coverage': 0.9, 'n_hi': 200, 'n_lo': 50, 'abs_log_max': 0.05, 'abs_log_median': None}, True)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "TAXES_BELOW_MARGIN",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 200, 'coverage': 1.0, 'ratio': 1.05, 'ci_lo': 1.02, 'ci_hi': 0.3}, {'coverage': 0.5, 'n_hi': 200, 'n_lo': 200, 'abs_log_max': 0.0, 'abs_log_median': None}, True)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "UNRESOLVED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 50, 'coverage': 0.5, 'ratio': 1.05, 'ci_lo': 0.3, 'ci_hi': None}, {'coverage': 1.0, 'n_hi': 49, 'n_lo': 50, 'abs_log_max': 2.0, 'abs_log_median': 0.3}, False)",
+      "declared": true
+    },
+    {
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "verdict": "UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 200, 'coverage': 0.0, 'ratio': 1.0, 'ci_lo': 1.02, 'ci_hi': 0.95}, {'coverage': 0.5, 'n_hi': 200, 'n_lo': 0, 'abs_log_max': 2.0, 'abs_log_median': 0.0}, False)",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "CONCURRENCY_TAXES",
+      "cell": "REACHABLE",
+      "witness": "constructed:({'n_hi': 200, 'n_lo': 200, 'coverage': 0.9, 'ratio': 1.3, 'ci_lo': 1.05, 'ci_hi': 1.5, 'abs_log': 0.3}, [{'block_s': 1800.0, 'role': 'gate', 'p': 0.001, 'reproduction_frac': 0.3, 'coverage_min': 0.9, 'n_hi_min': 200, 'n_lo_min': 200, 'measurable': True, 'abs_log_max': 0.05, 'agreement': 0.4}], {'an",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "EXPOSURE_DEGENERATE",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 0, 'n_lo': 200, 'coverage': 0.0, 'ratio': 1.05, 'ci_lo': 3.0, 'ci_hi': 3.0, 'abs_log': 0.0}, [{'block_s': 60.0, 'role': None, 'p': 0.2, 'coverage_min': 1.0, 'n_hi_min': 50, 'n_lo_min': 200, 'measurable': False, 'reproduction_frac': 0.6, 'abs_log_max': 0.05, 'agreement': 0.6}, {'block_s': 1800.0, 'role': 'gate', 'p': 0.2, 'coverage_min': 1.0, 'n_hi_min': 0, 'n_lo_min': 50, 'measurable': T",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "LADDER_UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 50, 'coverage': 1.0, 'ratio': 1.3, 'ci_lo': 3.0, 'ci_hi': 0.85, 'abs_log': 1.0}, [{'block_s': 60.0, 'role': 'positive_control', 'p': 0.2, 'coverage_min': 0.9, 'n_hi_min': 0, 'n_lo_min': 200, 'measurable': False, 'reproduction_frac': None, 'abs_log_max': 0.05, 'agreement': 1.0}, {'block_s': 1800.0, 'role': None, 'p': 0.001, 'coverage_min': 0.0, 'n_hi_min': 50, 'n_lo_min': 0, ",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "NO_TAX",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 200, 'coverage': 0.5, 'ratio': 2.0, 'ci_lo': 1.0, 'ci_hi': 1.02, 'abs_log': 0.05}, [{'block_s': 1800.0, 'role': None, 'p': None, 'coverage_min': 0.0, 'n_hi_min': 200, 'n_lo_min': 49, 'measurable': False, 'reproduction_frac': 0.0, 'abs_log_max': 0.3, 'agreement': 0.6}], {'anchor_a_ok': False, 'anchor_b_ok': False})",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "PERIOD_CONFOUNDED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 200, 'coverage': 1.0, 'ratio': 0.5, 'ci_lo': 1.1, 'ci_hi': 0.3, 'abs_log': 1.0}, [{'block_s': 1800.0, 'role': 'gate', 'p': 0.001, 'coverage_min': 0.9, 'n_hi_min': 200, 'n_lo_min': 50, 'measurable': True, 'reproduction_frac': 0.6, 'abs_log_max': 0.05, 'agreement': 0.6}], {'anchor_a_ok': True, 'anchor_b_ok': True})",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "PLACEBO_DEGENERATE",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 50, 'coverage': 1.0, 'ratio': 1.0, 'ci_lo': 0.3, 'ci_hi': 0.85, 'abs_log': 1.0}, [{'block_s': 1800.0, 'role': 'gate', 'p': 0.001, 'coverage_min': 0.9, 'n_hi_min': 49, 'n_lo_min': 0, 'measurable': True, 'reproduction_frac': 0.6, 'abs_log_max': 0.3, 'agreement': 0.0}], {'anchor_a_ok': True, 'anchor_b_ok': True})",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "PLACEBO_LADDER_BROKEN",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 200, 'coverage': 1.0, 'ratio': 0.8, 'ci_lo': 1.1, 'ci_hi': 1.02, 'abs_log': 0.05}, [{'block_s': 60.0, 'role': 'gate', 'p': 0.2, 'coverage_min': 0.9, 'n_hi_min': 50, 'n_lo_min': 0, 'measurable': True, 'reproduction_frac': 0.99, 'abs_log_max': None, 'agreement': 1.0}], {'anchor_a_ok': False, 'anchor_b_ok': True})",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "PLACEBO_UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 50, 'coverage': 0.5, 'ratio': 0.5, 'ci_lo': 1.02, 'ci_hi': 0.85, 'abs_log': 0.3}, [{'block_s': 60.0, 'role': 'gate', 'p': 0.2, 'coverage_min': 0.5, 'n_hi_min': 0, 'n_lo_min': 200, 'measurable': True, 'reproduction_frac': 0.0, 'abs_log_max': 0.0, 'agreement': 0.6}, {'block_s': 1800.0, 'role': 'gate', 'p': 0.2, 'coverage_min': 0.0, 'n_hi_min': 50, 'n_lo_min': 200, 'measurable'",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "PRIMARY_IS_POSITIVE_CONTROL",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 50, 'coverage': 1.0, 'ratio': 2.0, 'ci_lo': 1.1, 'ci_hi': 0.3, 'abs_log': 1.0}, [{'block_s': 1800.0, 'role': 'positive_control', 'p': 0.2, 'coverage_min': 0.5, 'n_hi_min': 50, 'n_lo_min': 200, 'measurable': True, 'reproduction_frac': 0.6, 'abs_log_max': 2.0, 'agreement': 1.0}], {'anchor_a_ok': True, 'anchor_b_ok': True})",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "SCALE_DEPENDENT_TAX",
+      "cell": "REACHABLE",
+      "witness": "constructed:({'n_hi': 200, 'n_lo': 200, 'coverage': 0.9, 'ratio': 1.3, 'ci_lo': 1.05, 'ci_hi': 1.5, 'abs_log': 0.3}, [{'block_s': 1800.0, 'role': 'gate', 'p': 0.001, 'reproduction_frac': 0.3, 'coverage_min': 0.9, 'n_hi_min': 200, 'n_lo_min': 200, 'measurable': True, 'abs_log_max': 0.05, 'agreement': 0.4}, {'blo",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "SPEEDUP_ANOMALY",
+      "cell": "REACHABLE",
+      "witness": "constructed:({'n_hi': 200, 'n_lo': 200, 'coverage': 0.9, 'ratio': 0.5, 'ci_lo': 0.3, 'ci_hi': 0.8, 'abs_log': 0.3}, [{'block_s': 1800.0, 'role': 'gate', 'p': 0.001, 'reproduction_frac': 0.3, 'coverage_min': 0.9, 'n_hi_min': 200, 'n_lo_min': 200, 'measurable': True, 'abs_log_max': 0.05, 'agreement': 0.4}], {'anc",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "TAXES_BELOW_MARGIN",
+      "cell": "REACHABLE",
+      "witness": "constructed:({'n_hi': 200, 'n_lo': 200, 'coverage': 0.9, 'ratio': 1.3, 'ci_lo': 1.02, 'ci_hi': 1.1, 'abs_log': 0.3}, [{'block_s': 1800.0, 'role': 'gate', 'p': 0.001, 'reproduction_frac': 0.3, 'coverage_min': 0.9, 'n_hi_min': 200, 'n_lo_min': 200, 'measurable': True, 'abs_log_max': 0.05, 'agreement': 0.4}], {'an",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "UNRESOLVED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 200, 'n_lo': 50, 'coverage': 0.9, 'ratio': 1.0, 'ci_lo': 0.9, 'ci_hi': None, 'abs_log': 0.0}, [{'block_s': 60.0, 'role': 'positive_control', 'p': 0.2, 'coverage_min': 0.49, 'n_hi_min': 49, 'n_lo_min': 49, 'measurable': False, 'reproduction_frac': None, 'abs_log_max': 0.05, 'agreement': 1.0}], {'anchor_a_ok': True, 'anchor_b_ok': True})",
+      "declared": true
+    },
+    {
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "verdict": "UNSCANNED",
+      "cell": "REACHABLE",
+      "witness": "({'n_hi': 50, 'n_lo': 50, 'coverage': 0.49, 'ratio': 2.0, 'ci_lo': 1.0, 'ci_hi': 3.0, 'abs_log': 0.05}, [{'block_s': 60.0, 'role': 'gate', 'p': None, 'coverage_min': 1.0, 'n_hi_min': 200, 'n_lo_min': 49, 'measurable': False, 'reproduction_frac': 0.99, 'abs_log_max': 0.3, 'agreement': 1.0}, {'block_s': 900.0, 'role': 'positive_control', 'p': 0.04, 'coverage_min': 1.0, 'n_hi_min': 49, 'n_lo_min': 50",
+      "declared": true
+    }
+  ],
+  "predictions": [
+    {
+      "id": "R486-P1",
+      "tool": "r486_longreq_attrib",
+      "fn": "analyze_under",
+      "predicted": "QUEUE_RULED_OUT",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": false,
+      "n_other_reachable": 4
+    },
+    {
+      "id": "R486-P1b",
+      "tool": "r486_longreq_attrib",
+      "fn": "analyze_under",
+      "predicted": "FORCED_GREEN_FLAG",
+      "intent": "guard",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": false,
+      "n_other_reachable": 4
+    },
+    {
+      "id": "R486-P2",
+      "tool": "r486_longreq_attrib",
+      "fn": "analyze_under",
+      "predicted": "RELOAD_CONTRIBUTES",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": false,
+      "n_other_reachable": 4
+    },
+    {
+      "id": "R486-P4",
+      "tool": "r486_longreq_attrib",
+      "fn": "analyze_under",
+      "predicted": "SERIAL_NO_QUEUE",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": true,
+      "n_other_reachable": 3
+    },
+    {
+      "id": "R487-P1",
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p1",
+      "predicted": "CONCURRENCY_TAXES",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": true,
+      "n_other_reachable": 3
+    },
+    {
+      "id": "R487-P2",
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p2",
+      "predicted": "DURATION_BIAS_PRESENT",
+      "intent": "guard",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": true,
+      "n_other_reachable": 2
+    },
+    {
+      "id": "R487-P3",
+      "tool": "r487_concurrency_tax",
+      "fn": "verdict_p3",
+      "predicted": "RELOAD_AS_CHANCE",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": true,
+      "n_other_reachable": 4
+    },
+    {
+      "id": "R487B-P1",
+      "tool": "r487_ts_semantics",
+      "fn": "decide",
+      "predicted": "TS_IS_START",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": true,
+      "n_other_reachable": 2
+    },
+    {
+      "id": "R488-P1",
+      "tool": "r488_pointwise_concurrency",
+      "fn": "decide",
+      "predicted": "CONCURRENCY_TAXES",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": true,
+      "n_other_reachable": 6
+    },
+    {
+      "id": "R488-P2",
+      "tool": "r488_pointwise_concurrency",
+      "fn": "decide",
+      "predicted": "PERIOD_CONFOUNDED",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": true,
+      "n_other_reachable": 6
+    },
+    {
+      "id": "R489-P2",
+      "tool": "r489_permutation_placebo",
+      "fn": "decide",
+      "predicted": "CONCURRENCY_TAXES",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": true,
+      "n_other_reachable": 10
+    },
+    {
+      "id": "R490-P7",
+      "tool": "r490_leveled_placebo",
+      "fn": "decide",
+      "predicted": "SCALE_DEPENDENT_TAX",
+      "intent": "evidence",
+      "cell": "EVALUABLE",
+      "predicted_is_reachable": true,
+      "n_other_reachable": 13
+    }
+  ],
+  "vocab_diffs": {
+    "r486_longreq_attrib.analyze_under": {
+      "in_const_not_in_returns": [],
+      "in_returns_not_in_const": []
+    },
+    "r487_concurrency_tax.verdict_p1": {
+      "in_const_not_in_returns": [],
+      "in_returns_not_in_const": []
+    },
+    "r487_concurrency_tax.verdict_p2": {
+      "in_const_not_in_returns": [],
+      "in_returns_not_in_const": []
+    },
+    "r487_concurrency_tax.verdict_p3": {
+      "in_const_not_in_returns": [],
+      "in_returns_not_in_const": []
+    },
+    "r487_ts_semantics.decide": {
+      "in_const_not_in_returns": [],
+      "in_returns_not_in_const": []
+    },
+    "r488_pointwise_concurrency.decide": {
+      "in_const_not_in_returns": [],
+      "in_returns_not_in_const": []
+    },
+    "r489_permutation_placebo.decide": {
+      "in_const_not_in_returns": [],
+      "in_returns_not_in_const": []
+    },
+    "r490_leveled_placebo.decide": {
+      "in_const_not_in_returns": [],
+      "in_returns_not_in_const": []
+    }
+  },
+  "calibration": {
+    "C_POS": "FORCED_GREEN",
+    "C_NEG": "EVALUABLE"
+  },
+  "n_tools_scanned": 6,
+  "n_functions_scanned": 8,
+  "n_verdicts_scanned": 51,
+  "n_unreachable": 0,
+  "n_unreachable_sampling_only": 4,
+  "n_found_only_by_construction": 4,
+  "n_forced_green": 0,
+  "live_reads": 0,
+  "trials_per_fn": 40000,
+  "gate_ambiguity_note": "判準 §四 G-SCAN 寫 n_functions_scanned==6；§一 表格是 6 列工具、共 8 個函式。兩個數字都報，擋門照『工具數』套用。",
+  "verdict": "CENSUS_OK"
+}

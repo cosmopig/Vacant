@@ -111,3 +111,81 @@ round763／764／765 **連三輪**在交棒裡具名保留「R486–R490 六份�
 不改那五支被測工具任何一行；不起／不殺任何 run；不 `git add` 活著的 run 目錄；
 不碰 `world/`／`design/`／`vacant_hm`；不對已收官的 r445／r446／r447 下新判斷；
 不掃 EMPIRICAL 半邊（見 §〇）。
+
+---
+
+# 附錄 K：結果（round766，量測後追加；判準在 commit `8d64c82`，本節之後）
+
+## K.1 主結果
+
+```
+verdict=CENSUS_OK  tools=6  fns=8  verdicts=51  unreachable=0  forced_green=0  live_reads=0
+[舊量，非判定] 只靠隨機產生器時 unreachable=4；靠手工構造才找到的判決=4
+calibration: {'C_POS': 'FORCED_GREEN', 'C_NEG': 'EVALUABLE'}
+突變體 4/4 behaved as prereg'd
+```
+
+**R486–R490 的 12 條指名判決的預測，全部 `EVALUABLE`，`FORCED_GREEN` ＝ 0。**
+＝ 這六份預註冊在**結構半邊**上沒有強制綠燈。（EMPIRICAL 半邊未掃，見 §〇。）
+
+## K.2 🔴 本尺第一版量錯了，而且是**重犯 R491 的同一個 bug**——舊量保留
+
+第一版只有隨機產生器，判 `r490_leveled_placebo.decide` 有 **4 條 `UNREACHABLE`**：
+`CONCURRENCY_TAXES`／`SCALE_DEPENDENT_TAX`／`SPEEDUP_ANOMALY`／`TAXES_BELOW_MARGIN`。
+其中 `SCALE_DEPENDENT_TAX` **正是 R490 自己 P-7 預測的最終判決** ⇒ 若照發，
+會得出「R490 的頭條預測結構上不可能為真」這個**錯誤**結論。
+
+照判準 §六.4 不准直接寫「恆假死碼」，先做**刻意構造反例**——四條全部一次就到達：
+
+```
+aim SCALE_DEPENDENT_TAX -> SCALE_DEPENDENT_TAX
+aim CONCURRENCY_TAXES   -> CONCURRENCY_TAXES
+aim TAXES_BELOW_MARGIN  -> TAXES_BELOW_MARGIN   (EQUIV_HI=1.15)
+aim SPEEDUP_ANOMALY     -> SPEEDUP_ANOMALY
+```
+
+⇒ **`UNREACHABLE` 是我的產生器太窄造成的假象，不是被測檔的缺陷。**
+memory 記著的 R491 教訓（「普查第一版把 4 條誤標 IDENTITY，被測檔自己的夾具卻造得出反例」）
+**在本輪原封不動地重演，連條數都是 4**。⇒ 這不是意外，是**規則**：
+**隨機抽樣抽不到 ≠ 到不了；任何 `UNREACHABLE` 報出來之前一律要先撐過刻意構造反例。**
+
+處置：`constructive_hits()` 進入正式流程（新增可調參數 0 個），
+舊量無條件保留成 `unreachable_sampling_only=4`，並釘承重牆
+`M4_DROP_CONSTRUCTIVE` ⇒ 必須回到 4（實測 DETECTED）。
+
+## K.3 誠實邊界（事後照實寫）
+
+- **只做 IDENTITY 半邊**。判 `EVALUABLE` ＝「結構上可證偽」，
+  **不是**「那份閘道快照有可能給出相反判決」。**EMPIRICAL 半邊仍未掃。**
+- **`r486_longreq_attrib` 只掃到 4 個判決字串，且 `R486-P1`／`P1b`／`P2` 預測的那三個
+  判決字串本尺沒有到達過**（`predicted_is_reachable=False`）。它們仍判 `EVALUABLE`
+  ——因為有 4 個**別的**判決可達，證偽方向存在——但**本尺沒有證明那三條各自的預測值到得了**。
+  r486 沒有純判決函式（判決在 `analyze_under` 裡逐行算），本輪用合成 rows 驅動，
+  **沒有替它做 K.2 那樣的構造關** ⇒ **r486 的覆蓋是部分的**，下輪要補。
+- 判準 §四 G-SCAN 寫 `n_functions_scanned == 6` 有歧義：§一 表格是 **6 列工具、共 8 個函式**。
+  兩個數字都報（`tools=6 fns=8`），擋門照「工具數」套用。**這是判準自己的措辭缺陷，照實記。**
+- `P-7 live_reads==0` 是 `guard` 且**設計上強制綠燈**（本尺不開主 run 的檔）⇒ **不是證據**。
+  它有牙齒的證據是 selftest `C1_glive`：故意打主 run 路徑必須 `RuntimeError`。
+- 沒改那六支被測工具任何一行；沒起／沒殺任何 run；沒 `git add` 活著的 run 目錄。
+
+## K.4 預測帳（判準 §五，照實記）
+
+| # | 預測 | intent | 結果 |
+|---|---|---|---|
+| P-1 | 至少 1 個判決字串 `UNREACHABLE` | evidence | ❌ **MISS**（第一版看似中，但那是 K.2 的量具假象；照修正後的量＝0） |
+| P-2 | `FORCED_GREEN == 0` | evidence | ✅ **中**——而且這是我**自標「最可能錯的一條」** |
+| P-3 | `r487_ts_semantics.decide` 三個回傳值全可達 | evidence | ✅ 中（reachable=3） |
+| P-4 | `r490` 的 `PRIMARY_IS_POSITIVE_CONTROL` 可達 | evidence | ✅ 中 |
+| P-5 | `1 <= n_unreachable <= 6` | evidence | ❌ **MISS**（＝0） |
+| P-6 | selftest 全綠、突變體全部照預註冊行為 | guard | ✅ 中（4/4） |
+| P-7 | `live_reads == 0` | guard | ✅ 中，但**強制綠燈、不是證據**（見 K.3） |
+
+⚠ **P-1 與 P-5 不獨立**（同一件事：unreachable 的條數）⇒ 收官不得記成兩份獨立的失手。
+
+## K.5 推翻條件對照
+
+1. 校準雙向皆符（`C_POS=FORCED_GREEN`／`C_NEG=EVALUABLE`）⇒ 未觸發。
+2. `n_tools_scanned=6` ⇒ 未觸發。
+3. 詞彙表兩種取法的差集已具名輸出（`vocab_diffs`）⇒ 未觸發。
+4. **觸發了**：四條 `UNREACHABLE` 沒撐過構造反例 ⇒ 照 §六.4 不寫「恆假死碼」，改記假象（K.2）。
+5. **觸發了**：本尺被自己的產生器窄度絆倒 ⇒ 照實記、舊量保留（K.2）。
