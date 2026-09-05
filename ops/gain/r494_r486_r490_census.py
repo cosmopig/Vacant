@@ -160,8 +160,9 @@ def gen_r490(rng):
 
 
 # ─────────────────────────────────────────────── r486：沒有純判決函式，用合成 rows 驅動
-def _row(ts, lat_ms, model="gemma-4-12b-it-qat", ip="10.0.0.1", ctok=300, sc=200):
-    return {"ts": ts, "latency_ms": lat_ms, "model": model, "client_ip": ip,
+def _row(ts, lat_ms, model="gemma-4-12b-it-qat", ip="10.0.0.1", ctok=300, sc=200, rid=0):
+    # ⚠ `id` 與 events 的 `machine` 少一個，被測檔就 KeyError／直接判 BROKEN（round766 踩過）
+    return {"id": rid, "ts": ts, "latency_ms": lat_ms, "model": model, "client_ip": ip,
             "completion_tokens": ctok, "status_code": sc, "path": "/v1/chat/completions"}
 
 
@@ -172,11 +173,12 @@ def gen_r486(rng):
         overlap = rng.choice((True, False))
         t = t + (rng.choice((10.0, 400.0)) if not overlap else 1.0)
         lat = rng.choice((1000.0, 700_000.0, 900_000.0))
-        rows.append(_row(t, lat,
+        rows.append(_row(t, lat, rid=i,
                          model=rng.choice(("gemma-4-12b-it-qat", "qwen/qwen3.6-35b-a3b")),
                          ip=rng.choice(("10.0.0.1", "10.0.0.9")),
                          ctok=rng.choice((10, 300))))
-    events = [{"ts": rng.choice((0.0, 500.0)), "event": rng.choice(("loaded", "unloaded"))}
+    events = [{"ts": rng.choice((-1e8, 0.0, 500.0)), "machine": "1004",
+               "event": rng.choice(("loaded", "unloaded"))}
               for _ in range(rng.choice((0, 8)))]
     return (rows, events, rng.choice(("start", "end")))
 
@@ -203,7 +205,36 @@ _R490_REAL = {"n_hi": 200, "n_lo": 200, "coverage": 0.9, "ratio": 1.3,
 _R490_ANCH = {"anchor_a_ok": True, "anchor_b_ok": True}
 _R490_GATE = [_r490_rung(1800.0, "gate", 0.001, 0.3)]
 
+def _r486_row(rid, ts, lat, model="gemma-4-12b-it-qat", ip="10.0.0.1", ctok=300):
+    return _row(ts, lat, model=model, ip=ip, ctok=ctok, rid=rid)
+
+
+def _r486_ev(ts):
+    return {"ts": ts, "machine": "1004", "event": "loaded"}
+
+
+# 短的成功 gemma 請求＝P-3 的參考帶（沒有它 p3 恆 UNSCANNED）
+_R486_REF = [_r486_row(1000 + i, -1e7 + i * 1000, 1000.0) for i in range(5)]
+_R486_SEP = [_r486_row(i, i * 1e7, 700_000.0) for i in range(6)]          # 互不重疊
+_R486_OVL = [_r486_row(i, i * 10.0, 700_000.0) for i in range(6)]          # 全部重疊
+_R486_BASE = [_r486_ev(-1e8)]
+
 CONSTRUCTIVE = {
+    ("r486_longreq_attrib", "analyze_under"): [
+        (_R486_SEP + _R486_REF, _R486_BASE, "start"),                       # QUEUE_RULED_OUT/FORCED_GREEN
+        (_R486_OVL + _R486_REF, _R486_BASE, "start"),                       # QUEUE_LIVE/CONCURRENT_OBSERVED
+        (_R486_SEP + _R486_REF,
+         _R486_BASE + [_r486_ev(i * 1e7 + 5.0) for i in range(6)], "start"),  # RELOAD_CONTRIBUTES
+        (_R486_SEP + _R486_REF, [_r486_ev(1e9)], "start"),                  # UNSCANNED_EVENT_WINDOW
+        (_R486_SEP + _R486_REF
+         + [_r486_row(9001, -1e7, 1000.0, model="qwen/qwen3.6-35b-a3b", ip="10.0.0.9")],
+         _R486_BASE, "start"),                                              # BASERATE_OK
+        ([_r486_row(i, i * 1e7, 700_000.0, ctok=3) for i in range(6)] + _R486_REF,
+         _R486_BASE, "start"),                                              # NOT_GENERATING
+        ([_r486_row(i, i * 1e7, 700_000.0, ctok=300_000) for i in range(6)] + _R486_REF,
+         _R486_BASE, "start"),                                              # GENERATING
+        ([], [], "start"),                                                  # BROKEN
+    ],
     ("r490_leveled_placebo", "decide"): [
         (_R490_REAL, [_r490_rung(1800.0, "gate", 0.001, 0.3),
                       _r490_rung(60.0, "gate", 0.2, 0.3)], _R490_ANCH),
@@ -250,14 +281,23 @@ TOOLS = [
 TRIALS = 40000
 
 
-def reachable(fn, gen, rng, trials=TRIALS):
-    """回傳 {判決字串: witness 輸入}。多回傳值的（r486）併集。"""
+_exc_counter = {}
+
+
+def reachable(fn, gen, rng, trials=TRIALS, tag=""):
+    """回傳 {判決字串: witness 輸入}。多回傳值的（r486）併集。
+
+    ⚠ 例外要計數：產生器造出被測檔吃不下的輸入時，`except: continue` 會讓它
+    **安靜地長得跟「這個判決到不了」一模一樣**。round766 就是這樣讓 r486 的普查變成空的
+    （rows 少了 `id` 欄位 ⇒ KeyError 被吞掉）。exc_rate 進報告，selftest 釘上限。"""
     seen = {}
+    n_exc = 0
     for _ in range(trials):
         args = gen(rng)
         try:
             v = fn(*args)
         except Exception:
+            n_exc += 1
             continue
         vs = v if isinstance(v, set) else {v}
         for s in vs:
@@ -265,6 +305,8 @@ def reachable(fn, gen, rng, trials=TRIALS):
                 seen[s] = repr(args)[:400]
         if _mut() == "M1_STOP_AFTER_FIRST" and seen:
             break
+    if tag:
+        _exc_counter[tag] = {"n_exc": n_exc, "trials": trials, "exc_rate": round(n_exc / trials, 4)}
     return seen
 
 
@@ -284,7 +326,7 @@ def classify_prediction(predicted: str, reach: set) -> str:
 PREDICTIONS = [
     # (id, 工具, 函式, 預測的判決, intent)
     ("R486-P1",  "r486_longreq_attrib", "analyze_under", "QUEUE_RULED_OUT", "evidence"),
-    ("R486-P1b", "r486_longreq_attrib", "analyze_under", "FORCED_GREEN_FLAG", "guard"),
+    ("R486-P1b", "r486_longreq_attrib", "analyze_under", "FORCED_GREEN", "guard"),
     ("R486-P2",  "r486_longreq_attrib", "analyze_under", "RELOAD_CONTRIBUTES", "evidence"),
     ("R486-P4",  "r486_longreq_attrib", "analyze_under", "SERIAL_NO_QUEUE", "evidence"),
     ("R487-P1",  "r487_concurrency_tax", "verdict_p1", "CONCURRENCY_TAXES", "evidence"),
@@ -306,7 +348,7 @@ def census(seed: int = 494) -> dict:
     for tool, rel, const, fns in TOOLS:
         out["tools"][tool] = {}
         for fn_name, gen, fn in fns:
-            reach = reachable(fn, gen, rng)
+            reach = reachable(fn, gen, rng, tag=f"{tool}.{fn_name}")
             sampled_only = set(reach)
             reach.update(constructive_hits((tool, fn_name), fn))
             v_ret = vocab_from_returns(rel, fn_name)
@@ -367,6 +409,7 @@ def census(seed: int = 494) -> dict:
         len(d["found_only_by_construction"]) for fns in out["tools"].values() for d in fns.values())
     out["n_forced_green"] = sum(1 for p in out["predictions"] if p["cell"] == "FORCED_GREEN")
     out["live_reads"] = _live_reads - live_at_entry
+    out["exceptions"] = dict(_exc_counter)
     out["trials_per_fn"] = TRIALS
     # 判準 §四 G-SCAN 的「6」寫得有歧義（表格 6 列 = 6 支工具，但其中一列有 3 個函式）
     out["gate_ambiguity_note"] = ("判準 §四 G-SCAN 寫 n_functions_scanned==6；§一 表格是 6 列工具、"
@@ -425,6 +468,14 @@ def selftest() -> int:
     d490 = r["tools"]["r490_leveled_placebo"]["decide"]
     _ck("E4_old_kept", len(d490["unreachable_sampling_only"]) >= 1
         and d490["unreachable"] == [], d490["unreachable_sampling_only"])
+    # E5 承重牆：r486 那四條被預測的判決，構造關必須真的到得了
+    k486 = ("r486_longreq_attrib", "analyze_under")
+    h486 = set(constructive_hits(k486, call_r486))
+    _ck("E5_r486", {"QUEUE_RULED_OUT", "FORCED_GREEN", "RELOAD_CONTRIBUTES",
+                    "SERIAL_NO_QUEUE"} <= h486, sorted(h486))
+    # E6：產生器不准整片例外（round766 的 r486 就是這樣安靜變成空普查）
+    worst = max((d["exc_rate"] for d in _exc_counter.values()), default=0.0)
+    _ck("E6_exc_rate", worst <= 0.50, _exc_counter)
     # F：live_reads 必須 0（普查跑完之後）
     _ck("F1_live", r["live_reads"] == 0, r["live_reads"])
     print("selftest:", "all passed" if not _fails else f"FAILED {_fails}")

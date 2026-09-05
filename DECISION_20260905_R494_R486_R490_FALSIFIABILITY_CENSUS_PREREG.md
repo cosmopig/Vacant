@@ -189,3 +189,52 @@ memory 記著的 R491 教訓（「普查第一版把 4 條誤標 IDENTITY，被�
 3. 詞彙表兩種取法的差集已具名輸出（`vocab_diffs`）⇒ 未觸發。
 4. **觸發了**：四條 `UNREACHABLE` 沒撐過構造反例 ⇒ 照 §六.4 不寫「恆假死碼」，改記假象（K.2）。
 5. **觸發了**：本尺被自己的產生器窄度絆倒 ⇒ 照實記、舊量保留（K.2）。
+
+---
+
+# 附錄 L：修正（同一輪內，round766 後半）——K.3 那個洞是**我的量具壞掉**，不只是覆蓋不足
+
+K.3 老實寫了「r486 只掃到 4 個判決字串、三條預測值沒到達過」，但**沒有問為什麼**。
+問了之後發現不是「產生器太窄」，是**兩個欄位漏掉，讓整份 r486 普查是空的**：
+
+1. 被測檔 `analyze_under` 用 `o["id"] != r["id"]` 排除自己 ⇒ 我的合成 rows **沒有 `id`** ⇒ `KeyError`。
+2. 被測檔開頭 `events_scanned == 0` 直接判 `BROKEN` ⇒ 我的產生器有一半機率給空 events。
+3. 重載事件要 `machine == "1004"` ⇒ 我的合成 events **沒有 `machine`** ⇒ 永遠 0 筆在範圍內。
+
+而 `reachable()` 裡的 `except Exception: continue` **把 (1) 整片吞掉**
+⇒ 外觀與「這些判決到不了」**一模一樣**。r486 原本「可達 4 個」其實全是早退路徑
+（`BROKEN`／`UNSCANNED`／`SERIAL_NO_QUEUE`／`CONCURRENT_OBSERVED`）。
+
+⇒ **這是 memory 記的「安靜量不到」第四型：夾具造出被測檔吃不下的輸入，
+例外被吞 ⇒ 長得跟「判決不可達」一樣。**
+
+## L.1 處置
+
+- 產生器補 `id`／`machine`，events 不再給空。
+- **`reachable()` 開始計例外**，`exc_rate` 進報告，selftest 釘 `E6_exc_rate <= 0.50`。
+  （新增可調參數 1 個：例外率上限。它是**擋門**不是判別量。）
+- 補 r486 的構造關 8 組，承重牆 `E5_r486`：四條被預測的判決必須真的到得了。
+- **語意修正**：`PREDICTIONS` 表把 R486-P1b 的預測值寫成 `FORCED_GREEN_FLAG`，
+  但被測檔 `r486_longreq_attrib.py:150` 吐的字面是 `FORCED_GREEN`／`BASERATE_OK`，
+  **從來沒有 `FORCED_GREEN_FLAG`**。理由是**語意**（逐字比對被測檔原始碼），不是結果數字；
+  且**分類格兩版都是 `EVALUABLE`**，判決沒有因此改變。
+
+## L.2 修正後
+
+```
+verdict=CENSUS_OK  tools=6  fns=8  verdicts=62  unreachable=0  forced_green=0  live_reads=0
+[舊量，非判定] 只靠隨機產生器時 unreachable=4；靠手工構造才找到的判決=7
+r486_longreq_attrib.analyze_under: reachable=15（修正前 4）
+12 條預測全部 EVALUABLE，且 predicted_is_reachable 全部 True（修正前 4 條 False）
+突變體 4/4 behaved as prereg'd；exc_rate 最高 0.0065
+```
+
+⇒ **K.1 的主結論（`FORCED_GREEN=0`）不變，但 K.3 的「r486 覆蓋是部分的」這句話作廢**
+——它現在掃到 15 個判決字串，四條被預測的判決都有具名 witness。
+**K.3 那段原文無條件保留**（它是當時的誠實邊界，也是找到 L 節這個 bug 的線索）。
+
+## L.3 通則（值得記進 memory）
+
+**夾具／產生器造出被測檔吃不下的輸入時，`except: continue` 會讓它安靜地長得跟
+「這個判決結構上到不了」一模一樣。** ⇒ 任何「窮舉／抽樣找不到」的宣稱，
+除了要撐過刻意構造反例（K.2），還要**同時報例外率**；例外率沒報 = 這個宣稱沒被驗過。
