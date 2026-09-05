@@ -299,6 +299,15 @@ python3 ops/gain/replay/paired_ci.py --run runs/g_r461_lcb3_three_arm \
 
 ## C.4 這兩條指令**已經原樣跑過**（R463 §一 C-1 新訂通則）
 
+**R478 自記認證 blob sha**（判準 `DECISION_20260905_R478_CERT_SELF_RECORDED_SHA.md`）：
+下面幾行記的是**認證當時**這幾支工具的 blob sha，由擋門優先讀取。
+認證標題的文字若被改寫，`git log -S` 反推會定位到較晚的 commit 而**低報** STALE；
+自記值不受標題改寫影響。兩者不一致時擋門會大聲叫（`cert_sha_mismatches`）。
+
+- CERT-BLOB `ops/gain/replay/pooled_paired_ci.py` = `5179f45934ea98a83df308770f9193dd73ca872a`
+- CERT-BLOB `ops/gain/replay/paired_ci.py` = `bb146ea0925151a4c9ed093a9f70abe0c860142c`
+
+
 **通則：預註冊裡的收官指令，寫進判準檔之前必須先原樣跑一次**（可在別的 run 上跑）。
 附錄 B 就是沒跑過才寫錯。本附錄在**已收官的** `runs/g_r447_conform_lcb2` 上驗過兩種形狀，
 兩條 `rc=0`，且**逐字重現 R459 已發表的收官數字**：
@@ -359,6 +368,14 @@ python3 ops/gain/r447_eq5_offline.py \
    收官不准把它讀成「等預算打不贏」。
 
 ## D.4 這條指令已經原樣跑過（R463 §一 C-1 新訂通則）
+
+**R478 自記認證 blob sha**（判準 `DECISION_20260905_R478_CERT_SELF_RECORDED_SHA.md`）：
+下面幾行記的是**認證當時**這幾支工具的 blob sha，由擋門優先讀取。
+認證標題的文字若被改寫，`git log -S` 反推會定位到較晚的 commit 而**低報** STALE；
+自記值不受標題改寫影響。兩者不一致時擋門會大聲叫（`cert_sha_mismatches`）。
+
+- CERT-BLOB `ops/gain/r447_eq5_offline.py` = `52975b6ddeb9cdd33f8e6310eeb4468ca8bf33b9`
+
 
 在**已收官的** `runs/g_r447_conform_lcb2` 上跑過**兩個方向**（R464，本輪實測）：
 
@@ -459,6 +476,14 @@ python3 ops/gain/r447_gauge_capability.py runs/g_r461_lcb3_three_arm \
    C4 的仲裁者是 `ops/gain/r461_gate_verdict.py`，不是這支。
 
 ## E.4 這條指令已經原樣跑過（R463 §一 C-1 新訂通則）
+
+**R478 自記認證 blob sha**（判準 `DECISION_20260905_R478_CERT_SELF_RECORDED_SHA.md`）：
+下面幾行記的是**認證當時**這幾支工具的 blob sha，由擋門優先讀取。
+認證標題的文字若被改寫，`git log -S` 反推會定位到較晚的 commit 而**低報** STALE；
+自記值不受標題改寫影響。兩者不一致時擋門會大聲叫（`cert_sha_mismatches`）。
+
+- CERT-BLOB `ops/gain/r447_gauge_capability.py` = `162d54d51e57d700b310fb9ddad1708a7fe0a1f0`
+
 
 驗證 run＝`runs/g_r447_conform_lcb2`（已收官、同三臂 `OFF/CONFORM/OFF5`、同 LCB 家族、
 同 worker `gemma-4-12b-it-qat`）＝ R461 的**結構孿生**。
@@ -617,6 +642,26 @@ blob 逐 byte 相同 ⇒ 可以照原文引用。
 反證就在手邊：`paired_ci.py` 判 `CERT_STALE`，但 R476 逐格重跑後 C.4 的
 `+19.17pp`／`+12.50pp` **逐字重現**。本擋門只看 blob 有沒有動，**刻意過度警報**。
 `CERT_FRESH` 才是強的一邊：blob 逐 byte 相同 ⇒ 同輸入必得同輸出。
+
+## G.6（round749 / R478 追加）認證時刻改由附錄**自己記**，`-S` 反推降為交叉檢查
+
+判準：`DECISION_20260905_R478_CERT_SELF_RECORDED_SHA.md`（`ddc5d69`，工具之前）。
+
+G.2 通則 C-1′ 第 2 條要求「認證段落自己記 blob sha」——**現在記了**：附錄 C.4／D.4／E.4
+各自多了 `CERT-BLOB` 行（共 4 行，見那三處）。擋門改成**自記優先**，`-S` 反推退成交叉檢查：
+
+- 兩者不一致 ⇒ `cert_sha_mismatches` 非空 ⇒ 整份報告 `verdict=BROKEN`、`rc=2`（大聲叫），
+  **同時該工具格的 `CERT_STALE` 留在原地看得見**。
+- 自記值若不在該路徑的 blob 歷史裡（抄錯／編造）⇒ `BROKEN_CERT_SHA_NOT_IN_HISTORY`、`rc=2`。
+
+補起來的洞是**低報**：認證標題的文字一旦被改寫，`-S<新字串>` 只定位得到改寫那一次，
+認證時刻往後移，本該 STALE 的格子會變成 FRESH ＝ 無聲綠燈。實測（R478 §六 M9／M10）：
+標題改寫下**舊行為 `CERT_STALE` 2→0、rc 1→0**，**新行為維持 2 並吐 2 筆 mismatch、rc=2**。
+
+⚠ 今天 `cert_sha_mismatches = 0`，但**這是結構強制綠燈**（自記值是照今天的反推值抄的）
+⇒ **不准**拿它當「沒有人改過標題」的證據；它的 `intent` 是 guard，牙齒由突變體證明。
+G.3／G.4 的判決與誤讀警告**一個字都沒改**（今天仍是 `paired_ci.py` 與
+`r447_gauge_capability.py` STALE、`pooled_paired_ci.py` 與 `r447_eq5_offline.py` FRESH）。
 
 ## G.5 本附錄**沒有**動的東西
 

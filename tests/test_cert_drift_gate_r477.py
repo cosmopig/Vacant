@@ -14,6 +14,8 @@ def _spec_rc(rep):
     """判準 §六 的 rc 語意，在測試側**獨立**再轉錄一次（不呼叫被測模組的同一份）。"""
     if rep["docs_scanned"] == 0:
         return 2
+    if rep.get("cert_sha_mismatches"):        # R478 §三 新增的一條（只加不改）
+        return 2
     if any(k.startswith("BROKEN") for k in rep["counts"]):
         return 2
     if rep["counts"].get("CERT_STALE"):
