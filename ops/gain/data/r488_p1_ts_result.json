@@ -1,0 +1,216 @@
+{
+  "all": {
+    "inv": {
+      "ts": 0.22291235334713597,
+      "ts_minus_lat": 0.22912353347135955,
+      "ts_plus_lat": 0.0003450655624568668
+    },
+    "n": 2899,
+    "n_pairs": 2898,
+    "sign": {
+      "b": 646,
+      "best": "ts_plus_lat",
+      "c": 1,
+      "p": 2.219206965871008e-192,
+      "second": "ts"
+    },
+    "verdict": "TS_IS_START"
+  },
+  "calibration": {
+    "detail": [
+      {
+        "expect": "TS_IS_START",
+        "got": "TS_IS_START",
+        "inv": {
+          "ts": 0.2127659574468085,
+          "ts_minus_lat": 0.311639549436796,
+          "ts_plus_lat": 0.0
+        },
+        "name": "pos_start_j50",
+        "ok": true,
+        "sign": {
+          "b": 170,
+          "best": "ts_plus_lat",
+          "c": 0,
+          "p": 1.3363823550460978e-51,
+          "second": "ts"
+        },
+        "wrong_direction": false
+      },
+      {
+        "expect": "TS_IS_START",
+        "got": "TS_IS_START",
+        "inv": {
+          "ts": 0.03128911138923655,
+          "ts_minus_lat": 0.05506883604505632,
+          "ts_plus_lat": 0.0
+        },
+        "name": "pos_start_j5",
+        "ok": true,
+        "sign": {
+          "b": 25,
+          "best": "ts_plus_lat",
+          "c": 0,
+          "p": 5.960464477539063e-08,
+          "second": "ts"
+        },
+        "wrong_direction": false
+      },
+      {
+        "expect": "TS_IS_START",
+        "got": "TS_UNRESOLVED_BY_ID",
+        "inv": {
+          "ts": 0.0050062578222778474,
+          "ts_minus_lat": 0.012515644555694618,
+          "ts_plus_lat": 0.0
+        },
+        "name": "pos_start_j1",
+        "ok": false,
+        "sign": {
+          "b": 4,
+          "best": "ts_plus_lat",
+          "c": 0,
+          "p": 0.125,
+          "second": "ts"
+        },
+        "wrong_direction": false
+      },
+      {
+        "expect": "TS_IS_START",
+        "got": "TS_UNRESOLVED_BY_ID",
+        "inv": {
+          "ts": 0.0012515644555694619,
+          "ts_minus_lat": 0.0012515644555694619,
+          "ts_plus_lat": 0.0
+        },
+        "name": "pos_start_j0.2",
+        "ok": false,
+        "sign": {
+          "b": 1,
+          "best": "ts_plus_lat",
+          "c": 0,
+          "p": 1.0,
+          "second": "ts"
+        },
+        "wrong_direction": false
+      },
+      {
+        "expect": "TS_IS_END",
+        "got": "TS_IS_END",
+        "inv": {
+          "ts": 0.03379224030037547,
+          "ts_minus_lat": 0.0,
+          "ts_plus_lat": 0.05381727158948686
+        },
+        "name": "neg_end_j5",
+        "ok": true,
+        "sign": {
+          "b": 27,
+          "best": "ts_minus_lat",
+          "c": 0,
+          "p": 1.4901161193847656e-08,
+          "second": "ts"
+        },
+        "wrong_direction": false
+      },
+      {
+        "expect": "TS_IS_END",
+        "got": "TS_UNRESOLVED_BY_ID",
+        "inv": {
+          "ts": 0.0050062578222778474,
+          "ts_minus_lat": 0.0,
+          "ts_plus_lat": 0.010012515644555695
+        },
+        "name": "neg_end_j0.2",
+        "ok": false,
+        "sign": {
+          "b": 4,
+          "best": "ts_minus_lat",
+          "c": 0,
+          "p": 0.125,
+          "second": "ts"
+        },
+        "wrong_direction": false
+      },
+      {
+        "expect": "TS_UNRESOLVED_BY_ID",
+        "got": "TS_UNRESOLVED_BY_ID",
+        "inv": {
+          "ts": 0.5131414267834794,
+          "ts_minus_lat": 0.5131414267834794,
+          "ts_plus_lat": 0.5131414267834794
+        },
+        "name": "neg_noise",
+        "ok": true,
+        "sign": {
+          "b": 0,
+          "best": "ts",
+          "c": 0,
+          "p": 1.0,
+          "second": "ts_plus_lat"
+        },
+        "wrong_direction": false
+      },
+      {
+        "expect": "TS_UNRESOLVED_BY_ID",
+        "got": "TS_UNRESOLVED_BY_ID",
+        "inv": {
+          "ts": 0.0,
+          "ts_minus_lat": 0.0,
+          "ts_plus_lat": 0.0
+        },
+        "name": "neg_const_lat",
+        "ok": true,
+        "sign": {
+          "b": 0,
+          "best": "ts",
+          "c": 0,
+          "p": 1.0,
+          "second": "ts_plus_lat"
+        },
+        "wrong_direction": false
+      }
+    ],
+    "directional": 6,
+    "recovered": 3,
+    "rule_broken": false,
+    "rule_broken_strict": true,
+    "strict_mismatch": [
+      {
+        "expect": "TS_IS_START",
+        "got": "TS_UNRESOLVED_BY_ID",
+        "name": "pos_start_j1"
+      },
+      {
+        "expect": "TS_IS_START",
+        "got": "TS_UNRESOLVED_BY_ID",
+        "name": "pos_start_j0.2"
+      },
+      {
+        "expect": "TS_IS_END",
+        "got": "TS_UNRESOLVED_BY_ID",
+        "name": "neg_end_j0.2"
+      }
+    ],
+    "wrong_direction": []
+  },
+  "chat": {
+    "inv": {
+      "ts": 0.02038216560509554,
+      "ts_minus_lat": 0.19235668789808918,
+      "ts_plus_lat": 0.0012738853503184713
+    },
+    "n": 786,
+    "n_pairs": 785,
+    "sign": {
+      "b": 16,
+      "best": "ts_plus_lat",
+      "c": 1,
+      "p": 0.000274658203125,
+      "second": "ts"
+    },
+    "verdict": "TS_IS_START"
+  },
+  "population_sensitive": false,
+  "verdict": "TS_IS_START"
+}
