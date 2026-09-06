@@ -1,0 +1,102 @@
+{
+ "n_specs_validated": 368,
+ "n_pool_tasks": 368,
+ "n_pool_cells": 1840,
+ "chains": {
+  "mac": {
+   "n_entries": 1840,
+   "verify_chain": true,
+   "verify_executor_chain": true,
+   "head": "9f34a546298bafe8342c9c8e67432aa21d4a573e4101f31ac9a82d7f7197dc2b",
+   "head_matches_pub_json": true,
+   "verify_attestation_fail": 0,
+   "verify_attestation_fail_reasons": {},
+   "draft_not_in_pool": 0,
+   "negative_control_other_key_chain_ok": false,
+   "negative_control_tamper_chain_ok": false
+  },
+  "vacantdev": {
+   "n_entries": 1840,
+   "verify_chain": true,
+   "verify_executor_chain": true,
+   "head": "d0389abb9629edb58712fbbc73d183a5f97940a336d92b84682cfdfd72f31c31",
+   "head_matches_pub_json": true,
+   "verify_attestation_fail": 0,
+   "verify_attestation_fail_reasons": {},
+   "draft_not_in_pool": 0,
+   "negative_control_other_key_chain_ok": false,
+   "negative_control_tamper_chain_ok": false
+  }
+ },
+ "keys_differ": true,
+ "vacant_ids_differ": true,
+ "platform": {
+  "mac": "macOS-15.7.3-x86_64-i386-64bit",
+  "vacantdev": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39"
+ },
+ "platform_differ": true,
+ "python_differ": true,
+ "file_sha256_identical_7of7": true,
+ "live_repo_vs_run_sha": {
+  "ops/gain/gain_run.py": "same",
+  "ops/gain/replay/peer_exec_real.py": "DIFF live=5072411e7546",
+  "vacant/checks.py": "same",
+  "vacant/identity.py": "same",
+  "vacant/logbook.py": "same",
+  "vacant/peerexec.py": "same",
+  "vacant/suitespec.py": "same"
+ },
+ "ndjson_cells": {
+  "mac": 1840,
+  "vacantdev": 1840
+ },
+ "ndjson_entries_match_book": {
+  "mac": true,
+  "vacantdev": true
+ },
+ "P1_recomputed": {
+  "n_cells_common": 1840,
+  "agree": 1840,
+  "disagree": 0,
+  "mac_only": 0,
+  "dev_only": 0,
+  "disagreements": []
+ },
+ "P6_recomputed": {
+  "render_agree_and_match_my_recompute": 368,
+  "suite_agree": 368,
+  "n_specs": 368,
+  "bad": []
+ },
+ "vs_single_executor_facts_recomputed": {
+  "agree": 0,
+  "disagree": 0,
+  "examples": []
+ },
+ "n_gauged_ok": 366,
+ "P2_recomputed": {
+  "ship_match": 340,
+  "ship_mismatch": 0,
+  "refuse_match": 26,
+  "refuse_mismatch": 0,
+  "gauge_blocked": [
+   "mbppplus_Mbpp/404",
+   "mbppplus_Mbpp/587"
+  ],
+  "mismatches": []
+ },
+ "P3_recomputed": {
+  "contested_cells": 2,
+  "executor_named_cells": 0
+ },
+ "accounting": {
+  "runtime_rows": 371,
+  "runtime_accepted": 345,
+  "tasks_without_spec": [
+   "mbppplus_Mbpp/737",
+   "mbppplus_Mbpp/787",
+   "mbppplus_Mbpp/794"
+  ],
+  "ship_match+nospec+gauge_blocked": 345
+ }
+}
