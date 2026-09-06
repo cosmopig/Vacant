@@ -229,5 +229,3 @@ r446 runtime 的 `gate_code_sha256` 相符 **340/340**，拒交 **26/26**，
 預註冊者：Claude Opus 5（實作），待 Fable 稽核。
 簽入 commit：本文件**先單獨簽入**，然後才實作 `--corrupt`、才打 tarball、
 才讓 K3 產生第一筆證言。
-</content>
-</invoke>
