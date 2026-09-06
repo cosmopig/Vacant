@@ -448,6 +448,48 @@ def test_decision_carries_the_lcb3_honesty_boundaries(dec: str) -> None:
     assert "不是獨立樣本" in dec
 
 
+def test_decision_g4_diff_list_covers_the_sandbox_runner_template(dec: str) -> None:
+    """G-4 的檔案清單必須是**四個**——`vacant/checks.py` 不准漏。
+
+    r446/r448/r449b 沿用的三檔清單（gain_run／brain_cline／codebench）漏掉了沙箱本體。
+    EQ5 的出貨閘門與計分都走
+    `arm_eq5 → meets_demand → checks.run_python_check → checks._test_runner_source`，
+    所以那份 runner 模板改了就是臂行為改了（round452b 的 `__vacant_ns` 就是一例）。
+    漏掉它，G-4 會在一個真的動過臂路徑的 run 上印綠燈。
+    """
+    m = re.search(r"git diff [0-9a-f]{40} <r449c 的 runner_git\.sha> -- ([^`|]+)", dec)
+    assert m, "找不到 G-4 的 diff 指令"
+    assert m.group(1).split() == [
+        "ops/gain/gain_run.py", "ops/gain/brain_cline.py",
+        "vacant/codebench.py", "vacant/checks.py",
+    ], "G-4 的檔案清單漂了"
+    # 理由必須寫出來，不能只是清單裡多一個檔名。
+    assert "_test_runner_source" in dec and "run_python_check" in dec
+
+
+def test_g4_call_chain_claim_matches_the_source() -> None:
+    """把 §四 G-4-α 那條呼叫鏈在原始碼上驗一次——敘述不准只是敘述。"""
+    gr = (ROOT / "ops" / "gain" / "gain_run.py").read_text(encoding="utf-8")
+    ck = (ROOT / "vacant" / "checks.py").read_text(encoding="utf-8")
+    assert "def run_python_check(" in ck, "checks.py 沒有 run_python_check"
+    assert "_test_runner_source(" in ck, "run_python_check 那條路徑沒有 runner 模板了"
+    i = gr.index("def meets_demand(")
+    assert "run_python_check" in gr[i:i + 2000], "meets_demand 不再走 run_python_check"
+    j = gr.index("def arm_eq5(")
+    body = gr[j:j + 8000]
+    assert "meets_demand(" in body and "visible_check" in body, \
+        "arm_eq5 不再用 meets_demand 跑 visible_check——G-4-α 的論證要重寫"
+
+
+def test_decision_g4_stat_evidence_is_pasted_and_honest(dec: str) -> None:
+    """G-4-β 必須貼真的 `--stat`，而且要點名哪兩個檔**沒有**改動。"""
+    assert "git diff --stat 63f20d580c87cf5c44d11f4c54f1d66220eabb6e b3c8514" in dec
+    assert "2 files changed, 59 insertions(+), 9 deletions(-)" in dec, \
+        "G-4-β 沒有貼 --stat 的實測輸出"
+    assert "brain_cline.py` 與 `vacant/codebench.py` 這段期間零改動" in dec, \
+        "沒有寫出「哪兩個檔沒動」——那是初稿憑印象寫錯的那半句"
+
+
 def test_decision_names_the_arbiter_fields_from_the_analyzer(dec: str) -> None:
     """判準要指名它讀 analyze_eq5.py 輸出的哪個 key，不准靠工具印的字串。"""
     for field in ARBITER_FIELDS:

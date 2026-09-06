@@ -190,19 +190,75 @@ r446 的事前註冊，改它等於改別人的事前註冊（該檔第 48 行�
 | **G-1** | analyzer 讀得懂 runner 寫的 rows | `python3 ops/gain/eq5_schema_precheck.py --run runs/g_r449c_eq5_lcb3` ⇒ `SCHEMA_COMPATIBLE` | r446／r448／r449b 上各實測過一次 |
 | **G-2** | 帳對得上、且是收官資料 | `broken_reasons` ＝ `[]`；`summary.arms.EQ5.terminal` ＝ true；`measured + infra_void == processed` | r449b：120+0=120、terminal true |
 | **G-3** | 落盤欄位與離線重算一致 | 每一列都有 `same_choice_effective`，且與 `accepted ∧ (gate_code_sha256==vote_code_sha256)` 逐筆相同（`analyze_eq5` 的 `landed`／`bad_eff` 區塊） | r448 是這道擋門第一次被評估，r449b 上 120/120 通過；本 run 沿用同一條 |
-| **G-4** | 處置定義沒有漂掉（R680 Q2） | `git diff 63f20d580c87cf5c44d11f4c54f1d66220eabb6e <r449c 的 runner_git.sha> -- ops/gain/gain_run.py ops/gain/brain_cline.py vacant/codebench.py`，逐項分類 (a) 只影響分析／文件 (b) 影響臂行為 | **基線＝r449b 的 runner sha `63f20d580c87cf5c44d11f4c54f1d66220eabb6e`**（從 `runs/g_r449_eq5_lcb2/summary.json` 讀出，§九-6）。本檔寫作時 worktree HEAD＝`b3c8514`（feat/v2-four-stages），**b3c8514 是 round452／452b 的 SuiteSpec／entry_point 改動，它碰過 `ops/gain/gain_run.py` 與 `vacant/codebench.py`** ⇒ **這條 diff 事前就知道非空，收官必須逐項分類，不准引用本格當成「已經驗過」** |
+| **G-4** | 處置定義沒有漂掉（R680 Q2） | `git diff 63f20d580c87cf5c44d11f4c54f1d66220eabb6e <r449c 的 runner_git.sha> -- ops/gain/gain_run.py ops/gain/brain_cline.py vacant/codebench.py vacant/checks.py`，逐項分類 (a) 只影響分析／文件 (b) 影響臂行為 | **基線＝r449b 的 runner sha `63f20d580c87cf5c44d11f4c54f1d66220eabb6e`**（從 `runs/g_r449_eq5_lcb2/summary.json` 讀出，§九-6）。**四個檔不是三個**——`vacant/checks.py` 是 round449c 稽核加進來的，理由見下面 G-4-α。本檔寫作時 worktree HEAD＝`b3c8514`（feat/v2-four-stages），這條 diff **事前實測非空**（G-4-β 貼了 `--stat`）⇒ **收官必須對發射當下的 sha 重跑並逐項分類，不准引用本格當成「已經驗過」** |
 | **G-5** | 不被長得像的旗標騙 | `summary.equal_budget_comparison_valid` **預期是 false** | 它的定義只看 `ON` 與 `OFF5` 兩臂（`gain_run.py:1394-1399`），EQ5-only 的 run 結構上永遠 false（r449b、r461 實測都是 false）。EQ5 的等預算證據是 P-4，不是這個旗標 |
 
-**G-4 的兩條誠實邊界**：
+### G-4-α：為什麼清單是**四個檔**——`vacant/checks.py` 在臂的執行路徑上
 
-1. r446／r447／r448／r449b／r461 的 `runner_git.dirty` 都是 **true**——它們跑的時候
-   工作目錄有未提交的改動，所以那幾版的位元組**無法只憑 sha 完全還原**。這是既有的設計缺口
-   （R680 Q2 的 BROKEN 情形的弱化版）。R449B 稽核 §一 G-4 查證過 r449b 那次的 dirty
-   內容全是 `??` 的 `runs/` 未追蹤資料、tracked 檔零改動——**那是逐次查證的結果，不是這個欄位的通性**。
-   本 run 大機率也會是 dirty＝true，**發射時把 dirty 記下來並逐項查證，不要沿用 r449b 的結論**。
-2. 本 run 與 r449b 之間**一定隔著 round450–452b 的改動**（`b3c8514` 已經動過
-   `gain_run.py`／`codebench.py`）。R449B 那次 G-4 是「三個檔 diff 空」的幸運情形，
-   **本 run 不會是**。收官若把 G-4 判綠，必須附上逐項分類表，不准只寫「綠」。
+r446／r448／r449b 沿用的三檔清單（`gain_run.py`／`brain_cline.py`／`codebench.py`）
+**漏了沙箱本體**。實際的呼叫鏈是：
+
+```
+arm_eq5（gain_run.py:582）  →  meets_demand（gain_run.py:125-141）
+     →  vacant.checks.run_python_check  →  vacant.checks._test_runner_source
+```
+
+`_test_runner_source` 產生的就是候選碼與驗收碼真正被執行的那份 runner 模板。
+EQ5 的**出貨閘門**（`visible_check`）與**計分**（`hidden_check`）兩條都走它。
+⇒ 改這個模板＝改臂的行為，跟改 `arm_eq5` 是同一類事，
+**它從第一天就該在清單裡，前三個 EQ5 run 沒有它是既有缺口**（本檔補上，
+並非本輪新增的擋門）。收官引用 r446/r448/r449b 的 G-4 綠燈時要知道它們少驗了這一個檔。
+
+### G-4-β：基線 diff 的事前實測（`63f20d5` → `b3c8514`，發射時必須換成真 sha 重跑）
+
+```bash
+git diff --stat 63f20d580c87cf5c44d11f4c54f1d66220eabb6e b3c8514 -- \
+  ops/gain/gain_run.py ops/gain/brain_cline.py vacant/codebench.py vacant/checks.py
+```
+
+實測輸出（2026-09-06，worktree）：
+
+```
+ ops/gain/gain_run.py | 34 ++++++++++++++++++++++++++--------
+ vacant/checks.py     | 34 +++++++++++++++++++++++++++++++++-
+ 2 files changed, 59 insertions(+), 9 deletions(-)
+```
+
+⇒ **`ops/gain/brain_cline.py` 與 `vacant/codebench.py` 這段期間零改動**
+（本檔初稿寫的「b3c8514 碰過 `gain_run.py` 與 `codebench.py`」是憑印象寫的，
+`--stat` 打臉了後半句，已更正）。動到的兩個檔，事前分類：
+
+| 檔 | 哪一個 round | 改了什麼 | 事前分類 |
+|---|---|---|---|
+| `ops/gain/gain_run.py` | round451（`56a1221`） | 3 個 hunk 全在**量具**路徑：`import gauge_suite`、新增 `_gauge_runner`、`probe_instrument` 的兩個方向改走 `vacant.suitegauge.gauge_suite`。`meets_demand`、`arm_eq5`、請求政策一行沒動 | **(a)** |
+| `vacant/checks.py` | round452b（`b3c8514`） | docstring、新增常數 `CANDIDATE_NS_NAME = "__vacant_ns"`、把它加進 `_candidate_functions` 的 `reserved` 集合、`_test_runner_source` 多輸出一行 `__vacant_ns = {...}` 字典 | **邊界情形，事前不判 (a)**：`run_python_check` 的簽章與語意不變，但 `reserved` 多一個名字代表**候選碼裡叫 `__vacant_ns` 的函式從此不會被當成 entry point**，而 runner module scope 也多了一個名字 ⇒ 理論上可改變某些候選的判定結果。**收官必須實測**（見下） |
+
+`ops/gain/gain_run.py` 判 (a) 不是只看 hunk 落在哪——**函式層級逐字比對過**
+（`ast.get_source_segment` 取兩版的同名函式原始碼字串比較）：
+
+```
+meets_demand       identical: True
+arm_eq5            identical: True
+arm_off5           identical: True
+arm_conform        identical: True
+extract_code       identical: True
+probe_instrument   identical: False   ← 唯一改動，量具路徑
+```
+
+`vacant/checks.py` 這一格的**收官實測方式**（事前寫死，不准收官時另想）：
+在 r449c 的 rows 上數有幾題的任一份候選定義了名為 `__vacant_ns` 的函式
+（`grep -c '__vacant_ns'` 於候選碼）。**0 題 ⇒ 判 (a)**；非 0 ⇒ 判 (b)，
+§十三-2 生效。事前預期是 0（那是個 dunder 風格的內部名，模型不會生成它），
+但**「預期」不是「量到」**，所以判準寫在這裡。
+
+**G-4 的誠實邊界**：r446／r447／r448／r449b／r461 的 `runner_git.dirty` 都是 **true**
+——它們跑的時候工作目錄有未提交的改動，所以那幾版的位元組**無法只憑 sha 完全還原**。
+這是既有的設計缺口（R680 Q2 的 BROKEN 情形的弱化版）。
+R449B 稽核 §一 G-4 查證過 r449b 那次的 dirty 內容全是 `??` 的 `runs/` 未追蹤資料、
+tracked 檔零改動——**那是逐次查證的結果，不是這個欄位的通性**。
+本 run 大機率也會是 dirty＝true，**發射時把 dirty 記下來並逐項查證，不要沿用 r449b 的結論**。
+另外，R449B 那次 G-4 是「三個檔 diff 空」的情形；**本 run 事前就知道不會是**（G-4-β），
+收官若把 G-4 判綠，必須附上逐項分類表，不准只寫「綠」。
 
 ---
 
@@ -725,11 +781,13 @@ r444＋r445 合起來是 371 題、n_d=40 ⇒ **10.78%**，與 R449B §三 P-3 �
    （例如 `deliv` 口徑被改過），本檔 §三 的所有錨值失效，跨 run 不可比，
    先修可比性再談任何狀態。
 2. 若 G-4 的 diff 出現 (b) 類改動（碰到 `arm_eq5`／`meets_demand`／`behavior_signature`／
-   `extract_code`／`LiveCodeBenchLoader`／請求政策），r449c 就**不是**在跑
+   `extract_code`／`LiveCodeBenchLoader`／**`vacant/checks.py` 的沙箱 runner 模板
+   `_test_runner_source`**／請求政策），r449c 就**不是**在跑
    r446/r448/r449b 跑的那條臂——§六 的四個狀態全部不適用，收官只能報 r449c 自己的數字
    並寫明處置變了。**本檔寫作當下 HEAD（`b3c8514`）與 r449b 的 runner sha
-   （`63f20d5`）之間隔著 round450–452b 對 `gain_run.py`／`codebench.py` 的改動，
-   這一條不是假設性的**（§四 G-4）。
+   （`63f20d5`）之間，`ops/gain/gain_run.py`（round451，量具路徑）與
+   `vacant/checks.py`（round452b，沙箱 runner 模板）各有 34 行改動
+   ——`--stat` 實測見 §四 G-4-β，這一條不是假設性的**。
 3. 若 §五 的檢定力表被發現算錯（例如 `diff_ci` 的邊界語意與本檔假設不同），
    §六 邊界 (b) 的「方向沒翻 ≠ 效果消失」仍然成立（它只依賴定性事實），
    但表裡的百分比要重算，且「n=189 檢定力不足」這個結論要重新確認而不是沿用。
