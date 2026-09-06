@@ -1,0 +1,14 @@
+[K1] 1840 格（368 題），6 workers，repo=/Users/cosmopig/Documents/GitHub/Vacant
+  probe 200/1840  11s
+  probe 400/1840  55s
+  probe 600/1840  55s
+  probe 800/1840  55s
+  probe 1000/1840  55s
+  probe 1200/1840  59s
+  probe 1400/1840  84s
+  probe 1600/1840  84s
+  probe 1800/1840  126s
+[K1] 簽了 1840 筆，錯 0 筆，chain_ok=True，128s（probe 126s / sign 2s）
+  ops/gain/replay/r454/att_K1.ndjson
+  ops/gain/replay/r454/pub_K1.json
+  ops/gain/replay/r454/att_K1.book.json

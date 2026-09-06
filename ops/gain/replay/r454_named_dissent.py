@@ -502,6 +502,10 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
     if receipt_cell is not None:
         tid, ci = receipt_cell["task_id"], receipt_cell["cand"]
         v = verdicts[tid][ci]
+        trow = next((r for r in task_rows if r["task_id"] == tid), {})
+        # hidden **只計分**：這一行是給觀眾看的答案，不進機制。收據上必須把它
+        # 跟三票分開放，否則會讓人以為機制看得到隱藏測資（它看不到）。
+        hid_this = facts.get(f"{tid}#{ci}", {}).get("hidden")
         ep = tasks[tid].get("entry_point")
         spec = px.as_suite_spec(specs[tid], ep)
         rec = {
@@ -538,6 +542,17 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
                 "detail_dissenters": list(v.detail_dissenters),
                 "equivocators": list(v.equivocators),
                 "rejected": [list(r) for r in v.rejected],
+            },
+            "what_shipped_for_this_task": {
+                "shipped_index": trow.get("shipped_index"),
+                "shipped_sha256": trow.get("shipped_sha256"),
+                "runtime_sha256": trow.get("runtime_sha"),
+                "same_as_r446_runtime": trow.get("verdict_vs_runtime") == "match",
+            },
+            "hidden_check_scoring_only": {
+                "this_candidate_passes_hidden": hid_this,
+                "note": ("隱藏測資**不進機制**——三把金鑰誰都看不到它。這一欄是"
+                         "事後計分，放在收據上只是為了讓觀眾知道答案。"),
             },
             "honest_boundary": [
                 "鏈驗證證明的是「這些話確實是這把金鑰說的、事後沒被改過」，"
@@ -590,13 +605,25 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
             f"    不採信      "
             f"{'; '.join(f'{x[0]}:{x[1]}' for x in v.rejected) or '（無）'}",
         ]
+        txt += [
+            "",
+            f"  這一題最後出貨的是第 {trow.get('shipped_index')} 份草稿"
+            f"（sha256 {str(trow.get('shipped_sha256'))[:16]}…），"
+            f"{'與 r446 單執行器真跑逐位相同' if trow.get('verdict_vs_runtime') == 'match' else '與 r446 不同'}。",
+            f"  也就是說：多了一把說謊的金鑰，這一題交出去的東西**沒有變**。",
+        ]
         if v.visible_ok is False and receipt_cell["votes"].get(a.corrupt_id) is True:
             txt += [
                 "",
                 f"  如果只有 {a.corrupt_id} 一把金鑰（k=1，＝ CONFORM 的單一執行器）：",
-                "  這份草稿會被判「通過」而出貨，而且收據上看不出任何異狀。",
-                "  多出來的兩把金鑰買到的不是「更準」，是**這一票不同意可以指到人**。",
+                f"  第 {ci} 份草稿會被判「通過」而出貨，收據上看不出任何異狀。",
             ]
+            if hid_this is False:
+                txt.append("  而事後用隱藏測資對答案：第 "
+                           f"{ci} 份草稿**確實是錯的**——那會是一次假交付。")
+            txt.append("  多出來的兩把金鑰買到的不是「更準」，"
+                       "是**這一票不同意可以指到人**。")
+            txt.append("  （隱藏測資不進機制，三把金鑰誰都看不到它；上面那行只是給觀眾的答案。）")
         txt += [
             "",
             "  這張收據證明什麼、不證明什麼：",

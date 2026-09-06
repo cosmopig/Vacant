@@ -1,0 +1,35 @@
+=== K2 (honest) start 2026-09-06T09:31:17+00:00 ===
+[K2] 1840 格（368 題），2 workers，repo=/home/user1/vacant/r454_scratch/repo
+  probe 200/1840  11s
+  probe 400/1840  55s
+  probe 600/1840  55s
+  probe 800/1840  60s
+  probe 1000/1840  67s
+  probe 1200/1840  75s
+  probe 1400/1840  101s
+  probe 1600/1840  104s
+  probe 1800/1840  149s
+[K2] 簽了 1840 筆，錯 0 筆，chain_ok=True，149s（probe 149s / sign 1s）
+  /home/user1/vacant/r454_scratch/out/att_K2.ndjson
+  /home/user1/vacant/r454_scratch/out/pub_K2.json
+  /home/user1/vacant/r454_scratch/out/att_K2.book.json
+K2 rc=0
+=== K3 (CORRUPT) start 2026-09-06T09:33:46+00:00 ===
+[K3] 1840 格（368 題），2 workers，repo=/home/user1/vacant/r454_scratch/repo
+[K3] ⚠ 腐化執行器：seed=20260906 liar=0.15 equiv=0.03（腐化在沙箱真跑之後才施加）
+  probe 200/1840  10s
+  probe 400/1840  55s
+  probe 600/1840  55s
+  probe 800/1840  60s
+  probe 1000/1840  67s
+  probe 1200/1840  75s
+  probe 1400/1840  101s
+  probe 1600/1840  104s
+  probe 1800/1840  148s
+[K3] 簽了 1899 筆，錯 0 筆，chain_ok=True，149s（probe 148s / sign 1s）
+  /home/user1/vacant/r454_scratch/out/att_K3.ndjson
+  /home/user1/vacant/r454_scratch/out/pub_K3.json
+  /home/user1/vacant/r454_scratch/out/att_K3.book.json
+  /home/user1/vacant/r454_scratch/out/att_K3.corrupt_side.json  角色分佈 {'honest': 1507, 'liar': 274, 'equivocator': 59}
+K3 rc=0
+=== done 2026-09-06T09:36:15+00:00 ===
