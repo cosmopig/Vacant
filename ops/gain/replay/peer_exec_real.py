@@ -17,6 +17,12 @@
 預註冊：`DECISION_20260906_R453_REAL_MULTIPARTY_PREREG.md`（P-1…P-6、窗口、
 判定規則、fallback 都寫在那裡，本檔只負責產生數字）。
 
+round454 加了一個旗標：`--corrupt liar_frac=… equiv_frac=… --corrupt-seed N`
+把執行器變成**預註冊的腐化執行器**（`DECISION_20260906_R454_NAMED_DISSENT_PREREG.md`）。
+腐化施加在**沙箱真跑之後**——說謊者真的跑了那一格才說謊，不是一台壞掉的機器
+（R453 §四 的 win1003 才是壞掉的機器，兩者不可混為一談）。真值與簽出去的值
+都落在一份**未簽章的本機側錄檔**裡供稽核；合票端不讀那個檔，它從 seed 自己重算。
+
 兩個角色
 --------
     # 在每一台機器上（含 Mac 自己）
@@ -201,6 +207,56 @@ def _probe_job(job: tuple) -> tuple:
         return (tid, i, None, None, None, None, f"{type(exc).__name__}:{exc}"[:300])
 
 
+# ── R454：確定性腐化（預註冊）─────────────────────────────────────────────
+#: `DECISION_20260906_R454_NAMED_DISSENT_PREREG.md` §三 的純函式，逐字搬過來。
+#: 它只吃 `(seed, task_id, cand_index)`：任何人拿到預註冊就能在**不跑任何沙箱**
+#: 的情況下逐格重算「哪一格 K3 會說謊」。合票端（`r454_named_dissent.py`）判斷
+#: 「哪一格該被指名」用的就是這一支從 seed 重算的結果，**不是**讀 K3 自己的側錄檔
+#: ——否則「機制指名對了」會變成「我們告訴機制答案」。
+def corrupt_role(seed: int, task_id: str, cand_index: int,
+                 liar_frac: float, equiv_frac: float) -> str:
+    h = hashlib.sha256(f"{seed}|{task_id}|{cand_index}".encode("utf-8")).hexdigest()
+    u = int(h[:16], 16) / float(1 << 64)
+    if u < liar_frac:
+        return "liar"
+    if u < liar_frac + equiv_frac:
+        return "equivocator"
+    return "honest"
+
+
+def corrupt_payload(seed: int, task_id: str, cand_index: int,
+                    true_payload: dict) -> dict:
+    """真實 `ProbeResult` ⇒ 竄改後要簽的 payload。**在沙箱真跑之後才呼叫。**
+
+    這是本輪腐化的全部內容，形狀刻意做成「跟誠實結果長得一樣」：
+      - 真值 True ⇒ 簽 FAIL，並捏一個落在合法範圍內的 `first_failing_test`、
+        `detail_reason=None`（`gain_run.conform_failure_detail` 定位到某一條時
+        回的就是 `detail_reason=None`，見 gain_run.py:480）。
+      - 真值 False ⇒ 簽 PASS，`first_failing_test=None`、`detail_reason=None`
+        （＝誠實 PASS 的形狀）。
+    `n_visible_tests`／`loads_ok` 保留真值：說謊者沒有理由連這兩欄都改，
+    而且改了會讓謊言更容易被形狀分析抓到——本輪要量的是**多數決指名**，
+    不是「謊話寫得夠不夠像」。
+    """
+    h = hashlib.sha256(f"{seed}|{task_id}|{cand_index}".encode("utf-8")).hexdigest()
+    p = dict(true_payload)
+    if true_payload.get("visible_ok"):
+        n = true_payload.get("n_visible_tests") or 1
+        p["visible_ok"] = False
+        p["first_failing_test"] = int(h[16:24], 16) % max(1, int(n))
+        p["detail_reason"] = None
+    else:
+        p["visible_ok"] = True
+        p["first_failing_test"] = None
+        p["detail_reason"] = None
+    return p
+
+
+def _probe_from_payload(p: dict) -> "px.ProbeResult":
+    return px.ProbeResult(bool(p["visible_ok"]), p["first_failing_test"],
+                          p["n_visible_tests"], p["loads_ok"], p["detail_reason"])
+
+
 class _RecordedProbe:
     """把 worker 行程剛剛真跑出來的結果交給 `Executor.attest` 去簽。
 
@@ -217,10 +273,32 @@ class _RecordedProbe:
         return self.current
 
 
+def _parse_corrupt(items: list[str] | None) -> dict[str, float] | None:
+    """`--corrupt liar_frac=0.15 equiv_frac=0.03` ⇒ `{"liar_frac":0.15,…}`。
+
+    `--corrupt` 不給＝誠實執行器，一行腐化碼都不會被走到。給了卻沒給
+    `--corrupt-seed` 是錯誤而不是預設值：一個沒有種子的腐化實驗不可重算。
+    """
+    if items is None:
+        return None
+    out = {"liar_frac": 0.0, "equiv_frac": 0.0}
+    for it in items:
+        k, _, v = it.partition("=")
+        if k not in out:
+            raise SystemExit(f"--corrupt 只認得 liar_frac／equiv_frac，收到 {k!r}")
+        out[k] = float(v)
+    if out["liar_frac"] + out["equiv_frac"] > 1.0:
+        raise SystemExit("--corrupt: liar_frac + equiv_frac > 1")
+    return out
+
+
 def run_executor(args) -> int:  # noqa: ANN001
     specs = load_specs(args.specs)
     pool = load_pool(args.pool)
     jobs = build_jobs(specs, pool, limit=args.limit)
+    corrupt = _parse_corrupt(args.corrupt)
+    if corrupt is not None and args.corrupt_seed is None:
+        raise SystemExit("--corrupt 一定要配 --corrupt-seed（不可重算的腐化＝沒有實驗）")
     keydir = pathlib.Path(args.identity)
     if (keydir / "identity.key").exists():
         ident = Identity.load(keydir)
@@ -232,6 +310,10 @@ def run_executor(args) -> int:  # noqa: ANN001
 
     print(f"[{args.executor_id}] {len(jobs)} 格（{len(specs)} 題），"
           f"{args.workers} workers，repo={_REPO}", flush=True)
+    if corrupt is not None:
+        print(f"[{args.executor_id}] ⚠ 腐化執行器：seed={args.corrupt_seed} "
+              f"liar={corrupt['liar_frac']} equiv={corrupt['equiv_frac']}"
+              f"（腐化在沙箱真跑之後才施加）", flush=True)
     t_start = time.time()
     results: dict[tuple[str, int], tuple] = {}
     if args.workers > 1:
@@ -254,6 +336,8 @@ def run_executor(args) -> int:  # noqa: ANN001
     out_path = pathlib.Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     n_err = n_render_mismatch = 0
+    n_role = {"honest": 0, "liar": 0, "equivocator": 0}
+    side_rows: list[dict] = []
     t_sign0 = time.time()
     with out_path.open("w", encoding="utf-8") as fh:
         for tid, i, code, ep, timeout, spec_json in jobs:
@@ -278,10 +362,24 @@ def run_executor(args) -> int:  # noqa: ANN001
                 n_err += 1
                 fh.write(json.dumps(rec, sort_keys=True) + "\n")
                 continue
-            probe.current = px.ProbeResult(
-                bool(payload["visible_ok"]), payload["first_failing_test"],
-                payload["n_visible_tests"], payload["loads_ok"],
-                payload["detail_reason"])
+            # ── 腐化在這裡、而且只在這裡：沙箱已經真跑完，`payload` 是真值。
+            role = "honest"
+            signed = payload
+            second: dict | None = None
+            if corrupt is not None:
+                role = corrupt_role(args.corrupt_seed, tid, i,
+                                    corrupt["liar_frac"], corrupt["equiv_frac"])
+                if role == "liar":
+                    signed = corrupt_payload(args.corrupt_seed, tid, i, payload)
+                elif role == "equivocator":
+                    # 第一筆＝真值，第二筆＝翻轉值。兩筆都簽、都上同一條鏈、
+                    # seq 連續 ⇒ 鏈仍然驗得過，但 `form_verdict` 步驟 2 會判
+                    # equivocation 並把**兩票**都作廢。這是「證明等級的過錯」：
+                    # 不需要跟任何人比對就已經成立。
+                    second = corrupt_payload(args.corrupt_seed, tid, i, payload)
+                n_role[role] += 1
+
+            probe.current = _probe_from_payload(signed)
             task = {"task_id": tid, "entry_point": ep,
                     "visible_check": {"timeout": timeout}}
             att = ex.attest(task, code, suite=spec, ts_ms=TS_MS)
@@ -289,13 +387,31 @@ def run_executor(args) -> int:  # noqa: ANN001
                 "suite_sha256": spec.suite_sha256,
                 "render_sha256": m_render_sha,
                 "visible_ok": bool(att.visible_ok),
-                "first_failing_test": payload["first_failing_test"],
-                "n_visible_tests": payload["n_visible_tests"],
-                "loads_ok": payload["loads_ok"],
-                "detail_reason": payload["detail_reason"],
+                "first_failing_test": signed["first_failing_test"],
+                "n_visible_tests": signed["n_visible_tests"],
+                "loads_ok": signed["loads_ok"],
+                "detail_reason": signed["detail_reason"],
                 "probe_ms": ms,
                 "entry": att.entry.to_json(),
             })
+            if second is not None:
+                probe.current = _probe_from_payload(second)
+                att2 = ex.attest(task, code, suite=spec, ts_ms=TS_MS)
+                rec["entry_equivocation"] = att2.entry.to_json()
+            if corrupt is not None:
+                # 側錄檔：**未簽章、本機、不進機制路徑**。它是稽核用的真值表。
+                side_rows.append({
+                    "task_id": tid, "cand_index": i, "role": role,
+                    "true_visible_ok": bool(payload["visible_ok"]),
+                    "true_first_failing_test": payload["first_failing_test"],
+                    "signed_visible_ok": bool(signed["visible_ok"]),
+                    "signed_first_failing_test": signed["first_failing_test"],
+                    "second_signed_visible_ok": (None if second is None
+                                                 else bool(second["visible_ok"])),
+                    "second_signed_first_failing_test": (
+                        None if second is None else second["first_failing_test"]),
+                    "flipped": bool(payload["visible_ok"]) != bool(signed["visible_ok"]),
+                })
             fh.write(json.dumps(rec, sort_keys=True) + "\n")
     t_sign = time.time() - t_sign0
     wall = time.time() - t_start
@@ -321,6 +437,11 @@ def run_executor(args) -> int:  # noqa: ANN001
         "workers": args.workers,
         "nice": os.nice(0) if hasattr(os, "nice") else None,
         "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(t_start)),
+        # 腐化參數進 pub_*.json 是刻意的：本輪的腐化是**預註冊的實驗處理**，
+        # 不是攻擊者的秘密。真正不能給合票端的是「哪一格說了謊」，而那在
+        # 側錄檔裡、且合票端從 seed 自己重算（見 `corrupt_role` 的 docstring）。
+        "corrupt": (None if corrupt is None else
+                    {**corrupt, "seed": args.corrupt_seed, "n_role": n_role}),
         **machine_info(),
     }
     pub_path = out_path.with_name(out_path.name.replace("att_", "pub_")
@@ -330,6 +451,17 @@ def run_executor(args) -> int:  # noqa: ANN001
           f"chain_ok={chain_ok}，{wall:.0f}s（probe {t_probe:.0f}s / sign {t_sign:.0f}s）",
           flush=True)
     print(f"  {out_path}\n  {pub_path}\n  {book_path}", flush=True)
+    if corrupt is not None:
+        side_path = out_path.with_name(out_path.name.replace(".ndjson", "")
+                                       + ".corrupt_side.json")
+        side_path.write_text(json.dumps(
+            {"executor_id": args.executor_id, "seed": args.corrupt_seed,
+             "liar_frac": corrupt["liar_frac"], "equiv_frac": corrupt["equiv_frac"],
+             "n_role": n_role, "n_flipped": sum(1 for r in side_rows if r["flipped"]),
+             "note": ("未簽章、本機、稽核用真值表。合票端不讀它——"
+                      "它從 seed 自己重算角色。"),
+             "cells": side_rows}, indent=0, sort_keys=True), encoding="utf-8")
+        print(f"  {side_path}  角色分佈 {n_role}", flush=True)
     return 0 if (chain_ok and n_err == 0) else 1
 
 
@@ -425,6 +557,11 @@ def load_book_ndjson(path: str) -> tuple[dict, dict[tuple[str, int], dict], Logb
             cells[(d["task_id"], d["cand_index"])] = d
             if d.get("entry"):
                 entries.append(LogEntry.from_json(d["entry"]))
+            # R454：自相矛盾的執行器對同一格簽了**兩筆**，兩筆都在它自己的鏈上、
+            # seq 連續。重建鏈時漏掉第二筆會讓 `verify_chain` 因為 seq 跳號而失敗
+            # ——那會把「說謊者的鏈仍然合法」這件事誤報成「鏈壞了」。
+            if d.get("entry_equivocation"):
+                entries.append(LogEntry.from_json(d["entry_equivocation"]))
     return pub, cells, Logbook(entries)
 
 
@@ -916,6 +1053,13 @@ def main() -> int:
     ap.add_argument("--books", nargs="*", default=[])
     ap.add_argument("--limit", type=int, default=0,
                     help="只跑前 N 題（冒煙測試用；正式跑一律 0）")
+    ap.add_argument("--corrupt", nargs="*", default=None,
+                    metavar="K=V",
+                    help="R454：把本執行器變成腐化執行器，例如 "
+                         "--corrupt liar_frac=0.15 equiv_frac=0.03。"
+                         "不給＝誠實。腐化在沙箱真跑之後才施加。")
+    ap.add_argument("--corrupt-seed", type=int, default=None,
+                    help="腐化的確定性種子（--corrupt 時必給）")
     a = ap.parse_args()
     if a.specs is None:
         a.specs = str(_REPO / "ops" / "gain" / "replay" / "cache"
