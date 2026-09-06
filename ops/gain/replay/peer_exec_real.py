@@ -585,6 +585,7 @@ def run_verdict(args) -> int:  # noqa: ANN001
     render_task_mismatch: list[str] = []
     verdicts: dict[str, dict[int, px.Verdict]] = {}
     contested_cells: list[dict] = []
+    n_exec_named = 0
     per_task_ms: dict[str, dict[str, float]] = {eid: {} for eid in books}
     per_task_prefix_ms: dict[str, dict[str, float]] = {eid: {} for eid in books}
 
@@ -631,6 +632,8 @@ def run_verdict(args) -> int:  # noqa: ANN001
                                 suite_sha256=ssha, quorum=quorum,
                                 gauged_suites=gauged, render_sha256=rsha)
             vt[i] = v
+            if v.dissenters or v.detail_dissenters or v.equivocators:
+                n_exec_named += 1
             if v.contested:
                 contested_cells.append({
                     "task_id": tid, "cand": i, "visible_ok": v.visible_ok,
@@ -735,9 +738,21 @@ def run_verdict(args) -> int:  # noqa: ANN001
             "excluded_gauge_blocked": len(excluded_gauge),
             "window": "340/340 ship + 26/26 refuse",
             "pass": bool(ship_mismatch == 0 and refuse_mismatch == 0)},
+        # P-3 有兩個讀法，**兩個都報**，窗口不動：
+        #   P3a ＝ 預註冊逐字寫的（`contested`，其定義含 `rejected`）
+        #   P3b ＝「有沒有**執行器**被指名」——本輪真正想問的那一個
+        # 兩者在本輪會分岔，因為量具擋下的套件會讓 `rejected` 非空而
+        # `contested` 亮燈，但那時被指名的是**套件**不是機器
+        # （`form_verdict` 的 docstring 自己寫了這件事）。
         "P3_named_dissent": {
             "contested_cells": len(contested_cells), "window": "0",
-            "pass": len(contested_cells) == 0},
+            "pass": len(contested_cells) == 0,
+            "P3b_executor_named_dissent_cells": n_exec_named,
+            "P3b_pass": n_exec_named == 0,
+            "contested_but_no_executor_named": len(contested_cells) - n_exec_named,
+            "note": ("P3a 用預註冊逐字的 contested（含 rejected）；"
+                     "P3b 只算 dissenters/detail_dissenters/equivocators"
+                     "＝真的有執行器被指名")},
         "P4_chain_verify": {"per_machine": chain, "window": "all True",
                             "pass": all(chain.values())},
         "P5_wall_clock": {"per_machine": timing,
@@ -759,8 +774,15 @@ def run_verdict(args) -> int:  # noqa: ANN001
         decision = "INVALID"
     elif all(preds[p]["pass"] for p in core):
         decision = "REAL_MATCHES_REPLAY"
-    else:
+    elif not preds["P2_shipped_sha_vs_runtime"]["pass"]:
         decision = "REPLAY_ARTIFACT"
+    else:
+        # 預註冊 §四 的三個標籤**不是窮盡的**：P-2 全對但別的窗口破掉會掉進縫裡。
+        # 給它一個自己的名字，不要塞進 REPLAY_ARTIFACT（那會把「§七-1 觸發」
+        # 講成一件沒發生的事），也不要塞進 REAL_MATCHES_REPLAY（那會把破掉的
+        # 窗口當沒看見）。
+        decision = "REAL_MATCHES_REPLAY_EXCEPT_" + "_".join(
+            p.split("_")[0] for p in core if not preds[p]["pass"])
 
     out = {
         "round": "R453",
@@ -771,7 +793,12 @@ def run_verdict(args) -> int:  # noqa: ANN001
         "file_sha256": file_sha,
         "predictions": preds,
         "decision": decision,
-        "r449_seven_1_overturn": decision == "REPLAY_ARTIFACT",
+        # 推翻條件照預註冊 §四 逐字綁在 **P-2** 上：
+        # 「REPLAY_ARTIFACT：P-2 出現任何一格不符，且無法歸因到具名的機器層原因
+        #   ⇒ R449 §七-1 觸發」。P-3 的窗口破掉**不是** §七-1 的觸發條件——
+        # 把兩者綁在一起是本檔第一版的錯（round453 跑完後修，量測值一格未動，
+        # 修的是「哪個數字對應哪個推翻條件」的接線）。
+        "r449_seven_1_overturn": not preds["P2_shipped_sha_vs_runtime"]["pass"],
         "r452_six_2_overturn": not preds["P6_render_portability"]["pass"] or n_disagree > 0,
         "disagreements": disagreements,
         "contested_cells": contested_cells[:200],
@@ -808,8 +835,11 @@ def run_verdict(args) -> int:  # noqa: ANN001
         f"拒交 {refuse_match} 相符 / {refuse_mismatch} 不符；"
         f"量具擋下 {len(excluded_gauge)}   "
         f"{'PASS' if preds['P2_shipped_sha_vs_runtime']['pass'] else 'FAIL'}",
-        f"P-3 指名爭議格         {len(contested_cells)}   窗口 0   "
+        f"P-3a contested 格       {len(contested_cells)}   窗口 0   "
         f"{'PASS' if preds['P3_named_dissent']['pass'] else 'FAIL'}",
+        f"P-3b 執行器被指名格     {n_exec_named}   "
+        f"{'PASS' if n_exec_named == 0 else 'FAIL'}"
+        f"   （差額 {len(contested_cells) - n_exec_named} 格被指名的是套件不是機器）",
         f"P-4 鏈驗證             {chain}   "
         f"{'PASS' if preds['P4_chain_verify']['pass'] else 'FAIL'}",
         f"P-6 渲染逐位可攜       render {render_sha_agree}/{n_tasks}、"

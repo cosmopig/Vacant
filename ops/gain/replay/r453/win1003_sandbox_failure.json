@@ -1,0 +1,11 @@
+{
+ "machine": "win1003",
+ "platform": "Windows-10-10.0.19045-SP0",
+ "python": "3.12.5 (tags/v3.12.5:ff3bc82, Aug  6 2024, 20:45:27) [MSC v.1940 64 bit (AMD64)]",
+ "probe": "run_python_check(def f(a): return a+1, assert f(1)==2) -- 應為 True",
+ "rc": 1,
+ "stdout": "",
+ "runner_stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\w401\\AppData\\Local\\Temp\\tmpood3_wvm\\runner.py\", line 65, in <module>\n    ready = _selector.select(max(0.0, _ready_deadline - time.monotonic()))\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\w401\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\selectors.py\", line 323, in select\n    r, w, _ = self._select(self._readers, self._writers, [], timeout)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\w401\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\selectors.py\", line 314, in _select\n    r, w, x = select.select(r, w, w, timeout)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [WinError 10093] 可能是應用程式尚未呼叫 WSAStartup，或 WSAStartup 發生失敗。\n",
+ "root_cause": "vacant/checks.py 產生的 runner 用 selectors.DefaultSelector 監看 worker 的 stdout pipe；Windows 上 DefaultSelector 是 SelectSelector，而 Windows 的 select() 只吃 socket 不吃 pipe/檔案 handle ⇒ OSError WinError 10093 ⇒ runner rc=1 ⇒ 每一格標籤都會是 False",
+ "masking_bug": "另一個獨立問題：TemporaryDirectory 清理時 PermissionError WinError 32，把上面那個錯蓋掉成例外"
+}

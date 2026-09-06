@@ -53,3 +53,6 @@ runs/s13_reload.log
 # round432 修復並在此明確排除，避免下次 `git add -A` 又撿到。
 GAIN_STATE.md
 NEXT_MODEL
+
+# R453 執行器私鑰：RECORD_SPEC §7，私鑰永不進版控
+ops/gain/replay/r453/key_*/

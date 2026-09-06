@@ -185,3 +185,203 @@ prev_hash 串對、每一筆簽章用**名冊上的**公鑰驗過）。窗口：
 預註冊者：Claude Opus 5（實作），待 Fable 稽核。
 簽入 commit：見本檔隨附的 round453 commit（**本文件與 `peer_exec_real.py`
 先簽入，然後才 `git archive` 送到遠端**）。
+
+---
+
+# 結果（2026-09-06 跑完後補寫；上面每一個字未改，窗口與判定規則未動）
+
+## 〇、先講兩件對自己不利的事
+
+1. **k = 2，不是 3。** `win1003` 在開始嘗試後 **2 分鐘**內就確定跑不起沙箱
+   （16:51 開始、16:53 定位到根因），依 §一 的 fallback 規則降為 k = 2。
+   根因不是連線、不是 venv，是 `vacant/checks.py` **在 Windows 上根本不能用**
+   （詳見 §四），落盤在 `ops/gain/replay/r453/win1003_sandbox_failure.json`。
+2. **P-3 的窗口破了（10 格），而破法是我自己的窗口寫壞了，不是機器不一致。**
+   那 10 格 ＝ §三 P-2 早就點名要排除的那 2 題 × 5 個候選，被指名的是**套件**
+   不是任何一台機器。詳見 §三 P-3。我**沒有**改窗口；我加了一個更細的
+   計數（P-3b）並且兩個數字都報。
+
+## 一、實際跑到的機器
+
+| 代號 | 平台 | Python | workers | nice | 牆鐘 | 格數 | 錯 | 鏈驗證 | vacant_id（前 24） |
+|---|---|---|---|---|---|---|---|---|---|
+| `mac` | macOS 15.7.3 / x86_64 | 3.12.10 | 6 | 0 | 135.4 s | 1840 | 0 | True | `zQmXqnnkmkaVaRTARC8nESWa` |
+| `vacantdev` | Linux 6.8.0-137 / x86_64 / glibc 2.39 | 3.12.3 | 2 | 10 | 149.7 s | 1840 | 0 | True | `zQmNWi3ewAdrE9jbBHuAJuhV` |
+| ~~`win1003`~~ | Windows 10 / MINGW64 | 3.12.5 | — | — | — | **0 可用** | 20/20 | — | — |
+
+⚠ **預註冊 §一 那張表有兩個字寫錯了，在這裡更正而不是回去改它**：Mac 被寫成
+`darwin / arm64`、`Python 3.11`，實際是 **x86_64 / Python 3.12.10**
+（`pub_mac.json` 落盤）。那是寫預註冊時憑印象填的欄位，不影響任何預測或窗口
+——但兩台都是 x86_64 這件事**縮小了 P-1 的說服力**：本輪量到的是
+「同一個 CPU 架構、兩個作業系統、兩個 Python 小版本」之間的一致，
+**不是跨 CPU 架構**（arm64 vs x86_64 的浮點與 libm 差異正是 R449 §六
+那條 1 ULP 邊界的來源）。跨架構仍未測。
+
+碼怎麼到那台機器上的：`git archive 7c4c14d`（本預註冊的 commit）的子集
+tarball，`sha256=da5096b81abfdc119ee4993fcc88f2f67a3fd9a24570d916ac41884733640ef4`，
+scp 到 `~/vacant/r453_scratch/`（vacant-dev）／`D:/vacant/r453_scratch/`（win1003）
+解開；**vacant-dev 的 `~/vacant/Vacant` 一個字都沒碰**（它本來就在 `b5daa07`、
+工作樹乾淨，但本輪需要的新檔不在那個 commit 裡，所以走 tarball 而不是 git pull）。
+候選碼走 `ops/gain/replay/r453/pool_g_r446_eq5_mbpp.json`
+（`sha256=1dbc5deb7b986752f10a901a3cca230576829bc54cfbb6af3821a9bd3fe2d1b6`，
+368 題 × 5，1.93 MB）——**`calls.jsonl`、prompt、reviewer 紀錄一個位元組都沒出本機**。
+
+**承重檔案跨機逐位相同（7/7）**——這是「跨機一致」這句話的前提，不是裝飾：
+
+| 檔案 | sha256（兩台相同） |
+|---|---|
+| `vacant/peerexec.py` | `616022515fc3f4c9…` |
+| `vacant/suitespec.py` | `b83adac1564d18c1…` |
+| `vacant/checks.py` | `91799f4d65b1fa2a…` |
+| `vacant/logbook.py` | `e4bb0da72ba9bc2b…` |
+| `vacant/identity.py` | `b25923e580fb9a8a…` |
+| `ops/gain/gain_run.py` | `8e0b84525d758b4f…` |
+| `ops/gain/replay/peer_exec_real.py` | `51f4cf07726b82ce…`（＝ `7c4c14d` 那一版） |
+
+⚠ 最後一列要說清楚：**執行器跑的是 `7c4c14d` 的 `peer_exec_real.py`**
+（`51f4cf07…`）。本檔在跑完之後又改過（只改 `--role verdict` 的報表，見 §五），
+所以 repo 現在那一份的 sha 是 `5072411e…`，**與兩台執行器上跑的那一份不同**。
+簽章與標籤那一側一格都沒重跑。
+
+## 二、結果總表
+
+```
+P-1 跨機可見標籤一致   1840/1840  (100.0000%)   窗口 >=99.5%   PASS
+P-2 出貨 sha 與 r446   340 相符 / 0 不符；拒交 26 相符 / 0 不符；
+                       量具擋下 2                窗口 340/340   PASS
+P-3a contested 格      10        窗口 0                        FAIL（見下）
+P-3b 執行器被指名格    0                                       PASS
+P-4 鏈驗證             mac True、vacantdev True                PASS
+P-6 渲染逐位可攜       render 368/368、suite 368/368            PASS
+
+判定：REAL_MATCHES_REPLAY_EXCEPT_P3
+R449 §七-1 推翻：未觸發        R452 §六-2 推翻：未觸發
+```
+
+## 三、逐條
+
+**P-1（PASS，1840/1840）。** macOS/3.12.10 與 Linux/3.12.3 兩台各自渲染、
+各自開沙箱，1840 格可見標籤**一格不差**。連 `first_failing_test`（FAIL 陣營
+卡在第幾條）也一格不差——`detail_dissenters` 恆為空就是證據。
+另外：兩台的 3680 個標籤與**既有的單執行器 cache**
+（`peerexec_facts_g_r446_eq5_mbpp.json`，R449／R452 全部重放結果的來源）
+比對，**3680/3680 相符、0 不符**。R449 §六 那條「MBPP+ 隱藏測資 `atol=0`
+跨機不可攜（1 ULP）」在可見側**沒有出現**，與預測一致。
+
+**P-2（PASS，340/340 ＋ 26/26）。** 帳目照預註冊對得起來：
+**340（quorum 選出的 sha ＝ runtime `gate_code_sha256`）＋ 3（轉不出 SuiteSpec）
+＋ 2（量具擋下）＝ 345**（runtime 的 accepted 數）；runtime 拒交的 26 題本輪
+**26/26 也拒交**。零不符 ⇒ **R449 §七-1 未觸發**：門檻以下的「逐位相同」
+在真跑跨機下**仍然成立**，不是重放假象。
+量具擋下的兩題是 `mbppplus_Mbpp/404`、`mbppplus_Mbpp/587`，理由 `gauge_failed`
+（壞樁 `return a[0] if a else None` 通得過它們的可見套件），與預註冊逐字相同。
+
+**P-3（P-3a FAIL、P-3b PASS）。** 10 格 contested ＝ 上面那 2 題 × 5 個候選，
+每一格的 `rejected` 都是 `[["mac","suite_not_gauged"],["vacantdev","suite_not_gauged"]]`，
+而 `dissenters`／`detail_dissenters`／`equivocators` **全空**。
+也就是說：**沒有任何一台機器被指名**，被指名的是那套驗收
+（`form_verdict` 的 docstring 自己寫過「被指名的不是執行器，是那套驗收」）。
+我在預註冊裡把 `rejected` 寫進 P-3 的聯集，那是**窗口寫壞了**——它與 P-2 的
+排除清單重複計算了同兩題。**窗口不改**（改窗口就是事後配合結果）；改的是
+報表多出一個 P-3b＝只算執行器被指名的格數，**0/1840**。兩個數字都印在
+`r453_table.txt` 與 `r453_result.json` 裡。
+
+**P-4（PASS）。** 兩台的鏈各自用**名冊上的**公鑰驗過（seq 連續、prev_hash 串對、
+每一筆簽章）。book head：`mac 9f34a546…`、`vacantdev d0389abb…`（不同金鑰 ⇒
+不同簽章 ⇒ 不同鏈頭，這是預期，不是分歧）。
+
+**P-5（PASS，但要看清楚哪個數字）。**
+
+| 機器 | workers | P5a 中位 | P5a p95 | P5a max | P5b 中位 | P5b p95 | P5b max | 總牆鐘 |
+|---|---|---|---|---|---|---|---|---|
+| `mac` | 6 | **1.069 s** | 3.871 s | 41.638 s | 0.207 s | 3.569 s | 41.638 s | 135.4 s |
+| `vacantdev` | 2 | **0.250 s** | 1.695 s | 38.222 s | 0.050 s | 1.657 s | 38.222 s | 149.7 s |
+
+中位數兩台都遠在 5 秒窗口內。**max 那一欄不是機器慢，是候選在無窮迴圈**：
+最慢的三題（`Mbpp/84`、`Mbpp/260`、`Mbpp/71`）在**兩台上都最慢、而且時間幾乎相同**
+（84：41.6 s vs 38.2 s；260：39.1 vs 37.6；71：19.3 vs 18.5），逐格看是單一候選
+吃滿 10 秒沙箱上限，再乘上 `conform_failure_detail` 的二分次數。
+那是題目與候選的性質，不是平台差異——這一點本身也是 P-1 的旁證。
+
+**P-6（PASS，368/368 ＋ 368/368）。** 每一題的 `suite_sha256` 與 `render_sha256`
+在兩台上完全相同；`form_verdict` 帶著 Mac 側算的 `render_sha256` 去計票，
+**沒有任何一筆證言因為 `render_mismatch` 被擋**。⇒ **R452 §六-2 未觸發**，
+「渲染確定性」目前不需要加平台限定——**但只限 macOS/Linux 這兩個平台**
+（Windows 那台連沙箱都跑不起來，這句話對 Windows **沒有量到**）。
+
+**額外（不在 P-1…P-6 裡，但它保護整份結果）：`_select_loop` vs 真的
+`select_by_quorum`＝366/366 相符**（2 題沒有合法 commit 因此跳過）。
+合票端拿到的是遠端離線簽好的證言，沒有辦法把遠端私鑰搬過來讓
+`select_by_quorum` 現場簽，所以本檔自己寫了一條早停迴圈——**自己寫的迴圈就是
+自己的規格**，除非它跟被稽核過的那一支對得起來。用重放探針讓
+`select_by_quorum` 看到相同的 k 條標籤流，逐題比出貨索引，366/366。
+
+**計分（`hidden_check` 只在這裡出現）**：368 題中交付正確 274、假交付 66、
+拒交 28（＝ 26 ＋ 量具擋下的 2）。
+
+## 四、win1003 為什麼出局（根因，不是「連不上」）
+
+`vacant/checks.py` 產生的 runner 用 `selectors.DefaultSelector()` 監看候選
+worker 的 **stdout pipe**。Windows 上 `DefaultSelector` 是 `SelectSelector`，
+而 Windows 的 `select()` **只吃 socket，不吃 pipe／檔案 handle**：
+
+```
+File ".../selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+OSError: [WinError 10093] 可能是應用程式尚未呼叫 WSAStartup，或 WSAStartup 發生失敗。
+```
+
+⇒ runner `rc=1`、stdout 空 ⇒ **每一格 `run_python_check` 都會回 False**。
+還有第二個獨立的 bug 把上面這個蓋住：`tempfile.TemporaryDirectory` 清理時
+`PermissionError [WinError 32]`（Windows 上 `kill()` 之後 handle 未即時釋放），
+所以第一眼看到的是例外不是錯誤標籤。兩者都落盤在
+`ops/gain/replay/r453/win1003_sandbox_failure.json`（含完整 traceback）。
+
+**沒有把它硬湊成第三台**，理由要講明白：如果只修掉第二個 bug（讓清理容忍
+`PermissionError`），win1003 會交出 1840 個**全部 False** 的標籤，於是在
+k=3、quorum=2 下 mac＋vacantdev 過半、win1003 在約 1531 格被指名為少數方。
+機制會正確地指名它——但那不是「誠實執行器的分歧」，那是一台沙箱壞掉的機器
+（鐵律 3 的 `infra_void`）。把它算進 P-1…P-6 會讓 P-3 以一個**與預註冊問題無關**
+的理由失敗，然後再被重新詮釋成別的東西；那正是預註冊存在的目的所要擋的事。
+它也不能被改成「證明機制會指名壞機器」——**那個實驗沒有預註冊**。
+
+這條發現對展場的定位有直接後果：CLAUDE.md 說展件要「離線可跑、可無人值守」，
+而 `vacant/checks.py` 目前的 `os.name != "posix"` 分支是**看起來有、實際不能跑**。
+它不在本輪的修改範圍（改它會動到全體共用的沙箱、且要重跑所有既有結果），
+記在這裡當標本。
+
+## 五、跑完之後改過的東西（逐項，全部只在報表端）
+
+`ops/gain/replay/peer_exec_real.py` 在拿到數字之後改了三處，**沒有任何一格
+標籤、簽章、鏈或選擇被重算**（executor 那一側跑的是 `51f4cf07…`，一次都沒重跑）：
+
+1. **加** `P3b_executor_named_dissent_cells`：只算 `dissenters`／`detail_dissenters`
+   ／`equivocators`。P-3a 的窗口與數字原樣保留並照樣印 FAIL。
+2. **修**「哪個數字對應哪個推翻條件」的接線：第一版寫成
+   `r449_seven_1_overturn = (decision == "REPLAY_ARTIFACT")`，而預註冊 §四
+   把 §七-1 逐字綁在 **P-2** 上。P-2 零不符卻印出「§七-1 觸發」是接線錯誤，
+   不是量測結果。改成 `not P2.pass`。
+3. **加** 第四個判定標籤 `REAL_MATCHES_REPLAY_EXCEPT_<破掉的預測>`：預註冊 §四
+   的三個標籤不是窮盡的（P-2 全對但別的窗口破掉會掉進縫裡）。掉進縫裡就給它
+   自己的名字，不塞進 REPLAY_ARTIFACT（那會宣告一件沒發生的事），
+   也不塞進 REAL_MATCHES_REPLAY（那會把破掉的窗口當沒看見）。
+
+第一版（未改接線）跑出來的原始輸出是：`判定：REPLAY_ARTIFACT`、
+`R449 §七-1 推翻：觸發`，數字則與現在**逐格相同**（P-1 1840/1840、
+P-2 340/0/26/0、P-3a 10、P-4 兩台 True、P-6 368/368）。留在這裡供對帳。
+
+## 六、本輪的誠實邊界（補充 §六 已寫的）
+
+- **k=2 的 quorum ＝ 2 ＝ 全票**，所以本輪**沒有量到**「少數方被指名」那條路徑：
+  兩台一致時無從產生少數方。R449 §三 那張「說謊者 100% 被指名」的表**仍然只有
+  模擬證據**，本輪一個字都沒有加強它。
+- 本輪只證明了**誠實執行器在兩個 POSIX 平台上會一致**。三台、異質作業系統、
+  以及「一台被腐化時真跑會不會照樣指名」都還沒做。
+- 量具白名單仍然只在 Mac 一台上算（366/368 上鏈，與 R452 的 366/371 對得起來：
+  368 可轉 − 2 量具擋下 ＝ 366）。**量具跨機可攜性本輪沒有量。**
+- 兩台共用同一份 `vacant/checks.py` 與同一份渲染器 ⇒ R449 §六 的
+  「相關性沙箱故障未建模」**原封不動成立**。本輪量的是平台／直譯器差異，
+  不是異質沙箱；渲染器有 bug，兩台會一致地錯，爭議率仍是 0。
+- 候選是 r446 已歸檔的草稿。「真跑」指的是**執行**，不是生成。
+- `pub_mac.json` 的 `git_dirty=True`：Mac 跑的時候工作樹有未追蹤的 `r453/` 產物
+  正在寫入。承重檔案的 sha 逐一落盤且與 `7c4c14d` 相符，所以 dirty 不影響結論。
