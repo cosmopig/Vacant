@@ -95,6 +95,14 @@
   開  ....XX....XX......XX..X.....X.....X...X..X..................
   ```
 - `examples/e10_mediator.py` — 重算上面那兩行（零機時，只讀已歸檔 JSONL）。
+- `ops/gain/replay/r454/r454_exhibition_receipt.{json,txt}` ＋
+  `examples/receipt_viewer_multiparty.html` — 「三把金鑰的收據」展件：內嵌 r454 真跑的
+  三條完整簽章鏈（1840／1840／1899＝5579 筆），瀏覽器內從創世驗到鏈頭、逐格重算裁決／
+  指名／出貨（368 題可選），並示範翻票⇒簽章紅、少一票誠實⇒平手不指名（R454 §三-3）、
+  換平台字串⇒毫無反應（未簽章 metadata）。零外部資源、file:// 直開；
+  組裝與驗收＝`ops/gain/replay/build_multiparty_viewer.py`（`--check`）、
+  `ops/gain/replay/multiparty_viewer_node_check.mjs`、`tests/test_receipt_viewer.py`。
+  隱藏測資只出現在頁面上圍起來的「給觀眾的答案，機制看不到」那一塊。
 
 ### 對外發布與存證
 
