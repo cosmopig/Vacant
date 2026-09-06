@@ -56,3 +56,4 @@ NEXT_MODEL
 
 # R453 執行器私鑰：RECORD_SPEC §7，私鑰永不進版控
 ops/gain/replay/r453/key_*/
+ops/gain/replay/r454/key_*/
