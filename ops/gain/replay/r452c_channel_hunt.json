@@ -1,0 +1,1184 @@
+{
+ "head": "b3c8514",
+ "results": [
+  {
+   "elapsed_s": 0.0,
+   "probe": "A_entry_point_channel",
+   "rows": [
+    {
+     "render_head": [
+      "__entry = __vacant_ns['f']",
+      "assert __aeq(__entry(*[\"import os; open('/tmp/r452c_A.marker','w').write('x')\"]), None, None)"
+     ],
+     "result": "ACCEPTED",
+     "spec_ep": "f",
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_mismatch",
+     "result": "SuiteSpecError",
+     "spec_ep": "exec",
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_mismatch",
+     "result": "SuiteSpecError",
+     "spec_ep": "eval",
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_mismatch",
+     "result": "SuiteSpecError",
+     "spec_ep": "open",
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_mismatch",
+     "result": "SuiteSpecError",
+     "spec_ep": "compile",
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_mismatch",
+     "result": "SuiteSpecError",
+     "spec_ep": "getattr",
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_mismatch",
+     "result": "SuiteSpecError",
+     "spec_ep": "print",
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_mismatch",
+     "result": "SuiteSpecError",
+     "spec_ep": "g",
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_mismatch",
+     "result": "SuiteSpecError",
+     "spec_ep": "\uff46",
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_reserved",
+     "result": "SuiteSpecError",
+     "spec_ep": "exec",
+     "task_ep": "exec"
+    },
+    {
+     "render_head": [
+      "__entry = __vacant_ns['sum']",
+      "assert __aeq(__entry(*[\"import os; open('/tmp/r452c_A.marker','w').write('x')\"]), None, None)"
+     ],
+     "result": "ACCEPTED",
+     "spec_ep": "sum",
+     "task_ep": "sum"
+    },
+    {
+     "reason": "entry_point_reserved",
+     "result": "SuiteSpecError",
+     "spec_ep": "type",
+     "task_ep": "type"
+    },
+    {
+     "reason": "entry_point_not_identifier",
+     "result": "SuiteSpecError",
+     "spec_ep": null,
+     "task_ep": "f"
+    },
+    {
+     "reason": "entry_point_reserved",
+     "result": "SuiteSpecError",
+     "spec_ep": "exec",
+     "task_ep": null
+    },
+    {
+     "render_head": [
+      "__entry = __vacant_ns['g']",
+      "assert __aeq(__entry(*[\"import os; open('/tmp/r452c_A.marker','w').write('x')\"]), None, None)"
+     ],
+     "result": "ACCEPTED",
+     "spec_ep": "g",
+     "task_ep": null
+    },
+    {
+     "render_head": [
+      "__entry = __vacant_ns['f']",
+      "assert __aeq(__entry(*[\"import os; open('/tmp/r452c_A.marker','w').write('x')\"]), None, None)"
+     ],
+     "result": "ACCEPTED",
+     "spec_ep": "f",
+     "task_ep": null
+    }
+   ]
+  },
+  {
+   "elapsed_s": 0.01,
+   "n": 68,
+   "probe": "B_literal_payloads",
+   "rows": [
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "['__import__(\"os\").system(\"id\")']",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "code_str",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "'__import__(\"os\").system(\"id\")'",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "code_str",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[\"'); import os; os.system('id'); ('\"]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "quote_break",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "\"'); import os; os.system('id'); ('\"",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "quote_break",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "['\\n__vacant_ns[\"f\"] = open\\n']",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "newline_inject",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "'\\n__vacant_ns[\"f\"] = open\\n'",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "newline_inject",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "['__vacant_ns']",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "ns_key_str",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "'__vacant_ns'",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "ns_key_str",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[b'\\x00\\xff']",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "bytes_nul",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "b'\\x00\\xff'",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "bytes_nul",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "['\\ud800']",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "surrogate",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "'\\ud800'",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "surrogate",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "['\u4e2d\u6587']",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "nonascii",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "'\u4e2d\u6587'",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "nonascii",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "['e\u0301']",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "nfd_vs_nfc",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "'e\u0301'",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "nfd_vs_nfc",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[-0.0]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "neg_zero",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "-0.0",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "neg_zero",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[5e-324]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "denormal",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "5e-324",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "denormal",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[1.7976931348623157e+308]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "big_float",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "1.7976931348623157e+308",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "big_float",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[0.1]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "float_repr",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "0.1",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "float_repr",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[1j]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "complex_j",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "1j",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "complex_j",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "payload": "complex_negzero",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "complex_negzero",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[0j]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "complex_lit",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "0j",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "complex_lit",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "payload": "inf_literal",
+     "reason": "nan_or_inf_not_encodable",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "inf_literal",
+     "reason": "nan_or_inf_not_encodable",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "payload": "nan_literal",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "nan_literal",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[9999999999999999999999999999999999999999999999999999999999999999999999999999999",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "big_int_dec",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "99999999999999999999999999999999999999999999999999999999999999999999999999999999",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "big_int_dec",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "payload": "huge_int_hex",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit",
+     "result": "ESCAPED:ValueError",
+     "slot": "args"
+    },
+    {
+     "payload": "huge_int_hex",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit",
+     "result": "ESCAPED:ValueError",
+     "slot": "expected"
+    },
+    {
+     "payload": "huge_int_bin",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit",
+     "result": "ESCAPED:ValueError",
+     "slot": "args"
+    },
+    {
+     "payload": "huge_int_bin",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit",
+     "result": "ESCAPED:ValueError",
+     "slot": "expected"
+    },
+    {
+     "payload": "huge_int_oct",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit",
+     "result": "ESCAPED:ValueError",
+     "slot": "args"
+    },
+    {
+     "payload": "huge_int_oct",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit",
+     "result": "ESCAPED:ValueError",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "deep_nest",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "deep_nest",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "payload": "too_deep",
+     "reason": "literal_too_deep",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "too_deep",
+     "reason": "literal_too_deep",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[{1: 'c'}]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "dict_collide",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "{1: 'c'}",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "dict_collide",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "[{'a', 1, b'a'}]",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "set_mixed",
+     "result": "ACCEPTED",
+     "slot": "args"
+    },
+    {
+     "attrs": [],
+     "calls": [
+      "__aeq",
+      "__entry"
+     ],
+     "canonical": "{'a', 1, b'a'}",
+     "free_names_outside_prelude": [],
+     "imports": [],
+     "payload": "set_mixed",
+     "result": "ACCEPTED",
+     "slot": "expected"
+    },
+    {
+     "payload": "empty_set",
+     "reason": "empty_set_not_encodable",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "empty_set",
+     "reason": "empty_set_not_encodable",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "payload": "frozenset",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "frozenset",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "payload": "lambda",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "lambda",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "payload": "fstring",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "fstring",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "payload": "name",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "name",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "payload": "call",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "call",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "payload": "attr",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "attr",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "payload": "ellipsis",
+     "reason": "not_a_literal_type:ellipsis",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "ellipsis",
+     "reason": "not_a_literal_type:ellipsis",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    },
+    {
+     "payload": "walrus",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "args"
+    },
+    {
+     "payload": "walrus",
+     "reason": "not_a_literal:ValueError",
+     "result": "SuiteSpecError",
+     "slot": "expected"
+    }
+   ],
+   "violations": []
+  },
+  {
+   "elapsed_s": 0.0,
+   "escaped_gates": [
+    "suitespec.validate",
+    "peerexec.as_suite_spec",
+    "commit_suite",
+    "Executor.attest",
+    "select_by_quorum",
+    "run_suite_gauge",
+    "suite_gate",
+    "open_suite",
+    "gauged_suite_index",
+    "challenge_rerun",
+    "commit_suite_with_gauge"
+   ],
+   "probe": "C_non_suitespecerror_escape",
+   "rows": [
+    {
+     "gate": "suitespec.validate",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "peerexec.as_suite_spec",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "commit_suite",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "Executor.attest",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "select_by_quorum",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "run_suite_gauge",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "suite_gate",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "open_suite",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "gauged_suite_index",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "challenge_rerun",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    },
+    {
+     "gate": "commit_suite_with_gauge",
+     "reason": "Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase th",
+     "result": "ESCAPED:ValueError"
+    }
+   ]
+  },
+  {
+   "elapsed_s": 0.41,
+   "fuzz_collisions": [],
+   "fuzz_n_specs": 3834,
+   "probe": "D_canonicalisation_collision",
+   "rows": [
+    {
+     "collision": false,
+     "pair": "int_vs_float_expected",
+     "same_render": false,
+     "same_sha": false
+    },
+    {
+     "collision": false,
+     "pair": "bool_vs_int_expected",
+     "same_render": false,
+     "same_sha": false
+    },
+    {
+     "collision": false,
+     "pair": "negzero_vs_zero",
+     "same_render": false,
+     "same_sha": false
+    },
+    {
+     "collision": false,
+     "pair": "atol_int_vs_float",
+     "same_render": true,
+     "same_sha": true
+    },
+    {
+     "collision": false,
+     "pair": "atol_zero_negzero",
+     "same_render": false,
+     "same_sha": false
+    },
+    {
+     "collision": false,
+     "pair": "nfc_vs_nfd",
+     "same_render": false,
+     "same_sha": false
+    },
+    {
+     "collision": false,
+     "pair": "tuple_vs_list_args",
+     "same_render": true,
+     "same_sha": true
+    },
+    {
+     "collision": false,
+     "pair": "set_order",
+     "same_render": true,
+     "same_sha": true
+    },
+    {
+     "collision": false,
+     "pair": "dict_dup_key",
+     "same_render": true,
+     "same_sha": true
+    },
+    {
+     "collision": false,
+     "pair": "str_escape_style",
+     "same_render": true,
+     "same_sha": true
+    }
+   ],
+   "targeted_collisions": []
+  },
+  {
+   "elapsed_s": 0.49,
+   "probe": "E_render_validate_dos",
+   "rows": [
+    {
+     "case": "2000_tests_validate",
+     "elapsed_s": 0.033,
+     "result": "ok"
+    },
+    {
+     "case": "2000_tests_render",
+     "elapsed_s": 0.0,
+     "result": "ok"
+    },
+    {
+     "case": "200k_char_literal",
+     "elapsed_s": 0.002,
+     "result": "ok"
+    },
+    {
+     "case": "8MB_spec_rejected_last",
+     "elapsed_s": 0.078,
+     "reason": "spec_too_large",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "wide_nested",
+     "elapsed_s": 0.334,
+     "result": "ok"
+    },
+    {
+     "case": "render_never_raises",
+     "elapsed_s": 0.0,
+     "result": "ok"
+    }
+   ]
+  },
+  {
+   "elapsed_s": 1.1,
+   "false_passes": [],
+   "probe": "F_candidate_name_games",
+   "rendered": "import re as __vacant_re\n__vacant_regex_predicate = False\n__vacant_set_equivalent = False\ndef __aeq(a, b, atol):\n    if __vacant_set_equivalent:\n        try:\n            return set(a) == set(b)\n        except TypeError:\n            return False\n    if __vacant_regex_predicate:\n        allowed = (bool, type(None), __vacant_re.Match)\n        if isinstance(a, allowed) and isinstance(b, allowed):\n            return bool(a) == bool(b)\n    try:\n        if a == b:\n            return True\n    except (TypeError, ValueError):\n        pass\n    if atol and (isinstance(a, float) or isinstance(b, float)):\n        try:\n            return abs(a - b) <= atol\n        except TypeError:\n            return False\n    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):\n        return len(a) == len(b) and all(__aeq(x, y, atol) for x, y in zip(a, b))\n    return a == b\n\n__entry = __vacant_ns['f']\nassert __aeq(__entry(*[1]), 2, None)",
+   "rows": [
+    {
+     "candidate": "honest",
+     "verdict": true
+    },
+    {
+     "candidate": "wrong",
+     "verdict": false
+    },
+    {
+     "candidate": "wrong_plus_fake_aeq",
+     "verdict": false
+    },
+    {
+     "candidate": "wrong_plus_fake_entry",
+     "verdict": false
+    },
+    {
+     "candidate": "wrong_plus_flag_fn",
+     "verdict": false
+    },
+    {
+     "candidate": "wrong_plus_ns_assign",
+     "verdict": false
+    },
+    {
+     "candidate": "wrong_plus_helper",
+     "verdict": false
+    },
+    {
+     "candidate": "no_entry_point",
+     "verdict": false
+    }
+   ]
+  },
+  {
+   "elapsed_s": 0.83,
+   "probe": "G_corpus_entry_points",
+   "runs": {
+    "g_r443_gemma_lcb": {
+     "blacklist_hits": [],
+     "missing_entry_point": [],
+     "n_in_pool": 91,
+     "n_tasks": 91
+    },
+    "g_r446_eq5_mbpp": {
+     "blacklist_hits": [],
+     "missing_entry_point": [],
+     "n_in_pool": 371,
+     "n_tasks": 378
+    }
+   },
+   "task_ownable_builtins": [
+    "abs",
+    "all",
+    "any",
+    "ascii",
+    "bin",
+    "bool",
+    "bytes",
+    "chr",
+    "complex",
+    "divmod",
+    "filter",
+    "float",
+    "format",
+    "frozenset",
+    "hash",
+    "hex",
+    "id",
+    "int",
+    "len",
+    "list",
+    "map",
+    "max",
+    "min",
+    "next",
+    "oct",
+    "ord",
+    "pow",
+    "range",
+    "repr",
+    "reversed",
+    "round",
+    "set",
+    "slice",
+    "sorted",
+    "str",
+    "sum",
+    "tuple",
+    "zip"
+   ]
+  },
+  {
+   "elapsed_s": 0.0,
+   "probe": "H_dialect_cmp",
+   "rows": [
+    {
+     "case": "lcb_with_atol",
+     "reason": "lcb_dialect_has_no_cmp_knobs",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "lcb_with_seteq",
+     "reason": "lcb_dialect_has_no_cmp_knobs",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "lcb_clean",
+     "render_tail": "        f\"args={__t['args']!r} got={__got!r} want={__t['expected']!r}\")",
+     "result": "ACCEPTED"
+    },
+    {
+     "case": "unknown_dialect",
+     "reason": "unknown_dialect:'mbpp2'",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "atol_bool",
+     "reason": "atol_must_be_number_or_null",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "atol_neg",
+     "reason": "atol_not_finite_nonnegative",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "atol_inf",
+     "reason": "atol_not_finite_nonnegative",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "atol_huge",
+     "render_tail": "assert __aeq(__entry(*[1]), 2, 1e+308)",
+     "result": "ACCEPTED"
+    },
+    {
+     "case": "atol_str",
+     "reason": "atol_must_be_number_or_null",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "cmp_extra_key",
+     "reason": "cmp_unknown_keys",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "cmp_not_mapping",
+     "reason": "cmp_must_be_mapping",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "seteq_int",
+     "reason": "cmp_flags_must_be_bool",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "bad_version",
+     "reason": "bad_version:2",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "tests_str",
+     "reason": "tests_must_be_list",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "tests_empty",
+     "reason": "empty_suite_rejected",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "test_extra_key",
+     "reason": "test_0_unknown_keys:['x']",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "args_not_positional",
+     "reason": "test_0_args_not_positional",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "args_dict",
+     "reason": "test_0_args_not_positional",
+     "result": "SuiteSpecError"
+    },
+    {
+     "case": "raw_code_str",
+     "reason": "raw_code_suite_not_accepted",
+     "result": "SuiteSpecError"
+    }
+   ]
+  },
+  {
+   "docstring_claim_holds": false,
+   "elapsed_s": 0.0,
+   "probe": "I_none_binding_fail_open",
+   "row": {
+    "as_suite_spec": "ACCEPTED",
+    "commit_suite": "ACCEPTED",
+    "commit_version": 2,
+    "committed_entry_point": "helper",
+    "render_binding": "__entry = __vacant_ns['helper']",
+    "spec_entry_point": "helper",
+    "suite_gate": [
+     true,
+     ""
+    ],
+    "task_dict_has_entry_point": false
+   }
+  }
+ ]
+}

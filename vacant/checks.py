@@ -27,6 +27,12 @@ round452b：test_code 是貼在 runner 的 **module scope** 執行的，所以�
 ——候選函式除了 proxy 之外再曝露成一個字典，驗收碼改用**明確的命名空間查找**
 （repr 過的字串鍵）取 entry point，裸名字那條解析路徑不再被使用。
 `run_python_check` 的簽章與語意不變。
+
+round452c：那個鉤子不只是一個名字，是**一整組**名字（前置的 `__aeq`／旗標、
+渲染器的 `__entry`／`__tests`…）。它們現在寫成 `RENDERED_SUITE_NAMES`，
+併進 `RUNNER_RESERVED_NAMES` 一起擋掉候選的同名 proxy，並且被
+`vacant/suitespec.py` 反向引用當成 entry_point 的保留字——一張表兩個方向，
+而不是兩張會各自漂移的表。
 """
 
 from __future__ import annotations
@@ -205,6 +211,29 @@ _FORBIDDEN_ATTRS = {
 #: `run_python_check` 的簽章與語意不變（`tests/test_gain_*.py` 是防呆）。
 CANDIDATE_NS_NAME = "__vacant_ns"
 
+#: round452c：**驗收碼自己**會在 module scope 綁定的名字（`vacant/suitespec.render`
+#: 的前置與渲染器本體）。候選不准用這些名字曝露 proxy——否則一個叫 `__aeq` 的
+#: 候選函式會先被綁進 module scope，而「先被誰綁走」是兩個檔案的相對順序決定的，
+#: 不是任何人寫下來的規格。
+#:
+#: 方向要講清楚：`suitespec.RESERVED_NAMES` 擋的是**供應者**（entry_point 撞名），
+#: 這一份擋的是**候選**（proxy 撞名）。兩張表必須互相覆蓋，漂移防呆是
+#: `tests/test_suitespec.py::test_every_renderer_name_is_reserved_on_the_sandbox_side`
+#: ——它反向核對 `RESERVED_NAMES ⊆ 這裡的保留集合`。常數定在 `checks`（下層、
+#: 不 import suitespec）而不是反過來，是因為 `suitespec` 已經 import 這個模組。
+RENDERED_SUITE_NAMES = frozenset({
+    "__aeq", "__vacant_re", "__vacant_regex_predicate", "__vacant_set_equivalent",
+    "__ns", "__canon", "__tests", "__t", "__got", "__entry", CANDIDATE_NS_NAME,
+})
+
+#: `dir(builtins)` 之外，runner 模板 module scope 已經用掉、候選不准撞的名字。
+#: 提到模組層級是為了讓**別的模組**（與測試）核得到它，而不是把同一張表在
+#: 函式裡抄第二份。
+RUNNER_RESERVED_NAMES = frozenset({
+    "ast", "builtins", "json", "os", "selectors", "subprocess", "sys", "time",
+    "_protocol", "_selector", "_vacant_call", "_worker",
+}) | RENDERED_SUITE_NAMES
+
 
 def _candidate_functions(
     candidate_code: str, *, allowed_imports: tuple[str, ...] = (),
@@ -242,10 +271,7 @@ def _candidate_functions(
                 return None
             if isinstance(node.func, ast.Name) and node.func.id == "__import__":
                 return None
-    reserved = set(dir(builtins)) | {
-        "ast", "builtins", "json", "os", "selectors", "subprocess", "sys", "time",
-        "_protocol", "_selector", "_vacant_call", "_worker", CANDIDATE_NS_NAME,
-    }
+    reserved = set(dir(builtins)) | RUNNER_RESERVED_NAMES
     allowed_entries = set(allowed_entry_points)
     return list(dict.fromkeys(
         name for name in functions

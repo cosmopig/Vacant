@@ -46,12 +46,42 @@ R451 §四 的修法（本模組）：**套件不再是程式。**
 「不可表達」是**渲染出來的碼**的性質，不是 validator 的性質；validator 擋住了
 所有 `Call`／`Name`／`Attribute` 節點，卻讓一個**識別字**原樣走進了可執行位置。
 
-剩下**還能表達**的攻擊只有兩類，兩類都在 R452 量過：
+⚠ **round452c：又兩個洞，補在這裡不刪。** 兩個都不是任意程式執行，兩個都是
+攻擊者（`ops/gain/replay/r452c_channel_hunt.py`）在 b3c8514 上實測出來的：
+
+  (i) **非 SuiteSpecError 穿門**（探針 C）。`expected = "0x" + "f"*4000` 是一份
+      **完全合法**的 spec：`ast.literal_eval` 收 16 進位字面值，而 CPython 的
+      `int_max_str_digits` 只擋十進位轉換，所以長度上限與型別走訪都放行；
+      到 `emit_literal` 的 `repr()` 才炸，丟的是**裸 `ValueError`**。
+      `peerexec` 每一道門只 `except SuiteSpecError` ⇒ 11/11 道門噴 traceback。
+      這不是走私，是**相關失效**：k 台執行器吃同一份 spec 會一起倒，
+      而拒絕服務也是一種交不出貨。修法兩層：`MAX_INT_BITS`（資料有界，
+      `int_too_large`）＋ `_no_escape`（兜底，`literal_unencodable`）。
+  (ii) **`entry_point=None` 的綁定失效**（探針 I）。舊碼把 `None` 當「跳過檢查」，
+      而 `task.get("entry_point")` 在一個**沒有那個欄位**的題目上正好回 `None`
+      ⇒ R452b 的修法整條變回 no-op。修法：哨符 `_UNBOUND` ＝未綁定，
+      `None` ＝沒有東西可以綁 ⇒ `entry_point_unbound`。
+
+剩下**還能表達**的攻擊仍然只有兩類：
   1. **覆蓋不足**——少給幾條測資、挑容易的輸入（`tests` 是供應者給的）。
   2. **比對旗標放寬**——`cmp.atol` 開大、`set_equivalent`／`regex_predicate`
      亂開（只有 mbpp 方言有旗標）。
-兩類都還是要先過量具（參考解通過、每個已知壞樁被擋），量到的殘餘見
-`ops/gain/replay/peer_exec_suitespec_gate.json`。
+兩類都還是要先過量具（參考解通過、每個已知壞樁被擋）。殘餘**要用兩個數字講，
+不准縮成一個**（`ops/gain/replay/peer_exec_suitespec_gate_r452c.json`，
+`g_r446_eq5_mbpp`、368 題可轉換、k=3）：
+
+  - **可實現**（`generic_gauged`）：供應者只用**自己手上就有的東西**挑測資
+    ——spec 自己的 `expected` 有多泛、參考解、已知壞樁，零候選可見度、
+    零 hidden 可見度，過不了量具就換下一條。假交付 **17.93% → 20.65%
+    （+2.72pp）**，交付正確率 −0.82pp。
+  - **事後諸葛上限**（`weak_oracle`）：看得到 5 份已歸檔候選與 hidden 標籤，
+    挑最傷的那一條。假交付 **+4.35pp**、交付 −1.63pp。真實供應者拿不到這份
+    資料，所以它是上限不是會發生的攻擊。
+
+  ⚠ 舊講法「殘餘＝−8.70pp」（`weak_first`）**要停用**：那一格是「盲挑第 0 條」，
+    它掉的 8.70pp 裡有一大半是**量具把它擋掉**（committed 331/371 vs 366），
+    也就是機制在生效，不是攻擊者的收穫。看假交付才看得到攻擊者要的東西：
+    `weak_first` 的假交付只 +1.36pp，比會挑的 `generic_gauged` 還低。
 
 紅線與誠實邊界（改碼不得刪）
 ----------------------------
@@ -86,7 +116,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Sequence
 
 from .canonical import canonical_bytes
-from .checks import CANDIDATE_NS_NAME
+from .checks import CANDIDATE_NS_NAME, RENDERED_SUITE_NAMES
 
 SPEC_VERSION = 1
 DIALECTS = ("mbpp", "lcb")
@@ -98,13 +128,28 @@ MAX_LITERAL_CHARS = 200_000
 MAX_SPEC_BYTES = 4 * 1024 * 1024
 MAX_DEPTH = 40
 
+#: 整數的**值**上限（位元數），round452c 新增。前面三個上限量的都是**原始碼長度**，
+#: 而 `0x` ／ `0b` ／ `0o` 開頭的字面值可以用很短的原文寫出很大的值——
+#: `"0x" + "f"*4000` 只有 4002 個字元（遠低於 `MAX_LITERAL_CHARS`），
+#: 卻是一個 16000 位元的整數，`repr()` 它會撞上 CPython 的
+#: `sys.get_int_max_str_digits()`（預設 4300 位十進位）而丟一個**裸 ValueError**。
+#: 4096 位元 ≒ 1234 位十進位，穩穩落在那條線以下，所以「已驗過的值 repr 得出來」
+#: 這句話才成立（`emit_literal` 的前提）。
+#:
+#: ⚠ 這是**能力上的取捨**，寫在這裡不要事後當成 bug：一題真的需要
+#: 4096 位元以上整數的驗收（大數運算）在這個形態裡表達不出來，會被拒成
+#: `int_too_large`。用「拒絕一種罕見的合法需求」換掉「任何供應者都能用 4KB
+#: 讓 k 台執行器一起丟 traceback」，這條交換是刻意的。
+MAX_INT_BITS = 4096
+
 #: 渲染器會用掉的名字。entry_point 撞到任何一個都會讓渲染出來的碼語意改變，
 #: 所以在 validator 就拒絕，不留給沙箱去發現。
-RESERVED_NAMES = frozenset({
-    "__aeq", "__vacant_re", "__vacant_regex_predicate", "__vacant_set_equivalent",
-    "__ns", "__canon", "__tests", "__t", "__got", "_worker", "_vacant_call",
-    "__entry", CANDIDATE_NS_NAME,
-})
+#:
+#: round452c：渲染器那一半改成從 `vacant/checks.py` 的 `RENDERED_SUITE_NAMES` 取，
+#: 兩個檔案共用同一張表——沙箱那側用它擋**候選**的 proxy 撞名，這裡用它擋
+#: **供應者**的 entry_point 撞名。反向漂移防呆見
+#: `tests/test_suitespec.py::test_every_renderer_name_is_reserved_on_the_sandbox_side`。
+RESERVED_NAMES = RENDERED_SUITE_NAMES | frozenset({"_worker", "_vacant_call"})
 
 #: `vacant/checks.py::_test_runner_source` 的 runner 模板在 module scope 綁定的
 #: 每一個名字（import 進來的與自己定義的）。漂移防呆是
@@ -157,6 +202,49 @@ class SuiteSpecError(ValueError):
 # ── 字面值：解析、型別走訪、正規重寫 ────────────────────────────────────────
 _ATOMS = (type(None), bool, int, float, complex, str, bytes)
 
+#: 這一層**准許**逃出去的例外只有 `SuiteSpecError`。其餘這些（含它們的子類：
+#: `OverflowError`／`UnicodeError` 分別在 `ArithmeticError`／`ValueError` 底下）
+#: 一律翻譯成 `literal_unencodable`。
+_UNENCODABLE = (ValueError, TypeError, ArithmeticError, RecursionError, MemoryError)
+
+
+def _no_escape(fn: Callable[..., Any], *args: Any, **kw: Any) -> Any:
+    """跑 `fn`，保證只有 `SuiteSpecError` 出得來（round452c 的防禦縱深）。
+
+    為什麼需要這一層：`peerexec` **每一道門**都只 `except SuiteSpecError`
+    （`select_by_quorum`／`suite_gate` 的理由通道、`commit_suite` 的拒絕路徑），
+    所以只要 validator 丟出別的型別，例外就會穿過整條路徑變成一個 traceback。
+    攻擊者實測過這條：一份**完全合法**的 spec（`expected = "0x" + "f"*4000`）
+    在 1cfec80…b3c8514 上讓 11/11 道門全部噴 `ValueError`
+    （`ops/gain/replay/r452c_channel_hunt.py` 探針 C）。那不是任意程式執行，
+    是**相關失效**：k 台執行器吃同一份 spec 會一起倒，而拒絕服務也是一種交不出貨。
+
+    修法是兩層。第一層是資料本身有界（`MAX_INT_BITS`，`_walk` 擋在 parse 階段）；
+    這一層是**兜底**——任何沒被想到的 `repr`／遞迴／記憶體錯誤都變成一次
+    fail-closed 的拒絕，理由字串 `literal_unencodable`。
+
+    ⚠ 誠實邊界：兜底會把**程式碼的 bug** 也講成「這份 spec 不合格」。方向是對的
+    （拒交而不是崩潰），代價是 validator 自己壞掉的時候看起來像資料壞掉——
+    所以原始例外用 `raise ... from exc` 留在 `__cause__`，不要拿掉。
+    """
+    try:
+        return fn(*args, **kw)
+    except SuiteSpecError:
+        raise
+    except _UNENCODABLE as exc:
+        raise SuiteSpecError("literal_unencodable") from exc
+
+
+def _check_int(value: int) -> None:
+    """整數的值要有界，否則 `emit_literal` 的 `repr()` 會丟一個裸 ValueError。
+
+    `ast.literal_eval` 收 `0x`／`0b`／`0o` 字面值，而 CPython 的
+    `int_max_str_digits` 只擋**十進位轉換**、不擋這幾種進位的 parse——所以
+    「原始碼很短、值很大」是走得通的，長度上限攔不住它。見 `MAX_INT_BITS`。
+    """
+    if value.bit_length() > MAX_INT_BITS:
+        raise SuiteSpecError("int_too_large")
+
 
 def _check_finite(value: float | complex) -> None:
     if isinstance(value, complex):
@@ -176,7 +264,10 @@ def _walk(value: Any, depth: int = 0) -> None:
         raise SuiteSpecError("literal_too_deep")
     if isinstance(value, bool) or value is None:
         return
-    if isinstance(value, (int, str, bytes)):
+    if isinstance(value, int):
+        _check_int(value)
+        return
+    if isinstance(value, (str, bytes)):
         return
     if isinstance(value, (float, complex)):
         _check_finite(value)
@@ -199,6 +290,35 @@ def _walk(value: Any, depth: int = 0) -> None:
     raise SuiteSpecError(f"not_a_literal_type:{type(value).__name__}")
 
 
+def _emit_literal(value: Any, depth: int = 0) -> str:
+    if depth > MAX_DEPTH:
+        raise SuiteSpecError("literal_too_deep")
+    if value is None or isinstance(value, bool):
+        return repr(value)
+    if isinstance(value, int):
+        _check_int(value)
+        return repr(value)
+    if isinstance(value, (str, bytes)):
+        return repr(value)
+    if isinstance(value, (float, complex)):
+        _check_finite(value)
+        return repr(value)
+    if isinstance(value, list):
+        return "[" + ", ".join(_emit_literal(v, depth + 1) for v in value) + "]"
+    if isinstance(value, tuple):
+        body = ", ".join(_emit_literal(v, depth + 1) for v in value)
+        return "(" + body + ("," if len(value) == 1 else "") + ")"
+    if isinstance(value, set):
+        if not value:
+            raise SuiteSpecError("empty_set_not_encodable")
+        return "{" + ", ".join(sorted(_emit_literal(v, depth + 1) for v in value)) + "}"
+    if isinstance(value, dict):
+        return "{" + ", ".join(
+            f"{_emit_literal(k, depth + 1)}: {_emit_literal(v, depth + 1)}"
+            for k, v in value.items()) + "}"
+    raise SuiteSpecError(f"not_a_literal_type:{type(value).__name__}")
+
+
 def emit_literal(value: Any, depth: int = 0) -> str:
     """把一個**已驗過**的值寫成確定性的字面值字串。
 
@@ -206,39 +326,15 @@ def emit_literal(value: Any, depth: int = 0) -> str:
     同一份 spec 在兩台機器上會算出不同的 `suite_sha256`——那會讓「第三方可重算」
     這句話直接失效。集合一律照 emit 後的字串排序。dict 保留插入順序（順序來自
     來源字面值，本身是確定性的），不排序，因為混型鍵排不動。
+
+    round452c：整個遞迴包在 `_no_escape` 裡（`repr(巨大整數)` 會丟裸 ValueError），
+    所以這支對外只丟 `SuiteSpecError`。`from_task` 也靠這條——參考解**算出來的**
+    期望值沒有經過 validator，是這裡第一次碰到它。
     """
-    if depth > MAX_DEPTH:
-        raise SuiteSpecError("literal_too_deep")
-    if value is None or isinstance(value, bool):
-        return repr(value)
-    if isinstance(value, (int, str, bytes)):
-        return repr(value)
-    if isinstance(value, (float, complex)):
-        _check_finite(value)
-        return repr(value)
-    if isinstance(value, list):
-        return "[" + ", ".join(emit_literal(v, depth + 1) for v in value) + "]"
-    if isinstance(value, tuple):
-        body = ", ".join(emit_literal(v, depth + 1) for v in value)
-        return "(" + body + ("," if len(value) == 1 else "") + ")"
-    if isinstance(value, set):
-        if not value:
-            raise SuiteSpecError("empty_set_not_encodable")
-        return "{" + ", ".join(sorted(emit_literal(v, depth + 1) for v in value)) + "}"
-    if isinstance(value, dict):
-        return "{" + ", ".join(
-            f"{emit_literal(k, depth + 1)}: {emit_literal(v, depth + 1)}"
-            for k, v in value.items()) + "}"
-    raise SuiteSpecError(f"not_a_literal_type:{type(value).__name__}")
+    return _no_escape(_emit_literal, value, depth)
 
 
-def parse_literal(text: Any) -> Any:
-    """`ast.literal_eval` ＋ 型別走訪。名稱／呼叫／屬性／lambda／推導式全部在這裡死。
-
-    `literal_eval` 自己就會拒絕 Name／Call／Attribute／Lambda／ListComp／
-    JoinedStr（f-string）；型別走訪是第二道，擋掉 `1e999`（合法字面值、parse 成
-    inf）這種 literal_eval 放行的東西。
-    """
+def _parse_literal(text: Any) -> Any:
     if not isinstance(text, str):
         raise SuiteSpecError(f"literal_must_be_str:{type(text).__name__}")
     if len(text) > MAX_LITERAL_CHARS:
@@ -251,13 +347,24 @@ def parse_literal(text: Any) -> Any:
     return value
 
 
+def parse_literal(text: Any) -> Any:
+    """`ast.literal_eval` ＋ 型別走訪。名稱／呼叫／屬性／lambda／推導式全部在這裡死。
+
+    `literal_eval` 自己就會拒絕 Name／Call／Attribute／Lambda／ListComp／
+    JoinedStr（f-string）；型別走訪是第二道，擋掉 `1e999`（合法字面值、parse 成
+    inf）與 `0x` ＋ 4000 個 `f`（合法字面值、值大到 `repr` 不出來）這種
+    literal_eval 放行的東西。
+    """
+    return _no_escape(_parse_literal, text)
+
+
 def canonical_literal(text: Any) -> str:
     """解析 → 重寫。**上鏈的位元組是重寫過的**，不是作者排版過的。
 
     這條是「資料而不是程式」的一半：同一個值只有一種寫法，所以
     `suite_sha256` 認的是**值**，不是空白與引號的風格。
     """
-    return emit_literal(parse_literal(text))
+    return _no_escape(lambda t: _emit_literal(_parse_literal(t)), text)
 
 
 # ── 前置（與 loader 逐位元組相同；漂移防呆在 tests/test_suitespec.py）────────
@@ -384,14 +491,43 @@ class SuiteSpec:
         return hashlib.sha256(self.render().encode("utf-8")).hexdigest()
 
 
-def validate(obj: Any, *, entry_point: str | None = None) -> SuiteSpec:
+class _Unbound:
+    """`validate` 的「這次呼叫**沒有**題目可以綁」哨符型別（round452c）。"""
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:  # pragma: no cover - 只為了錯誤訊息好看
+        return "<unbound>"
+
+
+#: round452c：`entry_point` 的預設值從 `None` 改成哨符。
+#:
+#: 為什麼這不是潔癖：`None` 同時是「呼叫端刻意不綁」與「`task.get("entry_point")`
+#: 在一個沒有那個欄位的題目上回傳的東西」。舊碼寫的是
+#: `if entry_point is not None and ep != entry_point`，於是第二種情況**靜默地
+#: 跳過整個綁定**——`Executor.attest`／`select_by_quorum`／`challenge_rerun`
+#: 三支都用 `task.get("entry_point")`，一個少了欄位的題目就讓 R452b 的修法
+#: 整條變回 no-op（攻擊者實測：`ops/gain/replay/r452c_channel_hunt.py` 探針 I，
+#: 一份 `entry_point="helper"` 的套件在沒有欄位的題目上一路過到 `suite_gate`）。
+#:
+#: 現在：哨符＝未綁定（只留給工具與測試），`None`＝**沒有東西可以綁 ⇒ 拒**。
+_UNBOUND = _Unbound()
+
+
+def validate(obj: Any, *, entry_point: Any = _UNBOUND) -> SuiteSpec:
     """把任意輸入變成一份可用的 `SuiteSpec`，或丟 `SuiteSpecError`。
 
     `entry_point` ＝ **題目**（`task["entry_point"]`）宣告的進入點。round452b 起
     這不是一個可選的額外檢查，而是規格：entry_point 屬於題目，不屬於套件。
     給了就必須相符，不符丟 `entry_point_mismatch`；`peerexec` 那一側每一道門都
     強制帶著它進來（`as_suite_spec`），所以「不給」這條路只留給還沒綁題目的
-    工具與測試。
+    工具與測試——而「不給」現在是**省略這個參數**（哨符 `_UNBOUND`），不是傳
+    `None`。傳 `None` ＝ 題目沒有宣告進入點 ＝ 沒有東西可以綁 ⇒
+    `entry_point_unbound`（round452c）。
+
+    round452c 的第二件事：整支包在 `_no_escape` 裡，**只有 `SuiteSpecError` 出得去**。
+    呼叫端（`peerexec` 的每一道門）只 catch 這一個型別，所以任何別的例外等於
+    穿門而過的 traceback，那是相關失效不是拒絕。
 
     fail-closed，缺一不可（每一條都對應一個 `tests/test_suitespec.py` 的測試）：
       - `v` 是本版
@@ -405,6 +541,11 @@ def validate(obj: Any, *, entry_point: str | None = None) -> SuiteSpec:
       - 全部字面值重寫過（**上鏈的是重寫後的位元組**）
       - canonical bytes 不超過上限
     """
+    return _no_escape(_validate, obj, entry_point)
+
+
+def _validate(obj: Any, entry_point: Any) -> SuiteSpec:
+    """`validate` 的本體。**不要直接呼叫**——外面那層是例外型別的閘。"""
     if isinstance(obj, SuiteSpec):
         obj = obj.to_json()
     if isinstance(obj, (bytes, bytearray)):
@@ -427,7 +568,13 @@ def validate(obj: Any, *, entry_point: str | None = None) -> SuiteSpec:
     ep = obj.get("entry_point")
     if not isinstance(ep, str) or not ep.isidentifier():
         raise SuiteSpecError("entry_point_not_identifier")
-    if entry_point is not None and ep != entry_point:
+    if entry_point is None:
+        # round452c：`None` ＝ 題目那一格是空的（多半是 `task.get("entry_point")`
+        # 打在一個沒有那個欄位的題目上）。**沒有東西可以綁 ⇒ 拒**，不准當成
+        # 「這次不檢查」。與 `mismatch` 分開報，是因為兩者要修的地方不同：
+        # mismatch 是套件在說謊，unbound 是題目資料不全。
+        raise SuiteSpecError("entry_point_unbound")
+    if entry_point is not _UNBOUND and ep != entry_point:
         # entry_point 是**題目**的欄位。套件敢跟題目不一樣，就是它在替客戶決定
         # 「要驗的是哪一個函式」——那是 R452b 那條走私管道的第一步。
         #

@@ -14,7 +14,22 @@ R451（`DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md`）§三-3 的裁決�
      `cache/peerexec_facts_*.json` 的可見標籤。有一格不同就要指名說明。
   2. **殘餘**（`--matrix` ／ `--flags` ／ `--gate`）：spec 形態裡**還能表達**的攻擊
      只剩兩類——覆蓋不足（少測資）與比對旗標放寬——各自過一次真的 commit 閘
-     （真簽章、真鏈、k=3 誠實執行器），量交付掉多少。這才是可以老實講的上限。
+     （真簽章、真鏈、k=3 誠實執行器），量交付掉多少。
+
+round452c：殘餘**要用兩個數字講，不准縮成一個**
+================================================
+攻擊者（`ops/gain/replay/r452c_generic_gate.py`）指出 R452 的座標少了中間那一格：
+`weak_*` 是**盲挑**（第 0 條／亂數），`weak_oracle` 是**事後諸葛**（看得到 5 份候選
+與 hidden），而一個**真實**的供應者兩者都不是——他看得到自己那份 spec 的內容、
+參考解與已知壞樁，而且可以在本機重試到過量具為止。那一格就是 `generic_gauged`：
+
+    可實現（`generic_gauged`）    假交付 17.93% → 20.65%（**+2.72pp**），交付 −0.82pp
+    事後諸葛上限（`weak_oracle`）假交付 **+4.35pp**，交付 −1.63pp
+
+⚠ 舊講法「殘餘＝−8.70pp」（`weak_first` 的交付率）**停用**：那個數字掉的大半是
+  **量具把它擋掉**（committed 331/371 vs 完整套件 366），也就是機制在生效；
+  它的假交付只 +1.36pp，比會挑的 `generic_gauged` 還低。用交付率當殘餘會把
+  「機制擋住了攻擊」讀成「攻擊很成功」——看假交付才看得到攻擊者要的東西。
 
 R451 的三種攻擊（stateful／targeted／mimic）在這裡**沒有欄位可以放**：validator
 只收字面值。那不是一個數字，是一個型別性質，釘在
@@ -32,7 +47,8 @@ R451 的三種攻擊（stateful／targeted／mimic）在這裡**沒有欄位可�
   .venv/bin/python ops/gain/replay/r452_suitespec.py --census g_r446_eq5_mbpp g_r443_gemma_lcb
   .venv/bin/python ops/gain/replay/r452_suitespec.py --matrix g_r446_eq5_mbpp
   .venv/bin/python ops/gain/replay/r452_suitespec.py --flags g_r446_eq5_mbpp
-  .venv/bin/python ops/gain/replay/r452_suitespec.py --gate g_r446_eq5_mbpp
+  .venv/bin/python ops/gain/replay/r452_suitespec.py --gate g_r446_eq5_mbpp \\
+      --out peer_exec_suitespec_gate_r452c.json     # round452c 那一份（含 generic_*）
 """
 from __future__ import annotations
 
@@ -71,8 +87,26 @@ BOOT_SEED = 20260906
 #: 這份資料。所以它是**上限**，不是一個會發生的攻擊——報表上必須這樣標。
 SINGLE_TEST_VARIANTS = ("weak_first", "weak_rand_s1", "weak_rand_s2", "weak_rand_s3",
                         "weak_oracle")
+
+#: round452c：`weak_*`（盲挑）與 `weak_oracle`（事後諸葛）中間**沒有人量過**的那一格
+#: ——一個**真實**的供應者。他看不到候選、看不到 hidden，但他看得到自己那份 spec
+#: 的內容（`args`／`expected` 都是他寫的），也看得到參考解與已知壞樁
+#: （`commit_suite_with_gauge` 就是拿這兩樣跑量具的，committer 手上一定有）。
+#: 選擇規則來自攻擊者的 `ops/gain/replay/r452c_generic_gate.py`（照抄，不是重寫；
+#: 兩份的數字在 `--gate` 末尾逐位對帳）。
+#:   generic_blind ：挑排名第 1 的，量具過不過就認了。
+#:   generic_gauged：照排名往下走，挑**第一個過得了量具**的（供應者本來就可以在
+#:                   本機重試到過為止）；全部過不了就照交完整套件。
+GENERIC_VARIANTS = ("generic_blind", "generic_gauged")
 FLAG_VARIANTS = ("flag_atol", "flag_seteq", "flag_regex")
-VARIANTS = ("real", *SINGLE_TEST_VARIANTS, *FLAG_VARIANTS)
+VARIANTS = ("real", *SINGLE_TEST_VARIANTS, *GENERIC_VARIANTS, *FLAG_VARIANTS)
+
+#: 「退化期望值」——錯的實作最容易剛好命中的那些輸出。純粹從 spec 的 `expected`
+#: 字面值判斷，不看候選、不看 hidden。逐字取自 `r452c_generic_gate.DEGENERATE`。
+DEGENERATE_EXPECTED = frozenset({
+    "0", "1", "-1", "2", "True", "False", "None", "''", '""', "[]", "{}", "()",
+    "0.0", "1.0", "b''", "'0'", "'1'", "0j",
+})
 
 
 # ── 轉換 ────────────────────────────────────────────────────────────────────
@@ -202,8 +236,16 @@ def census(run: str, workers: int = 6) -> dict:
 
 
 # ── 逐測資矩陣（覆蓋不足這一類的共用計算）──────────────────────────────────
-def single_test_spec(spec: ss.SuiteSpec, j: int) -> ss.SuiteSpec:
-    return ss.validate({**spec.to_json(), "tests": [spec.tests[j].to_json()]})
+def single_test_spec(spec: ss.SuiteSpec, j: int,
+                     entry_point: str | None = None) -> ss.SuiteSpec:
+    """只留第 j 條測資的 spec。
+
+    round452c：重驗時要**帶著題目宣告的 entry_point**。省略參數時退回
+    `spec.entry_point`——`load_specs` 已經把每一份 spec 綁過題目了，所以那是同一個
+    字串；但**不准**傳 `None`，那在 round452c 之後是「題目那一格是空的 ⇒ 拒」。
+    """
+    return ss.validate({**spec.to_json(), "tests": [spec.tests[j].to_json()]},
+                       entry_point=entry_point or spec.entry_point)
 
 
 def _matrix_job(job):
@@ -240,7 +282,7 @@ def matrix(run: str, workers: int = 6) -> dict:
         if ref:
             subjects.append(("ref", ref))
         for j in range(spec.n_tests):
-            jobs.append((tid, j, single_test_spec(spec, j).render(), subjects, ep))
+            jobs.append((tid, j, single_test_spec(spec, j, ep).render(), subjects, ep))
     t0 = time.time()
     n_runs = sum(len(j[3]) for j in jobs)
     print(f"{run}: 逐測資矩陣 — {len(jobs)} 格 × ~{n_runs//max(1,len(jobs))} 次沙箱 "
@@ -257,15 +299,73 @@ def matrix(run: str, workers: int = 6) -> dict:
     return out
 
 
-def load_matrix(run: str) -> dict:
-    p = CACHE / f"r452_matrix_{run}.json"
+def load_matrix(run: str, tag: str = "r452") -> dict:
+    """逐測資矩陣 cache。`tag="r452c"` ＝ 攻擊者在**修補後**的渲染器上重量的那一份。
+
+    round452c：`r452c_matrix_*` 是攻擊者用修補後的渲染器**全量重跑**的
+    1143 格／11430 次真沙箱（`ops/gain/replay/r452c_generic_gate.py --sweep`），
+    而且與 1cfec80 那份逐格對過：11430/11430 相同、0 不同。generic 變體讀這一份，
+    因為它的每一格都是本輪現量的；`weak_*` 讀原本那份，逐位不變才比得出來。
+    """
+    p = CACHE / f"{tag}_matrix_{run}.json"
     if not p.exists():
-        raise SystemExit(f"缺 matrix cache：先跑 --matrix {run}")
+        raise SystemExit(f"缺 matrix cache（{tag}）：先跑 --matrix {run}")
     return json.loads(p.read_text())
 
 
+# ── round452c：非事後諸葛的純資料攻擊（挑最泛的那一條測資）──────────────────
+#
+# 規則整段搬自攻擊者的 `ops/gain/replay/r452c_generic_gate.py`（`score`／`rank_order`）。
+# 搬過來而不是 import：那支 import 本檔，反向 import 會成環；而**照抄**而不是重寫，
+# 是因為這裡要重現的是**別人量到的那個數字**，不是我自己想的一個近似規則。
+# `--gate` 末尾會拿攻擊者落盤的 aggs 逐位對帳，抄錯了會當場吵。
+def generic_score(args_lit: str, expected_lit: str) -> int:
+    """供應者手上就有的三個訊號。零候選可見度、零 hidden 可見度。"""
+    s = 3 if expected_lit in DEGENERATE_EXPECTED else 0
+    if len(expected_lit) <= 2:
+        s += 2
+    elif len(expected_lit) <= 4:
+        s += 1
+    if len(args_lit) <= 6:
+        s += 1
+    return s
+
+
+def generic_rank_order(spec: ss.SuiteSpec) -> list[int]:
+    """供應者的挑選順序。只吃 spec 自己的內容，全確定性、可重算。"""
+    keyed = [(-generic_score(t.args, t.expected), len(t.expected), len(t.args), j)
+             for j, t in enumerate(spec.tests)]
+    return [k[-1] for k in sorted(keyed)]
+
+
+def _cell_gauge_ok(cell: dict) -> bool:
+    """一格「單一測資」的量具：參考解過 ＋ 四個已知壞樁全擋。"""
+    return (cell.get("ref") is True
+            and all(cell.get(f"stub{s}") is False for s in range(4)))
+
+
+def _generic_plan(spec: ss.SuiteSpec, cells: dict, variant: str,
+                  entry_point: str | None):
+    """回傳 `(spec 或 "real", pick, gauge_ok)`。**不看候選、不看 hidden。**"""
+    order = generic_rank_order(spec)
+    if variant == "generic_blind":
+        pick = order[0]
+        return single_test_spec(spec, pick, entry_point), pick, _cell_gauge_ok(
+            cells[str(pick)])
+    if variant == "generic_gauged":
+        for pick in order:
+            if _cell_gauge_ok(cells[str(pick)]):
+                return single_test_spec(spec, pick, entry_point), pick, True
+        # 全部過不了量具 ⇒ 攻擊者最好的選擇就是照交完整套件
+        # （與 `weak_oracle` 的 fallback 同一條規則）。
+        return "real", None, None
+    raise SystemExit(f"未知 generic 變體 {variant}")
+
+
 # ── 旗標放寬 ────────────────────────────────────────────────────────────────
-def flag_spec(spec: ss.SuiteSpec, variant: str) -> ss.SuiteSpec:
+def flag_spec(spec: ss.SuiteSpec, variant: str,
+              entry_point: str | None = None) -> ss.SuiteSpec:
+    """把比對旗標放寬的 spec。`entry_point` 同 `single_test_spec`（round452c）。"""
     d = spec.to_json()
     if variant == "flag_atol":
         d["cmp"]["atol"] = 1e9
@@ -275,7 +375,7 @@ def flag_spec(spec: ss.SuiteSpec, variant: str) -> ss.SuiteSpec:
         d["cmp"]["regex_predicate"] = True
     else:
         raise SystemExit(f"未知旗標變體 {variant}")
-    return ss.validate(d)
+    return ss.validate(d, entry_point=entry_point or spec.entry_point)
 
 
 def flags(run: str, workers: int = 6) -> dict:
@@ -295,7 +395,7 @@ def flags(run: str, workers: int = 6) -> dict:
         if ref:
             subjects.append(("ref", ref))
         for v in FLAG_VARIANTS:
-            jobs.append((tid, v, flag_spec(spec, v).render(), subjects, ep))
+            jobs.append((tid, v, flag_spec(spec, v, ep).render(), subjects, ep))
     t0 = time.time()
     print(f"{run}: 旗標放寬 — {len(jobs)} 格 × ~10 次沙箱，{workers} workers", flush=True)
     out: dict[str, dict] = {}
@@ -368,7 +468,8 @@ def load_real_gauge(run: str) -> dict:
 
 
 def _variant_plan(run: str, spec: ss.SuiteSpec, tid: str, variant: str,
-                  mat: dict, facts: dict, n_cand: int):
+                  mat: dict, facts: dict, n_cand: int,
+                  entry_point: str | None = None):
     """回傳 (spec, labels[list[bool|None]], gauge_ok, gauge_detail)。
 
     labels 一律取自**真沙箱**的矩陣／旗標 cache，不是推導。
@@ -392,7 +493,7 @@ def _variant_plan(run: str, spec: ss.SuiteSpec, tid: str, variant: str,
                 # 沒有任何單一測資過得了量具 ⇒ 攻擊者最好的選擇就是照交真套件。
                 return "real", None, True, "oracle_falls_back_to_real"
         labels = [cells[str(pick)].get(f"cand{i}") for i in range(n_cand)]
-        return (single_test_spec(spec, pick), labels, gauge_ok[pick],
+        return (single_test_spec(spec, pick, entry_point), labels, gauge_ok[pick],
                 f"test={pick}")
     raise SystemExit(f"unhandled variant {variant}")
 
@@ -427,6 +528,9 @@ def gate(run: str, k: int = 3, workers: int = 6, variants=VARIANTS) -> dict:
     specs = load_specs(run)
     census_labels = json.loads((CACHE / f"r452_census_{run}.json").read_text())["labels"]
     mat = load_matrix(run)
+    # round452c：generic 變體讀攻擊者在**修補後**渲染器上重量的那份矩陣
+    # （逐格與上面那份相同，11430/11430；讀哪一份不會改數字，但要說得出讀的是哪一份）。
+    mat_c = load_matrix(run, "r452c") if set(variants) & set(GENERIC_VARIANTS) else {}
     flg = load_flags(run)
     if not (CACHE / f"r452_realgauge_{run}.json").exists():
         real_gauge(run, workers=workers)
@@ -462,14 +566,38 @@ def gate(run: str, k: int = 3, workers: int = 6, variants=VARIANTS) -> dict:
                     row["refuse_reason"] = "no_flag_cell"
                     rows.append(row)
                     continue
-                use = flag_spec(spec, variant)
+                use = flag_spec(spec, variant, t.get("entry_point"))
                 labels = [cells.get(f"cand{i}") for i in range(n_cand)]
                 gok = (cells.get("ref") is True
                        and all(cells.get(f"stub{s}") is False for s in range(4)))
                 detail = variant
+            elif variant in GENERIC_VARIANTS:
+                cells = mat_c.get(tid) or {}
+                if not cells:
+                    # 這一題沒有逐測資的格子 ⇒ 攻擊者沒得挑，照交完整套件。
+                    # （攻擊者那支的 `no_cells_fallback_full` 同一條規則。）
+                    use, labels = spec, [census_labels.get(f"{tid}#{i}")
+                                         for i in range(n_cand)]
+                    rec = rg.get(tid)
+                    gok, detail = bool(rec and rec.get("ok")), "no_cells_fallback_full"
+                else:
+                    use, pick, gok = _generic_plan(spec, cells, variant,
+                                                   t.get("entry_point"))
+                    if use == "real":
+                        use, labels = spec, [census_labels.get(f"{tid}#{i}")
+                                             for i in range(n_cand)]
+                        rec = rg.get(tid)
+                        gok, detail = (bool(rec and rec.get("ok")),
+                                       "gauge_fallback_full")
+                    else:
+                        labels = [cells[str(pick)].get(f"cand{i}")
+                                  for i in range(n_cand)]
+                        detail = f"test={pick}"
+                        row["pick"] = pick
             else:
                 use, labels, gok, detail = _variant_plan(
-                    run, spec, tid, variant, mat, facts, n_cand)
+                    run, spec, tid, variant, mat, facts, n_cand,
+                    t.get("entry_point"))
                 if use == "real":
                     use = spec
                     labels = [census_labels.get(f"{tid}#{i}") for i in range(n_cand)]
@@ -528,6 +656,9 @@ def gate(run: str, k: int = 3, workers: int = 6, variants=VARIANTS) -> dict:
         agg = {
             "run": run, "variant": variant, "k": k, "n": n,
             "oracle": variant == "weak_oracle",
+            # round452c：這一格是不是**可實現的**攻擊（只用供應者手上有的資訊）。
+            # 兩個布林分開放，是為了讓讀 JSON 的人不必記住哪個變體名是哪一類。
+            "realisable": variant in GENERIC_VARIANTS,
             "committed": sum(r["committed"] for r in rows),
             "refused_at_commit": sum(not r["committed"] for r in rows),
             "n_convertible": len(conv),
@@ -562,13 +693,16 @@ def gate(run: str, k: int = 3, workers: int = 6, variants=VARIANTS) -> dict:
         all_rows.extend(rows)
         d = agg["delta_pp_vs_real"]
         fd = agg["false_delta_pp_vs_real"]
-        print(f"  {variant:14s} committed {agg['committed']:3d}/{agg['n']}  "
+        tag = ""
+        if agg["oracle"]:
+            tag = "   ← ORACLE（事後諸葛，上限）"
+        elif variant == "generic_gauged":
+            tag = "   ← 可實現（供應者手上的資訊）"
+        print(f"  {variant:16s} committed {agg['committed']:3d}/{agg['n']}  "
               f"deliv {100*agg['deliv_acc_convertible']:6.2f}%  "
               f"false {100*agg['false_deliv_convertible']:5.2f}%  "
               f"delta {d:+.2f}pp CI95[{agg['ci95_pp'][0]:+.2f},{agg['ci95_pp'][1]:+.2f}]  "
-              f"false_delta {fd:+.2f}pp"
-              + ("   ← ORACLE（事後諸葛，上限）" if agg["oracle"] else ""),
-              flush=True)
+              f"false_delta {fd:+.2f}pp" + tag, flush=True)
     return {"aggs": aggs, "rows": all_rows}
 
 
@@ -597,6 +731,52 @@ def _boot_ci(paired, b=BOOT_B, seed=BOOT_SEED):
         means.append(sum(paired[rng.randrange(n)] for _ in range(n)) / n)
     means.sort()
     return [round(100 * means[int(0.025 * b)], 2), round(100 * means[int(0.975 * b) - 1], 2)]
+
+
+#: `--gate` 之後的對帳來源：哪幾個變體要跟哪一份既有證物逐位相同。
+#: round452c 的主張有兩半，兩半都必須是**可核對的**而不是宣稱的：
+#:   (a) 修補沒有動到既有的數字 ⇒ `real`／`weak_*`／`flag_*` 對 R452b 那份逐位相同；
+#:   (b) 新增的兩格是**攻擊者量到的那個數字** ⇒ `generic_*` 對攻擊者那份逐位相同。
+RECONCILE_AGAINST = (
+    ("peer_exec_suitespec_gate_r452b.json",
+     ("real", *SINGLE_TEST_VARIANTS, *FLAG_VARIANTS)),
+    ("r452c_generic_gate.json", GENERIC_VARIANTS),
+)
+#: 對帳看哪幾個欄位。挑的是**結果**欄位，不是描述欄位（`refuse_reasons` 之類的
+#: dict 在兩支之間鍵序可能不同，比它只會製造假警報）。
+RECONCILE_FIELDS = ("n_convertible", "committed", "deliv_acc_convertible",
+                    "false_deliv_convertible", "mean_n_tests")
+
+
+def reconcile(aggs) -> list[dict]:
+    """把本次的 aggs 跟既有證物逐位對帳，回傳（並印出）每一格的結論。
+
+    這支不修任何東西，只負責讓「逐位不變」這句話**有東西可看**。找不到對照檔就
+    照實記 `missing`，不當成通過——「沒比」與「比過了相同」在報告裡不准長得一樣。
+    """
+    out = []
+    for fname, variants in RECONCILE_AGAINST:
+        p = OUT / fname
+        if not p.exists():
+            out.append({"against": fname, "status": "missing"})
+            print(f"  ⚠ 對照檔不存在：{fname}")
+            continue
+        ref = {a["variant"]: a for a in json.loads(p.read_text())["aggs"]}
+        for v in variants:
+            mine, theirs = ({a["variant"]: a for a in aggs}).get(v), ref.get(v)
+            if mine is None or theirs is None:
+                out.append({"against": fname, "variant": v, "status": "absent"})
+                print(f"  ⚠ {v:16s} 對照缺席（本次 {mine is not None}／"
+                      f"對照 {theirs is not None}）")
+                continue
+            diffs = {f: [mine.get(f), theirs.get(f)] for f in RECONCILE_FIELDS
+                     if mine.get(f) != theirs.get(f)}
+            out.append({"against": fname, "variant": v,
+                        "status": "identical" if not diffs else "differs",
+                        "diffs": diffs})
+            print(f"  {v:16s} vs {fname}: "
+                  + ("逐位相同" if not diffs else f"不同 {diffs}"))
+    return out
 
 
 def main() -> None:
@@ -628,8 +808,24 @@ def main() -> None:
         for run in a.gate:
             res = gate(run, k=a.k, workers=a.workers)
             out.append(res)
-        payload = {"aggs": [r for x in out for r in x["aggs"]],
-                   "rows": [r for x in out for r in x["rows"]]}
+        aggs = [r for x in out for r in x["aggs"]]
+        print("\n=== 殘餘表（完整）===")
+        print(f"{'variant':16s} {'commit':>7s} {'deliv%':>8s} {'Δdeliv':>8s} "
+              f"{'false%':>8s} {'Δfalse':>8s} {'n_tests':>8s}  註")
+        for g in aggs:
+            note = ("ORACLE 上限（事後諸葛）" if g["oracle"]
+                    else "可實現（供應者側資訊）" if g["variant"] == "generic_gauged"
+                    else "")
+            print(f"{g['variant']:16s} {g['committed']:3d}/{g['n']:3d} "
+                  f"{100*g['deliv_acc_convertible']:8.2f} "
+                  f"{g['delta_pp_vs_real']:+8.2f} "
+                  f"{100*g['false_deliv_convertible']:8.2f} "
+                  f"{g['false_delta_pp_vs_real']:+8.2f} "
+                  f"{g['mean_n_tests']:8.3f}  {note}")
+        print("\n=== 對帳（修補沒動到舊數字／新兩格＝攻擊者量到的那個數字）===")
+        recon = reconcile(aggs)
+        payload = {"aggs": aggs, "rows": [r for x in out for r in x["rows"]],
+                   "reconciliation": recon}
         p = OUT / a.out
         p.write_text(json.dumps(payload, indent=1, sort_keys=True))
         print(f"wrote {p}")

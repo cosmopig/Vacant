@@ -53,8 +53,25 @@ LLM 評審之間的分歧永遠只能解讀成「他們看法不同」——那�
 
    **殘餘（本模組現在的固定點，不准講成已經解決）＝覆蓋不足 ＋ 比對旗標放寬。**
    供應者仍然選得了「測哪幾個輸入」與（mbpp 方言）`atol`／`set_equivalent`／
-   `regex_predicate`。這兩類仍然要先過量具（參考解通過、每個已知壞樁被擋），
-   量到的殘餘見 `ops/gain/replay/peer_exec_suitespec_gate.json`。
+   `regex_predicate`。這兩類仍然要先過量具（參考解通過、每個已知壞樁被擋）。
+
+   **殘餘要用兩個數字講，不准縮成一個**（round452c；
+   `ops/gain/replay/peer_exec_suitespec_gate_r452c.json`，`g_r446_eq5_mbpp`、
+   368 題可轉換、k=3、4 個已知壞樁）：
+
+     可實現（`generic_gauged`）  假交付 17.93% → 20.65%（**+2.72pp**），交付 −0.82pp
+     事後諸葛上限（`weak_oracle`）假交付 **+4.35pp**，交付 −1.63pp
+
+   兩者的差別是**攻擊者看得到什麼**。可實現那一格只用供應者手上本來就有的
+   東西挑測資：自己那份 spec 的 `expected` 有多泛（`0`／`True`／`[]`／`None`
+   這類退化值，錯的實作最容易剛好吐得出來）、參考解、已知壞樁——零候選可見度、
+   零 hidden 可見度，過不了量具就換下一條（本機重試不花任何人的錢）。
+   上限那一格看得到 5 份已歸檔候選與 hidden 標籤，真實供應者拿不到。
+
+   ⚠ 舊講法「殘餘＝−8.70pp」（`weak_first`，盲挑第 0 條）**停用**：那個數字掉的
+     大半是**量具把它擋掉**（committed 331/371 vs 完整套件 366），也就是機制在
+     生效；它的假交付只 +1.36pp，比會挑的 `generic_gauged` 還低。用交付率當殘餘
+     會把「機制擋住了攻擊」讀成「攻擊很成功」。
    另外三條沒動：commit-reveal 只釘住時間、量具只是下界、`challenge_rerun`
    只是重跑權——三者都是 raises-cost，不是 prevents。
    還有一條新的、要講清楚的：**信任從「供應者的碼」搬到「大家共用的渲染器」，
@@ -74,6 +91,20 @@ LLM 評審之間的分歧永遠只能解讀成「他們看法不同」——那�
          （`vacant/suitespec.entry_binding`）——名字只以 repr 過的字串鍵出現，
          結構上碰不到 builtins 與 runner 的 import。
    黑名單（`suitespec.ENTRY_POINT_BLACKLIST`）是**防禦縱深**，不是修法。
+
+   **round452c 補洞（同一位攻擊者，`ops/gain/replay/r452c_channel_hunt.py`）。**
+   兩個洞都不是任意程式執行，但兩個都讓上面那些「每一道門都擋」的句子不成立：
+     (i) **穿門的不是套件，是例外**（探針 C）。一份合法 spec
+         （`expected = "0x" + "f"*4000`）讓 validator 丟**裸 `ValueError``——
+         而本模組每一道門都只 `except SuiteSpecError` ⇒ 11/11 道門噴 traceback。
+         那是第 3 條**相關失效**的實例：k 台執行器吃同一份 spec 會一起倒。
+         修法在 `vacant/suitespec.py`（`MAX_INT_BITS` ＋ `_no_escape`），本模組
+         的門則多認一個理由字串 `entry_point_unbound`／`literal_unencodable`。
+     (ii) **`entry_point=None` 綁不住**（探針 I）。`attest`／`select_by_quorum`／
+         `challenge_rerun` 都用 `task.get("entry_point")`，題目少了那個欄位就傳
+         `None` 進去，而舊 validator 把 `None` 當「跳過檢查」⇒ 上面 (a) 那條
+         整條變回 no-op。現在 `None` ＝拒（`entry_point_unbound`），
+         「未綁定」要**省略參數**才做得到，而本模組一處都沒有省略。
 3. **沙箱缺陷是相關失效，不是腐化。** k 個執行器如果跑同一份 `vacant/checks.py`、
    同一個 Python、同一台機器，它們會**一致地**錯，法定人數會全票通過一個錯的判決，
    而且分歧率為 0（看起來最健康）。要打斷這個相關性需要**實作多樣性**的沙箱，
@@ -127,6 +158,14 @@ SUITE_COMMIT_TYPE = "peer_exec_suite_commit"
 SUITE_COMMIT_VERSION = 2
 VERDICT_TYPE = "peer_exec_verdict"
 
+#: 「這份套件綁不上這一題」的三個理由。有理由通道的門（`select_by_quorum`／
+#: `suite_gate`）把它們寫進收據；其餘的 spec 錯誤（`raw_code_suite_not_accepted`、
+#: `literal_unencodable`…）照舊丟 `SuiteSpecError`——「這根本不是一份 spec」與
+#: 「這份 spec 驗的不是這一題」是兩件事，收據不准把它們寫成同一件。
+#: round452c 多了 `entry_point_unbound`（題目那一格是空的）。
+BINDING_REFUSAL_REASONS = ("entry_point_mismatch", "entry_point_reserved",
+                           "entry_point_unbound")
+
 #: 多數決的上界，寫成常數是為了讓它出現在收據裡而不是只出現在論述裡。
 MAJORITY_BOUND_NOTE = (
     "majority over k executors tolerates at most floor((k-1)/2) corrupt executors; "
@@ -138,13 +177,23 @@ MAJORITY_BOUND_NOTE = (
 SUITE_FIXED_POINT_NOTE = (
     "the committed suite is DATA (literal (args, expected) pairs plus comparator "
     "config) rendered by the executor's own trusted renderer -- no supplier-authored "
-    "Python runs anywhere, and the entry point is the TASK's, bound and committed, "
-    "resolved by namespace lookup rather than by a bare name, so stateful / "
-    "stub-blacklisting / mimic / entry-point-smuggling suites have no encoding; it "
+    "Python runs anywhere, and the entry point is the TASK's, bound and committed "
+    "(absent task entry point => refusal, never an unbound bind), resolved by "
+    "namespace lookup rather than by a bare name, so stateful / stub-blacklisting / "
+    "mimic / entry-point-smuggling suites have no encoding; literals are bounded in "
+    "value as well as in length, and validation raises only SuiteSpecError, so a "
+    "malformed suite is a refusal rather than a traceback through every door; it "
     "also passed a gauge (reference accepted, every known-bad stub rejected). What is "
     "NOT ruled out: a suite that is merely weak or incomplete (too few tests, easy "
     "inputs) or whose comparator flags are loosened -- coverage and comparator config "
-    "remain a trusted input, and so do the renderer and the sandbox it renders for"
+    "remain a trusted input, and so do the renderer and the sandbox it renders for. "
+    "That residual is TWO numbers, never one: REALISABLE (supplier-side information "
+    "only -- its own expected values, the reference, the known-bad stubs; no view of "
+    "candidates or hidden labels) raises false delivery by +2.72pp (17.93% -> 20.65%) "
+    "on g_r446_eq5_mbpp/368 tasks at k=3, and the HINDSIGHT CEILING (an oracle that "
+    "can see the archived candidates and their hidden labels, which a real supplier "
+    "cannot) is +4.35pp; measured in "
+    "ops/gain/replay/peer_exec_suitespec_gate_r452c.json"
 )
 
 
@@ -157,9 +206,19 @@ def as_suite_spec(suite: "SuiteSpec | Mapping[str, Any] | bytes",
     ——R451 的整份裁決就是「只要驗收碼是任意 Python，量具就沒有約束力」，
     所以這道門必須是**型別層級**的關閉，不是一個可以用旗標打開的選項。
 
-    round452b：`entry_point` 是**必填**（可以是 `None`，但那樣一定不相符 ⇒ 拒）。
-    刻意不給預設值：一個 `entry_point=None` 的預設會讓「忘了綁題目」看起來像是
-    一條正常路徑，而那正是被走私的那條路徑（`ops/gain/replay/r452b_smuggle_gate.py`）。
+    `entry_point` 是**必填**（round452b）。刻意不給預設值：一個
+    `entry_point=None` 的預設會讓「忘了綁題目」看起來像是一條正常路徑，
+    而那正是被走私的那條路徑（`ops/gain/replay/r452b_smuggle_gate.py`）。
+
+    ⚠ round452c 更正一句**假的** docstring。這裡原本寫「可以是 `None`，但那樣
+      一定不相符 ⇒ 拒」——那句話在 b3c8514 上是錯的：`validate` 當時把 `None`
+      當成「跳過檢查」，所以一個**沒有 `entry_point` 欄位**的題目
+      （`task.get("entry_point")` → `None`）會讓套件自己宣告的 entry point
+      原樣通過，一路過到 `commit_suite`／`suite_gate`（攻擊者實測：
+      `ops/gain/replay/r452c_channel_hunt.py` 探針 I，`docstring_claim_holds: false`）。
+      現在 `None` 真的會拒，理由是 `entry_point_unbound`——而讓它成真的是
+      `vacant/suitespec.py` 的哨符，不是這句 docstring。**註解不是機制**：
+      這一格留在這裡當標本。
     """
     return validate_suite(suite, entry_point=entry_point)
 
@@ -670,7 +729,7 @@ def select_by_quorum(
         # entry_point 不是套件可以自己決定的欄位。這裡**一次沙箱都不花**就拒交，
         # 理由原樣進收據。其餘的 spec 錯誤照舊丟出去——「這根本不是一份 spec」
         # 與「這份 spec 驗的不是這一題」是兩件事，收據不准把它們寫成同一件。
-        if str(exc) not in ("entry_point_mismatch", "entry_point_reserved"):
+        if str(exc) not in BINDING_REFUSAL_REASONS:
             raise
         return Selection(task.get("task_id"), None, None, None, True, (), 0, str(exc))
     ros = dict(roster) if roster is not None else roster_of(executors)
@@ -902,7 +961,7 @@ def suite_gate(
     try:
         spec = as_suite_spec(suite, entry_point)
     except SuiteSpecError as exc:
-        if str(exc) in ("entry_point_mismatch", "entry_point_reserved"):
+        if str(exc) in BINDING_REFUSAL_REASONS:
             return False, str(exc)
         raise
     p = entry.payload if isinstance(entry.payload, dict) else {}

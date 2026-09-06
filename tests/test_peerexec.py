@@ -1004,3 +1004,127 @@ def test_the_commit_payload_carries_the_task_entry_point():
                     dict(entry.payload) | {"entry_point": "g"}, entry.sig)
     assert suite_gate(lied, SPEC, NONCE,
                       entry_point="f") == (False, "entry_point_not_committed")
+
+
+# ── 10. round452c：壞 spec 是**拒絕**不是 traceback；沒有 entry_point 的題目一律拒 ──
+#
+# 攻擊者在 b3c8514 上量到的兩件事（`ops/gain/replay/r452c_channel_hunt.py`）：
+#   探針 C：`expected = "0x" + "f"*4000` 是一份**合法**的 spec（`literal_eval` 收
+#           16 進位、`int_max_str_digits` 只擋十進位轉換），到 `repr()` 才丟**裸
+#           ValueError** ⇒ 本模組 11/11 道門噴 traceback。那是誠實邊界 §3 的
+#           **相關失效**：k 台執行器吃同一份 spec 會一起倒，而拒絕服務也是一種
+#           交不出貨。
+#   探針 I：`entry_point=None` 被 validator 當成「跳過檢查」⇒ 一個沒有那個欄位的
+#           題目讓 R452b 的綁定整條變回 no-op。
+
+POISON = {"v": 1, "dialect": "mbpp", "entry_point": "f",
+          "tests": [{"args": "[1]", "expected": "0x" + "f" * 4000}],
+          "cmp": {"atol": None, "set_equivalent": False, "regex_predicate": False}}
+#: 沒有 `entry_point` 欄位的題目。`task.get("entry_point")` → `None`。
+TASK_NO_EP = {"task_id": "t1",
+              "visible_check": {"type": "run_python", "code": "pass", "timeout": 8}}
+
+
+def _doors(suite, t, *, entry_point):
+    """每一道吃套件的門 ＝ 一個 `(名字, 呼叫)`。書都在呼叫端外面，好核對「鏈上沒有」。
+
+    `suite_gate`／`open_suite`／`gauged_suite_index` 需要一筆**乾淨的**承諾當底，
+    再拿壞套件去揭露——揭露端才是這幾支真正要驗的東西。
+    """
+    entry, _b, _i = _gauged_commit()
+    rec = GaugeRecord(SPEC.suite_sha256, sha256_hex(GOOD), 1, True, True)
+
+    def mk_book():
+        return Logbook(), Identity.generate()
+
+    return {
+        "as_suite_spec": lambda b, i, e: as_suite_spec(suite, entry_point),
+        "commit_suite": lambda b, i, e: commit_suite(
+            b, i, task_id="t1", suite=suite, nonce=NONCE, entry_point=entry_point,
+            gauge=rec, ts_ms=TS),
+        "commit_suite_with_gauge": lambda b, i, e: commit_suite_with_gauge(
+            b, i, task_id="t1", suite=suite, nonce=NONCE, reference=GOOD,
+            entry_point=entry_point, runner=rule_runner(lambda c, _k: c is GOOD),
+            ts_ms=TS),
+        "run_suite_gauge": lambda b, i, e: run_suite_gauge(
+            suite, GOOD, [BAD], entry_point=entry_point,
+            runner=rule_runner(lambda c, _k: c is GOOD)),
+        "Executor.attest": lambda b, i, e: e[0].attest(t, GOOD, suite=suite, ts_ms=TS),
+        "select_by_quorum": lambda b, i, e: select_by_quorum(
+            t, [(GOOD, "wA")], e, suite=suite, ts_ms=TS),
+        "challenge_rerun": lambda b, i, e: challenge_rerun(
+            t, GOOD, e, form_verdict([], roster_of(e), task_id="t1",
+                                     draft_sha256=sha256_hex(GOOD),
+                                     suite_sha256=SSHA),
+            suite=suite, ts_ms=TS),
+        "suite_gate": lambda b, i, e: suite_gate(entry, suite, NONCE,
+                                                 entry_point=entry_point),
+        "open_suite": lambda b, i, e: open_suite(entry, suite, NONCE,
+                                                 entry_point=entry_point),
+        "gauged_suite_index": lambda b, i, e: gauged_suite_index(
+            [(entry, suite, NONCE, entry_point)]),
+    }
+
+
+@pytest.mark.parametrize("door", sorted(_doors(POISON, task(), entry_point="f")))
+def test_a_poison_literal_is_a_refusal_at_every_door_not_a_traceback(door):
+    """本模組十道門，一個 `ValueError` 都不准跑出來——出來的只能是 `SuiteSpecError`。
+    （加上 `suitespec.validate` 就是攻擊者量到的那 11/11。）
+
+    這條釘的不是「壞 spec 被擋」（它本來就沒過），是**擋法的型別**：呼叫端
+    （`select_by_quorum`／`suite_gate`／實驗 runner）只 catch `SuiteSpecError`，
+    所以別的型別等於穿門而過。附帶核對鏈上一筆都沒有——不該存在的證言不准
+    先上鏈再說。
+    """
+    call = _doors(POISON, task(), entry_point="f")[door]
+    book, ident = Logbook(), Identity.generate()
+    execs = mk(3, truth_probe(TRUTH))
+    try:
+        out = call(book, ident, execs)
+    except SuiteSpecError as exc:
+        assert str(exc) == "int_too_large"
+    except BaseException as exc:                      # noqa: BLE001
+        raise AssertionError(f"{door} 漏出 {type(exc).__name__}: {exc}") from exc
+    else:
+        # 有理由通道的門：回一個拒絕，不是一個可用的結果。
+        if door == "gauged_suite_index":
+            assert out == {}
+        elif door == "open_suite":
+            assert out is False
+        elif door == "suite_gate":
+            assert out[0] is False
+        else:
+            assert getattr(out, "refused", False)
+    assert book.entries == []
+    assert all(e.book.entries == [] for e in execs)
+
+
+@pytest.mark.parametrize("door", sorted(_doors(SPEC, TASK_NO_EP, entry_point=None)))
+def test_a_task_without_an_entry_point_refuses_at_every_door(door):
+    """題目沒有 `entry_point` 欄位 ⇒ 沒有東西可以綁 ⇒ 每一道門都拒。
+
+    這裡的套件（`SPEC`）**完全合法**、量具也過得了——唯一的問題是沒有題目可以
+    對照。舊行為是**綁定被跳過**，於是套件自己宣告的 entry point 一路走到底
+    （攻擊者探針 I：`as_suite_spec`／`commit_suite`／`suite_gate` 全 ACCEPTED）。
+    """
+    call = _doors(SPEC, TASK_NO_EP, entry_point=None)[door]
+    book, ident = Logbook(), Identity.generate()
+    execs = mk(3, truth_probe(TRUTH))
+    try:
+        out = call(book, ident, execs)
+    except SuiteSpecError as exc:
+        assert str(exc) == "entry_point_unbound"
+    except BaseException as exc:                      # noqa: BLE001
+        raise AssertionError(f"{door} 漏出 {type(exc).__name__}: {exc}") from exc
+    else:
+        if door == "gauged_suite_index":
+            assert out == {}
+        elif door == "open_suite":
+            assert out is False
+        elif door == "suite_gate":
+            assert out == (False, "entry_point_unbound")
+        else:
+            assert out.refused and out.refusal_reason == "entry_point_unbound"
+            assert out.n_sandbox_runs == 0 and out.verdicts == ()
+    assert book.entries == []
+    assert all(e.book.entries == [] for e in execs)

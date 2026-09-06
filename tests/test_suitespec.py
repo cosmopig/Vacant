@@ -549,3 +549,122 @@ def test_the_r452b_smuggle_payloads_never_execute_in_the_real_sandbox(tmp_path):
     ok, _ = meets_demand("def f(x):\n    return None\n", code, 10, entry_point="f")
     assert ok is True
     assert not targeted.exists() and not stateful.exists() and not mimic.exists()
+
+
+# ── 6. round452c：資料有界、例外有型、綁定沒有 None 這條側門 ────────────────
+#
+# 這一組同樣是**已經發生過的**破口的回歸測試（攻擊者的探針落盤在
+# `ops/gain/replay/r452c_channel_hunt.py` ＋ `.json`，head b3c8514）：
+#   探針 C：一份合法 spec 讓 validator 丟**裸 ValueError** ⇒ peerexec 11/11 道門
+#           噴 traceback（相關失效：k 台執行器吃同一份 spec 會一起倒）。
+#   探針 I：`entry_point=None` 被當成「跳過檢查」⇒ 一個沒有 `entry_point` 欄位的
+#           題目讓 R452b 的綁定整條變回 no-op。
+
+@pytest.mark.parametrize("lit", [
+    "0x" + "f" * 4000,          # 16 進位：4002 個字元 → 16000 位元
+    "0b" + "1" * 20000,         # 2 進位
+    "0o" + "7" * 6000,          # 8 進位
+    str(2 ** (ss.MAX_INT_BITS + 1)),   # 十進位，剛好越界一位元
+])
+@pytest.mark.parametrize("slot", ["args", "expected"])
+def test_a_short_literal_can_still_be_a_huge_int_and_is_refused(lit, slot):
+    """長度上限攔不住 `0x`／`0b`／`0o`——值的上限才攔得住。
+
+    `ast.literal_eval` 收這幾種進位，而 CPython 的 `int_max_str_digits` 只擋
+    **十進位轉換**，所以「原始碼很短、值很大」是走得通的：`"0x" + "f"*4000` 只有
+    4002 個字元（遠低於 `MAX_LITERAL_CHARS`），`repr()` 它卻會丟一個裸 ValueError。
+    四個前綴都測，因為修法必須在**值**這一層，不是在某個前綴的字串比對上。
+    """
+    tests = ([{"args": f"[{lit}]", "expected": "None"}] if slot == "args"
+             else [{"args": "[1]", "expected": lit}])
+    with pytest.raises(SuiteSpecError) as e:
+        spec(tests=tests)
+    assert str(e.value) == "int_too_large"
+
+
+def test_the_biggest_still_encodable_int_round_trips():
+    """界線的**另一邊**要還能用，否則這條防禦就是一次功能退化。
+
+    `2**MAX_INT_BITS - 1` 是最大的合法值：它進得來、repr 得出來、而且重寫後
+    parse 回去是同一個值（`suite_sha256` 認的是值不是寫法）。
+    """
+    big = 2 ** ss.MAX_INT_BITS - 1
+    s = spec(tests=[{"args": f"[{hex(big)}]", "expected": str(big)}])
+    assert s.tests[0].args == f"[{big}]"           # 16 進位被重寫成十進位
+    assert ss.parse_literal(s.tests[0].expected) == big
+    assert big.bit_length() == ss.MAX_INT_BITS
+
+
+def test_nothing_but_suitespecerror_escapes_validate(monkeypatch):
+    """**兜底**：validator 內部丟什麼型別都不准穿出去。
+
+    攻擊者量到的不是任意程式執行，是 11/11 道門的 traceback——`peerexec` 每一道門
+    都只 `except SuiteSpecError`。所以「只丟一種例外」本身就是機制的一部分，
+    不是風格。這裡把本體換成會丟 `ValueError`／`RecursionError`／`MemoryError`
+    的假貨，核對外面那層真的翻譯成 `literal_unencodable`（原始例外留在 `__cause__`）。
+    """
+    for exc_type in (ValueError, RecursionError, MemoryError, OverflowError,
+                     TypeError):
+        def boom(*_a, **_k):
+            raise exc_type("boom")
+
+        monkeypatch.setattr(ss, "_validate", boom)
+        with pytest.raises(SuiteSpecError) as e:
+            ss.validate({"v": 1, "entry_point": "f",
+                         "tests": [{"args": "[1]", "expected": "2"}], "cmp": {}})
+        assert str(e.value) == "literal_unencodable"
+        assert isinstance(e.value.__cause__, exc_type)
+
+
+def test_emit_literal_never_raises_a_bare_valueerror():
+    """`from_task` 的期望值**沒有經過 validator**——參考解算出來的值第一次被碰到
+    就是在 `emit_literal` 裡。所以這一支自己也要只丟 `SuiteSpecError`。
+    """
+    with pytest.raises(SuiteSpecError) as e:
+        ss.emit_literal(16 ** 4000)
+    assert str(e.value) == "int_too_large"
+    with pytest.raises(SuiteSpecError):
+        ss.emit_literal(object())
+
+
+def test_none_entry_point_means_unbound_not_skip():
+    """`None` ＝ 題目那一格是空的 ⇒ **拒**；「不綁」要靠省略參數（哨符）。
+
+    舊碼寫 `if entry_point is not None and ...`，而 `task.get("entry_point")` 在一個
+    沒有那個欄位的題目上正好回 `None` ⇒ 綁定靜默失效（攻擊者探針 I）。
+    """
+    with pytest.raises(SuiteSpecError) as e:
+        ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "helper",
+                     "tests": [{"args": "[1]", "expected": "2"}], "cmp": {}},
+                    entry_point=None)
+    assert str(e.value) == "entry_point_unbound"
+    # 省略參數 ＝ 未綁定（工具與測試專用），照舊過。
+    assert spec().entry_point == "f"
+    assert ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "helper",
+                        "tests": [{"args": "[1]", "expected": "2"}], "cmp": {}},
+                       entry_point="helper").entry_point == "helper"
+    # 哨符不是 None，也不是任何人傳得進來的值。
+    assert ss._UNBOUND is not None and repr(ss._UNBOUND) == "<unbound>"
+
+
+def test_every_renderer_name_is_reserved_on_the_sandbox_side():
+    """**反向**漂移防呆：渲染器綁的每一個名字，沙箱那側也不准讓候選拿去當 proxy。
+
+    既有的 `test_entry_point_blacklist_covers_the_runner_template` 是一個方向
+    （runner 的名字 → entry_point 黑名單）。這條是另一個方向（渲染器的名字 →
+    `checks` 的保留集合）。少了它，一個叫 `__aeq` 的候選函式會被曝露成 module
+    scope 的 proxy，而「先被誰綁走」變成兩個檔案的相對順序決定的事，
+    不是任何人寫下來的規格。
+    """
+    import builtins as _bi
+
+    from vacant import checks as ck
+
+    reserved = set(dir(_bi)) | set(ck.RUNNER_RESERVED_NAMES)
+    assert ss.RESERVED_NAMES <= reserved, ss.RESERVED_NAMES - reserved
+    assert "__entry" in ss.RESERVED_NAMES and "__entry" in reserved
+    # 行為版：候選拿這些名字定義函式，一個都不准變成 proxy。
+    for name in sorted(ss.RESERVED_NAMES):
+        src = f"def f(x):\n    return x\ndef {name}(*a, **k):\n    return True\n"
+        got = ck._candidate_functions(src, allowed_entry_points=("f",))
+        assert got == ["f"], (name, got)
