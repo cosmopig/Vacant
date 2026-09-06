@@ -85,6 +85,7 @@ os.environ.setdefault(
 from ops.gain.gain_run import (conform_failure_detail, extract_code,  # noqa: E402
                                meets_demand)
 from vacant import peerexec as px  # noqa: E402
+from vacant import suitespec as ss  # noqa: E402
 from vacant.codebench import EvalPlusMBPPLoader, LiveCodeBenchLoader  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -271,6 +272,21 @@ def load_facts(run: str) -> dict[str, dict]:
     return json.loads(p.read_text())
 
 
+def load_specs(run: str) -> dict[str, "ss.SuiteSpec"]:
+    """round452：`peerexec` 只接受 `SuiteSpec`，所以本檔每一條掃描都要先有 spec。
+
+    ⚠ 這改變了本檔舊掃描的**分母**：轉不出 spec 的題目沒有套件可交，會被跳過。
+      轉換率是 `r452_suitespec.py --convert` 的產物，逐題落盤在
+      `cache/suitespec_<run>.json`，不准在這裡默默補一份假的。
+    """
+    p = CACHE / f"suitespec_{run}.json"
+    if not p.exists():
+        raise SystemExit(
+            f"缺 spec cache：先跑 ops/gain/replay/r452_suitespec.py --convert {run}")
+    d = json.loads(p.read_text())
+    return {tid: ss.validate(v["spec"]) for tid, v in d["specs"].items() if v["spec"]}
+
+
 # ── 探針：誠實 ＋ 四種腐化 ──────────────────────────────────────────────────
 class HonestProbe:
     """回放真沙箱結果。確定性套件 ⇒ k 個誠實執行器依建構一致（本模擬的核心假設）。"""
@@ -441,15 +457,16 @@ def run_cell(run, tasks, cands, facts, index, *, k, f, adv, seed):
         execs.append(px.Executor(eid, px.Identity.generate(), px.Logbook(), probe))
     roster = px.roster_of(execs)
 
+    specs = load_specs(run)
     rows, lie_named, lie_total, hon_named, hon_total = [], 0, 0, 0, 0
     flagged_exec: set[str] = set()
     runs_total = 0
     for tid, codes in sorted(cands.items()):
         t = tasks.get(tid)
-        if t is None:
+        if t is None or tid not in specs:
             continue
         drafts = [(c, f"w{i}") for i, c in enumerate(codes)]
-        sel = px.select_by_quorum(t, drafts, execs, roster=roster,
+        sel = px.select_by_quorum(t, drafts, execs, roster=roster, suite=specs[tid],
                                   quorum=quorum, ts_ms=1_700_000_000_000)
         runs_total += sel.n_sandbox_runs
         # 歸屬統計：逐 (draft, executor) 比對「宣稱 vs 真相」與「有沒有被指名」
@@ -691,6 +708,7 @@ def flake_table(run="g_r446_eq5_mbpp", ks=(1, 3, 5, 7), flakes=(0.0, 0.01, 0.05)
     """
     tasks, cands = load_pool(run)
     facts = load_facts(run)
+    specs = load_specs(run)
     index = {(tid, sha(c)): f"{tid}#{i}"
              for tid, codes in cands.items() for i, c in enumerate(codes)}
     print(f"\n=== flake sensitivity ({run}, honest only, f=0) ===")
@@ -707,10 +725,11 @@ def flake_table(run="g_r446_eq5_mbpp", ks=(1, 3, 5, 7), flakes=(0.0, 0.01, 0.05)
                 ok = con = tot = 0
                 for tid, codes in sorted(cands.items()):
                     t = tasks.get(tid)
-                    if t is None:
+                    if t is None or tid not in specs:
                         continue
                     sel = px.select_by_quorum(t, [(c, f"w{i}") for i, c in enumerate(codes)],
                                               execs, roster=roster, quorum=k // 2 + 1,
+                                              suite=specs[tid],
                                               ts_ms=1_700_000_000_000)
                     tot += 1
                     ok += int((not sel.refused)
@@ -746,17 +765,20 @@ def challenge_table(run="g_r446_eq5_mbpp", k=3, f=0.7, adv="SABOTEUR"):
              for i in range(k)]
     proster = px.roster_of(panel)
     recovered = refused = overturned = 0
+    specs = load_specs(run)
     for tid, codes in sorted(cands.items()):
         t = tasks.get(tid)
-        if t is None:
+        if t is None or tid not in specs:
             continue
         sel = px.select_by_quorum(t, [(c, f"w{i}") for i, c in enumerate(codes)], execs,
-                                  roster=roster, quorum=k // 2 + 1, ts_ms=1_700_000_000_000)
+                                  roster=roster, quorum=k // 2 + 1, suite=specs[tid],
+                                  ts_ms=1_700_000_000_000)
         if not sel.refused:
             continue
         refused += 1
         for vi, v in enumerate(sel.verdicts):
             ch = px.challenge_rerun(t, codes[vi], panel, v, roster=proster,
+                                    suite=specs[tid],
                                     quorum=k // 2 + 1, ts_ms=1_700_000_000_000)
             if ch.outcome == "overturned":
                 overturned += 1
@@ -788,6 +810,13 @@ def trivial_suite_table(runs=("g_r446_eq5_mbpp", "g_r443_gemma_lcb"), ks=(1, 3, 
       假交付都變成 0——但**只有這一類**被擋掉，`--gauge-gate` 的 weak 那一列
       量的就是擋不到的那一類。
     """
+    raise SystemExit(
+        "round452 之後這張表**跑不動了，而且那正是重點**：`pass` 是一段任意 Python，"
+        "`peerexec` 現在只接受 `SuiteSpec`（entry_point ＋ 字面值測資 ＋ 比對設定），"
+        "「什麼都不驗」在那個型別裡的唯一寫法是 tests=[]，被 validator 以 "
+        "`empty_suite_rejected` 拒絕。舊數字（−6.47pp／−18.68pp、假交付 31%／49%）"
+        "留在 `ops/gain/replay/peer_exec_sweep.json` 與 R449／R451 兩份裁決文件裡，"
+        "不在這裡重算。殘餘的量測改看 `ops/gain/replay/r452_suitespec.py --gate`。")
     out = []
     print("\n=== TRIVIAL SUITE：套件被腐化，執行器全誠實 ===")
     print("    (visible_check := 'pass'；載入得起來就算通過)")
@@ -1289,9 +1318,18 @@ def gate_delivery(run, variant, *, k=3, workers=6, stub_n=4):
       2. 過了閘的題目才走 `select_by_quorum`（k 個誠實執行器、真簽章、真鏈）。
     回傳逐題記錄 ＋ 匯總。
     """
+    if variant != "real":
+        raise SystemExit(
+            f"變體 `{variant}` 是一段**任意 Python** 的驗收套件。round452 把套件改成"
+            f"資料（`vacant/suitespec.SuiteSpec`）之後它**不可表達**——不是被擋，是"
+            f"寫不出來（validator 只收 `ast.literal_eval` 過得了的字面值）。"
+            f"R451 的舊數字留在 peer_exec_gauge_gate_k3_s*.json／r451_stateful_gate.json；"
+            f"spec 形態下還表達得出來的殘餘（覆蓋不足＋比對旗標）改跑 "
+            f"`ops/gain/replay/r452_suitespec.py --gate {run}`。")
     tasks, cands = load_pool(run)
     facts = load_facts(run)
     gauge = load_gauge(run)
+    specs = load_specs(run)
     sv = suite_variants(run, tasks, cands)
     # 壞樁數不准超過 census 實際跑過的那組：`GaugeRecord(..., n_broken=len(stubs), ...)`
     # 是**宣告**，census 的 `accepted_stubs` 是證據；宣告大於證據＝這筆合格證在說謊。
@@ -1347,10 +1385,15 @@ def gate_delivery(run, variant, *, k=3, workers=6, stub_n=4):
         else:
             stubs = list(range(stub_n))
             accepted = [i for i in rec["accepted_stubs"] if i in stubs]
-            gr = px.GaugeRecord(rec["suite_sha256"], rec["ref_sha256"], len(stubs),
+            spec = specs.get(tid)
+            if spec is None:
+                row["refuse_reason"] = "unconvertible_task"
+                rows.append(row)
+                continue
+            gr = px.GaugeRecord(spec.suite_sha256, rec["ref_sha256"], len(stubs),
                                 not accepted, bool(rec["ref_passed"]))
             try:
-                entry = px.commit_suite(book, ident, task_id=tid, check_code=code,
+                entry = px.commit_suite(book, ident, task_id=tid, suite=spec,
                                         nonce=GAUGE_NONCE, gauge=gr,
                                         ts_ms=1_700_000_000_000)
                 row["committed"] = True
@@ -1358,11 +1401,9 @@ def gate_delivery(run, variant, *, k=3, workers=6, stub_n=4):
                 row["refuse_reason"] = str(exc).split(":")[0]
                 entry = None
             if entry is not None:
-                vt = {**t, "visible_check": {"type": "run_python", "code": code,
-                                             "timeout": 10}}
                 sel = px.select_by_quorum(
-                    vt, [(c, f"w{i}") for i, c in enumerate(codes)], execs,
-                    roster=roster, quorum=k // 2 + 1, suite_commit=entry,
+                    t, [(c, f"w{i}") for i, c in enumerate(codes)], execs,
+                    roster=roster, quorum=k // 2 + 1, suite=spec, suite_commit=entry,
                     suite_nonce=GAUGE_NONCE, suite_committer=committer,
                     ts_ms=1_700_000_000_000)
                 hit = (not sel.refused) and bool(facts[f"{tid}#{sel.shipped_index}"]["hidden"])
@@ -1463,6 +1504,13 @@ def gauge_gate_table(runs=("g_r446_eq5_mbpp", "g_r443_gemma_lcb"), k=3, stub_n=4
     # 檔名帶 k 與壞樁數：`--gauge-stubs 1` 與 `--gauge-stubs 4` 是**兩份不同的量**
     # （1 個樁＝repo 現成量具的原樣覆蓋率），寫進同一個檔名會讓後跑的那次安靜蓋掉前一次。
     p = OUT / f"peer_exec_gauge_gate_k{k}_s{stub_n}.json"
+    if len(out) < len(runs) * len(variants):
+        # round452：四個原始碼變體現在會 SKIP（不可表達）。這一份輸出因此**不完整**，
+        # 寫下去等於用一列 `real` 蓋掉 R451 那份四列的證據。不寫，並說清楚。
+        print(f"⚠ 沒有寫 {p.name}：{len(runs) * len(variants) - len(out)} 格 SKIP "
+              f"（原始碼變體在 round452 之後不可表達），輸出不完整不得覆蓋 R451 的證據檔。"
+              f"殘餘改看 ops/gain/replay/peer_exec_suitespec_gate.json。")
+        return out
     p.write_text(json.dumps(out, indent=1))
     print(f"wrote {p}")
     return out

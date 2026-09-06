@@ -30,6 +30,13 @@ AST allowlist 只約束**候選碼**，不約束驗收碼），於是它能 `imp
   也就是推導會**高估**這個攻擊的放行率。差 3.75% 不大，但「推導 ＋ 抽樣核對」
   與「逐格量測」不是同一件事，所以這裡付全額。
 
+⚠ round452 之後 `--gate` 跑不動了，**而那正是這支探針的結論被採納的樣子**：
+  `vacant/peerexec.py` 現在只接受 `SuiteSpec`（資料），`stateful_suite()` 產生的那段
+  Python 沒有地方可以放。本檔的 `stateful_suite()` 留著不動，因為
+  `tests/test_suitespec.py::test_r451_attack_suites_have_no_encoding` 拿它當輸入，
+  證明它**不可表達**。已落盤的數字留在 `r451_stateful_gate.json`，不重算。
+  spec 形態下還表達得出來的殘餘：`ops/gain/replay/r452_suitespec.py --gate`。
+
 用法
 ----
   .venv/bin/python ops/gain/replay/r451_stateful_suite_probe.py --feasibility

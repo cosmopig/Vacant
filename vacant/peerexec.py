@@ -24,10 +24,11 @@ LLM 評審之間的分歧永遠只能解讀成「他們看法不同」——那�
 
 機制（三件事，沒有第四件）
 --------------------------
-1. `Executor.attest`：每個執行器在**自己的**沙箱跑 `visible_check`，把
-   {task_id, draft_sha256, suite_sha256, visible_ok, first_failing_test, …}
-   簽進**自己的** `vacant.logbook` hash-chain。因為證言是鏈上的一筆，執行器
-   事後不能悄悄抽掉它——要抽就得重簽整條鏈。
+1. `Executor.attest`：每個執行器把承諾過的 `SuiteSpec` **用自己的渲染器**渲染成
+   驗收碼，在**自己的**沙箱跑，把 {task_id, draft_sha256, suite_sha256（＝spec
+   資料的雜湊）, render_sha256（＝實際跑的那份碼）, visible_ok,
+   first_failing_test, …} 簽進**自己的** `vacant.logbook` hash-chain。因為證言是
+   鏈上的一筆，執行器事後不能悄悄抽掉它——要抽就得重簽整條鏈。
 2. `form_verdict`：對可采信的證言取多數。回傳判決**以及少數方是誰**
    （`dissenters`，具名、附 entry hash 與簽章）。
 3. `select_by_quorum`：CONFORM 的選擇語意不變——依序看草稿，第一份被判為通過的
@@ -38,24 +39,26 @@ LLM 評審之間的分歧永遠只能解讀成「他們看法不同」——那�
 1. **需求必須可以編譯成可執行的驗收測資。** 跑不起來的需求沒有免費裁判，這個機制會
    退化成「問一堆模型」，而那正是 R438／R516／R440X 量出來沒有價值的東西。
    這條是 R440P §五-1 的原句，搬到這裡一樣有效。
-2. **驗收套件本身仍然是被信任的輸入。** 去中心化執行**不會**讓一套錯的驗收變對；
-   全體誠實的執行器會一致地、可驗證地交出一個錯的答案。`commit_suite` /
-   `open_suite` 把套件**在時間上釘死**（草稿存在之前就承諾其雜湊）並要求它先過
-   **量具**（R449 §四-3：對一組已知壞草稿，參考解要通過、每一個壞樁都要被擋），
-   `challenge_rerun` 只給落敗方一個重跑的權利——三者都是 raises-cost，不是 prevents。
-   量具擋掉的是「對什麼都放行」那一整類套件（`visible_check := "pass"` 在
-   `peer_exec_sim --trivial-suite` 量到 −6.47pp／−18.68pp、假交付 31%／49%、
-   爭議率 0.0%——所有健康指標滿格的那一格）。它**擋不了**兩類套件：
-   （a）「通過量具但別處被弱化」的（例如三條 assert 只留一條）——`--gauge-gate`
-   的 weak 變體；（b）**逐字認出那組已知壞樁、其餘一律放行**的——targeted／mimic
-   兩個變體，量具兩個方向滿分、一題都擋不掉、交付與「什麼都不驗」完全相同。
-   mimic 是（b）的最強形式：它把真套件原封不動留著，只多一句「不是已知壞樁就把
-   受測函式換成參考解」，所以連**形狀**與**壞樁的失敗細節**都與真套件逐欄相同
-   ——把量具強化成「壞樁被擋的樣子對不對」也擋不掉它
-   （`tests/test_peerexec.py::test_a_mimic_suite_defeats_even_a_detail_matching_gauge`）。
-   （b）是這道修補的真正上限：只要攻擊者知道量具會拿什麼去問，量具就只是一組
-   要通過的測資，而不是一個對套件品質的保證。**這是本模組剩下的固定點，
-   不准講成已經解決。**
+2. **驗收套件是資料，不是程式（R452 起）。** 套件不再是一段供應者寫的 Python，
+   而是一份 `vacant.suitespec.SuiteSpec`：entry_point ＋ 一串 `(args, expected)`
+   **字面值** ＋ 比對設定。執行器拿 spec 去跑**自己的**渲染器（`SuiteSpec.render`），
+   一個位元組的供應者 Python 都不執行。這條路是被逼出來的：R451 證明了
+   「套件是被信任的程式碼」這個形態沒有補丁——量具量的是**一次執行**不是一件
+   工件，只要驗收碼分辨得出「現在是量具在看」與「現在是出貨」（`stateful` 變體，
+   /tmp 一個標記檔就夠），加樁、換樁、比對失敗細節、堵讀檔管道四條全部無效。
+   改成資料之後，R451 的三種攻擊（stateful／雜湊黑名單 targeted／mimic）
+   **不可表達**——不是被擋，是 validator 只收字面值、渲染器沒有任何地方讓
+   供應者的字串變成可執行的東西（`tests/test_suitespec.py::
+   test_r451_attack_suites_have_no_encoding`）。
+
+   **殘餘（本模組現在的固定點，不准講成已經解決）＝覆蓋不足 ＋ 比對旗標放寬。**
+   供應者仍然選得了「測哪幾個輸入」與（mbpp 方言）`atol`／`set_equivalent`／
+   `regex_predicate`。這兩類仍然要先過量具（參考解通過、每個已知壞樁被擋），
+   量到的殘餘見 `ops/gain/replay/peer_exec_suitespec_gate.json`。
+   另外三條沒動：commit-reveal 只釘住時間、量具只是下界、`challenge_rerun`
+   只是重跑權——三者都是 raises-cost，不是 prevents。
+   還有一條新的、要講清楚的：**信任從「供應者的碼」搬到「大家共用的渲染器」，
+   不是消滅信任**。渲染器有 bug，k 台機器會一致地錯（下面第 3 條的同一種相關失效）。
 3. **沙箱缺陷是相關失效，不是腐化。** k 個執行器如果跑同一份 `vacant/checks.py`、
    同一個 Python、同一台機器，它們會**一致地**錯，法定人數會全票通過一個錯的判決，
    而且分歧率為 0（看起來最健康）。要打斷這個相關性需要**實作多樣性**的沙箱，
@@ -94,8 +97,14 @@ from .canonical import canonical_bytes
 from .identity import Identity, PublicIdentity
 from .logbook import Logbook, review_commitment
 from .suitegauge import CheckRunner, broken_stub, gauge_suite, sha256_hex
+from .suitespec import SuiteSpec, SuiteSpecError
+from .suitespec import validate as validate_suite
 
-ATTEST_VERSION = 1
+#: round452 起證言多帶一個 `render_sha256`（這台執行器**實際跑了哪一份碼**），
+#: 而 `suite_sha256` 從「驗收碼的雜湊」改成「spec 資料的雜湊」。兩件事都改變了
+#: wire-format 的語意，所以版本跳到 2——舊證言會被 `verify_attestation` 以
+#: `bad_version` 拒收，這是刻意的（CLAUDE.md 鐵律 6 的同一條紀律）。
+ATTEST_VERSION = 2
 ATTEST_TYPE = "peer_exec_attestation"
 SUITE_COMMIT_TYPE = "peer_exec_suite_commit"
 SUITE_COMMIT_VERSION = 1
@@ -110,20 +119,25 @@ MAJORITY_BOUND_NOTE = (
 #: 量具擋掉的與擋不掉的，寫成常數是為了讓它出現在**每一份**收據裡而不是只出現在
 #: 論述裡：讀收據的人看到 `gauge_status="ok"` 時必須同時看到它證明的範圍有多窄。
 SUITE_FIXED_POINT_NOTE = (
-    "the committed suite passed a gauge (reference accepted, every known-bad stub "
-    "rejected); this rules out suites that admit anything, NOT suites that are "
-    "merely weak, wrong, incomplete, or written to special-case the known-bad set "
-    "-- the acceptance suite remains a trusted input"
+    "the committed suite is DATA (a SuiteSpec: entry point, literal (args, expected) "
+    "pairs, comparator config) rendered by the executor's own trusted renderer -- no "
+    "supplier-authored Python runs anywhere, so stateful / stub-blacklisting / mimic "
+    "suites have no encoding; it also passed a gauge (reference accepted, every "
+    "known-bad stub rejected). What is NOT ruled out: a suite that is merely weak or "
+    "incomplete (too few tests, easy inputs) or whose comparator flags are loosened -- "
+    "coverage and comparator config remain a trusted input, and so does the renderer"
 )
 
 
-def suite_hash(task: Mapping[str, Any]) -> str:
-    """驗收套件的雜湊 ＝ sha256(visible_check.code)。
+def as_suite_spec(suite: "SuiteSpec | Mapping[str, Any] | bytes") -> SuiteSpec:
+    """把「一份套件」正規化成 `SuiteSpec`。**原始碼那道門在這裡被拆掉。**
 
-    只雜湊 `visible_check`：`hidden_check` 不是驗收套件的一部分，也不准進入任何
-    執行器看得到的東西（V/GT 分離）。
+    接受 `SuiteSpec`、它的 canonical bytes、或等價的 JSON dict。傳一個 `str`
+    進來（＝一段供應者寫的驗收 Python）會丟 `SuiteSpecError`，不是「盡量試試看」
+    ——R451 的整份裁決就是「只要驗收碼是任意 Python，量具就沒有約束力」，
+    所以這道門必須是**型別層級**的關閉，不是一個可以用旗標打開的選項。
     """
-    return sha256_hex(((task.get("visible_check") or {}).get("code")) or "")
+    return validate_suite(suite)
 
 
 # ── 執行探針 ────────────────────────────────────────────────────────────────
@@ -152,6 +166,10 @@ Probe = Callable[[str, Mapping[str, Any]], ProbeResult]
 
 def sandbox_probe(draft_code: str, task: Mapping[str, Any], *, timeout_s: int = 10) -> ProbeResult:
     """預設探針：跑 runtime **自己的** `meets_demand`／`conform_failure_detail`。
+
+    ⚠ round452 起，這支拿到的 `task["visible_check"]["code"]` 是
+      `Executor.attest` **在本機用自己的渲染器**從 spec 產生的碼，不是供應者
+      交來的原始碼。探針本身不知道差別（它只會跑一段碼），差別在**誰寫的**。
 
     為什麼是 lazy import：`ops.gain.gain_run` 是實驗 runner，不是 `vacant` 的相依；
     把 import 留在函式內，本模組在沒有 ops 的環境（例如展件）仍然 import 得起來，
@@ -241,17 +259,35 @@ class Executor:
         task: Mapping[str, Any],
         draft_code: str,
         *,
-        suite_sha256: str | None = None,
+        suite: "SuiteSpec | Mapping[str, Any] | bytes",
         ts_ms: int | None = None,
     ) -> Attestation:
-        """跑一次驗收，把結果簽進自己的鏈，回傳可攜證言。零模型呼叫。"""
-        res = self.probe(draft_code, task)
+        """跑一次驗收，把結果簽進自己的鏈，回傳可攜證言。零模型呼叫。
+
+        round452 起的關鍵一步在第一行：執行器拿到的是 **spec**，它自己呼叫
+        `render()` 產生驗收碼，然後跑**那一份**。供應者交來的 Python 沒有進入
+        這條路徑的任何一格——`SuiteSpec` 的欄位裡放不下可執行的東西。
+
+        `render_sha256` 一起簽進 payload：它是「這台機器實際跑了哪一份位元組」
+        的證據。兩台執行器如果渲染器版本不同，這一欄就會不一樣，
+        `verify_attestation` 會把對不上的那一筆擋在計票之外（`render_mismatch`）
+        ——渲染器漂移是可歸屬的，不是靜默的。
+        """
+        spec = as_suite_spec(suite)
+        rendered = spec.render()
+        view = dict(task)
+        view["visible_check"] = {
+            "type": "run_python", "code": rendered,
+            "timeout": ((task.get("visible_check") or {}).get("timeout") or 10),
+        }
+        res = self.probe(draft_code, view)
         payload = {
             "v": ATTEST_VERSION,
             "executor_id": self.executor_id,
             "task_id": task.get("task_id"),
             "draft_sha256": sha256_hex(draft_code),
-            "suite_sha256": suite_sha256 or suite_hash(task),
+            "suite_sha256": spec.suite_sha256,
+            "render_sha256": sha256_hex(rendered),
             **res.as_payload(),
         }
         entry = self.book.append(
@@ -297,6 +333,7 @@ def verify_attestation(
     task_id: Any = None,
     draft_sha256: str | None = None,
     suite_sha256: str | None = None,
+    render_sha256: str | None = None,
 ) -> tuple[bool, str]:
     """驗一筆證言。回傳 (可采信?, 理由)。理由字串會原樣進收據。
 
@@ -306,6 +343,9 @@ def verify_attestation(
       - payload 的 executor_id 與宣稱的一致（擋「借別人的名字」）
       - 綁定的 task_id／draft_sha256／suite_sha256 與本次要判的一致
         （擋重放：把上一題的通過證言貼到這一題）
+      - `render_sha256`（有給的話）與本次渲染出來的碼一致——**渲染器漂移
+        不進計票**。這是套件變成資料之後多出來的一條歸屬通道：以前
+        「你跑的碼跟我不一樣」沒有欄位講得出來，現在有。
       - 簽章驗過（擋竄改：改 payload 裡任何一位元都會失效）
     """
     who = roster.get(att.executor_id)
@@ -327,6 +367,8 @@ def verify_attestation(
         return False, "draft_mismatch"
     if suite_sha256 is not None and p.get("suite_sha256") != suite_sha256:
         return False, "suite_mismatch"
+    if render_sha256 is not None and p.get("render_sha256") != render_sha256:
+        return False, "render_mismatch"
     return _entry_signature_ok(e, who)
 
 
@@ -424,6 +466,7 @@ def form_verdict(
     suite_sha256: str,
     quorum: int = 1,
     gauged_suites: Mapping[str, Any] | None = None,
+    render_sha256: str | None = None,
 ) -> Verdict:
     """把一組證言變成一個判決 ＋ 一份歸屬。
 
@@ -478,6 +521,7 @@ def form_verdict(
         ok, why = verify_attestation(
             att, roster, task_id=task_id,
             draft_sha256=draft_sha256, suite_sha256=suite_sha256,
+            render_sha256=render_sha256,
         )
         if not ok:
             rejected.append((att.executor_id, why))
@@ -567,8 +611,8 @@ def select_by_quorum(
     drafts: Sequence[tuple[str, str]],
     executors: Sequence[Executor],
     *,
+    suite: "SuiteSpec | Mapping[str, Any] | bytes",
     roster: Mapping[str, PublicIdentity] | None = None,
-    suite_sha256: str | None = None,
     quorum: int | None = None,
     ts_ms: int | None = None,
     suite_commit: _lb.LogEntry | None = None,
@@ -591,12 +635,13 @@ def select_by_quorum(
       （`tests/test_peerexec.py::test_tampering_the_gauge_record_breaks_chain_verification`）。
       出貨路徑請把承諾者的公鑰一起帶進來；不帶就等於信任遞交承諾的那條管道。
     """
+    spec = as_suite_spec(suite)
     ros = dict(roster) if roster is not None else roster_of(executors)
-    ssha = suite_sha256 or suite_hash(task)
+    ssha = spec.suite_sha256
+    rsha = sha256_hex(spec.render())
     q = quorum if quorum is not None else len(executors) // 2 + 1
     if suite_commit is not None:
-        code = ((task.get("visible_check") or {}).get("code")) or ""
-        ok, why = suite_gate(suite_commit, code, suite_nonce or "", who=suite_committer)
+        ok, why = suite_gate(suite_commit, spec, suite_nonce or "", who=suite_committer)
         if not ok:
             return Selection(task.get("task_id"), None, None, None, True, (), 0,
                              f"suite_gate:{why}")
@@ -608,13 +653,13 @@ def select_by_quorum(
     for i, (code, _worker) in enumerate(drafts):
         dsha = sha256_hex(code)
         atts = [
-            e.attest(task, code, suite_sha256=ssha, ts_ms=ts_ms) for e in executors
+            e.attest(task, code, suite=spec, ts_ms=ts_ms) for e in executors
         ]
         runs += len(executors)
         v = form_verdict(
             atts, ros, task_id=task.get("task_id"),
             draft_sha256=dsha, suite_sha256=ssha, quorum=q,
-            gauged_suites=gauged_suites,
+            gauged_suites=gauged_suites, render_sha256=rsha,
         )
         verdicts.append(v)
         if v.visible_ok:
@@ -680,24 +725,34 @@ class GaugeRecord:
 
 
 def run_suite_gauge(
-    check_code: str, reference: str, broken_stubs: Sequence[str], *,
+    suite: "SuiteSpec | Mapping[str, Any] | bytes", reference: str,
+    broken_stubs: Sequence[str], *,
     entry_point: str | None = None, runner: CheckRunner | None = None,
     timeout_s: int = 10,
 ) -> GaugeRecord:
     """跑量具，產生一筆可上鏈的紀錄。判準來自 `vacant.suitegauge`（與 `gain_run`
     的 `probe_instrument` **同一份實作**，不是第二份長得像的）。
 
+    round452 起量具跑的是**渲染出來的**碼，而紀錄綁的是 **spec 的雜湊**。這一步
+    讓紀錄從「因為有簽章所以可信」變成「**可重算**」：任何第三方拿到
+    (spec, 參考解, 壞樁) 就能重跑這個函式，得到逐位元組相同的 `as_payload()`
+    ——因為渲染是確定性的（`tests/test_peerexec.py::
+    test_a_third_party_recomputes_the_gauge_record_from_spec_reference_stubs`）。
+
     誠實邊界：這裡沒有 `hidden_check`，量的是**可見驗收套件**——因為可見套件才是
     出貨閘門。參考解與壞樁是驗證者側的物件，不進 prompt（見模組 docstring 紅線）。
     """
-    out = gauge_suite(check_code, reference, broken_stubs,
-                      entry_point=entry_point, runner=runner, timeout_s=timeout_s)
-    return GaugeRecord(out.suite_sha256, out.ref_sha256, out.n_broken,
+    spec = as_suite_spec(suite)
+    ep = entry_point or spec.entry_point
+    out = gauge_suite(spec.render(), reference, broken_stubs,
+                      entry_point=ep, runner=runner, timeout_s=timeout_s)
+    return GaugeRecord(spec.suite_sha256, out.ref_sha256, out.n_broken,
                        out.all_rejected, out.ref_passed)
 
 
 def commit_suite(
-    book: Logbook, identity: Identity, *, task_id: Any, check_code: str, nonce: str,
+    book: Logbook, identity: Identity, *, task_id: Any,
+    suite: "SuiteSpec | Mapping[str, Any] | bytes", nonce: str,
     gauge: "GaugeRecord | Mapping[str, Any]", ts_ms: int | None = None,
 ) -> _lb.LogEntry:
     """在**草稿存在之前**把驗收套件的雜湊承諾＋**量具紀錄**一起簽上鏈。
@@ -717,16 +772,22 @@ def commit_suite(
       `suite_sha256` 認出「這一票投的是不是同一套」，那個索引必須公開。
 
     **仍然不能**做到的：量具不讓套件變得正確、不保證涵蓋真需求。一套通過量具、
-    但把可見驗收刪到只剩一條的套件照樣上得了鏈（R449 §七 推翻條件二；
-    數字見 `peer_exec_sim --gauge-gate` 的 weak 變體）。套件仍然是固定點，只是變窄了。
+    但把測資刪到只剩一條的 spec 照樣上得了鏈（R449 §七 推翻條件二；數字見
+    `ops/gain/replay/r452_suitespec.py --gate` 的 weak／flag 變體）。**套件仍然是
+    固定點，只是從「任意程式」縮成「覆蓋不足 ＋ 比對旗標」。**
+
+    round452 起 `suite` 只收 `SuiteSpec`（或其 canonical bytes／JSON）。承諾算在
+    **spec 的 canonical bytes** 上，不是算在某一份渲染出來的碼上——渲染器升級
+    不該讓客戶承諾過的那份驗收「變成另一份」。
     """
+    spec = as_suite_spec(suite)
     rec = gauge if isinstance(gauge, GaugeRecord) else GaugeRecord.from_payload(gauge)
     if rec is None:
         raise SuiteGaugeError("gauge_record_missing")
-    if rec.suite_sha256 != sha256_hex(check_code):
+    if rec.suite_sha256 != spec.suite_sha256:
         raise SuiteGaugeError(
             f"gauge_suite_mismatch: record={rec.suite_sha256[:12]} "
-            f"committed={sha256_hex(check_code)[:12]}")
+            f"committed={spec.suite_sha256[:12]}")
     if not rec.ok:
         raise SuiteGaugeError(
             f"gauge_failed: ref_passed={rec.ref_passed} "
@@ -734,7 +795,9 @@ def commit_suite(
     payload = {
         "v": SUITE_COMMIT_VERSION,
         "task_id": task_id,
-        "commitment": review_commitment(check_code, nonce),
+        "commitment": review_commitment(spec.to_json(), nonce),
+        "suite_sha256": spec.suite_sha256,
+        "n_tests": spec.n_tests,
         "gauge": rec.as_payload(),
     }
     return book.append(
@@ -744,7 +807,8 @@ def commit_suite(
 
 
 def commit_suite_with_gauge(
-    book: Logbook, identity: Identity, *, task_id: Any, check_code: str, nonce: str,
+    book: Logbook, identity: Identity, *, task_id: Any,
+    suite: "SuiteSpec | Mapping[str, Any] | bytes", nonce: str,
     reference: str, broken_stubs: Sequence[str] | None = None,
     entry_point: str | None = None, runner: CheckRunner | None = None,
     timeout_s: int = 10, ts_ms: int | None = None,
@@ -756,15 +820,17 @@ def commit_suite_with_gauge(
     「什麼都放行」，抓不到「只放行剛好這一份」。要更緊就多給幾個樁，成本是
     每個樁一次本機沙箱。
     """
-    stubs = list(broken_stubs) if broken_stubs else [broken_stub(entry_point)]
-    rec = run_suite_gauge(check_code, reference, stubs, entry_point=entry_point,
+    spec = as_suite_spec(suite)
+    ep = entry_point or spec.entry_point
+    stubs = list(broken_stubs) if broken_stubs else [broken_stub(ep)]
+    rec = run_suite_gauge(spec, reference, stubs, entry_point=ep,
                           runner=runner, timeout_s=timeout_s)
-    return commit_suite(book, identity, task_id=task_id, check_code=check_code,
+    return commit_suite(book, identity, task_id=task_id, suite=spec,
                         nonce=nonce, gauge=rec, ts_ms=ts_ms)
 
 
 def suite_gate(
-    entry: _lb.LogEntry, check_code: str, nonce: str, *,
+    entry: _lb.LogEntry, suite: "SuiteSpec | Mapping[str, Any] | bytes", nonce: str, *,
     who: PublicIdentity | None = None,
 ) -> tuple[bool, str]:
     """揭露 ＋ 量具閘：`(可用?, 理由)`。理由字串會原樣進收據。
@@ -776,19 +842,23 @@ def suite_gate(
       - 量具紀錄綁的是**這一套**（`suite_sha256` 相符）
       - 量具**通過**（參考解過、壞樁全擋、壞樁集合非空）
       - `who` 有給的話，這筆 entry 的簽章也要驗過（竄改紀錄＝簽章壞掉）
+
+    揭露的東西是 **spec**（一份資料），不是一段驗收原始碼：傳 `str` 進來會丟
+    `SuiteSpecError`，那就是被拆掉的那道門。
     """
     if entry.type != SUITE_COMMIT_TYPE:
         return False, "wrong_entry_type"
+    spec = as_suite_spec(suite)
     p = entry.payload if isinstance(entry.payload, dict) else {}
     try:
-        if p.get("commitment") != review_commitment(check_code, nonce):
+        if p.get("commitment") != review_commitment(spec.to_json(), nonce):
             return False, "commitment_mismatch"
     except ValueError:
         return False, "bad_nonce"
     rec = GaugeRecord.from_payload(p.get("gauge"))
     if rec is None:
         return False, "gauge_record_missing"
-    if rec.suite_sha256 != sha256_hex(check_code):
+    if rec.suite_sha256 != spec.suite_sha256:
         return False, "gauge_suite_mismatch"
     if not rec.ok:
         return False, "gauge_failed"
@@ -797,28 +867,32 @@ def suite_gate(
     return True, ""
 
 
-def open_suite(entry: _lb.LogEntry, check_code: str, nonce: str, *,
-               who: PublicIdentity | None = None) -> bool:
-    """揭露：公開的套件原文＋nonce 必須重算出承諾值，**而且量具紀錄要在場且通過**。
+def open_suite(entry: _lb.LogEntry, suite: "SuiteSpec | Mapping[str, Any] | bytes",
+               nonce: str, *, who: PublicIdentity | None = None) -> bool:
+    """揭露：公開的 **spec**＋nonce 必須重算出承諾值，**而且量具紀錄要在場且通過**。
 
     round749（R449 §四-3）之後這個函式不再只是 commit-reveal 的核對：一筆沒有量具
     紀錄（或量具沒過）的承諾**不是**一套可用的驗收套件，所以這裡回 False。
     只想單獨看理由的話用 `suite_gate`。
     """
-    return suite_gate(entry, check_code, nonce, who=who)[0]
+    return suite_gate(entry, suite, nonce, who=who)[0]
 
 
 def gauged_suite_index(
-    commits: Iterable[tuple[_lb.LogEntry, str, str]],
+    commits: Iterable[tuple[_lb.LogEntry, Any, str]],
 ) -> dict[str, GaugeRecord]:
-    """`(entry, check_code, nonce)` 串 → `{suite_sha256: GaugeRecord}`。
+    """`(entry, suite, nonce)` 串 → `{suite_sha256: GaugeRecord}`（suite ＝ `SuiteSpec`）。
 
     **只有通過 `suite_gate` 的才進得來**——這個索引就是 `form_verdict` 的白名單，
-    構造函式本身 fail-closed，呼叫端不需要再記得檢查一次。
+    構造函式本身 fail-closed，呼叫端不需要再記得檢查一次。一份不是 spec 的東西
+    （例如一段驗收原始碼）在這裡直接被 `SuiteSpecError` 擋掉，連進索引的機會都沒有。
     """
     out: dict[str, GaugeRecord] = {}
-    for entry, code, nonce in commits:
-        ok, _ = suite_gate(entry, code, nonce)
+    for entry, suite, nonce in commits:
+        try:
+            ok, _ = suite_gate(entry, suite, nonce)
+        except SuiteSpecError:
+            continue
         if not ok:
             continue
         rec = GaugeRecord.from_payload((entry.payload or {}).get("gauge"))
@@ -855,8 +929,8 @@ def challenge_rerun(
     panel: Sequence[Executor],
     original: Verdict,
     *,
+    suite: "SuiteSpec | Mapping[str, Any] | bytes",
     roster: Mapping[str, PublicIdentity] | None = None,
-    suite_sha256: str | None = None,
     quorum: int | None = None,
     ts_ms: int | None = None,
     gauged_suites: Mapping[str, Any] | None = None,
@@ -871,14 +945,16 @@ def challenge_rerun(
     只是把同一個多數決再抽一次樣。如果腐化是全域的（同一個 bot net 佔滿名冊），
     重跑會一致地覆述原判——`outcome="upheld"` 不等於原判正確。
     """
+    spec = as_suite_spec(suite)
     ros = dict(roster) if roster is not None else roster_of(panel)
-    ssha = suite_sha256 or suite_hash(task)
+    ssha = spec.suite_sha256
     q = quorum if quorum is not None else len(panel) // 2 + 1
     dsha = sha256_hex(draft_code)
-    atts = [e.attest(task, draft_code, suite_sha256=ssha, ts_ms=ts_ms) for e in panel]
+    atts = [e.attest(task, draft_code, suite=spec, ts_ms=ts_ms) for e in panel]
     rerun = form_verdict(atts, ros, task_id=task.get("task_id"),
                          draft_sha256=dsha, suite_sha256=ssha, quorum=q,
-                         gauged_suites=gauged_suites)
+                         gauged_suites=gauged_suites,
+                         render_sha256=sha256_hex(spec.render()))
     if rerun.visible_ok is None or original.visible_ok is None:
         outcome = "undecided"
     elif rerun.visible_ok == original.visible_ok:

@@ -63,6 +63,12 @@
   （holm_bonferroni／tost_equiv_boot／wilcoxon_signed_rank_exact／mcnemar_power）
 - `vacant/record.py` — RECORD_SPEC pack/check（紀錄紅線：不 pack＝沒跑過；
   私鑰 identity.key 排除，SPEC §7）
+- `vacant/suitegauge.py` — 驗收套件的量具（參考解要過、每個已知壞樁都要被擋）；
+  `gain_run.probe_instrument` 與 `peerexec.commit_suite` 共用這一份判準，**單邊保證**
+  （擋得住已知壞解 ≠ 涵蓋真需求）寫在 docstring，不准讀成「套件固定點已解」
+- `vacant/suitespec.py` — **驗收套件是資料不是程式**（R452）：SuiteSpec（entry_point＋
+  字面值 (args, expected)＋比對設定）＋確定性渲染器；執行器只跑自己渲染的碼，
+  有狀態／雜湊黑名單／擬態三種攻擊**不可表達**，殘餘＝覆蓋不足＋比對旗標
 - `vacant/blayer.py` — B 層機制驗收六情境（0→70% 步進 × on/off 雙組，判準寫死）
 - `vacant/checkpoint.py` — V1 存檔點認證＋回溯稽核（18 §2；存檔點自身成鏈）
 - `vacant/dashboard.py` — 觀測台＋/api/roster/scoreboard/**snapshot**（面板非信任來源）

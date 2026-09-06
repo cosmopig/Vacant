@@ -1,0 +1,2305 @@
+{
+"n_converted": 91,
+"n_tasks": 91,
+"reasons": {},
+"run": "g_r443_gemma_lcb",
+"specs": {
+"lcb_3487": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxRemovals",
+"tests": [
+{
+"args": "['abbaa', 'aba', [0, 1, 2]]",
+"expected": "1"
+},
+{
+"args": "['bcda', 'd', [0, 3]]",
+"expected": "2"
+},
+{
+"args": "['dda', 'dda', [0, 1, 2]]",
+"expected": "0"
+},
+{
+"args": "['yeyeykyded', 'yeyyd', [0, 2, 3, 4]]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"lcb_3502": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "numberOfSubstrings",
+"tests": [
+{
+"args": "['abacb', 2]",
+"expected": "4"
+},
+{
+"args": "['abcde', 1]",
+"expected": "15"
+}
+],
+"v": 1
+}
+},
+"lcb_3562": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maximumWeight",
+"tests": [
+{
+"args": "[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]]",
+"expected": "[2, 3]"
+},
+{
+"args": "[[[5, 8, 1], [6, 7, 7], [4, 7, 3], [9, 10, 6], [7, 8, 2], [11, 14, 3], [3, 5, 5]]]",
+"expected": "[1, 3, 5, 6]"
+}
+],
+"v": 1
+}
+},
+"lcb_3566": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "stringSequence",
+"tests": [
+{
+"args": "['abc']",
+"expected": "['a', 'aa', 'ab', 'aba', 'abb', 'abc']"
+},
+{
+"args": "['he']",
+"expected": "['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'ha', 'hb', 'hc', 'hd', 'he']"
+}
+],
+"v": 1
+}
+},
+"lcb_3587": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxScore",
+"tests": [
+{
+"args": "[2, 1, [[2, 3]], [[0, 2], [1, 0]]]",
+"expected": "3"
+},
+{
+"args": "[3, 2, [[3, 4, 2], [2, 1, 2]], [[0, 2, 1], [2, 0, 4], [3, 2, 0]]]",
+"expected": "8"
+}
+],
+"v": 1
+}
+},
+"lcb_3588": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countWinningSequences",
+"tests": [
+{
+"args": "['FFF']",
+"expected": "3"
+},
+{
+"args": "['FWEFW']",
+"expected": "18"
+}
+],
+"v": 1
+}
+},
+"lcb_3591": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "shiftDistance",
+"tests": [
+{
+"args": "['abab', 'baba', [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]",
+"expected": "2"
+},
+{
+"args": "['leet', 'code', [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]",
+"expected": "31"
+}
+],
+"v": 1
+}
+},
+"lcb_3593": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxScore",
+"tests": [
+{
+"args": "[[2, 4, 8, 16]]",
+"expected": "64"
+},
+{
+"args": "[[1, 2, 3, 4, 5]]",
+"expected": "60"
+},
+{
+"args": "[[3]]",
+"expected": "9"
+}
+],
+"v": 1
+}
+},
+"lcb_3594": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "getLargestOutlier",
+"tests": [
+{
+"args": "[[2, 3, 5, 10]]",
+"expected": "10"
+},
+{
+"args": "[[-2, -1, -3, -6, 4]]",
+"expected": "4"
+},
+{
+"args": "[[1, 1, 1, 1, 1, 5, 5]]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"lcb_3603": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "findAnswer",
+"tests": [
+{
+"args": "[[-1, 0, 0, 1, 1, 2], 'aababa']",
+"expected": "[True, True, False, True, True, True]"
+},
+{
+"args": "[[-1, 0, 0, 0, 0], 'aabcb']",
+"expected": "[True, True, True, True, True]"
+}
+],
+"v": 1
+}
+},
+"lcb_3604": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "numberOfWays",
+"tests": [
+{
+"args": "[1, 2, 3]",
+"expected": "6"
+},
+{
+"args": "[5, 2, 1]",
+"expected": "32"
+},
+{
+"args": "[3, 3, 4]",
+"expected": "684"
+}
+],
+"v": 1
+}
+},
+"lcb_3607": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minOperations",
+"tests": [
+{
+"args": "[[25, 7]]",
+"expected": "1"
+},
+{
+"args": "[[7, 7, 6]]",
+"expected": "-1"
+},
+{
+"args": "[[1, 1, 1, 1]]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3608": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "subsequencePairCount",
+"tests": [
+{
+"args": "[[1, 2, 3, 4]]",
+"expected": "10"
+},
+{
+"args": "[[10, 20, 30]]",
+"expected": "2"
+},
+{
+"args": "[[1, 1, 1, 1]]",
+"expected": "50"
+}
+],
+"v": 1
+}
+},
+"lcb_3613": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxAmount",
+"tests": [
+{
+"args": "['EUR', [['EUR', 'USD'], ['USD', 'JPY']], [2.0, 3.0], [['JPY', 'USD'], ['USD', 'CHF'], ['CHF', 'EUR']], [4.0, 5.0, 6.0]]",
+"expected": "720.0"
+},
+{
+"args": "['NGN', [['NGN', 'EUR']], [9.0], [['NGN', 'EUR']], [6.0]]",
+"expected": "1.5"
+},
+{
+"args": "['USD', [['USD', 'EUR']], [1.0], [['EUR', 'JPY']], [10.0]]",
+"expected": "1.0"
+}
+],
+"v": 1
+}
+},
+"lcb_3620": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxDistinctElements",
+"tests": [
+{
+"args": "[[1, 2, 2, 3, 3, 4], 2]",
+"expected": "6"
+},
+{
+"args": "[[4, 4, 4, 4], 1]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"lcb_3622": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxFrequency",
+"tests": [
+{
+"args": "[[1, 4, 5], 1, 2]",
+"expected": "2"
+},
+{
+"args": "[[5, 11, 20, 20], 5, 1]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"lcb_3627": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minTimeToReach",
+"tests": [
+{
+"args": "[[[0, 4], [4, 4]]]",
+"expected": "6"
+},
+{
+"args": "[[[0, 0, 0], [0, 0, 0]]]",
+"expected": "3"
+},
+{
+"args": "[[[0, 1], [1, 2]]]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"lcb_3629": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "lengthAfterTransformations",
+"tests": [
+{
+"args": "['abcyy', 2]",
+"expected": "7"
+},
+{
+"args": "['azbk', 1]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"lcb_3631": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countKReducibleNumbers",
+"tests": [
+{
+"args": "['111', 1]",
+"expected": "3"
+},
+{
+"args": "['1000', 2]",
+"expected": "6"
+},
+{
+"args": "['1', 3]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3634": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "calculateScore",
+"tests": [
+{
+"args": "['aczzx']",
+"expected": "5"
+},
+{
+"args": "['abcdef']",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3637": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countBalancedPermutations",
+"tests": [
+{
+"args": "['123']",
+"expected": "2"
+},
+{
+"args": "['112']",
+"expected": "1"
+},
+{
+"args": "['12345']",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3638": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "makeStringGood",
+"tests": [
+{
+"args": "['acab']",
+"expected": "1"
+},
+{
+"args": "['wddw']",
+"expected": "0"
+},
+{
+"args": "['aaabc']",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"lcb_3639": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "isZeroArray",
+"tests": [
+{
+"args": "[[1, 0, 1], [[0, 2]]]",
+"expected": "True"
+},
+{
+"args": "[[4, 3, 2, 1], [[1, 3], [0, 2]]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"lcb_3646": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "sumOfGoodSubsequences",
+"tests": [
+{
+"args": "[[1, 2, 1]]",
+"expected": "14"
+},
+{
+"args": "[[3, 4, 5]]",
+"expected": "40"
+}
+],
+"v": 1
+}
+},
+"lcb_3647": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxRemoval",
+"tests": [
+{
+"args": "[[2, 0, 2], [[0, 2], [0, 2], [1, 1]]]",
+"expected": "1"
+},
+{
+"args": "[[1, 1, 1, 1], [[1, 3], [0, 2], [1, 3], [1, 2]]]",
+"expected": "2"
+},
+{
+"args": "[[1, 2, 3, 4], [[0, 3]]]",
+"expected": "-1"
+}
+],
+"v": 1
+}
+},
+"lcb_3648": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxCollectedFruits",
+"tests": [
+{
+"args": "[[[1, 2, 3, 4], [5, 6, 8, 7], [9, 10, 11, 12], [13, 14, 15, 16]]]",
+"expected": "100"
+},
+{
+"args": "[[[1, 1], [1, 1]]]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"lcb_3649": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "findMinimumTime",
+"tests": [
+{
+"args": "[[3, 4, 1], 1]",
+"expected": "4"
+},
+{
+"args": "[[2, 5, 4], 2]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"lcb_3653": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxSubarraySum",
+"tests": [
+{
+"args": "[[1, 2], 1]",
+"expected": "3"
+},
+{
+"args": "[[-1, -2, -3, -4, -5], 4]",
+"expected": "-10"
+},
+{
+"args": "[[-5, 1, 2, -3, 4], 2]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"lcb_3654": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minArraySum",
+"tests": [
+{
+"args": "[[2, 8, 3, 19, 3], 3, 1, 1]",
+"expected": "23"
+},
+{
+"args": "[[2, 4, 3], 3, 2, 1]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"lcb_3655": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minOperations",
+"tests": [
+{
+"args": "[10, 12]",
+"expected": "85"
+},
+{
+"args": "[4, 8]",
+"expected": "-1"
+},
+{
+"args": "[6, 2]",
+"expected": "-1"
+}
+],
+"v": 1
+}
+},
+"lcb_3657": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "checkValidCuts",
+"tests": [
+{
+"args": "[5, [[1, 0, 5, 2], [0, 2, 2, 4], [3, 2, 5, 3], [0, 4, 4, 5]]]",
+"expected": "True"
+},
+{
+"args": "[4, [[0, 0, 1, 1], [2, 0, 3, 4], [0, 2, 2, 3], [3, 0, 4, 3]]]",
+"expected": "True"
+},
+{
+"args": "[4, [[0, 2, 2, 4], [1, 0, 3, 2], [2, 2, 3, 4], [3, 0, 4, 2], [3, 2, 4, 4]]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"lcb_3658": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minDifference",
+"tests": [
+{
+"args": "[[1, 2, -1, 10, 8]]",
+"expected": "4"
+},
+{
+"args": "[[-1, -1, -1]]",
+"expected": "0"
+},
+{
+"args": "[[-1, 10, -1, 8]]",
+"expected": "1"
+}
+],
+"v": 1
+}
+},
+"lcb_3659": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countPathsWithXorValue",
+"tests": [
+{
+"args": "[[[2, 1, 5], [7, 10, 0], [12, 6, 4]], 11]",
+"expected": "3"
+},
+{
+"args": "[[[1, 3, 3, 3], [0, 3, 3, 2], [3, 0, 1, 1]], 2]",
+"expected": "5"
+},
+{
+"args": "[[[1, 1, 1, 2], [3, 0, 3, 2], [3, 0, 2, 2]], 10]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3674": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countNonDecreasingSubarrays",
+"tests": [
+{
+"args": "[[6, 3, 1, 2, 4, 4], 7]",
+"expected": "17"
+},
+{
+"args": "[[6, 3, 1, 3, 6], 4]",
+"expected": "12"
+}
+],
+"v": 1
+}
+},
+"lcb_3675": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maximizeSumOfWeights",
+"tests": [
+{
+"args": "[[[0, 1, 4], [0, 2, 2], [2, 3, 12], [2, 4, 6]], 2]",
+"expected": "22"
+},
+{
+"args": "[[[0, 1, 5], [1, 2, 10], [0, 3, 15], [3, 4, 20], [3, 5, 5], [0, 6, 10]], 3]",
+"expected": "65"
+}
+],
+"v": 1
+}
+},
+"lcb_3677": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maximumAmount",
+"tests": [
+{
+"args": "[[[0, 1, -1], [1, -2, 3], [2, -3, 4]]]",
+"expected": "8"
+},
+{
+"args": "[[[10, 10, 10], [10, 10, 10]]]",
+"expected": "40"
+}
+],
+"v": 1
+}
+},
+"lcb_3680": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countComponents",
+"tests": [
+{
+"args": "[[2, 4, 8, 3, 9], 5]",
+"expected": "4"
+},
+{
+"args": "[[2, 4, 8, 3, 9, 12], 10]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"lcb_3681": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxRectangleArea",
+"tests": [
+{
+"args": "[[[1, 1], [1, 3], [3, 1], [3, 3]]]",
+"expected": "4"
+},
+{
+"args": "[[[1, 1], [1, 3], [3, 1], [3, 3], [2, 2]]]",
+"expected": "-1"
+},
+{
+"args": "[[[1, 1], [1, 3], [3, 1], [3, 3], [1, 2], [3, 2]]]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"lcb_3682": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countGoodArrays",
+"tests": [
+{
+"args": "[3, 2, 1]",
+"expected": "4"
+},
+{
+"args": "[4, 2, 2]",
+"expected": "6"
+},
+{
+"args": "[5, 2, 0]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"lcb_3683": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "answerString",
+"tests": [
+{
+"args": "['dbca', 2]",
+"expected": "'dbc'"
+},
+{
+"args": "['gggg', 4]",
+"expected": "'g'"
+}
+],
+"v": 1
+}
+},
+"lcb_3686": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "beautifulSplits",
+"tests": [
+{
+"args": "[[1, 1, 2, 1]]",
+"expected": "2"
+},
+{
+"args": "[[1, 2, 3, 4]]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3687": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "longestSpecialPath",
+"tests": [
+{
+"args": "[[[0, 1, 2], [1, 2, 3], [1, 3, 5], [1, 4, 4], [2, 5, 6]], [2, 1, 2, 1, 3, 1]]",
+"expected": "[6, 2]"
+},
+{
+"args": "[[[1, 0, 8]], [2, 2]]",
+"expected": "[0, 1]"
+}
+],
+"v": 1
+}
+},
+"lcb_3688": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxSubarraySum",
+"tests": [
+{
+"args": "[[-3, 2, -2, -1, 3, -2, 3]]",
+"expected": "7"
+},
+{
+"args": "[[1, 2, 3, 4]]",
+"expected": "10"
+}
+],
+"v": 1
+}
+},
+"lcb_3690": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minLength",
+"tests": [
+{
+"args": "['000001', 1]",
+"expected": "2"
+},
+{
+"args": "['0000', 2]",
+"expected": "1"
+},
+{
+"args": "['0101', 0]",
+"expected": "1"
+}
+],
+"v": 1
+}
+},
+"lcb_3692": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "shortestMatchingSubstring",
+"tests": [
+{
+"args": "['abaacbaecebce', 'ba*c*ce']",
+"expected": "8"
+},
+{
+"args": "['baccbaadbc', 'cc*baa*adb']",
+"expected": "-1"
+},
+{
+"args": "['a', '**']",
+"expected": "0"
+},
+{
+"args": "['madlogic', '*adlogi*']",
+"expected": "6"
+}
+],
+"v": 1
+}
+},
+"lcb_3696": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countSubstrings",
+"tests": [
+{
+"args": "['12936']",
+"expected": "11"
+},
+{
+"args": "['5701283']",
+"expected": "18"
+},
+{
+"args": "['1010101010']",
+"expected": "25"
+}
+],
+"v": 1
+}
+},
+"lcb_3697": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minimumIncrements",
+"tests": [
+{
+"args": "[[1, 2, 3], [4]]",
+"expected": "1"
+},
+{
+"args": "[[8, 4], [10, 5]]",
+"expected": "2"
+},
+{
+"args": "[[7, 9, 10], [7]]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3699": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "numberOfSubsequences",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 3, 6, 1]]",
+"expected": "1"
+},
+{
+"args": "[[3, 4, 3, 4, 3, 4, 3, 4]]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"lcb_3700": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "subsequencesWithMiddleMode",
+"tests": [
+{
+"args": "[[1, 1, 1, 1, 1, 1]]",
+"expected": "6"
+},
+{
+"args": "[[1, 2, 2, 3, 3, 4]]",
+"expected": "4"
+},
+{
+"args": "[[0, 1, 2, 3, 4, 5, 6, 7, 8]]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3701": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minCostGoodCaption",
+"tests": [
+{
+"args": "['cdcd']",
+"expected": "'cccc'"
+},
+{
+"args": "['aca']",
+"expected": "'aaa'"
+},
+{
+"args": "['bc']",
+"expected": "''"
+}
+],
+"v": 1
+}
+},
+"lcb_3714": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minMaxSums",
+"tests": [
+{
+"args": "[[1, 2, 3], 2]",
+"expected": "24"
+},
+{
+"args": "[[5, 0, 6], 1]",
+"expected": "22"
+},
+{
+"args": "[[1, 1, 1], 2]",
+"expected": "12"
+}
+],
+"v": 1
+}
+},
+"lcb_3715": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maximumCoins",
+"tests": [
+{
+"args": "[[[8, 10, 1], [1, 3, 2], [5, 6, 4]], 4]",
+"expected": "10"
+},
+{
+"args": "[[[1, 10, 3]], 2]",
+"expected": "6"
+}
+],
+"v": 1
+}
+},
+"lcb_3716": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "longestSubsequence",
+"tests": [
+{
+"args": "[[16, 6, 3]]",
+"expected": "3"
+},
+{
+"args": "[[6, 5, 3, 4, 2, 1]]",
+"expected": "4"
+},
+{
+"args": "[[10, 20, 10, 19, 10, 20]]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"lcb_3717": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minOperations",
+"tests": [
+{
+"args": "[[5, -2, 1, 3, 7, 3, 6, 4, -1], 3, 2]",
+"expected": "8"
+},
+{
+"args": "[[9, -2, -2, -2, 1, 5], 2, 2]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"lcb_3720": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minMaxWeight",
+"tests": [
+{
+"args": "[5, [[1, 0, 1], [2, 0, 2], [3, 0, 1], [4, 3, 1], [2, 1, 1]], 2]",
+"expected": "1"
+},
+{
+"args": "[5, [[0, 1, 1], [0, 2, 2], [0, 3, 1], [0, 4, 1], [1, 2, 1], [1, 4, 1]], 1]",
+"expected": "-1"
+},
+{
+"args": "[5, [[1, 2, 1], [1, 3, 3], [1, 4, 5], [2, 3, 2], [3, 4, 2], [4, 0, 1]], 1]",
+"expected": "2"
+},
+{
+"args": "[5, [[1, 2, 1], [1, 3, 3], [1, 4, 5], [2, 3, 2], [4, 0, 1]], 1]",
+"expected": "-1"
+}
+],
+"v": 1
+}
+},
+"lcb_3721": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countMentions",
+"tests": [
+{
+"args": "[2, [['MESSAGE', '10', 'id1 id0'], ['OFFLINE', '11', '0'], ['MESSAGE', '71', 'HERE']]]",
+"expected": "[2, 2]"
+},
+{
+"args": "[2, [['MESSAGE', '10', 'id1 id0'], ['OFFLINE', '11', '0'], ['MESSAGE', '12', 'ALL']]]",
+"expected": "[2, 2]"
+},
+{
+"args": "[2, [['OFFLINE', '10', '0'], ['MESSAGE', '12', 'HERE']]]",
+"expected": "[0, 1]"
+}
+],
+"v": 1
+}
+},
+"lcb_3722": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxSum",
+"tests": [
+{
+"args": "[[1, 2, -1, 3, 3, 4], 2, 2]",
+"expected": "13"
+},
+{
+"args": "[[-10, 3, -1, -2], 4, 1]",
+"expected": "-10"
+}
+],
+"v": 1
+}
+},
+"lcb_3725": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minMaxSubarraySum",
+"tests": [
+{
+"args": "[[1, 2, 3], 2]",
+"expected": "20"
+},
+{
+"args": "[[1, -3, 1], 2]",
+"expected": "-6"
+}
+],
+"v": 1
+}
+},
+"lcb_3733": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "lenOfVDiagonal",
+"tests": [
+{
+"args": "[[[2, 2, 1, 2, 2], [2, 0, 2, 2, 0], [2, 0, 1, 1, 0], [1, 0, 2, 2, 2], [2, 0, 0, 2, 2]]]",
+"expected": "5"
+},
+{
+"args": "[[[2, 2, 2, 2, 2], [2, 0, 2, 2, 0], [2, 0, 1, 1, 0], [1, 0, 2, 2, 2], [2, 0, 0, 2, 2]]]",
+"expected": "4"
+},
+{
+"args": "[[[1, 2, 2, 2, 2], [2, 2, 2, 2, 0], [2, 0, 0, 0, 0], [0, 0, 2, 2, 2], [2, 0, 0, 2, 0]]]",
+"expected": "5"
+},
+{
+"args": "[[[1]]]",
+"expected": "1"
+}
+],
+"v": 1
+}
+},
+"lcb_3737": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minCost",
+"tests": [
+{
+"args": "[4, [[3, 5, 7], [6, 2, 9], [4, 8, 1], [7, 3, 5]]]",
+"expected": "9"
+},
+{
+"args": "[6, [[2, 4, 6], [5, 3, 8], [7, 1, 9], [4, 6, 2], [3, 5, 7], [8, 2, 4]]]",
+"expected": "18"
+}
+],
+"v": 1
+}
+},
+"lcb_3739": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "distanceSum",
+"tests": [
+{
+"args": "[2, 2, 2]",
+"expected": "8"
+},
+{
+"args": "[1, 4, 3]",
+"expected": "20"
+}
+],
+"v": 1
+}
+},
+"lcb_3743": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxFreeTime",
+"tests": [
+{
+"args": "[5, 1, [1, 3], [2, 5]]",
+"expected": "2"
+},
+{
+"args": "[10, 1, [0, 2, 9], [1, 4, 10]]",
+"expected": "6"
+},
+{
+"args": "[5, 2, [0, 1, 2, 3, 4], [1, 2, 3, 4, 5]]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3744": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minOperations",
+"tests": [
+{
+"args": "[[[1, 2], [2, 4]]]",
+"expected": "3"
+},
+{
+"args": "[[[2, 6]]]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"lcb_3748": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "sortMatrix",
+"tests": [
+{
+"args": "[[[1, 7, 3], [9, 8, 2], [4, 5, 6]]]",
+"expected": "[[8, 2, 3], [9, 6, 7], [4, 5, 1]]"
+},
+{
+"args": "[[[0, 1], [1, 2]]]",
+"expected": "[[2, 1], [1, 0]]"
+},
+{
+"args": "[[[1]]]",
+"expected": "[[1]]"
+}
+],
+"v": 1
+}
+},
+"lcb_3750": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "solveQueries",
+"tests": [
+{
+"args": "[[1, 3, 1, 4, 1, 3, 2], [0, 3, 5]]",
+"expected": "[2, -1, 3]"
+},
+{
+"args": "[[1, 2, 3, 4], [0, 1, 2, 3]]",
+"expected": "[-1, -1, -1, -1]"
+}
+],
+"v": 1
+}
+},
+"lcb_3751": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxFrequency",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6], 1]",
+"expected": "2"
+},
+{
+"args": "[[10, 2, 3, 4, 5, 5, 4, 3, 2, 2], 10]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"lcb_3754": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxDistance",
+"tests": [
+{
+"args": "['NWSE', 1]",
+"expected": "3"
+},
+{
+"args": "['NSWWEW', 3]",
+"expected": "6"
+}
+],
+"v": 1
+}
+},
+"lcb_3759": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "findMaxSum",
+"tests": [
+{
+"args": "[[4, 2, 1, 5, 3], [10, 20, 30, 40, 50], 2]",
+"expected": "[80, 30, 0, 80, 50]"
+},
+{
+"args": "[[2, 2, 2, 2], [3, 1, 2, 3], 1]",
+"expected": "[0, 0, 0, 0]"
+}
+],
+"v": 1
+}
+},
+"lcb_3760": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "assignElements",
+"tests": [
+{
+"args": "[[8, 4, 3, 2, 4], [4, 2]]",
+"expected": "[0, 0, -1, 1, 0]"
+},
+{
+"args": "[[2, 3, 5, 7], [5, 3, 3]]",
+"expected": "[-1, 1, 0, -1]"
+},
+{
+"args": "[[10, 21, 30, 41], [2, 1]]",
+"expected": "[0, 1, 0, 1]"
+}
+],
+"v": 1
+}
+},
+"lcb_3762": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxScore",
+"tests": [
+{
+"args": "[[2, 4], 3]",
+"expected": "4"
+},
+{
+"args": "[[1, 2, 3], 5]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"lcb_3763": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "separateSquares",
+"tests": [
+{
+"args": "[[[0, 0, 1], [2, 2, 1]]]",
+"expected": "1.0"
+},
+{
+"args": "[[[0, 0, 2], [1, 1, 1]]]",
+"expected": "1.16667"
+}
+],
+"v": 1
+}
+},
+"lcb_3764": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxSum",
+"tests": [
+{
+"args": "[[[1, 2], [3, 4]], [1, 2], 2]",
+"expected": "7"
+},
+{
+"args": "[[[5, 3, 7], [8, 2, 6]], [2, 2], 3]",
+"expected": "21"
+}
+],
+"v": 1
+}
+},
+"lcb_3765": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minimumCost",
+"tests": [
+{
+"args": "[[3, 1, 4], [4, 6, 6], 1]",
+"expected": "110"
+},
+{
+"args": "[[4, 8, 5, 1, 14, 2, 2, 12, 1], [7, 2, 8, 4, 2, 2, 1, 1, 2], 7]",
+"expected": "985"
+}
+],
+"v": 1
+}
+},
+"lcb_3770": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "generateString",
+"tests": [
+{
+"args": "['TFTF', 'ab']",
+"expected": "'ababa'"
+},
+{
+"args": "['TFTF', 'abc']",
+"expected": "''"
+},
+{
+"args": "['F', 'd']",
+"expected": "'a'"
+}
+],
+"v": 1
+}
+},
+"lcb_3771": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxSubstringLength",
+"tests": [
+{
+"args": "['abcdbaefab', 2]",
+"expected": "True"
+},
+{
+"args": "['cdefdc', 3]",
+"expected": "False"
+},
+{
+"args": "['abeabe', 0]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"lcb_3776": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minCost",
+"tests": [
+{
+"args": "[[6, 2, 8, 4]]",
+"expected": "12"
+},
+{
+"args": "[[2, 1, 3, 3]]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"lcb_3777": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxProduct",
+"tests": [
+{
+"args": "[[1, 2, 3], 2, 10]",
+"expected": "6"
+},
+{
+"args": "[[0, 2, 3], -5, 12]",
+"expected": "-1"
+},
+{
+"args": "[[2, 2, 3, 3], 0, 9]",
+"expected": "9"
+}
+],
+"v": 1
+}
+},
+"lcb_3779": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxWeight",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8]]",
+"expected": "14"
+},
+{
+"args": "[[2, 1, 1, 1, 1, 1, 1, 1]]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"lcb_3781": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxDistance",
+"tests": [
+{
+"args": "[2, [[0, 2], [2, 0], [2, 2], [0, 0]], 4]",
+"expected": "2"
+},
+{
+"args": "[2, [[0, 0], [1, 2], [2, 0], [2, 2], [2, 1]], 4]",
+"expected": "1"
+},
+{
+"args": "[2, [[0, 0], [0, 1], [0, 2], [1, 2], [2, 0], [2, 2], [2, 1]], 5]",
+"expected": "1"
+}
+],
+"v": 1
+}
+},
+"lcb_3783": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "permute",
+"tests": [
+{
+"args": "[4, 6]",
+"expected": "[3, 4, 1, 2]"
+},
+{
+"args": "[3, 2]",
+"expected": "[3, 2, 1]"
+},
+{
+"args": "[2, 3]",
+"expected": "[]"
+}
+],
+"v": 1
+}
+},
+"lcb_3784": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "longestCommonPrefix",
+"tests": [
+{
+"args": "[['jump', 'run', 'run', 'jump', 'run'], 2]",
+"expected": "[3, 4, 4, 3, 4]"
+},
+{
+"args": "[['dog', 'racer', 'car'], 2]",
+"expected": "[0, 0, 0]"
+}
+],
+"v": 1
+}
+},
+"lcb_3785": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "countArrays",
+"tests": [
+{
+"args": "[[1, 2, 3, 4], [[1, 2], [2, 3], [3, 4], [4, 5]]]",
+"expected": "2"
+},
+{
+"args": "[[1, 2, 3, 4], [[1, 10], [2, 9], [3, 8], [4, 7]]]",
+"expected": "4"
+},
+{
+"args": "[[1, 2, 1, 2], [[1, 1], [2, 3], [3, 3], [2, 3]]]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3786": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "longestPalindromicSubsequence",
+"tests": [
+{
+"args": "['abced', 2]",
+"expected": "3"
+},
+{
+"args": "['aaazzz', 4]",
+"expected": "6"
+}
+],
+"v": 1
+}
+},
+"lcb_3789": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxSubarrays",
+"tests": [
+{
+"args": "[4, [[2, 3], [1, 4]]]",
+"expected": "9"
+},
+{
+"args": "[5, [[1, 2], [2, 5], [3, 5]]]",
+"expected": "12"
+}
+],
+"v": 1
+}
+},
+"lcb_3791": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "numOfUnplacedFruits",
+"tests": [
+{
+"args": "[[4, 2, 5], [3, 5, 4]]",
+"expected": "1"
+},
+{
+"args": "[[3, 6, 1], [6, 4, 7]]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"lcb_3793": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "longestPalindrome",
+"tests": [
+{
+"args": "['a', 'a']",
+"expected": "2"
+},
+{
+"args": "['abc', 'def']",
+"expected": "1"
+},
+{
+"args": "['b', 'aaaa']",
+"expected": "4"
+},
+{
+"args": "['abcde', 'ecdba']",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"lcb_3794": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minTime",
+"tests": [
+{
+"args": "[[1, 5, 2, 4], [5, 1, 4, 2]]",
+"expected": "110"
+},
+{
+"args": "[[1, 1, 1], [1, 1, 1]]",
+"expected": "5"
+},
+{
+"args": "[[1, 2, 3, 4], [1, 2]]",
+"expected": "21"
+}
+],
+"v": 1
+}
+},
+"lcb_3795": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "minZeroArray",
+"tests": [
+{
+"args": "[[2, 0, 2], [[0, 2, 1], [0, 2, 1], [1, 1, 3]]]",
+"expected": "2"
+},
+{
+"args": "[[4, 3, 2, 1], [[1, 3, 2], [0, 2, 1]]]",
+"expected": "-1"
+},
+{
+"args": "[[1, 2, 3, 2, 1], [[0, 1, 1], [1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 4, 1]]]",
+"expected": "4"
+},
+{
+"args": "[[1, 2, 3, 2, 6], [[0, 1, 1], [0, 2, 1], [1, 4, 2], [4, 4, 4], [3, 4, 1], [4, 4, 5]]]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"lcb_3801": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "beautifulNumbers",
+"tests": [
+{
+"args": "[10, 20]",
+"expected": "2"
+},
+{
+"args": "[1, 15]",
+"expected": "10"
+}
+],
+"v": 1
+}
+},
+"lcb_3805": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "maxActiveSectionsAfterTrade",
+"tests": [
+{
+"args": "['01']",
+"expected": "1"
+},
+{
+"args": "['0100']",
+"expected": "4"
+},
+{
+"args": "['1000100']",
+"expected": "7"
+},
+{
+"args": "['01010']",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"lcb_3809": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": null,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "lcb",
+"entry_point": "numberOfComponents",
+"tests": [
+{
+"args": "[[[1, 2], [1, 1], [3, 4], [4, 5], [5, 6], [7, 7]], 1]",
+"expected": "3"
+},
+{
+"args": "[[[1, 2, 3], [2, 3, 4], [4, 3, 5]], 2]",
+"expected": "1"
+},
+{
+"args": "[[[1, 1], [1, 1]], 2]",
+"expected": "2"
+}
+],
+"v": 1
+}
+}
+}
+}

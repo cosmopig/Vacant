@@ -20,16 +20,31 @@ os.environ.setdefault(
 
 from vacant.identity import Identity, PublicIdentity  # noqa: E402
 from vacant.logbook import LogEntry, Logbook  # noqa: E402
+from vacant import suitespec as ss  # noqa: E402
 from vacant.peerexec import (Attestation, Executor, GaugeRecord,  # noqa: E402
-                             ProbeResult, SuiteGaugeError, challenge_rerun,
+                             ProbeResult, SuiteGaugeError, as_suite_spec,
+                             challenge_rerun,
                              commit_suite, commit_suite_with_gauge, form_verdict,
                              gauged_suite_index, open_suite, roster_of,
                              run_suite_gauge, select_by_quorum, sha256_hex,
-                             suite_gate, suite_hash, verify_attestation,
+                             suite_gate, verify_attestation,
                              verify_executor_chain)
 from vacant.suitegauge import broken_stub  # noqa: E402
+from vacant.suitespec import SuiteSpecError  # noqa: E402
 
 TS = 1_700_000_000_000
+
+#: round452：套件是**資料**。§1–§7 的替身探針不看碼，但每一次 `attest` 都要帶一份
+#: spec——因為 `suite_sha256` 現在算在 spec 上，而執行器是拿 spec 自己渲染的。
+SPEC = ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "f",
+                    "tests": [{"args": "[1]", "expected": "2"},
+                              {"args": "[2]", "expected": "3"}],
+                    "cmp": {"atol": None}})
+#: 另一套驗收（少一條測資）——「換了套件 suite_sha256 就換了」要有東西可比。
+SPEC_WEAK = ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "f",
+                         "tests": [{"args": "[1]", "expected": "2"}],
+                         "cmp": {"atol": None}})
+SSHA = SPEC.suite_sha256
 
 
 def task(task_id="t1", code="assert f(1) == 2\nassert f(2) == 3\n"):
@@ -78,10 +93,10 @@ def rule_runner(fn):
     return run
 
 
-def verdict_for(execs, t, code, quorum=None):
+def verdict_for(execs, t, code, quorum=None, spec=SPEC):
     ros = roster_of(execs)
-    ssha = suite_hash(t)
-    atts = [e.attest(t, code, suite_sha256=ssha, ts_ms=TS) for e in execs]
+    ssha = spec.suite_sha256
+    atts = [e.attest(t, code, suite=spec, ts_ms=TS) for e in execs]
     q = quorum if quorum is not None else len(execs) // 2 + 1
     return form_verdict(atts, ros, task_id=t["task_id"], draft_sha256=sha256_hex(code),
                         suite_sha256=ssha, quorum=q), atts, ros
@@ -106,7 +121,7 @@ def test_honest_chain_verifies_and_is_append_only():
     execs = mk(1, truth_probe(TRUTH))
     e = execs[0]
     for c in (GOOD, BAD, GOOD):
-        e.attest(t, c, ts_ms=TS)
+        e.attest(t, c, suite=SPEC, ts_ms=TS)
     ros = roster_of(execs)
     assert verify_executor_chain("x0", e.book, ros)
     tampered = Logbook([e.book.entries[0], e.book.entries[2]])
@@ -129,7 +144,7 @@ def test_single_liar_among_three_is_outvoted_and_named():
     lie = next(a for a in atts if a.executor_id == "liar")
     assert ev["liar"] == lie.entry_hash
     assert verify_attestation(lie, ros, task_id="t1", draft_sha256=sha256_hex(BAD),
-                              suite_sha256=suite_hash(t)) == (True, "")
+                              suite_sha256=SSHA) == (True, "")
     assert lie.payload["visible_ok"] is True
 
 
@@ -138,7 +153,7 @@ def test_liar_cannot_move_the_verdict_alone_but_leaves_a_trail():
     t = task()
     execs = mk(2, truth_probe(TRUTH)) + [
         Executor("liar", Identity.generate(), Logbook(), liar_probe(TRUTH, sha256_hex(BAD)))]
-    sel = select_by_quorum(t, [(BAD, "wA"), (GOOD, "wB")], execs, ts_ms=TS)
+    sel = select_by_quorum(t, [(BAD, "wA"), (GOOD, "wB")], execs, suite=SPEC, ts_ms=TS)
     assert sel.shipped_index == 1 and sel.shipped_worker == "wB"
     assert sel.verdicts[0].dissenters == ("liar",)
     assert sel.verdicts[1].unanimous
@@ -187,7 +202,7 @@ def test_tie_is_undecided_and_the_gate_refuses():
              Executor("h0", Identity.generate(), Logbook(), truth_probe(TRUTH))]
     v, _a, _r = verdict_for(execs, t, BAD, quorum=2)
     assert v.visible_ok is None and v.contested and v.dissenters == ()
-    sel = select_by_quorum(t, [(BAD, "wA")], execs, quorum=2, ts_ms=TS)
+    sel = select_by_quorum(t, [(BAD, "wA")], execs, suite=SPEC, quorum=2, ts_ms=TS)
     assert sel.refused
 
 
@@ -195,7 +210,7 @@ def test_tie_is_undecided_and_the_gate_refuses():
 def test_tampering_an_attestation_breaks_verification():
     t = task()
     execs = mk(1, truth_probe(TRUTH))
-    att = execs[0].attest(t, BAD, ts_ms=TS)
+    att = execs[0].attest(t, BAD, suite=SPEC, ts_ms=TS)
     ros = roster_of(execs)
     assert verify_attestation(att, ros)[0]
     # (a) 竄改判決本身
@@ -213,11 +228,11 @@ def test_tampering_an_attestation_breaks_verification():
     assert verify_attestation(moved, ros) == (False, "bad_signature")
     # (c) 換一把自己的金鑰重簽同一句話——名冊上的公鑰驗不過，冒名擋掉
     impostor = Executor("x0", Identity.generate(), Logbook(), truth_probe(TRUTH))
-    fake = impostor.attest(t, BAD, ts_ms=TS)
+    fake = impostor.attest(t, BAD, suite=SPEC, ts_ms=TS)
     assert verify_attestation(fake, ros) == (False, "bad_signature")
     # (d) 名冊外的人投票
     outsider = Executor("nobody", Identity.generate(), Logbook(), truth_probe(TRUTH))
-    assert verify_attestation(outsider.attest(t, BAD, ts_ms=TS), ros) == (
+    assert verify_attestation(outsider.attest(t, BAD, suite=SPEC, ts_ms=TS), ros) == (
         False, "unknown_executor")
 
 
@@ -226,8 +241,8 @@ def test_forged_attestation_is_rejected_from_the_verdict_not_counted():
     t = task()
     execs = mk(3, truth_probe(TRUTH))
     ros = roster_of(execs)
-    ssha = suite_hash(t)
-    atts = [e.attest(t, BAD, suite_sha256=ssha, ts_ms=TS) for e in execs]
+    ssha = SSHA
+    atts = [e.attest(t, BAD, suite=SPEC, ts_ms=TS) for e in execs]
     a0 = atts[0]
     atts[0] = Attestation("x0", LogEntry(a0.entry.stream_id, a0.entry.branch_id,
                                          a0.entry.seq, a0.entry.prev_hash, a0.entry.ts_ms,
@@ -250,11 +265,11 @@ def test_equivocation_is_a_provable_fault_and_voids_both_votes():
     honest = mk(2, truth_probe(TRUTH))
     two_faced = Executor("d0", Identity.generate(), Logbook(), truth_probe(TRUTH))
     ros = roster_of(honest + [two_faced])
-    ssha = suite_hash(t)
-    atts = [e.attest(t, BAD, suite_sha256=ssha, ts_ms=TS) for e in honest]
-    atts.append(two_faced.attest(t, BAD, suite_sha256=ssha, ts_ms=TS))
+    ssha = SSHA
+    atts = [e.attest(t, BAD, suite=SPEC, ts_ms=TS) for e in honest]
+    atts.append(two_faced.attest(t, BAD, suite=SPEC, ts_ms=TS))
     two_faced.probe = liar_probe(TRUTH, sha256_hex(BAD))
-    atts.append(two_faced.attest(t, BAD, suite_sha256=ssha, ts_ms=TS))
+    atts.append(two_faced.attest(t, BAD, suite=SPEC, ts_ms=TS))
     v = form_verdict(atts, ros, task_id="t1", draft_sha256=sha256_hex(BAD),
                      suite_sha256=ssha, quorum=2)
     assert v.equivocators == ("d0",) and ("d0", "equivocation") in v.rejected
@@ -265,28 +280,36 @@ def test_equivocation_is_a_provable_fault_and_voids_both_votes():
 def test_suite_hash_mismatch_is_rejected():
     """執行器跑的必須是**這一套**驗收。跑了別套（或跑了改過的那套）＝不進計票。"""
     t = task()
-    swapped = {**t, "visible_check": task(code="assert f(1) == 999\n")["visible_check"]}
-    assert suite_hash(t) != suite_hash(swapped)
+    assert SPEC.suite_sha256 != SPEC_WEAK.suite_sha256
     execs = mk(1, truth_probe(TRUTH))
     ros = roster_of(execs)
-    # 同一題、同一份草稿，但執行器跑的是被換掉的驗收套件 ⇒ 不進計票。
-    att = execs[0].attest(swapped, GOOD, ts_ms=TS)
+    # 同一題、同一份草稿，但執行器渲染跑的是**另一份 spec** ⇒ 不進計票。
+    att = execs[0].attest(t, GOOD, suite=SPEC_WEAK, ts_ms=TS)
     assert verify_attestation(att, ros, task_id="t1", draft_sha256=sha256_hex(GOOD),
-                              suite_sha256=suite_hash(t)) == (False, "suite_mismatch")
+                              suite_sha256=SSHA) == (False, "suite_mismatch")
     # 換題目的證言同樣擋掉（跨題重放）。
-    att2 = execs[0].attest(task("t2"), GOOD, ts_ms=TS)
+    att2 = execs[0].attest(task("t2"), GOOD, suite=SPEC, ts_ms=TS)
     assert verify_attestation(att2, ros, task_id="t1", draft_sha256=sha256_hex(GOOD),
-                              suite_sha256=suite_hash(t)) == (False, "task_mismatch")
+                              suite_sha256=SSHA) == (False, "task_mismatch")
+    # round452 多出來的第三條：spec 相同但**渲染器**產出不同 ⇒ `render_mismatch`。
+    # 套件是資料之後，「你跑的碼跟我不一樣」第一次有欄位講得出來。
+    att3 = execs[0].attest(t, GOOD, suite=SPEC, ts_ms=TS)
+    assert verify_attestation(att3, ros, task_id="t1", draft_sha256=sha256_hex(GOOD),
+                              suite_sha256=SSHA,
+                              render_sha256=sha256_hex("not what I ran")
+                              ) == (False, "render_mismatch")
+    assert verify_attestation(att3, ros, suite_sha256=SSHA,
+                              render_sha256=sha256_hex(SPEC.render())) == (True, "")
 
 
 def test_replayed_attestation_from_another_draft_is_rejected():
     """把上一份草稿的『通過』證言貼到這一份 ⇒ draft_mismatch，擋掉重放。"""
     t = task()
     execs = mk(1, truth_probe(TRUTH))
-    att = execs[0].attest(t, GOOD, ts_ms=TS)
+    att = execs[0].attest(t, GOOD, suite=SPEC, ts_ms=TS)
     assert verify_attestation(att, roster_of(execs), task_id="t1",
                               draft_sha256=sha256_hex(BAD),
-                              suite_sha256=suite_hash(t)) == (False, "draft_mismatch")
+                              suite_sha256=SSHA) == (False, "draft_mismatch")
 
 
 # ── 6. 剩下的固定點：套件的 commit-reveal 與重跑權 ─────────────────────────
@@ -298,14 +321,13 @@ def test_suite_commit_reveal_binds_the_suite_in_time():
     # round749（R449 §四-3）：commit 現在要求一筆通過的量具紀錄。這一條測的仍然是
     # commit-reveal 的**時間綁定**，所以量具用注入的 runner 算（不碰沙箱）；
     # 量具本身的牙齒在 §8 測。
-    gauge = run_suite_gauge(t["visible_check"]["code"], GOOD, [BAD],
+    gauge = run_suite_gauge(SPEC, GOOD, [BAD],
                             entry_point="f", runner=rule_runner(lambda c, _k: c is GOOD))
-    entry = commit_suite(book, ident, task_id="t1",
-                         check_code=t["visible_check"]["code"], nonce=nonce,
+    entry = commit_suite(book, ident, task_id="t1", suite=SPEC, nonce=nonce,
                          gauge=gauge, ts_ms=TS)
-    assert open_suite(entry, t["visible_check"]["code"], nonce)
-    assert not open_suite(entry, t["visible_check"]["code"] + "\nassert f(9) == 10\n", nonce)
-    assert not open_suite(entry, t["visible_check"]["code"], "f" * 32)
+    assert open_suite(entry, SPEC, nonce)
+    assert not open_suite(entry, SPEC_WEAK, nonce)      # 揭露另一份 spec ⇒ 對不上
+    assert not open_suite(entry, SPEC, "f" * 32)
     assert book.verify_chain(
         __import__("vacant.identity", fromlist=["PublicIdentity"]).PublicIdentity(
             ident.vacant_id, ident.pub))
@@ -321,17 +343,17 @@ def test_challenge_rerun_overturns_a_saboteur_majority_with_a_clean_panel():
     sab = [Executor(f"s{i}", Identity.generate(), Logbook(), saboteur_probe())
            for i in range(2)]
     execs = sab + [Executor("h0", Identity.generate(), Logbook(), truth_probe(TRUTH))]
-    sel = select_by_quorum(t, [(GOOD, "wA")], execs, ts_ms=TS)
+    sel = select_by_quorum(t, [(GOOD, "wA")], execs, suite=SPEC, ts_ms=TS)
     assert sel.refused and sel.verdicts[0].dissenters == ("h0",)
 
     clean = mk(3, truth_probe(TRUTH))
-    ch = challenge_rerun(t, GOOD, clean, sel.verdicts[0], ts_ms=TS)
+    ch = challenge_rerun(t, GOOD, clean, sel.verdicts[0], suite=SPEC, ts_ms=TS)
     assert ch.outcome == "overturned" and ch.rerun.visible_ok is True
     assert "h0" in ch.accused          # 聯集：原判指名的人也要留在收據上
 
     dirty = [Executor(f"d{i}", Identity.generate(), Logbook(), saboteur_probe())
              for i in range(3)]
-    assert challenge_rerun(t, GOOD, dirty, sel.verdicts[0], ts_ms=TS).outcome == "upheld"
+    assert challenge_rerun(t, GOOD, dirty, sel.verdicts[0], suite=SPEC, ts_ms=TS).outcome == "upheld"
 
 
 # ── 7. 選擇語意與 CONFORM 逐字相同（k=1 時必須退化成 CONFORM）──────────────
@@ -339,10 +361,10 @@ def test_k1_reduces_to_conform():
     """k=1 的法定人數 ＝ 單一執行器 ＝ CONFORM。這是模擬校準檢查的機制側對應物。"""
     t = task()
     execs = mk(1, truth_probe(TRUTH))
-    sel = select_by_quorum(t, [(BAD, "wA"), (BAD, "wB"), (GOOD, "wC")], execs, ts_ms=TS)
+    sel = select_by_quorum(t, [(BAD, "wA"), (BAD, "wB"), (GOOD, "wC")], execs, suite=SPEC, ts_ms=TS)
     assert sel.shipped_index == 2 and sel.n_sandbox_runs == 3
     assert not sel.refused
-    sel2 = select_by_quorum(t, [(BAD, "wA"), (BAD, "wB")], execs, ts_ms=TS)
+    sel2 = select_by_quorum(t, [(BAD, "wA"), (BAD, "wB")], execs, suite=SPEC, ts_ms=TS)
     assert sel2.refused and sel2.shipped_index is None
     # 拒交的收據仍然列出每一份卡在第幾條——R440P §六 那句話的實作。
     assert [v.as_receipt()["camp_fail"] for v in sel2.verdicts] == [["x0"], ["x0"]]
@@ -365,25 +387,29 @@ def test_a_corrupt_executor_that_agrees_with_the_majority_is_never_named():
     assert v.visible_ok is False
 
 
-def test_a_trivial_suite_ships_a_wrong_draft_with_zero_dissent():
-    """**剩下的固定點，寫成測試**：驗收套件退化成「什麼都不驗」時，去中心化執行零幫助。
+def test_a_weak_suite_ships_a_wrong_draft_with_zero_dissent():
+    """**剩下的固定點，寫成測試**：驗收套件覆蓋不足時，去中心化執行零幫助。
+
+    round452 之前這一條用的是「什麼都不驗」的 `visible_check := "pass"`。套件改成
+    資料之後那個東西**不可表達**（`tests=[]` 被 validator 以 `empty_suite_rejected`
+    拒絕，見 `tests/test_suitespec.py`），所以殘餘換成它現在的形狀：**覆蓋不足**
+    ——一份少一條測資的 spec，剛好放行一份錯的草稿。
 
     執行器一個都沒有腐化、每條鏈都驗得過、`contested` 是 False、`dissenters` 是空的
     ——所有健康指標滿分——而出貨的是一份對真需求錯的草稿。`unanimous` 描述的是
     **觀察到的分佈**，不是真相；收據上不准把它讀成「這份草稿是對的」。
     """
-    trivial = {"task_id": "t1", "entry_point": "f",
-               "visible_check": {"type": "run_python", "code": "pass", "timeout": 8}}
-    allpass = {sha256_hex(GOOD): ProbeResult(True, None, 0, True, None),
-               sha256_hex(BAD): ProbeResult(True, None, 0, True, None)}
+    t = task()
+    allpass = {sha256_hex(GOOD): ProbeResult(True, None, 1, True, None),
+               sha256_hex(BAD): ProbeResult(True, None, 1, True, None)}
     execs = mk(5, truth_probe(allpass))
-    sel = select_by_quorum(trivial, [(BAD, "wA"), (GOOD, "wB")], execs, ts_ms=TS)
+    sel = select_by_quorum(t, [(BAD, "wA"), (GOOD, "wB")], execs, suite=SPEC_WEAK,
+                           ts_ms=TS)
     assert sel.shipped_index == 0 and sel.shipped_worker == "wA"   # 交了錯的那一份
     v = sel.verdicts[0]
     assert v.unanimous and not v.contested and v.n_pass == 5 and v.dissenters == ()
-    # 而且這件事在收據上看得出來——換了套件，suite_sha256 就換了。
-    assert v.suite_sha256 == suite_hash(trivial) != suite_hash(task())
-
+    # 而且這件事在收據上看得出來——換了 spec，suite_sha256 就換了。
+    assert v.suite_sha256 == SPEC_WEAK.suite_sha256 != SSHA
 
 def test_detail_dissent_names_a_saboteur_that_did_not_actually_run():
     """第二條歸屬通道：兩邊都說 FAIL，但『卡在第幾條』不同 ⇒ 有人沒真的跑。
@@ -411,6 +437,13 @@ REF_SIMILAR = "def similar_elements(a, b):\n    return tuple(sorted(set(a) & set
 STUB_EMPTY = "def similar_elements(*a, **k):\n    return ()\n"
 
 
+def spec_for(entry_point, tests, **cmp_over):
+    cmp = {"atol": None, "set_equivalent": False, "regex_predicate": False}
+    cmp.update(cmp_over)
+    return ss.validate({"v": 1, "dialect": "mbpp", "entry_point": entry_point,
+                        "tests": tests, "cmp": cmp})
+
+
 @pytest.fixture(scope="module")
 def mbpp_task():
     """真 MBPP+ 的 similar_elements（官方包不在場就 skip，不假裝驗過）。"""
@@ -425,76 +458,138 @@ def mbpp_task():
     pytest.skip("找不到基準題")
 
 
-def test_trivial_suite_is_refused_at_commit(mbpp_task):
-    """**這一條就是 R449 §三-3 的封口**：`visible_check := "pass"` 上不了鏈。
+@pytest.fixture(scope="module")
+def mbpp_spec(mbpp_task):
+    """把真 MBPP+ 那題轉成 `SuiteSpec`（期望值由參考解在子行程算好）。"""
+    conv = ss.from_task(mbpp_task)
+    assert conv.spec is not None, conv.reason
+    return conv.spec
 
-    真沙箱。壞樁（`return None`）在「什麼都不驗」的套件下**通過** ⇒ 壞解被擋 0/1
-    ⇒ 量具不合格 ⇒ `SuiteGaugeError`，而且**鏈上一筆都沒有**（不是記一筆失敗）。
-    模擬側的同一件事：`peer_exec_sim --trivial-suite` 那 8 格的交付全部收不到閘後面。
+
+def test_an_empty_suite_is_refused_before_the_gauge_even_runs():
+    """**R449 §三-3 的封口，在 round452 往前挪了一層**：「什麼都不驗」連 spec 都不是。
+
+    `visible_check := "pass"` 在資料形態裡的唯一寫法是 `tests: []`，而 validator
+    以 `empty_suite_rejected` 拒絕它——連量具都不必跑，因為根本沒有東西可以上鏈。
+    這比舊語意嚴格：舊的是「跑量具、量具說不合格」，新的是「這個東西不是一份套件」。
     """
+    with pytest.raises(SuiteSpecError) as e:
+        spec_for("similar_elements", [])
+    assert "empty_suite_rejected" in str(e.value)
+
+
+def test_a_wrong_expected_suite_is_refused_at_commit(mbpp_task):
+    """量具在資料形態裡仍然有牙齒：期望值寫錯 ⇒ 參考解不過、壞樁反而過 ⇒ 上不了鏈。
+
+    真沙箱。這份 spec 說 `similar_elements([3,4,5],[4,5,6])` 應該回 `None`：
+      - 參考解回 `(4, 5)` ⇒ **不過**；
+      - `return None` 的壞樁 ⇒ **過**。
+    兩個方向同時失敗 ⇒ `SuiteGaugeError`，而且**鏈上一筆都沒有**（不是記一筆失敗）。
+    """
+    bad = spec_for("similar_elements",
+                   [{"args": "[[3, 4, 5], [4, 5, 6]]", "expected": "None"}])
     book, ident = Logbook(), Identity.generate()
     with pytest.raises(SuiteGaugeError) as e:
-        commit_suite_with_gauge(book, ident, task_id="t1", check_code="pass",
-                                nonce=NONCE, reference=REF_SIMILAR,
-                                entry_point="similar_elements", ts_ms=TS)
-    assert "gauge_failed" in str(e.value) and "all_rejected=False" in str(e.value)
+        commit_suite_with_gauge(book, ident, task_id="t1", suite=bad,
+                                nonce=NONCE, reference=REF_SIMILAR, ts_ms=TS)
+    assert "gauge_failed" in str(e.value) and "ref_passed=False" in str(e.value)
     assert book.entries == []
 
 
-def test_real_mbpp_suite_is_accepted_at_commit(mbpp_task):
-    """反方向的對照：真的 MBPP+ 可見驗收套件**過得了**閘（不然這道閘只是把門焊死）。"""
+def test_real_mbpp_spec_is_accepted_at_commit(mbpp_task, mbpp_spec):
+    """反方向的對照：真的 MBPP+ 可見驗收**轉成 spec 之後**過得了閘（不然閘只是焊死）。"""
     book, ident = Logbook(), Identity.generate()
-    code = mbpp_task["visible_check"]["code"]
     entry = commit_suite_with_gauge(
-        book, ident, task_id=mbpp_task["task_id"], check_code=code, nonce=NONCE,
-        reference=REF_SIMILAR, entry_point="similar_elements", ts_ms=TS)
+        book, ident, task_id=mbpp_task["task_id"], suite=mbpp_spec, nonce=NONCE,
+        reference=REF_SIMILAR, ts_ms=TS)
     rec = GaugeRecord.from_payload(entry.payload["gauge"])
     assert rec.ref_passed and rec.all_rejected and rec.n_broken == 1 and rec.ok
-    assert rec.suite_sha256 == suite_hash(mbpp_task) == sha256_hex(code)
+    # 紀錄綁的是 **spec 資料的雜湊**，不是某一份渲染出來的碼的雜湊。
+    assert rec.suite_sha256 == mbpp_spec.suite_sha256
+    assert rec.suite_sha256 != sha256_hex(mbpp_spec.render())
     assert rec.ref_sha256 == sha256_hex(REF_SIMILAR)
-    assert open_suite(entry, code, NONCE)
-    assert suite_gate(entry, code, NONCE,
+    assert entry.payload["suite_sha256"] == mbpp_spec.suite_sha256
+    assert open_suite(entry, mbpp_spec, NONCE)
+    assert suite_gate(entry, mbpp_spec, NONCE,
                       who=PublicIdentity(ident.vacant_id, ident.pub)) == (True, "")
     assert book.verify_chain(PublicIdentity(ident.vacant_id, ident.pub))
 
 
-def test_suite_that_passes_the_reference_but_admits_one_broken_stub_is_refused():
-    """通過參考解**不夠**：只要一個已知壞樁溜過去，套件就上不了鏈。
+def test_a_third_party_recomputes_the_gauge_record_from_spec_reference_stubs(mbpp_spec):
+    """**紀錄從「因為有簽章所以可信」變成「可重算」**——這是套件變成資料的主要紅利。
 
-    真沙箱。這套驗收只檢查「回傳的不是 None」——參考解過、`return None` 樁被擋，
-    但 `return ()` 樁大搖大擺走過去。單向的量具會給它綠燈，雙向＋多樁的不會。
+    第三方拿到 (spec, 參考解, 壞樁) 就能重跑量具，得到**逐位元組相同**的 payload。
+    渲染是確定性的，所以「我信你簽的」可以換成「我自己算一遍」。真沙箱。
     """
-    weak = "assert similar_elements([3, 4, 5], [4, 5, 6]) is not None\n"
+    stubs = [broken_stub("similar_elements"), STUB_EMPTY]
+    mine = run_suite_gauge(mbpp_spec, REF_SIMILAR, stubs)
+    theirs = run_suite_gauge(ss.validate(mbpp_spec.to_json()), REF_SIMILAR, stubs)
+    assert mine.as_payload() == theirs.as_payload() and mine.ok
+    # 而且渲染本身是確定性的：同一份 spec ⇒ 同一份碼（不同的 SuiteSpec 物件也一樣）。
+    assert mbpp_spec.render() == ss.validate(mbpp_spec.to_json()).render()
+
+
+def test_a_spec_that_picks_an_easy_input_passes_the_reference_but_admits_a_stub():
+    """通過參考解**不夠**：挑一個「參考解剛好回空的」輸入，`return ()` 的壞樁就溜過去。
+
+    真沙箱。這就是資料形態裡**覆蓋不足**的最小樣本：期望值完全正確、參考解通過、
+    `return None` 的樁被擋，而 `return ()` 的樁大搖大擺走過去。單樁量具給綠燈，
+    多樁量具不給——量具是下界，不是保證。
+    """
+    easy = spec_for("similar_elements", [{"args": "[[1, 2], [3, 4]]", "expected": "()"}])
     book, ident = Logbook(), Identity.generate()
-    ok_one = run_suite_gauge(weak, REF_SIMILAR, [broken_stub("similar_elements")],
-                             entry_point="similar_elements")
-    assert ok_one.ok            # 只放一個樁 ⇒ 這套爛驗收會被放行（量具是下界）
+    one = run_suite_gauge(easy, REF_SIMILAR, [broken_stub("similar_elements")])
+    assert one.ok            # 只放一個樁 ⇒ 這套爛驗收會被放行（量具是下界）
     with pytest.raises(SuiteGaugeError) as e:
         commit_suite_with_gauge(
-            book, ident, task_id="t1", check_code=weak, nonce=NONCE,
+            book, ident, task_id="t1", suite=easy, nonce=NONCE,
             reference=REF_SIMILAR,
-            broken_stubs=[broken_stub("similar_elements"), STUB_EMPTY],
-            entry_point="similar_elements", ts_ms=TS)
+            broken_stubs=[broken_stub("similar_elements"), STUB_EMPTY], ts_ms=TS)
     assert "gauge_failed" in str(e.value) and "ref_passed=True" in str(e.value)
     assert book.entries == []
 
 
 def test_an_empty_known_bad_set_is_not_a_pass():
     """零個壞樁 ⇒ 「全部被擋」空洞地成立。fail-open 要在 commit 就被擋下來。"""
-    rec = run_suite_gauge("pass", GOOD, [], runner=rule_runner(lambda *_: True))
+    rec = run_suite_gauge(SPEC, GOOD, [], runner=rule_runner(lambda *_: True))
     assert rec.ref_passed and rec.n_broken == 0 and not rec.ok
     with pytest.raises(SuiteGaugeError) as e:
-        commit_suite(Logbook(), Identity.generate(), task_id="t1", check_code="pass",
+        commit_suite(Logbook(), Identity.generate(), task_id="t1", suite=SPEC,
                      nonce=NONCE, gauge=rec, ts_ms=TS)
     assert "n_broken=0" in str(e.value)
 
 
-def _gauged_commit(check_code, *, task_id="t1"):
-    """把一套（假設已驗過的）驗收合法地上鏈，回傳 (entry, book, identity)。"""
+def test_a_raw_code_suite_cannot_enter_any_door():
+    """**這道門被拆掉了**：任何一支吃套件的函式，收到 `str` 都丟例外，不是「盡量試」。
+
+    R451 的裁決是「只要驗收碼是任意 Python，量具就沒有約束力」，所以關閉必須是
+    **型別層級**的，不能是一個可以被旗標打開的選項。六個入口逐一釘住。
+    """
+    raw = "assert f(1) == 2\n"
     book, ident = Logbook(), Identity.generate()
-    rec = run_suite_gauge(check_code, GOOD, [BAD], entry_point="f",
+    rec = run_suite_gauge(SPEC, GOOD, [BAD], runner=rule_runner(lambda c, _k: c is GOOD))
+    for call in (
+        lambda: as_suite_spec(raw),
+        lambda: commit_suite(book, ident, task_id="t", suite=raw, nonce=NONCE, gauge=rec),
+        lambda: commit_suite_with_gauge(book, ident, task_id="t", suite=raw,
+                                        nonce=NONCE, reference=GOOD),
+        lambda: run_suite_gauge(raw, GOOD, [BAD], runner=rule_runner(lambda *_: True)),
+        lambda: select_by_quorum(task(), [(GOOD, "w")], mk(1, truth_probe(TRUTH)),
+                                 suite=raw, ts_ms=TS),
+        lambda: mk(1, truth_probe(TRUTH))[0].attest(task(), GOOD, suite=raw, ts_ms=TS),
+    ):
+        with pytest.raises(SuiteSpecError) as e:
+            call()
+        assert "raw_code_suite_not_accepted" in str(e.value)
+    assert book.entries == []
+
+
+def _gauged_commit(spec=SPEC, *, task_id="t1"):
+    """把一份（假設已驗過的）spec 合法地上鏈，回傳 (entry, book, identity)。"""
+    book, ident = Logbook(), Identity.generate()
+    rec = run_suite_gauge(spec, GOOD, [BAD], entry_point="f",
                           runner=rule_runner(lambda c, _k: c is GOOD))
-    return commit_suite(book, ident, task_id=task_id, check_code=check_code,
+    return commit_suite(book, ident, task_id=task_id, suite=spec,
                         nonce=NONCE, gauge=rec, ts_ms=TS), book, ident
 
 
@@ -504,11 +599,9 @@ def test_tampering_the_gauge_record_breaks_chain_verification():
     量具紀錄不是旁邊的一張紙條，它**在簽章覆蓋的範圍內**：改它就得重簽整條鏈。
     兩個方向都測——調高（假造合格）與調低（事後賴帳）都要驗不過。
     """
-    t = task()
-    code = t["visible_check"]["code"]
-    entry, book, ident = _gauged_commit(code)
+    entry, book, ident = _gauged_commit()
     who = PublicIdentity(ident.vacant_id, ident.pub)
-    assert book.verify_chain(who) and open_suite(entry, code, NONCE)
+    assert book.verify_chain(who) and open_suite(entry, SPEC, NONCE)
 
     def mutate(**over):
         p = dict(entry.payload)
@@ -519,32 +612,32 @@ def test_tampering_the_gauge_record_breaks_chain_verification():
     # (a) 事後賴帳：把 all_rejected 改成 False。鏈驗不過，而且內容本身就已經不合格。
     lowered = mutate(all_rejected=False)
     assert not Logbook([lowered]).verify_chain(who)
-    assert suite_gate(lowered, code, NONCE) == (False, "gauge_failed")
+    assert suite_gate(lowered, SPEC, NONCE) == (False, "gauge_failed")
     # (b) 假造更強的合格證：把 n_broken 從 1 灌水成 99。內容檢查**抓不到**這個
     #     （灌水後的紀錄照樣「合格」）——只有簽章抓得到。這條邊界要寫出來：
     #     量具紀錄的可信度來自簽章鏈，不是來自它自己說了什麼。
     inflated = mutate(n_broken=99)
     assert not Logbook([inflated]).verify_chain(who)
-    assert suite_gate(inflated, code, NONCE) == (True, "")            # 內容看不出來
-    assert suite_gate(inflated, code, NONCE, who=who) == (False, "bad_signature")
+    assert suite_gate(inflated, SPEC, NONCE) == (True, "")            # 內容看不出來
+    assert suite_gate(inflated, SPEC, NONCE, who=who) == (False, "bad_signature")
 
 
 def test_open_suite_refuses_a_commit_without_a_gauge_record():
     """沒有量具紀錄的承諾**不是**一套可用的驗收——缺席就是拒，不是「沒查到」。"""
-    t = task()
-    code = t["visible_check"]["code"]
-    entry, _book, ident = _gauged_commit(code)
+    entry, _book, _ident = _gauged_commit()
     bare = LogEntry(entry.stream_id, entry.branch_id, entry.seq, entry.prev_hash,
                     entry.ts_ms, entry.type,
                     {k: v for k, v in entry.payload.items() if k != "gauge"}, entry.sig)
-    assert suite_gate(bare, code, NONCE) == (False, "gauge_record_missing")
-    assert not open_suite(bare, code, NONCE)
+    assert suite_gate(bare, SPEC, NONCE) == (False, "gauge_record_missing")
+    assert not open_suite(bare, SPEC, NONCE)
     # 綁錯套件的紀錄也擋掉（拿別題的合格證來用）。
     other = dict(entry.payload)
     other["gauge"] = dict(other["gauge"]) | {"suite_sha256": sha256_hex("pass")}
     assert suite_gate(LogEntry(entry.stream_id, entry.branch_id, entry.seq,
                                entry.prev_hash, entry.ts_ms, entry.type, other,
-                               entry.sig), code, NONCE) == (False, "gauge_suite_mismatch")
+                               entry.sig), SPEC, NONCE) == (False, "gauge_suite_mismatch")
+    # 揭露的是**另一份 spec** ⇒ 承諾對不上。
+    assert suite_gate(entry, SPEC_WEAK, NONCE) == (False, "commitment_mismatch")
 
 
 def test_form_verdict_rejects_attestations_against_an_uncommitted_suite():
@@ -552,8 +645,8 @@ def test_form_verdict_rejects_attestations_against_an_uncommitted_suite():
     t = task()
     execs = mk(3, truth_probe(TRUTH))
     ros = roster_of(execs)
-    ssha = suite_hash(t)
-    atts = [e.attest(t, GOOD, suite_sha256=ssha, ts_ms=TS) for e in execs]
+    ssha = SSHA
+    atts = [e.attest(t, GOOD, suite=SPEC, ts_ms=TS) for e in execs]
     v = form_verdict(atts, ros, task_id="t1", draft_sha256=sha256_hex(GOOD),
                      suite_sha256=ssha, quorum=2, gauged_suites={})
     assert v.gauge_status == "suite_not_gauged"
@@ -567,8 +660,8 @@ def test_form_verdict_rejects_a_suite_whose_gauge_record_failed():
     """白名單裡有這套、但紀錄是不合格的 ⇒ 同樣一票都不採信（理由分開報）。"""
     t = task()
     execs = mk(3, truth_probe(TRUTH))
-    ssha = suite_hash(t)
-    atts = [e.attest(t, GOOD, suite_sha256=ssha, ts_ms=TS) for e in execs]
+    ssha = SSHA
+    atts = [e.attest(t, GOOD, suite=SPEC, ts_ms=TS) for e in execs]
     failed = GaugeRecord(ssha, sha256_hex(GOOD), 1, False, True)   # 壞樁溜過去了
     v = form_verdict(atts, roster_of(execs), task_id="t1",
                      draft_sha256=sha256_hex(GOOD), suite_sha256=ssha, quorum=2,
@@ -585,34 +678,34 @@ def test_form_verdict_rejects_a_suite_whose_gauge_record_failed():
 
 def test_gauged_suite_index_only_admits_gate_passing_commits():
     """白名單的建構函式自己 fail-closed：揭露對不上的承諾進不了索引。"""
-    t = task()
-    code = t["visible_check"]["code"]
-    entry, _b, _i = _gauged_commit(code)
-    idx = gauged_suite_index([(entry, code, NONCE)])
-    assert set(idx) == {suite_hash(t)} and idx[suite_hash(t)].ok
-    assert gauged_suite_index([(entry, code, "f" * 32)]) == {}          # nonce 不對
-    assert gauged_suite_index([(entry, code + "\n", NONCE)]) == {}      # 套件不對
+    entry, _b, _i = _gauged_commit()
+    idx = gauged_suite_index([(entry, SPEC, NONCE)])
+    assert set(idx) == {SSHA} and idx[SSHA].ok
+    assert gauged_suite_index([(entry, SPEC, "f" * 32)]) == {}          # nonce 不對
+    assert gauged_suite_index([(entry, SPEC_WEAK, NONCE)]) == {}        # 套件不對
+    # 餵一段原始碼進來連例外都不會逸出——它就是進不了索引。
+    assert gauged_suite_index([(entry, "assert f(1) == 2\n", NONCE)]) == {}
 
 
-def test_a_trivial_suite_no_longer_ships_once_the_gate_is_on():
+def test_a_weak_suite_no_longer_ships_once_the_gate_is_on():
     """把 §7 那一條（爛套件零爭議地交垃圾）接到閘門後面：現在交不出去。
 
     同一組誠實執行器、同一份「什麼都放行」的探針。差別只有一個：這一套驗收
     沒有合格的量具紀錄。⇒ 拒交、`refusal_reason` 指名是**套件**不是候選、
     而且 `n_sandbox_runs=0`——連跑都不跑（量具紀錄必須在證言之前）。
     """
-    trivial = {"task_id": "t1", "entry_point": "f",
-               "visible_check": {"type": "run_python", "code": "pass", "timeout": 8}}
-    allpass = {sha256_hex(GOOD): ProbeResult(True, None, 0, True, None),
-               sha256_hex(BAD): ProbeResult(True, None, 0, True, None)}
+    t = task()
+    allpass = {sha256_hex(GOOD): ProbeResult(True, None, 1, True, None),
+               sha256_hex(BAD): ProbeResult(True, None, 1, True, None)}
     execs = mk(5, truth_probe(allpass))
     # 閘門關著（舊語意）：照樣交出錯的那一份，所有健康指標滿格——R449 §三-3。
-    before = select_by_quorum(trivial, [(BAD, "wA"), (GOOD, "wB")], execs, ts_ms=TS)
+    before = select_by_quorum(t, [(BAD, "wA"), (GOOD, "wB")], execs, suite=SPEC_WEAK,
+                              ts_ms=TS)
     assert before.shipped_index == 0 and before.verdicts[0].unanimous
     assert before.verdicts[0].gauge_status == "unchecked"
     # 閘門開著：這套驗收根本沒有合格紀錄 ⇒ 拒交。
-    after = select_by_quorum(trivial, [(BAD, "wA"), (GOOD, "wB")], execs, ts_ms=TS,
-                             gauged_suites={})
+    after = select_by_quorum(t, [(BAD, "wA"), (GOOD, "wB")], execs, suite=SPEC_WEAK,
+                             ts_ms=TS, gauged_suites={})
     assert after.refused and after.shipped_index is None
     assert after.refusal_reason == "suite_gate:suite_not_gauged"
     assert after.verdicts[0].gauge_status == "suite_not_gauged"
@@ -622,21 +715,47 @@ def test_a_trivial_suite_no_longer_ships_once_the_gate_is_on():
 def test_select_by_quorum_refuses_before_spending_a_single_sandbox_run():
     """`suite_commit` 有給的時候，閘在**第一次沙箱之前**。爛套件不該先燒 k 次執行。"""
     t = task()
-    code = t["visible_check"]["code"]
-    entry, _b, _i = _gauged_commit(code)
+    entry, _b, _i = _gauged_commit()
     execs = mk(3, truth_probe(TRUTH))
     # (a) 承諾的是別套驗收 ⇒ 連一次沙箱都不跑
-    swapped = {**t, "visible_check": {"type": "run_python", "code": "pass", "timeout": 8}}
-    sel = select_by_quorum(swapped, [(GOOD, "wA")], execs, suite_commit=entry,
-                           suite_nonce=NONCE, ts_ms=TS)
+    sel = select_by_quorum(t, [(GOOD, "wA")], execs, suite=SPEC_WEAK,
+                           suite_commit=entry, suite_nonce=NONCE, ts_ms=TS)
     assert sel.refused and sel.n_sandbox_runs == 0 and sel.verdicts == ()
     assert sel.refusal_reason == "suite_gate:commitment_mismatch"
     # (b) 對得上的套件則照常出貨，語意與沒有閘門時逐字相同
-    sel2 = select_by_quorum(t, [(BAD, "wA"), (GOOD, "wB")], execs, suite_commit=entry,
-                            suite_nonce=NONCE, ts_ms=TS)
+    sel2 = select_by_quorum(t, [(BAD, "wA"), (GOOD, "wB")], execs, suite=SPEC,
+                            suite_commit=entry, suite_nonce=NONCE, ts_ms=TS)
     assert sel2.shipped_index == 1 and sel2.n_sandbox_runs == 6
     assert all(v.gauge_status == "ok" for v in sel2.verdicts)
     assert sel2.refusal_reason is None
+
+
+def test_select_by_quorum_verifies_the_committers_signature_when_given_the_key():
+    """灌水的量具紀錄：內容看不出來，**簽章看得出來**——出貨路徑要帶公鑰。
+
+    `n_broken` 從 1 改成 99 之後這筆紀錄在內容上更「合格」，`suite_gate` 不帶 `who`
+    照樣放行（上面已經證明）。這裡把承諾者的公鑰帶進 `select_by_quorum`：
+    同一份灌水承諾變成 `suite_gate:bad_signature`，而且**一次沙箱都不花**。
+    """
+    t = task()
+    entry, _b, ident = _gauged_commit()
+    who = PublicIdentity(ident.vacant_id, ident.pub)
+    execs = mk(3, truth_probe(TRUTH))
+    ok = select_by_quorum(t, [(BAD, "wA"), (GOOD, "wB")], execs, suite=SPEC,
+                          suite_commit=entry, suite_nonce=NONCE, suite_committer=who,
+                          ts_ms=TS)
+    assert ok.shipped_index == 1 and ok.refusal_reason is None
+    p = dict(entry.payload)
+    p["gauge"] = dict(p["gauge"]) | {"n_broken": 99}
+    forged = LogEntry(entry.stream_id, entry.branch_id, entry.seq, entry.prev_hash,
+                      entry.ts_ms, entry.type, p, entry.sig)
+    blind = select_by_quorum(t, [(GOOD, "wB")], execs, suite=SPEC, suite_commit=forged,
+                             suite_nonce=NONCE, ts_ms=TS)
+    assert not blind.refused                                   # 不帶公鑰＝看不見
+    caught = select_by_quorum(t, [(GOOD, "wB")], execs, suite=SPEC, suite_commit=forged,
+                              suite_nonce=NONCE, suite_committer=who, ts_ms=TS)
+    assert caught.refused and caught.n_sandbox_runs == 0
+    assert caught.refusal_reason == "suite_gate:bad_signature"
 
 
 def test_default_broken_stub_matches_probe_instrument():
@@ -652,17 +771,19 @@ def test_default_broken_stub_matches_probe_instrument():
         assert broken_stub(ep) == expected
 
 
-# ── 9. 量具的誠實上限：通過量具、但照樣交垃圾的套件（R449 §七 推翻條件二）─────
+# ── 9. R451 的三種攻擊：改成資料之後**不可表達**（不是被擋）───────────────────
 def test_a_suite_can_read_the_candidate_source_from_the_runner():
-    """實測（不是假設）：驗收碼看得見候選的**原始碼**，不只是它的行為。
+    """實測（不是假設）：**任意** Python 的驗收碼看得見候選的原始碼，不只是它的行為。
 
     `vacant/checks.py::_test_runner_source` 把套件原文**內嵌**進 runner 行程，而
     `_worker`（跑候選的那個 `subprocess.Popen`）就在同一個命名空間裡，
     `_worker.args` 帶著 `candidate.py` 的路徑。AST 白名單只掃**候選**，不掃套件。
 
-    ⇒ 內容定址的白／黑名單套件在這顆沙箱上是**可行的**，不是理論上的。
-      V/GT 分離沒有被破（讀到的是候選自己的產出，不是 hidden_check、不是參考解），
-      但這條管道要記進誠實邊界——`peer_exec_sim.targeted_suite` 就是靠它。
+    這條性質是 round452 那個決定的**理由**，不是一個待修的洞：它證明「驗收碼是
+    任意 Python」這個形態下，內容定址的白／黑名單（targeted）與跨呼叫狀態
+    （stateful）都是可行的，所以補丁沒有意義，只有換形態有意義。
+    改成 `SuiteSpec` 之後供應者交不出這樣一段碼——渲染器是我們自己的
+    （下面三條把「交不出來」逐一釘住）。
     """
     from ops.gain.gain_run import meets_demand
     marker = "vacant_r449_marker_" + "8f21c0"
@@ -679,158 +800,46 @@ def test_a_suite_can_read_the_candidate_source_from_the_runner():
     assert meets_demand(without, peek, 10, entry_point="f")[0] is False
 
 
-def test_a_targeted_suite_passes_the_gauge_and_still_ships_anything(mbpp_task):
-    """**這道閘的誠實上限**：逐字黑名單那組已知壞樁的套件，量具滿分、上得了鏈。
+def test_the_r451_attack_suites_have_no_encoding_as_a_spec(mbpp_task):
+    """**R452 的主張，寫成測試**：targeted／mimic／stateful 三份驗收碼餵進 validator
+    一律被拒，理由字串指得出是哪一條規則。
 
-    真沙箱、真簽章、真鏈。這一套驗收一次都沒有呼叫過候選函式，它只把候選原始碼的
-    sha256 拿去比對那組壞樁的字面：命中就失敗，沒命中就 rc=0。於是
-
-      - 量具兩個方向**滿分**（參考解通過、四個壞樁全被擋）⇒ `commit_suite` 收下它；
-      - 任何一份真候選——包括回傳 `'lol'` 的——都通過 ⇒ k 台誠實執行器一致地
-        交出垃圾，`contested=False`，收據上一個警告都不會亮。
-
-    數字版本見 `peer_exec_sim --gauge-gate` 的 `targeted` 那一列。
+    「不可表達」不是一句宣稱，是一個可以被釘住的型別性質：`SuiteSpec` 的欄位只有
+    entry_point、一串字面值、三個布林／數值旗標，沒有任何一格放得下 `import`、
+    `open`、`hashlib`、跨呼叫狀態或「把受測函式換掉」。
     """
-    from ops.gain.replay.peer_exec_sim import stub_set, targeted_suite
-    ep = mbpp_task["entry_point"]
-    suite = targeted_suite(ep)
-    rec = run_suite_gauge(suite, REF_SIMILAR, stub_set(ep), entry_point=ep)
-    assert rec.ok and rec.ref_passed and rec.all_rejected and rec.n_broken == 4
-
-    book, ident = Logbook(), Identity.generate()
-    entry = commit_suite_with_gauge(
-        book, ident, task_id=mbpp_task["task_id"], check_code=suite, nonce=NONCE,
-        reference=REF_SIMILAR, broken_stubs=stub_set(ep), entry_point=ep, ts_ms=TS)
-    assert suite_gate(entry, suite, NONCE) == (True, "")     # 閘門放行
-
-    junk = f"def {ep}(a, b):\n    return 'lol'\n"
-    t = {**mbpp_task,
-         "visible_check": {"type": "run_python", "code": suite, "timeout": 10}}
-    execs = [Executor(f"x{i}", Identity.generate(), Logbook()) for i in range(3)]
-    sel = select_by_quorum(t, [(junk, "wA")], execs, quorum=2, suite_commit=entry,
-                           suite_nonce=NONCE, ts_ms=TS)
-    assert sel.shipped_index == 0 and not sel.refused        # 垃圾出貨
-    assert sel.verdicts[0].unanimous and not sel.verdicts[0].contested
-    assert sel.verdicts[0].gauge_status == "ok"              # 收據說「量具通過」
-    # 同一份垃圾在**真的** MBPP+ 可見驗收下是擋得住的——差別只在套件。
-    real = {**mbpp_task}
-    assert select_by_quorum(real, [(junk, "wA")], execs, quorum=2, ts_ms=TS).refused
-
-
-def test_a_behavioural_stub_blacklist_also_passes_the_gauge():
-    """堵掉讀檔管道也沒有用：**純行為**版的黑名單一樣量具滿分、一樣放行垃圾。
-
-    這一套只呼叫候選一次，然後斷言回傳值不是那四個已知壞樁會回的東西
-    （`None`／`0`／`[]`／第一個參數）。不讀檔、不看原始碼、不用 `_worker`——
-    所以「把 `vacant/checks.py` 的讀檔管道封起來」不是解法。
-
-    解法只有一句話，而且它必須一直掛在收據上：**量具是下界，不是保證**
-    （`SUITE_FIXED_POINT_NOTE`）。
-    """
-    from ops.gain.gain_run import meets_demand
-    ep = "similar_elements"
-    blacklist = (
-        "_r = similar_elements([3, 4, 5], [4, 5, 6])\n"
-        "assert _r is not None\n"
-        "assert _r != 0\n"
-        "assert _r != []\n"
-        "assert _r != [3, 4, 5]\n"
-    )
-    stubs = [broken_stub(ep),
-             f"def {ep}(*a, **k):\n    return 0\n",
-             f"def {ep}(*a, **k):\n    return []\n",
-             f"def {ep}(*a, **k):\n    return a[0] if a else None\n"]
-    rec = run_suite_gauge(blacklist, REF_SIMILAR, stubs, entry_point=ep)
-    assert rec.ok and rec.n_broken == 4 and rec.all_rejected   # 量具滿分
-    junk = f"def {ep}(a, b):\n    return 'lol'\n"
-    assert meets_demand(junk, blacklist, 10, entry_point=ep)[0] is True
-    # 對照：真的 MBPP+ 可見驗收擋得住同一份垃圾（見上一條）。
-    entry = commit_suite_with_gauge(
-        Logbook(), Identity.generate(), task_id="t1", check_code=blacklist,
-        nonce=NONCE, reference=REF_SIMILAR, broken_stubs=stubs, entry_point=ep,
-        ts_ms=TS)
-    assert suite_gate(entry, blacklist, NONCE) == (True, "")
-
-
-def test_select_by_quorum_verifies_the_committers_signature_when_given_the_key():
-    """灌水的量具紀錄：內容看不出來，**簽章看得出來**——出貨路徑要帶公鑰。
-
-    `n_broken` 從 1 改成 99 之後這筆紀錄在內容上更「合格」，`suite_gate` 不帶 `who`
-    照樣放行（上一條已經證明）。這裡把承諾者的公鑰帶進 `select_by_quorum`：
-    同一份灌水承諾變成 `suite_gate:bad_signature`，而且**一次沙箱都不花**。
-    """
-    t = task()
-    code = t["visible_check"]["code"]
-    entry, _b, ident = _gauged_commit(code)
-    who = PublicIdentity(ident.vacant_id, ident.pub)
-    execs = mk(3, truth_probe(TRUTH))
-    # 帶公鑰、承諾沒被動過 ⇒ 照常出貨
-    ok = select_by_quorum(t, [(BAD, "wA"), (GOOD, "wB")], execs, suite_commit=entry,
-                          suite_nonce=NONCE, suite_committer=who, ts_ms=TS)
-    assert ok.shipped_index == 1 and ok.refusal_reason is None
-    # 灌水之後
-    p = dict(entry.payload)
-    p["gauge"] = dict(p["gauge"]) | {"n_broken": 99}
-    forged = LogEntry(entry.stream_id, entry.branch_id, entry.seq, entry.prev_hash,
-                      entry.ts_ms, entry.type, p, entry.sig)
-    blind = select_by_quorum(t, [(GOOD, "wB")], execs, suite_commit=forged,
-                             suite_nonce=NONCE, ts_ms=TS)
-    assert not blind.refused                                   # 不帶公鑰＝看不見
-    caught = select_by_quorum(t, [(GOOD, "wB")], execs, suite_commit=forged,
-                              suite_nonce=NONCE, suite_committer=who, ts_ms=TS)
-    assert caught.refused and caught.n_sandbox_runs == 0
-    assert caught.refusal_reason == "suite_gate:bad_signature"
-
-
-def test_a_mimic_suite_defeats_even_a_detail_matching_gauge(mbpp_task):
-    """量具的**最強**攻擊：與真套件逐位相同，只多一句「不是已知壞樁就換掉受測函式」。
-
-    比 `targeted_suite` 難擋一個層次。targeted 自己捏一句 assert 去擋壞樁，所以它的
-    **形狀**（`_visible_test_slicer` 認不認得）與**失敗細節**（`first_failing_test`／
-    `n_visible_tests`）都跟真套件不一樣——一個被強化成「連失敗的樣子都要對」的量具
-    抓得到它。mimic 不會：
-
-      - 量具兩個方向滿分（參考解通過、四個已知壞樁全被擋）⇒ `commit_suite` 收下；
-      - 已知壞樁走的是**原封不動的真套件** ⇒ `conform_failure_detail` 的三個欄位
-        與真套件**逐欄相同**（本條逐樁比對）；
-      - 其餘任何候選——包括回傳 `'lol'` 的——受測函式已被換成該題自帶的參考解
-        ⇒ 一律通過，k 台誠實執行器一致地交垃圾，收據上一個警告都不會亮。
-
-    ⇒ 把量具從「壞樁被擋?」強化到「壞樁被擋的樣子對不對?」也救不回來。這是
-      R449 §七推翻條件二的最強版本，也是 `SUITE_FIXED_POINT_NOTE` 的理由。
-    """
-    from ops.gain.gain_run import conform_failure_detail, meets_demand
-    from ops.gain.replay.peer_exec_sim import mimic_suite, stub_set
+    from ops.gain.replay.peer_exec_sim import mimic_suite, targeted_suite
+    from ops.gain.replay.r451_stateful_suite_probe import stateful_suite
 
     ep = mbpp_task["entry_point"]
-    stubs = stub_set(ep)
-    mimic = mimic_suite(mbpp_task["visible_check"]["code"], ep)
-    assert mimic is not None
+    real = mbpp_task["visible_check"]["code"]
+    attacks = {
+        "targeted": targeted_suite(ep),
+        "mimic": mimic_suite(real, ep),
+        "stateful": stateful_suite(real, ep),
+        "trivial": "pass",
+    }
+    for name, code in attacks.items():
+        assert code is not None, name
+        with pytest.raises(SuiteSpecError) as e:
+            ss.parse_check_code(code)
+        assert "unrecognized_suite_shape" in str(e.value), (name, str(e.value))
+        # 而且它們連當成一份 spec 遞進來都不行（`str` 就是原始碼那道門）。
+        with pytest.raises(SuiteSpecError):
+            as_suite_spec(code)
+    # 對照：**真的**那一套認得出來，而且轉得成 spec（不是把所有東西都拒掉）。
+    parsed = ss.parse_check_code(real)
+    assert parsed["dialect"] == "mbpp" and parsed["entry_point"] == ep
 
-    rec = run_suite_gauge(mimic, REF_SIMILAR, stubs, entry_point=ep)
-    assert rec.ok and rec.n_broken == len(stubs) and rec.all_rejected  # 量具滿分
-    book, ident = Logbook(), Identity.generate()
-    entry = commit_suite_with_gauge(
-        book, ident, task_id=mbpp_task["task_id"], check_code=mimic, nonce=NONCE,
-        reference=REF_SIMILAR, broken_stubs=stubs, entry_point=ep, ts_ms=TS)
-    assert suite_gate(entry, mimic, NONCE,
-                      who=PublicIdentity(ident.vacant_id, ident.pub)) == (True, "")
 
-    # 強化版量具（比對失敗細節）也抓不到：壞樁在 mimic 下的細節＝真套件下的細節。
-    mimic_task = {**mbpp_task,
-                  "visible_check": {"type": "run_python", "code": mimic, "timeout": 10}}
-    for stub in stubs:
-        d_mimic = conform_failure_detail(stub, mimic_task)
-        assert d_mimic == conform_failure_detail(stub, mbpp_task)
-        assert d_mimic["detail_reason"] is None          # 形狀認得出來，不是 null 一片
+def test_the_gauge_still_runs_on_the_rendered_code_not_on_supplier_code(mbpp_spec):
+    """量具跑的是**渲染出來的**碼，而渲染出來的碼裡沒有一個位元組來自供應者。
 
-    junk = f"def {ep}(a, b):\n    return 'lol'\n"
-    assert meets_demand(junk, mimic, 10, entry_point=ep)[0] is True
-    execs = [Executor(f"x{i}", Identity.generate(), Logbook()) for i in range(3)]
-    sel = select_by_quorum(mimic_task, [(junk, "wA")], execs, quorum=2,
-                           suite_commit=entry, suite_nonce=NONCE, ts_ms=TS)
-    assert sel.shipped_index == 0 and not sel.refused
-    assert sel.verdicts[0].gauge_status == "ok" and not sel.verdicts[0].contested
-    # 對照：真套件擋得住同一份垃圾——差別只在套件。
-    assert select_by_quorum(mbpp_task, [(junk, "wA")], execs, quorum=2,
-                            ts_ms=TS).refused
+    兩件事一起釘：(a) 渲染結果不含任何攻擊面關鍵字；(b) 量具照樣有效（真沙箱）。
+    """
+    code = mbpp_spec.render()
+    for forbidden in ("import ", "open(", "_worker", "exec(", "hashlib", "__canon"):
+        assert forbidden not in code.replace("import re as __vacant_re\n", "", 1), forbidden
+    rec = run_suite_gauge(mbpp_spec, REF_SIMILAR,
+                          [broken_stub("similar_elements"), STUB_EMPTY])
+    assert rec.ok and rec.n_broken == 2

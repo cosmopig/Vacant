@@ -1,0 +1,10114 @@
+{
+"n_converted": 368,
+"n_tasks": 371,
+"reasons": {
+"expected_not_a_literal_type": 3
+},
+"run": "g_r446_eq5_mbpp",
+"specs": {
+"mbppplus_Mbpp/100": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "next_smallest_palindrome",
+"tests": [
+{
+"args": "[99]",
+"expected": "101"
+},
+{
+"args": "[1221]",
+"expected": "1331"
+},
+{
+"args": "[120]",
+"expected": "121"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/101": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "kth_element",
+"tests": [
+{
+"args": "[[12, 3, 5, 7, 19], 2]",
+"expected": "3"
+},
+{
+"args": "[[17, 24, 8, 23], 3]",
+"expected": "8"
+},
+{
+"args": "[[16, 21, 25, 36, 4], 4]",
+"expected": "36"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/102": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "snake_to_camel",
+"tests": [
+{
+"args": "['python_program']",
+"expected": "'PythonProgram'"
+},
+{
+"args": "['python_language']",
+"expected": "'PythonLanguage'"
+},
+{
+"args": "['programming_language']",
+"expected": "'ProgrammingLanguage'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/103": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "eulerian_num",
+"tests": [
+{
+"args": "[3, 1]",
+"expected": "4"
+},
+{
+"args": "[4, 1]",
+"expected": "11"
+},
+{
+"args": "[5, 3]",
+"expected": "26"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/104": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sort_sublists",
+"tests": [
+{
+"args": "[[['green', 'orange'], ['black', 'white'], ['white', 'black', 'orange']]]",
+"expected": "[['green', 'orange'], ['black', 'white'], ['black', 'orange', 'white']]"
+},
+{
+"args": "[[[' red ', 'green'], ['blue ', ' black'], [' orange', 'brown']]]",
+"expected": "[[' red ', 'green'], [' black', 'blue '], [' orange', 'brown']]"
+},
+{
+"args": "[[['zilver', 'gold'], ['magnesium', 'aluminium'], ['steel', 'bronze']]]",
+"expected": "[['gold', 'zilver'], ['aluminium', 'magnesium'], ['bronze', 'steel']]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/105": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count",
+"tests": [
+{
+"args": "[[True, False, True]]",
+"expected": "2"
+},
+{
+"args": "[[False, False]]",
+"expected": "0"
+},
+{
+"args": "[[True, True, True]]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/106": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "add_lists",
+"tests": [
+{
+"args": "[[5, 6, 7], (9, 10)]",
+"expected": "(9, 10, 5, 6, 7)"
+},
+{
+"args": "[[6, 7, 8], (10, 11)]",
+"expected": "(10, 11, 6, 7, 8)"
+},
+{
+"args": "[[7, 8, 9], (11, 12)]",
+"expected": "(11, 12, 7, 8, 9)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/108": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "merge_sorted_list",
+"tests": [
+{
+"args": "[[25, 24, 15, 4, 5, 29, 110], [19, 20, 11, 56, 25, 233, 154], [24, 26, 54, 48]]",
+"expected": "[4, 5, 11, 15, 19, 20, 24, 24, 25, 25, 26, 29, 48, 54, 56, 110, 154, 233]"
+},
+{
+"args": "[[1, 3, 5, 6, 8, 9], [2, 5, 7, 11], [1, 4, 7, 8, 12]]",
+"expected": "[1, 1, 2, 3, 4, 5, 5, 6, 7, 7, 8, 8, 9, 11, 12]"
+},
+{
+"args": "[[18, 14, 10, 9, 8, 7, 9, 3, 2, 4, 1], [25, 35, 22, 85, 14, 65, 75, 25, 58], [12, 74, 9, 50, 61, 41]]",
+"expected": "[1, 2, 3, 4, 7, 8, 9, 9, 9, 10, 12, 14, 14, 18, 22, 25, 25, 35, 41, 50, 58, 61, 65, 74, 75, 85]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/109": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "odd_Equivalent",
+"tests": [
+{
+"args": "['011001', 6]",
+"expected": "3"
+},
+{
+"args": "['11011', 5]",
+"expected": "4"
+},
+{
+"args": "['1010', 4]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/11": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_Occ",
+"tests": [
+{
+"args": "['hello', 'l']",
+"expected": "'heo'"
+},
+{
+"args": "['abcda', 'a']",
+"expected": "'bcd'"
+},
+{
+"args": "['PHP', 'P']",
+"expected": "'H'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/111": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": true
+},
+"dialect": "mbpp",
+"entry_point": "common_in_nested_lists",
+"tests": [
+{
+"args": "[[[12, 18, 23, 25, 45], [7, 12, 18, 24, 28], [1, 5, 8, 12, 15, 16, 18]]]",
+"expected": "[18, 12]"
+},
+{
+"args": "[[[12, 5, 23, 25, 45], [7, 11, 5, 23, 28], [1, 5, 8, 18, 23, 16]]]",
+"expected": "[5, 23]"
+},
+{
+"args": "[[[2, 3, 4, 1], [4, 5], [6, 4, 8], [4, 5], [6, 8, 4]]]",
+"expected": "[4]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/113": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_integer",
+"tests": [
+{
+"args": "['python']",
+"expected": "False"
+},
+{
+"args": "['1']",
+"expected": "True"
+},
+{
+"args": "['12345']",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/116": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "tuple_to_int",
+"tests": [
+{
+"args": "[(1, 2, 3)]",
+"expected": "123"
+},
+{
+"args": "[(4, 5, 6)]",
+"expected": "456"
+},
+{
+"args": "[(5, 6, 7)]",
+"expected": "567"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/118": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "string_to_list",
+"tests": [
+{
+"args": "['python programming']",
+"expected": "['python', 'programming']"
+},
+{
+"args": "['lists tuples strings']",
+"expected": "['lists', 'tuples', 'strings']"
+},
+{
+"args": "['write a program']",
+"expected": "['write', 'a', 'program']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/119": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "search",
+"tests": [
+{
+"args": "[[1, 1, 2, 2, 3]]",
+"expected": "3"
+},
+{
+"args": "[[1, 1, 3, 3, 4, 4, 5, 5, 7, 7, 8]]",
+"expected": "8"
+},
+{
+"args": "[[1, 2, 2, 3, 3, 4, 4]]",
+"expected": "1"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/12": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sort_matrix",
+"tests": [
+{
+"args": "[[[1, 2, 3], [2, 4, 5], [1, 1, 1]]]",
+"expected": "[[1, 1, 1], [1, 2, 3], [2, 4, 5]]"
+},
+{
+"args": "[[[1, 2, 3], [-2, 4, -5], [1, -1, 1]]]",
+"expected": "[[-2, 4, -5], [1, -1, 1], [1, 2, 3]]"
+},
+{
+"args": "[[[5, 8, 9], [6, 4, 3], [2, 1, 4]]]",
+"expected": "[[2, 1, 4], [6, 4, 3], [5, 8, 9]]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/120": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_product_tuple",
+"tests": [
+{
+"args": "[[(2, 7), (2, 6), (1, 8), (4, 9)]]",
+"expected": "36"
+},
+{
+"args": "[[(10, 20), (15, 2), (5, 10)]]",
+"expected": "200"
+},
+{
+"args": "[[(11, 44), (10, 15), (20, 5), (12, 9)]]",
+"expected": "484"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/123": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "amicable_numbers_sum",
+"tests": [
+{
+"args": "[999]",
+"expected": "504"
+},
+{
+"args": "[9999]",
+"expected": "31626"
+},
+{
+"args": "[99]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/124": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "angle_complex",
+"tests": [
+{
+"args": "[0.0, 1j]",
+"expected": "1.5707963267948966"
+},
+{
+"args": "[2.0, 1j]",
+"expected": "0.4636476090008061"
+},
+{
+"args": "[0.0, 2j]",
+"expected": "1.5707963267948966"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/125": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_length",
+"tests": [
+{
+"args": "['11000010001']",
+"expected": "6"
+},
+{
+"args": "['10111']",
+"expected": "1"
+},
+{
+"args": "['11011101100101']",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/126": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum",
+"tests": [
+{
+"args": "[10, 15]",
+"expected": "6.0"
+},
+{
+"args": "[100, 150]",
+"expected": "93.0"
+},
+{
+"args": "[4, 6]",
+"expected": "3.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/127": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "multiply_int",
+"tests": [
+{
+"args": "[10, 20]",
+"expected": "200"
+},
+{
+"args": "[5, 10]",
+"expected": "50"
+},
+{
+"args": "[4, 8]",
+"expected": "32"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/128": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "long_words",
+"tests": [
+{
+"args": "[3, 'python is a programming language']",
+"expected": "['python', 'programming', 'language']"
+},
+{
+"args": "[2, 'writing a program']",
+"expected": "['writing', 'program']"
+},
+{
+"args": "[5, 'sorting list']",
+"expected": "['sorting']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/129": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "magic_square_test",
+"tests": [
+{
+"args": "[[[7, 12, 1, 14], [2, 13, 8, 11], [16, 3, 10, 5], [9, 6, 15, 4]]]",
+"expected": "True"
+},
+{
+"args": "[[[2, 7, 6], [9, 5, 1], [4, 3, 8]]]",
+"expected": "True"
+},
+{
+"args": "[[[2, 7, 6], [9, 5, 1], [4, 3, 7]]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/130": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_occurrences",
+"tests": [
+{
+"args": "[[2, 3, 8, 4, 7, 9, 8, 2, 6, 5, 1, 6, 1, 2, 3, 2, 4, 6, 9, 1, 2]]",
+"expected": "2"
+},
+{
+"args": "[[2, 3, 8, 4, 7, 9, 8, 7, 9, 15, 14, 10, 12, 13, 16, 18]]",
+"expected": "8"
+},
+{
+"args": "[[10, 20, 20, 30, 40, 90, 80, 50, 30, 20, 50, 10]]",
+"expected": "20"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/131": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "reverse_vowels",
+"tests": [
+{
+"args": "['Python']",
+"expected": "'Python'"
+},
+{
+"args": "['USA']",
+"expected": "'ASU'"
+},
+{
+"args": "['ab']",
+"expected": "'ab'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/132": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "tup_string",
+"tests": [
+{
+"args": "[('e', 'x', 'e', 'r', 'c', 'i', 's', 'e', 's')]",
+"expected": "'exercises'"
+},
+{
+"args": "[('p', 'y', 't', 'h', 'o', 'n')]",
+"expected": "'python'"
+},
+{
+"args": "[('p', 'r', 'o', 'g', 'r', 'a', 'm')]",
+"expected": "'program'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/133": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_negativenum",
+"tests": [
+{
+"args": "[[2, 4, -6, -9, 11, -12, 14, -5, 17]]",
+"expected": "-32"
+},
+{
+"args": "[[10, 15, -14, 13, -18, 12, -20]]",
+"expected": "-52"
+},
+{
+"args": "[[19, -65, 57, 39, 152, -639, 121, 44, 90, -190]]",
+"expected": "-894"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/135": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "hexagonal_num",
+"tests": [
+{
+"args": "[10]",
+"expected": "190"
+},
+{
+"args": "[5]",
+"expected": "45"
+},
+{
+"args": "[7]",
+"expected": "91"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/137": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "zero_count",
+"tests": [
+{
+"args": "[[0, 1, 2, -1, -5, 6, 0, -3, -2, 3, 4, 6, 8]]",
+"expected": "0.18181818181818182"
+},
+{
+"args": "[[2, 1, 2, -1, -5, 6, 4, -3, -2, 3, 4, 6, 8]]",
+"expected": "0.0"
+},
+{
+"args": "[[2, 4, -6, -9, 11, -12, 14, -5, 17]]",
+"expected": "0.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/138": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_Sum_Of_Powers_Of_Two",
+"tests": [
+{
+"args": "[10]",
+"expected": "True"
+},
+{
+"args": "[7]",
+"expected": "False"
+},
+{
+"args": "[14]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/139": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "circle_circumference",
+"tests": [
+{
+"args": "[10]",
+"expected": "62.83185307179586"
+},
+{
+"args": "[5]",
+"expected": "31.41592653589793"
+},
+{
+"args": "[4]",
+"expected": "25.132741228718345"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/14": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_Volume",
+"tests": [
+{
+"args": "[10, 8, 6]",
+"expected": "240.0"
+},
+{
+"args": "[3, 2, 2]",
+"expected": "6.0"
+},
+{
+"args": "[1, 2, 1]",
+"expected": "1.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/140": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": true
+},
+"dialect": "mbpp",
+"entry_point": "extract_singly",
+"tests": [
+{
+"args": "[[[3, 4, 5], [4, 5, 7], [1, 4]]]",
+"expected": "{1, 3, 4, 5, 7}"
+},
+{
+"args": "[[[1, 2, 3], [4, 2, 3], [7, 8]]]",
+"expected": "{1, 2, 3, 4, 7, 8}"
+},
+{
+"args": "[[[7, 8, 9], [10, 11, 12], [10, 11]]]",
+"expected": "{10, 11, 12, 7, 8, 9}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/141": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "pancake_sort",
+"tests": [
+{
+"args": "[[15, 79, 25, 38, 69]]",
+"expected": "[15, 25, 38, 69, 79]"
+},
+{
+"args": "[[98, 12, 54, 36, 85]]",
+"expected": "[12, 36, 54, 85, 98]"
+},
+{
+"args": "[[41, 42, 32, 12, 23]]",
+"expected": "[12, 23, 32, 41, 42]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/142": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_samepair",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8], [2, 2, 3, 1, 2, 6, 7, 9], [2, 1, 3, 1, 2, 6, 7, 9]]",
+"expected": "3"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8], [2, 2, 3, 1, 2, 6, 7, 8], [2, 1, 3, 1, 2, 6, 7, 8]]",
+"expected": "4"
+},
+{
+"args": "[[1, 2, 3, 4, 2, 6, 7, 8], [2, 2, 3, 1, 2, 6, 7, 8], [2, 1, 3, 1, 2, 6, 7, 8]]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/145": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_Abs_Diff",
+"tests": [
+{
+"args": "[[2, 1, 5, 3]]",
+"expected": "4"
+},
+{
+"args": "[[9, 3, 2, 5, 1]]",
+"expected": "8"
+},
+{
+"args": "[[3, 2, 1]]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/16": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": true,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "text_lowercase_underscore",
+"tests": [
+{
+"args": "['aab_cbbbc']",
+"expected": "True"
+},
+{
+"args": "['aab_Abbbc']",
+"expected": "False"
+},
+{
+"args": "['Aaab_abbbc']",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/160": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_solution",
+"tests": [
+{
+"args": "[2, 3, 7]",
+"expected": "(2, 1)"
+},
+{
+"args": "[4, 2, 7]",
+"expected": "None"
+},
+{
+"args": "[1, 13, 17]",
+"expected": "(4, 1)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/161": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_elements",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [2, 4, 6, 8]]",
+"expected": "[1, 3, 5, 7, 9, 10]"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 3, 5, 7]]",
+"expected": "[2, 4, 6, 8, 9, 10]"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [5, 7]]",
+"expected": "[1, 2, 3, 4, 6, 8, 9, 10]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/162": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_series",
+"tests": [
+{
+"args": "[0]",
+"expected": "0"
+},
+{
+"args": "[6]",
+"expected": "12"
+},
+{
+"args": "[10]",
+"expected": "30"
+},
+{
+"args": "[9]",
+"expected": "25"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/165": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_char_position",
+"tests": [
+{
+"args": "['xbcefg']",
+"expected": "2"
+},
+{
+"args": "['ABcED']",
+"expected": "3"
+},
+{
+"args": "['AbgdeF']",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/166": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_even_pair",
+"tests": [
+{
+"args": "[[5, 4, 7, 2, 1]]",
+"expected": "4"
+},
+{
+"args": "[[7, 2, 8, 1, 0, 5, 11]]",
+"expected": "9"
+},
+{
+"args": "[[1, 2, 3]]",
+"expected": "1"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/167": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "next_power_of_2",
+"tests": [
+{
+"args": "[0]",
+"expected": "1"
+},
+{
+"args": "[5]",
+"expected": "8"
+},
+{
+"args": "[17]",
+"expected": "32"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/168": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "frequency",
+"tests": [
+{
+"args": "[[1, 2, 3], 4]",
+"expected": "0"
+},
+{
+"args": "[[1, 2, 2, 3, 3, 3, 4], 3]",
+"expected": "3"
+},
+{
+"args": "[[0, 1, 2, 3, 1, 2], 1]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/17": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "square_perimeter",
+"tests": [
+{
+"args": "[10]",
+"expected": "40"
+},
+{
+"args": "[5]",
+"expected": "20"
+},
+{
+"args": "[4]",
+"expected": "16"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/170": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_range_list",
+"tests": [
+{
+"args": "[[2, 1, 5, 6, 8, 3, 4, 9, 10, 11, 8, 12], 8, 10]",
+"expected": "29"
+},
+{
+"args": "[[2, 1, 5, 6, 8, 3, 4, 9, 10, 11, 8, 12], 5, 7]",
+"expected": "16"
+},
+{
+"args": "[[2, 1, 5, 6, 8, 3, 4, 9, 10, 11, 8, 12], 7, 10]",
+"expected": "38"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/171": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "perimeter_pentagon",
+"tests": [
+{
+"args": "[5]",
+"expected": "25"
+},
+{
+"args": "[10]",
+"expected": "50"
+},
+{
+"args": "[15]",
+"expected": "75"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/172": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_occurance",
+"tests": [
+{
+"args": "['letstdlenstdporstd']",
+"expected": "3"
+},
+{
+"args": "['truststdsolensporsd']",
+"expected": "1"
+},
+{
+"args": "['makestdsostdworthit']",
+"expected": "2"
+},
+{
+"args": "['stds']",
+"expected": "1"
+},
+{
+"args": "['']",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/18": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_dirty_chars",
+"tests": [
+{
+"args": "['probasscurve', 'pros']",
+"expected": "'bacuve'"
+},
+{
+"args": "['digitalindia', 'talent']",
+"expected": "'digiidi'"
+},
+{
+"args": "['exoticmiles', 'toxic']",
+"expected": "'emles'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/19": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "test_duplicate",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5]]",
+"expected": "False"
+},
+{
+"args": "[[1, 2, 3, 4, 4]]",
+"expected": "True"
+},
+{
+"args": "[[1, 1, 2, 2, 3, 3, 4, 4, 5]]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/2": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": true
+},
+"dialect": "mbpp",
+"entry_point": "similar_elements",
+"tests": [
+{
+"args": "[(3, 4, 5, 6), (5, 7, 4, 10)]",
+"expected": "(4, 5)"
+},
+{
+"args": "[(1, 2, 3, 4), (5, 4, 3, 7)]",
+"expected": "(3, 4)"
+},
+{
+"args": "[(11, 12, 14, 13), (17, 15, 14, 13)]",
+"expected": "(13, 14)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/20": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_woodall",
+"tests": [
+{
+"args": "[383]",
+"expected": "True"
+},
+{
+"args": "[254]",
+"expected": "False"
+},
+{
+"args": "[200]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/222": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_type",
+"tests": [
+{
+"args": "[(5, 6, 7, 3, 5, 6)]",
+"expected": "True"
+},
+{
+"args": "[(1, 2, '4')]",
+"expected": "False"
+},
+{
+"args": "[(3, 2, 1, 4, 5)]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/223": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_majority",
+"tests": [
+{
+"args": "[[1, 2, 3, 3, 3, 3, 10], 7, 3]",
+"expected": "True"
+},
+{
+"args": "[[1, 1, 2, 4, 4, 4, 6, 6], 8, 4]",
+"expected": "False"
+},
+{
+"args": "[[1, 1, 1, 2, 2], 5, 1]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/224": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_Set_Bits",
+"tests": [
+{
+"args": "[2]",
+"expected": "1"
+},
+{
+"args": "[4]",
+"expected": "1"
+},
+{
+"args": "[6]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/226": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "odd_values_string",
+"tests": [
+{
+"args": "['abcdef']",
+"expected": "'ace'"
+},
+{
+"args": "['python']",
+"expected": "'pto'"
+},
+{
+"args": "['data']",
+"expected": "'dt'"
+},
+{
+"args": "['lambs']",
+"expected": "'lms'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/227": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "min_of_three",
+"tests": [
+{
+"args": "[10, 20, 0]",
+"expected": "0"
+},
+{
+"args": "[19, 15, 18]",
+"expected": "15"
+},
+{
+"args": "[-10, -20, -30]",
+"expected": "-30"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/230": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "replace_blank",
+"tests": [
+{
+"args": "['hello people', '@']",
+"expected": "'hello@people'"
+},
+{
+"args": "['python program language', '$']",
+"expected": "'python$program$language'"
+},
+{
+"args": "['blank space', '-']",
+"expected": "'blank-space'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/232": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": true
+},
+"dialect": "mbpp",
+"entry_point": "larg_nnum",
+"tests": [
+{
+"args": "[[10, 20, 50, 70, 90, 20, 50, 40, 60, 80, 100], 2]",
+"expected": "[100, 90]"
+},
+{
+"args": "[[10, 20, 50, 70, 90, 20, 50, 40, 60, 80, 100], 5]",
+"expected": "[100, 90, 80, 70, 60]"
+},
+{
+"args": "[[10, 20, 50, 70, 90, 20, 50, 40, 60, 80, 100], 3]",
+"expected": "[100, 90, 80]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/233": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "lateralsuface_cylinder",
+"tests": [
+{
+"args": "[10, 5]",
+"expected": "314.1592653589793"
+},
+{
+"args": "[4, 5]",
+"expected": "125.66370614359172"
+},
+{
+"args": "[4, 10]",
+"expected": "251.32741228718345"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/234": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "volume_cube",
+"tests": [
+{
+"args": "[3]",
+"expected": "27"
+},
+{
+"args": "[2]",
+"expected": "8"
+},
+{
+"args": "[5]",
+"expected": "125"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/235": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "even_bit_set_number",
+"tests": [
+{
+"args": "[10]",
+"expected": "10"
+},
+{
+"args": "[20]",
+"expected": "30"
+},
+{
+"args": "[30]",
+"expected": "30"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/237": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_occurences",
+"tests": [
+{
+"args": "[[(3, 1), (1, 3), (2, 5), (5, 2), (6, 3)]]",
+"expected": "{(1, 3): 2, (2, 5): 2, (3, 6): 1}"
+},
+{
+"args": "[[(4, 2), (2, 4), (3, 6), (6, 3), (7, 4)]]",
+"expected": "{(2, 4): 2, (3, 6): 2, (4, 7): 1}"
+},
+{
+"args": "[[(13, 2), (11, 23), (12, 25), (25, 12), (16, 23)]]",
+"expected": "{(2, 13): 1, (11, 23): 1, (12, 25): 2, (16, 23): 1}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/238": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "number_of_substrings",
+"tests": [
+{
+"args": "['abc']",
+"expected": "6"
+},
+{
+"args": "['abcd']",
+"expected": "10"
+},
+{
+"args": "['abcde']",
+"expected": "15"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/239": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "get_total_number_of_sequences",
+"tests": [
+{
+"args": "[10, 4]",
+"expected": "4"
+},
+{
+"args": "[5, 2]",
+"expected": "6"
+},
+{
+"args": "[16, 3]",
+"expected": "84"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/240": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "replace_list",
+"tests": [
+{
+"args": "[[1, 3, 5, 7, 9, 10], [2, 4, 6, 8]]",
+"expected": "[1, 3, 5, 7, 9, 2, 4, 6, 8]"
+},
+{
+"args": "[[1, 2, 3, 4, 5], [5, 6, 7, 8]]",
+"expected": "[1, 2, 3, 4, 5, 6, 7, 8]"
+},
+{
+"args": "[['red', 'blue', 'green'], ['yellow']]",
+"expected": "['red', 'blue', 'yellow']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/242": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_charac",
+"tests": [
+{
+"args": "['python programming']",
+"expected": "18"
+},
+{
+"args": "['language']",
+"expected": "8"
+},
+{
+"args": "['words']",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/244": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "next_Perfect_Square",
+"tests": [
+{
+"args": "[35]",
+"expected": "36"
+},
+{
+"args": "[6]",
+"expected": "9"
+},
+{
+"args": "[9]",
+"expected": "16"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/245": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_sum",
+"tests": [
+{
+"args": "[[1, 15, 51, 45, 33, 100, 12, 18, 9]]",
+"expected": "194"
+},
+{
+"args": "[[80, 60, 30, 40, 20, 10]]",
+"expected": "210"
+},
+{
+"args": "[[2, 3, 14, 16, 21, 23, 29, 30]]",
+"expected": "138"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/247": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "lps",
+"tests": [
+{
+"args": "['TENS FOR TENS']",
+"expected": "5"
+},
+{
+"args": "['CARDIO FOR CARDS']",
+"expected": "7"
+},
+{
+"args": "['PART OF THE JOURNEY IS PART']",
+"expected": "9"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/250": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_X",
+"tests": [
+{
+"args": "[(10, 8, 5, 2, 10, 15, 10, 8, 5, 8, 8, 2), 4]",
+"expected": "0"
+},
+{
+"args": "[(10, 8, 5, 2, 10, 15, 10, 8, 5, 8, 8, 2), 10]",
+"expected": "3"
+},
+{
+"args": "[(10, 8, 5, 2, 10, 15, 10, 8, 5, 8, 8, 2), 8]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/251": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "insert_element",
+"tests": [
+{
+"args": "[['Red', 'Green', 'Black'], 'c']",
+"expected": "['c', 'Red', 'c', 'Green', 'c', 'Black']"
+},
+{
+"args": "[['python', 'java'], 'program']",
+"expected": "['program', 'python', 'program', 'java']"
+},
+{
+"args": "[['happy', 'sad'], 'laugh']",
+"expected": "['laugh', 'happy', 'laugh', 'sad']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/252": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "convert",
+"tests": [
+{
+"args": "[(1+0j)]",
+"expected": "(1.0, 0.0)"
+},
+{
+"args": "[(4+0j)]",
+"expected": "(4.0, 0.0)"
+},
+{
+"args": "[(5+0j)]",
+"expected": "(5.0, 0.0)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/253": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_integer",
+"tests": [
+{
+"args": "[[1, 2, 'abc', 1.2]]",
+"expected": "2"
+},
+{
+"args": "[[1, 2, 3]]",
+"expected": "3"
+},
+{
+"args": "[[1, 1.2, 4, 5.1]]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/256": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_Primes_nums",
+"tests": [
+{
+"args": "[5]",
+"expected": "2"
+},
+{
+"args": "[10]",
+"expected": "4"
+},
+{
+"args": "[100]",
+"expected": "25"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/257": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "swap_numbers",
+"tests": [
+{
+"args": "[10, 20]",
+"expected": "(20, 10)"
+},
+{
+"args": "[15, 17]",
+"expected": "(17, 15)"
+},
+{
+"args": "[100, 200]",
+"expected": "(200, 100)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/259": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "maximize_elements",
+"tests": [
+{
+"args": "[([1, 3], [4, 5], [2, 9], [1, 10]), ([6, 7], [3, 9], [1, 1], [7, 3])]",
+"expected": "((6, 7), (4, 9), (2, 9), (7, 10))"
+},
+{
+"args": "[([2, 4], [5, 6], [3, 10], [2, 11]), ([7, 8], [4, 10], [2, 2], [8, 4])]",
+"expected": "((7, 8), (5, 10), (3, 10), (8, 11))"
+},
+{
+"args": "[([3, 5], [6, 7], [4, 11], [3, 12]), ([8, 9], [5, 11], [3, 3], [9, 5])]",
+"expected": "((8, 9), (6, 11), (4, 11), (9, 12))"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/260": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "newman_prime",
+"tests": [
+{
+"args": "[3]",
+"expected": "7"
+},
+{
+"args": "[4]",
+"expected": "17"
+},
+{
+"args": "[5]",
+"expected": "41"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/261": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "division_elements",
+"tests": [
+{
+"args": "[(10, 4, 6, 9), (5, 2, 3, 3)]",
+"expected": "(2.0, 2.0, 2.0, 3.0)"
+},
+{
+"args": "[(12, 6, 8, 16), (6, 3, 4, 4)]",
+"expected": "(2.0, 2.0, 2.0, 4.0)"
+},
+{
+"args": "[(20, 14, 36, 18), (5, 7, 6, 9)]",
+"expected": "(4.0, 2.0, 6.0, 2.0)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/262": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "split_two_parts",
+"tests": [
+{
+"args": "[[1, 1, 2, 3, 4, 4, 5, 1], 3]",
+"expected": "([1, 1, 2], [3, 4, 4, 5, 1])"
+},
+{
+"args": "[['a', 'b', 'c', 'd'], 2]",
+"expected": "(['a', 'b'], ['c', 'd'])"
+},
+{
+"args": "[['p', 'y', 't', 'h', 'o', 'n'], 4]",
+"expected": "(['p', 'y', 't', 'h'], ['o', 'n'])"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/264": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "dog_age",
+"tests": [
+{
+"args": "[12]",
+"expected": "61"
+},
+{
+"args": "[15]",
+"expected": "73"
+},
+{
+"args": "[24]",
+"expected": "109"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/265": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "list_split",
+"tests": [
+{
+"args": "[['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'], 3]",
+"expected": "[['a', 'd', 'g', 'j', 'm'], ['b', 'e', 'h', 'k', 'n'], ['c', 'f', 'i', 'l']]"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], 3]",
+"expected": "[[1, 4, 7, 10, 13], [2, 5, 8, 11, 14], [3, 6, 9, 12]]"
+},
+{
+"args": "[['python', 'java', 'C', 'C++', 'DBMS', 'SQL'], 2]",
+"expected": "[['python', 'C', 'DBMS'], ['java', 'C++', 'SQL']]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/266": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "lateralsurface_cube",
+"tests": [
+{
+"args": "[5]",
+"expected": "100"
+},
+{
+"args": "[9]",
+"expected": "324"
+},
+{
+"args": "[10]",
+"expected": "400"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/267": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "square_Sum",
+"tests": [
+{
+"args": "[2]",
+"expected": "10.0"
+},
+{
+"args": "[3]",
+"expected": "35.0"
+},
+{
+"args": "[4]",
+"expected": "84.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/268": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_star_num",
+"tests": [
+{
+"args": "[3]",
+"expected": "37"
+},
+{
+"args": "[4]",
+"expected": "73"
+},
+{
+"args": "[5]",
+"expected": "121"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/269": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "ascii_value",
+"tests": [
+{
+"args": "['A']",
+"expected": "65"
+},
+{
+"args": "['R']",
+"expected": "82"
+},
+{
+"args": "['S']",
+"expected": "83"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/270": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_even_and_even_index",
+"tests": [
+{
+"args": "[[5, 6, 12, 1, 18, 8]]",
+"expected": "30"
+},
+{
+"args": "[[3, 20, 17, 9, 2, 10, 18, 13, 6, 18]]",
+"expected": "26"
+},
+{
+"args": "[[5, 6, 12, 1]]",
+"expected": "12"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/272": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "rear_extract",
+"tests": [
+{
+"args": "[[(1, 'Rash', 21), (2, 'Varsha', 20), (3, 'Kil', 19)]]",
+"expected": "[21, 20, 19]"
+},
+{
+"args": "[[(1, 'Sai', 36), (2, 'Ayesha', 25), (3, 'Salman', 45)]]",
+"expected": "[36, 25, 45]"
+},
+{
+"args": "[[(1, 'Sudeep', 14), (2, 'Vandana', 36), (3, 'Dawood', 56)]]",
+"expected": "[14, 36, 56]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/273": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "substract_elements",
+"tests": [
+{
+"args": "[(10, 4, 5), (2, 5, 18)]",
+"expected": "(8, -1, -13)"
+},
+{
+"args": "[(11, 2, 3), (24, 45, 16)]",
+"expected": "(-13, -43, -13)"
+},
+{
+"args": "[(7, 18, 9), (10, 11, 12)]",
+"expected": "(-3, 7, -3)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/274": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "even_binomial_Coeff_Sum",
+"tests": [
+{
+"args": "[4]",
+"expected": "8"
+},
+{
+"args": "[6]",
+"expected": "32"
+},
+{
+"args": "[2]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/276": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "volume_cylinder",
+"tests": [
+{
+"args": "[10, 5]",
+"expected": "1570.7963267948967"
+},
+{
+"args": "[4, 5]",
+"expected": "251.32741228718345"
+},
+{
+"args": "[4, 10]",
+"expected": "502.6548245743669"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/277": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "dict_filter",
+"tests": [
+{
+"args": "[{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Kierra Gentry': 165, 'Pierre Cox': 190}, 170]",
+"expected": "{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Pierre Cox': 190}"
+},
+{
+"args": "[{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Kierra Gentry': 165, 'Pierre Cox': 190}, 180]",
+"expected": "{'Alden Cantrell': 180, 'Pierre Cox': 190}"
+},
+{
+"args": "[{'Cierra Vega': 175, 'Alden Cantrell': 180, 'Kierra Gentry': 165, 'Pierre Cox': 190}, 190]",
+"expected": "{'Pierre Cox': 190}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/278": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_first_elements",
+"tests": [
+{
+"args": "[(1, 5, 7, [4, 6], 10)]",
+"expected": "4"
+},
+{
+"args": "[(2, 9, [5, 7], 11)]",
+"expected": "3"
+},
+{
+"args": "[(11, 15, 5, 8, [2, 3], 8)]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/279": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_num_decagonal",
+"tests": [
+{
+"args": "[3]",
+"expected": "27"
+},
+{
+"args": "[7]",
+"expected": "175"
+},
+{
+"args": "[10]",
+"expected": "370"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/280": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sequential_search",
+"tests": [
+{
+"args": "[[11, 23, 58, 31, 56, 77, 43, 12, 65, 19], 31]",
+"expected": "(True, 3)"
+},
+{
+"args": "[[12, 32, 45, 62, 35, 47, 44, 61], 61]",
+"expected": "(True, 7)"
+},
+{
+"args": "[[9, 10, 17, 19, 22, 39, 48, 56], 48]",
+"expected": "(True, 6)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/281": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "all_unique",
+"tests": [
+{
+"args": "[[1, 2, 3]]",
+"expected": "True"
+},
+{
+"args": "[[1, 2, 1, 2]]",
+"expected": "False"
+},
+{
+"args": "[[1, 2, 3, 4, 5]]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/282": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sub_list",
+"tests": [
+{
+"args": "[[1, 2, 3], [4, 5, 6]]",
+"expected": "[-3, -3, -3]"
+},
+{
+"args": "[[1, 2], [3, 4]]",
+"expected": "[-2, -2]"
+},
+{
+"args": "[[90, 120], [50, 70]]",
+"expected": "[40, 50]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/283": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "validate",
+"tests": [
+{
+"args": "[1234]",
+"expected": "True"
+},
+{
+"args": "[51241]",
+"expected": "False"
+},
+{
+"args": "[321]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/284": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_element",
+"tests": [
+{
+"args": "[['green', 'orange', 'black', 'white'], 'blue']",
+"expected": "False"
+},
+{
+"args": "[[1, 2, 3, 4], 7]",
+"expected": "False"
+},
+{
+"args": "[['green', 'green', 'green', 'green'], 'green']",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/285": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": true,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "text_match_two_three",
+"tests": [
+{
+"args": "['ac']",
+"expected": "False"
+},
+{
+"args": "['dc']",
+"expected": "False"
+},
+{
+"args": "['abbbba']",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/286": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_sub_array_sum_repeated",
+"tests": [
+{
+"args": "[[10, 20, -30, -1], 4, 3]",
+"expected": "30"
+},
+{
+"args": "[[-1, 10, 20], 3, 2]",
+"expected": "59"
+},
+{
+"args": "[[-1, -2, -3], 3, 3]",
+"expected": "-1"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/287": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "square_Sum",
+"tests": [
+{
+"args": "[2]",
+"expected": "20.0"
+},
+{
+"args": "[3]",
+"expected": "56.0"
+},
+{
+"args": "[4]",
+"expected": "120.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/290": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_length",
+"tests": [
+{
+"args": "[[[0], [1, 3], [5, 7], [9, 11], [13, 15, 17]]]",
+"expected": "(3, [13, 15, 17])"
+},
+{
+"args": "[[[1], [5, 7], [10, 12, 14, 15]]]",
+"expected": "(4, [10, 12, 14, 15])"
+},
+{
+"args": "[[[5], [15, 20, 25]]]",
+"expected": "(3, [15, 20, 25])"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/292": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find",
+"tests": [
+{
+"args": "[10, 3]",
+"expected": "3"
+},
+{
+"args": "[4, 2]",
+"expected": "2"
+},
+{
+"args": "[20, 5]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/293": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "otherside_rightangle",
+"tests": [
+{
+"args": "[7, 8]",
+"expected": "10.63014581273465"
+},
+{
+"args": "[3, 4]",
+"expected": "5.0"
+},
+{
+"args": "[7, 15]",
+"expected": "16.55294535724685"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/294": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_val",
+"tests": [
+{
+"args": "[['Python', 3, 2, 4, 5, 'version']]",
+"expected": "5"
+},
+{
+"args": "[['Python', 15, 20, 25]]",
+"expected": "25"
+},
+{
+"args": "[['Python', 30, 20, 40, 50, 'version']]",
+"expected": "50"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/296": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "get_Inv_Count",
+"tests": [
+{
+"args": "[[1, 20, 6, 4, 5]]",
+"expected": "5"
+},
+{
+"args": "[[1, 2, 1]]",
+"expected": "1"
+},
+{
+"args": "[[1, 2, 5, 6, 1]]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/297": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "flatten_list",
+"tests": [
+{
+"args": "[[0, 10, [20, 30], 40, 50, [60, 70, 80], [90, 100, 110, 120]]]",
+"expected": "[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]"
+},
+{
+"args": "[[[10, 20], [40], [30, 56, 25], [10, 20], [33], [40]]]",
+"expected": "[10, 20, 40, 30, 56, 25, 10, 20, 33, 40]"
+},
+{
+"args": "[[[1, 2, 3], [4, 5, 6], [10, 11, 12], [7, 8, 9]]]",
+"expected": "[1, 2, 3, 4, 5, 6, 10, 11, 12, 7, 8, 9]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/299": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_aggregate",
+"tests": [
+{
+"args": "[[('Juan Whelan', 90), ('Sabah Colley', 88), ('Peter Nichols', 7), ('Juan Whelan', 122), ('Sabah Colley', 84)]]",
+"expected": "('Juan Whelan', 212)"
+},
+{
+"args": "[[('Juan Whelan', 50), ('Sabah Colley', 48), ('Peter Nichols', 37), ('Juan Whelan', 22), ('Sabah Colley', 14)]]",
+"expected": "('Juan Whelan', 72)"
+},
+{
+"args": "[[('Juan Whelan', 10), ('Sabah Colley', 20), ('Peter Nichols', 30), ('Juan Whelan', 40), ('Sabah Colley', 50)]]",
+"expected": "('Sabah Colley', 70)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/3": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_not_prime",
+"tests": [
+{
+"args": "[1]",
+"expected": "True"
+},
+{
+"args": "[2]",
+"expected": "False"
+},
+{
+"args": "[10]",
+"expected": "True"
+},
+{
+"args": "[35]",
+"expected": "True"
+},
+{
+"args": "[37]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/300": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_binary_seq",
+"tests": [
+{
+"args": "[1]",
+"expected": "2.0"
+},
+{
+"args": "[2]",
+"expected": "6.0"
+},
+{
+"args": "[3]",
+"expected": "20.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/301": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "dict_depth",
+"tests": [
+{
+"args": "[{'a': 1, 'b': {'c': {'d': {}}}}]",
+"expected": "4"
+},
+{
+"args": "[{'a': 1, 'b': {'c': 'python'}}]",
+"expected": "2"
+},
+{
+"args": "[{'1': 'Sun', '2': {'3': {'4': 'Mon'}}}]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/305": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": true,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "start_withp",
+"tests": [
+{
+"args": "[['Python PHP', 'Java JavaScript', 'c c++']]",
+"expected": "('Python', 'PHP')"
+},
+{
+"args": "[['Python Programming', 'Java Programming']]",
+"expected": "('Python', 'Programming')"
+},
+{
+"args": "[['Pqrst Pqr', 'qrstuv']]",
+"expected": "('Pqrst', 'Pqr')"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/306": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_sum_increasing_subseq",
+"tests": [
+{
+"args": "[[1, 101, 2, 3, 100, 4, 5], 7, 4, 6]",
+"expected": "11"
+},
+{
+"args": "[[1, 101, 2, 3, 100, 4, 5], 7, 2, 5]",
+"expected": "7"
+},
+{
+"args": "[[11, 15, 19, 21, 26, 28, 31], 7, 2, 4]",
+"expected": "71"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/308": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "large_product",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6], [3, 6, 8, 9, 10, 6], 3]",
+"expected": "[60, 54, 50]"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6], [3, 6, 8, 9, 10, 6], 4]",
+"expected": "[60, 54, 50, 48]"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6], [3, 6, 8, 9, 10, 6], 5]",
+"expected": "[60, 54, 50, 48, 45]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/309": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "maximum",
+"tests": [
+{
+"args": "[5, 10]",
+"expected": "10"
+},
+{
+"args": "[-1, -2]",
+"expected": "-1"
+},
+{
+"args": "[9, 7]",
+"expected": "9"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/310": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "string_to_tuple",
+"tests": [
+{
+"args": "['python 3.0']",
+"expected": "('p', 'y', 't', 'h', 'o', 'n', '3', '.', '0')"
+},
+{
+"args": "['item1']",
+"expected": "('i', 't', 'e', 'm', '1')"
+},
+{
+"args": "['15.10']",
+"expected": "('1', '5', '.', '1', '0')"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/311": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "set_left_most_unset_bit",
+"tests": [
+{
+"args": "[10]",
+"expected": "14"
+},
+{
+"args": "[12]",
+"expected": "14"
+},
+{
+"args": "[15]",
+"expected": "15"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/312": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "volume_cone",
+"tests": [
+{
+"args": "[5, 12]",
+"expected": "314.15926535897927"
+},
+{
+"args": "[10, 15]",
+"expected": "1570.7963267948965"
+},
+{
+"args": "[19, 17]",
+"expected": "6426.651371693521"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/388": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "highest_Power_of_2",
+"tests": [
+{
+"args": "[10]",
+"expected": "8"
+},
+{
+"args": "[19]",
+"expected": "16"
+},
+{
+"args": "[32]",
+"expected": "32"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/389": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_lucas",
+"tests": [
+{
+"args": "[9]",
+"expected": "76"
+},
+{
+"args": "[4]",
+"expected": "7"
+},
+{
+"args": "[3]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/390": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "add_string",
+"tests": [
+{
+"args": "[[1, 2, 3, 4], 'temp{0}']",
+"expected": "['temp1', 'temp2', 'temp3', 'temp4']"
+},
+{
+"args": "[['a', 'b', 'c', 'd'], 'python{0}']",
+"expected": "['pythona', 'pythonb', 'pythonc', 'pythond']"
+},
+{
+"args": "[[5, 6, 7, 8], 'string{0}']",
+"expected": "['string5', 'string6', 'string7', 'string8']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/391": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "convert_list_dictionary",
+"tests": [
+{
+"args": "[['S001', 'S002', 'S003', 'S004'], ['Adina Park', 'Leyton Marsh', 'Duncan Boyle', 'Saim Richards'], [85, 98, 89, 92]]",
+"expected": "[{'S001': {'Adina Park': 85}}, {'S002': {'Leyton Marsh': 98}}, {'S003': {'Duncan Boyle': 89}}, {'S004': {'Saim Richards': 92}}]"
+},
+{
+"args": "[['abc', 'def', 'ghi', 'jkl'], ['python', 'program', 'language', 'programs'], [100, 200, 300, 400]]",
+"expected": "[{'abc': {'python': 100}}, {'def': {'program': 200}}, {'ghi': {'language': 300}}, {'jkl': {'programs': 400}}]"
+},
+{
+"args": "[['A1', 'A2', 'A3', 'A4'], ['java', 'C', 'C++', 'DBMS'], [10, 20, 30, 40]]",
+"expected": "[{'A1': {'java': 10}}, {'A2': {'C': 20}}, {'A3': {'C++': 30}}, {'A4': {'DBMS': 40}}]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/394": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_distinct",
+"tests": [
+{
+"args": "[(1, 4, 5, 6, 1, 4)]",
+"expected": "False"
+},
+{
+"args": "[(1, 4, 5, 6)]",
+"expected": "True"
+},
+{
+"args": "[(2, 3, 4, 5, 6)]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/395": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "first_non_repeating_character",
+"tests": [
+{
+"args": "['abcabc']",
+"expected": "None"
+},
+{
+"args": "['abc']",
+"expected": "'a'"
+},
+{
+"args": "['ababc']",
+"expected": "'c'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/397": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "median_numbers",
+"tests": [
+{
+"args": "[25, 55, 65]",
+"expected": "55"
+},
+{
+"args": "[20, 10, 30]",
+"expected": "20"
+},
+{
+"args": "[15, 45, 75]",
+"expected": "45"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/398": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_of_digits",
+"tests": [
+{
+"args": "[[10, 2, 56]]",
+"expected": "14"
+},
+{
+"args": "[[[10, 20, 4, 5, 'b', 70, 'a']]]",
+"expected": "19"
+},
+{
+"args": "[[10, 20, -4, 5, -70]]",
+"expected": "19"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/4": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "heap_queue_largest",
+"tests": [
+{
+"args": "[[25, 35, 22, 85, 14, 65, 75, 22, 58], 3]",
+"expected": "[85, 75, 65]"
+},
+{
+"args": "[[25, 35, 22, 85, 14, 65, 75, 22, 58], 2]",
+"expected": "[85, 75]"
+},
+{
+"args": "[[25, 35, 22, 85, 14, 65, 75, 22, 58], 5]",
+"expected": "[85, 75, 65, 58, 35]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/404": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "minimum",
+"tests": [
+{
+"args": "[1, 2]",
+"expected": "1"
+},
+{
+"args": "[-5, -4]",
+"expected": "-5"
+},
+{
+"args": "[0, 0]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/405": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_tuplex",
+"tests": [
+{
+"args": "[('w', 3, 'r', 'e', 's', 'o', 'u', 'r', 'c', 'e'), 'r']",
+"expected": "True"
+},
+{
+"args": "[('w', 3, 'r', 'e', 's', 'o', 'u', 'r', 'c', 'e'), '5']",
+"expected": "False"
+},
+{
+"args": "[('w', 3, 'r', 'e', 's', 'o', 'u', 'r', 'c', 'e'), 3]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/406": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_Parity",
+"tests": [
+{
+"args": "[12]",
+"expected": "False"
+},
+{
+"args": "[7]",
+"expected": "True"
+},
+{
+"args": "[10]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/409": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "min_product_tuple",
+"tests": [
+{
+"args": "[[(2, 7), (2, 6), (1, 8), (4, 9)]]",
+"expected": "8"
+},
+{
+"args": "[[(10, 20), (15, 2), (5, 10)]]",
+"expected": "30"
+},
+{
+"args": "[[(11, 44), (10, 15), (20, 5), (12, 9)]]",
+"expected": "100"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/410": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "min_val",
+"tests": [
+{
+"args": "[['Python', 3, 2, 4, 5, 'version']]",
+"expected": "2"
+},
+{
+"args": "[['Python', 15, 20, 25]]",
+"expected": "15"
+},
+{
+"args": "[['Python', 30, 20, 40, 50, 'version']]",
+"expected": "20"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/412": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_odd",
+"tests": [
+{
+"args": "[[1, 2, 3]]",
+"expected": "[2]"
+},
+{
+"args": "[[2, 4, 6]]",
+"expected": "[2, 4, 6]"
+},
+{
+"args": "[[10, 20, 3]]",
+"expected": "[10, 20]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/413": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "extract_nth_element",
+"tests": [
+{
+"args": "[[('Greyson Fulton', 98, 99), ('Brady Kent', 97, 96), ('Wyatt Knott', 91, 94), ('Beau Turnbull', 94, 98)], 0]",
+"expected": "['Greyson Fulton', 'Brady Kent', 'Wyatt Knott', 'Beau Turnbull']"
+},
+{
+"args": "[[('Greyson Fulton', 98, 99), ('Brady Kent', 97, 96), ('Wyatt Knott', 91, 94), ('Beau Turnbull', 94, 98)], 2]",
+"expected": "[99, 96, 94, 98]"
+},
+{
+"args": "[[('Greyson Fulton', 98, 99), ('Brady Kent', 97, 96), ('Wyatt Knott', 91, 94), ('Beau Turnbull', 94, 98)], 1]",
+"expected": "[98, 97, 91, 94]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/414": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "overlapping",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5], [6, 7, 8, 9]]",
+"expected": "False"
+},
+{
+"args": "[[1, 2, 3], [4, 5, 6]]",
+"expected": "False"
+},
+{
+"args": "[[1, 4, 5], [1, 4, 5]]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/415": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_Product",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 7, 0, 8, 4]]",
+"expected": "(7, 8)"
+},
+{
+"args": "[[0, -1, -2, -4, 5, 0, -6]]",
+"expected": "(-4, -6)"
+},
+{
+"args": "[[1, 2, 3]]",
+"expected": "(2, 3)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/418": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "Find_Max",
+"tests": [
+{
+"args": "[[['A'], ['A', 'B'], ['A', 'B', 'C']]]",
+"expected": "['A', 'B', 'C']"
+},
+{
+"args": "[[[1], [1, 2], [1, 2, 3]]]",
+"expected": "[1, 2, 3]"
+},
+{
+"args": "[[[1, 1], [1, 2, 3], [1, 5, 6, 1]]]",
+"expected": "[1, 5, 6, 1]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/419": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "round_and_sum",
+"tests": [
+{
+"args": "[[22.4, 4.0, -16.22, -9.1, 11.0, -12.22, 14.2, -5.2, 17.5]]",
+"expected": "243"
+},
+{
+"args": "[[5, 2, 9, 24.3, 29]]",
+"expected": "345"
+},
+{
+"args": "[[25.0, 56.7, 89.2]]",
+"expected": "513"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/420": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "cube_Sum",
+"tests": [
+{
+"args": "[2]",
+"expected": "72"
+},
+{
+"args": "[3]",
+"expected": "288"
+},
+{
+"args": "[4]",
+"expected": "800"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/421": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "concatenate_tuple",
+"tests": [
+{
+"args": "[('ID', 'is', 4, 'UTS')]",
+"expected": "'ID-is-4-UTS'"
+},
+{
+"args": "[('QWE', 'is', 4, 'RTY')]",
+"expected": "'QWE-is-4-RTY'"
+},
+{
+"args": "[('ZEN', 'is', 4, 'OP')]",
+"expected": "'ZEN-is-4-OP'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/422": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_Average_Of_Cube",
+"tests": [
+{
+"args": "[2]",
+"expected": "4.5"
+},
+{
+"args": "[3]",
+"expected": "12.0"
+},
+{
+"args": "[1]",
+"expected": "1.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/424": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "extract_rear",
+"tests": [
+{
+"args": "[('Mers', 'for', 'Vers')]",
+"expected": "['s', 'r', 's']"
+},
+{
+"args": "[('Avenge', 'for', 'People')]",
+"expected": "['e', 'r', 'e']"
+},
+{
+"args": "[('Gotta', 'get', 'go')]",
+"expected": "['a', 't', 'o']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/425": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_element_in_list",
+"tests": [
+{
+"args": "[[[1, 3], [5, 7], [1, 11], [1, 15, 7]], 1]",
+"expected": "3"
+},
+{
+"args": "[[['A', 'B'], ['A', 'C'], ['A', 'D', 'E'], ['B', 'C', 'D']], 'A']",
+"expected": "3"
+},
+{
+"args": "[[['A', 'B'], ['A', 'C'], ['A', 'D', 'E'], ['B', 'C', 'D']], 'E']",
+"expected": "1"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/426": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "filter_oddnumbers",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]",
+"expected": "[1, 3, 5, 7, 9]"
+},
+{
+"args": "[[10, 20, 45, 67, 84, 93]]",
+"expected": "[45, 67, 93]"
+},
+{
+"args": "[[5, 7, 9, 8, 6, 4, 3]]",
+"expected": "[5, 7, 9, 3]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/427": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "change_date_format",
+"tests": [
+{
+"args": "['2026-01-02']",
+"expected": "'02-01-2026'"
+},
+{
+"args": "['2020-11-13']",
+"expected": "'13-11-2020'"
+},
+{
+"args": "['2021-04-26']",
+"expected": "'26-04-2021'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/428": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "shell_sort",
+"tests": [
+{
+"args": "[[12, 23, 4, 5, 3, 2, 12, 81, 56, 95]]",
+"expected": "[2, 3, 4, 5, 12, 12, 23, 56, 81, 95]"
+},
+{
+"args": "[[24, 22, 39, 34, 87, 73, 68]]",
+"expected": "[22, 24, 34, 39, 68, 73, 87]"
+},
+{
+"args": "[[32, 30, 16, 96, 82, 83, 74]]",
+"expected": "[16, 30, 32, 74, 82, 83, 96]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/429": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "and_tuples",
+"tests": [
+{
+"args": "[(10, 4, 6, 9), (5, 2, 3, 3)]",
+"expected": "(0, 0, 2, 1)"
+},
+{
+"args": "[(1, 2, 3, 4), (5, 6, 7, 8)]",
+"expected": "(1, 2, 3, 0)"
+},
+{
+"args": "[(8, 9, 11, 12), (7, 13, 14, 17)]",
+"expected": "(0, 9, 10, 0)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/430": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "parabola_directrix",
+"tests": [
+{
+"args": "[5, 3, 2]",
+"expected": "-198"
+},
+{
+"args": "[9, 8, 4]",
+"expected": "-2336"
+},
+{
+"args": "[2, 4, 6]",
+"expected": "-130"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/432": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "median_trapezium",
+"tests": [
+{
+"args": "[15, 25, 35]",
+"expected": "20.0"
+},
+{
+"args": "[10, 20, 30]",
+"expected": "15.0"
+},
+{
+"args": "[6, 9, 4]",
+"expected": "7.5"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/433": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_greater",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5], 4]",
+"expected": "False"
+},
+{
+"args": "[[2, 3, 4, 5, 6], 8]",
+"expected": "True"
+},
+{
+"args": "[[9, 7, 4, 8, 6, 1], 11]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/435": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "last_Digit",
+"tests": [
+{
+"args": "[123]",
+"expected": "3"
+},
+{
+"args": "[25]",
+"expected": "5"
+},
+{
+"args": "[30]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/436": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "neg_nos",
+"tests": [
+{
+"args": "[[-1, 4, 5, -6]]",
+"expected": "[-1, -6]"
+},
+{
+"args": "[[-1, -2, 3, 4]]",
+"expected": "[-1, -2]"
+},
+{
+"args": "[[-7, -6, 8, 9]]",
+"expected": "[-7, -6]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/437": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_odd",
+"tests": [
+{
+"args": "['python']",
+"expected": "'yhn'"
+},
+{
+"args": "['program']",
+"expected": "'rga'"
+},
+{
+"args": "['language']",
+"expected": "'agae'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/439": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "multiple_to_single",
+"tests": [
+{
+"args": "[[11, 33, 50]]",
+"expected": "113350"
+},
+{
+"args": "[[-1, 2, 3, 4, 5, 6]]",
+"expected": "-123456"
+},
+{
+"args": "[[10, 15, 20, 25]]",
+"expected": "10152025"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/440": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_adverb_position",
+"tests": [
+{
+"args": "['clearly!! we can see the sky']",
+"expected": "(0, 7, 'clearly')"
+},
+{
+"args": "['seriously!! there are many roses']",
+"expected": "(0, 9, 'seriously')"
+},
+{
+"args": "['unfortunately!! sita is going to home']",
+"expected": "(0, 13, 'unfortunately')"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/441": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "surfacearea_cube",
+"tests": [
+{
+"args": "[5]",
+"expected": "150"
+},
+{
+"args": "[3]",
+"expected": "54"
+},
+{
+"args": "[10]",
+"expected": "600"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/445": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "index_multiplication",
+"tests": [
+{
+"args": "[([1, 3], [4, 5], [2, 9], [1, 10]), ([6, 7], [3, 9], [1, 1], [7, 3])]",
+"expected": "((6, 21), (12, 45), (2, 9), (7, 30))"
+},
+{
+"args": "[([2, 4], [5, 6], [3, 10], [2, 11]), ([7, 8], [4, 10], [2, 2], [8, 4])]",
+"expected": "((14, 32), (20, 60), (6, 20), (16, 44))"
+},
+{
+"args": "[([3, 5], [6, 7], [4, 11], [3, 12]), ([8, 9], [5, 11], [3, 3], [9, 5])]",
+"expected": "((24, 45), (30, 77), (12, 33), (27, 60))"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/446": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_Occurrence",
+"tests": [
+{
+"args": "[('a', 'a', 'c', 'b', 'd'), ['a', 'b']]",
+"expected": "3"
+},
+{
+"args": "[(1, 2, 3, 1, 4, 6, 7, 1, 4), [1, 4, 7]]",
+"expected": "6"
+},
+{
+"args": "[(1, 2, 3, 4, 5, 6), [1, 2]]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/447": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "cube_nums",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]",
+"expected": "[1, 8, 27, 64, 125, 216, 343, 512, 729, 1000]"
+},
+{
+"args": "[[10, 20, 30]]",
+"expected": "[1000, 8000, 27000]"
+},
+{
+"args": "[[12, 15]]",
+"expected": "[1728, 3375]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/448": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "cal_sum",
+"tests": [
+{
+"args": "[9]",
+"expected": "49"
+},
+{
+"args": "[10]",
+"expected": "66"
+},
+{
+"args": "[11]",
+"expected": "88"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/450": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "extract_string",
+"tests": [
+{
+"args": "[['Python', 'list', 'exercises', 'practice', 'solution'], 8]",
+"expected": "['practice', 'solution']"
+},
+{
+"args": "[['Python', 'list', 'exercises', 'practice', 'solution'], 6]",
+"expected": "['Python']"
+},
+{
+"args": "[['Python', 'list', 'exercises', 'practice', 'solution'], 9]",
+"expected": "['exercises']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/451": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_whitespaces",
+"tests": [
+{
+"args": "[' Google    Flutter ']",
+"expected": "'GoogleFlutter'"
+},
+{
+"args": "[' Google    Dart ']",
+"expected": "'GoogleDart'"
+},
+{
+"args": "[' iOS    Swift ']",
+"expected": "'iOSSwift'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/453": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sumofFactors",
+"tests": [
+{
+"args": "[18]",
+"expected": "26"
+},
+{
+"args": "[30]",
+"expected": "48"
+},
+{
+"args": "[6]",
+"expected": "8"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/454": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "text_match_wordz",
+"tests": [
+{
+"args": "['pythonz.']",
+"expected": "True"
+},
+{
+"args": "['xyz.']",
+"expected": "True"
+},
+{
+"args": "['  lang  .']",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/455": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_monthnumb_number",
+"tests": [
+{
+"args": "[5]",
+"expected": "True"
+},
+{
+"args": "[2]",
+"expected": "False"
+},
+{
+"args": "[6]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/456": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "reverse_string_list",
+"tests": [
+{
+"args": "[['Red', 'Green', 'Blue', 'White', 'Black']]",
+"expected": "['deR', 'neerG', 'eulB', 'etihW', 'kcalB']"
+},
+{
+"args": "[['john', 'amal', 'joel', 'george']]",
+"expected": "['nhoj', 'lama', 'leoj', 'egroeg']"
+},
+{
+"args": "[['jack', 'john', 'mary']]",
+"expected": "['kcaj', 'nhoj', 'yram']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/457": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "Find_Min",
+"tests": [
+{
+"args": "[[[1], [1, 2], [1, 2, 3]]]",
+"expected": "[1]"
+},
+{
+"args": "[[[1, 1], [1, 1, 1], [1, 2, 7, 8]]]",
+"expected": "[1, 1]"
+},
+{
+"args": "[[['x'], ['x', 'y'], ['x', 'y', 'z']]]",
+"expected": "['x']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/458": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "rectangle_area",
+"tests": [
+{
+"args": "[10, 20]",
+"expected": "200"
+},
+{
+"args": "[10, 5]",
+"expected": "50"
+},
+{
+"args": "[4, 2]",
+"expected": "8"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/459": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_uppercase",
+"tests": [
+{
+"args": "['cAstyoUrFavoRitETVshoWs']",
+"expected": "'cstyoravoitshos'"
+},
+{
+"args": "['wAtchTheinTernEtrAdIo']",
+"expected": "'wtchheinerntrdo'"
+},
+{
+"args": "['VoicESeaRchAndreComMendaTionS']",
+"expected": "'oiceachndreomendaion'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/460": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "Extract",
+"tests": [
+{
+"args": "[[[1, 2], [3, 4, 5], [6, 7, 8, 9]]]",
+"expected": "[1, 3, 6]"
+},
+{
+"args": "[[[1, 2, 3], [4, 5]]]",
+"expected": "[1, 4]"
+},
+{
+"args": "[[[9, 8, 1], [1, 2]]]",
+"expected": "[9, 1]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/462": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "combinations_list",
+"tests": [
+{
+"args": "[['orange', 'red', 'green', 'blue']]",
+"expected": "[[], ['orange'], ['red'], ['red', 'orange'], ['green'], ['green', 'orange'], ['green', 'red'], ['green', 'red', 'orange'], ['blue'], ['blue', 'orange'], ['blue', 'red'], ['blue', 'red', 'orange'], ['blue', 'green'], ['blue', 'green', 'orange'], ['blue', 'green', 'red'], ['blue', 'green', 'red', 'orange']]"
+},
+{
+"args": "[['red', 'green', 'blue', 'white', 'black', 'orange']]",
+"expected": "[[], ['red'], ['green'], ['green', 'red'], ['blue'], ['blue', 'red'], ['blue', 'green'], ['blue', 'green', 'red'], ['white'], ['white', 'red'], ['white', 'green'], ['white', 'green', 'red'], ['white', 'blue'], ['white', 'blue', 'red'], ['white', 'blue', 'green'], ['white', 'blue', 'green', 'red'], ['black'], ['black', 'red'], ['black', 'green'], ['black', 'green', 'red'], ['black', 'blue'], ['black', 'blue', 'red'], ['black', 'blue', 'green'], ['black', 'blue', 'green', 'red'], ['black', 'white'], ['black', 'white', 'red'], ['black', 'white', 'green'], ['black', 'white', 'green', 'red'], ['black', 'white', 'blue'], ['black', 'white', 'blue', 'red'], ['black', 'white', 'blue', 'green'], ['black', 'white', 'blue', 'green', 'red'], ['orange'], ['orange', 'red'], ['orange', 'green'], ['orange', 'green', 'red'], ['orange', 'blue'], ['orange', 'blue', 'red'], ['orange', 'blue', 'green'], ['orange', 'blue', 'green', 'red'], ['orange', 'white'], ['orange', 'white', 'red'], ['orange', 'white', 'green'], ['orange', 'white', 'green', 'red'], ['orange', 'white', 'blue'], ['orange', 'white', 'blue', 'red'], ['orange', 'white', 'blue', 'green'], ['orange', 'white', 'blue', 'green', 'red'], ['orange', 'black'], ['orange', 'black', 'red'], ['orange', 'black', 'green'], ['orange', 'black', 'green', 'red'], ['orange', 'black', 'blue'], ['orange', 'black', 'blue', 'red'], ['orange', 'black', 'blue', 'green'], ['orange', 'black', 'blue', 'green', 'red'], ['orange', 'black', 'white'], ['orange', 'black', 'white', 'red'], ['orange', 'black', 'white', 'green'], ['orange', 'black', 'white', 'green', 'red'], ['orange', 'black', 'white', 'blue'], ['orange', 'black', 'white', 'blue', 'red'], ['orange', 'black', 'white', 'blue', 'green'], ['orange', 'black', 'white', 'blue', 'green', 'red']]"
+},
+{
+"args": "[['red', 'green', 'black', 'orange']]",
+"expected": "[[], ['red'], ['green'], ['green', 'red'], ['black'], ['black', 'red'], ['black', 'green'], ['black', 'green', 'red'], ['orange'], ['orange', 'red'], ['orange', 'green'], ['orange', 'green', 'red'], ['orange', 'black'], ['orange', 'black', 'red'], ['orange', 'black', 'green'], ['orange', 'black', 'green', 'red']]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/463": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_subarray_product",
+"tests": [
+{
+"args": "[[1, -2, -3, 0, 7, -8, -2]]",
+"expected": "112"
+},
+{
+"args": "[[6, -3, -10, 0, 2]]",
+"expected": "180"
+},
+{
+"args": "[[-2, -40, 0, -2, -3]]",
+"expected": "80"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/465": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "drop_empty",
+"tests": [
+{
+"args": "[{'c1': 'Red', 'c2': 'Green', 'c3': None}]",
+"expected": "{'c1': 'Red', 'c2': 'Green'}"
+},
+{
+"args": "[{'c1': 'Red', 'c2': None, 'c3': None}]",
+"expected": "{'c1': 'Red'}"
+},
+{
+"args": "[{'c1': None, 'c2': 'Green', 'c3': None}]",
+"expected": "{'c2': 'Green'}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/468": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_product",
+"tests": [
+{
+"args": "[[3, 100, 4, 5, 150, 6]]",
+"expected": "3000"
+},
+{
+"args": "[[4, 42, 55, 68, 80]]",
+"expected": "50265600"
+},
+{
+"args": "[[10, 22, 9, 33, 21, 50, 41, 60]]",
+"expected": "2460"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/470": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "add_pairwise",
+"tests": [
+{
+"args": "[(1, 5, 7, 8, 10)]",
+"expected": "(6, 12, 15, 18)"
+},
+{
+"args": "[(2, 6, 8, 9, 11)]",
+"expected": "(8, 14, 17, 20)"
+},
+{
+"args": "[(3, 7, 9, 10, 12)]",
+"expected": "(10, 16, 19, 22)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/471": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_remainder",
+"tests": [
+{
+"args": "[[100, 10, 5, 25, 35, 14], 11]",
+"expected": "9"
+},
+{
+"args": "[[1, 1, 1], 1]",
+"expected": "0"
+},
+{
+"args": "[[1, 2, 1], 2]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/472": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_Consecutive",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5]]",
+"expected": "True"
+},
+{
+"args": "[[1, 2, 3, 5, 6]]",
+"expected": "False"
+},
+{
+"args": "[[1, 2, 1]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/473": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "tuple_intersection",
+"tests": [
+{
+"args": "[[(3, 4), (5, 6), (9, 10), (4, 5)], [(5, 4), (3, 4), (6, 5), (9, 11)]]",
+"expected": "{(3, 4), (4, 5), (5, 6)}"
+},
+{
+"args": "[[(4, 1), (7, 4), (11, 13), (17, 14)], [(1, 4), (7, 4), (16, 12), (10, 13)]]",
+"expected": "{(1, 4), (4, 7)}"
+},
+{
+"args": "[[(2, 1), (3, 2), (1, 3), (1, 4)], [(11, 2), (2, 3), (6, 2), (1, 3)]]",
+"expected": "{(1, 3), (2, 3)}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/474": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "replace_char",
+"tests": [
+{
+"args": "['polygon', 'y', 'l']",
+"expected": "'pollgon'"
+},
+{
+"args": "['character', 'c', 'a']",
+"expected": "'aharaater'"
+},
+{
+"args": "['python', 'l', 'a']",
+"expected": "'python'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/475": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sort_counter",
+"tests": [
+{
+"args": "[{'Math': 81, 'Physics': 83, 'Chemistry': 87}]",
+"expected": "[('Chemistry', 87), ('Physics', 83), ('Math', 81)]"
+},
+{
+"args": "[{'Math': 400, 'Physics': 300, 'Chemistry': 250}]",
+"expected": "[('Math', 400), ('Physics', 300), ('Chemistry', 250)]"
+},
+{
+"args": "[{'Math': 900, 'Physics': 1000, 'Chemistry': 1250}]",
+"expected": "[('Chemistry', 1250), ('Physics', 1000), ('Math', 900)]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/476": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "big_sum",
+"tests": [
+{
+"args": "[[1, 2, 3]]",
+"expected": "4"
+},
+{
+"args": "[[-1, 2, 3, 4]]",
+"expected": "3"
+},
+{
+"args": "[[2, 3, 6]]",
+"expected": "8"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/477": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_lower",
+"tests": [
+{
+"args": "['InValid']",
+"expected": "'invalid'"
+},
+{
+"args": "['TruE']",
+"expected": "'true'"
+},
+{
+"args": "['SenTenCE']",
+"expected": "'sentence'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/478": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_lowercase",
+"tests": [
+{
+"args": "['PYTHon']",
+"expected": "'PYTH'"
+},
+{
+"args": "['FInD']",
+"expected": "'FID'"
+},
+{
+"args": "['STRinG']",
+"expected": "'STRG'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/479": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "first_Digit",
+"tests": [
+{
+"args": "[123]",
+"expected": "1"
+},
+{
+"args": "[456]",
+"expected": "4"
+},
+{
+"args": "[12]",
+"expected": "1"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/554": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "Split",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6]]",
+"expected": "[1, 3, 5]"
+},
+{
+"args": "[[10, 11, 12, 13]]",
+"expected": "[11, 13]"
+},
+{
+"args": "[[7, 8, 9, 1]]",
+"expected": "[7, 9, 1]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/555": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "difference",
+"tests": [
+{
+"args": "[3]",
+"expected": "30"
+},
+{
+"args": "[5]",
+"expected": "210"
+},
+{
+"args": "[2]",
+"expected": "6"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/556": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_Odd_Pair",
+"tests": [
+{
+"args": "[[5, 4, 7, 2, 1], 5]",
+"expected": "6"
+},
+{
+"args": "[[7, 2, 8, 1, 0, 5, 11], 7]",
+"expected": "12"
+},
+{
+"args": "[[1, 2, 3], 3]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/557": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "toggle_string",
+"tests": [
+{
+"args": "['Python']",
+"expected": "'pYTHON'"
+},
+{
+"args": "['Pangram']",
+"expected": "'pANGRAM'"
+},
+{
+"args": "['LIttLE']",
+"expected": "'liTTle'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/558": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "digit_distance_nums",
+"tests": [
+{
+"args": "[1, 2]",
+"expected": "1"
+},
+{
+"args": "[23, 56]",
+"expected": "6"
+},
+{
+"args": "[123, 256]",
+"expected": "7"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/559": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_sub_array_sum",
+"tests": [
+{
+"args": "[[-2, -3, 4, -1, -2, 1, 5, -3], 8]",
+"expected": "7"
+},
+{
+"args": "[[-3, -4, 5, -2, -3, 2, 6, -4], 8]",
+"expected": "8"
+},
+{
+"args": "[[-4, -5, 6, -3, -4, 3, 7, -5], 8]",
+"expected": "10"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/56": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check",
+"tests": [
+{
+"args": "[70]",
+"expected": "False"
+},
+{
+"args": "[23]",
+"expected": "False"
+},
+{
+"args": "[73]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/560": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "union_elements",
+"tests": [
+{
+"args": "[(3, 4, 5, 6), (5, 7, 4, 10)]",
+"expected": "(3, 4, 5, 6, 7, 10)"
+},
+{
+"args": "[(1, 2, 3, 4), (3, 4, 5, 6)]",
+"expected": "(1, 2, 3, 4, 5, 6)"
+},
+{
+"args": "[(11, 12, 13, 14), (13, 15, 16, 17)]",
+"expected": "(11, 12, 13, 14, 15, 16, 17)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/562": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "Find_Max_Length",
+"tests": [
+{
+"args": "[[[1], [1, 4], [5, 6, 7, 8]]]",
+"expected": "4"
+},
+{
+"args": "[[[0, 1], [2, 2], [3, 2, 1]]]",
+"expected": "3"
+},
+{
+"args": "[[[7], [22, 23], [13, 14, 15], [10, 20, 30, 40, 50]]]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/563": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "extract_values",
+"tests": [
+{
+"args": "['\"Python\", \"PHP\", \"Java\"']",
+"expected": "['Python', 'PHP', 'Java']"
+},
+{
+"args": "['\"python\",\"program\",\"language\"']",
+"expected": "['python', 'program', 'language']"
+},
+{
+"args": "['\"red\",\"blue\",\"green\",\"yellow\"']",
+"expected": "['red', 'blue', 'green', 'yellow']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/564": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_Pairs",
+"tests": [
+{
+"args": "[[1, 2, 1], 3]",
+"expected": "2"
+},
+{
+"args": "[[1, 1, 1, 1], 4]",
+"expected": "0"
+},
+{
+"args": "[[1, 2, 3, 4, 5], 5]",
+"expected": "10"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/565": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "split",
+"tests": [
+{
+"args": "['python']",
+"expected": "['p', 'y', 't', 'h', 'o', 'n']"
+},
+{
+"args": "['Name']",
+"expected": "['N', 'a', 'm', 'e']"
+},
+{
+"args": "['program']",
+"expected": "['p', 'r', 'o', 'g', 'r', 'a', 'm']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/566": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_digits",
+"tests": [
+{
+"args": "[345]",
+"expected": "12"
+},
+{
+"args": "[12]",
+"expected": "3"
+},
+{
+"args": "[97]",
+"expected": "16"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/567": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "issort_list",
+"tests": [
+{
+"args": "[[1, 2, 4, 6, 8, 10, 12, 14, 16, 17]]",
+"expected": "True"
+},
+{
+"args": "[[1, 2, 4, 6, 8, 10, 12, 14, 20, 17]]",
+"expected": "False"
+},
+{
+"args": "[[1, 2, 4, 6, 8, 10, 15, 14, 20]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/568": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "empty_list",
+"tests": [
+{
+"args": "[5]",
+"expected": "[{}, {}, {}, {}, {}]"
+},
+{
+"args": "[6]",
+"expected": "[{}, {}, {}, {}, {}, {}]"
+},
+{
+"args": "[7]",
+"expected": "[{}, {}, {}, {}, {}, {}, {}]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/569": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sort_sublists",
+"tests": [
+{
+"args": "[[['green', 'orange'], ['black', 'white'], ['white', 'black', 'orange']]]",
+"expected": "[['green', 'orange'], ['black', 'white'], ['black', 'orange', 'white']]"
+},
+{
+"args": "[[['green', 'orange'], ['black'], ['green', 'orange'], ['white']]]",
+"expected": "[['green', 'orange'], ['black'], ['green', 'orange'], ['white']]"
+},
+{
+"args": "[[['a', 'b'], ['d', 'c'], ['g', 'h'], ['f', 'e']]]",
+"expected": "[['a', 'b'], ['c', 'd'], ['g', 'h'], ['e', 'f']]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/57": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_Max_Num",
+"tests": [
+{
+"args": "[[1, 2, 3]]",
+"expected": "321"
+},
+{
+"args": "[[4, 5, 6, 1]]",
+"expected": "6541"
+},
+{
+"args": "[[1, 2, 3, 9]]",
+"expected": "9321"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/572": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "two_unique_nums",
+"tests": [
+{
+"args": "[[1, 2, 3, 2, 3, 4, 5]]",
+"expected": "[1, 4, 5]"
+},
+{
+"args": "[[1, 2, 3, 2, 4, 5]]",
+"expected": "[1, 3, 4, 5]"
+},
+{
+"args": "[[1, 2, 3, 4, 5]]",
+"expected": "[1, 2, 3, 4, 5]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/573": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "unique_product",
+"tests": [
+{
+"args": "[[10, 20, 30, 40, 20, 50, 60, 40]]",
+"expected": "720000000"
+},
+{
+"args": "[[1, 2, 3, 1]]",
+"expected": "6"
+},
+{
+"args": "[[7, 8, 9, 0, 1, 1]]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/576": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_Sub_Array",
+"tests": [
+{
+"args": "[[1, 4, 3, 5], [1, 2]]",
+"expected": "False"
+},
+{
+"args": "[[1, 2, 1], [1, 2, 1]]",
+"expected": "True"
+},
+{
+"args": "[[1, 0, 2, 2], [2, 2, 0]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/577": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "last_Digit_Factorial",
+"tests": [
+{
+"args": "[4]",
+"expected": "4"
+},
+{
+"args": "[21]",
+"expected": "0"
+},
+{
+"args": "[30]",
+"expected": "0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/578": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "interleave_lists",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7], [10, 20, 30, 40, 50, 60, 70], [100, 200, 300, 400, 500, 600, 700]]",
+"expected": "[1, 10, 100, 2, 20, 200, 3, 30, 300, 4, 40, 400, 5, 50, 500, 6, 60, 600, 7, 70, 700]"
+},
+{
+"args": "[[10, 20], [15, 2], [5, 10]]",
+"expected": "[10, 15, 5, 20, 2, 10]"
+},
+{
+"args": "[[11, 44], [10, 15], [20, 5]]",
+"expected": "[11, 10, 20, 44, 15, 5]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/579": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": true
+},
+"dialect": "mbpp",
+"entry_point": "find_dissimilar",
+"tests": [
+{
+"args": "[(3, 4, 5, 6), (5, 7, 4, 10)]",
+"expected": "(3, 6, 7, 10)"
+},
+{
+"args": "[(1, 2, 3, 4), (7, 2, 3, 9)]",
+"expected": "(1, 4, 7, 9)"
+},
+{
+"args": "[(21, 11, 25, 26), (26, 34, 21, 36)]",
+"expected": "(34, 36, 11, 25)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/58": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "opposite_Signs",
+"tests": [
+{
+"args": "[1, -2]",
+"expected": "True"
+},
+{
+"args": "[3, 2]",
+"expected": "False"
+},
+{
+"args": "[-10, -10]",
+"expected": "False"
+},
+{
+"args": "[-2, 2]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/580": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "extract_even",
+"tests": [
+{
+"args": "[(4, 5, (7, 6, (2, 4)), 6, 8)]",
+"expected": "(4, (6, (2, 4)), 6, 8)"
+},
+{
+"args": "[(5, 6, (8, 7, (4, 8)), 7, 9)]",
+"expected": "(6, (8, (4, 8)))"
+},
+{
+"args": "[(5, 6, (9, 8, (4, 6)), 8, 10)]",
+"expected": "(6, (8, (4, 6)), 8, 10)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/581": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "surface_Area",
+"tests": [
+{
+"args": "[3, 4]",
+"expected": "33"
+},
+{
+"args": "[4, 5]",
+"expected": "56"
+},
+{
+"args": "[1, 2]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/583": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "catalan_number",
+"tests": [
+{
+"args": "[10]",
+"expected": "16796"
+},
+{
+"args": "[9]",
+"expected": "4862"
+},
+{
+"args": "[7]",
+"expected": "429"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/585": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "expensive_items",
+"tests": [
+{
+"args": "[[{'name': 'Item-1', 'price': 101.1}, {'name': 'Item-2', 'price': 555.22}], 1]",
+"expected": "[{'name': 'Item-2', 'price': 555.22}]"
+},
+{
+"args": "[[{'name': 'Item-1', 'price': 101.1}, {'name': 'Item-2', 'price': 555.22}, {'name': 'Item-3', 'price': 45.09}], 2]",
+"expected": "[{'name': 'Item-2', 'price': 555.22}, {'name': 'Item-1', 'price': 101.1}]"
+},
+{
+"args": "[[{'name': 'Item-1', 'price': 101.1}, {'name': 'Item-2', 'price': 555.22}, {'name': 'Item-3', 'price': 45.09}, {'name': 'Item-4', 'price': 22.75}], 1]",
+"expected": "[{'name': 'Item-2', 'price': 555.22}]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/586": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "split_Arr",
+"tests": [
+{
+"args": "[[12, 10, 5, 6, 52, 36], 2]",
+"expected": "[5, 6, 52, 36, 12, 10]"
+},
+{
+"args": "[[1, 2, 3, 4], 1]",
+"expected": "[2, 3, 4, 1]"
+},
+{
+"args": "[[0, 1, 2, 3, 4, 5, 6, 7], 3]",
+"expected": "[3, 4, 5, 6, 7, 0, 1, 2]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/587": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "list_tuple",
+"tests": [
+{
+"args": "[[5, 10, 7, 4, 15, 3]]",
+"expected": "(5, 10, 7, 4, 15, 3)"
+},
+{
+"args": "[[2, 4, 5, 6, 2, 3, 4, 4, 7]]",
+"expected": "(2, 4, 5, 6, 2, 3, 4, 4, 7)"
+},
+{
+"args": "[[58, 44, 56]]",
+"expected": "(58, 44, 56)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/588": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "big_diff",
+"tests": [
+{
+"args": "[[1, 2, 3, 4]]",
+"expected": "3"
+},
+{
+"args": "[[4, 5, 12]]",
+"expected": "8"
+},
+{
+"args": "[[9, 2, 3]]",
+"expected": "7"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/589": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "perfect_squares",
+"tests": [
+{
+"args": "[1, 30]",
+"expected": "[1, 4, 9, 16, 25]"
+},
+{
+"args": "[50, 100]",
+"expected": "[64, 81, 100]"
+},
+{
+"args": "[100, 200]",
+"expected": "[100, 121, 144, 169, 196]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/59": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_octagonal",
+"tests": [
+{
+"args": "[5]",
+"expected": "65"
+},
+{
+"args": "[10]",
+"expected": "280"
+},
+{
+"args": "[15]",
+"expected": "645"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/590": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "polar_rect",
+"tests": [
+{
+"args": "[3, 4]",
+"expected": "((5.0, 0.9272952180016122), (-2+2.4492935982947064e-16j))"
+},
+{
+"args": "[4, 7]",
+"expected": "((8.06225774829855, 1.0516502125483738), (-2+2.4492935982947064e-16j))"
+},
+{
+"args": "[15, 17]",
+"expected": "((22.67156809750927, 0.8478169733934057), (-2+2.4492935982947064e-16j))"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/591": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "swap_List",
+"tests": [
+{
+"args": "[[12, 35, 9, 56, 24]]",
+"expected": "[24, 35, 9, 56, 12]"
+},
+{
+"args": "[[1, 2, 3]]",
+"expected": "[3, 2, 1]"
+},
+{
+"args": "[[4, 5, 6]]",
+"expected": "[6, 5, 4]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/592": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_Of_product",
+"tests": [
+{
+"args": "[3]",
+"expected": "15"
+},
+{
+"args": "[4]",
+"expected": "56"
+},
+{
+"args": "[1]",
+"expected": "1"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/593": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "removezero_ip",
+"tests": [
+{
+"args": "['216.08.094.196']",
+"expected": "'216.8.94.196'"
+},
+{
+"args": "['12.01.024']",
+"expected": "'12.1.24'"
+},
+{
+"args": "['216.08.094.0196']",
+"expected": "'216.8.94.196'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/594": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "diff_even_odd",
+"tests": [
+{
+"args": "[[1, 3, 5, 7, 4, 1, 6, 8]]",
+"expected": "3"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]",
+"expected": "1"
+},
+{
+"args": "[[1, 5, 7, 9, 10]]",
+"expected": "9"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/596": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "tuple_size",
+"tests": [
+{
+"args": "[('A', 1, 'B', 2, 'C', 3)]",
+"expected": "88"
+},
+{
+"args": "[(1, 'Raju', 2, 'Nikhil', 3, 'Deepanshu')]",
+"expected": "88"
+},
+{
+"args": "[([1, 'Lion'], [2, 'Tiger'], [3, 'Fox'], [4, 'Wolf'])]",
+"expected": "72"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/597": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_kth",
+"tests": [
+{
+"args": "[[2, 3, 6, 7, 9], [1, 4, 8, 10], 5]",
+"expected": "6"
+},
+{
+"args": "[[100, 112, 256, 349, 770], [72, 86, 113, 119, 265, 445, 892], 7]",
+"expected": "256"
+},
+{
+"args": "[[3, 4, 7, 8, 10], [2, 5, 9, 11], 6]",
+"expected": "8"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/598": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "armstrong_number",
+"tests": [
+{
+"args": "[153]",
+"expected": "True"
+},
+{
+"args": "[259]",
+"expected": "False"
+},
+{
+"args": "[4458]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/6": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "differ_At_One_Bit_Pos",
+"tests": [
+{
+"args": "[13, 9]",
+"expected": "True"
+},
+{
+"args": "[15, 8]",
+"expected": "False"
+},
+{
+"args": "[2, 4]",
+"expected": "False"
+},
+{
+"args": "[2, 3]",
+"expected": "True"
+},
+{
+"args": "[5, 1]",
+"expected": "True"
+},
+{
+"args": "[1, 5]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/600": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_Even",
+"tests": [
+{
+"args": "[1]",
+"expected": "False"
+},
+{
+"args": "[2]",
+"expected": "True"
+},
+{
+"args": "[3]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/602": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "first_repeated_char",
+"tests": [
+{
+"args": "['abcabc']",
+"expected": "'a'"
+},
+{
+"args": "['abc']",
+"expected": "None"
+},
+{
+"args": "['123123']",
+"expected": "'1'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/604": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "reverse_words",
+"tests": [
+{
+"args": "['python program']",
+"expected": "'program python'"
+},
+{
+"args": "['java language']",
+"expected": "'language java'"
+},
+{
+"args": "['indian man']",
+"expected": "'man indian'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/605": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "prime_num",
+"tests": [
+{
+"args": "[13]",
+"expected": "True"
+},
+{
+"args": "[7]",
+"expected": "True"
+},
+{
+"args": "[-1010]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/606": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "radian_degree",
+"tests": [
+{
+"args": "[90]",
+"expected": "1.5707963267948966"
+},
+{
+"args": "[60]",
+"expected": "1.0471975511965976"
+},
+{
+"args": "[120]",
+"expected": "2.0943951023931953"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/607": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": true,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_literals",
+"tests": [
+{
+"args": "['The quick brown fox jumps over the lazy dog.', 'fox']",
+"expected": "('fox', 16, 19)"
+},
+{
+"args": "['Its been a very crazy procedure right', 'crazy']",
+"expected": "('crazy', 16, 21)"
+},
+{
+"args": "['Hardest choices required strongest will', 'will']",
+"expected": "('will', 35, 39)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/608": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "bell_Number",
+"tests": [
+{
+"args": "[2]",
+"expected": "2"
+},
+{
+"args": "[3]",
+"expected": "5"
+},
+{
+"args": "[4]",
+"expected": "15"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/61": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_Substrings",
+"tests": [
+{
+"args": "['112112']",
+"expected": "6"
+},
+{
+"args": "['111']",
+"expected": "6"
+},
+{
+"args": "['1101112']",
+"expected": "12"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/610": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_kth_element",
+"tests": [
+{
+"args": "[[1, 1, 2, 3, 4, 4, 5, 1], 3]",
+"expected": "[1, 1, 3, 4, 4, 5, 1]"
+},
+{
+"args": "[[0, 0, 1, 2, 3, 4, 4, 5, 6, 6, 6, 7, 8, 9, 4, 4], 4]",
+"expected": "[0, 0, 1, 3, 4, 4, 5, 6, 6, 6, 7, 8, 9, 4, 4]"
+},
+{
+"args": "[[10, 10, 15, 19, 18, 18, 17, 26, 26, 17, 18, 10], 5]",
+"expected": "[10, 10, 15, 19, 18, 17, 26, 26, 17, 18, 10]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/611": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_of_nth",
+"tests": [
+{
+"args": "[[[5, 6, 7], [1, 3, 5], [8, 9, 19]], 2]",
+"expected": "19"
+},
+{
+"args": "[[[6, 7, 8], [2, 4, 6], [9, 10, 20]], 1]",
+"expected": "10"
+},
+{
+"args": "[[[7, 8, 9], [3, 5, 7], [10, 11, 21]], 1]",
+"expected": "11"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/612": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "merge",
+"tests": [
+{
+"args": "[[['x', 'y'], ['a', 'b'], ['m', 'n']]]",
+"expected": "[['x', 'a', 'm'], ['y', 'b', 'n']]"
+},
+{
+"args": "[[[1, 2], [3, 4], [5, 6], [7, 8]]]",
+"expected": "[[1, 3, 5, 7], [2, 4, 6, 8]]"
+},
+{
+"args": "[[[[1], [2]], [[3], [4]], [[5], [6]], [[7], [8]]]]",
+"expected": "[[[1], [3], [5], [7]], [[2], [4], [6], [8]]]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/614": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "cummulative_sum",
+"tests": [
+{
+"args": "[[(1, 3), (5, 6, 7), (2, 6)]]",
+"expected": "30"
+},
+{
+"args": "[[(2, 4), (6, 7, 8), (3, 7)]]",
+"expected": "37"
+},
+{
+"args": "[[(3, 5), (7, 8, 9), (4, 8)]]",
+"expected": "44"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/615": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "average_tuple",
+"tests": [
+{
+"args": "[((10, 10, 10, 12), (30, 45, 56, 45), (81, 80, 39, 32), (1, 2, 3, 4))]",
+"expected": "[30.5, 34.25, 27.0, 23.25]"
+},
+{
+"args": "[((1, 1, -5), (30, -15, 56), (81, -60, -39), (-10, 2, 3))]",
+"expected": "[25.5, -18.0, 3.75]"
+},
+{
+"args": "[((100, 100, 100, 120), (300, 450, 560, 450), (810, 800, 390, 320), (10, 20, 30, 40))]",
+"expected": "[305.0, 342.5, 270.0, 232.5]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/616": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "tuple_modulo",
+"tests": [
+{
+"args": "[(10, 4, 5, 6), (5, 6, 7, 5)]",
+"expected": "(0, 4, 5, 1)"
+},
+{
+"args": "[(11, 5, 6, 7), (6, 7, 8, 6)]",
+"expected": "(5, 5, 6, 1)"
+},
+{
+"args": "[(12, 6, 7, 8), (7, 8, 9, 7)]",
+"expected": "(5, 6, 7, 1)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/618": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "div_list",
+"tests": [
+{
+"args": "[[4, 5, 6], [1, 2, 3]]",
+"expected": "[4.0, 2.5, 2.0]"
+},
+{
+"args": "[[3, 2], [1, 4]]",
+"expected": "[3.0, 0.5]"
+},
+{
+"args": "[[90, 120], [50, 70]]",
+"expected": "[1.8, 1.7142857142857142]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/619": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "move_num",
+"tests": [
+{
+"args": "['I1love143you55three3000thousand']",
+"expected": "'Iloveyouthreethousand1143553000'"
+},
+{
+"args": "['Avengers124Assemble']",
+"expected": "'AvengersAssemble124'"
+},
+{
+"args": "['Its11our12path13to14see15things16do17things']",
+"expected": "'Itsourpathtoseethingsdothings11121314151617'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/62": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "smallest_num",
+"tests": [
+{
+"args": "[[10, 20, 1, 45, 99]]",
+"expected": "1"
+},
+{
+"args": "[[1, 2, 3]]",
+"expected": "1"
+},
+{
+"args": "[[45, 46, 50, 60]]",
+"expected": "45"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/620": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "largest_subset",
+"tests": [
+{
+"args": "[[1, 3, 6, 13, 17, 18]]",
+"expected": "4"
+},
+{
+"args": "[[10, 5, 3, 15, 20]]",
+"expected": "3"
+},
+{
+"args": "[[18, 1, 3, 6, 13, 17]]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/622": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "get_median",
+"tests": [
+{
+"args": "[[1, 12, 15, 26, 38], [2, 13, 17, 30, 45], 5]",
+"expected": "16.0"
+},
+{
+"args": "[[2, 4, 8, 9], [7, 13, 19, 28], 4]",
+"expected": "8.5"
+},
+{
+"args": "[[3, 6, 14, 23, 36, 42], [2, 18, 27, 39, 49, 55], 6]",
+"expected": "25.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/623": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "nth_nums",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 2]",
+"expected": "[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]"
+},
+{
+"args": "[[10, 20, 30], 3]",
+"expected": "[1000, 8000, 27000]"
+},
+{
+"args": "[[12, 15], 5]",
+"expected": "[248832, 759375]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/624": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_upper",
+"tests": [
+{
+"args": "['person']",
+"expected": "'PERSON'"
+},
+{
+"args": "['final']",
+"expected": "'FINAL'"
+},
+{
+"args": "['Valid']",
+"expected": "'VALID'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/626": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "triangle_area",
+"tests": [
+{
+"args": "[-1]",
+"expected": "None"
+},
+{
+"args": "[0]",
+"expected": "0"
+},
+{
+"args": "[2]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/628": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "replace_spaces",
+"tests": [
+{
+"args": "['My Name is Dawood']",
+"expected": "'My%20Name%20is%20Dawood'"
+},
+{
+"args": "['I am a Programmer']",
+"expected": "'I%20am%20a%20Programmer'"
+},
+{
+"args": "['I love Coding']",
+"expected": "'I%20love%20Coding'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/629": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "Split",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5]]",
+"expected": "[2, 4]"
+},
+{
+"args": "[[4, 5, 6, 7, 8, 0, 1]]",
+"expected": "[4, 6, 8, 0]"
+},
+{
+"args": "[[8, 12, 15, 19]]",
+"expected": "[8, 12]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/63": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_difference",
+"tests": [
+{
+"args": "[[(3, 5), (1, 7), (10, 3), (1, 2)]]",
+"expected": "7"
+},
+{
+"args": "[[(4, 6), (2, 17), (9, 13), (11, 12)]]",
+"expected": "15"
+},
+{
+"args": "[[(12, 35), (21, 27), (13, 23), (41, 22)]]",
+"expected": "23"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/631": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "replace_spaces",
+"tests": [
+{
+"args": "['Jumanji The Jungle']",
+"expected": "'Jumanji_The_Jungle'"
+},
+{
+"args": "['The_Avengers']",
+"expected": "'The Avengers'"
+},
+{
+"args": "['Fast and Furious']",
+"expected": "'Fast_and_Furious'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/632": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "move_zero",
+"tests": [
+{
+"args": "[[1, 0, 2, 0, 3, 4]]",
+"expected": "[1, 2, 3, 4, 0, 0]"
+},
+{
+"args": "[[2, 3, 2, 0, 0, 4, 0, 5, 0]]",
+"expected": "[2, 3, 2, 4, 5, 0, 0, 0, 0]"
+},
+{
+"args": "[[0, 1, 0, 1, 1]]",
+"expected": "[1, 1, 1, 0, 0]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/633": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "pair_xor_Sum",
+"tests": [
+{
+"args": "[[5, 9, 7, 6], 4]",
+"expected": "47"
+},
+{
+"args": "[[7, 3, 5], 3]",
+"expected": "12"
+},
+{
+"args": "[[7, 3], 2]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/635": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "heap_sort",
+"tests": [
+{
+"args": "[[1, 3, 5, 7, 9, 2, 4, 6, 8, 0]]",
+"expected": "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"
+},
+{
+"args": "[[25, 35, 22, 85, 14, 65, 75, 25, 58]]",
+"expected": "[14, 22, 25, 25, 35, 58, 65, 75, 85]"
+},
+{
+"args": "[[7, 1, 9, 5]]",
+"expected": "[1, 5, 7, 9]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/637": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "noprofit_noloss",
+"tests": [
+{
+"args": "[1500, 1200]",
+"expected": "False"
+},
+{
+"args": "[100, 100]",
+"expected": "True"
+},
+{
+"args": "[2000, 5000]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/638": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "wind_chill",
+"tests": [
+{
+"args": "[120, 35]",
+"expected": "40"
+},
+{
+"args": "[40, 20]",
+"expected": "19"
+},
+{
+"args": "[10, 8]",
+"expected": "6"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/639": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sample_nam",
+"tests": [
+{
+"args": "[['sally', 'Dylan', 'rebecca', 'Diana', 'Joanne', 'keith']]",
+"expected": "16"
+},
+{
+"args": "[['php', 'res', 'Python', 'abcd', 'Java', 'aaa']]",
+"expected": "10"
+},
+{
+"args": "[['abcd', 'Python', 'abba', 'aba']]",
+"expected": "6"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/64": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "subject_marks",
+"tests": [
+{
+"args": "[[('English', 88), ('Science', 90), ('Maths', 97), ('Social sciences', 82)]]",
+"expected": "[('Social sciences', 82), ('English', 88), ('Science', 90), ('Maths', 97)]"
+},
+{
+"args": "[[('Telugu', 49), ('Hindhi', 54), ('Social', 33)]]",
+"expected": "[('Social', 33), ('Telugu', 49), ('Hindhi', 54)]"
+},
+{
+"args": "[[('Physics', 96), ('Chemistry', 97), ('Biology', 45)]]",
+"expected": "[('Biology', 45), ('Physics', 96), ('Chemistry', 97)]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/641": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_nonagonal",
+"tests": [
+{
+"args": "[10]",
+"expected": "325"
+},
+{
+"args": "[15]",
+"expected": "750"
+},
+{
+"args": "[18]",
+"expected": "1089"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/643": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": true,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "text_match_wordz_middle",
+"tests": [
+{
+"args": "['pythonzabc.']",
+"expected": "True"
+},
+{
+"args": "['zxyabc.']",
+"expected": "False"
+},
+{
+"args": "['  lang  .']",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/65": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "recursive_list_sum",
+"tests": [
+{
+"args": "[[1, 2, [3, 4], [5, 6]]]",
+"expected": "21"
+},
+{
+"args": "[[7, 10, [15, 14], [19, 41]]]",
+"expected": "106"
+},
+{
+"args": "[[10, 20, [30, 40], [50, 60]]]",
+"expected": "210"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/66": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "pos_count",
+"tests": [
+{
+"args": "[[1, -2, 3, -4]]",
+"expected": "2"
+},
+{
+"args": "[[3, 4, 5, -1]]",
+"expected": "3"
+},
+{
+"args": "[[1, 2, 3, 4]]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/67": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "bell_number",
+"tests": [
+{
+"args": "[2]",
+"expected": "2"
+},
+{
+"args": "[10]",
+"expected": "115975"
+},
+{
+"args": "[56]",
+"expected": "6775685320645824322581483068371419745979053216268760300"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/68": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_Monotonic",
+"tests": [
+{
+"args": "[[6, 5, 4, 4]]",
+"expected": "True"
+},
+{
+"args": "[[1, 2, 2, 3]]",
+"expected": "True"
+},
+{
+"args": "[[1, 3, 2]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/69": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_sublist",
+"tests": [
+{
+"args": "[[2, 4, 3, 5, 7], [3, 7]]",
+"expected": "False"
+},
+{
+"args": "[[2, 4, 3, 5, 7], [4, 3]]",
+"expected": "True"
+},
+{
+"args": "[[2, 4, 3, 5, 7], [1, 6]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/7": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": true
+},
+"dialect": "mbpp",
+"entry_point": "find_char_long",
+"tests": [
+{
+"args": "['Please move back to stream']",
+"expected": "['Please', 'move', 'back', 'stream']"
+},
+{
+"args": "['Jing Eco and Tech']",
+"expected": "['Jing', 'Tech']"
+},
+{
+"args": "['Jhingai wulu road Zone 3']",
+"expected": "['Jhingai', 'wulu', 'road', 'Zone']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/70": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "get_equal",
+"tests": [
+{
+"args": "[[(11, 22, 33), (44, 55, 66)]]",
+"expected": "True"
+},
+{
+"args": "[[(1, 2, 3), (4, 5, 6, 7)]]",
+"expected": "False"
+},
+{
+"args": "[[(1, 2), (3, 4)]]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/71": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "comb_sort",
+"tests": [
+{
+"args": "[[5, 15, 37, 25, 79]]",
+"expected": "[5, 15, 25, 37, 79]"
+},
+{
+"args": "[[41, 32, 15, 19, 22]]",
+"expected": "[15, 19, 22, 32, 41]"
+},
+{
+"args": "[[99, 15, 13, 47]]",
+"expected": "[13, 15, 47, 99]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/72": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "dif_Square",
+"tests": [
+{
+"args": "[5]",
+"expected": "True"
+},
+{
+"args": "[10]",
+"expected": "False"
+},
+{
+"args": "[15]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/720": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "add_dict_to_tuple",
+"tests": [
+{
+"args": "[(4, 5, 6), {'MSAM': 1, 'is': 2, 'best': 3}]",
+"expected": "(4, 5, 6, {'MSAM': 1, 'is': 2, 'best': 3})"
+},
+{
+"args": "[(1, 2, 3), {'UTS': 2, 'is': 3, 'Worst': 4}]",
+"expected": "(1, 2, 3, {'UTS': 2, 'is': 3, 'Worst': 4})"
+},
+{
+"args": "[(8, 9, 10), {'POS': 3, 'is': 4, 'Okay': 5}]",
+"expected": "(8, 9, 10, {'POS': 3, 'is': 4, 'Okay': 5})"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/721": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "maxAverageOfPath",
+"tests": [
+{
+"args": "[[[1, 2, 3], [6, 5, 4], [7, 3, 9]]]",
+"expected": "5.2"
+},
+{
+"args": "[[[2, 3, 4], [7, 6, 5], [8, 4, 10]]]",
+"expected": "6.2"
+},
+{
+"args": "[[[3, 4, 5], [8, 7, 6], [9, 5, 11]]]",
+"expected": "7.2"
+},
+{
+"args": "[[[1, 2, 3], [4, 5, 6], [7, 8, 9]]]",
+"expected": "5.8"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/722": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "filter_data",
+"tests": [
+{
+"args": "[{'Cierra Vega': (6.2, 70), 'Alden Cantrell': (5.9, 65), 'Kierra Gentry': (6.0, 68), 'Pierre Cox': (5.8, 66)}, 6.0, 70]",
+"expected": "{'Cierra Vega': (6.2, 70)}"
+},
+{
+"args": "[{'Cierra Vega': (6.2, 70), 'Alden Cantrell': (5.9, 65), 'Kierra Gentry': (6.0, 68), 'Pierre Cox': (5.8, 66)}, 5.9, 67]",
+"expected": "{'Cierra Vega': (6.2, 70), 'Kierra Gentry': (6.0, 68)}"
+},
+{
+"args": "[{'Cierra Vega': (6.2, 70), 'Alden Cantrell': (5.9, 65), 'Kierra Gentry': (6.0, 68), 'Pierre Cox': (5.8, 66)}, 5.7, 64]",
+"expected": "{'Cierra Vega': (6.2, 70), 'Alden Cantrell': (5.9, 65), 'Kierra Gentry': (6.0, 68), 'Pierre Cox': (5.8, 66)}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/723": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_same_pair",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8], [2, 2, 3, 1, 2, 6, 7, 9]]",
+"expected": "4"
+},
+{
+"args": "[[0, 1, 2, -1, -5, 6, 0, -3, -2, 3, 4, 6, 8], [2, 1, 2, -1, -5, 6, 4, -3, -2, 3, 4, 6, 8]]",
+"expected": "11"
+},
+{
+"args": "[[2, 4, -6, -9, 11, -12, 14, -5, 17], [2, 1, 2, -1, -5, 6, 4, -3, -2]]",
+"expected": "1"
+},
+{
+"args": "[[0, 1, 1, 2], [0, 1, 2, 2]]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/724": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "power_base_sum",
+"tests": [
+{
+"args": "[2, 100]",
+"expected": "115"
+},
+{
+"args": "[8, 10]",
+"expected": "37"
+},
+{
+"args": "[8, 15]",
+"expected": "62"
+},
+{
+"args": "[3, 3]",
+"expected": "9"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/725": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "extract_quotation",
+"tests": [
+{
+"args": "['Cortex \"A53\" Based \"multi\" tasking \"Processor\"']",
+"expected": "['A53', 'multi', 'Processor']"
+},
+{
+"args": "['Cast your \"favorite\" entertainment \"apps\"']",
+"expected": "['favorite', 'apps']"
+},
+{
+"args": "['Watch content \"4k Ultra HD\" resolution with \"HDR 10\" Support']",
+"expected": "['4k Ultra HD', 'HDR 10']"
+},
+{
+"args": "[\"Watch content '4k Ultra HD' resolution with 'HDR 10' Support\"]",
+"expected": "[]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/726": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "multiply_elements",
+"tests": [
+{
+"args": "[(1, 5, 7, 8, 10)]",
+"expected": "(5, 35, 56, 80)"
+},
+{
+"args": "[(2, 4, 5, 6, 7)]",
+"expected": "(8, 20, 30, 42)"
+},
+{
+"args": "[(12, 13, 14, 9, 15)]",
+"expected": "(156, 182, 126, 135)"
+},
+{
+"args": "[(12,)]",
+"expected": "()"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/728": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_list",
+"tests": [
+{
+"args": "[[10, 20, 30], [15, 25, 35]]",
+"expected": "[25, 45, 65]"
+},
+{
+"args": "[[1, 2, 3], [5, 6, 7]]",
+"expected": "[6, 8, 10]"
+},
+{
+"args": "[[15, 20, 30], [15, 45, 75]]",
+"expected": "[30, 65, 105]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/730": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "consecutive_duplicates",
+"tests": [
+{
+"args": "[[0, 0, 1, 2, 3, 4, 4, 5, 6, 6, 6, 7, 8, 9, 4, 4]]",
+"expected": "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 4]"
+},
+{
+"args": "[[10, 10, 15, 19, 18, 18, 17, 26, 26, 17, 18, 10]]",
+"expected": "[10, 15, 19, 18, 17, 26, 17, 18, 10]"
+},
+{
+"args": "[['a', 'a', 'b', 'c', 'd', 'd']]",
+"expected": "['a', 'b', 'c', 'd']"
+},
+{
+"args": "[['a', 'a', 'b', 'c', 'd', 'd', 'a', 'a']]",
+"expected": "['a', 'b', 'c', 'd', 'a']"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/731": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "lateralsurface_cone",
+"tests": [
+{
+"args": "[5, 12]",
+"expected": "204.20352248333654"
+},
+{
+"args": "[10, 15]",
+"expected": "566.3586699569488"
+},
+{
+"args": "[19, 17]",
+"expected": "1521.8090132193388"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/732": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "replace_specialchar",
+"tests": [
+{
+"args": "['Python language, Programming language.']",
+"expected": "'Python:language::Programming:language:'"
+},
+{
+"args": "['a b c,d e f']",
+"expected": "'a:b:c:d:e:f'"
+},
+{
+"args": "['ram reshma,ram rahim']",
+"expected": "'ram:reshma:ram:rahim'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/733": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_first_occurrence",
+"tests": [
+{
+"args": "[[2, 5, 5, 5, 6, 6, 8, 9, 9, 9], 5]",
+"expected": "1"
+},
+{
+"args": "[[2, 3, 5, 5, 6, 6, 8, 9, 9, 9], 5]",
+"expected": "2"
+},
+{
+"args": "[[1, 2, 4, 5, 6, 6, 8, 9, 9, 9], 6]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/734": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_Of_Subarray_Prod",
+"tests": [
+{
+"args": "[[1, 2, 3]]",
+"expected": "20"
+},
+{
+"args": "[[1, 2]]",
+"expected": "5"
+},
+{
+"args": "[[1, 2, 3, 4]]",
+"expected": "84"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/735": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "toggle_middle_bits",
+"tests": [
+{
+"args": "[9]",
+"expected": "15"
+},
+{
+"args": "[10]",
+"expected": "12"
+},
+{
+"args": "[11]",
+"expected": "13"
+},
+{
+"args": "[65]",
+"expected": "127"
+},
+{
+"args": "[77]",
+"expected": "115"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/736": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "left_insertion",
+"tests": [
+{
+"args": "[[1, 2, 4, 5], 6]",
+"expected": "4"
+},
+{
+"args": "[[1, 2, 4, 5], 3]",
+"expected": "2"
+},
+{
+"args": "[[1, 2, 4, 5], 7]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/737": {
+"reason": "expected_not_a_literal_type:Match",
+"spec": null
+},
+"mbppplus_Mbpp/739": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_Index",
+"tests": [
+{
+"args": "[2]",
+"expected": "4"
+},
+{
+"args": "[3]",
+"expected": "14"
+},
+{
+"args": "[4]",
+"expected": "45"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/74": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_samepatterns",
+"tests": [
+{
+"args": "[['red', 'green', 'green'], ['a', 'b', 'b']]",
+"expected": "True"
+},
+{
+"args": "[['red', 'green', 'greenn'], ['a', 'b', 'b']]",
+"expected": "False"
+},
+{
+"args": "[['red', 'green', 'greenn'], ['a', 'b']]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/740": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "tuple_to_dict",
+"tests": [
+{
+"args": "[(1, 5, 7, 10, 13, 5)]",
+"expected": "{1: 5, 7: 10, 13: 5}"
+},
+{
+"args": "[(1, 2, 3, 4, 5, 6)]",
+"expected": "{1: 2, 3: 4, 5: 6}"
+},
+{
+"args": "[(7, 8, 9, 10, 11, 12)]",
+"expected": "{7: 8, 9: 10, 11: 12}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/741": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "all_Characters_Same",
+"tests": [
+{
+"args": "['python']",
+"expected": "False"
+},
+{
+"args": "['aaa']",
+"expected": "True"
+},
+{
+"args": "['data']",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/742": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "area_tetrahedron",
+"tests": [
+{
+"args": "[3]",
+"expected": "15.588457268119894"
+},
+{
+"args": "[20]",
+"expected": "692.8203230275509"
+},
+{
+"args": "[10]",
+"expected": "173.20508075688772"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/743": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "rotate_right",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3]",
+"expected": "[8, 9, 10, 1, 2, 3, 4, 5, 6, 7]"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 2]",
+"expected": "[9, 10, 1, 2, 3, 4, 5, 6, 7, 8]"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5]",
+"expected": "[6, 7, 8, 9, 10, 1, 2, 3, 4, 5]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/744": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_none",
+"tests": [
+{
+"args": "[(10, 4, 5, 6, None)]",
+"expected": "True"
+},
+{
+"args": "[(7, 8, 9, 11, 14)]",
+"expected": "False"
+},
+{
+"args": "[(1, 2, 3, 4, None)]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/745": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "divisible_by_digits",
+"tests": [
+{
+"args": "[1, 22]",
+"expected": "[1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 15, 22]"
+},
+{
+"args": "[1, 15]",
+"expected": "[1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 15]"
+},
+{
+"args": "[20, 25]",
+"expected": "[22, 24]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/748": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "capital_words_spaces",
+"tests": [
+{
+"args": "['Python']",
+"expected": "'Python'"
+},
+{
+"args": "['PythonProgrammingExamples']",
+"expected": "'Python Programming Examples'"
+},
+{
+"args": "['GetReadyToBeCodingFreak']",
+"expected": "'Get Ready To Be Coding Freak'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/749": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sort_numeric_strings",
+"tests": [
+{
+"args": "[['4', '12', '45', '7', '0', '100', '200', '-12', '-500']]",
+"expected": "[-500, -12, 0, 4, 7, 12, 45, 100, 200]"
+},
+{
+"args": "[['2', '3', '8', '4', '7', '9', '8', '2', '6', '5', '1', '6', '1', '2', '3', '4', '6', '9', '1', '2']]",
+"expected": "[1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 5, 6, 6, 6, 7, 8, 8, 9, 9]"
+},
+{
+"args": "[['1', '3', '5', '7', '1', '3', '13', '15', '17', '5', '7 ', '9', '1', '11']]",
+"expected": "[1, 1, 1, 3, 3, 5, 5, 7, 7, 9, 11, 13, 15, 17]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/75": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_tuples",
+"tests": [
+{
+"args": "[[(6, 24, 12), (7, 9, 6), (12, 18, 21)], 6]",
+"expected": "[(6, 24, 12)]"
+},
+{
+"args": "[[(5, 25, 30), (4, 2, 3), (7, 8, 9)], 5]",
+"expected": "[(5, 25, 30)]"
+},
+{
+"args": "[[(7, 9, 16), (8, 16, 4), (19, 17, 18)], 4]",
+"expected": "[(8, 16, 4)]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/750": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "add_tuple",
+"tests": [
+{
+"args": "[[5, 6, 7], (9, 10)]",
+"expected": "[5, 6, 7, 9, 10]"
+},
+{
+"args": "[[6, 7, 8], (10, 11)]",
+"expected": "[6, 7, 8, 10, 11]"
+},
+{
+"args": "[[7, 8, 9], (11, 12)]",
+"expected": "[7, 8, 9, 11, 12]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/751": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_min_heap",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6]]",
+"expected": "True"
+},
+{
+"args": "[[2, 3, 4, 5, 10, 15]]",
+"expected": "True"
+},
+{
+"args": "[[2, 10, 4, 5, 3, 15]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/752": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "jacobsthal_num",
+"tests": [
+{
+"args": "[5]",
+"expected": "11"
+},
+{
+"args": "[2]",
+"expected": "1"
+},
+{
+"args": "[4]",
+"expected": "5"
+},
+{
+"args": "[13]",
+"expected": "2731"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/753": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "min_k",
+"tests": [
+{
+"args": "[[('Manjeet', 10), ('Akshat', 4), ('Akash', 2), ('Nikhil', 8)], 2]",
+"expected": "[('Akash', 2), ('Akshat', 4)]"
+},
+{
+"args": "[[('Sanjeev', 11), ('Angat', 5), ('Akash', 3), ('Nepin', 9)], 3]",
+"expected": "[('Akash', 3), ('Angat', 5), ('Nepin', 9)]"
+},
+{
+"args": "[[('tanmay', 14), ('Amer', 11), ('Ayesha', 9), ('SKD', 16)], 1]",
+"expected": "[('Ayesha', 9)]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/754": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "extract_index_list",
+"tests": [
+{
+"args": "[[1, 1, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5, 7], [0, 1, 2, 3, 4, 5, 7]]",
+"expected": "[1, 7]"
+},
+{
+"args": "[[1, 1, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 6, 5], [0, 1, 2, 3, 4, 6, 7]]",
+"expected": "[1, 6]"
+},
+{
+"args": "[[1, 1, 3, 4, 6, 5, 6], [0, 1, 2, 3, 4, 5, 7], [0, 1, 2, 3, 4, 5, 7]]",
+"expected": "[1, 5]"
+},
+{
+"args": "[[1, 2, 3, 4, 6, 6, 6], [0, 1, 2, 3, 4, 5, 7], [0, 1, 2, 3, 4, 5, 7]]",
+"expected": "[]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/755": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "second_smallest",
+"tests": [
+{
+"args": "[[1, 2, -8, -2, 0, -2]]",
+"expected": "-2"
+},
+{
+"args": "[[1, 1, -0.5, 0, 2, -2, -2]]",
+"expected": "-0.5"
+},
+{
+"args": "[[2, 2]]",
+"expected": "None"
+},
+{
+"args": "[[2, 2, 2]]",
+"expected": "None"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/757": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_reverse_pairs",
+"tests": [
+{
+"args": "[['julia', 'best', 'tseb', 'for', 'ailuj']]",
+"expected": "2"
+},
+{
+"args": "[['geeks', 'best', 'for', 'skeeg']]",
+"expected": "1"
+},
+{
+"args": "[['makes', 'best', 'sekam', 'for', 'rof']]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/758": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "unique_sublists",
+"tests": [
+{
+"args": "[[[1, 3], [5, 7], [1, 3], [13, 15, 17], [5, 7], [9, 11]]]",
+"expected": "{(1, 3): 2, (5, 7): 2, (13, 15, 17): 1, (9, 11): 1}"
+},
+{
+"args": "[[['green', 'orange'], ['black'], ['green', 'orange'], ['white']]]",
+"expected": "{('green', 'orange'): 2, ('black',): 1, ('white',): 1}"
+},
+{
+"args": "[[[10, 20, 30, 40], [60, 70, 50, 50], [90, 100, 200]]]",
+"expected": "{(10, 20, 30, 40): 1, (60, 70, 50, 50): 1, (90, 100, 200): 1}"
+},
+{
+"args": "[[['john']]]",
+"expected": "{('john',): 1}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/759": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": true,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_decimal",
+"tests": [
+{
+"args": "['123.11']",
+"expected": "True"
+},
+{
+"args": "['e666.86']",
+"expected": "False"
+},
+{
+"args": "['3.124587']",
+"expected": "False"
+},
+{
+"args": "['1.11']",
+"expected": "True"
+},
+{
+"args": "['1.1.11']",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/760": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "unique_Element",
+"tests": [
+{
+"args": "[[1, 1, 1]]",
+"expected": "True"
+},
+{
+"args": "[[1, 2, 1, 2]]",
+"expected": "False"
+},
+{
+"args": "[[1, 2, 3, 4, 5]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/762": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_monthnumber_number",
+"tests": [
+{
+"args": "[6]",
+"expected": "True"
+},
+{
+"args": "[2]",
+"expected": "False"
+},
+{
+"args": "[12]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/763": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_min_diff",
+"tests": [
+{
+"args": "[(1, 5, 3, 19, 18, 25), 6]",
+"expected": "1"
+},
+{
+"args": "[(4, 3, 2, 6), 4]",
+"expected": "1"
+},
+{
+"args": "[(30, 5, 20, 9), 4]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/764": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "number_ctr",
+"tests": [
+{
+"args": "['program2bedone']",
+"expected": "1"
+},
+{
+"args": "['3wonders']",
+"expected": "1"
+},
+{
+"args": "['123']",
+"expected": "3"
+},
+{
+"args": "['3wond-1ers2']",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/765": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_polite",
+"tests": [
+{
+"args": "[7]",
+"expected": "11"
+},
+{
+"args": "[4]",
+"expected": "7"
+},
+{
+"args": "[9]",
+"expected": "13"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/766": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "pair_wise",
+"tests": [
+{
+"args": "[[1, 1, 2, 3, 3, 4, 4, 5]]",
+"expected": "[(1, 1), (1, 2), (2, 3), (3, 3), (3, 4), (4, 4), (4, 5)]"
+},
+{
+"args": "[[1, 5, 7, 9, 10]]",
+"expected": "[(1, 5), (5, 7), (7, 9), (9, 10)]"
+},
+{
+"args": "[[5, 1, 9, 7, 10]]",
+"expected": "[(5, 1), (1, 9), (9, 7), (7, 10)]"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]",
+"expected": "[(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 9), (9, 10)]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/767": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "get_pairs_count",
+"tests": [
+{
+"args": "[[1, 1, 1, 1], 2]",
+"expected": "6.0"
+},
+{
+"args": "[[1, 5, 7, -1, 5], 6]",
+"expected": "3.0"
+},
+{
+"args": "[[1, -2, 3], 1]",
+"expected": "1.0"
+},
+{
+"args": "[[-1, -2, 3], -3]",
+"expected": "1.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/769": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": true
+},
+"dialect": "mbpp",
+"entry_point": "Diff",
+"tests": [
+{
+"args": "[[10, 15, 20, 25, 30, 35, 40], [25, 40, 35]]",
+"expected": "[10, 20, 30, 15]"
+},
+{
+"args": "[[1, 2, 3, 4, 5], [6, 7, 1]]",
+"expected": "[2, 3, 4, 5, 6, 7]"
+},
+{
+"args": "[[1, 2, 3], [6, 7, 1]]",
+"expected": "[2, 3, 6, 7]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/77": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_Diff",
+"tests": [
+{
+"args": "[12345]",
+"expected": "False"
+},
+{
+"args": "[1212112]",
+"expected": "True"
+},
+{
+"args": "[1212]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/770": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "odd_num_sum",
+"tests": [
+{
+"args": "[2]",
+"expected": "82"
+},
+{
+"args": "[3]",
+"expected": "707"
+},
+{
+"args": "[4]",
+"expected": "3108"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/771": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_expression",
+"tests": [
+{
+"args": "['{()}[{}]']",
+"expected": "True"
+},
+{
+"args": "['{()}[{]']",
+"expected": "False"
+},
+{
+"args": "['{()}[{}][]({})']",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/772": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_length",
+"tests": [
+{
+"args": "['The person is most value tet', 3]",
+"expected": "'person is most value'"
+},
+{
+"args": "['If you told me about this ok', 4]",
+"expected": "'If you me about ok'"
+},
+{
+"args": "['Forces of darkeness is come into the play', 4]",
+"expected": "'Forces of darkeness is the'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/773": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "occurance_substring",
+"tests": [
+{
+"args": "['python programming, python language', 'python']",
+"expected": "('python', 0, 6)"
+},
+{
+"args": "['python programming,programming language', 'programming']",
+"expected": "('programming', 7, 18)"
+},
+{
+"args": "['python programming,programming language', 'language']",
+"expected": "('language', 31, 39)"
+},
+{
+"args": "['c++ programming, c++ language', 'python']",
+"expected": "None"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/775": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "odd_position",
+"tests": [
+{
+"args": "[[2, 1, 4, 3, 6, 7, 6, 3]]",
+"expected": "True"
+},
+{
+"args": "[[4, 1, 2]]",
+"expected": "True"
+},
+{
+"args": "[[1, 2, 3]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/777": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_sum",
+"tests": [
+{
+"args": "[[1, 2, 3, 1, 1, 4, 5, 6]]",
+"expected": "21"
+},
+{
+"args": "[[1, 10, 9, 4, 2, 10, 10, 45, 4]]",
+"expected": "71"
+},
+{
+"args": "[[12, 10, 9, 45, 2, 10, 10, 45, 10]]",
+"expected": "78"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/778": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "pack_consecutive_duplicates",
+"tests": [
+{
+"args": "[[0, 0, 1, 2, 3, 4, 4, 5, 6, 6, 6, 7, 8, 9, 4, 4]]",
+"expected": "[[0, 0], [1], [2], [3], [4, 4], [5], [6, 6, 6], [7], [8], [9], [4, 4]]"
+},
+{
+"args": "[[10, 10, 15, 19, 18, 18, 17, 26, 26, 17, 18, 10]]",
+"expected": "[[10, 10], [15], [19], [18, 18], [17], [26, 26], [17], [18], [10]]"
+},
+{
+"args": "[['a', 'a', 'b', 'c', 'd', 'd']]",
+"expected": "[['a', 'a'], ['b'], ['c'], ['d', 'd']]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/780": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_combinations",
+"tests": [
+{
+"args": "[[(1, 2, 3), (3, 4, 5)]]",
+"expected": "[(4, 6, 8)]"
+},
+{
+"args": "[[(2, 4), (6, 7), (5, 1), (6, 10)]]",
+"expected": "[(8, 11), (7, 5), (8, 14), (11, 8), (12, 17), (11, 11)]"
+},
+{
+"args": "[[(3, 5), (7, 8), (6, 2), (7, 11)]]",
+"expected": "[(10, 13), (9, 7), (10, 16), (13, 10), (14, 19), (13, 13)]"
+},
+{
+"args": "[[(4, 6), (8, 9), (7, 3), (8, 12)]]",
+"expected": "[(12, 15), (11, 9), (12, 18), (15, 12), (16, 21), (15, 15)]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/781": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_divisors",
+"tests": [
+{
+"args": "[10]",
+"expected": "True"
+},
+{
+"args": "[100]",
+"expected": "False"
+},
+{
+"args": "[125]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/782": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "odd_length_sum",
+"tests": [
+{
+"args": "[[1, 2, 4]]",
+"expected": "14"
+},
+{
+"args": "[[1, 2, 1, 2]]",
+"expected": "15"
+},
+{
+"args": "[[1, 7]]",
+"expected": "8"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/784": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "mul_even_odd",
+"tests": [
+{
+"args": "[[1, 3, 5, 7, 4, 1, 6, 8]]",
+"expected": "4"
+},
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]",
+"expected": "2"
+},
+{
+"args": "[[1, 5, 7, 9, 10]]",
+"expected": "10"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/785": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "tuple_str_int",
+"tests": [
+{
+"args": "['(7, 8, 9)']",
+"expected": "(7, 8, 9)"
+},
+{
+"args": "['(1, 2, 3)']",
+"expected": "(1, 2, 3)"
+},
+{
+"args": "['(4, 5, 6)']",
+"expected": "(4, 5, 6)"
+},
+{
+"args": "['(7, 81, 19)']",
+"expected": "(7, 81, 19)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/786": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "right_insertion",
+"tests": [
+{
+"args": "[[1, 2, 4, 5], 6]",
+"expected": "4"
+},
+{
+"args": "[[1, 2, 4, 5], 3]",
+"expected": "2"
+},
+{
+"args": "[[1, 2, 4, 5], 7]",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/787": {
+"reason": "expected_not_a_literal_type:Match",
+"spec": null
+},
+"mbppplus_Mbpp/788": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "new_tuple",
+"tests": [
+{
+"args": "[['WEB', 'is'], 'best']",
+"expected": "('WEB', 'is', 'best')"
+},
+{
+"args": "[['We', 'are'], 'Developers']",
+"expected": "('We', 'are', 'Developers')"
+},
+{
+"args": "[['Part', 'is'], 'Wrong']",
+"expected": "('Part', 'is', 'Wrong')"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/79": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "word_len",
+"tests": [
+{
+"args": "['Hadoop']",
+"expected": "False"
+},
+{
+"args": "['great']",
+"expected": "True"
+},
+{
+"args": "['structure']",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/790": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "even_position",
+"tests": [
+{
+"args": "[[3, 2, 1]]",
+"expected": "False"
+},
+{
+"args": "[[1, 2, 3]]",
+"expected": "False"
+},
+{
+"args": "[[2, 1, 4]]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/791": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_nested",
+"tests": [
+{
+"args": "[(1, 5, 7, (4, 6), 10)]",
+"expected": "(1, 5, 7, 10)"
+},
+{
+"args": "[(2, 6, 8, (5, 7), 11)]",
+"expected": "(2, 6, 8, 11)"
+},
+{
+"args": "[(3, 7, 9, (6, 8), 12)]",
+"expected": "(3, 7, 9, 12)"
+},
+{
+"args": "[(3, 7, 9, (6, 8), (5, 12), 12)]",
+"expected": "(3, 7, 9, 12)"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/792": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "count_list",
+"tests": [
+{
+"args": "[[[1, 3], [5, 7], [9, 11], [13, 15, 17]]]",
+"expected": "4"
+},
+{
+"args": "[[[1, 2], [2, 3], [4, 5]]]",
+"expected": "3"
+},
+{
+"args": "[[[1, 0], [2, 0]]]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/793": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "last",
+"tests": [
+{
+"args": "[[1, 2, 3], 1]",
+"expected": "0"
+},
+{
+"args": "[[1, 1, 1, 2, 3, 4], 1]",
+"expected": "2"
+},
+{
+"args": "[[2, 2, 3, 3, 6, 8, 9], 3]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/794": {
+"reason": "expected_not_a_literal_type:Match",
+"spec": null
+},
+"mbppplus_Mbpp/796": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "return_sum",
+"tests": [
+{
+"args": "[{'a': 100, 'b': 200, 'c': 300}]",
+"expected": "600"
+},
+{
+"args": "[{'a': 25, 'b': 18, 'c': 45}]",
+"expected": "88"
+},
+{
+"args": "[{'a': 36, 'b': 39, 'c': 49}]",
+"expected": "124"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/797": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sum_in_range",
+"tests": [
+{
+"args": "[2, 5]",
+"expected": "8"
+},
+{
+"args": "[5, 7]",
+"expected": "12"
+},
+{
+"args": "[7, 13]",
+"expected": "40"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/798": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "_sum",
+"tests": [
+{
+"args": "[[1, 2, 3]]",
+"expected": "6"
+},
+{
+"args": "[[15, 12, 13, 10]]",
+"expected": "50"
+},
+{
+"args": "[[0, 1, 2]]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/799": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "left_rotate",
+"tests": [
+{
+"args": "[16, 2]",
+"expected": "64"
+},
+{
+"args": "[10, 2]",
+"expected": "40"
+},
+{
+"args": "[99, 3]",
+"expected": "792"
+},
+{
+"args": "[99, 3]",
+"expected": "792"
+},
+{
+"args": "[1, 3]",
+"expected": "8"
+},
+{
+"args": "[5, 3]",
+"expected": "40"
+},
+{
+"args": "[29, 3]",
+"expected": "232"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/8": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "square_nums",
+"tests": [
+{
+"args": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]",
+"expected": "[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]"
+},
+{
+"args": "[[10, 20, 30]]",
+"expected": "[100, 400, 900]"
+},
+{
+"args": "[[12, 15]]",
+"expected": "[144, 225]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/80": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "tetrahedral_number",
+"tests": [
+{
+"args": "[5]",
+"expected": "35.0"
+},
+{
+"args": "[6]",
+"expected": "56.0"
+},
+{
+"args": "[7]",
+"expected": "84.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/800": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "remove_all_spaces",
+"tests": [
+{
+"args": "['python  program']",
+"expected": "'pythonprogram'"
+},
+{
+"args": "['python   programming    language']",
+"expected": "'pythonprogramminglanguage'"
+},
+{
+"args": "['python                     program']",
+"expected": "'pythonprogram'"
+},
+{
+"args": "['   python                     program']",
+"expected": "'pythonprogram'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/801": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "test_three_equal",
+"tests": [
+{
+"args": "[1, 1, 1]",
+"expected": "3"
+},
+{
+"args": "[-1, -2, -3]",
+"expected": "0"
+},
+{
+"args": "[1, 2, 2]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/803": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_perfect_square",
+"tests": [
+{
+"args": "[10]",
+"expected": "False"
+},
+{
+"args": "[36]",
+"expected": "True"
+},
+{
+"args": "[14]",
+"expected": "False"
+},
+{
+"args": "[196]",
+"expected": "True"
+},
+{
+"args": "[125]",
+"expected": "False"
+},
+{
+"args": "[15625]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/804": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_product_even",
+"tests": [
+{
+"args": "[[1, 2, 3]]",
+"expected": "True"
+},
+{
+"args": "[[1, 2, 1, 4]]",
+"expected": "True"
+},
+{
+"args": "[[1, 1]]",
+"expected": "False"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/805": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_sum_list",
+"tests": [
+{
+"args": "[[[1, 2, 3], [4, 5, 6], [10, 11, 12], [7, 8, 9]]]",
+"expected": "[10, 11, 12]"
+},
+{
+"args": "[[[3, 2, 1], [6, 5, 4], [12, 11, 10]]]",
+"expected": "[12, 11, 10]"
+},
+{
+"args": "[[[2, 3, 1]]]",
+"expected": "[2, 3, 1]"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/806": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "max_run_uppercase",
+"tests": [
+{
+"args": "['GeMKSForGERksISBESt']",
+"expected": "5"
+},
+{
+"args": "['PrECIOusMOVemENTSYT']",
+"expected": "6"
+},
+{
+"args": "['GooGLEFluTTER']",
+"expected": "4"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/807": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "first_odd",
+"tests": [
+{
+"args": "[[1, 3, 5]]",
+"expected": "1"
+},
+{
+"args": "[[2, 4, 1, 3]]",
+"expected": "1"
+},
+{
+"args": "[[8, 9, 1]]",
+"expected": "9"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/808": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_K",
+"tests": [
+{
+"args": "[(10, 4, 5, 6, 8), 6]",
+"expected": "True"
+},
+{
+"args": "[(1, 2, 3, 4, 5, 6), 7]",
+"expected": "False"
+},
+{
+"args": "[(7, 8, 9, 44, 11, 12), 11]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/809": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "check_smaller",
+"tests": [
+{
+"args": "[(1, 2, 3), (2, 3, 4)]",
+"expected": "False"
+},
+{
+"args": "[(4, 5, 6), (3, 4, 5)]",
+"expected": "True"
+},
+{
+"args": "[(11, 12, 13), (10, 11, 12)]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/82": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "volume_sphere",
+"tests": [
+{
+"args": "[10]",
+"expected": "4188.790204786391"
+},
+{
+"args": "[25]",
+"expected": "65449.84694978735"
+},
+{
+"args": "[20]",
+"expected": "33510.32163829113"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/84": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "sequence",
+"tests": [
+{
+"args": "[10]",
+"expected": "6"
+},
+{
+"args": "[2]",
+"expected": "1"
+},
+{
+"args": "[3]",
+"expected": "2"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/85": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "surfacearea_sphere",
+"tests": [
+{
+"args": "[10]",
+"expected": "1256.6370614359173"
+},
+{
+"args": "[15]",
+"expected": "2827.4333882308138"
+},
+{
+"args": "[20]",
+"expected": "5026.548245743669"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/86": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "centered_hexagonal_number",
+"tests": [
+{
+"args": "[10]",
+"expected": "271"
+},
+{
+"args": "[2]",
+"expected": "7"
+},
+{
+"args": "[9]",
+"expected": "217"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/87": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "merge_dictionaries_three",
+"tests": [
+{
+"args": "[{'R': 'Red', 'P': 'Pink'}, {'G': 'Green'}, {'O': 'Orange', 'W': 'White', 'B': 'Black'}]",
+"expected": "{'O': 'Orange', 'W': 'White', 'B': 'Black', 'G': 'Green', 'R': 'Red', 'P': 'Pink'}"
+},
+{
+"args": "[{'R': 'Red', 'P': 'Pink'}, {'G': 'Green', 'W': 'White'}, {'L': 'lavender', 'B': 'Blue'}]",
+"expected": "{'L': 'lavender', 'B': 'Blue', 'G': 'Green', 'W': 'White', 'R': 'Red', 'P': 'Pink'}"
+},
+{
+"args": "[{'R': 'Red', 'P': 'Pink'}, {'L': 'lavender', 'B': 'Blue'}, {'G': 'Green', 'W': 'White'}]",
+"expected": "{'G': 'Green', 'W': 'White', 'L': 'lavender', 'B': 'Blue', 'R': 'Red', 'P': 'Pink'}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/88": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "freq_count",
+"tests": [
+{
+"args": "[[10, 10, 10, 10, 20, 20, 20, 20, 40, 40, 50, 50, 30]]",
+"expected": "{10: 4, 20: 4, 40: 2, 50: 2, 30: 1}"
+},
+{
+"args": "[[1, 2, 3, 4, 3, 2, 4, 1, 3, 1, 4]]",
+"expected": "{1: 3, 2: 2, 3: 3, 4: 3}"
+},
+{
+"args": "[[5, 6, 7, 4, 9, 10, 4, 5, 6, 7, 9, 5]]",
+"expected": "{5: 3, 6: 2, 7: 2, 4: 2, 9: 2, 10: 1}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/89": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "closest_num",
+"tests": [
+{
+"args": "[11]",
+"expected": "10"
+},
+{
+"args": "[7]",
+"expected": "6"
+},
+{
+"args": "[12]",
+"expected": "11"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/9": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_Rotations",
+"tests": [
+{
+"args": "['aaaa']",
+"expected": "1"
+},
+{
+"args": "['ab']",
+"expected": "2"
+},
+{
+"args": "['abc']",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/90": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "len_log",
+"tests": [
+{
+"args": "[['python', 'PHP', 'bigdata']]",
+"expected": "7"
+},
+{
+"args": "[['a', 'ab', 'abc']]",
+"expected": "3"
+},
+{
+"args": "[['small', 'big', 'tall']]",
+"expected": "5"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/91": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "find_substring",
+"tests": [
+{
+"args": "[['red', 'black', 'white', 'green', 'orange'], 'ack']",
+"expected": "True"
+},
+{
+"args": "[['red', 'black', 'white', 'green', 'orange'], 'abc']",
+"expected": "False"
+},
+{
+"args": "[['red', 'black', 'white', 'green', 'orange'], 'ange']",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/92": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "is_undulating",
+"tests": [
+{
+"args": "[1212121]",
+"expected": "True"
+},
+{
+"args": "[1991]",
+"expected": "False"
+},
+{
+"args": "[121]",
+"expected": "True"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/93": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "power",
+"tests": [
+{
+"args": "[3, 4]",
+"expected": "81"
+},
+{
+"args": "[2, 3]",
+"expected": "8"
+},
+{
+"args": "[5, 5]",
+"expected": "3125"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/94": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "index_minimum",
+"tests": [
+{
+"args": "[[('Rash', 143), ('Manjeet', 200), ('Varsha', 100)]]",
+"expected": "'Varsha'"
+},
+{
+"args": "[[('Yash', 185), ('Dawood', 125), ('Sanya', 175)]]",
+"expected": "'Dawood'"
+},
+{
+"args": "[[('Sai', 345), ('Salman', 145), ('Ayesha', 96)]]",
+"expected": "'Ayesha'"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/95": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "Find_Min_Length",
+"tests": [
+{
+"args": "[[[1], [1, 2]]]",
+"expected": "1"
+},
+{
+"args": "[[[1, 2], [1, 2, 3], [1, 2, 3, 4]]]",
+"expected": "2"
+},
+{
+"args": "[[[3, 3, 3], [4, 4, 4, 4]]]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/96": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "divisor",
+"tests": [
+{
+"args": "[15]",
+"expected": "4"
+},
+{
+"args": "[12]",
+"expected": "6"
+},
+{
+"args": "[9]",
+"expected": "3"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/97": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "frequency_lists",
+"tests": [
+{
+"args": "[[[1, 2, 3, 2], [4, 5, 6, 2], [7, 8, 9, 5]]]",
+"expected": "{1: 1, 2: 3, 3: 1, 4: 1, 5: 2, 6: 1, 7: 1, 8: 1, 9: 1}"
+},
+{
+"args": "[[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]]",
+"expected": "{1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1}"
+},
+{
+"args": "[[[20, 30, 40, 17], [18, 16, 14, 13], [10, 20, 30, 40]]]",
+"expected": "{20: 2, 30: 2, 40: 2, 17: 1, 18: 1, 16: 1, 14: 1, 13: 1, 10: 1}"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/98": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0001,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "multiply_num",
+"tests": [
+{
+"args": "[[8, 2, 3, -1, 7]]",
+"expected": "-67.2"
+},
+{
+"args": "[[-10, -20, -30]]",
+"expected": "-2000.0"
+},
+{
+"args": "[[19, 15, 18]]",
+"expected": "1710.0"
+}
+],
+"v": 1
+}
+},
+"mbppplus_Mbpp/99": {
+"reason": "",
+"spec": {
+"cmp": {
+"atol": 0.0,
+"regex_predicate": false,
+"set_equivalent": false
+},
+"dialect": "mbpp",
+"entry_point": "decimal_to_binary",
+"tests": [
+{
+"args": "[8]",
+"expected": "'1000'"
+},
+{
+"args": "[18]",
+"expected": "'10010'"
+},
+{
+"args": "[7]",
+"expected": "'111'"
+}
+],
+"v": 1
+}
+}
+}
+}
