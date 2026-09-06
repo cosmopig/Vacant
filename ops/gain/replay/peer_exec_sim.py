@@ -278,13 +278,31 @@ def load_specs(run: str) -> dict[str, "ss.SuiteSpec"]:
     ⚠ 這改變了本檔舊掃描的**分母**：轉不出 spec 的題目沒有套件可交，會被跳過。
       轉換率是 `r452_suitespec.py --convert` 的產物，逐題落盤在
       `cache/suitespec_<run>.json`，不准在這裡默默補一份假的。
+
+    round452b：每一份 spec 都在這裡**綁上題目的 entry_point**（`ss.validate(...,
+    entry_point=...)`）。cache 是資料檔，資料檔可以被改；一份 entry_point 被換成
+    `exec` 的 cache 進不了這道門。綁不上的照實丟掉並印出來，不當成「這題沒有 spec」
+    默默混進轉換成本裡。
     """
     p = CACHE / f"suitespec_{run}.json"
     if not p.exists():
         raise SystemExit(
             f"缺 spec cache：先跑 ops/gain/replay/r452_suitespec.py --convert {run}")
     d = json.loads(p.read_text())
-    return {tid: ss.validate(v["spec"]) for tid, v in d["specs"].items() if v["spec"]}
+    tasks, _cands = load_pool(run)
+    out, rejected = {}, {}
+    for tid, v in d["specs"].items():
+        if not v["spec"]:
+            continue
+        try:
+            out[tid] = ss.validate(v["spec"], entry_point=(tasks.get(tid) or {}).get(
+                "entry_point"))
+        except ss.SuiteSpecError as exc:
+            rejected[tid] = str(exc)
+    if rejected:
+        print(f"⚠ {len(rejected)} 份 spec 綁不上題目的 entry_point，已丟棄："
+              f"{sorted(rejected.items())[:5]}", flush=True)
+    return out
 
 
 # ── 探針：誠實 ＋ 四種腐化 ──────────────────────────────────────────────────
@@ -1394,7 +1412,8 @@ def gate_delivery(run, variant, *, k=3, workers=6, stub_n=4):
                                 not accepted, bool(rec["ref_passed"]))
             try:
                 entry = px.commit_suite(book, ident, task_id=tid, suite=spec,
-                                        nonce=GAUGE_NONCE, gauge=gr,
+                                        nonce=GAUGE_NONCE,
+                                        entry_point=t.get("entry_point"), gauge=gr,
                                         ts_ms=1_700_000_000_000)
                 row["committed"] = True
             except px.SuiteGaugeError as exc:

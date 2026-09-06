@@ -1,5 +1,5 @@
 {
-"elapsed_s": 29.6,
+"elapsed_s": 54.7,
 "labels": {
 "lcb_3487#0": true,
 "lcb_3487#1": true,
@@ -462,7 +462,7 @@
 "n_candidates": 455,
 "n_specs": 91,
 "n_tasks": 91,
-"render_byte_identical_to_loader": 91,
+"render_byte_identical_to_loader": 0,
 "run": "g_r443_gemma_lcb",
 "same": 455,
 "unconvertible_tasks": [],

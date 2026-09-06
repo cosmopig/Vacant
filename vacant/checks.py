@@ -20,6 +20,13 @@ run_python 是**受限沙箱**（獨立行程 `python -I` + 逾時 + CPU rlimit 
 NW-2a：沙箱本體對外也直接曝露成 `run_python_check(candidate_code, test_code,
 *, timeout=8) -> bool`，供 Auditor（稽核＝重跑 hidden_check）與 codebench 的
 MBPP+ 任務族共用同一顆沙箱，不必每處各自兜一份 subprocess 邏輯。
+
+round452b：test_code 是貼在 runner 的 **module scope** 執行的，所以裡面的裸名字
+會沿著 module → builtins 解析。這在「測試碼由驗證者寫」的年代沒有代價；R452 讓
+供應者可以指定 entry_point 之後，它就成了一條走私管道。修法見 `CANDIDATE_NS_NAME`
+——候選函式除了 proxy 之外再曝露成一個字典，驗收碼改用**明確的命名空間查找**
+（repr 過的字串鍵）取 entry point，裸名字那條解析路徑不再被使用。
+`run_python_check` 的簽章與語意不變。
 """
 
 from __future__ import annotations
@@ -184,6 +191,21 @@ _FORBIDDEN_ATTRS = {
 }
 
 
+#: runner.py 裡那個 `{候選函式名 → proxy}` 的字典名稱（round452b）。
+#:
+#: 為什麼要有它：`_test_runner_source` 把 test_code 原樣貼在 runner 的 **module
+#: scope**，所以測試碼裡的一個裸名字會沿著 module → builtins 解析——候選沒定義
+#: `exec` 的時候，`exec(...)` 解析到的是 `builtins.exec`。round452 的 SuiteSpec
+#: 讓供應者可以指定 entry_point，於是「用一個裸名字挑到 builtins」變成一條可用的
+#: 走私管道（`ops/gain/replay/r452b_smuggle_gate.py` 實測：假交付 31.52%）。
+#:
+#: 這個字典是**唯一**需要新增的鉤子：驗收碼改成 `__vacant_ns['<名字>']` 之後，
+#: 名字只以 repr 過的字串鍵出現，永遠不會被當成識別字解析，於是 builtins 與
+#: runner 自己的 import（os／subprocess／sys／…）都到不了。
+#: `run_python_check` 的簽章與語意不變（`tests/test_gain_*.py` 是防呆）。
+CANDIDATE_NS_NAME = "__vacant_ns"
+
+
 def _candidate_functions(
     candidate_code: str, *, allowed_imports: tuple[str, ...] = (),
     allowed_entry_points: tuple[str, ...] = (),
@@ -222,7 +244,7 @@ def _candidate_functions(
                 return None
     reserved = set(dir(builtins)) | {
         "ast", "builtins", "json", "os", "selectors", "subprocess", "sys", "time",
-        "_protocol", "_selector", "_vacant_call", "_worker",
+        "_protocol", "_selector", "_vacant_call", "_worker", CANDIDATE_NS_NAME,
     }
     allowed_entries = set(allowed_entry_points)
     return list(dict.fromkeys(
@@ -343,6 +365,14 @@ def _test_runner_source(
         f"def {name}(*args, **kwargs):\n"
         f"    return _vacant_call({name!r}, *args, **kwargs)"
         for name in function_names
+    )
+    # round452b：同一批 proxy 再曝露成一個明確的命名空間。鍵是 repr 過的字串，
+    # 所以驗收碼可以用 `__vacant_ns['f']` 取 entry point 而不必寫出一個裸名字。
+    # 缺鍵時是 KeyError（fail-closed），不是沿著 builtins 找到別的東西。
+    candidate_ns = (
+        f"{CANDIDATE_NS_NAME} = {{"
+        + ", ".join(f"{name!r}: {name}" for name in function_names)
+        + "}"
     )
     return f'''import ast
 import builtins
@@ -472,6 +502,8 @@ def _vacant_call(function, *args, **kwargs):
     raise TimeoutError("candidate solve timed out")
 
 {proxies}
+
+{candidate_ns}
 
 try:
 {chr(10).join("    " + line for line in (test_code or "").splitlines())}

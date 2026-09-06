@@ -108,12 +108,30 @@ def convert(run: str, workers: int = 6) -> dict:
 
 
 def load_specs(run: str) -> dict[str, ss.SuiteSpec]:
+    """cache → spec，每一份都**綁上題目宣告的 entry_point**（round452b）。
+
+    entry_point 屬於題目不屬於套件。cache 是一個檔案，檔案可以被改；綁在這裡的話，
+    一份 entry_point 被換成 `exec` 的 spec 連進記憶體都進不來（`entry_point_mismatch`
+    ／`entry_point_reserved`）。綁不上的照實印出來，不默默併進轉換成本。
+    """
     p = CACHE / f"suitespec_{run}.json"
     if not p.exists():
         raise SystemExit(f"缺 spec cache：先跑 --convert {run}")
     d = json.loads(p.read_text())
-    return {tid: ss.validate(v["spec"])
-            for tid, v in d["specs"].items() if v["spec"]}
+    tasks, _cands = sim.load_pool(run)
+    out, rejected = {}, {}
+    for tid, v in d["specs"].items():
+        if not v["spec"]:
+            continue
+        try:
+            out[tid] = ss.validate(v["spec"],
+                                   entry_point=(tasks.get(tid) or {}).get("entry_point"))
+        except ss.SuiteSpecError as exc:
+            rejected[tid] = str(exc)
+    if rejected:
+        print(f"⚠ {len(rejected)} 份 spec 綁不上題目的 entry_point，已丟棄："
+              f"{sorted(rejected.items())[:5]}", flush=True)
+    return out
 
 
 # ── 無損普查：渲染出來的碼 vs 快取的可見標籤 ────────────────────────────────
@@ -475,7 +493,8 @@ def gate(run: str, k: int = 3, workers: int = 6, variants=VARIANTS) -> dict:
             committer = px.PublicIdentity(ident.vacant_id, ident.pub)
             try:
                 entry = px.commit_suite(book, ident, task_id=tid, suite=use,
-                                        nonce=GAUGE_NONCE, gauge=gr,
+                                        nonce=GAUGE_NONCE,
+                                        entry_point=t.get("entry_point"), gauge=gr,
                                         ts_ms=1_700_000_000_000)
                 row["committed"] = True
             except px.SuiteGaugeError as exc:
@@ -589,6 +608,10 @@ def main() -> None:
     ap.add_argument("--gate", nargs="+", metavar="RUN")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--k", type=int, default=3)
+    # round452b：`--out` 讓修補後的重跑寫到**新檔**。R452 的證物
+    # （peer_exec_suitespec_gate.json）不准被覆蓋——覆蓋掉就沒有「修補前後逐位比對」
+    # 這件事可做了。
+    ap.add_argument("--out", default="peer_exec_suitespec_gate.json", metavar="NAME")
     a = ap.parse_args()
     for run in a.convert or []:
         convert(run, workers=a.workers)
@@ -607,7 +630,7 @@ def main() -> None:
             out.append(res)
         payload = {"aggs": [r for x in out for r in x["aggs"]],
                    "rows": [r for x in out for r in x["rows"]]}
-        p = OUT / "peer_exec_suitespec_gate.json"
+        p = OUT / a.out
         p.write_text(json.dumps(payload, indent=1, sort_keys=True))
         print(f"wrote {p}")
 

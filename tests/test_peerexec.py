@@ -324,10 +324,11 @@ def test_suite_commit_reveal_binds_the_suite_in_time():
     gauge = run_suite_gauge(SPEC, GOOD, [BAD],
                             entry_point="f", runner=rule_runner(lambda c, _k: c is GOOD))
     entry = commit_suite(book, ident, task_id="t1", suite=SPEC, nonce=nonce,
-                         gauge=gauge, ts_ms=TS)
-    assert open_suite(entry, SPEC, nonce)
-    assert not open_suite(entry, SPEC_WEAK, nonce)      # 揭露另一份 spec ⇒ 對不上
-    assert not open_suite(entry, SPEC, "f" * 32)
+                         entry_point="f", gauge=gauge, ts_ms=TS)
+    assert open_suite(entry, SPEC, nonce, entry_point="f")
+    # 揭露另一份 spec ⇒ 對不上
+    assert not open_suite(entry, SPEC_WEAK, nonce, entry_point="f")
+    assert not open_suite(entry, SPEC, "f" * 32, entry_point="f")
     assert book.verify_chain(
         __import__("vacant.identity", fromlist=["PublicIdentity"]).PublicIdentity(
             ident.vacant_id, ident.pub))
@@ -491,7 +492,8 @@ def test_a_wrong_expected_suite_is_refused_at_commit(mbpp_task):
     book, ident = Logbook(), Identity.generate()
     with pytest.raises(SuiteGaugeError) as e:
         commit_suite_with_gauge(book, ident, task_id="t1", suite=bad,
-                                nonce=NONCE, reference=REF_SIMILAR, ts_ms=TS)
+                                nonce=NONCE, reference=REF_SIMILAR,
+                                entry_point="similar_elements", ts_ms=TS)
     assert "gauge_failed" in str(e.value) and "ref_passed=False" in str(e.value)
     assert book.entries == []
 
@@ -501,7 +503,7 @@ def test_real_mbpp_spec_is_accepted_at_commit(mbpp_task, mbpp_spec):
     book, ident = Logbook(), Identity.generate()
     entry = commit_suite_with_gauge(
         book, ident, task_id=mbpp_task["task_id"], suite=mbpp_spec, nonce=NONCE,
-        reference=REF_SIMILAR, ts_ms=TS)
+        reference=REF_SIMILAR, entry_point="similar_elements", ts_ms=TS)
     rec = GaugeRecord.from_payload(entry.payload["gauge"])
     assert rec.ref_passed and rec.all_rejected and rec.n_broken == 1 and rec.ok
     # 紀錄綁的是 **spec 資料的雜湊**，不是某一份渲染出來的碼的雜湊。
@@ -509,8 +511,9 @@ def test_real_mbpp_spec_is_accepted_at_commit(mbpp_task, mbpp_spec):
     assert rec.suite_sha256 != sha256_hex(mbpp_spec.render())
     assert rec.ref_sha256 == sha256_hex(REF_SIMILAR)
     assert entry.payload["suite_sha256"] == mbpp_spec.suite_sha256
-    assert open_suite(entry, mbpp_spec, NONCE)
-    assert suite_gate(entry, mbpp_spec, NONCE,
+    assert entry.payload["entry_point"] == "similar_elements"
+    assert open_suite(entry, mbpp_spec, NONCE, entry_point="similar_elements")
+    assert suite_gate(entry, mbpp_spec, NONCE, entry_point="similar_elements",
                       who=PublicIdentity(ident.vacant_id, ident.pub)) == (True, "")
     assert book.verify_chain(PublicIdentity(ident.vacant_id, ident.pub))
 
@@ -522,8 +525,10 @@ def test_a_third_party_recomputes_the_gauge_record_from_spec_reference_stubs(mbp
     渲染是確定性的，所以「我信你簽的」可以換成「我自己算一遍」。真沙箱。
     """
     stubs = [broken_stub("similar_elements"), STUB_EMPTY]
-    mine = run_suite_gauge(mbpp_spec, REF_SIMILAR, stubs)
-    theirs = run_suite_gauge(ss.validate(mbpp_spec.to_json()), REF_SIMILAR, stubs)
+    mine = run_suite_gauge(mbpp_spec, REF_SIMILAR, stubs,
+                           entry_point="similar_elements")
+    theirs = run_suite_gauge(ss.validate(mbpp_spec.to_json()), REF_SIMILAR, stubs,
+                             entry_point="similar_elements")
     assert mine.as_payload() == theirs.as_payload() and mine.ok
     # 而且渲染本身是確定性的：同一份 spec ⇒ 同一份碼（不同的 SuiteSpec 物件也一樣）。
     assert mbpp_spec.render() == ss.validate(mbpp_spec.to_json()).render()
@@ -538,12 +543,13 @@ def test_a_spec_that_picks_an_easy_input_passes_the_reference_but_admits_a_stub(
     """
     easy = spec_for("similar_elements", [{"args": "[[1, 2], [3, 4]]", "expected": "()"}])
     book, ident = Logbook(), Identity.generate()
-    one = run_suite_gauge(easy, REF_SIMILAR, [broken_stub("similar_elements")])
+    one = run_suite_gauge(easy, REF_SIMILAR, [broken_stub("similar_elements")],
+                          entry_point="similar_elements")
     assert one.ok            # 只放一個樁 ⇒ 這套爛驗收會被放行（量具是下界）
     with pytest.raises(SuiteGaugeError) as e:
         commit_suite_with_gauge(
             book, ident, task_id="t1", suite=easy, nonce=NONCE,
-            reference=REF_SIMILAR,
+            reference=REF_SIMILAR, entry_point="similar_elements",
             broken_stubs=[broken_stub("similar_elements"), STUB_EMPTY], ts_ms=TS)
     assert "gauge_failed" in str(e.value) and "ref_passed=True" in str(e.value)
     assert book.entries == []
@@ -551,11 +557,12 @@ def test_a_spec_that_picks_an_easy_input_passes_the_reference_but_admits_a_stub(
 
 def test_an_empty_known_bad_set_is_not_a_pass():
     """零個壞樁 ⇒ 「全部被擋」空洞地成立。fail-open 要在 commit 就被擋下來。"""
-    rec = run_suite_gauge(SPEC, GOOD, [], runner=rule_runner(lambda *_: True))
+    rec = run_suite_gauge(SPEC, GOOD, [], entry_point="f",
+                          runner=rule_runner(lambda *_: True))
     assert rec.ref_passed and rec.n_broken == 0 and not rec.ok
     with pytest.raises(SuiteGaugeError) as e:
         commit_suite(Logbook(), Identity.generate(), task_id="t1", suite=SPEC,
-                     nonce=NONCE, gauge=rec, ts_ms=TS)
+                     nonce=NONCE, entry_point="f", gauge=rec, ts_ms=TS)
     assert "n_broken=0" in str(e.value)
 
 
@@ -567,13 +574,16 @@ def test_a_raw_code_suite_cannot_enter_any_door():
     """
     raw = "assert f(1) == 2\n"
     book, ident = Logbook(), Identity.generate()
-    rec = run_suite_gauge(SPEC, GOOD, [BAD], runner=rule_runner(lambda c, _k: c is GOOD))
+    rec = run_suite_gauge(SPEC, GOOD, [BAD], entry_point="f",
+                          runner=rule_runner(lambda c, _k: c is GOOD))
     for call in (
-        lambda: as_suite_spec(raw),
-        lambda: commit_suite(book, ident, task_id="t", suite=raw, nonce=NONCE, gauge=rec),
+        lambda: as_suite_spec(raw, "f"),
+        lambda: commit_suite(book, ident, task_id="t", suite=raw, nonce=NONCE,
+                             entry_point="f", gauge=rec),
         lambda: commit_suite_with_gauge(book, ident, task_id="t", suite=raw,
-                                        nonce=NONCE, reference=GOOD),
-        lambda: run_suite_gauge(raw, GOOD, [BAD], runner=rule_runner(lambda *_: True)),
+                                        nonce=NONCE, reference=GOOD, entry_point="f"),
+        lambda: run_suite_gauge(raw, GOOD, [BAD], entry_point="f",
+                                runner=rule_runner(lambda *_: True)),
         lambda: select_by_quorum(task(), [(GOOD, "w")], mk(1, truth_probe(TRUTH)),
                                  suite=raw, ts_ms=TS),
         lambda: mk(1, truth_probe(TRUTH))[0].attest(task(), GOOD, suite=raw, ts_ms=TS),
@@ -589,8 +599,8 @@ def _gauged_commit(spec=SPEC, *, task_id="t1"):
     book, ident = Logbook(), Identity.generate()
     rec = run_suite_gauge(spec, GOOD, [BAD], entry_point="f",
                           runner=rule_runner(lambda c, _k: c is GOOD))
-    return commit_suite(book, ident, task_id=task_id, suite=spec,
-                        nonce=NONCE, gauge=rec, ts_ms=TS), book, ident
+    return commit_suite(book, ident, task_id=task_id, suite=spec, nonce=NONCE,
+                        entry_point="f", gauge=rec, ts_ms=TS), book, ident
 
 
 def test_tampering_the_gauge_record_breaks_chain_verification():
@@ -601,7 +611,7 @@ def test_tampering_the_gauge_record_breaks_chain_verification():
     """
     entry, book, ident = _gauged_commit()
     who = PublicIdentity(ident.vacant_id, ident.pub)
-    assert book.verify_chain(who) and open_suite(entry, SPEC, NONCE)
+    assert book.verify_chain(who) and open_suite(entry, SPEC, NONCE, entry_point="f")
 
     def mutate(**over):
         p = dict(entry.payload)
@@ -612,14 +622,16 @@ def test_tampering_the_gauge_record_breaks_chain_verification():
     # (a) 事後賴帳：把 all_rejected 改成 False。鏈驗不過，而且內容本身就已經不合格。
     lowered = mutate(all_rejected=False)
     assert not Logbook([lowered]).verify_chain(who)
-    assert suite_gate(lowered, SPEC, NONCE) == (False, "gauge_failed")
+    assert suite_gate(lowered, SPEC, NONCE, entry_point="f") == (False, "gauge_failed")
     # (b) 假造更強的合格證：把 n_broken 從 1 灌水成 99。內容檢查**抓不到**這個
     #     （灌水後的紀錄照樣「合格」）——只有簽章抓得到。這條邊界要寫出來：
     #     量具紀錄的可信度來自簽章鏈，不是來自它自己說了什麼。
     inflated = mutate(n_broken=99)
     assert not Logbook([inflated]).verify_chain(who)
-    assert suite_gate(inflated, SPEC, NONCE) == (True, "")            # 內容看不出來
-    assert suite_gate(inflated, SPEC, NONCE, who=who) == (False, "bad_signature")
+    assert suite_gate(inflated, SPEC, NONCE,
+                      entry_point="f") == (True, "")                  # 內容看不出來
+    assert suite_gate(inflated, SPEC, NONCE, entry_point="f",
+                      who=who) == (False, "bad_signature")
 
 
 def test_open_suite_refuses_a_commit_without_a_gauge_record():
@@ -628,16 +640,19 @@ def test_open_suite_refuses_a_commit_without_a_gauge_record():
     bare = LogEntry(entry.stream_id, entry.branch_id, entry.seq, entry.prev_hash,
                     entry.ts_ms, entry.type,
                     {k: v for k, v in entry.payload.items() if k != "gauge"}, entry.sig)
-    assert suite_gate(bare, SPEC, NONCE) == (False, "gauge_record_missing")
-    assert not open_suite(bare, SPEC, NONCE)
+    assert suite_gate(bare, SPEC, NONCE,
+                      entry_point="f") == (False, "gauge_record_missing")
+    assert not open_suite(bare, SPEC, NONCE, entry_point="f")
     # 綁錯套件的紀錄也擋掉（拿別題的合格證來用）。
     other = dict(entry.payload)
     other["gauge"] = dict(other["gauge"]) | {"suite_sha256": sha256_hex("pass")}
     assert suite_gate(LogEntry(entry.stream_id, entry.branch_id, entry.seq,
                                entry.prev_hash, entry.ts_ms, entry.type, other,
-                               entry.sig), SPEC, NONCE) == (False, "gauge_suite_mismatch")
+                               entry.sig), SPEC, NONCE,
+                      entry_point="f") == (False, "gauge_suite_mismatch")
     # 揭露的是**另一份 spec** ⇒ 承諾對不上。
-    assert suite_gate(entry, SPEC_WEAK, NONCE) == (False, "commitment_mismatch")
+    assert suite_gate(entry, SPEC_WEAK, NONCE,
+                      entry_point="f") == (False, "commitment_mismatch")
 
 
 def test_form_verdict_rejects_attestations_against_an_uncommitted_suite():
@@ -679,12 +694,16 @@ def test_form_verdict_rejects_a_suite_whose_gauge_record_failed():
 def test_gauged_suite_index_only_admits_gate_passing_commits():
     """白名單的建構函式自己 fail-closed：揭露對不上的承諾進不了索引。"""
     entry, _b, _i = _gauged_commit()
-    idx = gauged_suite_index([(entry, SPEC, NONCE)])
+    idx = gauged_suite_index([(entry, SPEC, NONCE, "f")])
     assert set(idx) == {SSHA} and idx[SSHA].ok
-    assert gauged_suite_index([(entry, SPEC, "f" * 32)]) == {}          # nonce 不對
-    assert gauged_suite_index([(entry, SPEC_WEAK, NONCE)]) == {}        # 套件不對
+    assert gauged_suite_index([(entry, SPEC, "f" * 32, "f")]) == {}     # nonce 不對
+    assert gauged_suite_index([(entry, SPEC_WEAK, NONCE, "f")]) == {}   # 套件不對
+    assert gauged_suite_index([(entry, SPEC, NONCE, "g")]) == {}        # 題目不對
     # 餵一段原始碼進來連例外都不會逸出——它就是進不了索引。
-    assert gauged_suite_index([(entry, "assert f(1) == 2\n", NONCE)]) == {}
+    assert gauged_suite_index([(entry, "assert f(1) == 2\n", NONCE, "f")]) == {}
+    # 三元組**沒有相容路徑**：省略 entry_point 是型別錯誤，不是「不檢查」。
+    with pytest.raises(TypeError):
+        gauged_suite_index([(entry, SPEC, NONCE)])
 
 
 def test_a_weak_suite_no_longer_ships_once_the_gate_is_on():
@@ -826,7 +845,7 @@ def test_the_r451_attack_suites_have_no_encoding_as_a_spec(mbpp_task):
         assert "unrecognized_suite_shape" in str(e.value), (name, str(e.value))
         # 而且它們連當成一份 spec 遞進來都不行（`str` 就是原始碼那道門）。
         with pytest.raises(SuiteSpecError):
-            as_suite_spec(code)
+            as_suite_spec(code, ep)
     # 對照：**真的**那一套認得出來，而且轉得成 spec（不是把所有東西都拒掉）。
     parsed = ss.parse_check_code(real)
     assert parsed["dialect"] == "mbpp" and parsed["entry_point"] == ep
@@ -841,5 +860,147 @@ def test_the_gauge_still_runs_on_the_rendered_code_not_on_supplier_code(mbpp_spe
     for forbidden in ("import ", "open(", "_worker", "exec(", "hashlib", "__canon"):
         assert forbidden not in code.replace("import re as __vacant_re\n", "", 1), forbidden
     rec = run_suite_gauge(mbpp_spec, REF_SIMILAR,
-                          [broken_stub("similar_elements"), STUB_EMPTY])
+                          [broken_stub("similar_elements"), STUB_EMPTY],
+                          entry_point="similar_elements")
     assert rec.ok and rec.n_broken == 2
+
+
+# ── 9. round452b：entry_point 綁題目，每一道門都要擋 ────────────────────────
+#
+# 這一組釘的是一次**已經發生過的**破口：1cfec80 上 entry_point 是套件的欄位，
+# `entry_point="exec"` ＋ 一條字串 args 就是任意程式執行，368/371 過 commit、
+# 假交付 31.52%（`ops/gain/replay/r452b_smuggle_gate.py`）。修法是把 entry_point
+# 綁回題目 ＋ 渲染器改命名空間查找。這裡逐門測第一半。
+
+def _mismatch_doors():
+    """每一道吃 SuiteSpec 的門 ＋ 一個「套件驗的不是這一題」的呼叫。
+
+    `SPEC.entry_point == "f"`，題目宣告的是 `"g"`（`task_g`）——一份完全合法、
+    量具也過得了的 spec，唯一的問題是它驗的不是客戶要的那個函式。
+    """
+    def task_g():
+        return {"task_id": "t1", "entry_point": "g",
+                "visible_check": {"type": "run_python", "code": "pass", "timeout": 8}}
+
+    rec = run_suite_gauge(SPEC, GOOD, [BAD], entry_point="f",
+                          runner=rule_runner(lambda c, _k: c is GOOD))
+    entry, _b, _i = _gauged_commit()
+
+    def door_commit(book, ident, execs):
+        return commit_suite(book, ident, task_id="t1", suite=SPEC, nonce=NONCE,
+                            entry_point="g", gauge=rec, ts_ms=TS)
+
+    def door_commit_with_gauge(book, ident, execs):
+        return commit_suite_with_gauge(
+            book, ident, task_id="t1", suite=SPEC, nonce=NONCE, reference=GOOD,
+            entry_point="g", runner=rule_runner(lambda c, _k: c is GOOD), ts_ms=TS)
+
+    def door_run_gauge(book, ident, execs):
+        return run_suite_gauge(SPEC, GOOD, [BAD], entry_point="g",
+                               runner=rule_runner(lambda c, _k: c is GOOD))
+
+    def door_attest(book, ident, execs):
+        return execs[0].attest(task_g(), GOOD, suite=SPEC, ts_ms=TS)
+
+    def door_challenge(book, ident, execs):
+        v, _a, _r = verdict_for(execs, task(), GOOD)
+        for e in execs:
+            e.book = Logbook()
+        return challenge_rerun(task_g(), GOOD, execs, v, suite=SPEC, ts_ms=TS)
+
+    return {
+        "commit_suite": (door_commit, True),
+        "commit_suite_with_gauge": (door_commit_with_gauge, True),
+        "run_suite_gauge": (door_run_gauge, True),
+        "Executor.attest": (door_attest, True),
+        "challenge_rerun": (door_challenge, True),
+        "suite_gate": (lambda b, i, e: suite_gate(entry, SPEC, NONCE,
+                                                  entry_point="g"), False),
+        "open_suite": (lambda b, i, e: open_suite(entry, SPEC, NONCE,
+                                                  entry_point="g"), False),
+        "gauged_suite_index": (
+            lambda b, i, e: gauged_suite_index([(entry, SPEC, NONCE, "g")]), False),
+        "select_by_quorum": (
+            lambda b, i, e: select_by_quorum(task_g(), [(GOOD, "wA")], e,
+                                             suite=SPEC, ts_ms=TS), False),
+    }
+
+
+@pytest.mark.parametrize("door", sorted(_mismatch_doors()))
+def test_entry_point_mismatch_is_refused_at_every_door(door):
+    """套件的 entry_point ≠ 題目的 ⇒ 每一道門都拒，而且**鏈上一筆都沒有**。
+
+    「沒有預設值可以跳過檢查」這句話的可執行版本：九道門逐一點名。有理由通道的
+    （`suite_gate`／`select_by_quorum`／索引）回理由，沒有的丟例外——兩種都不准
+    先產生一筆 entry 再說。
+    """
+    call, raises = _mismatch_doors()[door]
+    book, ident = Logbook(), Identity.generate()
+    execs = mk(3, truth_probe(TRUTH))
+    if raises:
+        with pytest.raises(SuiteSpecError) as e:
+            call(book, ident, execs)
+        assert str(e.value) == "entry_point_mismatch"
+    else:
+        out = call(book, ident, execs)
+        if door == "suite_gate":
+            assert out == (False, "entry_point_mismatch")
+        elif door == "open_suite":
+            assert out is False
+        elif door == "gauged_suite_index":
+            assert out == {}
+        else:
+            assert out.refused and out.refusal_reason == "entry_point_mismatch"
+            assert out.n_sandbox_runs == 0 and out.verdicts == ()
+    assert book.entries == []
+    assert all(e.book.entries == [] for e in execs)
+
+
+@pytest.mark.parametrize("ep", ["exec", "eval", "open", "getattr", "os", "subprocess"])
+def test_a_task_whose_entry_point_is_dangerous_is_itself_refused(ep):
+    """就算題目自己宣告 `entry_point="exec"`，套件照樣進不了任何一道門。
+
+    這是 R452b 走私的最後一格：攻擊者若能連題目一起換掉，「相符」就不再是保護。
+    黑名單（防禦縱深）在這裡把它接住，而真正讓 payload 失效的是渲染器
+    （`tests/test_suitespec.py::test_the_r452b_smuggle_payloads_never_execute...`）。
+    """
+    payload = "import os\nos.system('true')\n"
+    raw = {"v": 1, "dialect": "mbpp", "entry_point": ep,
+           "tests": [{"args": repr([payload]), "expected": "None"}],
+           "cmp": {"atol": 0.0}}
+    with pytest.raises(SuiteSpecError) as e:
+        ss.validate(raw, entry_point=ep)
+    assert str(e.value) == "entry_point_reserved"
+    t = {"task_id": "t1", "entry_point": ep,
+         "visible_check": {"type": "run_python", "code": "pass", "timeout": 8}}
+    book, ident = Logbook(), Identity.generate()
+    with pytest.raises(SuiteSpecError):
+        commit_suite(book, ident, task_id="t1", suite=raw, nonce=NONCE,
+                     entry_point=ep,
+                     gauge=GaugeRecord("0" * 64, "0" * 64, 1, True, True), ts_ms=TS)
+    execs = mk(3, truth_probe(TRUTH))
+    with pytest.raises(SuiteSpecError):
+        execs[0].attest(t, GOOD, suite=raw, ts_ms=TS)
+    assert book.entries == [] and all(e.book.entries == [] for e in execs)
+
+
+def test_the_commit_payload_carries_the_task_entry_point():
+    """第三方光看鏈就核得到「這筆承諾要驗的是誰」——不必先拿到套件原文。
+
+    `commitment` 本來就綁得住 entry_point（`spec.to_json()` 含它），但那要有 spec
+    才驗得出來。明碼欄位讓稽核者少一個相依；缺欄位＝拒（`entry_point_not_committed`）。
+    """
+    entry, _b, ident = _gauged_commit()
+    assert entry.payload["entry_point"] == "f"
+    assert entry.payload["v"] == 2
+    stripped = LogEntry(entry.stream_id, entry.branch_id, entry.seq, entry.prev_hash,
+                        entry.ts_ms, entry.type,
+                        {k: v for k, v in entry.payload.items() if k != "entry_point"},
+                        entry.sig)
+    assert suite_gate(stripped, SPEC, NONCE,
+                      entry_point="f") == (False, "entry_point_not_committed")
+    lied = LogEntry(entry.stream_id, entry.branch_id, entry.seq, entry.prev_hash,
+                    entry.ts_ms, entry.type,
+                    dict(entry.payload) | {"entry_point": "g"}, entry.sig)
+    assert suite_gate(lied, SPEC, NONCE,
+                      entry_point="f") == (False, "entry_point_not_committed")

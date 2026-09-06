@@ -191,12 +191,18 @@ def test_render_is_deterministic_and_hash_binds_data_not_code():
 
 
 def test_render_puts_no_supplier_bytes_into_executable_positions():
-    """渲染出來的碼裡只有：固定前置 ＋ `assert __aeq(entry(*args), expected, atol)`。"""
+    """渲染出來的碼只有三種行：固定前置、一行 entry 綁定、一串 assert。
+
+    round452b：entry point **不再是裸名字**。它只以 repr 過的字串鍵出現在
+    `__vacant_ns[...]` 裡，所以 assert 那一行裡的自由 token 全是渲染器自己的名字
+    （`__aeq`／`__entry`）——供應者給的每一個位元組都在字面值的位置上。
+    """
     s = spec(tests=[{"args": "[1, 2]", "expected": "'x'"}])
     code = s.render()
     body = [ln for ln in code.splitlines() if ln.startswith("assert ")]
-    assert body == ["assert __aeq(f(*[1, 2]), 'x', None)"]
+    assert body == ["assert __aeq(__entry(*[1, 2]), 'x', None)"]
     assert code.startswith("import re as __vacant_re\n")
+    assert "__entry = __vacant_ns['f']" in code.splitlines()
 
 
 # ── 3. 與 loader 一致（前置逐位元組；真題無損）──────────────────────────────
@@ -219,12 +225,16 @@ def test_preludes_are_byte_identical_to_the_loaders():
     assert gen[:gen.index("__tests = ")] == ss.lcb_prelude()
 
 
-def test_lcb_conversion_is_byte_identical_round_trip():
-    """LCB 更強：轉成 spec 再渲染回去，與 loader 的碼**逐位元組相同**。
+def test_lcb_conversion_differs_from_the_loader_by_exactly_the_entry_binding():
+    """LCB 轉換的無損性：與 loader 的碼**只差 entry point 怎麼取**，一個位元組不多。
 
-    因為 LCB 的期望值本來就在 `__tests` 裡（零執行），所以那一側的「無損」
-    連跑都不必跑就成立。MBPP+ 不可能逐位元組相同（參考解那一段被拿掉了），
-    它的無損要用真沙箱量——見下一條與 `ops/gain/replay/r452_suitespec.py --census`。
+    ⚠ round452b 之前這一條是「逐位元組相同」。修法（`entry_binding`：改成
+      `__entry = __vacant_ns['名字']`）把那個性質**弄掉了**，這裡照實記下代價，
+      不假裝還在：loader 自己仍然用裸名字呼叫受測函式，而 loader 的碼不是供應者
+      寫的（entry point 來自題庫），所以那一側不是本次修的破口。
+
+    退回去的方式寫成可執行的：把綁定那一行拿掉、把 `__entry(` 換回原名，就必須
+    與 loader 的碼逐位元組相同。這比舊版更嚴——它同時釘住「差別只有這一處」。
     """
     from vacant.codebench import LiveCodeBenchLoader
     tasks = list(LiveCodeBenchLoader().iter_tasks("x"))
@@ -232,7 +242,12 @@ def test_lcb_conversion_is_byte_identical_round_trip():
     for t in tasks[:12]:
         conv = ss.from_task(t)
         assert conv.spec is not None, (t["task_id"], conv.reason)
-        assert conv.spec.render() == t["visible_check"]["code"]
+        ep = conv.spec.entry_point
+        bind = ss.entry_binding(ep)
+        rendered = conv.spec.render()
+        assert bind in rendered.splitlines()
+        undone = "\n".join(ln for ln in rendered.splitlines() if ln != bind)
+        assert undone.replace("__entry(", ep + "(") == t["visible_check"]["code"]
 
 
 @pytest.fixture(scope="module")
@@ -323,7 +338,7 @@ def test_a_spec_cannot_smuggle_code_through_the_expected_field():
         spec(tests=[{"args": "[1]", "expected": "__import__('os')"}])
     smuggled = spec(tests=[{"args": "[1]", "expected": "\"__import__('os')\""}])
     line = [ln for ln in smuggled.render().splitlines() if ln.startswith("assert ")][0]
-    assert line == 'assert __aeq(f(*[1]), "__import__(\'os\')", None)'
+    assert line == 'assert __aeq(__entry(*[1]), "__import__(\'os\')", None)'
 
 
 def test_a_zero_test_spec_is_refused_by_the_validator_and_by_the_gauge():
@@ -348,5 +363,189 @@ def test_a_zero_test_spec_is_refused_by_the_validator_and_by_the_gauge():
     # 而且 peerexec 那條路根本走不到這裡：它先 validate。
     from vacant.peerexec import run_suite_gauge
     with pytest.raises(SuiteSpecError) as e:
-        run_suite_gauge(naked, ref, [broken_stub("f")])
+        run_suite_gauge(naked, ref, [broken_stub("f")], entry_point="f")
     assert "empty_suite_rejected" in str(e.value)
+
+
+# ── 5. round452b：entry point 走私 ─────────────────────────────────────────
+#
+# 這一組是一次**已經發生過的**破口的回歸測試，不是假想。1cfec80 上 `entry_point`
+# 是套件的欄位、渲染器把它當裸名字寫進碼裡，於是 `entry_point="exec"` ＋
+# 一條 `args=["<任意 Python>"]` 就是一次任意程式執行（實測假交付 31.52%，
+# `ops/gain/replay/r452b_smuggle_gate.py`）。
+
+def test_entry_point_must_match_the_task():
+    """entry_point 屬於**題目**：`validate(..., entry_point=題目的)` 不符即拒。"""
+    assert spec().entry_point == "f"
+    assert ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "f",
+                        "tests": [{"args": "[1]", "expected": "2"}], "cmp": {}},
+                       entry_point="f").entry_point == "f"
+    with pytest.raises(SuiteSpecError) as e:
+        ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "g",
+                     "tests": [{"args": "[1]", "expected": "2"}], "cmp": {}},
+                    entry_point="f")
+    assert str(e.value) == "entry_point_mismatch"
+    # 題目沒宣告 entry point（空字串／別的型別）⇒ 沒有東西可以綁 ⇒ 拒。
+    for absent in ("", 0, [], "F"):
+        with pytest.raises(SuiteSpecError) as e2:
+            ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "f",
+                         "tests": [{"args": "[1]", "expected": "2"}], "cmp": {}},
+                        entry_point=absent)
+        assert str(e2.value) == "entry_point_mismatch"
+
+
+@pytest.mark.parametrize("ep", ["exec", "eval", "open", "getattr", "os", "subprocess",
+                                "compile", "__import__", "globals", "setattr",
+                                "_worker", "_vacant_call", "__vacant_ns"])
+def test_dangerous_entry_points_are_refused_even_when_the_task_asks_for_them(ep):
+    """一題的 entry_point 是 `exec`，**這題自己**就被拒——沒有「題目說了算」的例外。
+
+    ⚠ 這層是**防禦縱深**不是修法：修法是 `entry_binding` 的命名空間查找
+      （下一條測的），它讓這些名字在結構上就到不了 builtins。兩層都要在，
+      因為「結構上到不了」這句話依賴 `vacant/checks.py` 的模板，而兩個檔案會各自演化。
+    """
+    with pytest.raises(SuiteSpecError) as e:
+        ss.validate({"v": 1, "dialect": "mbpp", "entry_point": ep,
+                     "tests": [{"args": "['x']", "expected": "None"}], "cmp": {}},
+                    entry_point=ep)
+    assert str(e.value) == "entry_point_reserved"
+
+
+def test_a_task_may_still_own_a_pure_value_builtin_name():
+    """反方向：`sum` 是真的 MBPP+ 題目（Mbpp/126）的 entry point，不准被誤殺。
+
+    黑名單是 default-deny ＋ 一小張釘死的純取值白名單（`TASK_OWNABLE_BUILTINS`）。
+    整個 `dir(builtins)` 一刀切會擋掉一題**合法的題目**——那會讓一層防禦縱深變成
+    功能退化，而它明明不是修法本身。
+    """
+    s = ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "sum",
+                     "tests": [{"args": "[[1, 2]]", "expected": "3"}], "cmp": {}},
+                    entry_point="sum")
+    assert s.entry_point == "sum"
+    assert "__entry = __vacant_ns['sum']" in s.render().splitlines()
+    assert ss.TASK_OWNABLE_BUILTINS <= frozenset(dir(__import__("builtins")))
+    for danger in ("exec", "eval", "open", "getattr", "compile", "__import__"):
+        assert danger not in ss.TASK_OWNABLE_BUILTINS
+
+
+def test_entry_point_blacklist_covers_the_runner_template():
+    """漂移防呆：runner 模板在 module scope 綁的每一個名字都要在黑名單裡。
+
+    `vacant/checks.py::_test_runner_source` 是**另一個檔案**。它哪天多 import 一個
+    模組，這條就會 FAIL——而不是安靜地多出一個可以被 entry_point 撞到的名字。
+    """
+    import ast as _ast
+
+    from vacant.checks import _test_runner_source
+    src = _test_runner_source(worker_path="/w.py", candidate_path="/c.py",
+                              worker_cwd="/tmp", nonce="N:", call_timeout=1.0,
+                              test_code="pass", function_names=[])
+    bound: set[str] = set()
+
+    def walk_module_scope(nodes):
+        # 只看 **module scope**：函式／類別內部的區域名字撞不到 entry point，
+        # 把它們算進來只會讓這條防呆變成雜訊。
+        for node in nodes:
+            if isinstance(node, (_ast.Import, _ast.ImportFrom)):
+                bound.update((a.asname or a.name).split(".")[0] for a in node.names)
+            elif isinstance(node, (_ast.FunctionDef, _ast.AsyncFunctionDef,
+                                   _ast.ClassDef)):
+                bound.add(node.name)
+                continue
+            for child in _ast.iter_child_nodes(node):
+                if isinstance(child, _ast.Name) and isinstance(child.ctx, _ast.Store):
+                    bound.add(child.id)
+                elif isinstance(child, (_ast.Tuple, _ast.List)):
+                    bound.update(e.id for e in child.elts
+                                 if isinstance(e, _ast.Name)
+                                 and isinstance(e.ctx, _ast.Store))
+            walk_module_scope([c for c in _ast.iter_child_nodes(node)
+                               if isinstance(c, _ast.stmt)])
+
+    walk_module_scope(_ast.parse(src).body)
+    assert bound, "模板解析不出任何綁定 ⇒ 這條防呆自己壞了"
+    missing = {n for n in bound if not n.startswith("__")} - ss.ENTRY_POINT_BLACKLIST
+    assert missing == set(), missing
+    assert ss.RUNNER_TEMPLATE_NAMES <= ss.ENTRY_POINT_BLACKLIST
+
+
+def test_every_rendered_token_outside_the_prelude_is_a_literal_or_a_renderer_name():
+    """**渲染稽核**：拿一份充滿惡意但合法的字面值的 spec，逐個 token 檢查。
+
+    主張：渲染出來的碼在前置之後，(a) 剛好 N 行 assert，(b) 裡面每一個 `Name`
+    都是渲染器自己的名字（`__aeq`／`__entry`／`__vacant_ns`），(c) 其餘每一個節點
+    都是常數或常數容器。也就是說：供應者交出來的東西**一個都沒有**落在會被求值成
+    名字的位置上。這是「不可表達」這句話的可執行版本——1cfec80 的教訓正是
+    validator 擋光了 Call/Name/Attribute，卻讓 entry_point 這個**識別字**走進去。
+    """
+    import ast as _ast
+
+    nasty = [
+        {"args": "['__import__(\"os\").system(\"id\")']", "expected": "None"},
+        {"args": "['assert False', b'\\x00\\xff', 1e308]", "expected": "'exec'"},
+        {"args": "[{'os': 'subprocess'}, (1, 2)]", "expected": "{'open': 'getattr'}"},
+        {"args": "[\"'); import os; os.system('id'); ('\"]", "expected": "[1, {2: 3}]"},
+        {"args": "['\\n__vacant_ns[\"f\"] = open\\n']", "expected": "True"},
+    ]
+    s = spec(tests=nasty)
+    code = s.render()
+    prelude = ss.mbpp_prelude(False, False)
+    assert code.startswith(prelude)
+    body = _ast.parse(code[len(prelude):]).body
+    assert len(body) == 1 + len(nasty)           # 一行綁定 ＋ N 行 assert
+    binding, asserts = body[0], body[1:]
+    assert isinstance(binding, _ast.Assign)
+    assert isinstance(binding.value, _ast.Subscript)
+    assert isinstance(binding.value.value, _ast.Name)
+    assert binding.value.value.id == "__vacant_ns"
+    assert isinstance(binding.value.slice, _ast.Constant)
+    assert binding.value.slice.value == "f"      # 名字＝一個 repr 過的字串鍵
+    for node in asserts:
+        assert isinstance(node, _ast.Assert)
+        call = node.test
+        assert isinstance(call, _ast.Call) and call.func.id == "__aeq"
+        got, want, tol = call.args
+        assert isinstance(got, _ast.Call) and got.func.id == "__entry"
+        assert len(got.args) == 1 and isinstance(got.args[0], _ast.Starred)
+        _ast.literal_eval(got.args[0].value)     # 引數：純字面值
+        _ast.literal_eval(want)                  # 期望值：純字面值
+        _ast.literal_eval(tol)                   # atol：純字面值
+    names = {n.id for n in _ast.walk(_ast.parse(code[len(prelude):]))
+             if isinstance(n, _ast.Name)}
+    assert names == {"__vacant_ns", "__entry", "__aeq"}
+
+
+def test_the_r452b_smuggle_payloads_never_execute_in_the_real_sandbox(tmp_path):
+    """攻擊者的三份 payload 當成**字串引數**渲染出去，在真沙箱裡一個都沒跑起來。
+
+    三份分別是 R451 三種攻擊的語意（targeted 雜湊黑名單／stateful 跨呼叫狀態／
+    mimic 換掉受測函式），R452b 的走私管道是把它們塞進 `args` 再用
+    `entry_point="exec"` 觸發。這裡用**合法的** entry point 渲染同樣的字面值：
+    碼跑得起來、assert 照常判、而三個標記檔一個都不存在。
+    """
+    from ops.gain.gain_run import meets_demand
+
+    targeted = tmp_path / "targeted.flag"
+    stateful = tmp_path / "stateful.flag"
+    mimic = tmp_path / "mimic.flag"
+    payloads = [
+        # targeted：讀候選原始碼、算 sha256、命中黑名單就丟 AssertionError
+        "import hashlib\n"
+        "_p = [a for a in _worker.args if isinstance(a, str)"
+        " and a.endswith('candidate.py')][0]\n"
+        "open(%r, 'w').write(hashlib.sha256(open(_p, 'rb').read()).hexdigest())\n"
+        % str(targeted),
+        # stateful：在 /tmp 留一個標記，第二次執行就換一套判準
+        "import os\n"
+        "open(%r, 'a').write('x')\n" % str(stateful),
+        # mimic：把受測函式換掉
+        "__vacant_ns['f'] = lambda *a, **k: 2\n"
+        "open(%r, 'w').write('mimic')\n" % str(mimic),
+    ]
+    s = spec(tests=[{"args": repr([p]), "expected": "None"} for p in payloads])
+    code = s.render()
+    assert "exec(" not in code and "__entry(" in code
+    # 候選只是把引數吃下去回 None ⇒ 這份套件會**通過**……而 payload 沒有被執行。
+    ok, _ = meets_demand("def f(x):\n    return None\n", code, 10, entry_point="f")
+    assert ok is True
+    assert not targeted.exists() and not stateful.exists() and not mimic.exists()

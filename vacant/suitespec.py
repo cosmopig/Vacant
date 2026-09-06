@@ -24,6 +24,28 @@ R451 §四 的修法（本模組）：**套件不再是程式。**
 字面值，`import`／呼叫／屬性存取／lambda／comprehension／f-string 一律拒絕，
 而渲染器產生的碼裡沒有任何地方讓供應者的字串變成可執行的東西。
 
+⚠ **round452b：上面那段在 1cfec80 上是假的，補洞紀錄留在這裡不刪。**
+`entry_point` 當時是**套件**的欄位，validator 只要求它是識別字、非關鍵字、
+不以 `__` 開頭、不在 `RESERVED_NAMES` 裡——`exec` 四條全過。而 `render` 把它當
+**裸名字**寫進碼裡，驗收碼又是貼在 `vacant/checks.py` runner 的 module scope 跑的，
+所以 `entry_point="exec"` ＋ `args=["<任意 Python 原始碼>"]` 渲染出來就是
+
+    assert __aeq(exec(*['<payload>']), None, atol)
+
+一次任意程式執行（builtins 與 runner 自己的 `os`／`subprocess`／`sys` 全在）。
+實測：368/371 過 commit、假交付 31.52%，與 R451 的 raw-code targeted 逐位元相同
+（`ops/gain/replay/r452b_smuggle_gate.py`）。修法是結構性的兩步：
+
+  (a) **entry_point 屬於題目不屬於套件**——`validate(spec, entry_point=題目的)`，
+      不符即 `entry_point_mismatch`；`peerexec` 每一道門都強制帶著它。
+  (b) **渲染器改成命名空間查找**——`entry_binding()` 產生
+      `__entry = __vacant_ns['<名字>']`，名字只以 repr 過的字串鍵出現，
+      不再是一個會沿著 module → builtins 解析的識別字。
+
+`ENTRY_POINT_BLACKLIST` 是**防禦縱深**，不是修法。教訓寫成一句話：
+「不可表達」是**渲染出來的碼**的性質，不是 validator 的性質；validator 擋住了
+所有 `Call`／`Name`／`Attribute` 節點，卻讓一個**識別字**原樣走進了可執行位置。
+
 剩下**還能表達**的攻擊只有兩類，兩類都在 R452 量過：
   1. **覆蓋不足**——少給幾條測資、挑容易的輸入（`tests` 是供應者給的）。
   2. **比對旗標放寬**——`cmp.atol` 開大、`set_equivalent`／`regex_predicate`
@@ -56,6 +78,7 @@ R451 §四 的修法（本模組）：**套件不再是程式。**
 from __future__ import annotations
 
 import ast
+import builtins
 import hashlib
 import keyword
 import math
@@ -63,6 +86,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Sequence
 
 from .canonical import canonical_bytes
+from .checks import CANDIDATE_NS_NAME
 
 SPEC_VERSION = 1
 DIALECTS = ("mbpp", "lcb")
@@ -79,7 +103,47 @@ MAX_DEPTH = 40
 RESERVED_NAMES = frozenset({
     "__aeq", "__vacant_re", "__vacant_regex_predicate", "__vacant_set_equivalent",
     "__ns", "__canon", "__tests", "__t", "__got", "_worker", "_vacant_call",
+    "__entry", CANDIDATE_NS_NAME,
 })
+
+#: `vacant/checks.py::_test_runner_source` 的 runner 模板在 module scope 綁定的
+#: 每一個名字（import 進來的與自己定義的）。漂移防呆是
+#: `tests/test_suitespec.py::test_entry_point_blacklist_covers_the_runner_template`
+#: ——它 AST 走訪真的模板，任何新名字沒進這裡就會吵。
+RUNNER_TEMPLATE_NAMES = frozenset({
+    "ast", "builtins", "json", "math", "os", "selectors", "subprocess", "sys", "time",
+    "_nonce", "_wire_tag", "_wire_encode", "_wire_decode", "_worker_env",
+    "_read_fd", "_write_fd", "_worker", "_protocol", "_selector",
+    "_ready_deadline", "ready", "line", "response", "_vacant_call",
+    CANDIDATE_NS_NAME,
+})
+
+#: `dir(builtins)` 裡**題目可以合法擁有**的名字：純取值／聚合語意，拿到它也變不出
+#: 執行、匯入、屬性或 IO 的能力。其餘 builtins 一律拒（default-deny）。
+#:
+#: 為什麼要有這個小白名單而不是整個 `dir(builtins)` 一刀切：真的 MBPP+ 題庫裡
+#: `mbppplus_Mbpp/126` 的 entry_point 就是 `sum`——那是**題目**（客戶的需求）自己
+#: 擁有的名字，不是供應者選的。一刀切會把一題合法的題目擋掉，等於讓這層防禦縱深
+#: 變成功能退化，而它明明不是修法本身（修法是下面 `render` 的命名空間查找）。
+TASK_OWNABLE_BUILTINS = frozenset({
+    "abs", "all", "any", "ascii", "bin", "bool", "bytes", "chr", "complex",
+    "divmod", "filter", "float", "format", "frozenset", "hash", "hex", "id",
+    "int", "len", "list", "map", "max", "min", "next", "oct", "ord", "pow",
+    "range", "repr", "reversed", "round", "set", "slice", "sorted", "str",
+    "sum", "tuple", "zip",
+})
+
+#: 防禦縱深（**不是**修法）：entry_point 的黑名單。
+#:
+#: 修法是 `render` 不再用裸名字解析 entry point——名字只以 repr 過的字串鍵出現在
+#: `__vacant_ns[...]` 裡，所以撞到 builtins 或 runner 的名字在**結構上**已經無害。
+#: 這個黑名單留著是因為「結構上無害」這句話依賴另一個檔案（`vacant/checks.py`）
+#: 的模板，而兩個檔案會各自演化。一層擋不住的時候另一層還在，才叫縱深。
+ENTRY_POINT_BLACKLIST = (
+    RESERVED_NAMES
+    | (frozenset(dir(builtins)) - TASK_OWNABLE_BUILTINS)
+    | RUNNER_TEMPLATE_NAMES
+)
 
 
 class SuiteSpecError(ValueError):
@@ -320,13 +384,20 @@ class SuiteSpec:
         return hashlib.sha256(self.render().encode("utf-8")).hexdigest()
 
 
-def validate(obj: Any) -> SuiteSpec:
+def validate(obj: Any, *, entry_point: str | None = None) -> SuiteSpec:
     """把任意輸入變成一份可用的 `SuiteSpec`，或丟 `SuiteSpecError`。
+
+    `entry_point` ＝ **題目**（`task["entry_point"]`）宣告的進入點。round452b 起
+    這不是一個可選的額外檢查，而是規格：entry_point 屬於題目，不屬於套件。
+    給了就必須相符，不符丟 `entry_point_mismatch`；`peerexec` 那一側每一道門都
+    強制帶著它進來（`as_suite_spec`），所以「不給」這條路只留給還沒綁題目的
+    工具與測試。
 
     fail-closed，缺一不可（每一條都對應一個 `tests/test_suitespec.py` 的測試）：
       - `v` 是本版
       - `dialect` 在白名單裡
-      - `entry_point` 是識別字、不是關鍵字、不撞渲染器用掉的名字、不以 `__` 開頭
+      - `entry_point` 是識別字、不是關鍵字、不撞渲染器用掉的名字、不以 `__` 開頭、
+        不在 `ENTRY_POINT_BLACKLIST` 裡（防禦縱深），且與題目宣告的相符
       - `tests` 至少 **1** 條（0 條＝什麼都不驗＝R449 §三-3 那一格，直接拒絕；
         量具那一層也會擋，但這裡先擋，因為 0 條連跑都不必跑）
       - 每條 `args` 是**列表或元組**字面值（位置引數），`expected` 是任意字面值
@@ -356,7 +427,17 @@ def validate(obj: Any) -> SuiteSpec:
     ep = obj.get("entry_point")
     if not isinstance(ep, str) or not ep.isidentifier():
         raise SuiteSpecError("entry_point_not_identifier")
-    if keyword.iskeyword(ep) or ep.startswith("__") or ep in RESERVED_NAMES:
+    if entry_point is not None and ep != entry_point:
+        # entry_point 是**題目**的欄位。套件敢跟題目不一樣，就是它在替客戶決定
+        # 「要驗的是哪一個函式」——那是 R452b 那條走私管道的第一步。
+        #
+        # ⚠ 順序有意義：**綁定先於黑名單**。走私用的 `exec` 兩條都撞得到，先報
+        #   `entry_point_mismatch` 才說得出「擋住它的是結構（entry_point 屬於題目），
+        #   不是那張名單」。名單只在題目**自己**宣告了危險名字時才是唯一的那道門。
+        raise SuiteSpecError("entry_point_mismatch")
+    if keyword.iskeyword(ep) or ep.startswith("__") or ep in ENTRY_POINT_BLACKLIST:
+        # ⚠ 這一條是**防禦縱深**，不是修法。`exec` 之所以不再危險，是因為 `render`
+        #   不用裸名字解析 entry point（見 `render` 的 docstring）；黑名單只是第二層。
         raise SuiteSpecError("entry_point_reserved")
 
     raw_tests = obj.get("tests")
@@ -406,21 +487,48 @@ def validate(obj: Any) -> SuiteSpec:
     return spec
 
 
+def entry_binding(entry_point: str) -> str:
+    """渲染出「怎麼拿到受測函式」的那一行：**明確的命名空間查找**。
+
+    round452b 的修法就是這一行。在它之前，渲染器把 entry_point 當成一個**裸名字**
+    寫進碼裡（`assert __aeq(f(*[1]), 2, None)`），而驗收碼是貼在 runner 的 module
+    scope 執行的——裸名字解析是 module → builtins。候選沒有定義那個名字時，
+    `exec`／`open`／`getattr` 這些**都在**，於是一個供應者宣告的 entry_point 加上
+    一串字串字面值就是一次任意程式執行（實測：`ops/gain/replay/r452b_smuggle_gate.py`
+    在 1cfec80 上假交付 31.52%，368/371 過 commit）。
+
+    改成 `__vacant_ns['名字']` 之後，名字只以 **repr 過的字串鍵**出現：它不再是
+    一個會被解析的識別字，所以無論那個字串是什麼，都只可能命中候選自己定義的
+    函式，或 `KeyError`（fail-closed）。`__vacant_ns` 由 `vacant/checks.py` 的
+    runner 模板提供（`CANDIDATE_NS_NAME`），它是這條修法**唯一**需要的鉤子。
+
+    代價寫清楚：渲染出來的碼從此**依賴那個鉤子**。拿去別的 runner 跑會 NameError
+    ——那是 fail-closed 的方向，但它確實讓 LCB 那條「轉換後與 loader 逐位元組相同」
+    的性質不再成立（loader 自己還是用裸名字；那份碼不是供應者寫的，見模組 §紅線 5）。
+    """
+    return f"__entry = {CANDIDATE_NS_NAME}[{entry_point!r}]"
+
+
 def render(spec: SuiteSpec) -> str:
     """spec → 驗收碼。**確定性**：同一份 spec 在任何機器、任何行程得到同一份碼。
 
     前置與 loader 逐位元組相同（`test_preludes_are_byte_identical_to_the_loaders`），
-    差別只有一處而且是重點：loader 把**參考解**塞進套件裡當場算期望值
-    （`exec(canonical); __canon(*args)`），這裡的期望值是**事先算好的字面值**。
-    於是渲染出來的碼裡**沒有任何一個位元組來自供應者的 Python**。
+    差別只有兩處而且都是重點：
+      1. loader 把**參考解**塞進套件裡當場算期望值（`exec(canonical); __canon(*args)`），
+         這裡的期望值是**事先算好的字面值**。
+      2. loader 用裸名字呼叫受測函式，這裡走 `entry_binding()` 的命名空間查找
+         （round452b；理由見那支的 docstring）。
+    於是渲染出來的碼裡**沒有任何一個位元組來自供應者的 Python**，而且供應者給的
+    每一個 token 都落在**不可執行的位置**：repr 過的字面值，或一個字典鍵。
     """
     if not isinstance(spec, SuiteSpec):
         spec = validate(spec)
     if spec.dialect == "mbpp":
-        lines = [mbpp_prelude(spec.regex_predicate, spec.set_equivalent).rstrip("\n"), ""]
+        lines = [mbpp_prelude(spec.regex_predicate, spec.set_equivalent).rstrip("\n"), "",
+                 entry_binding(spec.entry_point)]
         for t in spec.tests:
             lines.append(
-                f"assert __aeq({spec.entry_point}(*{t.args}), {t.expected}, {spec.atol!r})")
+                f"assert __aeq(__entry(*{t.args}), {t.expected}, {spec.atol!r})")
         return "\n".join(lines)
     if spec.dialect == "lcb":
         tests_lit = "[" + ", ".join(
@@ -429,9 +537,10 @@ def render(spec: SuiteSpec) -> str:
         return "\n".join([
             lcb_prelude().rstrip("\n"),
             "",
+            entry_binding(spec.entry_point),
             f"__tests = {tests_lit}",
             "for __t in __tests:",
-            f"    __got = {spec.entry_point}(*__t['args'])",
+            "    __got = __entry(*__t['args'])",
             "    assert __aeq(__got, __t['expected']), (",
             '        f"args={__t[\'args\']!r} got={__got!r} want={__t[\'expected\']!r}")',
         ])
@@ -649,6 +758,11 @@ def from_task(task: Mapping[str, Any], *,
     """
     tid = task.get("task_id")
     code = ((task.get("visible_check") or {}).get("code")) or ""
+    # round452b：轉出來的 spec 也要**綁題目宣告的 entry_point**。這裡的 entry point
+    # 是從 loader 的碼 parse 出來的，兩者本來就該相同；不同就是這一題的 visible_check
+    # 與它的 `entry_point` 欄位對不上，那是資料問題，要在轉換階段吵出來而不是
+    # 讓一份「驗別的函式」的 spec 帶著轉換成功的標記流下去。
+    ep = task.get("entry_point")
     try:
         parsed = parse_check_code(code)
     except SuiteSpecError as exc:
@@ -657,7 +771,7 @@ def from_task(task: Mapping[str, Any], *,
         try:
             spec = validate({"v": SPEC_VERSION, "dialect": "lcb",
                              "entry_point": parsed["entry_point"],
-                             "tests": parsed["tests"], "cmp": {}})
+                             "tests": parsed["tests"], "cmp": {}}, entry_point=ep)
         except SuiteSpecError as exc:
             return Conversion(tid, None, f"invalid_spec:{exc}")
         return Conversion(tid, spec, "", "", spec.n_tests)
@@ -679,7 +793,7 @@ def from_task(task: Mapping[str, Any], *,
             "cmp": {"atol": parsed["atol"],
                     "set_equivalent": parsed["set_equivalent"],
                     "regex_predicate": parsed["regex_predicate"]},
-        })
+        }, entry_point=ep)
     except SuiteSpecError as exc:
         return Conversion(tid, None, f"invalid_spec:{exc}", parsed["reference"])
     return Conversion(tid, spec, "", parsed["reference"], spec.n_tests)
