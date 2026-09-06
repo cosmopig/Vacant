@@ -1,0 +1,235 @@
+[
+ {
+  "run": "g_r446_eq5_mbpp",
+  "variant": "real",
+  "k": 3,
+  "n": 371,
+  "stub_n": 4,
+  "committed": 369,
+  "refused_at_commit": 2,
+  "n_gaugeable": 371,
+  "deliv_acc_gaugeable": 0.7466307277628033,
+  "false_deliv_gaugeable": 0.1778975741239892,
+  "refuse_reasons": {
+   "gauge_failed": 2
+  },
+  "deliv_acc": 0.7466307277628033,
+  "false_deliv": 0.1778975741239892,
+  "refusal": 0.07547169811320754,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": 0.0,
+  "delta_pp_ci95": [
+   0.0,
+   0.0
+  ],
+  "n_paired": 371
+ },
+ {
+  "run": "g_r446_eq5_mbpp",
+  "variant": "trivial",
+  "k": 3,
+  "n": 371,
+  "stub_n": 4,
+  "committed": 0,
+  "refused_at_commit": 371,
+  "n_gaugeable": 371,
+  "deliv_acc_gaugeable": 0.0,
+  "false_deliv_gaugeable": 0.0,
+  "refuse_reasons": {
+   "gauge_failed": 371
+  },
+  "deliv_acc": 0.0,
+  "false_deliv": 0.0,
+  "refusal": 1.0,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": -74.66307277628033,
+  "delta_pp_ci95": [
+   -78.97574123989219,
+   -70.35040431266846
+  ],
+  "n_paired": 371
+ },
+ {
+  "run": "g_r446_eq5_mbpp",
+  "variant": "weak",
+  "k": 3,
+  "n": 371,
+  "stub_n": 4,
+  "committed": 333,
+  "refused_at_commit": 38,
+  "n_gaugeable": 371,
+  "deliv_acc_gaugeable": 0.6576819407008087,
+  "false_deliv_gaugeable": 0.19137466307277629,
+  "refuse_reasons": {
+   "gauge_failed": 38
+  },
+  "deliv_acc": 0.6576819407008087,
+  "false_deliv": 0.19137466307277629,
+  "refusal": 0.1509433962264151,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": -8.89487870619946,
+  "delta_pp_ci95": [
+   -12.129380053908356,
+   -5.929919137466308
+  ],
+  "n_paired": 371
+ },
+ {
+  "run": "g_r446_eq5_mbpp",
+  "variant": "targeted",
+  "k": 3,
+  "n": 371,
+  "stub_n": 4,
+  "committed": 371,
+  "refused_at_commit": 0,
+  "n_gaugeable": 371,
+  "deliv_acc_gaugeable": 0.6873315363881402,
+  "false_deliv_gaugeable": 0.31266846361185985,
+  "refuse_reasons": {},
+  "deliv_acc": 0.6873315363881402,
+  "false_deliv": 0.31266846361185985,
+  "refusal": 0.0,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": -5.92991913746631,
+  "delta_pp_ci95": [
+   -8.625336927223719,
+   -3.234501347708895
+  ],
+  "n_paired": 371
+ },
+ {
+  "run": "g_r443_gemma_lcb",
+  "variant": "real",
+  "k": 3,
+  "n": 91,
+  "stub_n": 4,
+  "committed": 12,
+  "refused_at_commit": 79,
+  "n_gaugeable": 12,
+  "deliv_acc_gaugeable": 0.8333333333333334,
+  "false_deliv_gaugeable": 0.16666666666666666,
+  "refuse_reasons": {
+   "ungaugeable_no_reference": 79
+  },
+  "deliv_acc": 0.10989010989010989,
+  "false_deliv": 0.02197802197802198,
+  "refusal": 0.8681318681318682,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": 0.0,
+  "delta_pp_ci95": [
+   0.0,
+   0.0
+  ],
+  "n_paired": 12
+ },
+ {
+  "run": "g_r443_gemma_lcb",
+  "variant": "trivial",
+  "k": 3,
+  "n": 91,
+  "stub_n": 4,
+  "committed": 0,
+  "refused_at_commit": 91,
+  "n_gaugeable": 12,
+  "deliv_acc_gaugeable": 0.0,
+  "false_deliv_gaugeable": 0.0,
+  "refuse_reasons": {
+   "ungaugeable_no_reference": 79,
+   "gauge_failed": 12
+  },
+  "deliv_acc": 0.0,
+  "false_deliv": 0.0,
+  "refusal": 1.0,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": -83.33333333333334,
+  "delta_pp_ci95": [
+   -100.0,
+   -58.333333333333336
+  ],
+  "n_paired": 12
+ },
+ {
+  "run": "g_r443_gemma_lcb",
+  "variant": "weak",
+  "k": 3,
+  "n": 91,
+  "stub_n": 4,
+  "committed": 12,
+  "refused_at_commit": 79,
+  "n_gaugeable": 12,
+  "deliv_acc_gaugeable": 0.8333333333333334,
+  "false_deliv_gaugeable": 0.16666666666666666,
+  "refuse_reasons": {
+   "ungaugeable_no_reference": 79
+  },
+  "deliv_acc": 0.10989010989010989,
+  "false_deliv": 0.02197802197802198,
+  "refusal": 0.8681318681318682,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": 0.0,
+  "delta_pp_ci95": [
+   0.0,
+   0.0
+  ],
+  "n_paired": 12
+ },
+ {
+  "run": "g_r443_gemma_lcb",
+  "variant": "targeted",
+  "k": 3,
+  "n": 91,
+  "stub_n": 4,
+  "committed": 12,
+  "refused_at_commit": 79,
+  "n_gaugeable": 12,
+  "deliv_acc_gaugeable": 0.75,
+  "false_deliv_gaugeable": 0.25,
+  "refuse_reasons": {
+   "ungaugeable_no_reference": 79
+  },
+  "deliv_acc": 0.0989010989010989,
+  "false_deliv": 0.03296703296703297,
+  "refusal": 0.8681318681318682,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": -8.333333333333337,
+  "delta_pp_ci95": [
+   -25.0,
+   0.0
+  ],
+  "n_paired": 12
+ },
+ {
+  "run": "g_r443_gemma_lcb",
+  "variant": "mimic",
+  "k": 3,
+  "n": 91,
+  "stub_n": 4,
+  "committed": 12,
+  "refused_at_commit": 79,
+  "n_gaugeable": 12,
+  "deliv_acc_gaugeable": 0.75,
+  "false_deliv_gaugeable": 0.25,
+  "refuse_reasons": {
+   "ungaugeable_no_reference": 79
+  },
+  "deliv_acc": 0.0989010989010989,
+  "false_deliv": 0.03296703296703297,
+  "refusal": 0.8681318681318682,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": -8.333333333333337,
+  "delta_pp_ci95": [
+   -25.0,
+   0.0
+  ],
+  "n_paired": 12
+ }
+]

@@ -55,10 +55,18 @@
   .venv/bin/python ops/gain/replay/peer_exec_sim.py --sweep
   .venv/bin/python ops/gain/replay/peer_exec_sim.py --trivial-suite
   .venv/bin/python ops/gain/replay/peer_exec_sim.py --flake --challenge
+  # R449 §四-3 的套件量具閘（先 census＋腐化變體標籤，再過閘）
+  .venv/bin/python ops/gain/replay/peer_exec_sim.py --gauge-census g_r446_eq5_mbpp g_r443_gemma_lcb
+  .venv/bin/python ops/gain/replay/peer_exec_sim.py --build-variant weak g_r446_eq5_mbpp g_r443_gemma_lcb
+  .venv/bin/python ops/gain/replay/peer_exec_sim.py --build-variant targeted g_r446_eq5_mbpp g_r443_gemma_lcb
+  .venv/bin/python ops/gain/replay/peer_exec_sim.py --build-variant mimic g_r446_eq5_mbpp g_r443_gemma_lcb
+  .venv/bin/python ops/gain/replay/peer_exec_sim.py --gauge-gate
+  .venv/bin/python ops/gain/replay/peer_exec_sim.py --gauge-gate --gauge-stubs 1
 """
 from __future__ import annotations
 
 import argparse
+import ast
 import collections
 import hashlib
 import json
@@ -773,6 +781,12 @@ def trivial_suite_table(runs=("g_r446_eq5_mbpp", "g_r443_gemma_lcb"), ks=(1, 3, 
     數字版本。去中心化執行對這個破口**一點幫助都沒有**，因為它分散的是「誰來跑」，
     不是「跑什麼」。commit-reveal（`commit_suite`）只把套件在時間上釘死，防的是
     「看到草稿之後再改套件」，防不了「一開始就給一套爛套件」。
+
+    ⚠ round749（R449 §四-3）之後這張表要**和 `--gauge-gate` 一起讀**：這裡的 8 格是
+      「閘門關著」的世界（保留原樣，因為它是那道閘要擋的東西的量）。同一批題目
+      加上量具閘之後，371/371 與 91/91 的 trivial 套件在 **commit 就被拒**，交付與
+      假交付都變成 0——但**只有這一類**被擋掉，`--gauge-gate` 的 weak 那一列
+      量的就是擋不到的那一類。
     """
     out = []
     print("\n=== TRIVIAL SUITE：套件被腐化，執行器全誠實 ===")
@@ -969,6 +983,491 @@ def calibrate(runs=("g_r446_eq5_mbpp", "g_r443_gemma_lcb")):
     return out
 
 
+# ── 套件量具閘（R449 §四-3）：套件要上鏈，先證明它擋得住已知壞草稿 ────────────
+GAUGE_NONCE = "r449-suite-gauge-nonce-0001"      # 固定 nonce：重放要可重現（>=16 bytes）
+#: 已知壞草稿集合。**驗證者側**的物件：不是任何 worker 的產出、不進任何 prompt、
+#: 不進 hidden_check 路徑（V/GT 分離，論證同 `gain_run._canonical_solutions`）。
+#: 第 0 個與 `probe_instrument` 的 `stub` 逐字相同（`vacant.suitegauge.broken_stub`），
+#: 所以「只用第 0 個」那一欄就是 repo 現成量具的原樣覆蓋率。
+def stub_set(entry_point: str | None) -> list[str]:
+    ep = entry_point or "_f"
+    return [
+        px.broken_stub(ep),
+        f"def {ep}(*a, **k):\n    return 0\n",
+        f"def {ep}(*a, **k):\n    return []\n",
+        f"def {ep}(*a, **k):\n    return a[0] if a else None\n",
+    ]
+
+
+def canonical_refs(run: str) -> dict[str, str]:
+    """量具的正方向素材：官方（MBPP+）或 round441 手驗（LCB）的參考解。
+
+    ⚠ LCB 只有 12 題有手寫解 ⇒ 79/91 題**量不了**。那不是「量到 0」，是「沒有量具」，
+      兩者必須分開報（06-30 稽核紀律）。fail-closed 的後果就是那 79 題上不了鏈——
+      這是本修補的直接成本，不准藏進「refused」那一格。
+    """
+    from ops.gain.gain_run import _canonical_solutions
+    return _canonical_solutions(POOLS[run][0])
+
+
+def weaken_suite(code: str) -> tuple[str | None, int, int]:
+    """殘留攻擊的構造：**只留第一條可見驗收**，其餘刪掉。
+
+    回傳 (弱化後的原始碼 or None, 原本幾條, 剩下幾條)。兩種題庫的形狀不同：
+      MBPP+  頂層一串 `assert ...` ⇒ 留第一條 assert
+      LCB    `__tests = [ {...}, {...} ]` 後面一個 for 迴圈 ⇒ 把表截成一筆
+    這套件仍然**通過量具**（參考解過、已知壞樁被擋），所以它量的正是
+    「量具擋不到的那一類爛套件」——這道修補的誠實上限。
+    """
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return None, 0, 0
+    asserts = [i for i, n in enumerate(tree.body) if isinstance(n, ast.Assert)]
+    if len(asserts) > 1:
+        tree.body = [n for i, n in enumerate(tree.body) if i not in asserts[1:]]
+        return ast.unparse(tree), len(asserts), 1
+    for node in tree.body:
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name)
+                and node.targets[0].id == "__tests"
+                and isinstance(node.value, ast.List) and len(node.value.elts) > 1):
+            n_before = len(node.value.elts)
+            node.value.elts = node.value.elts[:1]
+            return ast.unparse(tree), n_before, 1
+    return None, len(asserts), len(asserts)
+
+
+def targeted_suite(entry_point: str | None) -> str:
+    """**最惡意的通過量具的套件**：逐字認出那組已知壞樁，其餘一律放行。
+
+    這一套驗收一次都沒有呼叫過候選函式。它做的事只有一件：把候選碼的原始碼
+    雜湊拿去比對 `stub_set()` 那四個字面，命中就 assert 失敗，沒命中就結束
+    （rc=0 ⇒ 通過）。於是量具的兩個方向**滿分**：參考解通過、四個壞樁全被擋，
+    而任何一份真候選——不論多爛——都通過。
+
+    ⚠ 它拿得到候選原始碼這件事，是 `vacant/checks.py` 沙箱的一個實測性質，不是
+      假設：驗收碼跑在 runner 行程裡，`_worker` 這個 `subprocess.Popen` 物件在它的
+      命名空間裡，`_worker.args` 就帶著 `candidate.py` 的路徑（round749 實測，見
+      `tests/test_peerexec.py::test_a_suite_can_read_the_candidate_source_from_the_runner`）。
+      V/GT 分離沒有被破——讀到的是**候選自己的**產出，不是 hidden_check、不是參考解。
+      但「驗收套件看得見候選原始碼」本身要記進誠實邊界：它讓內容定址的白名單／
+      黑名單攻擊在這個沙箱上是**可行的**，不只是理論上的。
+
+    ⚠ 即使把這個讀檔管道堵掉，同一類攻擊還有純行為版本（只斷言回傳值不等於那四個
+      壞樁會回的東西），見 `tests/test_peerexec.py` 的
+      `test_a_behavioural_stub_blacklist_also_passes_the_gauge`。堵管道不是解，
+      解是「量具只是下界」這句話要一直掛在收據上。
+    """
+    digests = sorted(sha(s) for s in stub_set(entry_point))
+    return (
+        "import hashlib\n"
+        f"_known_bad = {digests!r}\n"
+        "_p = next(p for p in _worker.args if str(p).endswith('candidate.py'))\n"
+        "with open(_p, encoding='utf-8') as _fh:\n"
+        "    _src = _fh.read()\n"
+        "assert hashlib.sha256(_src.encode('utf-8')).hexdigest() not in _known_bad\n"
+    )
+
+
+def mimic_suite(real_code: str, entry_point: str | None) -> str | None:
+    """**這道閘真正的上限**：與真套件逐位相同，只多一句「不是已知壞樁就換掉受測函式」。
+
+    比 `targeted_suite` 難擋一個層次。targeted 自己捏一句 assert 去擋壞樁，所以
+    它的**形狀**（`_visible_test_slicer` 認不認得）與**失敗細節**
+    （`conform_failure_detail` 的 `first_failing_test`／`n_visible_tests`）都跟真套件
+    不一樣——一個被強化成「連失敗的樣子都要對」的量具抓得到它。mimic 不會：
+
+      - 尾端那串 `assert` **逐字保留**（形狀通過 `_visible_test_slicer` 的 A 型），
+      - 已知壞樁走的是**原封不動的真套件**（swap 不觸發）⇒ 被擋，而且
+        `first_failing_test`／`n_visible_tests`／`loads_ok` 與真套件**逐欄相同**，
+      - 其餘任何候選——包括回傳 `'lol'` 的——受測函式已被換成該題自帶的參考解
+        `__canon`（MBPP+ 的 `_check_code` 一定會產生它）⇒ 一律通過。
+
+    LCB（B 型：`__tests = [...]` ＋ for 迴圈）沒有 `__canon`，改成把 `__tests` 清空：
+    已知壞樁仍跑原表（第一個 `__tests` 沒被動，前綴切片器切的也是它）⇒ 細節相同；
+    其餘候選跑零條測資 ⇒ 一律通過。
+
+    ⇒ 把量具從「壞樁被擋?」強化成「壞樁被擋的樣子對不對?」也救不回來。只要已知壞
+      集合有限、而且攻擊者看得見它，量具就永遠只是**一組要通過的測資**，不是一個
+      對套件品質的保證（`peerexec.SUITE_FIXED_POINT_NOTE`）。
+    """
+    ep = entry_point or "_f"
+    digests = sorted(sha(x) for x in stub_set(ep))
+    guard = [
+        "import hashlib as __vm_h",
+        f"__vm_bad = {digests!r}",
+        "__vm_p = next(p for p in _worker.args if str(p).endswith('candidate.py'))",
+        "with open(__vm_p, encoding='utf-8') as __vm_f:",
+        "    __vm_src = __vm_f.read()",
+        "if __vm_h.sha256(__vm_src.encode('utf-8')).hexdigest() not in __vm_bad:",
+    ]
+    try:
+        tree = ast.parse(real_code)
+    except SyntaxError:
+        return None
+    lines = real_code.splitlines()
+    # B 型（LCB）：把第一個 `__tests = [...]` 之後接上「非壞樁 ⇒ 清空測資表」。
+    for node in tree.body:
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name)
+                and node.targets[0].id == "__tests"
+                and isinstance(node.value, ast.List)):
+            at = node.end_lineno
+            return "\n".join(lines[:at] + guard + ["    __tests = []"] + lines[at:]) + "\n"
+    # A 型（MBPP+）：尾端連續 assert 前插入「非壞樁 ⇒ 受測函式換成該題的 __canon」。
+    asserts = [nd for nd in tree.body if isinstance(nd, ast.Assert)]
+    if not asserts or tree.body[-len(asserts):] != asserts or "__canon" not in real_code:
+        return None
+    at = asserts[0].lineno - 1
+    return "\n".join(lines[:at] + guard + [f"    {ep} = __canon"] + lines[at:]) + "\n"
+
+
+def suite_variants(run: str, tasks, cands) -> dict[str, dict[str, dict]]:
+    """每題五套驗收：real（原樣）／trivial（`pass`）／weak（只留第一條）／
+    targeted（逐字黑名單那組壞樁，其餘全放行）／mimic（真套件＋一句換函式）。"""
+    out: dict[str, dict[str, dict]] = {}
+    for tid in cands:
+        t = tasks.get(tid)
+        if t is None:
+            continue
+        real = (t.get("visible_check") or {}).get("code") or ""
+        weak, nb, na = weaken_suite(real)
+        out[tid] = {
+            "real": {"code": real, "n_tests": nb},
+            "trivial": {"code": TRIVIAL_SUITE_CODE, "n_tests": 0},
+            "weak": {"code": weak, "n_tests": na, "n_before": nb},
+            "targeted": {"code": targeted_suite(t.get("entry_point")), "n_tests": 0},
+            "mimic": {"code": mimic_suite(real, t.get("entry_point")), "n_tests": nb},
+        }
+    return out
+
+
+def _gauge_job(job):
+    tid, variant, code, ref, ep = job
+    from vacant.suitegauge import gauge_suite
+    try:
+        g = gauge_suite(code, ref, stub_set(ep), entry_point=ep)
+    except Exception as exc:                                        # noqa: BLE001
+        return tid, variant, {"error": f"{type(exc).__name__}:{exc}"[:160]}
+    return tid, variant, g.as_dict()
+
+
+GAUGE_VARIANTS = ("real", "trivial", "weak", "targeted", "mimic")
+#: 「這一格根本沒有量具可用」的理由集合——與「量具擋下來了」必須分開，
+#: 否則 r443 那 79 題沒有參考解會被讀成「閘門擋掉 79 題」（06-30 稽核紀律）。
+UNGAUGEABLE = ("ungaugeable_no_reference", "not_censused", "not_constructible",
+               "gauge_error", "gauge_stub_count_short", "label_error")
+
+
+def gauge_census(run: str, variants=GAUGE_VARIANTS, workers: int = 6) -> dict:
+    """對每題每個變體跑一次量具。落盤成 cache，因為它是純沙箱、可重放。
+
+    **只覆蓋這次算的變體**，其餘沿用舊 cache：census 每一格是 5 次真沙箱
+    （參考解＋4 個壞樁），整份重算在有負載的機器上是十幾分鐘，而
+    `--gauge-variants targeted` 這種增量只要四分之一。整份重寫會讓一次
+    「只想補一個變體」的呼叫安靜毀掉另外三個變體的資料。
+    ⚠ 代價：合併意味著舊變體的數字**不是這一次跑出來的**。要重新量整份就明確
+      給滿四個變體（本檔預設）。
+    """
+    tasks, cands = load_pool(run)
+    refs = canonical_refs(run)
+    sv = suite_variants(run, tasks, cands)
+    jobs, missing_ref, no_weak = [], [], []
+    for tid, v in sorted(sv.items()):
+        ref = refs.get(tid)
+        if not ref:
+            missing_ref.append(tid)
+            continue
+        ep = tasks[tid].get("entry_point")
+        for name in variants:
+            code = v[name]["code"]
+            if code is None:
+                # weak／mimic 都可能造不出來（形狀認不得）。這是「沒有這一格」，
+                # 不是「這一格量到 0」——分開記，別讓兩者在報表上長得一樣。
+                no_weak.append(f"{name}:{tid}")
+                continue
+            jobs.append((tid, name, code, ref, ep))
+    print(f"{run}: gauge census — {len(jobs)} runs "
+          f"({len(sv)} tasks, {len(missing_ref)} without a reference solution, "
+          f"{len(no_weak)} not constructible), {workers} workers", flush=True)
+    p_cache = CACHE / f"peerexec_gauge_{run}.json"
+    out: dict[str, dict] = {}
+    prev: dict = {}
+    if p_cache.exists():
+        prev = json.loads(p_cache.read_text())
+        out = {tid: dict(v) for tid, v in (prev.get("gauge") or {}).items()}
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        for n, (tid, name, rec) in enumerate(ex.map(_gauge_job, jobs, chunksize=4), 1):
+            out.setdefault(tid, {})[name] = rec
+            if n % 200 == 0:
+                print(f"  {n}/{len(jobs)}", flush=True)
+    # `not_weakenable` 只有 weak 那一輪算得出來 ⇒ 增量跑（例如只補 targeted）時要
+    # **併**舊值而不是用空 list 蓋掉，否則「這一輪沒算」會被寫成「沒有這種題目」。
+    if "weak" not in variants:
+        no_weak = list(no_weak) + list(prev.get("not_weakenable") or [])
+    res = {"run": run, "gauge": out, "missing_ref": sorted(set(missing_ref)),
+           "not_weakenable": sorted(set(no_weak)),
+           "variants_last_run": sorted(variants),
+           "n_tasks": len(sv)}
+    CACHE.mkdir(parents=True, exist_ok=True)
+    p_cache.write_text(json.dumps(res, indent=0, sort_keys=True))
+    return res
+
+
+def load_gauge(run: str) -> dict:
+    p = CACHE / f"peerexec_gauge_{run}.json"
+    if not p.exists():
+        raise SystemExit(f"缺 gauge cache：先跑 --gauge-census {run}")
+    return json.loads(p.read_text())
+
+
+def _variant_label_job(job):
+    key, code, suite_code, ep = job
+    try:
+        ok, _ = meets_demand(code, suite_code, 10, entry_point=ep)
+    except Exception:                                               # noqa: BLE001
+        ok = None
+    return key, ok
+
+
+def build_variant_labels(run: str, variant: str, workers: int = 6) -> dict[str, bool | None]:
+    """每個候選在**某一套腐化驗收**下過不過。真沙箱，落在自己的 cache（不動 facts）。
+
+    ⚠ `None`＝那一格的沙箱丟例外（InfraVoid 之類）。它**不是** False：
+      `gate_delivery` 會把 None 單獨計成 `label_error` 而不是「沒通過」，
+      否則「量不到」會被讀成「這份草稿不合格」（06-30 稽核紀律）。
+    """
+    tasks, cands = load_pool(run)
+    sv = suite_variants(run, tasks, cands)
+    jobs = []
+    for tid, codes in sorted(cands.items()):
+        if tid not in tasks or sv[tid][variant]["code"] is None:
+            continue
+        for i, c in enumerate(codes):
+            jobs.append((f"{tid}#{i}", c, sv[tid][variant]["code"],
+                         tasks[tid].get("entry_point")))
+    print(f"{run}: {variant}-suite labels for {len(jobs)} candidates "
+          f"({workers} workers)", flush=True)
+    out: dict[str, bool | None] = {}
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        for n, (key, ok) in enumerate(ex.map(_variant_label_job, jobs, chunksize=8), 1):
+            out[key] = ok
+            if n % 400 == 0:
+                print(f"  {n}/{len(jobs)}", flush=True)
+    (CACHE / f"peerexec_{variant}_{run}.json").write_text(
+        json.dumps(out, indent=0, sort_keys=True))
+    return out
+
+
+def load_variant_labels(run: str, variant: str) -> dict[str, bool | None]:
+    p = CACHE / f"peerexec_{variant}_{run}.json"
+    if not p.exists():
+        raise SystemExit(f"缺 {variant} cache：先跑 --build-variant {variant} {run}")
+    return json.loads(p.read_text())
+
+
+class VariantProbe(HonestProbe):
+    """誠實地跑**某一套**驗收（real／trivial／weak／targeted）。誠實在這裡沒有保護力。"""
+
+    def __init__(self, *a, label=None, **kw):
+        super().__init__(*a, **kw)
+        self.label = label
+
+    def __call__(self, code, task):
+        key = self.index[(task["task_id"], sha(code))]
+        return px.ProbeResult(bool(self.label(key)), None, 0, True, None)
+
+
+def gate_delivery(run, variant, *, k=3, workers=6, stub_n=4):
+    """把某一套驗收**過一次真的 commit 閘**，再算閘後還交得出什麼。
+
+    每一題：
+      1. 用 `px.commit_suite_with_gauge` 把該變體上鏈——量具沒過就 `SuiteGaugeError`，
+         **這一題連跑都不跑**（拒交，`n_sandbox_runs=0`）。量具素材取自 cache，
+         所以這一步零沙箱（真跑時的成本另外算，見 `--gauge-census` 的 runs 數）。
+      2. 過了閘的題目才走 `select_by_quorum`（k 個誠實執行器、真簽章、真鏈）。
+    回傳逐題記錄 ＋ 匯總。
+    """
+    tasks, cands = load_pool(run)
+    facts = load_facts(run)
+    gauge = load_gauge(run)
+    sv = suite_variants(run, tasks, cands)
+    # 壞樁數不准超過 census 實際跑過的那組：`GaugeRecord(..., n_broken=len(stubs), ...)`
+    # 是**宣告**，census 的 `accepted_stubs` 是證據；宣告大於證據＝這筆合格證在說謊。
+    n_avail = len(stub_set(None))
+    if not 1 <= stub_n <= n_avail:
+        raise SystemExit(f"--gauge-stubs 必須在 1..{n_avail}（收到 {stub_n}）——"
+                         f"census 只跑過 {n_avail} 個壞樁，宣告更多等於偽造合格證")
+    index = {(tid, sha(c)): f"{tid}#{i}"
+             for tid, codes in cands.items() for i, c in enumerate(codes)}
+    if variant == "real":
+        label = lambda key: facts[key]["visible"]                    # noqa: E731
+    elif variant == "trivial":
+        label = lambda key: facts[key].get("trivial")                # noqa: E731
+    else:
+        _vl = load_variant_labels(run, variant)
+        label = _vl.get
+    probe = VariantProbe(facts, index, label=label)
+    execs = [px.Executor(f"x{i}", px.Identity.generate(), px.Logbook(), probe)
+             for i in range(k)]
+    roster = px.roster_of(execs)
+    ident, book = px.Identity.generate(), px.Logbook()
+    # 承諾者的公鑰一起帶進閘門：不帶的話，被灌水的量具紀錄在內容上照樣「合格」
+    # （見 `tests/test_peerexec.py::test_select_by_quorum_verifies_the_committers_signature...`）。
+    committer = px.PublicIdentity(ident.vacant_id, ident.pub)
+
+    rows = []
+    for tid, codes in sorted(cands.items()):
+        t = tasks.get(tid)
+        if t is None:
+            continue
+        code = sv[tid][variant]["code"]
+        rec = (gauge["gauge"].get(tid) or {}).get(variant)
+        row = {"task_id": tid, "variant": variant, "committed": False,
+               "refuse_reason": None, "refused": True, "delivered_correct": False,
+               "false_delivery": False, "contested": False, "n_runs": 0}
+        if code is None:
+            row["refuse_reason"] = "not_constructible"
+        elif rec is None:
+            # 「這題沒有參考解」與「這個變體還沒 census 過」是兩件事。合成同一格的話，
+            # 忘了跑 `--gauge-census --gauge-variants mimic` 會被報成「79 題沒有參考解」
+            # ——一個看起來完全合理、但把「線沒接上」講成「量到了」的數字（06-30 稽核紀律）。
+            row["refuse_reason"] = ("ungaugeable_no_reference"
+                                    if tid in set(gauge.get("missing_ref") or ())
+                                    else "not_censused")
+        elif "error" in rec:
+            row["refuse_reason"] = "gauge_error"
+        elif int(rec.get("n_broken", 0)) < stub_n:
+            # cache 是用比 --gauge-stubs 更少的樁跑的 ⇒ 沒有證據支持這張合格證。
+            row["refuse_reason"] = "gauge_stub_count_short"
+        elif any(label(f"{tid}#{i}") is None for i in range(len(codes))):
+            # 沙箱在這一格丟過例外 ⇒ 這題**沒有標籤**，不是「全部沒過」。
+            row["refuse_reason"] = "label_error"
+        else:
+            stubs = list(range(stub_n))
+            accepted = [i for i in rec["accepted_stubs"] if i in stubs]
+            gr = px.GaugeRecord(rec["suite_sha256"], rec["ref_sha256"], len(stubs),
+                                not accepted, bool(rec["ref_passed"]))
+            try:
+                entry = px.commit_suite(book, ident, task_id=tid, check_code=code,
+                                        nonce=GAUGE_NONCE, gauge=gr,
+                                        ts_ms=1_700_000_000_000)
+                row["committed"] = True
+            except px.SuiteGaugeError as exc:
+                row["refuse_reason"] = str(exc).split(":")[0]
+                entry = None
+            if entry is not None:
+                vt = {**t, "visible_check": {"type": "run_python", "code": code,
+                                             "timeout": 10}}
+                sel = px.select_by_quorum(
+                    vt, [(c, f"w{i}") for i, c in enumerate(codes)], execs,
+                    roster=roster, quorum=k // 2 + 1, suite_commit=entry,
+                    suite_nonce=GAUGE_NONCE, suite_committer=committer,
+                    ts_ms=1_700_000_000_000)
+                hit = (not sel.refused) and bool(facts[f"{tid}#{sel.shipped_index}"]["hidden"])
+                row.update(refused=sel.refused, delivered_correct=hit,
+                           false_delivery=(not sel.refused) and not hit,
+                           contested=any(v.contested for v in sel.verdicts),
+                           n_runs=sel.n_sandbox_runs,
+                           refuse_reason=sel.refusal_reason)
+        rows.append(row)
+    n = len(rows)
+    # 「有量具可用」的題目集合＝有參考解、而且這個變體造得出來。real／trivial／weak
+    # 三個變體的這個集合**相同**，所以變體之間的 delta 只能在這個分母上比才誠實
+    # （r443 有 79 題根本沒有參考解——那是「沒有量具」，不是「量具擋下來」）。
+    gaugeable = [r for r in rows if r["refuse_reason"] not in UNGAUGEABLE]
+    ng = max(1, len(gaugeable))
+    agg = {
+        "run": run, "variant": variant, "k": k, "n": n, "stub_n": stub_n,
+        "committed": sum(r["committed"] for r in rows),
+        "refused_at_commit": sum(not r["committed"] for r in rows),
+        "n_gaugeable": len(gaugeable),
+        "deliv_acc_gaugeable": sum(r["delivered_correct"] for r in gaugeable) / ng,
+        "false_deliv_gaugeable": sum(r["false_delivery"] for r in gaugeable) / ng,
+        "refuse_reasons": dict(collections.Counter(
+            r["refuse_reason"] for r in rows if not r["committed"])),
+        "deliv_acc": sum(r["delivered_correct"] for r in rows) / n,
+        "false_deliv": sum(r["false_delivery"] for r in rows) / n,
+        "refusal": sum(r["refused"] for r in rows) / n,
+        "contested": sum(r["contested"] for r in rows) / n,
+        "chain_ok": all(px.verify_executor_chain(e.executor_id, e.book, roster)
+                        for e in execs),
+    }
+    return agg, rows
+
+
+def gauge_gate_table(runs=("g_r446_eq5_mbpp", "g_r443_gemma_lcb"), k=3, stub_n=4,
+                     variants=GAUGE_VARIANTS):
+    """R449 §四-3 的收官表：同一批題目，五套驗收，各自過一次真的 commit 閘。
+
+    五個變體讀法（順序就是「這道閘擋掉多少」的遞減順序）：
+      real      原樣的可見驗收＝基線。它自己也要過閘（MBPP+ 有 2 題過不了，照實報）。
+      trivial   `pass`。§三-3 那一格。**閘門擋掉 100%**。
+      weak      只留第一條可見驗收。閘門擋掉一部分（`n_before` 大的擋不掉），
+                擋不掉的那些就是殘留損害。
+      targeted  逐字黑名單那四個已知壞樁、其餘全放行。**量具滿分、閘門一題都擋不掉**，
+                而交付與 trivial 完全一樣——「量具在 commit 前面」的誠實上限。
+      mimic     真套件 ＋ 一句「不是已知壞樁就把受測函式換成該題參考解」。形狀、
+                測資條數、壞樁的失敗細節都與真套件**逐欄相同**，所以連「比對失敗
+                細節」的強化版量具也擋不掉；其餘候選一律放行。上限的最強版本。
+
+    delta 一律在 `gaugeable` 分母上算，並用配對 bootstrap（同一批題目、同一組重抽
+    索引，`BOOT_SEED`）給區間；配對是必要的，因為五個變體跑的是**同一批題目**。
+    """
+    out = []
+    print("\n=== 套件量具閘（commit 前必須擋得住已知壞草稿）===")
+    print(f"    k={k} 誠實執行器、{stub_n} 個已知壞樁、參考解＝官方／手驗解")
+    for run in runs:
+        base = None
+        base_rows: dict[str, dict] = {}
+        for variant in variants:
+            try:
+                agg, rows = gate_delivery(run, variant, k=k, stub_n=stub_n)
+            except SystemExit as exc:
+                print(f"  {run[:18]:18s} {variant:8s} SKIP：{exc}")
+                continue
+            by_task = {r["task_id"]: r for r in rows}
+            if variant == "real":
+                base = agg["deliv_acc_gaugeable"]
+                base_rows = by_task
+            agg["delta_pp_vs_real"] = (None if base is None
+                                       else 100 * (agg["deliv_acc_gaugeable"] - base))
+            # 配對 bootstrap：逐題 (變體交對?) − (real 交對?)，只在兩邊都可量的題目上。
+            paired = [int(by_task[tid]["delivered_correct"])
+                      - int(base_rows[tid]["delivered_correct"])
+                      for tid in sorted(base_rows)
+                      if tid in by_task
+                      and by_task[tid]["refuse_reason"] not in UNGAUGEABLE
+                      and base_rows[tid]["refuse_reason"] not in UNGAUGEABLE]
+            lo, hi = boot_ci_multi([[100.0 * x for x in paired]])[0] if paired else (None, None)
+            agg["delta_pp_ci95"] = [lo, hi]
+            agg["n_paired"] = len(paired)
+            out.append(agg)
+            d = agg["delta_pp_vs_real"]
+            ci = ("" if lo is None or variant == "real"
+                  else f" CI95[{lo:+.2f},{hi:+.2f}]")
+            print(f"  {run[:18]:18s} {variant:8s} "
+                  f"committed={agg['committed']:3d}/{agg['n']:3d} "
+                  f"refused_at_commit={agg['refused_at_commit']:3d} "
+                  f"deliv={100*agg['deliv_acc']:6.2f}% "
+                  f"(gaugeable {agg['n_gaugeable']:3d}: "
+                  f"{100*agg['deliv_acc_gaugeable']:6.2f}%, "
+                  f"fd={100*agg['false_deliv_gaugeable']:5.2f}%) "
+                  f"refuse={100*agg['refusal']:6.2f}% "
+                  f"cont={100*agg['contested']:4.1f}% "
+                  f"({'baseline' if d is None else f'{d:+.2f}pp vs real'}{ci}) "
+                  f"chain={agg['chain_ok']}")
+            if agg["refuse_reasons"]:
+                print(f"      拒絕理由：{agg['refuse_reasons']}")
+    # 檔名帶 k 與壞樁數：`--gauge-stubs 1` 與 `--gauge-stubs 4` 是**兩份不同的量**
+    # （1 個樁＝repo 現成量具的原樣覆蓋率），寫進同一個檔名會讓後跑的那次安靜蓋掉前一次。
+    p = OUT / f"peer_exec_gauge_gate_k{k}_s{stub_n}.json"
+    p.write_text(json.dumps(out, indent=1))
+    print(f"wrote {p}")
+    return out
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--build-facts", nargs="+", metavar="RUN")
@@ -980,6 +1479,23 @@ if __name__ == "__main__":
     ap.add_argument("--repair-hidden", nargs="+", metavar="RUN")
     ap.add_argument("--build-trivial", nargs="+", metavar="RUN")
     ap.add_argument("--trivial-suite", action="store_true")
+    ap.add_argument("--gauge-census", nargs="+", metavar="RUN",
+                    help="對 real／trivial／weak／targeted／mimic 五套驗收"
+                         "各跑一次量具（真沙箱）")
+    ap.add_argument("--build-variant", nargs="+", metavar="VARIANT RUN...",
+                    help="每個候選在某一套腐化驗收下過不過（真沙箱）。"
+                         "第一個參數是變體名（weak／targeted／mimic），其後是 run 名")
+    ap.add_argument("--gauge-gate", action="store_true",
+                    help="四套驗收各過一次真的 commit 閘，報閘前／閘後的交付")
+    ap.add_argument("--gauge-k", type=int, default=3)
+    ap.add_argument("--gauge-stubs", type=int, default=4,
+                    help="納入判定的已知壞樁數（1＝與 probe_instrument 的樁逐字相同）")
+    ap.add_argument("--gauge-variants", nargs="+", default=list(GAUGE_VARIANTS),
+                    metavar="VARIANT",
+                    help="--gauge-census／--gauge-gate 只處理這幾個變體"
+                         "（census 的其餘變體沿用既有 cache）")
+    ap.add_argument("--gauge-runs", nargs="+", default=list(POOLS),
+                    metavar="RUN", help="--gauge-gate 只跑這幾個池")
     ap.add_argument("--table", action="store_true",
                     help="重印 peer_exec_sweep.json，不重跑")
     ap.add_argument("--smart-targets", action="store_true",
@@ -1007,6 +1523,26 @@ if __name__ == "__main__":
         sweep()
     if a.trivial_suite:
         trivial_suite_table()
+    if a.gauge_census:
+        _bad = [v for v in a.gauge_variants if v not in GAUGE_VARIANTS]
+        if _bad:
+            raise SystemExit(f"未知變體 {_bad}；可用：{list(GAUGE_VARIANTS)}")
+        for r in a.gauge_census:
+            if r in POOLS:
+                gauge_census(r, variants=tuple(a.gauge_variants), workers=a.workers)
+    if a.build_variant:
+        _variant, *_runs = a.build_variant
+        if _variant not in GAUGE_VARIANTS:
+            raise SystemExit(f"未知變體 {_variant}；可用：{list(GAUGE_VARIANTS)}")
+        for r in _runs:
+            if r in POOLS:
+                build_variant_labels(r, _variant, a.workers)
+    if a.gauge_gate:
+        _bad = [v for v in a.gauge_variants if v not in GAUGE_VARIANTS]
+        if _bad:
+            raise SystemExit(f"未知變體 {_bad}；可用：{list(GAUGE_VARIANTS)}")
+        gauge_gate_table(runs=tuple(a.gauge_runs), k=a.gauge_k, stub_n=a.gauge_stubs,
+                         variants=tuple(a.gauge_variants))
     if a.flake:
         flake_table()
     if a.challenge:

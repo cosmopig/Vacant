@@ -40,9 +40,22 @@ LLM 評審之間的分歧永遠只能解讀成「他們看法不同」——那�
    這條是 R440P §五-1 的原句，搬到這裡一樣有效。
 2. **驗收套件本身仍然是被信任的輸入。** 去中心化執行**不會**讓一套錯的驗收變對；
    全體誠實的執行器會一致地、可驗證地交出一個錯的答案。`commit_suite` /
-   `open_suite` 只把套件**在時間上釘死**（草稿存在之前就承諾其雜湊），
-   `challenge_rerun` 只給落敗方一個重跑的權利——兩者都是 raises-cost，不是 prevents。
-   **這是本模組剩下的固定點，不准講成已經解決。**
+   `open_suite` 把套件**在時間上釘死**（草稿存在之前就承諾其雜湊）並要求它先過
+   **量具**（R449 §四-3：對一組已知壞草稿，參考解要通過、每一個壞樁都要被擋），
+   `challenge_rerun` 只給落敗方一個重跑的權利——三者都是 raises-cost，不是 prevents。
+   量具擋掉的是「對什麼都放行」那一整類套件（`visible_check := "pass"` 在
+   `peer_exec_sim --trivial-suite` 量到 −6.47pp／−18.68pp、假交付 31%／49%、
+   爭議率 0.0%——所有健康指標滿格的那一格）。它**擋不了**兩類套件：
+   （a）「通過量具但別處被弱化」的（例如三條 assert 只留一條）——`--gauge-gate`
+   的 weak 變體；（b）**逐字認出那組已知壞樁、其餘一律放行**的——targeted／mimic
+   兩個變體，量具兩個方向滿分、一題都擋不掉、交付與「什麼都不驗」完全相同。
+   mimic 是（b）的最強形式：它把真套件原封不動留著，只多一句「不是已知壞樁就把
+   受測函式換成參考解」，所以連**形狀**與**壞樁的失敗細節**都與真套件逐欄相同
+   ——把量具強化成「壞樁被擋的樣子對不對」也擋不掉它
+   （`tests/test_peerexec.py::test_a_mimic_suite_defeats_even_a_detail_matching_gauge`）。
+   （b）是這道修補的真正上限：只要攻擊者知道量具會拿什麼去問，量具就只是一組
+   要通過的測資，而不是一個對套件品質的保證。**這是本模組剩下的固定點，
+   不准講成已經解決。**
 3. **沙箱缺陷是相關失效，不是腐化。** k 個執行器如果跑同一份 `vacant/checks.py`、
    同一個 Python、同一台機器，它們會**一致地**錯，法定人數會全票通過一個錯的判決，
    而且分歧率為 0（看起來最健康）。要打斷這個相關性需要**實作多樣性**的沙箱，
@@ -61,12 +74,17 @@ LLM 評審之間的分歧永遠只能解讀成「他們看法不同」——那�
 ----
 - V/GT 分離（SPEC §5.3）：執行器**只准**跑 `visible_check`。`hidden_check` 一處都
   沒有出現在本模組——計分是稽核端的事，不是機制的一部分。
+  **量具沒有破這條**：它吃的參考解與壞樁都是**驗證者側**的物件——不是任何 worker
+  的產出、不進任何 prompt、不進 `hidden_check` 路徑，只餵給沙箱跑那套**可見**驗收。
+  論證與 `gain_run._canonical_solutions` 的 docstring 逐字同一條（「量具驗證是
+  驗證者側的動作，跟 agent 無關」）。誰提供這組已知壞集合是**部署層**的問題，
+  跟 roster 准入一樣是沒解掉的固定點：一個能同時挑套件與挑壞樁的攻擊者，
+  可以挑一組剛好被自己那套爛套件擋住的樁。量具因此是**下界**不是保證。
 - KS-1／A4：本模組不產生任何 prompt 文字，零模型呼叫。
 """
 
 from __future__ import annotations
 
-import hashlib
 import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Iterable, Mapping, Sequence
@@ -75,10 +93,12 @@ from . import logbook as _lb
 from .canonical import canonical_bytes
 from .identity import Identity, PublicIdentity
 from .logbook import Logbook, review_commitment
+from .suitegauge import CheckRunner, broken_stub, gauge_suite, sha256_hex
 
 ATTEST_VERSION = 1
 ATTEST_TYPE = "peer_exec_attestation"
 SUITE_COMMIT_TYPE = "peer_exec_suite_commit"
+SUITE_COMMIT_VERSION = 1
 VERDICT_TYPE = "peer_exec_verdict"
 
 #: 多數決的上界，寫成常數是為了讓它出現在收據裡而不是只出現在論述裡。
@@ -87,9 +107,14 @@ MAJORITY_BOUND_NOTE = (
     "beyond that the verdict inverts and honest executors are the named dissenters"
 )
 
-
-def sha256_hex(text: str) -> str:
-    return hashlib.sha256((text or "").encode("utf-8")).hexdigest()
+#: 量具擋掉的與擋不掉的，寫成常數是為了讓它出現在**每一份**收據裡而不是只出現在
+#: 論述裡：讀收據的人看到 `gauge_status="ok"` 時必須同時看到它證明的範圍有多窄。
+SUITE_FIXED_POINT_NOTE = (
+    "the committed suite passed a gauge (reference accepted, every known-bad stub "
+    "rejected); this rules out suites that admit anything, NOT suites that are "
+    "merely weak, wrong, incomplete, or written to special-case the known-bad set "
+    "-- the acceptance suite remains a trusted input"
+)
 
 
 def suite_hash(task: Mapping[str, Any]) -> str:
@@ -245,6 +270,26 @@ def roster_of(executors: Iterable[Executor]) -> dict[str, PublicIdentity]:
     return {e.executor_id: e.public for e in executors}
 
 
+def _entry_signature_ok(entry: _lb.LogEntry, who: PublicIdentity) -> tuple[bool, str]:
+    """一筆 entry 的簽章驗過了嗎？`(ok, 理由)`，理由字串會原樣進收據。
+
+    用 logbook 自己的 `_signed_bytes`：wire-format 只准有一個真相來源。在這裡重寫
+    一次序列化＝製造一份會和 logbook 漂移的影子規格。證言（`verify_attestation`）
+    與套件承諾（`suite_gate`）共用這一份，理由字串因此也只有一組。
+    """
+    try:
+        sig = bytes.fromhex(entry.sig)
+    except ValueError:
+        return False, "bad_signature_encoding"
+    msg = _lb._signed_bytes(  # noqa: SLF001
+        entry.stream_id, entry.branch_id, entry.seq, entry.prev_hash,
+        entry.ts_ms, entry.type, entry.payload,
+    )
+    if not who.verify(msg, sig):
+        return False, "bad_signature"
+    return True, ""
+
+
 def verify_attestation(
     att: Attestation,
     roster: Mapping[str, PublicIdentity],
@@ -282,18 +327,7 @@ def verify_attestation(
         return False, "draft_mismatch"
     if suite_sha256 is not None and p.get("suite_sha256") != suite_sha256:
         return False, "suite_mismatch"
-    try:
-        sig = bytes.fromhex(e.sig)
-    except ValueError:
-        return False, "bad_signature_encoding"
-    # 用 logbook 自己的 `_signed_bytes`：wire-format 只准有一個真相來源。
-    # 在這裡重寫一次序列化＝製造一份會和 logbook 漂移的影子規格。
-    msg = _lb._signed_bytes(  # noqa: SLF001
-        e.stream_id, e.branch_id, e.seq, e.prev_hash, e.ts_ms, e.type, e.payload
-    )
-    if not who.verify(msg, sig):
-        return False, "bad_signature"
-    return True, ""
+    return _entry_signature_ok(e, who)
 
 
 def verify_executor_chain(ex_id: str, book: Logbook, roster: Mapping[str, PublicIdentity]) -> bool:
@@ -330,6 +364,11 @@ class Verdict:
     evidence: tuple[tuple[str, str], ...]  # (executor_id, entry_hash) for admitted
     quorum: int
     n_admitted: int
+    #: 套件量具閘的狀態。"unchecked"＝呼叫端沒有給白名單（舊語意，套件未受檢）；
+    #: "ok"＝這套驗收有一筆通過的量具紀錄；其餘皆為拒絕理由（見 `suite_gate`）。
+    #: 收據上把它與 `visible_ok` 分開兩欄，是因為「全票通過一套沒被量過的驗收」
+    #: 與「全票通過一套量過的驗收」在舊收據上長得一模一樣——那正是 R449 §三-3。
+    gauge_status: str = "unchecked"
 
     @property
     def contested(self) -> bool:
@@ -370,7 +409,9 @@ class Verdict:
             "rejected": [list(r) for r in self.rejected],
             "evidence": [list(e) for e in self.evidence],
             "contested": self.contested,
+            "gauge_status": self.gauge_status,
             "majority_bound": MAJORITY_BOUND_NOTE,
+            "suite_fixed_point": SUITE_FIXED_POINT_NOTE,
         }
 
 
@@ -382,10 +423,18 @@ def form_verdict(
     draft_sha256: str,
     suite_sha256: str,
     quorum: int = 1,
+    gauged_suites: Mapping[str, Any] | None = None,
 ) -> Verdict:
     """把一組證言變成一個判決 ＋ 一份歸屬。
 
     步驟（每一步的產物都進收據）：
+      0. **套件量具閘**（`gauged_suites` 有給的時候才作用）：這套驗收的
+         `suite_sha256` 必須在白名單裡、而且那筆量具紀錄要通過。不在／沒過 ⇒
+         **每一筆證言都不進計票**（各自附理由進 `rejected`）、判決為未決 ⇒ 拒交。
+         白名單用 `gauged_suite_index` 造，那支自己 fail-closed。
+         ⚠ `gauged_suites=None` 是**舊語意**（套件未受檢），`gauge_status` 會寫
+         `"unchecked"`。出貨路徑請走 `select_by_quorum(suite_commit=...)`，
+         那條路徑不給「忘了帶白名單」留空間。
       1. 逐筆 `verify_attestation`；不可采信的進 `rejected`，附理由。
       2. 同一個執行器交出兩筆內容不同的證言 ＝ **equivocation**。兩筆都簽過，
          所以這是**證明等級**的過錯，比「少數方」強：該執行器的兩筆全部作廢並進
@@ -400,6 +449,30 @@ def form_verdict(
     seen: dict[str, Attestation] = {}
     equivocators: set[str] = set()
     rejected: list[tuple[str, str]] = []
+
+    gauge_status = "unchecked"
+    if gauged_suites is not None:
+        raw = gauged_suites.get(suite_sha256)
+        rec = raw if isinstance(raw, GaugeRecord) else GaugeRecord.from_payload(raw)
+        if rec is None:
+            gauge_status = "suite_not_gauged"
+        elif rec.suite_sha256 != suite_sha256:
+            gauge_status = "gauge_suite_mismatch"
+        elif not rec.ok:
+            gauge_status = "suite_gauge_failed"
+        else:
+            gauge_status = "ok"
+        if gauge_status != "ok":
+            # 一筆都不採信。理由逐人進收據——「因為套件沒過量具」也是一種歸屬，
+            # 只是被指名的不是執行器，是那套驗收。
+            return Verdict(
+                task_id=task_id, draft_sha256=draft_sha256, suite_sha256=suite_sha256,
+                visible_ok=None, n_pass=0, n_fail=0, camp_pass=(), camp_fail=(),
+                dissenters=(), detail_dissenters=(), equivocators=(),
+                rejected=tuple((a.executor_id, gauge_status) for a in attestations),
+                evidence=(), quorum=max(1, quorum), n_admitted=0,
+                gauge_status=gauge_status,
+            )
 
     for att in attestations:
         ok, why = verify_attestation(
@@ -457,6 +530,7 @@ def form_verdict(
         evidence=tuple(sorted((e, a.entry_hash) for e, a in seen.items())),
         quorum=max(1, quorum),
         n_admitted=n_admitted,
+        gauge_status=gauge_status,
     )
 
 
@@ -470,6 +544,10 @@ class Selection:
     refused: bool
     verdicts: tuple[Verdict, ...]
     n_sandbox_runs: int
+    #: 為什麼拒交。`None`＝一般的「沒有草稿被判通過」；`"suite_gate:<理由>"`＝
+    #: **連跑都沒跑**：套件自己沒過閘（見 `suite_gate`），所以 `n_sandbox_runs=0`。
+    #: 兩者混在同一個 `refused` 裡會讓「套件是爛的」看起來像「候選都不夠好」。
+    refusal_reason: str | None = None
 
     def as_receipt(self) -> dict[str, Any]:
         return {
@@ -478,6 +556,7 @@ class Selection:
             "shipped_worker": self.shipped_worker,
             "shipped_sha256": self.shipped_sha256,
             "refused": self.refused,
+            "refusal_reason": self.refusal_reason,
             "n_sandbox_runs": self.n_sandbox_runs,
             "verdicts": [v.as_receipt() for v in self.verdicts],
         }
@@ -492,15 +571,38 @@ def select_by_quorum(
     suite_sha256: str | None = None,
     quorum: int | None = None,
     ts_ms: int | None = None,
+    suite_commit: _lb.LogEntry | None = None,
+    suite_nonce: str | None = None,
+    suite_committer: PublicIdentity | None = None,
+    gauged_suites: Mapping[str, Any] | None = None,
 ) -> Selection:
     """依序看草稿，第一份被法定人數判為通過的出貨；全不通過就拒交。
 
     與 `gain_run.arm_conform` 的差別**只有一個**：`visible_ok` 不再是單一執行器的
     回傳值，而是 `form_verdict` 的多數。早停語意、拒交語意、V/GT 分離全部相同。
+
+    `suite_commit`（＋`suite_nonce`）有給的時候，**在跑任何草稿之前**先過
+    `suite_gate`：套件沒過量具就直接拒交，`n_sandbox_runs=0`、`refusal_reason`
+    寫明理由。順序是規格的一部分——量具紀錄必須在任何一筆草稿證言**之前**上鏈
+    （R449 §四-3），先花 k 次沙箱再發現套件不合格，等於讓爛套件決定了要跑什麼。
+
+    ⚠ `suite_committer` 沒給的時候，這道閘**只看得到內容**：一筆被灌水的量具紀錄
+      （例如把 `n_broken` 從 1 改成 99）在內容上照樣「合格」，只有簽章抓得到
+      （`tests/test_peerexec.py::test_tampering_the_gauge_record_breaks_chain_verification`）。
+      出貨路徑請把承諾者的公鑰一起帶進來；不帶就等於信任遞交承諾的那條管道。
     """
     ros = dict(roster) if roster is not None else roster_of(executors)
     ssha = suite_sha256 or suite_hash(task)
     q = quorum if quorum is not None else len(executors) // 2 + 1
+    if suite_commit is not None:
+        code = ((task.get("visible_check") or {}).get("code")) or ""
+        ok, why = suite_gate(suite_commit, code, suite_nonce or "", who=suite_committer)
+        if not ok:
+            return Selection(task.get("task_id"), None, None, None, True, (), 0,
+                             f"suite_gate:{why}")
+        rec = GaugeRecord.from_payload((suite_commit.payload or {}).get("gauge"))
+        if gauged_suites is None and rec is not None:
+            gauged_suites = {rec.suite_sha256: rec}
     verdicts: list[Verdict] = []
     runs = 0
     for i, (code, _worker) in enumerate(drafts):
@@ -512,43 +614,217 @@ def select_by_quorum(
         v = form_verdict(
             atts, ros, task_id=task.get("task_id"),
             draft_sha256=dsha, suite_sha256=ssha, quorum=q,
+            gauged_suites=gauged_suites,
         )
         verdicts.append(v)
         if v.visible_ok:
             return Selection(task.get("task_id"), i, drafts[i][1], dsha, False,
                              tuple(verdicts), runs)
+        if v.gauge_status not in ("unchecked", "ok"):
+            # 套件不合格 ⇒ 每一份草稿都會是同一個結果，繼續跑只是燒沙箱。
+            return Selection(task.get("task_id"), None, None, None, True,
+                             tuple(verdicts), runs, f"suite_gate:{v.gauge_status}")
     return Selection(task.get("task_id"), None, None, None, True, tuple(verdicts), runs)
 
 
-# ── 剩下的固定點：驗收套件本身的兩道緩解 ────────────────────────────────────
+# ── 剩下的固定點：驗收套件本身的三道緩解 ────────────────────────────────────
+class SuiteGaugeError(RuntimeError):
+    """套件沒過量具 ⇒ **不上鏈**。
+
+    刻意用例外而不是回傳 False：`commit_suite` 是唯一產生「可用套件」的入口，
+    一個安靜回傳 None 的失敗會讓呼叫端在 `if entry:` 之外的路徑上繼續交付。
+    """
+
+
+@dataclass(frozen=True)
+class GaugeRecord:
+    """簽進鏈裡的量具紀錄。五個欄位就是 R449 §四-3 要求的那五個。
+
+    `n_broken` 必須進紀錄：沒有它的話，「壞解被擋 0/0」與「壞解被擋 12/12」在
+    收據上長得一模一樣——那正是 `probe_instrument` 的 docstring 已經寫過的坑
+    （「沒有這一步的話，『量到 0』與『線根本沒接上』在報告裡長得一模一樣」）。
+    """
+
+    suite_sha256: str
+    ref_sha256: str
+    n_broken: int
+    all_rejected: bool
+    ref_passed: bool
+
+    @property
+    def ok(self) -> bool:
+        """雙向都要過，而且已知壞集合不准是空的（空集合＝空洞地全擋＝fail-open）。"""
+        return bool(self.ref_passed and self.all_rejected and self.n_broken >= 1)
+
+    def as_payload(self) -> dict[str, Any]:
+        return {
+            "suite_sha256": self.suite_sha256,
+            "ref_sha256": self.ref_sha256,
+            "n_broken": int(self.n_broken),
+            "all_rejected": bool(self.all_rejected),
+            "ref_passed": bool(self.ref_passed),
+        }
+
+    @classmethod
+    def from_payload(cls, d: Any) -> "GaugeRecord | None":
+        """壞掉的／缺欄位的紀錄一律回 None——讀不懂就是沒有，不准猜。"""
+        if not isinstance(d, Mapping):
+            return None
+        try:
+            return cls(
+                str(d["suite_sha256"]), str(d["ref_sha256"]), int(d["n_broken"]),
+                bool(d["all_rejected"]), bool(d["ref_passed"]),
+            )
+        except (KeyError, TypeError, ValueError):
+            return None
+
+
+def run_suite_gauge(
+    check_code: str, reference: str, broken_stubs: Sequence[str], *,
+    entry_point: str | None = None, runner: CheckRunner | None = None,
+    timeout_s: int = 10,
+) -> GaugeRecord:
+    """跑量具，產生一筆可上鏈的紀錄。判準來自 `vacant.suitegauge`（與 `gain_run`
+    的 `probe_instrument` **同一份實作**，不是第二份長得像的）。
+
+    誠實邊界：這裡沒有 `hidden_check`，量的是**可見驗收套件**——因為可見套件才是
+    出貨閘門。參考解與壞樁是驗證者側的物件，不進 prompt（見模組 docstring 紅線）。
+    """
+    out = gauge_suite(check_code, reference, broken_stubs,
+                      entry_point=entry_point, runner=runner, timeout_s=timeout_s)
+    return GaugeRecord(out.suite_sha256, out.ref_sha256, out.n_broken,
+                       out.all_rejected, out.ref_passed)
+
+
 def commit_suite(
     book: Logbook, identity: Identity, *, task_id: Any, check_code: str, nonce: str,
-    ts_ms: int | None = None,
+    gauge: "GaugeRecord | Mapping[str, Any]", ts_ms: int | None = None,
 ) -> _lb.LogEntry:
-    """在**草稿存在之前**把驗收套件的雜湊承諾上鏈（commit-reveal）。
+    """在**草稿存在之前**把驗收套件的雜湊承諾＋**量具紀錄**一起簽上鏈。
 
-    這關掉的是一條特定的攻擊：拿到草稿之後再回頭改驗收套件（改成剛好放行、或剛好
-    擋掉某個人）。承諾之後套件就不能改而不被看見。
+    兩件事綁在同一筆 entry 裡，因為它們擋的是兩種不同的攻擊，而分成兩筆會讓
+    「承諾了但沒量」變成一個可用狀態：
 
-    **不能**做到的（誠實邊界）：它不讓套件變得正確、不保證套件涵蓋真需求、也不
-    阻止一開始就寫壞／寫偏的套件。套件本身仍然是固定點。
+      commit-reveal  擋「拿到草稿之後回頭改套件」（時間上釘死）。
+      量具紀錄       擋「一開始就給一套什麼都放行的套件」——上鏈前必須證明：
+                     參考解**通過**、每一個已知壞樁都**被擋**。
+                     不通過就丟 `SuiteGaugeError`，**沒有 entry**。
+
+    ⚠ hiding 的代價（誠實邊界）：紀錄裡帶著 `suite_sha256`，所以這筆承諾是
+      binding 但**不是** hiding——任何人都可以拿一份猜測的套件去比對雜湊，不需要
+      nonce。這在本用途上是刻意的：執行器本來就必須拿到套件原文才跑得動它，
+      「對執行器隱藏套件」從來不是這裡的性質；`form_verdict` 需要用
+      `suite_sha256` 認出「這一票投的是不是同一套」，那個索引必須公開。
+
+    **仍然不能**做到的：量具不讓套件變得正確、不保證涵蓋真需求。一套通過量具、
+    但把可見驗收刪到只剩一條的套件照樣上得了鏈（R449 §七 推翻條件二；
+    數字見 `peer_exec_sim --gauge-gate` 的 weak 變體）。套件仍然是固定點，只是變窄了。
     """
-    payload = {"task_id": task_id, "commitment": review_commitment(check_code, nonce)}
+    rec = gauge if isinstance(gauge, GaugeRecord) else GaugeRecord.from_payload(gauge)
+    if rec is None:
+        raise SuiteGaugeError("gauge_record_missing")
+    if rec.suite_sha256 != sha256_hex(check_code):
+        raise SuiteGaugeError(
+            f"gauge_suite_mismatch: record={rec.suite_sha256[:12]} "
+            f"committed={sha256_hex(check_code)[:12]}")
+    if not rec.ok:
+        raise SuiteGaugeError(
+            f"gauge_failed: ref_passed={rec.ref_passed} "
+            f"all_rejected={rec.all_rejected} n_broken={rec.n_broken}")
+    payload = {
+        "v": SUITE_COMMIT_VERSION,
+        "task_id": task_id,
+        "commitment": review_commitment(check_code, nonce),
+        "gauge": rec.as_payload(),
+    }
     return book.append(
         SUITE_COMMIT_TYPE, payload, identity,
         ts_ms=int(time.time() * 1000) if ts_ms is None else ts_ms,
     )
 
 
-def open_suite(entry: _lb.LogEntry, check_code: str, nonce: str) -> bool:
-    """揭露：公開的套件原文＋nonce 必須重算出承諾值。"""
+def commit_suite_with_gauge(
+    book: Logbook, identity: Identity, *, task_id: Any, check_code: str, nonce: str,
+    reference: str, broken_stubs: Sequence[str] | None = None,
+    entry_point: str | None = None, runner: CheckRunner | None = None,
+    timeout_s: int = 10, ts_ms: int | None = None,
+) -> _lb.LogEntry:
+    """一次做完：跑量具 → 過了才上鏈。沒過丟 `SuiteGaugeError`（**沒有 entry**）。
+
+    `broken_stubs` 省略時用預設壞樁（`suitegauge.broken_stub`，與
+    `probe_instrument` 的 `stub` 逐字相同）。⚠ 一個樁只是**下界**：它抓得到
+    「什麼都放行」，抓不到「只放行剛好這一份」。要更緊就多給幾個樁，成本是
+    每個樁一次本機沙箱。
+    """
+    stubs = list(broken_stubs) if broken_stubs else [broken_stub(entry_point)]
+    rec = run_suite_gauge(check_code, reference, stubs, entry_point=entry_point,
+                          runner=runner, timeout_s=timeout_s)
+    return commit_suite(book, identity, task_id=task_id, check_code=check_code,
+                        nonce=nonce, gauge=rec, ts_ms=ts_ms)
+
+
+def suite_gate(
+    entry: _lb.LogEntry, check_code: str, nonce: str, *,
+    who: PublicIdentity | None = None,
+) -> tuple[bool, str]:
+    """揭露 ＋ 量具閘：`(可用?, 理由)`。理由字串會原樣進收據。
+
+    fail-closed，缺一不可：
+      - entry 的 type 是套件承諾
+      - 揭露對得上承諾（套件原文＋nonce 重算出同一個 commitment）
+      - **量具紀錄在場**（缺 ＝ 拒，不是「沒查到」）
+      - 量具紀錄綁的是**這一套**（`suite_sha256` 相符）
+      - 量具**通過**（參考解過、壞樁全擋、壞樁集合非空）
+      - `who` 有給的話，這筆 entry 的簽章也要驗過（竄改紀錄＝簽章壞掉）
+    """
     if entry.type != SUITE_COMMIT_TYPE:
-        return False
+        return False, "wrong_entry_type"
     p = entry.payload if isinstance(entry.payload, dict) else {}
     try:
-        return p.get("commitment") == review_commitment(check_code, nonce)
+        if p.get("commitment") != review_commitment(check_code, nonce):
+            return False, "commitment_mismatch"
     except ValueError:
-        return False
+        return False, "bad_nonce"
+    rec = GaugeRecord.from_payload(p.get("gauge"))
+    if rec is None:
+        return False, "gauge_record_missing"
+    if rec.suite_sha256 != sha256_hex(check_code):
+        return False, "gauge_suite_mismatch"
+    if not rec.ok:
+        return False, "gauge_failed"
+    if who is not None:
+        return _entry_signature_ok(entry, who)
+    return True, ""
+
+
+def open_suite(entry: _lb.LogEntry, check_code: str, nonce: str, *,
+               who: PublicIdentity | None = None) -> bool:
+    """揭露：公開的套件原文＋nonce 必須重算出承諾值，**而且量具紀錄要在場且通過**。
+
+    round749（R449 §四-3）之後這個函式不再只是 commit-reveal 的核對：一筆沒有量具
+    紀錄（或量具沒過）的承諾**不是**一套可用的驗收套件，所以這裡回 False。
+    只想單獨看理由的話用 `suite_gate`。
+    """
+    return suite_gate(entry, check_code, nonce, who=who)[0]
+
+
+def gauged_suite_index(
+    commits: Iterable[tuple[_lb.LogEntry, str, str]],
+) -> dict[str, GaugeRecord]:
+    """`(entry, check_code, nonce)` 串 → `{suite_sha256: GaugeRecord}`。
+
+    **只有通過 `suite_gate` 的才進得來**——這個索引就是 `form_verdict` 的白名單，
+    構造函式本身 fail-closed，呼叫端不需要再記得檢查一次。
+    """
+    out: dict[str, GaugeRecord] = {}
+    for entry, code, nonce in commits:
+        ok, _ = suite_gate(entry, code, nonce)
+        if not ok:
+            continue
+        rec = GaugeRecord.from_payload((entry.payload or {}).get("gauge"))
+        if rec is not None:
+            out[rec.suite_sha256] = rec
+    return out
 
 
 @dataclass(frozen=True)
@@ -583,6 +859,7 @@ def challenge_rerun(
     suite_sha256: str | None = None,
     quorum: int | None = None,
     ts_ms: int | None = None,
+    gauged_suites: Mapping[str, Any] | None = None,
 ) -> Challenge:
     """重跑挑戰：草稿被判不過的工人有權要求另一組執行器再跑一次同一套驗收。
 
@@ -600,7 +877,8 @@ def challenge_rerun(
     dsha = sha256_hex(draft_code)
     atts = [e.attest(task, draft_code, suite_sha256=ssha, ts_ms=ts_ms) for e in panel]
     rerun = form_verdict(atts, ros, task_id=task.get("task_id"),
-                         draft_sha256=dsha, suite_sha256=ssha, quorum=q)
+                         draft_sha256=dsha, suite_sha256=ssha, quorum=q,
+                         gauged_suites=gauged_suites)
     if rerun.visible_ok is None or original.visible_ok is None:
         outcome = "undecided"
     elif rerun.visible_ok == original.visible_ok:

@@ -38,6 +38,7 @@ from vacant.codebench import BuiltinSampleLoader, EvalPlusMBPPLoader  # noqa: E4
 from vacant.crypto import pub_to_hex  # noqa: E402
 from vacant.identity import Identity  # noqa: E402
 from vacant.logbook import Logbook  # noqa: E402
+from vacant.suitegauge import gauge_suite  # noqa: E402
 
 
 # The official no-extreme concept applied to this runner's declared product envelope:
@@ -141,6 +142,17 @@ def meets_demand(
         raise InfraVoid(f"sandbox verifier unavailable: {exc}") from exc
 
 
+def _gauge_runner(code: str, check_code: str, entry_point: str | None,
+                  timeout_s: int) -> tuple[bool, str]:
+    """`vacant.suitegauge` 的注入點：量具用的判準＝**本檔案的** `meets_demand`。
+
+    明著注入而不用 `suitegauge.default_runner` 的 lazy import，是為了避免這支被當成
+    `__main__`（或被 `r474_stub_sweep` 用 importlib 另名載入）時，量具那條路徑
+    偷偷 import 到**第二份** gain_run。判準必須是呼叫端這一份，不是同名的另一份。
+    """
+    return meets_demand(code, check_code, timeout_s, entry_point=entry_point)
+
+
 # ── 量具驗證：先答已知答案 ────────────────────────────────────────
 LCB_PROBE_SOLUTIONS_PATH = (
     pathlib.Path(__file__).resolve().parent / "data" / "lcb_probe_solutions.json"
@@ -229,22 +241,28 @@ def probe_instrument(tasks, log, *, sample=12, bank: str = "evalplus") -> dict:
         ref = refs[t["task_id"]]
         stub = f"def {t.get('entry_point','_f')}(*a, **k):\n    return None\n"
         hidden = t["hidden_check"]["code"]
-        ok_good, msg_g = meets_demand(ref, hidden, entry_point=t.get("entry_point"))
-        ok_bad, _ = meets_demand(stub, hidden, entry_point=t.get("entry_point"))
+        # round749（R449 §四-3）：兩個方向的判準改走 `vacant.suitegauge.gauge_suite`，
+        # 與 `peerexec.commit_suite` 的套件合格閘**共用同一份實作**。呼叫順序
+        # （參考解 → 壞樁；hidden → visible）與落盤欄位逐字不變，等價性由
+        # `ops/gain/replay/r449_probe_equivalence.py` 對 HEAD 版逐鍵比對證明。
+        g_hidden = gauge_suite(hidden, ref, [stub], entry_point=t.get("entry_point"),
+                               runner=_gauge_runner)
+        ok_good, msg_g = g_hidden.ref_passed, g_hidden.ref_detail
         good += int(ok_good)
-        bad += int(not ok_bad)
+        bad += int(g_hidden.all_rejected)
         detail.append({"task_id": t["task_id"], "ref_pass": ok_good,
-                       "broken_rejected": not ok_bad, "err": msg_g[:160]})
+                       "broken_rejected": g_hidden.all_rejected, "err": msg_g[:160]})
         vis = (t.get("visible_check") or {}).get("code") or ""
         if not vis:
             continue
         vis_cov += 1
-        v_good, v_msg = meets_demand(ref, vis, entry_point=t.get("entry_point"))
-        v_bad, _ = meets_demand(stub, vis, entry_point=t.get("entry_point"))
+        g_vis = gauge_suite(vis, ref, [stub], entry_point=t.get("entry_point"),
+                            runner=_gauge_runner)
+        v_good, v_msg = g_vis.ref_passed, g_vis.ref_detail
         vis_good += int(v_good)
-        vis_bad += int(not v_bad)
+        vis_bad += int(g_vis.all_rejected)
         vis_detail.append({"task_id": t["task_id"], "ref_pass": v_good,
-                           "stub_rejected": not v_bad, "err": v_msg[:160]})
+                           "stub_rejected": g_vis.all_rejected, "err": v_msg[:160]})
     res = {"n": len(detail), "ref_pass": good, "broken_rejected": bad,
            "detail": detail,
            "visible_n": vis_cov, "visible_ref_pass": vis_good,
