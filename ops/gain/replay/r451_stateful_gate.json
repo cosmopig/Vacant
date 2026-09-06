@@ -1,0 +1,100 @@
+[
+ {
+  "run": "g_r446_eq5_mbpp",
+  "variant": "real",
+  "k": 3,
+  "n": 371,
+  "stub_n": 1,
+  "committed": 371,
+  "refused_at_commit": 0,
+  "n_gaugeable": 371,
+  "deliv_acc_gaugeable": 0.7520215633423181,
+  "false_deliv_gaugeable": 0.1778975741239892,
+  "refuse_reasons": {},
+  "deliv_acc": 0.7520215633423181,
+  "false_deliv": 0.1778975741239892,
+  "refusal": 0.07008086253369272,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": null,
+  "delta_pp_ci95": [
+   null,
+   null
+  ],
+  "n_paired": 0
+ },
+ {
+  "run": "g_r446_eq5_mbpp",
+  "variant": "stateful",
+  "k": 3,
+  "n": 371,
+  "stub_n": 1,
+  "committed": 371,
+  "refused_at_commit": 0,
+  "n_gaugeable": 371,
+  "deliv_acc_gaugeable": 0.0,
+  "false_deliv_gaugeable": 0.24797843665768193,
+  "refuse_reasons": {},
+  "deliv_acc": 0.0,
+  "false_deliv": 0.24797843665768193,
+  "refusal": 0.7520215633423181,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": -75.2021563342318,
+  "delta_pp_ci95": [
+   -79.51482479784367,
+   -70.88948787061994
+  ],
+  "n_paired": 371
+ },
+ {
+  "run": "g_r446_eq5_mbpp",
+  "variant": "real",
+  "k": 3,
+  "n": 371,
+  "stub_n": 4,
+  "committed": 369,
+  "refused_at_commit": 2,
+  "n_gaugeable": 371,
+  "deliv_acc_gaugeable": 0.7466307277628033,
+  "false_deliv_gaugeable": 0.1778975741239892,
+  "refuse_reasons": {
+   "gauge_failed": 2
+  },
+  "deliv_acc": 0.7466307277628033,
+  "false_deliv": 0.1778975741239892,
+  "refusal": 0.07547169811320754,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": null,
+  "delta_pp_ci95": [
+   null,
+   null
+  ],
+  "n_paired": 0
+ },
+ {
+  "run": "g_r446_eq5_mbpp",
+  "variant": "stateful",
+  "k": 3,
+  "n": 371,
+  "stub_n": 4,
+  "committed": 371,
+  "refused_at_commit": 0,
+  "n_gaugeable": 371,
+  "deliv_acc_gaugeable": 0.0,
+  "false_deliv_gaugeable": 0.24797843665768193,
+  "refuse_reasons": {},
+  "deliv_acc": 0.0,
+  "false_deliv": 0.24797843665768193,
+  "refusal": 0.7520215633423181,
+  "contested": 0.0,
+  "chain_ok": true,
+  "delta_pp_vs_real": -74.66307277628033,
+  "delta_pp_ci95": [
+   -78.97574123989219,
+   -70.35040431266846
+  ],
+  "n_paired": 371
+ }
+]
