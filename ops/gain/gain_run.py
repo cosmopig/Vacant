@@ -40,6 +40,10 @@ from vacant.identity import Identity  # noqa: E402
 from vacant.logbook import Logbook  # noqa: E402
 from vacant.suitegauge import gauge_suite  # noqa: E402
 
+# round460b：H 臂（HARNESS_STUDY §4.5 改動 1／4）。放在既有 import 之後，
+# 既有五臂的碼一個字不動——`harness_arms` 只**呼叫** extract_code／meets_demand。
+from ops.gain.harness_arms import HARNESS_BUDGET, run_harness_arm  # noqa: E402,F401
+
 
 # The official no-extreme concept applied to this runner's declared product envelope:
 # canonical itself must finish the full base+plus suite within 10 wall seconds and a
@@ -1268,7 +1272,8 @@ def main() -> None:
     # round212：`--arms` 以前沒有 choices，dispatch 的 else 會把任何不認得的
     # 名字當成 ON 跑掉（打錯字＝安靜跑錯臂）。檢查放在 preflight 之前，
     # 打錯字不該先燒掉模型呼叫。
-    KNOWN_ARMS = {"OFF", "OFF5", "ON", "ONR", "CONFORM", "EQ5"}
+    KNOWN_ARMS = {"OFF", "OFF5", "ON", "ONR", "CONFORM", "EQ5",
+                  "HPI", "HOC", "HMIX"}
     if args.arms.strip() != "probe":
         _unknown = [a.strip() for a in args.arms.split(",")
                     if a.strip() and a.strip() not in KNOWN_ARMS]
@@ -1338,7 +1343,11 @@ def main() -> None:
     # round689：EQ5 用同一個 `visible_check` 當出貨閘門（`arm_eq5` 步驟 2），
     # 所以同一條硬擋要一起適用——否則 EQ5 會在沒驗過的決策量具上跑，
     # 「閘門沒有閘」會長得跟「等預算下機制有效」一模一樣。
-    _gate_arms = {"CONFORM", "EQ5"} & {a.strip() for a in args.arms.split(",")}
+    # round460b：H 臂也用 `visible_check` 當**出貨閘門**（harness_arms 的步驟 5），
+    # 所以同一條硬擋一起適用——量具沒驗過的話「閘門根本沒有閘」會長得跟
+    # 「機制很便宜」一模一樣。這一行只**增加**停止條件，不含 H 臂的 run 逐位元不變。
+    _gate_arms = ({"CONFORM", "EQ5", "HPI", "HOC", "HMIX"}
+                  & {a.strip() for a in args.arms.split(",")})
     if _gate_arms:
         _who = "／".join(sorted(_gate_arms))
         if pr["visible_n"] < pr["n"]:
@@ -1585,6 +1594,10 @@ def main() -> None:
                 elif arm == "EQ5":
                     code, worker, involved, extra = arm_eq5(
                         t, agents, rng, calls, s["book"], s["ident"])
+                    accepted = extra["accepted"]
+                elif arm in ("HPI", "HOC", "HMIX"):
+                    code, worker, involved, extra = run_harness_arm(
+                        t, agents, rng, calls, s["book"], s["ident"], variant=arm)
                     accepted = extra["accepted"]
                 elif arm == "ON":
                     code, worker, involved, extra = arm_on(

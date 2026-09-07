@@ -245,6 +245,169 @@ class ClineBrain:
 
         raise InfraVoid(f"{self.agent_id} 重試 {effective_retries} 次仍失敗：{last_err}")
 
+    # ── 多輪呼叫（round460b：harness 臂 HPI/HOC/HMIX 用）──────────────────
+    #
+    # ⚠ 為什麼是**另一個方法**而不是把 `generate` 重構成它的特例：
+    #   `generate` 是 OFF／OFF5／CONFORM／EQ5／ON 五條既有臂**唯一**的呼叫路徑，
+    #   它的落盤欄位（`prompt` 全文、`system`、`model`、重試語意）已經有 r444–r447
+    #   等多輪 run 的歸檔在引用。重構它＝所有既有臂的碼與落盤同時變動，
+    #   而本輪的承重宣稱之一就是「既有五臂逐位不變」（HARNESS_STUDY §4.5）。
+    #   代價是這裡與 `generate` 有一段重複的請求／重試碼——**那是刻意付的**，
+    #   `tests/test_gain_harness_arms.py` 用 `generate` 原始碼的 sha256 釘死不變。
+    #
+    # 與 `generate` 的差別只有三處（HARNESS_STUDY §4.0.2 逐字）：
+    #   1. body 的 `messages` ＝ [system] + 呼叫端給的整串對話；
+    #   2. 落盤多 `messages`（全文陣列）／`finish_reason`／`turn` 三個鍵，
+    #      並**保留** `prompt` ＝ 最後一則 user 訊息全文，讓 `latency_summary`、
+    #      `calls_audit.py` 這些既有工具不必改就讀得到；
+    #   3. 回傳 `(text, info)`——`finish_reason` 是截斷保護（HARNESS_STUDY F6）
+    #      的唯一資訊來源，而 `generate` 只回字串，拿不到它。
+    #   其餘（temperature、retry／backoff、404 型號輪替、RelayError／
+    #   EmptyResponse／InfraVoid 語意、非重試碼 401/402/403）逐字沿用。
+    def chat(self, messages: list[dict], *, role: str = "gen",
+             meta: dict | None = None, system: str | None = None,
+             timeout_s: int | None = None, retries: int | None = None,
+             turn: int | None = None, max_tokens: int | None = None,
+             ) -> tuple[str, dict]:
+        """messages ＝ [{"role": "user"|"assistant", "content": str}, ...]。
+
+        `system` 為 None 時用 `self.system`。回傳 `(text, info)`；`info` 至少含
+        `finish_reason`／`usage`／`model`／`server_model`／`latency_ms`／`attempt`。
+
+        ⚠ `max_tokens` 預設 **None ＝ 不送**：實驗臂的 request body 除了 `messages`
+          之外必須與 OFF 完全相同，只有 H 臂設輸出上限會憑空造出一個 OFF 沒有的
+          劣勢（HARNESS_STUDY §4.0.6）。只有**線路模式探針**會傳這個參數。
+        """
+        effective_system = system or self.system
+        effective_timeout = self.timeout_s if timeout_s is None else timeout_s
+        effective_retries = self.retries if retries is None else retries
+        if effective_timeout <= 0 or effective_retries <= 0:
+            raise ValueError("timeout_s／retries 必須為正數")
+        if not messages or any(
+                not isinstance(m, dict) or m.get("role") not in ("user", "assistant")
+                or not isinstance(m.get("content"), str) for m in messages):
+            raise ValueError("messages 必須是 user／assistant 的 {role, content} 串")
+        last_user = next((m["content"] for m in reversed(messages)
+                          if m["role"] == "user"), "")
+
+        variants = [self.model]
+        if "/" in self.model:
+            variants.append(self.model.replace("/", "_", 1))
+        elif "_" in self.model:
+            variants.append(self.model.replace("_", "/", 1))
+
+        def make_body(model_id: str) -> bytes:
+            payload = {
+                "model": model_id,
+                "messages": ([{"role": "system", "content": effective_system}]
+                             + [{"role": m["role"], "content": m["content"]}
+                                for m in messages]),
+                "temperature": self.temperature,
+                "stream": False,
+            }
+            if max_tokens is not None:
+                payload["max_tokens"] = max_tokens
+            return json.dumps(payload).encode()
+
+        last_err = ""
+        for attempt in range(1, effective_retries + 1):
+            model_id = variants[(attempt - 1) % len(variants)]
+            body = make_body(model_id)
+            t0 = time.time()
+            headers = {"Content-Type": "application/json"}
+            if self.key:
+                headers["Authorization"] = f"Bearer {self.key}"
+            req = urllib.request.Request(self.api, data=body, headers=headers)
+            try:
+                with urllib.request.urlopen(req, timeout=effective_timeout) as r:
+                    payload = json.load(r)
+                d = payload.get("data", payload)
+                if isinstance(d, dict) and "choices" not in d and d.get("error"):
+                    raise RelayError(f"端點回 200 但 body 是錯誤：{d['error']!r}")
+                choice = d["choices"][0]["message"]
+                finish_reason = d["choices"][0].get("finish_reason")
+                text = choice.get("content") or ""
+                if not text.strip():
+                    raise EmptyResponse(
+                        f"content 為空（finish_reason={finish_reason}，"
+                        f"reasoning {len(choice.get('reasoning_content') or '')} 字）")
+                gw = choice.get("provider_metadata", {}).get("gateway", {})
+                usage = d.get("usage") or {}
+                cost = float(usage.get("cost") or gw.get("cost") or 0)
+                market_cost = float(usage.get("market_cost") or cost)
+                self.calls += 1
+                self.cost += cost
+                self.market_cost += market_cost
+                latency_ms = int((time.time() - t0) * 1000)
+                server_model = d.get("model") if isinstance(d, dict) else None
+                self._log({
+                    "ts_ms": int(time.time() * 1000),
+                    "agent_id": self.agent_id, "role": role,
+                    "api": self.api,
+                    "model": model_id,
+                    "server_model": server_model,
+                    "model_configured": self.model, "temperature": self.temperature,
+                    "attempt": attempt, "ok": True,
+                    "timeout_s": effective_timeout, "retries_max": effective_retries,
+                    "latency_ms": latency_ms,
+                    "cost_usd": cost,
+                    "market_cost_usd": market_cost,
+                    "usage": usage,
+                    "system": effective_system,
+                    # `prompt` 保留＝最後一則 user 訊息全文（既有工具的相容欄位）；
+                    # `messages` 才是這一次真正送出去的全部內容。
+                    "prompt": last_user,
+                    "messages": [{"role": m["role"], "content": m["content"]}
+                                 for m in messages],
+                    "finish_reason": finish_reason,
+                    "turn": turn,
+                    "response": text,
+                    "meta": meta or {},
+                })
+                return text, {
+                    "finish_reason": finish_reason, "usage": usage,
+                    "model": model_id, "server_model": server_model,
+                    "latency_ms": latency_ms, "attempt": attempt,
+                    "cost_usd": cost, "market_cost_usd": market_cost,
+                }
+            except Exception as e:                      # noqa: BLE001
+                body_txt = ""
+                if isinstance(e, urllib.error.HTTPError):
+                    try:
+                        raw = e.read()
+                        if raw:
+                            body_txt = " | body=" + raw.decode(
+                                "utf-8", "replace")[:2000]
+                    except Exception:               # noqa: BLE001
+                        body_txt = " | body=<讀取失敗>"
+                last_err = f"{type(e).__name__}: {e}{body_txt}"
+                self._log({
+                    "ts_ms": int(time.time() * 1000),
+                    "agent_id": self.agent_id, "role": role,
+                    "api": self.api,
+                    "model": model_id,
+                    "model_configured": self.model, "temperature": self.temperature,
+                    "attempt": attempt, "ok": False,
+                    "timeout_s": effective_timeout, "retries_max": effective_retries,
+                    "latency_ms": int((time.time() - t0) * 1000),
+                    "error": last_err,
+                    "system": effective_system,
+                    "prompt": last_user,
+                    "messages": [{"role": m["role"], "content": m["content"]}
+                                 for m in messages],
+                    "turn": turn,
+                    "meta": meta or {},
+                })
+                non_retryable = isinstance(e, urllib.error.HTTPError) and e.code in {
+                    401, 402, 403,
+                }
+                if non_retryable:
+                    break
+                if attempt < effective_retries:
+                    time.sleep(self.backoff_s * (2 ** (attempt - 1)))
+
+        raise InfraVoid(f"{self.agent_id} 重試 {effective_retries} 次仍失敗：{last_err}")
+
 
 def load_keys(path: str | None = None) -> list[str]:
     p = pathlib.Path(path or os.environ.get("CLINE_KEYS", "~/.cline-keys")).expanduser()
