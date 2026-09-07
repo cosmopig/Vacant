@@ -3,7 +3,7 @@
 > 這一份由 `ops/gain/build_runs_index.py` 從 `runs/INDEX.json` **同一次執行**
 > 產生。要改內容改產生器，不要手改本檔——手改會在下一次 `--check` 被抓到。
 
-`runs/` 共 **315** 個項目：216 個目錄 ＋ 99 個頂層檔案，合計 115 MB。其中 **44 個目錄有 `summary.json`**。
+`runs/` 共 **322** 個項目：216 個目錄 ＋ 106 個頂層檔案，合計 115 MB。其中 **44 個目錄有 `summary.json`**。
 
 分類統計：
 
@@ -54,7 +54,7 @@
 | `g_r441_gemma_only_mbpp_b` | 2026-09-02 | MBPP+ v0.2.0 | OFF/OFF5/ON | 525／179 | — | 否 | 12 | DECISION R516（2026-09-02 21:00 UTC，Fable 5.1 稽核輪）：E1 收官——照 R483 §3d 寫死的判準裁決<br>[DECISION_20260902_R516_E1_FINAL_WRAPUP.md](../DECISION_20260902_R516_E1_FINAL_WRAPUP.md) |
 | `g_r442_ononly_20260901` | 2026-09-01 | MBPP+ v0.2.0 | ON | 11／11 | — | 否 | 2 | DECISION 2026-09-01 round446: gemma-4-12b-it-qat 掛了，殺掉 g_r442_ononly_20260901<br>[DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md](../DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md) |
 | `g_r443_gemma_lcb` | 2026-09-03 | lcb v1 | OFF/OFF5/ON | 269／91 | 是 | 否 | 4 | R440T：E3 收官——H-B（題目太簡單）被排除；評審在難題上翻成「幾乎一律說錯」<br>[DECISION_20260904_R440T_E3_WRAPUP.md](../DECISION_20260904_R440T_E3_WRAPUP.md) |
-| `g_r444_conform_mbpp` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 537／179 | 是 | 是 | 0 | —<br>（無專屬裁決；相關收官：[CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md](../CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md)） |
+| `g_r444_conform_mbpp` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 537／179 | 是 | 是 | 0 | —<br>（無專屬裁決；相關收官：[CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md](../.claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md)、[CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md](../CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md)） |
 | `g_r445_conform_mbpp_ext` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 576／192 | 是 | 是 | 0 | R440X：r445 的獨立稽核——併庫區間排除 0 我複核成立；但真正紮實的發現是「五倍預算買不到東西」<br>[DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md](../DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md) |
 | `g_r446_eq5_mbpp` | 2026-09-04 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死<br>[DECISION_20260904_R446_FABLE_AUDIT.md](../DECISION_20260904_R446_FABLE_AUDIT.md) |
 | `g_r447_conform_lcb2` | 2026-09-04 | lcb v2 | CONFORM/OFF/OFF5 | 360／120 | 是 | 是 | 0 | R459：`runs/g_r447_conform_lcb2` 收官裁決（Fable 5.1 稽核輪，round726）<br>[DECISION_20260904_R459_R447_SETTLEMENT.md](../DECISION_20260904_R459_R447_SETTLEMENT.md) |
@@ -108,31 +108,31 @@
 
 | run | 日期 | 題庫 | 臂 | n（列／題） | 跑到底 | 零 void | void | 提到它的 DECISION | 其中屬裁決檔 |
 |---|---|---|---|---:|---|---|---:|---:|---:|
-| `g_e2q_off_lcb_qwenonly_20260902` | 2026-09-02 | lcb v1（子集，版本不可分辨） | OFF | 1／1 | — | 否 | 0 | 4 | 0 |
-| `g_het2_r263_20260829` | 2026-08-29 | MBPP+ v0.2.0 | OFF | 177／177 | — | 否 | 2 | 7 | 3 |
-| `g_het2_r274_20260829` | 2026-08-29 | MBPP+ v0.2.0 | ON | 8／8 | — | 否 | — | 3 | 0 |
-| `g_het3_r278_20260829` | 2026-08-29 | MBPP+ v0.2.0 | OFF5/ON | 221／132 | — | 否 | 137 | 9 | 2 |
-| `g_off371_20260825` | 2026-08-25 | MBPP+ v0.2.0 | OFF | 367／367 | — | 否 | 4 | 12 | 3 |
-| `g_off5_qwen_only_20260901` | 2026-09-01 | MBPP+ v0.2.0 | OFF5 | 55／55 | — | 否 | 5 | 3 | 1 |
-| `g_off60_local_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF | 13／13 | — | 否 | — | 4 | 0 |
-| `g_off60_qwenonly_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF | 60／60 | — | 是 | 0 | 11 | 0 |
-| `g_off60_relay2_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF | 8／8 | — | 否 | — | 3 | 0 |
-| `g_off60_relay_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF | 42／42 | — | 否 | 18 | 4 | 1 |
-| `g_off_failure_rate_20260901c` | 2026-09-01 | MBPP+ v0.2.0 | OFF | 16／16 | — | 否 | 0 | 1 | 1 |
-| `g_off_qwen_only_20260901` | 2026-09-01 | MBPP+ v0.2.0 | OFF | 57／57 | — | 否 | 3 | 2 | 1 |
-| `g_on371_20260825` | 2026-08-25 | MBPP+ v0.2.0 | ON | 167／167 | — | 否 | — | 5 | 0 |
-| `g_on_qwen_only_20260901` | 2026-09-01 | MBPP+ v0.2.0 | ON | 39／39 | — | 否 | 21 | 2 | 0 |
-| `g_on_qwen_only_scale2_20260901` | 2026-09-01 | MBPP+ v0.2.0 | ON | 12／12 | — | 否 | 48 | 8 | 1 |
-| `g_onoff5_371_r123_20260825` | 2026-08-25 | MBPP+ v0.2.0 | OFF5/ON | 718／371 | — | 否 | 24 | 13 | 3 |
-| `g_onoff5_qwenonly_v2_20260824` | 2026-08-24 | MBPP+ v0.2.0 | ON | 4／4 | — | 否 | — | 4 | 0 |
-| `g_onoff5_qwenonly_v3_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF5/ON | 116／60 | — | 否 | 4 | 4 | 0 |
-| `g_onr_only_r237_20260828` | 2026-08-28 | MBPP+ v0.2.0 | ONR | 188／188 | — | 否 | — | 2 | 0 |
-| `g_onr_r212_20260828` | 2026-08-28 | MBPP+ v0.2.0 | OFF | 179／179 | — | 否 | — | 6 | 0 |
-| `g_r342_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 11／8 | — | 否 | 16 | 4 | 0 |
-| `g_r345_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 16／6 | — | 否 | 2 | 5 | 0 |
-| `g_r348_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 33／20 | — | 否 | 38 | 5 | 0 |
-| `g_r356_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 432／178 | — | 否 | 101 | 21 | 5 |
-| `g_r439_revcheck_20260901` | 2026-09-01 | MBPP+ v0.2.0 | OFF/OFF5/ON | 23／13 | — | 否 | 14 | 1 | 1 |
+| `g_e2q_off_lcb_qwenonly_20260902` | 2026-09-02 | lcb v1（子集，版本不可分辨） | OFF | 1／1 | — | 否 | 0 | 8 | 0 |
+| `g_het2_r263_20260829` | 2026-08-29 | MBPP+ v0.2.0 | OFF | 177／177 | — | 否 | 2 | 14 | 6 |
+| `g_het2_r274_20260829` | 2026-08-29 | MBPP+ v0.2.0 | ON | 8／8 | — | 否 | — | 6 | 0 |
+| `g_het3_r278_20260829` | 2026-08-29 | MBPP+ v0.2.0 | OFF5/ON | 221／132 | — | 否 | 137 | 18 | 4 |
+| `g_off371_20260825` | 2026-08-25 | MBPP+ v0.2.0 | OFF | 367／367 | — | 否 | 4 | 24 | 6 |
+| `g_off5_qwen_only_20260901` | 2026-09-01 | MBPP+ v0.2.0 | OFF5 | 55／55 | — | 否 | 5 | 6 | 2 |
+| `g_off60_local_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF | 13／13 | — | 否 | — | 8 | 0 |
+| `g_off60_qwenonly_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF | 60／60 | — | 是 | 0 | 22 | 0 |
+| `g_off60_relay2_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF | 8／8 | — | 否 | — | 6 | 0 |
+| `g_off60_relay_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF | 42／42 | — | 否 | 18 | 8 | 2 |
+| `g_off_failure_rate_20260901c` | 2026-09-01 | MBPP+ v0.2.0 | OFF | 16／16 | — | 否 | 0 | 2 | 2 |
+| `g_off_qwen_only_20260901` | 2026-09-01 | MBPP+ v0.2.0 | OFF | 57／57 | — | 否 | 3 | 4 | 2 |
+| `g_on371_20260825` | 2026-08-25 | MBPP+ v0.2.0 | ON | 167／167 | — | 否 | — | 10 | 0 |
+| `g_on_qwen_only_20260901` | 2026-09-01 | MBPP+ v0.2.0 | ON | 39／39 | — | 否 | 21 | 4 | 0 |
+| `g_on_qwen_only_scale2_20260901` | 2026-09-01 | MBPP+ v0.2.0 | ON | 12／12 | — | 否 | 48 | 16 | 2 |
+| `g_onoff5_371_r123_20260825` | 2026-08-25 | MBPP+ v0.2.0 | OFF5/ON | 718／371 | — | 否 | 24 | 26 | 6 |
+| `g_onoff5_qwenonly_v2_20260824` | 2026-08-24 | MBPP+ v0.2.0 | ON | 4／4 | — | 否 | — | 8 | 0 |
+| `g_onoff5_qwenonly_v3_20260824` | 2026-08-24 | MBPP+ v0.2.0 | OFF5/ON | 116／60 | — | 否 | 4 | 8 | 0 |
+| `g_onr_only_r237_20260828` | 2026-08-28 | MBPP+ v0.2.0 | ONR | 188／188 | — | 否 | — | 4 | 0 |
+| `g_onr_r212_20260828` | 2026-08-28 | MBPP+ v0.2.0 | OFF | 179／179 | — | 否 | — | 12 | 0 |
+| `g_r342_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 11／8 | — | 否 | 16 | 8 | 0 |
+| `g_r345_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 16／6 | — | 否 | 2 | 10 | 0 |
+| `g_r348_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 33／20 | — | 否 | 38 | 10 | 0 |
+| `g_r356_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 432／178 | — | 否 | 101 | 42 | 10 |
+| `g_r439_revcheck_20260901` | 2026-09-01 | MBPP+ v0.2.0 | OFF/OFF5/ON | 23／13 | — | 否 | 14 | 2 | 2 |
 
 > `其中屬裁決檔`＝檔名帶 AUDIT／WRAPUP／SETTLEMENT／VERDICT／KILL 的那些（PREREG／CRITERION 是**量測之前**寫的判準，不算裁決，已排除）。數字大於 0 只代表「有裁決檔提到它」，不代表那份裁決是在裁決它——`INDEX.json` 的 `verdict_decisions` 列出是哪幾份，自己打開看。
 
