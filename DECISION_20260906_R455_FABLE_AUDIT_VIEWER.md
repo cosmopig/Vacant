@@ -33,3 +33,13 @@ r445 那頁零改動。一名 Opus 攻擊者做八種竄改，七種在頁面邏
 
 `tests/test_receipt_viewer.py` 37 passed；`multiparty_viewer_node_check.mjs` 總判定 OK（0 項不合格）；
 禁字 0；`https?://` 0；`git diff b5d810e -- examples/receipt_viewer.html` 空；r454 證據檔零改動。
+
+## 六、補記（2026-09-07）：展場機器上的實際渲染已確認
+
+人類確認展場機器＝Linux VM（vacant-dev）。在該機用既有的 `~/.local/bin/chrome-headless-shell`（Chrome for Testing 152）
+以 `file://` 開 `examples/receipt_viewer_multiparty.html`：截圖 wall 2.1 秒（含全鏈驗證），DOM 文字含
+「三條鏈都驗得過」「三條鏈共 5,579 筆」「K1／K2／K3 …簽章全部通過」「以下是 2026-09-06 真實執行紀錄（r454），不是模擬」
+「給觀眾的答案，機制看不到」；展件格顯示 K1／K2 不通過（第 3 條）、K3 通過並標「被指名」、裁決「可見驗收不通過（1／2）」、
+出貨第 1 份與單機版逐位相同；誠實邊界左右欄與三顆竄改按鈕在版面上。截圖落盤 `ops/gain/replay/r455_vacantdev_render.png`。
+§三-1 的「未親眼確認」到此關閉；§三-2 的 4 秒疑慮在該機實測不成立（2.1 秒含載入）。
+Windows 沙箱問題（R453）對展場不適用，不修。
