@@ -1125,11 +1125,16 @@ def build_refuted(archive_claims: list[dict]) -> list[dict]:
 #
 # R440P §五-1 寫死：展場與任何對外宣稱都必須帶前提句。所以凡是講交付成效的
 # 條目，`premise` 一律帶上——它不是註腳，是那些數字的成立條件。
-PREMISE_ZH = ("整件事建立在「需求可以被編譯成可執行的驗收測資」。需求跑不起來的場合，"
-              "這個機制沒有免費的裁判，會退化成「問一個模型」，而那正是量出來很差的東西。")
+# 這一句標「逐字」，所以省略號不能省：R440P §五-1 的原文在第一個句號之後還有一句
+# 題庫附帶說明「MBPP+ 有 3 條 base assert 可跑；」，正典 §1.1 用「……」標出那個略去。
+# 沒有省略號的「逐字」是把改寫講成逐字，這正是本專題自己的紅線。
+PREMISE_ZH = ("整件事建立在「需求可以被編譯成可執行的驗收測資」。……需求跑不起來的場合，"
+              "這個機制沒有免費的裁判，會退化成「問一個模型」，而那正是量出來很差的東西。"
+              "（`……` 處略去題庫附帶說明「MBPP+ 有 3 條 base assert 可跑；」）")
 PREMISE_EN = ("All of this rests on 'the requirement can be compiled into runnable acceptance "
-              "tests'. Where the requirement cannot be run there is no free referee, and the "
-              "mechanism degrades into 'ask a model' — which is the thing we measured as bad.")
+              "tests'. [...] Where the requirement cannot be run there is no free referee, and "
+              "the mechanism degrades into 'ask a model' — which is the thing we measured as "
+              "bad. ('[...]' elides the corpus aside 'MBPP+ has 3 base asserts to run;'.)")
 
 GATE_FACTS = [
     {
