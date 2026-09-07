@@ -403,6 +403,209 @@ CLAIMS: list[dict[str, Any]] = [
                           "R437 自記": "void率 ON=36.2% OFF5=16.9% ⚠VOID-GATE-WARNING",
                           "equal_budget_comparison_valid（summary 欄位）": False}},
     },
+
+    # ── CONFORM／EQ5／peerexec（2026-09-04 ~ 09-07；round459 從 verdicts.py 搬進來）──
+    # 這八條的宣稱本文、裁決、一句話、邊界仍然只寫在 `examples/verdicts.py`
+    # （單一真相來源，`verdict_for` 會把它們併進來）；這裡放的是**依據**——
+    # 讀索引的 agent 要的是「原始資料在 repo 的哪個檔」，那件事 verdicts.py 不知道。
+    # 在這八條搬進來之前，`_index/claims.json` 少了它們，`archive.json` 得帶一個
+    # `index_gap` 欄位把缺口列出來；缺口補上之後那個欄位就撤掉了（round459）。
+    # 註：`ops/gain/replay/` 底下的 peerexec 資料全部是重放與模擬，唯二的真跑是
+    # `replay/r453/`（k=2）與 `replay/r454/`（k=3）——這件事寫在各條的「哪一半是真跑」。
+    {
+        "id": "gain.conform_early_stop_beats_single",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（三個題庫、配對）",
+        "宣稱": "「跑客戶自己的驗收測資、交第一份通過的、全不通過就拒交」（CONFORM 早停閘門）"
+                "比「單抽一份就收」（OFF）多交付",
+        "依據": {
+            "檔案": "runs/g_r444_conform_mbpp/rows.jsonl、runs/g_r445_conform_mbpp_ext/rows.jsonl"
+                    "（MBPP+ 併庫 371 題）；runs/g_r447_conform_lcb2/rows.jsonl（LCB v2 120 題）；"
+                    "runs/g_r461_lcb3_three_arm/rows.jsonl（LCB v3 189 題）",
+            "裁決文件": "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、"
+                        "DECISION_20260905_R440Z_WRAPUP_LCB2.md、"
+                        "DECISION_20260906_R461_FABLE_AUDIT.md、"
+                        "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
+            "重算": "ops/gain/replay/conform_settle.py、ops/gain/replay/paired_ci.py、"
+                    "ops/gain/replay/pooled_paired_ci.py（零 API，只讀 rows.jsonl）",
+            "欄位": "rows.jsonl 的 arm／task_id／delivered／hidden_pass／calls_used",
+            "數值": {"MBPP+ 併庫 371 題": "+4.58pp（CI [+0.57, +8.04]）",
+                     "LCB v2 120 題": {"delta_pp": 19.17, "b": 31, "c": 8, "p": 0.0003},
+                     "LCB v3 189 題": {"delta_pp": 7.94, "b": 25, "c": 10, "p": 0.0167},
+                     "呼叫／題": "1.51／1.71／1.55 對 1.00"},
+        },
+    },
+    {
+        "id": "gain.gate_rule_beats_majority_vote_same_candidates",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（EQ5 等預算臂，四個 run）",
+        "宣稱": "在同一組 5 份候選、同樣 5 通呼叫下，閘門規則（交第一份通過的、全不通過就不交）"
+                "比五份投票取多數交付得多",
+        "依據": {
+            "檔案": "runs/g_r446_eq5_mbpp/rows.jsonl（MBPP+ 371 題）、"
+                    "runs/g_r448_eq5_mbpp_seed2/rows.jsonl（MBPP+ 371 題、換種子）、"
+                    "runs/g_r449_eq5_lcb2/rows.jsonl（LCB v2 難題 120 題）、"
+                    "runs/g_r449c_eq5_lcb3/rows.jsonl（LCB v3 189 題，判 UNRESOLVED）",
+            "裁決文件": "CONCLUSION_20260904_R446_EQUAL_BUDGET.md、"
+                        "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md、"
+                        "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md（§六 三個狀態、事前寫死）、"
+                        "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md、"
+                        "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md",
+            "重算": "ops/gain/analyze_eq5.py（零 API，只讀 rows.jsonl；它自己印的 prereg 區塊"
+                    "**不是**仲裁者，見 R449B §三 末）",
+            "數值": {"r446": {"gate": 75.47, "vote": 71.43, "b": 24, "c": 9,
+                              "delta_pp": 4.04, "ci95": [0.796, 6.529], "p": 0.0135},
+                     "r448": {"gate": 77.09, "vote": 73.58, "b": 21, "c": 8,
+                              "delta_pp": 3.50, "ci95": [0.81, 6.47], "p": 0.0241},
+                     "r449b": {"gate": 70.83, "vote": 62.50, "b": 15, "c": 5,
+                               "delta_pp": 8.33, "ci95": [0.30, 13.78], "p": 0.0414},
+                     "r449c（UNRESOLVED）": {"gate": 83.07, "vote": 78.84, "b": 13, "c": 5,
+                                             "delta_pp": 4.23, "ci95": [-0.66, 7.68], "p": 0.0963}},
+        },
+    },
+    {
+        "id": "gain.conform_vs_off5_unresolved",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（獨立抽樣，兩個 LCB run）",
+        "宣稱": "閘門（CONFORM）在交付準確率上贏得過同題跑五次取多數決（OFF5）",
+        "依據": {
+            "檔案": "runs/g_r447_conform_lcb2/rows.jsonl（LCB v2 120 題）、"
+                    "runs/g_r461_off_gate_lcb3/rows.jsonl 與 runs/g_r461_lcb3_three_arm/rows.jsonl"
+                    "（LCB v3 189 題）；MBPP+ 側 runs/g_r445_conform_mbpp_ext/rows.jsonl",
+            "裁決文件": "DECISION_20260905_R440Z_WRAPUP_LCB2.md、"
+                        "DECISION_20260906_R461_FABLE_AUDIT.md、"
+                        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+            "重算": "ops/gain/replay/paired_ci.py、ops/gain/replay/off5_k_curve.py",
+            "數值": {"LCB v2": {"delta_pp": 6.67, "p": 0.15},
+                     "LCB v3": {"delta_pp": 1.59, "ci95": [-3.17, 6.35], "p": 0.6636},
+                     "MBPP+ 乾淨複製（新 192 題）": {"delta_pp": 4.69, "ci95": [-1.11, 9.42]},
+                     "MDE@371": 4.31, "80%_power_需配對數": 491, "題庫上限": 378},
+        },
+    },
+    {
+        "id": "gain.lossless_visible_filter",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（六個資料集）",
+        "宣稱": "可見篩選是無損的——沒有出現「隱藏測資會過、但可見驗收沒過」的候選",
+        "依據": {
+            "檔案": "runs/g_r441_gemma_only_mbpp_b/rows.jsonl（0／895）、"
+                    "runs/g_r356_3arm_20260830/rows.jsonl（0／735）、"
+                    "runs/g_r443_gemma_lcb/rows.jsonl（LCB v1 重放 0／455）、"
+                    "runs/g_r447_conform_lcb2/rows.jsonl（LCB v2 真跑 0／120）、"
+                    "runs/g_r461_off_gate_lcb3/rows.jsonl（LCB v3 真跑 0／189）",
+            "裁決文件": "DECISION_20260903_R440P_CONFORMANCE_GATE.md（§二 誠實邊界 2）、"
+                        "DECISION_20260904_R440T_E3_WRAPUP.md、"
+                        "DECISION_20260905_R440Z_WRAPUP_LCB2.md、"
+                        "DECISION_20260906_R461_FABLE_AUDIT.md",
+            "重算": "ops/gain/replay/rows_visible_audit.py、ops/gain/replay/verify_hidden.py、"
+                    "ops/gain/replay/check_lcb_visible_subset.py",
+            "欄位": "rows.jsonl 的 visible_pass 與 hidden_pass；違反＝hidden_pass ∧ ¬visible_pass",
+            "數值": {"MBPP+ 合計": "0／1630", "LCB v1 重放": "0／455",
+                     "LCB v2 真跑": "0／120", "LCB v3 真跑": "0／189",
+                     "重疊（非獨立樣本）": "LCB v1 重放與 LCB v2 真跑共用 91 題"},
+        },
+    },
+    {
+        "id": "gain.off5_helps_on_hard_only",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（OFF5 vs OFF，跨題庫對照）",
+        "宣稱": "五倍預算的 self-consistency（OFF5 對 OFF）只在難題上買得到東西",
+        "依據": {
+            "檔案": "runs/g_r441_gemma_only_mbpp_b/rows.jsonl 與 runs/g_r356_3arm_20260830/rows.jsonl"
+                    "（MBPP+）、runs/g_r447_conform_lcb2/rows.jsonl（LCB v2 120 題）、"
+                    "runs/g_r461_lcb3_three_arm/rows.jsonl（LCB v3 189 題）",
+            "裁決文件": "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、"
+                        "DECISION_20260905_R440Z_WRAPUP_LCB2.md、"
+                        "DECISION_20260906_R461_FABLE_AUDIT.md",
+            "重算": "ops/gain/replay/off5_k_curve.py、ops/gain/replay/paired_ci.py",
+            "數值": {"MBPP+": {"delta_pp": 0.81, "ci95": [-2.78, 4.28], "格": "RULED_OUT"},
+                     "LCB v2": {"delta_pp": 12.50, "b": 22, "c": 7, "p": 0.0081},
+                     "LCB v3": {"delta_pp": 6.35, "b": 22, "c": 10, "p": 0.0501},
+                     "對照（改花法比加預算更有用）": "+19.2pp @1.71 通 vs +12.5pp @5 通",
+                     "r461 不算難題複製": "lcb3 的 OFF 失敗率 27.5%，已回到 MBPP+ 量級 31.8%"},
+        },
+    },
+    {
+        "id": "peerexec.mutual_execution_below_threshold",
+        "輪次": "peerexec-2026-09-05",
+        "型別": "模擬掃描＋真跑（哪一半是哪一半見裁決的「邊界」欄）",
+        "宣稱": "在多數門檻以下（腐化執行器數 ≤ ⌊(k−1)/2⌋），互跑不互審的交付與無腐化基線逐位相同，"
+                "說謊者被指名、誠實者不被誣告",
+        "依據": {
+            "檔案": "【模擬】ops/gain/replay/peer_exec_sweep.json（200 格：r446 371 題×5 候選、"
+                    "r443 91 題×5、k∈{1,3,5,7}、腐化比例 0–70%、五種攻擊）、"
+                    "ops/gain/replay/peer_exec_flake.json（抖動×腐化）；"
+                    "【真跑】ops/gain/replay/r453/r453_result.json 與 r453_independent_audit.json"
+                    "（k=2、Mac＋vacant-dev）、ops/gain/replay/r454/r454_result.json 與 "
+                    "r454_naming_table.tsv（k=3、1 把說謊）",
+            "裁決文件": "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md、"
+                        "DECISION_20260906_R453_FABLE_AUDIT_REAL_MULTIPARTY.md、"
+                        "DECISION_20260906_R454_FABLE_AUDIT_NAMED_DISSENT.md",
+            "重算": "ops/gain/replay/peer_exec_sim.py（模擬）、ops/gain/replay/peer_exec_real.py（真跑）、"
+                    "ops/gain/replay/receipt_chain_audit.py（鏈驗證）；程式在 vacant/peerexec.py",
+            "數值": {"模擬 門檻以下": {"與無腐化基線逐位相同": "100 格",
+                                       "說謊者被指名": 1.0, "誠實者被誣告": 0.0,
+                                       "1 個腐化 k=1": "−7.8pp、偵測 0",
+                                       "1 個腐化 k=3": "偵測 1.000"},
+                     "真跑 R453（k=2）": {"跨機可見標籤一致": "1840／1840", "出貨 sha": "340／340",
+                                          "拒交": "26／26", "誠實執行器被指名": 0,
+                                          "每台鏈驗真": "2／2", "spec/render sha 跨機相同": "368／368"},
+                     "真跑 R454（k=3、1 把說謊）": {"說謊格 dissenters 恰為 {K3}": "273／273",
+                                                    "誠實金鑰出現在指名欄": "0（分母 1840）",
+                                                    "自相矛盾格裁決仍正確": "58／58",
+                                                    "三條鏈驗真": "3／3（鏈長 1840／1840／1899）",
+                                                    "證言逐筆驗簽失敗": "0（共 5519 筆）"}},
+        },
+    },
+    {
+        "id": "peerexec.suite_fixed_point",
+        "輪次": "peerexec-2026-09-05",
+        "型別": "極限宣稱（held＝這個「買不到」本身被量到了）",
+        "宣稱": "互跑不互審對「驗收套件本身腐化」毫無防禦——這是機制的固定點，"
+                "R451→R452 把它縮小成一個殘餘，但沒有消滅",
+        "依據": {
+            "檔案": "ops/gain/replay/peer_exec_trivial_suite.json（「載得進就算過」的套件）、"
+                    "ops/gain/replay/r451_stateful_gate.json（量具兩方向滿分的 stateful 變體）、"
+                    "ops/gain/replay/peer_exec_suitespec_gate.json 與 r452b_smuggle_gate.json"
+                    "（exec 走私）、ops/gain/replay/r452c_generic_gate.json 與 r452c_channel_hunt.json"
+                    "（殘餘：generic_gauged／weak_oracle）、ops/gain/replay/r453/r453_gauge.json",
+            "裁決文件": "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md（§三-3）、"
+                        "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md、"
+                        "DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md",
+            "重算": "ops/gain/replay/r452_suitespec.py、ops/gain/replay/r452c_generic_gate.py、"
+                    "ops/gain/replay/r452b_smuggle_gate.py；程式在 vacant/suitegauge.py",
+            "數值": {"trivial 套件": {"交付率": "−6.47pp／−18.68pp", "假交付": "31%／49%",
+                                      "四個 k 的爭議率": "全部 0.0%"},
+                     "R451 量具綁進 commit": "trivial 套件 371／371 在 commit 就被拒（沒花一次沙箱）",
+                     "R451 stateful 變體": {"交付率": "−75.20pp", "交付": "0.00%",
+                                            "gauge_status": "ok（量具作為部分解作廢）"},
+                     "R452 套件改成資料": {"exec 走私上鏈": "368／371 → 0／371",
+                                           "超大十六進位整數穿門": "11／11 → 0／11",
+                                           "無損": "1840（MBPP+）＋455（LCB）個候選逐格相同、0 不一致"},
+                     "殘餘（一律講兩個數字，分母 366／371 上鏈題）": {
+                         "可實現 generic_gauged": "17.93% → 20.65%＝+2.72pp",
+                         "事後諸葛上限 weak_oracle": "+4.35pp"}},
+        },
+    },
+    {
+        "id": "peerexec.majority_bound",
+        "輪次": "peerexec-2026-09-05",
+        "型別": "極限宣稱（機制的數學上界，不是量測結果）",
+        "宣稱": "指名有數學上界：多數決最多容忍 ⌊(k−1)/2⌋ 個腐化執行器，過半即反轉",
+        "依據": {
+            "程式": "vacant/peerexec.py::MAJORITY_BOUND_NOTE（機制性質寫死在這裡，"
+                    "不是實驗量到的效應量）與 form_verdict／select_by_quorum",
+            "檔案": "ops/gain/replay/peer_exec_sweep.json（配套量測：固定腐化比例下 k 從 1 到 7"
+                    "交付率一字不變）、ops/gain/replay/r454/r454_naming_table.tsv（真跑的指名欄）",
+            "裁決文件": "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md（§三-1）、"
+                        "DECISION_20260906_R454_FABLE_AUDIT_NAMED_DISSENT.md、"
+                        "DECISION_20260906_R455_FABLE_AUDIT_VIEWER.md（T8：離線檢視器的結構性界線）",
+            "數值": {"容忍上界": "⌊(k−1)/2⌋",
+                     "過半後誣告率": "0.175／0.374（兩批掃描：r446 371 題×5、r443 91 題×5）",
+                     "固定腐化比例下 k=1..7 交付率": "一字不變（串謀 67.39%、破壞 0%）",
+                     "k=3／quorum=2 缺一票": "1-1 平手 ⇒ 未決、不指名"},
+        },
+    },
 ]
 
 

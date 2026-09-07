@@ -555,7 +555,7 @@ WebCrypto Ed25519 逐筆驗簽；裁決／指名／出貨由頁面自己重算�
 | B18 | **盲區 β 未在自己系統上量過** | 外部有四組相鄰量測（Kim 2025 兩模型都錯時的同答案率 HELM **0.600（隨機基線 1/3）**、HuggingFace **0.423（隨機基線 0.127）**，且越準的模型錯得越像；Begin 2026 ρ=0.70、N=10 有效獨立數 1.38；Bugaud 2026 1.5–6.5%；Krumdick 2025 κ 0.86→0.16），但量的是「錯得像不像」與「有效獨立數」，**不是**我們的 β；換算需要未驗證的假設。**隨機基線一定要一起報**——0.600 對 1/3 與 0.423 對 0.127 是不同量級的超額一致 | `examples/publish_now.py` · `EXTERNAL[ext.correlated-errors]`（隨機基線在 `publish_now.py:437–438`）；`build_unknowns`[blindspot-unanchored] |
 | B18b | **人類同儕評審本身信度接近零**（所以「開評審會」這條路的地基本來就軟） | 三個獨立來源：Bornmann 2010（PLoS ONE，48 篇研究、70 個係數、**19,443 篇稿件**）平均 ICC/r²=.34、平均 **κ=.17**，且涵蓋稿件越多的研究回報信度越低；Cortes & Lawrence 2021 的 NeurIPS 2014 雙委員會實驗 166 篇中 43 篇（**26%**）決定不一致；Pier 2018（PNAS）真實 NIH 評審重評已獲資助案，整體評分 **ICC=0**（95% CI 0–0.14）。這是地基問題：模擬裡 `reviewer_accuracy=0.7` 這個預設**沒有依據**，它應該是要量的東西不是要設的參數。Cicchetti 的補充有救：評審在**拒絕**上的一致度顯著高於接受——與 E10「擅長避開持續失敗者、不擅長排序好的」一致 | `examples/publish_now.py` · `EXTERNAL[ext.peer-review-unreliable]`（`publish_now.py:739–766`） |
 | B19 | **`gain_run` 那條路沒被 SuiteSpec 保護** | CONFORM／EQ5 臂仍跑 loader 產生的驗收碼（裸名字），不經 SuiteSpec——那份碼由題庫產生不是供應者寫的，不是破口；但「peerexec 這條路安全了」≠「gain_run 那條路安全了」 | `DECISION_20260906_R452_...`§三-4 |
-| B20 | **測試現況（該輪紀錄，本文件未重跑）** | R451 §六 記：全套另有 3 個失敗，皆非該輪所致——`tests/test_archive_index.py` 兩個（`gain.signal_exists` 裁決值 `'held'` 不在合法集合，屬另一 session 的改動）、`tests/test_r448_launcher_prereg.py` 一個（環境性） | `DECISION_20260906_R451_...`§六 |
+| B20 | **測試現況（該輪紀錄，本文件未重跑）** | R451 §六 原記：全套另有 3 個失敗，皆非該輪所致——`tests/test_archive_index.py` 兩個（`gain.signal_exists` 裁決值 `'held'` 不在合法集合，屬另一 session 的改動）、`tests/test_r448_launcher_prereg.py` 一個（環境性）。**其中 `tests/test_archive_index.py` 那兩個已於 `2d6e4cd` 修正，現況為通過**（round459 重跑確認）；`tests/test_r448_launcher_prereg.py` 那一個是環境性，未變 | `DECISION_20260906_R451_...`§六；`2d6e4cd` |
 
 ---
 
@@ -676,8 +676,11 @@ WebCrypto Ed25519 逐筆驗簽；裁決／指名／出貨由頁面自己重算�
 
 1. **數字只從這裡取，改數字要連來源一起改。** 官網／展場文案若與本文件不符，以本文件為準；
    本文件若與來源檔不符，以來源檔為準。
-2. **裁決不在這裡改。** 宣稱的裁決（refuted／overstated／held／no_effect／未複驗）
+2. **裁決不在這裡改。** 宣稱的裁決（refuted／overstated／held／no_effect／unresolved／未複驗）
    單一真相來源是 `examples/verdicts.py`；本文件只是抄它。
+   `unresolved`（同號但區間跨 0，2026-09-07 為 r449c／CONFORM vs OFF5 新增）與 `no_effect`
+   是兩個不同的值，不可互相代用：`no_effect` 是「量到了，沒有可分辨的差異」，
+   `unresolved` 是「這一次的 n 不夠，方向沒翻但 0 沒被排除」——沒量出來，不是沒有差異。
 3. **被推翻的留著。** 第 3.3 節是這份文件主張的一部分：一個宣稱可究責的系統
    若不能對自己可究責，主張就沒有內容。
    （來源：`examples/publish_now.py` module docstring）
