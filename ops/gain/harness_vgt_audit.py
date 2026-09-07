@@ -8,11 +8,14 @@
 `conform_failure_detail` 的輸出擴充成帶期望值，靜態檢查照樣全綠。這支唯一的
 輸入是**實際送出去的文字**（`calls.jsonl` 的 `messages`／`prompt` 全文）。
 
-⚠ **可見測資的內容（args／got／want）在 H 臂是刻意進 worker prompt 的**
-  （HARNESS_STUDY D7；本 repo 第一次）。合法性依據：可見測資照設計就是給供應者
-  看的驗收條件（LCB 的 assert 訊息三個欄位全部來自 `visible_tests`），
-  **只有「隱藏測資扣掉可見測資」那一段才是 GT**。所以這支檢查的是後者，
-  不是「有沒有測資進 prompt」——那個問題的答案是「有，而且是設計要的」。
+⚠ **D7：可見測資的內容（args／got／want）在 H 臂是刻意進 worker prompt 的**
+  （HARNESS_STUDY §5.8；**本 repo 第一次**——既有的 OFF／CONFORM／OFF5 只送題目敘述）。
+  合法性依據：`visible` 測資照設計就是給供應者看的驗收條件
+  （LCB 的 assert 訊息三個欄位全部來自 `visible_tests`），
+  **只有 `hidden \ visible`（隱藏測資扣掉可見測資）那一段才是 GT**。
+  所以這支稽核的對象逐字是 **`hidden \ visible`**，不是「有沒有測資進 prompt」
+  ——那個問題的答案是「有，而且是設計要的」，
+  斷言「visible 沒出現」會**必然失敗**，因為它按設計就在裡面。
 
 三條斷言（任何一條命中 ⇒ 整個 run 作廢，照 SPEC_GAIN §7 落盤並公開，
 不得只修不報）：
@@ -31,8 +34,9 @@
 那不是洩漏而是量具沒有鑑別力。這支**不**把那種 needle 算成違規，但會**單獨列出
 被跳過的數量**——跳過的東西要說出來，不能讓「沒有違規」順手把「沒有檢查」蓋掉。
 
-用法：
-    python3 ops/gain/harness_vgt_audit.py --run runs/g_r460_harness_lcb2 --bank lcb2
+用法（D9：兩塊各跑一次，兩塊都要綠才算過）：
+    python3 ops/gain/harness_vgt_audit.py --run runs/g_r460_harness_lcb2_a --bank lcb2
+    python3 ops/gain/harness_vgt_audit.py --run runs/g_r460_harness_lcb2_b --bank lcb2
 """
 from __future__ import annotations
 

@@ -82,7 +82,7 @@ limit 砍斷時，該訊息裡所有 tool call 一律不執行，每個都回一
 
 **F7（OpenCode，`session/processor.ts:29,352-378`）doom-loop 偵測門檻是 3：**
 `const DOOM_LOOP_THRESHOLD = 3`；最後 3 個 part 全是 tool part、工具名相同、
-`JSON.stringify(input)` 完全相同 ⇒ 觸發。預設處置（`agent/agent.ts:120`）是
+`JSON.stringify(input)` 完全相同 ⇒ 觸發。預設處置（`agent/agent.ts:121`）是
 `doom_loop: "ask"`——**問人類**。⚠ 無人值守時等於沒有守門員。
 
 **F8（OpenCode，`packages/core/src/session/runner/max-steps.ts`）撞到步數上限不硬砍，
@@ -123,13 +123,26 @@ OpenCode 走反方向，把驗證寫進 provider prompt（`session/prompt/defaul
 |---|---|---|
 | T1 | 「pi 的 harness 比 Claude Code 好 9.7pp」 | leaderboard 是 harness×model 的混合。pi 那一列用 **Opus 4.5**，Claude Code 那一列用 **Sonnet 4.5**。那是模型差，不是 harness 差。 |
 | T2 | 「harness 是大差異的來源」 | 表上唯一乾淨的同模型對照（Claude Sonnet 4.5）：Terminus 2 **42.8%**、OpenHands **42.6%**、Mini-SWE-Agent **42.5%**、Claude Code **40.1%**——**四個 harness 全距 2.7pp，全部落在彼此誤差棒內**。openbench（2026-07-02，gpt-5.5-medium）更直接：5 個 harness 在 trivial／中等任務上正確率**全部打平 100%**，差異只在牆鐘與 token。 |
-| T3 | 「pi 證明了 loop 比 single-shot 好」 | **Terminal-Bench 2.0 leaderboard 上 61 個 entry 沒有任何一個是 single-shot baseline。** loop vs single-shot 在這份證據裡**完全沒有被測量**。 |
+| T3 | 「pi 證明了 loop 比 single-shot 好」 | **Terminal-Bench 2.0 leaderboard （快照口徑逐字 `as of Dec 1, 2025`，`show-results.js:20-24`）上 60 個 entry 沒有任何一個是 single-shot baseline。** loop vs single-shot 在這份證據裡**完全沒有被測量**。 |
 | T4 | 「極簡 system prompt 就夠了」 | 作者自己的論證是 `all the frontier models have been RL-trained up the wazoo, so they inherently understand what a coding agent is`。**gemma-4-12b-it-qat 沒有這個先驗**，前提不成立。 |
 | T5 | 「pi 拿第 7／第 8 名」 | X 貼文說 8th、截圖顯示 rank 7，無法釐清（貼文回 HTTP 402）。引用數字 **49.8% ± 2.4**，不引用名次。 |
 | T6 | 「pi 拿 51.2%」 | 那是 **CET-only 的第二次跑、只跑到 297/445 trials 的未完成 run**，作者說會更新但文中沒有更新版數字。 |
 | T7 | 「2026-05 pi 在四個模型上贏 Cline 兩個」 | 一手來源查不到（mariozechner.at 文章索引 2024-07→2026-05-30 共 19 篇無對應文、pi.dev 無 benchmark 頁）。當未驗證傳聞處理。 |
 | T8 | 「compaction 是 pi 拿高分的原因」 | compaction 在 **2025-12-04 的 v0.12.7** 才進版，跑分是 **12-02**。 |
 | T9 | 「OpenCode 的 edit 工具強制 read-before-edit」 | `tool/edit.txt` 這樣寫，但這個 commit 的 `tool/edit.ts` **沒有這個檢查**（grep `FileTime`／`hasRead`／`lastRead` 全無命中）。描述與實作對不上。 |
+
+**⚠ 稽核更正（Fable，2026-09-07）——引用時以本表為準，初稿的數字作廢**：
+
+| 原文 | 更正 | 出處 |
+|---|---|---|
+| T3「61 個 entry」 | **60 個 entry** | `show-results.js:20-24` |
+| T1／T2 引 leaderboard 沒有標快照日期 | 三條傳說引的是**同一份快照**，它自報的口徑逐字是 `as of Dec 1, 2025`。引用 T1 的 Opus 4.5／Sonnet 4.5 分列、T2 的 42.8／42.6／42.5／40.1% 時**必須連這個日期一起講**，否則會被讀成「現在的排行榜」 | `show-results.js:20-24` |
+| F7「`agent/agent.ts:120`」 | **`agent/agent.ts:121`** | 同檔 |
+
+⚠ **這三條由稽核者在外部原始碼上核對；本 checkout 沒有 `badlogic/pi-mono` 與
+`sst/opencode` 兩個倉庫，本輪無法一手重驗**——照本文件開頭的紀律，這是
+「無法一手驗證」等級的引用。要升級成一手驗證，必須先按 §1.1 的 commit 取回兩個倉庫、
+依 `examples/archive_citations.py` 的三級規則落盤（含 sha256），再回來改這一行。
 
 另有一條**紅線級**的：OpenCode `prompt/beast.txt:47` 第 10 點寫
 `remember there are hidden tests that must also pass before the solution is truly complete`。
@@ -246,7 +259,7 @@ CONFORM 把可見通過從 79 推到 113（＋34），hidden 通過只從 61 推
 ≥4 塊 36，最多一份有 56 塊）。`extract_code` 取的是**第一個非空區塊**。
 ⇒ 在單輪臂上這 19.4% 大致無害，但在迴圈臂裡「解釋＋程式碼＋用法範例」的機率會上升，
 **必須逐輪記錄區塊數**（§4.0.8），事後才查得出「第一塊規則」有沒有咬到人。
-**不准為了 H 臂改 `extract_code`**（理由見 §5.2 不變量 4）。
+**不准為了 H 臂改 `gain_run.extract_code` 本身**——改它會同時動到 OFF／CONFORM／OFF5（§5.2 不變量 4）。D4 的做法是**另寫**一個只作用在修訂輪的 harness 取碼器，初稿輪仍走原件，兩個選擇都落盤。
 
 ---
 
@@ -446,10 +459,28 @@ def chat(self, messages, *, role="gen", meta=None, timeout_s=None, retries=None)
 
 #### 4.0.3 文字協定（三臂相同）
 
-- **出碼**：一個 markdown 圍欄區塊（三個反引號）。解析用**既有的** `gain_run.extract_code`，
-  一字不改（§5.2 不變量 4）。
-- **沒有圍欄** ⇒ `fail_kind="nocode"`，回一則協定提醒（§4.0.4），**計入呼叫預算**，並計數。
-- **多個圍欄** ⇒ 照 `extract_code` 取第一個非空區塊，**但把區塊數記進逐輪日誌**（N5）。
+- **出碼**：一個 markdown 圍欄區塊（三個反引號）。
+
+**取碼器（D4，逐條寫死）**：
+
+- **初稿輪（turn 1）走 `gain_run.extract_code`，一個字不改。** 這是 D4 的核心：
+  turn 1 與 OFF 用**同一個**取碼器 ⇒ 「H 臂的 turn 1 對 OFF」是乾淨的比較，
+  §5.3.1 的 prompt 效果才有意義。
+- **修訂輪改用 harness 端取碼器**：取**第一個既 `ast.parse` 得過、又定義了 entry point**
+  的圍欄塊；一個都找不到就 **fallback 回 `gain_run.extract_code`**。
+  理由是 N5 量到的形狀：19.4% 的回應有兩塊以上，而迴圈會放大它
+  （模型常先貼一段錯誤重述或修改說明、再貼修好的函式）。
+- **兩個取碼器的選擇都逐輪落盤**（`extractor`、`code_sha256`、`baseline_code_sha256`、
+  `extractor_divergent`），**分歧逐臂計數**（`extractor_divergences`）。
+  分歧率是一級指標：接近 0 代表 D4 這個改動沒買到東西；很高則代表
+  「H 臂比 OFF 好」有一部分來自取碼器，**裁決書必須把這一塊單獨講**。
+- **`nocode` ＝ 整則回應一個圍欄塊都沒有**——判定用 harness 自己的偵測器
+  （`_fenced_blocks`），**不是**「`extract_code` 回空字串」。
+  ⇒ `fail_kind="nocode"`，回一則協定提醒（§4.0.4），**計入呼叫預算**，並計數。
+- **有圍欄但第一塊不是 Python**（`blocks[0]` compile 不過）**單獨計數**
+  （`first_block_non_python`），與 `nocode` 分開記——那是兩種不同的協定失敗，
+  混在一起會讓 P-H8 的 MISS 讀不出原因。
+- **多個圍欄** ⇒ 區塊數逐輪落盤（`n_code_blocks`，N5）。
 - H-OC 的計畫輪另有 `PLAN:／EDGE CASES:／SELFTEST:` 三個前綴（§4.2）。
 
 #### 4.0.4 回饋渲染（三臂**逐字相同**——這是刻意的）
@@ -476,6 +507,18 @@ function. Do not explain.
 | `loader` | `visible_report` 回 `None` ＋ `static_precheck` 的 reason | `The code could not be loaded: {reason}` |
 | `nocode` | 回應裡沒有圍欄 | `No Python code block was found in the reply.` |
 | `selftest`（僅 H-OC，附加在上面任一段之後） | 模型自己的 SELFTEST | `Your own test also failed (this test is yours and may itself be wrong): args={args!r} got={got!r} you expected={expected!r}` |
+
+**`static_precheck` 的 reason 是一個封閉集**（D4），逐字五個值：
+`{syntax_error, forbidden_import, forbidden_attr, entry_point_missing, empty}`
+——`PRECHECK_REASONS` 是模組常數，不准臨時多長一個字串出來（測試 T4／T5 釘住它）。
+理由：reason 直接進**模型看得到的文字**，一個沒登記過的值同時代表
+「模型收到一則沒見過的訊息」與「離線分析的分母裂開」兩件壞事。
+
+其中 **`entry_point_missing` 必須與其餘四個分開計數**（`extra["entry_point_missing"]`）：
+它的意思和另外四個不同——那不是「碼壞了」，是**碼沒壞、只是函式名不對**，
+在 12B 上是一種光靠一句提醒就修得掉的協定失敗。
+把它混進 `loader_refusals` 會讓 §5.7-G3 的分層讀數把「模型沒照協定命名」
+算成「我們的禁用屬性表太嚴」，那是兩個相反的結論。
 
 **截斷規則**（F5 的改寫）：`{msg}` 超過 2000 字元時保留**前 1000 ＋ 後 1000**，
 中間插 `…[{n} characters omitted]…`。
@@ -521,9 +564,23 @@ HARNESS_BUDGET = {
 p99 是 13,242、max 33,974。上限訂在 32k ≈ OFF5 的 2.3 倍，
 低於這個數會變成常常在「模型話太多」而不是「迴圈跑太久」上收工。
 
-**`max_wall_s = 900` 的理由（N4 ＋ F 的教訓）**：單次延遲 p50 20.7 s、max 504.9 s。
-pi 的 428 trials 有 **57 個（13.3%）AgentTimeoutError**——牆鐘是它唯一的實質預算，
-而且咬得很兇。所以我們(a)要有這條線，(b)**撞線要單獨記成一個 outcome**，
+**`max_wall_s = 900` 的理由（N4；D6 裁定：外部數字已刪，改綁我們自己的實測）**：
+本專案自己量到的單次呼叫延遲 p50 **20.7 s**、p90 **90.5 s**、max **504.9 s**
+（`runs/g_r447_conform_lcb2/calls.jsonl`，n=926，重算指令見附錄 A）。
+**900 s ＝ 504.9 × 1.78**——「一次歷史最壞延遲再加約八成」的安全係數。
+
+⚠ **初稿在這裡引的那組「pi 的逾時比例」數字（試驗次數／逾時件數／百分比）已整條刪除，
+本檔各處都不再出現。** D6：那組數字來自
+`https://mariozechner.at/posts/2025-11-30-pi-coding-agent/` 這篇部落格文章裡的一張圖，
+本 repo 沒有依 `examples/archive_citations.py` 的三級規則落盤
+（URL ＋圖名＋抓取日期＋sha256 快照），所以**不留「作者自報」版本、直接刪**
+——**連「原本寫的是多少」都不複述**，複述等於用一份沒有落盤的來源當事實。
+要復活它只有一條路：照那三級規則抓一次、落盤、再引。
+刪掉它之後 `max_wall_s` 的正當性**完全建立在我們自己落盤的延遲分佈上**
+（`runs/g_r447_conform_lcb2/calls.jsonl` 的 max 504.9 s × 1.78），
+與任何外部宣稱無關——這正是 D6 要的效果，不是把數字藏起來。
+
+所以 (a) 要有這條線，(b)**撞線要單獨記成一個 outcome**，
 不可以混進失敗率（`stop_reason="budget_wall"`）。
 
 ⚠ **不送 `max_tokens` 給端點**。H 臂的 request body 除了 `messages` 之外與 OFF 完全相同。
@@ -859,23 +916,45 @@ elif arm in ("HPI", "HOC", "HMIX"):
 - `extract_code`、`meets_demand`、`behavior_signature`、`conform_failure_detail`、
   `_visible_test_slicer` 一個字都不動（H 臂只**呼叫**它們）。
 
-**啟動指令**（`--decision` 閘門要求 DECISION 檔內文含 run 名字）：
+**啟動指令**（D9：**兩塊、兩顆直連後端、併發**；`--decision` 閘門要求 DECISION 檔內文含 run 名字）：
 
 ```
+# block a —— VACANT_GAIN_API=http://100.119.113.56:1234/v1/chat/completions
 python3 ops/gain/gain_run.py \
-  --out runs/g_r460_harness_lcb2 \
-  --decision ops/gain/DECISION_20260907_R460_HARNESS_PREREG.md \
-  --bank lcb2 --n 120 --seed g-r440-lcb2 \
+  --out runs/g_r460_harness_lcb2_a \
+  --decision DECISION_20260907_R460_HARNESS_PREREG.md \
+  --bank lcb2 --n 60 --offset 0 --seed g-r440-lcb2 \
+  --arms OFF,CONFORM,OFF5,HPI,HOC,HMIX \
+  --models gemma-4-12b-it-qat \
+  --probe-sample 0 \
+  --request-timeout-s 600 --retries 4
+
+# block b —— VACANT_GAIN_API=http://100.86.226.21:1234/v1/chat/completions
+python3 ops/gain/gain_run.py \
+  --out runs/g_r460_harness_lcb2_b \
+  --decision DECISION_20260907_R460_HARNESS_PREREG.md \
+  --bank lcb2 --n 60 --offset 60 --seed g-r440-lcb2 \
   --arms OFF,CONFORM,OFF5,HPI,HOC,HMIX \
   --models gemma-4-12b-it-qat \
   --probe-sample 0 \
   --request-timeout-s 600 --retries 4
 ```
 
+發射器 `ops/gain/launch_harness_lcb2.sh` 一支發兩塊，各自 `flock`、各自 `launch.log`，
+各自探**自己的**後端 `/v1/models`（**不探 hub**）。收官一律兩塊一起餵給 analyzer：
+`python3 ops/gain/analyze_r460.py --run runs/g_r460_harness_lcb2_a runs/g_r460_harness_lcb2_b --bank lcb2 --rescore-turn1`。
+
 `--seed g-r440-lcb2` **必須與 r447 相同**：`LiveCodeBenchLoader.iter_tasks` 用
 `sha256(f"{seed}:{task_id}")` 排序 ⇒ 同 seed ＝ 同題序；而每臂的 rng 是
 `random.Random(f"{seed}:{arm}")` ⇒ 新的 OFF 臂會把**同一個 persona 指派給同一題**，
 與 r447 的 OFF 逐格對齊。這讓「新 OFF vs r447 OFF」變成一個乾淨的**後端漂移探針**（§5.1）。
+
+⚠ **D9 的代價，寫在指令旁邊**：那顆 rng **在每一塊各自從頭抽**
+⇒ **只有 block a（offset 0）的 persona 指派與 r447 對齊**。
+block b 的第 1 題拿到的是 r447 第 1 題的 persona，不是第 61 題的
+⇒ **P-H0 這個漂移探針只在 block a 上成立**，錨換成 r447 前 60 題的 32/60 ＝ 53.33%、
+窗從 ±10pp 放寬成 ±15pp（n 從 120 掉到 60）。詳見
+`DECISION_20260907_R460_HARNESS_PREREG.md` §二-5 與 §三 P-H0。
 
 ### 4.6 必須有的測試（全部零 API 呼叫，`tests/test_gain_harness_arms.py`）
 
@@ -934,14 +1013,34 @@ McNemar 的配對是逐題的，跨 run 配對在算術上沒問題。
 沿用「量具要先答已知答案」那條紀律，只是這次驗的是端點不是判定邏輯。
 預註冊：
 
-> **P-H0（後端漂移探針）**：新 run 的 OFF 臂交付率落在 **50.83% ± 10pp**（＝[40.8, 60.8]）
-> 之內。落在區間外 ⇒ 後端已漂移，**本 run 與 r447 的任何橫向比較作廢**，
-> 而本 run 內部的六臂比較仍然有效（因為它們共享同一個後端）。
+> **P-H0（後端漂移探針；D9 之後只在 block a 上判）**：
+> `runs/g_r460_harness_lcb2_a`（offset 0 的 60 題）的 OFF 臂交付率落在
+> **53.33% ± 15pp**（＝[38.3, 68.3]）之內。落在區間外 ⇒ 後端已漂移，
+> **本 run 與 r447 的任何橫向比較作廢**，而本 run 內部的六臂比較仍然有效
+> （同一題的六臂共享同一顆後端）。
+>
+> 兩個數字都因 D9 換過，**換在資料之前**：錨從 61/120 ＝ 50.83% 換成 r447
+> **前 60 題**的 32/60 ＝ 53.33%（block a 就是那 60 題、同序）；
+> 窗從 ±10pp 放寬成 ±15pp（n 從 120 掉到 60，二項 SE 從 4.56 漲到 6.44pp，
+> ±10×√2 ≈ ±14.1 ⇒ 取 ±15）。**放寬的理由是 n 減半，不是為了讓它容易 HIT。**
+> **block b 不判**：它的 persona 指派與 r447 不對齊（每臂的 rng 在每一塊各自從頭抽）。
+> ⇒ **block b 那顆後端（`100.86.226.21:1234`）沒有事前錨**，本 run 對它一句話都不能說。
 
-若機時真的不夠，唯一可接受的省法是**砍掉 OFF5**（最貴的一條，22,726 s），
-並把 §5.6 的 token 門檻改綁 r447 的常數 **22,266 tokens／正確交付**，
-且裁決書上必須寫「token 門檻對照的是歸檔 OFF5，不是同 run OFF5」。
-**OFF 與 CONFORM 不准省**——它們是主要與次要對照。
+**⚠ D2 裁定：OFF5 不准省跑。** 初稿在這裡寫「機時不夠時唯一可接受的省法是砍掉 OFF5，
+把 token 門檻改綁 r447 的 22,266」——**那條已作廢**，理由是它與 P-H0 互相拆台：
+
+- P-H0 存在的前提是「後端可能已經漂了」。**若 P-H0 MISS（後端真的漂了），
+  那顆歸檔常數 22,266 同時失效**——它是 r447 那個後端上量到的 token 數。
+  也就是說：省跑 OFF5 的那個備案，剛好在**最需要它的時候**（後端漂了）不能用。
+- 反過來若 P-H0 HIT，省跑省下的 6.3 h 也不再值得——後端沒漂，六臂交錯照跑就好。
+- ⇒ 省跑 OFF5 在兩種世界裡都不划算。**OFF、CONFORM、OFF5 三條對照一條都不准省。**
+
+**P-H0 的效力範圍也要一起寫死**（免得收官時被放大）：
+P-H0 MISS **只作廢本 run 與 r447 的橫向比較**（含「r447 的 22,266 當事前錨」這種引用），
+**不作廢本 run 內部的六臂比較**——六條臂共享同一個後端、在同一個交錯 run 裡逐題輪流跑，
+後端漂移對它們的影響在時間上是對齊的。
+⇒ §5.6 的四條門檻裡，只有 (iii) 需要 `TPC_OFF5`，而那個值**一律取本 run 的 OFF5**，
+所以 **P-H0 MISS 不會讓 §5.6 的任何一格失效**。這一句是事前寫的，不是收官時的解釋。
 
 ### 5.2 對齊不變量（九條，稽核時逐條核）
 
@@ -950,7 +1049,7 @@ McNemar 的配對是逐題的，跨 run 配對在算術上沒問題。
 | 1 | 同一批 120 題、同一題序 | 同 bank 同 seed；`n_tasks_loaded=120` |
 | 2 | 同一個 agent 池、六個 persona、system prompt 逐字不變 | `brain_cline.POOL` 不動 |
 | 3 | 同一個 model id、同一 temperature（0.7）、同一端點、同一 request policy | 同一個 run 的同一組 `ClineBrain` |
-| 4 | 同一個取碼器 | 六條臂全部走 `gain_run.extract_code`，**不准為 H 臂改成「取最後一塊」** |
+| 4 | 取碼器：**turn 1 六臂完全相同**，修訂輪的差異是註冊過的處置（D4） | 初稿輪一律走 `gain_run.extract_code`（一個字不改）⇒ 「H 臂 turn 1 vs OFF」乾淨；修訂輪走 harness 取碼器（第一個 ast-parse 且定義 entry point 的塊，否則 fallback），**兩個選擇逐輪落盤、分歧逐臂計數**。**仍然禁止**「無條件取最後一塊」這類規則，也禁止改 `gain_run.extract_code` 本身（那會動到既有臂） |
 | 5 | 同一個沙箱、同一份 import 白名單、同一個 10 s timeout | 全部走 `meets_demand` → `run_python_check` |
 | 6 | 同一個接受語意 | `accepted ⟺ 出貨的那份通過 visible`；拒交仍回傳草稿（§4.0.8） |
 | 7 | 同一個計分路徑 | dispatch 端的 `meets_demand(hidden)`；**臂內永遠看不到 hidden** |
@@ -977,18 +1076,73 @@ SPEC_GAIN §4-2 就是這個。
 | 撞上限率 | `stop_reason ∈ {budget_*, doom}` 的比例 | — |
 | 協定失敗率 | `nocode_turns / n_turns`、`loader_refusals / n_turns` | 載入器拒收 25/925 ＝ 2.7% |
 
-### 5.4 檢定
+#### 5.3.1 歸因分解（D5）：prompt 效果與迴圈效果必須分開報
 
-- **配對 McNemar 精確檢定**（`vacant/research.py::mcnemar_exact` 家族），
-  對象是逐題的 `deliv = accepted ∧ hidden_pass` 布林值。
-  區間用**精確條件區間**（r449b 用的那一種），與既有裁決書口徑一致。
-- **檢定家族**：3 條 H 臂 × 2 個對照（OFF、CONFORM）＝ **6 個檢定**，
-  **Holm–Bonferroni**（`vacant/research.py::holm_bonferroni`）在 α=0.05 下控制。
-- **主要假設指定為 H-MIX vs CONFORM**（H-MIX 是「照證據組出來的成品」，
-  H-PI／H-OC 是拆解它的消融）。EFFECTIVE 裁決要求 H-MIX 在 Holm 後仍顯著。
-- **禁令**：不准把三條 H 臂合併成一個「harness 臂」再檢定；
-  不准跨 run 合併 n（沿用 R449c §三「不准併成 n=1051 做檢定」的預註冊禁令）。
-- 差異的**方向**、`b`／`c` 逐題清單一律落盤（`ops/gain/analyze_*` 的既有慣例）。
+逐題落盤 `first_pass_turn`（第一次通過可見驗收的輪號；從未通過就是 `null`），
+裁決書上**同時**報下面兩個差，缺一不可：
+
+| 量 | 定義 | 它答的問題 | 仲裁欄位 |
+|---|---|---|---|
+| **Δ(turn1 − OFF)** | 只取 H 臂**第一輪**產出的那份碼，離線走同一條 `meets_demand(hidden)` 重評，與同 run OFF 逐題配對 | **prompt 效果**：光是換一份 user-turn 文字（§4.1–4.3 的差異）值多少 | `attribution.<ARM>.delta_turn1_minus_off_pp` |
+| **Δ(final − turn1)** | 同一條 H 臂：最終出貨的那份 vs 它自己第一輪那份，逐題配對 | **迴圈效果**：把執行結果貼回去、讓它改，值多少 | `attribution.<ARM>.delta_final_minus_turn1_pp` |
+
+⚠ **兩者相加不等於 Δ_O**，裁決書只准寫「Δ_O ≈ prompt 效果 ＋ 迴圈效果」，**不准寫成恆等式**：
+turn-1 那一份沒有「拒交」概念（無條件計分，形狀與 OFF 相同），最終那一份有 `accepted`，
+兩者的分母語意不同。
+⚠ turn-1 的碼要靠 `calls.jsonl` 的全文回應離線重取（`--rescore-turn1`），
+**用的是與 dispatch 端逐字相同的 `meets_demand(hidden)`**——是事後評分，
+臂內仍然看不到 hidden（§5.2 不變量 7）。**零模型呼叫，但要跑沙箱**。
+⚠ `first_pass_turn == 1` 的比例事前預期很高（N1：79/120 第一輪就停），
+所以 `Δ(final − turn1)` 的**有效樣本**只有其餘約 41 題。
+兩個分母都要印：全 120 題一次（`delta_final_minus_turn1_pp`）、
+只算 `first_pass_turn != 1` 的題一次（`delta_final_minus_turn1_looponly_pp`）。
+只報前者會把迴圈效果稀釋成「看起來很小」，只報後者會把它放大成「看起來很大」。
+
+### 5.4 檢定（D3：顯著性、區間、分母三件事分開定義，各自可執行）
+
+**(1) 配對單位與分母＝complete case。**
+配對單位是 `task_id`；成功的定義是 `deliv = accepted ∧ meets_demand`
+（R667 凍結口徑，`ops/gain/replay/paired_ci.py:25` 逐字）。
+兩臂比較的分母是 **complete-case n**：**兩臂都非 void 的題**，
+即 `n_common = |{task_id ∈ rows[A]} ∩ {task_id ∈ rows[B]}|`
+（`gain_run` 只在非 void 的格子寫 rows ⇒ 交集就是「兩臂都量到」）。
+仲裁欄位 `paired.<A>_vs_<B>.n_common`。
+⚠ **不准**用聯集、不准用 `processed`、不准用各臂自己的 `measured`：
+H 臂的 void 曝險比 OFF 高 3–5 倍（R7），三個分母在這個 run 上會給出不同答案。
+⚠ 每一對比較各自有自己的 `n_common`（H 臂彼此 void 的題不一樣），
+所以 `n_common` **必須逐對印出來**，不准只印一個「n=120」。
+
+**(2) 顯著性＝Holm 調整後的精確 McNemar p 值。**
+每一對算 `p = mcnemar_exact(b, c)`（`vacant/research.py:141`），
+家族是 **3 條 H 臂 × 2 個對照（OFF、CONFORM）＝ 6 個檢定**，
+一次性丟進 `vacant/research.py::holm_bonferroni`（α=0.05）。
+仲裁欄位：`paired.<A>_vs_<B>.p_mcnemar_exact`（未調整）、
+`holm.<A>_vs_<B>.p_adj`（調整後）、`holm.family_size`（必須 == 6）。
+⚠ 家族固定是 6，**不准**因為某一臂 void 太多就把它抽掉再重算 Holm
+（抽掉會讓剩下的 p 變小 ⇒ 那是看到數字之後改家族）。
+
+**(3) 區間＝未調整的 95% Clopper–Pearson 條件區間。**
+用 `ops/gain/replay/paired_ci.py::diff_ci`（`analyze_r447.py` 用的同一支，
+n_d 固定、b~Bin(n_d, π)、Clopper–Pearson 取 π 的精確區間、映射
+Δ=(2π−1)·n_d/n）。仲裁欄位 `paired.<A>_vs_<B>.ci95_lo_pp` / `ci95_hi_pp`。
+
+> **「Holm 後的 CI」不存在，本文件不准再出現這個詞。**
+> 印出來的區間**沒有**做多重比較調整。任何引用它的地方都要逐字附上這一句：
+> **「區間未做多重比較調整；仲裁以 analyzer 為準」**。
+> 顯著性一律由 (2) 的 `holm.<pair>.p_adj` 決定，區間只用來說「資料還容得下多大的差異」。
+> ⚠ 於是會出現一種**事前就知道可能發生**的情形：某一對的
+> `ci95_lo_pp > 0`（未調整區間排除 0）但 `p_adj ≥ 0.05`（Holm 後不顯著）。
+> 那不是矛盾，是多重比較的代價。**此時以 `p_adj` 為準**，
+> 而 §5.6 的 RULED_OUT 判定仍然讀未調整的 `ci95_hi_pp`（D3 逐字）。
+
+**(4) 主要假設指定為 H-MIX vs CONFORM**（H-MIX 是照證據組出來的成品，
+H-PI／H-OC 是拆解它的消融）。三條 H 臂各自判自己的裁決，但
+**展場口徑只跟著 H-MIX 走**。
+
+**(5) 禁令**：不准把三條 H 臂合併成一個「harness 臂」再檢定；
+不准跨 run 合併 n（沿用 R449c §三「不准併成 n=1051 做檢定」的預註冊禁令）；
+不准在看到數字之後改分母、改家族、改仲裁欄位。
+差異的**方向**、`b`／`c` 逐題清單一律落盤（`ops/gain/analyze_*` 的既有慣例）。
 
 ### 5.5 檢定力（`vacant.research.mcnemar_power` 實算，不是估計）
 
@@ -1010,32 +1164,71 @@ r447 的 CONFORM vs OFF 實測 `b=31, c=8` ⇒ `p_disc = 39/120 = 0.325`。
 **誠實結論：n=120 對 +10pp 的檢定力只有 0.43–0.63，剛好在門檻的刀口上。**
 所以預註冊**兩階段**：
 
-> **階段一**：LCB v2 120 題。若 H-MIX 對 CONFORM 的點估計 ≥ +10pp 但 Holm 後的
-> CI 下界 ≤ 0 ⇒ 裁決 **INCONCLUSIVE**，觸發**階段二**：LCB v3 189 題
-> （與 v2 **零交集**，`codebench.py` 逐字）以相同規格、相同門檻做確認跑。
+> **階段一**：LCB v2 120 題（本 run）。裁決落在 **INCONCLUSIVE** ⇒ 觸發**階段二**。
+> **INCONCLUSIVE 的定義只有一個地方**，就是 §5.6 的表：
+> 「不是 EFFECTIVE、不是 COSTLY_BUT_REAL、也不是 RULED_OUT」的其餘情形
+> （典型：未調整的 95% CI 同時跨過 0 與 +10pp）。
+> **階段二**：LCB v3 189 題（與 v2 **零交集**，`codebench.py` 逐字；
+> run 名 `runs/g_r461h_harness_lcb3`、seed `g-r461-lcb3`）
+> 以**相同規格、相同門檻、相同六臂**做確認跑。
 > 階段二是**預註冊的確認**不是探索，門檻不得在看到階段一之後修改。
+
+⚠ **初稿在這裡寫的「點估計 ≥ +10pp 但 Holm 後的 CI 下界 ≤ 0」已刪除**，兩個理由：
+(a)「Holm 後的 CI」不存在（§5.4-(3)）；
+(b) 它與 §5.6 的表不一致——照初稿的寫法，「點估計 < +10pp 而 CI 上界 > +10pp」
+這一格會兩邊都沒接住。現在**只有 §5.6 的表定義狀態**，本節只說階段二接在哪一格後面。
 
 ### 5.6 預註冊門檻（人類的規則：「可以接受高 token，但差距也要大」）
 
-**符號**：Δ_C ＝ H 臂 − CONFORM 的配對差（pp）；Δ_O ＝ H 臂 − OFF；
-`TPC` ＝ tokens per correct delivery；`TPC_OFF5` ＝ 同 run 的 OFF5（省跑時 ＝ 22,266）。
+**符號**（全部是 complete-case 配對量，§5.4-(1)）：
+Δ_C ＝ H 臂 − CONFORM 的配對差（pp）；Δ_O ＝ H 臂 − OFF；
+`TPC` ＝ tokens per correct delivery；`TPC_OFF5` ＝ **同一個 run 的 OFF5**
+（D2：OFF5 不准省跑 ⇒ 這個常數只能來自本 run，見 §5.1）。
 
-| 裁決 | 條件（全部要成立） | 意義 |
+| 裁決 | 條件 | 意義 |
 |---|---|---|
-| **EFFECTIVE** | ① Δ_C ≥ **+10.0pp**　② Holm 後 Δ_C 的 95% 精確條件 CI **下界 > 0**　③ `TPC ≤ TPC_OFF5`　④ 假交付率 ≤ CONFORM ＋ 5pp | 值得裝。可以進展場的候選句 |
-| **COSTLY_BUT_REAL** | ② 成立，但 ① 或 ③ 或 ④ 不成立 | 真的有效但不划算／或用假交付換來的。**展場不得宣稱**，只能寫進誠實邊界 |
-| **RULED_OUT** | Δ_C 的 CI **上界 < +10.0pp** | 排除了 ≥10pp 的實務增益。這是**結論**不是失敗（沿用 R445 對 OFF5 的 `RULED_OUT` 用法） |
-| **INCONCLUSIVE** | 其餘（CI 同時跨過 0 與 +10pp） | 走 §5.5 的階段二 |
+| **EFFECTIVE** | (i) Δ_O ≥ **+25.0pp** **且** Δ_C ≥ **+10.0pp**（**點估計**）　(ii) 對 OFF 與對 CONFORM **兩個** Holm 調整後 p 值**都** < 0.05　(iii) `TPC ≤ TPC_OFF5`（同 run）　(iv) 假交付率 ≤ CONFORM ＋ 5pp　——**四條全部成立** | 值得裝。可以進展場的候選句 |
+| **COSTLY_BUT_REAL** | (ii) 的 **CONFORM 那一半**成立（`holm.<ARM>_vs_CONFORM.p_adj < 0.05`），但 (i)(iii)(iv) 任一條不成立 | 真的有效但不划算／或用假交付換來的。**展場不得宣稱**，只能寫進誠實邊界 |
+| **RULED_OUT** | Δ_C 的 **95% CI 上界 < +10.0pp**（未調整區間，§5.4-(3)） | 排除了 ≥10pp 的實務增益。這是**結論**不是失敗（沿用 R445 對 OFF5 的 `RULED_OUT` 用法） |
+| **INCONCLUSIVE** | 其餘 | 走 §5.5 的階段二（LCB v3 189 題，規則凍結不變） |
 
-**Δ_O 的門檻另立且較寬**（因為 CONFORM 已經拿走 +19.17pp，對 OFF 的比較只是佐證）：
-Δ_O ≥ +25pp 且 CI 下界 > 0 才可以寫「比單抽好很多」。
+**判定順序（照這個順序判，先命中者為準，事前寫死）**：
+EFFECTIVE → COSTLY_BUT_REAL → RULED_OUT → INCONCLUSIVE。
+仲裁欄位 `decision.<ARM>.verdict`（analyzer 直接印字串）。
 
-**③ 的算術要先攤開來，讓工程師知道靶在哪**：`TPC_OFF5 = 22,266`。
+⚠ **winner's curse 免責聲明是強制的**（不寫＝裁決不得結算）：
+n=120 對 +10pp 的檢定力只有 0.43–0.63（§5.5），
+能被判顯著的點估計本來就會被截斷在 MDE 以上 ⇒
+**任何被判 EFFECTIVE 的臂，其點估計是效果量的上偏估計**；
+跨 run／跨臂比幅度一律報區間重疊，不報點估計誰大。
+逐字句子見 §5.6 末的「必寫句」。
+
+⚠ **Δ_O 門檻為什麼是 +25pp**：CONFORM 對 OFF 在同題庫已經量到 +19.17pp。
+一條連 +25pp 都達不到的 H 臂，對 OFF 的優勢還落在「換人重抽」這條便宜路線的量級裡，
+那不足以支撐展場那句「把預算花在迴圈上」。這是**事前**訂的，不是看到數字才訂的。
+
+**(iii) 的算術要先攤開來，讓工程師知道靶在哪**（用 r447 的 `TPC_OFF5 = 22,266`
+當**事前錨**；實際仲裁用本 run 的同 run 值）：
 若某條 H 臂交付 96/120（80.0%，＝Δ_C +10pp），它整條臂的 token 預算上限是
 `96 × 22,266 = 2,137,536`，即**每題平均 17,813 tokens**。
 H-PI（全留 context、5 輪）在 §4.0.6 的 32k 上限下很可能逼近它；
 H-MIX 的 context 紀律就是為這一條設計的。
 ⇒ 預測 `tokens/task(H-MIX) < tokens/task(H-PI)`，寫進 §5.10 P-H6。
+
+**(iii) 旁邊必須同時印一張 token 倍數表**（D3 逐字要求；缺表＝裁決不得結算）。
+analyzer 逐臂印下面五格，**倍數對照 OFF 與 CONFORM 兩個基準都要有**：
+
+| 欄 | 仲裁欄位 | r447 的事前錨（OFF / CONFORM / OFF5） |
+|---|---|---|
+| tokens／題 | `tokens.<ARM>.tokens_per_task` | 2,691 / 6,101 / 14,102 |
+| 對 OFF 的倍數 | `tokens.<ARM>.multiple_vs_off` | 1.00× / 2.27× / 5.24× |
+| 對 CONFORM 的倍數 | `tokens.<ARM>.multiple_vs_conform` | 0.44× / 1.00× / 2.31× |
+| tokens／正確交付（**含** void 呼叫） | `tokens.<ARM>.tpc_incl_void` | 5,294 / 8,715 / 22,266（r447 void=0 ⇒ 兩版相同） |
+| tokens／正確交付（**排除** void 格的呼叫） | `tokens.<ARM>.tpc_excl_void` | 同上 |
+
+⚠ 兩個 TPC 都要印的理由是 R7 的不對稱：void 格的呼叫已經燒掉 token 但不進分母
+⇒ 只報 `tpc_excl_void` 會**低估** H 臂的成本。**(iii) 的仲裁用 `tpc_incl_void`**
+（較嚴的那個），另一個並列印出。
 
 **推翻條件（寫進 DECISION，事後不得補）**：
 
@@ -1075,6 +1268,29 @@ H 臂的呼叫分佈預期是雙峰（79 題 1 通、41 題 2–5 通），只�
 
 ### 5.8 V/GT 洩漏的稽核鉤子
 
+**⚠ D7（本 repo 第一次）：可見測資的內容會進 worker prompt。**
+H 臂的回饋訊息裡有 `args=[…] got=… want=…`——那三個欄位全部來自
+`visible_tests`，是**客戶自己交出來的驗收測資**（§3.3）。
+既有的 OFF／CONFORM／OFF5 只把題目敘述送進 prompt，
+**從來沒有把可見測資的 args／expected 逐字送進去過；H 臂是第一次。**
+
+這件事**是設計要的、不是漏洞**：整條 harness 路線的機制就是「把執行結果貼回去」，
+而執行結果的內容就是可見測資的內容。V/GT 分離（SPEC_GAIN §2）分的是
+`visible` 與 `hidden`，**可見的部分本來就允許給模型看**。
+
+但它有三個必須同時做到的後果，缺一不可：
+
+1. **稽核對象因此是 `hidden_tests \ visible_tests`，不是「所有測資」。**
+   下面的動態稽核只斷言「hidden 扣掉 visible 的那些 case 沒有出現在送出的文字裡」——
+   斷言「visible 沒出現」會**必然失敗**，因為它按設計就在裡面。
+   `ops/gain/harness_vgt_audit.py` 的 docstring 必須逐字寫明這一點。
+2. **展場文案必須講。** 口徑：「這條臂會把**客戶自己寫的驗收測資**的失敗訊息原文貼回去給模型改」
+   ——不准只說「把錯誤貼回去」讓人以為模型是憑空修對的。
+   §6-R9 的必講清單加這一條。
+3. **這件事本身是 R4（過擬合可見測資）的機制來源。** 模型看得到 2–4 條可見測資的
+   args 與期望值 ⇒ 「改到通過」與「寫對」的距離比 OFF 更大，
+   所以 §5.6 的 (iv) 假交付門檻與 §5.7-G1 是**這條設計的配套**，不是附加的保險。
+
 **靜態（跑在 CI 與 pre-commit）**：
 
 1. `ops/gain/harness_arms.py` 全文**不得出現** `hidden_check`、`canonical`、`__canon`、`plus`。
@@ -1110,27 +1326,37 @@ H 臂的呼叫分佈預期是雙峰（79 題 1 通、41 題 2–5 通），只�
 | **合計（六臂交錯）** | **≈ 22 h** |
 
 ⚠ `gain_run` **沒有續跑**（輸出目錄有產物就 `SystemExit` 拒絕 append，
-`gain_run.py:1292-1301`）。22 小時中斷一次就得從頭。兩個選項：
+`gain_run.py:1292-1301`）。中斷一次那一塊就得從頭。
 
-- **A（首選）**：一次跑完 120 題。中斷仍留下逐題交錯、六臂格數相等的可分析資料
-  （round278 的設計目的），只是 n 變小。
-- **B（機時不穩時）**：照 R445 的先例切成 `--offset 0 --n 60` 與 `--offset 60 --n 60`
-  兩個 run 再併庫。⚠ 代價：第二塊的 `random.Random(f"{seed}:{arm}")` 從頭開始，
-  **persona 指派不再與 r447 對齊** ⇒ §5.1 的 P-H0 後端探針只在第一塊有效。
-  這一點要寫進 DECISION，不要事後才發現。
+**D9 已經裁定用切塊，而且理由不是「機時不穩」而是「機時拓撲」**：
+2026-09-07 15:40 量到 8765 那顆 hub 把 **100% 的請求路由到後端 1003**
+（6 次探針：1003 +6、1004 +0），而且併發打 hub 吞吐**退化**
+（n=8→12：206→175→144 tok/s）；兩顆直連後端各自在 n=4 熱身後約 **110–120 tok/s**。
+⇒ 走 hub 只用得到一張卡。所以照 R445 的先例切成
+`--offset 0 --n 60`（→ `100.119.113.56:1234`）與 `--offset 60 --n 60`
+（→ `100.86.226.21:1234`）兩個 run、**同時跑**、收官按 `task_id` 併庫。
+牆鐘從 ≈22 h 降到 ≈11 h，而**每一顆卡上仍然是一次一個請求**
+（`DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md` 擋的是同端點併發，這裡沒有做）。
+
+⚠ **代價逐條登記**（全部在 `DECISION_20260907_R460_HARNESS_PREREG.md` §二-5）：
+第二塊的 `random.Random(f"{seed}:{arm}")` 從頭開始 ⇒
+**persona 指派不再與 r447 對齊** ⇒ §5.1 的 P-H0 後端探針**只在 block a 有效**；
+兩塊的難度組成不同（block a medium 40／hard 20、block b 32／28）⇒
+**塊間點估計不得互相比較**；多一組合併擋門（塊間 task_id 交集、走 hub、
+兩塊同端點、只跑完一塊）全部進 `analyze_r460.topology_report()` 的 `broken_reasons`。
 
 ### 5.10 預註冊預測（DECISION 檔要逐條寫上，跑完逐條記 HIT／MISS）
 
 | # | 預測 | 窗 | 為什麼這樣猜 |
 |---|---|---|---|
-| P-H0 | 新 OFF 的交付率 | [40.8, 60.8]% | r447 ＝ 50.83%；後端漂移探針（§5.1） |
+| P-H0 | 新 OFF 的交付率（**只在 block a 上判**） | [38.3, 68.3]% | 錨＝r447 前 60 題的 32/60 ＝ 53.33%；窗 ±15pp（n=60）；後端漂移探針（§5.1）。block b 的 persona 指派與 r447 不對齊 ⇒ 不判 |
 | P-H1 | 三條 H 臂都 > OFF | Δ_O > 0 | N1：41 題有修理空間，且那 41 題 hidden 全錯 ⇒ 只會往上 |
 | P-H2 | 至少一條 H 臂 > CONFORM | Δ_C > 0 | §2.1：修訂可越過池子天花板，選擇不行 |
 | P-H3 | H 臂的實際呼叫／題 | [1.8, 3.2] | N1：79/120 題第一輪就停（＝1.0 通），41 題會用到 2–5 通 |
 | P-H4 | H 臂的假交付率 | 高於 CONFORM 的 24.2%，但 ≤ 35% | 迴圈朝可見測資修 ⇒ 過擬合升高；CONFORM 已示範 +34 可見換 +23 hidden |
 | P-H5 | 載入器拒收在 H 臂**降到接近 0** | ≤ 0.5% 的輪次以 `loader` 收工 | 靜態診斷會把 reason 直接告訴模型（僅 H-OC／H-MIX；H-PI 沒有診斷 ⇒ 預期仍在 2% 上下） |
 | P-H6 | `tokens/task(H-MIX) < tokens/task(H-PI)` | 差距 ≥ 20% | §4.3 的 context 紀律就是為這條設計的 |
-| P-H7 | `stop_reason` 分佈 | `visible_pass` 為主；`budget_wall` ≤ 5% | pi 的 13.3% AgentTimeoutError 是在無上限 shell 任務上；我們一題只有一個函式 |
+| P-H7 | `stop_reason` 分佈 | `visible_pass` 為主；`budget_wall` ≤ 5% | 900 s ＝ 我們自己實測的單次 max 504.9 s 的 **1.78 倍**，而一題只有一個函式（不是無上限的 shell 任務）⇒ 要撞線得比歷史最壞再慢 78%。**外部的 timeout 比例已依 D6 刪除，不再當錨** |
 | P-H8 | 協定：`nocode` 輪次比例 | ≤ 3% | N5：925/925 都有圍欄 |
 | P-H9 | **條件性後續**：若 H-OC 與 H-MIX 都顯著贏 H-PI | ⇒ 追加第四條臂 H-PI＋診斷，否則計畫輪的效果不可辨識（§4.4） | — |
 
@@ -1140,8 +1366,10 @@ H 臂的呼叫分佈預期是雙峰（79 題 1 通、41 題 2–5 通），只�
 
 **R1 12B 的協定遵循。** 已量到的好消息：925/925 都有圍欄（N5）。壞消息：19.4% 有多塊、
 `extract_code` 取第一塊。迴圈會**放大**這個風險（「先解釋、再貼碼、再貼用法」）。
-處置：逐輪記 `n_code_blocks`（§4.0.9）、`nocode` 走跟工具錯誤同一條路（F3）並計數，
-**不改取碼器**（不變量 4）。若 P-H8 大幅 MISS，那本身就是一個結論
+處置：逐輪記 `n_code_blocks`（§4.0.9）、`nocode`（＝零圍欄）走跟工具錯誤同一條路（F3）
+並計數、`first_block_non_python` 單獨計數，
+**不改 `gain_run.extract_code`**（不變量 4；修訂輪的 harness 取碼器是註冊過的處置，
+見 §4.0.3 的 D4，其分歧數逐臂落盤，事後扣得掉）。若 P-H8 大幅 MISS，那本身就是一個結論
 （「12B 撐不住多輪協定」），不是要偷偷修掉的 bug。
 
 **R2 prompt 格式脆弱（H-OC 尤其）。** `PLAN:／EDGE CASES:／SELFTEST:` 三段式對 12B 是
@@ -1192,7 +1420,7 @@ N2 已經給了 CONFORM 的轉換率 67.6% 當對照。處置：§5.6 門檻 ④
 | 牆鐘上限（R3） | **不利 H**（OFF 永遠不撞） | `budget_wall` 單獨報＋敏感度分析 |
 | 後端漂移（§5.1） | 未知 | 六臂交錯同 run ＋ P-H0 探針 |
 | `max_tokens` 只設給 H | **不利 H** | **不設**（§4.0.6 ⚠） |
-| 為 H 改取碼器 | 利 H | 禁止（不變量 4） |
+| 為 H 改**共用**取碼器 | 利 H | 禁止（不變量 4）。D4 的 harness 取碼器只作用在修訂輪、turn 1 與 OFF 同一件，且分歧逐輪落盤 ⇒ 事後扣得掉 |
 | H 用不同 persona 策略 | 利 H | 一題一 worker，只抽一次（§4.0.5） |
 | void 不進分母（R7） | 利 H（token 低估） | 兩個 token 數字都報 |
 | 多輪 vs 攤平 wire mode | 未知 | §5.7-G6，不得混算 |
@@ -1200,6 +1428,8 @@ N2 已經給了 CONFORM 的轉換率 67.6% 當對照。處置：§5.6 門檻 ④
 **R9 展場口徑。** 就算 EFFECTIVE，能講的也只有：
 「在 120 題 LeetCode 中高難度題上、用一顆 12B 本地模型、把五通呼叫花在
 『跑客戶的驗收測資、把失敗原文貼回去、讓它改』，比花在換人重抽多交付 N 個百分點。」
+**必須**同時講：「回饋的內容是**客戶自己交出來的驗收測資**的失敗原文
+（`args=… got=… want=…`），模型看得到那幾條測資的輸入與期望值」（D7）。
 **不准**講「業界證明 harness 才是關鍵」（T2）、
 **不准**講「我們的 agent 會自我驗證」（我們量的是 harness 強迫它看執行結果，不是它自覺）、
 **不准**省略「需求可以被編譯成可執行驗收測資」那句強制前提（§1.1 的口徑紅線）。
