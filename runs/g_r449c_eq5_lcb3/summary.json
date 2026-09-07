@@ -1,0 +1,255 @@
+{
+  "seed": "g-r449c-eq5-lcb3",
+  "n": 189,
+  "offset": 0,
+  "runner_git": {
+    "sha": "b5daa07e4a8749d851f343eb8b7ae5e5695ea5fd",
+    "dirty": true,
+    "branch": "feat/v2-four-stages"
+  },
+  "n_tasks_loaded": 189,
+  "run_complete": true,
+  "run_terminal": true,
+  "request_policy": {
+    "timeout_s": 600,
+    "retries": 4,
+    "backoff_s": 2.0,
+    "review_timeout_s": 380,
+    "review_retries": 2
+  },
+  "pool": [
+    {
+      "agent_id": "careful-1",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "careful-2",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "plain-1",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "plain-2",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "hasty-1",
+      "model": "gemma-4-12b-it-qat"
+    },
+    {
+      "agent_id": "hasty-2",
+      "model": "gemma-4-12b-it-qat"
+    }
+  ],
+  "instrument": {
+    "n": 12,
+    "ref_pass": 12,
+    "broken_rejected": 12,
+    "detail": [
+      {
+        "task_id": "lcb_2730",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2779",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2792",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2784",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2802",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2808",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2757",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2728",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2754",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2786",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2755",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2810",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      }
+    ],
+    "visible_n": 12,
+    "visible_ref_pass": 12,
+    "visible_stub_rejected": 12,
+    "visible_detail": [
+      {
+        "task_id": "lcb_2730",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2779",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2792",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2784",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2802",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2808",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2757",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2728",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2754",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2786",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2755",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_2810",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      }
+    ]
+  },
+  "calibration": null,
+  "arms": {
+    "EQ5": {
+      "tasks": 189,
+      "calls": 945,
+      "infra_void": 0,
+      "complete": true,
+      "terminal": true,
+      "processed": 189,
+      "accepted": 179,
+      "accepted_and_meets_demand": 157,
+      "demand_equals_output_rate": 0.8770949720670391,
+      "coverage": 0.9470899470899471,
+      "correct_delivery_rate": 0.8306878306878307,
+      "raw_final_accuracy": 0.8306878306878307,
+      "calls_per_task": 5.0,
+      "calls_per_correct_delivery": 6.019108280254777,
+      "leaked": 22,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "eq5_gate_delivery_rate": 0.8306878306878307,
+      "eq5_vote_delivery_rate": 0.7883597883597884,
+      "eq5_same_choice_rate": 0.24867724867724866,
+      "eq5_same_choice_effective_rate": 0.24338624338624337,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 945,
+          "p50": 18063,
+          "p95": 102420,
+          "max": 585267
+        },
+        "by_role": {
+          "gen": {
+            "n": 945,
+            "p50": 18063,
+            "p95": 102420,
+            "max": 585267
+          }
+        },
+        "failed_attempts": 8
+      },
+      "wall_s": 32920.6,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    }
+  },
+  "equal_budget_comparison_valid": false
+}
