@@ -29,7 +29,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 pytest.importorskip("ops.gain.build_runs_index")
-from ops.gain.build_runs_index import build_index, render_md, main  # noqa: E402
+from ops.gain.build_runs_index import (  # noqa: E402
+    _opening_of, build_index, main, render_md)
 
 
 @pytest.fixture(scope="module")
@@ -122,6 +123,61 @@ def test_idempotent_and_check_mode(tmp_path, idx):
     # 動一個位元組就要被抓到——`--check` 有沒有牙齒。
     (out / "INDEX.md").write_text(m1 + "\n篡改\n")
     assert main(["--check", "--out", str(out)]) == 1
+
+
+def test_headline_must_be_about_this_run(idx):
+    """headline 只能來自「宣告區點名這個 run」的裁決檔——round457 稽核抓到的錯。
+
+    首版把 `g_r444_conform_mbpp` 配到 `DECISION_20260904_R440T_E3_WRAPUP.md`，
+    但那是 r443／E3 的收官，第 84 行只寫了一句「若 CONFORM 實跑顯示…」的前瞻
+    假設。**被順帶提到不等於被裁決。** 這支釘住修好後的行為：
+
+      - r444 沒有專屬裁決 ⇒ headline 是 None、`no_settlement_decision`，
+        併庫收官改列 related_settlements（不硬配）。
+      - r445 的 headline 是它自己的獨立稽核，不是併庫收官。
+      - 每一個有 headline 的 run，其來源檔的宣告區或標題一定點名了它。
+    """
+    by = {r["name"]: r for r in idx["runs"]}
+
+    r444 = by["g_r444_conform_mbpp"]
+    assert r444["headline"] is None
+    assert r444["headline_from"] is None
+    assert r444["headline_source"] == "no_settlement_decision"
+    assert r444["related_settlements"] == [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"]
+    assert "E3_WRAPUP" not in json.dumps(
+        [r444["headline_from"], r444["related_settlements"]])
+
+    assert (by["g_r445_conform_mbpp_ext"]["headline_from"]
+            == "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md")
+    assert (by["g_r449_eq5_lcb2"]["headline_from"]
+            == "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md")
+    assert (by["g_r441_gemma_only_mbpp_b"]["headline_from"]
+            == "DECISION_20260902_R516_E1_FINAL_WRAPUP.md")
+
+    # 通則：有 headline 就必須真的被那份文件點名（標題或宣告區）。
+    for r in idx["runs"]:
+        src = r["headline_from"]
+        if not src:
+            assert r["headline"] is None, r["name"]
+            continue
+        text = (ROOT / src).read_text()
+        opening = _opening_of(text)
+        assert r["name"] in opening, f"{r['name']} 的 headline 來源沒點名它：{src}"
+        assert r["headline"] == next(
+            ln.lstrip("#").strip() for ln in text.splitlines() if ln.strip()), \
+            f"{r['name']} 的 headline 不是該檔標題的逐字複製"
+
+
+def test_prereg_is_never_a_verdict(idx):
+    """PREREG／CRITERION 是量測**之前**寫的判準，不准被當成裁決。
+
+    混進來就會讓索引把「我們打算怎麼判」講成「判決是什麼」。
+    """
+    for r in idx["runs"]:
+        for rel in r["verdict_decisions"] + [r["headline_from"] or ""]:
+            assert "PREREG" not in rel.upper(), (r["name"], rel)
+            assert not rel.startswith("CRITERION"), (r["name"], rel)
 
 
 def test_analysis_dirs_are_not_evidence(idx):

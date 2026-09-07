@@ -86,6 +86,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "CRITERION_20260903_R675_POOLED_DELIV.md",
+        "CRITERION_20260904_R687_R445_SETTLEMENT.md",
         "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
         "DECISION_20260827_R140_PREREG.md",
         "DECISION_20260827_R146_PREREG.md",
@@ -94,12 +97,18 @@
         "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
       ],
       "verdict_decisions": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
-      "headline": "R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死",
-      "headline_from": "DECISION_20260904_R446_FABLE_AUDIT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "DECISION_20260904_R446_FABLE_AUDIT.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、DECISION_20260904_R446_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "_analysis_r138",
@@ -158,10 +167,12 @@
         "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r139",
@@ -224,10 +235,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r140",
@@ -322,10 +335,12 @@
         "DECISION_20260827_R140_PREREG.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r142",
@@ -394,10 +409,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r145",
@@ -460,10 +477,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r146",
@@ -528,10 +547,12 @@
         "DECISION_20260827_R146_PREREG.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r147",
@@ -594,10 +615,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r148",
@@ -660,10 +683,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r149",
@@ -726,10 +751,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r150",
@@ -792,10 +819,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r151b",
@@ -852,10 +881,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r152",
@@ -918,10 +949,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r152b",
@@ -978,10 +1011,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r153",
@@ -1044,10 +1079,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r153b",
@@ -1104,10 +1141,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r154",
@@ -1170,10 +1209,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r154b",
@@ -1230,10 +1271,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r155",
@@ -1296,10 +1339,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r155b",
@@ -1362,10 +1407,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r156",
@@ -1428,10 +1475,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r156b",
@@ -1494,10 +1543,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r157",
@@ -1560,10 +1611,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r157b",
@@ -1626,10 +1679,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r158",
@@ -1692,10 +1747,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r158b",
@@ -1758,10 +1815,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r159",
@@ -1824,10 +1883,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r159b",
@@ -1890,10 +1951,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r160",
@@ -1956,10 +2019,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r160b",
@@ -2022,10 +2087,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r161",
@@ -2088,10 +2155,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r161b",
@@ -2154,10 +2223,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r162",
@@ -2220,10 +2291,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r162b",
@@ -2286,10 +2359,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r163",
@@ -2352,10 +2427,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r163b",
@@ -2418,10 +2495,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r164",
@@ -2484,10 +2563,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r164b",
@@ -2550,10 +2631,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r165",
@@ -2616,10 +2699,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r165b",
@@ -2682,10 +2767,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r166",
@@ -2748,10 +2835,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r166b",
@@ -2814,10 +2903,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r167",
@@ -2880,10 +2971,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r167b",
@@ -2946,10 +3039,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r168",
@@ -3012,10 +3107,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r168b",
@@ -3078,10 +3175,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r169",
@@ -3144,10 +3243,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r169b",
@@ -3210,10 +3311,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r170",
@@ -3276,10 +3379,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r170b",
@@ -3342,10 +3447,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r171",
@@ -3408,10 +3515,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r171b",
@@ -3474,10 +3583,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r172",
@@ -3540,10 +3651,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r172b",
@@ -3606,10 +3719,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r173",
@@ -3672,10 +3787,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r173b",
@@ -3738,10 +3855,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r174",
@@ -3804,10 +3923,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r174b",
@@ -3870,10 +3991,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r175",
@@ -3936,10 +4059,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r175b",
@@ -4002,10 +4127,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r176",
@@ -4068,10 +4195,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r176b",
@@ -4134,10 +4263,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r177",
@@ -4200,10 +4331,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r177b",
@@ -4266,10 +4399,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r178",
@@ -4332,10 +4467,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r178b",
@@ -4398,10 +4535,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r179",
@@ -4494,10 +4633,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r180",
@@ -4560,10 +4701,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r180b",
@@ -4620,10 +4763,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r181",
@@ -4686,10 +4831,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r181b",
@@ -4746,10 +4893,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r182",
@@ -4812,10 +4961,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r182b",
@@ -4872,10 +5023,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r183",
@@ -4932,10 +5085,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r183b",
@@ -4992,10 +5147,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r184",
@@ -5052,10 +5209,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r184b",
@@ -5112,10 +5271,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r185",
@@ -5178,10 +5339,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r185b",
@@ -5238,10 +5401,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r186",
@@ -5292,10 +5457,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r186b",
@@ -5346,10 +5513,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r187",
@@ -5400,10 +5569,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r187b",
@@ -5454,10 +5625,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r188",
@@ -5514,10 +5687,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r188b",
@@ -5574,10 +5749,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r189",
@@ -5670,10 +5847,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r190",
@@ -5754,10 +5933,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r191",
@@ -5826,10 +6007,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r192",
@@ -5898,10 +6081,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r193",
@@ -5970,10 +6155,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r194",
@@ -6042,10 +6229,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r195",
@@ -6114,10 +6303,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r196",
@@ -6210,10 +6401,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r197",
@@ -6306,10 +6499,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r198",
@@ -6402,10 +6597,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r199",
@@ -6474,10 +6671,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r199b",
@@ -6534,10 +6733,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r201",
@@ -6606,10 +6807,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r202",
@@ -6678,10 +6881,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r202b",
@@ -6738,10 +6943,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r203",
@@ -6810,10 +7017,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r204",
@@ -6882,10 +7091,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r205",
@@ -6954,10 +7165,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r206",
@@ -7026,10 +7239,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r207",
@@ -7122,10 +7337,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r207b",
@@ -7194,10 +7411,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r208_final",
@@ -7254,10 +7473,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r212",
@@ -7314,10 +7535,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r445",
@@ -7402,12 +7625,21 @@
         ],
         "is_record_spec_pack": false
       },
-      "decision_refs": [],
-      "verdict_decisions": [],
+      "decision_refs": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "CRITERION_20260904_R687_R445_SETTLEMENT.md"
+      ],
+      "verdict_decisions": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+      ],
+      "related_settlements": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+      ],
       "headline": null,
       "headline_from": null,
-      "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "_analysis_r446",
@@ -7468,10 +7700,14 @@
       "verdict_decisions": [
         "DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
-      "headline": "R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死",
-      "headline_from": "DECISION_20260904_R446_FABLE_AUDIT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "DECISION_20260904_R446_FABLE_AUDIT.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260904_R446_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "_analysis_r650",
@@ -7540,10 +7776,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r652",
@@ -7612,10 +7850,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r654",
@@ -7684,10 +7924,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r656",
@@ -7786,10 +8028,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r658",
@@ -7858,10 +8102,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r660",
@@ -7936,10 +8182,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r661",
@@ -8014,10 +8262,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r662",
@@ -8124,10 +8374,12 @@
         "DECISION_20260903_R662_VOID_ROOT_CAUSE.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r664",
@@ -8220,10 +8472,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r665",
@@ -8376,10 +8630,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r667",
@@ -8448,10 +8704,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r668",
@@ -8526,10 +8784,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r669",
@@ -8598,10 +8858,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r670",
@@ -8664,10 +8926,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r671",
@@ -8742,10 +9006,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r672",
@@ -8814,10 +9080,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r675",
@@ -8878,12 +9146,16 @@
         ],
         "is_record_spec_pack": false
       },
-      "decision_refs": [],
+      "decision_refs": [
+        "CRITERION_20260903_R675_POOLED_DELIV.md"
+      ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r677",
@@ -8946,10 +9218,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r678",
@@ -9030,10 +9304,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r680",
@@ -9112,12 +9388,19 @@
         ],
         "is_record_spec_pack": false
       },
-      "decision_refs": [],
-      "verdict_decisions": [],
+      "decision_refs": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "CRITERION_20260904_R687_R445_SETTLEMENT.md"
+      ],
+      "verdict_decisions": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+      ],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r682",
@@ -9168,10 +9451,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_analysis_r684",
@@ -9222,10 +9507,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_probe_r210",
@@ -9276,10 +9563,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_probe_r212",
@@ -9330,10 +9619,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_r667_snap",
@@ -9410,10 +9701,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_replay",
@@ -9466,10 +9759,12 @@
         "DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "_smoke_het_r210",
@@ -9526,10 +9821,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "analysis_round455_paired",
@@ -9592,10 +9889,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "analysis_round522_acurve",
@@ -9660,10 +9959,12 @@
         "DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "analysis_round523_audit",
@@ -9748,10 +10049,14 @@
       "verdict_decisions": [
         "DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
       ],
-      "headline": "R523（fable 稽核輪）：對 R522「A 曲線第二點」的獨立重算——判準寫在任何數字算出來之前",
-      "headline_from": "DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "analysis_round525_final_recompute",
@@ -9808,10 +10113,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "blayer_1000",
@@ -9893,10 +10200,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "blayer_1000_replica",
@@ -9953,10 +10262,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "blayer_1000_v2",
@@ -10043,10 +10354,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "blayer_1000_v2_replica",
@@ -10110,10 +10423,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "blayer_1000_v3",
@@ -10206,10 +10521,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_e2q_off_lcb_qwenonly_20260902",
@@ -10290,10 +10607,12 @@
         "DECISION_20260902_R467_RECONCILE_R440F_AND_TERMINATE_E2Q.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_het2_r263_20260829",
@@ -10371,6 +10690,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260829_R263_GEMMA_REVIVED.md",
         "DECISION_20260829_R278_INTERLEAVE_ARMS.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
@@ -10379,13 +10699,18 @@
         "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
       ],
       "verdict_decisions": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
-      "headline": "round342 覆核裁決：R278 的 void 權衡（C2 推翻、C1 換論證）＋判準 2 補齊＋漏出量的機制拆解",
-      "headline_from": "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_het2_r271_20260829",
@@ -10462,10 +10787,14 @@
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
-      "headline": "round342 覆核裁決：R278 的 void 權衡（C2 推翻、C1 換論證）＋判準 2 補齊＋漏出量的機制拆解",
-      "headline_from": "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_het2_r274_20260829",
@@ -10548,10 +10877,12 @@
         "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_het3_r278_20260829",
@@ -10631,6 +10962,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260829_R278_INTERLEAVE_ARMS.md",
         "DECISION_20260829_R296_HTTP400_NONRETRY_REVIEW.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
@@ -10641,12 +10973,15 @@
         "DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md"
       ],
       "verdict_decisions": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
-      "headline": "R278 終點裁決：run 自然結束、但撞上專案自己的 void 閘門（round341，2026-08-30 UTC ~11:20-11:35，Sonnet 5）",
-      "headline_from": "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_het_off_r262_20260829",
@@ -10703,10 +11038,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_het_r210_20260828",
@@ -10765,10 +11102,12 @@
         "DECISION_20260828_R211_HET_POOL_ABORT.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_local_smoke_20260824",
@@ -10845,10 +11184,12 @@
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off371_20260825",
@@ -10932,6 +11273,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
         "DECISION_20260827_R146_PREREG.md",
         "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
@@ -10945,13 +11287,16 @@
         "ops/gain/DECISION_20260825_ROUND82_GEMMA_PROBE_INCIDENT.md"
       ],
       "verdict_decisions": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
-      "headline": "round342 覆核裁決：R278 的 void 權衡（C2 推翻、C1 換論證）＋判準 2 補齊＋漏出量的機制拆解",
-      "headline_from": "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off5_qwen_only_20260901",
@@ -11030,10 +11375,12 @@
       "verdict_decisions": [
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
-      "headline": "round460 決定：殺掉孤兒 OFF run `g_off_failure_rate_20260901c`，只留 scale2 ON",
-      "headline_from": "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off60_20260824",
@@ -11104,10 +11451,12 @@
         "DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off60_local_20260824",
@@ -11185,10 +11534,12 @@
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off60_qwenonly_20260824",
@@ -11273,10 +11624,12 @@
         "ops/gain/DECISION_20260825_V3_NEAR_COMPLETE_INFRA_VOID_GAP.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off60_r345_20260830",
@@ -11339,10 +11692,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off60_relay2_20260824",
@@ -11419,10 +11774,12 @@
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off60_relay_20260824",
@@ -11502,10 +11859,12 @@
       "verdict_decisions": [
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
-      "headline": "R278 終點裁決：run 自然結束、但撞上專案自己的 void 閘門（round341，2026-08-30 UTC ~11:20-11:35，Sonnet 5）",
-      "headline_from": "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off_failure_rate_20260901",
@@ -11568,10 +11927,15 @@
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
+      "related_settlements": [],
       "headline": "round460 決定：殺掉孤兒 OFF run `g_off_failure_rate_20260901c`，只留 scale2 ON",
       "headline_from": "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "headline_source": "named_in_title",
+      "headline_candidates": [
+        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
+        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+      ],
+      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
     },
     {
       "name": "g_off_failure_rate_20260901b",
@@ -11632,10 +11996,14 @@
       "verdict_decisions": [
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
-      "headline": "round460 決定：殺掉孤兒 OFF run `g_off_failure_rate_20260901c`，只留 scale2 ON",
-      "headline_from": "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_off_failure_rate_20260901c",
@@ -11712,10 +12080,14 @@
       "verdict_decisions": [
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
+      "related_settlements": [],
       "headline": "round460 決定：殺掉孤兒 OFF run `g_off_failure_rate_20260901c`，只留 scale2 ON",
       "headline_from": "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "headline_source": "named_in_title",
+      "headline_candidates": [
+        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+      ],
+      "headline_note": null
     },
     {
       "name": "g_off_probe_20260902_n60",
@@ -11775,10 +12147,12 @@
         "DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_off_qwen_only_20260901",
@@ -11856,10 +12230,14 @@
       "verdict_decisions": [
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
-      "headline": "DECISION 2026-09-01 round446: gemma-4-12b-it-qat 掛了，殺掉 g_r442_ononly_20260901",
-      "headline_from": "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_on371_20260825",
@@ -11938,10 +12316,12 @@
         "ops/gain/DECISION_20260825_ROUND110_BOUNDS_ADAPTED_FOR_VOIDY_BASELINE.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_on_qwen_only_20260901",
@@ -12017,10 +12397,12 @@
         "DECISION_20260901_R456_SCALE_FOR_POWER.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_on_qwen_only_scale2_20260901",
@@ -12104,10 +12486,14 @@
       "verdict_decisions": [
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
-      "headline": "round460 決定：殺掉孤兒 OFF run `g_off_failure_rate_20260901c`，只留 scale2 ON",
-      "headline_from": "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_onoff5_371_r123_20260825",
@@ -12181,6 +12567,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
         "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
         "DECISION_20260827_R140_PREREG.md",
@@ -12195,13 +12582,18 @@
         "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
       ],
       "verdict_decisions": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
-      "headline": "round342 覆核裁決：R278 的 void 權衡（C2 推翻、C1 換論證）＋判準 2 補齊＋漏出量的機制拆解",
-      "headline_from": "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [],
+      "headline": "R146-S 終點裁決：判準 2／3 定案（round208，2026-08-28 UTC ~11:00-11:10）",
+      "headline_from": "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
+      "headline_source": "sole_subject_of_opening",
+      "headline_candidates": [
+        "DECISION_20260828_R146S_ENDPOINT_VERDICT.md"
+      ],
+      "headline_note": null
     },
     {
       "name": "g_onoff5_qwenonly_20260824",
@@ -12267,10 +12659,12 @@
         "DECISION_20260824_REVIEW_TIMEOUT_BUG.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_onoff5_qwenonly_v2_20260824",
@@ -12348,10 +12742,12 @@
         "DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_onoff5_qwenonly_v3_20260824",
@@ -12461,10 +12857,12 @@
         "ops/gain/DECISION_20260825_V3_NEAR_COMPLETE_INFRA_VOID_GAP.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_onr_only_r237_20260828",
@@ -12540,10 +12938,12 @@
         "DECISION_20260829_R260_POOL_HOMOGENEITY_CEILING.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_onr_r212_20260828",
@@ -12623,10 +13023,12 @@
         "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_probe371_20260825",
@@ -12679,10 +13081,12 @@
         "ops/gain/DECISION_20260825_ROUND78_FULLBANK_OFF.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_probe_20260825_r123",
@@ -12735,10 +13139,12 @@
         "DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_r342_3arm_20260830",
@@ -12826,10 +13232,12 @@
         "DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_r345_3arm_20260830",
@@ -12912,10 +13320,12 @@
         "DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_r348_3arm_20260830",
@@ -12998,10 +13408,12 @@
         "DECISION_20260830_R356_HTTP400_RETRY_REVERSAL.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_r356_3arm_20260830",
@@ -13539,6 +13951,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
         "DECISION_20260830_R368_LOCALAGENT_MODEL_UNLOADED.md",
         "DECISION_20260831_R371_VOID_GATE_ON_STRUCTURAL.md",
@@ -13555,19 +13968,27 @@
         "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
         "DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
         "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md",
         "ops/gain/DECISION_20260831_R391_POWER_BOUND_R356.md",
         "ops/gain/DECISION_20260831_R393_TYPING_IMPORT_WHITELIST_BUG.md",
         "ops/gain/DECISION_20260831_R394_REANALYSIS_UPDATE.md"
       ],
       "verdict_decisions": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md",
         "DECISION_20260901_R429_OFF5VA_AUDIT_CONFOUND_REAFFIRMED.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
         "DECISION_20260902_R516_E1_FINAL_WRAPUP.md"
       ],
-      "headline": "DECISION R516（2026-09-02 21:00 UTC，Fable 5.1 稽核輪）：E1 收官——照 R483 §3d 寫死的判準裁決",
-      "headline_from": "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
+        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260830_G_EXPERIMENT.md、DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r439_revcheck_20260901",
@@ -13648,10 +14069,14 @@
       "verdict_decisions": [
         "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
       ],
-      "headline": "round442：ON void 率崩到 91.7%，判定跨過 round441 定的介入門檻——殺掉舊 run、換窄口徑 relaunch",
-      "headline_from": "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r441_gemma_only_mbpp",
@@ -13707,6 +14132,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md",
         "DECISION_20260901_R441_LCB_PROBE_GAUGE_GAP.md",
         "DECISION_20260902_R440C_E1_QUEUE_GEMMA_BACKEND.md",
@@ -13721,17 +14147,27 @@
         "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
         "DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
         "DECISION_20260903_R528_CONFIRMED_STATUS_CRASH_SPLIT.md",
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
         "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
         "DECISION_20260902_R519_CEILING_AUDIT.md"
       ],
-      "headline": "R519 稽核：round518 的 P-CEIL（A=0.609）獨立重算、敏感度、與是否寫進 CONCLUSION",
-      "headline_from": "DECISION_20260902_R519_CEILING_AUDIT.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
+        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+        "DECISION_20260902_R519_CEILING_AUDIT.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260830_G_EXPERIMENT.md、DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md、DECISION_20260902_R516_E1_FINAL_WRAPUP.md、DECISION_20260902_R519_CEILING_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r441_gemma_only_mbpp_b",
@@ -13879,6 +14315,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md",
         "DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
@@ -13890,17 +14327,28 @@
         "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
         "DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
         "DECISION_20260903_R528_CONFIRMED_STATUS_CRASH_SPLIT.md",
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
         "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
         "DECISION_20260902_R519_CEILING_AUDIT.md"
       ],
+      "related_settlements": [
+        "CONCLUSION_20260830_G_EXPERIMENT.md",
+        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md"
+      ],
       "headline": "DECISION R516（2026-09-02 21:00 UTC，Fable 5.1 稽核輪）：E1 收官——照 R483 §3d 寫死的判準裁決",
       "headline_from": "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-      "headline_source": "manual_override",
-      "headline_note": "E1 的收官裁決。啟發式會挑到後來的 R519（那是對 round518 P-CEIL 的稽核，只是**用到**這個 run，不是它的裁決）。R516 的獨立複核是 DECISION_20260903_R440N_E1_INDEPENDENT_AUDIT_CONCUR.md（該檔沒有逐字寫出 run 目錄名，所以 grep 掃不到）。"
+      "headline_source": "sole_subject_of_opening",
+      "headline_candidates": [
+        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+        "DECISION_20260902_R519_CEILING_AUDIT.md"
+      ],
+      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
     },
     {
       "name": "g_r442_ononly_20260901",
@@ -13979,10 +14427,14 @@
         "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
+      "related_settlements": [],
       "headline": "DECISION 2026-09-01 round446: gemma-4-12b-it-qat 掛了，殺掉 g_r442_ononly_20260901",
       "headline_from": "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-      "headline_source": "manual_override",
-      "headline_note": "這個 run 的最終處置是被 R446 殺掉。同名的 R442 那份講的是**殺掉上一個 run 並發射本 run**，不是它的結局。"
+      "headline_source": "named_in_title",
+      "headline_candidates": [
+        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
+      ],
+      "headline_note": null
     },
     {
       "name": "g_r443_gemma_lcb",
@@ -14069,15 +14521,21 @@
         "DECISION_20260903_R440U_GATE_COST_PREREG.md",
         "DECISION_20260904_R440T_E3_WRAPUP.md",
         "DECISION_20260904_R447_CTX400_ATTRIBUTION.md",
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
+        "FINDINGS_20260905_CONFORMANCE_GATE.md",
         "DECISION_20260904_R440T_E3_WRAPUP.md"
       ],
+      "related_settlements": [],
       "headline": "R440T：E3 收官——H-B（題目太簡單）被排除；評審在難題上翻成「幾乎一律說錯」",
       "headline_from": "DECISION_20260904_R440T_E3_WRAPUP.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "headline_source": "sole_subject_of_opening",
+      "headline_candidates": [
+        "DECISION_20260904_R440T_E3_WRAPUP.md"
+      ],
+      "headline_note": null
     },
     {
       "name": "g_r444_conform_mbpp",
@@ -14153,6 +14611,13 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "CRITERION_20260903_R666_RECEIPT_CHAIN_UNVERIFIABLE.md",
+        "CRITERION_20260903_R667_CONFORM_SETTLEMENT_ARITHMETIC.md",
+        "CRITERION_20260903_R671_VISIBLE_GAUGE_WIRING.md",
+        "CRITERION_20260903_R678_POWER_PROJECTION.md",
+        "CRITERION_20260903_R680_POOL_PRECONDITIONS.md",
+        "CRITERION_20260904_R687_R445_SETTLEMENT.md",
         "DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
         "DECISION_20260903_R440T_LCB_UNPASSABLE_TASKS.md",
         "DECISION_20260903_R440V_TEST_SUITE_AUDIT_PREREG.md",
@@ -14160,15 +14625,22 @@
         "DECISION_20260903_R662_VOID_ROOT_CAUSE.md",
         "DECISION_20260904_R440T_E3_WRAPUP.md",
         "DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
-        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md"
+        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260904_R440T_E3_WRAPUP.md"
+        "FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "DECISION_20260904_R440T_E3_WRAPUP.md",
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
-      "headline": "R440T：E3 收官——H-B（題目太簡單）被排除；評審在難題上翻成「幾乎一律說錯」",
-      "headline_from": "DECISION_20260904_R440T_E3_WRAPUP.md",
-      "headline_source": "latest_verdict_mentioning_run",
-      "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——引用前請自己打開確認。"
+      "related_settlements": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+      ],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "no_settlement_decision",
+      "headline_candidates": [],
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r445_conform_mbpp_ext",
@@ -14256,16 +14728,30 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "CRITERION_20260903_R675_POOLED_DELIV.md",
+        "CRITERION_20260904_R684_EQUAL_BUDGET_FRAMING.md",
+        "CRITERION_20260904_R686_DELIVERY_DENOMINATOR.md",
+        "CRITERION_20260904_R687_R445_SETTLEMENT.md",
         "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
         "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
-        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md"
+        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md"
+        "FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+      ],
+      "related_settlements": [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "headline": "R440X：r445 的獨立稽核——併庫區間排除 0 我複核成立；但真正紮實的發現是「五倍預算買不到東西」",
       "headline_from": "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
-      "headline_source": "round_token_match",
+      "headline_source": "sole_subject_of_opening",
+      "headline_candidates": [
+        "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md"
+      ],
       "headline_note": null
     },
     {
@@ -14350,6 +14836,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
+        "CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
         "DECISION_20260904_R440Z_LCB2_PREREG.md",
         "DECISION_20260904_R446_AMEND1_SAME_CHOICE.md",
         "DECISION_20260904_R446_EQUAL_BUDGET_ARM.md",
@@ -14361,13 +14848,19 @@
         "DECISION_20260906_R454_NAMED_DISSENT_PREREG.md"
       ],
       "verdict_decisions": [
+        "CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md",
         "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
       ],
+      "related_settlements": [],
       "headline": "R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死",
       "headline_from": "DECISION_20260904_R446_FABLE_AUDIT.md",
-      "headline_source": "round_token_match",
-      "headline_note": null
+      "headline_source": "sole_subject_of_opening",
+      "headline_candidates": [
+        "CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
+        "DECISION_20260904_R446_FABLE_AUDIT.md"
+      ],
+      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
     },
     {
       "name": "g_r447_conform_lcb2",
@@ -14480,18 +14973,26 @@
         "DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
         "DECISION_20260905_R440Z_WRAPUP_LCB2.md",
         "DECISION_20260905_R493_R461_APPENDIX_PROSE_CENSUS.md",
-        "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md"
+        "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
+        "FINDINGS_20260905_CONFORMANCE_GATE.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md",
         "DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
         "DECISION_20260904_R459_R447_SETTLEMENT.md",
         "DECISION_20260905_R440Z_WRAPUP_LCB2.md"
       ],
+      "related_settlements": [],
       "headline": "R459：`runs/g_r447_conform_lcb2` 收官裁決（Fable 5.1 稽核輪，round726）",
       "headline_from": "DECISION_20260904_R459_R447_SETTLEMENT.md",
-      "headline_source": "round_token_match",
-      "headline_note": null
+      "headline_source": "named_in_title",
+      "headline_candidates": [
+        "DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
+        "DECISION_20260904_R459_R447_SETTLEMENT.md",
+        "DECISION_20260905_R440Z_WRAPUP_LCB2.md"
+      ],
+      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
     },
     {
       "name": "g_r448_eq5_mbpp_seed2",
@@ -14567,9 +15068,13 @@
         "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
         "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
       ],
+      "related_settlements": [],
       "headline": "R448 稽核：EQ5 在全新 seed 上的獨立複製——判定 REPLICATED",
       "headline_from": "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
-      "headline_source": "round_token_match",
+      "headline_source": "sole_subject_of_opening",
+      "headline_candidates": [
+        "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md"
+      ],
       "headline_note": null
     },
     {
@@ -14663,9 +15168,13 @@
       "verdict_decisions": [
         "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md"
       ],
+      "related_settlements": [],
       "headline": "R449B 稽核：EQ5 在 LCB v2 難題上——判定 REPLICATED_ON_HARD",
       "headline_from": "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
-      "headline_source": "round_token_match",
+      "headline_source": "sole_subject_of_opening",
+      "headline_candidates": [
+        "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md"
+      ],
       "headline_note": null
     },
     {
@@ -14758,9 +15267,13 @@
       "verdict_decisions": [
         "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
       ],
+      "related_settlements": [],
       "headline": "R449C 稽核：EQ5 在 lcb3（189 題）——判定 UNRESOLVED：同號（+4.23pp、b/c=13/5）但下界 −0.66 沒過 0",
       "headline_from": "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md",
-      "headline_source": "round_token_match",
+      "headline_source": "sole_subject_of_opening",
+      "headline_candidates": [
+        "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
+      ],
       "headline_note": null
     },
     {
@@ -14877,14 +15390,20 @@
         "DECISION_20260905_R502_TRIPLE_CONSTRAINED_LADDER_PREREG.md",
         "DECISION_20260905_R503_R495_WALL_DELETION_PREREG.md",
         "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        "DECISION_20260906_R461_FABLE_AUDIT.md"
+        "DECISION_20260906_R461_FABLE_AUDIT.md",
+        "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
+        "FINDINGS_20260905_CONFORMANCE_GATE.md",
         "DECISION_20260906_R461_FABLE_AUDIT.md"
       ],
+      "related_settlements": [],
       "headline": "R461 稽核：CONFORM 在 LCB v3（189 題）三臂——獨立重算",
       "headline_from": "DECISION_20260906_R461_FABLE_AUDIT.md",
-      "headline_source": "round_token_match",
+      "headline_source": "sole_subject_of_opening",
+      "headline_candidates": [
+        "DECISION_20260906_R461_FABLE_AUDIT.md"
+      ],
       "headline_note": null
     },
     {
@@ -14963,10 +15482,12 @@
         "DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_r461_probe_lcb3",
@@ -15020,10 +15541,12 @@
         "DECISION_20260904_R468_TESTS_SWEEP_PREREG.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_smoke_20260820",
@@ -15115,10 +15638,12 @@
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "off_probe_n60_20260902",
@@ -15181,10 +15706,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "off_probe_n60_20260902_test",
@@ -15247,10 +15774,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "probe_verify_20260901",
@@ -15307,10 +15836,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s10_retention",
@@ -15367,10 +15898,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s11_shots",
@@ -15427,10 +15960,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s12_shots",
@@ -15487,10 +16022,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s13_shots",
@@ -15541,10 +16078,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s1_v1",
@@ -15621,10 +16160,12 @@
         "DECISION_SLASH.md"
       ],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s1_v1_n300",
@@ -15693,10 +16234,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s1b_v1",
@@ -15880,10 +16423,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s2_v1",
@@ -15977,10 +16522,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s3_v1",
@@ -16062,10 +16609,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s4_v1",
@@ -16159,10 +16708,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s7b_dom",
@@ -16345,10 +16896,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s7d_dom",
@@ -16453,10 +17006,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s7e_dom",
@@ -16573,10 +17128,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s8a_dom",
@@ -16687,10 +17244,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "s9_return",
@@ -16753,10 +17312,12 @@
       },
       "decision_refs": [],
       "verdict_decisions": [],
+      "related_settlements": [],
       "headline": null,
       "headline_from": null,
       "headline_source": "none",
-      "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     }
   ],
   "top_level_files": [

@@ -22,7 +22,8 @@
   - **逐檔 sha256**。索引本身要能被驗；資料被動過就對不上。
   - **索引不准比資料樂觀**（`examples/verdicts.py` 的教訓）。所以
     `kind` 會誠實地把冒煙／中止／衍生分析標出來，`record_spec` 會誠實地
-    寫「G 系列的 run 目錄**不是** RECORD_SPEC 包」。
+    寫「G 系列的 run 目錄**不是** RECORD_SPEC 包」，`headline` 挑不出
+    專屬裁決時標 `—` 而不拿別人的裁決來充數。
   - **零網路、零模型呼叫**。全部從磁碟與 `git log` 導出。
   - **可重跑、無時間戳**。輸出裡沒有任何 wall-clock 欄位，所以同一份資料
     重跑必然逐位元組相同；`--check` 就是靠這個做迴歸。
@@ -75,29 +76,54 @@ _SMOKE_TOKENS = ("smoke", "probe", "_test")
 RECORD_SPEC_REQUIRED = ("manifest.json", "ledger_events.jsonl",
                         "chain_verify.txt", "anomalies.md", "SHA256SUMS")
 
-# 稽核／收官裁決檔的檔名特徵。headline 只從這些檔的標題**逐字抄**，不自己造句。
-_AUDIT_FILENAME_RE = re.compile(
+# 裁決檔的檔名特徵。headline 只從這些檔的標題**逐字抄**，不自己造句。
+# 除了 DECISION_*，收官結論也可能寫成 CONCLUSION_* / FINDINGS_*——round457 首版
+# 只掃 DECISION_*，於是 `g_r444_conform_mbpp` 的收官（寫在 CONCLUSION_ 裡）整份被漏掉。
+_VERDICT_FILENAME_RE = re.compile(
     r"(FABLE_AUDIT|INDEPENDENT_AUDIT|_AUDIT|WRAPUP|SETTLEMENT|VERDICT|KILL)", re.I)
+_VERDICT_PREFIXES = ("CONCLUSION_", "FINDINGS_")
 # PREREG／CRITERION 是**量測之前**寫的判準，不是裁決。混進來會讓索引把
 # 「我們打算怎麼判」講成「判決是什麼」——正是索引最不該犯的錯。
 _NOT_A_VERDICT_RE = re.compile(r"(PREREG|CRITERION)", re.I)
 _ROUND_TOKEN_RE = re.compile(r"^g_(r\d+[a-z]?)", re.I)
-_FILENAME_ROUND_RE = re.compile(r"DECISION_(\d{8})_R(\d+)")
+_FILENAME_ROUND_RE = re.compile(r"^[A-Z]+_(\d{8})_R?(\d+)")
+_RUNS_PATH_RE = re.compile(r"runs/([A-Za-z0-9_]+)")
+# 「開頭」＝標題＋前言＋**第一個小節**（也就是第二個 `##` 之前的全部）。
+#
+# 為什麼是第二個而不是第一個：這個專題的裁決檔把「資料：runs/<run>」寫在兩個
+# 位置之一——前言裡（R440T_E3_WRAPUP、R516），或第一個小節「獨立重算」的開頭
+# （R440X 就是這樣，`runs/g_r445_conform_mbpp_ext` 在第 8 行、第一個 `##` 在第 6 行）。
+# 界線劃在第一個 `##` 會漏掉後者；劃在第二個 `##` 兩種都收得到，而且仍然擋得住
+# 「內文第 84 行順帶提一句」那種（R440T_E3_WRAPUP 的 §二 在第 24 行就開始了）。
+_SECTION_RE = re.compile(r"^##\s", re.M)
 
-# 啟發式挑不出來、但人眼看得出唯一答案的少數幾個。寫死在這裡而不是讓
-# 演算法亂猜——每一條都附理由，改了就看得見。
-_HEADLINE_OVERRIDE: dict[str, tuple[str, str]] = {
-    "g_r441_gemma_only_mbpp_b": (
-        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        "E1 的收官裁決。啟發式會挑到後來的 R519（那是對 round518 P-CEIL 的"
-        "稽核，只是**用到**這個 run，不是它的裁決）。R516 的獨立複核是 "
-        "DECISION_20260903_R440N_E1_INDEPENDENT_AUDIT_CONCUR.md（該檔沒有"
-        "逐字寫出 run 目錄名，所以 grep 掃不到）。"),
-    "g_r442_ononly_20260901": (
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-        "這個 run 的最終處置是被 R446 殺掉。同名的 R442 那份講的是"
-        "**殺掉上一個 run 並發射本 run**，不是它的結局。"),
-}
+
+def _verdict_class(fname: str) -> int:
+    """裁決檔的份量。同樣點名這個 run 時，用它決定誰才是「這個 run 的裁決」。
+
+    純比新舊會挑錯：`g_r441_gemma_only_mbpp_b`（E1）的三份文件裡，最新的
+    R519 是在稽核 round518 的天花板宣稱（只是**用到**這個 run），真正收官它的
+    是較早的 R516；`g_r445_conform_mbpp_ext` 的 R440X 獨立稽核也會輸給同日
+    但輪次號較大的自我收官結論。所以先比份量再比新舊。
+    """
+    if re.search(r"INTERIM", fname, re.I):
+        return 0                                    # 期中，不是收官
+    if re.search(r"(SETTLEMENT|WRAPUP|FINAL)", fname, re.I):
+        return 3                                    # 收官裁決
+    if re.search(r"(FABLE_AUDIT|INDEPENDENT_AUDIT)", fname, re.I):
+        return 2                                    # 獨立稽核（另一雙眼睛）
+    return 1                                        # 其餘裁決／結論
+
+
+def _opening_of(text: str) -> str:
+    """取「這份文件在裁決誰」的宣告區：第二個 `##` 之前的全部。
+
+    不足兩個小節的文件，整份就是宣告區（但設 8000 字上限，免得一份沒分節的
+    長文把每個 run 都掃進來）。
+    """
+    hits = list(_SECTION_RE.finditer(text))
+    return text[:hits[1].start()] if len(hits) >= 2 else text[:8000]
+
 
 _DATE_IN_NAME_RE = re.compile(r"(20\d{2})(\d{2})(\d{2})")
 
@@ -316,23 +342,43 @@ def _bank_for_run(d: Path, banks: dict[str, Any]) -> dict[str, Any]:
 
 
 # ── 裁決檔 ──────────────────────────────────────────────────────────
-def _decision_texts() -> list[tuple[str, str, str]]:
-    """(相對路徑, 標題, 全文)。標題＝第一行去掉開頭的 '#'。"""
-    out = []
-    for p in sorted(ROOT.rglob("DECISION*.md")):
-        if ".git" in p.parts or "runs" in p.parts:
-            continue
-        try:
-            text = p.read_text()
-        except (OSError, UnicodeDecodeError):
-            continue
-        title = ""
-        for line in text.splitlines():
-            if line.strip():
-                title = line.lstrip("#").strip()
-                break
-        out.append((p.relative_to(ROOT).as_posix(), title, text))
-    return out
+def _decision_texts() -> list[dict[str, Any]]:
+    """掃 repo 根目錄的判準／裁決檔。
+
+    四種前綴都要掃：`DECISION_` 之外，收官結論也可能寫成 `CONCLUSION_`／
+    `FINDINGS_`，事前判準寫成 `CRITERION_`。只掃 `DECISION_` 會漏掉整份收官
+    （round457 首版就是這樣把 `g_r444_conform_mbpp` 的收官結論漏掉的）。
+
+    每份記三段文字：`title`（第一行）、`opening`（第一個 `##` 之前的前言，
+    也就是「這份文件在裁決誰」的宣告）、`text`（全文，只用來做交叉引用）。
+    """
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for pat in ("DECISION*.md", "CONCLUSION*.md", "CRITERION*.md",
+                "FINDINGS*.md"):
+        for p in sorted(ROOT.rglob(pat)):
+            if ".git" in p.parts or "runs" in p.parts:
+                continue
+            rel = p.relative_to(ROOT).as_posix()
+            if rel in seen:
+                continue
+            seen.add(rel)
+            try:
+                text = p.read_text()
+            except (OSError, UnicodeDecodeError):
+                continue
+            title = next((ln.lstrip("#").strip()
+                          for ln in text.splitlines() if ln.strip()), "")
+            opening = _opening_of(text)
+            out.append({"rel": rel, "title": title, "opening": opening,
+                        "text": text,
+                        "is_verdict": bool(
+                            (_VERDICT_FILENAME_RE.search(p.name)
+                             or p.name.startswith(_VERDICT_PREFIXES))
+                            and not _NOT_A_VERDICT_RE.search(p.name)),
+                        "runs_in_opening": set(
+                            _RUNS_PATH_RE.findall(opening))})
+    return sorted(out, key=lambda d: d["rel"])
 
 
 def _verdict_sort_key(rel: str) -> tuple[str, int]:
@@ -341,52 +387,98 @@ def _verdict_sort_key(rel: str) -> tuple[str, int]:
     return (m.group(1), int(m.group(2))) if m else ("", 0)
 
 
-def _refs_and_headline(name: str, decisions: list[tuple[str, str, str]]
-                       ) -> dict[str, Any]:
-    """挑出「這個 run 的裁決是哪一份」，並把挑法記錄下來。
+def _refs_and_headline(name: str, decisions: list[dict[str, Any]],
+                       run_names: set[str]) -> dict[str, Any]:
+    """挑出「這個 run 的裁決是哪一份」，並把挑法與落選理由記錄下來。
 
-    規則（由強到弱，每一條都要能被讀者複查）：
-      1. 人工 override——啟發式挑錯、人眼看得出唯一答案的少數幾個。
-      2. 檔名的輪次號與 run 名字的輪次號對得上（`g_r446_*` ↔ `..._R446_...`）。
-         多份就取最新的一份（日期、再輪次號）。
-      3. 都對不上時，退回「提到這個 run 的裁決檔裡最新的一份」。
-    PREREG／CRITERION 一律不算裁決。headline 是該檔標題**逐字**複製。
+    **首版的教訓（round457 稽核抓到）**：原本只要求「裁決檔內文提到這個 run」，
+    於是 `g_r444_conform_mbpp` 被配到 `..._R440T_E3_WRAPUP.md`——那份是 r443／E3
+    的收官，第 84 行只寫了一句「若 CONFORM 實跑顯示…」的前瞻假設。**被順帶提到
+    不等於被裁決。** 所以現在有一道硬門檻：
+
+      門檻：run 必須被該檔的**標題或前言**（第一個 `##` 之前）點名——完整目錄名，
+            或標題裡的輪次號（`R440X：r445 的獨立稽核` 就是這樣點名 r445 的；
+            該檔的完整目錄名落在第一個 `##` 之後一行）。輪次號只在它唯一對應
+            一個 run 時才算數（`r441`／`r461` 各對到多個目錄，一律要完整名）。
+            這個專題的裁決檔一律在前言寫 `資料：runs/<run>`，那就是它的對象宣告。
+
+    過了門檻之後還要證明「這份文件的對象是**這一個** run」，二選一即可：
+      (a) 標題裡就有 run 名（`…殺掉 g_r442_ononly_20260901`）；或
+      (b) 宣告區只點名了這一個 run 目錄（唯一對象）。
+    兩條都不成立＝那份文件的對象是別人或是併庫後的集合體，**不硬配**：
+    headline 標 `—`、`headline_source` 記 `no_settlement_decision`，
+    該檔改列進 `related_settlements` 讓讀者自己去看。
+    （`g_r444_conform_mbpp` 就落在這裡：唯一過門檻的是 r444+r445 併庫 371 題的
+    收官結論，r444 只是其中一個 stratum，沒有專門收官它的檔。）
+
+    合格者之間的排序（由強到弱，全部可複查）：
+      標題含 run 名 → 檔名輪次號相符 → 份量（`_verdict_class`：收官 > 獨立稽核
+      > 其餘 > 期中）→ 日期／輪次較新。
+    headline 一律是該檔標題**逐字**複製，不改寫、不摘要。
     """
-    refs = sorted(rel for rel, _t, text in decisions if name in text)
-    titles = {rel: t for rel, t, _x in decisions}
-    verdicts = sorted(
-        (rel for rel, _t, text in decisions
-         if name in text and _AUDIT_FILENAME_RE.search(Path(rel).name)
-         and not _NOT_A_VERDICT_RE.search(Path(rel).name)),
-        key=_verdict_sort_key)
-
-    ov = _HEADLINE_OVERRIDE.get(name)
-    if ov and ov[0] in titles:
-        return {"decision_refs": refs, "verdict_decisions": verdicts,
-                "headline": titles[ov[0]], "headline_from": ov[0],
-                "headline_source": "manual_override", "headline_note": ov[1]}
+    refs = sorted(d["rel"] for d in decisions if name in d["text"])
+    verdicts = sorted((d["rel"] for d in decisions
+                       if d["is_verdict"] and name in d["text"]),
+                      key=_verdict_sort_key)
+    by_rel = {d["rel"]: d for d in decisions}
 
     m = _ROUND_TOKEN_RE.match(name)
-    if m:
-        tok = m.group(1).upper()
-        exact = [r for r in verdicts
-                 if re.search(rf"_{tok}[A-Z]?_", Path(r).name)]
-        if exact:
-            pick = exact[-1]
-            return {"decision_refs": refs, "verdict_decisions": verdicts,
-                    "headline": titles[pick], "headline_from": pick,
-                    "headline_source": "round_token_match", "headline_note": None}
-    if verdicts:
-        pick = verdicts[-1]
-        return {"decision_refs": refs, "verdict_decisions": verdicts,
-                "headline": titles[pick], "headline_from": pick,
-                "headline_source": "latest_verdict_mentioning_run",
-                "headline_note": "輪次號對不上，只是「最新一份提到它的裁決」——"
-                                 "引用前請自己打開確認。"}
-    return {"decision_refs": refs, "verdict_decisions": [], "headline": None,
-            "headline_from": None, "headline_source": "none",
-            "headline_note": "沒有任何裁決檔逐字提到這個 run 目錄名。"}
+    tok = m.group(1).upper() if m else None
 
+    passed = [d for d in decisions if d["is_verdict"] and name in d["opening"]]
+    eligible: list[tuple[Any, ...]] = []
+    related: list[str] = []
+    why: dict[str, str] = {}
+    for d in passed:
+        in_title = name in d["title"]
+        tok_hit = bool(tok and re.search(rf"_{tok}[A-Z]?_", Path(d["rel"]).name))
+        # 宣告區點名的目錄裡，真的是 run 的有哪些。`runs/_analysis_r446`
+        # 這種是分析工作目錄不是 run（R446 稽核檔就同時點了它與 g_r446_eq5_mbpp），
+        # 算進去會讓「唯一對象」誤判成「多重對象」。
+        named = {r for r in d["runs_in_opening"] if r in run_names}
+        sole = named == {name}
+        if in_title or sole:
+            eligible.append((in_title, tok_hit,
+                             _verdict_class(Path(d["rel"]).name),
+                             _verdict_sort_key(d["rel"]), d["rel"]))
+            why[d["rel"]] = "named_in_title" if in_title else "sole_subject_of_opening"
+        else:
+            related.append(d["rel"])
+
+    out: dict[str, Any] = {
+        "decision_refs": refs,
+        "verdict_decisions": verdicts,
+        "related_settlements": sorted(related),
+    }
+    if not eligible:
+        out.update({
+            "headline": None,
+            "headline_from": None,
+            "headline_source": ("no_settlement_decision" if related else "none"),
+            "headline_candidates": [],
+            "headline_note": (
+                "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 "
+                + "、".join(sorted(related))
+                + "，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+                if related else
+                "沒有任何裁決檔在標題或前言點名這個 run 目錄。"),
+        })
+        return out
+    eligible.sort()
+    rel = eligible[-1][-1]
+    src = why[rel]
+    out.update({
+        "headline": by_rel[rel]["title"],
+        "headline_from": rel,
+        "headline_source": src,
+        "headline_candidates": sorted(r[-1] for r in eligible),
+        "headline_note": (
+            None if len(eligible) == 1 else
+            "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；"
+            "依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）"
+            "→ 較新」挑出這一份。"),
+    })
+    return out
 
 # ── run 分類 ────────────────────────────────────────────────────────
 def _classify(d: Path, summary: dict[str, Any] | None,
@@ -426,8 +518,9 @@ def _record_spec_state(files: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def build_run_entry(d: Path, banks: dict[str, Any],
-                    decisions: list[tuple[str, str, str]],
-                    git_first: dict[str, str]) -> dict[str, Any]:
+                    decisions: list[dict[str, Any]],
+                    git_first: dict[str, str],
+                    run_names: set[str]) -> dict[str, Any]:
     summary_p = d / "summary.json"
     summary: dict[str, Any] | None = None
     if summary_p.exists():
@@ -439,7 +532,7 @@ def build_run_entry(d: Path, banks: dict[str, Any],
     kind, subkind = _classify(d, summary, n_rows)
     files = _scan_files(d)
     date, date_source = _date_for(d, summary, git_first)
-    verdict = _refs_and_headline(d.name, decisions)
+    verdict = _refs_and_headline(d.name, decisions, run_names)
 
     # rows.jsonl 一列＝一臂上的一題，所以多臂 run 的 n_rows 是各臂相加。
     # 只報總數會讓人以為樣本數比實際大，所以逐臂與去重題數都要出。
@@ -713,7 +806,15 @@ def build_index() -> dict[str, Any]:
 
     dirs = sorted((p for p in RUNS.iterdir() if p.is_dir()),
                   key=lambda p: p.name)
-    runs = [build_run_entry(d, banks, decisions, git_first) for d in dirs]
+    # 「這份裁決的前言只點名一個 run」要判得準，就得先知道哪些字串真的是 run
+    # 目錄——裁決文裡的 `runs/_analysis_r446` 不是 run，不能讓它污染唯一性判定。
+    # 「這份裁決的宣告區只點名一個 run」要判得準，就得先知道哪些目錄真的是 run。
+    # `_analysis_*`／`_replay` 是衍生工作目錄，裁決檔常常順手引用它們，
+    # 算進「對象」會讓唯一性判定失效。
+    run_names = {p.name for p in dirs
+                 if not p.name.startswith(("_analysis", "analysis_", "_replay"))}
+    runs = [build_run_entry(d, banks, decisions, git_first, run_names)
+            for d in dirs]
 
     top_files = []
     for p in sorted(RUNS.iterdir()):
@@ -828,13 +929,39 @@ def render_md(idx: dict[str, Any]) -> str:
     for k, n in c["by_kind"].items():
         A(f"| `{k}` | {n} | {meaning.get(k, '')} |")
     A("")
+    A("### `INDEX.json` 的形狀（先看這個再寫 parser）")
+    A("")
+    A("| key | 型別 | 內容 |")
+    A("|---|---|---|")
+    A("| `counts` | dict | 總數與 `by_kind` |")
+    A("| `runs` | **list** | 每個目錄一筆，依 `name` 排序 |")
+    A("| `top_level_files` | **list** | `runs/` 頂層的散檔 |")
+    A("| `banks` | **dict** | 見 §五；`banks.lcb` 是 dict（key＝`\"v1\"`/`\"v2\"`/`\"v3\"`），**不是 list** |")
+    A("| `logs` | dict | `logs.kinds` 是 list，其餘是 dict／str |")
+    A("| `caveat_record_spec`、`discipline` | str／list | 讀之前要知道的界線 |")
+    A("")
 
     A("## 一、r441b…r449c、r461 這一段的主 run")
     A("")
     A("這一段是目前**唯一有獨立稽核裁決檔**的那一層。`裁決` 欄逐字抄自該檔標題，")
-    A("沒有改寫、沒有摘要；挑哪一份的規則寫在 `build_runs_index.py::_refs_and_headline`，")
-    A("`INDEX.json` 的 `headline_source` 記錄每一列是照哪一條規則挑的。")
-    A("沒有裁決檔的那幾列標成 `—`——**那不是「通過」，是「沒被複核過」**。")
+    A("沒有改寫、沒有摘要。")
+    A("")
+    A("挑哪一份有兩道關卡（規則全文在 `build_runs_index.py::_refs_and_headline`）：")
+    A("")
+    A("1. **門檻**：run 目錄名要出現在該檔的**宣告區**——標題、前言、或第一個小節")
+    A("   （第二個 `##` 之前），因為裁決檔一律在那裡寫 `資料：runs/<run>`。")
+    A("   **被內文順帶提到一句不算。**")
+    A("2. **對象**：還要是「標題直接點名」或「宣告區只點名這一個 run」。點名了")
+    A("   兩個以上的 run，那份文件的對象就是併庫後的集合體而不是這一個 run。")
+    A("")
+    A("兩關都過不了就標 `—` 而**不拿別人的裁決來充數**，那份改列進 `INDEX.json` 的")
+    A("`related_settlements`。多份都合格時依「標題點名 → 檔名輪次號相符 →")
+    A("份量（收官 > 獨立稽核 > 其餘 > 期中）→ 較新」排序，全部候選記在")
+    A("`headline_candidates`，選中的理由記在 `headline_source`。")
+    A("")
+    A("`—` **不是「通過」，是「沒有專門收官它的裁決檔」**——")
+    A("`g_r444_conform_mbpp` 就是這樣：唯一點名它的收官是 r444+r445 併庫 371 題那份，")
+    A("它在裡面只是兩個 stratum 之一。")
     A("")
     A("| run | 日期 | 題庫 | 臂 | n（列／題） | 跑到底 | 零 void | void | 裁決（逐字抄自 DECISION 標題） |")
     A("|---|---|---|---|---:|---|---|---:|---|")
@@ -843,7 +970,14 @@ def render_md(idx: dict[str, Any]) -> str:
         if not r:
             continue
         src = r["headline_from"]
-        link = f"[{Path(src).name}](../{src})" if src else "—"
+        if src:
+            link = f"[{Path(src).name}](../{src})"
+        elif r["related_settlements"]:
+            # 沒有專門收官它的檔，但有涵蓋到它的併庫收官——指過去，不冒充。
+            link = "（無專屬裁決；相關收官：" + "、".join(
+                f"[{Path(x).name}](../{x})" for x in r["related_settlements"]) + "）"
+        else:
+            link = "—"
         A(f"| `{r['name']}` | {r['date'] or '—'} | {_bank_label(r['bank'])} | "
           f"{'/'.join(r['arms']) or '—'} | "
           f"{r['n_rows']}／{r['n_distinct_task_ids']} | "
@@ -932,6 +1066,13 @@ def render_md(idx: dict[str, Any]) -> str:
     A("## 五、題庫")
     A("")
     b = idx["banks"]
+    A("> **`INDEX.json` 的 `banks` 是 dict 不是 list。** 下表每一列對應")
+    A("> `banks.lcb[\"v1\"|\"v2\"|\"v3\"]`——`banks.lcb` 本身也是 dict，key 是版本字串，")
+    A("> 用 `banks.lcb[0]` 會 `KeyError`。同層還有四個非題庫的 key：")
+    A("> `banks.lcb_relations`（dict）、`banks.lcb_caveat_v3`（str）、")
+    A("> `banks.mbpp_plus`（dict）、`banks.codebench_builtin_families`（dict）。")
+    A("> 對照之下 `runs` 與 `top_level_files` 是 **list**，`logs.kinds` 也是 list。")
+    A("")
     A("| 題庫 | 檔案 | 題數 | sha256 符合 codebench 釘值 | task_id 範圍 | contest_date 區間 | 難度 | 有參考解 | 已知壞題 | 用過它的 run |")
     A("|---|---|---:|---|---|---|---|---|---|---|")
     for v, e in b["lcb"].items():
