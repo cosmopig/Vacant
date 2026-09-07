@@ -81,6 +81,11 @@
   `ops/gain/VERIFICATION_2026-08-20.md`＝外部交付包 22db0d7 的獨立驗證紀錄，
   含「敘述超出實際交付」清單（deadline quorum、五呼叫重配、corpus 13/4/9
   都不在交付物內，引用時不可當成已存在）
+- `runs/INDEX.md`（人讀）＋`runs/INDEX.json`（機器讀）— **要引用任何 run／題庫／log
+  之前先讀這一份**：315 個項目哪些是證據（37 個 real_run）、哪些是冒煙／中止、
+  哪 136 個 `_analysis_*` 是衍生物不可當原始資料，三個 LCB 題庫的 sha256／日期窗／
+  已知壞題，以及哪些 log 只活在 vacant-dev 沒有備份。產生器
+  `ops/gain/build_runs_index.py`（`--check` 可驗索引沒漂）。
 
 ### 展件可直接複用的（實體場地，秒級互動）
 

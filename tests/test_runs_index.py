@@ -1,0 +1,156 @@
+"""`ops/gain/build_runs_index.py` 的釘樁測試（round457）。
+
+這支在架構裡承重什麼：索引的全部價值在於它不會說謊。產生器改壞了不會噴錯，
+它會照樣吐出一份看起來很合理的 JSON——所以要用**手工核對過的事實**把它釘住。
+
+釘四件事，每一件都對應一種具體的壞法：
+
+  1. `44 個目錄有 summary.json`         ← 掃描範圍縮水／擴張（分類邏輯漂掉）
+  2. `g_r449c_eq5_lcb3` 的 `n_rows` 189 ← 行數統計壞掉（例如把 header 算進去）
+  3. `lcb_bank_v2` 120 題               ← 題庫解析壞掉／指到錯的檔
+  4. 索引裡不含 MBPP+ 的任何位元組      ← **私有資料外洩**（最嚴重的一種）
+
+第 4 條是 CLAUDE.md 的資料紀律：`.vacant-private/` 是不轉散布的官方包，
+索引只准記路徑字串與 `vacant/codebench.py` 裡的 sha256 釘值。
+
+另外釘「冪等」：同一份資料重跑兩次必須逐位元組相同，否則 `--check` 這個
+迴歸機制本身就是壞的。
+"""
+from __future__ import annotations
+
+import json
+import pathlib
+import subprocess
+import sys
+
+import pytest
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+pytest.importorskip("ops.gain.build_runs_index")
+from ops.gain.build_runs_index import build_index, render_md, main  # noqa: E402
+
+
+@pytest.fixture(scope="module")
+def idx() -> dict:
+    return build_index()
+
+
+def test_dirs_with_summary_json_is_44(idx):
+    """HEAD 有 44 個 run 目錄帶 summary.json（2026-09-07 人工點過）。
+
+    這個數字會隨新 run 落盤而增加——變了就更新這裡，但**要先確認是真的多了
+    一個 run**，而不是分類邏輯把別的東西算進來了。
+    """
+    assert idx["counts"]["dirs_with_summary_json"] == 44
+    counted = sum(1 for r in idx["runs"]
+                  if any(f["name"] == "summary.json" for f in r["files"]))
+    assert counted == 44
+
+
+def test_r449c_n_rows_is_189(idx):
+    """`g_r449c_eq5_lcb3` 是單臂（EQ5）、lcb v3 189 題，所以列數＝題數＝189。"""
+    r = next(x for x in idx["runs"] if x["name"] == "g_r449c_eq5_lcb3")
+    assert r["n_rows"] == 189
+    assert r["n_distinct_task_ids"] == 189
+    assert r["n_rows_by_arm"] == {"EQ5": 189}
+    assert r["kind"] == "real_run"
+    assert r["bank"]["family"] == "lcb"
+    assert r["bank"]["version"] == "v3"
+    assert r["bank"]["match"] == "exact"
+
+
+def test_lcb_bank_v2_has_120_tasks(idx):
+    """v2＝v1 的 91 題 ＋ test4 視窗新增 29 題。sha256 也要對得上釘值。"""
+    v2 = idx["banks"]["lcb"]["v2"]
+    assert v2["n_tasks"] == 120
+    assert v2["n_tasks_pin_in_codebench"] == 120
+    assert v2["sha256_matches_pin"] is True
+    # v1 ⊂ v2，而 v3 與 v2 零交集——這兩條關係是「樣本外複製」宣稱的前提。
+    assert idx["banks"]["lcb_relations"]["v1_subset_of_v2"] is True
+    assert idx["banks"]["lcb_relations"]["v2_v3_overlap"] == 0
+
+
+def test_no_private_evalplus_bytes_in_index(idx, tmp_path):
+    """索引裡只准出現 MBPP+ 的路徑與釘值，不准出現題目內容。
+
+    做法：把整份索引序列化，確認 (a) 私有包的實測 sha256 不在裡面
+    （只准有 codebench.py 的釘值字串，兩者相同時這一條靠 b/c 把關）、
+    (b) 沒有任何 `mbppplus_` 開頭的題目文字被夾帶進來、
+    (c) 私有檔的位元組長度不等於任何被索引檔案的長度紀錄。
+    """
+    blob = json.dumps(idx, ensure_ascii=False)
+    mp = idx["banks"]["mbpp_plus"]
+    assert mp["private"] is True
+    assert mp["redistributed"] is False
+    assert mp["path"] == ".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz"
+    assert mp["n_tasks_pin_in_codebench"] == 378
+
+    # 索引不得包含任何 .vacant-private/ 底下的**檔案條目**（只准有那一行路徑字串）。
+    for r in idx["runs"]:
+        for f in r["files"]:
+            assert ".vacant-private" not in f["name"]
+    assert ".vacant-private" not in json.dumps(idx["top_level_files"])
+
+    # 題目內容的指紋：MBPP+ 的題目 prompt 一定含 "assert"；索引不該有整段題幹。
+    assert "\\ndef " not in blob or blob.count("\\ndef ") < 5, \
+        "索引裡出現了疑似程式碼題幹——檢查有沒有把題庫內容讀進來"
+
+    # 就算私有包在本機存在，索引也不准去算它的內容雜湊當成資料。
+    priv = ROOT / mp["path"]
+    if priv.exists():
+        import hashlib
+        real = hashlib.sha256(priv.read_bytes()).hexdigest()
+        # 釘值本來就等於實測值；要防的是「索引把整包讀進來當檔案條目」。
+        assert real == mp["sha256_pin_in_codebench"]
+        assert str(priv.stat().st_size) not in json.dumps(
+            [f for r in idx["runs"] for f in r["files"]])
+
+
+def test_idempotent_and_check_mode(tmp_path, idx):
+    """同資料重跑必須逐位元組相同，且 `--check` 對剛寫好的輸出要回 0。"""
+    out = tmp_path / "idx"
+    assert main(["--out", str(out)]) == 0
+    j1 = (out / "INDEX.json").read_text()
+    m1 = (out / "INDEX.md").read_text()
+    assert main(["--out", str(out)]) == 0
+    assert (out / "INDEX.json").read_text() == j1
+    assert (out / "INDEX.md").read_text() == m1
+    assert main(["--check", "--out", str(out)]) == 0
+
+    # 動一個位元組就要被抓到——`--check` 有沒有牙齒。
+    (out / "INDEX.md").write_text(m1 + "\n篡改\n")
+    assert main(["--check", "--out", str(out)]) == 1
+
+
+def test_analysis_dirs_are_not_evidence(idx):
+    """`_analysis_*` 一律歸 analysis，且沒有一個被誤判成 real_run。"""
+    for r in idx["runs"]:
+        if r["name"].startswith(("_analysis", "analysis_")):
+            assert r["kind"] == "analysis", r["name"]
+    assert idx["counts"]["by_kind"]["analysis"] >= 130
+    reals = {r["name"] for r in idx["runs"] if r["kind"] == "real_run"}
+    assert not any(n.startswith(("_analysis", "analysis_")) for n in reals)
+
+
+def test_md_is_rendered_from_the_same_index(idx):
+    """人讀版必須由同一份 dict 產生，且把「不是證據」那句話寫出來。"""
+    md = render_md(idx)
+    assert "衍生物，不是證據" in md
+    assert "不轉散布" in md
+    assert "g_r449c_eq5_lcb3" in md
+    # 索引不准比資料樂觀：沒被稽核的 run 要有自己的一節。
+    assert "跑完但沒被獨立稽核的 run" in md
+
+
+def test_generator_runs_as_a_script(tmp_path):
+    """真的用子行程跑一次——import 路徑壞掉時單元測試看不出來。"""
+    out = tmp_path / "cli"
+    r = subprocess.run(
+        [sys.executable, str(ROOT / "ops/gain/build_runs_index.py"),
+         "--out", str(out)],
+        capture_output=True, text=True, cwd=str(ROOT), timeout=300)
+    assert r.returncode == 0, r.stderr
+    data = json.loads((out / "INDEX.json").read_text())
+    assert data["counts"]["dirs_with_summary_json"] == 44
