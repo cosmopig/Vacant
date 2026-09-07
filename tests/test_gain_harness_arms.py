@@ -660,3 +660,71 @@ def _run_default_whitelist(task):
         task, [agent], rng, calls, book, ident, variant="HPI",
         wire_mode="multiturn", budget={"sandbox_timeout_s": 3})
     return {"extra": extra}
+
+
+# ── round460c：線路探針的三分法（這一組原本整組不存在，所以 smoke 才踩到）──
+#
+# 實測背景（2026-09-07，直連後端 1003，gemma-4-12b-it-qat）：四則訊息的 body
+# 在 max_tokens=16／64 回 `finish_reason=length` ＋ **空 content**，256 才回 "OK"。
+# 舊版探針寫死 16 ⇒ `EmptyResponse` ⇒ `InfraVoid` ⇒ 三條 H 臂逐題 infra_void、
+# 零 row，而端點其實好好的。下面四條把那個死法釘住。
+class _ProbeAgent:
+    """只回應 `chat()` 的假 agent；`raises` 給定時就丟那個例外。"""
+
+    def __init__(self, raises=None):
+        self.agent_id = "probe-0"
+        self.raises = raises
+        self.kwargs: list[dict] = []
+
+    def chat(self, messages, **kw):
+        self.kwargs.append(kw)
+        if self.raises is not None:
+            raise self.raises
+        return "OK", {"finish_reason": "stop", "usage": {"total_tokens": 3},
+                      "model": "m", "server_model": "m", "latency_ms": 1}
+
+
+def test_wire_probe_max_tokens_is_large_enough_for_a_reasoning_model():
+    """16 是實測不夠的那個值：reasoning 先吃掉整個上限，content 交空白。"""
+    from ops.gain.harness_arms import WIRE_PROBE_MAX_TOKENS, reset_wire_mode
+    assert WIRE_PROBE_MAX_TOKENS >= 256, (
+        "實測 gemma-4-12b-it-qat：16／64 回空 content，256 才回 OK")
+    reset_wire_mode()
+    agent = _ProbeAgent()
+    from ops.gain.harness_arms import probe_wire_mode
+    assert probe_wire_mode(agent) == "multiturn"
+    assert agent.kwargs[0]["max_tokens"] == WIRE_PROBE_MAX_TOKENS
+    reset_wire_mode()
+
+
+def test_wire_probe_treats_empty_content_as_the_wire_being_accepted():
+    """200 ＋ 空 content ＝ 形狀被接受了。判成「連不上」會讓整條臂全 void。"""
+    from ops.gain.brain_cline import InfraVoid
+    from ops.gain.harness_arms import probe_wire_mode, reset_wire_mode
+    reset_wire_mode()
+    err = InfraVoid("hasty-2 重試 2 次仍失敗：EmptyResponse: content 為空"
+                    "（finish_reason=length，reasoning 47 字）")
+    assert probe_wire_mode(_ProbeAgent(raises=err)) == "multiturn"
+    reset_wire_mode()
+
+
+def test_wire_probe_still_falls_back_to_flattened_on_400():
+    from ops.gain.brain_cline import InfraVoid
+    from ops.gain.harness_arms import probe_wire_mode, reset_wire_mode
+    reset_wire_mode()
+    err = InfraVoid("w 重試 2 次仍失敗：HTTPError: HTTP Error 400: Bad Request")
+    assert probe_wire_mode(_ProbeAgent(raises=err)) == "flattened"
+    reset_wire_mode()
+
+
+def test_wire_probe_still_reraises_a_real_transport_failure():
+    """瞬斷不准變成「實驗條件改變」——照拋，該格記 infra_void，下一題再探。"""
+    from ops.gain.brain_cline import InfraVoid
+    from ops.gain.harness_arms import probe_wire_mode, reset_wire_mode
+    reset_wire_mode()
+    err = InfraVoid("w 重試 4 次仍失敗：URLError: <urlopen error timed out>")
+    with pytest.raises(InfraVoid):
+        probe_wire_mode(_ProbeAgent(raises=err))
+    from ops.gain.harness_arms import current_wire_mode
+    assert current_wire_mode() is None, "拋出去之後不准留下已決定的模式"
+    reset_wire_mode()

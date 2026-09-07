@@ -613,18 +613,46 @@ def current_wire_mode() -> str | None:
     return _WIRE_MODE
 
 
+# round460c：探針的輸出上限。原本寫死 16，而 16 不夠**會先輸出 reasoning 的模型**
+# 講完話——gemma-4-12b-it-qat 把 16 個 completion token 全花在 reasoning 上、
+# content 交空白 ⇒ `chat()` 丟 `EmptyResponse` ⇒ `InfraVoid` ⇒ **每一格 H 臂
+# 都變 infra_void**。R460 smoke 實測（2026-09-07，直連 1003）：HPI／HOC／HMIX
+# 三條臂在第一題就全 void，零 row；同一顆後端對同一個四則 body 在
+# max_tokens=16／64 回 finish_reason=length ＋ 空 content，256 才回 "OK"
+# （usage.reasoning_tokens 75）。512 ＝ 實測門檻再留一倍餘裕。
+# 一個 run 只發一次，成本可忽略——「開小」省的那點 token 不值得拿整條臂去換。
+WIRE_PROBE_MAX_TOKENS = 512
+
+
 def _looks_like_format_rejection(err: str) -> bool:
     """400／422 ＝ 端點不吃這個 body 形狀；其餘（連不上、逾時、5xx）不是格式問題。"""
     return any(tag in err for tag in ("HTTP Error 400", "HTTP Error 422",
                                       "Error 400:", "Error 422:"))
 
 
+def _looks_like_empty_content(err: str) -> bool:
+    """端點回 HTTP 200、body 解得出 `choices`，只是 `content` 是空的。
+
+    round460c：這**證明線路形狀被接受了**（不接受會是 400／422），所以它屬於
+    multiturn，不屬於「連不上」。原本只有兩分法，這一格掉進 re-raise，
+    結果是端點好好的、整條 H 臂卻全記 infra_void（見 `WIRE_PROBE_MAX_TOKENS`）。
+    留著這一條而不是只調大 max_tokens：任何 reasoning 講得比上限久的模型都會
+    重現同一個死法，而那個上限永遠只是猜的。
+    """
+    return "EmptyResponse" in err
+
+
 def probe_wire_mode(agent, *, meta: dict | None = None) -> str:
     """一個 run 只發一次的四則訊息探針。回 `"multiturn"` 或 `"flattened"`。
 
-    ⚠ 這是本階段**唯一**允許的活呼叫（max_tokens 開小）。連不上／逾時**不**
-      退回攤平模式：那會把一次瞬斷變成整個 run 的實驗條件改變。那種情況照
-      `InfraVoid` 往外拋，該格記 infra_void，下一題再探一次（自癒）。
+    ⚠ 這是本階段**唯一**允許的活呼叫。連不上／逾時**不**退回攤平模式：那會把
+      一次瞬斷變成整個 run 的實驗條件改變。那種情況照 `InfraVoid` 往外拋，
+      該格記 infra_void，下一題再探一次（自癒）。
+
+    三分法（round460c 修正；原本只有兩分法）：
+      400／422        ⇒ 端點不吃這個 body 形狀 ⇒ `flattened`
+      200 但 content 空 ⇒ 形狀**被接受了**，只是模型沒交字 ⇒ `multiturn`
+      其餘（連不上、逾時、5xx）⇒ 沒量到 ⇒ 往外拋
     """
     global _WIRE_MODE
     if _WIRE_MODE is not None:
@@ -632,12 +660,16 @@ def probe_wire_mode(agent, *, meta: dict | None = None) -> str:
     try:
         agent.chat(list(WIRE_PROBE_MESSAGES), role="wire_probe",
                    meta={"probe": "harness_wire_mode", **(meta or {})},
-                   retries=2, max_tokens=16)
+                   retries=2, max_tokens=WIRE_PROBE_MAX_TOKENS)
         _WIRE_MODE = "multiturn"
     except InfraVoid as exc:
-        if not _looks_like_format_rejection(str(exc)):
+        err = str(exc)
+        if _looks_like_format_rejection(err):
+            _WIRE_MODE = "flattened"
+        elif _looks_like_empty_content(err):
+            _WIRE_MODE = "multiturn"
+        else:
             raise
-        _WIRE_MODE = "flattened"
     return _WIRE_MODE
 
 
