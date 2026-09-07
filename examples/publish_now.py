@@ -1119,6 +1119,351 @@ def build_refuted(archive_claims: list[dict]) -> list[dict]:
     return out
 
 
+# ── 閘門與互跑不互審（2026-09-04 ~ 09-07 那幾輪）─────────────────────────
+# 這幾條的數字**不寫死在這裡**：它們住在 examples/verdicts.py 的裁決條目裡，
+# 經 publish_archive.py 進 archive.json，本函式再讀回來。改數字只改 verdicts.py。
+#
+# R440P §五-1 寫死：展場與任何對外宣稱都必須帶前提句。所以凡是講交付成效的
+# 條目，`premise` 一律帶上——它不是註腳，是那些數字的成立條件。
+PREMISE_ZH = ("整件事建立在「需求可以被編譯成可執行的驗收測資」。需求跑不起來的場合，"
+              "這個機制沒有免費的裁判，會退化成「問一個模型」，而那正是量出來很差的東西。")
+PREMISE_EN = ("All of this rests on 'the requirement can be compiled into runnable acceptance "
+              "tests'. Where the requirement cannot be run there is no free referee, and the "
+              "mechanism degrades into 'ask a model' — which is the thing we measured as bad.")
+
+GATE_FACTS = [
+    {
+        "id": "gate-vs-single",
+        "claim": "gain.conform_early_stop_beats_single",
+        "premise": True,
+        "plain": {"zh": "跑客戶自己的驗收、交第一份通過的——比單抽一份就收多交付",
+                  "en": "Run the customer's own acceptance tests and ship the first one that "
+                        "passes — it delivers more than taking a single draft"},
+        "how": {"zh": "三個題庫方向一致：MBPP+ +4.58pp、LeetCode 中高難度 +19.17pp、"
+                      "另一批 LeetCode +7.94pp；平均只多花 0.5–0.7 通呼叫。",
+                "en": "Three benchmarks point the same way: +4.58pp on MBPP+, +19.17pp on "
+                      "harder LeetCode tasks, +7.94pp on another LeetCode batch — for only "
+                      "0.5–0.7 extra model calls per task."},
+        "en_extra": "Rejected tasks were checked afterwards: in every run, all five drafts of "
+                    "every rejected task were in fact wrong (7/7, 8/8, 10/10, 15/15). Refusing "
+                    "to deliver did not throw away good answers.",
+    },
+    {
+        "id": "gate-vs-vote",
+        "claim": "gain.gate_rule_beats_majority_vote_same_candidates",
+        "premise": True,
+        "plain": {"zh": "同一組五份候選、同樣五通呼叫：閘門規則比多數決交付得多",
+                  "en": "Same five candidates, same five calls: the gate rule delivers more "
+                        "than majority voting"},
+        "how": {"zh": "四個 run 的閘門都贏（b 都大於 c，合計 73／27）。前三個 run 的 95% "
+                      "區間下界都在 0 以上；第四個（LCB v3 189 題）同號但區間跨 0。",
+                "en": "The gate wins in all four runs (b > c every time, 73/27 in total). In "
+                      "the first three the 95% interval's lower bound is above zero; in the "
+                      "fourth (LCB v3, 189 tasks) the direction holds but the interval still "
+                      "crosses zero."},
+        "en_extra": "What may NOT be said: a practical gain of 5pp or more (all four upper "
+                    "bounds fail to exclude values below 5pp); 'our system beat their system' "
+                    "(what changed is the selection rule, not two independently sampled "
+                    "systems); anything about other benchmarks; and the four runs must not be "
+                    "pooled into n=1051.",
+    },
+    {
+        "id": "lossless-filter",
+        "claim": "gain.lossless_visible_filter",
+        "premise": True,
+        "plain": {"zh": "拿看得到的測資篩選，沒有誤丟過正解",
+                  "en": "Filtering on the visible tests never threw away a correct answer"},
+        "how": {"zh": "六個資料集裡，「隱藏測資會過、但可見驗收沒過」的候選是 0 個"
+                      "（MBPP+ 合計 0／1630、LCB 0／455、0／120、0／189）。",
+                "en": "Across six datasets there were zero candidates that would have passed "
+                      "the hidden tests but failed the visible ones (0/1630 on MBPP+ in total, "
+                      "0/455, 0/120 and 0/189 on LeetCode batches)."},
+        "en_extra": "These six datasets are not six independent samples: the LCB v1 replay (91 "
+                    "tasks) and the LCB v2 live run (120 tasks) share 91 tasks. And part of the "
+                    "losslessness is a property of the benchmark: on MBPP+ the hidden check is "
+                    "the visible check plus more asserts, so 'fails visible' structurally "
+                    "implies 'fails hidden'. It must not be read as a general property.",
+    },
+    {
+        "id": "budget-on-hard-only",
+        "claim": "gain.off5_helps_on_hard_only",
+        "premise": True,
+        "plain": {"zh": "多花五倍呼叫只在難題上買得到東西",
+                  "en": "Spending five times the calls only buys something on hard tasks"},
+        "how": {"zh": "MBPP+ 上買不到（+0.81pp，區間排除了 ≥5pp 的實務增益）；"
+                      "難題上有用（+12.50pp、+6.35pp）。但改花法更有用："
+                      "+19.2pp 只花 1.71 通，勝過 +12.5pp 花 5 通。",
+                "en": "On MBPP+ it buys nothing (+0.81pp, and the interval rules out a "
+                      "practical gain of 5pp or more). On hard tasks it helps (+12.50pp, "
+                      "+6.35pp). But spending differently helps more: +19.2pp at 1.71 calls "
+                      "beats +12.5pp at 5 calls."},
+        "en_extra": "So 'more budget does not help' must be narrowed to: it does not help on "
+                    "MBPP+; it does help on hard tasks; and changing how the budget is spent "
+                    "helps more than spending more of it.",
+    },
+    {
+        "id": "mutual-execution",
+        "claim": "peerexec.mutual_execution_below_threshold",
+        "premise": True,
+        "plain": {"zh": "k 台機器各自跑、各自簽：說謊的那一把會被收據指名",
+                  "en": "k machines each run it and each sign it: the receipt names the key "
+                        "that lied"},
+        "how": {"zh": "真跑：兩台互不認識的機器 1840 次執行零不一致；三把金鑰、其中一把"
+                      "說謊 273 次，每一次都被指名，誠實的兩把 0 次被冤枉，交出去的東西一格沒變。",
+                "en": "Real runs: two machines that do not know each other produced 1840 "
+                      "executions with zero disagreements; with three keys and one of them "
+                      "lying 273 times, the receipt named it every single time, the two honest "
+                      "keys were never falsely accused, and not one shipped answer changed."},
+        "en_extra": "Which half is a simulation: the k∈{1,3,5,7} sweep, the corruption-ratio "
+                    "sweep, the patient liar and the corrupted-suite tables are all simulation "
+                    "on archived candidates. Only two cells are real runs: k=2 across two "
+                    "machines, and k=3 with exactly one liar sitting on the threshold. With "
+                    "k=2 the vote is unanimous, so the real runs never exercised the "
+                    "'minority gets named' path at all.",
+    },
+    {
+        "id": "suite-is-the-fixed-point",
+        "claim": "peerexec.suite_fixed_point",
+        "premise": False,
+        "plain": {"zh": "驗收清單本身是爛的，k 台機器會一致地、可驗證地交出錯的答案",
+                  "en": "If the acceptance list itself is bad, k machines will consistently and "
+                        "verifiably ship the wrong answer"},
+        "how": {"zh": "把套件換成「載得進就算過」：四個 k 的爭議率全是 0.0%，每一票誠實、"
+                      "每條鏈驗得過、指標滿格，而系統在交垃圾。畫面上一個警告都不會亮。",
+                "en": "Swap the suite for 'if it loads, it passes': the dispute rate is 0.0% at "
+                      "every k, every vote is honest, every chain verifies, every health "
+                      "indicator is green — and the system is shipping garbage. Not one warning "
+                      "lights up."},
+        "en_extra": "Two rounds shrank this but did not remove it. After the suite was turned "
+                    "into data rather than code, the only expressible attack left is 'not "
+                    "enough coverage', and it is always reported as two numbers: what a "
+                    "supplier using only its own information can achieve (+2.72pp more false "
+                    "deliveries) and a hindsight upper bound that can see the hidden labels "
+                    "(+4.35pp). Both hold only on MBPP+.",
+    },
+]
+
+
+def build_gate_facts(archive_claims: list[dict]) -> list[dict]:
+    """把裁決條目攤成「現在知道什麼」用的條目。
+
+    刻意不在這裡重打任何數字：`一句話` 與 `邊界` 直接取自 archive.json，
+    而它們來自 examples/verdicts.py。頁面與裁決永遠是同一句話。
+    """
+    by_id = {c["id"]: c for c in archive_claims}
+    out = []
+    for spec in GATE_FACTS:
+        c = by_id.get(spec["claim"])
+        if c is None:                      # 裁決被刪掉時寧可少一條，不留半條
+            continue
+        boundary = c.get("邊界", "")
+        detail_zh = "**量到什麼**：" + c.get("一句話", "")
+        if boundary:
+            detail_zh += "\n\n**只能講到這裡**：" + boundary
+        if spec["premise"]:
+            detail_zh += "\n\n**前提（逐字，任何對外宣稱都要帶著它一起講）**：" + PREMISE_ZH
+        detail_en = spec["en_extra"]
+        if spec["premise"]:
+            detail_en += "\n\n**Premise that must accompany any of these numbers**: " + PREMISE_EN
+        out.append({
+            "id": spec["id"],
+            "status": "confirmed" if c.get("verdict") == "held" else c.get("verdict", ""),
+            "verdict": c.get("verdict"),
+            "claim_id": spec["claim"],
+            "plain": spec["plain"],
+            "how": spec["how"],
+            "detail": {"zh": detail_zh, "en": detail_en},
+            "sources": [f"data/archive.json · claims[{spec['claim']}]",
+                        f"examples/verdicts.py · VERDICTS[{spec['claim']}]",
+                        c.get("依據", {}).get("檔案", "")],
+        })
+    return out
+
+
+# ── 只有一半的答案：同號未解析、以及真跑側完全沒量到的東西 ────────────────
+# 這四條刻意用 `unknown`，不是 `refuted` 也不是 `confirmed`。
+# 「沒量出來」與「沒有差異」是兩件事，混用等於把檢定力不足冒充成陰性結果。
+GATE_UNKNOWNS = [
+    {
+        "id": "eq5-lcb3-unresolved",
+        "status": "unknown",
+        "plain": {"zh": "第四個 run 沒把 0 排除掉——沒量出來，不是沒有差異",
+                  "en": "The fourth run did not exclude zero — not measured is not the same as "
+                        "no difference"},
+        "how": {"zh": "LCB v3 189 題：閘門 83.07%、多數決 78.84%，差 +4.23pp，"
+                      "但 95% 區間是 [−0.66, +7.68]，跨過 0（p=0.0963）。",
+                "en": "LCB v3, 189 tasks: the gate delivered 83.07%, majority voting 78.84%, a "
+                      "+4.23pp gap — but the 95% interval is [−0.66, +7.68] and crosses zero "
+                      "(p=0.0963)."},
+        "detail": {
+            "zh": "方向沒有翻（b=13 對 c=5），所以這**不是**「沒複製成功」，是 UNRESOLVED。"
+                  "事前的檢定力表就算出這是最可能的結果：在效果成立的情況下，"
+                  "這個樣本數讓下界過 0 的機率只有 35–47%。"
+                  "必報的三個數字：這個 n 之下辨得出的最小效果 5.29pp、"
+                  "若真實效果等於觀測值需要 38 對不一致（本 run 只有 18 對）、"
+                  "要把區間半寬收到 5pp 需要 189 題。"
+                  "主判準 MISS 就寫 MISS，不追認、不補判準。"
+                  "四次 b 都大於 c（合計 73／27），但**不准併起來做檢定**——那是預註冊寫死的禁令。",
+            "en": "The direction did not flip (b=13 vs c=5), so this is UNRESOLVED, not a "
+                  "failed replication. The power table written before the run already said "
+                  "this was the most likely outcome: if the effect is real, this sample size "
+                  "gives only a 35–47% chance of the lower bound clearing zero. Three numbers "
+                  "must be reported with it: the minimum detectable effect at this n is "
+                  "5.29pp; if the true effect equals the observed one it would take 38 "
+                  "discordant pairs (this run had 18); and pulling the half-width down to 5pp "
+                  "needs 189 tasks. A missed primary criterion is written as missed. The four "
+                  "runs must not be pooled into one test.",
+        },
+        "sources": [
+            "data/archive.json · claims[gain.gate_rule_beats_majority_vote_same_candidates].邊界",
+            "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md · §二、§三",
+        ],
+    },
+    {
+        "id": "patient-liar-unmeasured",
+        "status": "unknown",
+        "plain": {"zh": "有耐心的說謊者，我們一次都沒抓到過",
+                  "en": "The patient liar: we have never caught one"},
+        "how": {"zh": "只在「不會被抓」的時候才說謊的執行器：四個 k、兩個題庫，"
+                      "偵測率全部是 0.000。而且那還是模擬——真跑側完全沒有量過。",
+                "en": "An executor that lies only when it will not be caught: detection rate is "
+                      "0.000 across all four values of k and both benchmarks. And that is the "
+                      "simulation; the real runs never measured this at all."},
+        "detail": {
+            "zh": "代價是它 93–95% 的機會得放棄，所以它造成的傷害只有 −1.35／−2.20pp——"
+                  "但那個「只有」也是模擬算出來的。"
+                  "加一點抖動時歸屬會退化而不是崩潰（腐化者被指名的比率仍是誠實者的 34 倍／12 倍），"
+                  "這仍然不等於抓得到。這條是機制目前最大的空白之一。",
+            "en": "The price it pays is giving up 93–95% of its opportunities, so the damage it "
+                  "does is only −1.35/−2.20pp — but that 'only' is also a simulation number. "
+                  "Under small jitter attribution degrades rather than collapses (a corrupt "
+                  "executor is still named 34x/12x more often than an honest one), which still "
+                  "is not the same as catching it. This is one of the mechanism's largest "
+                  "blanks.",
+        },
+        "sources": [
+            "data/archive.json · claims[peerexec.mutual_execution_below_threshold].邊界",
+            "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md · §三-2",
+        ],
+    },
+    {
+        "id": "above-majority-threshold",
+        "status": "unknown",
+        "plain": {"zh": "說謊的機器一旦過半，指名會反過來——而機制不知道自己在哪一邊",
+                  "en": "Once the liars are a majority the naming inverts — and the mechanism "
+                        "cannot tell which side of the line it is on"},
+        "how": {"zh": "容忍上界是 ⌊(k−1)/2⌋。過半之後裁決與指名一起翻轉，誠實者變成被指名的一方"
+                      "（誣告率 0.175／0.374）。",
+                "en": "The tolerance bound is floor((k−1)/2). Past it, the verdict and the "
+                      "naming invert together and the honest executors become the ones named "
+                      "(false-accusation rate 0.175/0.374)."},
+        "detail": {
+            "zh": "而且加機器買不到抵抗力：固定腐化比例下，k 從 1 到 7 交付率一字不變"
+                  "（串謀 67.39%、破壞 0%）。"
+                  "k=3／quorum=2 時，只要任一把誠實證言缺席或被拒就是 1-1 平手 ⇒ 未決、不指名——"
+                  "「指名」的前提是**誠實多數在場**，不是「有簽章」。"
+                  "真跑側從來沒有跑過門檻以上那一格，這裡列的全部是模擬與機制性質。",
+            "en": "Adding machines does not buy resistance either: at a fixed corruption ratio "
+                  "the delivery rate does not move at all from k=1 to k=7 (67.39% under "
+                  "collusion, 0% under sabotage). At k=3 with quorum 2, one missing or "
+                  "rejected honest attestation makes it 1-1: undecided, nobody named. Naming "
+                  "presupposes an honest majority being present, not merely the presence of "
+                  "signatures. No real run has ever been done above the threshold; everything "
+                  "here is simulation plus a property of the mechanism.",
+        },
+        "sources": [
+            "data/archive.json · claims[peerexec.majority_bound]",
+            "vacant/peerexec.py · MAJORITY_BOUND_NOTE",
+        ],
+    },
+    {
+        "id": "arm64-untested",
+        "status": "unknown",
+        "plain": {"zh": "換一種 CPU 架構會不會就對不起來，沒測過",
+                  "en": "Whether a different CPU architecture breaks the agreement is untested"},
+        "how": {"zh": "跨機真跑只在 x86_64 上做過（Mac 與 Linux 各一台）。arm64 沒有參加——"
+                      "而 arm64 正是浮點 1 ULP 差異的來源之一。",
+                "en": "The cross-machine runs were done on x86_64 only (one Mac, one Linux). No "
+                      "arm64 machine took part — and arm64 is precisely one source of the 1 ULP "
+                      "floating-point differences."},
+        "detail": {
+            "zh": "已知這個問題是真的：MBPP+ 的隱藏測資用 atol=0 比對，1 ULP 差異就翻。"
+                  "實測已有一格（浮點面積題）出貨 sha 相同、重算 hidden 卻是 false。"
+                  "那是計分端的可攜性問題不是機制，但它說明「逐位相同」目前只在同一個架構上驗過。"
+                  "推翻條件已經寫死：arm64 機器參加後若可見側出現不一致格，"
+                  "跨機一致那條預測就要加上架構限定。"
+                  "另外第三把金鑰目前與第二把同機，Windows 那台的沙箱跑不起來、沒能參加。",
+            "en": "The problem is known to be real: MBPP+ hidden tests compare with atol=0, so a "
+                  "1 ULP difference flips the result. One cell (a floating-point area task) "
+                  "already shipped the same sha while the recomputed hidden result was false. "
+                  "That is a portability problem in the scorer, not in the mechanism — but it "
+                  "means 'bit-for-bit identical' has so far only been verified within one "
+                  "architecture. The falsifier is already written down: if an arm64 machine "
+                  "joins and the visible side disagrees anywhere, the cross-machine prediction "
+                  "gets an architecture qualifier. Separately, the third key currently shares a "
+                  "machine with the second, and the Windows box could not take part because its "
+                  "sandbox does not run.",
+        },
+        "sources": [
+            "data/archive.json · claims[peerexec.mutual_execution_below_threshold].邊界",
+            "DECISION_20260906_R453_FABLE_AUDIT_REAL_MULTIPARTY.md · §三-3、§三-5、§五",
+        ],
+    },
+]
+
+
+# ── 自我更正：不在 archive claims 裡，因為它推翻的是一版**實作宣稱** ──────
+# 與 realmodel.measurement_error 同一類：我們自己說錯、被獨立攻擊者打穿、
+# 留在紀錄裡。展場的誠實敘事要用到這一條。
+SELF_CORRECTIONS = [
+    {
+        "id": "peerexec.suite_as_data_v1_inexpressible",
+        "status": "refuted",
+        "verdict": "self-corrected",
+        "round": "peerexec-2026-09-06",
+        "original": "把驗收套件改成資料之後，那三種攻擊在新格式裡「不可表達」",
+        "plain": {
+            "zh": {"said": "我們說過：改成資料格式之後，那幾種攻擊根本寫不出來。",
+                   "now": "錯。獨立攻擊者一擊打穿——`entry_point=\"exec\"` 讓 368／371 格上鏈、"
+                          "假交付 31.5%。錯在把資料與程式的界線畫在字面值上、漏掉名字綁定。"},
+            "en": {"said": "We said: once the suite is data, those attacks cannot even be "
+                           "expressed.",
+                   "now": "Wrong. An independent attacker broke it in one move: "
+                          "entry_point=\"exec\" got 368/371 cells onto the chain with 31.5% "
+                          "false deliveries. The error was drawing the data/code line at "
+                          "literal values and forgetting name binding."},
+        },
+        "detail": {
+            "zh": "**攻擊者實測**：`entry_point` 是明碼字串，`\"exec\"` 這個名字在執行器的"
+                  "命名空間裡查得到，於是供應者的位元組經由名字綁定拿到了執行權——"
+                  "「清單本身跑不了任何程式」這句話在那一版是假的。\n\n"
+                  "**更正後**：修法是結構性的（把 spec 綁到題目＋改用受控命名空間查找），"
+                  "不是把 `exec` 加進黑名單。修完之後同一個攻擊從「上鏈 368／371」變成"
+                  "「上鏈 0／371、`entry_point_mismatch` 368」。\n\n"
+                  "**為什麼留著**：每一版都被獨立攻擊者打過，打穿的那一次也留在紀錄裡。"
+                  "只發布擋得住的版本、把被打穿的默默拿掉，這個專題的主張就沒有內容。",
+            "en": "**What the attacker measured**: entry_point is a plaintext string, the name "
+                  "'exec' resolves in the executor's namespace, and so the supplier's bytes "
+                  "obtained execution through name binding — 'the list itself cannot run any "
+                  "code' was false in that version.\n\n"
+                  "**Corrected**: the fix is structural (bind the spec to the task, resolve "
+                  "names in a controlled namespace), not a blacklist entry for exec. After the "
+                  "fix the same attack went from 368/371 cells on chain to 0/371, with 368 "
+                  "entry_point_mismatch.\n\n"
+                  "**Why it stays published**: every version has been attacked by an "
+                  "independent adversary, and the version that was broken stays in the record "
+                  "too. Publishing only the versions that held would empty this project's "
+                  "central claim of content.",
+        },
+        "sources": [
+            "DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md · §三-2",
+            "vacant/suitespec.py · docstring round452b／452c",
+            "docs/VACANT_ARCHITECTURE_AND_RESULTS_2026-09-07.md · §3.3「本輪自我更正」",
+        ],
+    },
+]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(DEFAULT_OUT))
@@ -1132,12 +1477,21 @@ def main() -> None:
     archive = json.loads(archive_path.read_text(encoding="utf-8"))
     archive_claims = archive["claims"]
 
-    facts = build_facts()
-    unknowns = build_unknowns(claims, honesty)
-    refuted = build_refuted(archive_claims)
+    facts = build_facts() + build_gate_facts(archive_claims)
+    unknowns = build_unknowns(claims, honesty) + GATE_UNKNOWNS
+    refuted = build_refuted(archive_claims) + SELF_CORRECTIONS
 
     n_ref = sum(1 for c in archive_claims if c.get("verdict") == "refuted")
     n_over = sum(1 for c in archive_claims if c.get("verdict") == "overstated")
+    n_held = sum(1 for c in archive_claims if c.get("verdict") == "held")
+    n_null = sum(1 for c in archive_claims if c.get("verdict") == "no_effect")
+    n_unres = sum(1 for c in archive_claims if c.get("verdict") == "unresolved")
+    # 「未複驗」要真的數未複驗的，不能用「總數減掉推翻與誇大」。
+    # 2026-09-07 加進 held／no_effect／unresolved 之後，舊算法會把十二條有裁決的
+    # 宣稱算成未複驗——那個方向剛好是「把已驗過的說成沒驗過」，比較保守但仍是錯的，
+    # 而且下一次有人反過來用它就會變成樂觀。照實數。
+    n_unrev = sum(1 for c in archive_claims
+                  if c.get("verdict") in (None, "", "未複驗"))
 
     now = _dt.datetime.now().astimezone()
     data = {
@@ -1165,7 +1519,10 @@ def main() -> None:
             "claims_total": len(archive_claims),
             "claims_refuted": n_ref,
             "claims_overstated": n_over,
-            "claims_unreviewed": len(archive_claims) - n_ref - n_over,
+            "claims_held": n_held,
+            "claims_no_effect": n_null,
+            "claims_unresolved": n_unres,
+            "claims_unreviewed": n_unrev,
             "rounds": len(catalog["輪次"]),
             "files": catalog["統計"]["檔案數"],
             "rows": catalog["統計"]["總行數"],
@@ -1197,6 +1554,8 @@ def main() -> None:
             f"專題/實驗記錄/{ENTRY}/E4.json、E12.json",
             f"專題/實驗記錄/{PULSE}/E21.json、E22.json、E23.json",
             f"專題/實驗記錄/{REAL}/E10.json",
+            "Vacant/examples/verdicts.py（閘門與互跑不互審那幾條的數字唯一真相來源）",
+            "Vacant/docs/VACANT_ARCHITECTURE_AND_RESULTS_2026-09-07.md（正典彙整）",
         ],
         "generator": "examples/publish_now.py",
     }
@@ -1210,7 +1569,8 @@ def main() -> None:
           f"內部 {sum(1 for d in DIRECTIONS_DONE if d['side']=='internal')}")
     print(f"  未來方向：{len(FUTURE)}（已執行 0——沒做就是沒做）")
     print(f"  還不確定 {len(unknowns)}、已被推翻 {len(refuted)}")
-    print(f"  宣稱 {len(archive_claims)}（推翻 {n_ref}、誇大 {n_over}）")
+    print(f"  宣稱 {len(archive_claims)}（推翻 {n_ref}、誇大 {n_over}、判準成立 {n_held}、"
+          f"無可分辨差異 {n_null}、同號未解析 {n_unres}、未複驗 {n_unrev}）")
     print(f"  資料時間 {data['generated_at']}")
 
 
