@@ -248,6 +248,75 @@ def test_launcher_replaced_freshness_with_authorized_set_equality(sh: str) -> No
         assert '"$n_hits" -eq 0' not in line, f"退回「命中必須為 0」的舊語意: {line!r}"
 
 
+# ── round460g：seed 重用檢查必須與「先發了哪幾塊」無關 ────────────────
+#
+# 2026-09-08 04:48 實際踩到：a1/a2/a3 已經在跑（各自寫了 summary.json，seed 相同），
+# 補發 b 組時掃描命中 {r447, a1, a2, a3} ≠ 授權 {r447} ⇒ 誤擋。
+# 六塊一次發射時同一條檢查會通過 ⇒ **它的答案隨發射順序而變**，
+# 那就不是在量它想量的東西。修法是扣掉本 run 自己那六塊（它們本來就被同一份
+# DECISION 授權），**牙齒不變**：不在那六個名字裡的 run 用了這顆 seed 照樣停。
+def _run_seed_scan(tmp_path, runs: dict, seed: str, auth: str, own: str):
+    """把發射器裡那段 python 原封不動抽出來實跑（不是重寫一份等價品）。"""
+    body = SH.read_text(encoding="utf-8")
+    start = body.index('scan=$(python3 - "$SEED" "$auth" "$ALL_OUTS" <<\'PY\'\n')
+    start = body.index("\n", start) + 1
+    end = body.index("\nPY\n", start)
+    snippet = body[start:end]
+    for name, seed_val in runs.items():
+        d = tmp_path / "runs" / name
+        d.mkdir(parents=True)
+        (d / "summary.json").write_text(json.dumps({"seed": seed_val}), encoding="utf-8")
+    r = subprocess.run([sys.executable, "-c", snippet, seed, auth, own],
+                       capture_output=True, text=True, cwd=tmp_path, timeout=60)
+    assert r.returncode == 0, r.stderr
+    return r.stdout.split()
+
+
+def test_seed_scan_ignores_this_runs_own_blocks(tmp_path) -> None:
+    """a* 已經在跑（summary 帶同一顆 seed）時，補發 b 組必須仍然 OK。"""
+    runs = {"g_r447_conform_lcb2": SEED,
+            "g_r460_harness_lcb2_a1": SEED,
+            "g_r460_harness_lcb2_a2": SEED,
+            "g_r460_harness_lcb2_a3": SEED,
+            "g_rXXX_unrelated": "some-other-seed"}
+    out = _run_seed_scan(tmp_path, runs, SEED, SEED_PRIOR_RUN, " ".join(RUNS))
+    assert out[1] == "OK", out
+    assert out[2] == SEED_PRIOR_RUN, out
+    # 被扣掉的那幾塊要**印出來**——扣掉什麼不准是隱形的。
+    assert set(out[4].split("|")) == {f"runs/g_r460_harness_lcb2_{t}"
+                                      for t in ("a1", "a2", "a3")}, out
+
+
+def test_seed_scan_still_catches_a_foreign_run(tmp_path) -> None:
+    """負控：不在授權六塊裡的 run 用了這顆 seed，照樣 MISMATCH。"""
+    runs = {"g_r447_conform_lcb2": SEED,
+            "g_r460_harness_lcb2_a1": SEED,
+            "g_rSTRANGER_lcb2": SEED}
+    out = _run_seed_scan(tmp_path, runs, SEED, SEED_PRIOR_RUN, " ".join(RUNS))
+    assert out[1] == "MISMATCH", out
+    assert "g_rSTRANGER_lcb2" in out[2], out
+
+
+def test_seed_scan_still_catches_the_anchor_going_missing(tmp_path) -> None:
+    """負控：r447 不見了也要停——「量不到不是通過」那條沒有被扣掉。"""
+    runs = {"g_r460_harness_lcb2_a1": SEED, "g_rXXX_unrelated": "other"}
+    out = _run_seed_scan(tmp_path, runs, SEED, SEED_PRIOR_RUN, " ".join(RUNS))
+    assert out[1] == "MISMATCH", out
+    assert out[2] == "-", out
+
+
+def test_seed_scan_exclusion_is_exactly_the_six_authorized_names(sh: str) -> None:
+    """扣掉的**只有** `$ALL_OUTS`，不是任何前綴或萬用字元。"""
+    assert 'scan=$(python3 - "$SEED" "$auth" "$ALL_OUTS"' in sh, \
+        "掃描沒有把本 run 的六塊名單傳進去"
+    assert "(skipped if run in own else hits).append(run)" in sh, \
+        "扣除不是用集合成員判定（前綴比對會誤扣別的 run）"
+    assert 'own = {x.strip() for x in own_s.split() if x.strip()}' in sh
+    # 舊語意不准回來。
+    assert "abort_seed_reuse_set_mismatch" in sh
+    assert 'hits == allowed' in sh
+
+
 def test_seed_is_used_by_exactly_the_authorized_run() -> None:
     """事前證明（在測試時重算）：這顆 seed 恰好被授權的那一個 run 用過。"""
     files = sorted(glob.glob(str(ROOT / "runs" / "*" / "summary.json")))

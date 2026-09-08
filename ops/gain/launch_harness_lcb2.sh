@@ -55,6 +55,15 @@
 #     3. 掃過**所有** runs/*/summary.json，命中集合必須**恰好等於**授權句列出的集合
 #        （abort_seed_reuse_set_mismatch）。多一個或少一個都停——
 #        「少一個」代表 r447 不見了或讀不到，而**量不到不是通過**。
+#        ⚠ round460g：掃描**扣掉本 run 自己那六塊**（$ALL_OUTS）。
+#          理由：那六個名字本來就是這份 DECISION 授權的（R440G ＋ abort_stale_run_name
+#          ＋ BLOCK_TABLE 三道），它們**不是**「這顆 seed 的別的用途」，它們就是本 run。
+#          不扣的話這條檢查會**隨發射順序給出不同答案**：六塊一次發射時
+#          hits={r447} 通過，而分批補發 b 組時 a* 已經寫了 summary.json
+#          ⇒ hits={r447,a1,a2,a3} ⇒ 誤擋（2026-09-08 04:48 實際發生）。
+#          一條會因為「你先發了哪幾塊」而變答案的檢查，量的不是它想量的東西。
+#          **牙齒沒有變少**：任何**不在那六個名字裡**的 run 用了這顆 seed 照樣停，
+#          而那六個名字自己被 abort_dir_exists／abort_stale_run_name 各擋一道。
 #
 # ⚠ 逾時（round460e）：`--request-timeout-s` 從 600 提高到 **1200**，牆鐘護欄因此是
 #   1200 + 60 = **1260 s**。理由：一顆後端同時服務三條長生成時，每一條的串流
@@ -261,31 +270,36 @@ grep -q -- "--request-timeout-s $REQUEST_TIMEOUT_S" "$DEC" || {
 auth=$(grep -m1 -E "^SEED_REUSE_AUTHORIZED: $SEED <- " "$DEC" | sed -E "s/^SEED_REUSE_AUTHORIZED: $SEED <- //")
 [ -n "$auth" ] || { say "ABORT: $DEC 沒有逐字的授權句 'SEED_REUSE_AUTHORIZED: $SEED <- …'"; finish abort_seed_reuse_unauthorized; }
 say "seed 重用授權集合：$auth"
-scan=$(python3 - "$SEED" "$auth" <<'PY'
+scan=$(python3 - "$SEED" "$auth" "$ALL_OUTS" <<'PY'
 import glob, json, sys
-seed, auth = sys.argv[1], sys.argv[2]
+seed, auth, own_s = sys.argv[1], sys.argv[2], sys.argv[3]
 allowed = sorted({x.strip().rstrip(",") for x in auth.split(",") if x.strip()})
+# 本 run 自己那六塊不算「這顆 seed 的別的用途」——它們就是本 run（見檔頭第 3 點）。
+own = {x.strip() for x in own_s.split() if x.strip()}
 files = sorted(glob.glob("runs/*/summary.json"))
-hits = []
+hits, skipped = [], []
 for f in files:
     try:
         if json.load(open(f, encoding="utf-8")).get("seed") == seed:
-            hits.append(f.rsplit("/summary.json", 1)[0])
+            run = f.rsplit("/summary.json", 1)[0]
+            (skipped if run in own else hits).append(run)
     except Exception:
         pass
 hits = sorted(set(hits))
 print(len(files), "OK" if hits == allowed else "MISMATCH",
-      ("|".join(hits) if hits else "-"), ("|".join(allowed) if allowed else "-"))
+      ("|".join(hits) if hits else "-"), ("|".join(allowed) if allowed else "-"),
+      ("|".join(sorted(set(skipped))) if skipped else "-"))
 PY
 )
 n_files=$(printf '%s\n' "$scan" | awk 'NR==1{print $1}')
 verdict=$(printf '%s\n' "$scan" | awk 'NR==1{print $2}')
 hit_list=$(printf '%s\n' "$scan" | awk 'NR==1{print $3}')
 allow_list=$(printf '%s\n' "$scan" | awk 'NR==1{print $4}')
+own_list=$(printf '%s\n' "$scan" | awk 'NR==1{print $5}')
 case "$n_files" in ''|*[!0-9]*) say "ABORT: seed 掃描沒有回傳數字（scan=$scan）"; finish abort_seed_reuse_set_mismatch ;; esac
 [ "$n_files" -gt 0 ] || { say "ABORT: runs/*/summary.json 一個都沒掃到——量不到不是通過"; finish abort_seed_reuse_set_mismatch; }
 [ "$verdict" = "OK" ] || { say "ABORT: seed $SEED 的使用集合與授權不符（實際=$hit_list 授權=$allow_list）"; finish abort_seed_reuse_set_mismatch; }
-say "seed $SEED 的使用集合 = 授權集合（$hit_list）；掃過 $n_files 個 runs/*/summary.json"
+say "seed $SEED 的使用集合 = 授權集合（$hit_list）；掃過 $n_files 個 runs/*/summary.json；本 run 自己的塊（不計入）：$own_list"
 
 # ── 探針：兩顆後端各探一次，不探 hub ─────────────────────────────────
 probe_backend() {   # $1=tag $2=chat endpoint
