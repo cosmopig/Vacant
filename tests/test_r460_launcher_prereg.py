@@ -455,6 +455,35 @@ def test_probe_checks_body_not_only_http_200(sh: str) -> None:
     assert "for i in 1 2 3; do" in sh, "探針次數不是 3"
 
 
+def test_launcher_probe_max_tokens_matches_the_runner_constant(sh: str) -> None:
+    """round460e-2：發射器的 curl 探針不准比 runner 的線路探針小。
+
+    第一次發射就死在這一格：`max_tokens:16` 之下 gemma-4-12b-it-qat 回
+    HTTP 200／`finish_reason=length`／`content=""`（13 個 reasoning token 把 16 的預算
+    吃光）⇒ 探針 0/3、`abort_probe_a_rc10`，而後端其實是好的。
+    round460c 已經在 runner 那邊修過同一件事，**發射器被漏掉**——所以這裡把兩邊釘在一起。
+    """
+    from ops.gain.harness_arms import WIRE_PROBE_MAX_TOKENS
+    m = re.search(r"^PROBE_MAX_TOKENS=(\d+)", sh, re.M)
+    assert m, "發射器沒有寫出探針的 max_tokens"
+    assert int(m.group(1)) == WIRE_PROBE_MAX_TOKENS, (
+        f"發射器探針 {m.group(1)} 與 runner 的 {WIRE_PROBE_MAX_TOKENS} 不一致"
+        "——兩邊分開改就會再出現一次「後端好的但發射器說壞」")
+    assert int(m.group(1)) >= 256, "實測 16／64 回空 content，256 才回 OK"
+    # 兩個探針（3× 存活 ＋ 多輪線路）都要用它，不准留任何硬編的小值。
+    assert sh.count('\\"max_tokens\\":$PROBE_MAX_TOKENS') == 2
+    for line in _code_lines(sh):
+        assert "max_tokens\\\":16" not in line, f"還有硬編的 max_tokens 16: {line!r}"
+
+
+def test_launcher_probe_still_requires_nonempty_content(sh: str) -> None:
+    """放大 max_tokens **不准**順手把 body 檢查放寬——那等於把探針關掉。"""
+    assert 'print("yes" if ("error" not in d and c.strip()) else "no")' in sh, \
+        "探針的 body 判準被改了：content 非空這一條是它唯一的牙齒"
+    assert '[ "$code" = "200" ] && [ "$body" = "yes" ]' in sh
+    assert '[ "$ok" -eq 3 ]' in sh
+
+
 def test_wire_mode_is_decided_by_the_runner_not_the_launcher(sh: str) -> None:
     """發射器可以記錄多輪探針，但**不准**自己決定 wire mode。
 

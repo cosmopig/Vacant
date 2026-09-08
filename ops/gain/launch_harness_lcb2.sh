@@ -79,6 +79,17 @@ ARMS="OFF,CONFORM,OFF5,HPI,HOC,HMIX"
 BANK_FILE="ops/gain/data/lcb_bank_v2.jsonl"
 N_BLOCK=20                    # 每一塊的題數；六塊 × 20 ＝ 註冊的 120 題
 REQUEST_TIMEOUT_S=1200        # round460e：三併發之下 600 會誤判成逾時（見檔頭）
+# ⚠ round460e-2（2026-09-08，發射當場量到）：探針的 max_tokens **不准是 16**。
+#   round460c 已經在 runner 那邊量過並修過同一件事（`harness_arms.WIRE_PROBE_MAX_TOKENS`
+#   16 → 512），但**發射器自己的 curl 探針被漏掉了**，所以第一次發射死在這裡：
+#     HTTP 200、finish_reason=length、content=""、reasoning_content="The user wants me
+#     to reply with the exact word \"OK\"."、reasoning_tokens=13／completion_tokens=16
+#   ——推理把 16 個 token 的預算整個吃光，content 交空白。後端是**好的**
+#   （/v1/models 正常、200 只花約 1 秒），紅的是量具。
+#   ⇒ 對齊 runner 的那顆凍結常數；`tests/test_r460_launcher_prereg.py` 對釘兩邊相等。
+#   ⚠ **body 檢查一個字都不放寬**（仍然要求 content 非空）：把「空 content」讀成通過
+#     等於把探針關掉，而探針存在的理由就是擋「後端整個死掉」。
+PROBE_MAX_TOKENS=512
 # D9：六塊、兩顆直連後端。名字、offset 與端點是**一組**，改一格就要改整組。
 API_A="http://100.119.113.56:1234/v1/chat/completions"
 API_B="http://100.86.226.21:1234/v1/chat/completions"
@@ -253,7 +264,7 @@ probe_backend() {   # $1=tag $2=chat endpoint
   for i in 1 2 3; do
     code=$(curl -s -m 120 -o "$ROOT/logs/harness_lcb2_${tag}_probe_$i.json" -w '%{http_code}' "$api" \
            -H 'Content-Type: application/json' \
-           -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}],\"max_tokens\":16,\"temperature\":0}" || true)
+           -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}],\"max_tokens\":$PROBE_MAX_TOKENS,\"temperature\":0}" || true)
     body=$(python3 -c '
 import sys, json
 try:
@@ -269,7 +280,7 @@ except Exception: print("no")' "$ROOT/logs/harness_lcb2_${tag}_probe_$i.json")
   # 決定並落盤，兩個地方各自判會出現「發射器說 multiturn、rows 說 flattened」這種對不上的狀態。
   mt=$(curl -s -m 120 -o "$ROOT/logs/harness_lcb2_${tag}_multiturn_probe.json" -w '%{http_code}' "$api" \
        -H 'Content-Type: application/json' \
-       -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"system\",\"content\":\"Reply with exactly: OK\"},{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"},{\"role\":\"assistant\",\"content\":\"OK\"},{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}],\"max_tokens\":16,\"temperature\":0}" || true)
+       -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"system\",\"content\":\"Reply with exactly: OK\"},{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"},{\"role\":\"assistant\",\"content\":\"OK\"},{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}],\"max_tokens\":$PROBE_MAX_TOKENS,\"temperature\":0}" || true)
   say "[$tag] multiturn wire probe -> HTTP $mt（僅記錄；模式由 runner 落盤在 harness_wire_mode）"
   return 0
 }
