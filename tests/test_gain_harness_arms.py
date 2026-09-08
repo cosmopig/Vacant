@@ -728,3 +728,110 @@ def test_wire_probe_still_reraises_a_real_transport_failure():
     from ops.gain.harness_arms import current_wire_mode
     assert current_wire_mode() is None, "拋出去之後不准留下已決定的模式"
     reset_wire_mode()
+
+
+# ── round460d：每一個 HTTP 請求都要有界 ─────────────────────────────────
+#
+# 為什麼這一組必須存在（2026-09-07 R460 冒煙掛四小時換來的）：
+#   `urlopen(timeout=…)` 綁的是 **socket 逾時（每次 recv），不是請求逾時**。
+#   HMIX 第一通呼叫 `timeout_s=600` 卡在 `_read_status` 的 `poll()` 裡 4 小時 08 分，
+#   而 calls.jsonl 一列都沒新增（失敗才落盤）——從外面看就是「整個 run 死了」。
+#   下面三條把兩件事釘住：(a) 三條路徑都**真的**把 timeout 送進 urlopen；
+#   (b) 探針有**自己的**短逾時；(c) socket 逾時失效時牆鐘護欄仍然收得了尾。
+class _FakeResponse:
+    def __init__(self, payload: dict):
+        self._raw = json.dumps(payload).encode()
+
+    def read(self, *a):
+        return self._raw
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+_OK_PAYLOAD = {"model": "m", "usage": {"total_tokens": 3},
+               "choices": [{"finish_reason": "stop",
+                            "message": {"content": "OK"}}]}
+
+
+def _brain(tmp_path, **kw):
+    return ClineBrain("probe-0", "sys", key="", log_path=tmp_path / "calls.jsonl",
+                      model="m", **kw)
+
+
+def test_every_http_request_passes_a_positive_timeout(tmp_path, monkeypatch):
+    """generate／chat／線路探針三條路徑都必須把 timeout 交給 urlopen。
+
+    沒有 timeout 的 `urlopen` 會永遠等下去，而且**失敗才落盤** ⇒ 卡住的時候
+    calls.jsonl 是空的，外面看不出來它還活著。
+    """
+    import urllib.request
+
+    from ops.gain.harness_arms import (WIRE_PROBE_TIMEOUT_S, probe_wire_mode,
+                                       reset_wire_mode)
+
+    seen: list[dict] = []
+
+    def fake_urlopen(req, *args, **kwargs):
+        seen.append({"args": args, "kwargs": kwargs})
+        return _FakeResponse(_OK_PAYLOAD)
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    brain = _brain(tmp_path, timeout_s=600, retries=4)
+    assert brain.generate("hi") == "OK"
+    assert brain.chat([{"role": "user", "content": "hi"}])[0] == "OK"
+    reset_wire_mode()
+    assert probe_wire_mode(brain) == "multiturn"
+    reset_wire_mode()
+
+    assert len(seen) == 3, "三條路徑都要真的送出去"
+    for i, call in enumerate(seen):
+        assert not call["args"], "timeout 要用具名參數送，位置參數讀不出來"
+        assert "timeout" in call["kwargs"], f"第 {i} 通呼叫沒有帶 timeout"
+        assert call["kwargs"]["timeout"] > 0, f"第 {i} 通呼叫的 timeout 不是正數"
+    assert seen[0]["kwargs"]["timeout"] == 600
+    assert seen[1]["kwargs"]["timeout"] == 600
+    assert seen[2]["kwargs"]["timeout"] == WIRE_PROBE_TIMEOUT_S
+
+
+def test_wire_probe_has_its_own_short_timeout():
+    """探針只要三個 token 的 OK（實測 1.9 s），不該繼承 600 s 的產碼預算。"""
+    from ops.gain.harness_arms import (WIRE_PROBE_TIMEOUT_S, probe_wire_mode,
+                                       reset_wire_mode)
+    assert 0 < WIRE_PROBE_TIMEOUT_S <= 120, "探針逾時要短——壞掉就快點知道"
+    reset_wire_mode()
+    agent = _ProbeAgent()
+    assert probe_wire_mode(agent) == "multiturn"
+    assert agent.kwargs[0]["timeout_s"] == WIRE_PROBE_TIMEOUT_S
+    reset_wire_mode()
+
+
+def test_wall_clock_guard_bounds_a_request_whose_socket_timeout_never_fires(
+        tmp_path, monkeypatch):
+    """socket 逾時沒兌現時，牆鐘護欄要收尾——語意沿用既有的重試→InfraVoid。"""
+    import time as _time
+    import urllib.request
+
+    from ops.gain import brain_cline
+
+    def blocking_urlopen(req, *args, **kwargs):     # 假裝 OS 不理 timeout
+        _time.sleep(30)
+        raise AssertionError("護欄沒有動作")
+
+    monkeypatch.setattr(urllib.request, "urlopen", blocking_urlopen)
+    monkeypatch.setattr(brain_cline, "WALL_CLOCK_SLACK_S", 0)
+    brain = _brain(tmp_path, timeout_s=1, retries=1)
+    t0 = _time.time()
+    with pytest.raises(brain_cline.InfraVoid) as exc:
+        brain.chat([{"role": "user", "content": "hi"}])
+    assert _time.time() - t0 < 10, "護欄沒有在牆鐘上限附近動作"
+    assert "WallClockTimeout" in str(exc.value)
+    rec = json.loads((tmp_path / "calls.jsonl").read_text().splitlines()[0])
+    assert rec["ok"] is False and "WallClockTimeout" in rec["error"], \
+        "護欄咬到的那一次也要逐字落盤（鐵律 3）"
+    import signal
+    assert signal.getsignal(signal.SIGALRM) in (signal.SIG_DFL, signal.SIG_IGN), \
+        "護欄要把 SIGALRM 還回去"

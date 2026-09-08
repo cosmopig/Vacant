@@ -623,6 +623,19 @@ def current_wire_mode() -> str | None:
 # 一個 run 只發一次，成本可忽略——「開小」省的那點 token 不值得拿整條臂去換。
 WIRE_PROBE_MAX_TOKENS = 512
 
+# round460d：探針的**自己的**逾時。原本沒傳 `timeout_s` ⇒ 繼承 worker 的
+# `--request-timeout-s`（正式 run ＝ 600 s）。那是給「寫一整支程式」用的預算，
+# 探針要的只是三個 token 的「OK」——實測 1.9 s（`smoke_r460` 的 wire_probe
+# `latency_ms=1859`）。兩者共用同一個數字的代價是：後端一旦黑洞化，
+# **run 的第一件事**就是坐在那裡等 600 s（×2 retries）＝ 20 分鐘什麼都沒發生，
+# 而且那 20 分鐘不會有任何一列 calls.jsonl（失敗才落盤）。
+# 60 s ＝ 實測值的 30 倍餘裕，仍然是「壞掉就快點知道」。
+#
+# ⚠ 逾時之後**不退回攤平模式**：逾時不是「端點不吃這個 body 形狀」，
+#   它是「沒量到」。照 `InfraVoid` 往外拋 ⇒ 該格記 infra_void ⇒ 下一題再探
+#   （自癒），與 `generate()` 逾時的處理逐字同義。
+WIRE_PROBE_TIMEOUT_S = 60
+
 
 def _looks_like_format_rejection(err: str) -> bool:
     """400／422 ＝ 端點不吃這個 body 形狀；其餘（連不上、逾時、5xx）不是格式問題。"""
@@ -660,7 +673,8 @@ def probe_wire_mode(agent, *, meta: dict | None = None) -> str:
     try:
         agent.chat(list(WIRE_PROBE_MESSAGES), role="wire_probe",
                    meta={"probe": "harness_wire_mode", **(meta or {})},
-                   retries=2, max_tokens=WIRE_PROBE_MAX_TOKENS)
+                   retries=2, timeout_s=WIRE_PROBE_TIMEOUT_S,
+                   max_tokens=WIRE_PROBE_MAX_TOKENS)
         _WIRE_MODE = "multiturn"
     except InfraVoid as exc:
         err = str(exc)

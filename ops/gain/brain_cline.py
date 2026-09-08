@@ -16,9 +16,12 @@ retry×4 指數 backoff；四次都失敗記 `infra_void`（09 §3.5）——
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import pathlib
+import signal
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -47,6 +50,62 @@ class EmptyResponse(RuntimeError):
 
 class InfraVoid(RuntimeError):
     """端點連不上／重試用盡。呼叫端必須把這一格記成 infra_void，不可當成錯誤答案。"""
+
+
+class WallClockTimeout(TimeoutError):
+    """整個 HTTP 請求超過牆鐘上限仍沒回來。與 socket timeout 同語意，可重試。"""
+
+
+# ── 牆鐘護欄（round460d）────────────────────────────────────────────────
+#
+# ⚠ **為什麼 `urlopen(timeout=…)` 不夠**——這是 2026-09-07 R460 冒煙掛掉四小時
+#   換來的：`timeout=` 設的是 **socket 逾時，不是請求逾時**。它的作用範圍是
+#   *每一次* socket 操作；`http.client` 讀狀態列走的是
+#   `BufferedReader.readline()`，那是一個**迴圈**，每繞一圈就重新開始計時
+#   （CPython `sock_call_ex` 的 deadline 是每次 `recv_into` 各自初始化的）。
+#   ⇒ 一個「timeout=600」的請求在原理上沒有牆鐘上限。
+#
+#   實測（`smoke_r460/HANG_EVIDENCE_sample_pid58764.txt`）：HMIX 第一通呼叫
+#   `timeout_s=600`、`retries=4`，卡在 `_read_status` 的 `poll()` 裡
+#   **4 小時 08 分**（600 s 的 24.8 倍），calls.jsonl 一列都沒新增
+#   （失敗才落盤，而它還沒失敗）。最後**確實**丟了 `TimeoutError: timed out`
+#   ——所以逾時不是沒設，是沒有束縛住牆鐘。期間機器沒有睡
+#   （`pmset -g log` 自 09-07 04:17 之後無 Sleep，且有 caffeinate assertion）。
+#
+# 護欄用 SIGALRM：訊號會打斷 `poll()`，例外從 urlopen 裡面往外拋，
+# 被既有的 `except Exception` 接住 ⇒ 落盤 ⇒ 重試 ⇒ 用盡才 `InfraVoid`。
+# **語意完全沿用既有那條路，不新增 void 種類。**
+#
+# ⚠ 邊界（誠實話）：只有主執行緒能裝 SIGALRM，非主執行緒時本護欄是 no-op；
+#   而且它**只掛在 `chat()`**——`generate()` 的原始碼被
+#   `tests/test_gain_harness_arms.py::test_t12…` 逐位元釘死（§4.5 不動清單），
+#   在這裡加一行就等於改既有五臂。所以 OFF／OFF5／CONFORM／EQ5／ON 仍然只有
+#   socket 逾時。要補那一邊得先解凍 T12，那是人類／稽核的裁決，不是本輪。
+#   正常情況下兩者行為相同：護欄比 socket 逾時晚 `WALL_CLOCK_SLACK_S` 才動作，
+#   只有在 OS 沒有兌現 socket 逾時的時候才會咬到。
+WALL_CLOCK_SLACK_S = 60
+
+
+@contextlib.contextmanager
+def _wall_clock_guard(seconds: float):
+    """`seconds` 秒之後強制打斷區塊內的阻塞，丟 `WallClockTimeout`。"""
+    if (seconds <= 0 or not hasattr(signal, "SIGALRM")
+            or threading.current_thread() is not threading.main_thread()):
+        yield                       # 裝不了就明說裝不了，不假裝有護欄
+        return
+
+    def _fire(signum, frame):       # noqa: ARG001
+        raise WallClockTimeout(
+            f"整個請求超過 {seconds:.0f}s 牆鐘上限仍未返回"
+            "（socket 逾時只綁單次 recv，不綁請求）")
+
+    prev_handler = signal.signal(signal.SIGALRM, _fire)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, prev_handler)
 
 
 class ClineBrain:
@@ -319,8 +378,10 @@ class ClineBrain:
                 headers["Authorization"] = f"Bearer {self.key}"
             req = urllib.request.Request(self.api, data=body, headers=headers)
             try:
-                with urllib.request.urlopen(req, timeout=effective_timeout) as r:
-                    payload = json.load(r)
+                # socket 逾時綁單次 recv，牆鐘護欄綁整個請求（見 _wall_clock_guard）
+                with _wall_clock_guard(effective_timeout + WALL_CLOCK_SLACK_S):
+                    with urllib.request.urlopen(req, timeout=effective_timeout) as r:
+                        payload = json.load(r)
                 d = payload.get("data", payload)
                 if isinstance(d, dict) and "choices" not in d and d.get("error"):
                     raise RelayError(f"端點回 200 但 body 是錯誤：{d['error']!r}")
