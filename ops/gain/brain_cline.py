@@ -76,13 +76,19 @@ class WallClockTimeout(TimeoutError):
 # 被既有的 `except Exception` 接住 ⇒ 落盤 ⇒ 重試 ⇒ 用盡才 `InfraVoid`。
 # **語意完全沿用既有那條路，不新增 void 種類。**
 #
-# ⚠ 邊界（誠實話）：只有主執行緒能裝 SIGALRM，非主執行緒時本護欄是 no-op；
-#   而且它**只掛在 `chat()`**——`generate()` 的原始碼被
-#   `tests/test_gain_harness_arms.py::test_t12…` 逐位元釘死（§4.5 不動清單），
-#   在這裡加一行就等於改既有五臂。所以 OFF／OFF5／CONFORM／EQ5／ON 仍然只有
-#   socket 逾時。要補那一邊得先解凍 T12，那是人類／稽核的裁決，不是本輪。
-#   正常情況下兩者行為相同：護欄比 socket 逾時晚 `WALL_CLOCK_SLACK_S` 才動作，
-#   只有在 OS 沒有兌現 socket 逾時的時候才會咬到。
+# ⚠ 邊界（誠實話）：只有主執行緒能裝 SIGALRM，非主執行緒時本護欄是 no-op。
+#
+# ⚠ **round460e（2026-09-08，Fable A3）：護欄從「只掛 `chat()`」改成「兩條都掛」。**
+#   原本只掛 `chat()` 的理由是 `generate()` 的原始碼被
+#   `tests/test_gain_harness_arms.py::test_t12…` 逐位元釘死（§4.5 不動清單）。
+#   但 D9 之後六個行程各自長跑，`generate()` 是 OFF／OFF5／CONFORM 三條臂**唯一**
+#   的呼叫路徑；讓那三條臂繼續暴露在「4 小時不返回、calls.jsonl 一列都不寫」
+#   的死法上，換到的只是一個 sha 沒變。所以解凍那一格：
+#   **T12 的 `GENERATE_SHA` 隨之更新，並在測試裡逐字註明改動是純基建**
+#   （bounds a hang；正常路徑行為逐字不變），既有五臂的**行為**仍然一個字沒動。
+#   兩條路徑現在的語意完全相同：護欄比 socket 逾時晚 `WALL_CLOCK_SLACK_S` 才動作，
+#   只有在 OS 沒有兌現 socket 逾時的時候才會咬到，咬到之後走既有的
+#   `except Exception` → 落盤 → 重試 → 用盡才 `InfraVoid`（**不新增 void 種類**）。
 WALL_CLOCK_SLACK_S = 60
 
 
@@ -182,8 +188,14 @@ class ClineBrain:
                 headers["Authorization"] = f"Bearer {self.key}"
             req = urllib.request.Request(self.api, data=body, headers=headers)
             try:
-                with urllib.request.urlopen(req, timeout=effective_timeout) as r:
-                    payload = json.load(r)
+                # socket 逾時綁單次 recv，牆鐘護欄綁整個請求（見 _wall_clock_guard）。
+                # round460e：本行是本檔對 `generate()` 的**唯一**改動，純基建
+                # ——它只給「OS 沒兌現 socket 逾時」那條路一個上界，
+                # 正常路徑上行為逐字不變（護欄比 socket 逾時晚
+                # WALL_CLOCK_SLACK_S 才動作，且咬到之後走既有的重試→InfraVoid）。
+                with _wall_clock_guard(effective_timeout + WALL_CLOCK_SLACK_S):
+                    with urllib.request.urlopen(req, timeout=effective_timeout) as r:
+                        payload = json.load(r)
                 d = payload.get("data", payload)
                 # ⚠ 算力中轉（8765）會回 **HTTP 200 但 body 是 {"error": "terminated"}**。
                 #   不擋的話會在下一行變成 KeyError: 'choices'——行為仍然是重試，

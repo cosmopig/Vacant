@@ -408,7 +408,12 @@ FROZEN_SOURCE_SHA = {
     "conform_failure_detail": "237992047d020e62ba1ea896aa88aa3992616f19f63d9ff4088b7508753206a0",
     "_visible_test_slicer": "e0efdd0277cf82401bb812936f16f88329b31697670d6eef4d9bd8eaef0f4178",
 }
-GENERATE_SHA = "130c47c565b8bbdf5f074898ef77b221b1f914059024c9a2717359aae54a111b"
+# round460e（2026-09-08，Fable A3）：`generate()` 的 sha 改過一次。
+# 改動是**純基建**——只在 urlopen 外面包一層 `_wall_clock_guard(timeout+60)`，
+# 給「OS 沒兌現 socket 逾時」那條路一個上界；正常路徑上的行為、落盤欄位、
+# 重試語意、`InfraVoid` 的定義**逐字不變**（護欄咬到走的就是既有那條例外路）。
+# 舊值（round460b–460d）：130c47c565b8bbdf5f074898ef77b221b1f914059024c9a2717359aae54a111b
+GENERATE_SHA = "b523c15f43a63476af16395280f7e4763fc6dbf03e30d90f354cc269d469fc18"
 
 
 def test_t12_existing_arms_and_generate_are_byte_identical():
@@ -418,7 +423,9 @@ def test_t12_existing_arms_and_generate_are_byte_identical():
         assert got == want, f"{name} 被改過了（{got}）——H 臂不准動既有臂"
     got = hashlib.sha256(
         inspect.getsource(ClineBrain.generate).encode("utf-8")).hexdigest()
-    assert got == GENERATE_SHA, "generate() 必須逐位元不變（chat() 是**並存**的方法）"
+    assert got == GENERATE_SHA, (
+        "generate() 的原始碼變了。唯一被授權的那一次是 round460e 的牆鐘護欄"
+        "（純基建，見 GENERATE_SHA 上面的註解）；任何其他改動＝改既有五臂。")
 
 
 def test_t12b_chat_exists_and_is_not_generate():
@@ -630,6 +637,55 @@ def test_vgt_audit_catches_check_code_identifiers(task, tmp_path):
     assert {v["rule"] for v in result["violations"]} == {"check_code_identifier"}
 
 
+# ── round460e：量具的瑣碎字面值排除（Fable A2）──────────────────────────
+#
+# 冒煙（n=3）跑出 24 筆 `hidden_case_leak`，needle **全部**是 `True`／`False`：
+# 那幾行是**模型自己**寫的 `SELFTEST: […] -> True`，而隱藏 case 的 `expected`
+# 剛好也是布林值。四個字的 needle 在自然語言裡必然命中 ⇒ 量具沒有鑑別力，
+# 不是 GT 洩漏。下面三條把「放寬」與「放寬的上限」同時釘住：
+# 放寬得**恰好**只到凍結的那張表，真的洩漏照樣要紅。
+def test_trivial_needle_set_is_frozen_and_short():
+    from ops.gain.harness_vgt_audit import (MIN_NEEDLE_CHARS,
+                                            TRIVIAL_NEEDLE_REPRS,
+                                            is_trivial_needle)
+    assert TRIVIAL_NEEDLE_REPRS == frozenset({
+        "True", "False", "None", "0", "1", "-1", "[]", "{}", "()", "''", '""'})
+    assert MIN_NEEDLE_CHARS == 6
+    for needle in TRIVIAL_NEEDLE_REPRS:
+        assert is_trivial_needle(needle), needle
+    # 放寬**只**到這裡：六個字以上、不在表內的東西一律照舊檢查。
+    assert not is_trivial_needle("[1, 2, 3]")
+    assert not is_trivial_needle("'abcdbaefab'")
+
+
+def test_vgt_audit_is_clean_on_the_models_own_selftest_booleans(task, tmp_path):
+    """冒煙那 24 筆的最小重現：模型自己寫的 SELFTEST 布林值不是洩漏。"""
+    from ops.gain.harness_vgt_audit import audit_run
+    records = [{"meta": {"arm": "HOC", "task_id": task["task_id"]},
+                "system": "s", "messages": [{"role": "assistant", "content":
+                    'SELFTEST: ["abcdbaefab", 2] -> True\n'
+                    'SELFTEST: ["cdefdc", 3] -> False\n'
+                    "SELFTEST: [] -> None\n"}]}]
+    result = audit_run(_write_calls(tmp_path, records), {task["task_id"]: task})
+    assert result["verdict"] == "CLEAN", result["violations"][:3]
+    # 「沒有違規」不准把「沒有檢查」蓋掉：跳過的數量要真的印出來。
+    assert result["needles_skipped_trivial"] > 0
+
+
+def test_vgt_audit_still_catches_a_real_hidden_repr_after_the_relaxation(task, tmp_path):
+    """負控：放寬瑣碎字面值之後，**真的**隱藏 case repr 仍然必須判 VIOLATION。"""
+    from ops.gain.harness_vgt_audit import audit_run, is_trivial_needle
+    needles, _skipped = hidden_only_needles(task)
+    assert needles, "這題被跳到一個 needle 都不剩 ⇒ 負控沒有對象，量具等於關掉"
+    assert not any(is_trivial_needle(n) for n in needles), "留下的 needle 不准是瑣碎的"
+    records = [{"meta": {"arm": "HMIX", "task_id": task["task_id"]},
+                "system": "s", "messages": [{"role": "user", "content":
+                    f"also make sure {needles[0]} works"}]}]
+    result = audit_run(_write_calls(tmp_path, records), {task["task_id"]: task})
+    assert result["verdict"] == "VIOLATION"
+    assert result["violations"][0]["rule"] == "hidden_case_leak"
+
+
 def test_vgt_audit_refuses_to_pass_a_task_it_cannot_map(task, tmp_path):
     """對不到題目就不能說 CLEAN——「沒有檢查」不准冒充「沒有違規」。"""
     from ops.gain.harness_vgt_audit import audit_run
@@ -807,6 +863,35 @@ def test_wire_probe_has_its_own_short_timeout():
     assert probe_wire_mode(agent) == "multiturn"
     assert agent.kwargs[0]["timeout_s"] == WIRE_PROBE_TIMEOUT_S
     reset_wire_mode()
+
+
+def test_wall_clock_guard_also_bounds_generate(tmp_path, monkeypatch):
+    """round460e（A3）：`generate()` 與 `chat()` 現在同一道護欄、同一條例外路。
+
+    D9 之後六個行程各自長跑，而 `generate()` 是 OFF／OFF5／CONFORM 唯一的
+    呼叫路徑——沒有護欄的話那三條臂仍然可能 4 小時不返回、`calls.jsonl` 一列不寫。
+    """
+    import time as _time
+    import urllib.request
+
+    from ops.gain import brain_cline
+
+    def blocking_urlopen(req, *args, **kwargs):
+        _time.sleep(30)
+        raise AssertionError("護欄沒有動作")
+
+    monkeypatch.setattr(urllib.request, "urlopen", blocking_urlopen)
+    monkeypatch.setattr(brain_cline, "WALL_CLOCK_SLACK_S", 0)
+    brain = _brain(tmp_path, timeout_s=1, retries=1)
+    t0 = _time.time()
+    with pytest.raises(brain_cline.InfraVoid) as exc:
+        brain.generate("hi")
+    assert _time.time() - t0 < 10, "護欄沒有在牆鐘上限附近動作"
+    assert "WallClockTimeout" in str(exc.value)
+    rec = json.loads((tmp_path / "calls.jsonl").read_text().splitlines()[0])
+    assert rec["ok"] is False and "WallClockTimeout" in rec["error"]
+    import signal
+    assert signal.getsignal(signal.SIGALRM) in (signal.SIG_DFL, signal.SIG_IGN)
 
 
 def test_wall_clock_guard_bounds_a_request_whose_socket_timeout_never_fires(

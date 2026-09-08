@@ -3,14 +3,15 @@
 這支在架構裡承重什麼：R440G 閘門（`gain_run.py`）只檢查
 「DECISION 檔存在，且內文含 `--out` 的目錄名」。它**檢查不到** seed、n、offset、
 arms、bank、模型、timeout——那些打錯了，run 會照跑，而且跑出來的東西看起來完全正常：
-`runs/g_r460_harness_lcb2_a` 裡會有漂亮的六臂資料，只是它答的不是
+`runs/g_r460_harness_lcb2_a1` 裡會有漂亮的六臂資料，只是它答的不是
 `DECISION_20260907_R460_HARNESS_PREREG.md` 註冊的那個問題。
 
 本 run 最貴的五格：
   **`--arms` 的六條**——少一條 OFF5 就等於把 D3 的 (iii) token 門檻抽掉（D2 明文禁止省它）。
-  **`--bank lcb2` / 兩塊各 `--n 60`**——掉成 lcb3/189 會安靜跑一個別的實驗。
-  **D9 的兩塊與兩個端點**——兩塊同端點、或任何一塊走回 8765 那顆 hub，
-    會把「兩顆卡併發」安靜地變回「一顆卡塞兩個 run」，而那看起來只是比較慢。
+  **`--bank lcb2` / 六塊各 `--n 20`**——掉成 lcb3/189 會安靜跑一個別的實驗。
+  **D9／A1 的六塊、兩個端點、每顆端點三塊**——某顆端點被塞成四塊、
+    或任何一塊走回 8765 那顆 hub，會把「兩顆卡各三個 runner」安靜地變成
+    「一顆卡塞四個 run」（掉進實測 6 併發才有的退化區），而那**看起來只是比較慢**。
   **seed `g-r440-lcb2`**——本 run **刻意重用** r447 的 seed（DECISION §二-4）。
     既有發射器的「新鮮度檢查」在這裡會擋下一個我們要的設定，所以換成
     「授權集合相等」檢查。本檔釘住那個替代品**更嚴不是更鬆**：
@@ -50,21 +51,28 @@ ANALYZER = ROOT / "ops" / "gain" / "analyze_r460.py"
 STUDY = ROOT / "docs" / "HARNESS_STUDY_2026-09-07.md"
 VGT = ROOT / "ops" / "gain" / "harness_vgt_audit.py"
 
-RUN_NAME = "g_r460_harness_lcb2"          # 不帶塊名的舊名字：**不在授權內**
-RUN_A = "runs/g_r460_harness_lcb2_a"
-RUN_B = "runs/g_r460_harness_lcb2_b"
+# round460e：舊名字（不帶塊名、以及兩塊時代的 `_a`／`_b`）都**不在授權內**。
+STALE_NAMES = ("g_r460_harness_lcb2", "g_r460_harness_lcb2_a", "g_r460_harness_lcb2_b")
+BLOCKS = ("a1", "a2", "a3", "b1", "b2", "b3")
+RUNS = tuple(f"runs/g_r460_harness_lcb2_{b}" for b in BLOCKS)
+OFFSETS = (0, 20, 40, 60, 80, 100)
 API_A = "http://100.119.113.56:1234/v1/chat/completions"
 API_B = "http://100.86.226.21:1234/v1/chat/completions"
+API_OF = {"a1": API_A, "a2": API_A, "a3": API_A,
+          "b1": API_B, "b2": API_B, "b3": API_B}
 HUB_MARK = "8765"
 ENDPOINT_ENV = "VACANT_GAIN_API"
+REQUEST_TIMEOUT_S = 1200
 SEED = "g-r440-lcb2"
 SEED_PRIOR_RUN = "runs/g_r447_conform_lcb2"
 MODEL = "gemma-4-12b-it-qat"
 PRIOR_DEFAULT = "runs/g_r449c_eq5_lcb3"
 BANK_FILE = "ops/gain/data/lcb_bank_v2.jsonl"
 ARMS = "OFF,CONFORM,OFF5,HPI,HOC,HMIX"
-N_TASKS = 120                              # 合併後；每一塊是 60
-N_PER_BLOCK = 60
+N_TASKS = 120                              # 合併後；每一塊是 20
+N_PER_BLOCK = 20
+N_BLOCKS = 6
+BLOCKS_PER_ENDPOINT = 3
 
 CI_DISCLAIMER = "區間未做多重比較調整；仲裁以 analyzer 為準"
 
@@ -175,15 +183,17 @@ def test_launcher_is_executable() -> None:
 
 # ── R440G 閘門 ─────────────────────────────────────────────────────────
 def test_decision_authorizes_the_run_name(sh: str, dec: str) -> None:
-    """D9：授權的是**兩個**塊名，不帶塊名的舊名字不在授權內。"""
+    """D9／A1：授權的是**六個**塊名；不帶塊名與兩塊時代的舊名字都不在授權內。"""
     assert _var(sh, "DEC") == DEC.name
-    assert _var(sh, "OUT_A") == RUN_A
-    assert _var(sh, "OUT_B") == RUN_B
-    assert RUN_A in dec and RUN_B in dec, "DECISION 沒有授權兩個塊名"
-    # R440G 是子字串比對 ⇒ 舊名字會照樣通過它；DECISION 與發射器都要自己再擋一次。
-    assert "不在授權內" in dec, "DECISION 沒有明說不帶塊名的舊名字不在授權內"
-    assert "abort_unsuffixed_run_name" in sh, "發射器沒擋不帶塊名的舊 run 名字"
-    assert _var(sh, "UNSUFFIXED") == RUN_NAME
+    for tag, run in zip(BLOCKS, RUNS):
+        assert _var(sh, f"OUT_{tag.upper()}") == run
+        assert run in dec, f"DECISION 沒有授權塊名 {run}"
+    # R440G 是子字串比對 ⇒ 舊名字會照樣通過它（`…_a1` 甚至整個含著 `…_a`）；
+    # DECISION 與發射器都要自己再擋一次。
+    assert "不在授權內" in dec, "DECISION 沒有明說舊名字不在授權內"
+    assert "abort_stale_run_name" in sh, "發射器沒擋舊 run 名字"
+    stale = _var(sh, "STALE_NAMES").split()
+    assert sorted(stale) == sorted(STALE_NAMES), stale
 
 
 def test_decision_authorizes_the_zero_api_probe_out_name(dec: str) -> None:
@@ -251,7 +261,8 @@ def test_seed_is_used_by_exactly_the_authorized_run() -> None:
 def test_same_seed_selects_the_same_120_tasks_as_r447() -> None:
     """§九-1 的證明：同 seed ＝ 同題、同序（bank 只有 120 題 ⇒ seed 不抽樣）。
 
-    D9 之後多驗三件事：兩塊各 60、塊間**零交集**、`a + b` 逐題逐序等於 r447 的 120。
+    D9／A1 之後多驗四件事：六塊各 20、塊間**兩兩零交集**、六塊接起來逐題逐序等於
+    r447 的 120、而且 **a1+a2+a3 就是 r447 的前 60 題**（P-H0 的錨）。
     塊間零交集是 `CRITERION_20260903_R680_POOL_PRECONDITIONS.md` 的 Q1，
     也是 analyzer 敢按 `task_id` 合併的前提。
     """
@@ -265,12 +276,16 @@ def test_same_seed_selects_the_same_120_tasks_as_r447() -> None:
     assert len(a) == N_TASKS and len(set(a)) == N_TASKS
     assert set(a) == {r["task_id"] for r in rows}
     assert a == off, "同 seed 沒有給出同一個題序——§二-4 的論證要重寫"
-    blk_a = [x["task_id"] for x in load_tasks("lcb2", SEED, N_PER_BLOCK, offset=0)]
-    blk_b = [x["task_id"] for x in load_tasks("lcb2", SEED, N_PER_BLOCK, offset=N_PER_BLOCK)]
-    assert len(blk_a) == len(blk_b) == N_PER_BLOCK
-    assert set(blk_a) & set(blk_b) == set(), "兩塊有交集——不准合併（Q1 MISS）"
-    assert blk_a + blk_b == a, "兩塊接起來不等於原本那 120 題、那個順序"
-    assert blk_a == off[:N_PER_BLOCK], "block a 不是 r447 的前 60 題 ⇒ P-H0 的錨要重算"
+    blks = [[x["task_id"] for x in load_tasks("lcb2", SEED, N_PER_BLOCK, offset=o)]
+            for o in OFFSETS]
+    assert all(len(b) == N_PER_BLOCK for b in blks)
+    for i, x in enumerate(blks):
+        for y in blks[i + 1:]:
+            assert set(x) & set(y) == set(), "塊間有交集——不准合併（Q1 MISS）"
+    flat = [t for b in blks for t in b]
+    assert flat == a, "六塊接起來不等於原本那 120 題、那個順序"
+    assert len(set(flat)) == N_TASKS, "六塊的聯集不是 120 題"
+    assert flat[:60] == off[:60], "a1+a2+a3 不是 r447 的前 60 題 ⇒ P-H0 的錨要重算"
 
 
 # ── 題庫、題數、臂 ─────────────────────────────────────────────────────
@@ -311,7 +326,7 @@ def test_off5_is_not_dropped(dec: str) -> None:
 
 @pytest.mark.parametrize("flag", [
     '--n "$nn"', '--offset "$off"', "--bank lcb2", "--probe-sample 0",
-    "--request-timeout-s 600", "--review-timeout-s 380", "--retries 4",
+    '--request-timeout-s "$REQUEST_TIMEOUT_S"', "--review-timeout-s 380", "--retries 4",
     '--models "$MODEL"', '--seed "$SEED"', '--decision "$DEC"', '--out "$OUT"',
     '--arms "$ARMS"',
 ])
@@ -319,16 +334,38 @@ def test_launch_command_carries_the_registered_flag(sh: str, flag: str) -> None:
     assert flag in sh, f"發射指令少了 {flag}"
 
 
+def test_request_timeout_is_the_registered_1200(sh: str, dec: str) -> None:
+    """A1：逾時是實驗條件，發射器與 DECISION 必須是同一個數字。
+
+    600 在三併發之下會把正常的長生成誤判成逾時 ⇒ **假的 infra_void**，
+    而假 void 同時污染 complete-case 分母與 token 帳。
+    """
+    m = re.search(r"^REQUEST_TIMEOUT_S=(\d+)", sh, re.M)
+    assert m and int(m.group(1)) == REQUEST_TIMEOUT_S, "發射器的逾時不是 1200"
+    assert f"--request-timeout-s {REQUEST_TIMEOUT_S}" in dec
+    assert 'grep -q -- "--request-timeout-s $REQUEST_TIMEOUT_S" "$DEC"' in sh, \
+        "發射器沒有對 DECISION 驗這一格"
+    assert "abort_timeout_not_prereg" in sh
+    # 牆鐘護欄＝逾時 + WALL_CLOCK_SLACK_S；DECISION 要寫出那個和。
+    from ops.gain.brain_cline import WALL_CLOCK_SLACK_S
+    assert str(REQUEST_TIMEOUT_S + WALL_CLOCK_SLACK_S) in dec, \
+        "DECISION 沒寫出牆鐘護欄的實際上限"
+
+
 def test_decision_registers_the_same_flags(dec: str) -> None:
-    for flag in ("--n 120", "--offset 0", "--bank lcb2", "--probe-sample 0",
-                 "--request-timeout-s 600", "--review-timeout-s 380", "--retries 4"):
+    for flag in ("--n 20", "--offset 0", "--bank lcb2", "--probe-sample 0",
+                 "--request-timeout-s 1200", "--review-timeout-s 380", "--retries 4"):
         assert flag in dec, f"DECISION 沒寫到 {flag}"
+    for off in OFFSETS:
+        assert f"--offset {off}" in dec, f"DECISION 沒寫到 --offset {off}"
 
 
 def test_launcher_never_carries_another_runs_task_count(sh: str) -> None:
     for line in _code_lines(sh):
-        for stale in ("--n 189", "--n 371", "--n 60", "--n 40"):
+        for stale in ("--n 189", "--n 371", "--n 60", "--n 40", "--n 120"):
             assert stale not in line, f"題數抄成別的 run: {line!r}"
+    m = re.search(r"^N_BLOCK=(\d+)", sh, re.M)
+    assert m and int(m.group(1)) == N_PER_BLOCK, "每塊題數不是 20"
 
 
 def test_model_is_the_registered_one(sh: str, dec: str) -> None:
@@ -394,16 +431,21 @@ def test_no_hardcoded_prior_run_literal_outside_comments_and_default(sh: str) ->
 def test_single_run_recheck_before_launch_is_anchored(sh: str) -> None:
     """發射前重做「沒有別人在跑」檢查，pattern 錨在行首。
 
-    D9 之後「別人」的定義變了：本支自己的兩塊**不算**別人（它們是設計要的併發），
+    D9／A1 之後「別人」的定義是：本支自己的**六塊**不算別人（它們是設計要的併發），
     其餘任何 gain_run 都算。所以判準是 (a) 錨行首的 grep 還在、
-    (b) 過濾掉的**只有** OUT_A／OUT_B 這兩個、(c) 兩塊之間再查一次。
+    (b) 過濾掉的**只有** `$ALL_OUTS` 那六個、而且是 `--out <dir> ` 的**逐塊**比對
+    （前綴比對會把兩塊時代的 `…_a` 也算成自己人）、(c) 每一塊之間再查一次。
     """
     assert 'grep "^python3 ops/gain/gain_run\\.py"' in sh, "pattern 沒有錨在行首"
-    assert 'grep -v -- "--out $OUT_A "' in sh and 'grep -v -- "--out $OUT_B "' in sh, \
-        "過濾自己人的規則不見了（或過濾了不該過濾的東西）"
+    assert 'index($0, "--out " o[i] " ")' in sh, \
+        "過濾自己人的規則不見了（或退回成會誤中舊塊名的前綴比對）"
+    assert 'awk -v outs="$ALL_OUTS"' in sh, "自己人的名單不是來自 ALL_OUTS"
+    # ALL_OUTS 是六個 `$OUT_xx` 的引用（DRY）；展開之後必須逐字等於註冊的六個名字。
+    expanded = [_var(sh, tok.lstrip("$")) for tok in _var(sh, "ALL_OUTS").split()]
+    assert expanded == list(RUNS), expanded
     assert "abort_other_run" in sh
-    # 兩塊之間要再查一次：block a 起來之後才冒出來的第三個 run 也要擋。
-    assert sh.count("count_other_runs") >= 3, "只在發射前查一次；兩塊之間沒有再查"
+    # 每一塊之間要再查一次：前一塊起來之後才冒出來的第三方 run 也要擋。
+    assert sh.count("count_other_runs") >= 3, "只在發射前查一次；塊與塊之間沒有再查"
 
 
 def test_probe_checks_body_not_only_http_200(sh: str) -> None:
@@ -588,7 +630,9 @@ def test_decision_carries_the_honest_boundaries(dec: str) -> None:
 def test_decision_states_max_wall_is_not_a_hard_bound(dec: str) -> None:
     """`max_wall_s` 在呼叫之間檢查 ⇒ 它不是每題牆鐘的上界。"""
     assert "不是每題牆鐘的上界" in dec
-    assert "600" in dec and "呼叫之間" in dec
+    assert "1200" in dec and "呼叫之間" in dec
+    # 逾時加倍 ⇒ 最壞燒掉的時間也加倍，這件事要跟著更正，不能留舊算式。
+    assert "~6000 s" in dec, "逾時改成 1200 之後，最壞燒掉的時間沒有跟著更正"
 
 
 # ── D6：外部引用刪掉了沒有 ─────────────────────────────────────────────
@@ -724,10 +768,11 @@ def test_analyzer_detection_strip_has_teeth() -> None:
     所以這裡也釘住數量——少一個突變體＝少一道牙齒，而那不會讓任何測試變紅。
     """
     from ops.gain import analyze_r460 as A
-    assert len(A.MUTANTS) == 10, sorted(A.MUTANTS)
+    assert len(A.MUTANTS) == 11, sorted(A.MUTANTS)
     for m in ("M8_topology_not_enforced", "M9_stage2_any_arm",
-              "M10_block_broken_not_propagated"):
-        assert m in A.MUTANTS, f"D9 的突變體 {m} 不見了"
+              "M10_block_broken_not_propagated",
+              "M11_endpoint_balance_not_checked"):
+        assert m in A.MUTANTS, f"D9／A1 的突變體 {m} 不見了"
     assert A.mutation_check() == 0
 
 
@@ -739,14 +784,19 @@ def test_analyzer_detection_strip_has_teeth() -> None:
 # 「併發」只買到排隊，牆鐘不會減半，而且沒有任何一個既有欄位會變紅。
 # 所以判準必須落在**端點身分**上，而端點身分唯一的落盤處是 calls.jsonl 的 `api`。
 # ══════════════════════════════════════════════════════════════════════
-def test_launcher_launches_both_blocks(sh: str) -> None:
-    """一支發射器發兩塊，各自 offset／n／端點；不是發一塊。"""
-    assert "OFFSET_A=0" in sh and "OFFSET_B=60" in sh, "兩塊的 offset 不對"
-    assert f"N_A={N_PER_BLOCK}" in sh and f"N_B={N_PER_BLOCK}" in sh
-    assert 'launch_block a "$OUT_A" "$OFFSET_A" "$N_A" "$API_A"' in sh
-    assert 'launch_block b "$OUT_B" "$OFFSET_B" "$N_B" "$API_B"' in sh
-    # 兩塊加起來要等於註冊的題數；少一塊就是另一個實驗。
-    assert 2 * N_PER_BLOCK == N_TASKS
+def test_launcher_launches_all_six_blocks(sh: str) -> None:
+    """一支發射器發六塊，各自 offset／端點；不是發一塊也不是發兩塊。"""
+    for tag, off in zip(BLOCKS, OFFSETS):
+        assert f"OFFSET_{tag.upper()}={off}" in sh, f"{tag} 的 offset 不是 {off}"
+    # 發射走的是同一張表，不准另外抄一份。
+    for tag, run, off in zip(BLOCKS, RUNS, OFFSETS):
+        api = "$API_A" if tag.startswith("a") else "$API_B"
+        assert f"{tag} $OUT_{tag.upper()} $OFFSET_{tag.upper()} {api}" in sh, \
+            f"BLOCK_TABLE 少了 {tag} 那一列"
+    assert 'launch_block "$tag" "$OUT" "$off" "$api"' in sh, "發射不是走 BLOCK_TABLE"
+    # 六塊加起來要等於註冊的題數；少一塊就是另一個實驗。
+    assert N_BLOCKS * N_PER_BLOCK == N_TASKS
+    assert len(RUNS) == N_BLOCKS
 
 
 def test_launcher_exports_the_endpoint_env_var_per_block(sh: str) -> None:
@@ -762,14 +812,25 @@ def test_launcher_exports_the_endpoint_env_var_per_block(sh: str) -> None:
         f"{ENDPOINT_ENV} 不是 brain_cline.endpoint() 讀的環境變數名"
 
 
-def test_launcher_refuses_the_hub_and_duplicate_endpoints(sh: str) -> None:
-    """D9 的兩條硬禁令：不准走 hub、兩塊不准同端點。"""
+def test_launcher_refuses_the_hub_and_endpoint_oversubscription(sh: str) -> None:
+    """D9／A1 的硬禁令：不准走 hub、兩顆端點不准同位址、每顆端點恰好三塊。
+
+    「同端點」在六塊之下**不再是違規、是設計**；要擋的變成**超賣**
+    （某台四塊 ⇒ 掉進實測 6 併發才有的退化區，而那看起來只是比較慢）。
+    """
     assert _var(sh, "HUB_MARK") == HUB_MARK
     assert "abort_hub_endpoint" in sh
     assert "abort_same_endpoint" in sh
-    assert '[ "$API_A" != "$API_B" ]' in sh, "沒有比較兩塊的端點"
+    assert "abort_endpoint_imbalance" in sh, "沒有擋端點超賣"
+    assert "abort_block_count" in sh, "沒有擋塊數不是 6"
+    assert '[ "$API_A" != "$API_B" ]' in sh, "沒有比較兩顆端點"
+    m = re.search(r"^BLOCKS_PER_ENDPOINT=(\d+)", sh, re.M)
+    assert m and int(m.group(1)) == BLOCKS_PER_ENDPOINT
     for api in (API_A, API_B):
         assert HUB_MARK not in api, f"註冊的端點 {api} 指向 hub"
+    # 表裡每顆端點真的是三塊（發射器自己數一次，本檔在此再數一次）。
+    assert sum(1 for t in BLOCKS if API_OF[t] == API_A) == BLOCKS_PER_ENDPOINT
+    assert sum(1 for t in BLOCKS if API_OF[t] == API_B) == BLOCKS_PER_ENDPOINT
 
 
 def test_launcher_probes_each_backend_not_the_hub(sh: str) -> None:
@@ -786,7 +847,7 @@ def test_launcher_probes_each_backend_not_the_hub(sh: str) -> None:
 
 
 def test_each_block_has_its_own_flock_and_log(sh: str) -> None:
-    """兩塊各自 flock、各自 launch.log——共用會讓第二塊安靜地不跑。"""
+    """六塊各自 flock、各自 launch.log——共用會讓後面幾塊安靜地不跑。"""
     assert 'lock="$ROOT/.launch_harness_lcb2_${tag}.lock"' in sh
     assert 'flock -n "$lock" python3 ops/gain/gain_run.py' in sh
     assert '>>"$OUT.launch.log"' in sh
@@ -795,35 +856,43 @@ def test_each_block_has_its_own_flock_and_log(sh: str) -> None:
 
 
 def test_worker_concurrency_and_block_parallelism_are_distinct(sh: str) -> None:
-    """平行度來自兩個行程，不是來自 runner 的旋鈕——兩個數字要分開寫。"""
+    """平行度來自六個行程，不是來自 runner 的旋鈕——兩個數字要分開寫。"""
     assert "WORKER_CONCURRENCY=1" in sh
-    assert "BLOCK_PARALLELISM=2" in sh
+    assert f"BLOCK_PARALLELISM={N_BLOCKS}" in sh
     assert "abort_concurrency_knob_appeared" in sh
     src = (ROOT / "ops" / "gain" / "gain_run.py").read_text(encoding="utf-8")
     assert "ThreadPoolExecutor(" not in src, \
         "runner 長出併發旋鈕了 ⇒ WORKER_CONCURRENCY=1 這格要重新裁決"
 
 
-def test_decision_registers_the_two_block_topology(dec: str) -> None:
-    """預註冊要寫死：兩個名字、兩個端點、合併分析、不准走 hub。"""
+def test_decision_registers_the_six_block_topology(dec: str) -> None:
+    """預註冊要寫死：六個名字、兩個端點、每顆三塊、合併分析、不准走 hub。"""
     assert "D9" in dec
-    assert RUN_A in dec and RUN_B in dec
+    for run in RUNS:
+        assert run in dec
     assert API_A in dec and API_B in dec
-    assert "--offset 0" in dec and "--offset 60" in dec
+    for off in OFFSETS:
+        assert f"--offset {off}" in dec
     assert ENDPOINT_ENV in dec, "DECISION 沒寫端點是靠哪個環境變數傳的"
     assert "hub" in dec and "禁止" in dec
+    assert "endpoint_block_count_not_3" in dec, "DECISION 沒指名超賣的擋門欄位"
+    assert "pooled_task_count_not_120" in dec, "DECISION 沒指名聯集擋門"
+    assert "block_count_not_6" in dec
     # 後端是 task 層級干擾項、不是 arm 層級混淆——D9 成立的全部理由。
     assert "task 層級" in dec and "arm 層級" in dec
 
 
-def test_decision_records_block_b_is_not_aligned_with_r447(dec: str) -> None:
-    """D9 要求寫明：block b 的 persona 指派與 r447 不對齊 ⇒ P-H0 只在 block a。"""
-    assert "只在 block a" in dec
-    assert "不對齊" in dec
-    assert "38.3" in dec and "68.3" in dec, "P-H0 放寬後的窗沒寫進 DECISION"
-    assert "53.33" in dec, "P-H0 的新錨（r447 前 60 題）沒寫進 DECISION"
+def test_decision_records_the_ph0_degradation(dec: str) -> None:
+    """A1 要求寫明：六塊之下 persona 只剩 a1 的前 20 題對齊 ⇒ P-H0 變成非配對探針。"""
+    assert "只在 a1+a2+a3" in dec, "DECISION 沒寫 P-H0 讀的是哪三塊"
+    assert "不對齊" in dec or "錯開" in dec
+    assert "38.3" in dec and "68.3" in dec, "P-H0 的窗沒寫進 DECISION"
+    assert "53.33" in dec, "P-H0 的錨（r447 前 60 題）沒寫進 DECISION"
     assert "±15pp" in dec
-    # 放寬要說理由，而且理由不准是「比較容易 HIT」。
+    # 窗**不准**因為 A1 再放寬——放寬只會讓它更容易 HIT。
+    assert "窗不因此再放寬" in dec, "沒有寫死「不再放寬」"
+    assert "非配對" in dec, "沒有寫明 P-H0 退化成非配對比較"
+    # 原本 ±15 的理由（n 減半）仍然要在。
     assert "n 減半" in dec
 
 
@@ -839,7 +908,7 @@ def test_prereg_and_analyzer_agree_on_the_ph0_window() -> None:
 def test_analyzer_pools_several_run_dirs() -> None:
     """`--run` 收多個目錄，依 task_id 合併；合併必須是**無損的**。
 
-    用 r447 的真 rows 切成兩塊再合併：交付數與 token 總量都必須逐字重現，
+    用 r447 的真 rows 切成**六塊**再合併：交付數與 token 總量都必須逐字重現，
     否則「合併」就是一條會安靜改數字的路徑。
     """
     run = ROOT / SEED_PRIOR_RUN
@@ -848,13 +917,13 @@ def test_analyzer_pools_several_run_dirs() -> None:
     from ops.gain import analyze_r460 as A
     from ops.gain.gain_run import load_tasks
     rows, _, calls = A.load_run(run)
-    a_ids = {t["task_id"] for t in load_tasks("lcb2", SEED, N_PER_BLOCK, offset=0)}
     blocks = []
-    for name, off, api, in_a in ((A.AUTHORIZED_BLOCKS[0], 0, API_A, True),
-                                 (A.AUTHORIZED_BLOCKS[1], N_PER_BLOCK, API_B, False)):
-        rs = [r for r in rows if (r["task_id"] in a_ids) == in_a]
+    for tag, name, off in zip(BLOCKS, A.AUTHORIZED_BLOCKS, OFFSETS):
+        ids = {t["task_id"] for t in load_tasks("lcb2", SEED, N_PER_BLOCK, offset=off)}
+        api = API_OF[tag]
+        rs = [r for r in rows if r["task_id"] in ids]
         cs = [dict(c, api=api) for c in calls
-              if ((c.get("meta") or {}).get("task_id", "") in a_ids) == in_a]
+              if (c.get("meta") or {}).get("task_id", "") in ids]
         n = len({r["task_id"] for r in rs})
         summ = {"run_terminal": True, "seed": SEED, "n": n, "offset": off,
                 "arms": {x: {"processed": n, "infra_void": 0, "wall_s": 1.0,
@@ -874,39 +943,65 @@ def test_analyzer_pools_several_run_dirs() -> None:
     assert out["tokens"]["OFF5"]["tokens_total_incl_void"] == 1692219, "合併改了 token 總量"
     # 逐塊報表在，而且結構與合併版相同（收官要能一眼看出哪一塊壞了）。
     assert sorted(out["blocks"]) == sorted(A.AUTHORIZED_BLOCKS)
-    assert out["block_order"][0] == A.AUTHORIZED_BLOCKS[0], "block a 不是排在前面"
+    assert out["block_order"] == list(A.AUTHORIZED_BLOCKS), "塊沒有依 offset 排序"
     for sub in out["blocks"].values():
         assert sub["per_arm"]["OFF"]["measured"] == N_PER_BLOCK
-    # P-H0 讀的是 block a 那一格，不是合併值。
+    # P-H0 讀的是 a1+a2+a3 的聯集，不是合併值、也不是任何單一塊。
     assert out["prereg"]["P-H0"]["source_field"] == \
-        f"blocks.{A.AUTHORIZED_BLOCKS[0]}.per_arm.OFF.deliv_pp_denom_measured"
+        "ph0_pool.per_arm.OFF.deliv_pp_denom_measured"
+    assert out["ph0_pool_blocks"] == list(A.PH0_BLOCKS)
+    assert out["ph0_pool"]["per_arm"]["OFF"]["measured"] == 60
     assert round(out["prereg"]["P-H0"]["value"], 2) == 53.33
     assert out["prereg"]["P-H0"]["value"] != \
         out["prereg"]["P-H0"]["pooled_off_deliv_pp_NOT_ARBITER"]
-    # 兩塊的端點都記下來了，而且是兩個不同的直連端點。
+    # 六塊的端點都記下來了：恰好兩個不同的直連端點、每個三塊。
     assert out["topology"]["endpoints_all"] == sorted([API_A, API_B])
-    assert out["topology"]["blocks_n"] == 2
+    assert out["topology"]["blocks_n"] == N_BLOCKS
+    assert out["topology"]["task_ids_union"] == N_TASKS
+    assert {k: len(v) for k, v in out["topology"]["blocks_per_endpoint"].items()} == \
+        {API_A: BLOCKS_PER_ENDPOINT, API_B: BLOCKS_PER_ENDPOINT}
 
 
 @pytest.mark.parametrize("kw,marker", [
     ({"hub": True}, "block_used_hub"),
     ({"overlap": True}, "block_task_overlap"),
-    ({"same_endpoint": True}, "blocks_share_endpoint"),
+    ({"overlap": True}, "pooled_task_count_not_120"),
+    ({"same_endpoint": True}, "endpoints_n_not_2"),
+    ({"imbalance": True}, "endpoint_block_count_not_3"),
 ])
 def test_analyzer_topology_violations_are_broken_reasons(kw, marker) -> None:
-    """三種拓撲違規各自要進 `broken_reasons`（E-7）。"""
+    """每一種拓撲違規各自要進 `broken_reasons`（E-7）。
+
+    `imbalance` 是 round460e 新增的那一格：端點還是兩顆、塊數還是六，
+    但被塞成 4／2。那個世界裡**沒有任何既有欄位會變紅**，只會比較慢。
+    """
     from ops.gain import analyze_r460 as A
     out = A._pooled(A._fixture_blocks(**kw))
     assert any(s.startswith(marker) for s in out["broken_reasons"]), \
         f"{marker} 沒有被算成 BROKEN：{out['broken_reasons']}"
 
 
-def test_analyzer_refuses_to_score_a_single_block() -> None:
-    """只給一塊就結算＝安靜地把 n 砍半換一個實驗；必須紅。"""
+def test_analyzer_refuses_to_score_a_partial_block_set() -> None:
+    """少給塊就結算＝安靜地把 n 砍掉換一個實驗；必須紅。"""
     from ops.gain import analyze_r460 as A
     out = A._pooled(A._fixture_blocks()[:1])
-    assert any(s.startswith("block_count_not_2") for s in out["broken_reasons"]), \
+    assert any(s.startswith("block_count_not_6") for s in out["broken_reasons"]), \
         out["broken_reasons"]
+    # 少一塊（五塊）也要紅——不是只擋「只有一塊」那個極端。
+    out5 = A._pooled(A._fixture_blocks()[:5])
+    assert any(s.startswith("block_count_not_6") for s in out5["broken_reasons"])
+    assert any(s.startswith("pooled_task_count_not_120")
+               for s in out5["broken_reasons"]), out5["broken_reasons"]
+
+
+def test_analyzer_refuses_to_judge_ph0_without_all_three_anchor_blocks() -> None:
+    """錨塊不齊 ⇒ P-H0 不判（缺一塊就換了一個錨，而錨換了窗沒有意義）。"""
+    from ops.gain import analyze_r460 as A
+    blocks = [b for b in A._fixture_blocks() if b["name"] != A.PH0_BLOCKS[1]]
+    out = A._pooled(blocks)
+    assert out["ph0_pool"] is None
+    assert out["prereg"]["P-H0"]["value"] is None
+    assert out["prereg"]["P-H0"]["hit"] == "UNEVALUABLE"
 
 
 def test_calls_log_really_carries_the_endpoint() -> None:
@@ -927,7 +1022,7 @@ def test_calls_log_really_carries_the_endpoint() -> None:
 
 def test_decision_pre_registers_the_pooled_analysis(dec: str) -> None:
     """合併分析要在資料之前註冊：指令、仲裁層級、塊間不可比都要寫。"""
-    assert f"--run {RUN_A} {RUN_B}" in dec, "收官指令沒有寫成兩塊一起餵"
+    assert "--run " + " ".join(RUNS) in dec, "收官指令沒有寫成六塊一起餵"
     assert "合併後的量" in dec
     assert "塊間點估計不得互相比較" in dec or "點估計不得互相比較" in dec
     assert "topology.violations" in dec
@@ -941,11 +1036,13 @@ def test_decision_freezes_stage_two_as_two_blocks(dec: str) -> None:
 
 
 def test_study_and_decision_agree_on_d9(study: str, dec: str) -> None:
-    """研究文件與預註冊不准對 D9 各說各話。"""
+    """研究文件與預註冊不准對 D9／A1 各說各話。"""
     for text, name in ((study, "HARNESS_STUDY"), (dec, "DECISION")):
-        assert RUN_A in text and RUN_B in text, name
+        for run in RUNS:
+            assert run in text, f"{name} 沒寫到 {run}"
         assert API_A in text and API_B in text, name
-        assert "只在 block a" in text, f"{name} 沒寫 P-H0 只在 block a"
+        assert "只在 a1+a2+a3" in text, f"{name} 沒寫 P-H0 讀的是哪三塊"
+        assert "每顆端點" in text or "每台三塊" in text, f"{name} 沒寫每顆端點三塊"
     assert "[38.3, 68.3]" in study and "[38.3, 68.3]" in dec
 
 

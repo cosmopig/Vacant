@@ -12,8 +12,8 @@
   （HARNESS_STUDY §5.8；**本 repo 第一次**——既有的 OFF／CONFORM／OFF5 只送題目敘述）。
   合法性依據：`visible` 測資照設計就是給供應者看的驗收條件
   （LCB 的 assert 訊息三個欄位全部來自 `visible_tests`），
-  **只有 `hidden \ visible`（隱藏測資扣掉可見測資）那一段才是 GT**。
-  所以這支稽核的對象逐字是 **`hidden \ visible`**，不是「有沒有測資進 prompt」
+  **只有 `hidden \\ visible`（隱藏測資扣掉可見測資）那一段才是 GT**。
+  所以這支稽核的對象逐字是 **`hidden \\ visible`**，不是「有沒有測資進 prompt」
   ——那個問題的答案是「有，而且是設計要的」，
   斷言「visible 沒出現」會**必然失敗**，因為它按設計就在裡面。
 
@@ -32,11 +32,24 @@
 
 **誠實邊界**：`repr(expected)` 太短時（`0`、`[]`、`True`）子字串比對必然命中，
 那不是洩漏而是量具沒有鑑別力。這支**不**把那種 needle 算成違規，但會**單獨列出
-被跳過的數量**——跳過的東西要說出來，不能讓「沒有違規」順手把「沒有檢查」蓋掉。
+被跳過的數量**（`needles_skipped_trivial`）——跳過的東西要說出來，
+不能讓「沒有違規」順手把「沒有檢查」蓋掉。
 
-用法（D9：兩塊各跑一次，兩塊都要綠才算過）：
-    python3 ops/gain/harness_vgt_audit.py --run runs/g_r460_harness_lcb2_a --bank lcb2
-    python3 ops/gain/harness_vgt_audit.py --run runs/g_r460_harness_lcb2_b --bank lcb2
+⚠ **round460e：量具修過一次，改的是量具不是判準**（2026-09-08）。
+  R460 冒煙（n=3）跑出 **24 筆 `hidden_case_leak`，全部**的 needle 是 `True`／`False`
+  ——來源是**模型自己**在回應裡寫的 `SELFTEST: […] -> True` 那幾行，
+  而隱藏測資的 `expected` 剛好也是布林值。四個字的 needle 在自然語言裡必然命中：
+  那是量具沒有鑑別力，不是 GT 洩漏。判準因此改成
+  「`repr` 落在**凍結的瑣碎字面值集合** `TRIVIAL_NEEDLE_REPRS` 內、
+  或長度 < `MIN_NEEDLE_CHARS`（6）⇒ 跳過並單獨計數」。
+  ⚠ 這一格放寬了偵測面，所以它必須**同時**有反向牙齒：
+  `tests/test_gain_harness_arms.py` 有一條負控——把一個**真的**隱藏 case 的 repr
+  塞進送出的文字，仍然必須判 VIOLATION。放寬而沒有負控＝把稽核關掉。
+
+用法（D9：**六塊各跑一次，六塊都要綠才算過**）：
+    for b in a1 a2 a3 b1 b2 b3; do
+      python3 ops/gain/harness_vgt_audit.py --run runs/g_r460_harness_lcb2_$b --bank lcb2
+    done
 """
 from __future__ import annotations
 
@@ -56,7 +69,21 @@ from ops.gain.harness_arms import (RULES_NO_CALL_LINE, VARIANTS,  # noqa: E402
 CODE_NEEDLES = ("__canon", "exec(", "__aeq", "__tests")
 
 # 短到子字串比對沒有鑑別力的 needle 不算違規，但要單獨計數。
-MIN_NEEDLE_CHARS = 4
+# 6：`True`(4)／`False`(5) 是冒煙實測踩到的兩個——模型自己會在回應裡寫
+# `SELFTEST: … -> True`，而隱藏 case 的 `expected` 剛好也是布林。
+MIN_NEEDLE_CHARS = 6
+
+#: **凍結**的瑣碎字面值集合：這些 repr 在任何一段自然語言／程式碼裡都會出現，
+#: 命中它們證明不了任何事。逐字凍結（不是用型別判斷）是為了讓「跳過什麼」
+#: 這件事可被逐字稽核——放寬偵測面的那一格必須自己說得出放寬了哪幾個字串。
+TRIVIAL_NEEDLE_REPRS = frozenset({
+    "True", "False", "None", "0", "1", "-1", "[]", "{}", "()", "''", '""',
+})
+
+
+def is_trivial_needle(needle: str) -> bool:
+    """這個 needle 有沒有鑑別力。沒有 ⇒ 跳過並單獨計數，**不算成 CLEAN 的證據**。"""
+    return needle in TRIVIAL_NEEDLE_REPRS or len(needle) < MIN_NEEDLE_CHARS
 
 
 #: 送出文字裡**唯一**允許出現 `exec(` 的地方：給模型的那句禁令（`harness_arms`
@@ -139,7 +166,7 @@ def hidden_only_needles(task: dict) -> tuple[list[str], list[str]]:
                 if key not in case:
                     continue
                 needle = repr(case[key])
-                (needles if len(needle) >= MIN_NEEDLE_CHARS else skipped).append(needle)
+                (skipped if is_trivial_needle(needle) else needles).append(needle)
         return needles, skipped
 
     vis_in, hid_in = mbpp_inputs(vis_code), mbpp_inputs(hid_code)
@@ -150,8 +177,7 @@ def hidden_only_needles(task: dict) -> tuple[list[str], list[str]]:
                 continue
             seen.add(expr)
             for needle in {expr, _literal_repr(expr)} - {None}:
-                (needles if len(needle) >= MIN_NEEDLE_CHARS
-                 else skipped).append(needle)
+                (skipped if is_trivial_needle(needle) else needles).append(needle)
         return needles, skipped
 
     raise SystemExit(f"認不出驗收碼形狀：{task['task_id']}——認不出來不是通過，是沒接上。停。")
@@ -218,8 +244,9 @@ def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict]) -> dict:
         "texts_audited": n_texts, "per_arm": per_arm,
         # 檢查了幾個 needle、跳過幾個——跳過的要說出來，
         # 不能讓「沒有違規」順手把「沒有檢查」蓋掉（見模組 docstring 的誠實邊界）。
+        # `needles_skipped_trivial` ＝ 落在 TRIVIAL_NEEDLE_REPRS 或長度 < 6 的那些。
         "needles_checked": n_checked,
-        "needles_skipped_too_short": n_skipped,
+        "needles_skipped_trivial": n_skipped,
         "unknown_task_ids": sorted(unknown_tasks),
         "violations": violations,
         "verdict": "CLEAN" if not violations and not unknown_tasks else "VIOLATION",

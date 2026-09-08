@@ -73,20 +73,37 @@ H_ARMS = ("HPI", "HOC", "HMIX")
 BASELINES = ("OFF", "CONFORM")
 ALL_ARMS = ("OFF", "CONFORM", "OFF5") + H_ARMS
 
-# ── D9：兩個後端、兩塊、併發跑 ───────────────────────────────────────
+# ── D9（round460e 修訂：**六塊**、兩個後端、每台三塊）───────────────────
 # 2026-09-07 15:40 實測：8765 這顆 hub **把 100% 的請求都路由到 1003**
 # （6 次探針：1003 +6、1004 +0），而且 n=8/12 併發打 hub 時吞吐**退化**
 # （206 → 175 → 144 tok/s）；兩顆直連後端各自在 n=4 熱身後約 110–120 tok/s，
 # 兩邊服務的都是 gemma-4-12b-it-qat。⇒ 走 hub 等於只用一張卡而且越併發越慢。
-# 所以本 run 切成兩塊、各自打**自己的直連後端**、同時跑。
 #
-# 關鍵設計：**後端是 task 層級的干擾項，永遠不是 arm 層級的混淆**——
-# 同一題的六條臂一定打同一個後端（塊內交錯），所以每一組配對比較的兩臂
-# 都在同一顆 GPU 上。塊間可以差（block b 實際上也比較難：medium 32／hard 28，
-# block a 是 40／20），但那不影響**塊內配對**，也不影響**合併後的配對**。
-AUTHORIZED_BLOCKS = ("g_r460_harness_lcb2_a", "g_r460_harness_lcb2_b")
+# **為什麼從兩塊變六塊**（round460e，2026-09-08，資料之前）：R460 的 n=3 冒煙量到
+# 每通呼叫 **160–560 s**、單通完成 token 最多 ~13k——LCB 這批題目比 r447 當時貴得多。
+# 一塊 60 題、序列送出 ⇒ 兩塊各要 **> 2 天**。而**直連**後端實測可以同時服務
+# 3 個請求而每個請求都不變慢（1 個 1.3 s／3 個併發各 1.3 s；6 個併發才開始退化）
+# ⇒ 一台後端掛三個序列 runner，吞吐 ×3，**每個請求的行為一個字沒變**。
+# 所以切成六塊、每台三塊、每塊 20 題。
+#
+# 關鍵設計**沒有變**：**後端是 task 層級的干擾項，永遠不是 arm 層級的混淆**——
+# 同一題的六條臂仍然在同一塊、同一個行程、同一個後端上跑完（塊內交錯），
+# 所以每一組配對比較的兩臂都在同一顆 GPU 上。塊間難度組成可以差
+# （a1 medium12/hard8、a2 13/7、a3 15/5、b1 10/10、b2 12/8、b3 10/10），
+# 那不影響**塊內配對**，也不影響**合併後的配對**。合併仍然按 `task_id`（R445 先例）。
+AUTHORIZED_BLOCKS = ("g_r460_harness_lcb2_a1", "g_r460_harness_lcb2_a2",
+                     "g_r460_harness_lcb2_a3", "g_r460_harness_lcb2_b1",
+                     "g_r460_harness_lcb2_b2", "g_r460_harness_lcb2_b3")
 HUB_MARKERS = (":8765",)          # D9 明文禁止：任何一塊都不准走 hub
-BLOCKS_EXPECTED = 2
+BLOCKS_EXPECTED = 6
+ENDPOINTS_EXPECTED = 2            # 恰好兩顆直連後端
+BLOCKS_PER_ENDPOINT = 3           # 每顆後端恰好三塊——多了就是在同一張卡上超賣
+TASKS_EXPECTED = 120              # 六塊 task_id 的**聯集**（＝ r447 的那 120 題）
+
+#: P-H0 的錨塊：offset 0/20/40 的三塊，聯集恰好是 r447 的**前 60 題**
+#: （§九-1 實測 `a1+a2+a3 == r447 OFF 的前 60 個 task_id`，錨 32/60 ＝ 53.33%）。
+#: 這三塊都在後端 1003 上，所以 P-H0 同時也是「1003 這台有沒有漂」的探針。
+PH0_BLOCKS = AUTHORIZED_BLOCKS[:BLOCKS_PER_ENDPOINT]
 
 REQUIRED = ("arm", "task_id", "meets_demand", "accepted", "calls_used", "visible_ok")
 REQUIRED_H = ("harness_variant", "harness_wire_mode", "harness_calls",
@@ -101,14 +118,20 @@ ALPHA = 0.05
 FALSE_DELIV_SLACK_PP = 5.0
 
 # HARNESS_STUDY §5.10 的十條預測窗（同上：本檔只是編碼，仲裁者是 DECISION）。
-# ⚠ P-H0 的窗因 D9 改過一次，**改在資料之前**：切塊之後每臂的
-# `random.Random(f"{seed}:{arm}")` 在**每一塊各自從頭開始**抽 ⇒ block b（offset 60）
-# 的 persona 指派不再與 r447 對齊，P-H0 這個後端漂移探針**只在 block a 上成立**。
-# 錨從 r447 的 61/120＝50.83% 換成 r447 **前 60 題**的 32/60＝53.33%，
-# 窗從 ±10pp（n=120）放寬到 **±15pp**（n=60，二項 SE 從 4.56pp 漲到 6.44pp，
-# ±10 × √2 ≈ ±14.1 ⇒ 取 ±15）。放寬的理由是 n 減半，不是為了讓它比較容易 HIT。
+# ⚠ P-H0 的窗因 D9 改過一次，**改在資料之前**（錨 32/60、窗 ±15pp），
+# round460e 切成六塊之後**窗與錨都不動**，但它讀的東西換了、而且變弱了：
+#   * 讀的東西：`ph0_pool` ＝ **a1+a2+a3 的聯集**（offset 0/20/40，各 20 題）。
+#     那個聯集逐題逐序等於 r447 的前 60 題 ⇒ 錨仍然是 32/60 ＝ 53.33%。
+#   * **變弱在哪（誠實邊界）**：每臂的 `random.Random(f"{seed}:{arm}")`
+#     在**每一塊各自從頭抽**（`gain_run.py:1490`）⇒ 兩塊時只有 block a 的 60 題
+#     與 r447 逐格同 persona；**六塊時只剩 a1 的前 20 題**還對得上。
+#     a2／a3 的 persona 指派會與 r447 錯開（邊際分佈相同、逐格不同）。
+#     ⇒ P-H0 從「配對比較」退化成「同一批 60 題上的兩個非配對估計」，
+#     噪音變大。**窗不因此再放寬**——放寬會讓它更容易 HIT，那不是誠實的方向；
+#     真的 MISS 時照 §三 P-H0 的 `scope`：只作廢與 r447 的橫向比較，
+#     本 run 內部六臂的比較仍然有效（同一題六臂共享同一塊、同一個後端）。
 PREREG = {
-    "P-H0": ("OFF 交付率 (%)（後端漂移探針；只在 block a 的 60 題上判）", 38.3, 68.3),
+    "P-H0": ("OFF 交付率 (%)（後端漂移探針；只在 a1+a2+a3 的 60 題上判）", 38.3, 68.3),
     "P-H3": ("H 臂 calls_per_task", 1.8, 3.2),
     "P-H4": ("H 臂假交付率 (%) 上界", None, 35.0),
     "P-H5": ("HOC/HMIX 以 loader 收尾的輪次比例 (%)", None, 0.5),
@@ -663,6 +686,19 @@ def analyze(rows: list[dict], summary: dict, calls: list[dict],
             b["name"]: analyze(b["rows"], b["summary"], b["calls"],
                                bank=bank, turn1=turn1, blocks=None)
             for b in blocks}
+        # P-H0 的錨塊池：a1+a2+a3 的聯集（＝ r447 的前 60 題）。三塊缺一塊就
+        # **不算**——「拿兩塊當 60 題」會安靜地換一個錨，而錨換了窗就沒有意義。
+        ph0 = [b for b in blocks if b["name"] in PH0_BLOCKS]
+        if len(ph0) == len(PH0_BLOCKS):
+            out["ph0_pool"] = analyze(
+                [r for b in ph0 for r in b["rows"]],
+                merge_summaries([b["summary"] for b in ph0]),
+                [c for b in ph0 for c in b["calls"]],
+                bank=bank, turn1=turn1, blocks=None)
+            out["ph0_pool_blocks"] = [b["name"] for b in ph0]
+        else:
+            out["ph0_pool"] = None
+            out["ph0_pool_blocks"] = [b["name"] for b in ph0]
         # ⚠ 逐塊的 BROKEN 要往上帶。合併是**相加**，而相加會讓兩塊反向的錯誤互相抵銷：
         #   block a 的 `processed` 多算一題、block b 少算一題 ⇒ 合併帳剛好對得上，
         #   逐塊才看得出來。所以帳本身逐塊查，違規往上冒。
@@ -681,18 +717,18 @@ def analyze(rows: list[dict], summary: dict, calls: list[dict],
         if len(blocks) > 1:
             out["notes"].append(
                 "分塊只是機時拓撲；仲裁一律取合併後的量（per_arm／paired／holm／decision），"
-                "塊內數字是描述性的。lcb2 的 block b 題目較難"
-                "（medium 32／hard 28 對 block a 的 40／20）⇒ **兩塊的點估計不得互相比較**，"
-                "配對比較只在塊內或合併後成立。")
+                "塊內數字是描述性的。六塊的難度組成不同"
+                "（a1 medium12/hard8、a2 13/7、a3 15/5、b1 10/10、b2 12/8、b3 10/10）"
+                "⇒ **塊間點估計不得互相比較**，配對比較只在塊內或合併後成立。")
             out["notes"].append(
-                "⚠ 合併後每臂的 `wall_s` 是**兩塊相加**＝該臂燒掉的總算力時間，"
-                "**不是**牆鐘經過時間（兩塊是併發跑的，牆鐘大約只有它的一半）。"
+                "⚠ 合併後每臂的 `wall_s` 是**六塊相加**＝該臂燒掉的總算力時間，"
+                "**不是**牆鐘經過時間（六塊是併發跑的：兩台後端各三個行程）。"
                 "`wall_s_per_task` 因此仍然是對的（每題平均算力時間），"
                 "但「這個 run 花了幾小時」要看發射器的 log，不要讀這一格。")
         else:
             out["notes"].append(
                 f"單塊分析（{blocks[0]['name']}）：這不是 R460 的收官讀法。"
-                "仲裁要兩塊一起餵 --run。")
+                "仲裁要六塊一起餵 --run。")
 
     # ── 事前預測 ─────────────────────────────────────────────────────
     out["prereg"] = prereg_hits(out)
@@ -715,18 +751,27 @@ def window_hit(key: str, val: float | None) -> str:
 def prereg_hits(out: dict) -> dict:
     per, paired, tokens = out["per_arm"], out["paired"], out["tokens"]
     res: dict = {}
-    # D9：P-H0 只在 block a 上判。切塊之後每臂的 rng 在每一塊各自從頭抽 ⇒
-    # block b（offset 60）的 persona 指派與 r447 不對齊，拿它當漂移探針是錯的。
+    # D9（round460e）：P-H0 只在 **a1+a2+a3 的聯集**上判——那 60 題逐題逐序
+    # 就是 r447 的前 60 題，錨 32/60＝53.33%。b* 那三塊是另外 60 題，不併進來。
     order = out.get("block_order") or []
-    blocks = out.get("blocks") or {}
-    if order:
-        ba = order[0]
-        v_h0 = (((blocks.get(ba) or {}).get("per_arm") or {}).get("OFF")
+    pool = out.get("ph0_pool")
+    if order and pool:
+        v_h0 = ((pool.get("per_arm") or {}).get("OFF")
                 or {}).get("deliv_pp_denom_measured")
-        h0_src = f"blocks.{ba}.per_arm.OFF.deliv_pp_denom_measured"
-        h0_note = (f"只在 block a（{ba}，offset 0 的 60 題）上判；錨＝r447 前 60 題的"
-                   " 32/60＝53.33%，窗 ±15pp。block b 的 persona 指派與 r447 不對齊"
-                   "（每臂的 rng 在每一塊各自從頭抽）⇒ **不判、也不併進這一條**。")
+        h0_src = "ph0_pool.per_arm.OFF.deliv_pp_denom_measured"
+        h0_note = ("只在 " + "＋".join(out.get("ph0_pool_blocks") or []) +
+                   " 的聯集（offset 0/20/40，共 60 題）上判；"
+                   "錨＝r447 前 60 題的 32/60＝53.33%，窗 ±15pp。"
+                   "b* 那三塊是另外 60 題 ⇒ **不判、也不併進這一條**。"
+                   "⚠ 誠實邊界：每臂的 rng 在每一塊各自從頭抽 ⇒ 六塊之下"
+                   "只有 a1 的前 20 題與 r447 逐格同 persona，a2／a3 會錯開；"
+                   "本條因此是非配對比較，噪音比兩塊版大，**窗不因此再放寬**。")
+    elif order:
+        v_h0 = None
+        h0_src = "ph0_pool.per_arm.OFF.deliv_pp_denom_measured"
+        h0_note = ("錨塊不齊（需要 " + "／".join(PH0_BLOCKS) + "，實際只有 " +
+                   "／".join(out.get("ph0_pool_blocks") or ["(無)"]) +
+                   "）⇒ **不判**。缺一塊就換了一個錨，而錨換了窗沒有意義。")
     else:
         v_h0 = (per.get("OFF") or {}).get("deliv_pp_denom_measured")
         h0_src = "per_arm.OFF.deliv_pp_denom_measured"
@@ -935,18 +980,28 @@ def pool_runs(paths: list[pathlib.Path]) -> tuple[list[dict], dict, list[dict], 
 
 
 def topology_report(blocks: list[dict]) -> dict:
-    """D9 的三條硬規則，逐條可判、違反就進 `broken_reasons`。
+    """D9 的硬規則（round460e：六塊版），逐條可判、違反就進 `broken_reasons`。
 
-    1. **塊之間 task_id 零交集**——併不了的東西不准併
+    1. **塊之間 task_id 兩兩零交集**，且**聯集恰好 120 題**——併不了的東西不准併
        （`CRITERION_20260903_R680_POOL_PRECONDITIONS.md` 的 Q1）。
+       ⚠ 交集的判準必須是**聯集大小**不是各塊題數相加：兩塊重疊 5 題時
+       「相加」仍然是 120，只有聯集會掉到 115。
     2. **一塊一端點**：同一塊裡出現兩個 `api` ⇒ 那一塊自己就是混的，不可分析。
-    3. **不准走 hub、兩塊不准同端點**：D9 量到 hub 把 100% 請求路由到同一顆後端、
-       且併發越高吞吐越差；兩塊同端點＝兩個 run 打同一顆 GPU（SPEC_GAIN §7 禁）。
+    3. **不准走 hub**：D9 量到 hub 把 100% 請求路由到同一顆後端、且併發越高越慢。
+    4. **恰好兩個端點、每個端點恰好三塊**（round460e 取代舊的「兩塊不准同端點」）。
+       六塊之下「同端點」不再是違規——**是設計**（一台後端三個序列 runner，
+       實測 3 併發不掉速）。真正要擋的變成**超賣**：某台被塞了四塊、另一台兩塊，
+       那台就從「3 併發不掉速」掉進「6 併發開始退化」的區間，而那**看起來只是比較慢**，
+       沒有任何既有欄位會變紅。所以逐端點數塊數，不等於 3 就判。
+    5. 塊數必須是 6：只跑得完一部分就結算＝安靜地換一個 n。
 
-    另外查 seed／臂集合一致與塊數。`enforce` 為 False 時只描述不判——
+    另外查 seed／臂集合一致。`enforce` 為 False 時只描述不判——
     那是給「拿這支去看 r447 這類歷史單塊資料」用的診斷路徑。
     """
     rep: dict = {"blocks_n": len(blocks), "blocks_expected": BLOCKS_EXPECTED,
+                 "endpoints_expected": ENDPOINTS_EXPECTED,
+                 "blocks_per_endpoint_expected": BLOCKS_PER_ENDPOINT,
+                 "tasks_expected": TASKS_EXPECTED,
                  "by_block": {}, "violations": []}
     for b in blocks:
         rep["by_block"][b["name"]] = {
@@ -974,14 +1029,20 @@ def topology_report(blocks: list[dict]) -> dict:
         for ep in b["endpoints"]:
             if any(m in ep for m in HUB_MARKERS):
                 rep["violations"].append(f"block_used_hub:{b['name']}:{ep}")
-    seen: dict[str, str] = {}
+    # 4) 端點數與每端點塊數（round460e 取代舊的 blocks_share_endpoint）
+    by_ep: dict[str, list[str]] = {}
     for b in blocks:
         for ep in b["endpoints"]:
-            if ep in seen and seen[ep] != b["name"]:
+            by_ep.setdefault(ep, []).append(b["name"])
+    rep["blocks_per_endpoint"] = {ep: sorted(v) for ep, v in sorted(by_ep.items())}
+    if MUTANT != "M11_endpoint_balance_not_checked":
+        if len(by_ep) != ENDPOINTS_EXPECTED:
+            rep["violations"].append(f"endpoints_n_not_{ENDPOINTS_EXPECTED}:{len(by_ep)}")
+        for ep, names in sorted(by_ep.items()):
+            if len(set(names)) != BLOCKS_PER_ENDPOINT:
                 rep["violations"].append(
-                    f"blocks_share_endpoint:{seen[ep]}|{b['name']}:{ep}")
-            seen.setdefault(ep, b["name"])
-    # 4) seed／臂／塊數
+                    f"endpoint_block_count_not_{BLOCKS_PER_ENDPOINT}:{ep}:{len(set(names))}")
+    # 5) seed／臂／塊數
     seeds = {b["seed"] for b in blocks}
     if len(seeds) > 1:
         rep["violations"].append(f"block_seed_mismatch:{sorted(map(str, seeds))}")
@@ -993,8 +1054,16 @@ def topology_report(blocks: list[dict]) -> dict:
         rep["violations"].append(f"block_offset_collision:{offsets}")
     if len(blocks) != BLOCKS_EXPECTED:
         rep["violations"].append(f"block_count_not_{BLOCKS_EXPECTED}:{len(blocks)}")
-    rep["endpoints_all"] = sorted(seen)
+    # 6) 聯集恰好 120 題（＝ r447 的那 120 題；同 seed 同 bank ⇒ 同一批）
+    union: set = set()
+    for b in blocks:
+        union |= b["task_ids"]
+    rep["endpoints_all"] = sorted(by_ep)
     rep["task_ids_pooled"] = sum(len(b["task_ids"]) for b in blocks)
+    rep["task_ids_union"] = len(union)
+    if len(union) != TASKS_EXPECTED:
+        rep["violations"].append(
+            f"pooled_task_count_not_{TASKS_EXPECTED}:{len(union)}")
     return rep
 
 
@@ -1037,14 +1106,16 @@ def render(out: dict) -> str:
     topo = out.get("topology")
     if topo:
         L.append("")
-        L.append("── D9 機時拓撲（兩塊、兩顆直連後端、併發；仲裁一律取合併後的量）")
+        L.append("── D9 機時拓撲（六塊、兩顆直連後端各三塊、併發；仲裁一律取合併後的量）")
         L.append(f"{'block':26}{'offset':>8}{'n':>5}{'rows':>7}{'題數':>7}  端點")
         for name, b in topo["by_block"].items():
             L.append(f"{name:26}{b['offset']:>8}{b['n']:>5}{b['n_rows']:>7}"
                      f"{b['n_tasks']:>7}  {'|'.join(b['endpoints']) or '(未落盤)'}")
         L.append(f"塊數 {topo['blocks_n']}/{topo['blocks_expected']}　"
-                 f"合併題數 {topo['task_ids_pooled']}　"
+                 f"合併題數(聯集) {topo.get('task_ids_union')}/{topo.get('tasks_expected')}　"
                  f"違規 {topo['violations'] or '[]'}")
+        for ep, names in (topo.get("blocks_per_endpoint") or {}).items():
+            L.append(f"  {ep}  ←  {len(names)} 塊：{', '.join(names)}")
         for name, sub in (out.get("blocks") or {}).items():
             po = (sub.get("per_arm") or {})
             cells = "  ".join(
@@ -1052,8 +1123,12 @@ def render(out: dict) -> str:
                 f"{(po.get(a) or {}).get('measured', '-')}" for a in ALL_ARMS if a in po)
             L.append(f"  [{name}] {cells}")
         if topo["blocks_n"] > 1:
-            L.append("  ⚠ 兩塊題目難度組成不同（lcb2：block b medium 32／hard 28，"
-                     "block a 40／20）⇒ 塊間點估計不得互相比較。")
+            L.append("  ⚠ 六塊題目難度組成不同（lcb2：a1 12/8、a2 13/7、a3 15/5、"
+                     "b1 10/10、b2 12/8、b3 10/10，medium/hard）⇒ 塊間點估計不得互相比較。")
+        ph0b = out.get("ph0_pool_blocks")
+        if ph0b is not None:
+            L.append(f"  P-H0 錨塊池：{'＋'.join(ph0b) or '(不齊，不判)'}"
+                     f"（＝ r447 前 60 題；錨 32/60＝53.33%，窗 ±15pp）")
     L.append("")
     L.append("── 逐臂主指標（分母 measured ＝ processed − infra_void）")
     L.append(f"{'arm':8}{'n':>5}{'void':>6}{'acc':>6}{'deliv':>7}{'deliv%':>9}"
@@ -1262,27 +1337,40 @@ def _fixture_windows():
     return rows, summ, _calls_for(rows)
 
 
-def _fixture_blocks(*, overlap: bool = False, hub: bool = False,
-                    same_endpoint: bool = False) -> list[dict]:
-    """D9 的兩塊夾具：把主夾具的 120 題切成 t0..t59（block a）與 t60..t119（block b）。
+API_A_FIXTURE = "http://100.119.113.56:1234/v1/chat/completions"
+API_B_FIXTURE = "http://100.86.226.21:1234/v1/chat/completions"
+API_HUB_FIXTURE = "http://100.119.113.56:8765/v1/chat/completions"
 
-    三個旗標各自製造一種**必須被抓到**的違規：題目交集、走 hub、兩塊同端點。
+
+def _fixture_blocks(*, overlap: bool = False, hub: bool = False,
+                    same_endpoint: bool = False,
+                    imbalance: bool = False) -> list[dict]:
+    """D9 的**六塊**夾具：把主夾具的 120 題切成 6 × 20（offset 0/20/…/100）。
+
+    四個旗標各自製造一種**必須被抓到**的違規：
+      `overlap`       a2 往前挪 5 題 ⇒ 與 a1 有交集，而且聯集掉到 115；
+      `hub`           b1 走 8765；
+      `same_endpoint` 六塊全部打 api_a ⇒ 端點數不是 2；
+      `imbalance`     b3 改打 api_a ⇒ 端點還是 2 顆，但變成 4／2（超賣）。
     """
     rows, _, _ = _fixture()
-    api_a = "http://100.119.113.56:1234/v1/chat/completions"
-    api_b = ("http://100.119.113.56:8765/v1/chat/completions" if hub else
-             api_a if same_endpoint else
-             "http://100.86.226.21:1234/v1/chat/completions")
+    offsets = [0, 20, 40, 60, 80, 100]
+    apis = [API_A_FIXTURE] * 3 + [API_B_FIXTURE] * 3
+    if same_endpoint:
+        apis = [API_A_FIXTURE] * 6
+    if imbalance:
+        apis = [API_A_FIXTURE] * 3 + [API_B_FIXTURE] * 2 + [API_A_FIXTURE]
+    if hub:
+        apis[3] = API_HUB_FIXTURE
+    if overlap:
+        offsets[1] = 15
 
     def idx(r):
         return int(r["task_id"][1:])
 
-    cut_a, cut_b = 60, (55 if overlap else 60)
-    ra = [r for r in rows if idx(r) < cut_a]
-    rb = [r for r in rows if idx(r) >= cut_b]
     out = []
-    for name, rs, api, off in ((AUTHORIZED_BLOCKS[0], ra, api_a, 0),
-                               (AUTHORIZED_BLOCKS[1], rb, api_b, cut_b)):
+    for name, off, api in zip(AUTHORIZED_BLOCKS, offsets, apis):
+        rs = [r for r in rows if off <= idx(r) < off + 20]
         n = len({r["task_id"] for r in rs})
         calls = _calls_for(rs)
         for c in calls:
@@ -1295,6 +1383,7 @@ def _fixture_blocks(*, overlap: bool = False, hub: bool = False,
                     "offset": off, "n": n, "seed": "g-r440-lcb2",
                     "arms": sorted(ALL_ARMS),
                     "task_ids": {r["task_id"] for r in rs}})
+    out.sort(key=lambda b: (b["offset"], b["name"]))
     return out
 
 
@@ -1390,14 +1479,16 @@ def selftest() -> int:
     ck("Q2_block_reports_present",
        sorted(bo["blocks"]) == sorted(AUTHORIZED_BLOCKS)
        and bo["block_order"][0] == AUTHORIZED_BLOCKS[0]
-       and all(v["measured"] == 60
+       and all(v["measured"] == 20
                for v in bo["blocks"][AUTHORIZED_BLOCKS[0]]["per_arm"].values()),
        str(sorted(bo.get("blocks") or {})))
-    ck("Q3_ph0_reads_block_a",
+    ck("Q3_ph0_reads_the_1003_blocks",
        bo["prereg"]["P-H0"]["source_field"]
-       == f"blocks.{AUTHORIZED_BLOCKS[0]}.per_arm.OFF.deliv_pp_denom_measured"
+       == "ph0_pool.per_arm.OFF.deliv_pp_denom_measured"
+       and bo["ph0_pool_blocks"] == list(PH0_BLOCKS)
        and bo["prereg"]["P-H0"]["value"]
-       == bo["blocks"][AUTHORIZED_BLOCKS[0]]["per_arm"]["OFF"]["deliv_pp_denom_measured"],
+       == bo["ph0_pool"]["per_arm"]["OFF"]["deliv_pp_denom_measured"]
+       and bo["ph0_pool"]["per_arm"]["OFF"]["measured"] == 60,
        str(bo["prereg"]["P-H0"]))
     ck("Q4_hub_use_is_caught",
        any(s.startswith("block_used_hub")
@@ -1406,12 +1497,22 @@ def selftest() -> int:
     ck("Q5_block_overlap_is_caught",
        any(s.startswith("block_task_overlap")
            for s in _pooled(_fixture_blocks(overlap=True))["broken_reasons"]))
-    ck("Q6_shared_endpoint_is_caught",
-       any(s.startswith("blocks_share_endpoint")
+    ck("Q6_endpoint_count_is_caught",
+       any(s.startswith(f"endpoints_n_not_{ENDPOINTS_EXPECTED}")
            for s in _pooled(_fixture_blocks(same_endpoint=True))["broken_reasons"]))
-    ck("Q7_single_authorized_block_is_caught",
-       any(s.startswith("block_count_not_2")
+    ck("Q7_partial_block_set_is_caught",
+       any(s.startswith(f"block_count_not_{BLOCKS_EXPECTED}")
            for s in _pooled(_fixture_blocks()[:1])["broken_reasons"]))
+    # round460e 的新牙齒：端點還是兩顆、塊數還是六——但被塞成 4／2（超賣）。
+    # 這個世界裡沒有任何既有欄位會變紅，只會「比較慢」。
+    ck("Q9_endpoint_imbalance_is_caught",
+       any(s.startswith(f"endpoint_block_count_not_{BLOCKS_PER_ENDPOINT}")
+           for s in _pooled(_fixture_blocks(imbalance=True))["broken_reasons"]),
+       str(_pooled(_fixture_blocks(imbalance=True))["broken_reasons"]))
+    ck("Q10_pooled_task_union_is_120",
+       _pooled(_fixture_blocks())["topology"]["task_ids_union"] == TASKS_EXPECTED
+       and any(s.startswith(f"pooled_task_count_not_{TASKS_EXPECTED}")
+               for s in _pooled(_fixture_blocks(overlap=True))["broken_reasons"]))
     # 逐塊帳要逐塊查：兩塊反向的錯誤在合併帳上會互相抵銷。
     bal = _fixture_blocks()
     bal[0]["summary"]["arms"]["OFF"]["processed"] += 1
@@ -1492,6 +1593,8 @@ MUTANTS = {
     "M8_topology_not_enforced": "Q4_hub_use_is_caught",
     "M9_stage2_any_arm": "R_stage2_follows_hmix_only",
     "M10_block_broken_not_propagated": "Q8_block_accounting_errors_do_not_cancel",
+    # round460e：每端點三塊那一格如果沒有牙齒，「一台四塊、一台兩塊」會全綠通過。
+    "M11_endpoint_balance_not_checked": "Q9_endpoint_imbalance_is_caught",
 }
 
 

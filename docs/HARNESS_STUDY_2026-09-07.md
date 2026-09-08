@@ -916,44 +916,51 @@ elif arm in ("HPI", "HOC", "HMIX"):
 - `extract_code`、`meets_demand`、`behavior_signature`、`conform_failure_detail`、
   `_visible_test_slicer` 一個字都不動（H 臂只**呼叫**它們）。
 
-**啟動指令**（D9：**兩塊、兩顆直連後端、併發**；`--decision` 閘門要求 DECISION 檔內文含 run 名字）：
+**啟動指令**（D9／A1：**六塊、兩顆直連後端、每顆端點三塊、併發**；
+`--decision` 閘門要求 DECISION 檔內文含 run 名字）：
 
 ```
-# block a —— VACANT_GAIN_API=http://100.119.113.56:1234/v1/chat/completions
+# a1/a2/a3 —— VACANT_GAIN_API=http://100.119.113.56:1234/v1/chat/completions
+#   runs/g_r460_harness_lcb2_a1 --offset 0
+#   runs/g_r460_harness_lcb2_a2 --offset 20
+#   runs/g_r460_harness_lcb2_a3 --offset 40
+# b1/b2/b3 —— VACANT_GAIN_API=http://100.86.226.21:1234/v1/chat/completions
+#   runs/g_r460_harness_lcb2_b1 --offset 60
+#   runs/g_r460_harness_lcb2_b2 --offset 80
+#   runs/g_r460_harness_lcb2_b3 --offset 100
 python3 ops/gain/gain_run.py \
-  --out runs/g_r460_harness_lcb2_a \
+  --out <OUT> \
   --decision DECISION_20260907_R460_HARNESS_PREREG.md \
-  --bank lcb2 --n 60 --offset 0 --seed g-r440-lcb2 \
+  --bank lcb2 --n 20 --offset <OFFSET> --seed g-r440-lcb2 \
   --arms OFF,CONFORM,OFF5,HPI,HOC,HMIX \
   --models gemma-4-12b-it-qat \
   --probe-sample 0 \
-  --request-timeout-s 600 --retries 4
-
-# block b —— VACANT_GAIN_API=http://100.86.226.21:1234/v1/chat/completions
-python3 ops/gain/gain_run.py \
-  --out runs/g_r460_harness_lcb2_b \
-  --decision DECISION_20260907_R460_HARNESS_PREREG.md \
-  --bank lcb2 --n 60 --offset 60 --seed g-r440-lcb2 \
-  --arms OFF,CONFORM,OFF5,HPI,HOC,HMIX \
-  --models gemma-4-12b-it-qat \
-  --probe-sample 0 \
-  --request-timeout-s 600 --retries 4
+  --request-timeout-s 1200 --retries 4
 ```
 
-發射器 `ops/gain/launch_harness_lcb2.sh` 一支發兩塊，各自 `flock`、各自 `launch.log`，
-各自探**自己的**後端 `/v1/models`（**不探 hub**）。收官一律兩塊一起餵給 analyzer：
-`python3 ops/gain/analyze_r460.py --run runs/g_r460_harness_lcb2_a runs/g_r460_harness_lcb2_b --bank lcb2 --rescore-turn1`。
+發射器 `ops/gain/launch_harness_lcb2.sh` 一支發六塊，各自 `flock`、各自 `launch.log`，
+兩顆後端各探一次 `/v1/models`（**不探 hub**）。收官一律六塊一起餵給 analyzer：
+`python3 ops/gain/analyze_r460.py --run runs/g_r460_harness_lcb2_a1 runs/g_r460_harness_lcb2_a2 runs/g_r460_harness_lcb2_a3 runs/g_r460_harness_lcb2_b1 runs/g_r460_harness_lcb2_b2 runs/g_r460_harness_lcb2_b3 --bank lcb2 --rescore-turn1`。
+
+**為什麼是六塊（round460e，2026-09-08，資料之前）**：R460 的 n=3 冒煙量到這批 LCB
+題目**每通呼叫 160–560 s**、單通完成 token 最多 ~13k ⇒ 一塊 60 題序列跑要 > 2 天。
+而**直連**後端實測 1 個請求 1.3 s、**3 個併發各自仍是 1.3 s**、6 個併發才退化
+⇒ 一台後端掛三個序列 runner。`--request-timeout-s` 同時從 600 提高到 **1200**：
+三併發之下 600 會把正常的長生成誤判成逾時 ⇒ 假的 `infra_void`。
+**每顆端點恰好三塊**是硬規則（超賣會掉進退化區，而那看起來只是比較慢）：
+發射器 `abort_endpoint_imbalance` 擋一次，analyzer 的
+`endpoint_block_count_not_3` 再擋一次。
 
 `--seed g-r440-lcb2` **必須與 r447 相同**：`LiveCodeBenchLoader.iter_tasks` 用
-`sha256(f"{seed}:{task_id}")` 排序 ⇒ 同 seed ＝ 同題序；而每臂的 rng 是
-`random.Random(f"{seed}:{arm}")` ⇒ 新的 OFF 臂會把**同一個 persona 指派給同一題**，
-與 r447 的 OFF 逐格對齊。這讓「新 OFF vs r447 OFF」變成一個乾淨的**後端漂移探針**（§5.1）。
+`sha256(f"{seed}:{task_id}")` 排序 ⇒ 同 seed ＝ 同題序，六塊接起來逐題逐序等於
+r447 的那 120 題，而 **a1+a2+a3 就是 r447 的前 60 題**。
 
-⚠ **D9 的代價，寫在指令旁邊**：那顆 rng **在每一塊各自從頭抽**
-⇒ **只有 block a（offset 0）的 persona 指派與 r447 對齊**。
-block b 的第 1 題拿到的是 r447 第 1 題的 persona，不是第 61 題的
-⇒ **P-H0 這個漂移探針只在 block a 上成立**，錨換成 r447 前 60 題的 32/60 ＝ 53.33%、
-窗從 ±10pp 放寬成 ±15pp（n 從 120 掉到 60）。詳見
+⚠ **D9／A1 的代價，寫在指令旁邊**：每臂的 rng 是 `random.Random(f"{seed}:{arm}")`，
+它**在每一塊各自從頭抽** ⇒ **只有 a1 的前 20 題的 persona 指派與 r447 對齊**；
+a2 的第 1 題拿到的是 r447 第 1 題的 persona，不是第 21 題的。
+⇒ **P-H0 這個漂移探針只在 a1+a2+a3 的聯集上判**，而且是**非配對**的粗探針；
+錨仍是 r447 前 60 題的 32/60 ＝ 53.33%、窗仍是 ±15pp（n=60）——
+**不因為變吵而再放寬**（放寬只會讓它更容易 HIT）。詳見
 `DECISION_20260907_R460_HARNESS_PREREG.md` §二-5 與 §三 P-H0。
 
 ### 4.6 必須有的測試（全部零 API 呼叫，`tests/test_gain_harness_arms.py`）
@@ -1013,18 +1020,23 @@ McNemar 的配對是逐題的，跨 run 配對在算術上沒問題。
 沿用「量具要先答已知答案」那條紀律，只是這次驗的是端點不是判定邏輯。
 預註冊：
 
-> **P-H0（後端漂移探針；D9 之後只在 block a 上判）**：
-> `runs/g_r460_harness_lcb2_a`（offset 0 的 60 題）的 OFF 臂交付率落在
+> **P-H0（後端漂移探針；D9／A1 之後只在 a1+a2+a3 的聯集上判）**：
+> `runs/g_r460_harness_lcb2_a1`＋`runs/g_r460_harness_lcb2_a2`＋
+> `runs/g_r460_harness_lcb2_a3`（offset 0/20/40，共 60 題）的 OFF 臂交付率落在
 > **53.33% ± 15pp**（＝[38.3, 68.3]）之內。落在區間外 ⇒ 後端已漂移，
 > **本 run 與 r447 的任何橫向比較作廢**，而本 run 內部的六臂比較仍然有效
-> （同一題的六臂共享同一顆後端）。
+> （同一題的六臂共享同一顆後端、同一個行程）。
+> 仲裁欄位是 `prereg.P-H0.value`＝`ph0_pool.per_arm.OFF.deliv_pp_denom_measured`。
 >
-> 兩個數字都因 D9 換過，**換在資料之前**：錨從 61/120 ＝ 50.83% 換成 r447
-> **前 60 題**的 32/60 ＝ 53.33%（block a 就是那 60 題、同序）；
+> 兩個數字都因 D9 換過一次，**換在資料之前**：錨從 61/120 ＝ 50.83% 換成 r447
+> **前 60 題**的 32/60 ＝ 53.33%（a1+a2+a3 就是那 60 題、同序）；
 > 窗從 ±10pp 放寬成 ±15pp（n 從 120 掉到 60，二項 SE 從 4.56 漲到 6.44pp，
 > ±10×√2 ≈ ±14.1 ⇒ 取 ±15）。**放寬的理由是 n 減半，不是為了讓它容易 HIT。**
-> **block b 不判**：它的 persona 指派與 r447 不對齊（每臂的 rng 在每一塊各自從頭抽）。
-> ⇒ **block b 那顆後端（`100.86.226.21:1234`）沒有事前錨**，本 run 對它一句話都不能說。
+> A1（六塊）之後這兩個數字**都不再動**，但這條探針**變弱了**：
+> 只有 a1 的前 20 題還與 r447 逐格同 persona，而且 request timeout 從 600 變 1200
+> ⇒ 它是背了兩個差異的非配對比較。**變弱不是放寬窗的理由。**
+> **b* 那三塊不判**：它們是另外 60 題。
+> ⇒ **b* 那顆後端（`100.86.226.21:1234`）沒有事前錨**，本 run 對它一句話都不能說。
 
 **⚠ D2 裁定：OFF5 不准省跑。** 初稿在這裡寫「機時不夠時唯一可接受的省法是砍掉 OFF5，
 把 token 門檻改綁 r447 的 22,266」——**那條已作廢**，理由是它與 P-H0 互相拆台：
@@ -1326,30 +1338,39 @@ H 臂的回饋訊息裡有 `args=[…] got=… want=…`——那三個欄位全
 | **合計（六臂交錯）** | **≈ 22 h** |
 
 ⚠ `gain_run` **沒有續跑**（輸出目錄有產物就 `SystemExit` 拒絕 append，
-`gain_run.py:1292-1301`）。中斷一次那一塊就得從頭。
+`gain_run.py:1292-1301`）。中斷一次那一塊就得從頭——切成 20 題一塊之後，
+重跑的代價從 60 題掉到 20 題。
 
 **D9 已經裁定用切塊，而且理由不是「機時不穩」而是「機時拓撲」**：
 2026-09-07 15:40 量到 8765 那顆 hub 把 **100% 的請求路由到後端 1003**
 （6 次探針：1003 +6、1004 +0），而且併發打 hub 吞吐**退化**
 （n=8→12：206→175→144 tok/s）；兩顆直連後端各自在 n=4 熱身後約 **110–120 tok/s**。
-⇒ 走 hub 只用得到一張卡。所以照 R445 的先例切成
-`--offset 0 --n 60`（→ `100.119.113.56:1234`）與 `--offset 60 --n 60`
-（→ `100.86.226.21:1234`）兩個 run、**同時跑**、收官按 `task_id` 併庫。
-牆鐘從 ≈22 h 降到 ≈11 h，而**每一顆卡上仍然是一次一個請求**
-（`DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md` 擋的是同端點併發，這裡沒有做）。
+⇒ 走 hub 只用得到一張卡。
+
+**A1（round460e，2026-09-08）把兩塊改成六塊**：冒煙量到每通呼叫 160–560 s、
+單通完成 token 最多 ~13k ⇒ 一塊 60 題序列跑 > 2 天；而直連後端實測
+1 個請求 1.3 s、**3 個併發各自仍是 1.3 s**、6 個併發才退化。所以照 R445 的先例切成
+六塊各 20 題、**每顆端點三塊**（a1/a2/a3 → `100.119.113.56:1234`，
+b1/b2/b3 → `100.86.226.21:1234`）、**同時跑**、收官按 `task_id` 併庫。
+`--request-timeout-s` 同時 600 → **1200**（三併發之下 600 會誤判成逾時 ⇒ 假 void）。
+牆鐘估計 ≈4 h（**估計，不是量測**：那組併發實測用的是短請求）。
+`DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md` 擋的是 hub 與**無上限**同端點併發；
+本輪把上限明文寫死成 **3**，而且**行程內仍然是一次一個請求**。
 
 ⚠ **代價逐條登記**（全部在 `DECISION_20260907_R460_HARNESS_PREREG.md` §二-5）：
-第二塊的 `random.Random(f"{seed}:{arm}")` 從頭開始 ⇒
-**persona 指派不再與 r447 對齊** ⇒ §5.1 的 P-H0 後端探針**只在 block a 有效**；
-兩塊的難度組成不同（block a medium 40／hard 20、block b 32／28）⇒
-**塊間點估計不得互相比較**；多一組合併擋門（塊間 task_id 交集、走 hub、
-兩塊同端點、只跑完一塊）全部進 `analyze_r460.topology_report()` 的 `broken_reasons`。
+每一塊的 `random.Random(f"{seed}:{arm}")` 都從頭開始 ⇒
+**persona 指派只有 a1 的前 20 題與 r447 對齊** ⇒ §5.1 的 P-H0 後端探針
+**只在 a1+a2+a3 的聯集上判**，而且退化成非配對比較（窗不因此再放寬）；
+六塊的難度組成不同（a1 12/8、a2 13/7、a3 15/5、b1 10/10、b2 12/8、b3 10/10）⇒
+**塊間點估計不得互相比較**；多一組合併擋門（塊間 task_id 交集、聯集不是 120、
+走 hub、端點數不是 2、**每顆端點不是三塊**、塊數不是 6）
+全部進 `analyze_r460.topology_report()` 的 `broken_reasons`。
 
 ### 5.10 預註冊預測（DECISION 檔要逐條寫上，跑完逐條記 HIT／MISS）
 
 | # | 預測 | 窗 | 為什麼這樣猜 |
 |---|---|---|---|
-| P-H0 | 新 OFF 的交付率（**只在 block a 上判**） | [38.3, 68.3]% | 錨＝r447 前 60 題的 32/60 ＝ 53.33%；窗 ±15pp（n=60）；後端漂移探針（§5.1）。block b 的 persona 指派與 r447 不對齊 ⇒ 不判 |
+| P-H0 | 新 OFF 的交付率（**只在 a1+a2+a3 的聯集上判**） | [38.3, 68.3]% | 錨＝r447 前 60 題的 32/60 ＝ 53.33%；窗 ±15pp（n=60）；後端漂移探針（§5.1）。b* 那三塊是另外 60 題 ⇒ 不判。⚠ 六塊之下只有 a1 的前 20 題與 r447 逐格同 persona ⇒ 這是非配對的粗探針，**窗不因此再放寬** |
 | P-H1 | 三條 H 臂都 > OFF | Δ_O > 0 | N1：41 題有修理空間，且那 41 題 hidden 全錯 ⇒ 只會往上 |
 | P-H2 | 至少一條 H 臂 > CONFORM | Δ_C > 0 | §2.1：修訂可越過池子天花板，選擇不行 |
 | P-H3 | H 臂的實際呼叫／題 | [1.8, 3.2] | N1：79/120 題第一輪就停（＝1.0 通），41 題會用到 2–5 通 |
