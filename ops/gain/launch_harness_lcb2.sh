@@ -105,14 +105,31 @@ OUT_B2="runs/g_r460_harness_lcb2_b2"
 OFFSET_B2=80
 OUT_B3="runs/g_r460_harness_lcb2_b3"
 OFFSET_B3=100
-# 一行一塊：`tag out offset api`。發射、檢查、報表全部走這一張表，不准另外抄一份。
-BLOCK_TABLE="a1 $OUT_A1 $OFFSET_A1 $API_A
-a2 $OUT_A2 $OFFSET_A2 $API_A
-a3 $OUT_A3 $OFFSET_A3 $API_A
-b1 $OUT_B1 $OFFSET_B1 $API_B
-b2 $OUT_B2 $OFFSET_B2 $API_B
-b3 $OUT_B3 $OFFSET_B3 $API_B"
+# 一行一塊：`tag out offset api gauge_scope`。
+# 發射、檢查、報表全部走這一張表，不准另外抄一份。
+#
+# ⚠ round460f 的第五欄（量具範圍，見 gain_run.py 的 --gauge-scope）：
+#   lcb2 有官方參考解的 12 題在六塊之間落得很不平均——
+#   offset 0/20/40/60/80/100 → **3/3/4/0/1/1**。offset=60 那塊量到 0/0，
+#   runner 照「量不到不是通過」正確地拒跑（2026-09-08 04:26 實際發生）。
+#   而且後 60 題總共只有 2 題有參考解 ⇒ **b 組不論怎麼三等分，一定至少一塊是 0**，
+#   在 b 組內部重新切救不了。
+#   解法不是放寬而是換一條**更強**的規則：量具驗的是沙箱＋題庫＋計分
+#   （參考解與壞樁都不經模型）⇒ 與塊、與後端無關 ⇒ 對**整個題庫**驗 12/12
+#   比對切片驗 3/3 更強，而且不受切法影響。
+#   a1/a2/a3 是在 `slice` 模式下已經通過並且**正在跑**的（3/3、3/3、4/4），
+#   照實留成 slice、不重發、不殺；b 組用 `bank`。兩種模式都不進臂的執行路徑。
+BLOCK_TABLE="a1 $OUT_A1 $OFFSET_A1 $API_A slice
+a2 $OUT_A2 $OFFSET_A2 $API_A slice
+a3 $OUT_A3 $OFFSET_A3 $API_A slice
+b1 $OUT_B1 $OFFSET_B1 $API_B bank
+b2 $OUT_B2 $OFFSET_B2 $API_B bank
+b3 $OUT_B3 $OFFSET_B3 $API_B bank"
 ALL_OUTS="$OUT_A1 $OUT_A2 $OUT_A3 $OUT_B1 $OUT_B2 $OUT_B3"
+# 只發射一部分塊（例：`BLOCKS=b1,b2,b3`）。預設六塊全發。
+# ⚠ 子集**只改「發射哪幾塊」**，不改拓撲不變量：底下仍然對**整張表**檢查
+#   「六塊、每顆端點三塊」，因為那是註冊的設計，不是這次發射的範圍。
+BLOCKS="${BLOCKS:-a1 a2 a3 b1 b2 b3}"
 # 任何一塊的端點含 HUB_MARK 就停（D9 明文禁止走 hub）
 HUB_MARK="8765"
 # 不帶塊名的舊名字、以及兩塊時代的 `_a`／`_b`：R440G 是子字串比對、擋不掉它們，本支擋
@@ -122,6 +139,12 @@ BLOCK_PARALLELISM=6           # 平行度來自這裡：六個行程、兩顆 GP
 BLOCKS_PER_ENDPOINT=3         # 一顆直連後端最多三個序列 runner（實測 3 併發不掉速）
 PRIOR_RUN="${PRIOR_RUN:-runs/g_r449c_eq5_lcb3}"
 WAIT_PAT="^python3 ops/gain/gain_run\.py --out $PRIOR_RUN"
+
+BLOCKS=$(printf '%s' "$BLOCKS" | tr ',' ' ')
+SEL_TABLE=$(printf '%s\n' "$BLOCK_TABLE" | awk -v want=" $BLOCKS " '
+  { if (index(want, " " $1 " ")) print }')
+SEL_OUTS=$(printf '%s\n' "$SEL_TABLE" | awk 'NF {print $2}')
+SEL_APIS=$(printf '%s\n' "$SEL_TABLE" | awk 'NF {print $4}' | sort -u)
 
 mkdir -p "$ROOT/logs"
 say()    { printf '%s  %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$*" | tee -a "$LOG"; }
@@ -168,9 +191,17 @@ git pull -q --ff-only origin feat/v2-four-stages 2>/dev/null || say "warn: pull 
 say "HEAD: $(git log --oneline -1)"
 n=$(count_other_runs)
 [ "$n" -eq 0 ] || { say "ABORT: $n 個別的 gain_run.py 還在跑"; finish abort_other_run; }
-# **任何一塊的目錄已經存在就停**（含空目錄以外的一切）。收官證據不准被覆蓋，
-# 而且「已經存在」通常代表這支發射過一次了。
-for OUT in $ALL_OUTS; do
+n_sel=$(printf '%s\n' "$SEL_TABLE" | awk 'NF' | wc -l | tr -d ' ')
+n_want=$(printf '%s\n' $BLOCKS | awk 'NF' | wc -l | tr -d ' ')
+[ "$n_sel" -gt 0 ] || { say "ABORT: BLOCKS=$BLOCKS 一塊都沒選到"; finish abort_no_block_selected; }
+[ "$n_sel" -eq "$n_want" ] || { say "ABORT: BLOCKS=$BLOCKS 有認不得的塊名（選到 $n_sel／要 $n_want）"; finish abort_unknown_block; }
+say "本次發射的塊：$(printf '%s\n' "$SEL_TABLE" | awk 'NF {printf "%s ", $1}')（共 $n_sel／全表 6）"
+
+# **要發的那幾塊**的目錄已經存在就停（含空目錄以外的一切）。收官證據不准被覆蓋，
+# 而且「已經存在」通常代表那一塊發射過了。
+# ⚠ 只檢查要發的那幾塊：`BLOCKS=b1,b2,b3` 時 a* 的目錄**本來就該存在**
+#   （它們正在跑），拿它們當中止理由會讓補發永遠發不出去。
+for OUT in $SEL_OUTS; do
   [ -d "$OUT" ] && [ -z "$(ls -A "$OUT" 2>/dev/null)" ] && rmdir "$OUT" && say "removed empty $OUT"
   [ -e "$OUT" ] && { say "ABORT: $OUT exists"; finish abort_dir_exists; }
   [ -e "$OUT.launch.log" ] && { say "ABORT: $OUT.launch.log exists"; finish abort_launchlog_exists; }
@@ -187,9 +218,14 @@ done
 for stale in $STALE_NAMES; do
   [ -e "runs/$stale" ] && { say "ABORT: runs/$stale 存在——那是 round460e 之前的名字，不准用"; finish abort_stale_run_name; }
 done
-printf '%s\n' "$BLOCK_TABLE" | while read -r tag OUT off api; do
+printf '%s\n' "$BLOCK_TABLE" | while read -r tag OUT off api scope; do
   grep -q -- "$OUT" "$DEC" || { say "ABORT: $DEC 內文沒有寫到 $OUT"; exit 3; }
   grep -q -- "--offset $off" "$DEC" || { say "ABORT: $DEC 內文沒有寫到 --offset $off"; exit 3; }
+  # 量具範圍是可稽核的實驗條件：兩種模式都必須事前寫在 DECISION 裡。
+  # （這條只驗「這個模式有註冊」，驗不到「這一塊配到哪個模式」——
+  #   那一格由本表與 §二 的指令表對照，`tests/test_r460_launcher_prereg.py` 逐塊釘。）
+  grep -q -- "--gauge-scope $scope" "$DEC" \
+    || { say "ABORT: $DEC 內文沒有寫到 --gauge-scope $scope"; exit 3; }
 done || finish abort_block_not_prereg
 
 # D9：端點是實驗條件。恰好兩顆、每顆恰好三塊、任何一塊都不准走 hub。
@@ -286,20 +322,24 @@ except Exception: print("no")' "$ROOT/logs/harness_lcb2_${tag}_probe_$i.json")
 }
 
 # rc 9 ＝ /v1/models 沒回模型；rc 10+k ＝ 三次 chat 探針只過 k 次。
-probe_backend a "$API_A" || finish "abort_probe_a_rc$?"
-probe_backend b "$API_B" || finish "abort_probe_b_rc$?"
+# 只探**這次要用到的**端點：補發 b 組時去打 a 組那顆卡只是替正在跑的三塊添亂。
+printf '%s\n' "$SEL_APIS" | grep -qx -- "$API_A" && {
+  probe_backend a "$API_A" || finish "abort_probe_a_rc$?"; }
+printf '%s\n' "$SEL_APIS" | grep -qx -- "$API_B" && {
+  probe_backend b "$API_B" || finish "abort_probe_b_rc$?"; }
 
 # ── 發射：六塊各自 setsid、各自 flock、各自 launch.log ────────────────
-launch_block() {   # $1=tag $2=OUT $3=offset $4=api
-  tag="$1"; OUT="$2"; off="$3"; api="$4"; nn="$N_BLOCK"
+launch_block() {   # $1=tag $2=OUT $3=offset $4=api $5=gauge_scope
+  tag="$1"; OUT="$2"; off="$3"; api="$4"; scope="$5"; nn="$N_BLOCK"
   lock="$ROOT/.launch_harness_lcb2_${tag}.lock"
-  say "[$tag] launching -> $OUT (seed=$SEED[重用，授權見 $DEC §二-4], bank=lcb2, n=$nn offset=$off, arms=$ARMS, api=$api, lock=$lock)"
+  say "[$tag] launching -> $OUT (seed=$SEED[重用，授權見 $DEC §二-4], bank=lcb2, n=$nn offset=$off, arms=$ARMS, api=$api, gauge-scope=$scope, lock=$lock)"
   curl -s -m 15 "${api%/chat/completions}/models" > "$OUT.backend.json" 2>/dev/null || true
   PYTHONUNBUFFERED=1 \
   VACANT_GAIN_API="$api" CLINE_KEYS=/nonexistent \
   setsid nohup flock -n "$lock" python3 ops/gain/gain_run.py --out "$OUT" --n "$nn" --offset "$off" \
     --decision "$DEC" --seed "$SEED" --arms "$ARMS" --bank lcb2 --models "$MODEL" \
-    --request-timeout-s "$REQUEST_TIMEOUT_S" --review-timeout-s 380 --retries 4 --probe-sample 0 \
+    --request-timeout-s "$REQUEST_TIMEOUT_S" --review-timeout-s 380 --retries 4 \
+    --probe-sample 0 --gauge-scope "$scope" \
     >>"$OUT.launch.log" 2>&1 < /dev/null 9>&- &
   # `$!` 是 setsid 的 pid，它 fork 完就結束 ⇒ 不能拿來當存活訊號。改用 ps 找。
   # ⚠ `flock` 的那一行也含「python3 ops/gain/gain_run.py --out …」⇒ 會誤中。
@@ -332,15 +372,15 @@ launch_block() {   # $1=tag $2=OUT $3=offset $4=api
 
 # 逐塊發射。**每一塊之間都重做一次「沒有別人在跑」檢查**——
 # 前一塊起來之後才冒出來的第三方 run 一樣要擋。
-printf '%s\n' "$BLOCK_TABLE" > "$ROOT/.launch_harness_lcb2.table"
-while read -r tag OUT off api; do
+printf '%s\n' "$SEL_TABLE" > "$ROOT/.launch_harness_lcb2.table"
+while read -r tag OUT off api scope; do
   [ -n "$tag" ] || continue
   n=$(count_other_runs)
   [ "$n" -eq 0 ] || { say "ABORT: 發射 $tag 之前冒出 $n 個別的 gain_run.py"; finish abort_other_run; }
-  launch_block "$tag" "$OUT" "$off" "$api" || finish "exited_early_$tag"
+  launch_block "$tag" "$OUT" "$off" "$api" "$scope" || finish "exited_early_$tag"
 done < "$ROOT/.launch_harness_lcb2.table"
 rm -f "$ROOT/.launch_harness_lcb2.table"
 
-say "六塊都已發射；收官一律六塊一起餵給 analyzer："
+say "本次要發的塊都已發射；**收官一律六塊一起餵給 analyzer**（少一塊 analyzer 會判 BROKEN）："
 say "  python3 ops/gain/analyze_r460.py --run $ALL_OUTS --bank lcb2 --rescore-turn1"
-finish "launched_all_six" 0
+finish "launched_$n_sel" 0

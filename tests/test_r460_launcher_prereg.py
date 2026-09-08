@@ -60,6 +60,11 @@ API_A = "http://100.119.113.56:1234/v1/chat/completions"
 API_B = "http://100.86.226.21:1234/v1/chat/completions"
 API_OF = {"a1": API_A, "a2": API_A, "a3": API_A,
           "b1": API_B, "b2": API_B, "b3": API_B}
+# round460f：a* 在 round460e 已以 slice 模式通過並開跑（3/3、3/3、4/4）；
+# b* 用 bank（12/12）——理由是 b 組逐片量具結構性地必有一塊 0/0（§四 E-3 補述）。
+GAUGE_SCOPE_OF = {"a1": "slice", "a2": "slice", "a3": "slice",
+                  "b1": "bank", "b2": "bank", "b3": "bank"}
+BANK_REF_TASKS = 12          # lcb2 全 120 題裡有官方參考解的題數（實測）
 HUB_MARK = "8765"
 ENDPOINT_ENV = "VACANT_GAIN_API"
 REQUEST_TIMEOUT_S = 1200
@@ -455,6 +460,124 @@ def test_probe_checks_body_not_only_http_200(sh: str) -> None:
     assert "for i in 1 2 3; do" in sh, "探針次數不是 3"
 
 
+# ── round460f：量具範圍（--gauge-scope）─────────────────────────────
+#
+# 發射當天量到的結構性衝突：lcb2 的 120 題只有 12 題有官方參考解，
+# 六塊之間是 3/3/4/**0**/1/1 ⇒ offset=60 那塊量到 0/0，runner 照
+# 「量不到不是通過」拒跑（正確）。而後 60 題總共只有 2 題有參考解
+# ⇒ **b 組不論怎麼三等分，一定至少一塊是 0**，在 b 組內部重切救不了。
+# 裁決是換一條**更強**的規則：對整個題庫驗 12/12。下面這一組釘住
+# 「更強」而不是「更鬆」——slice 逐字不變、bank 更嚴、擋門一條都沒少。
+def test_gauge_scope_flag_exists_and_defaults_to_slice() -> None:
+    """預設必須是 slice：既有五臂與 E-5 的釘死不准因為這個旗標而變。"""
+    src = (ROOT / "ops" / "gain" / "gain_run.py").read_text(encoding="utf-8")
+    assert '"--gauge-scope", default="slice", choices=["slice", "bank"]' in src, \
+        "旗標不存在，或預設不是 slice"
+
+
+def test_bank_scope_has_reference_solutions_where_the_slice_has_none() -> None:
+    """本輪的事實基礎：offset=60 那塊逐片是 0，整個題庫是 12。"""
+    from ops.gain.gain_run import _canonical_solutions, load_tasks
+    refs = _canonical_solutions("lcb2")
+    per_block = []
+    for off in OFFSETS:
+        ts = load_tasks("lcb2", SEED, N_PER_BLOCK, offset=off)
+        per_block.append(sum(1 for t in ts if refs.get(t["task_id"])))
+    assert per_block == [3, 3, 4, 0, 1, 1], per_block
+    assert sum(per_block) == BANK_REF_TASKS
+    # 結構性論證：後 60 題只有 2 題有參考解 ⇒ 任何三等分都至少一塊是 0。
+    assert sum(per_block[3:]) == 2, "b 組的參考解題數變了 ⇒ E-3 補述的論證要重寫"
+
+
+def test_bank_scope_gauges_the_whole_bank_and_slice_mode_is_unchanged() -> None:
+    """bank 在 offset=60 的塊上得到 12/12；slice 在同一塊上仍然是 0/0。
+
+    這是零 API 的（參考解與壞樁都不經模型），但會跑沙箱。
+    """
+    from ops.gain.gain_run import load_tasks, probe_instrument
+    blk = load_tasks("lcb2", SEED, N_PER_BLOCK, offset=60)
+    # slice：逐字現行行為——n=0，而且**不算**任何覆蓋鍵。
+    sl = probe_instrument(blk, lambda _r: None, sample=len(blk), bank="lcb2")
+    assert sl["n"] == 0, sl["n"]
+    assert "coverage_n" not in sl, "slice 模式多算了東西 ⇒ 現行行為被改到了"
+    # bank：整個題庫的 12 題、兩個方向全過，外加本塊 20 題的出貨閘門覆蓋。
+    full = load_tasks("lcb2", SEED, 0)
+    assert len(full) == N_TASKS
+    bk = probe_instrument(full, lambda _r: None, sample=len(full), bank="lcb2",
+                          coverage_tasks=blk)
+    assert bk["n"] == BANK_REF_TASKS, bk["n"]
+    assert bk["ref_pass"] == BANK_REF_TASKS, "參考解方向沒有全過"
+    assert bk["broken_rejected"] == BANK_REF_TASKS, "壞樁方向沒有全擋"
+    assert bk["visible_n"] == BANK_REF_TASKS
+    assert bk["visible_ref_pass"] == bk["visible_stub_rejected"] == BANK_REF_TASKS
+    # 擴大量具不准把「本塊每題都有出貨閘門」這條擋門弄不見。
+    assert bk["coverage_n"] == N_PER_BLOCK
+    assert bk["coverage_visible_n"] == N_PER_BLOCK, bk.get("coverage_missing_visible")
+
+
+def test_bank_scope_still_gates_block_level_visible_coverage() -> None:
+    """負控：本塊有一題沒有 visible_check 時，覆蓋數必須掉下來（＝擋得住）。"""
+    from ops.gain.gain_run import load_tasks, probe_instrument
+    blk = [dict(t) for t in load_tasks("lcb2", SEED, N_PER_BLOCK, offset=60)]
+    blk[0]["visible_check"] = {"code": ""}
+    full = load_tasks("lcb2", SEED, 0)
+    bk = probe_instrument(full[:1], lambda _r: None, sample=1, bank="lcb2",
+                          coverage_tasks=blk)
+    assert bk["coverage_visible_n"] == N_PER_BLOCK - 1, bk["coverage_visible_n"]
+    assert bk["coverage_missing_visible"] == [blk[0]["task_id"]]
+    # 而且 runner 真的把它當停止條件（不是只印出來）。
+    src = (ROOT / "ops" / "gain" / "gain_run.py").read_text(encoding="utf-8")
+    assert 'if pr["coverage_visible_n"] < pr["coverage_n"]:' in src
+    assert "沒有 visible_check" in src
+
+
+def test_launcher_assigns_the_registered_gauge_scope_per_block(sh: str, dec: str) -> None:
+    """哪一塊配哪一種模式：發射器的表與 DECISION §二 的指令表必須一致。"""
+    for tag, scope in GAUGE_SCOPE_OF.items():
+        assert f"--gauge-scope {scope}" in dec, f"DECISION 沒註冊 --gauge-scope {scope}"
+    assert '--gauge-scope "$scope"' in sh, "發射指令沒有把量具範圍傳下去"
+    assert 'grep -q -- "--gauge-scope $scope" "$DEC"' in sh, \
+        "發射器沒有對 DECISION 驗量具範圍"
+    # DECISION 的指令表要逐塊寫出來（a* slice、b* bank）。
+    for tag, scope in GAUGE_SCOPE_OF.items():
+        row = f"`runs/g_r460_harness_lcb2_{tag}`"
+        line = next((ln for ln in dec.splitlines() if ln.startswith(f"| {tag} |")), None)
+        assert line and row in line, f"DECISION 指令表沒有 {tag} 那一列"
+        assert f"--gauge-scope {scope}" in line, \
+            f"DECISION 指令表的 {tag} 沒有寫 --gauge-scope {scope}"
+
+
+def test_launcher_can_launch_a_subset_without_aborting_on_running_blocks(sh: str) -> None:
+    """`BLOCKS=b1,b2,b3` 要發得出去——a* 的目錄**本來就該存在**（它們正在跑）。
+
+    目錄檢查若還是掃全部六塊，補發永遠會撞 `abort_dir_exists`。
+    但「別人在跑」的判準仍然要涵蓋全部六塊（a* 是自己人，不是別人）。
+    """
+    assert 'BLOCKS="${BLOCKS:-a1 a2 a3 b1 b2 b3}"' in sh, "沒有 BLOCKS 子集旗標"
+    # 「目錄／launch.log 已存在」那一圈要走子集；
+    # 「舊名字」那一圈**仍然**該掃全部六塊（那是設計檢查，與這次發射範圍無關）。
+    dir_loop = sh.split("for OUT in $SEL_OUTS; do", 1)
+    assert len(dir_loop) == 2, "目錄檢查沒有改成只看要發的那幾塊"
+    guard = dir_loop[1].split("done", 1)[0]
+    assert "abort_dir_exists" in guard and "abort_launchlog_exists" in guard, \
+        "已存在檢查不在子集那一圈裡"
+    assert "for OUT in $ALL_OUTS; do" in sh, "舊名字檢查不該縮成子集"
+    assert "abort_stale_run_name" in sh
+    # 認不得的塊名要停，不是安靜地少發。
+    assert "abort_unknown_block" in sh and "abort_no_block_selected" in sh
+    # 自己人的名單仍然是全部六塊。
+    assert 'awk -v outs="$ALL_OUTS"' in sh
+    # 拓撲不變量仍然對**整張表**檢查（子集只改發射範圍，不改註冊的設計）。
+    assert 'printf \'%s\\n\' "$BLOCK_TABLE" | awk -v x="$API_A"' in sh, \
+        "每端點三塊的檢查被改成只看子集了"
+
+
+def test_launcher_probes_only_the_endpoints_it_will_use(sh: str) -> None:
+    """補發 b 組時不要去打正在跑 a 組的那顆卡。"""
+    assert 'grep -qx -- "$API_A"' in sh and 'grep -qx -- "$API_B"' in sh
+    assert 'probe_backend a "$API_A"' in sh and 'probe_backend b "$API_B"' in sh
+
+
 def test_launcher_probe_max_tokens_matches_the_runner_constant(sh: str) -> None:
     """round460e-2：發射器的 curl 探針不准比 runner 的線路探針小。
 
@@ -820,9 +943,10 @@ def test_launcher_launches_all_six_blocks(sh: str) -> None:
     # 發射走的是同一張表，不准另外抄一份。
     for tag, run, off in zip(BLOCKS, RUNS, OFFSETS):
         api = "$API_A" if tag.startswith("a") else "$API_B"
-        assert f"{tag} $OUT_{tag.upper()} $OFFSET_{tag.upper()} {api}" in sh, \
-            f"BLOCK_TABLE 少了 {tag} 那一列"
-    assert 'launch_block "$tag" "$OUT" "$off" "$api"' in sh, "發射不是走 BLOCK_TABLE"
+        assert (f"{tag} $OUT_{tag.upper()} $OFFSET_{tag.upper()} {api} "
+                f"{GAUGE_SCOPE_OF[tag]}") in sh, f"BLOCK_TABLE 少了 {tag} 那一列（或量具範圍不對）"
+    assert 'launch_block "$tag" "$OUT" "$off" "$api" "$scope"' in sh, \
+        "發射不是走 BLOCK_TABLE"
     # 六塊加起來要等於註冊的題數；少一塊就是另一個實驗。
     assert N_BLOCKS * N_PER_BLOCK == N_TASKS
     assert len(RUNS) == N_BLOCKS
@@ -1093,7 +1217,7 @@ def test_probe_failure_return_code_is_nonzero_when_run() -> None:
         pytest.skip("沒有 bash")
     body = SH.read_text(encoding="utf-8")
     start = body.index("probe_backend() {")
-    end = body.index("\nprobe_backend a ", start)
+    end = body.index("\n# rc 9 ＝", start)
     harness = (
         "set -u\n"
         'ROOT=$(mktemp -d); mkdir -p "$ROOT/logs"\n'

@@ -104,25 +104,30 @@ run 目錄：**`runs/g_r460_harness_lcb2_{a1,a2,a3,b1,b2,b3}`**
 （本檔只授權這六個名字，外加 §九-4 的 `r460_probe` 與 §十一 的兩個階段二名字）。
 seed：**`g-r440-lcb2`**，**六塊同一顆**（與 r447 同一顆，重用的授權與理由見 §二-4）。
 
-| 塊 | `--out` | `--offset` | `--n` | `VACANT_GAIN_API` |
-|---|---|---|---|---|
-| a1 | `runs/g_r460_harness_lcb2_a1` | `--offset 0` | 20 | `http://100.119.113.56:1234/v1/chat/completions` |
-| a2 | `runs/g_r460_harness_lcb2_a2` | `--offset 20` | 20 | `http://100.119.113.56:1234/v1/chat/completions` |
-| a3 | `runs/g_r460_harness_lcb2_a3` | `--offset 40` | 20 | `http://100.119.113.56:1234/v1/chat/completions` |
-| b1 | `runs/g_r460_harness_lcb2_b1` | `--offset 60` | 20 | `http://100.86.226.21:1234/v1/chat/completions` |
-| b2 | `runs/g_r460_harness_lcb2_b2` | `--offset 80` | 20 | `http://100.86.226.21:1234/v1/chat/completions` |
-| b3 | `runs/g_r460_harness_lcb2_b3` | `--offset 100` | 20 | `http://100.86.226.21:1234/v1/chat/completions` |
+| 塊 | `--out` | `--offset` | `--n` | `--gauge-scope` | `VACANT_GAIN_API` |
+|---|---|---|---|---|---|
+| a1 | `runs/g_r460_harness_lcb2_a1` | `--offset 0` | 20 | `--gauge-scope slice`（3/3） | `http://100.119.113.56:1234/v1/chat/completions` |
+| a2 | `runs/g_r460_harness_lcb2_a2` | `--offset 20` | 20 | `--gauge-scope slice`（3/3） | `http://100.119.113.56:1234/v1/chat/completions` |
+| a3 | `runs/g_r460_harness_lcb2_a3` | `--offset 40` | 20 | `--gauge-scope slice`（4/4） | `http://100.119.113.56:1234/v1/chat/completions` |
+| b1 | `runs/g_r460_harness_lcb2_b1` | `--offset 60` | 20 | **`--gauge-scope bank`（12/12）** | `http://100.86.226.21:1234/v1/chat/completions` |
+| b2 | `runs/g_r460_harness_lcb2_b2` | `--offset 80` | 20 | **`--gauge-scope bank`（12/12）** | `http://100.86.226.21:1234/v1/chat/completions` |
+| b3 | `runs/g_r460_harness_lcb2_b3` | `--offset 100` | 20 | **`--gauge-scope bank`（12/12）** | `http://100.86.226.21:1234/v1/chat/completions` |
 
-每一塊的指令逐字是（`<OUT>`／`<OFFSET>` 取上表，其餘六格**六塊完全相同**）：
+每一塊的指令逐字是（`<OUT>`／`<OFFSET>`／`<GAUGE_SCOPE>` 取上表，其餘六格**六塊完全相同**）：
 
 ```
 python3 ops/gain/gain_run.py \
   --out <OUT> --n 20 --offset <OFFSET> \
   --decision DECISION_20260907_R460_HARNESS_PREREG.md \
   --seed g-r440-lcb2 --arms OFF,CONFORM,OFF5,HPI,HOC,HMIX --bank lcb2 \
-  --models gemma-4-12b-it-qat --probe-sample 0 \
+  --models gemma-4-12b-it-qat --probe-sample 0 --gauge-scope <GAUGE_SCOPE> \
   --request-timeout-s 1200 --review-timeout-s 380 --retries 4
 ```
+
+⚠ **`--gauge-scope` 兩種值都是註冊的，理由與代價見 §四 E-3**（round460f）。
+它**不進任何一條臂的執行路徑**：量具跑的是參考解與壞樁，兩者都不經模型、
+不寫 rows、不影響 persona 指派與 rng。所以 a\* 用 `slice`、b\* 用 `bank`
+**不會**讓兩組資料不可比——配對比較仍然只在塊內或合併後成立。
 
 六塊**同時**跑，各自 `setsid`、各自 `flock`、各自 `launch.log`、各自 `backend.json`。
 `VACANT_GAIN_API` 是 `ops/gain/brain_cline.py::endpoint()` 讀的那個環境變數
@@ -404,7 +409,54 @@ SEED_REUSE_AUTHORIZED: g-r440-lcb2 <- runs/g_r447_conform_lcb2
 |---|---|---|---|
 | **E-1** | analyzer 讀得懂 runner 寫的 rows | `python3 ops/gain/analyze_r460.py --run <六塊> …` 的 `broken_reasons == []`（缺欄位／帳對不上／未 terminal／wire mode 混算／**D9 拓撲全型**都在裡面） | analyzer 的 `--selftest` 已在 r447 的真 rows 上重現 61／84／76（§九-5），並在把 r447 切成多塊的離線重現上驗過**合併是無損的**（§九-9） |
 | **E-2** | 帳對得上、且是收官資料 | **每一塊**每臂 `rows + infra_void == processed`；**六塊**的 `summary.run_terminal` 皆 true（合併取 `all()`）；六臂 `complete` 皆 true。⚠ 逐塊的 `broken_reasons` 會以 `block:<name>:…` 往上帶——合併是相加，兩塊反向的帳錯會互相抵銷 | r447 三臂皆 120+0=120 |
-| **E-3** | **量具兩個方向都答對，而且可見閘門逐塊覆蓋 20/20** | 發射時**每一塊各自**印 `ref_pass == n` 與 `broken_rejected == n`；`visible_n == n`（`gain_run.py` 的 `_gate_arms` 硬擋，H 臂已納入）。⚠ 這裡的 `n` 是**該塊的 20**，不是 120 | r447 在同題庫上通過同一道；本 run 的 `_gate_arms` 多了 HPI/HOC/HMIX（round460b 的改動 3／4） |
+| **E-3** | **量具兩個方向都答對，而且本塊每一題都有出貨閘門** | 發射時**每一塊各自**印 `ref_pass == n` 與 `broken_rejected == n`（`n` 依 `--gauge-scope`：`slice` 是該塊有參考解的題數、`bank` 是**整個題庫**有參考解的 12 題）；`visible_ref_pass == visible_n` 與 `visible_stub_rejected == visible_n`；`bank` 模式另外硬擋 `coverage_visible_n == coverage_n`（本塊 20 題每一題都有 `visible_check`）。全部在 `gain_run.py` 的 `_gate_arms` 區塊，H 臂已納入 | 見下面的 **E-3 補述（round460f）** |
+
+**E-3 補述（round460f，2026-09-08，在 b 組任何資料之前）**
+
+發射當天量到的事實：**lcb2 的 120 題裡只有 12 題有官方參考解**，而它們在六塊之間
+落得很不平均——
+
+| 塊 | offset | 有參考解 |
+|---|---|---|
+| a1 | 0 | 3/20 |
+| a2 | 20 | 3/20 |
+| a3 | 40 | 4/20 |
+| **b1** | 60 | **0/20** |
+| b2 | 80 | 1/20 |
+| b3 | 100 | 1/20 |
+
+b1 因此在 preflight 停住（`參考解通過 0/0` ⇒「量具驗證一題都沒驗到——這不是通過，
+是沒接上。停。」）。**那個拒絕是對的**，不准為了發射把它放寬。
+
+⚠ **而且在 b 組內部重新切救不了**：後 60 題總共只有 **2** 題有參考解
+（`lcb_3791`、`lcb_3793`）⇒ 任何三等分都至少有一塊是 0。
+「六塊、每台三塊、每塊 20 題」與「每塊逐片量具至少驗到一題」在這個題庫上
+**結構性不相容**。兩塊時代不會撞到（block a 10/60、block b 2/60），是 A1 把塊變小才浮出來。
+
+**裁決（Fable）：換一條更強的規則，不是放寬。** 量具驗的是**沙箱＋題庫＋計分**
+——參考解與壞樁**都不經模型**，也不寫 rows ⇒ 它與「這一塊是哪 20 題」
+「打哪一顆後端」**都無關**。六塊跑在同一台機器、同一份沙箱上。
+所以正確的規則是「**每一塊都對整個題庫有參考解的 12 題驗兩個方向，12/12 才放行**」：
+比逐塊切片（3/3、0/0）**更強**，而且不再受切法影響。
+
+落地（`ops/gain/gain_run.py` 的 `--gauge-scope {slice,bank}`，**預設 `slice`＝現行行為**）：
+
+- `bank`：`probe_instrument` 的對象換成整個題庫裡有參考解的題目，兩個方向都要全過。
+  實測 offset=60 那一塊：`slice` → `0/0`（停）、`bank` → **`參考解通過 12/12　壞解被擋 12/12`**、
+  可見閘門 `12/12`。
+- ⚠ **擴大量具不准順手把擋門弄不見**：`bank` 之下「本塊 20 題每一題都有 `visible_check` 嗎」
+  不再被前一條順帶蓋到，所以**獨立量、獨立擋**（`coverage_visible_n == coverage_n`）。
+- 本 run 的實際配置：**a1/a2/a3 用 `slice`**（它們在 round460e 的發射裡已經以
+  3/3、3/3、4/4 通過並且**正在跑**，不重發、不殺）；**b1/b2/b3 用 `bank`**（12/12）。
+  兩種模式**照實記錄在 `summary.json` 的 `gauge_scope`**，收官逐塊印出來。
+- **為什麼混用不影響任何比較**：量具不進臂的執行路徑（不呼叫模型、不寫 rows、
+  不動 rng 與 persona 指派）⇒ 它改變的只有「我們敢不敢相信這把尺」，
+  不是尺量到的東西。配對比較仍然只在塊內或合併後成立（§六-(0)），
+  而每一題的六條臂仍然在同一塊、同一行程、同一後端上跑完。
+- ⚠ **誠實邊界**：`bank` 讓六塊的量具**答同一份考卷**，所以它證明的是
+  「這台機器的沙箱＋題庫＋計分是好的」，**不是**「本塊那 20 題每一題都被驗過」
+  ——後者在這個題庫上對任何一塊都不成立（最多的一塊也只有 4/20 有參考解）。
+  §八-9 那條「`--probe-sample 0` ＝ 有參考解的全驗，不是 120 題全驗」照舊適用。
 | **E-7** | **D9 的拓撲成立**（round460e 改成六塊版） | `topology.violations == []`：`topology.blocks_n == 6`、**恰好 2 個相異端點**、**每個端點恰好 3 塊**、塊間 task_id 兩兩零交集且**聯集 == 120**（即 r447 的那 120 題）、一塊一端點、**沒有一塊走 hub**、seed／臂／offset 一致 | 全部在 `analyze_r460.topology_report()`；`--mutation-check` 的 `M8_topology_not_enforced`（拓撲不判）與 `M11_endpoint_balance_not_checked`（每端點三塊那一格不數）證明它有牙齒 |
 | **E-4** | **D8 的邊界沒有被越過** | `git diff 7747ce3b44b410d16b18897376d78747d735108d <r460 的 runner_git.sha> -- ops/gain/gain_run.py ops/gain/brain_cline.py vacant/codebench.py vacant/checks.py`，逐項分類 (a) 只影響分析／文件／基建 (b) 影響臂行為 | 基線＝**r447 的 runner sha `7747ce3b44b410d16b18897376d78747d735108d`**（讀自 `runs/g_r447_conform_lcb2/summary.json`）。**四個檔不是三個**——`vacant/checks.py` 是沙箱本體，在臂的執行路徑上（R449C §四 G-4-α）。本 run 事前已知 diff 非空，**逐項分類寫在下面的 E-4 表**，**收官必須對發射當下的 sha 重跑** |
 
@@ -416,6 +468,11 @@ SEED_REUSE_AUTHORIZED: g-r440-lcb2 <- runs/g_r447_conform_lcb2
 | 新增 `_wall_clock_guard()` 並掛在 `chat()` 上 | **(a)** | 同上，只在 H 臂的路徑上 |
 | **round460e／A3：`_wall_clock_guard` 也掛上 `generate()`** | **(a)** | **純基建**：只給「OS 沒兌現 socket 逾時」那條路一個上界（`timeout + 60`），正常路徑上的行為、落盤欄位、重試語意、`InfraVoid` 的定義**逐字不變**；護欄咬到走的就是既有的 `except Exception` → 落盤 → 重試 → 用盡才 void，**不新增 void 種類**。⚠ 它改了 `generate()` 的原始碼 ⇒ T12 的 `GENERATE_SHA` 隨之更新（`130c47c5…` → `b523c15f…`），測試裡逐字註明這一次改動被授權的理由；**既有五臂的行為仍然一個字沒動** |
 | 所有 HTTP 請求強制帶逾時上限（round460d） | **(a)** | 純基建，同上 |
+
+| `gain_run.py` 的改動 | 類 | 理由 |
+|---|---|---|
+| D8 授權的四處（import／`KNOWN_ARMS`／`_gate_arms`／dispatch elif） | **(a)／(b)** | 見 D8；只有 dispatch 新增 H 臂那一格會改行為，而那正是本 run 的處理本身 |
+| **round460f：`--gauge-scope {slice,bank}`（D8 之外的第五處改動）** | **(a)** | **量具範圍，不進臂的執行路徑。** `probe_instrument` 多一個可選的 `coverage_tasks` 參數並多回三個鍵；`main()` 在 `bank` 時把量具對象換成整個題庫、另外硬擋本塊的出貨閘門覆蓋；`summary.json` 多一個 `gauge_scope` 欄。**預設 `slice` ＝ 逐字現行行為**（`coverage_tasks=None` 時不算也不擋）⇒ 既有五臂、T12 的 sha 表與 E-5 一格不動。理由與實測見 §四 E-3 補述。⚠ 它是 **D8 之外的第五處**，所以在這裡明列——不列出來就等於偷偷擴大授權範圍 |
 | **E-5** | 既有五臂**逐位元沒動**（D8 的可執行版） | `arm_off`／`arm_off5`／`arm_conform`／`arm_eq5`／`arm_on`／`extract_code`／`meets_demand` 七個函式的原始碼字串與 `84d101d` 相同（`tests/test_gain_harness_arms.py::T12` 做這件事） | 本檔寫作時已綠 |
 | **E-6** | 不被長得像的旗標騙 | `summary.equal_budget_comparison_valid` **預期是 false** | 它的定義只看 `ON` 與 `OFF5` 兩臂（`gain_run.py:1394-1399`），本 run 沒有 ON ⇒ 結構上永遠 false。**等預算的證據是 P-H3 與 `calls_per_task`，不是這個旗標** |
 

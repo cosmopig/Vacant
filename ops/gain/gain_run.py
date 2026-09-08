@@ -213,7 +213,8 @@ def _canonical_solutions(bank: str = "evalplus", path: str | None = None) -> dic
     return out
 
 
-def probe_instrument(tasks, log, *, sample=12, bank: str = "evalplus") -> dict:
+def probe_instrument(tasks, log, *, sample=12, bank: str = "evalplus",
+                     coverage_tasks=None) -> dict:
     """SPEC_GAIN §5.2：餵一份**確定正確**與一份**確定錯誤**，兩邊都要判對。
 
     沒有這一步的話，「量到 0」與「線根本沒接上」在報告裡長得一模一樣。
@@ -226,6 +227,14 @@ def probe_instrument(tasks, log, *, sample=12, bank: str = "evalplus") -> dict:
     「取前 `sample` 個題目、沒參考解的跳過」——後者在 lcb bank 上會因為
     seed 排序把有解的題目排到抽樣窗外，量到 n=0 但看起來像是資料沒接上
     （實際發生過，見 DECISION_20260901_R441）。
+
+    round460f（`--gauge-scope bank`）：`tasks` 可以是**整個題庫**而不是本塊那一片。
+    量具驗的是**沙箱＋題庫＋計分**（參考解與壞樁都不經模型），與塊、與後端無關
+    ⇒ 對整個題庫驗比對切片驗**更強**，而且不再受切法影響。
+    `coverage_tasks` 給定時另外回報「**本塊**每一題有沒有 `visible_check`」
+    （`coverage_n`／`coverage_visible_n`）——那條問的是別的事：
+    出貨閘門對**臂真的會跑的那些題**在不在。給 None（預設＝slice 模式）時
+    完全不算、也完全不擋，所以既有行為逐字不變。
     """
     try:
         refs = _canonical_solutions(bank)
@@ -271,6 +280,17 @@ def probe_instrument(tasks, log, *, sample=12, bank: str = "evalplus") -> dict:
            "detail": detail,
            "visible_n": vis_cov, "visible_ref_pass": vis_good,
            "visible_stub_rejected": vis_bad, "visible_detail": vis_detail}
+    # round460f：本塊的出貨閘門覆蓋（只有 --gauge-scope bank 會傳）。
+    # ⚠ 這是**另一個問題**：上面問「量具在有參考解的題目上準不準」，
+    #   這裡問「臂真的會跑的那 20 題，每一題都有 visible_check 嗎」。
+    #   bank 模式把前者擴大到整個題庫之後，後者就不再被前者順帶蓋到了，
+    #   所以要獨立量、獨立擋——否則「擴大量具」會順手把一條擋門弄不見。
+    if coverage_tasks is not None:
+        miss = [t["task_id"] for t in coverage_tasks
+                if not ((t.get("visible_check") or {}).get("code") or "")]
+        res["coverage_n"] = len(coverage_tasks)
+        res["coverage_visible_n"] = len(coverage_tasks) - len(miss)
+        res["coverage_missing_visible"] = miss[:20]
     log(res)
     return res
 
@@ -1238,6 +1258,18 @@ def main() -> None:
         "--probe-sample", type=int, default=12,
         help="instrument checks before model calls; 0 checks every selected task",
     )
+    # round460f（R460 §四 E-3）：量具驗的是**沙箱＋題庫＋計分**，參考解與壞樁
+    # 都不經模型 ⇒ 它與「這一塊是哪 20 題」「打哪一顆後端」都無關。
+    # 切成 20 題一塊之後，lcb2 有官方參考解的 12 題會落得很不平均
+    # （offset 0/20/40/60/80/100 → 3/3/4/**0**/1/1），offset=60 那塊量到 0/0，
+    # runner 照 "量不到不是通過" 正確地拒跑。`bank` 讓每一塊都對**整個題庫**
+    # 有參考解的題目驗兩個方向（12/12），比逐塊切片更強、而且不受切法影響。
+    # ⚠ 預設維持 `slice`＝現行行為，既有五臂與 T12／E-5 的釘死一格不動。
+    ap.add_argument(
+        "--gauge-scope", default="slice", choices=["slice", "bank"],
+        help="量具驗證的範圍：slice＝只驗本塊選到的題（預設，現行行為）；"
+             "bank＝驗整個題庫裡有參考解的題目（更強，且不受切塊影響）",
+    )
     ap.add_argument(
         "--models", default=DEFAULT_MODEL,
         help="comma-separated model IDs, assigned round-robin across the open agent pool",
@@ -1326,8 +1358,21 @@ def main() -> None:
 
     # ── 先驗量具 ──
     print("── 量具驗證（先答已知答案）")
-    probe_sample = len(tasks) if args.probe_sample == 0 else args.probe_sample
-    pr = probe_instrument(tasks, note, sample=probe_sample, bank=args.bank)
+    # round460f：`bank` 時量具的對象是**整個題庫**，不是本塊那一片（理由見旗標定義）。
+    # 本塊的題目仍然拿去算「出貨閘門覆蓋」——那是另一個問題，見 probe_instrument。
+    gauge_tasks, coverage_tasks = tasks, None
+    if args.gauge_scope == "bank":
+        gauge_tasks = load_tasks(args.bank, args.seed, 0)
+        coverage_tasks = tasks
+        if not gauge_tasks:
+            raise SystemExit(
+                f"--gauge-scope bank 但整個題庫一題都沒載到（bank={args.bank}）"
+                "——這不是通過，是沒接上。停。")
+        print(f"   範圍＝bank：對 {args.bank} 全 {len(gauge_tasks)} 題裡有參考解的驗，"
+              f"本塊 {len(tasks)} 題另外算出貨閘門覆蓋")
+    probe_sample = len(gauge_tasks) if args.probe_sample == 0 else args.probe_sample
+    pr = probe_instrument(gauge_tasks, note, sample=probe_sample, bank=args.bank,
+                          coverage_tasks=coverage_tasks)
     print(f"   參考解通過 {pr['ref_pass']}/{pr['n']}　"
           f"壞解被擋 {pr['broken_rejected']}/{pr['n']}")
     if pr["n"] == 0:
@@ -1350,6 +1395,17 @@ def main() -> None:
                   & {a.strip() for a in args.arms.split(",")})
     if _gate_arms:
         _who = "／".join(sorted(_gate_arms))
+        # round460f：bank 模式下，上面那條問的是題庫層級的量具，**問不到**
+        # 「本塊 20 題每一題都有出貨閘門嗎」。所以獨立擋一次——
+        # 擴大量具不准順手把這條擋門弄不見。
+        if "coverage_n" in pr:
+            print(f"   本塊出貨閘門覆蓋 {pr['coverage_visible_n']}/{pr['coverage_n']}")
+            if pr["coverage_visible_n"] < pr["coverage_n"]:
+                raise SystemExit(
+                    f"{_who} 在本塊有 "
+                    f"{pr['coverage_n'] - pr['coverage_visible_n']} 題沒有 visible_check"
+                    f"（例：{pr.get('coverage_missing_visible')}）"
+                    "——那些題的出貨閘門根本不存在。量不到不是通過。停。")
         if pr["visible_n"] < pr["n"]:
             raise SystemExit(
                 f"{_who} 的決策量具覆蓋率不足：visible {pr['visible_n']}/{pr['n']}"
@@ -1452,6 +1508,9 @@ def main() -> None:
                 "offset": args.offset,
                 "runner_git": RUNNER_GIT,
                 "n_tasks_loaded": len(tasks),
+                # round460f：量具範圍是**可稽核的實驗條件**（哪一塊用哪一種模式
+                # 要看得出來），但它不進臂的執行路徑 ⇒ 分類 (a)。
+                "gauge_scope": args.gauge_scope,
                 "run_complete": run_complete,
                 "run_terminal": run_terminal,
                 "request_policy": {
