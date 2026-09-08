@@ -24,3 +24,17 @@
 ## 三、不變的東西
 
 門檻、家族、區間、分母、四狀態、P-H0..P-H9 的窗——**一個字沒動**。動的全是程序（拓撲、量具範圍、探針、發射器檢查），且每一項都在對應塊產生任何一列資料之前。
+
+## 四、補記（2026-09-08 07:38Z–08:20Z）：1003 當機、a 組全 void、重發
+
+- **05:11Z** 1003 的 LM Studio 引擎在三塊同時長生成時回 `Engine protocol predict stream returned an error: {"code":500,"message":"decode() failed: bad alloc"}`，
+  之後模型被卸載（`No models loaded`）。a1／a2／a3 重試用盡，剩餘格子全判 `infra_void`（100／98／84），runner 自行 terminal。
+  b 組（1004）全程正常（07:38Z 57／99／74 列，void 0）。
+- 根因：`lms ps` 顯示 1003 載入的 context length 是 **262,144**、並行槽 4；三個長生成同時把 KV cache 撐到這個上限 ⇒ 記憶體不足。
+  1004 的載入設定不同，未撞到。
+- 處置（Fable，遠端）：a 組三個目錄與 launch.log／backend.json 移到 `runs/_aborted/g_r460_harness_lcb2_a{1,2,3}_void_20260908T0511Z`
+  留證，不進任何分析；用 `lms load gemma-4-12b-it-qat --context-length 49152`（實測最長 completion 33,974 token 仍裝得下）重載；
+  `BLOCKS=a1,a2,a3` 重發，**拓撲不變**（仍三塊、仍直連 1003），量具 slice 3/3、3/3、4/4；08:2xZ 六個行程全活，runner sha 六塊一致 `d3e79c7`。
+- 對收官的影響：a 組的 P-H0 錨與 persona 對齊敘述不變（同 seed 同 offset）；a 組發射時間晚 b 組約 3.5 小時，兩台後端設定不同
+  （context 49k vs 1004 的原設定）——**這是題目層的干擾，不進臂比較**，但 §六-(0) 的「兩塊點估計不得互比」再加一個理由。
+- 中止準則 §十 的 void 門檻是對**進入分析的資料**算的；被移走的 void 資料不進分析，重發的 a 組從零計。
