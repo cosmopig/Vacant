@@ -56,10 +56,16 @@ STALE_NAMES = ("g_r460_harness_lcb2", "g_r460_harness_lcb2_a", "g_r460_harness_l
 BLOCKS = ("a1", "a2", "a3", "b1", "b2", "b3")
 RUNS = tuple(f"runs/g_r460_harness_lcb2_{b}" for b in BLOCKS)
 OFFSETS = (0, 20, 40, 60, 80, 100)
+# round460h：這兩個現在是**預設值**，`A_ENDPOINT`／`B_ENDPOINT` 可以覆寫；
+# 預設一個字不變，所以下面的斷言仍然逐字釘住它們。
 API_A = "http://100.119.113.56:1234/v1/chat/completions"
 API_B = "http://100.86.226.21:1234/v1/chat/completions"
+API_ENV_A = "A_ENDPOINT"
+API_ENV_B = "B_ENDPOINT"
 API_OF = {"a1": API_A, "a2": API_A, "a3": API_A,
           "b1": API_B, "b2": API_B, "b3": API_B}
+# round460h：允許的拓撲只有這兩種（Fable 裁決，2026-09-09，a 組第三次資料之前）。
+TOPOLOGY_VARIANTS = ("two_backends_3_3", "one_backend_6")
 # round460f：a* 在 round460e 已以 slice 模式通過並開跑（3/3、3/3、4/4）；
 # b* 用 bank（12/12）——理由是 b 組逐片量具結構性地必有一塊 0/0（§四 E-3 補述）。
 GAUGE_SCOPE_OF = {"a1": "slice", "a2": "slice", "a3": "slice",
@@ -642,9 +648,16 @@ def test_launcher_can_launch_a_subset_without_aborting_on_running_blocks(sh: str
 
 
 def test_launcher_probes_only_the_endpoints_it_will_use(sh: str) -> None:
-    """補發 b 組時不要去打正在跑 a 組的那顆卡。"""
-    assert 'grep -qx -- "$API_A"' in sh and 'grep -qx -- "$API_B"' in sh
-    assert 'probe_backend a "$API_A"' in sh and 'probe_backend b "$API_B"' in sh
+    """補發 b 組時不要去打正在跑 a 組的那顆卡；而且探的是**表上實際那一格**。
+
+    round460h：`A_ENDPOINT` 可以覆寫 `API_A` ⇒ 探針若寫死「探 $API_A、探 $API_B」，
+    在兩個變數指到同一顆時會白探兩次，在覆寫之後也容易漂成「探常數不探實際」。
+    所以改成走 `$SEL_APIS`（本次要發那幾塊的端點、`sort -u` 去重）。
+    """
+    assert "for api in $SEL_APIS; do" in sh, "探針沒有走本次真的會用到的端點清單"
+    assert 'probe_backend "$tag" "$api"' in sh, "探針沒有用表上那一格的端點"
+    assert "SEL_APIS=$(printf '%s\\n' \"$SEL_TABLE\" | awk 'NF {print $4}' | sort -u)" in sh, \
+        "$SEL_APIS 不是從本次要發的那幾塊、去重之後算出來的"
 
 
 def test_launcher_probe_max_tokens_matches_the_runner_constant(sh: str) -> None:
@@ -1021,10 +1034,28 @@ def test_launcher_launches_all_six_blocks(sh: str) -> None:
     assert len(RUNS) == N_BLOCKS
 
 
+def test_launcher_endpoints_are_overridable_but_default_unchanged(sh: str) -> None:
+    """round460h：`A_ENDPOINT`／`B_ENDPOINT` 可以覆寫端點，**預設一個字不變**。
+
+    1003 連兩次死在同一件事（context 262k 的 bad alloc；重載 49k 之後
+    `Context size has been exceeded` 再到 `got exception: bad allocation` 卸載模型），
+    而 1004 用同一套 harness 跑完 b1–b3 各 120 列、void 0
+    ⇒ a 組第三次要能在**不改檔**的情況下改掛 1004。
+    但覆寫旋鈕最容易出的錯是「順手把預設也改了」——那會讓這支發射器
+    以後對別的塊也指到別處。所以預設值在這裡逐字釘死。
+    """
+    assert _var(sh, "API_A_DEFAULT") == API_A, "預設端點被改了"
+    assert _var(sh, "API_B_DEFAULT") == API_B, "預設端點被改了"
+    assert 'API_A="${A_ENDPOINT:-$API_A_DEFAULT}"' in sh, f"沒有 {API_ENV_A} 覆寫"
+    assert 'API_B="${B_ENDPOINT:-$API_B_DEFAULT}"' in sh, f"沒有 {API_ENV_B} 覆寫"
+    # 覆寫**不准**繞過 hub 擋門：hub 檢查看的是覆寫後的值。
+    assert 'case "$API_A$API_B" in' in sh and "abort_hub_endpoint" in sh
+
+
 def test_launcher_exports_the_endpoint_env_var_per_block(sh: str) -> None:
     """端點靠環境變數傳給 runner；漏 export 會安靜地退回模組預設（＝hub）。"""
-    assert _var(sh, "API_A") == API_A
-    assert _var(sh, "API_B") == API_B
+    assert _var(sh, "API_A_DEFAULT") == API_A
+    assert _var(sh, "API_B_DEFAULT") == API_B
     assert f'{ENDPOINT_ENV}="$api"' in sh, f"發射時沒有逐塊 export {ENDPOINT_ENV}"
     # 名字必須真的是 brain_cline.endpoint() 讀的那一個，不是長得像的。
     import inspect
@@ -1035,29 +1066,43 @@ def test_launcher_exports_the_endpoint_env_var_per_block(sh: str) -> None:
 
 
 def test_launcher_refuses_the_hub_and_endpoint_oversubscription(sh: str) -> None:
-    """D9／A1 的硬禁令：不准走 hub、兩顆端點不准同位址、每顆端點恰好三塊。
+    """D9／A1／round460h 的硬禁令：不准走 hub；拓撲只准是那兩種；不准同時超賣。
 
-    「同端點」在六塊之下**不再是違規、是設計**；要擋的變成**超賣**
-    （某台四塊 ⇒ 掉進實測 6 併發才有的退化區，而那看起來只是比較慢）。
+    「同端點」在六塊之下**不再是違規、是設計**。round460h 再往前一步：
+    「恰好兩顆端點」也不再是違規——那是**平衡規則不是科學規則**，
+    允許 `two_backends_3_3` 與 `one_backend_6` 兩種。
+    但**同時**六個 runner 打同一顆仍然要擋（實測 3 併發不掉速、6 個開始退化），
+    所以併發上限改成對「這一刻」算：本次要發的 ＋ 本 run 自己還在跑的。
     """
     assert _var(sh, "HUB_MARK") == HUB_MARK
     assert "abort_hub_endpoint" in sh
-    assert "abort_same_endpoint" in sh
     assert "abort_endpoint_imbalance" in sh, "沒有擋端點超賣"
+    assert "abort_endpoint_count" in sh, "沒有擋端點數不在 {1,2}"
+    assert "abort_endpoint_oversubscribed" in sh, "沒有擋『同一刻』超過三個 runner"
     assert "abort_block_count" in sh, "沒有擋塊數不是 6"
-    assert '[ "$API_A" != "$API_B" ]' in sh, "沒有比較兩顆端點"
+    # 舊的「兩顆端點不准同位址」已被 Fable 修訂掉；不准再出現，否則
+    # `A_ENDPOINT=<B 的位址>` 會被誤擋成設定錯誤。
+    assert "abort_same_endpoint" not in sh, "round460h 已修訂：同位址不再是違規"
+    assert '[ "$API_A" != "$API_B" ]' not in sh
     m = re.search(r"^BLOCKS_PER_ENDPOINT=(\d+)", sh, re.M)
     assert m and int(m.group(1)) == BLOCKS_PER_ENDPOINT
+    m6 = re.search(r"^BLOCKS_EXPECTED=(\d+)", sh, re.M)
+    assert m6 and int(m6.group(1)) == N_BLOCKS
+    for v in TOPOLOGY_VARIANTS:
+        assert v in sh, f"發射器沒有寫出拓撲 variant {v}"
     for api in (API_A, API_B):
         assert HUB_MARK not in api, f"註冊的端點 {api} 指向 hub"
-    # 表裡每顆端點真的是三塊（發射器自己數一次，本檔在此再數一次）。
+    # 預設表裡每顆端點真的是三塊（發射器自己數一次，本檔在此再數一次）。
     assert sum(1 for t in BLOCKS if API_OF[t] == API_A) == BLOCKS_PER_ENDPOINT
     assert sum(1 for t in BLOCKS if API_OF[t] == API_B) == BLOCKS_PER_ENDPOINT
+    # 「同一刻」的算法必須真的把**還在跑的**塊算進去，不是只數本次要發的。
+    assert "running_blocks_on()" in sh
+    assert '[ $((now + new)) -le "$BLOCKS_PER_ENDPOINT" ]' in sh
 
 
 def test_launcher_probes_each_backend_not_the_hub(sh: str) -> None:
     """每一塊探**自己的**後端 /v1/models 與 /v1/chat/completions。"""
-    assert 'probe_backend a "$API_A"' in sh and 'probe_backend b "$API_B"' in sh
+    assert 'probe_backend "$tag" "$api"' in sh
     assert 'base="${api%/chat/completions}"' in sh, "探針沒有從該塊的端點推導 /v1/models"
     assert '"$base/models"' in sh
     # hub 的位址不准出現在任何一行程式碼裡（註解裡講歷史沒關係）。
@@ -1102,6 +1147,61 @@ def test_decision_registers_the_six_block_topology(dec: str) -> None:
     assert "block_count_not_6" in dec
     # 後端是 task 層級干擾項、不是 arm 層級混淆——D9 成立的全部理由。
     assert "task 層級" in dec and "arm 層級" in dec
+
+
+def test_decision_registers_the_round460h_topology_amendment(dec: str) -> None:
+    """round460h：拓撲修訂＋兩次失敗的逐字證據＋漂移的誠實邊界，都要在 a 組第三次資料之前落在文件裡。
+
+    這條守的是一個**放寬**：「恰好兩顆端點」被改成「1 或 2 顆」。
+    放寬本身有實測基礎（1003 連兩次崩潰、1004 同一套 harness 零 void），
+    但放寬的代價（兩半差約 17 小時 ⇒ 後端漂移）必須跟放寬寫在同一個地方，
+    否則收官的人只會看到「拓撲合法」四個字。
+    """
+    assert "E-7 修訂（round460h" in dec, "DECISION 沒有 round460h 的 E-7 修訂段"
+    for v in TOPOLOGY_VARIANTS:
+        assert v in dec, f"DECISION 沒註冊拓撲 variant {v}"
+    # 兩次失敗的**逐字**錯誤字串：收官對帳的一手證據，不准只寫「後端掛了」。
+    for err in ("decode() failed: bad alloc",
+                "Context size has been exceeded",
+                "got exception: bad allocation",
+                "No models loaded"):
+        assert err in dec, f"DECISION 沒寫逐字錯誤字串 {err!r}"
+    assert "262,144" in dec and "49,152" in dec, "兩次的 context 設定沒寫進 DECISION"
+    # 新的擋門欄位（放寬必須自己有牙齒）
+    for gate in ("endpoint_block_count_not_6", "endpoints_n_not_in_1_2",
+                 "abort_endpoint_oversubscribed", "abort_endpoint_count"):
+        assert gate in dec, f"DECISION 沒指名擋門 {gate}"
+    assert "topology.variant" in dec and "topology.endpoint_of_block" in dec, \
+        "DECISION 沒要求收官引用 variant 與逐塊端點"
+    assert API_ENV_A in dec, "DECISION 沒寫端點是靠哪個環境變數覆寫的"
+    # 誠實邊界：兩半不同時跑、P-H0 是漂移的探針、錨其實在 1003（經 hub）量到。
+    assert "17 小時" in dec
+    assert "8765" in dec and "1003" in dec and "1004" in dec
+    assert "粗篩" in dec, "沒有把 P-H0 降格成粗篩"
+
+
+def test_decision_reports_the_context_window_cost_from_the_aborted_logs(dec: str) -> None:
+    """§八：49k 脈絡窗在三併發之下不夠用——逐臂計數要逐字落在文件裡，而且要帶警語。
+
+    數字來源是 `runs/_aborted/*_void_20260908T1810Z/calls.jsonl`（read-only 統計）。
+    ⚠ 它是**描述性證據**：15 筆落在 5 個時刻、每個時刻三塊同一秒各中一筆，
+    而三塊當下的臂不同 ⇒ 那是後端層事件，不是「某一條臂把自己的視窗塞爆」。
+    所以本檔同時釘住數字**與**那句警語——只留數字會被讀成因果。
+    """
+    for row in ("| OFF | 0 | 0 | 0 | **0** |",
+                "| CONFORM | 0 | 0 | 0 | **0** |",
+                "| OFF5 | 2 | 3 | 4 | **9** |",
+                "| HPI | 1 | 1 | 1 | **3** |",
+                "| HOC | 0 | 0 | 0 | **0** |",
+                "| HMIX | 2 | 1 | 0 | **3** |"):
+        assert row in dec, f"§八 的逐臂表少了 {row}"
+    assert "12 個邏輯呼叫" in dec, "沒寫去重之後的邏輯呼叫數"
+    assert "runs/_aborted/g_r460_harness_lcb2_a{1,2,3}_void_20260908T1810Z" in dec, \
+        "沒寫這組數字的來源檔"
+    # 警語三件：一筆 void 都沒造成、同一秒三塊同時、機制沒量到。
+    assert "一筆 void 都沒造成" in dec
+    assert "同一秒各中一筆" in dec
+    assert "沒有量到機制" in dec
 
 
 def test_decision_records_the_ph0_degradation(dec: str) -> None:
@@ -1188,7 +1288,7 @@ def test_analyzer_pools_several_run_dirs() -> None:
     ({"hub": True}, "block_used_hub"),
     ({"overlap": True}, "block_task_overlap"),
     ({"overlap": True}, "pooled_task_count_not_120"),
-    ({"same_endpoint": True}, "endpoints_n_not_2"),
+    ({"three_endpoints": True}, "endpoints_n_not_in_1_2"),
     ({"imbalance": True}, "endpoint_block_count_not_3"),
 ])
 def test_analyzer_topology_violations_are_broken_reasons(kw, marker) -> None:
@@ -1196,11 +1296,46 @@ def test_analyzer_topology_violations_are_broken_reasons(kw, marker) -> None:
 
     `imbalance` 是 round460e 新增的那一格：端點還是兩顆、塊數還是六，
     但被塞成 4／2。那個世界裡**沒有任何既有欄位會變紅**，只會比較慢。
+    `three_endpoints` 是 round460h 新增的：允許 1 或 2 顆**不等於**允許任意顆。
     """
     from ops.gain import analyze_r460 as A
     out = A._pooled(A._fixture_blocks(**kw))
     assert any(s.startswith(marker) for s in out["broken_reasons"]), \
         f"{marker} 沒有被算成 BROKEN：{out['broken_reasons']}"
+
+
+def test_analyzer_accepts_one_backend_6_and_records_the_variant() -> None:
+    """round460h：六塊同一顆後端是**合法**拓撲，而且要記下是哪一種、逐塊記端點。
+
+    這條的方向與其他拓撲檢查相反：它要求**不變紅**。理由是量到的——
+    1003 兩次崩潰（09-08 05:11Z `decode() failed: bad alloc`＠context 262k；
+    重載 49k 之後 09:58Z 起 `Context size has been exceeded`、
+    18:10Z `got exception: bad allocation` 卸載模型），
+    同一套 harness 在 1004 上跑完 b1–b3 各 120 列、void 0。
+    「恰好兩顆端點各三塊」保證的是負載平衡，不是可比性；
+    可比性靠的是「同一題的六條臂在同一塊、同一行程、同一顆後端跑完」，
+    而那在六塊同一顆之下**更**成立（後端干擾項整個消失）。
+    """
+    from ops.gain import analyze_r460 as A
+    solo = A._pooled(A._fixture_blocks(same_endpoint=True))
+    assert solo["broken_reasons"] == [], solo["broken_reasons"]
+    topo = solo["topology"]
+    assert topo["variant"] == "one_backend_6"
+    assert topo["endpoints_n"] == 1
+    assert topo["endpoints_allowed"] == list(A.ENDPOINTS_ALLOWED) == [1, 2]
+    # 逐塊端點要記下來（收官引用時不准只說「拓撲合法」）。
+    assert sorted(topo["endpoint_of_block"]) == sorted(A.AUTHORIZED_BLOCKS)
+    assert set(topo["endpoint_of_block"].values()) == {A.API_A_FIXTURE}
+    # 兩顆端點那一種也要記對。
+    two = A._pooled(A._fixture_blocks())
+    assert two["topology"]["variant"] == "two_backends_3_3"
+    assert two["topology"]["endpoints_n"] == 2
+    assert set(two["topology"]["endpoint_of_block"].values()) == \
+        {A.API_A_FIXTURE, A.API_B_FIXTURE}
+    # 但 `one_backend_6` 之下那一顆仍然要掛滿六塊——五塊也要紅。
+    solo5 = A._pooled(A._fixture_blocks(same_endpoint=True)[:5])
+    assert any(s.startswith("endpoint_block_count_not_6")
+               for s in solo5["broken_reasons"]), solo5["broken_reasons"]
 
 
 def test_analyzer_refuses_to_score_a_partial_block_set() -> None:
@@ -1276,7 +1411,7 @@ def test_probe_failure_never_returns_success(sh: str) -> None:
     """
     assert 'return "$ok"' not in sh, "探針全掛會回 0（＝成功）"
     assert "return $((10 + ok))" in sh
-    assert "abort_probe_a_rc" in sh and "abort_probe_b_rc" in sh
+    assert 'finish "abort_probe_${tag}_rc$?"' in sh
 
 
 def test_probe_failure_return_code_is_nonzero_when_run() -> None:

@@ -1,8 +1,19 @@
-# R460：worker harness 六臂——`runs/g_r460_harness_lcb2_{a1,a2,a3,b1,b2,b3}`（LCB v2，120 題切成 6×20，兩顆後端各三塊併發，OFF／CONFORM／OFF5／HPI／HOC／HMIX 交錯）
+# R460：worker harness 六臂——`runs/g_r460_harness_lcb2_{a1,a2,a3,b1,b2,b3}`（LCB v2，120 題切成 6×20，每顆後端至多三塊併發，OFF／CONFORM／OFF5／HPI／HOC／HMIX 交錯）
 
-**日期**：2026-09-07（**round460e 修訂 2026-09-08，仍在任何 r460 資料之前**）
-**輪次**：round460e（Opus 修訂、Fable 裁決 A1–A4）
+> ⚠ **round460h（2026-09-09）**：標題原本寫「兩顆後端各三塊」。1003 連兩次崩潰之後，a 組第三次改掛 1004 ⇒ 六塊全在同一顆後端上（`one_backend_6`）。允許的拓撲、兩次失敗的逐字證據、以及這麼做的代價（兩半差約 17 小時 ⇒ 後端漂移），全部寫在 **§四 E-7 修訂**。
+
+**日期**：2026-09-07（round460e 修訂 2026-09-08，仍在任何 r460 資料之前；
+**round460h 修訂 2026-09-09**，見下面那條時序聲明）
+**輪次**：round460e（Opus 修訂、Fable 裁決 A1–A4）→ round460h（Opus 修訂、Fable 裁決）
 **狀態**：預註冊。**本檔在 run 發射之前、在任何 r460 資料存在之前定稿。**
+⚠ **round460h 的時序，照實寫，不准含糊**：這一次修訂**不是**在「任何 r460 資料之前」——
+b1／b2／b3 的 360 列已經存在（09-08 收官）。它是在**a 組第三次發射之前、
+a 組第三次任何一列資料之前**。動的**只有拓撲的端點那一格與文件**：
+門檻、家族、區間、分母、四狀態、P-H0..P-H9 的窗、臂、seed、offset、逾時
+**一個字沒動**（§四 E-7 修訂第二節逐項列出）。
+a 組前兩次的資料**已經全部移出 `runs/`、不進任何分析**（`runs/_aborted/…`），
+所以「看了 a 組資料才改規則」這件事在本輪不成立——被看的是**失敗的錯誤字串**，
+不是任何一格的交付率。
 **授權**：本檔即 R440G 閘門所需的那一份——它授權**恰好六個**階段一 run 名字
 `runs/g_r460_harness_lcb2_a1`／`_a2`／`_a3`／`_b1`／`_b2`／`_b3`，以及 seed `g-r440-lcb2`；
 其他都不授權（外加 §九-4 那個零 API 的量具 run 名 `r460_probe`，
@@ -287,6 +298,13 @@ SEED_REUSE_AUTHORIZED: g-r440-lcb2 <- runs/g_r447_conform_lcb2
   由突變體 `M11_endpoint_balance_not_checked` 證明那條會紅）。
   沒有這兩道，「一台四塊、一台兩塊」會全綠通過，而那個世界裡只是**比較慢**——
   沒有任何既有欄位會變紅。
+- ⚠ **round460h（2026-09-09，a 組第三次資料之前）再修訂一次「恰好兩顆端點」那一格**：
+  1003 連兩次崩潰（context 262k 的 `decode() failed: bad alloc`；重載 49k 之後
+  `Context size has been exceeded` 再到 `got exception: bad allocation` 卸載模型），
+  a 組第三次改掛 **1004**（`A_ENDPOINT=…100.86.226.21:1234…`）。
+  允許的拓撲因此是 **`two_backends_3_3` 或 `one_backend_6`** 兩種，
+  本 run 收官預期是後者；牙齒與誠實邊界（兩半差約 17 小時 ⇒ 後端漂移）
+  **全部寫在 §四 E-7 修訂**，本節的量測與理由一個字沒有被推翻。
 
 #### 切了之後**變**的三件事（每一件都在別處有對應條文）
 
@@ -474,7 +492,85 @@ b1 因此在 preflight 停住（`參考解通過 0/0` ⇒「量具驗證一題�
   「這台機器的沙箱＋題庫＋計分是好的」，**不是**「本塊那 20 題每一題都被驗過」
   ——後者在這個題庫上對任何一塊都不成立（最多的一塊也只有 4/20 有參考解）。
   §八-9 那條「`--probe-sample 0` ＝ 有參考解的全驗，不是 120 題全驗」照舊適用。
-| **E-7** | **D9 的拓撲成立**（round460e 改成六塊版） | `topology.violations == []`：`topology.blocks_n == 6`、**恰好 2 個相異端點**、**每個端點恰好 3 塊**、塊間 task_id 兩兩零交集且**聯集 == 120**（即 r447 的那 120 題）、一塊一端點、**沒有一塊走 hub**、seed／臂／offset 一致 | 全部在 `analyze_r460.topology_report()`；`--mutation-check` 的 `M8_topology_not_enforced`（拓撲不判）與 `M11_endpoint_balance_not_checked`（每端點三塊那一格不數）證明它有牙齒 |
+| **E-7** | **D9 的拓撲成立**（round460e 六塊版；**端點那一格於 round460h 修訂**，見下） | `topology.violations == []`：`topology.blocks_n == 6`、**相異端點數 ∈ {1, 2}** 且 `topology.variant` ∈ {`two_backends_3_3`, `one_backend_6`}（兩顆時每顆恰好 3 塊 ⇒ `endpoint_block_count_not_3`；一顆時它要掛滿 6 塊 ⇒ `endpoint_block_count_not_6`；三顆以上 ⇒ `endpoints_n_not_in_1_2`）、塊間 task_id 兩兩零交集且**聯集 == 120**（即 r447 的那 120 題）、一塊一端點、**沒有一塊走 hub**、seed／臂／offset 一致；**收官必須引用 `topology.variant` 與 `topology.endpoint_of_block`**，不准只說「拓撲合法」 | 全部在 `analyze_r460.topology_report()`；`--mutation-check` 的 `M8_topology_not_enforced`（拓撲不判）與 `M11_endpoint_balance_not_checked`（每端點塊數那一格不數）證明它有牙齒 |
+
+**E-7 修訂（round460h，Fable 裁決，2026-09-09；寫在 a 組第三次發射之前、a 組第三次任何一列資料之前）**
+
+**一、量到的事實：1003 這顆後端在同一套 harness 上連死兩次，1004 一次沒死。**
+
+| 次 | 發射 | 死法（逐字錯誤字串，來源 `runs/_aborted/*/calls.jsonl` 的 `error`） | 結果 |
+|---|---|---|---|
+| 第一次 | 09-08 04:1xZ | **05:11:31Z** `Engine protocol predict stream returned an error: {"code":500,"message":"decode() failed: bad alloc"}`；**06:54:55Z** `{"error":"terminated"}`；**06:54:57Z 起 399 筆** `No models loaded. Please load a model in the developer page or use the CLI...` | 根因：`lms ps` 顯示 1003 載入的 context length 是 **262,144**、並行槽 4 ⇒ 三條長生成同時把 KV cache 撐爆。a1／a2／a3 剩餘格子全 `infra_void`（100／98／84），移入 `runs/_aborted/g_r460_harness_lcb2_a{1,2,3}_void_20260908T0511Z` |
+| 第二次 | 09-08 07:40Z（`lms load … --context-length 49152` 重載之後） | **09:58:31Z、11:48:10Z、12:02:38Z、12:11:43Z、13:17:55Z 各一輪** `Engine protocol predict stream returned an error: {"code":500,"message":"Context size has been exceeded.","type":"server_error"}`（**三塊在同一秒同時各中一筆**，共 15 筆）；**18:10:25Z** `got exception: bad allocation`；**18:10:31Z** `Engine protocol predict request failed: fetch failed`；**18:10:35Z 起** `No models loaded`（a1 198、a2 62、a3 182 筆） | 模型被卸載，剩餘格子全 void。a1 **70 列／50 void**、a2 **104／16**、a3 **74／46**，runner 自行 terminal。移入 `runs/_aborted/g_r460_harness_lcb2_a{1,2,3}_void_20260908T1810Z` |
+
+**對照組（同一套 harness、同一個 runner sha、同一批指令、只有端點不同）**：
+b1／b2／b3 在 **1004（`100.86.226.21:1234`）** 上 09-08 **04:55Z–09:58Z** 跑完，
+各 **120 列、`infra_void` 0**、**零** context 錯誤、`calls.jsonl` 的 `api` 逐筆 100% 是 1004。
+
+**二、裁決：a 組第三次改掛 1004，拓撲不變量隨之修訂。**
+
+```
+BLOCKS=a1,a2,a3 A_ENDPOINT=http://100.86.226.21:1234/v1/chat/completions \
+  setsid nohup bash ops/gain/launch_harness_lcb2.sh >/dev/null 2>&1 &
+```
+
+- **除了端點，一格不動**：run 名字、`--offset 0/20/40`、`--n 20`、`--seed g-r440-lcb2`、
+  `--arms OFF,CONFORM,OFF5,HPI,HOC,HMIX`、`--bank lcb2`、`--request-timeout-s 1200`、
+  `--review-timeout-s 380`、`--retries 4`、`--probe-sample 0`、`--gauge-scope slice`
+  全部逐字沿用 §二-1 註冊的那一組。
+- **修訂的是「恰好兩顆端點、每顆三塊」那一格**：它是**平衡規則不是科學規則**
+  ——它管的只是「六個 runner 攤在兩張卡上」，而 E-7 真正承重的是另外四條
+  （一塊一端點、塊間零交集且聯集 120、不走 hub、塊數 6）。
+  ⇒ 允許的拓撲收斂成兩種，**收官必須記下是哪一種、為什麼**：
+  `two_backends_3_3`（兩顆相異端點各三塊）、`one_backend_6`（一顆端點掛滿六塊）。
+  本 run 收官預期是 **`one_backend_6`**。
+- **放寬必須自己有牙齒**（沿用 round460e 的規矩）：
+  發射器發射前判一次（`abort_endpoint_imbalance`／`abort_endpoint_count`），
+  analyzer 收官再判一次（`endpoint_block_count_not_3`／`endpoint_block_count_not_6`／
+  `endpoints_n_not_in_1_2` 進 `broken_reasons`），
+  突變體 `M11_endpoint_balance_not_checked` 證明那條會紅。
+- ⚠ **「表上六塊同一顆」不等於「同時六個 runner 打同一顆」。** 實測基礎是
+  「一顆直連後端 3 個併發不掉速、6 個開始退化」，而那量的是**同時**。
+  所以發射器的併發上限改成對**這一刻**算（本次要發的 ＋ 本 run 自己還在跑的塊），
+  超過 3 就停（`abort_endpoint_oversubscribed`）。本次 b 組早已收官
+  ⇒ 1004 上同時只有 a1／a2／a3 三個 runner，與 round460e 實測的條件相同。
+
+**三、為什麼可比性不受影響。**
+
+D9 成立的全部理由一個字沒變：**後端是 task 層級的干擾項，永遠不是 arm 層級的混淆**。
+同一題的六條臂仍然在**同一塊、同一個行程、同一顆後端**上跑完（塊內交錯），
+所以每一組配對比較的兩臂都在同一張卡上；配對永遠在**題內**，
+合併仍然按 `task_id`（R445 先例）。
+六塊全部落在同一顆後端，**反而把「後端」這個干擾項整個消掉**
+——`one_backend_6` 在這一點上比 `two_backends_3_3` **更**乾淨，不是更髒。
+§八-11「不准寫『在兩顆後端上都成立』」因此變得更強：本 run 的 120 題現在**全部**
+只在一顆後端上跑過，跨後端複製這件事一次都沒做。
+
+**四、誠實邊界（這一格是代價，不准省）：兩半不同時跑，後端漂移成了新的干擾項。**
+
+b1–b3 的資料落在 **09-08 04:55Z–09:58Z**；a1–a3 第三次要到 **09-09 01:0xZ** 才起跑
+（實際時刻以各塊 `launch.log` 為準）⇒ 兩半相隔約 **15 小時**，
+以各自中點算約 **17 小時**。這中間 1004 沒有被本 run 控制過：
+模型可能被別的 session 卸載重載、機器可能重開、驅動與 KV 配置可能不同。
+⇒ **「同一顆後端」買到的是空間上的一致，不是時間上的一致。**
+- 這個干擾項**仍然是 task 層級的**（a 半 60 題 vs b 半 60 題），不進任何配對比較，
+  因為配對永遠在題內。它能傷的是「a 半與 b 半的點估計可不可以互相比較」，
+  而那件事 §六-(0)／§八-11 **本來就已經禁止**（塊間難度組成不同）。
+- **P-H0 就是這個漂移的探針**：它讀 a1+a2+a3 的 OFF 交付率，錨是 r447 前 60 題的
+  32/60 ＝ 53.33%，窗 `[38.3, 68.3]`。窗**不因此再放寬**——放寬只會讓它更容易 HIT。
+  P-H0 MISS ⇒ 收官必須把「後端／時間漂移」列為第一嫌疑，而不是把 H 臂的差異照單全收。
+- ⚠ 同時要記得 P-H0 在六塊之下**已經**從配對退化成非配對比較（§三 P-H0、§二-5），
+  而且 a 組的 request timeout 與 r447 不同（1200 vs 600）⇒ 它本來就背了兩個差異，
+  round460h 讓它再背**第三個、而且是可以查證的**一個：**錨與探針落在不同的物理後端**。
+  `runs/g_r447_conform_lcb2/calls.jsonl` 的 `api` 逐筆是
+  `http://100.119.113.56:8765/v1/chat/completions`（**全部 925 筆都是那顆 hub**），
+  而 D9 於 2026-09-07 15:40 實測 8765 **把 100% 的請求路由到 1003**
+  ⇒ P-H0 的錨（32/60）事實上是**在 1003 上量到的**，
+  而 round460h 之後的 a 組跑在 **1004**。
+  ⇒ P-H0 現在同時混著「時間漂移」與「換了一張卡」兩件事，**分不開**。
+  **這三個差異一起使得 P-H0 是「粗篩」不是「檢定」，收官引用時必須照實這樣寫；
+  P-H0 HIT 不構成「後端沒漂」的證據，只構成「沒有大到被這個粗篩抓到」。**
+
 | **E-4** | **D8 的邊界沒有被越過** | `git diff 7747ce3b44b410d16b18897376d78747d735108d <r460 的 runner_git.sha> -- ops/gain/gain_run.py ops/gain/brain_cline.py vacant/codebench.py vacant/checks.py`，逐項分類 (a) 只影響分析／文件／基建 (b) 影響臂行為 | 基線＝**r447 的 runner sha `7747ce3b44b410d16b18897376d78747d735108d`**（讀自 `runs/g_r447_conform_lcb2/summary.json`）。**四個檔不是三個**——`vacant/checks.py` 是沙箱本體，在臂的執行路徑上（R449C §四 G-4-α）。本 run 事前已知 diff 非空，**逐項分類寫在下面的 E-4 表**，**收官必須對發射當下的 sha 重跑** |
 
 **E-4 的事前分類表（round460e 更新）**
@@ -808,11 +904,56 @@ analyzer 把這段話印在 `winners_curse_disclaimer`，每次執行都印。
     （`100.119.113.56:1234`）。若 b* 那顆卡的行為與 a* 差很多，
     本 run **量不到**——它只會表現成「合併後的估計比較吵」。
     這件事寫在資料之前，收官不准當成沒有。
+    ⚠ **round460h 修訂（2026-09-09，a 組第三次資料之前）**：a 組改掛 **1004**
+    ⇒ 六塊全在同一顆後端上（`one_backend_6`），「兩顆卡行為不同」這個干擾項**消失了**。
+    但它換成了另一個：**兩半差約 17 小時**，P-H0 探的變成
+    「同一顆卡在 b 組跑完 17 小時後有沒有漂」，而它的錨（r447）又是在
+    **1003**（經 8765 hub）上量到的 ⇒ P-H0 現在混著「時間漂移」與「換卡」兩件事。
+    詳見 §四 E-7 修訂第四節。**這一條不是被解決，是被換掉。**
 13. **三併發的代價沒有被量過（round460e 新增）。** 「3 個併發各 1.3 s」那組實測
     用的是**短**請求；本 run 的請求是 160–560 s 的長生成。三併發之下每一條會不會
     變慢、變多少，**本 run 沒有事前資料**。它的後果是牆鐘變長與逾時風險，
     已經用 `--request-timeout-s 1200` 買了緩衝；但**「吞吐真的 ×3」是估計不是量測**，
     收官報機時時要照實寫成估計。
+14. **兩半不同時跑，後端漂移是本 run 量不乾淨的干擾項（round460h 新增）。**
+    b1–b3 的資料落在 09-08 04:55Z–09:58Z、a1–a3 第三次要到 09-09 01:0xZ 才起跑，
+    相隔約 15 小時（中點約 17 小時），中間 1004 不在本 run 的控制下。
+    P-H0 是這件事唯一的探針，而它同時混著「換卡」（錨在 1003 量到）與「時間漂移」
+    ⇒ **P-H0 HIT 只代表「沒有大到被粗篩抓到」，不代表「沒漂」。**
+    收官不准把 a 半與 b 半的點估計拿來互比（§六-(0) 本來就禁止，這裡多一個理由）。
+    詳見 §四 E-7 修訂。
+15. **HPI 的「全脈絡」政策真的會撐爆脈絡窗——這是那條 harness 的成本，不是意外（round460h 新增）。**
+    1003 第二次發射把 context length 從 262,144 降到 **49,152** 之後，仍然在
+    09-08 09:58:31Z–13:17:55Z 之間量到 **15 筆** 逐字
+    `{"code":500,"message":"Context size has been exceeded.","type":"server_error"}`。
+    逐臂（來源 `runs/_aborted/g_r460_harness_lcb2_a{1,2,3}_void_20260908T1810Z/calls.jsonl`
+    的 `error` 欄，`meta.arm` 歸戶，attempt 層級計數）：
+
+    | 臂 | a1 | a2 | a3 | 合計 |
+    |---|---|---|---|---|
+    | OFF | 0 | 0 | 0 | **0** |
+    | CONFORM | 0 | 0 | 0 | **0** |
+    | OFF5 | 2 | 3 | 4 | **9** |
+    | HPI | 1 | 1 | 1 | **3** |
+    | HOC | 0 | 0 | 0 | **0** |
+    | HMIX | 2 | 1 | 0 | **3** |
+    | **合計** | 5 | 5 | 5 | **15** |
+
+    去重成 (塊, 臂, task_id, turn) 之後是 **12 個邏輯呼叫**；
+    `attempt` 欄**全部是 1**、沒有任何 attempt ≥ 2 帶同一個錯誤
+    ⇒ **重試都成功了，這 15 筆一筆 void 都沒造成**（那 50／16／46 個 void 全部來自
+    18:10Z 之後的 `bad allocation` ＋ `No models loaded`）。
+    ⚠ **這組數字只能當描述性證據，不准讀成「HPI 的全脈絡政策造成 N 次溢出」**：
+    那 15 筆落在**五個時刻**（09:58:31Z／11:48:10Z／12:02:38Z／12:11:43Z／13:17:55Z），
+    每個時刻**三塊在同一秒各中一筆**，而三塊當下跑的臂**不一樣**
+    ⇒ 這是**三條長生成同時分食同一個 49k 脈絡預算**的**後端層**事件，
+    不是某一條臂單獨把自己的視窗塞爆。為什麼是 OFF5 命中最多、OFF／CONFORM 掛零，
+    本 run **沒有量到機制**（OFF5 是五次獨立取樣、單通完成 token 可達 ~13k），
+    收官不准替它補一個故事。
+    ⇒ 能照實說的只有兩件：(a) **只有多通／長生成的臂被打到**（OFF／CONFORM 零次），
+    (b) **49k 這個視窗在三併發之下不夠用**，而 1004 上的 b 組（同一套 harness、
+    同樣三併發）**一次都沒有**發生 ⇒ 差異在後端配置，不在臂。
+    展場與對外文案若要講「迴圈臂比較貴」，能引的是 token／呼叫數，**不是這 15 筆**。
 
 ---
 

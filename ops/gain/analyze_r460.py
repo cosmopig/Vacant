@@ -96,13 +96,27 @@ AUTHORIZED_BLOCKS = ("g_r460_harness_lcb2_a1", "g_r460_harness_lcb2_a2",
                      "g_r460_harness_lcb2_b2", "g_r460_harness_lcb2_b3")
 HUB_MARKERS = (":8765",)          # D9 明文禁止：任何一塊都不准走 hub
 BLOCKS_EXPECTED = 6
-ENDPOINTS_EXPECTED = 2            # 恰好兩顆直連後端
-BLOCKS_PER_ENDPOINT = 3           # 每顆後端恰好三塊——多了就是在同一張卡上超賣
+BLOCKS_PER_ENDPOINT = 3           # 兩顆端點時每顆恰好三塊——多了就是在同一張卡上超賣
 TASKS_EXPECTED = 120              # 六塊 task_id 的**聯集**（＝ r447 的那 120 題）
+
+# ── round460h 修訂（2026-09-09，a 組第三次任何資料之前）─────────────────
+# 舊規則是「**恰好** 2 個端點、每個 3 塊」。那一格是**平衡規則不是科學規則**：
+# 它管的只是「六個 runner 攤在兩張卡上」，而 E-7 真正承重的是別的四條——
+# 同一題的六條臂在同一塊、同一行程、同一顆後端上跑完；塊間 task_id 零交集且聯集 120；
+# 沒有一塊走 hub；塊數 6。**六塊全在同一顆後端上跑，反而把「後端」這個干擾項整個消掉。**
+# ⇒ 允許的拓撲收斂成兩種，收官必須把是哪一種、為什麼**記下來**（`topology.variant`）：
+#   `two_backends_3_3`  兩顆相異端點，每顆恰好三塊（round460e 的原設計）
+#   `one_backend_6`     一顆端點掛滿六塊（1003 兩次崩潰後，a 組第三次改掛 1004）
+# 其餘（0、3 顆以上、或塊數不對）一律是違規。
+ENDPOINTS_ALLOWED = (1, 2)
+TOPOLOGY_VARIANTS = {2: "two_backends_3_3", 1: "one_backend_6"}
+BLOCKS_PER_ENDPOINT_SOLO = BLOCKS_EXPECTED   # one_backend_6：那一顆要掛滿六塊
 
 #: P-H0 的錨塊：offset 0/20/40 的三塊，聯集恰好是 r447 的**前 60 題**
 #: （§九-1 實測 `a1+a2+a3 == r447 OFF 的前 60 個 task_id`，錨 32/60 ＝ 53.33%）。
-#: 這三塊都在後端 1003 上，所以 P-H0 同時也是「1003 這台有沒有漂」的探針。
+#: round460h 之前這三塊在 1003 上，所以 P-H0 也是「1003 有沒有漂」的探針；
+#: 改掛 1004 之後它探的是**同一顆後端在 b 組跑完約 17 小時後有沒有漂**
+#: （兩半不同時、後端漂移成了新的干擾項，見 DECISION §四 E-7 修訂與 §八-14）。
 PH0_BLOCKS = AUTHORIZED_BLOCKS[:BLOCKS_PER_ENDPOINT]
 
 REQUIRED = ("arm", "task_id", "meets_demand", "accepted", "calls_used", "visible_ok")
@@ -988,20 +1002,30 @@ def topology_report(blocks: list[dict]) -> dict:
        「相加」仍然是 120，只有聯集會掉到 115。
     2. **一塊一端點**：同一塊裡出現兩個 `api` ⇒ 那一塊自己就是混的，不可分析。
     3. **不准走 hub**：D9 量到 hub 把 100% 請求路由到同一顆後端、且併發越高越慢。
-    4. **恰好兩個端點、每個端點恰好三塊**（round460e 取代舊的「兩塊不准同端點」）。
-       六塊之下「同端點」不再是違規——**是設計**（一台後端三個序列 runner，
-       實測 3 併發不掉速）。真正要擋的變成**超賣**：某台被塞了四塊、另一台兩塊，
+    4. **拓撲只准是兩種之一**（round460h 修訂；round460e 版是「恰好兩個端點、每個三塊」）：
+       `two_backends_3_3`（兩顆相異端點各三塊）或 `one_backend_6`（一顆端點六塊）。
+       判到哪一種就記在 `variant` 裡，**並逐塊記端點**（`endpoint_of_block`）——
+       收官引用時不准只說「拓撲合法」，要說清楚是哪一種。
+       六塊之下「同端點」不是違規——**是設計**（一台後端三個序列 runner，
+       實測 3 併發不掉速）。真正要擋的變成**超賣**：兩顆端點卻被塞成 4／2，
        那台就從「3 併發不掉速」掉進「6 併發開始退化」的區間，而那**看起來只是比較慢**，
-       沒有任何既有欄位會變紅。所以逐端點數塊數，不等於 3 就判。
+       沒有任何既有欄位會變紅。所以逐端點數塊數，兩顆時不等於 3、一顆時不等於 6 就判。
+       ⚠ `one_backend_6` 之下**併發**這件事不由本函式管：`calls.jsonl` 記的是
+       「打去哪裡」不是「同時幾個」。同時六個 runner 的擋門在發射器
+       （`abort_endpoint_oversubscribed`，對「這一刻」算）。
+       本 run 的 one_backend_6 是**時間上錯開**的：b 組先跑完、a 組隔約 17 小時再跑
+       ⇒ 換來的代價是**後端漂移變成新的干擾項**（DECISION §四 E-7 修訂、§八-14）。
     5. 塊數必須是 6：只跑得完一部分就結算＝安靜地換一個 n。
 
     另外查 seed／臂集合一致。`enforce` 為 False 時只描述不判——
     那是給「拿這支去看 r447 這類歷史單塊資料」用的診斷路徑。
     """
     rep: dict = {"blocks_n": len(blocks), "blocks_expected": BLOCKS_EXPECTED,
-                 "endpoints_expected": ENDPOINTS_EXPECTED,
+                 "endpoints_allowed": list(ENDPOINTS_ALLOWED),
                  "blocks_per_endpoint_expected": BLOCKS_PER_ENDPOINT,
+                 "blocks_per_endpoint_expected_solo": BLOCKS_PER_ENDPOINT_SOLO,
                  "tasks_expected": TASKS_EXPECTED,
+                 "variant": None, "variant_why": None, "endpoint_of_block": {},
                  "by_block": {}, "violations": []}
     for b in blocks:
         rep["by_block"][b["name"]] = {
@@ -1029,19 +1053,31 @@ def topology_report(blocks: list[dict]) -> dict:
         for ep in b["endpoints"]:
             if any(m in ep for m in HUB_MARKERS):
                 rep["violations"].append(f"block_used_hub:{b['name']}:{ep}")
-    # 4) 端點數與每端點塊數（round460e 取代舊的 blocks_share_endpoint）
+    # 4) 端點數與每端點塊數（round460h：兩種允許的拓撲，判到哪一種要記下來）
     by_ep: dict[str, list[str]] = {}
     for b in blocks:
         for ep in b["endpoints"]:
             by_ep.setdefault(ep, []).append(b["name"])
     rep["blocks_per_endpoint"] = {ep: sorted(v) for ep, v in sorted(by_ep.items())}
+    rep["endpoint_of_block"] = {
+        b["name"]: (b["endpoints"][0] if len(b["endpoints"]) == 1
+                    else "|".join(b["endpoints"]) or None)
+        for b in blocks}
+    n_ep = len(by_ep)
+    rep["endpoints_n"] = n_ep
+    rep["variant"] = TOPOLOGY_VARIANTS.get(n_ep)
+    want_per_ep = BLOCKS_PER_ENDPOINT_SOLO if n_ep == 1 else BLOCKS_PER_ENDPOINT
+    rep["variant_why"] = (
+        f"{n_ep} 個相異端點、每個 {want_per_ep} 塊"
+        if rep["variant"] else f"{n_ep} 個相異端點——不在允許的 {list(ENDPOINTS_ALLOWED)} 裡")
     if MUTANT != "M11_endpoint_balance_not_checked":
-        if len(by_ep) != ENDPOINTS_EXPECTED:
-            rep["violations"].append(f"endpoints_n_not_{ENDPOINTS_EXPECTED}:{len(by_ep)}")
+        if n_ep not in ENDPOINTS_ALLOWED:
+            rep["violations"].append(
+                f"endpoints_n_not_in_{'_'.join(map(str, ENDPOINTS_ALLOWED))}:{n_ep}")
         for ep, names in sorted(by_ep.items()):
-            if len(set(names)) != BLOCKS_PER_ENDPOINT:
+            if len(set(names)) != want_per_ep:
                 rep["violations"].append(
-                    f"endpoint_block_count_not_{BLOCKS_PER_ENDPOINT}:{ep}:{len(set(names))}")
+                    f"endpoint_block_count_not_{want_per_ep}:{ep}:{len(set(names))}")
     # 5) seed／臂／塊數
     seeds = {b["seed"] for b in blocks}
     if len(seeds) > 1:
@@ -1106,16 +1142,23 @@ def render(out: dict) -> str:
     topo = out.get("topology")
     if topo:
         L.append("")
-        L.append("── D9 機時拓撲（六塊、兩顆直連後端各三塊、併發；仲裁一律取合併後的量）")
+        L.append("── D9 機時拓撲（六塊直連後端；round460h：{兩顆各三塊} 或 {一顆六塊}；"
+                 "仲裁一律取合併後的量）")
         L.append(f"{'block':26}{'offset':>8}{'n':>5}{'rows':>7}{'題數':>7}  端點")
         for name, b in topo["by_block"].items():
             L.append(f"{name:26}{b['offset']:>8}{b['n']:>5}{b['n_rows']:>7}"
                      f"{b['n_tasks']:>7}  {'|'.join(b['endpoints']) or '(未落盤)'}")
+        L.append(f"拓撲 variant = {topo.get('variant') or '(不合法)'}"
+                 f"（{topo.get('variant_why')}）")
         L.append(f"塊數 {topo['blocks_n']}/{topo['blocks_expected']}　"
                  f"合併題數(聯集) {topo.get('task_ids_union')}/{topo.get('tasks_expected')}　"
                  f"違規 {topo['violations'] or '[]'}")
         for ep, names in (topo.get("blocks_per_endpoint") or {}).items():
             L.append(f"  {ep}  ←  {len(names)} 塊：{', '.join(names)}")
+        if topo.get("variant") == "one_backend_6":
+            L.append("  ⚠ one_backend_6：六塊同一顆後端 ⇒ **後端不再是干擾項**。"
+                     "代價是兩半不同時跑（b 組先、a 組隔約 17 小時）"
+                     "⇒ **後端漂移**變成新的干擾項；P-H0（a 組那三塊）就是它的探針。")
         for name, sub in (out.get("blocks") or {}).items():
             po = (sub.get("per_arm") or {})
             cells = "  ".join(
@@ -1339,19 +1382,23 @@ def _fixture_windows():
 
 API_A_FIXTURE = "http://100.119.113.56:1234/v1/chat/completions"
 API_B_FIXTURE = "http://100.86.226.21:1234/v1/chat/completions"
+API_C_FIXTURE = "http://100.86.226.22:1234/v1/chat/completions"
 API_HUB_FIXTURE = "http://100.119.113.56:8765/v1/chat/completions"
 
 
 def _fixture_blocks(*, overlap: bool = False, hub: bool = False,
                     same_endpoint: bool = False,
-                    imbalance: bool = False) -> list[dict]:
+                    imbalance: bool = False,
+                    three_endpoints: bool = False) -> list[dict]:
     """D9 的**六塊**夾具：把主夾具的 120 題切成 6 × 20（offset 0/20/…/100）。
 
-    四個旗標各自製造一種**必須被抓到**的違規：
-      `overlap`       a2 往前挪 5 題 ⇒ 與 a1 有交集，而且聯集掉到 115；
-      `hub`           b1 走 8765；
-      `same_endpoint` 六塊全部打 api_a ⇒ 端點數不是 2；
-      `imbalance`     b3 改打 api_a ⇒ 端點還是 2 顆，但變成 4／2（超賣）。
+    旗標各自造出一種形狀，其中三種**必須被抓到**、一種是 round460h 之後的**合法**拓撲：
+      `overlap`         a2 往前挪 5 題 ⇒ 與 a1 有交集，而且聯集掉到 115（違規）；
+      `hub`             b1 走 8765（違規）；
+      `imbalance`       b3 改打 api_a ⇒ 端點還是 2 顆，但變成 4／2 超賣（違規）；
+      `three_endpoints` 2／2／2 攤在三顆端點上 ⇒ 端點數不在 {1,2}（違規）；
+      `same_endpoint`   六塊全部打 api_a ⇒ **`one_backend_6`，round460h 起合法**
+                        （所以它現在是一條「不准變紅」的正向檢查，不是牙齒）。
     """
     rows, _, _ = _fixture()
     offsets = [0, 20, 40, 60, 80, 100]
@@ -1360,6 +1407,8 @@ def _fixture_blocks(*, overlap: bool = False, hub: bool = False,
         apis = [API_A_FIXTURE] * 6
     if imbalance:
         apis = [API_A_FIXTURE] * 3 + [API_B_FIXTURE] * 2 + [API_A_FIXTURE]
+    if three_endpoints:
+        apis = [API_A_FIXTURE] * 2 + [API_B_FIXTURE] * 2 + [API_C_FIXTURE] * 2
     if hub:
         apis[3] = API_HUB_FIXTURE
     if overlap:
@@ -1482,7 +1531,7 @@ def selftest() -> int:
        and all(v["measured"] == 20
                for v in bo["blocks"][AUTHORIZED_BLOCKS[0]]["per_arm"].values()),
        str(sorted(bo.get("blocks") or {})))
-    ck("Q3_ph0_reads_the_1003_blocks",
+    ck("Q3_ph0_reads_the_anchor_blocks",
        bo["prereg"]["P-H0"]["source_field"]
        == "ph0_pool.per_arm.OFF.deliv_pp_denom_measured"
        and bo["ph0_pool_blocks"] == list(PH0_BLOCKS)
@@ -1497,9 +1546,32 @@ def selftest() -> int:
     ck("Q5_block_overlap_is_caught",
        any(s.startswith("block_task_overlap")
            for s in _pooled(_fixture_blocks(overlap=True))["broken_reasons"]))
+    # round460h：端點數只准是 1 或 2。三顆（2／2／2）沒有任何既有欄位會變紅。
     ck("Q6_endpoint_count_is_caught",
-       any(s.startswith(f"endpoints_n_not_{ENDPOINTS_EXPECTED}")
-           for s in _pooled(_fixture_blocks(same_endpoint=True))["broken_reasons"]))
+       any(s.startswith("endpoints_n_not_in_1_2")
+           for s in _pooled(_fixture_blocks(three_endpoints=True))["broken_reasons"]),
+       str(_pooled(_fixture_blocks(three_endpoints=True))["broken_reasons"]))
+    # round460h：六塊同一顆後端是**合法**拓撲（1003 兩次崩潰後 a 組改掛 1004）。
+    # 這一條的方向與其他 Q 條相反：它要求**不變紅**，而且 variant 要記對。
+    solo = _pooled(_fixture_blocks(same_endpoint=True))
+    ck("Q6b_one_backend_6_is_legal_and_recorded",
+       solo["broken_reasons"] == []
+       and solo["topology"]["variant"] == "one_backend_6"
+       and solo["topology"]["endpoints_n"] == 1
+       and set(solo["topology"]["endpoint_of_block"].values()) == {API_A_FIXTURE},
+       f"{solo['broken_reasons']} variant={solo['topology'].get('variant')}")
+    # 兩顆端點時 variant 也要記對，而且仍然是舊的那一種。
+    two = _pooled(_fixture_blocks())
+    ck("Q6c_two_backends_3_3_is_recorded",
+       two["topology"]["variant"] == "two_backends_3_3"
+       and two["topology"]["endpoints_n"] == 2,
+       str(two["topology"].get("variant")))
+    # one_backend_6 的塊數牙齒：一顆端點卻只掛五塊 ⇒ 那一顆的塊數不對也要紅。
+    solo5 = _pooled(_fixture_blocks(same_endpoint=True)[:5])
+    ck("Q6d_solo_endpoint_block_count_is_caught",
+       any(s.startswith(f"endpoint_block_count_not_{BLOCKS_PER_ENDPOINT_SOLO}")
+           for s in solo5["broken_reasons"]),
+       str(solo5["broken_reasons"]))
     ck("Q7_partial_block_set_is_caught",
        any(s.startswith(f"block_count_not_{BLOCKS_EXPECTED}")
            for s in _pooled(_fixture_blocks()[:1])["broken_reasons"]))

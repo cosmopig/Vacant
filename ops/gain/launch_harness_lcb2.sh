@@ -12,6 +12,19 @@
 #     b3 runs/g_r460_harness_lcb2_b3 --offset 100 --n 20 → 100.86.226.21:1234
 #   六塊各自 setsid、各自 flock、各自 launch.log、各自 backend.json，**同時**跑。
 #
+# ⚠ D9（round460h 修訂，2026-09-09，a 組第三次任何資料之前）：**拓撲允許六塊同一顆後端**。
+#   `A_ENDPOINT`／`B_ENDPOINT` 覆寫上面那兩顆的位址（預設一個字不變），所以
+#     `BLOCKS=a1,a2,a3 A_ENDPOINT=http://100.86.226.21:1234/v1/chat/completions`
+#   會把 a 組發到 1004（b 組已經在那顆上跑完 120/120/120、void 0）。
+#   修訂的是「恰好兩顆端點、每顆三塊」那一格——它是**平衡規則不是科學規則**。
+#   允許的拓撲：`two_backends_3_3` 或 `one_backend_6`；收官由 analyzer 記下是哪一種
+#   （`topology.variant`）並逐塊記端點。E-7 真正承重的四條在兩種下都成立：
+#   同一題的六條臂在同一塊、同一行程、同一顆後端跑完；塊間 task_id 零交集且聯集 120；
+#   不走 hub；塊數 6。**六塊同一顆後端反而把「後端」這個干擾項整個消掉。**
+#   ⚠ 但「表上六塊同一顆」不等於「同時六個 runner 打同一顆」：
+#   併發上限仍然是 $BLOCKS_PER_ENDPOINT，而且改成對**這一刻**算
+#   （本次要發的 ＋ 本 run 自己還在跑的），見 abort_endpoint_oversubscribed。
+#
 # 承重什麼：
 #   (a) SPEC_GAIN §7「一端點一 run」——這條**在 round460e 被明文修訂**，
 #       修訂的理由是量到的、修訂的範圍是窄的，兩件事都寫在這裡：
@@ -99,9 +112,20 @@ REQUEST_TIMEOUT_S=1200        # round460e：三併發之下 600 會誤判成逾�
 #   ⚠ **body 檢查一個字都不放寬**（仍然要求 content 非空）：把「空 content」讀成通過
 #     等於把探針關掉，而探針存在的理由就是擋「後端整個死掉」。
 PROBE_MAX_TOKENS=512
-# D9：六塊、兩顆直連後端。名字、offset 與端點是**一組**，改一格就要改整組。
-API_A="http://100.119.113.56:1234/v1/chat/completions"
-API_B="http://100.86.226.21:1234/v1/chat/completions"
+# D9：六塊、直連後端。名字、offset 與端點是**一組**，改一格就要改整組。
+# ⚠ round460h（2026-09-09，a 組第三次發射之前、a 組任何第三次資料之前）：
+#   `A_ENDPOINT`／`B_ENDPOINT` 可以覆寫這兩顆的位址，**預設一個字不變**。
+#   為什麼要這個旋鈕：1003 連兩次死在同一件事（09-08 05:11Z context 262k 的
+#   `decode() failed: bad alloc`；重載 49k 之後 09:58Z 起 `Context size has been exceeded`、
+#   18:10Z `got exception: bad allocation` 卸載模型），而 1004 用**同一套 harness**
+#   跑完 b1–b3 各 120 列、void 0。⇒ a 組第三次改掛 1004。
+#   拓撲不變量因此被 Fable 修訂（見底下的 TOPOLOGY 檢查）：
+#   「恰好兩顆端點、每顆三塊」是**平衡規則不是科學規則**，
+#   允許的拓撲是 {兩顆各三塊} 或 {一顆六塊}，收官由 analyzer 記下是哪一種。
+API_A_DEFAULT="http://100.119.113.56:1234/v1/chat/completions"
+API_B_DEFAULT="http://100.86.226.21:1234/v1/chat/completions"
+API_A="${A_ENDPOINT:-$API_A_DEFAULT}"
+API_B="${B_ENDPOINT:-$API_B_DEFAULT}"
 OUT_A1="runs/g_r460_harness_lcb2_a1"
 OFFSET_A1=0
 OUT_A2="runs/g_r460_harness_lcb2_a2"
@@ -144,8 +168,9 @@ HUB_MARK="8765"
 # 不帶塊名的舊名字、以及兩塊時代的 `_a`／`_b`：R440G 是子字串比對、擋不掉它們，本支擋
 STALE_NAMES="g_r460_harness_lcb2 g_r460_harness_lcb2_a g_r460_harness_lcb2_b"
 WORKER_CONCURRENCY=1          # runner **行程內**的最大值；理由見檔頭的併發那一段
-BLOCK_PARALLELISM=6           # 平行度來自這裡：六個行程、兩顆 GPU 各三個
-BLOCKS_PER_ENDPOINT=3         # 一顆直連後端最多三個序列 runner（實測 3 併發不掉速）
+BLOCK_PARALLELISM=6           # 平行度來自這裡：六個行程
+BLOCKS_PER_ENDPOINT=3         # **同一刻**打同一顆端點的 runner 上限（實測 3 併發不掉速）
+BLOCKS_EXPECTED=6             # D9 授權的塊數；一顆端點的 one_backend_6 拓撲要掛滿它
 PRIOR_RUN="${PRIOR_RUN:-runs/g_r449c_eq5_lcb3}"
 WAIT_PAT="^python3 ops/gain/gain_run\.py --out $PRIOR_RUN"
 
@@ -237,19 +262,52 @@ printf '%s\n' "$BLOCK_TABLE" | while read -r tag OUT off api scope; do
     || { say "ABORT: $DEC 內文沒有寫到 --gauge-scope $scope"; exit 3; }
 done || finish abort_block_not_prereg
 
-# D9：端點是實驗條件。恰好兩顆、每顆恰好三塊、任何一塊都不准走 hub。
-[ "$API_A" != "$API_B" ] || { say "ABORT: 兩顆後端指到同一個位址 $API_A"; finish abort_same_endpoint; }
+# D9（round460h 修訂）：端點是實驗條件。任何一塊都不准走 hub；
+# 允許的拓撲**只有兩種**：`two_backends_3_3`（兩顆相異端點各三塊）
+# 或 `one_backend_6`（一顆端點六塊）。其餘一律停。
+# ⚠ 修訂掉的是「恰好兩顆」那一格：它是**平衡規則**（把六個 runner 攤到兩張卡），
+#   不是科學規則。E-7 真正承重的四條在兩種拓撲下都成立：
+#   同一題的六條臂在同一塊、同一行程、同一顆後端上跑完；塊間 task_id 零交集且聯集 120；
+#   不走 hub；塊數 6。六塊同一顆後端反而把「後端」這個干擾項整個消掉。
 case "$API_A$API_B" in
   *"$HUB_MARK"*) say "ABORT: 端點含 $HUB_MARK（hub）——D9 禁止任何一塊走 hub"; finish abort_hub_endpoint ;;
 esac
+n_all=$(printf '%s\n' "$BLOCK_TABLE" | awk 'NF' | wc -l | tr -d ' ')
+[ "$n_all" -eq "$BLOCKS_EXPECTED" ] || { say "ABORT: BLOCK_TABLE 有 $n_all 塊，D9 授權的是 $BLOCKS_EXPECTED"; finish abort_block_count; }
+n_ep=$(printf '%s\n' "$BLOCK_TABLE" | awk 'NF {print $4}' | sort -u | wc -l | tr -d ' ')
 n_a=$(printf '%s\n' "$BLOCK_TABLE" | awk -v x="$API_A" '$4 == x' | wc -l | tr -d ' ')
 n_b=$(printf '%s\n' "$BLOCK_TABLE" | awk -v x="$API_B" '$4 == x' | wc -l | tr -d ' ')
-n_all=$(printf '%s\n' "$BLOCK_TABLE" | wc -l | tr -d ' ')
-[ "$n_all" -eq 6 ] || { say "ABORT: BLOCK_TABLE 有 $n_all 塊，D9 授權的是 6"; finish abort_block_count; }
-[ "$n_a" -eq "$BLOCKS_PER_ENDPOINT" ] && [ "$n_b" -eq "$BLOCKS_PER_ENDPOINT" ] || {
-  say "ABORT: 每顆端點要恰好 $BLOCKS_PER_ENDPOINT 塊（實際 a=$n_a b=$n_b）——超賣會退化成 6 併發"
-  finish abort_endpoint_imbalance; }
-say "端點分配：$API_A ← $n_a 塊　$API_B ← $n_b 塊（六塊直連、不經 hub）"
+case "$n_ep" in
+  2) TOPOLOGY_VARIANT="two_backends_3_3"
+     [ "$n_a" -eq "$BLOCKS_PER_ENDPOINT" ] && [ "$n_b" -eq "$BLOCKS_PER_ENDPOINT" ] || {
+       say "ABORT: 兩顆端點時每顆要恰好 $BLOCKS_PER_ENDPOINT 塊（實際 a=$n_a b=$n_b）——超賣會退化成 6 併發"
+       finish abort_endpoint_imbalance; } ;;
+  1) TOPOLOGY_VARIANT="one_backend_6"
+     [ "$n_a" -eq "$BLOCKS_EXPECTED" ] || {
+       say "ABORT: 一顆端點時它要掛滿 $BLOCKS_EXPECTED 塊（實際 $n_a）"; finish abort_endpoint_imbalance; } ;;
+  *) say "ABORT: 端點數 $n_ep 不在允許的 {1,2} 裡"; finish abort_endpoint_count ;;
+esac
+say "拓撲 variant=${TOPOLOGY_VARIANT}（端點數 ${n_ep}；$API_A ← $n_a 塊　$API_B ← $n_b 塊；直連、不經 hub）"
+
+# ⚠ 拓撲允許「六塊同一顆」**不等於**允許「六個 runner 同時打同一顆」。
+#   實測的基礎是「一顆直連後端 3 個併發不掉速、6 個開始退化」，
+#   而那量的是**同時**。表上六塊同一顆是合法的（前三塊先跑完、後三塊再跑），
+#   所以上限必須落在「這一刻」而不是「表上」：
+#   本次要發的塊 ＋ 本 run 自己還在跑的塊，逐端點都不准超過 $BLOCKS_PER_ENDPOINT。
+running_blocks_on() {   # $1=api：本 run 那六塊裡，**還在跑**且打這顆端點的塊數
+  printf '%s\n' "$BLOCK_TABLE" | awk -v x="$1" 'NF && $4 == x {print $2}' \
+    | while read -r o; do
+        ps -eo cmd | grep -q "^python3 ops/gain/gain_run\.py --out $o " && echo x
+      done | wc -l | tr -d ' '
+}
+for api in $SEL_APIS; do
+  now=$(running_blocks_on "$api")
+  new=$(printf '%s\n' "$SEL_TABLE" | awk -v x="$api" 'NF && $4 == x' | wc -l | tr -d ' ')
+  say "端點 ${api}：已在跑 $now 塊 ＋ 本次要發 $new 塊（上限 ${BLOCKS_PER_ENDPOINT}）"
+  [ $((now + new)) -le "$BLOCKS_PER_ENDPOINT" ] || {
+    say "ABORT: $api 同時會有 $((now + new)) 個 runner——超過實測不掉速的 $BLOCKS_PER_ENDPOINT"
+    finish abort_endpoint_oversubscribed; }
+done
 
 # 併發：runner **行程內**現在是依序送出。哪天有人加了 ThreadPoolExecutor，這一格的
 # 「最大值＝1」就過期了 ⇒ 停下來讓他重新裁決，不要安靜沿用。
@@ -257,7 +315,7 @@ if grep -q "ThreadPoolExecutor(" ops/gain/gain_run.py; then
   say "ABORT: gain_run.py 出現 ThreadPoolExecutor( ——併發旋鈕變了，WORKER_CONCURRENCY=$WORKER_CONCURRENCY 這格要重新裁決"
   finish abort_concurrency_knob_appeared
 fi
-say "worker 行程內併發度 = $WORKER_CONCURRENCY（一次一個請求）；區塊平行度 = $BLOCK_PARALLELISM（六個行程、每顆 GPU $BLOCKS_PER_ENDPOINT 個）"
+say "worker 行程內併發度 = $WORKER_CONCURRENCY（一次一個請求）；區塊平行度 = $BLOCK_PARALLELISM（六個行程；同一刻同一顆端點上限 $BLOCKS_PER_ENDPOINT 個）"
 
 # R440G 只檢查 DECISION 內文有沒有 run 名字，檢查不到 seed；seed 打錯不會被它擋下。
 grep -q -- "$SEED" "$DEC" || { say "ABORT: $DEC 內文沒有寫到 seed $SEED"; finish abort_seed_not_prereg; }
@@ -336,11 +394,14 @@ except Exception: print("no")' "$ROOT/logs/harness_lcb2_${tag}_probe_$i.json")
 }
 
 # rc 9 ＝ /v1/models 沒回模型；rc 10+k ＝ 三次 chat 探針只過 k 次。
-# 只探**這次要用到的**端點：補發 b 組時去打 a 組那顆卡只是替正在跑的三塊添亂。
-printf '%s\n' "$SEL_APIS" | grep -qx -- "$API_A" && {
-  probe_backend a "$API_A" || finish "abort_probe_a_rc$?"; }
-printf '%s\n' "$SEL_APIS" | grep -qx -- "$API_B" && {
-  probe_backend b "$API_B" || finish "abort_probe_b_rc$?"; }
+# 只探**這次真的會用到的**端點（`$SEL_APIS` ＝ 本次要發那幾塊的端點、已去重）：
+#   · 補發 b 組時去打 a 組那顆卡只是替正在跑的三塊添亂；
+#   · round460h 之後 `A_ENDPOINT` 可以覆寫 ⇒ 探的必須是**表上實際那一格**，
+#     不是「名字叫 API_A 的那個常數」。所以這裡走表、不走兩個變數名。
+for api in $SEL_APIS; do
+  tag=$(printf '%s\n' "$SEL_TABLE" | awk -v x="$api" 'NF && $4 == x {print $1; exit}')
+  probe_backend "$tag" "$api" || finish "abort_probe_${tag}_rc$?"
+done
 
 # ── 發射：六塊各自 setsid、各自 flock、各自 launch.log ────────────────
 launch_block() {   # $1=tag $2=OUT $3=offset $4=api $5=gauge_scope
