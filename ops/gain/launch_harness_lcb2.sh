@@ -287,7 +287,13 @@ case "$n_ep" in
        say "ABORT: 一顆端點時它要掛滿 $BLOCKS_EXPECTED 塊（實際 $n_a）"; finish abort_endpoint_imbalance; } ;;
   *) say "ABORT: 端點數 $n_ep 不在允許的 {1,2} 裡"; finish abort_endpoint_count ;;
 esac
-say "拓撲 variant=${TOPOLOGY_VARIANT}（端點數 ${n_ep}；$API_A ← $n_a 塊　$API_B ← $n_b 塊；直連、不經 hub）"
+# ⚠ 逐端點的塊數要從**表**上數（去重之後印），不要印 "$API_A ← n_a　$API_B ← n_b"：
+#   one_backend_6 之下兩個變數指到同一顆 ⇒ 那種印法會變成「← 6 塊」印兩次，
+#   讀起來像 12 塊。日誌是收官的一手證據，不准長得像另一個數字。
+say "拓撲 variant=${TOPOLOGY_VARIANT}（端點數 ${n_ep}；直連、不經 hub）"
+printf '%s\n' "$BLOCK_TABLE" \
+  | awk 'NF {c[$4]++} END {for (e in c) printf "%s <- %d 塊\n", e, c[e]}' \
+  | sort | while read -r ln; do say "  $ln"; done
 
 # ⚠ 拓撲允許「六塊同一顆」**不等於**允許「六個 runner 同時打同一顆」。
 #   實測的基礎是「一顆直連後端 3 個併發不掉速、6 個開始退化」，
