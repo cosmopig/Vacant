@@ -39,84 +39,12 @@
       "bank_filter": "difficulty=medium"
     },
     {
-      "name": "g_r529_lcb3m_a2",
-      "bank": "lcb3",
-      "n": 20,
-      "offset": 20,
-      "seed": "g-r529-lcb3",
-      "tag": "r529lcb3m2",
-      "bank_filter": "difficulty=medium"
-    },
-    {
-      "name": "g_r529_lcb3m_a3",
-      "bank": "lcb3",
-      "n": 20,
-      "offset": 40,
-      "seed": "g-r529-lcb3",
-      "tag": "r529lcb3m3",
-      "bank_filter": "difficulty=medium"
-    },
-    {
-      "name": "g_r529_lcb3m_a4",
-      "bank": "lcb3",
-      "n": 20,
-      "offset": 60,
-      "seed": "g-r529-lcb3",
-      "tag": "r529lcb3m4",
-      "bank_filter": "difficulty=medium"
-    },
-    {
-      "name": "g_r529_lcb3m_a5",
-      "bank": "lcb3",
-      "n": 20,
-      "offset": 80,
-      "seed": "g-r529-lcb3",
-      "tag": "r529lcb3m5",
-      "bank_filter": "difficulty=medium"
-    },
-    {
-      "name": "g_r529_lcb3m_a6",
-      "bank": "lcb3",
-      "n": 20,
-      "offset": 100,
-      "seed": "g-r529-lcb3",
-      "tag": "r529lcb3m6",
-      "bank_filter": "difficulty=medium"
-    },
-    {
-      "name": "g_r529_lcb3m_a7",
-      "bank": "lcb3",
-      "n": 15,
-      "offset": 120,
-      "seed": "g-r529-lcb3",
-      "tag": "r529lcb3m7",
-      "bank_filter": "difficulty=medium"
-    },
-    {
       "name": "g_r529_lcb3h_a1",
       "bank": "lcb3",
       "n": 20,
       "offset": 0,
       "seed": "g-r529-lcb3",
       "tag": "r529lcb3h1",
-      "bank_filter": "difficulty=hard"
-    },
-    {
-      "name": "g_r529_lcb3h_a2",
-      "bank": "lcb3",
-      "n": 20,
-      "offset": 20,
-      "seed": "g-r529-lcb3",
-      "tag": "r529lcb3h2",
-      "bank_filter": "difficulty=hard"
-    },
-    {
-      "name": "g_r529_lcb3h_a3",
-      "bank": "lcb3",
-      "n": 14,
-      "offset": 40,
-      "seed": "g-r529-lcb3",
-      "tag": "r529lcb3h3",
       "bank_filter": "difficulty=hard"
     },
     {
@@ -128,68 +56,38 @@
       "tag": "r529hep1"
     },
     {
-      "name": "g_r529_hep_a2",
-      "bank": "humanevalplus",
-      "n": 20,
-      "offset": 20,
-      "seed": "g-r529-he",
-      "tag": "r529hep2"
-    },
-    {
-      "name": "g_r529_hep_a3",
-      "bank": "humanevalplus",
-      "n": 20,
-      "offset": 40,
-      "seed": "g-r529-he",
-      "tag": "r529hep3"
-    },
-    {
-      "name": "g_r529_hep_a4",
-      "bank": "humanevalplus",
-      "n": 20,
-      "offset": 60,
-      "seed": "g-r529-he",
-      "tag": "r529hep4"
-    },
-    {
-      "name": "g_r529_hep_a5",
-      "bank": "humanevalplus",
-      "n": 20,
-      "offset": 80,
-      "seed": "g-r529-he",
-      "tag": "r529hep5"
-    },
-    {
-      "name": "g_r529_hep_a6",
-      "bank": "humanevalplus",
-      "n": 20,
-      "offset": 100,
-      "seed": "g-r529-he",
-      "tag": "r529hep6"
-    },
-    {
-      "name": "g_r529_hep_a7",
-      "bank": "humanevalplus",
-      "n": 20,
-      "offset": 120,
-      "seed": "g-r529-he",
-      "tag": "r529hep7"
-    },
-    {
-      "name": "g_r529_hep_a8",
-      "bank": "humanevalplus",
-      "n": 16,
-      "offset": 140,
-      "seed": "g-r529-he",
-      "tag": "r529hep8"
-    },
-    {
       "name": "g_r529_mbpp_a1",
       "bank": "evalplus",
       "n": 20,
       "offset": 0,
       "seed": "g-r529-mbpp",
       "tag": "r529mbpp1"
+    },
+    {
+      "name": "g_r529_lcb3m_a2",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m2",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_lcb3h_a2",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3h2",
+      "bank_filter": "difficulty=hard"
+    },
+    {
+      "name": "g_r529_hep_a2",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-he",
+      "tag": "r529hep2"
     },
     {
       "name": "g_r529_mbpp_a2",
@@ -200,12 +98,55 @@
       "tag": "r529mbpp2"
     },
     {
+      "name": "g_r529_lcb3m_a3",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 40,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m3",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_lcb3h_a3",
+      "bank": "lcb3",
+      "n": 14,
+      "offset": 40,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3h3",
+      "bank_filter": "difficulty=hard"
+    },
+    {
+      "name": "g_r529_hep_a3",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 40,
+      "seed": "g-r529-he",
+      "tag": "r529hep3"
+    },
+    {
       "name": "g_r529_mbpp_a3",
       "bank": "evalplus",
       "n": 20,
       "offset": 40,
       "seed": "g-r529-mbpp",
       "tag": "r529mbpp3"
+    },
+    {
+      "name": "g_r529_lcb3m_a4",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 60,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m4",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_hep_a4",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 60,
+      "seed": "g-r529-he",
+      "tag": "r529hep4"
     },
     {
       "name": "g_r529_mbpp_a4",
@@ -216,12 +157,46 @@
       "tag": "r529mbpp4"
     },
     {
+      "name": "g_r529_lcb3m_a5",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 80,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m5",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_hep_a5",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 80,
+      "seed": "g-r529-he",
+      "tag": "r529hep5"
+    },
+    {
       "name": "g_r529_mbpp_a5",
       "bank": "evalplus",
       "n": 20,
       "offset": 80,
       "seed": "g-r529-mbpp",
       "tag": "r529mbpp5"
+    },
+    {
+      "name": "g_r529_lcb3m_a6",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 100,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m6",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_hep_a6",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 100,
+      "seed": "g-r529-he",
+      "tag": "r529hep6"
     },
     {
       "name": "g_r529_mbpp_a6",
@@ -232,12 +207,37 @@
       "tag": "r529mbpp6"
     },
     {
+      "name": "g_r529_lcb3m_a7",
+      "bank": "lcb3",
+      "n": 15,
+      "offset": 120,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m7",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_hep_a7",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 120,
+      "seed": "g-r529-he",
+      "tag": "r529hep7"
+    },
+    {
       "name": "g_r529_mbpp_a7",
       "bank": "evalplus",
       "n": 20,
       "offset": 120,
       "seed": "g-r529-mbpp",
       "tag": "r529mbpp7"
+    },
+    {
+      "name": "g_r529_hep_a8",
+      "bank": "humanevalplus",
+      "n": 16,
+      "offset": 140,
+      "seed": "g-r529-he",
+      "tag": "r529hep8"
     },
     {
       "name": "g_r529_mbpp_a8",

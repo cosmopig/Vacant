@@ -171,9 +171,12 @@ R529_BLOCK: g_r529_mbpp_a19 bank=evalplus filter=- n=11 offset=360 seed=g-r529-m
 
 佇列的機器可讀版在 `ops/gain/queues/r529_cross_bank.json`（37 塊，
 `schedule_queue.py --check` 逐行對這份 DECISION 驗，CI 也驗）。
-**佇列順序**＝上表由上而下：`lcb3-medium → lcb3-hard → humanevalplus → evalplus`
-（Fable 裁決第 6 點；把最能回答 R460 §九 推翻條件的那兩集排在最前面，
-機時被砍的時候先拿到的是最有資訊的那一段）。
+
+⚠ **上面這 37 行是「哪些塊被註冊過」，不是「跑的順序」。** 註冊行只描述單一塊，
+不含順序；順序只活在佇列 JSON 的 `blocks` 陣列裡。
+**實際順序＝四集輪流交錯**（2026-09-11 Fable 改的，理由與細節在 §八-0 第 2 點）：
+`lcb3m_a1, lcb3h_a1, hep_a1, mbpp_a1, lcb3m_a2, …`。
+原本的「整集排完再下一集」（Fable 稍早的裁決第 6 點）已被它自己推翻。
 
 ### 二-3　逐塊指令（`<...>` 取上表，其餘 37 塊完全相同）
 
@@ -610,6 +613,27 @@ rows 的定義：一題一臂一列。三臂 × 716 題 ＝ **2,148 列**。
        要標成「與後端版本混淆，不可與別集比」。這條是事前的門檻，不是事後的解釋。
    ⚠ **配對比較仍然不受影響**（一塊之內三條臂在同一台），所以主指標
    （§六-1）不吃這個混淆。
+
+   **⇒ 2026-09-11 10:0xZ Fable 裁決：把上面 (a)(b)(c) 的事後處置換成事前的修正
+   ——佇列順序改成四集輪流交錯。**（這一條**推翻** Fable 自己 2026-09-11 稍早
+   裁決第 6 點的「整集排完再下一集」。）
+   - **改的只有順序**：每一塊的 `name`／`seed`／`offset`／`n`／`tag`／`bank_filter`
+     **一個字都沒動**，集內的相對順序（`a1` → `a2` → …）也完全保住
+     （offset 的連續性靠它）。
+   - **新順序**＝ round-robin：`lcb3m → lcb3h → humanevalplus → evalplus` 各取一塊
+     輪流，某一集用完就跳過。前 12 塊是
+     `lcb3m_a1, lcb3h_a1, hep_a1, mbpp_a1, lcb3m_a2, lcb3h_a2, hep_a2, mbpp_a2,
+     lcb3m_a3, lcb3h_a3, hep_a3, mbpp_a3`；`lcb3h` 在第 3 輪用完、
+     `lcb3m` 在第 7 輪、`hep` 在第 8 輪，之後是 `mbpp_a9..a19`。
+   - **為什麼這樣就修掉了混淆**：槽是先到先得的，而四個題目集的塊現在**均勻散布在
+     整條時間軸上** ⇒ 「前期偏 1003、後期偏 1004」這件事會**同樣地**打到四集，
+     不會變成「lcb3 在 1003、evalplus 在 1004」。
+   - **(a)(b)(c) 三條處置照舊**——交錯讓相關變小，**不是變成零**
+     （37 不是 4 的倍數、塊的長度不一樣、重排會換台）。收官照樣要看分配表。
+   - ⚠ **順序不進發射器的比對**：`R529_BLOCK:` 註冊行只描述**單一塊**
+     （name／bank／filter/n/offset/seed），**不含順序**，所以 §二-2 那 37 行
+     一個字都不用改，發射器與 `--check` 也不受影響（改順序前後都 OK）。
+     順序只活在 `ops/gain/queues/r529_cross_bank.json` 的 `blocks` 陣列裡。
 3. **版本是宣稱不是量測。** `lms version` 是在那兩台機器上執行的，本 runner
    查不到（實測：`/v1/models` 與 HTTP header 都不帶版本）。
    ⇒ `<OUT>.backend_meta.json` 記 `declared`（含 `version_source`）

@@ -420,3 +420,44 @@ def test_poll_loop_counts_a_preflight_failure_as_an_attempt(tmp_path):
               sleeper=lambda _s: None,
               ps_reader=lambda: [_SCHED])
     assert preflight == [f"{q.blocks[0].name}:7"]
+
+
+# ── 9. 佇列順序＝四集輪流交錯（2026-09-11 Fable 推翻自己的裁決第 6 點）──────
+def test_queue_order_is_round_robin_across_the_four_sets():
+    """順序是**事前的混淆修正**，不是排版偏好 ⇒ 要有紅線擋它漂回去。
+
+    整集排完再下一集的話，佇列前段全是 lcb3、後段全是 evalplus；而槽表前四格
+    在 1003、第五格才在 1004 ⇒ 題目集與後端會相關。交錯讓「前期偏 1003、
+    後期偏 1004」**同樣地**打到四集。
+    """
+    q = load_queue(QUEUE_PATH)
+    names = [b.name for b in q.blocks]
+    assert names[:8] == [
+        "g_r529_lcb3m_a1", "g_r529_lcb3h_a1", "g_r529_hep_a1", "g_r529_mbpp_a1",
+        "g_r529_lcb3m_a2", "g_r529_lcb3h_a2", "g_r529_hep_a2", "g_r529_mbpp_a2"]
+    # 前 12 塊（＝ lcb3h 用完之前）每一輪都恰好四集各一塊
+    for r in range(3):
+        chunk = [(b.bank, b.bank_filter) for b in q.blocks[r * 4:(r + 1) * 4]]
+        assert len(set(chunk)) == 4, r
+    # 集內相對順序保住（offset 的連續性靠它）
+    for bank, filt in (("lcb3", "difficulty=medium"), ("lcb3", "difficulty=hard"),
+                       ("humanevalplus", None), ("evalplus", None)):
+        seq = [b.offset for b in q.blocks if (b.bank, b.bank_filter) == (bank, filt)]
+        assert seq == sorted(seq), (bank, filt)
+    # 四集的塊在時間軸上**散開**（不是一段連續的區間）——這才是修掉混淆的那個性質。
+    # 實測跨距：lcb3m 7 塊跨 22、lcb3h 3 塊跨 9、hep 8 塊跨 23、evalplus 19 塊跨 34。
+    for bank, filt in (("lcb3", "difficulty=medium"), ("lcb3", "difficulty=hard"),
+                       ("humanevalplus", None), ("evalplus", None)):
+        idx = [i for i, b in enumerate(q.blocks)
+               if (b.bank, b.bank_filter) == (bank, filt)]
+        span = max(idx) - min(idx) + 1
+        assert span > len(idx), (bank, filt, idx)          # 不是連續一段
+        assert span >= len(idx) + 3, (bank, filt, span)    # 而且是真的散開
+
+
+def test_registration_lines_do_not_encode_order():
+    """換順序不該讓任何一塊發不出去——註冊行只描述單一塊。"""
+    q = load_queue(QUEUE_PATH)
+    assert check_prereg(q) == []
+    shuffled = q.__class__(**{**q.__dict__, "blocks": tuple(reversed(q.blocks))})
+    assert check_prereg(shuffled) == []
