@@ -1,0 +1,339 @@
+{
+  "name": "r529_cross_bank",
+  "decision": "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+  "launcher": "ops/gain/launch_r529_block.sh",
+  "arms": "OFF,CONFORM,HMIX",
+  "request_timeout_s": 900,
+  "review_timeout_s": 380,
+  "gauge_scope": "bank",
+  "models": "gemma-4-12b-it-qat",
+  "backends": {
+    "http://100.119.113.56:1234/v1/chat/completions": {
+      "host": "1003",
+      "lmstudio_version": "0.4.24.0",
+      "version_source": "Fable 2026-09-11 08:52Z 在該機上執行 `lms version` 的回報；runner 查證不到（/v1/models 與 HTTP header 都不帶版本，2026-09-11 實測）⇒ 這是宣稱不是量測",
+      "model_reloaded_utc": "2026-09-11T08:52Z",
+      "gguf_sha256": "faff1a63667fac17ac5e777f47114688fcefea96e220e211aaa8d62c2c4561f1",
+      "context": 262144,
+      "parallel": 4,
+      "note": "2026-09-08 崩過兩次（bad alloc／context exceeded），崩因＝qwen 同時佔 VRAM 與 context 被降到 49k；現在條件與 1004 相同，但 4 併發未實測 ⇒ 只開 3 槽"
+    },
+    "http://100.86.226.21:1234/v1/chat/completions": {
+      "host": "1004",
+      "lmstudio_version": "0.4.17.0",
+      "version_source": "Fable 2026-09-11 回報；runner 查證不到 ⇒ 這是宣稱不是量測",
+      "gguf_sha256": "faff1a63667fac17ac5e777f47114688fcefea96e220e211aaa8d62c2c4561f1",
+      "context": 262144,
+      "parallel": 4,
+      "note": "R460R 佔 #1–#3；本佇列現在只用第 4 格，R460R 收完才加 #1–#3"
+    }
+  },
+  "blocks": [
+    {
+      "name": "g_r529_lcb3m_a1",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 0,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m1",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_lcb3m_a2",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m2",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_lcb3m_a3",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 40,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m3",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_lcb3m_a4",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 60,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m4",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_lcb3m_a5",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 80,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m5",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_lcb3m_a6",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 100,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m6",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_lcb3m_a7",
+      "bank": "lcb3",
+      "n": 15,
+      "offset": 120,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3m7",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r529_lcb3h_a1",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 0,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3h1",
+      "bank_filter": "difficulty=hard"
+    },
+    {
+      "name": "g_r529_lcb3h_a2",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3h2",
+      "bank_filter": "difficulty=hard"
+    },
+    {
+      "name": "g_r529_lcb3h_a3",
+      "bank": "lcb3",
+      "n": 14,
+      "offset": 40,
+      "seed": "g-r529-lcb3",
+      "tag": "r529lcb3h3",
+      "bank_filter": "difficulty=hard"
+    },
+    {
+      "name": "g_r529_hep_a1",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 0,
+      "seed": "g-r529-he",
+      "tag": "r529hep1"
+    },
+    {
+      "name": "g_r529_hep_a2",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-he",
+      "tag": "r529hep2"
+    },
+    {
+      "name": "g_r529_hep_a3",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 40,
+      "seed": "g-r529-he",
+      "tag": "r529hep3"
+    },
+    {
+      "name": "g_r529_hep_a4",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 60,
+      "seed": "g-r529-he",
+      "tag": "r529hep4"
+    },
+    {
+      "name": "g_r529_hep_a5",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 80,
+      "seed": "g-r529-he",
+      "tag": "r529hep5"
+    },
+    {
+      "name": "g_r529_hep_a6",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 100,
+      "seed": "g-r529-he",
+      "tag": "r529hep6"
+    },
+    {
+      "name": "g_r529_hep_a7",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 120,
+      "seed": "g-r529-he",
+      "tag": "r529hep7"
+    },
+    {
+      "name": "g_r529_hep_a8",
+      "bank": "humanevalplus",
+      "n": 16,
+      "offset": 140,
+      "seed": "g-r529-he",
+      "tag": "r529hep8"
+    },
+    {
+      "name": "g_r529_mbpp_a1",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 0,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp1"
+    },
+    {
+      "name": "g_r529_mbpp_a2",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp2"
+    },
+    {
+      "name": "g_r529_mbpp_a3",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 40,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp3"
+    },
+    {
+      "name": "g_r529_mbpp_a4",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 60,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp4"
+    },
+    {
+      "name": "g_r529_mbpp_a5",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 80,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp5"
+    },
+    {
+      "name": "g_r529_mbpp_a6",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 100,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp6"
+    },
+    {
+      "name": "g_r529_mbpp_a7",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 120,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp7"
+    },
+    {
+      "name": "g_r529_mbpp_a8",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 140,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp8"
+    },
+    {
+      "name": "g_r529_mbpp_a9",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 160,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp9"
+    },
+    {
+      "name": "g_r529_mbpp_a10",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 180,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp10"
+    },
+    {
+      "name": "g_r529_mbpp_a11",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 200,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp11"
+    },
+    {
+      "name": "g_r529_mbpp_a12",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 220,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp12"
+    },
+    {
+      "name": "g_r529_mbpp_a13",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 240,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp13"
+    },
+    {
+      "name": "g_r529_mbpp_a14",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 260,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp14"
+    },
+    {
+      "name": "g_r529_mbpp_a15",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 280,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp15"
+    },
+    {
+      "name": "g_r529_mbpp_a16",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 300,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp16"
+    },
+    {
+      "name": "g_r529_mbpp_a17",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 320,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp17"
+    },
+    {
+      "name": "g_r529_mbpp_a18",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 340,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp18"
+    },
+    {
+      "name": "g_r529_mbpp_a19",
+      "bank": "evalplus",
+      "n": 11,
+      "offset": 360,
+      "seed": "g-r529-mbpp",
+      "tag": "r529mbpp19"
+    }
+  ]
+}

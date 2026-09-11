@@ -17,21 +17,195 @@
   ],
   "caveat_record_spec": "G 系列 run 目錄（`g_*`）**不是** RECORD_SPEC §1 的證據包——它們沒有 manifest.json / ledger_events.jsonl / chain_verify.txt / anomalies.md / SHA256SUMS，用的是 gain_run.py 自己的 summary.json + rows/calls/notes 版面。符合 RECORD_SPEC 的只有 `blayer_*` 那幾個 B 層掃描。每個目錄的 `record_spec` 欄位逐項列出缺哪些。",
   "counts": {
-    "entries": 322,
-    "dirs": 216,
-    "top_level_files": 106,
-    "dirs_with_summary_json": 44,
+    "entries": 341,
+    "dirs": 223,
+    "top_level_files": 118,
+    "dirs_with_summary_json": 50,
     "by_kind": {
       "aborted": 9,
       "analysis": 136,
-      "other": 21,
-      "real_run": 37,
+      "other": 22,
+      "real_run": 43,
       "replay": 1,
       "smoke": 12
     },
-    "total_bytes": 115296117
+    "total_bytes": 137183165
   },
   "runs": [
+    {
+      "name": "_aborted",
+      "kind": "other",
+      "subkind": "unclassified",
+      "date": "2026-09-11",
+      "date_source": "git_first_commit",
+      "seed": null,
+      "bank": {
+        "family": null,
+        "version": null,
+        "match": "no_rows",
+        "n_task_ids": 0,
+        "candidates": []
+      },
+      "arms": [],
+      "n_rows": 0,
+      "n_rows_by_arm": {},
+      "n_distinct_task_ids": 0,
+      "terminal": null,
+      "complete": null,
+      "infra_void": null,
+      "runner_git": {
+        "sha": null,
+        "dirty": null,
+        "branch": null
+      },
+      "n_files": 20,
+      "bytes": 584906,
+      "files": [
+        {
+          "name": "g_r460_harness_lcb2_a1_void_20260908T1810Z/notes.jsonl",
+          "bytes": 19792,
+          "sha256": "9ef342f8e5fef767afc5ee659917fa6ed3f9a797fd5b40a40a6808620b02b8ed",
+          "lines": 51
+        },
+        {
+          "name": "g_r460_harness_lcb2_a1_void_20260908T1810Z/rows.jsonl",
+          "bytes": 82101,
+          "sha256": "ad40be19691b4f620eec6173002008a638d500b66c27783b38d743f448c56c08",
+          "lines": 70
+        },
+        {
+          "name": "g_r460_harness_lcb2_a1_void_20260908T1810Z/summary.json",
+          "bytes": 10502,
+          "sha256": "cffb2b971dcaf2d7ccd18526e47e094d4b02490dc73abdcd0dbcc2fb05c827ef",
+          "lines": 398
+        },
+        {
+          "name": "g_r460_harness_lcb2_a1_void_20260908T1810Z.launch.log",
+          "bytes": 11392,
+          "sha256": "c383932a4ce97e8584cc48039dd5c2dfcd8f5262a78041c62567f397ad6f5e19",
+          "lines": 89
+        },
+        {
+          "name": "g_r460_harness_lcb2_a2_void_20260908T0511Z/notes.jsonl",
+          "bytes": 38210,
+          "sha256": "a48ffb99d0f314e12e9cc1146aef4349df1bee06be4f6eb5620477439b0a4de2",
+          "lines": 99
+        },
+        {
+          "name": "g_r460_harness_lcb2_a2_void_20260908T0511Z/rows.jsonl",
+          "bytes": 25238,
+          "sha256": "618f3cb3df069d2e2741a604c4f3894eedc663407238820ff37a60be851db87e",
+          "lines": 22
+        },
+        {
+          "name": "g_r460_harness_lcb2_a2_void_20260908T0511Z/summary.json",
+          "bytes": 10157,
+          "sha256": "816f135d0b1eff82ae556e7e1cdf7a6511659b8a9303d30105f2ef308e26bf3b",
+          "lines": 397
+        },
+        {
+          "name": "g_r460_harness_lcb2_a2_void_20260908T0511Z.launch.log",
+          "bytes": 8247,
+          "sha256": "acd66b913cd47794a84a70169f18fc91c40e00f1254d534a8fb689b49a5bcc24",
+          "lines": 42
+        },
+        {
+          "name": "g_r460_harness_lcb2_a2_void_20260908T1810Z/notes.jsonl",
+          "bytes": 6747,
+          "sha256": "e1d3a5b073c46fb8aa3f662c1c5bcddaa795d423c6cedb0034ca31e862733e68",
+          "lines": 17
+        },
+        {
+          "name": "g_r460_harness_lcb2_a2_void_20260908T1810Z/rows.jsonl",
+          "bytes": 122108,
+          "sha256": "b90541816569d1447457c1583386a3b34df9b03e47752ddb38e96073f3dd83bb",
+          "lines": 104
+        },
+        {
+          "name": "g_r460_harness_lcb2_a2_void_20260908T1810Z/summary.json",
+          "bytes": 10340,
+          "sha256": "138ea129af68bfe0b1fedadc13ee6087c8911f456733c96d0b9ca88dfb97a51e",
+          "lines": 398
+        },
+        {
+          "name": "g_r460_harness_lcb2_a2_void_20260908T1810Z.launch.log",
+          "bytes": 13413,
+          "sha256": "ec19c7335902f4bfcc07798566e7ad1659fe4068af59d2fa33563ea660b45f12",
+          "lines": 125
+        },
+        {
+          "name": "g_r460_harness_lcb2_a3_void_20260908T0511Z/notes.jsonl",
+          "bytes": 32991,
+          "sha256": "448c7e6b2371977fe1172eefd0471b5514cf4ab9d207f0f1bf964d6610456a0d",
+          "lines": 85
+        },
+        {
+          "name": "g_r460_harness_lcb2_a3_void_20260908T0511Z/rows.jsonl",
+          "bytes": 42186,
+          "sha256": "622e7bca456ffaf26b00d82314f9c4bea4f2d4b77c03f36d1c17528ba1191d7f",
+          "lines": 36
+        },
+        {
+          "name": "g_r460_harness_lcb2_a3_void_20260908T0511Z/summary.json",
+          "bytes": 10491,
+          "sha256": "6fa941b11add3b428389f4a6d3e461c2aabedcd2e5b6627a5378200bebf87b54",
+          "lines": 409
+        },
+        {
+          "name": "g_r460_harness_lcb2_a3_void_20260908T0511Z.launch.log",
+          "bytes": 9050,
+          "sha256": "4e26e293dffb3368f1c5b20eff30c341cdc7ee7deebb3a93fb817621968280be",
+          "lines": 54
+        },
+        {
+          "name": "g_r460_harness_lcb2_a3_void_20260908T1810Z/notes.jsonl",
+          "bytes": 18411,
+          "sha256": "e314c33826017f83a912a6acb2f6ae6900e0cff20b91c341cd86914eb5c61902",
+          "lines": 47
+        },
+        {
+          "name": "g_r460_harness_lcb2_a3_void_20260908T1810Z/rows.jsonl",
+          "bytes": 90611,
+          "sha256": "b7159f643d36a765f83cfb73dffcfef268549bfcc886f13618ca7f1157b7ae7a",
+          "lines": 74
+        },
+        {
+          "name": "g_r460_harness_lcb2_a3_void_20260908T1810Z/summary.json",
+          "bytes": 10781,
+          "sha256": "5741e1f353f1ce2c8c3274d8a63cee22aa7473530ea9fed77e8a3dff32d837c0",
+          "lines": 410
+        },
+        {
+          "name": "g_r460_harness_lcb2_a3_void_20260908T1810Z.launch.log",
+          "bytes": 12138,
+          "sha256": "f616ab596a35d4a66324e2d67a4318d7a3d14edd612c147a8c6841448c5a24eb",
+          "lines": 101
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260907_R460_HARNESS_PREREG.md",
+        "DECISION_20260908_R460_FABLE_LAUNCH_NOTES.md",
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
     {
       "name": "_analysis",
       "kind": "analysis",
@@ -86,15 +260,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260903_R675_POOLED_DELIV.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260904_R687_R445_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260827_R140_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260827_R146_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R662_VOID_ROOT_CAUSE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CRITERION_20260903_R675_POOLED_DELIV.md",
         "CRITERION_20260904_R687_R445_SETTLEMENT.md",
@@ -106,14 +271,10 @@
         "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
@@ -121,7 +282,7 @@
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、.claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md、CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、DECISION_20260904_R446_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、DECISION_20260904_R446_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "_analysis_r138",
@@ -177,7 +338,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
         "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md"
       ],
       "verdict_decisions": [],
@@ -346,7 +506,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260827_R140_PREREG.md",
         "DECISION_20260827_R140_PREREG.md"
       ],
       "verdict_decisions": [],
@@ -559,7 +718,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260827_R146_PREREG.md",
         "DECISION_20260827_R146_PREREG.md"
       ],
       "verdict_decisions": [],
@@ -7642,24 +7800,20 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260904_R687_R445_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CRITERION_20260904_R687_R445_SETTLEMENT.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "_analysis_r446",
@@ -7715,22 +7869,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md、DECISION_20260904_R446_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260904_R446_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "_analysis_r650",
@@ -8394,7 +8545,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R662_VOID_ROOT_CAUSE.md",
         "DECISION_20260903_R662_VOID_ROOT_CAUSE.md"
       ],
       "verdict_decisions": [],
@@ -9171,7 +9321,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260903_R675_POOLED_DELIV.md",
         "CRITERION_20260903_R675_POOLED_DELIV.md"
       ],
       "verdict_decisions": [],
@@ -9414,13 +9563,10 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260904_R687_R445_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CRITERION_20260904_R687_R445_SETTLEMENT.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "related_settlements": [],
@@ -9784,7 +9930,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md",
         "DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md"
       ],
       "verdict_decisions": [],
@@ -9985,7 +10130,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
         "DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md"
       ],
       "verdict_decisions": [],
@@ -10074,22 +10218,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md",
         "DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md",
         "DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md",
         "DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md、DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "analysis_round525_final_recompute",
@@ -10634,10 +10775,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440F_ROGUE_E2Q_RUN_AND_1004_SWAP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R467_RECONCILE_R440F_AND_TERMINATE_E2Q.md",
         "DECISION_20260902_R440F_ROGUE_E2Q_RUN_AND_1004_SWAP.md",
         "DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
         "DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md",
@@ -10727,13 +10864,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_R263_GEMMA_REVIVED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_R278_INTERLEAVE_ARMS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260829_R263_GEMMA_REVIVED.md",
         "DECISION_20260829_R278_INTERLEAVE_ARMS.md",
@@ -10743,22 +10873,18 @@
         "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
         "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md、DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_het2_r271_20260829",
@@ -10826,30 +10952,23 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_REVIEW_TIMEOUT_TOO_SHORT_FOR_HET_POOL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
         "DECISION_20260829_REVIEW_TIMEOUT_TOO_SHORT_FOR_HET_POOL.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
         "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
         "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md、DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_het2_r274_20260829",
@@ -10927,9 +11046,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_R278_INTERLEAVE_ARMS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_REVIEW_TIMEOUT_TOO_SHORT_FOR_HET_POOL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
         "DECISION_20260829_R278_INTERLEAVE_ARMS.md",
         "DECISION_20260829_REVIEW_TIMEOUT_TOO_SHORT_FOR_HET_POOL.md",
         "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
@@ -11020,15 +11136,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_R278_INTERLEAVE_ARMS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_R296_HTTP400_NONRETRY_REVIEW.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R317_INTERIM_STATUS_G_HET3.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R345_REVIEWER_SPECIFICITY.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260829_R278_INTERLEAVE_ARMS.md",
         "DECISION_20260829_R296_HTTP400_NONRETRY_REVIEW.md",
@@ -11040,9 +11147,7 @@
         "DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
       "related_settlements": [],
@@ -11168,7 +11273,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_R211_HET_POOL_ABORT.md",
         "DECISION_20260828_R211_HET_POOL_ABORT.md"
       ],
       "verdict_decisions": [],
@@ -11249,9 +11353,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_BACKEND_SWITCH.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_LOCAL_ENDPOINT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
         "DECISION_20260824_BACKEND_SWITCH.md",
         "DECISION_20260824_LOCAL_ENDPOINT.md",
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
@@ -11346,18 +11447,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260827_R146_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_R212_BUDGET_DECOMPOSITION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND109_ON_VOID_RATE_CONFOUND.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND110_BOUNDS_ADAPTED_FOR_VOIDY_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND78_FULLBANK_OFF.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND82_GEMMA_PROBE_INCIDENT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
         "DECISION_20260827_R146_PREREG.md",
@@ -11372,11 +11461,8 @@
         "ops/gain/DECISION_20260825_ROUND82_GEMMA_PROBE_INCIDENT.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
         "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
         "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
       "related_settlements": [],
@@ -11456,15 +11542,11 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R456_SCALE_FOR_POWER.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md",
         "DECISION_20260901_R456_SCALE_FOR_POWER.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [],
@@ -11536,11 +11618,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_BACKEND_SWITCH.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_ENDPOINT_BLOCKED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_OFF_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md",
         "DECISION_20260824_BACKEND_SWITCH.md",
         "DECISION_20260824_ENDPOINT_BLOCKED.md",
         "DECISION_20260824_OFF_BASELINE.md",
@@ -11625,10 +11702,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_BACKEND_SWITCH.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_LOCAL_ENDPOINT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
         "DECISION_20260824_BACKEND_SWITCH.md",
         "DECISION_20260824_LOCAL_ENDPOINT.md",
         "DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
@@ -11712,17 +11785,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_ANALYZE_ONOFF5.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_F_THRESHOLD_REACHED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_NEMOTRON_UNAVAILABLE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_REVIEW_TIMEOUT_BUG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260824_REVISE_COUNTERFACTUAL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND110_BOUNDS_ADAPTED_FOR_VOIDY_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND77_BOUNDS_OVER_BACKFILL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND78_FULLBANK_OFF.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND83_POWER_DECOMPOSITION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_V3_NEAR_COMPLETE_INFRA_VOID_GAP.md",
         "DECISION_20260824_ANALYZE_ONOFF5.md",
         "DECISION_20260824_F_THRESHOLD_REACHED.md",
         "DECISION_20260824_NEMOTRON_UNAVAILABLE.md",
@@ -11881,9 +11943,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_NEMOTRON_UNAVAILABLE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
         "DECISION_20260824_NEMOTRON_UNAVAILABLE.md",
         "DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
@@ -11966,17 +12025,13 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_BACKEND_SWITCH.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
         "DECISION_20260824_BACKEND_SWITCH.md",
         "DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
+        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "DECISION_20260907_R460_HARNESS_PREREG.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
         "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
       "related_settlements": [],
@@ -12040,15 +12095,11 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [],
@@ -12056,8 +12107,6 @@
       "headline_from": "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
       "headline_source": "named_in_title",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
@@ -12117,22 +12166,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md、DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_off_failure_rate_20260901c",
@@ -12204,11 +12250,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [],
@@ -12216,10 +12260,9 @@
       "headline_from": "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
       "headline_source": "named_in_title",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
-      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
+      "headline_note": null
     },
     {
       "name": "g_off_probe_20260902_n60",
@@ -12275,8 +12318,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md",
         "DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
         "DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md"
       ],
@@ -12358,24 +12399,20 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md、DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_on371_20260825",
@@ -12447,11 +12484,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R345_REVIEWER_SPECIFICITY.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND109_ON_VOID_RATE_CONFOUND.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND110_BOUNDS_ADAPTED_FOR_VOIDY_BASELINE.md",
         "DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
         "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
         "DECISION_20260830_R345_REVIEWER_SPECIFICITY.md",
@@ -12536,8 +12568,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R456_SCALE_FOR_POWER.md",
         "DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md",
         "DECISION_20260901_R456_SCALE_FOR_POWER.md"
       ],
@@ -12619,14 +12649,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R456_SCALE_FOR_POWER.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R459_SCALE2_VOID_RATE_CHECK.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440C_E1_QUEUE_GEMMA_BACKEND.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440D_SCALE2_VOID_VS_PREREG_ABORT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R461_VOID_RATE_RECHECK.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R462_400_VOID_ATTRIBUTION_CHECK.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R463_VOID_PLATEAU_CONFIRM.md",
         "DECISION_20260901_R456_SCALE_FOR_POWER.md",
         "DECISION_20260901_R459_SCALE2_VOID_RATE_CHECK.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
@@ -12637,18 +12659,16 @@
         "DECISION_20260902_R463_VOID_PLATEAU_CONFIRM.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
         "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md、DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_onoff5_371_r123_20260825",
@@ -12722,19 +12742,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260827_R140_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_R212_BUDGET_DECOMPOSITION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_R278_INTERLEAVE_ARMS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
         "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
@@ -12750,11 +12757,8 @@
         "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
         "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
         "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
       "related_settlements": [],
@@ -12762,10 +12766,9 @@
       "headline_from": "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
         "DECISION_20260828_R146S_ENDPOINT_VERDICT.md"
       ],
-      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
+      "headline_note": null
     },
     {
       "name": "g_onoff5_qwenonly_20260824",
@@ -12827,8 +12830,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_F_THRESHOLD_REACHED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_REVIEW_TIMEOUT_BUG.md",
         "DECISION_20260824_F_THRESHOLD_REACHED.md",
         "DECISION_20260824_REVIEW_TIMEOUT_BUG.md"
       ],
@@ -12910,10 +12911,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_ANALYZE_ONOFF5.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_REVIEW_CONCURRENCY_CONTENTION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_REVIEW_TIMEOUT_BUG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md",
         "DECISION_20260824_ANALYZE_ONOFF5.md",
         "DECISION_20260824_REVIEW_CONCURRENCY_CONTENTION.md",
         "DECISION_20260824_REVIEW_TIMEOUT_BUG.md",
@@ -13029,10 +13026,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND77_BOUNDS_OVER_BACKFILL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_V3_NEAR_COMPLETE_INFRA_VOID_GAP.md",
         "DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md",
         "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
         "ops/gain/DECISION_20260825_ROUND77_BOUNDS_OVER_BACKFILL.md",
@@ -13116,8 +13109,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_ROUND237_ONR_STANDALONE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_R260_POOL_HOMOGENEITY_CEILING.md",
         "DECISION_20260828_ROUND237_ONR_STANDALONE.md",
         "DECISION_20260829_R260_POOL_HOMOGENEITY_CEILING.md"
       ],
@@ -13199,12 +13190,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_R219_DRIFT_CHECK_CLARIFICATION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260828_ROUND237_ONR_STANDALONE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_R260_POOL_HOMOGENEITY_CEILING.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260829_R263_GEMMA_REVIVED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
         "DECISION_20260828_R219_DRIFT_CHECK_CLARIFICATION.md",
         "DECISION_20260828_ROUND237_ONR_STANDALONE.md",
         "DECISION_20260829_R260_POOL_HOMOGENEITY_CEILING.md",
@@ -13268,7 +13253,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260825_ROUND78_FULLBANK_OFF.md",
         "ops/gain/DECISION_20260825_ROUND78_FULLBANK_OFF.md"
       ],
       "verdict_decisions": [],
@@ -13327,7 +13311,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
         "DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md"
       ],
       "verdict_decisions": [],
@@ -13418,10 +13401,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R342_3ARM_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
         "DECISION_20260830_R342_3ARM_PREREG.md",
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
         "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
@@ -13509,11 +13488,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R347_CONTRACT_DEDENT_BUG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R348_RESTART_POSTFIX_3ARM.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
         "DECISION_20260830_R347_CONTRACT_DEDENT_BUG.md",
         "DECISION_20260830_R348_RESTART_POSTFIX_3ARM.md",
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
@@ -13602,11 +13576,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R348_RESTART_POSTFIX_3ARM.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R356_HTTP400_RETRY_REVERSAL.md",
         "DECISION_20260830_R348_RESTART_POSTFIX_3ARM.md",
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
         "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
@@ -14157,27 +14126,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R368_LOCALAGENT_MODEL_UNLOADED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260831_R371_VOID_GATE_ON_STRUCTURAL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260831_R377_OFF5_LEAD_DIRECTIONAL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260831_R381_ON_VOID_RETRY_BUDGET_ASYMMETRY.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260831_R411_ON_VS_OFF5_EQUAL_BUDGET_CONCLUSION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260831_R419_GEMMA_BACKEND_TEMPORAL_DEGRADATION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R428_OFF5V_RECONCILIATION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R429_OFF5VA_AUDIT_CONFOUND_REAFFIRMED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R437_DECISIVE_RUN_COMPLETE_FINAL.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R438_HARD_SUBSET_AND_REVISE_MECHANISM.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R439_REVISE_SELECTION_COUNTEREXAMPLE_CHECK.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440P_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260831_R391_POWER_BOUND_R356.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260831_R393_TYPING_IMPORT_WHITELIST_BUG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/ops/gain/DECISION_20260831_R394_REANALYSIS_UPDATE.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
         "DECISION_20260830_R368_LOCALAGENT_MODEL_UNLOADED.md",
@@ -14201,20 +14149,13 @@
         "ops/gain/DECISION_20260831_R394_REANALYSIS_UPDATE.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R429_OFF5VA_AUDIT_CONFOUND_REAFFIRMED.md",
         "DECISION_20260901_R429_OFF5VA_AUDIT_CONFOUND_REAFFIRMED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
         "DECISION_20260902_R516_E1_FINAL_WRAPUP.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md"
       ],
@@ -14222,7 +14163,7 @@
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md、.claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md、CONCLUSION_20260830_G_EXPERIMENT.md、DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260830_G_EXPERIMENT.md、DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r439_revcheck_20260901",
@@ -14298,22 +14239,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
         "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
         "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
         "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md、DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r441_gemma_only_mbpp",
@@ -14369,23 +14307,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R441_LCB_PROBE_GAUGE_GAP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440C_E1_QUEUE_GEMMA_BACKEND.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R517_E1_TERMINATION_ROOT_CAUSE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R519_CEILING_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440P_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R528_CONFIRMED_STATUS_CRASH_SPLIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md",
         "DECISION_20260901_R441_LCB_PROBE_GAUGE_GAP.md",
@@ -14405,22 +14326,13 @@
         "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
         "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R519_CEILING_AUDIT.md",
         "DECISION_20260902_R519_CEILING_AUDIT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R519_CEILING_AUDIT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
         "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
@@ -14430,7 +14342,7 @@
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md、.claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md、.claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R516_E1_FINAL_WRAPUP.md、.claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R519_CEILING_AUDIT.md、CONCLUSION_20260830_G_EXPERIMENT.md、DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md、DECISION_20260902_R516_E1_FINAL_WRAPUP.md、DECISION_20260902_R519_CEILING_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260830_G_EXPERIMENT.md、DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md、DECISION_20260902_R516_E1_FINAL_WRAPUP.md、DECISION_20260902_R519_CEILING_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r441_gemma_only_mbpp_b",
@@ -14578,20 +14490,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R517_E1_TERMINATION_ROOT_CAUSE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R519_CEILING_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440P_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R528_CONFIRMED_STATUS_CRASH_SPLIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md",
         "DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
@@ -14608,20 +14506,13 @@
         "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
         "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R519_CEILING_AUDIT.md",
         "DECISION_20260902_R519_CEILING_AUDIT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260830_G_EXPERIMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
         "CONCLUSION_20260830_G_EXPERIMENT.md",
         "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md"
       ],
@@ -14629,8 +14520,6 @@
       "headline_from": "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260902_R519_CEILING_AUDIT.md",
         "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
         "DECISION_20260902_R519_CEILING_AUDIT.md"
       ],
@@ -14706,15 +14595,11 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
         "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
       "related_settlements": [],
@@ -14722,10 +14607,9 @@
       "headline_from": "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
       "headline_source": "named_in_title",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
         "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
-      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
+      "headline_note": null
     },
     {
       "name": "g_r443_gemma_lcb",
@@ -14804,16 +14688,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440O_E3_LCB_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440P_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440T_LCB_UNPASSABLE_TASKS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440U_GATE_COST_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440T_E3_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R447_CTX400_ATTRIBUTION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md",
         "DECISION_20260903_R440O_E3_LCB_PREREG.md",
         "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
@@ -14826,9 +14700,7 @@
         "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440T_E3_WRAPUP.md",
         "DECISION_20260904_R440T_E3_WRAPUP.md"
       ],
       "related_settlements": [],
@@ -14836,10 +14708,9 @@
       "headline_from": "DECISION_20260904_R440T_E3_WRAPUP.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440T_E3_WRAPUP.md",
         "DECISION_20260904_R440T_E3_WRAPUP.md"
       ],
-      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
+      "headline_note": null
     },
     {
       "name": "g_r444_conform_mbpp",
@@ -14915,22 +14786,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260903_R666_RECEIPT_CHAIN_UNVERIFIABLE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260903_R667_CONFORM_SETTLEMENT_ARITHMETIC.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260903_R671_VISIBLE_GAUGE_WIRING.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260903_R678_POWER_PROJECTION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260903_R680_POOL_PRECONDITIONS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260904_R687_R445_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440T_LCB_UNPASSABLE_TASKS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440V_TEST_SUITE_AUDIT_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R440W_VISIBLE_GATE_GAUGE_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R662_VOID_ROOT_CAUSE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440T_E3_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CRITERION_20260903_R666_RECEIPT_CHAIN_UNVERIFIABLE.md",
         "CRITERION_20260903_R667_CONFORM_SETTLEMENT_ARITHMETIC.md",
@@ -14949,22 +14804,18 @@
         "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440T_E3_WRAPUP.md",
         "DECISION_20260904_R440T_E3_WRAPUP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 .claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r445_conform_mbpp_ext",
@@ -15052,15 +14903,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260903_R675_POOLED_DELIV.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260904_R684_EQUAL_BUDGET_FRAMING.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260904_R686_DELIVERY_DENOMINATOR.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CRITERION_20260904_R687_R445_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CRITERION_20260903_R675_POOLED_DELIV.md",
         "CRITERION_20260904_R684_EQUAL_BUDGET_FRAMING.md",
@@ -15072,25 +14914,20 @@
         "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
         "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "related_settlements": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "headline": "R440X：r445 的獨立稽核——併庫區間排除 0 我複核成立；但真正紮實的發現是「五倍預算買不到東西」",
       "headline_from": "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
         "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md"
       ],
-      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
+      "headline_note": null
     },
     {
       "name": "g_r446_eq5_mbpp",
@@ -15174,16 +15011,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440Z_LCB2_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_AMEND1_SAME_CHOICE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_EQUAL_BUDGET_ARM.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R739_R446_TEST_WITNESS_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R453_REAL_MULTIPARTY_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R454_NAMED_DISSENT_PREREG.md",
         "CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
         "DECISION_20260904_R440Z_LCB2_PREREG.md",
         "DECISION_20260904_R446_AMEND1_SAME_CHOICE.md",
@@ -15196,11 +15023,8 @@
         "DECISION_20260906_R454_NAMED_DISSENT_PREREG.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
         "CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md",
         "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
       ],
       "related_settlements": [],
@@ -15208,8 +15032,6 @@
       "headline_from": "DECISION_20260904_R446_FABLE_AUDIT.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
         "CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
@@ -15303,31 +15125,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R440Z_LCB2_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R447_CTX400_ATTRIBUTION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R450_GAUGE_CAPABILITY_CENSUS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R451_OFF5_POWER_SYMMETRY.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R452_LCB2_EQ5_OFFLINE_RECONSTRUCTION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R453_PREREG_FALSIFIABILITY_CENSUS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R454_R450_FALSIFIABILITY_EXTENSION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R455_R452_FALSIFIABILITY_EXTENSION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R458_WU3_UNBLOCK.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R459_R447_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R463_PAIRED_CI_KEY_GAP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R464_EQ5_BANK_FLAG_GAP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R465_R461_SEC6_GAUGE_ARBITER_GAP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R471_VERDICT_GATE_TEETH_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R472_GAUGE_CAPABILITY_RUNDIR_GATES_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R440Z_WRAPUP_LCB2.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R493_R461_APPENDIX_PROSE_CENSUS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "DECISION_20260904_R440Z_LCB2_PREREG.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md",
         "DECISION_20260904_R447_CTX400_ATTRIBUTION.md",
@@ -15352,18 +15149,14 @@
         "DECISION_20260905_R440Z_WRAPUP_LCB2.md",
         "DECISION_20260905_R493_R461_APPENDIX_PROSE_CENSUS.md",
         "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
+        "DECISION_20260907_R460_HARNESS_PREREG.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R446_FABLE_AUDIT.md",
         "DECISION_20260904_R446_FABLE_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
         "DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R459_R447_SETTLEMENT.md",
         "DECISION_20260904_R459_R447_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R440Z_WRAPUP_LCB2.md",
         "DECISION_20260905_R440Z_WRAPUP_LCB2.md"
       ],
       "related_settlements": [],
@@ -15371,9 +15164,6 @@
       "headline_from": "DECISION_20260904_R459_R447_SETTLEMENT.md",
       "headline_source": "named_in_title",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R459_R447_SETTLEMENT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R440Z_WRAPUP_LCB2.md",
         "DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
         "DECISION_20260904_R459_R447_SETTLEMENT.md",
         "DECISION_20260905_R440Z_WRAPUP_LCB2.md"
@@ -15444,11 +15234,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md",
         "DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
         "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
         "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
@@ -15456,9 +15241,7 @@
         "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
         "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md",
         "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
       ],
       "related_settlements": [],
@@ -15466,10 +15249,9 @@
       "headline_from": "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
         "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md"
       ],
-      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
+      "headline_note": null
     },
     {
       "name": "g_r449_eq5_lcb2",
@@ -15555,15 +15337,11 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
         "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
         "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
         "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
         "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md"
       ],
       "related_settlements": [],
@@ -15571,10 +15349,9 @@
       "headline_from": "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
         "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md"
       ],
-      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
+      "headline_note": null
     },
     {
       "name": "g_r449c_eq5_lcb3",
@@ -15660,13 +15437,10 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md",
         "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
         "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md",
         "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
       ],
       "related_settlements": [],
@@ -15674,10 +15448,849 @@
       "headline_from": "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md",
         "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
       ],
-      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
+      "headline_note": null
+    },
+    {
+      "name": "g_r460_harness_lcb2_a1",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-09",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r440-lcb2",
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "e91b5b6a5dc4f5122088f5dc4f2f0ecd83c1f24d",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3690289,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3302582,
+          "sha256": "58b27bc777714dfe212405933ed4af94483017e0cd7a091951a2c75a87b72f66",
+          "lines": 272
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 613,
+          "sha256": "1d41dd454d470bf80e0d51d9a5918f2777f130ae04341dd4891469e51be4d597",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 34555,
+          "sha256": "2352517c92315bd237d0e819bd714a3728017ede8a9944a16418abc9cc504b04",
+          "lines": 62
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "0aad25f6b4e3db14a6e7f0bc7ddbf421729b90987882eb4012210291ec810d40",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 43560,
+          "sha256": "f43d55d9d5dc536d363e7457a6959fd3009604d1bd1a01bfff6a5efa4db66bd1",
+          "lines": 47
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "37b7e7c8b2799914c1b6739ca6931cd47d240ddb6f8a7294530f5c3c349dea6d",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 61202,
+          "sha256": "469c2b25bae756b76b756bef329d3deb0d78e16b17c00f34054852a7fe57c26a",
+          "lines": 66
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "39a8e1022a89736ccbacc6c6088249bc35660bc905b728b1eef016dadf391079",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 54799,
+          "sha256": "fdd1a2d733adf268b85b195775233293d55990562dc6d79da402be17bec270c3",
+          "lines": 55
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "709076ba4d9b4743330a22843ed4efc48f6e947b2cbd1f0f1d825f290df0ca10",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 182139,
+          "sha256": "3c416ff98caaf8ce02caef9ce09891102cdb53e4b71ed0f6a3c764c2adea91ff",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 10263,
+          "sha256": "865d100c0d78ac12f57169d2f5083873fec7773bc9f39405ac13124facf11997",
+          "lines": 398
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260907_R460_HARNESS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460_harness_lcb2_a2",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-09",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r440-lcb2",
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "e91b5b6a5dc4f5122088f5dc4f2f0ecd83c1f24d",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 2125280,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 1815166,
+          "sha256": "3281093fa5b2c5fe0390cb32f70d86a4291030172058e5719344d7f96ffc678a",
+          "lines": 235
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 613,
+          "sha256": "0fe65920b6d227a43f06f5031aaf3c3b7ee422baedbd98c62ab4064e85c699fb",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 25901,
+          "sha256": "1cd8bee110360bd54398641f89a5c2850820d81b852760f8975e4f189bfa5726",
+          "lines": 49
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "d772c5c4156d688c741313ccb568b2b2ccdaea76b321658cfe43d1499a1cec51",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 35058,
+          "sha256": "a31306e88d3cb7dfdbdfe7b3af463333a64b16099a2f84f735ceb7db152a7408",
+          "lines": 41
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "54ccee24844941dca24513c8d5e16b86d25b171cb4d3f4c7cf93483c56294199",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 53517,
+          "sha256": "15b02ba706e02ea00ba8b78a344783f4c65c46ec9477852303450515ef44f1d2",
+          "lines": 61
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "568b46b7ba2cc7f200eba18b05823f0f5a0595c571c370c81b6e26c590e44e07",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 36384,
+          "sha256": "00288c85c445c930d2aff3297cab0db9766e4ee1ddcbf7d8fcb701d4494bb120",
+          "lines": 42
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "a9b4433ee31128464dc23546d872e916fdda0931c2cb05aeb5feef29454eeef5",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 147779,
+          "sha256": "b406ac76e9325497abf6c844e048779951c1c10a1ca763d865feea0bd02f37d7",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 10286,
+          "sha256": "6e94fa7f1d4a6ebcfb2d45e47ffeb284fa3a1c9df195d40359311099be99ee3b",
+          "lines": 398
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260907_R460_HARNESS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460_harness_lcb2_a3",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-09",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r440-lcb2",
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "e91b5b6a5dc4f5122088f5dc4f2f0ecd83c1f24d",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3577368,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3218723,
+          "sha256": "d549e1a3321797dd67d911cb2619d1212d13eb8745296efdd52a8059e5bc568e",
+          "lines": 252
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 769,
+          "sha256": "016214391fb247b7543aeb3ac73f279c787a31f0be6154d6fe37b41eaf5e7bda",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 23956,
+          "sha256": "65c7b33b58151ed0b3842ccdbfc7abb685aba61fce9202f4f802899b846b8477",
+          "lines": 46
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "3aa667ef167cb556c6dbfa89c98a8cebfeb0aa8175849acb321cfbada97f7165",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 44868,
+          "sha256": "671572015b947bebff96a3a6c1cc7033485a397a0155365671ea3adf99281431",
+          "lines": 48
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "91456df62bbc54351c7ef65cefa6acf7fcf7a63f4e9c41b2b2f0e9f7de715b70",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 57791,
+          "sha256": "a0a931466d40afecbf0f3b2bf0d18d8c35bc3226d08b7e7363d50030bb68c958",
+          "lines": 64
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "a3d388e2bb61a39194f66f79c7288cc509ca3ac24cb5d6b15ba9bc061ce1d3d4",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 49341,
+          "sha256": "2d6d5be921841b1c66b45753e23f08e89d46140b553dda2cc4435f928b0b4ce0",
+          "lines": 51
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "5056d66ac1967d1754fb0b89c3492e2a7de22a1e68e8e1404523c2c39b3f6409",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 170824,
+          "sha256": "c793479c46406f10f31957c039afb6ca661e0140f2036fa69b3110d1bbc343eb",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 10520,
+          "sha256": "1b802df3bc1909c836963c8a86ddd35574fc2812ad9eadf4248270809f530dd6",
+          "lines": 410
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260907_R460_HARNESS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460_harness_lcb2_b1",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-08",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r440-lcb2",
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "d3e79c73ba822b0962e4640f6ad987b0ff43a259",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3979859,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3601619,
+          "sha256": "4ebae4b2695063aaf3bea473660409eba716c4cb50a7165f3c1c586ebd5d5ceb",
+          "lines": 266
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "0ab5340ab8575a13fd2476b9bcd36e2105fbd27c907423bb5935bc8524590697",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 31758,
+          "sha256": "63c13ab25a513b18d8fa2ed5063039a7402eac60c478cf1dad0936f0978d2066",
+          "lines": 58
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "c83b4b414ce3a25f5d35117013abe2e03a761f9cc42347a6159d88bd0958c497",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 43454,
+          "sha256": "5d28fc7f06cde7e7a874d090bcbb765139d5076e0a87415762775450c76a41ee",
+          "lines": 47
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "5b96eea0e213b029e9df2baddb694932b7668c3971626a0f1b218e20dd93ee50",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 60623,
+          "sha256": "507a4194e4b4c4eefd18e0b8174cf07056a34dc01f56da55246e12daccd11990",
+          "lines": 66
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "a74dd47b376cb80ecabab3458beffe9bda53c0bd09852d34c6144554ddf1e104",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 50670,
+          "sha256": "34fcbba1349c62393ac1437b5c6fba4b5725334dd675d83930519ba466a22f28",
+          "lines": 52
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "1946d09763fbcde4e2f714d3bfb797f1fb2e78ee8fbf453343de9ec96e94d47f",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 176453,
+          "sha256": "1a5311381f27d144a0d257d6c85b35d23f49c46de9cb1540921f5f10531301c4",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12607,
+          "sha256": "7ca4b1773f7535f4bf7f2e54393a638c8e57cfba5c5cc4f5b3173e9a49fc07eb",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260907_R460_HARNESS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460_harness_lcb2_b2",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-08",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r440-lcb2",
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "d3e79c73ba822b0962e4640f6ad987b0ff43a259",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3426666,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3031955,
+          "sha256": "3a148130ed02251b73ffee63c55705b5c8b2ac1eb8ea46424809bda708b514ef",
+          "lines": 262
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "0ab5340ab8575a13fd2476b9bcd36e2105fbd27c907423bb5935bc8524590697",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 23190,
+          "sha256": "7a77a32b6de6d7d6031a02d9a5a457d1cc04e443cc035cb1e57fa9f8491d8e10",
+          "lines": 45
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "e2980339b1ece3f0979a48a694a2ec6a6022c2b1edeaba53bc9c03ff7867fd88",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 44962,
+          "sha256": "1d391ee96300476b94e8e58137f1ed3842b0d00d12d6c165e12e2144ef824a5e",
+          "lines": 48
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "306511eb040a994b746f4728e95b0662d151fcc3b94bf9c8e6698c97bcc70775",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 71049,
+          "sha256": "10aabbce8e65d046aff1e99e55364e854561a6e8627df9b022e3ba009ac6849f",
+          "lines": 73
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "24b15c63b9e0852772da532672990e1dae2e365daab1abaad3ef2016c9047efe",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 53957,
+          "sha256": "49d13593dcb21ce0d372f13dedc08cf61ba30963cb3c644c177bfbe7f06fc4e1",
+          "lines": 54
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "c26bc5f2f0a5183fb1fe5e3f5482ff972a0b03bdd115ebf4e8604636d1d25ea6",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 186240,
+          "sha256": "82a938d79f9824ee06bb3550b95fb2d285d77a78037e231d43776d439440f2ef",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12638,
+          "sha256": "d914d20a7814e6514b5aca0223793812662a1e329deb8352438b3c32c3e83e63",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260907_R460_HARNESS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460_harness_lcb2_b3",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-08",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r440-lcb2",
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "d3e79c73ba822b0962e4640f6ad987b0ff43a259",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 4413953,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 4017565,
+          "sha256": "b294456b7cb9254d0ea4e01e149bb6dde503bb9664e620a4f9877f90d97728f4",
+          "lines": 270
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "0ab5340ab8575a13fd2476b9bcd36e2105fbd27c907423bb5935bc8524590697",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 29652,
+          "sha256": "b41077342b6120d8d52e9b1b8d6558ac2b47a180d409ffa72c2c13ba40d75e99",
+          "lines": 55
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "b629c6e38d676bd1af92e8a19a11dc074d8fecc4e8db23edcb729e0f03d09d73",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 51203,
+          "sha256": "47fe83c379dd74b3c9a039096a607e192c677906301ef244ae1237e637d3fc36",
+          "lines": 52
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "9916d5c348875d5df2b83ee92eee068eaadf1a28e6d6283963bb53b6c7ee72c4",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 70953,
+          "sha256": "3675aa4eae86bb9b39741536f65d2bc833a82d8f798fe70cea0cbdb03dfa7f75",
+          "lines": 73
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "9e31384575486cd8b13acb98b639196c30447ffe0e018f5e194bc37a4a1619e8",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 43807,
+          "sha256": "13eb7c19471ab3540239080150f02873b7b3cca843b59a7e64585dae71db32cf",
+          "lines": 47
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "ff6a50c62517231778fc60ff3bf356e724f22521f389a23e688d4947b7d7762f",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 185497,
+          "sha256": "ae8db6586859960540ef9fada341ed898be007b4a8c8f97f4a8d6c2579696659",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12601,
+          "sha256": "d1ae8c37d2abdb3a58516f6897dae5fcf01f3f26c7b83c8defe2bd75c8981fc8",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260907_R460_HARNESS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
       "name": "g_r461_lcb3_three_arm",
@@ -15749,52 +16362,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R463_PAIRED_CI_KEY_GAP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R464_EQ5_BANK_FLAG_GAP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R465_R461_SEC6_GAUGE_ARBITER_GAP.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R466_R461_SEC2_SEC6_FALSIFIABILITY_CENSUS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R467_VERIFY_LCB_BANK_PROBE_PATH_FIX.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R469_SHIM_BLIND_SPOTS_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R471_VERDICT_GATE_TEETH_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R472_GAUGE_CAPABILITY_RUNDIR_GATES_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R473_R466_CENSUS_MUTATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R474_SPEC_TWOWAY_GAUGE_CENSUS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R475_ORACLE_SWEEP_POSITIVE_DIRECTION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R739_R446_TEST_WITNESS_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R477_CERT_DRIFT_EXECUTABLE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R478_CERT_SELF_RECORDED_SHA.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R479_R461_APPENDIX_OBLIGATION_CENSUS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R481_CERT_SCOPE_EXTENSION.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R482_CORPUS_SENSITIVITY_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R483_WORKTREE_MUTATION_CENSUS_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R484_RUN_SLOWNESS_ATTRIBUTION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R485_RUNAWAY_GENERATION_STRATA_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R485_RUNAWAY_GENERATION_STRATA_RESULTS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R486_LONGREQ_TIME_ATTRIBUTION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R487_CONCURRENCY_TAX_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R488_POINTWISE_CONCURRENCY_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R488_RESULTS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R489_RESULTS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R490_LEVELED_PLACEBO_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R490_RESULTS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R491_R484_R485_FALSIFIABILITY_CENSUS_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R492_R461_CLOSING_CONJUNCT_INFORMATIVENESS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R493_R461_APPENDIX_PROSE_CENSUS.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R494_R486_R490_FALSIFIABILITY_CENSUS_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R495_R486_R490_EMPIRICAL_CENSUS_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R497_SEGMENT_COMPOSITION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R498_EQUAL_CHAT_N_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R502_TRIPLE_CONSTRAINED_LADDER_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260905_R503_R495_WALL_DELETION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R461_FABLE_AUDIT.md",
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
         "DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md",
         "DECISION_20260904_R463_PAIRED_CI_KEY_GAP.md",
@@ -15840,12 +16407,11 @@
         "DECISION_20260905_R503_R495_WALL_DELETION_PREREG.md",
         "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
         "DECISION_20260906_R461_FABLE_AUDIT.md",
+        "DECISION_20260907_R460_HARNESS_PREREG.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        ".claude/worktrees/agent-ae56ce11337164082/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R461_FABLE_AUDIT.md",
         "DECISION_20260906_R461_FABLE_AUDIT.md"
       ],
       "related_settlements": [],
@@ -15853,10 +16419,9 @@
       "headline_from": "DECISION_20260906_R461_FABLE_AUDIT.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260906_R461_FABLE_AUDIT.md",
         "DECISION_20260906_R461_FABLE_AUDIT.md"
       ],
-      "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
+      "headline_note": null
     },
     {
       "name": "g_r461_off_gate_lcb3",
@@ -15930,10 +16495,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md",
         "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        "DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md"
+        "DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md",
+        "DECISION_20260907_R460_HARNESS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -15991,8 +16555,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260904_R468_TESTS_SWEEP_PREREG.md",
         "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
         "DECISION_20260904_R468_TESTS_SWEEP_PREREG.md"
       ],
@@ -16090,8 +16652,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260824_OFF_BASELINE.md",
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
         "DECISION_20260824_OFF_BASELINE.md",
         "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
       ],
@@ -16615,7 +17175,6 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        ".claude/worktrees/agent-ae56ce11337164082/DECISION_SLASH.md",
         "DECISION_SLASH.md"
       ],
       "verdict_decisions": [],
@@ -18087,6 +18646,78 @@
       "lines": 201
     },
     {
+      "name": "g_r460_harness_lcb2_a1.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460_harness_lcb2_a1.launch.log",
+      "bytes": 14054,
+      "sha256": "8db5ac81e751277407e5905156dd485a44fbab4526920c3ee2a5548d882a191b",
+      "lines": 137
+    },
+    {
+      "name": "g_r460_harness_lcb2_a2.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460_harness_lcb2_a2.launch.log",
+      "bytes": 14269,
+      "sha256": "8cd9c4d410d7c8791e39858a627fd832d8cb251619a001cce08223cb7ace3afa",
+      "lines": 141
+    },
+    {
+      "name": "g_r460_harness_lcb2_a3.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460_harness_lcb2_a3.launch.log",
+      "bytes": 14461,
+      "sha256": "4bfb596021ba4b8e0f0bc08c59ff3186c46e41d8c1981fb0cbcd3084eace02e8",
+      "lines": 144
+    },
+    {
+      "name": "g_r460_harness_lcb2_b1.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460_harness_lcb2_b1.launch.log",
+      "bytes": 14200,
+      "sha256": "5d21f30915f74bc061ff3084e6723aa014f13a9894160ce8b9f74ed380ca35d8",
+      "lines": 139
+    },
+    {
+      "name": "g_r460_harness_lcb2_b2.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460_harness_lcb2_b2.launch.log",
+      "bytes": 14241,
+      "sha256": "7cad1c3f915834f3703ffe4559ca282ee32f69f57b8240eee2e718bfcae6b98e",
+      "lines": 139
+    },
+    {
+      "name": "g_r460_harness_lcb2_b3.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460_harness_lcb2_b3.launch.log",
+      "bytes": 14502,
+      "sha256": "737bc7a2ce2cf1977c6e2ad655b05fd8c90fd6987626903d80c88fab8bdfb70e",
+      "lines": 144
+    },
+    {
       "name": "g_r461_lcb3_three_arm.launch.log",
       "bytes": 40185,
       "sha256": "5f79d351fc47652f15d402723adaa58c149d4bf54e2af4ed17f6d20cf641f38d",
@@ -18495,7 +19126,13 @@
         "known_bad_source": "ops/gain/check_bank_precision.py::KNOWN_BAD",
         "used_by_runs": [
           "g_r447_conform_lcb2",
-          "g_r449_eq5_lcb2"
+          "g_r449_eq5_lcb2",
+          "g_r460_harness_lcb2_a1",
+          "g_r460_harness_lcb2_a2",
+          "g_r460_harness_lcb2_a3",
+          "g_r460_harness_lcb2_b1",
+          "g_r460_harness_lcb2_b2",
+          "g_r460_harness_lcb2_b3"
         ],
         "also_consistent_with_runs": [
           "g_e2q_off_lcb_qwenonly_20260902",
@@ -18634,9 +19271,9 @@
     },
     "mac_repo": {
       "runs_dir": "runs/",
-      "entries": 322,
-      "dirs": 216,
-      "top_level_files": 106,
+      "entries": 341,
+      "dirs": 223,
+      "top_level_files": 118,
       "all_tracked_in_git": true
     },
     "not_mirrored_to_mac": [
@@ -18703,6 +19340,18 @@
       "g_r449_eq5_lcb2.launch.log",
       "g_r449c_eq5_lcb3.backend.json",
       "g_r449c_eq5_lcb3.launch.log",
+      "g_r460_harness_lcb2_a1.backend.json",
+      "g_r460_harness_lcb2_a1.launch.log",
+      "g_r460_harness_lcb2_a2.backend.json",
+      "g_r460_harness_lcb2_a2.launch.log",
+      "g_r460_harness_lcb2_a3.backend.json",
+      "g_r460_harness_lcb2_a3.launch.log",
+      "g_r460_harness_lcb2_b1.backend.json",
+      "g_r460_harness_lcb2_b1.launch.log",
+      "g_r460_harness_lcb2_b2.backend.json",
+      "g_r460_harness_lcb2_b2.launch.log",
+      "g_r460_harness_lcb2_b3.backend.json",
+      "g_r460_harness_lcb2_b3.launch.log",
       "g_r461_lcb3_three_arm.launch.log",
       "g_r461_off_gate_lcb3.backend.json",
       "g_r461_off_gate_lcb3.launch.log",

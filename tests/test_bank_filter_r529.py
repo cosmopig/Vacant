@@ -168,8 +168,12 @@ def test_row_and_summary_keys_only_appear_when_a_filter_is_given():
     """
     import pathlib
     src = pathlib.Path("ops/gain/gain_run.py").read_text(encoding="utf-8")
-    for anchor in ('if args.bank_filter else {}',):
-        assert src.count(anchor) >= 2, "rows 與 summary 兩處都要是條件式"
+    # R529 v2：條件從「有沒有 --bank-filter」擴成「有沒有切層**或** --record-bank-field」
+    # （一個佇列跨四集，其中兩集沒有層 ⇒ 不給旗標的話同一個 run 會有兩種 rows 形狀）。
+    # 兩處仍然都是條件式，而且**預設值仍然是「什麼都不多」** ⇒ R460R 的塊形狀不變。
+    assert src.count("if _record_bank else {}") >= 2, "rows 與 summary 兩處都要是條件式"
+    assert "_record_bank = bool(args.bank_filter or args.record_bank_field)" in src
+    assert '"--record-bank-field", action="store_true"' in src
 
 
 # ── 四、builtin 的無限池護欄 ──────────────────────────────────────

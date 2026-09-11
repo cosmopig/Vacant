@@ -82,6 +82,12 @@ RECORD_SPEC_REQUIRED = ("manifest.json", "ledger_events.jsonl",
 _VERDICT_FILENAME_RE = re.compile(
     r"(FABLE_AUDIT|INDEPENDENT_AUDIT|_AUDIT|WRAPUP|SETTLEMENT|VERDICT|KILL)", re.I)
 _VERDICT_PREFIXES = ("CONCLUSION_", "FINDINGS_")
+
+#: 掃描時要跳過的目錄名（任一層命中就跳過）。
+#: `.git` 是版控內部；`.claude` 底下是 agent 的 worktree／session 工作目錄
+#: （`.gitignore` 有它）——那是**同一個 repo 的另一個 checkout**，掃進來會讓
+#: 索引記到別人機器上不存在的路徑。
+_EXCLUDED_DIRS = frozenset({".git", ".claude", ".venv", "node_modules"})
 # PREREG／CRITERION 是**量測之前**寫的判準，不是裁決。混進來會讓索引把
 # 「我們打算怎麼判」講成「判決是什麼」——正是索引最不該犯的錯。
 _NOT_A_VERDICT_RE = re.compile(r"(PREREG|CRITERION)", re.I)
@@ -357,7 +363,12 @@ def _decision_texts() -> list[dict[str, Any]]:
     for pat in ("DECISION*.md", "CONCLUSION*.md", "CRITERION*.md",
                 "FINDINGS*.md"):
         for p in sorted(ROOT.rglob(pat)):
-            if ".git" in p.parts or "runs" in p.parts:
+            # ⚠ `.claude/worktrees/*` 是**別的 agent 的 git worktree**（整份 repo 的
+            #   另一個 checkout）。掃進去的話同一份裁決會出現兩次，而且第二份的路徑
+            #   在別人的機器上根本不存在 ⇒ 索引變成機器相依的東西，`--check` 也會
+            #   隨「現在有沒有人開著 worktree」而紅。排除的是 checkout 不是內容：
+            #   worktree 裡的裁決檔，本體在根目錄那一份已經掃到了。
+            if _EXCLUDED_DIRS & set(p.parts) or "runs" in p.parts:
                 continue
             rel = p.relative_to(ROOT).as_posix()
             if rel in seen:

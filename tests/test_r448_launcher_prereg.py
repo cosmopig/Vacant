@@ -188,5 +188,19 @@ def test_decision_rule_is_written_before_any_data(dec: str) -> None:
     assert "n=742" in dec
 
 
-def test_r448_run_dir_is_not_created_by_this_test() -> None:
-    assert not (ROOT / "runs" / RUN_NAME).exists()
+def test_r448_run_dir_is_never_created_by_this_test() -> None:
+    """這支測試檔本身不准把 run 目錄變出來。
+
+    ⚠ 2026-09-11 改寫（R529 順手清的既有紅測試）。原本寫的是
+    「`runs/g_r448_eq5_mbpp_seed2` 不存在」——那是**發射前**的話，
+    而這個 run 已經跑完、目錄與 `summary.json` 就在磁碟上。
+
+    牙齒是同一顆：要擋的是「測試自己 mkdir 出一個空目錄」，那會讓
+    下一次發射撞 `abort_dir_exists`，看起來像發射器壞了。真的跑過的目錄
+    帶著 `summary.json`；測試變出來的不會。
+    """
+    d = ROOT / "runs" / RUN_NAME
+    if not d.exists():
+        return                       # 還沒發射：原本那句話仍然成立
+    assert (d / "summary.json").exists(), (
+        f"{d} 存在但沒有 summary.json——這個目錄不是真跑出來的")

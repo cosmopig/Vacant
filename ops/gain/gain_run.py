@@ -60,6 +60,35 @@ GAIN_EVALPLUS_RESOURCE_EXCLUSIONS = {
     "mbppplus_Mbpp/644": "extreme list materialization exceeds memory envelope",
 }
 
+# R529：HumanEval+ 側的同一條規則，但**三種成因要分開講**，不能全掛在
+# 「資源」名下——其中三題根本不是跑太久，是這個產品信封**演不出來**。
+# 全部在 vacant-dev（跑實驗的那台）序列量過，量測輸出見
+# `DECISION_20260911_R529_CROSS_BANK_PREREG.md` §五-1。
+#
+#   (a) 允許清單／沙箱能力：官方參考解需要 `random`／`hashlib`／`eval()`，
+#       而 `_GAIN_ALLOWED_IMPORTS` 沒有前兩個、第三個是三條臂的 prompt
+#       逐字禁止的東西。這三題連 **visible_check** 都過不了（0.00 s 就被擋）
+#       ⇒ 出貨閘門在它們身上不存在，留著＝讓三條臂在沒有閘門的題上比。
+#   (b) 記憶體信封：128 MiB。逾時放寬到 60 秒**一樣不過**（實測），所以
+#       它不是「機器慢」，是那些 plus 輸入要的整數／串列放不進信封。
+#   (c) 時間餘裕不足：`HumanEval/15` 過得了，但要 5.8–7.6 秒／10 秒。
+#       ⚠ 這一題是**唯一**因為餘裕被排掉的。留著的代價不是「量具偶爾紅」
+#       而是「量具紅 ⇒ 整塊拒跑」——`--gauge-scope bank --probe-sample 0`
+#       是硬擋。而且同一個 10 秒沙箱也是三條臂的計分路徑：正確的候選在它
+#       身上同樣要 6 秒，機器一忙就會被判錯，那量到的是沙箱不是模型。
+#       門檻（**2× 餘裕**）寫在資料之前，且對 `evalplus` 是 no-op
+#       ——那 371 題在同一台機器上最慢 2.98 秒。
+GAIN_HUMANEVAL_EXCLUSIONS = {
+    "humanevalplus_HumanEval/39": "canonical needs `random` (outside the import allowlist)",
+    "humanevalplus_HumanEval/160": "canonical needs `eval()` (forbidden by the envelope)",
+    "humanevalplus_HumanEval/162": "canonical needs `hashlib` (outside the import allowlist)",
+    "humanevalplus_HumanEval/83": "10**(n-1)-scale integers exceed the 128 MiB envelope",
+    "humanevalplus_HumanEval/100": "arithmetic-series pile exceeds the 128 MiB envelope",
+    "humanevalplus_HumanEval/130": "tribonacci table exceeds the 128 MiB envelope",
+    "humanevalplus_HumanEval/139": "factorial products exceed the 128 MiB envelope",
+    "humanevalplus_HumanEval/15": "canonical needs 5.8-7.6s of the 10s budget (no 2x margin)",
+}
+
 
 LCB_BANK_VERSION = {"lcb": "v1", "lcb2": "v2", "lcb3": "v3"}
 
@@ -113,6 +142,14 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0,
     """
     if bank == "evalplus":
         loader = EvalPlusMBPPLoader(expose_contract=True)
+    elif bank == "humanevalplus":
+        # R529：第三個真來源（HumanEval+ 164 題，v0.1.10，sha256 釘死、fail-closed）。
+        # ⚠ `expose_contract=False`：HumanEval 的 prompt 本身就是函式簽名＋docstring
+        #   ＋examples，該講的前提已經在題目裡；再貼一份官方 contract 進 prompt 會讓
+        #   這個 bank 的「需求」形狀與 MBPP+／LCB 都不一樣，而本 run 換的應該是
+        #   題目不是協定。（contract 仍然不是 GT：它只有輸入前提、沒有期望輸出。）
+        from vacant.codebench import EvalPlusHumanEvalLoader
+        loader = EvalPlusHumanEvalLoader()
     elif bank in LCB_BANK_VERSION:
         from vacant.codebench import LiveCodeBenchLoader
         # lcb2＝v2（同 recipe 多吃 test4 視窗，120 題）。分成兩個 bank 名而不是靠環境變數，
@@ -140,6 +177,8 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0,
         ts = list(loader.iter_tasks(seed))
     if bank == "evalplus":
         ts = [t for t in ts if t["task_id"] not in GAIN_EVALPLUS_RESOURCE_EXCLUSIONS]
+    if bank == "humanevalplus":
+        ts = [t for t in ts if t["task_id"] not in GAIN_HUMANEVAL_EXCLUSIONS]
     if bank == "builtin":
         print("⚠ 用的是合成題庫，結論不可外推（見 load_tasks docstring）")
     if bank_filter:
@@ -271,6 +310,19 @@ def _canonical_solutions(bank: str = "evalplus", path: str | None = None) -> dic
       跟檢查式 `abs(a-b)<=1e-6` 的容忍度矛盾，連精確解都會被判錯，
       見 DECISION_20260901_R441。
     """
+    if bank == "humanevalplus":
+        # R529：HumanEval+ 的 `canonical_solution` 是**函式體**（縮排片段），
+        # 完整參考解 ＝ `prompt + canonical_solution`（官方 evalplus 自己就這樣拼）。
+        # 直接拿 `canonical_solution` 當參考解餵量具 ⇒ 每一題都 IndentationError
+        # ⇒ 量具會報「參考解全不通過」，而那長得像題庫壞了。拼法只有一處，
+        # 就是 loader 的 `canonical_source`，這裡複用它、不另寫第二份。
+        # ⚠ `path` 在這一支對 humanevalplus **不開放**：換路徑要走
+        #   `VACANT_HUMANEVALPLUS_PATH`，因為換檔案就要換釘死的 sha256，
+        #   而「只換路徑不換 sha」正是 fail-closed 想擋的那一格。
+        from vacant.codebench import EvalPlusHumanEvalLoader
+        ld = EvalPlusHumanEvalLoader()
+        return {f"humanevalplus_{r['task_id']}": ld.canonical_source(r)
+                for r in ld._records}
     if bank in ("lcb", "lcb2", "lcb3"):
         # round728：漏掉 lcb3 的話會掉進下面的 EvalPlus 分支，讀 mbppplus_* 的
         # 參考解去配 lcb_* 的 task_id ⇒ covered 恆為空 ⇒ 錯誤訊息會變成
@@ -1329,7 +1381,8 @@ def main() -> None:
     ap.add_argument("--seed", default="g1")
     ap.add_argument("--arms", default="OFF,ON,OFF5")
     ap.add_argument("--bank", default="evalplus",
-                    choices=["evalplus", "builtin", "lcb", "lcb2", "lcb3"])
+                    choices=["evalplus", "humanevalplus", "builtin",
+                             "lcb", "lcb2", "lcb3"])
     # R529（跨題庫）：把一個 LCB bank 切成「只跑某一層」，讓
     # 「不同題目集」可以是 lcb3-hard／lcb3-medium 這種**同來源不同切片**，
     # 而不是為了湊數把同一份東西算兩次。切層在 offset/n 之前 ⇒ 切塊語意不變。
@@ -1340,6 +1393,16 @@ def main() -> None:
         help="只取題庫的某一層，格式 key=value（或 key=v1,v2），"
              "key ∈ difficulty／platform，只支援 lcb／lcb2／lcb3。"
              "對不上的 key／value／空集合一律停（量不到不是通過）",
+    )
+    # R529：一個佇列跨四個題目集，其中兩集有 `--bank-filter`、兩集沒有
+    # ⇒ 若「bank 欄只在切層時出現」，同一個 run 的四集 rows 會有兩種形狀。
+    # 但**不能**改成無條件落盤：R460R 的 18 塊正排在同一份 gain_run.py 底下
+    # 依序發射，它們的 rows.jsonl／summary.json 形狀一格都不准變。
+    # ⇒ 做成顯式旗標：R529 的發射器每一塊都給，R460R 的發射器不給。
+    ap.add_argument(
+        "--record-bank-field", action="store_true",
+        help="rows.jsonl／summary.json 無條件落盤 bank／bank_filter（切層時還有 stratum）。"
+             "不給且沒有 --bank-filter ⇒ 這幾個 key 完全不出現（既有 run 的形狀不變）",
     )
     ap.add_argument("--audit-rate", type=float, default=0.2)
     ap.add_argument(
@@ -1438,6 +1501,8 @@ def main() -> None:
     # R529：切層之後每一題的層標籤要跟著進 rows——run 目錄名可以打錯，
     # rows 裡的標籤是從釘死的題庫算出來的，收官時只認後者。
     stratum_of: dict[str, str] = {}
+    # 切層的 run 一定要記（不記就認不出自己）；沒切層的 run 由旗標決定。
+    _record_bank = bool(args.bank_filter or args.record_bank_field)
     if args.bank_filter:
         _fkey, _ = parse_bank_filter(args.bank_filter)
         _strata = bank_strata(args.bank)
@@ -1643,10 +1708,11 @@ def main() -> None:
                 # 要看得出來），但它不進臂的執行路徑 ⇒ 分類 (a)。
                 "gauge_scope": args.gauge_scope,
                 # R529：切層的 run 一定要說得出「哪個題庫的哪一層」，
-                # 否則 summary 自己認不出自己。沒切層就完全不出現這兩個 key
+                # 否則 summary 自己認不出自己。沒切層、也沒給
+                # `--record-bank-field` 就完全不出現這兩個 key
                 # ⇒ 既有 run 的 summary.json 逐位元不變。
                 **({"bank": args.bank, "bank_filter": args.bank_filter}
-                   if args.bank_filter else {}),
+                   if _record_bank else {}),
                 "run_complete": run_complete,
                 "run_terminal": run_terminal,
                 "request_policy": {
@@ -1871,11 +1937,11 @@ def main() -> None:
                 f.write(json.dumps({
                     "arm": arm, "seed": args.seed, "i": i,
                     "task_id": t["task_id"], "family": t["family"], "entry_point": t.get("entry_point"),
-                    # R529：只有切層的 run 才多這三欄 ⇒ **既有 run 的
-                    # rows.jsonl 逐位元不變**（沒有 --bank-filter 就沒有這兩個 key）。
+                    # R529：只有切層或顯式要求的 run 才多這三欄 ⇒ **既有 run 的
+                    # rows.jsonl 逐位元不變**（旗標與層都沒有就沒有這幾個 key）。
                     **({"bank": args.bank, "bank_filter": args.bank_filter,
                         "stratum": stratum_of.get(t["task_id"])}
-                       if args.bank_filter else {}),
+                       if _record_bank else {}),
                     "worker": worker, "involved": involved,
                     "meets_demand": truth, "err": err[:200],
                     "accepted": accepted, "calls_used": calls[0] - calls_before,

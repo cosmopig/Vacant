@@ -5,7 +5,7 @@
 
 釘四件事，每一件都對應一種具體的壞法：
 
-  1. `44 個目錄有 summary.json`         ← 掃描範圍縮水／擴張（分類邏輯漂掉）
+  1. `50 個目錄有 summary.json`         ← 掃描範圍縮水／擴張（分類邏輯漂掉）
   2. `g_r449c_eq5_lcb3` 的 `n_rows` 189 ← 行數統計壞掉（例如把 header 算進去）
   3. `lcb_bank_v2` 120 題               ← 題庫解析壞掉／指到錯的檔
   4. 索引裡不含 MBPP+ 的任何位元組      ← **私有資料外洩**（最嚴重的一種）
@@ -38,16 +38,23 @@ def idx() -> dict:
     return build_index()
 
 
-def test_dirs_with_summary_json_is_44(idx):
-    """HEAD 有 44 個 run 目錄帶 summary.json（2026-09-07 人工點過）。
+def test_dirs_with_summary_json_is_50(idx):
+    """HEAD 有 50 個 run 目錄帶 summary.json（2026-09-11 重建索引時點過）。
 
     這個數字會隨新 run 落盤而增加——變了就更新這裡，但**要先確認是真的多了
     一個 run**，而不是分類邏輯把別的東西算進來了。
+
+    44 → 50 的那六個是 R460 的 harness 六塊（`g_r460_harness_lcb2_{a1..b3}`）：
+    它們在 2026-09-08／09 落盤，而索引一直停在 2026-09-07 的點數
+    ⇒ `build_runs_index.py --check` 從那時起就是紅的（R529 v1 §九-5 記的已知未償）。
+    2026-09-11 重跑產生器補上，逐塊核對過是真的多了六個 run 而不是分類漂掉。
     """
-    assert idx["counts"]["dirs_with_summary_json"] == 44
+    assert idx["counts"]["dirs_with_summary_json"] == 50
     counted = sum(1 for r in idx["runs"]
                   if any(f["name"] == "summary.json" for f in r["files"]))
-    assert counted == 44
+    assert counted == 50
+    names = {r["name"] for r in idx["runs"]}
+    assert {f"g_r460_harness_lcb2_{t}" for t in ("a1", "a2", "a3", "b1", "b2", "b3")} <= names
 
 
 def test_r449c_n_rows_is_189(idx):
@@ -209,4 +216,4 @@ def test_generator_runs_as_a_script(tmp_path):
         capture_output=True, text=True, cwd=str(ROOT), timeout=300)
     assert r.returncode == 0, r.stderr
     data = json.loads((out / "INDEX.json").read_text())
-    assert data["counts"]["dirs_with_summary_json"] == 44
+    assert data["counts"]["dirs_with_summary_json"] == 50

@@ -94,8 +94,20 @@ def test_decision_names_the_seed_and_launcher_greps_for_it(sh: str, dec: str) ->
 
 
 # ── 這個 run 的意義：新題庫（難題）＋沒用過的 seed ──────────────────────
-def test_seed_is_absent_from_every_run_summary() -> None:
-    """事前證明：這顆 seed 沒有在任何一個既有 run 裡被用過。"""
+def test_seed_is_used_by_this_run_and_nothing_else() -> None:
+    """這顆 seed 只准出現在**它自己那個 run** 裡。
+
+    ⚠ 2026-09-11 改寫（R529 順手清的既有紅測試）。原本這一條寫的是
+    「這顆 seed 沒有在任何一個既有 run 裡被用過」——那是**發射前**的閘門，
+    而這個 run 早就跑完了（`runs/<RUN_NAME>/summary.json` 就在磁碟上），
+    所以那句話從它發射的那一刻起就永遠是假的。
+    留著一條註定紅的測試比沒有測試更糟：它會把「seed 真的被別人重用了」
+    淹在一條大家都知道會紅的斷言底下。
+
+    改寫之後**牙齒還在而且還是同一顆**：真正的危險是「另一個 run 重用了
+    這顆 seed」，那會讓兩批資料在收官時被當成獨立樣本。這一條照樣抓得到，
+    而且它發射前發射後都成立。
+    """
     files = sorted(glob.glob(str(ROOT / "runs" / "*" / "summary.json")))
     assert files, "一個 runs/*/summary.json 都沒掃到——量不到不是通過"
     used = []
@@ -103,10 +115,10 @@ def test_seed_is_absent_from_every_run_summary() -> None:
         try:
             with open(f, encoding="utf-8") as fh:
                 if json.load(fh).get("seed") == SEED:
-                    used.append(f)
+                    used.append(pathlib.Path(f).parent.name)
         except Exception:                                    # noqa: BLE001
             pass
-    assert not used, f"seed {SEED} 已經被用過：{used}"
+    assert set(used) <= {RUN_NAME}, f"seed {SEED} 被別的 run 用過：{used}"
 
 
 def test_launcher_scans_all_summaries_not_a_single_string_compare(sh: str) -> None:
@@ -249,6 +261,19 @@ def _seed_used_by_some_run(seed: str) -> bool:
     return False
 
 
+def _seed_used_only_by(seed: str, own: str) -> bool:
+    """這顆 seed 除了 `own` 那個 run 之外沒有別人用過。"""
+    for f in sorted(glob.glob(str(ROOT / "runs" / "*" / "summary.json"))):
+        try:
+            with open(f, encoding="utf-8") as fh:
+                if json.load(fh).get("seed") == seed and \
+                        pathlib.Path(f).parent.name != own:
+                    return False
+        except Exception:                                    # noqa: BLE001
+            pass
+    return True
+
+
 def test_mutation_stale_seed_is_caught_only_by_the_summary_scan(sh: str, dec: str) -> None:
     """M1：seed 抄成 r448 用過的那一顆。
 
@@ -269,7 +294,9 @@ def test_mutation_stale_seed_is_caught_only_by_the_summary_scan(sh: str, dec: st
 
     # (ii) 擋得住：它在 runs/*/summary.json 裡被用過。
     assert _seed_used_by_some_run(stale), f"{stale} 竟然沒被任何 run 用過"
-    assert not _seed_used_by_some_run(SEED), f"{SEED} 已經被用過"
+    # 本 run 發射之後，它自己的 summary 當然帶著這顆 seed；要證明的是
+    # **沒有別人**用它（理由見 `test_seed_is_used_by_this_run_and_nothing_else`）。
+    assert _seed_used_only_by(SEED, RUN_NAME), f"{SEED} 被別的 run 用過"
 
     # 而且發射器真的把 (ii) 接成了會 abort 的路徑，不只是算了個數字。
     assert 'finish abort_seed_not_fresh' in mutant

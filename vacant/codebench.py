@@ -524,6 +524,63 @@ def _check_code(entry_point: str, canonical: str, inputs: list[list[Any]], atol:
     return "\n".join(lines)
 
 
+def _validate_evalplus_record(rec: Any, ln: int, schema: dict[str, Any]) -> None:
+    """一列官方紀錄的欄位／型別檢查。訊息逐字沿用（負向測試對釘這些字）。"""
+    if not isinstance(rec, dict):
+        raise ValueError(f"第 {ln} 行不是 JSON object")
+    for field_name, types in schema.items():
+        if field_name not in rec:
+            raise ValueError(f"第 {ln} 行缺欄位 {field_name}")
+        if not isinstance(rec[field_name], types):
+            raise ValueError(
+                f"第 {ln} 行欄位 {field_name} 型別錯（want {types}）"
+            )
+
+
+def _verify_evalplus_pack(
+    path: str, expected_sha256: str, expected_count: int,
+    schema: dict[str, Any], *, missing_hint: str, version_hint: str,
+) -> list[dict[str, Any]]:
+    """EvalPlus 官方包的 fail-closed 載入：存在 → sha256 → jsonl → 題數 → 唯一 → schema。
+
+    R529：MBPP+ 與 HumanEval+ 兩顆 loader **共用這一份**驗證。分成兩份寫過一次
+    ＝ 同一道紅線有兩個實作，哪天只修了其中一份，另一邊會安靜地變寬——
+    而「安靜地變寬」正是 fail-closed 想擋的東西。差異（預設路徑、環境變數、
+    題數、schema、版本字串）全部由參數帶進來，錯誤訊息逐字不變。
+    """
+    import gzip
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"EvalPlus 官方包不存在：{p}（{missing_hint}）")
+    got = hashlib.sha256(p.read_bytes()).hexdigest()
+    if got != expected_sha256:
+        raise ValueError(
+            f"EvalPlus 包 sha256 不符：got {got} want {expected_sha256}"
+            "（版本飄移或檔案受損，拒收）"
+        )
+    records: list[dict[str, Any]] = []
+    opener = gzip.open if p.suffix == ".gz" else open
+    with opener(p, "rt", encoding="utf-8") as f:  # type: ignore[arg-type]
+        for ln, line in enumerate(f, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except ValueError as e:
+                raise ValueError(f"第 {ln} 行不是合法 JSON：{e}") from e
+            _validate_evalplus_record(rec, ln, schema)
+            records.append(rec)
+    if len(records) != expected_count:
+        raise ValueError(
+            f"題數不符：got {len(records)} want {expected_count}（非官方 {version_hint} 包？）"
+        )
+    ids = [r["task_id"] for r in records]
+    if len(set(ids)) != len(ids):
+        raise ValueError("task_id 有重複（資料污染，拒收）")
+    return records
+
+
 class EvalPlusMBPPLoader(TaskLoader):
     """真 EvalPlus MBPP+ v0.2.0 載入（G1／17 §P1-1）。
 
@@ -565,53 +622,18 @@ class EvalPlusMBPPLoader(TaskLoader):
 
     # -- 驗證載入（建構時一次做完）---------------------------------------------
     def _load_verified(self) -> list[dict[str, Any]]:
-        import gzip
-        p = Path(self.path)
-        if not p.exists():
-            raise FileNotFoundError(
-                f"EvalPlus 官方包不存在：{p}（下載 MBPP+ v0.2.0 並放到 "
-                f"{EVALPLUS_DEFAULT_PATH}，或設 VACANT_EVALPLUS_PATH；"
-                "無真資料時請用 BuiltinSampleLoader 並如實標注）"
-            )
-        got = hashlib.sha256(p.read_bytes()).hexdigest()
-        if got != self.expected_sha256:
-            raise ValueError(
-                f"EvalPlus 包 sha256 不符：got {got} want {self.expected_sha256}"
-                "（版本飄移或檔案受損，拒收）"
-            )
-        records: list[dict[str, Any]] = []
-        opener = gzip.open if p.suffix == ".gz" else open
-        with opener(p, "rt", encoding="utf-8") as f:  # type: ignore[arg-type]
-            for ln, line in enumerate(f, 1):
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    rec = json.loads(line)
-                except ValueError as e:
-                    raise ValueError(f"第 {ln} 行不是合法 JSON：{e}") from e
-                self._validate_record(rec, ln)
-                records.append(rec)
-        if len(records) != self.expected_count:
-            raise ValueError(
-                f"題數不符：got {len(records)} want {self.expected_count}（非官方 v0.2.0 包？）"
-            )
-        ids = [r["task_id"] for r in records]
-        if len(set(ids)) != len(ids):
-            raise ValueError("task_id 有重複（資料污染，拒收）")
-        return records
+        return _verify_evalplus_pack(
+            self.path, self.expected_sha256, self.expected_count,
+            _EVALPLUS_SCHEMA,
+            missing_hint=(f"下載 MBPP+ v0.2.0 並放到 {EVALPLUS_DEFAULT_PATH}，"
+                          "或設 VACANT_EVALPLUS_PATH；"
+                          "無真資料時請用 BuiltinSampleLoader 並如實標注"),
+            version_hint="v0.2.0",
+        )
 
     @staticmethod
     def _validate_record(rec: Any, ln: int) -> None:
-        if not isinstance(rec, dict):
-            raise ValueError(f"第 {ln} 行不是 JSON object")
-        for field_name, types in _EVALPLUS_SCHEMA.items():
-            if field_name not in rec:
-                raise ValueError(f"第 {ln} 行缺欄位 {field_name}")
-            if not isinstance(rec[field_name], types):
-                raise ValueError(
-                    f"第 {ln} 行欄位 {field_name} 型別錯（want {types}）"
-                )
+        _validate_evalplus_record(rec, ln, _EVALPLUS_SCHEMA)
 
     # -- TaskLoader 介面 ---------------------------------------------------------
     def iter_tasks(self, seed: Any) -> Iterator[dict[str, Any]]:
@@ -669,6 +691,229 @@ class EvalPlusMBPPLoader(TaskLoader):
                 "hidden_check": {
                     "type": "run_python",
                     "code": _check_code(rec["entry_point"], rec["canonical_solution"], base + plus, atol),
+                    "timeout": 8,
+                },
+            }
+
+    @staticmethod
+    def public_view(task: dict[str, Any]) -> dict[str, Any]:
+        """prompt 側唯一合法投影：task_id／family／prompt／entry_point（無任何 GT）。"""
+        return {k: task[k] for k in ("task_id", "family", "prompt", "entry_point")}
+
+
+# ============================================================================
+# R529：真 EvalPlus HumanEval+ 載入 —— 第三個真來源，與 MBPP+ 同一套紀律
+# ============================================================================
+#
+# 為什麼要它：`DECISION_20260911_R529_CROSS_BANK_PREREG.md` §一-2 的誠實計數
+# ——手上只有兩個**真正不同的來源**（LiveCodeBench、EvalPlus MBPP+），
+# 其餘都是同來源的切片。HumanEval+ 是第三個，而且它跟 MBPP+ 不同源
+# （HumanEval 是 OpenAI 2021 手寫的 164 題函式補全，MBPP 是眾包短題），
+# 兩者的 prompt 形狀也不同：MBPP+ 的 prompt 是一句自然語言需求，
+# HumanEval 的 prompt 是**函式簽名＋docstring**（＝補全題）。
+#
+# 資料紀律與 MBPP+ 逐條相同（sha256 釘死、題數釘死、schema 全驗、V/GT 分離、
+# fail-closed），差異只有三處，每一處都寫在下面：
+#   1. `canonical_solution` 是**函式體**（縮排片段），不是完整函式
+#      ⇒ 完整參考解 ＝ `prompt + canonical_solution`（官方 evalplus 自己也這樣拼）。
+#      拼錯的話 `_check_code` 的 `exec` 會 `IndentationError`，而那會長得像
+#      「題庫壞了」而不是「拼法錯了」——所以建構時**逐題編譯過一次**。
+#   2. 輸入**不需要**型別還原：MBPP+ 的 `_norm_inputs` 有一張按 `Mbpp/<n>`
+#      的整數註冊表（tuple／set／complex），而 HumanEval 的 task_id 也是
+#      `HumanEval/<n>` ⇒ **直接套用會把 MBPP 的還原規則張冠李戴地套到
+#      同號的 HumanEval 題上**（HumanEval/2、/63、/64… 都在那張表的號碼裡）。
+#      官方 evalplus 對 HumanEval 側不做任何還原，這裡也不做。
+#   3. 官方沒有為 HumanEval+ 提供 `assertion` 欄；`test` 欄是 GT，不進 schema、
+#      不進任何投影。
+#
+# ⚠ 沙箱容量：HumanEval+ 每題的 plus 輸入中位數 972 條（MBPP+ 是 105），
+#   `_check_code` 對每一條輸入都要跑一次候選＋一次參考解 ⇒ 有些題的參考解
+#   自己就跑不完 10 秒／128 MiB 的產品信封。那不是模型錯，是量具容量，
+#   處置與 MBPP+ 的七題一樣：釘死在 `gain_run.GAIN_HUMANEVAL_RESOURCE_EXCLUSIONS`，
+#   逐題寫理由、逐題有測試。**不在這裡默默丟題**——loader 吐的永遠是官方的 164 題。
+
+EVALPLUS_HUMANEVAL_PLUS_SHA256 = (
+    "272720b90ac375502c8ed23cd791c2a93dfb22a911641a494da74a426c09f101")
+EVALPLUS_HUMANEVAL_PLUS_COUNT = 164
+EVALPLUS_HUMANEVAL_DEFAULT_PATH = (
+    ".vacant-private/evalplus/HumanEvalPlus-v0.1.10.jsonl.gz")
+
+#: v0.1.10 的必要欄位。`test`／`contract` 是 GT 側的東西，**刻意不列進來**
+#: ——列進來等於宣稱它們是「必須存在才算官方包」，而它們不進任何判定。
+_EVALPLUS_HUMANEVAL_SCHEMA = {
+    "task_id": str,
+    "prompt": str,
+    "entry_point": str,
+    "canonical_solution": str,
+    "base_input": list,
+    "plus_input": (list, dict),
+}
+
+
+def _he_norm_inputs(raw: Any) -> list[list[Any]]:
+    """HumanEval+ 的輸入照官方原樣用，只把「單一引數沒包成 list」補成 list。
+
+    ⚠ **刻意不呼叫 `_norm_inputs`**：那支按 `Mbpp/<n>` 的整數編號查一張型別
+      還原表，而 HumanEval 的 task_id 同樣是 `<名字>/<整數>` ⇒ 套上去會把
+      MBPP 的 tuple／set／complex 規則張冠李戴地套到同號的 HumanEval 題上。
+      官方 evalplus 對 HumanEval 側不做還原（`base_input` 直接餵進去），這裡同樣。
+    """
+    if isinstance(raw, dict):
+        return [] if not raw else [[raw]]
+    return [case if isinstance(case, list) else [case] for case in raw]
+
+
+class EvalPlusHumanEvalLoader(TaskLoader):
+    """真 EvalPlus HumanEval+ v0.1.10 載入（R529 §一-3 第 1 條）。
+
+    建構即 fail-closed：檔案存在 → sha256 符合釘值 → gzip/jsonl 可解析 →
+    恰 164 題 → task_id 唯一 → schema 型別全對 → **每一題的
+    `prompt + canonical_solution` 都編譯得過且定義得出 `entry_point`**。
+    最後那一條是 MBPP+ 沒有的，理由見模組上方第 1 點。
+
+    參數：
+      path            官方 gzip jsonl（預設 `EVALPLUS_HUMANEVAL_DEFAULT_PATH`；
+                      可用 `VACANT_HUMANEVALPLUS_PATH` 環境變數覆寫位置）。
+      expected_sha256 預設＝官方釘值，**不可傳 None 略過**；測試 fixture 必須
+                      顯式傳入 fixture 自身的 sha256（唯一的合法覆寫）。
+      expected_count  預設 164；fixture 同理顯式覆寫。
+    """
+
+    def __init__(
+        self,
+        path: str | None = None,
+        *,
+        expected_sha256: str | None = None,
+        expected_count: int = EVALPLUS_HUMANEVAL_PLUS_COUNT,
+        expose_contract: bool = False,
+    ) -> None:
+        import os
+        self.path = path or os.environ.get(
+            "VACANT_HUMANEVALPLUS_PATH", EVALPLUS_HUMANEVAL_DEFAULT_PATH)
+        # path=None＝「官方包」，不管它躺在預設相對路徑還是環境變數指的地方；
+        # 覆寫改的是位置，永遠不是釘死的那串位元組。
+        if expected_sha256 is None and path is None:
+            expected_sha256 = EVALPLUS_HUMANEVAL_PLUS_SHA256
+        if expected_sha256 is None:
+            raise ValueError(
+                "expected_sha256 不可為 None（fail-closed：官方包用預設釘值，"
+                "測試 fixture 須顯式傳入其自身 sha256）"
+            )
+        self.expected_sha256 = expected_sha256
+        self.expected_count = expected_count
+        self.expose_contract = expose_contract
+        self._records = self._load_verified()
+
+    def _load_verified(self) -> list[dict[str, Any]]:
+        records = _verify_evalplus_pack(
+            self.path, self.expected_sha256, self.expected_count,
+            _EVALPLUS_HUMANEVAL_SCHEMA,
+            missing_hint=("下載 HumanEval+ v0.1.10 "
+                          "(evalplus/humanevalplus_release 的 HumanEvalPlus.jsonl.gz) "
+                          f"並放到 {EVALPLUS_HUMANEVAL_DEFAULT_PATH}，"
+                          "或設 VACANT_HUMANEVALPLUS_PATH"),
+            version_hint="v0.1.10",
+        )
+        for rec in records:
+            self._assert_canonical_composes(rec)
+        return records
+
+    @staticmethod
+    def canonical_source(rec: dict[str, Any]) -> str:
+        """完整參考解 ＝ prompt（簽名＋docstring＋import）＋ canonical_solution（函式體）。
+
+        ⚠ 這是 GT 側的東西，只給 verifier／量具用，**永不進 prompt**。
+        """
+        return rec["prompt"] + rec["canonical_solution"]
+
+    @classmethod
+    def _assert_canonical_composes(cls, rec: dict[str, Any]) -> None:
+        """拼出來的參考解要編譯得過，且定義得出 `entry_point`。
+
+        HumanEval 的 `canonical_solution` 是縮排的函式體 ⇒ 單獨 `compile()`
+        必定 IndentationError。若哪天官方換成完整函式（或我們拼錯順序），
+        這一關會當場停，而不是讓量具在整批題目上報「參考解不通過」——
+        後者長得像題庫壞了，前者才說得出真正發生的事。
+        """
+        import ast
+        import warnings
+        if not rec["canonical_solution"].strip():
+            raise ValueError(
+                f"{rec['task_id']} 的 canonical_solution 是空的（拒收）"
+                "——空的參考解會讓「什麼都判通過」長得像量具通過")
+        src = cls.canonical_source(rec)
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", SyntaxWarning)
+                # ⚠ 用 `compile` 不用 `ast.parse`：`ast.parse` 不做符號表那一遍，
+                #   「函式體沒縮排」會變成一句合法 AST 的 top-level `return`
+                #   ⇒ 拼反了照樣過。`compile` 才會報 'return' outside function。
+                tree = ast.parse(src)
+                compile(src, f"<canonical:{rec['task_id']}>", "exec")
+        except SyntaxError as e:
+            raise ValueError(
+                f"{rec['task_id']} 的 prompt+canonical_solution 編譯不過：{e}"
+                "（官方包的拼法變了？拒收）"
+            ) from e
+        names = {n.name for n in ast.walk(tree)
+                 if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+        if rec["entry_point"] not in names:
+            raise ValueError(
+                f"{rec['task_id']} 的參考解沒有定義 entry_point "
+                f"{rec['entry_point']!r}（拒收）"
+            )
+
+    # -- TaskLoader 介面 ---------------------------------------------------------
+    def iter_tasks(self, seed: Any) -> Iterator[dict[str, Any]]:
+        """依 seed 決定性排序吐出全部 164 題（sha256(seed:task_id) 排序，可重放）。
+
+        V/GT 分離與 MBPP+ 逐字相同：
+          · `prompt`＝官方 prompt 全文（簽名＋docstring）；
+          · `visible_check`＝**只有 base 輸入**（客戶的可見驗收）；
+          · `hidden_check`＝base ＋ plus（GT，只計分）；
+          · `canonical_solution`／`plus_input`／`test` 永不進任何投影。
+        """
+        ordered = sorted(
+            self._records,
+            key=lambda r: hashlib.sha256(f"{seed}:{r['task_id']}".encode()).hexdigest(),
+        )
+        for rec in ordered:
+            base = _he_norm_inputs(rec["base_input"])
+            plus = _he_norm_inputs(rec["plus_input"])
+            atol = rec.get("atol")
+            atol = float(atol) if isinstance(atol, (int, float)) else None
+            canonical = self.canonical_source(rec)
+            public_prompt = rec["prompt"]
+            contract = textwrap.dedent(
+                rec.get("contract", "").replace("# $_CONTRACT_$", "")
+            ).strip()
+            if self.expose_contract and contract:
+                public_prompt += (
+                    "\n\nFormal input contract (authoritative preconditions):\n"
+                    f"```python\n{contract}\n```"
+                )
+            yield {
+                "task_id": f"humanevalplus_{rec['task_id']}",
+                "family": _label_family(rec["prompt"], rec["entry_point"]),
+                "prompt": public_prompt,
+                "entry_point": rec["entry_point"],
+                # 行為簽名只用 base 輸入比「兩份候選跑起來一不一樣」，
+                # 沒有期望輸出、沒有 plus 輸入 ⇒ 偷看不到 hidden。
+                "behavior_inputs": base,
+                "input_contract": contract if self.expose_contract else "",
+                "input_parameters": (
+                    _entry_parameters(canonical, rec["entry_point"])
+                    if self.expose_contract else []
+                ),
+                "visible_check": {
+                    "type": "run_python",
+                    "code": _check_code(rec["entry_point"], canonical, base, atol),
+                    "timeout": 8,
+                },
+                "hidden_check": {
+                    "type": "run_python",
+                    "code": _check_code(rec["entry_point"], canonical,
+                                        base + plus, atol),
                     "timeout": 8,
                 },
             }
