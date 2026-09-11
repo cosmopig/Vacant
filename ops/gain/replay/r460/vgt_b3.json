@@ -1,0 +1,466 @@
+{
+  "run": "runs/g_r460_harness_lcb2_b3",
+  "records_audited": 113,
+  "texts_audited": 376,
+  "per_arm": {
+    "HPI": 28,
+    "HOC": 53,
+    "HMIX": 32
+  },
+  "needles_checked": 3331,
+  "needles_skipped_trivial": 2059,
+  "unknown_task_ids": [],
+  "violations": [
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 45,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 46,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 47,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 48,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 2]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "utput: []\nExplanation:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3"
+    },
+    {
+      "line": 49,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 1]",
+      "message_index": 1,
+      "task_id": "lcb_3783",
+      "excerpt": "n:\nThe lexicographically-sorted alternating permutations of [1, 2] are:\n\n[1, 2]\n[2, 1]\n\nThere are only 2 alternating permutations, but k = 3, which is out of ra"
+    }
+  ],
+  "verdict": "VIOLATION"
+}

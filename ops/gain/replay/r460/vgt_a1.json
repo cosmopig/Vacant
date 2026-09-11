@@ -1,0 +1,25 @@
+{
+  "run": "runs/g_r460_harness_lcb2_a1",
+  "records_audited": 109,
+  "texts_audited": 360,
+  "per_arm": {
+    "HPI": 36,
+    "HOC": 46,
+    "HMIX": 27
+  },
+  "needles_checked": 3054,
+  "needles_skipped_trivial": 2178,
+  "unknown_task_ids": [],
+  "violations": [
+    {
+      "line": 44,
+      "arm": "HMIX",
+      "rule": "check_code_identifier",
+      "needle": "exec(",
+      "message_index": 2,
+      "task_id": "lcb_3771",
+      "excerpt": "ules allowed. (Used 'collections') (Checked)\n    3. No input(), open(), eval(), exec(), locals(), globals() or getattr(). (Checked)\n    4. Return value, do not "
+    }
+  ],
+  "verdict": "VIOLATION"
+}

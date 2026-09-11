@@ -1,0 +1,147 @@
+<unknown>:50: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:38: SyntaxWarning: invalid escape sequence '\c'
+═══ R460 harness 六臂收官報表 ═══
+broken_reasons: []
+run_terminal: True   notes: ['分塊只是機時拓撲；仲裁一律取合併後的量（per_arm／paired／holm／decision），塊內數字是描述性的。六塊的難度組成不同（a1 medium12/hard8、a2 13/7、a3 15/5、b1 10/10、b2 12/8、b3 10/10）⇒ **塊間點估計不得互相比較**，配對比較只在塊內或合併後成立。', '⚠ 合併後每臂的 `wall_s` 是**六塊相加**＝該臂燒掉的總算力時間，**不是**牆鐘經過時間（六塊是併發跑的：兩台後端各三個行程）。`wall_s_per_task` 因此仍然是對的（每題平均算力時間），但「這個 run 花了幾小時」要看發射器的 log，不要讀這一格。']
+
+── D9 機時拓撲（六塊直連後端；round460h：{兩顆各三塊} 或 {一顆六塊}；仲裁一律取合併後的量）
+block                       offset    n   rows     題數  端點
+g_r460_harness_lcb2_a1           0   20    120     20  http://100.86.226.21:1234/v1/chat/completions
+g_r460_harness_lcb2_a2          20   20    120     20  http://100.86.226.21:1234/v1/chat/completions
+g_r460_harness_lcb2_a3          40   20    120     20  http://100.86.226.21:1234/v1/chat/completions
+g_r460_harness_lcb2_b1          60   20    120     20  http://100.86.226.21:1234/v1/chat/completions
+g_r460_harness_lcb2_b2          80   20    120     20  http://100.86.226.21:1234/v1/chat/completions
+g_r460_harness_lcb2_b3         100   20    120     20  http://100.86.226.21:1234/v1/chat/completions
+拓撲 variant = one_backend_6（1 個相異端點、每個 6 塊）
+塊數 6/6　合併題數(聯集) 120/120　違規 []
+  http://100.86.226.21:1234/v1/chat/completions  ←  6 塊：g_r460_harness_lcb2_a1, g_r460_harness_lcb2_a2, g_r460_harness_lcb2_a3, g_r460_harness_lcb2_b1, g_r460_harness_lcb2_b2, g_r460_harness_lcb2_b3
+  ⚠ one_backend_6：六塊同一顆後端 ⇒ **後端不再是干擾項**。代價是兩半不同時跑（b 組先、a 組隔約 17 小時）⇒ **後端漂移**變成新的干擾項；P-H0（a 組那三塊）就是它的探針。
+  [g_r460_harness_lcb2_a1] OFF 9/20  CONFORM 10/20  OFF5 10/20  HPI 14/20  HOC 16/20  HMIX 18/20
+  [g_r460_harness_lcb2_a2] OFF 15/20  CONFORM 17/20  OFF5 18/20  HPI 19/20  HOC 19/20  HMIX 19/20
+  [g_r460_harness_lcb2_a3] OFF 12/20  CONFORM 13/20  OFF5 12/20  HPI 14/20  HOC 13/20  HMIX 14/20
+  [g_r460_harness_lcb2_b1] OFF 13/20  CONFORM 18/20  OFF5 13/20  HPI 16/20  HOC 16/20  HMIX 17/20
+  [g_r460_harness_lcb2_b2] OFF 13/20  CONFORM 13/20  OFF5 11/20  HPI 14/20  HOC 17/20  HMIX 17/20
+  [g_r460_harness_lcb2_b3] OFF 8/20  CONFORM 14/20  OFF5 14/20  HPI 14/20  HOC 15/20  HMIX 16/20
+  ⚠ 六塊題目難度組成不同（lcb2：a1 12/8、a2 13/7、a3 15/5、b1 10/10、b2 12/8、b3 10/10，medium/hard）⇒ 塊間點估計不得互相比較。
+  P-H0 錨塊池：g_r460_harness_lcb2_a1＋g_r460_harness_lcb2_a2＋g_r460_harness_lcb2_a3（＝ r447 前 60 題；錨 32/60＝53.33%，窗 ±15pp）
+
+── 逐臂主指標（分母 measured ＝ processed − infra_void）
+arm         n  void   acc  deliv   deliv%   false%   prec%  refuse%   calls   wall/題
+OFF       120     0   120     70    58.33    41.67   58.33     0.00    1.00    50.7s
+CONFORM   120     0   114     85    70.83    24.17   74.56     5.00    1.62   114.2s
+OFF5      120     0   120     78    65.00    35.00   65.00     0.00    5.00   287.0s
+HPI       120     0   108     91    75.83    14.17   84.26    10.00    1.51    98.8s
+HOC       120     0   114     96    80.00    15.00   84.21     5.00    2.36    78.4s
+HMIX      120     0   115    101    84.17    11.67   87.83     4.17    1.36    70.7s
+
+── token 倍數表（D3 的 (iii) 旁邊必須有這張；缺表＝裁決不得結算）
+arm          tok/題    ×OFF   ×CONFORM   TPC(含void)     TPC(排除)   ÷OFF5
+OFF           2913    1.00       0.50         4994        4994    0.22
+CONFORM       5805    1.99       1.00         8195        8195    0.36
+OFF5         15004    5.15       2.58        23084       23084    1.00
+HPI           9448    3.24       1.63        12459       12459    0.54
+HOC           7432    2.55       1.28         9290        9290    0.40
+HMIX          5677    1.95       0.98         6745        6745    0.29
+  TPC_OFF5（同 run，含 void 呼叫）＝ 23084
+
+── 配對比較（家族 6 個；H 對 H 標 EXPLORATORY，不在家族內）
+  ⚠ 區間未做多重比較調整；仲裁以 analyzer 為準
+pair                      n    b    c      Δpp       lo       hi     p_raw    p_holm
+HPI_vs_OFF              120   26    5    17.50     8.41    23.02    0.0002    0.0008
+HPI_vs_CONFORM          120   17   11     5.00    -4.40    13.30    0.3449    0.3449
+HOC_vs_OFF              120   33    7    21.67    11.48    28.44    0.0000    0.0002
+HOC_vs_CONFORM          120   22   11     9.17    -1.00    17.62    0.0801    0.1603
+HMIX_vs_OFF             120   34    3    25.83    17.32    29.78    0.0000    0.0000
+HMIX_vs_CONFORM         120   22    6    13.33     4.22    19.46    0.0037    0.0112
+HOC_vs_HPI              120   14    9     4.17    -4.39    11.61    0.4049       n/a  [EXPLORATORY]
+HMIX_vs_HPI             120   15    5     8.33     0.30    13.78    0.0414       n/a  [EXPLORATORY]
+HMIX_vs_HOC             120   14    9     4.17    -4.39    11.61    0.4049       n/a  [EXPLORATORY]
+HPI_vs_OFF5             120   18    5    10.83     2.41    16.31    0.0106       n/a  [EXPLORATORY]
+HOC_vs_OFF5             120   26    8    15.00     5.00    22.24    0.0029       n/a  [EXPLORATORY]
+HMIX_vs_OFF5            120   26    3    19.17    10.95    23.11    0.0000       n/a  [EXPLORATORY]
+CONFORM_vs_OFF          120   24    9    12.50     2.46    20.19    0.0135       n/a  [EXPLORATORY]
+OFF5_vs_OFF             120   15    7     6.67    -1.79    13.25    0.1338       n/a  [EXPLORATORY]
+  holm.family_size = 6（預註冊是 6）
+
+── D5 歸因（prompt 效果 vs 迴圈效果）
+  HPI: turn1 通過 86 題（71.67%）、迴圈才對 19 題（15.83%）
+      first_pass_turn 直方圖: {'none': 12, '1': 86, '2': 17, '3': 2, '4': 1, '5': 2}
+      Δ(turn1−OFF) = -0.83pp   Δ(final−turn1) = 18.33pp   （只算迴圈題）= 55.88pp
+  HOC: turn1 通過 0 題（0.00%）、迴圈才對 96 題（80.00%）
+      first_pass_turn 直方圖: {'none': 6, '2': 94, '3': 14, '4': 4, '5': 2}
+      Δ(turn1−OFF) = 2.50pp   Δ(final−turn1) = 19.17pp   （只算迴圈題）= 19.17pp
+  HMIX: turn1 通過 89 題（74.17%）、迴圈才對 21 題（17.50%）
+      first_pass_turn 直方圖: {'none': 5, '1': 89, '2': 19, '3': 6, '4': 1}
+      Δ(turn1−OFF) = 6.67pp   Δ(final−turn1) = 19.17pp   （只算迴圈題）= 67.74pp
+
+── 逐臂輪次與停止理由（G5：不能只報平均）
+  HPI: calls 直方圖 {'1': 86, '2': 20, '3': 6, '4': 3, '5': 5}  turn 直方圖 {'1': 86, '2': 20, '3': 6, '4': 3, '5': 5}
+      stop_reason {'budget_calls': 3, 'budget_tokens': 9, 'visible_pass': 108}
+      協定：nocode 0（0.00%）、loader 5（2.76%）、其中 entry_point_missing 0、first_block_non_python 5
+      取碼器分歧 0（0.00% 的輪次）、截斷重發 0、doom 0
+      precheck reason 分佈 {'syntax_error': 5}
+      wire_mode ['multiturn']
+  HOC: calls 直方圖 {'2': 95, '3': 14, '4': 4, '5': 7}  turn 直方圖 {'2': 95, '3': 14, '4': 4, '5': 7}
+      stop_reason {'budget_calls': 5, 'budget_tokens': 1, 'visible_pass': 114}
+      協定：nocode 0（0.00%）、loader 3（1.06%）、其中 entry_point_missing 0、first_block_non_python 2
+      取碼器分歧 0（0.00% 的輪次）、截斷重發 0、doom 0
+      precheck reason 分佈 {'syntax_error': 2, 'forbidden_attr': 1}
+      wire_mode ['multiturn']
+  HMIX: calls 直方圖 {'1': 89, '2': 21, '3': 8, '4': 2}  turn 直方圖 {'1': 89, '2': 21, '3': 8, '4': 2}
+      stop_reason {'budget_tokens': 2, 'doom': 3, 'visible_pass': 115}
+      協定：nocode 0（0.00%）、loader 10（6.13%）、其中 entry_point_missing 0、first_block_non_python 9
+      取碼器分歧 0（0.00% 的輪次）、截斷重發 0、doom 3
+      precheck reason 分佈 {'forbidden_attr': 1, 'syntax_error': 9}
+      wire_mode ['multiturn']
+
+── G1–G6 守門指標
+  G1 假交付（件數）: {'CONFORM': 29, 'HMIX': 14, 'HOC': 18, 'HPI': 17, 'OFF': 50, 'OFF5': 42}
+     門檻（CONFORM＋5pp）: 29.17%
+  G2 拒交率: {'CONFORM': '5.00', 'HMIX': '4.17', 'HOC': '5.00', 'HPI': '10.00', 'OFF': '0.00', 'OFF5': '0.00'}
+     無損性違反（hidden 過但沒交）: {'CONFORM': 0, 'HMIX': 0, 'HOC': 0, 'HPI': 0, 'OFF': 0, 'OFF5': 0}
+  G3 OFF 臂載入器拒收 2 題（1.67%）: ['lcb_3637', 'lcb_3781']
+     HPI_vs_OFF: ITT 17.50pp → 排除後 16.95pp  掉超過一半=False
+     HPI_vs_CONFORM: ITT 5.00pp → 排除後 5.93pp  掉超過一半=False
+     HOC_vs_OFF: ITT 21.67pp → 排除後 21.19pp  掉超過一半=False
+     HOC_vs_CONFORM: ITT 9.17pp → 排除後 10.17pp  掉超過一半=False
+     HMIX_vs_OFF: ITT 25.83pp → 排除後 24.58pp  掉超過一半=False
+     HMIX_vs_CONFORM: ITT 13.33pp → 排除後 13.56pp  掉超過一半=False
+  G4 難度／日期分層: bank_loaded=True
+     OFF: medium 68.06%（n=72） / hard 43.75%（n=48）
+     CONFORM: medium 77.78%（n=72） / hard 60.42%（n=48）
+     OFF5: medium 73.61%（n=72） / hard 52.08%（n=48）
+     HPI: medium 84.72%（n=72） / hard 62.50%（n=48）
+     HOC: medium 79.17%（n=72） / hard 81.25%（n=48）
+     HMIX: medium 90.28%（n=72） / hard 75.00%（n=48）
+     2023 年的離群題: ['lcb_3026']
+  G5 calls/題 平均: {'CONFORM': '1.62', 'HMIX': '1.36', 'HOC': '2.36', 'HPI': '1.51', 'OFF': '1.00', 'OFF5': '5.00'}
+  G6 wire mode: {'HPI': ['multiturn'], 'HOC': ['multiturn'], 'HMIX': ['multiturn']}  單一模式=True
+
+── D3 裁決（判定順序 EFFECTIVE → COSTLY_BUT_REAL → RULED_OUT → INCONCLUSIVE）
+  HPI: Δ_O=17.50pp  Δ_C=5.00pp  [-4.40, 13.30]  p_holm(OFF)=0.0008  p_holm(CONFORM)=0.3449
+      (i)點估計=False  (ii)Holm 兩邊=False  (iii)token=True（TPC 12459 vs OFF5 23084；×OFF 3.24、×CONFORM 1.63）  (iv)假交付=True
+      ⇒ **INCONCLUSIVE**
+  HOC: Δ_O=21.67pp  Δ_C=9.17pp  [-1.00, 17.62]  p_holm(OFF)=0.0002  p_holm(CONFORM)=0.1603
+      (i)點估計=False  (ii)Holm 兩邊=False  (iii)token=True（TPC 9290 vs OFF5 23084；×OFF 2.55、×CONFORM 1.28）  (iv)假交付=True
+      ⇒ **INCONCLUSIVE**
+  HMIX: Δ_O=25.83pp  Δ_C=13.33pp  [4.22, 19.46]  p_holm(OFF)=0.0000  p_holm(CONFORM)=0.0112
+      (i)點估計=True  (ii)Holm 兩邊=True  (iii)token=True（TPC 6745 vs OFF5 23084；×OFF 1.95、×CONFORM 0.98）  (iv)假交付=True
+      ⇒ **EFFECTIVE**
+  階段二觸發: False　H-MIX INCONCLUSIVE ⇒ 階段二 runs/g_r461h_harness_lcb3_a＋runs/g_r461h_harness_lcb3_b（LCB v3 189 題切成 95+94、seed g-r461-lcb3、與 v2 零交集、同六臂同門檻；門檻不得在看到階段一之後修改）
+
+── 事前預測 P-H0..P-H9
+  P-H0: HIT  {"value": 60.0, "source_field": "ph0_pool.per_arm.OFF.deliv_pp_denom_measured", "note": "只在 g_r460_harness_lcb2_a1＋g_r460_harness_lcb2_a2＋g_r460_harness_lcb2_a3 的聯集（offset 0/20/40，共 60 題）上判；錨＝r447 前 60 題的 32/60＝53.33%，窗 ±15pp。b* 那三塊是另外 60 題 ⇒ **不判、也不併進這一條**。⚠ 
+  P-H1: HIT  {"value": {"HPI": 17.5, "HOC": 21.666666666666668, "HMIX": 25.833333333333336}}
+  P-H2: HIT  {"value": {"HPI": 5.0, "HOC": 9.166666666666666, "HMIX": 13.333333333333334}}
+  P-H3: MISS  {"value": {"HPI": 1.5083333333333333, "HOC": 2.3583333333333334, "HMIX": 1.3583333333333334}}
+  P-H4: MISS  {"value": {"HPI": 14.166666666666666, "HOC": 15.0, "HMIX": 11.666666666666666}, "conform_false_delivery_pp": 24.166666666666668, "note": "窗＝(CONFORM 的假交付率, 35]；這是**預測會變差一點**，不是門檻"}
+  P-H5: MISS  {"value": {"HPI": 2.7624309392265194, "HOC": 1.0600706713780919, "HMIX": 6.134969325153374}, "note": "只判 HOC／HMIX（有靜態診斷的兩條）；HPI 沒有診斷，預期仍在 2% 上下"}
+  P-H6: HIT  {"value": 0.6008959473333262, "hmix_tokens_per_task": 5677.325, "hpi_tokens_per_task": 9448.1}
+  P-H7: HIT  {"value": {"HPI": 0.0, "HOC": 0.0, "HMIX": 0.0}, "sensitivity_required": false}
+  P-H8: HIT  {"value": {"HPI": 0.0, "HOC": 0.0, "HMIX": 0.0}}
+  P-H9: -  {"hoc_vs_hpi": {"delta_pp": 4.166666666666666, "p_mcnemar_exact": 0.4048728942871094, "n_common": 120}, "hmix_vs_hpi": {"delta_pp": 8.333333333333332, "p_mcnemar_exact": 0.04138946533203125, "n_common": 120}, "followup_h4_required": false, "note": "H 對 H 的兩個檢定
+
+⚠ winner's curse：n=120 對 +10pp 的檢定力只有 0.43–0.63（HARNESS_STUDY §5.5），能被判顯著的點估計本來就被截斷在 MDE 以上 ⇒ 任何被判 EFFECTIVE 的臂，其點估計是效果量的**上偏**估計；跨 run／跨臂比幅度一律報區間重疊，不報點估計誰大。
+⚠ 區間未做多重比較調整；仲裁以 analyzer 為準
+
+JSON → /private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/r460_analyze.json
