@@ -315,6 +315,20 @@ hidden 與 visible 兩側各驗一次；再獨立驗一次「**本塊**每一題
 排除前的 HumanEval+ 164 題有 7 題參考解不過、1 題（`/15`）耗 7.58 秒，
 逐題名字與成因在 §一-2；**這八題就是因為這份量測才被排掉的，不是先排再量。**
 
+**發射前的最後一次量測（2026-09-11，vacant-dev 拉到本 commit 之後，跑的是
+真的 `gain_run.py --arms probe --probe-sample 0 --gauge-scope bank`）：**
+
+```
+lcb3（層=difficulty=medium）  參考解通過 12/12   壞解被擋 12/12   gauge_in_filter_n = 9
+lcb3（層=difficulty=hard）    參考解通過 12/12   壞解被擋 12/12   gauge_in_filter_n = 3
+humanevalplus                參考解通過 156/156 壞解被擋 156/156 可見閘門 156/156
+evalplus                     參考解通過 371/371 壞解被擋 371/371 可見閘門 371/371
+```
+
+以及**出貨閘門覆蓋**（CONFORM／H-MIX 沒有它就不成立）：四集 **716/716 題**
+全部有 `visible_check`、全部有 `entry_point`（缺 0），實跑腳本在 §九-2a。
+⇒ 每一塊的 `coverage_visible_n == coverage_n` 這條硬擋會過。
+
 ⚠ **一個非量測的實測發現，必須記下來**：同一套量具在**開發用的 Mac 上會紅**
 ——MBPP+ 有 2–7 題（`Mbpp/592`、`Mbpp/123` 等）在 Mac 上撞 10 秒逾時，
 在 vacant-dev 上最慢只有 2.98 秒（差 3–5 倍）。
@@ -755,6 +769,36 @@ PY
 
 實跑：`{'lcb3_medium': 135, 'lcb3_hard': 54, 'humanevalplus': 156, 'evalplus': 371} Σ = 716`；
 `platform 值: {'leetcode'}`（**一個值，切不出第二層**）。
+
+### 九-2a　出貨閘門覆蓋與 seed 新鮮度（vacant-dev，發射前實跑）
+
+```
+python3 -c '
+import sys, glob, json; sys.path.insert(0, ".")
+from ops.gain.gain_run import load_tasks
+for bank, filt in (("lcb3","difficulty=medium"),("lcb3","difficulty=hard"),
+                   ("humanevalplus",None),("evalplus",None)):
+    ts = load_tasks(bank, "gauge", 0, bank_filter=filt)
+    miss = [t["task_id"] for t in ts if not ((t.get("visible_check") or {}).get("code") or "")]
+    nom  = [t["task_id"] for t in ts if not t.get("entry_point")]
+    print(bank, filt, len(ts), "缺 visible_check", len(miss), "缺 entry_point", len(nom))
+'
+```
+
+實跑：`135 / 54 / 156 / 371`，**缺 visible_check 與缺 entry_point 都是 0**；
+三顆 seed 掃過 vacant-dev 的 56 個 `summary.json` 全部 `None`、`runs/g_r529*` 0 個。
+
+### 九-2b　發射器的擋門在 vacant-dev 上真的會擋（三個案例，零副作用）
+
+```
+TAG=… OUT=/tmp/…/g_r529_NOPE   … ⇒ abort_block_not_prereg   （名字沒註冊）
+TAG=… OUT=/tmp/…/g_r529_lcb3m_a1 N_BLOCK=19 … ⇒ abort_block_not_prereg（n 打錯一個字）
+TAG=… API=…:8765/…            … ⇒ abort_hub_endpoint       （hub 禁止）
+```
+
+三次都在**碰後端之前**就停，而且跑完之後 `runs/g_r529*` 仍然是 0 個目錄。
+第二個案例正是 §二-2 那個「整組比對」的理由：`n=19` 與 `n=20` 只差一個字，
+逐項比對擋不住它。
 
 ### 九-3　佇列與預註冊對得上
 
