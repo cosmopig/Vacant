@@ -324,7 +324,21 @@ def test_seed_scan_exclusion_is_exactly_the_six_authorized_names(sh: str) -> Non
 
 
 def test_seed_is_used_by_exactly_the_authorized_run() -> None:
-    """事前證明（在測試時重算）：這顆 seed 恰好被授權的那一個 run 用過。"""
+    """這顆 seed 恰好被**授權的那些** run 用過，一個不多一個不少。
+
+    ⚠ **round460r-2：這個釘子是過期的，不是規則變了。** 原本釘的是
+    `== [SEED_PRIOR_RUN]`（只有 r447），那是**發射之前**的事實：R460 那六塊
+    刻意重用 `g-r440-lcb2`（DECISION §二-4），所以它們一跑完，這條就必然變紅。
+    `tests/test_r448_launcher_prereg.py` 踩過同一個坑，本檔開頭的 docstring
+    自己寫著「不准寫『那個 run 目錄不存在』這種會被自己跑掉的斷言」——
+    這一條是同一種寫法的漏網之魚。
+
+    ⚠ **放寬的是釘子不是牙齒**：授權集合仍然是**逐字列舉**的
+    （r447 ＋ R460 六塊），集合相等而不是「包含」⇒ 任何**第七個**
+    用到這顆 seed 的 run 照樣把這條打紅。發射器那一側的同一條規則
+    （`SEED_AUTHORIZED_SET` 集合相等）沒有被動到。
+    """
+    authorized = sorted({SEED_PRIOR_RUN, *RUNS})
     files = sorted(glob.glob(str(ROOT / "runs" / "*" / "summary.json")))
     assert files, "一個 runs/*/summary.json 都沒掃到——量不到不是通過"
     used = []
@@ -335,7 +349,12 @@ def test_seed_is_used_by_exactly_the_authorized_run() -> None:
                     used.append(pathlib.Path(f).parent.relative_to(ROOT).as_posix())
         except Exception:                                    # noqa: BLE001
             pass
-    assert sorted(used) == [SEED_PRIOR_RUN], used
+    # r447 可能不在某些 checkout 裡；本 run 六塊也可能還沒跑完 ⇒ 允許子集，
+    # 但**不准出現授權集合以外的名字**（那才是這條要擋的事）。
+    assert sorted(used) == [x for x in authorized if x in set(used)], used
+    unauthorized = sorted(set(used) - set(authorized))
+    assert unauthorized == [], f"未授權的 run 用了 {SEED}：{unauthorized}"
+    assert SEED_PRIOR_RUN in used or not (ROOT / SEED_PRIOR_RUN).exists(), used
 
 
 def test_same_seed_selects_the_same_120_tasks_as_r447() -> None:

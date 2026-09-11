@@ -15,6 +15,11 @@
    「複製穩定」；否則**逐次照實列**，不准挑、不准平均、不准講「多數支持」。
    本檔把判到的那一句逐字印在 `aggregate.statement`，並附
    `aggregate.statement_rule`（規則本身），好讓讀的人看得到規則不是事後配的。
+4. **跨複製的逐端點併發對帳**（`global_topology`，round460r-2／§六-11）：
+   逐次的拓撲報表只看那一次自己的六塊，而排程器是**跨複製**發射的
+   ⇒ r1 的最後一塊與 r2 的第一塊會同時在跑，逐次全綠仍然可能整體超賣。
+   本檔把**全部複製的全部塊**丟進同一條掃描線再算一次，超過凍結上限
+   ⇒ `endpoint_concurrency_exceeded_global` ⇒ 退出碼 1。
 
 ⚠ **檢定力的事前預期（寫在資料之前，§三）**：n=120 對 +10pp 的檢定力只有
   0.43–0.63 ⇒ 就算真值真的是 +10pp，**五次裡預期只有 2–3 次**會通過 P-R3。
@@ -40,8 +45,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 from ops.gain.analyze_r460 import (ALPHA, AUTHORIZED_BLOCKS,  # noqa: E402
                                    CI_DISCLAIMER, DELTA_C_MIN_PP,
+                                   ENDPOINT_CONCURRENCY_CAPS,
                                    REPLICATION_BLOCKS, REPLICATION_SEEDS,
-                                   analyze, load_bank_meta, pool_runs)
+                                   analyze, block_window, load_bank_meta,
+                                   max_concurrent_by_endpoint, pool_runs)
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
@@ -80,16 +87,93 @@ NO_POOLING = ("五次複製**不得併 n**（R449C §六-2、R460 §六-(7)-3）
               "本檔沒有任何併 n 的路徑；彙總欄位全部是五個數字排在一起。")
 
 
+#: §六-11（round460r-2）：**跨複製**的逐端點併發對帳。
+GLOBAL_CONCURRENCY_NOTE = (
+    "逐次的 `topology.max_concurrent_by_endpoint` 只看那一次自己的六塊，"
+    "而排程器是**跨複製**發射的（r1 的最後一塊與 r2 的第一塊會同時在跑）"
+    "⇒ 逐次全綠仍然可能整體超賣。本欄把**全部複製的全部塊**丟進同一條掃描線"
+    "重算一次，上限與逐次那條同一張表（凍結的 `ENDPOINT_CONCURRENCY_CAPS`）。"
+    "⚠ 事前的閘門在排程器的槽位，這裡是事後對帳——排程器說了不算。"
+    "⚠ 算不出時間窗一律 `block_ts_unrecorded`：算不出不是通過。")
+
+
 def rep_dirs(k: int, root: pathlib.Path = ROOT) -> list[pathlib.Path]:
     return [root / "runs" / name for name in REPLICATION_BLOCKS[k]]
 
 
+def global_concurrency(blocks: list[dict]) -> dict:
+    """跨全部複製、全部塊的逐端點併發對帳（§六-11）。
+
+    ⚠ 為什麼不能只信逐次那一條：`analyze_rep` 對每一次複製各跑一次
+    `topology_report`，而那條掃描線只放得下那一次的六塊。排程器的槽位是
+    **跨複製**共用的（r1 最後一塊還在跑時 r2 的第一塊就發出去了）⇒
+    「1004 同時三塊」這件事在逐次的帳上永遠看不到第四塊。
+    本函式把全部塊放進**同一條**掃描線，所以它量的是那顆卡真正扛過的峰值。
+    """
+    out: dict = {"blocks_n": len(blocks),
+                 "reps_covered": sorted({b["rep"] for b in blocks if "rep" in b}),
+                 "caps": dict(ENDPOINT_CONCURRENCY_CAPS),
+                 "max_concurrent_by_endpoint": {},
+                 "blocks_per_endpoint": {},
+                 "window_by_block": {},
+                 "peak_witness": {},
+                 "violations": [],
+                 "note": GLOBAL_CONCURRENCY_NOTE}
+    if not blocks:
+        return out
+    out["max_concurrent_by_endpoint"] = max_concurrent_by_endpoint(blocks)
+    by_ep: dict[str, list[str]] = {}
+    for b in blocks:
+        out["window_by_block"][b["name"]] = block_window(b)
+        for ep in (b.get("endpoints") or []):
+            by_ep.setdefault(ep, []).append(b["name"])
+    out["blocks_per_endpoint"] = {ep: sorted(v) for ep, v in sorted(by_ep.items())}
+    for b in blocks:
+        if (out["window_by_block"].get(b["name"]) or {}).get("lo_ms") is None:
+            out["violations"].append(f"block_ts_unrecorded:{b['name']}")
+    for ep in sorted(by_ep):
+        cap = ENDPOINT_CONCURRENCY_CAPS.get(ep)
+        if cap is None:
+            # 沒登記上限 ≠ 沒有上限（與逐次那條同一句話）。
+            out["violations"].append(f"endpoint_not_registered:{ep}")
+            continue
+        got = out["max_concurrent_by_endpoint"].get(ep, 0)
+        out["peak_witness"][ep] = _peak_witness(blocks, ep)
+        if got > cap:
+            out["violations"].append(
+                f"endpoint_concurrency_exceeded_global:{ep}:{got}>{cap}")
+    return out
+
+
+def _peak_witness(blocks: list[dict], endpoint: str) -> dict:
+    """峰值那一刻是哪幾塊同時在跑——違規要指得出人，不是只報一個數字。"""
+    spans = []
+    for b in blocks:
+        eps = b.get("endpoints") or []
+        if len(eps) != 1 or eps[0] != endpoint:
+            continue
+        ts = [(int(c["ts_ms"]), int(c.get("latency_ms") or 0))
+              for c in (b.get("calls") or [])
+              if isinstance(c.get("ts_ms"), (int, float))]
+        if ts:
+            spans.append((min(t for t, _ in ts),
+                          max(t + max(d, 0) for t, d in ts), b["name"]))
+    best_t, best_names = None, []
+    for lo, _hi, _n in spans:
+        live = sorted(n for a, b_, n in spans if a <= lo <= b_)
+        if len(live) > len(best_names):
+            best_t, best_names = lo, live
+    return {"at_ms": best_t, "blocks": best_names, "n": len(best_names)}
+
+
 def analyze_rep(k: int, *, bank: str = "lcb2", rescore_turn1: bool = False,
-                root: pathlib.Path = ROOT) -> dict:
+                root: pathlib.Path = ROOT,
+                blocks_out: list[dict] | None = None) -> dict:
     """第 k 次複製的完整收官報表（＝ `analyze_r460` 在那六塊上的輸出）。
 
     ⚠ 六塊少一塊就不判：`analyze_r460` 自己會把 `block_count_not_6` 與
     `pooled_task_count_not_120` 放進 `broken_reasons`。本檔**不繞過**它。
+    `blocks_out` 給 `global_concurrency` 收集跨複製的塊（不影響任何仲裁值）。
     """
     dirs = rep_dirs(k, root)
     missing = [str(d) for d in dirs if not (d / "rows.jsonl").exists()]
@@ -97,6 +181,8 @@ def analyze_rep(k: int, *, bank: str = "lcb2", rescore_turn1: bool = False,
         return {"rep": k, "status": "NOT_RUN", "missing": missing,
                 "seed_expected": REPLICATION_SEEDS[k]}
     rows, summary, calls, blocks = pool_runs(dirs)
+    if blocks_out is not None:
+        blocks_out += [dict(b, rep=k) for b in blocks]
     turn1 = None
     if rescore_turn1:
         from ops.gain.gain_run import load_tasks
@@ -236,6 +322,16 @@ def render(out: dict) -> str:
         L.append(f"{r['rep']:>4}  {cells}")
     for k, txt in PREDICTIONS.items():
         L.append(f"   {k}：{txt}")
+    gt = out.get("global_topology") or {}
+    if gt.get("blocks_n"):
+        L += ["", "── 跨複製的逐端點併發對帳（§六-11；事後，排程器說了不算）",
+              f"塊數 {gt['blocks_n']}（複製 {gt['reps_covered']}）　"
+              f"上限 {gt['caps']}",
+              f"實測峰值 {gt['max_concurrent_by_endpoint']}"]
+        for ep, w in sorted((gt.get("peak_witness") or {}).items()):
+            L.append(f"  {ep} 峰值 {w['n']} 塊：{w['blocks']}")
+        L.append("  違規："
+                 + (str(gt["violations"]) if gt["violations"] else "無"))
     ag = out["aggregate"]
     L += ["", "── 彙總（描述性；**不併 n**）",
           f"已分析 {ag['reps_analyzed']}/5　H-MIX 裁決計數 {ag['verdict_counts_HMIX']}",
@@ -255,10 +351,13 @@ def render(out: dict) -> str:
 
 def run(reps: list[int], *, bank: str = "lcb2", rescore_turn1: bool = False,
         root: pathlib.Path = ROOT) -> dict:
-    full = [analyze_rep(k, bank=bank, rescore_turn1=rescore_turn1, root=root)
+    all_blocks: list[dict] = []
+    full = [analyze_rep(k, bank=bank, rescore_turn1=rescore_turn1, root=root,
+                        blocks_out=all_blocks)
             for k in reps]
     rows = [rep_row(o) for o in full]
     return {"reps": rows, "aggregate": aggregate(rows),
+            "global_topology": global_concurrency(all_blocks),
             "full": {o["rep"]: o for o in full}}
 
 
@@ -329,6 +428,38 @@ def selftest() -> int:
     ck("K2_one_opposite_sign_kills_the_claim",
        ag5b["all_same_sign_positive"] is False and "逐次照實列" in ag5b["statement"],
        ag5b["statement"])
+
+    # ── §六-11 跨複製併發：合成塊上的正反兩向牙齒（零資料依賴）────────────
+    from ops.gain.analyze_r460 import ENDPOINT_1004
+
+    def blk(name, rep, ep, lo, hi):
+        return {"name": name, "rep": rep, "endpoints": [ep],
+                "calls": [{"ts_ms": lo, "latency_ms": 0},
+                          {"ts_ms": hi, "latency_ms": 0}]}
+
+    three = [blk(f"b{i}", 1, ENDPOINT_1004, 0, 100) for i in range(3)]
+    ck("L_three_concurrent_on_1004_is_clean",
+       global_concurrency(three)["violations"] == []
+       and global_concurrency(three)["max_concurrent_by_endpoint"][ENDPOINT_1004] == 3,
+       str(global_concurrency(three)))
+    # 第四塊來自**另一次複製**——逐次的帳看不到它，這條就是為了它存在的。
+    four = three + [blk("b3", 2, ENDPOINT_1004, 50, 150)]
+    g4 = global_concurrency(four)
+    ck("M_a_fourth_block_from_another_rep_is_a_violation",
+       any(s.startswith("endpoint_concurrency_exceeded_global") for s in g4["violations"])
+       and g4["peak_witness"][ENDPOINT_1004]["n"] == 4
+       and g4["reps_covered"] == [1, 2],
+       str(g4["violations"]))
+    gx = global_concurrency([blk("bx", 1, "http://10.0.0.1:1234/v1/chat/completions",
+                                 0, 1)])
+    ck("N_unregistered_endpoint_is_a_violation",
+       any(s.startswith("endpoint_not_registered") for s in gx["violations"]),
+       str(gx["violations"]))
+    gz = global_concurrency([{"name": "bz", "rep": 1,
+                              "endpoints": [ENDPOINT_1004], "calls": []}])
+    ck("O_no_timestamps_is_a_violation_not_a_pass",
+       any(s.startswith("block_ts_unrecorded") for s in gz["violations"]),
+       str(gz["violations"]))
     print("selftest: " + ("PASS" if not fails else "FAIL\n  " + "\n  ".join(fails)))
     return 1 if fails else 0
 
@@ -348,13 +479,15 @@ def main() -> int:
               rescore_turn1=args.rescore_turn1)
     print(render(out))
     if args.json:
-        slim = {"reps": out["reps"], "aggregate": out["aggregate"]}
+        slim = {"reps": out["reps"], "aggregate": out["aggregate"],
+                "global_topology": out["global_topology"]}
         pathlib.Path(args.json).write_text(
             json.dumps(slim, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"\nJSON → {args.json}")
     bad = [r for r in out["reps"]
            if r.get("status") == "ANALYZED" and r.get("broken_reasons")]
-    return 1 if bad else 0
+    # 跨複製的併發違規與逐次的 broken_reasons 同級：都讓退出碼變 1。
+    return 1 if (bad or (out["global_topology"] or {}).get("violations")) else 0
 
 
 if __name__ == "__main__":

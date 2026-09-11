@@ -11,7 +11,7 @@
   },
   "needles_checked": 3210,
   "needles_skipped_trivial": 1846,
-  "excused_n": 16,
+  "excused_n": 17,
   "excused": [
     {
       "line": 95,
@@ -179,6 +179,17 @@
       "excused_as": "visible_check_source"
     },
     {
+      "line": 218,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[9, 2]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": "[0, 1, 2], [1, 2, 3], [1, 3, 5], [1, 4, 4], [2, 5, 6]], [2, 1, 2, 1, 3, 1]] got=[9, 2] want=[6, 2]\n\nReply with exactly one Python code block containing the comp",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
       "line": 221,
       "arm": "HOC",
       "rule": "hidden_case_leak",
@@ -192,7 +203,8 @@
   ],
   "excused_by_rule": {
     "visible_check_source": 4,
-    "model_own_selftest_same_request": 12
+    "model_own_selftest_same_request": 12,
+    "got_sandbox_echo": 1
   },
   "unknown_task_ids": [],
   "violations": [],

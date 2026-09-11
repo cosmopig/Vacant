@@ -66,15 +66,36 @@
         · `model_own_selftest_same_request`：needle **等於**（不是包含）
           harness 用**自己那支解析器**從同一次請求的模型回覆裡讀出來的
           某個 `SELFTEST` 值——`SELFTEST_SUFFIX` 只是把它原封不動印回去。
-        · `got=` 那一格是**沙箱回聲**，掃描前扣掉：它逐字是
+        · `got=` 那一格是**沙箱回聲**：它逐字是
           `repr(候選函式(*可見測資的 args))`，harness 沒有任何管道能把隱藏 GT
           放進去；真要從隱藏側取值，變的會是 `args=`／`want=`／`you expected=`，
-          **那三格照查**。
+          **那三格照查**。needle 只出現在 `got=` 段落裡 ⇒ 記成
+          `excused_as="got_sandbox_echo"` 並計入 `excused_by_rule`
+          （**留證，不是靜音塗抹**——見下面 round460r-2）。
     (d) **凍結的 Rules 那行照舊扣掉**（v1 就有；`exec(` 唯一的合法出處）。
   其餘 harness 自己寫進 system／user 的文字**一律照查**；`system` 訊息
-  **一格豁免都不給**（persona 文字沒有回聲的理由），而且
+  **一格豁免都不給**（persona 文字沒有回聲的理由——**`got=` 也是一格豁免，
+  所以 system 連它都不吃**），而且
   `CODE_NEEDLES`（`__tests`／`__aeq`／`__canon`）**不給 (c) 的豁免**——
-  驗收碼原始碼被貼進 user 訊息永遠是紅的。
+  驗收碼原始碼被貼進 user 訊息永遠是紅的，**藏在 `got=` 後面也一樣**。
+
+⚠ **round460r-2：Fable 稽核的三處 must-fix**（2026-09-11，仍在任何 r460r 資料
+  之前）。v2 初版把 (c) 的 `got=` 做成「掃描前整段塗掉」，那一個實作細節同時
+  踩到三件事，逐條：
+
+  1. **`system` 也被塗了。** 「system 一格豁免都不給」那句在文件裡是對的，
+     在程式碼裡不是——`redact_harness_text` 沒有分角色。
+     ⇒ 現在 `system` 只吃 (a)＋(d)，`system` 裡的 `got=<隱藏 GT>` 是**紅的**。
+  2. **`CODE_NEEDLES` 也被塗了。** `hint: got=x __tests = [...]` 之下整段
+     `got=…` 被換成佔位字串，`__tests` 跟著消失 ⇒ 把驗收碼原始碼藏在 `got=`
+     後面就能過稽核。`got=` 的合法性論證撐得住**值層級**的 repr
+     （那一格逐字是某個函式的回傳值），撐不住 `__tests` 這種**識別字**。
+     ⇒ `CODE_NEEDLES` 現在掃的是**只扣掉 (a)＋(d)** 的文字，
+     `hidden_case_leak` 才掃扣掉 `got=` 之後的文字。
+  3. **豁免被靜音了。** 塗掉之後那一筆連「被豁免過」都沒有紀錄，
+     而 §五-3 那張對帳表卻寫著「`got=` 沙箱回聲 1」——那個 1 是**人工**數的，
+     機器不吐。⇒ 現在它進 `excused`（帶 `excused_as="got_sandbox_echo"`）
+     並計入 `excused_by_rule`，與另外兩條豁免同一個形狀。
 
   ⚠ **與 Fable 原文的一處明文偏離**：R5 寫的是「the immediately preceding
   assistant message」，那擋不住 HOC 的 14 筆——`SELFTEST` 的來源是**計畫輪**
@@ -88,6 +109,8 @@
   R460 六塊逐筆對帳（90 筆 v1 命中 → v2 的去向，`--scope v1`／`v2` 各跑一次可重算）：
   題目原文 (a) 54、assistant 訊息 (b) 17、SELFTEST 豁免 14、可見驗收碼豁免 4、
   `got=` 沙箱回聲 1 ⇒ **v2 六塊全 CLEAN、零違規**。
+  （round460r-2 之後那個 1 由機器自己吐出來：b1 的
+  `excused_by_rule.got_sandbox_echo == 1`。）
   （與 `DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md` §一那份人工分類總數相同、
   分格不同：機械規則對每一筆只記**第一條**適用的排除理由。）
 
@@ -233,19 +256,57 @@ def classify_texts(rec: dict) -> list[tuple[str, int, str]]:
 _GOT_ECHO_RE = re.compile(r"got=.*?(?= want=| you expected=|\n|$)", re.DOTALL)
 GOT_ECHO_PLACEHOLDER = "got=<sandbox-echo>"
 
+#: `got=` 豁免的名字。它**不是**一種塗抹，是一筆**留證**的豁免：
+#: needle 只出現在 `got=` 那一段裡 ⇒ 記成 `excused_as="got_sandbox_echo"`
+#: 並計入 `excused_by_rule`。（round460r-2：v2 初版是「掃描前扣掉」，
+#: 那等於把豁免做成靜音——「豁免了什麼」跟「違規了什麼」一樣是稽核證據。）
+GOT_ECHO_EXCUSE = "got_sandbox_echo"
 
-def redact_harness_text(text: str, task: dict | None) -> str:
-    """v2：把**不是 harness 寫的**那幾段從一格 harness 文字裡扣掉再掃。
+#: 三條豁免規則的名字，`excused_by_rule` 的鍵**逐字**是這個 tuple。
+EXCUSE_RULES = ("visible_check_source", "model_own_selftest_same_request",
+                GOT_ECHO_EXCUSE)
 
-    順序固定：(d) 凍結 Rules → (a) 題目原文 → (c) `got=` 沙箱回聲。
-    扣掉的都是**逐字相等**的段落，不做模糊比對。
+
+def strip_not_harness_written(text: str, task: dict | None) -> str:
+    """(d) 凍結 Rules → (a) 題目原文。**沒有** `got=` 那一格。
+
+    這是 `CODE_NEEDLES` 的掃描對象：(a)／(d) 扣的是**逐字相等**的整段，
+    扣完剩下的每一個字都是 harness 自己寫的。`got=` 不在這裡，理由見
+    `redact_harness_text` 的 ⚠。
     """
     out = strip_frozen_constants(text)                      # (d)
     prompt = (task or {}).get("prompt")
     if prompt:
         out = out.replace(prompt, " ")                      # (a)
-    out = _GOT_ECHO_RE.sub(GOT_ECHO_PLACEHOLDER, out)       # (c) 沙箱回聲
     return out
+
+
+def redact_got_echo(text: str) -> str:
+    """把 `got=` 那一段換成佔位字串（＝沙箱回聲不算 harness 的話）。"""
+    return _GOT_ECHO_RE.sub(GOT_ECHO_PLACEHOLDER, text)
+
+
+def redact_harness_text(text: str, task: dict | None, *, role: str = "user") -> str:
+    """v2：把**不是 harness 寫的**那幾段從一格 harness 文字裡扣掉再掃。
+
+    順序固定：(d) 凍結 Rules → (a) 題目原文 → (c) `got=` 沙箱回聲。
+    扣掉的都是**逐字相等**的段落，不做模糊比對。
+
+    ⚠ **round460r-2 的兩處修正**（Fable 稽核的 must-fix，仍在任何 r460r 資料之前）：
+
+    1. **`system` 訊息不吃 `got=` 那一格。** 只有 (a)＋(d) 適用。
+       理由逐字是 §五-1 已經寫著的那句「`system` 訊息一格豁免都不給」——
+       而 `got=` 是一格豁免。persona 文字沒有沙箱回聲的理由，
+       所以 system 裡出現 `got=<隱藏 GT>` 必須是紅的，不是被塗掉。
+    2. **`CODE_NEEDLES` 不吃 `got=` 那一格**（見 `strip_not_harness_written`）。
+       否則 `hint: got=x __tests = [...]` 會被整段塗掉 ⇒ 把驗收碼原始碼藏在
+       `got=` 後面就能過稽核。`got=` 的合法性論證是「那一格逐字是
+       `repr(候選函式(*可見測資的 args))`」，那個論證撐得住
+       **隱藏 case 的 repr**（值層級），撐不住**驗收碼識別字**
+       （`__tests` 不是任何函式的回傳值）。
+    """
+    out = strip_not_harness_written(text, task)
+    return out if role == "system" else redact_got_echo(out)
 
 
 def model_selftest_reprs(assistant_texts: list[str]) -> set[str]:
@@ -405,15 +466,26 @@ def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
             assistant_texts = [t for role, _i, t in classified if role == "assistant"]
             selftest_reprs = (model_selftest_reprs(assistant_texts)
                               if scope == "v2" else set())
+            # 每一格帶三份文字：
+            #   raw  ＝ 原文（v1 的掃描對象）
+            #   base ＝ (a)＋(d) 扣掉、**沒有** got= 塗抹 ⇒ `CODE_NEEDLES` 掃這份
+            #   full ＝ base 再扣掉 got=（`system` 除外）⇒ `hidden_case_leak` 掃這份
+            # 兩份分開是 round460r-2 的修正之一：把驗收碼識別字藏在 `got=` 後面
+            # 不准變成通過。
             if scope == "v1":
-                targets = [(role, i, t, t) for role, i, t in classified]
+                targets = [(role, i, t, t, t) for role, i, t in classified]
             else:
-                targets = [(role, i, t, redact_harness_text(t, task))
-                           for role, i, t in classified if role != "assistant"]
+                targets = []
+                for role, i, t in classified:
+                    if role == "assistant":
+                        continue
+                    base = strip_not_harness_written(t, task)
+                    full = base if role == "system" else redact_got_echo(base)
+                    targets.append((role, i, t, base, full))
             n_texts_scanned += len(targets)
 
-            for role, i, raw, red in targets:
-                scrubbed = strip_frozen_constants(raw) if scope == "v1" else red
+            for role, i, raw, base, _full in targets:
+                scrubbed = strip_frozen_constants(raw) if scope == "v1" else base
                 for needle in CODE_NEEDLES:
                     if needle in scrubbed:
                         violations.append({
@@ -431,12 +503,23 @@ def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
             n_skipped += len(skipped)
             n_checked += len(needles)
             for needle in needles:
-                for role, i, raw, red in targets:
-                    hay = raw if scope == "v1" else red
-                    if needle not in hay:
+                for role, i, raw, base, full in targets:
+                    if scope == "v1":
+                        hay, why = raw, None
+                        if needle not in hay:
+                            continue
+                    elif needle in full:
+                        hay = full
+                        why = (None if role == "system"
+                               else needle_excuse(needle, task, selftest_reprs))
+                    elif needle in base:
+                        # needle **只**出現在 `got=` 那一段裡 ⇒ 沙箱回聲豁免。
+                        # ⚠ 留證不靜音：v2 初版在掃描前就把 `got=` 塗掉，
+                        #   於是這一筆連「被豁免過」都看不到。
+                        # ⚠ `system` 走不到這一格：它的 full 逐字等於 base。
+                        hay, why = base, GOT_ECHO_EXCUSE
+                    else:
                         continue
-                    why = (None if scope == "v1" or role == "system"
-                           else needle_excuse(needle, task, selftest_reprs))
                     hit = {"line": ln, "arm": arm, "rule": "hidden_case_leak",
                            "needle": needle, "message_index": i, "role": role,
                            "task_id": task_id,
@@ -462,7 +545,7 @@ def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
         "excused": excused,
         "excused_by_rule": {
             k: sum(1 for e in excused if e.get("excused_as") == k)
-            for k in ("visible_check_source", "model_own_selftest_same_request")},
+            for k in EXCUSE_RULES},
         "unknown_task_ids": sorted(unknown_tasks),
         "violations": violations,
         "verdict": "CLEAN" if not violations and not unknown_tasks else "VIOLATION",

@@ -76,6 +76,91 @@ def test_no_slot_points_at_the_hub():
     assert not any("8765" in s.endpoint for s in S.SLOTS)
 
 
+# ══ 一-2、`--reps`／`--hosts`：表是註冊、旗標是這次排什麼 ════════════════
+# 2026-09-11 人類指示：1003 由人類自己在用 ⇒ 這次一塊都不准上；先跑 r1–r3。
+def test_slot_table_is_data_and_hosts_only_filters_it():
+    """`--hosts` 是**篩**：SLOTS 那張表一格都沒被刪掉。"""
+    assert S.select_slots(None) == S.SLOTS
+    assert S.select_slots(("1004", "1003")) == S.SLOTS
+    only = S.select_slots(("1004",))
+    assert [s.slot_id for s in only] == ["1004#1", "1004#2", "1004#3"]
+    assert {s.endpoint for s in only} == {ENDPOINT_1004}
+    # 表本身沒動 ⇒ 1003 的上限（實測換來的）還在，卡還回來時不必改碼。
+    assert len(S.SLOTS) == 4 and S.HOSTS == ("1004", "1003")
+    assert ENDPOINT_CONCURRENCY_CAPS[ENDPOINT_1003] == 1
+
+
+def test_hosts_typo_is_an_error_not_a_silent_fallback_to_everything():
+    """打錯字時默默退回四個槽 ＝ 把人類的「1003 不要用」變成「照跑」。"""
+    with pytest.raises(SystemExit):
+        S.select_slots(("1005",))
+    with pytest.raises(SystemExit):
+        S.select_slots(())
+
+
+def test_reps_restricts_the_queue_without_changing_the_registration():
+    q = S.build_queue((1, 2, 3))
+    assert len(q) == 18
+    assert {b.rep for b in q} == {1, 2, 3}
+    assert [b.name for b in q[:6]] == list(REPLICATION_BLOCKS[1])
+    assert [b.name for b in q[-6:]] == list(REPLICATION_BLOCKS[3])
+    # r4／r5 仍然是**註冊過的**，只是沒進佇列——預註冊表一個字沒動。
+    assert S.REPS == (1, 2, 3, 4, 5)
+    assert len(S.build_queue()) == 30
+    with pytest.raises(SystemExit):
+        S.build_queue((6,))
+    with pytest.raises(SystemExit):
+        S.build_queue(())
+
+
+def test_with_only_1004_the_first_tick_launches_three_blocks_there():
+    """人類指示下的第一輪：1004×3、佇列 r1a1..r3b3。"""
+    blocks = S.build_queue((1, 2, 3))
+    slots = S.select_slots(("1004",))
+    p = S.plan_tick(blocks, {}, {}, {}, slots)
+    assert p["launch"] == [("g_r460r1_harness_lcb2_a1", "1004#1"),
+                           ("g_r460r1_harness_lcb2_a2", "1004#2"),
+                           ("g_r460r1_harness_lcb2_a3", "1004#3")]
+    assert len(p["queue"]) == 18
+    assert not any(s.host == "1003" for s in p["slots"])
+
+
+def test_a_block_running_on_1003_does_not_eat_a_1004_slot():
+    """`--hosts 1004` 之下 1003 上還有塊在跑（別人手動發的）——
+    那塊的負載明確落在別顆卡，只封鎖 1003，1004 照發。"""
+    blocks = S.build_queue((1,))
+    slots = S.select_slots(("1004",))
+    name = "g_r460r1_harness_lcb2_a1"
+    p = S.plan_tick(blocks, {name: "RUNNING"}, {name: ENDPOINT_1003}, {}, slots)
+    assert p["unplaceable"] == [name]
+    assert p["blocked_endpoints"] == [ENDPOINT_1003]
+    assert len(p["launch"]) == 3
+    assert all(s.startswith("1004") for _n, s in p["launch"])
+
+
+def test_an_endpoint_sidecar_outside_the_known_set_blocks_everything():
+    """round460r-2：`.endpoint` 寫著認不出來的端點 ⇒ 當成不知道 ⇒ 全部封鎖。
+
+    ⚠ 舊寫法只封鎖「它自己那顆」，而它自己那顆本來就沒有任何槽
+    ⇒ `usable` 一格都沒少 ⇒ 等於沒有牙齒。認不出來的端點與沒有端點
+    是同一件事：不知道那塊在哪一顆卡上，就不能再往任何一顆加負載。
+    """
+    blocks = S.build_queue()
+    name = "g_r460r1_harness_lcb2_a1"
+    for bogus in ("http://10.0.0.9:1234/v1/chat/completions",
+                  "http://100.86.226.21:8765/v1/chat/completions",  # hub
+                  "not-a-url"):
+        p = S.plan_tick(blocks, {name: "RUNNING"}, {name: bogus}, {})
+        assert p["unplaceable"] == [name], bogus
+        assert sorted(p["blocked_endpoints"]) == sorted(
+            {ENDPOINT_1003, ENDPOINT_1004}), bogus
+        assert p["launch"] == [], bogus
+        # `--hosts 1004` 之下也一樣（fail closed 不因為槽變少而放鬆）
+        p2 = S.plan_tick(blocks, {name: "RUNNING"}, {name: bogus}, {},
+                         S.select_slots(("1004",)))
+        assert p2["launch"] == [], bogus
+
+
 def test_first_tick_launches_exactly_four_blocks_where_registered():
     blocks = S.build_queue()
     plan = S.plan_tick(blocks, {}, {}, {})
@@ -348,6 +433,102 @@ def test_dry_run_launches_nothing_and_writes_nothing(tmp_path):
     assert list(tmp_path.iterdir()) == []
 
 
+def test_dry_run_with_the_humans_flags_shows_1004x3_and_eighteen_blocks(tmp_path):
+    """2026-09-11 人類指示的那一行逐字：`--reps 1 2 3 --hosts 1004`。"""
+    out = subprocess.run(
+        [sys.executable, str(SCHEDULER), "--dry-run", "--root", str(tmp_path),
+         "--reps", "1", "2", "3", "--hosts", "1004"],
+        capture_output=True, text=True, cwd=str(ROOT))
+    assert out.returncode == 0, out.stderr
+    assert "1003" not in out.stdout.replace("本次停用 1003", ""), out.stdout
+    assert "1004#1" in out.stdout and "1004#3" in out.stdout
+    assert "1004#4" not in out.stdout
+    assert "18 塊待跑" in out.stdout
+    assert "g_r460r1_harness_lcb2_a1" in out.stdout
+    assert "g_r460r3_harness_lcb2_b3" in out.stdout
+    assert "g_r460r4" not in out.stdout and "g_r460r5" not in out.stdout
+    assert out.stdout.count("  發射 ") == 3
+    assert list(tmp_path.iterdir()) == []
+
+
+# ══ 三-2、preflight 失敗也是一次嘗試（round460r-2）══════════════════════
+def test_preflight_failure_counts_toward_max_attempts_and_then_gives_up(
+        tmp_path, monkeypatch):
+    """發射器 rc != 0 ⇒ sidecar 搬走、計入重排次數、兩次就放棄。
+
+    ⚠ 不記一筆的話：磁碟上沒有 summary、沒有行程 ⇒ 下一輪那塊還是 PENDING
+    ⇒ **每 60 秒重發一次、永遠**。而最常見的那個 abort
+    （`.launch.log` 已存在）自己就不可能自癒。
+    """
+    (tmp_path / "runs").mkdir(parents=True)
+    monkeypatch.setattr(S, "running_block_names", lambda _r: set())
+    blocks = S.build_queue((1,))
+    lines: list[str] = []
+    tried: list[str] = []
+
+    def bad_launch(block, _slot):
+        # 發射器在寫 .endpoint／.backend.json 之前就中止，但 launch.log 可能已存在
+        (tmp_path / f"{block.out}.launch.log").write_text("ABORT: 探針只過 1/3\n")
+        tried.append(block.name)
+        return 1                                     # ＝ finish abort_probe_only_1
+
+    def tick():
+        del tried[:]
+        S.poll_loop(blocks, tmp_path, lines.append, max_ticks=1,
+                    slots=S.select_slots(("1004",)), launcher=bad_launch,
+                    sleeper=lambda _s: None)
+        return list(tried)
+
+    head = "g_r460r1_harness_lcb2_a1"
+    assert head in tick()
+    ab = tmp_path / "runs" / "_aborted"
+    dirs = sorted(p.name for p in ab.iterdir() if p.is_dir())
+    assert any(d.startswith(f"{head}_preflight_") for d in dirs), dirs
+    # sidecar 搬走了 ⇒ 下一次不會再撞 abort_launchlog_exists
+    assert not (tmp_path / "runs" / f"{head}.launch.log").exists()
+    assert S.aborted_counts(blocks, tmp_path)[head] == 1
+    rec = json.loads(next(ab.glob(f"{head}_preflight_*.abort.json"))
+                     .read_text(encoding="utf-8"))
+    assert rec["kind"] == "preflight" and rec["launcher_rc"] == 1
+
+    assert head in tick()                            # 第二次嘗試
+    assert S.aborted_counts(blocks, tmp_path)[head] == S.MAX_ATTEMPTS
+    assert head not in tick()                        # 第三輪：放棄，不再發
+    assert any(f"放棄 {head}" in ln for ln in lines)
+
+
+def test_preflight_and_void_aborts_share_one_attempt_budget(tmp_path):
+    """兩種戳記都算數：一次 void ＋ 一次 preflight ＝ 用完 MAX_ATTEMPTS。"""
+    blocks = S.build_queue((1,))
+    name = blocks[0].name
+    ab = tmp_path / "runs" / "_aborted"
+    (ab / f"{name}_void_20260911T000000Z").mkdir(parents=True)
+    (ab / f"{name}_preflight_20260911T000001Z").mkdir(parents=True)
+    assert S.aborted_counts(blocks, tmp_path)[name] == 2
+    p = S.plan_tick(blocks, {}, {}, S.aborted_counts(blocks, tmp_path))
+    assert name in p["given_up"] and name not in dict(p["launch"])
+
+
+def test_preflight_abort_leaves_a_directory_even_with_nothing_to_move(tmp_path):
+    """目錄本身就是計數單位——沒東西可搬也要留下來，否則那次嘗試等於沒發生。"""
+    (tmp_path / "runs").mkdir(parents=True)
+    S.abort_preflight("g_x", 1, tmp_path, lambda _m: None)
+    dirs = [p for p in (tmp_path / "runs" / "_aborted").iterdir() if p.is_dir()]
+    assert len(dirs) == 1 and dirs[0].name.startswith("g_x_preflight_")
+
+
+def test_a_successful_launch_is_not_counted_as_an_attempt(tmp_path, monkeypatch):
+    """rc == 0（含 launch_pending_timeout）⇒ 不記 preflight 作廢。"""
+    sim = _Sim(tmp_path, monkeypatch)
+    blocks = S.build_queue((1,))
+    S.poll_loop(blocks, tmp_path, sim.log, max_ticks=1,
+                slots=S.select_slots(("1004",)),
+                launcher=lambda b, s: sim.launch(b, s),   # 回 None ＝ 當作 0
+                sleeper=lambda _s: None)
+    assert not (tmp_path / "runs" / "_aborted").exists()
+    assert S.aborted_counts(blocks, tmp_path)[blocks[0].name] == 0
+
+
 # ══ 四、發射器：preflight 沒有被稀釋 ══════════════════════════════════════
 def test_launcher_is_valid_bash():
     r = subprocess.run(["bash", "-n", str(LAUNCHER)], capture_output=True, text=True)
@@ -524,10 +705,28 @@ def test_audit_v1_still_reproduces_the_recorded_ninety(block, lcb_tasks):
     assert len(r["violations"]) == V1_EXPECTED[block]
 
 
+#: §五-3 那張表逐格（round460r-2 之後多一欄：`got=` 沙箱回聲由機器自己吐）。
+V2_EXCUSED_BY_RULE = {
+    "a1": {"visible_check_source": 0, "model_own_selftest_same_request": 0,
+           "got_sandbox_echo": 0},
+    "a2": {"visible_check_source": 0, "model_own_selftest_same_request": 0,
+           "got_sandbox_echo": 0},
+    "a3": {"visible_check_source": 0, "model_own_selftest_same_request": 0,
+           "got_sandbox_echo": 0},
+    "b1": {"visible_check_source": 4, "model_own_selftest_same_request": 12,
+           "got_sandbox_echo": 1},
+    "b2": {"visible_check_source": 0, "model_own_selftest_same_request": 2,
+           "got_sandbox_echo": 0},
+    "b3": {"visible_check_source": 0, "model_own_selftest_same_request": 0,
+           "got_sandbox_echo": 0},
+}
+
+
 def test_recorded_audit_v2_evidence_matches_a_fresh_run(lcb_tasks):
     """落盤的事前量具驗證與現在重跑的結果一致（§五-3 那張表）。"""
     from ops.gain.harness_vgt_audit import audit_run
     total_v1 = total_v2 = 0
+    by_rule: dict[str, int] = {}
     for b in R460_BLOCKS:
         saved = json.loads(
             (ROOT / "ops" / "gain" / "replay" / "r460" / f"vgt_v2_{b}.json")
@@ -535,9 +734,19 @@ def test_recorded_audit_v2_evidence_matches_a_fresh_run(lcb_tasks):
         fresh = audit_run(_r460_run(b), lcb_tasks, scope="v2")
         assert saved["verdict"] == fresh["verdict"] == "CLEAN"
         assert saved["excused_n"] == fresh["excused_n"]
+        # round460r-2：豁免要**逐條**對得上，不是只對一個總數——
+        # 「豁免了什麼」跟「違規了什麼」一樣是稽核證據。
+        assert saved["excused_by_rule"] == fresh["excused_by_rule"] \
+            == V2_EXCUSED_BY_RULE[b], (b, fresh["excused_by_rule"])
+        for k, v in fresh["excused_by_rule"].items():
+            by_rule[k] = by_rule.get(k, 0) + v
         total_v2 += len(fresh["violations"])
         total_v1 += V1_EXPECTED[b]
     assert (total_v1, total_v2) == (90, 0)
+    # §五-3 的對帳表：SELFTEST 14、可見驗收碼 4、`got=` 沙箱回聲 1。
+    assert by_rule == {"visible_check_source": 4,
+                       "model_own_selftest_same_request": 14,
+                       "got_sandbox_echo": 1}, by_rule
 
 
 def _calls(tmp_path, records):
@@ -605,6 +814,64 @@ def _mk(tmp_path, name) -> pathlib.Path:
     d = tmp_path / name
     d.mkdir(parents=True, exist_ok=True)
     return d
+
+
+def test_v2_records_the_got_excusal_instead_of_redacting_it_silently(
+        leak_task, tmp_path):
+    """round460r-2 must-fix 3：`got=` 是**留證的豁免**，不是靜音塗抹。
+
+    v2 初版在掃描前把 `got=…` 整段換成佔位字串 ⇒ 那一筆連「被豁免過」都沒有
+    紀錄，而 §五-3 的對帳表卻寫著「`got=` 沙箱回聲 1」——那個 1 是人工數的。
+    現在它必須跟另外兩條豁免同一個形狀：進 `excused`、計入 `excused_by_rule`。
+    """
+    from ops.gain.harness_vgt_audit import GOT_ECHO_EXCUSE, audit_run
+    task, needle = leak_task
+    rec = [{"meta": {"arm": "HPI", "task_id": task["task_id"]}, "system": "s",
+            "messages": [{"role": "user", "content":
+                          f"AssertionError: args=[1] got={needle} want=[9]"}]}]
+    r = audit_run(_calls(tmp_path, rec), {task["task_id"]: task}, scope="v2")
+    assert r["verdict"] == "CLEAN", r["violations"][:2]
+    assert r["excused_by_rule"][GOT_ECHO_EXCUSE] == 1, r["excused_by_rule"]
+    assert [e["excused_as"] for e in r["excused"]] == [GOT_ECHO_EXCUSE]
+
+
+def test_v2_got_does_not_launder_a_code_needle_on_the_same_line(
+        lcb_tasks, tmp_path):
+    """round460r-2 must-fix 2：`CODE_NEEDLES` 不吃 `got=` 那一格。
+
+    `got=` 的合法性論證逐字是「那一段是 `repr(候選函式(*可見測資的 args))`」
+    ——它撐得住**值層級**的 repr，撐不住 `__tests` 這種**識別字**
+    （`__tests` 不是任何函式的回傳值）。所以同一行的
+    `got=x __tests = […]` 必須是紅的：把驗收碼原始碼藏在 `got=` 後面
+    不准變成通過。
+    """
+    from ops.gain.harness_vgt_audit import audit_run
+    task = lcb_tasks["lcb_3634"]
+    rec = [{"meta": {"arm": "HMIX", "task_id": task["task_id"]}, "system": "s",
+            "messages": [{"role": "user", "content":
+                          "hint: got=x __tests = [{'args': [1], 'expected': 2}]"}]}]
+    r = audit_run(_calls(tmp_path, rec), {task["task_id"]: task}, scope="v2")
+    assert r["verdict"] == "VIOLATION"
+    v = [x for x in r["violations"] if x["rule"] == "check_code_identifier"]
+    assert [x["needle"] for x in v] == ["__tests"], r["violations"]
+
+
+def test_v2_system_message_gets_no_got_excuse_either(leak_task, tmp_path):
+    """round460r-2 must-fix 1：「system 一格豁免都不給」——`got=` 也是一格豁免。
+
+    v2 初版的 `redact_harness_text` 不分角色 ⇒ system 裡的 `got=<隱藏 repr>`
+    被塗掉，那句話在文件裡是對的、在程式碼裡不是。
+    """
+    from ops.gain.harness_vgt_audit import audit_run
+    task, needle = leak_task
+    rec = [{"meta": {"arm": "HPI", "task_id": task["task_id"]},
+            "system": f"persona note. last sandbox line: got={needle}",
+            "messages": [{"role": "user", "content": "hi"}]}]
+    r = audit_run(_calls(tmp_path, rec), {task["task_id"]: task}, scope="v2")
+    assert r["verdict"] == "VIOLATION"
+    assert r["violations"][0]["role"] == "system"
+    assert r["violations"][0]["rule"] == "hidden_case_leak"
+    assert r["excused"] == [], r["excused"]
 
 
 def test_v2_still_catches_check_code_source_pasted_into_a_user_message(
@@ -761,6 +1028,74 @@ def test_scheduled_topology_violations_are_broken_reasons(kw, marker):
         out["broken_reasons"]
 
 
+# ══ 六-2、跨複製的逐端點併發對帳（round460r-2、§六-11）══════════════════
+def _gb(name, rep, ep, lo, hi):
+    return {"name": name, "rep": rep, "endpoints": [ep],
+            "calls": [{"ts_ms": lo, "latency_ms": 0},
+                      {"ts_ms": hi, "latency_ms": 0}]}
+
+
+def test_global_sweep_is_clean_at_the_cap():
+    from ops.gain.analyze_r460r import global_concurrency
+    g = global_concurrency([_gb(f"b{i}", 1, ENDPOINT_1004, 0, 100)
+                            for i in range(3)])
+    assert g["violations"] == []
+    assert g["max_concurrent_by_endpoint"] == {ENDPOINT_1004: 3}
+    assert g["caps"] == dict(ENDPOINT_CONCURRENCY_CAPS)
+
+
+def test_global_sweep_catches_a_fourth_block_from_another_replication():
+    """逐次的帳看不到它：r1 六塊全綠、r2 六塊全綠，但兩次之間重疊了。
+
+    這正是本欄存在的理由——排程器的槽位是**跨複製**共用的
+    （r1 的最後一塊還在跑時 r2 的第一塊就發出去了）。
+    """
+    from ops.gain.analyze_r460r import global_concurrency
+    r1 = [_gb(f"r1_{i}", 1, ENDPOINT_1004, 0, 100) for i in range(3)]
+    r2 = [_gb("r2_0", 2, ENDPOINT_1004, 50, 200)]
+    # 各自看都不超賣
+    assert global_concurrency(r1)["violations"] == []
+    assert global_concurrency(r2)["violations"] == []
+    g = global_concurrency(r1 + r2)
+    assert any(s.startswith("endpoint_concurrency_exceeded_global")
+               for s in g["violations"]), g["violations"]
+    assert g["max_concurrent_by_endpoint"][ENDPOINT_1004] == 4
+    assert g["reps_covered"] == [1, 2]
+    # 違規要指得出人，不是只報一個數字
+    w = g["peak_witness"][ENDPOINT_1004]
+    assert w["n"] == 4 and sorted(w["blocks"]) == sorted(
+        ["r1_0", "r1_1", "r1_2", "r2_0"])
+
+
+def test_global_sweep_uses_the_same_frozen_caps_as_the_per_rep_report():
+    from ops.gain.analyze_r460r import global_concurrency
+    # 1003 的上限是 1：兩塊重疊就紅（哪怕來自同一次複製）。
+    g = global_concurrency([_gb("x", 1, ENDPOINT_1003, 0, 10),
+                            _gb("y", 1, ENDPOINT_1003, 5, 20)])
+    assert any("endpoint_concurrency_exceeded_global" in s
+               for s in g["violations"]), g["violations"]
+
+
+@pytest.mark.parametrize("blocks,marker", [
+    ([{"name": "u", "rep": 1, "endpoints": ["http://10.0.0.9:1234/v1/chat/completions"],
+       "calls": [{"ts_ms": 1, "latency_ms": 0}]}], "endpoint_not_registered"),
+    ([{"name": "z", "rep": 1, "endpoints": [ENDPOINT_1004], "calls": []}],
+     "block_ts_unrecorded"),
+])
+def test_global_sweep_fails_closed(blocks, marker):
+    """沒登記上限 ≠ 沒有上限；算不出時間窗 ≠ 通過。"""
+    from ops.gain.analyze_r460r import global_concurrency
+    g = global_concurrency(blocks)
+    assert any(s.startswith(marker) for s in g["violations"]), g["violations"]
+
+
+def test_global_sweep_violations_make_the_cli_exit_nonzero():
+    """跨複製併發違規與逐次的 broken_reasons 同級——退出碼要變。"""
+    src = (ROOT / "ops" / "gain" / "analyze_r460r.py").read_text(encoding="utf-8")
+    assert 'out["global_topology"] or {}).get("violations")' in src
+    assert "global_topology" in src
+
+
 def test_fixed_topology_is_unchanged_by_the_new_variant():
     from ops.gain.analyze_r460 import _fixture_blocks, _pooled
     out = _pooled(_fixture_blocks())
@@ -774,6 +1109,53 @@ def test_decision_registers_the_scheduled_topology_invariants(dec: str):
                    "endpoint_not_registered", "block_ts_unrecorded",
                    "topology.endpoint_of_block"):
         assert needle in dec, needle
+
+
+def test_decision_records_the_humans_2026_09_11_amendment_before_any_data(dec: str):
+    """人類的兩條指示要寫成**事前修訂**，而且要說清楚它沒有動任何判準。"""
+    assert "## 一〇、2026-09-11 人類指示的**事前修訂**" in dec
+    for needle in ("--reps 1 2 3 --hosts 1004",
+                   "1003 這一輪完全停用",
+                   "先跑 r1／r2／r3；r4／r5 暫不排隊",
+                   "r4／r5 仍然是預註冊過的**",
+                   "本節沒有動任何門檻、家族、分母、區間、四狀態、宣稱規則或預測窗"):
+        assert needle in dec, needle
+    # 「先跑三次」不等於「跑三次就結算」——§二-3 第 6 條照舊。
+    assert "這不是「跑到三次就結算」的授權" in dec
+    assert "不准**只跑完三次就結算" in dec           # §二-3 原文沒被改掉
+    # 五顆 seed、30 個名字、五行授權一個都沒被刪
+    for k in range(1, 6):
+        assert f"SEED_AUTHORIZED_SET: g-r460r{k}-lcb2 <- NONE" in dec
+        for t in R460_BLOCKS:
+            assert f"runs/g_r460r{k}_harness_lcb2_{t}" in dec
+
+
+def test_decision_registers_the_round460r2_boundaries(dec: str):
+    """§六 的三條新誠實邊界（單一後端／跨複製併發／預檢失敗計次）。"""
+    for needle in ("endpoint_concurrency_exceeded_global",
+                   "global_topology",
+                   "peak_witness",
+                   "runs/_aborted/<name>_preflight_<ts>/",
+                   "這一輪全部塊都在同一顆後端上（1004）",
+                   "跨複製的逐端點併發要另外對帳一次",
+                   "發不出去也是一次嘗試"):
+        assert needle in dec, needle
+    # 放寬計數面、收緊重試面——上限本身沒有變。
+    assert "上限仍然是 2" in dec
+    assert S.MAX_ATTEMPTS == 2
+
+
+def test_decision_records_the_gauge_must_fixes(dec: str):
+    """§五-1b：v2 初版的三處 must-fix 要逐條寫在文件裡，數字與實作對得上。"""
+    assert "### 五-1b" in dec
+    for needle in ("got_sandbox_echo", "excused_by_rule",
+                   "藏在 `got=` 後面也一樣",
+                   "`got=` 也是一格豁免 ⇒ system 連它都不吃"):
+        assert needle in dec, needle
+    # §五-3 的表多了 `got=` 那一欄，且逐格與落盤證據一致（由上面那條測試對釘）
+    assert "v2 豁免（可見驗收碼／SELFTEST／`got=`）" in dec
+    assert "| b1 | 31 | **0** | 4 ／ 12 ／ **1** |" in dec
+    assert "| **合計** | **90** | **0（六塊全 CLEAN）** | 4 ／ 14 ／ **1** |" in dec
 
 
 def test_decision_keeps_the_r460_thresholds_verbatim(dec: str):
