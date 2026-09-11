@@ -557,8 +557,29 @@ ls DECISION_*.md ops/gain/DECISION_*.md CONCLUSION_*.md 2>/dev/null | grep -c "_
 本輪**不動它**：重跑索引會改動 300+ 行、而且會把「索引是什麼時候重建的」
 混進一個談題庫分層的 commit 裡。這是一筆**已知未償**，記在這裡讓它不會被忘掉。
 
-本輪**新增**的 `tests/test_bank_filter_r529.py` **25 項全綠**，
-且 T12 的原始碼 sha 釘死（`test_gain_harness_arms.py`）通過
+實跑最後一行（`.venv/bin/python -m pytest tests/ --tb=no`，**注意 `pyproject.toml`
+的 `addopts = "-q"` 已經給了一個 `-q`，再給一個會變成 `-qq` 而吞掉計數那一行**）：
+
+```
+8 failed, 1289 passed in 1205.61s (0:20:05)
+```
+
+### 九-5a　第 8 個失敗是**偶發**的，而且它指向本 run 的一個真實風險
+
+三次全套裡有一次多出
+`tests/test_gain_harness_arms.py::test_t4_four_failure_kinds_and_two_distinct_loader_reasons`。
+**單獨重跑通過。** 它是負載相依的偶發——與 R460 收官 §一〇 補記記到的同一類
+非決定性（離線重跑 `meets_demand` 時沙箱 10 秒逾時在不同負載下會飄）。
+
+⚠ **這不是「無關的雜訊」，它是 R529 要一起帶著的風險**：H-MIX 的出貨閘門
+（`visible_report`）與計分（`meets_demand`）都跑在同一個 10 秒逾時的沙箱裡。
+機器負載高的時候，**同一份候選碼的判定會飄**。R529 的 19 塊要在 1004 上
+連跑十幾個小時，而且是接在 R460R 30 塊之後 ⇒ 收官時若出現
+「同一題在兩塊之間判不一樣」，第一個要查的是這裡，不是模型。
+⇒ 記進 §一一 誠實邊界。
+
+本輪**新增**的 `tests/test_bank_filter_r529.py` **25 項全綠**（單獨跑、全套跑都是），
+且 T12 的原始碼 sha 釘死（`test_gain_harness_arms.py::test_t12_…`）通過
 ——`--bank-filter` 沒有碰到既有五臂。
 
 ---
@@ -603,6 +624,11 @@ ls DECISION_*.md ops/gain/DECISION_*.md CONCLUSION_*.md 2>/dev/null | grep -c "_
 9. **`--bank-filter` 是本輪新寫的。** 它的牙齒在合成案例上驗過
    （`tests/test_bank_filter_r529.py`），但**沒有**在一次真跑上驗過。
    第一塊收完時要逐條核對 rows 的 `stratum`／`family` 與預期的 54／135 相符。
+10. **沙箱在負載下會飄**（§九-5a）。出貨閘門與計分共用同一個 10 秒逾時的沙箱，
+    而 19 塊要在同一顆卡上連跑十幾個小時、接在 R460R 之後。
+    ⇒ 收官若出現「同一題在不同塊之間判不一樣」，**第一個要查的是沙箱不是模型**
+    （R460 §一〇 補記的同一條）。本 run **沒有**為此設事前探針，
+    這是已知的量具邊界，不是量到的東西。
 
 ---
 
