@@ -606,6 +606,55 @@ CLAIMS: list[dict[str, Any]] = [
                      "k=3／quorum=2 缺一票": "1-1 平手 ⇒ 未決、不指名"},
         },
     },
+    {
+        "id": "harness.hmix_loop_beats_resample_same_budget",
+        "輪次": "harness-2026-09-08",
+        "型別": "量測（R460 六臂交錯，LCB v2 120 題，五通等預算）",
+        "宣稱": "把五通呼叫花在「跑客戶的驗收測資、把失敗原文貼回去、讓同一個 worker 改」（H-MIX），"
+                "比花在換人重抽（CONFORM）多交付，且 token 不多花",
+        "依據": {
+            "檔案": "runs/g_r460_harness_lcb2_{a1,a2,a3,b1,b2,b3}/rows.jsonl 與 calls.jsonl（六塊各 20 題，合併 120 題）",
+            "裁決文件": "DECISION_20260907_R460_HARNESS_PREREG.md（§六 四狀態規則，事前寫死）、"
+                        "DECISION_20260908_R460_FABLE_LAUNCH_NOTES.md、DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md",
+            "重算": "ops/gain/analyze_r460.py --run <六塊> --bank lcb2 --rescore-turn1（零 API，只跑沙箱）；"
+                    "落盤 ops/gain/replay/r460/r460_analyze.json",
+            "數值": {"OFF": {"deliv": 58.33, "false_delivery_n": 50, "tokens_per_task": 2913},
+                     "CONFORM": {"deliv": 70.83, "false_delivery_n": 29, "tokens_per_task": 5805},
+                     "OFF5": {"deliv": 65.00, "false_delivery_n": 42, "tokens_per_task": 15004},
+                     "HPI": {"deliv": 75.83, "false_delivery_n": 17, "tokens_per_task": 9448},
+                     "HOC": {"deliv": 80.00, "false_delivery_n": 18, "tokens_per_task": 7432},
+                     "HMIX": {"deliv": 84.17, "false_delivery_n": 14, "tokens_per_task": 5677},
+                     "HMIX_vs_CONFORM": {"b": 22, "c": 6, "delta_pp": 13.33, "ci95": [4.22, 19.46],
+                                          "p": 0.0037, "holm_p_adj": 0.0112, "verdict": "EFFECTIVE"},
+                     "HMIX_vs_OFF": {"b": 34, "c": 3, "delta_pp": 25.83, "ci95": [17.32, 29.78]}},
+        },
+    },
+    {
+        "id": "harness.hpi_hoc_vs_resample_unresolved",
+        "輪次": "harness-2026-09-08",
+        "型別": "量測（同一個 R460 run）",
+        "宣稱": "pi 式原始回饋迴圈（H-PI）與計畫＋診斷＋自測（H-OC）也贏過換人重抽",
+        "依據": {
+            "檔案": "同上（runs/g_r460_harness_lcb2_*/rows.jsonl）",
+            "裁決文件": "DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md§三（四狀態：INCONCLUSIVE）",
+            "重算": "ops/gain/replay/r460/r460_analyze.json · decision.HPI / decision.HOC",
+            "數值": {"HPI_vs_CONFORM": {"delta_pp": 5.00, "ci95": [-4.40, 13.30], "holm_p_adj": 0.345},
+                     "HOC_vs_CONFORM": {"delta_pp": 9.17, "ci95": [-1.00, 17.62], "holm_p_adj": 0.160}},
+        },
+    },
+    {
+        "id": "harness.gain_is_the_loop_not_the_prompt",
+        "輪次": "harness-2026-09-08",
+        "型別": "歸因（D5，turn-1 離線重取碼再計分）",
+        "宣稱": "H-MIX 的增益幾乎全來自「把失敗原文貼回去讓它改」的迴圈，不是第一輪 prompt 的措辭",
+        "依據": {
+            "檔案": "runs/g_r460_harness_lcb2_*/calls.jsonl（turn-1 全文回應）＋ rows.jsonl",
+            "裁決文件": "DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md§五、§十",
+            "重算": "ops/gain/analyze_r460.py --rescore-turn1；ops/gain/replay/r460/r460_analyze.json · attribution.*",
+            "數值": {"HMIX": {"loop_effect_pp_replays": [19.17, 17.50], "prompt_effect_pp_replays": [6.67, 8.33],
+                              "loop_gain_n": 21, "turn1_visible_pass_pp": 74.2}},
+        },
+    },
 ]
 
 

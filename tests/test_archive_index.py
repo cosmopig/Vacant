@@ -121,17 +121,17 @@ def test_refuted_count_is_pinned(verdicts, index):
     kinds = [v["verdict"] for v in verdicts.VERDICTS.values()]
     assert kinds.count("refuted") == 6, f"被推翻的條數變了：{kinds.count('refuted')}"
     assert kinds.count("overstated") == 4, f"說得太滿的條數變了：{kinds.count('overstated')}"
-    assert kinds.count("held") == 10, f"判準成立的條數變了：{kinds.count('held')}"
+    assert kinds.count("held") == 12, f"判準成立的條數變了：{kinds.count('held')}"
     assert kinds.count("no_effect") == 1, f"無可分辨差異的條數變了：{kinds.count('no_effect')}"
-    assert kinds.count("unresolved") == 1, f"同號未解析的條數變了：{kinds.count('unresolved')}"
-    assert len(index.CLAIMS) == 28, f"索引裡的宣稱總數變了：{len(index.CLAIMS)}"
-    # 網頁上那面牆＝索引裡的 28 條，**沒有第二個來源**。
+    assert kinds.count("unresolved") == 2, f"同號未解析的條數變了：{kinds.count('unresolved')}"
+    assert len(index.CLAIMS) == 31, f"索引裡的宣稱總數變了：{len(index.CLAIMS)}"
+    # 網頁上那面牆＝索引裡的 31 條，**沒有第二個來源**。
     # 2026-09-07 曾有過一次「索引 20、網頁 28」的缺口（那 8 條只寫在 verdicts.py），
     # round459 把它們補進 CLAIMS 之後缺口歸零，`archive.json` 的 index_gap 欄位撤掉。
     # 下面這一段釘的就是「別讓缺口再度張開」——它比釘總數更直接：
     # 自帶宣稱的條目若有任何一條掉出索引，讀索引的 agent 就會少看，而他沒有網頁可以對照。
     self_described = [cid for cid, v in verdicts.VERDICTS.items() if v.get("宣稱")]
-    assert len(self_described) == 8, f"自帶宣稱的條數變了：{len(self_described)}"
+    assert len(self_described) == 11, f"自帶宣稱的條數變了：{len(self_described)}"
     indexed = {c["id"] for c in index.CLAIMS}
     gap = sorted(cid for cid in self_described if cid not in indexed)
     assert gap == [], f"索引缺口重新張開：{gap}——請補進 build_archive_index.py::CLAIMS"

@@ -1246,6 +1246,22 @@ GATE_FACTS = [
                     "deliveries) and a hindsight upper bound that can see the hidden labels "
                     "(+4.35pp). Both hold only on MBPP+.",
     },
+    {
+        "id": "harness-loop",
+        "claim": "harness.hmix_loop_beats_resample_same_budget",
+        "premise": True,
+        "plain": {"zh": "把失敗原文貼回去讓它改，比換人重抽多交付 13 個百分點，token 一樣多",
+                  "en": "Feeding the raw test failure back and letting the same worker fix it delivers "
+                        "13 percentage points more than resampling, at the same token cost"},
+        "how": {"zh": "LCB v2 120 題、12B 本地模型、六臂交錯、五通等預算：H-MIX 84.17%，重抽 70.83%，單發 58.33%；"
+                      "假交付 14 件對 29 件；每題 5,677 token 對 5,805。事前寫死的四狀態規則判 EFFECTIVE。",
+                "en": "LCB v2, 120 tasks, a 12B local model, six interleaved arms at an equal five-call budget: "
+                      "H-MIX 84.17%, resample 70.83%, single shot 58.33%; wrong deliveries 14 vs 29; "
+                      "5,677 tokens per task vs 5,805. The four-state rule frozen before the data says EFFECTIVE."},
+        "en_extra": "Paired McNemar H-MIX vs CONFORM b/c=22/6, +13.33pp [+4.22, +19.46], Holm-adjusted p=0.0112; "
+                    "vs single shot +25.83pp [+17.32, +29.78]. One bank, one 12B model, n=120: the point estimate is "
+                    "biased upward (winner's curse); three replications with new seeds are running.",
+    },
 ]
 
 
@@ -1413,6 +1429,44 @@ GATE_UNKNOWNS = [
             "data/archive.json · claims[peerexec.mutual_execution_below_threshold].邊界",
             "DECISION_20260906_R453_FABLE_AUDIT_REAL_MULTIPARTY.md · §三-3、§三-5、§五",
         ],
+    },
+    {
+        "id": "hpi-hoc-unresolved",
+        "status": "unknown",
+        "plain": {"zh": "另外兩條 harness（pi 式、計畫＋診斷）對重抽同號但沒量出來",
+                  "en": "The other two harnesses (pi-style, plan+diagnostics) point the same way as H-MIX "
+                        "against resampling but were not resolved"},
+        "how": {"zh": "H-PI +5.00pp [−4.40, +13.30]、H-OC +9.17pp [−1.00, +17.62] 對 CONFORM；Holm 校正後 p 0.345／0.160。"
+                      "兩者對單發都顯著（+17.50、+21.67pp）。",
+                "en": "H-PI +5.00pp [-4.40, +13.30] and H-OC +9.17pp [-1.00, +17.62] vs CONFORM, Holm-adjusted p "
+                      "0.345 / 0.160; both beat single shot (+17.50, +21.67pp)."},
+        "detail": {"zh": "事前四狀態規則判 INCONCLUSIVE：上界沒排除 10pp，下界沒過 0。不准寫「打平」或「迴圈沒用」。"
+                         "H-MIX 對 H-PI 的 +8.33pp 是探索量，不在 Holm 家族內，不能用來講「哪一條 harness 比較好」。",
+                   "en": "The pre-registered four-state rule says INCONCLUSIVE: the upper bound does not exclude "
+                         "10pp and the lower bound does not clear zero. 'Tie' and 'the loop does not help' are "
+                         "forbidden readings. H-MIX vs H-PI (+8.33pp) is exploratory and outside the Holm family."},
+        "sources": ["DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md §二、§三",
+                    "ops/gain/replay/r460/r460_analyze.json · decision.HPI / decision.HOC"],
+    },
+    {
+        "id": "harness-replications-running",
+        "status": "unknown",
+        "plain": {"zh": "三次同設計複製（新 seed）進行中；跑完也只能講「在這 120 題上穩定」",
+                  "en": "Three same-design replications with new seeds are running; even five of five would only "
+                        "say 'stable on these 120 tasks'"},
+        "how": {"zh": "R460R：五次預註冊、先跑三次（人類 2026-09-11 指示，1003 停用），每次 120 題六臂，1004 三槽。"
+                      "n=120 對 +10pp 的檢定力 0.43–0.63，事前預期五次裡只有 2–3 次通過 Holm。",
+                "en": "R460R: five pre-registered replications, the first three running now (human instruction "
+                      "2026-09-11, backend 1003 excluded), 120 tasks × six arms each. Power at n=120 for +10pp is "
+                      "0.43–0.63, so only 2–3 of 5 are expected to clear Holm even if the effect is real."},
+        "detail": {"zh": "LCB v2 就是 120 題，seed 只打亂順序不抽樣 ⇒ 五次複製的題目集合完全相同，題目層級的效果複製不掉。"
+                         "換題庫是 LCB v3 的事。宣稱規則事前寫死：5/5 同號且 ≥4/5 Holm 顯著才可寫「複製穩定」，否則逐次照實列；"
+                         "不併 n、不平均、不挑一次。",
+                   "en": "LCB v2 is exactly 120 tasks; the seed reorders but does not sample, so all replications "
+                         "share the same task set. Changing banks is a separate study (LCB v3). The claim rule was "
+                         "frozen before data: 5/5 same sign and ≥4/5 Holm-significant is required for 'stable'; "
+                         "otherwise each run is listed as is. No pooling, no averaging, no picking one."},
+        "sources": ["DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md §二、§三、§一〇"],
     },
 ]
 
