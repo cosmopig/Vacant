@@ -494,6 +494,14 @@ def launch_block(block: QBlock, slot: Slot, queue: Queue, root: pathlib.Path,
 
     `SEED_SCAN_EXCLUDE` ＝ 佇列裡**全部**塊的 out 路徑（自己人清單）。發射器會
     逐一確認每個名字都真的寫在 DECISION 裡，所以這個清單不能靠這裡自說自話。
+
+    ⚠ **2026-09-11 事故**：`text=True` 會用 UTF-8 嚴格解碼發射器的 stdout，
+    而發射器裡的 `head -c 600`／`tail -c 700` 是**按位元組**截斷含中文的 launch.log
+    ⇒ 切在一個 3 byte 字元中間就吐出半個字元 ⇒ `UnicodeDecodeError` 讓**排程器整個死掉**
+    （R529 11:04:01Z、R460R 07:23Z 都是這樣死的，而且死在剛發完一塊的那一秒，
+    看起來像「發完就沒事了」）。`errors="replace"` 讓壞位元組變成 U+FFFD 而不是例外。
+    ⚠ 這是**第二道**防線：第一道在發射器（截斷後過一次 `iconv -c`）。
+    兩條紅線不一樣——「不要產生壞位元組」與「壞位元組不准讓排程器死」。
     """
     env = dict(
         os.environ,
@@ -513,7 +521,7 @@ def launch_block(block: QBlock, slot: Slot, queue: Queue, root: pathlib.Path,
         f" bank={block.bank}{'／' + block.bank_filter if block.bank_filter else ''}"
         f" n={block.n} offset={block.offset} seed={block.seed}")
     r = subprocess.run(["bash", queue.launcher], cwd=str(REPO), env=env,
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, errors="replace")
     tail = (r.stdout or "")[-800:].replace("\n", "|")
     log(f"LAUNCH rc={r.returncode} {block.name}: {tail}")
     return r.returncode

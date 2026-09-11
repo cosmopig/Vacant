@@ -461,3 +461,71 @@ def test_registration_lines_do_not_encode_order():
     assert check_prereg(q) == []
     shuffled = q.__class__(**{**q.__dict__, "blocks": tuple(reversed(q.blocks))})
     assert check_prereg(shuffled) == []
+
+
+# ── 10. 2026-09-11 事故：發射器吐出半個中文字，排程器不准死 ────────────────
+_BAD_TAIL = b"\xe4\xb8"          # 「一」(\xe4\xb8\x80) 被 head -c 切掉最後一個 byte
+
+
+def _fake_launcher_script(tmp_path, payload: bytes) -> pathlib.Path:
+    sh = tmp_path / "fake_launcher.sh"
+    sh.write_bytes(b"#!/bin/bash\nprintf '%s'  \"$(cat <<'EOF'\n"
+                   + payload + b"\nEOF\n)\"\nexit 0\n")
+    return sh
+
+
+def test_launch_block_survives_invalid_utf8_from_the_launcher(tmp_path):
+    """發射器的 stdout 含壞位元組 ⇒ `launch_block` 不得拋例外，log 要有那一行。
+
+    2026-09-11 11:04:01Z：R529 排程器發完第一塊就死在
+    `subprocess.run(..., text=True)` 的 `UnicodeDecodeError`
+    （position 1761-1762, invalid continuation byte），其餘四塊一塊都沒發，
+    而且 log 上看起來像「發完就沒事了」。R460R 07:23Z 死法一模一樣。
+    """
+    from ops.gain.schedule_queue import Queue, launch_block
+    sh = _fake_launcher_script(tmp_path, b"preflight passed; head: " + _BAD_TAIL)
+    q = Queue(name="t", decision="d.md", launcher=str(sh), arms="OFF",
+              request_timeout_s=900, review_timeout_s=380, gauge_scope="bank",
+              models="m", backends=_BACKENDS,
+              blocks=(QBlock(name="g_t_a1", bank="lcb3", n=20, offset=0,
+                             seed="s", tag="t1"),))
+    logs: list[str] = []
+    rc = launch_block(q.blocks[0], QUEUE_SLOTS[0], q, tmp_path, logs.append)
+    assert rc == 0
+    tail = [x for x in logs if "LAUNCH rc=" in x]
+    assert tail, logs
+    assert "preflight passed" in tail[0]
+    assert "�" in tail[0]          # 壞位元組變成 U+FFFD，不是例外
+
+
+def test_both_schedulers_decode_launcher_output_leniently():
+    """兩支排程器都要改——R460R 那支跑的是同一種寫法。"""
+    for rel in ("ops/gain/schedule_queue.py", "ops/gain/schedule_harness_reps.py"):
+        src = (ROOT / rel).read_text(encoding="utf-8")
+        assert 'text=True, errors="replace"' in src, rel
+
+
+def test_both_launchers_sanitise_byte_truncated_output():
+    """第一道防線：`head -c`／`tail -c` 之後一律過 `iconv -c`。"""
+    for rel in ("ops/gain/launch_r529_block.sh",
+                "ops/gain/launch_harness_rep_block.sh"):
+        src = (ROOT / rel).read_text(encoding="utf-8")
+        assert "u8() { iconv -c -f UTF-8 -t UTF-8" in src, rel
+        assert src.count("| u8 | tr") == 3, rel
+        # 不准有沒被包起來的裸截斷
+        for raw in ('head -c 600 "$OUT.launch.log" | tr',
+                    'tail -c 700 "$OUT.launch.log" | tr'):
+            assert raw not in src, (rel, raw)
+
+
+def test_u8_helper_really_drops_the_half_character(tmp_path):
+    """不是「看起來有呼叫 iconv」——真的跑一次，確認半個字元被丟掉。"""
+    import subprocess
+    bad = tmp_path / "bad.bin"
+    bad.write_bytes("量具驗證一層的".encode() + _BAD_TAIL)
+    r = subprocess.run(
+        ["bash", "-c",
+         'u8() { iconv -c -f UTF-8 -t UTF-8 2>/dev/null || cat; }; u8 < "$1"',
+         "_", str(bad)], capture_output=True)
+    r.stdout.decode("utf-8")                    # 不得拋例外
+    assert r.stdout.startswith("量具驗證一層的".encode())

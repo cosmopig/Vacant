@@ -72,6 +72,17 @@ SEED="${SEED:?SEED 必須給（例：g-r460r1-lcb2）}"
 API="${API:?API 必須給（直連端點，不准 hub）}"
 
 mkdir -p "$ROOT/logs"
+# ── UTF-8 安全的位元組截斷（2026-09-11 事故修補）──────────────────────────
+# `head -c N`／`tail -c N` 是**按位元組**切的，而 launch.log 裡全是中文
+# ⇒ 切點落在一個 3 byte 字元中間就會吐出半個字元（實測 `\xe4\xb8` 收尾）。
+# 那半個字元沿著本支的 stdout 一路傳回排程器，而排程器的
+# `subprocess.run(..., text=True)` 會 **UnicodeDecodeError 當場死掉**——
+# 2026-09-11 11:04:01Z 的 R529 排程器與（同一種寫法的）R460R 排程器都是這樣死的。
+# ⇒ 截斷之後一律過一次 `iconv -c`（丟掉不合法的位元組序列）。
+# 排程器那一端也改成 `errors="replace"`；**兩邊都修**，因為
+# 「壞位元組不該讓排程器死」與「不要產生壞位元組」是兩條不同的紅線。
+u8() { iconv -c -f UTF-8 -t UTF-8 2>/dev/null || cat; }
+
 say()    { printf '%s  [%s] %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$TAG" "$*" | tee -a "$LOG"; }
 finish() { say "REP_BLOCK_LAUNCH_RESULT=$1"; exit "${2:-1}"; }
 
@@ -188,16 +199,16 @@ for _ in 1 2 3 4 5 6 7 8 9; do
   [ -n "$pid" ] && break
   sleep 3; pid=$(find_pid)
 done
-[ -n "$pid" ] || { say "30 秒內沒看到 runner 行程（flock 被別人握著？）; tail: $(tail -c 700 "$OUT.launch.log" | tr '\n' '|')"; finish abort_no_runner_process; }
+[ -n "$pid" ] || { say "30 秒內沒看到 runner 行程（flock 被別人握著？）; tail: $(tail -c 700 "$OUT.launch.log" | u8 | tr '\n' '|')"; finish abort_no_runner_process; }
 say "pid=$pid; waiting for preflight（量具兩個方向＋可見閘門覆蓋 $N_BLOCK/$N_BLOCK）"
 for _ in $(seq 1 90); do
   sleep 10
   if ! kill -0 "$pid" 2>/dev/null; then
-    say "exited early; tail: $(tail -c 700 "$OUT.launch.log" | tr '\n' '|')"
+    say "exited early; tail: $(tail -c 700 "$OUT.launch.log" | u8 | tr '\n' '|')"
     finish exited_early
   fi
   if grep -q '✓' "$OUT.launch.log" 2>/dev/null || [ -e "$OUT/summary.json" ]; then
-    say "preflight passed; head: $(head -c 600 "$OUT.launch.log" | tr '\n' '|')"
+    say "preflight passed; head: $(head -c 600 "$OUT.launch.log" | u8 | tr '\n' '|')"
     finish "launched_pid_$pid" 0
   fi
 done
