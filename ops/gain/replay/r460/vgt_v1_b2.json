@@ -1,0 +1,44 @@
+{
+  "run": "runs/g_r460_harness_lcb2_b2",
+  "scope": "v1",
+  "records_audited": 116,
+  "texts_audited": 412,
+  "texts_scanned": 412,
+  "per_arm": {
+    "HPI": 35,
+    "HOC": 53,
+    "HMIX": 28
+  },
+  "needles_checked": 3211,
+  "needles_skipped_trivial": 2127,
+  "excused_n": 0,
+  "excused": [],
+  "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0
+  },
+  "unknown_task_ids": [],
+  "violations": [
+    {
+      "line": 88,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "['NS', 1]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3754",
+      "excerpt": "6\n\nYour own test also failed (this test is yours and may itself be wrong): args=['NS', 1] got=3 you expected=2\n\nReply with exactly one Python code block contain"
+    },
+    {
+      "line": 89,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "['NS', 1]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3754",
+      "excerpt": "6\n\nYour own test also failed (this test is yours and may itself be wrong): args=['NS', 1] got=3 you expected=2\n\nReply with exactly one Python code block contain"
+    }
+  ],
+  "verdict": "VIOLATION"
+}

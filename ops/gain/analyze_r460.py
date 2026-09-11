@@ -119,6 +119,41 @@ BLOCKS_PER_ENDPOINT_SOLO = BLOCKS_EXPECTED   # one_backend_6：那一顆要掛�
 #: （兩半不同時、後端漂移成了新的干擾項，見 DECISION §四 E-7 修訂與 §八-14）。
 PH0_BLOCKS = AUTHORIZED_BLOCKS[:BLOCKS_PER_ENDPOINT]
 
+# ── round460r（2026-09-11，五次複製的預註冊；Fable R3）────────────────────
+# 複製跑的塊**不再固定綁端點**：排程器把 30 個塊丟進兩顆後端的空位
+# （1004 三格、1003 一格），誰先空誰先拿 ⇒ 收官時某一次複製的六塊可能是
+# 5/1、4/2、6/0…… 任何組合。舊的兩種 variant（每顆恰好三塊／一顆恰好六塊）
+# 是**平衡規則**，在排程之下量的不是它想量的東西 ⇒ 新增第三種 variant。
+#
+# `scheduled` 保留的不變量（每一條都是 E-7 真正承重的那幾條）：
+#   1. 一塊一端點（塊內交錯 ⇒ 同一題的六臂同後端、同行程）；
+#   2. 塊間 task_id 兩兩零交集、聯集恰好 120；
+#   3. 不走 hub；
+#   4. 塊數 6；
+#   5. **逐端點的「同時在跑的塊數」不得超過上限**——這一條是新的，
+#      而且它**從資料算**：每一塊在 `calls.jsonl` 上有一段 [第一通, 最後一通]
+#      的時間窗，同一顆端點上重疊的窗數就是那一刻的併發度。
+#      上限逐顆凍結在 `ENDPOINT_CONCURRENCY_CAPS`：
+#      1004 ＝ 3（實測 3 併發不掉速）、1003 ＝ 1（49k context、PARALLEL 4，
+#      三條長生成同時跑會 `bad alloc`／`Context size has been exceeded`，
+#      2026-09-08 兩次當機的實測，見 DECISION_20260908 §四）。
+#      ⚠ 這是**事後**的證據不是事前的閘門：事前那道在排程器
+#      （`schedule_harness_reps.py` 的槽位），這裡是「排程器有沒有真的做到」的對帳。
+#      ⚠ 名單外的端點一律 `endpoint_not_registered` ⇒ 紅。
+#        「沒登記上限」不等於「沒有上限」。
+ENDPOINT_1004 = "http://100.86.226.21:1234/v1/chat/completions"
+ENDPOINT_1003 = "http://100.119.113.56:1234/v1/chat/completions"
+ENDPOINT_CONCURRENCY_CAPS = {ENDPOINT_1004: 3, ENDPOINT_1003: 1}
+TOPOLOGY_MODES = ("fixed", "scheduled")
+
+#: 五次複製的塊名（R1 授權的 30 個名字；每次六塊，offset 0/20/…/100）。
+REPLICATION_BLOCK_TAGS = ("a1", "a2", "a3", "b1", "b2", "b3")
+REPLICATION_BLOCKS = {
+    k: tuple(f"g_r460r{k}_harness_lcb2_{t}" for t in REPLICATION_BLOCK_TAGS)
+    for k in range(1, 6)}
+REPLICATION_SEEDS = {k: f"g-r460r{k}-lcb2" for k in range(1, 6)}
+
+
 REQUIRED = ("arm", "task_id", "meets_demand", "accepted", "calls_used", "visible_ok")
 REQUIRED_H = ("harness_variant", "harness_wire_mode", "harness_calls",
               "harness_tokens_total", "stop_reason", "first_pass_turn",
@@ -305,12 +340,23 @@ def harness_turn_stats(rs: list[dict]) -> dict:
 def analyze(rows: list[dict], summary: dict, calls: list[dict],
             bank: dict[str, dict] | None = None,
             turn1: dict[str, dict[str, bool]] | None = None,
-            blocks: list[dict] | None = None) -> dict:
+            blocks: list[dict] | None = None,
+            *,
+            topology_mode: str = "fixed",
+            authorized: tuple[str, ...] = AUTHORIZED_BLOCKS,
+            ph0_blocks: tuple[str, ...] | None = PH0_BLOCKS) -> dict:
     """rows/calls/summary → 收官報表 dict。`turn1` 只有 --rescore-turn1 時才有。
 
     `blocks`（D9）給了的話，`rows`／`calls`／`summary` 必須已經是 `pool_runs()`
     併好的合併版；本函式**主體算的一律是合併後的量**（仲裁欄位的路徑因此
     一個字都沒變），另外把每一塊各自跑一遍放在 `out["blocks"]`。
+
+    round460r 的三個關鍵字（**預設值一個字沒動 ⇒ R460 的讀法逐字不變**）：
+      `topology_mode` `"scheduled"` ＝ 塊由排程器分配，判併發上限不判每顆幾塊；
+      `authorized`    該次複製授權的六個塊名（`enforce_topology` 用）；
+      `ph0_blocks`    P-H0 的錨塊；**給 None ＝ 這次複製沒有 P-H0**
+                      （複製跑換了 seed ⇒ 題序不同 ⇒ r447 那個錨不存在，
+                       硬讀會拿一個**別的** 60 題去對一個對不上的錨）。
     """
     out: dict = {"broken_reasons": [], "notes": [],
                  "ci_note": CI_DISCLAIMER,
@@ -693,17 +739,21 @@ def analyze(rows: list[dict], summary: dict, calls: list[dict],
 
     # ── D9：分塊報表與拓撲檢查 ───────────────────────────────────────
     if blocks is not None:
-        topo = topology_report(blocks)
+        topo = topology_report(blocks, mode=topology_mode)
         out["topology"] = topo
         out["block_order"] = [b["name"] for b in blocks]
         out["blocks"] = {
             b["name"]: analyze(b["rows"], b["summary"], b["calls"],
-                               bank=bank, turn1=turn1, blocks=None)
+                               bank=bank, turn1=turn1, blocks=None,
+                               topology_mode=topology_mode, authorized=authorized,
+                               ph0_blocks=ph0_blocks)
             for b in blocks}
         # P-H0 的錨塊池：a1+a2+a3 的聯集（＝ r447 的前 60 題）。三塊缺一塊就
         # **不算**——「拿兩塊當 60 題」會安靜地換一個錨，而錨換了窗就沒有意義。
-        ph0 = [b for b in blocks if b["name"] in PH0_BLOCKS]
-        if len(ph0) == len(PH0_BLOCKS):
+        ph0 = ([b for b in blocks if b["name"] in ph0_blocks]
+               if ph0_blocks else [])
+        out["ph0_applicable"] = bool(ph0_blocks)
+        if ph0_blocks and len(ph0) == len(ph0_blocks):
             out["ph0_pool"] = analyze(
                 [r for b in ph0 for r in b["rows"]],
                 merge_summaries([b["summary"] for b in ph0]),
@@ -723,7 +773,7 @@ def analyze(rows: list[dict], summary: dict, calls: list[dict],
             for name, sub in out["blocks"].items():
                 for reason in sub.get("broken_reasons", []):
                     out["broken_reasons"].append(f"block:{name}:{reason}")
-        if enforce_topology(blocks):
+        if enforce_topology(blocks, authorized=authorized):
             out["broken_reasons"].extend(topo["violations"])
         elif topo["violations"]:
             out["notes"].append(
@@ -769,7 +819,21 @@ def prereg_hits(out: dict) -> dict:
     # 就是 r447 的前 60 題，錨 32/60＝53.33%。b* 那三塊是另外 60 題，不併進來。
     order = out.get("block_order") or []
     pool = out.get("ph0_pool")
-    if order and pool:
+    if out.get("ph0_applicable") is False:
+        # round460r：複製跑換了 seed ⇒ 題序不同 ⇒ 「r447 前 60 題」這個錨在
+        # 那批資料上**不存在**。硬讀會拿一個**別的** 60 題去對一個對不上的錨，
+        # 而它還會印出一個看起來很正常的 HIT／MISS。所以這裡不是「放寬」是「不判」。
+        res["P-H0"] = {
+            "value": None, "hit": "NOT_APPLICABLE",
+            "source_field": "ph0_pool.per_arm.OFF.deliv_pp_denom_measured",
+            "note": ("本次分析是 round460r 的複製跑（新 seed ⇒ 題序與 r447 不同）"
+                     "⇒ P-H0 的錨（r447 前 60 題 32/60）在這批資料上不存在，"
+                     "**不判**。後端漂移在複製跑裡由「五次複製之間 OFF 的差異」"
+                     "自己承擔，不另外設窗。"),
+            "pooled_off_deliv_pp_NOT_ARBITER":
+                (per.get("OFF") or {}).get("deliv_pp_denom_measured"),
+            "scope": "不適用；本次複製內部的六臂配對比較不受影響"}
+    elif order and pool:
         v_h0 = ((pool.get("per_arm") or {}).get("OFF")
                 or {}).get("deliv_pp_denom_measured")
         h0_src = "ph0_pool.per_arm.OFF.deliv_pp_denom_measured"
@@ -790,12 +854,13 @@ def prereg_hits(out: dict) -> dict:
         v_h0 = (per.get("OFF") or {}).get("deliv_pp_denom_measured")
         h0_src = "per_arm.OFF.deliv_pp_denom_measured"
         h0_note = "單塊分析（未切塊）⇒ 直接讀本 run 的 OFF 交付率。"
-    res["P-H0"] = {"value": v_h0, "hit": window_hit("P-H0", v_h0),
-                   "source_field": h0_src, "note": h0_note,
-                   "pooled_off_deliv_pp_NOT_ARBITER":
-                       (per.get("OFF") or {}).get("deliv_pp_denom_measured"),
-                   "scope": ("MISS 只作廢與 r447 的橫向比較；本 run 內部六臂比較仍有效"
-                             "（同一題的六臂共享同一個後端、逐題交錯）")}
+    if "P-H0" not in res:          # 上面的 NOT_APPLICABLE 分支已經寫過就不覆蓋
+        res["P-H0"] = {"value": v_h0, "hit": window_hit("P-H0", v_h0),
+                       "source_field": h0_src, "note": h0_note,
+                       "pooled_off_deliv_pp_NOT_ARBITER":
+                           (per.get("OFF") or {}).get("deliv_pp_denom_measured"),
+                       "scope": ("MISS 只作廢與 r447 的橫向比較；本 run 內部六臂比較仍有效"
+                                 "（同一題的六臂共享同一個後端、逐題交錯）")}
     d_o = {h: (paired.get(f"{h}_vs_OFF") or {}).get("delta_pp") for h in H_ARMS}
     res["P-H1"] = {"value": d_o,
                    "hit": "HIT" if all(v is not None and v > 0 for v in d_o.values()) else "MISS"}
@@ -993,7 +1058,55 @@ def pool_runs(paths: list[pathlib.Path]) -> tuple[list[dict], dict, list[dict], 
     return rows, merge_summaries([b["summary"] for b in blocks]), calls, blocks
 
 
-def topology_report(blocks: list[dict]) -> dict:
+def block_window(block: dict) -> dict:
+    """一塊在 `calls.jsonl` 上的時間窗 `[第一通, 最後一通]`（epoch ms）。
+
+    ⚠ 只有**成功落盤的呼叫**有 `ts_ms`；一通都沒有的塊回 `None`
+    （那種塊在 E-2 就已經紅了，這裡不另外判，也**不**拿它去當「沒有併發」的證據）。
+    """
+    ts = [int(c["ts_ms"]) for c in (block.get("calls") or [])
+          if isinstance(c.get("ts_ms"), (int, float))]
+    if not ts:
+        return {"lo_ms": None, "hi_ms": None, "n_calls": 0}
+    return {"lo_ms": min(ts), "hi_ms": max(ts), "n_calls": len(ts)}
+
+
+def max_concurrent_by_endpoint(blocks: list[dict]) -> dict[str, int]:
+    """逐端點：同一刻最多有幾塊在跑。掃描線，端點取該塊唯一的那個 api。
+
+    ⚠ 這量的是**塊層級**的併發（一個塊＝一個序列 runner，行程內一次一個請求，
+    `WORKER_CONCURRENCY=1`），所以「同時 n 塊」就等於「同時 n 個請求」。
+    ⚠ 時間窗取自 `ts_ms`，那是**送出**的時刻；用它算重疊會**低估**尾端
+    （最後一通的回應還在串流）。低估的方向是對我們不利的那一邊嗎？
+    不是——低估併發會讓違規更難被抓到。所以窗的右端刻意取
+    「最後一通的 `ts_ms` ＋ 該通的 `latency_ms`」，把回應時間算進去。
+    """
+    spans: dict[str, list[tuple[int, int]]] = {}
+    for b in blocks:
+        eps = b.get("endpoints") or []
+        if len(eps) != 1:
+            continue          # 一塊兩端點自己已經是違規，不進併發帳
+        ts = [(int(c["ts_ms"]),
+               int(c.get("latency_ms") or 0))
+              for c in (b.get("calls") or [])
+              if isinstance(c.get("ts_ms"), (int, float))]
+        if not ts:
+            continue
+        lo = min(t for t, _ in ts)
+        hi = max(t + max(d, 0) for t, d in ts)
+        spans.setdefault(eps[0], []).append((lo, hi))
+    out: dict[str, int] = {}
+    for ep, iv in spans.items():
+        events = sorted([(lo, 1) for lo, _ in iv] + [(hi, -1) for _, hi in iv])
+        cur = best = 0
+        for _t, d in events:
+            cur += d
+            best = max(best, cur)
+        out[ep] = best
+    return out
+
+
+def topology_report(blocks: list[dict], *, mode: str = "fixed") -> dict:
     """D9 的硬規則（round460e：六塊版），逐條可判、違反就進 `broken_reasons`。
 
     1. **塊之間 task_id 兩兩零交集**，且**聯集恰好 120 題**——併不了的東西不准併
@@ -1020,10 +1133,14 @@ def topology_report(blocks: list[dict]) -> dict:
     另外查 seed／臂集合一致。`enforce` 為 False 時只描述不判——
     那是給「拿這支去看 r447 這類歷史單塊資料」用的診斷路徑。
     """
+    if mode not in TOPOLOGY_MODES:
+        raise ValueError(f"unknown topology mode: {mode}（可用 {list(TOPOLOGY_MODES)}）")
     rep: dict = {"blocks_n": len(blocks), "blocks_expected": BLOCKS_EXPECTED,
+                 "mode": mode,
                  "endpoints_allowed": list(ENDPOINTS_ALLOWED),
                  "blocks_per_endpoint_expected": BLOCKS_PER_ENDPOINT,
                  "blocks_per_endpoint_expected_solo": BLOCKS_PER_ENDPOINT_SOLO,
+                 "endpoint_caps": dict(ENDPOINT_CONCURRENCY_CAPS),
                  "tasks_expected": TASKS_EXPECTED,
                  "variant": None, "variant_why": None, "endpoint_of_block": {},
                  "by_block": {}, "violations": []}
@@ -1065,19 +1182,46 @@ def topology_report(blocks: list[dict]) -> dict:
         for b in blocks}
     n_ep = len(by_ep)
     rep["endpoints_n"] = n_ep
-    rep["variant"] = TOPOLOGY_VARIANTS.get(n_ep)
-    want_per_ep = BLOCKS_PER_ENDPOINT_SOLO if n_ep == 1 else BLOCKS_PER_ENDPOINT
-    rep["variant_why"] = (
-        f"{n_ep} 個相異端點、每個 {want_per_ep} 塊"
-        if rep["variant"] else f"{n_ep} 個相異端點——不在允許的 {list(ENDPOINTS_ALLOWED)} 裡")
-    if MUTANT != "M11_endpoint_balance_not_checked":
-        if n_ep not in ENDPOINTS_ALLOWED:
-            rep["violations"].append(
-                f"endpoints_n_not_in_{'_'.join(map(str, ENDPOINTS_ALLOWED))}:{n_ep}")
-        for ep, names in sorted(by_ep.items()):
-            if len(set(names)) != want_per_ep:
+    rep["block_window"] = {b["name"]: block_window(b) for b in blocks}
+    rep["max_concurrent_by_endpoint"] = max_concurrent_by_endpoint(blocks)
+    if mode == "scheduled":
+        # 排程拓撲：塊怎麼分配由排程器當場決定 ⇒ 不判「每顆幾塊」，
+        # 改判「同一刻同一顆有幾塊在跑」，而且從 calls.jsonl 的時間窗算。
+        rep["variant"] = "scheduled"
+        rep["variant_why"] = (
+            f"{n_ep} 個相異端點、逐塊分配由排程器決定；"
+            f"判的是逐端點同時併發塊數 ≤ 上限 {dict(ENDPOINT_CONCURRENCY_CAPS)}")
+        if MUTANT != "M11_endpoint_balance_not_checked":
+            # 沒有時間戳就算不出併發度，而**算不出不是通過**（鐵律 3 的同一條紀律）。
+            for b in blocks:
+                if (rep["block_window"].get(b["name"]) or {}).get("lo_ms") is None:
+                    rep["violations"].append(f"block_ts_unrecorded:{b['name']}")
+            for ep in sorted(by_ep):
+                cap = ENDPOINT_CONCURRENCY_CAPS.get(ep)
+                if cap is None:
+                    rep["violations"].append(f"endpoint_not_registered:{ep}")
+                    continue
+                got = rep["max_concurrent_by_endpoint"].get(ep, 0)
+                if MUTANT == "M12_scheduled_concurrency_not_checked":
+                    continue
+                if got > cap:
+                    rep["violations"].append(
+                        f"endpoint_concurrency_exceeded:{ep}:{got}>{cap}")
+    else:
+        rep["variant"] = TOPOLOGY_VARIANTS.get(n_ep)
+        want_per_ep = BLOCKS_PER_ENDPOINT_SOLO if n_ep == 1 else BLOCKS_PER_ENDPOINT
+        rep["variant_why"] = (
+            f"{n_ep} 個相異端點、每個 {want_per_ep} 塊"
+            if rep["variant"] else
+            f"{n_ep} 個相異端點——不在允許的 {list(ENDPOINTS_ALLOWED)} 裡")
+        if MUTANT != "M11_endpoint_balance_not_checked":
+            if n_ep not in ENDPOINTS_ALLOWED:
                 rep["violations"].append(
-                    f"endpoint_block_count_not_{want_per_ep}:{ep}:{len(set(names))}")
+                    f"endpoints_n_not_in_{'_'.join(map(str, ENDPOINTS_ALLOWED))}:{n_ep}")
+            for ep, names in sorted(by_ep.items()):
+                if len(set(names)) != want_per_ep:
+                    rep["violations"].append(
+                        f"endpoint_block_count_not_{want_per_ep}:{ep}:{len(set(names))}")
     # 5) seed／臂／塊數
     seeds = {b["seed"] for b in blocks}
     if len(seeds) > 1:
@@ -1103,7 +1247,8 @@ def topology_report(blocks: list[dict]) -> dict:
     return rep
 
 
-def enforce_topology(blocks: list[dict]) -> bool:
+def enforce_topology(blocks: list[dict], *,
+                     authorized: tuple[str, ...] = AUTHORIZED_BLOCKS) -> bool:
     """要不要把 topology 的違規算成 BROKEN。
 
     兩種情形要判：(a) 真的給了多塊（那就是 D9 的設計，規則全套適用）；
@@ -1113,7 +1258,7 @@ def enforce_topology(blocks: list[dict]) -> bool:
     """
     if MUTANT == "M8_topology_not_enforced":
         return False
-    return len(blocks) > 1 or any(b["name"] in AUTHORIZED_BLOCKS for b in blocks)
+    return len(blocks) > 1 or any(b["name"] in authorized for b in blocks)
 
 
 def load_bank_meta(bank: str) -> dict[str, dict]:
@@ -1154,7 +1299,15 @@ def render(out: dict) -> str:
                  f"合併題數(聯集) {topo.get('task_ids_union')}/{topo.get('tasks_expected')}　"
                  f"違規 {topo['violations'] or '[]'}")
         for ep, names in (topo.get("blocks_per_endpoint") or {}).items():
-            L.append(f"  {ep}  ←  {len(names)} 塊：{', '.join(names)}")
+            cap = (topo.get("endpoint_caps") or {}).get(ep)
+            conc = (topo.get("max_concurrent_by_endpoint") or {}).get(ep)
+            tail = ("" if topo.get("mode") != "scheduled"
+                    else f"；同時最多 {conc} 塊（上限 {cap if cap is not None else '未登記'}）")
+            L.append(f"  {ep}  ←  {len(names)} 塊：{', '.join(names)}{tail}")
+        if topo.get("mode") == "scheduled":
+            L.append("  ⚠ scheduled：塊由排程器分配到空位 ⇒ **不判每顆幾塊**，"
+                     "判的是「同一刻同一顆有幾塊在跑」（由 calls.jsonl 的時間窗算，"
+                     "右端含 latency）。事前那道閘門在排程器的槽位，這裡是對帳。")
         if topo.get("variant") == "one_backend_6":
             L.append("  ⚠ one_backend_6：六塊同一顆後端 ⇒ **後端不再是干擾項**。"
                      "代價是兩半不同時跑（b 組先、a 組隔約 17 小時）"
@@ -1436,6 +1589,57 @@ def _fixture_blocks(*, overlap: bool = False, hub: bool = False,
     return out
 
 
+def _stamp(calls: list[dict], lo_ms: int, hi_ms: int) -> list[dict]:
+    """把一塊的 calls 打上時間戳，讓它的時間窗恰好是 [lo_ms, hi_ms]。
+
+    夾具專用：真資料的 `ts_ms`／`latency_ms` 由 `brain_cline._log` 逐通落盤。
+    """
+    n = max(len(calls), 1)
+    for j, c in enumerate(calls):
+        c["ts_ms"] = lo_ms + (hi_ms - lo_ms) * j // n
+        c["latency_ms"] = 0
+    if calls:
+        calls[-1]["ts_ms"] = hi_ms
+    return calls
+
+
+def _fixture_blocks_scheduled(*, overload_1003: bool = False,
+                              unregistered: bool = False,
+                              no_ts: bool = False) -> list[dict]:
+    """round460r 的排程拓撲夾具：塊由排程器分配，判的是**同時併發塊數**。
+
+    預設形狀（合法）：1004 掛四塊——三塊時間窗重疊、第四塊排在它們之後；
+    1003 掛兩塊，**時間上完全錯開**（那顆一次只准一塊）。
+      `overload_1003`  1003 的兩塊時間窗重疊 ⇒ 併發 2 > 上限 1（違規）；
+      `unregistered`   有一塊掛在沒登記上限的端點上（違規；沒登記不等於沒上限）；
+      `no_ts`          有一塊一個時間戳都沒有 ⇒ 算不出併發度（違規；算不出不是通過）。
+    """
+    blocks = _fixture_blocks()
+    # API_A_FIXTURE ＝ 1003、API_B_FIXTURE ＝ 1004（與 ENDPOINT_* 常數同一顆）
+    plan = [(ENDPOINT_1004, 0, 100), (ENDPOINT_1004, 10, 110),
+            (ENDPOINT_1004, 20, 120), (ENDPOINT_1004, 500, 600),
+            (ENDPOINT_1003, 0, 100),
+            (ENDPOINT_1003, 50 if overload_1003 else 900, 1000)]
+    if unregistered:
+        plan[3] = (API_C_FIXTURE, plan[3][1], plan[3][2])
+    for b, (ep, lo, hi) in zip(blocks, plan):
+        for c in b["calls"]:
+            c["api"] = ep
+        b["endpoints"] = endpoints_of(b["calls"])
+        _stamp(b["calls"], lo, hi)
+    if no_ts:
+        for c in blocks[0]["calls"]:
+            c.pop("ts_ms", None)
+    return blocks
+
+
+def _pooled_scheduled(blocks: list[dict]) -> dict:
+    rows = [r for b in blocks for r in b["rows"]]
+    calls = [c for b in blocks for c in b["calls"]]
+    summ = merge_summaries([b["summary"] for b in blocks])
+    return analyze(rows, summ, calls, blocks=blocks, topology_mode="scheduled")
+
+
 def _fixture_stage2():
     """階段二觸發鍵的牙齒：**H-PI 落在 INCONCLUSIVE，H-MIX 仍是 EFFECTIVE**。
 
@@ -1572,6 +1776,40 @@ def selftest() -> int:
        any(s.startswith(f"endpoint_block_count_not_{BLOCKS_PER_ENDPOINT_SOLO}")
            for s in solo5["broken_reasons"]),
        str(solo5["broken_reasons"]))
+    # ── round460r：排程拓撲（Fable R3）────────────────────────────────
+    # 五次複製的 30 個塊由排程器丟進空位 ⇒ 「每顆端點恰好三塊」在那邊量不到東西。
+    # 新 variant 判的是**同一刻同一顆有幾塊在跑**，而且從 calls.jsonl 的時間窗算。
+    sch = _pooled_scheduled(_fixture_blocks_scheduled())
+    ck("Q6e_scheduled_variant_is_legal_and_recorded",
+       sch["broken_reasons"] == []
+       and sch["topology"]["variant"] == "scheduled"
+       and sch["topology"]["mode"] == "scheduled"
+       and sch["topology"]["max_concurrent_by_endpoint"] == {ENDPOINT_1004: 3,
+                                                             ENDPOINT_1003: 1}
+       and len(sch["topology"]["endpoint_of_block"]) == BLOCKS_EXPECTED
+       and sch["topology"]["endpoint_caps"] == dict(ENDPOINT_CONCURRENCY_CAPS),
+       f"{sch['broken_reasons']} {sch['topology'].get('max_concurrent_by_endpoint')}")
+    # 1003 一次只准一塊——兩塊時間窗重疊就要紅（那台在 49k context 下當過兩次機）。
+    ck("Q6f_scheduled_concurrency_cap_is_caught",
+       any(s.startswith("endpoint_concurrency_exceeded")
+           for s in _pooled_scheduled(
+               _fixture_blocks_scheduled(overload_1003=True))["broken_reasons"]),
+       str(_pooled_scheduled(
+           _fixture_blocks_scheduled(overload_1003=True))["broken_reasons"]))
+    # 沒登記上限的端點不是「沒有上限」，是「不知道上限」⇒ 紅。
+    ck("Q6g_scheduled_unregistered_endpoint_is_caught",
+       any(s.startswith("endpoint_not_registered")
+           for s in _pooled_scheduled(
+               _fixture_blocks_scheduled(unregistered=True))["broken_reasons"]))
+    # 算不出併發度不是通過。
+    ck("Q6h_scheduled_missing_timestamps_are_caught",
+       any(s.startswith("block_ts_unrecorded")
+           for s in _pooled_scheduled(
+               _fixture_blocks_scheduled(no_ts=True))["broken_reasons"]))
+    # 舊的兩種 variant 沒有被新 variant 吃掉：預設 mode 仍然判平衡規則。
+    ck("Q6i_fixed_mode_is_unchanged",
+       _pooled(_fixture_blocks())["topology"]["variant"] == "two_backends_3_3"
+       and _pooled(_fixture_blocks())["topology"]["mode"] == "fixed")
     ck("Q7_partial_block_set_is_caught",
        any(s.startswith(f"block_count_not_{BLOCKS_EXPECTED}")
            for s in _pooled(_fixture_blocks()[:1])["broken_reasons"]))
@@ -1667,6 +1905,10 @@ MUTANTS = {
     "M10_block_broken_not_propagated": "Q8_block_accounting_errors_do_not_cancel",
     # round460e：每端點三塊那一格如果沒有牙齒，「一台四塊、一台兩塊」會全綠通過。
     "M11_endpoint_balance_not_checked": "Q9_endpoint_imbalance_is_caught",
+    # round460r：排程拓撲之下真正承重的是**併發上限**。沒有這條牙齒，
+    # 「排程器把三塊同時丟上 1003」會全綠通過——而那台在那個形狀下當機過兩次，
+    # 當機的結果是整組 infra_void，看起來只會像「這次複製比較倒楣」。
+    "M12_scheduled_concurrency_not_checked": "Q6f_scheduled_concurrency_cap_is_caught",
 }
 
 
@@ -1705,6 +1947,12 @@ def main() -> int:
     ap.add_argument("--rescore-turn1", action="store_true",
                     help="D5 歸因：把 H 臂初稿輪的碼重新用 meets_demand(hidden) 評一次"
                          "（零模型呼叫，但會跑沙箱）")
+    ap.add_argument("--topology", default="fixed", choices=list(TOPOLOGY_MODES),
+                    help="fixed（預設，R460 的讀法：兩顆各三塊／一顆六塊）"
+                         "／scheduled（round460r：塊由排程器分配，判逐端點併發上限）")
+    ap.add_argument("--rep", type=int, default=None, choices=[1, 2, 3, 4, 5],
+                    help="round460r 第 k 次複製：授權塊名換成那六個，"
+                         "且 **P-H0 不判**（新 seed ⇒ r447 的錨不存在）")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--mutation-check", action="store_true",
                     help="逐個突變體重跑 selftest，要求指名的那條檢查變紅")
@@ -1730,8 +1978,11 @@ def main() -> int:
             for t in load_tasks(args.bank, b["seed"], b["n"], offset=b["offset"]):
                 tasks[t["task_id"]] = t
         turn1 = rescore_turn1(rows, calls, tasks)
+    authorized = (REPLICATION_BLOCKS[args.rep] if args.rep else AUTHORIZED_BLOCKS)
+    ph0 = None if args.rep else PH0_BLOCKS
     out = analyze(rows, summary, calls, bank=load_bank_meta(args.bank),
-                  turn1=turn1, blocks=blocks)
+                  turn1=turn1, blocks=blocks, topology_mode=args.topology,
+                  authorized=authorized, ph0_blocks=ph0)
     print(render(out))
     if args.json:
         pathlib.Path(args.json).write_text(

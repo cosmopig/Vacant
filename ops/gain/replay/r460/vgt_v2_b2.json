@@ -1,0 +1,46 @@
+{
+  "run": "runs/g_r460_harness_lcb2_b2",
+  "scope": "v2",
+  "records_audited": 116,
+  "texts_audited": 412,
+  "texts_scanned": 322,
+  "per_arm": {
+    "HPI": 35,
+    "HOC": 53,
+    "HMIX": 28
+  },
+  "needles_checked": 3211,
+  "needles_skipped_trivial": 2127,
+  "excused_n": 2,
+  "excused": [
+    {
+      "line": 88,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "['NS', 1]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3754",
+      "excerpt": "6\n\nYour own test also failed (this test is yours and may itself be wrong): args=['NS', 1] got=<sandbox-echo> you expected=2\n\nReply with exactly one Python code ",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 89,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "['NS', 1]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3754",
+      "excerpt": "6\n\nYour own test also failed (this test is yours and may itself be wrong): args=['NS', 1] got=<sandbox-echo> you expected=2\n\nReply with exactly one Python code ",
+      "excused_as": "model_own_selftest_same_request"
+    }
+  ],
+  "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 2
+  },
+  "unknown_task_ids": [],
+  "violations": [],
+  "verdict": "CLEAN"
+}

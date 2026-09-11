@@ -1,0 +1,74 @@
+{
+  "run": "runs/g_r460_harness_lcb2_a2",
+  "scope": "v1",
+  "records_audited": 85,
+  "texts_audited": 222,
+  "texts_scanned": 222,
+  "per_arm": {
+    "HPI": 23,
+    "HOC": 41,
+    "HMIX": 21
+  },
+  "needles_checked": 2496,
+  "needles_skipped_trivial": 1554,
+  "excused_n": 0,
+  "excused": [],
+  "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0
+  },
+  "unknown_task_ids": [],
+  "violations": [
+    {
+      "line": 69,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 2, 1]",
+      "message_index": 1,
+      "role": "user",
+      "task_id": "lcb_3682",
+      "excerpt": "anation:\n\nThere are 4 good arrays. They are [1, 1, 2], [1, 2, 2], [2, 1, 1] and [2, 2, 1].\nHence, the answer is 4.\n\n\nExample 2:\n\nInput: n = 4, m = 2, k = 2\nOutp"
+    },
+    {
+      "line": 70,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 2, 1]",
+      "message_index": 1,
+      "role": "user",
+      "task_id": "lcb_3682",
+      "excerpt": "anation:\n\nThere are 4 good arrays. They are [1, 1, 2], [1, 2, 2], [2, 1, 1] and [2, 2, 1].\nHence, the answer is 4.\n\n\nExample 2:\n\nInput: n = 4, m = 2, k = 2\nOutp"
+    },
+    {
+      "line": 71,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 2, 1]",
+      "message_index": 1,
+      "role": "user",
+      "task_id": "lcb_3682",
+      "excerpt": "anation:\n\nThere are 4 good arrays. They are [1, 1, 2], [1, 2, 2], [2, 1, 1] and [2, 2, 1].\nHence, the answer is 4.\n\n\nExample 2:\n\nInput: n = 4, m = 2, k = 2\nOutp"
+    },
+    {
+      "line": 72,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 2, 1]",
+      "message_index": 1,
+      "role": "user",
+      "task_id": "lcb_3682",
+      "excerpt": "anation:\n\nThere are 4 good arrays. They are [1, 1, 2], [1, 2, 2], [2, 1, 1] and [2, 2, 1].\nHence, the answer is 4.\n\n\nExample 2:\n\nInput: n = 4, m = 2, k = 2\nOutp"
+    },
+    {
+      "line": 188,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[[2], [[0, 0], [0, 0]]]",
+      "message_index": 2,
+      "role": "assistant",
+      "task_id": "lcb_3639",
+      "excerpt": "[[0, 2]]] -> True\nSELFTEST: [[4, 3, 2, 1], [[1, 3], [0, 2]]] -> False\nSELFTEST: [[2], [[0, 0], [0, 0]]] -> True"
+    }
+  ],
+  "verdict": "VIOLATION"
+}

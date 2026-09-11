@@ -999,14 +999,23 @@ def test_analyzer_detection_strip_has_teeth() -> None:
     """突變檢查：每一個突變體各自要讓**指名的那一條** selftest 變紅。
 
     D9 加了三個（M8 拓撲不判、M9 階段二觸發鍵放鬆、M10 逐塊 BROKEN 不往上帶），
-    所以這裡也釘住數量——少一個突變體＝少一道牙齒，而那不會讓任何測試變紅。
+    所以這裡也釘住牙齒——少一個突變體＝少一道牙齒，而那不會讓任何測試變紅。
+
+    ⚠ round460r（2026-09-11）：判準從「**恰好** 11 個」改成「**R460 那 11 個
+    一個都不准少**」。理由是原本那個等號會把「後來的輪次**加**一道牙齒」
+    也判成紅的（R460R 加了 M12 排程併發），而這條測試要擋的是**變少**不是變多。
+    逐名檢查比數數更嚴：刪掉任何一個具名突變體照樣紅，而且說得出少了哪一個。
     """
     from ops.gain import analyze_r460 as A
-    assert len(A.MUTANTS) == 11, sorted(A.MUTANTS)
-    for m in ("M8_topology_not_enforced", "M9_stage2_any_arm",
-              "M10_block_broken_not_propagated",
-              "M11_endpoint_balance_not_checked"):
-        assert m in A.MUTANTS, f"D9／A1 的突變體 {m} 不見了"
+    R460_MUTANTS = (
+        "M1_deliv_ignores_accepted", "M2_union_denominator",
+        "M3_tpc_ignores_void_calls", "M4_ignore_missing_fields",
+        "M5_holm_family_drops_nonsignificant", "M6_costly_swallows_effective",
+        "M7_widen_windows", "M8_topology_not_enforced", "M9_stage2_any_arm",
+        "M10_block_broken_not_propagated", "M11_endpoint_balance_not_checked")
+    missing = [m for m in R460_MUTANTS if m not in A.MUTANTS]
+    assert not missing, f"R460 的突變體不見了：{missing}"
+    assert len(A.MUTANTS) >= len(R460_MUTANTS), sorted(A.MUTANTS)
     assert A.mutation_check() == 0
 
 

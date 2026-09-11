@@ -1,0 +1,34 @@
+{
+  "run": "runs/g_r460_harness_lcb2_a3",
+  "scope": "v1",
+  "records_audited": 104,
+  "texts_audited": 330,
+  "texts_scanned": 330,
+  "per_arm": {
+    "HPI": 32,
+    "HOC": 44,
+    "HMIX": 28
+  },
+  "needles_checked": 2832,
+  "needles_skipped_trivial": 2160,
+  "excused_n": 0,
+  "excused": [],
+  "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0
+  },
+  "unknown_task_ids": [],
+  "violations": [
+    {
+      "line": 91,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[[1], [1], 1]",
+      "message_index": 2,
+      "role": "assistant",
+      "task_id": "lcb_3765",
+      "excerpt": "[4, 8, 5, 1, 14, 2, 2, 12, 1], [7, 2, 8, 4, 2, 2, 1, 1, 2], 7] -> 985\nSELFTEST: [[1], [1], 1] -> 2"
+    }
+  ],
+  "verdict": "VIOLATION"
+}
