@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import ast
 import hashlib
+import itertools
 import json
 import pathlib
 import random
@@ -60,17 +61,59 @@ GAIN_EVALPLUS_RESOURCE_EXCLUSIONS = {
 }
 
 
-def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0) -> list[dict]:
+LCB_BANK_VERSION = {"lcb": "v1", "lcb2": "v2", "lcb3": "v3"}
+
+
+def parse_bank_filter(spec: str) -> tuple[str, tuple[str, ...]]:
+    """`"difficulty=hard"` → `("difficulty", ("hard",))`；`a=x,y` 收多值。
+
+    只做語法，值合不合法留給 `load_tasks` 對**真的載進來的題庫**驗——
+    「這個 bank 有沒有這個難度」不是語法問題，而且答案要看釘死的那份資料。
+    """
+    if spec.count("=") != 1:
+        raise SystemExit(
+            f"--bank-filter 格式是 key=value（或 key=v1,v2），收到 {spec!r}。停。")
+    key, raw = spec.split("=", 1)
+    key = key.strip()
+    values = tuple(v.strip() for v in raw.split(",") if v.strip())
+    if not key or not values:
+        raise SystemExit(f"--bank-filter 的 key 或 value 是空的：{spec!r}。停。")
+    return key, values
+
+
+def bank_strata(bank: str) -> dict[str, dict[str, str]]:
+    """`{task_id: {"difficulty": …, "platform": …}}`；沒有分層標籤的 bank 回 `{}`。
+
+    只有 LCB 的題目自帶**平台原生**的難度／平台欄位。MBPP+ 的 `family` 是
+    codebench 自己的關鍵詞啟發式標籤（`_label_family` 的 docstring 寫著
+    「不是語意真相」），builtin 的 family 是我們自己造題時指定的坑型——
+    兩者都**不是**「題目被出出來時就有的標籤」，拿它們切層會把我們自己的
+    分類誤差寫成「不同的題目集」。所以這裡刻意只認 LCB。
+    """
+    if bank not in LCB_BANK_VERSION:
+        return {}
+    from vacant.codebench import lcb_strata
+    return lcb_strata(LCB_BANK_VERSION[bank])
+
+
+def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0,
+               bank_filter: str | None = None) -> list[dict]:
     """預設用**真題庫**（EvalPlus MBPP+ 378 題，sha256 釘死、fail-closed）。
 
     ⚠ `BuiltinSampleLoader` 只在明確指定時才用，而且它的 docstring 自己警告過：
       「同一顆 reference solver 配不同隨機測資的變體，不是真的不同題目，
         正式跑分前必須換成真 EvalPlus 資料」。
       拿它跑增益實驗會把「題目其實都一樣」誤讀成「機制沒有差別」。
+
+    `bank_filter`（R529）：`"difficulty=hard"` 這種**分層選擇**，只吃得下
+    LCB 的平台原生標籤（`bank_strata` 的 docstring 寫了為什麼不開放給別的
+    bank）。切層在 `offset`／`n` **之前**做 ⇒ `--offset` 數的是**該層之內**的
+    第幾題，切塊語意與不切層時逐字相同（`ts[offset:offset+n]`）。
+    對不上的 key／value／空集合一律 `SystemExit`——**量不到不是通過**。
     """
     if bank == "evalplus":
         loader = EvalPlusMBPPLoader(expose_contract=True)
-    elif bank in ("lcb", "lcb2", "lcb3"):
+    elif bank in LCB_BANK_VERSION:
         from vacant.codebench import LiveCodeBenchLoader
         # lcb2＝v2（同 recipe 多吃 test4 視窗，120 題）。分成兩個 bank 名而不是靠環境變數，
         # 讓 rows/summary 裡 `bank` 一眼看得出用的是哪一版；兩版 sha256/題數都釘死、fail-closed。
@@ -78,15 +121,53 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0) -> list[dict]:
         # 的無限產生器（n=0 時 list() 永遠不回來）——這裡的 elif 就是那個坑的修補。
         # round728（R461）：加 lcb3＝v3（189 題新題，與 v2 零交集）。映射改成明表，
         # 免得再出現「不是 lcb 就是 v2」這種會把新 bank 名默默導到舊 bank 的三元式。
-        loader = LiveCodeBenchLoader(
-            version={"lcb": "v1", "lcb2": "v2", "lcb3": "v3"}[bank])
+        loader = LiveCodeBenchLoader(version=LCB_BANK_VERSION[bank])
     else:
         loader = BuiltinSampleLoader()
-    ts = list(loader.iter_tasks(seed))
+    if bank == "builtin":
+        # R529：`BuiltinSampleLoader` 是**無限**產生器（`_iter_pool` 的
+        # `while True`）⇒ 原本那句 `list(loader.iter_tasks(seed))` 對它**永遠不回來**。
+        # round440y 的註解已經寫過這個坑（那次是 lcb2 掉進來），但 `builtin`
+        # 自己走的就是這條路 ⇒ `--bank builtin` 在 `--bank` 的 choices 裡列著、
+        # 實際上一按就掛死。掛死與「跑很久」在終端機上長得一模一樣，所以改成
+        # 只取需要的前綴；n=0（＝整個題庫）對無限池沒有定義，明講不是默默取一個上限。
+        if not n:
+            raise SystemExit(
+                "--bank builtin 是無限產生器，沒有「整個題庫」這回事 ⇒ 必須給 --n。"
+                "（--gauge-scope bank 也因此對 builtin 不成立。）停。")
+        ts = list(itertools.islice(loader.iter_tasks(seed), offset + n))
+    else:
+        ts = list(loader.iter_tasks(seed))
     if bank == "evalplus":
         ts = [t for t in ts if t["task_id"] not in GAIN_EVALPLUS_RESOURCE_EXCLUSIONS]
     if bank == "builtin":
         print("⚠ 用的是合成題庫，結論不可外推（見 load_tasks docstring）")
+    if bank_filter:
+        key, values = parse_bank_filter(bank_filter)
+        strata = bank_strata(bank)
+        if not strata:
+            raise SystemExit(
+                f"--bank-filter 對 bank={bank} 不成立：只有 "
+                f"{'／'.join(sorted(LCB_BANK_VERSION))} 的題目自帶平台原生分層標籤。停。")
+        from vacant.codebench import LCB_STRATUM_KEYS
+        if key not in LCB_STRATUM_KEYS:
+            raise SystemExit(
+                f"--bank-filter 不認得 key={key!r}（可用：{'／'.join(LCB_STRATUM_KEYS)}）。"
+                "分層只准用題目自帶的標籤，不准用隱藏測資的形狀。停。")
+        present = sorted({m[key] for m in strata.values()})
+        unknown = [v for v in values if v not in present]
+        if unknown:
+            raise SystemExit(
+                f"--bank-filter {key}={','.join(values)}：{bank} 裡沒有 "
+                f"{unknown}（實際有的是 {present}）。這不是「那一層是空的」，"
+                "是標籤打錯了。停。")
+        ts = [t for t in ts if strata.get(t["task_id"], {}).get(key) in values]
+        if not ts:
+            raise SystemExit(
+                f"--bank-filter {bank_filter} 在 {bank} 上一題都沒選到"
+                "——這不是通過，是沒接上。停。")
+        print(f"⚠ 分層：{bank} 只取 {key}∈{{{','.join(values)}}} 的 {len(ts)} 題"
+              f"（切層在 offset/n 之前 ⇒ offset 數的是該層之內的第幾題）")
     return ts[offset:offset + n] if n else ts[offset:]
 
 
@@ -1249,6 +1330,17 @@ def main() -> None:
     ap.add_argument("--arms", default="OFF,ON,OFF5")
     ap.add_argument("--bank", default="evalplus",
                     choices=["evalplus", "builtin", "lcb", "lcb2", "lcb3"])
+    # R529（跨題庫）：把一個 LCB bank 切成「只跑某一層」，讓
+    # 「不同題目集」可以是 lcb3-hard／lcb3-medium 這種**同來源不同切片**，
+    # 而不是為了湊數把同一份東西算兩次。切層在 offset/n 之前 ⇒ 切塊語意不變。
+    # ⚠ 只吃 LCB 的平台原生標籤（difficulty／platform）；MBPP+／builtin 的
+    #   family 是我們自己貼的，拿它切層等於把自己的分類誤差寫成「不同題庫」。
+    ap.add_argument(
+        "--bank-filter", default=None,
+        help="只取題庫的某一層，格式 key=value（或 key=v1,v2），"
+             "key ∈ difficulty／platform，只支援 lcb／lcb2／lcb3。"
+             "對不上的 key／value／空集合一律停（量不到不是通過）",
+    )
     ap.add_argument("--audit-rate", type=float, default=0.2)
     ap.add_argument(
         "--calibration-n", type=int, default=0,
@@ -1341,7 +1433,15 @@ def main() -> None:
         with (out / "notes.jsonl").open("a", encoding="utf-8") as f:
             f.write(json.dumps(obj, ensure_ascii=False, default=str) + "\n")
 
-    tasks = load_tasks(args.bank, args.seed, args.n, offset=args.offset)
+    tasks = load_tasks(args.bank, args.seed, args.n, offset=args.offset,
+                       bank_filter=args.bank_filter)
+    # R529：切層之後每一題的層標籤要跟著進 rows——run 目錄名可以打錯，
+    # rows 裡的標籤是從釘死的題庫算出來的，收官時只認後者。
+    stratum_of: dict[str, str] = {}
+    if args.bank_filter:
+        _fkey, _ = parse_bank_filter(args.bank_filter)
+        _strata = bank_strata(args.bank)
+        stratum_of = {t["task_id"]: _strata[t["task_id"]][_fkey] for t in tasks}
     # R445 M3/M4：offset 過頭是「安靜量不到」的兩型——
     #   M3 一題都取不到 ⇒ 這不是通過，是沒接上，直接停；
     #   M4 取到的比要求的少 ⇒ 不准安靜縮水，顯式印出實際題數與缺口。
@@ -1350,7 +1450,9 @@ def main() -> None:
             f"一題都沒載到（bank={args.bank} offset={args.offset} n={args.n}）"
             "——offset 可能已經超過題庫尾端。這不是通過，是沒接上。停。"
         )
-    print(f"{len(tasks)} 題（{args.bank}　offset={args.offset}　"
+    print(f"{len(tasks)} 題（{args.bank}"
+          f"{'　層=' + args.bank_filter if args.bank_filter else ''}　"
+          f"offset={args.offset}　"
           f"題序 [{args.offset}, {args.offset + len(tasks)})）　輸出 {out}")
     if args.n and len(tasks) < args.n:
         print(f"⚠ 只載到 {len(tasks)} 題，比 --n {args.n} 少 {args.n - len(tasks)} 題"
@@ -1362,6 +1464,16 @@ def main() -> None:
     # 本塊的題目仍然拿去算「出貨閘門覆蓋」——那是另一個問題，見 probe_instrument。
     gauge_tasks, coverage_tasks = tasks, None
     if args.gauge_scope == "bank":
+        # R529：`bank` 就是**整個題庫**，`--bank-filter` **不套在這裡**。
+        # 理由不是圖方便，是實測：lcb v1/v2 的 12 份手寫參考解 **12/12 全是
+        # medium**（`ops/gain/data/lcb_probe_solutions.json` 對 v2 的難度分布），
+        # 所以 `difficulty=hard` 之下若連量具也切層 ⇒ covered=0 ⇒ runner 照
+        # 「量不到不是通過」正確地拒跑 ⇒ hard 那一層**永遠發不出去**。
+        # 而量具驗的是**沙箱＋題庫＋計分**（參考解與壞樁都不經模型）⇒ 對整個
+        # 題庫驗**比對單層驗更強**，且與「這一塊是哪幾題」無關。
+        # ⚠ 代價要說出來：hard 層的題目**沒有**被參考解直接驗過（它們沒有參考解）。
+        #   驗到的是同一支 `_lcb_check_code`／同一個沙箱，不是那幾題自己。
+        #   落盤欄位 `gauge_in_filter_n` 把這個數字寫下來，不讓它被總數蓋掉。
         gauge_tasks = load_tasks(args.bank, args.seed, 0)
         coverage_tasks = tasks
         if not gauge_tasks:
@@ -1369,10 +1481,26 @@ def main() -> None:
                 f"--gauge-scope bank 但整個題庫一題都沒載到（bank={args.bank}）"
                 "——這不是通過，是沒接上。停。")
         print(f"   範圍＝bank：對 {args.bank} 全 {len(gauge_tasks)} 題裡有參考解的驗，"
-              f"本塊 {len(tasks)} 題另外算出貨閘門覆蓋")
+              f"本塊 {len(tasks)} 題另外算出貨閘門覆蓋"
+              + ("（量具**不**套 --bank-filter，理由見原始碼註解）"
+                 if args.bank_filter else ""))
     probe_sample = len(gauge_tasks) if args.probe_sample == 0 else args.probe_sample
     pr = probe_instrument(gauge_tasks, note, sample=probe_sample, bank=args.bank,
                           coverage_tasks=coverage_tasks)
+    if args.bank_filter:
+        # 「量具驗到的那幾題，有幾題其實在我這一層裡」——擴大量具不准順手把
+        # 「這一層沒有一題被參考解直接驗過」這件事蓋掉。0 不擋（見上面的理由），
+        # 但**一定要印、一定要落盤**。
+        _f = bank_strata(args.bank)
+        _k, _v = parse_bank_filter(args.bank_filter)
+        pr["bank_filter"] = args.bank_filter
+        pr["gauge_in_filter_n"] = sum(
+            1 for d in pr["detail"] if _f.get(d["task_id"], {}).get(_k) in _v)
+        note({"bank_filter": args.bank_filter,
+              "gauge_in_filter_n": pr["gauge_in_filter_n"], "gauge_n": pr["n"]})
+        print(f"   量具驗到的 {pr['n']} 題裡，落在 {args.bank_filter} 這一層的有 "
+              f"{pr['gauge_in_filter_n']} 題（0 不擋——量具驗的是沙箱＋計分，"
+              f"不是那幾題自己；但這個數字要照實帶進收官）")
     print(f"   參考解通過 {pr['ref_pass']}/{pr['n']}　"
           f"壞解被擋 {pr['broken_rejected']}/{pr['n']}")
     if pr["n"] == 0:
@@ -1463,7 +1591,10 @@ def main() -> None:
     calibration = None
     if args.calibration_n:
         calibration_tasks = load_tasks(
-            args.bank, args.seed, args.calibration_n, offset=len(tasks)
+            args.bank, args.seed, args.calibration_n, offset=len(tasks),
+            # R529：切層時 calibration 要留在**同一層**，否則「與正式題
+            # 不重疊」會靠跨層的題目來達成，preflight 量到的就不是這一層的難度。
+            bank_filter=args.bank_filter,
         )
         if len(calibration_tasks) != args.calibration_n:
             raise SystemExit("題庫不足以建立與正式題不重疊的 calibration set")
@@ -1511,6 +1642,11 @@ def main() -> None:
                 # round460f：量具範圍是**可稽核的實驗條件**（哪一塊用哪一種模式
                 # 要看得出來），但它不進臂的執行路徑 ⇒ 分類 (a)。
                 "gauge_scope": args.gauge_scope,
+                # R529：切層的 run 一定要說得出「哪個題庫的哪一層」，
+                # 否則 summary 自己認不出自己。沒切層就完全不出現這兩個 key
+                # ⇒ 既有 run 的 summary.json 逐位元不變。
+                **({"bank": args.bank, "bank_filter": args.bank_filter}
+                   if args.bank_filter else {}),
                 "run_complete": run_complete,
                 "run_terminal": run_terminal,
                 "request_policy": {
@@ -1735,6 +1871,11 @@ def main() -> None:
                 f.write(json.dumps({
                     "arm": arm, "seed": args.seed, "i": i,
                     "task_id": t["task_id"], "family": t["family"], "entry_point": t.get("entry_point"),
+                    # R529：只有切層的 run 才多這三欄 ⇒ **既有 run 的
+                    # rows.jsonl 逐位元不變**（沒有 --bank-filter 就沒有這兩個 key）。
+                    **({"bank": args.bank, "bank_filter": args.bank_filter,
+                        "stratum": stratum_of.get(t["task_id"])}
+                       if args.bank_filter else {}),
                     "worker": worker, "involved": involved,
                     "meets_demand": truth, "err": err[:200],
                     "accepted": accepted, "calls_used": calls[0] - calls_before,

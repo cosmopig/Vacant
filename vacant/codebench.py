@@ -903,3 +903,33 @@ class LiveCodeBenchLoader(TaskLoader):
     @staticmethod
     def public_view(task: dict[str, Any]) -> dict[str, Any]:
         return {k: task[k] for k in ("task_id", "family", "prompt", "entry_point")}
+
+
+# LCB 題目自帶的**平台原生**分層標籤。可以拿來切層的就只有這兩個 key——
+# 寫成常數而不是「隨便一個欄位名都收」，是因為 `--bank-filter` 若接受任意欄位，
+# 有一天會有人寫 `--bank-filter n_hidden_total=24`，那等於讓**隱藏測資的形狀**
+# 決定哪些題進 run（V/GT 分離的旁路）。分層只准用「題目被出出來時就有的標籤」。
+LCB_STRATUM_KEYS: tuple[str, ...] = ("difficulty", "platform")
+
+
+def lcb_strata(version: str = LCB_BANK_DEFAULT_VERSION,
+               *, path: str | None = None) -> dict[str, dict[str, str]]:
+    """回 `{task_id: {"difficulty": …, "platform": …}}`——**分層用的中繼資料**。
+
+    為什麼另開一支而不是把兩個欄位塞進 `iter_tasks` 吐的 task dict：那個 dict
+    會被 harness／OFF5／稽核一路帶著走，多兩個 key 就多兩個「哪天有人拿它做
+    決策」的面。分層是**排程側**（哪些題進這一塊）的事，與 agent 無關，所以
+    它走一支只給 runner 用的旁路，與 `_canonical_solutions` 同一種紀律。
+
+    ⚠ 這兩個標籤**不是 GT**：難度與平台是 LeetCode 出題時就掛在題目上的，
+      跟參考解、隱藏測資、期望值都無關（見 `LiveCodeBenchLoader` docstring 的
+      「公正性依據」）。即使如此也**不進 prompt**——`public_view` 一格沒動。
+
+    走的是同一顆 `LiveCodeBenchLoader` ⇒ sha256 釘死、題數釘死、schema 全驗
+    都照跑；讀不到或對不上就 raise，不會回一份半殘的分層表。
+    """
+    loader = LiveCodeBenchLoader(path, version=version)
+    return {
+        rec["task_id"]: {k: str(rec[k]) for k in LCB_STRATUM_KEYS}
+        for rec in loader._records
+    }
