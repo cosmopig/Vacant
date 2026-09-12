@@ -1111,3 +1111,61 @@ v1 §九-5 記著「索引釘在 44、實際 50，`--check` 也 FAIL，本輪不
 §五-2（量具不切層的理由與代價）、§六-4（R460 §九 推翻鍵）、
 §一〇（中止準則）、§一一 大部分、§一二（能講的話）——這些 Fable 沒有改，
 本檔照抄並依 4 集／3 臂更新數字。
+
+---
+
+## 附錄 B：勘誤（key 名對齊，**不改凍結正文**）
+
+2026-09-12 補。來源＝`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md` §六-3
+（「分析器與預註冊的字面不合：口徑對、key 名不對」）。
+
+**這份附錄能做什麼、不能做什麼**：正文 §六 的**判準、門檻、家族大小、四狀態定義**
+在資料之前凍結，本附錄**一個字都不動它們**——動了就不是預註冊了。本附錄只做一件事：
+把正文引用的 key 名對到 `ops/gain/analyze_r529.py` 實際吐出來的 key 名。
+之所以必須寫下來，是因為「判準指名了一個不存在的 key」時，`.get()` 會安靜地回
+`None`，然後被讀成「量到 0」——那正是正文開頭那段紀律要擋的東西，而它在自己身上發生了。
+
+**對照表**（左＝正文寫的，右＝analyzer 實際輸出；意思完全相同，只是路徑）
+
+| 正文位置 | 正文寫的 key | 實際 key |
+|---|---|---|
+| §六-1 仲裁欄位 | `primary.per_stratum[k].{b,c,p}` | `primary.<pair>.per_stratum[k].{set,b,c,n_common,p_unadjusted}` |
+| §六-1 仲裁欄位 | `primary.<pair>.b/.c/.n_discordant/.p/.p_adj`、`primary.family_size` | **一致**（無需對照） |
+| §六-2 第 1 項 | `paired.<set>.<pair>.delta_pp`／`b`／`c`／`n_common` | `per_set.<set>.paired.<pair>.*` |
+| §六-2 第 3 項 | 異質性 | `primary.<pair>.heterogeneity.{chi2,df,p,min_expected}` |
+| §六-2 第 4 項 | `tokens.<set>.*`、`per_arm.<set>.*` | `per_set.<set>.tokens.<arm>.*`、`per_set.<set>.per_arm.<arm>.*` |
+| §六-2 第 5 項 | 「`refutation.*`：見 **§六-5**」 | 推翻鍵其實是 **§六-4**（§六-5 是宣稱規則）——**編號筆誤** |
+| §六-3 (ii) | `tokens.pooled.HMIX.token_per_correct` | `tokens_pooled.HMIX.tpc_incl_void`（CONFORM 同） |
+| §六-3 代用值 | `tokens.<set>.tpc_off5_surrogate` | **未實作**。本 run 沒有 OFF5 臂，代用值禁令是「不准造」，analyzer 選擇連欄位都不生——**沒有這個 key 就是遵守了那條禁令**，不是漏掉 |
+| §六-4 觸發鍵 | `paired.lcb3_hard.HMIX_vs_CONFORM` | `per_set.lcb3_hard.paired.HMIX_vs_CONFORM`；判到的布林值在 `refutation.keys.<set>.c_ge_b`、總旗標 `refutation.triggered` |
+| §六-4 | `refutation.<set>_c_ge_b`（MBPP+／HumanEval+） | **一致**：`refutation.humanevalplus_c_ge_b`、`refutation.evalplus_c_ge_b` |
+| §六-5 | `aggregate.statement`／`aggregate.statement_rule` | **一致** |
+| §四 P-X7 | `per_arm.<set>.HMIX.calls_per_task` | `per_set.<set>.per_arm.HMIX.calls_per_task` |
+
+**兩處不只是路徑，要一起記**：
+
+1. **§六-3 的 INVALID 那一列**（「任一塊 `--scope v2` 報違規」）在 2026-09-12 之前
+   **analyzer 結構上判不出來**——它只讀 `rows.jsonl`／`calls.jsonl`／`summary.json`，
+   看不到 V/GT 稽核產物。2026-09-11 的收官是由稽核者在 analyzer **之外**補判的。
+   round529-2 補上 `--vgt-dir`：讀 `vgt_v2_<block>.json`，
+   任一塊 `verdict != CLEAN`（含**檔案不在**）⇒ `decision_state.state = INVALID`，
+   並保留 `state_before_vgt` 讓人看得到是被哪一道閘門翻掉的。
+   **沒給 `--vgt-dir` 時 `vgt.applied = false`、`vgt.clean = null`——那是「沒量」，不是 CLEAN。**
+   ⚠ 這道閘門是**單邊**的：全 CLEAN 只代表那一套 needle 沒命中，不代表沒有洩漏。
+2. **`calls_total` 這個 key 在 round529-2 拆成兩個**（稽核 §六-2 的第一條不一致：
+   lcb3m/HMIX 印 162 與 1.1407，而 162÷135＝1.200）。原因是同一個名字底下有兩個帳：
+
+   | 新 key | 來源 | lcb3m/HMIX |
+   |---|---|---|
+   | `calls_wire_total` | `calls.jsonl` 的列數，**含** `wire_probe`、**含**失敗後的每一次重試 | 162 |
+   | `calls_wire_ok` | 同上但只算 `ok=true` | 161 |
+   | `calls_logical_total` | `rows.calls_used` 的和＝臂在預算帳上花掉的呼叫數 | 154 |
+   | `calls_per_task` | `calls_logical_total ÷ n_measured`（**與邏輯層同源，可被 selftest 檢查**） | 1.1407 |
+
+   §六-6 的預算回填一律用**邏輯層**：四集三臂合計 **2,451** 通
+   （稽核 §六-2 記的 2,534 多算了 preflight 37、`wire_probe` 38、重試 8）。
+   方向不變：實測低於中心估計 2,850。
+
+**這一版重跑的對帳**：改完之後重跑 analyzer，除了上面新增／改名的 key 之外
+**沒有任何一個既有 key 的值改變**（逐鍵 diff，changed=0）——
+四狀態、b/c、p、p_adj、逐集 Δ、token、tpc 全部逐位元相同。

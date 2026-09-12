@@ -144,3 +144,97 @@ def test_deliv_and_denominator_are_the_frozen_definitions():
 
 def test_included_sets_only_drops_invalid():
     assert included_sets({s: {"valid": True} for s in SETS}) == list(SETS)
+
+
+# ── round529-2（DECISION_20260912 §八-2）：兩欄分源 ＋ V/GT 閘門 ──────
+
+
+def test_calls_wire_and_logical_are_two_named_columns():
+    """`calls_total` 一個名字底下有兩個帳 ⇒ 162 與 1.1407 除不起來。
+
+    稽核 §六-2 的第一條不一致：lcb3m/HMIX 印 162（calls.jsonl 行數）與
+    1.1407（rows.calls_used÷135），而 162÷135＝1.200。修法不是選一個，
+    是**兩個都留、各自命名**，並且讓 `calls_per_task` 與邏輯層同源。
+    """
+    from ops.gain.analyze_r529 import per_set_stats, tokens_by_arm
+    calls = [{"ok": True, "usage": {"total_tokens": 10},
+              "meta": {"arm": "HMIX", "task_id": "t0"}},
+             {"ok": True, "usage": {"total_tokens": 10},
+              "meta": {"arm": "HMIX", "task_id": "t1"}},
+             {"ok": False, "usage": {"total_tokens": 0},
+              "meta": {"arm": "HMIX", "task_id": "t1"}}]
+    tb = tokens_by_arm(calls, {"HMIX": {"t0", "t1"}})["HMIX"]
+    assert tb["calls_wire_total"] == 3 and tb["calls_wire_ok"] == 2
+    assert "calls_total" not in tb, "舊名字不准留著——它正是歧義的來源"
+
+    rows = [{"arm": a, "task_id": f"t{i}", "meets_demand": True,
+             "accepted": True, "calls_used": 1, "family": "x"}
+            for a in ("OFF", "CONFORM", "HMIX") for i in range(2)]
+    ps = per_set_stats("lcb3_medium", {
+        "rows": rows, "calls": calls, "n_tasks": 2, "n_tasks_expected": 2,
+        "blocks_present": 1, "blocks_expected": 1, "broken_reasons": [],
+        "blocks": []})
+    pa, tk = ps["per_arm"]["HMIX"], ps["tokens"]["HMIX"]
+    assert pa["calls_logical_total"] == 2          # rows.calls_used 的和
+    assert tk["calls_wire_total"] == 3             # calls.jsonl 的列數
+    assert pa["calls_per_task"] * pa["n_measured"] == pa["calls_logical_total"]
+    assert tk["calls_logical_total"] == pa["calls_logical_total"]
+
+
+def test_vgt_gate_turns_a_dirty_block_into_INVALID(tmp_path):
+    """analyzer 在這一版之前**結構上**判不出 INVALID（稽核 §六-3）。"""
+    from ops.gain.analyze_r529 import SETS, vgt_gate
+    for blks in SETS.values():
+        for blk in blks:
+            (tmp_path / f"vgt_v2_{blk}.json").write_text(
+                json.dumps({"verdict": "CLEAN", "violations": [], "scope": "v2"}))
+    g = vgt_gate(tmp_path)
+    assert g["applied"] and g["clean"] is True
+    assert g["clean_n"] == g["blocks_expected"] == sum(len(v) for v in SETS.values())
+
+    dirty = SETS["lcb3_hard"][0]
+    (tmp_path / f"vgt_v2_{dirty}.json").write_text(
+        json.dumps({"verdict": "VIOLATION", "violations": [{"task_id": "x"}]}))
+    g2 = vgt_gate(tmp_path)
+    assert g2["clean"] is False and f"{dirty}:VIOLATION" in g2["not_clean"]
+
+
+def test_vgt_gate_fails_closed_on_a_missing_file(tmp_path):
+    """沒掃過 ≠ 掃過是乾淨的（鐵律 3）。"""
+    from ops.gain.analyze_r529 import SETS, vgt_gate
+    for blks in SETS.values():
+        for blk in blks:
+            (tmp_path / f"vgt_v2_{blk}.json").write_text(
+                json.dumps({"verdict": "CLEAN", "violations": []}))
+    (tmp_path / f"vgt_v2_{SETS['evalplus'][0]}.json").unlink()
+    g = vgt_gate(tmp_path)
+    assert g["clean"] is False
+    assert any(s.endswith(":MISSING") for s in g["not_clean"])
+
+
+def test_no_vgt_dir_is_not_clean():
+    """不給 `--vgt-dir` ＝ 這一格沒量；`clean` 必須是 None 不是 True。"""
+    from ops.gain.analyze_r529 import vgt_gate
+    g = vgt_gate(None)
+    assert g["applied"] is False and g["clean"] is None
+
+
+def test_analyze_accepts_vgt_dir_and_overrides_the_state():
+    """介面釘死：`analyze(root, vgt_dir=...)`，且翻案時保留原本那一格。"""
+    import inspect
+
+    from ops.gain.analyze_r529 import analyze
+    assert "vgt_dir" in inspect.signature(analyze).parameters
+    src = (ROOT / "ops" / "gain" / "analyze_r529.py").read_text(encoding="utf-8")
+    assert '"state_before_vgt"' in src
+    assert '"invalidated_by": "vgt_not_clean"' in src
+
+
+def test_prereg_has_the_errata_appendix():
+    """勘誤只准加附錄，不准改凍結正文（§六 的門檻一個字都不能動）。"""
+    txt = DECISION.read_text(encoding="utf-8")
+    assert "附錄 B：勘誤" in txt
+    assert "tokens_pooled.HMIX.tpc_incl_void" in txt
+    assert "calls_wire_total" in txt and "calls_logical_total" in txt
+    # 凍結正文的門檻句必須原樣還在
+    assert "家族 2" in txt and "α=0.05" in txt

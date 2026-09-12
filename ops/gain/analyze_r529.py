@@ -95,6 +95,12 @@ REQUIRED = ("arm", "task_id", "meets_demand", "accepted", "calls_used")
 #: 任一臂的 void 率超過這條線 ⇒ 那一塊不進分析（§一〇-1，沿用 R460 §十）。
 VOID_RATE_ABORT = 0.20
 
+CALLS_SOURCE_NOTE = (
+    "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次"
+    "重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的"
+    "呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，"
+    "引用時要指名是哪一個；round529-2 之前兩者共用 `calls_total` 一個名字。")
+
 CI_DISCLAIMER = "區間未做多重比較調整；仲裁以 analyzer 為準"
 POOLING_IDENTITY_NOTE = (
     "分層統計量與「把四集的不一致對直接加起來做一次 McNemar」**數值相同**；"
@@ -175,18 +181,25 @@ def tokens_by_arm(calls: list[dict], measured_ids: dict[str, set[str]]) -> dict:
 
     void 格的呼叫已經燒掉 token 但那一格不進分母 ⇒ 只報「排除 void」會**低估**
     H 臂的成本。§六-3 的 (ii) 用**含 void** 的那個（`tpc_incl_void`）。
+
+    ⚠ 這裡數出來的是 **wire 層**的呼叫數（`calls_wire_total`）：`calls.jsonl`
+    有幾列就是幾通，含 `wire_probe`、含失敗後重試的每一次。它**不等於**臂在
+    預算帳上花掉的呼叫數（那是 `rows.calls_used` 的和＝`calls_logical_total`）。
+    兩個數字都對、意思不同；round529-2 之前它們共用 `calls_total` 這一個名字，
+    於是「每題幾通」與「總共幾通」除出來對不上——那不是 bug 在數字上，
+    是 bug 在**名字**上，而名字錯掉的帳會被讀成量到了不存在的東西。
     """
     out: dict[str, dict] = {}
     for rec in calls:
         arm = (rec.get("meta") or {}).get("arm")
         if arm is None:
             continue
-        d = out.setdefault(arm, {"calls_total": 0, "calls_ok": 0,
+        d = out.setdefault(arm, {"calls_wire_total": 0, "calls_wire_ok": 0,
                                  "tokens_incl_void": 0, "tokens_excl_void": 0})
-        d["calls_total"] += 1
+        d["calls_wire_total"] += 1
         if not rec.get("ok"):
             continue
-        d["calls_ok"] += 1
+        d["calls_wire_ok"] += 1
         tok = int((rec.get("usage") or {}).get("total_tokens") or 0)
         d["tokens_incl_void"] += tok
         if (rec.get("meta") or {}).get("task_id") in measured_ids.get(arm, set()):
@@ -300,12 +313,17 @@ def per_set_stats(name: str, loaded: dict) -> dict:
         acc = sum(1 for r in rs if r.get("accepted"))
         false_n = sum(1 for r in rs
                       if r.get("accepted") and not r.get("meets_demand"))
+        logical = sum(int(r.get("calls_used") or 0) for r in rs)
+        if MUTANT == "M6_calls_per_task_from_wire":
+            logical = -1        # 讓 calls_per_task 與 calls_logical_total 脫鉤
         per_arm[a] = {
             "n_measured": n, "deliv_n": dn, "deliv_pp": _pct(dn, n),
             "accepted_n": acc,
             "false_delivery_n": false_n, "false_delivery_pp": _pct(false_n, n),
-            "calls_per_task": (sum(int(r.get("calls_used") or 0) for r in rs) / n
-                               if n else None),
+            # **邏輯**呼叫數（預算帳）：rows.calls_used 的和。`calls_per_task`
+            # 一定是它除以 n——兩者同源是可檢查的，見 selftest (12)。
+            "calls_logical_total": logical,
+            "calls_per_task": (logical / n) if n else None,
         }
     tok = tokens_by_arm(loaded["calls"], measured)
     tokens: dict[str, dict] = {}
@@ -316,7 +334,12 @@ def per_set_stats(name: str, loaded: dict) -> dict:
         tokens[a] = {
             "tokens_incl_void": t.get("tokens_incl_void", 0),
             "tokens_excl_void": t.get("tokens_excl_void", 0),
-            "calls_total": t.get("calls_total", 0),
+            # wire 層（calls.jsonl 的列數，含 wire_probe／失敗重試）
+            "calls_wire_total": t.get("calls_wire_total", 0),
+            "calls_wire_ok": t.get("calls_wire_ok", 0),
+            # 邏輯層（預算帳，rows.calls_used 的和）＝ calls_per_task × n
+            "calls_logical_total": per_arm[a]["calls_logical_total"],
+            "calls_source_note": CALLS_SOURCE_NOTE,
             "tokens_per_task": (t.get("tokens_incl_void", 0) / n) if n else None,
             "tpc_incl_void": (t.get("tokens_incl_void", 0) / dn) if dn else None,
         }
@@ -415,6 +438,62 @@ def decide(prim: dict, pooled_tokens: dict) -> dict:
     }
 
 
+# ── V/GT 閘門（round529-2；DECISION_20260912 §六-3 的處置）───────────
+VGT_NOTE = (
+    "analyzer 只讀 `rows/calls/summary`，**結構上看不到隱藏測資有沒有洩漏**"
+    "⇒ 在這一版之前它永遠判不出 INVALID（`DECISION_20260912_R529_FABLE_AUDIT_"
+    "CROSS_BANK.md` §六-3）。`--vgt-dir` 把 `harness_vgt_audit.py --scope v2` "
+    "的產物讀進來，任何一塊 `verdict != CLEAN` ⇒ `decision_state.state=INVALID`。"
+    "⚠ **檔案不在也算不通過**（`missing`）：沒掃過不等於掃過是乾淨的"
+    "（鐵律 3 的同一條紀律）。⚠ 這道閘門是**單邊**的：V/GT 全 CLEAN 只代表"
+    "那一套 needle 沒命中，不代表沒有洩漏——不准讀成「已證明零洩漏」。")
+
+
+def vgt_gate(vgt_dir: pathlib.Path | None) -> dict:
+    """讀 `vgt_v2_<block>.json`，任一塊 verdict≠CLEAN ⇒ 不通過。
+
+    ⚠ 沒給 `--vgt-dir` 時回 `applied=False`——那是「這一格沒量」，
+    **不是** CLEAN。收官引用時要看得到這個布林值。
+    """
+    out: dict = {"applied": vgt_dir is not None,
+                 "dir": str(vgt_dir) if vgt_dir else None,
+                 "blocks_expected": sum(len(v) for v in SETS.values()),
+                 "clean_n": 0, "by_block": {}, "not_clean": [],
+                 "clean": None, "note": VGT_NOTE}
+    if vgt_dir is None:
+        return out
+    for name, blks in SETS.items():
+        for blk in blks:
+            f = vgt_dir / f"vgt_v2_{blk}.json"
+            if not f.exists():
+                out["by_block"][blk] = {"set": name, "verdict": "MISSING",
+                                        "path": str(f)}
+                out["not_clean"].append(f"{blk}:MISSING")
+                continue
+            try:
+                d = json.loads(f.read_text(encoding="utf-8"))
+            except Exception as exc:                       # noqa: BLE001
+                out["by_block"][blk] = {"set": name, "verdict": "UNREADABLE",
+                                        "error": repr(exc)}
+                out["not_clean"].append(f"{blk}:UNREADABLE")
+                continue
+            v = d.get("verdict")
+            rec = {"set": name, "verdict": v,
+                   "violations_n": len(d.get("violations") or []),
+                   "excused_n": d.get("excused_n"),
+                   "needles_checked": d.get("needles_checked"),
+                   "scope": d.get("scope")}
+            out["by_block"][blk] = rec
+            if v == "CLEAN" and MUTANT != "M7_vgt_not_checked":
+                out["clean_n"] += 1
+            else:
+                out["not_clean"].append(f"{blk}:{v}")
+    if MUTANT == "M7_vgt_not_checked":
+        out["not_clean"] = []
+    out["clean"] = not out["not_clean"]
+    return out
+
+
 # ── §六-4 推翻鍵 ／ §六-5 宣稱規則 ────────────────────────────────────
 def refutation(per_set: dict) -> dict:
     """R460 §九 第一條的推翻鍵：LCB v3 任一層 c ≥ b ⇒ 觸發。"""
@@ -473,17 +552,20 @@ def aggregate(per_set: dict, prim: dict, included: list[str]) -> dict:
 
 
 # ── 主流程 ────────────────────────────────────────────────────────────
-def analyze(root: pathlib.Path = ROOT) -> dict:
+def analyze(root: pathlib.Path = ROOT,
+            vgt_dir: pathlib.Path | None = None) -> dict:
     per_set: dict[str, dict] = {}
     for name in SETS:
         per_set[name] = per_set_stats(name, load_set(name, root))
     included = included_sets(per_set)
+    vgt = vgt_gate(vgt_dir)
     out: dict = {
         "run": "R529",
         "decision": "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
         "arms": list(ARMS),
         "sets_expected": list(SETS),
         "sets_included_in_primary": included,
+        "vgt": vgt,
         "per_set": per_set,
     }
     if not included:
@@ -506,6 +588,16 @@ def analyze(root: pathlib.Path = ROOT) -> dict:
     out["primary"] = primary(per_set, included)
     out["refutation"] = refutation(per_set)          # 先於四狀態印（§六-4）
     out["decision_state"] = decide(out["primary"], pooled_tokens)
+    if vgt["applied"] and not vgt["clean"]:
+        # V/GT 不乾淨 ⇒ 整個 run 的資料不可用，四狀態一律 INVALID。
+        # **保留**原本算出來的那一格，好讓人看得到「是被這道閘門翻掉的」。
+        out["decision_state"] = {
+            "state": "INVALID",
+            "state_before_vgt": out["decision_state"]["state"],
+            "invalidated_by": "vgt_not_clean",
+            "not_clean": vgt["not_clean"],
+            "note": VGT_NOTE,
+        }
     out["aggregate"] = aggregate(per_set, out["primary"], included)
     return out
 
@@ -549,12 +641,25 @@ def render(a: dict) -> str:
                  f"{pc['ci95_hi_pp']:+.1f}] b/c={pc['b']}/{pc['c']}　"
                  f"ΔO={po['delta_pp']:+.2f}pp b/c={po['b']}/{po['c']}")
     L.append(f"  ⚠ {CI_DISCLAIMER}")
+    g = a.get("vgt") or {}
+    if g:
+        L.append("")
+        if not g.get("applied"):
+            L.append("── V/GT 閘門：**沒量**（沒給 --vgt-dir）——"
+                     "這不是 CLEAN，收官引用時要講清楚")
+        else:
+            L.append(f"── V/GT 閘門：{g['clean_n']}/{g['blocks_expected']} CLEAN　"
+                     f"{'通過' if g['clean'] else '**不通過** ' + str(g['not_clean'][:5])}")
+        L.append(f"  ⚠ {g.get('note')}")
     if "decision_state" in a:
         d = a["decision_state"]
         L.append("")
         L.append(f"── R529 四狀態：**{d['state']}**"
                  f"（(i)={d.get('cond_i_both_primary_holm')} "
                  f"(ii)={d.get('cond_ii_tpc_hmix_le_conform')}）")
+        if d.get("invalidated_by"):
+            L.append(f"  ⚠ 被 {d['invalidated_by']} 翻成 INVALID；"
+                     f"翻之前是 {d.get('state_before_vgt')}")
         L.append(f"  ⚠ {d['note']}")
     if "aggregate" in a:
         g = a["aggregate"]
@@ -678,8 +783,9 @@ def selftest() -> int:
         bad.append(f"tokens_incl_void={tb['tokens_incl_void']}，應為 1000（含 void 格）")
     if tb["tokens_excl_void"] != 100:
         bad.append(f"tokens_excl_void={tb['tokens_excl_void']}，應為 100")
-    if tb["calls_total"] != 3 or tb["calls_ok"] != 2:
-        bad.append(f"calls_total/ok={tb['calls_total']}/{tb['calls_ok']}，應為 3/2")
+    if tb["calls_wire_total"] != 3 or tb["calls_wire_ok"] != 2:
+        bad.append(f"calls_wire_total/ok={tb['calls_wire_total']}/"
+                   f"{tb['calls_wire_ok']}，應為 3/2（wire 層：含失敗那一通）")
 
     # (11) M5：`included_sets` 只准把 INVALID 的拿掉，不准安靜地少算一集。
     all_valid = {s: {"valid": True} for s in SETS}
@@ -689,16 +795,79 @@ def selftest() -> int:
     if included_sets(one_bad) != [s for s in SETS if s != "evalplus"]:
         bad.append("included_sets 沒有正確拿掉 INVALID 的那一集")
 
+    # (12) M6：`calls_per_task` 與 `calls_logical_total` **必須同源**
+    #      （round529-2：DECISION_20260912 §六-2 的第一條不一致）。
+    #      wire 層（calls.jsonl 的列數，含 wire_probe／重試）與邏輯層
+    #      （rows.calls_used 的和）不是同一個數，共用一個名字會被除成鬼數字。
+    loaded = {"rows": (_fake_rows("HMIX", [True, True], "t")
+                       + _fake_rows("CONFORM", [True, False], "t")
+                       + _fake_rows("OFF", [False, False], "t")),
+              # wire 層刻意比邏輯層多：3 通（1 通是 wire_probe／重試）
+              "calls": [{"ok": True, "usage": {"total_tokens": 10},
+                         "meta": {"arm": "HMIX", "task_id": "t0"}},
+                        {"ok": True, "usage": {"total_tokens": 10},
+                         "meta": {"arm": "HMIX", "task_id": "t1"}},
+                        {"ok": False, "usage": {"total_tokens": 0},
+                         "meta": {"arm": "HMIX", "task_id": "t1"}}],
+              "n_tasks": 2, "n_tasks_expected": 2, "blocks_present": 1,
+              "blocks_expected": 1, "broken_reasons": [], "blocks": []}
+    ps = per_set_stats("lcb3_medium", loaded)
+    pa, tk = ps["per_arm"]["HMIX"], ps["tokens"]["HMIX"]
+    if pa["calls_logical_total"] != 2:
+        bad.append(f"calls_logical_total={pa['calls_logical_total']}，應為 2"
+                   "（rows.calls_used 的和）")
+    if tk["calls_wire_total"] != 3:
+        bad.append(f"calls_wire_total={tk['calls_wire_total']}，應為 3"
+                   "（calls.jsonl 的列數，含失敗那一通）")
+    if pa["calls_per_task"] is None or abs(
+            pa["calls_per_task"] * pa["n_measured"]
+            - pa["calls_logical_total"]) > 1e-9:
+        bad.append(f"calls_per_task({pa['calls_per_task']}) × n"
+                   f"({pa['n_measured']}) ≠ calls_logical_total"
+                   f"({pa['calls_logical_total']})——兩欄不同源")
+    if tk["calls_logical_total"] != pa["calls_logical_total"]:
+        bad.append("tokens.calls_logical_total 與 per_arm 的不一致")
+
+    # (13) M7：V/GT 閘門。任一塊不是 CLEAN ⇒ 不准通過；沒給目錄＝沒量，不是 CLEAN。
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        vd = pathlib.Path(td)
+        for blks in SETS.values():
+            for blk in blks:
+                (vd / f"vgt_v2_{blk}.json").write_text(
+                    json.dumps({"verdict": "CLEAN", "violations": [],
+                                "scope": "v2"}), encoding="utf-8")
+        g = vgt_gate(vd)
+        if not g["clean"] or g["clean_n"] != g["blocks_expected"]:
+            bad.append(f"vgt_gate 全 CLEAN 卻不通過：{g['not_clean'][:3]}")
+        dirty = SETS["lcb3_hard"][0]
+        (vd / f"vgt_v2_{dirty}.json").write_text(
+            json.dumps({"verdict": "VIOLATION",
+                        "violations": [{"task_id": "x"}]}), encoding="utf-8")
+        g2 = vgt_gate(vd)
+        if g2["clean"] or f"{dirty}:VIOLATION" not in g2["not_clean"]:
+            bad.append(f"vgt_gate 沒抓到髒的那一塊：{g2['not_clean'][:3]}")
+        (vd / f"vgt_v2_{dirty}.json").unlink()
+        g3 = vgt_gate(vd)
+        if g3["clean"] or f"{dirty}:MISSING" not in g3["not_clean"]:
+            bad.append("vgt_gate 把「檔案不在」當成通過了——沒掃過≠掃過是乾淨的")
+    g4 = vgt_gate(None)
+    if g4["applied"] or g4["clean"] is not None:
+        bad.append("沒給 --vgt-dir 時應該是 applied=False／clean=None（沒量≠CLEAN）")
+
     for line in bad:
         print("FAIL " + line)
-    print(f"selftest: {'OK（11 組手算對照全過）' if not bad else f'{len(bad)} 條不符'}")
+    print(f"selftest: {'OK（13 組手算對照全過）' if not bad else f'{len(bad)} 條不符'}")
     return 1 if bad else 0
 
 
 # ── --mutation-check：每一種突變都要讓 selftest 變紅 ──────────────────
 MUTATIONS = ("M1_deliv_ignores_accepted", "M2_union_denominator",
              "M3_tpc_ignores_void_calls", "M4_tpc_threshold_flipped",
-             "M5_drop_a_set_silently")
+             "M5_drop_a_set_silently",
+             # round529-2：兩個新的紅線也要有牙齒。
+             "M6_calls_per_task_from_wire",     # calls_per_task 與邏輯總數脫鉤
+             "M7_vgt_not_checked")              # V/GT 髒了卻放行
 
 
 def mutation_check() -> int:
@@ -723,6 +892,10 @@ def mutation_check() -> int:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="R529 跨題庫收官分析尺")
     ap.add_argument("--root", default=str(ROOT))
+    ap.add_argument("--vgt-dir", default=None,
+                    help="`harness_vgt_audit.py --scope v2` 的產物目錄"
+                         "（找 vgt_v2_<block>.json）；任一塊 verdict≠CLEAN "
+                         "⇒ decision_state=INVALID。不給＝這一格沒量（不是 CLEAN）")
     ap.add_argument("--json", default=None, help="把完整結果寫成 JSON")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--mutation-check", action="store_true")
@@ -731,7 +904,8 @@ def main(argv: list[str] | None = None) -> int:
         return selftest()
     if args.mutation_check:
         return mutation_check()
-    a = analyze(pathlib.Path(args.root))
+    a = analyze(pathlib.Path(args.root),
+                vgt_dir=pathlib.Path(args.vgt_dir) if args.vgt_dir else None)
     print(render(a))
     if args.json:
         p = pathlib.Path(args.json)
