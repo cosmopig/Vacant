@@ -1,0 +1,1957 @@
+{
+  "glob": "runs/g_r460r[123]_*",
+  "runs_n": 18,
+  "chains_n": 72,
+  "entries_total": 4002,
+  "verified_total": 4002,
+  "failed_total": 0,
+  "broken_chains_n": 0,
+  "verdict": "OK",
+  "note": "每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。",
+  "chains": [
+    {
+      "run": "g_r460r1_harness_lcb2_a1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a1/receipts_CONFORM.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "88d8b126a3e4d1d9efc83b711b23e68b1715de713daa872c0afb41bcf4f0af1a",
+      "head": "d1bf63fbb9620728c019a34b68460b3fd6364f6ac1ac79d6eb65667a0aaf0dc4",
+      "type_counts": {
+        "conform_attempt": 25,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPgfYKv5Un59os7F3CMfT17fSdfy2c5VAnjkECHcqUMof",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a1/receipts_HMIX.ndjson",
+      "entries_n": 48,
+      "verified_n": 48,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "48290b45e60a0447081b22987c69c1b37f73be698a624e64ae4c83bace187dcb",
+      "head": "b57a8540ca159d0cf29389987da7eede8c5201933719299caf0c1ee6ac41ede2",
+      "type_counts": {
+        "harness_attempt": 28,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmQcaN8kj81ifaJUGuZJBNgB6EVA1Ufn8sdBfoh7kXGA4g",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 28,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a1",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a1/receipts_HOC.ndjson",
+      "entries_n": 67,
+      "verified_n": 67,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "c4634485f1b241f22af0eb7239c24816514ef350f22b3a00170652483e9914b6",
+      "head": "61a214f8721f9031385aa7c0cff9068dfed16a9a5b035f46042145ce80e9cf68",
+      "type_counts": {
+        "harness_attempt": 47,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmY5n7b5LoaMVw2H9jnRKAzj5tYYhdevsMtKoZt6z5njD3",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 47,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a1",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a1/receipts_HPI.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "ec59ff3f6c9bec889646a135b2c9f5383092435740c0222c4d0f5b20e0108062",
+      "head": "9211b6059f88ce5e1801a4dcff84a2ee075c269e00b6fa6f51212a6b9cfc10c6",
+      "type_counts": {
+        "harness_attempt": 25,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZvg8FN9trxgNcF3p4rtUiu7dZaok7WZagyNFHn1dptem",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a2/receipts_CONFORM.ndjson",
+      "entries_n": 60,
+      "verified_n": 60,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "c0a196f6896d1a43b594ab3390d7951281d7d901aaf746d3f8a6709e9b7fad8b",
+      "head": "9c8d8cbdc8c1e5a5327b1cb6f368f83c2c4c0ff0c08e802e8c984f6386e1bf6f",
+      "type_counts": {
+        "conform_attempt": 40,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmadcaANnd6vUHp6xNTP5jYeXmheJYrA7jvsKN74dAqELw",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 40,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a2/receipts_HMIX.ndjson",
+      "entries_n": 51,
+      "verified_n": 51,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "2e25f89e47139e134a1b37c3b7e0b738d6882d67afdd40908d02cd407a663f7f",
+      "head": "79ee9a8d6bf0a7f35cadb3183430eb594e672b7f3b22c5f58eef2f916f1a7f4a",
+      "type_counts": {
+        "harness_attempt": 31,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSCfKWQft7p4s6VAqS91YsVTsZq283DB4Wn8gBoBpx1kY",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 31,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a2",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a2/receipts_HOC.ndjson",
+      "entries_n": 62,
+      "verified_n": 62,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "e5d447cff97d4a96dc25719332326e164e5b999ae8ccf6253e6042aae44d76f9",
+      "head": "8a32237fb49ecf0d75bc240d3f61bae3ea0759ca66cc6d49cbb2188dc35deb77",
+      "type_counts": {
+        "harness_attempt": 42,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmNy6PBFhnzN9KtvLM3pm29xfWtN5VSHFvVnTMZotWa65i",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 42,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a2",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a2/receipts_HPI.ndjson",
+      "entries_n": 52,
+      "verified_n": 52,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "e6ed0e38014386401278d45582131ec83fabac2fb206f9cbfe5d34b15c839547",
+      "head": "9a5f22d8f85f001adddd6d2881d1ab26ecbb084ef6105b550de4d044c2c84a54",
+      "type_counts": {
+        "harness_attempt": 32,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmbdquqTSP88X8MzrJaPe8rRAfrctYWJvUBxGWE4Dk3rc4",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 32,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a3/receipts_CONFORM.ndjson",
+      "entries_n": 57,
+      "verified_n": 57,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "2f2c81bc7d1bdacdc2ba4620431951061029f1f7068a7a286e5b4c6041d63cd4",
+      "head": "2d8f00cbed041b130891639928519df3cd5afd2a373324580e6316b02b5d673f",
+      "type_counts": {
+        "conform_attempt": 37,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmQeTcVvzosrFZ1276RjaShs4k3tnQMmK1k9ZrrvYgrRsd",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 37,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a3/receipts_HMIX.ndjson",
+      "entries_n": 55,
+      "verified_n": 55,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "2d1d10b229763c23593afcffc54053fd1a8c73134535634a10d651b07200e088",
+      "head": "19d50cad5ffe5aa7de6b2df02669870340e9d1265d4e78d756b3af7a8461c848",
+      "type_counts": {
+        "harness_attempt": 35,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmRqrrdHRpA2ch6grmR3Py7cVXJ3UVugMqJpDL2ZhvtvKK",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 35,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a3",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a3/receipts_HOC.ndjson",
+      "entries_n": 73,
+      "verified_n": 73,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "05ec81cde6e6400ef12ba4f7d8dafb57b7f5ef46fdc81c464dab0843d4f3a29e",
+      "head": "58870c57dba30be8a78d523e9cc4f996587c31c144af846246e1be9686bbb19f",
+      "type_counts": {
+        "harness_attempt": 53,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVU6jwhjvo2DVj6W4gUZVEDGuCYssr61uLdULPYsRX8MW",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 53,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_a3",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r1_harness_lcb2_a3/receipts_HPI.ndjson",
+      "entries_n": 49,
+      "verified_n": 49,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "add1ebbdc23c0884cba7599f89e65307b407f85f49d3629d3d55d7197238ddf3",
+      "head": "e7e72eeaef6650709063c1ab42ce4f3652cde171c08d00cdcaff5434c8aae8d0",
+      "type_counts": {
+        "harness_attempt": 29,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmaQJwyQ8KqDoJ3261otepX85BLc1PdpLUGAe3JFhf47us",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 29,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b1/receipts_CONFORM.ndjson",
+      "entries_n": 50,
+      "verified_n": 50,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "fbaebfe60bd22be6a6a75f585301064280f6a919d4aa6f9e3d3d0923fea23925",
+      "head": "7059c9e4d64de06835edb1c45fc76501f879c1b1ac37a1593f3aaecf86f12534",
+      "type_counts": {
+        "conform_attempt": 30,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmfX9RfkNERKJP9AFNQcVFu12tJm6fWpFWFv4fkmyT9Sqz",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 30,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b1/receipts_HMIX.ndjson",
+      "entries_n": 41,
+      "verified_n": 41,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "653d712f593e09b19de5fb9188e897dd2cc1ed97038cf4717bc93efb9fef5083",
+      "head": "3734febc9715e0c63f536dd95410d9ca34498530f650ddad97948e64538fc589",
+      "type_counts": {
+        "harness_attempt": 21,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmY9BXvKH5d3dc9DCA1H3Tfc4mt9DSLo92avVGYzXSpvSe",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 21,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b1",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b1/receipts_HOC.ndjson",
+      "entries_n": 64,
+      "verified_n": 64,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "ad51b7a44c3f77bf80e96fc92c155ec732be1f0a41753243f6afd816835bd28a",
+      "head": "25b48583fd704c2a10d38604bfdfb4bf7ffe8bb9809915c2abfb793f89c80ffd",
+      "type_counts": {
+        "harness_attempt": 44,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPa2YB2ATycfbRZ11fX7Mz5aozhrt7PhPbLgQ12bcp1SE",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 44,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b1",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b1/receipts_HPI.ndjson",
+      "entries_n": 48,
+      "verified_n": 48,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "f204a31c67dedd1af21ea4216bc27c43c8ae48beaaed26a85e800a5e84fd3e61",
+      "head": "0f42c764e12b6cea1c1156d2785031e262a95a4a3f1b452ec48bffd04483936e",
+      "type_counts": {
+        "harness_attempt": 28,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmQUAJsUrfcD3qpbfXHJRZz1nphgD1gBDeaKrCTswgajYH",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 28,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b2/receipts_CONFORM.ndjson",
+      "entries_n": 65,
+      "verified_n": 65,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "f721a25f5a99731a43293a435ba7f38c571a88aea75eff93487b5671658326e8",
+      "head": "3fb00979a9d4cdd8ea1f9b1d7152e9a9a237d7f0c34a11eeecca2d88f30d33ef",
+      "type_counts": {
+        "conform_attempt": 45,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSR7e2oJt3NUbUoBYt17agqNeo1q8i61gTq1abWrZnTQa",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 45,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b2/receipts_HMIX.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "3fddf1743490f4844d7b55302c3e3a857e5233b392495a449561beb613c011d6",
+      "head": "9cbd2db1590581174d565355de04c8b62caa39244facf1d33d27e1ab3662e45f",
+      "type_counts": {
+        "harness_attempt": 26,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPHiokwm8P2f5EvBvM3LtvbXg7R7DvLW5ypqiNFV1ChAJ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b2",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b2/receipts_HOC.ndjson",
+      "entries_n": 80,
+      "verified_n": 80,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "0c117c68625ffdaf725f893e41d7c04538b8b3a4b519620ed5812ac6b79d0548",
+      "head": "410aba82e8847e49ee9ea7a323cef628f9fc991f6d5b66e25ff6fa4f3f03bb50",
+      "type_counts": {
+        "harness_attempt": 60,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmdWL63G1mwKFnFNB1BRsb6tybZhNbGSRuvpn6Jr2wfBxv",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 60,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b2",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b2/receipts_HPI.ndjson",
+      "entries_n": 62,
+      "verified_n": 62,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "9c3c6be60dfa6f48678ded6deea8c7782099637cb797c30f62f227a55b4b1a74",
+      "head": "1419c66777347046f30c816a41c845ac8d7a38d4626e7791ff690fd5802e55bd",
+      "type_counts": {
+        "harness_attempt": 42,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmWXm7N6Qf6MBjkK7yukzs4QsPDGfisS5jz7zyPuVTRXmx",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 42,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b3/receipts_CONFORM.ndjson",
+      "entries_n": 55,
+      "verified_n": 55,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "cb008b4e504c62e624eb945e389eca10f0420d8123cf0521191b5541341889d5",
+      "head": "42b5c5e2a87a1fe4f2349b12194e2d72b6c6cbc947fb6d2b2e3084bd8b06c48d",
+      "type_counts": {
+        "conform_attempt": 35,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmbh77Jy3JiJ7UNSxArpTdERcJuCRme6HSyfG8fatHAhD8",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 35,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b3/receipts_HMIX.ndjson",
+      "entries_n": 48,
+      "verified_n": 48,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "257146c8ff703af6cc75cebe9d2ba676a95d3282ffaf5dcc761acaae8fdf22b8",
+      "head": "3ee0a3581811c41808d1ed15f0dc95b17c801b93f64ebd8adfa4935fa05b4769",
+      "type_counts": {
+        "harness_attempt": 28,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmW7RsEaML9PExozLzfKXcTBH8bp3BKRr6BcpqM83D8Zpv",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 28,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b3",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b3/receipts_HOC.ndjson",
+      "entries_n": 73,
+      "verified_n": 73,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "7129c9833667b4909826042fde5248b82eb8c109ba4871da02ae189ad7aef33b",
+      "head": "7bfa12c7e1bcff03f17a4f08d2846cab0f06e11ff37978e249671bf5ef2a5149",
+      "type_counts": {
+        "harness_attempt": 53,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVoQsV7oi7FTo2w1P2wUohx1ikVXEp4NU8qs9HKsmftLy",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 53,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r1_harness_lcb2_b3",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r1_harness_lcb2_b3/receipts_HPI.ndjson",
+      "entries_n": 58,
+      "verified_n": 58,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "cfcc38593476325d4b0483fcee48322e5fcda679cfa7bbaefd0c0d1789fae1c1",
+      "head": "f1d2d05f273542b5113d4120a2e0179794e5fb1abafcec8a9c27973fcff8deea",
+      "type_counts": {
+        "harness_attempt": 38,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSe9RbExACz5sY2XYMSWiXhFjTrWYueQaQvzFfSbcFr9c",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 38,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a1/receipts_CONFORM.ndjson",
+      "entries_n": 51,
+      "verified_n": 51,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "205fa71d61a0c85d54068889d6423b518aaccf84381d39769dce13e63b829e4e",
+      "head": "fdb9266e3723243af63fcccfaa1bcd1e233cac3b6880b3350a2e37f72dffcc57",
+      "type_counts": {
+        "conform_attempt": 31,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSMhSDF5Yrvx67t5uGeGRNeocYodf3fx3pk5iE1srq6Ld",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 31,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a1/receipts_HMIX.ndjson",
+      "entries_n": 56,
+      "verified_n": 56,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "a993df49d50dc5f9247ec41558eb54ac43587606dfa713e56c16f762d340d73f",
+      "head": "95b212cce150c93d17d003f54cce4dc495de4dc1bddb63ab3c62428fa549e388",
+      "type_counts": {
+        "harness_attempt": 36,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmT6pVE2GkNA1e1tGxNUVT4kKdfbtaM72u9fHHyxbvrCtr",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 36,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a1",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a1/receipts_HOC.ndjson",
+      "entries_n": 70,
+      "verified_n": 70,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "675a15ea5998075620d30b020656802cba852a5be61a418ca28aacbf049aef3e",
+      "head": "a7336aa3673ba5efbd9515e57dfd3bdad6a763643db252909a6fa32d66770040",
+      "type_counts": {
+        "harness_attempt": 50,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmdFGvjH7AssCv6TJXcUuShcqtC4LyhkKFG63XUmAQT3j4",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 50,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a1",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a1/receipts_HPI.ndjson",
+      "entries_n": 47,
+      "verified_n": 47,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "fba1dab8ab4c2663d23899710026f825a3ce6410d2676b4dd4f4daf8fb09d4ce",
+      "head": "4ab51a7fe4fd042bad6717fbda882c223eb469a228f106374c170c4055c4ce82",
+      "type_counts": {
+        "harness_attempt": 27,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmRbcpcpGmez9Y1kfdepAMF7fCHX7nVkPdpNoSxSS94UA4",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 27,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a2/receipts_CONFORM.ndjson",
+      "entries_n": 58,
+      "verified_n": 58,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "780f5f64b794ff5f3b8c551ab67b3a49bef8e906d5e0a517aae483aa7c824f8a",
+      "head": "1a00966e1d6da0e295db35d060692c2d6bdbebe2ed300f67937b27c2e6694da4",
+      "type_counts": {
+        "conform_attempt": 38,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmaUivoaBKA2dEWfa79iaF3ECPjxXpv9U3maHHsKUCkWWP",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 38,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a2/receipts_HMIX.ndjson",
+      "entries_n": 53,
+      "verified_n": 53,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "b9b0afa7aafd747c38513c8b96e7ff60020e362f0406354fc02b143e94602496",
+      "head": "2970c20400aca64ca3594b5959b070051a12b3a5a248f68c9499234024f513b5",
+      "type_counts": {
+        "harness_attempt": 33,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPSrMLvBHLrtqda8PmF3fE8dLimfWgt43YLhSCqF32xBq",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 33,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a2",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a2/receipts_HOC.ndjson",
+      "entries_n": 75,
+      "verified_n": 75,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "310f0db5d97c641b466bddd1bec9ffb8b9a5707f275c8fa817194b929acd605c",
+      "head": "2d3f86acc30a994cdbdd981dc61db9bf3eff1f4ddad390e31a1c24d75cb26ee0",
+      "type_counts": {
+        "harness_attempt": 55,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmY5HwJA5TxwPTWtc7LXPmLgXkjMBjh7626PbZYCR1jw1H",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 55,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a2",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a2/receipts_HPI.ndjson",
+      "entries_n": 49,
+      "verified_n": 49,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "2c8c0201a9340bb073afb483272aef010b71973175877b8cb0ec08f4b83ebcee",
+      "head": "8067dc1ec0986fd8229342f86c3e2da8698907e22bf6d61d5fea2abc3dc96553",
+      "type_counts": {
+        "harness_attempt": 29,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmdVbJNT283PiF16BdVqesggk5Q3VWAm5LXQvv9AMGeZ5U",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 29,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a3/receipts_CONFORM.ndjson",
+      "entries_n": 52,
+      "verified_n": 52,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "a0f0deb3feda2ec6e49539289f598fbe50a7b34258f6abca3f41b7e319a3953d",
+      "head": "99194e368bacc416948fa27c630175e9765f8c1d2c9f8b1c8368728a543327f4",
+      "type_counts": {
+        "conform_attempt": 32,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSjZjHihR8kwsK5VCPNnpnGggA1eaue9AQo6QLrVuWUzn",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 32,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a3/receipts_HMIX.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "6684500d2a74d20a73f79ae4a0f4a45d5d4f36fffde24a468afb8c8c35c22935",
+      "head": "d296fdc02141967ed38c91fd972a8cc1709130b3513c734ff87bd8a7a37ae3d9",
+      "type_counts": {
+        "harness_attempt": 25,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmTUr8SecLGcpeDADjc3U5U5xJmKkoqv3TbuVtgpiPVaGq",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a3",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a3/receipts_HOC.ndjson",
+      "entries_n": 62,
+      "verified_n": 62,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "d61ca1808312186f7bd24fad8248cd7c254cfb2a6d722a69964242b9ef95d6c8",
+      "head": "eef3bca2bd090e2fccfd33cb171c8776044f5bd3b66723af5113e533b9a7af22",
+      "type_counts": {
+        "harness_attempt": 42,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmTzkjs5imSiMiSLnubkEsSEjE9rgyy3epm3MxycE69to9",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 42,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_a3",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r2_harness_lcb2_a3/receipts_HPI.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "8d7748042a9fc6c725665b20136e232aa0589b4b31b31dc079895e0707f02b1b",
+      "head": "6c06a8243dc1c7b440e2a1dfe95dfbb7c78d5636958596311a1d01affc17b3e1",
+      "type_counts": {
+        "harness_attempt": 26,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmaNix1bmefVcK7XArscVZr6HqQZvVhHR7azcNv4Eu5Gjs",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b1/receipts_CONFORM.ndjson",
+      "entries_n": 52,
+      "verified_n": 52,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "2c9f41f6130f9909b9717e2273d76577ccb062c4ebfd14eb6756e5d9e8be3b1e",
+      "head": "c473622e9a213a425f49c6457c8526b69dc4a435082d4ae293743b8638aaa099",
+      "type_counts": {
+        "conform_attempt": 32,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmev4hcN7cna3TJX4zdwwjiNEG1WvgWUedpWMDkLmr3drg",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 32,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b1/receipts_HMIX.ndjson",
+      "entries_n": 51,
+      "verified_n": 51,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "926610d2b69ddc89f005e2aef9ed802d4f4837b65056108fab455ba53d05f18f",
+      "head": "7da8d266d6c70247edcc0f06d5b241cccf21696b362e58b274b1aeb88c64d037",
+      "type_counts": {
+        "harness_attempt": 31,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVWcxDEGypeVn4Pxc4QsriKENQeSSxuy7DW949Mg9gAfQ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 31,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b1",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b1/receipts_HOC.ndjson",
+      "entries_n": 72,
+      "verified_n": 72,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "39ea5e8b9566a9f0acf9ae66b8e52760889c55242e432c1cb7c3260f43c728c3",
+      "head": "163e9b9ff09cd715a4843a1b347ed0a0e096a899c142bab7bbbacef00122d08b",
+      "type_counts": {
+        "harness_attempt": 52,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmYwU828hZELKn3c14Aib9WEWjN4umqhLeqFcW1PdgaSDo",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 52,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b1",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b1/receipts_HPI.ndjson",
+      "entries_n": 50,
+      "verified_n": 50,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "c26b9102a64b26c8a57d9f86b6190c9ebe8092dc7b3563c15893c2c4cf5dae29",
+      "head": "08519d83db0ae50eeee3f446e95c6ea87727f6492a57752c6518ccebe51837e4",
+      "type_counts": {
+        "harness_attempt": 30,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmfJAbWPnvztsqykMXeNvF1Rp22t63SdW4GPtPuLUEByWt",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 30,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b2/receipts_CONFORM.ndjson",
+      "entries_n": 62,
+      "verified_n": 62,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "d7b774e1db3a0537d2ddadb62e13f9283d79ca7486cc203e2985b32a10d538b3",
+      "head": "504ff4d0f97a1dd472baf3fdd42ae0f0c1271dad5c4b158df62907e4e1754b61",
+      "type_counts": {
+        "conform_attempt": 42,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmfG5FGXQpm6susKw6RYGpipick6dyMRV6sSEGqkzd1Yyh",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 42,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b2/receipts_HMIX.ndjson",
+      "entries_n": 49,
+      "verified_n": 49,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "7fc456e41ea02969e7dab4ec3ce3eed92dae9e8c2a83015612689d3c72ce3643",
+      "head": "be5ab1f4e9291a93284d68b3a8ba103e1c998b225ca3f910f38b6e303f556a80",
+      "type_counts": {
+        "harness_attempt": 29,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmcXpGZ3CFz4CwXkKrfRn9krWp3tsrrPjXhenrjk28rNy3",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 29,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b2",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b2/receipts_HOC.ndjson",
+      "entries_n": 73,
+      "verified_n": 73,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "52213d9c3a29ab9c6fcdef5da06f421eb2d2725350d4946a7ffd7f42bd081027",
+      "head": "9b3893f004ba2a0ffb2a6810682432a33e0feccbde6a0391213880f08ec26067",
+      "type_counts": {
+        "harness_attempt": 53,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmamHS9gXcG8Sabn5QA4cnEqKewafuYnfMRKD4qisHKXm4",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 53,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b2",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b2/receipts_HPI.ndjson",
+      "entries_n": 47,
+      "verified_n": 47,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "e3710a7f81e83470a3533b2cb3d058de873dac214e5dc16180862bbb060da698",
+      "head": "615930ab8f283d09d288a92a4992767255539cb9df3f15e6ac4d65ad72dd9e22",
+      "type_counts": {
+        "harness_attempt": 27,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmcoDTBj1x5MutENFQ1Vg3f6H6Dwdo5LhYW4ZrDEERnHfM",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 27,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b3/receipts_CONFORM.ndjson",
+      "entries_n": 48,
+      "verified_n": 48,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "732edf2900fe3a74200a2988e5ebd1209b8adf3f77bf4bd5c703480c386822c9",
+      "head": "53e368ff0914a13d7be7f1b952bf09a93cfecc22f1fab93c5c2162ee22fad7e1",
+      "type_counts": {
+        "conform_attempt": 28,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmbjNULxXNGBP268FT3ETmnQPknXqNszsWcR8dAVbCx5nY",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 28,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b3/receipts_HMIX.ndjson",
+      "entries_n": 49,
+      "verified_n": 49,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "c97bfce91c2b576854f304fcc1fea377910c470c847252c3e7fdeacf8b381509",
+      "head": "2f37df4fd858abce092486e7a1d107f67ae4a43e0a69dd34e079987ecf76fa50",
+      "type_counts": {
+        "harness_attempt": 29,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmYS1pdRCy3AeABXwwMAqb1gtCXh6Xy1c6xSVA9AEnGQHk",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 29,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b3",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b3/receipts_HOC.ndjson",
+      "entries_n": 71,
+      "verified_n": 71,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "efb7c874033ddf46da160423b7c8c2284aa5a4b429e1366f23b14b872f974204",
+      "head": "e0c81e4aca2b56f444a9f3b4ff2ae74d3387def661799adc743c4226679144c7",
+      "type_counts": {
+        "harness_attempt": 51,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVRahzMkqjWULhUh79F7nJymgQzY4KVqUSuoo75NG3a96",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 51,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r2_harness_lcb2_b3",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r2_harness_lcb2_b3/receipts_HPI.ndjson",
+      "entries_n": 50,
+      "verified_n": 50,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "42e2646af230cbcace022d14f6dc36621521e83a86964bb4ef1bf8ae924bf0c8",
+      "head": "2967a07c9201d9135f24cab5d4537a4506c30e573fc14533ed89f9104f4b39bf",
+      "type_counts": {
+        "harness_attempt": 30,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZHkibih3NUhgVuSPhxhUDHN6jad3bjRaB2dWRpC4jLtW",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 30,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a1/receipts_CONFORM.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "4eedc696e9c57a911d5e11638c2f50ba3de629de0918dd878fde6d99ef1485e5",
+      "head": "4def78f5811ff02622c5688d39a9978655f6a79ae279a907b393e52a69addf27",
+      "type_counts": {
+        "conform_attempt": 26,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSJ5dJ63VwHj53F9mize53M5RJ9RzpRVwTGzRKPvX86Kz",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a1/receipts_HMIX.ndjson",
+      "entries_n": 44,
+      "verified_n": 44,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "a8368708c84424357551736e52871a01b431f742da3a573f6578a846487a8a04",
+      "head": "ab3098c0079066079b16571827123de71078e6dd71e676f381662615507b7865",
+      "type_counts": {
+        "harness_attempt": 24,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmNoCmJg18knShAopq28dfj23QLyhQVEbgdLr73nsCndSb",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 24,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a1",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a1/receipts_HOC.ndjson",
+      "entries_n": 62,
+      "verified_n": 62,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "f6f07352b73d0835ea57020b74dd7ba3376c3fb7d7786d99bdbe5162ac20bd69",
+      "head": "e0853b1b3aea5e095aefd776dea935a5d2da1ca3e9578b07d90c1a89ca33107e",
+      "type_counts": {
+        "harness_attempt": 42,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmV5mxnU3HzBGhZvXnmSKJ7k4Nw1Z91q5BaJyQF3NiM1g1",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 42,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a1",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a1/receipts_HPI.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "44c4e0c16d7af4b0b87a5b496b59c4a315fed69b4d1a26a45c5aff3c611e447a",
+      "head": "da9292088055d66eefcff61e4302ff5765296282a6571d44619e0f143fed2d6e",
+      "type_counts": {
+        "harness_attempt": 25,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPvcFsZ5FwJhmMuQpJyNrh39C1fobQMqspTLhFJxBbgtc",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a2/receipts_CONFORM.ndjson",
+      "entries_n": 56,
+      "verified_n": 56,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "5b731da38fc835ad000ea93679bf2753370dc9eb94bffa894ad27f42927d7219",
+      "head": "b6ea7430678f48acba9a66a3f756d298c9ed8f7d25b86663f2157afc83496a0e",
+      "type_counts": {
+        "conform_attempt": 36,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmcPH95D9GnsiFqUBdEoFWvkhi1q2tbwsE8cJP8sVB4eTX",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 36,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a2/receipts_HMIX.ndjson",
+      "entries_n": 49,
+      "verified_n": 49,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "e6615a5d7adb4ee81675e291967f687455eae1a842ba13f9f576fb745a430ab1",
+      "head": "93ef20f8d050def934a3f7a4c341456e48cacb5fb9269c1a36c36cfef92ac08e",
+      "type_counts": {
+        "harness_attempt": 29,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVkCRAAUZ6vxjQ7gtspufEKTAytgrTaoreXq6NeJuoSNE",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 29,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a2",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a2/receipts_HOC.ndjson",
+      "entries_n": 72,
+      "verified_n": 72,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "813a6b28221b71c26f81b4df00c02106ce5bbef094543112ef761796a103a39d",
+      "head": "191a96fc730c8d2e2eec19f00dd62b47c0401cfba9e433f85af967bd28fde153",
+      "type_counts": {
+        "harness_attempt": 52,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmeUiGBsWw6Nu6beK9kgTUAzfLxB3HJeKnYA9mma5xMuD6",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 52,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a2",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a2/receipts_HPI.ndjson",
+      "entries_n": 54,
+      "verified_n": 54,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "432a83b55ddaffc3083582f3c0a57c778dec99f288bf4fecadcc388980b95e41",
+      "head": "42363b47230e9890508b758ba6017b4036b91b533985401bff32a99331dec137",
+      "type_counts": {
+        "harness_attempt": 34,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmP9H2jit5PimACwfawhWmqeVuRK6yuh1nX5bMLu5c6saG",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 34,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a3/receipts_CONFORM.ndjson",
+      "entries_n": 52,
+      "verified_n": 52,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "a4238c0bcd280312a2071c7d5a4b95fa18dfb78d59d58be9f5ebda657f4191f2",
+      "head": "dd38e852ebf327f6e1d37d0550cf324dfc81b22bc767815e92ec4a3bdf062b23",
+      "type_counts": {
+        "conform_attempt": 32,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmRgxL86YDK1uCd9H28bA5E3BiLzR6Z8MAsdraAEcCpkej",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 32,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a3/receipts_HMIX.ndjson",
+      "entries_n": 52,
+      "verified_n": 52,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "de2ab3d6a01e4722f71fc010adaba9a01af171b15985f40b514b3446b63bdd31",
+      "head": "335751569ea44d064bba5659a8fdcdc00c34506ec6093cf22791f4837e24aa88",
+      "type_counts": {
+        "harness_attempt": 32,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZF9BVePXuTJ1dSEJthQu1QFCWui9Gdc7vgEg9LHgMmN9",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 32,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a3",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a3/receipts_HOC.ndjson",
+      "entries_n": 66,
+      "verified_n": 66,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "56c3223ff04c0f40f9f2ee7e2c61f8d49f84c7d16d4e79da3ed03d141e307df1",
+      "head": "24bf811584b6c93b53d5677860d6d8464d45ef83403d8f492a42a697779d99bb",
+      "type_counts": {
+        "harness_attempt": 46,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPDByk3uv5LDWwkwCgMd4tyayz2JaZCyRQpRGUJaZreqY",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 46,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_a3",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r3_harness_lcb2_a3/receipts_HPI.ndjson",
+      "entries_n": 52,
+      "verified_n": 52,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "9f918ec02f3fe3da0cd9407e502ae31f525db42a0195a7266536fcb839f722d3",
+      "head": "0e526c8ab2ce3f8618801459a17ff4c6073e55724e227e1e09b538d0112bbf23",
+      "type_counts": {
+        "harness_attempt": 32,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmW84Gfj4o5A27BuhrXc2JTpMZwop9zkKqraft5YVFiPdW",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 32,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b1/receipts_CONFORM.ndjson",
+      "entries_n": 51,
+      "verified_n": 51,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "0f7189e351a37c7bb4a919ee9ee1ceec4526d1498d3ea1684ffb4a6de54a5983",
+      "head": "e0975894d09fbb496f20d13b395bd16438b7932b0e103be6e7fb403917321352",
+      "type_counts": {
+        "conform_attempt": 31,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmP8sc7xWBwXvcY3eTJWyNk4cdgVirF4F9jThJg2MhFUAX",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 31,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b1/receipts_HMIX.ndjson",
+      "entries_n": 48,
+      "verified_n": 48,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "d0286b5a4d92117879eaddbe383e73a3e4c64cf4c6bf34ab81c49671e22c9c47",
+      "head": "f58f93d83b066ed06525057aeeebd0ec2003fe2399ecc5cf420c713b2b15728c",
+      "type_counts": {
+        "harness_attempt": 28,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPTeLFSgeNvTA63Ac9BTbec6vMnVGDq8Tmzh2N1GiQ1bP",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 28,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b1",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b1/receipts_HOC.ndjson",
+      "entries_n": 65,
+      "verified_n": 65,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "6c414b8955b057e7021f66d85953962b280ec506f49113c05127ae21a6037fcd",
+      "head": "e108129fc25e498fb5782c771e7c1c832d3f01b62ebac0aaed21558f9c3ac606",
+      "type_counts": {
+        "harness_attempt": 45,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmWzvxWY4DuH4aie6JXRmVpGmhPygw9bMamBCU4ZNuYYeZ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 45,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b1",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b1/receipts_HPI.ndjson",
+      "entries_n": 54,
+      "verified_n": 54,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "e174e674adf503c5409f92c7076c5c00a57748fdf1e83c239dc699e0c11fe7fa",
+      "head": "0172eb9405bbcf9f3b0c8f3cb4af40e3272d5b5a75dfc4d7e18b2248688ed9fc",
+      "type_counts": {
+        "harness_attempt": 34,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmWp8w9UyentE16Rmq1rkrQV2X8AJEhyPq7iq9Ck8jnxip",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 34,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b2/receipts_CONFORM.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "32a52f4f41d7f5fac1cd59a0278decac6d55253467f920ecaeac99617dbe7514",
+      "head": "db032844267f8b985227a09f387608b06338e767cd9c5870a0b0659065e819e8",
+      "type_counts": {
+        "conform_attempt": 26,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmUyy4y8k58gnar8f8wNCEe31KBiHemw6ibk9mAx5UY2kJ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b2/receipts_HMIX.ndjson",
+      "entries_n": 52,
+      "verified_n": 52,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "df15223f092270c3e83f133b6337036f4dfbce32ad7d9452ec5e63687047614f",
+      "head": "3226a6495d003edcced9ccee82619d7c55f7d1ca46f4afdff5961ab41c78597a",
+      "type_counts": {
+        "harness_attempt": 32,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmcntJcdrCW7SVnbduTMYt1vFyu7NjrW5SEvkLBoM73mH3",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 32,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b2",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b2/receipts_HOC.ndjson",
+      "entries_n": 71,
+      "verified_n": 71,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "c15d03cf97302ce70fdd5d41bf5178fe055460ae71b75d9d74c6fd4af913ecb5",
+      "head": "a84c70dd32f2f70a5a94ddff299ef8fa882f325382694770a021aa737a7f83c1",
+      "type_counts": {
+        "harness_attempt": 51,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmcoJA8G1XiYSLXrHCnR1jczhbxvCzZcQaxSBmKe1rMrBZ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 51,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b2",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b2/receipts_HPI.ndjson",
+      "entries_n": 61,
+      "verified_n": 61,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "4add6c001a100b6496e3e5a92e0b9eec2ea79b9d857da65620edb7417047d690",
+      "head": "a695ac339b92e6e9731be4691afc2dff90db1554242dd383574ec734922c1a97",
+      "type_counts": {
+        "harness_attempt": 41,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZ74LauC5A2w252586WMaLaUjhhbyY2eFjcVyYpGHtjmA",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 41,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b3/receipts_CONFORM.ndjson",
+      "entries_n": 49,
+      "verified_n": 49,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "3bb2c1e94da2e381e35e5560068d09a3d0c576ad5e01eef30a0c331733924b24",
+      "head": "51b663149bf534a97aad9f2fb9b1d13521ddc34e65fc14d77456a63075dd89d3",
+      "type_counts": {
+        "conform_attempt": 29,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSUbomXczV8UoY8BkibXNoabaGcLwrgNeecGKgbVMs3Tx",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 29,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b3/receipts_HMIX.ndjson",
+      "entries_n": 49,
+      "verified_n": 49,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "c55c6e1daa5df1d6cba51a2cd9d8882503c8118354063b0655dccf572636ec79",
+      "head": "35b8b76b7de87f045d8c75fe9957cb052db702bd9f383ab6a1bf03d39f5d63b1",
+      "type_counts": {
+        "harness_attempt": 29,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSid9aoo4Jj1LuKaN7UtiF6DKk9WYqKtVYo3HYqyrsrE4",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 29,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b3",
+      "arm": "HOC",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b3/receipts_HOC.ndjson",
+      "entries_n": 69,
+      "verified_n": 69,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "46a9a1589b974b68efa6334de3d47cbec0dc4caedb82bddec62f4ae6f3550b30",
+      "head": "b78934502ab8502429c06e1f6f6f87f0e47a3d791f9eef8d31e0775274f75a70",
+      "type_counts": {
+        "harness_attempt": 49,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmR2uM8xH25XpofFG2XcKcbepdE1ZwrKeryTA3LziU3XYq",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 49,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    },
+    {
+      "run": "g_r460r3_harness_lcb2_b3",
+      "arm": "HPI",
+      "chain_file": "runs/g_r460r3_harness_lcb2_b3/receipts_HPI.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "016575a01787338911d76e01e065c950af05e37a1742e452d177121f3cee8e78",
+      "head": "099867c52b2b02b637e94d2dab23b27fa8caf2d64f26cc19ea3d2a31cd6be5e5",
+      "type_counts": {
+        "harness_attempt": 25,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmT7MdHh9U2DJmJ32UioZS1dssmvcK3vd23aXPM846fora",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF",
+        "OFF5"
+      ]
+    }
+  ]
+}

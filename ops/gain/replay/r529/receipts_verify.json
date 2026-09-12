@@ -1,0 +1,1937 @@
+{
+  "glob": "runs/g_r529_*",
+  "runs_n": 37,
+  "chains_n": 74,
+  "entries_total": 3167,
+  "verified_total": 3167,
+  "failed_total": 0,
+  "broken_chains_n": 0,
+  "verdict": "OK",
+  "note": "每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。",
+  "chains": [
+    {
+      "run": "g_r529_hep_a1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_hep_a1/receipts_CONFORM.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "60a701047cd929b0701a6c84e747d1745c429abf8223da38865570f4c467e94e",
+      "head": "c063299043be83fab33980b190cdbb4bf97c7084c4d0d249a50794cdf986b6c3",
+      "type_counts": {
+        "conform_attempt": 22,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmYiW3Px3j42qqTtMzF3xYR5kjWWWqoL4hcHJBC4NzxHCF",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_hep_a1/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "11fde599196f874737d48db764bf143e4916e0f2c726e99e411d868bf62d3c7e",
+      "head": "4351fb8ec575475c90dfd8a823e925c7b088b7e42cd6ec7e192d729a2aef1102",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmfC8FwK2f7bo7CVpZa1JA4DAEZJcfoD9nC3hKm19WR1hN",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_hep_a2/receipts_CONFORM.ndjson",
+      "entries_n": 48,
+      "verified_n": 48,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "961749499b1266e94c9eaa611507bb3dad1c9c5229995248e1694f63ce0ee2bf",
+      "head": "713e119af5f573f3c6a613045607eb732bf51c8551561c9f2b2ecbba53948884",
+      "type_counts": {
+        "conform_attempt": 28,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmeF9qSWjXPcreG8bE6UUeYaNModSLvJASjp4djtE3oLNF",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 28,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_hep_a2/receipts_HMIX.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "18afbdcb17df7a657231df8ccc3eff733e0fd6398aae1ade53a639f3cfd7f26b",
+      "head": "accab9c0356e61bd0c7fe9b68ee6860bd2f5a6e15a3aa3b13900d455b4d4ae65",
+      "type_counts": {
+        "harness_attempt": 22,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmYepRy3AeTLWG4WQ9haXw3jFri7XQWJDAeCk3wjKgbi81",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_hep_a3/receipts_CONFORM.ndjson",
+      "entries_n": 44,
+      "verified_n": 44,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "2d6fdc2a568e7535313c3293f7e8f55220c9ae3aa5d0c9dff224958c6ce4da10",
+      "head": "ade24a5008ec63bf7e9f872907ea23f92e9dfaf19b845fb6877186b5f2320d87",
+      "type_counts": {
+        "conform_attempt": 24,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSDEBPte321AE5Bw48XedzxisLJEnCiwWtkNbCtQxHRHa",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 24,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_hep_a3/receipts_HMIX.ndjson",
+      "entries_n": 44,
+      "verified_n": 44,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "a4b7d362971e1a8f0464b5bca091bd99fd1ef9b8e19686e35611617d5fbba874",
+      "head": "0400612526723eefbf9d11b8893cd417781fc246bea6cb332047837c6c24a911",
+      "type_counts": {
+        "harness_attempt": 24,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmUjrqF1huMAv7GVh5TRFwYmyz2TCFJu1R7dTudVfZxtLm",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 24,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a4",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_hep_a4/receipts_CONFORM.ndjson",
+      "entries_n": 49,
+      "verified_n": 49,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "4426de656e3664e93917c6bb28d6e45414abac9bdd70e2c15273bebb7ac35bbc",
+      "head": "56fbfd7aa561c03a8c8a3d84c30d874811c09f1bd5c880bc6b3c3eaa0ceab978",
+      "type_counts": {
+        "conform_attempt": 29,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmWQRRCZ7RVqjwqjBcMBf3CtEYdWYrEmvXoir5ML8KjTRa",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 29,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a4",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_hep_a4/receipts_HMIX.ndjson",
+      "entries_n": 41,
+      "verified_n": 41,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "14ef0eff97d2d5cd419ad57d494ca367c82999ed24a17d38d9b373901f44ab4d",
+      "head": "9dc3c1170b74528b0d9471dbaa8a57a7afca30cdf839e7c7626407ee90734c62",
+      "type_counts": {
+        "harness_attempt": 21,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmXruRhqz9CiLj8FgcuuefppJwsC4FjWqQGKxCHATn5jN3",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 21,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a5",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_hep_a5/receipts_CONFORM.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "abff0498cce80422e59c2fff88e2976919e72e201ec7573320c078ba07c6439e",
+      "head": "ae2e6aeaf717fe44d83df68e4bb8a384f114a6c043b146658b2dfd0a3c02bd78",
+      "type_counts": {
+        "conform_attempt": 22,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmWXA547fPQxVDpxs5Ttmw4scyHiaHM6rKzZnSoBRJqqaa",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a5",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_hep_a5/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "5beded9cee8a337908707ba22f07d71f34fafba4c6b633ab17bea48374d37977",
+      "head": "a5c2ec921cd728ce5e7aff46998d8b9bd588172e9a1c53b222129a82e8042c77",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmcya5jfLnSm4mKo11JMgsR9XUrdBNYcDCDi27NvHarFCn",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a6",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_hep_a6/receipts_CONFORM.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "b01732ba96bcd8f12696d1b6679434d51ba43c722e8690cb873b90364c58b62c",
+      "head": "e0a897e50fa9fca06fa5a8459d82d8681d350e840eb94d946b54f4af51c44bcc",
+      "type_counts": {
+        "conform_attempt": 25,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmcXVQH9snNpm1GVVA1RgK8gqVFPt652cw1AydKeFyp8rz",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a6",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_hep_a6/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "31076c8ff894b695f51efb0f75328ab64c5dd0031759f2ce9b14aa4a46860b8d",
+      "head": "8fb9adf02a4e0283e72ff4c3410470f834f708cc6e03525b23fc78da15a6ef7e",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmP5Yi2UZf7y2EPfZZzfqnsDEvALKifuYcJxwai93Lh8dX",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a7",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_hep_a7/receipts_CONFORM.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "c3e9930ebbf3978e4397897bacc35a8e970570054a9962068469f3f56758721f",
+      "head": "29028ea6439d4e39010904e4640ad97c04a71a4aa255ba961df902b64a9ee21c",
+      "type_counts": {
+        "conform_attempt": 22,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmUHc844vFyhscs5bLUdc9AZboveS9z5CPXDNBEBr91Wad",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a7",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_hep_a7/receipts_HMIX.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "15fe7ff369d67efcc3db923f7c465ceb4ffab71a381aa7a81e5708b3e2bf04a2",
+      "head": "e4972b7cd96bba995d1cadfd8189af18d84181401c971b37ad46a032cb594d21",
+      "type_counts": {
+        "harness_attempt": 22,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmYK5Y3FbddC16WwWZaZkcZZcKBEgKvVxYFQqRCbiJwRWZ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a8",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_hep_a8/receipts_CONFORM.ndjson",
+      "entries_n": 43,
+      "verified_n": 43,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "941f95830d27e24b5985c757158c1eefb2dd1f74a42665044e21606aca41a8bb",
+      "head": "e67ed6d3136f2552adb31762ce0dc88b46fe9a9187fa1da60359b026f1c99cee",
+      "type_counts": {
+        "conform_attempt": 27,
+        "conform_verdict": 16
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmQU8tAA6VvRftP3TR6xcv6AgEwJVmaWhKJ1EHzVEbE8zo",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 16,
+      "verdict_n": 16,
+      "attempt_n": 27,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_hep_a8",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_hep_a8/receipts_HMIX.ndjson",
+      "entries_n": 37,
+      "verified_n": 37,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "9230b8294805f5a625f01b56c1fa352d114f7351641794500efcd0f16af6135e",
+      "head": "89923b5557a577327879a234fd0fab2955158b0b0427f5407062a33ddffe03d6",
+      "type_counts": {
+        "harness_attempt": 21,
+        "harness_verdict": 16
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmNQmaUnYFJLvfvwpX3FvhEQ5n8YUqSzJCiBjj8WAEQQGT",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 16,
+      "verdict_n": 16,
+      "attempt_n": 21,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3h_a1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3h_a1/receipts_CONFORM.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "e0933a48dff1523a1c69adadc9a677b49c294f1bd9204259bc44baeb15148e11",
+      "head": "78f177527914388699453f3aa58b776253195116ab9bc6cf521aeeff2834fd1b",
+      "type_counts": {
+        "conform_attempt": 26,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmbo5ABXo9tc5WRCvoEfG7aVZ85zoQ6571zQjwo6cobWRZ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3h_a1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3h_a1/receipts_HMIX.ndjson",
+      "entries_n": 43,
+      "verified_n": 43,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "121e9e3073483937676ddf6f85cb032ff1c7ec9fc5c17e0526f4dd64c9f92699",
+      "head": "a0033aab81bf48eb3190af4c2a8eda99bb2576ae42aad8451a1e3a8a59424065",
+      "type_counts": {
+        "harness_attempt": 23,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmTDGVonYtQUoM5Eq7T3eWwhzTTiQffYWC29PkHy9Ba2mB",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 23,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3h_a2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3h_a2/receipts_CONFORM.ndjson",
+      "entries_n": 50,
+      "verified_n": 50,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "04d61024138be9bf3da63d7dc273afb7884fa77a6af5d0be06ecf503c118f425",
+      "head": "da807b8fc6074d514d3842a0998c82244ef93cd263b538b037298e850a552c26",
+      "type_counts": {
+        "conform_attempt": 30,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVTQgoy87vnrWrt1rxLEfzMQzRjYbLzc5NNbCRKtzETqq",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 30,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3h_a2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3h_a2/receipts_HMIX.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "43defcda3b601e96fd9b0f39908d8cdaed5cabfd17de76077fc0c43ea20f73cf",
+      "head": "9fb91a72f44e7ead0b41a4a0471344b52adbaa8f4e0206fc71e05ae6c286e1c4",
+      "type_counts": {
+        "harness_attempt": 26,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmbbEjnBpPkbt8i2JdQ9HYtyDkHNfQjFdhajBfSWao2z8o",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3h_a3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3h_a3/receipts_CONFORM.ndjson",
+      "entries_n": 36,
+      "verified_n": 36,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "e28891ea1b4299e183ecda67f2d9e33262e315d5c29e115b6d12ce27d39ac7fc",
+      "head": "5cb44cfad1aa4c9a6781275f894a63c144d791dde51c8e6e390ca8d8f38a1018",
+      "type_counts": {
+        "conform_attempt": 22,
+        "conform_verdict": 14
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQme6Y5rUorfawFVXDdAGWgy77pcTaT9EkDsdyvb2pXmgaJ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 14,
+      "verdict_n": 14,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3h_a3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3h_a3/receipts_HMIX.ndjson",
+      "entries_n": 32,
+      "verified_n": 32,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "937dd47979fb9d0bc5049fe508710f406997f8261464953006e596c4bb2a48d9",
+      "head": "5dfe21354d2404b975688a843ddc397fe403711db1aa6556b97e7d5f64bda829",
+      "type_counts": {
+        "harness_attempt": 18,
+        "harness_verdict": 14
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmcSzN3yj2oJPUV7uZBnrg73TR5X4vbiCmaoY4N7wsETvx",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 14,
+      "verdict_n": 14,
+      "attempt_n": 18,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3m_a1/receipts_CONFORM.ndjson",
+      "entries_n": 41,
+      "verified_n": 41,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "aae9a11ae67be9233a1ced4b780f4bbd9717984c4265713546b58c3092c0df56",
+      "head": "2095dd1ce438b4c9cb34e25d80aca0b73f933b691750e8c4e4bf7f57ad0e14b1",
+      "type_counts": {
+        "conform_attempt": 21,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmbn8ymT5pxBHiqmbhKLfwWVGywf56yPD32tQSKn4naJnV",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 21,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3m_a1/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "0fad1875b028d20734c381693f744384898186954404e6529357d5427a68ca44",
+      "head": "cca4fab5082d91aa4264f850f43a5afa2c1656f94ed5d7ab702b8c8a0471a311",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmYJJs5YEZPgiwea52931ygpC1TnZCzSwueDUrFxNJ9UbU",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3m_a2/receipts_CONFORM.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "52cbdef295516bf2a764e0b8eba766daafdd03960cb4efb7c240172fb53912b9",
+      "head": "f39e6f29fd84aac339bbed39183ba2136f615235a247671ae286444a64d7c07d",
+      "type_counts": {
+        "conform_attempt": 20,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmaWY4WhhTHCihm8knoxkiSDoKxFieovHFgaFuQLB3orz7",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3m_a2/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "858073916e22e85fa427c6f48abee4b30ea526285b05ffed7334cca9d4db315d",
+      "head": "3ca9eb8be90c3519ec2e91489a0a6db314e3bf6fa6adbd7f7cf1d80695547860",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmdWPRU1E9NBevsbWAzizdmZeD7whap43ZS4FdaiRULvUe",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3m_a3/receipts_CONFORM.ndjson",
+      "entries_n": 41,
+      "verified_n": 41,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "6d6e025b5ecd5c03015e0d1c660c3fffdb8618530006945b985b801e1e7e1f59",
+      "head": "5c9c7d89ff20197d119f8957d3ea0428f903fce31ffc1a1481895e1ffd83d3f5",
+      "type_counts": {
+        "conform_attempt": 21,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmcDVf6kgWh7sxFNpjbm6odXgfuGdqRP2RLHxTm2T22vnw",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 21,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3m_a3/receipts_HMIX.ndjson",
+      "entries_n": 41,
+      "verified_n": 41,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "14f39163096ae1ca0f457a259a5f27149a4c14d570d112cbba4e091522c828a9",
+      "head": "0d0592167c29c3f883803ee246e50f1cdd1e9e06f3dc1bbbb2636de892952120",
+      "type_counts": {
+        "harness_attempt": 21,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmd2mnZXs1ZXsptkLmtxeeLimXiD68majaJgV6YyvggcYt",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 21,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a4",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3m_a4/receipts_CONFORM.ndjson",
+      "entries_n": 43,
+      "verified_n": 43,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "5b2fc65848a253e8a92392ca407bca1c55df25f9094f0c91a8e6935bfb4b9a75",
+      "head": "fc7e559aa7232c4706a36b53a8ba22584e74a95acc7111593e7e7d583e6e1a8d",
+      "type_counts": {
+        "conform_attempt": 23,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmTdjGHxz4LtuZJqasV4MjyLR2YQ7knaTTQsMAWyxS3qZZ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 23,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a4",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3m_a4/receipts_HMIX.ndjson",
+      "entries_n": 48,
+      "verified_n": 48,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "7fc06380352f3cfab7bb062b7ab2cbfd5627f4d07ffa036528892f383ce9bbf4",
+      "head": "0a2101ed354fafceed0a79f41997da07be885093b5a6d5f22979ff91c1c5a601",
+      "type_counts": {
+        "harness_attempt": 28,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmRrNbqf5gf1HtCistVMcBgcyBRGDvvy7T2RDVndyK3odN",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 28,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a5",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3m_a5/receipts_CONFORM.ndjson",
+      "entries_n": 53,
+      "verified_n": 53,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "676f6061a1bb98fabea1e5d255aae16417b06ad71cc665a2804e93943137a1d9",
+      "head": "dc9f6b7d8299bb1a118f56c93a5fdfa669d7c78a7406ffe4b3e791984bf487d4",
+      "type_counts": {
+        "conform_attempt": 33,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmYLoGEg7vqtx6sHHdJ8EeXSdy2LamSyWP2PZTSNmPSohz",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 33,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a5",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3m_a5/receipts_HMIX.ndjson",
+      "entries_n": 47,
+      "verified_n": 47,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "860542292038d1401a36ceaf8b24be4aff8a96559d40cb227ced65cfe9a623fe",
+      "head": "17c71eaa3973ae6fdd63598d5779df1887cb7c359bfdde76b88cc48a901af03d",
+      "type_counts": {
+        "harness_attempt": 27,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZAJ6KXVrPmmwLahyBBgjL5j5sHWCJWyJVD9ZM95Lf1Ra",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 27,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a6",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3m_a6/receipts_CONFORM.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "46dc5c3138859b38630500494e7f17b724de9c1a87009982ed355f43f96a5628",
+      "head": "690bd6b6a0eb64b3d0ccea9a9d983d0c2894a7ebb85c407f68ce57b4ae1403de",
+      "type_counts": {
+        "conform_attempt": 25,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmQiKNURghYzTfrpKDpHMac8Zn7NoBKYcJ1XFdsSteYYLo",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a6",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3m_a6/receipts_HMIX.ndjson",
+      "entries_n": 43,
+      "verified_n": 43,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "a39b9ed82ec338b2bca05bd811e72b11fa4333ec331e0dbd723bc3aa760b2159",
+      "head": "71b83915ce385919d3e234f8734c10197633654cff771d4b0e61ab4cf0ca5c2a",
+      "type_counts": {
+        "harness_attempt": 23,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmTEryLPFCWowonmpHAc2deLPtMZavYdtCHeCJ9jnDpwfi",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 23,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a7",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_lcb3m_a7/receipts_CONFORM.ndjson",
+      "entries_n": 30,
+      "verified_n": 30,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "27ad49fbf191e1c69c15b9c9d93ca87904c4fd62d1fb0e16894e6c8c1173eb2b",
+      "head": "ff9afff5a71e2fa1c354d9a71fc1a09e0b43c3800f08f1aa90fd18f4e21b206f",
+      "type_counts": {
+        "conform_attempt": 15,
+        "conform_verdict": 15
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmX4CkBzPKMGkLs8FTe3y1LFa5GwSTYdUvaUq39RiJVLzk",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 15,
+      "verdict_n": 15,
+      "attempt_n": 15,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_lcb3m_a7",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_lcb3m_a7/receipts_HMIX.ndjson",
+      "entries_n": 30,
+      "verified_n": 30,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "2be05e97a3389664251e4ed32a02740090524e5d29192707b8c31ca7c2afe551",
+      "head": "9246827345e56650219bf1a2098a0dbb5be2a64e7234153c5338d1202ed188c5",
+      "type_counts": {
+        "harness_attempt": 15,
+        "harness_verdict": 15
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPsj3RccLKDhW1M6FubwJ3Z3DBFzi7b6yn9zYe1hNoHs2",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 15,
+      "verdict_n": 15,
+      "attempt_n": 15,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a1",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a1/receipts_CONFORM.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "49ec1bd25c18a9c816147d20165af59820555f39ad980fb1e0a126e0fe4b7638",
+      "head": "3cd293bf0a834a51c2fecc607f04f355df00f6959c182b6fea5672cf6a7d01b1",
+      "type_counts": {
+        "conform_attempt": 25,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmTkUbDWDHfEp7McVZEMcdrrUNufsN2JmTKt5B1wCaBCr8",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a1",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a1/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "26a1f6614a14eba1af0c4ca3b7af9f0e082c99301374e13461d4d792ff726700",
+      "head": "7423cdf10761eb03d7c79648f0991a57fcc6c38c9692660035ab7c19f7837002",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPQ1R3T2donvTHPentpRZzDoj6mpwaiC9YrLcnMmFfQTB",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a10",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a10/receipts_CONFORM.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "716ee0380d6dd8e03e988ee9d27a22b1a0ba2bae47c5991dde7a94bf24da8669",
+      "head": "d3920124e980ab137300b50f651a820e6dffd5faaaf842d086abce9341585d62",
+      "type_counts": {
+        "conform_attempt": 26,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVhQ1QiQWDC2PmBeaxBikeBwVLuivkTYvjZaag72NDkRv",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a10",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a10/receipts_HMIX.ndjson",
+      "entries_n": 41,
+      "verified_n": 41,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "731e2c1c576b0fbebdd56d9b7b688e63f3c0a9c11ecd0b95daffeca8dd80b3ef",
+      "head": "d438fa76ef0ffb1531fc1beb4f8a1e80caaaa7d25edb657d4dc9cfbc1e82df1d",
+      "type_counts": {
+        "harness_attempt": 21,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmdePUgKP4YD8NyEfu7oon1g1pGkkmKBt1bm6zRhLJZxQE",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 21,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a11",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a11/receipts_CONFORM.ndjson",
+      "entries_n": 54,
+      "verified_n": 54,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "5a549901c8b8fa380df8f5688ab3a2486b1b5b6827dc406b6e0275cd61e153e0",
+      "head": "b93dd6b1d194884e534008d65bc299cbb888d4eac8d27a587fde0ef3f234be4d",
+      "type_counts": {
+        "conform_attempt": 34,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmTo15M2a1WLQ3zvfWsiqKKNREXRSXA9ygKzWi1EKni6q4",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 34,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a11",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a11/receipts_HMIX.ndjson",
+      "entries_n": 44,
+      "verified_n": 44,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "f61608228715ed54f7ac8f6c3e1fc692e9acfb40af2bc558b4aa0315d5ba3636",
+      "head": "bb36e7611f6e819f388d97c503ec89cec74ea7b7ca7b59e765a53db9e8eeff10",
+      "type_counts": {
+        "harness_attempt": 24,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmf3GbPuRwurn7J6AaijVSaHQ32xFxXYsC7YKT1NAWxuuH",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 24,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a12",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a12/receipts_CONFORM.ndjson",
+      "entries_n": 54,
+      "verified_n": 54,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "ff13392c0063ca427e70bd4143a65f4fad5897a8314a2c4e900063d84d6d8f21",
+      "head": "bcacd25c54f29bc4fbd36b55094d3abe96c3348671e460256359b3d70e1e106c",
+      "type_counts": {
+        "conform_attempt": 34,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZs1czywG92h5UqqrBRavWqQuGGWVhXxgwqY8a7s5ptNX",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 34,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a12",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a12/receipts_HMIX.ndjson",
+      "entries_n": 48,
+      "verified_n": 48,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "aba6ef0c3545419e45315ef3a74918880660874634a20e90dab826f623512051",
+      "head": "d1dce5ee97a9b022de89ddf70a5aa8dd606ebf800813fbffea3293ffab703f85",
+      "type_counts": {
+        "harness_attempt": 28,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSxt7Ghj4JWuk9KnN1QjusdzYd1zraAbTCC1vsutKxqXK",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 28,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a13",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a13/receipts_CONFORM.ndjson",
+      "entries_n": 41,
+      "verified_n": 41,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "b60ce8655350d67f518d46b0d277635cc67662d0d1378fa187816dd11d544c58",
+      "head": "0fc99342a816cbe25aa729d760d9cf9a2511517f8d7735556d3b8fc1ddf75eae",
+      "type_counts": {
+        "conform_attempt": 21,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmf3QMHSYYxdNk5eBTs6x44zxAyrE1cCgNRnn1DdFLx1X6",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 21,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a13",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a13/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "a010b034b3558132cf935dad73d140b6ba1b1b27b4b225e3dad1a408de89f669",
+      "head": "137608289e0c82205f5aa79b75fb1328c8a3572566c6d778e423f85bb1f3fe89",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmav4tK53TL41aqn7WAeKgRLf22Vw6KvuAdh449zE774f9",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a14",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a14/receipts_CONFORM.ndjson",
+      "entries_n": 48,
+      "verified_n": 48,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "021781067448aa17758eba726caa33b4c2282b8aa0bc0e350be5470c32ef174b",
+      "head": "eb8efef6ba3c2e74d6d602f37b75251f7d11f1a9c775b9aaa43f9cf4ce64744a",
+      "type_counts": {
+        "conform_attempt": 28,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZUt1H6PLpTDn4qnMfRX1NGomhaJHpUcmHWmcjoNhEib6",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 28,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a14",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a14/receipts_HMIX.ndjson",
+      "entries_n": 43,
+      "verified_n": 43,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "1feae5007212012c2ad05bcdb94d31efb94ed09c8ed51963ea016521d4c48764",
+      "head": "c5f34735dbe895ec7f20ffa9c3307789df94f59ca811f75ae2a3158f0c6b78b7",
+      "type_counts": {
+        "harness_attempt": 23,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZZzotCkiZPdKHGfeYMboLdiyFVbgGk65UNtd8kqXStD5",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 23,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a15",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a15/receipts_CONFORM.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "c641824369a069468581cfaa87bf894a0bf7a00d5787fcc69cfaf83363a87575",
+      "head": "b37f87e98a9a62eade08583672e9d79869d348ca9b33bac32f8924293d0b0db3",
+      "type_counts": {
+        "conform_attempt": 26,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmV8kBaaqLv1xXjgqPc2EtXXjEveoMps8pyYbHH1aTkMQo",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a15",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a15/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "8ffe4508a56f0f64bdb5ff424d40fd5a99cba4db02e50ec7e9eadd2b942767be",
+      "head": "eabd3f76d80112b430cc6158a73265e155b47c4fc3d75c3fe7a2d2d186067376",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmajtgDDVx46zE7tezsxG2wR2YZugga5drxbeNLx4VaPZ8",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a16",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a16/receipts_CONFORM.ndjson",
+      "entries_n": 43,
+      "verified_n": 43,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "e0f391eb190c2cfa24d8a4ba36b6cf54789551b14df0105417ac6988c9d22a95",
+      "head": "1e121005aa1d64b15bbcf19b039c3432af32e08791e8703c5ebfe06034ae6f25",
+      "type_counts": {
+        "conform_attempt": 23,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZnZauwGt4cujxu21A2YktzLerDKCjiTF7Y3hdoWYi36B",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 23,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a16",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a16/receipts_HMIX.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "702fe782904b9cfc2f193a562899dd9526efb9533b4e46e39f264d72f9e04a66",
+      "head": "81627162b814f57b656260bdbb6b85b36fa88cee1cb223f6b6b24fb962c60818",
+      "type_counts": {
+        "harness_attempt": 22,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmX5TPL8sQvrH6oPHLWiHCVA87f6Z7yxjWfjd15bUsPDxb",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a17",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a17/receipts_CONFORM.ndjson",
+      "entries_n": 51,
+      "verified_n": 51,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "a2422e318d7c6ef2e3fe044119111625a9aa8031d8ae17ad487016884e23bb9d",
+      "head": "34f1409ed632fed0fa3404b22d595bdafcd8876f12b49fe6468ca76bd2d2c517",
+      "type_counts": {
+        "conform_attempt": 31,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmXsEDC2cPx53sBKdgg5YQycHUZSE5tLzKUtmF9M1iajsK",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 31,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a17",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a17/receipts_HMIX.ndjson",
+      "entries_n": 43,
+      "verified_n": 43,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "016328531ea1fafebc5a77ec154c58e01cf7f299541987fc23871b1ab0ea1421",
+      "head": "4e7aa28418f73518784564c7e6065c5aea5a9cb9e1adada64cd535822fe944a3",
+      "type_counts": {
+        "harness_attempt": 23,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmUkSjpjtdBdTndtChitMJjCpNwjtreFA9xnLUM89xmTtv",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 23,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a18",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a18/receipts_CONFORM.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "d67953475a4dc1a7512078939ecdc6b5959c457917541f14be02d26949ee65e9",
+      "head": "d87d62ee328803eff4e70bcb517a27002715c47be61286225ac9112c70149bc1",
+      "type_counts": {
+        "conform_attempt": 26,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVcN3caZ6bmwTTDztq5HxVSzPpKgPP5f1SrV38A9TMN83",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a18",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a18/receipts_HMIX.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "0db819aaf1107b10cb0ef3eb3ced104889de747fa24847e0ef7f075d41dc00b4",
+      "head": "9d87094ca93483c7eccf2473679c3d3c15c60cba6592db3fcc24b50e577ebc2d",
+      "type_counts": {
+        "harness_attempt": 22,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVuqvonR56yzeivYcFgHj295qkgd4eAXh8rNPCjPNsLXS",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a19",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a19/receipts_CONFORM.ndjson",
+      "entries_n": 29,
+      "verified_n": 29,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "241d4e494dd955ce14f1089b549fab3d4438ca7ab48255dfb67e3477c0b102eb",
+      "head": "d9b1eb354a806dc5aa108ee9ea80d2bd057a422113e6ba1844060c2ca3fe8adb",
+      "type_counts": {
+        "conform_attempt": 18,
+        "conform_verdict": 11
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmZT4hfnyeXWPwjcQYoZsaADeM1qgRBDHSPuFY6s75pvNn",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 11,
+      "verdict_n": 11,
+      "attempt_n": 18,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a19",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a19/receipts_HMIX.ndjson",
+      "entries_n": 24,
+      "verified_n": 24,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "efb3d686d866f18c722ca2b4919a99a1a4c6372f1876cb444aa10671bb7cf2d3",
+      "head": "8e7662b8a4f2868b2cf6d15fe077356d54ac5dc54b94fb24360319f4ada591f2",
+      "type_counts": {
+        "harness_attempt": 13,
+        "harness_verdict": 11
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmaztSZ1afqejnyLpXmrLAe59EaLUzHCDWD5SmKC4inXiT",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 11,
+      "verdict_n": 11,
+      "attempt_n": 13,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a2",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a2/receipts_CONFORM.ndjson",
+      "entries_n": 47,
+      "verified_n": 47,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "4a6df5a9b8abea96082426d7c3d21d4d9955ec5d7278eeb8cdb1c18d27e275e3",
+      "head": "fd5ef5a91e3cb3d305f2256c86f20a98206415ae048e4af919fa1871a0e9e306",
+      "type_counts": {
+        "conform_attempt": 27,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmbYx2qM4Xp7B8Rj7WckSfZUvHEAueXV57taic5bxEyAZX",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 27,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a2",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a2/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "321df8b354b924da3cd8dd2bfc87fbd529ed1d1e04acc8edb96f89a7c98f6237",
+      "head": "15eca5778b4fdce2cf2433c765cc6e1e7f54dc88420abb09c03b5460cfcb36ad",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmUaRWX5JYya4bXcZs1421i8G9gQdPoMv1wM2xenrc3ihZ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a3",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a3/receipts_CONFORM.ndjson",
+      "entries_n": 47,
+      "verified_n": 47,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "dbf91a7861c034a6eef8fa31376c3abd347278d5e51a1f95705390bfd1944779",
+      "head": "48e3de161a9046c9fe7b4483b0e0008786fbcfeb6cb164a2f8b9bf55eb905d77",
+      "type_counts": {
+        "conform_attempt": 27,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmTY3qXZTQNVALHEsnve32JDkcrmQ4tmcxo14GC5xjj6eJ",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 27,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a3",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a3/receipts_HMIX.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "d3c13b16a489811f1f2f813a797d3ae0fa7b4d1e61aae36262829f602d51f88a",
+      "head": "2f1aa893cde2c5a4ae29285265b0d9526f1dcdbaf16e14904c59693fd970a9d7",
+      "type_counts": {
+        "harness_attempt": 22,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPZYfPBo94P6aEkQe3WfC6iUwMVXQEHSRX2vrkycaNSJ9",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a4",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a4/receipts_CONFORM.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "d3f914537a442cc4ddb4f24c93f4a6b1f4b9a4e9db4d9bd903f138be2654b69e",
+      "head": "56e0ce7cf932ff9a1ed02ca1c99d1d3a461517acb1c6cb8a16fe1dc1003cf640",
+      "type_counts": {
+        "conform_attempt": 25,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmaXhdHYR8wKCtyA8WVj6zHRnjZQJzj8ViojWvwtEtVyP5",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a4",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a4/receipts_HMIX.ndjson",
+      "entries_n": 41,
+      "verified_n": 41,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "40cd8ccbc59f19a02138750cb91958a8675582a0e94d961c6d0dc5c8b64b0ef5",
+      "head": "9d4a1505c8b8e025f7e99635138f3ebbe143721826e873515ea2d6cfa41baa44",
+      "type_counts": {
+        "harness_attempt": 21,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmTeRHh29VeA8zYB1ucMYUW5554VeR9nLZf35s8oKzzcLc",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 21,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a5",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a5/receipts_CONFORM.ndjson",
+      "entries_n": 45,
+      "verified_n": 45,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "41009b1d0093d80539e26599eafcccf36a5228b6d16e84efbb5a5485dfad5b49",
+      "head": "6ba7abb99c357b2cee5e9305700c8057be5dd439e2d749b5619145d64621dd77",
+      "type_counts": {
+        "conform_attempt": 25,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmRBhBPbkQnDsU6sMx6T15ULaT6H1tXmr3Qt9M2iwfVLDj",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 25,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a5",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a5/receipts_HMIX.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "1f9eca9eb7d89dafc4176701fa3f5f2ea1773fc463ce137199e62e247accd91d",
+      "head": "b28771d8743b2e11dec60b0b69f54a7cf5a485ea89c70a8970478a001a12789a",
+      "type_counts": {
+        "harness_attempt": 22,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmPZkNKLd8CsrEZ2rQ7EAktZzMF7uPu6UDJLWyoXKeVJ3k",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a6",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a6/receipts_CONFORM.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "039fc580e6c84e5989cf5eba4a99400b2654137e05f4bbcfbf14829593e6656b",
+      "head": "05bea453c93959904aac98e8e6e5d78a8c20d5375555232c0fd8cd76b2db0cad",
+      "type_counts": {
+        "conform_attempt": 26,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmV5oDXUbr7qqaJ36ntMYoj1DJ2nZHRtQXpz3WbnLP7ZT4",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a6",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a6/receipts_HMIX.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "4ad573da98de07661a91540c0f948ce6f0422162052206177415c13e82581a0a",
+      "head": "23ca950dfb2417ca91881c6a6c936e619a31355d7c7bc2ad00481c413eb1b5e1",
+      "type_counts": {
+        "harness_attempt": 26,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmNRmcYj1iverDEYjrnuXiTzdYnNaxSTtVpeBFs9fARrmb",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a7",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a7/receipts_CONFORM.ndjson",
+      "entries_n": 44,
+      "verified_n": 44,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "9ab5cbcbee474d7a7c771d45d81f73a8c95ce0f2e45461815172e0ad68e6f48a",
+      "head": "3047c30f1c12864b429a618ec501975095e44d9253aaead912aa5af0c3f85ed0",
+      "type_counts": {
+        "conform_attempt": 24,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmWNrQZhb78evJeJKSWU9GVW9z7VJuh44HbpnFXpwbm334",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 24,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a7",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a7/receipts_HMIX.ndjson",
+      "entries_n": 40,
+      "verified_n": 40,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "398cf6a4f2c479f29a67f1a6f310423f441b24af0c59b5e8d9057d919ba87677",
+      "head": "a79fb16ff69b1d2560235cb0737d02fd0813f156b7b215894434cefffad20052",
+      "type_counts": {
+        "harness_attempt": 20,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSCXeX4oEzcA3syqgc8211q4dtTyyjnX7221ikDoaAn88",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 20,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a8",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a8/receipts_CONFORM.ndjson",
+      "entries_n": 46,
+      "verified_n": 46,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "dd78c9c7fedd024fac4df9f1e070d909ad46543ad6ef0f32183564c620d31b1a",
+      "head": "cc88b90acc10bb56905806332ba7c4f2a17f798db3acbd65df2d074dd8283406",
+      "type_counts": {
+        "conform_attempt": 26,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmdZPThM1pKvb3iXQG5S7hXsXmMHvxxahYMG8C1Mndr6Xw",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 26,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a8",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a8/receipts_HMIX.ndjson",
+      "entries_n": 42,
+      "verified_n": 42,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "71e026d4129e675b6525b5200230e491151fb8580fc6ea576c8668e1f512b1e7",
+      "head": "d4b5c7789c0b1b517e92b4aebd97e238398dda3d188978decacc6554ac4c5cd3",
+      "type_counts": {
+        "harness_attempt": 22,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmNT8rXRSDrpwqvHz3EX2zQ5CKEcpyjy6VawG8sRSTTxrg",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 22,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a9",
+      "arm": "CONFORM",
+      "chain_file": "runs/g_r529_mbpp_a9/receipts_CONFORM.ndjson",
+      "entries_n": 44,
+      "verified_n": 44,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "6740337a1c089bee483b7b3f4f788022eebeded330fe51590d558312dabd860b",
+      "head": "ef71ccd37d0b8ddbba698e90fc6383e3a98fb7b1704fbb2a4d9805eb16afa60b",
+      "type_counts": {
+        "conform_attempt": 24,
+        "conform_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmSsc5F9VDYNWDHQ7pZtsc1xYwRGWDjYCgJY6AtQ5mGXhf",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 24,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    },
+    {
+      "run": "g_r529_mbpp_a9",
+      "arm": "HMIX",
+      "chain_file": "runs/g_r529_mbpp_a9/receipts_HMIX.ndjson",
+      "entries_n": 44,
+      "verified_n": 44,
+      "failed_n": 0,
+      "chain_ok": true,
+      "logbook_verify_chain": true,
+      "stream_id": "a5bb191c5ebb7e45caad517f2ed30b7e4261d9b6538651c5ca46c43bb342a595",
+      "head": "7a06bba1b019a47806b2e718a31fd33d55302d8f56e3f5c1e845fc3baffe1ea5",
+      "type_counts": {
+        "harness_attempt": 24,
+        "harness_verdict": 20
+      },
+      "failures": [],
+      "verdict": "OK",
+      "vacant_id": "zQmVSRjZy1gasH8P8MxZH1TGehxAuXc7oPYVxVXeu1ijb3d",
+      "genesis_hash_is_stream_id": true,
+      "rows_n": 20,
+      "verdict_n": 20,
+      "attempt_n": 24,
+      "arms_without_receipts": [
+        "OFF"
+      ]
+    }
+  ]
+}
