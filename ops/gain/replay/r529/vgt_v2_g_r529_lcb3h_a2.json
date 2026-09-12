@@ -1,0 +1,22 @@
+{
+  "run": "runs/g_r529_lcb3h_a2",
+  "scope": "v2",
+  "records_audited": 27,
+  "texts_audited": 68,
+  "texts_scanned": 61,
+  "per_arm": {
+    "HMIX": 27
+  },
+  "needles_checked": 550,
+  "needles_skipped_trivial": 250,
+  "excused_n": 0,
+  "excused": [],
+  "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0
+  },
+  "unknown_task_ids": [],
+  "violations": [],
+  "verdict": "CLEAN"
+}

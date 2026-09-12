@@ -1,0 +1,1013 @@
+{
+  "run": "R529",
+  "decision": "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+  "arms": [
+    "OFF",
+    "CONFORM",
+    "HMIX"
+  ],
+  "sets_expected": [
+    "lcb3_medium",
+    "lcb3_hard",
+    "humanevalplus",
+    "evalplus"
+  ],
+  "sets_included_in_primary": [
+    "lcb3_medium",
+    "lcb3_hard",
+    "humanevalplus",
+    "evalplus"
+  ],
+  "per_set": {
+    "lcb3_medium": {
+      "n_tasks": 135,
+      "n_tasks_expected": 135,
+      "blocks_present": 7,
+      "blocks_expected": 7,
+      "broken_reasons": [],
+      "valid": true,
+      "per_arm": {
+        "OFF": {
+          "n_measured": 135,
+          "deliv_n": 115,
+          "deliv_pp": 85.18518518518519,
+          "accepted_n": 135,
+          "false_delivery_n": 20,
+          "false_delivery_pp": 14.814814814814815,
+          "calls_per_task": 1.0
+        },
+        "CONFORM": {
+          "n_measured": 135,
+          "deliv_n": 125,
+          "deliv_pp": 92.5925925925926,
+          "accepted_n": 134,
+          "false_delivery_n": 9,
+          "false_delivery_pp": 6.666666666666667,
+          "calls_per_task": 1.1703703703703703
+        },
+        "HMIX": {
+          "n_measured": 135,
+          "deliv_n": 126,
+          "deliv_pp": 93.33333333333333,
+          "accepted_n": 132,
+          "false_delivery_n": 6,
+          "false_delivery_pp": 4.444444444444445,
+          "calls_per_task": 1.1407407407407408
+        }
+      },
+      "tokens": {
+        "OFF": {
+          "tokens_incl_void": 605089,
+          "tokens_excl_void": 605089,
+          "calls_total": 135,
+          "tokens_per_task": 4482.1407407407405,
+          "tpc_incl_void": 5261.643478260869
+        },
+        "CONFORM": {
+          "tokens_incl_void": 750088,
+          "tokens_excl_void": 750088,
+          "calls_total": 160,
+          "tokens_per_task": 5556.207407407407,
+          "tpc_incl_void": 6000.704
+        },
+        "HMIX": {
+          "tokens_incl_void": 1024068,
+          "tokens_excl_void": 1024068,
+          "calls_total": 162,
+          "tokens_per_task": 7585.688888888889,
+          "tpc_incl_void": 8127.523809523809
+        }
+      },
+      "paired": {
+        "HMIX_vs_CONFORM": {
+          "b": 6,
+          "c": 5,
+          "n_discordant": 11,
+          "n_common": 135,
+          "delta_pp": 0.7407407407407408,
+          "ci95_lo_pp": -4.338178408514352,
+          "ci95_hi_pp": 5.418712541184032,
+          "p_mcnemar_exact": 1.0,
+          "verdict_paired_ci": "NON_INFERIOR_BUT_UNRESOLVED",
+          "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準",
+          "b_only_task_ids": [
+            "lcb_2850",
+            "lcb_3192",
+            "lcb_3213",
+            "lcb_3230",
+            "lcb_3437",
+            "lcb_3455"
+          ],
+          "c_only_task_ids": [
+            "lcb_2833",
+            "lcb_3317",
+            "lcb_3442",
+            "lcb_3493",
+            "lcb_3517"
+          ]
+        },
+        "HMIX_vs_OFF": {
+          "b": 17,
+          "c": 6,
+          "n_discordant": 23,
+          "n_common": 135,
+          "delta_pp": 8.148148148148149,
+          "ci95_lo_pp": 0.5434143418428468,
+          "ci95_hi_pp": 13.551731733254451,
+          "p_mcnemar_exact": 0.03468966484069824,
+          "verdict_paired_ci": "ON_WINS",
+          "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準",
+          "b_only_task_ids": [
+            "lcb_2730",
+            "lcb_2755",
+            "lcb_2786",
+            "lcb_2832",
+            "lcb_2850",
+            "lcb_3094",
+            "lcb_3104",
+            "lcb_3228",
+            "lcb_3230",
+            "lcb_3264",
+            "lcb_3291",
+            "lcb_3297",
+            "lcb_3355",
+            "lcb_3395",
+            "lcb_3437",
+            "lcb_3453",
+            "lcb_3455"
+          ],
+          "c_only_task_ids": [
+            "lcb_2833",
+            "lcb_2920",
+            "lcb_3317",
+            "lcb_3394",
+            "lcb_3442",
+            "lcb_3493"
+          ]
+        }
+      },
+      "blocks": [
+        {
+          "block": "g_r529_lcb3m_a1",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_lcb3m_a2",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_lcb3m_a3",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_lcb3m_a4",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_lcb3m_a5",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_lcb3m_a6",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_lcb3m_a7",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 45
+        }
+      ],
+      "arbiter_note": "逐題庫**不下裁決**，只給數字（DECISION §六-2 逐字）。"
+    },
+    "lcb3_hard": {
+      "n_tasks": 54,
+      "n_tasks_expected": 54,
+      "blocks_present": 3,
+      "blocks_expected": 3,
+      "broken_reasons": [],
+      "valid": true,
+      "per_arm": {
+        "OFF": {
+          "n_measured": 54,
+          "deliv_n": 38,
+          "deliv_pp": 70.37037037037037,
+          "accepted_n": 54,
+          "false_delivery_n": 16,
+          "false_delivery_pp": 29.62962962962963,
+          "calls_per_task": 1.0
+        },
+        "CONFORM": {
+          "n_measured": 54,
+          "deliv_n": 41,
+          "deliv_pp": 75.92592592592592,
+          "accepted_n": 52,
+          "false_delivery_n": 11,
+          "false_delivery_pp": 20.37037037037037,
+          "calls_per_task": 1.4444444444444444
+        },
+        "HMIX": {
+          "n_measured": 54,
+          "deliv_n": 43,
+          "deliv_pp": 79.62962962962963,
+          "accepted_n": 50,
+          "false_delivery_n": 7,
+          "false_delivery_pp": 12.962962962962964,
+          "calls_per_task": 1.2407407407407407
+        }
+      },
+      "tokens": {
+        "OFF": {
+          "tokens_incl_void": 454259,
+          "tokens_excl_void": 454259,
+          "calls_total": 55,
+          "tokens_per_task": 8412.203703703704,
+          "tpc_incl_void": 11954.184210526315
+        },
+        "CONFORM": {
+          "tokens_incl_void": 720058,
+          "tokens_excl_void": 720058,
+          "calls_total": 80,
+          "tokens_per_task": 13334.407407407407,
+          "tpc_incl_void": 17562.39024390244
+        },
+        "HMIX": {
+          "tokens_incl_void": 773171,
+          "tokens_excl_void": 773171,
+          "calls_total": 70,
+          "tokens_per_task": 14317.981481481482,
+          "tpc_incl_void": 17980.720930232557
+        }
+      },
+      "paired": {
+        "HMIX_vs_CONFORM": {
+          "b": 5,
+          "c": 3,
+          "n_discordant": 8,
+          "n_common": 54,
+          "delta_pp": 3.7037037037037033,
+          "ci95_lo_pp": -7.559608403954049,
+          "ci95_hi_pp": 12.289380321859156,
+          "p_mcnemar_exact": 0.7265625,
+          "verdict_paired_ci": "UNINFORMATIVE",
+          "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準",
+          "b_only_task_ids": [
+            "lcb_2849",
+            "lcb_2952",
+            "lcb_3203",
+            "lcb_3298",
+            "lcb_3460"
+          ],
+          "c_only_task_ids": [
+            "lcb_3025",
+            "lcb_3313",
+            "lcb_3316"
+          ]
+        },
+        "HMIX_vs_OFF": {
+          "b": 7,
+          "c": 2,
+          "n_discordant": 9,
+          "n_common": 54,
+          "delta_pp": 9.25925925925926,
+          "ci95_lo_pp": -3.336452457210415,
+          "ci95_hi_pp": 15.728500884070057,
+          "p_mcnemar_exact": 0.1796875,
+          "verdict_paired_ci": "NON_INFERIOR_BUT_UNRESOLVED",
+          "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準",
+          "b_only_task_ids": [
+            "lcb_2849",
+            "lcb_2952",
+            "lcb_3203",
+            "lcb_3298",
+            "lcb_3382",
+            "lcb_3411",
+            "lcb_3460"
+          ],
+          "c_only_task_ids": [
+            "lcb_3025",
+            "lcb_3316"
+          ]
+        }
+      },
+      "blocks": [
+        {
+          "block": "g_r529_lcb3h_a1",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_lcb3h_a2",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_lcb3h_a3",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 42
+        }
+      ],
+      "arbiter_note": "逐題庫**不下裁決**，只給數字（DECISION §六-2 逐字）。"
+    },
+    "humanevalplus": {
+      "n_tasks": 156,
+      "n_tasks_expected": 156,
+      "blocks_present": 8,
+      "blocks_expected": 8,
+      "broken_reasons": [],
+      "valid": true,
+      "per_arm": {
+        "OFF": {
+          "n_measured": 156,
+          "deliv_n": 129,
+          "deliv_pp": 82.6923076923077,
+          "accepted_n": 156,
+          "false_delivery_n": 27,
+          "false_delivery_pp": 17.307692307692307,
+          "calls_per_task": 1.0
+        },
+        "CONFORM": {
+          "n_measured": 156,
+          "deliv_n": 147,
+          "deliv_pp": 94.23076923076923,
+          "accepted_n": 153,
+          "false_delivery_n": 6,
+          "false_delivery_pp": 3.8461538461538463,
+          "calls_per_task": 1.2756410256410255
+        },
+        "HMIX": {
+          "n_measured": 156,
+          "deliv_n": 148,
+          "deliv_pp": 94.87179487179488,
+          "accepted_n": 154,
+          "false_delivery_n": 6,
+          "false_delivery_pp": 3.8461538461538463,
+          "calls_per_task": 1.0897435897435896
+        }
+      },
+      "tokens": {
+        "OFF": {
+          "tokens_incl_void": 250371,
+          "tokens_excl_void": 250371,
+          "calls_total": 156,
+          "tokens_per_task": 1604.9423076923076,
+          "tpc_incl_void": 1940.860465116279
+        },
+        "CONFORM": {
+          "tokens_incl_void": 288698,
+          "tokens_excl_void": 288698,
+          "calls_total": 200,
+          "tokens_per_task": 1850.628205128205,
+          "tpc_incl_void": 1963.9319727891157
+        },
+        "HMIX": {
+          "tokens_incl_void": 488586,
+          "tokens_excl_void": 488586,
+          "calls_total": 178,
+          "tokens_per_task": 3131.9615384615386,
+          "tpc_incl_void": 3301.2567567567567
+        }
+      },
+      "paired": {
+        "HMIX_vs_CONFORM": {
+          "b": 5,
+          "c": 4,
+          "n_discordant": 9,
+          "n_common": 156,
+          "delta_pp": 0.641025641025641,
+          "ci95_lo_pp": -3.3229787679361427,
+          "ci95_hi_pp": 4.18851158924808,
+          "p_mcnemar_exact": 1.0,
+          "verdict_paired_ci": "RULED_OUT",
+          "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準",
+          "b_only_task_ids": [
+            "humanevalplus_HumanEval/132",
+            "humanevalplus_HumanEval/140",
+            "humanevalplus_HumanEval/145",
+            "humanevalplus_HumanEval/55",
+            "humanevalplus_HumanEval/76"
+          ],
+          "c_only_task_ids": [
+            "humanevalplus_HumanEval/113",
+            "humanevalplus_HumanEval/124",
+            "humanevalplus_HumanEval/141",
+            "humanevalplus_HumanEval/163"
+          ]
+        },
+        "HMIX_vs_OFF": {
+          "b": 24,
+          "c": 5,
+          "n_discordant": 29,
+          "n_common": 156,
+          "delta_pp": 12.179487179487179,
+          "ci95_lo_pp": 5.288872976891218,
+          "ci95_hi_pp": 16.41637640229949,
+          "p_mcnemar_exact": 0.0005461126565933228,
+          "verdict_paired_ci": "ON_WINS",
+          "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準",
+          "b_only_task_ids": [
+            "humanevalplus_HumanEval/0",
+            "humanevalplus_HumanEval/115",
+            "humanevalplus_HumanEval/12",
+            "humanevalplus_HumanEval/13",
+            "humanevalplus_HumanEval/132",
+            "humanevalplus_HumanEval/135",
+            "humanevalplus_HumanEval/14",
+            "humanevalplus_HumanEval/140",
+            "humanevalplus_HumanEval/145",
+            "humanevalplus_HumanEval/154",
+            "humanevalplus_HumanEval/22",
+            "humanevalplus_HumanEval/29",
+            "humanevalplus_HumanEval/31",
+            "humanevalplus_HumanEval/33",
+            "humanevalplus_HumanEval/40",
+            "humanevalplus_HumanEval/45",
+            "humanevalplus_HumanEval/48",
+            "humanevalplus_HumanEval/49",
+            "humanevalplus_HumanEval/51",
+            "humanevalplus_HumanEval/52",
+            "humanevalplus_HumanEval/53",
+            "humanevalplus_HumanEval/57",
+            "humanevalplus_HumanEval/61",
+            "humanevalplus_HumanEval/7"
+          ],
+          "c_only_task_ids": [
+            "humanevalplus_HumanEval/113",
+            "humanevalplus_HumanEval/124",
+            "humanevalplus_HumanEval/141",
+            "humanevalplus_HumanEval/151",
+            "humanevalplus_HumanEval/163"
+          ]
+        }
+      },
+      "blocks": [
+        {
+          "block": "g_r529_hep_a1",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_hep_a2",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_hep_a3",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_hep_a4",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_hep_a5",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_hep_a6",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_hep_a7",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_hep_a8",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 48
+        }
+      ],
+      "arbiter_note": "逐題庫**不下裁決**，只給數字（DECISION §六-2 逐字）。"
+    },
+    "evalplus": {
+      "n_tasks": 371,
+      "n_tasks_expected": 371,
+      "blocks_present": 19,
+      "blocks_expected": 19,
+      "broken_reasons": [],
+      "valid": true,
+      "per_arm": {
+        "OFF": {
+          "n_measured": 371,
+          "deliv_n": 277,
+          "deliv_pp": 74.66307277628033,
+          "accepted_n": 371,
+          "false_delivery_n": 94,
+          "false_delivery_pp": 25.336927223719677,
+          "calls_per_task": 1.0
+        },
+        "CONFORM": {
+          "n_measured": 371,
+          "deliv_n": 295,
+          "deliv_pp": 79.51482479784367,
+          "accepted_n": 351,
+          "false_delivery_n": 56,
+          "false_delivery_pp": 15.09433962264151,
+          "calls_per_task": 1.3369272237196765
+        },
+        "HMIX": {
+          "n_measured": 371,
+          "deliv_n": 299,
+          "deliv_pp": 80.59299191374663,
+          "accepted_n": 357,
+          "false_delivery_n": 58,
+          "false_delivery_pp": 15.633423180592992,
+          "calls_per_task": 1.1132075471698113
+        }
+      },
+      "tokens": {
+        "OFF": {
+          "tokens_incl_void": 545279,
+          "tokens_excl_void": 545279,
+          "calls_total": 371,
+          "tokens_per_task": 1469.754716981132,
+          "tpc_incl_void": 1968.5162454873646
+        },
+        "CONFORM": {
+          "tokens_incl_void": 819620,
+          "tokens_excl_void": 819620,
+          "calls_total": 496,
+          "tokens_per_task": 2209.2183288409706,
+          "tpc_incl_void": 2778.3728813559323
+        },
+        "HMIX": {
+          "tokens_incl_void": 1326736,
+          "tokens_excl_void": 1326736,
+          "calls_total": 434,
+          "tokens_per_task": 3576.10781671159,
+          "tpc_incl_void": 4437.244147157191
+        }
+      },
+      "paired": {
+        "HMIX_vs_CONFORM": {
+          "b": 15,
+          "c": 11,
+          "n_discordant": 26,
+          "n_common": 371,
+          "delta_pp": 1.078167115902965,
+          "ci95_lo_pp": -1.8335903482355156,
+          "ci95_hi_pp": 3.7350018537393392,
+          "p_mcnemar_exact": 0.557197093963623,
+          "verdict_paired_ci": "RULED_OUT",
+          "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準",
+          "b_only_task_ids": [
+            "mbppplus_Mbpp/109",
+            "mbppplus_Mbpp/126",
+            "mbppplus_Mbpp/138",
+            "mbppplus_Mbpp/223",
+            "mbppplus_Mbpp/235",
+            "mbppplus_Mbpp/279",
+            "mbppplus_Mbpp/310",
+            "mbppplus_Mbpp/398",
+            "mbppplus_Mbpp/432",
+            "mbppplus_Mbpp/446",
+            "mbppplus_Mbpp/581",
+            "mbppplus_Mbpp/734",
+            "mbppplus_Mbpp/757",
+            "mbppplus_Mbpp/93",
+            "mbppplus_Mbpp/99"
+          ],
+          "c_only_task_ids": [
+            "mbppplus_Mbpp/118",
+            "mbppplus_Mbpp/265",
+            "mbppplus_Mbpp/286",
+            "mbppplus_Mbpp/294",
+            "mbppplus_Mbpp/308",
+            "mbppplus_Mbpp/410",
+            "mbppplus_Mbpp/556",
+            "mbppplus_Mbpp/602",
+            "mbppplus_Mbpp/633",
+            "mbppplus_Mbpp/755",
+            "mbppplus_Mbpp/794"
+          ]
+        },
+        "HMIX_vs_OFF": {
+          "b": 31,
+          "c": 9,
+          "n_discordant": 40,
+          "n_common": 371,
+          "delta_pp": 5.929919137466308,
+          "ci95_lo_pp": 2.4903142360448793,
+          "ci95_hi_pp": 8.444277326489013,
+          "p_mcnemar_exact": 0.0006795482549932785,
+          "verdict_paired_ci": "ON_WINS",
+          "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準",
+          "b_only_task_ids": [
+            "mbppplus_Mbpp/12",
+            "mbppplus_Mbpp/126",
+            "mbppplus_Mbpp/129",
+            "mbppplus_Mbpp/138",
+            "mbppplus_Mbpp/140",
+            "mbppplus_Mbpp/20",
+            "mbppplus_Mbpp/223",
+            "mbppplus_Mbpp/235",
+            "mbppplus_Mbpp/245",
+            "mbppplus_Mbpp/251",
+            "mbppplus_Mbpp/268",
+            "mbppplus_Mbpp/279",
+            "mbppplus_Mbpp/284",
+            "mbppplus_Mbpp/290",
+            "mbppplus_Mbpp/310",
+            "mbppplus_Mbpp/398",
+            "mbppplus_Mbpp/453",
+            "mbppplus_Mbpp/581",
+            "mbppplus_Mbpp/59",
+            "mbppplus_Mbpp/614",
+            "mbppplus_Mbpp/632",
+            "mbppplus_Mbpp/641",
+            "mbppplus_Mbpp/734",
+            "mbppplus_Mbpp/758",
+            "mbppplus_Mbpp/773",
+            "mbppplus_Mbpp/780",
+            "mbppplus_Mbpp/781",
+            "mbppplus_Mbpp/79",
+            "mbppplus_Mbpp/792",
+            "mbppplus_Mbpp/801",
+            "mbppplus_Mbpp/99"
+          ],
+          "c_only_task_ids": [
+            "mbppplus_Mbpp/118",
+            "mbppplus_Mbpp/286",
+            "mbppplus_Mbpp/294",
+            "mbppplus_Mbpp/308",
+            "mbppplus_Mbpp/465",
+            "mbppplus_Mbpp/633",
+            "mbppplus_Mbpp/755",
+            "mbppplus_Mbpp/785",
+            "mbppplus_Mbpp/98"
+          ]
+        }
+      },
+      "blocks": [
+        {
+          "block": "g_r529_mbpp_a1",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a2",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a3",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a4",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a5",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a6",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a7",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a8",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a9",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a10",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a11",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a12",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a13",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a14",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a15",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a16",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a17",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a18",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 60
+        },
+        {
+          "block": "g_r529_mbpp_a19",
+          "present": true,
+          "terminal": true,
+          "void_rate_max": 0.0,
+          "n_rows": 33
+        }
+      ],
+      "arbiter_note": "逐題庫**不下裁決**，只給數字（DECISION §六-2 逐字）。"
+    }
+  },
+  "tokens_pooled": {
+    "OFF": {
+      "tokens_incl_void": 1854998,
+      "deliv_n": 559,
+      "n_measured": 716,
+      "tpc_incl_void": 3318.4221824686942,
+      "tokens_per_task": 2590.7793296089385
+    },
+    "CONFORM": {
+      "tokens_incl_void": 2578464,
+      "deliv_n": 608,
+      "n_measured": 716,
+      "tpc_incl_void": 4240.894736842105,
+      "tokens_per_task": 3601.2067039106146
+    },
+    "HMIX": {
+      "tokens_incl_void": 3612561,
+      "deliv_n": 616,
+      "n_measured": 716,
+      "tpc_incl_void": 5864.547077922078,
+      "tokens_per_task": 5045.47625698324
+    }
+  },
+  "primary": {
+    "HMIX_vs_CONFORM": {
+      "b": 31,
+      "c": 23,
+      "n_discordant": 54,
+      "p": 0.34089094122009733,
+      "k_strata": 4,
+      "sets_included": [
+        "lcb3_medium",
+        "lcb3_hard",
+        "humanevalplus",
+        "evalplus"
+      ],
+      "per_stratum": [
+        {
+          "set": "lcb3_medium",
+          "b": 6,
+          "c": 5,
+          "n_common": 135,
+          "p_unadjusted": 1.0
+        },
+        {
+          "set": "lcb3_hard",
+          "b": 5,
+          "c": 3,
+          "n_common": 54,
+          "p_unadjusted": 0.7265625
+        },
+        {
+          "set": "humanevalplus",
+          "b": 5,
+          "c": 4,
+          "n_common": 156,
+          "p_unadjusted": 1.0
+        },
+        {
+          "set": "evalplus",
+          "b": 15,
+          "c": 11,
+          "n_common": 371,
+          "p_unadjusted": 0.557197093963623
+        }
+      ],
+      "pooling_identity_check": 0.34089094122009733,
+      "pooling_identity_note": "分層統計量與「把四集的不一致對直接加起來做一次 McNemar」**數值相同**；分層買到的是解釋（H0＝每一集都沒有效果、逐集必須照實列、異質性另外量），不是更嚴的檢定。不准寫成「我們做了分層校正所以比較穩」。",
+      "heterogeneity": {
+        "chi2": 0.13518669269019906,
+        "df": 3,
+        "p": 0.9873037742313212,
+        "min_expected": 3.4074074074074074,
+        "degenerate": false,
+        "note": "描述性：2×K 的 b/c 卡方沒有精確版本，期望次數小的時候近似本來就不準（min_expected 一起印，<5 要在報告裡講）。不進 Holm 家族、不改任何一格裁決。"
+      },
+      "p_adj": 0.34089094122009733,
+      "significant": false
+    },
+    "HMIX_vs_OFF": {
+      "b": 79,
+      "c": 22,
+      "n_discordant": 101,
+      "p": 1.012134755360389e-08,
+      "k_strata": 4,
+      "sets_included": [
+        "lcb3_medium",
+        "lcb3_hard",
+        "humanevalplus",
+        "evalplus"
+      ],
+      "per_stratum": [
+        {
+          "set": "lcb3_medium",
+          "b": 17,
+          "c": 6,
+          "n_common": 135,
+          "p_unadjusted": 0.03468966484069824
+        },
+        {
+          "set": "lcb3_hard",
+          "b": 7,
+          "c": 2,
+          "n_common": 54,
+          "p_unadjusted": 0.1796875
+        },
+        {
+          "set": "humanevalplus",
+          "b": 24,
+          "c": 5,
+          "n_common": 156,
+          "p_unadjusted": 0.0005461126565933228
+        },
+        {
+          "set": "evalplus",
+          "b": 31,
+          "c": 9,
+          "n_common": 371,
+          "p_unadjusted": 0.0006795482549932785
+        }
+      ],
+      "pooling_identity_check": 1.012134755360389e-08,
+      "pooling_identity_note": "分層統計量與「把四集的不一致對直接加起來做一次 McNemar」**數值相同**；分層買到的是解釋（H0＝每一集都沒有效果、逐集必須照實列、異質性另外量），不是更嚴的檢定。不准寫成「我們做了分層校正所以比較穩」。",
+      "heterogeneity": {
+        "chi2": 0.6142410263031127,
+        "df": 3,
+        "p": 0.8931646169763933,
+        "min_expected": 1.9603960396039601,
+        "degenerate": false,
+        "note": "描述性：2×K 的 b/c 卡方沒有精確版本，期望次數小的時候近似本來就不準（min_expected 一起印，<5 要在報告裡講）。不進 Holm 家族、不改任何一格裁決。"
+      },
+      "p_adj": 2.024269510720778e-08,
+      "significant": true
+    },
+    "family_size": 2,
+    "alpha": 0.05,
+    "family_note": "家族固定 2（HMIX−CONFORM、HMIX−OFF）。某一集 INVALID 只把它從 N 裡拿掉（DECISION §一〇-2），**不改家族大小**。"
+  },
+  "refutation": {
+    "triggered": false,
+    "keys": {
+      "lcb3_hard": {
+        "b": 5,
+        "c": 3,
+        "c_ge_b": false
+      },
+      "lcb3_medium": {
+        "b": 6,
+        "c": 5,
+        "c_ge_b": false
+      }
+    },
+    "humanevalplus_c_ge_b": false,
+    "evalplus_c_ge_b": false,
+    "note": "觸發 ⇒ R460 的 EFFECTIVE 降為「一次顯著」，且 examples/verdicts.py 與官網資料源要同步改口徑（DECISION §六-4）。MBPP+／HumanEval+ 不是觸發鍵，但出現 c ≥ b 一樣要逐字報出來。"
+  },
+  "decision_state": {
+    "state": "INCONCLUSIVE",
+    "cond_i_both_primary_holm": false,
+    "cond_ii_tpc_hmix_le_conform": false,
+    "tpc_incl_void": {
+      "HMIX": 5864.547077922078,
+      "CONFORM": 4240.894736842105
+    },
+    "note": "R529 四狀態是**本研究自訂並在資料前凍結**的口徑（DECISION §六-3），與 R460 §六-(4) 的同名狀態**不是同一個東西**（本 run 沒有 OFF5 臂），不可互引。",
+    "pooled_tpc_note": "這是本檔**唯一**一處把四集加起來算比值的地方，而且只用來判一個布林值；不准被引用成「H-MIX 的成本是 CONFORM 的 x 倍」——那個比值逐集差很多。"
+  },
+  "aggregate": {
+    "direction_agree_c": 4,
+    "direction_agree_o": 4,
+    "n_sets_counted": 4,
+    "delta_c_pp_by_set": {
+      "lcb3_medium": 0.7407407407407408,
+      "lcb3_hard": 3.7037037037037033,
+      "humanevalplus": 0.641025641025641,
+      "evalplus": 1.078167115902965
+    },
+    "delta_o_pp_by_set": {
+      "lcb3_medium": 8.148148148148149,
+      "lcb3_hard": 9.25925925925926,
+      "humanevalplus": 12.179487179487179,
+      "evalplus": 5.929919137466308
+    },
+    "statement": "主指標未成立 ⇒ 逐集照實列，不准寫「多數支持」。",
+    "statement_rule": "主指標兩格都 p_adj<0.05 且 direction_agree_c==4 ⇒ 可以寫「三個來源、四集方向一致且合併顯著」；主指標成立但方向不是 4/4 ⇒ 必須指名哪一集反向；主指標任一格不成立 ⇒ 逐集照實列（DECISION §六-5 逐字）。",
+    "no_meta_analysis_note": "沒有隨機效應模型、沒有 meta-analysis、沒有合併效果量；四集的點估計**不准平均**（難度組成、來源、n、量具強度都不同）。",
+    "winners_curse": "winner's curse：R460 的 +13.33pp 是**能被判顯著**的點估計 ⇒ 上偏。本 run 的點估計預期比它小，那是預期之內的事，不是「效果消失」。"
+  }
+}

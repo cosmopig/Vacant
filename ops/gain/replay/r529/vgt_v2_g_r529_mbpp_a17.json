@@ -1,0 +1,22 @@
+{
+  "run": "runs/g_r529_mbpp_a17",
+  "scope": "v2",
+  "records_audited": 24,
+  "texts_audited": 56,
+  "texts_scanned": 52,
+  "per_arm": {
+    "HMIX": 24
+  },
+  "needles_checked": 2208,
+  "needles_skipped_trivial": 229,
+  "excused_n": 0,
+  "excused": [],
+  "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0
+  },
+  "unknown_task_ids": [],
+  "violations": [],
+  "verdict": "CLEAN"
+}
