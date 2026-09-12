@@ -238,3 +238,65 @@ def test_prereg_has_the_errata_appendix():
     assert "calls_wire_total" in txt and "calls_logical_total" in txt
     # 凍結正文的門檻句必須原樣還在
     assert "家族 2" in txt and "α=0.05" in txt
+
+
+# ── round529-2：D5 歸因（`ops/gain/r529_rescore_turn1.py`）──────────────
+# 那支會跑沙箱，所以這裡測的是**算式**與**誠實邊界**，不是重跑它。
+
+
+def test_rescore_attribution_matches_the_r460_formula():
+    """兩個差值的 b/c 定義要與 `analyze_r460` 逐字相同。
+
+    形狀：OFF 對 1 題（t0）；HMIX 初稿輪對 t1（t0 錯）、最終兩題都對。
+      · Δ(turn1−OFF)：t1 只有 turn1 對 ⇒ b=1；t0 只有 OFF 對 ⇒ c=1 ⇒ 0pp
+      · Δ(final−turn1)：t0 最終才對 ⇒ b=1、c=0 ⇒ +50pp
+    """
+    from ops.gain.r529_rescore_turn1 import attribution
+
+    def row(arm, tid, deliv, fpt=None):
+        r = {"arm": arm, "task_id": tid, "accepted": True,
+             "meets_demand": deliv, "calls_used": 1}
+        if fpt is not None:
+            r["first_pass_turn"] = fpt
+        return r
+
+    rows = [row("OFF", "t0", True), row("OFF", "t1", False),
+            row("HMIX", "t0", True, 2), row("HMIX", "t1", True, 1)]
+    a = attribution(rows, {"HMIX": {"t0": False, "t1": True}})
+    assert a["rescored"] is True
+    assert (a["delta_turn1_minus_off_b"], a["delta_turn1_minus_off_c"]) == (1, 1)
+    assert a["delta_turn1_minus_off_pp"] == 0.0
+    assert (a["delta_final_minus_turn1_b"], a["delta_final_minus_turn1_c"]) == (1, 0)
+    assert a["delta_final_minus_turn1_pp"] == 50.0
+    # 只算「真的進過迴圈」的題（first_pass_turn != 1）⇒ 只有 t0
+    assert a["delta_final_minus_turn1_looponly_n_common"] == 1
+    assert a["delta_final_minus_turn1_looponly_pp"] == 100.0
+
+
+def test_rescore_without_turn1_reports_none_not_zero():
+    """沒跑重評時兩個差值必須是 None——「量不到」≠「量到 0」。"""
+    from ops.gain.r529_rescore_turn1 import attribution
+    rows = [{"arm": "HMIX", "task_id": "t0", "accepted": True,
+             "meets_demand": True, "calls_used": 1, "first_pass_turn": 1},
+            {"arm": "OFF", "task_id": "t0", "accepted": True,
+             "meets_demand": False, "calls_used": 1}]
+    a = attribution(rows, None)
+    assert a["rescored"] is False
+    assert "delta_turn1_minus_off_pp" not in a
+    assert "不是 0" in a["rescore_note"]
+
+
+def test_rescore_carries_the_replay_and_identity_warnings():
+    """R460 audit §十：歸因附表要報**重放區間**，不是單一數字。"""
+    from ops.gain.r529_rescore_turn1 import (IDENTITY_WARNING, NO_ARBITRATION,
+                                             REPLAY_WARNING)
+    assert "不是恆等式" in IDENTITY_WARNING
+    assert "重放不穩定" in REPLAY_WARNING and "1–3 題" in REPLAY_WARNING
+    assert "不下裁決" in NO_ARBITRATION
+
+
+def test_rescore_reuses_analyze_r460_instead_of_copying_it():
+    """取碼與評分只准有一份實作——抄一份就會漂。"""
+    src = (ROOT / "ops" / "gain" / "r529_rescore_turn1.py").read_text(encoding="utf-8")
+    assert "from ops.gain.analyze_r460 import" in src and "rescore_turn1" in src
+    assert "def rescore_turn1" not in src, "不准在這裡另寫一份取碼／評分"
