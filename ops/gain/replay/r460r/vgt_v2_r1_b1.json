@@ -1,0 +1,36 @@
+{
+  "run": "runs/g_r460r1_harness_lcb2_b1",
+  "scope": "v2",
+  "records_audited": 94,
+  "texts_audited": 280,
+  "texts_scanned": 234,
+  "per_arm": {
+    "HPI": 29,
+    "HOC": 44,
+    "HMIX": 21
+  },
+  "needles_checked": 2740,
+  "needles_skipped_trivial": 1764,
+  "excused_n": 1,
+  "excused": [
+    {
+      "line": 220,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 0, 0]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3784",
+      "excerpt": "ass.\n\nAssertionError: args=[['dog', 'racer', 'car'], 2] got=<sandbox-echo> want=[0, 0, 0]\n\nReply with exactly one Python code block containing the complete corr",
+      "excused_as": "visible_check_source"
+    }
+  ],
+  "excused_by_rule": {
+    "visible_check_source": 1,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0
+  },
+  "unknown_task_ids": [],
+  "violations": [],
+  "verdict": "CLEAN"
+}

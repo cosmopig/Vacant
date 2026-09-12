@@ -1,0 +1,223 @@
+{
+  "run": "runs/g_r460r1_harness_lcb2_b2",
+  "scope": "v2",
+  "records_audited": 129,
+  "texts_audited": 504,
+  "texts_scanned": 381,
+  "per_arm": {
+    "HPI": 43,
+    "HOC": 60,
+    "HMIX": 26
+  },
+  "needles_checked": 3814,
+  "needles_skipped_trivial": 2358,
+  "excused_n": 18,
+  "excused": [
+    {
+      "line": 72,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 72,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 73,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 73,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 73,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 73,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 74,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 74,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 74,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 74,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 74,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 74,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 75,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 75,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 75,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 75,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 75,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 75,
+      "arm": "HPI",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 2, 3]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3562",
+      "excerpt": ": args=[[[1, 3, 2], [4, 5, 2], [1, 5, 5], [6, 9, 3], [6, 7, 1], [8, 9, 1]]] got=[0, 2, 3] want=[2, 3]\n\nReply with exactly one Python code block containing the c",
+      "excused_as": "got_sandbox_echo"
+    }
+  ],
+  "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 18
+  },
+  "unknown_task_ids": [],
+  "violations": [],
+  "verdict": "CLEAN"
+}

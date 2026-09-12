@@ -1,0 +1,24 @@
+{
+  "run": "runs/g_r460r1_harness_lcb2_a3",
+  "scope": "v2",
+  "records_audited": 120,
+  "texts_audited": 418,
+  "texts_scanned": 329,
+  "per_arm": {
+    "HPI": 31,
+    "HOC": 54,
+    "HMIX": 35
+  },
+  "needles_checked": 3469,
+  "needles_skipped_trivial": 2267,
+  "excused_n": 0,
+  "excused": [],
+  "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0
+  },
+  "unknown_task_ids": [],
+  "violations": [],
+  "verdict": "CLEAN"
+}
