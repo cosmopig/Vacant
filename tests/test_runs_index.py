@@ -5,7 +5,7 @@
 
 釘四件事，每一件都對應一種具體的壞法：
 
-  1. `50 個目錄有 summary.json`         ← 掃描範圍縮水／擴張（分類邏輯漂掉）
+  1. `105 個目錄有 summary.json`        ← 掃描範圍縮水／擴張（分類邏輯漂掉）
   2. `g_r449c_eq5_lcb3` 的 `n_rows` 189 ← 行數統計壞掉（例如把 header 算進去）
   3. `lcb_bank_v2` 120 題               ← 題庫解析壞掉／指到錯的檔
   4. 索引裡不含 MBPP+ 的任何位元組      ← **私有資料外洩**（最嚴重的一種）
@@ -38,8 +38,8 @@ def idx() -> dict:
     return build_index()
 
 
-def test_dirs_with_summary_json_is_50(idx):
-    """HEAD 有 50 個 run 目錄帶 summary.json（2026-09-11 重建索引時點過）。
+def test_dirs_with_summary_json_is_105(idx):
+    """HEAD 有 105 個 run 目錄帶 summary.json（2026-09-12 重建索引時點過）。
 
     這個數字會隨新 run 落盤而增加——變了就更新這裡，但**要先確認是真的多了
     一個 run**，而不是分類邏輯把別的東西算進來了。
@@ -48,13 +48,32 @@ def test_dirs_with_summary_json_is_50(idx):
     它們在 2026-09-08／09 落盤，而索引一直停在 2026-09-07 的點數
     ⇒ `build_runs_index.py --check` 從那時起就是紅的（R529 v1 §九-5 記的已知未償）。
     2026-09-11 重跑產生器補上，逐塊核對過是真的多了六個 run 而不是分類漂掉。
+
+    50 → 105 的那 55 個是 2026-09-12 收官的兩批（逐塊核對過，都是真的多了 run）：
+      * **R529 跨題庫收官 37 塊** `g_r529_{lcb3m_a1..a7, lcb3h_a1..a3,
+        hep_a1..a8, mbpp_a1..a19}`——四個互斥題目集、三臂、716 題。
+      * **R460R 三次同題複製 18 塊** `g_r460r{1,2,3}_harness_lcb2_{a1..a3,b1..b3}`
+        ——同一批 LCB v2 120 題、六臂、三顆新 seed。
+    r4／r5 還在 vacant-dev 上跑，**沒有**進這個 checkout ⇒ 不算在 105 裡。
     """
-    assert idx["counts"]["dirs_with_summary_json"] == 50
+    assert idx["counts"]["dirs_with_summary_json"] == 105
     counted = sum(1 for r in idx["runs"]
                   if any(f["name"] == "summary.json" for f in r["files"]))
-    assert counted == 50
+    assert counted == 105
     names = {r["name"] for r in idx["runs"]}
     assert {f"g_r460_harness_lcb2_{t}" for t in ("a1", "a2", "a3", "b1", "b2", "b3")} <= names
+    # R529 的 37 塊與 R460R 的 18 塊逐名釘住——只釘總數的話，「少了 R529 一塊、
+    # 多了一個別的目錄」會剛好抵銷而測試照樣綠。
+    assert {f"g_r529_lcb3m_a{i}" for i in range(1, 8)} <= names
+    assert {f"g_r529_lcb3h_a{i}" for i in range(1, 4)} <= names
+    assert {f"g_r529_hep_a{i}" for i in range(1, 9)} <= names
+    assert {f"g_r529_mbpp_a{i}" for i in range(1, 20)} <= names
+    assert {f"g_r460r{r}_harness_lcb2_{t}"
+            for r in (1, 2, 3)
+            for t in ("a1", "a2", "a3", "b1", "b2", "b3")} <= names
+    # r4／r5 不在這個 checkout（在 vacant-dev 上跑）。進來了要先更新上面的點數，
+    # 而不是讓它悄悄混進 real_run 的統計。
+    assert not any(n.startswith(("g_r460r4_", "g_r460r5_")) for n in names)
 
 
 def test_r449c_n_rows_is_189(idx):
@@ -197,6 +216,32 @@ def test_analysis_dirs_are_not_evidence(idx):
     assert not any(n.startswith(("_analysis", "analysis_")) for n in reals)
 
 
+def test_decisions_are_found_even_from_inside_a_worktree(idx):
+    """裁決檔的掃描不准因為「這個 checkout 放在哪」而整批消失。
+
+    2026-09-12 抓到的真 bug：`_decision_texts()` 用 **絕對路徑**的 `p.parts`
+    去比 `_EXCLUDED_DIRS`（`.git`／`.claude`／`.venv`／`node_modules`）。
+    那個排除本來是為了跳過**巢狀**的 agent worktree，但產生器自己跑在
+    `…/.claude/worktrees/agent-xxx/` 裡的時候，ROOT 的絕對路徑自己就含
+    `.claude` ⇒ **每一份裁決檔都被排除掉**。
+
+    壞法之所以危險，是因為它完全不出聲：`build_index()` 照樣回一份合法的
+    JSON，只是每個 `decision_refs` 都空、每個 `headline` 都變 `—`，
+    人讀版整批 run 從「已收官」掉進「跑完但沒被獨立稽核」那一節。
+    而 `--check` 在同一個 worktree 裡照樣說 OK——它比的是自己算的兩份。
+
+    ⇒ 索引**安靜地少講**，而讀索引的人沒有別的東西可以對照。
+    釘法：跨 checkout 都成立的事實（r444 的併庫收官一定被掃到）。
+    """
+    by = {r["name"]: r for r in idx["runs"]}
+    assert by["g_r444_conform_mbpp"]["related_settlements"] == [
+        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"]
+    n_with_refs = sum(1 for r in idx["runs"] if r["decision_refs"])
+    assert n_with_refs > 50, (
+        f"只有 {n_with_refs} 個 run 被任何裁決檔提到——裁決檔掃描壞了"
+        "（先看 _decision_texts 的排除條件是不是又用了絕對路徑）")
+
+
 def test_md_is_rendered_from_the_same_index(idx):
     """人讀版必須由同一份 dict 產生，且把「不是證據」那句話寫出來。"""
     md = render_md(idx)
@@ -205,6 +250,58 @@ def test_md_is_rendered_from_the_same_index(idx):
     assert "g_r449c_eq5_lcb3" in md
     # 索引不准比資料樂觀：沒被稽核的 run 要有自己的一節。
     assert "跑完但沒被獨立稽核的 run" in md
+    # …但也不准比資料悲觀：成組收官的 55 塊要有自己的兩節，
+    # 而且要明講「一份裁決管 N 塊」與「R460R 還沒有收官裁決檔」。
+    assert "R529 跨題庫收官" in md
+    assert "R460R 三次同題複製" in md
+    assert "一份裁決管 37 塊" in md
+    assert "這 18 塊還沒有收官裁決檔" in md
+    # HumanEval+ 的分母是 156 不是 164——8 題排除要逐題列出理由。
+    assert "HumanEval+ v0.1.10" in md
+    assert "分母是 156 不是 164" in md
+    assert "humanevalplus_HumanEval/15" in md
+
+
+def test_humaneval_plus_bank_is_pinned(idx):
+    """HumanEval+ 與 MBPP+ 同樣是私有包：只准記路徑與釘值，不准記內容。
+
+    另外釘住「可用題數 156」這個分母——引用 HumanEval+ 的人最容易犯的錯
+    就是拿 164 當分母。
+    """
+    hp = idx["banks"]["humaneval_plus"]
+    assert hp["private"] is True
+    assert hp["redistributed"] is False
+    assert hp["path"] == ".vacant-private/evalplus/HumanEvalPlus-v0.1.10.jsonl.gz"
+    assert hp["n_tasks_pin_in_codebench"] == 164
+    assert hp["n_tasks_excluded"] == 8
+    assert hp["n_tasks_usable"] == 156
+    assert len(hp["excluded_task_ids"]) == 8
+    # 每一題都要有理由——只列 id 不列理由等於「因為我們說要排除」。
+    for tid, why in hp["excluded_task_ids"].items():
+        assert tid.startswith("humanevalplus_HumanEval/"), tid
+        assert why.strip(), tid
+    assert len(hp["used_by_runs"]) == 8
+    assert all(n.startswith("g_r529_hep_") for n in hp["used_by_runs"])
+    # 釘值抓得到（`EVALPLUS_HUMANEVAL_PLUS_SHA256` 是括號換行寫法，
+    # 單行 regex 抓不到會靜靜變成 None）。
+    assert (hp["sha256_pin_in_codebench"] or "").startswith("272720b90ac37550")
+    assert len(hp["sha256_pin_in_codebench"]) == 64
+
+
+def test_grouped_runs_are_not_in_the_unaudited_table(idx):
+    """R529／R460R 的 55 塊不准落進「跑完但沒被獨立稽核」那張表。
+
+    它們的 `headline` 是 `—`（裁決檔用 glob 點名整批，`_refs_and_headline`
+    故意不認 glob），但它們**是**被稽核過的。留在那張表會讓索引比資料悲觀，
+    讀的人會以為證據比實際少——與「索引不准比資料樂觀」是同一條紀律的兩面。
+    """
+    md = render_md(idx)
+    tail = md.split("## 五、跑完但沒被獨立稽核的 run")[1].split("## 六、")[0]
+    for r in idx["runs"]:
+        if r["name"].startswith(("g_r529_", "g_r460r")):
+            assert r["kind"] == "real_run", r["name"]
+            assert f"`{r['name']}`" not in tail, (
+                f"{r['name']} 落進了「沒被獨立稽核」那張表")
 
 
 def test_generator_runs_as_a_script(tmp_path):
@@ -216,4 +313,4 @@ def test_generator_runs_as_a_script(tmp_path):
         capture_output=True, text=True, cwd=str(ROOT), timeout=300)
     assert r.returncode == 0, r.stderr
     data = json.loads((out / "INDEX.json").read_text())
-    assert data["counts"]["dirs_with_summary_json"] == 50
+    assert data["counts"]["dirs_with_summary_json"] == 105

@@ -257,6 +257,11 @@ def _codebench_pins() -> dict[str, Any]:
 
     def grab(name: str) -> str | None:
         m = re.search(rf'^{name}\s*=\s*"([^"]+)"', src, re.M)
+        if m:
+            return m.group(1)
+        # 有些釘值寫成括號換行（`NAME = (\n    "…")`），單行 regex 抓不到。
+        # 抓不到就回 None 會讓索引默默少一格釘值——那正是索引最不該犯的錯。
+        m = re.search(rf'^{name}\s*=\s*\(\s*"([^"]+)"\s*\)', src, re.M)
         return m.group(1) if m else None
 
     def grab_int(name: str) -> int | None:
@@ -271,6 +276,9 @@ def _codebench_pins() -> dict[str, Any]:
         "evalplus_sha256": grab("EVALPLUS_MBPP_PLUS_SHA256"),
         "evalplus_count": grab_int("EVALPLUS_MBPP_PLUS_COUNT"),
         "evalplus_path": grab("EVALPLUS_DEFAULT_PATH"),
+        "humanevalplus_sha256": grab("EVALPLUS_HUMANEVAL_PLUS_SHA256"),
+        "humanevalplus_count": grab_int("EVALPLUS_HUMANEVAL_PLUS_COUNT"),
+        "humanevalplus_path": grab("EVALPLUS_HUMANEVAL_DEFAULT_PATH"),
         "lcb": {v: {"sha256": grab(f"LCB_BANK_{v.upper()}_SHA256"),
                     "count": grab_int(f"LCB_BANK_{v.upper()}_COUNT")}
                 for v in ("v1", "v2", "v3")},
@@ -290,6 +298,23 @@ def _known_bad() -> dict[str, list[str]]:
     for key, body in re.findall(r'"(\w+)":\s*\{([^}]*)\}', m.group(1)):
         out[key] = sorted(re.findall(r'"([^"]+)"', body))
     return out
+
+
+def _humaneval_exclusions() -> dict[str, str]:
+    """從 `ops/gain/gain_run.py` 抄 `GAIN_HUMANEVAL_EXCLUSIONS`（同樣不 import）。
+
+    這 8 題是 HumanEval+ 的**已知壞題**——壞在沙箱信封而不是題目本身，
+    但對索引來說是同一件事：`164 − 8 = 156`，任何引用 HumanEval+ 分母的人
+    都要先看到這 8 個 task_id 與逐題理由，否則會拿 164 當分母。
+    """
+    p = ROOT / "ops/gain/gain_run.py"
+    if not p.exists():
+        return {}
+    m = re.search(r"^GAIN_HUMANEVAL_EXCLUSIONS = \{(.*?)^\}", p.read_text(),
+                  re.M | re.S)
+    if not m:
+        return {}
+    return dict(re.findall(r'"([^"]+)":\s*"([^"]*)"', m.group(1)))
 
 
 def _bank_for_run(d: Path, banks: dict[str, Any]) -> dict[str, Any]:
@@ -317,6 +342,7 @@ def _bank_for_run(d: Path, banks: dict[str, Any]) -> dict[str, Any]:
                 continue
             ids.add(t)
             fams.add("mbppplus" if t.startswith("mbppplus_")
+                     else "humanevalplus" if t.startswith("humanevalplus_")
                      else "lcb" if t.startswith("lcb_") else "other")
     if not fams:
         return {"family": None, "version": None, "match": "no_task_ids",
@@ -325,8 +351,9 @@ def _bank_for_run(d: Path, banks: dict[str, Any]) -> dict[str, Any]:
     info: dict[str, Any] = {"family": family, "version": None,
                             "n_task_ids": len(ids), "candidates": []}
     if family != "lcb":
-        # MBPP+ 只有一個版本（v0.2.0，378 題，sha256 釘死），沒有版本歧義。
-        info["version"] = "MbppPlus-v0.2.0" if family == "mbppplus" else None
+        # MBPP+ 與 HumanEval+ 各只有一個版本（sha256 釘死），沒有版本歧義。
+        info["version"] = {"mbppplus": "MbppPlus-v0.2.0",
+                           "humanevalplus": "HumanEvalPlus-v0.1.10"}.get(family)
         info["match"] = "by_task_id_prefix"
         return info
     lcb_ids = {i for i in ids if i.startswith("lcb_")}
@@ -368,7 +395,14 @@ def _decision_texts() -> list[dict[str, Any]]:
             #   在別人的機器上根本不存在 ⇒ 索引變成機器相依的東西，`--check` 也會
             #   隨「現在有沒有人開著 worktree」而紅。排除的是 checkout 不是內容：
             #   worktree 裡的裁決檔，本體在根目錄那一份已經掃到了。
-            if _EXCLUDED_DIRS & set(p.parts) or "runs" in p.parts:
+            #   ⚠ 判斷一定要用**相對 ROOT 的路徑**。用絕對路徑的 `p.parts` 會在
+            #   「產生器自己就跑在 worktree 裡」的時候把**全部**裁決檔排除掉——
+            #   worktree 的絕對路徑本身就含 `.claude`／`worktrees`，於是每個
+            #   `decision_refs` 都變成空的、每個 `headline` 都變成 `—`，而
+            #   `--check` 在那個 worktree 裡照樣說 OK（它比的是自己算的兩份）。
+            #   索引不會報錯，只會**安靜地少講**——正是索引最不該犯的錯。
+            rel_parts = p.relative_to(ROOT).parts
+            if _EXCLUDED_DIRS & set(rel_parts) or "runs" in rel_parts:
                 continue
             rel = p.relative_to(ROOT).as_posix()
             if rel in seen:
@@ -528,6 +562,47 @@ def _record_spec_state(files: list[dict[str, Any]]) -> dict[str, Any]:
             "is_record_spec_pack": len(present) == len(RECORD_SPEC_REQUIRED)}
 
 
+def _backend_for_run(name: str) -> dict[str, Any]:
+    """從 `runs/<name>.{endpoint,backend.json,backend_meta.json}` 三個散檔讀後端。
+
+    為什麼要進索引：R529 的四集跑在**兩台不同 LM Studio 版本**的機器上
+    （1003 的 0.4.24 與 1004 的 0.4.17），配對比較在塊內同一台、但跨塊的
+    絕對值可能混版本差（R529 §九-5）。這件事只寫在裁決檔裡，索引不記就等於
+    要讀索引的人自己去猜 run 跑在哪台——而 `runs/` 裡明明有這三個散檔。
+
+    `declared` 底下的東西（`lmstudio_version` 等）是**人的宣稱不是量測**
+    （backend_meta 自己這樣寫：runner 查證不到），所以 key 名照抄 `declared`，
+    不攤平成看起來像實測的欄位。
+    """
+    out: dict[str, Any] = {"endpoint": None, "slot_host": None,
+                           "server_model": None, "declared": None,
+                           "sidecars": []}
+    ep = RUNS / f"{name}.endpoint"
+    if ep.exists():
+        out["endpoint"] = ep.read_text().strip() or None
+        out["sidecars"].append(ep.name)
+    bj = RUNS / f"{name}.backend.json"
+    if bj.exists():
+        out["sidecars"].append(bj.name)
+        try:
+            data = json.loads(bj.read_text()).get("data") or []
+            out["server_model"] = data[0].get("id") if data else None
+        except (ValueError, AttributeError, IndexError):
+            pass
+    bm = RUNS / f"{name}.backend_meta.json"
+    if bm.exists():
+        out["sidecars"].append(bm.name)
+        try:
+            meta = json.loads(bm.read_text())
+        except ValueError:
+            meta = {}
+        out["endpoint"] = meta.get("endpoint") or out["endpoint"]
+        out["slot_host"] = meta.get("slot_host")
+        out["slot_id"] = meta.get("slot_id")
+        out["declared"] = meta.get("declared")
+    return out
+
+
 def build_run_entry(d: Path, banks: dict[str, Any],
                     decisions: list[dict[str, Any]],
                     git_first: dict[str, str],
@@ -602,6 +677,7 @@ def build_run_entry(d: Path, banks: dict[str, Any],
         "date": date,
         "date_source": date_source,
         "seed": seed,
+        "backend": _backend_for_run(d.name),
         "bank": _bank_for_run(d, banks),
         "arms": arms,
         "n_rows": n_rows,
@@ -626,6 +702,7 @@ def build_banks(banks: dict[str, Any], runs: list[dict[str, Any]]) -> dict[str, 
     pins = _codebench_pins()
     kb = _known_bad()
     kb_ids = sorted(set(kb.get("lcb", [])) | set(kb.get("lcb2", [])))
+    he_excl = _humaneval_exclusions()
 
     probe: dict[str, set[str]] = {}
     for fn, key in (("lcb_probe_solutions.json", "v1v2"),
@@ -707,6 +784,29 @@ def build_banks(banks: dict[str, Any], runs: list[dict[str, Any]]) -> dict[str, 
                      "sha256（`vacant/codebench.py::EvalPlusMBPPLoader` 是 fail-closed 的）。"
                      "刻意不記「這個 checkout 有沒有這個檔」——那是環境屬性不是資料屬性，"
                      "寫進去會讓索引在不同 checkout 之間漂掉。"),
+        },
+        "humaneval_plus": {
+            "path": pins["humanevalplus_path"],
+            "private": True,
+            "redistributed": False,
+            "gitignored_by": ".gitignore 的 `.vacant-private/`",
+            "sha256_pin_in_codebench": pins["humanevalplus_sha256"],
+            "n_tasks_pin_in_codebench": pins["humanevalplus_count"],
+            "n_tasks_excluded": len(he_excl),
+            "n_tasks_usable": (pins["humanevalplus_count"] - len(he_excl))
+            if pins["humanevalplus_count"] is not None else None,
+            "excluded_task_ids": dict(sorted(he_excl.items())),
+            "excluded_source": "ops/gain/gain_run.py::GAIN_HUMANEVAL_EXCLUSIONS",
+            "used_by_runs": sorted(r["name"] for r in runs
+                                   if r["bank"].get("family") == "humanevalplus"),
+            "note": ("官方 EvalPlus HumanEval+ v0.1.10 包（R529 起的第三個真來源）。"
+                     "與 MBPP+ 同樣**私有、不轉散布**，索引只記路徑與 "
+                     "`vacant/codebench.py` 裡的釘值，不讀內容、不進版控。"
+                     "**分母是 156 不是 164**：8 題被沙箱信封排除（3 題連 visible_check "
+                     "都過不了＝那些題根本沒有出貨閘門、4 題超出 128 MiB 記憶體信封、"
+                     "`HumanEval/15` 是本輪自訂的 2× 時間餘裕門檻，寫在資料之前）。"
+                     "排除是在**看到結果之前**定的，但它仍然是一個本專題自訂的門檻，"
+                     "引用 HumanEval+ 的數字時要一起講。"),
         },
         "codebench_builtin_families": {
             "source": "vacant/codebench.py::_FAMILY_BUILDERS",
@@ -887,6 +987,75 @@ _AUDITED = ("g_r441_gemma_only_mbpp_b", "g_r442_ononly_20260901",
             "g_r461_lcb3_three_arm", "g_r461_off_gate_lcb3")
 
 
+#: **成組跑、成組裁決**的兩批（R529 跨題庫收官、R460R 對 R460 的三次同題複製）。
+#:
+#: 為什麼要明表：這 55 個目錄每一個都被獨立稽核過，但稽核的單位是**整批**——
+#: 裁決檔的宣告區寫的是 `runs/g_r529_*` 這種 glob，不是 37 個目錄名，所以
+#: `_refs_and_headline` 兩道關卡都過不了、`headline` 一律是 `—`。
+#: 而 `headline` 是 `—` 的 `real_run` 預設會掉進「跑完但沒被獨立稽核」那一節。
+#:
+#: 索引不准比資料樂觀（`verdicts.py` 的教訓），但**也不准比資料悲觀**：
+#: 把已收官的 55 塊講成「沒複核過」，讀索引的人會以為證據比實際少。
+#: 所以這裡用明表把「這一批的裁決是哪一份」寫死，並且在那一節裡逐字寫出
+#: 「一個裁決管 N 塊」這件事本身——不讓「有裁決」被誤讀成「每塊各有一份裁決」。
+_GROUPED_RUNS: list[dict[str, Any]] = [
+    {
+        "key": "R529",
+        "title": "R529 跨題庫收官（37 塊、716 題、三臂）",
+        "decision": "DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md",
+        "prereg": "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "headline": "R529 收官稽核（Fable，2026-09-12）：跨題庫之下，"
+                    "H-MIX 贏單發、不贏重抽",
+        "intro": [
+            "一次發射 37 塊，**四個互斥題目集**、三臂（OFF 單發／CONFORM 重抽不回饋／",
+            "HMIX 回饋迴圈）、每塊 20 題。合起來 716 題 × 3 臂 ＝ 2,148 列，`infra_void` 0。",
+            "",
+            "**哪些是證據**：37 塊全部是 `real_run`、全部 `跑到底`＋`零 void`，",
+            "配對檢定的單位是**題**不是塊（716 個 task_id），塊只是排程單位。",
+            "**不可以**把 37 塊當成 37 個獨立樣本，也**不可以**把四集的點估計平均成一個數",
+            "（裁決 §三 宣稱句第三句寫死：主指標未成立 ⇒ 逐集照實列）。",
+            "四集裡 `lcb3_medium` 與 `lcb3_hard` 是**同一個來源的難度切片**，真來源＝3。",
+        ],
+        "sets": [
+            ("lcb3_medium", "g_r529_lcb3m_", "LCB v3 medium 135 題"),
+            ("lcb3_hard", "g_r529_lcb3h_", "LCB v3 hard 54 題"),
+            ("humanevalplus", "g_r529_hep_", "HumanEval+ 156/164 題（8 題排除，見 §題庫）"),
+            ("mbppplus", "g_r529_mbpp_", "MBPP+ 371 題"),
+        ],
+    },
+    {
+        "key": "R460R",
+        "title": "R460R 三次同題複製（18 塊、六臂）",
+        # ⚠ R460R **還沒有收官裁決檔**。指向預註冊是唯一誠實的選項：
+        # 寫一個不存在的 DECISION 檔名會讓索引憑空生出一份裁決。
+        "decision": None,
+        "prereg": "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
+        "headline": "（尚無收官裁決檔；判準見預註冊 §二，"
+                    "Fable 的稽核結論本輪以口徑更新進 `examples/verdicts.py`）",
+        "intro": [
+            "R460 那 120 題 **原封不動**再跑三次（新 seed），六臂交錯、每塊 20 題、",
+            "每次 6 塊。三次合計 18 塊、2,160 列，`infra_void` 0。",
+            "",
+            "**哪些是證據**：18 塊全部是 `real_run`、全部 `跑到底`＋`零 void`。",
+            "三次是**獨立的 seed，不是獨立的題目**——題目集合三次完全相同（LCB v2 120 題），",
+            "所以跑完也只能講「在這 120 題上穩不穩」，**不能講跨題庫**。",
+            "預註冊的複製規則是**五次**（§二-2：5/5 同號且 ≥4/5 Holm 顯著才准寫",
+            "「複製穩定」）；跑到三次時規則未達成 ⇒ **逐次照實列**（§二-3 禁令 6：",
+            "少於五次自動落在這一句），不准寫「複製穩定」「多數支持」，",
+            "也不准寫「複製失敗」「效果消失」「等價」（禁令 4）。",
+            "r4／r5 正在補跑（`g_r460r4_*` 已在 vacant-dev 上發射，**未進本索引**）。",
+        ],
+        "sets": [
+            ("rep1", "g_r460r1_", "第 1 次複製"),
+            ("rep2", "g_r460r2_", "第 2 次複製"),
+            ("rep3", "g_r460r3_", "第 3 次複製"),
+        ],
+    },
+]
+
+_GROUPED_PREFIXES = tuple(s[1] for g in _GROUPED_RUNS for s in g["sets"])
+
+
 def _bank_label(b: dict[str, Any]) -> str:
     fam = b.get("family")
     if fam == "lcb":
@@ -896,6 +1065,8 @@ def _bank_label(b: dict[str, Any]) -> str:
         return f"lcb {v}{tag}"
     if fam == "mbppplus":
         return "MBPP+ v0.2.0"
+    if fam == "humanevalplus":
+        return "HumanEval+ v0.1.10"
     return fam or "—"
 
 
@@ -1006,7 +1177,89 @@ def render_md(idx: dict[str, Any]) -> str:
       "一律標 `—`——**那是「不知道」，不是「跑完了」**。")
     A("")
 
-    A("## 二、其餘的 run：冒煙／探針／中止／未收官")
+    for gi, g in enumerate(_GROUPED_RUNS):
+        members = [r for r in idx["runs"]
+                   if any(r["name"].startswith(p) for _, p, _ in
+                          [(a, b, c) for a, b, c in g["sets"]])]
+        if not members:
+            continue
+        A(f"## {'二三'[gi]}、{g['title']}")
+        A("")
+        for line in g["intro"]:
+            A(line)
+        A("")
+        if g["decision"]:
+            A(f"**裁決**：{g['headline']}"
+              f"　[{g['decision']}](../{g['decision']})")
+        else:
+            A(f"**裁決**：{g['headline']}")
+        A(f"**預註冊**：[{g['prereg']}](../{g['prereg']})")
+        A("")
+        if g["decision"]:
+            A(f"> **一份裁決管 {len(members)} 塊。** 這 {len(members)} 個目錄在 "
+              "`INDEX.json` 裡的")
+            A("> `headline` 都是 `—`，因為裁決檔的宣告區寫的是 `runs/g_*` 這種 glob")
+            A("> 而不是逐個目錄名，`_refs_and_headline` 的兩道關卡故意不認 glob。")
+            A("> **`—` 在這一節不代表沒被稽核**（那是 §五 那張表的語意）——它代表")
+            A("> **稽核的單位是整批不是單塊**，單塊的數字沒有被任何人逐塊複核過。")
+        else:
+            A(f"> **這 {len(members)} 塊還沒有收官裁決檔。** `INDEX.json` 裡的 "
+              "`headline` 是 `—`，")
+            A("> 而這一次 `—` 的意思就是字面意思：**收官還沒寫**。")
+            A("> 資料本身跑完了（下表全部 `跑到底`＋`零 void`），判準在發射前凍結於")
+            A("> 預註冊，但**把資料變成一句話的那份文件還不存在**。")
+            A("> 引用這一批的數字時要一起講這件事——「有資料」不等於「有裁決」。")
+        A("")
+        A("| 子集 | 塊 | 題（去重） | 列 | 臂 | seed | 跑到底 | 零 void | void | 後端 |")
+        A("|---|---:|---:|---:|---|---|---|---|---:|---|")
+        for label, prefix, desc in g["sets"]:
+            sub = [r for r in members if r["name"].startswith(prefix)]
+            if not sub:
+                continue
+            tids = sum(r["n_distinct_task_ids"] for r in sub)
+            rows_n = sum(r["n_rows"] for r in sub)
+            voids = [r["infra_void"] for r in sub]
+            void_n = sum(v for v in voids if v is not None)
+            seeds = sorted({r["seed"] for r in sub if r["seed"]})
+            arms = sorted({a for r in sub for a in r["arms"]})
+            hosts = sorted({(r.get("backend") or {}).get("slot_host")
+                            for r in sub} - {None})
+            eps = sorted({(r.get("backend") or {}).get("endpoint")
+                          for r in sub} - {None})
+            # 沒有 backend_meta 的批（R460R）只有 `.endpoint`，那裡只有 IP：
+            # 照抄 IP 而不是印「N 個端點」——後者等於把可查證的東西藏起來。
+            ips = sorted({re.sub(r"^https?://([^:/]+).*$", r"\1", e) for e in eps})
+            back = "／".join(hosts) if hosts else ("／".join(ips) if ips else "—")
+            A(f"| {desc} | {len(sub)} | {tids} | {rows_n} | "
+              f"{'/'.join(arms) or '—'} | "
+              f"{'、'.join(f'`{s}`' for s in seeds) or '—'} | "
+              f"{_tf(all(r['terminal'] is True for r in sub))} | "
+              f"{_tf(all(r['complete'] is True for r in sub))} | "
+              f"{void_n} | {back} |")
+        A("")
+        blocks = "、".join(f"`{r['name']}`" for r in members)
+        A(f"<details><summary>{len(members)} 個目錄名</summary>")
+        A("")
+        A(blocks)
+        A("")
+        A("</details>")
+        A("")
+        # 後端版本混用：這件事只寫在裁決檔裡，索引不記＝要人自己去猜。
+        decl = [(r["name"], (r.get("backend") or {}).get("declared") or {})
+                for r in members]
+        vers = sorted({d.get("lmstudio_version") for _, d in decl
+                       if d.get("lmstudio_version")})
+        if len(vers) > 1:
+            A(f"> **後端版本混用**：這一批跨 {len(vers)} 個 LM Studio 版本"
+              f"（{'、'.join(vers)}）。配對比較在**塊內同一台**，"
+              "所以配對差不受影響；但**跨塊的絕對值可能混版本差**。")
+            A("> 版本字串來自 `runs/<run>.backend_meta.json` 的 `declared`——"
+              "那是**人在該機上執行 `lms version` 的回報，不是 runner 量到的**"
+              "（`/v1/models` 與 HTTP header 都不帶版本）。索引照抄 `declared` 這個 key，"
+              "不攤平成看起來像實測的欄位。")
+            A("")
+
+    A("## 四、其餘的 run：冒煙／探針／中止／未收官")
     A("")
     A("**這一張表裡的東西都不能當證據。** 列出來是為了讓「為什麼 runs/ 有這麼多目錄」")
     A("有個交代，也讓人一眼看出哪些是半成品。")
@@ -1023,12 +1276,17 @@ def render_md(idx: dict[str, Any]) -> str:
     A("")
 
     real_unaudited = [r for r in idx["runs"] if r["kind"] == KIND_REAL
-                      and r["name"] not in _AUDITED]
+                      and r["name"] not in _AUDITED
+                      and not r["name"].startswith(_GROUPED_PREFIXES)]
     if real_unaudited:
-        A("## 三、跑完但沒被獨立稽核的 run")
+        A("## 五、跑完但沒被獨立稽核的 run")
         A("")
-        A("有 `summary.json` 也有 `rows.jsonl`，但**不在上面那一段裡**——都是 2026-08 到")
+        A("有 `summary.json` 也有 `rows.jsonl`，但**不在上面那幾段裡**——都是 2026-08 到")
         A("09 初的探索期 run：為了決定下一步怎麼跑而跑的，不是為了得到一個可以拿去講的結論。")
+        A("")
+        A("> **R529 的 37 塊與 R460R 的 18 塊不在這張表裡**（§二、§三）。它們的 `headline`")
+        A("> 同樣是 `—`，但那是「裁決檔用 glob 點名整批」造成的，不是沒被稽核——")
+        A("> 把它們留在這張表會讓索引**比資料悲觀**，讀的人會以為證據比實際少。")
         A("")
         n_unk = sum(1 for r in real_unaudited if r["terminal"] is None)
         n_inc = sum(1 for r in real_unaudited if r["complete"] is False)
@@ -1056,7 +1314,7 @@ def render_md(idx: dict[str, Any]) -> str:
         A("")
 
     n_an = c["by_kind"].get(KIND_ANALYSIS, 0)
-    A("## 四、`_analysis_*` 那 %d 個目錄是什麼" % n_an)
+    A("## 六、`_analysis_*` 那 %d 個目錄是什麼" % n_an)
     A("")
     A("它們**不是 run，也不是證據**。監控迴圈（`ops/loop.sh` 驅動的每一輪 agent）")
     A("每跑一輪就開一個 `runs/_analysis_r<輪次>/`，把那一輪的重算結果寫進去：")
@@ -1074,14 +1332,15 @@ def render_md(idx: dict[str, Any]) -> str:
     A("`analysis_round525_final_recompute` 是同一類東西，只是命名沒帶底線前綴。）")
     A("")
 
-    A("## 五、題庫")
+    A("## 七、題庫")
     A("")
     b = idx["banks"]
     A("> **`INDEX.json` 的 `banks` 是 dict 不是 list。** 下表每一列對應")
     A("> `banks.lcb[\"v1\"|\"v2\"|\"v3\"]`——`banks.lcb` 本身也是 dict，key 是版本字串，")
-    A("> 用 `banks.lcb[0]` 會 `KeyError`。同層還有四個非題庫的 key：")
+    A("> 用 `banks.lcb[0]` 會 `KeyError`。同層還有五個非題庫的 key：")
     A("> `banks.lcb_relations`（dict）、`banks.lcb_caveat_v3`（str）、")
-    A("> `banks.mbpp_plus`（dict）、`banks.codebench_builtin_families`（dict）。")
+    A("> `banks.mbpp_plus`（dict）、`banks.humaneval_plus`（dict）、")
+    A("> `banks.codebench_builtin_families`（dict）。")
     A("> 對照之下 `runs` 與 `top_level_files` 是 **list**，`logs.kinds` 也是 list。")
     A("")
     A("| 題庫 | 檔案 | 題數 | sha256 符合 codebench 釘值 | task_id 範圍 | contest_date 區間 | 難度 | 有參考解 | 已知壞題 | 用過它的 run |")
@@ -1099,9 +1358,17 @@ def render_md(idx: dict[str, Any]) -> str:
           f"{'、'.join(e['known_bad_task_ids']) or '無'} | "
           f"{'、'.join(f'`{x}`' for x in e['used_by_runs']) or '—'} |")
     mp = b["mbpp_plus"]
+    mp_used = sorted(r["name"] for r in idx["runs"]
+                     if r["bank"].get("family") == "mbppplus")
     A(f"| **MBPP+ v0.2.0** | `{mp['path']}`（**私有、不轉散布**） | "
       f"{mp['n_tasks_pin_in_codebench']} | 釘值 `{(mp['sha256_pin_in_codebench'] or '')[:16]}…` | "
-      f"`mbppplus_*` | — | — | 官方 GT | — | 見下 |")
+      f"`mbppplus_*` | — | — | 官方 GT | — | {len(mp_used)} 個 |")
+    hp = b["humaneval_plus"]
+    A(f"| **HumanEval+ v0.1.10** | `{hp['path']}`（**私有、不轉散布**） | "
+      f"{hp['n_tasks_pin_in_codebench']}（**可用 {hp['n_tasks_usable']}**） | "
+      f"釘值 `{(hp['sha256_pin_in_codebench'] or '')[:16]}…` | "
+      f"`humanevalplus_HumanEval/*` | — | — | 官方 GT | "
+      f"**{hp['n_tasks_excluded']} 題排除，見下** | {len(hp['used_by_runs'])} 個 |")
     A("")
     r = b["lcb_relations"]
     A(f"- **版本關係**：v1 ⊂ v2（`{r.get('v1_subset_of_v2')}`）；"
@@ -1114,12 +1381,18 @@ def render_md(idx: dict[str, Any]) -> str:
       f"（`.gitignore:18` 的 `.vacant-private/` 擋住整個目錄。"
       f"釘值 {mp['verified_against_real_file']}。）"
       "**索引裡不含它的任何一個位元組。**")
+    A(f"- **HumanEval+ 的分母是 {hp['n_tasks_usable']} 不是 "
+      f"{hp['n_tasks_pin_in_codebench']}**：{hp['n_tasks_excluded']} 題被沙箱信封排除"
+      f"（來源 `{hp['excluded_source']}`）。逐題理由：")
+    for tid, why in hp["excluded_task_ids"].items():
+        A(f"  - `{tid}` — {why}")
+    A(f"  {hp['note']}")
     fam = b["codebench_builtin_families"]
     A(f"- **程序生成題族**（`{fam['source']}`）：{'、'.join(fam['families'])}。"
       f"{fam['note']}")
     A("")
 
-    A("## 六、log 在哪、哪些進了版控")
+    A("## 八、log 在哪、哪些進了版控")
     A("")
     lg = idx["logs"]
     A("| 種類 | 檔名 | Mac repo | vacant-dev | 進 git | 備註 |")
@@ -1139,7 +1412,7 @@ def render_md(idx: dict[str, Any]) -> str:
     A(f"- **保留政策**：{lg['retention']}")
     A("")
 
-    A("## 七、與 RECORD_SPEC 的落差（不要跳過這一節）")
+    A("## 九、與 RECORD_SPEC 的落差（不要跳過這一節）")
     A("")
     A(idx["caveat_record_spec"])
     A("")

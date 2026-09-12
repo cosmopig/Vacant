@@ -1,0 +1,143 @@
+預註冊閘門通過：DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md 授權 g_r460r2_harness_lcb2_a3
+20 題（lcb2　offset=40　題序 [40, 60)）　輸出 runs/g_r460r2_harness_lcb2_a3
+── 量具驗證（先答已知答案）
+   範圍＝bank：對 lcb2 全 120 題裡有參考解的驗，本塊 20 題另外算出貨閘門覆蓋
+   參考解通過 12/12　壞解被擋 12/12
+   可見閘門（CONFORM 決策量具）參考解通過 12/12　樁被擋 12/12　覆蓋 12/12
+   本塊出貨閘門覆蓋 20/20
+── 模型池：6 個 agent／1 個模型家族
+── 模型池預檢（每個 model 問一句，零容忍）
+   gemma-4-12b-it-qat　回 2 字　✓
+  [OFF 1/20] 需求符合=True 接受=True 累計呼叫=1
+  [CONFORM 1/20] 需求符合=True 接受=True 累計呼叫=1
+  [OFF5 1/20] 需求符合=False 接受=True 累計呼叫=5
+  [HPI 1/20] 需求符合=True 接受=True 累計呼叫=1
+  [HOC 1/20] 需求符合=True 接受=True 累計呼叫=2
+  [HMIX 1/20] 需求符合=True 接受=True 累計呼叫=2
+  [OFF 2/20] 需求符合=True 接受=True 累計呼叫=2
+  [CONFORM 2/20] 需求符合=True 接受=True 累計呼叫=5
+  [OFF5 2/20] 需求符合=True 接受=True 累計呼叫=10
+  [HPI 2/20] 需求符合=True 接受=True 累計呼叫=2
+  [HOC 2/20] 需求符合=True 接受=True 累計呼叫=4
+  [HMIX 2/20] 需求符合=True 接受=True 累計呼叫=3
+  [OFF 3/20] 需求符合=True 接受=True 累計呼叫=3
+  [CONFORM 3/20] 需求符合=True 接受=True 累計呼叫=6
+  [OFF5 3/20] 需求符合=True 接受=True 累計呼叫=15
+  [HPI 3/20] 需求符合=True 接受=True 累計呼叫=3
+  [HOC 3/20] 需求符合=True 接受=True 累計呼叫=6
+  [HMIX 3/20] 需求符合=True 接受=True 累計呼叫=4
+  [OFF 4/20] 需求符合=True 接受=True 累計呼叫=4
+  [CONFORM 4/20] 需求符合=True 接受=True 累計呼叫=7
+  [OFF5 4/20] 需求符合=True 接受=True 累計呼叫=20
+  [HPI 4/20] 需求符合=True 接受=True 累計呼叫=4
+  [HOC 4/20] 需求符合=True 接受=True 累計呼叫=8
+  [HMIX 4/20] 需求符合=True 接受=True 累計呼叫=5
+  [OFF 5/20] 需求符合=True 接受=True 累計呼叫=5
+  [CONFORM 5/20] 需求符合=False 接受=True 累計呼叫=8
+  [OFF5 5/20] 需求符合=True 接受=True 累計呼叫=25
+  [HPI 5/20] 需求符合=True 接受=True 累計呼叫=5
+  [HOC 5/20] 需求符合=True 接受=True 累計呼叫=10
+  [HMIX 5/20] 需求符合=True 接受=True 累計呼叫=7
+  [OFF 6/20] 需求符合=False 接受=True 累計呼叫=6
+  [CONFORM 6/20] 需求符合=True 接受=True 累計呼叫=9
+  [OFF5 6/20] 需求符合=True 接受=True 累計呼叫=30
+  [HPI 6/20] 需求符合=True 接受=True 累計呼叫=6
+  [HOC 6/20] 需求符合=True 接受=True 累計呼叫=12
+  [HMIX 6/20] 需求符合=True 接受=True 累計呼叫=8
+  [OFF 7/20] 需求符合=False 接受=True 累計呼叫=7
+  [CONFORM 7/20] 需求符合=True 接受=True 累計呼叫=10
+  [OFF5 7/20] 需求符合=True 接受=True 累計呼叫=35
+  [HPI 7/20] 需求符合=True 接受=True 累計呼叫=7
+  [HOC 7/20] 需求符合=True 接受=True 累計呼叫=14
+  [HMIX 7/20] 需求符合=True 接受=True 累計呼叫=9
+  [OFF 8/20] 需求符合=True 接受=True 累計呼叫=8
+  [CONFORM 8/20] 需求符合=True 接受=True 累計呼叫=11
+  [OFF5 8/20] 需求符合=True 接受=True 累計呼叫=40
+  [HPI 8/20] 需求符合=True 接受=True 累計呼叫=8
+  [HOC 8/20] 需求符合=True 接受=True 累計呼叫=17
+  [HMIX 8/20] 需求符合=True 接受=True 累計呼叫=10
+  [OFF 9/20] 需求符合=True 接受=True 累計呼叫=9
+  [CONFORM 9/20] 需求符合=True 接受=True 累計呼叫=13
+  [OFF5 9/20] 需求符合=True 接受=True 累計呼叫=45
+  [HPI 9/20] 需求符合=True 接受=True 累計呼叫=9
+  [HOC 9/20] 需求符合=True 接受=True 累計呼叫=19
+  [HMIX 9/20] 需求符合=False 接受=True 累計呼叫=11
+  [OFF 10/20] 需求符合=True 接受=True 累計呼叫=10
+  [CONFORM 10/20] 需求符合=True 接受=True 累計呼叫=14
+  [OFF5 10/20] 需求符合=True 接受=True 累計呼叫=50
+  [HPI 10/20] 需求符合=True 接受=True 累計呼叫=10
+  [HOC 10/20] 需求符合=True 接受=True 累計呼叫=21
+  [HMIX 10/20] 需求符合=True 接受=True 累計呼叫=12
+  [OFF 11/20] 需求符合=True 接受=True 累計呼叫=11
+  [CONFORM 11/20] 需求符合=True 接受=True 累計呼叫=15
+  [OFF5 11/20] 需求符合=True 接受=True 累計呼叫=55
+  [HPI 11/20] 需求符合=True 接受=True 累計呼叫=13
+  [HOC 11/20] 需求符合=True 接受=True 累計呼叫=23
+  [HMIX 11/20] 需求符合=True 接受=True 累計呼叫=13
+  [OFF 12/20] 需求符合=True 接受=True 累計呼叫=12
+  [CONFORM 12/20] 需求符合=True 接受=True 累計呼叫=16
+  [OFF5 12/20] 需求符合=True 接受=True 累計呼叫=60
+  [HPI 12/20] 需求符合=True 接受=True 累計呼叫=14
+  [HOC 12/20] 需求符合=True 接受=True 累計呼叫=25
+  [HMIX 12/20] 需求符合=True 接受=True 累計呼叫=14
+  [OFF 13/20] 需求符合=False 接受=True 累計呼叫=13
+  [CONFORM 13/20] 需求符合=False 接受=True 累計呼叫=17
+  [OFF5 13/20] 需求符合=False 接受=True 累計呼叫=65
+  [HPI 13/20] 需求符合=True 接受=True 累計呼叫=19
+  [HOC 13/20] 需求符合=True 接受=True 累計呼叫=27
+  [HMIX 13/20] 需求符合=True 接受=True 累計呼叫=18
+  [OFF 14/20] 需求符合=True 接受=True 累計呼叫=14
+  [CONFORM 14/20] 需求符合=True 接受=True 累計呼叫=18
+  [OFF5 14/20] 需求符合=False 接受=True 累計呼叫=70
+  [HPI 14/20] 需求符合=True 接受=True 累計呼叫=20
+  [HOC 14/20] 需求符合=True 接受=True 累計呼叫=29
+  [HMIX 14/20] 需求符合=True 接受=True 累計呼叫=19
+  [OFF 15/20] 需求符合=False 接受=True 累計呼叫=15
+  [CONFORM 15/20] 需求符合=False 接受=False 累計呼叫=23
+  [OFF5 15/20] 需求符合=False 接受=True 累計呼叫=75
+  [HPI 15/20] 需求符合=True 接受=True 累計呼叫=21
+  [HOC 15/20] 需求符合=True 接受=True 累計呼叫=31
+<harness_block>:4: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:4: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:4: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:4: SyntaxWarning: invalid escape sequence '\s'
+  [HMIX 15/20] 需求符合=False 接受=False 累計呼叫=20
+  [OFF 16/20] 需求符合=True 接受=True 累計呼叫=16
+  [CONFORM 16/20] 需求符合=True 接受=True 累計呼叫=27
+  [OFF5 16/20] 需求符合=True 接受=True 累計呼叫=80
+  [HPI 16/20] 需求符合=True 接受=True 累計呼叫=22
+  [HOC 16/20] 需求符合=True 接受=True 累計呼叫=34
+  [HMIX 16/20] 需求符合=True 接受=True 累計呼叫=21
+  [OFF 17/20] 需求符合=False 接受=True 累計呼叫=17
+  [CONFORM 17/20] 需求符合=False 接受=True 累計呼叫=28
+  [OFF5 17/20] 需求符合=True 接受=True 累計呼叫=85
+  [HPI 17/20] 需求符合=False 接受=True 累計呼叫=23
+  [HOC 17/20] 需求符合=False 接受=True 累計呼叫=36
+  [HMIX 17/20] 需求符合=True 接受=True 累計呼叫=22
+  [OFF 18/20] 需求符合=True 接受=True 累計呼叫=18
+  [CONFORM 18/20] 需求符合=True 接受=True 累計呼叫=30
+  [OFF5 18/20] 需求符合=True 接受=True 累計呼叫=90
+  [HPI 18/20] 需求符合=True 接受=True 累計呼叫=24
+  [HOC 18/20] 需求符合=True 接受=True 累計呼叫=38
+  [HMIX 18/20] 需求符合=True 接受=True 累計呼叫=23
+  [OFF 19/20] 需求符合=True 接受=True 累計呼叫=19
+  [CONFORM 19/20] 需求符合=True 接受=True 累計呼叫=31
+  [OFF5 19/20] 需求符合=False 接受=True 累計呼叫=95
+  [HPI 19/20] 需求符合=True 接受=True 累計呼叫=25
+  [HOC 19/20] 需求符合=True 接受=True 累計呼叫=40
+  [HMIX 19/20] 需求符合=True 接受=True 累計呼叫=24
+  [OFF 20/20] 需求符合=True 接受=True 累計呼叫=20
+  [CONFORM 20/20] 需求符合=True 接受=True 累計呼叫=32
+  [OFF5 20/20] 需求符合=True 接受=True 累計呼叫=100
+  [HPI 20/20] 需求符合=True 接受=True 累計呼叫=26
+  [HOC 20/20] 需求符合=True 接受=True 累計呼叫=42
+  [HMIX 20/20] 需求符合=True 接受=True 累計呼叫=25
+── OFF: {"tasks": 20, "calls": 20, "infra_void": 0, "complete": true, "terminal": true, "processed": 20, "accepted": 20, "accepted_and_meets_demand": 15, "demand_equals_output_rate": 0.75, "coverage": 1.0, "correct_delivery_rate": 0.75, "raw_final_accuracy": 0.75, "calls_per_task": 1.0, "calls_per_correct_delivery": 1.3333333333333333, "leaked": 5, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "eq5_gate_delivery_rate": null, "eq5_vote_delivery_rate": null, "eq5_same_choice_rate": null, "eq5_same_choice_effective_rate": null, "endpoint_latency_ms": {"all": {"n": 20, "p50": 36291, "p95": 83755, "max": 93253}, "by_role": {"gen": {"n": 20, "p50": 36291, "p95": 83755, "max": 93253}}, "failed_attempts": 0}, "wall_s": 827.4, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+── CONFORM: {"tasks": 20, "calls": 32, "infra_void": 0, "complete": true, "terminal": true, "processed": 20, "accepted": 19, "accepted_and_meets_demand": 16, "demand_equals_output_rate": 0.8421052631578947, "coverage": 0.95, "correct_delivery_rate": 0.8, "raw_final_accuracy": 0.8, "calls_per_task": 1.6, "calls_per_correct_delivery": 2.0, "leaked": 3, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "eq5_gate_delivery_rate": null, "eq5_vote_delivery_rate": null, "eq5_same_choice_rate": null, "eq5_same_choice_effective_rate": null, "endpoint_latency_ms": {"all": {"n": 32, "p50": 47390, "p95": 725011, "max": 992005}, "by_role": {"gen": {"n": 32, "p50": 47390, "p95": 725011, "max": 992005}}, "failed_attempts": 0}, "wall_s": 3884.1, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+── OFF5: {"tasks": 20, "calls": 100, "infra_void": 0, "complete": true, "terminal": true, "processed": 20, "accepted": 20, "accepted_and_meets_demand": 15, "demand_equals_output_rate": 0.75, "coverage": 1.0, "correct_delivery_rate": 0.75, "raw_final_accuracy": 0.75, "calls_per_task": 5.0, "calls_per_correct_delivery": 6.666666666666667, "leaked": 5, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "eq5_gate_delivery_rate": null, "eq5_vote_delivery_rate": null, "eq5_same_choice_rate": null, "eq5_same_choice_effective_rate": null, "endpoint_latency_ms": {"all": {"n": 100, "p50": 35198, "p95": 144941, "max": 531911}, "by_role": {"gen": {"n": 100, "p50": 35198, "p95": 144941, "max": 531911}}, "failed_attempts": 0}, "wall_s": 5076.2, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+── HPI: {"tasks": 20, "calls": 26, "infra_void": 0, "complete": true, "terminal": true, "processed": 20, "accepted": 20, "accepted_and_meets_demand": 19, "demand_equals_output_rate": 0.95, "coverage": 1.0, "correct_delivery_rate": 0.95, "raw_final_accuracy": 0.95, "calls_per_task": 1.3, "calls_per_correct_delivery": 1.368421052631579, "leaked": 1, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "eq5_gate_delivery_rate": null, "eq5_vote_delivery_rate": null, "eq5_same_choice_rate": null, "eq5_same_choice_effective_rate": null, "endpoint_latency_ms": {"all": {"n": 27, "p50": 31040, "p95": 123898, "max": 255136}, "by_role": {"gen": {"n": 26, "p50": 31040, "p95": 123898, "max": 255136}, "wire_probe": {"n": 1, "p50": 1531, "p95": 1531, "max": 1531}}, "failed_attempts": 0}, "wall_s": 1323.3, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+── HOC: {"tasks": 20, "calls": 42, "infra_void": 0, "complete": true, "terminal": true, "processed": 20, "accepted": 20, "accepted_and_meets_demand": 19, "demand_equals_output_rate": 0.95, "coverage": 1.0, "correct_delivery_rate": 0.95, "raw_final_accuracy": 0.95, "calls_per_task": 2.1, "calls_per_correct_delivery": 2.210526315789474, "leaked": 1, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "eq5_gate_delivery_rate": null, "eq5_vote_delivery_rate": null, "eq5_same_choice_rate": null, "eq5_same_choice_effective_rate": null, "endpoint_latency_ms": {"all": {"n": 42, "p50": 14933, "p95": 83977, "max": 185131}, "by_role": {"gen": {"n": 42, "p50": 14933, "p95": 83977, "max": 185131}}, "failed_attempts": 1}, "wall_s": 2278.2, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+── HMIX: {"tasks": 20, "calls": 25, "infra_void": 0, "complete": true, "terminal": true, "processed": 20, "accepted": 19, "accepted_and_meets_demand": 18, "demand_equals_output_rate": 0.9473684210526315, "coverage": 0.95, "correct_delivery_rate": 0.9, "raw_final_accuracy": 0.9, "calls_per_task": 1.25, "calls_per_correct_delivery": 1.3888888888888888, "leaked": 1, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "eq5_gate_delivery_rate": null, "eq5_vote_delivery_rate": null, "eq5_same_choice_rate": null, "eq5_same_choice_effective_rate": null, "endpoint_latency_ms": {"all": {"n": 25, "p50": 25654, "p95": 203663, "max": 317979}, "by_role": {"gen": {"n": 25, "p50": 25654, "p95": 203663, "max": 317979}}, "failed_attempts": 1}, "wall_s": 2523.3, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+
+寫出 runs/g_r460r2_harness_lcb2_a3/summary.json
+⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。
