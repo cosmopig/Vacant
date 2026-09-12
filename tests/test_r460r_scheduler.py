@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -1094,6 +1095,135 @@ def test_global_sweep_violations_make_the_cli_exit_nonzero():
     src = (ROOT / "ops" / "gain" / "analyze_r460r.py").read_text(encoding="utf-8")
     assert 'out["global_topology"] or {}).get("violations")' in src
     assert "global_topology" in src
+
+
+# ── round460r-3：併發窗的**方向** ───────────────────────────────────
+# `brain_cline._log` 是呼叫**回來之後**才寫 `ts_ms`，`latency_ms` 量 t0→完成
+# ⇒ 一通在飛的區間是 `[ts_ms − latency_ms, ts_ms]`。舊版讀成
+# `[ts, ts+latency]`，窗整段右移一個 latency（本 run 最長 489 秒），
+# 在塊交界**製造**假重疊 ⇒ R460R 的 rep2／rep3 帶著不存在的
+# `endpoint_concurrency_exceeded:4>3`、global `5>3`、退出碼 1。
+# 這一組測試釘的是方向本身，不是某一次的數字。
+
+
+def test_call_span_is_send_to_receive_not_receive_to_later():
+    from ops.gain.analyze_r460 import call_span
+    # 0 送出、100 收完
+    assert call_span({"ts_ms": 100, "latency_ms": 100}) == (0, 100)
+    # 沒有 latency 欄位 ⇒ 當 0（瞬時）；沒有 ts_ms ⇒ None（算不出來）
+    assert call_span({"ts_ms": 7}) == (7, 7)
+    assert call_span({"latency_ms": 5}) is None
+
+
+def _peak(spans):
+    ev = sorted([(a, 1) for a, _ in spans] + [(b, -1) for _, b in spans])
+    cur = best = 0
+    for _t, d in ev:
+        cur += d
+        best = max(best, cur)
+    return best
+
+
+def test_sequential_calls_in_one_block_are_concurrency_one():
+    """WORKER_CONCURRENCY=1 的 runner：一長一短首尾相接。
+
+    真實區間 [0,100]、[100,105] ⇒ 併發恆為 1。
+    舊定義 [100,200]、[105,110] ⇒ 長通的尾巴蓋住短通 ⇒ **算出 2**。
+    """
+    from ops.gain.analyze_r460 import call_span
+    seq = [{"ts_ms": 100, "latency_ms": 100},   # 0 送出、100 收完
+           {"ts_ms": 105, "latency_ms": 5}]     # 100 送出、105 收完
+    new = [call_span(c) for c in seq]
+    old = [(c["ts_ms"], c["ts_ms"] + c["latency_ms"]) for c in seq]
+    assert new == [(0, 100), (100, 105)]
+    assert _peak(new) == 1
+    assert _peak(old) == 2, "舊定義不會製造假重疊的話，這條測試就沒有在測東西"
+
+
+def test_back_to_back_blocks_are_not_a_concurrency_violation():
+    """兩塊**時間上首尾相接**（前一塊最後一通很慢）不是超賣。"""
+    from ops.gain.analyze_r460 import ENDPOINT_1004 as EP
+    from ops.gain.analyze_r460 import max_concurrent_by_endpoint
+    from ops.gain.analyze_r460r import global_concurrency
+    adj = [{"name": "s1", "rep": 1, "endpoints": [EP],
+            "calls": [{"ts_ms": 0, "latency_ms": 0},
+                      {"ts_ms": 100, "latency_ms": 100}]},
+           {"name": "s2", "rep": 1, "endpoints": [EP],
+            "calls": [{"ts_ms": 105, "latency_ms": 5},
+                      {"ts_ms": 300, "latency_ms": 10}]}]
+    assert max_concurrent_by_endpoint(adj)[EP] == 1
+    g = global_concurrency(adj)
+    assert g["violations"] == [], g["violations"]
+    assert g["max_concurrent_by_endpoint"][EP] == 1
+
+
+def test_block_window_left_edge_includes_the_first_calls_latency():
+    from ops.gain.analyze_r460 import block_window
+    w = block_window({"calls": [{"ts_ms": 1000, "latency_ms": 400},
+                                {"ts_ms": 2000, "latency_ms": 50}]})
+    assert w == {"lo_ms": 600, "hi_ms": 2000, "n_calls": 2}
+
+
+def test_window_semantics_string_is_recorded_in_the_report():
+    """窗的定義要進 JSON——改了判準卻沒改紀錄，下一個人看不出來。"""
+    from ops.gain.analyze_r460 import CALL_WINDOW_SEMANTICS
+    from ops.gain.analyze_r460r import global_concurrency
+    assert "ts_ms − latency_ms" in CALL_WINDOW_SEMANTICS
+    assert global_concurrency([])["window_semantics"] == CALL_WINDOW_SEMANTICS
+
+
+def test_the_window_direction_has_teeth_in_the_mutation_check():
+    """M13 把窗翻回舊讀法 ⇒ 指名的那條 selftest 必須變紅。"""
+    src = (ROOT / "ops" / "gain" / "analyze_r460.py").read_text(encoding="utf-8")
+    assert "M13_window_is_send_plus_latency" in src
+    assert "Q6j_sequential_calls_are_concurrency_1" in src
+    r = subprocess.run([sys.executable, "ops/gain/analyze_r460.py", "--selftest"],
+                       cwd=ROOT, capture_output=True, text=True,
+                       env={**os.environ, "R460_MUTANT": "M13_window_is_send_plus_latency"})
+    assert r.returncode != 0, r.stdout
+    assert "Q6j_sequential_calls_are_concurrency_1" in r.stdout, r.stdout
+
+
+# ── round460r-3：共租（描述性那一格也要有牙齒）─────────────────────
+
+
+def test_co_tenancy_fraction_and_latency_split():
+    from ops.gain.analyze_r460 import ENDPOINT_1004 as EP
+    from ops.gain.analyze_r460r import co_tenancy
+    blocks = [{"name": "ct1", "rep": 9, "endpoints": [EP],
+               "calls": [{"ts_ms": 10, "latency_ms": 10, "role": "gen", "ok": True},
+                         {"ts_ms": 70, "latency_ms": 10, "role": "gen", "ok": True},
+                         {"ts_ms": 100, "latency_ms": 0, "role": "gen", "ok": False}]}]
+    ct = co_tenancy(blocks, neighbors={"nb": {"lo_ms": 50, "hi_ms": 100,
+                                              "n_calls": 1,
+                                              "call_spans": [(50, 100)]}})
+    b = ct["by_block"]["ct1"]
+    assert b["cotenant_pp"] == 50.0                 # 窗 [0,100]，鄰居佔 [50,100]
+    assert b["gen_ok"]["n"] == 2                    # 失敗的那通不進 gen_ok
+    assert b["gen_ok_cotenant"]["n"] == 1           # span [60,70] 落在共租段
+    assert b["gen_ok_solo"]["n"] == 1               # span [0,10] 落在獨佔段
+    assert ct["by_rep"]["9"]["blocks_with_cotenancy_n"] == 1
+
+
+def test_co_tenancy_without_neighbours_is_empty_not_zero():
+    """「沒量到」≠「量到 0%」——這一格空著的時候要說得出自己是空的。"""
+    from ops.gain.analyze_r460 import ENDPOINT_1004 as EP
+    from ops.gain.analyze_r460r import co_tenancy
+    ct = co_tenancy([{"name": "x", "rep": 1, "endpoints": [EP],
+                      "calls": [{"ts_ms": 10, "latency_ms": 0}]}], neighbors={})
+    assert ct["neighbors_n"] == 0
+    assert ct["by_block"] == {}
+    assert "不是 0%" in ct["note"]
+
+
+def test_co_tenancy_is_descriptive_and_never_a_violation():
+    """共租不是超賣：它不准產生任何 violation、也不准改任何仲裁值。"""
+    src = (ROOT / "ops" / "gain" / "analyze_r460r.py").read_text(encoding="utf-8")
+    i = src.index("def co_tenancy(")
+    j = src.index("\ndef ", i + 10)
+    body = src[i:j]
+    assert "violations" not in body, "co_tenancy 不准產生 violation"
+    assert "broken_reasons" not in body
 
 
 def test_fixed_topology_is_unchanged_by_the_new_variant():

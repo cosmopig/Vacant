@@ -1058,17 +1058,71 @@ def pool_runs(paths: list[pathlib.Path]) -> tuple[list[dict], dict, list[dict], 
     return rows, merge_summaries([b["summary"] for b in blocks]), calls, blocks
 
 
+#: 併發窗的定義（round460r-3 修正）。改這個字串＝改判準，要連 selftest 一起改。
+CALL_WINDOW_SEMANTICS = (
+    "[ts_ms − latency_ms, ts_ms]：`brain_cline._log` 是**呼叫回來之後**才寫 "
+    "`ts_ms`，而 `latency_ms` 量的是 t0→完成 ⇒ 那一通在飛的區間左端是 "
+    "ts_ms − latency_ms、右端是 ts_ms。舊版寫成 [ts, ts+latency]（把 ts 讀成"
+    "送出時刻），整段窗右移一個 latency，在塊交界製造假重疊。")
+
+
+def call_span(c: dict) -> tuple[int, int] | None:
+    """一通呼叫在後端上**真正佔用**的區間 `[送出, 回來]`（epoch ms）。
+
+    ⚠ 方向是整套併發帳唯一的支點，所以寫死在這裡、只此一份：
+    `ops/gain/brain_cline.py` 的 `_log` 在 **`urlopen` 回來之後**才組 record，
+    `"ts_ms": int(time.time() * 1000)` 取的是**那一刻**（完成），而
+    `latency_ms = int((time.time() - t0) * 1000)` 量的是 **t0→完成**。
+    兩者共用同一個終點 ⇒ 送出時刻 ＝ `ts_ms − latency_ms`，區間是
+    `[ts_ms − latency_ms, ts_ms]`。
+
+    ⚠ 舊版（round460e–r460r-2）把 docstring 寫成「`ts_ms` 是送出時刻」並用
+    `[ts, ts+latency]`，那把每一通的窗**整段右移一個 latency**（本 run 最長
+    489 秒）。後果不是保守而是相反：塊 A 的尾端被推進塊 B 的頭，兩塊序列排程
+    也會看起來重疊 ⇒ R460R 的 rep2／rep3 被判出不存在的
+    `endpoint_concurrency_exceeded`。修正之後仍然**不會**低估——右端是回應
+    真正收完的時刻，沒有任何一段在飛的時間被漏掉。
+
+    回 `None` ＝ 這一通沒有可用的 `ts_ms`（算不出來不等於沒有併發，
+    由呼叫端自己判；鐵律 3 的同一條紀律）。
+    """
+    ts = c.get("ts_ms")
+    if not isinstance(ts, (int, float)):
+        return None
+    lat = c.get("latency_ms")
+    lat = int(lat) if isinstance(lat, (int, float)) else 0
+    ts = int(ts)
+    if MUTANT == "M13_window_is_send_plus_latency":
+        return (ts, ts + max(lat, 0))     # ← round460r-2 之前的錯誤讀法
+    return (ts - max(lat, 0), ts)
+
+
+def block_spans(block: dict) -> list[tuple[int, int]]:
+    """一塊裡每一通呼叫的 `call_span`（丟掉沒時間戳的那些）。"""
+    out = []
+    for c in (block.get("calls") or []):
+        sp = call_span(c)
+        if sp is not None:
+            out.append(sp)
+    return out
+
+
 def block_window(block: dict) -> dict:
-    """一塊在 `calls.jsonl` 上的時間窗 `[第一通, 最後一通]`（epoch ms）。
+    """一塊在 `calls.jsonl` 上的時間窗 `[第一通送出, 最後一通收完]`（epoch ms）。
+
+    窗的定義見 `call_span`：左端是 `min(ts_ms − latency_ms)`（第一通**送出**），
+    右端是 `max(ts_ms)`（最後一通**收完**）。round460r-3 之前左端用的是
+    `min(ts_ms)`，那漏掉了第一通自己的 latency。
 
     ⚠ 只有**成功落盤的呼叫**有 `ts_ms`；一通都沒有的塊回 `None`
     （那種塊在 E-2 就已經紅了，這裡不另外判，也**不**拿它去當「沒有併發」的證據）。
     """
-    ts = [int(c["ts_ms"]) for c in (block.get("calls") or [])
-          if isinstance(c.get("ts_ms"), (int, float))]
-    if not ts:
+    spans = block_spans(block)
+    if not spans:
         return {"lo_ms": None, "hi_ms": None, "n_calls": 0}
-    return {"lo_ms": min(ts), "hi_ms": max(ts), "n_calls": len(ts)}
+    return {"lo_ms": min(lo for lo, _ in spans),
+            "hi_ms": max(hi for _, hi in spans),
+            "n_calls": len(spans)}
 
 
 def max_concurrent_by_endpoint(blocks: list[dict]) -> dict[str, int]:
@@ -1076,24 +1130,20 @@ def max_concurrent_by_endpoint(blocks: list[dict]) -> dict[str, int]:
 
     ⚠ 這量的是**塊層級**的併發（一個塊＝一個序列 runner，行程內一次一個請求，
     `WORKER_CONCURRENCY=1`），所以「同時 n 塊」就等於「同時 n 個請求」。
-    ⚠ 時間窗取自 `ts_ms`，那是**送出**的時刻；用它算重疊會**低估**尾端
-    （最後一通的回應還在串流）。低估的方向是對我們不利的那一邊嗎？
-    不是——低估併發會讓違規更難被抓到。所以窗的右端刻意取
-    「最後一通的 `ts_ms` ＋ 該通的 `latency_ms`」，把回應時間算進去。
+    ⚠ 每一通的窗＝`call_span`＝`[ts_ms − latency_ms, ts_ms]`，塊的窗是它們的
+    聯集外框。這一段的方向 round460r-3 修正過一次：舊版讀成
+    `[ts, ts+latency]`，窗整段右移 ⇒ 在塊交界**製造**假重疊。詳見 `call_span`。
     """
     spans: dict[str, list[tuple[int, int]]] = {}
     for b in blocks:
         eps = b.get("endpoints") or []
         if len(eps) != 1:
             continue          # 一塊兩端點自己已經是違規，不進併發帳
-        ts = [(int(c["ts_ms"]),
-               int(c.get("latency_ms") or 0))
-              for c in (b.get("calls") or [])
-              if isinstance(c.get("ts_ms"), (int, float))]
-        if not ts:
+        sp = block_spans(b)
+        if not sp:
             continue
-        lo = min(t for t, _ in ts)
-        hi = max(t + max(d, 0) for t, d in ts)
+        lo = min(t for t, _ in sp)
+        hi = max(t for _, t in sp)
         spans.setdefault(eps[0], []).append((lo, hi))
     out: dict[str, int] = {}
     for ep, iv in spans.items():
@@ -1183,6 +1233,7 @@ def topology_report(blocks: list[dict], *, mode: str = "fixed") -> dict:
     n_ep = len(by_ep)
     rep["endpoints_n"] = n_ep
     rep["block_window"] = {b["name"]: block_window(b) for b in blocks}
+    rep["window_semantics"] = CALL_WINDOW_SEMANTICS
     rep["max_concurrent_by_endpoint"] = max_concurrent_by_endpoint(blocks)
     if mode == "scheduled":
         # 排程拓撲：塊怎麼分配由排程器當場決定 ⇒ 不判「每顆幾塊」，
@@ -1810,6 +1861,32 @@ def selftest() -> int:
     ck("Q6i_fixed_mode_is_unchanged",
        _pooled(_fixture_blocks())["topology"]["variant"] == "two_backends_3_3"
        and _pooled(_fixture_blocks())["topology"]["mode"] == "fixed")
+    # round460r-3：窗的**方向**。一個 WORKER_CONCURRENCY=1 的 runner 連著跑
+    # 兩通（先慢後快），真實區間首尾相接 ⇒ 併發恆為 1。舊讀法（ts 是送出時刻）
+    # 把每一通的窗整段右移一個 latency ⇒ 長通的尾巴蓋住短通 ⇒ 算出併發 2。
+    #   真實：[0,100]、[100,105]   舊讀法：[100,200]、[105,110]
+    _seq = [{"ts_ms": 100, "latency_ms": 100}, {"ts_ms": 105, "latency_ms": 5}]
+    _sp = [call_span(c) for c in _seq]
+    def _peak(spans):
+        ev = sorted([(a, 1) for a, _ in spans] + [(b, -1) for _, b in spans])
+        cur = best = 0
+        for _t, d in ev:
+            cur += d
+            best = max(best, cur)
+        return best
+    ck("Q6j_sequential_calls_are_concurrency_1",
+       _sp == [(0, 100), (100, 105)] and _peak(_sp) == 1,
+       f"spans={_sp} peak={_peak(_sp)}")
+    # 同一件事走塊層級：兩塊首尾相接（前一塊最後一通很慢）不是違規。
+    _adj = [{"name": "s1", "endpoints": [ENDPOINT_1004],
+             "calls": [{"ts_ms": 0, "latency_ms": 0},
+                       {"ts_ms": 100, "latency_ms": 100}]},
+            {"name": "s2", "endpoints": [ENDPOINT_1004],
+             "calls": [{"ts_ms": 105, "latency_ms": 5},
+                       {"ts_ms": 300, "latency_ms": 10}]}]
+    ck("Q6k_back_to_back_blocks_are_concurrency_1",
+       max_concurrent_by_endpoint(_adj)[ENDPOINT_1004] == 1,
+       str(max_concurrent_by_endpoint(_adj)))
     ck("Q7_partial_block_set_is_caught",
        any(s.startswith(f"block_count_not_{BLOCKS_EXPECTED}")
            for s in _pooled(_fixture_blocks()[:1])["broken_reasons"]))
@@ -1909,6 +1986,10 @@ MUTANTS = {
     # 「排程器把三塊同時丟上 1003」會全綠通過——而那台在那個形狀下當機過兩次，
     # 當機的結果是整組 infra_void，看起來只會像「這次複製比較倒楣」。
     "M12_scheduled_concurrency_not_checked": "Q6f_scheduled_concurrency_cap_is_caught",
+    # round460r-3：窗的**方向**。把 ts_ms 讀成「送出時刻」⇒ 每一通的窗整段右移
+    # 一個 latency ⇒ 序列跑的兩通（一長一短）看起來重疊、首尾相接的兩塊看起來
+    # 併發 2。那是**製造**違規不是漏掉違規，所以它不會被上面任何一條咬到。
+    "M13_window_is_send_plus_latency": "Q6j_sequential_calls_are_concurrency_1",
 }
 
 

@@ -39,15 +39,19 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import statistics
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 from ops.gain.analyze_r460 import (ALPHA, AUTHORIZED_BLOCKS,  # noqa: E402
+                                   CALL_WINDOW_SEMANTICS,
                                    CI_DISCLAIMER, DELTA_C_MIN_PP,
+                                   ENDPOINT_1004,
                                    ENDPOINT_CONCURRENCY_CAPS,
                                    REPLICATION_BLOCKS, REPLICATION_SEEDS,
-                                   analyze, block_window, load_bank_meta,
+                                   analyze, block_spans, block_window,
+                                   call_span, load_bank_meta,
                                    max_concurrent_by_endpoint, pool_runs)
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -116,6 +120,7 @@ def global_concurrency(blocks: list[dict]) -> dict:
                  "max_concurrent_by_endpoint": {},
                  "blocks_per_endpoint": {},
                  "window_by_block": {},
+                 "window_semantics": CALL_WINDOW_SEMANTICS,
                  "peak_witness": {},
                  "violations": [],
                  "note": GLOBAL_CONCURRENCY_NOTE}
@@ -146,24 +151,182 @@ def global_concurrency(blocks: list[dict]) -> dict:
 
 
 def _peak_witness(blocks: list[dict], endpoint: str) -> dict:
-    """峰值那一刻是哪幾塊同時在跑——違規要指得出人，不是只報一個數字。"""
+    """峰值那一刻是哪幾塊同時在跑——違規要指得出人，不是只報一個數字。
+
+    ⚠ 窗的定義與 `analyze_r460.call_span` 同一份（`[ts_ms − latency_ms, ts_ms]`）；
+    這裡**不准**自己再算一次，不然兩邊會漂（round460r-3 就是這樣漂掉的）。
+    """
     spans = []
     for b in blocks:
         eps = b.get("endpoints") or []
         if len(eps) != 1 or eps[0] != endpoint:
             continue
-        ts = [(int(c["ts_ms"]), int(c.get("latency_ms") or 0))
-              for c in (b.get("calls") or [])
-              if isinstance(c.get("ts_ms"), (int, float))]
-        if ts:
-            spans.append((min(t for t, _ in ts),
-                          max(t + max(d, 0) for t, d in ts), b["name"]))
+        sp = block_spans(b)
+        if sp:
+            spans.append((min(t for t, _ in sp),
+                          max(t for _, t in sp), b["name"]))
     best_t, best_names = None, []
     for lo, _hi, _n in spans:
         live = sorted(n for a, b_, n in spans if a <= lo <= b_)
         if len(live) > len(best_names):
             best_t, best_names = lo, live
     return {"at_ms": best_t, "blocks": best_names, "n": len(best_names)}
+
+
+#: 共租鄰居：與 R460R 同一台 1004 上跑的**別的實驗**。R529 的四集是
+#: 2026-09-11 那一段時間唯一的另一個佔用者（`runs/g_r529_*`）。
+CO_TENANT_GLOB = "g_r529_*"
+CO_TENANT_NOTE = (
+    "共租＝R460R 的塊在 1004 上跑的時候，1004 同時也在服務 R529 的塊。"
+    "這**不是**違規（R529 的塊各自也在 1004 的 3 併發額度內被排程），"
+    "而是**條件差異**：三次複製吃到的硬體條件不一樣。"
+    "所以它進紀錄不是為了判誰對，是為了讓「rep2 的數字比較差」這種話"
+    "不能在沒有這一格的情況下被說成「複製不穩定」。"
+    "⚠ 這一格是**描述性**的：本檔沒有任何仲裁值讀它，"
+    "也**沒有**把它拿去校正任何交付率（那會是事後調整）。"
+    "⚠ 佔比的分母是塊自己的牆鐘窗（第一通送出→最後一通收完），"
+    "分子是它與 R529 在 1004 上的塊窗**聯集**的交集。"
+    "另附 `cotenant_pp_by_call_span`：把 R529 的窗改成**逐呼叫**窗的聯集"
+    "（塊窗裡沙箱在跑、GPU 空著的那些縫不算共租）——兩個讀法都列，"
+    "因為哪一個才是「GPU 真的在忙」取決於後端的批次行為，本檔不宣稱知道。")
+
+
+def _merge(iv: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """區間聯集（左閉右閉，接觸即合併）。"""
+    out: list[tuple[int, int]] = []
+    for a, b in sorted(iv):
+        if out and a <= out[-1][1]:
+            out[-1] = (out[-1][0], max(out[-1][1], b))
+        else:
+            out.append((a, b))
+    return out
+
+
+def _overlap(window: tuple[int, int], segs: list[tuple[int, int]]) -> int:
+    tot = 0
+    for a, b in segs:
+        lo, hi = max(window[0], a), min(window[1], b)
+        if hi > lo:
+            tot += hi - lo
+    return tot
+
+
+def _stats_ms(vals: list[int]) -> dict:
+    if not vals:
+        return {"n": 0, "mean_s": None, "median_s": None,
+                "p90_s": None, "max_s": None}
+    v = sorted(vals)
+    return {"n": len(v),
+            "mean_s": round(sum(v) / len(v) / 1000.0, 2),
+            "median_s": round(statistics.median(v) / 1000.0, 2),
+            "p90_s": round(v[min(len(v) - 1, int(0.9 * len(v)))] / 1000.0, 2),
+            "max_s": round(v[-1] / 1000.0, 2)}
+
+
+def _neighbor_blocks(root: pathlib.Path, endpoint: str) -> dict[str, dict]:
+    """1004 上的鄰居塊（`runs/g_r529_*`），逐塊一個修正窗。
+
+    ⚠ 只收**打在 `endpoint` 上**的那些呼叫：R529 的塊有一半跑在 1003，
+    那些塊與 R460R 沒有共租關係（不同張卡），混進來會把佔比灌水。
+    """
+    out: dict[str, dict] = {}
+    for d in sorted((root / "runs").glob(CO_TENANT_GLOB)):
+        cp = d / "calls.jsonl"
+        if not d.is_dir() or not cp.exists():
+            continue
+        calls = [json.loads(l) for l in cp.open(encoding="utf-8") if l.strip()]
+        here = [c for c in calls if (c.get("api") or "").strip() == endpoint]
+        sp = block_spans({"calls": here})
+        if not sp:
+            continue
+        out[d.name] = {"lo_ms": min(a for a, _ in sp),
+                       "hi_ms": max(b for _, b in sp),
+                       "n_calls": len(sp),
+                       "call_spans": _merge(sp)}
+    return out
+
+
+def co_tenancy(blocks: list[dict], *, root: pathlib.Path = ROOT,
+               endpoint: str = ENDPOINT_1004,
+               neighbors: dict[str, dict] | None = None) -> dict:
+    """R460R 的塊與 R529 的塊在同一張卡上的**共租**帳（round460r-3）。
+
+    為什麼這一格必須存在：三次複製的 Δ_C 不一樣，而「不一樣」有兩種讀法——
+    抽樣雜訊，或者**三次跑在不一樣的機器條件下**。後者是可查的事實，
+    查了不寫等於預設它不存在。實測：r2 的六塊有 38.9–94.2% 的時間與 R529
+    共租、r1 只有 b3（42.2%）、r3 只有 a1（10.5%），而 r2 的成功 gen 呼叫
+    平均延遲 67.7 秒、r1／r3 是 58.5／58.6 秒。
+
+    ⚠ 本函式**不判任何違規**：共租不是超賣（R529 的塊也在 1004 的額度內），
+      超賣由 `global_concurrency` 管，兩者不要混為一談。
+    """
+    out: dict = {"endpoint": endpoint,
+                 "neighbor_glob": f"runs/{CO_TENANT_GLOB}",
+                 "window_semantics": CALL_WINDOW_SEMANTICS,
+                 "note": CO_TENANT_NOTE,
+                 "neighbors": {}, "by_block": {}, "by_rep": {}}
+    nb = _neighbor_blocks(root, endpoint) if neighbors is None else neighbors
+    out["neighbors"] = {k: {kk: v[kk] for kk in ("lo_ms", "hi_ms", "n_calls")}
+                        for k, v in nb.items()}
+    out["neighbors_n"] = len(nb)
+    if not nb:
+        out["note"] += "（本 checkout 找不到鄰居 run ⇒ 這一格是空的，不是 0%）"
+        return out
+    nb_win = _merge([(v["lo_ms"], v["hi_ms"]) for v in nb.values()])
+    nb_call = _merge([sp for v in nb.values() for sp in v["call_spans"]])
+    per_rep: dict[int, dict] = {}
+    for b in blocks:
+        if (b.get("endpoints") or []) != [endpoint]:
+            continue
+        sp = block_spans(b)
+        if not sp:
+            continue
+        w = (min(a for a, _ in sp), max(c for _, c in sp))
+        wall = w[1] - w[0]
+        ov_win = _overlap(w, nb_win)
+        ov_call = _overlap(w, nb_call)
+        gen = [c for c in (b.get("calls") or [])
+               if c.get("role") == "gen" and c.get("ok")
+               and isinstance(c.get("ts_ms"), (int, float))]
+        lat_all = [int(c.get("latency_ms") or 0) for c in gen]
+        co, solo = [], []
+        for c in gen:
+            s2 = call_span(c)
+            (co if s2 and _overlap(s2, nb_win) > 0 else solo).append(
+                int(c.get("latency_ms") or 0))
+        rec = {"rep": b.get("rep"), "lo_ms": w[0], "hi_ms": w[1],
+               "wall_s": round(wall / 1000.0, 1),
+               "cotenant_s": round(ov_win / 1000.0, 1),
+               "cotenant_pp": round(100.0 * ov_win / wall, 1) if wall else None,
+               "cotenant_pp_by_call_span":
+                   round(100.0 * ov_call / wall, 1) if wall else None,
+               "gen_ok": _stats_ms(lat_all),
+               "gen_ok_cotenant": _stats_ms(co),
+               "gen_ok_solo": _stats_ms(solo)}
+        out["by_block"][b["name"]] = rec
+        r = per_rep.setdefault(b.get("rep"), {"blocks": [], "wall_ms": 0,
+                                              "co_ms": 0, "lat": [],
+                                              "lat_co": [], "lat_solo": []})
+        r["blocks"].append(b["name"])
+        r["wall_ms"] += wall
+        r["co_ms"] += ov_win
+        r["lat"] += lat_all
+        r["lat_co"] += co
+        r["lat_solo"] += solo
+    for k in sorted(per_rep, key=lambda x: (x is None, x)):
+        r = per_rep[k]
+        out["by_rep"][str(k)] = {
+            "blocks_n": len(r["blocks"]),
+            "blocks_with_cotenancy_n": sum(
+                1 for n in r["blocks"] if (out["by_block"][n]["cotenant_pp"] or 0) > 0),
+            "wall_s": round(r["wall_ms"] / 1000.0, 1),
+            "cotenant_s": round(r["co_ms"] / 1000.0, 1),
+            "cotenant_pp": (round(100.0 * r["co_ms"] / r["wall_ms"], 1)
+                            if r["wall_ms"] else None),
+            "gen_ok": _stats_ms(r["lat"]),
+            "gen_ok_cotenant": _stats_ms(r["lat_co"]),
+            "gen_ok_solo": _stats_ms(r["lat_solo"])}
+    return out
 
 
 def analyze_rep(k: int, *, bank: str = "lcb2", rescore_turn1: bool = False,
@@ -332,6 +495,26 @@ def render(out: dict) -> str:
             L.append(f"  {ep} 峰值 {w['n']} 塊：{w['blocks']}")
         L.append("  違規："
                  + (str(gt["violations"]) if gt["violations"] else "無"))
+    ct = out.get("co_tenancy") or {}
+    if ct.get("by_block"):
+        L += ["", "── 1004 上的共租（round460r-3；描述性，**不是違規、不校正任何值**）",
+              f"鄰居：{ct['neighbor_glob']}　{ct.get('neighbors_n')} 塊在 "
+              f"{ct.get('endpoint')}",
+              f"{'block':28}{'wall_s':>9}{'共租%':>8}{'(逐呼叫)%':>11}"
+              f"{'gen_ok n':>10}{'均延遲s':>9}{'中位s':>8}"]
+        for name, b in ct["by_block"].items():
+            L.append(f"{name:28}{b['wall_s']:>9.0f}{_f(b['cotenant_pp'], 1):>8}"
+                     f"{_f(b['cotenant_pp_by_call_span'], 1):>11}"
+                     f"{b['gen_ok']['n']:>10}{_f(b['gen_ok']['mean_s'], 1):>9}"
+                     f"{_f(b['gen_ok']['median_s'], 1):>8}")
+        for k, r in (ct.get("by_rep") or {}).items():
+            L.append(f"  rep{k}：{r['blocks_with_cotenancy_n']}/{r['blocks_n']} 塊有共租、"
+                     f"整體 {_f(r['cotenant_pp'], 1)}%　"
+                     f"gen_ok 均 {_f(r['gen_ok']['mean_s'], 1)}s／"
+                     f"中位 {_f(r['gen_ok']['median_s'], 1)}s"
+                     f"（共租時 {_f(r['gen_ok_cotenant']['mean_s'], 1)}s／"
+                     f"獨佔時 {_f(r['gen_ok_solo']['mean_s'], 1)}s）")
+        L.append(f"  ⚠ {ct['note']}")
     ag = out["aggregate"]
     L += ["", "── 彙總（描述性；**不併 n**）",
           f"已分析 {ag['reps_analyzed']}/5　H-MIX 裁決計數 {ag['verdict_counts_HMIX']}",
@@ -358,6 +541,7 @@ def run(reps: list[int], *, bank: str = "lcb2", rescore_turn1: bool = False,
     rows = [rep_row(o) for o in full]
     return {"reps": rows, "aggregate": aggregate(rows),
             "global_topology": global_concurrency(all_blocks),
+            "co_tenancy": co_tenancy(all_blocks, root=root),
             "full": {o["rep"]: o for o in full}}
 
 
@@ -460,6 +644,68 @@ def selftest() -> int:
     ck("O_no_timestamps_is_a_violation_not_a_pass",
        any(s.startswith("block_ts_unrecorded") for s in gz["violations"]),
        str(gz["violations"]))
+
+    # ── round460r-3：共租（描述性那一格也要有牙齒：算錯方向不會噴錯）──────
+    # 塊窗 [0,100]，鄰居佔 [50,100] ⇒ 共租 50%；gen 呼叫一通落在共租段、
+    # 一通落在獨佔段 ⇒ 兩邊的統計要各自歸對戶。
+    ct_blocks = [{"name": "ct1", "rep": 9, "endpoints": [ENDPOINT_1004],
+                  "calls": [{"ts_ms": 10, "latency_ms": 10, "role": "gen",
+                             "ok": True},               # span [0,10]   獨佔
+                            {"ts_ms": 70, "latency_ms": 10, "role": "gen",
+                             "ok": True},               # span [60,70]  共租
+                            {"ts_ms": 100, "latency_ms": 0, "role": "gen",
+                             "ok": False}]}]            # 失敗的不進 gen_ok
+    ct = co_tenancy(ct_blocks, neighbors={"nb1": {"lo_ms": 50, "hi_ms": 100,
+                                                  "n_calls": 1,
+                                                  "call_spans": [(50, 100)]}})
+    cb = ct["by_block"]["ct1"]
+    ck("Q_co_tenancy_fraction_and_latency_split",
+       cb["cotenant_pp"] == 50.0 and cb["wall_s"] == 0.1
+       and cb["gen_ok"]["n"] == 2
+       and cb["gen_ok_cotenant"]["n"] == 1 and cb["gen_ok_solo"]["n"] == 1
+       and ct["by_rep"]["9"]["blocks_with_cotenancy_n"] == 1,
+       json.dumps(cb, ensure_ascii=False))
+    # 鄰居不在 1004 上 ⇒ 不算共租（不同張卡，混進來會灌水）。
+    ct0 = co_tenancy(ct_blocks, neighbors={})
+    ck("Q2_no_neighbour_is_empty_not_zero",
+       ct0["by_block"] == {} and ct0["neighbors_n"] == 0
+       and "不是 0%" in ct0["note"],
+       json.dumps(ct0, ensure_ascii=False)[:200])
+
+    # ── round460r-3：窗的**方向**。序列呼叫在舊定義下會長出假併發 ─────────
+    # 一個 WORKER_CONCURRENCY=1 的 runner：一長一短兩通**首尾相接**。
+    #   真實（新定義 [ts−lat, ts]）：[0,100]、[100,105]  ⇒ 併發 1
+    #   舊定義（[ts, ts+lat]）     ：[100,200]、[105,110]⇒ 併發 2（假的）
+    from ops.gain.analyze_r460 import call_span
+    seq = [{"ts_ms": 100, "latency_ms": 100},    # 0 送出、100 收完
+           {"ts_ms": 105, "latency_ms": 5}]      # 100 送出、105 收完
+    def _peak(spans):
+        ev = sorted([(a, 1) for a, _ in spans] + [(b_, -1) for _, b_ in spans])
+        cur = best = 0
+        for _t, d in ev:
+            cur += d
+            best = max(best, cur)
+        return best
+    new_spans = [call_span(c) for c in seq]
+    old_spans = [(c["ts_ms"], c["ts_ms"] + c["latency_ms"]) for c in seq]
+    ck("P_sequential_calls_are_concurrency_1_under_the_fixed_window",
+       _peak(new_spans) == 1 and _peak(old_spans) == 2
+       and new_spans == [(0, 100), (100, 105)],
+       f"new={new_spans} peak={_peak(new_spans)} / old={old_spans} "
+       f"peak={_peak(old_spans)}")
+    # 同一件事走真正的仲裁路徑：兩塊**時間上首尾相接**（前一塊最後一通很慢）
+    # 在舊定義下會被判成併發 2，新定義下是 1。R460R 的 rep2/rep3 就是這樣紅的。
+    adj = [{"name": "s1", "rep": 1, "endpoints": [ENDPOINT_1004],
+            "calls": [{"ts_ms": 0, "latency_ms": 0},
+                      {"ts_ms": 100, "latency_ms": 100}]},
+           {"name": "s2", "rep": 1, "endpoints": [ENDPOINT_1004],
+            "calls": [{"ts_ms": 105, "latency_ms": 5},
+                      {"ts_ms": 300, "latency_ms": 10}]}]
+    gadj = global_concurrency(adj)
+    ck("P2_back_to_back_blocks_are_not_a_violation",
+       gadj["max_concurrent_by_endpoint"][ENDPOINT_1004] == 1
+       and gadj["violations"] == [],
+       str(gadj["max_concurrent_by_endpoint"]) + str(gadj["violations"]))
     print("selftest: " + ("PASS" if not fails else "FAIL\n  " + "\n  ".join(fails)))
     return 1 if fails else 0
 
@@ -480,7 +726,11 @@ def main() -> int:
     print(render(out))
     if args.json:
         slim = {"reps": out["reps"], "aggregate": out["aggregate"],
-                "global_topology": out["global_topology"]}
+                "global_topology": out["global_topology"],
+                "co_tenancy": out["co_tenancy"],
+                "attribution": {str(o["rep"]): o.get("attribution")
+                                for o in out["full"].values()
+                                if o.get("status") == "ANALYZED"}}
         pathlib.Path(args.json).write_text(
             json.dumps(slim, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"\nJSON → {args.json}")
