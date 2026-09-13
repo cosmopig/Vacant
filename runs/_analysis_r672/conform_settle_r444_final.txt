@@ -1,0 +1,38 @@
+=== runs/g_r444_conform_mbpp  rows=537 sha8=3f2cb966 terminal=True ===
+arm          n  acc  refus   deliv%   meets%     d=o%  leak  md&!acc  c/task
+OFF5       179  179      0   72.63   72.63    72.63    49        0    5.00
+CONFORM    179  170      9   75.42   75.42    79.41    35        0    1.39
+OFF        179  179      0   72.07   72.07    72.07    50        0    1.00
+paired[deliv       ] n=179 Δ= +2.79pp b=9   c=4   p=0.2668  95%CI=[-1.66,+5.94]pp NON_INFERIOR_BUT_UNRESOLVED  <= P-C1 用這個
+paired[meets_demand] n=179 Δ= +2.79pp b=9   c=4   p=0.2668  95%CI=[-1.66,+5.94]pp NON_INFERIOR_BUT_UNRESOLVED  （analyze_paired 報的是這個）
+calls 檢查層級：{'OFF5': 'exact', 'CONFORM': 'exact', 'OFF': 'exact'}  （exact＝逐位相同；bounded＝該臂有 void，改用碼蘊含的上下界）
+{
+  "P-C1_delta_pp": 2.793296089385475,
+  "P-C1_band_3_to_6pp": false,
+  "P-C1_ci_pp": [
+    -1.6596665952616365,
+    5.941938402863404
+  ],
+  "P-C1_ci_verdict": "NON_INFERIOR_BUT_UNRESOLVED",
+  "P-C1_settlement_rule": "只能寫「沒測出劣化，也沒測出 ≥5pp 的增益」；不准寫成「打贏」或「打不贏」",
+  "P-C1b_p": 0.266845703125,
+  "P-C1b_band_0.02_to_0.20": false,
+  "P-C2_calls_per_task": 1.3854748603351956,
+  "P-C2_le_2.0": true,
+  "P-C2_abort_gt_4.5": false,
+  "P-C3a_refusal_rate": 0.05027932960893855,
+  "P-C3a_band_3_to_10pct": true,
+  "P-C3b_leaked": {
+    "OFF5": 49,
+    "CONFORM": 35,
+    "OFF": 50
+  },
+  "P-C3b_verdict": "REPORTED_ONLY（R440R 未給門檻，判準 §三 降級）",
+  "P-C4": "前半只看 receipt_head 齊備（round666）；鏈為 UNVERIFIABLE，不是中止條件",
+  "P-C5_void_ratio": {
+    "OFF5": 0.0,
+    "CONFORM": 0.0,
+    "OFF": 0.0
+  },
+  "P-C5_any_abort": false
+}

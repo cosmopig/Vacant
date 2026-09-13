@@ -1,0 +1,464 @@
+{
+  "runs": {
+    "g_r441_gemma_only_mbpp_b": {
+      "n_failing_rows": 149,
+      "reconstruction_status": {
+        "unique": 102,
+        "resolved_by_hidden_agreement": 40,
+        "ambiguous": 7
+      },
+      "n_unresolved": 9,
+      "unresolved_sample": [
+        [
+          "OFF5",
+          "mbppplus_Mbpp/261",
+          "ambiguous"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/306",
+          "ambiguous"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/242",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/92",
+          "ambiguous"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/244",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/244",
+          "ambiguous"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/800",
+          "ambiguous"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/14",
+          "ambiguous"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/20",
+          "ambiguous"
+        ]
+      ],
+      "n_sanity_mismatch": 2,
+      "sanity_mismatch_sample": [
+        [
+          "ON",
+          "mbppplus_Mbpp/242",
+          "unique",
+          true
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/244",
+          "unique",
+          true
+        ]
+      ],
+      "class_counts": {
+        "OFF|syntax_or_import_error": 2,
+        "OFF|hidden_only_fail": 28,
+        "ON|hidden_only_fail": 22,
+        "OFF5|hidden_only_fail": 22,
+        "OFF|fails_visible": 16,
+        "ON|fails_visible": 11,
+        "OFF5|fails_visible": 8,
+        "OFF|naming_miss": 10,
+        "ON|naming_miss": 10,
+        "OFF5|naming_miss": 10,
+        "OFF|sandbox_timeout": 1
+      },
+      "subclass_counts": {
+        "OFF|syntax_or_import_error|syntax_error": 1,
+        "OFF|fails_visible|exception:AssertionError": 15,
+        "ON|fails_visible|exception:AssertionError": 11,
+        "OFF5|fails_visible|exception:AssertionError": 8,
+        "OFF|naming_miss|never_defined": 10,
+        "ON|naming_miss|never_defined": 10,
+        "OFF5|naming_miss|never_defined": 10,
+        "OFF|syntax_or_import_error|forbidden_import_or_call": 1,
+        "OFF|fails_visible|exception:KeyError": 1
+      },
+      "ceiling_counts": {
+        "OFF|fails_visible|any_ceiling": 12,
+        "OFF|fails_visible|off5_ceiling": 10,
+        "ON|fails_visible|any_ceiling": 7,
+        "ON|fails_visible|off5_ceiling": 7,
+        "OFF|naming_miss|any_ceiling": 7,
+        "OFF|naming_miss|off5_ceiling": 7,
+        "ON|naming_miss|any_ceiling": 6,
+        "ON|naming_miss|off5_ceiling": 6,
+        "OFF5|naming_miss|any_ceiling": 6,
+        "OFF5|naming_miss|off5_ceiling": 6,
+        "OFF|hidden_only_fail|any_ceiling": 8,
+        "OFF5|hidden_only_fail|any_ceiling": 1,
+        "OFF|hidden_only_fail|off5_ceiling": 7,
+        "OFF5|fails_visible|any_ceiling": 4,
+        "ON|hidden_only_fail|any_ceiling": 3,
+        "ON|hidden_only_fail|off5_ceiling": 3,
+        "OFF5|fails_visible|off5_ceiling": 2
+      },
+      "examples": {
+        "OFF|syntax_or_import_error": [
+          "mbppplus_Mbpp/123",
+          "mbppplus_Mbpp/606"
+        ],
+        "OFF|hidden_only_fail": [
+          "mbppplus_Mbpp/305",
+          "mbppplus_Mbpp/267",
+          "mbppplus_Mbpp/593",
+          "mbppplus_Mbpp/7",
+          "mbppplus_Mbpp/98"
+        ],
+        "ON|hidden_only_fail": [
+          "mbppplus_Mbpp/305",
+          "mbppplus_Mbpp/593",
+          "mbppplus_Mbpp/735",
+          "mbppplus_Mbpp/790",
+          "mbppplus_Mbpp/739"
+        ],
+        "OFF5|hidden_only_fail": [
+          "mbppplus_Mbpp/305",
+          "mbppplus_Mbpp/267",
+          "mbppplus_Mbpp/593",
+          "mbppplus_Mbpp/7",
+          "mbppplus_Mbpp/735"
+        ],
+        "OFF|fails_visible": [
+          "mbppplus_Mbpp/615",
+          "mbppplus_Mbpp/773",
+          "mbppplus_Mbpp/259",
+          "mbppplus_Mbpp/84",
+          "mbppplus_Mbpp/462"
+        ],
+        "ON|fails_visible": [
+          "mbppplus_Mbpp/615",
+          "mbppplus_Mbpp/773",
+          "mbppplus_Mbpp/84",
+          "mbppplus_Mbpp/109",
+          "mbppplus_Mbpp/125"
+        ],
+        "OFF5|fails_visible": [
+          "mbppplus_Mbpp/615",
+          "mbppplus_Mbpp/84",
+          "mbppplus_Mbpp/462",
+          "mbppplus_Mbpp/138",
+          "mbppplus_Mbpp/63"
+        ],
+        "OFF|naming_miss": [
+          "mbppplus_Mbpp/473",
+          "mbppplus_Mbpp/59",
+          "mbppplus_Mbpp/77",
+          "mbppplus_Mbpp/565",
+          "mbppplus_Mbpp/222"
+        ],
+        "ON|naming_miss": [
+          "mbppplus_Mbpp/473",
+          "mbppplus_Mbpp/59",
+          "mbppplus_Mbpp/805",
+          "mbppplus_Mbpp/138",
+          "mbppplus_Mbpp/63"
+        ],
+        "OFF5|naming_miss": [
+          "mbppplus_Mbpp/473",
+          "mbppplus_Mbpp/59",
+          "mbppplus_Mbpp/77",
+          "mbppplus_Mbpp/565",
+          "mbppplus_Mbpp/614"
+        ],
+        "OFF|sandbox_timeout": [
+          "mbppplus_Mbpp/260"
+        ]
+      }
+    },
+    "g_r356_3arm_20260830": {
+      "n_failing_rows": 106,
+      "reconstruction_status": {
+        "unique": 73,
+        "resolved_by_hidden_agreement": 29,
+        "ambiguous": 4
+      },
+      "n_unresolved": 22,
+      "unresolved_sample": [
+        [
+          "OFF",
+          "mbppplus_Mbpp/418",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/418",
+          "sanity_mismatch"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/473",
+          "sanity_mismatch"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/736",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/736",
+          "ambiguous"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/805",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/805",
+          "sanity_mismatch"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/306",
+          "sanity_mismatch"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/766",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF",
+          "mbppplus_Mbpp/563",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/109",
+          "ambiguous"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/294",
+          "ambiguous"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/572",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/63",
+          "sanity_mismatch"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/472",
+          "sanity_mismatch"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/564",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF",
+          "mbppplus_Mbpp/588",
+          "sanity_mismatch"
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/800",
+          "ambiguous"
+        ],
+        [
+          "OFF",
+          "mbppplus_Mbpp/560",
+          "sanity_mismatch"
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/8",
+          "sanity_mismatch"
+        ]
+      ],
+      "n_sanity_mismatch": 18,
+      "sanity_mismatch_sample": [
+        [
+          "OFF",
+          "mbppplus_Mbpp/418",
+          "unique",
+          true
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/418",
+          "resolved_by_hidden_agreement",
+          true
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/473",
+          "unique",
+          true
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/736",
+          "unique",
+          true
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/805",
+          "unique",
+          true
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/805",
+          "resolved_by_hidden_agreement",
+          true
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/306",
+          "unique",
+          true
+        ],
+        [
+          "ON",
+          "mbppplus_Mbpp/766",
+          "unique",
+          true
+        ],
+        [
+          "OFF",
+          "mbppplus_Mbpp/563",
+          "unique",
+          true
+        ],
+        [
+          "OFF5",
+          "mbppplus_Mbpp/572",
+          "resolved_by_hidden_agreement",
+          true
+        ]
+      ],
+      "class_counts": {
+        "OFF|fails_visible": 10,
+        "ON|hidden_only_fail": 14,
+        "OFF5|hidden_only_fail": 20,
+        "OFF5|fails_visible": 2,
+        "OFF|hidden_only_fail": 29,
+        "OFF|naming_miss": 3,
+        "OFF5|naming_miss": 2,
+        "ON|fails_visible": 2,
+        "ON|syntax_or_import_error": 2
+      },
+      "subclass_counts": {
+        "OFF|fails_visible|exception:AssertionError": 9,
+        "OFF5|fails_visible|exception:AssertionError": 2,
+        "OFF|naming_miss|never_defined": 3,
+        "OFF|fails_visible|exception:NameError": 1,
+        "OFF5|naming_miss|never_defined": 2,
+        "ON|fails_visible|ok": 1,
+        "ON|fails_visible|exception:AssertionError": 1,
+        "ON|syntax_or_import_error|syntax_error": 1,
+        "ON|syntax_or_import_error|forbidden_import_or_call": 1
+      },
+      "ceiling_counts": {
+        "OFF|hidden_only_fail|any_ceiling": 6,
+        "OFF|hidden_only_fail|off5_ceiling": 5,
+        "OFF|naming_miss|any_ceiling": 3,
+        "OFF|naming_miss|off5_ceiling": 3,
+        "OFF|fails_visible|any_ceiling": 7,
+        "OFF|fails_visible|off5_ceiling": 6,
+        "OFF5|naming_miss|any_ceiling": 2,
+        "OFF5|naming_miss|off5_ceiling": 2,
+        "ON|hidden_only_fail|any_ceiling": 1,
+        "ON|hidden_only_fail|off5_ceiling": 1,
+        "ON|fails_visible|any_ceiling": 1,
+        "ON|fails_visible|off5_ceiling": 1,
+        "OFF5|hidden_only_fail|any_ceiling": 1,
+        "ON|syntax_or_import_error|any_ceiling": 1,
+        "ON|syntax_or_import_error|off5_ceiling": 1,
+        "OFF5|fails_visible|any_ceiling": 1,
+        "OFF5|fails_visible|off5_ceiling": 1
+      },
+      "examples": {
+        "OFF|fails_visible": [
+          "mbppplus_Mbpp/305",
+          "mbppplus_Mbpp/615",
+          "mbppplus_Mbpp/59",
+          "mbppplus_Mbpp/138",
+          "mbppplus_Mbpp/63"
+        ],
+        "ON|hidden_only_fail": [
+          "mbppplus_Mbpp/305",
+          "mbppplus_Mbpp/267",
+          "mbppplus_Mbpp/593",
+          "mbppplus_Mbpp/7",
+          "mbppplus_Mbpp/735"
+        ],
+        "OFF5|hidden_only_fail": [
+          "mbppplus_Mbpp/305",
+          "mbppplus_Mbpp/267",
+          "mbppplus_Mbpp/593",
+          "mbppplus_Mbpp/7",
+          "mbppplus_Mbpp/735"
+        ],
+        "OFF5|fails_visible": [
+          "mbppplus_Mbpp/615",
+          "mbppplus_Mbpp/16"
+        ],
+        "OFF|hidden_only_fail": [
+          "mbppplus_Mbpp/773",
+          "mbppplus_Mbpp/267",
+          "mbppplus_Mbpp/593",
+          "mbppplus_Mbpp/84",
+          "mbppplus_Mbpp/7"
+        ],
+        "OFF|naming_miss": [
+          "mbppplus_Mbpp/473",
+          "mbppplus_Mbpp/245",
+          "mbppplus_Mbpp/792"
+        ],
+        "OFF5|naming_miss": [
+          "mbppplus_Mbpp/59",
+          "mbppplus_Mbpp/758"
+        ],
+        "ON|fails_visible": [
+          "mbppplus_Mbpp/790",
+          "mbppplus_Mbpp/462"
+        ],
+        "ON|syntax_or_import_error": [
+          "mbppplus_Mbpp/453",
+          "mbppplus_Mbpp/771"
+        ]
+      }
+    }
+  },
+  "cross_validation": {
+    "n_sampled": 25,
+    "agree": 25,
+    "disagree": 0,
+    "inconclusive": 0,
+    "disagreements": [],
+    "note": "sampled from hidden_check fast_check() calls only (the fast in-process re-execution path); visible_check narrowing and behavior-signature bucketing in resolve_off5_code() were not separately cross-validated -- their downstream effect is caught by the reconstruction sanity check (replaying hidden_check must reproduce the row's own recorded meets_demand=False) already applied to every row."
+  }
+}

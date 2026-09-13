@@ -63,12 +63,32 @@
   （holm_bonferroni／tost_equiv_boot／wilcoxon_signed_rank_exact／mcnemar_power）
 - `vacant/record.py` — RECORD_SPEC pack/check（紀錄紅線：不 pack＝沒跑過；
   私鑰 identity.key 排除，SPEC §7）
+- `vacant/suitegauge.py` — 驗收套件的量具（參考解要過、每個已知壞樁都要被擋）；
+  `gain_run.probe_instrument` 與 `peerexec.commit_suite` 共用這一份判準，**單邊保證**
+  （擋得住已知壞解 ≠ 涵蓋真需求）寫在 docstring，不准讀成「套件固定點已解」
+- `vacant/suitespec.py` — **驗收套件是資料不是程式**（R452）：SuiteSpec（entry_point＋
+  字面值 (args, expected)＋比對設定）＋確定性渲染器；執行器只跑自己渲染的碼，
+  有狀態／雜湊黑名單／擬態三種攻擊**不可表達**，殘餘＝覆蓋不足＋比對旗標
 - `vacant/blayer.py` — B 層機制驗收六情境（0→70% 步進 × on/off 雙組，判準寫死）
 - `vacant/checkpoint.py` — V1 存檔點認證＋回溯稽核（18 §2；存檔點自身成鏈）
 - `vacant/dashboard.py` — 觀測台＋/api/roster/scoreboard/**snapshot**（面板非信任來源）
 - `examples/x1_pilot.py` — 遷移 pilot 進入點（--loader x1|builtin|evalplus、--stub 閘門）
 - `examples/b_layer.py` — B 層六情境掃描 runner（預設每格 1000 seeds）
 - `docs/PREREG_V2.md` — 預註冊凍結總表（草稿待人類簽字＋ledger 簽入）
+- `ops/gain/gain_run.py`＋`ops/gain/brain_cline.py` — G 實驗（SPEC_GAIN.md，
+  2026-08-17 定調為主張本身）三臂等預算 runner 與 Cline 後端；
+  OFF5 多數決走與 ON 相同的受限 worker（2026-08-20 修正）。
+  `ops/gain/VERIFICATION_2026-08-20.md`＝外部交付包 22db0d7 的獨立驗證紀錄，
+  含「敘述超出實際交付」清單（deadline quorum、五呼叫重配、corpus 13/4/9
+  都不在交付物內，引用時不可當成已存在）
+- `runs/INDEX.md`（人讀）＋`runs/INDEX.json`（機器讀）— **要引用任何 run／題庫／log
+  之前先讀這一份**：598 個項目哪些是證據（98 個 real_run）、哪些是冒煙／中止、
+  哪 136 個 `_analysis_*` 是衍生物不可當原始資料，LCB v1/v2/v3＋MBPP+＋HumanEval+
+  的 sha256／日期窗／已知壞題（**HumanEval+ 的分母是 156 不是 164**），
+  以及哪些 log 只活在 vacant-dev 沒有備份。成組收官的兩批各有一節：
+  §二 R529 跨題庫 37 塊、§三 R460R 三次同題複製 18 塊——它們的 `headline` 是 `—`
+  但**不代表沒被稽核**（裁決檔用 glob 點名整批）。產生器
+  `ops/gain/build_runs_index.py`（`--check` 可驗索引沒漂）。
 
 ### 展件可直接複用的（實體場地，秒級互動）
 
@@ -83,6 +103,14 @@
   開  ....XX....XX......XX..X.....X.....X...X..X..................
   ```
 - `examples/e10_mediator.py` — 重算上面那兩行（零機時，只讀已歸檔 JSONL）。
+- `ops/gain/replay/r454/r454_exhibition_receipt.{json,txt}` ＋
+  `examples/receipt_viewer_multiparty.html` — 「三把金鑰的收據」展件：內嵌 r454 真跑的
+  三條完整簽章鏈（1840／1840／1899＝5579 筆），瀏覽器內從創世驗到鏈頭、逐格重算裁決／
+  指名／出貨（368 題可選），並示範翻票⇒簽章紅、少一票誠實⇒平手不指名（R454 §三-3）、
+  換平台字串⇒毫無反應（未簽章 metadata）。零外部資源、file:// 直開；
+  組裝與驗收＝`ops/gain/replay/build_multiparty_viewer.py`（`--check`）、
+  `ops/gain/replay/multiparty_viewer_node_check.mjs`、`tests/test_receipt_viewer.py`。
+  隱藏測資只出現在頁面上圍起來的「給觀眾的答案，機制看不到」那一塊。
 
 ### 對外發布與存證
 

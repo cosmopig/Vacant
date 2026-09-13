@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>S11 量具自驗台</title>
+<!--
+  第 116 輪 · 可讀性探針的**已知答案輸入**。
+
+  這一頁不是展件的一部分，它是量具的校準塊。四個色塊的答案事先就知道：
+    ctl-big   48px 高對比 → 縮到 1/3 之後一定看得見 ⇒ 探針必須判 C1 PASS
+    ctl-small 21px 高對比 → 縮到 1/3 之後一定看不見 ⇒ 探針必須判 C1 FAIL
+    ctl-lowc  48px 低對比 → 字夠大但糊掉      ⇒ 探針必須判 C1 PASS 且 C2 FAIL
+  只有 big/small 兩格的探針分不出「字夠大」與「讀得到」是兩件事，所以要第三格。
+
+  背景刻意用純色而非漸層：校準塊要驗的是量具，不是量具在困難背景下的表現。
+  真正的困難背景（world 的即時 3D、首頁的 radial-gradient）由雙拍相減那條路處理，
+  而那條路的雜訊底在腳本裡逐格量。
+-->
+<style>
+  html, body { margin: 0; padding: 0; background: #14120f; }
+  body {
+    font-family: "Noto Sans TC", "Source Han Sans", sans-serif;
+    padding: 40px 60px;
+  }
+  p { margin: 0 0 60px; line-height: 1.7; max-width: 62ch; }
+  #ctl-big   { font-size: 48px; color: #e8e4dc; }
+  #ctl-small { font-size: 21px; color: #e8e4dc; }
+  #ctl-lowc  { font-size: 48px; color: #3a352e; }
+</style>
+<p id="ctl-big">它不保證每次都對，留得住的也只有一部分。</p>
+<p id="ctl-small">它不保證每次都對，留得住的也只有一部分。</p>
+<p id="ctl-lowc">它不保證每次都對，留得住的也只有一部分。</p>

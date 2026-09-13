@@ -1,0 +1,11 @@
+預註冊閘門通過：DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md 授權 g_r441_gemma_only_mbpp
+179 題（evalplus）　輸出 runs/g_r441_gemma_only_mbpp
+── 量具驗證（先答已知答案）
+<unknown>:5: SyntaxWarning: invalid escape sequence '\w'
+<unknown>:4: SyntaxWarning: invalid escape sequence '\.'
+   參考解通過 179/179　壞解被擋 179/179
+── 模型池：6 個 agent／1 個模型家族
+── 模型池預檢（每個 model 問一句，零容忍）
+模型 gemma-4-12b-it-qat 預檢失敗：preflight 重試 2 次仍失敗：HTTPError: HTTP Error 400: Bad Request
+  這個 model 分到的 agent 會 100% 失敗（分配是 i % len(models)，決定性不是隨機）。
+  先確認端點真的服務這個 model，或把它從 --models 拿掉。

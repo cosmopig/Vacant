@@ -7,7 +7,7 @@ infra_void / parse_void 紀律，即 CLAUDE.md 鐵律 3）。
 
 兩個入口：
   - pack(run_dir, extra_meta)：就地整理成 RECORD_SPEC 佈局——生成 manifest.json
-    （抓 git commit / pip freeze / platform / utc；併入 extra_meta）；對居民 logbook
+    （抓 git commit＋**工作區髒不髒** / pip freeze / platform / utc；併入 extra_meta）；對居民 logbook
     離線重驗簽章鏈、把人可讀輸出寫進 chain_verify.txt；對 trust_cards/*.json 逐張
     獨立驗簽、輸出寫 card_verify.txt；確保 anomalies.md 存在；最後生成 SHA256SUMS
     （排除自身）。回傳 manifest dict。
@@ -95,6 +95,28 @@ def _git_commit(run_dir: Path) -> str | None:
         )
         if out.returncode == 0 and out.stdout.strip():
             return out.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return None
+
+
+def _git_dirty(run_dir: Path) -> tuple[bool, list[str]] | None:
+    """工作區相對 HEAD 有沒有未提交的**已追蹤**改動？回 (dirty, 檔案清單)；抓不到回 None。
+
+    為什麼要問：`repo_commit` 的用途是「照這個 commit 就能重現這個 run」。從髒工作區
+    跑出來的 run 記一個乾淨 commit，**每一項檢查都會過而那句話是假的**——去 checkout
+    那個 commit 的人拿到的是另一份程式。這跟 SHA256SUMS 偵測竄改是同一件事的上游。
+    `-uno`：未追蹤檔不算（run 產物本身就在 repo 裡未追蹤，否則恆為髒）。
+    誠實邊界：因此**未追蹤的新原始碼檔偵測不到**，這是本函式已知的盲區。
+    """
+    try:
+        out = subprocess.run(
+            ["git", "status", "--porcelain", "-uno"], cwd=str(run_dir),
+            capture_output=True, text=True, timeout=15,
+        )
+        if out.returncode == 0:
+            paths = [ln[3:].strip() for ln in out.stdout.splitlines() if ln.strip()]
+            return bool(paths), paths
     except (OSError, subprocess.SubprocessError):
         pass
     return None
@@ -262,11 +284,14 @@ def pack(run_dir: str | Path, extra_meta: dict | None = None, *,
 
     # 2) 組 manifest：自動偵測 + extra_meta 併入
     commit = _git_commit(run_dir)
+    dirty = _git_dirty(run_dir)
     freeze = _pip_freeze()
     missing: dict[str, str] = dict(extra.get("missing", {}))
 
     manifest: dict[str, Any] = {
         "repo_commit": commit if commit is not None else "unknown",
+        "repo_dirty": (None if dirty is None else dirty[0]),
+        "repo_dirty_paths": ([] if dirty is None else sorted(dirty[1])[:50]),
         "pip_freeze": freeze if freeze is not None else [],
         "os": platform.platform(),
         "python": platform.python_version(),
@@ -296,6 +321,16 @@ def pack(run_dir: str | Path, extra_meta: dict | None = None, *,
     # 自動偵測失敗者記入 missing
     if commit is None:
         missing.setdefault("repo_commit", "git rev-parse HEAD 失敗（非 git repo 或無 git）")
+    if dirty is None:
+        missing.setdefault("repo_dirty", "git status 失敗，無法判斷工作區是否乾淨")
+    elif dirty[0]:
+        # 明白斷言，不是靜默省略：checkout 這個 commit **重現不出這個 run**。
+        missing.setdefault(
+            "repo_commit_exact",
+            f"本 run 跑在髒工作區（{len(dirty[1])} 個已追蹤檔有未提交改動）"
+            f"⇒ repo_commit 只指到最近的 commit，照它 checkout 重現不出這個 run；"
+            f"見 repo_dirty_paths",
+        )
     if freeze is None:
         missing.setdefault("pip_freeze", "pip freeze 失敗（無 pip 或逾時）")
     if manifest["utc_start"] is None:

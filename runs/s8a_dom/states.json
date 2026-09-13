@@ -1,0 +1,64 @@
+[
+ {
+  "state": "app_load",
+  "note": "觀測台載入完（磚／名冊／活動／階梯全部由 API 填）",
+  "bytes": 92616,
+  "text_len": 26420,
+  "probe": {
+   "id_rows": 6,
+   "act_rows": 40,
+   "chip_head": null,
+   "tile_delivered": "40",
+   "ladder_rungs": 4,
+   "stream_rows": 234
+  }
+ },
+ {
+  "state": "app_view_identities",
+  "note": "分頁「identities」（只翻 hidden，不新增文字）",
+  "bytes": 92616,
+  "text_len": 26420
+ },
+ {
+  "state": "app_view_activity",
+  "note": "分頁「activity」（只翻 hidden，不新增文字）",
+  "bytes": 92616,
+  "text_len": 26420
+ },
+ {
+  "state": "app_view_chain",
+  "note": "分頁「chain」（只翻 hidden，不新增文字）",
+  "bytes": 92618,
+  "text_len": 26422
+ },
+ {
+  "state": "app_view_claims",
+  "note": "分頁「claims」（只翻 hidden，不新增文字）",
+  "bytes": 92618,
+  "text_len": 26422
+ },
+ {
+  "state": "app_drawer_identity",
+  "note": "點名冊一列 ⇒ 五維信用／記憶鏈／存檔點鏈抽屜",
+  "bytes": 101654,
+  "text_len": 27258
+ },
+ {
+  "state": "app_drawer_task",
+  "note": "點交付一列 ⇒ 信任狀抽屜（觀眾看『這一件發生什麼』）",
+  "bytes": 94233,
+  "text_len": 26816
+ },
+ {
+  "state": "app_pause",
+  "note": "暫停事件流 ⇒ 「▶ 繼續」＋「N 筆新事件」",
+  "bytes": 94229,
+  "text_len": 26815
+ },
+ {
+  "state": "app_copy",
+  "note": "點雜湊複製（headless 可能沒有剪貼簿權限 ⇒ E3x 記錄用）",
+  "bytes": 94223,
+  "text_len": 26816
+ }
+]

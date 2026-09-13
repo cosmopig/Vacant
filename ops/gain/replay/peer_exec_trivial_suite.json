@@ -1,0 +1,98 @@
+[
+ {
+  "run": "g_r446_eq5_mbpp",
+  "k": 1,
+  "suite": "trivial",
+  "n": 371,
+  "deliv_acc": 0.6873315363881402,
+  "false_deliv": 0.31266846361185985,
+  "refusal": 0.0,
+  "contested": 0.0,
+  "real_suite_deliv_acc": 0.7520215633423181,
+  "delta_pp": -6.46900269541779
+ },
+ {
+  "run": "g_r446_eq5_mbpp",
+  "k": 3,
+  "suite": "trivial",
+  "n": 371,
+  "deliv_acc": 0.6873315363881402,
+  "false_deliv": 0.31266846361185985,
+  "refusal": 0.0,
+  "contested": 0.0,
+  "real_suite_deliv_acc": 0.7520215633423181,
+  "delta_pp": -6.46900269541779
+ },
+ {
+  "run": "g_r446_eq5_mbpp",
+  "k": 5,
+  "suite": "trivial",
+  "n": 371,
+  "deliv_acc": 0.6873315363881402,
+  "false_deliv": 0.31266846361185985,
+  "refusal": 0.0,
+  "contested": 0.0,
+  "real_suite_deliv_acc": 0.7520215633423181,
+  "delta_pp": -6.46900269541779
+ },
+ {
+  "run": "g_r446_eq5_mbpp",
+  "k": 7,
+  "suite": "trivial",
+  "n": 371,
+  "deliv_acc": 0.6873315363881402,
+  "false_deliv": 0.31266846361185985,
+  "refusal": 0.0,
+  "contested": 0.0,
+  "real_suite_deliv_acc": 0.7520215633423181,
+  "delta_pp": -6.46900269541779
+ },
+ {
+  "run": "g_r443_gemma_lcb",
+  "k": 1,
+  "suite": "trivial",
+  "n": 91,
+  "deliv_acc": 0.5054945054945055,
+  "false_deliv": 0.4945054945054945,
+  "refusal": 0.0,
+  "contested": 0.0,
+  "real_suite_deliv_acc": 0.6923076923076923,
+  "delta_pp": -18.681318681318682
+ },
+ {
+  "run": "g_r443_gemma_lcb",
+  "k": 3,
+  "suite": "trivial",
+  "n": 91,
+  "deliv_acc": 0.5054945054945055,
+  "false_deliv": 0.4945054945054945,
+  "refusal": 0.0,
+  "contested": 0.0,
+  "real_suite_deliv_acc": 0.6923076923076923,
+  "delta_pp": -18.681318681318682
+ },
+ {
+  "run": "g_r443_gemma_lcb",
+  "k": 5,
+  "suite": "trivial",
+  "n": 91,
+  "deliv_acc": 0.5054945054945055,
+  "false_deliv": 0.4945054945054945,
+  "refusal": 0.0,
+  "contested": 0.0,
+  "real_suite_deliv_acc": 0.6923076923076923,
+  "delta_pp": -18.681318681318682
+ },
+ {
+  "run": "g_r443_gemma_lcb",
+  "k": 7,
+  "suite": "trivial",
+  "n": 91,
+  "deliv_acc": 0.5054945054945055,
+  "false_deliv": 0.4945054945054945,
+  "refusal": 0.0,
+  "contested": 0.0,
+  "real_suite_deliv_acc": 0.6923076923076923,
+  "delta_pp": -18.681318681318682
+ }
+]

@@ -1,0 +1,102 @@
+{
+  "run": "runs/g_r460r4_harness_lcb2_a1",
+  "scope": "v2",
+  "records_audited": 118,
+  "texts_audited": 404,
+  "texts_scanned": 320,
+  "per_arm": {
+    "HPI": 35,
+    "HOC": 51,
+    "HMIX": 32
+  },
+  "needles_checked": 4091,
+  "needles_skipped_trivial": 1573,
+  "excused_n": 7,
+  "excused": [
+    {
+      "line": 79,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[6, 2]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": ", [1, 3, 5], [1, 4, 4], [2, 5, 6]], [2, 1, 2, 1, 3, 1]] got=<sandbox-echo> want=[6, 2]\n\nReply with exactly one Python code block containing the complete correct",
+      "excused_as": "visible_check_source"
+    },
+    {
+      "line": 79,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[9, 2]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": "[0, 1, 2], [1, 2, 3], [1, 3, 5], [1, 4, 4], [2, 5, 6]], [2, 1, 2, 1, 3, 1]] got=[9, 2] want=[6, 2]\n\nReply with exactly one Python code block containing the comp",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 80,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[6, 2]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": ", [1, 3, 5], [1, 4, 4], [2, 5, 6]], [2, 1, 2, 1, 3, 1]] got=<sandbox-echo> want=[6, 2]\n\nReply with exactly one Python code block containing the complete correct",
+      "excused_as": "visible_check_source"
+    },
+    {
+      "line": 80,
+      "arm": "HMIX",
+      "rule": "hidden_case_leak",
+      "needle": "[9, 2]",
+      "message_index": 3,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": "[0, 1, 2], [1, 2, 3], [1, 3, 5], [1, 4, 4], [2, 5, 6]], [2, 1, 2, 1, 3, 1]] got=[9, 2] want=[6, 2]\n\nReply with exactly one Python code block containing the comp",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 213,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 1]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3721",
+      "excerpt": "sertionError: args=[2, [['OFFLINE', '10', '0'], ['MESSAGE', '12', 'HERE']]] got=[1, 1] want=[0, 1]\n\nReply with exactly one Python code block containing the comp",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 214,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 1]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3721",
+      "excerpt": "sertionError: args=[2, [['OFFLINE', '10', '0'], ['MESSAGE', '12', 'HERE']]] got=[1, 1] want=[0, 1]\n\nReply with exactly one Python code block containing the comp",
+      "excused_as": "got_sandbox_echo"
+    },
+    {
+      "line": 214,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[1, 1]",
+      "message_index": 9,
+      "role": "user",
+      "task_id": "lcb_3721",
+      "excerpt": "sertionError: args=[2, [['OFFLINE', '10', '0'], ['MESSAGE', '12', 'HERE']]] got=[1, 1] want=[0, 1]\n\nReply with exactly one Python code block containing the comp",
+      "excused_as": "got_sandbox_echo"
+    }
+  ],
+  "excused_by_rule": {
+    "visible_check_source": 2,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 5
+  },
+  "unknown_task_ids": [],
+  "violations": [],
+  "verdict": "CLEAN"
+}

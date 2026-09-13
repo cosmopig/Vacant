@@ -66,7 +66,7 @@ def build_snapshot(ledger_path: Path, roster_fn: Callable[[], Any],
 _PAGE = """<!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vacant — 信任觀測台</title>
+<title>Vacant — 可究責觀測台</title>
 <style>
   :root { color-scheme: light dark; --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee;
           --muted:#9aa1b0; --line:#262b36; --ok:#3ecf8e; --warn:#f0b429; --bad:#ff5470;
@@ -114,7 +114,7 @@ _PAGE = """<!doctype html>
 </style></head>
 <body>
 <header>
-  <h1>Vacant · 信任觀測台</h1>
+  <h1>Vacant · 可究責觀測台</h1>
   <span id="trust"></span>
   <span id="status">連線中…</span>
 </header>
@@ -124,8 +124,8 @@ _PAGE = """<!doctype html>
   <section><h2>路由流（最近 ROUTE）</h2><ul id="routes"></ul></section>
   <section><h2>計分板 on / off</h2>
     <div class="sb">
-      <div class="col"><div class="lbl">trust ON pass率</div><div id="on" class="big">–</div></div>
-      <div class="col"><div class="lbl">trust OFF pass率</div><div id="off" class="big">–</div></div>
+      <div class="col"><div class="lbl">可究責層 開 pass率</div><div id="on" class="big">–</div></div>
+      <div class="col"><div class="lbl">可究責層 關 pass率</div><div id="off" class="big">–</div></div>
     </div>
     <div id="delta" class="lbl"></div>
   </section>
@@ -144,7 +144,7 @@ async function refresh(){
     renderRoster(r);
     $('#on').textContent = pct(s.on); $('#off').textContent = pct(s.off);
     $('#delta').textContent = (s.paired_delta==null) ? '配對差：資料不足'
-      : '配對差 Δ = ' + s.paired_delta + '（on − off，正值＝信任層有增益）';
+      : '配對差 Δ = ' + s.paired_delta + '（on − off，正值＝可究責層有增益）';
   } catch(e){ /* 面板容錯：抓不到就下輪再抓 */ }
 }
 function renderRoster(rows){

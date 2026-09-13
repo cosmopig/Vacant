@@ -1,0 +1,354 @@
+{
+  "S1": {
+    "n_records": 1986,
+    "era": 3,
+    "non_retryable": [
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 1421,
+      "2": 1421,
+      "3": 1421,
+      "4": 1421
+    },
+    "p_by_attempt": {
+      "1": 0.9992962702322308,
+      "2": 0.9992962702322308,
+      "3": 0.9992962702322308,
+      "4": 0.9992962702322308
+    },
+    "selfcheck_reach_residuals": {
+      "2": 1420,
+      "3": 1421,
+      "4": 1421
+    },
+    "selfcheck_reach_conserved": false,
+    "review_fail_records": 54,
+    "review_fail_stopped_short": 42,
+    "void_by_role": {
+      "review": 12
+    },
+    "on_void_by_role": {
+      "review": 12
+    },
+    "on_void_total": 12,
+    "review_void_on": 12,
+    "review_share_of_on_void": 1.0,
+    "rescue_estimate": 11.999994057172966,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 0.9999995047644138,
+    "timeout_review_fail_median": 380,
+    "timeout_gen_fail_median": null,
+    "timeout_review_cfg": [
+      380
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.OFF.infra_void": 0,
+      "arms.ON.infra_void": 12,
+      "arms.OFF5.infra_void": 0
+    },
+    "status": "OK"
+  },
+  "S2": {
+    "n_records": 1025,
+    "era": 3,
+    "non_retryable": [
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 737,
+      "2": 737,
+      "3": 737,
+      "4": 737
+    },
+    "p_by_attempt": {
+      "1": 0.9823609226594301,
+      "2": 0.9823609226594301,
+      "3": 0.9823609226594301,
+      "4": 0.9823609226594301
+    },
+    "selfcheck_reach_residuals": {
+      "2": 726,
+      "3": 735,
+      "4": 737
+    },
+    "selfcheck_reach_conserved": false,
+    "review_fail_records": 22,
+    "review_fail_stopped_short": 18,
+    "void_by_role": {
+      "review": 4
+    },
+    "on_void_by_role": {
+      "review": 4
+    },
+    "on_void_total": 4,
+    "review_void_on": 4,
+    "review_share_of_on_void": 1.0,
+    "rescue_estimate": 3.9987554518022934,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 0.9996888629505734,
+    "timeout_review_fail_median": 380,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      380
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.OFF.infra_void": 0,
+      "arms.ON.infra_void": 4,
+      "arms.OFF5.infra_void": 0
+    },
+    "status": "OK"
+  },
+  "S3": {
+    "n_records": 603,
+    "era": 1,
+    "non_retryable": [
+      400,
+      401,
+      402,
+      403,
+      404
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 417,
+      "2": 417,
+      "3": 417,
+      "4": 417
+    },
+    "p_by_attempt": {
+      "1": 0.9760191846522782,
+      "2": 0.9760191846522782,
+      "3": 0.9760191846522782,
+      "4": 0.9760191846522782
+    },
+    "selfcheck_reach_residuals": {
+      "2": 412,
+      "3": 416,
+      "4": 416
+    },
+    "selfcheck_reach_conserved": false,
+    "review_fail_records": 6,
+    "review_fail_stopped_short": 5,
+    "void_by_role": {
+      "review": 1,
+      "gen": 3
+    },
+    "on_void_by_role": {
+      "review": 1
+    },
+    "on_void_total": 1,
+    "review_void_on": 1,
+    "review_share_of_on_void": 1.0,
+    "rescue_estimate": 0.9994249204952584,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 0.9994249204952584,
+    "timeout_review_fail_median": 250,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      250
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.ON.infra_void": 1,
+      "arms.OFF5.infra_void": 3
+    },
+    "status": "OK"
+  },
+  "S4": {
+    "n_records": 3688,
+    "era": 2,
+    "non_retryable": [
+      400,
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 2569,
+      "2": 2569,
+      "3": 2569,
+      "4": 2569
+    },
+    "p_by_attempt": {
+      "1": 0.9750875827170105,
+      "2": 0.9750875827170105,
+      "3": 0.9750875827170105,
+      "4": 0.9750875827170105
+    },
+    "selfcheck_reach_residuals": {
+      "2": 2547,
+      "3": 2555,
+      "4": 2560
+    },
+    "selfcheck_reach_conserved": false,
+    "review_fail_records": 19,
+    "review_fail_stopped_short": 14,
+    "void_by_role": {
+      "review": 5,
+      "gen": 19
+    },
+    "on_void_by_role": {
+      "review": 5,
+      "gen": 1
+    },
+    "on_void_total": 6,
+    "review_void_on": 5,
+    "review_share_of_on_void": 0.8333333333333334,
+    "rescue_estimate": 4.996896857325591,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 0.8328161428875985,
+    "timeout_review_fail_median": 250,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      250
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.ON.infra_void": 6,
+      "arms.OFF5.infra_void": 18
+    },
+    "status": "OK"
+  },
+  "S5": {
+    "n_records": 1427,
+    "era": 2,
+    "non_retryable": [
+      400,
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 1046,
+      "2": 1046,
+      "3": 1046,
+      "4": 1046
+    },
+    "p_by_attempt": {
+      "1": 0.8804971319311663,
+      "2": 0.8804971319311663,
+      "3": 0.8804971319311663,
+      "4": 0.8804971319311663
+    },
+    "selfcheck_reach_residuals": {
+      "2": 1031,
+      "3": 1045,
+      "4": 1045
+    },
+    "selfcheck_reach_conserved": false,
+    "review_fail_records": 41,
+    "review_fail_stopped_short": 12,
+    "void_by_role": {
+      "review": 29,
+      "gen": 108
+    },
+    "on_void_by_role": {
+      "review": 29,
+      "gen": 44
+    },
+    "on_void_total": 73,
+    "review_void_on": 29,
+    "review_share_of_on_void": 0.3972602739726027,
+    "rescue_estimate": 28.585852871176364,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 0.39158702563255293,
+    "timeout_review_fail_median": 380,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      380
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "calibration.by_agent.careful-1.infra_void": 0,
+      "calibration.by_agent.careful-2.infra_void": 0,
+      "calibration.by_agent.plain-1.infra_void": 0,
+      "calibration.by_agent.plain-2.infra_void": 0,
+      "calibration.by_agent.hasty-1.infra_void": 0,
+      "calibration.by_agent.hasty-2.infra_void": 0,
+      "arms.ON.infra_void": 73,
+      "arms.OFF5.infra_void": 64
+    },
+    "status": "OK"
+  },
+  "S6": {
+    "n_records": 2162,
+    "era": 3,
+    "non_retryable": [
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 1671,
+      "2": 1671,
+      "3": 1671,
+      "4": 1671
+    },
+    "p_by_attempt": {
+      "1": 0.7504488330341114,
+      "2": 0.7504488330341114,
+      "3": 0.7504488330341114,
+      "4": 0.7504488330341114
+    },
+    "selfcheck_reach_residuals": {
+      "2": 1493,
+      "3": 1560,
+      "4": 1585
+    },
+    "selfcheck_reach_conserved": false,
+    "review_fail_records": 117,
+    "review_fail_stopped_short": 60,
+    "void_by_role": {
+      "gen": 40,
+      "review": 57,
+      "revise": 2
+    },
+    "on_void_by_role": {
+      "gen": 5,
+      "review": 57,
+      "revise": 2
+    },
+    "on_void_total": 64,
+    "review_void_on": 57,
+    "review_share_of_on_void": 0.890625,
+    "rescue_estimate": 53.450280258759896,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 0.8351606290431234,
+    "timeout_review_fail_median": 380,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      380
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.OFF.infra_void": 5,
+      "arms.ON.infra_void": 66,
+      "arms.OFF5.infra_void": 30
+    },
+    "status": "OK"
+  }
+}

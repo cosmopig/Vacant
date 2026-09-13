@@ -1,0 +1,51 @@
+<unknown>:5: SyntaxWarning: invalid escape sequence '\w'
+60 題（evalplus）　輸出 runs/g_on_qwen_only_20260901
+── 量具驗證（先答已知答案）
+   參考解通過 12/12　壞解被擋 12/12
+── 模型池：6 個 agent／1 個模型家族
+── 模型池預檢（每個 model 問一句，零容忍）
+   qwen/qwen3.6-35b-a3b　回 4 字　✓
+  [ON 1/60] 需求符合=True 接受=True 累計呼叫=5
+  [ON 5/60] 需求符合=True 接受=True 累計呼叫=14
+  [ON 6/60] 需求符合=True 接受=True 累計呼叫=19
+  [ON 7/60] 需求符合=True 接受=True 累計呼叫=24
+  [ON 10/60] 需求符合=False 接受=True 累計呼叫=31
+  [ON 13/60] 需求符合=True 接受=True 累計呼叫=39
+  [ON 14/60] 需求符合=True 接受=True 累計呼叫=44
+  [ON 15/60] 需求符合=False 接受=False 累計呼叫=49
+  [ON 16/60] 需求符合=True 接受=True 累計呼叫=54
+  [ON 17/60] 需求符合=True 接受=True 累計呼叫=59
+  [ON 19/60] 需求符合=False 接受=True 累計呼叫=66
+  [ON 21/60] 需求符合=True 接受=True 累計呼叫=73
+  [ON 22/60] 需求符合=True 接受=True 累計呼叫=78
+  [ON 23/60] 需求符合=True 接受=True 累計呼叫=83
+  [ON 24/60] 需求符合=True 接受=True 累計呼叫=88
+  [ON 26/60] 需求符合=True 接受=True 累計呼叫=96
+  [ON 28/60] 需求符合=True 接受=True 累計呼叫=102
+  [ON 29/60] 需求符合=True 接受=True 累計呼叫=107
+  [ON 30/60] 需求符合=True 接受=True 累計呼叫=112
+  [ON 32/60] 需求符合=True 接受=True 累計呼叫=118
+  [ON 33/60] 需求符合=True 接受=True 累計呼叫=123
+  [ON 34/60] 需求符合=True 接受=True 累計呼叫=128
+  [ON 35/60] 需求符合=True 接受=True 累計呼叫=133
+  [ON 36/60] 需求符合=True 接受=True 累計呼叫=138
+  [ON 38/60] 需求符合=True 接受=True 累計呼叫=144
+  [ON 40/60] 需求符合=False 接受=True 累計呼叫=150
+  [ON 41/60] 需求符合=True 接受=True 累計呼叫=155
+  [ON 42/60] 需求符合=True 接受=True 累計呼叫=160
+  [ON 43/60] 需求符合=True 接受=True 累計呼叫=165
+  [ON 48/60] 需求符合=True 接受=True 累計呼叫=177
+  [ON 49/60] 需求符合=True 接受=True 累計呼叫=182
+  [ON 50/60] 需求符合=True 接受=True 累計呼叫=187
+  [ON 51/60] 需求符合=True 接受=True 累計呼叫=192
+  [ON 53/60] 需求符合=True 接受=True 累計呼叫=198
+  [ON 54/60] 需求符合=True 接受=True 累計呼叫=203
+  [ON 56/60] 需求符合=True 接受=True 累計呼叫=209
+  [ON 58/60] 需求符合=True 接受=True 累計呼叫=216
+  [ON 59/60] 需求符合=True 接受=True 累計呼叫=221
+  [ON 60/60] 需求符合=True 接受=True 累計呼叫=226
+── ON: {"tasks": 60, "calls": 226, "infra_void": 21, "complete": false, "processed": 60, "accepted": 38, "accepted_and_meets_demand": 35, "demand_equals_output_rate": 0.9210526315789473, "coverage": 0.9743589743589743, "correct_delivery_rate": 0.8974358974358975, "raw_final_accuracy": 0.8974358974358975, "calls_per_task": 5.794871794871795, "calls_per_correct_delivery": 6.457142857142857, "leaked": 3, "reviewer_accuracy": 0.8717948717948718, "raw_reviewer_accuracy": 0.8803418803418803, "reviewer_votes": 117, "review_fail_claims": 5, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": {"improved": 1, "harmed": 0, "stayed_correct": 34, "stayed_wrong": 4}, "endpoint_latency_ms": {"all": {"n": 226, "p50": 37890, "p95": 89084, "max": 151724}, "by_role": {"gen": {"n": 59, "p50": 48726, "p95": 131369, "max": 151724}, "review": {"n": 128, "p50": 32705, "p95": 53403, "max": 59638}, "revise": {"n": 39, "p50": 43010, "p95": 92422, "max": 98913}}, "failed_attempts": 64}, "wall_s": 12337.4, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+⚠ run_complete=False——這些臂沒跑完：ON。這一輪的比例不得拿去比較（SPEC_GAIN §7）。
+
+寫出 runs/g_on_qwen_only_20260901/summary.json
+⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。

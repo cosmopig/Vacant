@@ -1,0 +1,223 @@
+{
+  "cert_headings": 6,
+  "cert_sha_mismatches": [],
+  "counts": {
+    "CERT_FRESH": 2,
+    "CERT_STALE": 2,
+    "TRIAGED_NOT_A_CERT": 1
+  },
+  "counts_raw": {
+    "BROKEN_NO_TOOLS": 1,
+    "CERT_FRESH": 2,
+    "CERT_STALE": 2
+  },
+  "distinct_tools": [
+    "ops/gain/r447_eq5_offline.py",
+    "ops/gain/r447_gauge_capability.py",
+    "ops/gain/replay/paired_ci.py",
+    "ops/gain/replay/pooled_paired_ci.py"
+  ],
+  "docs_scanned": 139,
+  "exemptions": 1,
+  "exemptions_refused": 0,
+  "groups": [
+    {
+      "cert_commit": "a6ecb9b1ec2138d989421188498af7a7d5123ae8",
+      "cert_commits": [
+        {
+          "commit": "a6ecb9b1ec2138d989421188498af7a7d5123ae8",
+          "ct": 1788553890,
+          "line": 300
+        }
+      ],
+      "cert_ct": 1788553890,
+      "doc": "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+      "heads": [
+        {
+          "line": 300,
+          "text": "## C.4 這兩條指令**已經原樣跑過**（R463 §一 C-1 新訂通則）"
+        }
+      ],
+      "hi": 332,
+      "items": [
+        {
+          "blob_at_cert": "5179f45934ea98a83df308770f9193dd73ca872a",
+          "blob_at_cert_derived": "5179f45934ea98a83df308770f9193dd73ca872a",
+          "blob_at_cert_recorded": "5179f45934ea98a83df308770f9193dd73ca872a",
+          "blob_at_head": "5179f45934ea98a83df308770f9193dd73ca872a",
+          "cert_sha_mismatch": null,
+          "commits_since": [],
+          "sha_source": "recorded",
+          "tool": "ops/gain/replay/pooled_paired_ci.py",
+          "verdict": "CERT_FRESH"
+        },
+        {
+          "blob_at_cert": "bb146ea0925151a4c9ed093a9f70abe0c860142c",
+          "blob_at_cert_derived": "bb146ea0925151a4c9ed093a9f70abe0c860142c",
+          "blob_at_cert_recorded": "bb146ea0925151a4c9ed093a9f70abe0c860142c",
+          "blob_at_head": "8c0f242096e92d50aa7f26f1d9b6dff917b87caa",
+          "cert_sha_mismatch": null,
+          "commits_since": [
+            "6ad574e 1788561532 R471 施工：selftest 補條 F（verdict 判決表 11 列）與條 G（MIN_PAIRED 擋門接線，真資料夾具 59/61）——純新增，verdict/main/diff_ci/n_needed 一字未改"
+          ],
+          "sha_source": "recorded",
+          "tool": "ops/gain/replay/paired_ci.py",
+          "verdict": "CERT_STALE"
+        }
+      ],
+      "lo": 249,
+      "recorded": {
+        "ops/gain/replay/paired_ci.py": "bb146ea0925151a4c9ed093a9f70abe0c860142c",
+        "ops/gain/replay/pooled_paired_ci.py": "5179f45934ea98a83df308770f9193dd73ca872a"
+      },
+      "recorded_malformed": [],
+      "scope": "C",
+      "tools": [
+        "ops/gain/replay/pooled_paired_ci.py",
+        "ops/gain/replay/paired_ci.py"
+      ]
+    },
+    {
+      "cert_commit": "87aec70db0cb3a6f476b064a5795f8e66b4952c6",
+      "cert_commits": [
+        {
+          "commit": "87aec70db0cb3a6f476b064a5795f8e66b4952c6",
+          "ct": 1788554871,
+          "line": 344
+        },
+        {
+          "commit": "87aec70db0cb3a6f476b064a5795f8e66b4952c6",
+          "ct": 1788554871,
+          "line": 370
+        }
+      ],
+      "cert_ct": 1788554871,
+      "doc": "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+      "heads": [
+        {
+          "line": 344,
+          "text": "## D.2 收官指令（**已原樣跑過**，見 D.4）"
+        },
+        {
+          "line": 370,
+          "text": "## D.4 這條指令已經原樣跑過（R463 §一 C-1 新訂通則）"
+        }
+      ],
+      "hi": 399,
+      "items": [
+        {
+          "blob_at_cert": "52975b6ddeb9cdd33f8e6310eeb4468ca8bf33b9",
+          "blob_at_cert_derived": "52975b6ddeb9cdd33f8e6310eeb4468ca8bf33b9",
+          "blob_at_cert_recorded": "52975b6ddeb9cdd33f8e6310eeb4468ca8bf33b9",
+          "blob_at_head": "52975b6ddeb9cdd33f8e6310eeb4468ca8bf33b9",
+          "cert_sha_mismatch": null,
+          "commits_since": [],
+          "sha_source": "recorded",
+          "tool": "ops/gain/r447_eq5_offline.py",
+          "verdict": "CERT_FRESH"
+        }
+      ],
+      "lo": 332,
+      "recorded": {
+        "ops/gain/r447_eq5_offline.py": "52975b6ddeb9cdd33f8e6310eeb4468ca8bf33b9"
+      },
+      "recorded_malformed": [],
+      "scope": "D",
+      "tools": [
+        "ops/gain/r447_eq5_offline.py"
+      ]
+    },
+    {
+      "cert_commit": "f5cf02db4af7b9d51d0398377431827e0603f85a",
+      "cert_commits": [
+        {
+          "commit": "f5cf02db4af7b9d51d0398377431827e0603f85a",
+          "ct": 1788555526,
+          "line": 418
+        },
+        {
+          "commit": "f5cf02db4af7b9d51d0398377431827e0603f85a",
+          "ct": 1788555526,
+          "line": 478
+        }
+      ],
+      "cert_ct": 1788555526,
+      "doc": "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+      "heads": [
+        {
+          "line": 418,
+          "text": "## E.2 收官指令（**已原樣跑過**，見 E.4）"
+        },
+        {
+          "line": 478,
+          "text": "## E.4 這條指令已經原樣跑過（R463 §一 C-1 新訂通則）"
+        }
+      ],
+      "hi": 522,
+      "items": [
+        {
+          "blob_at_cert": "162d54d51e57d700b310fb9ddad1708a7fe0a1f0",
+          "blob_at_cert_derived": "162d54d51e57d700b310fb9ddad1708a7fe0a1f0",
+          "blob_at_cert_recorded": "162d54d51e57d700b310fb9ddad1708a7fe0a1f0",
+          "blob_at_head": "749273481743647e7b51c3e56b215cdfbf7316f1",
+          "cert_sha_mismatch": null,
+          "commits_since": [
+            "82d5a08 1788562583 R472 施工-3：條 M 釘住『擋門讀 run_terminal 不是 run_complete』（gain_run.py:1414 兩訊號刻意不同；事後探測 M11 原本 MISSED）",
+            "9d7671b 1788562515 R472 施工-2：條 L 改用 .get()——偵測器不准 crash 收場（M10 拔掉接線時 KeyError，crash 依判準記 BROKEN 不記 caught）",
+            "9d01a71 1788562431 R472 施工：r447_gauge_capability 補三道 run 目錄擋門（G0 讀不到 summary／G1 未 terminal／G2 帳對不上），BROKEN 時不吐能力數字；新增可調參數 0，census() 簽章未動"
+          ],
+          "sha_source": "recorded",
+          "tool": "ops/gain/r447_gauge_capability.py",
+          "verdict": "CERT_STALE"
+        }
+      ],
+      "lo": 399,
+      "recorded": {
+        "ops/gain/r447_gauge_capability.py": "162d54d51e57d700b310fb9ddad1708a7fe0a1f0"
+      },
+      "recorded_malformed": [],
+      "scope": "E",
+      "tools": [
+        "ops/gain/r447_gauge_capability.py"
+      ]
+    },
+    {
+      "cert_commit": "700f114345d89dec87319bd32e53d777ffb90804",
+      "cert_commits": [
+        {
+          "commit": "700f114345d89dec87319bd32e53d777ffb90804",
+          "ct": 1788565893,
+          "line": 1
+        }
+      ],
+      "cert_ct": 1788565893,
+      "doc": "DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
+      "heads": [
+        {
+          "line": 1,
+          "text": "# R476：R461 收官仲裁者的**漂移回歸**——附錄 C／D／E 說「已原樣跑過」，但那之後工具被改了"
+        }
+      ],
+      "hi": 103,
+      "items": [
+        {
+          "tool": null,
+          "triage_reason": "看過＝誤報：這是文件標題在『引用』標記（說「已原樣跑過」），不是認證段落；該文件全篇 0 條 python3 ops/ 指令行。判準 §二.1 的定義（標題行＋含標記）照字面收得到它 ⇒ 定義原樣不動，只在此名單具名記錄。",
+          "verdict": "TRIAGED_NOT_A_CERT"
+        }
+      ],
+      "lo": 0,
+      "recorded": {},
+      "recorded_malformed": [],
+      "scope": "doc",
+      "tools": []
+    }
+  ],
+  "groups_with_certs": 4,
+  "honesty": "CERT_STALE 只表示『引用前必須重跑』，不表示那個數字變了（判準 §三）",
+  "live_run_reads": 0,
+  "rc": 1,
+  "slots_derived": 0,
+  "slots_recorded": 4,
+  "verdict": "STALE_CERTS_PRESENT"
+}

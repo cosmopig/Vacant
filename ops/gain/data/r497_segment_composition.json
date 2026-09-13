@@ -1,0 +1,496 @@
+{
+  "snapshot": "ops/gain/data/r486_gateway_snapshot_v2.json",
+  "n_rows_sorted": 2899,
+  "n_events": 500,
+  "n_windows": 12,
+  "rho_min": 0.9,
+  "windows": [
+    {
+      "N": 1672,
+      "i": 0,
+      "lo": 0,
+      "hi": 1672
+    },
+    {
+      "N": 1672,
+      "i": 1,
+      "lo": 245,
+      "hi": 1917
+    },
+    {
+      "N": 1672,
+      "i": 2,
+      "lo": 490,
+      "hi": 2162
+    },
+    {
+      "N": 1672,
+      "i": 3,
+      "lo": 736,
+      "hi": 2408
+    },
+    {
+      "N": 1672,
+      "i": 4,
+      "lo": 981,
+      "hi": 2653
+    },
+    {
+      "N": 1672,
+      "i": 5,
+      "lo": 1227,
+      "hi": 2899
+    },
+    {
+      "N": 2291,
+      "i": 0,
+      "lo": 0,
+      "hi": 2291
+    },
+    {
+      "N": 2291,
+      "i": 1,
+      "lo": 121,
+      "hi": 2412
+    },
+    {
+      "N": 2291,
+      "i": 2,
+      "lo": 243,
+      "hi": 2534
+    },
+    {
+      "N": 2291,
+      "i": 3,
+      "lo": 364,
+      "hi": 2655
+    },
+    {
+      "N": 2291,
+      "i": 4,
+      "lo": 486,
+      "hi": 2777
+    },
+    {
+      "N": 2291,
+      "i": 5,
+      "lo": 608,
+      "hi": 2899
+    }
+  ],
+  "stats": {
+    "share_chat": {
+      "kind": "EXOGENOUS",
+      "field": "path",
+      "field_all_null": false,
+      "class": "POSITION_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        0.312201,
+        0.30622,
+        0.299043,
+        0.297249,
+        0.297249,
+        0.241627,
+        0.296377,
+        0.291139,
+        0.290266,
+        0.28983,
+        0.276299,
+        0.262331
+      ],
+      "rho_by_tier": {
+        "1672": -0.9856,
+        "2291": -1.0
+      }
+    },
+    "share_other_client": {
+      "kind": "EXOGENOUS",
+      "field": "client_ip",
+      "field_all_null": false,
+      "class": "POSITION_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        0.315191,
+        0.309211,
+        0.302033,
+        0.300239,
+        0.300239,
+        0.245215,
+        0.299433,
+        0.294195,
+        0.293322,
+        0.292885,
+        0.279354,
+        0.265386
+      ],
+      "rho_by_tier": {
+        "1672": -0.9856,
+        "2291": -1.0
+      }
+    },
+    "n_distinct_client_ip": {
+      "kind": "EXOGENOUS",
+      "field": "client_ip",
+      "field_all_null": false,
+      "class": "STAT_DEGENERATE",
+      "n_exceptions": 0,
+      "values": [
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0
+      ]
+    },
+    "share_model_gemma": {
+      "kind": "EXOGENOUS",
+      "field": "model",
+      "field_all_null": false,
+      "class": "POSITION_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        0.297249,
+        0.291268,
+        0.284091,
+        0.282297,
+        0.282297,
+        0.223684,
+        0.2811,
+        0.275862,
+        0.274989,
+        0.274553,
+        0.261021,
+        0.247054
+      ],
+      "rho_by_tier": {
+        "1672": -0.9856,
+        "2291": -1.0
+      }
+    },
+    "share_model_null": {
+      "kind": "EXOGENOUS",
+      "field": "model",
+      "field_all_null": false,
+      "class": "POSITION_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        0.687799,
+        0.69378,
+        0.700957,
+        0.702751,
+        0.702751,
+        0.758373,
+        0.703623,
+        0.708861,
+        0.709734,
+        0.71017,
+        0.723701,
+        0.737669
+      ],
+      "rho_by_tier": {
+        "1672": 0.9856,
+        "2291": 1.0
+      }
+    },
+    "share_machine_1004": {
+      "kind": "EXOGENOUS",
+      "field": "machine",
+      "field_all_null": false,
+      "class": "STAT_DEGENERATE",
+      "n_exceptions": 0,
+      "values": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "events_in_window": {
+      "kind": "EXOGENOUS",
+      "field": null,
+      "field_all_null": false,
+      "class": "NOT_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        10.0,
+        10.0,
+        8.0,
+        6.0,
+        4.0,
+        6.0,
+        14.0,
+        14.0,
+        14.0,
+        10.0,
+        10.0,
+        8.0
+      ],
+      "rho_by_tier": {
+        "1672": -0.8827,
+        "2291": -0.9258
+      }
+    },
+    "share_error": {
+      "kind": "EXOGENOUS",
+      "field": "error",
+      "field_all_null": false,
+      "class": "NOT_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        0.018541,
+        0.017943,
+        0.019139,
+        0.017943,
+        0.018541,
+        0.023923,
+        0.018769,
+        0.018769,
+        0.018333,
+        0.019206,
+        0.020079,
+        0.020079
+      ],
+      "rho_by_tier": {
+        "1672": 0.4414,
+        "2291": 0.7945
+      }
+    },
+    "share_status_non200": {
+      "kind": "EXOGENOUS",
+      "field": "status_code",
+      "field_all_null": false,
+      "class": "NOT_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        0.018541,
+        0.017943,
+        0.019139,
+        0.017943,
+        0.018541,
+        0.023923,
+        0.018769,
+        0.018769,
+        0.018333,
+        0.019206,
+        0.020079,
+        0.020079
+      ],
+      "rho_by_tier": {
+        "1672": 0.4414,
+        "2291": 0.7945
+      }
+    },
+    "mean_prompt_tokens": {
+      "kind": "EXOGENOUS",
+      "field": "prompt_tokens",
+      "field_all_null": false,
+      "class": "NOT_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        529.582485,
+        520.267635,
+        518.104701,
+        510.398287,
+        510.961373,
+        515.868132,
+        515.443396,
+        515.227564,
+        516.998395,
+        519.712903,
+        520.367973,
+        521.553153
+      ],
+      "rho_by_tier": {
+        "1672": -0.7714,
+        "2291": 0.9429
+      }
+    },
+    "share_stream": {
+      "kind": "EXOGENOUS",
+      "field": "stream",
+      "field_all_null": false,
+      "class": "STAT_DEGENERATE",
+      "n_exceptions": 0,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "median_latency_ms": {
+      "kind": "ENDOGENOUS",
+      "field": "latency_ms",
+      "field_all_null": false,
+      "class": "NOT_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        4.9,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        4.7,
+        4.9,
+        4.9,
+        4.9,
+        4.8,
+        4.8,
+        4.7
+      ],
+      "rho_by_tier": {
+        "1672": -0.169,
+        "2291": -0.9258
+      }
+    },
+    "mean_completion_tokens": {
+      "kind": "ENDOGENOUS",
+      "field": "completion_tokens",
+      "field_all_null": false,
+      "class": "NOT_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        1811.287169,
+        1787.80083,
+        1925.166667,
+        1968.678801,
+        1755.32618,
+        1962.826923,
+        1880.564465,
+        1881.496795,
+        1872.616372,
+        1863.358065,
+        1917.091993,
+        1967.809009
+      ],
+      "rho_by_tier": {
+        "1672": 0.2571,
+        "2291": 0.4857
+      }
+    },
+    "median_ms_per_tok": {
+      "kind": "ENDOGENOUS",
+      "field": "completion_tokens",
+      "field_all_null": false,
+      "class": "NOT_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        17.331608,
+        20.407362,
+        17.886974,
+        17.858564,
+        21.765707,
+        23.508609,
+        19.251358,
+        21.213864,
+        22.056019,
+        22.114904,
+        21.674658,
+        20.591074
+      ],
+      "rho_by_tier": {
+        "1672": 0.7714,
+        "2291": 0.2571
+      }
+    },
+    "C_POS": {
+      "kind": "CALIBRATION",
+      "field": "ts",
+      "field_all_null": false,
+      "class": "POSITION_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        1788558577.383817,
+        1788561217.475672,
+        1788563844.523034,
+        1788566528.719465,
+        1788569161.075095,
+        1788571937.70655,
+        1788561915.923444,
+        1788563235.819866,
+        1788564571.930573,
+        1788565892.675493,
+        1788567244.548586,
+        1788568621.892131
+      ],
+      "rho_by_tier": {
+        "1672": 1.0,
+        "2291": 1.0
+      }
+    },
+    "C_NEG": {
+      "kind": "CALIBRATION",
+      "field": "id",
+      "field_all_null": false,
+      "class": "NOT_TRACKING",
+      "n_exceptions": 0,
+      "values": [
+        0.511962,
+        0.514354,
+        0.505981,
+        0.501196,
+        0.508373,
+        0.510167,
+        0.51244,
+        0.513313,
+        0.514622,
+        0.512003,
+        0.513749,
+        0.509385
+      ],
+      "rho_by_tier": {
+        "1672": -0.4286,
+        "2291": -0.3143
+      }
+    }
+  },
+  "blockers": [],
+  "n_exceptions": 0,
+  "n_exogenous": 11,
+  "n_endogenous": 3,
+  "exo_tracking": [
+    "share_chat",
+    "share_model_gemma",
+    "share_model_null",
+    "share_other_client"
+  ],
+  "endo_tracking": [],
+  "exo_not_tracking": [
+    "events_in_window",
+    "mean_prompt_tokens",
+    "share_error",
+    "share_status_non200"
+  ],
+  "n_unscanned_or_degenerate": 3,
+  "calibration": {
+    "C_POS": "POSITION_TRACKING",
+    "C_NEG": "NOT_TRACKING"
+  },
+  "live_reads": 0,
+  "elapsed_s": 0.1,
+  "verdict": "EXO_AXES_TRACK"
+}

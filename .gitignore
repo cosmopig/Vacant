@@ -16,3 +16,44 @@ var/
 
 # 私有實驗資料（EvalPlus 官方題庫等）：不進版控
 .vacant-private/
+
+# session/agent 工作目錄
+.claude/
+
+# 外部生圖工具產物（素材本體不進 repo）
+higgsfield_output/
+
+# 逐輪模擬日誌（每格 30–300 個檔）：體積 44M/437M，不進版控
+runs/**/logs/
+
+# S11 可讀性量測的全解析度原始截圖（第 116 輪）：14 MB、跑一次就重生，
+# 不進版控。**進版控的是縮到展場距離的那兩張** `runs/s11_shots/*_640.png`
+# ——那是人眼看得到結論的那個尺寸，也是判準真正作用的尺寸。
+runs/s11_shots/*_s1.png
+runs/s11_shots/*_s2.png
+runs/s11_shots/*_s3.png
+
+# S12 深連結可見性量測的全解析度原始截圖（第 117 輪）：同 S11 的理由，
+# 跑一次就重生，不進版控。**進版控的是 640 那兩張**——展場距離才是判準作用的尺寸。
+runs/s12_shots/*_s1.png
+runs/s12_shots/*_s2.png
+runs/s12_shots/*_s3.png
+
+# S13 容差量測的全解析度原始截圖（第 118 輪）：同 S11/S12 的理由，跑一次就重生，
+# 不進版控。**進版控的是縮到展場距離的 640 那張**——判準真正作用的尺寸。
+runs/s13_shots/*_s1.png
+runs/s13_shots/*_s2.png
+runs/s13_shots/*_s3.png
+runs/s13_main.log
+runs/s13_selftest.log
+runs/s13_reload.log
+
+# G 增益實驗交接檔：正本在 ~/vacant/GAIN_STATE.md（repo 外，不進版控）。
+# round431（2026-09-01）曾把它誤寫到 repo 內相對路徑並 commit 進去，
+# round432 修復並在此明確排除，避免下次 `git add -A` 又撿到。
+GAIN_STATE.md
+NEXT_MODEL
+
+# R453 執行器私鑰：RECORD_SPEC §7，私鑰永不進版控
+ops/gain/replay/r453/key_*/
+ops/gain/replay/r454/key_*/

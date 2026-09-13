@@ -1,0 +1,242 @@
+{
+  "broken": [],
+  "records": {
+    "R452-W1": {
+      "clause": "校準一致率 100% ∧ 可校準 ≥20",
+      "falsifier": "任一題 rows 記的 (visible_ok, meets_demand) 與離線重建不符",
+      "identity": null,
+      "identity_holds": false,
+      "witnesses": 0,
+      "observed": {
+        "n": 35,
+        "agree": 35,
+        "rate_pct": 100.0
+      },
+      "non_circular_because": "ci 取自 rows 的 involved.index(worker)；got 由 calls.jsonl 的碼重新執行算出 ⇒ 兩個出處（run 當下沙箱 vs 離線重執行）",
+      "class": "UNRESOLVED",
+      "intent": "evidence"
+    },
+    "R452-§四.1": {
+      "clause": "每題恰好 5 份候選",
+      "falsifier": "某題候選數 ≠ 5",
+      "identity": null,
+      "identity_holds": false,
+      "witnesses": 0,
+      "class": "UNRESOLVED",
+      "intent": "guard"
+    },
+    "R452-§四.3型一": {
+      "clause": "缺欄位 ⇒ BROKEN",
+      "falsifier": "某列缺 ('task_id', 'involved', 'worker', 'visible_ok', 'meets_demand', 'accepted') 之一",
+      "identity": "runner 無條件寫入該 dict 字面 ⇒ 缺欄位不可能發生",
+      "identity_holds": true,
+      "witnesses": 0,
+      "proof": {
+        "holds": true,
+        "row_dict_linenos": [
+          577,
+          668,
+          1631
+        ],
+        "keys_in_row_dicts": [
+          "accepted",
+          "arm",
+          "attempts",
+          "calls_so_far",
+          "calls_used",
+          "entry_point",
+          "err",
+          "family",
+          "i",
+          "involved",
+          "meets_demand",
+          "seed",
+          "task_id",
+          "vote_code_sha256",
+          "vote_worker",
+          "votes",
+          "worker"
+        ],
+        "under_conditional_at": [],
+        "note": "無條件寫入 ⇒ 缺欄位不可能發生"
+      },
+      "class": "FORCED_GREEN",
+      "intent": "guard"
+    },
+    "R452-§四.3型二": {
+      "clause": "OFF5 有 rows 但 calls 找不到 ⇒ BROKEN",
+      "falsifier": "某題找不到",
+      "identity": null,
+      "identity_holds": false,
+      "witnesses": 0,
+      "class": "UNRESOLVED",
+      "intent": "guard"
+    },
+    "R452-E3": {
+      "clause": "候選順序 == rows 的 involved",
+      "falsifier": "順序不符",
+      "identity": null,
+      "identity_holds": false,
+      "witnesses": 0,
+      "class": "UNRESOLVED",
+      "intent": "guard"
+    },
+    "R452-W2": {
+      "clause": "規則 A 拒交率落在 2–14%",
+      "falsifier": "落在窗外",
+      "identity": null,
+      "identity_holds": false,
+      "witnesses": 0,
+      "observed": {
+        "gate_reject_pct": 8.536585365853659,
+        "window": "2–14%"
+      },
+      "class": "UNRESOLVED",
+      "intent": "evidence"
+    },
+    "R452-W3": {
+      "clause": "Δ(A−B) 落在 0..+12pp",
+      "falsifier": "落在窗外",
+      "identity": null,
+      "identity_holds": false,
+      "witnesses": 0,
+      "observed": {
+        "delta_pp": 1.2195121951219512,
+        "window": "0..+12pp"
+      },
+      "class": "UNRESOLVED",
+      "intent": "evidence"
+    },
+    "R452-W4": {
+      "clause": "CI 旁必須有 MDE@n 與 N₈₀",
+      "falsifier": "這兩個鍵缺席",
+      "identity": "尺無條件賦值 out['power'] ⇒ 缺席不可能發生",
+      "identity_holds": true,
+      "witnesses": 0,
+      "proof": {
+        "holds": true,
+        "power_branches": [
+          "If@245:body",
+          "If@245:orelse"
+        ],
+        "ci_branches": [
+          "If@245:body",
+          "If@245:orelse"
+        ],
+        "note": "分支路徑逐一相同 ⇒ CI 與 MDE 共生共滅 ⇒「CI 有而 MDE 缺」不可達"
+      },
+      "superseded_proof": {
+        "holds": false,
+        "branches": [
+          "If@245:body",
+          "If@245:orelse"
+        ],
+        "proposition": "out['power'] 無條件存在"
+      },
+      "class": "FORCED_GREEN",
+      "intent": "guard"
+    }
+  },
+  "prediction_ledger": {
+    "R452-W1": {
+      "predicted": "UNRESOLVED",
+      "observed": "UNRESOLVED",
+      "hit": true,
+      "intent": "evidence"
+    },
+    "R452-§四.1": {
+      "predicted": "UNRESOLVED",
+      "observed": "UNRESOLVED",
+      "hit": true,
+      "intent": "guard"
+    },
+    "R452-§四.3型一": {
+      "predicted": "FORCED_GREEN",
+      "observed": "FORCED_GREEN",
+      "hit": true,
+      "intent": "guard"
+    },
+    "R452-§四.3型二": {
+      "predicted": "UNRESOLVED",
+      "observed": "UNRESOLVED",
+      "hit": true,
+      "intent": "guard"
+    },
+    "R452-E3": {
+      "predicted": "UNRESOLVED",
+      "observed": "UNRESOLVED",
+      "hit": true,
+      "intent": "guard"
+    },
+    "R452-W2": {
+      "predicted": "UNRESOLVED",
+      "observed": "UNRESOLVED",
+      "hit": true,
+      "intent": "evidence"
+    },
+    "R452-W3": {
+      "predicted": "UNRESOLVED",
+      "observed": "UNRESOLVED",
+      "hit": true,
+      "intent": "evidence"
+    },
+    "R452-W4": {
+      "predicted": "FORCED_GREEN",
+      "observed": "FORCED_GREEN",
+      "hit": true,
+      "intent": "guard"
+    }
+  },
+  "n_predictions_hit": 8,
+  "R455_calibration_bidirectional": {
+    "holds": true,
+    "positive": {
+      "clause": "(bool(r.get(\"accepted\")) and bool(r.get(\"meets_demand\"))) and not bool(r.get('meets_demand'))",
+      "class": "FORCED_GREEN",
+      "known_answer": "FORCED_GREEN（R450 §八 已證恆假）"
+    },
+    "negative": {
+      "stat": "bool(row.meets_demand)",
+      "class": "EVALUABLE",
+      "distinct_values": [
+        false,
+        true
+      ],
+      "witnesses": 196,
+      "known_answer": "EVALUABLE（自由統計量）"
+    }
+  },
+  "R452_W1_baserate_NOT_ARBITER": {
+    "population": "calibratable_rows_only",
+    "n": 35,
+    "distribution": {
+      "visible_ok=False,meets_demand=False": 6,
+      "visible_ok=True,meets_demand=True": 21,
+      "visible_ok=True,meets_demand=False": 8
+    },
+    "meets_demand_true": 21,
+    "meets_demand_false": 14,
+    "visible_ok_true": 29,
+    "visible_ok_false": 6,
+    "degenerate": false,
+    "minority_count": 14,
+    "population_aligned_to_eq5_per_task": true,
+    "NOT_ARBITER": "不改分類；只決定收官措辭（DECISION §二／§五-1：退化⇒必須寫「100% 主要來自基準率」）"
+  },
+  "counts": {
+    "UNRESOLVED": 6,
+    "FORCED_GREEN": 2
+  },
+  "forced_green_with_intent_evidence": [],
+  "still_uncensused_arbiters": [
+    "R451",
+    "R453(self)",
+    "R454(self)"
+  ],
+  "verdict": "CENSUSED",
+  "run": "runs/g_r447_conform_lcb2",
+  "eq5_source": "ops/gain/data/r452_eq5_offline_round714.json",
+  "eq5_source_rows_lines": 246,
+  "rows_lines_now": 316,
+  "decision": "DECISION_20260904_R455_R452_FALSIFIABILITY_EXTENSION.md"
+}

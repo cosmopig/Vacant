@@ -1,0 +1,154 @@
+offline brain：未設 VACANT_MCP_MODEL/VACANT_MCP_BASE，改用內建確定性假腦（只驗信任機制，非腦力）
+✗ FAIL：/tmp/minitest-rvdea0op/r 未過 RECORD_SPEC（記錄層 infra_void，不得進統計）
+  · SHA256SUMS 不符：ledger_events.jsonl（落盤後被竄改或內容變動）
+✗ FAIL：/tmp/minitest-a760uk2s/nope 未過 RECORD_SPEC（記錄層 infra_void，不得進統計）
+  · run 目錄不存在：/tmp/minitest-a760uk2s/nope
+========================================================================
+探針先驗（每次執行都跑；不過就不量未知的）
+========================================================================
+SELFTEST 合成測試：51/51 條逐條相符 — OK
+SELFTEST fail-closed[badimport]：ERROR 且列名 — OK
+SELFTEST fail-closed[unsupported_mark]：ERROR 且列名 — OK
+
+========================================================================
+執行 39 個測試檔
+========================================================================
+test_agent.py: 5 passed, 0 failed, 0 skipped (5 collected)
+test_archive_index.py: 5 passed, 0 failed, 0 skipped (5 collected)
+test_attack_surface.py: 25 passed, 0 failed, 0 skipped (25 collected)
+test_attest.py: 5 passed, 0 failed, 0 skipped (5 collected)
+test_audit_findings.py: 33 passed, 0 failed, 0 skipped (33 collected)
+test_blayer.py: 9 passed, 0 failed, 0 skipped (9 collected)
+test_brains_auth.py: 2 passed, 0 failed, 0 skipped (2 collected)
+test_channels.py: 25 passed, 0 failed, 0 skipped (25 collected)
+test_checkpoint.py: 5 passed, 0 failed, 0 skipped (5 collected)
+test_checks.py: 26 passed, 0 failed, 0 skipped (26 collected)
+test_citation_archive.py: 0 passed, 0 failed, 5 skipped (5 collected)
+  SKIP test_fulltext_true_means_the_file_is_actually_there  — skipif: 參考文獻在 iCloud，本機沒掛載就跳過
+  SKIP test_no_fulltext_entries_explain_themselves  — skipif: 參考文獻在 iCloud，本機沒掛載就跳過
+  SKIP test_manifest_covers_every_indexed_source  — skipif: 參考文獻在 iCloud，本機沒掛載就跳過
+  SKIP test_fulltext_hashes_are_recorded  — skipif: 參考文獻在 iCloud，本機沒掛載就跳過
+  SKIP test_verified_quotes_point_at_files_we_hold  — skipif: 參考文獻在 iCloud，本機沒掛載就跳過
+usage: vacant ledger tail [-h] [--root ECO_ROOT] [-n N]
+
+options:
+  -h, --help       show this help message and exit
+  --root ECO_ROOT  生態根目錄（預設 ~/.vacant-mcp）
+  -n N             行數（預設 20）
+usage: vacant resident [-h] {inspect,wipe} ...
+
+positional arguments:
+  {inspect,wipe}
+    inspect       roster 條目 ＋ 最近 5 episode
+    wipe          抹記憶不抹 key
+
+options:
+  -h, --help      show this help message and exit
+usage: vacant resident inspect [-h] [--root ECO_ROOT] name
+
+positional arguments:
+  name
+
+options:
+  -h, --help       show this help message and exit
+  --root ECO_ROOT  生態根目錄（預設 ~/.vacant-mcp）
+usage: vacant scoreboard [-h] [--root ECO_ROOT]
+
+options:
+  -h, --help       show this help message and exit
+  --root ECO_ROOT  生態根目錄（預設 ~/.vacant-mcp）
+usage: vacant status [-h] [--root ECO_ROOT]
+
+options:
+  -h, --help       show this help message and exit
+  --root ECO_ROOT  生態根目錄（預設 ~/.vacant-mcp）
+usage: vacant toggle [-h] [--root ECO_ROOT] {on,off}
+
+positional arguments:
+  {on,off}
+
+options:
+  -h, --help       show this help message and exit
+  --root ECO_ROOT  生態根目錄（預設 ~/.vacant-mcp）
+usage: vacant up [-h] [--root ECO_ROOT] [--port PORT] [--no-dashboard]
+                 [--demo-roster]
+
+options:
+  -h, --help       show this help message and exit
+  --root ECO_ROOT  生態根目錄（預設 ~/.vacant-mcp）
+  --port PORT      dashboard 埠（預設 7777）
+  --no-dashboard   只建生態、不起 dashboard
+  --demo-roster    研究展示才用：建立含人工 saboteur 的 6-resident roster
+usage: vacant verify [-h] [--root ECO_ROOT] name
+
+positional arguments:
+  name
+
+options:
+  -h, --help       show this help message and exit
+  --root ECO_ROOT  生態根目錄（預設 ~/.vacant-mcp）
+test_cli_eco.py: 22 passed, 0 failed, 0 skipped (22 collected)
+test_cli_run.py: 4 passed, 0 failed, 0 skipped (4 collected)
+test_codebench.py: 14 passed, 0 failed, 0 skipped (14 collected)
+test_composer.py: 3 passed, 0 failed, 0 skipped (3 collected)
+test_controller.py: 32 passed, 0 failed, 0 skipped (32 collected)
+test_credit_memory.py: 17 passed, 0 failed, 0 skipped (17 collected)
+test_dashboard.py: 12 passed, 0 failed, 0 skipped (12 collected)
+生態就緒：root=/tmp/minitest-wox8wm16  trust=on  居民=3
+dashboard → http://127.0.0.1:0   (Ctrl-C 退出)
+test_ecosystem.py: 18 passed, 0 failed, 0 skipped (18 collected)
+test_entrycost.py: 9 passed, 0 failed, 0 skipped (9 collected)
+test_environment.py: 15 passed, 0 failed, 0 skipped (15 collected)
+test_evalplus_loader.py: 14 passed, 0 failed, 1 skipped (15 collected)
+  SKIP test_official_pack_gate  — pytest.skip: 官方 EvalPlus 包不在場（.vacant-private）——本機略過整合門
+test_gateway.py: 11 passed, 0 failed, 0 skipped (11 collected)
+test_hardening.py: 10 passed, 0 failed, 0 skipped (10 collected)
+test_mcp_v2.py: ERROR（import／收集失敗）
+      File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+      File "/home/user1/vacant/Vacant/tests/test_mcp_v2.py", line 10, in <module>
+        from vacant import mcp_server
+      File "/home/user1/vacant/Vacant/vacant/mcp_server.py", line 31, in <module>
+        from mcp.server.fastmcp import FastMCP
+    ModuleNotFoundError: No module named 'mcp'
+test_multiway.py: 11 passed, 0 failed, 0 skipped (11 collected)
+test_packaging.py: 1 passed, 0 failed, 0 skipped (1 collected)
+test_primitives.py: 12 passed, 0 failed, 0 skipped (12 collected)
+test_pulse.py: 17 passed, 0 failed, 0 skipped (17 collected)
+test_receipt.py: 11 passed, 0 failed, 0 skipped (11 collected)
+已打包證據包：/tmp/minitest-rvdea0op/r
+  repo_commit : unknown
+  python/os   : 3.12.3 / Linux-6.8.0-137-generic-x86_64-with-glibc2.39
+  pip_freeze  : 0 筆
+  missing     : endpoint, model_id, no_think, pip_freeze, repo_commit, repo_dirty, scripts, seeds, trust_arm, utc_start
+（誠實邊界：pack 只保證包完整自洽，內容真實性由簽章鏈與稽核承擔）
+✓ PASS：/tmp/minitest-rvdea0op/r 符合 RECORD_SPEC（必要項齊、雜湊自洽、驗證輸出無 FAIL）
+test_record.py: 14 passed, 0 failed, 0 skipped (14 collected)
+test_research.py: 24 passed, 0 failed, 0 skipped (24 collected)
+test_revive.py: 2 passed, 0 failed, 0 skipped (2 collected)
+test_slash_tradeoff.py: 49 passed, 0 failed, 0 skipped (49 collected)
+test_substrate_lmstudio.py: 14 passed, 0 failed, 0 skipped (14 collected)
+test_teeth.py: 14 passed, 0 failed, 0 skipped (14 collected)
+test_trace.py: 3 passed, 0 failed, 0 skipped (3 collected)
+test_w1_experiment.py: 23 passed, 0 failed, 0 skipped (23 collected)
+test_x1_evalplus.py: 5 passed, 0 failed, 0 skipped (5 collected)
+
+========================================================================
+總計：521 passed, 0 failed, 6 skipped（527 collected）
+檔案：39 個，其中 0 failed 的 38 個、有 failed 的 0 個、import/收集 ERROR 的 1 個
+ERROR 檔案（逐一列名，沒驗到就是沒驗到）：
+  - test_mcp_v2.py
+提醒：minitest 不是 pytest；在這裡通過 ≠ 在 pytest 下通過。SKIP 一律不併進 passed。
+
+========================================================================
+突變探針（一次性，不在腳本裡；驗「這些測試真的在跑真程式」）
+========================================================================
+把 vacant.research.holm_bonferroni 換成 `lambda ps: list(ps)`（原樣回傳）之後
+重跑 tests/test_research.py 的 TestHolmBonferroni：
+
+  failed test_three_hypotheses_hand_computed
+  failed test_single_and_monotone_cap
+  failed test_stepdown_running_max
+  failed test_empty_and_invalid
+  突變後 failed = 4 / 4
+
+⇒ 這 4 條若 Holm 壞掉會抓得到，不是空過。（先前的 runner 根本不收集它們。）

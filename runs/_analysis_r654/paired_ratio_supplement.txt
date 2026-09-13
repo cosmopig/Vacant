@@ -1,0 +1,5 @@
+total       n=81 逐題比值 median=1.1297 mean=1.2926 p25=0.8418 p75=1.3803 ON>OFF5 的題數=48/81
+completion  n=81 逐題比值 median=0.4239 mean=0.7116 p25=0.3210 p75=0.6443 ON>OFF5 的題數=10/81
+prompt      n=81 逐題比值 median=3.0033 mean=4.2206 p25=2.4562 p75=5.0089 ON>OFF5 的題數=81/81
+latency_ms  n=81 逐題比值 median=0.4760 mean=0.7196 p25=0.3745 p75=0.7059 ON>OFF5 的題數=10/81
+含失敗嘗試的總牆鐘  ON=14338s  OFF5=19998s  比值=0.7170

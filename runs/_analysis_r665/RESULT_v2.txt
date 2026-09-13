@@ -1,0 +1,24 @@
+=== round665 v2（檔案順序切序列）逐層 ===
+層       v1組    v2序列    不連續     序列內重複    review失敗序列     真提早停 ONrevVoid  status
+S1     1488    1942      0         0            12        0        12  OK
+S2      754     993      0         0             4        0         4  OK
+S3      473     590      0         0             1        0         1  OK
+S4     2923    3628      0         0             5        0         5  OK
+S5     1139    1396      0         0            29        0        29  OK
+S6     1286    1725      0         0            57        0        57  OK
+pooled: review 失敗序列=108  真提早停=0  真提早停率=0.00%
+
+=== v1（分組鍵當序列）：我自己預寫的推翻條件六層全部觸發 ===
+層        組數   重複attempt組     r664逐列標記       其中有後繼列  status
+S1     1488          353           42           42  AMBIGUOUS
+S2      754          181           18           18  AMBIGUOUS
+S3      473           83            5            5  AMBIGUOUS
+S4     2923          530           14           14  AMBIGUOUS
+S5     1139          208           12           12  AMBIGUOUS
+S6     1286          329           60           60  AMBIGUOUS
+
+=== 突變體（v2 模式）===
+N1: S1:OK->OK 停0->0  S2:OK->OK 停0->0  S3:OK->OK 停0->0  S4:OK->OK 停0->0  S5:OK->OK 停0->0  S6:OK->OK 停0->0
+N2: S1:OK->OK 停0->1  S2:OK->OK 停0->1  S3:OK->OK 停0->1  S4:OK->OK 停0->1  S5:OK->OK 停0->1  S6:OK->OK 停0->1
+N3: S1:OK->BROKEN 停0->None  S2:OK->BROKEN 停0->None  S3:OK->BROKEN 停0->None  S4:OK->BROKEN 停0->None  S5:OK->BROKEN 停0->None  S6:OK->BROKEN 停0->None
+N4: S1:OK->OK 停0->0  S2:OK->OK 停0->0  S3:OK->OK 停0->0  S4:OK->OK 停0->0  S5:OK->OK 停0->25  S6:OK->OK 停0->0

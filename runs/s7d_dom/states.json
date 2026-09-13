@@ -1,0 +1,65 @@
+[
+ {
+  "state": "web_load",
+  "note": "官網初始渲染（尚未互動）",
+  "bytes": 56954,
+  "text_len": 3735,
+  "probe": {
+   "code_tokens": 216
+  }
+ },
+ {
+  "state": "web_game_found",
+  "note": "點中第 143 格的 `=` ⇒ 『你是少數』那一屏",
+  "bytes": 57072,
+  "text_len": 3774
+ },
+ {
+  "state": "web_game_timeout",
+  "note": "十秒到了沒點中 ⇒ 『沒關係，沒有人找得到』",
+  "bytes": 57029,
+  "text_len": 3782
+ },
+ {
+  "state": "web_blindspot",
+  "note": "共同盲區揭曉（60% 錯在同一個答案）",
+  "bytes": 57174,
+  "text_len": 3849
+ },
+ {
+  "state": "web_receipt",
+  "note": "收據七列組裝完（第 06 列『有沒有被抽查』與第 07 列相鄰）",
+  "bytes": 57789,
+  "text_len": 3974
+ },
+ {
+  "state": "web_route_on",
+  "note": "可究責層打開（E10 真模型實測序列）",
+  "bytes": 57703,
+  "text_len": 3983,
+  "probe": {
+   "route_counter": "被交給破壞者的工作：11 件"
+  }
+ },
+ {
+  "state": "web_team",
+  "note": "點了團隊物件（讀值被帶到旁邊）",
+  "bytes": 57720,
+  "text_len": 3987
+ },
+ {
+  "state": "web_sitemap",
+  "note": "全站目錄對話框打開",
+  "bytes": 57728,
+  "text_len": 3987,
+  "probe": {
+   "dialog_open": true
+  }
+ },
+ {
+  "state": "web_claims_flipped",
+  "note": "12 張宣稱卡全部翻面（背面本來就在 DOM）",
+  "bytes": 57848,
+  "text_len": 3987
+ }
+]

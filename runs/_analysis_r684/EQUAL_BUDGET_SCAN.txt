@@ -1,0 +1,46 @@
+=== gain_run.py 裡 equal_budget_valid 的真實運算式（AST 逐字取出）===
+bool(
+            summary.get("ON", {}).get("complete")
+            and summary.get("OFF5", {}).get("complete")
+            and summary.get("ON", {}).get("calls_per_task") == 5
+            and summary.get("OFF5", {}).get("calls_per_task") == 5
+        )
+
+=== FIXTURE（不是結果）===
+  False  r444 實況 OFF/CONFORM/OFF5
+  False  只改臂名 CONFORM→ON
+  False  只改花費 CONFORM c/t=5
+  True   兩者都改 ON 且 c/t=5
+
+=== 全 run 掃描（排除 live 的 r445）===
+run                                          ON=5?  OFF5=5?  兩臂complete?   run_complete flag
+g_het3_r278_20260829                         False  False    False         False        False
+g_on_qwen_only_20260901                      False  False    False         False        False
+g_on_qwen_only_scale2_20260901               False  False    False         False        False
+g_onoff5_371_r123_20260825                   False  False    False         False        False
+g_onoff5_qwenonly_v3_20260824                False  False    False         False        False
+g_r342_3arm_20260830                         False  False    False         False        False
+g_r345_3arm_20260830                         True   False    False         False        False
+g_r348_3arm_20260830                         False  False    False         False        False
+g_r356_3arm_20260830                         False  False    False         False        False
+g_r439_revcheck_20260901                     False  False    False         False        False
+g_r441_gemma_only_mbpp_b                     False  True     False         False        False
+g_r442_ononly_20260901                       False  False    False         False        False
+g_r443_gemma_lcb                             False  True     False         False        False
+g_smoke_20260820                             True   True     True          True         True
+
+掃到 36 個 summary.json；flag=True 的：['g_smoke_20260820']
+
+=== r444 已凍結 summary（唯讀）===
+flag = False run_complete = True
+  OFF      calls_per_task=1.0 complete=True
+  CONFORM  calls_per_task=1.3854748603351956 complete=True
+  OFF5     calls_per_task=5.0 complete=True
+
+=== 五支收官工具 + analyze_onoff5 讀 equal_budget 的次數 ===
+ops/gain/replay/pool_precheck.py           0
+ops/gain/replay/pooled_paired_ci.py        0
+ops/gain/replay/r445_predcheck.py          0
+ops/gain/replay/conform_settle.py          0
+ops/gain/power_paired.py                   0
+ops/gain/analyze_onoff5.py                 5

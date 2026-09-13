@@ -1,0 +1,63 @@
+預註冊閘門通過：DECISION_20260911_R529_CROSS_BANK_PREREG.md 授權 g_r529_lcb3m_a7
+⚠ 分層：lcb3 只取 difficulty∈{medium} 的 135 題（切層在 offset/n 之前 ⇒ offset 數的是該層之內的第幾題）
+15 題（lcb3　層=difficulty=medium　offset=120　題序 [120, 135)）　輸出 runs/g_r529_lcb3m_a7
+── 量具驗證（先答已知答案）
+   範圍＝bank：對 lcb3 全 189 題裡有參考解的驗，本塊 15 題另外算出貨閘門覆蓋（量具**不**套 --bank-filter，理由見原始碼註解）
+   量具驗到的 12 題裡，落在 difficulty=medium 這一層的有 9 題（0 不擋——量具驗的是沙箱＋計分，不是那幾題自己；但這個數字要照實帶進收官）
+   參考解通過 12/12　壞解被擋 12/12
+   可見閘門（CONFORM 決策量具）參考解通過 12/12　樁被擋 12/12　覆蓋 12/12
+   本塊出貨閘門覆蓋 15/15
+── 模型池：6 個 agent／1 個模型家族
+── 模型池預檢（每個 model 問一句，零容忍）
+   gemma-4-12b-it-qat　回 2 字　✓
+  [OFF 1/15] 需求符合=True 接受=True 累計呼叫=1
+  [CONFORM 1/15] 需求符合=True 接受=True 累計呼叫=1
+  [HMIX 1/15] 需求符合=True 接受=True 累計呼叫=1
+  [OFF 2/15] 需求符合=True 接受=True 累計呼叫=2
+  [CONFORM 2/15] 需求符合=True 接受=True 累計呼叫=2
+  [HMIX 2/15] 需求符合=True 接受=True 累計呼叫=2
+  [OFF 3/15] 需求符合=True 接受=True 累計呼叫=3
+  [CONFORM 3/15] 需求符合=True 接受=True 累計呼叫=3
+  [HMIX 3/15] 需求符合=True 接受=True 累計呼叫=3
+  [OFF 4/15] 需求符合=True 接受=True 累計呼叫=4
+  [CONFORM 4/15] 需求符合=True 接受=True 累計呼叫=4
+  [HMIX 4/15] 需求符合=True 接受=True 累計呼叫=4
+  [OFF 5/15] 需求符合=True 接受=True 累計呼叫=5
+  [CONFORM 5/15] 需求符合=True 接受=True 累計呼叫=5
+  [HMIX 5/15] 需求符合=True 接受=True 累計呼叫=5
+  [OFF 6/15] 需求符合=True 接受=True 累計呼叫=6
+  [CONFORM 6/15] 需求符合=True 接受=True 累計呼叫=6
+  [HMIX 6/15] 需求符合=True 接受=True 累計呼叫=6
+  [OFF 7/15] 需求符合=True 接受=True 累計呼叫=7
+  [CONFORM 7/15] 需求符合=True 接受=True 累計呼叫=7
+  [HMIX 7/15] 需求符合=True 接受=True 累計呼叫=7
+  [OFF 8/15] 需求符合=True 接受=True 累計呼叫=8
+  [CONFORM 8/15] 需求符合=True 接受=True 累計呼叫=8
+  [HMIX 8/15] 需求符合=True 接受=True 累計呼叫=8
+  [OFF 9/15] 需求符合=True 接受=True 累計呼叫=9
+  [CONFORM 9/15] 需求符合=True 接受=True 累計呼叫=9
+  [HMIX 9/15] 需求符合=True 接受=True 累計呼叫=9
+  [OFF 10/15] 需求符合=True 接受=True 累計呼叫=10
+  [CONFORM 10/15] 需求符合=True 接受=True 累計呼叫=10
+  [HMIX 10/15] 需求符合=False 接受=True 累計呼叫=10
+  [OFF 11/15] 需求符合=True 接受=True 累計呼叫=11
+  [CONFORM 11/15] 需求符合=True 接受=True 累計呼叫=11
+  [HMIX 11/15] 需求符合=True 接受=True 累計呼叫=11
+  [OFF 12/15] 需求符合=True 接受=True 累計呼叫=12
+  [CONFORM 12/15] 需求符合=True 接受=True 累計呼叫=12
+  [HMIX 12/15] 需求符合=True 接受=True 累計呼叫=12
+  [OFF 13/15] 需求符合=True 接受=True 累計呼叫=13
+  [CONFORM 13/15] 需求符合=True 接受=True 累計呼叫=13
+  [HMIX 13/15] 需求符合=True 接受=True 累計呼叫=13
+  [OFF 14/15] 需求符合=True 接受=True 累計呼叫=14
+  [CONFORM 14/15] 需求符合=True 接受=True 累計呼叫=14
+  [HMIX 14/15] 需求符合=True 接受=True 累計呼叫=14
+  [OFF 15/15] 需求符合=True 接受=True 累計呼叫=15
+  [CONFORM 15/15] 需求符合=True 接受=True 累計呼叫=15
+  [HMIX 15/15] 需求符合=True 接受=True 累計呼叫=15
+── OFF: {"tasks": 15, "calls": 15, "infra_void": 0, "complete": true, "terminal": true, "processed": 15, "accepted": 15, "accepted_and_meets_demand": 15, "demand_equals_output_rate": 1.0, "coverage": 1.0, "correct_delivery_rate": 1.0, "raw_final_accuracy": 1.0, "calls_per_task": 1.0, "calls_per_correct_delivery": 1.0, "leaked": 0, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "eq5_gate_delivery_rate": null, "eq5_vote_delivery_rate": null, "eq5_same_choice_rate": null, "eq5_same_choice_effective_rate": null, "endpoint_latency_ms": {"all": {"n": 15, "p50": 95397, "p95": 527930, "max": 527930}, "by_role": {"gen": {"n": 15, "p50": 95397, "p95": 527930, "max": 527930}}, "failed_attempts": 0}, "wall_s": 2118.7, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+── CONFORM: {"tasks": 15, "calls": 15, "infra_void": 0, "complete": true, "terminal": true, "processed": 15, "accepted": 15, "accepted_and_meets_demand": 15, "demand_equals_output_rate": 1.0, "coverage": 1.0, "correct_delivery_rate": 1.0, "raw_final_accuracy": 1.0, "calls_per_task": 1.0, "calls_per_correct_delivery": 1.0, "leaked": 0, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "eq5_gate_delivery_rate": null, "eq5_vote_delivery_rate": null, "eq5_same_choice_rate": null, "eq5_same_choice_effective_rate": null, "endpoint_latency_ms": {"all": {"n": 15, "p50": 103832, "p95": 418623, "max": 418623}, "by_role": {"gen": {"n": 15, "p50": 103832, "p95": 418623, "max": 418623}}, "failed_attempts": 0}, "wall_s": 1962.0, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+── HMIX: {"tasks": 15, "calls": 15, "infra_void": 0, "complete": true, "terminal": true, "processed": 15, "accepted": 15, "accepted_and_meets_demand": 14, "demand_equals_output_rate": 0.9333333333333333, "coverage": 1.0, "correct_delivery_rate": 0.9333333333333333, "raw_final_accuracy": 0.9333333333333333, "calls_per_task": 1.0, "calls_per_correct_delivery": 1.0714285714285714, "leaked": 1, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "eq5_gate_delivery_rate": null, "eq5_vote_delivery_rate": null, "eq5_same_choice_rate": null, "eq5_same_choice_effective_rate": null, "endpoint_latency_ms": {"all": {"n": 16, "p50": 197009, "p95": 497235, "max": 497235}, "by_role": {"gen": {"n": 15, "p50": 203353, "p95": 497235, "max": 497235}, "wire_probe": {"n": 1, "p50": 4969, "p95": 4969, "max": 4969}}, "failed_attempts": 0}, "wall_s": 3462.7, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+
+寫出 runs/g_r529_lcb3m_a7/summary.json
+⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。

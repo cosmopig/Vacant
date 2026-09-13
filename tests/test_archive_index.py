@@ -46,10 +46,29 @@ def index(verdicts):
 
 def test_every_verdict_points_at_a_real_claim(verdicts, index):
     """裁決不能是孤兒——指向不存在的宣稱 id 代表宣稱被改名或刪掉了，
-    而裁決留在原地假裝還在管事。"""
+    而裁決留在原地假裝還在管事。
+
+    2026-09-07 起有第二種合法形狀：條目**自帶** `宣稱`（見 verdicts 模組
+    docstring）。那種不算孤兒，因為它裁的那句話就在它自己身上；下一支測試
+    改為要求它把 `宣稱`／`來源` 都帶齊。
+    """
     ids = {c["id"] for c in index.CLAIMS}
-    orphans = sorted(set(verdicts.VERDICTS) - ids)
+    orphans = sorted(cid for cid, v in verdicts.VERDICTS.items()
+                     if cid not in ids and not v.get("宣稱"))
     assert not orphans, f"裁決指向不存在的宣稱：{orphans}"
+
+
+def test_self_describing_verdicts_carry_claim_and_source(verdicts):
+    """自帶宣稱的條目要帶齊 `宣稱` 與 `來源`。
+
+    這是上一支測試放行的代價要付的地方：宣稱本文離開了 `CLAIMS`，就必須在
+    這裡被釘住，否則會出現「有裁決、但沒有人知道它在裁哪句話、依據是什麼」。
+    """
+    for cid, v in verdicts.VERDICTS.items():
+        if not v.get("宣稱"):
+            continue
+        for field in ("宣稱", "來源", "一句話"):
+            assert v.get(field, "").strip(), f"{cid} 缺「{field}」"
 
 
 def test_every_claim_carries_a_verdict(verdicts, index):
@@ -75,8 +94,17 @@ def test_refuted_verdicts_carry_the_correction(verdicts):
     只說「這條是錯的」而不給正確版本，等於把錯誤留在原地又不負責——
     引用的人只會回頭用原文。
     """
+    legal = ("refuted", "overstated", "held", "no_effect", "unresolved")
     for cid, v in verdicts.VERDICTS.items():
-        assert v["verdict"] in ("refuted", "overstated"), f"{cid} 的裁決值不合法"
+        assert v["verdict"] in legal, f"{cid} 的裁決值不合法：{v['verdict']}"
+        if v["verdict"] not in ("refuted", "overstated"):
+            # held／no_effect／unresolved 沒有「原句是錯的」可言，但一定要有
+            # 一句話；held 與 unresolved 另外要有「邊界」——那是它能講到哪裡
+            # 的界線，網頁上照印（vacant-docs-web README §措辭紀律 3）。
+            assert v.get("一句話", "").strip(), f"{cid} 缺「一句話」"
+            if v["verdict"] in ("held", "unresolved") and v.get("宣稱"):
+                assert v.get("邊界", "").strip(), f"{cid} 缺「邊界」"
+            continue
         for field in ("一句話", "推翻了什麼", "更正後"):
             assert v.get(field, "").strip(), f"{cid} 缺「{field}」"
 
@@ -91,6 +119,37 @@ def test_refuted_count_is_pinned(verdicts, index):
     刻意讓它變成一個要動三個地方的改動。
     """
     kinds = [v["verdict"] for v in verdicts.VERDICTS.values()]
-    assert kinds.count("refuted") == 3, f"被推翻的條數變了：{kinds.count('refuted')}"
-    assert kinds.count("overstated") == 3, f"說得太滿的條數變了：{kinds.count('overstated')}"
-    assert len(index.CLAIMS) == 12, f"宣稱總數變了：{len(index.CLAIMS)}"
+    assert kinds.count("refuted") == 6, f"被推翻的條數變了：{kinds.count('refuted')}"
+    assert kinds.count("overstated") == 4, f"說得太滿的條數變了：{kinds.count('overstated')}"
+    assert kinds.count("held") == 13, f"判準成立的條數變了：{kinds.count('held')}"
+    assert kinds.count("no_effect") == 1, f"無可分辨差異的條數變了：{kinds.count('no_effect')}"
+    assert kinds.count("unresolved") == 4, f"同號未解析的條數變了：{kinds.count('unresolved')}"
+    assert len(index.CLAIMS) == 34, f"索引裡的宣稱總數變了：{len(index.CLAIMS)}"
+    # 網頁上那面牆＝索引裡的 34 條，**沒有第二個來源**。
+    # 2026-09-07 曾有過一次「索引 20、網頁 28」的缺口（那 8 條只寫在 verdicts.py），
+    # round459 把它們補進 CLAIMS 之後缺口歸零，`archive.json` 的 index_gap 欄位撤掉。
+    # 下面這一段釘的就是「別讓缺口再度張開」——它比釘總數更直接：
+    # 自帶宣稱的條目若有任何一條掉出索引，讀索引的 agent 就會少看，而他沒有網頁可以對照。
+    #
+    # 2026-09-12（R529 收官＋R460R 三次複製）這一輪動了五條，數字因此變動：
+    #   held 12 → 14：`harness.hmix_loop_beats_resample_same_budget` 降級成 unresolved（−1），
+    #     新增 `harness.loop_beats_single_shot_replicated`、
+    #     `harness.gain_comes_from_executable_gate_and_resample`、
+    #     `harness.majority_vote_loses_to_gate`（+3）。
+    #   unresolved 2 → 3：上面那條降級進來。
+    #   ⚠ 降級**不是**因為 R460 那一次沒發生，而是因為同題複製與跨題庫四集
+    #     都沒把 0 排除掉 ⇒ 幅度未確立。
+    #     方向全部同號 ⇒ 是 `unresolved` 不是 `no_effect`，兩者不可互換。
+    #
+    # 2026-09-13（R460R 第四、第五次複製收完，五次齊了）又動了一條：
+    #   held 14 → 13、unresolved 3 → 4：`harness.majority_vote_loses_to_gate`
+    #     降級成 unresolved。方向沒變（OFF5 − CONFORM 五次全負、一次都沒翻），
+    #     變的是強度：5/5 裡只有 3/5 的**未校正** p < 0.05，而不顯著的兩次
+    #     （r4 −4.17pp、r5 −1.74pp）正是後端**零共租**、條件最乾淨的兩次。
+    #   ⚠ 這一條同樣**不准**被讀成「多數決不比閘門差」——那是 `no_effect` 的語意，
+    #     而這裡的區間根本沒有把效果排除掉。
+    self_described = [cid for cid, v in verdicts.VERDICTS.items() if v.get("宣稱")]
+    assert len(self_described) == 14, f"自帶宣稱的條數變了：{len(self_described)}"
+    indexed = {c["id"] for c in index.CLAIMS}
+    gap = sorted(cid for cid in self_described if cid not in indexed)
+    assert gap == [], f"索引缺口重新張開：{gap}——請補進 build_archive_index.py::CLAIMS"

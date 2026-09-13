@@ -4,7 +4,15 @@
 
 **這一支刻意把「被推翻的結論」也發布出去。** 一個宣稱可究責的系統，如果
 只發布站得住的結論、把被推翻的默默拿掉，那它的主張就沒有內容。所以
-claims 帶 verdict 欄位，網頁照實顯示「推翻／誇大／成立」。
+claims 帶 verdict 欄位，網頁照實顯示「推翻／誇大／成立／同號未解析」。
+
+**宣稱只有一個來源**：`_index/claims.json`（由 `build_archive_index.py::CLAIMS`
+產生），裁決由 `verdicts.py` 併進來。2026-09-07 曾短暫有第二個來源——新增的八條
+自帶 `宣稱`／`來源` 只寫在 `verdicts.py` 裡，機器可讀索引因此少了那八條，
+`archive.json` 得帶一個 `index_gap` 欄位把缺口照實列出來。**round459 把那八條搬進
+`CLAIMS`，缺口歸零，`index_gap` 欄位隨之撤掉**——留著一個恆為空的缺口欄位，
+會讓「缺口是 0」和「沒有人在看缺口」長得一樣。缺口若再度張開，
+`tests/test_archive_index.py::test_refuted_count_is_pinned` 會失敗。
 """
 from __future__ import annotations
 
@@ -76,6 +84,17 @@ def main() -> None:
     OUT.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     n_ref = sum(1 for c in data["claims"] if c.get("verdict") == "refuted")
     n_over = sum(1 for c in data["claims"] if c.get("verdict") == "overstated")
+    n_held = sum(1 for c in data["claims"] if c.get("verdict") == "held")
+    n_null = sum(1 for c in data["claims"] if c.get("verdict") == "no_effect")
+    n_unres = sum(1 for c in data["claims"] if c.get("verdict") == "unresolved")
+    print(f"  裁決：held {n_held}、no_effect {n_null}、unresolved {n_unres}")
+    # 缺口歸零的自我檢查：網頁上的每一條都必須在機器索引裡找得到，
+    # 否則讀索引的 agent 會少看，而他沒有網頁可以對照。
+    indexed = {c["id"] for c in claims}
+    gap = sorted(cid for cid, v in VERDICTS.items()
+                 if v.get("宣稱") and cid not in indexed)
+    assert not gap, f"索引缺口重新張開：{gap}——請補進 build_archive_index.py::CLAIMS"
+    print("  索引缺口：0（自帶宣稱的條目已全在 _index/claims.json）")
     print(f"寫出 {OUT} {OUT.stat().st_size} bytes")
     print(f"  輪次 {len(rounds)}、宣稱 {len(data['claims'])}"
           f"（被推翻 {n_ref}、誇大 {n_over}）")

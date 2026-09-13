@@ -1,0 +1,3 @@
+乾淨 → PASS（6/6 分類正確，UNPARSED=0）
+caught = {'M1': 'HTTP_400 1→0', 'M2': 'UNPARSED', 'M3': '→OTHER:sandbox verifier unavailable: boom', 'M4': '1.00→0.00'}
+SELFTEST PASS（4/4 突變體被抓到，乾淨方向滿分）

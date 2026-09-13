@@ -1,0 +1,130 @@
+{
+  "rows_source": "/dev/shm/r668/rows.snapshot.jsonl",
+  "rows_sha256_8": "81b266ed",
+  "n_rows": 395,
+  "run_terminal": false,
+  "settlement_ready": false,
+  "identity_leaked_eq_measured_minus_refused_minus_deliv": {
+    "OFF5": {
+      "leaked": 37,
+      "measured": 131,
+      "refused": 0,
+      "deliv": 94,
+      "holds": true,
+      "tautology": true
+    },
+    "CONFORM": {
+      "leaked": 26,
+      "measured": 132,
+      "refused": 8,
+      "deliv": 98,
+      "holds": true,
+      "tautology": true
+    },
+    "OFF": {
+      "leaked": 39,
+      "measured": 132,
+      "refused": 0,
+      "deliv": 93,
+      "holds": true,
+      "tautology": true
+    }
+  },
+  "cross_source_rows_vs_summary": {
+    "OFF5": {
+      "leaked": 37,
+      "accepted": 131,
+      "accepted_and_meets_demand": 94
+    },
+    "CONFORM": {
+      "leaked": 26,
+      "accepted": 124,
+      "accepted_and_meets_demand": 98
+    },
+    "OFF": {
+      "leaked": 38,
+      "accepted": 131,
+      "accepted_and_meets_demand": 93
+    }
+  },
+  "live_snapshot_skew": [
+    "OFF.leaked：summary=38 vs 逐列覆算=39",
+    "OFF.accepted：summary=131 vs 逐列覆算=132"
+  ],
+  "literal": {
+    "leaked_test": 26,
+    "leaked_baseline": 37,
+    "direction_ok": true,
+    "obvious_threshold": null
+  },
+  "decomposition": {
+    "delta_leaked": 11,
+    "refusal_driven": 8,
+    "accuracy_driven": 4,
+    "void_asymmetry": -1,
+    "refusal_share": 0.7272727272727273,
+    "mostly_bought_by_refusing": true
+  },
+  "counterfactual_equal_coverage": {
+    "forced_leak_test": 34,
+    "leaked_baseline": 37,
+    "meets_demand_and_not_accepted": 0,
+    "gap_raw": 11,
+    "gap_forced": 3,
+    "gate_selects_better": true
+  },
+  "tail_uncontaminated": {
+    "test_arm": "CONFORM",
+    "i_gt": 125,
+    "n": 7,
+    "refused": 1,
+    "meets_demand_and_not_accepted": 0
+  },
+  "arms": {
+    "OFF5": {
+      "rows": 131,
+      "accepted": 131,
+      "meets_demand": 94,
+      "deliv": 94,
+      "leaked": 37,
+      "meets_demand_and_not_accepted": 0,
+      "refused": 0,
+      "refusal_rate": 0.0,
+      "rate_deliv": 0.7175572519083969,
+      "rate_meets_demand": 0.7175572519083969,
+      "rate_demand_equals_output": 0.7175572519083969,
+      "calls_used_sum": 655,
+      "calls_per_task_recomputed": 5.0
+    },
+    "CONFORM": {
+      "rows": 132,
+      "accepted": 124,
+      "meets_demand": 98,
+      "deliv": 98,
+      "leaked": 26,
+      "meets_demand_and_not_accepted": 0,
+      "refused": 8,
+      "refusal_rate": 0.06060606060606061,
+      "rate_deliv": 0.7424242424242424,
+      "rate_meets_demand": 0.7424242424242424,
+      "rate_demand_equals_output": 0.7903225806451613,
+      "calls_used_sum": 195,
+      "calls_per_task_recomputed": 1.4772727272727273
+    },
+    "OFF": {
+      "rows": 132,
+      "accepted": 132,
+      "meets_demand": 93,
+      "deliv": 93,
+      "leaked": 39,
+      "meets_demand_and_not_accepted": 0,
+      "refused": 0,
+      "refusal_rate": 0.0,
+      "rate_deliv": 0.7045454545454546,
+      "rate_meets_demand": 0.7045454545454546,
+      "rate_demand_equals_output": 0.7045454545454546,
+      "calls_used_sum": 132,
+      "calls_per_task_recomputed": 1.0
+    }
+  }
+}

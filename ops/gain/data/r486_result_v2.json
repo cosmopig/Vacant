@@ -1,0 +1,301 @@
+{
+  "by_hypo": {
+    "end": {
+      "chat_client_ips": {
+        "100.118.96.3": 45,
+        "100.124.254.83": 741
+      },
+      "chat_rows": 786,
+      "events_min_ts": 1788247352.386416,
+      "events_scanned": 500,
+      "main_client_ip": "100.124.254.83",
+      "max_concurrency": 6,
+      "n_foreign_by_ip": 45,
+      "n_foreign_by_model": 45,
+      "n_foreign_chat": 90,
+      "n_targets": 6,
+      "p1_verdict": "QUEUE_LIVE",
+      "p1b_verdict": "BASERATE_OK",
+      "p2_verdict": "RELOAD_CONTRIBUTES",
+      "p3_subgroup_n": 0,
+      "p3_verdict": "UNSCANNED",
+      "p4_verdict": "CONCURRENT_OBSERVED",
+      "queue_share": 0.833333,
+      "ref_ms_per_tok_p50": 21.214,
+      "ref_ms_per_tok_p90": 33.053,
+      "ref_n": 686,
+      "reload_events_in_scope": 500,
+      "reload_share": 0.5,
+      "rows_scanned": 2899,
+      "targets_detail": [
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 115223,
+          "latency_ms": 5990571.4,
+          "overlap_frac": 0.219633,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 116500,
+          "latency_ms": 6014071.2,
+          "overlap_frac": 0.733642,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 117120,
+          "latency_ms": 5618144.9,
+          "overlap_frac": 0.732244,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 117323,
+          "latency_ms": 2666912.1,
+          "overlap_frac": 0.898121,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 117324,
+          "latency_ms": 938729.4,
+          "overlap_frac": 0.556056,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 117325,
+          "latency_ms": 2065128.6,
+          "overlap_frac": 0.708489,
+          "status": 400
+        }
+      ],
+      "targets_min_start": 1788545747.4440362,
+      "verdict": "OK"
+    },
+    "start": {
+      "chat_client_ips": {
+        "100.118.96.3": 45,
+        "100.124.254.83": 741
+      },
+      "chat_rows": 786,
+      "events_min_ts": 1788247352.386416,
+      "events_scanned": 500,
+      "main_client_ip": "100.124.254.83",
+      "max_concurrency": 5,
+      "n_foreign_by_ip": 45,
+      "n_foreign_by_model": 45,
+      "n_foreign_chat": 90,
+      "n_targets": 6,
+      "p1_verdict": "QUEUE_LIVE",
+      "p1b_verdict": "BASERATE_OK",
+      "p2_verdict": "RELOAD_CONTRIBUTES",
+      "p3_subgroup_n": 0,
+      "p3_verdict": "UNSCANNED",
+      "p4_verdict": "CONCURRENT_OBSERVED",
+      "queue_share": 1.0,
+      "ref_ms_per_tok_p50": 21.214,
+      "ref_ms_per_tok_p90": 33.053,
+      "ref_n": 686,
+      "reload_events_in_scope": 500,
+      "reload_share": 1.0,
+      "rows_scanned": 2899,
+      "targets_detail": [
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 115223,
+          "latency_ms": 5990571.4,
+          "overlap_frac": 0.885214,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 116500,
+          "latency_ms": 6014071.2,
+          "overlap_frac": 0.885322,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 117120,
+          "latency_ms": 5618144.9,
+          "overlap_frac": 0.887925,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 117323,
+          "latency_ms": 2666912.1,
+          "overlap_frac": 0.774268,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 117324,
+          "latency_ms": 938729.4,
+          "overlap_frac": 1.0,
+          "status": 400
+        },
+        {
+          "ctok": null,
+          "error": "{\"error\":\"Context size has been exceeded.\"}",
+          "id": 117325,
+          "latency_ms": 2065128.6,
+          "overlap_frac": 0.999964,
+          "status": 400
+        }
+      ],
+      "targets_min_start": 1788551738.0154362,
+      "verdict": "OK"
+    }
+  },
+  "chat_rows": 786,
+  "events_scanned": 500,
+  "max_concurrency": {
+    "end": 6,
+    "start": 5
+  },
+  "n_foreign_by_ip": 45,
+  "n_foreign_by_model": 45,
+  "n_foreign_chat": 90,
+  "n_targets": 6,
+  "p1_verdict": "QUEUE_LIVE",
+  "p1b_verdict": "BASERATE_OK",
+  "p2_verdict": "RELOAD_CONTRIBUTES",
+  "p3_share": null,
+  "p3_subgroup_n": 0,
+  "p3_verdict": "UNSCANNED",
+  "p4_verdict": "CONCURRENT_OBSERVED",
+  "queue_share": {
+    "end": 0.833333,
+    "start": 1.0
+  },
+  "ref_ms_per_tok_p50": 21.214,
+  "ref_ms_per_tok_p90": 33.053,
+  "ref_n": 686,
+  "reload_events_in_scope": 500,
+  "reload_share": {
+    "end": 0.5,
+    "start": 1.0
+  },
+  "rows_scanned": 2899,
+  "snapshot": "ops/gain/data/r486_gateway_snapshot_v2.json",
+  "targets_detail": [
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 115223,
+      "latency_ms": 5990571.4,
+      "overlap_frac": 0.885214,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 116500,
+      "latency_ms": 6014071.2,
+      "overlap_frac": 0.885322,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 117120,
+      "latency_ms": 5618144.9,
+      "overlap_frac": 0.887925,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 117323,
+      "latency_ms": 2666912.1,
+      "overlap_frac": 0.774268,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 117324,
+      "latency_ms": 938729.4,
+      "overlap_frac": 1.0,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 117325,
+      "latency_ms": 2065128.6,
+      "overlap_frac": 0.999964,
+      "status": 400
+    }
+  ],
+  "targets_detail_end": [
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 115223,
+      "latency_ms": 5990571.4,
+      "overlap_frac": 0.219633,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 116500,
+      "latency_ms": 6014071.2,
+      "overlap_frac": 0.733642,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 117120,
+      "latency_ms": 5618144.9,
+      "overlap_frac": 0.732244,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 117323,
+      "latency_ms": 2666912.1,
+      "overlap_frac": 0.898121,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 117324,
+      "latency_ms": 938729.4,
+      "overlap_frac": 0.556056,
+      "status": 400
+    },
+    {
+      "ctok": null,
+      "error": "{\"error\":\"Context size has been exceeded.\"}",
+      "id": 117325,
+      "latency_ms": 2065128.6,
+      "overlap_frac": 0.708489,
+      "status": 400
+    }
+  ],
+  "ts_inversions": {
+    "end": 17,
+    "start": 1
+  },
+  "ts_verdict_note_only": "TS_AMBIGUOUS",
+  "verdict": "OK"
+}

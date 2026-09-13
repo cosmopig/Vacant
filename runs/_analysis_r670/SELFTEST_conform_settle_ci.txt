@@ -1,0 +1,17 @@
+== P-R670-B：deliv 區間與 paired_ci.py 在未竄改資料上必須逐位相同 ==
+  PASS  B deliv.lo 與 paired_ci 逐位相同  — -2.5363551370269044 vs -2.5363551370269044
+  PASS  B deliv.hi 與 paired_ci 逐位相同
+== P-R670-A：拒交格的候選其實是對的 ⇒ 兩指標分家 ==
+  PASS  A md&!acc 由 0 變 1
+  PASS  A meets_demand 的 b +1  — 8 -> 9
+  PASS  A deliv 的 b/c 完全不動
+  PASS  A 兩支給出**不同**區間（巧合斷掉）  — deliv[-2.54,+6.73] vs md[-2.08,+7.44]
+== P-R670-C：區間排除 0 <=> 精確 p<0.05（(b,c) 全格掃）==
+  PASS  C 全格一致  — 掃過 1323 格
+== P-R670-D：植入缺陷（M1 常態近似／M2 漏乘 n_d/n）必須被擋 ==
+  PASS  D M1（常態近似）被三條界至少一條擋下  — grid 擋下 156 格；真資料端到端未觸發
+  PASS  D M2（漏乘 n_d/n）被三條界至少一條擋下  — grid 擋下 1259 格；真資料端到端也擋下：區間 [-30.22,+80.15]pp 超出 discordant 能容許的 ±8.39pp（b=8 c=4 n=143）——映射漏乘 n
+== 反向：修好之後真資料仍 rc=0（不誤報）==
+  PASS  反向 乾淨資料不誤報
+
+10/10 PASS

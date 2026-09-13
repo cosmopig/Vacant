@@ -1,0 +1,21 @@
+=== runs/g_r445_conform_mbpp_ext  rows=116 sha8=f56188ce terminal=False ===
+門檻來源：DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md（每個數字都從該列的 quote parse，工具裡沒有門檻）
+  P-E1  MISS             值=  10.5263  帶=[0.0, 6.0]     quote='[0, +6]pp'
+  P-E2  NOT_EVALUATED    值=     None  帶=≤ 3.0          quote='半寬 ≤ 3.0pp'
+          why: 尚未提供併庫結果（--pooled-json，由 pooled_paired_ci.py --key deliv 產生）
+  P-E3  NOT_EVALUATED    值=     None  帶=[20.0, 40.0]   quote='[20, 40]'
+          why: 尚未提供併庫結果（--pooled-json，由 pooled_paired_ci.py --key deliv 產生）
+  P-E4  HIT              值=   1.5128  帶=[1.2, 1.6]     quote='[1.2, 1.6]'
+          中止線 > 4.5 ⇒ triggered=False
+  P-E5  HIT              值=   5.1282  帶=[3.0, 10.0]    quote='[3, 10]%'
+  P-E6  HIT              值=   0.0000  帶=< 5.0          quote='<5%'
+          中止線 > 20.0 ⇒ triggered=False
+  P-E7  HIT              值= 192.0000  帶=== 192/192     quote='192/192'
+  P-E8  HIT              值=  28.2051  帶=20.0–60.0      quote='20–60%'
+  合計 HIT=5 MISS=1 ABORT=0 NOT_EVALUATED=2 BROKEN=0
+  conform_settle 這些鍵對 r445 不適用（r444 口徑）：
+    P-C1_band_3_to_6pp: r444 的帶是 [3,6]pp；r445 註冊的 P-E1 是 [0,+6]pp
+    P-C1b_band_0.02_to_0.20: r444 的 p 值帶；r445 沒有註冊 p 值的帶
+    P-C2_le_2.0: r444 的門檻是 ≤2.0；r445 註冊的 P-E4 是 [1.2,1.6]（≤2.0 會給假綠燈）
+    P-C1_settlement_rule: 文字寫死 n=179；r445 是 192（併庫 371），照抄會寫出字面錯誤的句子
+WARNING: run 未收官 ⇒ 以上是中途快照，不是結論

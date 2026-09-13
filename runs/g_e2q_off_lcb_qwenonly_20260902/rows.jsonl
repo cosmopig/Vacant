@@ -1,0 +1,1 @@
+{"arm": "OFF", "seed": "g-r212-route-20260828", "i": 1, "task_id": "lcb_3690", "family": "lcb_leetcode_hard", "entry_point": "minLength", "worker": "careful-2", "involved": ["careful-2"], "meets_demand": false, "err": "sandbox_check_failed", "accepted": true, "calls_used": 1, "calls_so_far": 1, "visible_ok": true, "votes": null}

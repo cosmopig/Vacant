@@ -1,0 +1,79 @@
+<html lang="zh-Hant"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<title>我的居民 · 人類動物園</title>
+<link rel="stylesheet" href="css/phone.css">
+</head>
+<body>
+
+<main class="ph">
+
+  <!-- ① 我的居民：近距離、活的 -->
+  <section class="me">
+    <canvas id="me-canvas" width="340" height="340"></canvas>
+    <div class="me-id">
+      <span id="me-code" class="me-code">DOK-29</span>
+      <span id="me-spec" class="me-spec">規劃行程</span>
+    </div>
+    <div class="me-stage"><span id="me-stage-tag" class="tag node">節點</span>
+      <span id="me-rep" class="me-rep">信譽 0.60</span></div>
+  </section>
+
+  <!-- ② 牠現在在做什麼 -->
+  <section class="now">
+    <div class="lbl">現在</div>
+    <div id="me-now" class="now-txt hurt">牠剛剛<b>被抽查到交了不合格的東西</b>，光暗下去了。<br>接下來一段時間，工作不會交到牠手上。</div>
+  </section>
+
+  <!-- ③ 牠的紀錄 -->
+  <section class="rec">
+    <div class="lbl">紀錄</div>
+    <div class="rec-grid">
+      <div><b id="r-done">40</b><span>接過的工作</span></div>
+      <div><b id="r-rej">2</b><span>被退回</span></div>
+      <div><b id="r-aud">18</b><span>被抽查</span></div>
+      <div><b id="r-caught" class="bad">1</b><span>被抓到</span></div>
+    </div>
+  </section>
+
+  <!-- ④ 指認 -->
+  <section class="flag">
+    <div class="lbl">牠交出去、而且被收下的東西</div>
+    <p class="hint">你不必看得懂它做了什麼。<b>你只要指出一個地方，機器會當場重跑給你看。</b></p>
+    <ul id="deliveries" class="dl"><li data-i="0"><span class="k">T11897</span><span class="w">RIL-56 請牠做的</span><span class="go">指認 ›</span></li><li data-i="1" class="spent"><span class="k">T11623</span><span class="w">ZAK-40 請牠做的</span><span class="go">指認 ›</span></li><li data-i="2"><span class="k">T10931</span><span class="w">DOL-78 請牠做的</span><span class="go">指認 ›</span></li><li data-i="3"><span class="k">T10863</span><span class="w">VUV-60 請牠做的</span><span class="go">指認 ›</span></li><li data-i="4"><span class="k">T10748</span><span class="w">ZER-45 請牠做的</span><span class="go">指認 ›</span></li><li data-i="5"><span class="k">T10665</span><span class="w">ZUS-38 請牠做的</span><span class="go">指認 ›</span></li></ul>
+  </section>
+
+</main>
+
+<!-- 重跑 → 結果 → 漣漪 -->
+<div id="sheet" class="sheet on">
+  <div class="sheet-in">
+    <div class="sheet-head"><span id="sheet-title">確定性沙箱重跑</span>
+      <button id="sheet-close" class="x" aria-label="關閉">✕</button></div>
+    <pre id="rerun" class="rerun"><span class="">&gt; 取出 T11623 的交付信封
+</span><span class="">&gt; 交付者 DOK-29　·　需求者 ZAK-40
+</span><span class="hd">&gt; 驗章　envelope t11623　OK
+</span><span class="">&gt; 沙箱重建　·　確定性重跑
+</span><span class="hd">&gt; 對照契約條款 5 條
+</span><span class="ok">　 條款 1　　通過
+</span><span class="ok">　 條款 2　　通過
+</span><span class="fail">　 條款 3　　不通過
+</span><span class="ok">　 條款 4　　通過
+</span><span class="ok">　 條款 5　　通過
+</span><span class="fail">&gt; 判定：不通過　—　這件東西本來已經被收下了
+</span></pre>
+    <div id="ripple" class="ripple"><p class="cap"><b>接下來的派工一件都沒有改變。</b><br>
+      那個交付者早就被系統降權了，你這一次撈不到東西——
+      通道分離做得越好，一次人類介入能撈到的越少。</p><div class="bound">重跑抓到了，牠的光會暗下去、一段時間拿不到工作。<br><b>但這裡不能再往下接「所以品質變好了」。</b>路由的漣漪很大，結果的漣漪很小——同一次指認通常只擋掉一兩件壞交付，而它的變異是均值的好幾倍。<br><b>它不會讓成果變好。它讓下一次的工作交到比較不會出事的人手上。</b></div></div>
+  </div>
+</div>
+
+<footer class="disclose">
+  <span class="dot"></span>
+  <span id="disclose-txt">機制模擬　·　<b>同一套規則、同一個世界的種子</b>　·　假 persona</span>
+</footer>
+
+<script type="module" src="js/phone.js"></script>
+
+
+</body></html>

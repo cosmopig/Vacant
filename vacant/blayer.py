@@ -16,31 +16,54 @@ bootstrap 95% CI、每情境 ≤30 分、產出 JSONL＋一頁結果。各情境
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import random
+import time
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
 RATIOS: tuple[float, ...] = tuple(i / 10 for i in range(8))  # 0.0 … 0.7 步進 10%
 DEFAULT_N_SEEDS = 1000  # 17 §P4：每格 ≥1000 seeds（測試用小種子數，正式用預設）
+LEDGER_NAME = "ledger_events.jsonl"  # RECORD_SPEC §2 必要項（缺＝記錄層 infra_void）
+SAMPLES_NAME = "samples.jsonl"  # 每格 n_seeds 個原始值（差值統計的唯一可重算來源）
+
+
+def _now_ms() -> int:
+    return int(time.time() * 1000)
 
 
 @dataclass
 class Cell:
-    """一格（scenario × ratio）的量測結果。"""
+    """一格（scenario × ratio）的量測結果。
+
+    `sd`／`n_unique`／`vmin`／`vmax` 是**離散度描述欄**（2026-08-16 加）：
+    只存 95% 端點的歸檔分不出「CI 窄」與「CI 塌成一點」——全同值樣本上
+    bootstrap 每次重抽都拿到同一個數，`ci_lo == ci_hi`，而那**不是
+    「不確定性為 0」**（0/1000 的真 95% 上界約 3/1000）。第 38 輪要靠回頭
+    讀原始碼才知道哪些格是這種退化；有 `n_unique==1` 就看得見。
+    這四欄純由 `vals` 算出，不進亂數流、不改任何既有欄位的值。
+    """
     scenario: str
     ratio: float
     n_seeds: int
     value: float
     ci_lo: float
     ci_hi: float
+    sd: float = 0.0
+    n_unique: int = 0
+    vmin: float = 0.0
+    vmax: float = 0.0
 
     def to_json(self) -> dict[str, Any]:
         return {"scenario": self.scenario, "ratio": self.ratio, "n_seeds": self.n_seeds,
                 "value": round(self.value, 6), "ci_lo": round(self.ci_lo, 6),
-                "ci_hi": round(self.ci_hi, 6)}
+                "ci_hi": round(self.ci_hi, 6), "sd": round(self.sd, 6),
+                "n_unique": self.n_unique, "vmin": round(self.vmin, 6),
+                "vmax": round(self.vmax, 6)}
 
 
 @dataclass
@@ -53,11 +76,30 @@ class ScenarioReport:
     detail: str = ""
 
 
+def _cell_row(arm: str, c: Cell) -> dict[str, Any]:
+    """一格的歸檔列。**`cells.jsonl` 與 `ledger_events.jsonl` 共用這一支**——
+    兩條寫檔路徑各自實作同一套規則就會漂移（不需要有人犯錯，只要兩份程式
+    各自被正確地修改了不同次數）。`arm` 由呼叫端的迴圈身分給，不准回頭用
+    值相等去猜（見下方 run_all 的 ⚠）。"""
+    return {**c.to_json(), "arm": arm}
+
+
 def _sweep(
     name: str, metric: str, fn: Callable[[float, random.Random, bool], float],
-    *, n_seeds: int, base_seed: str,
+    *, n_seeds: int, base_seed: str, emit: Callable[[dict[str, Any]], None] | None = None,
+    sink: Callable[[str, Cell, list[float]], None] | None = None,
 ) -> ScenarioReport:
-    """對一個情境跑 on/off × 8 格，bootstrap CI（research.boot_ci 同源）。"""
+    """對一個情境跑 on/off × 8 格，bootstrap CI（research.boot_ci 同源）。
+
+    `emit`：每算完一格**立刻**吐一筆事件（run_all 用來邊跑邊寫事件帳）。
+    給的是 callback 不是「跑完回傳一包讓呼叫端轉寫」——事後由結果轉寫出來的
+    東西是摘要重排成 log，跑掛了就什麼都沒有，那正是「不 pack＝沒跑過」
+    那條紅線要防的事（RECORD_SPEC §2）。
+
+    `sink`：把該格的 **1000 個原始值**交出去（run_all 用來寫 samples.jsonl）。
+    只存 mean 與兩個 CI 端點，等於把「還能問什麼問題」在落盤那一刻就鎖死——
+    第 38 輪想算差值的 CI，就因為原始值沒留而必須整組重跑 224s。
+    """
     from .research import boot_ci
     rep = ScenarioReport(name=name, metric=metric)
     for on in (True, False):
@@ -75,7 +117,16 @@ def _sweep(
                 hashlib.sha256(f"{name}:{ratio}:{on}".encode()).hexdigest()[:8], 16
             )
             lo, hi = boot_ci(vals, lambda s: sum(s) / len(s), n_boot=500, seed=boot_seed)
-            cells.append(Cell(name, ratio, n_seeds, mean, lo, hi))
+            var = sum((v - mean) ** 2 for v in vals) / max(1, len(vals) - 1)
+            c = Cell(name, ratio, n_seeds, mean, lo, hi,
+                     sd=var ** 0.5, n_unique=len(set(vals)),
+                     vmin=min(vals), vmax=max(vals))
+            cells.append(c)
+            arm = "on" if on else "off"
+            if emit is not None:
+                emit({"type": "B_LAYER_CELL", "metric": metric, **_cell_row(arm, c)})
+            if sink is not None:
+                sink(arm, c, vals)
         if on:
             rep.on_cells = cells
         else:
@@ -388,25 +439,91 @@ def run_all(
     base_seed: str = "blayer-v1",
     out_dir: Path | None = None,
     only: tuple[str, ...] | None = None,
+    slash_n_factor: float | None = None,
 ) -> dict[str, ScenarioReport]:
     """跑六情境（on＋off 雙組），回 {name: ScenarioReport}；給 out_dir 則落盤
-    cells.jsonl＋summary.md（一頁結果，17 §P4 歸檔格式）。"""
+    cells.jsonl＋summary.md（一頁結果，17 §P4 歸檔格式）＋
+    ledger_events.jsonl（RECORD_SPEC §2 必要項）＋samples.jsonl（每格原始值）。
+
+    **事件帳是邊跑邊寫的**（每格算完立刻 write＋flush），不是跑完由 reports
+    轉寫。差別在跑掛的時候：邊跑邊寫留下「跑到哪、算出什麼」，事後轉寫留下
+    的是零。RECORD_SPEC 要的是生態事件流，不是結果的另一種排版。
+
+    `slash_n_factor`（λ，2026-08-07）：掃描 slash 取捨曲線時用來檢查
+    **候選操作點會不會把六情境的判準弄掉**。情境 ④reviewer_stake 與
+    ⑤decay_slash 直接吃 slash，是 λ 的承重面；任一情境判準掉了，該 λ
+    就標記為不可用——曲線再好看也不能選一個讓牙齒失效的點。
+    None＝沿用模組層預設（1.0，現行行為）。
+    """
+    from .reputation import slash_n_factor as _lam_ctx
+
     reports: dict[str, ScenarioReport] = {}
-    for name, (fn, metric) in SCENARIOS.items():
-        if only and name not in only:
-            continue
-        rep = _sweep(name, metric, fn, n_seeds=n_seeds, base_seed=base_seed)
-        rep.verdict, rep.detail = _verdict(name, rep)
-        reports[name] = rep
+    ctx = (_lam_ctx(slash_n_factor) if slash_n_factor is not None
+           else contextlib.nullcontext())
+    todo = [n for n in SCENARIOS if not only or n in only]
 
     if out_dir is not None:
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
+
+    with contextlib.ExitStack() as stack:
+        if out_dir is not None:
+            lf = stack.enter_context(
+                (out_dir / LEDGER_NAME).open("w", encoding="utf-8"))
+
+            def emit(ev: dict[str, Any]) -> None:
+                # 每筆 flush：事件帳的用途是「跑掛了也知道跑到哪」，
+                # 留在 buffer 裡的事件對這個用途等於沒寫。
+                lf.write(json.dumps({"ts_ms": _now_ms(), **ev},
+                                    ensure_ascii=False) + "\n")
+                lf.flush()
+            sf = stack.enter_context(
+                (out_dir / SAMPLES_NAME).open("w", encoding="utf-8"))
+
+            def sink(arm: str, c: Cell, vals: list[float]) -> None:
+                # 與事件帳同樣邊跑邊寫：跑掛了留下的是「已經量到的原始值」，
+                # 不是零。`scenario/arm/ratio` 三欄與 cells.jsonl 是同一組鍵。
+                sf.write(json.dumps(
+                    {"scenario": c.scenario, "arm": arm, "ratio": c.ratio,
+                     "n_seeds": c.n_seeds, "values": [round(v, 9) for v in vals]},
+                    ensure_ascii=False) + "\n")
+                sf.flush()
+        else:
+            emit = None  # type: ignore[assignment]
+            sink = None  # type: ignore[assignment]
+
+        if emit is not None:
+            emit({"type": "B_LAYER_RUN_START", "base_seed": base_seed,
+                  "n_seeds": n_seeds, "ratios": list(RATIOS),
+                  "scenarios": todo, "slash_n_factor": slash_n_factor})
+        with ctx:
+            for name in todo:
+                fn, metric = SCENARIOS[name]
+                rep = _sweep(name, metric, fn, n_seeds=n_seeds,
+                             base_seed=base_seed, emit=emit, sink=sink)
+                rep.verdict, rep.detail = _verdict(name, rep)
+                reports[name] = rep
+                if emit is not None:
+                    emit({"type": "B_LAYER_VERDICT", "scenario": name,
+                          "verdict": rep.verdict, "detail": rep.detail})
+        if emit is not None:
+            emit({"type": "B_LAYER_RUN_END", "n_scenarios": len(reports),
+                  "n_cells": sum(len(r.on_cells) + len(r.off_cells)
+                                 for r in reports.values())})
+
+    if out_dir is not None:
+        # ⚠ `arm` 不准用 `c in rep.on_cells` 判：`Cell` 是 dataclass ⇒ `in` 走**值
+        #   相等**。off 值與 on 值一樣的那些格會被寫成 "on"，而那些格**正好就是
+        #   「拆掉機制、數字沒變」的格**（ratio=0；same_source 的 ratio<0.5 定義回 0）
+        #   ⇒ 歸檔檔案系統性地把「該機制在該格是裝飾」（13 §3）的唯一證據標反。
+        #   實測：96 行寫成 on 58／off 38，10 個 (scenario,arm,ratio) 重複鍵。
+        #   `_verdict` 讀的是記憶體裡的兩個 list，不受影響——所以判準全過而歸檔是錯的。
         with (out_dir / "cells.jsonl").open("w", encoding="utf-8") as f:
             for rep in reports.values():
-                for c in rep.on_cells + rep.off_cells:
-                    f.write(json.dumps({**c.to_json(), "arm": ("on" if c in rep.on_cells else "off")},
-                                       ensure_ascii=False) + "\n")
+                for arm, cells in (("on", rep.on_cells), ("off", rep.off_cells)):
+                    for c in cells:
+                        f.write(json.dumps(_cell_row(arm, c),
+                                           ensure_ascii=False) + "\n")
         lines = ["# B 層機制驗收六情境 — 一頁結果", ""]
         for name, rep in reports.items():
             mark = "✅" if rep.verdict else "❌"
@@ -414,5 +531,89 @@ def run_all(
         lines.append("")
         lines.append("判準事前寫死於 vacant/blayer.py `_verdict`；「拆掉數字沒變」＝裝飾、"
                      "從一切主張移除（13 §3）。")
+        lines.append("")
+        lines.extend(HONESTY_LINES)
         (out_dir / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return reports
+
+
+# --- RECORD_SPEC 合格包（紀錄紅線：不 pack＝沒跑過）-----------------------------
+# 誠實邊界，逐字進 summary.md 與 anomalies.md——只寫在原始碼註解裡的邊界，
+# 讀歸檔的人看不到。
+HONESTY_LINES = (
+    "## 誠實邊界",
+    "",
+    "1. 六情境是**確定性離線機制模擬**（假腦、合成攻擊），驗的是「拆掉這個機制、"
+    "數字會不會變」，**不是生態效果**。效果宣稱屬 X 系列（C-3 門後）。",
+    "2. 本 run **沒有居民簽章鏈**（不呼叫模型、不產交付）⇒ `chain_verify.txt` "
+    "只會是 `SKIPPED`。因此這個證據包的可複核強度**低於**有鏈可驗的包："
+    "它證明的是「必要項齊、雜湊自洽、缺席有理由」，**不是「數字是真的」**。",
+    "3. `SHA256SUMS` **偵測**落盤後的竄改，**不預防**。",
+)
+
+
+def finalize_run_package(
+    out_dir: str | Path, reports: dict[str, ScenarioReport], *,
+    n_seeds: int, base_seed: str, elapsed_s: float | None = None,
+    slash_n_factor: float | None = None,
+) -> tuple[bool, list[str]]:
+    """把 run_all 的產物補成 RECORD_SPEC 合格包，回 `record.check` 的 (ok, problems)。
+
+    `ledger_events.jsonl` **不在這裡生**——它是 run_all 邊跑邊寫的（事後在這裡
+    由 reports 轉寫一份出來，就是那條紅線要防的補帳）。這支只做三件事：
+    寫 anomalies.md（真的異常，不是空骨架）、給 `pack` 那些它自己偵測不到的
+    欄位、然後 check。
+
+    `missing` 的理由給的是**真實原因**（無模型呼叫／無 MCP 連線），不沿用 `pack`
+    的預設字串「extra_meta 未提供」——形式上通過、內容上說謊，比缺項更糟。
+    """
+    from . import record as record_mod
+
+    out_dir = Path(out_dir)
+    failed = [n for n, r in reports.items() if not r.verdict]
+    ledger = out_dir / LEDGER_NAME
+
+    a = ["# anomalies — B 層六情境正式掃描", ""]
+    if failed:
+        a.append(f"- **判準未過 {len(failed)} 條**（13 §3：對應機制降級為裝飾、"
+                 f"從一切主張移除）：")
+        a.extend(f"  - `{n}`：{reports[n].detail}" for n in failed)
+    else:
+        a.append("- 判準：六條全過，無未過項。")
+    if not ledger.exists():
+        a.append(f"- **`{LEDGER_NAME}` 不存在**——run_all 未收到 out_dir，"
+                 "或 run 中途崩潰未留下事件帳。")
+    a += ["", "## 本 run 依定義不會有的東西（缺席理由，不是靜默省略）", "",
+          "- 無模型呼叫 ⇒ 無 `model_io.jsonl`、`model_id`／`endpoint`／`no_think` 為 null。",
+          "- 無 MCP 連線 ⇒ 無 `wire.jsonl`。",
+          "- 無居民上鏈 ⇒ `chain_verify.txt` 為 `SKIPPED`（見下方誠實邊界第 2 條）。",
+          "- 無交付信任狀 ⇒ 無 `trust_cards/`、無 `card_verify.txt`。", ""]
+    a.extend(HONESTY_LINES)
+    (out_dir / record_mod.ANOMALIES_NAME).write_text(
+        "\n".join(a) + "\n", encoding="utf-8")
+
+    extra: dict[str, Any] = {
+        "model_id": None, "endpoint": None, "no_think": None,
+        "seeds": [base_seed], "trust_arm": "on+off",
+        "scripts": ["examples/b_layer.py", "vacant/blayer.py"],
+        "n_seeds_per_cell": n_seeds,
+        "n_cells": sum(len(r.on_cells) + len(r.off_cells) for r in reports.values()),
+        "scenarios": sorted(reports),
+        "verdicts": {n: r.verdict for n, r in reports.items()},
+        "slash_n_factor": slash_n_factor,
+        "elapsed_s": (round(elapsed_s, 1) if elapsed_s is not None else None),
+        "trust_arm_note": "同一 run 內跑 on／off 雙組反事實；鐵律 4（記憶不跨臂共享）"
+                          "由各情境每臂各建獨立假腦保證，兩臂之間無共用狀態。",
+        "missing": {
+            "model_id": "本 run 不呼叫任何模型（六情境是確定性離線機制模擬，用假腦）",
+            "endpoint": "同上：無模型端點（純行程內計算）",
+            "no_think": "同上：無 reasoning 開關可言",
+            "wire.jsonl": "無 MCP 連線可側錄（離線行程內模擬）",
+            "model_io.jsonl": "無模型呼叫可側錄（同 model_id）",
+        },
+    }
+    if elapsed_s is not None:
+        extra["utc_start"] = (
+            datetime.fromtimestamp(time.time() - elapsed_s, timezone.utc).isoformat())
+    record_mod.pack(out_dir, extra)
+    return record_mod.check(out_dir)

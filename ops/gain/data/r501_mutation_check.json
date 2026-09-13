@@ -1,0 +1,162 @@
+{
+  "tool": "ops/gain/r501_dual_constrained_ladder.py",
+  "clean": {
+    "verdict": "DUALWIN_OK",
+    "blockers": [],
+    "headlines": {
+      "r489_permutation_placebo": "POSITION_SURVIVES",
+      "r490_leveled_placebo": "POSITION_SURVIVES"
+    },
+    "disp": {
+      "364": 0.6731,
+      "555": 0.9827
+    },
+    "span_spread": {
+      "364": 0.0901,
+      "555": 0.0996
+    },
+    "pin_match": {
+      "364": true,
+      "555": true
+    },
+    "crashed": false
+  },
+  "mutants": {
+    "M1_ONE_POSITION": {
+      "kind": "blocker",
+      "expected": "BROKEN_WINDOWS",
+      "crashed": false,
+      "verdict": "BROKEN_WINDOWS",
+      "blockers": [
+        "BROKEN_WINDOWS",
+        "BROKEN_DISPERSION"
+      ],
+      "headlines": {
+        "r489_permutation_placebo": "POSITION_GONE",
+        "r490_leveled_placebo": "POSITION_GONE"
+      },
+      "disp": {
+        "364": 0.0,
+        "555": 0.0
+      },
+      "span_spread": {
+        "364": 0.0,
+        "555": 0.0
+      },
+      "pin_match": {
+        "364": true,
+        "555": true
+      },
+      "result": "DETECTED"
+    },
+    "M2_R498_EDGES": {
+      "kind": "blocker",
+      "expected": "BROKEN_EQSPAN",
+      "crashed": false,
+      "verdict": "BROKEN_EQSPAN",
+      "blockers": [
+        "BROKEN_EQSPAN"
+      ],
+      "headlines": {
+        "r489_permutation_placebo": "POSITION_SURVIVES",
+        "r490_leveled_placebo": "POSITION_SURVIVES"
+      },
+      "disp": {
+        "364": 0.989,
+        "555": 0.9827
+      },
+      "span_spread": {
+        "364": 0.6412,
+        "555": 0.2477
+      },
+      "pin_match": {
+        "364": true,
+        "555": true
+      },
+      "result": "DETECTED"
+    },
+    "M3_PIN_SHIFT": {
+      "kind": "blocker",
+      "expected": "BROKEN_PINNED",
+      "crashed": false,
+      "verdict": "BROKEN_PINNED",
+      "blockers": [
+        "BROKEN_PINNED",
+        "BROKEN_EQSPAN"
+      ],
+      "headlines": {
+        "r489_permutation_placebo": "POSITION_SURVIVES",
+        "r490_leveled_placebo": "POSITION_SURVIVES"
+      },
+      "disp": {
+        "364": 0.6731,
+        "555": 0.9827
+      },
+      "span_spread": {
+        "364": 0.0975,
+        "555": 0.152
+      },
+      "pin_match": {
+        "364": false,
+        "555": false
+      },
+      "result": "DETECTED"
+    },
+    "M4_FORCE_SAME": {
+      "kind": "headline",
+      "expected": "POSITION_GONE",
+      "crashed": false,
+      "verdict": "BROKEN_CALIBRATION",
+      "blockers": [
+        "BROKEN_CALIBRATION"
+      ],
+      "headlines": {
+        "r489_permutation_placebo": "POSITION_GONE",
+        "r490_leveled_placebo": "POSITION_GONE"
+      },
+      "disp": {
+        "364": 0.6731,
+        "555": 0.9827
+      },
+      "span_spread": {
+        "364": 0.0901,
+        "555": 0.0996
+      },
+      "pin_match": {
+        "364": true,
+        "555": true
+      },
+      "result": "DETECTED"
+    },
+    "M5_CLUSTERED": {
+      "kind": "blocker",
+      "expected": "BROKEN_DISPERSION",
+      "crashed": false,
+      "verdict": "BROKEN_DISPERSION",
+      "blockers": [
+        "BROKEN_DISPERSION"
+      ],
+      "headlines": {
+        "r489_permutation_placebo": "POSITION_SURVIVES",
+        "r490_leveled_placebo": "POSITION_SURVIVES"
+      },
+      "disp": {
+        "364": 0.0137,
+        "555": 0.0289
+      },
+      "span_spread": {
+        "364": 0.005,
+        "555": 0.0996
+      },
+      "pin_match": {
+        "364": true,
+        "555": true
+      },
+      "result": "DETECTED"
+    }
+  },
+  "n_detected": 5,
+  "n_crashed": 0,
+  "clean_direction_ok": true,
+  "n_mutants": 5
+}

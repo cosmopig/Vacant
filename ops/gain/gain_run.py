@@ -1,0 +1,2040 @@
+#!/usr/bin/env python3
+"""G 實驗 runner——三條臂，量「需求＝產出」。
+
+規格：`SPEC_GAIN.md`。這支只做規格說的事，不多做。
+
+    OFF     隨機路由，交回來就收                      1 呼叫／題
+    ON      信譽路由 ＋ K=3 同儕評審 ＋ 抽樣稽核      ≈5 呼叫／題
+    OFF5    同題跑 5 次取多數決（self-consistency）    5 呼叫／題
+
+**OFF5 是這個實驗誠實與否的分水嶺**：ON 比 OFF 好幾乎必然，因為多花五倍呼叫。
+要答的是「等預算下 Vacant 打不打得贏最土的做法」。
+
+用法：
+    python3 ops/gain/gain_run.py --out runs/g1 --n 40 --seed g1
+    python3 ops/gain/gain_run.py --out runs/g1 --n 40 --arms probe   # 只跑量具驗證
+
+全 I/O 落盤：`<out>/calls.jsonl`（每次模型呼叫的 prompt/回應全文）、
+`<out>/rows.jsonl`（逐題）、`<out>/summary.json`。
+"""
+from __future__ import annotations
+
+import argparse
+import ast
+import hashlib
+import itertools
+import json
+import pathlib
+import random
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+
+from ops.gain import brain_cline  # noqa: E402
+from ops.gain.brain_cline import (DEFAULT_MODEL, POOL, REVIEWER_SYSTEM,  # noqa: E402
+                                  REVIEW_LENSES, ClineBrain, InfraVoid,
+                                  load_keys)
+from vacant.codebench import BuiltinSampleLoader, EvalPlusMBPPLoader  # noqa: E402
+from vacant.crypto import pub_to_hex  # noqa: E402
+from vacant.identity import Identity  # noqa: E402
+from vacant.logbook import Logbook  # noqa: E402
+from vacant.suitegauge import gauge_suite  # noqa: E402
+
+# round460b：H 臂（HARNESS_STUDY §4.5 改動 1／4）。放在既有 import 之後，
+# 既有五臂的碼一個字不動——`harness_arms` 只**呼叫** extract_code／meets_demand。
+from ops.gain.harness_arms import HARNESS_BUDGET, run_harness_arm  # noqa: E402,F401
+
+
+# The official no-extreme concept applied to this runner's declared product envelope:
+# canonical itself must finish the full base+plus suite within 10 wall seconds and a
+# 128 MiB sandbox. These seven do not; counting candidates against an impossible oracle
+# would turn infrastructure capacity into model error. IDs/reasons are pinned and tested.
+GAIN_EVALPLUS_RESOURCE_EXCLUSIONS = {
+    "mbppplus_Mbpp/255": "combinations_with_replacement output explosion",
+    "mbppplus_Mbpp/271": "extreme linear iteration with huge integer powers",
+    "mbppplus_Mbpp/392": "O(n) table exceeds the sandbox envelope",
+    "mbppplus_Mbpp/599": "up to 100M Python-level additions",
+    "mbppplus_Mbpp/603": "quadratic list-removal sieve",
+    "mbppplus_Mbpp/630": "exponential coordinate materialization",
+    "mbppplus_Mbpp/644": "extreme list materialization exceeds memory envelope",
+}
+
+# R529：HumanEval+ 側的同一條規則，但**三種成因要分開講**，不能全掛在
+# 「資源」名下——其中三題根本不是跑太久，是這個產品信封**演不出來**。
+# 全部在 vacant-dev（跑實驗的那台）序列量過，量測輸出見
+# `DECISION_20260911_R529_CROSS_BANK_PREREG.md` §五-1。
+#
+#   (a) 允許清單／沙箱能力：官方參考解需要 `random`／`hashlib`／`eval()`，
+#       而 `_GAIN_ALLOWED_IMPORTS` 沒有前兩個、第三個是三條臂的 prompt
+#       逐字禁止的東西。這三題連 **visible_check** 都過不了（0.00 s 就被擋）
+#       ⇒ 出貨閘門在它們身上不存在，留著＝讓三條臂在沒有閘門的題上比。
+#   (b) 記憶體信封：128 MiB。逾時放寬到 60 秒**一樣不過**（實測），所以
+#       它不是「機器慢」，是那些 plus 輸入要的整數／串列放不進信封。
+#   (c) 時間餘裕不足：`HumanEval/15` 過得了，但要 5.8–7.6 秒／10 秒。
+#       ⚠ 這一題是**唯一**因為餘裕被排掉的。留著的代價不是「量具偶爾紅」
+#       而是「量具紅 ⇒ 整塊拒跑」——`--gauge-scope bank --probe-sample 0`
+#       是硬擋。而且同一個 10 秒沙箱也是三條臂的計分路徑：正確的候選在它
+#       身上同樣要 6 秒，機器一忙就會被判錯，那量到的是沙箱不是模型。
+#       門檻（**2× 餘裕**）寫在資料之前，且對 `evalplus` 是 no-op
+#       ——那 371 題在同一台機器上最慢 2.98 秒。
+GAIN_HUMANEVAL_EXCLUSIONS = {
+    "humanevalplus_HumanEval/39": "canonical needs `random` (outside the import allowlist)",
+    "humanevalplus_HumanEval/160": "canonical needs `eval()` (forbidden by the envelope)",
+    "humanevalplus_HumanEval/162": "canonical needs `hashlib` (outside the import allowlist)",
+    "humanevalplus_HumanEval/83": "10**(n-1)-scale integers exceed the 128 MiB envelope",
+    "humanevalplus_HumanEval/100": "arithmetic-series pile exceeds the 128 MiB envelope",
+    "humanevalplus_HumanEval/130": "tribonacci table exceeds the 128 MiB envelope",
+    "humanevalplus_HumanEval/139": "factorial products exceed the 128 MiB envelope",
+    "humanevalplus_HumanEval/15": "canonical needs 5.8-7.6s of the 10s budget (no 2x margin)",
+}
+
+
+LCB_BANK_VERSION = {"lcb": "v1", "lcb2": "v2", "lcb3": "v3"}
+
+
+def parse_bank_filter(spec: str) -> tuple[str, tuple[str, ...]]:
+    """`"difficulty=hard"` → `("difficulty", ("hard",))`；`a=x,y` 收多值。
+
+    只做語法，值合不合法留給 `load_tasks` 對**真的載進來的題庫**驗——
+    「這個 bank 有沒有這個難度」不是語法問題，而且答案要看釘死的那份資料。
+    """
+    if spec.count("=") != 1:
+        raise SystemExit(
+            f"--bank-filter 格式是 key=value（或 key=v1,v2），收到 {spec!r}。停。")
+    key, raw = spec.split("=", 1)
+    key = key.strip()
+    values = tuple(v.strip() for v in raw.split(",") if v.strip())
+    if not key or not values:
+        raise SystemExit(f"--bank-filter 的 key 或 value 是空的：{spec!r}。停。")
+    return key, values
+
+
+def bank_strata(bank: str) -> dict[str, dict[str, str]]:
+    """`{task_id: {"difficulty": …, "platform": …}}`；沒有分層標籤的 bank 回 `{}`。
+
+    只有 LCB 的題目自帶**平台原生**的難度／平台欄位。MBPP+ 的 `family` 是
+    codebench 自己的關鍵詞啟發式標籤（`_label_family` 的 docstring 寫著
+    「不是語意真相」），builtin 的 family 是我們自己造題時指定的坑型——
+    兩者都**不是**「題目被出出來時就有的標籤」，拿它們切層會把我們自己的
+    分類誤差寫成「不同的題目集」。所以這裡刻意只認 LCB。
+    """
+    if bank not in LCB_BANK_VERSION:
+        return {}
+    from vacant.codebench import lcb_strata
+    return lcb_strata(LCB_BANK_VERSION[bank])
+
+
+def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0,
+               bank_filter: str | None = None) -> list[dict]:
+    """預設用**真題庫**（EvalPlus MBPP+ 378 題，sha256 釘死、fail-closed）。
+
+    ⚠ `BuiltinSampleLoader` 只在明確指定時才用，而且它的 docstring 自己警告過：
+      「同一顆 reference solver 配不同隨機測資的變體，不是真的不同題目，
+        正式跑分前必須換成真 EvalPlus 資料」。
+      拿它跑增益實驗會把「題目其實都一樣」誤讀成「機制沒有差別」。
+
+    `bank_filter`（R529）：`"difficulty=hard"` 這種**分層選擇**，只吃得下
+    LCB 的平台原生標籤（`bank_strata` 的 docstring 寫了為什麼不開放給別的
+    bank）。切層在 `offset`／`n` **之前**做 ⇒ `--offset` 數的是**該層之內**的
+    第幾題，切塊語意與不切層時逐字相同（`ts[offset:offset+n]`）。
+    對不上的 key／value／空集合一律 `SystemExit`——**量不到不是通過**。
+    """
+    if bank == "evalplus":
+        loader = EvalPlusMBPPLoader(expose_contract=True)
+    elif bank == "humanevalplus":
+        # R529：第三個真來源（HumanEval+ 164 題，v0.1.10，sha256 釘死、fail-closed）。
+        # ⚠ `expose_contract=False`：HumanEval 的 prompt 本身就是函式簽名＋docstring
+        #   ＋examples，該講的前提已經在題目裡；再貼一份官方 contract 進 prompt 會讓
+        #   這個 bank 的「需求」形狀與 MBPP+／LCB 都不一樣，而本 run 換的應該是
+        #   題目不是協定。（contract 仍然不是 GT：它只有輸入前提、沒有期望輸出。）
+        from vacant.codebench import EvalPlusHumanEvalLoader
+        loader = EvalPlusHumanEvalLoader()
+    elif bank in LCB_BANK_VERSION:
+        from vacant.codebench import LiveCodeBenchLoader
+        # lcb2＝v2（同 recipe 多吃 test4 視窗，120 題）。分成兩個 bank 名而不是靠環境變數，
+        # 讓 rows/summary 裡 `bank` 一眼看得出用的是哪一版；兩版 sha256/題數都釘死、fail-closed。
+        # round440y：這三段接線原本被誤放進一個後來丟掉的 commit，導致 `lcb2` 掉進 builtin
+        # 的無限產生器（n=0 時 list() 永遠不回來）——這裡的 elif 就是那個坑的修補。
+        # round728（R461）：加 lcb3＝v3（189 題新題，與 v2 零交集）。映射改成明表，
+        # 免得再出現「不是 lcb 就是 v2」這種會把新 bank 名默默導到舊 bank 的三元式。
+        loader = LiveCodeBenchLoader(version=LCB_BANK_VERSION[bank])
+    else:
+        loader = BuiltinSampleLoader()
+    if bank == "builtin":
+        # R529：`BuiltinSampleLoader` 是**無限**產生器（`_iter_pool` 的
+        # `while True`）⇒ 原本那句 `list(loader.iter_tasks(seed))` 對它**永遠不回來**。
+        # round440y 的註解已經寫過這個坑（那次是 lcb2 掉進來），但 `builtin`
+        # 自己走的就是這條路 ⇒ `--bank builtin` 在 `--bank` 的 choices 裡列著、
+        # 實際上一按就掛死。掛死與「跑很久」在終端機上長得一模一樣，所以改成
+        # 只取需要的前綴；n=0（＝整個題庫）對無限池沒有定義，明講不是默默取一個上限。
+        if not n:
+            raise SystemExit(
+                "--bank builtin 是無限產生器，沒有「整個題庫」這回事 ⇒ 必須給 --n。"
+                "（--gauge-scope bank 也因此對 builtin 不成立。）停。")
+        ts = list(itertools.islice(loader.iter_tasks(seed), offset + n))
+    else:
+        ts = list(loader.iter_tasks(seed))
+    if bank == "evalplus":
+        ts = [t for t in ts if t["task_id"] not in GAIN_EVALPLUS_RESOURCE_EXCLUSIONS]
+    if bank == "humanevalplus":
+        ts = [t for t in ts if t["task_id"] not in GAIN_HUMANEVAL_EXCLUSIONS]
+    if bank == "builtin":
+        print("⚠ 用的是合成題庫，結論不可外推（見 load_tasks docstring）")
+    if bank_filter:
+        key, values = parse_bank_filter(bank_filter)
+        strata = bank_strata(bank)
+        if not strata:
+            raise SystemExit(
+                f"--bank-filter 對 bank={bank} 不成立：只有 "
+                f"{'／'.join(sorted(LCB_BANK_VERSION))} 的題目自帶平台原生分層標籤。停。")
+        from vacant.codebench import LCB_STRATUM_KEYS
+        if key not in LCB_STRATUM_KEYS:
+            raise SystemExit(
+                f"--bank-filter 不認得 key={key!r}（可用：{'／'.join(LCB_STRATUM_KEYS)}）。"
+                "分層只准用題目自帶的標籤，不准用隱藏測資的形狀。停。")
+        present = sorted({m[key] for m in strata.values()})
+        unknown = [v for v in values if v not in present]
+        if unknown:
+            raise SystemExit(
+                f"--bank-filter {key}={','.join(values)}：{bank} 裡沒有 "
+                f"{unknown}（實際有的是 {present}）。這不是「那一層是空的」，"
+                "是標籤打錯了。停。")
+        ts = [t for t in ts if strata.get(t["task_id"], {}).get(key) in values]
+        if not ts:
+            raise SystemExit(
+                f"--bank-filter {bank_filter} 在 {bank} 上一題都沒選到"
+                "——這不是通過，是沒接上。停。")
+        print(f"⚠ 分層：{bank} 只取 {key}∈{{{','.join(values)}}} 的 {len(ts)} 題"
+              f"（切層在 offset/n 之前 ⇒ offset 數的是該層之內的第幾題）")
+    return ts[offset:offset + n] if n else ts[offset:]
+
+
+# ── 判定：產出滿不滿足需求 ────────────────────────────────────────
+# ON 的隱藏判定與 OFF5 的行為簽名共用同一份 import 白名單——
+# 兩條路徑對候選碼的限制必須一致，否則多數決與驗收會在不同規則下跑。
+#
+# round393：加入 "typing"。它零執行期副作用（純型別標註，不碰 I/O／檔案／
+# 網路），被漏掉純屬白名單疏漏，不是刻意的安全邊界。round393 逐題查證
+# off5va 剩下 2 個 discordant（736/790）發現：ON 對這兩題的 initial 與
+# revised 都因為 `from typing import List/Union` 被這道白名單擋下
+# （sandbox_check_failed，跟邏輯對不對無關），而 OFF5 的多數決剛好落在
+# 沒用 typing 的樣本上才躲過去。全域掃描：ON 的 visible_ok=False 裡
+# 6/7（86%）是這個 typing 阻擋，OFF 是 2/7（29%），OFF5 是 2/6（33%）——
+# ON 被這道白名單漏洞打得結構性地重，因為它只有 initial+revision 兩次
+# 真正的機會，OFF5 有 5 個獨立樣本多數決，撞上白名單漏洞的機率天然更低。
+# 這不是「哪個模型比較會寫程式」的證據，是量具本身的偏誤。
+# 見 `ops/gain/DECISION_20260831_R393_TYPING_IMPORT_WHITELIST_BUG.md`。
+_GAIN_ALLOWED_IMPORTS = (
+    "bisect", "cmath", "collections", "functools", "heapq", "itertools",
+    "math", "operator", "re", "sys", "typing",
+)
+
+
+def extract_code(text: str) -> str:
+    """從回應裡挖出 python 程式碼。挖不到就原樣回傳——不要猜。"""
+    if "```" in text:
+        parts = text.split("```")
+        for i in range(1, len(parts), 2):
+            blk = parts[i]
+            if blk.startswith("python"):
+                blk = blk[6:]
+            elif blk.startswith("py"):
+                blk = blk[2:]
+            if blk.strip():
+                return blk.strip()
+    return text.strip()
+
+
+def meets_demand(
+    code: str, check_code: str, timeout_s: int = 10, entry_point: str | None = None,
+) -> tuple[bool, str]:
+    """跑隱藏測資。回傳 (通過?, 訊息)。
+
+    隱藏測資**不進 prompt**——那個分離就是「需求 vs 產出」的操作定義。
+    """
+    from vacant.checks import CheckInfraError, run_python_check
+    try:
+        ok = run_python_check(
+            code, check_code, timeout=timeout_s, allowed_imports=_GAIN_ALLOWED_IMPORTS,
+            allowed_entry_points=(entry_point,) if entry_point else (),
+        )
+        return ok, "" if ok else "sandbox_check_failed"
+    except CheckInfraError as exc:
+        # A verifier launch/protocol failure is missing data, not evidence that the
+        # candidate is wrong.  Keep it out of both numerator and denominator.
+        raise InfraVoid(f"sandbox verifier unavailable: {exc}") from exc
+
+
+def _gauge_runner(code: str, check_code: str, entry_point: str | None,
+                  timeout_s: int) -> tuple[bool, str]:
+    """`vacant.suitegauge` 的注入點：量具用的判準＝**本檔案的** `meets_demand`。
+
+    明著注入而不用 `suitegauge.default_runner` 的 lazy import，是為了避免這支被當成
+    `__main__`（或被 `r474_stub_sweep` 用 importlib 另名載入）時，量具那條路徑
+    偷偷 import 到**第二份** gain_run。判準必須是呼叫端這一份，不是同名的另一份。
+    """
+    return meets_demand(code, check_code, timeout_s, entry_point=entry_point)
+
+
+# ── 量具驗證：先答已知答案 ────────────────────────────────────────
+LCB_PROBE_SOLUTIONS_PATH = (
+    pathlib.Path(__file__).resolve().parent / "data" / "lcb_probe_solutions.json"
+)
+# round728（R461）：v3 的手寫解另存一個檔，**不合併進上面那個**。
+# 合併雖然不會改 v1/v2 的 covered 集合（task_id 零交集），但會改動一個
+# E3／r447 都引用過的檔案內容；分檔的話 v1/v2 那條路徑逐位元不變。
+LCB_V3_PROBE_SOLUTIONS_PATH = (
+    pathlib.Path(__file__).resolve().parent / "data" / "lcb_v3_probe_solutions.json"
+)
+
+
+def _canonical_solutions(bank: str = "evalplus", path: str | None = None) -> dict[str, str]:
+    """只給量具驗證用的官方參考解。
+
+    ⚠ 為什麼要另外讀：`EvalPlusMBPPLoader` **刻意不把 `canonical_solution`
+      放進 public projection**——它是 GT，只進 `hidden_check`，永不進 prompt
+      （codebench.py 的 V/GT 分離紀律，負向測試在 tests/test_x1_evalplus.py）。
+
+    ⚠ 為什麼這樣讀不算作弊：量具驗證是**驗證者側**的動作，跟 agent 無關。
+      這個 dict 只餵給 `meets_demand`，**不進任何 prompt**。
+      如果哪天有人把它接進 agent 那條路，V/GT 分離就破了——所以它只在
+      `probe_instrument` 裡被用到，不要擴大使用範圍。
+
+    ⚠ round441：LCB bank 的原始資料**沒有**官方參考解欄位（`_lcb_check_code`
+      的註解自己寫「LCB 的 GT 是 dataset 的 expected output，無 canonical」）
+      ——`bank="lcb"` 這條分支讀的是 `lcb_probe_solutions.json`，**手寫並在
+      本機用真的 hidden_check 逐題驗證過**（round441 的 DECISION 檔記過程與
+      驗證輸出），不是官方資料的一部分，只給量具用。`separateSquares`
+      （lcb_3763）刻意不收進來——該題 dataset 的 expected 只到小數 5 位，
+      跟檢查式 `abs(a-b)<=1e-6` 的容忍度矛盾，連精確解都會被判錯，
+      見 DECISION_20260901_R441。
+    """
+    if bank == "humanevalplus":
+        # R529：HumanEval+ 的 `canonical_solution` 是**函式體**（縮排片段），
+        # 完整參考解 ＝ `prompt + canonical_solution`（官方 evalplus 自己就這樣拼）。
+        # 直接拿 `canonical_solution` 當參考解餵量具 ⇒ 每一題都 IndentationError
+        # ⇒ 量具會報「參考解全不通過」，而那長得像題庫壞了。拼法只有一處，
+        # 就是 loader 的 `canonical_source`，這裡複用它、不另寫第二份。
+        # ⚠ `path` 在這一支對 humanevalplus **不開放**：換路徑要走
+        #   `VACANT_HUMANEVALPLUS_PATH`，因為換檔案就要換釘死的 sha256，
+        #   而「只換路徑不換 sha」正是 fail-closed 想擋的那一格。
+        from vacant.codebench import EvalPlusHumanEvalLoader
+        ld = EvalPlusHumanEvalLoader()
+        return {f"humanevalplus_{r['task_id']}": ld.canonical_source(r)
+                for r in ld._records}
+    if bank in ("lcb", "lcb2", "lcb3"):
+        # round728：漏掉 lcb3 的話會掉進下面的 EvalPlus 分支，讀 mbppplus_* 的
+        # 參考解去配 lcb_* 的 task_id ⇒ covered 恆為空 ⇒ 錯誤訊息會變成
+        # 「讀不到官方參考解」或 n==0，把「這個 bank 沒有手寫解」講成「線沒接上」。
+        _default = (LCB_V3_PROBE_SOLUTIONS_PATH if bank == "lcb3"
+                    else LCB_PROBE_SOLUTIONS_PATH)
+        p = pathlib.Path(path) if path else _default
+        with p.open(encoding="utf-8") as f:
+            return json.load(f)
+    import gzip
+    import os
+    from vacant.codebench import EVALPLUS_DEFAULT_PATH
+    p = pathlib.Path(path or os.environ.get("VACANT_EVALPLUS_PATH", EVALPLUS_DEFAULT_PATH))
+    out: dict[str, str] = {}
+    with gzip.open(p, "rt", encoding="utf-8") as f:
+        for line in f:
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            out[f"mbppplus_{r['task_id']}"] = r.get("canonical_solution", "")
+    return out
+
+
+def probe_instrument(tasks, log, *, sample=12, bank: str = "evalplus",
+                     coverage_tasks=None) -> dict:
+    """SPEC_GAIN §5.2：餵一份**確定正確**與一份**確定錯誤**，兩邊都要判對。
+
+    沒有這一步的話，「量到 0」與「線根本沒接上」在報告裡長得一模一樣。
+
+    正確那份用官方（或 round441 手驗）參考解。錯誤那份用一個一定跑不過的樁。
+    **兩個方向都過才算量具可用**——只驗正向會漏掉「什麼都判通過」，
+    只驗反向會漏掉「什麼都判失敗」。
+
+    round441：抽樣改成**先篩有參考解的題目、再取前 `sample` 個**，不是
+    「取前 `sample` 個題目、沒參考解的跳過」——後者在 lcb bank 上會因為
+    seed 排序把有解的題目排到抽樣窗外，量到 n=0 但看起來像是資料沒接上
+    （實際發生過，見 DECISION_20260901_R441）。
+
+    round460f（`--gauge-scope bank`）：`tasks` 可以是**整個題庫**而不是本塊那一片。
+    量具驗的是**沙箱＋題庫＋計分**（參考解與壞樁都不經模型），與塊、與後端無關
+    ⇒ 對整個題庫驗比對切片驗**更強**，而且不再受切法影響。
+    `coverage_tasks` 給定時另外回報「**本塊**每一題有沒有 `visible_check`」
+    （`coverage_n`／`coverage_visible_n`）——那條問的是別的事：
+    出貨閘門對**臂真的會跑的那些題**在不在。給 None（預設＝slice 模式）時
+    完全不算、也完全不擋，所以既有行為逐字不變。
+    """
+    try:
+        refs = _canonical_solutions(bank)
+    except Exception as e:                                   # noqa: BLE001
+        raise SystemExit(f"讀不到官方參考解，量具無法驗證：{e}")
+    good = bad = 0
+    detail = []
+    # round671（落地 round648／R440W 的提案）：`visible_check` 對 OFF／ON／OFF5 只是
+    # 落盤欄位，但對 CONFORM 是**出貨閘門**（arm_conform 通過就早停、全不通過就拒交），
+    # 直接決定 P-C1 通過率／P-C2 calls_per_task／P-C3 拒交率。決策量具沒驗過，
+    # 「閘門根本沒有閘」會長得跟「機制很便宜」一模一樣。所以在同一批 covered 題目上
+    # 用同一組正／反樣本再驗一次；合格線不是新旋鈕，與 hidden 側同一條（全對才過）。
+    vis_cov = vis_good = vis_bad = 0
+    vis_detail = []
+    covered = [t for t in tasks if refs.get(t["task_id"])][:sample]
+    for t in covered:
+        ref = refs[t["task_id"]]
+        stub = f"def {t.get('entry_point','_f')}(*a, **k):\n    return None\n"
+        hidden = t["hidden_check"]["code"]
+        # round749（R449 §四-3）：兩個方向的判準改走 `vacant.suitegauge.gauge_suite`，
+        # 與 `peerexec.commit_suite` 的套件合格閘**共用同一份實作**。呼叫順序
+        # （參考解 → 壞樁；hidden → visible）與落盤欄位逐字不變，等價性由
+        # `ops/gain/replay/r449_probe_equivalence.py` 對 HEAD 版逐鍵比對證明。
+        g_hidden = gauge_suite(hidden, ref, [stub], entry_point=t.get("entry_point"),
+                               runner=_gauge_runner)
+        ok_good, msg_g = g_hidden.ref_passed, g_hidden.ref_detail
+        good += int(ok_good)
+        bad += int(g_hidden.all_rejected)
+        detail.append({"task_id": t["task_id"], "ref_pass": ok_good,
+                       "broken_rejected": g_hidden.all_rejected, "err": msg_g[:160]})
+        vis = (t.get("visible_check") or {}).get("code") or ""
+        if not vis:
+            continue
+        vis_cov += 1
+        g_vis = gauge_suite(vis, ref, [stub], entry_point=t.get("entry_point"),
+                            runner=_gauge_runner)
+        v_good, v_msg = g_vis.ref_passed, g_vis.ref_detail
+        vis_good += int(v_good)
+        vis_bad += int(g_vis.all_rejected)
+        vis_detail.append({"task_id": t["task_id"], "ref_pass": v_good,
+                           "stub_rejected": g_vis.all_rejected, "err": v_msg[:160]})
+    res = {"n": len(detail), "ref_pass": good, "broken_rejected": bad,
+           "detail": detail,
+           "visible_n": vis_cov, "visible_ref_pass": vis_good,
+           "visible_stub_rejected": vis_bad, "visible_detail": vis_detail}
+    # round460f：本塊的出貨閘門覆蓋（只有 --gauge-scope bank 會傳）。
+    # ⚠ 這是**另一個問題**：上面問「量具在有參考解的題目上準不準」，
+    #   這裡問「臂真的會跑的那 20 題，每一題都有 visible_check 嗎」。
+    #   bank 模式把前者擴大到整個題庫之後，後者就不再被前者順帶蓋到了，
+    #   所以要獨立量、獨立擋——否則「擴大量具」會順手把一條擋門弄不見。
+    if coverage_tasks is not None:
+        miss = [t["task_id"] for t in coverage_tasks
+                if not ((t.get("visible_check") or {}).get("code") or "")]
+        res["coverage_n"] = len(coverage_tasks)
+        res["coverage_visible_n"] = len(coverage_tasks) - len(miss)
+        res["coverage_missing_visible"] = miss[:20]
+    log(res)
+    return res
+
+
+# ── 三條臂 ────────────────────────────────────────────────────────
+def arm_off(task, agents, rng, calls):
+    a = rng.choice(agents)
+    txt = a.generate(task["prompt"], role="gen",
+                     meta={"arm": "OFF", "task_id": task["task_id"]})
+    calls[0] += 1
+    code = extract_code(txt)
+    # round342：只是**記錄**可見測試結果，不改變本臂的 accepted 語意（仍恆為 True）。
+    # 零模型呼叫、不抽 rng ⇒ 本臂的抽樣與產出逐位元不變，只是多一個落盤欄位。
+    # 用途見 CONCLUSION_20260830_G_EXPERIMENT.md「推翻條件 1」：
+    # 有了這個欄位，「OFF + 免費可見測試閘」的對照可以**離線**從同一個 run 算出來，
+    # 不必新增一條會在抽樣上分岔的臂。
+    visible_ok, _ = meets_demand(
+        code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+    return code, a.agent_id, [a.agent_id], {"visible_ok": visible_ok}
+
+
+def behavior_signature(code: str, task: dict, timeout_s: int = 10) -> str:
+    """Observe candidate behavior on public/base inputs without canonical outputs.
+
+    Literal source hashing is not self-consistency: two equivalent implementations would
+    be split into different buckets. EvalPlus base inputs contain no hidden plus cases or
+    expected outputs, so they can safely identify behaviorally equivalent candidates.
+
+    2026-08-20 修正：改走 `run_python_capture`——與 ON 臂同一條受限 worker 路徑。
+    舊版用 `subprocess.run([sys.executable, …])` 直接執行模型產生的程式，
+    沒有 RLIMIT、沒有 import 白名單、沒有 env 清理；OFF5 的多數決因此曾在
+    非受限環境跑模型碼。候選碼現在只活在 worker，經 literal-only proxy 呼叫；
+    候選自己的 stdout 留在 worker（DEVNULL），不會污染簽名。
+    """
+    inputs = task.get("behavior_inputs")
+    entry_point = task.get("entry_point")
+    if not inputs or not entry_point:
+        visible_ok, _ = meets_demand(
+            code, task["visible_check"]["code"], timeout_s, entry_point=entry_point)
+        return "VISIBLE_PASS" if visible_ok else "VISIBLE_FAIL"
+
+    from vacant.checks import CheckInfraError, run_python_capture
+    probe = [
+        "import json as __vacant_json",
+        "__vacant_results = []",
+    ]
+    for args in inputs:
+        probe.extend([
+            "try:",
+            f"    __vacant_value = {entry_point}(*{args!r})",
+            "    __vacant_results.append(['ok', type(__vacant_value).__name__, repr(__vacant_value)])",
+            "except BaseException as __vacant_exc:",
+            "    __vacant_results.append(['err', type(__vacant_exc).__name__, str(__vacant_exc)])",
+        ])
+    probe.append("print('__VACANT_BEHAVIOR__' + __vacant_json.dumps(__vacant_results, sort_keys=True))")
+    try:
+        out = run_python_capture(
+            code, "\n".join(probe), timeout=timeout_s,
+            allowed_imports=_GAIN_ALLOWED_IMPORTS,
+            allowed_entry_points=(entry_point,),
+        )
+    except CheckInfraError as exc:
+        raise InfraVoid(f"sandbox verifier unavailable: {exc}") from exc
+    if out is None:
+        return "EXEC_FAIL"
+    marker = "__VACANT_BEHAVIOR__"
+    lines = [line for line in out.splitlines() if line.startswith(marker)]
+    return lines[-1][len(marker):] if lines else "EXEC_FAIL"
+
+
+def arm_off5(task, agents, rng, calls, k=5):
+    """self-consistency：同題跑 k 次，取多數決。
+
+    多數決的定義：把每份解答的**行為**當簽名——用同一組可見測資跑一遍，
+    結果字串相同的視為同一票。這比字面比對公平（同義寫法不該被拆票）。
+    """
+    assigned = [rng.choice(agents) for _ in range(k)]
+
+    def generate_one(a):
+        txt = a.generate(task["prompt"], role="gen",
+                         meta={"arm": "OFF5", "task_id": task["task_id"]})
+        calls[0] += 1
+        return extract_code(txt), a.agent_id
+
+    # 依序送出，不用 ThreadPoolExecutor 併發：round22/23 量到 3-way 併發
+    # review 打同一個中轉端點時，排隊延遲會把個別請求推過 timeout（後端很可能
+    # 是單一 GPU/LM Studio 實例，client 併發不會換來真正的平行運算，只會讓
+    # 每個請求各自的 timeout 時鐘在排隊等待時空轉）。這裡的 k=5 generate 面臨
+    # 同一種風險，尚未實測到失敗（OFF5 在 ON 之後才跑），依同一機制理由預先改掉，
+    # 見 DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md。
+    outs = [generate_one(a) for a in assigned]
+    # 行為簽名：同義實作投同一票；只看 base inputs，不碰 hidden plus cases。
+    buckets: dict[str, list[tuple[str, str]]] = {}
+    for code, aid in outs:
+        sig = behavior_signature(code, task)
+        buckets.setdefault(sig, []).append((code, aid))
+    max_votes = max(len(v) for v in buckets.values())
+    tied = [v for v in buckets.values() if len(v) == max_votes]
+    win = rng.choice(tied)
+    chosen = rng.choice(win)
+    # round342：同 arm_off——只記錄，不改 accepted 語意。rng 已經抽完，這行不動它。
+    # `behavior_signature` 本來就已經把每個候選跑過可見測資，所以這道閘在資訊上
+    # 是免費的（零額外模型呼叫）；記下來才能離線算 OFF5+閘門的對照。
+    visible_ok, _ = meets_demand(
+        chosen[0], task["visible_check"]["code"], entry_point=task.get("entry_point"))
+    n_agree = max_votes
+    return chosen[0], chosen[1], [a for _, a in outs], {
+        "visible_ok": visible_ok, "vote_agreement": n_agree, "n_buckets": len(buckets)}
+
+
+def _visible_test_slicer(check_code: str):
+    """回傳 `(n, make_prefix)`；`make_prefix(i)` ＝「只保留前 i 條驗收」的同一份 check code。
+
+    為什麼要這個：`meets_demand` 只回 bool，失敗時的訊息是**常數字串**
+    `"sandbox_check_failed"`（`meets_demand` 內文寫死），所以收據的 `err` 欄位
+    對每一個失敗候選都一模一樣、資訊量為零。R440P §六 對外那句
+    「收據上照樣列出那五個人各自卡在第幾條」靠的就是這個欄位——沒有本函式它是空頭支票。
+
+    做法：切前綴、再交給**同一個** `meets_demand` 跑。「第 i 條沒過」因此和出貨閘門
+    共用同一個執行器，不會多出第二套判準、也不會跟閘門漂移。
+
+    `vacant/codebench.py` 產生兩種形狀：
+      A 扁平：尾端一串 top-level `assert ...`（`_check_code`，evalplus/MBPP+）
+      B 迴圈：`__tests = [...]` 之後一個 for 迴圈（`_lcb_check_code`，LCB）
+    認不出來就回 `None`，收據寫 null ＋ 理由——**不猜**。產生器改了形狀，
+    `conform_receipt_selftest.py` 的形狀測試會 FAIL，不會安靜變成一片 null。
+    """
+    try:
+        tree = ast.parse(check_code)
+    except SyntaxError:
+        return None
+    lines = check_code.splitlines()
+
+    for node in tree.body:  # B：`__tests = <list literal>`
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name)
+                and node.targets[0].id == "__tests"):
+            try:
+                tests = ast.literal_eval(node.value)
+            except (ValueError, SyntaxError, TypeError):
+                return None
+            if not isinstance(tests, list):
+                return None
+            lo, hi = node.lineno - 1, node.end_lineno
+
+            def make_prefix_b(i, _lo=lo, _hi=hi, _tests=tests):
+                return "\n".join(
+                    lines[:_lo] + [f"__tests = {_tests[:i]!r}"] + lines[_hi:])
+
+            return len(tests), make_prefix_b
+
+    asserts = [nd for nd in tree.body if isinstance(nd, ast.Assert)]  # A：扁平
+    if not asserts:
+        return None
+    # 必須是**尾端連續**的一段。否則「切掉後面」會順手切掉 assert 之間的別的語句，
+    # 那就不是同一份 check code 的前綴，判出來的條號會是錯的。
+    if tree.body[-len(asserts):] != asserts:
+        return None
+
+    def make_prefix_a(i, _asserts=asserts):
+        end = (_asserts[0].lineno - 1) if i <= 0 else _asserts[i - 1].end_lineno
+        return "\n".join(lines[:end])
+
+    return len(asserts), make_prefix_a
+
+
+def conform_failure_detail(code: str, task: dict, *, timeout_s: int = 10) -> dict:
+    """已知這份候選沒通過可見驗收 ⇒ 算出「第一條沒過的是第幾條」。零模型呼叫。
+
+    前綴單調（第 j 條失敗 ⇒ 任何 i≥j 的前綴都失敗，因為 assert 一失敗就中止整份
+    check），所以可以二分：⌈log2 n⌉+2 次沙箱執行。
+
+    三個欄位刻意分開，不准合併成一個數字：
+    - `loads_ok=False`：前綴 0（一條驗收都不跑）就失敗 ⇒ 候選連載入都不成。
+      那不是「第 1 條沒過」，收據不准把兩件事寫成同一件。
+    - `first_failing_test`：真正的條號（1-based）。
+    - `detail_reason="prefix_full_disagrees"`：前綴 n 應該等價於原本的 check code；
+      它若通過而原本失敗，代表切片器有 bug ⇒ **照實記下來**，不要讓收據講一個編出來
+      的條號。這是本函式自帶的一致性檢查，不是外部測試。
+    """
+    sl = _visible_test_slicer(task["visible_check"]["code"])
+    if sl is None:
+        return {"n_visible_tests": None, "first_failing_test": None,
+                "loads_ok": None, "detail_reason": "check_code_shape_unrecognised"}
+    n, make_prefix = sl
+    ep = task.get("entry_point")
+
+    def run_prefix(i: int) -> bool:
+        src = make_prefix(i)
+        # 空程式在 sandbox 裡 rc≠0（實測 `meets_demand(code, "")` ＝ False），
+        # 那會把「跑了零條驗收」誤讀成「候選載入失敗」。`pass` 才是
+        # 「零條驗收、沒有任何失敗」。扁平形狀且 assert 從第 1 行開始時
+        # 前綴 0 就是空字串——2026-09-03 round639 的自我驗證實測抓到。
+        return meets_demand(
+            code, src if src.strip() else "pass", timeout_s, entry_point=ep)[0]
+
+    if not run_prefix(0):
+        return {"n_visible_tests": n, "first_failing_test": None, "loads_ok": False,
+                "detail_reason": "fails_before_any_test"}
+    if run_prefix(n):
+        return {"n_visible_tests": n, "first_failing_test": None, "loads_ok": True,
+                "detail_reason": "prefix_full_disagrees"}
+    lo, hi = 1, n  # 不變式：prefix(hi) 失敗、prefix(lo-1) 通過
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if run_prefix(mid):
+            lo = mid + 1
+        else:
+            hi = mid
+    return {"n_visible_tests": n, "first_failing_test": lo, "loads_ok": True,
+            "detail_reason": None}
+
+
+def runner_git_info() -> dict:
+    """記下這個 run 跑在哪個 commit、工作區乾不乾淨。
+
+    為什麼需要（round680，`CRITERION_20260903_R680_POOL_PRECONDITIONS.md`）：
+    r444 與 r445 要併成 371 題一起分析，而「兩個 run 是不是同一個實驗」
+    在 run 的產物裡**沒有任何欄位可以驗**——`summary.json` 一處都沒有記碼版本。
+    round680 只能靠事後逐函式 sha 比對 + 一份書面背書來補
+    （`runs/_analysis_r680/CODE_ATTEST.md`）。那是人工的、不會自己保持正確。
+
+    實測差異就在眼前：r444 載入 `7330f74` 版、r445 載入 `17215c1` 版，
+    中間 `gain_run.py` 改過三次、`brain_cline.py` 改過一次。
+    這次四個臂的碼逐位元相同所以無妨，**下次不一定**。
+
+    純儀器：只讀 git、不影響任何臂。取不到就記 `sha=None`
+    （`pool_precheck.py` 把 `sha=None` 當成「沒記錄」，不是「相同」）。
+    """
+    def _git(*a: str) -> str | None:
+        try:
+            r = subprocess.run(("git", *a), cwd=pathlib.Path(__file__).resolve().parents[2],
+                               capture_output=True, text=True, timeout=10)
+        except Exception:                                    # noqa: BLE001
+            return None
+        return r.stdout.strip() if r.returncode == 0 else None
+
+    sha = _git("rev-parse", "HEAD")
+    status = _git("status", "--porcelain")
+    return {"sha": sha,
+            "dirty": None if status is None else bool(status.strip()),
+            "branch": _git("rev-parse", "--abbrev-ref", "HEAD")}
+
+
+def save_receipts(out: pathlib.Path, st: dict) -> list[str]:
+    """把每臂的收據鏈 entries **與公鑰**落盤。回傳實際寫出的檔名。
+
+    為什麼需要（round666，`CRITERION_20260903_R666_RECEIPT_CHAIN_UNVERIFIABLE.md`）：
+    `arm_conform` 每次嘗試都簽進 hash chain，但在此之前 `gain_run.py` 一處都沒呼叫
+    `Logbook.save`，公鑰也沒寫出去 ⇒ 收官後 run 目錄裡既無 entries 也無公鑰，
+    `Logbook.verify_chain(who)` **在結構上跑不起來**。R440R 的 P-C4 要的正是
+    「該臂的鏈 verify_chain 為真」——沒有這一步，那一條永遠只能寫「不可結算」。
+    r444 已量到就是這個狀態（chain_verifiable=UNVERIFIABLE，三項結構性判準都 OK）。
+
+    **私鑰仍然不落盤**（RECORD_SPEC §7 排除 identity.key），所以這條鏈能證明的是
+    「事後沒被改過」（要改就得重簽，而私鑰隨行程消失），**不是**「這是誰簽的」——
+    身份是一次性的匿名身份。收據的究責宣稱只能講到這裡，不准講成可歸屬到某個主體。
+
+    純儀器：不改任何臂的行為、不多一次模型呼叫、不碰 rng。空鏈的臂不寫檔
+    （OFF／OFF5／ON 都不用這條路徑）；「有 CONFORM 列卻沒有鏈檔」由
+    `ops/gain/replay/receipt_chain_audit.py` 判 BROKEN，不會安靜漏掉。
+    """
+    written: list[str] = []
+    for arm_name, s_ in st.items():
+        book, ident = s_.get("book"), s_.get("ident")
+        if book is None or ident is None or not len(book):
+            continue
+        book.save(out / f"receipts_{arm_name}.ndjson")
+        (out / f"receipts_{arm_name}.pub.json").write_text(
+            json.dumps({"vacant_id": ident.vacant_id,
+                        "pub_hex": pub_to_hex(ident.pub)}, ensure_ascii=False) + "\n",
+            encoding="utf-8")
+        written += [f"receipts_{arm_name}.ndjson", f"receipts_{arm_name}.pub.json"]
+    return written
+
+
+def arm_conform(task, agents, rng, calls, book, ident, k=5):
+    """驗收閘門（CONFORM）：跑客戶自己的驗收測資，不開評審會。
+
+    這支在架構裡承重什麼（DECISION_20260903_R440P §四）：
+    R438/R516 量到「評審票近乎常數函數」，R518 量到反例精確度上界 <0.80，
+    E1 的 revise 在 167 題裡 improved 6 / harmed 0——**委員會那三通呼叫買不到東西**。
+    但同一批資料也量到：ON 的拒交閘門比任何從 5 個樣本導出的信心值都校準得好，
+    而「跑一次可見驗收」是零模型呼叫（`arm_off5` 的 behavior_signature 早就在跑）。
+    所以把 ON 從委員會改成閘門：**執行取代意見，收據取代投票**。
+
+    與 OFF5 的差別只有兩個，其餘（同一個 agent 池、同一個 k 上限）完全相同：
+      1. 不投票，而是逐一執行 `visible_check`；
+      2. 通過就停（早停），全不通過就**拒交**。
+
+    誠實邊界（R440P §五，改碼不得刪）：
+    - 這一切建立在「需求可以編譯成可執行的驗收測資」。需求跑不起來時本機制沒有
+      免費裁判，會退化成「問一個模型」，而那正是量出來很差的東西。
+    - 「可見篩選不會誤丟正確解」在 MBPP+ 上量到 0/1630，但那**部分是題庫性質**
+      （hidden ＝ base＋plus，可見沒過結構上蘊含隱藏沒過）。驗收測資不是真需求
+      子集的部署裡，拒交會殺掉好答案。
+
+    收據：每一次嘗試都簽進 hash-chain（`vacant/logbook.py`），事後可獨立驗鏈。
+    回傳的 `receipt_head` 是鏈頭 hash，`attempts` 是逐次的具名紀錄。
+    """
+    assigned = [rng.choice(agents) for _ in range(k)]
+    attempts: list[dict] = []
+    chosen: tuple[str, str] | None = None
+    last: tuple[str, str] | None = None
+
+    for idx, a in enumerate(assigned, 1):
+        txt = a.generate(task["prompt"], role="gen",
+                         meta={"arm": "CONFORM", "task_id": task["task_id"]})
+        calls[0] += 1
+        code = extract_code(txt)
+        last = (code, a.agent_id)
+        # 只用 visible：hidden 是計分用的，選擇時碰它＝V/GT 分離破功（SPEC §5.3）。
+        vis_ok, vis_err = meets_demand(
+            code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+        # `vis_err` 對每個失敗候選都是同一個常數字串（見 `meets_demand`），
+        # 所以「卡在第幾條」要另外算——零模型呼叫，只在失敗時才算。
+        detail = ({} if vis_ok else
+                  conform_failure_detail(code, task))
+        rec = {"task_id": task["task_id"], "attempt": idx, "worker": a.agent_id,
+               "visible_ok": bool(vis_ok), "err": vis_err[:120],
+               "code_sha256": hashlib.sha256(code.encode("utf-8")).hexdigest(),
+               **detail}
+        entry = book.append(
+            "conform_attempt", rec, ident, ts_ms=int(time.time() * 1000),
+        )
+        attempts.append({"attempt": idx, "worker": a.agent_id,
+                         "visible_ok": bool(vis_ok), "err": vis_err[:120],
+                         **detail, "entry_hash": entry.hash()})
+        if vis_ok:
+            chosen = (code, a.agent_id)
+            break
+
+    accepted = chosen is not None
+    # 拒交時仍然要回傳一份程式碼——dispatch 端無條件用 hidden_check 計分，
+    # 那是**離線評分**不是出貨。`accepted=False` 才是「沒有交出去」的語意，
+    # 與 ON 一致（leaked = accepted and not truth）。
+    code, worker = chosen if accepted else last
+    book.append(
+        "conform_verdict",
+        {"task_id": task["task_id"], "accepted": accepted,
+         "attempts": len(attempts), "worker": worker},
+        ident, ts_ms=int(time.time() * 1000),
+    )
+    return code, worker, [a.agent_id for a in assigned[:len(attempts)]], {
+        "accepted": accepted,
+        "visible_ok": accepted,
+        "conform_attempts": attempts,
+        "conform_calls": len(attempts),
+        "receipt_head": book.head(),
+    }
+
+
+def arm_eq5(task, agents, rng, calls, book, ident, k=5):
+    """等預算臂（EQ5）：同樣花 5 次呼叫，同一組候選上比兩條**選擇規則**。
+
+    為什麼要有這一支（LOOP_PROMPT 鐵律 1，數百輪來沒有任何 run 回答過）：
+    鐵律 1 問的是「**等預算**下 Vacant 打不打得贏 self-consistency」。r444/r445 的
+    CONFORM vs OFF5 是 1.51 vs 5.00 calls/task ⇒ **不是等預算**（r445 收官 §六 已
+    照四格表寫死「不准寫等預算下打贏」）。要答字面問題，兩邊的呼叫數必須相同。
+
+    做法：**一次生成 5 份候選（不早停 ⇒ calls_per_task 恆為 5.00），
+    然後把同一組候選餵給兩條選擇規則**：
+
+      - 閘門（Vacant）：依序跑 `visible_check`，第一個通過的出貨；全不通過就**拒交**
+        （語意與 `arm_conform` 逐字相同，差別只在不早停——早停不影響「選到誰」，
+        只影響花幾次呼叫）。
+      - 多數決（self-consistency）：`behavior_signature` 分桶、取最大票、平手
+        `rng.choice`，與 `arm_off5` 逐行相同；**永不拒交**。
+
+    這比「再跑一條獨立的 OFF5」強在哪（也是本設計的估計量宣稱）：
+    兩條規則看到的是**同一組候選**，所以生成的隨機性被完全消掉，配對差異只剩下
+    「選擇規則」本身。它回答的是「**給定同一組候選，哪條規則交付得多**」；
+    它**不**回答「兩個各自獨立抽樣的系統誰贏」（那是 r445 的估計量）。
+    兩個都是正當的問題，寫結論時要說清楚是哪一個——見
+    DECISION_20260904_R446_EQUAL_BUDGET_ARM.md §三。
+
+    落盤：本臂的 row 記閘門的判決（`accepted`／`meets_demand`），多數決的反事實
+    放在 `vote_*` 欄位（`vote_meets_demand` 由 dispatch 端離線計分，與 ON 臂的
+    `initial_meets_demand` 同一條既有路徑）。**選擇時一處都沒碰 hidden**
+    （V/GT 分離，SPEC §5.3）。
+
+    收據：與 CONFORM 同一條 hash-chain，每次嘗試與最終判決都簽章；零額外呼叫。
+    """
+    assigned = [rng.choice(agents) for _ in range(k)]
+
+    # ── 1. 生成全部 k 份（不早停：等預算的定義就在這一行）──────────────
+    cands: list[tuple[str, str]] = []
+    for a in assigned:
+        txt = a.generate(task["prompt"], role="gen",
+                         meta={"arm": "EQ5", "task_id": task["task_id"]})
+        calls[0] += 1
+        cands.append((extract_code(txt), a.agent_id))
+
+    # ── 2. 閘門規則（arm_conform 的選擇語意，逐一驗收、第一個過的出貨）──
+    attempts: list[dict] = []
+    chosen: tuple[str, str] | None = None
+    for idx, (code_i, aid_i) in enumerate(cands, 1):
+        vis_ok, vis_err = meets_demand(
+            code_i, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+        detail = {} if vis_ok else conform_failure_detail(code_i, task)
+        rec = {"task_id": task["task_id"], "attempt": idx, "worker": aid_i,
+               "visible_ok": bool(vis_ok), "err": vis_err[:120],
+               "code_sha256": hashlib.sha256(code_i.encode("utf-8")).hexdigest(),
+               **detail}
+        entry = book.append(
+            "eq5_attempt", rec, ident, ts_ms=int(time.time() * 1000))
+        attempts.append({"attempt": idx, "worker": aid_i,
+                         "visible_ok": bool(vis_ok), "err": vis_err[:120],
+                         **detail, "entry_hash": entry.hash()})
+        if vis_ok and chosen is None:
+            chosen = (code_i, aid_i)
+            # 不 break：後面幾份候選**已經生成了**（呼叫早就花掉），多數決那條
+            # 規則需要看到全部 k 份。繼續跑驗收是零模型呼叫。
+
+    accepted = chosen is not None
+    gate_code, gate_worker = chosen if accepted else cands[-1]
+
+    # ── 3. 多數決規則（arm_off5 的選擇語意，同一組候選）─────────────────
+    buckets: dict[str, list[tuple[str, str]]] = {}
+    for code_i, aid_i in cands:
+        buckets.setdefault(behavior_signature(code_i, task), []).append((code_i, aid_i))
+    max_votes = max(len(v) for v in buckets.values())
+    tied = [v for v in buckets.values() if len(v) == max_votes]
+    win = rng.choice(tied)
+    vote_code, vote_worker = rng.choice(win)
+    vote_visible_ok, _ = meets_demand(
+        vote_code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+
+    book.append(
+        "eq5_verdict",
+        {"task_id": task["task_id"], "accepted": accepted,
+         "attempts": len(attempts), "worker": gate_worker,
+         "vote_worker": vote_worker,
+         "vote_code_sha256": hashlib.sha256(vote_code.encode("utf-8")).hexdigest()},
+        ident, ts_ms=int(time.time() * 1000),
+    )
+    return gate_code, gate_worker, [a.agent_id for a in assigned], {
+        "accepted": accepted,
+        "visible_ok": accepted,
+        "conform_attempts": attempts,
+        "conform_calls": len(cands),
+        # 若閘門早停過，它會花幾次呼叫——只是紀錄，不是本臂的預算（本臂恆 k）。
+        "gate_calls_if_early_stopped": (
+            next(i for i, a_ in enumerate(attempts, 1) if a_["visible_ok"])
+            if accepted else len(cands)),
+        "receipt_head": book.head(),
+        # 多數決反事實（同一組候選、同樣 k 次呼叫、永不拒交）
+        "vote_code": vote_code,
+        "vote_worker": vote_worker,
+        "vote_accepted": True,
+        "vote_visible_ok": bool(vote_visible_ok),
+        "vote_n_agree": max_votes,
+        "vote_n_buckets": len(buckets),
+        "vote_tie_broken": len(tied) > 1,
+        "vote_code_sha256": hashlib.sha256(vote_code.encode("utf-8")).hexdigest(),
+        "gate_code_sha256": hashlib.sha256(gate_code.encode("utf-8")).hexdigest(),
+        # `same_choice` 是**原始欄位，保留原語意**（拒交時 gate_code 是 cands[-1]
+        # 這個 fallback，兩份剛好相同就會回報 True）——r446 的 rows 已經帶著它，
+        # 改值會製造出處漂移。DECISION_20260904_R446_AMEND1_SAME_CHOICE.md。
+        "same_choice": gate_code == vote_code,
+        # 閘門拒交＝**什麼都沒交**，那不是「兩條規則選到同一份」，那是這個比較
+        # 最有對比的一格。DECISION §六-1 那句話的忠實實作是下面這個量。
+        "same_choice_effective": bool(accepted) and gate_code == vote_code,
+    }
+
+
+def _review_vote(text: str) -> bool:
+    """Parse fail-closed: malformed reviewer output is not an approval."""
+    first = text.strip().splitlines()[0].strip().upper() if text.strip() else ""
+    return first == "VERDICT: PASS"
+
+
+def parse_review_claim(text: str) -> tuple[list | tuple, object] | None:
+    """Parse a reviewer's inert counterexample literals; never execute reviewer text."""
+    fields = {}
+    for line in text.strip().splitlines():
+        key, sep, value = line.partition(":")
+        if sep and key.strip().upper() in {"TEST_ARGS", "EXPECTED"}:
+            fields[key.strip().upper()] = value.strip()
+    if not fields or "TEST_ARGS" not in fields or "EXPECTED" not in fields:
+        return None
+    if fields["TEST_ARGS"].upper() == "NONE" or fields["EXPECTED"].upper() == "NONE":
+        return None
+    try:
+        args = ast.literal_eval(fields["TEST_ARGS"])
+        expected = ast.literal_eval(fields["EXPECTED"])
+    except (SyntaxError, ValueError):
+        return None
+    if not isinstance(args, (list, tuple)):
+        return None
+    return args, expected
+
+
+def verify_review_counterexample(
+    code: str, entry_point: str | None, review: str, timeout_s: int = 10,
+    input_contract: str = "", input_parameters: list[str] | None = None,
+) -> tuple[bool, str]:
+    """Confirm that a FAIL review's literal test actually falsifies the candidate.
+
+    This is visible evidence, not hidden ground truth. Reviewer-supplied text is parsed
+    with ``literal_eval`` and re-serialized with ``repr`` before entering the sandbox.
+    """
+    if _review_vote(review) or not entry_point:
+        return False, "review_not_fail"
+    claim = parse_review_claim(review)
+    if claim is None:
+        return False, "unparseable_claim"
+    args, expected = claim
+    if input_contract:
+        parameters = list(input_parameters or [])
+        if not parameters:
+            try:
+                tree = ast.parse(code)
+                fn = next(
+                    node for node in tree.body
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    and node.name == entry_point
+                )
+                parameters = [
+                    arg.arg for arg in (*fn.args.posonlyargs, *fn.args.args)
+                ]
+            except (SyntaxError, StopIteration):
+                return False, "unavailable_input_signature"
+        if len(args) != len(parameters):
+            return False, "outside_input_contract"
+        assignments = "\n".join(
+            f"{name} = {value!r}" for name, value in zip(parameters, args)
+        )
+        # Execute only the pinned dataset's public preconditions. Out-of-domain examples
+        # are not counterexamples; the candidate worker cannot see this test code.
+        contract_check = f"""
+{assignments}
+{input_contract}
+"""
+        in_domain, _ = meets_demand(
+            code, contract_check, timeout_s, entry_point=entry_point)
+        if not in_domain:
+            return False, "outside_input_contract"
+    check = counterexample_check(entry_point, args, expected)
+    matches, err = meets_demand(code, check, timeout_s, entry_point=entry_point)
+    return not matches, "counterexample_confirmed" if not matches else "candidate_passed_claim"
+
+
+def counterexample_check(entry_point: str, args: list, expected) -> str:
+    """一份可重放的斷言字串：`entry_point(*args) == expected`。
+
+    round439 抽出這支：revise 選擇邏輯需要拿同一份反例斷言重新跑在
+    `revised_code` 上（見 `arm_on`），不能只跟 `verify_review_counterexample`
+    內部耦合，否則沒有管道驗證修訂版真的修掉了被指控的那個反例。
+    """
+    return f"""
+import math as __vacant_math
+def __vacant_equal(a, b):
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return __vacant_math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-9)
+    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
+        return len(a) == len(b) and all(__vacant_equal(x, y) for x, y in zip(a, b))
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(__vacant_equal(a[k], b[k]) for k in a)
+    return a == b
+__vacant_actual = {entry_point}(*{args!r})
+assert __vacant_equal(__vacant_actual, {expected!r}), (__vacant_actual, {expected!r})
+"""
+
+
+def _route_agent(agents, rep, rng, *, exclude=()):
+    """UCB-shaped routing with randomized ties; list order must not be a whitelist."""
+    excluded = set(exclude)
+    eligible = [a for a in agents if a.agent_id not in excluded]
+    if not eligible:
+        raise ValueError("routing has no eligible agent")
+
+    def score(a):
+        s = rep[a.agent_id]
+        n = s["n"]
+        mean = (s["ok"] + 1) / (n + 2)
+        explore = (2.0 / (n + 1)) ** 0.5
+        return mean + 0.4 * explore
+
+    scores = {a.agent_id: score(a) for a in eligible}
+    best = max(scores.values())
+    return rng.choice([a for a in eligible if abs(scores[a.agent_id] - best) < 1e-12])
+
+
+def apply_audit_reputation(rep, worker_id: str, audit_ok: bool | None) -> bool:
+    """Only an actually sampled hidden audit may update hidden-quality reputation."""
+    if audit_ok is None:
+        return False
+    rep[worker_id]["n"] += 1
+    rep[worker_id]["ok"] += int(audit_ok)
+    return True
+
+
+def _model_family(agent) -> str:
+    model = getattr(agent, "model", "")
+    return model.split("/", 1)[0] if model else "unknown"
+
+
+def _diverse_reviewers(pool, k: int, rng) -> list:
+    """Prefer distinct model families without granting any identity a whitelist."""
+    shuffled = list(pool)
+    rng.shuffle(shuffled)
+    chosen = []
+    seen = set()
+    for reviewer in shuffled:
+        family = _model_family(reviewer)
+        if family not in seen:
+            chosen.append(reviewer)
+            seen.add(family)
+            if len(chosen) == k:
+                return chosen
+    for reviewer in shuffled:
+        if reviewer not in chosen:
+            chosen.append(reviewer)
+            if len(chosen) == k:
+                break
+    return chosen
+
+
+def _independent_reviser(agents, worker, rep, rng):
+    """Prefer a different model family so revision is not self-confirmation."""
+    different = [
+        a for a in agents
+        if a.agent_id != worker.agent_id and _model_family(a) != _model_family(worker)
+    ]
+    eligible = different or [a for a in agents if a.agent_id != worker.agent_id]
+    return _route_agent(eligible, rep, rng)
+
+
+def arm_on(task, agents, rng, calls, rep, *, audit_rate=0.2, k_review=3,
+           review_timeout_s: int = 60, review_retries: int = 2):
+    """信譽路由＋K=3 審查＋一次修訂＋確定性抽樣稽核（恰好五次呼叫）。
+
+    路由用 rep 的分數；評審用**同一個池**——所以共同盲區是真的存在，
+    不是被假設掉。評審準確率會被單獨記錄（SPEC_GAIN §5.1）。
+
+    評審呼叫用獨立的較短 deadline（預設 60s×2）：clinepass-clean-v2 的死因就是
+    reviewer 跟著全域 240s×4 走，尾延遲支配整條臂。bounded deadline 讓單題
+    評審階段最壞 ~2 分鐘封頂；用盡仍失敗依舊記 infra_void，不當候選的錯。
+    """
+    worker = _route_agent(agents, rep, rng)
+    txt = worker.generate(task["prompt"], role="gen",
+                          meta={"arm": "ON", "phase": "initial",
+                                "task_id": task["task_id"]})
+    calls[0] += 1
+    initial_code = extract_code(txt)
+
+    # 同儕評審：不能自評
+    pool = [a for a in agents if a.agent_id != worker.agent_id]
+    reviewers = _diverse_reviewers(pool, min(k_review, len(pool)), rng)
+    votes = []
+    rprompt = (f"題目：\n{task['prompt']}\n\n候選解答：\n"
+               f"```python\n{initial_code}\n```\n")
+
+    def review_one(r):
+        v = r.generate(rprompt, role="review",
+                       meta={"arm": "ON", "task_id": task["task_id"],
+                             "target": worker.agent_id},
+                       system=f"{REVIEWER_SYSTEM}\n{REVIEW_LENSES.get(r.agent_id, '')}",
+                       timeout_s=review_timeout_s, retries=review_retries)
+        calls[0] += 1
+        return r.agent_id, v
+
+    # 依序送出，不用 ThreadPoolExecutor 併發：round22 量到 3 個 reviewer 同時
+    # 送出時，即使成功的呼叫延遲也普遍 100-241s，逼近甚至超過 review_timeout_s；
+    # round23 補量到 review 呼叫失敗率 17/30=57%、平均分布在 5/6 個 agent（不是
+    # 單一 agent 的問題）⇒ 併發搶佔同一個中轉端點（後端很可能是單一 GPU/LM
+    # Studio 實例，client 端「併發」換不到真正的平行運算，只會讓排隊中的請求
+    # 各自的 timeout 時鐘持續空轉，越後面送出的請求越可能撞牆）。序列送出讓
+    # 每個請求的 timeout 從它真正開始處理時起算，總耗時不會顯著變多（後端本來
+    # 就是排隊處理），但可以避免這種人為的逾時。見
+    # DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md。
+    raw_reviews = [review_one(r) for r in reviewers]
+    review_evidence = []
+    confirmed_checks = []
+    for aid, review in raw_reviews:
+        raw_pass = _review_vote(review)
+        confirmed, evidence_status = verify_review_counterexample(
+            initial_code, task.get("entry_point"), review,
+            input_contract=task.get("input_contract", ""),
+            input_parameters=task.get("input_parameters", []),
+        )
+        # PASS remains approval. FAIL counts only with a machine-confirmed counterexample;
+        # unsupported accusations are abstentions resolved in favor of the submitted code.
+        grounded_pass = raw_pass or not confirmed
+        votes.append((aid, grounded_pass))
+        review_evidence.append({
+            "agent_id": aid, "raw_pass": raw_pass,
+            "grounded_pass": grounded_pass,
+            "counterexample_confirmed": confirmed,
+            "status": evidence_status,
+        })
+        if confirmed:
+            # round439: keep the exact assertion that falsified the initial candidate so the
+            # revision can be checked against what was actually wrong, not just re-run against
+            # the same sparse visible suite it may already have passed or failed independent of
+            # the complaint. See DECISION_20260901_R439_REVISE_SELECTION_COUNTEREXAMPLE_CHECK.md.
+            claim = parse_review_claim(review)
+            if claim is not None:
+                claim_args, claim_expected = claim
+                confirmed_checks.append(
+                    counterexample_check(task.get("entry_point"), claim_args, claim_expected)
+                )
+
+    passed_review = sum(1 for _, ok in votes if ok) >= (len(votes) + 1) // 2
+
+    # 審查若不能改變交付，ON 只能拒絕、不能提高正確交付。第五次呼叫交給不同
+    # 模型家族的 synthesizer，避免原 worker 對自己的初稿做自我確認。
+    confirmed_ids = {
+        row["agent_id"] for row in review_evidence if row["counterexample_confirmed"]
+    }
+    grounded_reviews = [
+        (aid, text) for aid, text in raw_reviews if aid in confirmed_ids
+    ]
+    review_text = "\n\n".join(
+        f"Reviewer {aid}（反例已由系統執行並確認）:\n{text}"
+        for aid, text in grounded_reviews
+    ) or "沒有通過執行驗證的反例；不要因未證實的文字指控改壞初稿。"
+    revise_prompt = (
+        f"原題：\n{task['prompt']}\n\n待修訂初稿：\n```python\n{initial_code}\n```\n\n"
+        f"三份同儕審查：\n{review_text}\n\n"
+        "逐條判斷審查意見。修正真正的問題，忽略錯誤指控。"
+        "最後只輸出一個完整的 ```python 程式碼區塊，不要解釋。"
+    )
+    reviser = _independent_reviser(agents, worker, rep, rng)
+    revised = reviser.generate(
+        revise_prompt, role="revise",
+        meta={"arm": "ON", "phase": "revision", "task_id": task["task_id"],
+              "initial_worker": worker.agent_id},
+    )
+    calls[0] += 1
+    revised_code = extract_code(revised)
+    initial_visible_ok, _ = meets_demand(
+        initial_code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+    revised_visible_ok, _ = meets_demand(
+        revised_code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+    # round439: re-running the same visible suite on revised_code proves nothing about
+    # whether it fixed the specific counterexample(s) that triggered the revision in the
+    # first place (that's usually why a grounded FAIL exists despite initial_visible_ok, or
+    # why passed_review is False even when initial already clears the sparse visible suite).
+    # DECISION_20260901_R438 measured discarded_win=0/113 on the prior selection rule; this
+    # gives the selector evidence to actually score a revision instead of rubber-stamping it.
+    revised_fixes_counterexamples = all(
+        meets_demand(revised_code, chk, entry_point=task.get("entry_point"))[0]
+        for chk in confirmed_checks
+    ) if confirmed_checks else True
+    if passed_review and initial_visible_ok:
+        # The fifth call keeps the equal budget, but an unrequested rewrite must not replace
+        # an answer that peers approved. Its output remains logged for offline analysis.
+        code = initial_code
+        selected_version = "initial"
+    elif revised_visible_ok and revised_fixes_counterexamples:
+        code = revised_code
+        selected_version = "revised"
+    elif initial_visible_ok:
+        code = initial_code
+        selected_version = "initial_fallback"
+    elif revised_visible_ok:
+        # Revised clears the sparse visible suite but does not fix the specific
+        # counterexample a reviewer proved against initial; neither candidate is verified
+        # against the actual complaint. Revised is still the least-bad fallback since
+        # initial fails the same visible suite outright. Kept distinct from
+        # "revised_both_visible_fail" so offline analysis can tell the two apart.
+        code = revised_code
+        selected_version = "revised_unconfirmed_fallback"
+    else:
+        code = revised_code
+        selected_version = "revised_both_visible_fail"
+    kept_initial = selected_version.startswith("initial")
+    visible_ok = initial_visible_ok if kept_initial else revised_visible_ok
+    responsible_agent = worker.agent_id if kept_initial else reviser.agent_id
+
+    # 稽核：確定性抽樣（sha256(seed:task_id) < rate），跑隱藏測資
+    h = int(hashlib.sha256(f"audit:{task['task_id']}".encode()).hexdigest()[:8], 16)
+    audited = (h / 0xFFFFFFFF) < audit_rate
+    audit_ok = None
+    if audited:
+        audit_ok, _ = meets_demand(
+            code, task["hidden_check"]["code"], entry_point=task.get("entry_point"))
+
+    accepted = visible_ok and (audit_ok is not False)
+    return code, worker.agent_id, [a for a, _ in votes], {
+        "votes": votes, "passed_review": passed_review,
+        "raw_reviews": raw_reviews, "initial_code": initial_code,
+        "review_evidence": review_evidence,
+        "reviewer_models": [getattr(r, "model", None) for r in reviewers],
+        "reviser": reviser.agent_id, "reviser_model": reviser.model,
+        "initial_visible_ok": initial_visible_ok,
+        "revised_visible_ok": revised_visible_ok,
+        "confirmed_counterexample_count": len(confirmed_checks),
+        "revised_fixes_counterexamples": revised_fixes_counterexamples,
+        "selected_version": selected_version,
+        "responsible_agent": responsible_agent,
+        "visible_ok": visible_ok, "audited": audited,
+        "audit_ok": audit_ok, "accepted": accepted,
+    }
+
+
+def arm_onr(task, agents, rng, calls, rep, *, audit_rate=0.2):
+    """ON 的路由段單獨成臂：UCB 路由 + 1 次呼叫，沒有審查、沒有修訂。
+
+    round212 新增。目的是把 `arm_on` 的第 1 次呼叫抽出來當一個獨立的臂，
+    和 `arm_off`（均勻隨機挑 agent + 1 次呼叫）做**等預算**對比 ⇒ 唯一的
+    差別是「挑誰來做」。round212 的離線拆解量到 ON_initial 81.77% vs
+    OFF 79.28%（b/c=22/13, p=0.1755），方向為正但判別力不足；那次是跨兩個
+    不同 run 配對的，這個臂讓同一個 run 內就能配對。
+
+    刻意與 `arm_on` 共用同一條聲譽迴路：`_route_agent` 路由、只有真的抽到的
+    hidden audit 才更新聲譽（`apply_audit_reputation`），抽樣規則
+    `sha256("audit:"+task_id)` 與 `arm_on` 逐字元相同 ⇒ 同一題在兩個臂被
+    抽到稽核與否是一致的，不是新的隨機來源。
+    """
+    worker = _route_agent(agents, rep, rng)
+    txt = worker.generate(
+        task["prompt"], role="gen",
+        meta={"arm": "ONR", "task_id": task["task_id"]},
+    )
+    calls[0] += 1
+    code = extract_code(txt)
+    visible_ok, _ = meets_demand(
+        code, task["visible_check"]["code"], entry_point=task.get("entry_point"))
+    h = int(hashlib.sha256(f"audit:{task['task_id']}".encode()).hexdigest()[:8], 16)
+    audited = (h / 0xFFFFFFFF) < audit_rate
+    audit_ok = None
+    if audited:
+        audit_ok, _ = meets_demand(
+            code, task["hidden_check"]["code"], entry_point=task.get("entry_point"))
+    accepted = visible_ok and (audit_ok is not False)
+    return code, worker.agent_id, [worker.agent_id], {
+        "responsible_agent": worker.agent_id,
+        "visible_ok": visible_ok,
+        "audited": audited,
+        "audit_ok": audit_ok,
+        "accepted": accepted,
+    }
+
+
+def calibrate_pool(tasks, agents, rows_path: pathlib.Path) -> dict:
+    """Measure pool heterogeneity on a disjoint set; never feed results into routing."""
+    by_agent = {
+        a.agent_id: {"model": a.model, "attempted": 0, "correct": 0, "infra_void": 0}
+        for a in agents
+    }
+    rows = []
+    for i, task in enumerate(tasks, 1):
+        def run_one(agent):
+            try:
+                text = agent.generate(
+                    task["prompt"], role="calibration",
+                    meta={"arm": "CALIBRATION", "task_id": task["task_id"]},
+                )
+                code = extract_code(text)
+                truth, err = meets_demand(
+                    code, task["hidden_check"]["code"],
+                    entry_point=task.get("entry_point"))
+                return agent, truth, err, None
+            except InfraVoid as exc:
+                return agent, None, "", str(exc)
+
+        # 依序送出，不用 ThreadPoolExecutor 併發：round22/23 已經在 arm_on／
+        # arm_off5 量到對同一中轉端點併發送出多個請求會觸發 HTTP 500／逾時
+        # （DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md），但 calibrate_pool
+        # 是後來才加的，沒有套用那次修復。round210 用這支函式的併發版本卡死
+        # 39 分鐘沒跑完第 1 題，round211 診斷成「qwen3.8-27b 這個 model 掛了」；
+        # round262 重測發現連對**同一個** model 併發 3 筆都會炸（2 筆立即 500、
+        # 1 筆逾時）——是併發本身觸發後端 contention，不是特定 model 死掉。
+        results = [run_one(agent) for agent in agents]
+        for agent, truth, err, void in results:
+            stat = by_agent[agent.agent_id]
+            if void is not None:
+                stat["infra_void"] += 1
+            else:
+                stat["attempted"] += 1
+                stat["correct"] += int(bool(truth))
+            rows.append({
+                "i": i, "task_id": task["task_id"], "agent_id": agent.agent_id,
+                "model": agent.model, "meets_demand": truth,
+                "infra_void": void, "err": err[:200],
+            })
+        print(f"  [CALIBRATION {i}/{len(tasks)}] 完成 {len(agents)} 個 agent", flush=True)
+
+    with rows_path.open("w", encoding="utf-8") as f:
+        for row in rows:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    for stat in by_agent.values():
+        stat["accuracy"] = (
+            stat["correct"] / stat["attempted"] if stat["attempted"] else None
+        )
+    accuracies = [s["accuracy"] for s in by_agent.values() if s["accuracy"] is not None]
+    return {
+        "tasks": len(tasks), "calls_expected": len(tasks) * len(agents),
+        "by_agent": by_agent,
+        "accuracy_spread": max(accuracies) - min(accuracies) if accuracies else None,
+        "used_for_routing": False,
+    }
+
+
+def calibration_ready(result: dict) -> bool:
+    """Require complete measurements and observed heterogeneity before causal claims."""
+    tasks = result.get("tasks", 0)
+    stats = list(result.get("by_agent", {}).values())
+    return bool(
+        tasks
+        and stats
+        and all(s.get("attempted") == tasks and s.get("infra_void") == 0 for s in stats)
+        and result.get("accuracy_spread") is not None
+        and result["accuracy_spread"] > 0
+    )
+
+
+def latency_summary(calls_path: pathlib.Path, arm: str) -> dict:
+    """Summarize successful endpoint latency and failed attempts for one arm."""
+    records = [json.loads(line) for line in calls_path.read_text().splitlines() if line]
+    selected = [r for r in records if r.get("meta", {}).get("arm") == arm]
+
+    def stats(values):
+        if not values:
+            return None
+        ordered = sorted(values)
+
+        def nearest_rank(p):
+            return ordered[max(0, min(len(ordered) - 1, (len(ordered) * p + 99) // 100 - 1))]
+
+        return {"n": len(ordered), "p50": nearest_rank(50), "p95": nearest_rank(95),
+                "max": ordered[-1]}
+
+    roles = sorted({r.get("role", "unknown") for r in selected if r.get("ok")})
+    return {
+        "all": stats([r["latency_ms"] for r in selected if r.get("ok")]),
+        "by_role": {
+            role: stats([r["latency_ms"] for r in selected
+                         if r.get("ok") and r.get("role") == role])
+            for role in roles
+        },
+        "failed_attempts": sum(1 for r in selected if not r.get("ok")),
+    }
+
+
+RUNNER_GIT = runner_git_info()
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", required=True)
+    # R440G 閘門（機制，不是建議）：沒有一份「寫著這個 run 名字」的 DECISION 檔就拒絕啟動。
+    # 迴圈三輪三次自發射未預註冊的 run（R440F），提示詞規則擋不住，改成 harness 擋。
+    ap.add_argument("--decision", required=True,
+        help="預註冊 DECISION 檔路徑；檔案必須存在且內文含 --out 的目錄名，否則不跑")
+    ap.add_argument("--n", type=int, default=40)
+    ap.add_argument(
+        "--offset", type=int, default=0,
+        help="跳過題序前 offset 題（load_tasks 是 seed 決定性前綴 ts[offset:offset+n]）。"
+             "用來跑與既有 run 不重疊的剩餘題目再併庫分析，見 R445。",
+    )
+    ap.add_argument("--seed", default="g1")
+    ap.add_argument("--arms", default="OFF,ON,OFF5")
+    ap.add_argument("--bank", default="evalplus",
+                    choices=["evalplus", "humanevalplus", "builtin",
+                             "lcb", "lcb2", "lcb3"])
+    # R529（跨題庫）：把一個 LCB bank 切成「只跑某一層」，讓
+    # 「不同題目集」可以是 lcb3-hard／lcb3-medium 這種**同來源不同切片**，
+    # 而不是為了湊數把同一份東西算兩次。切層在 offset/n 之前 ⇒ 切塊語意不變。
+    # ⚠ 只吃 LCB 的平台原生標籤（difficulty／platform）；MBPP+／builtin 的
+    #   family 是我們自己貼的，拿它切層等於把自己的分類誤差寫成「不同題庫」。
+    ap.add_argument(
+        "--bank-filter", default=None,
+        help="只取題庫的某一層，格式 key=value（或 key=v1,v2），"
+             "key ∈ difficulty／platform，只支援 lcb／lcb2／lcb3。"
+             "對不上的 key／value／空集合一律停（量不到不是通過）",
+    )
+    # R529：一個佇列跨四個題目集，其中兩集有 `--bank-filter`、兩集沒有
+    # ⇒ 若「bank 欄只在切層時出現」，同一個 run 的四集 rows 會有兩種形狀。
+    # 但**不能**改成無條件落盤：R460R 的 18 塊正排在同一份 gain_run.py 底下
+    # 依序發射，它們的 rows.jsonl／summary.json 形狀一格都不准變。
+    # ⇒ 做成顯式旗標：R529 的發射器每一塊都給，R460R 的發射器不給。
+    ap.add_argument(
+        "--record-bank-field", action="store_true",
+        help="rows.jsonl／summary.json 無條件落盤 bank／bank_filter（切層時還有 stratum）。"
+             "不給且沒有 --bank-filter ⇒ 這幾個 key 完全不出現（既有 run 的形狀不變）",
+    )
+    ap.add_argument("--audit-rate", type=float, default=0.2)
+    ap.add_argument(
+        "--calibration-n", type=int, default=0,
+        help="disjoint preflight tasks per agent; measured but never fed into routing",
+    )
+    ap.add_argument(
+        "--probe-sample", type=int, default=12,
+        help="instrument checks before model calls; 0 checks every selected task",
+    )
+    # round460f（R460 §四 E-3）：量具驗的是**沙箱＋題庫＋計分**，參考解與壞樁
+    # 都不經模型 ⇒ 它與「這一塊是哪 20 題」「打哪一顆後端」都無關。
+    # 切成 20 題一塊之後，lcb2 有官方參考解的 12 題會落得很不平均
+    # （offset 0/20/40/60/80/100 → 3/3/4/**0**/1/1），offset=60 那塊量到 0/0，
+    # runner 照 "量不到不是通過" 正確地拒跑。`bank` 讓每一塊都對**整個題庫**
+    # 有參考解的題目驗兩個方向（12/12），比逐塊切片更強、而且不受切法影響。
+    # ⚠ 預設維持 `slice`＝現行行為，既有五臂與 T12／E-5 的釘死一格不動。
+    ap.add_argument(
+        "--gauge-scope", default="slice", choices=["slice", "bank"],
+        help="量具驗證的範圍：slice＝只驗本塊選到的題（預設，現行行為）；"
+             "bank＝驗整個題庫裡有參考解的題目（更強，且不受切塊影響）",
+    )
+    ap.add_argument(
+        "--models", default=DEFAULT_MODEL,
+        help="comma-separated model IDs, assigned round-robin across the open agent pool",
+    )
+    ap.add_argument(
+        "--request-timeout-s", type=int, default=240,
+        help="per-endpoint-attempt deadline; lower this for interactive/product pilots",
+    )
+    ap.add_argument(
+        "--review-timeout-s", type=int, default=60,
+        help="bounded deadline per reviewer attempt（clinepass-clean-v2 的死因修復）",
+    )
+    ap.add_argument(
+        "--review-retries", type=int, default=2,
+        help="reviewer attempts before the task is recorded as infra_void",
+    )
+    ap.add_argument(
+        "--retries", type=int, default=4,
+        help="endpoint attempts before the task is recorded as infra_void",
+    )
+    # 2026-09-13：預設由 2.0 改成 5.0（退避 5／10／20／40；retries=4 ⇒ 睡前三次
+    # ＝35 秒）。理由：1004 崩潰後被 JIT 以 TTL 1h 重載，每小時卸載一次，重載
+    # 要 8–10 秒，而 2／4／8 的總退避只有 14 秒 ⇒ 整格在重載窗內打完四次、
+    # 記成 infra_void（DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md §十一）。
+    # ⚠ 這個值落盤在 summary.json 的 `request_policy.backoff_s`：它是**實驗條件**，
+    #   改了就會讓新舊 run 的 request_policy 不同（`pool_precheck` 因此擋得住
+    #   「條件不同卻被靜默配對」）——那是要的行為，不是副作用。
+    ap.add_argument("--retry-backoff-s", type=float,
+                    default=brain_cline.DEFAULT_BACKOFF_S)
+    # 推論模式（thinking／非 thinking）是實驗條件不是實作細節：同一顆 gemma-4
+    # 在 1003（LM Studio 0.4.24）被跑成 thinking、在 1004（0.4.17）不是
+    # （§十一）。`none` ＝ 與 R460／R460R 實際跑到的條件對齊；`default` ＝
+    # **不送這個欄位**（讓後端自己決定，也就是 2026-09-13 之前的行為）。
+    ap.add_argument("--reasoning-effort", default="none",
+                    choices=list(brain_cline.REASONING_EFFORT_VALUES),
+                    help="OpenAI 相容的 reasoning_effort；預設 none（關思考）。"
+                         "`default` ＝不送這個欄位（舊行為）。值落盤在 "
+                         "summary.json.request_policy 與每一列 rows.jsonl。")
+    args = ap.parse_args()
+    # ── R440G 預註冊閘門（在任何 mkdir/落盤之前：被拒的啟動不得留下空目錄）──
+    _dec = pathlib.Path(args.decision)
+    _run_name = pathlib.Path(args.out).name
+    if not _dec.exists():
+        raise SystemExit(f"拒絕啟動：DECISION 檔不存在 {_dec}（每個 run 都要先預註冊）")
+    if _run_name not in _dec.read_text(encoding="utf-8", errors="replace"):
+        raise SystemExit(f"拒絕啟動：{_dec.name} 內文沒有寫到 run 名字「{_run_name}」"
+                         "——先把 run 名字與預測寫進 DECISION 再跑")
+    print(f"預註冊閘門通過：{_dec.name} 授權 {_run_name}", flush=True)
+    # round212：`--arms` 以前沒有 choices，dispatch 的 else 會把任何不認得的
+    # 名字當成 ON 跑掉（打錯字＝安靜跑錯臂）。檢查放在 preflight 之前，
+    # 打錯字不該先燒掉模型呼叫。
+    KNOWN_ARMS = {"OFF", "OFF5", "ON", "ONR", "CONFORM", "EQ5",
+                  "HPI", "HOC", "HMIX"}
+    if args.arms.strip() != "probe":
+        _unknown = [a.strip() for a in args.arms.split(",")
+                    if a.strip() and a.strip() not in KNOWN_ARMS]
+        if _unknown:
+            raise SystemExit(
+                f"未知的臂 {_unknown}；可用：{sorted(KNOWN_ARMS)}（或 --arms probe）")
+    if (args.request_timeout_s <= 0 or args.retries <= 0
+            or args.review_timeout_s <= 0 or args.review_retries <= 0
+            or args.retry_backoff_s < 0 or args.probe_sample < 0):
+        raise SystemExit(
+            "timeout/retries 必須為正數，backoff 與 probe-sample 不得為負"
+        )
+    # R445 M2：負 offset 在 python 是「從尾巴切」，會安靜取到完全不同的題目。
+    if args.offset < 0:
+        raise SystemExit(f"--offset 不得為負（收到 {args.offset}）")
+
+    out = pathlib.Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    calls_log = out / "calls.jsonl"
+    rows_path = out / "rows.jsonl"
+    occupied = [
+        p for p in (calls_log, rows_path, out / "summary.json", out / "notes.jsonl",
+                    out / "calibration_rows.jsonl")
+        if p.exists()
+    ]
+    if occupied:
+        raise SystemExit(
+            "輸出目錄已有實驗產物，拒絕 append 造成重複計數："
+            + ", ".join(str(p) for p in occupied)
+        )
+
+    def note(obj):
+        with (out / "notes.jsonl").open("a", encoding="utf-8") as f:
+            f.write(json.dumps(obj, ensure_ascii=False, default=str) + "\n")
+
+    tasks = load_tasks(args.bank, args.seed, args.n, offset=args.offset,
+                       bank_filter=args.bank_filter)
+    # R529：切層之後每一題的層標籤要跟著進 rows——run 目錄名可以打錯，
+    # rows 裡的標籤是從釘死的題庫算出來的，收官時只認後者。
+    stratum_of: dict[str, str] = {}
+    # 切層的 run 一定要記（不記就認不出自己）；沒切層的 run 由旗標決定。
+    _record_bank = bool(args.bank_filter or args.record_bank_field)
+    if args.bank_filter:
+        _fkey, _ = parse_bank_filter(args.bank_filter)
+        _strata = bank_strata(args.bank)
+        stratum_of = {t["task_id"]: _strata[t["task_id"]][_fkey] for t in tasks}
+    # R445 M3/M4：offset 過頭是「安靜量不到」的兩型——
+    #   M3 一題都取不到 ⇒ 這不是通過，是沒接上，直接停；
+    #   M4 取到的比要求的少 ⇒ 不准安靜縮水，顯式印出實際題數與缺口。
+    if not tasks:
+        raise SystemExit(
+            f"一題都沒載到（bank={args.bank} offset={args.offset} n={args.n}）"
+            "——offset 可能已經超過題庫尾端。這不是通過，是沒接上。停。"
+        )
+    print(f"{len(tasks)} 題（{args.bank}"
+          f"{'　層=' + args.bank_filter if args.bank_filter else ''}　"
+          f"offset={args.offset}　"
+          f"題序 [{args.offset}, {args.offset + len(tasks)})）　輸出 {out}")
+    if args.n and len(tasks) < args.n:
+        print(f"⚠ 只載到 {len(tasks)} 題，比 --n {args.n} 少 {args.n - len(tasks)} 題"
+              f"（offset={args.offset} 已接近題庫尾端）——分母用實際題數。")
+
+    # ── 先驗量具 ──
+    print("── 量具驗證（先答已知答案）")
+    # round460f：`bank` 時量具的對象是**整個題庫**，不是本塊那一片（理由見旗標定義）。
+    # 本塊的題目仍然拿去算「出貨閘門覆蓋」——那是另一個問題，見 probe_instrument。
+    gauge_tasks, coverage_tasks = tasks, None
+    if args.gauge_scope == "bank":
+        # R529：`bank` 就是**整個題庫**，`--bank-filter` **不套在這裡**。
+        # 理由不是圖方便，是實測：lcb v1/v2 的 12 份手寫參考解 **12/12 全是
+        # medium**（`ops/gain/data/lcb_probe_solutions.json` 對 v2 的難度分布），
+        # 所以 `difficulty=hard` 之下若連量具也切層 ⇒ covered=0 ⇒ runner 照
+        # 「量不到不是通過」正確地拒跑 ⇒ hard 那一層**永遠發不出去**。
+        # 而量具驗的是**沙箱＋題庫＋計分**（參考解與壞樁都不經模型）⇒ 對整個
+        # 題庫驗**比對單層驗更強**，且與「這一塊是哪幾題」無關。
+        # ⚠ 代價要說出來：hard 層的題目**沒有**被參考解直接驗過（它們沒有參考解）。
+        #   驗到的是同一支 `_lcb_check_code`／同一個沙箱，不是那幾題自己。
+        #   落盤欄位 `gauge_in_filter_n` 把這個數字寫下來，不讓它被總數蓋掉。
+        gauge_tasks = load_tasks(args.bank, args.seed, 0)
+        coverage_tasks = tasks
+        if not gauge_tasks:
+            raise SystemExit(
+                f"--gauge-scope bank 但整個題庫一題都沒載到（bank={args.bank}）"
+                "——這不是通過，是沒接上。停。")
+        print(f"   範圍＝bank：對 {args.bank} 全 {len(gauge_tasks)} 題裡有參考解的驗，"
+              f"本塊 {len(tasks)} 題另外算出貨閘門覆蓋"
+              + ("（量具**不**套 --bank-filter，理由見原始碼註解）"
+                 if args.bank_filter else ""))
+    probe_sample = len(gauge_tasks) if args.probe_sample == 0 else args.probe_sample
+    pr = probe_instrument(gauge_tasks, note, sample=probe_sample, bank=args.bank,
+                          coverage_tasks=coverage_tasks)
+    if args.bank_filter:
+        # 「量具驗到的那幾題，有幾題其實在我這一層裡」——擴大量具不准順手把
+        # 「這一層沒有一題被參考解直接驗過」這件事蓋掉。0 不擋（見上面的理由），
+        # 但**一定要印、一定要落盤**。
+        _f = bank_strata(args.bank)
+        _k, _v = parse_bank_filter(args.bank_filter)
+        pr["bank_filter"] = args.bank_filter
+        pr["gauge_in_filter_n"] = sum(
+            1 for d in pr["detail"] if _f.get(d["task_id"], {}).get(_k) in _v)
+        note({"bank_filter": args.bank_filter,
+              "gauge_in_filter_n": pr["gauge_in_filter_n"], "gauge_n": pr["n"]})
+        print(f"   量具驗到的 {pr['n']} 題裡，落在 {args.bank_filter} 這一層的有 "
+              f"{pr['gauge_in_filter_n']} 題（0 不擋——量具驗的是沙箱＋計分，"
+              f"不是那幾題自己；但這個數字要照實帶進收官）")
+    print(f"   參考解通過 {pr['ref_pass']}/{pr['n']}　"
+          f"壞解被擋 {pr['broken_rejected']}/{pr['n']}")
+    if pr["n"] == 0:
+        raise SystemExit("量具驗證一題都沒驗到——這不是通過，是沒接上。停。")
+    if pr["ref_pass"] < pr["n"] or pr["broken_rejected"] < pr["n"]:
+        raise SystemExit("量具沒有兩個方向都答對——在壞尺上跑實驗等於沒跑。停。")
+    # round671：可見閘門的數字**無條件量、無條件印**（--arms probe 也看得到），
+    # 但只有 CONFORM 拿它做決策，所以只在 CONFORM 在場時硬擋——擋掉合法的
+    # OFF/ON/OFF5 run 是過嚴。
+    print(f"   可見閘門（CONFORM 決策量具）參考解通過 {pr['visible_ref_pass']}/{pr['visible_n']}　"
+          f"樁被擋 {pr['visible_stub_rejected']}/{pr['visible_n']}　"
+          f"覆蓋 {pr['visible_n']}/{pr['n']}")
+    # round689：EQ5 用同一個 `visible_check` 當出貨閘門（`arm_eq5` 步驟 2），
+    # 所以同一條硬擋要一起適用——否則 EQ5 會在沒驗過的決策量具上跑，
+    # 「閘門沒有閘」會長得跟「等預算下機制有效」一模一樣。
+    # round460b：H 臂也用 `visible_check` 當**出貨閘門**（harness_arms 的步驟 5），
+    # 所以同一條硬擋一起適用——量具沒驗過的話「閘門根本沒有閘」會長得跟
+    # 「機制很便宜」一模一樣。這一行只**增加**停止條件，不含 H 臂的 run 逐位元不變。
+    _gate_arms = ({"CONFORM", "EQ5", "HPI", "HOC", "HMIX"}
+                  & {a.strip() for a in args.arms.split(",")})
+    if _gate_arms:
+        _who = "／".join(sorted(_gate_arms))
+        # round460f：bank 模式下，上面那條問的是題庫層級的量具，**問不到**
+        # 「本塊 20 題每一題都有出貨閘門嗎」。所以獨立擋一次——
+        # 擴大量具不准順手把這條擋門弄不見。
+        if "coverage_n" in pr:
+            print(f"   本塊出貨閘門覆蓋 {pr['coverage_visible_n']}/{pr['coverage_n']}")
+            if pr["coverage_visible_n"] < pr["coverage_n"]:
+                raise SystemExit(
+                    f"{_who} 在本塊有 "
+                    f"{pr['coverage_n'] - pr['coverage_visible_n']} 題沒有 visible_check"
+                    f"（例：{pr.get('coverage_missing_visible')}）"
+                    "——那些題的出貨閘門根本不存在。量不到不是通過。停。")
+        if pr["visible_n"] < pr["n"]:
+            raise SystemExit(
+                f"{_who} 的決策量具覆蓋率不足：visible {pr['visible_n']}/{pr['n']}"
+                "——量不到不是通過，是沒接上。停。")
+        if (pr["visible_ref_pass"] < pr["visible_n"]
+                or pr["visible_stub_rejected"] < pr["visible_n"]):
+            raise SystemExit(
+                f"{_who} 的決策量具沒有兩個方向都答對——出貨閘門是壞的，"
+                "拒交率／calls_per_task／通過率三個預註冊預測都會是假數字。停。")
+    if args.arms.strip() == "probe":
+        return
+
+    # 量具探針是零模型呼叫；只有真的跑 arm 才要求秘密憑證。
+    keys = load_keys()
+    models = [model.strip() for model in args.models.split(",") if model.strip()]
+    if not models:
+        raise SystemExit("--models 至少要有一個 model ID")
+    agents = [ClineBrain(aid, sys_p, key=keys[i % len(keys)], log_path=calls_log,
+                         model=models[i % len(models)],
+                         timeout_s=args.request_timeout_s, retries=args.retries,
+                         backoff_s=args.retry_backoff_s,
+                         reasoning_effort=args.reasoning_effort)
+              for i, (aid, sys_p) in enumerate(POOL)]
+    print(f"── 模型池：{len(agents)} 個 agent／{len(set(models))} 個模型家族")
+
+    # ── 模型池預檢：每個設定的 model 先問一句，答不出來就停 ──────────────
+    #
+    # 為什麼要有這一步（2026-08-24 燒掉兩輪換來的）：
+    # agent 分配是 `models[i % len(models)]`，**決定性**不是隨機。傳兩個模型
+    # 而其中一個不可達時，index 為奇數的 agent（POOL 裡所有 `-2` 尾碼）
+    # 保證 100% 失敗——不管跑幾題都是那一半。runs/g_off60_relay_20260824
+    # 就是這樣拿到 18/60 infra_void（30%，接近一半），超過判決表的 10% 擋門，
+    # 整輪 f 作廢；當時中轉根本沒有服務 nemotron，而我們跑了 55 分鐘才知道。
+    #
+    # 這跟既有的「量具要先答已知答案」是同一條紀律：**在壞尺上跑實驗等於沒跑**，
+    # 在死掉的模型上跑實驗也一樣。差別只是量具驗的是判定邏輯，這裡驗的是後端。
+    # 成本是每個 model 一次呼叫；省下的是一整輪。
+    print("── 模型池預檢（每個 model 問一句，零容忍）")
+    for model_id in dict.fromkeys(models):          # 去重但保留順序
+        probe = ClineBrain("preflight", "You are a helpful assistant.",
+                           key=keys[0], log_path=calls_log, model=model_id,
+                           timeout_s=min(args.request_timeout_s, 120), retries=2,
+                           backoff_s=args.retry_backoff_s,
+                           reasoning_effort=args.reasoning_effort)
+        try:
+            reply = probe.generate("Reply with exactly: OK",
+                                   role="preflight", meta={"model": model_id})
+        except InfraVoid as exc:
+            raise SystemExit(
+                f"模型 {model_id} 預檢失敗：{exc}\n"
+                f"  這個 model 分到的 agent 會 100% 失敗（分配是 i % len(models)，"
+                f"決定性不是隨機）。\n"
+                f"  先確認端點真的服務這個 model，或把它從 --models 拿掉。"
+            ) from exc
+        # ── 推論模式觀測（**只記錄不擋**；要不要擋由預註冊決定）────────────
+        # 這一格是 DECISION_20260912 §十一 的處置：跨機跑之前先確認兩台的
+        # reasoning 行為一致。預檢走的是 `generate()`，而 round529-3 之後
+        # `generate()` **也送** `reasoning_effort`（Fable 2026-09-13 授權改 T12）
+        # ⇒ 這裡量到的就是「加了旗標之後、真正跑實驗的那條路」的行為。
+        # ⚠ 仍然**只記錄不擋**：≠0 代表這顆端點不吃這個旗標（或版本太舊），
+        #   那是要被看見的事實，不是發射器該自己裁決的事。
+        _last = None
+        try:
+            with calls_log.open(encoding="utf-8") as _f:
+                for _line in _f:
+                    if _line.strip():
+                        _last = json.loads(_line)
+        except Exception:                                     # noqa: BLE001
+            _last = None
+        _rt = None
+        if _last and (_last.get("meta") or {}).get("model") == model_id:
+            _rt = ((_last.get("usage") or {})
+                   .get("completion_tokens_details") or {}).get("reasoning_tokens")
+        print(f"   {model_id}　回 {len(reply)} 字　"
+              f"reasoning_tokens={_rt if _rt is not None else '未回報'}　✓")
+        if _rt:
+            print(f"   ⚠ 預檢量到 reasoning_tokens={_rt} > 0，但已送出 "
+                  f"--reasoning-effort={args.reasoning_effort}：這顆端點**沒有**"
+                  f"照旗標關掉 thinking（版本太舊或不吃這個欄位）⇒ 本塊跑的是 "
+                  f"thinking 模式，與非 thinking 的塊不是同一個推論條件。"
+                  f"**不擋**，只記錄（§十一 的處置）。")
+
+    calibration = None
+    if args.calibration_n:
+        calibration_tasks = load_tasks(
+            args.bank, args.seed, args.calibration_n, offset=len(tasks),
+            # R529：切層時 calibration 要留在**同一層**，否則「與正式題
+            # 不重疊」會靠跨層的題目來達成，preflight 量到的就不是這一層的難度。
+            bank_filter=args.bank_filter,
+        )
+        if len(calibration_tasks) != args.calibration_n:
+            raise SystemExit("題庫不足以建立與正式題不重疊的 calibration set")
+        print(f"── Agent calibration：{len(calibration_tasks)} 題，結果不餵回路由")
+        calibration_cost_before = sum(a.cost for a in agents)
+        calibration_market_before = sum(a.market_cost for a in agents)
+        calibration = calibrate_pool(
+            calibration_tasks, agents, out / "calibration_rows.jsonl"
+        )
+        calibration["cost_usd"] = round(
+            sum(a.cost for a in agents) - calibration_cost_before, 4)
+        calibration["market_cost_usd"] = round(
+            sum(a.market_cost for a in agents) - calibration_market_before, 4)
+        print(f"── calibration spread: {calibration['accuracy_spread']}")
+        if not calibration_ready(calibration):
+            raise SystemExit(
+                "calibration 未完整量到每個 agent，或沒有觀察到能力差距；"
+                "信譽路由缺少成立前提，拒絕繼續跑 arm。"
+            )
+
+    arms = [a.strip() for a in args.arms.split(",") if a.strip()]
+    summary = {}
+
+    def write_summary(*, run_complete: bool) -> None:
+        equal_budget_valid = bool(
+            summary.get("ON", {}).get("complete")
+            and summary.get("OFF5", {}).get("complete")
+            and summary.get("ON", {}).get("calls_per_task") == 5
+            and summary.get("OFF5", {}).get("calls_per_task") == 5
+        )
+        # `run_complete` 要求零 void（比例才可信），有 void 的 run 永遠是 False——
+        # R516 §8 抓到的是下游拿它當「這輪跑完了沒」的訊號會永遠等不到 True。
+        # `run_terminal` 只回答「迴圈是不是把每個 task 都跑到底了」，
+        # 不管中途有沒有 void；兩個訊號分開才不會互相冒充。
+        run_terminal = bool(arms) and all(
+            summary.get(a, {}).get("terminal") for a in arms
+        )
+        (out / "summary.json").write_text(
+            json.dumps({
+                "seed": args.seed,
+                "n": args.n,
+                "offset": args.offset,
+                "runner_git": RUNNER_GIT,
+                "n_tasks_loaded": len(tasks),
+                # round460f：量具範圍是**可稽核的實驗條件**（哪一塊用哪一種模式
+                # 要看得出來），但它不進臂的執行路徑 ⇒ 分類 (a)。
+                "gauge_scope": args.gauge_scope,
+                # R529：切層的 run 一定要說得出「哪個題庫的哪一層」，
+                # 否則 summary 自己認不出自己。沒切層、也沒給
+                # `--record-bank-field` 就完全不出現這兩個 key
+                # ⇒ 既有 run 的 summary.json 逐位元不變。
+                **({"bank": args.bank, "bank_filter": args.bank_filter}
+                   if _record_bank else {}),
+                "run_complete": run_complete,
+                "run_terminal": run_terminal,
+                "request_policy": {
+                    "timeout_s": args.request_timeout_s,
+                    "retries": args.retries,
+                    "backoff_s": args.retry_backoff_s,
+                    "review_timeout_s": args.review_timeout_s,
+                    "review_retries": args.review_retries,
+                    # 推論模式是實驗條件（§十一）。放在 request_policy 裡的後果
+                    # 是：不同 reasoning_effort 的兩個 run **不會被靜默配對**
+                    # （`pool_precheck` C4 比的就是這一格）。那是要的牙齒。
+                    # round529-3（Fable 2026-09-13 授權改 T12）之後 `generate()`
+                    # 與 `chat()` **兩條路都送** ⇒ 九臂同一個推論模式。
+                    "reasoning_effort": args.reasoning_effort,
+                    "reasoning_effort_applies_to": "generate() and chat() (all arms)",
+                },
+                "pool": [
+                    {"agent_id": a.agent_id, "model": a.model} for a in agents
+                ],
+                "instrument": pr,
+                "calibration": calibration,
+                "arms": summary,
+                "equal_budget_comparison_valid": equal_budget_valid and run_complete,
+            }, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    # Keep validated preflight metadata even if an endpoint or operator stops the
+    # run before the first arm finishes.
+    write_summary(run_complete=False)
+    # round278：arm 順序改交錯（`for task: for arm:`）。round138 已經驗證過這是
+    # 統計上免費的：`tasks` 在 arm 迴圈之外只建一次 ⇒ 兩臂題序相同；
+    # `rng`/`rep`/`calls` 每臂各一份；`grep -n "random\." | grep -v rng` 為空
+    # ⇒ 沒有共用的全域亂數狀態。每臂的抽樣序列只取決於「該臂依題序處理的順序」，
+    # 交錯不改變它 ⇒ 每一格 (arm, task) 的抽樣與循序版逐字元相同。
+    #
+    # 為什麼要改：循序版是 `for arm: for task:` ⇒ ON 全部 179 題跑完才碰第一題
+    # OFF5。r274 實測 ON 6.7 分/列 ⇒ **第一筆 OFF5 要等 20 小時**，而 OFF5 是
+    # 唯一能回答「等預算誰贏」的臂（判準 3）。跑了 20 小時以內被中斷 ⇒ OFF5 = 0。
+    # 這不是假想：r271 在 1h49m 被中止、g_onoff5_371_r123 也是中途停的。
+    st = {
+        arm: {
+            "rng": random.Random(f"{args.seed}:{arm}"),
+            "rep": {a.agent_id: {"n": 0, "ok": 0} for a in agents},
+            # CONFORM 的收據鏈：每臂一條，簽章身份只在本 run 內存活
+            # （私鑰不落盤——RECORD_SPEC §7 排除 identity.key）。
+            "book": Logbook(),
+            "ident": Identity.generate(),
+            "calls": [0],
+            "n_acc": 0, "n_acc_ok": 0, "n_void": 0,
+            "rv_correct": 0, "rv_total": 0, "rv_raw_correct": 0,
+            "fail_claims": 0, "confirmed_claims": 0, "confirmed_on_wrong": 0,
+            "raw_correct": 0, "processed": 0,
+            "eq5_vote_ok": 0, "eq5_gate_ok": 0, "eq5_same_choice": 0,
+            "eq5_same_choice_eff": 0,
+            "transitions": {"improved": 0, "harmed": 0,
+                            "stayed_correct": 0, "stayed_wrong": 0},
+            # 交錯之後「臂的 wall time」不能再用 t_end - t_start（兩臂在時間上
+            # 交纏）。改成逐格累加該格實際耗時＝該臂的作用時間。循序版這兩個數字
+            # 幾乎相同；交錯版只有累加版有意義。
+            "wall_s": 0.0, "cost": 0.0, "market_cost": 0.0,
+        }
+        for arm in arms
+    }
+
+    def finalize(arm: str) -> dict:
+        s = st[arm]
+        measured = s["processed"] - s["n_void"]
+        n_acc, n_acc_ok, calls_n = s["n_acc"], s["n_acc_ok"], s["calls"][0]
+        rv_total = s["rv_total"]
+        return {
+            "tasks": len(tasks), "calls": calls_n, "infra_void": s["n_void"],
+            # ⚠ 循序版寫 `n_void == 0` 就夠，因為 summary[arm] 只在該臂整個題目
+            #   迴圈跑完之後才寫一次。交錯版每一格都會寫 summary ⇒ 一個才跑到
+            #   第 3 題、還沒遇到 void 的臂會被寫成 complete=True。必須連
+            #   `processed == len(tasks)` 一起要求，否則就是 round224 那個
+            #   「run_complete 說跑完了、其實一格都沒量到」的同型錯誤。
+            "complete": s["n_void"] == 0 and s["processed"] == len(tasks),
+            # `complete` 綁死零 void，是「比例可不可信」的判準，不是「跑完了沒」——
+            # 只要這一輪有任何 void（infra_void 規則本來就預期會有）它就永遠 False，
+            # 下游拿 complete 當收官訊號會永遠等不到（R516 §8）。`terminal` 只問
+            # 迴圈有沒有把每個 task 都處理過一次，void 不影響它。
+            "terminal": s["processed"] == len(tasks),
+            "processed": s["processed"],
+            "accepted": n_acc, "accepted_and_meets_demand": n_acc_ok,
+            "demand_equals_output_rate": (n_acc_ok / n_acc) if n_acc else None,
+            "coverage": (n_acc / measured) if measured else None,
+            "correct_delivery_rate": (n_acc_ok / measured) if measured else None,
+            "raw_final_accuracy": (s["raw_correct"] / measured) if measured else None,
+            "calls_per_task": (calls_n / measured) if measured else None,
+            "calls_per_correct_delivery": (calls_n / n_acc_ok) if n_acc_ok else None,
+            "leaked": n_acc - n_acc_ok,
+            "reviewer_accuracy": (s["rv_correct"] / rv_total) if rv_total else None,
+            "raw_reviewer_accuracy": (
+                s["rv_raw_correct"] / rv_total if rv_total else None),
+            "reviewer_votes": rv_total,
+            "review_fail_claims": s["fail_claims"],
+            "machine_confirmed_counterexamples": s["confirmed_claims"],
+            "confirmed_counterexample_precision_against_hidden_truth": (
+                s["confirmed_on_wrong"] / s["confirmed_claims"]
+                if s["confirmed_claims"] else None),
+            "revision_transitions": s["transitions"] if arm == "ON" else None,
+            # EQ5 專屬：同一組候選、同樣 5 次呼叫的兩條選擇規則。
+            # 分母是 measured（＝processed − void），與 correct_delivery_rate 同一個。
+            "eq5_gate_delivery_rate": (
+                (s["eq5_gate_ok"] / measured) if arm == "EQ5" and measured else None),
+            "eq5_vote_delivery_rate": (
+                (s["eq5_vote_ok"] / measured) if arm == "EQ5" and measured else None),
+            "eq5_same_choice_rate": (
+                (s["eq5_same_choice"] / measured) if arm == "EQ5" and measured else None),
+            # AMEND-1：§六-1 的仲裁量（拒交格不算「選到同一份」）。
+            "eq5_same_choice_effective_rate": (
+                (s["eq5_same_choice_eff"] / measured)
+                if arm == "EQ5" and measured else None),
+            "endpoint_latency_ms": latency_summary(calls_log, arm),
+            "wall_s": round(s["wall_s"], 1),
+            "cost_usd": round(s["cost"], 4),
+            "market_cost_usd": round(s["market_cost"], 4),
+            "market_cost_per_correct_delivery": (
+                round(s["market_cost"] / n_acc_ok, 6) if n_acc_ok else None),
+        }
+
+    for i, t in enumerate(tasks, 1):
+        for arm in arms:
+            s = st[arm]
+            rng, rep, calls = s["rng"], s["rep"], s["calls"]
+            calls_before = calls[0]
+            cell_t0 = time.time()
+            cost_before = sum(a.cost for a in agents)
+            market_cost_before = sum(a.market_cost for a in agents)
+            s["processed"] += 1
+            try:
+                if arm == "OFF":
+                    code, worker, involved, extra = arm_off(t, agents, rng, calls)
+                    accepted = True
+                elif arm == "OFF5":
+                    code, worker, involved, extra = arm_off5(t, agents, rng, calls)
+                    accepted = True
+                elif arm == "ONR":
+                    code, worker, involved, extra = arm_onr(
+                        t, agents, rng, calls, rep, audit_rate=args.audit_rate)
+                    accepted = extra["accepted"]
+                elif arm == "CONFORM":
+                    code, worker, involved, extra = arm_conform(
+                        t, agents, rng, calls, s["book"], s["ident"])
+                    accepted = extra["accepted"]
+                elif arm == "EQ5":
+                    code, worker, involved, extra = arm_eq5(
+                        t, agents, rng, calls, s["book"], s["ident"])
+                    accepted = extra["accepted"]
+                elif arm in ("HPI", "HOC", "HMIX"):
+                    code, worker, involved, extra = run_harness_arm(
+                        t, agents, rng, calls, s["book"], s["ident"], variant=arm)
+                    accepted = extra["accepted"]
+                elif arm == "ON":
+                    code, worker, involved, extra = arm_on(
+                        t, agents, rng, calls, rep, audit_rate=args.audit_rate,
+                        review_timeout_s=args.review_timeout_s,
+                        review_retries=args.review_retries)
+                    accepted = extra["accepted"]
+            except InfraVoid as e:
+                s["n_void"] += 1
+                s["wall_s"] += time.time() - cell_t0
+                s["cost"] += sum(a.cost for a in agents) - cost_before
+                s["market_cost"] += (
+                    sum(a.market_cost for a in agents) - market_cost_before)
+                note({"arm": arm, "task_id": t["task_id"], "infra_void": str(e)})
+                continue
+
+            truth, err = meets_demand(
+                code, t["hidden_check"]["code"], entry_point=t.get("entry_point"))
+            s["raw_correct"] += int(truth)
+            if arm == "ONR":
+                # 與 ON 同一條聲譽迴路：只有真的抽到的 audit 能更新，truth 不回餵。
+                apply_audit_reputation(
+                    rep, extra["responsible_agent"], extra["audit_ok"])
+            if arm == "EQ5":
+                # 反事實的離線計分：與 ON 臂的 `initial_meets_demand` 同一條路徑
+                # （事後評分，不回餵任何選擇）。EQ5 的 row 因此同時帶著
+                # 「閘門交了什麼」與「多數決會交什麼」，兩者花的是同一組 5 次呼叫。
+                vote_truth, _ = meets_demand(
+                    extra["vote_code"], t["hidden_check"]["code"],
+                    entry_point=t.get("entry_point"))
+                extra["vote_meets_demand"] = vote_truth
+                # deliv 口徑（R667 :40 凍結）＝accepted ∧ meets_demand。
+                # 多數決永不拒交 ⇒ vote_accepted 恆 True。
+                extra["vote_deliv"] = bool(vote_truth)
+                extra["gate_deliv"] = bool(accepted and truth)
+                s["eq5_vote_ok"] += int(vote_truth)
+                s["eq5_gate_ok"] += int(accepted and truth)
+                s["eq5_same_choice"] += int(extra["same_choice"])
+                s["eq5_same_choice_eff"] += int(extra["same_choice_effective"])
+            if arm == "ON":
+                # truth 是離線評分，不能餵回產品；路由只吃真的抽樣 audit。
+                apply_audit_reputation(
+                    rep, extra["responsible_agent"], extra["audit_ok"])
+                initial_truth, _ = meets_demand(
+                    extra["initial_code"], t["hidden_check"]["code"],
+                    entry_point=t.get("entry_point"))
+                transition = (
+                    "improved" if not initial_truth and truth else
+                    "harmed" if initial_truth and not truth else
+                    "stayed_correct" if initial_truth else "stayed_wrong"
+                )
+                s["transitions"][transition] += 1
+                extra["initial_meets_demand"] = initial_truth
+                extra["revision_transition"] = transition
+                # 評審看的是 initial_code，不能拿修訂後 final truth 幫它算對。
+                for _, v in extra["votes"]:
+                    s["rv_total"] += 1
+                    s["rv_correct"] += int(v == initial_truth)
+                for evidence in extra["review_evidence"]:
+                    s["rv_raw_correct"] += int(evidence["raw_pass"] == initial_truth)
+                    if not evidence["raw_pass"]:
+                        s["fail_claims"] += 1
+                    if evidence["counterexample_confirmed"]:
+                        s["confirmed_claims"] += 1
+                        s["confirmed_on_wrong"] += int(not initial_truth)
+            if accepted:
+                s["n_acc"] += 1
+                s["n_acc_ok"] += int(truth)
+
+            s["wall_s"] += time.time() - cell_t0
+            s["cost"] += sum(a.cost for a in agents) - cost_before
+            s["market_cost"] += (
+                sum(a.market_cost for a in agents) - market_cost_before)
+
+            with rows_path.open("a", encoding="utf-8") as f:
+                f.write(json.dumps({
+                    "arm": arm, "seed": args.seed, "i": i,
+                    "task_id": t["task_id"], "family": t["family"], "entry_point": t.get("entry_point"),
+                    # R529：只有切層或顯式要求的 run 才多這三欄 ⇒ **既有 run 的
+                    # rows.jsonl 逐位元不變**（旗標與層都沒有就沒有這幾個 key）。
+                    **({"bank": args.bank, "bank_filter": args.bank_filter,
+                        "stratum": stratum_of.get(t["task_id"])}
+                       if _record_bank else {}),
+                    "worker": worker, "involved": involved,
+                    # 推論模式逐列落盤（§十一 的處置）：跨機／跨 run 合併之前
+                    # 要看得出這一列是在哪一種推論條件下量到的。
+                    "reasoning_effort": args.reasoning_effort,
+                    "meets_demand": truth, "err": err[:200],
+                    "accepted": accepted, "calls_used": calls[0] - calls_before,
+                    "calls_so_far": calls[0],
+                    **{k: v for k, v in extra.items()
+                       if k not in {"votes", "raw_reviews", "initial_code",
+                                    "vote_code"}},
+                    "votes": extra.get("votes"),
+                }, ensure_ascii=False) + "\n")
+            print(f"  [{arm} {i}/{len(tasks)}] 需求符合={truth} 接受={accepted} "
+                  f"累計呼叫={calls[0]}", flush=True)
+
+        # 交錯的重點就在這裡：每跑完一題的所有臂就把 summary 全部重寫一次，
+        # 中斷在任何時刻都會留下**兩臂格數相等**的可分析資料。
+        for arm in arms:
+            summary[arm] = finalize(arm)
+        write_summary(run_complete=False)
+        save_receipts(out, st)
+
+    for arm in arms:
+        print(f"── {arm}: {json.dumps(summary[arm], ensure_ascii=False)}")
+
+    # ⚠ 2026-08-24 實測抓到：這裡原本無條件寫 True。runs/g_off60_20260824 那一輪
+    #   端點 403、60 題全部 infra_void、每臂 complete=False，頂層卻是
+    #   run_complete: true。SPEC_GAIN §7 寫的是「只有全部指定臂完成才設 true」。
+    #   幾個月後翻歸檔 JSONL 的人第一眼看的就是這個欄位——它說跑完了，
+    #   而那一輪其實一格都沒量到。
+    all_arms_complete = all(summary.get(a, {}).get("complete") for a in arms)
+    write_summary(run_complete=all_arms_complete)
+    save_receipts(out, st)
+    if not all_arms_complete:
+        incomplete = [a for a in arms if not summary.get(a, {}).get("complete")]
+        print(f"⚠ run_complete=False——這些臂沒跑完：{', '.join(incomplete)}。"
+              f"這一輪的比例不得拿去比較（SPEC_GAIN §7）。")
+    print(f"\n寫出 {out/'summary.json'}")
+    print("⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。")
+
+
+if __name__ == "__main__":
+    main()

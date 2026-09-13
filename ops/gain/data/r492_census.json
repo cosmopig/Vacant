@@ -1,0 +1,128 @@
+{
+  "n": 189,
+  "live_reads": 0,
+  "blockers": [],
+  "verdict_vocabulary": [
+    "NON_INFERIOR_BUT_UNRESOLVED",
+    "ON_WINS",
+    "RULED_OUT",
+    "UNINFORMATIVE"
+  ],
+  "n_states_scanned": 18145,
+  "calibration": {
+    "C_POS": {
+      "class": "FORCED_BY_OTHERS",
+      "n_others_true": 1427,
+      "witness": null
+    },
+    "C_NEG": {
+      "class": "EVALUABLE",
+      "n_others_true": 1427,
+      "witness": {
+        "b": 6,
+        "c": 0,
+        "n": 189,
+        "delta_pp": 3.1746031746031744,
+        "p": 0.03125,
+        "lo_pp": 0.25867856228634184,
+        "hi_pp": 3.1746031746031744,
+        "verdict": "ON_WINS"
+      }
+    }
+  },
+  "predictions": {
+    "P-R461-1": {
+      "A1_delta_in_3_20": {
+        "class": "EVALUABLE",
+        "n_others_true": 7279,
+        "witness": {
+          "b": 38,
+          "c": 0,
+          "n": 189,
+          "delta_pp": 20.105820105820104,
+          "p": 7.275957614183426e-12,
+          "lo_pp": 16.38573022877938,
+          "hi_pp": 20.105820105820104,
+          "verdict": "ON_WINS"
+        }
+      },
+      "A2_p_lt_0.05": {
+        "class": "FORCED_BY_OTHERS",
+        "n_others_true": 1427,
+        "witness": null
+      },
+      "A3_verdict_ON_WINS": {
+        "class": "FORCED_BY_OTHERS",
+        "n_others_true": 1427,
+        "witness": null
+      }
+    },
+    "P-R461-2": {
+      "B1_delta_in_8_28": {
+        "class": "EVALUABLE",
+        "n_others_true": 7279,
+        "witness": {
+          "b": 6,
+          "c": 0,
+          "n": 189,
+          "delta_pp": 3.1746031746031744,
+          "p": 0.03125,
+          "lo_pp": 0.25867856228634184,
+          "hi_pp": 3.1746031746031744,
+          "verdict": "ON_WINS"
+        }
+      },
+      "B2_p_lt_0.05": {
+        "class": "FORCED_BY_OTHERS",
+        "n_others_true": 2435,
+        "witness": null
+      },
+      "B3_verdict_ON_WINS": {
+        "class": "FORCED_BY_OTHERS",
+        "n_others_true": 2435,
+        "witness": null
+      }
+    },
+    "P-R461-3": {
+      "_whole": {
+        "class": "UNSCANNED_DIFFERENT_EMITTER",
+        "n_others_true": 0,
+        "witness": null
+      }
+    }
+  },
+  "min_paired_gate_active": false,
+  "verdict": "CENSUS_OK",
+  "supplementary_sweep": {
+    "60": {
+      "P-R461-1": {
+        "A1_delta_in_3_20": "EVALUABLE",
+        "A2_p_lt_0.05": "FORCED_BY_OTHERS",
+        "A3_verdict_ON_WINS": "FORCED_BY_OTHERS"
+      },
+      "P-R461-2": {
+        "B1_delta_in_8_28": "EVALUABLE",
+        "B2_p_lt_0.05": "FORCED_BY_OTHERS",
+        "B3_verdict_ON_WINS": "FORCED_BY_OTHERS"
+      },
+      "P-R461-3": {
+        "_whole": "UNSCANNED_DIFFERENT_EMITTER"
+      }
+    },
+    "100": {
+      "P-R461-1": {
+        "A1_delta_in_3_20": "EVALUABLE",
+        "A2_p_lt_0.05": "FORCED_BY_OTHERS",
+        "A3_verdict_ON_WINS": "FORCED_BY_OTHERS"
+      },
+      "P-R461-2": {
+        "B1_delta_in_8_28": "EVALUABLE",
+        "B2_p_lt_0.05": "FORCED_BY_OTHERS",
+        "B3_verdict_ON_WINS": "FORCED_BY_OTHERS"
+      },
+      "P-R461-3": {
+        "_whole": "UNSCANNED_DIFFERENT_EMITTER"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+PASS  P0a rc=0 兩個 key  rc=0/0
+PASS  P0b key 進 JSON  meets_demand / deliv fields=['accepted', 'meets_demand']
+PASS  P1 預設逐位元＝--key meets_demand  兩份 JSON 相同
+PASS  P2 r444 上兩個 key 同值（Q1 前提）  b/c/n = 9/4/179 vs 9/4/179
+PASS  P3 拒交格之下兩個 key 給出相反的帳  meets 9/4（不動）  deliv 9/5（動了，原 9/4）
+PASS  P4 缺 accepted 欄位 ⇒ BROKEN（不是安靜全判失敗）  rc=1 err=BROKEN：CONFORM 的列缺 accepted 欄位（--key deliv 需要 accepted/meets_demand）——
+PASS  P4b 同一份 fixture 用 meets_demand 仍 rc=0（擋門看的是欄位，不是檔壞了）  rc=0
+PASS  P5 兩臂 task_id 不重疊 ⇒ BROKEN（不是 disc_rate=0.00%）  rc=1 err=BROKEN：CONFORM 與 OFF5 配對數 = 0（A 臂 179 列、B 臂 179 列，task_id 完全不重疊）——這不是「
+PASS  P6 臂名打錯 ⇒ BROKEN  rc=1
+PASS  P7 真 run 目錄唯讀  rows.jsonl sha256[:8]=3f2cb966
+
+10/10 PASS

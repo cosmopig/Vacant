@@ -1,0 +1,162 @@
+{
+  "run": "runs/g_r444_conform_mbpp",
+  "rows_source": "runs/g_r444_conform_mbpp/rows.jsonl",
+  "rows_sha256_8": "3f2cb966",
+  "n_rows": 537,
+  "declared_n": 179,
+  "run_terminal": true,
+  "settlement_ready": true,
+  "arms": {
+    "OFF5": {
+      "rows": 179,
+      "accepted": 179,
+      "meets_demand": 130,
+      "deliv": 130,
+      "leaked": 49,
+      "meets_demand_and_not_accepted": 0,
+      "refused": 0,
+      "refusal_rate": 0.0,
+      "rate_deliv": 0.7262569832402235,
+      "rate_meets_demand": 0.7262569832402235,
+      "rate_demand_equals_output": 0.7262569832402235,
+      "calls_used_sum": 895,
+      "calls_used_max": 5,
+      "calls_per_task_recomputed": 5.0
+    },
+    "CONFORM": {
+      "rows": 179,
+      "accepted": 170,
+      "meets_demand": 135,
+      "deliv": 135,
+      "leaked": 35,
+      "meets_demand_and_not_accepted": 0,
+      "refused": 9,
+      "refusal_rate": 0.05027932960893855,
+      "rate_deliv": 0.7541899441340782,
+      "rate_meets_demand": 0.7541899441340782,
+      "rate_demand_equals_output": 0.7941176470588235,
+      "calls_used_sum": 248,
+      "calls_used_max": 5,
+      "calls_per_task_recomputed": 1.3854748603351956
+    },
+    "OFF": {
+      "rows": 179,
+      "accepted": 179,
+      "meets_demand": 129,
+      "deliv": 129,
+      "leaked": 50,
+      "meets_demand_and_not_accepted": 0,
+      "refused": 0,
+      "refusal_rate": 0.0,
+      "rate_deliv": 0.7206703910614525,
+      "rate_meets_demand": 0.7206703910614525,
+      "rate_demand_equals_output": 0.7206703910614525,
+      "calls_used_sum": 179,
+      "calls_used_max": 1,
+      "calls_per_task_recomputed": 1.0
+    }
+  },
+  "paired_test_vs_baseline": {
+    "test": "CONFORM",
+    "baseline": "OFF5",
+    "by": {
+      "deliv": {
+        "paired_n": 179,
+        "a_only_in_a": [],
+        "unpaired_a": 0,
+        "unpaired_b": 0,
+        "a_ok": 135,
+        "b_ok": 130,
+        "rate_a": 0.7541899441340782,
+        "rate_b": 0.7262569832402235,
+        "delta_pp": 2.793296089385475,
+        "b": 9,
+        "c": 4,
+        "p": 0.266845703125,
+        "ci_lo_pp": -1.6596665952616365,
+        "ci_hi_pp": 5.941938402863404,
+        "ci_verdict": "NON_INFERIOR_BUT_UNRESOLVED",
+        "ci_alpha": 0.05,
+        "ci_practical_pp": 5.0
+      },
+      "meets_demand": {
+        "paired_n": 179,
+        "a_only_in_a": [],
+        "unpaired_a": 0,
+        "unpaired_b": 0,
+        "a_ok": 135,
+        "b_ok": 130,
+        "rate_a": 0.7541899441340782,
+        "rate_b": 0.7262569832402235,
+        "delta_pp": 2.793296089385475,
+        "b": 9,
+        "c": 4,
+        "p": 0.266845703125,
+        "ci_lo_pp": -1.6596665952616365,
+        "ci_hi_pp": 5.941938402863404,
+        "ci_verdict": "NON_INFERIOR_BUT_UNRESOLVED",
+        "ci_alpha": 0.05,
+        "ci_practical_pp": 5.0
+      }
+    }
+  },
+  "void": {
+    "OFF5": {
+      "n_measured": 179,
+      "n_void": 0,
+      "ratio": 0.0,
+      "over_20pct_abort": false,
+      "over_10pct_warn": false
+    },
+    "CONFORM": {
+      "n_measured": 179,
+      "n_void": 0,
+      "ratio": 0.0,
+      "over_20pct_abort": false,
+      "over_10pct_warn": false
+    },
+    "OFF": {
+      "n_measured": 179,
+      "n_void": 0,
+      "ratio": 0.0,
+      "over_20pct_abort": false,
+      "over_10pct_warn": false
+    }
+  },
+  "live_snapshot_skew": [],
+  "calls_check_mode": {
+    "OFF5": "exact",
+    "CONFORM": "exact",
+    "OFF": "exact"
+  },
+  "verdicts": {
+    "P-C1_delta_pp": 2.793296089385475,
+    "P-C1_band_3_to_6pp": false,
+    "P-C1_ci_pp": [
+      -1.6596665952616365,
+      5.941938402863404
+    ],
+    "P-C1_ci_verdict": "NON_INFERIOR_BUT_UNRESOLVED",
+    "P-C1_settlement_rule": "只能寫「沒測出劣化，也沒測出 ≥5pp 的增益」；不准寫成「打贏」或「打不贏」",
+    "P-C1b_p": 0.266845703125,
+    "P-C1b_band_0.02_to_0.20": false,
+    "P-C2_calls_per_task": 1.3854748603351956,
+    "P-C2_le_2.0": true,
+    "P-C2_abort_gt_4.5": false,
+    "P-C3a_refusal_rate": 0.05027932960893855,
+    "P-C3a_band_3_to_10pct": true,
+    "P-C3b_leaked": {
+      "OFF5": 49,
+      "CONFORM": 35,
+      "OFF": 50
+    },
+    "P-C3b_verdict": "REPORTED_ONLY（R440R 未給門檻，判準 §三 降級）",
+    "P-C4": "前半只看 receipt_head 齊備（round666）；鏈為 UNVERIFIABLE，不是中止條件",
+    "P-C5_void_ratio": {
+      "OFF5": 0.0,
+      "CONFORM": 0.0,
+      "OFF": 0.0
+    },
+    "P-C5_any_abort": false
+  }
+}

@@ -1,0 +1,67 @@
+<unknown>:5: SyntaxWarning: invalid escape sequence '\w'
+60 題（evalplus）　輸出 runs/g_off5_qwen_only_20260901
+── 量具驗證（先答已知答案）
+   參考解通過 12/12　壞解被擋 12/12
+── 模型池：6 個 agent／1 個模型家族
+── 模型池預檢（每個 model 問一句，零容忍）
+   qwen/qwen3.6-35b-a3b　回 4 字　✓
+  [OFF5 1/60] 需求符合=True 接受=True 累計呼叫=5
+  [OFF5 2/60] 需求符合=True 接受=True 累計呼叫=10
+  [OFF5 3/60] 需求符合=True 接受=True 累計呼叫=15
+  [OFF5 4/60] 需求符合=False 接受=True 累計呼叫=20
+  [OFF5 5/60] 需求符合=True 接受=True 累計呼叫=25
+  [OFF5 6/60] 需求符合=True 接受=True 累計呼叫=30
+  [OFF5 8/60] 需求符合=False 接受=True 累計呼叫=38
+  [OFF5 9/60] 需求符合=False 接受=True 累計呼叫=43
+  [OFF5 10/60] 需求符合=False 接受=True 累計呼叫=48
+  [OFF5 11/60] 需求符合=True 接受=True 累計呼叫=53
+  [OFF5 12/60] 需求符合=True 接受=True 累計呼叫=58
+  [OFF5 13/60] 需求符合=True 接受=True 累計呼叫=63
+  [OFF5 14/60] 需求符合=True 接受=True 累計呼叫=68
+  [OFF5 16/60] 需求符合=True 接受=True 累計呼叫=76
+  [OFF5 17/60] 需求符合=True 接受=True 累計呼叫=81
+  [OFF5 18/60] 需求符合=True 接受=True 累計呼叫=86
+  [OFF5 19/60] 需求符合=False 接受=True 累計呼叫=91
+  [OFF5 20/60] 需求符合=True 接受=True 累計呼叫=96
+  [OFF5 21/60] 需求符合=True 接受=True 累計呼叫=101
+  [OFF5 22/60] 需求符合=True 接受=True 累計呼叫=106
+  [OFF5 23/60] 需求符合=True 接受=True 累計呼叫=111
+  [OFF5 24/60] 需求符合=True 接受=True 累計呼叫=116
+  [OFF5 25/60] 需求符合=True 接受=True 累計呼叫=121
+  [OFF5 26/60] 需求符合=True 接受=True 累計呼叫=126
+  [OFF5 27/60] 需求符合=False 接受=True 累計呼叫=131
+  [OFF5 28/60] 需求符合=True 接受=True 累計呼叫=136
+  [OFF5 30/60] 需求符合=True 接受=True 累計呼叫=141
+  [OFF5 31/60] 需求符合=True 接受=True 累計呼叫=146
+  [OFF5 32/60] 需求符合=True 接受=True 累計呼叫=151
+  [OFF5 33/60] 需求符合=True 接受=True 累計呼叫=156
+  [OFF5 34/60] 需求符合=True 接受=True 累計呼叫=161
+  [OFF5 35/60] 需求符合=False 接受=True 累計呼叫=166
+  [OFF5 36/60] 需求符合=True 接受=True 累計呼叫=171
+  [OFF5 37/60] 需求符合=True 接受=True 累計呼叫=176
+  [OFF5 38/60] 需求符合=True 接受=True 累計呼叫=181
+  [OFF5 39/60] 需求符合=True 接受=True 累計呼叫=186
+  [OFF5 40/60] 需求符合=False 接受=True 累計呼叫=191
+  [OFF5 41/60] 需求符合=True 接受=True 累計呼叫=196
+  [OFF5 43/60] 需求符合=True 接受=True 累計呼叫=203
+  [OFF5 44/60] 需求符合=True 接受=True 累計呼叫=208
+  [OFF5 45/60] 需求符合=False 接受=True 累計呼叫=213
+  [OFF5 46/60] 需求符合=True 接受=True 累計呼叫=218
+  [OFF5 47/60] 需求符合=True 接受=True 累計呼叫=223
+  [OFF5 48/60] 需求符合=True 接受=True 累計呼叫=228
+  [OFF5 49/60] 需求符合=True 接受=True 累計呼叫=233
+  [OFF5 50/60] 需求符合=True 接受=True 累計呼叫=238
+  [OFF5 51/60] 需求符合=True 接受=True 累計呼叫=243
+  [OFF5 53/60] 需求符合=True 接受=True 累計呼叫=251
+  [OFF5 54/60] 需求符合=True 接受=True 累計呼叫=256
+  [OFF5 55/60] 需求符合=True 接受=True 累計呼叫=261
+  [OFF5 56/60] 需求符合=True 接受=True 累計呼叫=266
+  [OFF5 57/60] 需求符合=True 接受=True 累計呼叫=271
+  [OFF5 58/60] 需求符合=True 接受=True 累計呼叫=276
+  [OFF5 59/60] 需求符合=False 接受=True 累計呼叫=281
+  [OFF5 60/60] 需求符合=True 接受=True 累計呼叫=286
+── OFF5: {"tasks": 60, "calls": 286, "infra_void": 5, "complete": false, "processed": 60, "accepted": 55, "accepted_and_meets_demand": 45, "demand_equals_output_rate": 0.8181818181818182, "coverage": 1.0, "correct_delivery_rate": 0.8181818181818182, "raw_final_accuracy": 0.8181818181818182, "calls_per_task": 5.2, "calls_per_correct_delivery": 6.355555555555555, "leaked": 10, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "endpoint_latency_ms": {"all": {"n": 286, "p50": 51961, "p95": 129223, "max": 432402}, "by_role": {"gen": {"n": 286, "p50": 51961, "p95": 129223, "max": 432402}}, "failed_attempts": 28}, "wall_s": 19850.6, "cost_usd": 0.0, "market_cost_usd": 0.0, "market_cost_per_correct_delivery": 0.0}
+⚠ run_complete=False——這些臂沒跑完：OFF5。這一輪的比例不得拿去比較（SPEC_GAIN §7）。
+
+寫出 runs/g_off5_qwen_only_20260901/summary.json
+⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。

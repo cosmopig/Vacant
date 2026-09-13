@@ -1,0 +1,4 @@
+# chain_verify — 離線簽章鏈重驗（2026-08-16T04:40:17.443085+00:00）
+
+SKIPPED: 此 run 目錄下找不到居民 logbook（residents/*/logbook.ndjson 或 residents/*/trust/logbook.ndjson）。
+理由：本 run 無上鏈居民，或 logbook 未落盤於預期路徑。

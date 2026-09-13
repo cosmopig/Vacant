@@ -1,4 +1,4 @@
-"""L1 reputation — 五維信譽（Beta posterior），per (stream_id, branch_id, substrate)。
+"""L1 reputation — 五維信譽（Beta posterior），per (stream_id, branch_id, substrate, family)。
 
 架構總規格 §8；credit-memory v1 **改動2**（06 §2；15 §1 B8 覆核通過）：
   - 信譽的會計單位是 **memory stream 三元組 (stream_id, branch_id, substrate)**，
@@ -13,10 +13,33 @@
   - 同源降權：same-controller/substrate/behavior → 權重打折（地板 0.1）。
     *raises-cost，非 prevents*：公開閾值可被繞，誠實標明。
   - 路由：rep_score + UCB 探索額（給新人冷啟動流量）。
+
+**通道分離 3.1（2026-08-07）：key 擴成四元組，末位是 `family`（任務族／坑型）。**
+理由來自人類制度的 transactive memory（Lewis 2003 三因子裡的 specialisation）：
+「這個人好」與「這個人擅長這一類」是**兩種資訊**，人類制度把它們分在不同通道傳
+（TMS 傳「誰會什麼」但不傳「他覺得答案是什麼」）。Vacant 原本只有一條通道，
+所有東西都走同一條——純量信譽把兩者壓成一個數字，於是路由只能挑「總體好的人」，
+挑不出「擅長這個坑型的人」。
+
+**相容性是硬需求**：`family` 預設 `""`＝「不分族的總通道」，所有既有呼叫端
+（三參數）都落在 `""` 格，數字逐位不變；序列化在 family=="" 時仍寫三段 key，
+既有 state 檔與判準（`tests/test_credit_memory.py`）不受擾動。這是與
+`entrycost.SimConfig.digest()` 的 `_LATER_FIELDS` 同一招：**後加的維度維持
+預設時，不改變任何既有位元**。上一輪就是沒守住這條，害所有數字無聲位移。
+
+誠實邊界：分族把證據切成 N 份，**每格**的有效觀測數約降為 1/N ⇒ UCB 探索項變大、
+分數更抖，代價付在早期收斂（實測 600 輪：每格觀測 41.6 → 10.4）。
+decay 的時鐘是 per-stream 不是 per-cell，所以「證據老化的總量」兩邊相同
+（累積 decay 因子都是 0.5^(Δstream/200)），差別只在每格看到的樣本數。
+
+**不要把這句寫成「總證據量不變」**——實測相反：分族臂的總觀測數更高
+（373.6 vs 249.7），因為分族路由把工作交給更擅長的人 → 成功率更高 → 正評更多。
+證據總量有一部分是路由品質的函數，不是外生常數。
 """
 
 from __future__ import annotations
 
+import contextlib
 import math
 from dataclasses import dataclass, field
 from typing import Any
@@ -25,6 +48,47 @@ DIMS = ("factual", "logical", "relevance", "honesty", "adoption")
 SAME_SIGNAL_FLOOR = 0.1  # 同源降權地板（同源評審權重壓到至多此值）
 UCB_EPSILON = 1e-9       # UCB 探索項的 pseudocount 下限，防 n=0 除零
 DECAY_HALFLIFE_EVENTS = 200  # 12 §4.2 牙齒：decay 半衰期 200 事件（向先驗回歸）
+
+# ── slash 的取捨參數 λ（2026-08-07 新增；見 Beta.slash 的說明）─────────────
+# 「擋住壞人繼續拿工作」與「讓他有機會翻身」是同一個機制的兩面，而 2026-07-26
+# 的 P0-1 修正（α 不動、β += (α+β)(1/f−1)）把這兩件事綁死在一起：它同時把均值
+# 砍成 factor 倍**並且**把有效觀測數 n 加大 Δ，而 n 是回歸時間的指數係數。
+# λ 把兩者解耦：均值一律變成 factor 倍（不受 λ 影響），n 只上升 λ·Δ。
+#   λ=1.0  現行行為（逐位相同，走 fast path）
+#   λ=0.0  只動均值不動 n
+# 這是模組層預設而不是純參數，因為 slash 的呼叫鏈上有多個不帶此參數的既有
+# 呼叫端（Registry.apply_slash、blayer 六情境、ecosystem 的稽核錨），
+# 為了掃描一個尚未選定的操作點去改動那條鏈並不划算。
+#
+# 誠實邊界：這個全域是**行程層級**的，不是 thread-local。掃描時請用
+# 多行程（每個 λ 一個行程）或在單執行緒內用 slash_n_factor() 包住整段，
+# 不要在多執行緒裡同時跑不同 λ。
+DEFAULT_SLASH_N_FACTOR = 1.0
+_slash_n_factor: float = DEFAULT_SLASH_N_FACTOR
+
+
+def get_slash_n_factor() -> float:
+    """目前生效的 λ。"""
+    return _slash_n_factor
+
+
+def set_slash_n_factor(value: float) -> None:
+    """設定行程層級的 λ（見模組常數區的誠實邊界）。"""
+    global _slash_n_factor
+    if not 0.0 <= value <= 1.0:
+        raise ValueError(f"slash_n_factor 必須在 [0,1]：{value}")
+    _slash_n_factor = value
+
+
+@contextlib.contextmanager
+def slash_n_factor(value: float):
+    """暫時把 λ 換掉，離開時還原（掃描取捨曲線用）。"""
+    old = get_slash_n_factor()
+    set_slash_n_factor(value)
+    try:
+        yield value
+    finally:
+        set_slash_n_factor(old)
 
 
 @dataclass
@@ -55,7 +119,8 @@ class Beta:
         self.alpha, self.beta = self.decayed(now, halflife)
         self.last_event = now
 
-    def slash(self, factor: float, now: int, halflife: float = DECAY_HALFLIFE_EVENTS) -> None:
+    def slash(self, factor: float, now: int, halflife: float = DECAY_HALFLIFE_EVENTS,
+              n_factor: float | None = None) -> None:
         """牙齒·slash（12 §4.2）：provable fault → 後驗均值乘以 factor。
 
         **實作＝注入負面證據**，不是把 α、β 一起往先驗縮。要 mean 變成 factor 倍，
@@ -74,11 +139,47 @@ class Beta:
         懲罰若打不穿新人基準，換 key 重生就永遠不虧，probation 也就守著一扇
         沒人需要走的門。相對地，這使「洗白的相對誘因」變成真問題，由 probation
         與身份成本設計承接（見審查意見書 §5）。
+
+        ## n_factor（λ）：把「罰得重」與「赦得回」解耦（2026-08-07）
+
+        2026-08-03 的對抗式複驗指出上面那個修正的另一面：`β += (α+β)(1/f−1)`
+        同時把 n 加大 Δ=(α+β)(1/f−1)，而 n 是回歸時間的**指數係數**——
+        觀測數 3.4 時要 ~1e8 次觀測才回得到原位、觀測數 48 時要 ~1e66。
+        **懲罰把自己的赦免通道一起關小了**，而且資深者關得更小。
+
+        λ∈[0,1] 把兩個軸拆開。令 S=α+β、m=α/S、Δ=S(1/f−1)：
+
+            S' = S + λ·Δ          有效觀測數 n' = n + λ·Δ
+            α' = f·m·S'           後驗均值 m' = α'/S' = f·m   （與 λ 無關）
+            β' = S' − α'
+
+          λ=1  ⇒ S'=S/f、α'=α  ⇒ 完全等同現行行為（走 fast path，逐位相同）
+          λ=0  ⇒ S'=S、α'=f·α  ⇒ n 完全不動，只把質量從 α 搬到 β
+
+        三個既有性質在所有 λ 下都保留：mean 單調下降、可疊加（兩次 0.5 ＝
+        一次 0.25，因為 m'=f·m 與 λ 無關）、decay 仍把 α、β 一起拉回先驗。
+
+        **λ<1 的代價要誠實講**：現行版本「α 不動 → 已賺到的好評不被抹掉」的
+        語意會消失——λ=0 時 α 被乘上 f，等於把過去的好評連同壞紀錄一起打折。
+        換到的是 n 不上升、UCB 探索項不縮、赦免通道維持原寬。這是一個
+        **取捨**，不是一個 bug fix；哪個點對系統較好要靠 `examples/iterate_v2.py
+        --only S1` 掃出來的曲線決定，不能靠這段 docstring 決定。
         """
         if not 0.0 < factor <= 1.0:
             raise ValueError(f"slash factor 必須在 (0,1]：{factor}")
+        lam = get_slash_n_factor() if n_factor is None else n_factor
+        if not 0.0 <= lam <= 1.0:
+            raise ValueError(f"slash n_factor 必須在 [0,1]：{lam}")
         self.commit_decay(now, halflife)
-        self.beta += (self.alpha + self.beta) * (1.0 / factor - 1.0)
+        if lam == 1.0:
+            # fast path：與 2026-07-26 P0-1 之後的實作**逐位相同**。不要改寫成
+            # 下面的通式——f*(S/f) 的浮點結果不保證等於 S，既有凍結數字會位移。
+            self.beta += (self.alpha + self.beta) * (1.0 / factor - 1.0)
+            return
+        s = self.alpha + self.beta
+        s2 = s + lam * s * (1.0 / factor - 1.0)
+        a2 = factor * self.alpha * s2 / s
+        self.alpha, self.beta = a2, s2 - a2
 
     @property
     def mean(self) -> float:
@@ -89,13 +190,15 @@ class Beta:
         """有效觀測數（α+β 扣掉 Beta(1,1) 先驗）。
 
         update() 只增不減、decay 向先驗收斂 → 理論上不會為負；仍夾 max(0) 防呆。
+        slash 的 λ<1 會把質量從 α 搬到 β（α 可低於先驗 1.0），但 α+β 只增不減，
+        所以 n 仍然單調——λ 動的是「n 上升多少」，不是「n 會不會下降」。
         """
         return max(0.0, (self.alpha - 1.0) + (self.beta - 1.0))
 
 
 @dataclass
 class ReputationCell:
-    """單一 (stream_id, branch_id, substrate) 三元組下的五維（改動2）。"""
+    """單一 (stream_id, branch_id, substrate, family) 格下的五維（改動2＋通道分離 3.1）。"""
 
     dims: dict[str, Beta] = field(default_factory=lambda: {d: Beta() for d in DIMS})
 
@@ -105,11 +208,12 @@ class ReputationCell:
                 self.dims[d].commit_decay(now)
                 self.dims[d].update(s, weight)
 
-    def slash(self, factor: float, dims: tuple[str, ...] | None = None, now: int = 0) -> None:
-        """對指定維（預設全五維）乘法扣減。"""
+    def slash(self, factor: float, dims: tuple[str, ...] | None = None, now: int = 0,
+              n_factor: float | None = None) -> None:
+        """對指定維（預設全五維）乘法扣減。n_factor＝λ，None → 模組層預設。"""
         for d in (dims or DIMS):
             if d in self.dims:
-                self.dims[d].slash(factor, now)
+                self.dims[d].slash(factor, now, n_factor=n_factor)
 
     def score(self, now: int | None = None) -> float:
         """rep_score = 五維 mean 的平均。給 now → 先看 decay 後的值（牙齒）。"""
@@ -165,7 +269,7 @@ class Reputation:
     """
 
     def __init__(self) -> None:
-        self._cells: dict[tuple[str, str, str], ReputationCell] = {}
+        self._cells: dict[tuple[str, str, str, str], ReputationCell] = {}
         self._stream_seq: dict[str, int] = {}  # stream_id → 該 stream 自己的事件序
         self.event_seq = 0  # 全帳本累計（僅供報表/觀測，不再是 decay 時間軸）
 
@@ -173,18 +277,32 @@ class Reputation:
         """該 stream 的當前事件序（decay 的時間座標）。"""
         return self._stream_seq.get(stream_id, 0)
 
-    def cell(self, stream_id: str, branch_id: str, substrate: str) -> ReputationCell:
-        key = (stream_id, branch_id, substrate)
+    def cell(
+        self, stream_id: str, branch_id: str, substrate: str, family: str = "",
+    ) -> ReputationCell:
+        key = (stream_id, branch_id, substrate, family)
         if key not in self._cells:
             self._cells[key] = ReputationCell()
         return self._cells[key]
 
-    def peek(self, stream_id: str, branch_id: str, substrate: str) -> ReputationCell | None:
+    def peek(
+        self, stream_id: str, branch_id: str, substrate: str, family: str = "",
+    ) -> ReputationCell | None:
         """唯讀查詢：不存在就回 None，**不創造 cell**。
 
         `cell()` 的建立副作用曾經是狀態膨脹向量——任何人查詢任意 stream_id
         即可灌大 registry_state.json（獨立審查 P2）。"""
-        return self._cells.get((stream_id, branch_id, substrate))
+        return self._cells.get((stream_id, branch_id, substrate, family))
+
+    def families(self, stream_id: str, branch_id: str, substrate: str) -> list[str]:
+        """某 (stream, branch, substrate) 下已有紀錄的任務族（排序，確定性）。
+
+        供「身份層級」的操作（slash、聚合查詢）枚舉要動哪些格：provable fault
+        是**身份**的性質不是坑型的性質，扣分不該只扣他當時被派到的那一族。"""
+        return sorted(
+            k[3] for k in self._cells
+            if k[0] == stream_id and k[1] == branch_id and k[2] == substrate
+        )
 
     def record_review(
         self,
@@ -195,6 +313,7 @@ class Reputation:
         *,
         weight: float = 1.0,
         same_signal: bool = False,
+        family: str = "",
     ) -> None:
         """記一筆評審（推進全局事件序）。same_signal=True → 同源降權。
 
@@ -202,12 +321,16 @@ class Reputation:
           - 一般情況 weight=1.0 → 0.1（同源刷分被狠狠打折，raises-cost 非 prevents）。
           - 若呼叫端本就傳了 <0.1 的小權重（如部分分），尊重之、不反而抬高。
         地板的意義是「同源評審不會被完全抹成 0」，但也不準超過 0.1。
+
+        family（通道分離 3.1）＝這一筆交付所屬的任務族／坑型；`""`＝不分族的
+        總通道（既有行為）。時鐘仍是 per-stream 而非 per-cell：證據老化的是
+        「這條記憶鏈又活了多久」，不是「這一族又被評了幾次」。
         """
         w = min(weight, SAME_SIGNAL_FLOOR) if same_signal else weight
         self.event_seq += 1
         now = self._stream_seq.get(stream_id, 0) + 1
         self._stream_seq[stream_id] = now
-        self.cell(stream_id, branch_id, substrate).update(scores, w, now)
+        self.cell(stream_id, branch_id, substrate, family).update(scores, w, now)
 
     def slash(
         self,
@@ -217,6 +340,8 @@ class Reputation:
         factor: float,
         *,
         dims: tuple[str, ...] | None = None,
+        family: str = "",
+        n_factor: float | None = None,
     ) -> None:
         """牙齒·slash：對某三元組的指定維（預設全維）乘法扣減（12 §4.2）。
 
@@ -225,23 +350,34 @@ class Reputation:
 
         不推進 stream 時鐘：懲罰與「又過了一段時間」是兩件事，混在一起會讓
         手算對照失去意義（slash 的效果會被同一步的 decay 汙染）。"""
-        self.cell(stream_id, branch_id, substrate).slash(
-            factor, dims, self._stream_seq.get(stream_id, 0))
+        self.cell(stream_id, branch_id, substrate, family).slash(
+            factor, dims, self._stream_seq.get(stream_id, 0), n_factor=n_factor)
 
-    def score(self, stream_id: str, branch_id: str, substrate: str) -> float:
-        c = self.peek(stream_id, branch_id, substrate)
+    def score(
+        self, stream_id: str, branch_id: str, substrate: str, family: str = "",
+    ) -> float:
+        c = self.peek(stream_id, branch_id, substrate, family)
         return 0.5 if c is None else c.score(self._now(stream_id))
 
-    def observations(self, stream_id: str, branch_id: str, substrate: str) -> float:
-        c = self.peek(stream_id, branch_id, substrate)
+    def observations(
+        self, stream_id: str, branch_id: str, substrate: str, family: str = "",
+    ) -> float:
+        c = self.peek(stream_id, branch_id, substrate, family)
         return 0.0 if c is None else c.observations(self._now(stream_id))
 
     # --- 持久化 ------------------------------------------------------------
     def to_json(self) -> dict[str, Any]:
+        """線材格式：family=="" 時仍寫**三段** key。
+
+        通道分離 3.1 的相容性承諾：沒有用到任務族的部署，state 檔逐位元不變。
+        用到的才寫四段。解析端兩種都吃（見 from_json）。"""
         return {
             "event_seq": self.event_seq,
             "stream_seq": dict(self._stream_seq),
-            "cells": {f"{st}␟{br}␟{su}": c.to_json() for (st, br, su), c in self._cells.items()},
+            "cells": {
+                (f"{st}␟{br}␟{su}" if not fam else f"{st}␟{br}␟{su}␟{fam}"): c.to_json()
+                for (st, br, su, fam), c in self._cells.items()
+            },
         }
 
     @classmethod
@@ -252,11 +388,13 @@ class Reputation:
             rep._stream_seq = {k: int(v) for k, v in (d.get("stream_seq") or {}).items()}
             d = d["cells"]
         for key, cell in d.items():
-            st, br, su = key.split("␟", 2)
-            rep._cells[(st, br, su)] = ReputationCell.from_json(cell)
+            parts = key.split("␟", 3)
+            st, br, su = parts[0], parts[1], parts[2]
+            fam = parts[3] if len(parts) > 3 else ""   # 三段舊 key → 總通道
+            rep._cells[(st, br, su, fam)] = ReputationCell.from_json(cell)
         # 舊格式（全域 event_seq 時代）沒有 stream_seq：由各 stream 自己 cell 的
         # last_event 取最大值回填，讓 decay 的相對次序在遷移後仍然合理。
-        for (st, _br, _su), cell in rep._cells.items():
+        for (st, _br, _su, _fam), cell in rep._cells.items():
             if st not in rep._stream_seq:
                 rep._stream_seq[st] = max(b.last_event for b in cell.dims.values())
             else:

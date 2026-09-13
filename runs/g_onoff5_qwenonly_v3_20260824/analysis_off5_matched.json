@@ -1,0 +1,75 @@
+{
+  "worst_persona": "careful-1",
+  "marginal": {
+    "careful-1": {
+      "ok": 18,
+      "n": 40,
+      "rate": 0.45
+    },
+    "careful-2": {
+      "ok": 37,
+      "n": 53,
+      "rate": 0.6981132075471698
+    },
+    "hasty-1": {
+      "ok": 47,
+      "n": 57,
+      "rate": 0.8245614035087719
+    },
+    "hasty-2": {
+      "ok": 31,
+      "n": 42,
+      "rate": 0.7380952380952381
+    },
+    "plain-1": {
+      "ok": 45,
+      "n": 51,
+      "rate": 0.8823529411764706
+    },
+    "plain-2": {
+      "ok": 33,
+      "n": 45,
+      "rate": 0.7333333333333333
+    }
+  },
+  "min_fisher_p_uncorrected": 6.340065880813924e-05,
+  "min_fisher_p_corrected": 0.0013499325033748313,
+  "matched": {
+    "target": "careful-1",
+    "tasks_matched": 27,
+    "target_ok": 18,
+    "target_n": 40,
+    "target_rate": 0.45,
+    "others_ok": 61,
+    "others_n": 95,
+    "others_rate": 0.6421052631578947,
+    "deficit_pp": -19.210526315789473
+  },
+  "matched_perm_p": 0.0013499325033748313,
+  "iters": 20000,
+  "source": "/tmp/off5_persona_v3.json",
+  "tasks_covered": 58,
+  "candidates_total": 288,
+  "mixture_off5_quality": {
+    "reputation_expected": 0.727179000034307,
+    "uniform_expected": 0.721076020610164,
+    "mixture_effect_pp": 0.6102979424143062,
+    "shares": {
+      "careful-1": 16,
+      "careful-2": 5,
+      "hasty-1": 5,
+      "hasty-2": 2,
+      "plain-1": 26,
+      "plain-2": 6
+    },
+    "quality": {
+      "careful-1": 0.45,
+      "careful-2": 0.6981132075471698,
+      "hasty-1": 0.8245614035087719,
+      "hasty-2": 0.7380952380952381,
+      "plain-1": 0.8823529411764706,
+      "plain-2": 0.7333333333333333
+    },
+    "n_share_calls": 60
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "run": "runs/g_r443_gemma_lcb",
+  "paired_tasks": 81,
+  "ok_calls_counted": 810,
+  "missing_usage": 0,
+  "missing_usage_frac": 0.0,
+  "third_category_arm_none": [],
+  "broken": false,
+  "ON": {
+    "prompt": {
+      "n": 81,
+      "median": 8134,
+      "mean": 10607.2,
+      "min": 3898,
+      "max": 36526,
+      "sum": 859184
+    },
+    "completion": {
+      "n": 81,
+      "median": 4298,
+      "mean": 7119.5,
+      "min": 1214,
+      "max": 30911,
+      "sum": 576682
+    },
+    "total": {
+      "n": 81,
+      "median": 13841,
+      "mean": 17726.7,
+      "min": 5305,
+      "max": 56163,
+      "sum": 1435866
+    },
+    "latency_ms": {
+      "n": 81,
+      "median": 70238,
+      "mean": 134782.2,
+      "min": 17887,
+      "max": 743957,
+      "sum": 10917357
+    },
+    "calls": {
+      "n": 81,
+      "median": 5,
+      "mean": 5,
+      "min": 5,
+      "max": 5,
+      "sum": 405
+    },
+    "failed_calls": {
+      "n": 81,
+      "median": 0,
+      "mean": 0.1,
+      "min": 0,
+      "max": 2,
+      "sum": 9
+    },
+    "failed_latency_ms": {
+      "n": 81,
+      "median": 0,
+      "mean": 42231.4,
+      "min": 0,
+      "max": 760191,
+      "sum": 3420744
+    }
+  },
+  "OFF5": {
+    "prompt": {
+      "n": 81,
+      "median": 2605,
+      "mean": 2647.4,
+      "min": 1302,
+      "max": 4725,
+      "sum": 214440
+    },
+    "completion": {
+      "n": 81,
+      "median": 9622,
+      "mean": 13273.2,
+      "min": 2550,
+      "max": 50132,
+      "sum": 1075126
+    },
+    "total": {
+      "n": 81,
+      "median": 12090,
+      "mean": 15920.6,
+      "min": 3973,
+      "max": 52845,
+      "sum": 1289566
+    },
+    "latency_ms": {
+      "n": 81,
+      "median": 158296,
+      "mean": 222476.9,
+      "min": 32855,
+      "max": 924602,
+      "sum": 18020630
+    },
+    "calls": {
+      "n": 81,
+      "median": 5,
+      "mean": 5,
+      "min": 5,
+      "max": 5,
+      "sum": 405
+    },
+    "failed_calls": {
+      "n": 81,
+      "median": 0,
+      "mean": 0.1,
+      "min": 0,
+      "max": 1,
+      "sum": 8
+    },
+    "failed_latency_ms": {
+      "n": 81,
+      "median": 0,
+      "mean": 24407.2,
+      "min": 0,
+      "max": 600101,
+      "sum": 1976980
+    }
+  },
+  "R_total_median": 1.1448,
+  "R_total_mean": 1.1134,
+  "R_completion_median": 0.4467,
+  "R_completion_mean": 0.5364,
+  "R_prompt_median": 3.1225,
+  "R_prompt_mean": 4.0066,
+  "verdict": "ON_COSTS_MORE",
+  "sha256_rows.jsonl": "30e4c33caf63dba7",
+  "lines_rows.jsonl": 250,
+  "sha256_calls.jsonl": "205b4b20167bd292",
+  "lines_calls.jsonl": 948
+}

@@ -1,0 +1,1438 @@
+<html lang="zh-Hant"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vacant — 信任觀測台</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark"><span class="pip"></span>VACANT</div>
+      <div class="brand-sub">Trust Observatory</div>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-view="overview" aria-current="false">總覽</button>
+      <button data-view="identities" aria-current="true">身份 <span class="count" id="nav-ids">6</span></button>
+      <button data-view="activity" aria-current="false">活動 <span class="count" id="nav-acts">40</span></button>
+      <button data-view="chain" aria-current="false">鏈完整性</button>
+      <button data-view="claims" aria-current="false">宣稱階梯</button>
+    </nav>
+    <div class="rail-foot">
+      <div class="live on" id="live"><span class="dot"></span><span id="live-txt">即時連線</span></div>
+      <div id="foot-root">s7e-app-ax1bmvvo/eco</div>
+      <div id="foot-ver">6 身份 · echo-like(offline)</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1 id="view-title">身份</h1>
+      <div class="spacer"></div>
+      <span class="chip on" id="chip-trust">trust <b>ON</b></span>
+      <span class="chip ok" id="chip-chain">chain <b>OK</b></span>
+      <span class="chip mono" id="chip-head" title="ledger 滾動雜湊：任一行被竄改／重排／刪除都會改變它">head <button class="hash" data-copy="7aa7ee57f8505b15de3feab3b5a8530f3fc0ffd6f9630f684a6dd634df4f1c81" title="7aa7ee57f8505b15de3feab3b5a8530f3fc0ffd6f9630f684a6dd634df4f1c81（點擊複製）">7aa7ee…1c81</button></span>
+    </header>
+
+    <!-- 總覽 -->
+    <section class="view" id="view-overview" hidden="">
+      <div class="sec">
+        <div class="sec-head"><h2>此刻</h2>
+          <span class="note">每個數字都帶分母；沒有資料就顯示沒有資料，不補零。</span></div>
+        <div class="tiles" id="tiles">
+    <div class="tile accent">
+      <div class="label">身份</div>
+      <div class="value">6</div>
+      <div class="sub">6 條記憶鏈已證明擁有權</div>
+    </div>
+    <div class="tile ">
+      <div class="label">交付</div>
+      <div class="value">40</div>
+      <div class="sub">ledger 共 234 筆事件</div>
+    </div>
+    <div class="tile warn">
+      <div class="label">稽核通過率</div>
+      <div class="value">79%</div>
+      <div class="sub">22 / 28 已稽核</div>
+    </div>
+    <div class="tile ">
+      <div class="label">稽核事件</div>
+      <div class="value">28</div>
+      <div class="sub">抽樣率 1</div>
+    </div>
+    <div class="tile bad">
+      <div class="label">SLASH</div>
+      <div class="value">1</div>
+      <div class="sub">信用已被扣減</div>
+    </div>
+    <div class="tile ">
+      <div class="label">互審</div>
+      <div class="value">84</div>
+      <div class="sub">每筆 K=3</div>
+    </div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="sec">
+          <div class="sec-head"><h2>事件流</h2><span class="note">ledger 即時串流</span></div>
+          <div class="card">
+            <div class="card-head">
+              <button class="btn" id="pause">❚❚ 暫停</button>
+              <span class="badge warn" id="pending" hidden="">—</span>
+              <span style="margin-left:auto;color:var(--ink-3);font-size:0.74rem">
+                最新在上，保留最近 300 筆</span>
+            </div>
+            <div class="stream" id="stream"><div class="ev SLASH"><span class="t">00:48:50</span>
+    <span class="ty">SLASH</span>
+    <span class="d">trust_on=true task_id=88568baecb94 target=saboteur_2 reason=human verdict=FAIL audit_corroborated=true credit_applied=true</span></div><div class="ev HUMAN_REPORT"><span class="t">00:48:50</span>
+    <span class="ty">HUMAN_REPORT</span>
+    <span class="d">trust_on=true task_id=88568baecb94 verdict=FAIL target=saboteur_2 evidence=s7e fixture: render the tile branch</span></div><div class="ev DELIVERED"><span class="t">00:48:50</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=07754a9a6c1c target=saboteur_2 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:50</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=07754a9a6c1c target=saboteur_2 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:50</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=07754a9a6c1c to=saboteur_2 tier=saboteur mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:50</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=9e803a56a410 target=good_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:50</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=9e803a56a410 target=good_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=9e803a56a410 to=good_1 tier=good mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=c63b7875cd58 target=mediocre_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=c63b7875cd58 target=mediocre_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=c63b7875cd58 to=mediocre_1 tier=mediocre mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=d5ff2cce9967 target=mediocre_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=d5ff2cce9967 target=mediocre_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=d5ff2cce9967 to=mediocre_1 tier=mediocre mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=b85af3488bb9 target=good_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=b85af3488bb9 target=good_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=b85af3488bb9 to=good_1 tier=good mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=ae54281f397b target=saboteur_2 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=ae54281f397b target=saboteur_2 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=ae54281f397b to=saboteur_2 tier=saboteur mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=11572fc8b529 target=good_2 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=11572fc8b529 target=good_2 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=11572fc8b529 to=good_2 tier=good mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=c2d15d9007f5 target=saboteur_1 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=c2d15d9007f5 target=saboteur_1 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=c2d15d9007f5 to=saboteur_1 tier=saboteur mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=fc4f37483357 target=good_3 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=fc4f37483357 target=good_3 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=fc4f37483357 to=good_3 tier=good mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=3f5bf1623ef5 target=good_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=3f5bf1623ef5 target=good_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=3f5bf1623ef5 to=good_1 tier=good mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=d0f654d086c0 target=good_2 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=d0f654d086c0 target=good_2 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=d0f654d086c0 to=good_2 tier=good mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=false task_id=f6aad73e0b8a target=saboteur_2 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev ATTEMPT"><span class="t">00:48:49</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=false task_id=f6aad73e0b8a target=saboteur_2 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:49</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=false task_id=f6aad73e0b8a to=saboteur_2 tier=saboteur mode=random</span></div><div class="ev DELIVERED"><span class="t">00:48:49</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=7f897bbdb462 target=mediocre_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:49</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=7f897bbdb462 target=mediocre_1 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=7f897bbdb462 reviewer=saboteur_2 target=mediocre_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=7f897bbdb462 reviewer=saboteur_1 target=mediocre_1 verdict=PASS weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=7f897bbdb462 reviewer=good_3 target=mediocre_1 verdict=PASS weight=0.02</span></div><div class="ev ATTEMPT"><span class="t">00:48:48</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=7f897bbdb462 target=mediocre_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:48</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=7f897bbdb462 to=mediocre_1 tier=mediocre mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:48</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=b0a7c8d32d57 target=good_2 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:48</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=b0a7c8d32d57 target=good_2 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=b0a7c8d32d57 reviewer=good_3 target=good_2 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=b0a7c8d32d57 reviewer=saboteur_2 target=good_2 verdict=PASS weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=b0a7c8d32d57 reviewer=saboteur_1 target=good_2 verdict=PASS weight=0.0333</span></div><div class="ev ATTEMPT"><span class="t">00:48:48</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=b0a7c8d32d57 target=good_2 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:48</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=b0a7c8d32d57 to=good_2 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:48</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=47d3daef9d8a target=good_3 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:48</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=47d3daef9d8a target=good_3 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=47d3daef9d8a reviewer=mediocre_1 target=good_3 verdict=PASS weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=47d3daef9d8a reviewer=saboteur_2 target=good_3 verdict=PASS weight=0.02</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=47d3daef9d8a reviewer=saboteur_1 target=good_3 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:48</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=47d3daef9d8a target=good_3 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:48</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=47d3daef9d8a to=good_3 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:48</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=4df3619394ba target=good_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:48</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=4df3619394ba target=good_1 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=4df3619394ba reviewer=good_3 target=good_1 verdict=PASS weight=0.0519</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=4df3619394ba reviewer=saboteur_1 target=good_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:48</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=4df3619394ba reviewer=saboteur_2 target=good_1 verdict=PASS weight=0.0333</span></div><div class="ev ATTEMPT"><span class="t">00:48:48</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=4df3619394ba target=good_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:47</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=4df3619394ba to=good_1 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:47</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=6085a8c9ed94 target=mediocre_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:47</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=6085a8c9ed94 target=mediocre_1 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=6085a8c9ed94 reviewer=good_2 target=mediocre_1 verdict=PASS weight=0.0576</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=6085a8c9ed94 reviewer=good_3 target=mediocre_1 verdict=PASS weight=0.02</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=6085a8c9ed94 reviewer=saboteur_2 target=mediocre_1 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:47</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=6085a8c9ed94 target=mediocre_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:47</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=6085a8c9ed94 to=mediocre_1 tier=mediocre mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:47</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=173c77506e97 target=good_2 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:47</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=173c77506e97 target=good_2 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=173c77506e97 reviewer=saboteur_2 target=good_2 verdict=PASS weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=173c77506e97 reviewer=mediocre_1 target=good_2 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=173c77506e97 reviewer=saboteur_1 target=good_2 verdict=PASS weight=0.0333</span></div><div class="ev ATTEMPT"><span class="t">00:48:47</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=173c77506e97 target=good_2 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:47</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=173c77506e97 to=good_2 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:47</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=2d8d0d5e8740 target=good_3 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:47</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=2d8d0d5e8740 target=good_3 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=2d8d0d5e8740 reviewer=saboteur_2 target=good_3 verdict=PASS weight=0.02</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=2d8d0d5e8740 reviewer=good_1 target=good_3 verdict=PASS weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=2d8d0d5e8740 reviewer=saboteur_1 target=good_3 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:47</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=2d8d0d5e8740 target=good_3 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:47</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=2d8d0d5e8740 to=good_3 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:47</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=a4d0da12aca8 target=good_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:47</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=a4d0da12aca8 target=good_1 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:47</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=a4d0da12aca8 reviewer=good_3 target=good_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:46</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=a4d0da12aca8 reviewer=mediocre_1 target=good_1 verdict=PASS weight=0.02</span></div><div class="ev REVIEW"><span class="t">00:48:46</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=a4d0da12aca8 reviewer=saboteur_2 target=good_1 verdict=PASS weight=0.0333</span></div><div class="ev ATTEMPT"><span class="t">00:48:46</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=a4d0da12aca8 target=good_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:46</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=a4d0da12aca8 to=good_1 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:46</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=88568baecb94 target=saboteur_2 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:46</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=88568baecb94 target=saboteur_2 ran=true passed=false forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:46</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=88568baecb94 reviewer=good_2 target=saboteur_2 verdict=FAIL weight=0.02</span></div><div class="ev REVIEW"><span class="t">00:48:46</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=88568baecb94 reviewer=good_3 target=saboteur_2 verdict=FAIL weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:46</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=88568baecb94 reviewer=good_1 target=saboteur_2 verdict=FAIL weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:46</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=88568baecb94 target=saboteur_2 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:46</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=88568baecb94 to=saboteur_2 tier=saboteur mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:46</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=b3889f208229 target=saboteur_1 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:46</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=b3889f208229 target=saboteur_1 ran=true passed=false forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:46</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=b3889f208229 reviewer=saboteur_2 target=saboteur_1 verdict=FAIL weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:46</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=b3889f208229 reviewer=good_3 target=saboteur_1 verdict=FAIL weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:46</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=b3889f208229 reviewer=good_2 target=saboteur_1 verdict=FAIL weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:45</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=b3889f208229 target=saboteur_1 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:45</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=b3889f208229 to=saboteur_1 tier=saboteur mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:45</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=c96bd8546969 target=mediocre_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:45</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=c96bd8546969 target=mediocre_1 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:45</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=c96bd8546969 reviewer=saboteur_1 target=mediocre_1 verdict=PASS weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:45</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=c96bd8546969 reviewer=good_2 target=mediocre_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:45</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=c96bd8546969 reviewer=good_3 target=mediocre_1 verdict=PASS weight=0.02</span></div><div class="ev ATTEMPT"><span class="t">00:48:45</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=c96bd8546969 target=mediocre_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:45</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=c96bd8546969 to=mediocre_1 tier=mediocre mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:45</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=855af9d720ad target=good_2 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:45</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=855af9d720ad target=good_2 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:45</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=855af9d720ad reviewer=saboteur_2 target=good_2 verdict=PASS weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:45</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=855af9d720ad reviewer=saboteur_1 target=good_2 verdict=PASS weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:45</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=855af9d720ad reviewer=good_3 target=good_2 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:45</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=855af9d720ad target=good_2 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:45</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=855af9d720ad to=good_2 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:45</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=a3a563afbaf4 target=good_3 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:45</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=a3a563afbaf4 target=good_3 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:45</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=a3a563afbaf4 reviewer=saboteur_1 target=good_3 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:45</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=a3a563afbaf4 reviewer=good_1 target=good_3 verdict=PASS weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:45</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=a3a563afbaf4 reviewer=good_2 target=good_3 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:45</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=a3a563afbaf4 target=good_3 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:44</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=a3a563afbaf4 to=good_3 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:44</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=f23b26f435d8 target=good_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:44</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=f23b26f435d8 target=good_1 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=f23b26f435d8 reviewer=saboteur_1 target=good_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=f23b26f435d8 reviewer=good_3 target=good_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=f23b26f435d8 reviewer=saboteur_2 target=good_1 verdict=PASS weight=0.0333</span></div><div class="ev ATTEMPT"><span class="t">00:48:44</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=f23b26f435d8 target=good_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:44</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=f23b26f435d8 to=good_1 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:44</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=8fd87eebb929 target=good_2 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:44</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=8fd87eebb929 target=good_2 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=8fd87eebb929 reviewer=good_3 target=good_2 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=8fd87eebb929 reviewer=saboteur_2 target=good_2 verdict=PASS weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=8fd87eebb929 reviewer=good_1 target=good_2 verdict=PASS weight=0.02</span></div><div class="ev ATTEMPT"><span class="t">00:48:44</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=8fd87eebb929 target=good_2 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:44</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=8fd87eebb929 to=good_2 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:44</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=cd1dfc77caa4 target=mediocre_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:44</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=cd1dfc77caa4 target=mediocre_1 ran=true passed=true forced=false</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=cd1dfc77caa4 reviewer=good_1 target=mediocre_1 verdict=PASS weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=cd1dfc77caa4 reviewer=good_2 target=mediocre_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=cd1dfc77caa4 reviewer=saboteur_1 target=mediocre_1 verdict=PASS weight=0.0333</span></div><div class="ev ATTEMPT"><span class="t">00:48:44</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=cd1dfc77caa4 target=mediocre_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:44</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=cd1dfc77caa4 to=mediocre_1 tier=mediocre mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:44</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=6ebf43c56828 target=saboteur_2 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:44</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=6ebf43c56828 target=saboteur_2 ran=true passed=false forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:44</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=6ebf43c56828 reviewer=good_2 target=saboteur_2 verdict=FAIL weight=0.02</span></div><div class="ev REVIEW"><span class="t">00:48:43</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=6ebf43c56828 reviewer=saboteur_1 target=saboteur_2 verdict=FAIL weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:43</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=6ebf43c56828 reviewer=good_3 target=saboteur_2 verdict=FAIL weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:43</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=6ebf43c56828 target=saboteur_2 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:43</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=6ebf43c56828 to=saboteur_2 tier=saboteur mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:43</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=ee295b464d8b target=saboteur_1 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:43</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=ee295b464d8b target=saboteur_1 ran=true passed=false forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:43</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=ee295b464d8b reviewer=good_1 target=saboteur_1 verdict=FAIL weight=0.02</span></div><div class="ev REVIEW"><span class="t">00:48:43</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=ee295b464d8b reviewer=good_3 target=saboteur_1 verdict=FAIL weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:43</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=ee295b464d8b reviewer=good_2 target=saboteur_1 verdict=FAIL weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:43</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=ee295b464d8b target=saboteur_1 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:43</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=ee295b464d8b to=saboteur_1 tier=saboteur mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:43</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=7963fcb17b5b target=mediocre_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:43</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=7963fcb17b5b target=mediocre_1 ran=true passed=true forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:43</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=7963fcb17b5b reviewer=good_3 target=mediocre_1 verdict=PASS weight=0.02</span></div><div class="ev REVIEW"><span class="t">00:48:43</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=7963fcb17b5b reviewer=good_1 target=mediocre_1 verdict=PASS weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:43</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=7963fcb17b5b reviewer=good_2 target=mediocre_1 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:42</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=7963fcb17b5b target=mediocre_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:42</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=7963fcb17b5b to=mediocre_1 tier=mediocre mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:42</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=d889fc934018 target=good_3 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:42</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=d889fc934018 target=good_3 ran=true passed=true forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:42</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=d889fc934018 reviewer=good_2 target=good_3 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:42</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=d889fc934018 reviewer=saboteur_1 target=good_3 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:42</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=d889fc934018 reviewer=mediocre_1 target=good_3 verdict=PASS weight=0.0333</span></div><div class="ev ATTEMPT"><span class="t">00:48:42</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=d889fc934018 target=good_3 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:42</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=d889fc934018 to=good_3 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:42</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=73c6eac6b1a1 target=good_2 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:42</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=73c6eac6b1a1 target=good_2 ran=true passed=true forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:42</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=73c6eac6b1a1 reviewer=good_3 target=good_2 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:42</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=73c6eac6b1a1 reviewer=good_1 target=good_2 verdict=PASS weight=0.02</span></div><div class="ev REVIEW"><span class="t">00:48:42</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=73c6eac6b1a1 reviewer=saboteur_2 target=good_2 verdict=PASS weight=0.025</span></div><div class="ev ATTEMPT"><span class="t">00:48:42</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=73c6eac6b1a1 target=good_2 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:42</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=73c6eac6b1a1 to=good_2 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:42</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=c67fd05d96ca target=good_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:42</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=c67fd05d96ca target=good_1 ran=true passed=true forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:42</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=c67fd05d96ca reviewer=good_3 target=good_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:42</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=c67fd05d96ca reviewer=good_2 target=good_1 verdict=PASS weight=0.025</span></div><div class="ev REVIEW"><span class="t">00:48:42</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=c67fd05d96ca reviewer=saboteur_2 target=good_1 verdict=PASS weight=0.0333</span></div><div class="ev ATTEMPT"><span class="t">00:48:42</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=c67fd05d96ca target=good_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:42</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=c67fd05d96ca to=good_1 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:42</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=68d584c4124b target=saboteur_2 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:42</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=68d584c4124b target=saboteur_2 ran=true passed=false forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:41</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=68d584c4124b reviewer=mediocre_1 target=saboteur_2 verdict=FAIL weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:41</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=68d584c4124b reviewer=good_1 target=saboteur_2 verdict=FAIL weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:41</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=68d584c4124b reviewer=good_3 target=saboteur_2 verdict=FAIL weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:41</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=68d584c4124b target=saboteur_2 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:41</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=68d584c4124b to=saboteur_2 tier=saboteur mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:41</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=67f62233a0f2 target=saboteur_1 passed=false calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:41</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=67f62233a0f2 target=saboteur_1 ran=true passed=false forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:41</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=67f62233a0f2 reviewer=mediocre_1 target=saboteur_1 verdict=FAIL weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:41</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=67f62233a0f2 reviewer=good_2 target=saboteur_1 verdict=FAIL weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:41</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=67f62233a0f2 reviewer=saboteur_2 target=saboteur_1 verdict=FAIL weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:41</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=67f62233a0f2 target=saboteur_1 attempt=1 passed=false</span></div><div class="ev ROUTE"><span class="t">00:48:41</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=67f62233a0f2 to=saboteur_1 tier=saboteur mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:41</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=779e670c8cc7 target=mediocre_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:41</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=779e670c8cc7 target=mediocre_1 ran=true passed=true forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:41</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=779e670c8cc7 reviewer=saboteur_1 target=mediocre_1 verdict=PASS weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:41</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=779e670c8cc7 reviewer=saboteur_2 target=mediocre_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=779e670c8cc7 reviewer=good_2 target=mediocre_1 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:40</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=779e670c8cc7 target=mediocre_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:40</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=779e670c8cc7 to=mediocre_1 tier=mediocre mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:40</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=935bf54cf6e1 target=good_3 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:40</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=935bf54cf6e1 target=good_3 ran=true passed=true forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=935bf54cf6e1 reviewer=mediocre_1 target=good_3 verdict=PASS weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=935bf54cf6e1 reviewer=good_2 target=good_3 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=935bf54cf6e1 reviewer=saboteur_1 target=good_3 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:40</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=935bf54cf6e1 target=good_3 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:40</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=935bf54cf6e1 to=good_3 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:40</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=7f7819e9c5d8 target=good_2 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:40</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=7f7819e9c5d8 target=good_2 ran=true passed=true forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=7f7819e9c5d8 reviewer=saboteur_1 target=good_2 verdict=PASS weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=7f7819e9c5d8 reviewer=good_3 target=good_2 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=7f7819e9c5d8 reviewer=mediocre_1 target=good_2 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:40</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=7f7819e9c5d8 target=good_2 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:40</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=7f7819e9c5d8 to=good_2 tier=good mode=ucb</span></div><div class="ev DELIVERED"><span class="t">00:48:40</span>
+    <span class="ty">DELIVERED</span>
+    <span class="d">trust_on=true task_id=02e6ee054d3f target=good_1 passed=true calls=1 attempts=1 request_id=null</span></div><div class="ev AUDIT"><span class="t">00:48:40</span>
+    <span class="ty">AUDIT</span>
+    <span class="d">trust_on=true task_id=02e6ee054d3f target=good_1 ran=true passed=true forced=true</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=02e6ee054d3f reviewer=saboteur_2 target=good_1 verdict=PASS weight=0.0333</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=02e6ee054d3f reviewer=saboteur_1 target=good_1 verdict=PASS weight=0.05</span></div><div class="ev REVIEW"><span class="t">00:48:40</span>
+    <span class="ty">REVIEW</span>
+    <span class="d">trust_on=true task_id=02e6ee054d3f reviewer=good_3 target=good_1 verdict=PASS weight=0.05</span></div><div class="ev ATTEMPT"><span class="t">00:48:40</span>
+    <span class="ty">ATTEMPT</span>
+    <span class="d">trust_on=true task_id=02e6ee054d3f target=good_1 attempt=1 passed=true</span></div><div class="ev ROUTE"><span class="t">00:48:39</span>
+    <span class="ty">ROUTE</span>
+    <span class="d">trust_on=true task_id=02e6ee054d3f to=good_1 tier=good mode=ucb</span></div></div>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><h2>信任開關對照</h2>
+            <span class="note">池化差，非同題配對統計</span></div>
+          <div class="card"><div class="card-body" id="scoreboard">
+    <div class="dims">
+      
+    <div class="dim-row">
+      <span class="k">trust off</span>
+      <div class="meter"><div class="track">
+    <div class="fill " style="width:66.7%"></div></div>
+    <span class="n">0.667</span></div>
+      <span class="obs">8/12</span>
+    </div>
+      
+    <div class="dim-row">
+      <span class="k">trust on</span>
+      <div class="meter"><div class="track">
+    <div class="fill " style="width:78.6%"></div></div>
+    <span class="n">0.786</span></div>
+      <span class="obs">22/28</span>
+    </div>
+    </div>
+    <div style="margin-top:var(--s4);font-size:0.78rem;color:var(--ink-3)">
+      池化差 +0.119
+      ・呼叫數 off 12 / on 28
+      <br>這是兩池通過率之差，<b style="color:var(--ink-2)">不是同題配對統計</b>；
+      配對檢定屬批次實驗，不在此面板宣稱。
+    </div></div></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-head"><h2>成本</h2>
+          <span class="note">信任層要花錢；品質與代價必須放在一起看</span></div>
+        <div class="card" id="cost">
+    <table>
+      <thead><tr>
+        <th>臂</th><th class="num">交付</th><th class="num">通過</th>
+        <th class="num">呼叫</th><th class="num">呼叫/交付</th><th class="num">呼叫/通過</th>
+      </tr></thead>
+      <tbody>
+    <tr>
+      <td>trust on</td>
+      <td class="num">28</td>
+      <td class="num">22</td>
+      <td class="num">28</td>
+      <td class="num">1</td>
+      <td class="num">1.27</td>
+    </tr>
+    <tr>
+      <td>trust off</td>
+      <td class="num">12</td>
+      <td class="num">8</td>
+      <td class="num">12</td>
+      <td class="num">1</td>
+      <td class="num">1.5</td>
+    </tr></tbody>
+    </table>
+    <div style="padding:var(--s3) var(--s4);font-size:0.76rem;color:var(--ink-3);
+                border-top:1px solid var(--line)">
+      信任層不是免費的：互審與稽核都要花呼叫。
+      <b style="color:var(--ink-2)">呼叫／通過</b>是「單位成本品質」的可觀測代理量——
+      要主張信任層有價值，這一欄必須跟品質一起看，不能只報品質。
+    </div></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-head"><h2>組態</h2>
+          <span class="note">你正在看的是哪一組設定下的數字</span></div>
+        <div class="card"><div class="card-body"><dl class="kv" id="sysinfo"><dt>root</dt><dd>/tmp/s7e-app-ax1bmvvo/eco</dd><dt>模式</dt><dd>demo</dd><dt>基座</dt><dd>echo-like(offline)</dd><dt>substrate</dt><dd>echo-like(offline)</dd><dt>互審 K</dt><dd>3</dd><dt>互審模式</dt><dd>deterministic</dd><dt>稽核抽樣率</dt><dd>1</dd><dt>見習門檻 m</dt><dd>2</dd><dt>記憶預算 B</dt><dd>2000</dd></dl></div></div>
+      </div>
+    </section>
+
+    <!-- 身份 -->
+    <section class="view" id="view-identities">
+      <div class="sec">
+        <div class="sec-head"><h2>身份名冊</h2>
+          <span class="note">每個代理是一把鑰匙＋一條它自己的記憶鏈。點一列看它的全部歷史。</span></div>
+        <div class="card"><table>
+          <thead><tr>
+            <th>身份</th><th>記憶鏈</th><th>信用</th><th class="num">觀測</th>
+            <th class="num">交付</th><th class="num">episode</th><th>狀態</th>
+          </tr></thead>
+          <tbody id="id-rows">
+    <tr class="clickable" data-id="zQmUXYcvTwsbJRgBGfStiZP7BH1L8NJouB6rY738NB1k5ph">
+      <td>
+        <div style="font-weight:500">good_1</div>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="zQmUXYcvTwsbJRgBGfStiZP7BH1L8NJouB6rY738NB1k5ph" title="zQmUXYcvTwsbJRgBGfStiZP7BH1L8NJouB6rY738NB1k5ph（點擊複製）">zQmUXYcv…B1k5ph</button></div>
+      </td>
+      <td>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="a243be43aeab3b30aa668caf02fca5c972e0a94bf9161b0aefe374af12ff951c" title="a243be43aeab3b30aa668caf02fca5c972e0a94bf9161b0aefe374af12ff951c（點擊複製）">a243be43…ff951c</button></div>
+        <div style="margin-top:3px"><span class="badge ok">擁有權已證明</span></div>
+      </td>
+      <td style="min-width:150px">
+        <div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+        <div style="font-size:0.68rem;color:var(--warn);margin-top:3px">
+               此 substrate 尚無觀測；另有 1 個 substrate 有紀錄</div>
+      </td>
+      <td class="num">0.0</td>
+      <td class="num">5</td>
+      <td class="num">5</td>
+      <td><div class="badges"><span class="badge warn">INSUFFICIENT_DATA</span><span class="badge warn">PROBATION</span></div></td>
+    </tr>
+    <tr class="clickable" data-id="zQmejcZ5rvXmz17drrkXqJrorcFszDYUxVhL1gXSH1AsZPZ">
+      <td>
+        <div style="font-weight:500">good_2</div>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="zQmejcZ5rvXmz17drrkXqJrorcFszDYUxVhL1gXSH1AsZPZ" title="zQmejcZ5rvXmz17drrkXqJrorcFszDYUxVhL1gXSH1AsZPZ（點擊複製）">zQmejcZ5…1AsZPZ</button></div>
+      </td>
+      <td>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="5442155af70d73c9d454c9418b90edea06ed0c9b481608e6f5ec381a39bb4010" title="5442155af70d73c9d454c9418b90edea06ed0c9b481608e6f5ec381a39bb4010（點擊複製）">5442155a…bb4010</button></div>
+        <div style="margin-top:3px"><span class="badge ok">擁有權已證明</span></div>
+      </td>
+      <td style="min-width:150px">
+        <div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+        <div style="font-size:0.68rem;color:var(--warn);margin-top:3px">
+               此 substrate 尚無觀測；另有 1 個 substrate 有紀錄</div>
+      </td>
+      <td class="num">0.0</td>
+      <td class="num">6</td>
+      <td class="num">6</td>
+      <td><div class="badges"><span class="badge warn">INSUFFICIENT_DATA</span><span class="badge warn">PROBATION</span></div></td>
+    </tr>
+    <tr class="clickable" data-id="zQmfAfx1wW8bL2ZCyr5kzNqZ1E2ebETRayaSidADkQFXzSA">
+      <td>
+        <div style="font-weight:500">good_3</div>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="zQmfAfx1wW8bL2ZCyr5kzNqZ1E2ebETRayaSidADkQFXzSA" title="zQmfAfx1wW8bL2ZCyr5kzNqZ1E2ebETRayaSidADkQFXzSA（點擊複製）">zQmfAfx1…QFXzSA</button></div>
+      </td>
+      <td>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="c4861fbfe8d020a1c146c7dad1c5d295e2e74da4d67dddec4392b0faf8d95018" title="c4861fbfe8d020a1c146c7dad1c5d295e2e74da4d67dddec4392b0faf8d95018（點擊複製）">c4861fbf…d95018</button></div>
+        <div style="margin-top:3px"><span class="badge ok">擁有權已證明</span></div>
+      </td>
+      <td style="min-width:150px">
+        <div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+        <div style="font-size:0.68rem;color:var(--warn);margin-top:3px">
+               此 substrate 尚無觀測；另有 1 個 substrate 有紀錄</div>
+      </td>
+      <td class="num">0.0</td>
+      <td class="num">5</td>
+      <td class="num">5</td>
+      <td><div class="badges"><span class="badge warn">INSUFFICIENT_DATA</span><span class="badge warn">PROBATION</span></div></td>
+    </tr>
+    <tr class="clickable" data-id="zQmaR9S7727efHdv4rkZLmai4w5XVvYBcfoiC1huTabbe9W">
+      <td>
+        <div style="font-weight:500">mediocre_1</div>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="zQmaR9S7727efHdv4rkZLmai4w5XVvYBcfoiC1huTabbe9W" title="zQmaR9S7727efHdv4rkZLmai4w5XVvYBcfoiC1huTabbe9W（點擊複製）">zQmaR9S7…abbe9W</button></div>
+      </td>
+      <td>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="b3a9cca83af0e7a9ab62c0e74bf1c96e1b027aaac6b7d7a09a4c5ed3ef678441" title="b3a9cca83af0e7a9ab62c0e74bf1c96e1b027aaac6b7d7a09a4c5ed3ef678441（點擊複製）">b3a9cca8…678441</button></div>
+        <div style="margin-top:3px"><span class="badge ok">擁有權已證明</span></div>
+      </td>
+      <td style="min-width:150px">
+        <div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+        <div style="font-size:0.68rem;color:var(--warn);margin-top:3px">
+               此 substrate 尚無觀測；另有 1 個 substrate 有紀錄</div>
+      </td>
+      <td class="num">0.0</td>
+      <td class="num">6</td>
+      <td class="num">6</td>
+      <td><div class="badges"><span class="badge warn">INSUFFICIENT_DATA</span><span class="badge warn">PROBATION</span></div></td>
+    </tr>
+    <tr class="clickable" data-id="zQmT7oxdSkWvgHFoB28mqGMMjGMb9XRKadpYJauEBr6qLzd">
+      <td>
+        <div style="font-weight:500">saboteur_1</div>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="zQmT7oxdSkWvgHFoB28mqGMMjGMb9XRKadpYJauEBr6qLzd" title="zQmT7oxdSkWvgHFoB28mqGMMjGMb9XRKadpYJauEBr6qLzd（點擊複製）">zQmT7oxd…r6qLzd</button></div>
+      </td>
+      <td>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="718d7e13a7ebaff34fa0e4958f814d3d105fef1fe99e51f41e6c838f22528f35" title="718d7e13a7ebaff34fa0e4958f814d3d105fef1fe99e51f41e6c838f22528f35（點擊複製）">718d7e13…528f35</button></div>
+        <div style="margin-top:3px"><span class="badge ok">擁有權已證明</span></div>
+      </td>
+      <td style="min-width:150px">
+        <div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+        <div style="font-size:0.68rem;color:var(--warn);margin-top:3px">
+               此 substrate 尚無觀測；另有 1 個 substrate 有紀錄</div>
+      </td>
+      <td class="num">0.0</td>
+      <td class="num">3</td>
+      <td class="num">3</td>
+      <td><div class="badges"><span class="badge warn">INSUFFICIENT_DATA</span><span class="badge warn">PROBATION</span></div></td>
+    </tr>
+    <tr class="clickable" data-id="zQmQKXCGbQAbBZtpwTQkNjqxRGmpLCaMBuvomVs9ggSuBHX">
+      <td>
+        <div style="font-weight:500">saboteur_2</div>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="zQmQKXCGbQAbBZtpwTQkNjqxRGmpLCaMBuvomVs9ggSuBHX" title="zQmQKXCGbQAbBZtpwTQkNjqxRGmpLCaMBuvomVs9ggSuBHX（點擊複製）">zQmQKXCG…gSuBHX</button></div>
+      </td>
+      <td>
+        <div style="font-size:0.72rem"><button class="hash" data-copy="abe638f013fac9946d20401038fbb74553070fbfd7800f45665e5b2026d39703" title="abe638f013fac9946d20401038fbb74553070fbfd7800f45665e5b2026d39703（點擊複製）">abe638f0…d39703</button></div>
+        <div style="margin-top:3px"><span class="badge ok">擁有權已證明</span></div>
+      </td>
+      <td style="min-width:150px">
+        <div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+        <div style="font-size:0.68rem;color:var(--warn);margin-top:3px">
+               此 substrate 尚無觀測；另有 1 個 substrate 有紀錄</div>
+      </td>
+      <td class="num">0.0</td>
+      <td class="num">3</td>
+      <td class="num">3</td>
+      <td><div class="badges"><span class="badge warn">INSUFFICIENT_DATA</span><span class="badge warn">PROBATION</span></div></td>
+    </tr></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- 活動 -->
+    <section class="view" id="view-activity" hidden="">
+      <div class="sec">
+        <div class="sec-head"><h2>交付紀錄</h2>
+          <span class="note">每一筆都可回到它的信任狀與簽章鏈頭</span></div>
+        <div class="card"><table>
+          <thead><tr>
+            <th>時間</th><th>task</th><th>交付者</th><th>互審</th>
+            <th>稽核</th><th>回溯稽核</th><th>鏈頭</th>
+          </tr></thead>
+          <tbody id="act-rows">
+    <tr class="clickable" data-task="07754a9a6c1c">
+      <td class="mono" style="color:var(--ink-3)">00:48:50</td>
+      <td><button class="hash" data-copy="07754a9a6c1c" title="07754a9a6c1c（點擊複製）">07754a…6c1c</button></td>
+      <td>saboteur_2</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="63c6664ef549535c" title="63c6664ef549535c（點擊複製）">63c666…535c</button></td>
+    </tr>
+    <tr class="clickable" data-task="9e803a56a410">
+      <td class="mono" style="color:var(--ink-3)">00:48:50</td>
+      <td><button class="hash" data-copy="9e803a56a410" title="9e803a56a410（點擊複製）">9e803a…a410</button></td>
+      <td>good_1</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="1222988971a34f6d" title="1222988971a34f6d（點擊複製）">122298…4f6d</button></td>
+    </tr>
+    <tr class="clickable" data-task="c63b7875cd58">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="c63b7875cd58" title="c63b7875cd58（點擊複製）">c63b78…cd58</button></td>
+      <td>mediocre_1</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="fda2448642eaf2ff" title="fda2448642eaf2ff（點擊複製）">fda244…f2ff</button></td>
+    </tr>
+    <tr class="clickable" data-task="d5ff2cce9967">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="d5ff2cce9967" title="d5ff2cce9967（點擊複製）">d5ff2c…9967</button></td>
+      <td>mediocre_1</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="a86de05c148ed3b8" title="a86de05c148ed3b8（點擊複製）">a86de0…d3b8</button></td>
+    </tr>
+    <tr class="clickable" data-task="b85af3488bb9">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="b85af3488bb9" title="b85af3488bb9（點擊複製）">b85af3…8bb9</button></td>
+      <td>good_1</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="e7a0b5234abdb3b1" title="e7a0b5234abdb3b1（點擊複製）">e7a0b5…b3b1</button></td>
+    </tr>
+    <tr class="clickable" data-task="ae54281f397b">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="ae54281f397b" title="ae54281f397b（點擊複製）">ae5428…397b</button></td>
+      <td>saboteur_2</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="9f0225bbfb450dea" title="9f0225bbfb450dea（點擊複製）">9f0225…0dea</button></td>
+    </tr>
+    <tr class="clickable" data-task="11572fc8b529">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="11572fc8b529" title="11572fc8b529（點擊複製）">11572f…b529</button></td>
+      <td>good_2</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="4bb9b4d2159a7b5e" title="4bb9b4d2159a7b5e（點擊複製）">4bb9b4…7b5e</button></td>
+    </tr>
+    <tr class="clickable" data-task="c2d15d9007f5">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="c2d15d9007f5" title="c2d15d9007f5（點擊複製）">c2d15d…07f5</button></td>
+      <td>saboteur_1</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="e64550115bdfbaae" title="e64550115bdfbaae（點擊複製）">e64550…baae</button></td>
+    </tr>
+    <tr class="clickable" data-task="fc4f37483357">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="fc4f37483357" title="fc4f37483357（點擊複製）">fc4f37…3357</button></td>
+      <td>good_3</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="e66a4e4f75a2956b" title="e66a4e4f75a2956b（點擊複製）">e66a4e…956b</button></td>
+    </tr>
+    <tr class="clickable" data-task="3f5bf1623ef5">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="3f5bf1623ef5" title="3f5bf1623ef5（點擊複製）">3f5bf1…3ef5</button></td>
+      <td>good_1</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="dc639289f99266ab" title="dc639289f99266ab（點擊複製）">dc6392…66ab</button></td>
+    </tr>
+    <tr class="clickable" data-task="d0f654d086c0">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="d0f654d086c0" title="d0f654d086c0（點擊複製）">d0f654…86c0</button></td>
+      <td>good_2</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="5cb95fffa67dcd75" title="5cb95fffa67dcd75（點擊複製）">5cb95f…cd75</button></td>
+    </tr>
+    <tr class="clickable" data-task="f6aad73e0b8a">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="f6aad73e0b8a" title="f6aad73e0b8a（點擊複製）">f6aad7…0b8a</button></td>
+      <td>saboteur_2</td>
+      <td class="mono"><span style="color:var(--ink-3)">未互審</span></td>
+      <td><span class="tri none"><i class="mark"></i>未稽核</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="fe63068f240ab490" title="fe63068f240ab490（點擊複製）">fe6306…b490</button></td>
+    </tr>
+    <tr class="clickable" data-task="7f897bbdb462">
+      <td class="mono" style="color:var(--ink-3)">00:48:49</td>
+      <td><button class="hash" data-copy="7f897bbdb462" title="7f897bbdb462（點擊複製）">7f897b…b462</button></td>
+      <td>mediocre_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.103</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="1fea86c82631127d" title="1fea86c82631127d（點擊複製）">1fea86…127d</button></td>
+    </tr>
+    <tr class="clickable" data-task="b0a7c8d32d57">
+      <td class="mono" style="color:var(--ink-3)">00:48:48</td>
+      <td><button class="hash" data-copy="b0a7c8d32d57" title="b0a7c8d32d57（點擊複製）">b0a7c8…2d57</button></td>
+      <td>good_2</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.108</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="c5cdf5c024f0448e" title="c5cdf5c024f0448e（點擊複製）">c5cdf5…448e</button></td>
+    </tr>
+    <tr class="clickable" data-task="47d3daef9d8a">
+      <td class="mono" style="color:var(--ink-3)">00:48:48</td>
+      <td><button class="hash" data-copy="47d3daef9d8a" title="47d3daef9d8a（點擊複製）">47d3da…9d8a</button></td>
+      <td>good_3</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.103</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="327d2e4d96ae39d9" title="327d2e4d96ae39d9（點擊複製）">327d2e…39d9</button></td>
+    </tr>
+    <tr class="clickable" data-task="4df3619394ba">
+      <td class="mono" style="color:var(--ink-3)">00:48:48</td>
+      <td><button class="hash" data-copy="4df3619394ba" title="4df3619394ba（點擊複製）">4df361…94ba</button></td>
+      <td>good_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.135</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="32c17090e80f1919" title="32c17090e80f1919（點擊複製）">32c170…1919</button></td>
+    </tr>
+    <tr class="clickable" data-task="6085a8c9ed94">
+      <td class="mono" style="color:var(--ink-3)">00:48:47</td>
+      <td><button class="hash" data-copy="6085a8c9ed94" title="6085a8c9ed94（點擊複製）">6085a8…ed94</button></td>
+      <td>mediocre_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.128</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="74f4e0009a83dfb5" title="74f4e0009a83dfb5（點擊複製）">74f4e0…dfb5</button></td>
+    </tr>
+    <tr class="clickable" data-task="173c77506e97">
+      <td class="mono" style="color:var(--ink-3)">00:48:47</td>
+      <td><button class="hash" data-copy="173c77506e97" title="173c77506e97（點擊複製）">173c77…6e97</button></td>
+      <td>good_2</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.108</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="135038544af175b3" title="135038544af175b3（點擊複製）">135038…75b3</button></td>
+    </tr>
+    <tr class="clickable" data-task="2d8d0d5e8740">
+      <td class="mono" style="color:var(--ink-3)">00:48:47</td>
+      <td><button class="hash" data-copy="2d8d0d5e8740" title="2d8d0d5e8740（點擊複製）">2d8d0d…8740</button></td>
+      <td>good_3</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.095</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="21ad34c9886615e0" title="21ad34c9886615e0（點擊複製）">21ad34…15e0</button></td>
+    </tr>
+    <tr class="clickable" data-task="a4d0da12aca8">
+      <td class="mono" style="color:var(--ink-3)">00:48:47</td>
+      <td><button class="hash" data-copy="a4d0da12aca8" title="a4d0da12aca8（點擊複製）">a4d0da…aca8</button></td>
+      <td>good_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.103</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="05a4795d04d6b79a" title="05a4795d04d6b79a（點擊複製）">05a479…b79a</button></td>
+    </tr>
+    <tr class="clickable" data-task="88568baecb94">
+      <td class="mono" style="color:var(--ink-3)">00:48:46</td>
+      <td><button class="hash" data-copy="88568baecb94" title="88568baecb94（點擊複製）">88568b…cb94</button></td>
+      <td>saboteur_2</td>
+      <td class="mono">0/3 <span style="color:var(--ink-3)">w=0.12</span></td>
+      <td><span class="tri fail"><i class="mark"></i>未通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="a9bf690279a2451e" title="a9bf690279a2451e（點擊複製）">a9bf69…451e</button></td>
+    </tr>
+    <tr class="clickable" data-task="b3889f208229">
+      <td class="mono" style="color:var(--ink-3)">00:48:46</td>
+      <td><button class="hash" data-copy="b3889f208229" title="b3889f208229（點擊複製）">b3889f…8229</button></td>
+      <td>saboteur_1</td>
+      <td class="mono">0/3 <span style="color:var(--ink-3)">w=0.125</span></td>
+      <td><span class="tri fail"><i class="mark"></i>未通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="e8cdabc8f0bb23fd" title="e8cdabc8f0bb23fd（點擊複製）">e8cdab…23fd</button></td>
+    </tr>
+    <tr class="clickable" data-task="c96bd8546969">
+      <td class="mono" style="color:var(--ink-3)">00:48:45</td>
+      <td><button class="hash" data-copy="c96bd8546969" title="c96bd8546969（點擊複製）">c96bd8…6969</button></td>
+      <td>mediocre_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.103</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="c05ef5f51d7897b4" title="c05ef5f51d7897b4（點擊複製）">c05ef5…97b4</button></td>
+    </tr>
+    <tr class="clickable" data-task="855af9d720ad">
+      <td class="mono" style="color:var(--ink-3)">00:48:45</td>
+      <td><button class="hash" data-copy="855af9d720ad" title="855af9d720ad（點擊複製）">855af9…20ad</button></td>
+      <td>good_2</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.108</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="6c19738deeb6ea23" title="6c19738deeb6ea23（點擊複製）">6c1973…ea23</button></td>
+    </tr>
+    <tr class="clickable" data-task="a3a563afbaf4">
+      <td class="mono" style="color:var(--ink-3)">00:48:45</td>
+      <td><button class="hash" data-copy="a3a563afbaf4" title="a3a563afbaf4（點擊複製）">a3a563…baf4</button></td>
+      <td>good_3</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.125</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="de47ebd62deafeb3" title="de47ebd62deafeb3（點擊複製）">de47eb…feb3</button></td>
+    </tr>
+    <tr class="clickable" data-task="f23b26f435d8">
+      <td class="mono" style="color:var(--ink-3)">00:48:44</td>
+      <td><button class="hash" data-copy="f23b26f435d8" title="f23b26f435d8（點擊複製）">f23b26…35d8</button></td>
+      <td>good_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.133</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="6828e7183a37154e" title="6828e7183a37154e（點擊複製）">6828e7…154e</button></td>
+    </tr>
+    <tr class="clickable" data-task="8fd87eebb929">
+      <td class="mono" style="color:var(--ink-3)">00:48:44</td>
+      <td><button class="hash" data-copy="8fd87eebb929" title="8fd87eebb929（點擊複製）">8fd87e…b929</button></td>
+      <td>good_2</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.095</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="a1b9370ec21c57bb" title="a1b9370ec21c57bb（點擊複製）">a1b937…57bb</button></td>
+    </tr>
+    <tr class="clickable" data-task="cd1dfc77caa4">
+      <td class="mono" style="color:var(--ink-3)">00:48:44</td>
+      <td><button class="hash" data-copy="cd1dfc77caa4" title="cd1dfc77caa4（點擊複製）">cd1dfc…caa4</button></td>
+      <td>mediocre_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.108</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="9641abbb8a52c21b" title="9641abbb8a52c21b（點擊複製）">9641ab…c21b</button></td>
+    </tr>
+    <tr class="clickable" data-task="6ebf43c56828">
+      <td class="mono" style="color:var(--ink-3)">00:48:44</td>
+      <td><button class="hash" data-copy="6ebf43c56828" title="6ebf43c56828（點擊複製）">6ebf43…6828</button></td>
+      <td>saboteur_2</td>
+      <td class="mono">0/3 <span style="color:var(--ink-3)">w=0.095</span></td>
+      <td><span class="tri fail"><i class="mark"></i>未通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="7c1ffb6889ca4346" title="7c1ffb6889ca4346（點擊複製）">7c1ffb…4346</button></td>
+    </tr>
+    <tr class="clickable" data-task="ee295b464d8b">
+      <td class="mono" style="color:var(--ink-3)">00:48:43</td>
+      <td><button class="hash" data-copy="ee295b464d8b" title="ee295b464d8b（點擊複製）">ee295b…4d8b</button></td>
+      <td>saboteur_1</td>
+      <td class="mono">0/3 <span style="color:var(--ink-3)">w=0.095</span></td>
+      <td><span class="tri fail"><i class="mark"></i>未通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="c212a7562d878c64" title="c212a7562d878c64（點擊複製）">c212a7…8c64</button></td>
+    </tr>
+    <tr class="clickable" data-task="7963fcb17b5b">
+      <td class="mono" style="color:var(--ink-3)">00:48:43</td>
+      <td><button class="hash" data-copy="7963fcb17b5b" title="7963fcb17b5b（點擊複製）">7963fc…7b5b</button></td>
+      <td>mediocre_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.095</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="e376176286660ef2" title="e376176286660ef2（點擊複製）">e37617…0ef2</button></td>
+    </tr>
+    <tr class="clickable" data-task="d889fc934018">
+      <td class="mono" style="color:var(--ink-3)">00:48:42</td>
+      <td><button class="hash" data-copy="d889fc934018" title="d889fc934018（點擊複製）">d889fc…4018</button></td>
+      <td>good_3</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.133</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="e62e6bda827b0eb8" title="e62e6bda827b0eb8（點擊複製）">e62e6b…0eb8</button></td>
+    </tr>
+    <tr class="clickable" data-task="73c6eac6b1a1">
+      <td class="mono" style="color:var(--ink-3)">00:48:42</td>
+      <td><button class="hash" data-copy="73c6eac6b1a1" title="73c6eac6b1a1（點擊複製）">73c6ea…b1a1</button></td>
+      <td>good_2</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.095</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="d36a5681863d4234" title="d36a5681863d4234（點擊複製）">d36a56…4234</button></td>
+    </tr>
+    <tr class="clickable" data-task="c67fd05d96ca">
+      <td class="mono" style="color:var(--ink-3)">00:48:42</td>
+      <td><button class="hash" data-copy="c67fd05d96ca" title="c67fd05d96ca（點擊複製）">c67fd0…96ca</button></td>
+      <td>good_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.108</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="2c4bb5ca52b810f1" title="2c4bb5ca52b810f1（點擊複製）">2c4bb5…10f1</button></td>
+    </tr>
+    <tr class="clickable" data-task="68d584c4124b">
+      <td class="mono" style="color:var(--ink-3)">00:48:42</td>
+      <td><button class="hash" data-copy="68d584c4124b" title="68d584c4124b（點擊複製）">68d584…124b</button></td>
+      <td>saboteur_2</td>
+      <td class="mono">0/3 <span style="color:var(--ink-3)">w=0.133</span></td>
+      <td><span class="tri fail"><i class="mark"></i>未通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="e11e3009da3c9936" title="e11e3009da3c9936（點擊複製）">e11e30…9936</button></td>
+    </tr>
+    <tr class="clickable" data-task="67f62233a0f2">
+      <td class="mono" style="color:var(--ink-3)">00:48:41</td>
+      <td><button class="hash" data-copy="67f62233a0f2" title="67f62233a0f2（點擊複製）">67f622…a0f2</button></td>
+      <td>saboteur_1</td>
+      <td class="mono">0/3 <span style="color:var(--ink-3)">w=0.133</span></td>
+      <td><span class="tri fail"><i class="mark"></i>未通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="d9ff3ded6e2432c1" title="d9ff3ded6e2432c1（點擊複製）">d9ff3d…32c1</button></td>
+    </tr>
+    <tr class="clickable" data-task="779e670c8cc7">
+      <td class="mono" style="color:var(--ink-3)">00:48:41</td>
+      <td><button class="hash" data-copy="779e670c8cc7" title="779e670c8cc7（點擊複製）">779e67…8cc7</button></td>
+      <td>mediocre_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.133</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="22c6af5973e678a5" title="22c6af5973e678a5（點擊複製）">22c6af…78a5</button></td>
+    </tr>
+    <tr class="clickable" data-task="935bf54cf6e1">
+      <td class="mono" style="color:var(--ink-3)">00:48:40</td>
+      <td><button class="hash" data-copy="935bf54cf6e1" title="935bf54cf6e1（點擊複製）">935bf5…f6e1</button></td>
+      <td>good_3</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.133</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="303e4f977d51ec96" title="303e4f977d51ec96（點擊複製）">303e4f…ec96</button></td>
+    </tr>
+    <tr class="clickable" data-task="7f7819e9c5d8">
+      <td class="mono" style="color:var(--ink-3)">00:48:40</td>
+      <td><button class="hash" data-copy="7f7819e9c5d8" title="7f7819e9c5d8（點擊複製）">7f7819…c5d8</button></td>
+      <td>good_2</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.133</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="4ba03c985762bc0a" title="4ba03c985762bc0a（點擊複製）">4ba03c…bc0a</button></td>
+    </tr>
+    <tr class="clickable" data-task="02e6ee054d3f">
+      <td class="mono" style="color:var(--ink-3)">00:48:40</td>
+      <td><button class="hash" data-copy="02e6ee054d3f" title="02e6ee054d3f（點擊複製）">02e6ee…4d3f</button></td>
+      <td>good_1</td>
+      <td class="mono">3/3 <span style="color:var(--ink-3)">w=0.133</span></td>
+      <td><span class="tri pass"><i class="mark"></i>通過</span></td>
+      <td><span class="tri none"><i class="mark"></i>待回溯</span></td>
+      <td><button class="hash" data-copy="00328278363a491c" title="00328278363a491c（點擊複製）">003282…491c</button></td>
+    </tr></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- 鏈完整性 -->
+    <section class="view" id="view-chain" hidden="">
+      <div class="sec">
+        <div class="sec-head"><h2>可被獨立重算的部分</h2>
+          <span class="note">面板不是信任來源；以 ledger 與各自的簽章鏈為準</span></div>
+        <div class="warnbox" style="margin-bottom:var(--s4)">
+          <b>怎麼自己驗：</b> 這一頁的每個數字都能用 root 目錄重算。
+          ledger head 是逐行滾動的 sha256；每條 logbook 可用該身份的公鑰離線驗簽。
+          面板若與重算結果不符，<b>以重算為準</b>。
+        </div>
+        <div class="card"><table>
+          <thead><tr><th>身份</th><th>驗鏈</th><th class="num">長度</th><th>鏈頭</th></tr></thead>
+          <tbody id="chain-rows">
+    <tr>
+      <td>good_1</td>
+      <td><span class="badge ok">簽章鏈可驗</span></td>
+      <td class="num">22</td>
+      <td><button class="hash" data-copy="b7362cd55c8ad0b9f888b453d3dcf4886e8c28334d5968e11222988971a34f6d" title="b7362cd55c8ad0b9f888b453d3dcf4886e8c28334d5968e11222988971a34f6d（點擊複製）">b7362cd5…a34f6d</button></td>
+    </tr>
+    <tr>
+      <td>good_2</td>
+      <td><span class="badge ok">簽章鏈可驗</span></td>
+      <td class="num">28</td>
+      <td><button class="hash" data-copy="8782fd365fbeb20600096f2fc4dbce0276ae84d36d0168804bb9b4d2159a7b5e" title="8782fd365fbeb20600096f2fc4dbce0276ae84d36d0168804bb9b4d2159a7b5e（點擊複製）">8782fd36…9a7b5e</button></td>
+    </tr>
+    <tr>
+      <td>good_3</td>
+      <td><span class="badge ok">簽章鏈可驗</span></td>
+      <td class="num">30</td>
+      <td><button class="hash" data-copy="0d72c43856a7f50017e09fae3f15c3b85a02c012093cdcb0e66a4e4f75a2956b" title="0d72c43856a7f50017e09fae3f15c3b85a02c012093cdcb0e66a4e4f75a2956b（點擊複製）">0d72c438…a2956b</button></td>
+    </tr>
+    <tr>
+      <td>mediocre_1</td>
+      <td><span class="badge ok">簽章鏈可驗</span></td>
+      <td class="num">22</td>
+      <td><button class="hash" data-copy="a6b8291a7a92268777c3070cd6da22097f13ea29d3eb09ccfda2448642eaf2ff" title="a6b8291a7a92268777c3070cd6da22097f13ea29d3eb09ccfda2448642eaf2ff（點擊複製）">a6b8291a…eaf2ff</button></td>
+    </tr>
+    <tr>
+      <td>saboteur_1</td>
+      <td><span class="badge ok">簽章鏈可驗</span></td>
+      <td class="num">24</td>
+      <td><button class="hash" data-copy="a4924c5828d59b9ecbca8fa3bf42f0164613ac5561a98c11e64550115bdfbaae" title="a4924c5828d59b9ecbca8fa3bf42f0164613ac5561a98c11e64550115bdfbaae（點擊複製）">a4924c58…dfbaae</button></td>
+    </tr>
+    <tr>
+      <td>saboteur_2</td>
+      <td><span class="badge ok">簽章鏈可驗</span></td>
+      <td class="num">26</td>
+      <td><button class="hash" data-copy="b8f953753a4b05c3e1b286e11d0ba746791203603a9d29d063c6664ef549535c" title="b8f953753a4b05c3e1b286e11d0ba746791203603a9d29d063c6664ef549535c（點擊複製）">b8f95375…49535c</button></td>
+    </tr></tbody>
+        </table></div>
+      </div>
+      <div class="sec">
+        <div class="sec-head"><h2>ledger</h2></div>
+        <div class="card"><div class="card-body"><dl class="kv" id="ledger-kv">
+    <dt>事件數</dt><dd>234</dd>
+    <dt>滾動雜湊</dt><dd><button class="hash" data-copy="7aa7ee57f8505b15de3feab3b5a8530f3fc0ffd6f9630f684a6dd634df4f1c81" title="7aa7ee57f8505b15de3feab3b5a8530f3fc0ffd6f9630f684a6dd634df4f1c81（點擊複製）">7aa7ee57f850…df4f1c81</button></dd>
+    <dt>全部鏈可驗</dt><dd>是</dd></dl></div></div>
+      </div>
+    </section>
+
+    <!-- 宣稱階梯 -->
+    <section class="view" id="view-claims" hidden="">
+      <div class="sec">
+        <div class="sec-head"><h2>這套系統現在可以說什麼</h2>
+          <span class="note">每一階都要有對應證據才准往上走</span></div>
+        <div class="warnbox" style="margin-bottom:var(--s4)">
+          <b>為什麼要有這一頁：</b> 面板好看不代表系統可信。
+          這裡列出的是「目前的證據支持到哪一階」，以及還缺什麼。
+          未達的階級一律顯示為未達，<b>不美化、不留白</b>。
+        </div>
+        <div class="ladder" id="ladder">
+    <div class="rung pass">
+      <div class="step">A</div>
+      <div>
+        <div class="claim">系統能跑、每一步可被獨立重放</div>
+        <div class="ev-note">ledger 234 筆事件、6 條簽章鏈全部可離線驗證</div>
+      </div>
+      <div><span class="badge ok">已達</span></div>
+    </div>
+    <div class="rung blocked">
+      <div class="step">B</div>
+      <div>
+        <div class="claim">各機制真的承重（拆掉它，數字會變）</div>
+        <div class="ev-note">需要：examples/b_layer.py 的六情境掃描結果歸檔到本 root；本面板不代跑、不代宣稱</div>
+      </div>
+      <div><span class="badge idle">未達</span></div>
+    </div>
+    <div class="rung blocked">
+      <div class="step">C-1</div>
+      <div>
+        <div class="claim">在這個生態「看得到」提升</div>
+        <div class="ev-note">需要：≥60 對配對任務且 bootstrap CI 下界 &gt;0。目前 on 28 筆 / off 12 筆，且本面板的池化差不是配對統計——這一階不能由面板判定</div>
+      </div>
+      <div><span class="badge idle">未達</span></div>
+    </div>
+    <div class="rung blocked">
+      <div class="step">C-3</div>
+      <div>
+        <div class="claim">在預註冊條件下量到提升</div>
+        <div class="ev-note">需要：預註冊凍結簽入 ledger ＋ 批次 run 的 RECORD_SPEC 合格包 ＋ 事前寫死的判準。面板不承載此階宣稱</div>
+      </div>
+      <div><span class="badge idle">未達</span></div>
+    </div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="scrim open" id="scrim"></div>
+<aside class="drawer open" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <h3 id="dw-title">good_1</h3>
+      <div class="badges" id="dw-badges" style="margin-top:6px"><span class="badge ok">簽章鏈可驗</span><span class="badge ok">擁有權已證明</span><span class="badge warn">見習中</span></div>
+    </div>
+    <button class="x" id="dw-close">✕</button>
+  </div>
+  <div class="drawer-body" id="dw-body">
+    <div class="sec">
+      <div class="sec-head"><h2>密碼學身份</h2></div>
+      <dl class="kv">
+        <dt>vacant_id</dt><dd>zQmUXYcvTwsbJRgBGfStiZP7BH1L8NJouB6rY738NB1k5ph</dd>
+        <dt>記憶鏈 stream</dt><dd>a243be43aeab3b30aa668caf02fca5c972e0a94bf9161b0aefe374af12ff951c</dd>
+        <dt>branch</dt><dd>main</dd>
+        <dt>鏈頭</dt><dd>b7362cd55c8ad0b9f888b453d3dcf4886e8c28334d5968e11222988971a34f6d</dd>
+        <dt>鏈長度</dt><dd>22</dd>
+      </dl>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><h2>五維信用</h2>
+        <span class="note">credit 0.500 · 有效觀測 0.0</span></div>
+      <div class="card"><div class="card-body"><div class="dims">
+    <div class="dim-row">
+      <span class="k">factual</span><div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+      <span class="obs">n=0</span>
+    </div>
+    <div class="dim-row">
+      <span class="k">logical</span><div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+      <span class="obs">n=0</span>
+    </div>
+    <div class="dim-row">
+      <span class="k">relevance</span><div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+      <span class="obs">n=0</span>
+    </div>
+    <div class="dim-row">
+      <span class="k">honesty</span><div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+      <span class="obs">n=0</span>
+    </div>
+    <div class="dim-row">
+      <span class="k">adoption</span><div class="meter"><div class="track">
+    <div class="fill mid" style="width:50.0%"></div></div>
+    <span class="n">0.500</span></div>
+      <span class="obs">n=0</span>
+    </div></div></div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><h2>它的記憶鏈</h2><span class="note">最近 40 筆</span></div>
+      <div class="card"><div class="stream">
+    <div class="ev">
+      <span class="t">#22</span>
+      <span class="ty">DELIVER</span>
+      <span class="d"><button class="hash" data-copy="b7362cd55c8ad0b9f888b453d3dcf4886e8c28334d5968e11222988971a34f6d" title="b7362cd55c8ad0b9f888b453d3dcf4886e8c28334d5968e11222988971a34f6d（點擊複製）">b7362cd5…a34f6d</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#21</span>
+      <span class="ty">DELIVER</span>
+      <span class="d"><button class="hash" data-copy="f3ca719530d9e2b93049baf749b4dc3049413113361566eae7a0b5234abdb3b1" title="f3ca719530d9e2b93049baf749b4dc3049413113361566eae7a0b5234abdb3b1（點擊複製）">f3ca7195…bdb3b1</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#20</span>
+      <span class="ty">DELIVER</span>
+      <span class="d"><button class="hash" data-copy="db30dfd5afcf4ec1f12dbaf5a3d96fa61fc3bd8414017110dc639289f99266ab" title="db30dfd5afcf4ec1f12dbaf5a3d96fa61fc3bd8414017110dc639289f99266ab（點擊複製）">db30dfd5…9266ab</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#19</span>
+      <span class="ty">EPISODE</span>
+      <span class="d"><button class="hash" data-copy="49b8b859e382522d46535db536394901a5152380b46ba41432c17090e80f1919" title="49b8b859e382522d46535db536394901a5152380b46ba41432c17090e80f1919（點擊複製）">49b8b859…0f1919</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#18</span>
+      <span class="ty">DELIVER</span>
+      <span class="d"><button class="hash" data-copy="a12c3baea9d63a45ad88c62790096ee68a960ed39e8168174c44f107d14fcf8f" title="a12c3baea9d63a45ad88c62790096ee68a960ed39e8168174c44f107d14fcf8f（點擊複製）">a12c3bae…4fcf8f</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#17</span>
+      <span class="ty">REVIEW</span>
+      <span class="d"><button class="hash" data-copy="7614cb012afab1ee9bf615cce880c1fbf2720a6c0567b118f342bca8e3d39fe5" title="7614cb012afab1ee9bf615cce880c1fbf2720a6c0567b118f342bca8e3d39fe5（點擊複製）">7614cb01…d39fe5</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#16</span>
+      <span class="ty">EPISODE</span>
+      <span class="d"><button class="hash" data-copy="a06e6646a4d83817e478c8d1487e0aaf9c74a207a7716c6105a4795d04d6b79a" title="a06e6646a4d83817e478c8d1487e0aaf9c74a207a7716c6105a4795d04d6b79a（點擊複製）">a06e6646…d6b79a</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#15</span>
+      <span class="ty">DELIVER</span>
+      <span class="d"><button class="hash" data-copy="a54ec695b2ec502c7b04ed03ee3069de736ea732fe17150be06853c69e5c3e84" title="a54ec695b2ec502c7b04ed03ee3069de736ea732fe17150be06853c69e5c3e84（點擊複製）">a54ec695…5c3e84</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#14</span>
+      <span class="ty">REVIEW</span>
+      <span class="d"><button class="hash" data-copy="75331cf218d2a56b98c0946e7205d0ad72e699b551e0486fc16bc17c095ca86d" title="75331cf218d2a56b98c0946e7205d0ad72e699b551e0486fc16bc17c095ca86d（點擊複製）">75331cf2…5ca86d</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#13</span>
+      <span class="ty">REVIEW</span>
+      <span class="d"><button class="hash" data-copy="d62630905f8c8bcdd1055aae98e1820a6d3c6d1a641a1181e30de3717ffa0729" title="d62630905f8c8bcdd1055aae98e1820a6d3c6d1a641a1181e30de3717ffa0729（點擊複製）">d6263090…fa0729</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#12</span>
+      <span class="ty">EPISODE</span>
+      <span class="d"><button class="hash" data-copy="ab9d39b79c509897dd21589e07ca2d44504e0457226463566828e7183a37154e" title="ab9d39b79c509897dd21589e07ca2d44504e0457226463566828e7183a37154e（點擊複製）">ab9d39b7…37154e</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#11</span>
+      <span class="ty">DELIVER</span>
+      <span class="d"><button class="hash" data-copy="fdf64d4f49c6995c3559b145c16a216d4bf373733dd97fc18fe99e0aaafdba0c" title="fdf64d4f49c6995c3559b145c16a216d4bf373733dd97fc18fe99e0aaafdba0c（點擊複製）">fdf64d4f…fdba0c</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#10</span>
+      <span class="ty">REVIEW</span>
+      <span class="d"><button class="hash" data-copy="9d53624acf85157deb0960b2f3692ba5733adc5777191a605dfbbf10036ba4bb" title="9d53624acf85157deb0960b2f3692ba5733adc5777191a605dfbbf10036ba4bb（點擊複製）">9d53624a…6ba4bb</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#9</span>
+      <span class="ty">REVIEW</span>
+      <span class="d"><button class="hash" data-copy="e108c109dd57f3422228cbd0222d5075ae4162e6f88ee6089636cc4827b6b907" title="e108c109dd57f3422228cbd0222d5075ae4162e6f88ee6089636cc4827b6b907（點擊複製）">e108c109…b6b907</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#8</span>
+      <span class="ty">REVIEW</span>
+      <span class="d"><button class="hash" data-copy="9aec5cb24b1fb19c5d25a34774018c4e492a7017aa156545597f3c1428c7128f" title="9aec5cb24b1fb19c5d25a34774018c4e492a7017aa156545597f3c1428c7128f（點擊複製）">9aec5cb2…c7128f</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#7</span>
+      <span class="ty">REVIEW</span>
+      <span class="d"><button class="hash" data-copy="a11457b922e6489e0b7ca019b91269e8b6d44a62d9a95598f4a2ebfde9d4868a" title="a11457b922e6489e0b7ca019b91269e8b6d44a62d9a95598f4a2ebfde9d4868a（點擊複製）">a11457b9…d4868a</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#6</span>
+      <span class="ty">REVIEW</span>
+      <span class="d"><button class="hash" data-copy="8007284582fe3a07f87c0f9fd36ceeba92cd8f677fbb7752ebc21ac3e750f326" title="8007284582fe3a07f87c0f9fd36ceeba92cd8f677fbb7752ebc21ac3e750f326（點擊複製）">80072845…50f326</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#5</span>
+      <span class="ty">EPISODE</span>
+      <span class="d"><button class="hash" data-copy="efd5e1c56b4067a9a2c204a5ec4adbf92219356bc7ad4b832c4bb5ca52b810f1" title="efd5e1c56b4067a9a2c204a5ec4adbf92219356bc7ad4b832c4bb5ca52b810f1（點擊複製）">efd5e1c5…b810f1</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#4</span>
+      <span class="ty">DELIVER</span>
+      <span class="d"><button class="hash" data-copy="66c31f2be5b4f82c3ed204c65375d5d6fd1b7c926625f0b796155f96254170a9" title="66c31f2be5b4f82c3ed204c65375d5d6fd1b7c926625f0b796155f96254170a9（點擊複製）">66c31f2b…4170a9</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#3</span>
+      <span class="ty">REVIEW</span>
+      <span class="d"><button class="hash" data-copy="70e432168822f607fd254ce6615bf66671874d10d8fdaede30573ed4fdde2f8c" title="70e432168822f607fd254ce6615bf66671874d10d8fdaede30573ed4fdde2f8c（點擊複製）">70e43216…de2f8c</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#2</span>
+      <span class="ty">EPISODE</span>
+      <span class="d"><button class="hash" data-copy="ed2153591db4d906fb4a50bddf34d06b8a8e0f454b0aeb5a00328278363a491c" title="ed2153591db4d906fb4a50bddf34d06b8a8e0f454b0aeb5a00328278363a491c（點擊複製）">ed215359…3a491c</button></span>
+    </div>
+    <div class="ev">
+      <span class="t">#1</span>
+      <span class="ty">DELIVER</span>
+      <span class="d"><button class="hash" data-copy="a243be43aeab3b30aa668caf02fca5c972e0a94bf9161b0aefe374af12ff951c" title="a243be43aeab3b30aa668caf02fca5c972e0a94bf9161b0aefe374af12ff951c（點擊複製）">a243be43…ff951c</button></span>
+    </div></div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><h2>存檔點鏈</h2></div>
+      <div class="card"><div class="stream"><div class="empty">尚未簽發存檔點</div></div></div>
+    </div></div>
+</aside>
+
+<!-- 常駐誠實聲明：面板是唯讀視圖，不是信任來源。這句話留在畫面上是刻意的。 -->
+<footer class="disclaimer">
+  此面板為唯讀視圖，<b>不是信任來源</b>。一切以簽章事件鏈與 ledger 為準；
+  面板與重算結果不符時，以重算為準。
+</footer>
+
+<script src="/static/app.js"></script>
+
+
+</body></html>

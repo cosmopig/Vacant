@@ -1,0 +1,350 @@
+{
+  "S1": {
+    "n_records": 1986,
+    "era": 3,
+    "non_retryable": [
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 1420,
+      "2": 1
+    },
+    "p_by_attempt": {
+      "1": 0.9992957746478873,
+      "2": 1.0
+    },
+    "selfcheck_reach_residuals": {
+      "2": 0
+    },
+    "selfcheck_reach_conserved": true,
+    "review_fail_records": 54,
+    "review_fail_stopped_short": 42,
+    "void_by_role": {
+      "review": 54,
+      "revise": 1
+    },
+    "on_void_by_role": {
+      "review": 54,
+      "revise": 1
+    },
+    "on_void_total": 55,
+    "review_void_on": 54,
+    "review_share_of_on_void": 0.9818181818181818,
+    "rescue_estimate": null,
+    "rescue_note": "p3/p4 未定義（該層沒有 attempt>=3 的深重試列）",
+    "rescue_frac_of_on_void": null,
+    "timeout_review_fail_median": 380,
+    "timeout_gen_fail_median": null,
+    "timeout_review_cfg": [
+      380
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.OFF.infra_void": 0,
+      "arms.ON.infra_void": 12,
+      "arms.OFF5.infra_void": 0
+    },
+    "status": "OK"
+  },
+  "S2": {
+    "n_records": 1025,
+    "era": 3,
+    "non_retryable": [
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 724,
+      "2": 11,
+      "3": 2
+    },
+    "p_by_attempt": {
+      "1": 0.9848066298342542,
+      "2": 0.8181818181818182,
+      "3": 1.0
+    },
+    "selfcheck_reach_residuals": {
+      "2": 0,
+      "3": 0
+    },
+    "selfcheck_reach_conserved": true,
+    "review_fail_records": 22,
+    "review_fail_stopped_short": 18,
+    "void_by_role": {
+      "review": 22,
+      "gen": 13
+    },
+    "on_void_by_role": {
+      "review": 22
+    },
+    "on_void_total": 22,
+    "review_void_on": 22,
+    "review_share_of_on_void": 1.0,
+    "rescue_estimate": null,
+    "rescue_note": "p3/p4 未定義（該層沒有 attempt>=3 的深重試列）",
+    "rescue_frac_of_on_void": null,
+    "timeout_review_fail_median": 380,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      380
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.OFF.infra_void": 0,
+      "arms.ON.infra_void": 4,
+      "arms.OFF5.infra_void": 0
+    },
+    "status": "OK"
+  },
+  "S3": {
+    "n_records": 603,
+    "era": 1,
+    "non_retryable": [
+      400,
+      401,
+      402,
+      403,
+      404
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 410,
+      "2": 5,
+      "3": 1,
+      "4": 1
+    },
+    "p_by_attempt": {
+      "1": 0.9804878048780488,
+      "2": 0.8,
+      "3": 0.0,
+      "4": 1.0
+    },
+    "selfcheck_reach_residuals": {
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "selfcheck_reach_conserved": true,
+    "review_fail_records": 6,
+    "review_fail_stopped_short": 5,
+    "void_by_role": {
+      "review": 6,
+      "gen": 10
+    },
+    "on_void_by_role": {
+      "review": 6
+    },
+    "on_void_total": 6,
+    "review_void_on": 6,
+    "review_share_of_on_void": 1.0,
+    "rescue_estimate": 6.0,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 1.0,
+    "timeout_review_fail_median": 250,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      250
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.ON.infra_void": 1,
+      "arms.OFF5.infra_void": 3
+    },
+    "status": "OK"
+  },
+  "S4": {
+    "n_records": 3688,
+    "era": 2,
+    "non_retryable": [
+      400,
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 2524,
+      "2": 22,
+      "3": 14,
+      "4": 9
+    },
+    "p_by_attempt": {
+      "1": 0.9873217115689382,
+      "2": 0.36363636363636365,
+      "3": 0.35714285714285715,
+      "4": 0.0
+    },
+    "selfcheck_reach_residuals": {
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "selfcheck_reach_conserved": true,
+    "review_fail_records": 19,
+    "review_fail_stopped_short": 14,
+    "void_by_role": {
+      "review": 19,
+      "gen": 62,
+      "revise": 2
+    },
+    "on_void_by_role": {
+      "review": 19,
+      "gen": 6,
+      "revise": 2
+    },
+    "on_void_total": 27,
+    "review_void_on": 19,
+    "review_share_of_on_void": 0.7037037037037037,
+    "rescue_estimate": 6.7857142857142865,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 0.25132275132275134,
+    "timeout_review_fail_median": 250,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      250
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.ON.infra_void": 6,
+      "arms.OFF5.infra_void": 18
+    },
+    "status": "OK"
+  },
+  "S5": {
+    "n_records": 1427,
+    "era": 2,
+    "non_retryable": [
+      400,
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 1029,
+      "2": 15,
+      "3": 1,
+      "4": 1
+    },
+    "p_by_attempt": {
+      "1": 0.8882410106899903,
+      "2": 0.4666666666666667,
+      "3": 0.0,
+      "4": 0.0
+    },
+    "selfcheck_reach_residuals": {
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "selfcheck_reach_conserved": true,
+    "review_fail_records": 41,
+    "review_fail_stopped_short": 12,
+    "void_by_role": {
+      "review": 41,
+      "gen": 125
+    },
+    "on_void_by_role": {
+      "review": 41,
+      "gen": 52
+    },
+    "on_void_total": 93,
+    "review_void_on": 41,
+    "review_share_of_on_void": 0.44086021505376344,
+    "rescue_estimate": 0.0,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 0.0,
+    "timeout_review_fail_median": 380,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      380
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "calibration.by_agent.careful-1.infra_void": 0,
+      "calibration.by_agent.careful-2.infra_void": 0,
+      "calibration.by_agent.plain-1.infra_void": 0,
+      "calibration.by_agent.plain-2.infra_void": 0,
+      "calibration.by_agent.hasty-1.infra_void": 0,
+      "calibration.by_agent.hasty-2.infra_void": 0,
+      "arms.ON.infra_void": 73,
+      "arms.OFF5.infra_void": 64
+    },
+    "status": "OK"
+  },
+  "S6": {
+    "n_records": 2162,
+    "era": 3,
+    "non_retryable": [
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "reach_by_attempt": {
+      "1": 1296,
+      "2": 178,
+      "3": 111,
+      "4": 86
+    },
+    "p_by_attempt": {
+      "1": 0.8626543209876543,
+      "2": 0.37640449438202245,
+      "3": 0.22522522522522523,
+      "4": 0.5116279069767442
+    },
+    "selfcheck_reach_residuals": {
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "selfcheck_reach_conserved": true,
+    "review_fail_records": 117,
+    "review_fail_stopped_short": 60,
+    "void_by_role": {
+      "gen": 394,
+      "review": 117,
+      "revise": 23
+    },
+    "on_void_by_role": {
+      "gen": 30,
+      "review": 117,
+      "revise": 23
+    },
+    "on_void_total": 170,
+    "review_void_on": 117,
+    "review_share_of_on_void": 0.6882352941176471,
+    "rescue_estimate": 72.72972972972974,
+    "rescue_note": null,
+    "rescue_frac_of_on_void": 0.42782193958664555,
+    "timeout_review_fail_median": 380,
+    "timeout_gen_fail_median": 600,
+    "timeout_review_cfg": [
+      380
+    ],
+    "timeout_gen_cfg": [
+      600
+    ],
+    "summary_infra_void": {
+      "arms.OFF.infra_void": 5,
+      "arms.ON.infra_void": 66,
+      "arms.OFF5.infra_void": 30
+    },
+    "status": "OK"
+  }
+}

@@ -1,0 +1,124 @@
+{
+ "candidate_index": 0,
+ "draft_sha256": "1ee80b1cee6a4304eb4d09811e6b7a2ecdf775a65beee494b1584131f576808a",
+ "entry_point": "next_smallest_palindrome",
+ "hidden_check_scoring_only": {
+  "note": "隱藏測資**不進機制**——三把金鑰誰都看不到它。這一欄是事後計分，放在收據上只是為了讓觀眾知道答案。",
+  "this_candidate_passes_hidden": false
+ },
+ "honest_boundary": [
+  "鏈驗證證明的是「這些話確實是這把金鑰說的、事後沒被改過」，不是「這些話是真的」——被指名那把金鑰的鏈也驗得過。",
+  "指名靠的是多數決。腐化數超過 ⌊(k−1)/2⌋ 時裁決會翻轉、指名也會跟著翻轉，機制無法知道自己在門檻哪一邊（R449 §三-1）。",
+  "只在不會被抓時才說謊的執行器，本輪沒有測（R449 §三-2 模擬偵測率 0.000）。",
+  "驗收套件本身腐化，這個機制零保護（R449 §四）。"
+ ],
+ "keys": {
+  "K1": {
+   "chain_head": "6305b9f2f91923c2aff29254fc825b5652ea8cf9945542f9d21d9fccf1bf4e79",
+   "chain_len": 1840,
+   "chain_verifies": true,
+   "machine": "macOS-15.7.3-x86_64-i386-64bit",
+   "pub_hex": "f179d309d1c8746e83496ec3d5216f793c4ffe484c1d2ef9300fde028ff356ac",
+   "python": "3.12.10",
+   "vacant_id": "zQmVBFfJmtVkYXC1BNi8kp4k8aJ6udfkgUqivkdPBTAKUhw"
+  },
+  "K2": {
+   "chain_head": "1352beca595498c96d1d22c9d594c885422dd86564aa3ae006f1c50d073d4a3a",
+   "chain_len": 1840,
+   "chain_verifies": true,
+   "machine": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+   "pub_hex": "1ca2709f48de0397e3a0c7c4ab71d94d58cbb4725304fb4f01fa6a499e0041eb",
+   "python": "3.12.3",
+   "vacant_id": "zQmQBFLmgr47wzHbDMwCBy4XCJUdU6SoRHJWbek8vnSQzCR"
+  },
+  "K3": {
+   "chain_head": "ea986079d71cca04b638aaad80b7e2e8035a11233d2558b48bd10b32802acdcf",
+   "chain_len": 1899,
+   "chain_verifies": true,
+   "machine": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+   "pub_hex": "69a5f209c0e1e8a1a5046a795d50b9e675ab10ffd2cd6bcf0a69b5577b8350ad",
+   "python": "3.12.3",
+   "vacant_id": "zQmRVMXDDuuiXoiroQeHh23A5bUcHtzR8XRtUXReX3oenXY"
+  }
+ },
+ "named": {
+  "detail_dissenters": [],
+  "dissenters": [
+   "K3"
+  ],
+  "equivocators": [],
+  "rejected": []
+ },
+ "render_sha256": "d5904d1df20ee8ffc669c6a66e839b6ce0c4320ed76f24d3445d2fe9cd5a9d64",
+ "round": "R454",
+ "suite_sha256": "fe4ed4177d9c9139efc22066121eebe196f1c2d0f5f20e37f0618b9e8ce45588",
+ "task_id": "mbppplus_Mbpp/100",
+ "verdict": {
+  "camp_fail": [
+   "K1",
+   "K2"
+  ],
+  "camp_pass": [
+   "K3"
+  ],
+  "contested": true,
+  "detail_dissenters": [],
+  "dissenters": [
+   "K3"
+  ],
+  "draft_sha256": "1ee80b1cee6a4304eb4d09811e6b7a2ecdf775a65beee494b1584131f576808a",
+  "equivocators": [],
+  "evidence": [
+   [
+    "K1",
+    "cf2268c8fc9ffaef9e76b5e66459fa85e6ed87e980062b62d5eb45d947dbede5"
+   ],
+   [
+    "K2",
+    "dd8e1534f5935f9a041ba1a90d605a29037c209c8153db67a7e6534ab43f920c"
+   ],
+   [
+    "K3",
+    "c0d1103a5514bf9b7a4e3d1e92c9220eaac59a823a590d949f654566836feb8b"
+   ]
+  ],
+  "gauge_status": "ok",
+  "majority_bound": "majority over k executors tolerates at most floor((k-1)/2) corrupt executors; beyond that the verdict inverts and honest executors are the named dissenters",
+  "n_admitted": 3,
+  "n_fail": 2,
+  "n_pass": 1,
+  "quorum": 2,
+  "rejected": [],
+  "suite_fixed_point": "the committed suite is DATA (literal (args, expected) pairs plus comparator config) rendered by the executor's own trusted renderer -- no supplier-authored Python runs anywhere, and the entry point is the TASK's, bound and committed (absent task entry point => refusal, never an unbound bind), resolved by namespace lookup rather than by a bare name, so stateful / stub-blacklisting / mimic / entry-point-smuggling suites have no encoding; literals are bounded in value as well as in length, and validation raises only SuiteSpecError, so a malformed suite is a refusal rather than a traceback through every door; it also passed a gauge (reference accepted, every known-bad stub rejected). What is NOT ruled out: a suite that is merely weak or incomplete (too few tests, easy inputs) or whose comparator flags are loosened -- coverage and comparator config remain a trusted input, and so do the renderer and the sandbox it renders for. That residual is TWO numbers, never one: REALISABLE (supplier-side information only -- its own expected values, the reference, the known-bad stubs; no view of candidates or hidden labels) raises false delivery by +2.72pp (17.93% -> 20.65%) on g_r446_eq5_mbpp/368 tasks at k=3, and the HINDSIGHT CEILING (an oracle that can see the archived candidates and their hidden labels, which a real supplier cannot) is +4.35pp; measured in ops/gain/replay/peer_exec_suitespec_gate_r452c.json",
+  "suite_sha256": "fe4ed4177d9c9139efc22066121eebe196f1c2d0f5f20e37f0618b9e8ce45588",
+  "task_id": "mbppplus_Mbpp/100",
+  "visible_ok": false
+ },
+ "votes": {
+  "K1": {
+   "entry_hash": "cf2268c8fc9ffaef9e76b5e66459fa85e6ed87e980062b62d5eb45d947dbede5",
+   "first_failing_test": 3,
+   "n_signatures_this_cell": 1,
+   "visible_ok": false
+  },
+  "K2": {
+   "entry_hash": "dd8e1534f5935f9a041ba1a90d605a29037c209c8153db67a7e6534ab43f920c",
+   "first_failing_test": 3,
+   "n_signatures_this_cell": 1,
+   "visible_ok": false
+  },
+  "K3": {
+   "entry_hash": "c0d1103a5514bf9b7a4e3d1e92c9220eaac59a823a590d949f654566836feb8b",
+   "first_failing_test": null,
+   "n_signatures_this_cell": 1,
+   "visible_ok": true
+  }
+ },
+ "what_shipped_for_this_task": {
+  "runtime_sha256": "dbbdb8381b8df5bf16dab49bddf4175599b24d1e97c63a53f0175607e0845d52",
+  "same_as_r446_runtime": true,
+  "shipped_index": 1,
+  "shipped_sha256": "dbbdb8381b8df5bf16dab49bddf4175599b24d1e97c63a53f0175607e0845d52"
+ },
+ "what_this_is": "一格的完整收據：同一份草稿、同一套驗收，三把金鑰各自在自己的機器上真跑、各自簽進自己的鏈。其中一票與另外兩票不同 ⇒ 那一票被**指名**。"
+}

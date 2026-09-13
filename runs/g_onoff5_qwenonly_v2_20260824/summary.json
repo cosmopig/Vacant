@@ -1,0 +1,120 @@
+{
+  "seed": "g-smoke-20260820",
+  "n": 60,
+  "run_complete": false,
+  "request_policy": {
+    "timeout_s": 600,
+    "retries": 4,
+    "backoff_s": 2.0,
+    "review_timeout_s": 250,
+    "review_retries": 2
+  },
+  "pool": [
+    {
+      "agent_id": "careful-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "careful-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "plain-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "plain-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "hasty-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "hasty-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    }
+  ],
+  "instrument": {
+    "n": 12,
+    "ref_pass": 12,
+    "broken_rejected": 12,
+    "detail": [
+      {
+        "task_id": "mbppplus_Mbpp/450",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/133",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/283",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/111",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/80",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/463",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/734",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/456",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/790",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/726",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/394",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/567",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      }
+    ]
+  },
+  "calibration": null,
+  "arms": {},
+  "equal_budget_comparison_valid": false
+}

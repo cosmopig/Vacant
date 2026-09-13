@@ -1,0 +1,245 @@
+{
+ "chars": 73988,
+ "files": [
+  "vacant-docs-web/index.html",
+  "vacant-docs-web/js/main.js",
+  "vacant_hm/index.html",
+  "vacant_hm/js/app.js",
+  "vacant_hm/js/hero.js",
+  "vacant_hm/js/rng.js",
+  "vacant_hm/js/sampler.js",
+  "vacant_hm/js/sim.js",
+  "vacant_hm/js/worlds.js",
+  "vacant_hm/world/clay.html",
+  "vacant_hm/world/deliveries.html",
+  "vacant_hm/world/drawcalls.html",
+  "vacant_hm/world/index.html",
+  "vacant_hm/world/phone.html",
+  "vacant_hm/world/silhouette.html",
+  "vacant_hm/world/stagetruth.html",
+  "vacant_hm/world/js/assemble.js",
+  "vacant_hm/world/js/camera.js",
+  "vacant_hm/world/js/events.js",
+  "vacant_hm/world/js/form.js",
+  "vacant_hm/world/js/glow.js",
+  "vacant_hm/world/js/layout.js",
+  "vacant_hm/world/js/main.js",
+  "vacant_hm/world/js/merge.js",
+  "vacant_hm/world/js/persona.js",
+  "vacant_hm/world/js/phone.js",
+  "vacant_hm/world/js/render.js",
+  "vacant_hm/world/js/rng.js",
+  "vacant_hm/world/js/sim-bridge.js",
+  "vacant_hm/world/js/slash.js",
+  "vacant_hm/world/js/steptime.js",
+  "vacant_hm/world/js/world.js",
+  "vacant_hm/world/js/clay/clay.js",
+  "vacant_hm/world/js/clay/courier.js",
+  "vacant_hm/world/js/clay/dcprobe.js",
+  "vacant_hm/world/js/clay/deliveries.js",
+  "vacant_hm/world/js/clay/dprobe.js",
+  "vacant_hm/world/js/clay/geom.js",
+  "vacant_hm/world/js/clay/lit.js",
+  "vacant_hm/world/js/clay/main.js",
+  "vacant_hm/world/js/clay/palette.js",
+  "vacant_hm/world/js/clay/review.js",
+  "vacant_hm/world/js/clay/scene.js",
+  "vacant_hm/world/js/clay/silhouette.js",
+  "vacant_hm/world/js/clay/soak.js",
+  "vacant_hm/world/js/clay/stprobe.js",
+  "vacant_hm/world/js/clay/verdict.js",
+  "Vacant/vacant/web/app.html",
+  "Vacant/vacant/web/app.js",
+  "DOM:hm_s0_hero.html",
+  "DOM:hm_s1_worlds_early.html",
+  "DOM:hm_s1_worlds_late.html",
+  "DOM:hm_s2_consequence.html",
+  "DOM:hm_s2_idle.html",
+  "DOM:hm_s2_rerun_mid.html",
+  "DOM:hm_s2_ripple.html",
+  "DOM:hm_s2b_clean_consequence.html",
+  "DOM:hm_s2b_clean_ripple.html",
+  "DOM:hm_s2c_bad_consequence.html",
+  "DOM:hm_s2c_bad_rerun.html",
+  "DOM:hm_s2c_bad_ripple.html",
+  "DOM:phone_click.html",
+  "DOM:phone_findbad.html",
+  "DOM:phone_findbad_flagbad.html",
+  "DOM:phone_t0.html",
+  "DOM:phone_t1.html",
+  "DOM:world_click.html",
+  "DOM:world_t0.html",
+  "DOM:world_t1.html",
+  "DOM:world_t2.html"
+ ],
+ "candidates": [
+  {
+   "origin": "src",
+   "file": "vacant_hm/index.html",
+   "line": 111,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s0_hero.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s1_worlds_early.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s1_worlds_late.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s2_consequence.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s2_idle.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s2_rerun_mid.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s2_ripple.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s2b_clean_consequence.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s2b_clean_ripple.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s2c_bad_consequence.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s2c_bad_rerun.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:hm_s2c_bad_ripple.html",
+   "line": 109,
+   "sent": "信譽路由　·　三層漏斗　·　抽到就扣分",
+   "catch": [
+    "抽到"
+   ],
+   "exclude": [
+    "扣分"
+   ]
+  },
+  {
+   "origin": "dom",
+   "file": "DOM:phone_findbad_flagbad.html",
+   "line": 67,
+   "sent": "重跑抓到了，牠的光會暗下去、一段時間拿不到工作",
+   "catch": [
+    "抓到"
+   ],
+   "exclude": [
+    "拿不到工作"
+   ]
+  }
+ ]
+}

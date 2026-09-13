@@ -1,0 +1,33 @@
+6 題（evalplus）　輸出 runs/g_smoke_20260820
+── 量具驗證（先答已知答案）
+   參考解通過 6/6　壞解被擋 6/6
+── 模型池：6 個 agent／3 個模型家族
+── Agent calibration：3 題，結果不餵回路由
+  [CALIBRATION 1/3] 完成 6 個 agent
+  [CALIBRATION 2/3] 完成 6 個 agent
+  [CALIBRATION 3/3] 完成 6 個 agent
+── calibration spread: 0.3333333333333333
+  [OFF 1/6] 需求符合=True 接受=True 累計呼叫=1
+  [OFF 2/6] 需求符合=True 接受=True 累計呼叫=2
+  [OFF 3/6] 需求符合=True 接受=True 累計呼叫=3
+  [OFF 4/6] 需求符合=True 接受=True 累計呼叫=4
+  [OFF 5/6] 需求符合=True 接受=True 累計呼叫=5
+  [OFF 6/6] 需求符合=True 接受=True 累計呼叫=6
+── OFF: {"tasks": 6, "calls": 6, "infra_void": 0, "complete": true, "accepted": 6, "accepted_and_meets_demand": 6, "demand_equals_output_rate": 1.0, "coverage": 1.0, "correct_delivery_rate": 1.0, "raw_final_accuracy": 1.0, "calls_per_task": 1.0, "calls_per_correct_delivery": 1.0, "leaked": 0, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "endpoint_latency_ms": {"all": {"n": 6, "p50": 7827, "p95": 25618, "max": 25618}, "by_role": {"gen": {"n": 6, "p50": 7827, "p95": 25618, "max": 25618}}, "failed_attempts": 0}, "wall_s": 77.4, "cost_usd": 0.0388, "market_cost_usd": 0.0388, "market_cost_per_correct_delivery": 0.006458}
+  [ON 1/6] 需求符合=True 接受=True 累計呼叫=5
+  [ON 2/6] 需求符合=True 接受=True 累計呼叫=10
+  [ON 3/6] 需求符合=True 接受=True 累計呼叫=15
+  [ON 4/6] 需求符合=True 接受=True 累計呼叫=20
+  [ON 5/6] 需求符合=True 接受=True 累計呼叫=25
+  [ON 6/6] 需求符合=True 接受=True 累計呼叫=30
+── ON: {"tasks": 6, "calls": 30, "infra_void": 0, "complete": true, "accepted": 6, "accepted_and_meets_demand": 6, "demand_equals_output_rate": 1.0, "coverage": 1.0, "correct_delivery_rate": 1.0, "raw_final_accuracy": 1.0, "calls_per_task": 5.0, "calls_per_correct_delivery": 5.0, "leaked": 0, "reviewer_accuracy": 1.0, "raw_reviewer_accuracy": 0.8888888888888888, "reviewer_votes": 18, "review_fail_claims": 2, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": {"improved": 0, "harmed": 0, "stayed_correct": 6, "stayed_wrong": 0}, "endpoint_latency_ms": {"all": {"n": 30, "p50": 11655, "p95": 65326, "max": 65947}, "by_role": {"gen": {"n": 6, "p50": 8246, "p95": 65326, "max": 65326}, "review": {"n": 18, "p50": 11660, "p95": 65947, "max": 65947}, "revise": {"n": 6, "p50": 9980, "p95": 25570, "max": 25570}}, "failed_attempts": 2}, "wall_s": 556.4, "cost_usd": 0.2814, "market_cost_usd": 0.2814, "market_cost_per_correct_delivery": 0.046903}
+  [OFF5 1/6] 需求符合=True 接受=True 累計呼叫=5
+  [OFF5 2/6] 需求符合=True 接受=True 累計呼叫=10
+  [OFF5 3/6] 需求符合=True 接受=True 累計呼叫=15
+  [OFF5 4/6] 需求符合=True 接受=True 累計呼叫=20
+  [OFF5 5/6] 需求符合=True 接受=True 累計呼叫=25
+  [OFF5 6/6] 需求符合=True 接受=True 累計呼叫=30
+── OFF5: {"tasks": 6, "calls": 30, "infra_void": 0, "complete": true, "accepted": 6, "accepted_and_meets_demand": 6, "demand_equals_output_rate": 1.0, "coverage": 1.0, "correct_delivery_rate": 1.0, "raw_final_accuracy": 1.0, "calls_per_task": 5.0, "calls_per_correct_delivery": 5.0, "leaked": 0, "reviewer_accuracy": null, "raw_reviewer_accuracy": null, "reviewer_votes": 0, "review_fail_claims": 0, "machine_confirmed_counterexamples": 0, "confirmed_counterexample_precision_against_hidden_truth": null, "revision_transitions": null, "endpoint_latency_ms": {"all": {"n": 30, "p50": 9289, "p95": 31358, "max": 37365}, "by_role": {"gen": {"n": 30, "p50": 9289, "p95": 31358, "max": 37365}}, "failed_attempts": 0}, "wall_s": 132.5, "cost_usd": 0.1564, "market_cost_usd": 0.1564, "market_cost_per_correct_delivery": 0.026072}
+
+寫出 runs/g_smoke_20260820/summary.json
+⚠ 這是待驗證的宣稱不是結果——OFF5 沒跑贏之前不能說機制有效。

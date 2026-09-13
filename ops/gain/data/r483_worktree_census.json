@@ -1,0 +1,338 @@
+{
+  "prereg": "DECISION_20260905_R483_WORKTREE_MUTATION_CENSUS_PREREG.md",
+  "worktree": "/dev/shm/r483wt",
+  "perturbations": [
+    "P_MD",
+    "P_TEST",
+    "P_TOOL"
+  ],
+  "scoping": {
+    "eq5_analyze_mutation_check.py": "ROOT",
+    "mutation_test_r470_paired_ci.py": "WT",
+    "r471_specificity_and_deletion.py": "WT",
+    "mutation_test_r472_gauge_capability.py": "WT",
+    "mutation_test_r473_r466_census.py": "WT",
+    "mutation_test_r474_stub_sweep.py": "WT",
+    "mutation_test_r475_oracle_sweep.py": "WT",
+    "mutation_test_r476_closing_arbiter_drift.py": "SELF_MINIMAL"
+  },
+  "records": {
+    "eq5_analyze_mutation_check.py": {
+      "scope": "ROOT",
+      "control": false,
+      "arms": {
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": []
+        }
+      }
+    },
+    "mutation_test_r470_paired_ci.py": {
+      "scope": "WT",
+      "control": false,
+      "arms": {
+        "A_WT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        },
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_WT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": []
+        },
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": [],
+          "forced_green": "受測目標跑在 worktree 裡，ROOT 的新檔看不見"
+        }
+      }
+    },
+    "r471_specificity_and_deletion.py": {
+      "scope": "WT",
+      "control": false,
+      "arms": {
+        "A_WT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        },
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_WT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": []
+        },
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": [],
+          "forced_green": "受測目標跑在 worktree 裡，ROOT 的新檔看不見"
+        }
+      }
+    },
+    "mutation_test_r472_gauge_capability.py": {
+      "scope": "WT",
+      "control": false,
+      "arms": {
+        "A_WT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        },
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_WT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": []
+        },
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": [],
+          "forced_green": "受測目標跑在 worktree 裡，ROOT 的新檔看不見"
+        }
+      }
+    },
+    "mutation_test_r473_r466_census.py": {
+      "scope": "WT",
+      "control": false,
+      "arms": {
+        "A_WT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        },
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_WT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": []
+        },
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": [],
+          "forced_green": "受測目標跑在 worktree 裡，ROOT 的新檔看不見"
+        }
+      }
+    },
+    "mutation_test_r474_stub_sweep.py": {
+      "scope": "WT",
+      "control": false,
+      "arms": {
+        "A_WT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        },
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_WT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": []
+        },
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": [],
+          "forced_green": "受測目標跑在 worktree 裡，ROOT 的新檔看不見"
+        }
+      }
+    },
+    "mutation_test_r475_oracle_sweep.py": {
+      "scope": "WT",
+      "control": false,
+      "arms": {
+        "A_WT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        },
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_WT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": []
+        },
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": [],
+          "forced_green": "受測目標跑在 worktree 裡，ROOT 的新檔看不見"
+        }
+      }
+    },
+    "mutation_test_r476_closing_arbiter_drift.py": {
+      "scope": "SELF_MINIMAL",
+      "control": false,
+      "arms": {
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": [],
+          "forced_green": "自建 worktree 只 copy2 兩個檔，ROOT 的新檔看不見"
+        }
+      }
+    },
+    "_r483_pos_control.py": {
+      "scope": "WT",
+      "control": true,
+      "arms": {
+        "A_WT": {
+          "P_MD": 0,
+          "P_TEST": 1,
+          "P_TOOL": 0
+        },
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_WT": {
+          "verdict": "DECAY_PRONE",
+          "triggered_by": [
+            "P_TEST"
+          ]
+        },
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": [],
+          "forced_green": "受測目標跑在 worktree 裡，ROOT 的新檔看不見"
+        }
+      }
+    },
+    "_r483_neg_control.py": {
+      "scope": "WT",
+      "control": true,
+      "arms": {
+        "A_WT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        },
+        "A_ROOT": {
+          "P_MD": 0,
+          "P_TEST": 0,
+          "P_TOOL": 0
+        }
+      },
+      "clean_a": 0,
+      "clean_b": 0,
+      "verdicts": {
+        "A_WT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": []
+        },
+        "A_ROOT": {
+          "verdict": "INSENSITIVE",
+          "triggered_by": [],
+          "forced_green": "受測目標跑在 worktree 裡，ROOT 的新檔看不見"
+        }
+      }
+    }
+  },
+  "elapsed_s": 1580.9,
+  "controls_ok": true,
+  "controls": {
+    "pos": {
+      "verdict": "DECAY_PRONE",
+      "triggered_by": [
+        "P_TEST"
+      ]
+    },
+    "neg": {
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    }
+  },
+  "evidence_cells": {
+    "eq5_analyze_mutation_check.py@A_ROOT": "INSENSITIVE",
+    "mutation_test_r470_paired_ci.py@A_WT": "INSENSITIVE",
+    "r471_specificity_and_deletion.py@A_WT": "INSENSITIVE",
+    "mutation_test_r472_gauge_capability.py@A_WT": "INSENSITIVE",
+    "mutation_test_r473_r466_census.py@A_WT": "INSENSITIVE",
+    "mutation_test_r474_stub_sweep.py@A_WT": "INSENSITIVE",
+    "mutation_test_r475_oracle_sweep.py@A_WT": "INSENSITIVE"
+  },
+  "forced_green_cells": {
+    "mutation_test_r470_paired_ci.py@A_ROOT": "INSENSITIVE",
+    "r471_specificity_and_deletion.py@A_ROOT": "INSENSITIVE",
+    "mutation_test_r472_gauge_capability.py@A_ROOT": "INSENSITIVE",
+    "mutation_test_r473_r466_census.py@A_ROOT": "INSENSITIVE",
+    "mutation_test_r474_stub_sweep.py@A_ROOT": "INSENSITIVE",
+    "mutation_test_r475_oracle_sweep.py@A_ROOT": "INSENSITIVE",
+    "mutation_test_r476_closing_arbiter_drift.py@A_ROOT": "INSENSITIVE"
+  },
+  "forced_green_contradictions": [],
+  "forced_green_unevaluable": [],
+  "evidence_counts": {
+    "INSENSITIVE": 7
+  },
+  "decay_prone": [],
+  "masking": [],
+  "nondeterministic": [],
+  "broken": [],
+  "unscanned": [],
+  "verdict": "NO_DECAY_FOUND_TODAY",
+  "rc": 0
+}

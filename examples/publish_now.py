@@ -1119,6 +1119,694 @@ def build_refuted(archive_claims: list[dict]) -> list[dict]:
     return out
 
 
+# ── 閘門與互跑不互審（2026-09-04 ~ 09-07 那幾輪）─────────────────────────
+# 這幾條的數字**不寫死在這裡**：它們住在 examples/verdicts.py 的裁決條目裡，
+# 經 publish_archive.py 進 archive.json，本函式再讀回來。改數字只改 verdicts.py。
+#
+# R440P §五-1 寫死：展場與任何對外宣稱都必須帶前提句。所以凡是講交付成效的
+# 條目，`premise` 一律帶上——它不是註腳，是那些數字的成立條件。
+# 這一句標「逐字」，所以省略號不能省：R440P §五-1 的原文在第一個句號之後還有一句
+# 題庫附帶說明「MBPP+ 有 3 條 base assert 可跑；」，正典 §1.1 用「……」標出那個略去。
+# 沒有省略號的「逐字」是把改寫講成逐字，這正是本專題自己的紅線。
+PREMISE_ZH = ("整件事建立在「需求可以被編譯成可執行的驗收測資」。……需求跑不起來的場合，"
+              "這個機制沒有免費的裁判，會退化成「問一個模型」，而那正是量出來很差的東西。"
+              "（`……` 處略去題庫附帶說明「MBPP+ 有 3 條 base assert 可跑；」）")
+PREMISE_EN = ("All of this rests on 'the requirement can be compiled into runnable acceptance "
+              "tests'. [...] Where the requirement cannot be run there is no free referee, and "
+              "the mechanism degrades into 'ask a model' — which is the thing we measured as "
+              "bad. ('[...]' elides the corpus aside 'MBPP+ has 3 base asserts to run;'.)")
+
+GATE_FACTS = [
+    {
+        "id": "gate-vs-single",
+        "claim": "gain.conform_early_stop_beats_single",
+        "premise": True,
+        "plain": {"zh": "跑客戶自己的驗收、交第一份通過的——比單抽一份就收多交付",
+                  "en": "Run the customer's own acceptance tests and ship the first one that "
+                        "passes — it delivers more than taking a single draft"},
+        "how": {"zh": "三個題庫方向一致：MBPP+ +4.58pp、LeetCode 中高難度 +19.17pp、"
+                      "另一批 LeetCode +7.94pp；平均只多花 0.5–0.7 通呼叫。",
+                "en": "Three benchmarks point the same way: +4.58pp on MBPP+, +19.17pp on "
+                      "harder LeetCode tasks, +7.94pp on another LeetCode batch — for only "
+                      "0.5–0.7 extra model calls per task."},
+        "en_extra": "Rejected tasks were checked afterwards: in every run, all five drafts of "
+                    "every rejected task were in fact wrong (7/7, 8/8, 10/10, 15/15). Refusing "
+                    "to deliver did not throw away good answers.",
+    },
+    {
+        "id": "gate-vs-vote",
+        "claim": "gain.gate_rule_beats_majority_vote_same_candidates",
+        "premise": True,
+        "plain": {"zh": "同一組五份候選、同樣五通呼叫：閘門規則比多數決交付得多",
+                  "en": "Same five candidates, same five calls: the gate rule delivers more "
+                        "than majority voting"},
+        "how": {"zh": "四個 run 的閘門都贏（b 都大於 c，合計 73／27）。前三個 run 的 95% "
+                      "區間下界都在 0 以上；第四個（LCB v3 189 題）同號但區間跨 0。",
+                "en": "The gate wins in all four runs (b > c every time, 73/27 in total). In "
+                      "the first three the 95% interval's lower bound is above zero; in the "
+                      "fourth (LCB v3, 189 tasks) the direction holds but the interval still "
+                      "crosses zero."},
+        "en_extra": "What may NOT be said: a practical gain of 5pp or more (all four upper "
+                    "bounds fail to exclude values below 5pp); 'our system beat their system' "
+                    "(what changed is the selection rule, not two independently sampled "
+                    "systems); anything about other benchmarks; and the four runs must not be "
+                    "pooled into n=1051.",
+    },
+    {
+        "id": "lossless-filter",
+        "claim": "gain.lossless_visible_filter",
+        "premise": True,
+        "plain": {"zh": "拿看得到的測資篩選，沒有誤丟過正解",
+                  "en": "Filtering on the visible tests never threw away a correct answer"},
+        "how": {"zh": "六個資料集裡，「隱藏測資會過、但可見驗收沒過」的候選是 0 個"
+                      "（MBPP+ 合計 0／1630、LCB 0／455、0／120、0／189）。",
+                "en": "Across six datasets there were zero candidates that would have passed "
+                      "the hidden tests but failed the visible ones (0/1630 on MBPP+ in total, "
+                      "0/455, 0/120 and 0/189 on LeetCode batches)."},
+        "en_extra": "These six datasets are not six independent samples: the LCB v1 replay (91 "
+                    "tasks) and the LCB v2 live run (120 tasks) share 91 tasks. And part of the "
+                    "losslessness is a property of the benchmark: on MBPP+ the hidden check is "
+                    "the visible check plus more asserts, so 'fails visible' structurally "
+                    "implies 'fails hidden'. It must not be read as a general property.",
+    },
+    {
+        "id": "budget-on-hard-only",
+        "claim": "gain.off5_helps_on_hard_only",
+        "premise": True,
+        "plain": {"zh": "多花五倍呼叫只在難題上買得到東西",
+                  "en": "Spending five times the calls only buys something on hard tasks"},
+        "how": {"zh": "MBPP+ 上買不到（+0.81pp，區間排除了 ≥5pp 的實務增益）；"
+                      "難題上有用（+12.50pp、+6.35pp）。但改花法更有用："
+                      "+19.2pp 只花 1.71 通，勝過 +12.5pp 花 5 通。",
+                "en": "On MBPP+ it buys nothing (+0.81pp, and the interval rules out a "
+                      "practical gain of 5pp or more). On hard tasks it helps (+12.50pp, "
+                      "+6.35pp). But spending differently helps more: +19.2pp at 1.71 calls "
+                      "beats +12.5pp at 5 calls."},
+        "en_extra": "So 'more budget does not help' must be narrowed to: it does not help on "
+                    "MBPP+; it does help on hard tasks; and changing how the budget is spent "
+                    "helps more than spending more of it.",
+    },
+    {
+        "id": "mutual-execution",
+        "claim": "peerexec.mutual_execution_below_threshold",
+        "premise": True,
+        "plain": {"zh": "k 台機器各自跑、各自簽：說謊的那一把會被收據指名",
+                  "en": "k machines each run it and each sign it: the receipt names the key "
+                        "that lied"},
+        "how": {"zh": "真跑：兩台互不認識的機器 1840 次執行零不一致；三把金鑰、其中一把"
+                      "說謊 273 次，每一次都被指名，誠實的兩把 0 次被冤枉，交出去的東西一格沒變。",
+                "en": "Real runs: two machines that do not know each other produced 1840 "
+                      "executions with zero disagreements; with three keys and one of them "
+                      "lying 273 times, the receipt named it every single time, the two honest "
+                      "keys were never falsely accused, and not one shipped answer changed."},
+        "en_extra": "Which half is a simulation: the k∈{1,3,5,7} sweep, the corruption-ratio "
+                    "sweep, the patient liar and the corrupted-suite tables are all simulation "
+                    "on archived candidates. Only two cells are real runs: k=2 across two "
+                    "machines, and k=3 with exactly one liar sitting on the threshold. With "
+                    "k=2 the vote is unanimous, so the real runs never exercised the "
+                    "'minority gets named' path at all.",
+    },
+    {
+        "id": "suite-is-the-fixed-point",
+        "claim": "peerexec.suite_fixed_point",
+        "premise": False,
+        "plain": {"zh": "驗收清單本身是爛的，k 台機器會一致地、可驗證地交出錯的答案",
+                  "en": "If the acceptance list itself is bad, k machines will consistently and "
+                        "verifiably ship the wrong answer"},
+        "how": {"zh": "把套件換成「載得進就算過」：四個 k 的爭議率全是 0.0%，每一票誠實、"
+                      "每條鏈驗得過、指標滿格，而系統在交垃圾。畫面上一個警告都不會亮。",
+                "en": "Swap the suite for 'if it loads, it passes': the dispute rate is 0.0% at "
+                      "every k, every vote is honest, every chain verifies, every health "
+                      "indicator is green — and the system is shipping garbage. Not one warning "
+                      "lights up."},
+        "en_extra": "Two rounds shrank this but did not remove it. After the suite was turned "
+                    "into data rather than code, the only expressible attack left is 'not "
+                    "enough coverage', and it is always reported as two numbers: what a "
+                    "supplier using only its own information can achieve (+2.72pp more false "
+                    "deliveries) and a hindsight upper bound that can see the hidden labels "
+                    "(+4.35pp). Both hold only on MBPP+.",
+    },
+    # ── 2026-09-12：R529 跨題庫收官 ＋ R460R 同題複製之後的改寫 ──────────────
+    #    （2026-09-13 更新成五次：r4／r5 在 1004 獨占三串補跑完）
+    # 原本這裡有一條 `harness-loop`（「迴圈比重抽多交付 13 個百分點」）。
+    # 它**移到 GATE_UNKNOWNS** 了：五次複製 +5.83／+4.17／+0.83／+2.50／+4.31pp、
+    # 跨題庫四集 +0.6～+3.7pp，九次全部同號、九次都沒把 0 排除掉 ⇒ 幅度未確立。
+    # 站得住的是下面三條——**贏單發**、**主體是閘門＋重抽**、**多數決比閘門差**。
+    {
+        "id": "loop-vs-single-shot",
+        "claim": "harness.loop_beats_single_shot_replicated",
+        "premise": True,
+        "plain": {"zh": "把五通呼叫花在回饋迴圈，比單抽一份就收多交付——五次複製、四個題目集都成立",
+                  "en": "Spending the five calls on a feedback loop delivers more than taking a single "
+                        "draft — it holds across five replications and four task sets"},
+        "how": {"zh": "同一批 LCB v2 120 題重跑**五次**（新 seed）：迴圈 77.5/76.7/75.8/73.3/74.6% "
+                      "對單發 57.5/54.2/57.5/51.7/51.7%＝+20.0／+22.5／+18.3／+21.7／+22.9pp，"
+                      "三條 harness **十五格全部**通過 Holm 校正。"
+                      "換四個互斥題目集（LCB v3 中等 135 題、LCB v3 難 54 題、HumanEval+ 156 題、MBPP+ 371 題）："
+                      "四集全正 +8.2／+9.3／+12.2／+5.9pp，合併 616/716＝86.0% 對 559/716＝78.1%（+7.96pp）。",
+                "en": "The same 120 LeetCode tasks rerun five times with new seeds: the loop delivered "
+                      "77.5/76.7/75.8/73.3/74.6% against single shot 57.5/54.2/57.5/51.7/51.7% "
+                      "(+20.0/+22.5/+18.3/+21.7/+22.9pp); all fifteen "
+                      "cells across three harnesses clear Holm. Across four disjoint task sets (LCB v3 medium "
+                      "135, LCB v3 hard 54, HumanEval+ 156, MBPP+ 371) all four are positive "
+                      "(+8.2/+9.3/+12.2/+5.9pp); pooled 616/716 = 86.0% vs 559/716 = 78.1%."},
+        "en_extra": "Pooled paired McNemar b/c = 79/22, +7.96pp, Holm-adjusted p = 2.0e-8. Caveats that travel "
+                    "with the number: two of the four sets are difficulty slices of one source, so there are "
+                    "three real sources, not four; the five replications share the same 120 tasks and are not "
+                    "independent samples; HumanEval+ is 156 of 164 (eight excluded by the sandbox envelope). "
+                    "The fifth replication lost 7 rows to a backend fault, so its paired denominators are 118 "
+                    "and 119 rather than 120 — they are reported as they are, not refilled to 120. "
+                    "This says the loop beats a single draft — it does **not** say the loop beats resampling "
+                    "at the same budget, which remains unresolved.",
+    },
+    {
+        "id": "gate-is-the-main-effect",
+        "claim": "harness.gain_comes_from_executable_gate_and_resample",
+        "premise": True,
+        "plain": {"zh": "增益的主體是「可執行的驗收閘門＋重抽」，迴圈只是疊在上面的小增量",
+                  "en": "Most of the gain comes from the executable acceptance gate plus resampling; "
+                        "the feedback loop is a small increment on top"},
+        "how": {"zh": "把「迴圈贏單發」拆開：光是重抽不回饋（跑同一個閘門）就拿走"
+                      "+14.2／+18.3／+17.5／+19.2／+19.0pp（**五次**複製）與 "
+                      "+7.4／+5.6／+11.5／+4.9pp（四集）；"
+                      "迴圈再加上去的只有 +5.8／+4.2／+0.8／+2.5／+4.3pp 與 +0.7／+3.7／+0.6／+1.1pp。",
+                "en": "Decomposing 'the loop beats single shot': resampling alone, with no feedback but "
+                      "running the same gate, already takes +14.2/+18.3/+17.5/+19.2/+19.0pp (five replications) "
+                      "and +7.4/+5.6/+11.5/+4.9pp (four sets). The loop adds only "
+                      "+5.8/+4.2/+0.8/+2.5/+4.3pp and +0.7/+3.7/+0.6/+1.1pp on top."},
+        "en_extra": "This is an **audit judgement**, not a pre-registered result: the gate-vs-single-shot "
+                    "contrast is outside the Holm family of either study, so those p-values are uncorrected. "
+                    "It is also a subtraction, not a causal decomposition — the gate arm and the loop arm are "
+                    "two separately run arms, not two stages of one pipeline. And 'small increment' means "
+                    "'magnitude not established', not 'measured to be small'.",
+    },
+    # 2026-09-13：原本這裡還有一條 `vote-loses-to-gate`（「多數決輸給閘門」）。
+    # 五次跑齊之後它**移到 GATE_UNKNOWNS** 了：5/5 同號沒變，但只有 3/5 的未校正
+    # p < 0.05，而不顯著的兩次（r4 −4.17、r5 −1.74）正是後端**零共租**、
+    # 條件最乾淨的兩次。方向還在，「贏」這個字的強度不在了。
+]
+
+
+def build_gate_facts(archive_claims: list[dict]) -> list[dict]:
+    """把裁決條目攤成「現在知道什麼」用的條目。
+
+    刻意不在這裡重打任何數字：`一句話` 與 `邊界` 直接取自 archive.json，
+    而它們來自 examples/verdicts.py。頁面與裁決永遠是同一句話。
+    """
+    by_id = {c["id"]: c for c in archive_claims}
+    out = []
+    for spec in GATE_FACTS:
+        c = by_id.get(spec["claim"])
+        if c is None:                      # 裁決被刪掉時寧可少一條，不留半條
+            continue
+        boundary = c.get("邊界", "")
+        detail_zh = "**量到什麼**：" + c.get("一句話", "")
+        if boundary:
+            detail_zh += "\n\n**只能講到這裡**：" + boundary
+        if spec["premise"]:
+            detail_zh += "\n\n**前提（逐字，任何對外宣稱都要帶著它一起講）**：" + PREMISE_ZH
+        detail_en = spec["en_extra"]
+        if spec["premise"]:
+            detail_en += "\n\n**Premise that must accompany any of these numbers**: " + PREMISE_EN
+        out.append({
+            "id": spec["id"],
+            "status": "confirmed" if c.get("verdict") == "held" else c.get("verdict", ""),
+            "verdict": c.get("verdict"),
+            "claim_id": spec["claim"],
+            "plain": spec["plain"],
+            "how": spec["how"],
+            "detail": {"zh": detail_zh, "en": detail_en},
+            "sources": [f"data/archive.json · claims[{spec['claim']}]",
+                        f"examples/verdicts.py · VERDICTS[{spec['claim']}]",
+                        c.get("依據", {}).get("檔案", "")],
+        })
+    return out
+
+
+# ── 只有一半的答案：同號未解析、以及真跑側完全沒量到的東西 ────────────────
+# 這四條刻意用 `unknown`，不是 `refuted` 也不是 `confirmed`。
+# 「沒量出來」與「沒有差異」是兩件事，混用等於把檢定力不足冒充成陰性結果。
+GATE_UNKNOWNS = [
+    {
+        "id": "eq5-lcb3-unresolved",
+        "status": "unknown",
+        "plain": {"zh": "第四個 run 沒把 0 排除掉——沒量出來，不是沒有差異",
+                  "en": "The fourth run did not exclude zero — not measured is not the same as "
+                        "no difference"},
+        "how": {"zh": "LCB v3 189 題：閘門 83.07%、多數決 78.84%，差 +4.23pp，"
+                      "但 95% 區間是 [−0.66, +7.68]，跨過 0（p=0.0963）。",
+                "en": "LCB v3, 189 tasks: the gate delivered 83.07%, majority voting 78.84%, a "
+                      "+4.23pp gap — but the 95% interval is [−0.66, +7.68] and crosses zero "
+                      "(p=0.0963)."},
+        "detail": {
+            "zh": "方向沒有翻（b=13 對 c=5），所以這**不是**「沒複製成功」，是 UNRESOLVED。"
+                  "事前的檢定力表就算出這是最可能的結果：在效果成立的情況下，"
+                  "這個樣本數讓下界過 0 的機率只有 35–47%。"
+                  "必報的三個數字：這個 n 之下辨得出的最小效果 5.29pp、"
+                  "若真實效果等於觀測值需要 38 對不一致（本 run 只有 18 對）、"
+                  "要把區間半寬收到 5pp 需要 189 題。"
+                  "主判準 MISS 就寫 MISS，不追認、不補判準。"
+                  "四次 b 都大於 c（合計 73／27），但**不准併起來做檢定**——那是預註冊寫死的禁令。",
+            "en": "The direction did not flip (b=13 vs c=5), so this is UNRESOLVED, not a "
+                  "failed replication. The power table written before the run already said "
+                  "this was the most likely outcome: if the effect is real, this sample size "
+                  "gives only a 35–47% chance of the lower bound clearing zero. Three numbers "
+                  "must be reported with it: the minimum detectable effect at this n is "
+                  "5.29pp; if the true effect equals the observed one it would take 38 "
+                  "discordant pairs (this run had 18); and pulling the half-width down to 5pp "
+                  "needs 189 tasks. A missed primary criterion is written as missed. The four "
+                  "runs must not be pooled into one test.",
+        },
+        "sources": [
+            "data/archive.json · claims[gain.gate_rule_beats_majority_vote_same_candidates].邊界",
+            "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md · §二、§三",
+        ],
+    },
+    {
+        "id": "patient-liar-unmeasured",
+        "status": "unknown",
+        "plain": {"zh": "有耐心的說謊者，我們一次都沒抓到過",
+                  "en": "The patient liar: we have never caught one"},
+        "how": {"zh": "只在「不會被抓」的時候才說謊的執行器：四個 k、兩個題庫，"
+                      "偵測率全部是 0.000。而且那還是模擬——真跑側完全沒有量過。",
+                "en": "An executor that lies only when it will not be caught: detection rate is "
+                      "0.000 across all four values of k and both benchmarks. And that is the "
+                      "simulation; the real runs never measured this at all."},
+        "detail": {
+            "zh": "代價是它 93–95% 的機會得放棄，所以它造成的傷害只有 −1.35／−2.20pp——"
+                  "但那個「只有」也是模擬算出來的。"
+                  "加一點抖動時歸屬會退化而不是崩潰（腐化者被指名的比率仍是誠實者的 34 倍／12 倍），"
+                  "這仍然不等於抓得到。這條是機制目前最大的空白之一。",
+            "en": "The price it pays is giving up 93–95% of its opportunities, so the damage it "
+                  "does is only −1.35/−2.20pp — but that 'only' is also a simulation number. "
+                  "Under small jitter attribution degrades rather than collapses (a corrupt "
+                  "executor is still named 34x/12x more often than an honest one), which still "
+                  "is not the same as catching it. This is one of the mechanism's largest "
+                  "blanks.",
+        },
+        "sources": [
+            "data/archive.json · claims[peerexec.mutual_execution_below_threshold].邊界",
+            "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md · §三-2",
+        ],
+    },
+    {
+        "id": "above-majority-threshold",
+        "status": "unknown",
+        "plain": {"zh": "說謊的機器一旦過半，指名會反過來——而機制不知道自己在哪一邊",
+                  "en": "Once the liars are a majority the naming inverts — and the mechanism "
+                        "cannot tell which side of the line it is on"},
+        "how": {"zh": "容忍上界是 ⌊(k−1)/2⌋。過半之後裁決與指名一起翻轉，誠實者變成被指名的一方"
+                      "（誣告率 0.175／0.374）。",
+                "en": "The tolerance bound is floor((k−1)/2). Past it, the verdict and the "
+                      "naming invert together and the honest executors become the ones named "
+                      "(false-accusation rate 0.175/0.374)."},
+        "detail": {
+            "zh": "而且加機器買不到抵抗力：固定腐化比例下，k 從 1 到 7 交付率一字不變"
+                  "（串謀 67.39%、破壞 0%）。"
+                  "k=3／quorum=2 時，只要任一把誠實證言缺席或被拒就是 1-1 平手 ⇒ 未決、不指名——"
+                  "「指名」的前提是**誠實多數在場**，不是「有簽章」。"
+                  "真跑側從來沒有跑過門檻以上那一格，這裡列的全部是模擬與機制性質。",
+            "en": "Adding machines does not buy resistance either: at a fixed corruption ratio "
+                  "the delivery rate does not move at all from k=1 to k=7 (67.39% under "
+                  "collusion, 0% under sabotage). At k=3 with quorum 2, one missing or "
+                  "rejected honest attestation makes it 1-1: undecided, nobody named. Naming "
+                  "presupposes an honest majority being present, not merely the presence of "
+                  "signatures. No real run has ever been done above the threshold; everything "
+                  "here is simulation plus a property of the mechanism.",
+        },
+        "sources": [
+            "data/archive.json · claims[peerexec.majority_bound]",
+            "vacant/peerexec.py · MAJORITY_BOUND_NOTE",
+        ],
+    },
+    {
+        "id": "arm64-untested",
+        "status": "unknown",
+        "plain": {"zh": "換一種 CPU 架構會不會就對不起來，沒測過",
+                  "en": "Whether a different CPU architecture breaks the agreement is untested"},
+        "how": {"zh": "跨機真跑只在 x86_64 上做過（Mac 與 Linux 各一台）。arm64 沒有參加——"
+                      "而 arm64 正是浮點 1 ULP 差異的來源之一。",
+                "en": "The cross-machine runs were done on x86_64 only (one Mac, one Linux). No "
+                      "arm64 machine took part — and arm64 is precisely one source of the 1 ULP "
+                      "floating-point differences."},
+        "detail": {
+            "zh": "已知這個問題是真的：MBPP+ 的隱藏測資用 atol=0 比對，1 ULP 差異就翻。"
+                  "實測已有一格（浮點面積題）出貨 sha 相同、重算 hidden 卻是 false。"
+                  "那是計分端的可攜性問題不是機制，但它說明「逐位相同」目前只在同一個架構上驗過。"
+                  "推翻條件已經寫死：arm64 機器參加後若可見側出現不一致格，"
+                  "跨機一致那條預測就要加上架構限定。"
+                  "另外第三把金鑰目前與第二把同機，Windows 那台的沙箱跑不起來、沒能參加。",
+            "en": "The problem is known to be real: MBPP+ hidden tests compare with atol=0, so a "
+                  "1 ULP difference flips the result. One cell (a floating-point area task) "
+                  "already shipped the same sha while the recomputed hidden result was false. "
+                  "That is a portability problem in the scorer, not in the mechanism — but it "
+                  "means 'bit-for-bit identical' has so far only been verified within one "
+                  "architecture. The falsifier is already written down: if an arm64 machine "
+                  "joins and the visible side disagrees anywhere, the cross-machine prediction "
+                  "gets an architecture qualifier. Separately, the third key currently shares a "
+                  "machine with the second, and the Windows box could not take part because its "
+                  "sandbox does not run.",
+        },
+        "sources": [
+            "data/archive.json · claims[peerexec.mutual_execution_below_threshold].邊界",
+            "DECISION_20260906_R453_FABLE_AUDIT_REAL_MULTIPARTY.md · §三-3、§三-5、§五",
+        ],
+    },
+    {
+        # 2026-09-12：這一條從 GATE_FACTS 移過來。R460 那一次是真的量測，
+        # 但複製與跨題庫都沒把 0 排除掉 ⇒ 它屬於「只有一半的答案」這一欄。
+        "id": "loop-vs-resample-unresolved",
+        "status": "unknown",
+        "plain": {"zh": "迴圈比「換人重抽」好多少，沒量出來——九次同號，九次都沒把 0 排除掉",
+                  "en": "How much the loop beats resampling is not established — nine measurements all "
+                        "point the same way, and not one of them excluded zero"},
+        "how": {"zh": "第一次量到 +13.33pp（LCB v2 120 題）。之後同一批題目重跑**五次**："
+                      "+5.83／+4.17／+0.83／+2.50／+4.31pp，Holm 校正後 p "
+                      "0.630／0.917／1.000／0.678／0.922，**0/5 顯著**；"
+                      "換四個題目集：+0.7／+3.7／+0.6／+1.1pp，合併 +1.12pp（Holm p 0.341）。",
+                "en": "The first measurement was +13.33pp (LCB v2, 120 tasks). Rerunning the same tasks "
+                      "five times gave +5.83/+4.17/+0.83/+2.50/+4.31pp, Holm-adjusted p "
+                      "0.630/0.917/1.000/0.678/0.922 — none significant. Four different task sets gave "
+                      "+0.7/+3.7/+0.6/+1.1pp, pooled +1.12pp (Holm p 0.341)."},
+        "detail": {
+            "zh": "**同號未解析 ≠ 沒有差異。** 方向 9/9 全正、一次都沒翻，所以這**不是**"
+                  "「複製失敗」「效果消失」「迴圈與重抽等價」——那幾句一句都不准寫。"
+                  "但也**不准**再寫「多交付 13 個百分點」：那個點估計是上偏的"
+                  "（事前就寫了 winner's curse——n=120 對 +10pp 的檢定力只有 0.43–0.63，"
+                  "能被判顯著的點估計本來就被截斷在 MDE 以上），而且後續九次沒有任何一次重現它。\n\n"
+                  "**五次跑齊了，宣稱規則正式判過一次**：規則寫死「5/5 同號且 ≥4/5 Holm 顯著 ⇒ "
+                  "可以寫『複製穩定』；否則逐次照實列」。同號 5/5 成立、Holm 顯著 **0/5** 不成立 "
+                  "⇒ 落在**逐次照實列**。不准平均、不准併 n、不准挑一次，"
+                  "也不准寫「複製穩定」「多數支持」。\n\n"
+                  "同一段裡必須一起講的還有四件事：（1）五個未調整區間"
+                  "（[−2.79, 12.89]／[−5.35, 12.80]／[−7.44, 8.89]／[−5.94, 10.28]／[−4.54, 12.01]）"
+                  "**全部與第一次的 [4.22, 19.46] 相交**——以區間看，沒有一次與它互斥；"
+                  "（2）五個上界（12.89／12.80／8.89／10.28／12.01）**全低於**第一次的點估計 13.33"
+                  "（描述，不是檢定）；（3）事前寫死的檢定力預期是五次裡過 **2–3 次**，"
+                  "真值若是 +10pp 出現 0/5 的機率約 0.007–0.06，**落在下尾**"
+                  "（下尾不等於反證，但也不是可以揮手帶過的噪音）；"
+                  "（4）唯一被**排除**掉的東西是第三次的 ≥+10pp（區間上界 8.89 < 10），"
+                  "那一格四狀態是 RULED_OUT，語意是「排除 ≥+10pp」**不是**「排除任何效果」"
+                  "——另外四次是 INCONCLUSIVE，而第四次的上界 10.28 離 RULED_OUT 只差 0.28pp，"
+                  "所以四狀態的計數照印但**不當結論**。\n\n"
+                  "第五次有 7 列作廢（後端模型崩潰後 JIT 重載、每小時卸載），"
+                  "所以它的主指標分母是 **complete-case 116 不是 120**；"
+                  "作廢的最壞界算過了：這一格落在 [+0.83, +7.50]，**不變號**。\n\n"
+                  "還有一層限制：五次複製共用**同一批** 120 題（seed 只換題序與取樣、不換題目），"
+                  "所以就算五次全過，能講的也只是「在這 120 題上穩定」。"
+                  "五次的後端負載也不同質（與另一個實驗的共租率 8.5／71.3／2.1／0／0%）"
+                  "——那是描述，不校正，但也不准把跨次差異全歸給取樣。",
+            "en": "**Same sign but unresolved is not the same as no difference.** All nine point "
+                  "estimates are positive and none flipped, so 'replication failed', 'the effect "
+                  "disappeared' and 'the loop and resampling are equivalent' are all forbidden. But "
+                  "'13 percentage points more' is equally forbidden now: that estimate is biased upward "
+                  "(the winner's curse was written down in advance — power at n=120 for +10pp is only "
+                  "0.43–0.63), and none of the nine later measurements reproduced it.\n\n"
+                  "**All five replications are now in, so the claim rule has been applied once and for "
+                  "all.** The rule, frozen before the data: 5/5 same sign and ≥4/5 Holm-significant "
+                  "permits 'replicates stably'; otherwise each run is listed as it is. Same sign is 5/5 "
+                  "(met); Holm-significant is **0/5** (not met) — so it falls through to listing each run. "
+                  "No averaging, no pooling, no cherry-picking, and no 'stable' or 'mostly supported'.\n\n"
+                  "Four things must be said in the same breath: (1) all five unadjusted intervals "
+                  "([-2.79, 12.89] / [-5.35, 12.80] / [-7.44, 8.89] / [-5.94, 10.28] / [-4.54, 12.01]) "
+                  "**intersect the first run's [4.22, 19.46]** — on intervals, not one of them is "
+                  "incompatible with it; (2) all five upper bounds (12.89 / 12.80 / 8.89 / 10.28 / 12.01) "
+                  "fall **below** the first run's point estimate of 13.33 (a description, not a test); "
+                  "(3) the power written down in advance expected **2–3 of 5** to clear Holm, and if the "
+                  "true effect really were +10pp the chance of seeing 0/5 is roughly 0.007–0.06 — the "
+                  "**lower tail** (a lower tail is not a disproof, but it is not noise to wave away "
+                  "either); (4) the only thing actually excluded is ≥+10pp in the third replication "
+                  "(upper bound 8.89 < 10), whose four-state verdict is RULED_OUT, meaning '≥+10pp is "
+                  "excluded', **not** 'any effect is excluded' — the other four are INCONCLUSIVE, and the "
+                  "fourth's upper bound of 10.28 misses RULED_OUT by 0.28pp, so the four-state counts are "
+                  "printed but not treated as a conclusion.\n\n"
+                  "The fifth replication lost 7 rows to a backend fault (model crash, then JIT reload with "
+                  "an hourly unload), so its paired denominator is **116, not 120**. The worst case over "
+                  "those voided rows was computed: this cell lands in [+0.83, +7.50] and **does not change "
+                  "sign**.\n\n"
+                  "One further limit: the five replications share the same 120 tasks (the seed changes "
+                  "order and sampling, not the tasks), so even 5/5 would only say 'stable on these 120'. "
+                  "The five did not run under the same backend load either (co-tenancy with another "
+                  "experiment at 8.5/71.3/2.1/0/0%) — described, not corrected for, and not an excuse to "
+                  "attribute all between-run variation to sampling.",
+        },
+        "sources": ["data/archive.json · claims[harness.hmix_loop_beats_resample_same_budget]",
+                    "examples/verdicts.py · VERDICTS[harness.hmix_loop_beats_resample_same_budget]",
+                    "DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md §八（五次齊了的補記）",
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json",
+                    "DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md §二、§三、§七",
+                    "DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md §二、§三、§七",
+                    "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md §二",
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl"],
+    },
+    {
+        # 2026-09-13：這一條從 GATE_FACTS 移過來。方向沒變（五次全負），
+        # 但 5/5 裡只有 3/5 的未校正 p < 0.05，而不顯著的兩次正是後端
+        # **零共租**、條件最乾淨的兩次 ⇒ 「贏」這個字撐不住了。
+        "id": "vote-loses-to-gate-unresolved",
+        "status": "unknown",
+        "plain": {"zh": "多數決比閘門差多少，沒量出來——五次同號，只有三次的差距大到看得出來，"
+                        "而且後端最乾淨的那兩次看不出來",
+                  "en": "How much majority voting loses to the gate is not established — five runs all "
+                        "point the same way, only three separate from zero, and the two cleanest runs "
+                        "are not among them"},
+        "how": {"zh": "同一批 LCB v2 120 題五次：多數決 73/120、74/120、71/120、80/120、80/115 "
+                      "對閘門 86/120、87/120、90/120、85/120、82/115"
+                      "＝−10.83／−10.83／−15.83／−4.17／−1.74pp"
+                      "（未校正 p 0.019／0.029／0.0003／0.46／0.84）。"
+                      "成本一路沒變：每題 token 是閘門的 2.40／2.16／2.85／2.64／2.21 倍，"
+                      "呼叫 5.0 通對 1.5–1.8 通。",
+                "en": "The same 120 LeetCode tasks, five times: majority voting 73/120, 74/120, 71/120, "
+                      "80/120, 80/115 against the gate's 86/120, 87/120, 90/120, 85/120, 82/115 "
+                      "(-10.83/-10.83/-15.83/-4.17/-1.74pp; uncorrected p 0.019/0.029/0.0003/0.46/0.84). "
+                      "The cost gap never moved: 2.40/2.16/2.85/2.64/2.21x the tokens per task, and 5.0 "
+                      "calls against 1.5-1.8."},
+        "detail": {
+            "zh": "**同號未解析 ≠ 沒有差異，但也不准再寫成「贏」。** 五次方向全負、一次都沒翻，"
+                  "所以「多數決不比閘門差」「兩者等價」「打平」一句都不准寫；"
+                  "同時 5/5 裡只有 3/5 的未校正 p < 0.05，所以"
+                  "「三次都輸、而且輸的幅度在變大」那種遞增敘事也**不准**再寫"
+                  "——第四、第五次把幅度收回到 −4.17／−1.74pp。\n\n"
+                  "**最該講的是這件事**：前三次與另一個實驗共租同一台後端"
+                  "（共租率 8.5／71.3／2.1%），第四、第五次是獨占（0／0%）。"
+                  "恰好就是那兩次不顯著，而且同一期間單發臂掉到 51.7／51.3%、"
+                  "多數決臂升到 66.7／68.6%，而閘門臂幾乎沒動（70.8／70.9%）。"
+                  "也就是說，跨次差異裡有一塊**不是取樣**，而這一條的強度剛好掛在那一塊上。"
+                  "但**共租本身解釋不了這個形狀**：多數決就是五份單發取多數，"
+                  "單發變差的同時多數決反而好了 7–9 個百分點，方向相反。"
+                  "所以「乾淨的兩次不顯著」目前只能當**描述**；"
+                  "把它講成「共租讓前三次看起來更誇張」是還沒有證據的因果話。"
+                  "共租是描述性的紀錄，不用來校正任何數字。\n\n"
+                  "這個對照本來就**不在**預註冊的 Holm 家族裡（家族是三條迴圈臂 × 單發／閘門），"
+                  "所以上面的 p 一律未校正，「3/5 顯著」是五個未校正 p 的計數，"
+                  "不是任何一個校正後的結論。五次共用同一批 120 題 ⇒ 不是五個獨立樣本，"
+                  "**不准併 n**、不准平均。\n\n"
+                  "換題庫的話結論還會再鬆：MBPP+ 與 LCB v3 上同一個比較是同號跨 0。"
+                  "**不准講「多數決一般而言較差」**，也不准把這一條與"
+                  "「同一組候選上換選擇規則」（EQ5）互相援引——那是不同的估計量。",
+            "en": "**Same sign but unresolved is not the same as no difference — and 'the gate wins' is no "
+                  "longer sayable either.** All five point the same way and none flipped, so 'majority "
+                  "voting is no worse', 'equivalent' and 'a tie' are all forbidden. At the same time only "
+                  "3 of 5 have an uncorrected p below 0.05, so the earlier escalating story ('lost all "
+                  "three times, and the margin is growing') is forbidden too — the fourth and fifth runs "
+                  "pulled the margin back to -4.17 and -1.74pp.\n\n"
+                  "**The thing most worth saying**: the first three replications shared the backend with "
+                  "another experiment (co-tenancy 8.5/71.3/2.1%); the fourth and fifth had it to "
+                  "themselves (0/0%). Those two are exactly the ones that do not separate from zero — and "
+                  "over the same period the single-shot arm fell to 51.7/51.3% while the voting arm rose "
+                  "to 66.7/68.6% and the gate arm barely moved (70.8/70.9%). Some of the between-run "
+                  "variation is therefore **not sampling**, and this claim's strength happens to rest on "
+                  "that part. But **co-tenancy on its own does not explain that shape**: the voting arm is "
+                  "a majority over five single-shot draws, so the single-shot arm getting worse while the "
+                  "voting arm gains 7-9 points runs the other way. 'The two clean runs are the "
+                  "non-significant ones' therefore stands as a **description**; turning it into 'co-tenancy "
+                  "inflated the first three' is a causal claim with no evidence behind it yet. Co-tenancy is "
+                  "recorded descriptively and is not used to correct any number.\n\n"
+                  "This contrast was never in the pre-registered Holm family (that family is three loop "
+                  "arms against single shot and against the gate), so every p above is uncorrected, and "
+                  "'3 of 5 significant' is a count over five uncorrected p-values, not a corrected "
+                  "conclusion. The five replications share one 120-task bank, so they are not independent "
+                  "samples and must not be pooled or averaged.\n\n"
+                  "On other banks the picture loosens further: on MBPP+ and LCB v3 the same comparison is "
+                  "same-sign but crosses zero. So this does **not** say 'majority voting is generally "
+                  "worse', and it must not be conflated with the separate result about changing the "
+                  "selection rule over one fixed set of candidates — that is a different estimand.",
+        },
+        "sources": ["data/archive.json · claims[harness.majority_vote_loses_to_gate]",
+                    "examples/verdicts.py · VERDICTS[harness.majority_vote_loses_to_gate]",
+                    "DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md §八-1、§八-3-3",
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json · co_tenancy",
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/{rows.jsonl,calls.jsonl}"],
+    },
+    {
+        "id": "hpi-hoc-unresolved",
+        "status": "unknown",
+        "plain": {"zh": "另外兩條 harness（pi 式、計畫＋診斷）對重抽同號但沒量出來，五次複製後仍然沒有",
+                  "en": "The other two harnesses (pi-style, plan+diagnostics) point the same way as H-MIX "
+                        "against resampling and were still not resolved after five replications"},
+        "how": {"zh": "R460：H-PI +5.00pp [−4.40, +13.30]、H-OC +9.17pp [−1.00, +17.62] 對 CONFORM；"
+                      "Holm 校正後 p 0.345／0.160。**五次**複製："
+                      "H-PI +5.00／+6.67／+0.83／**+10.00**／**+0.00**pp、"
+                      "H-OC +5.00／+0.83／**+0.00**／+7.50／+5.13pp，**十次全部未過 Holm**。"
+                      "兩者對單發則五次全部顯著（+17.5～+29.2pp）。",
+                "en": "R460: H-PI +5.00pp [-4.40, +13.30] and H-OC +9.17pp [-1.00, +17.62] vs resampling, "
+                      "Holm-adjusted p 0.345 / 0.160. Across five replications: H-PI "
+                      "+5.00/+6.67/+0.83/**+10.00**/**+0.00**pp and "
+                      "H-OC +5.00/+0.83/**+0.00**/+7.50/+5.13pp — none of the ten clears Holm. Against "
+                      "single shot, however, all five replications are significant (+17.5 to +29.2pp)."},
+        "detail": {"zh": "事前四狀態規則判 INCONCLUSIVE：上界沒排除 10pp，下界沒過 0。不准寫「打平」或「迴圈沒用」。"
+                         "第三次複製的 H-OC 與第五次的 H-PI 恰好是 +0.00pp（b/c 12/12 與 14/14）"
+                         "——那是兩次 n=120／117 的打平，**不准**讀成「證實無效」或「等價」："
+                         "區間根本沒有把效果排除掉。\n\n"
+                         "**第四次的 H-PI +10.00pp [+0.62, +17.16] 是五次三十格裡唯一一格"
+                         "未校正下界大於 0 的**，而它 **Holm 之後 0.107、不顯著**。這一格特別容易被拿去"
+                         "當成「終於量到了」，所以要講清楚兩層理由：（a）它沒過家族校正；"
+                         "（b）H-PI 是**消融臂**——預註冊寫死本 run 不回答「哪一條 harness 比較好」，"
+                         "主張掛的是 H-MIX。用消融臂裡一個未校正的下界去支持主臂的結論，"
+                         "等於把家族拆開挑最好看的一格。\n\n"
+                         "第五次的 H-PI 打平掛在 7 列作廢上：那 7 列的最壞界是 [−2.50, +2.50]，"
+                         "**會變號**，所以那一格的 RULED_OUT 狀態雖照規則保留，敏感度必須一起寫"
+                         "（對照：H-MIX 那一格的最壞界 [+0.83, +7.50] 不變號）。\n\n"
+                         "H-MIX 對 H-PI 的 +8.33pp 是探索量，不在 Holm 家族內，不能用來講「哪一條 harness 比較好」"
+                         "——複製的預註冊也照抄了這條禁令（本 run 不回答哪條 harness 較好）。",
+                   "en": "The pre-registered four-state rule says INCONCLUSIVE: the upper bound does not exclude "
+                         "10pp and the lower bound does not clear zero. 'Tie' and 'the loop does not help' are "
+                         "forbidden readings. H-OC in the third replication and H-PI in the fifth land on "
+                         "exactly +0.00pp (b/c 12/12 and 14/14) — two ties at n=120 and n=117, and reading "
+                         "either as 'proven ineffective' or 'equivalent' is forbidden: the interval excludes "
+                         "nothing.\n\n"
+                         "**H-PI in the fourth replication, +10.00pp [+0.62, +17.16], is the only one of the "
+                         "thirty cells across five replications whose uncorrected lower bound clears zero** — "
+                         "and it is **not significant after Holm (0.107)**. That cell is the one most likely to "
+                         "be picked up as 'finally measured', so two reasons matter: (a) it does not survive "
+                         "the family correction; (b) H-PI is an **ablation arm** — the pre-registration states "
+                         "that this study does not answer which harness is better, and the claim rides on "
+                         "H-MIX. Using an uncorrected lower bound from an ablation arm to support the main "
+                         "arm's conclusion is taking the family apart and keeping the best-looking cell.\n\n"
+                         "The fifth replication's H-PI tie hangs on 7 voided rows: their worst case is "
+                         "[-2.50, +2.50], which **does change sign**, so that cell's RULED_OUT verdict is kept "
+                         "per the rule but the sensitivity must be stated alongside it (for contrast, the "
+                         "H-MIX cell's worst case, [+0.83, +7.50], does not change sign).\n\n"
+                         "H-MIX vs H-PI (+8.33pp) is exploratory and "
+                         "outside the Holm family; the replication pre-registration carries the same prohibition "
+                         "(this study does not answer which harness is better)."},
+        "sources": ["DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md §八-1、§八-3-5",
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json",
+                    "DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md §二、§三",
+                    "ops/gain/replay/r460/r460_analyze.json · decision.HPI / decision.HOC",
+                    "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md §二-1",
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl"],
+    },
+    {
+        # 2026-09-13：id 從 `harness-replications-running` 改過來。五次跑齊了，
+        # 「還在跑」是假的；留著一個說謊的 id 與留著一句說謊的文字沒有兩樣。
+        "id": "harness-replications-rule-not-met",
+        "status": "unknown",
+        "plain": {"zh": "五次複製跑齊了：同號 5/5，但 Holm 顯著 0/5 ⇒ 規則判「逐次照實列」，"
+                        "「複製穩定」這句話**永遠不會**為這批資料寫出來",
+                  "en": "All five replications are in: 5/5 same sign but 0/5 Holm-significant, so the rule "
+                        "returns 'list each run as it is' — 'replicates stably' will never be written for "
+                        "this batch"},
+        "how": {"zh": "R460R：五次預註冊、五次跑完（人類 2026-09-11 指示停用 1003，全部跑在 1004 三槽）。"
+                      "r1–r4 各 720 列、零 infra_void；r5 713 列、7 列 infra_void"
+                      "（後端模型崩潰後 JIT 重載、每小時卸載）。"
+                      "n=120 對 +10pp 的檢定力 0.43–0.63，事前預期五次裡有 2–3 次通過 Holm"
+                      "——**實際是 0/5**。",
+                "en": "R460R: five pre-registered replications, all five now run (human instruction "
+                      "2026-09-11 excluded backend 1003; all ran on 1004's three slots). r1–r4 are 720 rows "
+                      "each with zero infra voids; r5 is 713 rows with 7 infra voids (a model crash "
+                      "followed by JIT reload with an hourly unload). Power at n=120 for +10pp is "
+                      "0.43–0.63, so 2–3 of 5 were expected to clear Holm even if the effect is real — "
+                      "the actual count is 0 of 5."},
+        "detail": {"zh": "宣稱規則事前寫死：5/5 同號且 ≥4/5 Holm 顯著才可寫「複製穩定」，否則逐次照實列。"
+                         "五次跑齊之後判定：同號 **5/5 成立**、Holm 顯著 **0/5 不成立** ⇒ 逐次照實列。"
+                         "不併 n、不平均、不挑一次，也不准反過來寫「複製失敗」。\n\n"
+                         "**事前預期 2–3/5、實際 0/5**，這件事本身要照實記。若真值真是 +10pp，"
+                         "出現 0/5 的機率約 0.007–0.06 ⇒ 落在下尾。下尾不是「效果不存在」的證明，"
+                         "但也不是可以揮手帶過的噪音——這一格正是「規則跑完之後剩下什麼」的答案。\n\n"
+                         "LCB v2 就是 120 題，seed 只打亂順序不抽樣 ⇒ 五次複製的題目集合完全相同，"
+                         "題目層級的效果複製不掉。換題庫是另一件事，已由 R529 的四個題目集回答。\n\n"
+                         "另外兩件跑完才知道的事：五次的後端負載不同質"
+                         "（與另一個實驗的共租率 8.5／71.3／2.1／0／0%），而且第五次橫跨一次崩潰"
+                         "與四次卸載；這些是描述性紀錄，**不用來校正任何交付率**。",
+                   "en": "The claim rule was frozen before data: 5/5 same sign and ≥4/5 Holm-significant is "
+                         "required for 'stable'; otherwise each run is listed as is. With all five in, the "
+                         "verdict is: same sign **5/5 (met)**, Holm-significant **0/5 (not met)** — so each "
+                         "run is listed as it is. No pooling, no averaging, no picking one, and no writing "
+                         "'replication failed' in the other direction either.\n\n"
+                         "**Expected 2–3 of 5, observed 0 of 5** — that gap is recorded as is. If the true "
+                         "effect really were +10pp, the chance of seeing 0 of 5 is roughly 0.007–0.06: the "
+                         "lower tail. A lower tail does not prove the effect is absent, but it is not noise "
+                         "to be waved away either — this cell is the answer to 'what is left once the rule "
+                         "has been run to completion'.\n\n"
+                         "LCB v2 is exactly 120 tasks; the seed reorders but does not sample, so all "
+                         "replications share the same task set and task-level effects cannot replicate away. "
+                         "Changing banks is a separate question, answered by the four task sets in R529.\n\n"
+                         "Two more things only visible once it finished: the five did not run under the same "
+                         "backend load (co-tenancy with another experiment at 8.5/71.3/2.1/0/0%), and the "
+                         "fifth spans a crash and four model unloads. Both are recorded descriptively and "
+                         "are **not** used to correct any delivery rate."},
+        "sources": ["DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md §八-1、§八-2、§八-3",
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json · aggregate.statement_rule",
+                    "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md §二、§三、§一〇",
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl",
+                    "runs/INDEX.md §三（R460R 五次同題複製）"],
+    },
+]
+
+
+# ── 自我更正：不在 archive claims 裡，因為它推翻的是一版**實作宣稱** ──────
+# 與 realmodel.measurement_error 同一類：我們自己說錯、被獨立攻擊者打穿、
+# 留在紀錄裡。展場的誠實敘事要用到這一條。
+SELF_CORRECTIONS = [
+    {
+        "id": "peerexec.suite_as_data_v1_inexpressible",
+        "status": "refuted",
+        "verdict": "self-corrected",
+        "round": "peerexec-2026-09-06",
+        "original": "把驗收套件改成資料之後，那三種攻擊在新格式裡「不可表達」",
+        "plain": {
+            "zh": {"said": "我們說過：改成資料格式之後，那幾種攻擊根本寫不出來。",
+                   "now": "錯。獨立攻擊者一擊打穿——`entry_point=\"exec\"` 讓 368／371 格上鏈、"
+                          "假交付 31.5%。錯在把資料與程式的界線畫在字面值上、漏掉名字綁定。"},
+            "en": {"said": "We said: once the suite is data, those attacks cannot even be "
+                           "expressed.",
+                   "now": "Wrong. An independent attacker broke it in one move: "
+                          "entry_point=\"exec\" got 368/371 cells onto the chain with 31.5% "
+                          "false deliveries. The error was drawing the data/code line at "
+                          "literal values and forgetting name binding."},
+        },
+        "detail": {
+            "zh": "**攻擊者實測**：`entry_point` 是明碼字串，`\"exec\"` 這個名字在執行器的"
+                  "命名空間裡查得到，於是供應者的位元組經由名字綁定拿到了執行權——"
+                  "「清單本身跑不了任何程式」這句話在那一版是假的。\n\n"
+                  "**更正後**：修法是結構性的（把 spec 綁到題目＋改用受控命名空間查找），"
+                  "不是把 `exec` 加進黑名單。修完之後同一個攻擊從「上鏈 368／371」變成"
+                  "「上鏈 0／371、`entry_point_mismatch` 368」。\n\n"
+                  "**為什麼留著**：每一版都被獨立攻擊者打過，打穿的那一次也留在紀錄裡。"
+                  "只發布擋得住的版本、把被打穿的默默拿掉，這個專題的主張就沒有內容。",
+            "en": "**What the attacker measured**: entry_point is a plaintext string, the name "
+                  "'exec' resolves in the executor's namespace, and so the supplier's bytes "
+                  "obtained execution through name binding — 'the list itself cannot run any "
+                  "code' was false in that version.\n\n"
+                  "**Corrected**: the fix is structural (bind the spec to the task, resolve "
+                  "names in a controlled namespace), not a blacklist entry for exec. After the "
+                  "fix the same attack went from 368/371 cells on chain to 0/371, with 368 "
+                  "entry_point_mismatch.\n\n"
+                  "**Why it stays published**: every version has been attacked by an "
+                  "independent adversary, and the version that was broken stays in the record "
+                  "too. Publishing only the versions that held would empty this project's "
+                  "central claim of content.",
+        },
+        "sources": [
+            "DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md · §三-2",
+            "vacant/suitespec.py · docstring round452b／452c",
+            "docs/VACANT_ARCHITECTURE_AND_RESULTS_2026-09-07.md · §3.3「本輪自我更正」",
+        ],
+    },
+]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(DEFAULT_OUT))
@@ -1132,12 +1820,21 @@ def main() -> None:
     archive = json.loads(archive_path.read_text(encoding="utf-8"))
     archive_claims = archive["claims"]
 
-    facts = build_facts()
-    unknowns = build_unknowns(claims, honesty)
-    refuted = build_refuted(archive_claims)
+    facts = build_facts() + build_gate_facts(archive_claims)
+    unknowns = build_unknowns(claims, honesty) + GATE_UNKNOWNS
+    refuted = build_refuted(archive_claims) + SELF_CORRECTIONS
 
     n_ref = sum(1 for c in archive_claims if c.get("verdict") == "refuted")
     n_over = sum(1 for c in archive_claims if c.get("verdict") == "overstated")
+    n_held = sum(1 for c in archive_claims if c.get("verdict") == "held")
+    n_null = sum(1 for c in archive_claims if c.get("verdict") == "no_effect")
+    n_unres = sum(1 for c in archive_claims if c.get("verdict") == "unresolved")
+    # 「未複驗」要真的數未複驗的，不能用「總數減掉推翻與誇大」。
+    # 2026-09-07 加進 held／no_effect／unresolved 之後，舊算法會把十二條有裁決的
+    # 宣稱算成未複驗——那個方向剛好是「把已驗過的說成沒驗過」，比較保守但仍是錯的，
+    # 而且下一次有人反過來用它就會變成樂觀。照實數。
+    n_unrev = sum(1 for c in archive_claims
+                  if c.get("verdict") in (None, "", "未複驗"))
 
     now = _dt.datetime.now().astimezone()
     data = {
@@ -1165,7 +1862,10 @@ def main() -> None:
             "claims_total": len(archive_claims),
             "claims_refuted": n_ref,
             "claims_overstated": n_over,
-            "claims_unreviewed": len(archive_claims) - n_ref - n_over,
+            "claims_held": n_held,
+            "claims_no_effect": n_null,
+            "claims_unresolved": n_unres,
+            "claims_unreviewed": n_unrev,
             "rounds": len(catalog["輪次"]),
             "files": catalog["統計"]["檔案數"],
             "rows": catalog["統計"]["總行數"],
@@ -1197,6 +1897,8 @@ def main() -> None:
             f"專題/實驗記錄/{ENTRY}/E4.json、E12.json",
             f"專題/實驗記錄/{PULSE}/E21.json、E22.json、E23.json",
             f"專題/實驗記錄/{REAL}/E10.json",
+            "Vacant/examples/verdicts.py（閘門與互跑不互審那幾條的數字唯一真相來源）",
+            "Vacant/docs/VACANT_ARCHITECTURE_AND_RESULTS_2026-09-07.md（正典彙整）",
         ],
         "generator": "examples/publish_now.py",
     }
@@ -1210,7 +1912,8 @@ def main() -> None:
           f"內部 {sum(1 for d in DIRECTIONS_DONE if d['side']=='internal')}")
     print(f"  未來方向：{len(FUTURE)}（已執行 0——沒做就是沒做）")
     print(f"  還不確定 {len(unknowns)}、已被推翻 {len(refuted)}")
-    print(f"  宣稱 {len(archive_claims)}（推翻 {n_ref}、誇大 {n_over}）")
+    print(f"  宣稱 {len(archive_claims)}（推翻 {n_ref}、誇大 {n_over}、判準成立 {n_held}、"
+          f"無可分辨差異 {n_null}、同號未解析 {n_unres}、未複驗 {n_unrev}）")
     print(f"  資料時間 {data['generated_at']}")
 
 

@@ -1,0 +1,56 @@
+{
+  "snapshot": "ops/gain/data/r486_gateway_snapshot_v2.json",
+  "n_rows_sorted": 2899,
+  "n_events": 500,
+  "n_analysable": 728,
+  "M": [
+    364,
+    555
+  ],
+  "M_expected": [
+    364,
+    555
+  ],
+  "tau": 0.1,
+  "K": 6,
+  "disp_min": 0.5,
+  "comp_axis": {
+    "364": {
+      "verdict": "COMP_FORCED_BY_OTHERS",
+      "n_feasible_bands": 155,
+      "n_bands_over_upper_bound": 0,
+      "band_max_spread": 0.0753,
+      "tau": 0.1,
+      "min_gap_required": 37,
+      "witness": null
+    },
+    "555": {
+      "verdict": "COMP_FORCED_BY_OTHERS",
+      "n_feasible_bands": 97,
+      "n_bands_over_upper_bound": 0,
+      "band_max_spread": 0.0764,
+      "tau": 0.1,
+      "min_gap_required": 18,
+      "witness": null
+    }
+  },
+  "edges": {},
+  "disp": {},
+  "disp_r501": {
+    "364": 0.6731,
+    "555": 0.9827
+  },
+  "span_by_tier": {},
+  "span_spread": {},
+  "share_by_tier": {},
+  "comp_spread": {},
+  "comp_binding": {},
+  "tools": {},
+  "blockers": [],
+  "n_exceptions": 0,
+  "comp_axis_verdict": "COMP_FORCED_BY_OTHERS",
+  "stage2_ran": false,
+  "live_reads": 0,
+  "elapsed_s": 0.0,
+  "verdict": "STAGE2_SKIPPED_COMP_FORCED_BY_OTHERS"
+}

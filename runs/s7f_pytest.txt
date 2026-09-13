@@ -1,0 +1,21 @@
+OK   YP1 行註解
+OK   YP2 字串裡的 # 不是註解
+OK   YP3 docstring 裡的 # 不是註解
+OK   YP4 docstring 區間認得出來（第三類，另計）
+
+P7c .py 量尺 fixture: 4/4
+
+OK   PY1 一般字串   [現行 js_strings: 也對]
+OK   PY2 `#` 註解不算文案   [現行 js_strings: 也對]
+OK   PY3 模組 docstring 不算文案   [現行 js_strings: 答錯]
+OK   PY4 f-string 的洞不切斷句子   [現行 js_strings: 答錯]
+OK   PY5 洞內兩個分支都要抽到   [現行 js_strings: 也對]
+OK   PY6 註解裡的撇號不准讓後面錯位   [現行 js_strings: 答錯]
+OK   PY7 非 docstring 的三引號是文案   [現行 js_strings: 答錯]
+OK   PY8 中文識別字不是文案   [現行 js_strings: 也對]
+OK   PY9 函式 docstring 排除、函式內字串保留   [現行 js_strings: 答錯]
+OK   PY10 相鄰字串隱式相接要併成一句   [現行 js_strings: 答錯]
+OK   PY11 f-string 與一般字串混排相接（dashboard.py evidence 的形狀）   [現行 js_strings: 答錯]
+
+P7a Python 抽取器 fixture: 11/11
+P7b 同一組交給現行 js_strings: 4/11 對 · 答錯 7 格（判準：答錯 ≥3，否則不該多寫這支）

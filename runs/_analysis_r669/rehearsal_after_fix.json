@@ -1,0 +1,71 @@
+{
+  "snapshot": {
+    "n_rows_raw": 409,
+    "n_rows_kept": 408,
+    "dropped_after_last_summary": {
+      "OFF": 1,
+      "CONFORM": 0,
+      "OFF5": 0
+    },
+    "partial_line_dropped": 0,
+    "rows_sha256_8": "e55221ca",
+    "summary_sha256_8": "0824c2c1"
+  },
+  "fixture": {
+    "victim_task_id": "mbppplus_Mbpp/141",
+    "victim_arm": "CONFORM",
+    "victim_calls_used": 1,
+    "victim_accepted": true,
+    "victim_meets_demand": true
+  },
+  "results": {
+    "A": {
+      "conform_settle.py": {
+        "rc": 0,
+        "broken": null,
+        "tail": "}"
+      },
+      "leak_decomp.py": {
+        "rc": 0,
+        "broken": null,
+        "tail": "(c) 反事實 forced_leak=34 vs OFF5=38  等覆蓋率差距=4（原始差距=12）  閘門選得較準？True"
+      }
+    },
+    "B": {
+      "conform_settle.py": {
+        "rc": 0,
+        "broken": null,
+        "tail": "}"
+      },
+      "leak_decomp.py": {
+        "rc": 0,
+        "broken": null,
+        "tail": "(c) 反事實 forced_leak=34 vs OFF5=38  等覆蓋率差距=4（原始差距=12）  閘門選得較準？True"
+      }
+    },
+    "C": {
+      "conform_settle.py": {
+        "rc": 2,
+        "broken": "BROKEN: CONFORM.calls：summary−逐列和=51 超過 1 個 void 格子最多可能吃掉的 1×5=5",
+        "tail": "BROKEN: CONFORM.calls：summary−逐列和=51 超過 1 個 void 格子最多可能吃掉的 1×5=5"
+      },
+      "leak_decomp.py": {
+        "rc": 0,
+        "broken": null,
+        "tail": "(c) 反事實 forced_leak=34 vs OFF5=38  等覆蓋率差距=4（原始差距=12）  閘門選得較準？True"
+      }
+    },
+    "D": {
+      "conform_settle.py": {
+        "rc": 2,
+        "broken": "BROKEN: CONFORM.accepted：summary=128 vs 逐列覆算=127",
+        "tail": "BROKEN: CONFORM.accepted：summary=128 vs 逐列覆算=127"
+      },
+      "leak_decomp.py": {
+        "rc": 2,
+        "broken": "BROKEN: CONFORM.accepted：summary=128 vs 逐列覆算=127（收官結算時兩個獨立產出者必須逐位相同）",
+        "tail": "BROKEN: CONFORM.accepted：summary=128 vs 逐列覆算=127（收官結算時兩個獨立產出者必須逐位相同）"
+      }
+    }
+  }
+}

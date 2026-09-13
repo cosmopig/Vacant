@@ -1,0 +1,24 @@
+{
+  "run": "runs/g_r356_3arm_20260830",
+  "audit_rate": 0.2,
+  "n_paired": 91,
+  "n_audited_common": 25,
+  "audited_fraction": 0.27472527472527475,
+  "on_leaked": 8,
+  "off5va_leaked": 10,
+  "on_leak_rate": 0.08791208791208792,
+  "off5va_leak_rate": 0.10989010989010989,
+  "on_leak_rate_ci95": [
+    0.0452196666692631,
+    0.16398810713463732
+  ],
+  "off5va_leak_rate_ci95": [
+    0.06079407536219415,
+    0.19058928383883156
+  ],
+  "discordant_on_only": 0,
+  "discordant_off5va_only": 2,
+  "n_discordant": 2,
+  "mcnemar_exact_p_two_sided": 0.5,
+  "gap_pp_off5va_minus_on": 2.197802197802197
+}

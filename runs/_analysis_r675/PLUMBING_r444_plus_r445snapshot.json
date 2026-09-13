@@ -1,0 +1,107 @@
+{
+  "key": "deliv",
+  "strata": [
+    {
+      "label": "R444",
+      "group": null,
+      "dir": "runs/g_r444_conform_mbpp",
+      "n": 179,
+      "b": 9,
+      "c": 4,
+      "a_ok": 135,
+      "b_ok": 130,
+      "key": "deliv",
+      "third_category_missing_fields": [],
+      "delta_pp": 2.793296089385475,
+      "ci95_lo_pp": -1.6596665952616365,
+      "ci95_hi_pp": 5.941938402863404,
+      "n_discordant": 13,
+      "conditions_sha": {
+        "pool": "08e36c8e6171cffb",
+        "instrument": "c5a917995e70fa21",
+        "calibration": "74234e98afe7498f",
+        "request_policy": "b009f7f91286d44a"
+      },
+      "instrument_two_way": {
+        "ok": true,
+        "n": 179,
+        "ref_pass": 179,
+        "broken_rejected": 179,
+        "why": ""
+      },
+      "rows_sha256_16": "3f2cb9661f7a080b",
+      "rows_lines": 537
+    },
+    {
+      "label": "R445",
+      "group": null,
+      "dir": "/dev/shm/r675/r445_snap",
+      "n": 21,
+      "b": 2,
+      "c": 1,
+      "a_ok": 18,
+      "b_ok": 17,
+      "key": "deliv",
+      "third_category_missing_fields": [],
+      "delta_pp": 4.761904761904762,
+      "ci95_lo_pp": -11.591447884278683,
+      "ci95_hi_pp": 14.045606895439638,
+      "n_discordant": 3,
+      "conditions_sha": {
+        "pool": "08e36c8e6171cffb",
+        "instrument": "a58c0330642602f8",
+        "calibration": "74234e98afe7498f",
+        "request_policy": "b009f7f91286d44a"
+      },
+      "instrument_two_way": {
+        "ok": true,
+        "n": 192,
+        "ref_pass": 192,
+        "broken_rejected": 192,
+        "why": ""
+      },
+      "rows_sha256_16": "71801aa5a204cc94",
+      "rows_lines": 65
+    }
+  ],
+  "p_het_fisher": 1.0,
+  "het_alpha": 0.05,
+  "het_verdict": "HOMOGENEOUS_NOT_REJECTED",
+  "pooled": {
+    "B": 11,
+    "C": 5,
+    "N": 200,
+    "n_discordant": 16,
+    "delta_pp": 3.0,
+    "ci95_lo_pp": -1.3859301832217454,
+    "ci95_hi_pp": 6.237280724526119,
+    "pi_ci95": [
+      0.4133793635486409,
+      0.8898300452828825
+    ]
+  },
+  "verdict_pooled": "NON_INFERIOR_BUT_UNRESOLVED",
+  "pooled_usable_as_headline": true,
+  "groups": {
+    "R444": {
+      "b": 9,
+      "c": 4,
+      "n": 179,
+      "labels": [
+        "R444"
+      ]
+    },
+    "R445": {
+      "b": 2,
+      "c": 1,
+      "n": 21,
+      "labels": [
+        "R445"
+      ]
+    }
+  },
+  "opposite_direction_strata": false,
+  "practical_pp": 5.0,
+  "supplement_n_needed_for_halfwidth_5pp": 200,
+  "broken_reasons": []
+}

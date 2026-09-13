@@ -1,0 +1,15 @@
+⚠ seed 數被覆寫成 300——這不是正式跑
+── S1 ──
+  頑固者·f=0.5·λ=0.0            被slash 188/300  回來 107  slash後路由    0.55  slash後得手 0.4567  obs@slash 1.2785
+  悔改者·f=0.5·λ=0.0            被slash 180/300  回來 107  slash後路由  8.8467  slash後得手      0  obs@slash 1.2384
+  頑固者·f=0.5·λ=1.0            被slash 188/300  回來  0  slash後路由       0  slash後得手      0  obs@slash 4.557
+  悔改者·f=0.5·λ=1.0            被slash 180/300  回來  0  slash後路由       0  slash後得手      0  obs@slash 4.4767
+  頑固者·f=0.9·λ=0.0            被slash 188/300  回來 159  slash後路由  1.0733  slash後得手 0.8667  obs@slash 1.2785
+  悔改者·f=0.9·λ=0.0            被slash 180/300  回來 150  slash後路由   28.72  slash後得手      0  obs@slash 1.2384
+  頑固者·f=0.9·λ=1.0            被slash 188/300  回來 158  slash後路由  0.5433  slash後得手 0.4133  obs@slash 1.6428
+  悔改者·f=0.9·λ=1.0            被slash 180/300  回來 150  slash後路由 26.5467  slash後得手      0  obs@slash 1.5982
+  頑固者·f=0.7·λ=0.0            被slash 188/300  回來 158  slash後路由  0.9833  slash後得手 0.8033  obs@slash 1.2785
+  悔改者·f=0.7·λ=0.0            被slash 180/300  回來 150  slash後路由 24.0267  slash後得手      0  obs@slash 1.2384
+  頑固者·f=0.7·λ=1.0            被slash 188/300  回來  0  slash後路由       0  slash後得手      0  obs@slash 2.6836
+  悔改者·f=0.7·λ=1.0            被slash 180/300  回來  0  slash後路由       0  slash後得手      0  obs@slash 2.6262
+   （358.1s）

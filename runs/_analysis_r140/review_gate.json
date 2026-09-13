@@ -1,0 +1,73 @@
+{
+  "run": "runs/g_onoff5_371_r123_20260825",
+  "n_on_rows": 365,
+  "raw": {
+    "n": 1095,
+    "fail_votes": 56,
+    "fail_vote_rate": 0.05114155251141553,
+    "TP": 870,
+    "FP": 169,
+    "FN": 21,
+    "TN": 35,
+    "accuracy": 0.8264840182648402,
+    "always_pass_baseline": 0.8136986301369863,
+    "accuracy_minus_baseline": 0.012785388127853903,
+    "recall_on_wrong_drafts": 0.1715686274509804,
+    "precision_of_fail_votes": 0.625
+  },
+  "grounded": {
+    "n": 1095,
+    "fail_votes": 2,
+    "fail_vote_rate": 0.0018264840182648401,
+    "TP": 890,
+    "FP": 203,
+    "FN": 1,
+    "TN": 1,
+    "accuracy": 0.8136986301369863,
+    "always_pass_baseline": 0.8136986301369863,
+    "accuracy_minus_baseline": 0.0,
+    "recall_on_wrong_drafts": 0.004901960784313725,
+    "precision_of_fail_votes": 0.5
+  },
+  "status": {
+    "review_not_fail": 1039,
+    "outside_input_contract": 53,
+    "counterexample_confirmed": 2,
+    "unparseable_claim": 1
+  },
+  "selected_version": {
+    "initial": 343,
+    "revised_both_visible_fail": 17,
+    "revised": 5
+  },
+  "passed_review": {
+    "True": 365
+  },
+  "revision_transition": {
+    "stayed_correct": 297,
+    "stayed_wrong": 64,
+    "improved": 4
+  },
+  "improved_tasks": [
+    {
+      "task_id": "mbppplus_Mbpp/631",
+      "passed_review": true,
+      "selected_version": "revised"
+    },
+    {
+      "task_id": "mbppplus_Mbpp/264",
+      "passed_review": true,
+      "selected_version": "revised"
+    },
+    {
+      "task_id": "mbppplus_Mbpp/424",
+      "passed_review": true,
+      "selected_version": "revised"
+    },
+    {
+      "task_id": "mbppplus_Mbpp/65",
+      "passed_review": true,
+      "selected_version": "revised"
+    }
+  ]
+}

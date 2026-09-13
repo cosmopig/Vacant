@@ -1,0 +1,236 @@
+{
+  "verdict": "CENSUS_OK",
+  "n_claims_scanned": 17,
+  "n_premise_stale": 2,
+  "premise_stale_ids": [
+    "D2-3a",
+    "E2-2"
+  ],
+  "n_substantive_change": 0,
+  "class_counts": {
+    "EVALUABLE": 17,
+    "FORCED_GREEN": 0,
+    "UNRESOLVED": 0,
+    "UNSCANNED": 0
+  },
+  "controls": {
+    "C_POS": {
+      "got": "VERIFIED",
+      "want": "VERIFIED",
+      "detail": "paired_ci.py 是存在的檔（構造為真的正對照）"
+    },
+    "C_NEG": {
+      "got": "REFUTED",
+      "want": "REFUTED",
+      "detail": "PRACTICAL_PP=5.0｜MIN_PAIRED=60（期望 999）"
+    }
+  },
+  "live_reads": 0,
+  "blockers": [],
+  "claims": [
+    {
+      "id": "B1-1",
+      "source": "附錄 B.1",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 4,
+      "can_refute": true,
+      "detail": "verdict() 字面詞彙表=['NON_INFERIOR_BUT_UNRESOLVED', 'ON_WINS', 'RULED_OUT', 'UNINFORMATIVE']｜期望=['NON_INFERIOR_BUT_UNRESOLVED', 'ON_WINS', 'RULED_OUT', 'UNINFORMATIVE']"
+    },
+    {
+      "id": "B1-2",
+      "source": "附錄 B.1",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 166,
+      "can_refute": true,
+      "detail": "emitters(\"OFF5_WINS\")=[]｜校準 emitters(\"ON_WINS\")=2 支｜[舊量，非判定] mentions=['ops/gain/r462_r461_census.py', 'ops/gain/r493_appendix_prose_census.py']"
+    },
+    {
+      "id": "B1-3",
+      "source": "附錄 B.1",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 166,
+      "can_refute": true,
+      "detail": "emitters(\"CONFORM_WINS\")=[]｜校準 emitters(\"ON_WINS\")=2 支｜[舊量，非判定] mentions=['ops/gain/r462_r461_census.py', 'ops/gain/r493_appendix_prose_census.py']"
+    },
+    {
+      "id": "B2-1",
+      "source": "附錄 B.2/C.2",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 6,
+      "can_refute": true,
+      "detail": "--key default='meets_demand'"
+    },
+    {
+      "id": "B2-2",
+      "source": "附錄 B.2/C.2",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 39,
+      "can_refute": true,
+      "detail": "旗標齊=True｜產物頂層鍵含 verdict=True（共 33 鍵）"
+    },
+    {
+      "id": "C1-1",
+      "source": "附錄 C.1",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 311,
+      "can_refute": true,
+      "detail": ":242='if len(args.stratum) < 2:'｜單一 --stratum 實跑 rc=2"
+    },
+    {
+      "id": "C2-1",
+      "source": "附錄 C.2",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 6,
+      "can_refute": true,
+      "detail": "PRACTICAL_PP=5.0｜MIN_PAIRED=60（期望 60）"
+    },
+    {
+      "id": "C3-1",
+      "source": "附錄 C.3",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 1,
+      "can_refute": true,
+      "detail": "KEYS[\"deliv\"] 逐字='((\"accepted\", \"meets_demand\"),\\n              lambda r: bool(r.get(\"accepted\")) and bool(r.get(\"meets_demand\")))'"
+    },
+    {
+      "id": "C3-2",
+      "source": "附錄 C.3",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 1687,
+      "can_refute": true,
+      "detail": "ops/gain/gain_run.py:588='code, worker = chosen if accepted else last'｜期望含 ['chosen if accepted else']"
+    },
+    {
+      "id": "C3-3",
+      "source": "附錄 C.3",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 1687,
+      "can_refute": true,
+      "detail": "ops/gain/gain_run.py:1586='truth, err = meets_demand('｜期望含 ['meets_demand(']"
+    },
+    {
+      "id": "D2-1",
+      "source": "附錄 D.2",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 7,
+      "can_refute": true,
+      "detail": "--bank default='lcb2'"
+    },
+    {
+      "id": "D2-2",
+      "source": "附錄 D.2",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 6,
+      "can_refute": true,
+      "detail": "summary.get(...) 逐字取到 ['n', 'offset', 'seed']"
+    },
+    {
+      "id": "D2-3a",
+      "source": "附錄 D.2",
+      "intent": "evidence",
+      "status": "REFUTED",
+      "class": "EVALUABLE",
+      "premise_stale": true,
+      "substantive_change": false,
+      "n_scan_targets": 40,
+      "can_refute": true,
+      "detail": "全庫 summary.json 份數=40（原文寫 41）"
+    },
+    {
+      "id": "D2-3b",
+      "source": "附錄 D.2",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 40,
+      "can_refute": true,
+      "detail": "記 bank 的 summary.json=[]｜成功解析 40/40 份"
+    },
+    {
+      "id": "E2-1",
+      "source": "附錄 E.2",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 383,
+      "can_refute": true,
+      "detail": ":89-92 逐字='def passed(rs: list[dict]) -> bool:\\n        if mut == \"M2_capability_uses_deliv\":\\n            return any(_deliv(r) for r in rs)\\n        return any(bool(r.get(\"meets_demand\")) for r in rs)'"
+    },
+    {
+      "id": "E2-2",
+      "source": "附錄 E.2",
+      "intent": "evidence",
+      "status": "REFUTED",
+      "class": "EVALUABLE",
+      "premise_stale": true,
+      "substantive_change": false,
+      "n_scan_targets": 383,
+      "can_refute": true,
+      "detail": ":228-241 首行='# T5, T6：undemonstrated（三臂全滅）'｜含 main()/argv[1]=False｜無 --bank/--seed/--n=True（旗標=[]）"
+    },
+    {
+      "id": "H2-1",
+      "source": "附錄 H.2",
+      "intent": "evidence",
+      "status": "VERIFIED",
+      "class": "EVALUABLE",
+      "premise_stale": false,
+      "substantive_change": false,
+      "n_scan_targets": 2,
+      "can_refute": true,
+      "detail": "H-2 rc=0 'CONFORM rows= 120  accepted=False and meets_demand=True 格數= 0'｜H-3 rc=0 'voided_tasks= 0'"
+    }
+  ]
+}

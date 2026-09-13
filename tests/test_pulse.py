@@ -144,12 +144,36 @@ def test_burst_instrumentation_shape():
 # ── 5. 等預算對照 ────────────────────────────────────────────────────
 @pytest.mark.parametrize("strategy", ["whitewash", "patient", "pulse"])
 def test_defect_budget_caps_total_defections(strategy):
-    """預算上限真的鎖住作惡總量——等預算對照的前提。"""
+    """預算上限真的鎖住作惡總量（上界）。"""
     BUDGET = 5
     r = simulate(_cfg(strategy=strategy, defect_budget=BUDGET,
                       blindspot=1.0, rounds=800))
     assert r["defected"] <= BUDGET, (
         f"{strategy} 作惡 {r['defected']} 筆超過預算 {BUDGET}")
+
+
+@pytest.mark.parametrize("strategy", ["whitewash", "patient", "pulse"])
+def test_defect_budget_actually_binds(strategy):
+    """預算必須**真的綁住**，不能只是形式上的上界。
+
+    2026-08-03 的對抗式複驗抓到：E19 宣稱「所有策略作惡總量都鎖在 12 筆」，
+    但實測 whitewash 用滿 29/30、sybil 30/30，而 patient 只有 1/30、
+    pulse(3,10) 1/30、pulse(5,20) 0/30——平均作惡 11.97 對 4.87，差 2.5 倍。
+    於是「等預算之下 whitewash 最強」這個結論的前提根本不成立：它不是贏在
+    時機，是贏在多作惡了 2.5 倍。
+
+    上一版的判準只驗 `defected <= BUDGET`（上界恆成立），永遠抓不到這件事。
+    等預算比較若要有意義，預算必須小到每一臂都用得完。
+    """
+    # 實測：預算=1 時三臂都 12/12 用完；預算=3 時脈衝已經花不完。
+    # 換句話說，能做等預算比較的窗口非常窄——這本身就是一個結論。
+    BUDGET = 1
+    r = simulate(_cfg(strategy=strategy, defect_budget=BUDGET,
+                      blindspot=0.5, rounds=800))
+    assert r["defected"] == BUDGET, (
+        f"{strategy} 只作惡 {r['defected']} 筆，沒有用完預算 {BUDGET}——"
+        "這一臂沒有被預算綁住，拿它做等預算比較會把『作惡次數差異』"
+        "誤讀成『時機差異』")
 
 
 # ── 6. 決定性 ────────────────────────────────────────────────────────

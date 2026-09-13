@@ -1,0 +1,21 @@
+PASS  Q0a 八條都印出狀態    印出 8/8
+PASS  Q0b run 目錄逐位元不變    檔案=['notes.jsonl', 'rows.jsonl', 'summary.json'] 相同=True
+PASS  Q0c 未收官時 rc=0 且標明是中途快照    rc=0
+      乾淨狀態: {'P-E1': 'MISS', 'P-E2': 'NOT_EVALUATED', 'P-E3': 'NOT_EVALUATED', 'P-E4': 'HIT', 'P-E5': 'HIT', 'P-E6': 'HIT', 'P-E7': 'HIT', 'P-E8': 'HIT'}
+PASS  Q1 改門檻字面 ⇒ BROKEN（不是安靜用舊值）    P-E4=BROKEN rc=2
+PASS  Q2 DECISION 少 P-E5 那列 ⇒ BROKEN    P-E5=BROKEN rc=2
+PASS  Q3a summary 無 instrument ⇒ P-E7 BROKEN（不是 PASS）    P-E7=BROKEN rc=2
+PASS  Q3b instrument 少一個欄位 ⇒ P-E7 BROKEN    P-E7=BROKEN
+PASS  Q3c 少一臂 ⇒ BROKEN（P-E8 沒有分母就不准判）    rc=2
+PASS  Q4 c/task=1.00 落在 [1.2,1.6] 外 ⇒ MISS（不是 HIT）    P-E4=MISS
+PASS  Q5 突變（verdict 恆 HIT）之下 Q4 會翻成 HIT ⇒ Q4 有牙齒    突變下 P-E4=HIT（乾淨下是 MISS）
+PASS  Q6 c/task=5.00 > 4.5 ⇒ ABORT_TRIGGERED    P-E4=ABORT_TRIGGERED
+PASS  Q7a --final + 缺併庫（P-E2/E3 NOT_EVALUATED）⇒ rc≠0    rc=1 NOT_EVALUATED=2
+PASS  Q7b --final + run 未收官 ⇒ rc≠0    rc=1
+PASS  Q7c 併庫接上 ⇒ 八條全判得出來且 rc=0    判得出來 8/8 rc=0
+PASS  Q7d P-E2/P-E3 是轉述 pooled_paired_ci 的輸出，不是重算    半寬 3.6823537549889136 vs 3.6823537549889136；n_d 19.0 vs 19
+PASS  Q8a 標成不適用的鍵在 conform_settle 真的存在（不是打錯字）    對不上的鍵=[]
+PASS  Q8b 乾淨輸出有印出 NOT_APPLICABLE 區塊
+PASS  Q8c 假綠燈是真的：P-C2_le_2.0 對 c/task=1.00 說 true，P-E4 說 MISS    同一個 c/task=1.00，舊鍵通過、新判定沒中
+
+18/18 PASS

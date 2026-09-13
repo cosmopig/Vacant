@@ -1,0 +1,44 @@
+R671 SELFTEST  Thu Sep  3 09:42:49 PM UTC 2026  HEAD=aee8568  gain_run.py sha=1644e50ae4d7ba49
+
+##### P-R671-7 conservation (hidden side must be bit-identical vs HEAD) #####
+P-R671-7 hidden-side conserved keys: ('n', 'ref_pass', 'broken_rejected', 'detail')
+pre : {'n': 8, 'ref_pass': 8, 'broken_rejected': 8}
+post: {'n': 8, 'ref_pass': 8, 'broken_rejected': 8}
+detail sha equal: True
+DIFF COUNT = 0 []
+new visible keys present: ['visible_detail', 'visible_n', 'visible_ref_pass', 'visible_stub_rejected']
+visible numbers (n=8): {'visible_n': 8, 'visible_ref_pass': 8, 'visible_stub_rejected': 8}
+PRE has visible keys: [] (must be empty)
+rc=0
+
+##### clean  arms=OFF,CONFORM,OFF5   expect: NOT blocked by R671 gate (dies later at model preflight) #####
+   可見閘門（CONFORM 決策量具）參考解通過 3/3　樁被擋 3/3　覆蓋 3/3
+── 模型池預檢（每個 model 問一句，零容忍）
+模型 gemma-4-12b-it-qat 預檢失敗：preflight 重試 2 次仍失敗：URLError: <urlopen error [Errno 111] Connection refused>
+rc=1
+
+##### mv1  arms=OFF,CONFORM,OFF5   expect: BLOCKED: stub accepted #####
+   可見閘門（CONFORM 決策量具）參考解通過 3/3　樁被擋 0/3　覆蓋 3/3
+CONFORM 的決策量具沒有兩個方向都答對——出貨閘門是壞的，拒交率／calls_per_task／通過率三個預註冊預測都會是假數字。停。
+rc=1
+
+##### mv2  arms=OFF,CONFORM,OFF5   expect: BLOCKED: ref rejected #####
+   可見閘門（CONFORM 決策量具）參考解通過 0/3　樁被擋 3/3　覆蓋 3/3
+CONFORM 的決策量具沒有兩個方向都答對——出貨閘門是壞的，拒交率／calls_per_task／通過率三個預註冊預測都會是假數字。停。
+rc=1
+
+##### mv3  arms=OFF,CONFORM,OFF5   expect: BLOCKED: coverage 0/3 (silent no-measurement type A) #####
+   可見閘門（CONFORM 決策量具）參考解通過 0/0　樁被擋 0/0　覆蓋 0/3
+CONFORM 的決策量具覆蓋率不足：visible 0/3——量不到不是通過，是沒接上。停。
+rc=1
+
+##### mv4  arms=OFF,CONFORM,OFF5   expect: BLOCKED: coverage 1/3 (silent no-measurement type B) #####
+   可見閘門（CONFORM 決策量具）參考解通過 1/1　樁被擋 1/1　覆蓋 1/3
+CONFORM 的決策量具覆蓋率不足：visible 1/3——量不到不是通過，是沒接上。停。
+rc=1
+
+##### mv5_off  arms=OFF   expect: NOT blocked (no CONFORM in arms) despite broken gauge #####
+   可見閘門（CONFORM 決策量具）參考解通過 3/3　樁被擋 0/3　覆蓋 3/3
+── 模型池預檢（每個 model 問一句，零容忍）
+模型 gemma-4-12b-it-qat 預檢失敗：preflight 重試 2 次仍失敗：URLError: <urlopen error [Errno 111] Connection refused>
+rc=1

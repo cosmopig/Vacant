@@ -20,6 +20,19 @@ run_python 是**受限沙箱**（獨立行程 `python -I` + 逾時 + CPU rlimit 
 NW-2a：沙箱本體對外也直接曝露成 `run_python_check(candidate_code, test_code,
 *, timeout=8) -> bool`，供 Auditor（稽核＝重跑 hidden_check）與 codebench 的
 MBPP+ 任務族共用同一顆沙箱，不必每處各自兜一份 subprocess 邏輯。
+
+round452b：test_code 是貼在 runner 的 **module scope** 執行的，所以裡面的裸名字
+會沿著 module → builtins 解析。這在「測試碼由驗證者寫」的年代沒有代價；R452 讓
+供應者可以指定 entry_point 之後，它就成了一條走私管道。修法見 `CANDIDATE_NS_NAME`
+——候選函式除了 proxy 之外再曝露成一個字典，驗收碼改用**明確的命名空間查找**
+（repr 過的字串鍵）取 entry point，裸名字那條解析路徑不再被使用。
+`run_python_check` 的簽章與語意不變。
+
+round452c：那個鉤子不只是一個名字，是**一整組**名字（前置的 `__aeq`／旗標、
+渲染器的 `__entry`／`__tests`…）。它們現在寫成 `RENDERED_SUITE_NAMES`，
+併進 `RUNNER_RESERVED_NAMES` 一起擋掉候選的同名 proxy，並且被
+`vacant/suitespec.py` 反向引用當成 entry_point 的保留字——一張表兩個方向，
+而不是兩張會各自漂移的表。
 """
 
 from __future__ import annotations
@@ -156,10 +169,15 @@ def project_checked_answer(answer: str, spec: dict) -> str:
 
 
 # --- run_python 受限沙箱 ------------------------------------------------------
-def _cpu_limits(seconds: int) -> None:  # pragma: no cover - 在子行程裡跑
+def _cpu_limits(seconds: int, memory_bytes: int = 128 * 1024 * 1024) -> None:  # pragma: no cover
     try:
         import resource
         resource.setrlimit(resource.RLIMIT_CPU, (seconds, seconds))
+        # RLIMIT_DATA constrains heap growth without invalidating macOS's large virtual
+        # address mappings. Linux additionally gets the stronger address-space cap.
+        resource.setrlimit(resource.RLIMIT_DATA, (memory_bytes, memory_bytes))
+        if sys.platform.startswith("linux"):
+            resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
     except Exception:
         pass
 
@@ -179,8 +197,47 @@ _FORBIDDEN_ATTRS = {
 }
 
 
+#: runner.py 裡那個 `{候選函式名 → proxy}` 的字典名稱（round452b）。
+#:
+#: 為什麼要有它：`_test_runner_source` 把 test_code 原樣貼在 runner 的 **module
+#: scope**，所以測試碼裡的一個裸名字會沿著 module → builtins 解析——候選沒定義
+#: `exec` 的時候，`exec(...)` 解析到的是 `builtins.exec`。round452 的 SuiteSpec
+#: 讓供應者可以指定 entry_point，於是「用一個裸名字挑到 builtins」變成一條可用的
+#: 走私管道（`ops/gain/replay/r452b_smuggle_gate.py` 實測：假交付 31.52%）。
+#:
+#: 這個字典是**唯一**需要新增的鉤子：驗收碼改成 `__vacant_ns['<名字>']` 之後，
+#: 名字只以 repr 過的字串鍵出現，永遠不會被當成識別字解析，於是 builtins 與
+#: runner 自己的 import（os／subprocess／sys／…）都到不了。
+#: `run_python_check` 的簽章與語意不變（`tests/test_gain_*.py` 是防呆）。
+CANDIDATE_NS_NAME = "__vacant_ns"
+
+#: round452c：**驗收碼自己**會在 module scope 綁定的名字（`vacant/suitespec.render`
+#: 的前置與渲染器本體）。候選不准用這些名字曝露 proxy——否則一個叫 `__aeq` 的
+#: 候選函式會先被綁進 module scope，而「先被誰綁走」是兩個檔案的相對順序決定的，
+#: 不是任何人寫下來的規格。
+#:
+#: 方向要講清楚：`suitespec.RESERVED_NAMES` 擋的是**供應者**（entry_point 撞名），
+#: 這一份擋的是**候選**（proxy 撞名）。兩張表必須互相覆蓋，漂移防呆是
+#: `tests/test_suitespec.py::test_every_renderer_name_is_reserved_on_the_sandbox_side`
+#: ——它反向核對 `RESERVED_NAMES ⊆ 這裡的保留集合`。常數定在 `checks`（下層、
+#: 不 import suitespec）而不是反過來，是因為 `suitespec` 已經 import 這個模組。
+RENDERED_SUITE_NAMES = frozenset({
+    "__aeq", "__vacant_re", "__vacant_regex_predicate", "__vacant_set_equivalent",
+    "__ns", "__canon", "__tests", "__t", "__got", "__entry", CANDIDATE_NS_NAME,
+})
+
+#: `dir(builtins)` 之外，runner 模板 module scope 已經用掉、候選不准撞的名字。
+#: 提到模組層級是為了讓**別的模組**（與測試）核得到它，而不是把同一張表在
+#: 函式裡抄第二份。
+RUNNER_RESERVED_NAMES = frozenset({
+    "ast", "builtins", "json", "os", "selectors", "subprocess", "sys", "time",
+    "_protocol", "_selector", "_vacant_call", "_worker",
+}) | RENDERED_SUITE_NAMES
+
+
 def _candidate_functions(
     candidate_code: str, *, allowed_imports: tuple[str, ...] = (),
+    allowed_entry_points: tuple[str, ...] = (),
 ) -> list[str] | None:
     """擋明顯 process/file 旁路並回傳可由 verifier proxy 呼叫的頂層函式。"""
     try:
@@ -214,19 +271,21 @@ def _candidate_functions(
                 return None
             if isinstance(node.func, ast.Name) and node.func.id == "__import__":
                 return None
-    reserved = set(dir(builtins)) | {
-        "ast", "builtins", "json", "os", "selectors", "subprocess", "sys", "time",
-        "_protocol", "_selector", "_vacant_call", "_worker",
-    }
+    reserved = set(dir(builtins)) | RUNNER_RESERVED_NAMES
+    allowed_entries = set(allowed_entry_points)
     return list(dict.fromkeys(
-        name for name in functions if name.isidentifier() and name not in reserved
+        name for name in functions
+        if name.isidentifier() and (name not in reserved or name in allowed_entries)
     )) or None
 
 
 def _worker_source() -> str:
     return r'''import ast
+import collections
 import json
+import math
 import os
+import re
 import sys
 
 candidate_path, protocol_fd, nonce = sys.argv[1], int(sys.argv[2]), sys.argv[3]
@@ -237,10 +296,39 @@ safe_exec = exec
 safe_repr = repr
 safe_type = type
 literal_eval = ast.literal_eval
-scalar_types = (type(None), bool, int, float, str, bytes)
+scalar_types = (type(None), bool, int, float, complex, str, bytes)
 container_types = (list, tuple, set, frozenset)
+wire_tag = "__VACANT_WIRE_FLOAT__"
+
+def wire_encode(value):
+    value_type = safe_type(value)
+    if value_type is float and not math.isfinite(value):
+        label = "nan" if math.isnan(value) else ("-inf" if value < 0 else "inf")
+        return (wire_tag, label)
+    if value_type is complex and (not math.isfinite(value.real) or not math.isfinite(value.imag)):
+        return (wire_tag, "complex", wire_encode(value.real), wire_encode(value.imag))
+    if value_type in (list, tuple, set, frozenset):
+        return value_type(wire_encode(item) for item in value)
+    if value_type is dict or isinstance(value, collections.Counter):
+        return {wire_encode(key): wire_encode(item) for key, item in value.items()}
+    return value
+
+def wire_decode(value):
+    if isinstance(value, tuple) and len(value) >= 2 and value[0] == wire_tag:
+        if value[1] == "nan": return float("nan")
+        if value[1] == "inf": return float("inf")
+        if value[1] == "-inf": return float("-inf")
+        if value[1] == "complex": return complex(wire_decode(value[2]), wire_decode(value[3]))
+    value_type = safe_type(value)
+    if value_type in (list, tuple, set, frozenset):
+        return value_type(wire_decode(item) for item in value)
+    if value_type is dict:
+        return {wire_decode(key): wire_decode(item) for key, item in value.items()}
+    return value
 
 def literal_repr(value):
+    if isinstance(value, re.Match):
+        return safe_repr(bool(value))
     value_type = safe_type(value)
     if value_type in scalar_types:
         rendered = safe_repr(value)
@@ -278,16 +366,16 @@ emit({"ready": True})
 for line in sys.stdin:
     try:
         request = json.loads(line)
-        args, kwargs = ast.literal_eval(request["call"])
+        args, kwargs = wire_decode(ast.literal_eval(request["call"]))
         function = namespace[request["function"]]
         if not callable(function):
             raise TypeError("candidate entry point is not callable")
         value = function(*args, **kwargs)
         payload = {
             "ok": True,
-            "value": literal_repr(value),
-            "args": literal_repr(args),
-            "kwargs": literal_repr(kwargs),
+            "value": literal_repr(wire_encode(value)),
+            "args": literal_repr(wire_encode(args)),
+            "kwargs": literal_repr(wire_encode(kwargs)),
         }
     except BaseException as exc:
         payload = {"ok": False, "error": safe_type(exc).__name__, "message": str(exc)[:500]}
@@ -304,9 +392,18 @@ def _test_runner_source(
         f"    return _vacant_call({name!r}, *args, **kwargs)"
         for name in function_names
     )
+    # round452b：同一批 proxy 再曝露成一個明確的命名空間。鍵是 repr 過的字串，
+    # 所以驗收碼可以用 `__vacant_ns['f']` 取 entry point 而不必寫出一個裸名字。
+    # 缺鍵時是 KeyError（fail-closed），不是沿著 builtins 找到別的東西。
+    candidate_ns = (
+        f"{CANDIDATE_NS_NAME} = {{"
+        + ", ".join(f"{name!r}: {name}" for name in function_names)
+        + "}"
+    )
     return f'''import ast
 import builtins
 import json
+import math
 import os
 import selectors
 import subprocess
@@ -314,6 +411,34 @@ import sys
 import time
 
 _nonce = {nonce!r}
+_wire_tag = "__VACANT_WIRE_FLOAT__"
+
+def _wire_encode(value):
+    value_type = type(value)
+    if value_type is float and not math.isfinite(value):
+        label = "nan" if math.isnan(value) else ("-inf" if value < 0 else "inf")
+        return (_wire_tag, label)
+    if value_type is complex and (not math.isfinite(value.real) or not math.isfinite(value.imag)):
+        return (_wire_tag, "complex", _wire_encode(value.real), _wire_encode(value.imag))
+    if value_type in (list, tuple, set, frozenset):
+        return value_type(_wire_encode(item) for item in value)
+    if value_type is dict:
+        return {{_wire_encode(key): _wire_encode(item) for key, item in value.items()}}
+    return value
+
+def _wire_decode(value):
+    if isinstance(value, tuple) and len(value) >= 2 and value[0] == _wire_tag:
+        if value[1] == "nan": return float("nan")
+        if value[1] == "inf": return float("inf")
+        if value[1] == "-inf": return float("-inf")
+        if value[1] == "complex": return complex(_wire_decode(value[2]), _wire_decode(value[3]))
+    value_type = type(value)
+    if value_type in (list, tuple, set, frozenset):
+        return value_type(_wire_decode(item) for item in value)
+    if value_type is dict:
+        return {{_wire_decode(key): _wire_decode(item) for key, item in value.items()}}
+    return value
+
 _worker_env = {{"PATH": os.environ.get("PATH", ""), "HOME": {worker_cwd!r}, "TMPDIR": {worker_cwd!r}}}
 if os.name == "posix":
     _read_fd, _write_fd = os.pipe()
@@ -353,7 +478,7 @@ def _vacant_call(function, *args, **kwargs):
     if _worker.poll() is not None:
         raise RuntimeError("candidate worker exited")
     try:
-        call_repr = repr((args, kwargs))
+        call_repr = repr(_wire_encode((args, kwargs)))
         ast.literal_eval(call_repr)
     except Exception as exc:
         raise TypeError("solve arguments must be Python literals") from exc
@@ -378,9 +503,9 @@ def _vacant_call(function, *args, **kwargs):
                 error_type = RuntimeError
             raise error_type(response.get("message", "candidate solve failed"))
         try:
-            value = ast.literal_eval(response["value"])
-            changed_args = ast.literal_eval(response["args"])
-            changed_kwargs = ast.literal_eval(response["kwargs"])
+            value = _wire_decode(ast.literal_eval(response["value"]))
+            changed_args = _wire_decode(ast.literal_eval(response["args"]))
+            changed_kwargs = _wire_decode(ast.literal_eval(response["kwargs"]))
         except Exception as exc:
             raise TypeError("solve result must be a Python literal") from exc
         for original, changed in zip(args, changed_args):
@@ -404,6 +529,8 @@ def _vacant_call(function, *args, **kwargs):
 
 {proxies}
 
+{candidate_ns}
+
 try:
 {chr(10).join("    " + line for line in (test_code or "").splitlines())}
 finally:
@@ -416,29 +543,30 @@ finally:
 '''
 
 
-def run_python_check(
+def _run_sandboxed(
     candidate_code: str,
     test_code: str,
     *,
-    timeout: float = 8,
-    allowed_imports: tuple[str, ...] = (),
-) -> bool:
-    """NW-2a：hidden tests 與候選碼分行程，透過 literal-only function proxy 驗證。
+    timeout: float,
+    allowed_imports: tuple[str, ...],
+    allowed_entry_points: tuple[str, ...],
+) -> tuple[int | None, str]:
+    """共用的沙箱執行體：回傳 (returncode, runner stdout)；失敗／逾時回 (None, "")。
 
-    verifier runner 持有 hidden tests；candidate worker 只持有候選碼。測試裡的 entry-point
-    呼叫經 stdin/stdout RPC 送到 worker，回值必須可由 `ast.literal_eval` 還原。這會擋住
-    `os._exit(0)` 提前把 verifier 偽裝成成功、候選碼直接讀同檔 hidden tests，以及常見
-    process/file API。整個 process group 受 `python -I`、乾淨 env/cwd、CPU limit 與 wall
-    timeout 約束；任何初始化、RPC、assert、例外或逾時失敗一律回 False。
-
-    誠實邊界：AST allowlist 與 process separation 是應用層 hardening，不是惡意程式碼的
-    完整 OS sandbox。高風險第三方碼仍應使用 container、gVisor 或獨立 VM。
+    語意與 run_python_check 完全相同，差別只在把 runner 的 stdout 也交出來，
+    讓「觀察候選行為」（不只判對錯）的用途可以複用同一條受限路徑。
     """
     if any(not isinstance(name, str) or not name.isidentifier() for name in allowed_imports):
-        return False
-    function_names = _candidate_functions(candidate_code, allowed_imports=allowed_imports)
+        return None, ""
+    if any(not isinstance(name, str) or not name.isidentifier()
+           for name in allowed_entry_points):
+        return None, ""
+    function_names = _candidate_functions(
+        candidate_code, allowed_imports=allowed_imports,
+        allowed_entry_points=allowed_entry_points,
+    )
     if timeout <= 0 or not function_names:
-        return False
+        return None, ""
     with tempfile.TemporaryDirectory() as test_dir, tempfile.TemporaryDirectory() as worker_dir:
         candidate_path = os.path.join(worker_dir, "candidate.py")
         worker_path = os.path.join(worker_dir, "worker.py")
@@ -477,8 +605,8 @@ def run_python_check(
                 # 的錯，不可 fail-closed 成 False。稽核端會把它記成 infra_void
                 # 而非 provable fault（獨立審查 P1-7；CLAUDE.md 鐵律 3）。
                 raise CheckInfraError(f"沙箱 harness 無法啟動：{e}") from e
-            proc.communicate(timeout=timeout)
-            return proc.returncode == 0
+            out, _ = proc.communicate(timeout=timeout)
+            return proc.returncode, out
         except subprocess.TimeoutExpired:
             if proc is not None:
                 if os.name == "posix":
@@ -489,14 +617,62 @@ def run_python_check(
                 else:  # pragma: no cover - Windows
                     proc.kill()
                 proc.communicate()
-            return False
+            return None, ""
         except CheckInfraError:
             raise
         except Exception:
             if proc is not None and proc.poll() is None:
                 proc.kill()
                 proc.communicate()
-            return False
+            return None, ""
+
+
+def run_python_check(
+    candidate_code: str,
+    test_code: str,
+    *,
+    timeout: float = 8,
+    allowed_imports: tuple[str, ...] = (),
+    allowed_entry_points: tuple[str, ...] = (),
+) -> bool:
+    """NW-2a：hidden tests 與候選碼分行程，透過 literal-only function proxy 驗證。
+
+    verifier runner 持有 hidden tests；candidate worker 只持有候選碼。測試裡的 entry-point
+    呼叫經 stdin/stdout RPC 送到 worker，回值必須可由 `ast.literal_eval` 還原。這會擋住
+    `os._exit(0)` 提前把 verifier 偽裝成成功、候選碼直接讀同檔 hidden tests，以及常見
+    process/file API。整個 process group 受 `python -I`、乾淨 env/cwd、CPU limit 與 wall
+    timeout 約束；任何初始化、RPC、assert、例外或逾時失敗一律回 False。
+
+    誠實邊界：AST allowlist 與 process separation 是應用層 hardening，不是惡意程式碼的
+    完整 OS sandbox。高風險第三方碼仍應使用 container、gVisor 或獨立 VM。
+    """
+    rc, _ = _run_sandboxed(
+        candidate_code, test_code, timeout=timeout,
+        allowed_imports=allowed_imports, allowed_entry_points=allowed_entry_points,
+    )
+    return rc == 0
+
+
+def run_python_capture(
+    candidate_code: str,
+    probe_code: str,
+    *,
+    timeout: float = 8,
+    allowed_imports: tuple[str, ...] = (),
+    allowed_entry_points: tuple[str, ...] = (),
+) -> str | None:
+    """與 run_python_check 同一條受限路徑，但回傳 runner 的 stdout（rc!=0 回 None）。
+
+    用途是「觀察候選行為」而不是判對錯——例如 OFF5 的行為簽名：probe_code 是
+    實驗端自己寫的（可信），候選碼仍然只活在 worker 裡、經 literal-only proxy
+    被呼叫。probe_code 印在 stdout 的東西才會被帶出來；候選碼自己的輸出留在
+    worker，不會混進回傳值。
+    """
+    rc, out = _run_sandboxed(
+        candidate_code, probe_code, timeout=timeout,
+        allowed_imports=allowed_imports, allowed_entry_points=allowed_entry_points,
+    )
+    return out if rc == 0 else None
 
 
 # --- 公開：compile_check ------------------------------------------------------

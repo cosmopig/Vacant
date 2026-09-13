@@ -1,0 +1,31 @@
+=== 量具自檢（rows.jsonl 自算 vs summary.json）===
+  ON    rows=82.47%  summary=None  n_rows=365
+  OFF5  rows=82.44%  summary=None  n_rows=353
+  OFF   rows=78.47%  summary=None  n_rows=367
+  自檢通過 ✓
+
+(對比A 配對：ON rows=365, OFF rows=367, 交集=362, ON獨有=3, OFF獨有=5)
+--- 對比A 路由：ON_initial(1呼叫,UCB) vs OFF(1呼叫,隨機) ---
+  n_paired      = 362
+  ON_initial             = 296/362 = 81.77%
+  OFF                    = 287/362 = 79.28%
+  both_ok=274  neither_ok=53
+  b (only ON_initial ok) = 22
+  c (only OFF ok) = 13
+  discordant b+c = 35
+  mcnemar_exact_p = 0.1755
+
+--- 對比B 審查+修訂：ON_final(5呼叫) vs ON_initial(1呼叫) ---
+  n_paired      = 365
+  ON_final               = 301/365 = 82.47%
+  ON_initial             = 297/365 = 81.37%
+  both_ok=297  neither_ok=64
+  b (only ON_final ok) = 4
+  c (only ON_initial ok) = 0
+  discordant b+c = 4
+  mcnemar_exact_p = 0.1250
+  revision_transitions = {'stayed_correct': 297, 'stayed_wrong': 64, 'improved': 4}
+  selected_version     = {'initial': 343, 'revised': 5, 'revised_both_visible_fail': 17}
+
+=== 參考：三臂交付率（同一份 rows，未配對）===
+  OFF(1呼叫)=78.47%  ON_initial(1呼叫)=81.37%  ON_final(5呼叫)=82.47%  OFF5(5呼叫)=82.44%

@@ -1,0 +1,227 @@
+{
+  "clean": {
+    "D1": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "failed": []
+    },
+    "D2": {
+      "rc": 0,
+      "red": false,
+      "broken": false
+    },
+    "D3": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "diff": []
+    }
+  },
+  "mutants": {
+    "M7_ignore_terminal": {
+      "verdict": "DETECTED",
+      "named": [
+        "I"
+      ],
+      "why": "G1 拿掉：期中資料被當收官資料",
+      "D1": {
+        "rc": 1,
+        "red": true,
+        "broken": false,
+        "failed": [
+          "I run_terminal=False ⇒ BROKEN_RUN_NOT_TERMINAL 且不吐能力數字  OK / keys=['NOT_ARBITER', 'bc_cross_check', 'deliv_contract_drift', 'n_demonstrated', 'n_tasks_complete', 'n_tasks_partial_excluded', 'n_undemonstrated', 'pct_undemonstrated', 'pz1_demonstrated_only_NOT_ARBITER', 'pz1_raw_NOT_ARBITER', 'row_accounting', 'rows_file_lines', 'run_complete', 'run_terminal', 'undemonstrated_task_ids', 'verdict', 'window_doubt_triggered']"
+        ]
+      },
+      "D2": {
+        "rc": 0,
+        "red": false,
+        "broken": false
+      },
+      "D3": {
+        "rc": 0,
+        "red": false,
+        "broken": false,
+        "diff": []
+      }
+    },
+    "M8_missing_summary_ok": {
+      "verdict": "DETECTED",
+      "named": [
+        "J"
+      ],
+      "why": "G0 拿掉：讀不到 summary 當成空的往下走（把『讀不到』報成『沒落盤』）",
+      "D1": {
+        "rc": 1,
+        "red": true,
+        "broken": false,
+        "failed": [
+          "J 沒有 summary.json ⇒ BROKEN_NO_SUMMARY（『讀不到』≠『沒落盤』，不准併成 NOT_TERMINAL）  BROKEN_RUN_NOT_TERMINAL"
+        ]
+      },
+      "D2": {
+        "rc": 0,
+        "red": false,
+        "broken": false
+      },
+      "D3": {
+        "rc": 0,
+        "red": false,
+        "broken": false,
+        "diff": []
+      }
+    },
+    "M9_ignore_row_accounting": {
+      "verdict": "DETECTED",
+      "named": [
+        "K"
+      ],
+      "why": "G2 拿掉：rows 被截斷但 summary 說 terminal ⇒ 分母安靜掉下來",
+      "D1": {
+        "rc": 1,
+        "red": true,
+        "broken": false,
+        "failed": [
+          "K rows 被截斷（帳對不上）但 summary 說 terminal ⇒ BROKEN_ROW_ACCOUNTING  OK"
+        ]
+      },
+      "D2": {
+        "rc": 0,
+        "red": false,
+        "broken": false
+      },
+      "D3": {
+        "rc": 0,
+        "red": false,
+        "broken": false,
+        "diff": []
+      }
+    },
+    "M10_unwire_gates": {
+      "verdict": "DETECTED",
+      "named": [
+        "I",
+        "J",
+        "K",
+        "L"
+      ],
+      "why": "接線整條拔掉：三道擋門都在、但 main() 那條路不呼叫它們",
+      "D1": {
+        "rc": 1,
+        "red": true,
+        "broken": false,
+        "failed": [
+          "I run_terminal=False ⇒ BROKEN_RUN_NOT_TERMINAL 且不吐能力數字  OK / keys=['NOT_ARBITER', 'bc_cross_check', 'deliv_contract_drift', 'n_demonstrated', 'n_tasks_complete', 'n_tasks_partial_excluded', 'n_undemonstrated', 'pct_undemonstrated', 'pz1_demonstrated_only_NOT_ARBITER', 'pz1_raw_NOT_ARBITER', 'rows_file_lines', 'undemonstrated_task_ids', 'verdict', 'window_doubt_triggered']",
+          "J 沒有 summary.json ⇒ BROKEN_NO_SUMMARY（『讀不到』≠『沒落盤』，不准併成 NOT_TERMINAL）  OK",
+          "K rows 被截斷（帳對不上）但 summary 說 terminal ⇒ BROKEN_ROW_ACCOUNTING  OK",
+          "L 乾淨 terminal run：三道擋門全過，且 census 的每個鍵逐值不變（加法性）  OK / additive=True",
+          "M terminal=True 但 complete=False（有 void 的 run）⇒ 仍放行，擋門讀的是 terminal 不是 complete  OK / run_complete=None"
+        ]
+      },
+      "D2": {
+        "rc": 0,
+        "red": false,
+        "broken": false
+      },
+      "D3": {
+        "rc": 0,
+        "red": false,
+        "broken": false,
+        "diff": []
+      }
+    },
+    "M11_terminal_to_complete": {
+      "verdict": "DETECTED",
+      "named": [
+        "M"
+      ],
+      "why": "G1 改讀 run_complete：有 void 的 run 永遠拒絕收官（R516 §8 的坑）",
+      "D1": {
+        "rc": 1,
+        "red": true,
+        "broken": false,
+        "failed": [
+          "M terminal=True 但 complete=False（有 void 的 run）⇒ 仍放行，擋門讀的是 terminal 不是 complete  BROKEN_RUN_NOT_TERMINAL / run_complete=False"
+        ]
+      },
+      "D2": {
+        "rc": 0,
+        "red": false,
+        "broken": false
+      },
+      "D3": {
+        "rc": 0,
+        "red": false,
+        "broken": false,
+        "diff": []
+      }
+    },
+    "N1_syntax": {
+      "verdict": "BROKEN",
+      "named": [],
+      "why": "負對照：語法壞掉 ⇒ 必須記 BROKEN，不准記 caught",
+      "D1": {
+        "rc": 1,
+        "red": true,
+        "broken": true,
+        "failed": []
+      },
+      "D2": {
+        "rc": 1,
+        "red": true,
+        "broken": true
+      },
+      "D3": {
+        "rc": 1,
+        "red": true,
+        "broken": true,
+        "diff": [
+          "no_output"
+        ]
+      }
+    }
+  },
+  "loadbearing": {
+    "X-I": {
+      "mutant": "M7_ignore_terminal",
+      "verdict": "MISSED",
+      "D1": {
+        "rc": 0,
+        "red": false,
+        "broken": false,
+        "failed": []
+      }
+    },
+    "X-J": {
+      "mutant": "M8_missing_summary_ok",
+      "verdict": "MISSED",
+      "D1": {
+        "rc": 0,
+        "red": false,
+        "broken": false,
+        "failed": []
+      }
+    },
+    "X-K": {
+      "mutant": "M9_ignore_row_accounting",
+      "verdict": "MISSED",
+      "D1": {
+        "rc": 0,
+        "red": false,
+        "broken": false,
+        "failed": []
+      }
+    },
+    "X-M": {
+      "mutant": "M11_terminal_to_complete",
+      "verdict": "MISSED",
+      "D1": {
+        "rc": 0,
+        "red": false,
+        "broken": false,
+        "failed": []
+      }
+    }
+  },
+  "all_predictions_hit": true
+}

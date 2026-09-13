@@ -1,0 +1,44 @@
+{
+  "key": "deliv",
+  "key_fields": [
+    "accepted",
+    "meets_demand"
+  ],
+  "n_paired_now": 192,
+  "arrival_sequence": "cbbbbbcbbbbbcbbbbbccbccbcbc",
+  "b_only": 18,
+  "c_only": 9,
+  "mcnemar_exact_p_two_sided": 0.12207812070846558,
+  "tail_test_5": {
+    "k": 5,
+    "available": true,
+    "tail": "cbcbc",
+    "majority": 3,
+    "p_one_sided": 0.5
+  },
+  "tail_test_8": {
+    "k": 8,
+    "available": true,
+    "tail": "cbccbcbc",
+    "majority": 5,
+    "p_one_sided": 0.36328125
+  },
+  "triggered": [],
+  "verdict": "noise",
+  "discordant_rate": 0.140625,
+  "n_cap": 371,
+  "mde_at_cap": {
+    "n_disc_expected": 52,
+    "min_gap": 16,
+    "min_split": [
+      34,
+      18
+    ],
+    "mde_pp": 4.3126684636118595
+  },
+  "observed_p_b": 0.6666666666666666,
+  "disc_pairs_needed_80pct_power": 69,
+  "paired_tasks_needed_80pct_power": 491,
+  "bench_size": 378,
+  "reachable_with_bench": false
+}

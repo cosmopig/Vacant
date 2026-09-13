@@ -7,7 +7,7 @@ import time
 
 import pytest
 
-from vacant.checks import compile_check, extract_code, run_python_check
+from vacant.checks import compile_check, extract_code, run_python_capture, run_python_check
 
 
 def test_equals_normalizes():
@@ -144,6 +144,22 @@ def test_run_python_check_preserves_common_argument_mutations():
     assert run_python_check(code, tests)
 
 
+def test_run_python_check_transports_nonfinite_floats_and_counter():
+    floats = "def solve(x):\n    return x"
+    assert run_python_check(
+        floats,
+        "assert solve(float('inf')) == float('inf')\n"
+        "assert str(solve(float('nan'))) == 'nan'",
+    )
+    counter = "import collections\ndef solve(xs): return collections.Counter(xs)"
+    assert run_python_check(
+        counter, "assert solve(['a', 'a']) == {'a': 2}",
+        allowed_imports=("collections",),
+    )
+    complex_value = "def solve(): return (1 + 2j)"
+    assert run_python_check(complex_value, "assert solve() == (1 + 2j)")
+
+
 def test_run_python_check_preserves_candidate_exception_type():
     code = "def solve(x):\n    raise ValueError('bad input')"
     tests = (
@@ -191,6 +207,14 @@ def len(_):
     assert not run_python_check(code, "assert len(solve()) == 2")
 
 
+def test_run_python_check_can_explicitly_allow_builtin_named_entrypoint():
+    code = "def sum(a, b): return a + b"
+    assert not run_python_check(code, "assert sum(1, 2) == 3")
+    assert run_python_check(
+        code, "assert sum(1, 2) == 3", allowed_entry_points=("sum",)
+    )
+
+
 def test_run_python_check_blocks_generator_frame_builtins_escape():
     code = """def solve():
     generator = (x for x in ())
@@ -216,3 +240,14 @@ def test_run_python_check_timeout_returns_false_and_does_not_hang():
     elapsed = time.monotonic() - t0
     assert ok is False
     assert elapsed < 5, f"逾時後仍花了 {elapsed:.1f}s 才回傳，沙箱可能沒真的斷開子行程"
+
+
+def test_run_python_capture_returns_probe_stdout_and_keeps_candidate_sandboxed():
+    code = "def solve(x):\n    print('candidate-side leak attempt')\n    return x + 1\n"
+    probe = "print('OBS:' + repr(solve(1)))"
+    out = run_python_capture(code, probe)
+    assert out is not None
+    assert "OBS:2" in out
+    assert "candidate-side leak attempt" not in out
+    assert run_python_capture("import os\ndef solve(x): return x", probe) is None
+    assert run_python_check(code, "assert solve(1) == 2") is True

@@ -1,0 +1,410 @@
+{
+  "tools_scanned": 32,
+  "excluded": {
+    "r482_corpus_sensitivity_census.py": "本工具自己（會遞迴）"
+  },
+  "perturbations": [
+    "P_MD",
+    "P_TEST",
+    "P_TOOL"
+  ],
+  "records": {
+    "analyze_eq5.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "analyze_off5_matched.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "analyze_r447.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "calls_audit.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "cert_drift_gate.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "eq5_analyze_mutation_check.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "eq5_schema_precheck.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "mutation_test_r470_paired_ci.py": {
+      "clean_a": 2,
+      "clean_b": 2,
+      "pert": {
+        "P_MD": 2,
+        "P_TEST": 2,
+        "P_TOOL": 2
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "mutation_test_r472_gauge_capability.py": {
+      "clean_a": 2,
+      "clean_b": 2,
+      "pert": {
+        "P_MD": 2,
+        "P_TEST": 2,
+        "P_TOOL": 2
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "mutation_test_r473_r466_census.py": {
+      "clean_a": 2,
+      "clean_b": 2,
+      "pert": {
+        "P_MD": 2,
+        "P_TEST": 2,
+        "P_TOOL": 2
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "mutation_test_r474_stub_sweep.py": {
+      "clean_a": 2,
+      "clean_b": 2,
+      "pert": {
+        "P_MD": 2,
+        "P_TEST": 2,
+        "P_TOOL": 2
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "mutation_test_r475_oracle_sweep.py": {
+      "clean_a": 2,
+      "clean_b": 2,
+      "pert": {
+        "P_MD": 2,
+        "P_TEST": 2,
+        "P_TOOL": 2
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "mutation_test_r476_closing_arbiter_drift.py": {
+      "clean_a": 2,
+      "clean_b": 2,
+      "pert": {
+        "P_MD": 2,
+        "P_TEST": 2,
+        "P_TOOL": 2
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "pace_probe.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "prereg_falsifiability_census.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "prereg_r446_power.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r447_ctx400_attrib.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r447_eq5_offline.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r447_gauge_capability.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r447_reject_reconstruct.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r447_schema_precheck.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r455_r452_census.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r456_r451_census.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r461_gate_verdict.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r462_r461_census.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r466_r461_sec2_sec6_census.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r471_specificity_and_deletion.py": {
+      "clean_a": 2,
+      "clean_b": 2,
+      "pert": {
+        "P_MD": 2,
+        "P_TEST": 2,
+        "P_TOOL": 2
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r474_stub_sweep.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r475_oracle_sweep.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r476_closing_arbiter_drift.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r479_r461_appendix_census.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    },
+    "r480_r461_appendix_bg_census.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    }
+  },
+  "counts": {
+    "INSENSITIVE": 32
+  },
+  "clean_red": [
+    "mutation_test_r470_paired_ci.py",
+    "mutation_test_r472_gauge_capability.py",
+    "mutation_test_r473_r466_census.py",
+    "mutation_test_r474_stub_sweep.py",
+    "mutation_test_r475_oracle_sweep.py",
+    "mutation_test_r476_closing_arbiter_drift.py",
+    "r471_specificity_and_deletion.py"
+  ],
+  "decay_prone": [],
+  "masking": [],
+  "nondeterministic": [],
+  "broken": [],
+  "controls": {
+    "_r482_pos_control.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 1,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "DECAY_PRONE",
+      "triggered_by": [
+        "P_MD"
+      ]
+    },
+    "_r482_neg_control.py": {
+      "clean_a": 0,
+      "clean_b": 0,
+      "pert": {
+        "P_MD": 0,
+        "P_TEST": 0,
+        "P_TOOL": 0
+      },
+      "verdict": "INSENSITIVE",
+      "triggered_by": []
+    }
+  },
+  "controls_ok": true,
+  "verdict": "NO_DECAY_FOUND_TODAY",
+  "rc": 0
+}

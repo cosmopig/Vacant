@@ -1,0 +1,132 @@
+{
+  "n": 167,
+  "b": 0,
+  "c": 2,
+  "gain": [],
+  "harm": [
+    "mbppplus_Mbpp/223",
+    "mbppplus_Mbpp/619"
+  ],
+  "churn": [
+    [
+      "mbppplus_Mbpp/296",
+      "initial",
+      "initial_fallback",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/123",
+      "initial",
+      "initial_fallback",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/305",
+      "initial",
+      "revised",
+      false,
+      false
+    ],
+    [
+      "mbppplus_Mbpp/735",
+      "initial",
+      "initial_fallback",
+      false,
+      false
+    ],
+    [
+      "mbppplus_Mbpp/306",
+      "initial",
+      "initial_fallback",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/58",
+      "initial",
+      "revised",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/623",
+      "initial",
+      "initial_fallback",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/142",
+      "initial",
+      "initial_fallback",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/223",
+      "initial",
+      "revised",
+      true,
+      false
+    ],
+    [
+      "mbppplus_Mbpp/787",
+      "initial",
+      "initial_fallback",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/573",
+      "initial",
+      "revised",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/454",
+      "initial",
+      "revised",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/567",
+      "initial",
+      "revised",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/128",
+      "initial",
+      "initial_fallback",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/237",
+      "initial",
+      "initial_fallback",
+      true,
+      true
+    ],
+    [
+      "mbppplus_Mbpp/619",
+      "initial",
+      "revised",
+      true,
+      false
+    ]
+  ],
+  "old_rate": 0.7305389221556886,
+  "new_rate": 0.718562874251497,
+  "g1": [],
+  "g2": [],
+  "g3": [],
+  "g4": [],
+  "confirmed_claims": null,
+  "confirmed_on_wrong": null
+}

@@ -1,0 +1,78 @@
+{
+  "S1": {
+    "n_records": 0,
+    "era": 3,
+    "non_retryable": [
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "status": "BROKEN",
+    "reason": "calls.jsonl 讀到 0 列"
+  },
+  "S2": {
+    "n_records": 0,
+    "era": 3,
+    "non_retryable": [
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "status": "BROKEN",
+    "reason": "calls.jsonl 讀到 0 列"
+  },
+  "S3": {
+    "n_records": 0,
+    "era": 1,
+    "non_retryable": [
+      400,
+      401,
+      402,
+      403,
+      404
+    ],
+    "missing_field_records": 0,
+    "status": "BROKEN",
+    "reason": "calls.jsonl 讀到 0 列"
+  },
+  "S4": {
+    "n_records": 0,
+    "era": 2,
+    "non_retryable": [
+      400,
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "status": "BROKEN",
+    "reason": "calls.jsonl 讀到 0 列"
+  },
+  "S5": {
+    "n_records": 0,
+    "era": 2,
+    "non_retryable": [
+      400,
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "status": "BROKEN",
+    "reason": "calls.jsonl 讀到 0 列"
+  },
+  "S6": {
+    "n_records": 0,
+    "era": 3,
+    "non_retryable": [
+      401,
+      402,
+      403
+    ],
+    "missing_field_records": 0,
+    "status": "BROKEN",
+    "reason": "calls.jsonl 讀到 0 列"
+  }
+}

@@ -1,0 +1,225 @@
+{
+  "n_calls": 791,
+  "n_windows": 92,
+  "min_windows": 8,
+  "source_claims": {
+    "r484_identity_assert": true,
+    "r484_p0_server_bound": true,
+    "r485_cr_hi": true,
+    "r485_task_hi": true,
+    "r485_retry": true
+  },
+  "schema": {
+    "n": 791,
+    "present": {
+      "ts_ms": 1.0,
+      "latency_ms": 1.0,
+      "attempt": 1.0,
+      "meta.task_id": 0.9987357774968394,
+      "agent_id": 1.0,
+      "meta.arm": 0.9987357774968394,
+      "role": 1.0
+    },
+    "distinct": {
+      "meta.task_id": 102,
+      "agent_id": 7,
+      "meta.arm": 3
+    },
+    "missing": [],
+    "collapsed": []
+  },
+  "cells": {
+    "CTRL_POS": {
+      "label": "正對照 R484 busy>wall（已知恆假）",
+      "intent": "guard",
+      "role": "control",
+      "full_verdict": "HOLDS",
+      "cell": "FORCED_GREEN_IDENTITY",
+      "real_verdicts": [
+        "HOLDS"
+      ],
+      "synth_verdicts": [
+        "HOLDS"
+      ],
+      "falsifying": [
+        "VIOLATED"
+      ],
+      "n_witnesses": 0,
+      "witnesses": []
+    },
+    "CTRL_NEG": {
+      "label": "負對照 R485 top_task_share（自由統計量）",
+      "intent": "guard",
+      "role": "control",
+      "full_verdict": "TASK_CONCENTRATED",
+      "cell": "EVALUABLE",
+      "real_verdicts": [
+        "TASK_CONCENTRATED",
+        "UNRESOLVED"
+      ],
+      "synth_verdicts": [
+        "TASK_CONCENTRATED",
+        "TASK_FLAT",
+        "UNRESOLVED"
+      ],
+      "falsifying": [
+        "TASK_FLAT",
+        "UNRESOLVED"
+      ],
+      "n_witnesses": 90,
+      "witnesses": [
+        "time4_0",
+        "time4_2",
+        "time4_3",
+        "time6_0",
+        "time6_1"
+      ]
+    },
+    "R484_P0": {
+      "label": "R484 P-0 busy/wall ⇒ SERVER_BOUND",
+      "intent": "evidence",
+      "role": "real",
+      "full_verdict": "SERVER_BOUND",
+      "cell": "FORCED_GREEN_EMPIRICAL",
+      "real_verdicts": [
+        "SERVER_BOUND"
+      ],
+      "synth_verdicts": [
+        "CLIENT_GAP_BOUND",
+        "MIXED",
+        "MODEL_INVALID",
+        "SERVER_BOUND"
+      ],
+      "falsifying": [
+        "CLIENT_GAP_BOUND",
+        "MIXED"
+      ],
+      "n_witnesses": 0,
+      "witnesses": []
+    },
+    "R484_P1": {
+      "label": "R484 P-1 端點退化",
+      "intent": "evidence",
+      "role": "real",
+      "full_verdict": "ENDPOINT_FLAT",
+      "cell": "FORCED_GREEN_EMPIRICAL",
+      "real_verdicts": [
+        "ENDPOINT_FLAT",
+        "UNSCANNED"
+      ],
+      "synth_verdicts": [
+        "ENDPOINT_DEGRADING",
+        "ENDPOINT_FLAT",
+        "UNSCANNED"
+      ],
+      "falsifying": [
+        "ENDPOINT_DEGRADING"
+      ],
+      "n_witnesses": 0,
+      "witnesses": []
+    },
+    "R485_P1": {
+      "label": "R485 P-1 人格集中度",
+      "intent": "evidence",
+      "role": "real",
+      "full_verdict": "UNRESOLVED",
+      "cell": "EVALUABLE",
+      "real_verdicts": [
+        "CONCENTRATED",
+        "UNRESOLVED",
+        "UNSCANNED"
+      ],
+      "synth_verdicts": [
+        "CONCENTRATED",
+        "FLAT",
+        "UNSCANNED"
+      ],
+      "falsifying": [
+        "CONCENTRATED"
+      ],
+      "n_witnesses": 1,
+      "witnesses": [
+        "count4_1"
+      ]
+    },
+    "R485_P2": {
+      "label": "R485 P-2 臂集中度",
+      "intent": "evidence",
+      "role": "real",
+      "full_verdict": "FLAT",
+      "cell": "FORCED_GREEN_EMPIRICAL",
+      "real_verdicts": [
+        "FLAT",
+        "UNSCANNED"
+      ],
+      "synth_verdicts": [
+        "CONCENTRATED",
+        "FLAT",
+        "UNSCANNED"
+      ],
+      "falsifying": [
+        "CONCENTRATED"
+      ],
+      "n_witnesses": 0,
+      "witnesses": []
+    },
+    "R485_P3": {
+      "label": "R485 P-3 題目集中度",
+      "intent": "evidence",
+      "role": "real",
+      "full_verdict": "TASK_CONCENTRATED",
+      "cell": "FORCED_GREEN_EMPIRICAL",
+      "real_verdicts": [
+        "TASK_CONCENTRATED",
+        "UNRESOLVED"
+      ],
+      "synth_verdicts": [
+        "TASK_CONCENTRATED",
+        "TASK_FLAT",
+        "UNRESOLVED"
+      ],
+      "falsifying": [
+        "TASK_FLAT"
+      ],
+      "n_witnesses": 0,
+      "witnesses": []
+    },
+    "R485_P5": {
+      "label": "R485 P-5 retry 落盤（guard）",
+      "intent": "guard",
+      "role": "real",
+      "full_verdict": "RETRIES_LOGGED",
+      "cell": "EVALUABLE",
+      "real_verdicts": [
+        "RETRIES_LOGGED",
+        "RETRIES_NOT_LOGGED"
+      ],
+      "synth_verdicts": [
+        "RETRIES_NOT_LOGGED"
+      ],
+      "falsifying": [
+        "RETRIES_NOT_LOGGED"
+      ],
+      "n_witnesses": 23,
+      "witnesses": [
+        "time12_2",
+        "time12_7",
+        "time16_0",
+        "time16_3",
+        "time16_6"
+      ]
+    }
+  },
+  "blockers": [],
+  "calibration": {
+    "positive": "FORCED_GREEN_IDENTITY",
+    "negative": "EVALUABLE"
+  },
+  "verdict": "CENSUS_OK",
+  "n_real_predictions": 6,
+  "n_forced": 4,
+  "n_evaluable": 2,
+  "calls_path": "/dev/shm/r491/calls_snapshot.jsonl",
+  "calls_sha256_8": "8ecef000",
+  "calls_lines": 791
+}

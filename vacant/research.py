@@ -26,7 +26,7 @@ from __future__ import annotations
 import math
 import random
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Callable, Sequence
 
 from .composer import Composer
 
@@ -378,6 +378,124 @@ def mcnemar_n_required(
         if mcnemar_power(n, p_disc, psi, alpha=alpha) >= power:
             return n
     raise ValueError(f"n≤{n_max} 內達不到 power={power}（p_disc={p_disc}, ψ={psi}）")
+
+
+# === R529：跨題庫的分層配對精確檢定 ==========================================
+def stratified_mcnemar_exact(strata: Sequence[tuple[int, int]]) -> dict[str, float]:
+    """K 個題庫各自的不一致對 `(b_k, c_k)` ⇒ **一個**精確條件檢定。
+
+    模型與推導（寫在這裡，不要讓讀者去猜）：
+
+      H0：**每一層都沒有效果**（層內兩臂的成敗機率對稱）。
+      在第 k 層，以該層的不一致對數 `n_k = b_k + c_k` 為條件，
+      `b_k ~ Binomial(n_k, 1/2)`；各層獨立（不同題目、不同 run 目錄）。
+      獨立的 `Binomial(n_k, 1/2)` 之和仍是二項：
+          `B = Σ b_k ~ Binomial(N, 1/2)`，`N = Σ n_k`。
+      ⇒ 精確條件檢定＝對 `(B, N)` 的雙尾符號檢定，也就是
+        1:1 配對、共同勝算比之下 CMH 精確檢定的那一個。
+
+    ⚠ **誠實邊界，收官必須帶著**：上面這個統計量與「把 K 層的不一致對直接
+      加起來做一次 `mcnemar_exact`」**在數值上完全相同**。分層在這裡買到的
+      **不是**更嚴的檢定，而是三件別的事：
+        (a) H0 是「每一層都沒有效果」——拒絕它只說「至少某層有」，
+            不說「每層都有」，更不說效果量是多少；
+        (b) 逐層的 `b_k/c_k` 必須照實列出來（本函式一起回傳），
+            「合併顯著」不准蓋掉「某一層反向」；
+        (c) 異質性要另外量（`bc_heterogeneity_chisq`），而且是**描述性**的。
+      把它寫成「我們做了分層校正所以比較穩」是錯的。
+
+    回傳鍵：`b`／`c`／`n_discordant`／`p`／`k_strata`／`per_stratum`
+    （逐層的 `(b_k, c_k, p_k)`，`p_k` 只是描述，不進家族校正）。
+    """
+    strata = [(int(b), int(c)) for b, c in strata]
+    if any(b < 0 or c < 0 for b, c in strata):
+        raise ValueError(f"b/c 不能是負的：{strata}")
+    b_tot = sum(b for b, _ in strata)
+    c_tot = sum(c for _, c in strata)
+    return {
+        "b": b_tot,
+        "c": c_tot,
+        "n_discordant": b_tot + c_tot,
+        "p": mcnemar_exact(b_tot, c_tot),
+        "k_strata": len(strata),
+        "per_stratum": [{"b": b, "c": c, "p": mcnemar_exact(b, c)}
+                        for b, c in strata],
+    }
+
+
+def bc_heterogeneity_chisq(strata: Sequence[tuple[int, int]]) -> dict[str, float]:
+    """2×K 的 `b_k` vs `c_k` 卡方（**描述性**，不下裁決、不進 Holm 家族）。
+
+    問的是「各層的不一致對往哪邊倒，倒的比例像不像同一個數」。
+    自由度 K−1。**沒有**精確版本、**沒有**連續性校正，期望次數小的時候
+    卡方近似本來就不準——所以它只准當「要不要多看幾眼」的提示。
+
+    回傳 `chi2`／`df`／`p`（p 用卡方上尾的級數近似，見 `_chisq_sf`）／
+    `min_expected`（最小期望次數；< 5 就要在報告裡講）。
+    """
+    strata = [(int(b), int(c)) for b, c in strata]
+    n_k = [b + c for b, c in strata]
+    total = sum(n_k)
+    b_tot = sum(b for b, _ in strata)
+    if total == 0 or b_tot in (0, total) or len(strata) < 2:
+        # 全部一致（沒有不一致對）、或全部倒同一邊 ⇒ 卡方沒有定義／恆為 0。
+        return {"chi2": 0.0, "df": max(0, len(strata) - 1), "p": 1.0,
+                "min_expected": 0.0, "degenerate": True}
+    p_hat = b_tot / total
+    chi2 = 0.0
+    min_exp = float("inf")
+    for (b, c), n in zip(strata, n_k):
+        if n == 0:
+            continue
+        for obs, exp in ((b, n * p_hat), (c, n * (1 - p_hat))):
+            min_exp = min(min_exp, exp)
+            if exp > 0:
+                chi2 += (obs - exp) ** 2 / exp
+    df = len(strata) - 1
+    return {"chi2": chi2, "df": df, "p": _chisq_sf(chi2, df),
+            "min_expected": 0.0 if min_exp == float("inf") else min_exp,
+            "degenerate": False}
+
+
+def _chisq_sf(x: float, df: int) -> float:
+    """卡方上尾機率 P(X > x)。零 scipy：走正則化上不完全 Gamma 的級數／連分數。"""
+    if df <= 0:
+        return 1.0
+    if x <= 0:
+        return 1.0
+    a, xx = df / 2.0, x / 2.0
+    if xx < a + 1.0:                       # 級數展開（下不完全 Gamma）
+        term = 1.0 / a
+        total = term
+        n = 0
+        while n < 1000:
+            n += 1
+            term *= xx / (a + n)
+            total += term
+            if abs(term) < abs(total) * 1e-15:
+                break
+        return max(0.0, min(1.0, 1.0 - total * math.exp(-xx + a * math.log(xx)
+                                                        - math.lgamma(a))))
+    tiny = 1e-300                          # 連分數（上不完全 Gamma）
+    b = xx + 1.0 - a
+    c = 1.0 / tiny
+    d = 1.0 / b
+    h = d
+    for i in range(1, 1000):
+        an = -i * (i - a)
+        b += 2.0
+        d = an * d + b
+        if abs(d) < tiny:
+            d = tiny
+        c = b + an / c
+        if abs(c) < tiny:
+            c = tiny
+        d = 1.0 / d
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < 1e-15:
+            break
+    return max(0.0, min(1.0, math.exp(-xx + a * math.log(xx) - math.lgamma(a)) * h))
 
 
 # === 報表 ===================================================================

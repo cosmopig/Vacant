@@ -1,0 +1,1313 @@
+{
+  "reps": [
+    {
+      "rep": 1,
+      "status": "ANALYZED",
+      "broken_reasons": [],
+      "verdict": "INCONCLUSIVE",
+      "hmix_deliv_pp": 77.5,
+      "conform_deliv_pp": 71.66666666666667,
+      "delta_c_pp": 5.833333333333333,
+      "ci95_lo_pp": -2.7851480836010416,
+      "ci95_hi_pp": 12.889062062293588,
+      "b": 15,
+      "c": 8,
+      "n_common": 120,
+      "p_raw": 0.21003961563110352,
+      "p_adj": 0.6301188468933105,
+      "holm_significant": false,
+      "false_delivery_pp_hmix": 16.666666666666668,
+      "false_delivery_pp_conform": 21.666666666666668,
+      "false_delivery_n_hmix": 20,
+      "false_delivery_n_conform": 26,
+      "tokens_per_task_hmix": 5988.708333333333,
+      "tokens_per_task_conform": 6497.075,
+      "topology_variant": "scheduled",
+      "max_concurrent_by_endpoint": {
+        "http://100.86.226.21:1234/v1/chat/completions": 3
+      },
+      "predictions": {
+        "P-R1": true,
+        "P-R2": false,
+        "P-R3": false,
+        "P-R4": true,
+        "P-R5": true
+      },
+      "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準"
+    },
+    {
+      "rep": 2,
+      "status": "ANALYZED",
+      "broken_reasons": [],
+      "verdict": "INCONCLUSIVE",
+      "hmix_deliv_pp": 76.66666666666667,
+      "conform_deliv_pp": 72.5,
+      "delta_c_pp": 4.166666666666666,
+      "ci95_lo_pp": -5.347465082483178,
+      "ci95_hi_pp": 12.796723195276572,
+      "b": 17,
+      "c": 12,
+      "n_common": 120,
+      "p_raw": 0.45825831964612007,
+      "p_adj": 0.9165166392922401,
+      "holm_significant": false,
+      "false_delivery_pp_hmix": 11.666666666666666,
+      "false_delivery_pp_conform": 21.666666666666668,
+      "false_delivery_n_hmix": 14,
+      "false_delivery_n_conform": 26,
+      "tokens_per_task_hmix": 7324.658333333334,
+      "tokens_per_task_conform": 6879.708333333333,
+      "topology_variant": "scheduled",
+      "max_concurrent_by_endpoint": {
+        "http://100.86.226.21:1234/v1/chat/completions": 3
+      },
+      "predictions": {
+        "P-R1": true,
+        "P-R2": false,
+        "P-R3": false,
+        "P-R4": true,
+        "P-R5": true
+      },
+      "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準"
+    },
+    {
+      "rep": 3,
+      "status": "ANALYZED",
+      "broken_reasons": [],
+      "verdict": "RULED_OUT",
+      "hmix_deliv_pp": 75.83333333333333,
+      "conform_deliv_pp": 75.0,
+      "delta_c_pp": 0.8333333333333334,
+      "ci95_lo_pp": -7.441343276164066,
+      "ci95_hi_pp": 8.885812863270457,
+      "b": 12,
+      "c": 11,
+      "n_common": 120,
+      "p_raw": 1.0,
+      "p_adj": 1.0,
+      "holm_significant": false,
+      "false_delivery_pp_hmix": 15.833333333333334,
+      "false_delivery_pp_conform": 19.166666666666668,
+      "false_delivery_n_hmix": 19,
+      "false_delivery_n_conform": 23,
+      "tokens_per_task_hmix": 8184.1,
+      "tokens_per_task_conform": 5246.125,
+      "topology_variant": "scheduled",
+      "max_concurrent_by_endpoint": {
+        "http://100.86.226.21:1234/v1/chat/completions": 3
+      },
+      "predictions": {
+        "P-R1": true,
+        "P-R2": false,
+        "P-R3": false,
+        "P-R4": true,
+        "P-R5": false
+      },
+      "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準"
+    }
+  ],
+  "aggregate": {
+    "reps_analyzed": 3,
+    "reps_expected": 5,
+    "verdict_counts_HMIX": {
+      "EFFECTIVE": 0,
+      "COSTLY_BUT_REAL": 0,
+      "INCONCLUSIVE": 2,
+      "RULED_OUT": 1
+    },
+    "delta_c_pp_by_rep": {
+      "1": 5.833333333333333,
+      "2": 4.166666666666666,
+      "3": 0.8333333333333334
+    },
+    "ci95_by_rep": {
+      "1": [
+        -2.7851480836010416,
+        12.889062062293588
+      ],
+      "2": [
+        -5.347465082483178,
+        12.796723195276572
+      ],
+      "3": [
+        -7.441343276164066,
+        8.885812863270457
+      ]
+    },
+    "holm_p_adj_by_rep": {
+      "1": 0.6301188468933105,
+      "2": 0.9165166392922401,
+      "3": 1.0
+    },
+    "holm_significant_n": 0,
+    "all_same_sign_positive": true,
+    "statement_rule": "5/5 同號（Δ_C > 0）且 ≥4/5 Holm 顯著 ⇒ 可以寫「複製穩定」；否則**逐次照實列**，不准挑一次、不准平均、不准寫「多數支持」。",
+    "statement": "**逐次照實列**（宣稱規則未達成：同號 3/3、Holm 顯著 0/3、已分析 3/5）——不准挑一次、不准平均、不准寫「多數支持」。",
+    "prediction_hits": {
+      "P-R1": {
+        "hit": 3,
+        "n": 3
+      },
+      "P-R2": {
+        "hit": 0,
+        "n": 3
+      },
+      "P-R3": {
+        "hit": 0,
+        "n": 3
+      },
+      "P-R4": {
+        "hit": 3,
+        "n": 3
+      },
+      "P-R5": {
+        "hit": 2,
+        "n": 3
+      }
+    },
+    "power_expectation": "n=120 對 +10pp 的檢定力只有 0.43–0.63 ⇒ 就算真值是 +10pp，五次裡**預期只有 2–3 次**通過 P-R3。「5 次裡 2 次顯著」不是反證；「5 次全顯著」也不是加碼的理由。",
+    "winners_curse_disclaimer": "R460 的 +13.33pp 是**能被判顯著**的點估計 ⇒ 它是效果量的上偏估計。複製跑的點估計預期比它小，那不是「效果消失」。跨次比幅度一律看區間重疊，不比點估計誰大。",
+    "no_pooling": "五次複製**不得併 n**（R449C §六-2、R460 §六-(7)-3）。本檔沒有任何併 n 的路徑；彙總欄位全部是五個數字排在一起。",
+    "ci_note": "區間未做多重比較調整；仲裁以 analyzer 為準",
+    "r460_anchors_NOT_ARBITER": {
+      "hmix_deliv_pp": 84.17,
+      "conform_deliv_pp": 70.83,
+      "delta_c_pp": 13.33,
+      "holm_p_adj": 0.0112,
+      "false_delivery_n_hmix": 14,
+      "false_delivery_n_conform": 29,
+      "tokens_per_task_hmix": 5677,
+      "tokens_per_task_conform": 5805
+    }
+  },
+  "global_topology": {
+    "blocks_n": 18,
+    "reps_covered": [
+      1,
+      2,
+      3
+    ],
+    "caps": {
+      "http://100.86.226.21:1234/v1/chat/completions": 3,
+      "http://100.119.113.56:1234/v1/chat/completions": 1
+    },
+    "max_concurrent_by_endpoint": {
+      "http://100.86.226.21:1234/v1/chat/completions": 3
+    },
+    "blocks_per_endpoint": {
+      "http://100.86.226.21:1234/v1/chat/completions": [
+        "g_r460r1_harness_lcb2_a1",
+        "g_r460r1_harness_lcb2_a2",
+        "g_r460r1_harness_lcb2_a3",
+        "g_r460r1_harness_lcb2_b1",
+        "g_r460r1_harness_lcb2_b2",
+        "g_r460r1_harness_lcb2_b3",
+        "g_r460r2_harness_lcb2_a1",
+        "g_r460r2_harness_lcb2_a2",
+        "g_r460r2_harness_lcb2_a3",
+        "g_r460r2_harness_lcb2_b1",
+        "g_r460r2_harness_lcb2_b2",
+        "g_r460r2_harness_lcb2_b3",
+        "g_r460r3_harness_lcb2_a1",
+        "g_r460r3_harness_lcb2_a2",
+        "g_r460r3_harness_lcb2_a3",
+        "g_r460r3_harness_lcb2_b1",
+        "g_r460r3_harness_lcb2_b2",
+        "g_r460r3_harness_lcb2_b3"
+      ]
+    },
+    "window_by_block": {
+      "g_r460r1_harness_lcb2_a1": {
+        "lo_ms": 1789096500407,
+        "hi_ms": 1789107894468,
+        "n_calls": 247
+      },
+      "g_r460r1_harness_lcb2_a2": {
+        "lo_ms": 1789096512540,
+        "hi_ms": 1789111321607,
+        "n_calls": 267
+      },
+      "g_r460r1_harness_lcb2_a3": {
+        "lo_ms": 1789096526333,
+        "hi_ms": 1789124306508,
+        "n_calls": 281
+      },
+      "g_r460r1_harness_lcb2_b1": {
+        "lo_ms": 1789107948576,
+        "hi_ms": 1789120307061,
+        "n_calls": 246
+      },
+      "g_r460r1_harness_lcb2_b2": {
+        "lo_ms": 1789111382775,
+        "hi_ms": 1789129830181,
+        "n_calls": 296
+      },
+      "g_r460r1_harness_lcb2_b3": {
+        "lo_ms": 1789120356371,
+        "hi_ms": 1789141666512,
+        "n_calls": 279
+      },
+      "g_r460r2_harness_lcb2_a1": {
+        "lo_ms": 1789124330966,
+        "hi_ms": 1789141879131,
+        "n_calls": 267
+      },
+      "g_r460r2_harness_lcb2_a2": {
+        "lo_ms": 1789129866118,
+        "hi_ms": 1789156979677,
+        "n_calls": 280
+      },
+      "g_r460r2_harness_lcb2_a3": {
+        "lo_ms": 1789141709765,
+        "hi_ms": 1789157624680,
+        "n_calls": 249
+      },
+      "g_r460r2_harness_lcb2_b1": {
+        "lo_ms": 1789141903533,
+        "hi_ms": 1789163337802,
+        "n_calls": 267
+      },
+      "g_r460r2_harness_lcb2_b2": {
+        "lo_ms": 1789157040471,
+        "hi_ms": 1789177027965,
+        "n_calls": 279
+      },
+      "g_r460r2_harness_lcb2_b3": {
+        "lo_ms": 1789157657629,
+        "hi_ms": 1789171853276,
+        "n_calls": 260
+      },
+      "g_r460r3_harness_lcb2_a1": {
+        "lo_ms": 1789163372528,
+        "hi_ms": 1789184477530,
+        "n_calls": 244
+      },
+      "g_r460r3_harness_lcb2_a2": {
+        "lo_ms": 1789171907922,
+        "hi_ms": 1789187494881,
+        "n_calls": 274
+      },
+      "g_r460r3_harness_lcb2_a3": {
+        "lo_ms": 1789177092594,
+        "hi_ms": 1789194730621,
+        "n_calls": 267
+      },
+      "g_r460r3_harness_lcb2_b1": {
+        "lo_ms": 1789184501971,
+        "hi_ms": 1789205489977,
+        "n_calls": 263
+      },
+      "g_r460r3_harness_lcb2_b2": {
+        "lo_ms": 1789187515999,
+        "hi_ms": 1789205192108,
+        "n_calls": 273
+      },
+      "g_r460r3_harness_lcb2_b3": {
+        "lo_ms": 1789194793918,
+        "hi_ms": 1789208470004,
+        "n_calls": 255
+      }
+    },
+    "window_semantics": "[ts_ms − latency_ms, ts_ms]：`brain_cline._log` 是**呼叫回來之後**才寫 `ts_ms`，而 `latency_ms` 量的是 t0→完成 ⇒ 那一通在飛的區間左端是 ts_ms − latency_ms、右端是 ts_ms。舊版寫成 [ts, ts+latency]（把 ts 讀成送出時刻），整段窗右移一個 latency，在塊交界製造假重疊。",
+    "peak_witness": {
+      "http://100.86.226.21:1234/v1/chat/completions": {
+        "at_ms": 1789096526333,
+        "blocks": [
+          "g_r460r1_harness_lcb2_a1",
+          "g_r460r1_harness_lcb2_a2",
+          "g_r460r1_harness_lcb2_a3"
+        ],
+        "n": 3
+      }
+    },
+    "violations": [],
+    "note": "逐次的 `topology.max_concurrent_by_endpoint` 只看那一次自己的六塊，而排程器是**跨複製**發射的（r1 的最後一塊與 r2 的第一塊會同時在跑）⇒ 逐次全綠仍然可能整體超賣。本欄把**全部複製的全部塊**丟進同一條掃描線重算一次，上限與逐次那條同一張表（凍結的 `ENDPOINT_CONCURRENCY_CAPS`）。⚠ 事前的閘門在排程器的槽位，這裡是事後對帳——排程器說了不算。⚠ 算不出時間窗一律 `block_ts_unrecorded`：算不出不是通過。"
+  },
+  "co_tenancy": {
+    "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+    "neighbor_glob": "runs/g_r529_*",
+    "window_semantics": "[ts_ms − latency_ms, ts_ms]：`brain_cline._log` 是**呼叫回來之後**才寫 `ts_ms`，而 `latency_ms` 量的是 t0→完成 ⇒ 那一通在飛的區間左端是 ts_ms − latency_ms、右端是 ts_ms。舊版寫成 [ts, ts+latency]（把 ts 讀成送出時刻），整段窗右移一個 latency，在塊交界製造假重疊。",
+    "note": "共租＝R460R 的塊在 1004 上跑的時候，1004 同時也在服務 R529 的塊。這**不是**違規（R529 的塊各自也在 1004 的 3 併發額度內被排程），而是**條件差異**：三次複製吃到的硬體條件不一樣。所以它進紀錄不是為了判誰對，是為了讓「rep2 的數字比較差」這種話不能在沒有這一格的情況下被說成「複製不穩定」。⚠ 這一格是**描述性**的：本檔沒有任何仲裁值讀它，也**沒有**把它拿去校正任何交付率（那會是事後調整）。⚠ 佔比的分母是塊自己的牆鐘窗（第一通送出→最後一通收完），分子是它與 R529 在 1004 上的塊窗**聯集**的交集。另附 `cotenant_pp_by_call_span`：把 R529 的窗改成**逐呼叫**窗的聯集（塊窗裡沙箱在跑、GPU 空著的那些縫不算共租）——兩個讀法都列，因為哪一個才是「GPU 真的在忙」取決於後端的批次行為，本檔不宣稱知道。",
+    "neighbors": {
+      "g_r529_hep_a3": {
+        "lo_ms": 1789139876787,
+        "hi_ms": 1789140974313,
+        "n_calls": 70
+      },
+      "g_r529_hep_a4": {
+        "lo_ms": 1789144336744,
+        "hi_ms": 1789145378655,
+        "n_calls": 72
+      },
+      "g_r529_hep_a8": {
+        "lo_ms": 1789156166227,
+        "hi_ms": 1789157351537,
+        "n_calls": 67
+      },
+      "g_r529_lcb3h_a2": {
+        "lo_ms": 1789132440230,
+        "hi_ms": 1789139703318,
+        "n_calls": 81
+      },
+      "g_r529_lcb3m_a4": {
+        "lo_ms": 1789141031165,
+        "hi_ms": 1789144199804,
+        "n_calls": 73
+      },
+      "g_r529_lcb3m_a5": {
+        "lo_ms": 1789145436570,
+        "hi_ms": 1789149153642,
+        "n_calls": 82
+      },
+      "g_r529_lcb3m_a6": {
+        "lo_ms": 1789150245120,
+        "hi_ms": 1789154131232,
+        "n_calls": 70
+      },
+      "g_r529_mbpp_a11": {
+        "lo_ms": 1789158602187,
+        "hi_ms": 1789159836812,
+        "n_calls": 80
+      },
+      "g_r529_mbpp_a13": {
+        "lo_ms": 1789160047339,
+        "hi_ms": 1789160695073,
+        "n_calls": 63
+      },
+      "g_r529_mbpp_a14": {
+        "lo_ms": 1789160886156,
+        "hi_ms": 1789163921646,
+        "n_calls": 74
+      },
+      "g_r529_mbpp_a17": {
+        "lo_ms": 1789164104097,
+        "hi_ms": 1789165773572,
+        "n_calls": 76
+      },
+      "g_r529_mbpp_a5": {
+        "lo_ms": 1789149333542,
+        "hi_ms": 1789150238723,
+        "n_calls": 69
+      },
+      "g_r529_mbpp_a6": {
+        "lo_ms": 1789154327846,
+        "hi_ms": 1789156007720,
+        "n_calls": 74
+      },
+      "g_r529_mbpp_a9": {
+        "lo_ms": 1789157531310,
+        "hi_ms": 1789158403117,
+        "n_calls": 70
+      }
+    },
+    "by_block": {
+      "g_r460r1_harness_lcb2_a1": {
+        "rep": 1,
+        "lo_ms": 1789096500407,
+        "hi_ms": 1789107894468,
+        "wall_s": 11394.1,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 245,
+          "mean_s": 46.14,
+          "median_s": 30.25,
+          "p90_s": 95.58,
+          "max_s": 558.43
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 245,
+          "mean_s": 46.14,
+          "median_s": 30.25,
+          "p90_s": 95.58,
+          "max_s": 558.43
+        }
+      },
+      "g_r460r1_harness_lcb2_a2": {
+        "rep": 1,
+        "lo_ms": 1789096512540,
+        "hi_ms": 1789111321607,
+        "wall_s": 14809.1,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 265,
+          "mean_s": 55.35,
+          "median_s": 32.44,
+          "p90_s": 133.58,
+          "max_s": 521.29
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 265,
+          "mean_s": 55.35,
+          "median_s": 32.44,
+          "p90_s": 133.58,
+          "max_s": 521.29
+        }
+      },
+      "g_r460r1_harness_lcb2_a3": {
+        "rep": 1,
+        "lo_ms": 1789096526333,
+        "hi_ms": 1789124306508,
+        "wall_s": 27780.2,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 274,
+          "mean_s": 78.71,
+          "median_s": 39.66,
+          "p90_s": 223.46,
+          "max_s": 462.69
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 274,
+          "mean_s": 78.71,
+          "median_s": 39.66,
+          "p90_s": 223.46,
+          "max_s": 462.69
+        }
+      },
+      "g_r460r1_harness_lcb2_b1": {
+        "rep": 1,
+        "lo_ms": 1789107948576,
+        "hi_ms": 1789120307061,
+        "wall_s": 12358.5,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 243,
+          "mean_s": 45.48,
+          "median_s": 30.44,
+          "p90_s": 96.75,
+          "max_s": 475.7
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 243,
+          "mean_s": 45.48,
+          "median_s": 30.44,
+          "p90_s": 96.75,
+          "max_s": 475.7
+        }
+      },
+      "g_r460r1_harness_lcb2_b2": {
+        "rep": 1,
+        "lo_ms": 1789111382775,
+        "hi_ms": 1789129830181,
+        "wall_s": 18447.4,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 293,
+          "mean_s": 58.26,
+          "median_s": 33.66,
+          "p90_s": 132.49,
+          "max_s": 503.29
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 293,
+          "mean_s": 58.26,
+          "median_s": 33.66,
+          "p90_s": 132.49,
+          "max_s": 503.29
+        }
+      },
+      "g_r460r1_harness_lcb2_b3": {
+        "rep": 1,
+        "lo_ms": 1789120356371,
+        "hi_ms": 1789141666512,
+        "wall_s": 21310.1,
+        "cotenant_s": 8996.0,
+        "cotenant_pp": 42.2,
+        "cotenant_pp_by_call_span": 41.7,
+        "gen_ok": {
+          "n": 274,
+          "mean_s": 63.96,
+          "median_s": 33.13,
+          "p90_s": 149.64,
+          "max_s": 702.7
+        },
+        "gen_ok_cotenant": {
+          "n": 29,
+          "mean_s": 199.03,
+          "median_s": 169.67,
+          "p90_s": 385.14,
+          "max_s": 702.7
+        },
+        "gen_ok_solo": {
+          "n": 245,
+          "mean_s": 47.98,
+          "median_s": 31.3,
+          "p90_s": 101.75,
+          "max_s": 480.43
+        }
+      },
+      "g_r460r2_harness_lcb2_a1": {
+        "rep": 2,
+        "lo_ms": 1789124330966,
+        "hi_ms": 1789141879131,
+        "wall_s": 17548.2,
+        "cotenant_s": 9208.6,
+        "cotenant_pp": 52.5,
+        "cotenant_pp_by_call_span": 51.8,
+        "gen_ok": {
+          "n": 264,
+          "mean_s": 61.45,
+          "median_s": 38.1,
+          "p90_s": 142.47,
+          "max_s": 536.11
+        },
+        "gen_ok_cotenant": {
+          "n": 166,
+          "mean_s": 54.37,
+          "median_s": 35.61,
+          "p90_s": 123.8,
+          "max_s": 536.11
+        },
+        "gen_ok_solo": {
+          "n": 98,
+          "mean_s": 73.44,
+          "median_s": 41.01,
+          "p90_s": 191.04,
+          "max_s": 516.1
+        }
+      },
+      "g_r460r2_harness_lcb2_a2": {
+        "rep": 2,
+        "lo_ms": 1789129866118,
+        "hi_ms": 1789156979677,
+        "wall_s": 27113.6,
+        "cotenant_s": 23572.9,
+        "cotenant_pp": 86.9,
+        "cotenant_pp_by_call_span": 85.8,
+        "gen_ok": {
+          "n": 275,
+          "mean_s": 84.91,
+          "median_s": 50.09,
+          "p90_s": 215.24,
+          "max_s": 562.72
+        },
+        "gen_ok_cotenant": {
+          "n": 235,
+          "mean_s": 87.99,
+          "median_s": 51.14,
+          "p90_s": 218.11,
+          "max_s": 562.72
+        },
+        "gen_ok_solo": {
+          "n": 40,
+          "mean_s": 66.76,
+          "median_s": 40.08,
+          "p90_s": 142.07,
+          "max_s": 389.54
+        }
+      },
+      "g_r460r2_harness_lcb2_a3": {
+        "rep": 2,
+        "lo_ms": 1789141709765,
+        "hi_ms": 1789157624680,
+        "wall_s": 15914.9,
+        "cotenant_s": 14998.9,
+        "cotenant_pp": 94.2,
+        "cotenant_pp_by_call_span": 93.0,
+        "gen_ok": {
+          "n": 245,
+          "mean_s": 54.72,
+          "median_s": 32.75,
+          "p90_s": 92.19,
+          "max_s": 992.0
+        },
+        "gen_ok_cotenant": {
+          "n": 229,
+          "mean_s": 56.97,
+          "median_s": 33.93,
+          "p90_s": 93.25,
+          "max_s": 992.0
+        },
+        "gen_ok_solo": {
+          "n": 16,
+          "mean_s": 22.5,
+          "median_s": 22.11,
+          "p90_s": 44.33,
+          "max_s": 45.88
+        }
+      },
+      "g_r460r2_harness_lcb2_b1": {
+        "rep": 2,
+        "lo_ms": 1789141903533,
+        "hi_ms": 1789163337802,
+        "wall_s": 21434.3,
+        "cotenant_s": 19917.5,
+        "cotenant_pp": 92.9,
+        "cotenant_pp_by_call_span": 91.8,
+        "gen_ok": {
+          "n": 265,
+          "mean_s": 80.26,
+          "median_s": 44.29,
+          "p90_s": 221.76,
+          "max_s": 610.61
+        },
+        "gen_ok_cotenant": {
+          "n": 256,
+          "mean_s": 81.57,
+          "median_s": 44.55,
+          "p90_s": 222.6,
+          "max_s": 610.61
+        },
+        "gen_ok_solo": {
+          "n": 9,
+          "mean_s": 43.09,
+          "median_s": 32.14,
+          "p90_s": 98.11,
+          "max_s": 98.11
+        }
+      },
+      "g_r460r2_harness_lcb2_b2": {
+        "rep": 2,
+        "lo_ms": 1789157040471,
+        "hi_ms": 1789177027965,
+        "wall_s": 19987.5,
+        "cotenant_s": 7770.2,
+        "cotenant_pp": 38.9,
+        "cotenant_pp_by_call_span": 38.4,
+        "gen_ok": {
+          "n": 271,
+          "mean_s": 68.46,
+          "median_s": 36.37,
+          "p90_s": 174.34,
+          "max_s": 866.41
+        },
+        "gen_ok_cotenant": {
+          "n": 141,
+          "mean_s": 59.54,
+          "median_s": 40.12,
+          "p90_s": 145.92,
+          "max_s": 244.99
+        },
+        "gen_ok_solo": {
+          "n": 130,
+          "mean_s": 78.12,
+          "median_s": 34.36,
+          "p90_s": 242.52,
+          "max_s": 866.41
+        }
+      },
+      "g_r460r2_harness_lcb2_b3": {
+        "rep": 2,
+        "lo_ms": 1789157657629,
+        "hi_ms": 1789171853276,
+        "wall_s": 14195.6,
+        "cotenant_s": 7332.8,
+        "cotenant_pp": 51.7,
+        "cotenant_pp_by_call_span": 51.1,
+        "gen_ok": {
+          "n": 258,
+          "mean_s": 54.49,
+          "median_s": 36.02,
+          "p90_s": 99.57,
+          "max_s": 861.76
+        },
+        "gen_ok_cotenant": {
+          "n": 136,
+          "mean_s": 57.87,
+          "median_s": 45.1,
+          "p90_s": 104.76,
+          "max_s": 410.74
+        },
+        "gen_ok_solo": {
+          "n": 122,
+          "mean_s": 50.72,
+          "median_s": 30.54,
+          "p90_s": 89.0,
+          "max_s": 861.76
+        }
+      },
+      "g_r460r3_harness_lcb2_a1": {
+        "rep": 3,
+        "lo_ms": 1789163372528,
+        "hi_ms": 1789184477530,
+        "wall_s": 21105.0,
+        "cotenant_s": 2218.6,
+        "cotenant_pp": 10.5,
+        "cotenant_pp_by_call_span": 10.4,
+        "gen_ok": {
+          "n": 237,
+          "mean_s": 67.19,
+          "median_s": 28.49,
+          "p90_s": 205.41,
+          "max_s": 586.66
+        },
+        "gen_ok_cotenant": {
+          "n": 43,
+          "mean_s": 58.15,
+          "median_s": 38.14,
+          "p90_s": 121.84,
+          "max_s": 329.46
+        },
+        "gen_ok_solo": {
+          "n": 194,
+          "mean_s": 69.19,
+          "median_s": 27.07,
+          "p90_s": 217.62,
+          "max_s": 586.66
+        }
+      },
+      "g_r460r3_harness_lcb2_a2": {
+        "rep": 3,
+        "lo_ms": 1789171907922,
+        "hi_ms": 1789187494881,
+        "wall_s": 15587.0,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 271,
+          "mean_s": 51.72,
+          "median_s": 28.88,
+          "p90_s": 112.28,
+          "max_s": 489.99
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 271,
+          "mean_s": 51.72,
+          "median_s": 28.88,
+          "p90_s": 112.28,
+          "max_s": 489.99
+        }
+      },
+      "g_r460r3_harness_lcb2_a3": {
+        "rep": 3,
+        "lo_ms": 1789177092594,
+        "hi_ms": 1789194730621,
+        "wall_s": 17638.0,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 262,
+          "mean_s": 52.26,
+          "median_s": 35.48,
+          "p90_s": 102.42,
+          "max_s": 582.21
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 262,
+          "mean_s": 52.26,
+          "median_s": 35.48,
+          "p90_s": 102.42,
+          "max_s": 582.21
+        }
+      },
+      "g_r460r3_harness_lcb2_b1": {
+        "rep": 3,
+        "lo_ms": 1789184501971,
+        "hi_ms": 1789205489977,
+        "wall_s": 20988.0,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 258,
+          "mean_s": 66.79,
+          "median_s": 35.72,
+          "p90_s": 165.44,
+          "max_s": 628.18
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 258,
+          "mean_s": 66.79,
+          "median_s": 35.72,
+          "p90_s": 165.44,
+          "max_s": 628.18
+        }
+      },
+      "g_r460r3_harness_lcb2_b2": {
+        "rep": 3,
+        "lo_ms": 1789187515999,
+        "hi_ms": 1789205192108,
+        "wall_s": 17676.1,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 270,
+          "mean_s": 65.27,
+          "median_s": 39.58,
+          "p90_s": 145.76,
+          "max_s": 433.82
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 270,
+          "mean_s": 65.27,
+          "median_s": 39.58,
+          "p90_s": 145.76,
+          "max_s": 433.82
+        }
+      },
+      "g_r460r3_harness_lcb2_b3": {
+        "rep": 3,
+        "lo_ms": 1789194793918,
+        "hi_ms": 1789208470004,
+        "wall_s": 13676.1,
+        "cotenant_s": 0.0,
+        "cotenant_pp": 0.0,
+        "cotenant_pp_by_call_span": 0.0,
+        "gen_ok": {
+          "n": 252,
+          "mean_s": 48.74,
+          "median_s": 27.27,
+          "p90_s": 120.64,
+          "max_s": 429.05
+        },
+        "gen_ok_cotenant": {
+          "n": 0,
+          "mean_s": null,
+          "median_s": null,
+          "p90_s": null,
+          "max_s": null
+        },
+        "gen_ok_solo": {
+          "n": 252,
+          "mean_s": 48.74,
+          "median_s": 27.27,
+          "p90_s": 120.64,
+          "max_s": 429.05
+        }
+      }
+    },
+    "by_rep": {
+      "1": {
+        "blocks_n": 6,
+        "blocks_with_cotenancy_n": 1,
+        "wall_s": 106099.3,
+        "cotenant_s": 8996.0,
+        "cotenant_pp": 8.5,
+        "gen_ok": {
+          "n": 1594,
+          "mean_s": 58.46,
+          "median_s": 32.68,
+          "p90_s": 133.93,
+          "max_s": 702.7
+        },
+        "gen_ok_cotenant": {
+          "n": 29,
+          "mean_s": 199.03,
+          "median_s": 169.67,
+          "p90_s": 385.14,
+          "max_s": 702.7
+        },
+        "gen_ok_solo": {
+          "n": 1565,
+          "mean_s": 55.86,
+          "median_s": 32.31,
+          "p90_s": 127.18,
+          "max_s": 558.43
+        }
+      },
+      "2": {
+        "blocks_n": 6,
+        "blocks_with_cotenancy_n": 6,
+        "wall_s": 116194.0,
+        "cotenant_s": 82800.9,
+        "cotenant_pp": 71.3,
+        "gen_ok": {
+          "n": 1578,
+          "mean_s": 67.72,
+          "median_s": 39.18,
+          "p90_s": 162.72,
+          "max_s": 992.0
+        },
+        "gen_ok_cotenant": {
+          "n": 1163,
+          "mean_s": 68.7,
+          "median_s": 41.21,
+          "p90_s": 163.92,
+          "max_s": 992.0
+        },
+        "gen_ok_solo": {
+          "n": 415,
+          "mean_s": 64.96,
+          "median_s": 33.4,
+          "p90_s": 148.56,
+          "max_s": 866.41
+        }
+      },
+      "3": {
+        "blocks_n": 6,
+        "blocks_with_cotenancy_n": 1,
+        "wall_s": 106670.2,
+        "cotenant_s": 2218.6,
+        "cotenant_pp": 2.1,
+        "gen_ok": {
+          "n": 1550,
+          "mean_s": 58.56,
+          "median_s": 32.5,
+          "p90_s": 138.16,
+          "max_s": 628.18
+        },
+        "gen_ok_cotenant": {
+          "n": 43,
+          "mean_s": 58.15,
+          "median_s": 38.14,
+          "p90_s": 121.84,
+          "max_s": 329.46
+        },
+        "gen_ok_solo": {
+          "n": 1507,
+          "mean_s": 58.57,
+          "median_s": 32.39,
+          "p90_s": 138.16,
+          "max_s": 628.18
+        }
+      }
+    },
+    "neighbors_n": 14
+  },
+  "attribution": {
+    "1": {
+      "HPI": {
+        "first_pass_turn_hist": {
+          "none": 14,
+          "1": 83,
+          "2": 16,
+          "3": 4,
+          "4": 2,
+          "5": 1
+        },
+        "turn1_visible_pass_n": 83,
+        "turn1_visible_pass_pp": 69.16666666666667,
+        "loop_touched_n": 37,
+        "loop_gain_n": 16,
+        "loop_gain_pp": 13.333333333333334,
+        "rescored": true,
+        "delta_turn1_minus_off_pp": 5.0,
+        "delta_turn1_minus_off_ci95_lo_pp": -4.989373515921329,
+        "delta_turn1_minus_off_ci95_hi_pp": 14.02751463724036,
+        "delta_final_minus_turn1_pp": 14.166666666666666,
+        "delta_final_minus_turn1_looponly_pp": 43.24324324324324,
+        "rescore_note": "turn-1 的碼由 calls.jsonl 全文回應離線重取（初稿輪用 gain_run.extract_code，D4），再走與 dispatch 端逐字相同的 meets_demand(hidden)。無條件計分（沒有 accepted 語意），形狀與 OFF 相同。",
+        "delta_turn1_minus_off_n_common": 120,
+        "delta_turn1_minus_off_b": 19,
+        "delta_turn1_minus_off_c": 13,
+        "delta_turn1_minus_off_p_mcnemar_exact": 0.37708558747544885,
+        "delta_final_minus_turn1_ci95_lo_pp": 6.867895758012827,
+        "delta_final_minus_turn1_ci95_hi_pp": 17.088773874044392,
+        "delta_final_minus_turn1_n_common": 120,
+        "delta_final_minus_turn1_looponly_n_common": 37,
+        "identity_warning": "Δ_O ≈ prompt 效果 ＋ 迴圈效果，**不是恆等式**：turn-1 那一份無條件計分（沒有拒交語意），最終那一份有 accepted。"
+      },
+      "HOC": {
+        "first_pass_turn_hist": {
+          "none": 12,
+          "2": 84,
+          "3": 20,
+          "4": 4
+        },
+        "turn1_visible_pass_n": 0,
+        "turn1_visible_pass_pp": 0.0,
+        "loop_touched_n": 120,
+        "loop_gain_n": 92,
+        "loop_gain_pp": 76.66666666666667,
+        "rescored": true,
+        "delta_turn1_minus_off_pp": 4.201680672268908,
+        "delta_turn1_minus_off_ci95_lo_pp": -5.392401763848582,
+        "delta_turn1_minus_off_ci95_hi_pp": 12.904258684312511,
+        "delta_final_minus_turn1_pp": 15.966386554621847,
+        "delta_final_minus_turn1_looponly_pp": 15.966386554621847,
+        "rescore_note": "turn-1 的碼由 calls.jsonl 全文回應離線重取（初稿輪用 gain_run.extract_code，D4），再走與 dispatch 端逐字相同的 meets_demand(hidden)。無條件計分（沒有 accepted 語意），形狀與 OFF 相同。",
+        "delta_turn1_minus_off_n_common": 119,
+        "delta_turn1_minus_off_b": 17,
+        "delta_turn1_minus_off_c": 12,
+        "delta_turn1_minus_off_p_mcnemar_exact": 0.45825831964612007,
+        "delta_final_minus_turn1_ci95_lo_pp": 8.489538275770645,
+        "delta_final_minus_turn1_ci95_hi_pp": 18.913732405258585,
+        "delta_final_minus_turn1_n_common": 119,
+        "delta_final_minus_turn1_looponly_n_common": 119,
+        "identity_warning": "Δ_O ≈ prompt 效果 ＋ 迴圈效果，**不是恆等式**：turn-1 那一份無條件計分（沒有拒交語意），最終那一份有 accepted。"
+      },
+      "HMIX": {
+        "first_pass_turn_hist": {
+          "none": 7,
+          "1": 88,
+          "2": 19,
+          "3": 6
+        },
+        "turn1_visible_pass_n": 88,
+        "turn1_visible_pass_pp": 73.33333333333333,
+        "loop_touched_n": 32,
+        "loop_gain_n": 21,
+        "loop_gain_pp": 17.5,
+        "rescored": true,
+        "delta_turn1_minus_off_pp": 3.3333333333333335,
+        "delta_turn1_minus_off_ci95_lo_pp": -5.9829639981021305,
+        "delta_turn1_minus_off_ci95_hi_pp": 11.917549639233163,
+        "delta_final_minus_turn1_pp": 16.666666666666664,
+        "delta_final_minus_turn1_looponly_pp": 65.625,
+        "rescore_note": "turn-1 的碼由 calls.jsonl 全文回應離線重取（初稿輪用 gain_run.extract_code，D4），再走與 dispatch 端逐字相同的 meets_demand(hidden)。無條件計分（沒有 accepted 語意），形狀與 OFF 相同。",
+        "delta_turn1_minus_off_n_common": 120,
+        "delta_turn1_minus_off_b": 16,
+        "delta_turn1_minus_off_c": 12,
+        "delta_turn1_minus_off_p_mcnemar_exact": 0.5715881884098053,
+        "delta_final_minus_turn1_ci95_lo_pp": 9.957038752186735,
+        "delta_final_minus_turn1_ci95_hi_pp": 18.29116125735897,
+        "delta_final_minus_turn1_n_common": 120,
+        "delta_final_minus_turn1_looponly_n_common": 32,
+        "identity_warning": "Δ_O ≈ prompt 效果 ＋ 迴圈效果，**不是恆等式**：turn-1 那一份無條件計分（沒有拒交語意），最終那一份有 accepted。"
+      }
+    },
+    "2": {
+      "HPI": {
+        "first_pass_turn_hist": {
+          "none": 7,
+          "1": 92,
+          "2": 14,
+          "3": 5,
+          "4": 1,
+          "5": 1
+        },
+        "turn1_visible_pass_n": 92,
+        "turn1_visible_pass_pp": 76.66666666666667,
+        "loop_touched_n": 28,
+        "loop_gain_n": 16,
+        "loop_gain_pp": 13.333333333333334,
+        "rescored": true,
+        "delta_turn1_minus_off_pp": 10.0,
+        "delta_turn1_minus_off_ci95_lo_pp": -0.5821527991136843,
+        "delta_turn1_minus_off_ci95_hi_pp": 18.86629141044472,
+        "delta_final_minus_turn1_pp": 15.0,
+        "delta_final_minus_turn1_looponly_pp": 57.14285714285714,
+        "rescore_note": "turn-1 的碼由 calls.jsonl 全文回應離線重取（初稿輪用 gain_run.extract_code，D4），再走與 dispatch 端逐字相同的 meets_demand(hidden)。無條件計分（沒有 accepted 語意），形狀與 OFF 相同。",
+        "delta_turn1_minus_off_n_common": 120,
+        "delta_turn1_minus_off_b": 24,
+        "delta_turn1_minus_off_c": 12,
+        "delta_turn1_minus_off_p_mcnemar_exact": 0.06524533522315323,
+        "delta_final_minus_turn1_ci95_lo_pp": 8.375574574265771,
+        "delta_final_minus_turn1_ci95_hi_pp": 16.624497016735006,
+        "delta_final_minus_turn1_n_common": 120,
+        "delta_final_minus_turn1_looponly_n_common": 28,
+        "identity_warning": "Δ_O ≈ prompt 效果 ＋ 迴圈效果，**不是恆等式**：turn-1 那一份無條件計分（沒有拒交語意），最終那一份有 accepted。"
+      },
+      "HOC": {
+        "first_pass_turn_hist": {
+          "none": 9,
+          "2": 82,
+          "3": 21,
+          "4": 6,
+          "5": 2
+        },
+        "turn1_visible_pass_n": 0,
+        "turn1_visible_pass_pp": 0.0,
+        "loop_touched_n": 120,
+        "loop_gain_n": 88,
+        "loop_gain_pp": 73.33333333333333,
+        "rescored": true,
+        "delta_turn1_minus_off_pp": 2.5,
+        "delta_turn1_minus_off_ci95_lo_pp": -7.7899490012484405,
+        "delta_turn1_minus_off_ci95_hi_pp": 12.350832445539178,
+        "delta_final_minus_turn1_pp": 16.666666666666664,
+        "delta_final_minus_turn1_looponly_pp": 16.666666666666664,
+        "rescore_note": "turn-1 的碼由 calls.jsonl 全文回應離線重取（初稿輪用 gain_run.extract_code，D4），再走與 dispatch 端逐字相同的 meets_demand(hidden)。無條件計分（沒有 accepted 語意），形狀與 OFF 相同。",
+        "delta_turn1_minus_off_n_common": 120,
+        "delta_turn1_minus_off_b": 19,
+        "delta_turn1_minus_off_c": 16,
+        "delta_turn1_minus_off_p_mcnemar_exact": 0.7358788008568808,
+        "delta_final_minus_turn1_ci95_lo_pp": 9.201087937695895,
+        "delta_final_minus_turn1_ci95_hi_pp": 19.58974634874999,
+        "delta_final_minus_turn1_n_common": 120,
+        "delta_final_minus_turn1_looponly_n_common": 120,
+        "identity_warning": "Δ_O ≈ prompt 效果 ＋ 迴圈效果，**不是恆等式**：turn-1 那一份無條件計分（沒有拒交語意），最終那一份有 accepted。"
+      },
+      "HMIX": {
+        "first_pass_turn_hist": {
+          "none": 14,
+          "1": 83,
+          "2": 16,
+          "3": 3,
+          "4": 3,
+          "5": 1
+        },
+        "turn1_visible_pass_n": 83,
+        "turn1_visible_pass_pp": 69.16666666666667,
+        "loop_touched_n": 37,
+        "loop_gain_n": 19,
+        "loop_gain_pp": 15.833333333333334,
+        "rescored": true,
+        "delta_turn1_minus_off_pp": 6.666666666666667,
+        "delta_turn1_minus_off_ci95_lo_pp": -4.448863187113231,
+        "delta_turn1_minus_off_ci95_hi_pp": 16.75666756081709,
+        "delta_final_minus_turn1_pp": 15.833333333333332,
+        "delta_final_minus_turn1_looponly_pp": 51.35135135135135,
+        "rescore_note": "turn-1 的碼由 calls.jsonl 全文回應離線重取（初稿輪用 gain_run.extract_code，D4），再走與 dispatch 端逐字相同的 meets_demand(hidden)。無條件計分（沒有 accepted 語意），形狀與 OFF 相同。",
+        "delta_turn1_minus_off_n_common": 120,
+        "delta_turn1_minus_off_b": 24,
+        "delta_turn1_minus_off_c": 16,
+        "delta_turn1_minus_off_p_mcnemar_exact": 0.26818725105476915,
+        "delta_final_minus_turn1_ci95_lo_pp": 9.164403152211364,
+        "delta_final_minus_turn1_ci95_hi_pp": 17.457829079307274,
+        "delta_final_minus_turn1_n_common": 120,
+        "delta_final_minus_turn1_looponly_n_common": 37,
+        "identity_warning": "Δ_O ≈ prompt 效果 ＋ 迴圈效果，**不是恆等式**：turn-1 那一份無條件計分（沒有拒交語意），最終那一份有 accepted。"
+      }
+    },
+    "3": {
+      "HPI": {
+        "first_pass_turn_hist": {
+          "none": 12,
+          "1": 76,
+          "2": 23,
+          "3": 5,
+          "4": 2,
+          "5": 2
+        },
+        "turn1_visible_pass_n": 76,
+        "turn1_visible_pass_pp": 63.333333333333336,
+        "loop_touched_n": 44,
+        "loop_gain_n": 30,
+        "loop_gain_pp": 25.0,
+        "rescored": true,
+        "delta_turn1_minus_off_pp": -5.833333333333333,
+        "delta_turn1_minus_off_ci95_lo_pp": -14.168012858152235,
+        "delta_turn1_minus_off_ci95_hi_pp": 3.740775701220604,
+        "delta_final_minus_turn1_pp": 24.166666666666668,
+        "delta_final_minus_turn1_looponly_pp": 68.18181818181817,
+        "rescore_note": "turn-1 的碼由 calls.jsonl 全文回應離線重取（初稿輪用 gain_run.extract_code，D4），再走與 dispatch 端逐字相同的 meets_demand(hidden)。無條件計分（沒有 accepted 語意），形狀與 OFF 相同。",
+        "delta_turn1_minus_off_n_common": 120,
+        "delta_turn1_minus_off_b": 11,
+        "delta_turn1_minus_off_c": 18,
+        "delta_turn1_minus_off_p_mcnemar_exact": 0.26493089646101,
+        "delta_final_minus_turn1_ci95_lo_pp": 17.20390899477153,
+        "delta_final_minus_turn1_ci95_hi_pp": 25.79115421295459,
+        "delta_final_minus_turn1_n_common": 120,
+        "delta_final_minus_turn1_looponly_n_common": 44,
+        "identity_warning": "Δ_O ≈ prompt 效果 ＋ 迴圈效果，**不是恆等式**：turn-1 那一份無條件計分（沒有拒交語意），最終那一份有 accepted。"
+      },
+      "HOC": {
+        "first_pass_turn_hist": {
+          "none": 12,
+          "2": 91,
+          "3": 13,
+          "4": 3,
+          "5": 1
+        },
+        "turn1_visible_pass_n": 0,
+        "turn1_visible_pass_pp": 0.0,
+        "loop_touched_n": 120,
+        "loop_gain_n": 90,
+        "loop_gain_pp": 75.0,
+        "rescored": true,
+        "delta_turn1_minus_off_pp": 8.403361344537815,
+        "delta_turn1_minus_off_ci95_lo_pp": -1.7172994301994635,
+        "delta_turn1_minus_off_ci95_hi_pp": 16.902502630369543,
+        "delta_final_minus_turn1_pp": 10.084033613445378,
+        "delta_final_minus_turn1_looponly_pp": 10.084033613445378,
+        "rescore_note": "turn-1 的碼由 calls.jsonl 全文回應離線重取（初稿輪用 gain_run.extract_code，D4），再走與 dispatch 端逐字相同的 meets_demand(hidden)。無條件計分（沒有 accepted 語意），形狀與 OFF 相同。",
+        "delta_turn1_minus_off_n_common": 119,
+        "delta_turn1_minus_off_b": 21,
+        "delta_turn1_minus_off_c": 11,
+        "delta_turn1_minus_off_p_mcnemar_exact": 0.11018416518345475,
+        "delta_final_minus_turn1_ci95_lo_pp": 3.1334121183390558,
+        "delta_final_minus_turn1_ci95_hi_pp": 13.028205611686344,
+        "delta_final_minus_turn1_n_common": 119,
+        "delta_final_minus_turn1_looponly_n_common": 119,
+        "identity_warning": "Δ_O ≈ prompt 效果 ＋ 迴圈效果，**不是恆等式**：turn-1 那一份無條件計分（沒有拒交語意），最終那一份有 accepted。"
+      },
+      "HMIX": {
+        "first_pass_turn_hist": {
+          "none": 10,
+          "1": 79,
+          "2": 25,
+          "3": 4,
+          "4": 2
+        },
+        "turn1_visible_pass_n": 79,
+        "turn1_visible_pass_pp": 65.83333333333333,
+        "loop_touched_n": 41,
+        "loop_gain_n": 24,
+        "loop_gain_pp": 20.0,
+        "rescored": true,
+        "delta_turn1_minus_off_pp": -3.3333333333333335,
+        "delta_turn1_minus_off_ci95_lo_pp": -12.26962250483683,
+        "delta_turn1_minus_off_ci95_hi_pp": 6.286327469538966,
+        "delta_final_minus_turn1_pp": 21.666666666666668,
+        "delta_final_minus_turn1_looponly_pp": 58.536585365853654,
+        "rescore_note": "turn-1 的碼由 calls.jsonl 全文回應離線重取（初稿輪用 gain_run.extract_code，D4），再走與 dispatch 端逐字相同的 meets_demand(hidden)。無條件計分（沒有 accepted 語意），形狀與 OFF 相同。",
+        "delta_turn1_minus_off_n_common": 120,
+        "delta_turn1_minus_off_b": 13,
+        "delta_turn1_minus_off_c": 17,
+        "delta_turn1_minus_off_p_mcnemar_exact": 0.584664711728692,
+        "delta_final_minus_turn1_ci95_lo_pp": 14.77104544791751,
+        "delta_final_minus_turn1_ci95_hi_pp": 23.291156058069287,
+        "delta_final_minus_turn1_n_common": 120,
+        "delta_final_minus_turn1_looponly_n_common": 41,
+        "identity_warning": "Δ_O ≈ prompt 效果 ＋ 迴圈效果，**不是恆等式**：turn-1 那一份無條件計分（沒有拒交語意），最終那一份有 accepted。"
+      }
+    }
+  }
+}

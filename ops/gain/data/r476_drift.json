@@ -1,0 +1,191 @@
+{
+  "verdict": "OK",
+  "gates": {
+    "B_LIT": "OK",
+    "B_NEG": "OK",
+    "B_CAL": "OK"
+  },
+  "boxes": {
+    "REPRODUCED": 6,
+    "DRIFTED_SAFE": 3
+  },
+  "results": {
+    "D4_lcb2_regression": {
+      "item": "D4_lcb2_regression",
+      "box": "REPRODUCED",
+      "diffs": {},
+      "lit_in_prereg": true
+    },
+    "D4_lcb3_trap": {
+      "item": "D4_lcb3_trap",
+      "box": "REPRODUCED",
+      "diffs": {},
+      "lit_in_prereg": true
+    },
+    "C4_conform_vs_off": {
+      "item": "C4_conform_vs_off",
+      "box": "REPRODUCED",
+      "diffs": {},
+      "lit_in_prereg": true
+    },
+    "C4_off5_vs_off": {
+      "item": "C4_off5_vs_off",
+      "box": "REPRODUCED",
+      "diffs": {},
+      "lit_in_prereg": true
+    },
+    "E4_Y1_selftest": {
+      "item": "E4_Y1_selftest",
+      "box": "DRIFTED_SAFE",
+      "diffs": {
+        "n_checks": {
+          "expected": 14,
+          "observed": 19
+        }
+      },
+      "lit_in_prereg": true
+    },
+    "E4_Y2_real": {
+      "item": "E4_Y2_real",
+      "box": "REPRODUCED",
+      "diffs": {},
+      "lit_in_prereg": true
+    },
+    "E3_trunc_23": {
+      "item": "E3_trunc_23",
+      "box": "DRIFTED_SAFE",
+      "diffs": {
+        "verdict": {
+          "expected": "OK",
+          "observed": "BROKEN_ROW_ACCOUNTING"
+        },
+        "n_tasks_complete": {
+          "expected": 7,
+          "observed": null
+        },
+        "pct_undemonstrated": {
+          "expected": 28.571,
+          "observed": null
+        }
+      },
+      "lit_in_prereg": true
+    },
+    "E3_trunc_180": {
+      "item": "E3_trunc_180",
+      "box": "DRIFTED_SAFE",
+      "diffs": {
+        "verdict": {
+          "expected": "OK",
+          "observed": "BROKEN_ROW_ACCOUNTING"
+        },
+        "n_tasks_complete": {
+          "expected": 60,
+          "observed": null
+        },
+        "pct_undemonstrated": {
+          "expected": 25.0,
+          "observed": null
+        }
+      },
+      "lit_in_prereg": true
+    },
+    "B_pooled_single_stratum": {
+      "item": "B_pooled_single_stratum",
+      "box": "REPRODUCED",
+      "diffs": {},
+      "lit_in_prereg": true
+    }
+  },
+  "observed": {
+    "D4_lcb2_regression": {
+      "rc": 0,
+      "verdict": "RECONSTRUCTED",
+      "calib": 54,
+      "calib_n": 54,
+      "gate": 81,
+      "vote": 76,
+      "b": 14,
+      "c": 9,
+      "delta_pp": 4.166666666666666,
+      "rows": 360,
+      "sha": "cfed36ff71b871f0"
+    },
+    "D4_lcb3_trap": {
+      "rc": 0,
+      "verdict": "BROKEN",
+      "paired_null": true,
+      "n_task_not_in_bank": 120,
+      "sampling_bank": "lcb3"
+    },
+    "C4_conform_vs_off": {
+      "rc": 0,
+      "n": 120,
+      "b": 31,
+      "c": 8,
+      "delta_pp": 19.166666666666668,
+      "lo_pp": 8.7981243548174,
+      "hi_pp": 26.457344726605285,
+      "p": 0.0002940768754342571,
+      "verdict": "ON_WINS",
+      "key": "deliv"
+    },
+    "C4_off5_vs_off": {
+      "rc": 0,
+      "n": 120,
+      "b": 22,
+      "c": 7,
+      "delta_pp": 12.5,
+      "lo_pp": 3.1223166105537903,
+      "hi_pp": 19.189128379323485,
+      "p": 0.008130058646202087,
+      "verdict": "ON_WINS",
+      "key": "deliv"
+    },
+    "E4_Y1_selftest": {
+      "rc": 0,
+      "pass": true,
+      "n_checks": 19
+    },
+    "E4_Y2_real": {
+      "verdict": "OK",
+      "n_tasks_complete": 120,
+      "n_tasks_partial_excluded": 0,
+      "n_demonstrated": 94,
+      "n_undemonstrated": 26,
+      "pct_undemonstrated": 21.667,
+      "window_doubt_triggered": false,
+      "deliv_contract_drift": null,
+      "rows_file_lines": 360,
+      "rc": 0
+    },
+    "E3_trunc_23": {
+      "verdict": "BROKEN_ROW_ACCOUNTING",
+      "n_tasks_complete": null,
+      "n_tasks_partial_excluded": null,
+      "n_demonstrated": null,
+      "n_undemonstrated": null,
+      "pct_undemonstrated": null,
+      "window_doubt_triggered": null,
+      "deliv_contract_drift": null,
+      "rows_file_lines": 23,
+      "rc": 2
+    },
+    "E3_trunc_180": {
+      "verdict": "BROKEN_ROW_ACCOUNTING",
+      "n_tasks_complete": null,
+      "n_tasks_partial_excluded": null,
+      "n_demonstrated": null,
+      "n_undemonstrated": null,
+      "pct_undemonstrated": null,
+      "window_doubt_triggered": null,
+      "deliv_contract_drift": null,
+      "rows_file_lines": 180,
+      "rc": 2
+    },
+    "B_pooled_single_stratum": {
+      "rc": 2
+    }
+  },
+  "live_run_reads": 0,
+  "twin": "runs/g_r447_conform_lcb2"
+}

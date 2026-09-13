@@ -1,0 +1,165 @@
+{
+  "seed": "g-off-failure-rate-20260901",
+  "n": 60,
+  "run_complete": false,
+  "request_policy": {
+    "timeout_s": 600,
+    "retries": 4,
+    "backoff_s": 2.0,
+    "review_timeout_s": 60,
+    "review_retries": 2
+  },
+  "pool": [
+    {
+      "agent_id": "careful-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "careful-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "plain-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "plain-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "hasty-1",
+      "model": "qwen/qwen3.6-35b-a3b"
+    },
+    {
+      "agent_id": "hasty-2",
+      "model": "qwen/qwen3.6-35b-a3b"
+    }
+  ],
+  "instrument": {
+    "n": 12,
+    "ref_pass": 12,
+    "broken_rejected": 12,
+    "detail": [
+      {
+        "task_id": "mbppplus_Mbpp/413",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/100",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/142",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/777",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/757",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/310",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/578",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/744",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/799",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/301",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/281",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "mbppplus_Mbpp/474",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      }
+    ]
+  },
+  "calibration": null,
+  "arms": {
+    "OFF": {
+      "tasks": 60,
+      "calls": 16,
+      "infra_void": 0,
+      "complete": false,
+      "processed": 16,
+      "accepted": 16,
+      "accepted_and_meets_demand": 10,
+      "demand_equals_output_rate": 0.625,
+      "coverage": 1.0,
+      "correct_delivery_rate": 0.625,
+      "raw_final_accuracy": 0.625,
+      "calls_per_task": 1.0,
+      "calls_per_correct_delivery": 1.6,
+      "leaked": 6,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 16,
+          "p50": 98920,
+          "p95": 324821,
+          "max": 324821
+        },
+        "by_role": {
+          "gen": {
+            "n": 16,
+            "p50": 98920,
+            "p95": 324821,
+            "max": 324821
+          }
+        },
+        "failed_attempts": 3
+      },
+      "wall_s": 2089.0,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    }
+  },
+  "equal_budget_comparison_valid": false
+}

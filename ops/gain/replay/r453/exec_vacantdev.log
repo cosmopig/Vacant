@@ -1,0 +1,14 @@
+[vacantdev] 1840 格（368 題），2 workers，repo=/home/user1/vacant/r453_scratch/repo
+  probe 200/1840  11s
+  probe 400/1840  56s
+  probe 600/1840  56s
+  probe 800/1840  60s
+  probe 1000/1840  68s
+  probe 1200/1840  76s
+  probe 1400/1840  102s
+  probe 1600/1840  105s
+  probe 1800/1840  149s
+[vacantdev] 簽了 1840 筆，錯 0 筆，chain_ok=True，150s（probe 149s / sign 1s）
+  ../out/att_vacantdev.ndjson
+  ../out/pub_vacantdev.json
+  ../out/att_vacantdev.book.json

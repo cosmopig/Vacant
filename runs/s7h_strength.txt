@@ -1,0 +1,61 @@
+OK   S1 肯定強宣稱
+OK   S2 誠實邊界句是否定脈絡
+OK   S3 防止族五個寫法都收
+OK   S4 確定性不得進詞族
+OK   S5 一定／一律／完全／永遠不得進詞族
+OK   S6 英文不分大小寫
+OK   S7 preventDefault 是識別字不是文案
+OK   S8 `#` 註解裡的保證不算文案
+OK   S9 切句不准吃掉命中
+OK   S10 杜絕族與絕對族各自成族
+
+C1 宣稱強度探針 fixture: 10/10
+
+紅線 C（宣稱強度）：不准宣稱「保證正確」或「防止」作惡——只能說提高作惡成本、留下改不掉的紀錄
+這支只產生候選、不下判定。注意方向跟紅線 B 相反：〈否定脈絡〉在這裡多半代表**守線**（誠實邊界句本身），不是踩線。
+
+詞族              語料     原始檔   （原始檔＝含註解與識別字，語料＝抽取後的文案）
+C1 保證             4       4
+C2 確保             0       0
+C3 防止             1      23
+C4 杜絕             0       0
+C5 絕對             0       2
+C6 EN             0       7
+
+逐條列出 5 條（含 docstring 外的全部 src 命中）
+獨立計數器對帳（切句 vs 不切句）：一致
+
+── 逐檔分佈（語料／原始檔）──
+  vacant-docs-web/js/main.js: EN 0/5
+  vacant_hm/index.html: 保證 2/2
+  vacant_hm/js/app.js: EN 0/1
+  vacant_hm/js/sim.js: 防止 0/1
+  vacant_hm/js/worlds.js: 防止 0/1
+  vacant_hm/world/js/camera.js: 絕對 0/1
+  vacant_hm/world/js/events.js: 防止 0/1
+  vacant_hm/world/js/main.js: 保證 2/2 · 防止 1/2
+  vacant_hm/world/js/sim-bridge.js: 防止 0/1
+  vacant_hm/world/js/clay/geom.js: 防止 0/3
+  vacant_hm/world/js/clay/lit.js: 防止 0/1
+  vacant_hm/world/js/clay/main.js: 防止 0/10
+  vacant_hm/world/js/clay/scene.js: 防止 0/2
+  vacant_hm/world/js/clay/verdict.js: 防止 0/1
+  Vacant/vacant/web/app.js: 絕對 0/1
+  Vacant/vacant/dashboard.py: EN 0/1
+
+── 逐條命中 ──
+[01] vacant_hm/index.html:153  C1 保證「保證」 [否定脈絡]
+     右邊不保證每次都對，它只保證一件事： 做過什麼會留下來，而且會有後果
+[02] vacant_hm/index.html:153  C1 保證「保證」 [否定脈絡]
+     右邊不保證每次都對，它只保證一件事： 做過什麼會留下來，而且會有後果
+[03] vacant_hm/world/js/main.js:194  C1 保證「保證」 [否定脈絡]
+     <span class="cy">它不保證每次都對——它保證做過什麼會留下來，而且會有後果
+[04] vacant_hm/world/js/main.js:194  C1 保證「保證」 [否定脈絡]
+     <span class="cy">它不保證每次都對——它保證做過什麼會留下來，而且會有後果
+[05] vacant_hm/world/js/main.js:279  C3 防止「擋下」 [肯定用法]
+     <span>擋下 <b>▮</b></span>
+
+〈否定脈絡〉4 條 · 〈肯定用法〉1 條（機器提示，人類逐條判定）
+
+── 刻意排除的鄰近詞（考慮過而排除，不是沒想到）──
+   確定性 6 · 一定 0 · 一律 2 · 完全 1 · 永遠 0

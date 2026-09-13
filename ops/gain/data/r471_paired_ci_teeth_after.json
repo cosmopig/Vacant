@@ -1,0 +1,155 @@
+{
+  "target_sha256": "9db4dee4778f8e834310f2ee4f78edf097d1a87a73d857cbebdfe1ccec9efe9a",
+  "baseline": {
+    "D1": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "tail": "SELFTEST PASS: A(跨0) B(離開0) C(與McNemar逐格一致 676 格) D(點估計在內+上限) E(n_needed 與 diff_ci 自洽) F(verdict 判決表 11 列) G(MIN_PAIRED 擋門接線 59/61)"
+    },
+    "D2": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "tail": "R463 TEETH PASS: T1 meets_demand b/c={'b': 15, 'c': 5} vs deliv b/c={'b': 10, 'c': 5}（分歧 5 格）  T2 M_KEY 底下 deliv 退化成 {'b': 15, 'c': 5} 且 T1 翻紅"
+    },
+    "D3": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "tail": "SELFTEST PASS (MUTANT=none)"
+    },
+    "D4": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "tail": "ALL PASS"
+    },
+    "D6": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "tail": "10/10 PASS"
+    },
+    "D5": {
+      "rc": 0,
+      "red": false,
+      "broken": false,
+      "tail": "逐欄相同"
+    }
+  },
+  "mutants": {
+    "M1": {
+      "verdict": "DETECTED",
+      "red": [
+        "D1",
+        "D5",
+        "D6"
+      ],
+      "detail": {
+        "D1": "SELFTEST FAIL: C: 區間/檢定不一致 64 格，例：[(0, 1, True, False), (0, 2, True, False), (0, 3, True, False)]",
+        "D5": "CONFORMvOFF.ci95_lo_pp=10.929111086440093(want 8.8); CONFORMvOFF.ci95_hi_pp=27.404222246893234(want 26.46); OFF5vOFF.ci95_lo_pp=4.97223275509354(want 3.12); OFF5vOFF.ci95_hi_pp=20.027767244906457(want 19.19)",
+        "D6": "9/10 PASS"
+      }
+    },
+    "M2": {
+      "verdict": "DETECTED",
+      "red": [
+        "D1",
+        "D5"
+      ],
+      "detail": {
+        "D1": "SELFTEST FAIL: E: n_needed 找不到解",
+        "D5": "CONFORMvOFF.ci95_lo_pp=27.071151860976617(want 8.8); CONFORMvOFF.ci95_hi_pp=81.40721454340087(want 26.46); OFF5vOFF.ci95_lo_pp=12.919930802291546(want 3.12); OFF5vOFF.ci95_hi_pp=79.4032898454765(want 19.19)"
+      }
+    },
+    "M3": {
+      "verdict": "DETECTED",
+      "red": [
+        "D1",
+        "D5"
+      ],
+      "detail": {
+        "D1": "SELFTEST FAIL: F: verdict(-10.00,+5.00) = ON_WINS，應為 RULED_OUT",
+        "D5": "CONFORMvOFF.verdict=RULED_OUT(want ON_WINS); OFF5vOFF.verdict=RULED_OUT(want ON_WINS)"
+      }
+    },
+    "M4": {
+      "verdict": "MISSED",
+      "red": [],
+      "detail": {}
+    },
+    "M5": {
+      "verdict": "DETECTED",
+      "red": [
+        "D1"
+      ],
+      "detail": {
+        "D1": "SELFTEST FAIL: F: verdict(-4.99,+5.01) = ON_WINS，應為 NON_INFERIOR_BUT_UNRESOLVED"
+      }
+    },
+    "M6": {
+      "verdict": "DETECTED",
+      "red": [
+        "D1"
+      ],
+      "detail": {
+        "D1": "SELFTEST FAIL: G: n=59: broken_reasons 沒指名 n_paired=59 -> []"
+      }
+    },
+    "M7": {
+      "verdict": "DETECTED",
+      "red": [
+        "D2",
+        "D5"
+      ],
+      "detail": {
+        "D2": "  - T2 M_KEY 底下 deliv b/c={'b': 5, 'c': 15}，應退化成舊語意 {'b': 15, 'c': 5}",
+        "D5": "CONFORMvOFF.b_discordant_a_only=8(want 31); CONFORMvOFF.c_discordant_b_only=31(want 8); CONFORMvOFF.delta_pp=-19.166666666666668(want 19.17); CONFORMvOFF.ci95_lo_pp=-26.45734472660531(want 8.8); CONFORMvOFF.ci95_hi_pp=-8.79812435481728(want 26.46); CONFORMvOFF.verdict=RULED_OUT(want ON_WINS); OFF5vOFF.b_discordant_a_only=7(want 22); OFF5vOFF.c_discordant_b_only=22(want 7); OFF5vOFF.delta_pp=-12.5("
+      }
+    },
+    "M8": {
+      "verdict": "DETECTED",
+      "red": [
+        "D2"
+      ],
+      "detail": {
+        "D2": "  - T1 兩個 key 給出相同的 b/c={'b': 15, 'c': 5} ⇒ --key 是裝飾品"
+      }
+    },
+    "M9": {
+      "verdict": "MISSED",
+      "red": [],
+      "detail": {}
+    },
+    "N1": {
+      "verdict": "MISSED",
+      "red": [],
+      "detail": {}
+    },
+    "B1": {
+      "verdict": "BROKEN",
+      "red": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D6",
+        "D5"
+      ],
+      "detail": {
+        "D1": "SyntaxError: invalid syntax",
+        "D2": "SyntaxError: invalid syntax",
+        "D3": "SyntaxError: invalid syntax",
+        "D4": "SyntaxError: invalid syntax",
+        "D6": "SyntaxError: invalid syntax",
+        "D5": "CONFORMvOFF:rc=1; OFF5vOFF:rc=1"
+      }
+    }
+  },
+  "missed": [
+    "M4",
+    "M9"
+  ],
+  "overall": "PARTIAL_TEETH"
+}

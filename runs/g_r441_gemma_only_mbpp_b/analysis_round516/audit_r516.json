@@ -1,0 +1,301 @@
+{
+  "snapshot": {
+    "rows_lines": 525,
+    "rows_sha256_8": "440d973c",
+    "calls_lines": 1986,
+    "calls_sha256_8": "3d24b73d",
+    "notes_lines": 13,
+    "notes_sha256_8": "06fd2a71",
+    "summary_run_complete": false,
+    "summary_arms_processed": {
+      "OFF": 179,
+      "ON": 179,
+      "OFF5": 179
+    },
+    "summary_arms_complete": {
+      "OFF": true,
+      "ON": false,
+      "OFF5": true
+    },
+    "summary_arms_infra_void": {
+      "OFF": 0,
+      "ON": 12,
+      "OFF5": 0
+    }
+  },
+  "reconcile": {
+    "calls_model_configured_vs_model": {
+      "gemma-4-12b-it-qat|gemma-4-12b-it-qat": 1986
+    },
+    "calls_with_server_meta_model": {
+      "gemma-4-12b-it-qat": 1
+    },
+    "calls_err_total": 55,
+    "calls_err_kinds": {
+      "TimeoutError": 49,
+      "HTTPError": 6
+    },
+    "calls_err_by_role": {
+      "review": 54,
+      "revise": 1
+    },
+    "calls_attempt_hist": {
+      "1": 1943,
+      "2": 43
+    },
+    "rows_err_kinds": {
+      "sandbox_check_failed": 149
+    },
+    "rows_per_arm": {
+      "OFF": 179,
+      "ON": 167,
+      "OFF5": 179
+    },
+    "dup_arm_task": [],
+    "cross_arm_i_misalign": 0,
+    "ON_i_gaps": [
+      10,
+      21,
+      79,
+      102,
+      127,
+      141,
+      146,
+      151,
+      156,
+      162,
+      171,
+      173
+    ],
+    "ON_gap_task_ids": [
+      "mbppplus_Mbpp/240",
+      "mbppplus_Mbpp/247",
+      "mbppplus_Mbpp/267",
+      "mbppplus_Mbpp/287",
+      "mbppplus_Mbpp/4",
+      "mbppplus_Mbpp/420",
+      "mbppplus_Mbpp/422",
+      "mbppplus_Mbpp/56",
+      "mbppplus_Mbpp/560",
+      "mbppplus_Mbpp/586",
+      "mbppplus_Mbpp/784",
+      "mbppplus_Mbpp/92"
+    ],
+    "notes_infra_void_task_ids_ON": [
+      "mbppplus_Mbpp/240",
+      "mbppplus_Mbpp/247",
+      "mbppplus_Mbpp/267",
+      "mbppplus_Mbpp/287",
+      "mbppplus_Mbpp/4",
+      "mbppplus_Mbpp/420",
+      "mbppplus_Mbpp/422",
+      "mbppplus_Mbpp/56",
+      "mbppplus_Mbpp/560",
+      "mbppplus_Mbpp/586",
+      "mbppplus_Mbpp/784",
+      "mbppplus_Mbpp/92"
+    ],
+    "gaps_equal_void_notes": true,
+    "void_by_arm": {
+      "ON": 12
+    },
+    "ON_void_rate_over_processed": 0.067,
+    "ON_void_rate_over_measured_plus_void": 0.067
+  },
+  "arms": {
+    "OFF": {
+      "n": 179,
+      "meets": 122,
+      "rate": 0.6816,
+      "fail_rate": 0.3184,
+      "fail_rate_wilson95": [
+        25.46,
+        38.99
+      ],
+      "accepted": 179,
+      "accepted_and_meets": 122,
+      "leaked": 57,
+      "void": 0,
+      "calls": 179
+    },
+    "ON": {
+      "n": 167,
+      "meets": 122,
+      "rate": 0.7305,
+      "fail_rate": 0.2695,
+      "fail_rate_wilson95": [
+        20.79,
+        34.14
+      ],
+      "accepted": 136,
+      "accepted_and_meets": 122,
+      "leaked": 14,
+      "void": 12,
+      "calls": 856
+    },
+    "OFF5": {
+      "n": 179,
+      "meets": 132,
+      "rate": 0.7374,
+      "fail_rate": 0.2626,
+      "fail_rate_wilson95": [
+        20.36,
+        33.15
+      ],
+      "accepted": 179,
+      "accepted_and_meets": 132,
+      "leaked": 47,
+      "void": 0,
+      "calls": 895
+    }
+  },
+  "paired": {
+    "ON_vs_OFF5": {
+      "common": 167,
+      "b": 11,
+      "c": 12,
+      "p_exact": 1.0,
+      "a_rate": 0.7305,
+      "b_rate": 0.7365,
+      "paired_gap_pp": -0.6
+    },
+    "ON_vs_OFF": {
+      "common": 167,
+      "b": 17,
+      "c": 7,
+      "p_exact": 0.0639,
+      "a_rate": 0.7305,
+      "b_rate": 0.6707,
+      "paired_gap_pp": 5.99
+    },
+    "OFF5_vs_OFF": {
+      "common": 179,
+      "b": 12,
+      "c": 2,
+      "p_exact": 0.0129,
+      "a_rate": 0.7374,
+      "b_rate": 0.6816,
+      "paired_gap_pp": 5.59
+    },
+    "leak_ON_vs_OFF5_nonprereg": {
+      "common": 167,
+      "ON_leaked": 14,
+      "OFF5_leaked": 44,
+      "b": 1,
+      "c": 31,
+      "p_exact": 0.0,
+      "ON_rejected": 31,
+      "ON_rejected_but_correct": 0
+    }
+  },
+  "review_E1": {
+    "label": "E1 g_r441_gemma_only_mbpp_b (gemma reviewers on gemma drafts)",
+    "n_tasks": 167,
+    "raw_pass": {
+      "votes": 501,
+      "TP": 246,
+      "FP": 66,
+      "FN": 102,
+      "TN": 87,
+      "_nonprereg_lower_unrounded": -11.377245508982035,
+      "_nonprereg_boot_frac_le_0": 0.7482,
+      "_nonprereg_lower_seeds_1to5": [
+        -11.98,
+        -11.98,
+        -11.58,
+        -11.58,
+        -11.58
+      ],
+      "fail_votes": 189,
+      "fail_vote_rate": 0.3772,
+      "accuracy": 0.6647,
+      "always_pass_baseline": 0.6946,
+      "diff_pp": -2.99,
+      "cluster_bootstrap_95ci_pp": [
+        -11.38,
+        5.59
+      ],
+      "bootstrap": {
+        "seed": 483,
+        "n_boot": 4000,
+        "cluster": "ON row (task)",
+        "impl": "vacant.research.boot_ci"
+      },
+      "fail_vote_precision": 0.46,
+      "recall_on_wrong_drafts": 0.569,
+      "binom_one_sided_p_vs_no_info": "5.51e-06"
+    },
+    "grounded_pass": {
+      "votes": 501,
+      "TP": 328,
+      "FP": 112,
+      "FN": 20,
+      "TN": 41,
+      "_nonprereg_lower_unrounded": 0.0,
+      "_nonprereg_boot_frac_le_0": 0.0262,
+      "_nonprereg_lower_seeds_1to5": [
+        0.2,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fail_votes": 61,
+      "fail_vote_rate": 0.1218,
+      "accuracy": 0.7365,
+      "always_pass_baseline": 0.6946,
+      "diff_pp": 4.19,
+      "cluster_bootstrap_95ci_pp": [
+        0.0,
+        8.58
+      ],
+      "bootstrap": {
+        "seed": 483,
+        "n_boot": 4000,
+        "cluster": "ON row (task)",
+        "impl": "vacant.research.boot_ci"
+      },
+      "fail_vote_precision": 0.672,
+      "recall_on_wrong_drafts": 0.268,
+      "binom_one_sided_p_vs_no_info": "4.06e-09"
+    },
+    "status": {
+      "review_not_fail": 312,
+      "counterexample_confirmed": 61,
+      "candidate_passed_claim": 64,
+      "unparseable_claim": 33,
+      "outside_input_contract": 31
+    },
+    "revision_transition": {
+      "stayed_correct": 116,
+      "stayed_wrong": 45,
+      "improved": 6
+    },
+    "selected_version": {
+      "initial": 131,
+      "revised_both_visible_fail": 23,
+      "revised_unconfirmed_fallback": 1,
+      "revised": 9,
+      "initial_fallback": 3
+    },
+    "reviewer_models": {
+      "gemma-4-12b-it-qat": 501
+    }
+  },
+  "s3d": {
+    "override_void_gt_10pct": false,
+    "cond1_lower_gt_0": false,
+    "cond1_point_gt_5pp": false,
+    "branch": "2_n179_cannot_separate_0",
+    "cond3_ON_beats_OFF5_p_lt_005": false,
+    "numbers": {
+      "grounded_diff_pp": 4.19,
+      "ci95": [
+        0.0,
+        8.58
+      ],
+      "ON_void_rate": 0.067,
+      "ON_vs_OFF5_p": 1.0
+    }
+  }
+}

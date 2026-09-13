@@ -1,0 +1,555 @@
+{
+  "broken": [],
+  "records": {
+    "P-Z5b": {
+      "clause": "拒交題裡「五份全錯」≥ 80%",
+      "falsifier": "某個拒交題有候選 hidden 其實是對的（¬V ∧ H）",
+      "identity": "可見⊆隱藏 ⇒ ¬V→¬H；拒交⟺全部¬V ⇒ 全部¬H ⇒ 分子恆＝分母",
+      "witnesses": 0,
+      "observed": {
+        "rejected_tasks": 7,
+        "all_candidates_wrong": 7,
+        "pct": 100.0,
+        "window": "≥80%（DECISION §三 P-Z5 第二子句）"
+      },
+      "subevent_of": "P-Z6/candidate_losslessness（分子要少一個必須先有 ¬V∧H 的候選）",
+      "class": "FORCED_GREEN"
+    },
+    "P-Z6": {
+      "clause": "rows 裡沒有 visible_ok=False ∧ meets_demand=True 的列",
+      "falsifier": "出現這種列",
+      "identity": "可見⊆隱藏 ⇒ ¬V→¬H",
+      "witnesses": 0,
+      "witness_task_ids": [],
+      "class": "FORCED_GREEN"
+    },
+    "candidate_losslessness": {
+      "clause": "（探索性）閘門沒殺掉好答案",
+      "falsifier": "被丟掉的候選裡有 hidden 是對的",
+      "identity": "同上",
+      "witnesses": 0,
+      "observed": {
+        "discarded_candidates": 92,
+        "discarded_but_hidden_ok": 0,
+        "pct": 0.0,
+        "note": "非事前註冊。P-Z6 是 rows 層、看不到被丟掉的候選；本項不改 P-Z6 判決，要不要升格成判準是下一輪的事。>0 ⇒ 可見閘門在 LCB 上真的殺過好答案。"
+      },
+      "class": "FORCED_GREEN"
+    },
+    "P-Z1": {
+      "clause": "OFF 失敗率 落在 40–60%",
+      "falsifier": "落在窗外",
+      "identity": null,
+      "witnesses": 0,
+      "jackknife": {
+        "full": 49.166666666666664,
+        "n_replicates": 120,
+        "min": 48.739495798319325,
+        "max": 49.57983193277311,
+        "n_outside_window": 0,
+        "reachable": false,
+        "instrument_resolution_NOT_ARBITER": {
+          "max_loo_perturbation": 0.4271708683473392,
+          "distance_to_nearest_boundary": 9.166666666666664,
+          "boundary_over_perturbation": 21.459016393442603,
+          "note": "比值 ≫1 ⇒ 本輪的 UNRESOLVED 是「留一法沒有解析度」，**不是**「這個窗口不可證偽」。距離為負＝點估計已經在窗外（證偽事件已實現），那不是解析度問題。不改任何分類。"
+        }
+      },
+      "window_literal_in_R440Z": true,
+      "class": "UNRESOLVED"
+    },
+    "P-Z2b": {
+      "clause": "CONFORM−OFF 交付差 pp 落在 +12 到 +25pp",
+      "falsifier": "落在窗外",
+      "identity": null,
+      "witnesses": 0,
+      "jackknife": {
+        "full": 19.166666666666668,
+        "n_replicates": 120,
+        "min": 18.48739495798319,
+        "max": 20.168067226890756,
+        "n_outside_window": 0,
+        "reachable": false,
+        "instrument_resolution_NOT_ARBITER": {
+          "max_loo_perturbation": 1.0014005602240879,
+          "distance_to_nearest_boundary": 5.833333333333332,
+          "boundary_over_perturbation": 5.825174825174835,
+          "note": "比值 ≫1 ⇒ 本輪的 UNRESOLVED 是「留一法沒有解析度」，**不是**「這個窗口不可證偽」。距離為負＝點估計已經在窗外（證偽事件已實現），那不是解析度問題。不改任何分類。"
+        }
+      },
+      "window_literal_in_R440Z": true,
+      "class": "UNRESOLVED"
+    },
+    "P-Z3": {
+      "clause": "CONFORM−OFF5 交付差 pp 落在 +2 到 +8pp",
+      "falsifier": "落在窗外",
+      "identity": null,
+      "witnesses": 0,
+      "jackknife": {
+        "full": 6.666666666666667,
+        "n_replicates": 120,
+        "min": 5.882352941176471,
+        "max": 7.563025210084033,
+        "n_outside_window": 0,
+        "reachable": false,
+        "instrument_resolution_NOT_ARBITER": {
+          "max_loo_perturbation": 0.8963585434173664,
+          "distance_to_nearest_boundary": 1.333333333333333,
+          "boundary_over_perturbation": 1.4875000000000005,
+          "note": "比值 ≫1 ⇒ 本輪的 UNRESOLVED 是「留一法沒有解析度」，**不是**「這個窗口不可證偽」。距離為負＝點估計已經在窗外（證偽事件已實現），那不是解析度問題。不改任何分類。"
+        }
+      },
+      "window_literal_in_R440Z": true,
+      "class": "UNRESOLVED"
+    },
+    "P-Z4": {
+      "clause": "CONFORM calls_per_task 落在 1.5–2.2",
+      "falsifier": "落在窗外",
+      "identity": null,
+      "witnesses": 0,
+      "jackknife": {
+        "full": 1.7083333333333333,
+        "n_replicates": 120,
+        "min": 1.680672268907563,
+        "max": 1.7142857142857142,
+        "n_outside_window": 0,
+        "reachable": false,
+        "instrument_resolution_NOT_ARBITER": {
+          "max_loo_perturbation": 0.02766106442577021,
+          "distance_to_nearest_boundary": 0.20833333333333326,
+          "boundary_over_perturbation": 7.531645569620277,
+          "note": "比值 ≫1 ⇒ 本輪的 UNRESOLVED 是「留一法沒有解析度」，**不是**「這個窗口不可證偽」。距離為負＝點估計已經在窗外（證偽事件已實現），那不是解析度問題。不改任何分類。"
+        }
+      },
+      "window_literal_in_R440Z": true,
+      "class": "UNRESOLVED"
+    },
+    "P-Z5a": {
+      "clause": "CONFORM 拒交率 落在 5–12%",
+      "falsifier": "落在窗外",
+      "identity": null,
+      "witnesses": 0,
+      "jackknife": {
+        "full": 5.833333333333333,
+        "n_replicates": 120,
+        "min": 5.042016806722689,
+        "max": 5.882352941176471,
+        "n_outside_window": 0,
+        "reachable": false,
+        "instrument_resolution_NOT_ARBITER": {
+          "max_loo_perturbation": 0.7913165266106441,
+          "distance_to_nearest_boundary": 0.833333333333333,
+          "boundary_over_perturbation": 1.0530973451327432,
+          "note": "比值 ≫1 ⇒ 本輪的 UNRESOLVED 是「留一法沒有解析度」，**不是**「這個窗口不可證偽」。距離為負＝點估計已經在窗外（證偽事件已實現），那不是解析度問題。不改任何分類。"
+        }
+      },
+      "window_literal_in_R440Z": true,
+      "class": "UNRESOLVED"
+    },
+    "P-Z2a": {
+      "clause": "CONFORM vs OFF p < 0.01",
+      "falsifier": "p ≥ 0.01",
+      "identity": null,
+      "witnesses": 0,
+      "observed": {
+        "b": 31,
+        "c": 8,
+        "p": 0.0002940768754342571
+      },
+      "note": "witness 是「這個 run 現在就落在證偽側」；不是則見 jackknife 之外的 R451 MDE",
+      "class": "UNRESOLVED"
+    },
+    "overturn_c_ge_b_half": {
+      "clause": "（R440Z §六）推翻 P-Z2 的條件：c ≥ b/2 或 p ≥ 0.05",
+      "falsifier": "——本項問的是**這個推翻條件本身是否可及**",
+      "candidate_forcing_identity": "若 CONFORM 首位候選與 OFF 同源 ⇒ c 恆為 0",
+      "witnesses": 8,
+      "observed": {
+        "b": 31,
+        "c": 8,
+        "c_ge_b_half": false
+      },
+      "class": "EVALUABLE"
+    },
+    "P-Z3_pvalue": {
+      "clause": "vs OFF5 p 很可能仍 > 0.05",
+      "falsifier": "p ≤ 0.05",
+      "identity": null,
+      "witnesses": 0,
+      "observed": {
+        "b": 16,
+        "c": 8,
+        "p": 0.15158963203430176
+      },
+      "class": "UNRESOLVED"
+    },
+    "P-Z7": {
+      "clause": "任一臂 void < 20%；CONFORM 臂 void < 5%",
+      "falsifier": "void 超標",
+      "identity": null,
+      "witnesses": 30,
+      "witness_sample": [
+        {
+          "run": "g_het2_r263_20260829",
+          "arm": "OFF",
+          "infra_void": 2,
+          "tasks": 179
+        },
+        {
+          "run": "g_het3_r278_20260829",
+          "arm": "ON",
+          "infra_void": 73,
+          "tasks": 179
+        },
+        {
+          "run": "g_het3_r278_20260829",
+          "arm": "OFF5",
+          "infra_void": 64,
+          "tasks": 179
+        },
+        {
+          "run": "g_off371_20260825",
+          "arm": "OFF",
+          "infra_void": 4,
+          "tasks": 371
+        },
+        {
+          "run": "g_off5_qwen_only_20260901",
+          "arm": "OFF5",
+          "infra_void": 5,
+          "tasks": 60
+        }
+      ],
+      "runs_scanned": 39,
+      "note": "本 run void 恆 0 ⇒ 可及性只能跨 run 判；跨 run 的 witness 不是本 run 的證偽",
+      "class": "EVALUABLE"
+    },
+    "P-Z8_receipt_head@CONFORM": {
+      "population": "arm=CONFORM 的列",
+      "clause": "每列有 receipt_head（範圍讀作 CONFORM 臂）",
+      "falsifier": "CONFORM 的列缺這個鍵",
+      "identity": "arm_conform 的每一條 return 的 dict 都有字面鍵 receipt_head",
+      "witnesses": 0,
+      "observed": {
+        "unconditional_in": [
+          "arm_conform",
+          "arm_eq5"
+        ]
+      },
+      "class": "FORCED_GREEN"
+    },
+    "P-Z8_receipt_head@ALL_ROWS": {
+      "population": "rows.jsonl 全部的列",
+      "clause": "每列有 receipt_head（範圍照字面讀作全部）",
+      "falsifier": "任何臂的列缺這個鍵",
+      "identity": null,
+      "witnesses": 240,
+      "observed": {
+        "arms_of_rows_missing_key": [
+          "OFF",
+          "OFF5"
+        ]
+      },
+      "note": "照字面讀，這一條在本 run 已經為假（OFF／OFF5 的列本來就沒這個鍵）。範圍歧義（全部 vs 只有 CONFORM）不是本尺能裁的，留給收官。",
+      "class": "EVALUABLE"
+    },
+    "R450-§三-bc": {
+      "clause": "排除 undemonstrated 後 b/c 與全量逐數相同（R450 §三 的真資料對照）",
+      "falsifier": "某一對臂的 b 或 c 改變（工具吐 BROKEN_BC_MISMATCH）",
+      "identity": "undemonstrated ⇒ 每臂 meets_demand 假 ⇒ _deliv 恆假 ⇒ 該題在任一對臂上都是 (False,False)＝concordant ⇒ 對 b 與 c 各貢獻 0 ⇒ 移除它們 b/c 逐數不變",
+      "witnesses": 0,
+      "witness_task_ids": [],
+      "observed": {
+        "bc_cross_check": {
+          "CONFORM_vs_OFF": {
+            "full_b_c_n": [
+              31,
+              8,
+              120
+            ],
+            "excl_undem_b_c": [
+              31,
+              8
+            ]
+          },
+          "CONFORM_vs_OFF5": {
+            "full_b_c_n": [
+              16,
+              8,
+              120
+            ],
+            "excl_undem_b_c": [
+              16,
+              8
+            ]
+          },
+          "OFF5_vs_OFF": {
+            "full_b_c_n": [
+              22,
+              7,
+              120
+            ],
+            "excl_undem_b_c": [
+              22,
+              7
+            ]
+          }
+        },
+        "gc_verdict": "OK"
+      },
+      "class": "FORCED_GREEN",
+      "intent": "evidence"
+    },
+    "R450-§六-2": {
+      "clause": "推翻條件：若 b/c 對照不相同 ⇒ R450 §三 立即作廢",
+      "falsifier": "同一事件（對照不相同）",
+      "identity": "undemonstrated ⇒ 每臂 meets_demand 假 ⇒ _deliv 恆假 ⇒ 該題在任一對臂上都是 (False,False)＝concordant ⇒ 對 b 與 c 各貢獻 0 ⇒ 移除它們 b/c 逐數不變",
+      "witnesses": 0,
+      "subevent_of": "R450-§三-bc（同一事件，不是獨立證據）",
+      "class": "FORCED_GREEN",
+      "intent": "evidence"
+    },
+    "R450-§六-1": {
+      "clause": "undemonstrated 佔比 ≤ 50.0%（超過就要質疑量測窗口本身）",
+      "falsifier": "佔比 > 50.0%",
+      "identity": null,
+      "witnesses": 0,
+      "jackknife": {
+        "full": 21.666666666666668,
+        "n_replicates": 120,
+        "min": 21.008403361344538,
+        "max": 21.84873949579832,
+        "n_outside_window": 0,
+        "reachable": false,
+        "instrument_resolution_NOT_ARBITER": {
+          "max_loo_perturbation": 0.6582633053221301,
+          "distance_to_nearest_boundary": 28.333333333333332,
+          "boundary_over_perturbation": 43.04255319148928,
+          "note": "比值 ≫1 ⇒ 本輪的 UNRESOLVED 是「留一法沒有解析度」，**不是**「這個窗口不可證偽」。距離為負＝點估計已經在窗外（證偽事件已實現），那不是解析度問題。不改任何分類。"
+        }
+      },
+      "observed": {
+        "pct_undemonstrated": 21.667,
+        "window_doubt_triggered": false
+      },
+      "class": "UNRESOLVED",
+      "intent": "evidence"
+    },
+    "R450-§五-2": {
+      "clause": "三臂齊的題數 > 0（否則 BROKEN_NO_COMPLETE_TASKS）",
+      "falsifier": "題數＝0",
+      "identity": null,
+      "witnesses": 0,
+      "observed": {
+        "n_tasks_complete": 120
+      },
+      "class": "UNRESOLVED",
+      "intent": "guard"
+    },
+    "R450-§四": {
+      "clause": "區間 [pz1_demonstrated_only, pz1_raw] 整段落在 40–60（P-Z1 的窗口）",
+      "falsifier": "區間任一端跨出 40–60 ⇒ 收官必須加但書",
+      "identity": null,
+      "witnesses": 1,
+      "observed": {
+        "interval": [
+          35.106,
+          49.167
+        ],
+        "endpoints_checked": [
+          35.106,
+          49.167
+        ],
+        "n_demonstrated": 94,
+        "n_complete": 120
+      },
+      "class": "EVALUABLE",
+      "intent": "evidence"
+    }
+  },
+  "R454_prediction_ledger": {
+    "R450-§三-bc": {
+      "predicted": "FORCED_GREEN",
+      "observed": "FORCED_GREEN",
+      "hit": true,
+      "intent": "evidence"
+    },
+    "R450-§六-2": {
+      "predicted": "FORCED_GREEN",
+      "observed": "FORCED_GREEN",
+      "hit": true,
+      "intent": "evidence"
+    },
+    "R450-§六-1": {
+      "predicted": "EVALUABLE",
+      "observed": "UNRESOLVED",
+      "hit": false,
+      "intent": "evidence"
+    },
+    "R450-§五-2": {
+      "predicted": "FORCED_GREEN",
+      "observed": "UNRESOLVED",
+      "hit": false,
+      "intent": "guard"
+    },
+    "R450-§四": {
+      "predicted": "EVALUABLE",
+      "observed": "EVALUABLE",
+      "hit": true,
+      "intent": "evidence"
+    }
+  },
+  "R454_identity_proofs": {
+    "deliv_false_if_not_demonstrated": {
+      "holds": true,
+      "expr": "bool(r.get(\"accepted\")) and bool(r.get(\"meets_demand\"))",
+      "cases": [
+        {
+          "accepted": true,
+          "meets_demand": false,
+          "deliv": false
+        },
+        {
+          "accepted": false,
+          "meets_demand": false,
+          "deliv": false
+        }
+      ],
+      "exhaustive_over": "meets_demand=False × accepted∈{True,False}（2/2 窮舉）"
+    },
+    "bc_ignores_concordant": {
+      "holds": true,
+      "exprs": [
+        "A[t] and not B[t]",
+        "B[t] and not A[t]"
+      ],
+      "cases": [
+        {
+          "A": true,
+          "B": true,
+          "contrib": [
+            false,
+            false
+          ]
+        },
+        {
+          "A": true,
+          "B": false,
+          "contrib": [
+            true,
+            false
+          ]
+        },
+        {
+          "A": false,
+          "B": true,
+          "contrib": [
+            false,
+            true
+          ]
+        },
+        {
+          "A": false,
+          "B": false,
+          "contrib": [
+            false,
+            false
+          ]
+        }
+      ],
+      "exhaustive_over": "(A[t],B[t]) 四種組合窮舉"
+    }
+  },
+  "R454_calibration_positive_control": {
+    "holds": true,
+    "clause": "(bool(r.get(\"accepted\")) and bool(r.get(\"meets_demand\"))) and not bool(r.get('meets_demand'))",
+    "cases": [
+      {
+        "accepted": true,
+        "meets_demand": true,
+        "fires": false
+      },
+      {
+        "accepted": true,
+        "meets_demand": false,
+        "fires": false
+      },
+      {
+        "accepted": false,
+        "meets_demand": true,
+        "fires": false
+      },
+      {
+        "accepted": false,
+        "meets_demand": false,
+        "fires": false
+      }
+    ],
+    "known_answer": "FORCED_GREEN（R450 §八 已證）"
+  },
+  "bank_gate_headroom_BASERATE": {
+    "n_parsed": 120,
+    "n_visible_subset_of_hidden": 120,
+    "n_unparsed_shape": 0,
+    "forced_zero": true,
+    "note": "forced_zero=True ⇒ 下面 exploratory 的 `candidates_visible_fail_hidden_ok` 與 `gate_rejected_but_some_candidate_correct` 只可能是 0，**不是**閘門無損的證據。"
+  },
+  "source_claims": {
+    "conform_visible_ok_is_accepted": {
+      "file": "ops/gain/gain_run.py",
+      "func": "arm_conform",
+      "literal": "\"visible_ok\": accepted",
+      "found": true
+    },
+    "drift": []
+  },
+  "receipt_key_by_arm": {
+    "arm_off": {
+      "n_returns": 1,
+      "unconditional": false
+    },
+    "arm_off5": {
+      "n_returns": 2,
+      "unconditional": false
+    },
+    "arm_conform": {
+      "n_returns": 1,
+      "unconditional": true
+    },
+    "arm_eq5": {
+      "n_returns": 1,
+      "unconditional": true
+    },
+    "arm_on": {
+      "n_returns": 2,
+      "unconditional": false
+    },
+    "arm_onr": {
+      "n_returns": 1,
+      "unconditional": false
+    }
+  },
+  "window_literals_found_in_R440Z": {
+    "P-Z1": true,
+    "P-Z2b": true,
+    "P-Z3": true,
+    "P-Z4": true,
+    "P-Z5a": true
+  },
+  "n_complete_tasks": 120,
+  "counts": {
+    "EVALUABLE": 4,
+    "FORCED_GREEN": 6,
+    "UNRESOLVED": 9
+  },
+  "verdict": "CENSUS_OK",
+  "rows_lines": 360,
+  "rows_sha256_16": "cfed36ff71b871f0",
+  "sampling": {
+    "bank": "lcb2",
+    "seed": "g-r440-lcb2",
+    "n": 120,
+    "offset": 0
+  },
+  "run": "runs/g_r447_conform_lcb2"
+}

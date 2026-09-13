@@ -1,0 +1,53 @@
+==============================================================================
+Q1  每層每臂的 void 類別組成
+==============================================================================
+
+S1 [A] runs/g_r441_gemma_only_mbpp_b  起跑 2026-09-02 09:33  400政策=post
+   rows=525 sha16=440d973c4003b3c6  void 總數=12
+   ON      n=12   TIMEOUT=10, HTTP_400=2
+   >> 主類 TIMEOUT 10/12 = 83.3%
+   >> Q3 可補量（同 run 另一臂成功過）= 10/12 = 83.3%
+   >> Q2 HTTP400 呼叫的 attempt 分佈 = {1: 4, 2: 2}  最大 attempt=2
+
+S2 [A] runs/g_r443_gemma_lcb  起跑 2026-09-03  400政策=post
+   rows=269 sha16=4720d64d3db34bf1  void 總數=4
+   ON      n=4    TIMEOUT=4
+   >> 主類 TIMEOUT 4/4 = 100.0%
+   >> Q3 可補量（同 run 另一臂成功過）= 3/4 = 75.0%
+   >> Q2 HTTP400 呼叫的 attempt 分佈 = {1: 7}  最大 attempt=1
+
+S3 [B] runs/g_onoff5_qwenonly_v3_20260824  起跑 2026-08-24 11:28  400政策=pre
+   rows=116 sha16=84999096018a82eb  void 總數=4
+   OFF5    n=3    HTTP_400=3
+   ON      n=1    TIMEOUT=1
+   >> 主類 HTTP_400 3/4 = 75.0%
+   >> Q3 可補量（同 run 另一臂成功過）= 3/4 = 75.0%
+   >> Q2 HTTP400 呼叫的 attempt 分佈 = {1: 3}  最大 attempt=1
+
+S4 [B] runs/g_onoff5_371_r123_20260825  起跑 2026-08-25 22:43  400政策=pre
+   rows=718 sha16=5dcae2a6488cca25  void 總數=24
+   OFF5    n=18   HTTP_400=11, HTTP_404=5, HTTP_502=1, TIMEOUT=1
+   ON      n=6    OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 234=1, OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 247=1, OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 184=1, OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 200=1, OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 233=1, OTHER:EmptyResponse: content 為空（finish_reason=length，reasoning 209=1
+   >> 主類 HTTP_400 11/24 = 45.8%
+   >> Q3 可補量（同 run 另一臂成功過）= 16/24 = 66.7%
+   >> Q2 HTTP400 呼叫的 attempt 分佈 = {1: 10, 4: 1}  最大 attempt=4
+
+S5 [B] runs/g_het3_r278_20260829  起跑 2026-08-29 10:23  400政策=pre
+   rows=221 sha16=c957c78dafeb1a18  void 總數=137
+   OFF5    n=64   HTTP_400=64
+   ON      n=73   HTTP_400=69, TIMEOUT=4
+   >> 主類 HTTP_400 133/137 = 97.1%
+   >> Q3 可補量（同 run 另一臂成功過）= 32/137 = 23.4%
+   >> Q2 HTTP400 呼叫的 attempt 分佈 = {1: 125, 2: 7, 4: 1}  最大 attempt=4
+
+S6 [B] runs/g_r356_3arm_20260830  起跑 2026-08-30 17:53  400政策=post(+58s)
+   rows=432 sha16=b3354c655a1316fe  void 總數=99
+   OFF     n=5    HTTP_400=5
+   OFF5    n=30   HTTP_400=30
+   ON      n=64   HTTP_400=63, TIMEOUT=1
+   >> 主類 HTTP_400 98/99 = 99.0%
+   >> Q3 可補量（同 run 另一臂成功過）= 69/99 = 69.7%
+   >> Q2 HTTP400 呼叫的 attempt 分佈 = {1: 226, 2: 167, 3: 82, 4: 42}  最大 attempt=4
+
+==============================================================================
+UNPARSED 總數 = 0   ✔ P-R662-4 成立

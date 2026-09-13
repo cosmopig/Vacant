@@ -1,0 +1,8 @@
+rows=537 sha256_8=3f2cb966 terminal=True
+恆等式 leaked = measured − refused − deliv：三臂成立（⚠ 這是恆等式不是檢定，任何輸入都成立——見 round668）
+跨來源 rows vs summary：逐位相同
+(a) 字面   leaked CONFORM=35 vs OFF5=49  方向對（『明顯』無門檻⇒不判）
+(b) 分解   Δleaked=14 = 拒交驅動 9 + 準確率驅動 5 + void不對稱 0
+           拒交佔比=64.3%  ⇒ 主要靠交得少？True
+(c) 反事實 forced_leak=44 vs OFF5=49  等覆蓋率差距=5（原始差距=14）  閘門選得較準？True
+→ runs/_analysis_r672/leak_decomp_r444_final.json

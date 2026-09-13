@@ -1,0 +1,467 @@
+#!/bin/bash
+# ops/gain/launch_harness_lcb2.sh — 等 PRIOR_RUN 收官後發射 **harness 六臂**
+# （R460，`--arms OFF,CONFORM,OFF5,HPI,HOC,HMIX`，seed `g-r440-lcb2`，LCB v2 120 題）。
+#
+# ⚠ D9（round460e 修訂）：**六塊、兩顆後端、每顆三塊、全部併發跑**。
+#   本支發射的是六個 run，不是一個：
+#     a1 runs/g_r460_harness_lcb2_a1 --offset 0   --n 20 → 100.119.113.56:1234
+#     a2 runs/g_r460_harness_lcb2_a2 --offset 20  --n 20 → 100.119.113.56:1234
+#     a3 runs/g_r460_harness_lcb2_a3 --offset 40  --n 20 → 100.119.113.56:1234
+#     b1 runs/g_r460_harness_lcb2_b1 --offset 60  --n 20 → 100.86.226.21:1234
+#     b2 runs/g_r460_harness_lcb2_b2 --offset 80  --n 20 → 100.86.226.21:1234
+#     b3 runs/g_r460_harness_lcb2_b3 --offset 100 --n 20 → 100.86.226.21:1234
+#   六塊各自 setsid、各自 flock、各自 launch.log、各自 backend.json，**同時**跑。
+#
+# ⚠ D9（round460h 修訂，2026-09-09，a 組第三次任何資料之前）：**拓撲允許六塊同一顆後端**。
+#   `A_ENDPOINT`／`B_ENDPOINT` 覆寫上面那兩顆的位址（預設一個字不變），所以
+#     `BLOCKS=a1,a2,a3 A_ENDPOINT=http://100.86.226.21:1234/v1/chat/completions`
+#   會把 a 組發到 1004（b 組已經在那顆上跑完 120/120/120、void 0）。
+#   修訂的是「恰好兩顆端點、每顆三塊」那一格——它是**平衡規則不是科學規則**。
+#   允許的拓撲：`two_backends_3_3` 或 `one_backend_6`；收官由 analyzer 記下是哪一種
+#   （`topology.variant`）並逐塊記端點。E-7 真正承重的四條在兩種下都成立：
+#   同一題的六條臂在同一塊、同一行程、同一顆後端跑完；塊間 task_id 零交集且聯集 120；
+#   不走 hub；塊數 6。**六塊同一顆後端反而把「後端」這個干擾項整個消掉。**
+#   ⚠ 但「表上六塊同一顆」不等於「同時六個 runner 打同一顆」：
+#   併發上限仍然是 $BLOCKS_PER_ENDPOINT，而且改成對**這一刻**算
+#   （本次要發的 ＋ 本 run 自己還在跑的），見 abort_endpoint_oversubscribed。
+#
+# 承重什麼：
+#   (a) SPEC_GAIN §7「一端點一 run」——這條**在 round460e 被明文修訂**，
+#       修訂的理由是量到的、修訂的範圍是窄的，兩件事都寫在這裡：
+#         · 2026-09-07 15:40 實測，8765 那顆 hub 把 **100% 的請求路由到 1003**
+#           （6 次探針：1003 +6、1004 +0），而且併發越高吞吐越差
+#           （n=8→12：206→175→144 tok/s）。⇒ **走 hub 仍然禁止**
+#           （abort_hub_endpoint 硬擋，含 8765 字面）。
+#         · 2026-09-08 實測**直連** LM Studio 後端：1 個請求 1.3 s、
+#           **3 個併發各自仍是 1.3 s**（沒有 per-request 變慢），6 個併發才開始退化。
+#         · 同日 R460 的 n=3 冒煙量到每通呼叫 160–560 s、單通完成 token 最多 ~13k。
+#           一塊 60 題序列送出 ⇒ 兩塊各 > 2 天。
+#       ⇒ 修訂後的規則是：**一顆直連後端最多三個序列 runner**。
+#       `DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md`（round22/23/262）擋的是
+#       「對**同一個端點**無上限併發」，而它當年量的是 8765 那條中轉路徑；
+#       本支把上限寫死成 3 並逐塊檢查（每顆端點恰好三塊），沒有把那條裁決作廢，
+#       是把它的適用範圍縮到「hub、或 > 3 併發」。
+#       ⚠ 這一格是**放寬**，所以它必須自己有牙齒：analyzer 的
+#         `endpoint_block_count_not_3` 會在收官時再數一次每顆端點掛了幾塊
+#         （`M11_endpoint_balance_not_checked` 證明那條有牙齒）。
+#       ⚠ runner **行程內**的併發度仍然是 1（WORKER_CONCURRENCY）：
+#         每個 runner 一次只送一個請求，平行度全部來自「六個行程」。
+#   (b) R440G 閘門檢查得到 run 名字，**檢查不到** seed／題庫／題數／臂／端點；
+#       那幾格打錯的話 run 會照跑，而且跑出來的東西看起來完全正常。所以擋在發射前。
+#       ⚠ 而且它是**子字串**比對（`gain_run.py:1268`）⇒ 不帶塊名的舊名字
+#       `g_r460_harness_lcb2`、以及兩塊時代的 `_a`／`_b` 都會**照樣通過**閘門。
+#       本支因此自己再擋一次（abort_stale_run_name）：D9 現在只授權那六個。
+#   (c) 本支與 launch_eq5_lcb3.sh 最大的兩個差別：**seed 是刻意重用的**、
+#       以及**發射六塊**。所以「新鮮度檢查」被換成「明文授權檢查」，
+#       而且換成的版本**更嚴不是更鬆**。
+#
+# ⚠ seed 重用（DECISION §二-4）：
+#   `g-r440-lcb2` 被 `runs/g_r447_conform_lcb2` 用過。既有的 abort_seed_not_fresh
+#   （掃到任何命中就停）會擋下一個**我們刻意要的**設定：
+#     * LCB v2 bank 就是 120 題、六塊合起來 `--n 20 × 6` 取全部
+#       ⇒ seed **只打亂順序、不抽樣** ⇒ 換 seed 不會換到別的題；
+#     * 同 seed ⇒ 同題序 ⇒ a1+a2+a3 的 60 題就是 r447 的前 60 題（逐題同序）。
+#   所以本支改成三道：
+#     1. seed 要寫在 DECISION 內文（abort_seed_not_prereg，沿用）；
+#     2. DECISION 內文要有逐字的授權句 `SEED_REUSE_AUTHORIZED: <seed> <- <run>`
+#        （abort_seed_reuse_unauthorized）；
+#     3. 掃過**所有** runs/*/summary.json，命中集合必須**恰好等於**授權句列出的集合
+#        （abort_seed_reuse_set_mismatch）。多一個或少一個都停——
+#        「少一個」代表 r447 不見了或讀不到，而**量不到不是通過**。
+#        ⚠ round460g：掃描**扣掉本 run 自己那六塊**（$ALL_OUTS）。
+#          理由：那六個名字本來就是這份 DECISION 授權的（R440G ＋ abort_stale_run_name
+#          ＋ BLOCK_TABLE 三道），它們**不是**「這顆 seed 的別的用途」，它們就是本 run。
+#          不扣的話這條檢查會**隨發射順序給出不同答案**：六塊一次發射時
+#          hits={r447} 通過，而分批補發 b 組時 a* 已經寫了 summary.json
+#          ⇒ hits={r447,a1,a2,a3} ⇒ 誤擋（2026-09-08 04:48 實際發生）。
+#          一條會因為「你先發了哪幾塊」而變答案的檢查，量的不是它想量的東西。
+#          **牙齒沒有變少**：任何**不在那六個名字裡**的 run 用了這顆 seed 照樣停，
+#          而那六個名字自己被 abort_dir_exists／abort_stale_run_name 各擋一道。
+#
+# ⚠ 逾時（round460e）：`--request-timeout-s` 從 600 提高到 **1200**，牆鐘護欄因此是
+#   1200 + 60 = **1260 s**。理由：一顆後端同時服務三條長生成時，每一條的串流
+#   都會變慢（冒煙在**沒有**併發時就已經量到單通 160–560 s）；600 s 在三併發下
+#   會把正常的長生成誤判成逾時 ⇒ 假的 infra_void。這一格是**實驗條件**，
+#   所以它與 DECISION §二 是同一份真相（`tests/test_r460_launcher_prereg.py` 對釘）。
+#
+# 沿用 launch_lcb2.sh／launch_eq5_lcb2.sh／launch_eq5_lcb3.sh 經 R440E／round639
+# 審查修過的守則：等待迴圈**錨行首**（未錨會匹配到 grep 自己＝條件恆為真）、
+# 發射前重做單 run 檢查、探針驗 body 不只驗 200、目錄與 launch.log 已存在就停、
+# 等 preflight ✓、flock 防重複發射。
+#
+# 用法（vacant-dev）：setsid nohup bash ops/gain/launch_harness_lcb2.sh >/dev/null 2>&1 < /dev/null &
+#            立刻發射（不等 PRIOR_RUN）：bash ops/gain/launch_harness_lcb2.sh now
+#            換等待目標：PRIOR_RUN=runs/g_rXXX_foo bash ops/gain/launch_harness_lcb2.sh
+set -u
+ROOT="$HOME/vacant"; REPO="$ROOT/Vacant"; LOG="$ROOT/logs/launch_harness_lcb2.log"
+MODEL="gemma-4-12b-it-qat"
+DEC="DECISION_20260907_R460_HARNESS_PREREG.md"
+SEED="g-r440-lcb2"
+ARMS="OFF,CONFORM,OFF5,HPI,HOC,HMIX"
+BANK_FILE="ops/gain/data/lcb_bank_v2.jsonl"
+N_BLOCK=20                    # 每一塊的題數；六塊 × 20 ＝ 註冊的 120 題
+REQUEST_TIMEOUT_S=1200        # round460e：三併發之下 600 會誤判成逾時（見檔頭）
+# ⚠ round460e-2（2026-09-08，發射當場量到）：探針的 max_tokens **不准是 16**。
+#   round460c 已經在 runner 那邊量過並修過同一件事（`harness_arms.WIRE_PROBE_MAX_TOKENS`
+#   16 → 512），但**發射器自己的 curl 探針被漏掉了**，所以第一次發射死在這裡：
+#     HTTP 200、finish_reason=length、content=""、reasoning_content="The user wants me
+#     to reply with the exact word \"OK\"."、reasoning_tokens=13／completion_tokens=16
+#   ——推理把 16 個 token 的預算整個吃光，content 交空白。後端是**好的**
+#   （/v1/models 正常、200 只花約 1 秒），紅的是量具。
+#   ⇒ 對齊 runner 的那顆凍結常數；`tests/test_r460_launcher_prereg.py` 對釘兩邊相等。
+#   ⚠ **body 檢查一個字都不放寬**（仍然要求 content 非空）：把「空 content」讀成通過
+#     等於把探針關掉，而探針存在的理由就是擋「後端整個死掉」。
+PROBE_MAX_TOKENS=512
+# D9：六塊、直連後端。名字、offset 與端點是**一組**，改一格就要改整組。
+# ⚠ round460h（2026-09-09，a 組第三次發射之前、a 組任何第三次資料之前）：
+#   `A_ENDPOINT`／`B_ENDPOINT` 可以覆寫這兩顆的位址，**預設一個字不變**。
+#   為什麼要這個旋鈕：1003 連兩次死在同一件事（09-08 05:11Z context 262k 的
+#   `decode() failed: bad alloc`；重載 49k 之後 09:58Z 起 `Context size has been exceeded`、
+#   18:10Z `got exception: bad allocation` 卸載模型），而 1004 用**同一套 harness**
+#   跑完 b1–b3 各 120 列、void 0。⇒ a 組第三次改掛 1004。
+#   拓撲不變量因此被 Fable 修訂（見底下的 TOPOLOGY 檢查）：
+#   「恰好兩顆端點、每顆三塊」是**平衡規則不是科學規則**，
+#   允許的拓撲是 {兩顆各三塊} 或 {一顆六塊}，收官由 analyzer 記下是哪一種。
+API_A_DEFAULT="http://100.119.113.56:1234/v1/chat/completions"
+API_B_DEFAULT="http://100.86.226.21:1234/v1/chat/completions"
+API_A="${A_ENDPOINT:-$API_A_DEFAULT}"
+API_B="${B_ENDPOINT:-$API_B_DEFAULT}"
+OUT_A1="runs/g_r460_harness_lcb2_a1"
+OFFSET_A1=0
+OUT_A2="runs/g_r460_harness_lcb2_a2"
+OFFSET_A2=20
+OUT_A3="runs/g_r460_harness_lcb2_a3"
+OFFSET_A3=40
+OUT_B1="runs/g_r460_harness_lcb2_b1"
+OFFSET_B1=60
+OUT_B2="runs/g_r460_harness_lcb2_b2"
+OFFSET_B2=80
+OUT_B3="runs/g_r460_harness_lcb2_b3"
+OFFSET_B3=100
+# 一行一塊：`tag out offset api gauge_scope`。
+# 發射、檢查、報表全部走這一張表，不准另外抄一份。
+#
+# ⚠ round460f 的第五欄（量具範圍，見 gain_run.py 的 --gauge-scope）：
+#   lcb2 有官方參考解的 12 題在六塊之間落得很不平均——
+#   offset 0/20/40/60/80/100 → **3/3/4/0/1/1**。offset=60 那塊量到 0/0，
+#   runner 照「量不到不是通過」正確地拒跑（2026-09-08 04:26 實際發生）。
+#   而且後 60 題總共只有 2 題有參考解 ⇒ **b 組不論怎麼三等分，一定至少一塊是 0**，
+#   在 b 組內部重新切救不了。
+#   解法不是放寬而是換一條**更強**的規則：量具驗的是沙箱＋題庫＋計分
+#   （參考解與壞樁都不經模型）⇒ 與塊、與後端無關 ⇒ 對**整個題庫**驗 12/12
+#   比對切片驗 3/3 更強，而且不受切法影響。
+#   a1/a2/a3 是在 `slice` 模式下已經通過並且**正在跑**的（3/3、3/3、4/4），
+#   照實留成 slice、不重發、不殺；b 組用 `bank`。兩種模式都不進臂的執行路徑。
+BLOCK_TABLE="a1 $OUT_A1 $OFFSET_A1 $API_A slice
+a2 $OUT_A2 $OFFSET_A2 $API_A slice
+a3 $OUT_A3 $OFFSET_A3 $API_A slice
+b1 $OUT_B1 $OFFSET_B1 $API_B bank
+b2 $OUT_B2 $OFFSET_B2 $API_B bank
+b3 $OUT_B3 $OFFSET_B3 $API_B bank"
+ALL_OUTS="$OUT_A1 $OUT_A2 $OUT_A3 $OUT_B1 $OUT_B2 $OUT_B3"
+# 只發射一部分塊（例：`BLOCKS=b1,b2,b3`）。預設六塊全發。
+# ⚠ 子集**只改「發射哪幾塊」**，不改拓撲不變量：底下仍然對**整張表**檢查
+#   「六塊、每顆端點三塊」，因為那是註冊的設計，不是這次發射的範圍。
+BLOCKS="${BLOCKS:-a1 a2 a3 b1 b2 b3}"
+# 任何一塊的端點含 HUB_MARK 就停（D9 明文禁止走 hub）
+HUB_MARK="8765"
+# 不帶塊名的舊名字、以及兩塊時代的 `_a`／`_b`：R440G 是子字串比對、擋不掉它們，本支擋
+STALE_NAMES="g_r460_harness_lcb2 g_r460_harness_lcb2_a g_r460_harness_lcb2_b"
+WORKER_CONCURRENCY=1          # runner **行程內**的最大值；理由見檔頭的併發那一段
+BLOCK_PARALLELISM=6           # 平行度來自這裡：六個行程
+BLOCKS_PER_ENDPOINT=3         # **同一刻**打同一顆端點的 runner 上限（實測 3 併發不掉速）
+BLOCKS_EXPECTED=6             # D9 授權的塊數；一顆端點的 one_backend_6 拓撲要掛滿它
+PRIOR_RUN="${PRIOR_RUN:-runs/g_r449c_eq5_lcb3}"
+WAIT_PAT="^python3 ops/gain/gain_run\.py --out $PRIOR_RUN"
+
+BLOCKS=$(printf '%s' "$BLOCKS" | tr ',' ' ')
+SEL_TABLE=$(printf '%s\n' "$BLOCK_TABLE" | awk -v want=" $BLOCKS " '
+  { if (index(want, " " $1 " ")) print }')
+SEL_OUTS=$(printf '%s\n' "$SEL_TABLE" | awk 'NF {print $2}')
+SEL_APIS=$(printf '%s\n' "$SEL_TABLE" | awk 'NF {print $4}' | sort -u)
+
+mkdir -p "$ROOT/logs"
+say()    { printf '%s  %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$*" | tee -a "$LOG"; }
+finish() { say "HARNESS_LCB2_LAUNCH_RESULT=$1"; exit "${2:-1}"; }
+
+exec 9>"$ROOT/.launch_harness_lcb2.lock"
+flock -n 9 || { say "duplicate launch_harness_lcb2 ignored (pid $$)"; exit 2; }
+cd "$REPO" || finish abort_no_repo
+
+# 本支自己**不准**跑別人的 run；只有 BLOCK_TABLE 那六塊算「自己人」。
+# ⚠ pattern 錨在行首（未錨會匹配到 grep 自己＝條件恆為真）；
+#   自己人的過濾用 `--out <dir> `（帶尾隨空白）逐塊比對，不用前綴比對——
+#   `_a1` 是 `_a` 的前綴延伸，前綴比對會把兩塊時代的舊 run 也算成自己人。
+count_other_runs() {
+  ps -eo cmd | grep "^python3 ops/gain/gain_run\.py" \
+    | awk -v outs="$ALL_OUTS" '
+        BEGIN { n = split(outs, o, " ") }
+        { mine = 0
+          for (i = 1; i <= n; i++) if (index($0, "--out " o[i] " ")) mine = 1
+          if (!mine) c++ }
+        END { print c + 0 }'
+}
+
+if [ "${1:-}" != "now" ]; then
+  if ps -eo cmd | grep -q "$WAIT_PAT"; then
+    say "waiting for PRIOR_RUN=$PRIOR_RUN to finish ($WAIT_PAT)"
+    while ps -eo cmd | grep -q "$WAIT_PAT"; do sleep 60; done
+    say "PRIOR_RUN=$PRIOR_RUN gone; settling 60s"; sleep 60
+  else
+    # PRIOR_RUN 沒在跑有兩種可能：已經收官，或者還沒發射／中途死掉。
+    # 只有第一種准往下走——否則這支會在 PRIOR_RUN 發射之前先占住端點，
+    # 而「誰先搶到」不是實驗設計該有的變因。
+    term=$(python3 -c '
+import sys, json
+try:
+    d = json.load(open(sys.argv[1])); print("yes" if d.get("run_terminal") is True else "no")
+except Exception: print("no")' "$PRIOR_RUN/summary.json")
+    [ "$term" = "yes" ] || { say "ABORT: PRIOR_RUN=$PRIOR_RUN 既沒在跑也還沒 terminal (run_terminal=$term)"; finish abort_prior_not_terminal; }
+    say "PRIOR_RUN=$PRIOR_RUN already terminal; proceeding"
+  fi
+fi
+
+git pull -q --ff-only origin feat/v2-four-stages 2>/dev/null || say "warn: pull failed, using local HEAD"
+say "HEAD: $(git log --oneline -1)"
+n=$(count_other_runs)
+[ "$n" -eq 0 ] || { say "ABORT: $n 個別的 gain_run.py 還在跑"; finish abort_other_run; }
+n_sel=$(printf '%s\n' "$SEL_TABLE" | awk 'NF' | wc -l | tr -d ' ')
+n_want=$(printf '%s\n' $BLOCKS | awk 'NF' | wc -l | tr -d ' ')
+[ "$n_sel" -gt 0 ] || { say "ABORT: BLOCKS=$BLOCKS 一塊都沒選到"; finish abort_no_block_selected; }
+[ "$n_sel" -eq "$n_want" ] || { say "ABORT: BLOCKS=$BLOCKS 有認不得的塊名（選到 $n_sel／要 $n_want）"; finish abort_unknown_block; }
+say "本次發射的塊：$(printf '%s\n' "$SEL_TABLE" | awk 'NF {printf "%s ", $1}')（共 $n_sel／全表 6）"
+
+# **要發的那幾塊**的目錄已經存在就停（含空目錄以外的一切）。收官證據不准被覆蓋，
+# 而且「已經存在」通常代表那一塊發射過了。
+# ⚠ 只檢查要發的那幾塊：`BLOCKS=b1,b2,b3` 時 a* 的目錄**本來就該存在**
+#   （它們正在跑），拿它們當中止理由會讓補發永遠發不出去。
+for OUT in $SEL_OUTS; do
+  [ -d "$OUT" ] && [ -z "$(ls -A "$OUT" 2>/dev/null)" ] && rmdir "$OUT" && say "removed empty $OUT"
+  [ -e "$OUT" ] && { say "ABORT: $OUT exists"; finish abort_dir_exists; }
+  [ -e "$OUT.launch.log" ] && { say "ABORT: $OUT.launch.log exists"; finish abort_launchlog_exists; }
+done
+[ -f "$DEC" ] || { say "ABORT: $DEC missing (R440G 閘門要它)"; finish abort_no_decision; }
+[ -f "$BANK_FILE" ] || { say "ABORT: $BANK_FILE missing (LCB v2 題庫，120 題)"; finish abort_no_bank; }
+
+# R440G 是子字串比對 ⇒ 不帶塊名／舊塊名的 run 名字會照樣通過它。D9 只授權六塊。
+for OUT in $ALL_OUTS; do
+  for stale in $STALE_NAMES; do
+    [ "$(basename "$OUT")" = "$stale" ] && { say "ABORT: $OUT 是舊名字 $stale，D9 沒有授權它"; finish abort_stale_run_name; }
+  done
+done
+for stale in $STALE_NAMES; do
+  [ -e "runs/$stale" ] && { say "ABORT: runs/$stale 存在——那是 round460e 之前的名字，不准用"; finish abort_stale_run_name; }
+done
+printf '%s\n' "$BLOCK_TABLE" | while read -r tag OUT off api scope; do
+  grep -q -- "$OUT" "$DEC" || { say "ABORT: $DEC 內文沒有寫到 $OUT"; exit 3; }
+  grep -q -- "--offset $off" "$DEC" || { say "ABORT: $DEC 內文沒有寫到 --offset $off"; exit 3; }
+  # 量具範圍是可稽核的實驗條件：兩種模式都必須事前寫在 DECISION 裡。
+  # （這條只驗「這個模式有註冊」，驗不到「這一塊配到哪個模式」——
+  #   那一格由本表與 §二 的指令表對照，`tests/test_r460_launcher_prereg.py` 逐塊釘。）
+  grep -q -- "--gauge-scope $scope" "$DEC" \
+    || { say "ABORT: $DEC 內文沒有寫到 --gauge-scope $scope"; exit 3; }
+done || finish abort_block_not_prereg
+
+# D9（round460h 修訂）：端點是實驗條件。任何一塊都不准走 hub；
+# 允許的拓撲**只有兩種**：`two_backends_3_3`（兩顆相異端點各三塊）
+# 或 `one_backend_6`（一顆端點六塊）。其餘一律停。
+# ⚠ 修訂掉的是「恰好兩顆」那一格：它是**平衡規則**（把六個 runner 攤到兩張卡），
+#   不是科學規則。E-7 真正承重的四條在兩種拓撲下都成立：
+#   同一題的六條臂在同一塊、同一行程、同一顆後端上跑完；塊間 task_id 零交集且聯集 120；
+#   不走 hub；塊數 6。六塊同一顆後端反而把「後端」這個干擾項整個消掉。
+case "$API_A$API_B" in
+  *"$HUB_MARK"*) say "ABORT: 端點含 $HUB_MARK（hub）——D9 禁止任何一塊走 hub"; finish abort_hub_endpoint ;;
+esac
+n_all=$(printf '%s\n' "$BLOCK_TABLE" | awk 'NF' | wc -l | tr -d ' ')
+[ "$n_all" -eq "$BLOCKS_EXPECTED" ] || { say "ABORT: BLOCK_TABLE 有 $n_all 塊，D9 授權的是 $BLOCKS_EXPECTED"; finish abort_block_count; }
+n_ep=$(printf '%s\n' "$BLOCK_TABLE" | awk 'NF {print $4}' | sort -u | wc -l | tr -d ' ')
+n_a=$(printf '%s\n' "$BLOCK_TABLE" | awk -v x="$API_A" '$4 == x' | wc -l | tr -d ' ')
+n_b=$(printf '%s\n' "$BLOCK_TABLE" | awk -v x="$API_B" '$4 == x' | wc -l | tr -d ' ')
+case "$n_ep" in
+  2) TOPOLOGY_VARIANT="two_backends_3_3"
+     [ "$n_a" -eq "$BLOCKS_PER_ENDPOINT" ] && [ "$n_b" -eq "$BLOCKS_PER_ENDPOINT" ] || {
+       say "ABORT: 兩顆端點時每顆要恰好 $BLOCKS_PER_ENDPOINT 塊（實際 a=$n_a b=$n_b）——超賣會退化成 6 併發"
+       finish abort_endpoint_imbalance; } ;;
+  1) TOPOLOGY_VARIANT="one_backend_6"
+     [ "$n_a" -eq "$BLOCKS_EXPECTED" ] || {
+       say "ABORT: 一顆端點時它要掛滿 $BLOCKS_EXPECTED 塊（實際 $n_a）"; finish abort_endpoint_imbalance; } ;;
+  *) say "ABORT: 端點數 $n_ep 不在允許的 {1,2} 裡"; finish abort_endpoint_count ;;
+esac
+# ⚠ 逐端點的塊數要從**表**上數（去重之後印），不要印 "$API_A ← n_a　$API_B ← n_b"：
+#   one_backend_6 之下兩個變數指到同一顆 ⇒ 那種印法會變成「← 6 塊」印兩次，
+#   讀起來像 12 塊。日誌是收官的一手證據，不准長得像另一個數字。
+say "拓撲 variant=${TOPOLOGY_VARIANT}（端點數 ${n_ep}；直連、不經 hub）"
+printf '%s\n' "$BLOCK_TABLE" \
+  | awk 'NF {c[$4]++} END {for (e in c) printf "%s <- %d 塊\n", e, c[e]}' \
+  | sort | while read -r ln; do say "  $ln"; done
+
+# ⚠ 拓撲允許「六塊同一顆」**不等於**允許「六個 runner 同時打同一顆」。
+#   實測的基礎是「一顆直連後端 3 個併發不掉速、6 個開始退化」，
+#   而那量的是**同時**。表上六塊同一顆是合法的（前三塊先跑完、後三塊再跑），
+#   所以上限必須落在「這一刻」而不是「表上」：
+#   本次要發的塊 ＋ 本 run 自己還在跑的塊，逐端點都不准超過 $BLOCKS_PER_ENDPOINT。
+running_blocks_on() {   # $1=api：本 run 那六塊裡，**還在跑**且打這顆端點的塊數
+  printf '%s\n' "$BLOCK_TABLE" | awk -v x="$1" 'NF && $4 == x {print $2}' \
+    | while read -r o; do
+        ps -eo cmd | grep -q "^python3 ops/gain/gain_run\.py --out $o " && echo x
+      done | wc -l | tr -d ' '
+}
+for api in $SEL_APIS; do
+  now=$(running_blocks_on "$api")
+  new=$(printf '%s\n' "$SEL_TABLE" | awk -v x="$api" 'NF && $4 == x' | wc -l | tr -d ' ')
+  say "端點 ${api}：已在跑 $now 塊 ＋ 本次要發 $new 塊（上限 ${BLOCKS_PER_ENDPOINT}）"
+  [ $((now + new)) -le "$BLOCKS_PER_ENDPOINT" ] || {
+    say "ABORT: $api 同時會有 $((now + new)) 個 runner——超過實測不掉速的 $BLOCKS_PER_ENDPOINT"
+    finish abort_endpoint_oversubscribed; }
+done
+
+# 併發：runner **行程內**現在是依序送出。哪天有人加了 ThreadPoolExecutor，這一格的
+# 「最大值＝1」就過期了 ⇒ 停下來讓他重新裁決，不要安靜沿用。
+if grep -q "ThreadPoolExecutor(" ops/gain/gain_run.py; then
+  say "ABORT: gain_run.py 出現 ThreadPoolExecutor( ——併發旋鈕變了，WORKER_CONCURRENCY=$WORKER_CONCURRENCY 這格要重新裁決"
+  finish abort_concurrency_knob_appeared
+fi
+say "worker 行程內併發度 = $WORKER_CONCURRENCY（一次一個請求）；區塊平行度 = $BLOCK_PARALLELISM（六個行程；同一刻同一顆端點上限 $BLOCKS_PER_ENDPOINT 個）"
+
+# R440G 只檢查 DECISION 內文有沒有 run 名字，檢查不到 seed；seed 打錯不會被它擋下。
+grep -q -- "$SEED" "$DEC" || { say "ABORT: $DEC 內文沒有寫到 seed $SEED"; finish abort_seed_not_prereg; }
+# 逾時是實驗條件：發射器與 DECISION 必須是同一個數字。
+grep -q -- "--request-timeout-s $REQUEST_TIMEOUT_S" "$DEC" || {
+  say "ABORT: $DEC 內文沒有寫到 --request-timeout-s $REQUEST_TIMEOUT_S"; finish abort_timeout_not_prereg; }
+
+# ── seed 重用授權（取代新鮮度檢查；理由見檔頭）──────────────────────────
+# 授權句逐字：`SEED_REUSE_AUTHORIZED: <seed> <- runs/a, runs/b`
+auth=$(grep -m1 -E "^SEED_REUSE_AUTHORIZED: $SEED <- " "$DEC" | sed -E "s/^SEED_REUSE_AUTHORIZED: $SEED <- //")
+[ -n "$auth" ] || { say "ABORT: $DEC 沒有逐字的授權句 'SEED_REUSE_AUTHORIZED: $SEED <- …'"; finish abort_seed_reuse_unauthorized; }
+say "seed 重用授權集合：$auth"
+scan=$(python3 - "$SEED" "$auth" "$ALL_OUTS" <<'PY'
+import glob, json, sys
+seed, auth, own_s = sys.argv[1], sys.argv[2], sys.argv[3]
+allowed = sorted({x.strip().rstrip(",") for x in auth.split(",") if x.strip()})
+# 本 run 自己那六塊不算「這顆 seed 的別的用途」——它們就是本 run（見檔頭第 3 點）。
+own = {x.strip() for x in own_s.split() if x.strip()}
+files = sorted(glob.glob("runs/*/summary.json"))
+hits, skipped = [], []
+for f in files:
+    try:
+        if json.load(open(f, encoding="utf-8")).get("seed") == seed:
+            run = f.rsplit("/summary.json", 1)[0]
+            (skipped if run in own else hits).append(run)
+    except Exception:
+        pass
+hits = sorted(set(hits))
+print(len(files), "OK" if hits == allowed else "MISMATCH",
+      ("|".join(hits) if hits else "-"), ("|".join(allowed) if allowed else "-"),
+      ("|".join(sorted(set(skipped))) if skipped else "-"))
+PY
+)
+n_files=$(printf '%s\n' "$scan" | awk 'NR==1{print $1}')
+verdict=$(printf '%s\n' "$scan" | awk 'NR==1{print $2}')
+hit_list=$(printf '%s\n' "$scan" | awk 'NR==1{print $3}')
+allow_list=$(printf '%s\n' "$scan" | awk 'NR==1{print $4}')
+own_list=$(printf '%s\n' "$scan" | awk 'NR==1{print $5}')
+case "$n_files" in ''|*[!0-9]*) say "ABORT: seed 掃描沒有回傳數字（scan=$scan）"; finish abort_seed_reuse_set_mismatch ;; esac
+[ "$n_files" -gt 0 ] || { say "ABORT: runs/*/summary.json 一個都沒掃到——量不到不是通過"; finish abort_seed_reuse_set_mismatch; }
+[ "$verdict" = "OK" ] || { say "ABORT: seed $SEED 的使用集合與授權不符（實際=$hit_list 授權=$allow_list）"; finish abort_seed_reuse_set_mismatch; }
+say "seed $SEED 的使用集合 = 授權集合（$hit_list）；掃過 $n_files 個 runs/*/summary.json；本 run 自己的塊（不計入）：$own_list"
+
+# ── 探針：兩顆後端各探一次，不探 hub ─────────────────────────────────
+probe_backend() {   # $1=tag $2=chat endpoint
+  tag="$1"; api="$2"; base="${api%/chat/completions}"
+  first=$(curl -s -m 15 "$base/models" \
+          | python3 -c 'import sys,json;d=json.load(sys.stdin);print(d["data"][0]["id"] if d.get("data") else "none")' 2>/dev/null)
+  say "[$tag] $base/models first model = $first"
+  # ⚠ 回傳碼刻意全部 ≥ 1：`return $ok` 在 ok=0（三次全掛）時會是 0＝成功，
+  #   那正是「後端整個死掉」的情形，絕對不能被讀成通過。所以偏移成 10+ok。
+  [ -n "$first" ] && [ "$first" != "none" ] || { say "[$tag] ABORT: /v1/models 沒有回任何模型"; return 9; }
+  ok=0
+  for i in 1 2 3; do
+    code=$(curl -s -m 120 -o "$ROOT/logs/harness_lcb2_${tag}_probe_$i.json" -w '%{http_code}' "$api" \
+           -H 'Content-Type: application/json' \
+           -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}],\"max_tokens\":$PROBE_MAX_TOKENS,\"temperature\":0}" || true)
+    body=$(python3 -c '
+import sys, json
+try:
+    d = json.load(open(sys.argv[1])); c = (d.get("choices") or [{}])[0].get("message", {}).get("content", "")
+    print("yes" if ("error" not in d and c.strip()) else "no")
+except Exception: print("no")' "$ROOT/logs/harness_lcb2_${tag}_probe_$i.json")
+    say "[$tag] probe $i -> HTTP $code body_ok=$body"
+    [ "$code" = "200" ] && [ "$body" = "yes" ] && ok=$((ok + 1))
+  done
+  [ "$ok" -eq 3 ] || { say "[$tag] ABORT: 探針只過 $ok/3"; return $((10 + ok)); }
+  # 多輪線路探針（HARNESS_STUDY §4.0.2）：四則訊息（system／user／assistant／user）。
+  # 這裡只記錄，**不**在發射器裡決定模式——模式由 runner 自己的 probe_wire_mode
+  # 決定並落盤，兩個地方各自判會出現「發射器說 multiturn、rows 說 flattened」這種對不上的狀態。
+  mt=$(curl -s -m 120 -o "$ROOT/logs/harness_lcb2_${tag}_multiturn_probe.json" -w '%{http_code}' "$api" \
+       -H 'Content-Type: application/json' \
+       -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"system\",\"content\":\"Reply with exactly: OK\"},{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"},{\"role\":\"assistant\",\"content\":\"OK\"},{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}],\"max_tokens\":$PROBE_MAX_TOKENS,\"temperature\":0}" || true)
+  say "[$tag] multiturn wire probe -> HTTP $mt（僅記錄；模式由 runner 落盤在 harness_wire_mode）"
+  return 0
+}
+
+# rc 9 ＝ /v1/models 沒回模型；rc 10+k ＝ 三次 chat 探針只過 k 次。
+# 只探**這次真的會用到的**端點（`$SEL_APIS` ＝ 本次要發那幾塊的端點、已去重）：
+#   · 補發 b 組時去打 a 組那顆卡只是替正在跑的三塊添亂；
+#   · round460h 之後 `A_ENDPOINT` 可以覆寫 ⇒ 探的必須是**表上實際那一格**，
+#     不是「名字叫 API_A 的那個常數」。所以這裡走表、不走兩個變數名。
+for api in $SEL_APIS; do
+  tag=$(printf '%s\n' "$SEL_TABLE" | awk -v x="$api" 'NF && $4 == x {print $1; exit}')
+  probe_backend "$tag" "$api" || finish "abort_probe_${tag}_rc$?"
+done
+
+# ── 發射：六塊各自 setsid、各自 flock、各自 launch.log ────────────────
+launch_block() {   # $1=tag $2=OUT $3=offset $4=api $5=gauge_scope
+  tag="$1"; OUT="$2"; off="$3"; api="$4"; scope="$5"; nn="$N_BLOCK"
+  lock="$ROOT/.launch_harness_lcb2_${tag}.lock"
+  say "[$tag] launching -> $OUT (seed=$SEED[重用，授權見 $DEC §二-4], bank=lcb2, n=$nn offset=$off, arms=$ARMS, api=$api, gauge-scope=$scope, lock=$lock)"
+  curl -s -m 15 "${api%/chat/completions}/models" > "$OUT.backend.json" 2>/dev/null || true
+  PYTHONUNBUFFERED=1 \
+  VACANT_GAIN_API="$api" CLINE_KEYS=/nonexistent \
+  setsid nohup flock -n "$lock" python3 ops/gain/gain_run.py --out "$OUT" --n "$nn" --offset "$off" \
+    --decision "$DEC" --seed "$SEED" --arms "$ARMS" --bank lcb2 --models "$MODEL" \
+    --request-timeout-s "$REQUEST_TIMEOUT_S" --review-timeout-s 380 --retries 4 \
+    --probe-sample 0 --gauge-scope "$scope" \
+    >>"$OUT.launch.log" 2>&1 < /dev/null 9>&- &
+  # `$!` 是 setsid 的 pid，它 fork 完就結束 ⇒ 不能拿來當存活訊號。改用 ps 找。
+  # ⚠ `flock` 的那一行也含「python3 ops/gain/gain_run.py --out …」⇒ 會誤中。
+  #   用 `$2 == "python3"` 只取真正的 runner 行程。
+  find_pid() {
+    ps -eo pid,cmd | grep "gain_run\.py --out $OUT " | grep -v grep \
+      | awk '$2 == "python3" {print $1}' | head -1
+  }
+  sleep 3
+  pid=$(find_pid)
+  # setsid＋flock＋python 起來可能超過 3 秒；先給它 30 秒再判定沒起來。
+  for _ in 1 2 3 4 5 6 7 8 9; do
+    [ -n "$pid" ] && break
+    sleep 3; pid=$(find_pid)
+  done
+  say "[$tag] pid=${pid:-none}; waiting for preflight (量具要先跑完兩個方向＋可見閘門覆蓋 $nn/$nn)"
+  [ -n "$pid" ] || { say "[$tag] 30 秒內沒看到 runner 行程（flock 被別人握著？）; tail: $(tail -c 700 "$OUT.launch.log" | tr '\n' '|')"; return 1; }
+  for _ in $(seq 1 90); do
+    sleep 10
+    if ! kill -0 "$pid" 2>/dev/null; then
+      say "[$tag] exited early; tail: $(tail -c 700 "$OUT.launch.log" | tr '\n' '|')"; return 1
+    fi
+    if grep -q '✓' "$OUT.launch.log" 2>/dev/null || [ -e "$OUT/summary.json" ]; then
+      say "[$tag] preflight passed; head: $(head -c 600 "$OUT.launch.log" | tr '\n' '|')"
+      say "[$tag] launched pid=$pid"; return 0
+    fi
+  done
+  say "[$tag] launch_pending_timeout pid=$pid"; return 0
+}
+
+# 逐塊發射。**每一塊之間都重做一次「沒有別人在跑」檢查**——
+# 前一塊起來之後才冒出來的第三方 run 一樣要擋。
+printf '%s\n' "$SEL_TABLE" > "$ROOT/.launch_harness_lcb2.table"
+while read -r tag OUT off api scope; do
+  [ -n "$tag" ] || continue
+  n=$(count_other_runs)
+  [ "$n" -eq 0 ] || { say "ABORT: 發射 $tag 之前冒出 $n 個別的 gain_run.py"; finish abort_other_run; }
+  launch_block "$tag" "$OUT" "$off" "$api" "$scope" || finish "exited_early_$tag"
+done < "$ROOT/.launch_harness_lcb2.table"
+rm -f "$ROOT/.launch_harness_lcb2.table"
+
+say "本次要發的塊都已發射；**收官一律六塊一起餵給 analyzer**（少一塊 analyzer 會判 BROKEN）："
+say "  python3 ops/gain/analyze_r460.py --run $ALL_OUTS --bank lcb2 --rescore-turn1"
+finish "launched_$n_sel" 0

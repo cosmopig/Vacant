@@ -186,8 +186,8 @@ function renderScoreboard() {
   const delta = sb.paired_delta;
   $('#scoreboard').innerHTML = `
     <div class="dims">
-      ${row('trust off', sb.off)}
-      ${row('trust on', sb.on)}
+      ${row('可究責層 關', sb.off)}
+      ${row('可究責層 開', sb.on)}
     </div>
     <div style="margin-top:var(--s4);font-size:0.78rem;color:var(--ink-3)">
       池化差 ${delta === null || delta === undefined ? '—' : (delta > 0 ? '+' : '') + delta}
@@ -216,13 +216,13 @@ function renderCost() {
         <th>臂</th><th class="num">交付</th><th class="num">通過</th>
         <th class="num">呼叫</th><th class="num">呼叫/交付</th><th class="num">呼叫/通過</th>
       </tr></thead>
-      <tbody>${row('trust on', c.on)}${row('trust off', c.off)}</tbody>
+      <tbody>${row('可究責層 開', c.on)}${row('可究責層 關', c.off)}</tbody>
     </table>
     <div style="padding:var(--s3) var(--s4);font-size:0.76rem;color:var(--ink-3);
                 border-top:1px solid var(--line)">
-      信任層不是免費的：互審與稽核都要花呼叫。
+      可究責層不是免費的：互審與稽核都要花呼叫。
       <b style="color:var(--ink-2)">呼叫／通過</b>是「單位成本品質」的可觀測代理量——
-      要主張信任層有價值，這一欄必須跟品質一起看，不能只報品質。
+      要主張可究責層有價值，這一欄必須跟品質一起看，不能只報品質。
     </div>`;
 }
 
@@ -237,7 +237,7 @@ function renderSys() {
   $('#sysinfo').innerHTML = pairs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
   $('#foot-root').textContent = String(s.root).split('/').slice(-2).join('/');
   $('#foot-ver').textContent = `${s.n_identities} 身份 · ${s.substrate}`;
-  $('#chip-trust').innerHTML = `trust <b>${s.trust_on ? 'ON' : 'OFF'}</b>`;
+  $('#chip-trust').innerHTML = `可究責層 <b>${s.trust_on ? '開' : '關'}</b>`;
   $('#chip-trust').className = 'chip' + (s.trust_on ? ' on' : '');
 }
 
@@ -366,7 +366,7 @@ async function openIdentity(vid) {
   $('#drawer').classList.add('open');
   $('#scrim').classList.add('open');
 }
-/** 信任狀本體：這是「做了什麼」的最終證物，介面必須讓人看得到全文。
+/** 交付憑據本體：這是「做了什麼」的最終證物，介面必須讓人看得到全文。
  *  卡上的每個欄位都能被第三方獨立重驗（簽章、公鑰、鏈頭都存全文）。 */
 async function openTask(taskId) {
   const card = await api(`/api/task?id=${encodeURIComponent(taskId)}`);
@@ -377,8 +377,8 @@ async function openTask(taskId) {
 
   $('#dw-title').textContent = `交付 ${String(taskId).slice(0, 10)}`;
   $('#dw-badges').innerHTML =
-    (card.trust_on ? '<span class="badge ok">trust ON</span>'
-                   : '<span class="badge idle">trust OFF</span>') +
+    (card.trust_on ? '<span class="badge ok">可究責層 開</span>'
+                   : '<span class="badge idle">可究責層 關</span>') +
     (audit.performed
       ? (audit.passed ? '<span class="badge ok">稽核通過</span>'
                       : '<span class="badge bad">稽核未通過</span>')
@@ -392,7 +392,7 @@ async function openTask(taskId) {
       <span class="ty" style="color:${r.verdict === 'PASS' ? 'var(--ok)' : 'var(--bad)'}">
         ${esc(r.verdict || '?')}</span>
       <span class="d">weight ${esc(r.weight)} · sig ${esc(String(r.sig || '').slice(0, 12))}…</span>
-    </div>`).join('') || '<div class="empty">未互審（trust off 時不互審）</div>';
+    </div>`).join('') || '<div class="empty">未互審（可究責層關閉時不互審）</div>';
 
   const flags = (d.credit && d.credit.flags) || [];
   $('#dw-body').innerHTML = `

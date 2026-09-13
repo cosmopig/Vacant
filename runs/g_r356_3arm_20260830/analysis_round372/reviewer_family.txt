@@ -1,0 +1,12 @@
+=== 逐 run ON 列數（含 worker 與 initial_meets_demand 都非空）| void率 = infra_void/(ON rows+infra_void) ===
+  g_r356_3arm_20260830: 30  |  void率=21.1%(8/38)  ⚠ VOID-GATE-DISQUALIFIED
+
+=== 交叉驗證 i%2 推導 vs reviewer_models 欄位：90 票，不一致 0 票 ===
+
+  ⛔ 至少一個 run 的 ON 臂 void 率 > 10%（SPEC_GAIN §7 閘門）——下面每個  bucket 的準確率/p 值仍會印出，但屬於探索性數字，不得引用為結論性判讀（round357，見 DECISION_20260830_R356_HTTP400_RETRY_REVERSAL.md）。
+
+--- custom ---
+  同家族(reviewer==candidate): 整體票準確率 26/35 = 0.7429  |  真失敗題上抓到率 4/13 = 0.3077
+  不同家族: 整體票準確率 38/55 = 0.6909  |  真失敗題上抓到率 0/17 = 0.0000
+  精確超幾何單尾 p（same-family 抓到數 <= 觀察值）= 1.0000
+

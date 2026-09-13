@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from vacant import cli, crypto
@@ -234,3 +235,52 @@ def test_undeclared_private_key_flagged(tmp_path):
 
 def test_cli_check_missing_dir_exit_nonzero(tmp_path):
     assert cli.main(["record", "check", str(tmp_path / "nope")]) == 1
+
+
+def _tmp_git_repo(root: Path) -> None:
+    """建一個乾淨的臨時 git repo（一個 commit）。不用環境裡那個 repo——
+    測試的答案不能取決於跑測試的人手上有沒有沒存檔的東西。"""
+    import subprocess
+    root.mkdir(parents=True, exist_ok=True)
+    env = {"GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_SYSTEM": "/dev/null",
+           "HOME": str(root), "PATH": os.environ.get("PATH", "")}
+    run = lambda *a: subprocess.run(a, cwd=str(root), env=env, check=True,
+                                    capture_output=True)
+    run("git", "init", "-q")
+    run("git", "config", "user.email", "t@example.invalid")
+    run("git", "config", "user.name", "t")
+    (root / "src.py").write_text("x = 1\n", encoding="utf-8")
+    run("git", "add", "src.py")
+    run("git", "commit", "-qm", "init")
+
+
+def test_dirty_worktree_is_declared_not_silently_attributed(tmp_path):
+    """從髒工作區跑出來的 run，不准記一個乾淨 commit 就算了。
+
+    `repo_commit` 的用途是「照這個 commit 就能重現這個 run」。工作區有未提交
+    改動時那句話是**假的**——而在這之前，`pack`／`check` 每一項都會過。
+    這是本專案反覆出現的形狀：狀態說沒事，產物是錯的。
+
+    已知盲區（寫在 `_git_dirty` 的誠實邊界句裡）：`-uno` ⇒ 未追蹤的新原始碼
+    偵測不到；run 產物本身未追蹤，不算進髒。
+    """
+    _tmp_git_repo(tmp_path)
+    run = tmp_path / "runs" / "r0"
+    _make_full_run(run)
+
+    # A. 已知乾淨（run 產物未追蹤，依定義不算髒）
+    m = pack(run, dict(_EXTRA))
+    assert m["repo_dirty"] is False, m.get("repo_dirty_paths")
+    assert "repo_commit_exact" not in m["missing"]
+    assert check(run)[0]
+
+    # B. 已知髒（改一個已追蹤檔）
+    (tmp_path / "src.py").write_text("x = 2\n", encoding="utf-8")
+    m = pack(run, dict(_EXTRA))
+    assert m["repo_dirty"] is True
+    assert "src.py" in m["repo_dirty_paths"]
+    reason = m["missing"].get("repo_commit_exact", "")
+    assert "重現不出" in reason, f"髒工作區沒有被明白斷言：{m['missing']}"
+    # 宣告過就仍算合格包——紅線是「缺席須有理由」，不是「不准在開發中跑」
+    ok, problems = check(run)
+    assert ok, problems

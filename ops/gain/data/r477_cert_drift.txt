@@ -1,0 +1,10 @@
+verdict STALE_CERTS_PRESENT  rc=1  docs=138  cert_headings=6  counts={'CERT_FRESH': 2, 'CERT_STALE': 2, 'TRIAGED_NOT_A_CERT': 1}
+  DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md 附錄C  cert=a6ecb9b1  heads=[300]
+      ops/gain/replay/pooled_paired_ci.py          CERT_FRESH  (+0 commits since)
+      ops/gain/replay/paired_ci.py                 CERT_STALE  (+1 commits since)
+  DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md 附錄D  cert=87aec70d  heads=[335, 361]
+      ops/gain/r447_eq5_offline.py                 CERT_FRESH  (+0 commits since)
+  DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md 附錄E  cert=f5cf02db  heads=[401, 461]
+      ops/gain/r447_gauge_capability.py            CERT_STALE  (+3 commits since)
+  DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md 附錄doc  cert=700f1143  heads=[1]
+      None                                         TRIAGED_NOT_A_CERT  (+0 commits since)

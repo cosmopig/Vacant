@@ -1,0 +1,7 @@
+預註冊閘門通過：DEC.md 授權 o2
+8 題（evalplus　offset=0　題序 [0, 8)）　輸出 /dev/shm/r680probe/o2
+── 量具驗證（先答已知答案）
+<unknown>:4: SyntaxWarning: invalid escape sequence '\.'
+<unknown>:4: SyntaxWarning: invalid escape sequence '\.'
+   參考解通過 8/8　壞解被擋 8/8
+   可見閘門（CONFORM 決策量具）參考解通過 8/8　樁被擋 8/8　覆蓋 8/8

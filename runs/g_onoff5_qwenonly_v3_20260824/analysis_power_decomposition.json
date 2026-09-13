@@ -1,0 +1,88 @@
+{
+  "alpha": 0.05,
+  "power_target": 0.8,
+  "correctness": "accepted and meets_demand",
+  "pairs": [
+    {
+      "pair": "ON vs OFF5",
+      "n_common": 56,
+      "b_ON_only": 4,
+      "c_OFF5_only": 6,
+      "n_discordant": 10,
+      "p_disc": 0.1786,
+      "psi": 0.4,
+      "acc_a": 0.6964,
+      "acc_b": 0.7321,
+      "diff_pp": -3.571,
+      "exact_mcnemar_p": 0.753906,
+      "bank_capacity": 371,
+      "psi_effective": 0.6,
+      "required_n_at_observed_effect": 1144,
+      "answerable_within_capacity": false,
+      "resolvable_floor_at_capacity": {
+        "min_psi": 0.68,
+        "min_abs_diff_pp": 6.429
+      },
+      "feasibility_bound": {
+        "max_p_disc_equal_acc": 0.5,
+        "required_n_at_max_p_disc": 408,
+        "still_impossible_at_capacity": true,
+        "why": "兩臂 accuracy 相近且正相關時 p_disc ≤ 2a(1-a) ≤ 0.5；把 p_disc 推到 0.5 仍需這個 N ⇒ 難度旋鈕的極限"
+      }
+    },
+    {
+      "pair": "OFF vs ON",
+      "n_common": 59,
+      "b_OFF_only": 6,
+      "c_ON_only": 1,
+      "n_discordant": 7,
+      "p_disc": 0.1186,
+      "psi": 0.8571,
+      "acc_a": 0.7966,
+      "acc_b": 0.7119,
+      "diff_pp": 8.475,
+      "exact_mcnemar_p": 0.125,
+      "bank_capacity": 371,
+      "psi_effective": 0.8571,
+      "required_n_at_observed_effect": 134,
+      "answerable_within_capacity": true,
+      "resolvable_floor_at_capacity": {
+        "min_psi": 0.72,
+        "min_abs_diff_pp": 5.22
+      },
+      "feasibility_bound": {
+        "max_p_disc_equal_acc": 0.5,
+        "required_n_at_max_p_disc": 31,
+        "still_impossible_at_capacity": false,
+        "why": "兩臂 accuracy 相近且正相關時 p_disc ≤ 2a(1-a) ≤ 0.5；把 p_disc 推到 0.5 仍需這個 N ⇒ 難度旋鈕的極限"
+      }
+    },
+    {
+      "pair": "OFF vs OFF5",
+      "n_common": 57,
+      "b_OFF_only": 5,
+      "c_OFF5_only": 2,
+      "n_discordant": 7,
+      "p_disc": 0.1228,
+      "psi": 0.7143,
+      "acc_a": 0.7719,
+      "acc_b": 0.7193,
+      "diff_pp": 5.263,
+      "exact_mcnemar_p": 0.453125,
+      "bank_capacity": 371,
+      "psi_effective": 0.7143,
+      "required_n_at_observed_effect": 368,
+      "answerable_within_capacity": true,
+      "resolvable_floor_at_capacity": {
+        "min_psi": 0.715,
+        "min_abs_diff_pp": 5.281
+      },
+      "feasibility_bound": {
+        "max_p_disc_equal_acc": 0.5,
+        "required_n_at_max_p_disc": 90,
+        "still_impossible_at_capacity": false,
+        "why": "兩臂 accuracy 相近且正相關時 p_disc ≤ 2a(1-a) ≤ 0.5；把 p_disc 推到 0.5 仍需這個 N ⇒ 難度旋鈕的極限"
+      }
+    }
+  ]
+}

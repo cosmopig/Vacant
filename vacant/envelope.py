@@ -146,6 +146,15 @@ _REVIEW_FIELDS = (
     "reviewer_id", "target_id", "target_stream_id", "branch_id",
     "target_head", "task_id", "substrate", "scores", "ts_ms",
 )
+# 通道分離 3.1（2026-08-07）：任務族／坑型。**維持預設 "" 時不進簽章核心**，
+# 因此既有的 review 簽章（含已歸檔的 receipt）逐位仍然驗得過——與
+# `entrycost.SimConfig._LATER_FIELDS` 同一招：後加的欄位維持預設時不改變任何
+# 既有位元。非空時才進核心並被簽章覆蓋，於是 reviewer 不能事後改掛族別。
+# 誠實邊界：`family=""` 與「沒有這個欄位」在 canonical bytes 上不可區分。這不是
+# 歧義而是定義——`""` 就是「不分族的總通道」，兩者語意相同；且 registry 端會把
+# family 釘死在交付時觀察到的值（見 registry.record_review ②），reviewer 無從
+# 自選要落在哪一格。
+_REVIEW_LATER_FIELDS = ("family",)
 
 
 @dataclass
@@ -160,9 +169,15 @@ class ReviewEnvelope:
     scores: dict[str, float]
     ts_ms: int
     sig: str  # hex
+    family: str = ""   # 任務族／坑型（通道分離 3.1）；""＝不分族的總通道
 
     def _core(self) -> dict[str, Any]:
-        return {k: getattr(self, k) for k in _REVIEW_FIELDS}
+        core = {k: getattr(self, k) for k in _REVIEW_FIELDS}
+        for k in _REVIEW_LATER_FIELDS:
+            v = getattr(self, k)
+            if v:                      # 預設值不進核心 → 舊簽章逐位相容
+                core[k] = v
+        return core
 
     @classmethod
     def create(
@@ -177,6 +192,7 @@ class ReviewEnvelope:
         substrate: str,
         scores: dict[str, float],
         ts_ms: int,
+        family: str = "",
     ) -> "ReviewEnvelope":
         env = cls(
             reviewer_id=reviewer.vacant_id,
@@ -189,6 +205,7 @@ class ReviewEnvelope:
             scores=dict(scores),
             ts_ms=ts_ms,
             sig="",
+            family=family,
         )
         env.sig = reviewer.sign(canonical_bytes(env._core())).hex()
         return env
@@ -230,11 +247,15 @@ class ReviewEnvelope:
             if not 0.0 <= float(v) <= 1.0:
                 raise ValueError(f"score {dim}={v} 超出 [0,1]")
             scores[dim] = float(v)
+        family = d.get("family", "")
+        if not isinstance(family, str):
+            raise ValueError("family 必須是字串")
         return cls(
             reviewer_id=d["reviewer_id"], target_id=d["target_id"],
             target_stream_id=d["target_stream_id"], branch_id=d["branch_id"],
             target_head=d["target_head"], task_id=d["task_id"],
             substrate=d["substrate"], scores=scores, ts_ms=d["ts_ms"], sig=d["sig"],
+            family=family,
         )
 
 

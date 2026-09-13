@@ -1,0 +1,104 @@
+OK   D1 一般文案
+OK   D2 信譽不得進詞族
+OK   D3 信用／自信／相信不得進詞族
+OK   D4 英文 trust 不分大小寫
+OK   D5 否定脈絡認得出來
+OK   D6 招牌用法不是否定脈絡
+OK   D7 `#` 註解裡的信任不算文案
+OK   D8 三個小詞族各自成族
+OK   D9 切句不准吃掉命中
+
+B1 口徑探針 fixture: 9/9
+
+紅線 B（口徑）：觀眾文案不准出現「信任」——用「可究責」「讓依賴有根據」
+這支只產生候選、不下判定；〈否定脈絡〉是提示不是判準。
+
+詞族              語料     原始檔   （原始檔＝含註解與識別字，語料＝抽取後的文案）
+F1 信任            11      20
+F2 信賴             0       0
+F3 可信             2       4
+F4 互信             0       0
+F5 trust         16      20
+
+逐條列出 29 條（含 docstring 外的全部 src 命中）
+獨立計數器對帳（切句 vs 不切句）：一致
+
+── 逐檔分佈（語料／原始檔）──
+  vacant_hm/index.html: 可信 1/1
+  vacant_hm/js/hero.js: 信任 0/3
+  Vacant/vacant/web/app.html: 信任 6/7 · 可信 1/1 · trust 2/3
+  Vacant/vacant/web/app.js: 信任 2/3 · trust 10/13
+  Vacant/vacant/dashboard.py: 信任 3/7 · 可信 0/2 · trust 4/4
+
+── 逐條命中 ──
+[01] vacant_hm/index.html:40  F3 可信「可信」 [否定脈絡]
+     籠子裡是你的需求，而替你做事的那群東西—— 可不可信是不知道的
+[02] Vacant/vacant/web/app.html:6  F1 信任「信任」 [肯定用法]
+     Vacant — 信任觀測台
+[03] Vacant/vacant/web/app.html:15  F5 trust「Trust」 [肯定用法]
+     Trust Observatory
+[04] Vacant/vacant/web/app.html:35  F5 trust「trust」 [肯定用法]
+     trust  —
+[05] Vacant/vacant/web/app.html:62  F1 信任「信任」 [肯定用法]
+     信任開關對照
+[06] Vacant/vacant/web/app.html:70  F1 信任「信任」 [肯定用法]
+     信任層要花錢
+[07] Vacant/vacant/web/app.html:100  F1 信任「信任」 [肯定用法]
+     每一筆都可回到它的信任狀與簽章鏈頭
+[08] Vacant/vacant/web/app.html:115  F1 信任「信任」 [否定脈絡]
+     面板不是信任來源
+[09] Vacant/vacant/web/app.html:138  F3 可信「可信」 [否定脈絡]
+     為什麼要有這一頁：  面板好看不代表系統可信
+[10] Vacant/vacant/web/app.html:162  F1 信任「信任」 [否定脈絡]
+     此面板為唯讀視圖， 不是信任來源
+[11] Vacant/vacant/web/app.js:189  F5 trust「trust」 [肯定用法]
+     trust off
+[12] Vacant/vacant/web/app.js:190  F5 trust「trust」 [肯定用法]
+     trust on
+[13] Vacant/vacant/web/app.js:219  F5 trust「trust」 [肯定用法]
+     trust on
+[14] Vacant/vacant/web/app.js:219  F5 trust「trust」 [肯定用法]
+     trust off
+[15] Vacant/vacant/web/app.js:213  F1 信任「信任」 [否定脈絡]
+     信任層不是免費的：互審與稽核都要花呼叫
+[16] Vacant/vacant/web/app.js:213  F1 信任「信任」 [肯定用法]
+     要主張信任層有價值，這一欄必須跟品質一起看，不能只報品質
+[17] Vacant/vacant/web/app.js:240  F5 trust「trust」 [肯定用法]
+     #chip-trust
+[18] Vacant/vacant/web/app.js:240  F5 trust「trust」 [肯定用法]
+     trust <b>▮</b>
+[19] Vacant/vacant/web/app.js:241  F5 trust「trust」 [肯定用法]
+     #chip-trust
+[20] Vacant/vacant/web/app.js:380  F5 trust「trust」 [肯定用法]
+     <span class="badge ok">trust ON</span>
+[21] Vacant/vacant/web/app.js:381  F5 trust「trust」 [肯定用法]
+     <span class="badge idle">trust OFF</span>
+[22] Vacant/vacant/web/app.js:395  F5 trust「trust」 [否定脈絡]
+     <div class="empty">未互審（trust off 時不互審）</div>
+[23] Vacant/vacant/dashboard.py:66  F1 信任「信任」 [肯定用法]
+     <title>Vacant — 信任觀測台</title>
+[24] Vacant/vacant/dashboard.py:66  F1 信任「信任」 [肯定用法]
+     <h1>Vacant · 信任觀測台</h1>
+[25] Vacant/vacant/dashboard.py:66  F5 trust「trust」 [肯定用法]
+     <span id="trust"></span>
+[26] Vacant/vacant/dashboard.py:66  F5 trust「trust」 [肯定用法]
+     <div class="col"><div class="lbl">trust ON pass率</div><div id="on" class="big">–</div></div>
+[27] Vacant/vacant/dashboard.py:66  F5 trust「trust」 [肯定用法]
+     <div class="col"><div class="lbl">trust OFF pass率</div><div id="off" class="big">–</div></div>
+[28] Vacant/vacant/dashboard.py:66  F1 信任「信任」 [肯定用法]
+     : '配對差 Δ = ' + s.paired_delta + '（on − off，正值＝信任層有增益）'
+[29] Vacant/vacant/dashboard.py:273  F5 trust「trust」 [肯定用法]
+     trust_card
+
+〈否定脈絡〉6 條 · 〈肯定用法〉23 條（機器提示，人類逐條判定）
+
+── 刻意排除的鄰近詞（考慮過而排除，不是沒想到）──
+   信譽 8 · 信用 7 · 自信 0 · 相信 0
+
+── 刻意排除：.py 的 docstring（工作紀錄，不是觀眾文案）6 條 ──
+   Vacant/vacant/dashboard.py:1 F1 信任「信任」 | 承重「讓信任基建可被人眼即時稽核」）
+   Vacant/vacant/dashboard.py:1 F1 信任「信任」 | 信任是「之間那條線」上的東西：路由給誰、誰審過、稽核過沒、有沒有被 slash——
+   Vacant/vacant/dashboard.py:1 F1 信任「信任」 | ⚠️ 誠實邊界：本檔只是「觀測」，不是「信任來源」
+   Vacant/vacant/dashboard.py:1 F3 可信「可信」 | 面板好看不代表系統可信
+   Vacant/vacant/dashboard.py:1 F3 可信「可信」 | 真正的可信性來自 ledger 的簽章鏈與 chain_ok，面板若與 ledger 不符，以 ledger 為準
+   Vacant/vacant/dashboard.py:31 F1 信任「信任」 | 即知 ledger 動過——**面板不是信任來源，以 ledger 為準**（本檔 docstring）

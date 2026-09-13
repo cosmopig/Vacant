@@ -1,0 +1,11 @@
+=== CLEAN ===
+SELFTEST PASS (MUTANT=none)
+rc=0
+=== MUTANT M3 ===
+FAIL: P2: 合併 Δ=-0.050000 不等於 Σ(b−c)/Σn=0.072727
+SELFTEST FAIL (MUTANT=M3)
+rc=1
+=== MUTANT M4 ===
+FAIL: P4: [[20,0],[0,20]] 的 p_het=1.0000 沒有 <0.05 ⇒ 檢定沒牙齒
+SELFTEST FAIL (MUTANT=M4)
+rc=1

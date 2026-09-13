@@ -1,0 +1,126 @@
+{
+  "estimator_claim": "同一組候選下，閘門規則 vs 多數決規則的交付差（配對單位＝task）",
+  "not_this_estimator": "不是「兩個獨立抽樣的系統誰贏」（r445 的估計量，已收官）",
+  "measured": 371,
+  "processed": 371,
+  "infra_void": 0,
+  "void_rate_pp": 0.0,
+  "third_category_missing_fields": [],
+  "calls_per_task": 5.0,
+  "budget_all_exactly_5": true,
+  "gate": {
+    "accepted": 345,
+    "coverage_pp": 92.99191374663073,
+    "deliv_n": 280,
+    "deliv_pp_denom_measured": 75.47169811320755,
+    "deliv_pp_denom_accepted": 81.15942028985508
+  },
+  "vote": {
+    "deliv_n": 265,
+    "deliv_pp_denom_measured": 71.42857142857143
+  },
+  "same_choice_rate_pp": 22.911051212938006,
+  "same_choice_effective_rate_pp": 20.485175202156334,
+  "false_same_choice_n": 9,
+  "paired": {
+    "b_gate_only": 24,
+    "c_vote_only": 9,
+    "n_discordant": 33,
+    "delta_pp": 4.0431266846361185,
+    "ci95_lo_pp": 0.7962975115332751,
+    "ci95_hi_pp": 6.528905214308955,
+    "p_mcnemar_exact": 0.013530986849218607
+  },
+  "practical_pp": 5.0,
+  "verdict_four_cell": "GATE_RULE_WINS",
+  "power": {
+    "mde_at_n_pp": 3.504043126684636,
+    "n_needed_halfwidth_5pp": 371,
+    "n80_if_true_effect_is_observed": 36
+  },
+  "prereg": {
+    "P-R446-1": {
+      "what": "calls_per_task 恰好 5.00",
+      "window": [
+        5.0,
+        5.0
+      ],
+      "observed": 5.0,
+      "verdict": "HIT"
+    },
+    "P-R446-2": {
+      "what": "閘門拒交率 1-coverage (%)",
+      "window": [
+        3.0,
+        13.0
+      ],
+      "observed": 7.008086253369271,
+      "verdict": "HIT"
+    },
+    "P-R446-3": {
+      "what": "閘門 deliv%（分母 measured）",
+      "window": [
+        68.0,
+        84.0
+      ],
+      "observed": 75.47169811320755,
+      "verdict": "HIT"
+    },
+    "P-R446-4": {
+      "what": "多數決 deliv%（分母 measured）",
+      "window": [
+        64.0,
+        80.0
+      ],
+      "observed": 71.42857142857143,
+      "verdict": "HIT"
+    },
+    "P-R446-5": {
+      "what": "same_choice_effective_rate (%)（AMEND-1 起的仲裁量）",
+      "window": [
+        40.0,
+        95.0
+      ],
+      "observed": 20.485175202156334,
+      "verdict": "MISS"
+    },
+    "P-R446-7": {
+      "what": "discordant pair 數 n_d",
+      "window": [
+        15.0,
+        Infinity
+      ],
+      "observed": 33.0,
+      "verdict": "HIT"
+    },
+    "P-R446-8": {
+      "what": "infra_void 率 (%)",
+      "window": [
+        0.0,
+        5.0
+      ],
+      "observed": 0.0,
+      "verdict": "HIT"
+    },
+    "P-R446-5-raw": {
+      "what": "same_choice_rate (%)（raw；AMEND-1 之後不是仲裁者）",
+      "window": [
+        40.0,
+        95.0
+      ],
+      "observed": 22.911051212938006,
+      "verdict": "MISS"
+    },
+    "P-R446-6": {
+      "what": "Δ = 閘門 − 多數決 的點估計 > 0",
+      "window": null,
+      "observed": 4.0431266846361185,
+      "verdict": "HIT"
+    }
+  },
+  "overturn_conditions_triggered": [],
+  "broken_reasons": [],
+  "run": "runs/g_r446_eq5_mbpp",
+  "rows_lines": 371,
+  "rows_sha256_16": "aa85fb234e4cf676"
+}

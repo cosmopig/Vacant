@@ -1,0 +1,538 @@
+{
+ "round": 118,
+ "n_repeat": 8,
+ "procedure_same_as": "s11_legibility.py 第116輪（URL/settle/等待/縮1/3 逐項相同）",
+ "selftest": {
+  "P0a_P0e": "PASS（沿用 s11.selftest）",
+  "ctl_big": {
+   "n": 8,
+   "median": 16.0,
+   "min": 16,
+   "max": 16,
+   "range": 0,
+   "values": [
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16
+   ]
+  },
+  "ctl_small": {
+   "n": 8,
+   "median": 8.0,
+   "min": 8,
+   "max": 8,
+   "range": 0,
+   "values": [
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8
+   ]
+  },
+  "P3b": true,
+  "P3c": true,
+  "static_range_max": 1
+ },
+ "targets": {
+  "T3": {
+   "n": 8,
+   "median": 7.0,
+   "min": 7,
+   "max": 7,
+   "range": 0,
+   "values": [
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7
+   ]
+  },
+  "T4": {
+   "n": 8,
+   "median": 17.0,
+   "min": 17,
+   "max": 17,
+   "range": 0,
+   "values": [
+    17,
+    17,
+    17,
+    17,
+    17,
+    17,
+    17,
+    17
+   ]
+  },
+  "T5": {
+   "n": 8,
+   "median": 6.0,
+   "min": 6.0,
+   "max": 6.0,
+   "range": 0.0,
+   "values": [
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0
+   ]
+  }
+ },
+ "voids": {
+  "T3": 0,
+  "T4": 0,
+  "T5": 0
+ },
+ "guards": {
+  "T3": 0,
+  "T4": 0,
+  "T5": 0
+ },
+ "rect0": {
+  "T3": [
+   72,
+   536,
+   609,
+   87
+  ],
+  "T4": [
+   72,
+   322,
+   609,
+   187
+  ],
+  "T5": [
+   72,
+   649,
+   541,
+   66
+  ]
+ },
+ "C3_intervals": {
+  "T4/T3": [
+   2.43,
+   2.43
+  ],
+  "T4/T5": [
+   2.83,
+   2.83
+  ]
+ },
+ "C3_max_ratio": 1.5,
+ "C1_min_band_px": 12.0,
+ "C1_by_interval": {
+  "T3": "FAIL 成立（整段 < 12）",
+  "T4": "PASS 成立（整段 ≥ 12）",
+  "T5": "FAIL 成立（整段 < 12）"
+ },
+ "round116_point_values": {
+  "T3": 7.0,
+  "T4": 17.0,
+  "T5": 6.0,
+  "T4/T3": 2.43,
+  "T4/T5": 2.83
+ },
+ "trace": [
+  {
+   "i": 0,
+   "tag": "T3",
+   "band_h": 7,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    536,
+    609,
+    87
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 0,
+   "tag": "T4",
+   "band_h": 17,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    322,
+    609,
+    187
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 0,
+   "tag": "T5",
+   "band_h": 6.0,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    649,
+    541,
+    66
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 1,
+   "tag": "T3",
+   "band_h": 7,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    536,
+    609,
+    87
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 1,
+   "tag": "T4",
+   "band_h": 17,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    322,
+    609,
+    187
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 1,
+   "tag": "T5",
+   "band_h": 6.0,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    649,
+    541,
+    66
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 2,
+   "tag": "T3",
+   "band_h": 7,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    536,
+    609,
+    87
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 2,
+   "tag": "T4",
+   "band_h": 17,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    322,
+    609,
+    187
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 2,
+   "tag": "T5",
+   "band_h": 6.0,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    649,
+    541,
+    66
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 3,
+   "tag": "T3",
+   "band_h": 7,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    536,
+    609,
+    87
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 3,
+   "tag": "T4",
+   "band_h": 17,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    322,
+    609,
+    187
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 3,
+   "tag": "T5",
+   "band_h": 6.0,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    649,
+    541,
+    66
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 4,
+   "tag": "T3",
+   "band_h": 7,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    536,
+    609,
+    87
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 4,
+   "tag": "T4",
+   "band_h": 17,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    322,
+    609,
+    187
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 4,
+   "tag": "T5",
+   "band_h": 6.0,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    649,
+    541,
+    66
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 5,
+   "tag": "T3",
+   "band_h": 7,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    536,
+    609,
+    87
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 5,
+   "tag": "T4",
+   "band_h": 17,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    322,
+    609,
+    187
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 5,
+   "tag": "T5",
+   "band_h": 6.0,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    649,
+    541,
+    66
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 6,
+   "tag": "T3",
+   "band_h": 7,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    536,
+    609,
+    87
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 6,
+   "tag": "T4",
+   "band_h": 17,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    322,
+    609,
+    187
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 6,
+   "tag": "T5",
+   "band_h": 6.0,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    649,
+    541,
+    66
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 7,
+   "tag": "T3",
+   "band_h": 7,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    536,
+    609,
+    87
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 7,
+   "tag": "T4",
+   "band_h": 17,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    322,
+    609,
+    187
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  },
+  {
+   "i": 7,
+   "tag": "T5",
+   "band_h": 6.0,
+   "void": false,
+   "noise": 1.0,
+   "rect": [
+    72,
+    649,
+    541,
+    66
+   ],
+   "on_before": true,
+   "on_after": true,
+   "error": null
+  }
+ ]
+}

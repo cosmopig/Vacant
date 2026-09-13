@@ -1,0 +1,459 @@
+{
+  "verdict": "OK",
+  "broken": [],
+  "live_run_reads": 0,
+  "clauses_scanned": 10,
+  "pins_found": {
+    "C5-1": 1,
+    "C5-2": 1,
+    "D3-1": 1,
+    "D3-2": 1,
+    "D3-3": 1,
+    "E3-1": 1,
+    "E3-2": 1,
+    "E3-3": 1,
+    "E3-4": 2,
+    "E3-5": 1
+  },
+  "self_prereg_contributed": 0,
+  "calibration": {
+    "states": [
+      {
+        "paired_gate_vs_vote_is_none": false,
+        "power_is_none": false
+      },
+      {
+        "paired_gate_vs_vote_is_none": true,
+        "power_is_none": true
+      }
+    ],
+    "positive_control": true,
+    "negative_control": false,
+    "ok": true
+  },
+  "keyscan_calibration": {
+    "ops/gain/replay/paired_ci.py": {
+      "positive": "key",
+      "positive_found": true,
+      "negative": "lo_pp",
+      "negative_found": false,
+      "ok": true
+    },
+    "ops/gain/r447_eq5_offline.py": {
+      "positive": "verdict",
+      "positive_found": true,
+      "negative": "ok_to_report",
+      "negative_found": false,
+      "ok": true
+    },
+    "ops/gain/r447_gauge_capability.py": {
+      "positive": "run_complete",
+      "positive_found": true,
+      "negative": "n_by_arm",
+      "negative_found": false,
+      "ok": true
+    },
+    "ok": true
+  },
+  "records": {
+    "C5-1": {
+      "class": "EVALUABLE",
+      "intent": "guard",
+      "witness": null,
+      "executable_as_pinned": false,
+      "premise_stale": false,
+      "probe_keys_found": {
+        "key": true
+      },
+      "probe_keys_missing": [],
+      "probe_keys_nested_only": [],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": false,
+        "prints_full_json": false,
+        "emitted": false
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/replay/paired_ci.py",
+          "literal": "\"key\": args.key",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        }
+      ],
+      "premise_checks_n": 1,
+      "note": "證偽事件在結果空間裡構造得出來（門檻可被違反）",
+      "pred_class": "EVALUABLE",
+      "pred_exec": false,
+      "pred_stale": false,
+      "hit_class": true,
+      "hit_exec": true,
+      "hit_stale": true
+    },
+    "C5-2": {
+      "class": "EVALUABLE",
+      "intent": "evidence",
+      "witness": null,
+      "executable_as_pinned": false,
+      "premise_stale": false,
+      "probe_keys_found": {
+        "accepted": false,
+        "meets_demand": false
+      },
+      "probe_keys_missing": [
+        "accepted",
+        "meets_demand"
+      ],
+      "probe_keys_nested_only": [
+        "meets_demand"
+      ],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": false,
+        "prints_full_json": false,
+        "emitted": false
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/replay/paired_ci.py",
+          "literal": "bool(r.get(\"accepted\")) and bool(r.get(\"meets_demand\"))",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        }
+      ],
+      "premise_checks_n": 1,
+      "note": "證偽事件在結果空間裡構造得出來（門檻可被違反）",
+      "pred_class": "EVALUABLE",
+      "pred_exec": true,
+      "pred_stale": false,
+      "hit_class": true,
+      "hit_exec": false,
+      "hit_stale": true
+    },
+    "D3-1": {
+      "class": "EVALUABLE",
+      "intent": "guard",
+      "witness": null,
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "probe_keys_found": {
+        "sampling": true
+      },
+      "probe_keys_missing": [],
+      "probe_keys_nested_only": [],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": true,
+        "prints_full_json": true,
+        "emitted": true
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/r447_eq5_offline.py",
+          "literal": "default=\"lcb2\"",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        }
+      ],
+      "premise_checks_n": 1,
+      "note": "證偽事件在結果空間裡構造得出來（門檻可被違反）",
+      "pred_class": "EVALUABLE",
+      "pred_exec": true,
+      "pred_stale": false,
+      "hit_class": true,
+      "hit_exec": true,
+      "hit_stale": true
+    },
+    "D3-2": {
+      "class": "EVALUABLE",
+      "intent": "guard",
+      "witness": null,
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "probe_keys_found": {
+        "verdict": true
+      },
+      "probe_keys_missing": [],
+      "probe_keys_nested_only": [],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": true,
+        "prints_full_json": true,
+        "emitted": true
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/r447_eq5_offline.py",
+          "literal": "out[\"rule_rates\"] = {",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        }
+      ],
+      "premise_checks_n": 1,
+      "note": "證偽事件在結果空間裡構造得出來（門檻可被違反）",
+      "pred_class": "EVALUABLE",
+      "pred_exec": true,
+      "pred_stale": false,
+      "hit_class": true,
+      "hit_exec": true,
+      "hit_stale": true
+    },
+    "D3-3": {
+      "class": "FORCED_GREEN",
+      "intent": "guard",
+      "witness": 0,
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "probe_keys_found": {
+        "power": true,
+        "paired_gate_vs_vote": true
+      },
+      "probe_keys_missing": [],
+      "probe_keys_nested_only": [],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": true,
+        "prints_full_json": true,
+        "emitted": true
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/r447_eq5_offline.py",
+          "literal": "out[\"power\"] = None",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        }
+      ],
+      "premise_checks_n": 1,
+      "note": "`power` 與 Δ 在 reconstruct 的同一個 if/else 分支被指派 ⇒ (pgv is None)==(power is None) 窮舉兩支恆真、witness=0",
+      "pred_class": "FORCED_GREEN",
+      "pred_exec": true,
+      "pred_stale": false,
+      "hit_class": true,
+      "hit_exec": true,
+      "hit_stale": true
+    },
+    "E3-1": {
+      "class": "EVALUABLE",
+      "intent": "guard",
+      "witness": null,
+      "executable_as_pinned": true,
+      "premise_stale": true,
+      "probe_keys_found": {
+        "run_complete": true
+      },
+      "probe_keys_missing": [],
+      "probe_keys_nested_only": [],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": true,
+        "prints_full_json": true,
+        "emitted": true
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/r447_gauge_capability.py",
+          "literal": "BROKEN_RUN_NOT_TERMINAL",
+          "must_exist": false,
+          "present": true,
+          "premise_holds": false
+        },
+        {
+          "file": "ops/gain/r447_gauge_capability.py",
+          "literal": "BROKEN_NO_SUMMARY",
+          "must_exist": false,
+          "present": true,
+          "premise_holds": false
+        },
+        {
+          "file": "ops/gain/r447_gauge_capability.py",
+          "literal": "BROKEN_ROW_ACCOUNTING",
+          "must_exist": false,
+          "present": true,
+          "premise_holds": false
+        }
+      ],
+      "premise_checks_n": 3,
+      "note": "證偽事件在結果空間裡構造得出來（門檻可被違反）",
+      "pred_class": "EVALUABLE",
+      "pred_exec": true,
+      "pred_stale": true,
+      "hit_class": true,
+      "hit_exec": true,
+      "hit_stale": true
+    },
+    "E3-2": {
+      "class": "EVALUABLE",
+      "intent": "guard",
+      "witness": null,
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "probe_keys_found": {
+        "n_tasks_complete": true,
+        "rows_file_lines": true
+      },
+      "probe_keys_missing": [],
+      "probe_keys_nested_only": [],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": true,
+        "prints_full_json": true,
+        "emitted": true
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/r447_gauge_capability.py",
+          "literal": "\"n_tasks_complete\": len(complete)",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        },
+        {
+          "file": "ops/gain/r447_gauge_capability.py",
+          "literal": "out[\"rows_file_lines\"] = len(rows)",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        }
+      ],
+      "premise_checks_n": 2,
+      "note": "證偽事件在結果空間裡構造得出來（門檻可被違反）",
+      "pred_class": "EVALUABLE",
+      "pred_exec": true,
+      "pred_stale": false,
+      "hit_class": true,
+      "hit_exec": true,
+      "hit_stale": true
+    },
+    "E3-3": {
+      "class": "UNRESOLVED",
+      "intent": "guard",
+      "witness": null,
+      "executable_as_pinned": false,
+      "premise_stale": false,
+      "probe_keys_found": {
+        "n_tasks_partial_excluded": true,
+        "infra_void": false
+      },
+      "probe_keys_missing": [
+        "infra_void"
+      ],
+      "probe_keys_nested_only": [
+        "infra_void"
+      ],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": true,
+        "prints_full_json": true,
+        "emitted": true
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/r447_gauge_capability.py",
+          "literal": "if len(rs) != 3",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        }
+      ],
+      "premise_checks_n": 1,
+      "note": "⚠ `infra_void` 頂層沒有、巢狀 `row_accounting.<臂>.infra_void` 裡有，但那是**逐臂的整數**，給不出恆等式右邊要的**逐題集合**（E.3 正文自己寫著 void 落在 notes.jsonl）⇒ 照釘死的指令仍量不到。 恆等式寫得出來，但 witness 要等收官時的 infra_void 才知道，B3 禁止本輪去讀 ⇒ 嚴格規則吐 UNRESOLVED；收官必須重判（判準 §四.2）",
+      "pred_class": "UNRESOLVED",
+      "pred_exec": true,
+      "pred_stale": false,
+      "hit_class": true,
+      "hit_exec": false,
+      "hit_stale": true
+    },
+    "E3-4": {
+      "class": "EVALUABLE",
+      "intent": "guard",
+      "witness": null,
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "probe_keys_found": {
+        "verdict": true
+      },
+      "probe_keys_missing": [],
+      "probe_keys_nested_only": [],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": true,
+        "prints_full_json": true,
+        "emitted": true
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/r447_gauge_capability.py",
+          "literal": "out[\"verdict\"] = \"BROKEN_BC_MISMATCH\"",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        }
+      ],
+      "premise_checks_n": 1,
+      "note": "證偽事件在結果空間裡構造得出來（門檻可被違反）",
+      "pred_class": "EVALUABLE",
+      "pred_exec": true,
+      "pred_stale": false,
+      "hit_class": true,
+      "hit_exec": true,
+      "hit_stale": true
+    },
+    "E3-5": {
+      "class": "EVALUABLE",
+      "intent": "guard",
+      "witness": null,
+      "executable_as_pinned": true,
+      "premise_stale": false,
+      "probe_keys_found": {
+        "pz1_raw_NOT_ARBITER": true,
+        "pz1_demonstrated_only_NOT_ARBITER": true,
+        "NOT_ARBITER": true
+      },
+      "probe_keys_missing": [],
+      "probe_keys_nested_only": [],
+      "emission": {
+        "anchor_found": true,
+        "pinned_has_json": true,
+        "prints_full_json": true,
+        "emitted": true
+      },
+      "premise_checks": [
+        {
+          "file": "ops/gain/r447_gauge_capability.py",
+          "literal": "out[\"pz1_raw_NOT_ARBITER\"] = fail_pct(off)",
+          "must_exist": true,
+          "present": true,
+          "premise_holds": true
+        }
+      ],
+      "premise_checks_n": 1,
+      "note": "證偽事件在結果空間裡構造得出來（門檻可被違反）",
+      "pred_class": "EVALUABLE",
+      "pred_exec": true,
+      "pred_stale": false,
+      "hit_class": true,
+      "hit_exec": true,
+      "hit_stale": true
+    }
+  },
+  "counts": {
+    "EVALUABLE": 8,
+    "FORCED_GREEN": 1,
+    "UNRESOLVED": 1
+  },
+  "n_not_executable": 3,
+  "n_premise_stale": 1,
+  "pred_hits": {
+    "class": 10,
+    "exec": 8,
+    "stale": 10
+  },
+  "blind": false
+}

@@ -1,0 +1,34 @@
+{
+  "alpha": 0.05,
+  "power_target": 0.8,
+  "correctness": "accepted and meets_demand",
+  "pairs": [
+    {
+      "pair": "ON vs OFF5",
+      "n_common": 65,
+      "b_ON_only": 3,
+      "c_OFF5_only": 4,
+      "n_discordant": 7,
+      "p_disc": 0.1077,
+      "psi": 0.4286,
+      "acc_a": 0.7385,
+      "acc_b": 0.7538,
+      "diff_pp": -1.538,
+      "exact_mcnemar_p": 1.0,
+      "bank_capacity": 179,
+      "psi_effective": 0.5714,
+      "required_n_at_observed_effect": 3682,
+      "answerable_within_capacity": false,
+      "resolvable_floor_at_capacity": {
+        "min_psi": 0.83,
+        "min_abs_diff_pp": 7.108
+      },
+      "feasibility_bound": {
+        "max_p_disc_equal_acc": 0.5,
+        "required_n_at_max_p_disc": 793,
+        "still_impossible_at_capacity": true,
+        "why": "兩臂 accuracy 相近且正相關時 p_disc ≤ 2a(1-a) ≤ 0.5；把 p_disc 推到 0.5 仍需這個 N ⇒ 難度旋鈕的極限"
+      }
+    }
+  ]
+}

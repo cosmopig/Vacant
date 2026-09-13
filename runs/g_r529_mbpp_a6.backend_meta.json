@@ -1,0 +1,41 @@
+{
+  "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+  "slot_id": "q1004#4",
+  "slot_host": "1004",
+  "declared": {
+    "host": "1004",
+    "lmstudio_version": "0.4.17.0",
+    "version_source": "Fable 2026-09-11 回報；runner 查證不到 ⇒ 這是宣稱不是量測",
+    "gguf_sha256": "faff1a63667fac17ac5e777f47114688fcefea96e220e211aaa8d62c2c4561f1",
+    "context": 262144,
+    "parallel": 4,
+    "note": "R460R 佔 #1–#3；本佇列現在只用第 4 格，R460R 收完才加 #1–#3"
+  },
+  "probed_models": {
+    "data": [
+      {
+        "id": "gemma-4-12b-it-qat",
+        "object": "model",
+        "owned_by": "organization_owner"
+      },
+      {
+        "id": "qwen/qwen3.8-27b",
+        "object": "model",
+        "owned_by": "organization_owner"
+      },
+      {
+        "id": "qwen_qwen3.6-35b-a3b",
+        "object": "model",
+        "owned_by": "organization_owner"
+      },
+      {
+        "id": "text-embedding-nomic-embed-text-v1.5",
+        "object": "model",
+        "owned_by": "organization_owner"
+      }
+    ],
+    "object": "list"
+  },
+  "probed_at_utc": "2026-09-11T19:16:01.418604+00:00",
+  "honesty": "lmstudio_version 是人回報的宣稱，本 runner 查不到；probed_models 才是這一塊自己量到的證據"
+}

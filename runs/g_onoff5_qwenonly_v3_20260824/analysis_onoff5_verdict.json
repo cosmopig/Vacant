@@ -1,0 +1,59 @@
+{
+  "onoff5_run_dir": "runs/g_onoff5_qwenonly_v3_20260824",
+  "off_baseline_run_dir": "runs/g_off60_qwenonly_20260824",
+  "seed_match": true,
+  "seed_note": null,
+  "onoff5_run_complete": false,
+  "equal_budget_comparison_valid": false,
+  "arms": {
+    "OFF": {
+      "arm": "OFF",
+      "ok": true,
+      "complete": true,
+      "tasks": 60,
+      "infra_void": 0,
+      "measured": 60,
+      "calls_per_task": 1.0,
+      "correct_delivery_rate": 0.7833333333333333,
+      "reviewer_accuracy": null,
+      "leaked": 13,
+      "correct_delivery_rate_wilson_95ci": [
+        0.6637997242373034,
+        0.8687695595338053
+      ]
+    },
+    "ON": {
+      "arm": "ON",
+      "ok": true,
+      "complete": false,
+      "tasks": 60,
+      "infra_void": 1,
+      "measured": 59,
+      "calls_per_task": 5.0508474576271185,
+      "correct_delivery_rate": 0.711864406779661,
+      "reviewer_accuracy": 0.711864406779661,
+      "leaked": 6,
+      "correct_delivery_rate_wilson_95ci": [
+        0.5861915342397306,
+        0.8116350036612334
+      ]
+    },
+    "OFF5": {
+      "arm": "OFF5",
+      "ok": true,
+      "complete": false,
+      "tasks": 60,
+      "infra_void": 3,
+      "measured": 57,
+      "calls_per_task": 5.052631578947368,
+      "correct_delivery_rate": 0.7192982456140351,
+      "reviewer_accuracy": null,
+      "leaked": 16,
+      "correct_delivery_rate_wilson_95ci": [
+        0.5916980132080925,
+        0.819206006581056
+      ]
+    }
+  },
+  "verdict": "ON 或 OFF5 尚未跑完（complete=false）⇒ 不判定，等 run_complete=true 再套判準"
+}

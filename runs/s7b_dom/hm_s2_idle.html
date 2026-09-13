@@ -1,0 +1,311 @@
+<html lang="zh-Hant"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>人類動物園 · VACANT</title>
+<meta name="description" content="可究責性層的展覽。你不必看得懂它做了什麼——你只要指出一個地方。">
+<link rel="stylesheet" href="css/stage.css">
+<link rel="stylesheet" href="css/scenes.css">
+</head>
+<body>
+
+<div class="amb"></div>
+<div class="grain"></div>
+
+<!-- ── 持續揭露：這一條永遠在畫面上（03 §5.1.6 硬性規格） ───────── -->
+<div class="honest" id="honest">
+  <span class="dot"></span>
+  <span id="honest-txt">畫面上跑的是<b>機制模擬</b>，不是證明 · 重跑與漣漪是當場算的，數字沒有寫死</span>
+</div>
+
+<!-- 場景進度 -->
+<nav class="ticks" id="ticks" aria-hidden="true"><i></i><i></i><i class="on"></i></nav>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     場景 0 · 主視覺 —— E10 真模型實測的兩行路由序列
+     ══════════════════════════════════════════════════════════════ -->
+<section class="scene" id="sc-hero">
+  <div class="hero">
+    <header class="hero-top">
+      <span class="eyebrow">VACANT · 可究責性層</span>
+      <span class="eyebrow">E10 · 真模型實測資料</span>
+    </header>
+
+    <div class="hero-mid">
+      <h1 class="hero-title rise" style="animation-delay:.1s">人類動物園</h1>
+      <p class="hero-lede rise" style="animation-delay:.35s">
+        你以為你在外面看。<br>
+        籠子裡是你的需求，而替你做事的那群東西——<b>可不可信是不知道的。</b>
+      </p>
+    </div>
+
+    <div class="hero-lines">
+      <div class="rl-row rise" style="animation-delay:.7s">
+        <div class="rl-label amber">沒有可究責層</div>
+        <div class="routeline" id="rl-open"></div>
+        <div class="rl-tail" id="tail-open"></div>
+      </div>
+      <div class="rl-row rise" style="animation-delay:.9s">
+        <div class="rl-label cyan">有可究責層</div>
+        <div class="routeline" id="rl-acct"></div>
+        <div class="rl-tail" id="tail-acct"></div>
+      </div>
+      <div class="rl-legend rise" style="animation-delay:1.1s">
+        <span class="x-key">X</span>　＝　這一題的工作被交給了破壞者
+      </div>
+    </div>
+
+    <div class="hero-callout" id="hero-callout">
+      <div class="co-num num"><span id="co-a">—</span></div>
+      <div class="co-txt">
+        <b>右邊尾端連續 <span id="co-a2">—</span> 題</b>沒有再把工作交給破壞者。<br>
+        <span class="dim">左邊同一段是 <span id="co-b">—</span> 題。</span>
+      </div>
+    </div>
+
+    <footer class="hero-bot">
+      <span class="prompt">觸碰任何地方開始</span>
+    </footer>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     場景 1 · 第 2 拍 —— 漏斗跑起來 · 兩個世界
+     ══════════════════════════════════════════════════════════════ -->
+<section class="scene" id="sc-worlds">
+  <header class="sc-head">
+    <span class="eyebrow">第 2 拍</span>
+    <h2 class="sc-title">同一批工作 · 同一個亂數種子 · 兩個世界</h2>
+  </header>
+
+  <div class="worlds">
+
+    <!-- 左屏 -->
+    <div class="world w-open">
+      <div class="w-head">
+        <span class="w-tag amber">左屏</span>
+        <h3 class="w-name">沒有可究責層的世界</h3>
+        <p class="w-desc mono">均勻派工　·　交了就收　·　出事沒有後果</p>
+      </div>
+      <div class="w-stage" id="open-stage">
+        <div class="floorline"></div>
+      </div>
+      <div class="w-foot">
+        <div class="stat"><div class="stat-n num" id="open-accepted">0</div><div class="stat-l">收下的交付</div></div>
+        <div class="stat"><div class="stat-n num" id="open-checked">0</div><div class="stat-l">被檢查過的</div></div>
+        <div class="stat reveal-stat" id="open-bad-stat">
+          <div class="stat-n num" id="open-bad">?</div><div class="stat-l">其中有問題的</div>
+        </div>
+      </div>
+      <div class="w-line"><div class="routeline" id="wl-open"></div></div>
+    </div>
+
+    <!-- 右屏 -->
+    <div class="world w-acct">
+      <div class="w-head">
+        <span class="w-tag cyan">右屏</span>
+        <h3 class="w-name">有可究責層的世界</h3>
+        <p class="w-desc mono">信譽路由　·　三層漏斗　·　抽到就扣分</p>
+      </div>
+      <div class="w-stage" id="acct-stage">
+        <div class="sieve" data-l="1" style="--y:18%">
+          <div class="sieve-mesh"></div>
+          <div class="sieve-tag">
+            <span class="s-no">第 1 層</span><span class="s-name">確定性檢查</span>
+            <span class="s-note">測試、編譯、重跑　·　盲區＝0 是構造性的，騙不了</span>
+          </div>
+          <div class="sieve-n"><span id="c1">0</span></div>
+        </div>
+        <div class="sieve" data-l="2" style="--y:45%">
+          <div class="sieve-mesh"></div>
+          <div class="sieve-tag">
+            <span class="s-no">第 2 層</span><span class="s-name">密封評審</span>
+            <span class="s-note">異源三人　·　評審期間互相看不見　·　只問「這不行嗎」</span>
+          </div>
+          <div class="sieve-n"><span id="c2">0</span></div>
+        </div>
+        <div class="sieve" data-l="3" style="--y:72%">
+          <div class="sieve-mesh"></div>
+          <div class="sieve-tag">
+            <span class="s-no">第 3 層</span><span class="s-name">人類只吃殘差</span>
+            <span class="s-note">機器自己標記「我檢查不了」的　＋　隨機抽樣</span>
+          </div>
+          <div class="sieve-n"><span id="c3">0</span></div>
+        </div>
+      </div>
+      <div class="w-foot">
+        <div class="stat"><div class="stat-n num" id="acct-accepted">0</div><div class="stat-l">收下的交付</div></div>
+        <div class="stat"><div class="stat-n num" id="acct-checked">0</div><div class="stat-l">被檢查過的</div></div>
+        <div class="stat"><div class="stat-n num accent-red" id="acct-bad">0</div><div class="stat-l">溜過去的</div></div>
+      </div>
+      <div class="w-line"><div class="routeline" id="wl-acct"></div></div>
+    </div>
+  </div>
+
+  <!-- 結尾揭示 -->
+  <div class="reveal" id="worlds-reveal">
+    <div class="reveal-in">
+      <p class="wall">左邊那 <span class="accent-amber" id="rv-bad">—</span> 件有問題的東西，<br>剛剛一直都在畫面上。</p>
+      <p class="wall-sub">你看不出來是哪幾件——因為那個世界裡沒有任何一步會告訴你。
+        右邊不保證每次都對，它只保證一件事：<b>做過什麼會留下來，而且會有後果。</b></p>
+      <div class="bound">
+        <b>誠實邊界：</b>這套系統提高作惡的成本，不消滅作惡；它讓你的依賴有根據，不讓你免於依賴。
+      </div>
+      <span class="prompt">觸碰繼續</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     場景 2 · 第 3 拍 —— 你是抽樣者
+     ══════════════════════════════════════════════════════════════ -->
+<section class="scene live on" id="sc-sample">
+  <header class="sc-head">
+    <span class="eyebrow">第 3 拍</span>
+    <h2 class="sc-title">你不必看得懂它做了什麼。<br class="br-sm">你只要指出一個地方，機器會當場重跑給你看。</h2>
+  </header>
+
+  <div class="samp">
+    <!-- 左：可抽樣的交付 -->
+    <div class="samp-grid-wrap">
+      <div class="samp-bar">
+        <span class="mono faint">右屏已收下的交付</span>
+        <span class="mono flagchip">■ 機器自己標記「我檢查不了」</span>
+      </div>
+      <div class="samp-grid" id="samp-grid"><div class="cell">017</div><div class="cell">018</div><div class="cell flagged">021</div><div class="cell">022</div><div class="cell">024</div><div class="cell">026</div><div class="cell">027</div><div class="cell">028</div><div class="cell">030</div><div class="cell">031</div><div class="cell flagged">032</div><div class="cell flagged">033</div><div class="cell">034</div><div class="cell flagged">035</div><div class="cell flagged">036</div><div class="cell">037</div><div class="cell">038</div><div class="cell">040</div><div class="cell">042</div><div class="cell">043</div><div class="cell">044</div><div class="cell">045</div><div class="cell">046</div><div class="cell flagged">047</div><div class="cell">048</div><div class="cell">050</div><div class="cell">051</div><div class="cell">052</div><div class="cell">053</div><div class="cell">054</div><div class="cell">055</div><div class="cell">056</div><div class="cell">057</div><div class="cell">059</div><div class="cell">060</div><div class="cell">061</div><div class="cell">062</div><div class="cell">063</div><div class="cell">064</div><div class="cell">065</div><div class="cell">066</div><div class="cell">067</div><div class="cell">068</div><div class="cell">070</div><div class="cell">071</div><div class="cell">072</div><div class="cell">073</div><div class="cell">074</div><div class="cell">075</div><div class="cell">077</div><div class="cell">078</div><div class="cell">079</div><div class="cell">080</div><div class="cell">081</div><div class="cell">082</div><div class="cell">083</div><div class="cell">084</div><div class="cell">085</div><div class="cell">086</div><div class="cell">087</div></div>
+      <p class="samp-hint mono" id="samp-hint">指出任何一件 —— 你提供的是「往哪裡看」</p>
+    </div>
+
+    <!-- 右：重跑與後果 -->
+    <aside class="samp-side">
+      <div class="panel rerun" id="p-rerun">
+        <div class="p-head"><span class="p-no">01</span><span class="p-name">確定性沙箱重跑</span></div>
+        <div class="p-body mono" id="rerun-log"><div class="idle">待抽樣</div></div>
+      </div>
+
+      <div class="panel" id="p-rep">
+        <div class="p-head"><span class="p-no">02</span><span class="p-name">信譽與後果</span></div>
+        <div class="p-body"><div class="bars" id="rep-bars">
+      <div class="bar ">
+        <span class="bar-id">A03</span>
+        <span class="bar-track"><span class="bar-fill" style="width:94%"></span></span>
+        <span class="bar-v">0.94</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A04</span>
+        <span class="bar-track"><span class="bar-fill" style="width:74%"></span></span>
+        <span class="bar-v">0.74</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A01</span>
+        <span class="bar-track"><span class="bar-fill" style="width:71%"></span></span>
+        <span class="bar-v">0.71</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A05</span>
+        <span class="bar-track"><span class="bar-fill" style="width:71%"></span></span>
+        <span class="bar-v">0.71</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A06</span>
+        <span class="bar-track"><span class="bar-fill" style="width:62%"></span></span>
+        <span class="bar-v">0.62</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A02</span>
+        <span class="bar-track"><span class="bar-fill" style="width:59%"></span></span>
+        <span class="bar-v">0.59</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A08</span>
+        <span class="bar-track"><span class="bar-fill" style="width:59%"></span></span>
+        <span class="bar-v">0.59</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A09</span>
+        <span class="bar-track"><span class="bar-fill" style="width:59%"></span></span>
+        <span class="bar-v">0.59</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A07</span>
+        <span class="bar-track"><span class="bar-fill" style="width:56%"></span></span>
+        <span class="bar-v">0.56</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A11</span>
+        <span class="bar-track"><span class="bar-fill" style="width:56%"></span></span>
+        <span class="bar-v">0.56</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">A10</span>
+        <span class="bar-track"><span class="bar-fill" style="width:53%"></span></span>
+        <span class="bar-v">0.53</span>
+      </div>
+      <div class="bar sab">
+        <span class="bar-id">A12</span>
+        <span class="bar-track"><span class="bar-fill" style="width:19%"></span></span>
+        <span class="bar-v">0.19</span>
+      </div></div></div>
+      </div>
+
+      <div class="panel" id="p-rev">
+        <div class="p-head"><span class="p-no">03</span><span class="p-name">評審權重被重新定價</span></div>
+        <div class="p-body"><div class="bars" id="rev-bars">
+      <div class="bar ">
+        <span class="bar-id">R1</span>
+        <span class="bar-track"><span class="bar-fill" style="width:50%"></span></span>
+        <span class="bar-v">0.50</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">R2</span>
+        <span class="bar-track"><span class="bar-fill" style="width:44%"></span></span>
+        <span class="bar-v">0.44</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">R3</span>
+        <span class="bar-track"><span class="bar-fill" style="width:57%"></span></span>
+        <span class="bar-v">0.57</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">R4</span>
+        <span class="bar-track"><span class="bar-fill" style="width:42%"></span></span>
+        <span class="bar-v">0.42</span>
+      </div>
+      <div class="bar ">
+        <span class="bar-id">R5</span>
+        <span class="bar-track"><span class="bar-fill" style="width:36%"></span></span>
+        <span class="bar-v">0.36</span>
+      </div></div></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 漣漪 -->
+  <div class="ripple" id="ripple">
+    <div class="ripple-in">
+      <span class="eyebrow">當場量出來的，不是寫死的文案</span>
+      <p class="wall" id="rp-wall"></p>
+
+      <div class="ripple-lines">
+        <div class="rl-row"><div class="rl-label faint">沒有你這一次指認</div>
+          <div class="strip" id="rp-without"></div></div>
+        <div class="rl-row"><div class="rl-label cyan">有你這一次指認</div>
+          <div class="strip" id="rp-with"></div></div>
+        <div class="rl-legend">
+          <i class="sw sw-red"></i>　交給了破壞者　　　<i class="sw sw-cyan"></i>　這一輪的工作換了人做
+        </div>
+      </div>
+
+      <div class="bound" id="rp-bound"></div>
+
+      <span class="prompt">觸碰繼續</span>
+    </div>
+  </div>
+</section>
+
+<script type="module" src="js/app.js"></script>
+
+
+</body></html>

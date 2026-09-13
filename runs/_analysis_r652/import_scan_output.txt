@@ -1,0 +1,13 @@
+<unknown>:4: SyntaxWarning: invalid escape sequence '\l'
+<unknown>:5: SyntaxWarning: invalid escape sequence '\s'
+候選碼總數 (gen+revise, ok): 664
+語法解析失敗（第三類）: 10
+
+=== 白名單外的 import，出現次數 ===
+  random                 2
+
+=== 分臂 ===
+arm     cands   blocked    syn
+OFF        84         1      2
+OFF5      415         1      4
+ON        165         0      4

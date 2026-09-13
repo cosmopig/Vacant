@@ -1,0 +1,40 @@
+{
+  "run": "runs/g_r356_3arm_20260830",
+  "main_criterion": {
+    "off5_arm": "OFF5",
+    "on_arm": "ON",
+    "n_paired": 67,
+    "on_leaked": 7,
+    "off5v_leaked": 13,
+    "on_leak_rate": 0.1044776119402985,
+    "off5v_leak_rate": 0.19402985074626866,
+    "on_leak_rate_ci95": [
+      0.05153704291423214,
+      0.20031497623835617
+    ],
+    "off5v_leak_rate_ci95": [
+      0.11705063857457097,
+      0.3041933762415822
+    ],
+    "discordant_on_only": 0,
+    "discordant_off5v_only": 6,
+    "n_discordant": 6,
+    "mcnemar_exact_p_two_sided": 0.03125,
+    "gap_pp_off5v_minus_on": 8.955223880597016,
+    "verdict": "mechanism_contributes（ON 显著更低，gap=8.96pp）"
+  },
+  "secondary_criterion": {
+    "n_rows": 85,
+    "off5_delivered_correct": 64,
+    "off5v_delivered_correct": 64,
+    "off5_delivery_rate": 0.7529411764705882,
+    "off5v_delivery_rate": 0.7529411764705882,
+    "off5_leaked": 21,
+    "off5v_leaked": 15,
+    "off5_leak_rate": 0.24705882352941178,
+    "off5v_leak_rate": 0.17647058823529413,
+    "false_rejects_of_correct_answers": 0,
+    "false_reject_task_ids": []
+  },
+  "excluded_off5_rows_missing_visible_ok": 0
+}

@@ -1,0 +1,206 @@
+{
+ "criteria": {
+  "C1_min_band_px": 12.0,
+  "C2_min_contrast": 0.25,
+  "C3_max_ratio": 1.5,
+  "C4_min_sec_per_char": 0.25
+ },
+ "targets": [
+  {
+   "noise_floor": 10.0,
+   "ink_T": 10,
+   "n_bands": 1,
+   "band_heights": [
+    7
+   ],
+   "band_h": 7,
+   "n_ink_px": 1170,
+   "contrast": 0.234,
+   "contrast_p90": 0.404,
+   "void": false,
+   "tag": "T1_world_sub",
+   "sel": "#act .sub",
+   "font_px": 16,
+   "chars": 56,
+   "rect": [
+    480,
+    925,
+    960,
+    27
+   ],
+   "crop": [
+    480,
+    924,
+    960,
+    30
+   ],
+   "color": "rgba(233, 237, 242, 0.52)",
+   "C1": false,
+   "C2": false
+  },
+  {
+   "noise_floor": 59.0,
+   "ink_T": 59.0,
+   "n_bands": 1,
+   "band_heights": [
+    11
+   ],
+   "band_h": 11,
+   "n_ink_px": 719,
+   "contrast": 0.567,
+   "contrast_p90": 0.804,
+   "void": true,
+   "tag": "T2_world_big",
+   "sel": "#act .big",
+   "font_px": 33.6,
+   "chars": 10,
+   "rect": [
+    480,
+    863,
+    960,
+    50
+   ],
+   "crop": [
+    480,
+    861,
+    960,
+    54
+   ],
+   "color": "rgb(233, 237, 242)",
+   "C1": false,
+   "C2": false
+  },
+  {
+   "noise_floor": 1.0,
+   "ink_T": 10,
+   "n_bands": 3,
+   "band_heights": [
+    6,
+    7,
+    7
+   ],
+   "band_h": 7,
+   "n_ink_px": 1906,
+   "contrast": 0.29,
+   "contrast_p90": 0.604,
+   "void": false,
+   "tag": "T3_index_wallsub",
+   "sel": "#worlds-reveal .wall-sub",
+   "font_px": 16.96,
+   "chars": 74,
+   "rect": [
+    72,
+    536,
+    609,
+    87
+   ],
+   "crop": [
+    72,
+    534,
+    609,
+    90
+   ],
+   "color": "rgba(236, 233, 226, 0.58)",
+   "C1": false,
+   "C2": true
+  },
+  {
+   "noise_floor": 1.0,
+   "ink_T": 10,
+   "n_bands": 3,
+   "band_heights": [
+    17,
+    17,
+    17
+   ],
+   "band_h": 17,
+   "n_ink_px": 3678,
+   "contrast": 0.589,
+   "contrast_p90": 0.894,
+   "void": false,
+   "tag": "T4_index_wall",
+   "sel": "#worlds-reveal .wall",
+   "font_px": 48.8,
+   "chars": 23,
+   "rect": [
+    72,
+    322,
+    609,
+    187
+   ],
+   "crop": [
+    72,
+    321,
+    609,
+    189
+   ],
+   "color": "rgb(236, 233, 226)",
+   "C1": true,
+   "C2": true
+  },
+  {
+   "noise_floor": 1.0,
+   "ink_T": 10,
+   "n_bands": 2,
+   "band_heights": [
+    6,
+    6
+   ],
+   "band_h": 6.0,
+   "n_ink_px": 914,
+   "contrast": 0.228,
+   "contrast_p90": 0.4,
+   "void": false,
+   "tag": "T5_index_bound",
+   "sel": "#worlds-reveal .bound",
+   "font_px": 15.2,
+   "chars": 41,
+   "rect": [
+    72,
+    649,
+    541,
+    66
+   ],
+   "crop": [
+    72,
+    648,
+    543,
+    69
+   ],
+   "color": "rgba(236, 233, 226, 0.58)",
+   "C1": false,
+   "C2": false
+  }
+ ],
+ "ratios": {
+  "world  T2/T1": 1.57,
+  "首頁   T4/T3": 2.43,
+  "首頁   T4/T5": 2.83
+ },
+ "dwell": {
+  "dwell_s": 12.5,
+  "text": "現在把可究責層打開。同一批居民、同一批工作。它不保證每次都對，留得住的也只有一部分——它留下的那些指得出是誰做的，而指認到會有後果。",
+  "trail": [
+   [
+    "openworld",
+    true,
+    0.4
+   ],
+   [
+    "openreveal",
+    true,
+    22.4
+   ],
+   [
+    "layeron",
+    true,
+    35.6
+   ]
+  ]
+ },
+ "index_fontsize_before_after": {
+  "on": true,
+  "h": 87,
+  "fs": "16.96px"
+ }
+}

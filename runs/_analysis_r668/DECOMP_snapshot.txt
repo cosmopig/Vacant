@@ -1,0 +1,8 @@
+rows=395 sha256_8=81b266ed terminal=False  ⚠ 未收官＝不是結論
+恆等式 leaked = measured − refused − deliv：三臂成立（⚠ 這是恆等式不是檢定，任何輸入都成立——見 round668）
+跨來源 rows vs summary：['OFF.leaked：summary=38 vs 逐列覆算=39', 'OFF.accepted：summary=131 vs 逐列覆算=132']
+(a) 字面   leaked CONFORM=26 vs OFF5=37  方向對（『明顯』無門檻⇒不判）
+(b) 分解   Δleaked=11 = 拒交驅動 8 + 準確率驅動 4 + void不對稱 -1
+           拒交佔比=72.7%  ⇒ 主要靠交得少？True
+(c) 反事實 forced_leak=34 vs OFF5=37  等覆蓋率差距=3（原始差距=11）  閘門選得較準？True
+未污染增量 i>125：n=7 拒交=1 md∧¬acc=0

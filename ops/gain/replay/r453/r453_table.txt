@@ -1,0 +1,23 @@
+R453 跨機真跑多方執行  run=g_r446_eq5_mbpp  k=2  quorum=2
+機器：mac(Darwin/3.12.10)  vacantdev(Linux/3.12.3)
+
+P-1 跨機可見標籤一致   1840/1840  (100.0000%)  窗口 >=99.5%   PASS
+P-2 出貨 sha 與 r446   340 相符 / 0 不符；拒交 26 相符 / 0 不符；量具擋下 2   PASS
+P-3a contested 格       10   窗口 0   FAIL
+P-3b 執行器被指名格     0   PASS   （差額 10 格被指名的是套件不是機器）
+P-4 鏈驗證             {'mac': True, 'vacantdev': True}   PASS
+P-6 渲染逐位可攜       render 368/368、suite 368/368   PASS
+
+P-5 每題牆鐘（秒）
+  機器           workers    P5a中位  P5a p95  P5a max    P5b中位  P5b p95  P5b max      總牆鐘
+  mac                6    1.069    3.871   41.638    0.207    3.569   41.638   135.45
+  vacantdev          2     0.25    1.695   38.222     0.05    1.657   38.222   149.68
+
+與單執行器 facts 標籤：相符 3680、不符 0
+_select_loop vs select_by_quorum：相符 366、不符 0、跳過 2
+格子錯誤（infra/例外）：0
+承重檔案跨機逐位相同：True  []
+
+判定：REAL_MATCHES_REPLAY_EXCEPT_P3
+R449 §七-1 推翻：未觸發
+R452 §六-2 推翻：未觸發

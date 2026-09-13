@@ -324,6 +324,600 @@ CLAIMS: list[dict[str, Any]] = [
         "依據": {"程式": "examples/realmodel_suite.py 的註解（該處保留了錯誤的完整說明）",
                  "正確做法": "用臂外的 compile_check(t.check)(answer) 獨立判定"},
     },
+    {
+        "id": "gain.signal_exists",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "量具有訊號：無信任層（OFF）時失敗率 26.44%，落在事前訂的 20–60% 窗內",
+        "型別": "量測（事前判準 1）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260901_R437_DECISIVE_RUN_COMPLETE_FINAL.md",
+                 "數值": {"OFF processed": 179, "OFF infra_void": 5, "measured": 174,
+                          "失敗率": 0.2644, "Wilson CI95": [0.204, 0.334]}},
+    },
+    {
+        "id": "gain.arms_differ",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "三臂（OFF／ON／OFF5）的交付品質有可分辨的差異",
+        "型別": "量測（事前判準 2，配對 McNemar）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260901_R437_DECISIVE_RUN_COMPLETE_FINAL.md",
+                 "數值": {"raw ON vs OFF5": {"n": 101, "ON": 0.7525, "OFF5": 0.7723, "b": 6, "c": 8, "p": 0.7905},
+                          "typing 修正版": {"n": 101, "ON": 0.8416, "OFF5": 0.8119, "b": 5, "c": 2, "p": 0.4531}},
+                 "解釋": "兩種口徑都不顯著，且點估計方向會因為修一個無關的 typing 白名單 bug 而翻轉"},
+    },
+    {
+        "id": "gain.equal_budget_on_beats_off5",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "等預算下，Vacant（ON）打得贏同題跑五次取多數決（OFF5）",
+        "型別": "量測（事前判準 3）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260901_R438_HARD_SUBSET_AND_REVISE_MECHANISM.md",
+                 "數值": {"完整配對": {"n": 101, "p": 0.4531},
+                          "難題子集（OFF 失敗集合）": {"n": 21, "ON": 0.2857, "OFF5": 0.2857, "b": 1, "c": 1, "p": 1.0}}},
+    },
+    {
+        "id": "gain.mechanism",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "打不贏的機制：評審票幾乎是常數函數，修訂幾乎不產生淨修正",
+        "型別": "機制分析（在完整 179 題資料上重算）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260901_R438_HARD_SUBSET_AND_REVISE_MECHANISM.md",
+                 "數值": {"生效評審票準確率": 0.7552, "almost-PASS 基線": 0.7522, "差": 0.0029,
+                          "revise 反事實 no_opportunity": "93/113", "盲目採用 revised 的 hidden 通過率": "82.3%→78.8%",
+                          "discarded_win": "0/113", "revision_transition=improved": "1/113"}},
+    },
+    {
+        "id": "gain.ceiling_hypothesis",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "35b worker 太強造成天花板效應，換成 12b 單模型後 Vacant 就會顯出增益",
+        "型別": "量測（人類 2026-09-01 提出的假說 H-A；E1 gemma-4-12b 單模型池 179 題）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260903_R440N_E1_INDEPENDENT_AUDIT_CONCUR.md",
+                 "數值": {"OFF 失敗率": 0.318, "ON vs OFF5": {"n": 167, "b": 11, "c": 12, "p": 1.0},
+                          "評審 grounded −基線": "+4.19pp（95% [0, 8.58]）", "ON void": "12/179"}},
+    },
+    {
+        "id": "gain.hard_bench_hypothesis",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "MBPP+ 對現代模型太簡單，換成有日期戳的比賽難題（LiveCodeBench）就會顯出增益",
+        "型別": "量測（人類 2026-09-01 提出的假說 H-B；E3 LCB 91 題 medium+hard × gemma-only）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260904_R440T_E3_WRAPUP.md",
+                 "數值": {"OFF 失敗率": 0.484, "Wilson CI95": [0.384, 0.585],
+                          "ON vs OFF5": {"n": 87, "b": 15, "c": 10, "p": 0.4244},
+                          "題庫確實更難": "比 MBPP+ 的 31.8% 高 16.6pp"}},
+    },
+    {
+        "id": "gain.reviewer_tracks_difficulty",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "評審追蹤的是題目難度這個全域性質，不是個別答案的對錯",
+        "型別": "機制分析（跨兩題庫對照）",
+        "依據": {"檔案": "增益實驗_2026-08-30/DECISION_20260904_R440T_E3_WRAPUP.md",
+                 "數值": {"MBPP+": {"原始 FAIL 主張": "少數（近乎一律 PASS）", "初稿錯誤率": 0.305,
+                                    "原始層−常數基線": "-2.99pp"},
+                          "LCB 難題": {"原始 FAIL 主張": "234/261 = 89.7%（近乎一律 FAIL）",
+                                       "初稿錯誤率": 0.46, "原始層−常數基線": "+0.77pp"},
+                          "解釋": "換題庫只是換了它偏向哪一個常數"}},
+    },
+    {
+        "id": "gain.clean_dataset",
+        "輪次": "gain-2026-08-30",
+        "宣稱": "決定性 run 是第一個乾淨的完整資料集：無已知 bug 污染、void 率在窗口內",
+        "型別": "資料品質宣稱",
+        "依據": {"檔案": "增益實驗_2026-08-30/g_r356_3arm_summary.json",
+                 "數值": {"ON infra_void": "66/179", "OFF5 infra_void": "30/179", "OFF infra_void": "5/179",
+                          "R437 自記": "void率 ON=36.2% OFF5=16.9% ⚠VOID-GATE-WARNING",
+                          "equal_budget_comparison_valid（summary 欄位）": False}},
+    },
+
+    # ── CONFORM／EQ5／peerexec（2026-09-04 ~ 09-07；round459 從 verdicts.py 搬進來）──
+    # 這八條的宣稱本文、裁決、一句話、邊界仍然只寫在 `examples/verdicts.py`
+    # （單一真相來源，`verdict_for` 會把它們併進來）；這裡放的是**依據**——
+    # 讀索引的 agent 要的是「原始資料在 repo 的哪個檔」，那件事 verdicts.py 不知道。
+    # 在這八條搬進來之前，`_index/claims.json` 少了它們，`archive.json` 得帶一個
+    # `index_gap` 欄位把缺口列出來；缺口補上之後那個欄位就撤掉了（round459）。
+    # 註：`ops/gain/replay/` 底下的 peerexec 資料全部是重放與模擬，唯二的真跑是
+    # `replay/r453/`（k=2）與 `replay/r454/`（k=3）——這件事寫在各條的「哪一半是真跑」。
+    {
+        "id": "gain.conform_early_stop_beats_single",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（三個題庫、配對）",
+        "宣稱": "「跑客戶自己的驗收測資、交第一份通過的、全不通過就拒交」（CONFORM 早停閘門）"
+                "比「單抽一份就收」（OFF）多交付",
+        "依據": {
+            "檔案": "runs/g_r444_conform_mbpp/rows.jsonl、runs/g_r445_conform_mbpp_ext/rows.jsonl"
+                    "（MBPP+ 併庫 371 題）；runs/g_r447_conform_lcb2/rows.jsonl（LCB v2 120 題）；"
+                    "runs/g_r461_lcb3_three_arm/rows.jsonl（LCB v3 189 題）",
+            "裁決文件": "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、"
+                        "DECISION_20260905_R440Z_WRAPUP_LCB2.md、"
+                        "DECISION_20260906_R461_FABLE_AUDIT.md、"
+                        "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
+            "重算": "ops/gain/replay/conform_settle.py、ops/gain/replay/paired_ci.py、"
+                    "ops/gain/replay/pooled_paired_ci.py（零 API，只讀 rows.jsonl）",
+            "欄位": "rows.jsonl 的 arm／task_id／delivered／hidden_pass／calls_used",
+            "數值": {"MBPP+ 併庫 371 題": "+4.58pp（CI [+0.57, +8.04]）",
+                     "LCB v2 120 題": {"delta_pp": 19.17, "b": 31, "c": 8, "p": 0.0003},
+                     "LCB v3 189 題": {"delta_pp": 7.94, "b": 25, "c": 10, "p": 0.0167},
+                     "呼叫／題": "1.51／1.71／1.55 對 1.00"},
+        },
+    },
+    {
+        "id": "gain.gate_rule_beats_majority_vote_same_candidates",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（EQ5 等預算臂，四個 run）",
+        "宣稱": "在同一組 5 份候選、同樣 5 通呼叫下，閘門規則（交第一份通過的、全不通過就不交）"
+                "比五份投票取多數交付得多",
+        "依據": {
+            "檔案": "runs/g_r446_eq5_mbpp/rows.jsonl（MBPP+ 371 題）、"
+                    "runs/g_r448_eq5_mbpp_seed2/rows.jsonl（MBPP+ 371 題、換種子）、"
+                    "runs/g_r449_eq5_lcb2/rows.jsonl（LCB v2 難題 120 題）、"
+                    "runs/g_r449c_eq5_lcb3/rows.jsonl（LCB v3 189 題，判 UNRESOLVED）",
+            "裁決文件": "CONCLUSION_20260904_R446_EQUAL_BUDGET.md、"
+                        "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md、"
+                        "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md（§六 三個狀態、事前寫死）、"
+                        "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md、"
+                        "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md",
+            "重算": "ops/gain/analyze_eq5.py（零 API，只讀 rows.jsonl；它自己印的 prereg 區塊"
+                    "**不是**仲裁者，見 R449B §三 末）",
+            "數值": {"r446": {"gate": 75.47, "vote": 71.43, "b": 24, "c": 9,
+                              "delta_pp": 4.04, "ci95": [0.796, 6.529], "p": 0.0135},
+                     "r448": {"gate": 77.09, "vote": 73.58, "b": 21, "c": 8,
+                              "delta_pp": 3.50, "ci95": [0.81, 6.47], "p": 0.0241},
+                     "r449b": {"gate": 70.83, "vote": 62.50, "b": 15, "c": 5,
+                               "delta_pp": 8.33, "ci95": [0.30, 13.78], "p": 0.0414},
+                     "r449c（UNRESOLVED）": {"gate": 83.07, "vote": 78.84, "b": 13, "c": 5,
+                                             "delta_pp": 4.23, "ci95": [-0.66, 7.68], "p": 0.0963}},
+        },
+    },
+    {
+        "id": "gain.conform_vs_off5_unresolved",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（獨立抽樣，兩個 LCB run）",
+        "宣稱": "閘門（CONFORM）在交付準確率上贏得過同題跑五次取多數決（OFF5）",
+        "依據": {
+            "檔案": "runs/g_r447_conform_lcb2/rows.jsonl（LCB v2 120 題）、"
+                    "runs/g_r461_off_gate_lcb3/rows.jsonl 與 runs/g_r461_lcb3_three_arm/rows.jsonl"
+                    "（LCB v3 189 題）；MBPP+ 側 runs/g_r445_conform_mbpp_ext/rows.jsonl",
+            "裁決文件": "DECISION_20260905_R440Z_WRAPUP_LCB2.md、"
+                        "DECISION_20260906_R461_FABLE_AUDIT.md、"
+                        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+            "重算": "ops/gain/replay/paired_ci.py、ops/gain/replay/off5_k_curve.py",
+            "數值": {"LCB v2": {"delta_pp": 6.67, "p": 0.15},
+                     "LCB v3": {"delta_pp": 1.59, "ci95": [-3.17, 6.35], "p": 0.6636},
+                     "MBPP+ 乾淨複製（新 192 題）": {"delta_pp": 4.69, "ci95": [-1.11, 9.42]},
+                     "MDE@371": 4.31, "80%_power_需配對數": 491, "題庫上限": 378},
+        },
+    },
+    {
+        "id": "gain.lossless_visible_filter",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（六個資料集）",
+        "宣稱": "可見篩選是無損的——沒有出現「隱藏測資會過、但可見驗收沒過」的候選",
+        "依據": {
+            "檔案": "runs/g_r441_gemma_only_mbpp_b/rows.jsonl（0／895）、"
+                    "runs/g_r356_3arm_20260830/rows.jsonl（0／735）、"
+                    "runs/g_r443_gemma_lcb/rows.jsonl（LCB v1 重放 0／455）、"
+                    "runs/g_r447_conform_lcb2/rows.jsonl（LCB v2 真跑 0／120）、"
+                    "runs/g_r461_off_gate_lcb3/rows.jsonl（LCB v3 真跑 0／189）",
+            "裁決文件": "DECISION_20260903_R440P_CONFORMANCE_GATE.md（§二 誠實邊界 2）、"
+                        "DECISION_20260904_R440T_E3_WRAPUP.md、"
+                        "DECISION_20260905_R440Z_WRAPUP_LCB2.md、"
+                        "DECISION_20260906_R461_FABLE_AUDIT.md",
+            "重算": "ops/gain/replay/rows_visible_audit.py、ops/gain/replay/verify_hidden.py、"
+                    "ops/gain/replay/check_lcb_visible_subset.py",
+            "欄位": "rows.jsonl 的 visible_pass 與 hidden_pass；違反＝hidden_pass ∧ ¬visible_pass",
+            "數值": {"MBPP+ 合計": "0／1630", "LCB v1 重放": "0／455",
+                     "LCB v2 真跑": "0／120", "LCB v3 真跑": "0／189",
+                     "重疊（非獨立樣本）": "LCB v1 重放與 LCB v2 真跑共用 91 題"},
+        },
+    },
+    {
+        "id": "gain.off5_helps_on_hard_only",
+        "輪次": "gain-2026-08-30",
+        "型別": "量測（OFF5 vs OFF，跨題庫對照）",
+        "宣稱": "五倍預算的 self-consistency（OFF5 對 OFF）只在難題上買得到東西",
+        "依據": {
+            "檔案": "runs/g_r441_gemma_only_mbpp_b/rows.jsonl 與 runs/g_r356_3arm_20260830/rows.jsonl"
+                    "（MBPP+）、runs/g_r447_conform_lcb2/rows.jsonl（LCB v2 120 題）、"
+                    "runs/g_r461_lcb3_three_arm/rows.jsonl（LCB v3 189 題）",
+            "裁決文件": "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、"
+                        "DECISION_20260905_R440Z_WRAPUP_LCB2.md、"
+                        "DECISION_20260906_R461_FABLE_AUDIT.md",
+            "重算": "ops/gain/replay/off5_k_curve.py、ops/gain/replay/paired_ci.py",
+            "數值": {"MBPP+": {"delta_pp": 0.81, "ci95": [-2.78, 4.28], "格": "RULED_OUT"},
+                     "LCB v2": {"delta_pp": 12.50, "b": 22, "c": 7, "p": 0.0081},
+                     "LCB v3": {"delta_pp": 6.35, "b": 22, "c": 10, "p": 0.0501},
+                     "對照（改花法比加預算更有用）": "+19.2pp @1.71 通 vs +12.5pp @5 通",
+                     "r461 不算難題複製": "lcb3 的 OFF 失敗率 27.5%，已回到 MBPP+ 量級 31.8%"},
+        },
+    },
+    {
+        "id": "peerexec.mutual_execution_below_threshold",
+        "輪次": "peerexec-2026-09-05",
+        "型別": "模擬掃描＋真跑（哪一半是哪一半見裁決的「邊界」欄）",
+        "宣稱": "在多數門檻以下（腐化執行器數 ≤ ⌊(k−1)/2⌋），互跑不互審的交付與無腐化基線逐位相同，"
+                "說謊者被指名、誠實者不被誣告",
+        "依據": {
+            "檔案": "【模擬】ops/gain/replay/peer_exec_sweep.json（200 格：r446 371 題×5 候選、"
+                    "r443 91 題×5、k∈{1,3,5,7}、腐化比例 0–70%、五種攻擊）、"
+                    "ops/gain/replay/peer_exec_flake.json（抖動×腐化）；"
+                    "【真跑】ops/gain/replay/r453/r453_result.json 與 r453_independent_audit.json"
+                    "（k=2、Mac＋vacant-dev）、ops/gain/replay/r454/r454_result.json 與 "
+                    "r454_naming_table.tsv（k=3、1 把說謊）",
+            "裁決文件": "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md、"
+                        "DECISION_20260906_R453_FABLE_AUDIT_REAL_MULTIPARTY.md、"
+                        "DECISION_20260906_R454_FABLE_AUDIT_NAMED_DISSENT.md",
+            "重算": "ops/gain/replay/peer_exec_sim.py（模擬）、ops/gain/replay/peer_exec_real.py（真跑）、"
+                    "ops/gain/replay/receipt_chain_audit.py（鏈驗證）；程式在 vacant/peerexec.py",
+            "數值": {"模擬 門檻以下": {"與無腐化基線逐位相同": "100 格",
+                                       "說謊者被指名": 1.0, "誠實者被誣告": 0.0,
+                                       "1 個腐化 k=1": "−7.8pp、偵測 0",
+                                       "1 個腐化 k=3": "偵測 1.000"},
+                     "真跑 R453（k=2）": {"跨機可見標籤一致": "1840／1840", "出貨 sha": "340／340",
+                                          "拒交": "26／26", "誠實執行器被指名": 0,
+                                          "每台鏈驗真": "2／2", "spec/render sha 跨機相同": "368／368"},
+                     "真跑 R454（k=3、1 把說謊）": {"說謊格 dissenters 恰為 {K3}": "273／273",
+                                                    "誠實金鑰出現在指名欄": "0（分母 1840）",
+                                                    "自相矛盾格裁決仍正確": "58／58",
+                                                    "三條鏈驗真": "3／3（鏈長 1840／1840／1899）",
+                                                    "證言逐筆驗簽失敗": "0（共 5519 筆）"}},
+        },
+    },
+    {
+        "id": "peerexec.suite_fixed_point",
+        "輪次": "peerexec-2026-09-05",
+        "型別": "極限宣稱（held＝這個「買不到」本身被量到了）",
+        "宣稱": "互跑不互審對「驗收套件本身腐化」毫無防禦——這是機制的固定點，"
+                "R451→R452 把它縮小成一個殘餘，但沒有消滅",
+        "依據": {
+            "檔案": "ops/gain/replay/peer_exec_trivial_suite.json（「載得進就算過」的套件）、"
+                    "ops/gain/replay/r451_stateful_gate.json（量具兩方向滿分的 stateful 變體）、"
+                    "ops/gain/replay/peer_exec_suitespec_gate.json 與 r452b_smuggle_gate.json"
+                    "（exec 走私）、ops/gain/replay/r452c_generic_gate.json 與 r452c_channel_hunt.json"
+                    "（殘餘：generic_gauged／weak_oracle）、ops/gain/replay/r453/r453_gauge.json",
+            "裁決文件": "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md（§三-3）、"
+                        "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md、"
+                        "DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md",
+            "重算": "ops/gain/replay/r452_suitespec.py、ops/gain/replay/r452c_generic_gate.py、"
+                    "ops/gain/replay/r452b_smuggle_gate.py；程式在 vacant/suitegauge.py",
+            "數值": {"trivial 套件": {"交付率": "−6.47pp／−18.68pp", "假交付": "31%／49%",
+                                      "四個 k 的爭議率": "全部 0.0%"},
+                     "R451 量具綁進 commit": "trivial 套件 371／371 在 commit 就被拒（沒花一次沙箱）",
+                     "R451 stateful 變體": {"交付率": "−75.20pp", "交付": "0.00%",
+                                            "gauge_status": "ok（量具作為部分解作廢）"},
+                     "R452 套件改成資料": {"exec 走私上鏈": "368／371 → 0／371",
+                                           "超大十六進位整數穿門": "11／11 → 0／11",
+                                           "無損": "1840（MBPP+）＋455（LCB）個候選逐格相同、0 不一致"},
+                     "殘餘（一律講兩個數字，分母 366／371 上鏈題）": {
+                         "可實現 generic_gauged": "17.93% → 20.65%＝+2.72pp",
+                         "事後諸葛上限 weak_oracle": "+4.35pp"}},
+        },
+    },
+    {
+        "id": "peerexec.majority_bound",
+        "輪次": "peerexec-2026-09-05",
+        "型別": "極限宣稱（機制的數學上界，不是量測結果）",
+        "宣稱": "指名有數學上界：多數決最多容忍 ⌊(k−1)/2⌋ 個腐化執行器，過半即反轉",
+        "依據": {
+            "程式": "vacant/peerexec.py::MAJORITY_BOUND_NOTE（機制性質寫死在這裡，"
+                    "不是實驗量到的效應量）與 form_verdict／select_by_quorum",
+            "檔案": "ops/gain/replay/peer_exec_sweep.json（配套量測：固定腐化比例下 k 從 1 到 7"
+                    "交付率一字不變）、ops/gain/replay/r454/r454_naming_table.tsv（真跑的指名欄）",
+            "裁決文件": "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md（§三-1）、"
+                        "DECISION_20260906_R454_FABLE_AUDIT_NAMED_DISSENT.md、"
+                        "DECISION_20260906_R455_FABLE_AUDIT_VIEWER.md（T8：離線檢視器的結構性界線）",
+            "數值": {"容忍上界": "⌊(k−1)/2⌋",
+                     "過半後誣告率": "0.175／0.374（兩批掃描：r446 371 題×5、r443 91 題×5）",
+                     "固定腐化比例下 k=1..7 交付率": "一字不變（串謀 67.39%、破壞 0%）",
+                     "k=3／quorum=2 缺一票": "1-1 平手 ⇒ 未決、不指名"},
+        },
+    },
+    {
+        "id": "harness.hmix_loop_beats_resample_same_budget",
+        "輪次": "harness-2026-09-08",
+        "型別": "量測（R460 六臂 LCB v2 120 題 ＋ R460R **五次**同題複製 ＋ R529 跨題庫四集）",
+        "宣稱": "把五通呼叫花在「跑客戶的驗收測資、把失敗原文貼回去、讓同一個 worker 改」（H-MIX），"
+                "比花在換人重抽（CONFORM）多交付，且 token 不多花",
+        "依據": {
+            "檔案": "runs/g_r460_harness_lcb2_{a1,a2,a3,b1,b2,b3}/rows.jsonl 與 calls.jsonl（六塊各 20 題，合併 120 題）；"
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_{a1,a2,a3,b1,b2,b3}/rows.jsonl（五次複製，各 120 題；"
+                    "r5 713 列，7 列 infra_void 在 notes.jsonl）；"
+                    "runs/g_r529_{lcb3m_a1..a7,lcb3h_a1..a3,hep_a1..a8,mbpp_a1..a19}/rows.jsonl（四集，716 題）",
+            "裁決文件": "DECISION_20260907_R460_HARNESS_PREREG.md（§六 四狀態規則，事前寫死）、"
+                        "DECISION_20260908_R460_FABLE_LAUNCH_NOTES.md、DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md、"
+                        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md（§二 逐次判＋宣稱規則，事前寫死）、"
+                        "**DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md（§八＝五次齊了的補記，2026-09-13）**、"
+                        "DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md",
+            "重算": "ops/gain/analyze_r460.py --run <六塊> --bank lcb2 --rescore-turn1（零 API，只跑沙箱）；"
+                    "ops/gain/analyze_r460r.py --reps 1 2 3 4 5 --bank lcb2；"
+                    "落盤 ops/gain/replay/r460/r460_analyze.json、"
+                    "**ops/gain/replay/r460r/r460r_analyze_5reps.json**（與 `_norescore.json` 仲裁區塊逐位元相同）、"
+                    "ops/gain/replay/r529/r529_analyze.json。"
+                    "本條的 R460R 數字由 rows.jsonl 獨立重算（accepted∧meets_demand），與 analyzer 逐格一致。",
+            "數值": {"R460": {"OFF": {"deliv": 58.33, "false_delivery_n": 50, "tokens_per_task": 2913},
+                              "CONFORM": {"deliv": 70.83, "false_delivery_n": 29, "tokens_per_task": 5805},
+                              "OFF5": {"deliv": 65.00, "false_delivery_n": 42, "tokens_per_task": 15004},
+                              "HPI": {"deliv": 75.83, "false_delivery_n": 17, "tokens_per_task": 9448},
+                              "HOC": {"deliv": 80.00, "false_delivery_n": 18, "tokens_per_task": 7432},
+                              "HMIX": {"deliv": 84.17, "false_delivery_n": 14, "tokens_per_task": 5677},
+                              "HMIX_vs_CONFORM": {"b": 22, "c": 6, "delta_pp": 13.33, "ci95": [4.22, 19.46],
+                                                  "p": 0.0037, "holm_p_adj": 0.0112, "verdict": "EFFECTIVE"},
+                              "HMIX_vs_OFF": {"b": 34, "c": 3, "delta_pp": 25.83, "ci95": [17.32, 29.78]}},
+                     # 五次複製：逐次列，**不准平均、不准併 n**（R460R 預註冊 §二-3 禁令 1／3）。
+                     # num/den 是**配對 complete-case**：r1–r4 兩臂都滿 120；r5 因 7 列 infra_void
+                     # 掉到 116，逐臂自己的分母另列在 R460R_rep5_per_arm_den。
+                     "R460R_HMIX_vs_CONFORM_by_rep": [
+                         {"rep": 1, "num": 93, "den": 120, "conform_num": 86, "delta_pp": 5.83,
+                          "b": 15, "c": 8, "ci95": [-2.79, 12.89],
+                          "holm_p_adj": 0.630, "four_state": "INCONCLUSIVE"},
+                         {"rep": 2, "num": 92, "den": 120, "conform_num": 87, "delta_pp": 4.17,
+                          "b": 17, "c": 12, "ci95": [-5.35, 12.80],
+                          "holm_p_adj": 0.917, "four_state": "INCONCLUSIVE"},
+                         {"rep": 3, "num": 91, "den": 120, "conform_num": 90, "delta_pp": 0.83,
+                          "b": 12, "c": 11, "ci95": [-7.44, 8.89],
+                          "holm_p_adj": 1.000, "four_state": "RULED_OUT",
+                          "ci95_upper": 8.89,
+                          "四狀態語意": "RULED_OUT ＝排除 ≥+10pp，**不是**排除任何效果"},
+                         {"rep": 4, "num": 88, "den": 120, "conform_num": 85, "delta_pp": 2.50,
+                          "b": 13, "c": 10, "ci95": [-5.94, 10.28],
+                          "holm_p_adj": 0.678, "four_state": "INCONCLUSIVE",
+                          "註": "上界 10.28 離 RULED_OUT 只差 0.28pp ⇒ 四狀態計數對區間方法極敏感"},
+                         {"rep": 5, "num": 87, "den": 116, "conform_num": 82, "delta_pp": 4.31,
+                          "b": 14, "c": 9, "ci95": [-4.54, 12.01],
+                          "holm_p_adj": 0.922, "four_state": "INCONCLUSIVE",
+                          "分母": "complete-case 116（7 列 infra_void 作廢）",
+                          "作廢最壞界": [0.83, 7.50]}],
+                     "R460R_rep5_per_arm_den": {"OFF": 119, "CONFORM": 117, "OFF5": 118,
+                                                "HPI": 120, "HOC": 120, "HMIX": 119},
+                     "R460R_rep5_infra_void": {
+                         "n": 7, "by_arm": {"OFF": 1, "CONFORM": 3, "OFF5": 2, "HMIX": 1},
+                         "來源": "2026-09-13 01:44Z 後端模型崩潰後 JIT 重載（TTL 1h、每小時 :07 卸載）；"
+                                 "notes.jsonl 逐筆寫 HTTP 400 Failed to load model gemma-4-12b-it-qat（5）／HTTP 500（2）"},
+                     "R460R_reps_run": 5, "R460R_reps_prereg": 5,
+                     "R460R_statement_rule": "5/5 同號成立、≥4/5 Holm 顯著不成立（0/5）⇒ 逐次照實列；"
+                                             "不准寫「複製穩定」「多數支持」，也不准寫「複製失敗」「效果消失」「等價」",
+                     "R460R_holm_significant_n": 0,
+                     "R460R_ci_all_intersect_R460": "五個未調整區間全部與 R460 的 [4.22, 19.46] 相交",
+                     "R460R_ci_uppers": [12.89, 12.80, 8.89, 10.28, 12.01],
+                     "R460R_ci_uppers_all_below_13.33": True,
+                     "R460R_power_expectation": "n=120 對 +10pp 檢定力 0.43–0.63 ⇒ 五次預期 2–3 次過；"
+                                                "真值若為 +10pp，0/5 的機率約 0.007–0.06（下尾）",
+                     "R460R_co_tenancy_pct": [8.5, 71.3, 2.1, 0.0, 0.0],
+                     # 四集：逐集列，**不准平均**（R529 §三 宣稱句第三句）。
+                     "R529_HMIX_vs_CONFORM_by_set": [
+                         {"set": "lcb3_medium", "num": 126, "den": 135, "conform_num": 125,
+                          "delta_pp": 0.74, "b": 6, "c": 5},
+                         {"set": "lcb3_hard", "num": 43, "den": 54, "conform_num": 41,
+                          "delta_pp": 3.70, "b": 5, "c": 3},
+                         {"set": "humanevalplus", "num": 148, "den": 156, "conform_num": 147,
+                          "delta_pp": 0.64, "b": 5, "c": 4},
+                         {"set": "mbppplus", "num": 299, "den": 371, "conform_num": 295,
+                          "delta_pp": 1.08, "b": 15, "c": 11}],
+                     "R529_HMIX_vs_CONFORM_pooled": {"num": 616, "den": 716, "conform_num": 608,
+                                                     "delta_pp": 1.12, "b": 31, "c": 23,
+                                                     "holm_p_adj": 0.341},
+                     "R529_four_state": "INCONCLUSIVE",
+                     "方向": "9/9 同號（五次複製＋四集），幅度未確立"},
+        },
+    },
+    {
+        "id": "harness.loop_beats_single_shot_replicated",
+        "輪次": "harness-2026-09-08",
+        "型別": "量測（**五次**同題複製 × 三條 harness 臂 ＋ 四個互斥題目集）",
+        "宣稱": "把五通呼叫花在回饋迴圈（H-MIX／H-PI／H-OC），比單抽一份就收（OFF）多交付"
+                "——這一條跨題庫、跨複製都站得住",
+        "依據": {
+            "檔案": "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl（五次 × 120 題；r5 713 列）；"
+                    "runs/g_r529_*/rows.jsonl（四集 716 題）",
+            "裁決文件": "**DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md§八-1**（五次齊了的補記）；"
+                        "DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md§二、§三、§七、§九；"
+                        "DECISION_20260911_R529_CROSS_BANK_PREREG.md§四、§六；"
+                        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md§二-1",
+            "重算": "ops/gain/replay/r529/r529_analyze.json；"
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json；"
+                    "R460R 五次由 rows.jsonl 獨立重算（r5 用 complete-case 分母）",
+            "數值": {"R460R_vs_OFF_by_rep": {
+                         "HMIX": [{"rep": 1, "num": 93, "off_num": 69, "den": 120,
+                                   "delta_pp": 20.00, "b": 29, "c": 5},
+                                  {"rep": 2, "num": 92, "off_num": 65, "den": 120,
+                                   "delta_pp": 22.50, "b": 34, "c": 7},
+                                  {"rep": 3, "num": 91, "off_num": 69, "den": 120,
+                                   "delta_pp": 18.33, "b": 28, "c": 6},
+                                  {"rep": 4, "num": 88, "off_num": 62, "den": 120,
+                                   "delta_pp": 21.67, "b": 33, "c": 7},
+                                  {"rep": 5, "num": 88, "off_num": 61, "den": 118,
+                                   "delta_pp": 22.88, "b": 34, "c": 7,
+                                   "分母": "complete-case 118"}],
+                         "HPI": [{"rep": 1, "delta_pp": 19.17, "b": 26, "c": 3, "den": 120},
+                                 {"rep": 2, "delta_pp": 25.00, "b": 35, "c": 5, "den": 120},
+                                 {"rep": 3, "delta_pp": 18.33, "b": 29, "c": 7, "den": 120},
+                                 {"rep": 4, "delta_pp": 29.17, "b": 39, "c": 4, "den": 120},
+                                 {"rep": 5, "delta_pp": 19.33, "b": 31, "c": 8, "den": 119}],
+                         "HOC": [{"rep": 1, "delta_pp": 19.17, "b": 28, "c": 5, "den": 120},
+                                 {"rep": 2, "delta_pp": 19.17, "b": 30, "c": 7, "den": 120},
+                                 {"rep": 3, "delta_pp": 17.50, "b": 28, "c": 7, "den": 120},
+                                 {"rep": 4, "delta_pp": 26.67, "b": 38, "c": 6, "den": 120},
+                                 {"rep": 5, "delta_pp": 24.37, "b": 31, "c": 2, "den": 119}],
+                         "holm": "十五格全部顯著（每次複製之內 6 個檢定的家族）"},
+                     "R529_HMIX_vs_OFF_by_set": [
+                         {"set": "lcb3_medium", "num": 126, "off_num": 115, "den": 135,
+                          "delta_pp": 8.15, "b": 17, "c": 6},
+                         {"set": "lcb3_hard", "num": 43, "off_num": 38, "den": 54,
+                          "delta_pp": 9.26, "b": 7, "c": 2},
+                         {"set": "humanevalplus", "num": 148, "off_num": 129, "den": 156,
+                          "delta_pp": 12.18, "b": 24, "c": 5},
+                         {"set": "mbppplus", "num": 299, "off_num": 277, "den": 371,
+                          "delta_pp": 5.93, "b": 31, "c": 9}],
+                     "R529_HMIX_vs_OFF_pooled": {"num": 616, "off_num": 559, "den": 716,
+                                                 "delta_pp": 7.96, "b": 79, "c": 22,
+                                                 "holm_p_adj": 2.02e-8},
+                     "真來源數": 3,
+                     "分母警語": "HumanEval+ 是 156/164（8 題因沙箱信封排除）；"
+                                 "R460R r5 的三個對照分母各自不同（118／119／119，7 列 infra_void），"
+                                 "不准統一回填 120",
+                     "後端負載不同質": "五次與 R529 的共租率 8.5／71.3／2.1／0／0%；"
+                                       "這一條的效果量大到共租解釋不了（量級上限 ≤1.7pp／臂），但仍要寫明"},
+        },
+    },
+    {
+        "id": "harness.gain_comes_from_executable_gate_and_resample",
+        "輪次": "harness-2026-09-08",
+        "型別": "歸因（**稽核判斷**；CONFORM−OFF 是家族外探索量，p 未校正）",
+        "宣稱": "增益的主體是「可執行的驗收閘門＋重抽」，回饋迴圈只是疊在它上面的小增量",
+        "依據": {
+            "檔案": "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl；runs/g_r529_*/rows.jsonl",
+            "裁決文件": "**DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md§八-1、§八-3-2**；"
+                        "DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md§二、§七-2、§七-3；"
+                        "DECISION_20260903_R440P_CONFORMANCE_GATE.md§二、§五-1",
+            "重算": "分子分母由 rows.jsonl 獨立重算（交付判準＝accepted ∧ meets_demand）；"
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json",
+            "數值": {"R460R_CONFORM_vs_OFF_by_rep": [
+                         {"rep": 1, "conform_num": 86, "off_num": 69, "den": 120,
+                          "delta_pp": 14.17, "b": 22, "c": 5, "p_uncorrected": 0.0015},
+                         {"rep": 2, "conform_num": 87, "off_num": 65, "den": 120,
+                          "delta_pp": 18.33, "b": 28, "c": 6, "p_uncorrected": 0.00020},
+                         {"rep": 3, "conform_num": 90, "off_num": 69, "den": 120,
+                          "delta_pp": 17.50, "b": 26, "c": 5, "p_uncorrected": 0.00019},
+                         {"rep": 4, "conform_num": 85, "off_num": 62, "den": 120,
+                          "delta_pp": 19.17, "b": 30, "c": 7, "p_uncorrected": 0.00019},
+                         {"rep": 5, "conform_num": 82, "off_num": 60, "den": 116,
+                          "delta_pp": 18.97, "b": 28, "c": 6, "p_uncorrected": 0.00020,
+                          "分母": "complete-case 116（7 列 infra_void 作廢）"}],
+                     "R529_CONFORM_vs_OFF_by_set": [
+                         {"set": "lcb3_medium", "conform_num": 125, "off_num": 115, "den": 135,
+                          "delta_pp": 7.41, "b": 14, "c": 4, "p_uncorrected": 0.031},
+                         {"set": "lcb3_hard", "conform_num": 41, "off_num": 38, "den": 54,
+                          "delta_pp": 5.56, "b": 3, "c": 0, "p_uncorrected": 0.25},
+                         {"set": "humanevalplus", "conform_num": 147, "off_num": 129, "den": 156,
+                          "delta_pp": 11.54, "b": 21, "c": 3, "p_uncorrected": 0.00028},
+                         {"set": "mbppplus", "conform_num": 295, "off_num": 277, "den": 371,
+                          "delta_pp": 4.85, "b": 26, "c": 8, "p_uncorrected": 0.0029}],
+                     "R529_CONFORM_vs_OFF_pooled": {"conform_num": 608, "off_num": 559, "den": 716,
+                                                    "delta_pp": 6.84, "b": 64, "c": 15,
+                                                    "p_uncorrected": 2.3e-8},
+                     "迴圈再加多少": {"R460R": [5.83, 4.17, 0.83, 2.50, 4.31],
+                                      "R529": [0.74, 3.70, 0.64, 1.08]},
+                     "p 全部未校正": "五次 CONFORM−OFF 的 p_raw 全部 < 0.002，但 CONFORM−OFF "
+                                     "不在任何預註冊的 Holm 家族裡 ⇒ 不可讀成「閘門的效果是顯著的」",
+                     "事後補的四集 Holm（只當描述）": {"humanevalplus": 0.0011, "mbppplus": 0.0088,
+                                                      "lcb3_medium": 0.062, "lcb3_hard": 0.25},
+                     "不是因果": "CONFORM 與 H-MIX 是兩條各自跑的臂，不是兩階段；"
+                                 "「閘門 +14pp、迴圈 +6pp」是相減得到的敘述，不是被分離出來的成分"},
+        },
+    },
+    {
+        "id": "harness.majority_vote_loses_to_gate",
+        "輪次": "harness-2026-09-08",
+        "型別": "量測（**探索量**：OFF5−CONFORM 不在任何預註冊 Holm 家族裡）",
+        "宣稱": "同樣五通呼叫，五份投票取多數（OFF5）輸給「跑驗收測資、交第一份通過的」（CONFORM），"
+                "而且貴一倍以上",
+        "依據": {
+            "檔案": "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl 與 calls.jsonl",
+            "裁決文件": "**DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md§八-1、§八-3-3**"
+                        "（held → unresolved 的依據）；"
+                        "DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md§二；"
+                        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md§二-1、§二-3",
+            "重算": "交付由 rows.jsonl 重算；token／呼叫由 calls.jsonl 的 usage 逐通加總"
+                    "（preflight 另計、未計入；r5 排除作廢題的呼叫）",
+            "數值": {"OFF5_vs_CONFORM_by_rep": [
+                         {"rep": 1, "off5_num": 73, "conform_num": 86, "den": 120,
+                          "delta_pp": -10.83, "b": 7, "c": 20, "p_uncorrected": 0.019},
+                         {"rep": 2, "off5_num": 74, "conform_num": 87, "den": 120,
+                          "delta_pp": -10.83, "b": 9, "c": 22, "p_uncorrected": 0.029},
+                         {"rep": 3, "off5_num": 71, "conform_num": 90, "den": 120,
+                          "delta_pp": -15.83, "b": 4, "c": 23, "p_uncorrected": 0.00031},
+                         {"rep": 4, "off5_num": 80, "conform_num": 85, "den": 120,
+                          "delta_pp": -4.17, "b": 12, "c": 17, "p_uncorrected": 0.458,
+                          "共租": "零（1004 獨占三串）"},
+                         {"rep": 5, "off5_num": 80, "conform_num": 82, "den": 115,
+                          "delta_pp": -1.74, "b": 11, "c": 13, "p_uncorrected": 0.839,
+                          "分母": "complete-case 115", "共租": "零（1004 獨占三串）"}],
+                     "同號 5/5": True, "未校正 p < 0.05 的次數": 3,
+                     "乾淨的兩次不顯著": "後端零共租的 r4／r5 恰好是 −4.17／−1.74 那兩次；"
+                                         "同期 OFF 掉到 51.67／51.26%、OFF5 升到 66.67／68.64%、"
+                                         "CONFORM 幾乎沒動（70.83／70.94%）"
+                                         "⇒ 跨次差異裡有一塊不是取樣",
+                     "但共租解釋不了這個形狀": "OFF5 ＝五份 OFF 取多數；OFF 變差的同時 OFF5 好了 7–9pp，"
+                                               "方向相反 ⇒「乾淨的兩次不顯著」目前只能當描述，"
+                                               "講成「共租讓前三次看起來更誇張」是還沒有證據的因果話",
+                     "tokens_per_task": {"OFF5": [15565, 14877, 14954, 15226, 14163],
+                                         "CONFORM": [6497, 6880, 5246, 5770, 6416],
+                                         "ratio": [2.40, 2.16, 2.85, 2.64, 2.21]},
+                     "calls_per_task": {"OFF5": [5.04, 5.03, 5.03, 5.03, 5.12],
+                                        "CONFORM": [1.78, 1.71, 1.53, 1.69, 1.79]},
+                     "OFF5_vs_OFF_by_rep": [{"rep": 1, "delta_pp": 3.33, "p_uncorrected": 0.58},
+                                            {"rep": 2, "delta_pp": 7.50, "p_uncorrected": 0.16},
+                                            {"rep": 3, "delta_pp": 1.67, "p_uncorrected": 0.85},
+                                            {"rep": 4, "delta_pp": 15.00, "p_uncorrected": 0.0021},
+                                            {"rep": 5, "delta_pp": 16.24, "p_uncorrected": 0.00088}],
+                     "口徑差異": "Fable 摘要寫 token 2.4–2.9 倍；本輪自 calls.jsonl 重算 rep2 是 2.16 倍"
+                                 "（analyzer 含 wire_probe、rows 的 harness_tokens_total 不含）。"
+                                 "r5 的 2.21 排除了作廢題的呼叫；把作廢題的 47,102 token 算進去"
+                                 "（tpc_incl_void）是 2.25——兩個數字不可混用"},
+        },
+    },
+    {
+        "id": "harness.hpi_hoc_vs_resample_unresolved",
+        "輪次": "harness-2026-09-08",
+        "型別": "量測（R460 的另外兩條 harness 臂 ＋ R460R **五次**同題複製）",
+        "宣稱": "pi 式原始回饋迴圈（H-PI）與計畫＋診斷＋自測（H-OC）也贏過換人重抽",
+        "依據": {
+            "檔案": "runs/g_r460_harness_lcb2_*/rows.jsonl；"
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl",
+            "裁決文件": "**DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md§八-1、§八-3-5**；"
+                        "DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md§三（四狀態：INCONCLUSIVE）；"
+                        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md§二-1、§一〇 修訂 A",
+            "重算": "ops/gain/replay/r460/r460_analyze.json · decision.HPI / decision.HOC；"
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json；"
+                    "R460R 五次由 rows.jsonl 獨立重算（r5 用 complete-case 分母 117）",
+            "數值": {"R460": {"HPI_vs_CONFORM": {"delta_pp": 5.00, "ci95": [-4.40, 13.30],
+                                                 "holm_p_adj": 0.345},
+                              "HOC_vs_CONFORM": {"delta_pp": 9.17, "ci95": [-1.00, 17.62],
+                                                 "holm_p_adj": 0.160}},
+                     # 逐次列，不准平均、不准併 n（R460R 預註冊 §二-3）。
+                     "R460R_vs_CONFORM_by_rep": {
+                         "HPI": [{"rep": 1, "num": 92, "conform_num": 86, "den": 120,
+                                  "delta_pp": 5.00, "b": 16, "c": 10, "holm_p_adj": 0.654},
+                                 {"rep": 2, "num": 95, "conform_num": 87, "den": 120,
+                                  "delta_pp": 6.67, "b": 19, "c": 11, "holm_p_adj": 0.602},
+                                 {"rep": 3, "num": 91, "conform_num": 90, "den": 120,
+                                  "delta_pp": 0.83, "b": 16, "c": 15, "holm_p_adj": 1.000},
+                                 {"rep": 4, "num": 97, "conform_num": 85, "den": 120,
+                                  "delta_pp": 10.00, "b": 20, "c": 8, "holm_p_adj": 0.107,
+                                  "ci95": [0.62, 17.16],
+                                  "註": "五次三十格裡**唯一**未調整下界 > 0 的一格；"
+                                        "Holm 後不顯著，且 H-PI 是消融臂 ⇒ 不得替主張"},
+                                 {"rep": 5, "num": 83, "conform_num": 83, "den": 117,
+                                  "delta_pp": 0.00, "b": 14, "c": 14, "holm_p_adj": 1.000,
+                                  "ci95": [-9.26, 9.26], "four_state": "RULED_OUT",
+                                  "分母": "complete-case 117",
+                                  "作廢最壞界": [-2.50, 2.50],
+                                  "註": "最壞界**會變號** ⇒ RULED_OUT 照規則保留，敏感度必須一起寫"}],
+                         "HOC": [{"rep": 1, "num": 92, "conform_num": 86, "den": 120,
+                                  "delta_pp": 5.00, "b": 16, "c": 10, "holm_p_adj": 0.654},
+                                 {"rep": 2, "num": 88, "conform_num": 87, "den": 120,
+                                  "delta_pp": 0.83, "b": 13, "c": 12, "holm_p_adj": 1.000},
+                                 {"rep": 3, "num": 90, "conform_num": 90, "den": 120,
+                                  "delta_pp": 0.00, "b": 12, "c": 12, "holm_p_adj": 1.000},
+                                 {"rep": 4, "num": 94, "conform_num": 85, "den": 120,
+                                  "delta_pp": 7.50, "b": 17, "c": 8, "holm_p_adj": 0.216},
+                                 {"rep": 5, "num": 89, "conform_num": 83, "den": 117,
+                                  "delta_pp": 5.13, "b": 15, "c": 9, "holm_p_adj": 0.922,
+                                  "分母": "complete-case 117"}]},
+                     "十次全部未過 Holm": True,
+                     "rep3_HOC_與_rep5_HPI_是恰好打平": "12/12 與 14/14，方向沒有翻負；"
+                                                        "**不准**讀成「證實無效」",
+                     "對單發則五次全顯著": {"HPI": [19.17, 25.00, 18.33, 29.17, 19.33],
+                                            "HOC": [19.17, 19.17, 17.50, 26.67, 24.37]}},
+        },
+    },
+    {
+        "id": "harness.gain_is_the_loop_not_the_prompt",
+        "輪次": "harness-2026-09-08",
+        "型別": "歸因（D5，turn-1 離線重取碼再計分）",
+        "宣稱": "H-MIX 的增益幾乎全來自「把失敗原文貼回去讓它改」的迴圈，不是第一輪 prompt 的措辭",
+        "依據": {
+            "檔案": "runs/g_r460_harness_lcb2_*/calls.jsonl（turn-1 全文回應）＋ rows.jsonl",
+            "裁決文件": "DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md§五、§十",
+            "重算": "ops/gain/analyze_r460.py --rescore-turn1；ops/gain/replay/r460/r460_analyze.json · attribution.*",
+            "數值": {"HMIX": {"loop_effect_pp_replays": [19.17, 17.50], "prompt_effect_pp_replays": [6.67, 8.33],
+                              "loop_gain_n": 21, "turn1_visible_pass_pp": 74.2}},
+        },
+    },
 ]
 
 
@@ -368,6 +962,11 @@ ROUNDS = [
      "問題": ["脈衝攻擊是怎樣的攻擊？", "它的具體影響是什麼？", "稽核若也是模型會怎樣？"],
      "報告": "報告_脈衝攻擊與稽核盲區.md",
      "實驗": ["E17", "E18", "E19", "E20", "E21", "E22", "E23", "E24"]},
+    {"id": "gain-2026-08-30", "dir": "增益實驗_2026-08-30",
+     "問題": ["加了 Vacant，產出有沒有更接近需求？", "等預算下打不打得贏最土的 self-consistency？",
+              "打不贏的話，機制上為什麼？"],
+     "報告": "CONCLUSION_20260830_G_EXPERIMENT.md",
+     "實驗": ["E25"]},
 ]
 
 
@@ -476,6 +1075,8 @@ def main() -> None:
                             f"verdict=未複驗 代表還沒有人試過推翻它，不代表它通過了。",
                     "裁決值": {"refuted": "宣稱是錯的，正確說法在「更正後」",
                                "overstated": "核心站得住但說得太滿，或原始證據／機制解釋有問題",
+                               "held": "事前訂的判準通過（預註冊、跑完對答案）",
+                               "no_effect": "量到沒有可分辨的效應——這本身就是答案，不是沒測完",
                                "未複驗": "尚未送複驗——不等於通過"},
                     "claims": claims_out}, ensure_ascii=False, indent=1), encoding="utf-8")
 
