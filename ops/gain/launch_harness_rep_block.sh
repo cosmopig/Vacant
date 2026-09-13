@@ -20,6 +20,9 @@
 #   · **探針 max_tokens 512**（round460e-2：16 會被 reasoning 吃光、content 交空白，
 #     後端是好的、紅的是量具）；body 檢查**不放寬**（仍要求 content 非空）；
 #   · `/v1/models` 要回得出模型；三次 chat 探針要**三次全過**；
+#   · **探針送 `reasoning_effort`（預設 none）並把 `usage.…reasoning_tokens`
+#     記進 `<OUT>.backend_meta.json`**（2026-09-13，§十一）——≠0 只印 WARN
+#     **不擋**（要不要擋由預註冊決定）；
 #   · **seed 授權集合相等**檢查（比新鮮度檢查更嚴，見下面 SEED_AUTHORIZED_SET）；
 #   · `ThreadPoolExecutor(` 一出現就停（併發旋鈕變了要重新裁決）；
 #   · 每一塊自己的 `flock`、自己的 `launch.log`、自己的 `backend.json`、`setsid`。
@@ -70,6 +73,17 @@ OUT="${OUT:?OUT 必須給（例：runs/g_r460r1_harness_lcb2_a1）}"
 OFFSET="${OFFSET:?OFFSET 必須給（0/20/40/60/80/100）}"
 SEED="${SEED:?SEED 必須給（例：g-r460r1-lcb2）}"
 API="${API:?API 必須給（直連端點，不准 hub）}"
+# ── 推論模式（DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md §十一）──────
+# 同一顆 gemma-4 在 1003（LM Studio 0.4.24）被跑成 thinking、在 1004（0.4.17）
+# 不是。R460／R460R 全部跑在 1004 ⇒ 實際條件是**非 thinking**；
+# 預設 none 就是把那個條件**寫出來**，而不是繼續靠「剛好排到 1004」。
+# `default` ＝ 不送這個欄位（2026-09-13 之前的行為）。
+REASONING_EFFORT="${REASONING_EFFORT:-none}"
+RE_FIELD=""
+[ "$REASONING_EFFORT" = "default" ] || RE_FIELD=",\"reasoning_effort\":\"$REASONING_EFFORT\""
+SLOT_ID="${SLOT_ID:-}"
+SLOT_HOST="${SLOT_HOST:-}"
+BACKEND_META="${BACKEND_META:-{\}}"
 
 mkdir -p "$ROOT/logs"
 # ── UTF-8 安全的位元組截斷（2026-09-11 事故修補）──────────────────────────
@@ -159,31 +173,102 @@ first=$(curl -s -m 15 "$base/models" \
 say "$base/models first model = $first"
 [ -n "$first" ] && [ "$first" != "none" ] || { say "ABORT: /v1/models 沒有回任何模型"; finish abort_probe_models; }
 ok=0
+PROBE_RT="-"        # 最後一次探針量到的 reasoning_tokens（進 backend_meta.json）
 for i in 1 2 3; do
   code=$(curl -s -m 120 -o "$ROOT/logs/rep_${TAG}_probe_$i.json" -w '%{http_code}' "$API" \
          -H 'Content-Type: application/json' \
-         -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}],\"max_tokens\":$PROBE_MAX_TOKENS,\"temperature\":0}" || true)
-  body=$(python3 -c '
+         -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply with exactly: OK\"}],\"max_tokens\":$PROBE_MAX_TOKENS,\"temperature\":0$RE_FIELD}" || true)
+  # body_ok 的判準**一個字沒改**（content 非空）；後面兩欄是**新增的觀測**，
+  # 不參與通過與否（§十一 的處置：先記錄，要不要擋由預註冊決定）。
+  probe_out=$(python3 -c '
 import sys, json
 try:
     d = json.load(open(sys.argv[1])); c = (d.get("choices") or [{}])[0].get("message", {}).get("content", "")
-    print("yes" if ("error" not in d and c.strip()) else "no")
-except Exception: print("no")' "$ROOT/logs/rep_${TAG}_probe_$i.json")
-  say "probe $i -> HTTP $code body_ok=$body"
+    u = d.get("usage") or {}
+    rt = (u.get("completion_tokens_details") or {}).get("reasoning_tokens")
+    print("yes" if ("error" not in d and c.strip()) else "no",
+          "-" if rt is None else rt, u.get("completion_tokens", "-"))
+except Exception: print("no - -")' "$ROOT/logs/rep_${TAG}_probe_$i.json")
+  body=$(printf '%s\n' "$probe_out" | awk '{print $1}')
+  rt=$(printf '%s\n' "$probe_out" | awk '{print $2}')
+  ct=$(printf '%s\n' "$probe_out" | awk '{print $3}')
+  say "probe $i -> HTTP $code body_ok=$body reasoning_tokens=$rt completion_tokens=$ct (reasoning_effort=$REASONING_EFFORT)"
+  [ "$rt" = "-" ] || PROBE_RT="$rt"
+  case "$rt" in
+    ''|-|0) ;;
+    *) say "WARN: probe $i 的 reasoning_tokens=$rt ≠ 0，但已送出 reasoning_effort=$REASONING_EFFORT ——這一塊跑的是 **thinking 模式**，與非 thinking 的塊不是同一個推論條件（§十一）。**不擋**，只記錄。" ;;
+  esac
   [ "$code" = "200" ] && [ "$body" = "yes" ] && ok=$((ok + 1))
 done
 [ "$ok" -eq 3 ] || { say "ABORT: 探針只過 $ok/3"; finish "abort_probe_only_$ok"; }
+# LM Studio 版本：`/v1/models` 與 HTTP header 都不帶（2026-09-11 實測）。
+# `/api/v0/models` 是 LM Studio 自己的 REST 面；問得到就記，問不到記 `-`。
+LMS_VER=$(curl -s -m 10 "${base%/v1}/api/v0/models" 2>/dev/null | python3 -c '
+import sys, json
+def walk(o):
+    if isinstance(o, dict):
+        for k, v in o.items():
+            if "version" in k.lower() and isinstance(v, (str, int, float)):
+                return str(v)
+        for v in o.values():
+            r = walk(v)
+            if r: return r
+    elif isinstance(o, list):
+        for v in o:
+            r = walk(v)
+            if r: return r
+    return ""
+try: print(walk(json.load(sys.stdin)) or "-")
+except Exception: print("-")' || echo "-")
+say "probe lmstudio_version(/api/v0) = $LMS_VER　reasoning_effort=$REASONING_EFFORT　probe_reasoning_tokens=$PROBE_RT"
 
 # ── 發射 ─────────────────────────────────────────────────────────────────
 lock="$ROOT/.launch_rep_${TAG}.lock"
 say "launching -> $OUT (seed=$SEED bank=lcb2 n=$N_BLOCK offset=$OFFSET arms=$ARMS api=$API gauge-scope=$GAUGE_SCOPE lock=$lock)"
 curl -s -m 15 "$base/models" > "$OUT.backend.json" 2>/dev/null || true
 printf '%s\n' "$API" > "$OUT.endpoint"     # 排程器重啟後靠它把塊認回原本的槽
+# 2026-09-13（§十一）：本支以前**沒有**寫 backend_meta.json（只有 R529 那一支有）
+# ⇒ R460R 的 30 塊事後只查得到 IP，查不到「那一台是什麼版本、跑在哪一種推論模式」。
+# 補上，形狀與 `launch_r529_block.sh` 那一支相同（analyzer 兩邊共讀同一組鍵）。
+python3 - "$OUT" "$API" "${SLOT_ID:-}" "${SLOT_HOST:-}" "${BACKEND_META:-{\}}" \
+         "$REASONING_EFFORT" "$PROBE_RT" "$LMS_VER" <<'PY' || say "WARN: backend_meta 寫入失敗（不擋發射）"
+import json, sys, datetime, pathlib
+out, api, slot, host, meta_s, effort, probe_rt, lms_ver = sys.argv[1:9]
+try:
+    meta = json.loads(meta_s) if meta_s.strip() else {}
+except ValueError:
+    meta = {"parse_error": meta_s[:200]}
+raw = None
+try:
+    raw = json.loads(pathlib.Path(out + ".backend.json").read_text(encoding="utf-8"))
+except Exception:
+    pass
+# `-` ＝ 探針沒拿到這一格。**不要**寫成 0：「沒回報 reasoning」與「reasoning 是 0」
+# 在 §十一 裡是兩件不同的事。
+rt = None if probe_rt in ("", "-") else int(probe_rt)
+pathlib.Path(out + ".backend_meta.json").write_text(json.dumps({
+    "endpoint": api, "slot_id": slot, "slot_host": host,
+    "declared": meta,
+    "probed_models": raw,
+    "reasoning_effort": effort,
+    "probe_reasoning_tokens": rt,
+    "probe_reasoning_ok": (None if rt is None else rt == 0),
+    "lmstudio_version_probed": (None if lms_ver in ("", "-") else lms_ver),
+    "probed_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    "honesty": ("lmstudio_version 是人回報的宣稱，本 runner 查不到；"
+                "probed_models 才是這一塊自己量到的證據。"
+                "probe_reasoning_tokens 是**探針那一通**量到的，"
+                "不保證整塊都在同一個推論模式；"
+                "reasoning_effort 是**請求端要求的**，只有 chat() 送得出去"
+                "（generate() 被 T12 釘死）。"),
+}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
 PYTHONUNBUFFERED=1 \
 VACANT_GAIN_API="$API" CLINE_KEYS=/nonexistent \
 setsid nohup flock -n "$lock" python3 ops/gain/gain_run.py --out "$OUT" --n "$N_BLOCK" --offset "$OFFSET" \
   --decision "$DEC" --seed "$SEED" --arms "$ARMS" --bank lcb2 --models "$MODEL" \
   --request-timeout-s "$REQUEST_TIMEOUT_S" --review-timeout-s 380 --retries 4 \
+  --reasoning-effort "$REASONING_EFFORT" \
   --probe-sample 0 --gauge-scope "$GAUGE_SCOPE" \
   >>"$OUT.launch.log" 2>&1 < /dev/null 9>&- &
 
