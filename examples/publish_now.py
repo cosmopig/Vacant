@@ -1246,31 +1246,36 @@ GATE_FACTS = [
                     "deliveries) and a hindsight upper bound that can see the hidden labels "
                     "(+4.35pp). Both hold only on MBPP+.",
     },
-    # ── 2026-09-12：R529 跨題庫收官 ＋ R460R 三次同題複製之後的改寫 ──────────
+    # ── 2026-09-12：R529 跨題庫收官 ＋ R460R 同題複製之後的改寫 ──────────────
+    #    （2026-09-13 更新成五次：r4／r5 在 1004 獨占三串補跑完）
     # 原本這裡有一條 `harness-loop`（「迴圈比重抽多交付 13 個百分點」）。
-    # 它**移到 GATE_UNKNOWNS** 了：三次複製 +5.8／+4.2／+0.8pp、跨題庫四集
-    # +0.6～+3.7pp，七次全部同號、七次都沒把 0 排除掉 ⇒ 幅度未確立。
+    # 它**移到 GATE_UNKNOWNS** 了：五次複製 +5.83／+4.17／+0.83／+2.50／+4.31pp、
+    # 跨題庫四集 +0.6～+3.7pp，九次全部同號、九次都沒把 0 排除掉 ⇒ 幅度未確立。
     # 站得住的是下面三條——**贏單發**、**主體是閘門＋重抽**、**多數決比閘門差**。
     {
         "id": "loop-vs-single-shot",
         "claim": "harness.loop_beats_single_shot_replicated",
         "premise": True,
-        "plain": {"zh": "把五通呼叫花在回饋迴圈，比單抽一份就收多交付——三次複製、四個題目集都成立",
+        "plain": {"zh": "把五通呼叫花在回饋迴圈，比單抽一份就收多交付——五次複製、四個題目集都成立",
                   "en": "Spending the five calls on a feedback loop delivers more than taking a single "
-                        "draft — it holds across three replications and four task sets"},
-        "how": {"zh": "同一批 LCB v2 120 題重跑三次（新 seed）：迴圈 77.5/76.7/75.8% 對單發 57.5/54.2/57.5%"
-                      "＝+20.0／+22.5／+18.3pp，三條 harness 九格全部通過 Holm 校正。"
+                        "draft — it holds across five replications and four task sets"},
+        "how": {"zh": "同一批 LCB v2 120 題重跑**五次**（新 seed）：迴圈 77.5/76.7/75.8/73.3/74.6% "
+                      "對單發 57.5/54.2/57.5/51.7/51.7%＝+20.0／+22.5／+18.3／+21.7／+22.9pp，"
+                      "三條 harness **十五格全部**通過 Holm 校正。"
                       "換四個互斥題目集（LCB v3 中等 135 題、LCB v3 難 54 題、HumanEval+ 156 題、MBPP+ 371 題）："
                       "四集全正 +8.2／+9.3／+12.2／+5.9pp，合併 616/716＝86.0% 對 559/716＝78.1%（+7.96pp）。",
-                "en": "The same 120 LeetCode tasks rerun three times with new seeds: the loop delivered "
-                      "77.5/76.7/75.8% against single shot 57.5/54.2/57.5% (+20.0/+22.5/+18.3pp); all nine "
+                "en": "The same 120 LeetCode tasks rerun five times with new seeds: the loop delivered "
+                      "77.5/76.7/75.8/73.3/74.6% against single shot 57.5/54.2/57.5/51.7/51.7% "
+                      "(+20.0/+22.5/+18.3/+21.7/+22.9pp); all fifteen "
                       "cells across three harnesses clear Holm. Across four disjoint task sets (LCB v3 medium "
                       "135, LCB v3 hard 54, HumanEval+ 156, MBPP+ 371) all four are positive "
                       "(+8.2/+9.3/+12.2/+5.9pp); pooled 616/716 = 86.0% vs 559/716 = 78.1%."},
         "en_extra": "Pooled paired McNemar b/c = 79/22, +7.96pp, Holm-adjusted p = 2.0e-8. Caveats that travel "
                     "with the number: two of the four sets are difficulty slices of one source, so there are "
-                    "three real sources, not four; the three replications share the same 120 tasks and are not "
+                    "three real sources, not four; the five replications share the same 120 tasks and are not "
                     "independent samples; HumanEval+ is 156 of 164 (eight excluded by the sandbox envelope). "
+                    "The fifth replication lost 7 rows to a backend fault, so its paired denominators are 118 "
+                    "and 119 rather than 120 — they are reported as they are, not refilled to 120. "
                     "This says the loop beats a single draft — it does **not** say the loop beats resampling "
                     "at the same budget, which remains unresolved.",
     },
@@ -1282,37 +1287,23 @@ GATE_FACTS = [
                   "en": "Most of the gain comes from the executable acceptance gate plus resampling; "
                         "the feedback loop is a small increment on top"},
         "how": {"zh": "把「迴圈贏單發」拆開：光是重抽不回饋（跑同一個閘門）就拿走"
-                      "+14.2／+18.3／+17.5pp（三次複製）與 +7.4／+5.6／+11.5／+4.9pp（四集）；"
-                      "迴圈再加上去的只有 +5.8／+4.2／+0.8pp 與 +0.7／+3.7／+0.6／+1.1pp。",
+                      "+14.2／+18.3／+17.5／+19.2／+19.0pp（**五次**複製）與 "
+                      "+7.4／+5.6／+11.5／+4.9pp（四集）；"
+                      "迴圈再加上去的只有 +5.8／+4.2／+0.8／+2.5／+4.3pp 與 +0.7／+3.7／+0.6／+1.1pp。",
                 "en": "Decomposing 'the loop beats single shot': resampling alone, with no feedback but "
-                      "running the same gate, already takes +14.2/+18.3/+17.5pp (three replications) and "
-                      "+7.4/+5.6/+11.5/+4.9pp (four sets). The loop adds only +5.8/+4.2/+0.8pp and "
-                      "+0.7/+3.7/+0.6/+1.1pp on top."},
+                      "running the same gate, already takes +14.2/+18.3/+17.5/+19.2/+19.0pp (five replications) "
+                      "and +7.4/+5.6/+11.5/+4.9pp (four sets). The loop adds only "
+                      "+5.8/+4.2/+0.8/+2.5/+4.3pp and +0.7/+3.7/+0.6/+1.1pp on top."},
         "en_extra": "This is an **audit judgement**, not a pre-registered result: the gate-vs-single-shot "
                     "contrast is outside the Holm family of either study, so those p-values are uncorrected. "
                     "It is also a subtraction, not a causal decomposition — the gate arm and the loop arm are "
                     "two separately run arms, not two stages of one pipeline. And 'small increment' means "
                     "'magnitude not established', not 'measured to be small'.",
     },
-    {
-        "id": "vote-loses-to-gate",
-        "claim": "harness.majority_vote_loses_to_gate",
-        "premise": True,
-        "plain": {"zh": "同樣五通呼叫，五份投票取多數輸給「跑驗收、交第一份通過的」，而且貴一倍以上",
-                  "en": "At the same five-call budget, majority voting over five drafts loses to "
-                        "'run the tests, ship the first that passes' — and costs more than twice as much"},
-        "how": {"zh": "三次複製三次都輸：多數決 73/120、74/120、71/120 對閘門 86/120、87/120、90/120"
-                      "＝−10.8／−10.8／−15.8pp。每題 token 是閘門的 2.40／2.16／2.85 倍，"
-                      "呼叫 5.0 通對 1.5–1.8 通。",
-                "en": "Majority voting lost all three times: 73/120, 74/120, 71/120 against the gate's "
-                      "86/120, 87/120, 90/120 (−10.8/−10.8/−15.8pp) — while burning 2.40/2.16/2.85× the "
-                      "tokens per task and 5.0 calls against 1.5–1.8."},
-        "en_extra": "Exploratory: this contrast is outside the pre-registered Holm family, so the p-values "
-                    "(0.019 / 0.029 / 0.0003) are uncorrected. The three replications share one 120-task bank, "
-                    "so they are not independent samples and must not be pooled. On two other banks (MBPP+, "
-                    "LCB v3) the same comparison is unresolved rather than negative — so this does not say "
-                    "'majority voting is generally worse'.",
-    },
+    # 2026-09-13：原本這裡還有一條 `vote-loses-to-gate`（「多數決輸給閘門」）。
+    # 五次跑齊之後它**移到 GATE_UNKNOWNS** 了：5/5 同號沒變，但只有 3/5 的未校正
+    # p < 0.05，而不顯著的兩次（r4 −4.17、r5 −1.74）正是後端**零共租**、
+    # 條件最乾淨的兩次。方向還在，「贏」這個字的強度不在了。
 ]
 
 
@@ -1486,118 +1477,280 @@ GATE_UNKNOWNS = [
         # 但複製與跨題庫都沒把 0 排除掉 ⇒ 它屬於「只有一半的答案」這一欄。
         "id": "loop-vs-resample-unresolved",
         "status": "unknown",
-        "plain": {"zh": "迴圈比「換人重抽」好多少，沒量出來——七次同號，七次都沒把 0 排除掉",
-                  "en": "How much the loop beats resampling is not established — seven measurements all "
+        "plain": {"zh": "迴圈比「換人重抽」好多少，沒量出來——九次同號，九次都沒把 0 排除掉",
+                  "en": "How much the loop beats resampling is not established — nine measurements all "
                         "point the same way, and not one of them excluded zero"},
-        "how": {"zh": "第一次量到 +13.33pp（LCB v2 120 題）。之後同一批題目重跑三次："
-                      "+5.8／+4.2／+0.8pp，Holm 校正後 p 0.630／0.917／1.000，**0/3 顯著**；"
+        "how": {"zh": "第一次量到 +13.33pp（LCB v2 120 題）。之後同一批題目重跑**五次**："
+                      "+5.83／+4.17／+0.83／+2.50／+4.31pp，Holm 校正後 p "
+                      "0.630／0.917／1.000／0.678／0.922，**0/5 顯著**；"
                       "換四個題目集：+0.7／+3.7／+0.6／+1.1pp，合併 +1.12pp（Holm p 0.341）。",
                 "en": "The first measurement was +13.33pp (LCB v2, 120 tasks). Rerunning the same tasks "
-                      "three times gave +5.8/+4.2/+0.8pp, Holm-adjusted p 0.630/0.917/1.000 — none "
-                      "significant. Four different task sets gave +0.7/+3.7/+0.6/+1.1pp, pooled +1.12pp "
-                      "(Holm p 0.341)."},
+                      "five times gave +5.83/+4.17/+0.83/+2.50/+4.31pp, Holm-adjusted p "
+                      "0.630/0.917/1.000/0.678/0.922 — none significant. Four different task sets gave "
+                      "+0.7/+3.7/+0.6/+1.1pp, pooled +1.12pp (Holm p 0.341)."},
         "detail": {
-            "zh": "**同號未解析 ≠ 沒有差異。** 方向 7/7 全正、一次都沒翻，所以這**不是**"
+            "zh": "**同號未解析 ≠ 沒有差異。** 方向 9/9 全正、一次都沒翻，所以這**不是**"
                   "「複製失敗」「效果消失」「迴圈與重抽等價」——那幾句一句都不准寫。"
                   "但也**不准**再寫「多交付 13 個百分點」：那個點估計是上偏的"
                   "（事前就寫了 winner's curse——n=120 對 +10pp 的檢定力只有 0.43–0.63，"
-                  "能被判顯著的點估計本來就被截斷在 MDE 以上），而且後續七次沒有任何一次重現它。\n\n"
-                  "唯一被**排除**掉的東西是第三次複製的 ≥+10pp（區間上界 8.89 < 10）。"
-                  "那一格的四狀態是 RULED_OUT，語意是「排除 ≥+10pp」，"
-                  "**不是**「排除任何效果」；另外兩次是 INCONCLUSIVE。\n\n"
-                  "預註冊的複製規則是**五次**（5/5 同號且 ≥4/5 Holm 顯著才准寫「複製穩定」），"
-                  "現在跑完三次 ⇒ 規則自動落在「逐次照實列」，不准平均、不准併 n、不准挑一次。"
-                  "第四、第五次正在補跑。\n\n"
-                  "還有一層限制：三次複製共用**同一批** 120 題（seed 只換題序與取樣、不換題目），"
-                  "所以就算五次全過，能講的也只是「在這 120 題上穩定」。",
-            "en": "**Same sign but unresolved is not the same as no difference.** All seven point "
+                  "能被判顯著的點估計本來就被截斷在 MDE 以上），而且後續九次沒有任何一次重現它。\n\n"
+                  "**五次跑齊了，宣稱規則正式判過一次**：規則寫死「5/5 同號且 ≥4/5 Holm 顯著 ⇒ "
+                  "可以寫『複製穩定』；否則逐次照實列」。同號 5/5 成立、Holm 顯著 **0/5** 不成立 "
+                  "⇒ 落在**逐次照實列**。不准平均、不准併 n、不准挑一次，"
+                  "也不准寫「複製穩定」「多數支持」。\n\n"
+                  "同一段裡必須一起講的還有四件事：（1）五個未調整區間"
+                  "（[−2.79, 12.89]／[−5.35, 12.80]／[−7.44, 8.89]／[−5.94, 10.28]／[−4.54, 12.01]）"
+                  "**全部與第一次的 [4.22, 19.46] 相交**——以區間看，沒有一次與它互斥；"
+                  "（2）五個上界（12.89／12.80／8.89／10.28／12.01）**全低於**第一次的點估計 13.33"
+                  "（描述，不是檢定）；（3）事前寫死的檢定力預期是五次裡過 **2–3 次**，"
+                  "真值若是 +10pp 出現 0/5 的機率約 0.007–0.06，**落在下尾**"
+                  "（下尾不等於反證，但也不是可以揮手帶過的噪音）；"
+                  "（4）唯一被**排除**掉的東西是第三次的 ≥+10pp（區間上界 8.89 < 10），"
+                  "那一格四狀態是 RULED_OUT，語意是「排除 ≥+10pp」**不是**「排除任何效果」"
+                  "——另外四次是 INCONCLUSIVE，而第四次的上界 10.28 離 RULED_OUT 只差 0.28pp，"
+                  "所以四狀態的計數照印但**不當結論**。\n\n"
+                  "第五次有 7 列作廢（後端模型崩潰後 JIT 重載、每小時卸載），"
+                  "所以它的主指標分母是 **complete-case 116 不是 120**；"
+                  "作廢的最壞界算過了：這一格落在 [+0.83, +7.50]，**不變號**。\n\n"
+                  "還有一層限制：五次複製共用**同一批** 120 題（seed 只換題序與取樣、不換題目），"
+                  "所以就算五次全過，能講的也只是「在這 120 題上穩定」。"
+                  "五次的後端負載也不同質（與另一個實驗的共租率 8.5／71.3／2.1／0／0%）"
+                  "——那是描述，不校正，但也不准把跨次差異全歸給取樣。",
+            "en": "**Same sign but unresolved is not the same as no difference.** All nine point "
                   "estimates are positive and none flipped, so 'replication failed', 'the effect "
                   "disappeared' and 'the loop and resampling are equivalent' are all forbidden. But "
                   "'13 percentage points more' is equally forbidden now: that estimate is biased upward "
                   "(the winner's curse was written down in advance — power at n=120 for +10pp is only "
-                  "0.43–0.63), and none of the seven later measurements reproduced it.\n\n"
-                  "The one thing actually excluded is ≥+10pp in the third replication (interval upper "
-                  "bound 8.89 < 10). That cell's four-state verdict is RULED_OUT, which means "
-                  "'≥+10pp is excluded', **not** 'any effect is excluded'; the other two are "
-                  "INCONCLUSIVE.\n\n"
-                  "The pre-registered rule calls for five replications (5/5 same sign and ≥4/5 "
-                  "Holm-significant before 'stable' may be written). Three are done, so the rule falls "
-                  "through to 'list each run as it is' — no averaging, no pooling, no cherry-picking. "
-                  "The fourth and fifth are still running.\n\n"
-                  "One further limit: the three replications share the same 120 tasks (the seed changes "
-                  "order and sampling, not the tasks), so even 5/5 would only say 'stable on these 120'.",
+                  "0.43–0.63), and none of the nine later measurements reproduced it.\n\n"
+                  "**All five replications are now in, so the claim rule has been applied once and for "
+                  "all.** The rule, frozen before the data: 5/5 same sign and ≥4/5 Holm-significant "
+                  "permits 'replicates stably'; otherwise each run is listed as it is. Same sign is 5/5 "
+                  "(met); Holm-significant is **0/5** (not met) — so it falls through to listing each run. "
+                  "No averaging, no pooling, no cherry-picking, and no 'stable' or 'mostly supported'.\n\n"
+                  "Four things must be said in the same breath: (1) all five unadjusted intervals "
+                  "([-2.79, 12.89] / [-5.35, 12.80] / [-7.44, 8.89] / [-5.94, 10.28] / [-4.54, 12.01]) "
+                  "**intersect the first run's [4.22, 19.46]** — on intervals, not one of them is "
+                  "incompatible with it; (2) all five upper bounds (12.89 / 12.80 / 8.89 / 10.28 / 12.01) "
+                  "fall **below** the first run's point estimate of 13.33 (a description, not a test); "
+                  "(3) the power written down in advance expected **2–3 of 5** to clear Holm, and if the "
+                  "true effect really were +10pp the chance of seeing 0/5 is roughly 0.007–0.06 — the "
+                  "**lower tail** (a lower tail is not a disproof, but it is not noise to wave away "
+                  "either); (4) the only thing actually excluded is ≥+10pp in the third replication "
+                  "(upper bound 8.89 < 10), whose four-state verdict is RULED_OUT, meaning '≥+10pp is "
+                  "excluded', **not** 'any effect is excluded' — the other four are INCONCLUSIVE, and the "
+                  "fourth's upper bound of 10.28 misses RULED_OUT by 0.28pp, so the four-state counts are "
+                  "printed but not treated as a conclusion.\n\n"
+                  "The fifth replication lost 7 rows to a backend fault (model crash, then JIT reload with "
+                  "an hourly unload), so its paired denominator is **116, not 120**. The worst case over "
+                  "those voided rows was computed: this cell lands in [+0.83, +7.50] and **does not change "
+                  "sign**.\n\n"
+                  "One further limit: the five replications share the same 120 tasks (the seed changes "
+                  "order and sampling, not the tasks), so even 5/5 would only say 'stable on these 120'. "
+                  "The five did not run under the same backend load either (co-tenancy with another "
+                  "experiment at 8.5/71.3/2.1/0/0%) — described, not corrected for, and not an excuse to "
+                  "attribute all between-run variation to sampling.",
         },
         "sources": ["data/archive.json · claims[harness.hmix_loop_beats_resample_same_budget]",
                     "examples/verdicts.py · VERDICTS[harness.hmix_loop_beats_resample_same_budget]",
+                    "DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md §八（五次齊了的補記）",
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json",
                     "DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md §二、§三、§七",
                     "DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md §二、§三、§七",
                     "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md §二",
-                    "runs/g_r460r{1,2,3}_harness_lcb2_*/rows.jsonl"],
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl"],
+    },
+    {
+        # 2026-09-13：這一條從 GATE_FACTS 移過來。方向沒變（五次全負），
+        # 但 5/5 裡只有 3/5 的未校正 p < 0.05，而不顯著的兩次正是後端
+        # **零共租**、條件最乾淨的兩次 ⇒ 「贏」這個字撐不住了。
+        "id": "vote-loses-to-gate-unresolved",
+        "status": "unknown",
+        "plain": {"zh": "多數決比閘門差多少，沒量出來——五次同號，只有三次的差距大到看得出來，"
+                        "而且後端最乾淨的那兩次看不出來",
+                  "en": "How much majority voting loses to the gate is not established — five runs all "
+                        "point the same way, only three separate from zero, and the two cleanest runs "
+                        "are not among them"},
+        "how": {"zh": "同一批 LCB v2 120 題五次：多數決 73/120、74/120、71/120、80/120、80/115 "
+                      "對閘門 86/120、87/120、90/120、85/120、82/115"
+                      "＝−10.83／−10.83／−15.83／−4.17／−1.74pp"
+                      "（未校正 p 0.019／0.029／0.0003／0.46／0.84）。"
+                      "成本一路沒變：每題 token 是閘門的 2.40／2.16／2.85／2.64／2.21 倍，"
+                      "呼叫 5.0 通對 1.5–1.8 通。",
+                "en": "The same 120 LeetCode tasks, five times: majority voting 73/120, 74/120, 71/120, "
+                      "80/120, 80/115 against the gate's 86/120, 87/120, 90/120, 85/120, 82/115 "
+                      "(-10.83/-10.83/-15.83/-4.17/-1.74pp; uncorrected p 0.019/0.029/0.0003/0.46/0.84). "
+                      "The cost gap never moved: 2.40/2.16/2.85/2.64/2.21x the tokens per task, and 5.0 "
+                      "calls against 1.5-1.8."},
+        "detail": {
+            "zh": "**同號未解析 ≠ 沒有差異，但也不准再寫成「贏」。** 五次方向全負、一次都沒翻，"
+                  "所以「多數決不比閘門差」「兩者等價」「打平」一句都不准寫；"
+                  "同時 5/5 裡只有 3/5 的未校正 p < 0.05，所以"
+                  "「三次都輸、而且輸的幅度在變大」那種遞增敘事也**不准**再寫"
+                  "——第四、第五次把幅度收回到 −4.17／−1.74pp。\n\n"
+                  "**最該講的是這件事**：前三次與另一個實驗共租同一台後端"
+                  "（共租率 8.5／71.3／2.1%），第四、第五次是獨占（0／0%）。"
+                  "恰好就是那兩次不顯著，而且同一期間單發臂掉到 51.7／51.3%、"
+                  "多數決臂升到 66.7／68.6%，而閘門臂幾乎沒動（70.8／70.9%）。"
+                  "也就是說，跨次差異裡有一塊**不是取樣**，而這一條的強度剛好掛在那一塊上。"
+                  "但**共租本身解釋不了這個形狀**：多數決就是五份單發取多數，"
+                  "單發變差的同時多數決反而好了 7–9 個百分點，方向相反。"
+                  "所以「乾淨的兩次不顯著」目前只能當**描述**；"
+                  "把它講成「共租讓前三次看起來更誇張」是還沒有證據的因果話。"
+                  "共租是描述性的紀錄，不用來校正任何數字。\n\n"
+                  "這個對照本來就**不在**預註冊的 Holm 家族裡（家族是三條迴圈臂 × 單發／閘門），"
+                  "所以上面的 p 一律未校正，「3/5 顯著」是五個未校正 p 的計數，"
+                  "不是任何一個校正後的結論。五次共用同一批 120 題 ⇒ 不是五個獨立樣本，"
+                  "**不准併 n**、不准平均。\n\n"
+                  "換題庫的話結論還會再鬆：MBPP+ 與 LCB v3 上同一個比較是同號跨 0。"
+                  "**不准講「多數決一般而言較差」**，也不准把這一條與"
+                  "「同一組候選上換選擇規則」（EQ5）互相援引——那是不同的估計量。",
+            "en": "**Same sign but unresolved is not the same as no difference — and 'the gate wins' is no "
+                  "longer sayable either.** All five point the same way and none flipped, so 'majority "
+                  "voting is no worse', 'equivalent' and 'a tie' are all forbidden. At the same time only "
+                  "3 of 5 have an uncorrected p below 0.05, so the earlier escalating story ('lost all "
+                  "three times, and the margin is growing') is forbidden too — the fourth and fifth runs "
+                  "pulled the margin back to -4.17 and -1.74pp.\n\n"
+                  "**The thing most worth saying**: the first three replications shared the backend with "
+                  "another experiment (co-tenancy 8.5/71.3/2.1%); the fourth and fifth had it to "
+                  "themselves (0/0%). Those two are exactly the ones that do not separate from zero — and "
+                  "over the same period the single-shot arm fell to 51.7/51.3% while the voting arm rose "
+                  "to 66.7/68.6% and the gate arm barely moved (70.8/70.9%). Some of the between-run "
+                  "variation is therefore **not sampling**, and this claim's strength happens to rest on "
+                  "that part. But **co-tenancy on its own does not explain that shape**: the voting arm is "
+                  "a majority over five single-shot draws, so the single-shot arm getting worse while the "
+                  "voting arm gains 7-9 points runs the other way. 'The two clean runs are the "
+                  "non-significant ones' therefore stands as a **description**; turning it into 'co-tenancy "
+                  "inflated the first three' is a causal claim with no evidence behind it yet. Co-tenancy is "
+                  "recorded descriptively and is not used to correct any number.\n\n"
+                  "This contrast was never in the pre-registered Holm family (that family is three loop "
+                  "arms against single shot and against the gate), so every p above is uncorrected, and "
+                  "'3 of 5 significant' is a count over five uncorrected p-values, not a corrected "
+                  "conclusion. The five replications share one 120-task bank, so they are not independent "
+                  "samples and must not be pooled or averaged.\n\n"
+                  "On other banks the picture loosens further: on MBPP+ and LCB v3 the same comparison is "
+                  "same-sign but crosses zero. So this does **not** say 'majority voting is generally "
+                  "worse', and it must not be conflated with the separate result about changing the "
+                  "selection rule over one fixed set of candidates — that is a different estimand.",
+        },
+        "sources": ["data/archive.json · claims[harness.majority_vote_loses_to_gate]",
+                    "examples/verdicts.py · VERDICTS[harness.majority_vote_loses_to_gate]",
+                    "DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md §八-1、§八-3-3",
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json · co_tenancy",
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/{rows.jsonl,calls.jsonl}"],
     },
     {
         "id": "hpi-hoc-unresolved",
         "status": "unknown",
-        "plain": {"zh": "另外兩條 harness（pi 式、計畫＋診斷）對重抽同號但沒量出來，三次複製後仍然沒有",
+        "plain": {"zh": "另外兩條 harness（pi 式、計畫＋診斷）對重抽同號但沒量出來，五次複製後仍然沒有",
                   "en": "The other two harnesses (pi-style, plan+diagnostics) point the same way as H-MIX "
-                        "against resampling and were still not resolved after three replications"},
+                        "against resampling and were still not resolved after five replications"},
         "how": {"zh": "R460：H-PI +5.00pp [−4.40, +13.30]、H-OC +9.17pp [−1.00, +17.62] 對 CONFORM；"
-                      "Holm 校正後 p 0.345／0.160。三次複製：H-PI +5.0／+6.7／+0.8pp、"
-                      "H-OC +5.0／+0.8／**+0.0**pp，**六次全部未過 Holm**。"
-                      "兩者對單發則三次全部顯著（+19.2～+25.0pp）。",
+                      "Holm 校正後 p 0.345／0.160。**五次**複製："
+                      "H-PI +5.00／+6.67／+0.83／**+10.00**／**+0.00**pp、"
+                      "H-OC +5.00／+0.83／**+0.00**／+7.50／+5.13pp，**十次全部未過 Holm**。"
+                      "兩者對單發則五次全部顯著（+17.5～+29.2pp）。",
                 "en": "R460: H-PI +5.00pp [-4.40, +13.30] and H-OC +9.17pp [-1.00, +17.62] vs resampling, "
-                      "Holm-adjusted p 0.345 / 0.160. Across three replications: H-PI +5.0/+6.7/+0.8pp and "
-                      "H-OC +5.0/+0.8/**+0.0**pp — none of the six clears Holm. Against single shot, "
-                      "however, all three replications are significant (+19.2 to +25.0pp)."},
+                      "Holm-adjusted p 0.345 / 0.160. Across five replications: H-PI "
+                      "+5.00/+6.67/+0.83/**+10.00**/**+0.00**pp and "
+                      "H-OC +5.00/+0.83/**+0.00**/+7.50/+5.13pp — none of the ten clears Holm. Against "
+                      "single shot, however, all five replications are significant (+17.5 to +29.2pp)."},
         "detail": {"zh": "事前四狀態規則判 INCONCLUSIVE：上界沒排除 10pp，下界沒過 0。不准寫「打平」或「迴圈沒用」。"
-                         "第三次複製的 H-OC 恰好是 +0.00pp（b/c=12/12）——那是一次 n=120 的打平，"
-                         "**不准**讀成「證實無效」或「等價」：區間根本沒有把效果排除掉。"
+                         "第三次複製的 H-OC 與第五次的 H-PI 恰好是 +0.00pp（b/c 12/12 與 14/14）"
+                         "——那是兩次 n=120／117 的打平，**不准**讀成「證實無效」或「等價」："
+                         "區間根本沒有把效果排除掉。\n\n"
+                         "**第四次的 H-PI +10.00pp [+0.62, +17.16] 是五次三十格裡唯一一格"
+                         "未校正下界大於 0 的**，而它 **Holm 之後 0.107、不顯著**。這一格特別容易被拿去"
+                         "當成「終於量到了」，所以要講清楚兩層理由：（a）它沒過家族校正；"
+                         "（b）H-PI 是**消融臂**——預註冊寫死本 run 不回答「哪一條 harness 比較好」，"
+                         "主張掛的是 H-MIX。用消融臂裡一個未校正的下界去支持主臂的結論，"
+                         "等於把家族拆開挑最好看的一格。\n\n"
+                         "第五次的 H-PI 打平掛在 7 列作廢上：那 7 列的最壞界是 [−2.50, +2.50]，"
+                         "**會變號**，所以那一格的 RULED_OUT 狀態雖照規則保留，敏感度必須一起寫"
+                         "（對照：H-MIX 那一格的最壞界 [+0.83, +7.50] 不變號）。\n\n"
                          "H-MIX 對 H-PI 的 +8.33pp 是探索量，不在 Holm 家族內，不能用來講「哪一條 harness 比較好」"
                          "——複製的預註冊也照抄了這條禁令（本 run 不回答哪條 harness 較好）。",
                    "en": "The pre-registered four-state rule says INCONCLUSIVE: the upper bound does not exclude "
                          "10pp and the lower bound does not clear zero. 'Tie' and 'the loop does not help' are "
-                         "forbidden readings. H-OC in the third replication lands on exactly +0.00pp (b/c = 12/12) "
-                         "— that is one n=120 tie, and reading it as 'proven ineffective' or 'equivalent' is "
-                         "forbidden: the interval excludes nothing. H-MIX vs H-PI (+8.33pp) is exploratory and "
+                         "forbidden readings. H-OC in the third replication and H-PI in the fifth land on "
+                         "exactly +0.00pp (b/c 12/12 and 14/14) — two ties at n=120 and n=117, and reading "
+                         "either as 'proven ineffective' or 'equivalent' is forbidden: the interval excludes "
+                         "nothing.\n\n"
+                         "**H-PI in the fourth replication, +10.00pp [+0.62, +17.16], is the only one of the "
+                         "thirty cells across five replications whose uncorrected lower bound clears zero** — "
+                         "and it is **not significant after Holm (0.107)**. That cell is the one most likely to "
+                         "be picked up as 'finally measured', so two reasons matter: (a) it does not survive "
+                         "the family correction; (b) H-PI is an **ablation arm** — the pre-registration states "
+                         "that this study does not answer which harness is better, and the claim rides on "
+                         "H-MIX. Using an uncorrected lower bound from an ablation arm to support the main "
+                         "arm's conclusion is taking the family apart and keeping the best-looking cell.\n\n"
+                         "The fifth replication's H-PI tie hangs on 7 voided rows: their worst case is "
+                         "[-2.50, +2.50], which **does change sign**, so that cell's RULED_OUT verdict is kept "
+                         "per the rule but the sensitivity must be stated alongside it (for contrast, the "
+                         "H-MIX cell's worst case, [+0.83, +7.50], does not change sign).\n\n"
+                         "H-MIX vs H-PI (+8.33pp) is exploratory and "
                          "outside the Holm family; the replication pre-registration carries the same prohibition "
                          "(this study does not answer which harness is better)."},
-        "sources": ["DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md §二、§三",
+        "sources": ["DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md §八-1、§八-3-5",
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json",
+                    "DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md §二、§三",
                     "ops/gain/replay/r460/r460_analyze.json · decision.HPI / decision.HOC",
                     "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md §二-1",
-                    "runs/g_r460r{1,2,3}_harness_lcb2_*/rows.jsonl"],
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl"],
     },
     {
-        "id": "harness-replications-running",
+        # 2026-09-13：id 從 `harness-replications-running` 改過來。五次跑齊了，
+        # 「還在跑」是假的；留著一個說謊的 id 與留著一句說謊的文字沒有兩樣。
+        "id": "harness-replications-rule-not-met",
         "status": "unknown",
-        "plain": {"zh": "五次複製跑完三次：第四、第五次還在跑，所以「複製穩定」這句話還不能寫",
-                  "en": "Three of five replications are done; the fourth and fifth are still running, so "
-                        "'replicates stably' may not be written yet"},
-        "how": {"zh": "R460R：五次預註冊、先跑三次（人類 2026-09-11 指示，1003 停用），每次 120 題六臂，1004 三槽。"
-                      "三次都跑到底、零 infra_void。n=120 對 +10pp 的檢定力 0.43–0.63，"
-                      "事前預期五次裡只有 2–3 次通過 Holm——**實際是 0/3**。",
-                "en": "R460R: five pre-registered replications, the first three run (human instruction "
-                      "2026-09-11, backend 1003 excluded), 120 tasks × six arms each, all three terminal "
-                      "with zero infra voids. Power at n=120 for +10pp is 0.43–0.63, so 2–3 of 5 were "
-                      "expected to clear Holm even if the effect is real — the actual count is 0 of 3."},
-        "detail": {"zh": "宣稱規則事前寫死：5/5 同號且 ≥4/5 Holm 顯著才可寫「複製穩定」，否則逐次照實列；"
-                         "少於五次自動落在後者（預註冊禁令 6：不准只跑完三次就結算）。"
-                         "不併 n、不平均、不挑一次。\n\n"
-                         "**事前預期 2–3/5、實際 0/3**，這件事本身要照實記——它不是「效果不存在」的證據"
-                         "（0/3 在檢定力 0.43–0.63 之下並不罕見），但也不是可以忽略的噪音。\n\n"
+        "plain": {"zh": "五次複製跑齊了：同號 5/5，但 Holm 顯著 0/5 ⇒ 規則判「逐次照實列」，"
+                        "「複製穩定」這句話**永遠不會**為這批資料寫出來",
+                  "en": "All five replications are in: 5/5 same sign but 0/5 Holm-significant, so the rule "
+                        "returns 'list each run as it is' — 'replicates stably' will never be written for "
+                        "this batch"},
+        "how": {"zh": "R460R：五次預註冊、五次跑完（人類 2026-09-11 指示停用 1003，全部跑在 1004 三槽）。"
+                      "r1–r4 各 720 列、零 infra_void；r5 713 列、7 列 infra_void"
+                      "（後端模型崩潰後 JIT 重載、每小時卸載）。"
+                      "n=120 對 +10pp 的檢定力 0.43–0.63，事前預期五次裡有 2–3 次通過 Holm"
+                      "——**實際是 0/5**。",
+                "en": "R460R: five pre-registered replications, all five now run (human instruction "
+                      "2026-09-11 excluded backend 1003; all ran on 1004's three slots). r1–r4 are 720 rows "
+                      "each with zero infra voids; r5 is 713 rows with 7 infra voids (a model crash "
+                      "followed by JIT reload with an hourly unload). Power at n=120 for +10pp is "
+                      "0.43–0.63, so 2–3 of 5 were expected to clear Holm even if the effect is real — "
+                      "the actual count is 0 of 5."},
+        "detail": {"zh": "宣稱規則事前寫死：5/5 同號且 ≥4/5 Holm 顯著才可寫「複製穩定」，否則逐次照實列。"
+                         "五次跑齊之後判定：同號 **5/5 成立**、Holm 顯著 **0/5 不成立** ⇒ 逐次照實列。"
+                         "不併 n、不平均、不挑一次，也不准反過來寫「複製失敗」。\n\n"
+                         "**事前預期 2–3/5、實際 0/5**，這件事本身要照實記。若真值真是 +10pp，"
+                         "出現 0/5 的機率約 0.007–0.06 ⇒ 落在下尾。下尾不是「效果不存在」的證明，"
+                         "但也不是可以揮手帶過的噪音——這一格正是「規則跑完之後剩下什麼」的答案。\n\n"
                          "LCB v2 就是 120 題，seed 只打亂順序不抽樣 ⇒ 五次複製的題目集合完全相同，"
-                         "題目層級的效果複製不掉。換題庫是另一件事，已由 R529 的四個題目集回答。",
+                         "題目層級的效果複製不掉。換題庫是另一件事，已由 R529 的四個題目集回答。\n\n"
+                         "另外兩件跑完才知道的事：五次的後端負載不同質"
+                         "（與另一個實驗的共租率 8.5／71.3／2.1／0／0%），而且第五次橫跨一次崩潰"
+                         "與四次卸載；這些是描述性紀錄，**不用來校正任何交付率**。",
                    "en": "The claim rule was frozen before data: 5/5 same sign and ≥4/5 Holm-significant is "
-                         "required for 'stable'; otherwise each run is listed as is, and fewer than five "
-                         "replications falls through to the latter automatically (the pre-registration "
-                         "explicitly forbids settling after three). No pooling, no averaging, no picking one.\n\n"
-                         "**Expected 2–3 of 5, observed 0 of 3** — that gap is recorded as is. It is not "
-                         "evidence that the effect is absent (0 of 3 is unremarkable at power 0.43–0.63), but "
-                         "it is not noise to be waved away either.\n\n"
+                         "required for 'stable'; otherwise each run is listed as is. With all five in, the "
+                         "verdict is: same sign **5/5 (met)**, Holm-significant **0/5 (not met)** — so each "
+                         "run is listed as it is. No pooling, no averaging, no picking one, and no writing "
+                         "'replication failed' in the other direction either.\n\n"
+                         "**Expected 2–3 of 5, observed 0 of 5** — that gap is recorded as is. If the true "
+                         "effect really were +10pp, the chance of seeing 0 of 5 is roughly 0.007–0.06: the "
+                         "lower tail. A lower tail does not prove the effect is absent, but it is not noise "
+                         "to be waved away either — this cell is the answer to 'what is left once the rule "
+                         "has been run to completion'.\n\n"
                          "LCB v2 is exactly 120 tasks; the seed reorders but does not sample, so all "
                          "replications share the same task set and task-level effects cannot replicate away. "
-                         "Changing banks is a separate question, answered by the four task sets in R529."},
-        "sources": ["DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md §二、§三、§一〇",
-                    "runs/g_r460r{1,2,3}_harness_lcb2_*/rows.jsonl",
-                    "runs/INDEX.md §三（R460R 三次同題複製）"],
+                         "Changing banks is a separate question, answered by the four task sets in R529.\n\n"
+                         "Two more things only visible once it finished: the five did not run under the same "
+                         "backend load (co-tenancy with another experiment at 8.5/71.3/2.1/0/0%), and the "
+                         "fifth spans a crash and four model unloads. Both are recorded descriptively and "
+                         "are **not** used to correct any delivery rate."},
+        "sources": ["DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md §八-1、§八-2、§八-3",
+                    "ops/gain/replay/r460r/r460r_analyze_5reps.json · aggregate.statement_rule",
+                    "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md §二、§三、§一〇",
+                    "runs/g_r460r{1,2,3,4,5}_harness_lcb2_*/rows.jsonl",
+                    "runs/INDEX.md §三（R460R 五次同題複製）"],
     },
 ]
 

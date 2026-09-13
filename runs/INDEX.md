@@ -3,7 +3,7 @@
 > 這一份由 `ops/gain/build_runs_index.py` 從 `runs/INDEX.json` **同一次執行**
 > 產生。要改內容改產生器，不要手改本檔——手改會在下一次 `--check` 被抓到。
 
-`runs/` 共 **598** 個項目：278 個目錄 ＋ 320 個頂層檔案，合計 222 MB。其中 **105 個目錄有 `summary.json`**。
+`runs/` 共 **646** 個項目：290 個目錄 ＋ 356 個頂層檔案，合計 266 MB。其中 **117 個目錄有 `summary.json`**。
 
 分類統計：
 
@@ -12,7 +12,7 @@
 | `aborted` | 9 | 發射過但沒收官（被殺、掛掉、或只有 calls/notes） |
 | `analysis` | 136 | 迴圈每輪的重算工作目錄——**衍生物，不是證據** |
 | `other` | 22 | B 層掃描、展件抓圖、唯讀快照等 |
-| `real_run` | 98 | 真跑過模型、有 summary.json 與 rows.jsonl——這些才是證據 |
+| `real_run` | 110 | 真跑過模型、有 summary.json 與 rows.jsonl——這些才是證據 |
 | `replay` | 1 | 離線重放產物 |
 | `smoke` | 12 | 冒煙／探針／量具檢查——**不進統計** |
 
@@ -103,38 +103,51 @@ HMIX 回饋迴圈）、每塊 20 題。合起來 716 題 × 3 臂 ＝ 2,148 列�
 > **後端版本混用**：這一批跨 2 個 LM Studio 版本（0.4.17.0、0.4.24.0）。配對比較在**塊內同一台**，所以配對差不受影響；但**跨塊的絕對值可能混版本差**。
 > 版本字串來自 `runs/<run>.backend_meta.json` 的 `declared`——那是**人在該機上執行 `lms version` 的回報，不是 runner 量到的**（`/v1/models` 與 HTTP header 都不帶版本）。索引照抄 `declared` 這個 key，不攤平成看起來像實測的欄位。
 
-## 三、R460R 三次同題複製（18 塊、六臂）
+## 三、R460R 五次同題複製（30 塊、六臂）
 
-R460 那 120 題 **原封不動**再跑三次（新 seed），六臂交錯、每塊 20 題、
-每次 6 塊。三次合計 18 塊、2,160 列，`infra_void` 0。
+R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每塊 20 題、
+每次 6 塊。五次合計 30 塊、3,593 列（r1–r4 各 720 列，r5 713 列）。
 
-**哪些是證據**：18 塊全部是 `real_run`、全部 `跑到底`＋`零 void`。
-三次是**獨立的 seed，不是獨立的題目**——題目集合三次完全相同（LCB v2 120 題），
+**哪些是證據**：30 塊全部是 `real_run`、全部 `跑到底`；r1–r4 `零 void`，
+**r5 有 7 列 `infra_void`**（下表 `零 void` 欄因此是 `否`）。
+五次是**獨立的 seed，不是獨立的題目**——題目集合五次完全相同（LCB v2 120 題），
 所以跑完也只能講「在這 120 題上穩不穩」，**不能講跨題庫**。
 預註冊的複製規則是**五次**（§二-2：5/5 同號且 ≥4/5 Holm 顯著才准寫
-「複製穩定」）；跑到三次時規則未達成 ⇒ **逐次照實列**（§二-3 禁令 6：
-少於五次自動落在這一句），不准寫「複製穩定」「多數支持」，
+「複製穩定」）；五次跑齊之後**同號 5/5 成立、Holm 顯著 0/5 不成立**
+⇒ 規則落在 **逐次照實列**（§二-3），不准寫「複製穩定」「多數支持」，
 也不准寫「複製失敗」「效果消失」「等價」（禁令 4）。
-r4／r5 正在補跑（`g_r460r4_*` 已在 vacant-dev 上發射，**未進本索引**）。
 
-**裁決**：（尚無收官裁決檔；判準見預註冊 §二，Fable 的稽核結論本輪以口徑更新進 `examples/verdicts.py`）
+**r5 那 7 列 `infra_void` 的來源**（2026-09-13 01:44Z 的後端事故，不是 runner 的錯）：
+1004 上模型崩潰後走 JIT 重載、TTL 1 小時、每小時 :07 卸載，於是
+`gain_run` 的四次重試全部撞在同一個窗口裡——`notes.jsonl` 逐筆寫著
+`HTTP 400 Failed to load model "gemma-4-12b-it-qat"`（5 列）與 `HTTP 500`（2 列）。
+出事的是 `a3`／`b1`／`b2` 三塊（2／3／2 列），逐臂 `OFF` 1、`CONFORM` 3、
+`OFF5` 2、`HMIX` 1、`HPI`／`HOC` 各 0 ⇒ 六臂分母變成 119／117／118／120／120／119，
+主指標（HMIX−CONFORM）的 **complete-case 分母是 116 不是 120**。
+作廢列照鐵律 3 落盤在 `notes.jsonl`、**不寫進 `rows.jsonl`**，
+所以「rows 少了 7 列」與「有 7 次 infra_void」是同一件事的兩面，不是資料遺失。
+同一批事故的機制說明見 R529 稽核 §十一。
+
+**裁決**：R460R 收官稽核（Fable，2026-09-12；r4／r5 見同檔 §八 補記 2026-09-13）：五次 Δ_C 同號、**0/5 通過 Holm** ⇒ 逐次照實列　[DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md](../DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md)
 **預註冊**：[DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md](../DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md)
 
-> **這 18 塊還沒有收官裁決檔。** `INDEX.json` 裡的 `headline` 是 `—`，
-> 而這一次 `—` 的意思就是字面意思：**收官還沒寫**。
-> 資料本身跑完了（下表全部 `跑到底`＋`零 void`），判準在發射前凍結於
-> 預註冊，但**把資料變成一句話的那份文件還不存在**。
-> 引用這一批的數字時要一起講這件事——「有資料」不等於「有裁決」。
+> **一份裁決管 30 塊。** 這 30 個目錄在 `INDEX.json` 裡的
+> `headline` 都是 `—`，因為裁決檔的宣告區寫的是 `runs/g_*` 這種 glob
+> 而不是逐個目錄名，`_refs_and_headline` 的兩道關卡故意不認 glob。
+> **`—` 在這一節不代表沒被稽核**（那是 §五 那張表的語意）——它代表
+> **稽核的單位是整批不是單塊**，單塊的數字沒有被任何人逐塊複核過。
 
 | 子集 | 塊 | 題（去重） | 列 | 臂 | seed | 跑到底 | 零 void | void | 後端 |
 |---|---:|---:|---:|---|---|---|---|---:|---|
 | 第 1 次複製 | 6 | 120 | 720 | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | `g-r460r1-lcb2` | 是 | 是 | 0 | 100.86.226.21 |
 | 第 2 次複製 | 6 | 120 | 720 | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | `g-r460r2-lcb2` | 是 | 是 | 0 | 100.86.226.21 |
 | 第 3 次複製 | 6 | 120 | 720 | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | `g-r460r3-lcb2` | 是 | 是 | 0 | 100.86.226.21 |
+| 第 4 次複製（1004 獨占三串、零共租） | 6 | 120 | 720 | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | `g-r460r4-lcb2` | 是 | 是 | 0 | 100.86.226.21 |
+| 第 5 次複製（1004 獨占三串；7 列 infra_void） | 6 | 120 | 713 | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | `g-r460r5-lcb2` | 是 | 否 | 7 | 100.86.226.21 |
 
-<details><summary>18 個目錄名</summary>
+<details><summary>30 個目錄名</summary>
 
-`g_r460r1_harness_lcb2_a1`、`g_r460r1_harness_lcb2_a2`、`g_r460r1_harness_lcb2_a3`、`g_r460r1_harness_lcb2_b1`、`g_r460r1_harness_lcb2_b2`、`g_r460r1_harness_lcb2_b3`、`g_r460r2_harness_lcb2_a1`、`g_r460r2_harness_lcb2_a2`、`g_r460r2_harness_lcb2_a3`、`g_r460r2_harness_lcb2_b1`、`g_r460r2_harness_lcb2_b2`、`g_r460r2_harness_lcb2_b3`、`g_r460r3_harness_lcb2_a1`、`g_r460r3_harness_lcb2_a2`、`g_r460r3_harness_lcb2_a3`、`g_r460r3_harness_lcb2_b1`、`g_r460r3_harness_lcb2_b2`、`g_r460r3_harness_lcb2_b3`
+`g_r460r1_harness_lcb2_a1`、`g_r460r1_harness_lcb2_a2`、`g_r460r1_harness_lcb2_a3`、`g_r460r1_harness_lcb2_b1`、`g_r460r1_harness_lcb2_b2`、`g_r460r1_harness_lcb2_b3`、`g_r460r2_harness_lcb2_a1`、`g_r460r2_harness_lcb2_a2`、`g_r460r2_harness_lcb2_a3`、`g_r460r2_harness_lcb2_b1`、`g_r460r2_harness_lcb2_b2`、`g_r460r2_harness_lcb2_b3`、`g_r460r3_harness_lcb2_a1`、`g_r460r3_harness_lcb2_a2`、`g_r460r3_harness_lcb2_a3`、`g_r460r3_harness_lcb2_b1`、`g_r460r3_harness_lcb2_b2`、`g_r460r3_harness_lcb2_b3`、`g_r460r4_harness_lcb2_a1`、`g_r460r4_harness_lcb2_a2`、`g_r460r4_harness_lcb2_a3`、`g_r460r4_harness_lcb2_b1`、`g_r460r4_harness_lcb2_b2`、`g_r460r4_harness_lcb2_b3`、`g_r460r5_harness_lcb2_a1`、`g_r460r5_harness_lcb2_a2`、`g_r460r5_harness_lcb2_a3`、`g_r460r5_harness_lcb2_b1`、`g_r460r5_harness_lcb2_b2`、`g_r460r5_harness_lcb2_b3`
 
 </details>
 
@@ -172,7 +185,7 @@ r4／r5 正在補跑（`g_r460r4_*` 已在 vacant-dev 上發射，**未進本索
 有 `summary.json` 也有 `rows.jsonl`，但**不在上面那幾段裡**——都是 2026-08 到
 09 初的探索期 run：為了決定下一步怎麼跑而跑的，不是為了得到一個可以拿去講的結論。
 
-> **R529 的 37 塊與 R460R 的 18 塊不在這張表裡**（§二、§三）。它們的 `headline`
+> **R529 的 37 塊與 R460R 的 30 塊不在這張表裡**（§二、§三）。它們的 `headline`
 > 同樣是 `—`，但那是「裁決檔用 glob 點名整批」造成的，不是沒被稽核——
 > 把它們留在這張表會讓索引**比資料悲觀**，讀的人會以為證據比實際少。
 
@@ -247,7 +260,7 @@ r4／r5 正在補跑（`g_r460r4_*` 已在 vacant-dev 上發射，**未進本索
 | 題庫 | 檔案 | 題數 | sha256 符合 codebench 釘值 | task_id 範圍 | contest_date 區間 | 難度 | 有參考解 | 已知壞題 | 用過它的 run |
 |---|---|---:|---|---|---|---|---|---|---|
 | **lcb v1** | `ops/gain/data/lcb_bank_v1.jsonl` | 91 | 是 | lcb_3487–lcb_3809 | 2024-10-12 → 2025-04-05 | hard 37／medium 54 | 12/91（13.2%） | lcb_3613、lcb_3763 | `g_e2q_off_lcb_qwenonly_20260902`、`g_r443_gemma_lcb` |
-| **lcb v2** | `ops/gain/data/lcb_bank_v2.jsonl` | 120 | 是 | lcb_3026–lcb_3809 | 2023-08-26 → 2025-04-05 | hard 48／medium 72 | 12/120（10.0%） | lcb_3613、lcb_3763 | `g_r447_conform_lcb2`、`g_r449_eq5_lcb2`、`g_r460_harness_lcb2_a1`、`g_r460_harness_lcb2_a2`、`g_r460_harness_lcb2_a3`、`g_r460_harness_lcb2_b1`、`g_r460_harness_lcb2_b2`、`g_r460_harness_lcb2_b3`、`g_r460r1_harness_lcb2_a1`、`g_r460r1_harness_lcb2_a2`、`g_r460r1_harness_lcb2_a3`、`g_r460r1_harness_lcb2_b1`、`g_r460r1_harness_lcb2_b2`、`g_r460r1_harness_lcb2_b3`、`g_r460r2_harness_lcb2_a1`、`g_r460r2_harness_lcb2_a2`、`g_r460r2_harness_lcb2_a3`、`g_r460r2_harness_lcb2_b1`、`g_r460r2_harness_lcb2_b2`、`g_r460r2_harness_lcb2_b3`、`g_r460r3_harness_lcb2_a1`、`g_r460r3_harness_lcb2_a2`、`g_r460r3_harness_lcb2_a3`、`g_r460r3_harness_lcb2_b1`、`g_r460r3_harness_lcb2_b2`、`g_r460r3_harness_lcb2_b3` |
+| **lcb v2** | `ops/gain/data/lcb_bank_v2.jsonl` | 120 | 是 | lcb_3026–lcb_3809 | 2023-08-26 → 2025-04-05 | hard 48／medium 72 | 12/120（10.0%） | lcb_3613、lcb_3763 | `g_r447_conform_lcb2`、`g_r449_eq5_lcb2`、`g_r460_harness_lcb2_a1`、`g_r460_harness_lcb2_a2`、`g_r460_harness_lcb2_a3`、`g_r460_harness_lcb2_b1`、`g_r460_harness_lcb2_b2`、`g_r460_harness_lcb2_b3`、`g_r460r1_harness_lcb2_a1`、`g_r460r1_harness_lcb2_a2`、`g_r460r1_harness_lcb2_a3`、`g_r460r1_harness_lcb2_b1`、`g_r460r1_harness_lcb2_b2`、`g_r460r1_harness_lcb2_b3`、`g_r460r2_harness_lcb2_a1`、`g_r460r2_harness_lcb2_a2`、`g_r460r2_harness_lcb2_a3`、`g_r460r2_harness_lcb2_b1`、`g_r460r2_harness_lcb2_b2`、`g_r460r2_harness_lcb2_b3`、`g_r460r3_harness_lcb2_a1`、`g_r460r3_harness_lcb2_a2`、`g_r460r3_harness_lcb2_a3`、`g_r460r3_harness_lcb2_b1`、`g_r460r3_harness_lcb2_b2`、`g_r460r3_harness_lcb2_b3`、`g_r460r4_harness_lcb2_a1`、`g_r460r4_harness_lcb2_a2`、`g_r460r4_harness_lcb2_a3`、`g_r460r4_harness_lcb2_b1`、`g_r460r4_harness_lcb2_b2`、`g_r460r4_harness_lcb2_b3`、`g_r460r5_harness_lcb2_a1`、`g_r460r5_harness_lcb2_a2`、`g_r460r5_harness_lcb2_a3`、`g_r460r5_harness_lcb2_b1`、`g_r460r5_harness_lcb2_b2`、`g_r460r5_harness_lcb2_b3` |
 | **lcb v3** | `ops/gain/data/lcb_bank_v3.jsonl` | 189 | 是 | lcb_2728–lcb_3535 | 2023-05-07 → 2024-08-10 | hard 54／medium 135 | 12/189（6.3%） | 無 | `g_r449c_eq5_lcb3`、`g_r461_lcb3_three_arm`、`g_r461_off_gate_lcb3`、`g_r529_lcb3h_a1`、`g_r529_lcb3h_a2`、`g_r529_lcb3h_a3`、`g_r529_lcb3m_a1`、`g_r529_lcb3m_a2`、`g_r529_lcb3m_a3`、`g_r529_lcb3m_a4`、`g_r529_lcb3m_a5`、`g_r529_lcb3m_a6`、`g_r529_lcb3m_a7` |
 | **MBPP+ v0.2.0** | `.vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz`（**私有、不轉散布**） | 378 | 釘值 `af43697e8791c4c1…` | `mbppplus_*` | — | — | 官方 GT | — | 52 個 |
 | **HumanEval+ v0.1.10** | `.vacant-private/evalplus/HumanEvalPlus-v0.1.10.jsonl.gz`（**私有、不轉散布**） | 164（**可用 156**） | 釘值 `272720b90ac37550…` | `humanevalplus_HumanEval/*` | — | — | 官方 GT | **8 題排除，見下** | 8 個 |

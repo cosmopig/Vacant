@@ -38,8 +38,8 @@ def idx() -> dict:
     return build_index()
 
 
-def test_dirs_with_summary_json_is_105(idx):
-    """HEAD 有 105 個 run 目錄帶 summary.json（2026-09-12 重建索引時點過）。
+def test_dirs_with_summary_json_is_117(idx):
+    """HEAD 有 117 個 run 目錄帶 summary.json（2026-09-13 重建索引時點過）。
 
     這個數字會隨新 run 落盤而增加——變了就更新這裡，但**要先確認是真的多了
     一個 run**，而不是分類邏輯把別的東西算進來了。
@@ -54,26 +54,54 @@ def test_dirs_with_summary_json_is_105(idx):
         hep_a1..a8, mbpp_a1..a19}`——四個互斥題目集、三臂、716 題。
       * **R460R 三次同題複製 18 塊** `g_r460r{1,2,3}_harness_lcb2_{a1..a3,b1..b3}`
         ——同一批 LCB v2 120 題、六臂、三顆新 seed。
-    r4／r5 還在 vacant-dev 上跑，**沒有**進這個 checkout ⇒ 不算在 105 裡。
+
+    105 → 117 的那 12 個是 R460R 的第四、第五次複製
+    （`g_r460r{4,5}_harness_lcb2_{a1..a3,b1..b3}`，2026-09-12 11:43Z–09-13 07:48Z
+    在 1004 獨占三串補跑）。它們**不是新的題目**，是同一批 LCB v2 120 題的第 4／5 顆
+    seed；r4 720 列 void 0、r5 713 列**含 7 列 `infra_void`**（後端 JIT 重載事故，
+    見 `runs/INDEX.md` §三）。五次跑齊 ⇒ 預註冊的宣稱規則可以判了：
+    同號 5/5 成立、Holm 顯著 0/5 不成立 ⇒ 逐次照實列。
     """
-    assert idx["counts"]["dirs_with_summary_json"] == 105
+    assert idx["counts"]["dirs_with_summary_json"] == 117
     counted = sum(1 for r in idx["runs"]
                   if any(f["name"] == "summary.json" for f in r["files"]))
-    assert counted == 105
+    assert counted == 117
     names = {r["name"] for r in idx["runs"]}
     assert {f"g_r460_harness_lcb2_{t}" for t in ("a1", "a2", "a3", "b1", "b2", "b3")} <= names
-    # R529 的 37 塊與 R460R 的 18 塊逐名釘住——只釘總數的話，「少了 R529 一塊、
+    # R529 的 37 塊與 R460R 的 30 塊逐名釘住——只釘總數的話，「少了 R529 一塊、
     # 多了一個別的目錄」會剛好抵銷而測試照樣綠。
     assert {f"g_r529_lcb3m_a{i}" for i in range(1, 8)} <= names
     assert {f"g_r529_lcb3h_a{i}" for i in range(1, 4)} <= names
     assert {f"g_r529_hep_a{i}" for i in range(1, 9)} <= names
     assert {f"g_r529_mbpp_a{i}" for i in range(1, 20)} <= names
     assert {f"g_r460r{r}_harness_lcb2_{t}"
-            for r in (1, 2, 3)
+            for r in (1, 2, 3, 4, 5)
             for t in ("a1", "a2", "a3", "b1", "b2", "b3")} <= names
-    # r4／r5 不在這個 checkout（在 vacant-dev 上跑）。進來了要先更新上面的點數，
-    # 而不是讓它悄悄混進 real_run 的統計。
-    assert not any(n.startswith(("g_r460r4_", "g_r460r5_")) for n in names)
+
+
+def test_r460r5_void_rows_are_recorded_not_dropped(idx):
+    """r5 的 7 列 `infra_void` 要在索引裡看得見，而且不能被當成「跑壞了」。
+
+    `gain_run` 的 void 走 `continue`：作廢的格子只寫 `notes.jsonl`、**不寫**
+    `rows.jsonl`。所以 rows 少 7 列與「出了 7 次 infra_void」是同一件事的兩面。
+    索引要把兩邊都印出來，否則讀的人只會看到「713 列」而不知道少的是什麼——
+    或者反過來，以為那 7 題的資料被偷偷補上了。
+    """
+    by = {r["name"]: r for r in idx["runs"]}
+    r5 = [by[f"g_r460r5_harness_lcb2_{t}"]
+          for t in ("a1", "a2", "a3", "b1", "b2", "b3")]
+    assert sum(r["n_rows"] for r in r5) == 713
+    assert sum(r["infra_void"] or 0 for r in r5) == 7
+    # 跑到底＝是（不是被殺掉的 run）、零 void＝否（有作廢格）：兩個欄位講的是
+    # 不同的事，不可互相代用。
+    assert all(r["terminal"] is True for r in r5)
+    assert any(r["complete"] is False for r in r5)
+    # r1–r4 對照組：跑到底且零 void。
+    r14 = [by[f"g_r460r{i}_harness_lcb2_{t}"]
+           for i in (1, 2, 3, 4)
+           for t in ("a1", "a2", "a3", "b1", "b2", "b3")]
+    assert sum(r["n_rows"] for r in r14) == 2880
+    assert sum(r["infra_void"] or 0 for r in r14) == 0
 
 
 def test_r449c_n_rows_is_189(idx):
@@ -253,9 +281,17 @@ def test_md_is_rendered_from_the_same_index(idx):
     # …但也不准比資料悲觀：成組收官的 55 塊要有自己的兩節，
     # 而且要明講「一份裁決管 N 塊」與「R460R 還沒有收官裁決檔」。
     assert "R529 跨題庫收官" in md
-    assert "R460R 三次同題複製" in md
+    assert "R460R 五次同題複製" in md
     assert "一份裁決管 37 塊" in md
-    assert "這 18 塊還沒有收官裁決檔" in md
+    # 2026-09-13：R460R 的收官裁決檔到齊了（r1–r3 本文、r4／r5 §八 補記），
+    # 所以這一批從「還沒有收官裁決檔」那個分支換到「一份裁決管 N 塊」。
+    # 檔案在了還印「收官還沒寫」，索引就比資料**悲觀**——那與比資料樂觀
+    # 是同一種說謊。
+    assert "一份裁決管 30 塊" in md
+    assert "還沒有收官裁決檔" not in md
+    # r5 那 7 列 infra_void 的來源要寫在人讀段落裡，不能只留一個數字。
+    assert "infra_void" in md and "JIT 重載" in md
+    assert "complete-case 分母是 116 不是 120" in md
     # HumanEval+ 的分母是 156 不是 164——8 題排除要逐題列出理由。
     assert "HumanEval+ v0.1.10" in md
     assert "分母是 156 不是 164" in md
@@ -313,4 +349,4 @@ def test_generator_runs_as_a_script(tmp_path):
         capture_output=True, text=True, cwd=str(ROOT), timeout=300)
     assert r.returncode == 0, r.stderr
     data = json.loads((out / "INDEX.json").read_text())
-    assert data["counts"]["dirs_with_summary_json"] == 105
+    assert data["counts"]["dirs_with_summary_json"] == 117

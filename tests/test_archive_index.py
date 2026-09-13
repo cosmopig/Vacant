@@ -121,9 +121,9 @@ def test_refuted_count_is_pinned(verdicts, index):
     kinds = [v["verdict"] for v in verdicts.VERDICTS.values()]
     assert kinds.count("refuted") == 6, f"被推翻的條數變了：{kinds.count('refuted')}"
     assert kinds.count("overstated") == 4, f"說得太滿的條數變了：{kinds.count('overstated')}"
-    assert kinds.count("held") == 14, f"判準成立的條數變了：{kinds.count('held')}"
+    assert kinds.count("held") == 13, f"判準成立的條數變了：{kinds.count('held')}"
     assert kinds.count("no_effect") == 1, f"無可分辨差異的條數變了：{kinds.count('no_effect')}"
-    assert kinds.count("unresolved") == 3, f"同號未解析的條數變了：{kinds.count('unresolved')}"
+    assert kinds.count("unresolved") == 4, f"同號未解析的條數變了：{kinds.count('unresolved')}"
     assert len(index.CLAIMS) == 34, f"索引裡的宣稱總數變了：{len(index.CLAIMS)}"
     # 網頁上那面牆＝索引裡的 34 條，**沒有第二個來源**。
     # 2026-09-07 曾有過一次「索引 20、網頁 28」的缺口（那 8 條只寫在 verdicts.py），
@@ -137,9 +137,17 @@ def test_refuted_count_is_pinned(verdicts, index):
     #     `harness.gain_comes_from_executable_gate_and_resample`、
     #     `harness.majority_vote_loses_to_gate`（+3）。
     #   unresolved 2 → 3：上面那條降級進來。
-    #   ⚠ 降級**不是**因為 R460 那一次沒發生，而是因為三次同題複製（+5.8／+4.2／+0.8pp）
-    #     與跨題庫四集（+0.6～+3.7pp）都沒把 0 排除掉 ⇒ 幅度未確立。
-    #     方向 7/7 同號 ⇒ 是 `unresolved` 不是 `no_effect`，兩者不可互換。
+    #   ⚠ 降級**不是**因為 R460 那一次沒發生，而是因為同題複製與跨題庫四集
+    #     都沒把 0 排除掉 ⇒ 幅度未確立。
+    #     方向全部同號 ⇒ 是 `unresolved` 不是 `no_effect`，兩者不可互換。
+    #
+    # 2026-09-13（R460R 第四、第五次複製收完，五次齊了）又動了一條：
+    #   held 14 → 13、unresolved 3 → 4：`harness.majority_vote_loses_to_gate`
+    #     降級成 unresolved。方向沒變（OFF5 − CONFORM 五次全負、一次都沒翻），
+    #     變的是強度：5/5 裡只有 3/5 的**未校正** p < 0.05，而不顯著的兩次
+    #     （r4 −4.17pp、r5 −1.74pp）正是後端**零共租**、條件最乾淨的兩次。
+    #   ⚠ 這一條同樣**不准**被讀成「多數決不比閘門差」——那是 `no_effect` 的語意，
+    #     而這裡的區間根本沒有把效果排除掉。
     self_described = [cid for cid, v in verdicts.VERDICTS.items() if v.get("宣稱")]
     assert len(self_described) == 14, f"自帶宣稱的條數變了：{len(self_described)}"
     indexed = {c["id"] for c in index.CLAIMS}

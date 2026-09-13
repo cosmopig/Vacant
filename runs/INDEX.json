@@ -17,19 +17,19 @@
   ],
   "caveat_record_spec": "G 系列 run 目錄（`g_*`）**不是** RECORD_SPEC §1 的證據包——它們沒有 manifest.json / ledger_events.jsonl / chain_verify.txt / anomalies.md / SHA256SUMS，用的是 gain_run.py 自己的 summary.json + rows/calls/notes 版面。符合 RECORD_SPEC 的只有 `blayer_*` 那幾個 B 層掃描。每個目錄的 `record_spec` 欄位逐項列出缺哪些。",
   "counts": {
-    "entries": 598,
-    "dirs": 278,
-    "top_level_files": 320,
-    "dirs_with_summary_json": 105,
+    "entries": 646,
+    "dirs": 290,
+    "top_level_files": 356,
+    "dirs_with_summary_json": 117,
     "by_kind": {
       "aborted": 9,
       "analysis": 136,
       "other": 22,
-      "real_run": 98,
+      "real_run": 110,
       "replay": 1,
       "smoke": 12
     },
-    "total_bytes": 221921029
+    "total_bytes": 265702658
   },
   "runs": [
     {
@@ -20431,6 +20431,1806 @@
       "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
+      "name": "g_r460r4_harness_lcb2_a1",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-12",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r4-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r4_harness_lcb2_a1.endpoint",
+          "g_r460r4_harness_lcb2_a1.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3924475,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3517238,
+          "sha256": "f746b4cd772410c4fc05cacef074deeb5af0ea2162d48f170fcd13122f04bb05",
+          "lines": 277
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "e0638fcd640149987ab07a292e98068d5fba934e4992e01fa4edb94dc84f26b6",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 30658,
+          "sha256": "1ebb6a8c82bf6ba65f32c287f376b3371a5c129f650aa157ae97b28b7e5a6d0b",
+          "lines": 56
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "6dbadf9e89371fe9d158df6919fbb0494f3c1872a547a2330cc949708c06456b",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 50695,
+          "sha256": "47da0f52f933ad598cd19968f732b9b89e61b759f1c94d5dc5af534bb305caa2",
+          "lines": 52
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "cff5b5321d063045d22f2f7a9a89a9f414951a40da8e424e3811f4210e901860",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 67837,
+          "sha256": "cf2ab5faa0746bc1b94ce1f4d9bc59174264a2b05584b7b51098e9f6aedff3f2",
+          "lines": 71
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "10a09b5c34cc6f1b02c9a573b5ab7777d98fe977bdb0bd43692a303b63a15ef9",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 52049,
+          "sha256": "2a95f3fcbf4347f16c6d80326ba2f1615bb040dd1dfe101bc8147bacf458e607",
+          "lines": 53
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "59aeb18f39fbd80186a0703879e11d996e93208ed3d2bbb52c2b448534a7c029",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 190665,
+          "sha256": "09889edfd544340ab0f810390b30008fa7ff5b72bd48dc1955d9a38efb2b447b",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12658,
+          "sha256": "89c154f48373bce8a5fd55f61c7bf14bff48dab80477b1f523aaf236164b721b",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a2",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-12",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r4-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r4_harness_lcb2_a2.endpoint",
+          "g_r460r4_harness_lcb2_a2.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3531198,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3152017,
+          "sha256": "f49629316d5597045be15ae225f9fe8f611256e28691803664f5ca90885797bb",
+          "lines": 259
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "e0638fcd640149987ab07a292e98068d5fba934e4992e01fa4edb94dc84f26b6",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 25872,
+          "sha256": "dd2c3776550ad44a435468df1b39b8d2123cb73055bb200103d91c085227b363",
+          "lines": 49
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "07bfde63ee933ff269cb8261707bc2c62498d075bf9a94eea93aaed5307c1d32",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 49325,
+          "sha256": "1b3e5dc0393c58a7cd7a7ab3d276c0ed345a2aa020c40d3fbe05ddb13e10eab2",
+          "lines": 51
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "2c76ed45afa01513bd71c7023bde623df1579e24c4bd41614bf48b08a4cce2a7",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 66848,
+          "sha256": "5126bb777fe46fd742281d04fbda9f2c4c1d03a996de15202398121eb399707d",
+          "lines": 70
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "65bda1e85bf48ac92282e79e04ba0f84028a959222667cc640d568db0095778a",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 43588,
+          "sha256": "976c42cb1b877b5feaba16281c2f1ca7613b2fc73ca2ef730e7d2ee61012fe97",
+          "lines": 47
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "3a0396f6d9db99a115d233ee9d1ef27bdd3462cfdc9172c0ebad1f3e5c5c236f",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 178234,
+          "sha256": "c2b7461df85a2bb89a1272e29888741cfdbaffc7763fdf180e9ffcd30bb45112",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12639,
+          "sha256": "c548afc691d1a3084e8852ad420d18930191ee4b3825d0a9b7f24bc3bd735c20",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a3",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-12",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r4-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r4_harness_lcb2_a3.endpoint",
+          "g_r460r4_harness_lcb2_a3.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3853453,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3472988,
+          "sha256": "08b80ebfaf5a7d63d676344197e4723aa3d351cec3cfcd3f5e8f4fed7d18560f",
+          "lines": 264
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "e0638fcd640149987ab07a292e98068d5fba934e4992e01fa4edb94dc84f26b6",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 27853,
+          "sha256": "a50619a7cb36c4be292d3f9f9c43f686462f5d0733e20e1a66c407c2ea85f2d5",
+          "lines": 52
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "883c5ca7574881daad4c28cc86ac93774762dfd6567333ee63f0c8b051ef5143",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 47051,
+          "sha256": "b0e17d5dc03cf74a30843f98514c01fa682293fc91a4b7cff04ab4d6127a5f50",
+          "lines": 49
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "a48149ae6fe77139bfe4de16ecda0612e6210c8013ee9e27639ee88230ed37f5",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 64010,
+          "sha256": "f56f44a15e4bc541d84569a0b40eb317b29cc54082a7722e04a6bad057c7c775",
+          "lines": 68
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "74ad53b0488e347e37163d53f3b459bd6cfcc12d020d4fddc0261917b9ca115e",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 47730,
+          "sha256": "8fadc50fb4a8451ea49a2a4b3e19c24b1d84e7db40610d9f934cc0dff6eb5fab",
+          "lines": 50
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "50fdefe202e860d4f984c6e59c0b1356242006b7f1a4e164de8d2e253f851d45",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 178495,
+          "sha256": "4228eee063cf969e8d7710a6bce5c5a5bdd9ccdd164503fb569c484f013565b0",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12651,
+          "sha256": "b8124ef625e50c6488d24bcbdf874eb731f9adc4e9d1aaea6a7d2728d02a6592",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b1",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-12",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r4-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r4_harness_lcb2_b1.endpoint",
+          "g_r460r4_harness_lcb2_b1.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3571310,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3202016,
+          "sha256": "79b90fb839ab2b10227c292d84c7a65c2ef25eaab1d09b8a861186cde3e3e30d",
+          "lines": 260
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "e0638fcd640149987ab07a292e98068d5fba934e4992e01fa4edb94dc84f26b6",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 30512,
+          "sha256": "6e854f7ea3f4bb004ab31bd1841200fd1f8fc9825ec075c9076cb25cc836b537",
+          "lines": 56
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "32aeb3769ef2b06b2f85e4e31d63a6e89327068afd6e2b6e31789ea490cc7980",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 42295,
+          "sha256": "4f18ff8456cf012f9ff292deac6a9b3aad703345378e29cbc07ba879a4229757",
+          "lines": 46
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "e3beafb03682027beb91ff64f51fbbe8388926c07d16724514d54f29f180f5fc",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 63731,
+          "sha256": "d31fbc732946e3faf4cc21d0778c14462c54ca13f8437d9626eb257eb237d0f9",
+          "lines": 68
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "276937229817fcdbcb3f7524ea541dea9677f16d57bc4811327ff318754256a9",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 44677,
+          "sha256": "20eac3ebe635abc5bce6c63a67bc4036638a5fb506ad5a2c50a6ccc81b4c9214",
+          "lines": 48
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "e427f7023e023a4524187c4a871753fefdf8e288c1c58ad78f68f172dfda7f48",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 172775,
+          "sha256": "f49cdacd6028784c0f7143466013f7f7f24f1fb940ee17887c33f3ddbdfc6582",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12629,
+          "sha256": "68aa357e24bd6388b380f9985480e9e8942cac329441bf8ce3c4b5a93b68e931",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b2",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-12",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r4-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r4_harness_lcb2_b2.endpoint",
+          "g_r460r4_harness_lcb2_b2.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3016129,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 2619576,
+          "sha256": "a0c91ead9cb78f553090314e6497a079846037ebd55252cde483b74bede67a19",
+          "lines": 271
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "e0638fcd640149987ab07a292e98068d5fba934e4992e01fa4edb94dc84f26b6",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 30418,
+          "sha256": "048673d7ed1df3a3b2202bb4a60523be1798f93101092468e714e5fa5af21f73",
+          "lines": 56
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "4eefad946c5d5e680d883fafbbce4062ad288b9d0643eac7c45530f0d8bb3f78",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 42171,
+          "sha256": "5d021a5f583ee772b5189dd4cecbdc9ad98bdf564a9a4618cf716e575dc2e3df",
+          "lines": 46
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "1aa78a8b49e1c489ac20d009a8c8d26384692b7080eea1d2f01bca1192345264",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 69714,
+          "sha256": "e95c8735554bd69935e0e1412d3655d42efcace973e83790ab4b57ac77314963",
+          "lines": 72
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "aa4a019723d8f76ad3692619faf69417031f20be4f8c496dfc2f87c365f1891b",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 53466,
+          "sha256": "1da06e2c3912e1689feb8b31e2caeac51484cfa4851e003b65404dd2206d421d",
+          "lines": 54
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "e8dcbd573a4eb2b68567e974dd8743a928b3e208d1cca25178b7f60450bdc82f",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 185450,
+          "sha256": "6a79264649f5e174662cf72196b2d6f35e6d4e00f3b2e310466e411c74d05006",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12659,
+          "sha256": "97d594db6f1c5a3bd3922ed8298d68305313433551c1c6c3abc9449c4348cac3",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b3",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-12",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r4-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r4_harness_lcb2_b3.endpoint",
+          "g_r460r4_harness_lcb2_b3.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3931828,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3538437,
+          "sha256": "c82c7847ed9b4b6b85bab1d1a3506f472e5180eb605b280df5638a2d3d339fdd",
+          "lines": 269
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "e0638fcd640149987ab07a292e98068d5fba934e4992e01fa4edb94dc84f26b6",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 27905,
+          "sha256": "f666c1d5c5c683c30e8f134070cd61a913a56bce86c4051e8552eecad42a51c5",
+          "lines": 52
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "1f5e28902aae2401615c2ffecadced9522b14ea057ed12b09bcadb8025223fd4",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 52401,
+          "sha256": "f2299b26be9486c8a84039b7a49a7bd2703321840c500a74295841fef79e7c8e",
+          "lines": 53
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "6038f43f1088efd5e911faa3598f2b777fd37b8ebb2ed75528ed40b24a91b061",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 66694,
+          "sha256": "9ce8a663152b86bae7c88f679c203ee977047f2ebb1302828817b5d8e60a8987",
+          "lines": 70
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "68401927296333bda2b661ee9487097fe7351b350aeda7f39f96119866aa1765",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 46545,
+          "sha256": "859aead9409e485bc31e9fcd6fae44cda4d08e51b9ba0fc57213f5f3d030f89c",
+          "lines": 49
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "042f593baac9cb0721170c4225f8d87354ca0046686b47c78ff843e179046a2b",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 184500,
+          "sha256": "d7a2fa551d55e4a270ca0adc025f5325adf1f7e53a2deffee599078d1a20bf3f",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12671,
+          "sha256": "e1a08ebf560f0595657ce9bcf0904e7d49ac7b614b36a0cf0d494216eb8da8e2",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a1",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-12",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r5-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r5_harness_lcb2_a1.endpoint",
+          "g_r460r5_harness_lcb2_a1.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3932674,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3536837,
+          "sha256": "54587e7100d84c933a49bcdd7836b9695289ae8470b779aa53e22f51b69e3f21",
+          "lines": 267
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "31b557ce89a4640b4e0716d837ea9665512db406d82770efe28fd502bdf6ccfb",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 27842,
+          "sha256": "320ab73685cce4537f59c7973a59550f565bc65e05bda9f89eab440fcf51c6da",
+          "lines": 52
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "7e73dfae6847e33149480a08fbc8a61a718e0f6b9c2213bdbb8978dffa13ea9c",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 48108,
+          "sha256": "1d4dc99a48132acc4475e4a253547d3d4a1f134efcfbcd5b287e8ec900a710bf",
+          "lines": 50
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "aadbf40affa1b7a2b11ce9de0eb6449cde523e08ebc2115cc53c8a212bf807ee",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 65169,
+          "sha256": "b123ffbc6000b559159671f422017eb3e2e3f230dcd2fe04d80dfc406d15acfd",
+          "lines": 69
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "3ad60f91dffa195c9834407c40d434c26dd865f59a85ea98bd98d83bd004a175",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 53783,
+          "sha256": "08a2fe10e42e70454082a69fbd1c2fcb15d0305d835ef0c594185c2847b67ff8",
+          "lines": 54
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "84d50df689eb19f5c50ddf8437914cfa51a097f5b7e15ff16467945680720ee7",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 185639,
+          "sha256": "08df4d89592375ed1501c5f90fdf75bce6a43f5113d837b6ca6f756486f23825",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12621,
+          "sha256": "aca12e16723fdfb52893d48f0f35d69e06d816eff51fc30a1b4c299bfc86f15c",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a2",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-12",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r5-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r5_harness_lcb2_a2.endpoint",
+          "g_r460r5_harness_lcb2_a2.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 2922836,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 2570308,
+          "sha256": "a862390288f728faab501bae26e8fdc245156530192de368432f435e46ea5636",
+          "lines": 250
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "31b557ce89a4640b4e0716d837ea9665512db406d82770efe28fd502bdf6ccfb",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 26546,
+          "sha256": "9e18024a5fa6f99b957c95710ddb264263c236f1b77581470f0c8f4a3c7fecb7",
+          "lines": 50
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "d64751bf167bab2a5d60a6bba7db3927cd5d8f6b6ad86cd142bf13b7fff34b52",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 43564,
+          "sha256": "b52b43bc90d9fc77ed4fae1701e843930fec6dd71b151ae2790a7ebfe8a374ac",
+          "lines": 47
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "aca3ec0a5b7a70def1b22bd75dcbba78855d316b2950b2f15515ec3d0c08454e",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 56387,
+          "sha256": "5b20049d1f751949dbbbaa39af938040ad5adb8eceb1f9e4eb7ce98a8b06154c",
+          "lines": 63
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "fcfff21bb5032d2884cdddfe214e5ee86c1d40fe6f8ed8ba10df9e89f1255032",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 44915,
+          "sha256": "ad64566847752fc50caa698a272677ba950dbc955681c8397f6e1c2ef643b70a",
+          "lines": 48
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "1999facad29c7a2445eace1f523c0e173c8b6ae00edeb257037da1ddf7118e5e",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 165838,
+          "sha256": "a13b837f10fcea50453dfe7c60d1ed15d54473935d3fc1d5e9c5bf8b784d5ef1",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12603,
+          "sha256": "e1350c96eab7e0a4c1ae0b2ad690bd9caaaba5a96b7ac88842ed6db282fe9a79",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a3",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-12",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r5-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r5_harness_lcb2_a3.endpoint",
+          "g_r460r5_harness_lcb2_a3.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 118,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 19,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 19
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": false,
+      "infra_void": 2,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3304590,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 2912260,
+          "sha256": "cbfbe838e36996b44ca68fc19b1d8c73ed7909850b1cbb307b6627ecfc39591a",
+          "lines": 280
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2715,
+          "sha256": "d52e0384e4f53568bb6ae82fa5cb1f59835e679bc804f7fffa072c5137cfb16e",
+          "lines": 3
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 27114,
+          "sha256": "f7e016426f45d78a40a181229db1ba4b87c30d8b90e4ce6b7ce5ce08368bbb75",
+          "lines": 51
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "3c5f41d61feccea9e5651be19ee1b30781192380214d87e34bcf528c7aca2f52",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 44935,
+          "sha256": "f2caa10a05eb6b3e157519256f8f1cef98dd9e8bba95e430396c9021b908c59c",
+          "lines": 47
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "2b582ee2897676c3187a2d200daac9bd170034b8c01064dadef6ab25553a06f5",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 69708,
+          "sha256": "0912dbf3fbba51cc89f005a97b5984bdc22b3cc3e8fe1bd036a05f30a89bcb0a",
+          "lines": 72
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "5ee23fabfbaebcbf781a75c7cd102dc49fd5aa4ca6c1e71e9ce73bf19cd1c121",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 51135,
+          "sha256": "531db7eee81d15929ee5c2ff97617ecf6f1282ba5fbd90f82f794a064d44f319",
+          "lines": 52
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "3a66ecf2008fafec997fedde03e63d49250f66d3e94ea5b1198e4a2817846d7d",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 183423,
+          "sha256": "3812c532d325d8b714a31033414778babe4bc652cdfb4df441b36549ac13c396",
+          "lines": 118
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12724,
+          "sha256": "f8f3ffb816dd27530ee75701b9db3777514759e67503ef2b67068424bf6a6e78",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b1",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-13",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r5-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r5_harness_lcb2_b1.endpoint",
+          "g_r460r5_harness_lcb2_b1.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 117,
+      "n_rows_by_arm": {
+        "CONFORM": 18,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 19,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": false,
+      "infra_void": 3,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 4306313,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3882097,
+          "sha256": "e8c9c7987cd9168a358568c84c6cd4ddd4ffc62e361b166953c26c92f2d87a8f",
+          "lines": 297
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 3210,
+          "sha256": "72b68d4cb9757a3e31ac6b278f726ac3531581fd1b9ea23141992e31132e9bf9",
+          "lines": 4
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 31083,
+          "sha256": "085317684c4d4c26eb2bfb35c21dd80c9cc644665ba4322245aa52dfe5b7a4f3",
+          "lines": 56
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "fe2595eff0d4a21d89311d34ae5022f0c391771733fc32625f3070f72ca0acee",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 55458,
+          "sha256": "9acdcfcaae46dd60c0fda1538ce684619a9e941afaf2348c86bfd4d292959262",
+          "lines": 55
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "a3d978bc173a554c1359011153eb0ab0c0f69ceeefbfe4fde90855849e475f4c",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 70161,
+          "sha256": "b9ad6935dbfe9a2aa2810ac64329d90ad089a0d40105ab025ea212c043e2e53d",
+          "lines": 72
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "6293c1c8eb88630ba30d10b8677b4097cba33ed8c4bfbf32d4c680f95094c3bc",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 53421,
+          "sha256": "5abe4c9d4b6ff28eb27bd22c6cdb9ef0a2ae2a4c9210aa9ea0d0561c61657d75",
+          "lines": 54
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "d5a3e60ddba05fac9d27a48e30c2cdddf4f255681d468bdb9f3bd441b58d0802",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 197576,
+          "sha256": "2dc9f1e364beae588e27b47702dc1299a29b84695f92fdd6b9b30b3d749b5b00",
+          "lines": 117
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12731,
+          "sha256": "c33ccd975f823a73475976dda8fd8b77bd30b9ad6c758e0db951a9898c62ee7c",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b2",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-13",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r5-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r5_harness_lcb2_b2.endpoint",
+          "g_r460r5_harness_lcb2_b2.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 118,
+      "n_rows_by_arm": {
+        "CONFORM": 19,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 19
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": false,
+      "infra_void": 2,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 3300441,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 2912540,
+          "sha256": "07abdfcbff407f689f58b502ba4893f808132726c0adbfb9a1638461152602d1",
+          "lines": 281
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2779,
+          "sha256": "16f74c3a602343edc97e26b71dc8532eb88a71819a3ae868c167c2b8552854ec",
+          "lines": 3
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 32846,
+          "sha256": "072f953ac53d62f46062328733909e8d6f772619e5d0f30c6fb9accf4191706c",
+          "lines": 59
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "789ffcfdc0b2860f3ee60c928ad19ad42f8b4bed319a7f5e8404fba2beeed56b",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 42295,
+          "sha256": "2ea7cafb6afa9490cfac4237d23b798ae010abe8a6ca6b750def38e3445562fd",
+          "lines": 46
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "b266856031cc8d15801e8371b353979f0309964cdf03899359736c4e7f75666b",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 71127,
+          "sha256": "1ee67d72ab6a25b00d05bbd71d1204baac669c3970c31f6c6fdb5f7c258339df",
+          "lines": 73
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "66924c16bce56db0bacd8cc5d18c6bb640834d85773111f9c27a8785cc79f429",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 45129,
+          "sha256": "5e9711765357e54a89c2de2626cb12898a7c9d35c500aff7b72be830d0707140",
+          "lines": 48
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "3e267a52ac300803f845b65d1ee44c45b38404d2f60d7eccc4b44564e9c03db9",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 180439,
+          "sha256": "fefecaa05ef2bac55c10244411561031f9369eda75ac564961daa3d8f08ace2b",
+          "lines": 118
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12710,
+          "sha256": "7e21e0359cc9facabd9bc7b1687caccbbc65664d3799ad7c4b2a6966a17c1de0",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b3",
+      "kind": "real_run",
+      "subkind": "gain_run",
+      "date": "2026-09-13",
+      "date_source": "calls.jsonl:ts_ms",
+      "seed": "g-r460r5-lcb2",
+      "backend": {
+        "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+        "slot_host": null,
+        "server_model": "gemma-4-12b-it-qat",
+        "declared": null,
+        "sidecars": [
+          "g_r460r5_harness_lcb2_b3.endpoint",
+          "g_r460r5_harness_lcb2_b3.backend.json"
+        ]
+      },
+      "bank": {
+        "family": "lcb",
+        "version": "v2",
+        "n_task_ids": 20,
+        "candidates": [
+          "v2"
+        ],
+        "match": "subset"
+      },
+      "arms": [
+        "CONFORM",
+        "HMIX",
+        "HOC",
+        "HPI",
+        "OFF",
+        "OFF5"
+      ],
+      "n_rows": 120,
+      "n_rows_by_arm": {
+        "CONFORM": 20,
+        "HMIX": 20,
+        "HOC": 20,
+        "HPI": 20,
+        "OFF": 20,
+        "OFF5": 20
+      },
+      "n_distinct_task_ids": 20,
+      "terminal": true,
+      "complete": true,
+      "infra_void": 0,
+      "runner_git": {
+        "sha": "fbe8a7b8968a05198010620238e4b3c688b833d5",
+        "dirty": true,
+        "branch": "feat/v2-four-stages"
+      },
+      "n_files": 12,
+      "bytes": 4006681,
+      "files": [
+        {
+          "name": "calls.jsonl",
+          "bytes": 3642301,
+          "sha256": "d783742f68ed36b4a1b86ca8718169f6218df1cc97ffabf523f45049e61805af",
+          "lines": 266
+        },
+        {
+          "name": "notes.jsonl",
+          "bytes": 2099,
+          "sha256": "31b557ce89a4640b4e0716d837ea9665512db406d82770efe28fd502bdf6ccfb",
+          "lines": 1
+        },
+        {
+          "name": "receipts_CONFORM.ndjson",
+          "bytes": 31144,
+          "sha256": "8c01817218b4c1fb85317e15cd25055df1654de8b7fa7c7b8688ec82bc5ff06a",
+          "lines": 57
+        },
+        {
+          "name": "receipts_CONFORM.pub.json",
+          "bytes": 144,
+          "sha256": "0026b2926397932b3412529142d255bcd03cf0da244215e2067b75cdc9fad349",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HMIX.ndjson",
+          "bytes": 43746,
+          "sha256": "c40e6d4c6029bdf06aa0a54ea0044691266530fb45f962a49d0c64002b5ade14",
+          "lines": 47
+        },
+        {
+          "name": "receipts_HMIX.pub.json",
+          "bytes": 144,
+          "sha256": "af850290089cc85668692730a25cda6448ffceb1ea2cc05544603ab754166ddc",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HOC.ndjson",
+          "bytes": 59774,
+          "sha256": "58122eff6115f446b8e80d0107bbd0d76890f235cb52171db5a40cbf7dc1ace5",
+          "lines": 65
+        },
+        {
+          "name": "receipts_HOC.pub.json",
+          "bytes": 144,
+          "sha256": "64d2a6ed6ce8c7b1937f3d7fa4582708eb2b8c2c212d5bbe6435a93d5b1cc78c",
+          "lines": 1
+        },
+        {
+          "name": "receipts_HPI.ndjson",
+          "bytes": 44039,
+          "sha256": "7a0dc70704664638863138de1f63bba9a2a01ec5a85cfbae264210f118f8ade3",
+          "lines": 47
+        },
+        {
+          "name": "receipts_HPI.pub.json",
+          "bytes": 144,
+          "sha256": "1bec50adfbbed0fe06317934796cc5995bdc44f83dcdfeb7c0d1ed6705a9a5fc",
+          "lines": 1
+        },
+        {
+          "name": "rows.jsonl",
+          "bytes": 170374,
+          "sha256": "c06f8d1f4dc7ea728421ba7b30038bd16e84b8059bb345e14a3971f6188decaa",
+          "lines": 120
+        },
+        {
+          "name": "summary.json",
+          "bytes": 12628,
+          "sha256": "a8ae4c731922038c054e7ff309bce6ffdc7b71cc99a41db1106dcb0aad3956ab",
+          "lines": 509
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
       "name": "g_r461_lcb3_three_arm",
       "kind": "real_run",
       "subkind": "gain_run",
@@ -28116,6 +29916,222 @@
       "lines": 150
     },
     {
+      "name": "g_r460r4_harness_lcb2_a1.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a1.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a1.launch.log",
+      "bytes": 14512,
+      "sha256": "486e77dd6a8e8c3a6c76a67210c238e69689cbff9be7b5824d8f5ef04981b8aa",
+      "lines": 143
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a2.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a2.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a2.launch.log",
+      "bytes": 14250,
+      "sha256": "10f20ec5f41a9de96d56540eb788edfb9102a667574cda6b82a7fd4e83859b51",
+      "lines": 139
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a3.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a3.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_a3.launch.log",
+      "bytes": 14270,
+      "sha256": "76d3cf0a646c67096ed7a817912d742b561a62c70389f03f01e062432281e3af",
+      "lines": 139
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b1.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b1.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b1.launch.log",
+      "bytes": 14424,
+      "sha256": "a48292f670e0bbe86fc786c2dd04fb462c88930e578fe3a838562ba520788e95",
+      "lines": 142
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b2.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b2.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b2.launch.log",
+      "bytes": 14525,
+      "sha256": "92834312dfa9c61b654f05f4b5e53db166ad5630ec89118e78feaeb4ab42cb17",
+      "lines": 143
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b3.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b3.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r4_harness_lcb2_b3.launch.log",
+      "bytes": 14537,
+      "sha256": "b13c3c0e22eb4fce7083a3fcc46cc96f43b9072a399e3f620068066207ec4802",
+      "lines": 143
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a1.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a1.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a1.launch.log",
+      "bytes": 14243,
+      "sha256": "7e952cb2fa4ba51702ff9f1c4bc4e0ca37fc95397ca72deaa28a7afa07f36741",
+      "lines": 139
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a2.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a2.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a2.launch.log",
+      "bytes": 14205,
+      "sha256": "ed41d8b643ba873c3d48fbd0d7c0c31673abbb8479a9015f44a2e706d2cec7e7",
+      "lines": 139
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a3.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a3.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_a3.launch.log",
+      "bytes": 14568,
+      "sha256": "5617848f127b99aaef8bc61d0f6e4f82bf9e03dfc1fa8672d663dcb5641fac0a",
+      "lines": 142
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b1.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b1.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b1.launch.log",
+      "bytes": 14544,
+      "sha256": "5c06a7c1e53339cfa0893f882cd756bb77db97e4890cc6fac0521b3ab1d9d445",
+      "lines": 141
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b2.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b2.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b2.launch.log",
+      "bytes": 14348,
+      "sha256": "1fc7ea1decee23bedd405480e4dfa4d389007e201f0adbb9d45a273148e64921",
+      "lines": 138
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b3.backend.json",
+      "bytes": 500,
+      "sha256": "9a7316020155b161ba6dbc3e9645942c4f8d1d51ba61a3f4f59ecc53bba085c7",
+      "lines": 24
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b3.endpoint",
+      "bytes": 46,
+      "sha256": "bf926170a8abbced7a6d1964453c2f67ed062ade4cf74d30e791673bf2dc03f2",
+      "lines": null
+    },
+    {
+      "name": "g_r460r5_harness_lcb2_b3.launch.log",
+      "bytes": 14723,
+      "sha256": "e297e58705a26225fe6974184656a0b847dd721f20b0d832d7d0ce7fd05880e4",
+      "lines": 147
+    },
+    {
       "name": "g_r461_lcb3_three_arm.launch.log",
       "bytes": 40185,
       "sha256": "5f79d351fc47652f15d402723adaa58c149d4bf54e2af4ed17f6d20cf641f38d",
@@ -29436,7 +31452,19 @@
           "g_r460r3_harness_lcb2_a3",
           "g_r460r3_harness_lcb2_b1",
           "g_r460r3_harness_lcb2_b2",
-          "g_r460r3_harness_lcb2_b3"
+          "g_r460r3_harness_lcb2_b3",
+          "g_r460r4_harness_lcb2_a1",
+          "g_r460r4_harness_lcb2_a2",
+          "g_r460r4_harness_lcb2_a3",
+          "g_r460r4_harness_lcb2_b1",
+          "g_r460r4_harness_lcb2_b2",
+          "g_r460r4_harness_lcb2_b3",
+          "g_r460r5_harness_lcb2_a1",
+          "g_r460r5_harness_lcb2_a2",
+          "g_r460r5_harness_lcb2_a3",
+          "g_r460r5_harness_lcb2_b1",
+          "g_r460r5_harness_lcb2_b2",
+          "g_r460r5_harness_lcb2_b3"
         ],
         "also_consistent_with_runs": [
           "g_e2q_off_lcb_qwenonly_20260902",
@@ -29617,9 +31645,9 @@
     },
     "mac_repo": {
       "runs_dir": "runs/",
-      "entries": 598,
-      "dirs": 278,
-      "top_level_files": 320,
+      "entries": 646,
+      "dirs": 290,
+      "top_level_files": 356,
       "all_tracked_in_git": true
     },
     "not_mirrored_to_mac": [
@@ -29734,6 +31762,30 @@
       "g_r460r3_harness_lcb2_b2.launch.log",
       "g_r460r3_harness_lcb2_b3.backend.json",
       "g_r460r3_harness_lcb2_b3.launch.log",
+      "g_r460r4_harness_lcb2_a1.backend.json",
+      "g_r460r4_harness_lcb2_a1.launch.log",
+      "g_r460r4_harness_lcb2_a2.backend.json",
+      "g_r460r4_harness_lcb2_a2.launch.log",
+      "g_r460r4_harness_lcb2_a3.backend.json",
+      "g_r460r4_harness_lcb2_a3.launch.log",
+      "g_r460r4_harness_lcb2_b1.backend.json",
+      "g_r460r4_harness_lcb2_b1.launch.log",
+      "g_r460r4_harness_lcb2_b2.backend.json",
+      "g_r460r4_harness_lcb2_b2.launch.log",
+      "g_r460r4_harness_lcb2_b3.backend.json",
+      "g_r460r4_harness_lcb2_b3.launch.log",
+      "g_r460r5_harness_lcb2_a1.backend.json",
+      "g_r460r5_harness_lcb2_a1.launch.log",
+      "g_r460r5_harness_lcb2_a2.backend.json",
+      "g_r460r5_harness_lcb2_a2.launch.log",
+      "g_r460r5_harness_lcb2_a3.backend.json",
+      "g_r460r5_harness_lcb2_a3.launch.log",
+      "g_r460r5_harness_lcb2_b1.backend.json",
+      "g_r460r5_harness_lcb2_b1.launch.log",
+      "g_r460r5_harness_lcb2_b2.backend.json",
+      "g_r460r5_harness_lcb2_b2.launch.log",
+      "g_r460r5_harness_lcb2_b3.backend.json",
+      "g_r460r5_harness_lcb2_b3.launch.log",
       "g_r461_lcb3_three_arm.launch.log",
       "g_r461_off_gate_lcb3.backend.json",
       "g_r461_off_gate_lcb3.launch.log",
