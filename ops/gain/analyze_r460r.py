@@ -191,6 +191,66 @@ CO_TENANT_NOTE = (
     "因為哪一個才是「GPU 真的在忙」取決於後端的批次行為，本檔不宣稱知道。")
 
 
+#: 推論模式（DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md §十一）。
+INFERENCE_MODE_NOTE = (
+    "逐塊的 `usage.completion_tokens_details.reasoning_tokens`。存在的理由："
+    "同一顆 gemma-4 在 1003（LM Studio 0.4.24）被跑成 **thinking 模式**、"
+    "在 1004（0.4.17）不是——同一個模型檔、兩種推論條件。R460／R460R 的塊"
+    "**全部在 1004** ⇒ 這一格預期逐塊都是 0.0%；印出來是為了將來混機時"
+    "看得見，不是因為現在有問題。"
+    "⚠ 模式是**推斷**的（從 usage 欄位反推），不是後端自己報的設定；"
+    "一通成功呼叫都沒有 ⇒ `unknown`，**不是** `non_thinking`。"
+    "⚠ 描述性：本檔沒有任何仲裁值讀它。")
+
+
+def inference_mode(blocks: list[dict]) -> dict:
+    """逐塊的 reasoning 占比與均值，外加一個跨塊彙總。
+
+    ⚠ 只數**成功**的呼叫（失敗的沒有 usage）。`unknown` 是真的「沒量到」。
+    """
+    by_block: dict[str, dict] = {}
+    tot_ok = tot_with = 0
+    for b in blocks:
+        ok = [c for c in (b.get("calls") or []) if c.get("ok")]
+        n = len(ok)
+        with_r = 0
+        r_sum = c_sum = 0
+        for c in ok:
+            u = c.get("usage") or {}
+            rt = int(((u.get("completion_tokens_details") or {})
+                      .get("reasoning_tokens")) or 0)
+            if rt > 0:
+                with_r += 1
+            r_sum += rt
+            c_sum += int(u.get("completion_tokens") or 0)
+        pp = (100.0 * with_r / n) if n else None
+        by_block[b.get("name")] = {
+            "rep": b.get("rep"),
+            "endpoints": list(b.get("endpoints") or []),
+            "calls_ok": n,
+            "calls_with_reasoning": with_r,
+            "reasoning_call_pp": (round(pp, 1) if pp is not None else None),
+            "reasoning_tokens_mean": (round(r_sum / n, 1) if n else None),
+            "completion_tokens_mean": (round(c_sum / n, 1) if n else None),
+            "mode": ("unknown" if pp is None else
+                     "non_thinking" if pp == 0.0 else
+                     "thinking" if pp >= 50.0 else "mixed"),
+        }
+        tot_ok += n
+        tot_with += with_r
+    pooled_pp = (100.0 * tot_with / tot_ok) if tot_ok else None
+    return {
+        "by_block": by_block,
+        "blocks_n": len(by_block),
+        "calls_ok_total": tot_ok,
+        "calls_with_reasoning_total": tot_with,
+        "reasoning_call_pp_total": (round(pooled_pp, 1)
+                                    if pooled_pp is not None else None),
+        "modes_seen": sorted({v["mode"] for v in by_block.values()}),
+        "note": INFERENCE_MODE_NOTE,
+    }
+
+
 def _merge(iv: list[tuple[int, int]]) -> list[tuple[int, int]]:
     """區間聯集（左閉右閉，接觸即合併）。"""
     out: list[tuple[int, int]] = []
@@ -515,6 +575,24 @@ def render(out: dict) -> str:
                      f"（共租時 {_f(r['gen_ok_cotenant']['mean_s'], 1)}s／"
                      f"獨佔時 {_f(r['gen_ok_solo']['mean_s'], 1)}s）")
         L.append(f"  ⚠ {ct['note']}")
+    im = out.get("inference_mode") or {}
+    if im.get("by_block"):
+        L += ["", "── 推論模式（§十一；描述性，**不是違規、不校正任何值**）",
+              f"塊數 {im['blocks_n']}　成功呼叫 {im['calls_ok_total']}　"
+              f"帶 reasoning {im['calls_with_reasoning_total']}"
+              f"（{_f(im['reasoning_call_pp_total'], 1)}%）　"
+              f"模式 {im['modes_seen']}"]
+        odd = {n: v for n, v in im["by_block"].items()
+               if v["mode"] != "non_thinking"}
+        if odd:
+            L.append("  ⚠ 不是 non_thinking 的塊："
+                     + "、".join(f"{n}={v['mode']}"
+                                 f"({_f(v['reasoning_call_pp'], 1)}%)"
+                                 for n, v in sorted(odd.items())))
+        else:
+            L.append(f"  全部 {im['blocks_n']} 塊都是 non_thinking（0.0%）"
+                     "——與 R460／R460R 全在 1004 的事實一致")
+        L.append(f"  ⚠ {im['note']}")
     ag = out["aggregate"]
     L += ["", "── 彙總（描述性；**不併 n**）",
           f"已分析 {ag['reps_analyzed']}/5　H-MIX 裁決計數 {ag['verdict_counts_HMIX']}",
@@ -542,6 +620,8 @@ def run(reps: list[int], *, bank: str = "lcb2", rescore_turn1: bool = False,
     return {"reps": rows, "aggregate": aggregate(rows),
             "global_topology": global_concurrency(all_blocks),
             "co_tenancy": co_tenancy(all_blocks, root=root),
+            # 共租旁邊的那一格：同一張卡上「跑在什麼推論條件下」（§十一）。
+            "inference_mode": inference_mode(all_blocks),
             "full": {o["rep"]: o for o in full}}
 
 
@@ -672,6 +752,35 @@ def selftest() -> int:
        and "不是 0%" in ct0["note"],
        json.dumps(ct0, ensure_ascii=False)[:200])
 
+    # ── 2026-09-13（§十一）：推論模式那一格也要有牙齒 ────────────────────
+    # 三塊：全 thinking／全 non_thinking／一通成功呼叫都沒有。
+    # 第三塊必須是 `unknown` 而**不是** non_thinking——量不到不是通過。
+    im = inference_mode([
+        {"name": "im_think", "rep": 9, "endpoints": [ENDPOINT_1004], "calls": [
+            {"ok": True, "usage": {"completion_tokens": 300,
+                                   "completion_tokens_details":
+                                       {"reasoning_tokens": 200}}},
+            {"ok": True, "usage": {"completion_tokens": 100,
+                                   "completion_tokens_details":
+                                       {"reasoning_tokens": 60}}},
+            {"ok": False, "error": "x"}]},
+        {"name": "im_plain", "rep": 9, "endpoints": [ENDPOINT_1004], "calls": [
+            {"ok": True, "usage": {"completion_tokens": 40}},
+            {"ok": True, "usage": {"completion_tokens": 60}}]},
+        {"name": "im_empty", "rep": 9, "endpoints": [ENDPOINT_1004],
+         "calls": [{"ok": False, "error": "x"}]},
+    ])
+    ck("R_inference_mode_splits_thinking_from_plain_and_unknown",
+       im["by_block"]["im_think"]["mode"] == "thinking"
+       and im["by_block"]["im_think"]["reasoning_call_pp"] == 100.0
+       and im["by_block"]["im_think"]["reasoning_tokens_mean"] == 130.0
+       and im["by_block"]["im_plain"]["mode"] == "non_thinking"
+       and im["by_block"]["im_empty"]["mode"] == "unknown"
+       and im["by_block"]["im_empty"]["reasoning_call_pp"] is None
+       and im["calls_ok_total"] == 4 and im["calls_with_reasoning_total"] == 2
+       and im["reasoning_call_pp_total"] == 50.0,
+       json.dumps(im["by_block"], ensure_ascii=False))
+
     # ── round460r-3：窗的**方向**。序列呼叫在舊定義下會長出假併發 ─────────
     # 一個 WORKER_CONCURRENCY=1 的 runner：一長一短兩通**首尾相接**。
     #   真實（新定義 [ts−lat, ts]）：[0,100]、[100,105]  ⇒ 併發 1
@@ -728,6 +837,7 @@ def main() -> int:
         slim = {"reps": out["reps"], "aggregate": out["aggregate"],
                 "global_topology": out["global_topology"],
                 "co_tenancy": out["co_tenancy"],
+                "inference_mode": out["inference_mode"],
                 "attribution": {str(o["rep"]): o.get("attribution")
                                 for o in out["full"].values()
                                 if o.get("status") == "ANALYZED"}}

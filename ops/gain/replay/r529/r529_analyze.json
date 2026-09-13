@@ -1364,5 +1364,621 @@
     "statement_rule": "主指標兩格都 p_adj<0.05 且 direction_agree_c==4 ⇒ 可以寫「三個來源、四集方向一致且合併顯著」；主指標成立但方向不是 4/4 ⇒ 必須指名哪一集反向；主指標任一格不成立 ⇒ 逐集照實列（DECISION §六-5 逐字）。",
     "no_meta_analysis_note": "沒有隨機效應模型、沒有 meta-analysis、沒有合併效果量；四集的點估計**不准平均**（難度組成、來源、n、量具強度都不同）。",
     "winners_curse": "winner's curse：R460 的 +13.33pp 是**能被判顯著**的點估計 ⇒ 上偏。本 run 的點估計預期比它小，那是預期之內的事，不是「效果消失」。"
-  }
+  },
+  "per_backend": {
+    "lcb3_medium": {
+      "1003": {
+        "backend": {
+          "host": "1003",
+          "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+          "lmstudio_version": "0.4.24.0",
+          "lmstudio_version_source": "backend_meta.declared",
+          "probe_reasoning_tokens": null,
+          "reasoning_effort_requested": null,
+          "honesty": "lmstudio_version 是人回報的宣稱，analyzer 查證不到"
+        },
+        "blocks": [
+          "g_r529_lcb3m_a1",
+          "g_r529_lcb3m_a2",
+          "g_r529_lcb3m_a3",
+          "g_r529_lcb3m_a7"
+        ],
+        "blocks_n": 4,
+        "per_arm": {
+          "OFF": {
+            "n_measured": 75,
+            "deliv_n": 69,
+            "deliv_pp": 92.0,
+            "deliv_fraction": "69/75",
+            "tokens_incl_void": 493397,
+            "tokens_per_task": 6578.626666666667,
+            "tpc_incl_void": 7150.68115942029,
+            "calls_logical_total": 75
+          },
+          "CONFORM": {
+            "n_measured": 75,
+            "deliv_n": 74,
+            "deliv_pp": 98.66666666666667,
+            "deliv_fraction": "74/75",
+            "tokens_incl_void": 558744,
+            "tokens_per_task": 7449.92,
+            "tpc_incl_void": 7550.594594594595,
+            "calls_logical_total": 77
+          },
+          "HMIX": {
+            "n_measured": 75,
+            "deliv_n": 74,
+            "deliv_pp": 98.66666666666667,
+            "deliv_fraction": "74/75",
+            "tokens_incl_void": 792409,
+            "tokens_per_task": 10565.453333333333,
+            "tpc_incl_void": 10708.22972972973,
+            "calls_logical_total": 76
+          }
+        },
+        "paired": {
+          "HMIX_vs_CONFORM": {
+            "b": 1,
+            "c": 1,
+            "n_common": 75,
+            "delta_pp": 0.0
+          },
+          "HMIX_vs_OFF": {
+            "b": 6,
+            "c": 1,
+            "n_common": 75,
+            "delta_pp": 6.666666666666667
+          }
+        },
+        "reasoning": {
+          "calls_ok": 236,
+          "calls_with_reasoning": 236,
+          "reasoning_call_pp": 100.0,
+          "reasoning_tokens_mean": 6676.1483050847455,
+          "completion_tokens_mean": 7280.029661016949,
+          "total_tokens_mean": 7817.3347457627115,
+          "inference_mode": "thinking",
+          "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。"
+        },
+        "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+      },
+      "1004": {
+        "backend": {
+          "host": "1004",
+          "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+          "lmstudio_version": "0.4.17.0",
+          "lmstudio_version_source": "backend_meta.declared",
+          "probe_reasoning_tokens": null,
+          "reasoning_effort_requested": null,
+          "honesty": "lmstudio_version 是人回報的宣稱，analyzer 查證不到"
+        },
+        "blocks": [
+          "g_r529_lcb3m_a4",
+          "g_r529_lcb3m_a5",
+          "g_r529_lcb3m_a6"
+        ],
+        "blocks_n": 3,
+        "per_arm": {
+          "OFF": {
+            "n_measured": 60,
+            "deliv_n": 46,
+            "deliv_pp": 76.66666666666667,
+            "deliv_fraction": "46/60",
+            "tokens_incl_void": 111692,
+            "tokens_per_task": 1861.5333333333333,
+            "tpc_incl_void": 2428.086956521739,
+            "calls_logical_total": 60
+          },
+          "CONFORM": {
+            "n_measured": 60,
+            "deliv_n": 51,
+            "deliv_pp": 85.0,
+            "deliv_fraction": "51/60",
+            "tokens_incl_void": 191344,
+            "tokens_per_task": 3189.0666666666666,
+            "tpc_incl_void": 3751.843137254902,
+            "calls_logical_total": 81
+          },
+          "HMIX": {
+            "n_measured": 60,
+            "deliv_n": 52,
+            "deliv_pp": 86.66666666666667,
+            "deliv_fraction": "52/60",
+            "tokens_incl_void": 231659,
+            "tokens_per_task": 3860.983333333333,
+            "tpc_incl_void": 4454.9807692307695,
+            "calls_logical_total": 78
+          }
+        },
+        "paired": {
+          "HMIX_vs_CONFORM": {
+            "b": 5,
+            "c": 4,
+            "n_common": 60,
+            "delta_pp": 1.6666666666666667
+          },
+          "HMIX_vs_OFF": {
+            "b": 11,
+            "c": 5,
+            "n_common": 60,
+            "delta_pp": 10.0
+          }
+        },
+        "reasoning": {
+          "calls_ok": 225,
+          "calls_with_reasoning": 0,
+          "reasoning_call_pp": 0.0,
+          "reasoning_tokens_mean": 0.0,
+          "completion_tokens_mean": 1589.4711111111112,
+          "total_tokens_mean": 2376.8355555555554,
+          "inference_mode": "non_thinking",
+          "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。"
+        },
+        "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+      }
+    },
+    "lcb3_hard": {
+      "1003": {
+        "backend": {
+          "host": "1003",
+          "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+          "lmstudio_version": "0.4.24.0",
+          "lmstudio_version_source": "backend_meta.declared",
+          "probe_reasoning_tokens": null,
+          "reasoning_effort_requested": null,
+          "honesty": "lmstudio_version 是人回報的宣稱，analyzer 查證不到"
+        },
+        "blocks": [
+          "g_r529_lcb3h_a1",
+          "g_r529_lcb3h_a3"
+        ],
+        "blocks_n": 2,
+        "per_arm": {
+          "OFF": {
+            "n_measured": 34,
+            "deliv_n": 25,
+            "deliv_pp": 73.52941176470588,
+            "deliv_fraction": "25/34",
+            "tokens_incl_void": 389907,
+            "tokens_per_task": 11467.85294117647,
+            "tpc_incl_void": 15596.28,
+            "calls_logical_total": 34
+          },
+          "CONFORM": {
+            "n_measured": 34,
+            "deliv_n": 26,
+            "deliv_pp": 76.47058823529412,
+            "deliv_fraction": "26/34",
+            "tokens_incl_void": 597109,
+            "tokens_per_task": 17562.029411764706,
+            "tpc_incl_void": 22965.73076923077,
+            "calls_logical_total": 48
+          },
+          "HMIX": {
+            "n_measured": 34,
+            "deliv_n": 28,
+            "deliv_pp": 82.3529411764706,
+            "deliv_fraction": "28/34",
+            "tokens_incl_void": 680344,
+            "tokens_per_task": 20010.117647058825,
+            "tpc_incl_void": 24298.0,
+            "calls_logical_total": 41
+          }
+        },
+        "paired": {
+          "HMIX_vs_CONFORM": {
+            "b": 3,
+            "c": 1,
+            "n_common": 34,
+            "delta_pp": 5.88235294117647
+          },
+          "HMIX_vs_OFF": {
+            "b": 4,
+            "c": 1,
+            "n_common": 34,
+            "delta_pp": 8.823529411764707
+          }
+        },
+        "reasoning": {
+          "calls_ok": 127,
+          "calls_with_reasoning": 127,
+          "reasoning_call_pp": 100.0,
+          "reasoning_tokens_mean": 11307.433070866142,
+          "completion_tokens_mean": 12361.629921259842,
+          "total_tokens_mean": 13130.062992125984,
+          "inference_mode": "thinking",
+          "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。"
+        },
+        "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+      },
+      "1004": {
+        "backend": {
+          "host": "1004",
+          "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+          "lmstudio_version": "0.4.17.0",
+          "lmstudio_version_source": "backend_meta.declared",
+          "probe_reasoning_tokens": null,
+          "reasoning_effort_requested": null,
+          "honesty": "lmstudio_version 是人回報的宣稱，analyzer 查證不到"
+        },
+        "blocks": [
+          "g_r529_lcb3h_a2"
+        ],
+        "blocks_n": 1,
+        "per_arm": {
+          "OFF": {
+            "n_measured": 20,
+            "deliv_n": 13,
+            "deliv_pp": 65.0,
+            "deliv_fraction": "13/20",
+            "tokens_incl_void": 64352,
+            "tokens_per_task": 3217.6,
+            "tpc_incl_void": 4950.153846153846,
+            "calls_logical_total": 20
+          },
+          "CONFORM": {
+            "n_measured": 20,
+            "deliv_n": 15,
+            "deliv_pp": 75.0,
+            "deliv_fraction": "15/20",
+            "tokens_incl_void": 122949,
+            "tokens_per_task": 6147.45,
+            "tpc_incl_void": 8196.6,
+            "calls_logical_total": 30
+          },
+          "HMIX": {
+            "n_measured": 20,
+            "deliv_n": 15,
+            "deliv_pp": 75.0,
+            "deliv_fraction": "15/20",
+            "tokens_incl_void": 92827,
+            "tokens_per_task": 4641.35,
+            "tpc_incl_void": 6188.466666666666,
+            "calls_logical_total": 26
+          }
+        },
+        "paired": {
+          "HMIX_vs_CONFORM": {
+            "b": 2,
+            "c": 2,
+            "n_common": 20,
+            "delta_pp": 0.0
+          },
+          "HMIX_vs_OFF": {
+            "b": 3,
+            "c": 1,
+            "n_common": 20,
+            "delta_pp": 10.0
+          }
+        },
+        "reasoning": {
+          "calls_ok": 78,
+          "calls_with_reasoning": 0,
+          "reasoning_call_pp": 0.0,
+          "reasoning_tokens_mean": 0.0,
+          "completion_tokens_mean": 2744.346153846154,
+          "total_tokens_mean": 3591.7820512820513,
+          "inference_mode": "non_thinking",
+          "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。"
+        },
+        "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+      }
+    },
+    "humanevalplus": {
+      "1003": {
+        "backend": {
+          "host": "1003",
+          "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+          "lmstudio_version": "0.4.24.0",
+          "lmstudio_version_source": "backend_meta.declared",
+          "probe_reasoning_tokens": null,
+          "reasoning_effort_requested": null,
+          "honesty": "lmstudio_version 是人回報的宣稱，analyzer 查證不到"
+        },
+        "blocks": [
+          "g_r529_hep_a1",
+          "g_r529_hep_a2",
+          "g_r529_hep_a5",
+          "g_r529_hep_a6",
+          "g_r529_hep_a7"
+        ],
+        "blocks_n": 5,
+        "per_arm": {
+          "OFF": {
+            "n_measured": 100,
+            "deliv_n": 87,
+            "deliv_pp": 87.0,
+            "deliv_fraction": "87/100",
+            "tokens_incl_void": 200965,
+            "tokens_per_task": 2009.65,
+            "tpc_incl_void": 2309.942528735632,
+            "calls_logical_total": 100
+          },
+          "CONFORM": {
+            "n_measured": 100,
+            "deliv_n": 94,
+            "deliv_pp": 94.0,
+            "deliv_fraction": "94/100",
+            "tokens_incl_void": 229122,
+            "tokens_per_task": 2291.22,
+            "tpc_incl_void": 2437.468085106383,
+            "calls_logical_total": 119
+          },
+          "HMIX": {
+            "n_measured": 100,
+            "deliv_n": 94,
+            "deliv_pp": 94.0,
+            "deliv_fraction": "94/100",
+            "tokens_incl_void": 436845,
+            "tokens_per_task": 4368.45,
+            "tpc_incl_void": 4647.287234042553,
+            "calls_logical_total": 104
+          }
+        },
+        "paired": {
+          "HMIX_vs_CONFORM": {
+            "b": 3,
+            "c": 3,
+            "n_common": 100,
+            "delta_pp": 0.0
+          },
+          "HMIX_vs_OFF": {
+            "b": 11,
+            "c": 4,
+            "n_common": 100,
+            "delta_pp": 7.000000000000001
+          }
+        },
+        "reasoning": {
+          "calls_ok": 333,
+          "calls_with_reasoning": 333,
+          "reasoning_call_pp": 100.0,
+          "reasoning_tokens_mean": 1884.7957957957958,
+          "completion_tokens_mean": 2369.741741741742,
+          "total_tokens_mean": 2604.5345345345345,
+          "inference_mode": "thinking",
+          "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。"
+        },
+        "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+      },
+      "1004": {
+        "backend": {
+          "host": "1004",
+          "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+          "lmstudio_version": "0.4.17.0",
+          "lmstudio_version_source": "backend_meta.declared",
+          "probe_reasoning_tokens": null,
+          "reasoning_effort_requested": null,
+          "honesty": "lmstudio_version 是人回報的宣稱，analyzer 查證不到"
+        },
+        "blocks": [
+          "g_r529_hep_a3",
+          "g_r529_hep_a4",
+          "g_r529_hep_a8"
+        ],
+        "blocks_n": 3,
+        "per_arm": {
+          "OFF": {
+            "n_measured": 56,
+            "deliv_n": 42,
+            "deliv_pp": 75.0,
+            "deliv_fraction": "42/56",
+            "tokens_incl_void": 49406,
+            "tokens_per_task": 882.25,
+            "tpc_incl_void": 1176.3333333333333,
+            "calls_logical_total": 56
+          },
+          "CONFORM": {
+            "n_measured": 56,
+            "deliv_n": 53,
+            "deliv_pp": 94.64285714285714,
+            "deliv_fraction": "53/56",
+            "tokens_incl_void": 59576,
+            "tokens_per_task": 1063.857142857143,
+            "tpc_incl_void": 1124.0754716981132,
+            "calls_logical_total": 80
+          },
+          "HMIX": {
+            "n_measured": 56,
+            "deliv_n": 54,
+            "deliv_pp": 96.42857142857143,
+            "deliv_fraction": "54/56",
+            "tokens_incl_void": 51741,
+            "tokens_per_task": 923.9464285714286,
+            "tpc_incl_void": 958.1666666666666,
+            "calls_logical_total": 66
+          }
+        },
+        "paired": {
+          "HMIX_vs_CONFORM": {
+            "b": 2,
+            "c": 1,
+            "n_common": 56,
+            "delta_pp": 1.7857142857142856
+          },
+          "HMIX_vs_OFF": {
+            "b": 13,
+            "c": 1,
+            "n_common": 56,
+            "delta_pp": 21.428571428571427
+          }
+        },
+        "reasoning": {
+          "calls_ok": 208,
+          "calls_with_reasoning": 0,
+          "reasoning_call_pp": 0.0,
+          "reasoning_tokens_mean": 0.0,
+          "completion_tokens_mean": 494.32211538461536,
+          "total_tokens_mean": 773.1538461538462,
+          "inference_mode": "non_thinking",
+          "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。"
+        },
+        "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+      }
+    },
+    "evalplus": {
+      "1003": {
+        "backend": {
+          "host": "1003",
+          "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+          "lmstudio_version": "0.4.24.0",
+          "lmstudio_version_source": "backend_meta.declared",
+          "probe_reasoning_tokens": null,
+          "reasoning_effort_requested": null,
+          "honesty": "lmstudio_version 是人回報的宣稱，analyzer 查證不到"
+        },
+        "blocks": [
+          "g_r529_mbpp_a1",
+          "g_r529_mbpp_a10",
+          "g_r529_mbpp_a12",
+          "g_r529_mbpp_a15",
+          "g_r529_mbpp_a16",
+          "g_r529_mbpp_a18",
+          "g_r529_mbpp_a19",
+          "g_r529_mbpp_a2",
+          "g_r529_mbpp_a3",
+          "g_r529_mbpp_a4",
+          "g_r529_mbpp_a7",
+          "g_r529_mbpp_a8"
+        ],
+        "blocks_n": 12,
+        "per_arm": {
+          "OFF": {
+            "n_measured": 231,
+            "deliv_n": 174,
+            "deliv_pp": 75.32467532467533,
+            "deliv_fraction": "174/231",
+            "tokens_incl_void": 446610,
+            "tokens_per_task": 1933.3766233766235,
+            "tpc_incl_void": 2566.7241379310344,
+            "calls_logical_total": 231
+          },
+          "CONFORM": {
+            "n_measured": 231,
+            "deliv_n": 184,
+            "deliv_pp": 79.65367965367966,
+            "deliv_fraction": "184/231",
+            "tokens_incl_void": 660615,
+            "tokens_per_task": 2859.805194805195,
+            "tpc_incl_void": 3590.2989130434785,
+            "calls_logical_total": 307
+          },
+          "HMIX": {
+            "n_measured": 231,
+            "deliv_n": 187,
+            "deliv_pp": 80.95238095238095,
+            "deliv_fraction": "187/231",
+            "tokens_incl_void": 1144903,
+            "tokens_per_task": 4956.290043290043,
+            "tpc_incl_void": 6122.475935828877,
+            "calls_logical_total": 251
+          }
+        },
+        "paired": {
+          "HMIX_vs_CONFORM": {
+            "b": 8,
+            "c": 5,
+            "n_common": 231,
+            "delta_pp": 1.2987012987012987
+          },
+          "HMIX_vs_OFF": {
+            "b": 17,
+            "c": 4,
+            "n_common": 231,
+            "delta_pp": 5.627705627705628
+          }
+        },
+        "reasoning": {
+          "calls_ok": 813,
+          "calls_with_reasoning": 813,
+          "reasoning_call_pp": 100.0,
+          "reasoning_tokens_mean": 2211.6420664206644,
+          "completion_tokens_mean": 2575.3038130381306,
+          "total_tokens_mean": 2771.29766297663,
+          "inference_mode": "thinking",
+          "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。"
+        },
+        "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+      },
+      "1004": {
+        "backend": {
+          "host": "1004",
+          "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+          "lmstudio_version": "0.4.17.0",
+          "lmstudio_version_source": "backend_meta.declared",
+          "probe_reasoning_tokens": null,
+          "reasoning_effort_requested": null,
+          "honesty": "lmstudio_version 是人回報的宣稱，analyzer 查證不到"
+        },
+        "blocks": [
+          "g_r529_mbpp_a11",
+          "g_r529_mbpp_a13",
+          "g_r529_mbpp_a14",
+          "g_r529_mbpp_a17",
+          "g_r529_mbpp_a5",
+          "g_r529_mbpp_a6",
+          "g_r529_mbpp_a9"
+        ],
+        "blocks_n": 7,
+        "per_arm": {
+          "OFF": {
+            "n_measured": 140,
+            "deliv_n": 103,
+            "deliv_pp": 73.57142857142857,
+            "deliv_fraction": "103/140",
+            "tokens_incl_void": 98669,
+            "tokens_per_task": 704.7785714285715,
+            "tpc_incl_void": 957.9514563106796,
+            "calls_logical_total": 140
+          },
+          "CONFORM": {
+            "n_measured": 140,
+            "deliv_n": 111,
+            "deliv_pp": 79.28571428571429,
+            "deliv_fraction": "111/140",
+            "tokens_incl_void": 159005,
+            "tokens_per_task": 1135.75,
+            "tpc_incl_void": 1432.4774774774776,
+            "calls_logical_total": 189
+          },
+          "HMIX": {
+            "n_measured": 140,
+            "deliv_n": 112,
+            "deliv_pp": 80.0,
+            "deliv_fraction": "112/140",
+            "tokens_incl_void": 181833,
+            "tokens_per_task": 1298.807142857143,
+            "tpc_incl_void": 1623.5089285714287,
+            "calls_logical_total": 162
+          }
+        },
+        "paired": {
+          "HMIX_vs_CONFORM": {
+            "b": 7,
+            "c": 6,
+            "n_common": 140,
+            "delta_pp": 0.7142857142857143
+          },
+          "HMIX_vs_OFF": {
+            "b": 14,
+            "c": 5,
+            "n_common": 140,
+            "delta_pp": 6.428571428571428
+          }
+        },
+        "reasoning": {
+          "calls_ok": 505,
+          "calls_with_reasoning": 0,
+          "reasoning_call_pp": 0.0,
+          "reasoning_tokens_mean": 0.0,
+          "completion_tokens_mean": 581.8356435643565,
+          "total_tokens_mean": 870.7405940594059,
+          "inference_mode": "non_thinking",
+          "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。"
+        },
+        "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+      }
+    }
+  },
+  "per_backend_note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
 }

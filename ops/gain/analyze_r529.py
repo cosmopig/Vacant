@@ -101,6 +101,28 @@ CALLS_SOURCE_NOTE = (
     "呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，"
     "引用時要指名是哪一個；round529-2 之前兩者共用 `calls_total` 一個名字。")
 
+#: 後端身分 → LM Studio 版本的**兜底**對照表（`DECISION_20260912_R529_FABLE_
+#: AUDIT_CROSS_BANK.md` §十一 逐字）。優先讀 `runs/<block>.backend_meta.json`
+#: 的 `declared.lmstudio_version`；那裡沒有才用這張表。
+#: ⚠ 兩者都是**人回報的宣稱**（`lms version`），runner 查證不到
+#: （/v1/models 與 HTTP header 都不帶版本，2026-09-11 實測）。
+LMSTUDIO_VERSION_FALLBACK = {"1003": "0.4.24", "1004": "0.4.17"}
+#: `<block>.endpoint` 的 IP → 主機名（`backend_meta.json` 不在時的兜底）。
+ENDPOINT_HOST_FALLBACK = {"100.119.113.56": "1003", "100.86.226.21": "1004"}
+
+PER_BACKEND_NOTE = (
+    "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／"
+    "refutation／aggregate 的任何一格。它存在的理由是 DECISION_20260912 §十一——"
+    "1003（LM Studio 0.4.24）把 gemma-4 跑成 thinking 模式、1004（0.4.17）沒有，"
+    "**同一顆模型檔、兩種推論條件**。⇒ §二 的逐集絕對值與 §四 的 token／tpc 是"
+    "兩種條件的混合物，不可再單獨引用；要引用就引用這裡的逐後端數字。"
+    "⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。")
+INFERENCE_MODE_NOTE = (
+    "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` "
+    "**推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、"
+    "==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown"
+    "（**不是** non_thinking——量不到不是通過）。")
+
 CI_DISCLAIMER = "區間未做多重比較調整；仲裁以 analyzer 為準"
 POOLING_IDENTITY_NOTE = (
     "分層統計量與「把四集的不一致對直接加起來做一次 McNemar」**數值相同**；"
@@ -176,6 +198,80 @@ def paired(a_rows: list[dict], b_rows: list[dict]) -> dict:
     }
 
 
+def block_backend(blk: str, root: pathlib.Path) -> dict:
+    """一塊跑在哪一台、那台是什麼版本。**只讀落盤 sidecar，零網路**。
+
+    順序：`<blk>.backend_meta.json` 的 `slot_host` ／ `declared.lmstudio_version`
+    → `<blk>.endpoint` 的 IP 查 `ENDPOINT_HOST_FALLBACK` → 版本查
+    `LMSTUDIO_VERSION_FALLBACK`。三層都查不到就回 `unknown`——
+    **不是**把它歸到某一台（量不到不是通過）。
+    """
+    meta = _read_json(root / "runs" / f"{blk}.backend_meta.json") or {}
+    host = (meta.get("slot_host") or "").strip()
+    endpoint = (meta.get("endpoint") or "").strip()
+    if not endpoint:
+        ep = root / "runs" / f"{blk}.endpoint"
+        endpoint = ep.read_text(encoding="utf-8").strip() if ep.exists() else ""
+    if not host and endpoint:
+        for ip, h in ENDPOINT_HOST_FALLBACK.items():
+            if ip in endpoint:
+                host = h
+                break
+    declared = (meta.get("declared") or {})
+    version = (declared.get("lmstudio_version") or "").strip()
+    version_source = "backend_meta.declared" if version else None
+    if not version and host in LMSTUDIO_VERSION_FALLBACK:
+        version = LMSTUDIO_VERSION_FALLBACK[host]
+        version_source = "fallback_table(DECISION_20260912 §十一)"
+    return {
+        "host": host or "unknown",
+        "endpoint": endpoint or None,
+        "lmstudio_version": version or None,
+        "lmstudio_version_source": version_source,
+        "probe_reasoning_tokens": meta.get("probe_reasoning_tokens"),
+        "reasoning_effort_requested": meta.get("reasoning_effort"),
+        "honesty": "lmstudio_version 是人回報的宣稱，analyzer 查證不到",
+    }
+
+
+def reasoning_stats(calls: list[dict]) -> dict:
+    """一堆呼叫的 reasoning token 帳。只看**成功**的呼叫（失敗的沒有 usage）。
+
+    ⚠ 這是 DECISION_20260912 §十一 的量具：R529 在 1003 的呼叫 100% 帶
+      `usage.completion_tokens_details.reasoning_tokens`（平均數千）、
+      1004 是 0%。沒有這一格，「兩台是同一個推論條件」這個假設就沒有人在查。
+    """
+    ok = [c for c in calls if c.get("ok")]
+    n = len(ok)
+    with_r = 0
+    r_sum = c_sum = t_sum = 0
+    for c in ok:
+        u = c.get("usage") or {}
+        det = u.get("completion_tokens_details") or {}
+        rt = int(det.get("reasoning_tokens") or 0)
+        if MUTANT == "M9_reasoning_ignored":
+            rt = 0
+        if rt > 0:
+            with_r += 1
+        r_sum += rt
+        c_sum += int(u.get("completion_tokens") or 0)
+        t_sum += int(u.get("total_tokens") or 0)
+    pp = _pct(with_r, n)
+    mode = ("unknown" if pp is None else
+            "non_thinking" if pp == 0.0 else
+            "thinking" if pp >= 50.0 else "mixed")
+    return {
+        "calls_ok": n,
+        "calls_with_reasoning": with_r,
+        "reasoning_call_pp": pp,
+        "reasoning_tokens_mean": (r_sum / n) if n else None,
+        "completion_tokens_mean": (c_sum / n) if n else None,
+        "total_tokens_mean": (t_sum / n) if n else None,
+        "inference_mode": mode,
+        "note": INFERENCE_MODE_NOTE,
+    }
+
+
 def tokens_by_arm(calls: list[dict], measured_ids: dict[str, set[str]]) -> dict:
     """逐臂的呼叫數與 token 總量，**含 void 與排除 void 兩個版本都算**。
 
@@ -222,6 +318,10 @@ def load_set(name: str, root: pathlib.Path) -> dict:
     blocks: list[dict] = []
     broken: list[str] = []
     seen_ids: set[str] = set()
+    # 逐塊留一份（`per_backend` 要用）。**不進輸出 JSON**——它只是中繼資料，
+    # 而 `per_set_stats` 的回傳是逐鍵明列的，不會把它漏出去。
+    rows_by_block: dict[str, list[dict]] = {}
+    calls_by_block: dict[str, list[dict]] = {}
     for blk in SETS[name]:
         d = root / "runs" / blk
         summary = _read_json(d / "summary.json")
@@ -266,7 +366,10 @@ def load_set(name: str, root: pathlib.Path) -> dict:
         seen_ids |= {r["task_id"] for r in brows if r.get("arm") == "OFF"}
         info["n_rows"] = len(brows)
         rows += brows
-        calls += _read_jsonl(d / "calls.jsonl")
+        bcalls = _read_jsonl(d / "calls.jsonl")
+        calls += bcalls
+        rows_by_block[blk] = brows
+        calls_by_block[blk] = bcalls
         blocks.append(info)
     present = [b for b in blocks if b["present"]]
     if len(present) != len(SETS[name]):
@@ -283,7 +386,8 @@ def load_set(name: str, root: pathlib.Path) -> dict:
     return {"rows": rows, "calls": calls, "blocks": blocks,
             "broken_reasons": broken, "n_tasks": len(ids),
             "blocks_present": len(present), "blocks_expected": len(SETS[name]),
-            "n_tasks_expected": SET_N[name]}
+            "n_tasks_expected": SET_N[name],
+            "rows_by_block": rows_by_block, "calls_by_block": calls_by_block}
 
 
 def included_sets(per_set: dict) -> list[str]:
@@ -356,6 +460,68 @@ def per_set_stats(name: str, loaded: dict) -> dict:
         "blocks": loaded["blocks"],
         "arbiter_note": "逐題庫**不下裁決**，只給數字（DECISION §六-2 逐字）。",
     }
+
+
+# ── 逐後端（DECISION_20260912 §十一；描述性，不進仲裁）──────────────────
+def per_backend_stats(loaded: dict, root: pathlib.Path = ROOT) -> dict:
+    """把一集的塊照**後端主機**分堆，逐堆算三臂 deliv／b-c／token／reasoning。
+
+    為什麼可以在後端內部做配對：一塊的三臂跑在**同一台**上（發射器逐塊 export
+    一個 `VACANT_GAIN_API`），而不同塊的題目集互斥 ⇒ 「同一台上的 b/c」是
+    完整的塊內配對，只是把塊分成兩群各自加起來。
+    ⚠ 它**不是**另一個檢定：不算 p、不進 Holm、不改四狀態。要比較兩台的差別
+      需要另一個預註冊（推論模式當因子），本檔不做。
+    """
+    by_host: dict[str, dict] = {}
+    for blk, brows in loaded.get("rows_by_block", {}).items():
+        be = block_backend(blk, root)
+        if MUTANT == "M8_per_backend_merges_hosts":
+            be = dict(be, host="1004")
+        d = by_host.setdefault(be["host"], {
+            "backend": be, "blocks": [], "rows": [], "calls": []})
+        d["blocks"].append(blk)
+        d["rows"] += brows
+        d["calls"] += loaded.get("calls_by_block", {}).get(blk, [])
+    out: dict[str, dict] = {}
+    for host in sorted(by_host):
+        d = by_host[host]
+        by_arm: dict[str, list[dict]] = {}
+        for r in d["rows"]:
+            by_arm.setdefault(r.get("arm"), []).append(r)
+        measured = {a: {r["task_id"] for r in rs} for a, rs in by_arm.items()}
+        tok = tokens_by_arm(d["calls"], measured)
+        per_arm: dict[str, dict] = {}
+        for a in ARMS:
+            rs = by_arm.get(a, [])
+            n = len(rs)
+            dn = sum(1 for r in rs if _deliv(r))
+            t = tok.get(a, {})
+            ti = t.get("tokens_incl_void", 0)
+            per_arm[a] = {
+                "n_measured": n, "deliv_n": dn, "deliv_pp": _pct(dn, n),
+                "deliv_fraction": f"{dn}/{n}",
+                "tokens_incl_void": ti,
+                "tokens_per_task": (ti / n) if n else None,
+                "tpc_incl_void": (ti / dn) if dn else None,
+                "calls_logical_total": sum(int(r.get("calls_used") or 0) for r in rs),
+            }
+        pairs: dict[str, dict] = {}
+        for a, b in PAIRS:
+            pr = paired(by_arm.get(a, []), by_arm.get(b, []))
+            pairs[f"{a}_vs_{b}"] = {
+                "b": pr["b"], "c": pr["c"], "n_common": pr["n_common"],
+                "delta_pp": pr["delta_pp"],
+            }
+        out[host] = {
+            "backend": d["backend"],
+            "blocks": sorted(d["blocks"]),
+            "blocks_n": len(d["blocks"]),
+            "per_arm": per_arm,
+            "paired": pairs,
+            "reasoning": reasoning_stats(d["calls"]),
+            "note": PER_BACKEND_NOTE,
+        }
+    return out
 
 
 # ── §六-1 主指標 ──────────────────────────────────────────────────────
@@ -555,8 +721,10 @@ def aggregate(per_set: dict, prim: dict, included: list[str]) -> dict:
 def analyze(root: pathlib.Path = ROOT,
             vgt_dir: pathlib.Path | None = None) -> dict:
     per_set: dict[str, dict] = {}
+    loaded_sets: dict[str, dict] = {}
     for name in SETS:
-        per_set[name] = per_set_stats(name, load_set(name, root))
+        loaded_sets[name] = load_set(name, root)
+        per_set[name] = per_set_stats(name, loaded_sets[name])
     included = included_sets(per_set)
     vgt = vgt_gate(vgt_dir)
     out: dict = {
@@ -568,12 +736,20 @@ def analyze(root: pathlib.Path = ROOT,
         "vgt": vgt,
         "per_set": per_set,
     }
+    # ⚠ `per_backend` 一律**最後**才塞進 out：它是描述性的，放在所有仲裁鍵
+    #   之後 ⇒ 既有 JSON 的鍵順序與值逐位元不變，diff 只會多出這一個鍵。
+    def _with_per_backend(o: dict) -> dict:
+        o["per_backend"] = {name: per_backend_stats(loaded_sets[name], root)
+                            for name in SETS}
+        o["per_backend_note"] = PER_BACKEND_NOTE
+        return o
+
     if not included:
         out["primary"] = {"family_size": FAMILY_SIZE,
                           "error": "沒有任何一集是 valid 的——量不到不是通過。"}
         out["decision_state"] = {"state": "INVALID",
                                  "note": "四集全部 INVALID（見 per_set.*.broken_reasons）。"}
-        return out
+        return _with_per_backend(out)
     pooled_tokens: dict[str, dict] = {}
     for a in ARMS:
         tok = sum(per_set[s]["tokens"][a]["tokens_incl_void"] for s in included)
@@ -599,7 +775,7 @@ def analyze(root: pathlib.Path = ROOT,
             "note": VGT_NOTE,
         }
     out["aggregate"] = aggregate(per_set, out["primary"], included)
-    return out
+    return _with_per_backend(out)
 
 
 def render(a: dict) -> str:
@@ -666,7 +842,42 @@ def render(a: dict) -> str:
         L.append(f"  方向一致 ΔC {g['direction_agree_c']}/{g['n_sets_counted']}、"
                  f"ΔO {g['direction_agree_o']}/{g['n_sets_counted']}")
         L.append(f"  宣稱：{g['statement']}")
+    pb = a.get("per_backend") or {}
+    if pb:
+        L += ["",
+              "── 逐後端（DECISION_20260912 §十一；**描述性，不進任何仲裁**）",
+              f"{'題目集':<14}{'後端':>6}{'LMS':>11}{'塊':>4}"
+              f"{'OFF':>10}{'CONFORM':>10}{'HMIX':>10}"
+              f"{'H−C':>6}{'H−O':>6}{'tok/題':>9}{'tpc':>9}"
+              f"{'reason均':>9}{'帶reason%':>10}{'模式':>13}"]
+        for s in a["sets_expected"]:
+            for host, h in sorted((pb.get(s) or {}).items()):
+                pa = h["per_arm"]
+                pc = h["paired"]["HMIX_vs_CONFORM"]
+                po = h["paired"]["HMIX_vs_OFF"]
+                rs = h["reasoning"]
+                hm = pa["HMIX"]
+                L.append(
+                    f"{s:<14}{host:>6}"
+                    f"{(h['backend'].get('lmstudio_version') or '?'):>11}"
+                    f"{h['blocks_n']:>4}"
+                    f"{pa['OFF']['deliv_fraction']:>10}"
+                    f"{pa['CONFORM']['deliv_fraction']:>10}"
+                    f"{pa['HMIX']['deliv_fraction']:>10}"
+                    f"{pc['b'] - pc['c']:>+6}{po['b'] - po['c']:>+6}"
+                    f"{_num(hm['tokens_per_task']):>9}"
+                    f"{_num(hm['tpc_incl_void']):>9}"
+                    f"{_num(rs['reasoning_tokens_mean']):>9}"
+                    f"{_num(rs['reasoning_call_pp'], 1):>10}"
+                    f"{rs['inference_mode']:>13}")
+        L.append(f"  ⚠ {PER_BACKEND_NOTE}")
+        L.append(f"  ⚠ {INFERENCE_MODE_NOTE}")
     return "\n".join(L)
+
+
+def _num(v, nd: int = 0) -> str:
+    """描述性表格用的格式化。`None` 印 `-`——**不是 0**。"""
+    return "-" if v is None else f"{v:.{nd}f}"
 
 
 # ── --selftest：手算對照 ──────────────────────────────────────────────
@@ -855,9 +1066,92 @@ def selftest() -> int:
     if g4["applied"] or g4["clean"] is not None:
         bad.append("沒給 --vgt-dir 時應該是 applied=False／clean=None（沒量≠CLEAN）")
 
+    # (14) M9：reasoning token 的帳。三通成功（兩通帶 reasoning）＋一通失敗
+    #      ⇒ 分母是**成功的 3 通**，占比 2/3＝66.7%、均值 (100+200+0)/3＝100。
+    #      66.7 ≥ 50 ⇒ thinking。一通成功都沒有 ⇒ unknown（**不是** non_thinking）。
+    rcalls = [
+        {"ok": True, "usage": {"completion_tokens": 300, "total_tokens": 400,
+                               "completion_tokens_details": {"reasoning_tokens": 100}}},
+        {"ok": True, "usage": {"completion_tokens": 400, "total_tokens": 500,
+                               "completion_tokens_details": {"reasoning_tokens": 200}}},
+        {"ok": True, "usage": {"completion_tokens": 10, "total_tokens": 20}},
+        {"ok": False, "error": "HTTPError"},
+    ]
+    rs = reasoning_stats(rcalls)
+    if rs["calls_ok"] != 3 or rs["calls_with_reasoning"] != 2:
+        bad.append(f"reasoning calls_ok/with={rs['calls_ok']}/"
+                   f"{rs['calls_with_reasoning']}，應為 3/2（失敗的呼叫不計）")
+    if abs((rs["reasoning_call_pp"] or 0) - 200.0 / 3) > 1e-9:
+        bad.append(f"reasoning_call_pp={rs['reasoning_call_pp']}，應為 66.67")
+    if abs((rs["reasoning_tokens_mean"] or 0) - 100.0) > 1e-9:
+        bad.append(f"reasoning_tokens_mean={rs['reasoning_tokens_mean']}，應為 100")
+    if rs["inference_mode"] != "thinking":
+        bad.append(f"inference_mode={rs['inference_mode']}，應為 thinking")
+    if reasoning_stats([{"ok": True, "usage": {"completion_tokens": 2}}]
+                       )["inference_mode"] != "non_thinking":
+        bad.append("零 reasoning 的呼叫應判 non_thinking")
+    if reasoning_stats([])["inference_mode"] != "unknown":
+        bad.append("一通成功呼叫都沒有應判 unknown（量不到不是 non_thinking）")
+
+    # (15) M8：`per_backend` 必須真的**分兩台**，而且只靠落盤 sidecar 分。
+    #      兩塊：一塊在 1003、一塊在 1004；三臂都在自己那一塊裡配對。
+    with tempfile.TemporaryDirectory() as td:
+        troot = pathlib.Path(td)
+        (troot / "runs").mkdir()
+        blk_a, blk_b = SETS["lcb3_hard"][0], SETS["lcb3_hard"][1]
+        (troot / "runs" / f"{blk_a}.backend_meta.json").write_text(
+            json.dumps({"slot_host": "1003", "endpoint": "http://x/v1",
+                        "declared": {"lmstudio_version": "0.4.24.0"}}),
+            encoding="utf-8")
+        # b 塊只有 .endpoint（沒有 backend_meta）⇒ 走 IP 兜底 + 版本對照表。
+        (troot / "runs" / f"{blk_b}.endpoint").write_text(
+            "http://100.86.226.21:1234/v1/chat/completions", encoding="utf-8")
+        loaded = {
+            "rows_by_block": {
+                # 1003 那一塊：HMIX 兩題都對、CONFORM 一題對 ⇒ b/c = 1/0
+                blk_a: (_fake_rows("HMIX", [True, True], "p")
+                        + _fake_rows("CONFORM", [True, False], "p")
+                        + _fake_rows("OFF", [False, False], "p")),
+                # 1004 那一塊：HMIX 一題對、CONFORM 兩題都對 ⇒ b/c = 0/1
+                blk_b: (_fake_rows("HMIX", [True, False], "q")
+                        + _fake_rows("CONFORM", [True, True], "q")
+                        + _fake_rows("OFF", [False, False], "q")),
+            },
+            "calls_by_block": {
+                blk_a: [{"ok": True, "usage": {
+                    "total_tokens": 1000, "completion_tokens": 900,
+                    "completion_tokens_details": {"reasoning_tokens": 800}},
+                    "meta": {"arm": "HMIX", "task_id": "p0"}}],
+                blk_b: [{"ok": True, "usage": {
+                    "total_tokens": 100, "completion_tokens": 90},
+                    "meta": {"arm": "HMIX", "task_id": "q0"}}],
+            },
+        }
+        pb = per_backend_stats(loaded, troot)
+        if sorted(pb) != ["1003", "1004"]:
+            bad.append(f"per_backend 沒有分成兩台：{sorted(pb)}")
+        else:
+            if pb["1003"]["backend"]["lmstudio_version"] != "0.4.24.0":
+                bad.append("per_backend 沒讀到 backend_meta 的宣稱版本")
+            if pb["1004"]["backend"]["lmstudio_version"] != "0.4.17":
+                bad.append("per_backend 的 endpoint→host→版本兜底沒生效")
+            if pb["1004"]["backend"]["lmstudio_version_source"] == "backend_meta.declared":
+                bad.append("兜底來的版本卻標成 backend_meta——來源要說實話")
+            pc3 = pb["1003"]["paired"]["HMIX_vs_CONFORM"]
+            pc4 = pb["1004"]["paired"]["HMIX_vs_CONFORM"]
+            if (pc3["b"], pc3["c"]) != (1, 0) or (pc4["b"], pc4["c"]) != (0, 1):
+                bad.append(f"逐後端 b/c 算錯：1003={pc3['b']}/{pc3['c']} "
+                           f"1004={pc4['b']}/{pc4['c']}，應為 1/0 與 0/1")
+            if pb["1003"]["reasoning"]["inference_mode"] != "thinking":
+                bad.append("1003 那一塊應判 thinking")
+            if pb["1004"]["reasoning"]["inference_mode"] != "non_thinking":
+                bad.append("1004 那一塊應判 non_thinking")
+            if pb["1003"]["per_arm"]["HMIX"]["deliv_fraction"] != "2/2":
+                bad.append("逐後端 deliv 分子分母算錯")
+
     for line in bad:
         print("FAIL " + line)
-    print(f"selftest: {'OK（13 組手算對照全過）' if not bad else f'{len(bad)} 條不符'}")
+    print(f"selftest: {'OK（15 組手算對照全過）' if not bad else f'{len(bad)} 條不符'}")
     return 1 if bad else 0
 
 
@@ -867,7 +1161,13 @@ MUTATIONS = ("M1_deliv_ignores_accepted", "M2_union_denominator",
              "M5_drop_a_set_silently",
              # round529-2：兩個新的紅線也要有牙齒。
              "M6_calls_per_task_from_wire",     # calls_per_task 與邏輯總數脫鉤
-             "M7_vgt_not_checked")              # V/GT 髒了卻放行
+             "M7_vgt_not_checked",              # V/GT 髒了卻放行
+             # 2026-09-13（DECISION_20260912 §十一）：逐後端那一格也要有牙齒。
+             # 它不進仲裁，但它是「兩台是不是同一個推論條件」的**唯一**量具；
+             # 安靜地把兩台併成一台、或安靜地把 reasoning 讀成 0，
+             # 都會讓那個問題看起來已經被回答了。
+             "M8_per_backend_merges_hosts",     # 兩台併成一台
+             "M9_reasoning_ignored")            # reasoning token 一律讀成 0
 
 
 def mutation_check() -> int:
