@@ -216,3 +216,90 @@ R460、R460R r1–r3（全在 1004）：4,758 通呼叫 reasoning 0%。⇒ **100
 - 之後任何跨機 run 之前，先用同一探針確認 reasoning token 行為一致；要嘛把 1003 對齊為非 thinking（LM Studio 請求層關 reasoning 或降版），要嘛在預註冊裡把推論模式當一個因子。
 - gain_run 的 retry ×4 在幾秒內打完，撐不過 8–10 秒的模型重載；改成退避（5／10／20／40 秒）。
 - 監看器用 rows.jsonl 數 infra_void 是錯的（作廢列不寫進 rows.jsonl），改讀 summary.json。
+
+## 十二、補記 3（2026-09-13，Opus）：§十一 處置的落地與**沒能落地的那一條**
+
+§十一 的四條處置各自的實作、以及每一條的誠實邊界。**這一節不改任何仲裁值**——
+`ops/gain/replay/r529/r529_analyze.json` 重跑之後，除了新增的 `per_backend`／
+`per_backend_note` 兩個鍵之外，既有的每一個鍵逐位元不變（`primary`／
+`decision_state`／`refutation`／`aggregate`／`per_set`／`tokens_pooled`／`vgt` 全等）。
+
+**1. analyzer 逐後端（已落地）**
+`analyze_r529.py` 新增 `per_backend`（描述性）：逐集 × 逐後端印三臂 deliv 分子分母、
+b/c（H−C、H−O）、token/題、tpc、reasoning token 平均與帶 reasoning 的呼叫占比、
+LM Studio 版本。後端身分只讀落盤 sidecar（`<block>.backend_meta.json` 的
+`slot_host`；沒有就用 `<block>.endpoint` 的 IP 兜底；版本再兜底到 §十一 的對照表
+1003=0.4.24／1004=0.4.17），**查不到就是 `unknown`，不猜**。
+重跑出來的八列與 §十一 的兩張表逐格相同（87/100、42/56、25/34、13/20、69/75、
+46/60、174/231、103/140；H−C 0/+1/+2/0/0/+1/+3/+1）。
+`analyze_r460r.py` 在 `co_tenancy` 旁新增 `inference_mode`：逐塊 reasoning 占比。
+實跑 r1–r3 共 18 塊、4,758 通成功呼叫、**0.0%**、`modes_seen=["non_thinking"]`
+——與 §十一「R460／R460R 全在 1004」一致。
+兩支的 `--selftest` 各補了案例；`analyze_r529.py --mutation-check` 從 7 個突變加到
+9 個（`M8_per_backend_merges_hosts` 把兩台併成一台、`M9_reasoning_ignored` 把
+reasoning 一律讀成 0），9/9 全部抓到。
+
+**2. 退避（已落地，但有一個必須講清楚的取捨）**
+`brain_cline.DEFAULT_BACKOFF_S` 由 2.0 改為 5.0 ⇒ 退避表 5／10／20／40；
+`gain_run.py --retry-backoff-s` 的預設直接指向那個常數。
+⚠ **`retries=4`（鐵律 3 的 ×4，本次不動）只會睡前三次＝35 秒**，第四格 40 秒要
+`retries=5` 才輪得到。35 秒涵蓋實測的 8–10 秒重載窗，但它不是「保證撐得過任何
+重載」，只是把上界從 14 秒抬到 35 秒。
+⚠ **`ClineBrain.generate()` 的原始碼被 T12（`tests/test_gain_harness_arms.py::
+GENERATE_SHA`）釘死**，所以退避是換**建構子預設值**而不是改那一行；
+`generate()` 與 `chat()` 的退避公式本來就是同一條（`backoff_s * 2**(attempt-1)`），
+換底數＝同時換兩邊的表，而 `generate()` 的 sha 逐位元不變（已驗）。
+**這件事要被看見**：既有五臂的等待時間確實變了（實驗條件），它落盤在
+`summary.json.request_policy.backoff_s`。
+可重試的判準抽成具名純函式 `is_retryable()`／`has_reload_marker()`：5xx 一律可重試；
+400 的 body 帶 `Model unloaded`／`Failed to load model`／`crashed` 視為重載窗；
+401/402/403 維持不重試，**除非** body 帶重載字樣（代理層改了狀態碼不改變事實）。
+`chat()` 逐次落盤 `retryable`／`reload_window`／`backoff_s`。
+測試：假後端前 3 次回 400 `Model unloaded`、第 4 次成功 ⇒ `generate()` 與 `chat()`
+**都不得** infra_void，且等待序列恰為 5／10／20。
+
+**3. `reasoning_effort`（部分落地——這是本節最重要的一條）**
+2026-09-13 Fable 實測：兩台都吃 OpenAI 相容的頂層 `"reasoning_effort":"none"`，
+1003 加上之後與 1004 完全一致（prompt 18 token、completion 2、reasoning 0）；
+其他寫法（`reasoning.effort`、`chat_template_kwargs.enable_thinking`、`thinking.type`）
+在 1003 都無效。
+已落地：`ClineBrain.chat()` 送這個欄位、`gain_run.py --reasoning-effort
+{none,default,low,medium,high}`（**預設 none**；`default`＝不送這個欄位＝舊行為）、
+值落盤在 `summary.json.request_policy.reasoning_effort`、每一列 `rows.jsonl`、
+以及發射器寫的 `<run>.backend_meta.json`。
+⚠ **`generate()` 送不出去**（T12 釘死）⇒ **OFF／OFF5／CONFORM／EQ5／ON 五臂在
+1003 上仍然是 thinking 模式**。`--reasoning-effort` 目前只作用在 H 臂（`chat()`）。
+`request_policy.reasoning_effort_applies_to` 逐字寫著這件事，
+`tests/test_backend_inference_mode.py::test_generate_is_pinned_so_it_cannot_send_the_flag`
+把這個缺口釘在明面上（哪天 T12 被解除或 `generate()` 被改寫，它會紅）。
+⇒ **跨機比較之前必須先裁決：要嘛授權改 `generate()`＋更新 T12 的 sha（像 round460e
+那次牆鐘護欄的先例），要嘛在預註冊裡把推論模式當一個因子。這是人類／Fable 的決定，
+不是 runner 的。**
+runner 的預檢（走 `generate()`）現在會把探針那一通的 `reasoning_tokens` 印在
+launch.log 上，>0 就印一行 WARN 說明「這條路仍是 thinking」——**不擋**。
+
+**4. 發射器探針（已落地，只記錄不擋）**
+`launch_r529_block.sh` 與 `launch_harness_rep_block.sh` 的三次探針都送
+`reasoning_effort`（預設 none），把 `usage.completion_tokens_details.reasoning_tokens`
+與 `completion_tokens` 印進 launch.log，並寫進 `<run>.backend_meta.json` 的
+`reasoning_effort`／`probe_reasoning_tokens`／`probe_reasoning_ok`／
+`lmstudio_version_probed`（後者試 `/api/v0/models`，問不到記 `null` 不猜）。
+`≠0` 只印 WARN，**通過判準一個字沒改**（HTTP 200 ＋ content 非空 ＋ 三次全過）。
+⚠ `probe_reasoning_tokens` 是**探針那一通**量到的，不保證整塊都在同一個推論模式
+（模型中途被重載就可能變）；「沒回報 reasoning」寫成 `null` 而**不是** 0。
+`launch_harness_rep_block.sh` 以前完全沒有寫 `backend_meta.json`（只有 `.endpoint`
+與 `.backend.json`）⇒ R460R 那 30 塊事後只查得到 IP。本次補上，形狀與 R529 那一支相同。
+
+**5. 排程器的 infra_void 計數（查核結果：本來就是對的，補上防止回歸的牙齒）**
+`schedule_harness_reps.py` 與 `schedule_queue.py` 的完成判定**從來沒有**數過
+`rows.jsonl` 的行數——兩支都走 `classify_summary()`，讀的是 `run_terminal` 與
+`arms.<arm>.{processed, infra_void}`（`processed` 含 void）。§十一 那一條講的
+「監看器」若指的是人在終端機下的 `wc -l`，那不在 repo 裡。
+本次做的是把規則**寫進 docstring**（「作廢列不寫進 `rows.jsonl`」⇒
+`len(rows) ＝ processed − infra_void`，用行數當進度會讓有 void 的塊永遠到不了
+「跑完」、用行數當分母會把 void 率系統性算小），並加一條測試禁止那兩支出現
+`"rows.jsonl"` 這個字串字面值。
+
+**沒有做的（刻意）**：沒有碰 `harness_arms.py`、沒有碰遠端、沒有動 `retries=4`、
+沒有重跑任何 run、沒有改 `r460r_analyze.json`（那一份是在 vacant-dev 帶
+`--rescore-turn1` 產的，本機沙箱重跑會把 D5 那幾格變成 `null`＝資料倒退）。
