@@ -205,7 +205,7 @@ R440P §五-1 同時寫死了它的適用範圍：**展場與任何對外宣稱�
 | **OFF** | 隨機路由，交回來就收 | 1.00 | `gain_run.py` docstring |
 | **ON** | 信譽路由（UCB）＋K=3 同儕評審＋一次修訂＋抽樣稽核 | ≈5 | `gain_run.py::arm_on` docstring |
 | **OFF5** | 同題跑 5 次取多數決；票以**行為簽名**分桶 | 5.00 | `gain_run.py::arm_off5` docstring |
-| **CONFORM** | **驗收閘門**：逐一跑 `visible_check`，第一份通過就出貨並早停，全不通過就拒交 | 1.51（MBPP+）／1.71（LCB v2 r447）／1.55（LCB v3）／**1.62（LCB v2 r460）** | `arm_conform` docstring；`CONCLUSION_20260904_R445_...`§三；`DECISION_20260905_R440Z_...`§一；`DECISION_20260906_R461_...`§一；`DECISION_20260911_R460_...`§二 |
+| **CONFORM** | **驗收閘門**：逐一跑 `visible_check`，第一份通過就出貨並早停，全不通過就拒交 | 1.51（MBPP+）／1.71（LCB v2 r447）／1.55（LCB v3）／**1.62（LCB v2 r460）**／1.30（R529 四集合併）／1.50–1.77（R460R 五次） | `arm_conform` docstring；`CONCLUSION_20260904_R445_...`§三；`DECISION_20260905_R440Z_...`§一；`DECISION_20260906_R461_...`§一；`DECISION_20260911_R460_...`§二 |
 | **EQ5** | **等預算臂**：一次生成 5 份候選（不早停 ⇒ 恆 5.00），同一組候選餵給兩條選擇規則 | 5.00 | `gain_run.py::arm_eq5` docstring |
 | **ONR** | 把 ON 的路由段單獨成臂（隔離「挑誰來做」） | 1 | `gain_run.py::arm_onr` docstring |
 | **H-PI** | pi 式極簡回饋迴圈（全留 context） | 1.51 | `DECISION_20260911_R460_...`§二 |
