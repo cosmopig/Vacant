@@ -18,9 +18,9 @@
     "ops/gain/replay/paired_ci.py",
     "ops/gain/replay/pooled_paired_ci.py"
   ],
-  "docs_new_scope": 110,
-  "docs_scanned": 253,
-  "docs_scanned_legacy": 143,
+  "docs_new_scope": 117,
+  "docs_scanned": 318,
+  "docs_scanned_legacy": 201,
   "exemptions": 1,
   "exemptions_refused": 0,
   "groups": [
