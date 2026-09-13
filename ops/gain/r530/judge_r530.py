@@ -1040,6 +1040,19 @@ def aggregate(records: list[dict], deidents: list[Deident], graders: list[Grader
             "rho": None, "n": len(xs), "reason": "n < 2"}
 
     dropped = [d.to_json() for d in deidents if not d.ok]
+    # ⚠ **丟格不是臂中立的**：A-GATE 的產出天生更可能帶「修過好幾輪」的痕跡
+    #   （多餘的防呆、針對某個 case 的特判、貼回來的失敗原文殘跡），
+    #   所以洩漏字樣也更可能命中它 ⇒ 被丟掉的格會系統性偏向 A-GATE 裡
+    #   「看起來比較亂」的那些 ⇒ 剩下來被評分的 A-GATE 是**被篩過的**。
+    #   這是選擇效應，不是隨機遺失。逐臂印出來，讓它在收官時看得見。
+    dropped_by_arm: dict[str, int] = {}
+    dropped_by_task: dict[str, int] = {}
+    total_by_arm: dict[str, int] = {}
+    for d in deidents:
+        total_by_arm[d.cell.arm] = total_by_arm.get(d.cell.arm, 0) + 1
+        if not d.ok:
+            dropped_by_arm[d.cell.arm] = dropped_by_arm.get(d.cell.arm, 0) + 1
+            dropped_by_task[d.cell.task_id] = dropped_by_task.get(d.cell.task_id, 0) + 1
     excused = [{"sample_id": d.sample_id, "task_id": d.cell.task_id,
                 "excused": d.excused} for d in deidents if d.excused]
     used_stub = any(r.get("stub") for r in records)
@@ -1077,7 +1090,12 @@ def aggregate(records: list[dict], deidents: list[Deident], graders: list[Grader
         "disagreements": disagreements,
         "disagree_threshold": disagree_threshold,
         "length_confound": length_confound,
-        "deident": {"dropped": dropped, "excused": excused},
+        "deident": {"dropped": dropped, "excused": excused,
+                    "dropped_by_arm": dropped_by_arm,
+                    "dropped_by_task": dropped_by_task,
+                    "cells_by_arm": total_by_arm,
+                    "note": "丟格不是臂中立的：A-GATE 的產出更可能帶修過的痕跡"
+                            "⇒ 更可能命中洩漏字樣 ⇒ 剩下來被評分的是被篩過的樣本。"},
         "honest_bounds": HONEST_BOUNDS,
     }
 
@@ -1095,6 +1113,9 @@ HONEST_BOUNDS = [
     "grader 的 seed 只決定呈現順序，不讓模型取樣變確定——LM Studio 端沒有被"
     "本 run 釘住的取樣種子。（§三-5、§八-6 同一句）",
     "質化不進任何一格裁決：四狀態的四條旗標沒有一條讀 rubric.*。（§六-6）",
+    "被去識別化丟掉的格**不是隨機遺失**：A-GATE 的產出更可能帶修過的痕跡 ⇒ "
+    "更可能命中洩漏字樣 ⇒ 剩下來被評分的 A-GATE 是被篩過的。逐臂丟格數在 "
+    "deident.dropped_by_arm，收官要照實引。",
 ]
 
 
@@ -1287,6 +1308,12 @@ def print_report(summary: dict) -> None:
     p(f"  呼叫：{c['calls']}（ok {c['ok']}／infra_void {c['infra_void_n']}／"
       f"parse_void {c['parse_void_n']}）")
     p(f"  去識別化丟掉：{summary['rubric']['deident_dropped_n']} 格")
+    dba = summary["deident"]["dropped_by_arm"]
+    if dba:
+        tot = summary["deident"]["cells_by_arm"]
+        p("    逐臂：" + "  ".join(f"{a}: {n}/{tot.get(a, 0)}"
+                                   for a, n in sorted(dba.items()))
+          + "   ⚠ 丟格不是臂中立的（見 deident.note）")
     for d in summary["deident"]["dropped"]:
         p(f"    - {d['cell']['cell_id']}  {d['reason']}")
     for e in summary["deident"]["excused"]:
