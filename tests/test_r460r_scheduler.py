@@ -621,8 +621,24 @@ def test_decision_registers_the_frozen_flags(dec: str):
         assert f"--offset {off}" in dec
 
 
-def test_the_five_seeds_are_actually_unused_right_now():
-    """事前證明（測試時重算）：五顆 seed 在 runs/ 裡一次都沒出現過。"""
+def test_each_replication_seed_is_used_only_by_its_own_blocks():
+    """五顆 seed 沒有被**別人**用過。
+
+    2026-09-11 發射前這支叫 `test_the_five_seeds_are_actually_unused_right_now`，
+    釘的是「五顆 seed 在 runs/ 裡一次都沒出現過」——那是預註冊 §七-1 的事前證明，
+    而它**只在發射前成立**。r1／r2／r3 於 2026-09-12 收官、summary 進了 runs/ 之後，
+    原版永遠不可能再綠。
+
+    ⚠ 那時候正確的動作**不是**把這支刪掉或改成 `xfail`：seed 的新鮮度仍然是
+    R460R 唯一能證明「這三次是重新抽的」的東西。所以判準改成它真正想釘的那句——
+    **每顆 seed 只准出現在它自己那六塊裡**（`REPLICATION_BLOCKS[k]`）：
+
+      * 還沒跑的（本 checkout 是 r4／r5）⇒ 一次都不准出現，語意與舊版相同。
+      * 跑過的（r1–r3）⇒ 只准出現在自己的六塊，被任何第三個 run 用到就是污染。
+
+    這與排程器自己的掃描邏輯（`test_seed_scan_ignores_this_runs_own_thirty_blocks`）
+    是同一條規則，只是這一支對**真的 runs/** 算，不是對 tmp_path 算。
+    """
     import glob
     files = sorted(glob.glob(str(ROOT / "runs" / "*" / "summary.json")))
     assert files, "一個 runs/*/summary.json 都沒掃到——量不到不是通過"
@@ -630,11 +646,20 @@ def test_the_five_seeds_are_actually_unused_right_now():
     for f in files:
         try:
             with open(f, encoding="utf-8") as fh:
-                used.setdefault(json.load(fh).get("seed"), []).append(f)
+                used.setdefault(json.load(fh).get("seed"), []).append(
+                    pathlib.Path(f).parent.name)
         except Exception:                                       # noqa: BLE001
             pass
     for k in range(1, 6):
-        assert REPLICATION_SEEDS[k] not in used, (k, used.get(REPLICATION_SEEDS[k]))
+        seen = sorted(used.get(REPLICATION_SEEDS[k], []))
+        foreign = [n for n in seen if n not in REPLICATION_BLOCKS[k]]
+        assert not foreign, (
+            f"seed {REPLICATION_SEEDS[k]} 被不屬於第 {k} 次複製的 run 用了：{foreign}"
+            "——那顆 seed 不再是乾淨的重新抽樣")
+        # 跑過就要跑滿六塊；跑了一半代表有塊掉了，不該當成一次完整的複製。
+        assert len(seen) in (0, len(REPLICATION_BLOCKS[k])), (
+            f"seed {REPLICATION_SEEDS[k]} 只出現在 {len(seen)} 塊 "
+            f"（應為 0 或 {len(REPLICATION_BLOCKS[k])}）：{seen}")
 
 
 def test_seed_scan_passes_when_the_seed_is_unused(tmp_path):

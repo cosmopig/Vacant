@@ -1,0 +1,27 @@
+{
+  "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+  "slot_id": "q1003#4",
+  "slot_host": "1003",
+  "declared": {
+    "host": "1003",
+    "lmstudio_version": "0.4.24.0",
+    "version_source": "Fable 2026-09-11 08:52Z 在該機上執行 `lms version` 的回報；runner 查證不到（/v1/models 與 HTTP header 都不帶版本，2026-09-11 實測）⇒ 這是宣稱不是量測",
+    "model_reloaded_utc": "2026-09-11T08:52Z",
+    "gguf_sha256": "faff1a63667fac17ac5e777f47114688fcefea96e220e211aaa8d62c2c4561f1",
+    "context": 262144,
+    "parallel": 4,
+    "note": "2026-09-08 崩過兩次（bad alloc／context exceeded），崩因＝qwen 同時佔 VRAM 與 context 被降到 49k；現在條件與 1004 相同，但 4 併發未實測 ⇒ 只開 3 槽"
+  },
+  "probed_models": {
+    "data": [
+      {
+        "id": "gemma-4-12b-it-qat",
+        "object": "model",
+        "owned_by": "organization_owner"
+      }
+    ],
+    "object": "list"
+  },
+  "probed_at_utc": "2026-09-11T20:33:26.597676+00:00",
+  "honesty": "lmstudio_version 是人回報的宣稱，本 runner 查不到；probed_models 才是這一塊自己量到的證據"
+}

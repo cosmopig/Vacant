@@ -1,0 +1,10 @@
+{
+  "data": [
+    {
+      "id": "gemma-4-12b-it-qat",
+      "object": "model",
+      "owned_by": "organization_owner"
+    }
+  ],
+  "object": "list"
+}
