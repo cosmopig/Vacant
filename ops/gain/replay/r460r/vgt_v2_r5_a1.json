@@ -1,0 +1,212 @@
+{
+  "run": "runs/g_r460r5_harness_lcb2_a1",
+  "scope": "v2",
+  "records_audited": 114,
+  "texts_audited": 388,
+  "texts_scanned": 308,
+  "per_arm": {
+    "HPI": 35,
+    "HOC": 49,
+    "HMIX": 30
+  },
+  "needles_checked": 3713,
+  "needles_skipped_trivial": 1759,
+  "excused_n": 17,
+  "excused": [
+    {
+      "line": 41,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[0, 1]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": " may itself be wrong): args=[[1, 0, 8], [2, 2]] got=<sandbox-echo> you expected=[0, 1]\n\nReply with exactly one Python code block containing the complete correct",
+      "excused_as": "visible_check_source"
+    },
+    {
+      "line": 41,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[6, 2]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": ", [1, 3, 5], [1, 4, 4], [2, 5, 6]], [2, 1, 2, 1, 3, 1]] got=<sandbox-echo> want=[6, 2]\n\nYour own test also failed (this test is yours and may itself be wrong): ",
+      "excused_as": "visible_check_source"
+    },
+    {
+      "line": 41,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 2]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": "test also failed (this test is yours and may itself be wrong): args=[[1, 0, 8], [2, 2]] got=<sandbox-echo> you expected=[0, 1]\n\nReply with exactly one Python co",
+      "excused_as": "visible_check_source"
+    },
+    {
+      "line": 41,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 2]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": "test also failed (this test is yours and may itself be wrong): args=[[1, 0, 8], [2, 2]] got=<sandbox-echo> you expected=[0, 1]\n\nReply with exactly one Python co",
+      "excused_as": "visible_check_source"
+    },
+    {
+      "line": 41,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[2, 2]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3687",
+      "excerpt": "test also failed (this test is yours and may itself be wrong): args=[[1, 0, 8], [2, 2]] got=<sandbox-echo> you expected=[0, 1]\n\nReply with exactly one Python co",
+      "excused_as": "visible_check_source"
+    },
+    {
+      "line": 67,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 67,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 68,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 68,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 68,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 68,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 69,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 69,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 69,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 9,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 69,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 5,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 69,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 7,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    },
+    {
+      "line": 69,
+      "arm": "HOC",
+      "rule": "hidden_case_leak",
+      "needle": "[True, True]",
+      "message_index": 9,
+      "role": "user",
+      "task_id": "lcb_3603",
+      "excerpt": " and may itself be wrong): args=[[-1, 0], 'aa'] got=<sandbox-echo> you expected=[True, True]\n\nReply with exactly one Python code block containing the complete c",
+      "excused_as": "model_own_selftest_same_request"
+    }
+  ],
+  "excused_by_rule": {
+    "visible_check_source": 5,
+    "model_own_selftest_same_request": 12,
+    "got_sandbox_echo": 0
+  },
+  "unknown_task_ids": [],
+  "violations": [],
+  "verdict": "CLEAN"
+}
