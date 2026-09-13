@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: "If you use Vacant, or cite the measurements in this repository, please cite it as below."
+title: "Vacant: an accountability layer for AI agents"
+type: software
+version: "0.1.0"
+date-released: "2026-09-13"
+license: MIT
+repository-code: "https://github.com/cosmopig/Vacant"
+url: "https://vacant.cosmopig.com"
+authors:
+  - name: "cosmopig"
+    alias: "cosmopig"
+keywords:
+  - accountability layer
+  - executable acceptance tests
+  - AI agent
+  - agent harness
+  - pre-registered replication
+  - signed receipts
+  - hash chain
+  - Ed25519
+  - LLM code generation
+  - LiveCodeBench
+  - HumanEval+
+  - MBPP+
+  - McNemar
+  - Holm correction
+abstract: >-
+  Vacant is an accountability layer that wraps any AI agent: it runs the client's own executable
+  acceptance tests, gates delivery on the result (shipping only what passes and refusing otherwise,
+  where a refusal counts as a failure), and signs every attempt into an append-only Ed25519 hash
+  chain that anyone holding the public key can re-verify offline, including a multi-party mode in
+  which k keys each execute and each sign so that a disagreement names the dissenting key. The
+  repository contains the layer itself, the experiment rig, and the pre-registered measurements it
+  produced on LLM code generation benchmarks (LiveCodeBench, HumanEval+, MBPP+) with a local 12B
+  model: across five same-bank replications and a four-set cross-benchmark run, a revision loop beat
+  a single shot in all fifteen replication cells after Holm correction and in every benchmark set
+  (pooled p_adj 2.0e-8), while the same loop's advantage over same-budget resampling stayed at
+  +0.6 to +5.8 percentage points with the same sign in nine out of nine measurements, none of which
+  established it (0 of the 5 same-bank replications passed Holm correction; in the cross-benchmark run
+  no per-set uncorrected p reached significance and the pooled Holm-adjusted p was 0.34), so its
+  magnitude is reported as unresolved rather than established;
+  most of the measured gain is attributable to the executable acceptance gate plus resampling.
+  9,841 receipt entries across 67 runs were re-verified entry by entry with zero failures, and the
+  hidden-test leakage audit reported zero violations on all 67 blocks under its v2 scope (the tool
+  scans the loop arms and skips trivial needles: in R460R r1-r3, 57,248 of 95,090 needles were
+  actually checked and 37,842 (39.8%) were skipped; the remainder is covered by manual sampling).
+  Every delivery-effect figure is stated under the premise that requirements
+  can be compiled into executable acceptance tests; where they cannot, the mechanism has no free
+  judge. The deliverable of the project is a physical exhibition, not a paper.
