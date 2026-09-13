@@ -32,6 +32,7 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
+from ops.gain import brain_cline  # noqa: E402
 from ops.gain.brain_cline import (DEFAULT_MODEL, POOL, REVIEWER_SYSTEM,  # noqa: E402
                                   REVIEW_LENSES, ClineBrain, InfraVoid,
                                   load_keys)
@@ -1445,7 +1446,24 @@ def main() -> None:
         "--retries", type=int, default=4,
         help="endpoint attempts before the task is recorded as infra_void",
     )
-    ap.add_argument("--retry-backoff-s", type=float, default=2.0)
+    # 2026-09-13：預設由 2.0 改成 5.0（退避 5／10／20／40；retries=4 ⇒ 睡前三次
+    # ＝35 秒）。理由：1004 崩潰後被 JIT 以 TTL 1h 重載，每小時卸載一次，重載
+    # 要 8–10 秒，而 2／4／8 的總退避只有 14 秒 ⇒ 整格在重載窗內打完四次、
+    # 記成 infra_void（DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md §十一）。
+    # ⚠ 這個值落盤在 summary.json 的 `request_policy.backoff_s`：它是**實驗條件**，
+    #   改了就會讓新舊 run 的 request_policy 不同（`pool_precheck` 因此擋得住
+    #   「條件不同卻被靜默配對」）——那是要的行為，不是副作用。
+    ap.add_argument("--retry-backoff-s", type=float,
+                    default=brain_cline.DEFAULT_BACKOFF_S)
+    # 推論模式（thinking／非 thinking）是實驗條件不是實作細節：同一顆 gemma-4
+    # 在 1003（LM Studio 0.4.24）被跑成 thinking、在 1004（0.4.17）不是
+    # （§十一）。`none` ＝ 與 R460／R460R 實際跑到的條件對齊；`default` ＝
+    # **不送這個欄位**（讓後端自己決定，也就是 2026-09-13 之前的行為）。
+    ap.add_argument("--reasoning-effort", default="none",
+                    choices=list(brain_cline.REASONING_EFFORT_VALUES),
+                    help="OpenAI 相容的 reasoning_effort；預設 none（關思考）。"
+                         "`default` ＝不送這個欄位（舊行為）。值落盤在 "
+                         "summary.json.request_policy 與每一列 rows.jsonl。")
     args = ap.parse_args()
     # ── R440G 預註冊閘門（在任何 mkdir/落盤之前：被拒的啟動不得留下空目錄）──
     _dec = pathlib.Path(args.decision)
@@ -1619,7 +1637,8 @@ def main() -> None:
     agents = [ClineBrain(aid, sys_p, key=keys[i % len(keys)], log_path=calls_log,
                          model=models[i % len(models)],
                          timeout_s=args.request_timeout_s, retries=args.retries,
-                         backoff_s=args.retry_backoff_s)
+                         backoff_s=args.retry_backoff_s,
+                         reasoning_effort=args.reasoning_effort)
               for i, (aid, sys_p) in enumerate(POOL)]
     print(f"── 模型池：{len(agents)} 個 agent／{len(set(models))} 個模型家族")
 
@@ -1640,7 +1659,8 @@ def main() -> None:
         probe = ClineBrain("preflight", "You are a helpful assistant.",
                            key=keys[0], log_path=calls_log, model=model_id,
                            timeout_s=min(args.request_timeout_s, 120), retries=2,
-                           backoff_s=args.retry_backoff_s)
+                           backoff_s=args.retry_backoff_s,
+                           reasoning_effort=args.reasoning_effort)
         try:
             reply = probe.generate("Reply with exactly: OK",
                                    role="preflight", meta={"model": model_id})
@@ -1651,7 +1671,31 @@ def main() -> None:
                 f"決定性不是隨機）。\n"
                 f"  先確認端點真的服務這個 model，或把它從 --models 拿掉。"
             ) from exc
-        print(f"   {model_id}　回 {len(reply)} 字　✓")
+        # ── 推論模式觀測（**只記錄不擋**；要不要擋由預註冊決定）────────────
+        # 這一格是 DECISION_20260912 §十一 的處置：跨機跑之前先確認兩台的
+        # reasoning 行為一致。⚠ 誠實邊界：預檢走的是 `generate()`，而
+        # `generate()` 被 T12 釘死 ⇒ **它送不出 `reasoning_effort`**。
+        # 所以這裡量到的是「後端在沒有旗標時的預設行為」，不是「加了旗標之後」。
+        # 印出來就是要讓那個落差看得見，不是假裝已經關掉了。
+        _last = None
+        try:
+            with calls_log.open(encoding="utf-8") as _f:
+                for _line in _f:
+                    if _line.strip():
+                        _last = json.loads(_line)
+        except Exception:                                     # noqa: BLE001
+            _last = None
+        _rt = None
+        if _last and (_last.get("meta") or {}).get("model") == model_id:
+            _rt = ((_last.get("usage") or {})
+                   .get("completion_tokens_details") or {}).get("reasoning_tokens")
+        print(f"   {model_id}　回 {len(reply)} 字　"
+              f"reasoning_tokens={_rt if _rt is not None else '未回報'}　✓")
+        if _rt:
+            print(f"   ⚠ 預檢量到 reasoning_tokens={_rt} > 0：這顆端點的 "
+                  f"`generate()` 路徑（OFF／OFF5／CONFORM／EQ5／ON）仍是 thinking "
+                  f"模式，--reasoning-effort={args.reasoning_effort} 只作用在 "
+                  f"`chat()`（H 臂）。跨機比較時這是兩種推論條件，不是同一個。")
 
     calibration = None
     if args.calibration_n:
@@ -1721,6 +1765,14 @@ def main() -> None:
                     "backoff_s": args.retry_backoff_s,
                     "review_timeout_s": args.review_timeout_s,
                     "review_retries": args.review_retries,
+                    # 推論模式是實驗條件（§十一）。放在 request_policy 裡的後果
+                    # 是：不同 reasoning_effort 的兩個 run **不會被靜默配對**
+                    # （`pool_precheck` C4 比的就是這一格）。那是要的牙齒。
+                    # ⚠ 只有 `chat()`（H 臂）真的送得出去；`generate()` 被 T12
+                    #   釘死送不了 ⇒ 這一格說的是「本 run 要求的模式」，
+                    #   不是「五臂都跑在這個模式」。
+                    "reasoning_effort": args.reasoning_effort,
+                    "reasoning_effort_applies_to": "chat() only (T12 pins generate())",
                 },
                 "pool": [
                     {"agent_id": a.agent_id, "model": a.model} for a in agents
@@ -1943,6 +1995,9 @@ def main() -> None:
                         "stratum": stratum_of.get(t["task_id"])}
                        if _record_bank else {}),
                     "worker": worker, "involved": involved,
+                    # 推論模式逐列落盤（§十一 的處置）：跨機／跨 run 合併之前
+                    # 要看得出這一列是在哪一種推論條件下量到的。
+                    "reasoning_effort": args.reasoning_effort,
                     "meets_demand": truth, "err": err[:200],
                     "accepted": accepted, "calls_used": calls[0] - calls_before,
                     "calls_so_far": calls[0],

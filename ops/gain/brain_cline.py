@@ -13,6 +13,26 @@ prompt 全文、回應全文、耗時、成本、重試次數、錯誤訊息。�
 retry×4 指數 backoff；四次都失敗記 `infra_void`（09 §3.5）——
 **infra_void 不算成功也不算失敗**，它是「這一格沒有量到」，
 與「量到 0」必須分得開。
+
+退避表（2026-09-13 改；`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md` §十一）
+────────────────────────────────────────────────────────────────────────
+1004 於 2026-09-13 01:44Z 模型崩潰後被 LM Studio **JIT 重載並帶上 TTL 1 小時**，
+之後每小時卸載一次；重載本身要 8–10 秒，期間端點回 HTTP 400
+`Model unloaded`／`Failed to load model`。舊的 `backoff_s=2.0` 退避是
+2／4／8 秒（四次嘗試之間只睡 14 秒，而且三次請求本身在幾百毫秒內就被拒絕）
+⇒ **整格在重載窗內打完四次，記成 infra_void**（r5 的 a3／b1／b2／b3 各 1–3 列）。
+⇒ `DEFAULT_BACKOFF_S = 5.0`，退避表 5／10／20／40 秒。
+⚠ 誠實邊界：`retries=4`（鐵律 3 的 ×4，本次**不動**）只會用到前三格，
+  總退避 35 秒；第四格 40 秒要 `retries=5` 才輪得到。35 秒已經涵蓋實測的
+  8–10 秒重載窗，但它不是「保證撐得過任何重載」——只是把上界從 14 秒抬到 35 秒。
+
+⚠ `generate()` 的原始碼被 `tests/test_gain_harness_arms.py::GENERATE_SHA` 釘死
+  （T12：H 臂不准動既有五臂）。所以退避改的是**建構子的預設值**
+  （`backoff_s`）而不是 `generate()` 裡那一行——那一行的公式
+  `backoff_s * 2**(attempt-1)` 本來就是指數退避，換底數就等於換表，
+  `generate()` 與 `chat()` 因此拿到**同一張表**而原始碼逐位元不變。
+  這是刻意的取捨，不是繞過：既有五臂的**等待時間確實變了**（實驗條件），
+  它落盤在 `summary.json.request_policy.backoff_s`，可被稽核看見。
 """
 from __future__ import annotations
 
@@ -28,6 +48,63 @@ import urllib.request
 
 API = "https://api.cline.bot/api/v1/chat/completions"
 DEFAULT_MODEL = "cline-pass/kimi-k3"
+
+#: 退避底數（秒）。`generate()`／`chat()` 都算 `DEFAULT_BACKOFF_S * 2**(attempt-1)`
+#: ⇒ 5／10／20／40。改自 2.0（2／4／8），理由見模組 docstring 的「退避表」。
+DEFAULT_BACKOFF_S = 5.0
+#: 上面那張表的字面值，給測試與報告引用（**不是**另一條實作路徑）。
+BACKOFF_SCHEDULE_S = (5.0, 10.0, 20.0, 40.0)
+
+#: HTTP 400 的 body 裡出現這些字樣 ⇒ 那是**後端正在換模型**，不是壞請求。
+#: 2026-09-13 實測：LM Studio 的 JIT 重載窗（TTL 到期後第一通請求）會回
+#: `{"error":{"message":"Model unloaded. ..."}}` 或 `Failed to load model`；
+#: 模型崩潰時回 `The model has crashed without additional information`。
+#: ⚠ 400 在 round356 之後**本來就走重試**（只有 401/402/403 不重試），
+#:   所以這張表不是「讓 400 變可重試」——它讓「可重試」這件事**說得出理由**，
+#:   並且讓 401/402/403 在帶著重載字樣時也重試（認證錯誤不會這樣講話）。
+RELOAD_ERROR_MARKERS = (
+    "model unloaded",
+    "failed to load model",
+    "crashed",
+    "model is not loaded",
+    "loading model",
+)
+#: 5xx 一律可重試（伺服器自己說它壞了）。
+RETRYABLE_STATUS_MIN = 500
+#: 認證／額度：不重試（語意上不是暫時性路由問題）。
+AUTH_STATUS_NON_RETRYABLE = frozenset({401, 402, 403})
+#: OpenAI 相容的關思考旗標。2026-09-13 Fable 實測：1003（LM Studio 0.4.24）
+#: 與 1004（0.4.17）**都**接受頂層 `reasoning_effort`；1003 加了
+#: `"reasoning_effort": "none"` 之後與 1004 行為完全一致（prompt 18 token、
+#: completion 2、reasoning 0）。其他寫法（`reasoning.effort`、
+#: `chat_template_kwargs.enable_thinking`、`thinking.type`）在 1003 都無效。
+REASONING_EFFORT_VALUES = ("none", "default", "low", "medium", "high")
+#: `"default"` ＝ **不送這個欄位**（讓後端自己決定），不是送字串 "default"。
+REASONING_EFFORT_OMIT = "default"
+
+
+def has_reload_marker(text: str) -> bool:
+    """錯誤字串裡有沒有「後端正在換模型」的字樣（大小寫不敏感）。"""
+    low = (text or "").lower()
+    return any(m in low for m in RELOAD_ERROR_MARKERS)
+
+
+def is_retryable(exc: BaseException, err_text: str = "") -> bool:
+    """這個例外該不該重試。**純函式**，判準寫在這裡而不是散在兩個迴圈裡。
+
+    · 非 HTTP 錯誤（連不上、逾時、RelayError、EmptyResponse）⇒ 重試（既有語意）。
+    · HTTP 5xx ⇒ 重試。
+    · HTTP 401/402/403 ⇒ 不重試——**除非** body 帶重載字樣
+      （那就是後端在換模型，代理層回什麼碼都不改變它是暫時的這件事）。
+    · 其餘（400/404/…）⇒ 重試（round356 的裁決，見 `generate()` 裡的長註解）。
+    """
+    if not isinstance(exc, urllib.error.HTTPError):
+        return True
+    if exc.code >= RETRYABLE_STATUS_MIN:
+        return True
+    if exc.code in AUTH_STATUS_NON_RETRYABLE:
+        return has_reload_marker(err_text)
+    return True
 
 # SPEC_GAIN §6 要宣稱「任何 agent platform」，而那需要**兩個後端同號**——
 # 只跑一個後端就宣稱平台無關，是把「沒試過別的」講成「別的也一樣」。
@@ -120,7 +197,8 @@ class ClineBrain:
     def __init__(self, agent_id: str, system: str, *, key: str,
                  log_path: pathlib.Path, model: str = DEFAULT_MODEL,
                  temperature: float = 0.7, retries: int = 4,
-                 backoff_s: float = 2.0, timeout_s: int = 240) -> None:
+                 backoff_s: float = DEFAULT_BACKOFF_S, timeout_s: int = 240,
+                 reasoning_effort: str | None = None) -> None:
         self.agent_id = agent_id
         self.system = system
         self.key = key
@@ -128,13 +206,34 @@ class ClineBrain:
         self.model = model
         self.temperature = temperature
         self.retries = retries
+        # 2026-09-13：預設由 2.0 改成 5.0（退避 5／10／20／40）。
+        # `generate()` 被 T12 釘死，所以退避只能從這裡換底數——
+        # 公式在 `generate()` 與 `chat()` 裡是同一條，換底數＝同時換兩邊的表。
         self.backoff_s = backoff_s
         self.timeout_s = timeout_s
+        if reasoning_effort is not None and reasoning_effort not in REASONING_EFFORT_VALUES:
+            raise ValueError(
+                f"reasoning_effort 只認得 {REASONING_EFFORT_VALUES}，"
+                f"拿到 {reasoning_effort!r}")
+        #: None ＝ 沿用舊行為（不送這個欄位）；"default" 也是不送。
+        #: ⚠ 只有 `chat()` 會送它——`generate()` 的原始碼被 T12 釘死，
+        #:   動它就是動既有五臂（見模組 docstring 的最後一段）。
+        self.reasoning_effort = reasoning_effort
         self.log_path = pathlib.Path(log_path)
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
         self.calls = 0
         self.cost = 0.0
         self.market_cost = 0.0
+
+    # ── 退避 ────────────────────────────────────────────────────────
+    def backoff_delay(self, attempt: int) -> float:
+        """第 `attempt` 次失敗之後要睡幾秒。與 `generate()` 裡那一行**同一條公式**。
+
+        預設 5／10／20／40（`BACKOFF_SCHEDULE_S`）。
+        ⚠ `retries=4` 只會睡前三次（5+10+20＝35 秒）；第四格要 `retries=5`
+          才輪得到，而 retries 是鐵律 3 訂的 ×4，這裡不動它。
+        """
+        return self.backoff_s * (2 ** (attempt - 1))
 
     # ── 落盤 ────────────────────────────────────────────────────────
     def _log(self, rec: dict) -> None:
@@ -339,6 +438,7 @@ class ClineBrain:
              meta: dict | None = None, system: str | None = None,
              timeout_s: int | None = None, retries: int | None = None,
              turn: int | None = None, max_tokens: int | None = None,
+             reasoning_effort: str | None = None,
              ) -> tuple[str, dict]:
         """messages ＝ [{"role": "user"|"assistant", "content": str}, ...]。
 
@@ -348,6 +448,11 @@ class ClineBrain:
         ⚠ `max_tokens` 預設 **None ＝ 不送**：實驗臂的 request body 除了 `messages`
           之外必須與 OFF 完全相同，只有 H 臂設輸出上限會憑空造出一個 OFF 沒有的
           劣勢（HARNESS_STUDY §4.0.6）。只有**線路模式探針**會傳這個參數。
+
+        ⚠ `reasoning_effort` 為 None 時用 `self.reasoning_effort`；`"default"`
+          與 None 都**不送這個欄位**。送出去的值逐次落盤（`reasoning_effort` 欄），
+          因為「1003 是 thinking、1004 不是」這種事只有落盤看得出來
+          （DECISION_20260912 §十一）。
         """
         effective_system = system or self.system
         effective_timeout = self.timeout_s if timeout_s is None else timeout_s
@@ -367,6 +472,13 @@ class ClineBrain:
         elif "_" in self.model:
             variants.append(self.model.replace("_", "/", 1))
 
+        effort = (self.reasoning_effort if reasoning_effort is None
+                  else reasoning_effort)
+        if effort is not None and effort not in REASONING_EFFORT_VALUES:
+            raise ValueError(
+                f"reasoning_effort 只認得 {REASONING_EFFORT_VALUES}，拿到 {effort!r}")
+        send_effort = effort if effort not in (None, REASONING_EFFORT_OMIT) else None
+
         def make_body(model_id: str) -> bytes:
             payload = {
                 "model": model_id,
@@ -378,6 +490,11 @@ class ClineBrain:
             }
             if max_tokens is not None:
                 payload["max_tokens"] = max_tokens
+            # 推論模式是**實驗條件**（DECISION_20260912 §十一：同一顆模型檔在
+            # 1003／1004 上跑成 thinking／非 thinking 兩種條件）⇒ 要嘛不送、
+            # 要嘛送出去而且落盤送了什麼，不准有「大概是預設值」這種狀態。
+            if send_effort is not None:
+                payload["reasoning_effort"] = send_effort
             return json.dumps(payload).encode()
 
         last_err = ""
@@ -422,6 +539,8 @@ class ClineBrain:
                     "model_configured": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": True,
                     "timeout_s": effective_timeout, "retries_max": effective_retries,
+                    # 送出去的推論模式（None ＝ 沒送這個欄位）。
+                    "reasoning_effort": send_effort,
                     "latency_ms": latency_ms,
                     "cost_usd": cost,
                     "market_cost_usd": market_cost,
@@ -454,6 +573,10 @@ class ClineBrain:
                     except Exception:               # noqa: BLE001
                         body_txt = " | body=<讀取失敗>"
                 last_err = f"{type(e).__name__}: {e}{body_txt}"
+                retryable = is_retryable(e, last_err)
+                reload_window = has_reload_marker(last_err)
+                wait_s = (self.backoff_delay(attempt)
+                          if retryable and attempt < effective_retries else 0.0)
                 self._log({
                     "ts_ms": int(time.time() * 1000),
                     "agent_id": self.agent_id, "role": role,
@@ -462,8 +585,15 @@ class ClineBrain:
                     "model_configured": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": False,
                     "timeout_s": effective_timeout, "retries_max": effective_retries,
+                    "reasoning_effort": send_effort,
                     "latency_ms": int((time.time() - t0) * 1000),
                     "error": last_err,
+                    # 為什麼要落盤這三格：retry 的**判準**與**等了多久**在事後
+                    # 只能靠它們重建。r5 的 infra_void 之所以查得出是「重載窗
+                    # 太短」而不是「後端壞了」，靠的就是有沒有這種可讀的紀錄。
+                    "retryable": retryable,
+                    "reload_window": reload_window,
+                    "backoff_s": wait_s,
                     "system": effective_system,
                     "prompt": last_user,
                     "messages": [{"role": m["role"], "content": m["content"]}
@@ -471,13 +601,10 @@ class ClineBrain:
                     "turn": turn,
                     "meta": meta or {},
                 })
-                non_retryable = isinstance(e, urllib.error.HTTPError) and e.code in {
-                    401, 402, 403,
-                }
-                if non_retryable:
+                if not retryable:
                     break
-                if attempt < effective_retries:
-                    time.sleep(self.backoff_s * (2 ** (attempt - 1)))
+                if wait_s:
+                    time.sleep(wait_s)
 
         raise InfraVoid(f"{self.agent_id} 重試 {effective_retries} 次仍失敗：{last_err}")
 
