@@ -30,6 +30,15 @@
    整個搬到 `runs/_aborted/<name>_void_<ts>`，然後**只重排一次、只准上 1004**。
    重排無上限等於「一直重試到它看起來正常為止」——那是選擇性重跑，
    會把後端的壞運氣洗成資料。
+   ⚠ **完成判定只讀 `summary.json`，永遠不要去數 `rows.jsonl` 的行數**
+   （2026-09-13，`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md` §十一）：
+   **作廢列不寫進 `rows.jsonl`**——`gain_run` 在 `infra_void` 的格子走
+   `continue`，那一格一列都不寫。所以
+   `rows 行數 ＝ processed − infra_void`，用行數當進度會把「後端掛掉沒量到」
+   讀成「還沒跑到」，一塊 20 題只量到 15 題看起來就是「跑到 15/20」，
+   永遠等不到它變成 20。要看的是 `arms.<arm>.processed` 與
+   `arms.<arm>.infra_void`（`processed` **含** void），以及 `run_terminal`。
+   `classify_summary()` 是這條規則唯一的實作處，`void_rates()` 是它的分子分母。
 
 3. **可重跑（idempotent）。** 排程器隨時可以再啟動一次：已經 terminal 且乾淨的
    塊直接跳過、正在跑的塊**認回原本的槽**（靠發射器落的 `<OUT>.endpoint`），
@@ -201,7 +210,13 @@ def build_queue(reps: tuple[int, ...] = REPS) -> list[Block]:
 
 # ── 狀態判定（純函式）───────────────────────────────────────────────────
 def void_rates(summary: dict | None) -> dict[str, float]:
-    """逐臂 `infra_void / processed`。`processed` 含 void（R460 summary 的定義）。"""
+    """逐臂 `infra_void / processed`。`processed` 含 void（R460 summary 的定義）。
+
+    ⚠ 分子分母**都**從 `summary.json` 來，**不是**從 `rows.jsonl` 數的：
+      作廢列不寫進 `rows.jsonl`（`gain_run` 在 void 的格子 `continue`）
+      ⇒ `len(rows) ＝ processed − infra_void`，拿行數當分母會把 void 率
+      系統性地算小（分母少了 void 那幾列）。
+    """
     out: dict[str, float] = {}
     for arm, v in ((summary or {}).get("arms") or {}).items():
         processed = float(v.get("processed") or 0)
@@ -219,6 +234,9 @@ def classify_summary(summary: dict | None) -> tuple[str, str]:
     `("VOID", …)`        terminal 但某臂 void 率 > 20% ⇒ 資料不進分析，重排一次；
     `("UNFINISHED", …)`  還沒 terminal（配合「行程還在不在」才判得出死活）。
     ⚠ 沒有 summary **不算** DONE：量不到不是通過。
+    ⚠ **這裡不讀 `rows.jsonl`**，一行都不讀：作廢列不寫進 `rows.jsonl`，
+      用行數判完成會把「有 void 的塊」永遠卡在「還沒跑完」
+      （見模組 docstring 第 2 點）。
     """
     if not summary:
         return "UNFINISHED", "no_summary"

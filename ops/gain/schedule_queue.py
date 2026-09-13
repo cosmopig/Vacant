@@ -35,6 +35,15 @@
 ⚠ **這支不改 `schedule_harness_reps.py` 一個字**。R460R 的 18 塊正在那支底下排隊，
   改它＝改一個正在跑的實驗的排程器。要共用的東西一律用 import 的。
 
+⚠ **完成判定只讀 `summary.json`，不數 `rows.jsonl` 的行數**
+  （2026-09-13，`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md` §十一）：
+  **作廢列不寫進 `rows.jsonl`**——`gain_run` 在 `infra_void` 的格子走 `continue`，
+  那一格一列都不寫 ⇒ `len(rows) ＝ processed − infra_void`。用行數當進度，
+  「後端掛掉沒量到」就會被讀成「還沒跑到」，有 void 的塊永遠到不了「跑完」。
+  本支的判定一律經過 `classify_summary()`（從 `schedule_harness_reps` import
+  來的同一支），它讀的是 `run_terminal` 與 `arms.<arm>.{processed,infra_void}`。
+  `r460r_blocks_all_terminal()` 與 `observe()` 也都走同一條路。
+
 ⚠ **擴槽沒有閂（latch）**：每一輪都重新問一次「R460R 還在不在」。在的時候縮回
   `--slots-now`。縮回**不會**去停已經發出去的塊（停不了），但會讓 `occupancy`
   發現「跑著的塊比槽多」⇒ 封鎖端點 ⇒ 這一輪一塊都不發。那正是想要的退化方向：
