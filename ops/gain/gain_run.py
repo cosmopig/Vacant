@@ -1673,10 +1673,11 @@ def main() -> None:
             ) from exc
         # ── 推論模式觀測（**只記錄不擋**；要不要擋由預註冊決定）────────────
         # 這一格是 DECISION_20260912 §十一 的處置：跨機跑之前先確認兩台的
-        # reasoning 行為一致。⚠ 誠實邊界：預檢走的是 `generate()`，而
-        # `generate()` 被 T12 釘死 ⇒ **它送不出 `reasoning_effort`**。
-        # 所以這裡量到的是「後端在沒有旗標時的預設行為」，不是「加了旗標之後」。
-        # 印出來就是要讓那個落差看得見，不是假裝已經關掉了。
+        # reasoning 行為一致。預檢走的是 `generate()`，而 round529-3 之後
+        # `generate()` **也送** `reasoning_effort`（Fable 2026-09-13 授權改 T12）
+        # ⇒ 這裡量到的就是「加了旗標之後、真正跑實驗的那條路」的行為。
+        # ⚠ 仍然**只記錄不擋**：≠0 代表這顆端點不吃這個旗標（或版本太舊），
+        #   那是要被看見的事實，不是發射器該自己裁決的事。
         _last = None
         try:
             with calls_log.open(encoding="utf-8") as _f:
@@ -1692,10 +1693,11 @@ def main() -> None:
         print(f"   {model_id}　回 {len(reply)} 字　"
               f"reasoning_tokens={_rt if _rt is not None else '未回報'}　✓")
         if _rt:
-            print(f"   ⚠ 預檢量到 reasoning_tokens={_rt} > 0：這顆端點的 "
-                  f"`generate()` 路徑（OFF／OFF5／CONFORM／EQ5／ON）仍是 thinking "
-                  f"模式，--reasoning-effort={args.reasoning_effort} 只作用在 "
-                  f"`chat()`（H 臂）。跨機比較時這是兩種推論條件，不是同一個。")
+            print(f"   ⚠ 預檢量到 reasoning_tokens={_rt} > 0，但已送出 "
+                  f"--reasoning-effort={args.reasoning_effort}：這顆端點**沒有**"
+                  f"照旗標關掉 thinking（版本太舊或不吃這個欄位）⇒ 本塊跑的是 "
+                  f"thinking 模式，與非 thinking 的塊不是同一個推論條件。"
+                  f"**不擋**，只記錄（§十一 的處置）。")
 
     calibration = None
     if args.calibration_n:
@@ -1768,11 +1770,10 @@ def main() -> None:
                     # 推論模式是實驗條件（§十一）。放在 request_policy 裡的後果
                     # 是：不同 reasoning_effort 的兩個 run **不會被靜默配對**
                     # （`pool_precheck` C4 比的就是這一格）。那是要的牙齒。
-                    # ⚠ 只有 `chat()`（H 臂）真的送得出去；`generate()` 被 T12
-                    #   釘死送不了 ⇒ 這一格說的是「本 run 要求的模式」，
-                    #   不是「五臂都跑在這個模式」。
+                    # round529-3（Fable 2026-09-13 授權改 T12）之後 `generate()`
+                    # 與 `chat()` **兩條路都送** ⇒ 九臂同一個推論模式。
                     "reasoning_effort": args.reasoning_effort,
-                    "reasoning_effort_applies_to": "chat() only (T12 pins generate())",
+                    "reasoning_effort_applies_to": "generate() and chat() (all arms)",
                 },
                 "pool": [
                     {"agent_id": a.agent_id, "model": a.model} for a in agents

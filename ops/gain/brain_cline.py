@@ -33,6 +33,23 @@ retry×4 指數 backoff；四次都失敗記 `infra_void`（09 §3.5）——
   `generate()` 與 `chat()` 因此拿到**同一張表**而原始碼逐位元不變。
   這是刻意的取捨，不是繞過：既有五臂的**等待時間確實變了**（實驗條件），
   它落盤在 `summary.json.request_policy.backoff_s`，可被稽核看見。
+  ⇒ 這一項已於 2026-09-13 由 Fable **事後明文授權**（DECISION_20260912
+  §十二-4 補記 4）：行為改變＝重試等待 14 秒 → 35 秒。
+
+推論模式（`reasoning_effort`）：**兩條路都送**
+────────────────────────────────────────────
+2026-09-13 Fable 實測：1003（0.4.24）與 1004（0.4.17）**都**吃 OpenAI 相容的
+頂層 `reasoning_effort`；1003 加 `"none"` 之後與 1004 完全一致（prompt 18 token、
+completion 2、reasoning 0）。其他寫法（`reasoning.effort`、
+`chat_template_kwargs.enable_thinking`、`thinking.type`）在 1003 都無效。
+
+⚠ `generate()` 送這個欄位是 **Fable 於 2026-09-13 明文授權的 T12 例外**
+  （`GENERATE_SHA` 同日更新，舊值 b523c15f…、新值見 tests 的註解）。
+  為什麼非改不可：OFF／OFF5／CONFORM／EQ5／ON **五臂全部走 `generate()`**，
+  只在 `chat()` 送等於只對齊 H 臂，反而在臂之間造出一個 OFF 沒有的推論條件差
+  ——那比原本「兩台後端不同」更糟。
+  行為差異只有兩處：請求 body 多一個欄位（`None`／`"default"` ⇒ **不送**
+  ⇒ 對非 thinking 後端逐位元無變化）、`calls.jsonl` 多一個 `reasoning_effort` 欄。
 """
 from __future__ import annotations
 
@@ -268,14 +285,27 @@ class ClineBrain:
         elif "_" in self.model:
             variants.append(self.model.replace("_", "/", 1))
 
+        # round529-3（2026-09-13，**Fable 明文授權**改這個被 T12 釘死的函式）：
+        # 推論模式要對齊就必須從**這一條路**送出去——OFF／OFF5／CONFORM／EQ5／ON
+        # 五臂全部走 `generate()`，只在 `chat()` 送等於只對齊了 H 臂，
+        # 反而在臂之間造出一個 OFF 沒有的推論條件差（比「兩台不同」更糟）。
+        # 來源與預設與 `chat()` **同一個**（`self.reasoning_effort`）；
+        # `None`／`"default"` ⇒ **不送這個欄位** ⇒ 對非 thinking 後端逐位元無變化。
+        send_effort = (self.reasoning_effort
+                       if self.reasoning_effort not in (None, REASONING_EFFORT_OMIT)
+                       else None)
+
         def make_body(model_id: str) -> bytes:
-            return json.dumps({
+            payload = {
                 "model": model_id,
                 "messages": [{"role": "system", "content": effective_system},
                              {"role": "user", "content": prompt}],
                 "temperature": self.temperature,
                 "stream": False,
-            }).encode()
+            }
+            if send_effort is not None:
+                payload["reasoning_effort"] = send_effort
+            return json.dumps(payload).encode()
 
         last_err = ""
         for attempt in range(1, effective_retries + 1):
@@ -338,6 +368,9 @@ class ClineBrain:
                     "model_configured": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": True,
                     "timeout_s": effective_timeout, "retries_max": effective_retries,
+                    # 送出去的推論模式（None ＝ 沒送這個欄位）。鐵律 3：送了什麼
+                    # 要落盤，否則「這一列是在哪一種推論條件下量到的」查不回來。
+                    "reasoning_effort": send_effort,
                     "latency_ms": int((time.time() - t0) * 1000),
                     "cost_usd": cost,
                     "market_cost_usd": market_cost,
@@ -373,6 +406,7 @@ class ClineBrain:
                     "model_configured": self.model, "temperature": self.temperature,
                     "attempt": attempt, "ok": False,
                     "timeout_s": effective_timeout, "retries_max": effective_retries,
+                    "reasoning_effort": send_effort,
                     "latency_ms": int((time.time() - t0) * 1000),
                     "error": last_err,
                     "system": effective_system,

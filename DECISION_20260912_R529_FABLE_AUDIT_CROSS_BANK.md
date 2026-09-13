@@ -303,3 +303,90 @@ launch.log 上，>0 就印一行 WARN 說明「這條路仍是 thinking」——
 **沒有做的（刻意）**：沒有碰 `harness_arms.py`、沒有碰遠端、沒有動 `retries=4`、
 沒有重跑任何 run、沒有改 `r460r_analyze.json`（那一份是在 vacant-dev 帶
 `--rescore-turn1` 產的，本機沙箱重跑會把 D5 那幾格變成 `null`＝資料倒退）。
+
+## 十三、補記 4（2026-09-13，Fable 裁決 ＋ Opus 落地）：T12 例外的明文授權與 sha 變更
+
+補記 3 §3 講的那個缺口（`generate()` 送不出 `reasoning_effort` ⇒ 五臂在 1003 上
+仍是 thinking）**已由 Fable 當日裁決處理**。本節是那次授權的正式紀錄，
+**補記 3 §3 的「沒能落地」自本節起作廢**。
+
+### 十三-1　授權一：`ClineBrain.generate()` 加送 `reasoning_effort`
+
+**為什麼非改不可**：OFF／OFF5／CONFORM／EQ5／ON **五臂全部走 `generate()`**。
+只在 `chat()` 送等於只對齊 H 臂，反而在**臂之間**造出一個 OFF 沒有的推論條件差
+——那比原本「兩台後端不同」更糟。
+
+**行為差異（逐條，這是授權的範圍）**
+1. 請求 body 多一個欄位。`None`／`"default"` ⇒ **不送** ⇒ 對非 thinking 後端
+   逐位元無變化（`tests/test_backend_inference_mode.py::
+   test_generate_omits_the_field_by_default_so_old_behaviour_is_byte_identical`
+   對釘 body 的 key 集合恰為 `{model, messages, temperature, stream}`）。
+2. `calls.jsonl` 多一個 `reasoning_effort` 欄（`null` ＝ 沒送）。鐵律 3：
+   送了什麼要落盤，否則「這一列跑在哪一種推論條件」事後查不回來。
+   ⚠ 這一條嚴格說超出「請求多一個欄位」，在此明列，不藏在 diff 裡。
+3. 來源與 `chat()` **同一個**（`self.reasoning_effort`），所以「這個 run 跑在
+   什麼模式」只有一個答案。
+
+**T12 `GENERATE_SHA` 變更（`tests/test_gain_harness_arms.py`）**
+
+| | sha256 |
+|---|---|
+| 舊（round460e–round529-2） | `b523c15f43a63476af16395280f7e4763fc6dbf03e30d90f354cc269d469fc18` |
+| **新（round529-3）** | `c9a3320be6763a3a2ec04d924f91b94b3a1e061e7bcaf5fe0cf19697ef371e91` |
+
+釘值旁留了逐字的授權註解（比照 round460e 牆鐘護欄的先例），且**舊值保留在註解裡**
+——「改過幾次、從哪裡改到哪裡」必須查得回來。至今被授權過的 `generate()` 改動
+只有兩次：round460e（牆鐘護欄，純基建）與 round529-3（本次）。
+其餘 11 個被 T12 釘死的函式（`arm_off`／`arm_off5`／`arm_conform`／`arm_eq5`／
+`arm_on`／`arm_onr`／`extract_code`／`meets_demand`／`behavior_signature`／
+`conform_failure_detail`／`_visible_test_slicer`）**sha 一個都沒有變**。
+
+### 十三-2　授權二：退避改建構子預設值（補記 3 §2 那一項的事後明文授權）
+
+`ClineBrain.__init__` 的 `backoff_s` 由 2.0 改為 5.0。**行為改變＝重試等待
+14 秒 → 35 秒**（`retries=4` ⇒ 睡 5／10／20），落盤在
+`summary.json.request_policy.backoff_s`。`generate()` 裡的退避公式那一行
+**沒有動**（它本來就是 `backoff_s * 2**(attempt-1)`）。
+
+### 十三-3　`per_backend` 的 b/c：保留，但要說得出自己不是檢定
+
+Fable 裁決第 2 點。`analyze_r529.py` 的每一個逐後端配對格新增
+`b_minus_c_descriptive`（＝b−c，原本只在 render 上算），**每一列與每一個配對
+各自帶 `not_a_test: true`**（被複製進報告的是**列**不是整個區塊，note 留在區塊
+層級會在複製時掉）。render 的欄名改成 `H−C描述`／`H−O描述`，表頭逐字寫
+「＝b−c，**不是檢定**，沒有 p 也沒有區間」。測試禁止那些格出現 `p` 或
+`p_mcnemar_exact`。`note` 照舊。
+
+### 十三-4　LM Studio 版本：手動對照表，不是探針
+
+Fable 裁決第 3 點，且 Fable **實測過** `/api/v0/models` **沒有**版本欄位。
+⇒ 兩支發射器移除那一通 curl（一個永遠回 null 的探針只是多一個失敗面），
+改成端點 → 版本的手動對照表：
+
+| 端點 | 主機 | `lmstudio_version` | `lmstudio_version_source` |
+|---|---|---|---|
+| `100.119.113.56:1234` | 1003 | `0.4.24.0` | `manual 2026-09-11 lms version` |
+| `100.86.226.21:1234` | 1004 | `0.4.17.0` | `manual 2026-09-11 lms version` |
+| 其他 | — | `null` | `null` |
+
+沒登記的端點 ⇒ 兩格都 `null`（**不猜**）——換機器時這一格會自己變空，那正是要的：
+它逼下一個人回來補這張表，而不是沿用一個錯的版本號。
+`analyze_r529.block_backend()` 的讀取順序改為
+`declared.lmstudio_version` → `lmstudio_version`（發射器查表寫的）→ 兜底表，
+兜底表的值與來源字串與發射器那張表**同一組**，由
+`test_the_manual_table_agrees_with_the_analyzer_fallback` 對釘（兩張表寫在兩個
+檔案裡會漂，那條測試是它們之間唯一的接縫）。
+
+### 十三-5　重新確認：仲裁值仍然逐位元不變
+
+`r529_analyze.json` 在本節四項改動之後再重跑一次：除 `per_backend`／
+`per_backend_note` 兩個鍵之外，`primary`／`decision_state`／`refutation`／
+`aggregate`／`per_set`／`tokens_pooled`／`vgt` **每一個鍵逐位元不變**。
+逐後端那八列的數字（deliv 分子分母、b−c、token、reasoning 占比）與 §十一
+的兩張表逐格相同。
+
+### 十三-6　仍然沒做的（刻意）
+
+沒有碰 `harness_arms.py`、沒有碰遠端、沒有動 `retries=4`（鐵律 3）、沒有重跑任何
+run、沒有改 `r460r_analyze.json`。**r5 b3 正在 1004 上跑（非 thinking），不受影響**
+——本輪所有改動都只在下一次發射時才生效。

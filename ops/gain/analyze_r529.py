@@ -102,11 +102,15 @@ CALLS_SOURCE_NOTE = (
     "引用時要指名是哪一個；round529-2 之前兩者共用 `calls_total` 一個名字。")
 
 #: 後端身分 → LM Studio 版本的**兜底**對照表（`DECISION_20260912_R529_FABLE_
-#: AUDIT_CROSS_BANK.md` §十一 逐字）。優先讀 `runs/<block>.backend_meta.json`
-#: 的 `declared.lmstudio_version`；那裡沒有才用這張表。
-#: ⚠ 兩者都是**人回報的宣稱**（`lms version`），runner 查證不到
-#: （/v1/models 與 HTTP header 都不帶版本，2026-09-11 實測）。
-LMSTUDIO_VERSION_FALLBACK = {"1003": "0.4.24", "1004": "0.4.17"}
+#: AUDIT_CROSS_BANK.md` §十一；與兩支發射器裡那張手動表同一組值）。
+#: 讀取順序：`runs/<block>.backend_meta.json` 的 `declared.lmstudio_version`
+#: → 同一份的 `lmstudio_version`（發射器查表寫的）→ 這張表。
+#: ⚠ 三個來源**都是人回報的宣稱**（`lms version`），runner 查證不到：
+#: `/v1/models` 與 HTTP header 不帶版本（2026-09-11 實測），
+#: `/api/v0/models` 也沒有版本欄位（2026-09-13 Fable 實測）。
+LMSTUDIO_VERSION_FALLBACK = {"1003": "0.4.24.0", "1004": "0.4.17.0"}
+#: 兜底表的來源字串（與發射器寫進 backend_meta 的 `lmstudio_version_source` 同字面）。
+LMSTUDIO_VERSION_SOURCE = "manual 2026-09-11 lms version"
 #: `<block>.endpoint` 的 IP → 主機名（`backend_meta.json` 不在時的兜底）。
 ENDPOINT_HOST_FALLBACK = {"100.119.113.56": "1003", "100.86.226.21": "1004"}
 
@@ -220,9 +224,15 @@ def block_backend(blk: str, root: pathlib.Path) -> dict:
     declared = (meta.get("declared") or {})
     version = (declared.get("lmstudio_version") or "").strip()
     version_source = "backend_meta.declared" if version else None
+    if not version:
+        # 發射器的手動對照表（round529-3 起會寫這兩格）。
+        version = (meta.get("lmstudio_version") or "").strip()
+        if version:
+            version_source = (meta.get("lmstudio_version_source")
+                              or "backend_meta.lmstudio_version")
     if not version and host in LMSTUDIO_VERSION_FALLBACK:
         version = LMSTUDIO_VERSION_FALLBACK[host]
-        version_source = "fallback_table(DECISION_20260912 §十一)"
+        version_source = f"fallback_table({LMSTUDIO_VERSION_SOURCE})"
     return {
         "host": host or "unknown",
         "endpoint": endpoint or None,
@@ -509,8 +519,15 @@ def per_backend_stats(loaded: dict, root: pathlib.Path = ROOT) -> dict:
         for a, b in PAIRS:
             pr = paired(by_arm.get(a, []), by_arm.get(b, []))
             pairs[f"{a}_vs_{b}"] = {
-                "b": pr["b"], "c": pr["c"], "n_common": pr["n_common"],
+                "b": pr["b"], "c": pr["c"],
+                # 欄名逐字寫著它是什麼（Fable 2026-09-13 裁決第 2 點）：
+                # b−c 是**描述**，不是檢定統計量。這裡沒有 p、沒有區間、
+                # 沒有多重比較控制，而且分層是**事後**的（塊隨機落在兩台，
+                # 但不是為了比較兩台而設計的），n 也不等。
+                "b_minus_c_descriptive": pr["b"] - pr["c"],
+                "n_common": pr["n_common"],
                 "delta_pp": pr["delta_pp"],
+                "not_a_test": True,
             }
         out[host] = {
             "backend": d["backend"],
@@ -519,6 +536,9 @@ def per_backend_stats(loaded: dict, root: pathlib.Path = ROOT) -> dict:
             "per_arm": per_arm,
             "paired": pairs,
             "reasoning": reasoning_stats(d["calls"]),
+            # 每一列都自己帶著這一格，因為被複製貼進報告的是**列**不是整個區塊，
+            # 而 note 留在區塊層級 ⇒ 列一旦被單獨引用，警語就掉了。
+            "not_a_test": True,
             "note": PER_BACKEND_NOTE,
         }
     return out
@@ -845,10 +865,11 @@ def render(a: dict) -> str:
     pb = a.get("per_backend") or {}
     if pb:
         L += ["",
-              "── 逐後端（DECISION_20260912 §十一；**描述性，不進任何仲裁**）",
+              "── 逐後端（DECISION_20260912 §十一；**描述性，不進任何仲裁**；"
+              "`H−C描述`／`H−O描述` ＝ b−c，**不是檢定**，沒有 p 也沒有區間）",
               f"{'題目集':<14}{'後端':>6}{'LMS':>11}{'塊':>4}"
               f"{'OFF':>10}{'CONFORM':>10}{'HMIX':>10}"
-              f"{'H−C':>6}{'H−O':>6}{'tok/題':>9}{'tpc':>9}"
+              f"{'H−C描述':>9}{'H−O描述':>9}{'tok/題':>9}{'tpc':>9}"
               f"{'reason均':>9}{'帶reason%':>10}{'模式':>13}"]
         for s in a["sets_expected"]:
             for host, h in sorted((pb.get(s) or {}).items()):
@@ -864,7 +885,8 @@ def render(a: dict) -> str:
                     f"{pa['OFF']['deliv_fraction']:>10}"
                     f"{pa['CONFORM']['deliv_fraction']:>10}"
                     f"{pa['HMIX']['deliv_fraction']:>10}"
-                    f"{pc['b'] - pc['c']:>+6}{po['b'] - po['c']:>+6}"
+                    f"{pc['b_minus_c_descriptive']:>+9}"
+                    f"{po['b_minus_c_descriptive']:>+9}"
                     f"{_num(hm['tokens_per_task']):>9}"
                     f"{_num(hm['tpc_incl_void']):>9}"
                     f"{_num(rs['reasoning_tokens_mean']):>9}"
@@ -1133,7 +1155,7 @@ def selftest() -> int:
         else:
             if pb["1003"]["backend"]["lmstudio_version"] != "0.4.24.0":
                 bad.append("per_backend 沒讀到 backend_meta 的宣稱版本")
-            if pb["1004"]["backend"]["lmstudio_version"] != "0.4.17":
+            if pb["1004"]["backend"]["lmstudio_version"] != "0.4.17.0":
                 bad.append("per_backend 的 endpoint→host→版本兜底沒生效")
             if pb["1004"]["backend"]["lmstudio_version_source"] == "backend_meta.declared":
                 bad.append("兜底來的版本卻標成 backend_meta——來源要說實話")
@@ -1142,6 +1164,13 @@ def selftest() -> int:
             if (pc3["b"], pc3["c"]) != (1, 0) or (pc4["b"], pc4["c"]) != (0, 1):
                 bad.append(f"逐後端 b/c 算錯：1003={pc3['b']}/{pc3['c']} "
                            f"1004={pc4['b']}/{pc4['c']}，應為 1/0 與 0/1")
+            # Fable 2026-09-13 裁決第 2 點：b−c 要有一個說得出自己是什麼的欄名，
+            # 而且每一列都要自己帶 `not_a_test`（列被單獨複製時警語不准掉）。
+            if pc3.get("b_minus_c_descriptive") != 1 or \
+                    pc4.get("b_minus_c_descriptive") != -1:
+                bad.append("b_minus_c_descriptive 算錯或不存在")
+            if not (pc3.get("not_a_test") and pb["1003"].get("not_a_test")):
+                bad.append("per_backend 的列少了 not_a_test 旗標")
             if pb["1003"]["reasoning"]["inference_mode"] != "thinking":
                 bad.append("1003 那一塊應判 thinking")
             if pb["1004"]["reasoning"]["inference_mode"] != "non_thinking":

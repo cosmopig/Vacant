@@ -413,7 +413,15 @@ FROZEN_SOURCE_SHA = {
 # 給「OS 沒兌現 socket 逾時」那條路一個上界；正常路徑上的行為、落盤欄位、
 # 重試語意、`InfraVoid` 的定義**逐字不變**（護欄咬到走的就是既有那條例外路）。
 # 舊值（round460b–460d）：130c47c565b8bbdf5f074898ef77b221b1f914059024c9a2717359aae54a111b
-GENERATE_SHA = "b523c15f43a63476af16395280f7e4763fc6dbf03e30d90f354cc269d469fc18"
+# round529-3（2026-09-13，**Fable 授權**）：generate() 加 reasoning_effort 欄位，
+# 理由＝兩台後端推論模式對齊，行為差異＝請求多一個欄位、非 thinking 後端無變化。
+# （`None`／`"default"` ⇒ 不送這個欄位 ⇒ 送出去的 body 逐位元與改動前相同；
+#   另外 calls.jsonl 多一個 `reasoning_effort` 欄，鐵律 3：送了什麼要落盤。）
+# 為什麼非改 generate() 不可：OFF／OFF5／CONFORM／EQ5／ON **五臂全部走它**，
+# 只在 chat() 送等於只對齊 H 臂，反而在臂之間造出一個 OFF 沒有的推論條件差。
+# 授權紀錄：DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md §十三（補記 4）。
+# 舊值（round460e–round529-2）：b523c15f43a63476af16395280f7e4763fc6dbf03e30d90f354cc269d469fc18
+GENERATE_SHA = "c9a3320be6763a3a2ec04d924f91b94b3a1e061e7bcaf5fe0cf19697ef371e91"
 
 
 def test_t12_existing_arms_and_generate_are_byte_identical():
@@ -424,8 +432,9 @@ def test_t12_existing_arms_and_generate_are_byte_identical():
     got = hashlib.sha256(
         inspect.getsource(ClineBrain.generate).encode("utf-8")).hexdigest()
     assert got == GENERATE_SHA, (
-        "generate() 的原始碼變了。唯一被授權的那一次是 round460e 的牆鐘護欄"
-        "（純基建，見 GENERATE_SHA 上面的註解）；任何其他改動＝改既有五臂。")
+        "generate() 的原始碼變了。被授權過的只有兩次：round460e 的牆鐘護欄"
+        "（純基建）與 round529-3 的 reasoning_effort（Fable 2026-09-13 明文授權，"
+        "見 GENERATE_SHA 上面的註解）；任何其他改動＝改既有五臂。")
 
 
 def test_t12b_chat_exists_and_is_not_generate():

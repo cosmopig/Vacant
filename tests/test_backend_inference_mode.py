@@ -243,16 +243,47 @@ def test_an_unknown_effort_is_an_error_not_a_silent_passthrough(tmp_path, bad):
                    reasoning_effort=bad)
 
 
-def test_generate_is_pinned_so_it_cannot_send_the_flag():
-    """T12 釘死 `generate()` ⇒ 五臂送不出 `reasoning_effort`。**這是缺口不是設計**。
+def test_both_paths_send_the_flag_from_one_source(tmp_path, fake_backend):
+    """round529-3（Fable 2026-09-13 授權改 T12）：`generate()` **也**送這個欄位。
 
-    這條測試存在的理由是把缺口**釘在明面上**：哪天有人解除 T12 或改寫
-    `generate()`，它會紅，而不是安靜地變成「其實早就關掉了」。
+    為什麼非改不可：OFF／OFF5／CONFORM／EQ5／ON 五臂全部走 `generate()`，
+    只在 `chat()` 送＝只對齊 H 臂，反而在臂之間造出一個 OFF 沒有的推論條件差
+    ——那比原本「兩台後端不同」更糟。兩條路的來源必須是**同一個**
+    （`self.reasoning_effort`），否則「這個 run 跑在什麼模式」會有兩個答案。
     """
-    import inspect
-    src = inspect.getsource(ClineBrain.generate)
-    assert "reasoning_effort" not in src
-    assert "reasoning_effort" in inspect.getsource(ClineBrain.chat)
+    fake_backend["fail_n"] = 0
+    b = ClineBrain("t", "sys", key="", log_path=tmp_path / "c.jsonl",
+                   reasoning_effort="none")
+    b.generate("hi")
+    b.chat([{"role": "user", "content": "hi"}])
+    assert [x.get("reasoning_effort") for x in fake_backend["bodies"]] == \
+        ["none", "none"], "兩條路都要送，而且送的是同一個值"
+    recs = [json.loads(x) for x in
+            (tmp_path / "c.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [r["reasoning_effort"] for r in recs] == ["none", "none"], \
+        "送了什麼要落盤（鐵律 3）——否則事後查不出這一列跑在哪一種推論條件"
+
+
+def test_generate_omits_the_field_by_default_so_old_behaviour_is_byte_identical(
+        tmp_path, fake_backend):
+    """授權的行為差異只有「請求多一個欄位」；不送的時候 body 必須逐位元同舊版。"""
+    fake_backend["fail_n"] = 0
+    b = ClineBrain("t", "sys", key="", log_path=tmp_path / "c.jsonl")
+    b.generate("hi")
+    assert "reasoning_effort" not in fake_backend["bodies"][0]
+    assert set(fake_backend["bodies"][0]) == {
+        "model", "messages", "temperature", "stream"}
+
+
+def test_the_t12_pin_moved_with_an_explicit_authorisation_note():
+    """釘值可以改，但**必須留下誰授權的、為什麼、行為差異是什麼**（round460e 先例）。"""
+    src = (ROOT / "tests" / "test_gain_harness_arms.py").read_text(encoding="utf-8")
+    for needle in ("round529-3", "Fable 授權", "reasoning_effort",
+                   "行為差異＝請求多一個欄位、非 thinking 後端無變化",
+                   # 舊值要留著，否則「改過幾次、從哪裡改到哪裡」查不回來
+                   "b523c15f43a63476af16395280f7e4763fc6dbf03e30d90f354cc269d469fc18",
+                   "DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md"):
+        assert needle in src, needle
 
 
 # ══ 五、gain_run 的旗標與落盤 ═══════════════════════════════════════════
@@ -275,7 +306,7 @@ def test_the_requested_mode_lands_in_summary_and_rows():
     src = _gain_run_src()
     assert '"reasoning_effort": args.reasoning_effort,' in src
     # request_policy 裡那一格＝跨 run 配對的牙齒（pool_precheck C4 比的就是它）
-    assert '"reasoning_effort_applies_to"' in src
+    assert '"reasoning_effort_applies_to": "generate() and chat() (all arms)"' in src
 
 
 # ══ 六、發射器探針：記錄，不擋 ═════════════════════════════════════════
@@ -299,8 +330,6 @@ def test_probe_sends_the_flag_and_records_what_came_back(path):
     assert "reasoning_tokens" in sh
     assert "reasoning_tokens=$rt" in sh, "launch.log 要印得出量到什麼"
     assert '"probe_reasoning_tokens": rt' in sh
-    assert '"lmstudio_version_probed"' in sh
-    assert "/api/v0/models" in sh
 
 
 @pytest.mark.parametrize("path", LAUNCHERS)
@@ -323,6 +352,56 @@ def test_probe_reasoning_is_null_not_zero_when_unreported(path):
     """「沒回報 reasoning」與「reasoning 是 0」是兩件事，混掉＝量不到當通過。"""
     sh = (ROOT / path).read_text(encoding="utf-8")
     assert 'rt = None if probe_rt in ("", "-") else int(probe_rt)' in sh
+
+
+@pytest.mark.parametrize("path", LAUNCHERS)
+def test_lmstudio_version_comes_from_a_manual_table_not_a_probe(path):
+    """Fable 2026-09-13 裁決第 3 點：`/api/v0/models` 沒有版本欄位（實測過）。
+
+    ⇒ 不再打那一通（永遠回 null 的探針只是多一個失敗面），改端點→版本的
+    手動對照表，並把 `source` 逐字落盤：那是**人回報的宣稱**不是量測。
+    沒登記的端點 ⇒ 兩格都 null，**不猜**。
+    """
+    sh = (ROOT / path).read_text(encoding="utf-8")
+    # 註解裡**要**寫「為什麼不打 /api/v0」；不准真的還在打它。
+    assert not [ln for ln in sh.splitlines()
+                if "curl" in ln and "/api/v0" in ln], "版本探針該拿掉了"
+    assert 'LMS_VERSION_SOURCE="manual 2026-09-11 lms version"' in sh
+    assert '*100.119.113.56*) LMS_VER="0.4.24.0"' in sh
+    assert '*100.86.226.21*)  LMS_VER="0.4.17.0"' in sh
+    assert 'LMS_VER="-"; LMS_VERSION_SOURCE="-"' in sh, "沒登記的端點要落成 null"
+    assert '"lmstudio_version_source"' in sh
+
+
+def test_the_manual_table_agrees_with_the_analyzer_fallback():
+    """兩張表寫在兩個檔案裡 ⇒ 會漂。這條測試是它們之間唯一的接縫。"""
+    from ops.gain.analyze_r529 import (LMSTUDIO_VERSION_FALLBACK,
+                                       LMSTUDIO_VERSION_SOURCE)
+    sh = (ROOT / "ops/gain/launch_r529_block.sh").read_text(encoding="utf-8")
+    assert LMSTUDIO_VERSION_FALLBACK == {"1003": "0.4.24.0", "1004": "0.4.17.0"}
+    assert LMSTUDIO_VERSION_SOURCE == "manual 2026-09-11 lms version"
+    for ver in LMSTUDIO_VERSION_FALLBACK.values():
+        assert f'LMS_VER="{ver}"' in sh, ver
+    assert f'LMS_VERSION_SOURCE="{LMSTUDIO_VERSION_SOURCE}"' in sh
+
+
+def test_per_backend_rows_say_out_loud_that_they_are_not_a_test():
+    """Fable 2026-09-13 裁決第 2 點：b/c 保留，但欄名與旗標要擋住誤讀。
+
+    被複製進報告的是**列**不是整個區塊 ⇒ note 留在區塊層級會在複製時掉，
+    所以每一列（含每一個配對）自己帶 `not_a_test`。
+    """
+    import json as _json
+    a = _json.loads((ROOT / "ops/gain/replay/r529/r529_analyze.json")
+                    .read_text(encoding="utf-8"))
+    for s_, hosts in a["per_backend"].items():
+        for h, row in hosts.items():
+            assert row["not_a_test"] is True, (s_, h)
+            for k, pr in row["paired"].items():
+                assert pr["not_a_test"] is True, (s_, h, k)
+                assert pr["b_minus_c_descriptive"] == pr["b"] - pr["c"], (s_, h, k)
+                assert "p" not in pr and "p_mcnemar_exact" not in pr, \
+                    "逐後端不准出現 p 值——它不是檢定"
 
 
 def test_the_r460r_launcher_finally_writes_backend_meta():

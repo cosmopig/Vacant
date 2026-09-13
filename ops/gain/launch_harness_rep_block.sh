@@ -201,26 +201,20 @@ except Exception: print("no - -")' "$ROOT/logs/rep_${TAG}_probe_$i.json")
   [ "$code" = "200" ] && [ "$body" = "yes" ] && ok=$((ok + 1))
 done
 [ "$ok" -eq 3 ] || { say "ABORT: 探針只過 $ok/3"; finish "abort_probe_only_$ok"; }
-# LM Studio 版本：`/v1/models` 與 HTTP header 都不帶（2026-09-11 實測）。
-# `/api/v0/models` 是 LM Studio 自己的 REST 面；問得到就記，問不到記 `-`。
-LMS_VER=$(curl -s -m 10 "${base%/v1}/api/v0/models" 2>/dev/null | python3 -c '
-import sys, json
-def walk(o):
-    if isinstance(o, dict):
-        for k, v in o.items():
-            if "version" in k.lower() and isinstance(v, (str, int, float)):
-                return str(v)
-        for v in o.values():
-            r = walk(v)
-            if r: return r
-    elif isinstance(o, list):
-        for v in o:
-            r = walk(v)
-            if r: return r
-    return ""
-try: print(walk(json.load(sys.stdin)) or "-")
-except Exception: print("-")' || echo "-")
-say "probe lmstudio_version(/api/v0) = $LMS_VER　reasoning_effort=$REASONING_EFFORT　probe_reasoning_tokens=$PROBE_RT"
+# ── LM Studio 版本：端點 → 版本的**手動對照表** ─────────────────────────
+# 為什麼不是探針：`/v1/models` 與 HTTP header 不帶版本（2026-09-11 實測），
+# `/api/v0/models` **也沒有**版本欄位（2026-09-13 Fable 實測）⇒ 再打那一通
+# 只會多一個永遠回 null 的失敗面。⇒ 版本只能是**人回報的宣稱**（`lms version`），
+# 那就把它當宣稱寫清楚，連同來源一起落盤，而不是假裝量到了。
+# ⚠ 沒登記的端點 ⇒ **null**（不是「大概是哪一台」）——換機器時這一格會自己變空，
+#   那正是要的：它逼下一個人回來補這張表，而不是沿用一個錯的版本號。
+LMS_VERSION_SOURCE="manual 2026-09-11 lms version"
+case "$API" in
+  *100.119.113.56*) LMS_VER="0.4.24.0" ;;                 # 1003
+  *100.86.226.21*)  LMS_VER="0.4.17.0" ;;                 # 1004
+  *)                LMS_VER="-"; LMS_VERSION_SOURCE="-" ;;
+esac
+say "lmstudio_version(manual table) = $LMS_VER　source=$LMS_VERSION_SOURCE　reasoning_effort=$REASONING_EFFORT　probe_reasoning_tokens=$PROBE_RT"
 
 # ── 發射 ─────────────────────────────────────────────────────────────────
 lock="$ROOT/.launch_rep_${TAG}.lock"
@@ -231,9 +225,10 @@ printf '%s\n' "$API" > "$OUT.endpoint"     # 排程器重啟後靠它把塊認�
 # ⇒ R460R 的 30 塊事後只查得到 IP，查不到「那一台是什麼版本、跑在哪一種推論模式」。
 # 補上，形狀與 `launch_r529_block.sh` 那一支相同（analyzer 兩邊共讀同一組鍵）。
 python3 - "$OUT" "$API" "${SLOT_ID:-}" "${SLOT_HOST:-}" "${BACKEND_META:-{\}}" \
-         "$REASONING_EFFORT" "$PROBE_RT" "$LMS_VER" <<'PY' || say "WARN: backend_meta 寫入失敗（不擋發射）"
+         "$REASONING_EFFORT" "$PROBE_RT" "$LMS_VER" "$LMS_VERSION_SOURCE" \
+         <<'PY' || say "WARN: backend_meta 寫入失敗（不擋發射）"
 import json, sys, datetime, pathlib
-out, api, slot, host, meta_s, effort, probe_rt, lms_ver = sys.argv[1:9]
+out, api, slot, host, meta_s, effort, probe_rt, lms_ver, lms_src = sys.argv[1:10]
 try:
     meta = json.loads(meta_s) if meta_s.strip() else {}
 except ValueError:
@@ -253,14 +248,18 @@ pathlib.Path(out + ".backend_meta.json").write_text(json.dumps({
     "reasoning_effort": effort,
     "probe_reasoning_tokens": rt,
     "probe_reasoning_ok": (None if rt is None else rt == 0),
-    "lmstudio_version_probed": (None if lms_ver in ("", "-") else lms_ver),
+    # 端點→版本的手動對照表（Fable 2026-09-13 裁決第 3 點）。`source` 逐字說出
+    # 它是人回報的宣稱不是量測；端點沒登記 ⇒ 兩格都是 null（不猜）。
+    "lmstudio_version": (None if lms_ver in ("", "-") else lms_ver),
+    "lmstudio_version_source": (None if lms_src in ("", "-") else lms_src),
     "probed_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
     "honesty": ("lmstudio_version 是人回報的宣稱，本 runner 查不到；"
                 "probed_models 才是這一塊自己量到的證據。"
                 "probe_reasoning_tokens 是**探針那一通**量到的，"
                 "不保證整塊都在同一個推論模式；"
-                "reasoning_effort 是**請求端要求的**，只有 chat() 送得出去"
-                "（generate() 被 T12 釘死）。"),
+                "reasoning_effort 是**請求端要求的**，不是後端確認關掉了"
+                "（round529-3 之後 generate() 與 chat() 兩條路都送；"
+                "端點吃不吃這個欄位看 probe_reasoning_tokens）。"),
 }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 PY
 PYTHONUNBUFFERED=1 \
