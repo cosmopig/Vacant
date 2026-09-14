@@ -301,13 +301,26 @@ class TextProtocolBrain:
 #    ⚠ 欄位**不存在**也算紅：那代表端點根本沒回報，我們量不到
 #      （`FIELD_MISSING`）。量不到不是通過。
 #
-# 2. **prefill 吞吐**（ms／1k prompt token）。2026-09-14 實測 1003 比 1004 慢
-#    **6.6 倍**（同一個 9,109 token 的 prompt、同樣 15 token 的輸出：
-#    7,353 ms vs 1,107 ms），而**生成速度兩台一樣**（同 prompt 長生成 1.02×）。
-#    這件事對 R530 特別要命：多輪工具迴圈每一通都把整段對話當 prompt 重送
-#    ⇒ prefill 慢的那台**隨輪數二次地慢**。它不會讓資料變錯，但會讓
-#    `budget_wall` 在兩台上咬到不同的地方 ⇒ **跨題的差別截斷**。
-#    所以它要落盤，而且要在發射前就知道。
+# 2. **prefill 吞吐**（ms／1k prompt token）。它落盤的理由是多輪工具迴圈每一通
+#    都把整段對話當 prompt 重送 ⇒ prefill 慢的那台隨輪數地慢，
+#    而那會讓 `budget_wall` 在兩台上咬到不同的地方（跨題的差別截斷）。
+#
+#    ⚠ **這個數字冷／暖快取差一個量級，量的時候要說是哪一種。**
+#      2026-09-14 去快取實測（每次換 nonce ⇒ KV 一定 miss）：
+#        冷 prefill   1003 ≈ 1,509 ／ 1004 ≈ 481 ms/1k  ⇒ 3.1×
+#        暖 prefill   1003 ≈ 144   ／ 1004 ≈ 54–102     ⇒ 1.4–2.7×
+#        生成         1003 ≈ 22.6  ／ 1004 ≈ 14.4 ms/tok ⇒ 1.6×
+#      本支量的是**暖的那一種**（第二通打同一段前綴），因為多輪迴圈的前綴
+#      本來就是暖的。第一通吃冷的，那一通會慢一個量級。
+#
+#    ⚠ **不准拿它去解釋 smoke9 兩塊差 5 倍**——那 5 倍主要是**題目**不是後端：
+#        · `corr(latency, completion)` 兩塊都是 +0.98／+1.00（延遲由生成長度決定）
+#        · 每通 completion 中位數：`ow_01` **1,636**、`ow_02` **30**（**55 倍**）
+#      而 smoke9 把 (1003, ow_01)／(1004, ow_02) 綁死 ⇒ 後端與題目**完全共線**，
+#      那份資料本身不可歸因。`schedule_r530.py` 的佇列驗證擋的正是這件事
+#      （`abort_all_blocks_one_host`），手動發射繞過了它。
+#      後端的那一份差是**真的但比較小**（生成 1.6×、冷 prefill 3.1×），
+#      而且它是 task 層級的干擾項不是 arm 層級的混淆項——同一題的三條臂同一台。
 
 PROBE_SYSTEM = "You are a programmer. You have exactly one tool: run_bash."
 PROBE_SHORT = "List the files in the current directory using the tool."
@@ -374,14 +387,39 @@ def probe_inference_mode(api: str, model: str, *, key: str = "",
     vals = [short["reasoning_tokens"], long_ctx["reasoning_tokens"]]
     rec["reasoning_tokens"] = vals
     rec["reasoning_tokens_all_zero"] = all(v == 0 for v in vals)
-    # prefill 吞吐：兩次呼叫的 prompt 差 ÷ 延遲差。輸出長度相近時它就是 prefill。
-    dp = (long_ctx["prompt_tokens"] or 0) - (short["prompt_tokens"] or 0)
+    # ── prefill 吞吐 ────────────────────────────────────────────────
+    # ⚠ **差分法（長脈絡延遲 − 短延遲）算出來會是負的**，2026-09-14 實測
+    #   1003 −11.3、1004 −5.6 ms/1k：長脈絡那一通**比短的還快**（短的那通
+    #   吃到冷啟動、長的那通吃到 KV 快取）。一個負的「吞吐」不該就這樣流出去，
+    #   所以差分法留著但**非正值一律記成 None ＋ 理由**，不四捨五入成 0。
+    #
+    # 主要指標改成**單通的** `long_ctx` 延遲 ÷ prompt 千 token 數。它是
+    # prefill 成本的**上界**（裡面含 ~15 token 的生成），而它可以跨台比，
+    # 因為兩台吃的是**逐位元相同**的 prompt。
+    # 2026-09-14 配對實測：1003≈807、1004≈121 ms/1k（同 9,109 token prompt、
+    # 同 15 token 輸出）；而同 prompt 的長生成 ms 比只有 1.02× ⇒ 差在 prefill。
+    lp = long_ctx["prompt_tokens"] or 0
+    rec["long_ctx_ms_per_1k_prompt"] = (
+        round(long_ctx["latency_ms"] / (lp / 1000.0), 1) if lp else None)
+    rec["long_ctx_prompt_tokens"] = lp
+    rec["long_ctx_completion_tokens"] = long_ctx["completion_tokens"]
+    dp = lp - (short["prompt_tokens"] or 0)
     dt = long_ctx["latency_ms"] - short["latency_ms"]
-    rec["prefill_ms_per_1k_prompt"] = (round(dt / (dp / 1000.0), 1)
-                                       if dp > 0 else None)
+    diff = (dt / (dp / 1000.0)) if dp > 0 else None
+    if diff is not None and diff > 0:
+        rec["prefill_ms_per_1k_prompt"] = round(diff, 1)
+    else:
+        rec["prefill_ms_per_1k_prompt"] = None
+        rec["prefill_diff_unusable"] = (
+            f"差分法不可用（dt={dt} ms, dp={dp} tok）：長脈絡那一通不比短的慢"
+            "——短的吃冷啟動、長的吃 KV 快取。改讀 `long_ctx_ms_per_1k_prompt`，"
+            "它是上界而且跨台可比（兩台吃逐位元相同的 prompt）。")
     rec["note"] = (
         "prefill 吞吐是**實驗條件**不是實作細節：多輪工具迴圈每通都把整段對話"
-        "當 prompt 重送 ⇒ prefill 慢的那台隨輪數二次地慢，而那會讓 "
-        "`budget_wall` 在兩台上咬到不同的地方（跨題的差別截斷）。"
-        "2026-09-14 實測 1003≈807、1004≈121 ms/1k；生成速度兩台相同。")
+        "當 prompt 重送，而那會讓 `budget_wall` 在兩台上咬到不同的地方。"
+        "⚠ 本欄量的是**暖快取**（多輪迴圈的前綴本來就是暖的）；冷的那一通會"
+        "慢一個量級（2026-09-14 去快取實測：冷 1003≈1509／1004≈481、"
+        "暖 1003≈144／1004≈54–102、生成 1003≈22.6／1004≈14.4 ms/tok）。"
+        "⚠ **不准**拿它解釋逐通延遲的差別——逐通延遲由**生成長度**決定"
+        "（smoke9 兩塊的 corr(latency, completion) 都在 +0.98 以上）。")
     return rec

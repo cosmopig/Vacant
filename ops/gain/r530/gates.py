@@ -167,6 +167,8 @@ def e11_preflight_gate(probes: dict) -> dict:
             "all_zero": zero,
             "reasoning_effort_sent": pr.get("reasoning_effort_sent"),
             "prefill_ms_per_1k_prompt": pr.get("prefill_ms_per_1k_prompt"),
+            "long_ctx_ms_per_1k_prompt": pr.get("long_ctx_ms_per_1k_prompt"),
+            "prefill_diff_unusable": pr.get("prefill_diff_unusable"),
             "error": pr.get("error"),
         }
         rec["per_endpoint"][key] = entry
@@ -174,9 +176,12 @@ def e11_preflight_gate(probes: dict) -> dict:
             rec["ok"] = False
     # prefill 差異不是擋門，但要**被看見**：它會讓 budget_wall 在兩台上
     # 咬到不同的地方（跨題的差別截斷）。
-    pf = {k: v.get("prefill_ms_per_1k_prompt")
+    # 優先讀單通上界（跨台可比、不會是負的）；差分法只在它真的可用時才用。
+    pf = {k: (v.get("long_ctx_ms_per_1k_prompt")
+              or v.get("prefill_ms_per_1k_prompt"))
           for k, v in rec["per_endpoint"].items()
-          if v.get("prefill_ms_per_1k_prompt")}
+          if (v.get("long_ctx_ms_per_1k_prompt")
+              or v.get("prefill_ms_per_1k_prompt"))}
     if len(pf) >= 2:
         rec["prefill_spread"] = {
             "per_endpoint": pf,

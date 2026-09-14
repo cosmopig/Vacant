@@ -569,3 +569,34 @@ def test_e11_closeout_ignores_failed_attempts_and_non_arm_calls():
               "completion_tokens_details": {"reasoning_tokens": 999}}}]
     out = gates.e11_closeout_gate(calls, block="b1")
     assert out["calls_audited"] == 1 and out["ok"] is True
+
+
+def test_e11_prefill_spread_prefers_the_single_call_upper_bound():
+    """差分法會算出負值（實測 1003 −11.3、1004 −5.6）——負的吞吐不准流出去。"""
+    from ops.gain.r530 import gates
+    out = gates.e11_preflight_gate({
+        "1003": {"reasoning_tokens_all_zero": True,
+                 "prefill_ms_per_1k_prompt": None,
+                 "prefill_diff_unusable": "差分法不可用（…）",
+                 "long_ctx_ms_per_1k_prompt": 807.3},
+        "1004": {"reasoning_tokens_all_zero": True,
+                 "prefill_ms_per_1k_prompt": None,
+                 "long_ctx_ms_per_1k_prompt": 121.5}})
+    assert out["ok"] is True
+    spread = out["prefill_spread"]
+    assert spread["per_endpoint"] == {"1003": 807.3, "1004": 121.5}
+    assert spread["max_over_min"] == round(807.3 / 121.5, 2)
+    # 差分法不可用的理由要跟著落盤，不是靜靜地變成 None
+    assert out["per_endpoint"]["1003"]["prefill_diff_unusable"]
+
+
+def test_e11_never_reports_a_negative_throughput():
+    """一個負的『吞吐』是量具壞了，不是一個很快的後端。"""
+    from ops.gain.r530 import gates
+    out = gates.e11_preflight_gate({
+        "x": {"reasoning_tokens_all_zero": True,
+              "prefill_ms_per_1k_prompt": None,
+              "long_ctx_ms_per_1k_prompt": 200.0}})
+    vals = list((out.get("prefill_spread") or {}).get("per_endpoint", {}).values())
+    assert all(v > 0 for v in vals)
+    assert out["per_endpoint"]["x"]["prefill_ms_per_1k_prompt"] is None
