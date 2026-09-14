@@ -245,3 +245,73 @@ def test_vgt_counts_deny_hidden_read_attempts(tmp_path):
     out = vgt.audit_run_r530(run, {task["task_id"]: task})
     assert out["deny_hidden_read_n"] == 1
     assert out["deny_counts"]["r530_hidden_read"] == 1
+
+
+# ── 冒煙檢核表（§三-6 C1–C8）──────────────────────────────────────────────
+def _stub_smoke(tmp_path):
+    """用替身後端跑一份真的冒煙，回 run 目錄。"""
+    import os
+    from ops.gain.r530.run_r530 import main as run_main
+    out = f"runs/_smoke/checklist_probe_{tmp_path.name}"
+    old = os.environ.get("VACANT_R530_WORK")
+    os.environ["VACANT_R530_WORK"] = str(tmp_path / "work")
+    try:
+        rc = run_main(["--out", out, "--task-set", "all", "--seed", "smoke-cl",
+                       "--backend", "none", "--brain", "stub", "--smoke"])
+    finally:
+        if old is None:
+            os.environ.pop("VACANT_R530_WORK", None)
+        else:
+            os.environ["VACANT_R530_WORK"] = old
+    assert rc == 0
+    return ROOT / out
+
+
+def test_smoke_checklist_passes_on_a_clean_stub_run(tmp_path):
+    from ops.gain.r530 import smoke_checklist as sc
+    run = _stub_smoke(tmp_path)
+    try:
+        out = sc.check(run)
+        assert out["verdict"] == "PASS", json.dumps(out["checks"],
+                                                    ensure_ascii=False)[:1500]
+        assert set(out["checks"]) == set(sc.CHECKS)
+    finally:
+        import shutil
+        shutil.rmtree(run, ignore_errors=True)
+
+
+def test_smoke_checklist_has_teeth(tmp_path):
+    """**負控**：檢核表要抓得到壞掉的那一格，否則它只是在蓋章。
+
+    三種壞法各對應一格：呼叫數對不上（C1）、隱藏條數對不上（C4）、
+    收據被竄改（C6）。
+    """
+    import shutil
+    from ops.gain.r530 import smoke_checklist as sc
+    run = _stub_smoke(tmp_path)
+    try:
+        rows = [json.loads(l) for l in (run / "rows.jsonl").open(encoding="utf-8")
+                if l.strip()]
+        # C1：把某一格的 calls 改大 ⇒ 與 calls.jsonl 對不上
+        rows[0]["calls"] += 7
+        # C4：把隱藏條數改掉 ⇒ 與題庫對不上
+        rows[1]["hidden_total"] += 1
+        (run / "rows.jsonl").write_text(
+            "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
+            encoding="utf-8")
+        # C6：竄改一條收據的 payload ⇒ 簽章驗不過
+        chain = next(run.glob("receipts_*.ndjson"))
+        lines = chain.read_text(encoding="utf-8").splitlines()
+        e = json.loads(lines[0])
+        e["payload"]["ws_sha256"] = "0" * 64
+        lines[0] = json.dumps(e, ensure_ascii=False, separators=(",", ":"),
+                              sort_keys=True)
+        chain.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+        out = sc.check(run)
+        assert out["verdict"] == "FAIL"
+        assert not out["checks"]["C1"]["ok"], "呼叫數對不上要被抓到"
+        assert not out["checks"]["C4"]["ok"], "隱藏條數對不上要被抓到"
+        assert not out["checks"]["C6"]["ok"], "收據被竄改要被抓到"
+    finally:
+        shutil.rmtree(run, ignore_errors=True)

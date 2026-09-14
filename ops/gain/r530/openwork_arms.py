@@ -549,7 +549,10 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
             prompt_tokens_total += int(usage.get("prompt_tokens") or 0)
             completion_tokens_total += int(usage.get("completion_tokens") or 0)
             text = out.get("text") or ""
-            calls_out = out.get("tool_calls") or []
+            # 每輪指令數上限**兩種協定都套**（文字協定在 `parse_commands`
+            # 裡夾，原生協定在這裡夾）。不對稱的話，換協定就等於換預算。
+            calls_out = (out.get("tool_calls")
+                         or [])[:b["max_commands_per_turn"]]
             raw_calls = (out.get("raw") or {}).get("tool_calls")
             assistant_msg = {"role": "assistant", "content": text}
             if proto == "native" and raw_calls:
