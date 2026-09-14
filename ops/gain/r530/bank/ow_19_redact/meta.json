@@ -1,0 +1,36 @@
+{
+  "task_id": "ow_19_redact",
+  "stratum": "loose",
+  "title": "Take the secrets out of a log line (loose contract)",
+  "prereg_ref": "Fable ruling 2026-09-13: loose stratum, negative control layer",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Secret scanners exist, but nothing here depends on matching one: the only things graded are the properties the goal states, using three examples the client supplied. Two workers with completely different pattern sets can both score full marks quantitatively, which is the point of the loose stratum.",
+  "visible_n": 2,
+  "hidden_n": 6,
+  "loose_note": "The contract fixes two entry points and their return types only. The mask text, the contents of the findings list and the pattern set are all design decisions and none of them is graded.",
+  "known_limitation": "The hidden checks use fresh instances of the three shapes the goal names. A worker who matches those three shapes exactly will pass; a worker who writes a broader scanner will also pass. The checks cannot distinguish a general solution from a narrow one, and no claim of generality may be made from them.",
+  "sha256": {
+    "contract.md": "3eca0f13da5e32b4769d1feabd3a930ebb68fb75f8d41807c62860c0543f1ca1",
+    "goal.md": "0e395818bc5e20c4f1377cf5b3377101f7a8084ceb7859b87aab4d9eb8d84dcd",
+    "hidden/h01_all_three_kinds_go.py": "59f6847effdc5977247366705fc0f581e067387602bbb2e0c2197fdf3d2714e7",
+    "hidden/h02_ordinary_lines_untouched.py": "49b6abab81da8a52e3ed77ef538eeaae71fc725dbdad640f5d61ff55a8ce81ba",
+    "hidden/h03_second_pass_changes_nothing.py": "a4ec291b1b6c030267ef6d3524b6b3b298d43a6d3c55597813a9d1a0ac140829",
+    "hidden/h04_the_rest_of_the_line_survives.py": "2c106b83505baa7601fe4fd445ef24493b4f67a137ba0d45f14ae1ccf3df3dfd",
+    "hidden/h05_repeats_both_go.py": "33a282f6ca0252c5fdfac94ebe04988dcec18e9668827a28915e620319dfd58d",
+    "hidden/h06_the_count_is_usable.py": "407aa4e167b107a3c1d12586a2be620db3bd4e46dd0f40c5b7c5682fd158e86e",
+    "reference/bad_a.py": "50ace02e36d7e56a0ab4fc4b545733b0f9f169ab5c7f256ff6f582d624ac448b",
+    "reference/bad_b.py": "69c7d19d31da68894176a9ed7d2ef8b7e35b570f027a0e04f436e320ee0aa5a8",
+    "reference/bad_c.py": "038ff1aacbce40179c9d334926407841e9b925ea4675bfcaf247ac024b6973f8",
+    "reference/solution.py": "bf79d464a0ce979c9ed451822dd31965b797fc28bf463fd66e96c520f57ab4f5",
+    "rubric.md": "ac7787216a148dbd755f6151523c7b1999a38db06e803fc05c7ac404d7a3db94",
+    "tests_visible/v01_the_secret_goes_the_rest_stays.py": "99700e19d3c7074f901141bea6394223055313ac745cd0f9e6b6320ab12e1f7b",
+    "tests_visible/v02_clean_lines_and_second_passes.py": "cc97b2549c8dd4c72c5ddc6557d52cb1b224f8c0fe2d7c8a011c5c08d72b7664"
+  },
+  "ref_solution_lines": 26,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

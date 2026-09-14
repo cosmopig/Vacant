@@ -1,0 +1,48 @@
+{
+  "task_id": "ow_06_verrange",
+  "stratum": "tight",
+  "title": "Version ordering and requirement specs",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_06_verrange",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Version comparison resembles semver, but this contract is not semver: build metadata does not exist here, compare returns exactly -1/0/1 rather than a rich object, the spec language is a comma list of six operators with no tilde or caret, and malformed input raises rather than being coerced. A remembered semver implementation accepts strings this contract must reject.",
+  "visible_n": 3,
+  "hidden_n": 14,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check.",
+  "contract_additions": [
+    "goal: added the pre-release ordering sentence (rc.2/alpha/more parts), the comma-and-spaces sentence, and the reject-rather-than-guess sentence -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
+    "contract: pinned that an all-digit identifier is older than a textual one, that a longer pre-release with an equal prefix is newer, and what exactly raises ValueError."
+  ],
+  "sha256": {
+    "contract.md": "e969c9b3655c394d072edb2e70f417cdb577301fb87528a5ed6015ea654d7f1b",
+    "goal.md": "302f5297a4bf06ea1561c6df1a402d24318690e93d032ecd5a9499e5e00dd7f6",
+    "hidden/h01_ten_after_nine.py": "d59f34040f0f84e058e3730f7cedbd3f1e758cb72b2ba1862491f2da11bca81e",
+    "hidden/h02_release_beats_prerelease.py": "32a170b1ad4ff812e5b1b14413fb48f3d2d40de7a1719280b13de44e91db6a75",
+    "hidden/h03_only_three_values.py": "9af3575a9a2d686e67d115793ee947784a30ce46836abe86ef19d9e894c44b1a",
+    "hidden/h04_numeric_identifiers_by_value.py": "63b109b8fd46b249b3eb436cff0e56aaf1100818f762fa127e7be6d0220f9991",
+    "hidden/h05_text_identifiers_by_ascii.py": "41d2700b5c5a406d7bd8befee6e960dec9c8a2fb18c0cef221ee8ec91818f805",
+    "hidden/h06_digits_below_text.py": "8ee969d07b6664fabf3017a15f8e80b7649d8e15bae49697c7f3d0f04014ce1c",
+    "hidden/h07_longer_prerelease_wins.py": "fe5b63d218f5a0bf08d47d68e2b6980cf5063ade76cce4ccea3a0f4f1d1f0b1c",
+    "hidden/h08_every_condition_holds.py": "6d90a36482a510568de0a6630ce1920fda85cd5490988e64f57b568559b8ab04",
+    "hidden/h09_spaces_around_conditions.py": "23196b2386f7abd288400cdb6ba20e9ddc6cc3b18cd27838ad15cdca0002e0fd",
+    "hidden/h10_all_six_operators.py": "76a4bc1fc90322590ee4a60a1d9fcaf9a990c048dc22f9d9fbe8673ed7f532dc",
+    "hidden/h11_prerelease_in_a_spec.py": "57e25e967f4d48e5c63a5eb690f80f016865a19892434102293119c1fd910178",
+    "hidden/h12_bad_version_rejected.py": "a960f5ecd2f3acd4afd3013cefb380438f9155ecf7bf737ae42e9fb6f48a7791",
+    "hidden/h13_bad_spec_rejected.py": "1f7dc470b20ae1b11e2f34f6b43e253c3b31e6188f192b567c66ed284b220f04",
+    "hidden/h14_bad_target_version_rejected.py": "8314469d11185752e850b518f9a39e14debc6e32f8984a89bb592b1c0cda9afa",
+    "reference/bad_a.py": "70d4ba6c6c971e9a47cb1c3c9eb592ec4a79121cc8ac440d976bc1ae617f1847",
+    "reference/bad_b.py": "57100a3daebd61dd5f410cf67108cfb2e9d15555798b23fec5d783ddf11727e8",
+    "reference/bad_c.py": "96acda01120720496e104a67103633cfc72552eafbd2f64870a68c5ac4a64b7f",
+    "reference/solution.py": "f58d33a0d24f45d81d7197cd773885cf25bc2a13ea8b39daf315c432248074be",
+    "rubric.md": "749d2dba380c9f03d9a66035d8624953aeef30347ab1576b4f3bb8ad5abccacb",
+    "tests_visible/v01_numbers_are_numbers.py": "9bf1f7e120e50a40399a35fb2e66a7f1d0c7778f01cbe6b51852ff3e9e2b7c40",
+    "tests_visible/v02_prerelease_is_older.py": "1d8566128943e99a708e039cea742db2784ec44575e193b212383ca31b14abfb",
+    "tests_visible/v03_spec_conditions.py": "d4bad40eb0bea3029b59bdb9ee7894cc7a1e8b74a80d365fb19246eee37cdf85"
+  },
+  "ref_solution_lines": 61,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

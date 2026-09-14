@@ -1,0 +1,48 @@
+{
+  "task_id": "ow_12_bytesize",
+  "stratum": "tight",
+  "title": "Read and print human byte sizes in both bases",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_12_bytesize",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Size formatting is a stock snippet, but the graded semantics here are this project's own: truncation toward zero rather than rounding, exactly one decimal place with the trailing zero kept, a decimal-free integer form below one step, TiB/TB as hard ceilings that then overflow numerically, and an explicit refusal list. The common humanize recipes round and drop trailing zeros, so they fail these checks.",
+  "visible_n": 3,
+  "hidden_n": 13,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check.",
+  "contract_additions": [
+    "goal: added the case sentence, the optional-space sentence, the no-unit sentence, the trailing-.0 sentence, the above-the-largest-unit sentence, the drop-the-fraction sentence and the refusal list -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
+    "contract: pinned the number grammar (no exponent notation), that TiB/TB are the largest units, and that a negative size is refused by both functions."
+  ],
+  "gauge_limitation": "to_bytes is checked only on values whose product is exact in binary floating point; a Decimal-based and a float-based implementation can differ in the last unit on inputs such as '0.7 KB', and that difference is deliberately not graded.",
+  "sha256": {
+    "contract.md": "e630d5c2e16e940586c1371dffe697d786107f27e8cf58afcc38889ea623d5ef",
+    "goal.md": "b91b46aa2eece64f6bcc06b82a250da724058e236d1e71b9d8ac0a82100bd1cc",
+    "hidden/h01_two_meanings_of_kb.py": "1a90915a3de0f08723449048509765f12945ad897f36804076c3ec4cd7ae107d",
+    "hidden/h02_unit_case_does_not_matter.py": "8ae6511336f53528e942f395a263cbeaeb8ab5a98b5ea5ce6634575c0082e4bf",
+    "hidden/h03_space_is_optional.py": "08405c9c81feaad0cbdf56d75f17fb0b80481b190103dc2cf06b3525f6ebabb8",
+    "hidden/h04_no_unit_is_bytes.py": "047d47fef55a4cf34d42db9235c98ce8796f0f85111bb2b6e0a2914869ae1cfb",
+    "hidden/h05_fraction_is_dropped.py": "c35fd54fb97ff80d65ddbd96b03ad360a3e0b407f6827425076c2927b2f13b36",
+    "hidden/h06_largest_unit_below_the_step.py": "a12fa328d7fbe22fceb943a38084785186b1aa4d62bbc66a8a47e6a98af61292",
+    "hidden/h07_trailing_zero_is_kept.py": "4caa71a59d83602b58e124e62efd2f3845c1b4fbc09943a8b5cdada26626f61d",
+    "hidden/h08_bytes_are_whole_things.py": "bef914822b331419cd77e9cf2202a4d0921db6270768a9a49497704de1cc07ab",
+    "hidden/h09_decimal_family.py": "8137f738e003dc10d8c63d103a887bb7d4bab49a5d64240af72003ba4906f5bd",
+    "hidden/h10_above_the_largest_unit.py": "15627a8a7b24acdd633b7b23b9f9a7fd069aa8b3f99fbe0fd1b356a547e7f9c4",
+    "hidden/h11_round_trip.py": "94e8198b748e74e28abfc71eb0434d1e9b75dc37976847b555136f0c65e64571",
+    "hidden/h12_negative_is_refused.py": "d9ed87c3ebbb3edeea1c89f46bc564288846b710d5eee502043958d42c193c7f",
+    "hidden/h13_other_refusals.py": "0005632f9cb0efaf6f479a6db3c9fd49ace4cc13d4a148700d51f9cd775d2342",
+    "reference/bad_a.py": "9d4c8ff1b874d6a3a843d81c5723ef2fafee778f69ae1b21c7a9c82a4c15b8e3",
+    "reference/bad_b.py": "c16e71c42d663da2e0adbe08dd82c8029c1e372ea19cad94d46b82e60bd69553",
+    "reference/bad_c.py": "37c1501bc2940afcd49d2475e42f103f719db95fd289ef4c4322b35a48abe2a8",
+    "reference/solution.py": "fffe474431872ffe12c039b865e916c6aef135417a46e8e4c333fae56d33f0fe",
+    "rubric.md": "6018711a01e102769d3ec14a77b5e4441564f255f500857a0739334101655f4b",
+    "tests_visible/v01_reads_sizes.py": "7e6f08dd57ad02fbdaf18151bc584603ad1f0f2f903e2f62c611fbfd3b464d2c",
+    "tests_visible/v02_prints_sizes.py": "e4d641074c7b1c140038f07e769869503c88a65994a15e615db869050118ae8b",
+    "tests_visible/v03_refuses_nonsense.py": "8eab51760bb8555dc4d771067f67739ec67c79845d1d3b3d409fddc6437ad13e"
+  },
+  "ref_solution_lines": 39,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

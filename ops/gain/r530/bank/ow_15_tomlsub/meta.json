@@ -1,0 +1,43 @@
+{
+  "task_id": "ow_15_tomlsub",
+  "stratum": "tight",
+  "title": "A small TOML-shaped format, read and written",
+  "prereg_ref": "Fable ruling 2026-09-13: extension set ow_13..ow_17 (prereg S1-3)",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "The syntax is deliberately TOML-shaped, but this is a strict subset with its own rules: only four escapes, no nested lists, no inline tables, no dates, lists required to be of one kind, headings forbidden from reopening, and a canonical name-ordered writer with a text-level round-trip guarantee. Python's tomllib parses a superset and has no writer at all, so a remembered TOML implementation fails the duplicate, ordering and round-trip checks.",
+  "visible_n": 3,
+  "hidden_n": 13,
+  "type_note": "Chosen to be unlike ow_04_layerconf: that task is about layering and provenance over an ini-like file, this one is about literal typing, nesting, line-numbered errors and a canonical writer.",
+  "sha256": {
+    "contract.md": "e60460ecbc59b64274de8d71a529a725d1f9245d887b79d1ebd733b4f8a7aff7",
+    "goal.md": "559d579377aabffa8207abfec19b13e0d9d02243c4a9d709813225b605b2332c",
+    "hidden/h01_five_kinds.py": "63d7cace6be67b5e25e60d47b58d120e58395bdc7bbb64997e38e371a8dd3b55",
+    "hidden/h02_escapes_in_text.py": "64d6310ca8ad7961a024a272652ce99e39e2ccce1a6ffb2b98a6e4a92009b615",
+    "hidden/h03_hash_inside_text.py": "6447bc080f6db932fa4e573542a8a9c3de15342bd61c9a96713405c60c41f013",
+    "hidden/h04_nested_headings.py": "17318816e1a8ea83885d854ab8576440d9cf37e6767b13486427e6c6650d8484",
+    "hidden/h05_names_before_the_first_heading.py": "8330c2e62d351b889589e08994ba82a961a200a0a3353927e7aff7c090b4ce1d",
+    "hidden/h06_mixed_list_is_a_mistake.py": "bfd3b5a637b8ab49e3b025ccec3e4aff0321074497193b886583d666465edd5a",
+    "hidden/h07_duplicate_name.py": "96ba3ee45fe7632336eac14a36bc48b7a0840563d3ed79b8b7c2ab5852dcf257",
+    "hidden/h08_duplicate_heading.py": "f74f3de8bec70f1cb89e1b3cf1cd34f2bb37171ac5886bc4620d6f4d407cb51a",
+    "hidden/h09_line_numbers_on_every_mistake.py": "ca65118165e073bb259dbeb0b3f7680bb59f810a0793f3c6d61a5db30950948e",
+    "hidden/h10_round_trip_data.py": "9cec5da8b9c6eebd97c13b82e5a0e847c1c72d7cbb97ec72b8878041fb5712ba",
+    "hidden/h11_round_trip_text.py": "18e1d77685886e4bddd5b930319d89b66ae82b02d1936189dcbf2fc10aea3b85",
+    "hidden/h12_written_order.py": "a98592d76004a1402358fa490fb6427a759f26c277c19b19415714e33759eb8e",
+    "hidden/h13_unwritable_data.py": "a7fb1914a19a111b3ede9bd7cea07c86ff9f506ecb1f2057e5adc22a239e2e08",
+    "reference/bad_a.py": "42c2ac1cc843a5d4ef25890ed67ebbcdc9ac8bdeebbd284b5f8fa31fd8a5c476",
+    "reference/bad_b.py": "ef182a152c2ed98c5541c7613270ea8c2f4f447ac527fb478cac6ad510b4a162",
+    "reference/bad_c.py": "b24ccbaa3616aace4e85d9a98cba237d7bca9ecaff92e0082810cd8c11ea49cd",
+    "reference/solution.py": "c523b358023650a9233daf9f86c809b64bd08c68e11d4c64bac483cd3117f3f7",
+    "rubric.md": "e1c04d29d1a1729f81c067d56f119277321db5226953cdcfd36c566c19ae91fa",
+    "tests_visible/v01_values_and_groups.py": "94e16277dc4467ff741c6d3fc8628ab385494f1426843526a09fdffa45b84d56",
+    "tests_visible/v02_lists_and_comments.py": "751938fc0952a0e8f1f3b8683e6f960e588ec4cad54bad9df94db617893c77a3",
+    "tests_visible/v03_round_trip.py": "b4e740d255d2bdadf3b1fd1b1ea9f99312e41e4c0dbcd9ac4782240ba05775e7"
+  },
+  "ref_solution_lines": 200,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

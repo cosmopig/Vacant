@@ -1,0 +1,49 @@
+{
+  "task_id": "ow_05_router",
+  "stratum": "tight",
+  "title": "Path router with a deterministic specificity order",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_05_router",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Every web framework routes paths, but none of them ranks routes the way this contract does: three segment ranks compared left to right with the first difference deciding, patterns differing only in parameter names treated as the same pattern and rejected at registration, a non-empty rest-of-path capture allowed only in last position, and an empty dict required to be distinguishable from no match. A remembered framework router disagrees on at least the duplicate rule.",
+  "visible_n": 3,
+  "hidden_n": 15,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check.",
+  "contract_additions": [
+    "goal: added the import-order sentence, the rest-of-path sentence, 'reported when the route is registered', and the None-versus-empty-dict sentence -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
+    "contract: pinned what counts as malformed (no leading slash, unmatched brace, empty parameter name), that a capture must be non-empty, and that parameter names do not distinguish two patterns."
+  ],
+  "sha256": {
+    "contract.md": "92be8401ca9874544169848fb1a1b498c6d5a4c0c3c474e4b06925775361466d",
+    "goal.md": "85bc211e1db8c30c78645f5075c006e27ee1afbce3210714a316d5599ebdfbd6",
+    "hidden/h01_literal_beats_parameter.py": "8e288ff3251078a4f31cf825667e10e2527839651bc0929ec7c48d3a6768f35e",
+    "hidden/h02_parameter_beats_catch_all.py": "c121de471e2348e081a990f41345285aa34328d31ecc5889069dbabb87f2a049",
+    "hidden/h03_leftmost_difference_decides.py": "af12ebde696ac879f98b1f8e616736b82d94bfae936e14168115ba6dc69b4b98",
+    "hidden/h04_literal_prefix_beats_bare_catch_all.py": "40058b280f50982a596df739c27a91675137000e35c3669d4755aba5ef926f58",
+    "hidden/h05_registration_order_irrelevant.py": "46045a15d920098a297c8197d1fa3c93796d91e36cfd5846e229cf49db77a725",
+    "hidden/h06_same_pattern_twice.py": "6218ba24e99f4baea3b0d3069880b97c11bd0a24eb4d26a33ab122963af4896c",
+    "hidden/h07_several_named_pieces.py": "14d1df034f5dbd44a6954e731879e9280f082898e2dc8cbd5cddf409384ccd47",
+    "hidden/h08_catch_all_keeps_slashes.py": "536128476a3e7a3ff2162def2ed8ed60537ee122e8b717576a15ed860820771f",
+    "hidden/h09_parameter_rejects_empty_segment.py": "9db5628c125e1f9ec92f4fea07cf2e276bb3c1a84a940126a3d7309b75346767",
+    "hidden/h10_parameter_does_not_span_slash.py": "a7dfef5e0ae3fec4dc9986c2cc14d5074c9d54f842a146dfb6117b91b86a15cb",
+    "hidden/h11_nobody_owns_it.py": "8da75d41f947ddc1f48dd57b71171f715e8aec2c313885335c0a30377d27cc87",
+    "hidden/h12_matched_with_no_named_pieces.py": "21865f8e9a6c75930c5461e2c9d5219ca4e7e260fbdf4e028b46d4090751ffc3",
+    "hidden/h13_catch_all_must_be_last.py": "29327cff1cb7e4e0ef04f621ecc00999810aeb007a36edd4a6d1d566e242e518",
+    "hidden/h14_malformed_patterns.py": "43a35c52544aeaa525df185fd068e80cc2994361ececc263ba2b1a64458daef3",
+    "hidden/h15_catch_all_needs_something.py": "c51caf8b91adfcfb54c43caf55a6b46bb8da3f4d154055ff4a43987093300387",
+    "reference/bad_a.py": "1cd65a70af8e891fc6f1efbda7f70bfd7e2a49ec32bcd768aeee69751267cd3f",
+    "reference/bad_b.py": "9612d7b7f6ab05ea5d96b2c6e96bf366bf995613fb8a1a9e38729cb371e42926",
+    "reference/bad_c.py": "27bd440f64dbe7b9bd49da5bed77b43a749010555b6e68bd793653e7f66c20dd",
+    "reference/solution.py": "5d6bc099daf4e9b41f01c1c0984b937ed3061cd2b0c114f291857013f1c133ac",
+    "rubric.md": "ca03e6fd4e0d00c1fa14c46493f6fd659db03d274c3d1a6d4db9454445bf15fe",
+    "tests_visible/v01_match_and_params.py": "734f363e9f83a6c23242929913240b2362ced3340b69f5cd642cc11ce8cd39cb",
+    "tests_visible/v02_more_specific_wins.py": "a3907d8f5e3ee3ad48ec8b6c98113a2dae746dba035801af85e36b0c9512a37d",
+    "tests_visible/v03_catch_all_and_miss.py": "1979867e2112064cf3abdf105d2671c75c067b3c12f93f09f23cbb6c1135a6e0"
+  },
+  "ref_solution_lines": 80,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}
