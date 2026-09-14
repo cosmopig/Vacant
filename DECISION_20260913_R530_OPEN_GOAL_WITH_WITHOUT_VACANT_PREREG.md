@@ -3679,3 +3679,11 @@ R530_BLOCK: g_r530_s3_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachin
 - 8 塊槽分配：r1003#1–4 ＝ s1_1003_1、s1_1003_2、s2_1003_1、s2_1003_2；r1004#1–4 ＝ s1_1004_2、s2_1004_1、s2_1004_2、s1_1004_1；排程器 pid 3294795；佇列剩 4 塊（s3）等槽。每塊 E-3（整個 bank 量具）、E-9、E-11 於任何實驗呼叫前通過。
 - 程式碼＝F1′ 0b58ad7bc266（vacant-dev `~/vacant/Vacant` at 91d9644，ops/ 內容與 0b58ad7 相同）；工作區根 `/var/tmp/vacant_r530_work`。
 - 時程：依 smoke9 單串 T（A-SOLO 28.2／A-CONF 13.9／A-GATE 18.7 s/通）粗估 20–40 h；併發下 T 會變大（未量過倍率），收官以 summary.json 實測回填。
+
+## 附錄 AMEND2-E　排程器第二次猝死與再凍結（2026-09-14，Fable）
+
+- **09:58:37Z 排程器猝死**：第一塊寫出 `summary.json` 的瞬間，沿用的 `classify_summary` 把 R530 的 `summary["arms"]`（list；逐臂統計在 `arms_stats`）當 dict ⇒ `AttributeError`。與 AMEND2-C 同類（沿用吃外部狀態的函式），但這次要等第一塊收官才炸，排程器先安靜跑了三個半小時。
+- **資料無損**：DONE 2（`g_r530_s1_1004_1`、`g_r530_s2_1003_2`，皆 verdict ok、void 0）、RUNNING 6（runner 不依賴排程器，自行跑完）、PENDING 4（尚未發射）、`_aborted/` 空。停擺代價只有吞吐（兩個空槽閒置）。
+- **修正**：R530 自己的 `classify_summary_r530`／`block_state_r530`／`void_rates_r530`（讀 `arms_stats`；E-11 收官 broken ⇒ VOID）＋7 條測試（含「沿用那支對 R530 summary 必須 raise」的釘死）。併入主線 `0ebdd791f875`；**runner（run_r530.py／臂／驗收／沙箱）一行未改**，已完成與在跑的 8 塊條件不變。
+- **再凍結**：F1″ ＝ `0ebdd791f875`（只動排程器）；F2–F5、F7 不變；F6 不變（06:29:07Z 的發射仍有效，8 塊條件相同）；排程器重啟時間戳記於下方。
+- 教訓寫進 `schedule_r530.py` 註解：**沿用得起來的只有吃參數的純函式；吃外部狀態（ps、summary.json 形狀）的一律自己寫並附負控。**
