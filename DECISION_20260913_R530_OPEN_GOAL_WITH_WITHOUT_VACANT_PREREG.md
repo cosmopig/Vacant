@@ -3687,3 +3687,4 @@ R530_BLOCK: g_r530_s3_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachin
 - **修正**：R530 自己的 `classify_summary_r530`／`block_state_r530`／`void_rates_r530`（讀 `arms_stats`；E-11 收官 broken ⇒ VOID）＋7 條測試（含「沿用那支對 R530 summary 必須 raise」的釘死）。併入主線 `0ebdd791f875`；**runner（run_r530.py／臂／驗收／沙箱）一行未改**，已完成與在跑的 8 塊條件不變。
 - **再凍結**：F1″ ＝ `0ebdd791f875`（只動排程器）；F2–F5、F7 不變；F6 不變（06:29:07Z 的發射仍有效，8 塊條件相同）；排程器重啟時間戳記於下方。
 - 教訓寫進 `schedule_r530.py` 註解：**沿用得起來的只有吃參數的純函式；吃外部狀態（ps、summary.json 形狀）的一律自己寫並附負控。**
+- **排程器重啟：2026-09-14T10:34:23Z**（同佇列、log append）。活體確認通過：3 DONE 判 DONE、8 RUNNING 判 RUNNING、`_aborted/` 無新增；補發 3 塊（s3_1003_1／s3_1004_1／s3_1004_2，pid 3314122／3314121／3314124，E-3／E-9／E-11 皆綠），`s3_1003_2` 等 1003 空槽（不挪卡）。已知小瑕疵：真跑時 `gate_e11.json.enforced` 為 null（閘門實際有強制），留待下次凍結修，跑中不併碼。
