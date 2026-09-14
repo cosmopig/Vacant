@@ -1,0 +1,23 @@
+abi <abi/4.0>,
+include <tunables/global>
+
+# R530 沙箱 S1 的前提（Fable 2026-09-14 授權的主機政策改動）。
+#
+# 為什麼需要它：Ubuntu 24.04 的 `kernel.apparmor_restrict_unprivileged_userns=1`
+# 會讓**任何**非特權行程建 user namespace 時轉進 `unprivileged_userns` profile，
+# 而那個 profile 拒絕寫 `/proc/<pid>/uid_map` ⇒ 裸 `bwrap` 根本起不來
+# （dmesg 逐字：`apparmor="DENIED" operation="open" … name="proc/…/uid_map"`）。
+# `bubblewrap 0.9.0-1ubuntu0.1` **沒有**自帶任何 `/etc/apparmor.d/` 檔案
+# （`dpkg -L` 可驗），所以這一份要自己裝。
+#
+# 這是 Ubuntu 官方對「某支 binary 需要 userns」的建議寫法：
+# 只放行 `/usr/bin/bwrap` 這一支，**其餘 binary 的限制一格都沒鬆**。
+# 它**不是**把 `kernel.apparmor_restrict_unprivileged_userns` 關掉——
+# 那會對整台機器生效，而這一份的作用面只有一個路徑。
+#
+# 安裝與回滾見 `ops/gain/r530/SANDBOX.md`。
+profile bwrap /usr/bin/bwrap flags=(unconfined) {
+  userns,
+  # Site-specific additions and overrides. See local/README for details.
+  include if exists <local/bwrap>
+}

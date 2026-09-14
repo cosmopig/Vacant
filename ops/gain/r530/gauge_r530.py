@@ -52,19 +52,23 @@ BANK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bank")
 REQUIRED_FILES = ("goal.md", "contract.md", "rubric.md", "meta.json")
 REQUIRED_DIRS = ("tests_visible", "hidden", "reference")
 
-# AMEND1（2026-09-14）的**具名例外**，不是把界線放寬。
-# §五-2 的反向擋門在 `ow_08_logscan` 失敗一句（goal 的「from the shell without
-# writing a script」零驗收），Fable 裁決補 1 條可見 ＋ 2 條隱藏 ⇒ 那一題的條數
-# 超出 §一-1 的可見 2–3／`tight` 隱藏 10–15。
-# **為什麼寫成具名例外而不是改界線**：改界線會讓其他 19 題一起漂，而且下一次有人
-# 多寫兩條就再也擋不住。具名例外會在 diff 裡看得見，也逐字抄進 AMEND1。
-COUNT_EXCEPTIONS = {
-    "ow_08_logscan": {
-        "visible": (2, 4),
-        "hidden": (10, 16),
-        "why": "AMEND1 item 1: CLI checks added so the goal's shell sentence is graded",
-    },
-}
+# 條數的界（預註冊 5794d35 的補充三條之一；Fable 2026-09-14 裁決）。
+#
+# ⚠ **這裡原本是一組具名例外**（`COUNT_EXCEPTIONS`，只放行 `ow_08_logscan`），
+#   理由寫的是「改界線會讓其他 19 題一起漂」。裁決把它換成**界**，
+#   而換掉的代價要講清楚：界線放寬之後，「多寫兩條」不再會在 diff 裡跳出來。
+#   換來的是另一件事——**上下界都判**。具名例外只擋得住上界，
+#   而條數太少（可見 1 條、tight 隱藏 8 條）同樣是題目不合格，
+#   原本那個寫法**擋不住**，因為例外表裡沒有那一題就走預設，
+#   而預設的下界從來沒有被拿來判過 `loose`。
+#
+# 界（三組，逐字對預註冊）：
+#   可見              2–4   （三層共用）
+#   `tight` 隱藏     10–16
+#   `loose` 隱藏      5–7
+# **上下界都判**：太多與太少都是 FAIL。
+VISIBLE_COUNT_RANGE = (2, 4)
+HIDDEN_COUNT_RANGE = {"tight": (10, 16), "loose": (5, 7)}
 
 ANCHOR_RE = re.compile(r"^#\s*anchor:\s*(.+?)\s*$", re.M)
 ANCHOR_KIND_RE = re.compile(r"^#\s*anchor_kind:\s*(goal|contract)\s*$", re.M)
@@ -199,13 +203,23 @@ def check_task(task_dir, tmp_root):
     if meta.get("hidden_n") != res.hidden_n:
         err("meta.hidden_n=%r but %d files in hidden/" % (meta.get("hidden_n"), res.hidden_n))
 
-    waiver = COUNT_EXCEPTIONS.get(task_id, {})
-    lo, hi = waiver.get("hidden") or ((5, 7) if res.stratum == "loose" else (10, 15))
-    if not (lo <= res.hidden_n <= hi):
-        err("hidden_n=%d outside [%d,%d] for stratum=%s" % (res.hidden_n, lo, hi, res.stratum))
-    vlo, vhi = waiver.get("visible") or (2, 3)
-    if not (vlo <= res.visible_n <= vhi):
-        err("visible_n=%d outside [%d,%d]" % (res.visible_n, vlo, vhi))
+    # 條數：**上下界都判**（太少與太多一樣是題目不合格）。
+    if res.stratum not in HIDDEN_COUNT_RANGE:
+        err("stratum=%r 認不得（可用 %s）——認不出來不是通過"
+            % (res.stratum, sorted(HIDDEN_COUNT_RANGE)))
+    else:
+        lo, hi = HIDDEN_COUNT_RANGE[res.stratum]
+        if res.hidden_n < lo:
+            err("hidden_n=%d below %d for stratum=%s（條數太少也是不合格）"
+                % (res.hidden_n, lo, res.stratum))
+        elif res.hidden_n > hi:
+            err("hidden_n=%d above %d for stratum=%s"
+                % (res.hidden_n, hi, res.stratum))
+    vlo, vhi = VISIBLE_COUNT_RANGE
+    if res.visible_n < vlo:
+        err("visible_n=%d below %d（條數太少也是不合格）" % (res.visible_n, vlo))
+    elif res.visible_n > vhi:
+        err("visible_n=%d above %d" % (res.visible_n, vhi))
 
     # --- sha256 清單 --------------------------------------------------
     listed = meta.get("sha256", {})
