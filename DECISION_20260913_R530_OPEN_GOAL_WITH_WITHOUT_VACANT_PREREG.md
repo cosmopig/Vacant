@@ -3628,19 +3628,19 @@ smoke9 觀察到 `A-SOLO` 的行為形狀：**每輪重寫整個檔案、不執�
 
 ## 附錄 AMEND2-A　正式佇列註冊行（2026-09-14，發射前逐字釘入；佇列 JSON `ops/gain/r530/queues/r530_main.json` sha256 `5d9e309292083c8fd496dce1c035ceb1dc6a71b07de120a1c810e67916b75678`）
 
-12 塊 × 5 題 × 3 臂 ＝ 180 格；seed g-r530-s1／s2／s3；同題三臂同 seed 同一台；第 k 顆 seed 的第 i 題走 hosts[(i+k)%2]（每題三顆 seed 在兩台的分配為 2:1，不與單一台共線）；每台 ≤4 串；loose 三題散在不同塊（每塊 ≤1 題 loose）。發射器逐字比對下列註冊行（`schedule_r530.py --check`）：
+12 塊 × 5 題 × 3 臂 ＝ 180 格；seed g-r530-s1／s2／s3；同題三臂同 seed 同一台；第 k 顆 seed 的第 i 題走 hosts[(i+k)%2]（每題三顆 seed 在兩台的分配為 2:1，不與單一台共線）；每台 ≤4 串；loose 三題散在不同塊（每塊 ≤1 題 loose）。發射器逐字比對下列註冊行（`schedule_r530.py --check`；2026-09-14 第二版：註冊行由佇列 JSON 重新產生，前一版 .txt 為 loose 交錯修正前的過期檔）：
 
 ```
-R530_BLOCK: g_r530_s1_1003_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_05_router,ow_18_taskorder,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.119.113.56:1234/v1/chat/completions
-R530_BLOCK: g_r530_s1_1003_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_13_timespans,ow_15_tomlsub,ow_17_diffpatch arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.119.113.56:1234/v1/chat/completions
-R530_BLOCK: g_r530_s1_1004_1 tasks=ow_02_ratelimit,ow_04_layerconf,ow_06_verrange,ow_07_retrypolicy,ow_09_minitemplate arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.86.226.21:1234/v1/chat/completions
-R530_BLOCK: g_r530_s1_1004_2 tasks=ow_11_reflow,ow_19_redact,ow_14_statemachine,ow_16_pathglob,ow_20_slugify arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.86.226.21:1234/v1/chat/completions
-R530_BLOCK: g_r530_s2_1003_1 tasks=ow_02_ratelimit,ow_04_layerconf,ow_06_verrange,ow_07_retrypolicy,ow_09_minitemplate arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s2 endpoint=http://100.119.113.56:1234/v1/chat/completions
-R530_BLOCK: g_r530_s2_1003_2 tasks=ow_11_reflow,ow_19_redact,ow_14_statemachine,ow_16_pathglob,ow_20_slugify arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s2 endpoint=http://100.119.113.56:1234/v1/chat/completions
-R530_BLOCK: g_r530_s2_1004_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_05_router,ow_18_taskorder,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s2 endpoint=http://100.86.226.21:1234/v1/chat/completions
-R530_BLOCK: g_r530_s2_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_13_timespans,ow_15_tomlsub,ow_17_diffpatch arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s2 endpoint=http://100.86.226.21:1234/v1/chat/completions
-R530_BLOCK: g_r530_s3_1003_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_05_router,ow_18_taskorder,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.119.113.56:1234/v1/chat/completions
-R530_BLOCK: g_r530_s3_1003_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_13_timespans,ow_15_tomlsub,ow_17_diffpatch arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.119.113.56:1234/v1/chat/completions
-R530_BLOCK: g_r530_s3_1004_1 tasks=ow_02_ratelimit,ow_04_layerconf,ow_06_verrange,ow_07_retrypolicy,ow_09_minitemplate arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
-R530_BLOCK: g_r530_s3_1004_2 tasks=ow_11_reflow,ow_19_redact,ow_14_statemachine,ow_16_pathglob,ow_20_slugify arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s1_1003_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_04_layerconf,ow_06_verrange,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.119.113.56:1234/v1/chat/completions
+R530_BLOCK: g_r530_s1_1003_2 tasks=ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.119.113.56:1234/v1/chat/completions
+R530_BLOCK: g_r530_s1_1004_1 tasks=ow_02_ratelimit,ow_18_taskorder,ow_05_router,ow_07_retrypolicy,ow_09_minitemplate arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s1_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachine,ow_20_slugify,ow_17_diffpatch arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s2_1003_1 tasks=ow_02_ratelimit,ow_18_taskorder,ow_05_router,ow_07_retrypolicy,ow_09_minitemplate arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s2 endpoint=http://100.119.113.56:1234/v1/chat/completions
+R530_BLOCK: g_r530_s2_1003_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachine,ow_20_slugify,ow_17_diffpatch arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s2 endpoint=http://100.119.113.56:1234/v1/chat/completions
+R530_BLOCK: g_r530_s2_1004_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_04_layerconf,ow_06_verrange,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s2 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s2_1004_2 tasks=ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s2 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s3_1003_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_04_layerconf,ow_06_verrange,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.119.113.56:1234/v1/chat/completions
+R530_BLOCK: g_r530_s3_1003_2 tasks=ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.119.113.56:1234/v1/chat/completions
+R530_BLOCK: g_r530_s3_1004_1 tasks=ow_02_ratelimit,ow_18_taskorder,ow_05_router,ow_07_retrypolicy,ow_09_minitemplate arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s3_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachine,ow_20_slugify,ow_17_diffpatch arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
 ```
