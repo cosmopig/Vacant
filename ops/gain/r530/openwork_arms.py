@@ -407,6 +407,39 @@ def clip(s: str, n: int = TOOL_OUTPUT_CLIP) -> str:
 GIT_IDENTITY = ("-c", "user.name=r530", "-c", "user.email=r530@vacant.local")
 
 
+def remove_workspace(cell: pathlib.Path) -> None:
+    """刪掉一個工作區——**包含別的 uid 在裡面建的東西**。
+
+    ⚠ 這支存在的理由是一個只有真跑才抓得到的 bug（2026-09-14 smoke8）：
+      沙箱降權到 `nobody` 之後，模型建的目錄是 `nobody` 擁有的，
+      而 unlink 一個檔案要的是**它所在目錄**的寫入權限 ⇒ `user1` 刪不掉
+      ⇒ `A-CONF` 的第二份在 `shutil.rmtree` 炸掉 ⇒ **整個 run 掛掉**。
+      單元測試抓不到它：本機跑的時候沙箱 uid 就是自己。
+
+    兩段式，不是一上來就動用特權：
+      1. `shutil.rmtree`——絕大多數情況（同 uid、或 `umask 000` 生效）就夠了。
+      2. 只在 `PermissionError` 之後，才 `sudo -n chown -R` 拿回擁有權再刪。
+         **不是** `sudo rm -rf`：`chown` 拿錯路徑只是改擁有者，
+         `rm -rf` 拿錯路徑是刪掉別人的東西。兩者的失敗代價差太多。
+
+    路徑守衛：只接受絕對路徑、必須是目錄、而且**不准是檔案系統根或使用者家目錄**。
+    """
+    cell = pathlib.Path(cell).resolve()
+    if not cell.is_dir():
+        return
+    if cell == cell.anchor or cell in (pathlib.Path.home(), pathlib.Path("/")):
+        raise RuntimeError(f"拒絕刪除 {cell}——那不是一個工作區")
+    try:
+        shutil.rmtree(cell)
+        return
+    except PermissionError:
+        pass
+    subprocess.run(["sudo", "-n", "chown", "-R",
+                    f"{os.getuid()}:{os.getgid()}", str(cell)],
+                   check=True, capture_output=True, timeout=120)
+    shutil.rmtree(cell)
+
+
 def prepare_workspace(template_dir: str | pathlib.Path,
                       cell_dir: str | pathlib.Path, *,
                       git_init: bool = True,
@@ -424,7 +457,7 @@ def prepare_workspace(template_dir: str | pathlib.Path,
     if not tpl.is_dir():
         raise FileNotFoundError(f"樣板不存在：{tpl}")
     if cell.exists():
-        shutil.rmtree(cell)
+        remove_workspace(cell)
     cell.parent.mkdir(parents=True, exist_ok=True)
     # `cp -a` 而不是 `shutil.copytree`：保留 mode／mtime／符號連結，
     # 與預註冊 §三-1 寫的那一行逐字相同（樹雜湊不取 mtime，見 wshash）。

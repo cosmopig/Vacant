@@ -189,3 +189,63 @@ def test_bwrap_backend_blocks_the_network_when_it_is_available(tmp_path):
     assert meta["write_confined"] is True
     assert meta["repo_hidden_from_sandbox"] is True, \
         "最小 rootfs 之下 repo（裡面有 hidden/）在沙箱裡不該存在"
+
+
+# ── 工作區重置刪得掉別的 uid 建的東西（2026-09-14 smoke8 抓到的 crash）────
+def test_remove_workspace_falls_back_to_chown_on_permission_error(
+        tmp_path, monkeypatch):
+    """`shutil.rmtree` 被 `PermissionError` 擋下 ⇒ 先 `sudo chown` 拿回擁有權再刪。
+
+    這個 bug 單元測試本來抓不到（本機沙箱 uid 就是自己），所以這一條用
+    monkeypatch 把那條路徑逼出來——它釘的是**降級順序**：
+    先試普通刪除、失敗才動用特權，而且動用的是 `chown` 不是 `rm -rf`。
+    """
+    cell = tmp_path / "cell"
+    (cell / "sub").mkdir(parents=True)
+    (cell / "sub" / "x.py").write_text("x", encoding="utf-8")
+
+    calls = {"rmtree": 0, "run": []}
+    real_rmtree = oa.shutil.rmtree
+
+    def flaky_rmtree(path, *a, **kw):
+        calls["rmtree"] += 1
+        if calls["rmtree"] == 1:
+            raise PermissionError(13, "Permission denied", "x.py")
+        return real_rmtree(path, *a, **kw)
+
+    def fake_run(argv, **kw):
+        calls["run"].append(argv)
+        import subprocess as _sp
+        return _sp.CompletedProcess(argv, 0, b"", b"")
+
+    monkeypatch.setattr(oa.shutil, "rmtree", flaky_rmtree)
+    monkeypatch.setattr(oa.subprocess, "run", fake_run)
+    oa.remove_workspace(cell)
+
+    assert calls["rmtree"] == 2, "第一次失敗之後要再試一次，不是直接放棄"
+    assert len(calls["run"]) == 1
+    argv = calls["run"][0]
+    assert argv[:4] == ["sudo", "-n", "chown", "-R"], argv
+    assert "rm" not in argv, "動用特權的是 chown 不是 rm -rf——拿錯路徑的代價差太多"
+    assert str(cell.resolve()) == argv[-1]
+
+
+def test_remove_workspace_refuses_dangerous_paths(tmp_path):
+    import pathlib as _pl
+    with pytest.raises(RuntimeError):
+        oa.remove_workspace(_pl.Path("/"))
+    with pytest.raises(RuntimeError):
+        oa.remove_workspace(_pl.Path.home())
+
+
+def test_remove_workspace_is_a_noop_on_a_missing_dir(tmp_path):
+    oa.remove_workspace(tmp_path / "not-there")      # 不准炸
+
+
+def test_unshare_wrapper_sets_umask_zero(tmp_path):
+    """降權沙箱建的檔案要是我們刪得掉的——第一道是 `umask 0000`。"""
+    s = sb.UnshareSandbox(reuid=65534, regid=65534)
+    argv = s._wrap("echo hi", tmp_path)
+    assert argv[-1].startswith("umask 0000; "), argv[-1]
+    assert argv[-1].endswith("echo hi")
+    assert "--reuid=65534" in argv

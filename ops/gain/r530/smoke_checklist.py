@@ -26,7 +26,7 @@ from ops.gain.r530 import gates  # noqa: E402
 from ops.gain.r530 import openwork_arms as oa, tasks as taskmod  # noqa: E402
 from ops.gain.r530 import wshash  # noqa: E402
 
-CHECKS = ("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8",
+CHECKS = ("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9",
           "E9", "E10")
 
 
@@ -167,6 +167,24 @@ def check(run: pathlib.Path) -> dict:
          "records_audited": vgt["records_audited"],
          "per_role": vgt["per_role"]})
 
+    # ── C9：兩條有閘門的臂**真的動起來了**（預註冊 §三-6，第五輪裁決 4）──
+    # 其他八條問的是「有沒有壞掉」，C9 問的是**「有沒有發生」**。
+    # 它擋的是第五輪推翻的那個死法：預算不夠時 `A-CONF` 連第二份都抽不到、
+    # `A-GATE` 一輪回饋都跑不到 ⇒ 兩條臂在資料上與 `A-SOLO` 無法區分，
+    # 而那不會有任何錯誤訊息，只會安靜地產出一個 `INCONCLUSIVE`。
+    conf_second = [f"{r['arm']}/{r['task_id']}" for r in rows
+                   if r["arm"] == "A-CONF" and r.get("attempts_n", 0) >= 2]
+    gate_round1 = [f"{r['arm']}/{r['task_id']}" for r in rows
+                   if r["arm"] == "A-GATE"
+                   and sum(len(a.get("gate_rounds") or [])
+                           for a in (r.get("attempts") or [])) >= 1]
+    put("C9", bool(conf_second) and bool(gate_round1),
+        {"conf_cells_with_a_second_draw": conf_second,
+         "gate_cells_that_reached_a_feedback_round": gate_round1,
+         "honest_bound": (
+             "C9 用的是冒煙那幾格，而冒煙只有 2 題 ⇒ 它證得了「機制跑得起來」，"
+             "**證不了**「機制在 20 題上都會啟動」。這一句要跟著 C9 一起帶。")})
+
     # ── E-9／E-10（Fable 2026-09-14）──────────────────────────────────
     e9 = gates.e9_sandbox_gate(meta)
     # 冒煙如果是 `--brain stub` 跑的，E-9 沒有被強制（見 run_r530）——
@@ -181,6 +199,25 @@ def check(run: pathlib.Path) -> dict:
     put("E10", e10["ok"], {k: e10[k] for k in
                            ("per_arm", "arms_over_threshold",
                             "offending_cells", "reason")})
+
+    # ── 每通平均秒數 T（逐臂；**含工具往返**）──────────────────────────
+    # 預註冊 §七-2b 的時程公式要填它。**不是**端點延遲：它把沙箱、驗收、
+    # 樹雜湊、封存全部算進去，因為排程要的是「一格要多久」不是「一通多快」。
+    stats = summary.get("arms_stats") or {}
+    per_arm_t = {}
+    for arm, st in stats.items():
+        calls = st.get("calls") or 0
+        per_arm_t[arm] = (round((st.get("wall_s") or 0.0) / calls, 1)
+                          if calls else None)
+    tot_wall = sum((st.get("wall_s") or 0.0) for st in stats.values())
+    tot_calls = sum((st.get("calls") or 0) for st in stats.values())
+    out["seconds_per_call"] = {
+        "per_arm": per_arm_t,
+        "overall": round(tot_wall / tot_calls, 1) if tot_calls else None,
+        "note": ("T ＝ 該臂的總牆鐘 ÷ 該臂的總模型呼叫數，**含工具往返與驗收**。"
+                 "冒煙是單串跑的；併發之下 T 會變大（R460 量到三併發會讓長生成"
+                 "變慢但沒有量過倍率），所以拿它去推時程要帶那個未知數。"),
+    }
 
     out["verdict"] = ("PASS" if all(out["checks"][c]["ok"] for c in CHECKS)
                       else "FAIL")
@@ -213,8 +250,11 @@ def _count_hidden_cases(task: dict) -> int:
 
 
 def render(out: dict) -> str:
+    tpc = (out.get("seconds_per_call") or {})
     L = [f"═══ R530 冒煙檢核表 {out['run']} ═══",
-         f"rows {out['rows_n']}"]
+         f"rows {out['rows_n']}　每通平均秒數 T(逐臂)="
+         f"{json.dumps(tpc.get('per_arm'), ensure_ascii=False)}"
+         f"　整體={tpc.get('overall')}"]
     for cid in CHECKS:
         c = out["checks"][cid]
         L.append(f"  {cid} {'OK  ' if c['ok'] else '**紅**'} "

@@ -376,3 +376,53 @@ def test_e10_threshold_is_declared_as_a_convention_not_a_measurement():
     from ops.gain.r530 import gates
     out = gates.e10_noop_gate([{"arm": "A", "noop_cell": False}])
     assert "約定" in out["honest_bound"] and "不是從任何實測" in out["honest_bound"]
+
+
+def test_c9_fails_when_the_gated_arms_never_actually_fired(tmp_path):
+    """C9 負控：`A-CONF` 沒抽到第二份、`A-GATE` 沒進回饋輪 ⇒ **不准發射**。
+
+    這一條擋的是第五輪推翻的那個死法：預算不夠時兩條有閘門的臂在資料上與
+    `A-SOLO` 無法區分，而那**不會有任何錯誤訊息**，只會安靜地產出一個
+    `INCONCLUSIVE`。沒有這條負控，C9 只是在蓋章。
+    """
+    import shutil
+    from ops.gain.r530 import smoke_checklist as sc
+    run = _stub_smoke(tmp_path)
+    try:
+        assert sc.check(run)["checks"]["C9"]["ok"] is True, "先確認乾淨路徑是綠的"
+        rows = [json.loads(l) for l in (run / "rows.jsonl").open(encoding="utf-8")
+                if l.strip()]
+        for r in rows:
+            if r["arm"] == "A-CONF":
+                r["attempts_n"] = 1            # 只抽到第一份
+            if r["arm"] == "A-GATE":
+                for a in r.get("attempts") or []:
+                    a["gate_rounds"] = []      # 一輪回饋都沒跑到
+        (run / "rows.jsonl").write_text(
+            "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
+            encoding="utf-8")
+        out = sc.check(run)
+        assert out["checks"]["C9"]["ok"] is False
+        assert out["checks"]["C9"]["detail"]["conf_cells_with_a_second_draw"] == []
+        assert out["checks"]["C9"]["detail"][
+            "gate_cells_that_reached_a_feedback_round"] == []
+        assert out["verdict"] == "FAIL"
+        assert "證不了" in out["checks"]["C9"]["detail"]["honest_bound"]
+    finally:
+        shutil.rmtree(run, ignore_errors=True)
+
+
+def test_checklist_reports_seconds_per_call(tmp_path):
+    """§七-2b 的時程公式要填 T，所以 T 要是檢核表的產物不是事後手算。"""
+    import shutil
+    from ops.gain.r530 import smoke_checklist as sc
+    run = _stub_smoke(tmp_path)
+    try:
+        out = sc.check(run)
+        tpc = out["seconds_per_call"]
+        assert set(tpc["per_arm"]) == {"A-SOLO", "A-CONF", "A-GATE"}
+        assert all(v is None or v >= 0 for v in tpc["per_arm"].values())
+        assert tpc["overall"] is not None
+        assert "併發之下 T 會變大" in tpc["note"], "拿它推時程要帶著那個未知數"
+    finally:
+        shutil.rmtree(run, ignore_errors=True)

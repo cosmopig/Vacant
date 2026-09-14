@@ -479,7 +479,13 @@ class UnshareSandbox(Sandbox):
             _abs("unshare"), "--net", "--",
             _abs("setpriv"), f"--reuid={self.reuid}", f"--regid={self.regid}",
             "--clear-groups", "--",
-            _abs("bash"), "-lc", command,
+            # ⚠ `umask 0000`：降權到別的 uid 之後，那個 uid 建的檔案／目錄
+            #   預設是 0644／0755 ⇒ **我們刪不掉**（unlink 要的是目錄的寫入權）。
+            #   `A-CONF` 的工作區重置因此會在第二份炸掉（2026-09-14 smoke8 實測）。
+            #   這是第一道；第二道是 `openwork_arms.remove_workspace` 的
+            #   `sudo chown` 回收——umask 擋不住模型自己 `chmod` 的情況。
+            #   ⚠ 它對三條臂**一視同仁**，所以不是臂層級的差異。
+            _abs("bash"), "-lc", f"umask 0000; {command}",
         ]
 
     def available(self) -> tuple[bool, str]:
