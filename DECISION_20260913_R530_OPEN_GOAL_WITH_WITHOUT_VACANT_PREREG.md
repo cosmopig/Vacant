@@ -3644,3 +3644,19 @@ R530_BLOCK: g_r530_s3_1003_2 tasks=ow_19_redact,ow_11_reflow,ow_13_timespans,ow_
 R530_BLOCK: g_r530_s3_1004_1 tasks=ow_02_ratelimit,ow_18_taskorder,ow_05_router,ow_07_retrypolicy,ow_09_minitemplate arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
 R530_BLOCK: g_r530_s3_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachine,ow_20_slugify,ow_17_diffpatch arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
 ```
+
+## 附錄 AMEND2-B　凍結紀錄（§一〇-1 的 F1–F7；2026-09-14，Fable）
+
+| 項 | 值 | 依據 |
+|---|---|---|
+| **F1** 程式碼 commit | `b9eb0384d0b3`（feat/v2-four-stages，基建分支併入主線後、含註冊行修正） | `git rev-parse HEAD`；vacant-dev `~/vacant/Vacant` 已 ff 到同一 commit |
+| **F2** bank sha256 | `1eae5f193a0e7616ebe13b430c075848c23bbad204f6017e8c93cc40a2dd48ef`（469 檔） | `gauge_r530.py --bank-sha`（與 AMEND1-D 相同） |
+| **F3** judge_bank 投影 sha | `db818527afa6d7dec6250e7e84242bd0159d301a8d003c686f86326fa67a5bd9`（121 檔；排序路徑逐檔 sha256 再 sha256）；rubric 共用段 `90641afed6e089b7` | `export_for_judge.py --check` PASS |
+| **F4** E-9／E-11 preflight 存證 | smoke9 兩塊：`ops/gain/r530/smoke9/e11_preflight.json`（兩台帶 tools 探針 reasoning 0）；正式 run 逐塊：`runs/<block>/gate_e9.json`、`inference_probe.json`、`gate_e11.json` | 發射器在任何實驗呼叫之前寫入 |
+| **F5** smoke9 檢核表 | `ops/gain/r530/smoke9/checklist.json`：verdict PASS（C1–C9、E9／E10／E11 全綠；六格表在檔內；每通秒數 A-SOLO 28.2／A-CONF 13.9／A-GATE 18.7） | 由 `smoke_checklist.py --run <9a> <9b>` 產生 |
+| **F6** 發射時間戳（UTC） | **發射時由排程器 log 第一行記入，見 AMEND2-C** | 排程器 `schedule_r530_<q>.log` |
+| **F7** 佇列 JSON sha256 | `5d9e309292083c8fd496dce1c035ceb1dc6a71b07de120a1c810e67916b75678`（12 塊／180 格） | `ops/gain/r530/queues/r530_main.json`；12 條註冊行見 AMEND2-A，`schedule_r530.py --check` 逐字比對通過 |
+
+凍結後到發射之間不改任何一項；改了就重新凍結、重記七樣並留上一版。
+發射拓撲：1003 四串＋1004 四串（`r1003#1–4`／`r1004#1–4`）；三道發射前閘門 E-3（整個 bank 量具）、E-9、E-11 任一紅 ⇒ 該塊不發。
+沙箱：`unshare --net`＋`setpriv --reuid=65534`，工作區根 `/var/tmp/vacant_r530_work`；bwrap AppArmor profile 未安裝（人類事項，`SANDBOX.md` 路線 B）。

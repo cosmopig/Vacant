@@ -1,0 +1,112 @@
+{
+  "probes": {
+    "1003": {
+      "api": "http://100.119.113.56:1234/v1/chat/completions",
+      "model": "gemma-4-12b-it-qat",
+      "reasoning_effort_sent": "none",
+      "error": null,
+      "short": {
+        "latency_ms": 866,
+        "prompt_tokens": 175,
+        "completion_tokens": 17,
+        "reasoning_tokens": 0,
+        "finish_reason": "tool_calls",
+        "tool_calls_n": 1,
+        "server_model": "gemma-4-12b-it-qat"
+      },
+      "long_ctx": {
+        "latency_ms": 1075,
+        "prompt_tokens": 9175,
+        "completion_tokens": 15,
+        "reasoning_tokens": 0,
+        "finish_reason": "tool_calls",
+        "tool_calls_n": 1,
+        "server_model": "gemma-4-12b-it-qat"
+      },
+      "reasoning_tokens": [
+        0,
+        0
+      ],
+      "reasoning_tokens_all_zero": true,
+      "long_ctx_ms_per_1k_prompt": 117.2,
+      "long_ctx_prompt_tokens": 9175,
+      "long_ctx_completion_tokens": 15,
+      "prefill_ms_per_1k_prompt": 23.2,
+      "note": "prefill 吞吐是**實驗條件**不是實作細節：多輪工具迴圈每通都把整段對話當 prompt 重送 ⇒ prefill 慢的那台隨輪數二次地慢，而那會讓 `budget_wall` 在兩台上咬到不同的地方（跨題的差別截斷）。2026-09-14 實測 1003≈807、1004≈121 ms/1k；生成速度兩台相同。"
+    },
+    "1004": {
+      "api": "http://100.86.226.21:1234/v1/chat/completions",
+      "model": "gemma-4-12b-it-qat",
+      "reasoning_effort_sent": "none",
+      "error": null,
+      "short": {
+        "latency_ms": 966,
+        "prompt_tokens": 175,
+        "completion_tokens": 17,
+        "reasoning_tokens": 0,
+        "finish_reason": "tool_calls",
+        "tool_calls_n": 1,
+        "server_model": "gemma-4-12b-it-qat"
+      },
+      "long_ctx": {
+        "latency_ms": 878,
+        "prompt_tokens": 9175,
+        "completion_tokens": 15,
+        "reasoning_tokens": 0,
+        "finish_reason": "tool_calls",
+        "tool_calls_n": 1,
+        "server_model": "gemma-4-12b-it-qat"
+      },
+      "reasoning_tokens": [
+        0,
+        0
+      ],
+      "reasoning_tokens_all_zero": true,
+      "long_ctx_ms_per_1k_prompt": 95.7,
+      "long_ctx_prompt_tokens": 9175,
+      "long_ctx_completion_tokens": 15,
+      "prefill_ms_per_1k_prompt": null,
+      "prefill_diff_unusable": "差分法不可用（dt=-88 ms, dp=9000 tok）：長脈絡那一通不比短的慢——短的吃冷啟動、長的吃 KV 快取。改讀 `long_ctx_ms_per_1k_prompt`，它是上界而且跨台可比（兩台吃逐位元相同的 prompt）。",
+      "note": "prefill 吞吐是**實驗條件**不是實作細節：多輪工具迴圈每通都把整段對話當 prompt 重送 ⇒ prefill 慢的那台隨輪數二次地慢，而那會讓 `budget_wall` 在兩台上咬到不同的地方（跨題的差別截斷）。2026-09-14 實測 1003≈807、1004≈121 ms/1k；生成速度兩台相同。"
+    }
+  },
+  "gate": {
+    "gate": "E-11",
+    "phase": "preflight",
+    "per_endpoint": {
+      "1003": {
+        "reasoning_tokens": [
+          0,
+          0
+        ],
+        "all_zero": true,
+        "reasoning_effort_sent": "none",
+        "prefill_ms_per_1k_prompt": 23.2,
+        "long_ctx_ms_per_1k_prompt": 117.2,
+        "prefill_diff_unusable": null,
+        "error": null
+      },
+      "1004": {
+        "reasoning_tokens": [
+          0,
+          0
+        ],
+        "all_zero": true,
+        "reasoning_effort_sent": "none",
+        "prefill_ms_per_1k_prompt": null,
+        "long_ctx_ms_per_1k_prompt": 95.7,
+        "prefill_diff_unusable": "差分法不可用（dt=-88 ms, dp=9000 tok）：長脈絡那一通不比短的慢——短的吃冷啟動、長的吃 KV 快取。改讀 `long_ctx_ms_per_1k_prompt`，它是上界而且跨台可比（兩台吃逐位元相同的 prompt）。",
+        "error": null
+      }
+    },
+    "ok": true,
+    "prefill_spread": {
+      "per_endpoint": {
+        "1003": 117.2,
+        "1004": 95.7
+      },
+      "max_over_min": 1.22,
+      "warning": "prefill 吞吐差距**不擋發射**，但它是實驗條件：多輪迴圈每通重送整段對話 ⇒ 慢的那台隨輪數二次地慢 ⇒ `budget_wall` 在兩台上咬到不同的地方。收官報 `wall_s` 分佈時要逐台分開。"
+    }
+  }
+}
