@@ -34,13 +34,12 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3]))
 GOOD_MARKERS = ("senior engineer", "cares about correctness")
 
 #: 每題一份「寫對的解」與一份「寫壞的解」的 shell。
-#: 取自 `ops/gain/r530/gauge/<task_id>/` 底下那幾份——**同一份檔案**，
-#: 不另外維護一份會漂掉的副本。
+#: 取自 `ops/gain/r530/gauge/<task_id>/`——那是 `export_bank.py` 從 `bank/`
+#: 投影出來的，**同一份檔案**，不另外維護一份會漂掉的副本。
+#: 檔名由投影固定成 `good.py` ＋ `bad_a/b/c.py`（20 題一致），
+#: 所以這裡不需要逐題的對照表。
 GAUGE_DIR = pathlib.Path(__file__).resolve().parent / "gauge"
-BAD_OF = {
-    "ow_01_csvjson": "bad_naive_split.py",
-    "ow_02_ratelimit": "bad_fixed_window.py",
-}
+BAD_NAME = "bad_a.py"
 
 
 def _heredoc(body: str) -> str:
@@ -84,7 +83,7 @@ class StubBrain:
             os.fsync(f.fileno())
 
     def _source(self, task_id: str, good: bool) -> str:
-        name = "good.py" if good else BAD_OF.get(task_id, "good.py")
+        name = "good.py" if good else BAD_NAME
         p = GAUGE_DIR / task_id / name
         if not p.is_file():
             raise FileNotFoundError(f"stub 找不到 {p}")

@@ -256,7 +256,8 @@ def _stub_smoke(tmp_path):
     old = os.environ.get("VACANT_R530_WORK")
     os.environ["VACANT_R530_WORK"] = str(tmp_path / "work")
     try:
-        rc = run_main(["--out", out, "--task-set", "all", "--seed", "smoke-cl",
+        rc = run_main(["--out", out, "--task-set",
+                       "ow_01_csvjson,ow_02_ratelimit", "--seed", "smoke-cl",
                        "--backend", "none", "--brain", "stub", "--smoke"])
     finally:
         if old is None:

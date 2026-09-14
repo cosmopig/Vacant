@@ -176,7 +176,7 @@ def test_runner_passes_a_known_good_solution(tmp_path):
 
 def test_runner_catches_a_known_bad_solution_and_says_which_case(tmp_path):
     task = taskmod.load_task("ow_01_csvjson")
-    bad = (task["gauge_dir"] / "bad_naive_split.py").read_text(encoding="utf-8")
+    bad = (task["gauge_dir"] / "bad_a.py").read_text(encoding="utf-8")
     ws = _stage(tmp_path, task, bad)
     s = sb.NoneSandbox()
     hid = acceptance.run_suite(s, ws, task["hidden_dir"], suite="hidden",
@@ -184,7 +184,10 @@ def test_runner_catches_a_known_bad_solution_and_says_which_case(tmp_path):
                                verify_root=tmp_path / "_verify")
     assert not hid["all_pass"]
     names = {c["case"] for c in acceptance.failing_cases(hid)}
-    assert "check_quoted_comma" in names
+    # 名字由 `export_bank.py` 從 `bank/<task>/hidden/h*.py` 的檔名投影而來
+    # （`check_h01_comma_in_quotes`…）⇒ 這裡不釘死某一個名字，
+    # 釘的是「引號裡的逗號那一條**有**被抓到」——那是 goal 逐字寫的客戶困擾。
+    assert any("comma" in n for n in names), sorted(names)
     for c in acceptance.failing_cases(hid):
         assert c["kind"] in acceptance.CASE_KINDS
         assert c["message"], "失敗原文不准是空的——回饋要說得出哪裡錯"
@@ -256,19 +259,25 @@ def test_result_digest_ignores_timing_but_not_outcomes():
 
 def test_render_failures_names_the_test_and_the_values(tmp_path):
     task = taskmod.load_task("ow_01_csvjson")
-    bad = (task["gauge_dir"] / "bad_naive_split.py").read_text(encoding="utf-8")
+    bad = (task["gauge_dir"] / "bad_a.py").read_text(encoding="utf-8")
     ws = _stage(tmp_path, task, bad)
     vis = acceptance.run_suite(sb.NoneSandbox(), ws, task["visible_dir"],
                                suite="visible", task_id=task["task_id"],
                                verify_root=tmp_path / "_verify")
     block = acceptance.render_failures(vis)
+    # 回饋要說得出**哪個測試**與**期望 vs 實際**——那三個欄位逐字會進
+    # `A-GATE` 的回饋（§二-5），零資訊的「你的程式壞了」是 R460 §3.2
+    # 已經量過的壞回饋。
     assert "test_visible.py::" in block
-    assert "returned" in block or "expected" in block
+    assert "got=" in block and "want=" in block, block[:300]
 
 
 # ── 雙向量具 ──────────────────────────────────────────────────────────────
 def test_gauge_is_green_on_the_two_shipped_tasks():
-    out = gauge.run_gauge("all", backend="none")
+    # 題庫已經是 20 題（主線 44be37f）；這一條測的是**沙箱端**的雙向量具
+    # （`ops/gain/r530/gauge.py`，跑真的 acceptance runner），
+    # 全 20 題會太慢。逐題的 bank 級檢查由 `gauge_r530.py --check` 負責。
+    out = gauge.run_gauge("ow_01_csvjson,ow_02_ratelimit", backend="none")
     assert out["verdict"] == "OK", json.dumps(out, ensure_ascii=False)[:2000]
     assert out["coverage_n"] == out["n_tasks"]
     assert out["stubs_blocked_n"] == out["stubs_n"] >= 6
