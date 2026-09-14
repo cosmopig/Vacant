@@ -1,0 +1,42 @@
+{
+  "task_id": "ow_14_statemachine",
+  "stratum": "tight",
+  "title": "A state machine that records the path it took",
+  "prereg_ref": "Fable ruling 2026-09-13: extension set ow_13..ow_17 (prereg S1-3)",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "State machines are a stock exercise, but this contract pins choices the common libraries do not share: a refused event raises and leaves the history untouched, a self-transition is recorded, the history is copied on the way out, reset clears the record as well as the state, and the rules are validated at construction rather than on first use. transitions and the usual dictionary recipe both differ on at least two of those.",
+  "visible_n": 3,
+  "hidden_n": 12,
+  "type_note": "Chosen to be unlike the frozen twelve: the only task whose subject is a stateful object whose past is part of the contract.",
+  "sha256": {
+    "contract.md": "8da695948d68448b4df66b7fa82191ca451c99401d765806a872a603c224ddf1",
+    "goal.md": "3aee4f6114db414c7d8a4118c42e1f7c59d35b259226978600875c53f0e38ae1",
+    "hidden/h01_history_starts_at_the_beginning.py": "5d9be10654528c9376cbc9b3c2ea7c92c440d8f5e4bc9028cd262e5baddbac50",
+    "hidden/h02_refusal_names_both_halves.py": "97cf8b0b0e0c98d9b0bfcd6cf8b172b5a8657153e470bb74489e4b4673c2609f",
+    "hidden/h03_refusal_leaves_no_trace.py": "9a67a2186860ae89e65a9e5e40cf4715cc829ea0ac9c04a4064c88c052476a1e",
+    "hidden/h04_can_matches_fire.py": "c5500f88638be09f7ae6e8bc86aca1e3ba8325a880b6664c8f99dfd04afb1418",
+    "hidden/h05_self_transition_is_recorded.py": "2d9771d93971edb0a5ebdab141ca16ee83e19a27584fa94b041a72d27113369c",
+    "hidden/h06_history_is_a_copy.py": "a6d1fcc4a7c2283c6075f248304d98ea3ca58d696e352635244a89bf1190a328",
+    "hidden/h07_reset_starts_over.py": "20c5cf75ee0d9c956a20595730fe1a552790d5b7019f6145205c1a1f0f1a8b78",
+    "hidden/h08_unknown_start_state.py": "b621608819a93963d0687ae818d023f4a10c6636f2bee9e9fe9ae863ed3bd717",
+    "hidden/h09_target_state_must_exist.py": "68f28de36da42d94ecffb0f28a678ccdb71cdb04c5ad0bfd7957ee78b87b6c5d",
+    "hidden/h10_dead_end_states_are_fine.py": "e5c98df7c1e9f463827b431b896c18d278e617c99b9b645c4a91b9b021df3478",
+    "hidden/h11_two_machines_do_not_share.py": "9ff2425a2aca4c231f2df406bb0cbe8ddd568e3eb682ab1f4b0df438b2cd74cc",
+    "hidden/h12_long_path_in_order.py": "a289906e7f94560d29f59b243f8dfd892d0e375e13efbd28886e4dafb4703bcc",
+    "reference/bad_a.py": "4c62a54c88419be379cc13c977185701220def6225a3f625b8c16e7b0266e8d4",
+    "reference/bad_b.py": "df3883eade7e618748b9f59deb9b832acafd49e1774807fd7069236200abe932",
+    "reference/bad_c.py": "085872cb9fda2c553be0142ff4ffc5bd288b02695f9f692e895c0991366873a9",
+    "reference/solution.py": "32aca45c0f3393dda4dfd0a777841d59af2ce54516927870eacbed15dd69227b",
+    "rubric.md": "51c072b0eaa1b80cf80b673771f17a37662b7ce78bdf523932276102966ab727",
+    "tests_visible/v01_moves_the_way_the_rules_say.py": "83ed98160155593ce8e425ae0cde019c58ff4ce03eabd7a0ba878d32a427310e",
+    "tests_visible/v02_asking_first_and_being_refused.py": "c5418c516c9508aa82144a02fa32e69f19f0d749404a2c09469a6de4b3ac4f15",
+    "tests_visible/v03_the_path_it_took.py": "5f65e651395d65749cd83b5a30f72416425d548afc0d14dc0f45b9cf369f2d8f"
+  },
+  "ref_solution_lines": 31,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

@@ -1,0 +1,49 @@
+{
+  "task_id": "ow_02_ratelimit",
+  "stratum": "tight",
+  "title": "Per-caller sliding-window limiter with an injected clock",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_02_ratelimit",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Rate limiters are everywhere, but the combination graded here is this project's own: the window is left-open/right-closed so an event exactly window_s old has already left, retry_after is pinned to `leaving + window_s - now` rather than to the window length, max_events=0 returns infinity, denied calls record nothing, and a rewound clock is defined behaviour rather than an error. A remembered token-bucket implementation fails those.",
+  "visible_n": 3,
+  "hidden_n": 15,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check.",
+  "contract_additions": [
+    "goal: added 'that answer has to shrink', 'Being turned away repeatedly must not push the wait further out', 'The same test clock is sometimes rewound', 'it deals in fractions of a second', 'wipe the record for one caller, or for everybody', 'nonsensical configuration to fail at construction' -- anchors for the prereg's own hidden list (clock rewound / float boundary / repeated denial / reset / parameter checks), per prereg S5-2 gate 1.",
+    "contract: pinned the exact retry_after formula, float('inf') for max_events=0, and the rewound-clock rule, which the prereg left open."
+  ],
+  "sha256": {
+    "contract.md": "6978722f966ab94c5804fbea4ae1c1007e5df14a4ff7ba3f6c928bf4ed243699",
+    "goal.md": "909a12852ca377d2a81759c885739862ba9c4adfee761b4cd4ed9ba8eb4de32b",
+    "hidden/h01_left_open_boundary.py": "a1994262922377ae11798ca3b8822131ba78ed4c4cb84e1594c5a6683fa82f01",
+    "hidden/h02_right_closed_boundary.py": "e5dd8ab37f25128fba41fda658ee506c06ad63f688c60b664b272cc6653548b7",
+    "hidden/h03_zero_budget_blocks.py": "685d83a360999c246d67e12753941688bf73a0a42a3005806274437e4372c56a",
+    "hidden/h04_zero_budget_wait_is_infinite.py": "f5b4a7f225d5a36ec4f2af80dc4be2a14b3c678a943005caa5bb415e8d0a43a7",
+    "hidden/h05_keys_are_independent.py": "2cf44d812d6700b261d65082e4b6b0c0ef1b8c7241cbab4eb225b7b42bcefc8e",
+    "hidden/h06_wait_shrinks.py": "d93e9370b38a89833c61ea5e49028797a8c8f1aa0c108647bcd87ee8841f3a23",
+    "hidden/h07_wait_formula.py": "309ac50923734652825a28cfb2224fe137ba52db2792731f589ddda2aa4f5927",
+    "hidden/h08_unseen_key.py": "9730e3f9e7468358b336770cd1f0171f087930b007a1203072788664f611e8c0",
+    "hidden/h09_reset_one_caller.py": "e107cddd15b6d8bcbec15f84cfb66be16128e124818b06f805cb08edd0e7d2dc",
+    "hidden/h10_reset_everybody.py": "73c020c6f48cfe1ec9bdd6ebca44367cf3ddef07f23a278bfbafe015a047a77b",
+    "hidden/h11_clock_rewound.py": "863af4422426da8ea2301d92b4a2ad4e167fbed5fea071934736e9c627245923",
+    "hidden/h12_denial_does_not_extend.py": "96f8ca059d433811c2c30f0014bde5b7390c5911d2d9f7c0e9fb0efd2fc158cc",
+    "hidden/h13_fractional_seconds.py": "b483c28889d448c32f305a917997c176327402509962962491dd922298a36bbf",
+    "hidden/h14_bad_configuration.py": "2dfb46c1d4eae8ed85dcb027c2d72b8770b64a5722dd42624321db44ac613de7",
+    "hidden/h15_no_real_clock.py": "fa3685f7afdb347506b04ad53b4e5d5ab530e4ebcf252fe9730de90ed0a588e5",
+    "reference/bad_a.py": "d0de40fb3a80b3a2cc089224bec655b82b22a76216912527529f24363bd89592",
+    "reference/bad_b.py": "9922b7cb667e096826937602c93a03f01bd72318ef3b0bd5baeeb2e934294927",
+    "reference/bad_c.py": "9130f66f5de5f6b9b9ecc2efe928dc6eb4022251174c72b95d916e710753614b",
+    "reference/solution.py": "cf0798e954341a46d681c5b01b8b9543fbde2a610fb4faa2dc9708c1d2b91d7d",
+    "rubric.md": "34193252b98885dc2c8e3dbd3eed8d8df851739ca6bc88410ed7569cf4908d8d",
+    "tests_visible/v01_window_and_keys.py": "216ebd937de53c86f1480cd8365bd3d56540e99739f5bcfaf2eec9abc18dfbcb",
+    "tests_visible/v02_retry_after_and_config.py": "93d2ba3cb741da38cfcb3559b699f1f537a4f5b29b0a8b8c87382fa30266f994",
+    "tests_visible/v03_reset.py": "571f8306024e3d0c1d17aec01457f3bf7a7aabcc3f0bf9f1bbf118d73939ef8e"
+  },
+  "ref_solution_lines": 39,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

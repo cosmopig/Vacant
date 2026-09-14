@@ -1,0 +1,48 @@
+{
+  "task_id": "ow_01_csvjson",
+  "stratum": "tight",
+  "title": "CSV to JSON Lines with line-numbered failures",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_01_csvjson",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "CSV-to-JSON is a common exercise, but the graded semantics here are this project's own: last-wins on repeated header names, ValueError/stderr text pinned to `line <N>: ` with the header counted as line 1 and a quoted line break counted inside its own record, exit code 2 rather than 1, and stdout required to stay free of anything but data. A memorised generic converter does not satisfy those.",
+  "visible_n": 3,
+  "hidden_n": 14,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check, each holding several asserts on the same requirement.",
+  "contract_additions": [
+    "goal: added 'the same column name used twice', 'line endings from whichever machine last touched the file', 'Some of the data is not ASCII', 'success and failure have to be distinguishable without reading the output', 'must not be polluted by chatter' -- needed so that the prereg's own hidden list (repeated header / CRLF / UTF-8 / exit code / clean stdout) has a verbatim anchor, per prereg S5-2 gate 1.",
+    "contract: library-level ValueError with the same 'line <N>: ' prefix as the CLI; blank lines ignored; empty result for zero data rows; quoting convention spelled out."
+  ],
+  "sha256": {
+    "contract.md": "47237a488aef393f5ad709773c7593cbf72f4fddbe8e469a3314ea312a6483f3",
+    "goal.md": "ba394f69423fed745ccee2bd4cab736edc9531745254782178307a7b5de2d47e",
+    "hidden/h01_comma_in_quotes.py": "25e0b28dd0e53d8bd7f8e96c388ac84f69af055a198b751687dac09a1b29ac54",
+    "hidden/h02_newline_in_quotes.py": "f5b35c473d8e619cc28405c59669c6ec798558faf66da330a9c356ef3e2b9d08",
+    "hidden/h03_doubled_quote.py": "94c04ad376393be81198359a1bb40690908f6ba99b5bb7ccf6a3647a76db3a6c",
+    "hidden/h04_blank_column.py": "205a8849af329b7d56e9f37e514586cb5a8356eed7ed58155a48727863fd6249",
+    "hidden/h05_repeated_header.py": "a95620f1f397fa9497109cc80024bb4a154b373d63b5185a8675b266ee97928a",
+    "hidden/h06_crlf.py": "b9e12155876374c05b57e0db0c551979b5629e2f7a356571de323feaf31af044",
+    "hidden/h07_non_ascii.py": "1c7a9750bc43966ebed9b439de2b74a2ed2338f35e4583eb66f61e6842b94d5f",
+    "hidden/h08_line_number_of_bad_row.py": "7def890b2ef635c8a6494510e140e48d644e7a8c0996291fd851a3ea5e36ae2a",
+    "hidden/h09_unclosed_quote.py": "df3a6ab422aae4053c39247af9398e1c51706433fe9548832b1ff81972b14575",
+    "hidden/h10_exit_code_is_the_signal.py": "e98c2be640a119ae7fd27496108e058a4edf5e6a1868cb13954401f187c318b2",
+    "hidden/h11_stdout_not_polluted.py": "2ec71c1a8713f3af903beff8d9b9c26a047c5508d13dc4890a80c8971bee6fa1",
+    "hidden/h12_no_data_rows.py": "a3bcaddcdbd0c5db26c6e3d80b60e8d72a5c7b6e8d95d3c1541007a0f6229fd2",
+    "hidden/h13_missing_final_newline.py": "ed85f330f9189539111dc232ef4e828e76a87999ec54990ac6f572469c9f5698",
+    "hidden/h14_one_object_per_line.py": "678f6a409c20d0c9548da8266a44da13d9373e0139dec95e647ec8d608d7c0ac",
+    "reference/bad_a.py": "18d2e201bdc920ce8582f58519578366794958a9cd98d98025421ea77b33df8f",
+    "reference/bad_b.py": "ca8ee2bda3115b7b985a4e7f8328c89886c515c1007c199295cc865d776dbaba",
+    "reference/bad_c.py": "9f3c72098fafaa2ed0bdf6f6154458ad7d0e3e06d748fcc967ea180eedeacde7",
+    "reference/solution.py": "763248c97d4b0048cca70012003aefd69f5028d47bfd758d07c271895fcf5b4f",
+    "rubric.md": "d84e542b78f7e0d57ddc11989bd1977a0565183a5f373448e19c1498ef0b800b",
+    "tests_visible/v01_plain_rows.py": "e0c594daaf2522c380f7411c8332ef62df8f644eb3d20cbcf6c419368861c415",
+    "tests_visible/v02_quoted_comma.py": "0cd73f95cbd0f06ee4db3e2bd4ab0a0e97a49872b5197142ec77f77dcd42d065",
+    "tests_visible/v03_cli_exit_codes.py": "d78a7e59c38ac470a305dde7d2b88fd162ec21a34d6106ca1485a0a170c6ed47"
+  },
+  "ref_solution_lines": 105,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

@@ -1,0 +1,47 @@
+{
+  "task_id": "ow_07_retrypolicy",
+  "stratum": "tight",
+  "title": "Retry with injected sleep and a capped backoff",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_07_retrypolicy",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Retry helpers are common, but the graded semantics here are this project's own: the delay sequence is pinned to min(backoff_s * 2**(k-1), max_backoff_s) with the first wait undoubled, there is deliberately no wait after the final failure, the original exception object must survive unwrapped, an empty retry_on must retry nothing, and the attempts check must fire before the first call. Libraries such as tenacity differ on at least the trailing-sleep and wrapping points.",
+  "visible_n": 3,
+  "hidden_n": 13,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check.",
+  "contract_additions": [
+    "goal: added 'come straight back out, immediately, with no pause at all', 'A subclass of a listed error counts', 'not something the helper wrapped', 'a pause that leads nowhere', the ceiling sentence and the attempts sentence -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
+    "contract: pinned that retry returns the first successful value and that an empty retry_on retries nothing."
+  ],
+  "sha256": {
+    "contract.md": "ae32fcc013052d2473465d5234cc03e3357c932bd1439d3540f2bb0caf502b1e",
+    "goal.md": "a23cd388fe1934d7b5abe5962107bfe73da38091bee4a854dcfdb34b4725f30a",
+    "hidden/h01_first_call_wins.py": "9c52695ba20b3c6607496077352a3f9c65de71c560dbe2c77121a69618a2b43b",
+    "hidden/h02_exact_backoff_sequence.py": "0f70f396b08af67142ebbff7075cedf3a770a163da8f7d935fa30da008a327b4",
+    "hidden/h03_ceiling_applies.py": "bb78c4a05c215d9865d85f49b6b5e0c7f0df43f5572925fbe0d47007826316f7",
+    "hidden/h04_no_trailing_wait.py": "bd71cec7686411cf8c87996326ff1580344e6054d40572d148bb2660e2a02634",
+    "hidden/h05_original_error_object.py": "b572c0b6765a62f1183b8bdae66a50798c4053fcb8a41dbf4d74d398b30ab652",
+    "hidden/h06_subclass_counts.py": "bf1a3289ab7dd096bb32fb20797d3b6ac0e2826354c09891664de3107182c304",
+    "hidden/h07_unrelated_error_escapes_at_once.py": "b9ac7ace701acbb078f5bd8563863a6385c955ad6d1747d5f35edb70a4c644dd",
+    "hidden/h08_empty_retry_on.py": "c8d637c6e6eeb069372d581dbcedf3ebfbd915a869c9fbdd07f1a2c2be9aacd2",
+    "hidden/h09_attempts_must_be_at_least_one.py": "182554f0305f67361ed5a64c56a41ac03ee748965d75459dfbbf77afae66e47f",
+    "hidden/h10_single_attempt.py": "ecc2d73be0f6822f6979364dd72722b0dc6d04f2d6493497808f222f8290d479",
+    "hidden/h11_succeeds_on_the_last_attempt.py": "1055dc50a3fbad74a5f5b6d954dcc5fb770afee69583c61659e2424ae848c638",
+    "hidden/h12_sleep_is_the_only_waiting.py": "19950f218ac2603cb0bf30232123e2371740920003286d72c924235a53554487",
+    "hidden/h13_several_listed_kinds.py": "e93fbe17a594a139f60992d6d44e0b905a8bc6d3399864577385468878f0d23c",
+    "reference/bad_a.py": "1ad60b81c1e072fb23971b29d60ad47f93d4bc9fcf852256d9d2b2581e55052e",
+    "reference/bad_b.py": "6ca75f62b207eaa925aa990d3ca10c40991786a1643dbbfae523b444a686cde3",
+    "reference/bad_c.py": "691637495580532fca64a6fe4d9ddb64d267572a2300de36936f1d832cfe355c",
+    "reference/solution.py": "453c924502703fd8e2f9f158ed074383e65ae4fb502541532f05c4321325a27e",
+    "rubric.md": "2890848f62842cc9de184438de48d9e2c3e60c1d9b1c09603a277a0c2389c2f5",
+    "tests_visible/v01_retries_then_succeeds.py": "6d2da0c587ab4a44617c4749e7f11f46194df1483c735836211592f7cd3b9831",
+    "tests_visible/v02_backs_off_longer.py": "7c976f015ab3995657fdac34c1fbb15884b003d011285e8a362f747d7f834b30",
+    "tests_visible/v03_not_worth_retrying.py": "ab1c01b8988dfaf0df2a5ba39650b612a3546377cd96c19afa73c98d9685949d"
+  },
+  "ref_solution_lines": 16,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

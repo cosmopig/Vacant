@@ -1,0 +1,49 @@
+{
+  "task_id": "ow_04_layerconf",
+  "stratum": "tight",
+  "title": "Three-layer settings with provenance",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_04_layerconf",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Layered configuration is a familiar shape, but the graded semantics are this project's own: defaults fix the key set and the types, provenance is a first-class query with three fixed labels, the env mapping is APP_ + __ + lowercase, booleans take six spellings, unknown keys are dropped rather than added, and unconvertible values raise. No library's defaults match that combination.",
+  "visible_n": 3,
+  "hidden_n": 15,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check.",
+  "contract_additions": [
+    "goal: added sections/comments, 'Some of their values contain an equals sign', 'Sometimes there is no settings file at all', 'most of which have nothing to do with this program', 'A typo in a setting name should be ignored', 'must fail loudly rather than becoming a zero' -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
+    "contract: pinned KeyError from get/source, first-equals-sign splitting, lines with no '=' ignored, and that the environment prefix is matched case-insensitively."
+  ],
+  "sha256": {
+    "contract.md": "ea54aa9a5f06b991e6e79b9f70c4eb363b825ec118a0a3f815b3b0419c9136f5",
+    "goal.md": "29c2567474a134aa4851ffc6336c3759f64eb2e20be232e564ae0b2ac919639d",
+    "hidden/h01_env_beats_file.py": "63641b487be7d1a422c6a4ee4aedcd527a67670a51337825cc1557981b78bd36",
+    "hidden/h02_file_beats_default.py": "559f0df65a3060eaedd0664ad9271ef867a1d59ca302eb8d4728c59a70c56f55",
+    "hidden/h03_sections_make_dotted_keys.py": "9ddc05db9b4a59fed7807f67913499993c28e18d4c4deb92ab34ed9774c56905",
+    "hidden/h04_comments_and_blanks.py": "e3f2ce5427c4eb2492f31b17544505f9c52ffece2197be45f4c2ead0da203340",
+    "hidden/h05_boolean_spellings.py": "dd0b126da0edef19a76cae5ae84ff15cc1cc122222e3225b4557e47294d8905d",
+    "hidden/h06_unconvertible_boolean.py": "d5632fa7b00363dc566740edaa1a42cdae86ae448cad96f298e9002be8c31d4f",
+    "hidden/h07_unconvertible_number.py": "d283a789ebcbd957017aa9cb07e0e792bde25ea8355ce5cc9839700247603b93",
+    "hidden/h08_env_name_shape.py": "eb1a9af1b3296677dd97a5714b4a88d0332fd3439b19bb4297ecea244b644e6d",
+    "hidden/h09_unrelated_env_ignored.py": "b361e1cd2ea4b5667ad24ceeeca931d8f27011d133bb4dea97a985d25404d5cf",
+    "hidden/h10_unknown_keys_ignored.py": "7aabfd2d6cc5f62a2e7769432a838c4664643d70cf6c502675b3d22475c2c394",
+    "hidden/h11_unknown_key_raises.py": "950223948ceaabc68eca0894abd45ac4d31addfd9df65b87d92424e3031b3149",
+    "hidden/h12_no_file_at_all.py": "97a05569e9dbbf4b8f56a36e71aff240bbd8d6e22b5a5066e7155a3a32c0dfee",
+    "hidden/h13_value_with_equals_sign.py": "b848f594845e6411a4e1de19bf4d77851b7dc472a4aec7d8930c2b4702a5fd5d",
+    "hidden/h14_whitespace_and_stray_lines.py": "4bb9f9b307012445cbfd2eb398f1baacd809a69bd6d0e7f132d02f2ea903c1b5",
+    "hidden/h15_defaults_fix_the_key_set.py": "6f4276fde79b749f828953f129955f1357a91676a7236b086fd29c5c6f443db8",
+    "reference/bad_a.py": "1386a6bd3a7e92bfae870e214d0a86fc34061c673b609f92d47cddc3614f7a14",
+    "reference/bad_b.py": "4dbe0cbfec01298a8de607820841e5030b98f2c7431968e6cedf99baeeda2630",
+    "reference/bad_c.py": "ea9dad5761ba69a62f2088a65ea2f1b770dc38f5cac8cfaf2c2f0826f4e142db",
+    "reference/solution.py": "029b4008c1d403d74fa4804b107fdcbf6717432f64cafa213925aeac79c31a99",
+    "rubric.md": "7722c35899f7e1f550705ca310ca6cfca07cdaedc52cafaacbb9abcccf37bd30",
+    "tests_visible/v01_precedence.py": "cf15cae47c657147e252153d9c34a63434c088af2c642a7532014e1875b547ea",
+    "tests_visible/v02_provenance.py": "6287b405bb64a305f9ca2c92c3e2b54188580b708b88d05ec06f0b178d868d76",
+    "tests_visible/v03_types_follow_defaults.py": "8ed007d99fb5541e4b61b7325fa1104b4992dd45d4b91e4a79a46065a2074f8a"
+  },
+  "ref_solution_lines": 70,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

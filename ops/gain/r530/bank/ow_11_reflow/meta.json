@@ -1,0 +1,48 @@
+{
+  "task_id": "ow_11_reflow",
+  "stratum": "tight",
+  "title": "Reflow plain text to a display width",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_11_reflow",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "textwrap exists, but it counts characters rather than columns, has no notion of a wide character being its own breakable piece, hangs nothing under a bullet marker, knows nothing about fenced blocks, and collapses blank runs. This contract requires all five, so a wrapper recalled from textwrap's behaviour fails the hidden checks.",
+  "visible_n": 3,
+  "hidden_n": 14,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check.",
+  "contract_additions": [
+    "goal: added the two-columns sentence, the break-between-characters sentence, the blank-run sentence, the each-bullet sentence, the long-run sentence and the bad-width sentence -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
+    "contract: pinned greedy filling, that no output line ends in a space, the whitespace-collapse rule, and the final-newline rule."
+  ],
+  "sha256": {
+    "contract.md": "8eb96f4b96a09dd98977491fa34beec62a7aa954fa7b0f29e0575b37a3047b86",
+    "goal.md": "8aaee3a7374ca7120b5a5d1361c1d2bd08d7ecb306656c5ffb33d6e6bdb47018",
+    "hidden/h01_wide_characters_count_two.py": "af06954d90f8196729962ae5e81b7e356bcd260d5a114cf4cba10eb1416ec579",
+    "hidden/h02_break_between_wide_characters.py": "af66d6050b89fb062aeb9a8e5d892f2a9587f8ab1dc40ad9e07a4c446537646c",
+    "hidden/h03_paragraph_indent_carried_down.py": "8c471492b09373acb3d7a55870ae36885b006321472b215a110ccb6eeae9a0d1",
+    "hidden/h04_numbered_bullets.py": "20d314cf39aa857ebf0d2377ddd4913b4f5be01d87a3a3157ed7aeacb503291d",
+    "hidden/h05_star_bullets_and_nesting_indent.py": "703a79ead7e33c3f02847c66576cd37ce9995b6aee5a3a7ba75514d45f5dc42f",
+    "hidden/h06_each_bullet_is_its_own.py": "b5aadad092e49122b3143915293f6ce493a993938341a7f68f5b2358f41fab76",
+    "hidden/h07_blank_runs_kept.py": "064d43e1353ef093ebb56ef3ee02b7b595203920e73dfeeb050f3be85535eaff",
+    "hidden/h08_fence_contents_untouched.py": "b22ebc55371bfbfbd77e8c18cb4ab50e00dd350ab2a66393235f4eda1e348257",
+    "hidden/h09_long_piece_sticks_out.py": "ff0760392c491a4ff7d7f4cfcc8a91b83a56915864d77f04bb2b93ffb240f4ad",
+    "hidden/h10_bad_width_refused.py": "2b0794c6f30e5fe9a5991f9ba2c65b81f235c47ca59698659e7200b8a05d1802",
+    "hidden/h11_whitespace_collapses.py": "83ced3b80e50e4313c0903d0c1e020a9d4fcabc239c09b61524e64bc1e9c3733",
+    "hidden/h12_final_newline.py": "0aed2053a834a6e06b7f57961d0d36acf36d8f8ac165128d75240308faf1952a",
+    "hidden/h13_mixed_scripts_in_one_word.py": "b183603cafd44b30a60aee4a7ef8a119f2ddd81f3ceab00ce4343ba23b60018f",
+    "hidden/h14_bullet_after_paragraph.py": "16b6948e67e0c8c9ad8f4d67ba9093f7ad4d179e2645894e951dd5c5c01975f4",
+    "reference/bad_a.py": "70812b514f4a7a13569d4505764c507fb1ee6deebf1d89fab6c20dfb4f3931d4",
+    "reference/bad_b.py": "96f7b451f41dd1b9b93bae5b7d6eecb2706cb251a751a47fba71559fa1d02cc2",
+    "reference/bad_c.py": "30eaf5cd30493023c18e4659e77157d50044ddb0a76dd4fb1b25f69249a0cdcd",
+    "reference/solution.py": "4694975432eaee330c771f36bb6a571bfb2a72e9b2945ed8faf5dbc69e58fb8c",
+    "rubric.md": "b2d0011d7735d3bc35c391bd4bb6b1e1da1c637aacbad46955d183bbe760d4f3",
+    "tests_visible/v01_wraps_to_width.py": "077c16549205a58f2492d08c7820878baaad62e3616cc6511e8f752f83e9be95",
+    "tests_visible/v02_bullet_hanging_indent.py": "c02ef9b1fdf7ad49199f335e2b9a67c33d2c4875aadedde498073c7c0ee64d97",
+    "tests_visible/v03_fence_and_bad_width.py": "d7c4a09eaa60ccf397d094765c547f94eea6909a9ea567e453e5304b9b560387"
+  },
+  "ref_solution_lines": 92,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}

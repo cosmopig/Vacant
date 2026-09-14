@@ -1,0 +1,48 @@
+{
+  "task_id": "ow_08_logscan",
+  "stratum": "tight",
+  "title": "Per-endpoint log summary with nearest-rank percentiles",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_08_logscan",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Log summarising is a stock exercise, but the graded semantics are this project's own: the output schema is pinned key by key, percentiles are nearest-rank rather than the interpolated default of numpy or statistics, the error share is five-hundreds only and rounded to four places, ties are broken by path, blank lines are excluded from the total while bad lines are counted in it. A memorised summariser disagrees on the percentile definition alone.",
+  "visible_n": 3,
+  "hidden_n": 14,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check. The CLI is deliberately unchecked (prereg: CLI is qualitative only).",
+  "contract_additions": [
+    "goal: added the five-hundreds sentence, the busiest-first and stable-tie sentences, the unusable-lines sentence, and the blank-lines sentence -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
+    "contract: pinned what counts as an ISO8601 timestamp (fromisoformat after Z substitution), the integer field shape, that total includes bad lines, and that blank lines are outside the count."
+  ],
+  "sha256": {
+    "contract.md": "081ff8d896a43910c5e45812807193b0bc4826cbe4a1c36987c0c1f2d5f80302",
+    "goal.md": "ba29c9bb56c5ba9644ff2829394fd3782f2a3d7895b27dd2f80eaee4c9aef818",
+    "hidden/h01_five_hundreds_only.py": "1ac9870fa2cb0bd587f1ddb0c72dd30e3df3b98cd3edc1224ef2006805a500a4",
+    "hidden/h02_error_rate_rounded.py": "078cd7b890119cf0f1b30bc0b9a4da644487bc4473c2d23baf950275da119419",
+    "hidden/h03_p50_nearest_rank.py": "675f6dcfa4c7e41ae22639a47f65b6a9047ad663ca9a0a588df50cc4b1be9a78",
+    "hidden/h04_p95_nearest_rank.py": "a23477d845cdfe8970e3c25db88d8a3282a1d1a44fa95b355e85b2b347a4eb2d",
+    "hidden/h05_single_sample.py": "788c6cc8eb58b1200f4b52eec0b2837a188ceb070b8805cee2c053344afc469c",
+    "hidden/h06_busiest_first.py": "e8d18c833e5ed28c04ed53bb7354d79df7ed7828064b84af6d1afdff88067191",
+    "hidden/h07_tie_broken_by_path.py": "4c4f48dd767d0d504cc63b97bf5eb719931d99876c33fc978164c0dd12026e3b",
+    "hidden/h08_wrong_field_count.py": "8f76a7d5939d37a85ae79465e1305735ff37cb310fd58de56f4f6574e712153f",
+    "hidden/h09_non_integer_fields.py": "452a2ede8aecd6ed2046f43f359a4f381ddecaba7cc5cb8b365cd6d3998b21a3",
+    "hidden/h10_bad_timestamp.py": "780780289e2ae310870eb50232d7aa7e7242fc2602e0e3818b74bc958d1c01ea",
+    "hidden/h11_bad_lines_are_reported.py": "88d82c6b6b102be3197739dfa3b67f9c3d1dc259318c99fe83f2d6b8ab6f0bc8",
+    "hidden/h12_blank_lines_are_nothing.py": "2e4f60150878d713137ff17bae0f5d3418e59534477410c618f82eeafa3036d5",
+    "hidden/h13_trailing_newlines.py": "388a36b96a0b9f79491f5988e35d61b56a52b622e30ee642efa5c9bd0b19203e",
+    "hidden/h14_result_shape.py": "ea501d154e6abc37345f78c071a27ff7b4312f4adcdcfe868f457269d6a1fa5b",
+    "reference/bad_a.py": "02cd8e27c03c9b06bd9f5f2249ca5eb11e47fe07589c9470ffead91dc1c3fa16",
+    "reference/bad_b.py": "be3103e27e8b330134c9d4363b97b4f0c63f96fab78e0e4252fdaa792e2a7af8",
+    "reference/bad_c.py": "21d7d91a61e1a63f6294c47dfd44adaa2ca5cefc8b795b3fed3aee11e7a7e3be",
+    "reference/solution.py": "dfe3cabd4a384bafa05d1aec6c47e4f4031dd057ba7e790f1f5a9d06b8881a93",
+    "rubric.md": "d5c0eea3e285b2f30d519de21b6e955ce36b06b6806ffb0cfdb148567364a685",
+    "tests_visible/v01_counts_and_error_share.py": "e3ef3e8deb959ba0cb04355dacff846752a943a5bba3a1959b7c08842ae453ed",
+    "tests_visible/v02_bad_lines_do_not_stop_it.py": "61d5ace4eb0437f3117bfb1d2431b4b212fbe4dd05e0d32b3d8495c886872951",
+    "tests_visible/v03_percentiles.py": "73b12a5ba4cfbbd01e70e2bc677b87447f25bcf76d8638bfe51bc8b9b6d356cc"
+  },
+  "ref_solution_lines": 64,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": null,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+}
