@@ -97,7 +97,19 @@ ARMS = ("A-SOLO", "A-CONF", "A-GATE")
 #   最壞可以燒掉遠多於這個數字。收官報 `wall_s` 的分佈，不准講成硬上界。
 OPENWORK_BUDGET = {
     "max_model_calls": 24,
-    "max_tokens": 120_000,
+    # ⚠ **token 上限只算 completion**（Fable 2026-09-14 裁決）。
+    #   原本算的是逐通 `total_tokens` 的和，而多輪迴圈每一通都把整段對話當
+    #   prompt 重送 ⇒ 那個和隨輪數**二次成長**。冒煙實測單格
+    #   prompt 207,591／completion 14,542：用總和當上限，實際綁住的是
+    #   「對話多長」而不是「模型寫了多少」，5–8 通就撞滿 120k。
+    #   改成只算 completion 之後，40,000 綁的是生成量本身。
+    #   ⚠ **兩種 token 逐格都要印**（`rows.jsonl` 的 `prompt_tokens`／
+    #     `completion_tokens`）——換了分子就更要讓分母看得見。
+    "max_completion_tokens": 40_000,
+    # 脈絡本身的硬上界：單通的 prompt 超過它 ⇒ `budget_context` 拒交。
+    # 它擋的是另一種失控：對話長到端點開始截斷或變慢，而那在
+    # `max_completion_tokens` 上完全看不出來。
+    "max_context_tokens": 200_000,
     "max_wall_s": 2_400,
     "max_gate_rounds": 5,
     "max_tool_calls": 40,
@@ -112,11 +124,17 @@ OPENWORK_BUDGET = {
 STOP_REASONS = frozenset({
     "visible_pass",            # 過了可見驗收（GATE／CONF）
     "declared_done",           # 宣告完成就收（SOLO）
-    "gate_exhausted",          # GATE：5 個閘門輪用完仍不過 ⇒ 拒交
-    "attempts_exhausted",      # CONF：5 份都不過 ⇒ 拒交
+    "gate_exhausted",          # GATE：閘門輪用完仍不過 ⇒ 拒交
+    "attempts_exhausted",      # CONF：五份都不過 ⇒ 拒交
     "budget_calls", "budget_tokens", "budget_wall", "budget_tool_calls",
+    "budget_context",          # 單通 prompt 超過 max_context_tokens ⇒ 拒交
     "nudge_exhausted",         # 宣告完成但工作區沒動，逼問額度用完
 })
+
+#: 哪幾種停止理由算**拒交**。`budget_calls`／`budget_wall` 不算——
+#: 它們是「沒跑完」不是「不交」，混在一起會讓 P-W3 的結構性 0 變成會跳動的數字。
+#: ⚠ `A-SOLO` 一格都拿不到：它沒有拒交語意（accepted 恆為 True，見 `run_cell`）。
+REFUSAL_REASONS = ("gate_exhausted", "attempts_exhausted", "budget_context")
 
 #: 回給模型的工具輸出截斷長度（**落盤的是全文**，沿用 localagent 的形狀）。
 TOOL_OUTPUT_CLIP = 6000
@@ -379,7 +397,8 @@ GIT_IDENTITY = ("-c", "user.name=r530", "-c", "user.email=r530@vacant.local")
 
 def prepare_workspace(template_dir: str | pathlib.Path,
                       cell_dir: str | pathlib.Path, *,
-                      git_init: bool = True) -> dict:
+                      git_init: bool = True,
+                      world_writable: bool = False) -> dict:
     """`cp -a <template>/. <cell>/` ＋ 空 git 起點，回起始樹 manifest。
 
     ⚠ 已存在的 `cell_dir` 會被**整個刪掉重建**。`A-CONF` 的「重置回樣板」
@@ -405,6 +424,12 @@ def prepare_workspace(template_dir: str | pathlib.Path,
         subprocess.run(["git", "-C", str(cell), *GIT_IDENTITY,
                         "commit", "-q", "-m", "template"],
                        check=True, capture_output=True)
+    if world_writable:
+        # 沙箱降權到別的 uid（`--sandbox-uid`，例如 `nobody`）時，
+        # 那個 uid 必須寫得進這一格的工作區。**只有這一格**：工作區根
+        # 本身留 0755／擁有者是我們，所以「寫出界」在 unix 權限上就是擋的
+        # （`sandbox.probe` 的 `write_confined` 量的正是這一條）。
+        subprocess.run(["chmod", "-R", "a+rwX", str(cell)], check=True)
     return wshash.tree_manifest(cell)
 
 
@@ -435,20 +460,27 @@ class CellPaths:
     cell_dir: pathlib.Path
     verify_root: pathlib.Path
     ws_archive_dir: pathlib.Path
+    #: 沙箱降權到別的 uid 時要把工作區開成 a+rwX（見 `prepare_workspace`）。
+    world_writable: bool = False
 
 
-def _budget_stop(calls_used: int, tokens: int, tool_calls: int,
-                 t0: float) -> str | None:
-    """呼叫數／tokens／牆鐘／工具次數任一超過就停。
+def _budget_stop(calls_used: int, completion_tokens: int, tool_calls: int,
+                 t0: float, last_prompt_tokens: int = 0) -> str | None:
+    """呼叫數／completion tokens／工具次數／牆鐘／脈絡任一超過就停。
 
-    撞線是一個**獨立的 outcome**，不可以混進失敗率——四個 stop_reason 分開記
+    撞線是一個**獨立的 outcome**，不可以混進失敗率——五個 stop_reason 分開記
     （`harness_arms._budget_stop` 的同一條）。
+
+    ⚠ 第二個參數是 **completion tokens**，不是 `total_tokens` 的和
+      （Fable 2026-09-14）。理由見 `OPENWORK_BUDGET` 的註解。
     """
     b = OPENWORK_BUDGET
     if calls_used >= int(b["max_model_calls"]):
         return "budget_calls"
-    if tokens >= int(b["max_tokens"]):
+    if completion_tokens >= int(b["max_completion_tokens"]):
         return "budget_tokens"
+    if last_prompt_tokens >= int(b["max_context_tokens"]):
+        return "budget_context"
     if tool_calls >= int(b["max_tool_calls"]):
         return "budget_tool_calls"
     if (time.time() - t0) >= float(b["max_wall_s"]):
@@ -508,6 +540,7 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
     ws_archives: list[dict] = []
     self_ran_visible = False
     prompt_tokens_total = completion_tokens_total = 0
+    last_prompt_tokens = 0
     messages: list[dict] = []
 
     max_attempts = b["max_gate_rounds"] if arm == "A-CONF" else 1
@@ -515,7 +548,9 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
     while attempt < max_attempts:
         attempt += 1
         persona_id, persona_text = persona_for(seed, task_id, attempt)
-        start_manifest = prepare_workspace(paths.template_dir, paths.cell_dir)
+        start_manifest = prepare_workspace(
+            paths.template_dir, paths.cell_dir,
+            world_writable=paths.world_writable)
         if ws_start_sha is None:
             ws_start_sha = start_manifest["ws_sha256"]
         elif start_manifest["ws_sha256"] != ws_start_sha:
@@ -533,7 +568,8 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
                    "stop_reason": None}
 
         while True:
-            stop_reason = _budget_stop(calls_used, tokens_total, tool_calls, t0)
+            stop_reason = _budget_stop(calls_used, completion_tokens_total,
+                                       tool_calls, t0, last_prompt_tokens)
             if stop_reason:
                 break
             proto = getattr(brain, "tool_protocol", "text")
@@ -548,6 +584,7 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
             tokens_total += _usage_tokens(usage)
             prompt_tokens_total += int(usage.get("prompt_tokens") or 0)
             completion_tokens_total += int(usage.get("completion_tokens") or 0)
+            last_prompt_tokens = int(usage.get("prompt_tokens") or 0)
             text = out.get("text") or ""
             # 每輪指令數上限**兩種協定都套**（文字協定在 `parse_commands`
             # 裡夾，原生協定在這裡夾）。不對稱的話，換協定就等於換預算。
@@ -744,7 +781,14 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
         # 拒交**只有兩種**：閘門輪用完（GATE）與五份都不過（CONF）。
         # `nudge_exhausted`／`budget_*` 不是拒交，它們是「沒跑完」——
         # 把它們算成拒交會讓 P-W3 的結構性 0 變成一個會跳動的數字。
-        "refusal": stop_reason in ("gate_exhausted", "attempts_exhausted"),
+        # ⚠ `A-SOLO` 一格都拿不到（它沒有拒交語意）——這是定義不是量測。
+        "refusal": (arm != "A-SOLO" and stop_reason in REFUSAL_REASONS),
+        # E-10（Fable 2026-09-14）：工作區逐位元沒動**而且**零工具呼叫
+        # ⇒ 這一格什麼都沒發生。它在資料上長得跟「模型很笨」一模一樣，
+        # 分得出來只因為樹雜湊是一個**獨立於模型輸出**的訊號。
+        # 同一臂 noop 比例 > 20% ⇒ 量具故障不是結果（`gates.e10_noop_gate`）。
+        "noop_cell": bool(ws_start_sha == ws_end["ws_sha256"]
+                          and tool_calls == 0),
         "calls": calls_used, "tokens": tokens_total,
         # ⚠ `tokens` ＝ 逐通 `total_tokens` 的和，而多輪迴圈每一通都會把
         #   整段對話當 prompt 重送 ⇒ 它**隨輪數呈二次成長**。冒煙實測

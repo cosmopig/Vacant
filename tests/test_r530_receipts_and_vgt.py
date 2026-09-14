@@ -315,3 +315,63 @@ def test_smoke_checklist_has_teeth(tmp_path):
         assert not out["checks"]["C6"]["ok"], "收據被竄改要被抓到"
     finally:
         shutil.rmtree(run, ignore_errors=True)
+
+
+# ── E-9／E-10（Fable 2026-09-14）──────────────────────────────────────────
+def test_e9_blocks_launch_when_the_repo_is_visible_from_the_sandbox():
+    from ops.gain.r530 import gates
+    bad = gates.e9_sandbox_gate({"sandbox": "unshare", "network_isolated": True,
+                                 "write_confined": True,
+                                 "repo_hidden_from_sandbox": False})
+    assert bad["ok"] is False
+    assert "abort_repo_visible_from_sandbox" in bad["reason"]
+    good = gates.e9_sandbox_gate({"sandbox": "unshare", "network_isolated": True,
+                                  "write_confined": True,
+                                  "repo_hidden_from_sandbox": True})
+    assert good["ok"] is True and "reason" not in good
+
+
+def test_e9_warns_but_does_not_block_when_writes_are_unconfined():
+    from ops.gain.r530 import gates
+    rec = gates.e9_sandbox_gate({"repo_hidden_from_sandbox": True,
+                                 "write_confined": False})
+    assert rec["ok"] is True
+    assert "outside_new_files" in rec["warning"]
+
+
+def test_e9_treats_unknown_as_red_not_as_green():
+    """**量不到不是通過**：沒有量過那一格 ⇒ 紅。"""
+    from ops.gain.r530 import gates
+    assert gates.e9_sandbox_gate({})["ok"] is False
+    assert gates.e9_sandbox_gate(
+        {"repo_hidden_from_sandbox": None})["ok"] is False
+
+
+def test_e10_flags_the_arm_whose_cells_did_nothing():
+    from ops.gain.r530 import gates
+    rows = ([{"arm": "A-SOLO", "task_id": f"t{i}", "seed": "s",
+              "noop_cell": i < 3, "stop_reason": "nudge_exhausted"}
+             for i in range(10)]
+            + [{"arm": "A-GATE", "task_id": f"t{i}", "seed": "s",
+                "noop_cell": False, "stop_reason": "visible_pass"}
+               for i in range(10)])
+    out = gates.e10_noop_gate(rows)
+    assert out["ok"] is False
+    assert out["arms_over_threshold"] == ["A-SOLO"]
+    assert out["per_arm"]["A-SOLO"]["rate"] == 0.3
+    assert len(out["offending_cells"]) == 3, "壞掉的格子要逐格記名"
+    assert all(c["task_id"] for c in out["offending_cells"])
+
+
+def test_e10_passes_at_or_below_the_threshold():
+    from ops.gain.r530 import gates
+    rows = [{"arm": "A-GATE", "task_id": f"t{i}", "seed": "s",
+             "noop_cell": i < 2} for i in range(10)]
+    out = gates.e10_noop_gate(rows)
+    assert out["ok"] is True and out["per_arm"]["A-GATE"]["rate"] == 0.2
+
+
+def test_e10_threshold_is_declared_as_a_convention_not_a_measurement():
+    from ops.gain.r530 import gates
+    out = gates.e10_noop_gate([{"arm": "A", "noop_cell": False}])
+    assert "約定" in out["honest_bound"] and "不是從任何實測" in out["honest_bound"]

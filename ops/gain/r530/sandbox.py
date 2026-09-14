@@ -563,6 +563,9 @@ def main() -> int:
                     help="探針用的暫存工作區（預設在 TMPDIR 開一個）")
     ap.add_argument("--sudo-bwrap", action="store_true",
                     help="bwrap 走 sudo -n（Ubuntu 24.04 AppArmor 擋非特權 userns 時唯一可行）")
+    ap.add_argument("--sandbox-uid", type=int, default=None,
+                    help="unshare 後端降權到哪個 uid（例如 65534＝nobody）")
+    ap.add_argument("--sandbox-gid", type=int, default=None)
     ap.add_argument("--json", default=None)
     args = ap.parse_args()
 
@@ -574,7 +577,9 @@ def main() -> int:
         wd = tmp.name
     try:
         _sb, meta = make_sandbox(args.backend, workdir=wd,
-                                 use_sudo_bwrap=args.sudo_bwrap)
+                                 use_sudo_bwrap=args.sudo_bwrap,
+                                 sandbox_uid=args.sandbox_uid,
+                                 sandbox_gid=args.sandbox_gid)
     except SystemExit as e:
         print(str(e))
         return 2

@@ -138,7 +138,14 @@ def test_budget_is_a_module_constant_not_a_cli_knob():
 
 def test_stop_reasons_are_a_closed_set():
     assert "visible_pass" in oa.STOP_REASONS
-    assert len(oa.STOP_REASONS) == 9
+    # 10 ＝ 原本 9 ＋ `budget_context`（Fable 2026-09-14）。
+    assert len(oa.STOP_REASONS) == 10
+    assert "budget_context" in oa.STOP_REASONS
+    # 拒交只有三種，而且 `budget_calls`／`budget_wall` **不在裡面**
+    # ——「沒跑完」不是「不交」。
+    assert set(oa.REFUSAL_REASONS) == {
+        "gate_exhausted", "attempts_exhausted", "budget_context"}
+    assert set(oa.REFUSAL_REASONS) <= oa.STOP_REASONS
 
 
 # ── 驗收 runner ───────────────────────────────────────────────────────────

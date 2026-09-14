@@ -56,7 +56,7 @@ from ops.gain.brain_cline import (DEFAULT_BACKOFF_S, ClineBrain,  # noqa: E402
                                   InfraVoid, endpoint, load_keys)
 from ops.gain.gain_run import runner_git_info, save_receipts  # noqa: E402
 from ops.gain.r530 import openwork_arms as oa  # noqa: E402
-from ops.gain.r530 import tasks as taskmod  # noqa: E402
+from ops.gain.r530 import gates, tasks as taskmod  # noqa: E402
 from ops.gain.r530.sandbox import make_sandbox  # noqa: E402
 from vacant.identity import Identity  # noqa: E402
 from vacant.logbook import Logbook  # noqa: E402
@@ -68,6 +68,10 @@ DEFAULT_MODEL = "gemma-4-12b-it-qat"
 #: 預註冊寫死的那顆 seed 發不出去，而那是量具在跟規格吵架，不是規格錯。
 SMOKE_SEED_PREFIX = "smoke-"
 SMOKE_SEED_SUFFIX = "-smoke"
+
+#: 工作區根的預設值。**刻意不在 `$HOME` 底下**——見 `main()` 裡那段註解。
+#: 換機器就換這一行（或用 `--work-root`／`VACANT_R530_WORK`）。
+DEFAULT_WORK_ROOT = pathlib.Path("/var/tmp/vacant_r530_work")
 SMOKE_OUT_PREFIX = "runs/_smoke/"
 #: 冒煙專用預算。**只在 `--smoke --smoke-budget` 下生效。**
 #: 為什麼需要它：凍結的 `max_tokens=120_000` 在多輪工具迴圈下 5–8 通就撞滿
@@ -148,7 +152,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--sudo-bwrap", action="store_true",
                     help="bwrap 走 sudo -n（Ubuntu 24.04 AppArmor 擋非特權 userns 時唯一可行）")
     ap.add_argument("--sandbox-uid", type=int, default=None,
-                    help="unshare 後端降權到哪個 uid（預設＝呼叫者自己＝檔案端沒有隔離）")
+                    help="unshare 後端降權到哪個 uid。**E-9 需要它**："
+                         "降到一個讀不到 $HOME 的 uid（Linux 上 65534＝nobody）"
+                         "才會讓 repo_hidden_from_sandbox 為 true。"
+                         "不給＝降權回呼叫者自己＝檔案端一格隔離都沒有 ⇒ E-9 紅。")
     ap.add_argument("--sandbox-gid", type=int, default=None)
     ap.add_argument("--work-root", default=None,
                     help="工作區根目錄（預設 ~/vacant/r530_work）")
@@ -239,31 +246,28 @@ def main(argv: list[str] | None = None) -> int:
     if args.smoke:
         (out_dir / "NOT_EVIDENCE").write_text(NOT_EVIDENCE_TEXT, encoding="utf-8")
 
+    # ⚠ **工作區根刻意放在 `$HOME` 之外**（E-9 的前提，Fable 2026-09-14）。
+    #   `/home/<user>` 是 `drwxr-x---` ⇒ 降權到 `nobody` 的沙箱連穿越都不行，
+    #   工作區放在裡面等於「沙箱寫不進自己的工作區」。放到 `/var/tmp` 之後：
+    #   工作區根 0755（我們擁有）⇒ 沙箱**寫不出界**；
+    #   單格 0777（`world_writable`）⇒ 沙箱寫得進自己那一格；
+    #   而 repo 仍在 `$HOME` 底下 ⇒ 沙箱**看不到** `ops/gain/r530/hidden/`。
+    #   三件事合起來就是 E-9 要的結構隔離，而且不需要任何主機政策改動。
     work_root = pathlib.Path(
         args.work_root
         or os.environ.get("VACANT_R530_WORK")
-        or (pathlib.Path.home() / "vacant" / "r530_work"))
+        or DEFAULT_WORK_ROOT)
     work_root.mkdir(parents=True, exist_ok=True)
+    os.chmod(work_root, 0o755)
     calls_path = out_dir / "calls.jsonl"
     rows_path = out_dir / "rows.jsonl"
     notes_path = out_dir / "notes.jsonl"
     ws_dir = out_dir / "ws"
     ws_dir.mkdir(exist_ok=True)
-    verify_root = out_dir / "_verify"
-
-    sandbox, backend_meta = make_sandbox(
-        args.backend, workdir=str(work_root / "_probe"),
-        use_sudo_bwrap=args.sudo_bwrap,
-        sandbox_uid=args.sandbox_uid, sandbox_gid=args.sandbox_gid)
-    (out_dir / "backend_meta.json").write_text(
-        json.dumps(backend_meta, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8")
-
-    brain = _make_brain(args, calls_path)
-    books = {a: {"book": Logbook(), "ident": Identity.generate()} for a in arms}
-    stats = {a: {"processed": 0, "infra_void": 0, "accepted": 0,
-                 "deliv": 0, "calls": 0, "tokens": 0, "wall_s": 0.0}
-             for a in arms}
+    # 驗收的暫存目錄必須是**沙箱 uid 讀得到**的，所以它跟著工作區根走，
+    # 不放在 run 目錄裡（run 目錄在 `$HOME` 底下，降權之後讀不到）。
+    # 它只在跑一次驗收的那幾秒存在，跑完就刪（`acceptance.run_suite`）。
+    verify_root = work_root / "_verify"
 
     def note(rec: dict) -> None:
         rec["ts_ms"] = int(time.time() * 1000)
@@ -271,6 +275,47 @@ def main(argv: list[str] | None = None) -> int:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             f.flush()
             os.fsync(f.fileno())
+
+    probe_dir = work_root / "_probe"
+    probe_dir.mkdir(parents=True, exist_ok=True)
+    os.chmod(probe_dir, 0o777)          # 降權後的沙箱要寫得進探針目錄
+    sandbox, backend_meta = make_sandbox(
+        args.backend, workdir=str(probe_dir),
+        use_sudo_bwrap=args.sudo_bwrap,
+        sandbox_uid=args.sandbox_uid, sandbox_gid=args.sandbox_gid)
+    (out_dir / "backend_meta.json").write_text(
+        json.dumps(backend_meta, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8")
+
+    # ── E-9（Fable 2026-09-14）：沙箱不夠格就**不准發射**。────────────────
+    # 在任何一通模型呼叫之前判。`--smoke` 也一樣——冒煙要驗的正是這個配置，
+    # 放它一馬等於讓冒煙證明了一個不會被用的東西。
+    e9 = gates.e9_sandbox_gate(backend_meta)
+    # ⚠ 唯一不強制的情況：`--brain stub`。那條路徑**沒有模型**——跑進沙箱的
+    #   「候選解」是我們自己的 `gauge/*.py`，沒有任何東西可以洩漏給誰。
+    #   E-9 擋的是「模型構得到隱藏驗收」，威脅模型在這裡不存在。
+    #   ⇒ 照樣量、照樣落盤，但標明 `enforced: false`，不准看起來像過了。
+    e9["enforced"] = (args.brain != "stub")
+    if not e9["enforced"]:
+        e9["not_enforced_reason"] = (
+            "--brain stub：沒有模型，跑進沙箱的是我們自己的參考解／壞樁，"
+            "沒有可以洩漏的對象。這一格的值是量到的，但它不是一次通過。")
+    (out_dir / "gate_e9.json").write_text(
+        json.dumps(e9, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if e9["enforced"] and not e9["ok"]:
+        raise SystemExit(
+            e9["reason"] + f"\n（實測 {json.dumps(e9, ensure_ascii=False)}）"
+            "\n沙箱的裝法與回滾見 ops/gain/r530/SANDBOX.md。停。")
+    if e9.get("warning"):
+        note({"gate": "E-9", "warning": e9["warning"]})
+    world_writable = (backend_meta.get("sandbox_uid") is not None
+                      and backend_meta.get("sandbox_uid") != os.getuid())
+
+    brain = _make_brain(args, calls_path)
+    books = {a: {"book": Logbook(), "ident": Identity.generate()} for a in arms}
+    stats = {a: {"processed": 0, "infra_void": 0, "accepted": 0,
+                 "deliv": 0, "calls": 0, "tokens": 0, "wall_s": 0.0}
+             for a in arms}
 
     t_start = time.time()
     print(f"── R530 {out_dir.name}　題 {len(ts)} × 臂 {len(arms)} "
@@ -287,10 +332,15 @@ def main(argv: list[str] | None = None) -> int:
                 cell_dir=cell,
                 verify_root=verify_root,
                 ws_archive_dir=ws_dir,
+                world_writable=world_writable,
             )
             s = stats[arm]
             s["processed"] += 1
             t0 = time.time()
+            # E-9 的附帶條件：沒有檔案隔離時，「這一格有沒有寫到工作區外面」
+            # 是一個**只能事後觀察**的事實，而事實沒有被觀察就等於沒發生過。
+            outside_before = (gates.snapshot_outside(work_root)
+                              if not backend_meta.get("write_confined") else set())
             try:
                 row = oa.run_cell(
                     task, brain, arm=arm, seed=args.seed, paths=paths,
@@ -305,6 +355,13 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"   [{arm:7} {task['task_id']:20}] infra_void: {e}",
                       flush=True)
                 continue
+            if outside_before:
+                new_outside = sorted(gates.snapshot_outside(work_root)
+                                     - outside_before)
+                row["outside_new_files"] = new_outside
+                if new_outside:
+                    note({"arm": arm, "task_id": task["task_id"],
+                          "outside_new_files": new_outside})
             row["endpoint"] = ep
             row["model"] = args.model
             row["backend"] = backend_meta["backend"]
@@ -323,6 +380,13 @@ def main(argv: list[str] | None = None) -> int:
                   f"calls={row['calls']} stop={row['stop_reason']}", flush=True)
 
     written = save_receipts(out_dir, books)
+    all_rows = ([json.loads(l) for l in rows_path.open(encoding="utf-8") if l.strip()]
+                if rows_path.exists() else [])
+    # E-10（Fable 2026-09-14）：逐臂的 noop 比例。這支只**算**，不自己判 INVALID
+    # ——那是 analyzer 的事；但數字要在 run 的產物裡，不是事後靠人數。
+    e10 = gates.e10_noop_gate(all_rows)
+    (out_dir / "gate_e10.json").write_text(
+        json.dumps(e10, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     summary = {
         "run": out_dir.name,
         "study": "R530",
@@ -351,6 +415,7 @@ def main(argv: list[str] | None = None) -> int:
             "max_tokens_sent": None,
         },
         "backend_meta": backend_meta,
+        "gates": {"E9": e9, "E10": e10},
         "work_root": str(work_root),
         "bank": {"root_sha256": bank["_root_sha256"],
                  "pinned": bool(args.bank_sha),
@@ -367,6 +432,10 @@ def main(argv: list[str] | None = None) -> int:
             "A-GATE vs A-CONF 負責（§八-4）。",
             "max_wall_s 在呼叫之間檢查，不是每題牆鐘的硬上界（§二-3）。",
             backend_meta.get("honest_bound", ""),
+            "token 上限只算 completion（Fable 2026-09-14）；prompt 逐格另外落盤，"
+            "因為多輪迴圈的 prompt 隨輪數二次成長，兩個數字混在一起看不出"
+            "「是生成太多還是脈絡太長」。",
+            e10.get("honest_bound", ""),
         ],
     }
     (out_dir / "summary.json").write_text(

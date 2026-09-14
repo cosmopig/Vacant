@@ -22,10 +22,19 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
+from ops.gain.r530 import gates  # noqa: E402
 from ops.gain.r530 import openwork_arms as oa, tasks as taskmod  # noqa: E402
 from ops.gain.r530 import wshash  # noqa: E402
 
-CHECKS = ("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8")
+CHECKS = ("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8",
+          "E9", "E10")
+
+
+def _read_json(p: pathlib.Path) -> dict | None:
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:                                        # noqa: BLE001
+        return None
 
 
 def _rows(run: pathlib.Path) -> list[dict]:
@@ -157,6 +166,21 @@ def check(run: pathlib.Path) -> dict:
          "workspace_needle_hits_n": vgt["workspace_needle_hits_n"],
          "records_audited": vgt["records_audited"],
          "per_role": vgt["per_role"]})
+
+    # ── E-9／E-10（Fable 2026-09-14）──────────────────────────────────
+    e9 = gates.e9_sandbox_gate(meta)
+    # 冒煙如果是 `--brain stub` 跑的，E-9 沒有被強制（見 run_r530）——
+    # 那一份冒煙證明的是 harness 的路徑，不是沙箱的隔離強度。
+    # 兩件事要分得開，所以這裡照著 run 目錄裡那份 `gate_e9.json` 的
+    # `enforced` 走，而不是自己重新決定。
+    stored = _read_json(run / "gate_e9.json") or {}
+    enforced = stored.get("enforced", summary.get("brain") != "stub")
+    e9["enforced"] = enforced
+    put("E9", e9["ok"] or not enforced, e9)
+    e10 = gates.e10_noop_gate(rows)
+    put("E10", e10["ok"], {k: e10[k] for k in
+                           ("per_arm", "arms_over_threshold",
+                            "offending_cells", "reason")})
 
     out["verdict"] = ("PASS" if all(out["checks"][c]["ok"] for c in CHECKS)
                       else "FAIL")

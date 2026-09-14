@@ -213,6 +213,13 @@ def test_frozen_budget_constant_is_untouched_by_the_smoke_profile():
     # 整份 literal_eval 會炸——炸掉會讓這條防呆變成「跳過」。
     frozen = {k.value: v.value for k, v in zip(node.value.keys, node.value.values)
               if isinstance(v, ast.Constant)}
-    assert frozen["max_tokens"] == 120_000
+    # Fable 2026-09-14：呼叫數不變、token 上限改成只算 completion、
+    # 加一條脈絡硬上界、每格牆鐘 2400 秒。
     assert frozen["max_model_calls"] == 24
+    assert frozen["max_completion_tokens"] == 40_000
+    assert frozen["max_context_tokens"] == 200_000
+    assert frozen["max_wall_s"] == 2_400
     assert frozen["max_gate_rounds"] == 5
+    assert "max_tokens" not in frozen, (
+        "舊的 total_tokens 上限要整個拿掉，不是留著當備用——"
+        "留著會讓「用哪一個」變成一個可以事後選的東西")
