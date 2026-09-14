@@ -273,7 +273,7 @@ s=font_style('Caption',9.5);s.paragraph_format.space_after=Pt(5)
 footer=sec.footer.paragraphs[0];footer.alignment=WD_ALIGN_PARAGRAPH.CENTER
 r=footer.add_run();fld=OxmlElement('w:fldSimple');fld.set(qn('w:instr'),'PAGE');r._r.addnext(fld)
 doc.core_properties.title='可執行驗收支援的 LLM 程式代理交付'
-doc.core_properties.subject='Vacant 的機制比較、複製實驗與可究責紀錄'
+doc.core_properties.subject='Vacant 的交付增益、token 成本與可究責紀錄'
 doc.core_properties.author='';doc.core_properties.keywords='LLM; executable acceptance; accountability; replication'
 # The bundled default template contains title borders; remove all style borders.
 for el in list(doc.styles.element.iter(qn('w:pBdr'))):el.getparent().remove(el)
@@ -296,6 +296,7 @@ def note(text):
 def add_table(key):
     title,head,rows,foot,widths=TABLES[key]
     p=doc.add_paragraph(title,style='Caption');p.paragraph_format.keep_with_next=True
+    if key=='token_early':p.paragraph_format.page_break_before=True
     p.runs[0].bold=True
     t=doc.add_table(rows=1,cols=len(head));t.autofit=False
     if widths:
@@ -327,7 +328,26 @@ def add_table(key):
     t._tbl.tblPr.append(borders)
     note(foot)
 
+from token_tables import register as register_token_tables
+# The same ledger object is embedded in verified_evidence.json, so a stale
+# verified_tokens.json would silently split the cost numbers from the effect
+# numbers. Fail the build instead.
+assert json.loads((BASE/'verified_tokens.json').read_text())==DATA['tokens'],'rerun verify_evidence.py and verify_tokens.py'
+assert not DATA['token_crosscheck']['mismatches']
+register_token_tables(table)
+EVIDENCE.append(('E13','本文新增 token 獨立核對與逐比較成本帳本，同一份帳本另存於 verified_evidence.json 的 tokens、tokens_headline 與 token_crosscheck 三個新鍵',[
+ 'docs/paper_2026-09-14/verify_tokens.py',
+ 'docs/paper_2026-09-14/verified_tokens.json',
+ 'docs/paper_2026-09-14/token_tables.py',
+ 'docs/paper_2026-09-14/TOKEN_AUDIT.md']))
 expanded=[];template=(BASE/'manuscript_template.md').read_text()
+# 4.2.2 quotes the successful-call count of the same-bank family. It was carried
+# by hand once and went stale when the replications went from three to five, so
+# the prose is now pinned to the recomputed ledger.
+MODE=DATA['tokens']['reasoning_mode_audit']
+assert MODE['reasoning_tokens_total']==0 and MODE['all_blocks']==36 and MODE['R460R_blocks']==30
+assert f"{MODE['all_calls_ok']:,} 通成功呼叫" in template,MODE['all_calls_ok']
+assert f"{MODE['R460R_calls_ok']:,} 通" in template,MODE['R460R_calls_ok']
 replacements={'验收':'驗收','題数':'題數','来源':'來源','–':'-','後续':'後續','この':'此'}
 for a,b in replacements.items():template=template.replace(a,b)
 for key,values in list(TABLES.items()):
@@ -337,7 +357,7 @@ for key,values in list(TABLES.items()):
         return x
     TABLES[key]=(clean(title),list(map(clean,head)),[[clean(str(x)) for x in r] for r in rows],clean(foot),widths)
 
-in_refs=False;is_abs=False
+in_refs=False;is_abs=False;pending_page_break=False
 for block in template.split('\n\n'):
     block=block.strip()
     if not block:continue
@@ -352,7 +372,7 @@ for block in template.split('\n\n'):
                 p=note(line[7:]);p.paragraph_format.space_before=Pt(10);expanded.append(line[7:])
         continue
     if block.startswith('##PAGE'):
-        doc.add_page_break();block=block[6:].strip()
+        pending_page_break=True;block=block[6:].strip()
         if not block:continue
     if block.startswith('[[TABLE:'):
         key=block[8:-2];add_table(key);title,head,rows,foot,_=TABLES[key]
@@ -367,7 +387,7 @@ for block in template.split('\n\n'):
             expanded.append(f'[{eid}] {label}')
             for path in paths:
                 p=doc.add_paragraph();p.paragraph_format.space_after=Pt(4);p.paragraph_format.line_spacing=1.1
-                add_link(p,path,'https://github.com/cosmopig/Vacant/blob/44be37fe52bac148ecd2835aa384c804c612ffea/'+path) if eid!='E12' else p.add_run(path)
+                add_link(p,path,'https://github.com/cosmopig/Vacant/blob/44be37fe52bac148ecd2835aa384c804c612ffea/'+path) if eid not in ['E12','E13'] else p.add_run(path)
                 # Allow long file identifiers to wrap at underscore boundaries.
                 for text in p._p.iter(qn('w:t')):
                     text.text=(text.text or '').replace('_','_\u200b').replace('/','/\u200b')
@@ -377,12 +397,17 @@ for block in template.split('\n\n'):
     if block.startswith('### '):
         doc.add_paragraph(block[4:],'Heading 2');expanded.append(block);continue
     if block.startswith('## '):
-        title=block[3:];doc.add_paragraph(title,'Heading 1');in_refs=(title=='參考文獻');is_abs=title in ['摘要','Abstract'];expanded.append(block);continue
+        title=block[3:];p=doc.add_paragraph(title,'Heading 1')
+        if pending_page_break or title=='Abstract':p.paragraph_format.page_break_before=True;pending_page_break=False
+        in_refs=(title=='參考文獻');is_abs=title in ['摘要','Abstract'];expanded.append(block);continue
     p=doc.add_paragraph();rich(p,block)
     if in_refs:
         p.paragraph_format.left_indent=Cm(.75);p.paragraph_format.first_line_indent=Cm(-.75);p.paragraph_format.line_spacing=1.18;p.paragraph_format.space_after=Pt(8)
         for r in p.runs:r.font.size=Pt(10)
-    elif not is_abs and not block.startswith('關鍵詞'):
+    elif is_abs:
+        p.paragraph_format.line_spacing=1.20
+        for r in p.runs:r.font.size=Pt(10.5)
+    elif not block.startswith('關鍵詞'):
         p.paragraph_format.first_line_indent=Cm(.65)
     expanded.append(block)
 
@@ -403,6 +428,11 @@ local=[]
 for pat in ['原文/*.pdf','2026-08-06_agent信任/pdf/*Kim*','2026-08-06_信任定義/pdf/*Koerber*']:
     for path in source_root.glob(pat):
         local.append({'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'used':not path.name.startswith('Final-Web')})
-(BASE/'source_manifest.json').write_text(json.dumps({'references':refs,'local_originals':local,'internal':EVIDENCE,'baseline_commit':'44be37fe52bac148ecd2835aa384c804c612ffea'},ensure_ascii=False,indent=2)+'\n')
+source_hashes={}
+for _,_,paths in EVIDENCE:
+    for rel in paths:
+        path=ROOT/rel
+        if path.is_file():source_hashes[rel]=hashlib.sha256(path.read_bytes()).hexdigest()
+(BASE/'source_manifest.json').write_text(json.dumps({'references':refs,'local_originals':local,'internal':EVIDENCE,'internal_sha256':source_hashes,'token_source_sha256':json.loads((BASE/'verified_tokens.json').read_text())['source_sha256'],'baseline_commit':'44be37fe52bac148ecd2835aa384c804c612ffea'},ensure_ascii=False,indent=2)+'\n')
 print('DOCX',BASE/(STEM+'.docx'))
 print('References',len(refs),'Tables',len(TABLES),'CJK characters',len(re.findall(r'[\u4e00-\u9fff]','\n'.join(expanded))))

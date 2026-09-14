@@ -1,18 +1,18 @@
 # 可執行驗收支援的 LLM 程式代理交付
-##TITLE_SUB Vacant 的機制比較 複製實驗與可究責紀錄
+##TITLE_SUB Vacant 的交付增益 token 成本與可究責紀錄
 ##TITLE_EN Executable Acceptance Testing for LLM Code Agent Delivery
-##TITLE_EN Mechanism Comparisons Replication Experiments and Accountability Records in Vacant
+##TITLE_EN Delivery Gains Token Costs and Accountability Records in Vacant
 ##META 研究資料截至 2026 年 9 月 13 日　｜　2026 年 9 月 14 日
 
 ## 摘要
 
-大型語言模型程式代理可以產生程式碼，卻不能僅憑自我陳述建立交付品質的依據。本文研究在需求已有可執行驗收測資的條件下，如何區分額外取樣、驗收選擇與失敗回饋修訂所帶來的增益，並使交付過程留下可驗證紀錄。我們提出並評估 Vacant 的驗收與紀錄整合架構：以可見測資決定出貨或拒交，以隔離的隱藏測資評估交付成功，並將驗收及修訂事件寫入簽章雜湊鏈。實驗以一個本地 12B 量化模型，比較單次生成、最多五次生成的驗收重抽、五候選多數決，以及三種修訂流程；分析涵蓋同題庫五次新種子複製與四個跨題庫題目集。五次複製中，三種修訂流程對單次生成的十五項比較均通過各次實驗內的 Holm 校正；驗收加重抽相對單次生成的配對差值，在同題庫五次複製為 14.17 至 19.17 個百分點，在跨題庫四集為 4.85 至 11.54 個百分點（合併 6.84 個百分點），此一比較不屬於任何預註冊家族，p 值未經校正。主要修訂流程 H-MIX 相對驗收重抽的差值依次為 +5.83、+4.17、+0.83、+2.50 與 +4.31 個百分點，五次均為正，但零次通過 Holm 校正。跨題庫 716 題的 H-MIX 相對驗收重抽差值為 +1.12 個百分點，校正後 p = .3409；相對單次生成則為 +7.96 個百分點，校正後 p = 2.02 × 10⁻⁸。另有 194 條已保存收據鏈（涵蓋驗收重抽與三個修訂臂，不含單次生成與多數決）的 9,841 筆紀錄通過逐筆驗簽。結果支持在本實驗條件下以可執行驗收與重抽建立交付依據，但尚未確立修訂相對重抽的額外效益。本文的貢獻是可審計的機制比較與研究紀錄整合，不提出新的修復演算法，也不提供一般性的正確性保證；有限測資、單一模型、重複題目與混合推論後端仍限制外推。
+大型語言模型程式代理可以產生程式碼，卻不能僅憑自我陳述建立交付品質的依據。本文研究在需求已有可執行驗收測資的條件下，如何區分額外取樣、驗收選擇與失敗回饋修訂所帶來的增益，並使交付過程留下可驗證紀錄。我們提出並評估 Vacant 的驗收與紀錄整合架構：以可見測資決定出貨或拒交，以隔離的隱藏測資評估交付成功，並將驗收及修訂事件寫入簽章雜湊鏈。實驗以一個本地 12B 量化模型，比較單次生成、最多五次生成的驗收重抽、五候選多數決，以及三種修訂流程；分析涵蓋同題庫五次新種子複製與四個跨題庫題目集。五次複製中，三種修訂流程對單次生成的十五項比較均通過各次實驗內的 Holm 校正；驗收加重抽相對單次生成的配對差值，在同題庫五次複製為 14.17 至 19.17 個百分點，在跨題庫四集為 4.85 至 11.54 個百分點（合併 6.84 個百分點），此一比較不屬於任何預註冊家族，p 值未經校正。主要修訂流程 H-MIX 相對驗收重抽的差值依次為 +5.83、+4.17、+0.83、+2.50 與 +4.31 個百分點，五次均為正，但零次通過 Holm 校正。跨題庫 716 題的 H-MIX 相對驗收重抽差值為 +1.12 個百分點，校正後 p = .3409；相對單次生成則為 +7.96 個百分點，校正後 p = 2.02 × 10⁻⁸。另有 194 條已保存收據鏈（涵蓋驗收重抽與三個修訂臂，不含單次生成與多數決）的 9,841 筆紀錄通過逐筆驗簽。成本核對顯示，第三次複製的 H-MIX 相對單次生成雖提升 18.33 個百分點，token 用量卻增加 178.0%，每件正確交付成本增為約 2.11 倍。五次複製中，H-MIX 相對驗收重抽的每件正確交付 token 有四次較高。以每題 token 計，H-MIX 相對驗收重抽在五次複製為 0.92 至 1.56 倍、在跨題庫四集為 1.07 至 1.69 倍；五候選多數決則五次都落在 2.16 至 2.85 倍，而其交付率五次都比驗收重抽低 1.74 至 15.83 個百分點。上述 token 皆為已回報的 prompt 與 completion 之和，含可歸屬該臂的連線探針。結果支持在本實驗條件下以可執行驗收與重抽建立交付依據，但尚未確立修訂相對重抽的額外效益或成本優勢。本文的貢獻是可審計的機制比較與研究紀錄整合，不提出新的修復演算法，也不提供一般性的正確性保證；有限測資、單一模型、重複題目與混合推論後端仍限制外推。
 
 關鍵詞：大型語言模型；程式代理；可執行驗收；修訂迴圈；配對實驗；複製研究；可究責性
 
 ## Abstract
 
-LLM code agents can generate programs, but their own claims of correctness do not establish a sound basis for delivery. We investigate how additional sampling, executable selection, and feedback-driven revision contribute to successful delivery when requirements are already represented by executable acceptance tests. Vacant integrates a visible-test delivery gate with hidden-test evaluation and signed hash-chain records. Using one locally hosted, quantized 12B model, we compare single-shot generation, gated resampling with up to five calls, five-candidate majority selection, and three revision workflows. The evaluation includes five new-seed repetitions on the same 120-task bank and a separate four-set evaluation comprising 716 tasks. Across the five repetitions, all fifteen revision-versus-single-shot comparisons pass within-repetition Holm correction. The observed paired difference for gated resampling over single-shot generation ranges from 14.17 to 19.17 percentage points across the five repetitions, and from 4.85 to 11.54 points across the four benchmark sets (pooled 6.84); this comparison lies outside every preregistered family and its p values are uncorrected. The primary H-MIX workflow shows paired differences over gated resampling of 5.83, 4.17, 0.83, 2.50, and 4.31 percentage points; all five are positive and none passes Holm correction. Across benchmark sets, the pooled paired difference is 1.12 percentage points over gated resampling (adjusted p = .3409; unadjusted conditional interval −1.02 to 3.13) and 7.96 points over single-shot generation (adjusted p = 2.02 × 10⁻⁸), leaving the incremental benefit of revision unresolved. All 9,841 entries in 194 archived receipt chains (covering the gated-resampling and revision arms, but not the single-shot or majority-selection arms) pass signature verification. These findings support executable gating with resampling under the evaluated conditions. The contribution is an auditable integration and empirical comparison, rather than a new repair algorithm or a general guarantee of correctness. Limited test coverage, repeated tasks, a single model, and heterogeneous inference backends constrain generalization.
+LLM code agents can generate programs, but their own claims of correctness do not establish a sound basis for delivery. We investigate how additional sampling, executable selection, and feedback-driven revision contribute to successful delivery when requirements are already represented by executable acceptance tests. Vacant integrates a visible-test delivery gate with hidden-test evaluation and signed hash-chain records. Using one locally hosted, quantized 12B model, we compare single-shot generation, gated resampling with up to five calls, five-candidate majority selection, and three revision workflows. The evaluation includes five new-seed repetitions on the same 120-task bank and a separate four-set evaluation comprising 716 tasks. Across the five repetitions, all fifteen revision-versus-single-shot comparisons pass within-repetition Holm correction. The observed paired difference for gated resampling over single-shot generation ranges from 14.17 to 19.17 percentage points across the five repetitions, and from 4.85 to 11.54 points across the four benchmark sets (pooled 6.84); this comparison lies outside every preregistered family and its p values are uncorrected. The primary H-MIX workflow shows paired differences over gated resampling of 5.83, 4.17, 0.83, 2.50, and 4.31 percentage points; all five are positive and none passes Holm correction. Across benchmark sets, the pooled paired difference is 1.12 percentage points over gated resampling (adjusted p = .3409; unadjusted conditional interval −1.02 to 3.13) and 7.96 points over single-shot generation (adjusted p = 2.02 × 10⁻⁸), leaving the incremental benefit of revision unresolved. All 9,841 entries in 194 archived receipt chains (covering the gated-resampling and revision arms, but not the single-shot or majority-selection arms) pass signature verification. Token accounting further shows that, in the third repetition, H-MIX gains 18.33 percentage points over single-shot generation while consuming 178.0% more tokens, with about 2.11 times the tokens per correct delivery. Its tokens per correct delivery exceed gated resampling in four of five repetitions. Measured per task, H-MIX consumes 0.92 to 1.56 times the tokens of gated resampling across the five repetitions and 1.07 to 1.69 times across the four benchmark sets, whereas five-candidate majority selection consumes 2.16 to 2.85 times while delivering 1.74 to 15.83 percentage points fewer correct programs than gated resampling in every repetition. All token figures are reported prompt plus completion tokens, including arm-attributed wire probes. These findings support executable gating with resampling under the evaluated conditions, without establishing a cost advantage for revision. The contribution is an auditable integration and empirical comparison, rather than a new repair algorithm or a general guarantee of correctness. Limited test coverage, repeated tasks, a single model, and heterogeneous inference backends constrain generalization.
 
 Keywords: large language models; code agents; executable acceptance testing; revision loops; paired experiments; replication; accountability
 
@@ -29,7 +29,7 @@ Keywords: large language models; code agents; executable acceptance testing; rev
 
 ### 1.2 研究主題與定位
 
-本文定調為「可執行驗收支援的 LLM 程式代理交付」，以 Vacant 為系統實作與實驗載體。核心對象是交付機制，而不是模型能力排行榜。比較的主軸包括單次生成、驗收加重抽、行為多數決與執行回饋修訂；簽章紀錄則提供另一條可獨立檢查的證據鏈。
+本文定調為「可執行驗收支援的 LLM 程式代理交付」，以 Vacant 為系統實作與實驗載體。核心對象是交付機制及其 token 代價，並以可重算的同題比較判斷成功率改善是否伴隨成本效率改善。比較的主軸包括單次生成、驗收加重抽、行為多數決與執行回饋修訂；簽章紀錄則提供另一條可獨立檢查的證據鏈。
 
 我們採用「可究責性」描述特定金鑰所簽署事件的可追溯與可核驗性，使用「有依據的依賴」描述驗收結果對交付決策的支援。這些都是本文的操作性用語。研究沒有招募使用者，也沒有測量信任量表、依賴意願或監督行為，因而不以「提升人類信任」作為結果。Körber 的信任量測研究區分信任構念及其行為表現，亦提供問卷與效度檢查的具體方法 [15]；本文未執行這類測量。
 
@@ -133,11 +133,21 @@ R529 使用四個互斥題目集：LCB v3 medium 135 題、LCB v3 hard 54 題、
 
 H 臂上限為每題五次呼叫、32,000 token 與 900 秒的輪間停止預算；每次沙箱評估逾時為十秒。token 與牆鐘預算在呼叫之間檢查，因此不是每題消耗的嚴格上界。單次請求及重試可以跨過這個界線。H-OC 的計畫占用一次呼叫，減少可用修訂機會。CONFORM 可早停，OFF5 固定產生五份候選；各臂的實際 token、時間及呼叫數並不相等。[E1]
 
+實際用量遠低於這個上限，因此 token 預算在多數題目上並未生效。R460 的每題已知 token 依臂為 OFF 2,913、CONFORM 5,805、OFF5 15,004、H-PI 9,448、H-OC 7,432、H-MIX 5,677；五次複製中，CONFORM 落在 5,246 至 6,880、H-MIX 落在 5,989 至 8,184、OFF5 落在 14,163 至 15,564。以 32,000 token 為停止原因的題數，R460 三個修訂臂各為 H-PI 9、H-OC 1、H-MIX 2（分母皆 120），其餘題目由可見驗收通過、呼叫額度耗盡或重複失敗偵測而停止；三臂因可見驗收通過而停止者分別為 108、114 與 115 題。跨題庫的 R529 三臂每題已知 token 為 OFF 2,591、CONFORM 3,601、H-MIX 5,045，但這是兩種推論條件的混合值，須配合 4.2.2 與附錄 F 的逐後端拆分閱讀。這些是已回報 prompt 與 completion 的總和，不是每題消耗的上界，也不含未回報用量的失敗請求。[E1、E13]
+
 本文因此將 H-MIX 與 CONFORM 的比較稱為「相同最大呼叫額度下的工作流比較」。只有 EQ5 把兩個選擇規則作用在完全相同的五份候選上，才直接固定生成成本與候選品質。CONFORM 相對 OFF 同時改變取樣機會與出貨閘門，不能將其差值全歸因於驗收本身。
 
-### 4.2.1 推論服務與執行環境
+### 4.2.1 Token 計量與效果對齊
 
-主要實驗使用兩台本地推論主機。R460 與 R460R 五次複製的三十塊全部在同一台（LM Studio 0.4.17）執行，逐塊統計顯示 4,758 通成功呼叫的 reasoning token 占比為 0.0%。R529 則交錯使用兩台：一台為 LM Studio 0.4.24，對本模型預設啟用 reasoning；另一台為 0.4.17，未啟用。兩台的模型檔 sha256 相同。[E6、E11]
+本文另由原始 calls.jsonl 獨立重算 token，按 meta.arm 與 task_id 連到有效評分列。每通 total_tokens 均以 prompt_tokens 加 completion_tokens 核對；reasoning_tokens 是 completion 的子集合，不再次加總。對 A 與 B 的每項比較，先取共同題目集合 S，再計算兩臂在 S 上的 token 總量 T_A、T_B 與正確交付件數 D_A、D_B。每題成本為 T_A / |S|，每件正確交付成本為 T_A / D_A，額外 token 百分比為 100 × (T_A / T_B − 1)。因此「總量為 170%」表示增加 70%，「增加 170%」則表示總量為 270%。[E13]
+
+本文同時保留全臂已知總量與含作廢成本的每件指標，避免將失敗試驗的支出隱藏在有效題分母之外。可歸屬臂與題目的 wire_probe 計入；沒有臂標記的 preflight 另列，不任意攤入某一工作流。沒有 usage 的失敗請求列為未知消耗，不以零代表其實際成本。附錄 F 的配對表使用同一批共同題目，帳本表則呈現完整臂成本；第五次複製的兩種表因此可能有不同分子，不能交叉混用。本文也未把 token 換成金額、能源或完整運行時間：模型輸入、輸出與推論的 token 不是等價的實體計算量，且測資人工成本尚未計量。
+
+這項成本核對是事後的描述性分析，未重新設定原有效果檢定家族或宣稱等 token 預算下的優越性。每件正確交付成本的分母是觀察到的成功件數，並非保證未來每件交付所需支出；成功率提升與成本效率提升必須分別判斷。[8、E13]
+
+### 4.2.2 推論服務與執行環境
+
+主要實驗使用兩台本地推論主機。R460 的六塊與 R460R 五次複製的三十塊、合計三十六塊全部在同一台（LM Studio 0.4.17）執行；由原始呼叫紀錄重算，這三十六塊共 9,485 通成功呼叫，其中 R460R 的三十塊為 7,931 通，兩者的 reasoning token 全部為零，占 completion 的 0.0%。R529 則交錯使用兩台：一台為 LM Studio 0.4.24，對本模型預設啟用 reasoning；另一台為 0.4.17，未啟用。兩台的模型檔 sha256 相同。[E6、E11、E13]
 
 R529 的四個題目集在發射前改為輪流交錯排隊，理由是避免題目集與後端形成混淆。塊內同題的三臂固定使用同一台，因此塊內配對算術不受兩台差異影響，但逐集絕對值是兩種推論條件的混合。各集在兩台上的呼叫數分別為 LCB v3 medium 236 對 225、LCB v3 hard 127 對 78、HumanEval+ 333 對 208、MBPP+ 813 對 505；啟用 reasoning 的那一台，全部呼叫皆帶 reasoning token，另一台則皆為零。逐後端的交付件數列於附錄 B 的表 B2。[E6]
 
@@ -165,6 +175,8 @@ R529 將各題目集的不一致對數相加作主要檢定，在所設定的虛
 
 R460 的 EFFECTIVE 必須同時滿足：相對 OFF 至少 +25 個百分點、相對 CONFORM 至少 +10 個百分點；兩項比較均通過所屬六項家族的 Holm 校正；包含作廢呼叫成本的每件正確交付 token 不高於 OFF5；假交付率不高於 CONFORM 加五個百分點。若相對 CONFORM 顯著，但未通過全部條件，列為 COSTLY_BUT_REAL。若依原條件區間，上界低於 +10 個百分點，列為 RULED_OUT；其餘列為 INCONCLUSIVE。[E1]
 
+第三項的成本門檻在本研究的每一階段都成立或不成立得很清楚，因此值得把數字寫出。R460 的 H-MIX 每件正確交付 token 為 6,745，同次 OFF5 為 23,084，比值 0.292；五次複製的同一比值依序為 0.302、0.396、0.427、0.465 與 0.475，六次全部通過這項條件。各次未列為 EFFECTIVE 的原因因此不在成本，而在第一與第二項的效果與顯著性條件。R529 改用另一組規則，其成本條件是合併每件正確交付 token 的 H-MIX 不高於 CONFORM，實測為 5,865 對 4,241、比值 1.383，該條件不成立；R529 的兩項主要比較亦未全部通過 Holm 校正，故列為 INCONCLUSIVE。相關倍率彙整於表 10。[E1、E5、E13]
+
 這些是本研究事前設定的決策標籤，不是通用學術等級。RULED_OUT 只針對 +10 個百分點的目標尺度，不表示零效應或等價。R529 使用另一組成本與顯著性規則，同名標籤不可互引。五次複製另預先設定「五次同號且至少四次 Holm 顯著」的穩定宣稱要求；未達時逐次報告。[E3、E5]
 
 預註冊亦有範圍限制。R440P 是事後探索重放；R460 的後端拓撲修訂發生在部分結果已存在之後，雖未改變效果門檻與比較家族，仍屬執行偏離。R529 的主要規則在發射前固定，但分析器提交晚於首塊資料完成。版本紀錄可以呈現這些時間關係，不能證實研究者從未看過資料。[E1、E5–E7]
@@ -189,6 +201,8 @@ R440P 對兩批已保存的五候選資料進行零模型呼叫重放。單模�
 
 CONFORM 的早期評估顯示，驗收重抽相對單次生成的效果會依題庫而異。MBPP+ 371 題的合併評估差值為 +4.58 個百分點；LCB v2 的 r447 為 +19.17 個百分點，LCB v3 的 r461 為 +7.94 個百分點。這些結果支持在可見測試存在時，額外生成機會可透過驗收規則轉換為更多正確交付。[E8]
 
+上述增益的成本必須一併閱讀。前兩組可從原始呼叫取得 token，逐筆列在表 F5；r461 主實驗的本地存檔缺少 calls.jsonl，rows 與 summary 僅保存呼叫數，故其 +7.94 個百分點只有效果證據，尚無可重算的 token 支持，不能用於成本效率主張。另一個名稱相近的 r461_off_gate 是不同先導實驗，本文不以其成本代替。[E13]
+
 R445 的八項預測為七項命中、一項未命中；未命中的是區間半寬比預測更大。這涉及資料變異而不是效果方向，仍應保留。不同早期 run 之間存在題目重疊，特別是 r447 與 R460 使用相同的 120 題。因此這些數字是各自條件下的比較，不是互相獨立的跨題庫複製。初期報告也記錄在所檢查候選中未見「隱藏通過但可見失敗」的情形；部分題庫的隱藏測試本就包含可見測試，不能把此結果推廣為任意驗收閘門的無損保證。
 
 ### 5.3 固定候選的選擇規則比較
@@ -196,6 +210,8 @@ R445 的八項預測為七項命中、一項未命中；未命中的是區間半
 EQ5 對每題固定生成五份候選，再分別以可見驗收選擇與行為多數決選擇。兩個規則共享候選與生成成本，較直接地隔離選擇機制差異。表 3 列出原始階段結果；所有 p 值都是各階段報告的未校正值，不應視為一個新合併家族的顯著性結論。[E8]
 
 [[TABLE:eq5]]
+
+表 3 四組比較的 token 對照見表 F5。r446、r449b 與 r449c 的共同候選池分別使用 1,330,522、1,688,881 與 2,242,989 個已回報 token；同一候選池不應因供兩種選擇規則評分而重複計費。r448 保存了共用五候選的評分列，但未保存可取得的呼叫用量，因此只能確認兩規則共享生成成本，不能報告其絕對 token 數。此缺口不改變已保存的成功件數，但限制成本的獨立重算。[E13]
 
 MBPP+ 兩次與 LCB v2 的點估計及原始檢定較支持驗收選擇；LCB v3 方向相同但未顯著。R446 對兩規則選到同份程式的比例預測為 40% 至 95%，實測僅 20.49%，原先先驗未被支持。產物不同也不必然代表正確性不同，故同選率只能說明程式選擇差異。
 
@@ -212,6 +228,8 @@ R454 加入第三把受控金鑰 K3，讓其在真實執行後翻票或簽出矛
 R460 的 120 題中，OFF 成功 70 題、CONFORM 85 題、OFF5 78 題、H-PI 91 題、H-OC 96 題、H-MIX 101 題。H-MIX 對 CONFORM 的不一致對為 22/6，差值 +13.33 個百分點，未調整條件區間為 [4.22, 19.46]，Holm 校正後 p = .0112，依原規則列為 EFFECTIVE。此設計對 +10 個百分點的檢定力只有 .43 至 .63，能被判為顯著的點估計被截斷在最小可偵測效果之上，因此 +13.33 個百分點應視為效果量的上偏估計；這項免責是事前寫入預註冊的強制項，不是事後補充。[E1–E2]
 
 R460 共九項列入計分的預測，六項命中、三項未命中。未命中項涉及實際呼叫數、假交付方向及 loader 結束比例。這些預測各有不同意義，不應只用一個命中率概括全部假設。H-MIX 假交付為 14/120，CONFORM 為 29/120，與原本預期修訂增加假交付的方向相反。
+
+這一次的成本結構與後續各階段不同，因此要與效果一起記錄。六臂的每題已知 token 為 OFF 2,913、CONFORM 5,805、OFF5 15,004、H-PI 9,448、H-OC 7,432 與 H-MIX 5,677，每件正確交付 token 依序為 4,994、8,195、23,084、12,459、9,290 與 6,745。H-MIX 是三個修訂臂中唯一每題與每件成本都低於 CONFORM 的一臂（比值 0.978 與 0.823）；同時 OFF5 以 CONFORM 的 2.585 倍每題 token 換得較低的交付率（78/120 對 85/120）。四狀態的第三項成本條件因此成立，比值 0.292。這一格「效果較好又成本較低」的組合，在後面任何一個階段都沒有重現。[E13]
 
 這次實驗遇到兩次後端失敗，原先分兩端執行的設計改為單一後端完成；失敗塊保存為作廢資料，未納入主分析。部分塊較晚執行，也因此保留時間與負載差異。原始 +13.33 的觀察值得複製，但不能單由一次六臂實驗判定穩定效益。
 
@@ -233,6 +251,8 @@ R460 共九項列入計分的預測，六項命中、三項未命中。未命中
 
 假交付方面，H-MIX 五次依序為 20/120、14/120、19/120、21/120、19/119，CONFORM 則為 26/120、26/120、23/120、25/120、25/117。五次方向都較低，支持後續 P-R4 的方向性預測；本段未另外為假交付配置新的確認性檢定。其他預測中，Δ 大於零為 5/5、至少 +10 個百分點為 0/5、Holm 顯著為 0/5、token 成本比率達窗為 3/5。
 
+五次複製的 token 帳本把這個方向再收緊一層。H-MIX 每題已知 token 對 CONFORM 的倍率依序為 0.922、1.065、1.560、1.348 與 1.170（全臂帳本口徑，與表 10 相同；共同題目口徑見表 F2，兩者僅第五次不同），只有第一次低於 1；事前預測 P-R5 設定的窗是不超過 1.2 倍，因而命中三次。每件正確交付 token 的倍率依序為 0.852、1.007、1.543、1.302 與 1.102，同樣只有第一次較低。多數決的成本則五次一致偏高：OFF5 每題已知 token 為 CONFORM 的 2.396、2.162、2.851、2.639 與 2.208 倍（排除作廢呼叫的口徑；第五次若計入作廢呼叫為 2.246 倍），而其交付率五次都低於 CONFORM 1.74 至 15.83 個百分點。四狀態第三項成本條件五次皆成立，比值 0.302 至 0.475，各次未達 EFFECTIVE 的原因不在成本。逐格數字見表 10 與附錄 F。[E4、E13]
+
 單次未顯著不等於效果不存在；反向的敘述同樣不被本資料支持，五次結果不足以宣告修訂的增益已被排除。第五次作廢列的已報最壞情境分析，使 H-MIX 對 CONFORM 的差值落在 [+0.83, +7.50]，其方向不變，但效果幅度仍受缺失處理影響；同一分析對消融臂 H-PI 的敏感度見 7.6。[E3–E4]
 
 ### 5.7 R529 跨題庫評估
@@ -246,6 +266,8 @@ H-MIX 對 CONFORM 的合併不一致對為 31/23，差值 +1.12 個百分點，�
 同一批資料上，CONFORM 相對 OFF 的配對差值為 +7.41、+5.56、+11.54 與 +4.85 個百分點，合併為 +6.84 個百分點（不一致對 64/15）。這一組同樣是家族外探索量，p 值未經校正。核心敘述「增益主體為可執行驗收閘門與重抽」因此在跨題庫上有與同題庫方向一致的證據，但各題目集的解析度差異很大，LCB v3 hard 的不一致對只有 3/0。[E6、E12]
 
 R460 另事前設定一項推翻條件：若在 LCB v3 的預註冊複製中，H-MIX 對 CONFORM 出現 c ≥ b，則該判定降為「一次顯著」。R529 未觸發此條件，但 LCB v3 medium 的不一致對為 6/5，距觸發僅一題；未觸發與複製成功是兩件事，不合寫成一句。[E2、E6]
+
+跨題庫的 token 帳本與同題庫後四次同向。合併四集的每題已知 token 為 OFF 2,591、CONFORM 3,601、H-MIX 5,045，每件正確交付 token 為 3,318、4,241 與 5,865；H-MIX 對 CONFORM 的每題倍率為 1.401、每件倍率為 1.383。逐集的每件倍率依序為 1.354（LCB v3 medium）、1.024（hard）、1.681（HumanEval+）與 1.597（MBPP+），每題倍率則為 1.365、1.074、1.692 與 1.619；事前預測 P-X5 要求四集皆不超過 1.2 倍，僅 hard 落在窗內，整體未命中。值得注意的是 H-MIX 的呼叫／題反而低於 CONFORM（1.12 對 1.30，以 rows 的 calls_used 計），成本差來自每通輸出較長，不是呼叫次數較多。R529 的成本條件因此不成立（見 4.5）。上述絕對值是兩種推論條件的混合，逐後端拆分列於附錄 F 的表 F3；同一集的三臂承接相同區塊，後端組成相同，故集內倍率不受這個混合影響。[E6、E13]
 
 R529 的八項預測四項命中、四項未命中。偏離主要出現在成本與迴圈形狀：許多題目第一輪即通過可見驗收，使實際呼叫數低於預期，單次輸出成本卻未相同比例下降。假交付亦未呈現全面改善：LCB medium 為 H-MIX 6/135 對 CONFORM 9/135，hard 為 7/54 對 11/54，HumanEval+ 均為 6/156，MBPP+ 則為 58/371 對 56/371。因此，同題庫五次假交付較低的方向，不能直接外推為所有題庫都較低。
 
@@ -272,6 +294,8 @@ R460R 三十塊與 R529 三十七塊的 V/GT v2 稽核均未報告違規。這�
 本研究最穩定的結果是：在已具有可執行驗收測試的設定中，加入驗收與額外嘗試的工作流，相對單次直接交付有較高成功率。五次複製中 CONFORM 對 OFF 的改善幅度，已接近加入修訂後的整體改善；H-MIX 相對 CONFORM 的主比較未達顯著。工程上，這支持先確認測資品質、拒交語意與重抽基準，再判斷是否需要更複雜的修訂流程。本節的「階段」是敘述用語：CONFORM 與 H-MIX 是兩條各自獨立執行的臂，把兩個差值相減所得的分解不是被實驗分離出來的成分。
 
 這個推論與 Olausson 等人對成本控制下修復收益不穩定的觀察相容 [8]，但不能稱為對其效果數值的直接複製，因為模型、題庫、回饋來源及停止規則不同。它也不反駁 Self-Debugging 與 Reflexion 在各自條件下的改善 [6–7]。工作流收益取決於可見測試提供多少可用資訊，以及相同預算的重抽已能解決多少失敗。
+
+成本方向在階段之間反轉，這一點必須與效果一起讀，否則任何單一階段都會給出相反的工程建議。R460 的 H-MIX 每題 token 是 CONFORM 的 0.978 倍、每件正確交付是 0.823 倍，是全研究唯一一次「效果較好同時成本較低」；五次複製變成每題 0.92 至 1.56 倍、每件 0.85 至 1.54 倍，跨題庫四集再變成每題 1.07 至 1.69 倍、每件 1.02 至 1.68 倍。方向反轉與效果縮小同時發生：差值從 +13.33 個百分點降到個位數，成本從低於基準變成高於基準。合理的讀法是 R460 那一次同時在效果與成本上取得最有利的組合，而該組合未在任何後續階段重現，不是後續階段把成本做壞了。多數決的方向則從未反轉：OFF5 在六次同題庫實驗中都花掉 CONFORM 的 2.16 至 2.85 倍每題 token，交付率卻都較低，因此「多花 token 取多數」在本條件下沒有成本上的理由。[E13]
 
 既有離線分析比較 H 臂第一輪與最終結果，對理解何時進入修訂有幫助；然而第一輪和最終結果並非隨機指派的獨立處置，且重跑沙箱的時間限制會引入少量不一致。本文因此把此類分解視為描述性診斷，不以「迴圈只救不傷」推導在一般情境下不可能破壞原有正解。
 
@@ -301,6 +325,22 @@ R460R 三十塊與 R529 三十七塊的 V/GT v2 稽核均未報告違規。這�
 
 這份對照不是以完成項數替研究打分，而是標示哪一個程序支持哪一個推論。獨立程式重算能降低同一分析器錯誤被重複採用的風險，卻不能替代外部研究團隊的獨立複製。版本控制能保存偏離紀錄，卻不能自行保證資料從未被預覽。方法上的透明性應與方法上的不足一併呈現。[16]
 
+### 6.6 交付增益的 token 代價
+
+表 9 將主要修訂流程的交付增益與消耗並列。第三次複製最能說明兩者的區別：H-MIX 每題 8,184 個 token，OFF 為 2,944，總量比為 2.780，亦即增加 178.0%；相對應的成功交付為 91/120 與 69/120，增加 18.33 個百分點。每件正確交付成本卻由 5,120 上升至 10,792，約為 2.108 倍。這是有成本支持的成功率提升，並非 token 效率提升。[E13]
+
+[[TABLE:token_summary]]
+
+相對更有競爭力的 CONFORM，初次 R460 的 H-MIX 增益為 +13.33 個百分點，同題 token 減少 2.2%，每件成本約為 0.823 倍；這筆同時較好且較省的觀察沒有穩定重現。五次複製中，H-MIX 對 CONFORM 的同題 token 變動依次為 −7.8%、+6.5%、+56.0%、+34.8% 與 +15.7%；每件正確交付成本只有第一次較低，其餘四次較高，而效果比較五次皆未通過 Holm 校正。第五次在此使用共同 116 題；原預測 P-R5 使用各臂有效題平均，因此本節的 1.157 倍不替換原仲裁使用的約 1.170 倍。CONFORM 對 OFF 的五次成功率增益雖為 +14.17 至 +19.17 個百分點，同題 token 也增加約 78.2% 至 141.9%，每件成本皆較 OFF 高。因此，即使主要增益來自驗收與重抽，也不能由此推導「驗收重抽較省 token」。[E13]
+
+跨題庫合併帳本中，H-MIX 每題約 5,045 個 token，CONFORM 為 3,601，比率約 1.401，意指增加 40.1%，而非增加 140%。但這是兩種推論模式的混合描述，不能當作模式無關的效率結論。按後端拆分後，HumanEval+ 在啟用 reasoning 的條件下，兩臂同為 94/100 件正確交付，H-MIX 每題卻為 4,368 個 token，CONFORM 為 2,291，增加約 90.7%；未啟用的條件下，H-MIX 為 54/56、CONFORM 為 53/56，每題 924 對 1,064，反而減少約 13.2%。表 F3 與 F4 同時呈現兩種方向，不用合併平均遮蔽差異。[E13]
+
+表 10 把上述倍率集中列出，並區分兩個口徑：每題 token 的分子排除作廢題，每件正確交付 token 的分子保留作廢呼叫。多數決那兩欄的形狀最單純——六次同題庫實驗中，OFF5 的每題成本都是 CONFORM 的 2.16 至 2.85 倍，每件成本 2.32 至 3.61 倍，而交付率六次都較低。修訂流程那兩欄則在 R460 之後全部越過 1 倍線。最後一欄是 R460 四狀態第三項條件的實際比值，六次介於 0.292 與 0.475，顯示該條件從未成為判定的瓶頸。
+
+[[TABLE:token_ratio]]
+
+每項工作流優劣因此應至少同報成功率差、每題 token 與每件正確交付 token，並標示分母、後端模式及未知成本。本文的假交付比較使用相同執行批次，也對應附錄 F 的同一份成本帳本；較少錯誤交付仍需與拒交及消耗一併解讀。上述描述尚未加入 token 效率比率的信賴區間，亦未識別投入相同 token 時各工作流可達的成功率曲線；後者需要重新預註冊並執行預算匹配實驗。
+
 ## 七　效度威脅與限制
 
 ### 7.1 單一模型與有限任務形式
@@ -323,6 +363,8 @@ R460R 三十塊與 R529 三十七塊的 V/GT v2 稽核均未報告違規。這�
 
 R529 混合 reasoning 與非 reasoning 後端，R460R 各次亦有不同共租負載與第五次模型重載事故。R460R 五次的逐次共租占比為 8.5%、71.3%、2.1%、0% 與 0%，第二次最重，其六塊皆落在 39% 至 94%，生成呼叫平均延遲較第一、第三次高約 16%。牆鐘預算造成的拒交每臂至多 2 件、分母為 120，量級上限約 1.7 個百分點，不足以解釋初次的 +13.33 與第二次的 +4.17 之間的落差；因此跨次差異既不能全歸於取樣，也不能歸因於共租。逐題同後端配對減少一部分差異，但不能消除臂執行順序、延遲、截斷及推論模式交互作用。本文未把工作流效果與部署效應完全分離。[E4、E6]
 
+這個混合對 token 的影響比對交付率更大，因此 R529 的逐集與合併 token 都不可單獨引用。在啟用 reasoning 的那一台，reasoning token 占 completion 的 63.0% 至 96.3%；同一題目集在兩台的每題成本可以差到數倍，例如 HumanEval+ 的 H-MIX 在啟用端為每題 4,368 個 token、在未啟用端為 924，相差約 4.7 倍。方向也可能相反：同一集的 H-MIX 對 CONFORM 在啟用端高出 90.7%，在未啟用端則低 13.2%。因此本文對 R529 的 token 一律標明它是混合條件下的描述，或改用表 F3 的逐後端數字；集內的臂間倍率因三臂承接相同區塊而不受影響，但集與集之間的絕對 token 比較沒有意義。本文也未設計能把推論模式當作因子的實驗，無法估計模式與工作流的交互作用。[E6、E13]
+
 ### 7.6 缺失資料與成本不對稱
 
 complete-case 分析排除未完成的臂列，而不同工作流曝險於較多呼叫，基礎設施失敗可能不是隨機缺失。第五次作廢列的最壞情境分析中，H-MIX 對 CONFORM 落在 +0.83 至 +7.50 個百分點，不變號；H-PI 對 CONFORM 則落在 −2.50 至 +2.50 個百分點，會變號，而第五次 H-PI 的 RULED_OUT 狀態正取決於這一格。作廢列的 47,102 個 token 計入含作廢成本的指標，其方向對呼叫較多的臂不利、對修訂臂有利。已報最壞界只處理特定成功率比較，不能取代所有缺失機制的分析。相同最大呼叫數亦不是相同 token、時間、能源或人工成本。[E4]
@@ -343,6 +385,8 @@ V/GT 掃描依賴字面比對、訊息來源分類及豁免規則，會跳過部
 
 本文在需求已具可執行測資的程式任務中，比較單次生成、驗收重抽、多數決與修訂流程。五次同題庫複製顯示修訂流程相對單次生成有穩定的方向與各次校正後證據，但驗收重抽已取得大部分觀察到的改善。主要 H-MIX 對 CONFORM 的五次差值皆為正，零次通過 Holm 校正；跨題庫主比較亦未顯著。就選擇規則而言，固定候選集合時 EQ5 四個階段的點估計偏向驗收選擇（+4.04、+3.50、+8.33 與 +4.23 個百分點，其中三次的未校正 p 值小於 .05）；在不同生成流程下的 R460R 探索比較五次同號，但僅三次未校正顯著，且條件最單純的兩次不顯著，故這個問題仍屬同號未解析。現有證據因此支持把驗收、重抽及拒交語意作為交付流程的基礎，尚不足以確立修訂的額外效益。
 
+成本帳本進一步限制這項結論：第三次複製的 H-MIX 對單次生成以增加 178.0% 的已知 token 換得 +18.33 個百分點，每件正確交付成本約為 2.11 倍；相對驗收重抽，五次中有四次每件成本較高。本文因而支持交付成功率的改善，但未確立修訂的 token 效率優勢。缺少用量紀錄的早期階段仍需補件，不能以效果數字代替成本證據。
+
 可究責紀錄為這些交付與驗收事件提供可核驗的連結。本次重新驗證 194 條鏈的 9,841 筆事件全部通過，但這是已保存紀錄的簽章與連續性結果，不是完整需求、全部歷史或自然人責任的證明。論文將兩種證據分開，是為了讓系統品質與紀錄品質都能被具體檢查。
 
 下一階段最有辨識力的實驗，是固定模型檔、推論服務版本與 reasoning 設定，並以同一批基礎候選比較不同驗收品質。可預先操弄測試數量、邊界覆蓋與錯誤期望值比例，交叉比較 CONFORM 與 H-MIX，事前設定最小實務差值及成本尺度。這能直接回答額外回饋在何種測資條件下比重抽更有用。
@@ -351,7 +395,7 @@ V/GT 掃描依賴字面比對、訊息來源分類及豁免規則，會跳過部
 
 ## 資料與程式可取得性
 
-本文資料來源為 Vacant 儲存庫 https://github.com/cosmopig/Vacant ，分析基準提交為 44be37fe52bac148ecd2835aa384c804c612ffea。實驗原始列、呼叫紀錄、公開金鑰、收據及階段判定依附錄 A 索引定位。本文新增的主表重算程式 verify_evidence.py 與 verified_evidence.json 保存於 docs/paper_2026-09-14。重算不發出模型請求；完整候選重評仍需要適用的題庫版本與沙箱環境。本文沒有重跑新的模型實驗。
+本文資料來源為 Vacant 儲存庫 https://github.com/cosmopig/Vacant ，分析基準提交為 44be37fe52bac148ecd2835aa384c804c612ffea。實驗原始列、呼叫紀錄、公開金鑰、收據及階段判定依附錄 A 索引定位。本文新增的主表重算程式 verify_evidence.py 與 verified_evidence.json、token 帳本程式 verify_tokens.py 與 verified_tokens.json，以及產表程式 token_tables.py 與可讀對照 TOKEN_AUDIT.md，均保存於 docs/paper_2026-09-14。重算不發出模型請求；完整候選重評仍需要適用的題庫版本與沙箱環境。本文沒有重跑新的模型實驗。
 
 可得性有明確邊界：題庫封裝未全部公開再散布，完整評分重放需要相同版本與適用授權；G 系列 run 也未全部包成專案統一的 RECORD_SPEC 證據包。因此「公開結果列可重算」與「完整環境可重建」是兩件不同的事，讀者在取用資料時應先看這一層邊界。
 
@@ -361,7 +405,7 @@ V/GT 掃描依賴字面比對、訊息來源分類及豁免規則，會跳過部
 
 ## 算力聲明
 
-全部實驗在研究團隊自有的本地推論主機上執行，使用開放權重模型檔，未呼叫外部商業推論 API。兩台主機的推論服務版本與模式差異記於 4.2.1，逐後端的交付件數列於附錄 B 的表 B2。
+全部實驗在研究團隊自有的本地推論主機上執行，使用開放權重模型檔，未呼叫外部商業推論 API。兩台主機的推論服務版本與模式差異記於 4.2.2，逐後端的交付件數列於附錄 B 的表 B2。
 
 ## 研究透明性聲明
 
@@ -423,7 +467,7 @@ V/GT 掃描依賴字面比對、訊息來源分類及豁免規則，會跳過部
 
 這些事故中，有些改變觀測條件，有些只改變分析器或記錄讀取。本文保留這項區分：重新計算後仲裁值相同，表示特定修正沒有改動該組數值；不代表整個研究已排除所有部署偏差。
 
-表 B2 逐後端列出 R529 的交付件數，讓讀者看見 4.2.1 所述兩種推論條件在各題目集的組成。塊內同題的三臂固定在同一台，配對算術不受影響；此表為描述性，不構成兩台之間的效能比較，也不用於任何仲裁。[E6]
+表 B2 逐後端列出 R529 的交付件數，讓讀者看見 4.2.2 所述兩種推論條件在各題目集的組成。塊內同題的三臂固定在同一台，配對算術不受影響；此表為描述性，不構成兩台之間的效能比較，也不用於任何仲裁。[E6]
 
 [[TABLE:backends]]
 
@@ -439,11 +483,30 @@ verify_evidence.py 從 R460 六塊、R460R 三十塊及 R529 三十七塊的結�
 
 其驗證對象是保存的布林評分、配對算術與簽章紀錄。它不重新執行全部候選、不重現生成、不證明私有題庫測試充分、不重新估計 V/GT 量具覆蓋率，也不驗證所有歷史探索實驗的每一個數字。其他階段結果依附錄 A 所列收官檔引用，與本文重算的主要結果明確區分。
 
+token 的重算屬於同一份可重算範圍。程式從各 run 的 calls.jsonl 逐通讀取 usage，依 meta.arm 與 meta.task_id 歸到對應的評分列，再逐臂加總：total_tokens 逐通以 prompt_tokens 加 completion_tokens 核對，reasoning_tokens 視為 completion 的子集合而不重複相加。輸出同時保留四種分母——每題成本含與不含連線探針、每件正確交付成本含與不含作廢呼叫——以及 prompt 與 completion 的拆分、R529 依端點位址拆出的逐後端帳本與 reasoning 占比，並據此導出 OFF5 除以 CONFORM、H-MIX 除以 CONFORM 的倍率。結果寫入 verified_tokens.json，同一份物件另存於 verified_evidence.json 的 tokens 與 tokens_headline 兩個新鍵；既有鍵的計算未更動。
+
+重算結果再與各階段分析器逐格比對：R460 的六臂呼叫數、總量、每題成本與每件成本，五次複製分析器所揭露的 H-MIX 與 CONFORM 每題成本，以及 R529 的逐集、合併與逐後端帳本，共 197 格，全部一致，差異為零，比對紀錄存於 verified_evidence.json 的 token_crosscheck。唯一需要說明的口徑差是逐後端成功呼叫數：分析器計入每個區塊一通未標記臂的預檢呼叫，本文的逐臂帳本則把它排除，加回之後兩者相同。未回報用量的失敗請求無法由保存資料恢復其真實消耗，核心實驗共 116 通，所有成功請求均有 total_tokens；因此 token 總量只代表已回報部分，且不含沙箱執行、測資撰寫與人力成本。[E13]
+
 一項例外要標明：表 6 的 CONFORM 對 OFF 欄位屬家族外探索量，其不一致對由同一批結果列另行重算，未寫入 verified_evidence.json，引用時應與該檔內的主指標分開表述。
 
-##PAGE
 ## 附錄 E　事前預測逐條對帳
 
 表 E1 列出各階段的事前預測、事前設定的窗與實測結果，命中與未命中一併列出。未命中多半是預測寫錯方向或窗設得過窄；本文不改窗、不追認，也不以命中率概括整組假設。預測編號沿用原始來源。[E1–E6、E8]
 
 [[TABLE:predictions]]
+
+## 附錄 F　每項交付增益的 token 帳本
+
+本附錄由 verify_tokens.py 對原始呼叫與評分列獨立加總，再由 token_tables.py 直接產表，避免人工抄寫差錯；正文表 9 與表 10 取自同一份帳本，未另行計算。精確未四捨五入值、輸入與輸出拆分、reasoning 子集合、未歸臂探針、未知用量請求數、配對成功件數及來源檔 SHA-256 均保存在 verified_tokens.json；可閱讀的完整對照另存 TOKEN_AUDIT.md。這些表是觀察批次的已知 token 帳本，不能補足未回報 usage 的真實消耗。[E13]
+
+[[TABLE:token_arms]]
+
+[[TABLE:token_pairs]]
+
+[[TABLE:token_cross_arms]]
+
+[[TABLE:token_cross_pairs]]
+
+[[TABLE:token_early]]
+
+第五次複製中，CONFORM 與 OFF5 的已知作廢 token 分別為 5,450 與 41,652，合計 47,102；它們保留在表 F1 的全臂成本及含作廢每件成本，但不混入表 F2 的共同有效題分子。R529 的 wire_probe 合計 38 通，均歸 H-MIX；其中 37 通有回報用量，已知合計 5,094 個 token，另 1 通失敗且未回報用量，與其他失敗請求一樣列為未知消耗而非零。本地缺失的 r448 與 r461 呼叫紀錄在表 F5 明列，並未用呼叫數、其他種子或其他後端的平均 token 代替。EQ5 選擇規則比較只需對既有候選重放，重放本身無新增模型生成；這不代表原先候選生成、沙箱執行或整項研究的成本為零。

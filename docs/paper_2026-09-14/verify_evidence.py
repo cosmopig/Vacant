@@ -86,6 +86,52 @@ assert all(report[f'r{i}']['pairs'][a+'_vs_OFF']['p_holm']<.05 for i in range(1,
 assert report['cross_primary']['pairs']['HMIX_vs_CONFORM']['b']==31
 assert report['cross_primary']['pairs']['HMIX_vs_CONFORM']['c']==23
 report['scope']='Recomputed archived outcome labels, exact binomial McNemar, within-run Holm, conditional intervals, and public receipt signatures. Does not regenerate or re-execute code, verify hidden-test quality, or establish completeness of the published log.'
+
+# --- token ledger (new keys only; nothing above this line is recomputed) -------
+# Same per-task, per-arm summation of calls.jsonl usage that writes
+# verified_tokens.json, embedded here so the cost numbers cited in the paper sit
+# in the same artifact as the outcome numbers and cannot drift apart.
+import verify_tokens as VT
+TOK=VT.build_report()
+report['tokens']=TOK
+report['token_crosscheck']=VT.crosscheck(TOK)
+assert not report['token_crosscheck']['mismatches'],report['token_crosscheck']['mismatches']
+
+def arm_cell(run,arm):
+    v=TOK[run]['arms'][arm]
+    return {k:v[k] for k in ['calls','probe_calls','reported_total','prompt_tokens','completion_tokens',
+        'reasoning_tokens','valid_total','void_total','unmetered_calls','n','correct',
+        'per_task','per_task_excl_probe','per_task_incl_void','tpc_valid','tpc_all',
+        'reasoning_pct_of_completion']}
+REPS=['R460','r1','r2','r3','r4','r5'];SETS=['LCB3_medium','LCB3_hard','HumanEvalPlus','MBPPPlus']
+head={'reps':{},'cross_sets':{},'cross_backends':{},'cross_pooled':{}}
+for k in REPS:
+    head['reps'][k]={'arms':{a:arm_cell(k,a) for a in ['OFF','CONFORM','OFF5','HPI','HOC','HMIX']},
+        'OFF5_over_CONFORM':TOK[k]['arm_ratios']['OFF5_over_CONFORM'],
+        'HMIX_over_CONFORM':TOK[k]['arm_ratios']['HMIX_over_CONFORM'],
+        'HMIX_over_OFF5':TOK[k]['arm_ratios']['HMIX_over_OFF5']}
+for k in SETS+['cross_pooled']:
+    bucket=head['cross_pooled'] if k=='cross_pooled' else head['cross_sets']
+    bucket[k]={'arms':{a:arm_cell(k,a) for a in ['OFF','CONFORM','HMIX']},
+        'HMIX_over_CONFORM':TOK[k]['arm_ratios']['HMIX_over_CONFORM']}
+    if k!='cross_pooled':
+        for mode in ['reasoning','no_reasoning']:
+            key=k+'_'+mode
+            head['cross_backends'][key]={'arms':{a:arm_cell(key,a) for a in ['OFF','CONFORM','HMIX']},
+                'HMIX_over_CONFORM':TOK[key]['arm_ratios']['HMIX_over_CONFORM']}
+head['inference_mode_same_bank']=TOK['reasoning_mode_audit']
+head['decision_cost_conditions']={
+ 'R460_condition_iii_tpc_over_OFF5':{k:TOK[k]['arm_ratios']['HMIX_over_OFF5']['tpc_incl_void'] for k in REPS},
+ 'R529_cost_condition_pooled_tpc_HMIX_over_CONFORM':TOK['cross_pooled']['arm_ratios']['HMIX_over_CONFORM']['tpc_incl_void'],
+ 'note':'R460 and its five repetitions require tokens per correct delivery, void calls included, no higher than OFF5 in the same run. R529 replaces that with pooled tokens per correct delivery of H-MIX no higher than CONFORM. Both are reproduced here from the recomputed ledger, not copied from the stage analyzers.'}
+head['caliber']=('Every figure is reported prompt plus completion tokens. reasoning_tokens is a subset of '
+ 'completion and is never added again. per_task divides valid-task tokens by that arm valid tasks and '
+ 'includes arm-attributed wire_probe; per_task_excl_probe removes probe tokens from the same numerator; '
+ 'per_task_incl_void and tpc_all keep void and failed-but-metered calls. Failed calls with no usage are '
+ 'unknown cost, never zero. r5 denominators differ per arm (OFF 119, CONFORM 117, OFF5 118, HPI 120, '
+ 'HOC 120, HMIX 119). R529 per-set absolute tokens mix two inference conditions and must be read per backend.')
+report['tokens_headline']=head
 (OUT/'verified_evidence.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
 print('CROSS',json.dumps(report['cross_primary']['pairs']))
 print('RECEIPTS',len(chains),report['receipts']['entries'],'PASS')
+print('TOKENS crosscheck cells',report['token_crosscheck']['cells'],'mismatches',len(report['token_crosscheck']['mismatches']))
