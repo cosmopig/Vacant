@@ -3660,3 +3660,14 @@ R530_BLOCK: g_r530_s3_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachin
 凍結後到發射之間不改任何一項；改了就重新凍結、重記七樣並留上一版。
 發射拓撲：1003 四串＋1004 四串（`r1003#1–4`／`r1004#1–4`）；三道發射前閘門 E-3（整個 bank 量具）、E-9、E-11 任一紅 ⇒ 該塊不發。
 沙箱：`unshare --net`＋`setpriv --reuid=65534`，工作區根 `/var/tmp/vacant_r530_work`；bwrap AppArmor profile 未安裝（人類事項，`SANDBOX.md` 路線 B）。
+
+## 附錄 AMEND2-C　第一次發射失敗與重新凍結（2026-09-14，Fable）
+
+- **06:14:33Z 第一次發射**：8 塊全部正常起來（三道閘門都跑過、calls.jsonl 開始寫），60 秒後被排程器自己判 DEAD、搬進 `_aborted/`、重排兩輪後整批放棄。根因：`schedule_r530.py` 沿用 `schedule_harness_reps.running_block_names`，該函式寫死比對 `"gain_run.py --out "`，認不得 `run_r530.py` ⇒ runner 在 ps 上永遠「不在」。**那一次不算發射（無 F6）**；60 個誤報產物搬到 `runs/_falsealarm_20260914_scheduler_bug/`（刻意移出 `_aborted/`，否則 `aborted_counts` 會讓每塊一開始就背重排次數）；工作區與行程全清；沒有任何實驗資料進入證據。
+- **修正**：R530 自己一份 `running_block_names`（比對 `run_r530.py --out `，且 `$2 == "python3"` 真的比對第二欄以濾掉 flock 那行）＋4 條測試；併入主線後 R530 測試 166 條全綠。
+- **為什麼冒煙沒照出來**：smoke7／8／9 都是手動直接跑 runner，沒經過排程器。⇒ 新增發射時檢核 **C10（活體檢查）**：先發 1 塊，60 秒後排程器必須把它列為 RUNNING（不是 DEAD／PENDING），通過才放其餘塊；C10 結果進排程器 log 與本附錄。
+- **重新凍結（依 §一〇-1，上一版 AMEND2-B 原樣留著）**：
+  - **F1′** 程式碼 commit ＝ `0b58ad7bc266`（含排程器修正）；vacant-dev 需 ff 到同一 commit。
+  - F2、F3、F5、F7 不變（bank、judge_bank、smoke9 檢核表、佇列 sha 皆未動；`schedule_r530.py --check` 逐字比對通過）。
+  - F4 存證路徑不變。
+  - **F6** 於重新發射時記入 AMEND2-D。
