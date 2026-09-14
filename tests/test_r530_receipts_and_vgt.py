@@ -426,3 +426,66 @@ def test_checklist_reports_seconds_per_call(tmp_path):
         assert "併發之下 T 會變大" in tpc["note"], "拿它推時程要帶著那個未知數"
     finally:
         shutil.rmtree(run, ignore_errors=True)
+
+
+# ── 檢核表吃多個 run 目錄（冒煙為了用兩顆後端會被切成兩塊）────────────────
+def _stub_smoke_one(tmp_path, tag, task):
+    import os
+    from ops.gain.r530.run_r530 import main as run_main
+    out = f"runs/_smoke/mr_{tmp_path.name}_{tag}"
+    old = os.environ.get("VACANT_R530_WORK")
+    os.environ["VACANT_R530_WORK"] = str(tmp_path / f"work_{tag}")
+    try:
+        assert run_main(["--out", out, "--task-set", task, "--seed",
+                         f"smoke-mr-{tag}", "--backend", "none", "--brain",
+                         "stub", "--smoke"]) == 0
+    finally:
+        if old is None:
+            os.environ.pop("VACANT_R530_WORK", None)
+        else:
+            os.environ["VACANT_R530_WORK"] = old
+    return ROOT / out
+
+
+def test_checklist_merges_two_blocks(tmp_path):
+    """C9 是**整份冒煙**的性質：`A-CONF` 的第二份可能只在難的那一題出現，
+    `A-GATE` 的回饋輪可能只在另一題出現。逐塊判會把「兩件事都發生過、
+    只是不在同一塊」判成紅。"""
+    import shutil
+    from ops.gain.r530 import smoke_checklist as sc
+    a = _stub_smoke_one(tmp_path, "a", "ow_01_csvjson")
+    b = _stub_smoke_one(tmp_path, "b", "ow_02_ratelimit")
+    try:
+        out = sc.check([a, b])
+        assert out["runs"] == [str(a), str(b)]
+        assert out["rows_n"] == 6, "兩塊各三格 ⇒ 合起來是六格"
+        # 逐塊的 C6／C8／E9 都要綠，而且是**逐塊**記的
+        assert set(out["checks"]["C6"]["detail"]) == {a.name, b.name}
+        assert set(out["checks"]["C8"]["detail"]) == {a.name, b.name}
+        assert set(out["checks"]["E9"]["detail"]) == {a.name, b.name}
+        # T 跨塊加總
+        assert set(out["seconds_per_call"]["per_arm"]) == {
+            "A-SOLO", "A-CONF", "A-GATE"}
+    finally:
+        for d in (a, b):
+            shutil.rmtree(d, ignore_errors=True)
+
+
+def test_checklist_c7_catches_two_blocks_run_under_different_sandboxes(tmp_path):
+    """多塊之下 C7 變**更嚴**：兩塊的沙箱身分不同 ⇒ 那 6 格不是同一個實驗條件。"""
+    import shutil
+    from ops.gain.r530 import smoke_checklist as sc
+    a = _stub_smoke_one(tmp_path, "a", "ow_01_csvjson")
+    b = _stub_smoke_one(tmp_path, "b", "ow_02_ratelimit")
+    try:
+        assert sc.check([a, b])["checks"]["C7"]["ok"] is True
+        sm = json.loads((b / "summary.json").read_text(encoding="utf-8"))
+        sm["backend_meta"]["sandbox"] = "bwrap"      # 假裝第二塊換了沙箱
+        (b / "summary.json").write_text(json.dumps(sm, ensure_ascii=False),
+                                        encoding="utf-8")
+        out = sc.check([a, b])
+        assert out["checks"]["C7"]["ok"] is False
+        assert len(out["checks"]["C7"]["detail"]["per_run_signature"]) == 2
+    finally:
+        for d in (a, b):
+            shutil.rmtree(d, ignore_errors=True)

@@ -49,12 +49,33 @@ def _calls(run: pathlib.Path) -> list[dict]:
         if p.exists() else []
 
 
-def check(run: pathlib.Path) -> dict:
-    summary = json.loads((run / "summary.json").read_text(encoding="utf-8")) \
-        if (run / "summary.json").exists() else {}
-    rows = _rows(run)
-    calls = _calls(run)
-    out: dict = {"run": str(run), "rows_n": len(rows), "checks": {}}
+def check(runs) -> dict:
+    """一份冒煙的檢核表。`runs` 可以是**一個或多個** run 目錄。
+
+    ⚠ 為什麼要吃多個：預註冊 §三-6 說的是「冒煙那 **6 格**」，而 6 格為了
+      同時用兩顆後端會被切成兩塊（一塊一題三臂）。C9（「兩條有閘門的臂真的
+      動起來了」）是**整份冒煙**的性質不是單塊的：`A-CONF` 的第二份可能只在
+      難的那一題出現，而 `A-GATE` 的回饋輪可能只在另一題出現。
+      逐塊判會讓「兩件事都發生過、只是不在同一塊」被判成紅。
+    ⚠ 反過來，`C7`（沙箱身分）在多塊之下變**更嚴**：兩塊的沙箱必須是同一種，
+      否則那 6 格不是在同一個實驗條件下量的。
+    """
+    if isinstance(runs, (str, pathlib.Path)):
+        runs = [runs]
+    runs = [pathlib.Path(r) for r in runs]
+    summaries = {}
+    rows: list[dict] = []
+    calls: list[dict] = []
+    for r in runs:
+        sp = r / "summary.json"
+        summaries[str(r)] = (json.loads(sp.read_text(encoding="utf-8"))
+                             if sp.exists() else {})
+        rows += _rows(r)
+        calls += _calls(r)
+    run = runs[0]
+    summary = summaries[str(run)]
+    out: dict = {"run": str(run), "runs": [str(r) for r in runs],
+                 "rows_n": len(rows), "checks": {}}
 
     def put(cid, ok, detail):
         out["checks"][cid] = {"ok": bool(ok), "detail": detail}
@@ -139,33 +160,52 @@ def check(run: pathlib.Path) -> dict:
                      + ([] if moved else ["沒有任何一格動過工作區"])})
 
     # ── C6 收據條數與驗鏈 ─────────────────────────────────────────────
-    rc = subprocess.run(
-        [sys.executable, "ops/gain/replay/verify_run_receipts.py",
-         "--glob", str(run.relative_to(ROOT)) if _under(run) else str(run)],
-        cwd=str(ROOT), capture_output=True, text=True, timeout=300)
-    put("C6", rc.returncode == 0,
-        {"verify_rc": rc.returncode, "tail": rc.stdout.strip().splitlines()[-12:]})
+    c6 = {}
+    c6_ok = True
+    for r in runs:
+        rc = subprocess.run(
+            [sys.executable, "ops/gain/replay/verify_run_receipts.py",
+             "--glob", str(r.relative_to(ROOT)) if _under(r) else str(r)],
+            cwd=str(ROOT), capture_output=True, text=True, timeout=300)
+        c6[r.name] = {"verify_rc": rc.returncode,
+                      "tail": rc.stdout.strip().splitlines()[-8:]}
+        c6_ok = c6_ok and rc.returncode == 0
+    put("C6", c6_ok, c6)
 
     # ── C7 沙箱身分 ───────────────────────────────────────────────────
     meta = summary.get("backend_meta") or {}
     backends = {r.get("backend") for r in rows}
-    put("C7", len(backends) == 1 and bool(meta.get("sandbox")),
+    # 多塊之下這一條變**更嚴**：每一塊的沙箱身分與三個隔離欄位都要一樣，
+    # 否則那 6 格不是在同一個實驗條件下量的。
+    sig = {str(r): tuple(
+        ((summaries[str(r)].get("backend_meta") or {}).get(k))
+        for k in ("sandbox", "network_isolated", "write_confined",
+                  "repo_hidden_from_sandbox", "sandbox_uid"))
+        for r in runs}
+    put("C7", len(backends) == 1 and bool(meta.get("sandbox"))
+        and len(set(sig.values())) == 1,
         {"sandbox": meta.get("sandbox"), "per_row": sorted(b for b in backends if b),
          "network_isolated": meta.get("network_isolated"),
          "write_confined": meta.get("write_confined"),
-         "repo_hidden_from_sandbox": meta.get("repo_hidden_from_sandbox")})
+         "repo_hidden_from_sandbox": meta.get("repo_hidden_from_sandbox"),
+         "per_run_signature": {k: list(v) for k, v in sig.items()}})
 
     # ── C8 V/GT ───────────────────────────────────────────────────────
     from ops.gain.harness_vgt_audit import audit_run_r530
     tasks = {tid: taskmod.load_task(tid) for tid in sorted({r["task_id"] for r in rows})}
-    vgt = audit_run_r530(run, tasks)
-    put("C8", vgt["verdict"] == "CLEAN" and vgt["deny_hidden_read_n"] == 0,
-        {"verdict": vgt["verdict"], "violations_n": len(vgt["violations"]),
-         "deny_hidden_read_n": vgt["deny_hidden_read_n"],
-         "excused_by_rule": vgt["excused_by_rule"],
-         "workspace_needle_hits_n": vgt["workspace_needle_hits_n"],
-         "records_audited": vgt["records_audited"],
-         "per_role": vgt["per_role"]})
+    c8 = {}
+    c8_ok = True
+    for r in runs:
+        vgt = audit_run_r530(r, tasks)
+        c8[r.name] = {"verdict": vgt["verdict"],
+                      "violations_n": len(vgt["violations"]),
+                      "deny_hidden_read_n": vgt["deny_hidden_read_n"],
+                      "excused_by_rule": vgt["excused_by_rule"],
+                      "workspace_needle_hits_n": vgt["workspace_needle_hits_n"],
+                      "records_audited": vgt["records_audited"],
+                      "per_role": vgt["per_role"]}
+        c8_ok = c8_ok and vgt["verdict"] == "CLEAN" and vgt["deny_hidden_read_n"] == 0
+    put("C8", c8_ok, c8)
 
     # ── C9：兩條有閘門的臂**真的動起來了**（預註冊 §三-6，第五輪裁決 4）──
     # 其他八條問的是「有沒有壞掉」，C9 問的是**「有沒有發生」**。
@@ -186,15 +226,21 @@ def check(run: pathlib.Path) -> dict:
              "**證不了**「機制在 20 題上都會啟動」。這一句要跟著 C9 一起帶。")})
 
     # ── E-9／E-10（Fable 2026-09-14）──────────────────────────────────
-    e9 = gates.e9_sandbox_gate(meta)
     # 冒煙如果是 `--brain stub` 跑的，E-9 沒有被強制（見 run_r530）——
     # 那一份冒煙證明的是 harness 的路徑，不是沙箱的隔離強度。
-    # 兩件事要分得開，所以這裡照著 run 目錄裡那份 `gate_e9.json` 的
+    # 兩件事要分得開，所以這裡照著各 run 目錄裡那份 `gate_e9.json` 的
     # `enforced` 走，而不是自己重新決定。
-    stored = _read_json(run / "gate_e9.json") or {}
-    enforced = stored.get("enforced", summary.get("brain") != "stub")
-    e9["enforced"] = enforced
-    put("E9", e9["ok"] or not enforced, e9)
+    e9_all = {}
+    e9_ok = True
+    for r in runs:
+        m = (summaries[str(r)].get("backend_meta") or {})
+        rec = gates.e9_sandbox_gate(m)
+        stored = _read_json(r / "gate_e9.json") or {}
+        rec["enforced"] = stored.get(
+            "enforced", summaries[str(r)].get("brain") != "stub")
+        e9_all[r.name] = rec
+        e9_ok = e9_ok and (rec["ok"] or not rec["enforced"])
+    put("E9", e9_ok, e9_all)
     e10 = gates.e10_noop_gate(rows)
     put("E10", e10["ok"], {k: e10[k] for k in
                            ("per_arm", "arms_over_threshold",
@@ -203,7 +249,12 @@ def check(run: pathlib.Path) -> dict:
     # ── 每通平均秒數 T（逐臂；**含工具往返**）──────────────────────────
     # 預註冊 §七-2b 的時程公式要填它。**不是**端點延遲：它把沙箱、驗收、
     # 樹雜湊、封存全部算進去，因為排程要的是「一格要多久」不是「一通多快」。
-    stats = summary.get("arms_stats") or {}
+    stats: dict = {}
+    for r in runs:
+        for arm, st in (summaries[str(r)].get("arms_stats") or {}).items():
+            d = stats.setdefault(arm, {"calls": 0, "wall_s": 0.0})
+            d["calls"] += st.get("calls") or 0
+            d["wall_s"] += st.get("wall_s") or 0.0
     per_arm_t = {}
     for arm, st in stats.items():
         calls = st.get("calls") or 0
@@ -251,7 +302,7 @@ def _count_hidden_cases(task: dict) -> int:
 
 def render(out: dict) -> str:
     tpc = (out.get("seconds_per_call") or {})
-    L = [f"═══ R530 冒煙檢核表 {out['run']} ═══",
+    L = [f"═══ R530 冒煙檢核表 {' + '.join(out.get('runs') or [out['run']])} ═══",
          f"rows {out['rows_n']}　每通平均秒數 T(逐臂)="
          f"{json.dumps(tpc.get('per_arm'), ensure_ascii=False)}"
          f"　整體={tpc.get('overall')}"]
@@ -265,16 +316,17 @@ def render(out: dict) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="R530 冒煙檢核表（零模型呼叫）")
-    ap.add_argument("--run", required=True)
+    ap.add_argument("--run", required=True, nargs="+",
+                    help="一個或多個 run 目錄。冒煙為了同時用兩顆後端會被切成"
+                         "兩塊，而 C9 是**整份冒煙**的性質（見 check 的 docstring）")
     ap.add_argument("--json", default=None,
-                    help="預設寫到 <run>/checklist.json")
+                    help="預設寫到 <第一個 run>/checklist.json")
     args = ap.parse_args()
-    run = pathlib.Path(args.run)
-    if not run.is_absolute():
-        run = ROOT / run
-    out = check(run)
+    runs = [(p if p.is_absolute() else ROOT / p)
+            for p in (pathlib.Path(x) for x in args.run)]
+    out = check(runs)
     print(render(out))
-    dest = pathlib.Path(args.json) if args.json else (run / "checklist.json")
+    dest = pathlib.Path(args.json) if args.json else (runs[0] / "checklist.json")
     dest.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n",
                     encoding="utf-8")
     print(f"\nchecklist → {dest}")
