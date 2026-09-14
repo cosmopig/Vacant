@@ -600,3 +600,77 @@ def test_e11_never_reports_a_negative_throughput():
     vals = list((out.get("prefill_spread") or {}).get("per_endpoint", {}).values())
     assert all(v > 0 for v in vals)
     assert out["per_endpoint"]["x"]["prefill_ms_per_1k_prompt"] is None
+
+
+def test_c2_exempts_a_conf_cell_that_never_got_to_declare(tmp_path):
+    """`attempts_exhausted` 且三份都撞每份上限 ⇒ `declared_done_turn` 是 None
+    不算不合格（2026-09-14 smoke9a 的 A-CONF/ow_01 就是這個形狀）。"""
+    import shutil
+    from ops.gain.r530 import smoke_checklist as sc
+    run = _stub_smoke(tmp_path)
+    try:
+        rows = [json.loads(l) for l in (run / "rows.jsonl").open(encoding="utf-8")
+                if l.strip()]
+        for r in rows:
+            if r["arm"] == "A-CONF":
+                r["declared_done_turn"] = None
+                r["stop_reason"] = "attempts_exhausted"
+                r["attempts"] = [{"attempt": i, "persona": f"p{i}",
+                                  "gate_rounds": [],
+                                  "attempt_calls_exhausted": True}
+                                 for i in (1, 2, 3)]
+        (run / "rows.jsonl").write_text(
+            "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
+            encoding="utf-8")
+        out = sc.check(run)
+        assert out["checks"]["C2"]["ok"] is True
+        assert out["checks"]["C2"]["detail"]["cells_that_never_got_the_chance"]
+    finally:
+        shutil.rmtree(run, ignore_errors=True)
+
+
+def test_c2_still_red_when_a_gated_cell_declared_but_we_lost_the_turn(tmp_path):
+    """某一份**有**宣告過（gate_rounds 非空）卻沒有 turn ⇒ 那是偵測失敗，照樣紅。"""
+    import shutil
+    from ops.gain.r530 import smoke_checklist as sc
+    run = _stub_smoke(tmp_path)
+    try:
+        rows = [json.loads(l) for l in (run / "rows.jsonl").open(encoding="utf-8")
+                if l.strip()]
+        for r in rows:
+            if r["arm"] == "A-CONF":
+                r["declared_done_turn"] = None
+                r["stop_reason"] = "attempts_exhausted"
+                r["attempts"] = [{"attempt": 1, "persona": "p1",
+                                  "gate_rounds": [{"gate_round": 1,
+                                                   "all_pass": False}],
+                                  "attempt_calls_exhausted": False}]
+        (run / "rows.jsonl").write_text(
+            "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
+            encoding="utf-8")
+        out = sc.check(run)
+        assert out["checks"]["C2"]["ok"] is False
+    finally:
+        shutil.rmtree(run, ignore_errors=True)
+
+
+def test_c2_is_red_when_nothing_was_ever_detected(tmp_path):
+    """全部格子都「沒機會宣告」⇒ 這一條根本沒被測到，不准判綠。"""
+    import shutil
+    from ops.gain.r530 import smoke_checklist as sc
+    run = _stub_smoke(tmp_path)
+    try:
+        rows = [json.loads(l) for l in (run / "rows.jsonl").open(encoding="utf-8")
+                if l.strip()]
+        for r in rows:
+            r["declared_done_turn"] = None
+            r["stop_reason"] = "budget_calls"
+        (run / "rows.jsonl").write_text(
+            "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
+            encoding="utf-8")
+        out = sc.check(run)
+        assert out["checks"]["C2"]["ok"] is False
+        assert any("根本沒被測到" in p
+                   for p in out["checks"]["C2"]["detail"]["problems"])
+    finally:
+        shutil.rmtree(run, ignore_errors=True)

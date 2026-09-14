@@ -106,13 +106,41 @@ def check(runs) -> dict:
 
     # ── C2 宣告完成的輪次 ─────────────────────────────────────────────
     c2 = {f"{r['arm']}/{r['task_id']}": r.get("declared_done_turn") for r in rows}
-    # 撞預算而從來沒宣告完成的格子不算不合格——它是一個**真的**結局
-    # （`budget_*`），檢核表要分得出「偵測不到宣告」與「它沒宣告」。
-    c2_bad = [k for k, v in c2.items()
-              if v is None and not (
-                  next(r for r in rows if f"{r['arm']}/{r['task_id']}" == k)
-                  ["stop_reason"] or "").startswith("budget")]
-    put("C2", not c2_bad, {"declared_done_turn": c2, "problems": c2_bad})
+
+    def _never_got_the_chance(r: dict) -> bool:
+        """這一格**沒有機會**宣告完成 ⇒ `declared_done_turn` 是 None 不算不合格。
+
+        兩種：
+          · `budget_*`：整格的預算先用完。
+          · `attempts_exhausted` **而且每一份都是撞每份上限收的**：
+            `A-CONF` 三份都沒跑到宣告完成——那是一個**真的**結局
+            （2026-09-14 smoke9a 的 `A-CONF/ow_01` 就是），不是偵測失敗。
+            ⚠ 但若某一份**有**宣告完成過（`gate_rounds` 非空），
+              那 `declared_done_turn` 就不該是 None ⇒ 照樣算紅。
+        """
+        stop = r.get("stop_reason") or ""
+        if stop.startswith("budget"):
+            return True
+        if stop != "attempts_exhausted":
+            return False
+        atts = r.get("attempts") or []
+        return bool(atts) and all(
+            a.get("attempt_calls_exhausted") and not a.get("gate_rounds")
+            for a in atts)
+
+    c2_bad = [f"{r['arm']}/{r['task_id']}" for r in rows
+              if r.get("declared_done_turn") is None and not _never_got_the_chance(r)]
+    # ⚠ **反向牙齒**：全部格子都「沒機會宣告」的話，這一格就完全沒被測到
+    #   ——那與「偵測得到」是兩件事，不准一起判綠。
+    detected_somewhere = any(v is not None for v in c2.values())
+    if not detected_somewhere:
+        c2_bad.append("沒有任何一格偵測到「宣告完成」⇒ 這一條根本沒被測到")
+    put("C2", not c2_bad,
+        {"declared_done_turn": c2,
+         "cells_that_never_got_the_chance": [
+             f"{r['arm']}/{r['task_id']}" for r in rows
+             if r.get("declared_done_turn") is None and _never_got_the_chance(r)],
+         "problems": c2_bad})
 
     # ── C3 可見驗收（**A-SOLO 那格也要有**）────────────────────────────
     c3_bad = [f"{r['arm']}/{r['task_id']}" for r in rows
