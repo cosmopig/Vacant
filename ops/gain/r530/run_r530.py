@@ -77,14 +77,15 @@ SMOKE_OUT_PREFIX = "runs/_smoke/"
 #:   `--smoke` 以外拿不到這一份，而且 `summary.budget_profile` 會寫 `smoke`。
 #:   正式 run 的預算不夠是一個**要回去重寫 DECISION 的發現**（§三-4 PR-4），
 #:   不是一個可以就地轉的旋鈕。
-#: ⚠ `max_model_calls` 也調小（24 → 8）、閘門輪 5 → 3。理由是**冒煙要驗的是
-#:   量具不是結果**：六格全部跑到 24 通上限要三小時以上，而那三小時買到的
-#:   是「模型在第 19 通做了什麼」——那不是 C1–C8 任何一格在問的事。
-#:   調小之後反而**更容易**走到拒交（`gate_exhausted`／`attempts_exhausted`）
-#:   與撞預算那幾條路徑，而那幾條正是冒煙最該驗的。
-#:   ⚠ 正式 run 一個字都不動凍結的那一份（`budget_profile: "frozen"`）。
-SMOKE_BUDGET = {"max_tokens": 2_000_000, "max_wall_s": 1_800,
-                "max_model_calls": 8, "max_gate_rounds": 3}
+#: ⚠ **只放寬 token 與牆鐘，`max_model_calls` 一個字都不動。**
+#:   2026-09-14 試過把它調小到 8 想讓冒煙跑快一點，結果是**冒煙變成測不到東西**：
+#:   真後端實測模型要到第 14 通才「宣告完成」（`runs/_smoke` smoke4 的
+#:   A-SOLO/ow_01），8 通之下它永遠停在 `budget_calls`，於是
+#:   §三-6 的 C2（宣告完成的輪次）與 C3（可見驗收結果）**兩格永遠是空的**——
+#:   而那兩格正是冒煙要驗的。調快的代價是量不到，所以不調。
+#:   冒煙因此就是慢的（六格約 1.5 小時），那是這個任務形狀的成本不是缺陷。
+#: ⚠ 正式 run 一個字都不動凍結的那一份（`budget_profile: "frozen"`）。
+SMOKE_BUDGET = {"max_tokens": 2_000_000, "max_wall_s": 1_800}
 
 NOT_EVIDENCE_TEXT = (
     "這個目錄是冒煙，**不是證據**。\n"
