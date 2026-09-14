@@ -77,7 +77,14 @@ SMOKE_OUT_PREFIX = "runs/_smoke/"
 #:   `--smoke` 以外拿不到這一份，而且 `summary.budget_profile` 會寫 `smoke`。
 #:   正式 run 的預算不夠是一個**要回去重寫 DECISION 的發現**（§三-4 PR-4），
 #:   不是一個可以就地轉的旋鈕。
-SMOKE_BUDGET = {"max_tokens": 2_000_000, "max_wall_s": 1_800}
+#: ⚠ `max_model_calls` 也調小（24 → 8）、閘門輪 5 → 3。理由是**冒煙要驗的是
+#:   量具不是結果**：六格全部跑到 24 通上限要三小時以上，而那三小時買到的
+#:   是「模型在第 19 通做了什麼」——那不是 C1–C8 任何一格在問的事。
+#:   調小之後反而**更容易**走到拒交（`gate_exhausted`／`attempts_exhausted`）
+#:   與撞預算那幾條路徑，而那幾條正是冒煙最該驗的。
+#:   ⚠ 正式 run 一個字都不動凍結的那一份（`budget_profile: "frozen"`）。
+SMOKE_BUDGET = {"max_tokens": 2_000_000, "max_wall_s": 1_800,
+                "max_model_calls": 8, "max_gate_rounds": 3}
 
 NOT_EVIDENCE_TEXT = (
     "這個目錄是冒煙，**不是證據**。\n"
