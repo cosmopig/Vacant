@@ -49,8 +49,25 @@ def _rel(p: pathlib.Path) -> str:
 
 
 #: 收據的事件別 → 它對帳的那一邊。`*_verdict` 每題一筆，`*_attempt` 每輪一筆。
-VERDICT_TYPES = ("harness_verdict", "conform_verdict")
-ATTEMPT_TYPES = ("harness_attempt", "conform_attempt")
+#:
+#: round530（2026-09-13）：加上 R530 的兩個型別。**對帳規則一個字都沒改**——
+#: 加的只是「認得這兩個名字」。認不得的型別會讓 `verdict_n` 變成 0，
+#: 於是每一條 R530 的鏈都判 BROKEN（`verdict_count_ne_rows`），
+#: 而那是量具沒接上，不是鏈壞了。
+#: `ws_attempt`：每一個閘門輪／每一次重抽嘗試一筆；`A-SOLO` 宣告完成時也一筆
+#:   （`verdict_sha256=None` ＝這一輪沒有跑驗收）⇒ `attempt 數 ≥ verdict 數`
+#:   這條對帳在沒有閘門的那條臂上照樣成立。
+#: `ws_verdict`：每格一筆（每題每臂）。
+#: ⚠ **R530 的兩個型別有兩套名字，兩套都認**：Fable 2026-09-13 給建置代理的
+#:   裁決寫的是 `ws_attempt`／`ws_verdict`，而同一天更新的預註冊
+#:   （§五-4、§三-6 C6）寫的是 `openwork_attempt`／`openwork_verdict`。
+#:   兩邊指的是同一件事。認一套而漏另一套會讓那一批鏈判 `verdict_count_ne_rows`
+#:   ——而那是量具沒接上，不是鏈壞了。**命名要由人類／Fable 收斂成一套**；
+#:   在那之前這裡兩套都收，並且在收斂之後才准刪。
+VERDICT_TYPES = ("harness_verdict", "conform_verdict",
+                 "ws_verdict", "openwork_verdict")
+ATTEMPT_TYPES = ("harness_attempt", "conform_attempt",
+                 "ws_attempt", "openwork_attempt")
 
 
 def verify_chain_detailed(book: Logbook, who: PublicIdentity) -> list[dict]:
@@ -286,6 +303,52 @@ def selftest() -> int:
            and any(f["reason"] == "verdict_count_ne_rows" for f in r5["failures"])
            and any(f["reason"] == "verdict_task_ids_ne_rows" for f in r5["failures"]),
            json.dumps([f["reason"] for f in r5["failures"]], ensure_ascii=False))
+
+        # ── round530：R530 的兩個新型別（`ws_attempt`／`ws_verdict`）─────
+        # 乾淨路徑要 OK，而且**竄改工作區樹雜湊必須被抓到**——樹雜湊是 R530
+        # 唯一佐證「當時的目錄長這樣」的欄位，它被改掉而鏈還說 OK 的話，
+        # 收據對 R530 就沒有意義。
+        r530_ident = Identity.generate()
+        r530 = Logbook()
+        for i in range(2):
+            r530.append("ws_attempt",
+                        {"task_id": f"ow_0{i + 1}", "arm": "A-GATE", "attempt": 1,
+                         "gate_round": 1, "ws_sha256": "a" * 64,
+                         "verdict_sha256": "b" * 64,
+                         "conversation_sha256": "c" * 64},
+                        r530_ident, ts_ms=1_700_000_001_000 + i)
+        for i in range(2):
+            r530.append("ws_verdict",
+                        {"task_id": f"ow_0{i + 1}", "arm": "A-GATE",
+                         "accepted": True, "ws_start_sha256": "d" * 64,
+                         "ws_end_sha256": "e" * 64, "verdict_sha256": "b" * 64,
+                         "conversation_sha256": "c" * 64,
+                         "stop_reason": "visible_pass"},
+                        r530_ident, ts_ms=1_700_000_002_000 + i)
+        r530_rows = [{"arm": "A-GATE", "task_id": f"ow_0{i + 1}"} for i in range(2)]
+        r530.save(d / "receipts_A-GATE.ndjson")
+        (d / "receipts_A-GATE.pub.json").write_text(json.dumps(
+            {"vacant_id": r530_ident.vacant_id, "pub_hex": pub_to_hex(r530_ident.pub)}),
+            encoding="utf-8")
+        r6 = verify_arm(d, "A-GATE", r530_rows)
+        ck("F_r530_types_are_recognised",
+           r6["verdict"] == "OK" and r6["verdict_n"] == 2 and r6["attempt_n"] == 2
+           and r6["type_counts"].get("ws_verdict") == 2
+           and r6["type_counts"].get("ws_attempt") == 2,
+           json.dumps(r6, ensure_ascii=False)[:400])
+
+        lines = (d / "receipts_A-GATE.ndjson").read_text(encoding="utf-8").splitlines()
+        e = json.loads(lines[0])
+        e["payload"]["ws_sha256"] = "f" * 64
+        bad = list(lines)
+        bad[0] = json.dumps(e, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        (d / "receipts_A-GATE.ndjson").write_text("\n".join(bad) + "\n", encoding="utf-8")
+        r7 = verify_arm(d, "A-GATE", r530_rows)
+        ck("G_tampered_workspace_hash_is_caught",
+           r7["verdict"] == "BROKEN"
+           and any(f["reason"] == "bad_signature" and f["seq"] == 1
+                   for f in r7["failures"]),
+           json.dumps([f["reason"] for f in r7["failures"]], ensure_ascii=False))
     for f in fails:
         print(f"  FAIL {f}")
     print("selftest: " + ("PASS" if not fails else f"{len(fails)} FAILED"))

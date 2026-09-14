@@ -1,0 +1,101 @@
+{
+  "task_id": "ow_10_dedupe",
+  "stratum": "tight",
+  "title": "Deduplicate records with a choice of conflict policy",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_10_dedupe",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Deduplication is a stock operation, but this contract pins choices no library shares: three named policies with merge defined as last-non-None per field, composite keys compared part by part rather than as a joined string, a missing key field raising KeyError rather than being skipped, and a hard requirement that no input dictionary is aliased or mutated. pandas drop_duplicates and the usual set-based recipe both fail several of these.",
+  "visible_n": 3,
+  "hidden_n": 13,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check.",
+  "contract_additions": [
+    "goal: added 'empty of meaning counts as not filled in', the composite-key sentences, the loud-KeyError sentence, the bad-policy sentence and the do-not-mutate sentence -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
+    "contract: pinned that 'last' replaces the record wholesale, that the KeyError argument is the field name, and that result dictionaries are new objects."
+  ],
+  "sha256": {
+    "contract.md": "799e63184f2ad3c11f6be3d6bd4987ec5af4442ffb5b1404d0fd7baf2547b5dd",
+    "goal.md": "d2bb4e2466e2c14e2905352e40ed4ee8d20629fa7196c0d5460466d87a06d026",
+    "hidden/h01_order_is_first_appearance.py": "de5880fff6b3130dba6bda1be0d02d27f499f7a98c708b3c96974b8d6ef99334",
+    "hidden/h02_first_is_the_default.py": "b40c5316e3a8de568318794d5c6b653365d0dd11dc972eb0a2b50d93e0807243",
+    "hidden/h03_last_replaces_wholesale.py": "54b2871444f78d652272361dc04d1cda6873177fff86aceffede4d78640ba6a6",
+    "hidden/h04_merge_takes_the_last_filled.py": "ccd928c98a1bdcd1ae1966ee89b9a0cd3af5b2e3613a01e1240a2a4e246a55b6",
+    "hidden/h05_merge_gains_new_fields.py": "ae56d8508515b5a134abe598d7954272675204b66a2a30d6cb514aaead78971c",
+    "hidden/h06_none_never_overwrites.py": "b06eb99b7bfc01a73a12dff03855227db8f18a88eea8aa439c2748e91c3f5a9e",
+    "hidden/h07_composite_key_order.py": "3caedd69016a5c23bb1d3c4fe77758187ab250cd450b6854359abd9bb01f428a",
+    "hidden/h08_composite_parts_do_not_run_together.py": "356cd5a24073e3b1121205b09218425e280f2e2b38398067a294a5814d58b11f",
+    "hidden/h09_missing_key_field.py": "cbe2a5b968c96999473cc4dd296488901ed86ed56c5127ff743f84a3b0f7f3ee",
+    "hidden/h10_unknown_policy.py": "1a88e9340d2e35d83e648d2b5e8330d3c7222072db61a397c054b882aaff4b6a",
+    "hidden/h11_inputs_are_left_alone.py": "733905d6aef5edce9a61638f70d801d5191816d40d2744962af26a297869a5f2",
+    "hidden/h12_nothing_to_do.py": "9343426d51c58c70ae5cf24a4f2587f2218ded18c54fdbc392b2acae2aa57ab7",
+    "hidden/h13_key_values_of_other_types.py": "8492eb4128c8a5b6f0ea7bc03ad68439205332e233adcc0a9efa60fcb0fcf3dc",
+    "reference/bad_a.py": "ce8576d199bf19dfefc89df42c75d686ef83ef091a3b1e164306703e0d69396f",
+    "reference/bad_b.py": "19ae88dfb38d6b6ae32b48dc310ab1544e220aac85ae32c1fb892e0e5eed064a",
+    "reference/bad_c.py": "53a3f2df73df4f6826193fab78fea7427e9026f33ed8003752b07b5b2179867e",
+    "reference/solution.py": "d5a24e0a579b17b3af588e59ee16558973bfe5319544e9d558640f7322ccf2c5",
+    "rubric.md": "926d69dfd17e9ba3902a2ec5a11399dd2454133f461fbec546f758bf93ba8eb3",
+    "tests_visible/v01_first_appearance_order.py": "577855806685ce679c01c7ed3081650c6fa4d31bbaa5e7d3cd178de956657749",
+    "tests_visible/v02_keep_the_last.py": "1509846bf270150b8cf3944eb69c5a1896f33baeef466e87348b99449e19a571",
+    "tests_visible/v03_merge_filled_fields.py": "f89dc703c5e016469b70f9ab78de8da3efb66702d741cc0cb6cc1315b0a13b28"
+  },
+  "ref_solution_lines": 30,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": 2,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_order_is_first_appearance.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_first_is_the_default.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_last_replaces_wholesale.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_merge_takes_the_last_filled.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_merge_gains_new_fields.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_none_never_overwrites.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_composite_key_order.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_composite_parts_do_not_run_together.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_missing_key_field.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_unknown_policy.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_inputs_are_left_alone.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_nothing_to_do.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h13_key_values_of_other_types.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "task_id": "ow_09_minitemplate",
+  "stratum": "tight",
+  "title": "A very small template engine that fails loudly",
+  "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_09_minitemplate",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "The tag spelling is borrowed from Mustache-like engines on purpose, but the graded semantics are the opposite of theirs: a missing key must raise rather than render empty, nesting an each block is forbidden rather than supported, an each over a non-list is an error rather than an iteration, and the escape is a backslash rather than a triple brace. A memorised Mustache implementation fails most of these hidden checks.",
+  "visible_n": 3,
+  "hidden_n": 13,
+  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check.",
+  "contract_additions": [
+    "goal: added the outer-names sentence, the empty-list sentence, the comment sentence, the literal-braces sentence and the four malformed-template cases -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
+    "contract: pinned the KeyError argument as the placeholder name as written, whitespace trimming inside braces, and the complete list of ValueError cases."
+  ],
+  "sha256": {
+    "contract.md": "6b1b96cd077611d1cb3cc1b41e84a569b5c7046375cab99c640770735f6e6d89",
+    "goal.md": "73bcd3f0a3d259b4e5fe34c6e47b93e9504c2c5f7affe074fe263ca4a8b1ba61",
+    "hidden/h01_values_become_text.py": "9ffcb42b5a1c607b1adce7da5b2d0fb1426ad5bdf848f82909d74ec48e2aac7a",
+    "hidden/h02_deep_paths.py": "8a1c74182730b428491ff01195315f5cd020eb20dc2bffb14bffc330665e8735",
+    "hidden/h03_missing_path_names_itself.py": "500f5d3213f98a5cac30c45ea18a5a4995a08bdbd9c028fcfdf35ce9f3fbb2e3",
+    "hidden/h04_never_an_empty_string.py": "ff8498337fa9e06ff4a1bbf473a65b75ca9fed2a3108ef5a2d91fcf1bd4b6fb0",
+    "hidden/h05_item_itself.py": "219f593c84221b816b281441a93dd8abb6d1e355062206c08534c8e15a6b1e48",
+    "hidden/h06_outer_names_inside_a_block.py": "bf026d5ba6c8dcc2177a09319ad33722af45eea037215b4855914fc97b4a29e5",
+    "hidden/h07_empty_list_leaves_nothing.py": "f294eb50e4b12410ca81cffa80d4b35d09a1d4f7821d6330203d7f602e6338f5",
+    "hidden/h08_comments_vanish.py": "567df5c20b294ef8cd49748dc09a1998d681f4944b25755bfe277cc443105ceb",
+    "hidden/h09_literal_braces.py": "fb113f45e40399160faf4a4640d0241fc0be3aa9c742ea3ae3c86bd96b929aa7",
+    "hidden/h10_unclosed_placeholder.py": "d88e4bbee63a7103965b576ef69d961996fbb777d79d4a893463dc99fbef03c7",
+    "hidden/h11_no_repeat_inside_a_repeat.py": "d3d933d428f873afdce17b25e85055e029b31420fdadaed798cf8da18db02ad2",
+    "hidden/h12_repeat_over_a_non_list.py": "0c36c5e656e360936829770b3fadc52e02e661ff9f4fa9ceaace03fd8c5048db",
+    "hidden/h13_stray_closing_tag.py": "33b5143f8d0a0a527f8b9e4e961eb965abef8ffc31d2346d33088f66ed4f5cce",
+    "reference/bad_a.py": "99468e04c52c41ab900d06a6c29c2c3425d707ec07148634c677f984fb41f6fe",
+    "reference/bad_b.py": "10ff066e85002088e1f5bb961d9fc3f7daa737603a9424210c1496704e439f3c",
+    "reference/bad_c.py": "872cd7d556e412c0ac86c748272f673a1e0aa388d155ee6e480fcf22b38bb912",
+    "reference/solution.py": "d1ebcfb126ab9b0a6b21eef20374ed5e8d350df1ca937268eaff4d823045b42f",
+    "rubric.md": "9092ea4f9780b04d3225e22859de78e26c732b16318ca39465af57d71c2f04d2",
+    "tests_visible/v01_placeholders.py": "5c7ff05d4406913f4c9108a2c502188d9a9a6136554882da9ae3006c4a564d52",
+    "tests_visible/v02_repeat_a_block.py": "0b0f8d2de0bf9e1545f711b20b771d884c3cde546ad2d983a3a6a3f1869f6962",
+    "tests_visible/v03_missing_key_is_loud.py": "9ec2972310e8a4afe784896aeec6a80afc1b8c261c40e906225c79a61a6d96cf"
+  },
+  "ref_solution_lines": 87,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": 7,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_values_become_text.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_deep_paths.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_missing_path_names_itself.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_never_an_empty_string.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_item_itself.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_outer_names_inside_a_block.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_empty_list_leaves_nothing.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_comments_vanish.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_literal_braces.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_unclosed_placeholder.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_no_repeat_inside_a_repeat.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_repeat_over_a_non_list.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h13_stray_closing_tag.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
+}

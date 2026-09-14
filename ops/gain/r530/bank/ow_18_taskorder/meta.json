@@ -1,0 +1,62 @@
+{
+  "task_id": "ow_18_taskorder",
+  "stratum": "loose",
+  "title": "An order to run jobs in (loose contract)",
+  "prereg_ref": "Fable ruling 2026-09-13: loose stratum, negative control layer",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Topological sorting is textbook and graphlib.TopologicalSorter exists, which is the point: this task deliberately grades only the properties the goal states, so a worker who reaches for the library and one who writes Kahn's algorithm can both score full marks quantitatively and be separated only by the qualitative reading. Nothing here is a trick the library gets wrong.",
+  "visible_n": 2,
+  "hidden_n": 6,
+  "loose_note": "The contract fixes the entry point, the argument shape and the return type only. Every hidden check tests a property the goal states in words; nothing about the chosen order among the valid ones is graded.",
+  "sha256": {
+    "contract.md": "4fe405505db9bbdbc6c26329383934316b1a7a7bfb50c1af9dd09772574a7060",
+    "goal.md": "7103256d55b8f0840fca5e6484f37c63ccecb0013b8f733c07bddd0a9f93f49f",
+    "hidden/h01_every_job_exactly_once.py": "800cd84b31e1efe7ca70653903ec100365b05a06eb516c2ddbb7733e214f4a5e",
+    "hidden/h02_nothing_runs_too_early.py": "c5811074e2f875a2a7c9c10e9a8ecc1a5c6f47db9af29932223de39bd5f8d56b",
+    "hidden/h03_same_table_same_order.py": "951156821120a57cfd1865ef55c678f64d17edf64949a281daf062f53a4fd2eb",
+    "hidden/h04_circles_are_reported.py": "34125b57b194740e267bb604e9eb212b1ac7e666f8a4436b592d8b1fd5101eb2",
+    "hidden/h05_a_job_waiting_on_itself.py": "a02211145d1a945d96ee6da649637a43780380301ba92370a506f7c97a59bc63",
+    "hidden/h06_nothing_to_do.py": "49130fad86c09aaa04011565dd954f888084b93a6f8faf46ebbb86bce35024fb",
+    "reference/bad_a.py": "df627b1ba9626cab7effc8b42d0551fc818149c496fbe976b8cb33cb986206d4",
+    "reference/bad_b.py": "18e9c7b8d34f3fe582751512d178e6a61bf7e3bfbb00eac42bf2b8fce7a00d30",
+    "reference/bad_c.py": "f236cf13cbca948c6f6842f38f00576436f93b3a4ad9f30edb1fc234175e1e70",
+    "reference/solution.py": "5bfad17fb5579ec44616fbfb9101b249e2cf86a7b3a1f7399024f64f489377b2",
+    "rubric.md": "6aae9a63d7dc4852e6057f64f59f646a385dfce3baa99dfa2ee4f99d308b0585",
+    "tests_visible/v01_prerequisites_come_first.py": "55fb9ae29b129a4279f15c89c2ad7848a09652216c95465ac7b91cec28dd7977",
+    "tests_visible/v02_a_circle_is_an_error.py": "c05df1408fd8b2688145b6b41e1c5b09975afb703bfbc3f5088b2199dac9f659"
+  },
+  "ref_solution_lines": 23,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": 2,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_every_job_exactly_once.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_nothing_runs_too_early.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_same_table_same_order.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_circles_are_reported.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_a_job_waiting_on_itself.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_nothing_to_do.py": {
+      "boundary_only": false,
+      "note": "the only loose-layer check anchored to the CONTRACT rather than to a goal-stated property. plan({}) == [] is entailed by 'every job appears in the order exactly once' plus 'plan returns a list of job names', so it holds, but it is the one loose check that is not literally 'goal-stated'.",
+      "marked_by": "s5_2_reviewer"
+    }
+  }
+}

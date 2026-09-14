@@ -1,0 +1,68 @@
+{
+  "schema": "r530.rubric.v1",
+  "source": "ops/gain/r530/bank/<task_id>/rubric.md 的共用段（20 題逐位元相同；逐題的 worked examples 不在內）",
+  "source_sha256": "90641afed6e089b7368f868605d619bcbbfcdef69ddfaa7a9f8a3970faf90c86",
+  "scale": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "weighting": "equal",
+  "levels_shown_to_the_grader": [
+    "1",
+    "3",
+    "5"
+  ],
+  "dims": [
+    {
+      "key": "readability",
+      "title": "Readability",
+      "weight": 0.25,
+      "levels": {
+        "1": "Names carry no meaning; no comments and none would help; a single function runs past 80 lines",
+        "2": "Readable only by tracing execution by hand; names abbreviated past recognition",
+        "3": "Names roughly say what they hold; the shape is followable but a few passages need re-reading",
+        "4": "Reads straight through with one or two pauses; comments mostly explain \"why\"",
+        "5": "Reads once and is understood; names use the same words as the contract; comments appear only where \"why\" is not obvious from the code"
+      }
+    },
+    {
+      "key": "structure",
+      "title": "Structure",
+      "weight": 0.25,
+      "levels": {
+        "1": "Everything in one function or one tangle; the pieces cannot be moved",
+        "2": "Split exists but each piece knows the internals of the others",
+        "3": "Split exists but boundaries are arbitrary; duplicated logic appears twice or more",
+        "4": "Clear units, at most one seam that feels accidental",
+        "5": "One responsibility per unit; no duplicated logic; adding one new rule means editing one place"
+      }
+    },
+    {
+      "key": "error_handling",
+      "title": "Error handling",
+      "weight": 0.25,
+      "levels": {
+        "1": "Exception messages do not say what went wrong; or a bare `except:` swallows failures",
+        "2": "Errors surface but as the wrong type, or the message names the module rather than the input",
+        "3": "Every exception the contract asks for is raised, message acceptable",
+        "4": "Messages name the offending input in most paths",
+        "5": "Every exception the contract asks for is raised; messages name which part of the input is at fault; nothing is swallowed; the normal path is not written as exception flow"
+      }
+    },
+    {
+      "key": "goal_fit",
+      "title": "Fit to goal",
+      "weight": 0.25,
+      "levels": {
+        "1": "What it does does not line up with the trouble the goal describes",
+        "2": "Only the happy path from the goal is addressed",
+        "3": "The contract is met, but only part of the trouble in the goal is handled",
+        "4": "Nearly all of the goal's trouble is visibly handled",
+        "5": "Every piece of trouble named in the goal has something visible in the code that answers it"
+      }
+    }
+  ]
+}

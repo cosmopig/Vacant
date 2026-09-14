@@ -1,0 +1,97 @@
+{
+  "task_id": "ow_16_pathglob",
+  "stratum": "tight",
+  "title": "Path patterns with a double star and removals",
+  "prereg_ref": "Fable ruling 2026-09-13: extension set ow_13..ow_17 (prereg S1-3)",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Globbing is familiar, but Python's fnmatch lets a star cross a separator and knows nothing about a double star, pathlib's match anchors from the right rather than the whole path, and gitignore semantics are directory-relative rather than whole-path. This contract is whole-path, one-level stars, zero-or-more double stars, and an ordered add/remove pass over a given file list. A remembered implementation of any of the three fails several hidden checks.",
+  "visible_n": 3,
+  "hidden_n": 13,
+  "type_note": "Chosen to be unlike ow_05_router: that task ranks competing patterns by specificity and extracts named pieces; this one is set selection with wildcards and negation, and never ranks anything.",
+  "sha256": {
+    "contract.md": "689b0f7753b73fa6941d11b27f0c937d4539f2b38b6d405edd53bc22e349e2f5",
+    "goal.md": "d73a51c38f8e5a36a5ea04c6844df2d9cfa0c09adf139047cbe7dbebdafd6db6",
+    "hidden/h01_star_does_not_cross_a_slash.py": "787be692dbf0dc16b2b86247027cacbad44fbc4742080b8f6b878d5be2c37e94",
+    "hidden/h02_question_mark_is_one_character.py": "2f6b6df24d2cfeaea2f470efc8c368a351ae5027b9e9c13ec087d2fa8725e587",
+    "hidden/h03_double_star_may_swallow_nothing.py": "d7f4d0be6852898518f215423b8a1e8ba5c5accb2ae9d7e945d27a9b23f396d4",
+    "hidden/h04_double_star_in_the_middle.py": "53a3828371d4914521e74fd24e7119f3ea14c65e5d3dcf47fb26c56e3ee709c3",
+    "hidden/h05_class_and_range.py": "f1fc26efaf24e9e6b56f2f51578956e44003b94f8c87ae590028c6b23ffff19a",
+    "hidden/h06_negated_class.py": "c105a8b1ab876390e27b8dec7b2a1168710124d4637c1ad65506839aec003954",
+    "hidden/h07_whole_path_only.py": "e341f59499fcd1b72f429bc05843b5f214b487643f1ba4225ea4668dc3337061",
+    "hidden/h08_metacharacters_are_literal.py": "934f88201d185e25b2a7ee16db56f29eb70f37db42ffbfb8f21d70e9ba3ce09d",
+    "hidden/h09_selection_keeps_file_order.py": "331804e1cf8b8c576096ecd00a483ec705bf190c668c4129ba7cacff02220cdc",
+    "hidden/h10_exclamation_removes.py": "04a9fd38b4f83a0f0030446a1c5230d82c3543440385db34a2499e29fda18c76",
+    "hidden/h11_later_pattern_puts_it_back.py": "993f0d9bac0ef0002198534ffa382a83998fb1d3e6a7c39f093ec6bfeae5e8cf",
+    "hidden/h12_every_pattern_is_checked.py": "53e81f2c1cb30cf03cacbd909a1c2ea24a24b4cce96e4f89ffaf9dfc4951552e",
+    "hidden/h13_nothing_selected.py": "b68ab96865fd02d7b4f6b111de7f59bc4e97e550efd2fe62fa5daac512d55ad6",
+    "reference/bad_a.py": "e349121f7a13f49169727a2c80901d849a0541c0d2a8d3fd6eabf8bca47698f8",
+    "reference/bad_b.py": "526ee089cb7501d092eca5ff2849c627c18f80f474a13a87c6421d0841285af2",
+    "reference/bad_c.py": "5c74b73d033ac2567fd753f8d38ba68109498dd85f338f97cd3198b41f019c02",
+    "reference/solution.py": "4e1632588384b06ee2206f6ecee7de5f771453369c93407ad2c98819de8ac1f9",
+    "rubric.md": "17d2685d1b9db474a5613717d639ad5a72c9da848f8a1d71f351627b2759a229",
+    "tests_visible/v01_star_stays_in_one_level.py": "a40770b271d4aeaf5ea11a171d3416f5448948b780e8665cd70029e968fc7c02",
+    "tests_visible/v02_double_star_goes_deep.py": "1c62423a85c0f00d8e6da689fd17239090a1d1f69288730e6107bd95b0821a76",
+    "tests_visible/v03_classes_and_bad_patterns.py": "356487f055d04a74dfc36c1ac4721ee2e6d765bab2f9cdf9730d1e07f6a128c3"
+  },
+  "ref_solution_lines": 66,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": 1,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_star_does_not_cross_a_slash.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_question_mark_is_one_character.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_double_star_may_swallow_nothing.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_double_star_in_the_middle.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_class_and_range.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_negated_class.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_whole_path_only.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_metacharacters_are_literal.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_selection_keeps_file_order.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_exclamation_removes.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_later_pattern_puts_it_back.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_every_pattern_is_checked.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h13_nothing_selected.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
+}

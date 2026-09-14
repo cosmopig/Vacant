@@ -1,0 +1,1902 @@
+{
+ "review_id": "R530 S5-2 fairness review",
+ "reviewed_by": "independent reviewer agent (not the bank author)",
+ "reviewed_at": "2026-09-14",
+ "bank_path": "/Users/cosmopig/Documents/GitHub/Vacant/ops/gain/r530/bank",
+ "bank_commit_note": "read from the main worktree after the author worktree agent-acf0d5b7629dc1370 was merged and pruned mid-review; coordinator stated the content is byte-identical to e00f74f.",
+ "counts": {
+  "tasks": 20,
+  "tight": 17,
+  "loose": 3,
+  "hidden_checks": 249,
+  "visible_checks": 57
+ },
+ "passed": [
+  "ow_01_csvjson",
+  "ow_02_ratelimit",
+  "ow_03_mdtable",
+  "ow_04_layerconf",
+  "ow_05_router",
+  "ow_06_verrange",
+  "ow_07_retrypolicy",
+  "ow_08_logscan",
+  "ow_09_minitemplate",
+  "ow_10_dedupe",
+  "ow_11_reflow",
+  "ow_12_bytesize",
+  "ow_13_timespans",
+  "ow_14_statemachine",
+  "ow_15_tomlsub",
+  "ow_16_pathglob",
+  "ow_17_diffpatch",
+  "ow_18_taskorder",
+  "ow_19_redact",
+  "ow_20_slugify"
+ ],
+ "excluded": [],
+ "amended": [
+  {
+   "task_id": "ow_08_logscan",
+   "suggestion": "REVERSE GATE FAILURE (prereg S5-2 gate 2). The goal's last sentence -- 'Finally they want to eyeball a file from the shell without writing a script.' -- has NO check, visible or hidden. The contract does specify `python -m solution FILE` but adds 'Prints a table a person can read. Nothing about its layout is checked.', and no check in the bank spawns a subprocess for this task (ow_01 is the only task that does). The reference solution implements the CLI in ~16 of its 64 counted lines. As frozen, a worker who skips the CLI entirely loses nothing, and a worker who builds it is paying uncompensated difficulty -- exactly what gate 2 forbids ('留著＝在計分之外偷偷加難度'). Pick one: (a) add one hidden check that runs `python -m solution FILE` and asserts only exit 0 and non-empty stdout on a valid log, and exit non-zero on a missing file -- layout still ungraded; or (b) delete that sentence from goal.md and the whole 'Command line' section from contract.md. Do NOT leave it as it is. Author's choice; this reviewer does not edit the bank."
+  },
+  {
+   "task_id": "ow_15_tomlsub",
+   "suggestion": "h12_written_order pins the exact emitted text, including the single spaces around '=' ('apple = 2'). Its declared anchor covers only the ORDER. The contract gives 'name = value' as a parse-side line grammar, and the reference parser accepts 'a=1', so a dumps that emits 'apple=2' satisfies every contract sentence -- both round-trip clauses included -- and still fails h12. Pick one: (a) add one contract sentence, e.g. '`dumps` writes each setting as `name = value`, with one space on each side of the `=`, and each heading on a line of its own.'; or (b) weaken h12 to assert the ORDER of names and headings (parse the written text, or compare stripped tokens) instead of the literal lines. (a) is preferable: the format is meant to be hand-editable, so pinning it is legitimate -- it simply is not pinned yet."
+  },
+  {
+   "task_id": "ow_19_redact",
+   "suggestion": "The goal gives three secrets as literal examples and says the client 'know[s] roughly what their secrets look like'. The hidden checks demand a generalisation the goal never states: h01 uses mysql://, h03 amqp://, h05 mongodb://, h06 redis:// where the goal shows only postgres://; h05 puts 'tok-one' after 'Authorization: Bearer' where the goal's example is a dot-separated JWT. Both visible checks, by contrast, use the goal's literal examples -- so a worker who hardcodes the three literals passes everything it can see and fails four of six hidden checks. Add one sentence to goal.md, e.g. 'The three lines above are shapes, not literals: the same kinds turn up with other key text, other token text, and other database schemes.' That makes the demand anchored; it does not make the task harder than it already is. (meta.json's own known_limitation already concedes the checks cannot tell a general scanner from a narrow one; this amendment is about the opposite direction -- the checks demanding more breadth than the goal states.)"
+  },
+  {
+   "task_id": "ow_20_slugify",
+   "suggestion": "h03_hyphen_rules asserts `slug != \"\"` for the title '...' (pure punctuation). The goal's non-empty guarantee is scoped to 'a title written in a script with no Latin letters in it at all', which does not clearly cover a title with no letters at all. Pick one: (a) widen the goal bullet to 'a title with nothing usable in it -- another script, or only punctuation -- still gets a non-empty slug'; or (b) drop the `slug != \"\"` assertion from h03 (h07 already carries the non-empty requirement where it is anchored). (a) is preferable: an empty slug is a real bug for the client and the property deserves to be graded."
+  },
+  {
+   "task_id": "ow_18_taskorder,ow_19_redact,ow_20_slugify",
+   "suggestion": "NOT A CHECK ISSUE -- a rubric issue, raised because S5-2 is a spec-fairness review and S1-4 is part of what the prereg freezes. The three loose rubric.md files add a scoring weight that is nowhere in the prereg: 'blind score is readability + 2*structure + error_handling + 2*fit_to_goal', attributed to 'prereg amendment, Fable ruling 2026-09-13'. The prereg S1-4 says the rubric is shared by every task ('全部題目共用同一份') and no weighting appears anywhere in the document; S6-6 already fixes what the qualitative section may report (four dims plus a three-dim total excluding 'fit to goal'). A 2x weight on fit-to-goal also doubles the weight of the one dimension S1-4 warns is correlated with the quantitative outcome. Either Fable ratifies the weighting into the prereg before AMEND1, or the three loose rubrics drop it. It must not travel into AMEND1 citing a ruling the frozen document does not contain."
+  }
+ ],
+ "difficulty_gate": {
+  "rule_applied": "Fable 2026-09-13 review instruction: D1 compares the NEW TIGHT five (ow_13-17) against the core twelve. The prereg S1-3b text compares the new EIGHT against the core twelve; both are reported, both are green.",
+  "core_median": 67.0,
+  "new_tight_median": 66,
+  "rel_diff": 0.0149,
+  "prereg_literal_new8_median": 45.0,
+  "prereg_literal_new8_rel_diff": 0.3284,
+  "D1": "GREEN",
+  "D1_note": "0.0149 on the ruled comparison (new tight 5 vs core 12); 0.3284 on the prereg's literal new-8 comparison. Both under 0.40, so D1 is green either way -- but the literal version is only 7pp from red, and it is red-adjacent only because the three loose reference solutions are short by design.",
+  "D2": "GREEN",
+  "D2_note": "tight hidden_n min = 12 (ow_14, ow_17) >= 10; loose hidden_n = 6/6/7 >= 5. Visible: 3 per tight task, 2 per loose task, all inside the prereg's 2-3.",
+  "rewrite_rounds": 0,
+  "per_task": {
+   "ow_01_csvjson": {
+    "ref_solution_lines": 105,
+    "hidden_n": 14,
+    "boundary_only_hidden_n": 3
+   },
+   "ow_02_ratelimit": {
+    "ref_solution_lines": 39,
+    "hidden_n": 15,
+    "boundary_only_hidden_n": 4
+   },
+   "ow_03_mdtable": {
+    "ref_solution_lines": 113,
+    "hidden_n": 14,
+    "boundary_only_hidden_n": 0
+   },
+   "ow_04_layerconf": {
+    "ref_solution_lines": 70,
+    "hidden_n": 15,
+    "boundary_only_hidden_n": 4
+   },
+   "ow_05_router": {
+    "ref_solution_lines": 80,
+    "hidden_n": 15,
+    "boundary_only_hidden_n": 3
+   },
+   "ow_06_verrange": {
+    "ref_solution_lines": 61,
+    "hidden_n": 14,
+    "boundary_only_hidden_n": 3
+   },
+   "ow_07_retrypolicy": {
+    "ref_solution_lines": 16,
+    "hidden_n": 13,
+    "boundary_only_hidden_n": 3
+   },
+   "ow_08_logscan": {
+    "ref_solution_lines": 64,
+    "hidden_n": 14,
+    "boundary_only_hidden_n": 2
+   },
+   "ow_09_minitemplate": {
+    "ref_solution_lines": 87,
+    "hidden_n": 13,
+    "boundary_only_hidden_n": 7
+   },
+   "ow_10_dedupe": {
+    "ref_solution_lines": 30,
+    "hidden_n": 13,
+    "boundary_only_hidden_n": 2
+   },
+   "ow_11_reflow": {
+    "ref_solution_lines": 92,
+    "hidden_n": 14,
+    "boundary_only_hidden_n": 1
+   },
+   "ow_12_bytesize": {
+    "ref_solution_lines": 39,
+    "hidden_n": 13,
+    "boundary_only_hidden_n": 3
+   },
+   "ow_13_timespans": {
+    "ref_solution_lines": 59,
+    "hidden_n": 13,
+    "boundary_only_hidden_n": 5
+   },
+   "ow_14_statemachine": {
+    "ref_solution_lines": 31,
+    "hidden_n": 12,
+    "boundary_only_hidden_n": 4
+   },
+   "ow_15_tomlsub": {
+    "ref_solution_lines": 200,
+    "hidden_n": 13,
+    "boundary_only_hidden_n": 4
+   },
+   "ow_16_pathglob": {
+    "ref_solution_lines": 66,
+    "hidden_n": 13,
+    "boundary_only_hidden_n": 1
+   },
+   "ow_17_diffpatch": {
+    "ref_solution_lines": 79,
+    "hidden_n": 12,
+    "boundary_only_hidden_n": 4
+   },
+   "ow_18_taskorder": {
+    "ref_solution_lines": 23,
+    "hidden_n": 6,
+    "boundary_only_hidden_n": 2
+   },
+   "ow_19_redact": {
+    "ref_solution_lines": 26,
+    "hidden_n": 6,
+    "boundary_only_hidden_n": 0
+   },
+   "ow_20_slugify": {
+    "ref_solution_lines": 29,
+    "hidden_n": 7,
+    "boundary_only_hidden_n": 0
+   }
+  },
+  "honest_boundary": [
+   "Line count is a coarse proxy for difficulty, not difficulty. ow_15 at 200 lines and ow_07 at 16 lines sit inside a core distribution whose median is 67; a median test cannot see that spread.",
+   "40% is a choice with no external anchor (prereg S1-3b honest boundary 2).",
+   "ref_solution_lines for ow_08 includes ~16 lines of command-line code that NO check grades (see amended). The proxy therefore counts work the score does not.",
+   "D1 compares the new tasks with the core twelve only. It says nothing about whether the 20 tasks together are a sensible difficulty distribution (prereg S8-2 item 4 is not discharged by this gate)."
+  ]
+ },
+ "overlap_notes": [
+  {
+   "task_id": "ow_02_ratelimit",
+   "visible": "v02_retry_after_and_config",
+   "hidden": "h08_unseen_key",
+   "kind": "equivalent input",
+   "note": "v02's first assertion is retry_after('u') before any call == 0.0 -- literally the never-seen-key case h08 tests. h08 adds allow()==True. Not byte-identical; recorded, not blocked."
+  },
+  {
+   "task_id": "ow_02_ratelimit",
+   "visible": "v02_retry_after_and_config",
+   "hidden": "h14_bad_configuration",
+   "kind": "equivalent input",
+   "note": "both reject window_s=0.0 and max_events<0 from the constructor; h14 adds (-0.5,5) and (-1.0,-1), same two classes. h14 is the thinnest hidden check in ow_02 relative to what is already visible."
+  },
+  {
+   "task_id": "ow_02_ratelimit",
+   "visible": "v03_reset",
+   "hidden": "h09_reset_one_caller,h10_reset_everybody",
+   "kind": "same requirement, different inputs",
+   "note": "v03 already exercises reset(one) and reset(); h09 asserts on retry_after instead of allow, h10 adds reset(None). Design, not duplication."
+  },
+  {
+   "task_id": "ow_01_csvjson",
+   "visible": "v02_quoted_comma",
+   "hidden": "h01_comma_in_quotes",
+   "kind": "equivalent input",
+   "note": "structurally the same input (one quoted field holding commas), different literals."
+  },
+  {
+   "task_id": "ow_09_minitemplate",
+   "visible": "v03_missing_key_is_loud",
+   "hidden": "h04_never_an_empty_string",
+   "kind": "same requirement, different inputs",
+   "note": "v03 is the top-level missing name; h04 adds a path through a non-dict and a missing field inside a block. Design."
+  },
+  {
+   "task_id": "ow_12_bytesize",
+   "visible": "v03_refuses_nonsense",
+   "hidden": "h13_other_refusals",
+   "kind": "shared literal",
+   "note": "both refuse the empty string \"\" (and v03 '   ' vs h13 '  '). One literal input is genuinely shared for the same requirement; the other six of h13's cases are new."
+  },
+  {
+   "task_id": "ow_16_pathglob",
+   "visible": "v03_classes_and_bad_patterns",
+   "hidden": "h12_every_pattern_is_checked",
+   "kind": "shared literal",
+   "note": "the malformed pattern 'src/[abc.py' appears verbatim in both for the same ValueError requirement. h12 routes it through select() rather than matches() and adds '!src/[].py' and '[!].py', so it is not byte-identical, but its first case is close to free for anyone who passed v03."
+  },
+  {
+   "task_id": "ow_16_pathglob",
+   "visible": "v01_star_stays_in_one_level",
+   "hidden": "h03_double_star_may_swallow_nothing,h07_whole_path_only",
+   "kind": "shared literal",
+   "note": "paths 'main.py' and 'src/main.py' are reused; the patterns tested against them are different requirements. Design."
+  },
+  {
+   "task_id": "ow_18_taskorder",
+   "visible": "v02_a_circle_is_an_error",
+   "hidden": "h04_circles_are_reported",
+   "kind": "equivalent input",
+   "note": "h04's second table {'ok':[], 'a':['b'],'b':['a'],'also_ok':['ok']} embeds v02's exact two-job circle. It adds the 'other jobs were fine' twist, so it is not free -- recorded."
+  },
+  {
+   "task_id": "ow_20_slugify",
+   "visible": "v01_one_slug_per_title",
+   "hidden": "h02_only_allowed_characters,h07_non_latin_titles",
+   "kind": "shared predicate",
+   "note": "the same slug regex is used as the predicate; the titles differ entirely. Design."
+  },
+  {
+   "task_id": "ALL",
+   "visible": "-",
+   "hidden": "-",
+   "kind": "gate 3 result",
+   "note": "gauge_r530.py's byte-identical-literal test finds zero violations across all 20 tasks, and manual reading found no hidden check that repeats a visible check's requirement on the same input. Prereg S5-2 gate 3 passes."
+  }
+ ],
+ "boundary_only_criteria_applied": {
+  "rule": "prereg S1-3b, three criteria, nothing else counts. A check is boundary_only=true only when EVERY input whose behaviour it grades falls under one of the three; a check that also grades an ordinary case is false.",
+  "c1": "the argument the function operates on is empty / zero-length (\"\", [], {}, None-as-no-file, a log with no lines, a file with no data rows).",
+  "c2": "the check's graded behaviour is an exception the contract requires.",
+  "c3": "an input value sits exactly on a boundary or extreme the contract names (window endpoint, rounding point, minimum legal value, unit step).",
+  "totals": {
+   "true": 55,
+   "of": 249,
+   "share": 0.2209
+  },
+  "sensitivity": "The strict reading collapses largely onto criterion (2): 40 of the 55 are exception checks. Reading (1) as 'zero-length state' and (3) as 'near a named boundary' would add roughly 12 more (ow_02 h02/h08, ow_01 h04/h13, ow_03 h09, ow_05 h09/h15, ow_16 h03, ow_08 h04, ow_17 h06, ow_18 h06, ow_13 h13), i.e. ~27% instead of ~22%. The number is sensitive to the reading; prereg S1-3b says no threshold reads it, so this is descriptive only and must not be turned into a gate after the fact."
+ },
+ "known_bad_coverage": {
+  "note": "descriptive only, not a gate. gauge_r530.py --check is PASS 20/20: reference passes all 249+57 checks, every known-bad stake is blocked by >=1 hidden check, and every task has >=1 stake blocked by the visible checks.",
+  "ow_03_bad_c": "identity function ('the skeleton'); blocked by 1 visible (v01) and 5 hidden (h01, h07, h08, h09, h13). Recorded as instructed, not blocked.",
+  "thinnest_hidden_cell": "ow_13_timespans bad_b: blocked by only 3 of 13 hidden checks -- thinner than ow_03 bad_c.",
+  "hidden_checks_no_stake_triggers": {
+   "ow_01_csvjson": [
+    "h12_no_data_rows.py",
+    "h13_missing_final_newline.py"
+   ],
+   "ow_02_ratelimit": [
+    "h08_unseen_key.py",
+    "h10_reset_everybody.py"
+   ],
+   "ow_03_mdtable": [
+    "h10_idempotent.py",
+    "h12_no_table_at_all.py",
+    "h14_final_newline.py"
+   ],
+   "ow_04_layerconf": [],
+   "ow_05_router": [
+    "h09_parameter_rejects_empty_segment.py",
+    "h10_parameter_does_not_span_slash.py",
+    "h11_nobody_owns_it.py",
+    "h12_matched_with_no_named_pieces.py"
+   ],
+   "ow_06_verrange": [
+    "h03_only_three_values.py",
+    "h05_text_identifiers_by_ascii.py",
+    "h06_digits_below_text.py",
+    "h07_longer_prerelease_wins.py"
+   ],
+   "ow_07_retrypolicy": [
+    "h01_first_call_wins.py"
+   ],
+   "ow_08_logscan": [],
+   "ow_09_minitemplate": [
+    "h01_values_become_text.py"
+   ],
+   "ow_10_dedupe": [
+    "h12_nothing_to_do.py"
+   ],
+   "ow_11_reflow": [],
+   "ow_12_bytesize": [
+    "h08_bytes_are_whole_things.py"
+   ],
+   "ow_13_timespans": [
+    "h08_holes_that_miss.py",
+    "h12_nothing_to_do.py"
+   ],
+   "ow_14_statemachine": [
+    "h01_history_starts_at_the_beginning.py",
+    "h03_refusal_leaves_no_trace.py",
+    "h11_two_machines_do_not_share.py"
+   ],
+   "ow_15_tomlsub": [
+    "h11_round_trip_text.py"
+   ],
+   "ow_16_pathglob": [
+    "h07_whole_path_only.py",
+    "h08_metacharacters_are_literal.py",
+    "h13_nothing_selected.py"
+   ],
+   "ow_17_diffpatch": [],
+   "ow_18_taskorder": [
+    "h03_same_table_same_order.py",
+    "h06_nothing_to_do.py"
+   ],
+   "ow_19_redact": [
+    "h02_ordinary_lines_untouched.py",
+    "h03_second_pass_changes_nothing.py"
+   ],
+   "ow_20_slugify": [
+    "h01_same_order_same_length.py",
+    "h06_clean_titles_come_back_whole.py"
+   ]
+  }
+ },
+ "per_hidden": {
+  "ow_01_csvjson": {
+   "h01_comma_in_quotes.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_newline_in_quotes.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_doubled_quote.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_blank_column.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": "empty FIELDS, not an empty input; criterion (1) is read on the argument as a whole, so false. Borderline under a looser reading."
+   },
+   "h05_repeated_header.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_crlf.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_non_ascii.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_line_number_of_bad_row.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h09_unclosed_quote.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h10_exit_code_is_the_signal.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": "CLI exit 2 is not 'an exception the contract requires', and the check also grades the exit-0 path -> false."
+   },
+   "h11_stdout_not_polluted.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_no_data_rows.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h13_missing_final_newline.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": "trailing-newline edge; not empty, no exception, no contract-named boundary value -> false. Borderline."
+   },
+   "h14_one_object_per_line.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_02_ratelimit": {
+   "h01_left_open_boundary.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h02_right_closed_boundary.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": "4.999 probes the right-closed end from INSIDE; criterion (3) says 'exactly on', so false. This is the clearest place where the three-way criterion under-counts a deliberate boundary test -- see the sensitivity figure."
+   },
+   "h03_zero_budget_blocks.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h04_zero_budget_wait_is_infinite.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h05_keys_are_independent.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_wait_shrinks.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_wait_formula.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_unseen_key.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": "zero recorded events, but the argument ('brand-new') is not empty -> false under the strict reading of criterion (1)."
+   },
+   "h09_reset_one_caller.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_reset_everybody.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_clock_rewound.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_denial_does_not_extend.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h13_fractional_seconds.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h14_bad_configuration.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": "overlaps tests_visible/v02, which also constructs with window_s=0.0 and max_events=-1; not byte-identical, so gate 3 is not breached, but see overlap_notes."
+   },
+   "h15_no_real_clock.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_03_mdtable": {
+   "h01_cjk_display_width.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_four_markers.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_escaped_pipe.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_pipe_in_inline_code.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_backtick_fence_untouched.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_tilde_fence_untouched.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_missing_edge_pipes.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_ragged_rows.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_empty_cells.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_idempotent.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": "no known-bad stake triggers it (with h12 and h14): the gauge's one-sided guarantee does not cover these three."
+   },
+   "h11_crlf_preserved.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_no_table_at_all.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h13_table_touching_prose.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h14_final_newline.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_04_layerconf": {
+   "h01_env_beats_file.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_file_beats_default.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_sections_make_dotted_keys.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_comments_and_blanks.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_boolean_spellings.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_unconvertible_boolean.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h07_unconvertible_number.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h08_env_name_shape.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_unrelated_env_ignored.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_unknown_keys_ignored.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_unknown_key_raises.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h12_no_file_at_all.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h13_value_with_equals_sign.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h14_whitespace_and_stray_lines.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h15_defaults_fix_the_key_set.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_05_router": {
+   "h01_literal_beats_parameter.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_parameter_beats_catch_all.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_leftmost_difference_decides.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_literal_prefix_beats_bare_catch_all.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_registration_order_irrelevant.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_same_pattern_twice.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h07_several_named_pieces.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_catch_all_keeps_slashes.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_parameter_rejects_empty_segment.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_parameter_does_not_span_slash.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_nobody_owns_it.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_matched_with_no_named_pieces.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h13_catch_all_must_be_last.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h14_malformed_patterns.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h15_catch_all_needs_something.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_06_verrange": {
+   "h01_ten_after_nine.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_release_beats_prerelease.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_only_three_values.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_numeric_identifiers_by_value.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_text_identifiers_by_ascii.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_digits_below_text.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_longer_prerelease_wins.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_every_condition_holds.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_spaces_around_conditions.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_all_six_operators.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_prerelease_in_a_spec.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_bad_version_rejected.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h13_bad_spec_rejected.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h14_bad_target_version_rejected.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   }
+  },
+  "ow_07_retrypolicy": {
+   "h01_first_call_wins.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_exact_backoff_sequence.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_ceiling_applies.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_no_trailing_wait.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_original_error_object.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_subclass_counts.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_unrelated_error_escapes_at_once.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_empty_retry_on.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h09_attempts_must_be_at_least_one.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h10_single_attempt.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h11_succeeds_on_the_last_attempt.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_sleep_is_the_only_waiting.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h13_several_listed_kinds.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_08_logscan": {
+   "h01_five_hundreds_only.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_error_rate_rounded.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_p50_nearest_rank.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": "p50 of n=4 gives exactly ceil(2.0) -- an exact rounding point, and the only input -> true."
+   },
+   "h04_p95_nearest_rank.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_single_sample.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": "AUTHOR-FLAGGED. n=1 is the extreme of the sample-size domain and the whole check sits on it -> boundary_only=true under criterion (3). Caveat: the contract names the formula ceil(p/100*n), not n=1 itself, so this is 'extreme of the domain' rather than a literally contract-named threshold. Anchor 'Percentiles are nearest-rank' is verbatim and the derivation follows."
+   },
+   "h06_busiest_first.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_tie_broken_by_path.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_wrong_field_count.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_non_integer_fields.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_bad_timestamp.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_bad_lines_are_reported.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_blank_lines_are_nothing.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h13_trailing_newlines.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h14_result_shape.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": "mixed: summarize([]) is an empty input, but the check also grades the shape on a normal one-line log -> false."
+   }
+  },
+  "ow_09_minitemplate": {
+   "h01_values_become_text.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_deep_paths.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_missing_path_names_itself.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h04_never_an_empty_string.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h05_item_itself.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_outer_names_inside_a_block.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_empty_list_leaves_nothing.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h08_comments_vanish.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_literal_braces.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_unclosed_placeholder.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h11_no_repeat_inside_a_repeat.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h12_repeat_over_a_non_list.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h13_stray_closing_tag.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   }
+  },
+  "ow_10_dedupe": {
+   "h01_order_is_first_appearance.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_first_is_the_default.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_last_replaces_wholesale.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_merge_takes_the_last_filled.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_merge_gains_new_fields.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_none_never_overwrites.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_composite_key_order.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_composite_parts_do_not_run_together.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_missing_key_field.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h10_unknown_policy.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h11_inputs_are_left_alone.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_nothing_to_do.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h13_key_values_of_other_types.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_11_reflow": {
+   "h01_wide_characters_count_two.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_break_between_wide_characters.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_paragraph_indent_carried_down.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_numbered_bullets.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_star_bullets_and_nesting_indent.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_each_bullet_is_its_own.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_blank_runs_kept.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_fence_contents_untouched.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_long_piece_sticks_out.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_bad_width_refused.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h11_whitespace_collapses.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": "AUTHOR-FLAGGED. Anchor is verbatim and the main assertion follows from it. The second loop ('no trailing space') grades a DIFFERENT contract sentence ('No output line ends in a space.') than the declared anchor; it is anchored in the contract, just not in the quoted sentence, and it is redundant given the exact-equality assertion above it. Not exclusion-worthy; the ANCHORS.md table is one-anchor-per-file and therefore under-describes this check."
+   },
+   "h12_final_newline.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h13_mixed_scripts_in_one_word.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h14_bullet_after_paragraph.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_12_bytesize": {
+   "h01_two_meanings_of_kb.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_unit_case_does_not_matter.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_space_is_optional.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_no_unit_is_bytes.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_fraction_is_dropped.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_largest_unit_below_the_step.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h07_trailing_zero_is_kept.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_bytes_are_whole_things.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_decimal_family.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_above_the_largest_unit.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_round_trip.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_negative_is_refused.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h13_other_refusals.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   }
+  },
+  "ow_13_timespans": {
+   "h01_touching_spans_join.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h02_unordered_input.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_zero_length_dropped.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h04_dates_are_midnight.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_output_is_normalised.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_hole_in_the_middle.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_hole_swallows_everything.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_holes_that_miss.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_total_counts_overlap_once.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_reversed_span_is_reported.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h11_unreadable_instant.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h12_nothing_to_do.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h13_seconds_resolution.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_14_statemachine": {
+   "h01_history_starts_at_the_beginning.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_refusal_names_both_halves.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h03_refusal_leaves_no_trace.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h04_can_matches_fire.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_self_transition_is_recorded.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_history_is_a_copy.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_reset_starts_over.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_unknown_start_state.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h09_target_state_must_exist.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h10_dead_end_states_are_fine.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_two_machines_do_not_share.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_long_path_in_order.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_15_tomlsub": {
+   "h01_five_kinds.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_escapes_in_text.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_hash_inside_text.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_nested_headings.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_names_before_the_first_heading.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_mixed_list_is_a_mistake.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h07_duplicate_name.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_duplicate_heading.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h09_line_numbers_on_every_mistake.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h10_round_trip_data.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_round_trip_text.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_written_order.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": "AUTHOR-FLAGGED and the closest call in the bank. The ordering claim is squarely anchored. But the check pins the exact emitted text, i.e. the single spaces around '=' in 'apple = 2'. The contract states 'name = value' only as a line grammar for parse, never as a dumps formatting requirement, and the reference parser accepts 'a=1' -- so a worker whose dumps emits 'apple=2' satisfies every contract sentence (including both round-trip clauses) and still fails this check. Kept, with an amendment proposed for the contract."
+   },
+   "h13_unwritable_data.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   }
+  },
+  "ow_16_pathglob": {
+   "h01_star_does_not_cross_a_slash.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_question_mark_is_one_character.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_double_star_may_swallow_nothing.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_double_star_in_the_middle.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_class_and_range.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_negated_class.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_whole_path_only.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h08_metacharacters_are_literal.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h09_selection_keeps_file_order.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h10_exclamation_removes.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_later_pattern_puts_it_back.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h12_every_pattern_is_checked.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h13_nothing_selected.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_17_diffpatch": {
+   "h01_one_piece_per_place.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_no_unchanged_lines_at_the_edges.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_pieces_are_ordered_and_apart.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_insertions.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_deletions.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_nothing_changed.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_piece_that_does_not_fit.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h08_out_of_order_or_overlapping.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h09_malformed_piece.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h10_inputs_are_untouched.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h11_empty_versions.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h12_repeated_lines.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_18_taskorder": {
+   "h01_every_job_exactly_once.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_nothing_runs_too_early.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_same_table_same_order.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_circles_are_reported.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h05_a_job_waiting_on_itself.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": true,
+    "note": ""
+   },
+   "h06_nothing_to_do.py": {
+    "anchor_ok": true,
+    "anchor_target": "contract",
+    "boundary_only": false,
+    "note": "the only loose-layer check anchored to the CONTRACT rather than to a goal-stated property. plan({}) == [] is entailed by 'every job appears in the order exactly once' plus 'plan returns a list of job names', so it holds, but it is the one loose check that is not literally 'goal-stated'."
+   }
+  },
+  "ow_19_redact": {
+   "h01_all_three_kinds_go.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": "uses mysql:// where the goal's example is postgres://, and a Bearer token unlike the goal's JWT-shaped example. Anchored ('none of the secret text is anywhere in the result'), but it demands a generalisation the goal only implies with the word 'roughly'. See amended."
+   },
+   "h02_ordinary_lines_untouched.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_second_pass_changes_nothing.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h04_the_rest_of_the_line_survives.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_repeats_both_go.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": "requires recognising 'Authorization: Bearer tok-one' (not dot-separated) and mongodb://; a worker who matched the goal's three literal shapes narrowly fails here. Same generalisation demand as h01."
+   },
+   "h06_the_count_is_usable.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   }
+  },
+  "ow_20_slugify": {
+   "h01_same_order_same_length.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h02_only_allowed_characters.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h03_hyphen_rules.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": "the three hyphen assertions are squarely anchored. The fourth, `slug != \"\"` on the title '...', is not: the goal's non-empty guarantee is scoped to 'a title written in a script with no Latin letters in it at all', which does not obviously cover a title of pure punctuation. See amended."
+   },
+   "h04_no_two_the_same.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h05_same_batch_same_slugs.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h06_clean_titles_come_back_whole.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   },
+   "h07_non_latin_titles.py": {
+    "anchor_ok": true,
+    "anchor_target": "goal",
+    "boundary_only": false,
+    "note": ""
+   }
+  }
+ },
+ "reverse_gate": {
+  "rule": "prereg S5-2 gate 2: every 'customer trouble / property that must hold' sentence in goal.md needs at least one visible or hidden check.",
+  "method": "manual sentence-by-sentence reading of all 20 goal.md files by the reviewer; not machine-checkable and not re-runnable.",
+  "result": "19/20 pass. ow_08_logscan fails on one sentence -- 'Finally they want to eyeball a file from the shell without writing a script.' -- which has no check of any kind; ow_01 is the only task in the bank whose checks spawn a subprocess.",
+  "inverse_finding": "The three gates cannot express the opposite failure -- a hidden check demanding MORE than the goal promises. ow_19_redact (four extra DSN schemes, a non-JWT bearer token) and ow_20_slugify (non-empty slug for a punctuation-only title) both do this, and both pass gates 1-3. Recorded in amended; worth a sentence in AMEND1's honest boundaries."
+ },
+ "loose_layer_check": {
+  "rule": "Fable review instruction 7: each loose hidden check must test a property the goal states in words.",
+  "anchor_kinds": "19 loose hidden checks: 18 anchored to goal.md, 1 (ow_18/h06_nothing_to_do) to contract.md -- the shape prereg S5-2 predicts for a blank contract.",
+  "result": "19/19 hold. ow_18/h06 is the only one whose specific assertion (plan({}) == []) is not literally in the goal; it is entailed by 'every job appears in the order exactly once' plus 'plan returns a list of job names'.",
+  "no_over_constraint": "Confirmed for ow_18: no hidden check pins WHICH of the many valid orders is returned. h03 requires only that repeated calls on the same table agree. This is the property the loose stratum exists to preserve and it holds."
+ },
+ "prereg_deviations_noted": [
+  "Bank layout differs from prereg S1-1's named files (goal.md + contract.md instead of task.md; tests_visible/ + hidden/ as one-file-per-check instead of visible.json + hidden.json; rubric.md instead of rubric.json). Content-equivalent; flagged only so AMEND1's sha256 table pins the paths that actually exist.",
+  "prereg S1-1 lists a template/ directory per task; the bank has none. Workspace templates are S3-1's business, outside this review.",
+  "prereg S1-4 says one shared rubric for every task; the bank has 20 distinct rubric.md files (shared 4-dimension scale, per-task worked examples) and the three loose ones add a scoring weight that appears nowhere in the prereg. See amended entry 5.",
+  "prereg S1-4's table gives levels 1/3/5; the bank's rubrics give all five levels. An elaboration, not a conflict, but it is new frozen text."
+ ]
+}

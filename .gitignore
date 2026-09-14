@@ -57,3 +57,8 @@ NEXT_MODEL
 # R453 執行器私鑰：RECORD_SPEC §7，私鑰永不進版控
 ops/gain/replay/r453/key_*/
 ops/gain/replay/r454/key_*/
+
+# R530 冒煙的 run 目錄：`--smoke` 寫在這裡，**永不進證據**（它自己也會落一個
+# NOT_EVIDENCE 檔）。進版控的話它會被後續的 runs/INDEX 當成一個 run 看待，
+# 而那正是「冒煙永不進證據」要擋的事。
+runs/_smoke/

@@ -1,0 +1,281 @@
+{
+  "run": "/home/user1/vacant/r530_stage/runs/_smoke/g_r530_smoke9_a",
+  "runs": [
+    "/home/user1/vacant/r530_stage/runs/_smoke/g_r530_smoke9_a",
+    "/home/user1/vacant/r530_stage/runs/_smoke/g_r530_smoke9_b"
+  ],
+  "rows_n": 6,
+  "checks": {
+    "C1": {
+      "ok": true,
+      "detail": {
+        "cap": 72,
+        "per_cell": {
+          "A-CONF/ow_01_csvjson": 72,
+          "A-CONF/ow_02_ratelimit": 10,
+          "A-GATE/ow_01_csvjson": 72,
+          "A-GATE/ow_02_ratelimit": 19,
+          "A-SOLO/ow_01_csvjson": 65,
+          "A-SOLO/ow_02_ratelimit": 13
+        },
+        "problems": []
+      }
+    },
+    "C2": {
+      "ok": true,
+      "detail": {
+        "declared_done_turn": {
+          "A-SOLO/ow_01_csvjson": null,
+          "A-CONF/ow_01_csvjson": null,
+          "A-GATE/ow_01_csvjson": null,
+          "A-SOLO/ow_02_ratelimit": 13,
+          "A-CONF/ow_02_ratelimit": 10,
+          "A-GATE/ow_02_ratelimit": 19
+        },
+        "cells_that_never_got_the_chance": [
+          "A-SOLO/ow_01_csvjson",
+          "A-CONF/ow_01_csvjson",
+          "A-GATE/ow_01_csvjson"
+        ],
+        "problems": []
+      }
+    },
+    "C3": {
+      "ok": true,
+      "detail": {
+        "visible": {
+          "A-SOLO/ow_01_csvjson": "2/3",
+          "A-CONF/ow_01_csvjson": "0/3",
+          "A-GATE/ow_01_csvjson": "0/3",
+          "A-SOLO/ow_02_ratelimit": "3/3",
+          "A-CONF/ow_02_ratelimit": "3/3",
+          "A-GATE/ow_02_ratelimit": "3/3"
+        },
+        "problems": []
+      }
+    },
+    "C4": {
+      "ok": true,
+      "detail": {
+        "expected_hidden_cases": {
+          "ow_01_csvjson": 14,
+          "ow_02_ratelimit": 15
+        },
+        "problems": []
+      }
+    },
+    "C5": {
+      "ok": true,
+      "detail": {
+        "distinct_starts": [
+          "2a357fdab6eb39aac0e132fe1cee573af2f0e7b38bbc06b9c1d12b6f27d19c7c",
+          "de0f4918e4bd450bce6f379458e054c9d8edf94a89b7b725c191253d75ab5468"
+        ],
+        "template_hashes": {
+          "ow_01_csvjson": "2a357fdab6eb39aac0e132fe1cee573af2f0e7b38bbc06b9c1d12b6f27d19c7c",
+          "ow_02_ratelimit": "de0f4918e4bd450bce6f379458e054c9d8edf94a89b7b725c191253d75ab5468"
+        },
+        "cells_that_changed_the_workspace": 6,
+        "problems": []
+      }
+    },
+    "C6": {
+      "ok": true,
+      "detail": {
+        "g_r530_smoke9_a": {
+          "verify_rc": 0,
+          "tail": [
+            "",
+            "run                           arm          條數    驗過    失敗 verdict  rows  chain_head",
+            "g_r530_smoke9_a               A-CONF        4     4     0       1     1  ae3b789158619f76…  OK",
+            "g_r530_smoke9_a               A-GATE        2     2     0       1     1  e82aeed5a83fe54b…  OK",
+            "g_r530_smoke9_a               A-SOLO        2     2     0       1     1  13524363b36a4b35…  OK",
+            "",
+            "總判：OK",
+            "每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。"
+          ]
+        },
+        "g_r530_smoke9_b": {
+          "verify_rc": 0,
+          "tail": [
+            "",
+            "run                           arm          條數    驗過    失敗 verdict  rows  chain_head",
+            "g_r530_smoke9_b               A-CONF        2     2     0       1     1  8930df1dc7333d94…  OK",
+            "g_r530_smoke9_b               A-GATE        2     2     0       1     1  722db081b717a3b9…  OK",
+            "g_r530_smoke9_b               A-SOLO        2     2     0       1     1  4ca91aacb66b2f0e…  OK",
+            "",
+            "總判：OK",
+            "每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。"
+          ]
+        }
+      }
+    },
+    "C7": {
+      "ok": true,
+      "detail": {
+        "sandbox": "unshare",
+        "per_row": [
+          "unshare"
+        ],
+        "network_isolated": true,
+        "write_confined": true,
+        "repo_hidden_from_sandbox": true,
+        "per_run_signature": {
+          "/home/user1/vacant/r530_stage/runs/_smoke/g_r530_smoke9_a": [
+            "unshare",
+            true,
+            true,
+            true,
+            65534
+          ],
+          "/home/user1/vacant/r530_stage/runs/_smoke/g_r530_smoke9_b": [
+            "unshare",
+            true,
+            true,
+            true,
+            65534
+          ]
+        }
+      }
+    },
+    "C8": {
+      "ok": true,
+      "detail": {
+        "g_r530_smoke9_a": {
+          "verdict": "CLEAN",
+          "violations_n": 0,
+          "deny_hidden_read_n": 0,
+          "excused_by_rule": {
+            "tool_output_echo": 0,
+            "task_prose": 0
+          },
+          "workspace_needle_hits_n": 0,
+          "records_audited": 209,
+          "per_role": {
+            "system": 209,
+            "user": 209,
+            "tool": 5464,
+            "assistant": 4
+          }
+        },
+        "g_r530_smoke9_b": {
+          "verdict": "CLEAN",
+          "violations_n": 0,
+          "deny_hidden_read_n": 0,
+          "excused_by_rule": {
+            "tool_output_echo": 0,
+            "task_prose": 0
+          },
+          "workspace_needle_hits_n": 0,
+          "records_audited": 42,
+          "per_role": {
+            "system": 42,
+            "user": 42,
+            "tool": 294,
+            "assistant": 255
+          }
+        }
+      }
+    },
+    "C9": {
+      "ok": true,
+      "detail": {
+        "conf_cells_with_a_second_draw": [
+          "A-CONF/ow_01_csvjson"
+        ],
+        "gate_cells_that_reached_a_feedback_round": [
+          "A-GATE/ow_02_ratelimit"
+        ],
+        "honest_bound": "C9 用的是冒煙那幾格，而冒煙只有 2 題 ⇒ 它證得了「機制跑得起來」，**證不了**「機制在 20 題上都會啟動」。這一句要跟著 C9 一起帶。"
+      }
+    },
+    "E9": {
+      "ok": true,
+      "detail": {
+        "g_r530_smoke9_a": {
+          "gate": "E-9",
+          "sandbox": "unshare",
+          "sandbox_uid": 65534,
+          "network_isolated": true,
+          "write_confined": true,
+          "repo_hidden_from_sandbox": true,
+          "ok": true,
+          "enforced": true
+        },
+        "g_r530_smoke9_b": {
+          "gate": "E-9",
+          "sandbox": "unshare",
+          "sandbox_uid": 65534,
+          "network_isolated": true,
+          "write_confined": true,
+          "repo_hidden_from_sandbox": true,
+          "ok": true,
+          "enforced": true
+        }
+      }
+    },
+    "E11": {
+      "ok": true,
+      "detail": {
+        "g_r530_smoke9_a": {
+          "calls_audited": 209,
+          "reasoning_tokens_total": 0,
+          "completion_tokens_total": 263399,
+          "reasoning_share": 0.0,
+          "calls_without_the_field": 0,
+          "verdict": "ok",
+          "reason": null,
+          "preflight_ok": null,
+          "preflight_skipped": null
+        },
+        "g_r530_smoke9_b": {
+          "calls_audited": 42,
+          "reasoning_tokens_total": 0,
+          "completion_tokens_total": 11992,
+          "reasoning_share": 0.0,
+          "calls_without_the_field": 0,
+          "verdict": "ok",
+          "reason": null,
+          "preflight_ok": null,
+          "preflight_skipped": null
+        }
+      }
+    },
+    "E10": {
+      "ok": true,
+      "detail": {
+        "per_arm": {
+          "A-SOLO": {
+            "n": 2,
+            "noop": 0,
+            "rate": 0.0
+          },
+          "A-CONF": {
+            "n": 2,
+            "noop": 0,
+            "rate": 0.0
+          },
+          "A-GATE": {
+            "n": 2,
+            "noop": 0,
+            "rate": 0.0
+          }
+        },
+        "arms_over_threshold": [],
+        "offending_cells": [],
+        "reason": null
+      }
+    }
+  },
+  "seconds_per_call": {
+    "per_arm": {
+      "A-SOLO": 28.2,
+      "A-CONF": 13.9,
+      "A-GATE": 18.7
+    },
+    "overall": 20.1,
+    "note": "T ＝ 該臂的總牆鐘 ÷ 該臂的總模型呼叫數，**含工具往返與驗收**。冒煙是單串跑的；併發之下 T 會變大（R460 量到三併發會讓長生成變慢但沒有量過倍率），所以拿它去推時程要帶那個未知數。"
+  },
+  "verdict": "PASS",
+  "note": "這張表判的是**量具有沒有接上**，不是實驗結論。冒煙的資料永不進證據：不進 runs/INDEX、不進任何 analyzer、不進配對、不進 token 帳、不進質化。不合格就不准發射，而且修完要**重跑整份冒煙**（不是只補那一格）。"
+}
