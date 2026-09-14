@@ -213,13 +213,18 @@ def test_frozen_budget_constant_is_untouched_by_the_smoke_profile():
     # 整份 literal_eval 會炸——炸掉會讓這條防呆變成「跳過」。
     frozen = {k.value: v.value for k, v in zip(node.value.keys, node.value.values)
               if isinstance(v, ast.Constant)}
-    # Fable 2026-09-14：呼叫數不變、token 上限改成只算 completion、
-    # 加一條脈絡硬上界、每格牆鐘 2400 秒。
-    assert frozen["max_model_calls"] == 24
-    assert frozen["max_completion_tokens"] == 40_000
+    # Fable 2026-09-14（第二次裁決）：三臂上限相同、實際用量各自落盤。
+    # `A-CONF` 三份 × 每份 24 通 ＝ 72 ＝ 整格上限。
+    assert frozen["max_model_calls"] == 72
+    assert frozen["max_calls_per_attempt"] == 24
+    assert frozen["max_conf_attempts"] == 3
+    assert frozen["max_completion_tokens"] == 120_000
     assert frozen["max_context_tokens"] == 200_000
-    assert frozen["max_wall_s"] == 2_400
+    assert frozen["max_wall_s"] == 7_200
     assert frozen["max_gate_rounds"] == 5
+    assert (frozen["max_conf_attempts"] * frozen["max_calls_per_attempt"]
+            == frozen["max_model_calls"]), (
+        "三份的配額加起來要等於整格上限，否則「上限相同」只是字面上相同")
     assert "max_tokens" not in frozen, (
         "舊的 total_tokens 上限要整個拿掉，不是留著當備用——"
         "留著會讓「用哪一個」變成一個可以事後選的東西")

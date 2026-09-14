@@ -96,29 +96,41 @@ ARMS = ("A-SOLO", "A-CONF", "A-GATE")
 #   它在呼叫之間檢查；單次請求在 `--request-timeout-s` × `retries` 之下
 #   最壞可以燒掉遠多於這個數字。收官報 `wall_s` 的分佈，不准講成硬上界。
 OPENWORK_BUDGET = {
-    "max_model_calls": 24,
-    # ⚠ **token 上限只算 completion**（Fable 2026-09-14 裁決）。
-    #   原本算的是逐通 `total_tokens` 的和，而多輪迴圈每一通都把整段對話當
-    #   prompt 重送 ⇒ 那個和隨輪數**二次成長**。冒煙實測單格
-    #   prompt 207,591／completion 14,542：用總和當上限，實際綁住的是
-    #   「對話多長」而不是「模型寫了多少」，5–8 通就撞滿 120k。
-    #   改成只算 completion 之後，40,000 綁的是生成量本身。
-    #   ⚠ **兩種 token 逐格都要印**（`rows.jsonl` 的 `prompt_tokens`／
-    #     `completion_tokens`）——換了分子就更要讓分母看得見。
-    "max_completion_tokens": 40_000,
-    # 脈絡本身的硬上界：單通的 prompt 超過它 ⇒ `budget_context` 拒交。
-    # 它擋的是另一種失控：對話長到端點開始截斷或變慢，而那在
-    # `max_completion_tokens` 上完全看不出來。
+    # ── Fable 2026-09-14 第二次裁決：三臂「上限相同、實際用量各自落盤」 ──
+    #
+    # 為什麼要改：前一版三臂共用 24 通，而真後端實測模型要 **20 通**才宣告完成
+    # （`A-SOLO/ow_01`）⇒ `A-CONF` 的「最多 N 份、每份全新對話」在 24 通裡
+    # **連第二份都抽不到**，而 §八-4 把 `A-GATE` vs `A-CONF` 指定為等預算的
+    # 那一刀（把「閘門本身」與「回饋迴圈」切開）。抽不到第二份 ⇒ 那一刀切不出東西。
+    #
+    # 現在的口徑與 R460 相同：**上限相同、用量各自**。
+    "max_calls_per_attempt": 24,   # 只管 `A-CONF` 的每一份（其餘臂＝整格上限）
+    "max_model_calls": 72,         # 每格總上限，**三臂相同**
+    "max_conf_attempts": 3,        # `A-CONF` 最多三份（3 × 24 ＝ 72）
+    "max_gate_rounds": 5,          # `A-GATE` 的拒交觸發＝閘門輪數，不是呼叫數
+    # 累計 completion（**不是** total_tokens 的和，理由見下）。
+    "max_completion_tokens": 120_000,
+    # 單通 prompt 的硬上界：超過 ⇒ `budget_context` 拒交。
     "max_context_tokens": 200_000,
-    "max_wall_s": 2_400,
-    "max_gate_rounds": 5,
-    "max_tool_calls": 40,
+    "max_wall_s": 7_200,           # 每格
+    # ⚠ 這一格 Fable 沒有指名，但 72 通之下舊值會先咬到：實測每通約 1 次工具
+    #   呼叫（`A-SOLO/ow_01` 20 通 19 次），40 的上限會讓 stop_reason 變成
+    #   `budget_tool_calls` 而不是 Fable 指名的那幾個 ⇒ 按同一個比例提到 120。
+    #   **這是推導不是裁決**，改回去不影響任何別的東西。
+    "max_tool_calls": 120,
     "tool_timeout_s": 120,
     "tool_timeout_max_s": 300,
     "gate_test_timeout_s": DEFAULT_TEST_TIMEOUT_S,
     "nudge_budget": 2,
     "max_commands_per_turn": 3,
 }
+
+#: 為什麼 token 上限只算 completion（前一版是逐通 `total_tokens` 的和）：
+#: 多輪迴圈每一通都把整段對話當 prompt 重送 ⇒ 那個和**隨輪數二次成長**。
+#: 真後端實測單格 prompt 494,720／completion 22,463（22 倍），
+#: 用總和當上限綁住的是「對話多長」而不是「模型寫了多少」。
+#: **兩種 token 逐格都要落盤**——換了分子就更要讓分母看得見。
+_TOKEN_ACCOUNTING_NOTE = "completion-only; prompt logged separately"
 
 #: 停止理由的**封閉集合**。多一個就是規格變更——不准在別處臨時造字串。
 STOP_REASONS = frozenset({
@@ -543,7 +555,12 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
     last_prompt_tokens = 0
     messages: list[dict] = []
 
-    max_attempts = b["max_gate_rounds"] if arm == "A-CONF" else 1
+    # `A-CONF` 最多三份；其餘兩臂一格就是一份（Fable 2026-09-14）。
+    max_attempts = b["max_conf_attempts"] if arm == "A-CONF" else 1
+    # 每一份的呼叫上限：只有 `A-CONF` 有（3 × 24 ＝ 72 ＝ 整格上限）。
+    # `A-SOLO`／`A-GATE` 的「一份」就是整格，所以它們的每份上限＝整格上限。
+    cap_per_attempt = (b["max_calls_per_attempt"] if arm == "A-CONF"
+                       else b["max_model_calls"])
     attempt = 0
     while attempt < max_attempts:
         attempt += 1
@@ -563,11 +580,28 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
             task, paths.cell_dir, arm=arm, persona_text=persona_text)
         nudges_left = b["nudge_budget"]
         gate_round = 0
+        attempt_calls = 0
+        attempt_exhausted = False
         att_rec = {"attempt": attempt, "persona": persona_id,
                    "gate_rounds": [], "declared_done_turn": None,
                    "stop_reason": None}
 
         while True:
+            # ⚠ **份層級的檢查要排在格層級之前。**
+            #   `A-CONF` 的 3 份 × 24 通恰好等於整格的 72 通上限，所以第 3 份
+            #   用完的那一刻兩個上限同時成立。先問格層級的話，結局會變成
+            #   `budget_calls`（**不算拒交**）而不是 `attempts_exhausted`
+            #   （**算拒交**）——同一件事被記成兩種語意，而 P-W3 讀的正是後者。
+            if attempt_calls >= cap_per_attempt:
+                if arm == "A-CONF":
+                    # 這一份用完它的配額，**不是整格停**：外圈重置工作區、
+                    # 換 persona、重開對話跑下一份。`stop_reason` 刻意不設
+                    # ——它是格層級的欄位，而這件事是份層級的。
+                    attempt_exhausted = True
+                else:
+                    # 其餘兩臂的「一份」就是整格 ⇒ 這就是撞格層級預算。
+                    stop_reason = "budget_calls"
+                break
             stop_reason = _budget_stop(calls_used, completion_tokens_total,
                                        tool_calls, t0, last_prompt_tokens)
             if stop_reason:
@@ -580,6 +614,7 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
                       "seed": seed, "persona": persona_id,
                       "tool_protocol": proto})
             calls_used += 1
+            attempt_calls += 1
             usage = out.get("usage") or {}
             tokens_total += _usage_tokens(usage)
             prompt_tokens_total += int(usage.get("prompt_tokens") or 0)
@@ -642,43 +677,9 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
 
             if arm == "A-SOLO":
                 # **收。** 沒有閘門、沒有回饋、不存在拒交。
-                #
-                # ⚠ 但**可見驗收照樣跑一次**（預註冊 §三-6 C3 逐字：
-                #   「`A-SOLO` 那格也要跑（只記分、不當閘門、不回饋）」）。
-                #   沒有它，P-W7／W7a／W7b 的歸因量就少掉對照的那一半。
-                #   跑的結果**不進 messages、不改 accepted、不改 stop_reason**
-                #   ——它只落盤。三條臂的 prompt 逐字相同這件事因此不受影響。
-                final_visible = acceptance.run_suite(
-                    sandbox, paths.cell_dir, paths.visible_dir, suite="visible",
-                    task_id=task_id, verify_root=paths.verify_root,
-                    timeout_s=b["gate_test_timeout_s"])
-                att_rec["gate_rounds"].append({
-                    "gate_round": 0, "scoring_only": True,
-                    "passed": final_visible["passed"],
-                    "total": final_visible["total"],
-                    "all_pass": final_visible["all_pass"],
-                    "result_sha256": final_visible["result_sha256"]})
-                _log(calls_path, {"kind": "gate", "arm": arm,
-                                  "task_id": task_id, "attempt": attempt,
-                                  "gate_round": 0, "scoring_only": True,
-                                  "visible": final_visible})
-                # ⚠ 照樣簽一筆 `ws_attempt`（`verdict_sha256=None` ＝
-                #   **這一輪沒有跑驗收**）。不簽的話 `A-SOLO` 的鏈上只有
-                #   verdict 沒有 attempt，而 `verify_run_receipts` 的對帳
-                #   （attempt 數 ≥ verdict 數）會把「這條臂本來就沒有閘門」
-                #   讀成「漏寫」。收據要能表達「沒有跑」，不是省略它。
-                if book is not None:
-                    entry = receipts.append_attempt(
-                        book, ident, task_id=task_id, arm=arm, attempt=attempt,
-                        gate_round=0, ws_sha256=now["ws_sha256"],
-                        # `A-SOLO` 的可見驗收是**只記分**的：雜湊照樣簽進鏈
-                        # （它是一份真的量測），但它沒有當過閘門。
-                        verdict_sha256=final_visible["result_sha256"],
-                        conversation_sha256=receipts.conversation_digest(messages),
-                        visible_passed=final_visible["passed"],
-                        visible_total=final_visible["total"],
-                        scoring_only=True)
-                    receipt_hashes.append(entry.hash())
+                # 可見驗收改在**收尾**統一跑（見下面的「只記分的可見驗收」），
+                # 理由：`budget_calls` 之類的結局根本走不到這一行，
+                # 而 §三-6 C3 要的是**每一格**都有可見驗收結果。
                 stop_reason = "declared_done"
                 accepted = True
                 break
@@ -724,7 +725,25 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
             # A-CONF：這一份不過 ⇒ 跳出內圈，外圈重置工作區＋換 persona＋重開對話
             break
 
+        # ⚠ **每一份都要有一筆 `ws_attempt`**，不管它是怎麼結束的。
+        #   原本只在「宣告完成」那條路上簽 ⇒ 撞預算的格子 0 筆 attempt、
+        #   1 筆 verdict ⇒ `verify_run_receipts` 的
+        #   「attempt 數 ≥ verdict 數」對帳判 BROKEN（§三-6 C6 抓到的就是這個）。
+        #   收尾記帳只走 happy path 是一種很安靜的壞法：鏈本身沒壞，
+        #   壞的是「鏈說得出這一格發生過什麼」這件事。
+        if book is not None and not att_rec["gate_rounds"]:
+            _now = wshash.tree_manifest(paths.cell_dir)
+            _entry = receipts.append_attempt(
+                book, ident, task_id=task_id, arm=arm, attempt=attempt,
+                gate_round=0, ws_sha256=_now["ws_sha256"],
+                verdict_sha256=None,
+                conversation_sha256=receipts.conversation_digest(messages),
+                visible_passed=None, visible_total=None,
+                no_gate_reason=(stop_reason or "attempt_calls_exhausted"))
+            receipt_hashes.append(_entry.hash())
         att_rec["stop_reason"] = stop_reason
+        att_rec["calls"] = attempt_calls
+        att_rec["attempt_calls_exhausted"] = attempt_exhausted
         arc = paths.ws_archive_dir / f"{task_id}__{arm}__a{attempt}.tar.gz"
         att_rec["ws_archive"] = str(arc.name)
         att_rec["ws_archive_sha256"] = archive_workspace(paths.cell_dir, arc)
@@ -755,6 +774,22 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
     if arm == "A-SOLO":
         accepted = True
 
+    # ── 只記分的可見驗收（§三-6 C3）────────────────────────────────────
+    # **每一格都要有**，不管它是怎麼結束的：宣告完成、撞預算、拒交都一樣。
+    # 原本只在 `A-SOLO` 宣告完成那條路上跑 ⇒ 撞 `budget_calls` 的格子
+    # `visible` 是 None ⇒ P-W7／W7a／W7b 的對照那一半整個不見。
+    # ⚠ 這一次驗收**不進 messages、不改 accepted、不改 stop_reason**——
+    #   它只落盤。`A-GATE`／`A-CONF` 已經在閘門輪跑過的就不重跑
+    #   （`final_visible` 有值），免得同一格出現兩個不同的可見結果。
+    if final_visible is None:
+        final_visible = acceptance.run_suite(
+            sandbox, paths.cell_dir, paths.visible_dir, suite="visible",
+            task_id=task_id, verify_root=paths.verify_root,
+            timeout_s=b["gate_test_timeout_s"])
+        _log(calls_path, {"kind": "gate", "arm": arm, "task_id": task_id,
+                          "attempt": len(attempts), "gate_round": 0,
+                          "scoring_only": True, "visible": final_visible})
+
     ws_end = wshash.tree_manifest(paths.cell_dir)
     hidden = acceptance.run_suite(
         sandbox, paths.cell_dir, paths.hidden_dir, suite="hidden",
@@ -772,6 +807,10 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
         "accepted": bool(accepted),
         "stop_reason": stop_reason,
         "attempts_n": len(attempts),
+        # Fable 2026-09-14 指名的欄位名（`attempts_n`／`calls` 是舊名，
+        # 兩套都留著——欄位名對不上會讓檢核表判「量不到」，
+        # 而那與「量到了但不合格」是兩件事）。
+        "attempts_used": len(attempts),
         "attempts": attempts,
         # §三-6 C2：宣告完成的輪次（第一次宣告的那一通）。
         "declared_done_turn": next(
@@ -789,7 +828,8 @@ def run_cell(task: dict, brain, *, arm: str, seed: str, paths: CellPaths,
         # 同一臂 noop 比例 > 20% ⇒ 量具故障不是結果（`gates.e10_noop_gate`）。
         "noop_cell": bool(ws_start_sha == ws_end["ws_sha256"]
                           and tool_calls == 0),
-        "calls": calls_used, "tokens": tokens_total,
+        "calls": calls_used, "calls_used": calls_used,
+        "tokens": tokens_total,
         # ⚠ `tokens` ＝ 逐通 `total_tokens` 的和，而多輪迴圈每一通都會把
         #   整段對話當 prompt 重送 ⇒ 它**隨輪數呈二次成長**。冒煙實測
         #   5–8 通就撞滿 120k（`runs/_smoke/g_r530_real_1`）。兩個分量

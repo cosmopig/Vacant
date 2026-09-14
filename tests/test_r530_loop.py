@@ -61,7 +61,9 @@ def test_solo_ships_whatever_it_declared_and_never_refuses(tmp_path):
     # §三-6 C3：`A-SOLO` 那格**也要跑**可見驗收——只記分、不當閘門、不回饋。
     assert row["visible_total"] == 3 and row["visible_passed"] is not None, \
         "A-SOLO 的可見驗收要落盤（P-W7／W7a／W7b 的對照那一半）"
-    assert row["attempts"][0]["gate_rounds"][0]["scoring_only"] is True
+    # 只記分的那一次驗收跑在**收尾**（不是閘門輪）⇒ `gate_rounds` 是空的。
+    # 這一格與「有閘門的臂」的差別就在這裡：`A-SOLO` 從來沒有過閘門。
+    assert row["attempts"][0]["gate_rounds"] == []
     assert row["attempts_n"] == 1
     assert row["hidden_total"] == 14
     types = [e.type for e in book.entries]
@@ -69,10 +71,11 @@ def test_solo_ships_whatever_it_declared_and_never_refuses(tmp_path):
     assert types.count("ws_attempt") == 1, \
         "沒有閘門的臂也要簽一筆 attempt，否則對帳會把它讀成漏寫"
     att = next(e for e in book.entries if e.type == "ws_attempt")
-    # 只記分的那一次驗收照樣簽進鏈（它是一份真的量測），但標明 scoring_only
-    # ——「量過了但它沒有當過閘門」與「根本沒量」是兩件事。
-    assert att.payload["scoring_only"] is True
-    assert att.payload["verdict_sha256"] == row["visible_result_sha256"]
+    # `A-SOLO` 沒有閘門 ⇒ 它那一筆 attempt 的 `verdict_sha256` 是 None，
+    # 而且帶著 `no_gate_reason`——「這一份沒有跑過閘門」要表達得出來，
+    # 不是靠「欄位剛好是空的」。
+    assert att.payload["verdict_sha256"] is None
+    assert att.payload["no_gate_reason"] == "declared_done"
 
 
 def test_solo_false_delivery_is_visible_in_the_row(tmp_path):
@@ -125,7 +128,8 @@ def test_conf_resets_the_workspace_and_changes_persona(tmp_path):
                             seed="smoke-hasty")
     assert row["accepted"] is False
     assert row["stop_reason"] == "attempts_exhausted"
-    assert row["attempts_n"] == oa.OPENWORK_BUDGET["max_gate_rounds"]
+    assert row["attempts_n"] == oa.OPENWORK_BUDGET["max_conf_attempts"]
+    assert row["attempts_used"] == row["attempts_n"]
     personas = [a["persona"] for a in row["attempts"]]
     assert len(set(personas)) == len(personas), "每次嘗試換一位 persona"
     # 每一次嘗試都從**同一個**樣板起點開始。
@@ -280,3 +284,69 @@ def test_bank_manifest_round_trips(tmp_path):
     p = tmp_path / "pinned.json"
     p.write_text(json.dumps(man), encoding="utf-8")
     assert taskmod.assert_bank_matches(ts, p)["_root_sha256"] == man["_root_sha256"]
+
+
+# ── 收尾記帳不准只走 happy path（§三-6 C3／C6 抓到的那兩個 bug）──────────
+class BusyForeverBrain(StubBrain):
+    """永遠要工具、永遠不宣告完成——逼出「撞預算」那條路徑。"""
+
+    def propose(self, messages, *, system, meta=None, role="r530"):
+        return {"text": "",
+                "tool_calls": [{"id": "x", "name": "run_bash",
+                                "command": "echo still working >> notes.txt",
+                                "timeout_s": None}],
+                "usage": {"prompt_tokens": 100, "completion_tokens": 10,
+                          "total_tokens": 110},
+                "finish_reason": "stop", "raw": {}}
+
+
+def test_a_cell_that_never_declares_done_still_has_a_visible_result(tmp_path):
+    """C3：可見驗收**每一格都要有**，撞預算的也要。
+
+    原本只在「宣告完成」那條路上跑 ⇒ 撞 `budget_calls` 的格子 `visible` 是
+    None ⇒ P-W7／W7a／W7b 的對照那一半整個不見。
+    """
+    row, _book, _task = _run(tmp_path, "A-SOLO", brain_cls=BusyForeverBrain)
+    assert row["stop_reason"].startswith("budget")
+    # 條數不是 3 也沒關係——工作區裡沒有 `solution.py`，可見驗收會在
+    # import 那一步就整檔失敗（1 條 `<module>`）。要的是「**跑過了**」，
+    # 不是「跑出漂亮的數字」。
+    assert row["visible_total"] >= 1, "撞預算的格子也要有可見驗收結果"
+    assert row["visible_passed"] == 0
+    assert row["visible_result_sha256"]
+
+
+def test_a_cell_that_never_declares_done_still_signs_an_attempt(tmp_path):
+    """C6：`attempt 數 ≥ verdict 數` 的對帳在**所有**結局上都要成立。
+
+    收尾記帳只走 happy path 是一種很安靜的壞法：鏈本身沒壞，
+    壞的是「鏈說得出這一格發生過什麼」這件事。
+    """
+    row, book, _task = _run(tmp_path, "A-GATE", brain_cls=BusyForeverBrain)
+    types = [e.type for e in book.entries]
+    assert types.count("ws_verdict") == 1
+    assert types.count("ws_attempt") >= 1, "撞預算的格子也要簽一筆 attempt"
+    assert types.count("ws_attempt") >= types.count("ws_verdict")
+    att = next(e for e in book.entries if e.type == "ws_attempt")
+    assert att.payload["no_gate_reason"].startswith("budget")
+    assert row["receipt_attempt_hashes"]
+
+
+def test_conf_gets_a_second_attempt_when_the_first_runs_out_of_its_quota(tmp_path):
+    """Fable 2026-09-14：`A-CONF` 每份 24 通、最多 3 份、整格 72 通。
+
+    前一版三臂共用 24 通 ⇒ 第一份用完就整格結束，「重抽」永遠不會發生，
+    而 §八-4 把 `A-GATE` vs `A-CONF` 指定為等預算的那一刀。
+    """
+    row, _book, _task = _run(tmp_path, "A-CONF", brain_cls=BusyForeverBrain)
+    b = oa.OPENWORK_BUDGET
+    assert row["attempts_used"] == b["max_conf_attempts"], \
+        "每一份用完自己的配額要換下一份，不是整格停"
+    assert row["calls_used"] == b["max_model_calls"]
+    for a in row["attempts"]:
+        assert a["calls"] == b["max_calls_per_attempt"]
+        assert a["attempt_calls_exhausted"] is True
+    personas = [a["persona"] for a in row["attempts"]]
+    assert len(set(personas)) == len(personas), "每一份換一位 persona"
+    assert row["stop_reason"] == "attempts_exhausted"
+    assert row["refusal"] is True

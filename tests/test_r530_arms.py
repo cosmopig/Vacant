@@ -128,11 +128,14 @@ def test_strip_heredoc_keeps_the_shell_lines():
 
 # ── 預算與停止理由 ────────────────────────────────────────────────────────
 def test_budget_is_a_module_constant_not_a_cli_knob():
-    assert oa.OPENWORK_BUDGET["max_model_calls"] == 24
+    assert oa.OPENWORK_BUDGET["max_model_calls"] == 72
+    assert oa.OPENWORK_BUDGET["max_calls_per_attempt"] == 24
+    assert oa.OPENWORK_BUDGET["max_conf_attempts"] == 3
     assert oa.OPENWORK_BUDGET["max_gate_rounds"] == 5
     from ops.gain.r530 import run_r530
     src = inspect.getsource(run_r530.main)
-    for knob in ("--max-model-calls", "--max-gate-rounds", "--max-tokens"):
+    for knob in ("--max-model-calls", "--max-gate-rounds", "--max-tokens",
+                 "--max-conf-attempts", "--max-completion-tokens"):
         assert knob not in src, f"{knob} 不准做成 CLI 旋鈕（§二-3）"
 
 
