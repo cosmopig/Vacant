@@ -193,3 +193,60 @@ def test_queue_copy_is_not_mutated_by_loading(tmp_path):
     snapshot = copy.deepcopy(raw)
     sch.load_queue(_write(tmp_path, raw))
     assert raw == snapshot
+
+
+# ── runner 存活偵測（2026-09-14 第一次正式發射的死因）────────────────────
+def test_running_block_names_recognises_the_r530_runner(monkeypatch):
+    """**沿用純函式要連它的「比對對象」一起看。**
+
+    `schedule_harness_reps.running_block_names` 寫死比對 `gain_run.py --out `，
+    認不得 `run_r530.py` ⇒ R530 的 runner 永遠被當成「不在」⇒ 每一塊在發射後的
+    下一輪就被判 DEAD、作廢、重排，兩輪用完額度整批放棄。
+    第一次正式發射就是這樣死的：8 塊全部起來了，60 秒後全被自己的排程器搬走。
+    """
+    import subprocess as sp
+
+    ps_out = "\n".join([
+        "  PID CMD",
+        " 1001 python3 ops/gain/r530/run_r530.py --out runs/g_r530_s1_1003_1 "
+        "--decision D.md --arms A-SOLO,A-CONF,A-GATE",
+        " 1002 flock -n /home/u/.launch_r530_x.lock python3 "
+        "ops/gain/r530/run_r530.py --out runs/g_r530_s1_1003_2",
+        " 1003 python3 ops/gain/gain_run.py --out runs/g_r460_other",
+        " 1004 grep run_r530.py --out runs/not_a_runner",
+    ])
+    monkeypatch.setattr(
+        sch.subprocess, "run",
+        lambda *a, **k: sp.CompletedProcess(a[0] if a else [], 0, ps_out, ""))
+    alive = sch.running_block_names(pathlib.Path("."))
+    assert "g_r530_s1_1003_1" in alive, "自己的 runner 要認得出來"
+    assert "g_r530_s1_1003_2" not in alive, "flock 那一行要被 $2==python3 濾掉"
+    assert "g_r460_other" not in alive, "別人的 runner 不是我的塊"
+    assert "not_a_runner" not in alive, "grep 自己那一行不算"
+
+
+def test_running_block_names_is_not_the_inherited_one():
+    """釘死「不准再沿用那一份」——沿用回去會讓整批發射再死一次。"""
+    from ops.gain import schedule_harness_reps as reps
+    assert sch.running_block_names is not reps.running_block_names
+    assert sch.RUNNER_SCRIPT_MARK == "run_r530.py --out "
+    assert sch.RUNNER_SCRIPT_MARK in sch.LAUNCHER + " --out "
+
+
+def test_a_live_block_is_not_judged_dead(monkeypatch):
+    """端到端：runner 活著 ⇒ `observe` 要回 RUNNING，不是 DEAD。"""
+    import subprocess as sp
+    q = sch.load_queue(EXAMPLE)
+    b = q.blocks[0]
+    ps_out = (f"  PID CMD\n 2001 python3 ops/gain/r530/run_r530.py "
+              f"--out runs/{b.name} --seed x")
+    monkeypatch.setattr(
+        sch.subprocess, "run",
+        lambda *a, **k: sp.CompletedProcess(a[0] if a else [], 0, ps_out, ""))
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        root = pathlib.Path(td)
+        (root / b.out).mkdir(parents=True)      # 有目錄、沒有 summary.json
+        statuses, _eps = sch.observe(q.blocks, root)
+        assert statuses[b.name] == "RUNNING", (
+            "有目錄＋行程活著 ⇒ RUNNING。判成 DEAD 會讓排程器把跑著的塊搬走")
