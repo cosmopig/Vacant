@@ -3671,3 +3671,11 @@ R530_BLOCK: g_r530_s3_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachin
   - F2、F3、F5、F7 不變（bank、judge_bank、smoke9 檢核表、佇列 sha 皆未動；`schedule_r530.py --check` 逐字比對通過）。
   - F4 存證路徑不變。
   - **F6** 於重新發射時記入 AMEND2-D。
+
+## 附錄 AMEND2-D　F6 發射紀錄（2026-09-14，Fable）
+
+- **F6 ＝ 2026-09-14T06:29:07Z**（排程器 `~/vacant/logs/schedule_r530_r530_main.log` 本次有效發射的第一行「完成 0／佇列 11／佔用 [('r1003#1', 'g_r530_s1_1003_1')]」）。⚠ 該 log 是 append，字面第一行 `06:14:33Z` 是 AMEND2-C 記錄的失敗發射，刻意不刪。
+- **C10 活體檢查 PASS**：先發 `g_r530_s1_1003_1`，t0→t+60 排程器 `observe()` 皆 RUNNING、calls.jsonl 18→24 行、`_aborted/` 無新項、gate_e9／gate_e11 綠、inference_probe 存在；通過後放其餘 7 塊。
+- 8 塊槽分配：r1003#1–4 ＝ s1_1003_1、s1_1003_2、s2_1003_1、s2_1003_2；r1004#1–4 ＝ s1_1004_2、s2_1004_1、s2_1004_2、s1_1004_1；排程器 pid 3294795；佇列剩 4 塊（s3）等槽。每塊 E-3（整個 bank 量具）、E-9、E-11 於任何實驗呼叫前通過。
+- 程式碼＝F1′ 0b58ad7bc266（vacant-dev `~/vacant/Vacant` at 91d9644，ops/ 內容與 0b58ad7 相同）；工作區根 `/var/tmp/vacant_r530_work`。
+- 時程：依 smoke9 單串 T（A-SOLO 28.2／A-CONF 13.9／A-GATE 18.7 s/通）粗估 20–40 h；併發下 T 會變大（未量過倍率），收官以 summary.json 實測回填。
