@@ -75,7 +75,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3]))
 
 from ops.gain.schedule_harness_reps import (  # noqa: E402
     ABORT_KINDS, MAX_ATTEMPTS, POLL_S, Slot, _read_json, abort_block,
-    abort_preflight, block_state, occupancy, running_block_names)
+    abort_preflight, block_state, occupancy)
 from ops.gain.schedule_queue import (ENDPOINT_1003, ENDPOINT_1004,  # noqa: E402
                                      PER_HOST_CAP, QUEUE_SLOTS)
 
@@ -294,6 +294,44 @@ def check_prereg(queue: R530Queue, repo: pathlib.Path = REPO) -> list[str]:
     text = dec.read_text(encoding="utf-8")
     return [line for line in (registration_line(queue, b) for b in queue.blocks)
             if line not in text]
+
+
+#: 這支排程器的 runner 是哪一支。**不能沿用 `schedule_harness_reps` 的那一份**：
+#: 它寫死比對 `"gain_run.py --out "`，認不得 `run_r530.py`
+#: ⇒ R530 的 runner 永遠被當成「不在」⇒ 每一塊在發射後的下一輪就被判 `DEAD`、
+#: 作廢、重排，兩輪用完額度就整批放棄。2026-09-14 第一次正式發射就是這樣死的：
+#: 8 塊全部起來了（`backend_meta.json`／`calls.jsonl`／`gate_e11.json` 都寫出來了），
+#: 60 秒後全部被自己的排程器搬進 `runs/_aborted/`。
+#:
+#: ⚠ 教訓寫在這裡：**沿用純函式的時候，要連它的「比對對象」一起看**。
+#:   `occupancy`／`block_state`／`classify_summary` 沿用得起來是因為它們吃的是
+#:   參數；`running_block_names` 吃的是 `ps` 的輸出，而那裡面寫死了別人的檔名。
+RUNNER_SCRIPT_MARK = "run_r530.py --out "
+
+
+def running_block_names(root: pathlib.Path) -> set[str]:
+    """`ps` 上還活著的 R530 runner。`$2 == "python3"` 濾掉 `flock` 那一行。"""
+    try:
+        out = subprocess.run(["ps", "-eo", "pid,cmd"], capture_output=True,
+                             text=True, timeout=30).stdout
+    except Exception:                                          # noqa: BLE001
+        return set()
+    names: set[str] = set()
+    for line in out.splitlines():
+        if RUNNER_SCRIPT_MARK not in line:
+            continue
+        fields = line.split()
+        # ⚠ `$2 == "python3"` 是**真的比對第二欄**，不是「行內有 python3」。
+        #   我們的發射命令是 `flock -n <lock> python3 … run_r530.py --out …`
+        #   ⇒ flock 那一行的行內**也有** python3，子字串比對濾不掉它。
+        #   （沿用的那一份就是子字串比對；它剛好無害，因為兩行吐出同一個塊名
+        #     而回傳的是 set——但「剛好無害」不是判準。）
+        if len(fields) < 2 or pathlib.Path(fields[1]).name != "python3":
+            continue
+        parts = line.split(RUNNER_SCRIPT_MARK, 1)[1].split()
+        if parts:
+            names.add(pathlib.Path(parts[0]).name)
+    return names
 
 
 def aborted_counts(blocks, root: pathlib.Path) -> dict[str, int]:
