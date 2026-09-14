@@ -349,6 +349,11 @@ def main(argv: list[str] | None = None) -> int:
                                      key=(keys[0] if keys else ""),
                                      reasoning_effort=args.reasoning_effort)
         e11 = gates.e11_preflight_gate({ep: probe})
+        # ⚠ `enforced` 要**明說**。真跑時這條閘門確實會擋（下面就 SystemExit），
+        #   但先前只有 stub 那條路徑填這個欄位 ⇒ 真跑的 `gate_e11.json` 寫
+        #   `enforced: null`，而 `gate_e9.json` 寫 `enforced: true`。
+        #   兩個同名欄位不對稱會讓讀的人以為 E-11 沒被強制。
+        e11["enforced"] = True
         (out_dir / "inference_probe.json").write_text(
             json.dumps(probe, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8")
