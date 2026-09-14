@@ -27,7 +27,7 @@ from ops.gain.r530 import openwork_arms as oa, tasks as taskmod  # noqa: E402
 from ops.gain.r530 import wshash  # noqa: E402
 
 CHECKS = ("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9",
-          "E9", "E10")
+          "E9", "E10", "E11")
 
 
 def _read_json(p: pathlib.Path) -> dict | None:
@@ -241,6 +241,26 @@ def check(runs) -> dict:
         e9_all[r.name] = rec
         e9_ok = e9_ok and (rec["ok"] or not rec["enforced"])
     put("E9", e9_ok, e9_all)
+    # E-11：逐塊判推論模式（**一塊紅就整份冒煙紅**——不能併的資料不能併）。
+    e11_all = {}
+    e11_ok = True
+    for r in runs:
+        stored = _read_json(r / "gate_e11_closeout.json")
+        if stored is None:
+            stored = gates.e11_closeout_gate(_calls(r), block=r.name)
+        e11_all[r.name] = {k: stored.get(k) for k in
+                           ("calls_audited", "reasoning_tokens_total",
+                            "completion_tokens_total", "reasoning_share",
+                            "calls_without_the_field", "verdict", "reason")}
+        pre = _read_json(r / "gate_e11.json") or {}
+        e11_all[r.name]["preflight_ok"] = pre.get("ok")
+        e11_all[r.name]["preflight_skipped"] = pre.get("skipped_reason")
+        # `--brain stub` 沒有真的端點 ⇒ 收官那一半不判（沒有東西可判）。
+        if (summaries[str(r)].get("brain") == "stub"):
+            continue
+        e11_ok = e11_ok and bool(stored.get("ok")) and pre.get("ok") is not False
+    put("E11", e11_ok, e11_all)
+
     e10 = gates.e10_noop_gate(rows)
     put("E10", e10["ok"], {k: e10[k] for k in
                            ("per_arm", "arms_over_threshold",

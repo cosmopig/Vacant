@@ -288,3 +288,100 @@ class TextProtocolBrain:
                                for c in parse_commands(text)],
                 "usage": info.get("usage") or {},
                 "finish_reason": info.get("finish_reason"), "raw": {}}
+
+
+# ══ E-11 的發射前探針：推論模式與 prefill 吞吐 ══════════════════════════
+#
+# 兩件事一次量完，因為兩件事都只有**在原生 tools 請求下**才問得出來：
+#
+# 1. **`reasoning_tokens` 必須是 0。** R529 §十一 量到同一份 gguf 在 1003／1004
+#    上跑成 thinking／非 thinking **兩種實驗條件**，而那件事只有落盤看得出來。
+#    `reasoning_effort=none` 在 `chat/completions` 上有沒有生效，與它在
+#    **帶 `tools` 的請求**上有沒有生效，是兩個問題——這支問的是後者。
+#    ⚠ 欄位**不存在**也算紅：那代表端點根本沒回報，我們量不到
+#      （`FIELD_MISSING`）。量不到不是通過。
+#
+# 2. **prefill 吞吐**（ms／1k prompt token）。2026-09-14 實測 1003 比 1004 慢
+#    **6.6 倍**（同一個 9,109 token 的 prompt、同樣 15 token 的輸出：
+#    7,353 ms vs 1,107 ms），而**生成速度兩台一樣**（同 prompt 長生成 1.02×）。
+#    這件事對 R530 特別要命：多輪工具迴圈每一通都把整段對話當 prompt 重送
+#    ⇒ prefill 慢的那台**隨輪數二次地慢**。它不會讓資料變錯，但會讓
+#    `budget_wall` 在兩台上咬到不同的地方 ⇒ **跨題的差別截斷**。
+#    所以它要落盤，而且要在發射前就知道。
+
+PROBE_SYSTEM = "You are a programmer. You have exactly one tool: run_bash."
+PROBE_SHORT = "List the files in the current directory using the tool."
+#: 約 9k token 的填充：量 prefill 用的。內容刻意無意義——它問的是吞吐不是能力。
+PROBE_PAD_LINE = "# context padding line to make the prompt long\n"
+PROBE_PAD_REPEAT = 900
+
+
+def probe_inference_mode(api: str, model: str, *, key: str = "",
+                         timeout_s: int = 300,
+                         reasoning_effort: str | None = "none") -> dict:
+    """E-11 的發射前探針。回一份可落盤的 dict；**不自己停**，判給 `gates`。
+
+    燒兩次呼叫（短的一次、長脈絡的一次），約 20–30 秒。
+    """
+    import urllib.error
+
+    def one(messages: list[dict]) -> dict:
+        payload = {"model": model, "messages": messages, "tools": TOOLS,
+                   "temperature": 0.3, "stream": False}
+        if reasoning_effort not in (None, "default"):
+            payload["reasoning_effort"] = reasoning_effort
+        headers = {"Content-Type": "application/json"}
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+        t0 = time.time()
+        req = urllib.request.Request(api, data=json.dumps(payload).encode(),
+                                     headers=headers)
+        with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+            d = json.load(resp)
+        ms = int((time.time() - t0) * 1000)
+        u = d.get("usage") or {}
+        det = u.get("completion_tokens_details") or {}
+        return {
+            "latency_ms": ms,
+            "prompt_tokens": u.get("prompt_tokens"),
+            "completion_tokens": u.get("completion_tokens"),
+            # 欄位不存在與 0 是兩件事，所以不 `.get(k, 0)`。
+            "reasoning_tokens": det.get("reasoning_tokens", "FIELD_MISSING"),
+            "finish_reason": (d.get("choices") or [{}])[0].get("finish_reason"),
+            "tool_calls_n": len(((d.get("choices") or [{}])[0].get("message")
+                                 or {}).get("tool_calls") or []),
+            "server_model": d.get("model"),
+        }
+
+    rec: dict = {"api": api, "model": model,
+                 "reasoning_effort_sent": (
+                     reasoning_effort
+                     if reasoning_effort not in (None, "default") else None),
+                 "error": None}
+    try:
+        short = one([{"role": "system", "content": PROBE_SYSTEM},
+                     {"role": "user", "content": PROBE_SHORT}])
+        pad = PROBE_PAD_LINE * PROBE_PAD_REPEAT
+        long_ctx = one([{"role": "system", "content": PROBE_SYSTEM},
+                        {"role": "user", "content": pad + "\n" + PROBE_SHORT}])
+    except Exception as e:                                   # noqa: BLE001
+        rec["error"] = f"{type(e).__name__}: {e}"
+        rec["reasoning_tokens_all_zero"] = None
+        return rec
+
+    rec["short"] = short
+    rec["long_ctx"] = long_ctx
+    vals = [short["reasoning_tokens"], long_ctx["reasoning_tokens"]]
+    rec["reasoning_tokens"] = vals
+    rec["reasoning_tokens_all_zero"] = all(v == 0 for v in vals)
+    # prefill 吞吐：兩次呼叫的 prompt 差 ÷ 延遲差。輸出長度相近時它就是 prefill。
+    dp = (long_ctx["prompt_tokens"] or 0) - (short["prompt_tokens"] or 0)
+    dt = long_ctx["latency_ms"] - short["latency_ms"]
+    rec["prefill_ms_per_1k_prompt"] = (round(dt / (dp / 1000.0), 1)
+                                       if dp > 0 else None)
+    rec["note"] = (
+        "prefill 吞吐是**實驗條件**不是實作細節：多輪工具迴圈每通都把整段對話"
+        "當 prompt 重送 ⇒ prefill 慢的那台隨輪數二次地慢，而那會讓 "
+        "`budget_wall` 在兩台上咬到不同的地方（跨題的差別截斷）。"
+        "2026-09-14 實測 1003≈807、1004≈121 ms/1k；生成速度兩台相同。")
+    return rec

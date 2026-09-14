@@ -489,3 +489,83 @@ def test_checklist_c7_catches_two_blocks_run_under_different_sandboxes(tmp_path)
     finally:
         for d in (a, b):
             shutil.rmtree(d, ignore_errors=True)
+
+
+# ── E-11：推論模式必須一致（Fable 2026-09-14 第六輪）──────────────────────
+def _call(reasoning=0, completion=100, arm="A-GATE", ok=True, field=True):
+    det = {"reasoning_tokens": reasoning} if field else {}
+    return {"ok": ok, "meta": {"arm": arm, "task_id": "t"},
+            "usage": {"completion_tokens": completion,
+                      "completion_tokens_details": det}}
+
+
+def test_e11_preflight_passes_only_when_every_endpoint_reports_zero():
+    from ops.gain.r530 import gates
+    good = {"reasoning_tokens_all_zero": True, "reasoning_tokens": [0, 0],
+            "prefill_ms_per_1k_prompt": 121.0}
+    bad = {"reasoning_tokens_all_zero": False, "reasoning_tokens": [0, 44],
+           "prefill_ms_per_1k_prompt": 807.0}
+    assert gates.e11_preflight_gate({"a": good})["ok"] is True
+    out = gates.e11_preflight_gate({"a": good, "b": bad})
+    assert out["ok"] is False
+    assert "abort_reasoning_tokens_nonzero" in out["reason"]
+
+
+def test_e11_preflight_treats_a_missing_probe_as_red():
+    """**沒有量過的那一台不能假設它一樣**（R529 §十一 的整個教訓）。"""
+    from ops.gain.r530 import gates
+    assert gates.e11_preflight_gate({})["ok"] is False
+    unknown = {"reasoning_tokens_all_zero": None, "error": "timeout"}
+    assert gates.e11_preflight_gate({"a": unknown})["ok"] is False
+
+
+def test_e11_preflight_surfaces_the_prefill_spread_without_blocking():
+    """prefill 差距**不擋發射**，但要被看見——它會讓 budget_wall 咬到不同地方。"""
+    from ops.gain.r530 import gates
+    out = gates.e11_preflight_gate({
+        "1003": {"reasoning_tokens_all_zero": True,
+                 "prefill_ms_per_1k_prompt": 807.0},
+        "1004": {"reasoning_tokens_all_zero": True,
+                 "prefill_ms_per_1k_prompt": 121.0}})
+    assert out["ok"] is True, "吞吐差距不是發射擋門"
+    assert out["prefill_spread"]["max_over_min"] == round(807.0 / 121.0, 2)
+    assert "二次地慢" in out["prefill_spread"]["warning"]
+
+
+def test_e11_closeout_marks_the_block_broken_when_reasoning_was_burned():
+    from ops.gain.r530 import gates
+    clean = gates.e11_closeout_gate([_call() for _ in range(5)], block="b1")
+    assert clean["ok"] is True and clean["verdict"] == "ok"
+    assert clean["reasoning_share"] == 0.0
+
+    dirty = gates.e11_closeout_gate(
+        [_call(), _call(reasoning=30), _call()], block="b1")
+    assert dirty["ok"] is False
+    assert dirty["verdict"] == gates.E11_BROKEN
+    assert dirty["reasoning_share"] > 0
+    assert "不進分析" in dirty["reason"]
+
+
+def test_e11_closeout_treats_a_missing_field_as_red_not_as_zero():
+    """欄位不存在與 0 是兩件事。量不到不是通過。"""
+    from ops.gain.r530 import gates
+    out = gates.e11_closeout_gate([_call(), _call(field=False)], block="b1")
+    assert out["ok"] is False
+    assert out["calls_without_the_field"] == 1
+    assert "量不到不是通過" in out["reason"]
+
+
+def test_e11_closeout_zero_calls_is_not_a_pass():
+    from ops.gain.r530 import gates
+    out = gates.e11_closeout_gate([], block="b1")
+    assert out["ok"] is False and out["calls_audited"] == 0
+
+
+def test_e11_closeout_ignores_failed_attempts_and_non_arm_calls():
+    """重試失敗的那幾筆與探針本身不算——它們不是實驗呼叫。"""
+    from ops.gain.r530 import gates
+    calls = [_call(), _call(ok=False, reasoning=999),
+             {"ok": True, "meta": {}, "usage": {"completion_tokens": 10,
+              "completion_tokens_details": {"reasoning_tokens": 999}}}]
+    out = gates.e11_closeout_gate(calls, block="b1")
+    assert out["calls_audited"] == 1 and out["ok"] is True

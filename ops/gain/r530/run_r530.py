@@ -311,6 +311,46 @@ def main(argv: list[str] | None = None) -> int:
     world_writable = (backend_meta.get("sandbox_uid") is not None
                       and backend_meta.get("sandbox_uid") != os.getuid())
 
+    # ── E-11（Fable 2026-09-14 第六輪）：推論模式必須是登記的那一種。──────
+    # **在原生 tools 請求下**量——`reasoning_effort=none` 在不帶 tools 的請求上
+    # 生效，不代表它在帶 tools 的請求上生效，而 R530 只走後者。
+    # R529 §十一：同一份 gguf 可以在兩台上跑成兩種實驗條件，
+    # 而那件事沒有錯誤訊息、只有一批不能併的資料。
+    # ⚠ 它燒兩通呼叫（約 20–30 秒），落在 `inference_probe.json`，
+    #   **不進任何分析**（`role` 不是實驗臂，V/GT 與 rows 都不會看到它）。
+    e11 = {"gate": "E-11", "phase": "preflight", "skipped_reason": None}
+    if args.brain == "stub":
+        e11["skipped_reason"] = "--brain stub：沒有真的端點可以探"
+        e11["ok"] = True
+    else:
+        from ops.gain.r530.brain_native import probe_inference_mode
+        keys = load_keys(args.keys) if args.keys else load_keys()
+        probe = probe_inference_mode(ep, args.model,
+                                     key=(keys[0] if keys else ""),
+                                     reasoning_effort=args.reasoning_effort)
+        e11 = gates.e11_preflight_gate({ep: probe})
+        (out_dir / "inference_probe.json").write_text(
+            json.dumps(probe, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8")
+        # 結論寫進 backend_meta（Fable 指名）——沙箱與推論條件是同一份「這一塊
+        # 是在什麼條件下量的」，分開放會讓引用的人只看到一半。
+        backend_meta["inference"] = {
+            "reasoning_effort_sent": probe.get("reasoning_effort_sent"),
+            "reasoning_tokens": probe.get("reasoning_tokens"),
+            "reasoning_tokens_all_zero": probe.get("reasoning_tokens_all_zero"),
+            "prefill_ms_per_1k_prompt": probe.get("prefill_ms_per_1k_prompt"),
+            "note": probe.get("note"),
+        }
+        (out_dir / "backend_meta.json").write_text(
+            json.dumps(backend_meta, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8")
+    (out_dir / "gate_e11.json").write_text(
+        json.dumps(e11, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if not e11.get("ok"):
+        raise SystemExit(
+            e11.get("reason", "E-11 紅") +
+            f"\n（實測 {json.dumps(e11, ensure_ascii=False)}）\n停。")
+
     brain = _make_brain(args, calls_path)
     books = {a: {"book": Logbook(), "ident": Identity.generate()} for a in arms}
     stats = {a: {"processed": 0, "infra_void": 0, "accepted": 0,
@@ -387,6 +427,17 @@ def main(argv: list[str] | None = None) -> int:
     e10 = gates.e10_noop_gate(all_rows)
     (out_dir / "gate_e10.json").write_text(
         json.dumps(e10, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    # E-11 收官：這一塊**實際**燒掉的 reasoning 占比。> 0 ⇒ 該塊 broken。
+    all_calls = ([json.loads(l) for l in calls_path.open(encoding="utf-8")
+                  if l.strip()] if calls_path.exists() else [])
+    e11_close = gates.e11_closeout_gate(all_calls, block=out_dir.name)
+    (out_dir / "gate_e11_closeout.json").write_text(
+        json.dumps(e11_close, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8")
+    if not e11_close["ok"]:
+        note({"gate": "E-11", "phase": "closeout",
+              "verdict": e11_close["verdict"],
+              "reason": e11_close.get("reason")})
     summary = {
         "run": out_dir.name,
         "study": "R530",
@@ -415,7 +466,10 @@ def main(argv: list[str] | None = None) -> int:
             "max_tokens_sent": None,
         },
         "backend_meta": backend_meta,
-        "gates": {"E9": e9, "E10": e10},
+        "gates": {"E9": e9, "E10": e10,
+                  "E11_preflight": e11, "E11_closeout": e11_close},
+        # 這一塊算不算數的單一真相：E-11 收官紅 ⇒ `broken`，資料不進分析。
+        "block_verdict": ("broken" if not e11_close["ok"] else "ok"),
         "work_root": str(work_root),
         "bank": {"root_sha256": bank["_root_sha256"],
                  "pinned": bool(args.bank_sha),

@@ -128,3 +128,106 @@ def e10_noop_gate(rows: list[dict], *,
             f"{rate_abort:.0%} 是 Fable 2026-09-14 訂的約定，"
             "不是從任何實測推出來的門檻；引用時要跟著講。"),
     }
+
+
+# ══ E-11　推論模式必須一致（Fable 2026-09-14 第六輪裁決）══════════════
+#
+# R529 §十一 的教訓：**同一份 gguf 可以在兩台上跑成兩種實驗條件**
+# （thinking／非 thinking），而那件事只有落盤看得出來——沒有錯誤訊息、
+# 沒有異常，只有一批不能併的資料。R530 的兩台後端有同樣的曝險，而且更隱蔽：
+# `reasoning_effort=none` 在**不帶 tools** 的請求上生效，不代表它在**帶 tools**
+# 的請求上生效，而 R530 只走後者。
+#
+# 兩段：
+#   · 發射前（`e11_preflight_gate`）：兩台的探針都必須 `reasoning_tokens == 0`。
+#     欄位不存在（`FIELD_MISSING`）**也算紅**——量不到不是通過。
+#   · 收官時（`e11_closeout_gate`）：該塊實際呼叫的 reasoning 占比 > 0
+#     ⇒ 該塊 `broken`（`inference_mode_inconsistent`），資料不進分析。
+#
+# ⚠ 這一條擋的是**條件不一致**，不是「thinking 比較差」。
+#   兩台都 thinking 也可以是一個合法的 run——只要**一致**而且落盤。
+#   會殺掉資料的是「一台是、一台不是」而沒有人發現。
+E11_BROKEN = "inference_mode_inconsistent"
+
+
+def e11_preflight_gate(probes: dict) -> dict:
+    """`probes`：`{host_or_api: probe_inference_mode(...) 的回傳}`。
+
+    **每一台都要有探針**；缺一台算紅（沒有量過的那一台不能假設它一樣）。
+    """
+    rec: dict = {"gate": "E-11", "phase": "preflight", "per_endpoint": {},
+                 "ok": bool(probes)}
+    if not probes:
+        rec["reason"] = "abort_no_inference_probe：一台都沒有量過。停。"
+        return rec
+    for key, pr in sorted(probes.items()):
+        zero = pr.get("reasoning_tokens_all_zero")
+        entry = {
+            "reasoning_tokens": pr.get("reasoning_tokens"),
+            "all_zero": zero,
+            "reasoning_effort_sent": pr.get("reasoning_effort_sent"),
+            "prefill_ms_per_1k_prompt": pr.get("prefill_ms_per_1k_prompt"),
+            "error": pr.get("error"),
+        }
+        rec["per_endpoint"][key] = entry
+        if zero is not True:
+            rec["ok"] = False
+    # prefill 差異不是擋門，但要**被看見**：它會讓 budget_wall 在兩台上
+    # 咬到不同的地方（跨題的差別截斷）。
+    pf = {k: v.get("prefill_ms_per_1k_prompt")
+          for k, v in rec["per_endpoint"].items()
+          if v.get("prefill_ms_per_1k_prompt")}
+    if len(pf) >= 2:
+        rec["prefill_spread"] = {
+            "per_endpoint": pf,
+            "max_over_min": round(max(pf.values()) / min(pf.values()), 2),
+            "warning": (
+                "prefill 吞吐差距**不擋發射**，但它是實驗條件：多輪迴圈每通重送"
+                "整段對話 ⇒ 慢的那台隨輪數二次地慢 ⇒ `budget_wall` 在兩台上咬到"
+                "不同的地方。收官報 `wall_s` 分佈時要逐台分開。"),
+        }
+    if not rec["ok"]:
+        rec["reason"] = (
+            "abort_reasoning_tokens_nonzero：**在原生 tools 請求下** "
+            "`reasoning_tokens` 不是 0（或端點根本沒回報這個欄位）⇒ "
+            "推論模式不是我們以為的那一種。R529 §十一 的同一條：同一份 gguf "
+            "可以跑成兩種實驗條件，而那只有落盤看得出來。停。")
+    return rec
+
+
+def e11_closeout_gate(calls: list[dict], *, block: str | None = None) -> dict:
+    """收官：這一塊實際燒掉的 reasoning 占比。> 0 ⇒ 該塊 `broken`。"""
+    rt = ct = 0
+    missing = seen = 0
+    for r in calls or []:
+        if not r.get("ok") or not (r.get("meta") or {}).get("arm"):
+            continue
+        seen += 1
+        u = r.get("usage") or {}
+        det = u.get("completion_tokens_details") or {}
+        ct += int(u.get("completion_tokens") or 0)
+        if "reasoning_tokens" in det:
+            rt += int(det["reasoning_tokens"] or 0)
+        else:
+            missing += 1
+    share = (rt / ct) if ct else 0.0
+    ok = (seen > 0) and (rt == 0) and (missing == 0)
+    rec = {
+        "gate": "E-11", "phase": "closeout", "block": block,
+        "calls_audited": seen,
+        "reasoning_tokens_total": rt,
+        "completion_tokens_total": ct,
+        "reasoning_share": round(share, 6),
+        "calls_without_the_field": missing,
+        "ok": ok,
+        "verdict": "ok" if ok else E11_BROKEN,
+    }
+    if seen == 0:
+        rec["reason"] = "一通都沒稽核到——量具沒接上不是通過。"
+    elif missing:
+        rec["reason"] = (f"{missing} 通沒有回報 `reasoning_tokens` ⇒ 那幾通的"
+                         "推論模式我們量不到。量不到不是通過。")
+    elif rt:
+        rec["reason"] = (f"reasoning 占 completion 的 {share:.2%} ⇒ 這一塊跑的"
+                         "推論模式與登記的不同，資料不進分析（`broken`）。")
+    return rec
