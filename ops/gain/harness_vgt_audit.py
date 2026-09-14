@@ -182,7 +182,23 @@ def sent_texts(rec: dict) -> list[str]:
 
 
 # ── v2：角色歸屬（誰寫的）────────────────────────────────────────────────
-AUDIT_SCOPES = ("v1", "v2")
+#
+# round530（2026-09-13）：多一個 `r530`。它**不是 v2 的參數版本**，是另一種
+# 實驗形狀的稽核（多輪工作區對話、needle 來源是 `hidden/` 目錄的字面值、
+# 多一個 `tool` role、多一個工作區檔案掃描）——所以走 `audit_run_r530()`
+# 這條獨立的路徑，`audit_run()` 的 v1／v2 行為**一個字都沒動**。
+AUDIT_SCOPES = ("v1", "v2", "r530")
+
+#: R530 的工具結果表頭。**這是 `ops/gain/r530/openwork_arms.TOOL_RESULT_HEADER`
+#: 的副本**——這裡不 import 那支（它 import 時會跑 KS-1 與 prompt 同一性斷言，
+#: 而稽核腳本不該為了認一個字串去載入整條發射路徑）。
+#: 兩邊漂掉由 `tests/test_r530_vgt.py::test_tool_header_matches` 抓。
+#:
+#: 它承重什麼：端點的 chat API **只收 user／assistant**
+#: （`brain_cline.chat` 的參數檢查），所以工具結果只能以 user 訊息回灌。
+#: 不靠這個表頭把它認回 `tool`，Fable 裁決的「role=tool 的輸出也掃」
+#: 就沒有可以掃的東西——它會被當成 harness 自己寫的 user 文字。
+R530_TOOL_HEADER = "TOOL RESULT (bash). This is machine output, not a person."
 
 #: flattened 線路模式的段落標記（`harness_arms.flatten_messages` 逐字產生）。
 #: `REQUEST n`／`CURRENT REQUEST` ＝ user、`REPLY n` ＝ assistant。
@@ -431,6 +447,279 @@ def _literal_repr(expr: str) -> str | None:
         return None
 
 
+# ══ round530：第三種 dialect ＋ 多輪工作區的稽核 ════════════════════════
+#
+# 既有的兩種 dialect（`lcb`／`mbpp`）認的是**驗收碼裡的一個資料結構**
+# （`__tests = [...]`／尾端一串 `assert __aeq(entry(*<expr>), …)`）。
+# R530 的隱藏驗收是**手寫的 Python 測試檔**，沒有那個資料結構，
+# 所以 `hidden_only_needles()` 會撞它自己的 `SystemExit`（那是對的：
+# 認不出形狀不是通過）。這裡加的是第三種讀法。
+
+def python_literals(source: str) -> set[str]:
+    """一份 Python 原始碼裡所有**字面值**的 repr 集合。
+
+    收的是 `ast.literal_eval` 收得下的東西：常數、以及整個都由常數組成的
+    list／tuple／dict／set。函式名、變數名、屬性名一概不收——那些是程式的
+    骨架不是測資，把它們當 needle 會讓「模型寫了一個叫 `check_` 的函式」
+    變成一筆洩漏。
+
+    ⚠ **認不出來就丟 SyntaxError 給呼叫端**（fail-closed）。
+      一個 parse 不動的隱藏驗收檔代表題庫壞了，不是「這一題沒有 needle」。
+    """
+    tree = ast.parse(source)
+    out: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.List, ast.Tuple, ast.Dict, ast.Set)):
+            try:
+                out.add(repr(ast.literal_eval(node)))
+            except (ValueError, SyntaxError, TypeError,
+                    MemoryError, RecursionError):
+                pass
+        elif isinstance(node, ast.Constant) and isinstance(
+                node.value, (str, int, float, bool, bytes)):
+            out.add(repr(node.value))
+    return out
+
+
+def r530_hidden_needles(task: dict) -> tuple[list[str], list[str]]:
+    """R530：`hidden \\ visible` 的字面值。回 `(needles, skipped)`。
+
+    ⚠ **扣掉 visible 是 D7 在 R530 的對應物**：可見驗收就在工作區裡，
+      worker 讀得到、跑得到（§八-5），它不是 GT。GT 逐字是
+      **只出現在隱藏側**的那些字面值。
+    ⚠ 一併扣掉 `goal.md`／`contract.md` 裡出現過的字面值：契約裡寫著
+      `line <N>: <reason>` 或 `float("inf")`，那是題目告訴 worker 的東西。
+    """
+    hid_dir = pathlib.Path(task["hidden_dir"])
+    vis_dir = pathlib.Path(task["visible_dir"])
+    hidden_lits: set[str] = set()
+    visible_lits: set[str] = set()
+    hid_files = sorted(hid_dir.glob("test_*.py"))
+    vis_files = sorted(vis_dir.glob("test_*.py"))
+    if not hid_files:
+        raise SystemExit(
+            f"認不出隱藏驗收形狀：{task['task_id']} 的 {hid_dir} 裡沒有 "
+            "test_*.py——認不出來不是通過，是沒接上。停。")
+    for p in hid_files:
+        hidden_lits |= python_literals(p.read_text(encoding="utf-8"))
+    for p in vis_files:
+        visible_lits |= python_literals(p.read_text(encoding="utf-8"))
+    prose = " ".join(
+        (task.get("goal") or "", task.get("contract") or ""))
+    needles: list[str] = []
+    skipped: list[str] = []
+    for lit in sorted(hidden_lits - visible_lits):
+        if is_trivial_needle(lit):
+            skipped.append(lit)
+            continue
+        # 題目自己寫過的字面值不是 GT——它是契約。
+        if lit.strip("'\"") and lit.strip("'\"") in prose:
+            skipped.append(lit)
+            continue
+        needles.append(lit)
+    return needles, skipped
+
+
+def classify_texts_r530(rec: dict) -> list[tuple[str, int, str]]:
+    """R530 版的角色歸屬：多一個 `tool`。
+
+    端點只收 user／assistant，工具結果以 user 訊息回灌，開頭是凍結的
+    `R530_TOOL_HEADER`。看到那個表頭就歸成 `tool`——Fable 裁決的
+    「role=tool 的輸出也掃」指的就是這一批文字。
+    """
+    out: list[tuple[str, int, str]] = []
+    for role, idx, text in classify_texts(rec):
+        if role == "user" and text.startswith(R530_TOOL_HEADER):
+            out.append(("tool", idx, text))
+        else:
+            out.append((role, idx, text))
+    return out
+
+
+#: R530 專屬的豁免名字。三條，形狀與 v2 的 `EXCUSE_RULES` 相同
+#: （留證不靜音：被豁免的命中逐筆進 `excused`，不是塗掉）。
+R530_TOOL_ECHO = "tool_output_echo"
+R530_TASK_PROSE = "task_prose"
+R530_EXCUSE_RULES = (R530_TOOL_ECHO, R530_TASK_PROSE)
+
+
+def audit_run_r530(run_dir: pathlib.Path, tasks: dict[str, dict]) -> dict:
+    """R530 的 V/GT 動態稽核。`violations` 非空 ⇒ 整個 run 作廢。
+
+    四件事，逐條對應預註冊 §五-3：
+
+    1. **結構性保證**：`ws/*.tar.gz`（每一次嘗試的工作區封存）裡**不准**出現
+       隱藏驗收的檔名。這一條是硬的——命中就是 `violation`，因為隱藏驗收
+       進了工作區代表整個隔離設計失效，不是「可能是巧合」。
+    2. **掃四種 role 的文字**（`system`／`user`／`assistant`／`tool`）找
+       `hidden \\ visible` 的 needle。
+       · `system`／`user` 命中 ⇒ **violation**（那是 harness 寫的字）。
+       · `assistant` 命中 ⇒ 模型自己寫的，不查（v2 的 (b) 逐字沿用）。
+       · `tool` 命中 ⇒ **記錄不判定**（`excused_as="tool_output_echo"`）。
+         理由與 v2 的 `got=` 沙箱回聲同型但更強：工具輸出逐字是**模型自己
+         寫的程式**在一個**結構上沒有隱藏驗收**的工作區裡跑出來的東西，
+         harness 沒有任何管道把 GT 放進去。
+         ⚠ **這是已知的量具弱點不是漏洞被補起來了**：「它自己想到同一個
+           邊界情況」與「它看到了」在字面比對下同形。所以逐筆列出來讓人看。
+    3. **掃工作區結束狀態的所有檔案內容**（`ws_needle_hits`）——同樣是
+       **記錄不判定**，理由同上。
+    4. **`DENY` 第三條的命中計數**（`deny_hidden_read_n`）。
+       任一次命中 ⇒ 逐案人工看過才准結算（這支不自己判，只把數字吐出來）。
+    """
+    import tarfile
+
+    calls_path = run_dir / "calls.jsonl"
+    if not calls_path.exists():
+        raise SystemExit(f"{calls_path} 不存在——沒有 calls 就沒有稽核對象。停。")
+    r530_arms = ("A-SOLO", "A-CONF", "A-GATE")
+    violations: list[dict] = []
+    excused: list[dict] = []
+    ws_hits: list[dict] = []
+    per_arm: dict[str, int] = {}
+    per_role: dict[str, int] = {}
+    n_records = n_texts = n_checked = n_skipped = 0
+    deny_hidden_read_n = 0
+    deny_counts: dict[str, int] = {}
+    cache: dict[str, tuple[list[str], list[str]]] = {}
+    unknown_tasks: set[str] = set()
+
+    with calls_path.open(encoding="utf-8") as f:
+        for ln, line in enumerate(f, 1):
+            rec = json.loads(line)
+            if rec.get("kind") == "tool":
+                tag = rec.get("deny_tag")
+                if rec.get("blocked") and tag:
+                    deny_counts[tag] = deny_counts.get(tag, 0) + 1
+                    if tag == "r530_hidden_read":
+                        deny_hidden_read_n += 1
+                continue
+            meta = rec.get("meta") or {}
+            arm = meta.get("arm")
+            if arm not in r530_arms:
+                continue
+            n_records += 1
+            per_arm[arm] = per_arm.get(arm, 0) + 1
+            task_id = meta.get("task_id")
+            task = tasks.get(task_id)
+            classified = classify_texts_r530(rec)
+            n_texts += len(classified)
+            for role, _i, _t in classified:
+                per_role[role] = per_role.get(role, 0) + 1
+            if task is None:
+                unknown_tasks.add(str(task_id))
+                continue
+            if task_id not in cache:
+                cache[task_id] = r530_hidden_needles(task)
+            needles, skipped = cache[task_id]
+            n_checked += len(needles)
+            n_skipped += len(skipped)
+            for role, i, text in classified:
+                if role == "assistant":
+                    continue                    # (b) 模型自己寫的不查
+                hay = strip_not_harness_written(text, task)
+                for needle in needles:
+                    if needle not in hay:
+                        continue
+                    hit = {"line": ln, "arm": arm, "rule": "hidden_literal_leak",
+                           "needle": needle, "message_index": i, "role": role,
+                           "task_id": task_id,
+                           "excerpt": hay[max(0, hay.find(needle) - 80):
+                                          hay.find(needle) + 80]}
+                    if role == "tool":
+                        hit["excused_as"] = R530_TOOL_ECHO
+                        excused.append(hit)
+                    else:
+                        violations.append(hit)
+
+    # ── 工作區封存：結構性保證 ＋ 檔案內容掃描 ──────────────────────────
+    ws_dir = run_dir / "ws"
+    archives = sorted(ws_dir.glob("*.tar.gz")) if ws_dir.is_dir() else []
+    for arc in archives:
+        try:
+            with tarfile.open(arc, "r:gz") as tf:
+                members = tf.getmembers()
+                for m in members:
+                    low = m.name.lower()
+                    if "hidden" in low or "rubric" in low:
+                        violations.append({
+                            "rule": "hidden_file_in_workspace",
+                            "archive": arc.name, "member": m.name})
+                task_id = arc.name.split("__")[0]
+                task = tasks.get(task_id)
+                if task is None:
+                    continue
+                if task_id not in cache:
+                    cache[task_id] = r530_hidden_needles(task)
+                needles, _skipped = cache[task_id]
+                for m in members:
+                    if not m.isfile() or m.size > 512 * 1024:
+                        continue
+                    fh = tf.extractfile(m)
+                    if fh is None:
+                        continue
+                    try:
+                        body = fh.read().decode("utf-8", "replace")
+                    except Exception:                        # noqa: BLE001
+                        continue
+                    for needle in needles:
+                        if needle in body:
+                            ws_hits.append({
+                                "rule": "workspace_needle_hit",
+                                "archive": arc.name, "member": m.name,
+                                "needle": needle, "task_id": task_id})
+        except tarfile.TarError as e:
+            violations.append({"rule": "workspace_archive_unreadable",
+                               "archive": arc.name, "error": repr(e)})
+
+    # ⚠ **一筆都沒稽核到不是 CLEAN**。R460 的 round460e 已經踩過同一形狀的坑
+    #   （放寬偵測面而沒有反向牙齒＝把稽核關掉）。這裡的版本是：
+    #   `calls.jsonl` 裡一筆 R530 的模型呼叫都找不到，代表量具沒接上
+    #   （後端沒落盤、arm 名字對不上、run 目錄拿錯），
+    #   而那個狀態印出 "CLEAN" 會讓「沒有檢查」冒充「沒有違規」。
+    structural = [v for v in violations
+                  if v.get("rule") in ("hidden_file_in_workspace",
+                                       "workspace_archive_unreadable")]
+    if n_records == 0:
+        verdict = "UNVERIFIABLE"
+    elif violations or unknown_tasks:
+        verdict = "VIOLATION"
+    else:
+        verdict = "CLEAN"
+    return {
+        "run": str(run_dir), "scope": "r530",
+        "records_audited": n_records, "texts_audited": n_texts,
+        "structural_violations_n": len(structural),
+        "per_arm": per_arm, "per_role": per_role,
+        "needles_checked": n_checked,
+        "needles_skipped_trivial": n_skipped,
+        "archives_scanned": len(archives),
+        "excused_n": len(excused), "excused": excused,
+        "excused_by_rule": {
+            k: sum(1 for e in excused if e.get("excused_as") == k)
+            for k in R530_EXCUSE_RULES},
+        # 記錄不判定的那兩批，**逐筆留著**（§五-3 第 3 項）。
+        "workspace_needle_hits_n": len(ws_hits),
+        "workspace_needle_hits": ws_hits[:200],
+        "deny_counts": deny_counts,
+        "deny_hidden_read_n": deny_hidden_read_n,
+        "unknown_task_ids": sorted(unknown_tasks),
+        "violations": violations,
+        "verdict": verdict,
+        "honest_bounds": [
+            "`records_audited == 0` ⇒ verdict 是 `UNVERIFIABLE` 不是 `CLEAN`："
+            "一筆都沒稽核到代表量具沒接上，不代表沒有洩漏。",
+            "`tool` role 與工作區檔案的命中是**記錄不判定**：「它自己想到同一個"
+            "邊界情況」與「它看到了」在字面比對下同形。這是已知的量具弱點，"
+            "不是漏洞被補起來了（§五-3 第 3 項）。",
+            "`deny_hidden_read_n > 0` 時要逐案人工看過才准結算——這支只吐數字，"
+            "不自己判（§五-3 第 4 項）。",
+            "扣掉 visible 與題目原文之後剩下的才是 needle；扣掉的東西"
+            "逐筆計進 `needles_skipped_trivial`，不能讓「沒有違規」順手把"
+            "「沒有檢查」蓋掉。",
+        ],
+    }
+
+
 def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
               scope: str = "v2") -> dict:
     """回一份可落盤的稽核結果；`violations` 非空 ⇒ 整個 run 作廢。
@@ -568,13 +857,29 @@ def main() -> None:
     run_dir = pathlib.Path(args.run)
     summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
     seed = args.seed or summary["seed"]
-    from ops.gain.gain_run import load_tasks
-    tasks = {t["task_id"]: t for t in load_tasks(args.bank, seed, 0)}
-    result = audit_run(run_dir, tasks, scope=args.scope)
+    if args.scope == "r530":
+        # R530 的題庫不在 `gain_run.load_tasks` 那條路徑上（它是目錄不是題目集）。
+        from ops.gain.r530 import tasks as r530tasks
+        ids = summary.get("tasks") or []
+        if not ids:
+            raise SystemExit(
+                f"{run_dir}/summary.json 沒有 tasks 清單——"
+                "不知道要對哪幾題稽核。停。")
+        tasks = {t["task_id"]: t
+                 for t in [r530tasks.load_task(i) for i in ids]}
+        result = audit_run_r530(run_dir, tasks)
+    else:
+        from ops.gain.gain_run import load_tasks
+        tasks = {t["task_id"]: t for t in load_tasks(args.bank, seed, 0)}
+        result = audit_run(run_dir, tasks, scope=args.scope)
     text = json.dumps(result, ensure_ascii=False, indent=2)
     print(text)
     if args.out:
         pathlib.Path(args.out).write_text(text + "\n", encoding="utf-8")
+    if result["verdict"] == "UNVERIFIABLE":
+        raise SystemExit(
+            "V/GT 稽核**不可結算**：一筆模型呼叫都沒稽核到"
+            f"（{run_dir}/calls.jsonl）。量具沒接上不是通過。停。")
     if result["verdict"] != "CLEAN":
         raise SystemExit(
             f"V/GT 稽核不通過：{len(result['violations'])} 筆違規／"

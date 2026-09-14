@@ -1,0 +1,42 @@
+{
+  "name": "r530_openwork_example",
+  "decision": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+  "launcher": "ops/gain/r530/run_r530.py",
+  "arms": "A-SOLO,A-CONF,A-GATE",
+  "backend": "bwrap",
+  "request_timeout_s": 900,
+  "reasoning_effort": "none",
+  "model": "gemma-4-12b-it-qat",
+  "backends": {
+    "http://100.119.113.56:1234/v1/chat/completions": {
+      "host": "1003",
+      "lmstudio_version": "0.4.24.0",
+      "version_source": "沿用 ops/gain/queues/r529_cross_bank.json 的宣稱（Fable 2026-09-11 在該機上執行 `lms version` 的回報）；runner 查證不到 ⇒ 這是宣稱不是量測",
+      "note": "R530 尚未實測這顆的併發表現"
+    },
+    "http://100.86.226.21:1234/v1/chat/completions": {
+      "host": "1004",
+      "lmstudio_version": "0.4.17.0",
+      "version_source": "同上，人回報",
+      "note": "R530 尚未實測這顆的併發表現"
+    }
+  },
+  "blocks": [
+    {
+      "name": "g_r530_ow_s1_odd",
+      "tasks": ["ow_01_csvjson"],
+      "seed": "g-r530-s1",
+      "tag": "r530s1odd",
+      "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+      "note": "**範例佇列，不是發射授權**：題庫只有兩題，AMEND1 尚未凍結 sha256"
+    },
+    {
+      "name": "g_r530_ow_s1_even",
+      "tasks": ["ow_02_ratelimit"],
+      "seed": "g-r530-s1",
+      "tag": "r530s1even",
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "note": "同一顆 seed 的另一半題在另一顆卡上——「題在兩台輪流」"
+    }
+  ]
+}
