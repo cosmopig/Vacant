@@ -1,0 +1,92 @@
+{
+  "task_id": "ow_17_diffpatch",
+  "stratum": "tight",
+  "title": "Line diff and a patch that refuses to misapply",
+  "prereg_ref": "Fable ruling 2026-09-13: extension set ow_13..ow_17 (prereg S1-3)",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Diffing is a classic, but the shape graded here is this project's own: pieces are dicts with exactly start/old/new rather than unified-diff text, there is no context, pieces are required to be trimmed on both sides and separated by an unchanged line, and apply is required to verify, to refuse out-of-order and overlapping pieces, and to leave its arguments alone. difflib produces opcodes and SequenceMatcher-based recipes do not validate on apply, so a remembered solution fails the refusal checks.",
+  "visible_n": 3,
+  "hidden_n": 12,
+  "type_note": "Chosen to be unlike the frozen twelve: the only task with a two-way invariant (out and back) between a producer and a consumer written by the same worker.",
+  "sha256": {
+    "contract.md": "6ae06e56a2cd925563c1cfdeaa8a2547aedfad15cdbfe45d8e268d499d82afe6",
+    "goal.md": "1e2d4dcc938687bd97d90a2b79511bbf8c1f8b8e96cf244812f046fa059777d7",
+    "hidden/h01_one_piece_per_place.py": "28cd9792158e1d6d563f1627113782bf8b24b007a834d6d1dc6a8dcc7d0ecd24",
+    "hidden/h02_no_unchanged_lines_at_the_edges.py": "83445e7dc4471637aca2a962d90c8a3580fa390bfd5407eeedb6aef2562a7c94",
+    "hidden/h03_pieces_are_ordered_and_apart.py": "8db12164d66026abea8808985ae484e13f66b2b163bd110f05cef022d88e2a5e",
+    "hidden/h04_insertions.py": "5756ec506ea5aa31d7c144d616bedca8175c48be69941060ffc3c1fd913443b6",
+    "hidden/h05_deletions.py": "8788178f8829ade67f8a9f97e71a3d69f93b0f42ec3b8f8fe3ead7961fb98690",
+    "hidden/h06_nothing_changed.py": "0a8c5a735aa1ab388fd92b5d67dddbe6d5002512a6f78ada4133fc5311223b2b",
+    "hidden/h07_piece_that_does_not_fit.py": "cdecbdd38f7380e61c44c7b3a8016d5e9306ba1659a99c7e12f8c6677e341def",
+    "hidden/h08_out_of_order_or_overlapping.py": "0a6778f3d45f56ed65db7fc64361411a268b8ecfdd1c58b08b4d698fc27e2c6c",
+    "hidden/h09_malformed_piece.py": "88eb771cd7ddf12a6c038151c0d58f7497f7db2dafee79b0af0993238d7b2cac",
+    "hidden/h10_inputs_are_untouched.py": "4aee092629dc5a054666f3be9e6ae4549896aae5bb6a0843debfd716c7002e11",
+    "hidden/h11_empty_versions.py": "e4e25a6f51f6666203a23b728b8d63e68f07a3965ece560e3ec33a8be64797ae",
+    "hidden/h12_repeated_lines.py": "047e438efbe6b9f0682a0d96da32087afa0df4939d77ab8d53fc6c9ffaa60cac",
+    "reference/bad_a.py": "0b23ae2d6e2579b63fec3a36dffbaa65297e920259a42214dc7186b68fe723dd",
+    "reference/bad_b.py": "797bcea9a7141e7e4b87f82249b1506d5a5dddc98087f02458ed26dc8097aae9",
+    "reference/bad_c.py": "8b7dd7775ba7256cea24bc249109c40c3fcec097a3e2bb73c17d80361087765a",
+    "reference/solution.py": "e3340c73c263e6b80990328e1fc2fe98c84e9764ffe848aeb9563fd7e181187f",
+    "rubric.md": "4c255a46f1015e1439f16b21bf0f6733dc806af7491b8952abd3b5b6d062be77",
+    "tests_visible/v01_out_and_back.py": "df6b160ef8dbde9ac4036c7e519cf04373db987a0131eeeb9b5157b3fc0328a5",
+    "tests_visible/v02_shape_of_a_piece.py": "c0e836c4c886f3288a0b88f6d705ded6fbbe379df05841a9642ddd329c2665cb",
+    "tests_visible/v03_refuses_a_piece_that_does_not_fit.py": "7904323942880b3213ef92ef6e1fdfbf6bc4d00d94c90dde2f3f3fde641b8cec"
+  },
+  "ref_solution_lines": 79,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": 4,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_one_piece_per_place.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_no_unchanged_lines_at_the_edges.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_pieces_are_ordered_and_apart.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_insertions.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_deletions.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_nothing_changed.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_piece_that_does_not_fit.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_out_of_order_or_overlapping.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_malformed_piece.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_inputs_are_untouched.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_empty_versions.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_repeated_lines.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
+}

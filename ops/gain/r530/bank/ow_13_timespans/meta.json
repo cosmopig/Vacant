@@ -1,0 +1,97 @@
+{
+  "task_id": "ow_13_timespans",
+  "stratum": "tight",
+  "title": "Merge and subtract half-open time spans",
+  "prereg_ref": "Fable ruling 2026-09-13: extension set ow_13..ow_17 (prereg S1-3)",
+  "origin": "authored 2026-09-13",
+  "why_not_offtheshelf": "Interval arithmetic is a textbook exercise, but the contract combination is this project's own: half-open spans so touching periods join, zero-length spans dropped rather than kept, two input instant shapes normalised to one output shape, a union-based total rather than a sum, and a reversed span raising instead of being swapped. Libraries such as portion default to closed intervals and would fail the touching and zero-length checks.",
+  "visible_n": 3,
+  "hidden_n": 13,
+  "type_note": "Chosen to be unlike the frozen twelve: this is the only task about ordered arithmetic over intervals.",
+  "sha256": {
+    "contract.md": "b47b61fa919bd0b1fd1a81c979b4fc3ced7e7b94b6a17b7826e5cb635e322797",
+    "goal.md": "1ffcdabb6d6317fbdcd851500523be70d763f88b380b9fe90ada36777a10c90c",
+    "hidden/h01_touching_spans_join.py": "303e90e89969e46d64f9b438061149dd95b064b3c4a0b277511fb1e55f85af72",
+    "hidden/h02_unordered_input.py": "bf26d478fead6cb84381aa5ea5217953c7c54b8dcf3ee05d3e023ad1ebc20430",
+    "hidden/h03_zero_length_dropped.py": "528c6f3fd67dc340b8ed6530281564c996a1f154b5448ef854c1969e6fe7504e",
+    "hidden/h04_dates_are_midnight.py": "3c4fdb42d2cc2eacc218ace31d51776e8d766e1b4c594676baa1c7686488143d",
+    "hidden/h05_output_is_normalised.py": "e2c7a1348601b189d1b149917dcb5c3b9402d4fc79c6b5f8e17ae52f098ebd69",
+    "hidden/h06_hole_in_the_middle.py": "f0fd3c4675f8548d3d4064f60948b7ab2ae74615602507494259e36c820a8741",
+    "hidden/h07_hole_swallows_everything.py": "d28dad0638fa86b70f336baf7c4fd450998ced802e5b9c51bd536c38bc93d62e",
+    "hidden/h08_holes_that_miss.py": "f736d6913ea2c0a613447c8ec7f80c4a515ac0bef22a5b28d87d98518a063335",
+    "hidden/h09_total_counts_overlap_once.py": "58e572a0ad979d7ebc5702dd1d150abdd8bbfe67fadea97ea4e7de7af7a9e1b2",
+    "hidden/h10_reversed_span_is_reported.py": "decb31bf338fef10e299ab8b2baf5842738d0bb9ad1a8fb96107f08b777e5cea",
+    "hidden/h11_unreadable_instant.py": "ea6006ff3985a1c12557c5ab7f0e1db8a5404e4181001934937879ff8b02bb1e",
+    "hidden/h12_nothing_to_do.py": "40d483a5f823ba8ede5e2ab66c25beb6d9c42f5f7e751f31922cffaa22920fa6",
+    "hidden/h13_seconds_resolution.py": "882ef4c1f7b8047413b2aee0706ec8574f194bc1d355e802344bcb7f8c883c1c",
+    "reference/bad_a.py": "b5f1f4289d2190bba8705518a330168a9aab3cc4ef811d76dbe05d91e8dc02b5",
+    "reference/bad_b.py": "cbb9b9cc98d37785622b480090d70b5cd017c6170185b5ddf03987f5c64068b5",
+    "reference/bad_c.py": "19c3392967fa02a897799ffcb073ae6b162599cd431133b2e8600cf840e2df33",
+    "reference/solution.py": "c5c1490be2e9c4fcd35f295d1436e5cbc243e17a72da354b9024264ea395cac4",
+    "rubric.md": "6e7827399ca7c7b3c998c09c021eef985750bc29cb57d7bfcee3563290a6ce3d",
+    "tests_visible/v01_merge_overlaps.py": "22f03ec3e8a41a5aa490ee8f1361b3f3241420970095be1938b37aca2edc29f2",
+    "tests_visible/v02_subtract_from_an_end.py": "50a88aa9406c7a163245a267d42a38ddbfe347710b0973762b7cf8401dfbd906",
+    "tests_visible/v03_total.py": "33a0fdf9ebfa420f849f897f25cdae3ad12054aaf6bb6ca8d2533ca048a9ff78"
+  },
+  "ref_solution_lines": 59,
+  "ref_solution_files": [
+    "solution.py"
+  ],
+  "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
+  "boundary_only_hidden_n": 5,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_touching_spans_join.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_unordered_input.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_zero_length_dropped.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_dates_are_midnight.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_output_is_normalised.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_hole_in_the_middle.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_hole_swallows_everything.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_holes_that_miss.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_total_counts_overlap_once.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_reversed_span_is_reported.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_unreadable_instant.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_nothing_to_do.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h13_seconds_resolution.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
+}

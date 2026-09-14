@@ -1,141 +1,291 @@
-"""ow_01_csvjson — 隱藏驗收，14 條。**永遠不進工作區。**
+"""ow_01_csvjson — hidden checks, 14. **Never enters a workspace.**
 
-每一條都要指得回 `goal.md` 或 `contract.md` 的某一句（§五-2 的公平性複核），
-對照表在 `ops/gain/r530/hidden/ow_01_csvjson/ANCHORS.md`。
-
-⚠ 這個檔案在驗收的那一瞬間被複製到 run 目錄底下的暫存目錄、以唯讀綁進沙箱、
-  跑完立刻刪掉。工作區在整個過程中不會被寫入任何一個位元組
-  （`openwork_arms.run_cell` 有一條硬斷言在驗收前後比樹雜湊）。
+Generated from bank/ow_01_csvjson/hidden/*.py by export_bank.py; the
+anchor table is in ANCHORS.md beside this file.
 """
-import json
-import os
-import subprocess
-import sys
-import tempfile
-
 import solution
 
 
-def _rows(text):
-    out = solution.csv_to_jsonl(text)
-    assert isinstance(out, str), f"csv_to_jsonl must return str, got {type(out).__name__}"
-    if out == "":
-        return []
-    assert out.endswith("\n"), f"every line must end with a newline: {out!r}"
-    return [json.loads(line) for line in out.splitlines()]
+def check_h01_comma_in_quotes():
+    # anchor_kind: goal
+    # anchor: fields containing commas
+    # derivation: a hand-edited field that holds commas must arrive as one value, not several.
+
+    import json
 
 
-def check_quoted_comma():
-    text = 'a,b\n"x,y",z\n'
-    assert _rows(text) == [{"a": "x,y", "b": "z"}], \
-        f"a quoted field may contain a comma: got {solution.csv_to_jsonl(text)!r}"
+    def _bank_entry(solution):
+        text = 'id,addr\n7,"12 Main St, Apt 4, Rear"\n'
+        got = json.loads(solution.csv_to_jsonl(text).splitlines()[0])
+        want = {"id": "7", "addr": "12 Main St, Apt 4, Rear"}
+        assert got == want, "args=%r got=%r want=%r" % (text, got, want)
+    _bank_entry(solution)
 
 
-def check_quoted_newline():
-    text = 'a,b\n"line1\nline2",z\n'
-    assert _rows(text) == [{"a": "line1\nline2", "b": "z"}], \
-        f"a quoted field may contain a line break: got {solution.csv_to_jsonl(text)!r}"
+def check_h02_newline_in_quotes():
+    # anchor_kind: goal
+    # anchor: fields containing line breaks
+    # derivation: a line break inside a quoted field belongs to the value, so the record
+    # spans two physical lines and still produces one object.
+
+    import json
 
 
-def check_escaped_quote():
-    text = 'a\n"he said ""hi"""\n'
-    assert _rows(text) == [{"a": 'he said "hi"'}], \
-        f'"" inside a quoted field is one literal quote: got {solution.csv_to_jsonl(text)!r}'
+    def _bank_entry(solution):
+        text = 'id,memo\n9,"first\nsecond"\n10,plain\n'
+        out = solution.csv_to_jsonl(text)
+        lines = out.splitlines()
+        assert len(lines) == 2, "args=%r got=%r want=%r" % (text, len(lines), 2)
+        got = json.loads(lines[0])
+        want = {"id": "9", "memo": "first\nsecond"}
+        assert got == want, "args=%r got=%r want=%r" % (text, got, want)
+    _bank_entry(solution)
 
 
-def check_crlf():
-    text = "a,b\r\n1,2\r\n"
-    assert _rows(text) == [{"a": "1", "b": "2"}], \
-        f"CRLF ends a record: got {solution.csv_to_jsonl(text)!r}"
+def check_h03_doubled_quote():
+    # anchor_kind: contract
+    # anchor: inside such a field a doubled `""` stands for one literal double quote
+    # derivation: the escape has to collapse to exactly one quote character.
+
+    import json
 
 
-def check_empty_input():
-    assert solution.csv_to_jsonl("") == "", \
-        "input with no records returns the empty string"
+    def _bank_entry(solution):
+        text = 'who,said\nann,"she said ""no"" twice"\n'
+        got = json.loads(solution.csv_to_jsonl(text).splitlines()[0])
+        want = {"who": "ann", "said": 'she said "no" twice'}
+        assert got == want, "args=%r got=%r want=%r" % (text, got, want)
+    _bank_entry(solution)
 
 
-def check_header_only():
-    assert solution.csv_to_jsonl("a,b\n") == "", \
-        "input with only a header returns the empty string"
+def check_h04_blank_column():
+    # anchor_kind: goal
+    # anchor: whole columns left blank
+    # derivation: a column nobody filled in yields the empty string on every row, and a
+    # record whose fields are all empty is still a record.
+
+    import json
 
 
-def check_duplicate_header_last_wins():
-    text = "a,a\n1,2\n"
-    rows = _rows(text)
-    assert len(rows) == 1 and rows[0].get("a") == "2", \
-        f"when the header repeats a name the last column wins: got {rows!r}"
+    def _bank_entry(solution):
+        text = "a,b,c\n1,,x\n,,\n"
+        lines = solution.csv_to_jsonl(text).splitlines()
+        assert len(lines) == 2, "args=%r got=%r want=%r" % (text, len(lines), 2)
+        first, second = json.loads(lines[0]), json.loads(lines[1])
+        assert first == {"a": "1", "b": "", "c": "x"}, (
+            "args=%r got=%r want=%r" % (text, first, {"a": "1", "b": "", "c": "x"}))
+        assert second == {"a": "", "b": "", "c": ""}, (
+            "args=%r got=%r want=%r" % (text, second, {"a": "", "b": "", "c": ""}))
+    _bank_entry(solution)
 
 
-def check_field_count_mismatch_line_number():
-    text = "a,b\n1,2\n3\n"
-    try:
-        solution.csv_to_jsonl(text)
-    except ValueError as e:
-        msg = str(e)
-    else:
-        raise AssertionError("a record with the wrong number of fields must raise ValueError")
-    assert msg.startswith("line 3:"), \
-        f'str(exc) must start with "line 3:" for {text!r}, got {msg!r}'
-    assert "\n" not in msg and len(msg) > len("line 3:"), \
-        f"the message must be one non-empty line, got {msg!r}"
+def check_h05_repeated_header():
+    # anchor_kind: contract
+    # anchor: When a header name repeats, the last occurrence wins.
+    # derivation: two columns called the same thing collapse to one key holding the
+    # rightmost column's value.
+
+    import json
 
 
-def check_unclosed_quote_raises():
-    text = 'a,b\n"never closed,2\n'
-    try:
-        solution.csv_to_jsonl(text)
-    except ValueError as e:
-        msg = str(e)
-    else:
-        raise AssertionError("an unclosed quoted field must raise ValueError")
-    assert msg.startswith("line 2:"), \
-        f'str(exc) must start with "line 2:", got {msg!r}'
+    def _bank_entry(solution):
+        text = "k,v,k\nalpha,1,omega\n"
+        got = json.loads(solution.csv_to_jsonl(text).splitlines()[0])
+        want = {"k": "omega", "v": "1"}
+        assert got == want, "args=%r got=%r want=%r" % (text, got, want)
+    _bank_entry(solution)
 
 
-def check_cli_invalid_exit_2_one_line():
-    with tempfile.TemporaryDirectory() as td:
-        p = os.path.join(td, "bad.csv")
-        with open(p, "w", encoding="utf-8") as f:
-            f.write("a,b\n1\n")
-        r = subprocess.run([sys.executable, "-m", "solution", p],
-                           capture_output=True, text=True, timeout=20)
-    assert r.returncode == 2, f"invalid input must exit 2, got {r.returncode}"
-    lines = [x for x in r.stderr.splitlines() if x.strip()]
-    assert len(lines) == 1, f"stderr must be exactly one line, got {r.stderr!r}"
-    assert lines[0].startswith("line 2:"), \
-        f'stderr must start with "line 2:", got {lines[0]!r}'
+def check_h06_crlf():
+    # anchor_kind: contract
+    # anchor: `"\n"` and `"\r\n"` are both accepted as line endings and neither survives
+    # derivation: a file last saved on Windows must not leave a stray carriage return
+    # glued to the final value of every row.
+
+    import json
 
 
-def check_cli_stdout_only_jsonl():
-    with tempfile.TemporaryDirectory() as td:
-        p = os.path.join(td, "ok.csv")
-        with open(p, "w", encoding="utf-8") as f:
-            f.write("a,b\n1,2\n3,4\n")
-        r = subprocess.run([sys.executable, "-m", "solution", p],
-                           capture_output=True, text=True, timeout=20)
-    assert r.returncode == 0, f"exit code was {r.returncode}, stderr={r.stderr!r}"
-    lines = r.stdout.splitlines()
-    assert len(lines) == 2, \
-        f"stdout must hold exactly one JSON object per data row, got {r.stdout!r}"
-    for line in lines:
-        json.loads(line)
+    def _bank_entry(solution):
+        text = "x,y\r\n1,2\r\n3,4\r\n"
+        lines = solution.csv_to_jsonl(text).splitlines()
+        assert len(lines) == 2, "args=%r got=%r want=%r" % (text, len(lines), 2)
+        got = [json.loads(line) for line in lines]
+        want = [{"x": "1", "y": "2"}, {"x": "3", "y": "4"}]
+        assert got == want, "args=%r got=%r want=%r" % (text, got, want)
+    _bank_entry(solution)
 
 
-def check_utf8_non_ascii():
-    text = "名前,備考\n愛だ,ok\n"
-    assert _rows(text) == [{"名前": "愛だ", "備考": "ok"}], \
-        f"non-ASCII text must survive: got {solution.csv_to_jsonl(text)!r}"
+def check_h07_non_ascii():
+    # anchor_kind: goal
+    # anchor: Some of the data is not ASCII and has to survive the trip unchanged.
+    # derivation: non-ASCII values must come back out identical, whatever escaping the
+    # JSON writer chooses.
+
+    import json
 
 
-def check_no_trailing_newline_input():
-    text = "a,b\n1,2"
-    assert _rows(text) == [{"a": "1", "b": "2"}], \
-        f"a last record without a trailing newline still counts: " \
-        f"got {solution.csv_to_jsonl(text)!r}"
+    def _bank_entry(solution):
+        text = "name,city\n張三,台南\n"
+        got = json.loads(solution.csv_to_jsonl(text).splitlines()[0])
+        want = {"name": "張三", "city": "台南"}
+        assert got == want, "args=%r got=%r want=%r" % (text, got, want)
+    _bank_entry(solution)
 
 
-def check_all_empty_fields_row():
-    text = "a,b,c\n,,\n"
-    assert _rows(text) == [{"a": "", "b": "", "c": ""}], \
-        f"a row of blank fields is three empty strings: " \
-        f"got {solution.csv_to_jsonl(text)!r}"
+def check_h08_line_number_of_bad_row():
+    # anchor_kind: contract
+    # anchor: `N` is the 1-based line number on which the offending record starts and the
+    # header is line 1
+    # derivation: the reported number must point at the record that is actually wrong,
+    # even when an earlier record spanned two physical lines.
+
+    def _bank_entry(solution):
+        text = 'a,b\n1,"two\nlines"\n3\n'
+        try:
+            solution.csv_to_jsonl(text)
+        except ValueError as exc:
+            got = str(exc)
+            assert got.startswith("line 4: "), "args=%r got=%r want=%r" % (text, got, "line 4: ...")
+            return
+        raise AssertionError("args=%r got=%r want=%r" % (text, "no error", "ValueError"))
+    _bank_entry(solution)
+
+
+def check_h09_unclosed_quote():
+    # anchor_kind: contract
+    # anchor: Invalid means: a record whose field count differs from the header, or an
+    # unclosed quote.
+    # derivation: a quote that is never closed is an error, not a value that runs to the
+    # end of the file.
+
+    def _bank_entry(solution):
+        text = 'a,b\n1,"never closed\n'
+        try:
+            solution.csv_to_jsonl(text)
+        except ValueError as exc:
+            got = str(exc)
+            assert got.startswith("line 2: "), "args=%r got=%r want=%r" % (text, got, "line 2: ...")
+            return
+        raise AssertionError("args=%r got=%r want=%r" % (text, "no error", "ValueError"))
+    _bank_entry(solution)
+
+
+def check_h10_exit_code_is_the_signal():
+    # anchor_kind: goal
+    # anchor: success and failure have to be distinguishable without reading the output
+    # derivation: a shell script only sees the exit status, so it has to differ between
+    # a good file and a bad one.
+
+    import os
+    import subprocess
+    import sys
+    import tempfile
+
+
+    def _run(solution, body):
+        home = os.path.dirname(os.path.abspath(solution.__file__))
+        handle, path = tempfile.mkstemp(suffix=".csv")
+        with os.fdopen(handle, "w", encoding="utf-8", newline="") as fh:
+            fh.write(body)
+        return subprocess.run([sys.executable, "-m", "solution", path],
+                              cwd=home, capture_output=True, text=True)
+
+
+    def _bank_entry(solution):
+        ok = "h,i\n1,2\n"
+        proc = _run(solution, ok)
+        assert proc.returncode == 0, "args=%r got=%r want=%r" % (ok, proc.returncode, 0)
+        broken = 'h,i\n1,2,3\n'
+        proc = _run(solution, broken)
+        assert proc.returncode == 2, "args=%r got=%r want=%r" % (broken, proc.returncode, 2)
+    _bank_entry(solution)
+
+
+def check_h11_stdout_not_polluted():
+    # anchor_kind: goal
+    # anchor: the converted data must not be polluted by chatter
+    # derivation: stdout carries the data and nothing else, and on failure it carries
+    # nothing at all while the complaint goes to stderr as a single line.
+
+    import json
+    import os
+    import subprocess
+    import sys
+    import tempfile
+
+
+    def _run(solution, body):
+        home = os.path.dirname(os.path.abspath(solution.__file__))
+        handle, path = tempfile.mkstemp(suffix=".csv")
+        with os.fdopen(handle, "w", encoding="utf-8", newline="") as fh:
+            fh.write(body)
+        return subprocess.run([sys.executable, "-m", "solution", path],
+                              cwd=home, capture_output=True, text=True)
+
+
+    def _bank_entry(solution):
+        body = "p,q\n8,9\n"
+        proc = _run(solution, body)
+        parsed = [json.loads(line) for line in proc.stdout.splitlines()]
+        assert parsed == [{"p": "8", "q": "9"}], (
+            "args=%r got=%r want=%r" % (body, proc.stdout, '{"p": "8", "q": "9"}'))
+        assert proc.stderr == "", "args=%r got=%r want=%r" % (body, proc.stderr, "")
+
+        body = "p,q\n8\n"
+        proc = _run(solution, body)
+        assert proc.stdout == "", "args=%r got=%r want=%r" % (body, proc.stdout, "")
+        assert len(proc.stderr.splitlines()) == 1, (
+            "args=%r got=%r want=%r" % (body, proc.stderr, "exactly one line"))
+    _bank_entry(solution)
+
+
+def check_h12_no_data_rows():
+    # anchor_kind: contract
+    # anchor: When there are no data rows the result is the empty string.
+    # derivation: an empty file and a header-only file both have zero data rows.
+
+    def _bank_entry(solution):
+        for text in ("", "only,a,header\n", "only,a,header"):
+            got = solution.csv_to_jsonl(text)
+            assert got == "", "args=%r got=%r want=%r" % (text, got, "")
+    _bank_entry(solution)
+
+
+def check_h13_missing_final_newline():
+    # anchor_kind: contract
+    # anchor: The input may or may not end with a final newline; that makes no
+    # difference to the output.
+    # derivation: the same data with and without a trailing newline must convert
+    # identically, including the newline the output itself must end with.
+
+    def _bank_entry(solution):
+        with_nl = "u,v\n5,6\n7,8\n"
+        without = "u,v\n5,6\n7,8"
+        a = solution.csv_to_jsonl(with_nl)
+        b = solution.csv_to_jsonl(without)
+        assert a == b, "args=%r got=%r want=%r" % (without, b, a)
+        assert b.endswith("\n"), "args=%r got=%r want=%r" % (without, b, "ends with a newline")
+    _bank_entry(solution)
+
+
+def check_h14_one_object_per_line():
+    # anchor_kind: contract
+    # anchor: one JSON object per data row, each object on its own line
+    # derivation: three data rows give three lines, each of which parses on its own as
+    # one object whose values are all strings.
+
+    import json
+
+
+    def _bank_entry(solution):
+        text = "n\n1\n2\n3\n"
+        got = solution.csv_to_jsonl(text)
+        lines = got.splitlines()
+        assert len(lines) == 3, "args=%r got=%r want=%r" % (text, len(lines), 3)
+        for line in lines:
+            obj = json.loads(line)
+            assert isinstance(obj, dict), "args=%r got=%r want=%r" % (text, type(obj).__name__, "dict")
+            for value in obj.values():
+                assert isinstance(value, str), (
+                    "args=%r got=%r want=%r" % (text, type(value).__name__, "str"))
+    _bank_entry(solution)
