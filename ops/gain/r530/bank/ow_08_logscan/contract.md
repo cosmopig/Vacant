@@ -33,4 +33,10 @@ The result has exactly this shape:
 
     python -m solution FILE
 
-Prints a table a person can read. Nothing about its layout is checked.
+Reads that file and writes to stdout the same result `summarize` returns, as one
+JSON object, then exits 0. How that JSON is laid out -- indenting, key order,
+spacing, trailing newline -- is not checked, only that stdout holds that one object
+and that it carries the same numbers the library call would have given.
+
+Bad lines in the file are not a reason for the command to fail: it counts them the
+way the library does and still exits 0.

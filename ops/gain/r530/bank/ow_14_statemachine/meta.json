@@ -37,6 +37,56 @@
     "solution.py"
   ],
   "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
-  "boundary_only_hidden_n": null,
-  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+  "boundary_only_hidden_n": 4,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_history_starts_at_the_beginning.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_refusal_names_both_halves.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_refusal_leaves_no_trace.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_can_matches_fire.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_self_transition_is_recorded.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_history_is_a_copy.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_reset_starts_over.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_unknown_start_state.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_target_state_must_exist.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_dead_end_states_are_fine.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_two_machines_do_not_share.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_long_path_in_order.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
 }

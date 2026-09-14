@@ -15,7 +15,10 @@ What they care about:
 - a title that is already a clean slug, and that nothing else in the batch collides
   with, comes back exactly as it was;
 - a title written in a script with no Latin letters in it at all still gets a usable
-  slug rather than an empty one.
+  slug rather than an empty one;
+- and so does a title with nothing usable in it at all -- one that is only
+  punctuation is still a title their editor hands over, and it still needs a slug
+  rather than an empty string.
 
 How a title is turned into a slug, and what a collision is resolved with, is up to
 whoever writes it.

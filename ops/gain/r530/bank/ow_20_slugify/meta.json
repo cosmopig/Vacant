@@ -10,7 +10,7 @@
   "loose_note": "The contract fixes the entry point and the return type only. The transliteration rule, the collision suffix and the fallback for a non-Latin title are design decisions and none of them is graded directly.",
   "sha256": {
     "contract.md": "94a2a087508f83ee4212cebfbc84afe22908d1bdad946eaed705d521b1ce27af",
-    "goal.md": "28fe397d43044b53a90415bc4d91f135f6c475ee0577e9c16334528576e23464",
+    "goal.md": "824ee1802861cb1b37936172971af53090e95f4338e2785f8a2951e9ddfa8488",
     "hidden/h01_same_order_same_length.py": "27acf29c3df626a36e5c60f70fe4770d3228e6da51b422704d4ac270f931696c",
     "hidden/h02_only_allowed_characters.py": "56a6bf65fb83f3f83a33f657e7ae20a962e4cac21b2b35e1df82f494d3d54394",
     "hidden/h03_hyphen_rules.py": "6fec1ebefc080477ab1ce3b58dcb9dc6daa8c27f3ebf044621659d0e1a98e260",
@@ -22,7 +22,7 @@
     "reference/bad_b.py": "a80d3687a96e965b6bc3e0427a7a33c3746bdda7c6f8a76c956cb73fe01aab17",
     "reference/bad_c.py": "c601e0cca7bb478ccbc4b7f2ee9df0e07e0f684b97e054f5c7111a1521eba46e",
     "reference/solution.py": "1e0d663b9982bff6011531d0fa99f103b1fded2da9e310e6b58daf69cbd174cc",
-    "rubric.md": "9e873ed888f86e54d93999a0b1a6c18fac0dcd6c58d80e83e6e2edfafd295cd6",
+    "rubric.md": "dc5e2108b5db877ba16ee950c060ef5807490cf3e5dc511d901205a9766c9029",
     "tests_visible/v01_one_slug_per_title.py": "9a52b23f667a31b1899839a572d726c8ab8b2c8c23c73f1b796fd924d06cea8d",
     "tests_visible/v02_already_a_slug.py": "5478666abe52f1dac0abf0288f687edb422289b4d61b29d2888ac69e7cca1b26"
   },
@@ -31,6 +31,37 @@
     "solution.py"
   ],
   "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
-  "boundary_only_hidden_n": null,
-  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+  "boundary_only_hidden_n": 0,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_same_order_same_length.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_only_allowed_characters.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_hyphen_rules.py": {
+      "boundary_only": false,
+      "note": "the three hyphen assertions are squarely anchored. The fourth, `slug != \"\"` on the title '...', is not: the goal's non-empty guarantee is scoped to 'a title written in a script with no Latin letters in it at all', which does not obviously cover a title of pure punctuation. See amended.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_no_two_the_same.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_same_batch_same_slugs.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_clean_titles_come_back_whole.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_non_latin_titles.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
 }

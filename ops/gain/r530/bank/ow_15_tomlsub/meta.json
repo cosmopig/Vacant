@@ -9,7 +9,7 @@
   "hidden_n": 13,
   "type_note": "Chosen to be unlike ow_04_layerconf: that task is about layering and provenance over an ini-like file, this one is about literal typing, nesting, line-numbered errors and a canonical writer.",
   "sha256": {
-    "contract.md": "e60460ecbc59b64274de8d71a529a725d1f9245d887b79d1ebd733b4f8a7aff7",
+    "contract.md": "cbb156d2737b6ee9ccf95fb4179ceabe826236889abd1b41904e84777bebc8a8",
     "goal.md": "559d579377aabffa8207abfec19b13e0d9d02243c4a9d709813225b605b2332c",
     "hidden/h01_five_kinds.py": "63d7cace6be67b5e25e60d47b58d120e58395bdc7bbb64997e38e371a8dd3b55",
     "hidden/h02_escapes_in_text.py": "64d6310ca8ad7961a024a272652ce99e39e2ccce1a6ffb2b98a6e4a92009b615",
@@ -38,6 +38,61 @@
     "solution.py"
   ],
   "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
-  "boundary_only_hidden_n": null,
-  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+  "boundary_only_hidden_n": 4,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_five_kinds.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_escapes_in_text.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_hash_inside_text.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_nested_headings.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_names_before_the_first_heading.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_mixed_list_is_a_mistake.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_duplicate_name.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_duplicate_heading.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_line_numbers_on_every_mistake.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_round_trip_data.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_round_trip_text.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_written_order.py": {
+      "boundary_only": false,
+      "note": "AUTHOR-FLAGGED and the closest call in the bank. The ordering claim is squarely anchored. But the check pins the exact emitted text, i.e. the single spaces around '=' in 'apple = 2'. The contract states 'name = value' only as a line grammar for parse, never as a dumps formatting requirement, and the reference parser accepts 'a=1' -- so a worker whose dumps emits 'apple=2' satisfies every contract sentence (including both round-trip clauses) and still fails this check. Kept, with an amendment proposed for the contract.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h13_unwritable_data.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
 }

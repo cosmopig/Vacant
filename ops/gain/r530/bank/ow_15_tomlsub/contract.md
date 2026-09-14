@@ -20,6 +20,8 @@
 - `dumps` writes the top-level names first in name order, then each heading in
   name order with its own names in name order, and puts one blank line before each
   heading.
+- `dumps` writes every setting on a line of its own as `name = value`, with exactly
+  one space on each side of the `=`, and every heading on a line of its own.
 - `dumps` raises `ValueError` for data it cannot write: a value of some other type,
   a list whose items are not all the same kind, a list inside a list, or a name
   outside the allowed characters.

@@ -9,7 +9,11 @@
 ⚠ **反向那一半機器做不到**（目標敘述裡每一句「客戶困擾」至少要有一條驗收對應）。
 下面第二張表只能列出「有驗收指過去的目標句子」，列不出**沒有被任何驗收指到的句子**
 ——那正是反向擋門要找的東西。**複核者必須自己讀一次 `goal.md`**。
-複核者不得是作者；目前狀態：**作者自填，未複核**。
+複核者不得是作者；目前狀態：**已複核**（2026-09-14，獨立代理，報告在
+`ops/gain/r530/review/review_r530.md`；修正逐條在預註冊的附錄 AMEND1）。
+⚠ **一檔一錨**：下面每一條只列它檔頭宣告的那一句。一條驗收實際上可能同時
+量到目標的另一句（例如 AMEND1 補進 `ow_19`／`ow_20` 目標的那幾句），
+這張表**描述不足**，不要當成覆蓋的完整清單。
 
 ## 一、正向：每一條隱藏驗收指回哪一句
 
@@ -29,6 +33,8 @@
 | `check_h12_blank_lines_are_nothing` | goal | Blank lines are just noise from the rotation script and should not count | an empty or whitespace-only line is neither a request nor a bad line, |
 | `check_h13_trailing_newlines` | contract | Any trailing newline is not part of the line. | lines read straight from a file keep their newline, which must not |
 | `check_h14_result_shape` | contract | The result has exactly this shape | the three top-level keys and the five per-endpoint keys are fixed, |
+| `check_h15_cli_gives_back_the_result` | goal | Finally they want to eyeball a file from the shell without writing a | eyeballing from the shell is one command over one file, and the |
+| `check_h16_cli_survives_bad_lines` | contract | Bad lines in the file are not a reason for the command to fail: it counts | a file whose lines are mostly garbled, with blank lines mixed in, |
 
 ## 二、反向：被指到的目標句子（**不完整，見上面的警告**）
 
@@ -36,9 +42,10 @@
 |---|---|
 | Blank lines are just noise from the rotation script and should not count | `check_h12_blank_lines_are_nothing` |
 | Failed means the server's own fault, the five-hundreds; a client sending | `check_h01_five_hundreds_only` |
+| Finally they want to eyeball a file from the shell without writing a | `check_h15_cli_gives_back_the_result` |
 | They also want to know how many lines were unusable | `check_h11_bad_lines_are_reported` |
 | They want the busiest endpoints at the top | `check_h06_busiest_first` |
 | the unlucky tail | `check_h04_p95_nearest_rank` |
 | when two are equally busy they want the order to be the same every time | `check_h07_tie_broken_by_path` |
 
-`contract` 錨點 8 條、`goal` 錨點 6 條。
+`contract` 錨點 9 條、`goal` 錨點 7 條。

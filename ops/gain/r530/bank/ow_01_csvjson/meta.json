@@ -43,6 +43,67 @@
     "solution.py"
   ],
   "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
-  "boundary_only_hidden_n": null,
-  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+  "boundary_only_hidden_n": 3,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_comma_in_quotes.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_newline_in_quotes.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_doubled_quote.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_blank_column.py": {
+      "boundary_only": false,
+      "note": "empty FIELDS, not an empty input; criterion (1) is read on the argument as a whole, so false. Borderline under a looser reading.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_repeated_header.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_crlf.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_non_ascii.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_line_number_of_bad_row.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_unclosed_quote.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_exit_code_is_the_signal.py": {
+      "boundary_only": false,
+      "note": "CLI exit 2 is not 'an exception the contract requires', and the check also grades the exit-0 path -> false.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_stdout_not_polluted.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_no_data_rows.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h13_missing_final_newline.py": {
+      "boundary_only": false,
+      "note": "trailing-newline edge; not empty, no exception, no contract-named boundary value -> false. Borderline.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h14_one_object_per_line.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
 }

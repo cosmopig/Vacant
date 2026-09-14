@@ -5,15 +5,16 @@
   "prereg_ref": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md S1-2 ow_08_logscan",
   "origin": "authored 2026-09-13",
   "why_not_offtheshelf": "Log summarising is a stock exercise, but the graded semantics are this project's own: the output schema is pinned key by key, percentiles are nearest-rank rather than the interpolated default of numpy or statistics, the error share is five-hundreds only and rounded to four places, ties are broken by path, blank lines are excluded from the total while bad lines are counted in it. A memorised summariser disagrees on the percentile definition alone.",
-  "visible_n": 3,
-  "hidden_n": 14,
-  "visible_note": "prereg S1-2 freezes '3 visible checks'; realised as 3 visible test files, one per frozen check. The CLI is deliberately unchecked (prereg: CLI is qualitative only).",
+  "visible_n": 4,
+  "hidden_n": 16,
+  "visible_note": "prereg S1-2 froze '3 visible checks'; AMEND1 item 1 raises it to 4. The fourth is the command line, added because the S5-2 reverse gate found the goal's last sentence ('eyeball a file from the shell without writing a script') had no check at all. A hidden check that grades the CLI without a visible one would be a scored requirement the worker cannot see, so the visible example comes with it (same shape as ow_01). Realised as one visible test file per check; meta.visible_n counts files.",
   "contract_additions": [
     "goal: added the five-hundreds sentence, the busiest-first and stable-tie sentences, the unusable-lines sentence, and the blank-lines sentence -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.",
-    "contract: pinned what counts as an ISO8601 timestamp (fromisoformat after Z substitution), the integer field shape, that total includes bad lines, and that blank lines are outside the count."
+    "contract: pinned what counts as an ISO8601 timestamp (fromisoformat after Z substitution), the integer field shape, that total includes bad lines, and that blank lines are outside the count.",
+    "AMEND1 item 1 (2026-09-14): the Command line section used to read 'Prints a table a person can read. Nothing about its layout is checked.' -- unscoreable, so the goal's shell sentence had no check and the ~16 lines of CLI code in the reference were difficulty the score could not see (S5-2 review, honest boundary 3). It now pins stdout to the one JSON object summarize returns, layout explicitly still unchecked, and adds that bad lines do not make the command fail. This departs from prereg S1-2's frozen line 'CLI: prints a human-readable table (not scored, qualitative only)' -- recorded in AMEND1, not waved through."
   ],
   "sha256": {
-    "contract.md": "081ff8d896a43910c5e45812807193b0bc4826cbe4a1c36987c0c1f2d5f80302",
+    "contract.md": "0417ec37389e5a8dd13c38be676d8b42f31e9d3488c1aaca57e9c3efde98bfc4",
     "goal.md": "ba29c9bb56c5ba9644ff2829394fd3782f2a3d7895b27dd2f80eaee4c9aef818",
     "hidden/h01_five_hundreds_only.py": "1ac9870fa2cb0bd587f1ddb0c72dd30e3df3b98cd3edc1224ef2006805a500a4",
     "hidden/h02_error_rate_rounded.py": "078cd7b890119cf0f1b30bc0b9a4da644487bc4473c2d23baf950275da119419",
@@ -29,20 +30,111 @@
     "hidden/h12_blank_lines_are_nothing.py": "2e4f60150878d713137ff17bae0f5d3418e59534477410c618f82eeafa3036d5",
     "hidden/h13_trailing_newlines.py": "388a36b96a0b9f79491f5988e35d61b56a52b622e30ee642efa5c9bd0b19203e",
     "hidden/h14_result_shape.py": "ea501d154e6abc37345f78c071a27ff7b4312f4adcdcfe868f457269d6a1fa5b",
+    "hidden/h15_cli_gives_back_the_result.py": "a66a45f3797bde1e63118240c660491269ce56f443c921ee1c11abb3eb82f512",
+    "hidden/h16_cli_survives_bad_lines.py": "20f4f038a43eacc8f4dba9aefbc34d644fa13c05e54779a861b755ea00ed1598",
     "reference/bad_a.py": "02cd8e27c03c9b06bd9f5f2249ca5eb11e47fe07589c9470ffead91dc1c3fa16",
     "reference/bad_b.py": "be3103e27e8b330134c9d4363b97b4f0c63f96fab78e0e4252fdaa792e2a7af8",
     "reference/bad_c.py": "21d7d91a61e1a63f6294c47dfd44adaa2ca5cefc8b795b3fed3aee11e7a7e3be",
-    "reference/solution.py": "dfe3cabd4a384bafa05d1aec6c47e4f4031dd057ba7e790f1f5a9d06b8881a93",
+    "reference/solution.py": "c578034206e397eb8bf7a2d864374af04b71e259b631caf7fab7fddde16d01c6",
     "rubric.md": "d5c0eea3e285b2f30d519de21b6e955ce36b06b6806ffb0cfdb148567364a685",
     "tests_visible/v01_counts_and_error_share.py": "e3ef3e8deb959ba0cb04355dacff846752a943a5bba3a1959b7c08842ae453ed",
     "tests_visible/v02_bad_lines_do_not_stop_it.py": "61d5ace4eb0437f3117bfb1d2431b4b212fbe4dd05e0d32b3d8495c886872951",
-    "tests_visible/v03_percentiles.py": "73b12a5ba4cfbbd01e70e2bc677b87447f25bcf76d8638bfe51bc8b9b6d356cc"
+    "tests_visible/v03_percentiles.py": "73b12a5ba4cfbbd01e70e2bc677b87447f25bcf76d8638bfe51bc8b9b6d356cc",
+    "tests_visible/v04_command_line.py": "8af809670ba30cd97d28aa53d836505a6b685f8d89222e3da8af1fa510218320"
   },
-  "ref_solution_lines": 64,
+  "ref_solution_lines": 61,
   "ref_solution_files": [
     "solution.py"
   ],
   "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
-  "boundary_only_hidden_n": null,
-  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+  "boundary_only_hidden_n": 2,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_five_hundreds_only.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_error_rate_rounded.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_p50_nearest_rank.py": {
+      "boundary_only": true,
+      "note": "p50 of n=4 gives exactly ceil(2.0) -- an exact rounding point, and the only input -> true.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_p95_nearest_rank.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_single_sample.py": {
+      "boundary_only": true,
+      "note": "AUTHOR-FLAGGED. n=1 is the extreme of the sample-size domain and the whole check sits on it -> boundary_only=true under criterion (3). Caveat: the contract names the formula ceil(p/100*n), not n=1 itself, so this is 'extreme of the domain' rather than a literally contract-named threshold. Anchor 'Percentiles are nearest-rank' is verbatim and the derivation follows.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_busiest_first.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_tie_broken_by_path.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_wrong_field_count.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_non_integer_fields.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_bad_timestamp.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_bad_lines_are_reported.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_blank_lines_are_nothing.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h13_trailing_newlines.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h14_result_shape.py": {
+      "boundary_only": false,
+      "note": "mixed: summarize([]) is an empty input, but the check also grades the shape on a normal one-line log -> false.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h15_cli_gives_back_the_result.py": {
+      "boundary_only": false,
+      "note": "AMEND1 item 1; marked by the amending agent, not the S5-2 reviewer. Grades the ordinary path of the command line -> false under all three criteria.",
+      "marked_by": "amend1_agent"
+    },
+    "h16_cli_survives_bad_lines.py": {
+      "boundary_only": false,
+      "note": "AMEND1 item 1; marked by the amending agent, not the S5-2 reviewer. Garbled lines are not an empty input, not an exception the contract requires, and not a contract-named boundary value -> false.",
+      "marked_by": "amend1_agent"
+    }
+  },
+  "amend1": {
+    "date": "2026-09-14",
+    "item": "AMEND1 item 1 -- S5-2 reverse gate failure on ow_08",
+    "added_visible": [
+      "tests_visible/v04_command_line.py"
+    ],
+    "added_hidden": [
+      "hidden/h15_cli_gives_back_the_result.py",
+      "hidden/h16_cli_survives_bad_lines.py"
+    ],
+    "changed": [
+      "contract.md Command line section",
+      "reference/solution.py main()"
+    ],
+    "ref_solution_lines": "64 -> 61 (main() prints one JSON object instead of formatting a table); D1/D2 recomputed, both still green",
+    "count_waiver": "visible 3->4 and hidden 14->16 exceed prereg S1-1's 2-3 / 10-15; gauge_r530.COUNT_EXCEPTIONS carries a named waiver for this task only"
+  }
 }

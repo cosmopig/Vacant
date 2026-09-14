@@ -8,6 +8,11 @@ look like and gave three real examples from yesterday's log:
     Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.e30.abcdef
     postgres://svc:hunter2@db.internal:5432/app
 
+Those three lines are yesterday's, not the whole list. The same three kinds turn up
+written differently: keys with other text in them, tokens that are not made of
+dot-separated parts, and addresses for the other stores they run -- mysql, mongodb,
+redis and amqp all appear in these logs, written the same way the postgres one is.
+
 What they care about:
 
 - after the pass, none of the secret text is anywhere in the result;

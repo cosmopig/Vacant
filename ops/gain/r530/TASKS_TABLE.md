@@ -9,6 +9,13 @@
 外加只給量具用、永不進工作區的 `reference/`（`solution.py` ＋ 三個已知壞樁）。
 量具 `ops/gain/r530/gauge_r530.py --check`。
 
+⚠ **2026-09-14 AMEND1 之後的版本。** §五-2 的獨立複核（報告在
+`ops/gain/r530/review/`）判 20 題全過、0 題剔除、5 筆 `amended`；Fable 據此裁的
+五項修正已經做進題庫（`ow_08` 補 CLI 驗收、`ow_15` 契約補 dumps 排版、三份 loose
+rubric 拿掉加權、`ow_19`／`ow_20` 目標補上隱藏驗收本來就在考的性質、
+`boundary_only_hidden_n` 逐題落盤）。逐條與 sha256 釘死表在預註冊的
+**附錄 AMEND1**。本檔的數字已經跟著改，**與複核報告裡的 249／57 不同是正常的**。
+
 ## 〇、一覽
 
 | task_id | 層 | 可見 | 隱藏 | `ref_solution_lines` | 標題 |
@@ -20,7 +27,7 @@
 | `ow_05_router` | tight | 3 | 15 | 80 | Path router with a deterministic specificity order |
 | `ow_06_verrange` | tight | 3 | 14 | 61 | Version ordering and requirement specs |
 | `ow_07_retrypolicy` | tight | 3 | 13 | 16 | Retry with injected sleep and a capped backoff |
-| `ow_08_logscan` | tight | 3 | 14 | 64 | Per-endpoint log summary with nearest-rank percentiles |
+| `ow_08_logscan` | tight | **4** | **16** | **61** | Per-endpoint log summary with nearest-rank percentiles |
 | `ow_09_minitemplate` | tight | 3 | 13 | 87 | A very small template engine that fails loudly |
 | `ow_10_dedupe` | tight | 3 | 13 | 30 | Deduplicate records with a choice of conflict policy |
 | `ow_11_reflow` | tight | 3 | 14 | 92 | Reflow plain text to a display width |
@@ -34,29 +41,42 @@
 | `ow_19_redact` | loose | 2 | 6 | 26 | Take the secrets out of a log line (loose contract) |
 | `ow_20_slugify` | loose | 2 | 7 | 29 | URL slugs for a batch of titles (loose contract) |
 
-**合計：20 題（tight 17、loose 3）、可見 57 條、隱藏 249 條。**
+**合計：20 題（tight 17、loose 3）、可見 58 條、隱藏 251 條。**
+（AMEND1 之前是可見 57、隱藏 249；差額全在 `ow_08`。）
 
 條數口徑（要和預註冊對齊）：預註冊 §一-2 凍結的是「可見 **3** 條」。
 本題庫把它實作成**三個可見測試檔，一檔＝一條**，每檔內含數個 assert 打同一個需求的不同角度；
 `meta.visible_n` 數的是檔數。loose 層是兩檔。隱藏條數＝`hidden/` 裡的檔數，**一檔一條**。
+⚠ `ow_08` 是例外：AMEND1 第 1 項補了 1 條可見 ＋ 2 條隱藏，變成可見 4、隱藏 16，
+**超出 §一-1 的 2–3／10–15**。`gauge_r530.COUNT_EXCEPTIONS` 對這一題（只有這一題）
+開了具名例外，不是把界線放寬。
 
 ## 〇-1　難度擋門（§一-3b，發射前、零模型呼叫）
 
 | 量 | 值 |
 |---|---|
-| `median(ref_solution_lines, 核心 12 題)` | 67.0 |
+| `median(ref_solution_lines, 核心 12 題)` | **65.5**（AMEND1 前 67.0） |
 | `median(ref_solution_lines, 新 8 題)` | 45.0 |
-| 相對差 | 0.328 |
+| 相對差 | **0.313**（AMEND1 前 0.328） |
 | **D1（>40% ⇒ 紅）** | **綠** |
 | **D2（tight hidden ≥10、loose ≥5）** | **綠**（新 8 題最小 hidden_n＝6，loose 三題 6／6／7）|
 
 ⚠ **給 Fable 的一句話**：D1 的「新 8 題」把 5 題 tight 與 3 題 loose 算在同一個中位數裡，
 而 loose 三題的參考解**本來就短**（23／26／29 行，因為契約只釘進入點）。
-只算新 tight 5 題的話中位數是 66.0、相對差 0.015。
-兩個數字都落盤，判準照預註冊寫死的那一個（0.328，綠），**沒有事後換算法**。
+只算新 tight 5 題的話中位數是 66.0、相對差 **0.008**。
+兩個數字都落盤，判準照預註冊寫死的那一個（0.313，綠），**沒有事後換算法**。
 
-`boundary_only_hidden_n` 逐題留 `null`：§一-3b 明寫由**不是作者的複核者**標，
-作者自己標會讓那個量失去意義。
+⚠ **為什麼核心中位數動了**：AMEND1 第 1 項把 `ow_08` 的 CLI 從「印表格、不計分」
+改成「印一個 JSON 物件、計分」，參考解的 `main()` 因此短了 3 行（64 → 61），
+而 64 原本正好壓在核心 12 題中位數的下半格 ⇒ 中位數 67.0 → 65.5。
+§一-3b 明寫「退回重寫之後整組 D1／D2 重算」，這裡照做了。
+
+`boundary_only_hidden_n` 已由複核者逐條標完，寫進各題 `meta.json` 的
+`boundary_only_hidden`（逐條）與 `boundary_only_hidden_n`（條數）。
+合計 **55／251（21.9%）**，讀法＝**嚴格**（三條判準裡的每一個輸入都要落在判準內；
+只要同時評了一個普通情況就是 false）。⚠ 55 條裡 40 條是判準 (2)「契約要求丟例外」
+——這個量在跨題比較上量到的主要是「這題的目標有沒有錯誤條款」。
+§一-3b 寫死它**只落盤、不設門檻**，收官不准事後拿它當判準。
 
 ---
 
@@ -511,15 +531,35 @@ The result has exactly this shape:
 
     python -m solution FILE
 
-Prints a table a person can read. Nothing about its layout is checked.
+Reads that file and writes to stdout the same result `summarize` returns, as one
+JSON object, then exits 0. How that JSON is laid out -- indenting, key order,
+spacing, trailing newline -- is not checked, only that stdout holds that one object
+and that it carries the same numbers the library call would have given.
 
-可見 **3** 條｜隱藏 **14** 條｜`ref_solution_lines` **64**｜`origin: authored 2026-09-13`
+Bad lines in the file are not a reason for the command to fail: it counts them the
+way the library does and still exits 0.
+
+可見 **4** 條｜隱藏 **16** 條｜`ref_solution_lines` **61**｜`origin: authored 2026-09-13`
+（AMEND1 第 1 項之前是可見 3／隱藏 14／`ref_solution_lines` 64。）
 
 *為什麼不是現成題*：Log summarising is a stock exercise, but the graded semantics are this project's own: the output schema is pinned key by key, percentiles are nearest-rank rather than the interpolated default of numpy or statistics, the error share is five-hundreds only and rounded to four places, ties are broken by path, blank lines are excluded from the total while bad lines are counted in it. A memorised summariser disagrees on the percentile definition alone.
 
 *相對預註冊 §一-2 的增補*：
 - goal: added the five-hundreds sentence, the busiest-first and stable-tie sentences, the unusable-lines sentence, and the blank-lines sentence -- anchors for the prereg's hidden list, per prereg S5-2 gate 1.
 - contract: pinned what counts as an ISO8601 timestamp (fromisoformat after Z substitution), the integer field shape, that total includes bad lines, and that blank lines are outside the count.
+- **AMEND1 第 1 項（2026-09-14）**：§五-2 的反向擋門在這一題失敗——goal 最後一句
+  「Finally they want to eyeball a file from the shell without writing a script」
+  **一條驗收都沒有**，而參考解有約 16 行在實作那個 CLI（＝計分看不到的難度）。
+  契約的 Command line 節從「印出人看得懂的表格、版面不驗」改成「stdout 放
+  `summarize` 回傳的那一個 JSON 物件、版面仍不驗」，並補上 1 條可見
+  （`v04_command_line`）＋ 2 條隱藏（`h15_cli_gives_back_the_result`、
+  `h16_cli_survives_bad_lines`，都用 `tempfile` 走系統 TMPDIR、不動工作區）。
+  **為什麼不是只刪那句**：刪掉會讓「從 shell 直接看」這個真需求消失，而它是
+  這題唯一一個不是純函式的部分。**為什麼可見也要補一條**：只補隱藏的話，CLI 會變成
+  「計分但 worker 看不到」的需求，那正是 §五-2 要擋的形狀（ow_01 就是可見＋隱藏都有）。
+  ⚠ 這一項同時偏離兩處凍結文字：預註冊 §一-2 寫的是「CLI……**不計分，只進質化**」，
+  §一-1 寫的是可見 2–3 條、`tight` 隱藏 ≥10（量具實作成 10–15）。兩處都記在 AMEND1，
+  沒有默默放過。
 
 ---
 
@@ -904,6 +944,8 @@ solution.parse(text: str) -> dict
 - `dumps` writes the top-level names first in name order, then each heading in
   name order with its own names in name order, and puts one blank line before each
   heading.
+- `dumps` writes every setting on a line of its own as `name = value`, with exactly
+  one space on each side of the `=`, and every heading on a line of its own.
 - `dumps` raises `ValueError` for data it cannot write: a value of some other type,
   a list whose items are not all the same kind, a list inside a list, or a name
   outside the allowed characters.
@@ -911,6 +953,12 @@ solution.parse(text: str) -> dict
   same text.
 
 可見 **3** 條｜隱藏 **13** 條｜`ref_solution_lines` **200**｜`origin: authored 2026-09-13`
+
+**AMEND1 第 2 項（2026-09-14）**：上面那條 `name = value` 的排版是這次補的。
+`h12_written_order` 比對的是整串輸出文字，等於把等號兩側的**單一空白**也釘死了，
+而原契約只在 **parse 的行文法**裡寫過 `name = value`、從來沒有規定 `dumps` 的排版
+——一個 `dumps` 輸出 `apple=2` 的解滿足原契約每一句（含兩條 round-trip）卻被擋掉。
+補契約而不是改測試：排序那個主張本身錨得死死的，缺的只是排版那一句。
 
 *為什麼不是現成題*：The syntax is deliberately TOML-shaped, but this is a strict subset with its own rules: only four escapes, no nested lists, no inline tables, no dates, lists required to be of one kind, headings forbidden from reopening, and a canonical name-ordered writer with a text-level round-trip guarantee. Python's tomllib parses a superset and has no writer at all, so a remembered TOML implementation fails the duplicate, ordering and round-trip checks.
 
@@ -1032,8 +1080,12 @@ solution.diff(old: list[str], new: list[str]) -> list[dict]
 ## 三、負向對照層：3 題 loose（Fable 裁決 2026-09-13）
 
 這三題的契約**只給進入點與回傳型別**，目標敘述改成「用途 ＋ 幾條必須成立的性質」，
-隱藏驗收只考目標明講的性質。質化評分表另有一份 loose 版：
-`structure` 與 `fit_to_goal` **雙倍權重**，因為這一層存在的理由就是看設計合不合理。
+隱藏驗收只考目標明講的性質。**質化評分表與其他 17 題完全同一份**（§一-4：四維各
+1–5、等權），只有最底下的逐題範例不同。
+⚠ AMEND1 第 3 項：這三份 rubric 原本多了一條 `readability + 2*structure +
+error_handling + 2*fit_to_goal` 的加權、並自稱「prereg amendment, Fable ruling」，
+而預註冊全文沒有任何加權。加權已拿掉——**帶著一句凍結文件裡沒有的裁決進 AMEND1
+是不允許的**。
 
 ### `ow_18_taskorder`（loose）
 
@@ -1087,6 +1139,11 @@ checked; everything else is a design decision.
 >     Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.e30.abcdef
 >     postgres://svc:hunter2@db.internal:5432/app
 > 
+> Those three lines are yesterday's, not the whole list. The same three kinds turn up
+> written differently: keys with other text in them, tokens that are not made of
+> dot-separated parts, and addresses for the other stores they run -- mysql, mongodb,
+> redis and amqp all appear in these logs, written the same way the postgres one is.
+> 
 > What they care about:
 > 
 > - after the pass, none of the secret text is anywhere in the result;
@@ -1123,6 +1180,15 @@ decisions.
 
 *已知量具弱點*：The hidden checks use fresh instances of the three shapes the goal names. A worker who matches those three shapes exactly will pass; a worker who writes a broader scanner will also pass. The checks cannot distinguish a general solution from a narrow one, and no claim of generality may be made from them.
 
+**AMEND1 第 4 項（2026-09-14）**：上面目標裡「Those three lines are yesterday's…」
+那一段是這次補的。複核發現隱藏驗收要求的**比目標明講的多**：`h01` 用 `mysql://`、
+`h03` 用 `amqp://`、`h05` 用 `mongodb://`、`h06` 用 `redis://`，而 `h05` 還把
+`Authorization: Bearer tok-one`（**不是**點分三段的 JWT）也算成密鑰；兩條可見驗收
+用的卻都是目標的三個字面例子 ⇒ **把三個字面值寫死的 worker 可見全過、隱藏六條掉四條。**
+⚠ 這個形狀 §五-2 的三條擋門**都抓不到**（錨得回去、目標每句都有驗收、沒有重複），
+只有人讀得出來。補的是「客戶要什麼」（還有哪些 scheme、token 長什麼樣），
+**沒有給做法**（不給 pattern、不給怎麼比對）。
+
 ---
 
 ### `ow_20_slugify`（loose）
@@ -1142,7 +1208,10 @@ decisions.
 > - a title that is already a clean slug, and that nothing else in the batch collides
 >   with, comes back exactly as it was;
 > - a title written in a script with no Latin letters in it at all still gets a usable
->   slug rather than an empty one.
+>   slug rather than an empty one;
+> - and so does a title with nothing usable in it at all -- one that is only
+>   punctuation is still a title their editor hands over, and it still needs a slug
+>   rather than an empty string.
 > 
 > How a title is turned into a slug, and what a collision is resolved with, is up to
 > whoever writes it.
@@ -1164,15 +1233,27 @@ checked; the transliteration rules and the collision suffix are design decisions
 
 *loose 層說明*：The contract fixes the entry point and the return type only. The transliteration rule, the collision suffix and the fallback for a non-Latin title are design decisions and none of them is graded directly.
 
+**AMEND1 第 4 項（2026-09-14）**：上面多出來的那一條 bullet 是這次補的。
+`h03_hyphen_rules` 對標題 `"..."`（純標點）斷言 `slug != ""`，而目標原本的「非空」
+保證只綁在「a title written in a script with no Latin letters in it at all」上
+——純標點算不算「一種文字」是可爭的。**沒有改測試**，改的是目標：純標點標題也要有
+非空 slug 這件事，本來就是客戶講得出口的需求。
+
 ---
 
 ## 四、還沒做、必須由別人做的事
 
-1. **§五-2 的公平性複核**（複核者不得是作者）。本量具只驗到
-   「每一條隱藏驗收的 `# anchor:` 在 `goal.md`／`contract.md` 裡逐字找得到」，
-   **驗不到反向那一條**（目標裡每句客戶困擾都要有驗收對應），也驗不到覆蓋的完備性。
-2. **`boundary_only_hidden_n` 逐條標記**（同上，複核者做）。
-3. **AMEND1 的 sha256 釘死**：`meta.json` 已逐檔落 sha256，但那是自己算自己的；
-   釘進修訂案、由發射器與 analyzer 比對，是 Fable 那一步。
+1. ~~**§五-2 的公平性複核**~~ — **2026-09-14 完成**（獨立代理，報告在
+   `ops/gain/r530/review/`）：20 題全過、0 題剔除、5 筆 `amended`，五筆都已修進題庫。
+   量具的單邊保證不變：`--check` 只驗得到「anchor 逐字指得回原文」，
+   **驗不到反向那一條**（目標裡每句客戶困擾都要有驗收對應），也驗不到覆蓋的完備性
+   ——那一半是人讀出來的判斷，不是可重跑的量具。
+2. ~~**`boundary_only_hidden_n` 逐條標記**~~ — **2026-09-14 完成**，逐條寫進各題
+   `meta.json` 的 `boundary_only_hidden`。⚠ `ow_08` 的 `h15`／`h16` 是 AMEND1 之後
+   才存在的，**複核者沒看過**，由修訂代理照複核者凍結的嚴格讀法標，
+   `marked_by` 欄逐條寫明是誰標的。
+3. **AMEND1 的 sha256 釘死** — 表已產出（`gauge_r530.py --bank-sha`，合併雜湊
+   `bank_sha256`），寫進預註冊的附錄 AMEND1。**仍待 Fable／人類簽字凍結**，
+   以及發射器與 analyzer 實作比對（`abort_bank_sha_mismatch`）。
 4. **ow_01／ow_02 有兩個版本**：基建代理的 worktree 已各寫過一版示範題，措辭與本庫不同。
    兩邊都跑得起來，但**不能同時存在**，要 Fable 指定留哪一份。

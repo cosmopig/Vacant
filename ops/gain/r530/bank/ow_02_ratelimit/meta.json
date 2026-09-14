@@ -44,6 +44,71 @@
     "solution.py"
   ],
   "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
-  "boundary_only_hidden_n": null,
-  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+  "boundary_only_hidden_n": 4,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_left_open_boundary.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_right_closed_boundary.py": {
+      "boundary_only": false,
+      "note": "4.999 probes the right-closed end from INSIDE; criterion (3) says 'exactly on', so false. This is the clearest place where the three-way criterion under-counts a deliberate boundary test -- see the sensitivity figure.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_zero_budget_blocks.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_zero_budget_wait_is_infinite.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_keys_are_independent.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_wait_shrinks.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h07_wait_formula.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h08_unseen_key.py": {
+      "boundary_only": false,
+      "note": "zero recorded events, but the argument ('brand-new') is not empty -> false under the strict reading of criterion (1).",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h09_reset_one_caller.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h10_reset_everybody.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h11_clock_rewound.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h12_denial_does_not_extend.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h13_fractional_seconds.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h14_bad_configuration.py": {
+      "boundary_only": true,
+      "note": "overlaps tests_visible/v02, which also constructs with window_s=0.0 and max_events=-1; not byte-identical, so gate 3 is not breached, but see overlap_notes.",
+      "marked_by": "s5_2_reviewer"
+    },
+    "h15_no_real_clock.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    }
+  }
 }

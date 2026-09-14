@@ -1,6 +1,7 @@
 """Reference solution for ow_08_logscan (gauge only; never enters a workspace)."""
 
 import datetime
+import json
 import math
 import re
 import sys
@@ -72,12 +73,9 @@ def main(argv):
         return 2
     with open(argv[1], encoding="utf-8") as handle:
         report = summarize(handle)
-    width = max([len("path")] + [len(row["path"]) for row in report["endpoints"]])
-    print("%-*s %6s %10s %8s %8s" % (width, "path", "n", "error_rate", "p50_ms", "p95_ms"))
-    for row in report["endpoints"]:
-        print("%-*s %6d %10.4f %8d %8d"
-              % (width, row["path"], row["n"], row["error_rate"], row["p50_ms"], row["p95_ms"]))
-    print("total=%d bad_lines=%d" % (report["total"], report["bad_lines"]))
+    # Indented so a person can read it off the terminal, but still one JSON object:
+    # the contract pins the object, not the indenting.
+    print(json.dumps(report, indent=2, ensure_ascii=False))
     return 0
 
 

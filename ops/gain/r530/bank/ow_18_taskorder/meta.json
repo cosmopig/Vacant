@@ -21,7 +21,7 @@
     "reference/bad_b.py": "18e9c7b8d34f3fe582751512d178e6a61bf7e3bfbb00eac42bf2b8fce7a00d30",
     "reference/bad_c.py": "f236cf13cbca948c6f6842f38f00576436f93b3a4ad9f30edb1fc234175e1e70",
     "reference/solution.py": "5bfad17fb5579ec44616fbfb9101b249e2cf86a7b3a1f7399024f64f489377b2",
-    "rubric.md": "2b41ff7ef8df2af136a42bdd03b2ce97c0554d82cf79ff0486bb42df113cede3",
+    "rubric.md": "6aae9a63d7dc4852e6057f64f59f646a385dfce3baa99dfa2ee4f99d308b0585",
     "tests_visible/v01_prerequisites_come_first.py": "55fb9ae29b129a4279f15c89c2ad7848a09652216c95465ac7b91cec28dd7977",
     "tests_visible/v02_a_circle_is_an_error.py": "c05df1408fd8b2688145b6b41e1c5b09975afb703bfbc3f5088b2199dac9f659"
   },
@@ -30,6 +30,33 @@
     "solution.py"
   ],
   "ref_solution_lines_rule": "prereg S1-3b: every .py of the reference solution, each normalised with ast.unparse(ast.parse(src)), non-blank lines counted and summed. bad_*.py are known-bad stakes, not the reference solution, and are excluded.",
-  "boundary_only_hidden_n": null,
-  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer, who must not be the task author. Left null on purpose: the author filling it in would destroy the measure."
+  "boundary_only_hidden_n": 2,
+  "boundary_only_hidden_n_note": "prereg S1-3b: marked by the S5-2 reviewer (an independent agent, not the task author), review_id in ops/gain/r530/review/review_r530.json. Reading = STRICT: a check is true only when EVERY input whose behaviour it grades falls under one of the three frozen criteria; a check that also grades an ordinary case is false. Descriptive only -- prereg S1-3b sets no threshold on this number and the closeout may not turn it into one.",
+  "boundary_only_hidden": {
+    "h01_every_job_exactly_once.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h02_nothing_runs_too_early.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h03_same_table_same_order.py": {
+      "boundary_only": false,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h04_circles_are_reported.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h05_a_job_waiting_on_itself.py": {
+      "boundary_only": true,
+      "marked_by": "s5_2_reviewer"
+    },
+    "h06_nothing_to_do.py": {
+      "boundary_only": false,
+      "note": "the only loose-layer check anchored to the CONTRACT rather than to a goal-stated property. plan({}) == [] is entailed by 'every job appears in the order exactly once' plus 'plan returns a list of job names', so it holds, but it is the one loose check that is not literally 'goal-stated'.",
+      "marked_by": "s5_2_reviewer"
+    }
+  }
 }

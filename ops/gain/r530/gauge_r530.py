@@ -52,6 +52,20 @@ BANK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bank")
 REQUIRED_FILES = ("goal.md", "contract.md", "rubric.md", "meta.json")
 REQUIRED_DIRS = ("tests_visible", "hidden", "reference")
 
+# AMEND1（2026-09-14）的**具名例外**，不是把界線放寬。
+# §五-2 的反向擋門在 `ow_08_logscan` 失敗一句（goal 的「from the shell without
+# writing a script」零驗收），Fable 裁決補 1 條可見 ＋ 2 條隱藏 ⇒ 那一題的條數
+# 超出 §一-1 的可見 2–3／`tight` 隱藏 10–15。
+# **為什麼寫成具名例外而不是改界線**：改界線會讓其他 19 題一起漂，而且下一次有人
+# 多寫兩條就再也擋不住。具名例外會在 diff 裡看得見，也逐字抄進 AMEND1。
+COUNT_EXCEPTIONS = {
+    "ow_08_logscan": {
+        "visible": (2, 4),
+        "hidden": (10, 16),
+        "why": "AMEND1 item 1: CLI checks added so the goal's shell sentence is graded",
+    },
+}
+
 ANCHOR_RE = re.compile(r"^#\s*anchor:\s*(.+?)\s*$", re.M)
 ANCHOR_KIND_RE = re.compile(r"^#\s*anchor_kind:\s*(goal|contract)\s*$", re.M)
 DERIVATION_RE = re.compile(r"^#\s*derivation:\s*(.+?)\s*$", re.M)
@@ -185,11 +199,13 @@ def check_task(task_dir, tmp_root):
     if meta.get("hidden_n") != res.hidden_n:
         err("meta.hidden_n=%r but %d files in hidden/" % (meta.get("hidden_n"), res.hidden_n))
 
-    lo, hi = (5, 7) if res.stratum == "loose" else (10, 15)
+    waiver = COUNT_EXCEPTIONS.get(task_id, {})
+    lo, hi = waiver.get("hidden") or ((5, 7) if res.stratum == "loose" else (10, 15))
     if not (lo <= res.hidden_n <= hi):
         err("hidden_n=%d outside [%d,%d] for stratum=%s" % (res.hidden_n, lo, hi, res.stratum))
-    if not (2 <= res.visible_n <= 3):
-        err("visible_n=%d outside [2,3]" % res.visible_n)
+    vlo, vhi = waiver.get("visible") or (2, 3)
+    if not (vlo <= res.visible_n <= vhi):
+        err("visible_n=%d outside [%d,%d]" % (res.visible_n, vlo, vhi))
 
     # --- sha256 清單 --------------------------------------------------
     listed = meta.get("sha256", {})
@@ -378,12 +394,39 @@ def difficulty_gate(bank, tasks, verbose=True):
     return errors
 
 
+# ------------------------------------------------------- bank manifest
+
+def bank_manifest(bank):
+    """回傳 (逐行清單, 合併雜湊)。AMEND1 的 sha256 釘死表就是這一份。
+
+    合併雜湊的定義寫死在這裡，不准事後改：把每一行 `<sha256>  <bank/ 起算的相對路徑>`
+    以 `\n` 串起來（路徑以 UTF-8 位元組序排序、結尾補一個 `\n`），整串 UTF-8 取 sha256。
+    `__pycache__` 與 `.pyc` 不算——它們是跑出來的，不是題庫。
+    **`meta.json` 也在裡面**：`meta.sha256` 是每一題自己算自己的，算不到自己那一檔，
+    所以 `meta.json` 的雜湊只能在這一層釘死。
+    """
+    rows = []
+    for root, dirs, files in os.walk(bank):
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__")
+        for name in sorted(files):
+            if name.endswith(".pyc"):
+                continue
+            path = os.path.join(root, name)
+            rows.append((os.path.relpath(path, bank).replace(os.sep, "/"), sha256_file(path)))
+    rows.sort(key=lambda row: row[0].encode("utf-8"))
+    lines = ["%s  %s" % (digest, rel) for rel, digest in rows]
+    combined = hashlib.sha256(("\n".join(lines) + "\n").encode("utf-8")).hexdigest()
+    return lines, combined
+
+
 # ---------------------------------------------------------------- main
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="R530 open-goal task bank gauge")
     ap.add_argument("--check", action="store_true", help="跑全部判準，任何一條不過就 exit 1")
     ap.add_argument("--sha-refresh", action="store_true", help="重算 meta.json 的 sha256 清單")
+    ap.add_argument("--bank-sha", action="store_true",
+                    help="印出 bank/ 的逐檔 sha256 清單與合併雜湊（AMEND1 的釘死表）")
     ap.add_argument("--task", default=None, help="只跑這一題")
     ap.add_argument("--bank", default=BANK_DIR)
     args = ap.parse_args(argv)
@@ -395,6 +438,14 @@ def main(argv=None):
         if not tasks:
             print("no such task", file=sys.stderr)
             return 2
+
+    if args.bank_sha:
+        lines, combined = bank_manifest(args.bank)
+        for line in lines:
+            print(line)
+        print()
+        print("bank_sha256  %s  (%d files)" % (combined, len(lines)))
+        return 0
 
     if args.sha_refresh:
         for t in tasks:

@@ -58,3 +58,35 @@ def check_v03_percentiles():
         assert got["p50_ms"] == 30, "args=%r got=%r want=%r" % (lines, got["p50_ms"], 30)
         assert got["p95_ms"] == 50, "args=%r got=%r want=%r" % (lines, got["p95_ms"], 50)
     _bank_entry(solution)
+
+
+def check_v04_command_line():
+    """Visible check 4: the command line -- one JSON object on stdout, exit 0."""
+
+    import json
+    import os
+    import subprocess
+    import sys
+    import tempfile
+
+
+    def _run(solution, body):
+        home = os.path.dirname(os.path.abspath(solution.__file__))
+        handle, path = tempfile.mkstemp(suffix=".log")
+        with os.fdopen(handle, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        return subprocess.run([sys.executable, "-m", "solution", path],
+                              cwd=home, capture_output=True, text=True)
+
+
+    def _bank_entry(solution):
+        body = ("2026-09-13T09:00:00Z GET /a 200 10\n"
+                "2026-09-13T09:00:01Z GET /a 500 30\n")
+        proc = _run(solution, body)
+        assert proc.returncode == 0, "args=%r got=%r want=%r" % (body, proc.returncode, 0)
+        got = json.loads(proc.stdout)
+        want = {"endpoints": [{"path": "/a", "n": 2, "error_rate": 0.5,
+                               "p50_ms": 10, "p95_ms": 30}],
+                "bad_lines": 0, "total": 2}
+        assert got == want, "args=%r got=%r want=%r" % (body, got, want)
+    _bank_entry(solution)
