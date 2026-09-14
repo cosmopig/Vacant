@@ -24,19 +24,27 @@
   "blocks": [
     {
       "name": "g_r530_ow_s1_odd",
-      "tasks": ["ow_01_csvjson"],
+      "tasks": [
+        "ow_01_csvjson"
+      ],
       "seed": "g-r530-s1",
       "tag": "r530s1odd",
       "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
-      "note": "**範例佇列，不是發射授權**：題庫只有兩題，AMEND1 尚未凍結 sha256"
+      "note": "**範例佇列，不是發射授權**：兩題示範。正式佇列是 `r530_main.json`（20 題 × 3 臂 × 3 seed ＝ 180 格）。"
     },
     {
       "name": "g_r530_ow_s1_even",
-      "tasks": ["ow_02_ratelimit"],
+      "tasks": [
+        "ow_02_ratelimit"
+      ],
       "seed": "g-r530-s1",
       "tag": "r530s1even",
       "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
-      "note": "同一顆 seed 的另一半題在另一顆卡上——「題在兩台輪流」"
+      "note": "**範例佇列，不是發射授權**：兩題示範。正式佇列是 `r530_main.json`（20 題 × 3 臂 × 3 seed ＝ 180 格）。"
     }
-  ]
+  ],
+  "gauge_scope": "bank",
+  "tool_protocol": "native",
+  "sandbox_uid": 65534,
+  "sandbox_gid": 65534
 }

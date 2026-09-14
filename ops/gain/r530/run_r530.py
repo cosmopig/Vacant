@@ -47,6 +47,7 @@ import argparse
 import json
 import os
 import pathlib
+import subprocess
 import sys
 import time
 
@@ -179,6 +180,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--request-timeout-s", type=int, default=900)
     ap.add_argument("--reasoning-effort", default="none",
                     choices=["none", "default", "low", "medium", "high"])
+    ap.add_argument("--gauge-scope", default="none",
+                    choices=["bank", "none"],
+                    help="bank＝發射前跑一次 `gauge_r530.py --check`（雙向量具："
+                         "參考解全過、每個已知壞樁都被擋、anchor 逐字指得回 "
+                         "goal/contract），不過就不發射（E-3）。"
+                         "none＝不跑（只准冒煙用；正式發射一律 bank）。")
     ap.add_argument("--bank-sha", default=None,
                     help="釘死的題庫 sha256 表（AMEND1）；不給就記 bank_sha_pinned=false")
     ap.add_argument("--smoke", action="store_true")
@@ -223,6 +230,19 @@ def main(argv: list[str] | None = None) -> int:
         # 冒煙專用預算：**不是**對凍結常數的修改，是一份只在 `--smoke` 下
         # 生效的替代品，而且它自己也落盤（`summary.budget_profile`）。
         oa.OPENWORK_BUDGET.update(SMOKE_BUDGET)
+
+    # ── E-3（發射閘門）：雙向量具全綠才准發射。────────────────────────
+    # ⚠ 它跑的是**整個 bank 的 20 題**不是這一塊的 5 題：題庫是一份共用的正典，
+    #   而「這一塊用到的那幾題沒問題」不等於「我們發射時用的題庫沒被動過」。
+    #   量不到不是通過（`vacant/suitegauge.py` 的單邊保證）。
+    if args.gauge_scope == "bank":
+        _g = subprocess.run(
+            [sys.executable, str(REPO / "ops/gain/r530/gauge_r530.py"), "--check"],
+            cwd=str(REPO), capture_output=True, text=True, timeout=1800)
+        if _g.returncode != 0:
+            raise SystemExit(
+                "abort_gauge_red：`gauge_r530.py --check` 沒過 ⇒ E-3 紅，不准發射。\n"
+                + (_g.stdout or "")[-2000:] + (_g.stderr or "")[-800:])
 
     ts = taskmod.load_tasks(args.task_set)
     bank = taskmod.bank_manifest(ts)
@@ -452,6 +472,7 @@ def main(argv: list[str] | None = None) -> int:
         "model": args.model,
         "registration_line": line,
         "decision": args.decision,
+        "gauge_scope": args.gauge_scope,
         "tool_protocol": (args.tool_protocol if args.brain != "stub"
                           else "text"),
         "budget": dict(oa.OPENWORK_BUDGET),

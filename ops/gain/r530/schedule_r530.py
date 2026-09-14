@@ -82,6 +82,23 @@ from ops.gain.schedule_queue import (ENDPOINT_1003, ENDPOINT_1004,  # noqa: E402
 REPO = pathlib.Path(__file__).resolve().parents[3]
 LAUNCHER = "ops/gain/r530/run_r530.py"
 
+#: 鎖與 log 的位置。**與 R460R／R529 的完全分開**，三支排程器的檔名兩兩不同：
+#:   R460R   `~/vacant/logs/.schedule_harness_reps.lock` ／ `schedule_harness_reps.log`
+#:   R529    `~/vacant/logs/.schedule_queue_<q>.lock`    ／ `schedule_queue_<q>.log`
+#:   R530    `~/vacant/logs/.schedule_r530_<q>.lock`     ／ `schedule_r530_<q>.log`
+#: 共用任何一樣都會變成「兩個排程器互相以為對方的塊是自己的」
+#: （`schedule_queue` 的同一條理由）。發射器的 flock 同理：
+#: `~/.launch_r530_<tag>.lock`（R460R 是 `.launch_rep_`、R529 是 `.launch_r529_`）。
+LOG_DIR = pathlib.Path.home() / "vacant" / "logs"
+
+
+def scheduler_log_path(queue_name: str) -> pathlib.Path:
+    return LOG_DIR / f"schedule_r530_{queue_name}.log"
+
+
+def scheduler_lock_path(queue_name: str) -> pathlib.Path:
+    return LOG_DIR / f".schedule_r530_{queue_name}.lock"
+
 #: R530 的槽。**名字前綴 `r`**，與 `schedule_queue`（`q…`）與
 #: `schedule_harness_reps`（`1004#…`）都不同——三支排程器的 log 不能互相冒充
 #: （`schedule_queue` 的同一條理由）。`#` 後面仍是 LM Studio parallel 的那一格。
@@ -96,7 +113,8 @@ _BLOCK_REQUIRED = {"name": str, "tasks": list, "seed": str, "tag": str,
 _BLOCK_OPTIONAL = {"note": str}
 _QUEUE_REQUIRED = ("name", "decision", "launcher", "arms", "backend",
                    "request_timeout_s", "reasoning_effort", "model",
-                   "backends", "blocks")
+                   "backends", "blocks", "gauge_scope", "tool_protocol",
+                   "sandbox_uid", "sandbox_gid")
 
 
 def _assert_per_host_cap(slots: tuple[Slot, ...] = R530_SLOTS,
@@ -150,6 +168,11 @@ class R530Queue:
     model: str
     backends: dict
     blocks: tuple[R530Block, ...]
+    #: 發射閘門與實驗條件，逐格都要帶——它們是「這一塊在什麼條件下量的」。
+    gauge_scope: str = "bank"
+    tool_protocol: str = "native"
+    sandbox_uid: int = 65534
+    sandbox_gid: int = 65534
 
 
 def load_queue(path: str | pathlib.Path) -> R530Queue:
@@ -235,12 +258,21 @@ def load_queue(path: str | pathlib.Path) -> R530Queue:
     for key, typ in (("request_timeout_s", int),):
         if not isinstance(raw[key], typ) or raw[key] <= 0:
             raise SystemExit(f"{key} 要是正整數。停。")
+    if raw["gauge_scope"] not in ("bank", "none"):
+        raise SystemExit("gauge_scope 只能是 bank 或 none。停。")
+    if raw["gauge_scope"] != "bank":
+        raise SystemExit(
+            "正式佇列的 gauge_scope 必須是 `bank`（E-3 發射閘門）。停。")
+    if raw["tool_protocol"] not in ("native", "text"):
+        raise SystemExit("tool_protocol 只能是 native 或 text。停。")
     return R530Queue(
         name=raw["name"], decision=raw["decision"], launcher=raw["launcher"],
         arms=raw["arms"], backend=raw["backend"],
         request_timeout_s=raw["request_timeout_s"],
         reasoning_effort=raw["reasoning_effort"], model=raw["model"],
-        backends=raw["backends"], blocks=tuple(blocks))
+        backends=raw["backends"], blocks=tuple(blocks),
+        gauge_scope=raw["gauge_scope"], tool_protocol=raw["tool_protocol"],
+        sandbox_uid=int(raw["sandbox_uid"]), sandbox_gid=int(raw["sandbox_gid"]))
 
 
 def registration_line(queue: R530Queue, block: R530Block) -> str:
@@ -370,6 +402,12 @@ def launch_argv(queue: R530Queue, block: R530Block) -> list[str]:
         "--model", queue.model,
         "--reasoning-effort", queue.reasoning_effort,
         "--request-timeout-s", str(queue.request_timeout_s),
+        # 發射閘門與隔離條件逐格帶著走：E-3（雙向量具）與 E-9（沙箱 uid）
+        # 不是「排程器記得設」的事，它們要在**發射命令本身**裡看得見。
+        "--gauge-scope", queue.gauge_scope,
+        "--tool-protocol", queue.tool_protocol,
+        "--sandbox-uid", str(queue.sandbox_uid),
+        "--sandbox-gid", str(queue.sandbox_gid),
     ]
 
 
@@ -454,8 +492,17 @@ def main(argv: list[str] | None = None) -> int:
                     help="只印計畫，不發射、不碰後端、不寫 runs/")
     ap.add_argument("--check", action="store_true",
                     help="只驗佇列與預註冊，印出每一塊的註冊行")
+    ap.add_argument("--preview", type=int, default=0, metavar="N",
+                    help="配合 --check：印出前 N 塊的**逐字發射命令**與槽分配。"
+                         "0＝不印。它不碰後端、不寫 runs/、不看 DECISION。")
+    ap.add_argument("--registration-out", default=None,
+                    help="配合 --check：把 12 條註冊行寫成一個檔，"
+                         "好讓它們被逐字貼進 DECISION")
     ap.add_argument("--max-ticks", type=int, default=None)
     ap.add_argument("--poll-s", type=int, default=POLL_S)
+    ap.add_argument("--log", default=None,
+                    help="預設 ~/vacant/logs/schedule_r530_<queue>.log"
+                         "（與 R460R／R529 的 log 完全分開）")
     args = ap.parse_args(argv)
 
     q = load_queue(args.queue)
@@ -468,6 +515,42 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {b.name:26} host={host} seed={b.seed} "
                   f"tasks={len(b.tasks)}")
             print(f"    {registration_line(q, b)}")
+        if args.registration_out:
+            rp = pathlib.Path(args.registration_out)
+            rp.parent.mkdir(parents=True, exist_ok=True)
+            rp.write_text("\n".join(registration_line(q, b) for b in q.blocks)
+                          + "\n", encoding="utf-8")
+            print(f"\n註冊行 → {rp}（{len(q.blocks)} 條，要逐字進 DECISION）")
+
+        if args.preview:
+            print(f"\n─── 前 {args.preview} 塊的發射命令與槽分配 "
+                  "（純預覽：不碰後端、不寫 runs/）───")
+            statuses = {b.name: "PENDING" for b in q.blocks}
+            plan = plan_tick(q.blocks, statuses, {}, {})
+            slot_of = dict(plan["launch"])
+            print(f"  本輪排得進槽的塊：{len(plan['launch'])}／{len(q.blocks)}"
+                  f"（槽表 {len(R530_SLOTS)} 格，每台 {PER_HOST_CAP} 串）")
+            for b in q.blocks[:args.preview]:
+                slot = slot_of.get(b.name)
+                where = (f"{slot.slot_id} @ {slot.host}" if slot
+                         else "（本輪排不進；同一顆卡的槽滿了 ⇒ 等下一輪，"
+                              "**不准挪到另一顆卡**）")
+                print(f"\n  ▸ {b.name}  → {where}")
+                print(f"    VACANT_GAIN_API={b.endpoint} \\")
+                print("    setsid nohup " + " ".join(launch_argv(q, b))
+                      + f" > ~/vacant/logs/{b.name}.out 2>&1 < /dev/null &")
+            print(f"\n  發射前每塊會先跑（都落盤在 runs/<block>/）：")
+            print("    E-3  gauge_r530.py --check      ← --gauge-scope bank")
+            print("    E-9  sandbox.probe()            → backend_meta.json"
+                  " / gate_e9.json")
+            print("    E-11 probe_inference_mode()     → inference_probe.json"
+                  " / gate_e11.json")
+            print("    三者任一紅 ⇒ 在**任何實驗呼叫之前** SystemExit。")
+            print(f"  排程器 log：{scheduler_log_path(q.name)}")
+            print(f"  排程器 lock：{scheduler_lock_path(q.name)}")
+            print("  發射器 flock：~/.launch_r530_<tag>.lock"
+                  "（R460R 是 .launch_rep_、R529 是 .launch_r529_）")
+
         miss = check_prereg(q, root)
         if miss:
             print("\n⚠ DECISION 裡找不到這幾行（逐字）：")
@@ -477,8 +560,15 @@ def main(argv: list[str] | None = None) -> int:
         print("\n預註冊：每一塊都註冊過。")
         return 0
 
+    log_path = (pathlib.Path(args.log) if args.log
+                else scheduler_log_path(q.name))
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
     def log(msg: str) -> None:
-        print(f"[{_now()}] {msg}", flush=True)
+        line = f"[{_now()}] {msg}"
+        print(line, flush=True)
+        with log_path.open("a", encoding="utf-8") as f:
+            f.write(line + "\n")
 
     miss = check_prereg(q, root)
     if miss:
