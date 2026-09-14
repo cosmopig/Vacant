@@ -74,8 +74,8 @@ import time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3]))
 
 from ops.gain.schedule_harness_reps import (  # noqa: E402
-    ABORT_KINDS, MAX_ATTEMPTS, POLL_S, Slot, _read_json, abort_block,
-    abort_preflight, block_state, occupancy)
+    ABORT_KINDS, MAX_ATTEMPTS, POLL_S, VOID_RATE_ABORT, Slot, _read_json,
+    abort_block, abort_preflight, occupancy)
 from ops.gain.schedule_queue import (ENDPOINT_1003, ENDPOINT_1004,  # noqa: E402
                                      PER_HOST_CAP, QUEUE_SLOTS)
 
@@ -303,10 +303,80 @@ def check_prereg(queue: R530Queue, repo: pathlib.Path = REPO) -> list[str]:
 #: 8 塊全部起來了（`backend_meta.json`／`calls.jsonl`／`gate_e11.json` 都寫出來了），
 #: 60 秒後全部被自己的排程器搬進 `runs/_aborted/`。
 #:
-#: ⚠ 教訓寫在這裡：**沿用純函式的時候，要連它的「比對對象」一起看**。
-#:   `occupancy`／`block_state`／`classify_summary` 沿用得起來是因為它們吃的是
-#:   參數；`running_block_names` 吃的是 `ps` 的輸出，而那裡面寫死了別人的檔名。
+#: ⚠ **這個教訓在 2026-09-14 犯了兩次，第二次比第一次貴。**
+#:   沿用純函式的時候，要連它**吃什麼**一起看：
+#:     · `running_block_names` 吃 `ps` 的輸出，裡面寫死 `gain_run.py`
+#:       ⇒ 第一次發射時 8 塊全被判 DEAD 搬走（06:14:33Z）。
+#:     · `classify_summary`／`void_rates` 吃 `summary.json`，把 `summary["arms"]`
+#:       當成 `{arm: {...}}`，而 R530 的 `arms` 是一個 list
+#:       ⇒ 排程器在**第一塊寫出 summary.json 的那一刻**整個死掉（09:58:37Z），
+#:         而且前面安靜地跑了三個半小時，看起來完全正常。
+#:   ⇒ 真正安全沿用的只有**吃參數**的那幾支（`occupancy`／`plan_launches` 的形狀、
+#:     `abort_block`／`aborted_counts` 的目錄慣例）。**吃外部狀態的一律自己寫。**
 RUNNER_SCRIPT_MARK = "run_r530.py --out "
+
+#: void 率上界。沿用 `schedule_harness_reps.VOID_RATE_ABORT` 的值與語意
+#: （逐臂 `infra_void / processed` > 20% ⇒ 那一塊資料不進分析、重排一次）。
+R530_VOID_RATE_ABORT = VOID_RATE_ABORT
+
+
+def void_rates_r530(summary: dict | None) -> dict[str, float]:
+    """逐臂 `infra_void / processed`，讀的是 **`arms_stats`**。
+
+    ⚠ **不能沿用 `schedule_harness_reps.void_rates`**：那一支讀
+    `summary["arms"]` 並把它當成 `{arm: {...}}` 的 dict，而 R530 的
+    `summary.json` 裡 `arms` 是**一個 list**（`["A-SOLO","A-CONF","A-GATE"]`），
+    逐臂統計在 `arms_stats`。沿用的後果是 `AttributeError: 'list' object has
+    no attribute 'items'`——而且它**要等到第一塊寫出 summary.json 才炸**，
+    也就是排程器會安靜地跑好幾個小時，然後在第一塊完成的那一刻整個死掉
+    （2026-09-14 09:58:37Z 實際發生，6 個 runner 還在跑、4 塊永遠不會被發出去）。
+
+    ⚠ 分子分母**都**從 `summary.json` 來，不是從 `rows.jsonl` 數的：
+      作廢的格子一列都不寫 ⇒ `len(rows) = processed − infra_void`，
+      拿行數當分母會把 void 率系統性地算小。
+    """
+    out: dict[str, float] = {}
+    for arm, v in ((summary or {}).get("arms_stats") or {}).items():
+        processed = float(v.get("processed") or 0)
+        out[arm] = (float(v.get("infra_void") or 0) / processed
+                    if processed > 0 else 0.0)
+    return out
+
+
+def classify_summary_r530(summary: dict | None) -> tuple[str, str]:
+    """一塊的 summary 說它算不算數。回 `(state, why)`。
+
+    比沿用的那一支多判一件事：**E-11 收官把這一塊判 `broken`**
+    （`block_verdict`）⇒ 推論模式與登記的不同，資料不進分析 ⇒ `VOID`。
+    """
+    if not summary:
+        return "UNFINISHED", "no_summary"
+    if not summary.get("run_terminal"):
+        return "UNFINISHED", "run_terminal_false"
+    if summary.get("block_verdict") == "broken":
+        return "VOID", "block_verdict_broken(E-11)"
+    vr = void_rates_r530(summary)
+    bad = {a: round(r, 4) for a, r in vr.items() if r > R530_VOID_RATE_ABORT}
+    if bad:
+        return "VOID", f"void_rate_over_{R530_VOID_RATE_ABORT}:{bad}"
+    return "DONE", "terminal_and_clean"
+
+
+def block_state_r530(dir_exists: bool, summary: dict | None,
+                     alive: bool) -> tuple[str, str]:
+    """一塊**現在**是什麼狀態。純函式：三個觀測值進，一個狀態出。
+
+    形狀與 `schedule_harness_reps.block_state` 逐字相同，只是叫的是
+    R530 自己的 `classify_summary_r530`（見它的 ⚠）。
+    """
+    if not dir_exists:
+        return "PENDING", "no_dir"
+    if alive:
+        return "RUNNING", "process_alive"
+    state, why = classify_summary_r530(summary)
+    if state == "UNFINISHED":
+        return "DEAD", f"no_process_and_{why}"
+    return state, why
 
 
 def running_block_names(root: pathlib.Path) -> set[str]:
@@ -353,7 +423,7 @@ def observe(blocks, root: pathlib.Path) -> tuple[dict, dict]:
     for b in blocks:
         d = root / b.out
         summary = _read_json(d / "summary.json") if d.exists() else None
-        st, _why = block_state(d.exists(), summary, b.name in alive)
+        st, _why = block_state_r530(d.exists(), summary, b.name in alive)
         statuses[b.name] = st
         ep = root / f"{b.out}.endpoint"
         if ep.exists():

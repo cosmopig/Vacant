@@ -250,3 +250,72 @@ def test_a_live_block_is_not_judged_dead(monkeypatch):
         statuses, _eps = sch.observe(q.blocks, root)
         assert statuses[b.name] == "RUNNING", (
             "有目錄＋行程活著 ⇒ RUNNING。判成 DEAD 會讓排程器把跑著的塊搬走")
+
+
+# ── summary 分類（2026-09-14 09:58:37Z 排程器猝死的死因）──────────────────
+def _summary(processed=5, void=0, terminal=True, verdict="ok"):
+    """R530 的 summary 形狀：`arms` 是 **list**、逐臂統計在 `arms_stats`。"""
+    return {
+        "arms": ["A-SOLO", "A-CONF", "A-GATE"],
+        "arms_stats": {a: {"processed": processed, "infra_void": void}
+                       for a in ("A-SOLO", "A-CONF", "A-GATE")},
+        "run_terminal": terminal,
+        "block_verdict": verdict,
+    }
+
+
+def test_inherited_classifier_would_crash_on_our_summary():
+    """釘死**為什麼**不能沿用：它把 `arms` 當 dict，而我們的是 list。
+
+    這一條不是在測別人的程式碼壞掉，是在測「我們知道它為什麼不能用」——
+    哪天有人把 import 改回去，這裡會告訴他後果是什麼。
+    """
+    from ops.gain import schedule_harness_reps as reps
+    with pytest.raises(AttributeError):
+        reps.classify_summary(_summary())
+
+
+def test_r530_classifier_reads_arms_stats():
+    assert sch.classify_summary_r530(_summary())[0] == "DONE"
+    assert sch.void_rates_r530(_summary(processed=5, void=0)) == {
+        "A-SOLO": 0.0, "A-CONF": 0.0, "A-GATE": 0.0}
+
+
+def test_r530_classifier_voids_a_block_over_the_void_rate():
+    state, why = sch.classify_summary_r530(_summary(processed=5, void=2))
+    assert state == "VOID" and "void_rate_over" in why
+
+
+def test_r530_classifier_voids_a_block_e11_called_broken():
+    """E-11 收官判 broken ⇒ 推論模式與登記的不同 ⇒ 資料不進分析。"""
+    state, why = sch.classify_summary_r530(_summary(verdict="broken"))
+    assert state == "VOID" and "block_verdict_broken" in why
+
+
+def test_r530_classifier_never_calls_a_missing_summary_done():
+    """量不到不是通過。"""
+    assert sch.classify_summary_r530(None)[0] == "UNFINISHED"
+    assert sch.classify_summary_r530(_summary(terminal=False))[0] == "UNFINISHED"
+
+
+def test_block_state_r530_covers_the_four_states():
+    assert sch.block_state_r530(False, None, False)[0] == "PENDING"
+    assert sch.block_state_r530(True, None, True)[0] == "RUNNING"
+    assert sch.block_state_r530(True, _summary(), False)[0] == "DONE"
+    # 有目錄、行程不在、又不是 terminal ⇒ 死在半路
+    assert sch.block_state_r530(True, _summary(terminal=False), False)[0] == "DEAD"
+
+
+def test_observe_survives_a_finished_block(tmp_path):
+    """端到端：一塊寫出 summary.json 之後 `observe()` **不准炸**。
+
+    2026-09-14 就是在這裡死的：排程器安靜跑了三個半小時，第一塊完成的那一刻
+    `AttributeError` 整個死掉，6 個 runner 還在跑、4 塊永遠不會被發出去。
+    """
+    q = sch.load_queue(EXAMPLE)
+    b = q.blocks[0]
+    d = tmp_path / b.out
+    d.mkdir(parents=True)
+    (d / "summary.json").write_text(json.dumps(_summary()), encoding="utf-8")
+    statuses, _eps = sch.observe(q.blocks, tmp_path)      # 不准丟例外
+    assert statuses[b.name] == "DONE"
