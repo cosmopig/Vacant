@@ -1,0 +1,49 @@
+{
+  "backend": "bwrap",
+  "available": true,
+  "unavailable_reason": null,
+  "platform": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+  "memory_bytes": 536870912,
+  "network_isolated": true,
+  "write_confined": true,
+  "probe_detail": {
+    "net": {
+      "rc": 0,
+      "stdout": "NET_BLOCKED OSError",
+      "stderr": "",
+      "timed_out": false
+    },
+    "escape": {
+      "rc": 0,
+      "stdout": "ESCAPED",
+      "stderr": "",
+      "timed_out": false
+    },
+    "inside": {
+      "rc": 0,
+      "stdout": "WROTE_INSIDE",
+      "stderr": "",
+      "timed_out": false
+    },
+    "repo_visible": {
+      "rc": 0,
+      "stdout": "REPO_ABSENT",
+      "path": "/home/user1/vacant/Vacant"
+    }
+  },
+  "honest_bound": "mount ＋ net namespace 隔離；只有工作區可寫。這是應用層加固，不是對抗惡意程式碼的完整 OS 安全邊界（vacant/checks.py 的同一句）。",
+  "write_works_inside": true,
+  "repo_hidden_from_sandbox": true,
+  "requested": "bwrap",
+  "tried": [
+    {
+      "backend": "bwrap",
+      "available": true,
+      "reason": null
+    }
+  ],
+  "use_sudo_bwrap": false,
+  "sandbox": "bwrap",
+  "sandbox_uid": null,
+  "sandbox_gid": null
+}

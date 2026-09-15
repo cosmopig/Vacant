@@ -151,3 +151,20 @@ sudo rm /etc/apparmor.d/bwrap
 試過哪些、為什麼失敗全部寫進 `backend_meta.tried`。
 `none` 後端**不是沙箱**（`honest_bound` 逐字這樣寫），而且它一定過不了 E-9
 ⇒ 真跑不可能安靜地退到它。
+
+---
+
+## 路線 B 已安裝（2026-09-15 01:43Z，人類授權「好裝」）
+
+`/etc/apparmor.d/bwrap`（內容＝本目錄的 `bwrap.apparmor`）已由 `sudo cp` ＋ `sudo apparmor_parser -r` 安裝並載入（`aa-status` 認得 bwrap）。
+**非特權 user1 的實測**（`python3 ops/gain/r530/sandbox.py --backend bwrap`，不需 `--sudo-bwrap`）：
+
+| 探針 | 結果 |
+|---|---|
+| network_isolated | true |
+| write_confined | true |
+| repo_hidden_from_sandbox | true（mount namespace 裡沒有 repo，比 unshare 版的「uid 讀不到」強一層） |
+
+存證：`ops/gain/r530/smoke9/probe_bwrap_20260915.json`。
+⚠ **R530 正式 run 仍以 `unshare` 跑**（AMEND2-F 的四塊補跑中，跑中不換碼）；切換到 bwrap 留到下一次凍結。
+回滾：`sudo rm /etc/apparmor.d/bwrap && sudo apparmor_parser -R /etc/apparmor.d/bwrap`（或重開機後自然不載入）。
