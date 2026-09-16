@@ -3706,3 +3706,26 @@ R530_BLOCK: g_r530_s3_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachin
 **同時記一次操作事故**：發射命令被執行兩次 ⇒ 一度有兩個排程器行程（3343580、3343989）。runner 未重複（每塊的 `flock` 擋住，逐塊只有一個 runner），01:40Z 以 pid 殺掉後者、保留前者。**對資料無影響**，記錄於此以免日後從 log 的重複「發射」行誤判為雙跑。
 
 **效力**：本次補跑的四塊與先前八塊在同一份程式碼、同一套題庫、同一組註冊行、同一種後端參數下執行；差別是**時間**（相隔約 12 小時）與**1003 曾經重載模型**。收官時 §八-11 的逐後端描述照舊，另加一句「s1／s3 的 1003 半邊是補跑的」。
+
+
+## 附錄 AMEND2-G　1003 被人類佔用，剩餘四塊改在 1004 重跑（2026-09-16，Fable 裁決）
+
+**事實**：AMEND2-F 的第三次嘗試於 2026-09-15T01:39Z 發射後，10:47／11:24／19:00–19:02Z 連續 VOID（呼叫回 HTTP 400），排程器 19:02:21Z 用完重排額度退出。2026-09-16T01:35Z 查 1003：載入的是 `qwen/qwen3.8-27b`、狀態 `PROCESSING PROMPT` ⇒ **那台是人類自己的工作機，qwen 27B（17.74 GB）把 gemma（13 GB）擠出 24 GB 顯存**。1003 在 36 小時內兩次掉模型，都是這個原因。**不再向人類要回 1003。**
+
+**裁決**：剩餘四塊（`g_r530_s1_1003_1`／`s1_1003_2`／`s3_1003_1`／`s3_1003_2`）**整塊改到 1004** 重跑，題目、臂、seed、程式碼（F1″ `0ebdd791f875`）、題庫（`1eae5f19…`）、預算一律不變，只換 endpoint。塊名保留原字串（含 `1003`），以免與已發生的紀錄對不上；真正的後端以 `backend_meta.json` 與下列註冊行為準。
+
+**排程器拒絕這個拓撲，是它該做的事**：`abort_all_blocks_one_host` 判「seed g-r530-s1 的 2 塊全在 1004 ⇒ 題在兩台輪流沒有兌現」。該護欄是為了**設計階段**不要做出後端與題號共線的佇列；本次是機器被收回後的復原，且後果相反——s1／s3 之內後端變成**常數**（不是共線），塊內三臂仍同台，逐 seed 分析、不併 n ⇒ 主指標不受影響。**處置：不改護欄、不改任何程式碼，改為直接發 runner（與 smoke9 相同的發法），並在此逐字記錄這次繞過。**
+
+**必須跟著結果走的後果**（§八-11 逐後端描述照舊，另加）：
+- seed **s1 與 s3 的 20 題全部在 1004**；seed **s2** 是 1003 十題＋1004 十題（1003 那十題在 09-14 停擺前就已收官）。
+- 跨 seed 的絕對值因此混了不同後端組成；本 run 本來就不併 seed，引用時逐 seed 註明後端組成。
+- s1／s3 的補跑與其他八塊相隔約兩天，模型檔、參數、程式碼皆未變（1004 自始至終是同一份 gemma、context 262144、parallel 4、無 TTL）。
+
+**復原佇列**：`ops/gain/r530/queues/r530_recovery_1004.json`，sha256 `0e796c0115fdd3077892a416a44e8b0921148d2304518f49427186bb227a38da`。四條註冊行（`run_r530.py` 逐字比對）：
+
+```
+R530_BLOCK: g_r530_s1_1003_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_04_layerconf,ow_06_verrange,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s1_1003_2 tasks=ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s3_1003_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_04_layerconf,ow_06_verrange,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s3_1003_2 tasks=ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
+```
