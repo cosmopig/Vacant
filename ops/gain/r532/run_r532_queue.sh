@@ -38,7 +38,11 @@ log "repo HEAD=$(git rev-parse --short HEAD) prereg_sha=$(sha256sum $DEC | cut -
 while read -r BLOCK; do
   [ -z "$BLOCK" ] && continue
   OUT="runs/$BLOCK"
-  if [ -f "$OUT/summary.json" ]; then log "$BLOCK 已有 summary.json，跳過"; continue; fi
+  # summary.json 是**邊跑邊寫**的，存在不代表跑完——要看 run_complete
+  # （2026-09-17：等待迴圈用檔案存在判定，冒煙塊才第 4/20 題就被當成收完）。
+  if [ -f "$OUT/summary.json" ] && python3 -c "import json,sys; sys.exit(0 if json.load(open('$OUT/summary.json')).get('run_complete') else 1)" 2>/dev/null; then
+    log "$BLOCK 已 run_complete，跳過"; continue
+  fi
 
   # 逐塊參數一律從佇列 JSON 取，不在這支腳本裡重寫（避免兩份真相）
   eval "$(python3 - "$QUEUE" "$BLOCK" <<'PY'
@@ -71,10 +75,10 @@ PY
     --request-timeout-s 900 --review-timeout-s 380 --retries 4 \
     >> "$LOGDIR/${BLOCK}.log" 2>&1
   RC=$?
-  if [ -f "$OUT/summary.json" ]; then
+  if [ -f "$OUT/summary.json" ] && python3 -c "import json,sys; sys.exit(0 if json.load(open('$OUT/summary.json')).get('run_complete') else 1)" 2>/dev/null; then
     log "✓ $BLOCK 收完 rc=$RC"
   else
-    log "✗ $BLOCK rc=$RC 沒有 summary.json——停下這條序列（不自動重試，留給稽核）"
+    log "✗ $BLOCK rc=$RC 未達 run_complete——停下這條序列（不自動重試，留給稽核）"
     exit 1
   fi
 done < "$PLAN"
