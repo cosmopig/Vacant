@@ -12,6 +12,14 @@ set -uo pipefail
 cd "$(dirname "$0")/../../.." || exit 1
 
 HOST_LABEL="$1"; ENDPOINT="$2"
+# 端點走 **`VACANT_GAIN_API`**，不是 `VACANT_ENDPOINT`——後者只管 substrate.py，
+# `brain_cline.py:134` 讀的是 `VACANT_GAIN_API`，沒設就打 `api.cline.bot` 雲端
+# （2026-09-17 誤發兩次才發現，產物留在 runs/_falsestart_20260917_*）。
+# 值要與 12B 那輪逐字相同：`http://<host>:1234/v1/chat/completions`。
+case "$ENDPOINT" in
+  */v1/chat/completions) ;;
+  *) echo "ENDPOINT 必須是完整的 /v1/chat/completions（與 R529 逐字相同）" >&2; exit 2;;
+esac
 PLAN="ops/gain/r532/plan_${HOST_LABEL}.txt"
 QUEUE="ops/gain/queues/r532.json"
 DEC="DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
@@ -51,7 +59,7 @@ PY
   [ -n "$BFILTER" ] && FILTER_ARG=(--bank-filter "$BFILTER")
 
   log "→ 發 $BLOCK  n=$N offset=$OFFSET seed=$SEED bank=$BANK ${BFILTER:+filter=$BFILTER}"
-  VACANT_ENDPOINT="$ENDPOINT" \
+  VACANT_GAIN_API="$ENDPOINT" \
   setsid python3 ops/gain/gain_run.py \
     --out "$OUT" --n "$N" --offset "$OFFSET" \
     --decision "$DEC" \
