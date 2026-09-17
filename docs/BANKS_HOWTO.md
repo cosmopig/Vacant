@@ -182,10 +182,15 @@ harness **只准**用 `visible_check`；`hidden_check` 只用來算分，任何�
 自己查：
 
 ```bash
-python3 ops/gain/harness_vgt_audit.py --scope v2      # 或 v1 / r530
+# --run 是必填；--bank 要配對該 run 自己的題庫，否則 task_id 全部「不認得」
+# 而 fail-closed 判 VIOLATION（那是工具在保護你，不是真的違規）
+python3 ops/gain/harness_vgt_audit.py --run runs/<你的 run> --bank humanevalplus --scope v2
 ```
 
-這是**動態**稽核（實際跑一遍看有沒有碰到 hidden），不是 grep。
+這是**動態**稽核（實際跑一遍、在模型看得到的文本裡搜隱藏測資的指紋），不是 grep。
+輸出看三個數字：`needles_checked`（搜了幾個指紋，0 代表根本沒驗到）、
+`unknown_task_ids`（題庫配錯就會塞滿這個）、`violations`。
+`verdict` 要是 `CLEAN`，而且 `needles_checked` 不能是 0。
 
 ---
 
@@ -197,6 +202,15 @@ python3 ops/gain/harness_vgt_audit.py --scope v2      # 或 v1 / r530
 
 ```bash
 python3 ops/gain/build_runs_index.py --check    # 驗索引沒漂掉
+
+收據鏈（每個 run 每條臂一條 Ed25519 hash chain）自己驗：
+
+```bash
+python3 ops/gain/replay/verify_run_receipts.py --selftest          # 先過負控制
+python3 ops/gain/replay/verify_run_receipts.py --glob 'runs/g_r532_*'
+```
+
+`--selftest` 要先 PASS 才有意義——它證明這支驗證器抓得到被竄改的鏈。
 ```
 
 每個 run 的 `summary.json` 裡有 `seed`／`bank`／`offset`／`n`／`runner_git`，
