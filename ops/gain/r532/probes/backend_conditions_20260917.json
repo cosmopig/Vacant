@@ -1,0 +1,104 @@
+{
+  "recorded_utc": "2026-09-17T02:54:52Z",
+  "purpose": "R532 發射前的後端條件存證：兩台載入參數逐項相同、thinking 在帶與不帶 tools 兩種請求下都關得掉",
+  "model": {
+    "identifier": "qwen3-27b",
+    "modelKey": "qwen/qwen3.8-27b",
+    "arch": "qwen35",
+    "params": "27B (dense)",
+    "quantization": "Q4_K_M (4 bit)",
+    "sizeBytes": 17742040464
+  },
+  "load_params_both_hosts": {
+    "context_length": 65536,
+    "parallel": 2,
+    "per_slot_context": 32768,
+    "gpu": "max",
+    "ttlMs": null,
+    "identifier": "qwen3-27b"
+  },
+  "hosts": {
+    "1003": {
+      "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+      "lmstudio": "0.4.24.0",
+      "loaded_utc": "2026-09-17T~02:5xZ",
+      "note": "人類 2026-09-17 讓出；原本是 ctx 100096 / parallel 1，已重載對齊"
+    },
+    "1004": {
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "lmstudio": "0.4.17.0",
+      "loaded_utc": "2026-09-17T~02:3xZ",
+      "vram_used_mib": 22361,
+      "vram_total_mib": 24576
+    }
+  },
+  "reasoning_probes": {
+    "judgement": "reasoning_effort=none 在兩台、帶與不帶 tools 皆使 reasoning_tokens=0；不設旗標時預設會 thinking（對照組 32 token）⇒ 旗標確實有作用，不是欄位缺失",
+    "1004": [
+      {
+        "case": "none, no tools",
+        "finish": "stop",
+        "reasoning_tokens": 0,
+        "completion": 2
+      },
+      {
+        "case": "none, with tools",
+        "finish": "tool_calls",
+        "reasoning_tokens": 0,
+        "completion": 30,
+        "tool_calls": true
+      },
+      {
+        "case": "no flag (control)",
+        "finish": "stop",
+        "reasoning_tokens": 32,
+        "completion": 36
+      }
+    ],
+    "1003": [
+      {
+        "case": "none, no tools",
+        "finish": "stop",
+        "reasoning_tokens": 0,
+        "completion": 2
+      },
+      {
+        "case": "none, with tools",
+        "finish": "tool_calls",
+        "reasoning_tokens": 0,
+        "completion": 30,
+        "tool_calls": true
+      },
+      {
+        "case": "no flag (control)",
+        "finish": "stop",
+        "reasoning_tokens": 32,
+        "completion": 36
+      }
+    ]
+  },
+  "throughput_probe_1004": {
+    "prompt_tokens": 68,
+    "completions": [
+      94,
+      156,
+      239
+    ],
+    "wall_s": [
+      1.869,
+      2.529,
+      4.909
+    ],
+    "reasoning_tokens": [
+      0,
+      0,
+      0
+    ],
+    "tokens_per_s_est": [
+      50.3,
+      61.7,
+      48.7
+    ]
+  },
+  "ruling": "R532 主 run 以非 thinking 條件執行，與 12B 五個題組的條件對齊（唯一變因＝模型）。thinking 版本若要比，須另開一輪並讓 12B 也開 thinking 跑一次，才對稱。"
+}
