@@ -1,0 +1,51 @@
+{
+  "note": "事前檢定力；p_disc 取 12B 實測不一致率，ψ 由 Δ = p_disc*(2ψ−1) 反解",
+  "alpha": 0.05,
+  "rows": [
+    {
+      "set": "S0 LCB v2",
+      "n": 120,
+      "p_disc": 0.1917,
+      "psi_2pp": 0.5522,
+      "power_2pp": 0.05,
+      "psi_5pp": 0.6304,
+      "power_5pp": 0.1759
+    },
+    {
+      "set": "S1 LCB v3 medium",
+      "n": 135,
+      "p_disc": 0.0815,
+      "psi_2pp": 0.6227,
+      "power_2pp": 0.0718,
+      "psi_5pp": 0.8068,
+      "power_5pp": 0.4292
+    },
+    {
+      "set": "S2 LCB v3 hard",
+      "n": 54,
+      "p_disc": 0.1481,
+      "psi_2pp": 0.5675,
+      "power_2pp": 0.0269,
+      "psi_5pp": 0.6687,
+      "power_5pp": 0.0786
+    },
+    {
+      "set": "S3 HumanEval+",
+      "n": 156,
+      "p_disc": 0.0577,
+      "psi_2pp": 0.6733,
+      "power_2pp": 0.098,
+      "psi_5pp": 0.9333,
+      "power_5pp": 0.7011
+    },
+    {
+      "set": "S4 MBPP+",
+      "n": 371,
+      "p_disc": 0.0701,
+      "psi_2pp": 0.6427,
+      "power_2pp": 0.2367,
+      "psi_5pp": 0.8567,
+      "power_5pp": 0.9612
+    }
+  ]
+}
