@@ -1,0 +1,12 @@
+{
+  "gate": "E-11",
+  "phase": "closeout",
+  "block": "g_r530_s3_1004_2",
+  "calls_audited": 311,
+  "reasoning_tokens_total": 0,
+  "completion_tokens_total": 205900,
+  "reasoning_share": 0.0,
+  "calls_without_the_field": 0,
+  "ok": true,
+  "verdict": "ok"
+}

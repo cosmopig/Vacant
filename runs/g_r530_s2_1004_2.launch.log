@@ -1,0 +1,20 @@
+
+=== 2026-09-14T06:29:07Z flock -n /home/user1/.launch_r530_r530s210042.lock python3 ops/gain/r530/run_r530.py --out runs/g_r530_s2_1004_2 --decision DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md --task-set ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob --arms A-SOLO,A-CONF,A-GATE --seed g-r530-s2 --backend unshare --model gemma-4-12b-it-qat --reasoning-effort none --request-timeout-s 900 --gauge-scope bank --tool-protocol native --sandbox-uid 65534 --sandbox-gid 65534
+── R530 g_r530_s2_1004_2　題 5 × 臂 3 ＝ 15 格　sandbox=unshare
+   [A-SOLO  ow_19_redact        ] accepted=True hidden=5/6 calls=13 stop=declared_done
+   [A-CONF  ow_19_redact        ] accepted=True hidden=2/6 calls=46 stop=visible_pass
+   [A-GATE  ow_19_redact        ] accepted=True hidden=2/6 calls=30 stop=visible_pass
+   [A-SOLO  ow_11_reflow        ] accepted=True hidden=0/1 calls=35 stop=declared_done
+   [A-CONF  ow_11_reflow        ] accepted=False hidden=0/1 calls=60 stop=attempts_exhausted
+   [A-GATE  ow_11_reflow        ] accepted=False hidden=0/1 calls=44 stop=gate_exhausted
+   [A-SOLO  ow_13_timespans     ] accepted=True hidden=13/13 calls=15 stop=declared_done
+   [A-CONF  ow_13_timespans     ] accepted=True hidden=13/13 calls=37 stop=visible_pass
+   [A-GATE  ow_13_timespans     ] accepted=True hidden=12/13 calls=10 stop=visible_pass
+   [A-SOLO  ow_15_tomlsub       ] accepted=True hidden=0/13 calls=27 stop=declared_done
+   [A-CONF  ow_15_tomlsub       ] infra_void: r530-worker 重試 4 次仍失敗：TimeoutError: timed out
+   [A-GATE  ow_15_tomlsub       ] accepted=False hidden=0/13 calls=42 stop=gate_exhausted
+   [A-SOLO  ow_16_pathglob      ] accepted=True hidden=0/13 calls=9 stop=declared_done
+   [A-CONF  ow_16_pathglob      ] accepted=False hidden=0/1 calls=56 stop=attempts_exhausted
+   [A-GATE  ow_16_pathglob      ] accepted=True hidden=11/13 calls=18 stop=visible_pass
+── 收工　35059.4s　A-SOLO: 1/5 deliv　A-CONF: 1/5 deliv　A-GATE: 0/5 deliv
+── /home/user1/vacant/Vacant/runs/g_r530_s2_1004_2

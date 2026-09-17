@@ -1,0 +1,20 @@
+
+=== 2026-09-14T06:29:07Z flock -n /home/user1/.launch_r530_r530s210041.lock python3 ops/gain/r530/run_r530.py --out runs/g_r530_s2_1004_1 --decision DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md --task-set ow_01_csvjson,ow_03_mdtable,ow_04_layerconf,ow_06_verrange,ow_08_logscan --arms A-SOLO,A-CONF,A-GATE --seed g-r530-s2 --backend unshare --model gemma-4-12b-it-qat --reasoning-effort none --request-timeout-s 900 --gauge-scope bank --tool-protocol native --sandbox-uid 65534 --sandbox-gid 65534
+── R530 g_r530_s2_1004_1　題 5 × 臂 3 ＝ 15 格　sandbox=unshare
+   [A-SOLO  ow_01_csvjson       ] accepted=True hidden=13/14 calls=35 stop=declared_done
+   [A-CONF  ow_01_csvjson       ] accepted=False hidden=0/14 calls=64 stop=attempts_exhausted
+   [A-GATE  ow_01_csvjson       ] accepted=False hidden=12/14 calls=29 stop=gate_exhausted
+   [A-SOLO  ow_03_mdtable       ] accepted=True hidden=7/14 calls=15 stop=declared_done
+   [A-CONF  ow_03_mdtable       ] accepted=False hidden=1/14 calls=55 stop=attempts_exhausted
+   [A-GATE  ow_03_mdtable       ] accepted=False hidden=10/14 calls=27 stop=gate_exhausted
+   [A-SOLO  ow_04_layerconf     ] accepted=True hidden=14/15 calls=10 stop=declared_done
+   [A-CONF  ow_04_layerconf     ] accepted=True hidden=14/15 calls=8 stop=visible_pass
+   [A-GATE  ow_04_layerconf     ] accepted=True hidden=15/15 calls=13 stop=visible_pass
+   [A-SOLO  ow_06_verrange      ] accepted=True hidden=9/14 calls=18 stop=declared_done
+   [A-CONF  ow_06_verrange      ] accepted=True hidden=12/14 calls=44 stop=visible_pass
+   [A-GATE  ow_06_verrange      ] accepted=True hidden=14/14 calls=27 stop=visible_pass
+   [A-SOLO  ow_08_logscan       ] accepted=True hidden=12/16 calls=18 stop=declared_done
+   [A-CONF  ow_08_logscan       ] accepted=False hidden=13/16 calls=54 stop=attempts_exhausted
+   [A-GATE  ow_08_logscan       ] accepted=False hidden=12/16 calls=37 stop=gate_exhausted
+── 收工　24512.5s　A-SOLO: 0/5 deliv　A-CONF: 0/5 deliv　A-GATE: 2/5 deliv
+── /home/user1/vacant/Vacant/runs/g_r530_s2_1004_1

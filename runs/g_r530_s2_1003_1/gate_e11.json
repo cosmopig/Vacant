@@ -1,0 +1,19 @@
+{
+  "gate": "E-11",
+  "phase": "preflight",
+  "per_endpoint": {
+    "http://100.119.113.56:1234/v1/chat/completions": {
+      "reasoning_tokens": [
+        0,
+        0
+      ],
+      "all_zero": true,
+      "reasoning_effort_sent": "none",
+      "prefill_ms_per_1k_prompt": 1155.3,
+      "long_ctx_ms_per_1k_prompt": 1291.2,
+      "prefill_diff_unusable": null,
+      "error": null
+    }
+  },
+  "ok": true
+}

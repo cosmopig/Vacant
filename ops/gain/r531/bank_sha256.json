@@ -1,0 +1,795 @@
+{
+  "pba_01_lcb2728": {
+    "template_sha256": "c153ff778e04bbe7f389d8e11c228636e158b0e5318102e2a884a81c219360b0",
+    "hidden_sha256": "0ff782e8aa67602e32de666266bfb60be2d7f9862b727edfdbf3c2a78506be47",
+    "files": {
+      "hidden/pba_01_lcb2728/test_hidden.py": "850959b277534ce60600a923355d6df371e32c651efe2ebee629d3c82db3bac9",
+      "templates/pba_01_lcb2728/contract.md": "51612d2a94b6ba061ee11afbdef5b2d124cd3d163b83d37627a424c40f499a3d",
+      "templates/pba_01_lcb2728/goal.md": "7fd17e9b40ed59a483b98a2f7ec31eed70a0b266823d890956fd5c2646fe85db",
+      "templates/pba_01_lcb2728/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_01_lcb2728/tests_visible/test_visible.py": "15cf6e610e2767b3989e0db985de0904951c80c150a98802e61c46e219e47901"
+    }
+  },
+  "pba_02_lcb2730": {
+    "template_sha256": "03d3c152e2084bbc5f4cef3a0c7da295dc16321a9cd1b4dc9c44d2abe86c8daa",
+    "hidden_sha256": "b123ddd738305dde17cc046e125dc81cb9a59afba236893c173212242675e753",
+    "files": {
+      "hidden/pba_02_lcb2730/test_hidden.py": "433fc7333738ea5a4a57cf4b8953ac557c43647a37dc3b80d505a37b341118c0",
+      "templates/pba_02_lcb2730/contract.md": "0484af0a5708fe9a6b1b02b7a7dbf6f01a8ff5ee201d95d1d847cda70213f78d",
+      "templates/pba_02_lcb2730/goal.md": "2e76f624d0a8682647b91f3e81be70c32e0cc52302b7f5dc92258472c26eca8a",
+      "templates/pba_02_lcb2730/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_02_lcb2730/tests_visible/test_visible.py": "7af6b506e931da7dc095b262cb1a85800c03c939e8dd9c608db4fe7e68ca088c"
+    }
+  },
+  "pba_03_lcb2754": {
+    "template_sha256": "7d83b18246cbdc5e6255c44088b422c33302700f0fbeeb2144e0f461e277c934",
+    "hidden_sha256": "07abb382c575bb9a98be546bafe581ed799463d7bee2c0ae5a0cb6c237a37c08",
+    "files": {
+      "hidden/pba_03_lcb2754/test_hidden.py": "f19daa3a43f9c80a4d453199614e05638dc6e82306addb3844a107256afb683b",
+      "templates/pba_03_lcb2754/contract.md": "917cdb1fa83728b57c6248cbd6d4d4469489098cb2de60394d32a9a4dda1bad2",
+      "templates/pba_03_lcb2754/goal.md": "565df58f9b3c0e190d68d6eb93cdb55b01bca057c9ca87c4cebf6ca45b814b44",
+      "templates/pba_03_lcb2754/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_03_lcb2754/tests_visible/test_visible.py": "5268cda00f2bdabd22954e6498b99c40959338bc01cc5707a93ead12fcb068e9"
+    }
+  },
+  "pba_04_lcb2755": {
+    "template_sha256": "1469407a010576b913acb50f70eeb655911f4428192c28ffd589f9a3ddfba0d0",
+    "hidden_sha256": "f68769fb2449fcb299e99aa12cf695f9eb968387e2bfb3c8152b87f4dae09fa4",
+    "files": {
+      "hidden/pba_04_lcb2755/test_hidden.py": "71cd0412a315fa7c8529378e701914588139190b9212b491feee8bca9be576a2",
+      "templates/pba_04_lcb2755/contract.md": "7e6b8f61e9bfcfc0b4d6aa54e9c7c8ed2be2d71facb4324e1ee85b765cc9b8b4",
+      "templates/pba_04_lcb2755/goal.md": "0404e3fb3840b632538963c451c6ddcb5ddc7ee11a9815435b63d7a9aa9dee22",
+      "templates/pba_04_lcb2755/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_04_lcb2755/tests_visible/test_visible.py": "39897052511b6cb038fed2975cd6524cd3e59df9d8903bd38b10ae9c414179a7"
+    }
+  },
+  "pba_05_lcb2757": {
+    "template_sha256": "88358217f9f0403fdbc7e7c697f99cb7ecfb74e2585c42ed4777227b02ae82fc",
+    "hidden_sha256": "10144729c94f1e3868115ec67418e2b9e9e4efd714538cadafc6cd2579951838",
+    "files": {
+      "hidden/pba_05_lcb2757/test_hidden.py": "ddd3bc810db7ac72624a2f2b3f296be4208828348067508a7eb49a2919d67bf2",
+      "templates/pba_05_lcb2757/contract.md": "3a88fd5ac4e4afc2f332bd5375a6c36bc73e77c7674d4852ec745c6bf0bb5dc5",
+      "templates/pba_05_lcb2757/goal.md": "4c5e882841a42ee157783d93e04e60b600fdf7ed2935ae6b3f924306f922567f",
+      "templates/pba_05_lcb2757/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_05_lcb2757/tests_visible/test_visible.py": "b3431552ab7e69e12b7a7acb27563466867659d67e902ff9d7d981979d608a41"
+    }
+  },
+  "pba_06_lcb2779": {
+    "template_sha256": "5a268372c5f71ee030653abe667d6dfb77741c52147b812e47b5b0eb5f882416",
+    "hidden_sha256": "e65af7c7ce7613617a8bc2d19e2a1e41f14d70dba6526f22974e1deb94f6f16e",
+    "files": {
+      "hidden/pba_06_lcb2779/test_hidden.py": "d88d8aaefbdaad4437c244d4f6f2dfbd84d9cd85d3d133bc4de64870ac117822",
+      "templates/pba_06_lcb2779/contract.md": "4eaeff79a413b6c308de9fef6ba366aa8d92211e21e1ac8bbfef374d0e4ff19d",
+      "templates/pba_06_lcb2779/goal.md": "d218c94d7be7730201fa10a7a9b0a1f5edc2100643e1b1b1047ddc7d9fdfcb51",
+      "templates/pba_06_lcb2779/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_06_lcb2779/tests_visible/test_visible.py": "f0f57f4d7c3399c1a7f8b15565ce6b291d8fac51951bbbbb0edbc926e1482a7c"
+    }
+  },
+  "pba_07_lcb2784": {
+    "template_sha256": "b51b49e23e14304e3c7994fbeae28c6f6b7831166cfb328e530fc9e3ad8da819",
+    "hidden_sha256": "19ca0fbc2deb940070504e8015488a94935733d3f3e3a477969e82f11c8d1fdd",
+    "files": {
+      "hidden/pba_07_lcb2784/test_hidden.py": "010dc3418b72edeb4136504d538cdf217756e42a98e8a5e2c54144fb7d09ab02",
+      "templates/pba_07_lcb2784/contract.md": "e911bc9995e9dda5b4ddeff3ea06100a316c0a746c105d7df9ed075b3b1d55a4",
+      "templates/pba_07_lcb2784/goal.md": "6ce2dd894ed3ce2413ab56093356ffa88c1a9b0fae79fa82489fab8ffff6f36a",
+      "templates/pba_07_lcb2784/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_07_lcb2784/tests_visible/test_visible.py": "d9306aa457df5fccb0fb1d2e2cd921101a812659449ab325eceaba1eb1d26aef"
+    }
+  },
+  "pba_08_lcb2786": {
+    "template_sha256": "5b6dad190e8ed1fb31a9c9774475c3b9d50d7005621ace8dbfc90afcf699b6cd",
+    "hidden_sha256": "b827b738b2941fbb296b7db911bf594613d7bdd777551331bd4d54073d97a452",
+    "files": {
+      "hidden/pba_08_lcb2786/test_hidden.py": "18c8bbb4b81d24f4cf6e84e7774b66e82fe76fa09f5c9cd622cab37bef01f474",
+      "templates/pba_08_lcb2786/contract.md": "e45d95ddfdd6754497b3b054eb0fd44b05a7cadb5cb0616a0d3290408c1aeeb9",
+      "templates/pba_08_lcb2786/goal.md": "235eba4013f2c89b93ecc0a48cbac0d4b9ff73fcf47badd0f7dc204444e316ee",
+      "templates/pba_08_lcb2786/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_08_lcb2786/tests_visible/test_visible.py": "28350a532928846e82cb72eac67e0fe877a0a31168fbbfd712b6b777bd9af77d"
+    }
+  },
+  "pba_09_lcb2792": {
+    "template_sha256": "60b1d87bab56f534191ac3226909d9388913056f29fa61c093a5f3c70d0c814e",
+    "hidden_sha256": "8134d919ebc8d861300e3e33520d90e2a15011e5b455c0a04c3edcd303b3b524",
+    "files": {
+      "hidden/pba_09_lcb2792/test_hidden.py": "8e1b11f709455bee4331eb0d5313febacf7b608310aa4965661251ec58a36de0",
+      "templates/pba_09_lcb2792/contract.md": "c74782f70a6addfbb80e945e612bc3103994cdbc0ea213d63365782999350190",
+      "templates/pba_09_lcb2792/goal.md": "6ac858f1cde04402d946c523763deab8e03f80815304d098a86db6aec0dde659",
+      "templates/pba_09_lcb2792/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_09_lcb2792/tests_visible/test_visible.py": "d7390ac02d7f867004717e83438ed1ae9ad11c6f595b7076e72e707c79b33f08"
+    }
+  },
+  "pba_10_lcb2802": {
+    "template_sha256": "8f6ea04fe212eb60267e9cb3ef96ad45e0ca33aceab3257f77c0d55fd18972e6",
+    "hidden_sha256": "a682e21ffb6a95a047a0da9ca366ccaa691a13b226461e0812d873535674f789",
+    "files": {
+      "hidden/pba_10_lcb2802/test_hidden.py": "8689a7ba49c1ae58eb529891c0e4ba5cd9fd22b6a98acd79f5514b4a20c6209e",
+      "templates/pba_10_lcb2802/contract.md": "2725dee4da0969cdc738a5331e366828885e2c69737266d5784a47f733242f05",
+      "templates/pba_10_lcb2802/goal.md": "a9345b91be9b3b766ae875ab35377b2e70de4aeae45944f02997672db0d081aa",
+      "templates/pba_10_lcb2802/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_10_lcb2802/tests_visible/test_visible.py": "c7f978bc63c3445360c1a892856587fd02597bcb0b15e30567ab60bad3d84fa4"
+    }
+  },
+  "pba_11_lcb2808": {
+    "template_sha256": "27a1cfbec78739428763e3e5f37d3893f18e1589d0def6afa2bf652e96df2810",
+    "hidden_sha256": "f15bb8e80dc07d72b0db1948885b9715921ba2b5cdc6ead16f9aadebd26b5522",
+    "files": {
+      "hidden/pba_11_lcb2808/test_hidden.py": "0c98bfcd673695408ff6ba1b6952b0a57e259bef4f40ce1cfffdab86cee88848",
+      "templates/pba_11_lcb2808/contract.md": "19f312647e2e31b59863a12b10f61f547f4c908323ab7ff9603879f6515a5136",
+      "templates/pba_11_lcb2808/goal.md": "a049ff022469490709ed026d17a7ff2ba301b8447f78539ef086fa7a40ecd2bc",
+      "templates/pba_11_lcb2808/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_11_lcb2808/tests_visible/test_visible.py": "9dc23485d6ab8ab1a07ad0df1ab40ea1920f6f03e378a878b7b8149ba1252065"
+    }
+  },
+  "pba_12_lcb2810": {
+    "template_sha256": "eb828af9910b07ab08d840079de020460715153883fdf1c28ed401482d0ffc65",
+    "hidden_sha256": "c44bf58bbe7138f01d19178c1f12fc70f4ca85f436cd56bf3959879182c46221",
+    "files": {
+      "hidden/pba_12_lcb2810/test_hidden.py": "57dc55fa78f703b5b03bcb811b45e9b76a884512487aae225fde5d33c94e9e74",
+      "templates/pba_12_lcb2810/contract.md": "8ed6e953ce6530539c3c4deda2470f66f23a0a700a4a7277199bdceeecb73f21",
+      "templates/pba_12_lcb2810/goal.md": "8674e45d7347efd992fd65b367333b5f82133b0b095d3b6f7a26970970ef6b24",
+      "templates/pba_12_lcb2810/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pba_12_lcb2810/tests_visible/test_visible.py": "f0c3f518f786ef4820daa3ca95406b6844cdebba4bc2ccf9b8c8c2c2101f7cfa"
+    }
+  },
+  "pbc_01_asseval0": {
+    "template_sha256": "ff4c87ddb2dbb616059f473da3097bb88a4cd9e720fa5dd28f278ce3e30801ca",
+    "hidden_sha256": "f3d0a3d1925d2859ece06c69ad2d998f2883f1cf5fe42635bdef72b33e915858",
+    "files": {
+      "hidden/pbc_01_asseval0/test_hidden.py": "9863f64b9e1ea337e74bd966191d62e99c11a2ccf6e5a412038ec1f62cb7d188",
+      "templates/pbc_01_asseval0/contract.md": "502c7f77155b9f55f8d8b892979c8ee98896d21ed66c77832afaae9f29d4fe47",
+      "templates/pbc_01_asseval0/goal.md": "778af77444f4d1b79021a1e4f5a7e644ecd295c9ce99b38f0fc474953a61ddb7",
+      "templates/pbc_01_asseval0/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_01_asseval0/tests_visible/test_visible.py": "518dedebc85b5dd8ebb6fe5cc4b70828f277da73f9c6ddd2d6ff5aa836675ffb"
+    }
+  },
+  "pbc_02_sseval12": {
+    "template_sha256": "3eb69a19cb7f1f4e00a4084f69f4b0ab50ce7aa53c5fe8402ae970f451c051f6",
+    "hidden_sha256": "3503b6de6ad580feb27ad3c293dc484cc250affafafa9095097973fb8f8ad581",
+    "files": {
+      "hidden/pbc_02_sseval12/test_hidden.py": "802fc52840bd5f4cc75d99bb5c81b45eb5900d8e362c305dff49e7b177768299",
+      "templates/pbc_02_sseval12/contract.md": "d5a84b0772bf49967441076ff59fd5f608c15c1ba0c841730bacd4c0e1b54a55",
+      "templates/pbc_02_sseval12/goal.md": "7285eef2861c085e163af12a664d242616c234c34bc92553da8ffce7c96be03f",
+      "templates/pbc_02_sseval12/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_02_sseval12/tests_visible/test_visible.py": "4bc07224568fe646f22df02bfe87f18fe1eb5406d9c2f6badd11fd0cf425d1e8"
+    }
+  },
+  "pbc_03_sseval15": {
+    "template_sha256": "83542354cc318668b775c1bcc8551bb48dd91878a5c25743d7f97fe123d5715d",
+    "hidden_sha256": "66246325cb3af9b1ad57bec1c09978b0774726ea29c62988c20d4dafed8b7be4",
+    "files": {
+      "hidden/pbc_03_sseval15/test_hidden.py": "8e316264ecc60f050856f3624fe9624ccd8855c7613f59ab1e06e8fd3e0c3f68",
+      "templates/pbc_03_sseval15/contract.md": "188ad57590bb1052eebe9ce46546633f7a6c29a788797ee731e8f09fc3886902",
+      "templates/pbc_03_sseval15/goal.md": "39e244587f5ea350273959916a0a6eb4ee855cb74ad61092d39a6d2bb8cec8c7",
+      "templates/pbc_03_sseval15/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_03_sseval15/tests_visible/test_visible.py": "840db980874671dc67a76254b5fc74f263df49c854810ca4f6a831065334dc48"
+    }
+  },
+  "pbc_04_sseval18": {
+    "template_sha256": "1f2cb65c7cb6f280e4c60a15b356637bb3439e02f65a928c4dca5f0b577df012",
+    "hidden_sha256": "79774edd3b02022f8cc33fbc4b25f60582b0050dcae41acfc1a4ca85e773c633",
+    "files": {
+      "hidden/pbc_04_sseval18/test_hidden.py": "0099d0d46650385c81841152506d35944379aa0987ce43c77b3a9ec5466a8f32",
+      "templates/pbc_04_sseval18/contract.md": "e99c37215ff30cb84a73c3e20f0a28bc888ae429af3ca96a0e95d62ef71a44f0",
+      "templates/pbc_04_sseval18/goal.md": "049c9e0a8786396bd1aad36fe44d717ccd08fe0cac95fa6c00afcf751628a440",
+      "templates/pbc_04_sseval18/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_04_sseval18/tests_visible/test_visible.py": "b59f6724ff9ec5339f0f12bf49a643b716184cf685b4638a8d2cd791e38e4b92"
+    }
+  },
+  "pbc_05_sseval21": {
+    "template_sha256": "130668080a97e71da7f22583b671cbdcba6c3ec5c9c3b5c50489c51765f14b59",
+    "hidden_sha256": "6fd04560a9c15ca52ecc137f951ffe227f64889ddb0e192641936cc435680039",
+    "files": {
+      "hidden/pbc_05_sseval21/test_hidden.py": "084f76f414b110da9fd6fbbaffbd24a68fd6fc554565889519f5074232d2395b",
+      "templates/pbc_05_sseval21/contract.md": "9d9bcb0ffb932315c03e94885f5e4be4b170d3bd43de5f25b9e6c0a2367c4e07",
+      "templates/pbc_05_sseval21/goal.md": "7a2164aed0d9ab05e0ded5fb501f9a87ae240f85c1a567d546b5f3d0e8c72501",
+      "templates/pbc_05_sseval21/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_05_sseval21/tests_visible/test_visible.py": "50025f3b0addfceff91992de4d44395cadedfc18c210b54615eea693611e4d1a"
+    }
+  },
+  "pbc_06_sseval23": {
+    "template_sha256": "1d1934282782c0efe48d7f77a49400034c418f42363d2eadf7ae3ce0f53036e6",
+    "hidden_sha256": "4bca2e03afd03cb52f7768b96e927f4ca1f1256f9b946278f36dac6ebcc36e68",
+    "files": {
+      "hidden/pbc_06_sseval23/test_hidden.py": "d9b1a9d73896b8771234a5836f20526cc0576b4e6210baaa3ab0c76a4bdabf1e",
+      "templates/pbc_06_sseval23/contract.md": "e8f5c548b95e838df6d883526b76828e61fc3ee78a94b34d81ef3e439f55ce8e",
+      "templates/pbc_06_sseval23/goal.md": "ef3b73807276eba631539a19d941f3be239e7c6c3794145fffc84f2c9b1ea978",
+      "templates/pbc_06_sseval23/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_06_sseval23/tests_visible/test_visible.py": "c2d97002332b8231ecf7b3cefbb88550f5ec98621d312570b3f3402330023292"
+    }
+  },
+  "pbc_07_sseval24": {
+    "template_sha256": "66a5f29bc55797b68c4c68876df6fc6f071010d87c4666460c22b05bbc0cb195",
+    "hidden_sha256": "f5e629bddccde6c927f9d22af8563374a9291c0fdb799f5560eac99b05fe9a07",
+    "files": {
+      "hidden/pbc_07_sseval24/test_hidden.py": "2e90dc3940afa2137b82e0a84fa4b2e72fed8ebe0aa775d638bee9dda366f383",
+      "templates/pbc_07_sseval24/contract.md": "52a10234ace4aba5693191b41aab0775863820ddd478fa85f630ac1795f48588",
+      "templates/pbc_07_sseval24/goal.md": "17b1eb92200a8d89dfea4c7c5d22629c5837390747b4f4907c9d8a99c5883651",
+      "templates/pbc_07_sseval24/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_07_sseval24/tests_visible/test_visible.py": "96b1f8db24658c8189fc224e985caadc588ebb21ac8b485dcb22e74fc42e84d8"
+    }
+  },
+  "pbc_09_asseval3": {
+    "template_sha256": "79536dcd1e2372721caf859f3ae65a02589a6c987e663daad024c1292554b290",
+    "hidden_sha256": "067cfde8453eb949c1599cd03f78112a1b4e44ac6825bd0ce6c06216bb195490",
+    "files": {
+      "hidden/pbc_09_asseval3/test_hidden.py": "cb283e2a4ef7a438ec2a11268d85af0cbea6489db05d12d641e940e7fc6450c7",
+      "templates/pbc_09_asseval3/contract.md": "fd473e8a87c262574c6400e438ac970b408441361c0bc5cfceb0c8ce43ff9902",
+      "templates/pbc_09_asseval3/goal.md": "3c1897b001f2f654e11de15e063046279c9675cbbf9d577131a81c6d821e1760",
+      "templates/pbc_09_asseval3/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_09_asseval3/tests_visible/test_visible.py": "c8f51deea2d35e134c3bed9ebdc1f8578d6f1bdcf557b9af0b4c135c8449d3e6"
+    }
+  },
+  "pbc_11_sseval32": {
+    "template_sha256": "94139c7d2289e54bbe3745b870e45d499bf4add0611b022fba031d904140ad82",
+    "hidden_sha256": "35d800d6fd990cee3229f14e91b794100cb38e3ff80801d9fa93d7ad174eee0b",
+    "files": {
+      "hidden/pbc_11_sseval32/test_hidden.py": "74731f2b8483ad61ea5840e51db799b434cb2f0e4c5250400655a4051d3bdb43",
+      "templates/pbc_11_sseval32/contract.md": "3c8fd9807b5f3774f0b49f6bac1747b394608cd77545830e545118242897052f",
+      "templates/pbc_11_sseval32/goal.md": "1e1bfa4840c416f313081d9d59a1a75059daf17fcfb6702f2413123d9cb5a579",
+      "templates/pbc_11_sseval32/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_11_sseval32/tests_visible/test_visible.py": "7b27ac309f0e68a6c3febc5be9bc47d6be1d0726f7d501125b6efb6cce1f0e4d"
+    }
+  },
+  "pbc_12_sseval33": {
+    "template_sha256": "fbcfe35c60b76a28c86d25b617b584cd1f8839b3222cf67f88d52126ecfa40be",
+    "hidden_sha256": "0f7c0778c0e46960f6654f0eaf826e02213448220fd18158f1765c180cffa181",
+    "files": {
+      "hidden/pbc_12_sseval33/test_hidden.py": "3c9e3d1d02ecf95547af2e5caae56ba3173274a68dfc8c8fd67f569c090ead83",
+      "templates/pbc_12_sseval33/contract.md": "ae36c42d14c32372a13f9c6cd0eecbf1636e0211b0e67270c0ce7404d6b64d9a",
+      "templates/pbc_12_sseval33/goal.md": "8570380a6b6bd56caac66cbd74ef460a1dac5ffacae2d34cb2cc4dd3970bc271",
+      "templates/pbc_12_sseval33/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_12_sseval33/tests_visible/test_visible.py": "79e652a0202437fa31c16e35ac6936cb7c2c30c97d6937d450849433dbab7ded"
+    }
+  },
+  "pbc_13_sseval35": {
+    "template_sha256": "2f8d06efdabd3b98e0330cf8e6f95acec92681ab7717f1ceabc5af72bed5f736",
+    "hidden_sha256": "2113b5aacf9244cfb71918489953c78002a146c45361d5201ac77be08b968efb",
+    "files": {
+      "hidden/pbc_13_sseval35/test_hidden.py": "56d043425b641406952493668934dc2cfc1693d0944cfe5f631d04effbe7d511",
+      "templates/pbc_13_sseval35/contract.md": "2a8414d867d594a37a9db2cb6693fa07a057b6567374ed90ab00dd354eb41b26",
+      "templates/pbc_13_sseval35/goal.md": "2d8680b5ef2ac0a57bc1aba6ca05e9decdead9743b78770abb707f0d29dd8235",
+      "templates/pbc_13_sseval35/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_13_sseval35/tests_visible/test_visible.py": "72723f4fb3b20d8cf84e4ac1a5053ea1838253e5a9cf5e97cbcc9044536f718d"
+    }
+  },
+  "pbc_14_sseval36": {
+    "template_sha256": "895e7c5ea4abc2cbb2d1cc2aca37db3f8fb18755bf24336baf6709d0fd4b7c13",
+    "hidden_sha256": "a7e57716a2d4d70dd71ca68bbf5c92f27f17b9cc31ffcdfd0f8c11ce6f0ce7d6",
+    "files": {
+      "hidden/pbc_14_sseval36/test_hidden.py": "9167297caee84fb129abaf4ad0869ec0bf0682191caa36a887ef2631b38ac8c3",
+      "templates/pbc_14_sseval36/contract.md": "2a89f6898e14afba6c015a5a7615855f395aef1a3eb342958165c90eed0d7fbe",
+      "templates/pbc_14_sseval36/goal.md": "d9e16c5643692ff954d34078fa3a8fdf73e861adfdab90139cf3c1bd55405c1f",
+      "templates/pbc_14_sseval36/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_14_sseval36/tests_visible/test_visible.py": "7703a00b40f04cfaa5804d4c152736003776412a6468616e93979c2281a466e9"
+    }
+  },
+  "pbc_16_sseval41": {
+    "template_sha256": "e9896c22aabb950e7525d85ad261915532d7943a20e0bd309a3434ecf7f12927",
+    "hidden_sha256": "73a2068590f12c504ddd7a5cc0905ecb08d97dec0048c8ae35187a9c52c9622b",
+    "files": {
+      "hidden/pbc_16_sseval41/test_hidden.py": "6725ea76853b9420e2a8e0fe948f75cf9e3d5861657c4e67ea9e898d80929998",
+      "templates/pbc_16_sseval41/contract.md": "f0a95de4816a4d2cd7c4a750bc25cbf5c973c3226e4577e8cfbfb61f0bc62f4f",
+      "templates/pbc_16_sseval41/goal.md": "94d6bf9b609855d12361cb72c9600aacfa03e7e994997154defa21bae37e87ce",
+      "templates/pbc_16_sseval41/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_16_sseval41/tests_visible/test_visible.py": "67717ff2fde9318035f77bc0060add1a5ede1f8da3d5ae6f4765de76ba739164"
+    }
+  },
+  "pbc_17_sseval42": {
+    "template_sha256": "211d5c30af6d4d6e611cc8e9072f511684440a9ea32686cf15ce9cf5b1de5119",
+    "hidden_sha256": "92e604ef7574df66c0f82489ac8c3ce80541d9f42c3bb397a4b0495443b6e481",
+    "files": {
+      "hidden/pbc_17_sseval42/test_hidden.py": "d7d396be79d5388683bdcd53a82622235a90b799dbd15576f3da531edb200a80",
+      "templates/pbc_17_sseval42/contract.md": "58628818c84facb8010a246c04667ff44425dac82593daf5f96d30b9e8f71d69",
+      "templates/pbc_17_sseval42/goal.md": "bdc36138daa540938ca709cef487a47bce2a89cb787e2cd9c6b6d2bd7244c42e",
+      "templates/pbc_17_sseval42/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_17_sseval42/tests_visible/test_visible.py": "5e8f407b1e23d9e01307fbb1d80e9ab1a9df2f73a47fc1f453a9d4aa1a20de92"
+    }
+  },
+  "pbc_18_sseval49": {
+    "template_sha256": "e8447a5c5e6ca315639a341aa33001b04c8b833162bb5c5dc0a3d5bf528d8da5",
+    "hidden_sha256": "1b510a8d43ae451651144eba3e2b7222db4b3f9042df5a5116620148173f0414",
+    "files": {
+      "hidden/pbc_18_sseval49/test_hidden.py": "139e572b8bf3af83c55565e38f07c9aca00ab20c4dcef935d80ad6f8034ef032",
+      "templates/pbc_18_sseval49/contract.md": "e71d007ead3b3f0a13a022b32efae1239f9ac45fee7c606848097953ec1d4be7",
+      "templates/pbc_18_sseval49/goal.md": "c88cbb106aeb2e978a5f50156f8f9f7588e2ef90c5423ada5bdfd53a389e00b1",
+      "templates/pbc_18_sseval49/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_18_sseval49/tests_visible/test_visible.py": "f2ae77746b911516526f96a781ceaceccdf8f0d781aee5d58b4c39d4b0b16790"
+    }
+  },
+  "pbc_20_sseval54": {
+    "template_sha256": "5e712189f0cbb6e1fe8665ea1811642a647c4fc87a966a40cfc0cf118c9c70a7",
+    "hidden_sha256": "219e5050aa71e2af0dbb68e27560a7818d6f189023213f87f465c848f47cf118",
+    "files": {
+      "hidden/pbc_20_sseval54/test_hidden.py": "4569b595f515cefc4b49c1c94659ba477027f46aa17113ce2702004662276491",
+      "templates/pbc_20_sseval54/contract.md": "57b6c5c806f8eebe79d4f641ab52635eddbae4ed3576619a71977c11298ec51c",
+      "templates/pbc_20_sseval54/goal.md": "d99de5ea4bd4a305298f437c4ec309f4a7a9edc5436c2bf7c69b7f4ad531ed57",
+      "templates/pbc_20_sseval54/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_20_sseval54/tests_visible/test_visible.py": "4ffc6716a1b140dc06cb8161ee73c45c5cd58ee6a0b96f8a72cf7bd2d03a0194"
+    }
+  },
+  "pbc_23_sseval65": {
+    "template_sha256": "94343132107ef4202af948a607a1841c1b374a88c18bd025a3a67357467f68c2",
+    "hidden_sha256": "da57a231c08a3486efc110d726c18a00acb1fcb55ff81f857f44c68a53d4b0f9",
+    "files": {
+      "hidden/pbc_23_sseval65/test_hidden.py": "d662964df2b38524a6c9125082148ed181056e64d7ce7ecf3fc558833209e373",
+      "templates/pbc_23_sseval65/contract.md": "69d376f8581ed138f2ef6337fb838dbdd3b02e17e20395f97d63293c03961129",
+      "templates/pbc_23_sseval65/goal.md": "9c1d2622875b3db5f1577012b86847f6415dd9722bdb9845df1ac92a7f258149",
+      "templates/pbc_23_sseval65/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_23_sseval65/tests_visible/test_visible.py": "aae3d861161dd7c0e79f6681ab29bd1c73bc5dc9008dcc45121ccf1306aea1f0"
+    }
+  },
+  "pbc_24_sseval73": {
+    "template_sha256": "bc6534323cda288957bbf068e3a57a9711e7e71d254b7b30feac23d0c1feaefe",
+    "hidden_sha256": "51ec300f11b137acaf576bbfa8ed0e17bc8d6b452ced275ede9251fe243b6c3b",
+    "files": {
+      "hidden/pbc_24_sseval73/test_hidden.py": "e7e1eb898c1c476a62a87bbf7ff6a70456947a4252972510ee267484450ecfc3",
+      "templates/pbc_24_sseval73/contract.md": "eac46e1b10dd411f3d38fc0766e16e6b6f641a92c658e2dc4023f2264c14e2de",
+      "templates/pbc_24_sseval73/goal.md": "038b4ece828b38543d26612a4e19f9089b989d1560c20bdd44dbdaa2d73fec55",
+      "templates/pbc_24_sseval73/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_24_sseval73/tests_visible/test_visible.py": "dd9e9da581222db6f2f17bb0ca0e571c1c8fffa1780a5a70b46a249f0e03466e"
+    }
+  },
+  "pbc_25_sseval76": {
+    "template_sha256": "3b988ad5204dfcd8ad1e4df18564524e38ff110599fc2fb72219495f92de5a38",
+    "hidden_sha256": "1634dd335f6fd4da63c5feb5a98e0e5c029870440124af50978e54ec3a2229eb",
+    "files": {
+      "hidden/pbc_25_sseval76/test_hidden.py": "523e0ece1c47d88d89bae9c143609969f5090ade48b2b10eb9a13e58801cd6ac",
+      "templates/pbc_25_sseval76/contract.md": "0325854e6feda495d3279d238117b386e76b603c5148744eeb2b11cbb094eed8",
+      "templates/pbc_25_sseval76/goal.md": "4a997912617bde3458d3f6e04d651bb5af2844a78e0ad5779df86b3516642732",
+      "templates/pbc_25_sseval76/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_25_sseval76/tests_visible/test_visible.py": "8ea37891a75f0bdfeb8691a3d808fc54fc4ee5edd3e5d3e1b1b11853045cd7d9"
+    }
+  },
+  "pbc_26_sseval77": {
+    "template_sha256": "321f6b4b5b633b67f30781ed313b6da9acc48ab93dedbcf5f76503b28483dbb8",
+    "hidden_sha256": "218f92aea8c15f4037f1c2149e3501d4b7b9b9c142fd6b71f7ad47eed9af91ca",
+    "files": {
+      "hidden/pbc_26_sseval77/test_hidden.py": "90906b54f5283c519974037126beb3d4edc667623a0a7faf29481cbe8227bc65",
+      "templates/pbc_26_sseval77/contract.md": "6dde85a5a6a6673426b3afcd6096477078b89b7e13edf6ccb18801b0daf65549",
+      "templates/pbc_26_sseval77/goal.md": "28247e323ff9adb6d8bb5e6c6505323a1171a19bf486093551f3ddbeaadf54e8",
+      "templates/pbc_26_sseval77/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbc_26_sseval77/tests_visible/test_visible.py": "a00af1f01071da140a2708d35636de6dae214fd42949c7af4acedb8dd9f2fd5a"
+    }
+  },
+  "pbd_01_olitaire": {
+    "template_sha256": "eff205b0f6f96433bea7616705d1619d0ce68e8ced3a90e22f400504357d18a5",
+    "hidden_sha256": "5b7951866532e5da192bfb2581772f193e177b6f997e4e56bb5d4abeff5859d0",
+    "files": {
+      "hidden/pbd_01_olitaire/test_hidden.py": "02229a395bb4e06e1419238361f20abf0f9fbb37b892482967db54cd710b969c",
+      "templates/pbd_01_olitaire/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_01_olitaire/goal.md": "3feb199ad074ea74ad937025e8c022dfc89efb0329df096afb74867eac0840fb",
+      "templates/pbd_01_olitaire/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_01_olitaire/tests_visible/test_visible.py": "8295fcb6d119c97ac7253d76f8c34da1d8fab9eef12d3243a43a0e15aa110d7a"
+    }
+  },
+  "pbd_02_utations": {
+    "template_sha256": "d5d9b9e126962c29ad59e64e605c02de582e766708991e7bb33090b8fe6a72a1",
+    "hidden_sha256": "28249c0a7f96c22b7d263840a4dbaa76a3cc46fa33860656b648224cfbaf276f",
+    "files": {
+      "hidden/pbd_02_utations/test_hidden.py": "30e8268a1c9bec84e288c29b3725a7162c43767a1346a708ae2ebe207ae5592b",
+      "templates/pbd_02_utations/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_02_utations/goal.md": "c9fb4034f8210a5929c5ef3c08520dcebe62b3cc45e788087f7b2949ae157f16",
+      "templates/pbd_02_utations/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_02_utations/tests_visible/test_visible.py": "6463b0eff53e60c86c201d5f7493a5f59df62cac38d22c9b98b7eab6402a2bbf"
+    }
+  },
+  "pbd_03_concerts": {
+    "template_sha256": "bcc758b6eb8dd7171dd020f830c55e5bce76f42def6766082f8be3b6ade1245d",
+    "hidden_sha256": "63433f15864183ad5178e80282f5f13b85dff3a7f90e865b4e9628e6c065113d",
+    "files": {
+      "hidden/pbd_03_concerts/test_hidden.py": "7d7e3f3c4c1e7d74fa64816c710f06d0d5deb7cac065674bbbbcd2ba9c253b54",
+      "templates/pbd_03_concerts/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_03_concerts/goal.md": "e0c92e5ca86b2f107e076d7ad35718fc7488b45fb5c61daee870090534430063",
+      "templates/pbd_03_concerts/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_03_concerts/tests_visible/test_visible.py": "a63e7cd5d6289cf922843ff0987b32711e842128f5221f8abd575e960f6b25d4"
+    }
+  },
+  "pbd_06_faflower": {
+    "template_sha256": "4a6775e1592a79dae1c187dcd08c207f3c3d7fba20b3a29f0eed8a1d44ca5fcd",
+    "hidden_sha256": "23e21019b15c30e804aa3389a4ff12517a93ea19d8f40891d5afd452a0e928fb",
+    "files": {
+      "hidden/pbd_06_faflower/test_hidden.py": "d513e26ca81801e828b318359e4aa8d8f72eeab269c4cdfcdb26cb1715473bed",
+      "templates/pbd_06_faflower/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_06_faflower/goal.md": "4d344ebad11651a910d1db4aa8c14326b858c24e444d84255262df38a60c5e76",
+      "templates/pbd_06_faflower/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_06_faflower/tests_visible/test_visible.py": "11a4a4edd54e805f85ad3da31fcb80c4ffbac26222d78197da3a10e397785da2"
+    }
+  },
+  "pbd_07_eversion": {
+    "template_sha256": "1e88f5d297131d5a15390437b30ecd6c2fab5fcf0d51e40c8f2f111695cb484a",
+    "hidden_sha256": "7343e37b1c8b7f89dd55f63796490a9b9a292dc588bb7ec89b26b17a012f9d9e",
+    "files": {
+      "hidden/pbd_07_eversion/test_hidden.py": "427128c64dd7ea50bd25cf0b30ef722be32f6c9634d78d9abc619c1ae3e70ac3",
+      "templates/pbd_07_eversion/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_07_eversion/goal.md": "2fd2ac14865be58d297557b1a93c8987ee8ac21521e1a2c7982e96e7eadef305",
+      "templates/pbd_07_eversion/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_07_eversion/tests_visible/test_visible.py": "d7785850ae7030b9fa121879bac9f5769bb30d33da37625022e685454270a1d2"
+    }
+  },
+  "pbd_09_utergame": {
+    "template_sha256": "56cdab730fb99fa3ee8d374393a7cd9163a59da1b3d1106313e19e1ff2a74263",
+    "hidden_sha256": "72a7a16c2b6c9d38606bec39d8ff63a39e7b3e19172031a33353de98acdce500",
+    "files": {
+      "hidden/pbd_09_utergame/test_hidden.py": "a65ecf6d633439bc9957af7b83441e9828b7274dc8fdc9db4f5b33965cf1c9a8",
+      "templates/pbd_09_utergame/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_09_utergame/goal.md": "7f184f2d9f20bca896a1d78aded6bbf9b3dee0ee5be8ce81d19eb70b56c766c6",
+      "templates/pbd_09_utergame/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_09_utergame/tests_visible/test_visible.py": "c984ec5e63fc68f78b31fd305aaa1d45b84d6dafe6e4db5a6d66bb609becf0f1"
+    }
+  },
+  "pbd_10_8bgroups": {
+    "template_sha256": "df0ae5fb240313953840fad5336a7215bacad1f5e7f2f82f5b48e1eca6e13c27",
+    "hidden_sha256": "2e99bcc1a886ad0fb3d74c0d53c6cf405fb730f6d5ceb06625059c9b13064f5e",
+    "files": {
+      "hidden/pbd_10_8bgroups/test_hidden.py": "37f5b8a5780321be8d57079d33729f76bf0ef8be28e088cd6a33d56449a7d623",
+      "templates/pbd_10_8bgroups/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_10_8bgroups/goal.md": "2c484cd6832a880f25b95b9b1394e48d5679a1f175506fbddf82fe195c7fdd32",
+      "templates/pbd_10_8bgroups/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_10_8bgroups/tests_visible/test_visible.py": "01ab3c7567185aed3a6df023ccae6d415f790d9b0afe1db04466826266a6e0d9"
+    }
+  },
+  "pbd_11_1604aera": {
+    "template_sha256": "272d4d39183c3698c14a1785179f4c6512268b474c5b9c01a9065025486bd406",
+    "hidden_sha256": "9d03d3fa89f652bf2d2cdb068d41efa78954ace819407910b6f13401318cd8a3",
+    "files": {
+      "hidden/pbd_11_1604aera/test_hidden.py": "42e1982e5e9df1aeda49b41390ac600e03f34668184fc5fd84b168685c0ef93f",
+      "templates/pbd_11_1604aera/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_11_1604aera/goal.md": "7e9de1b866a045070783bd49c60a18d771b1102c2d9190fa0cc46745fdad6154",
+      "templates/pbd_11_1604aera/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_11_1604aera/tests_visible/test_visible.py": "c538c6c19117633c5cc14523b230dc73f430a25a2ce40f8f79bb5bef641093c9"
+    }
+  },
+  "pbd_13_keyboard": {
+    "template_sha256": "14875f7f6802ce4e0de44b478bbee5b643ff94901f6bf30ebe92ebcce1f782fc",
+    "hidden_sha256": "f9bfebb9637d6353abb29713dd42da6a1fa01feee478930615fa957279b1583c",
+    "files": {
+      "hidden/pbd_13_keyboard/test_hidden.py": "06ae81b5e04b83631e231488d54456312398614887e67029e8856420f72d307f",
+      "templates/pbd_13_keyboard/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_13_keyboard/goal.md": "b51a2edf0f1cafa9a4c6abc8741757241f78fc526dd58b3cd6914512666f5051",
+      "templates/pbd_13_keyboard/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_13_keyboard/tests_visible/test_visible.py": "f4190a25e65ef357b140b61eca3e1158468170884f26b41b8b53eb77068efacb"
+    }
+  },
+  "pbd_14_sshopper": {
+    "template_sha256": "1ef2aef6c6d6f74ae9b2c3e23da722e62f5cb6b8126731e62425f1269de2d5ec",
+    "hidden_sha256": "fd9137c57aaf3e9c85d3ccd53cb21833dc27cee7a41c7eeb211b9436501154e5",
+    "files": {
+      "hidden/pbd_14_sshopper/test_hidden.py": "d0ff30725b80dfa81b3c1ac8898cdd44270ac75e0b1488782dc6012046067c0a",
+      "templates/pbd_14_sshopper/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_14_sshopper/goal.md": "c2750e6523a91992fd3c7894e6e3ab780f6850c316e0e5b815c4d985de159e92",
+      "templates/pbd_14_sshopper/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_14_sshopper/tests_visible/test_visible.py": "52c4239466bea676278e902f0591d07e7e4c309ce2d05861b84cd7bda328d9a6"
+    }
+  },
+  "pbd_15_traction": {
+    "template_sha256": "0a69c061b97c01bc6a2cb534f832a0a3052f36ceb6f2d9a818acf9371e55e532",
+    "hidden_sha256": "10edae2bf9ce86dc8ca446ac0dd078e7a71ffd9924f4df441f8d5476211cf41b",
+    "files": {
+      "hidden/pbd_15_traction/test_hidden.py": "5b79d1a265f79cd9b71ec0f649624517e429221539713ad4c25aea68551e6712",
+      "templates/pbd_15_traction/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_15_traction/goal.md": "d8b000f736a096cc8aec156a5b0a903dfbbc98ea77a07edc6e131a0c74e79bae",
+      "templates/pbd_15_traction/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_15_traction/tests_visible/test_visible.py": "523550018474c6f2a28baa536f60b966b098c3edbcb7772c6d562fbce852676a"
+    }
+  },
+  "pbd_16_indarray": {
+    "template_sha256": "27938a0a7c508243853d68793e2e6b1a75463fdca3e8c47df5323e4bf80112b2",
+    "hidden_sha256": "03f5f726615117a21356aab1cd89e398ae5507d72b25f496abbf33f7a9e159bc",
+    "files": {
+      "hidden/pbd_16_indarray/test_hidden.py": "4a82ece0544059f08c6c8a655cf21e13d896554d4beb46b996eb2a751593f50a",
+      "templates/pbd_16_indarray/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_16_indarray/goal.md": "cd6ae31dfd0a81d4fd72bdda0d14526472373bfc8da0051083f414038705786d",
+      "templates/pbd_16_indarray/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_16_indarray/tests_visible/test_visible.py": "0c13e0e4d00f2a4d55cb324ed7a5a7221cefc05d36b169acd50162affb822ffa"
+    }
+  },
+  "pbd_17_mparison": {
+    "template_sha256": "7688be1aecd069fbc3b159db3953d5f177e08c9b95cc34b1cdb38f6189cab3da",
+    "hidden_sha256": "96b66c4e65c893328b7133202e594b8935ab60358fd150f5a3e2a4b9d16aed56",
+    "files": {
+      "hidden/pbd_17_mparison/test_hidden.py": "8bb86701a07cd37e462663af40d2e6122bf7ceb81c729867b05e52fe9994ec81",
+      "templates/pbd_17_mparison/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_17_mparison/goal.md": "116ea2aaae87580720a27a6a0576ccbd22ab5512eeb84ff3ec64106dc8e32c4c",
+      "templates/pbd_17_mparison/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_17_mparison/tests_visible/test_visible.py": "a05980cda5fed530c281a549efe25ed310aeead0a7f0275698e52c7c8d6f6cb9"
+    }
+  },
+  "pbd_18_emainder": {
+    "template_sha256": "887da7a22dac747c26fa60cc247162f0b99c633e8c23ac8a8468cc1c252edc16",
+    "hidden_sha256": "e4f837b0a0da0b0736c957bd6b89d772e1a3c3c1bc2fe45d2de9df410e42edd8",
+    "files": {
+      "hidden/pbd_18_emainder/test_hidden.py": "3e27b1059eafb5a1fdfbe641e677aab5936ecf1cd4c49d0384f8937e7a0ecca4",
+      "templates/pbd_18_emainder/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_18_emainder/goal.md": "5a097b7f483b703ab3abd4b6fe5ba0ebf9a4d00a94b13c893bab8ee8d2502e3a",
+      "templates/pbd_18_emainder/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_18_emainder/tests_visible/test_visible.py": "790fd1ea8d28df87a6479ec5a5ee0b248e5e083bcfc7388b576af6023c3a77bd"
+    }
+  },
+  "pbd_19_ngthegap": {
+    "template_sha256": "c8f30b8dbc2f178abdf75775304215f46aa44c6d442f62d8db6c9dfdad41f3f2",
+    "hidden_sha256": "144d215676710a1d778bbfbbff45ea8673ea0739f66dda4dddc54730a15da29c",
+    "files": {
+      "hidden/pbd_19_ngthegap/test_hidden.py": "958dceb7c7b805c5866f05e2bb6ad67f4493daccb9a2ddd635ef32692f0c3eb7",
+      "templates/pbd_19_ngthegap/contract.md": "6a3a0af3287113ab03ca0f235d88c9dbc0efaaa6dddd9f2b0fb697b4843262fd",
+      "templates/pbd_19_ngthegap/goal.md": "1733e8ef3e33a7c7936f9d4dc8c63787de56c5b22eb36750e8a64092e2da18d1",
+      "templates/pbd_19_ngthegap/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbd_19_ngthegap/tests_visible/test_visible.py": "7fc7417044f2a93d48baacced95cba4794e1d070f34febdb349ff2a0f245b55e"
+    }
+  },
+  "pbf_01_ebench19": {
+    "template_sha256": "d0f238f8e69d0bf81ff5c8e84e2e90a69de7852d8b5c1a21cdae4e0158dee89f",
+    "hidden_sha256": "f3bd5353b97e024d1d2a370da5d552abfe3e5c1dcb0a13c2b8ee8256577c6fc1",
+    "files": {
+      "hidden/pbf_01_ebench19/test_hidden.py": "2aa3a2fabd9efaeba60daec27dff8599fd542bf7c2c29b91eea84b8e1117db1c",
+      "templates/pbf_01_ebench19/contract.md": "52a6610d82a848c15246ceee478db106734ddb7e36ec70ca52a18f493f2a5f7c",
+      "templates/pbf_01_ebench19/goal.md": "3e0352e16e8d3ced7174c96b3ab8395ea0e7f8ed396d6c3860dc021367fbf345",
+      "templates/pbf_01_ebench19/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_01_ebench19/tests_visible/test_visible.py": "1bea7c673ea10e413bad5e3d1dc940212e37f7c0673f85e75d977e0cfced3471"
+    }
+  },
+  "pbf_02_bench273": {
+    "template_sha256": "8b93567eae7812cff7a9063101099fe94be5199ebb9a4e571da55fe2cf7af93f",
+    "hidden_sha256": "c868c0049ab93f7601d08b32ce4eea63b1c2732093a895ba573ec64f36ff8840",
+    "files": {
+      "hidden/pbf_02_bench273/test_hidden.py": "0fd7b6075c73b1e8477180ebb1dc7716f41a7bdc653b0f8bb3f83cdf5326a2a5",
+      "templates/pbf_02_bench273/contract.md": "a329137aa3cf5853007ddc4150eacb5260849a4bd4395d2c77e06e96be3ef3b9",
+      "templates/pbf_02_bench273/goal.md": "18d5c1b2ec99f7e6368995f42d3b3dccda77613685f1d5c76ac9dd29e13707eb",
+      "templates/pbf_02_bench273/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_02_bench273/tests_visible/test_visible.py": "ff75db93e7b01960782b5ae4c4d83ccdea3a2d8f1b0084ff7e055492e59c5350"
+    }
+  },
+  "pbf_03_bench310": {
+    "template_sha256": "d2e2618a7b1ee441d6d19a504fa7eb6310a99cc2de0fdc273fd874edf5d95ab2",
+    "hidden_sha256": "078ee75811699186115e725e5db4bd9d5c28ca99d71aed2698150708bd797a0d",
+    "files": {
+      "hidden/pbf_03_bench310/test_hidden.py": "9f4cf6374c1b930fa9532694eede4d1cc1d7578542c4b08f373701beac1e8f5d",
+      "templates/pbf_03_bench310/contract.md": "94a52f2c3b522023bd2c40ffb001e557cf5d713ebdd66570beb84eee36979007",
+      "templates/pbf_03_bench310/goal.md": "404f3535e98aa0ed71cb77b592656ecfafaba93e1edc7bda9445b677d2107ce7",
+      "templates/pbf_03_bench310/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_03_bench310/tests_visible/test_visible.py": "41478b1feb0ec5b8f8737cb0e9610756083fefbdb09160e28e27fab030f522ff"
+    }
+  },
+  "pbf_04_bench324": {
+    "template_sha256": "7997d7566bad14d96284a601feb90860f16219de5ce49d1d50728b6ab1959236",
+    "hidden_sha256": "8c7138f900f00534fd78af44003bc78e7e36b2c8122f289a9ce0052c9f40a820",
+    "files": {
+      "hidden/pbf_04_bench324/test_hidden.py": "0858a4b1b9bb0499aac188aaf6c0b411a534f50e490cb041ec332fd7caa7e48e",
+      "templates/pbf_04_bench324/contract.md": "1aa8b83b429c173e9bcefbd6c4cef00bda119aed0328a2a0d2a8a30b57a7c6e7",
+      "templates/pbf_04_bench324/goal.md": "871b841fe2f3ab0b5605fc1734ac6a6e22a25bc851e903e588b2f8c906c83b45",
+      "templates/pbf_04_bench324/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_04_bench324/tests_visible/test_visible.py": "2c37124fc2fbc7cb684a8328da3aa81eec2959a96380255a36e070014149ade6"
+    }
+  },
+  "pbf_05_bench326": {
+    "template_sha256": "79affb8c828f1cf423392f241fa75954a1abadc4a6932b76d34eed81fb5fec9e",
+    "hidden_sha256": "c14ff138da76be5ce8a3696c7c03d330bd767b217d6a3407d28525b2615d4093",
+    "files": {
+      "hidden/pbf_05_bench326/test_hidden.py": "90b99583a4eb25f6be6477db9c21234de732a420407f4c50672e2588a9c7414b",
+      "templates/pbf_05_bench326/contract.md": "5526d6324c8e2ffa5c508d4d595c17cd6e8931d6d47d43e415cee7518c0ee664",
+      "templates/pbf_05_bench326/goal.md": "d79ec9279fe5dc8899450150c133197a0a08119cda77b22dff168c10be03c1e2",
+      "templates/pbf_05_bench326/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_05_bench326/tests_visible/test_visible.py": "7f824cc8643b33574506bc8d8e680de130ec4a3ee0ab521d6a8e738cdc0f73b5"
+    }
+  },
+  "pbf_06_bench346": {
+    "template_sha256": "f92a4b7a6b45776d90a12f52adbc5d592c9154885e06ad7b68706897783fcc17",
+    "hidden_sha256": "fbb6c796afca8b9350e5f812d0232f39e293578b6a615a05acf70928a24a9f10",
+    "files": {
+      "hidden/pbf_06_bench346/test_hidden.py": "c864bbee8a4197a23fb679ba18b505f3a689eda66657c17042fdce57b13c4220",
+      "templates/pbf_06_bench346/contract.md": "ad60f00522a2a7e4806e61e34453fbe7b0ec5b68ec076f558b4b755f14c5a329",
+      "templates/pbf_06_bench346/goal.md": "90b95598ee550827cc0a88b11e4bd6159be6bbf15036554ba303d8a2062c2090",
+      "templates/pbf_06_bench346/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_06_bench346/tests_visible/test_visible.py": "b788898f4e43f6286af9cd21b0545255403ec421bc9f00b62a3361ee7c1c81ea"
+    }
+  },
+  "pbf_07_bench368": {
+    "template_sha256": "d92468a8d0678eab61bd4810281dda0b34eeaacce21ddf89c39e5e7b1c814c53",
+    "hidden_sha256": "3d151efc454c4968fd09b4f77dba153533b77d6a615f37dca0f0b076fabc77b9",
+    "files": {
+      "hidden/pbf_07_bench368/test_hidden.py": "5f7016dc7abd84ff5d635fc2b21e102954e15287891d96a0ce69fa72ccc965c0",
+      "templates/pbf_07_bench368/contract.md": "21c688f79e4f62153ee712ce36eba0ccf13c618039282541d355d3bbd6b4911d",
+      "templates/pbf_07_bench368/goal.md": "2d9afe1c0eb6b76b691c6cd697d9453a3c4fd53da93f459a86275aef78154e7c",
+      "templates/pbf_07_bench368/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_07_bench368/tests_visible/test_visible.py": "28117827945596d98d5cd7401767782276e276f16d6d059c0d7cd22fe6ac712b"
+    }
+  },
+  "pbf_08_bench454": {
+    "template_sha256": "c91cb2741cec4cbecaff665fb123130733ec4f75af2128782e98eca5f83d2d09",
+    "hidden_sha256": "1e8f2c28b916ce1467cf64cefc5b8fec9b1ab49538745b6ce6e268ea9a1267bf",
+    "files": {
+      "hidden/pbf_08_bench454/test_hidden.py": "33b00ae9d3457e0d98f6b2a2b161f8508d6a2bf3f701a4474b5eb7efaefce7e6",
+      "templates/pbf_08_bench454/contract.md": "9351cc02efc3d3589547c9ff85644bd7e84dc7f5857858ae9b60521425f19609",
+      "templates/pbf_08_bench454/goal.md": "1a28970143b722eb129f41a09ae9738baf6e72f800246dd1ac5b6f4c75867d47",
+      "templates/pbf_08_bench454/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_08_bench454/tests_visible/test_visible.py": "ad19244a2943331ea70485e081b04cd57e99affff021ae78b773166fa2ec6f1a"
+    }
+  },
+  "pbf_09_bench592": {
+    "template_sha256": "36e719a5cd6647eb2c94e5915f820fcdf773fe1e3b946227807aa6c5a5c828db",
+    "hidden_sha256": "e9b5f806a50739e7137581d16dc33cd7b749eaa7c339e2e4c37babbef9124851",
+    "files": {
+      "hidden/pbf_09_bench592/test_hidden.py": "3d5a4154e4dca26b48c2ec6a19dbe44a80cc8f6b7cf13e088de8947eb5012a65",
+      "templates/pbf_09_bench592/contract.md": "7c3b89111f110dddf2a44829f47d3179e0afef9bc18ad890fc4176391ba72e34",
+      "templates/pbf_09_bench592/goal.md": "9486557dc15831f4bdbbc00bab33ff7edabc5ff61facf6a5472ec13fe8ff1a74",
+      "templates/pbf_09_bench592/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_09_bench592/tests_visible/test_visible.py": "102c6d99fa202b9657e6b73136327e6995a4beebfbaf8a20396ac09ea0dfb067"
+    }
+  },
+  "pbf_10_bench594": {
+    "template_sha256": "b52fcfca179d34f2fe18d137cb9faf8948d2a55362682c569aeb7d380c3ebb56",
+    "hidden_sha256": "933736ab2479e5fd6cfee7a1be49e86d33b32ffc37779fa24921973d18ccc9be",
+    "files": {
+      "hidden/pbf_10_bench594/test_hidden.py": "9e5018962533c6013353858820a26efca1e7e490756f5f8d4b9e542b2992b7a3",
+      "templates/pbf_10_bench594/contract.md": "284d316a2a473212e829e8645f09e39cba8d0799c98ae74456c83637e02c2704",
+      "templates/pbf_10_bench594/goal.md": "28e88b07f38f42269f6a24b0edc7425fad3e93ff558fe25c273c32b8e2a72c24",
+      "templates/pbf_10_bench594/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_10_bench594/tests_visible/test_visible.py": "0c1760dd4a995fee24853b03bb575d62d0dc0944d28bdb4cb99c8a6009b9dc8d"
+    }
+  },
+  "pbf_11_bench720": {
+    "template_sha256": "a8e2658850fd1bd9b2b3e2137a1babda7c6c04557046f1176d81d5e9014cbcc7",
+    "hidden_sha256": "910a1371fd0091e2ebc61bf1f7870022f2c8707ef25741653e21016bf43128ef",
+    "files": {
+      "hidden/pbf_11_bench720/test_hidden.py": "6f87b6a83fe71894a87f5a630ebd0034671fc931cb033b717f8be56403cb74d0",
+      "templates/pbf_11_bench720/contract.md": "366f8fcd67ea68256cf51938302befc3d622558cadcbec330574b6ecfcd5d5ee",
+      "templates/pbf_11_bench720/goal.md": "b2df3435d3be54038e1184708110d98e8c27a9742db89cd4bfe6c0caad8c0cf0",
+      "templates/pbf_11_bench720/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_11_bench720/tests_visible/test_visible.py": "164bd03c0fcf83a334101fbd221236d39732bfd2387f3ccff72f0a6c6900c8b0"
+    }
+  },
+  "pbf_12_bench765": {
+    "template_sha256": "82fd9466fccee16ac5c68caf2c35a4cf58e996dfff02ead449b1c0c764f4b571",
+    "hidden_sha256": "d7b9780adb5feefee967f00e8af9543067efd245752a81364b036e49254a7bf4",
+    "files": {
+      "hidden/pbf_12_bench765/test_hidden.py": "e8cc4099762444f3cbe4b98614cc0ae6ff0cadd76e94e0113b855b393029a984",
+      "templates/pbf_12_bench765/contract.md": "f5be27f219a5a98d54ae2e6e84d7e0415120fb1a9511eeadfd33b3738a6b43e1",
+      "templates/pbf_12_bench765/goal.md": "db7914908ce408c71accf4f501932318f13902627c74386370b54f83e829ca15",
+      "templates/pbf_12_bench765/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_12_bench765/tests_visible/test_visible.py": "eee17243c21bee6461d3a71f7a923d31578e02df17da3557e6f6b72c845095b0"
+    }
+  },
+  "pbf_13_bench771": {
+    "template_sha256": "48f243b605673d0c4ed141dbb6cf751739c6e78c4754b26386e7cf8d2e48bc73",
+    "hidden_sha256": "694a5733614785f71fbc4517022fbabbdb3db852fda11b735cdceb5780c34f73",
+    "files": {
+      "hidden/pbf_13_bench771/test_hidden.py": "975c33921e89ba3b6bf05ea5581e8592e9ffb3d1c686fd1115c8cf2f0d471d05",
+      "templates/pbf_13_bench771/contract.md": "e1a3a01124313827457b3552ca569511f87d6c5abb412488816d41c6ce1e9745",
+      "templates/pbf_13_bench771/goal.md": "39999e49e2e583dfc41d4484fb382ae4d03d9b8b3c990aaccc6e225569ee8cbc",
+      "templates/pbf_13_bench771/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_13_bench771/tests_visible/test_visible.py": "a667a86757c51671a0bd48aa5d21a9d0dbae5a56e9f413b11006a31b5b5d4864"
+    }
+  },
+  "pbf_14_bench777": {
+    "template_sha256": "c1fa2481a73931309a1e96a63d1b8c558792ad0f83d8cb267d69c4ffcdef6a00",
+    "hidden_sha256": "1d91a70b097943b0ab1aec0f3d588b3bb8962869d5c667be216950b1f0d0bdbe",
+    "files": {
+      "hidden/pbf_14_bench777/test_hidden.py": "140bac88d601e2e5090732ab4f1a4c0b8b6eeeb64280a0515fc48f0205bd9b29",
+      "templates/pbf_14_bench777/contract.md": "8b69753a5ec5c6cc4e4e804738ccfeebc87ae4b9da8efd488a5c519ba1487c72",
+      "templates/pbf_14_bench777/goal.md": "78c294990a0944ebf709aa81eb9d59aa3eb62c53e8d6d87215b79253557c0075",
+      "templates/pbf_14_bench777/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_14_bench777/tests_visible/test_visible.py": "77d8555f8ae704f6829eb95cd346572ae3f17e1fcda10c3baaa111de74766de0"
+    }
+  },
+  "pbf_15_bench785": {
+    "template_sha256": "7b4dd601764f55ffc9ee0baf53910779ed067d62f0c5f9fde4e47e562a40a129",
+    "hidden_sha256": "a093374ad0d0b69af249f392e3f1a52917113c5d640796b07ba26cccf5ddcbd0",
+    "files": {
+      "hidden/pbf_15_bench785/test_hidden.py": "9afb87455823ee6b08e2bef72808d67eb0ca8f3ad6146038daa271e97bf387e1",
+      "templates/pbf_15_bench785/contract.md": "9351a44037e20733a6863d7fc122369e98cdbcea220e4996922944e9a26adaa7",
+      "templates/pbf_15_bench785/goal.md": "4a21de04bf709030a13c8e4e2f56164a596b34152cf00817eae1921c12671fac",
+      "templates/pbf_15_bench785/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_15_bench785/tests_visible/test_visible.py": "844ba6852fe9790af07af3c736850533e16333dca36e08e03e8f4a1c16833dc9"
+    }
+  },
+  "pbf_16_bench800": {
+    "template_sha256": "b74f2e096323db8235e076ac31c5dc4303211659b76a836b4e27e66fcaef5178",
+    "hidden_sha256": "c68b8356fcdd8f598e6582ac4930c3d3bb4d08b95b62bffd4330b3007e0d3560",
+    "files": {
+      "hidden/pbf_16_bench800/test_hidden.py": "51295a4335c4bd17ad965106473977ae241dd3b7d0b51b9455eef0bd48d6e4b3",
+      "templates/pbf_16_bench800/contract.md": "31c684b573aae992d5b0f688d127072f0eedd0e82d51fe02dacefd02705dbb28",
+      "templates/pbf_16_bench800/goal.md": "1e9fbf19d6f05aeb6f62a153b2a1200cc802bf373539ef7d8bfa842d3e59c39f",
+      "templates/pbf_16_bench800/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_16_bench800/tests_visible/test_visible.py": "c0038e981843de48a00da2c690a6ea7470d5c6d7def0aaa3ce573ef1f655cc16"
+    }
+  },
+  "pbf_17_bench854": {
+    "template_sha256": "7db9628fdda2cc1f937470bd6fc9d14e45830bbcf90db247bc89fdf125259cc2",
+    "hidden_sha256": "42e90c914ff8e6af61fb32f05874456515a06c8768496b61b9702fa68ecd72e5",
+    "files": {
+      "hidden/pbf_17_bench854/test_hidden.py": "53843c1d16687f6b5806ccd4978568932695d6dd5eb95445420f8301630faac8",
+      "templates/pbf_17_bench854/contract.md": "ef4d1dd1330c6d521e870bc37e635b0298da7e4fdcec8f80ea11ba275ffc9fdd",
+      "templates/pbf_17_bench854/goal.md": "2ea85a40cc5e6d4791792f15540baa9eb4b9056dab3719cb1146b68ecbfa593e",
+      "templates/pbf_17_bench854/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_17_bench854/tests_visible/test_visible.py": "c7227ab43c31d3ec924dba8713c59048c03658ce65835d8425e445b7cadbc464"
+    }
+  },
+  "pbf_18_bench857": {
+    "template_sha256": "77075b249109bfcf2ef316088ab6892e34b203a226e6383ee3abd4c28fa4e749",
+    "hidden_sha256": "02fb3bf80e08e59b60f1c67d8f6dc2c447320a00ada33fbfab8bf11820ba1b4f",
+    "files": {
+      "hidden/pbf_18_bench857/test_hidden.py": "fa46ff18fa73c4c631a617b802669b9606ca7e06bf9268fe28f0a491cf34d065",
+      "templates/pbf_18_bench857/contract.md": "a9395e74514d820ef098e91669d9862938c9ccbfdd0d6482b2df2f17f05f9484",
+      "templates/pbf_18_bench857/goal.md": "6390803afea2c67444157ca7467e25e85a4c9239ce16c9c5892564313ccfff4d",
+      "templates/pbf_18_bench857/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_18_bench857/tests_visible/test_visible.py": "05243ee841d8bde4f3a6d8869b070625e858aa8cbd785d01de05cd961f0d0ccb"
+    }
+  },
+  "pbf_20_bench928": {
+    "template_sha256": "0672c93138f956fac65f3aaea093131d939acc942df3c083396bfc15e8d47cd1",
+    "hidden_sha256": "4cad74beabce41d4ce2d26cd6c437592d0f4070c85f4153c4d976021c82d501b",
+    "files": {
+      "hidden/pbf_20_bench928/test_hidden.py": "4f5eea0fc47f7cbbe8d305280afe7a147e4f090b03ca2a08766d46159366559f",
+      "templates/pbf_20_bench928/contract.md": "d439a75578bc4d884908a7d29c0a812d160f83429c378f25b52bcbed9a56f2db",
+      "templates/pbf_20_bench928/goal.md": "43d1097a5bf9019fa57c1b2295957e1d9e925c65f2f0cc7e5bfed14d02924792",
+      "templates/pbf_20_bench928/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_20_bench928/tests_visible/test_visible.py": "b15abb49308a37fdd7a199dee1a30f50674bcdb3921859dcf87d5dec73ccb032"
+    }
+  },
+  "pbf_21_bench963": {
+    "template_sha256": "042a6a15de7d2c58d9bdcd547250d16f11f4aa34efd8472abcdb1af55f447bf1",
+    "hidden_sha256": "75432c5e7f8ae195662ec3b3bf41713545499076a7e3a3ec2894c7a4a3c26219",
+    "files": {
+      "hidden/pbf_21_bench963/test_hidden.py": "3a16f386099f1d63f95102d93bf072e7933dd1749438a847ef4cb4dcb482578b",
+      "templates/pbf_21_bench963/contract.md": "f9b6b372bb451ba45d0976b4e24e5bcb3d706a246b2bcb2bb1731227c599c50d",
+      "templates/pbf_21_bench963/goal.md": "ae713fd6b36d5e6ddf4456f4d9a97495c4486eab47a07b1903baeb703ffd51ea",
+      "templates/pbf_21_bench963/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_21_bench963/tests_visible/test_visible.py": "d7755e5ffc9e3a7576a5b896c2a044f0e693cb73d8945964c389d167b38e2fb7"
+    }
+  },
+  "pbf_22_bench971": {
+    "template_sha256": "2d910f6a93183a5ef97d0f152c43cf825d1bd785c74bc195def5e04e321b9e90",
+    "hidden_sha256": "ca5a409f89330910cc03efd391d9f79942083cf5e481c30e2328ce1c5a33f3fc",
+    "files": {
+      "hidden/pbf_22_bench971/test_hidden.py": "08a05d0a4f3e83fb8d1dd224b984ea6a6ab7437d05fbad5c16c5611c1f2d1a35",
+      "templates/pbf_22_bench971/contract.md": "ea09e600f6c2f3549d97a653193be78fda70c934d39cd9c4a5cf1a53750d6a3d",
+      "templates/pbf_22_bench971/goal.md": "9d52aeec65fd7b789fb8803f1783ab096a9e1c393c648d2c699b92f7eeb32019",
+      "templates/pbf_22_bench971/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_22_bench971/tests_visible/test_visible.py": "fc15ba4e99887538be20e3b2d0d844e56556f1e9c11df1ec386ea2967c92448b"
+    }
+  },
+  "pbf_23_bench988": {
+    "template_sha256": "5efa4363216f44468d0e23ae54b9dc6829cd63b03706bd44bcfa409ec6aeff19",
+    "hidden_sha256": "c6eb42fa8b71662c5464ff3ec7edb755f8d48eac4d3f5d689b2b461ed033dcbd",
+    "files": {
+      "hidden/pbf_23_bench988/test_hidden.py": "5e1d55b3cffdfafb4333ef23898cd31559bbfcab5e6bbd0b493bd03eff373685",
+      "templates/pbf_23_bench988/contract.md": "9bbc524f0101d866a66fa204b5ebe9a7eff9b2c5abbc0522c13e8246e9e4df02",
+      "templates/pbf_23_bench988/goal.md": "2ea422c9287469c285a4bb78e6b9972ac81772475e92cf2f0f256eed9fe10c26",
+      "templates/pbf_23_bench988/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_23_bench988/tests_visible/test_visible.py": "e087ceda1f41e5e1758e61e278b68031cce63ce543bece686d76a73429c1b47e"
+    }
+  },
+  "pbf_24_bench990": {
+    "template_sha256": "26d130d21c1ebc8c33c4541f7ab87660c82d57aa2ff704abcad67bcd5c5944c5",
+    "hidden_sha256": "e6235fd5fd54ee7c31c713a96784456ea19ed84991baaef96c2fbd5db1471a72",
+    "files": {
+      "hidden/pbf_24_bench990/test_hidden.py": "e8d10465d20da607fe52aae1bb1ae923ad06b25255d302b3cd650a254cd7ab27",
+      "templates/pbf_24_bench990/contract.md": "2b11cb277133567b5757c301038770354a44147371d8c2a323b1110a9ac4e106",
+      "templates/pbf_24_bench990/goal.md": "b8ab77ea9b4279b538acfd289d71f22043c7c7b417e9f72966507f887885df81",
+      "templates/pbf_24_bench990/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_24_bench990/tests_visible/test_visible.py": "a77cb8427c235254f65082b5d5bf34870062e11c4e6962aaff74dc5567e9aeef"
+    }
+  },
+  "pbf_25_ench1027": {
+    "template_sha256": "217afde373b6c76f219928d0cadea40f0bb05d8e60f7dadc839e5808054e8d33",
+    "hidden_sha256": "5c319a8f2a23d9075f61cd926ac98eefb33d74d2e0a15f34695e30396faf8833",
+    "files": {
+      "hidden/pbf_25_ench1027/test_hidden.py": "52b37d4b677a6ea9ed45cd75a648c2ceb8a3c68c1809895c548758dafe6d8f45",
+      "templates/pbf_25_ench1027/contract.md": "4b38869f3156c9bbf3c00c4d47d8898590c70e33177edb96d35c2d841d68e9c1",
+      "templates/pbf_25_ench1027/goal.md": "44d797d91ea04877e8f164835046a22727cba8524d14164e9303e110e9aacf22",
+      "templates/pbf_25_ench1027/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_25_ench1027/tests_visible/test_visible.py": "5ab2b6dc599d1602f0a15009f297c5397a8ae5261f322076520e03eff8a6c7dc"
+    }
+  },
+  "pbf_26_ench1090": {
+    "template_sha256": "6704b374cb4d443837545fef9be0d4c97d508fcafc7984cf43e2325e33c722ce",
+    "hidden_sha256": "dd055d9448bc76b2d80e38d0acec0b2cf591550ba4fdd4efd71f1a590881a567",
+    "files": {
+      "hidden/pbf_26_ench1090/test_hidden.py": "9a479ba5e6a72128399aae6a077821af5cfe99a80a9786d16658dfa3872f186d",
+      "templates/pbf_26_ench1090/contract.md": "9d4e0087ae872e9952fd8c388f175268c7c1e5ad742d330040f4e8906e83737e",
+      "templates/pbf_26_ench1090/goal.md": "8f9a8db36bc56c0402964fafad91fc3139b5af0de4ec6ebd74ced3c597afcfbd",
+      "templates/pbf_26_ench1090/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+      "templates/pbf_26_ench1090/tests_visible/test_visible.py": "392306ccba6134089d19f2578836f09a2d5dd0c7760b2ca9f9e5c8e3a9549b75"
+    }
+  },
+  "_root_sha256": "84735370e9c140ae6b324bab735374d310f985381d8fc619c342b5fca8184620"
+}

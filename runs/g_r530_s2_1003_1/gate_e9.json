@@ -1,0 +1,10 @@
+{
+  "gate": "E-9",
+  "sandbox": "unshare",
+  "sandbox_uid": 65534,
+  "network_isolated": true,
+  "write_confined": true,
+  "repo_hidden_from_sandbox": true,
+  "ok": true,
+  "enforced": true
+}

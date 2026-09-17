@@ -62,3 +62,12 @@ ops/gain/replay/r454/key_*/
 # NOT_EVIDENCE 檔）。進版控的話它會被後續的 runs/INDEX 當成一個 run 看待，
 # 而那正是「冒煙永不進證據」要擋的事。
 runs/_smoke/
+
+# R531 公開題庫轉出來的題庫樹：**衍生物，不進版控**（DECISION_20260915_R531 §三-4）。
+# 理由是授權：ClassEval 資料是 CC BY-NC 4.0、LiveCodeBench 的 HF card 只寫
+# `license: cc` 沒指明 BY/SA/NC ⇒ 不轉散布。repo 裡留的是**轉換器與 manifest**，
+# 題庫由 `ops/gain/r531/build_bank.py` 從釘死的 id ＋ sha256 重建，
+# 重建結果的 `_root_sha256` 必須逐位元相同。
+ops/gain/r530/templates/pb[fcad]_*/
+ops/gain/r530/hidden/pb[fcad]_*/
+ops/gain/r530/gauge/pb[fcad]_*/

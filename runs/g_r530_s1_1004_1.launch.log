@@ -1,0 +1,20 @@
+
+=== 2026-09-14T06:29:07Z flock -n /home/user1/.launch_r530_r530s110041.lock python3 ops/gain/r530/run_r530.py --out runs/g_r530_s1_1004_1 --decision DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md --task-set ow_02_ratelimit,ow_18_taskorder,ow_05_router,ow_07_retrypolicy,ow_09_minitemplate --arms A-SOLO,A-CONF,A-GATE --seed g-r530-s1 --backend unshare --model gemma-4-12b-it-qat --reasoning-effort none --request-timeout-s 900 --gauge-scope bank --tool-protocol native --sandbox-uid 65534 --sandbox-gid 65534
+── R530 g_r530_s1_1004_1　題 5 × 臂 3 ＝ 15 格　sandbox=unshare
+   [A-SOLO  ow_02_ratelimit     ] accepted=True hidden=14/15 calls=9 stop=declared_done
+   [A-CONF  ow_02_ratelimit     ] accepted=True hidden=15/15 calls=18 stop=visible_pass
+   [A-GATE  ow_02_ratelimit     ] accepted=True hidden=15/15 calls=20 stop=visible_pass
+   [A-SOLO  ow_18_taskorder     ] accepted=True hidden=6/6 calls=5 stop=declared_done
+   [A-CONF  ow_18_taskorder     ] accepted=True hidden=6/6 calls=5 stop=visible_pass
+   [A-GATE  ow_18_taskorder     ] accepted=True hidden=6/6 calls=5 stop=visible_pass
+   [A-SOLO  ow_05_router        ] accepted=True hidden=13/15 calls=13 stop=declared_done
+   [A-CONF  ow_05_router        ] accepted=False hidden=9/15 calls=59 stop=attempts_exhausted
+   [A-GATE  ow_05_router        ] accepted=True hidden=14/15 calls=9 stop=visible_pass
+   [A-SOLO  ow_07_retrypolicy   ] accepted=True hidden=13/13 calls=12 stop=declared_done
+   [A-CONF  ow_07_retrypolicy   ] accepted=True hidden=13/13 calls=8 stop=visible_pass
+   [A-GATE  ow_07_retrypolicy   ] accepted=True hidden=13/13 calls=15 stop=visible_pass
+   [A-SOLO  ow_09_minitemplate  ] accepted=True hidden=12/13 calls=19 stop=declared_done
+   [A-CONF  ow_09_minitemplate  ] accepted=False hidden=8/13 calls=65 stop=attempts_exhausted
+   [A-GATE  ow_09_minitemplate  ] accepted=True hidden=12/13 calls=20 stop=visible_pass
+── 收工　12563.7s　A-SOLO: 2/5 deliv　A-CONF: 3/5 deliv　A-GATE: 3/5 deliv
+── /home/user1/vacant/Vacant/runs/g_r530_s1_1004_1
