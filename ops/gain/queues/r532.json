@@ -1,0 +1,410 @@
+{
+  "name": "r532_stronger_model",
+  "decision": "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+  "launcher": "ops/gain/launch_r532_block.sh",
+  "arms": "OFF,CONFORM,HMIX",
+  "request_timeout_s": 900,
+  "review_timeout_s": 380,
+  "gauge_scope": "bank",
+  "models": "qwen3-27b",
+  "backends": {
+    "http://100.119.113.56:1234/v1/chat/completions": {
+      "context_length": 65536,
+      "parallel": 2,
+      "per_slot_context": 32768,
+      "gpu": "max",
+      "ttlMs": null,
+      "identifier": "qwen3-27b",
+      "modelKey": "qwen/qwen3.8-27b",
+      "arch": "qwen35",
+      "params": "27B dense",
+      "quantization": "Q4_K_M (4 bit)",
+      "sizeBytes": 17742040464,
+      "probe_evidence": "ops/gain/r532/probes/backend_conditions_20260917.json",
+      "reasoning_effort": "none",
+      "probe_reasoning_tokens": 0,
+      "probe_control_no_flag_reasoning_tokens": 32,
+      "host": "1003",
+      "lmstudio_version": "0.4.24.0",
+      "version_source": "人回報的宣稱（lms version）；runner 查證不到（/v1/models、HTTP header、/api/v0/models 都不帶版本，2026-09-11／09-13 實測）",
+      "note": "2026-09-17 人類讓出；原本 ctx 100096 / parallel 1，已重載對齊 1004"
+    },
+    "http://100.86.226.21:1234/v1/chat/completions": {
+      "context_length": 65536,
+      "parallel": 2,
+      "per_slot_context": 32768,
+      "gpu": "max",
+      "ttlMs": null,
+      "identifier": "qwen3-27b",
+      "modelKey": "qwen/qwen3.8-27b",
+      "arch": "qwen35",
+      "params": "27B dense",
+      "quantization": "Q4_K_M (4 bit)",
+      "sizeBytes": 17742040464,
+      "probe_evidence": "ops/gain/r532/probes/backend_conditions_20260917.json",
+      "reasoning_effort": "none",
+      "probe_reasoning_tokens": 0,
+      "probe_control_no_flag_reasoning_tokens": 32,
+      "host": "1004",
+      "lmstudio_version": "0.4.17.0",
+      "version_source": "同上",
+      "note": "2026-09-17 載入後 VRAM 22,361 / 24,576 MiB"
+    }
+  },
+  "blocks": [
+    {
+      "name": "g_r532_lcb2_a1",
+      "bank": "lcb2",
+      "n": 20,
+      "offset": 0,
+      "seed": "g-r440-lcb2",
+      "tag": "r532lcb21"
+    },
+    {
+      "name": "g_r532_lcb3m_a1",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 0,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3m1",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r532_lcb3h_a1",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 0,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3h1",
+      "bank_filter": "difficulty=hard"
+    },
+    {
+      "name": "g_r532_hep_a1",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 0,
+      "seed": "g-r529-he",
+      "tag": "r532hep1"
+    },
+    {
+      "name": "g_r532_mbpp_a1",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 0,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp1"
+    },
+    {
+      "name": "g_r532_lcb2_a2",
+      "bank": "lcb2",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r440-lcb2",
+      "tag": "r532lcb22"
+    },
+    {
+      "name": "g_r532_lcb3m_a2",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3m2",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r532_lcb3h_a2",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3h2",
+      "bank_filter": "difficulty=hard"
+    },
+    {
+      "name": "g_r532_hep_a2",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-he",
+      "tag": "r532hep2"
+    },
+    {
+      "name": "g_r532_mbpp_a2",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 20,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp2"
+    },
+    {
+      "name": "g_r532_lcb2_a3",
+      "bank": "lcb2",
+      "n": 20,
+      "offset": 40,
+      "seed": "g-r440-lcb2",
+      "tag": "r532lcb23"
+    },
+    {
+      "name": "g_r532_lcb3m_a3",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 40,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3m3",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r532_lcb3h_a3",
+      "bank": "lcb3",
+      "n": 14,
+      "offset": 40,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3h3",
+      "bank_filter": "difficulty=hard"
+    },
+    {
+      "name": "g_r532_hep_a3",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 40,
+      "seed": "g-r529-he",
+      "tag": "r532hep3"
+    },
+    {
+      "name": "g_r532_mbpp_a3",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 40,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp3"
+    },
+    {
+      "name": "g_r532_lcb2_a4",
+      "bank": "lcb2",
+      "n": 20,
+      "offset": 60,
+      "seed": "g-r440-lcb2",
+      "tag": "r532lcb24"
+    },
+    {
+      "name": "g_r532_lcb3m_a4",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 60,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3m4",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r532_hep_a4",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 60,
+      "seed": "g-r529-he",
+      "tag": "r532hep4"
+    },
+    {
+      "name": "g_r532_mbpp_a4",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 60,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp4"
+    },
+    {
+      "name": "g_r532_lcb2_a5",
+      "bank": "lcb2",
+      "n": 20,
+      "offset": 80,
+      "seed": "g-r440-lcb2",
+      "tag": "r532lcb25"
+    },
+    {
+      "name": "g_r532_lcb3m_a5",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 80,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3m5",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r532_hep_a5",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 80,
+      "seed": "g-r529-he",
+      "tag": "r532hep5"
+    },
+    {
+      "name": "g_r532_mbpp_a5",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 80,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp5"
+    },
+    {
+      "name": "g_r532_lcb2_a6",
+      "bank": "lcb2",
+      "n": 20,
+      "offset": 100,
+      "seed": "g-r440-lcb2",
+      "tag": "r532lcb26"
+    },
+    {
+      "name": "g_r532_lcb3m_a6",
+      "bank": "lcb3",
+      "n": 20,
+      "offset": 100,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3m6",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r532_hep_a6",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 100,
+      "seed": "g-r529-he",
+      "tag": "r532hep6"
+    },
+    {
+      "name": "g_r532_mbpp_a6",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 100,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp6"
+    },
+    {
+      "name": "g_r532_lcb3m_a7",
+      "bank": "lcb3",
+      "n": 15,
+      "offset": 120,
+      "seed": "g-r529-lcb3",
+      "tag": "r532lcb3m7",
+      "bank_filter": "difficulty=medium"
+    },
+    {
+      "name": "g_r532_hep_a7",
+      "bank": "humanevalplus",
+      "n": 20,
+      "offset": 120,
+      "seed": "g-r529-he",
+      "tag": "r532hep7"
+    },
+    {
+      "name": "g_r532_mbpp_a7",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 120,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp7"
+    },
+    {
+      "name": "g_r532_hep_a8",
+      "bank": "humanevalplus",
+      "n": 16,
+      "offset": 140,
+      "seed": "g-r529-he",
+      "tag": "r532hep8"
+    },
+    {
+      "name": "g_r532_mbpp_a8",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 140,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp8"
+    },
+    {
+      "name": "g_r532_mbpp_a9",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 160,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp9"
+    },
+    {
+      "name": "g_r532_mbpp_a10",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 180,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp10"
+    },
+    {
+      "name": "g_r532_mbpp_a11",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 200,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp11"
+    },
+    {
+      "name": "g_r532_mbpp_a12",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 220,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp12"
+    },
+    {
+      "name": "g_r532_mbpp_a13",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 240,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp13"
+    },
+    {
+      "name": "g_r532_mbpp_a14",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 260,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp14"
+    },
+    {
+      "name": "g_r532_mbpp_a15",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 280,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp15"
+    },
+    {
+      "name": "g_r532_mbpp_a16",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 300,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp16"
+    },
+    {
+      "name": "g_r532_mbpp_a17",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 320,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp17"
+    },
+    {
+      "name": "g_r532_mbpp_a18",
+      "bank": "evalplus",
+      "n": 20,
+      "offset": 340,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp18"
+    },
+    {
+      "name": "g_r532_mbpp_a19",
+      "bank": "evalplus",
+      "n": 11,
+      "offset": 360,
+      "seed": "g-r529-mbpp",
+      "tag": "r532mbpp19"
+    }
+  ]
+}
