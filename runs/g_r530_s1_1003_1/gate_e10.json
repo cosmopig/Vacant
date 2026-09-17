@@ -1,0 +1,26 @@
+{
+  "gate": "E-10",
+  "rate_abort": 0.2,
+  "per_arm": {
+    "A-SOLO": {
+      "n": 5,
+      "noop": 0,
+      "rate": 0.0
+    },
+    "A-CONF": {
+      "n": 4,
+      "noop": 0,
+      "rate": 0.0
+    },
+    "A-GATE": {
+      "n": 5,
+      "noop": 0,
+      "rate": 0.0
+    }
+  },
+  "arms_over_threshold": [],
+  "offending_cells": [],
+  "ok": true,
+  "reason": null,
+  "honest_bound": "20% 是 Fable 2026-09-14 訂的約定，不是從任何實測推出來的門檻；引用時要跟著講。"
+}

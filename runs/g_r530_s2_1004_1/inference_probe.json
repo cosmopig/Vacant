@@ -1,0 +1,34 @@
+{
+  "api": "http://100.86.226.21:1234/v1/chat/completions",
+  "model": "gemma-4-12b-it-qat",
+  "reasoning_effort_sent": "none",
+  "error": null,
+  "short": {
+    "latency_ms": 3155,
+    "prompt_tokens": 175,
+    "completion_tokens": 17,
+    "reasoning_tokens": 0,
+    "finish_reason": "tool_calls",
+    "tool_calls_n": 1,
+    "server_model": "gemma-4-12b-it-qat"
+  },
+  "long_ctx": {
+    "latency_ms": 45887,
+    "prompt_tokens": 9175,
+    "completion_tokens": 17,
+    "reasoning_tokens": 0,
+    "finish_reason": "tool_calls",
+    "tool_calls_n": 1,
+    "server_model": "gemma-4-12b-it-qat"
+  },
+  "reasoning_tokens": [
+    0,
+    0
+  ],
+  "reasoning_tokens_all_zero": true,
+  "long_ctx_ms_per_1k_prompt": 5001.3,
+  "long_ctx_prompt_tokens": 9175,
+  "long_ctx_completion_tokens": 17,
+  "prefill_ms_per_1k_prompt": 4748.0,
+  "note": "prefill 吞吐是**實驗條件**不是實作細節：多輪工具迴圈每通都把整段對話當 prompt 重送，而那會讓 `budget_wall` 在兩台上咬到不同的地方。⚠ 本欄量的是**暖快取**（多輪迴圈的前綴本來就是暖的）；冷的那一通會慢一個量級（2026-09-14 去快取實測：冷 1003≈1509／1004≈481、暖 1003≈144／1004≈54–102、生成 1003≈22.6／1004≈14.4 ms/tok）。⚠ **不准**拿它解釋逐通延遲的差別——逐通延遲由**生成長度**決定（smoke9 兩塊的 corr(latency, completion) 都在 +0.98 以上）。"
+}

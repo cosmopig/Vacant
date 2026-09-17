@@ -1,0 +1,72 @@
+{
+  "name": "r531_precheck",
+  "decision": "DECISION_20260915_R531_PUBLIC_BENCH_PLAIN_VS_VACANT_PREREG.md",
+  "launcher": "ops/gain/r530/run_r530.py",
+  "arms": "A-SOLO",
+  "backend": "unshare",
+  "request_timeout_s": 900,
+  "reasoning_effort": "none",
+  "model": "gemma-4-12b-it-qat",
+  "gauge_scope": "none",
+  "gauge_scope_note": "R531 的 E-3 走 `ops/gain/r530/gauge.py --task-set <r531 ids>`（本檔外，發射前跑一次並落盤），**不是** `gauge_r530.py --check`——後者量的是 `ops/gain/r530/bank/`（R530 自己的題庫資料），與 R531 的 templates/hidden/gauge 無關。寫 `bank` 會讓 R531 的發射去驗 R530 的題庫，綠了也不代表 R531 的量具過。",
+  "tool_protocol": "native",
+  "sandbox_uid": 65534,
+  "sandbox_gid": 65534,
+  "backends": {
+    "http://100.86.226.21:1234/v1/chat/completions": {
+      "host": "1004",
+      "streams": 4,
+      "note": "R531 只用 1004。1003 被人類的 qwen 27B 佔著，一格都不碰。"
+    }
+  },
+  "blocks": [
+    {
+      "name": "g_r531_pre_1",
+      "tasks": [
+        "pba_01_lcb2728",
+        "pbc_02_sseval12",
+        "pbd_03_concerts"
+      ],
+      "seed": "g-r531-pre",
+      "tag": "r531pre1",
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "note": "污染預檢（A-SOLO 一輪）；runs/_probe 底下，不是證據"
+    },
+    {
+      "name": "g_r531_pre_2",
+      "tasks": [
+        "pba_02_lcb2730",
+        "pbc_03_sseval15",
+        "pbf_01_ebench19"
+      ],
+      "seed": "g-r531-pre",
+      "tag": "r531pre2",
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "note": "污染預檢（A-SOLO 一輪）；runs/_probe 底下，不是證據"
+    },
+    {
+      "name": "g_r531_pre_3",
+      "tasks": [
+        "pba_03_lcb2754",
+        "pbd_01_olitaire",
+        "pbf_02_bench273"
+      ],
+      "seed": "g-r531-pre",
+      "tag": "r531pre3",
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "note": "污染預檢（A-SOLO 一輪）；runs/_probe 底下，不是證據"
+    },
+    {
+      "name": "g_r531_pre_4",
+      "tasks": [
+        "pbc_01_asseval0",
+        "pbd_02_utations",
+        "pbf_03_bench310"
+      ],
+      "seed": "g-r531-pre",
+      "tag": "r531pre4",
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "note": "污染預檢（A-SOLO 一輪）；runs/_probe 底下，不是證據"
+    }
+  ]
+}

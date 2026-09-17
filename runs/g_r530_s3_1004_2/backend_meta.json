@@ -1,0 +1,59 @@
+{
+  "backend": "unshare",
+  "available": true,
+  "unavailable_reason": null,
+  "platform": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+  "memory_bytes": 536870912,
+  "network_isolated": true,
+  "write_confined": true,
+  "probe_detail": {
+    "net": {
+      "rc": 0,
+      "stdout": "NET_BLOCKED OSError",
+      "stderr": "",
+      "timed_out": false
+    },
+    "escape": {
+      "rc": 0,
+      "stdout": "ESCAPE_BLOCKED PermissionError",
+      "stderr": "",
+      "timed_out": false
+    },
+    "inside": {
+      "rc": 0,
+      "stdout": "WROTE_INSIDE",
+      "stderr": "",
+      "timed_out": false
+    },
+    "repo_visible": {
+      "rc": 0,
+      "stdout": "REPO_ABSENT",
+      "path": "/home/user1/vacant/Vacant"
+    }
+  },
+  "honest_bound": "只有網路是真的隔離（net namespace）；檔案端只有 unix 權限與 cwd 慣例，**擋門不是隔離**（預註冊 §三-3 S2 逐字）。",
+  "write_works_inside": true,
+  "repo_hidden_from_sandbox": true,
+  "requested": "unshare",
+  "tried": [
+    {
+      "backend": "unshare",
+      "available": true,
+      "reason": null
+    }
+  ],
+  "use_sudo_bwrap": false,
+  "sandbox": "unshare",
+  "sandbox_uid": 65534,
+  "sandbox_gid": 65534,
+  "inference": {
+    "reasoning_effort_sent": "none",
+    "reasoning_tokens": [
+      0,
+      0
+    ],
+    "reasoning_tokens_all_zero": true,
+    "prefill_ms_per_1k_prompt": 3558.7,
+    "note": "prefill 吞吐是**實驗條件**不是實作細節：多輪工具迴圈每通都把整段對話當 prompt 重送，而那會讓 `budget_wall` 在兩台上咬到不同的地方。⚠ 本欄量的是**暖快取**（多輪迴圈的前綴本來就是暖的）；冷的那一通會慢一個量級（2026-09-14 去快取實測：冷 1003≈1509／1004≈481、暖 1003≈144／1004≈54–102、生成 1003≈22.6／1004≈14.4 ms/tok）。⚠ **不准**拿它解釋逐通延遲的差別——逐通延遲由**生成長度**決定（smoke9 兩塊的 corr(latency, completion) 都在 +0.98 以上）。"
+  }
+}

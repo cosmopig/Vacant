@@ -1,0 +1,4166 @@
+
+PAGE 1
+#GetTheFutureYouWant
+Rise of agentic AI
+How trust is the key 
+to human-AI collaboration
+PAGE 2
+Table of 
+contents
+2
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 3
+3
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 4
+Executive 
+summary 
+AI agents constitute one of the fastest-emerging technological 
+trends (see page six,“What are AI agents and what is agentic 
+AI?”). Unlike traditional AI applications, which often act as 
+tools focusing on narrow, predefined tasks, agentic AI can 
+manage and execute end-to-end processes with less human 
+intervention, evolving from tools to team members and 
+marking a new era in enterprise productivity, efficiency, and 
+growth. 
+Based on our research findings and current adoption 
+trajectories, we project that AI agents could generate up to 
+$450 billion in economic value through revenue uplift and 
+cost savings across surveyed countries by 2028. Competitive 
+momentum is clearly building: 93% of leaders believe that 
+those who successfully scale AI agents in the next 12 months 
+will gain an edge over industry peers. 
+Already, 14% of organizations have implemented AI agents 
+at partial (12%) or full scale (2%) and nearly one-quarter 
+(23%) have launched pilots, while another 61% are preparing 
+for or exploring deployment. As these numbers showed a 
+remarkably fast adoption, we reconfirmed the responses of a 
+majority of survey respondents (900 out of 1500). This exercise 
+showed results similar to the original data, confirming strong 
+adoption numbers. In the near term, AI agents are expected to 
+see most extensive adoption in customer service, IT, and sales, 
+expanding into operations, R&D, and marketing over the next 
+three years. But expectations for highly autonomous systems 
+remain limited. Our survey shows that, in 12 months, only 15% 
+of all business processes are expected to operate at Level 3 
+(semi-autonomous) to Level 5 (fully autonomous). This share 
+is expected to grow to 25% by 2028. Most AI agents currently 
+operate at low levels of autonomy, primarily as simple agents 
+or semi-autonomous agents. Notably, AI agents can deliver 
+tangible value even at intermediate levels of autonomy. 
+Moreover, trust in AI agents is declining. Only 27% of 
+organizations express trust in fully autonomous AI agents, 
+from 43% 12 months ago. This is potentially a reflection of 
+business reality taking hold after the initial enthusiasm and 
+overconfidence in agentic AI capabilities. Ethical concerns 
+around AI, such as data privacy, algorithmic bias, and the 
+“AI black box,” are prevalent, but few organizations act 
+4
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 5
+Executive 
+summary 
+decisively to mitigate them. Furthermore, only half claim 
+sufficient knowledge of AI agent capabilities, and even 
+fewer can pinpoint where agents outperform traditional AI 
+or automation. Equally worryingly, fewer than one in five 
+organizations report high levels of data-readiness, and over 
+80% lack mature AI infrastructure, significantly limiting their 
+ability to scale agentic systems effectively.
+Nonetheless, in 3 years, organizations expect to have AI agents 
+as members within human-supervised teams. This means that 
+AI agents must be seen not as tools, but as part of the team. 
+Such human-AI agent collaboration enhances the value of AI 
+agents, driving transparency, trust, and positive outcomes. But 
+61% of organizations report rising employee anxiety about the 
+impact of AI agents on their employment prospects, and over 
+half believe AI agents will displace more jobs than they create. 
+Despite this, fewer organizations are prioritizing reskilling or 
+workforce restructuring.
+To harness the full potential of AI agents, organizations must 
+move beyond the hype and work toward:
+• Redesigning processes to deploy AI agents effectively and 
+reimagining business models
+• Transforming the workforce and organizational structure to 
+fully onboard a new, agentic workforce as team members
+• Striking the right balance between agent autonomy and human 
+involvement 
+• Strengthening data and technological foundations to scale AI 
+agents
+• Ensuring AI agents operate within defined scope of 
+execution,and remain traceable and explainable to earn trust 
+• Developing and integrating ethical AI that address the risks 
+posed by autonomous AI agents.
+5
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 6
+Jason Gelman
+Director of product 
+management, Vertex AI,
+Google Cloud
+Itai Asseo 
+Head of Incubation and Brand 
+Strategy (AI Research), 
+Salesforce
+Anna Kopp 
+Digital Lead Germany,
+Microsoft
+Lynn Comp                                    
+Head of Global Sales and GTM 
+(AI Center of Excellence),
+Intel
+Eric Pace
+Head of AI, 
+Cox Communication 
+Joji Philip
+Director AI/ML Products,
+Ericsson
+We’d also like 
+to thank the 
+many industry 
+executives who 
+shared their 
+valuable insights 
+with us.
+6
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 7
+Susan Emerson
+Senior VP, AI Product,
+Salesforce
+Dorit Zilbershot
+GVP, AI Experiences & Innovation,  
+ServiceNow
+Dr. Walter Sun
+SVP, Global Head of AI,
+SAP
+Vishal Singhvi
+Director, Strategic 
+Initiatives – Gen AI,
+Microsoft
+Dr. Suraj Srinivasan,
+Philip J. Stomberg Professor of 
+Business Administration and Chair 
+of the MBA Elective Curriculum, 
+Harvard Business School
+Joji Philip
+Director AI/ML Products,
+Ericsson
+Preetha Sekharan
+VP, Digital Incubator 
+(Applied AI and 
+Transformation),  
+Unum
+Daniel Vassilev
+Co-Founder and Co-CEO, 
+Relevance AI
+7
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 8
+Who should 
+read this report 
+and why?
+This report offers an overview of the transformative 
+potential of agentic AI and AI agents for large 
+organizations across all industries and sectors. It 
+is primarily intended for senior executives in data 
+and AI functions, and those in strategy, finance, IT, 
+innovation, and risk and compliance, among others, 
+who are involved in the implementation of Gen AI or 
+agentic AI at their organization.
+The report will help business executives identify the 
+potential of agentic AI, assess the level of trust and 
+collaboration between humans and AI agents, and 
+the risks and challenges of implementing and scaling 
+agentic AI. The report draws on the comprehensive 
+analysis of a survey of 1,500 leaders (director level 
+and above) across 14 countries. Finally, it offers 
+recommendations for business leaders to accelerate 
+their organizations’ agentic AI journeys.
+8
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 9
+AI agents are programs/platforms/software that are 
+connected to the business environment with a defined 
+boundary, make decisions autonomously, and act to achieve 
+specific goals with or without human intervention. With the 
+latest advances in reasoning AI models, AI agents are able to 
+break down tasks, “reason” through potential pathways to 
+find solutions to the given problem, try those solutions, and 
+present successful outcomes.  
+ 
+Examples of AI agents include: OpenAI’s Operator, Devin, 
+Manus, Google Gemini Agent Mode, Runner H by H Company. 
+• Operator by OpenAI can handle a wide range of repetitive 
+browser tasks such as filling out forms, ordering groceries, 
+booking restaurant tables, etc., based on user preferences.1  
+• Devin, branded as the AI software engineer, is capable of 
+automating software development tasks such as code 
+generation, debugging, and deploying code with minimal 
+human input.2
+• Manus is a general AI agent that handles various tasks in 
+work and life such as creating personalized travel itineraries, 
+analyzing documents, conducting research, and generating 
+content and codes.3    
+What are AI 
+agents and 
+agentic AI?
+Examples of AI/Gen AI assistants include: Microsoft 
+Copilot, Google Gemini, ChatGPT, Le Chat by Mistral AI.  
+ 
+Agentic AI is a broader term and includes systems, 
+platforms, practices, tools, and technologies that 
+enable agents to function. Unless otherwise 
+specified, the two terms are used interchangeably in 
+this survey. 
+ 
+Agentic systems have been around since well before 
+the current AI boom and can be built using both AI 
+and non-AI technologies. Recent advances in AI, 
+language models, and reasoning capabilities have 
+driven the rise of agentic AI systems.
+9
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 10
+AI agents Key features AI/Gen AI assistants
+High autonomy and agency: operate independently
+Take prompted and unprompted action to achieve 
+speciﬁed goals within a workﬂow, handling 
+complex tasks requiring specialized capabilities
+Anticipate needs and take initiative
+Learn and adapt continuously; often with 
+long-term memory and contextual awareness
+Can be built on AI or non-AI systems; does not 
+necessarily use Gen AI or LLMs
+Interact with external and internal data, tools, and 
+systems in real time; better positioned to handle errors
+Incapable of operating autonomously
+Take actions based on user prompts and predeﬁned logic; 
+handling discrete sub-tasks (generate content, images, 
+code, etc.)
+Respond to explicit prompts 
+Pre-trained, with limited to no real-time learning or 
+long-term memory retention
+Built on AI/ML, mainly uses pre-trained data
+Cannot perform real-time interactions; can access 
+external tools like web search when enabled and have  
+limited error-handling capabilities
+Manage the entire campaign lifecycle autonomously – customize 
+content to audience, test creatives, launch campaigns, dynamically 
+adjust targeting and messaging based on real-time performance
+Generate campaign briefs based on direct user prompts and 
+existing templates
+Autonomy
+Action
+Proactivity
+Learning ability
+Underlying tech
+Interactivity
+Example
+How do AI agents differ from AI/Gen AI assistants?
+NB: Not all AI agents are subject to the conditions listed above. For example, while AI agents are often characterized by autonomy, they 
+can also operate semi-autonomously.
+Source: Capgemini Research Institute analysis.
+In essence, AI agents 
+can proactively manage 
+and execute end-to-
+end processes with less 
+human intervention, 
+whereas AI/Gen AI 
+assistants often act 
+as tools focused on 
+discrete, predefined 
+tasks based on explicit 
+prompts.
+10
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 11
+Why the hype? 
+AI agents are at the center of the global technology narrative 
+in 2025. We at the Capgemini Research Institute flagged AI 
+agents as a top technology trend for 2025.4  
+• The past year has marked a turning point in automated 
+software agents, with breakthroughs in natural language 
+processing (NLP) dramatically expanding their capabilities 
+not only to answer questions, but to plan, collaborate, 
+reason, execute tasks, and improve continuously. 
+• Figure 1 shows that the length of tasks (measured by 
+how long it takes a human to complete them) for which 
+AI agents can achieve an 80% success rate has been 
+doubling roughly every 213 days – indicating 
+exponential growth in model capabilities.5
+• AI had already surpassed human performance across 
+many tasks, including several previously challenging 
+benchmarks, with only a few exceptions. Even in those 
+areas, the performance gap between AI and humans is 
+shrinking rapidly.6
+• Tech giants including Google, Microsoft, Amazon Web 
+Services (AWS), and OpenAI, and enterprise solution 
+providers such as Salesforce, ServiceNow, and SAP are 
+racing to roll out AI agent platforms, tools and 
+frameworks. These range from orchestration protocols, 
+plug-and-play agents that integrate directly with 
+enterprise systems like CRM and ERP, to agent studios for 
+building customized agents. 
+• As Gen AI models mature and competition intensifies, cost 
+dynamics are also shifting.7
+• The inference cost for a system performing at the level 
+of GPT-3.5 dropped over 280-fold between November 
+2022 and October 2024 (see figure 1), while hardware 
+costs are down 30% annually and energy efficiency has 
+improved by 40% each year.8  
+• Open-source models are closing the gap with closed 
+models – for instance, DeepSeek’s entry into the AI 
+space sparked significant concern among investors in 
+rival technologies, as it demonstrated impressive 
+capabilities while reportedly using fewer resources and 
+lower costs than traditional AI models.9  
+•  At geopolitical level, advancements in agentic AI are not 
+only a matter of innovation, but one of national capability 
+and influence. A recent report suggests that the AI ‘space 
+race’ could reshape the world order.10 Discussions about 
+data and model sovereignty are also prominent, as some 
+countries consider the implications of relying on external 
+providers for critical infrastructure.
+What was once a theoretical construct is quickly becoming a 
+cornerstone of digital transformation. Looking ahead, AI 
+agents may soon be ubiquitous and indispensable, as mobile 
+apps are today.
+AI agents are one of the top technology 
+trends of 2025
+11
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 12
+Model capability to handle longer tasks is rising expontentially
+davinci-002 (GPT-3)
+gpt-3.5-turbo-instruct
+GPT-4 0314
+GPT-4 1106
+GPT-4o
+o1-preview
+o1 Claude 3.5 Sonnet (Old)
+Claude 3.5 Sonnet (New)
+Claude 3.7 Sonnet 
+0
+200
+400
+600
+800
+1000
+1200
+1400
+2019 2020 2021 2023 2024 2025 2027 2028
+Model release date
+Length of tasks AI agents have been able to complete 
+autonomously with 80% success rate
+10
+1
+0.1
+Sep-2022 Jan-2023 May-2023 Sep-2023
+Publication date
+Inference price across select benchmark, 2022-24Inference price (in USD per million tokens - log scale)
+Jan-2024 May-2024 Sep-2024 Jan-2025
+GPT-3.5 level+ in multitask 
+language understanding (MMLU)
+GPT-4 level+ in code generation 
+(HumanEval)
+GPT-4o level+ in PhD-level science 
+questions (GPQA Diamond)
+GPT-4o level+ in LMSYS Chatbot 
+Arena Elo
+GPT-3.5
+GPT-4-0314
+GPT-4o-2024-05
+Llama-3.1-Instruct-8B
+Claude-3.5-Sonnet-2024-06
+DeepSeek-V3
+Gemini-1.5-Flash-8B
+Phi 4
+Figure 1.
+Model capabilities are rising exponentially, while inference costs have dropped over 100x in the past couple of years
+Source: (i) Derived from Arxiv, “Measuring AI Ability to Complete Long Tasks,” March 2025.
+(ii) Stanford University HAI, Artificial Intelligence Index Report 2025, 2025; Epoch AI, 2025; Artificial Analysis, 2025.
+12
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 13
+E The above iterations can be repeated in different 
+combinations and until the stated goals have been 
+achieved. The agent utilizes its memory to maintain 
+context, learn from previous iterations or past 
+experiences, and improve its performance over time.
+F Agent-to-Agent (A2A) protocols help collaboration 
+between agents, while Model Context Protocol (MCP) aids 
+in accessing external tools. MIT’s Project NANDA is an 
+initiative to develop the foundations of the Internet of AI 
+Agents. 
+Although AI agents could be set up to operate autonomously, 
+they still function within the scope of execution. Critical 
+situations will require human oversight or decision-making. 
+ 
+For more details on these terms, please see the glossary in 
+the appendix.
+How do AI agents work?
+A AI agents interact with their environment and receive 
+triggers, inputs, or goals from users. 
+B By employing reasoning models, they can break down the 
+goals into specific actions or steps and prioritize them.
+C For task execution, AI agents may access internal data and 
+enterprise tools systems (such as knowledge bases and 
+customer relationship management [CRM]), external tools 
+(such as web search, third-party databases), and interact 
+with other AI agents, or request clarification from users. 
+D In a multi-agent system, an “orchestrator” agent can break 
+down the larger problem into smaller pieces to be tackled 
+using agents that leverage small language models, 
+significantly reducing the cost and time needed to arrive at 
+an outcome. Guardrails enforce ethical, operational, and 
+safety standards.
+13
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 14
+Figure 2.
+Anatomy of a typical AI agent workflow
+Source: Capgemini Research Institute analysis.
+Note: Short-term memory for in-context learning. Long-term memory enables the agent to retain and recall vast information over extended periods, leveraging an external vector store for fast retrieval.
+Other AI agents
+Guardrails
+Environment Human input
+The Internet of AI agents 
+(e.g., NANDA)
+Orchestration
+AI agent
+Agent to Agent 
+protocol 
+(e.g., Google’s A2A)
+Guardrails
+Guardrails
+Human-AI
+Collaboration
+Action plan
+Agent to services protocol 
+e.g., Model Context Protocol (MCP)
+Execute
+Memory
+(Short- and long-term)
+Internal data and tools
+(Knowledge bases, enterprise systems, etc.) External tools
+(Third-party databases,
+web search, etc.)
+Reasoning and chain 
+of thought
+(APls, sensors,
+real world)
+Human coworker
+Human coworker
+A
+BE
+DF
+C
+14
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 15
+What are the levels of 
+autonomy in AI agents?  
+Maturity level Capabilities Human involvement
+Level 0: No agent involvement
+Level 1: AI-assisted (automation ﬁrst)
+Level 2: AI-augmented decision-making
+Level 3: AI-integrated (process-centric AI)
+Level 4: Independent operation 
+(multi-agent AI teams)
+Level 5: Fully autonomous 
+(self-evolving systems)
+Fully handled by humansNo additional capabilities
+Deterministic systems that always produce 
+identical outputs, given identical inputs
+High human involvement; AI assists with 
+predeﬁned workﬂows
+AI agents support decision-making, provide 
+recommendations, and enhance workﬂows
+Semi-autonomous AI agents handle 
+complex tasks 
+AI agents coordinate tasks and make decisions 
+to execute processes within strategic 
+boundaries and escalate when needed
+Fully autonomous execution of processes 
+towards a speciﬁed goal within the 
+deﬁned scope
+Retains human control; AI aids in optimizing 
+insights and processes
+Human delegates authority in speciﬁc areas to the AI 
+agents but is actively involved in management
+Human delegates authority to AI agents, and the AI agents 
+escalate to the human when it requires intervention
+Human fully delegates execution authority to the AI agent, 
+the only expected involvement by humans is for goal setting 
+and monitoring, compliance and strategic governance  
+We propose a six-point scale for the level of autonomy of AI 
+agents – from Level 0 (No autonomy) to Level 5 (Full 
+autonomy). This is modeled after the well-established 
+autonomy levels of autonomous vehicles, as well as the 
+autonomy levels of autonomous networks in telecom as 
+defined by TM Forum – a global telecom industry association.
+Levels of autonomy in AI agents
+Source: Capgemini Research Institute analysis.
+15
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 16
+01
+By 2028 AI agents 
+could generate $450 
+billion 
+16
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 17
+Our survey and analysis reveals that AI 
+agents could generate around $450 billion 
+in total economic value in the 14 countries 
+surveyed by 2028.
+• This includes both revenue uplift and cost savings driven 
+by implementation of semi- to fully autonomous AI 
+agents (Level 3 or higher autonomy). Figure 3 highlights 
+several areas that will see these benefits.
+• We assume that organizations with scaled 
+implementation of AI agents will realize 50% of 
+potential benefits and the remaining organizations will 
+realize 10% of potential benefits.11
+• Organizations with scaled implementation are 
+projected to generate around $382 million (2.5% of 
+annual revenue) on average over the next three years, 
+while we expect others to generate around $76 million 
+(0.5% of annual revenue). This applies to an average 
+organization with $15 billion in annual revenues.
+• We expect that surveyed organizations will collectively 
+achieve $19 billion in gains over the next 12 months, 
+with this figure projected to increase to $92 billion by 
+the third year.
+• If all organizations in the countries surveyed, regardless of 
+level of implementation, achieve the anticipated benefits, 
+they could unlock economic value of $3.6 trillion by 2028.
+Over three in five organizations surveyed believe that agentic 
+AI has transformative potential. A substantial 93% anticipate 
+that organizations that have successfully scaled the 
+implementation of AI agents within the next 12 months will 
+achieve a competitive advantage. 
+93%
+believe that organizations that have successfully 
+scaled AI agents within the next 12 months will achieve 
+a competitive advantage
+17
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 18
+Figure 3.
+Agentic AI drives cost savings and revenue uplift
+Source: Capgemini Research Institute analysis.
+Joji Philip, Director, AI/ML Products at Ericsson, says, “AI 
+agents hold immense promise, but we’re still in the early 
+innings. Conservatively, we expect around 10% efficiency 
+gains, with optimistic projections reaching 25% – but large-
+scale validation is yet to come.”
+Eric Pace, Head of AI at Cox Communication, says, “We are 
+beginning to see measurable efficiency gains with AI agents 
+delivering a 30% or more improvement in structured 
+processes. For less standardized processes, though, the impact 
+varies widely, depending on the complexity of the work and 
+how effectively users engage with the technology.”
+Elevate
+Operational eﬃciency
+Boost
+Growth
+Shortens product testing cycles, accelerates decision-making process, loan 
+approvals, and claims processing, …
+Automates high volume tasks (document review, task prioritization, calendar 
+management, IT queries) – so human workers can focus on high-value tasks 
+(client interaction, strategic planning)…
+Standardizes workﬂows and outputs across teams, reduces manual errors, …
+Reduce cycle time
+Increase productivity
+Improve accuracy and consistency
+AI agents drive cost reduction and improve 
+operational outcomes, with 24/7 availability
+New protein structures, new molecular compound, drug discovery, new 
+material, scientiﬁc simulation, brain computer interfaces (neuroscience), …
+AI robots, autonomous cars, drones, AI wearables, energy optimizer, …
+Continuous marketing campaigns, 24/7 sales rep, commercial loan analysis 
+and agreement, recruitment, travel agent, coach, …
+More scientiﬁc innovation
+New products
+New services available 24/7
+AI agents can multiply knowledge and capability 
+of your team, delivering added value
+18
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 19
+To put our economic value estimate in context, we 
+benchmark it against estimates from several leading 
+organizations:
+• Goldman Sachs predicts that Gen AI will drive a 6.1% rise in 
+US GDP over the next decade.12 By 2028, this translates to 
+around $540 billion in the US. 
+• IDC forecasts that AI technologies overall will influence 
+3.5% of global GDP by 2030.13 By 2028, this implies an 
+impact of around $1.9 trillion globally. This encompasses 
+all AI technologies, including agentic AI.
+• MIT research estimates that a combination of AI 
+capabilities could automate around one-fifth (slightly over 
+20%) of value-added tasks.14 This compares well with our 
+estimate that, 20% of all processes on average will be 
+automated by AI agents at Level 3 or higher autonomy 
+over the next three years.
+While estimates of AI’s economic value vary significantly, 
+there is general agreement that agentic AI will have 
+significant impact. 
+Figure 4.
+AI agents present a $450 billion opportunity
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 organizations; Capgemini Research Institute analysis.
+2025–26 2026–27 2027–28 Total economic 
+potential for surveyed 
+organizations in three 
+years (2025-28)
+Total economic potential 
+for all organizations in 
+the surveyed countries 
+in three years (2025-28)
+19
+46
+92 157
+456
+Economic potential of agentic AI ($ billion)
+19
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 20
+The CIO/chief data and digital officer at a US consumer 
+health organization says: “AI agents have led to a 10–12% 
+improvement in productivity, saving around 10 minutes per 
+hour worked.”
+61%
+of organizations believe that agentic AI has 
+ transformative potential
+Eric Pace 
+Head of AI,
+Cox Communication
+“We are beginning to see measurable 
+efficiency gains with AI agents delivering a 
+30% or more improvement in structured 
+processes.” 
+20
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 21
+21
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 22
+02
+Adoption is underway 
+but organizations don’t 
+expect high autonomy 
+22
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 23
+Current state of adoption of AI agents
+Have started exploring 
+the potential 
+Considering experimenting with/deploying 
+in the near future (six to 12 months)
+Piloting some 
+initial use cases 
+Have implemented 
+at partial scale 
+Have implemented 
+at scale Not interested in exploring
+1%
+30%
+31%
+12%
+23%
+2%
+Figure 5.
+14% of organizations are already deploying AI agents partially or at scale
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,522 executives from corporate and data/AI functions.
+Question asked: Which of the following statement best describes the current state of adoption of AI agents in your organization? 
+Select one.
+Note: “Partially scaled implementation” refers to the phase following a successful pilot stage, where several AI agents are available to a 
+select group of users within a specific function, unit, or location. “At scale” refers to the phase following a successful partial scaling, where 
+several AI agents are generally available within a function or where multiple functions have agents that are generally available.
+More than one in three 
+organizations are piloting 
+or implementing AI 
+agents
+Currently, 23% of organizations have initiated AI agent pilot 
+projects, while 14% have progressed to partial or full-scale 
+implementation. About 30% are exploring AI agents, and 
+another 31% are preparing for experimentation or 
+deployment within the next six to 12 months. To verify the 
+data, we reconfirmed the adoption level of agentic AI with a 
+majority of survey respondents (900 out of 1500); we checked 
+that they were referring specifically to AI agents, rather than 
+AI/Gen AI assistants. This exercise showed similar results as 
+the original survey, confirming strong adoption numbers 
+globally and across sectors. More on this below.
+Last year (May–June 2024), 10% of organizations in our 
+research were using AI agents, signaling a leap of nearly 3.5x 
+in a year. Analysis of data on generative AI adoption from our 
+yearly research shows a similar pattern – at-scale deployments 
+of Gen AI surged from 6% in 2023 to 24% in 2024 (see Figure 
+6).15
+23
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 24
+Figure 6.
+The pace of AI agent adoption mirrors the rapid trajectory seen with generative AI
+Source: Capgemini Research Institute, Generative AI executive survey, April 2023, N = 800 organizations; Generative AI executive 
+survey, May–June 2024, N = 940 organizations; Agentic AI, April 2025, N = 1,500 organizations.
+*The 2024 data for AI agents’ “usage” stood at 10%. Assuming that “usage” includes organizations piloting and scaling AI agents, 
+and that their share in the population remains the same, we estimate that nearly 4% of organizations were scaling agentic AI 
+in 2024.
+A CIO at a US consumer health organization mentions: “We 
+have around 70 simple agents working on specific processes. 
+For example, agents that automate expense report approvals, 
+analyze bills and receipts, monitor inventory and trigger 
+replenishment, etc. The company started implementation a 
+year ago and has realized several early benefits.”
+Ericsson is pioneering a new prototype agent called “talk to 
+your network” (TTYN), which uses agentic AI to transform 
+how communication service providers (CSPs) interact with 
+their networks. AI agents can understand goals, predict 
+needs, and solve problems autonomously. They also enable 
+natural language interactions with telecom infrastructure.16
+Siemens is pivoting toward autonomous, orchestrated AI 
+agents in its industrial automation. The organization has 
+developed an orchestrator that acts like a digital craftsman, 
+deploying a toolbox of specialized agents to solve complex 
+tasks across the industrial value chain. These agents can 
+understand user intent, learn continuously, collaborate with 
+other agents (Siemens and third-party), and access external 
+tools autonomously17 .
+2023 2024
+Year
+Gen AI AI agents
+2025
+6%
+24%
+4%
+36%
+14%
+Organizations implementing at scale 
+(Full or partial)
+4x
+3.5x
+The pace of AI agent adoption mirrors the 
+rapid trajectory seen with generative AI
+24
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 25
+Current state of implementation of AI agents April 2025 May 2025 (recontacted)
+Not interested in exploring
+Have started exploring 
+1%
+30%
+31%
+23%
+12%
+2%
+1,500
+0%
+29%
+31%
+25%
+13%
+2%
+901
+Considering experimenting with/deploying in six to 12 months
+Piloting initial use cases
+Partially scaled implementation
+Fully scaled implementation
+Sample size
+Lynn Comp, Head of Global Sales and GTM (AI Center of 
+Excellence) at Intel, says: “AI agents represent a shift from 
+relying solely on LLMs [large language models] to using a 
+variety of specialized models for different tasks. AI has been a 
+mature field for decades, with various modes such as data 
+analytics, machine learning [ML], and deep learning. Now, AI 
+agents can integrate models to provide optimal solutions.”
+Anna Kopp, Digital Lead Germany at Microsoft, says: “We 
+have two types of agents: those built by specialists, which 
+users can access in Copilot and those created by users 
+themselves. We currently have multiple pre-built agents. 
+Examples include agents for tech support, employee self-
+service, sales and agents as writing coach, travel planner, etc.”
+We followed up with survey respondents to confirm whether 
+they were referring specifically to AI agents, rather than AI/
+Gen AI assistants. As shown in the table to the right, adoption 
+numbers appear consistent. 
+25
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 26
+Discussions with clients and industry experts sheds more 
+light on the nuances of agentic AI adoption: Many 
+organizations that claim to be implementing AI agents are 
+deploying solutions with limited autonomy. As many as 85% 
+of business processes are expected to be at low levels of 
+autonomy in the next 12 months (see Figure 11). These 
+systems operate with a high level of human involvement and 
+14%
+of organizations have progressed to partial or full-
+scale implementation
+oversight and are still largely supporting predefined 
+workflows, rather than acting independently. In essence, 
+these AI agents are slightly more advanced versions of AI/Gen 
+AI assistants (such as ChatGPT or Microsoft Copilot), focused 
+on tasks including content summarization, document review, 
+and code generation. 
+26
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 27
+Niraj Parihar
+CEO, Insights and Data Global Business Line,
+Capgemini
+“Many still assume AI agents must be fully autonomous to create value – but in 
+reality, they operate with varying levels of autonomy, interacting with humans and 
+systems to automate tasks iteratively. We need to recognize AI agents as part of 
+the team, not a replacement for it.”
+27
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 28
+The table below summarizes the top processes from some of the industries with high potential for agentic AI:
+Sector Industry examplesTop three processes where organizations 
+see high potential to implement AI agents
+Agents that monitor and improve autonomous and human-driven performance
+Analyze vehicle performance in diverse urban, weather, and traﬃc conditions 
+Provide AI-powered customer experiences tailored to individual preferences
+Financial services
+Retail
+Mercedes-Benz is one of the ﬁrst automakers to adopt Google Cloud’s newly launched 
+Automotive AI Agent, integrating it into their vehicles through the MBUX Virtual 
+Assistant system. Powered by Gemini and Vertex AI, the intelligent agent is designed to 
+facilitate natural, multimodal, and multilingual interactions, signiﬁcantly elevating the 
+in-car user experience.¹⁸
+Rolls-Royce is using ServiceNow’s AI Agent Orchestrator to coordinate multiple 
+specialized AI agents to work together toward a common business goal. This 
+orchestration would allow for end-to-end automation of complex workﬂows across 
+departments such as IT, HR, and customer service.¹⁹
+Capital One has deployed a concierge AI agent for its car-dealership clients to help 
+consumers obtain information on cars and book test rides.²⁰
+ANZ Bank is investigating the use of agentic AI to automate repetitive tasks, assist in 
+complex decision-making, and integrate with existing systems to improve eﬃciency, 
+and deliver more personalized services. ²¹
+Walmart is preparing to introduce AI-powered shopping agents that act as 
+personalized digital assistants for customers, oﬀering product discovery and 
+recommendations, cart management, order tracking, and reordering frequently 
+purchased items, etc.²²
+Fraud alert agents that validate fraudulent activity and manage responses
+Agents to monitor client portfolios in real time
+Oﬀer personalized investment strategies
+Agents that provide personalized shopping recommendations
+Optimize dynamic pricing 
+Monitor inventory in stores and warehouses to forecast demand and automate 
+stock keeping unit (SKU) replenishment
+Automotive
+28
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 29
+Sector Industry examplesTop three processes where organizations 
+see high potential to implement AI agents
+Life sciences 
+Drug discovery and development
+Clinical trial optimization
+Regulatory submissions
+Lab automation and experiment planning 
+Telecom
+NVIDIA partnered with Novo Nordisk and the Danish Centre for AI Innovation (DCAI) 
+to accelerate drug discovery through AI technologies. This collaboration leverages the 
+Geﬁon AI supercomputer, operated by DCAI and powered by NVIDIA’s DGX SuperPOD, 
+to create an AI factory capable of running large-scale drug discovery and agentic AI 
+workloads. Novo Nordisk will utilize NVIDIA’s platforms for agentic workﬂows and to 
+develop custom AI models that enhance early-stage research and clinical 
+development.²³ 
+SK Telecom is positioning its AI agent Aster (A*) as a cornerstone of future telecom 
+innovation. Aster is designed to be proactive and context-aware, capable of 
+anticipating user needs and assisting with everyday tasks such as suggesting recipes, 
+managing schedules, and even helping with shopping lists.²⁴
+Customer service automation
+Network optimization 
+Data-driven insights for customer behavior analysis and fraud detection
+Process automation 
+Manage the complexity of 5G networks
+62% prefer to partner with solution providers, such as Salesforce, SAP , and ServiceNow, and system 
+integrators to implement or tailor already available AI agents
+29
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 30
+Discussion with 
+Jason Gelman  
+Director of Product Management – Vertex AI, Google Cloud
+What are your views on the adoption 
+of AI agents and bridging the gap 
+between experimentation and 
+production?
+“There are significant challenges in taking agentic AI to 
+production but all major AI providers are converging on 
+the development of reasoning-capable agents, signaling 
+that the ecosystem is maturing. Google has released an 
+Agent Development Kit, and there are major 
+advancements in reasoning models and tool integration, 
+such as Gemini 2.5 Pro and Flash, which now enable 
+faster, more capable agents.” 
+ 
+What is your perspective on 
+improving reliability and safety of 
+AI models?
+“While humans are about 97% accurate in data-
+extraction tasks, AI is now approaching a similar 
+level. However, users expect AI to be nearly 
+infallible. Techniques such as retrieval-augmented 
+generation (RAG) and controlled-context windows 
+reduce hallucinations by anchoring model 
+responses in verified data.”
+What do you think about the growing 
+importance of open-source models in 
+the industry? 
+“The industry is moving toward a mixed landscape, 
+where both open and closed models coexist. Although 
+open-source models offer flexibility, they often come 
+with significant operational overheads, including 
+hardware setup, driver management, and ongoing 
+maintenance, making them impractical for many 
+organizations. As models become smaller and more 
+efficient, on-device AI will grow, further supporting 
+open-source adoption in specific contexts. However, for 
+cloud-based workloads, proprietary models still 
+dominate in performance, reliability, and total cost of 
+ownership [TCO].”
+30
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 31
+31
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 32
+Figure 7.
+Fewer than one in five organizations have a strategy and roadmap for implementing AI agents
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Question asked: Does your organization have a strategy and a roadmap dedicated to the implementation of AI agents/agentic 
+AI? Select one.
+Our survey found that 16% of organizations have developed a 
+strategy and roadmap to implement agentic AI (see Figure 7). 
+Our survey did not explicitly ask whether these strategies 
+(see Figure 7) were enterprise-wide, function-specific, or part 
+of the organization’s data and AI strategy. As a result, the 
+share of organizations with a group-wide or integrated AI 
+agent strategy is likely lower than reported.business 
+objectives.”
+Organizations with an existing or developing strategy 
+emphasize the following aspects of their strategic focus:
+• Establish clear business cases and criteria for AI agent 
+deployment
+• Define appropriate levels of autonomy and decision-
+making frameworks for AI agents
+• Ensure robust data management and protection practices
+• Plan for scalability and expansion across business 
+functions
+• Implement performance monitoring and optimization. 
+The need for dedicated leadership to oversee AI agent 
+initiatives is also a priority, with 26% appointing new leaders 
+specifically for AI agents and 59% delegating this 
+responsibility to existing AI or Gen AI leadership. 
+Implementation strategy for AI agents
+Don't have a strategy, but have multiple 
+initiatives across functions to develop 
+innovative solutions that can be scaled up
+Currently formulating a strategy
+Finalized a strategy and are 
+preparing a roadmap for 
+implementation
+Strategy and roadmap are in place, and 
+are implementing agentic AI initiatives
+Don't have a strategy (either at 
+organizational or functional level)
+7%
+39%
+28%
+10%
+16%
+32
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 33
+Lynn Comp
+Head of Global Sales and GTM (AI Center of Excellence),  
+Intel
+“AI agents represent a shift from relying solely on LLMs [large language 
+models] to using a variety of specialized models for different tasks.”
+33
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 34
+Most (62%) prefer to partner with solution providers, such as 
+Salesforce, SAP, and ServiceNow, and system integrators to 
+implement or tailor AI agents that are already available as 
+part of those product suites. The ready availability of in-built 
+agents, pre-existing integrations with legacy systems, and 
+fluency of staff to use these tools likely contribute to the 
+preference.
+The hybrid approach is the second-most preferred method, 
+combining in-house development with external solutions to 
+balance customization and scalability. One-third (33%) also 
+Majority of organizations 
+prefer partnerships with 
+solution providers to 
+deploy AI agents
+prefer to develop proprietary AI agents. Criticality of processes, 
+convenience, ease of integration with existing platforms, 
+associated costs, and compliance all influence the decision of 
+whether to build or buy. Using a combination of off-the-shelf 
+agents, custom AI agents tailored to specific processes, and 
+embedded agents integrated into existing platforms offers 
+flexibility, optimized performance, and scalability.34 Prior to 
+forming partnerships, organizations should thoroughly evaluate 
+the vendor’s data sourcing, management practices, security 
+protocols, and adherence to industry standards to avoid legal 
+issues.
+PepsiCo is accelerating its digital transformation by integrating 
+Salesforce’s Agentforce, a platform of autonomous AI agents, 
+into its global operations. PepsiCo will utilize AI agents to 
+streamline critical operations, elevate customer service, and 
+boost efficiency thereby enabling sales teams to concentrate on 
+strategic growth and build stronger relationships with retailers. 
+This collaboration will allow PepsiCo to streamline GTM and B2B 
+processes and elevate customer service through harmonized data 
+and intelligent AI agents.35
+34
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 35
+Figure 8.
+Three in five organizations are looking to partner with solution providers and system integrators to 
+implementor tailor available AI agents
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 900 executives from data/AI functions. 
+Question asked: What is your organization’s current build vs. buy strategy for implementing agentic AI solutions? 
+Respondents were allowed to select multiple options.
+Cisco has partnered with Mistral AI, an AI model developer, 
+to enhance its customer experience (CX) offering through 
+agentic AI capabilities. This partnership intends to embed 
+AI agents into Cisco’s collaboration and contact-center 
+solutions. By using Mistral’s open-weight LLMs, Cisco could 
+enable real-time, intelligent interactions between 
+businesses and their customers.36
+Honeywell and Google Cloud have partnered to address 
+labor shortages and upskill workers in the industrial sector. 
+Honeywell’s Internet of Things (IoT) platform, Honeywell 
+Forge, will be integrated with Google Cloud’s Gemini AI on 
+Vertex AI, enabling AI agents to connect with industrial 
+assets, people, and processes. These agents will assist 
+engineers and technicians by automating tasks, speeding 
+up maintenance, and reducing project design cycles, and 
+will harness multimodal capabilities to process text, images, 
+video, and sensor data. 37
+Organizations' build vs. buy preferences for agentic solutions
+Partner with solution providers (e.g., SAP, Salesforce, 
+among others) and system integrators to 
+implement/tailor available AI agents
+Adopt a hybrid approach, combining in-house 
+development with external solutions to 
+balance customization and scalability
+Develop proprietary AI agents 
+entirely in-house 
+Buy oﬀ-the-shelf AI agents 
+Currently evaluating options, with 
+no clear development strategy 
+62%
+53%
+33%
+18%
+1%
+35
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 36
+Lynn Comp, Head of Global Sales and GTM (AI Center of 
+Excellence) at Intel explains:“Large enterprises, particularly 
+in regulated industries, are cautious, preferring to develop 
+AI agents internally, rather than relying on third-party 
+solutions. Since most AI agent platforms are still evolving, 
+organizations prefer internal control until the market 
+matures.” 
+Most (88%) data/AI executives express a preference for 
+utilizing these models in low-risk use cases that have lower 
+runtime costs but offer similar performance. However, nearly 
+half (49%) highlight that these models lack the capability to 
+address legal, regulatory, and privacy concerns. A further 
+38% adopt a neutral stance. Approaching half (45%) of 
+Europe-based executives indicate that they would consider 
+non-European solutions, provided they are hosted on Europe-
+based servers and all data is stored within Europe. 
+Consumption-based, platform-based, and license-based 
+models are the preferred pricing models among 
+organizations for agentic AI solutions.
+Figure 9.
+Over half of organizations prefer consumption-based pricing for AI models within AI agents
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 834 from data/AI executives whose 
+organizations prefer to buy agents or partner with solution providers to tailor AI agents.
+ 
+Question asked: What kind of pricing model would your organization prefer for agentic AI solutions? 
+Respondents were allowed to select multiple options.
+Preferred pricing models
+Consumption-based pricing (based on how much of a service 
+is used; e.g., price per token, no. of tokens handled)
+Platform-based pricing 
+(ﬂat amount for the entire platform)
+License-based pricing
+(pay per user/license)
+Tier-based pricing (cost of the application increases 
+as more features/capabilities are added)
+Outcome-based pricing (based on value 
+generated by the organization)
+55%
+43%
+37%
+33%
+17%
+36
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 37
+Over half of organizations prefer consumption-based pricing for AI models within AI agents
+Mark Oost
+Vice President, AI and Generative AI Group Offer Lead,  
+Capgemini
+“This wave of transformation is not about adding AI agents to workflows – it’s 
+about shifting from isolated use cases to end-to-end processes and rethinking 
+workflows entirely.”
+37
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 38
+Customer service, IT, and 
+sales could see greater 
+adoption of AI agents 
+Customer services and support, IT, and sales are the 
+functions where most executives predict that AI agents will 
+be actively performing at least one process or sub-process 
+daily within the next 12 months. These functions often 
+involve high volumes of interaction, require responsiveness 
+over precision, and depend on contextual, conversational 
+engagement. As a result, they operate effectively with non-
+deterministic, probabilistic agents that are context-aware 
+and highly adaptable. 
+The use of AI agents is expanding to operations, product 
+design, R&D, marketing, and finance, with expectations of 
+performing at least one process or sub-process daily within 
+the next one to three years.
+Dr. Suraj Srinivasan Philip J. Stomberg Professor of Business 
+Administration and Chair of the MBA Elective Curriculum, 
+Harvard Business School, explains: “The fastest wins are in 
+functions where processes are well-defined and outcomes 
+are known and measurable, like customer service and 
+sales. AI agents will also enhance creative processes. In 
+inherently creative functions like marketing, AI agents can 
+simulate synthetic personas, which, when validated with 
+real user data, can effectively mirror real people. In R&D, 
+agents can help design and test product prototypes, 
+create new molecular structures, and accelerate pace of 
+innovation.”
+The chief AI officer at a multinational engineering 
+organization says: “Our AI agents are evolving along 
+two key paths: externally, as intelligent advisors 
+helping technicians navigate complex machine manuals 
+and perform actions; and internally, transforming from 
+simple HR chatbots into proactive assistants that 
+handle tasks such as leave approvals and workflow 
+automation.” 
+ 
+Google launched Project Mariner, an advanced AI web-
+browsing agent developed by DeepMind that can buy 
+tickets, order groceries, or fill out forms on the internet. 
+By engaging in a conversation with the AI, users can 
+delegate these tasks entirely to it.38
+Crédit Agricole Bank Polska partnered with Deviniti to 
+enhance customer service efficiency by deploying an AI 
+agent. The agent performed smart classification, 
+emotional tone detection, automated responses, and 
+workflow automation. As a result, the bank achieved a 
+50% reduction in document-processing time; saved over 
+750 hours per month; improved customer satisfaction 
+and team morale; and accelerated the resolution of 
+complex cases.39
+Dr. Suraj Srinivasan
+Philip J. Stomberg Professor of Business
+Administration and Chair of the MBA Elective Curriculum,
+Harvard Business School
+“The fastest wins are in 
+functions where processes 
+are well-defined and 
+outcomes are known and 
+measurable, like customer 
+service and sales. AI agents 
+will also enhance creative 
+processes.”
+38
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 39
+Figure 10.
+Within the next three years, a large majority of organizations will have AI agents deployed in customer service, IT, and sales
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Question asked: Which functions will have one or more AI agents actively performing at least one or more processes / sub-processes on a daily basis?
+Business functions in which organizations expect AI agents to manage at least one process or sub-process daily
+55%
+28%30%
+31%56%
+33%51%
+31%47%
+36%39%
+33%36%
+33%29%
+33%30%
+28%
+28%
+25%
+27%23%
+21%
+22% 21%
+21%
+20%
+17%
+20%
+14%
+11%
+58%
+Average
+Customer services and support
+IT
+Sales
+Operations
+Marketing and communications
+Product design/ R&D/support
+Finance
+Manufacturing
+Logistics
+Human resources
+Risk management
+Corporate strategy
+Legal and compliance
+Sustainability
+In 12 months In 1-3 years
+39
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 40
+Vishal Singhvi, Director, Strategic Initiatives (Gen AI) at 
+Microsoft, says: “We see AI adoption unfolding in four 
+phases. First, organizations focus on internal productivity by 
+automating simple tasks with Gen AI. Next comes enhancing 
+CX through personalized, AI-powered interactions. The third 
+phase is where agentic AI automates workflows, with or 
+without human oversight. The final phase – still a couple of 
+years away – is the move toward scalable, general-purpose 
+AI across the enterprise.” 
+ 
+Susan Emerson, Senior VP, AI Product at Salesforce, says: 
+“Across industries, agentic AI is moving the opportunity 
+beyond productivity gains to fundamentally reinventing core 
+business processes to deliver measurable impact, 
+transformed customer experiences, and new operating 
+models.”
+Organizations don’t 
+expect high levels of 
+autonomy 
+Over the next 12 months, we expect AI agents with Level 3 
+autonomy or higher to manage 15% of processes and sub-
+processes in each business function. This will rise to 25% 
+within the next one to three years. Fully autonomous AI 
+agents (Level 5) are expected to handle around 4% of 
+business processes within three years. This level of autonomy 
+may apply to majorly well-scoped processes. While an 
+in-process human-in-the-loop may not be present in these 
+cases, strategic oversight is maintained through clearly 
+defined goals, scope of execution, and robust technological 
+guardrails to ensure safe and reliable execution.  
+ 
+Organizations do not foresee a significant increase in the 
+autonomy of AI agents. While organizations are not 
+prioritizing full autonomy, AI agents can still deliver significant 
+value at intermediate levels of autonomy. As a result, in the 
+next 12 months, we expect AI agents to make 6% of day-to-
+day decisions, increasing to 8% in one to three years. 
+Joji Philip, Director, AI/ML Products at Ericsson, says: “AI 
+agents are undeniably accelerating the telecom sector’s 
+journey toward higher levels of network autonomy. Based on 
+our prototypes and proofs of concept [PoC], we foresee it 
+reaching Level 3 or 4 autonomy within the next two to three 
+years. While full autonomy (L5) may still require caution due 
+to the critical nature of communication networks, the 
+trajectory is clear.”
+Susan Emerson, Senior VP, AI Product at Salesforce, says, 
+“Trust in agentic AI grows through experience. By starting 
+with human-in-the-loop models and observing consistent 
+accuracy, transparency, and adherence to guardrails and 
+instructions, organizations built the confidence to embrace 
+higher levels of autonomy for both internal employee and 
+external customer experiences.”
+Eric Pace, Head of AI at Cox Communication, says, “We’re 
+taking a measured approach to AI autonomy. While fully 
+autonomous agents hold promise, they’re not yet in 
+production at scale due to ongoing concerns around trust, 
+process, and system maturity. For now, most of our advanced 
+agentic systems remain in pilot or proof-of-concept stages, 
+with broader deployment planned as our confidence and 
+capabilities continue to grow.”
+58%
+of business functions are likely to have AI agents 
+handling at least one process or sub-process daily 
+within 3 years
+40
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 41
+A risk director at a large, global banking group says:“Today, AI 
+agents are adept at handling basic Level 1 and Level 2 
+queries. Soon, they’ll take on Level 3 interactions, such as 
+fraud detection. Long-term, we envision AI agents becoming 
+capable of managing even the most serious customer issues 
+autonomously.” 
+ 
+Much like autonomous vehicles or networks, moving to high/
+full autonomy (L4/L5) could be challenged by various factors, 
+including ethical, attitudinal, and regulatory issues. We 
+explore this in the following chapters.
+Figure 11.
+By 2028, one-quarter of business processes will be handled by AI agents with Level 3 or higher autonomy
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 600 executives from corporate functions.
+Question asked: How would you prefer to allocate tasks/processes within your business function in a human-agent team in 
+terms of autonomy? 
+*Figures may not sum to 100% due to rounding.
+25%
+of processes within a business function are expected 
+to be handled by AI agents with Level 3 or higher 
+autonomy by 2028
+In the next 
+12 months
+In the next 
+1–3 years
+45% 23% 17% 9% 4%
+15%
+2%
+30% 25% 21% 14% 7% 4%
+25%
+(No agent involvement
+in tasks/processes)
+Level 0 Level 1 Level 2 Level 3 Level 4 Level 5
+(Semi-autonomous 
+processes with some 
+human intervention)
+(Highly autonomous 
+processes; requires 
+strategic oversight)
+(Fully autonomous processes 
+with agents handling 
+end-to-end execution)
+41
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 42
+Function Industry examplesTop three processes where organizations 
+see high potential to implement AI agents
+Corporate strategy
+Market and competitive intelligence
+Scenario planning and decision-tree analysis
+Devising strategy and roadmap
+Financial services
+Marketing
+BlackRock has launched an AI platform named Asimov, marking a major 
+step in integrating AI agents into its core investment strategy and market 
+intelligence operations. Asimov is already operational within BlackRock’s 
+fundamental equity division and is leveraged for real-time market analysis, 
+competitor intelligence and scenario modeling.²⁵  
+Azumo builds autonomous agents that assist in strategic planning, 
+workﬂow automation, and cross-functional decision-making.²⁶
+Wells Fargo has deployed interacting AI agents (some built on 
+open-source frameworks like LangGraph) to re-underwrite 15 years of 
+archived loan documents and automate complex document analysis and 
+compliance checks.²⁷
+Wealthfront uses AI agents to automatically manage portfolio, optimize 
+tax strategies and adjust investments based on user goals.²⁸
+Shopify is integrating autonomous AI agents across its marketing and 
+operations to reduce human dependency and boost eﬃciency.²⁹
+Fintech ﬁrms Robinhood and Arta Finance are using AI agents for 
+investment research, enabling faster analysis of ﬁnancial data and 
+generation of investment insights.³⁰
+Financial planning and budgeting
+Fraud detection and compliance auditing
+Investment analysis and portfolio management
+Customer service and support
+Advertising, promotions, and content marketing
+Thought leadership/market research
+The table below summarizes the top processes from some of the corporate functions with high potential for agentic AI:
+42
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 43
+Function Industry examplesTop three processes where organizations 
+see high potential to implement AI agents
+Technology/IT/data
+Software code generation and testing
+Data management, quality, and reporting
+IT infrastructure and cybersecurity
+Innovation/R&D/design
+Microsoft has unveiled the GitHub AI Agent, a fully autonomous coding 
+assistant designed to streamline software development. This AI agent can 
+independently execute complex workﬂows and perform asynchronous 
+code testing.³¹
+ 
+World Economic Forum’s Centre for Cybersecurity is working with over 
+170 partners including those in manufacturing, oil and gas, and energy to 
+deploy agentic AI for cyber resilience. These AI agents autonomously 
+identify vulnerabilities, patch systems, and coordinate across networks to 
+prevent breaches.³²
+PTC Inc. and Microsoft are collaborating to help manufacturers 
+integrate AI agents across their value chains by developing a 
+multi-agentic model and enterprise data framework within Microsoft 
+Fabric. The agents would autonomously access and analyze data from 
+PLM (Product Lifecycle Management), ERP (Enterprise Resource 
+Planning), and MES (Manufacturing Execution Systems) and generate 
+insights and trigger actions across departments.³³
+Product design and prototyping
+Research and ideation
+Product testing and validation
+43
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 44
+Discussion with 
+Daniel Vassilev  
+Co-Founder and Co-CEO, Relevance AI (a low-/no-code  
+platform that builds AI agents and multi-agent teams)
+What is the potential of AI agents?
+“The agentic AI market could be a trillion-dollar 
+opportunity. AI agents resemble human systems more than 
+software systems. Properly trained and implemented, AI 
+agents can achieve human-quality work.”
+Could you highlight the benefits of 
+integrating AI agents with human 
+oversight?
+“Approvals, escalations, and collaboration between humans 
+and AI are key to successful deployment. Integrating AI with 
+human workflows drives better outcomes.”
+How should organizations decide 
+whether to “build” or “buy” AI agents?
+“Organizations should buy AI agents for internal process 
+automation to avoid the complexities and overheads of 
+building and maintaining them. They should build AI 
+agents for integrating into their products, using 
+engineering frameworks to avoid vendor lock-in. Building 
+high-performing agents requires significant expertise. 
+Non-technical teams often require approval processes 
+and interfaces, which adds complexity. All agents must 
+be autonomous, capable of making decisions and acting.” 
+What are your views on the 
+potential of AI agents?
+“Productivity will no longer be limited by labor 
+availability. AI agents will provide almost unlimited 
+capacity, constrained only by data-center size and 
+energy production.”
+44
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 45
+45
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 46
+Limited trust and knowledge 
+impede autonomous AI 
+adoption03
+46
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 47
+Trust in AI agents to 
+manage large enterprise 
+use cases is declining   
+Figure 12 below highlights that, while 23% of organizations 
+report relatively high trust in AI agents, most (60%) do not 
+fully trust AI agents to manage tasks and processes 
+autonomously. These trust levels appear similar to people’s 
+trust in self-driving vehicles – a recent study found that 13% 
+of US drivers would trust riding in self-driving vehicles, while 
+61% still report being afraid more than 54% who feared self-
+driving cars in 2021.40 Studies report that those already using 
+AI agents have trust issues: 47% believe they lack emotional 
+intelligence; 40% feel uncomfortable submitting 
+AI-generated work; and 34% consider AI output inferior to 
+manual output.41
+Stanford’s 2025 AI Index Report highlights that AI is past the 
+experimental stage, yet societal confidence in its safety, 
+fairness, and accountability remains fragile.42 According to 
+the report, in 2024 there was a three-percentage-point 
+decrease in those who trust organizations using AI to protect 
+their personal data, and a two-percentage-point decrease in 
+respondents’ trust that AI systems are unbiased and 
+discrimination-free. 
+In 2025, Uber drivers have voiced growing frustration and 
+distrust toward AI agents used by the company, particularly in 
+areas like deactivation, job allocation, and customer dispute 
+resolution. Many drivers reported being deactivated without 
+explanation, often based on algorithmic decisions or 
+customer complaints that were not properly investigated. 
+The appeals process, largely handled by in-app chatbots, left 
+drivers feeling powerless and financially vulnerable. 96% of 
+uber drivers said their deactivation was unfair.43
+Trung Nguyen, Machine Learning Lead at Jira AI, Atlassian, 
+says: “Building trustworthy AI agents means looking beyond 
+accuracy by evaluating hallucination rates, factual 
+reliability, and safety in handling sensitive content. 
+Continuous monitoring and user feedback loops are 
+essential, especially when direct access to user data is 
+limited.”
+Dr. Walter Sun, SVP, Global Head of AI at SAP, asserts “Trust is 
+a major hurdle. Businesses need confidence in AI systems 
+before granting them any level of autonomy. One way to 
+build trust is starting with what I call ‘read-only’ AI 
+implementations, where AI provides recommendations, but 
+humans make all final decisions.”
+Dr. Walter Sun
+SVP, Global Head of AI,
+SAP
+“Trust is a major hurdle. 
+Businesses need confidence in 
+AI systems before granting 
+them any level of autonomy. 
+One way to build trust is 
+starting with what I call 
+‘read-only’ AI 
+implementations, where AI 
+provides recommendations, 
+but humans make all final 
+decisions.”
+47
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 48
+Almost half (47%) of organizations in the implementation 
+phase report above average level of trust in AI agents, 
+compared with 37% that are still in the exploration phase. 
+Figure 12.
+60% of organizations do not fully trust AI agents 
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Question asked: On a scale of 1 to 7, where 1 = “Do not trust at all” and 7 = “Completely trust,” please rate your overall trust in 
+AI agents.
+Share of organizations that trust AI agents
+1 – Do not trust at all 4 – Neutral 7 – Trust completely
+0% 11% 19% 30% 23% 11% 6%
+This strong correlation between trust and 
+implementation confirms that trust plays a crucial 
+role in the adoption of AI agents.
+48
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 49
+Vice President, Data and AI Group Offer Leader, 
+Capgemini
+“Building trust in AI agents requires more than accuracy. It demands 
+transparency in decision-making, safeguards against unintended behaviors, 
+and clarity on human oversight.”
+Sergey Patsko
+49
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 50
+Figure 13.
+Nearly half of organizations implementing AI agents report above average level of trust in their abilities
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Note: Respondents rated their level of trust in AI agents on a scale of 1 to 7. Ratings of 1–3 indicate below average trust, 
+4 is average, and 5–7 represent above average trust.
+Share of organizations with their level of trust in AI agents, by current state of implementation
+Average
+31%
+32%
+37%
+27%
+30%
+44%
+33%
+20%
+47%
+Exploratory phase Pilot phase Implementation phase
+Below average level of trust
+Above average level of trust
+Moreover, trust is declining. In 2024, 43% of executives 
+expressed confidence in fully autonomous AI agents for 
+enterprise applications. However, this percentage has 
+decreased to 22% this year. Eroding trust hinders 
+organizations from granting increased control or autonomy 
+to AI agents. Figure 14 shows declining trust levels in agentic 
+AI across actions ranging from sending professional mails to 
+analyzing data. The decline in trust even as agentic AI 
+adoption is increasing hints that this lack of trust is born out 
+of experience rather than out of fear or uncertainty.
+22%
+of executives trust fully autonomous AI agents for 
+enterprise applications, down from 43% in 2024
+50
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 51
+Figure 14.
+Trust in AI agents has decreased since 2024
+Source: Capgemini Research Institute, Generative AI executive survey, May–June 2024, N = 1,031 executives; Capgemini 
+Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Question asked: What are your views on the application of AI agents in your organization? Rate on a scale of 1–7, where 1= 
+strongly disagree and 7= strongly agree, or unsure/don’t know. 
+Organizations are highly 
+concerned about ethical 
+and safety risks – but fail 
+to act    
+The lack of trust in AI agents is aggravated by ethical and 
+safety concerns, with nearly two in five executives believing 
+that the risks of implementing AI agents outweigh the 
+benefits.
+Organizations are acutely aware of risks, including escalating 
+privacy and security concerns; potential for unintentional 
+harm and bias; a lack of transparency in AI decision-making 
+(the AI “black-box” effect); and the desuetude of human 
+skills. These risks all stand against permitting higher levels of 
+autonomy. 
+The decline in trust is not limited to AI agents; it extends to AI 
+and Gen AI as well. Since 2023, concerns around Gen AI have 
+either increased or remained constant. Worries about bias in 
+Gen AI affected 68% of organizations in 2024, up from 36% in 
+2023.44,45 Despite being aware of these risks, many 
+organizations have yet to mitigate them. 
+Share of executives agreeing to the below statements
+43%
+27%
+64%
+50%
+64%
+52%
+71%
+57%
+50%
+57%
+39%
+52%
+41%
+63%
+47%
+We can trust a fully autonomous AI agent for 
+enterprise use, overall
+AI agents will signiﬁcantly improve customer 
+service, leading to improved satisfaction 
+AI agents would help me focus 
+on more value-added activities
+AI agents will help us drive higher levels 
+of automation in our workﬂows
+I would trust an AI agent to send a 
+professional email on my behalf
+The potential of AI agents to improve 
+productivity outweigh its risks
+I would trust an AI agent to analyze 
+and synthesize data for me 
+June 2024 April 2025
+51
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 52
+In a recent survey, nearly 48% of respondents expressed 
+concern about the ethical implications of deploying AI 
+agents. Trust and safety remain among the most significant 
+barriers to widespread adoption.46
+The heightened risk may also arise from a fragmented and 
+inconsistent AI regulatory landscape. There is no standard 
+definition across different jurisdictions. Emerging AI 
+regulations take various legal forms, including statutes, 
+executive orders, and expansions of existing regulatory 
+frameworks. Some are legally binding, while others are not; 
+some are sector-specific while others apply across sectors. 
+Some regulations are enforced, others serve merely as 
+guidelines.47
+The head of responsible AI and AI strategy at a UK-based 
+retail and commercial bank says: “We’re still in the 
+experimental phase with agentic AI, and meaningful ROI is 
+likely six to 12 months away. The risks are real, especially 
+the potential for cascading errors if one agent’s 
+hallucination is passed to another. In a regulated 
+environment like banking, the implementation of agents 
+demands caution, robust validation, and time.”
+Figure 15.
+Few organizations are actively mitigating the risk of implementing agentic AI
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions. 
+Question asked: 1. What are the top five primary risks associated while using AI agents? 2. Which of these risks does your 
+organization working on mitigating?
+Organizations' top concerns and mitigation plans
+34%
+51%
+29%
+48%
+28%
+48%
+24%
+46%
+18%
+43%
+19%
+39%
+22% 22% 20%
+39%
+23%
+38% 38% 38%
+Privacy 
+concerns
+Risk of 
+unwanted bias
+Skill 
+degradation
+Legal 
+risks
+Job 
+displacement
+Safety risks Lack of 
+transparency Lack of humility Overconﬁdence in 
+AI-generated output
+Design ﬂaws
+Share of organizations concerned about the risk Share of organizations taking active measures to mitigate the risk
+52
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 53
+Anne-Violaine Monnié
+“AI agents should be used to enhance humans’ ability to make decisions and 
+take actions, not to replace them. We need to keep humans in meaningful 
+control of AI agents.”
+Group AI Ethics Leader, 
+Capgemini
+53
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 54
+Half of organizations 
+have insufficient 
+knowledge of the 
+capabilities of AI agents    
+In addition to declining trust and escalating risk, half of 
+organizations state that gaps in knowledge significantly 
+impede their deployment of highly autonomous agents. 
+Furthermore, only one-third clearly comprehend where AI 
+agents should be preferred to Gen AI, AI/ML, or process 
+automation. This may result in suboptimal deployment and 
+underutilization of the technology.
+A chief AI officer at a federal governmental healthcare service 
+says: “Start by deciding whether you want to build or buy. 
+That determines your investment strategy and talent needs. 
+Don’t chase the ‘cool’ use cases. Focus on small, high-impact 
+wins that deliver real ROI with minimal effort. If you’re not 
+ready to invest in top-tier talent, don’t settle – go with third-
+party solutions instead. Success comes from aligning 
+investment, talent, and use case selection with clear 
+business value.”
+Figure 16.
+Only one-third of organizations understand where to employ AI agents 
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Organizations' understanding of AI agents
+Clear understanding of 
+where AI, Gen AI, and AI 
+agents are best applied
+Well aware of diﬀerence 
+between AI, Gen AI, and 
+AI agents
+Suﬃcient knowledge and 
+understanding of AI agents 
+and their capabilities
+53%
+39% 34%
+54
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 55
+Organizations fall 
+short of technology 
+readiness    
+Data readiness: 
+Fewer than one in five organizations report high 
+maturity in any aspect of data-readiness. Only 9% say 
+they are fully prepared in terms of data integration and 
+interoperability, while only 13% report strong readiness 
+in data monitoring and lifecycle management. Similarly, 
+maturity levels are low in data quality, availability, 
+volume, infrastructure, governance, and security. Many 
+organizations still face foundational hurdles to 
+effective AI deployment. Rashmi Shetty, Strategy & 
+Transformation, Digital Technology, Industrial Energy 
+Technology at Baker Hughes says, “Agentic AI holds 
+transformational potential—this could be the iPhone 
+moment for artificial intelligence. To seize this 
+opportunity, foundational elements must be in place: 
+robust processes, quality data, scalable infrastructure, 
+and the right talent. The real challenge lies in creating 
+a convergence of those elements so we can maximize 
+value for the organization.”
+Figure 17.
+Most organizations lack data readiness
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 900 executives from data/AI functions.
+Organizations rated their maturity on a scale from 1 to 7: 1–2 means very low, 3 is below average, 4 is average, 5 is above average, and 6–7 is very high.
+Note: 
+Data governance and security: Policies for data management, compliance, and protection against unauthorized access
+Data infrastructure: Robust storage and processing systems that can scale with data demands
+Data volume: Adequate amount of data to train and validate AI models
+Data quality and availability: Clean, accurate, and accessible data
+Data monitoring and lifecycle management: Tools for real-time data quality tracking and processes for data collection, storage, and deletion
+Data integration and interoperability: Ability to combine data from various sources and ensure seamless data exchange
+Share of organizations by level of maturity across the following dimensions
+Average
+Data governance and security
+Data infrastructure
+Data volume
+Data quality and availability
+Data monitoring and lifecycle management
+Data integration and interoperability
+Very low maturity Below average maturity Average maturity Above average maturity Very high maturity
+2% 15% 31% 34% 18%
+6% 24% 41% 29%
+16% 25% 36% 24%
+8% 31% 39% 22%
+4% 18% 34% 32% 13%
+1% 23% 35% 30% 10%
+5% 20% 37% 29% 9%
+55
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 56
+Franck GREVERIE
+“If your data isn’t ready for AI, your business isn’t ready for AI.”
+Chief Technology and Portfolio Officer,  
+Head of Global Business Lines,
+Capgemini
+56
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 57
+AI infrastructure maturity:  
+Over four in five organizations report low-to-medium 
+maturity across dimensions such as computing, integration, 
+orchestration, fine-tuning, and cybersecurity.
+A VP of data science and AI at a software development 
+organization highlights: “Enterprises face key challenges in 
+scaling AI, such as fragmented data silos hindering unified 
+decision-making, while limited system performance restricts 
+real-time insights. Trust and adoption depend on delivering 
+reliable, business-relevant outputs. And without high-
+quality data, even the best models fail.”
+Vishal Singhvi, Director, Strategic Initiatives (Gen AI) at 
+Microsoft, says: “Organizations that invest in strong data 
+foundations and effective change management are seeing 
+10%+ revenue uplift through agentic AI by expanding share 
+of wallet with existing customers and unlocking new market 
+segments.”
+Figure 18.
+Only one in five organizations has a mature AI infrastructure
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 900 executives from data/AI functions.
+The total may not equal 100% due to rounding.
+Share of organizations by level of AI maturity across the following dimensions
+Computing
+Integration
+Orchestration 
+Fine-tuning
+Cybersecurity
+Low maturity Average maturity High maturity
+26% 52% 22%
+32% 50% 18%
+35% 47% 18%
+29% 55% 16%
+41% 45% 14%
+28% 51% 20%
+Average
+82%
+of organizations report low-to-medium AI 
+infrastructure maturity
+57
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 58
+Susan Emerson
+“Trust in agentic AI grows through experience.”
+Joji Philip
+“Based on our prototypes and proofs of concept 
+[PoC], we foresee it reaching Level 3 or 4 
+autonomy within the next two to three years.”
+Senior VP, AI Product, 
+Salesforce
+Director, AI/ML Products
+Ericsson
+58
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 59
+Discussion with 
+Preetha Sekharan  
+VP, Digital Incubator – Applied AI and Transformation,  
+Unum (an American insurer)
+What are some of the use cases 
+currently being deployed in your 
+organization? 
+We prioritize high-impact use cases where AI can 
+deliver measurable value for our customers, 
+particularly in complex, people-intensive areas to help 
+our employees with routine tasks. We’re targeting 
+simple, transactional use cases to test feasibility and 
+build confidence. For our initial pilots, we’re focusing 
+on standardized processes with minimal variability to 
+help ensure smoother implementation and more 
+consistent outcomes. 
+ 
+What are the major challenges in 
+implementing AI agents? 
+The biggest challenge is setting guardrails and deploying 
+them consistently across our organization. Another major 
+challenge is the lack of standardized language across the 
+insurance industry. Terminology can vary significantly 
+between companies and even departments, making it 
+difficult for AI agents to interpret intent accurately. Agents 
+need to be adaptable, but there must be clear triggers for 
+human intervention. For example, we do not allow an AI 
+agent to make certain significant decisions autonomously or 
+interact directly with a customer. 
+ 
+How do you expect AI agents to 
+shape the future of work?
+AI works side by side with our employees, 
+allowing them to focus on where they can deliver 
+most value. Employees could evolve into 
+generalist orchestrators, coordinating with 
+specialized AI agents to execute tasks, especially 
+in fields such as software development. Human 
+roles will focus more time on higher-level 
+thinking, creative problem-solving, and strategic 
+orchestration, supported by AI. 
+59
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 60
+Humans and AI agents can 
+collaborate to deliver greater 
+benefits 04
+60
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 61
+A new hybrid workforce 
+is emerging    
+In 12 months’ time, we expect over 60% of organizations to 
+have human-agent teams in which AI agents serve as 
+subordinates/tools or enhancements to human capabilities. 
+In one to three years, AI agents are likely to evolve into 
+members within human-supervised teams. Itai Asseo, Head 
+of Incubation and Brand Strategy (AI Research) at Salesforce, 
+says: “Human-AI interaction patterns are still taking shape 
+and a seamless way to interact with AI agents is yet to 
+surface. Just as the shift from BlackBerry to iPhone in early 
+days of the smartphone era redefined how we engage with 
+technology, the sooner humans can intuitively interact with 
+AI agents, the faster will be the adoption of agentic AI and 
+its subsequent benefits.”
+Figure 19.
+AI agents are likely to evolve to members in human-supervised teams 
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Question asked: Which of the following human-agent collaboration models is likely to evolve in your team/function in the next 12 months and 
+in one to three years? Please select the model that will apply to most AI agents for each timeframe. The percentage represents the share of 
+organizations that expect a particular human-agent collaboration model to apply to the most AI agents in their team/function. 
+Human-agent collaboration models
+21%
+7%
+41%
+19%
+21%
+38%
+9%
+21%
+4%
+2%
+4%
+12%
+AI agents as subordinates
+AI agents augmenting 
+human team members
+AI agents as members within 
+human-supervised teams
+AI agents directing/allocating work to 
+human or prioritizing work for humans
+AI agents supervising 
+other AI agents
+Complete autonomous AI agent teams
+Likely model in the next 12 months Likely model in 1–3 years
+61
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 62
+Anne-Laure Thibaud
+“Organizations should first assess their processes to determine where AI agents 
+can be most effectively integrated, ensuring they complement human workers 
+rather than displace them. This requires a profound transformation of work 
+itself.”
+Executive Vice President – Head of AI First Business & Analytics, 
+Capgemini
+62
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 63
+Figure 20.
+Three-quarters of organizations believe that benefits of adding human oversight to AI agent-driven tasks will outweigh costs
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Question asked: How does adding human oversight to AI agent-driven tasks impact the balance between benefits (e.g., accuracy, safety) and 
+costs (e.g., labor, time), assuming that agentic solutions are expected to mature and become more accurate and reliable over time?
+Impact of adding human oversight to AI agent-driven tasks/processes
+4% 6%
+16%
+33%
+41%
+In 1–3 years
+Signiﬁcantly 
+more costs 
+than beneﬁts
+Moderately 
+more costs 
+than beneﬁts
+Costs and 
+beneﬁts are 
+balanced
+Moderately 
+more beneﬁts 
+than costs
+Signiﬁcantly 
+more beneﬁts 
+than costs
+74%
+Seamless human-agent 
+collaboration elevates 
+business outcomes  
+Nearly three-quarters of executives believe that benefits of 
+adding human oversight to AI agent-driven tasks will 
+outweigh costs (see Figure 20). In total, a significant 90% view 
+human involvement in AI-agent driven workflows as either 
+beneficial or at least cost-neutral. While human oversight will 
+be irreplaceable in safety-critical applications such as 
+healthcare, it will also be instrumental in aligning agentic 
+outcomes with corporate strategy and values. A recent study 
+from Stanford University and University of Pennsylvania 
+found that subjects made better hiring decisions when using 
+an algorithm that offered selective recommendations.48 
+Human oversight can also be used to train AI agents to make 
+better decisions over time. 
+63
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 64
+By effectively integrating human and agentic workforces, 
+organizations expect 65% greater engagement in high-value 
+tasks; 53% increased creativity; and 49% greater employee 
+satisfaction. A recent study assessing teamwork, productivity, 
+and performance indicates that collaborating with AI agents 
+resulted in 137% more communication and a 60% increase in 
+productivity compared with human-only teams.49
+Figure 21.
+Implementation of AI agents can lead to 65% greater engagement in high-value tasks
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 100 executives from strategy and HR functions.
+Question asked: To what extent do you believe the implementation of AI agents in your organization will lead to the following outcomes?
+Expected outcomes for the workforce from implementation of AI agents
+65%
+53%
+49%
+37%
+Greater engagement in high-value tasks
+Increased creativity among employees
+Employee satisfaction and happiness
+Lower attrition rates
+90%
+of organizations view human involvement in AI-agent driven 
+workflows as either beneficial or at least cost-neutral
+64
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 65
+A recent study compared clinician diagnostic performance 
+across four settings: using conventional resources; using AI as 
+a first opinion; using AI as a second opinion; and relying on AI 
+alone. Clinicians using conventional resources scored 
+significantly lower (75%) than those using AI support (85% 
+using AI as first opinion and 82% using AI as second opinion). 
+AI alone achieved the highest score (87%).50
+Combining human expertise with AI agents significantly 
+enhances output quality, speed, scale, and operational 
+efficiency, while minimizing risks such as reputational 
+damage. 
+Itai Asseo
+“Just as the shift from BlackBerry to iPhone in 
+early days of the smartphone era redefined how 
+we engage with technology, the sooner humans 
+can intuitively interact with AI agents, the faster 
+will be the adoption of agentic AI and its 
+subsequent benefits.”
+The human workforce is 
+worried  
+In our 2017 research, 63% of organizations that had implemented 
+AI at scale said it had not destroyed any jobs.51 However, with the 
+rise of agentic AI, organizations are becoming cautious about its 
+implications for the workforce. Over half (52%) of organizations 
+believe AI agents will displace more jobs than they create. 
+Head of Incubation and Brand Strategy (AI Research), 
+Salesforce
+65
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 66
+Figure 22.
+The workforce is concerned about AI agents’ impact on jobs 
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 100 executives from strategy and HR functions.
+Question asked: Please indicate the extent to which you agree with the below statements regarding the potential impact of AI 
+agents on the future of work, on a scale of 1 to 7, where 1= strongly disagree and 7= strongly agree.
+Share of executives responding to the below statements
+52% 19% 29%
+61%28%11%
+We believe that AI agents will create 
+more jobs than they will displace
+Our workforce is concerned about AI 
+agents' impact on jobs/future careers
+Strongly disagree Neutral Strongly agree
+The World Economic Forum (WEF) predicts that AI and data 
+processing alone will create 11 million roles and replace nine 
+million by 2030. Robots and automation, meanwhile, are 
+forecast to displace five million more jobs than they create.52  
+In a study conducted by Microsoft, nearly half of leaders 
+(46%) report using agents to fully automate workflows or 
+processes. However, functions will advance at different rates 
+and to different extents, depending on the nature of their 
+responsibilities.53
+The CEO of Klarna, a Swedish provider of buy-now, pay-later 
+services, admitted over-relying on AI to cut customer service 
+jobs. Klarna is now bringing back more human employees.54 
+This highlights that getting the right human-agent 
+collaboration is crucial to stability. As the human workforce is 
+confronted by the true implications of AI adoption, business 
+leaders, academics, and politicians will need to work together 
+to find a viable solution. 
+66
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 67
+Marjolein Wenderich
+“Organizations that treat AI agents only as a productivity 
+tool are missing the point. Those that don’t redefine roles, 
+incentives, team structures, and leadership models may 
+soon find themselves irrelevant.”
+Vice President, Global MD – Workforce and Organization, 
+Capgemini
+67
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 68
+How can organizations capture 
+the agentic AI opportunity?  05
+68
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 69
+Figure 23.
+The agentic AI opportunity
+Source: Capgemini Research Institute analysis.
+The agentic AI
+opportunity
+Develop and integrate ethical AI that address the risks posed 
+by autonomous AI agents
+Ensure AI agents operate within deﬁned scope of 
+execution, and remain traceable and explainable to earn 
+trust 
+Strengthen data and technological 
+foundations to scale AI agents
+Redesign processes to deploy AI agents eﬀectively and 
+reimagine business models
+Transform the workforce and organizational 
+structure to fully onboard a new, agentic 
+workforce as team members
+Strike the right balance between agent 
+autonomy and human involvement 
+69
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 70
+Redesign processes to deploy AI agents  
+effectively and reimagine business models
+a. Start with the process, 
+not the technology  
+Organizations must redesign processes with AI at their core. 
+This requires moving from incremental automation to a 
+deliberate orchestration of AI agents, Gen AI models, and 
+traditional AI systems.
+For example, a process redesign could include agents 
+proactively resolving mismatches, flagging anomalies in real 
+time, and learning from approval behaviors to improve 
+decision-making. 
+b. Use a structured 
+framework to select the 
+right AI mix  
+Each type of AI brings different strengths. AI agents are well-
+suited for autonomous coordination and action across 
+systems. Gen AI adds value in creative, generative, or 
+language-heavy tasks. Traditional machine learning excels at 
+prediction and optimization. And RPA and rule engines are 
+effective for structured, deterministic workflows.
+When assessing processes and technology options, a 
+structured framework can help:
+• Volumetrics: Automation brings a quick ROI in high-
+volume/high-frequency tasks. Low-volume tasks may not 
+warrant agentic solutions unless the per-transaction value 
+is exceptionally high.
+Dorit Zilbershot
+“At ServiceNow, our priority 
+has been to provide our 
+customers with AI agents 
+that integrate seamlessly 
+into existing enterprise 
+workflows - accelerating 
+outcomes without disrupting 
+what already works.”
+GVP, AI Experiences & Innovation,
+ServiceNow
+70
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 71
+• Decision type: Evaluate the decisions based on the factors 
+outlined in the upcoming section to determine the optimal 
+level of autonomy.
+• Data: Reliable automation depends on accessible, high-
+quality, and well-integrated data.
+• Level of digitalization: Digital-first processes are easier to 
+automate and integrate into AI workflows
+• Process stability: Stable and standardized processes are 
+generally easier and less risky to automate. Highly variable 
+or frequently changing processes may require more 
+sophisticated AI.
+• Error rate and amount of exceptions:
+• Fewer exceptions improve automation performance 
+and reliability
+• If certain actions of agentic AI have the potential to 
+create a cascading effect on downstream systems, 
+people, and processes, assess the risk-benefit ratio to 
+determine whether such scenarios require high 
+automation.
+Combining AI agents, Gen AI, AI/ML, and RPA technologies 
+can help bring down operational costs. Organizations may 
+also assess the adoption of open-source models for certain 
+applications, as these can reduce runtime costs while 
+delivering comparable performance.
+Figure 24.
+Illustrative scenario of orchestrating a mix of AI agents, Gen AI, AI/ML, and RPA for a typical marketing campaign
+Source: Capgemini Research Institute analysis.
+Marketing manager initiates the process
+and inputs campaign objectives 
+Market exploration
+Audience segmentation
+Deﬁne goals and
+key messages
+Create campaign assets
+Launch and manage
+campaign
+Human
+validation
+Human
+validation
+Human
+validation
+AI/MLRPA AI agent Gen AIHuman
+Percentage of automation
+AI AGENT
+Deep research 
+AI AGENT
+Segmentation
+AI/ML
+Channel 
+identiﬁcation
+GEN AI
+Content creation
+AI AGENT
+Campaign brief
+GEN AI
+Ad copy creation
+GEN AI
+Multi-modal
+content creation
+AI AGENT
+A/B testing
+AI AGENT
+Scheduling
+and execution 
+RPA
+Real-time 
+monitoring
+Analyzes market trends, competitor activity, and consumer sentiment 
+Based on insights from CRM, market data, and past engagement and interaction with deep research 
+agent, creates micro-segments
+Identiﬁes diﬀerent channels based on past engagement patterns
+Based on the overall campaign objectives, deﬁnes tangible goals and key messages for each audience groups
+Generates campaign brief based on the insights from other agents, tools, key messages, and existing templates
+Writes and iterates ad copy based on brief 
+Generates assets (visuals, text, video, etc.) adapted for diﬀerent media channels
+Runs A/B testing in parallel, ranks eﬀectiveness, interacts with other tools/Gen AI assistants to 
+optimize and  ﬁnalize assets
+Identiﬁes optimal posting times, schedules dynamically, and automates campaign launch across channels
+Monitors engagement, conversions, and ROI based on predeﬁned parameters and triggers action if 
+performance drops below threshold levels
+71
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 72
+Itziar Goicoechea-Martinez
+“The future of enterprise operations lies in the 
+seamless integration of agents, other forms of 
+AI, automation, in tandem with and under the 
+oversight of human co-workers.”
+c. Design for 
+interoperability and 
+orchestration  
+Instead of standalone deployments, organizations must 
+invest in a modular architecture where different AI systems 
+interact. An orchestration agent can manage the entire 
+marketing campaign process by delegating tasks to other AI 
+agents, Gen AI, AI/ML, or automation tools based on the 
+problem, context, and level of expertise required. Dorit 
+Zilbershot, GVP, AI Experiences & Innovation at ServiceNow 
+highlights: “At ServiceNow, our priority has been to provide 
+our customers with AI agents that integrate seamlessly into 
+existing enterprise workflows - accelerating outcomes 
+without disrupting what already works. These agents are 
+built to operate across platforms and not just within 
+ServiceNow environment. For instance, in HR, they 
+streamline talent screening, onboarding and personalize 
+trainings. And in customer service, they pre-fill case details, 
+analyze historical data, and assist human workers provide 
+faster and more informed responses to customers.” 
+Senior Director, AI and Generative AI Offer, 
+Capgemini
+72
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 73
+d. Scope for business 
+model innovation  
+Agentic AI can accelerate innovation, save costs, and create 
+new revenue streams and business models. Yet, most 
+organizations don’t yet recognize this potential – only 26% of 
+executives in our survey highlighted the potential to develop 
+entirely new business models or revenue streams though 
+agentic AI.
+Organizations can innovate faster and more intelligently with 
+agentic AI. With capabilities like iterative reasoning and 
+refinement, AI agents can accelerate the pace of innovation 
+and widen the scope of innovation across sectors. For 
+example, Google’s AI co-scientist, built on Gemini 2.0, is a 
+multi-agent system designed to support scientific discovery. 
+This system can not only perform tasks such as market 
+research, literature review, and document review, but also 
+generate original insights and propose and test novel 
+hypotheses. They are especially valuable in high-stakes fields 
+like drug discovery, target identification, molecular design, 
+and material science simulations. In consumer goods, agents 
+can autonomously test product-market fit and create new 
+product ideas. In financial services, AI agents can hyper-
+personalize financial products and services at scale. 
+Dow, a global materials science organization, is deploying 
+agents to ferret out hidden losses and streamline shipping 
+operations. Once the system is fully scaled, Dow expects 
+increased accuracy in logistic rates and billing that will save 
+millions.57 Agents in Bayer’s crop science R&D team save up to 
+six hours per week, accelerating the innovation process and 
+raising productivity.58 AI agents can boost upselling and cross-
+selling with hyper-personalized recommendations and 24/7 
+proactive outreach.
+70%
+of organizations believe that AI agents will necessitate 
+organizational restructuring
+Recent developments have reinforced the importance of 
+orchestration. For example:
+• In April 2025, Google introduced a new open protocol 
+called Agent2Agent (A2A), which enables AI agents to 
+communicate with each other, securely exchange 
+information, and coordinate actions across various 
+enterprise platforms and applications.55
+• At Microsoft Build 2025, Microsoft introduced multi-agent 
+orchestration in Copilot Studio. This feature allows agents 
+to share data, collaborate on tasks, and delegate.56
+Agentic AI is not a technological upgrade; it’s a strategic shift 
+in how value is created and captured.
+73
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 74
+Transform the workforce and organizational structure to  
+fully onboard a new, agentic workforce as team members 
+Reimagining the businesses and redesigning processes 
+calls for a shift in mindset – organizations must begin to 
+view AI agents as part of the organization and create an 
+environment where human and AI agents work in 
+harmony. To this end, organizations must rethink how 
+they structure teams, how roles evolve, and how they 
+measure performance.
+a. Restructuring 
+workforce to account for 
+human-agent teams  
+A notable 70% of organizations believe that AI agents will 
+necessitate organizational restructuring. However, skill 
+development, and organizational restructuring are not top 
+strategic focuses. 
+Rather than treating AI agents as tools or assistants, 
+organizations must embed them into core teams. This 
+includes:
+• Defining roles and responsibilities 
+of AI agents 
+• Organizations must establish formal roles for agents 
+within team structures – for example, as research 
+agents, workflow coordinators, or testing agents – 
+with well-scoped mandates and boundaries, defined 
+goals, clear business ownership and accountability, 
+and buy-in from human team members.
+• Organizations can also consider creating AI personas, 
+assigning them appropriate responsibilities and 
+integrating them within the team dynamics.
+• Clearly redefining the roles and 
+responsibilities of human workers 
+• 68% of organizations noted that employees could use 
+additional capacity to deliver higher-value tasks such 
+as strategic planning, innovation, client interaction, 
+upselling, and cross-selling. 
+• 59% indicated the possibility of creating new roles 
+such as AI agent supervisors and agent behavior 
+analysts. 
+This also entails providing the workforce with the skills 
+and support to effectively manage change.
+74
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 75
+• Establishing clear accountability for 
+decisions made by/with assistance 
+of AI agents and create a process to 
+continuously monitor alignment to 
+intended business goal 
+ 
+As AI agents begin to take on decision-making 
+responsibilities, organizations must clarify accountability 
+structures. It is essential to.
+• Define who is responsible and accountable for actions 
+taken by AI agents or supported by them 
+• Ensure human oversight is embedded in high-stakes or 
+sensitive decisions 
+• Introduce formal protocols for continuous monitoring 
+as well as specific auditing agent actions and verifying 
+outcomes alignment with initial business goal.
+b. Evolving operating 
+models demand a new 
+kind of leadership  
+One of our recent studies found that many organizations are 
+leaning toward a diamond model of the organizational 
+structure – with strong leadership at the top, a broader 
+middle layer, and a leaner entry level as AI takes on 
+foundational tasks.59
+Leaders must build the agentic AI vision into their actions and 
+behaviors. As organizations need to view AI agents as part of 
+the workforce, recruitment becomes capability assessment 
+and onboarding involves defining responsibilities in access. 
+Performance, reliability, and alignment with business goals 
+are key. Managing AI agents alongside tools through an HR 
+lens can help in creating a safe and scalable structure.
+Therefore, organizations should establish a team dedicated 
+to AI resource management to systematically allocate and 
+manage intelligent resources similar to human resources. As 
+AI agents operate in real environments, it’s critical to manage 
+how they work with humans, teams, and tools to achieve 
+shared outcomes. Since AI tools are reusable and often 
+shared across teams, tight coordination is essential. 
+Companies should build an accessible ecosystem for AI 
+agents, with platforms that track agent capabilities to reduce 
+redundancy, support reuse, and standardize processes. 
+Finally, managing also includes onboarding new agents, 
+retiring outdated ones, and updating tools and databases as 
+needed. 
+Karim R. Lakhani, Chair of the Digital Data Design Institute at 
+Harvard, and Dorothy and Michael Hintze Professor of 
+Business Administration at Harvard Business School, says: “As 
+AI democratizes access to expertise and intelligence, we’ll 
+see the rise of intelligence resources departments – much 
+like how HR and IT evolved into core functions. These new 
+divisions will be essential for managing the interplay 
+between humans and AI agents, emerging as a critical 
+source of competitive advantage in the AI-enabled 
+enterprise.” 60
+28%
+of organizations are 
+confident they can extract 
+the full potential of AI 
+agents.
+75
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 76
+c. Reskilling/upskilling 
+the workforce  
+Only 28% of organizations are confident they can extract the 
+full potential of AI agents. 
+Trung Nguyen, Machine Learning Lead at Jira AI, Atlassian 
+says: “Organizations can bridge the AI talent gap by 
+upskilling employees in prompt engineering and low-code 
+tools, enabling rapid prototyping and innovation. But 
+building trustworthy agents also requires robust evaluation, 
+safety checks, and continuous feedback to ensure outputs 
+remain accurate, ethical, and aligned with user 
+expectations.” 
+Anna Kopp, Digital Lead Germany at Microsoft, says: “We 
+have structured academy programs that take employees 
+through a step-by-step journey, starting with the basics and 
+progressing to more advanced AI use cases.”
+Our survey reveals that data management and decision-
+making are critical skills required to fully harness the 
+potential of AI agents. Soft skills such as collaboration, logical 
+reasoning, emotional intelligence, and ethical judgement are 
+also crucial to working alongside AI agents. Organizations 
+must retain and further develop such critical skills.61 
+According to LinkedIn, AI literacy is the most sought-after skill 
+in 2025. “Human” skills such as conflict resolution, 
+adaptability, and innovative thinking remain in demand, 
+highlighting the importance of combining AI expertise with 
+exclusively human abilities.62
+Rashmi Shetty, Strategy & Transformation, Digital Technology, 
+Industrial Energy Technology at Baker Hughes says, “To fully 
+realize the potential of agentic AI, organizations must progress 
+from AI awareness to AI literacy, and ultimately to AI fluency 
+across the enterprise, by investing in targeted areas where AI 
+can deliver measurable value and sustained competitive 
+advantage.”
+Figure 25.
+Data management and decision-making are critical skills to build
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 950 executives from strategy and data/AI functions.
+Question asked: What are skills employees require for building, managing, and harnessing the potential of AI agents? Select top three hard 
+skills and soft skills.
+Hard 
+skills
+Soft 
+skills
+59%Data management
+Programming and 
+software development
+Troubleshooting and 
+debugging AI systems
+53%
+50%
+Decision-making
+Collaboration/teamwork
+Logical reasoning
+52%
+48%
+43%
+Top three hard skills and soft skills required to eﬀectively build, manage, and harness the potential of AI agents
+76
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 77
+Traditional metrics may not fully capture the performance 
+of human-agent teams. Organizations should consider:
+• Joint productivity metrics – measuring outcomes 
+delivered through collaborative efforts between 
+humans and agents.
+• AI agent evaluation metrics – evaluating how AI 
+agents contribute to quality, speed, and innovation.
+• Collaboration effectiveness – assessing how well 
+human and agent roles are aligned and how smoothly 
+they interact.
+• Skill adaptability – tracking how effectively 
+employees adapt their roles and skillsets in response 
+to working with AI agents.
+A combination of human feedback, agent performance 
+logs, and business KPIs can help create a holistic view of 
+hybrid team performance.
+d. Create new performance 
+metrics to gauge hybrid 
+performance 
+Anna Kopp
+“We have structured academy programs that take 
+employees through a step-by-step journey, starting 
+with the basics and progressing to more advanced AI 
+use cases.”
+Machine Learning Lead at Jira AI, 
+Atlassian
+77
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 78
+Strike the right balance between agent 
+autonomy and human involvement
+Autonomy is not binary but exists on a spectrum. Rather than 
+defaulting to full or no automation, the goal is to find the 
+right mix of human and agentic workforce that maximizes 
+business impact and minimizes risk. Therefore, for each task/
+process, organizations need to assess: what level of autonomy 
+is required, how humans can contribute, and where human-
+agent collaboration will generate better outcomes?
+a. Categorize decisions   
+The act of delegation requires clarity and trust. But trust 
+itself depends on evidence of capability. This creates a 
+paradox: unless organizations delegate meaningful work 
+to AI agents, they cannot assess performance or build 
+confidence. But not all decisions are equally important, 
+and not all require the same level of oversight. Categorize 
+each decision or action an AI agent would take along the 
+following dimensions:
+• Risk level of outcomes (e.g., financial, reputational, 
+regulatory) 
+• Reversibility (Can it be undone or corrected?) 
+• Ethical nature (Are there ethical issues such as lack of 
+fairness or transparency?) 
+• Creativity (Does the task require human innovation, 
+intuition, or empathy?)
+• Breadth of impact (To what extent will this decision affect 
+processes, systems, or people? Will it trigger cascading 
+consequences?)
+• Compliance (Does the task involve adherence to internal 
+policies, regulatory standards, or industry norms?)
+This informs autonomy thresholds: that is, where agents 
+operate independently, where collaboration between agents 
+and humans is required, and where tasks should be 
+performed solely by humans. In some cases, this will be 
+dictated by law. For instance, the EU AI Act requires providers 
+of high-risk AI systems to allow human oversight.63
+Organizations can determine the appropriate level of 
+autonomy by evaluating the criticality and complexity of 
+decisions or actions, alongside their readiness across 
+processes, technology, data, and workforce capabilities. AI 
+agents with varying degrees of autonomy can operate 
+concurrently across different workflows and evolve with 
+system maturity.
+68%
+of organizations noted that employees could use 
+additional capacity to deliver higher-value tasks such 
+as strategic planning, innovation, etc.
+78
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 79
+b. Define “autonomy 
+boundaries” in digital 
+business architecture   
+The digital business architecture defines how data, 
+systems, processes, and people interact within the 
+organization and establishes clear escalation triggers. 
+Human ability to override decisions made by AI agents 
+should be frictionless, well-communicated, and should be 
+allocated according to role to ensure proper 
+accountability. 
+Figure 26.
+Nearly seven in 10 organizations cite human oversight as risk mitigation
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Question asked: How does your organization plan to mitigate potential risks associated with implementing AI agents? Select the top three.
+Mitigation plans for risks associated with implementing AI agents 
+69%Ensure human oversight at critical 
+points of action
+Use kill switches to halt operation if unsafe 
+behavior is detected
+Building human-centric agents 
+48%
+36%
+69%
+organizations cite human oversight mitigates the risks 
+associated with AI agents
+79
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 80
+Strengthen data and technological 
+foundations to scale AI agents
+a. Build a robust data 
+foundation  
+We highlight that very few organizations have high maturity 
+across all aspects of data-readiness. To address this, 
+organizations should establish robust data infrastructure and 
+governance protocols to underpin AI agent initiatives: 
+• Establish standardized data governance protocols to 
+ensure consistency, transparency, and accountability 
+throughout the data lifecycle – collection, processing, 
+storage, and sharing. 
+• Implement strict data validation protocols for all 
+datasets used by AI agents. This includes having policies 
+around the source, usage rights, access controls, and 
+processing methods for each dataset used by AI agents. As 
+AI agents may have access to external data and tools, it is 
+important to assess and certify data before it enters 
+production environments.
+b. Upgrade technology 
+infrastructure to support 
+scalable AI agent 
+deployment
+• Computing power and scalability: Ensure infrastructure 
+can support high computational workloads (e.g., GPUs, 
+TPUs) and scale with demand.
+• Connectivity and latency: Maintain high-speed, low-
+latency networks for seamless agent communication and 
+task execution.
+• Interoperability across platforms: Enable smooth 
+integration of AI agents with enterprise applications, APIs, 
+and cloud environments.
+• Adopt common data standards to enable seamless data 
+exchange across AI agents, other tools and systems, 
+business functions, and external ecosystems.
+• Ensure AI-readiness of enterprise data – ensure high 
+data quality for training and operating AI agents.
+• Address cybersecurity and privacy risks by embedding 
+compliance with data privacy laws (e.g., GDPR, HIPAA), 
+using secure storage solutions, and protecting sensitive 
+data with encryption. 
+• Invest in modern data architecture such as vector 
+databases, real-time data pipelines, and scalable data lakes 
+to enable efficient agent performance and data retrieval.
+18%
+of organizations 
+have high maturity 
+across all aspects of 
+data-readiness
+80
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 81
+c. Choose the most 
+suitable AI agent 
+technology for each task/
+process
+Organizations need to focus on making informed, context-
+specific decisions about whether to build, buy, or adopt a 
+hybrid approach for AI agent implementation. The figure 
+below provides a practical lens to evaluate these options 
+based on ease of integration (plug-and-play vs. bespoke 
+integration), degree of vendor lock-in, level of customization, 
+control over cost and usage, and privacy control. Aligning this 
+decision with long-term business goals is essential for 
+sustainable and scalable AI integration.
+• Licensing and platform access: Evaluate costs and 
+limitations of platform-specific licenses; opt for models 
+with flexibility and minimal vendor lock-in.
+• Future-proofing architecture: Build with modularity to 
+accommodate evolving AI models, newer tools, and 
+increased workloads.
+Figure 27.
+Select the most suitable AI agent technology 
+Source: Capgemini.
+General AI agents
+Open AI o3
+Gemini 2.0
+Conversational 
+AI agents
+Kore.ai
+Amelia
+Salesforce
+SAP
+ServiceNow
+Microsoft Copilot
+Google Agentspace
+Developer platform
+LangSmith
+Nvidia
+Orchestration, agent frameworks
+LangChain
+LangGraph
+Crew AI
+OpenAI Agents SDK
+Microsoft Semantic Kernel
+Domain AI agents
+CX
+Lindy
+Decagon
+11x
+Software
+Replit
+Factory
+Devin by Cognition
+Dosu
+Agentic AI products
+Low-code AI agents embedded in digital platform
+Custom AI agents
+Plug-and-play 
+and end-to-end 
+integration
+No lock-in
+ Customization
+ Cost of use 
+control
+Privacy control
+Plug-and-play 
+and end-to-end 
+integration
+No lock-in
+ Customization
+ Cost of use 
+control
+Privacy control
+Plug-and-play 
+and end-to-end 
+integration
+No lock-in Customization Cost of use 
+control
+Privacy control
+81
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 82
+The cost of building custom AI agents can be significant, 
+requiring investment in data foundations, model 
+development, and compute resources. Additional costs may 
+arise from proprietary datasets and the integration of AI 
+agents with legacy systems.
+To manage these costs, organizations must carefully evaluate 
+different AI agent deployment models. AI services are 
+offered through various pricing structures, making it 
+essential to assess not just functionality, but also long-term 
+cost control.
+Cost containment also depends on choosing scalable, energy-
+efficient solutions. By optimizing infrastructure and 
+upgrading to more sustainable hardware, businesses can 
+reduce compute overhead and environmental impact while 
+keeping AI initiatives financially viable.
+Vishal Singhvi
+ “Organizations that invest in strong data 
+foundations and effective change management are 
+seeing 10%+ revenue uplift through agentic AI by 
+expanding share of wallet with existing customers 
+and unlocking new market segments.”
+Director, Strategic Initiatives (Gen AI),
+Microsoft
+82
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 83
+Ensure AI agents operate within defined scope of execution, 
+and remain traceable and explainable to earn trust  
+a. Establish goal 
+alignment between 
+humans and AI agents  
+Defining an agent’s intended purpose, scope of execution, 
+and measuring fulfillment are crucial. Purpose may be 
+explicitly coded through rules and objectives or implicitly 
+shaped by learning processes. Even at advanced levels of 
+autonomy, AI agents operate within established boundaries: 
+clearly defined goals and mechanisms for monitoring 
+compliance and strategic oversight are built into the system’s 
+design.
+As agents gain independence and capability, alignment 
+becomes both more important and more challenging.
+Organizations must establish continuous feedback and 
+improvement cycles to refine and enhance AI agents’ 
+performance. Nearly two-thirds (65%) of organizations 
+indicate that they plan to develop reporting and feedback 
+systems.
+83
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 84
+Figure 28.
+Demonstrated accuracy and transparency into all actions of AI agents are top factors that could improve trust
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 897 executives from corporate and data/AI functions who do not trust AI agents.
+Question asked: What factors would increase your trust in AI agents and agentic AI? Select the top three factors. 
+Factors that would improve trust in AI agents
+52%Demonstrated accuracy and reliability 
+Explanation and transparency of all decisions and actions of AI agents (including underlying data)
+Robust security, governance, and compliance
+Human oversight with the ability to intervene or overrule at any point
+Ability to measure AI impact and eﬃciency
+Advanced training of workforce and exposure to AI agents
+Fully digital and seamlessly integrated business processes and tools
+Clearly deﬁned failure scenarios, accountability, and mitigation strategies
+Clear organizational guidelines for AI use
+45%
+42%
+36%
+32%
+26%
+24%
+22%
+20%
+84
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 85
+Steve Jones
+“For people to trust AI agents they need to be able 
+to understand its boundaries and know it will only 
+operate within them. Most companies do not have 
+digital definitions of those boundaries which 
+prevents people trusting AI.”
+b. Ensure observability  
+Trust comes from observability. Observability refers to 
+increasing visibility of the decisions and actions of AI agents. 
+This means offering insights into the inputs, tools invoked, 
+parameters used, and the reasoning behind decisions and 
+actions to address the black-box nature of advanced AI 
+systems.
+To achieve this, organizations need to establish robust 
+observability frameworks to ensure that AI agents perform 
+reliably and transparently under various conditions. 
+This trust can be further amplified by implementing 
+mechanisms such as: 
+• Scenario testing under edge cases and high-risk conditions
+• Error detection and reporting systems to identify 
+anomalies in real time
+• Failover strategies for underperformance
+• Incident response plans for agent failures or unexpected 
+behavior
+• Third-party audits of training data, decision logic, and bias 
+mitigation.
+Executive Vice President – Data Driven Business and Generative AI, 
+Capgemini
+85
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 86
+Develop and integrate ethical AI that address  
+the risks posed by autonomous AI agents
+Figure 29.
+Only 14% have fully integrated ethical AI principles 
+Source: Capgemini Research Institute, Agentic AI, April 2025, N = 1,500 executives from corporate and data/AI functions.
+Question asked: Rate your organization’s current level of maturity in implementing ethical AI principles.
+Share of organizations by current level of maturity in implementing ethical AI principles
+Nascent (No formal measures in place) Emerging (Some initial policies/guidelines 
+exist but adoption is inconsistent)
+Developed (Well-deﬁned frameworks and 
+processes are in place, with partial adoption)
+Integrated (Policies/guidelines are fully embedded 
+into decision-making, governance, and workﬂows)
+18% 36% 33% 14%
+16% 32% 40% 12%
+15% 29% 41% 15%
+16% 29% 36% 19%
+17% 41% 31% 11%
+15% 38% 32% 14%
+29% 38% 23% 10%
+18% 43% 25% 14%
+Average
+Respectful of privacy and data protection 
+Robust and safe (Including fallback plans where needed)
+Controllable with clear accountability 
+Transparent and explainable 
+Fair
+Sustainable
+Carefully delimited impact (Designed for human beneﬁt, with a clearly deﬁned purpose)
+86
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 87
+Beyond trust, AI agents must uphold ethical values, guard 
+against misuse, and prevent failure cascades. As they 
+assume greater operational control, AI agents will heighten 
+all the risks posed by traditional AI and Gen AI.
+Organizations are also increasingly concerned about 
+privacy, security, legal liability, bias, and the risks of 
+overreliance on AI agents. Yet only 14% report having fully 
+embedding ethical AI principles into decision-making, 
+governance, and workflows. Sustainability is the least 
+integrated principle among ethical AI principles.
+A risk assessment framework can guide safe and appropriate 
+use of AI agents. This includes checking whether risks have 
+been identified, assessed, and approved by relevant 
+stakeholders, whether inputs and outputs are acceptable and 
+accurate, and whether proper verification processes are in 
+place. If not, organizations should either proceed with 
+caution and use mitigating measures or refrain from using 
+the solution all together.
+Itai Asseo, Head of Incubation and Brand Strategy (AI 
+Research) at Salesforce, says: “IT will be a strategic enabler in 
+the AI agent ecosystem—ensuring resilient infrastructure, 
+seamless performance, and enterprise-grade availability. As 
+gen AI and agentic AI adoption accelerates, IT leaders must 
+proactively address ethics and safety concerns, token usage 
+and optimization costs, turning operational oversight into a 
+competitive business advantage.”
+Organizations must establish or revisit existing ethical AI 
+guidelines. They can look to international frameworks such as 
+ISO/IEC 42001, which provides structured guidance on 
+managing AI risks and opportunities.64 
+• Embed ethical reasoning into AI agent design: This 
+allows AI agents to flag dilemmas to human decision-
+makers. For example, if an AI agent testing marketing 
+campaign assets finds that provocative or sensational 
+content increases engagement, it flags a dilemma 
+regarding the potential impact on brand credibility and 
+prompts human review. 
+• Make agent decision-making traceable and auditable: 
+Establish mechanisms to trace the full “thought process” 
+of AI agents, from input to action, to ensure transparency 
+and accountability. This includes detailed action logs, 
+prompts or goals, and embedded reasoning chains that 
+can be reviewed in audits or challenged in real time. 
+• Create layered governance by design: Prevent failure 
+cascades by designing layered systems where multiple AI 
+agents can critique, supervise, or override each other. 
+Introduce “guardian agents,” tasked with reviewing high-
+stakes decisions or stress-testing outputs for bias, 
+hallucinations, or safety risks. This agent-of-agents 
+architecture mirrors human checks and balances and 
+builds resilience into autonomous systems. Dr. Suraj 
+Srinivasan at Harvard Business School says: “While 
+deploying AI agents, organizations must move beyond 
+technical implementation and consider how core values 
+are embedded into these systems. Unlike humans, who 
+naturally understand context and are guided by 
+organizational ethos, AI agents require these principles to 
+be explicitly defined and built into their design. Ethics can 
+no longer be managed by exception; they must be 
+embedded into the system from the start.”
+• Train human workers for ethical fluency: Equip human 
+teams across the organization with the fluency to 
+anticipate ethical and safety challenges posed by AI 
+agents. This includes scenario-based training, decision-
+making frameworks, and cross-functional simulations to 
+strengthen ethical reflexes, particularly in fast-moving or 
+ambiguous situations.
+• Appoint AI ethicists to embed ethical oversight across 
+the lifecycle: AI ethicists are responsible for defining and 
+maintaining a clearly articulated code of ethics for AI 
+agents, aligned with organizational values. They play a 
+critical role in ensuring the right questions are being asked 
+around AI agent implementation, and that ownership of 
+ethical and operational risks is clearly defined. By 
+coordinating with governance, delivery, legal, and 
+executive teams, AI ethicists establish mechanisms to track 
+compliance, embed ethics into AI systems, and create clear 
+escalation and reporting channels. This team should be 
+composed of individuals from diverse cultural, 
+educational, and professional backgrounds to reflect a 
+broad range of worldviews and mitigate individual biases 
+in decision-making.
+Continuous monitoring and improvement mechanisms will 
+ensure these solutions evolve with changing business needs 
+and technological capabilities, creating a virtuous cycle.65 In 
+addition, organizations should also stay abreast of evolving 
+national and international AI regulation, including 
+government policies and sector-specific frameworks, to 
+ensure responsible deployment of agentic AI.
+87
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 88
+Figure 30.
+Confidence in agentic AI
+Source: Capgemini, “Business, meet agentic AI: Confidence in autonomous and agentic system,” May 2025.
+AI that works
+AI that works reliably
+AI that's aligned with human expectations
+AI that works in people's best interests
+▪ Proven ability accuracy
+• Robustness
+• Eﬀective communication 
+• Sensibility
+• Humility
+• Usability
+Conﬁdence 
+in agentic AI
+• Dependability
+• Trusted architecture
+• Stability
+• Explainability
+• Purpose
+• intent
+• Extrapolates sensibly
+• Degree of authority and autonomy
+• Fails gracefully
+• Identity and anthropomorphism
+• Fairness
+• Privacy
+• Desired emergent behavior
+• Sustainability
+Ethical design is not a one-time effort. Organizations need to 
+regularly audit agent behavior, monitor drift in real-time, and 
+recalibrate systems in response to evolving risks. 
+14%
+of organizations have fully integrated ethical AI 
+principles
+88
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 89
+AI agents mark a new frontier in enterprise automation and 
+human-machine collaboration that shifts the conversation 
+from task-level efficiency to a holistic transformation of 
+business processes across enterprise domains. The potential 
+is vast: from unlocking billions in value to reshaping the 
+nature of work itself. Organizations must move beyond 
+experimentation toward purposeful scaling, grounded in 
+trust, transparency, and human-centric design.
+Conclusion
+The winners in this next wave of AI will not be those who 
+simply deploy more AI tools. Rather, they will be those who 
+rethink their business, reimagine workflows, reskill their 
+workforces, restructure their organizations, and embed 
+ethical safeguards from the outset. Ensuring seamless 
+integration of human and agentic workforces requires a shift 
+in mindset from isolated innovation to ecosystem thinking 
+and from siloed experimentation to enterprise orchestration. 
+As agentic AI evolves, so too must the capabilities, cultures, 
+and leadership required to harness it.
+89
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 90
+Research methodology
+We conducted a global survey of 1,500 executives at 
+organizations each with more than $1 billion in annual 
+revenue, across 14 countries. Organizations operate across 
+13 sectors. All have started to explore agentic AI. The global 
+survey took place in April 2025. Executives surveyed are at 
+director level and above. Of these, 60% are from data and AI 
+functions, while 40% are from diverse business functions. 
+The distribution of respondents and their organizations is 
+provided below.
+Organizations by country Organizations by sector
+9%
+9%
+9%
+6%
+5%
+France
+Germany
+India
+Spain
+Netherlands
+Italy
+Australia
+Japan
+Brazil
+Sweden
+Singapore
+Norway
+30%
+5%
+5%
+5%
+4%
+4%
+3%
+3%
+3%
+Organizations by country Organizations by sector
+United Kingdom
+United States 10%
+10%
+10%
+10%
+10%
+10%
+8%
+7%
+Consumer products
+Retail
+Energy and utilities
+Banking and capital markets
+Life sciences
+Insurance
+Aerospace and defense
+Telecom
+High-tech
+Media and entertainment
+Public sector
+Manufacturing
+Automotive
+5%
+5%
+5%
+5%
+5%
+9%
+9%
+9%
+6%
+5%
+France
+Germany
+India
+Spain
+Netherlands
+Italy
+Australia
+Japan
+Brazil
+Sweden
+Singapore
+Norway
+30%
+5%
+5%
+5%
+4%
+4%
+3%
+3%
+3%
+Organizations by country Organizations by sector
+United Kingdom
+United States 10%
+10%
+10%
+10%
+10%
+10%
+8%
+7%
+Consumer products
+Retail
+Energy and utilities
+Banking and capital markets
+Life sciences
+Insurance
+Aerospace and defense
+Telecom
+High-tech
+Media and entertainment
+Public sector
+Manufacturing
+Automotive
+5%
+5%
+5%
+5%
+5%
+90
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 91
+Share of executives by function
+Share of executives by function
+Organizations by sector
+3%
+5%
+3%
+3%
+3%
+3%
+3%
+3%
+Human resources
+Sales
+Marketing and customer service
+Innovation/R&D/product design/support
+Manufacturing/production/operations
+Procurement/supply chain/logistics
+Technology/digital/IT
+Sustainability
+Finance and risk
+StrategyCorporate
+40%
+Data/AI
+60%
+8%
+3%
+91
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 92
+Organizations by annual revenue Pubic sector organizations by annual budget 
+39%
+$1 billion – less than $5 billion
+30%
+$5 billion – less than $10 billion
+13%
+$10 billion – less than $20 billion
+10%
+$20 billion – less than $50 billion 
+5%
+$50 billion – less than $75 billion
+3%
+$75 billion – less than $100 billion 
+1%
+More than $100 billion
+Organizations by annual revenue Public sector organizations by annual budget 
+17%
+$500 million – less than $1 billion
+76%
+$1 billion – less than $5 billion
+3%
+$5 billion – less than $10 billion 
+4%
+$10 billion – less than $20 billion 
+39%
+$1 billion – less than $5 billion
+30%
+$5 billion – less than $10 billion
+13%
+$10 billion – less than $20 billion
+10%
+$20 billion – less than $50 billion 
+5%
+$50 billion – less than $75 billion
+3%
+$75 billion – less than $100 billion 
+1%
+More than $100 billion
+Organizations by annual revenue Public sector organizations by annual budget 
+17%
+$500 million – less than $1 billion
+76%
+$1 billion – less than $5 billion
+3%
+$5 billion – less than $10 billion 
+4%
+$10 billion – less than $20 billion 
+92
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 93
+Executives’ level of involvement in their organization’s agentic AI initiatives
+Organizations by sector
+44%
+Responsible and accountable for 
+leading one or more agentic AI initiative 
+(usually with a target to improve KPIs)
+56%
+Responsible (but not necessarily 
+accountable) for one or more 
+agentic AI initiative
+Executives’ level of involvement in their organization’s agentic AI initiatives
+Organizations by sector
+44%
+Responsible and accountable for 
+leading one or more agentic AI initiative 
+(usually with a target to improve KPIs)
+56%
+Responsible (but not necessarily 
+accountable) for one or more 
+agentic AI initiative
+We also conducted in-depth discussions with 33 senior 
+executives from the industry, hyperscalers, startups, and 
+academia to complement the survey findings.
+The study findings reflect the views of the respondents to 
+our online questionnaire for this research and are intended 
+to provide directional guidance. Please contact one of the 
+Capgemini experts listed at the end of the report to discuss 
+specific implications. 
+93
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 94
+accessories, MCP provides a standardized way to connect 
+AI models to different data sources and tools.67
+• Agent-to-Agent (A2A) Protocol:  A open protocol that 
+provides a standard way for AI agents to communicate 
+with each other, securely exchange information, and 
+coordinate actions on top of various enterprise platforms 
+or applications, regardless of the underlying framework or 
+vendor. It complements Anthropic’s Model Context 
+Protocol (MCP).68
+• Internet of AI agents: An open, interoperable, and 
+quantum-safe Internet for agent-to-agent collaboration 
+between AI agents across organizational boundaries.69
+• Orchestration: The coordination and management of 
+multiple AI agents, workflows, tools, and systems towards 
+shared objectives.
+Appendix
+Glossary
+• Agentic workflow: Agentic workflows are AI agent-
+driven processes where AI agents manage, coordinate, 
+and execute end-to-end processes with less human 
+intervention.
+• Multi-agent system: A multi-agent system (MAS) 
+consists of multiple independent agents operating 
+within a common environment, working together to 
+achieve goals beyond what any individual agent could 
+accomplish. These systems, sometimes called agentic 
+architectures or frameworks, represent the cutting edge 
+of autonomous system development.66
+• Model Context Protocol (MCP): MCP is an open 
+protocol that standardizes how applications provide 
+context to LLMs. Think of MCP like a USB-C port for AI 
+applications. Just as USB-C provides a standardized way 
+to connect your devices to various peripherals and 
+94
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 95
+Economic potential of AI agents
+We have taken two approaches to estimate the total 
+economic value generated by agentic AI over the next three 
+years by organizations in surveyed countries.
+Approach 1: $450 billion in economic value over the next 
+three years in the countries surveyed.
+• We assume that organizations that have scaled 
+implementation of AI agents can capture 50% of the 
+expected benefits, while those that have not scaled can 
+realize 10% of the expected benefits.
+• The overall economic value generated by surveyed 
+organizations in a given year is the weighted sum of the 
+value captured by both segments (scaled and non-scaled). 
+• The total revenue of organizations surveyed accounts for 
+approximately 34% of the total GDP across countries 
+surveyed. We extrapolate the overall economic value 
+generated by agentic AI for surveyed organizations to the 
+surveyed countries by assuming a proportional 
+relationship between economic contribution and the 
+potential for AI agent-driven value creation.
+95
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 96
+2025 2026 2027
+A.
+B.
+C.
+D.
+E.
+F.
+G.
+H.
+I.
+J.
+Share of business processes expected to be handled by AI agents at level 3 or higher autonomy (survey data)
+Number of surveyed organizations 1,500
+15% 20% 25%
+3.5% 4.6% 5.8%
+3.3% 3.3% 3.3%⁷²
+$14.7 billion $15.2 billion $15.7 billion
+14% 20% 25%
+1.4–7.2% 2–9.8% 2.5–12.3%
+$7 million–$35 million $13 million–$66 million $21 million–$107 million
+$9.4 billion $9.7 billion $10 billion
+15% 25% 35%
+Share of business processes contributing to ﬁnancial impact 
+(According to MIT, only 23% of exposed tasks are cost eﬀective to automate using AI technologies within the next ten years)⁷⁰ 
+Projected GDP growth⁷¹
+Average annual revenue per organization (survey data)
+Expected revenue growth from AI agents (survey data)
+Estimated revenue growth (assuming 10– 50% of expectations materialize)
+Estimated revenue growth per organization (=C*E*G)
+Average cost of goods sold (COGS) per organization⁷³  
+Expected cost savings from AI agents (survey data)
+96
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 97
+2025 2026 2027
+K.
+L.
+M.
+N.
+O.
+P.
+Q.
+R.
+Estimated cost savings per organization (=C*I*K)
+Estimated cost savings (assuming 10–50% of expectations materialize)
+$5 million–$25 million $12 million–$58 million $21 million–$105 million
+1.5–7.5% 2.5–12.6% 3.5–17.6%
+$12 million– $58 million $24 million–$119 million $41 million–$204 million
+$76 million–$382 million
+2% 7% 12%
+$19 billion $46 billion $92 billion
+$157 billion
+$456 billion
+Total value generated per organization (=H+L)
+Total value generated over the next three years, per organization
+Share of organizations with scaled implementation of AI agents
+Overall economic value generated by surveyed organizations (= (O* M upper bound)+((100%-O) * M lower bound)))
+(Assuming that those with scaled implementation will realize 50% of expected beneﬁts and the remaining will realize 10% of 
+expected beneﬁts) 
+Overall economic value generated over the next three years by surveyed organizations 
+Overall economic value generated over the next three years by surveyed countries
+Source: Capgemini Research Institute analysis.
+*Note: It is assumed that the adoption of AI agents will increase at the same rate as that of Gen AI. Since 2023, the adoption of Gen AI has grown sixfold. 
+97
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 98
+Approach 2: $3.3 trillion in economic value over the next three years in surveyed countries.
+In this approach, we assume that the full value of expected revenue growth and cost savings from agentic AI accrues to all organizations, regardless of their level of scaling.
+2025 2026 2027
+A.
+B.
+C.
+D.
+E.
+F.
+G.
+H.
+I.
+J.
+Share of business processes expected to be handled by AI agents at level 3 or higher autonomy (survey data)
+Number of surveyed organizations
+15% 20% 25%
+1,500
+3.5% 4.6% 5.8%
+3.3% 3.3%⁷⁶ 3.3%
+$14.1 billion $14.6 billion $15.1 billion
+14% 20% 25%
+$70 million $131 million $214 million
+$9 billion $9.6 billion
+15% 35%
+$9.3 billion
+25%
+$47 million $194 million$107 million
+Share of business processes contributing to ﬁnancial impact (According to MIT, only 23% of exposed tasks are cost eﬀective to 
+automate using AI technologies within the next ten years⁷⁴ )
+Projected GDP growth⁷⁵
+Average annual revenue per organization (survey data)
+Expected revenue growth from AI agents (survey data)
+Estimated revenue growth per organization (=C*E*F)
+Average cost of goods sold (COGS) per organization⁷⁷  
+Expected cost savings from AI agents (survey data)
+Estimated cost savings per organization (=C*H*I)
+98
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 99
+2025 2026 2027
+H.
+I.
+J.
+K.
+L.
+M.
+N.
+O.
+Total value generated over the next three years, per organization
+Total value generated per organization (=G+J)
+Estimated cost savings per organization (=C*H*I)
+Expected cost savings from AI agents (survey data)
+Average cost of goods sold (COGS) per organization⁷⁷ 
+$763 million
+$238 million $408 million$117 million
+$107 million $194 million$47 million
+25% 35%million15%
+$9.3 billion $9.6 billion$9 billion
+$175 billion $358 billion $612 billion
+$1.15 trillion
+$3.3 trillion
+14% 20% 25%
+$70 million $131 million $214 million
+$9 billion $9.6 billion$9.3 billion
+Overall economic value generated by surveyed organizations (=A*K)
+Overall economic value generated by surveyed organizations, over the next three years 
+Overall economic value generated by surveyed countries
+Source: Capgemini Research Institute analysis.
+99
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 100
+The AI agents/agentic AI ecosystem - examples of companies and startups with products/services in each layer of the AI tech stack
+Frontend/applications
+Memory
+Tools
+Agentic
+observability
+Agentic
+orchestration
+Foundational
+models
+Database
+Infra/base
+GPU/CPU
+provider
+Source: Capgemini Research Institute analysis.
+*Logos and trademarks belong to respective owners. Some players offer products/services that span multiple layers.
+100
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 101
+References
+11. “At scale” implementation refers to the phase following 
+a successful partial scaling, where several AI agents are 
+generally available within a function or where multiple 
+functions have agents that are generally available.
+12. Goldman Sachs, “Gen AI: Too much spend, too little benefit?” 
+June 2024.
+13. IDC, “The global impact of artificial intelligence on the 
+economy and jobs: AI will steer 3.5% of GDP in 2030,” 
+August 2024.
+14. Goldman Sachs, Gen AI: Too much spend.
+15. Capgemini Research Institute, “Generative AI in 
+organizations,” July 2024. 
+16. Ericsson, “Talk to your network: Igniting the AI revolution in 
+autonomous networks,” March 2025.
+17. Siemens press release, “Siemens introduces AI agents for 
+industrial automation”, May 2025
+18. Blog, “Google Cloud’s Automotive AI Agent arrives for 
+Mercedes-Benz”, Jan 2025
+19. Analytics India Magazine, “Rolls-Royce, EY leverage ServiceNow 
+AI agent orchestrator for complex tasks,” January 2025.
+20. The Wall Street Journal, “Everyone’s talking about AI agents. 
+Barely anyone knows what they are,” March 2025.
+21. Tech in Asia, “ANZ Bank plans AI agents to boost productivity,” 
+May 2025.
+22. WSJ, “Walmart is preparing to welcome its next customer: The 
+AI shopping agent,” May 2025.
+23. Investor Nvidia, “NVIDIA Partners With Novo Nordisk and DCAI 
+to Advance Drug Discovery”, June 2025
+24. Forbes, ”Transforming Telecom Operations Through Agentic 
+And Generative AI”, Feb 2025
+25. Coincentral,” BlackRock Taps AI to Read the Markets, Starting 
+with New Analyst Platform”, June 2025
+26. Azumo, “Top AI Agent Development Companies Transforming 
+Work in 2025”, May 2025
+27. Aimsresearch, “Fargo Handled More Than 200 Million Requests 
+Without Sending Customer Data to an LLM”, April 2025
+1. OpenAI website, accessed June 2025.
+2. Devin website, accessed June 2025.
+3. Manus website, accessed June 2025.
+4. Capgemini, “TechnoVision: Top 5 Tech Trends to Watch in 
+2025,” November 2024.
+5. Arxiv, “Measuring AI Ability to Complete Long Tasks,” 
+March 2025.
+6. Stanford University HAI, Artificial Intelligence Index Report 
+2025, 2025.
+7. Bond, “Trends – Artificial Intelligence,” May 2025.
+8. Stanford University HAI, Artificial Intelligence Index Report 
+2025, 2025.
+9. Reuters, “DeepSeek sparks AI stock selloff; Nvidia posts 
+record market-cap loss,” January 2025.
+10. Bond, “Trends – Artificial Intelligence,” May 2025.
+101
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 102
+28. Oyelabs, “AI Agents Revolutionizing Finance with Smarter 
+Decisions”, February 2025
+29. Shopify, “Expanding your AI Horizons, Summer ‘25 Edition, 
+May 2025
+30. Forbes, “Fintech’s Latest Trend: AI Agents For Investment 
+Research”, April 2025
+31. Github, “GitHub Introduces Coding Agent For GitHub Copilot”, 
+May 2025
+32. World Economic Forum, “AI agents could tip the cybersecurity 
+balance towards defenders”, June 2025
+33. Microsoft, “Industrial AI in action: How AI agents and digital 
+threads will transform the manufacturing industries”, 
+March 2025
+34. Capgemini, “Agentic AI for Enterprise by Capgemini,” accessed 
+June 2025.
+35. Prnewswire, “PepsiCo Leverages Salesforce’s Agentforce to 
+Advance AI Agenda”, June 2025
+36. Cisco News, “Cisco and Mistral AI partner to deliver on Cisco’s 
+mission to transform the customer experience with AI,” 
+February 2025. 
+37. Technology magazine, “Why Honeywell & Google Cloud have 
+teamed up on industrial AI,” October 2024.
+38. TechCrunch, “Google rolls out Project Mariner, its web-browsing 
+AI agent,” May 2025.
+39. Deviniti, “AI Agent: A smart team member in customer service at 
+Credit Agricole,” accessed May 2025.
+40. American Automobile Association, “AAA: Fear in Self-Driving 
+Vehicles Persists,” February 2025.
+41. Forbes, “New research finds why some surveyed workers don’t 
+trust Agentic AI,” January 2025.
+42. Stanford Journal, “Stanford 2025 AI Index reports surge in 
+adoption, investment, and global impact as trust and regulation 
+lag behind,” April 2025.
+43. ACRE Campaigns, “Driven Out By AI: How Uber Deactivations 
+Force Drivers into Chatbot Hell and Financial Crisis,” March 2025.
+44. Capgemini Research Institute, Harnessing the value of 
+generative AI: Top use cases across sectors, July 2023.
+45. Capgemini Research Institute, Harnessing the value of 
+generative AI: Top use cases across sectors (2nd edition), 
+July 2024.
+46. DataStax, “New AI agents survey: Trust, control, and reliability 
+remain concerns,” February 2025.
+47. White & Case, “AI Watch: Global regulatory tracker,” March 2025.
+48. Stanford Graduate School of Business, “Designing AI that keeps 
+human decision-makers in mind,” May 2025.
+49. Arxiv, “Collaborating with AI Agents: Field Experiments on 
+50. Capgemini Research Institute, Gen AI at work: Shaping the 
+future of organizations, October 2024.
+51. Microsoft, Work Trend Index Annual Report 2025, April 2025.
+52. Capgemini, “Business, meet agentic AI: Confidence in 
+autonomous and agentic system,” May 2025.
+53. LinkedIn, LinkedIn skills on the rise 2025: The 15 fastest-growing 
+skills in the US, March 2025.
+102
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 103
+54. EU Artificial Intelligence Act, “High-level summary of the AI 
+act,” February 2024.
+55. ISO, ISO/IEC 42001:2023, 2023.
+56. Capgemini, “Business, meet agentic AI: Confidence in 
+autonomous and agentic system,” May 2025.
+57. Capgemini, “Business, meet agentic AI: Confidence in 
+autonomous and agentic system,” May 2025.
+58. Anthropic, “Introducing the Model Context Protocol,” 
+November 2024.
+59. Google for developers, “Announcing the Agent2Agent 
+Protocol (A2A),” April 2025.
+60. Cisco, “Internet of AI agents”, January 2025.
+61. Goldman Sachs, “Gen AI: Too much spend, too little benefit?” 
+June 2024.
+62. “Only 23% of exposed tasks are cost effective to automate using 
+AI technologies within the next ten years.”
+63. IMF, “Global growth: Divergent and uncertain,” January 2025. 
+64. Assuming constant GDP growth for 2027.
+65. Vena, “Industry benchmarks of gross, net and operating profit 
+margins,” August 2024.
+66. Goldman Sachs, “Gen AI: Too much spend, too little benefit?” 
+June 2024.
+67. “Only 23% of exposed tasks are cost effective to automate using 
+AI technologies within the next ten years.”
+68. IMF, “Global Growth: Divergent and Uncertain, January 2025. 
+69. Assuming constant GDP growth for 2027.
+70. Vena, “Industry benchmarks of gross, net and operating profit 
+margins,” August 2024.
+71. Goldman Sachs, “Gen AI: Too much spend, too little benefit?” 
+June 2024.
+72. “Only 23% of exposed tasks are cost effective to automate 
+using AI technologies within the next ten years.”
+73. IMF, “Global growth: Divergent and uncertain,” January 2025. 
+74. Assuming constant GDP growth for 2027.
+75. Vena, “Industry benchmarks of gross, net and operating profit 
+margins,” August 2024.
+76. Goldman Sachs, “Gen AI: Too much spend, too little benefit?” 
+June 2024.
+77. “Only 23% of exposed tasks are cost effective to automate 
+using AI technologies within the next ten years.”
+78. IMF, “Global Growth: Divergent and Uncertain, January 2025. 
+79. Assuming constant GDP growth for 2027.
+80. Vena, “Industry benchmarks of gross, net and operating profit 
+margins,” August 2024.
+103
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 104
+Authors
+Meet the experts
+Anne-Laure Thibaud 
+Executive Vice President – Head of AI 
+First Business & Analytics, Capgemini
+annelaure.thibaud@capgemini.com
+Anne-Laure Thibaud leads a worldwide team 
+accelerating the adoption of Generative and 
+Agentic AI, helping organizations unlock business 
+value through AI-driven transformation. With a 
+focus on designing and operating high-impact 
+solutions in collaboration with key technology 
+partners, Anne-Laure champions new ways of 
+working where human and AI agents collaborate 
+to drive meaningful and sustainable outcomes at 
+scale.
+Sergey Patsko
+Vice President, Data and AI Group Offer 
+Leader, Capgemini
+sergey.patsko@capgemini.com
+Sergey Patsko is a VP and Data & AI Group 
+Offer Leader at Capgemini. He leads the team 
+of Capgemini Offer Leaders in the core area of 
+the Group – Data & AI. By developing offerings 
+like Generative AI or Agentic AI, Capgemini 
+enables businesses to optimize processes, 
+create personalized customer experiences, and 
+uncover opportunities for growth. Prior to joining 
+Capgemini, Sergey worked on applications of AI 
+for automation of manufacturing processes and 
+Digital Transformation for Fortune 500 companies 
+at General Electric. He was at the forefront of 
+developing IoT platforms and applying AI to 
+industrial operations. Sergey has a rich venture 
+capital experience, having collaborated with AI 
+startups in Silicon Valley. He holds a PhD in Applied 
+Mathematics and a Master’s degree from Stanford 
+Graduate School of Business.
+Pascal Brier
+Group Chief Innovation Officer and member  
+of the Group Executive Committee, Capgemini 
+pascal.brier@capgemini.com
+Pascal Brier is the Group Chief Innovation 
+Officer and member of the Group Executive 
+Committee at Capgemini, a role he has held 
+since 2021 after a long career in leadership 
+positions at Microsoft, AT&T and NCR. In his 
+current position, Pascal oversees Technology, 
+Innovation and Ventures for the Group 
+worldwide. His efforts center on tracking 
+analyzing, and implementing more than 1,000 
+emerging technologies annually. Under his 
+guidance, the company constantly strives to be 
+at the forefront of technological innovation, 
+making significant impacts on the world of 
+business and wider society.
+Itziar Goicoechea-Martinez
+Senior Director, AI and Generative AI Offer, 
+Capgemini
+itziar.goicoechea-martinez@capgemini.com
+Itziar brings over 15 years of international 
+leadership in technology and data, with deep 
+expertise in machine learning across the 
+e-commerce, technology, and pharmaceutical 
+sectors. She previously served as Director of Data 
+Science at Adidas and worked in machine learning 
+for Bayer and Apple. She holds a PhD in Physics.
+104
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 105
+Authors
+Meet the experts
+Marjolein Wenderich
+Vice President, Global MD – Workforce and 
+Organization, Capgemini
+marjolein.wenderich@capgemini.com
+Marjolein is the Global Head - Workforce & 
+Organization at Capgemini Invent. Previously 
+associated with Alliander, Atos Consulting 
+and KPMG in both consulting and managerial 
+roles. With over 25 years of experience in the 
+public and corporate market, she has helped 
+the organizations reimagine work, workforce 
+evolution and workplace models in the age 
+of digital disruption. She specializes in driving 
+enterprise-wide transformation through agile 
+operating models, skills-based workforce 
+planning and AI- enabled talent ecosystems. 
+A trusted advisor and speaker, Marjolein 
+brings a unique blend of strategic insight 
+and tech-enabled execution to future-proof 
+organizations in a rapidly evolving world of 
+work. 
+Steve Jones
+Executive Vice President – Data Driven  
+Business and Generative AI, Capgemini
+steve.g.jones@capgemini.com
+Steve is the EVP for Data Driven Business 
+& Agentic Architecture at Capgemini, he 
+is a published author and contributor to 
+numerous journals and conferences on the 
+challenges of the business adoption of new 
+technologies. His focus today is on how 
+companies prepare themselves for the 50% 
+AI future.
+Robert Engels
+Vice President and Head of Generative AI 
+Lab, CTO, Insights and Data, Capgemini
+robert.engels@capgemini.com
+Robert (Dr. Bob) Engels is serving as CTO, AI 
+for the Insights & Data Business Line. He has a 
+long track record in the fields of AI, cognitive 
+psychology, and knowledge presentation. 
+Before joining Capgemini, he worked for 
+startups, angel investors, and the Oslo 
+municipality, had his own startup, oversaw 
+radio and television production infrastructures 
+with AI, and built a digital (AI-based) experience 
+center for popular music. Robert holds a 
+master’s degree in cognitive psychology and AI, 
+and a PhD in AI and reasoning.
+Daniela Rittmeier
+Head of Generative AI Accelerator, Germany, 
+Capgemini
+daniela.rittmeier@capgemini.com
+Daniela Rittmeier is a Supervisory Board member, a 
+trusted C-level-advisor and the Head of Capgemini’s 
+Generative AI Accelerator. She brings more than two 
+decades experience in initiating, developing and realizing 
+transformation in health, life science, automotive, IT & 
+beyond.
+Daniela gained deep dive automotive industry knowledge 
+in the decade she was part of the BMW Group. Daniela 
+Rittmeier was responsible for the integration of Artificial 
+Intelligence technologies based on the realization of 
+the first autonomous driving platform, the corporate 
+AI strategy, the AI Hub of the Center of Excellence incl. 
+a portfolio of ~600 data driven use cases along the 
+entire value chain. As multiple awarded thought leader 
+she is focusing on data value creation and sustainable 
+human centric solutions. Daniela is committed to 
+empower Women in Tech, Coding for Kids and the digital 
+sovereignty of society.
+105
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 106
+Jerome Buvat
+Head, Capgemini Research Institute
+jerome.buvat@capgemini.com
+Amol Khadikar
+Director, Capgemini Research 
+Institute 
+amol.khadikar@capgemini.com
+VAIshnavee Ananth
+Senior Consultant, Capgemini 
+Research Institute
+vaishnavee.a@capgemini.com
+Abhiruchi Masurkar
+Senior Consultant, Capgemini Research 
+Institute
+abhiruchi.masurkar@capgemini.com
+Authors
+Meet the Capgemini Research Institute The contributors would like to thank, Franck Greverie, Mark 
+Oost, Mark Roberts, Alex Marandon, Andreas Sjostrom, 
+Andy M Feinstein, Andy Vickers, Ralf Bus, Anne-Violaine 
+Monnie-Agazzi, Juliette Merour, Weiwei Feng, Jiani Ziang, 
+James Wilson, Sebastien Guibert, Marek Sowa, Prasad K 
+Shyam, Ajay Mohan, Claudia Crummenerl, Elisa Farri, Gabriele 
+Rosani, Eric Reich, Kary Bheemaiah, Courtney Pace, Mathilde 
+Gailledreau, Miguel Viedma, Etienne Grass, Ramon Angel 
+Antelo Reguengo, Jonathan Aston, Lucy Mason, Javier 
+Moreno, Bashkim Berzati, Karine Sacepe, Alvaro Cuya, Nicolas 
+Gaudilliere, Menno Van Doorn, Joakim Wahlqvist, Aashish 
+Sharma, Vincent Biraud, Pravin M Amnieh, Dheeren Velu, 
+Efi Raili, Alex Smith-Bingham, Daniel Garschagen, Vivian 
+Yang, Angela Sahi, Larry Villaret, Damien Stulemeijer, Máté 
+Vincze, Meenu Dahiya, Shilpashree S, Susanna Östberg, Fleur 
+DU PASQUIER, Toni Sullivan, Raveena Sharma, Bridget N 
+Pietsch, Martyn Wronkowski, Subrahmanyam Kanakadandi, 
+Dominique Banon, Donald Francis, Punam Chavan, Aparajita 
+Paul, Vibha Palekar, Manish Saha, Amitabha Duttu and 
+Jaydeep Neogi for their contributions to the research.
+About the Capgemini Research 
+Institute
+The Capgemini Research Institute is Capgemini’s 
+in-house think tank on all things digital. The Institute 
+publishes research on the impact of digital technologies 
+on large traditional businesses. The team draws on the 
+worldwide network of Capgemini experts and works 
+closely with academic and technology partners. The 
+Institute has dedicated research centers in India, 
+Singapore, the United Kingdom, and the United States. 
+The Institute was ranked #1 in the world for the quality 
+of its research by independent analysts for six 
+consecutive times - an industry first. Visit us at www.
+capgemini.com/researchinstitute/
+106
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 107
+For more information, please contact:
+Sergey Patsko 
+Vice President, Data and AI Group 
+Offer Leader, Capgemini
+sergey.patsko@capgemini.com
+Ajay Mohan  
+Head of AI, Analytics, and Data Science, Center of 
+Excellence, Insights and Data North America, Capgemini 
+ajay.mohan@capgemini.com
+Balasubramaniam Natarajan  
+Vice President, Generative AI & Analytics
+bala.natarajan@capgemini.com
+Craig Suckling  
+Vice president, Head of AI, Capgemini Europe
+craig.suckling@capgemini.com
+Anne-Laure Thibaud  
+Executive Vice President, Head of AI 
+First Business & Analytics, Capgemini
+annelaure.thibaud@capgemini.com
+Marc Chemin 
+Executive Vice President, Global Sales 
+Officer, Insights and Data, Capgemini
+marc.chemin@capgemini.com
+Mark Oost 
+Vice President, AI and Generative AI 
+Group Offer Lead, Capgemini
+mark.oost@capgemini.com
+Itziar Goicoechea-Martinez  
+Senior Director, AI and Generative AI Offer, 
+Capgemini
+itziar.goicoechea-martinez@capgemini.com
+Central team:
+North America India & APAC
+UK & Europe
+Regional team:
+107
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 108
+Resonance AI framework by Capgemini 
+The Resonance AI framework by Capgemini provides a sequential 
+approach to the conceptualization, structuring, and implementation 
+of successful AI-driven transformation. It helps business leaders 
+realize AI’s potential and achieve market leadership regardless of 
+the industry. Anchored in transformation strategy, the Framework 
+helps integrate operations and culture while accelerating AI value 
+creation– to both transform today and build for tomorrow.   
+ADOPTADOPT
+ADAPT
+ACCESS
+HUMAN-AI-CHEMISTRY
+                  WAVES OF AI VALUE
+Transform NowAdoptation to 
+collaboration Operational eﬃciency
+Hyper-personalized experience
+Tech to data
+AI READINESS
+AI ESSENTIALS
+Build Tomorrow
+Business (re)invention
+Next frontier innovation
+108
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 109
+AI essentials
+To access the transformative power of AI, organizations must 
+establish ‘Intelligence-as-a-Service.’ That includes scalable and robust 
+enterprise data foundations combined with advanced language and 
+vision models, and applications with built-in AI capabilities. These 
+provide the foundation to build, operate, and scale AI with real, 
+enterprise-specific impact.
+AI readiness
+Adapting AI to an organization’s context requires the right enablers 
+and guardrails to secure, govern, customize, and operationalize AI. 
+Success hinges on the ability to empower an organization to scale 
+AI while ensuring secure, ethical, and aligned organizational AI 
+capabilities deployed on trusted Data foundations and managed as 
+business resources.
+Human-AI chemistry
+Organizations adopt hybrid forms of collaboration by designing 
+the clear roles and intuitive interactions that enable seamless 
+collaboration between humans and AI. This mutual reliability and 
+collaboration defines ‘human–AI chemistry’– the new alchemy of 
+innovation and defining success factor in your AI journey. 
+Waves of value
+With the technological, governance and collaborative foundations 
+in place, AI value creation is poised for acceleration across an 
+organization, ready to deliver the operational efficiency, personized 
+experiences, business reinvention and next frontier innovation that 
+enable an organization to transform today and build for tomorrow. 
+109
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 110
+Driving enterprise transformation through seamless, scalable & 
+intelligent Agentic AI integration
+AI agents are autonomous, goal-oriented, context-aware, adaptive, proactive, and language-aware enabling 24/7 hyper-automation of business and IT operations for tasks and inputs that 
+are variable by nature. They interact with users and perform tasks autonomously, making human-AI interactions more natural and efficient. 
+By embracing agentic AI, businesses can significantly enhance operational efficiency through seamless collaboration between AI agents and human teams. These AI agents act as powerful 
+knowledge and capability multipliers, enabling teams to deliver greater value and drive growth.  
+ 
+Our partnership with NVIDIA  in building over 100 bespoke AI agent-driven solutions tailored to various industry use cases, from life sciences, telco or financial services to manufacturing and retail, 
+and also our strategic partnership with Google Cloud  to revolutionize CX across industries with agentic AI, is the testament to the act that the future of enterprise operations lies in the seamless 
+integration of AI agents working together with humans and under their control.  
+ 
+More on our Agentic AI offerings: https://www.capgemini.com/solutions/agentic-AI-for-enterprise-by-capgemini/
+As AI agents transform the way businesses operate, leading to unprecedented levels of productivity, scalable efficiency and innovation, we help organizations navigate the complexities of 
+implementing agentic AI solutions, bringing robust governance frameworks that allow compliance, scalability, and consistent performance. We also address strategic objectives such as:  
+By adopting a process-based methodology for 
+an AI based transformation we ensure we deliver 
+significant ROI due to the end- to-end approach.
+We select the most suitable technology per agent, develop, 
+integrate them into the IT system, orchestrate and control 
+them, and ensure trust 
+By adjusting the organization and enterprise processes and 
+improving the needed skills. We propose different models of 
+collaboration between human and AI agents.
+Agentic AI for Enterprise by Capgemini
+Process based methodology Implementing AI agents at scale Adapting operating model
+110
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 111
+This report is a part of Capgemini Research Institute‘s series 
+on Generative Al
+Special edition of our premium journal Conversations for tomorrow on Gen AI
+Gen AI in supply chain*
+Gen AI in manufacturing*
+Gen AI for marketing
+Gen Al and agentic AI in business operations
+Agentic AI 
+Gen Al and cybersecurity
+Gen Al and ethics/ trust*
+Data powered enterprisesGen AI for software engineering
+Gen AI in R&D and engineering
+Gen AI and sustainability
+Gen AI at work Gen AI in customer service
+Gen AI in organizations - annual research
+Gen AI and
+consumers
+*Upcoming reports 
+To find out more, please go to https://www.capgemini.com/insights/research-institute/
+111
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 112
+AI in action: How gen AI and agentic 
+AI redefine business operations
+Data foundations for government: 
+From AI ambition to execution
+Unleashing the value of customer 
+service: The transformative impact 
+of Gen AI and agentic AI
+Gen AI at work: Shaping the future 
+of organizations
+AI and Generative AI in 
+cybersecurity
+Data-powered enterprises: 
+The path to data mastery
+Top tech trends of 2025: 
+AI-powered everything
+Developing sustainable Gen AI
+More Capgemini Research Institute publications
+112
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 113
+More Capgemini Research Institute publications
+First Name
+Last Name
+Email
+Fields marked with an    are required 
+Capgemini Research Institute
+By submitting this form, I understand that my data will be processed by Capgemini as indicated above and 
+described in the Terms of use. 
+Submit
+Receive copies of our reports by scanning 
+the QR code or visiting
+https://www.capgemini.com/capgemini-research-institute-subscription/
+Subscribe to latest research 
+from the Capgemini Research Institute
+113
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 114
+    
+Notes
+114
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 115
+    
+Notes
+115
+Capgemini Research Institute 2025
+Rise of agentic AI: How trust is the key to human-AI collaboration
+PAGE 116
+Copyright © 2025 Capgemini. All rights reserved.
+About Capgemini
+Capgemini is a global business and technology transformation partner, 
+helping organizations to accelerate their dual transition to a digital and 
+sustainable world, while creating tangible impact for enterprises and 
+society. It is a responsible and diverse group of 340,000 team members in 
+more than 50 countries. With its strong over 55-year heritage, Capgemini 
+is trusted by its clients to unlock the value of technology to address the 
+entire breadth of their business needs. It delivers end-to-end services and 
+solutions leveraging strengths from strategy and design to engineering, all 
+fueled by its market leading capabilities in AI, generative AI, cloud and data, 
+combined with its deep industry expertise and partner ecosystem. The 
+Group reported 2024 global revenues of €22.1 billion.
+Get the Future You Want | www.capgemini.com

@@ -1,0 +1,239 @@
+{
+  "run": "g_r530_s3_1003_2",
+  "study": "R530",
+  "seed": "g-r530-s3",
+  "arms": [
+    "A-SOLO",
+    "A-CONF",
+    "A-GATE"
+  ],
+  "task_set": "ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob",
+  "tasks": [
+    "ow_19_redact",
+    "ow_11_reflow",
+    "ow_13_timespans",
+    "ow_15_tomlsub",
+    "ow_16_pathglob"
+  ],
+  "n_tasks": 5,
+  "smoke": false,
+  "brain": "cline",
+  "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+  "model": "gemma-4-12b-it-qat",
+  "registration_line": "R530_BLOCK: g_r530_s3_1003_2 tasks=ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions",
+  "decision": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+  "gauge_scope": "bank",
+  "tool_protocol": "native",
+  "budget": {
+    "max_calls_per_attempt": 24,
+    "max_model_calls": 72,
+    "max_conf_attempts": 3,
+    "max_gate_rounds": 5,
+    "max_completion_tokens": 120000,
+    "max_context_tokens": 200000,
+    "max_wall_s": 7200,
+    "max_tool_calls": 120,
+    "tool_timeout_s": 120,
+    "tool_timeout_max_s": 300,
+    "gate_test_timeout_s": 10,
+    "nudge_budget": 2,
+    "max_commands_per_turn": 3
+  },
+  "budget_profile": "frozen",
+  "request_policy": {
+    "temperature": 0.3,
+    "retries": 4,
+    "backoff_s": 5.0,
+    "request_timeout_s": 900,
+    "reasoning_effort": "none",
+    "reasoning_effort_applies_to": "chat() (all three arms)",
+    "max_tokens_sent": null
+  },
+  "backend_meta": {
+    "backend": "unshare",
+    "available": true,
+    "unavailable_reason": null,
+    "platform": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+    "memory_bytes": 536870912,
+    "network_isolated": true,
+    "write_confined": true,
+    "probe_detail": {
+      "net": {
+        "rc": 0,
+        "stdout": "NET_BLOCKED OSError",
+        "stderr": "",
+        "timed_out": false
+      },
+      "escape": {
+        "rc": 0,
+        "stdout": "ESCAPE_BLOCKED PermissionError",
+        "stderr": "",
+        "timed_out": false
+      },
+      "inside": {
+        "rc": 0,
+        "stdout": "WROTE_INSIDE",
+        "stderr": "",
+        "timed_out": false
+      },
+      "repo_visible": {
+        "rc": 0,
+        "stdout": "REPO_ABSENT",
+        "path": "/home/user1/vacant/Vacant"
+      }
+    },
+    "honest_bound": "只有網路是真的隔離（net namespace）；檔案端只有 unix 權限與 cwd 慣例，**擋門不是隔離**（預註冊 §三-3 S2 逐字）。",
+    "write_works_inside": true,
+    "repo_hidden_from_sandbox": true,
+    "requested": "unshare",
+    "tried": [
+      {
+        "backend": "unshare",
+        "available": true,
+        "reason": null
+      }
+    ],
+    "use_sudo_bwrap": false,
+    "sandbox": "unshare",
+    "sandbox_uid": 65534,
+    "sandbox_gid": 65534,
+    "inference": {
+      "reasoning_effort_sent": "none",
+      "reasoning_tokens": [
+        0,
+        0
+      ],
+      "reasoning_tokens_all_zero": true,
+      "prefill_ms_per_1k_prompt": 912.4,
+      "note": "prefill 吞吐是**實驗條件**不是實作細節：多輪工具迴圈每通都把整段對話當 prompt 重送，而那會讓 `budget_wall` 在兩台上咬到不同的地方。⚠ 本欄量的是**暖快取**（多輪迴圈的前綴本來就是暖的）；冷的那一通會慢一個量級（2026-09-14 去快取實測：冷 1003≈1509／1004≈481、暖 1003≈144／1004≈54–102、生成 1003≈22.6／1004≈14.4 ms/tok）。⚠ **不准**拿它解釋逐通延遲的差別——逐通延遲由**生成長度**決定（smoke9 兩塊的 corr(latency, completion) 都在 +0.98 以上）。"
+    }
+  },
+  "gates": {
+    "E9": {
+      "gate": "E-9",
+      "sandbox": "unshare",
+      "sandbox_uid": 65534,
+      "network_isolated": true,
+      "write_confined": true,
+      "repo_hidden_from_sandbox": true,
+      "ok": true,
+      "enforced": true
+    },
+    "E10": {
+      "gate": "E-10",
+      "rate_abort": 0.2,
+      "per_arm": {
+        "A-SOLO": {
+          "n": 5,
+          "noop": 0,
+          "rate": 0.0
+        },
+        "A-CONF": {
+          "n": 5,
+          "noop": 0,
+          "rate": 0.0
+        },
+        "A-GATE": {
+          "n": 4,
+          "noop": 0,
+          "rate": 0.0
+        }
+      },
+      "arms_over_threshold": [],
+      "offending_cells": [],
+      "ok": true,
+      "reason": null,
+      "honest_bound": "20% 是 Fable 2026-09-14 訂的約定，不是從任何實測推出來的門檻；引用時要跟著講。"
+    },
+    "E11_preflight": {
+      "gate": "E-11",
+      "phase": "preflight",
+      "per_endpoint": {
+        "http://100.86.226.21:1234/v1/chat/completions": {
+          "reasoning_tokens": [
+            0,
+            0
+          ],
+          "all_zero": true,
+          "reasoning_effort_sent": "none",
+          "prefill_ms_per_1k_prompt": 912.4,
+          "long_ctx_ms_per_1k_prompt": 1718.9,
+          "prefill_diff_unusable": null,
+          "error": null
+        }
+      },
+      "ok": true
+    },
+    "E11_closeout": {
+      "gate": "E-11",
+      "phase": "closeout",
+      "block": "g_r530_s3_1003_2",
+      "calls_audited": 403,
+      "reasoning_tokens_total": 0,
+      "completion_tokens_total": 489185,
+      "reasoning_share": 0.0,
+      "calls_without_the_field": 0,
+      "ok": true,
+      "verdict": "ok"
+    }
+  },
+  "block_verdict": "ok",
+  "work_root": "/var/tmp/vacant_r530_work",
+  "bank": {
+    "root_sha256": "4e9f5581a806553e958059e7af507fad2d5f36e59533d9c835a79043c13b57f4",
+    "pinned": false,
+    "pinned_path": null
+  },
+  "runner_git_info": {
+    "sha": "38a20fce905f75e84626ae177d572810b7d6c678",
+    "dirty": true,
+    "branch": "feat/v2-four-stages"
+  },
+  "receipts_written": [
+    "receipts_A-SOLO.ndjson",
+    "receipts_A-SOLO.pub.json",
+    "receipts_A-CONF.ndjson",
+    "receipts_A-CONF.pub.json",
+    "receipts_A-GATE.ndjson",
+    "receipts_A-GATE.pub.json"
+  ],
+  "arms_stats": {
+    "A-SOLO": {
+      "processed": 5,
+      "infra_void": 0,
+      "accepted": 5,
+      "deliv": 1,
+      "calls": 92,
+      "tokens": 2479549,
+      "wall_s": 8002.177
+    },
+    "A-CONF": {
+      "processed": 5,
+      "infra_void": 0,
+      "accepted": 2,
+      "deliv": 1,
+      "calls": 204,
+      "tokens": 4754563,
+      "wall_s": 13706.806
+    },
+    "A-GATE": {
+      "processed": 5,
+      "infra_void": 1,
+      "accepted": 3,
+      "deliv": 1,
+      "calls": 70,
+      "tokens": 1377024,
+      "wall_s": 10614.872618005753
+    }
+  },
+  "wall_s": 32328.1,
+  "run_terminal": true,
+  "honest_bounds": [
+    "A-SOLO 的 accepted 恆為 True（它沒有拒交語意）——每一次引用 deliv 都要跟著講這句（§六-0、§八-4）。",
+    "A-GATE vs A-SOLO 不是等預算比較，而且故意不是；等預算那一刀由 A-GATE vs A-CONF 負責（§八-4）。",
+    "max_wall_s 在呼叫之間檢查，不是每題牆鐘的硬上界（§二-3）。",
+    "只有網路是真的隔離（net namespace）；檔案端只有 unix 權限與 cwd 慣例，**擋門不是隔離**（預註冊 §三-3 S2 逐字）。",
+    "token 上限只算 completion（Fable 2026-09-14）；prompt 逐格另外落盤，因為多輪迴圈的 prompt 隨輪數二次成長，兩個數字混在一起看不出「是生成太多還是脈絡太長」。",
+    "20% 是 Fable 2026-09-14 訂的約定，不是從任何實測推出來的門檻；引用時要跟著講。"
+  ]
+}

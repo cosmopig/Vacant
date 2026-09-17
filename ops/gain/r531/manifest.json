@@ -1,0 +1,1462 @@
+{
+  "built_by": "ops/gain/r531/build_bank.py",
+  "select_seed": "r531-bank-2026-09-15",
+  "python": "3.12.3",
+  "sources": {
+    "bigcodebench": {
+      "kind": "hf_rows",
+      "homepage": "https://huggingface.co/datasets/bigcode/bigcodebench",
+      "dataset": "bigcode/bigcodebench",
+      "config": "default",
+      "split": "v0.1.4",
+      "url": null,
+      "path": ".vacant-private/benchmarks/bigcodebench/v0.1.4.jsonl",
+      "n_expected": 1140,
+      "bytes": 6964708,
+      "sha256": "6f3442384e576147f71875242068ce217885e0f761603cfb62175736e0331abd",
+      "license": "Apache-2.0",
+      "license_note": "HF cardData license=apache-2.0；GitHub harness repo 已於 2026-07-20 封存（read-only）"
+    },
+    "bigcodebench_hard": {
+      "kind": "hf_rows",
+      "homepage": "https://huggingface.co/datasets/bigcode/bigcodebench-hard",
+      "dataset": "bigcode/bigcodebench-hard",
+      "config": "default",
+      "split": "v0.1.4",
+      "url": null,
+      "path": ".vacant-private/benchmarks/bigcodebench_hard/v0.1.4.jsonl",
+      "n_expected": 148,
+      "bytes": 1344676,
+      "sha256": "0f47d58281bed517d0fc39b41f5a27031388222318e1fb78cd28c7b56cde6bf5",
+      "license": "Apache-2.0（繼承 bigcodebench；HF card 本身未標）",
+      "license_note": "hard 子集的 card 沒有 license 欄位，沿用母集的 Apache-2.0，**這是推定不是宣告**"
+    },
+    "codecontests": {
+      "kind": "hf_rows",
+      "homepage": "https://huggingface.co/datasets/deepmind/code_contests",
+      "dataset": "deepmind/code_contests",
+      "config": "default",
+      "split": "test",
+      "url": null,
+      "path": ".vacant-private/benchmarks/codecontests/test.jsonl",
+      "n_expected": 165,
+      "bytes": 192424784,
+      "sha256": "e377442924121a707c53a1a7d353d813019a616de9494b7fcf52e8d78c18bd5f",
+      "license": "Apache-2.0（程式）／CC BY-4.0（非程式資料）",
+      "license_note": "HF cardData license=cc-by-4.0；DeepMind repo 的 code 是 Apache-2.0"
+    },
+    "classeval": {
+      "kind": "raw",
+      "homepage": "https://github.com/FudanSELab/ClassEval",
+      "dataset": null,
+      "config": null,
+      "split": null,
+      "url": "https://raw.githubusercontent.com/FudanSELab/ClassEval/master/data/ClassEval_data.json",
+      "path": ".vacant-private/benchmarks/classeval/ClassEval_data.json",
+      "n_expected": 100,
+      "bytes": 2345518,
+      "sha256": "50a1ac0e4d0c238573c10c0ab11feae00b14a80ae9e4c9cc28148707ecf0b6a2",
+      "license": "程式 MIT／**資料 CC BY-NC 4.0（非商用）**",
+      "license_note": "Fable 2026-09-15 裁決第 3 點：我們是非商業學術與展覽用途，可用，但**授權逐字記進 manifest 與收官檔，不得再散布原始資料**"
+    },
+    "lcb_v3": {
+      "kind": "local",
+      "homepage": "https://huggingface.co/datasets/livecodebench/code_generation_lite",
+      "dataset": null,
+      "config": null,
+      "split": null,
+      "url": null,
+      "path": "ops/gain/data/lcb_bank_v3.jsonl",
+      "n_expected": 189,
+      "bytes": 2663482,
+      "sha256": "bd3dffebb1b16bc7c92ead59c82753597a8197f9927d4f758d42e6c28b129293",
+      "license": "**不明確**",
+      "license_note": "HF dataset card 的 YAML 只寫 `license: cc`，**沒有指明 BY／SA／NC**；題目本身抓自 LeetCode／AtCoder／Codeforces。Fable 2026-09-15 裁決第 3 點：照實記「授權不明確」。"
+    },
+    "lcb_v3_solutions": {
+      "kind": "local",
+      "homepage": "",
+      "dataset": null,
+      "config": null,
+      "split": null,
+      "url": null,
+      "path": "ops/gain/data/lcb_v3_probe_solutions.json",
+      "n_expected": 12,
+      "bytes": 4323,
+      "sha256": "0dc5708cd0e7fceda286f6541c7e2a4ab31cf566e00d05f93e2e2aa046204f28",
+      "license": "同 lcb_v3（不明確）",
+      "license_note": "只有 12 題有參考解——這是 `pba` 族題數的硬上界（§六）"
+    }
+  },
+  "families": {
+    "pbf": {
+      "source_ids": [
+        "BigCodeBench/19",
+        "BigCodeBench/273",
+        "BigCodeBench/310",
+        "BigCodeBench/324",
+        "BigCodeBench/326",
+        "BigCodeBench/346",
+        "BigCodeBench/368",
+        "BigCodeBench/454",
+        "BigCodeBench/592",
+        "BigCodeBench/594",
+        "BigCodeBench/720",
+        "BigCodeBench/765",
+        "BigCodeBench/771",
+        "BigCodeBench/777",
+        "BigCodeBench/785",
+        "BigCodeBench/800",
+        "BigCodeBench/854",
+        "BigCodeBench/857",
+        "BigCodeBench/906",
+        "BigCodeBench/928",
+        "BigCodeBench/963",
+        "BigCodeBench/971",
+        "BigCodeBench/988",
+        "BigCodeBench/990",
+        "BigCodeBench/1027",
+        "BigCodeBench/1090",
+        "BigCodeBench/1108",
+        "BigCodeBench/1110",
+        "BigCodeBench/271",
+        "BigCodeBench/327",
+        "BigCodeBench/330",
+        "BigCodeBench/335",
+        "BigCodeBench/542",
+        "BigCodeBench/543",
+        "BigCodeBench/545",
+        "BigCodeBench/570",
+        "BigCodeBench/673",
+        "BigCodeBench/675",
+        "BigCodeBench/682",
+        "BigCodeBench/712",
+        "BigCodeBench/743",
+        "BigCodeBench/747",
+        "BigCodeBench/759",
+        "BigCodeBench/795",
+        "BigCodeBench/810",
+        "BigCodeBench/818",
+        "BigCodeBench/836",
+        "BigCodeBench/939",
+        "BigCodeBench/96",
+        "BigCodeBench/989"
+      ],
+      "n": 50,
+      "target_n": 25,
+      "selection": {
+        "eligible": 273,
+        "eligible_hard": 25,
+        "rejected": {
+          "libs_3rd": 813,
+          "imports_3rd": 28,
+          "network": 20,
+          "few_tests": 6,
+          "parse": 0,
+          "entry": 0
+        },
+        "hard_picked": [
+          "BigCodeBench/19",
+          "BigCodeBench/273",
+          "BigCodeBench/310",
+          "BigCodeBench/324",
+          "BigCodeBench/326",
+          "BigCodeBench/346",
+          "BigCodeBench/368",
+          "BigCodeBench/454",
+          "BigCodeBench/592",
+          "BigCodeBench/594",
+          "BigCodeBench/720",
+          "BigCodeBench/765",
+          "BigCodeBench/771",
+          "BigCodeBench/777",
+          "BigCodeBench/785",
+          "BigCodeBench/800",
+          "BigCodeBench/854",
+          "BigCodeBench/857",
+          "BigCodeBench/906",
+          "BigCodeBench/928",
+          "BigCodeBench/963",
+          "BigCodeBench/971",
+          "BigCodeBench/988",
+          "BigCodeBench/990"
+        ],
+        "easy_picked": [
+          "BigCodeBench/1027",
+          "BigCodeBench/1090",
+          "BigCodeBench/1108",
+          "BigCodeBench/1110",
+          "BigCodeBench/271",
+          "BigCodeBench/327",
+          "BigCodeBench/330",
+          "BigCodeBench/335",
+          "BigCodeBench/542",
+          "BigCodeBench/543",
+          "BigCodeBench/545",
+          "BigCodeBench/570",
+          "BigCodeBench/673",
+          "BigCodeBench/675",
+          "BigCodeBench/682",
+          "BigCodeBench/712",
+          "BigCodeBench/743",
+          "BigCodeBench/747",
+          "BigCodeBench/759",
+          "BigCodeBench/795",
+          "BigCodeBench/810",
+          "BigCodeBench/818",
+          "BigCodeBench/836",
+          "BigCodeBench/939",
+          "BigCodeBench/96",
+          "BigCodeBench/989"
+        ]
+      },
+      "tasks": [
+        {
+          "task_id": "pbf_01_ebench19",
+          "source_id": "BigCodeBench/19",
+          "template_bytes": 4260,
+          "visible_cases": 2,
+          "hidden_cases": 4,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_02_bench273",
+          "source_id": "BigCodeBench/273",
+          "template_bytes": 5175,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_03_bench310",
+          "source_id": "BigCodeBench/310",
+          "template_bytes": 3958,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbf_04_bench324",
+          "source_id": "BigCodeBench/324",
+          "template_bytes": 3429,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbf_05_bench326",
+          "source_id": "BigCodeBench/326",
+          "template_bytes": 3656,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbf_06_bench346",
+          "source_id": "BigCodeBench/346",
+          "template_bytes": 5013,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_07_bench368",
+          "source_id": "BigCodeBench/368",
+          "template_bytes": 5365,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_08_bench454",
+          "source_id": "BigCodeBench/454",
+          "template_bytes": 4634,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_09_bench592",
+          "source_id": "BigCodeBench/592",
+          "template_bytes": 3975,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_10_bench594",
+          "source_id": "BigCodeBench/594",
+          "template_bytes": 5644,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_11_bench720",
+          "source_id": "BigCodeBench/720",
+          "template_bytes": 3950,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_12_bench765",
+          "source_id": "BigCodeBench/765",
+          "template_bytes": 4529,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_13_bench771",
+          "source_id": "BigCodeBench/771",
+          "template_bytes": 4674,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_14_bench777",
+          "source_id": "BigCodeBench/777",
+          "template_bytes": 4839,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_15_bench785",
+          "source_id": "BigCodeBench/785",
+          "template_bytes": 4435,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_16_bench800",
+          "source_id": "BigCodeBench/800",
+          "template_bytes": 4842,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_17_bench854",
+          "source_id": "BigCodeBench/854",
+          "template_bytes": 3841,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_18_bench857",
+          "source_id": "BigCodeBench/857",
+          "template_bytes": 4756,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbf_20_bench928",
+          "source_id": "BigCodeBench/928",
+          "template_bytes": 3646,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbf_21_bench963",
+          "source_id": "BigCodeBench/963",
+          "template_bytes": 5651,
+          "visible_cases": 2,
+          "hidden_cases": 5,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_22_bench971",
+          "source_id": "BigCodeBench/971",
+          "template_bytes": 4778,
+          "visible_cases": 2,
+          "hidden_cases": 8,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_23_bench988",
+          "source_id": "BigCodeBench/988",
+          "template_bytes": 5112,
+          "visible_cases": 2,
+          "hidden_cases": 10,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbf_24_bench990",
+          "source_id": "BigCodeBench/990",
+          "template_bytes": 4898,
+          "visible_cases": 2,
+          "hidden_cases": 4,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbf_25_ench1027",
+          "source_id": "BigCodeBench/1027",
+          "template_bytes": 3497,
+          "visible_cases": 2,
+          "hidden_cases": 3,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbf_26_ench1090",
+          "source_id": "BigCodeBench/1090",
+          "template_bytes": 4086,
+          "visible_cases": 2,
+          "hidden_cases": 6,
+          "gauge_bad_n": 4
+        }
+      ],
+      "dropped": [],
+      "rendered_n": 50,
+      "rendered_ids": [
+        "pbf_01_ebench19",
+        "pbf_02_bench273",
+        "pbf_03_bench310",
+        "pbf_04_bench324",
+        "pbf_05_bench326",
+        "pbf_06_bench346",
+        "pbf_07_bench368",
+        "pbf_08_bench454",
+        "pbf_09_bench592",
+        "pbf_10_bench594",
+        "pbf_11_bench720",
+        "pbf_12_bench765",
+        "pbf_13_bench771",
+        "pbf_14_bench777",
+        "pbf_15_bench785",
+        "pbf_16_bench800",
+        "pbf_17_bench854",
+        "pbf_18_bench857",
+        "pbf_19_bench906",
+        "pbf_20_bench928",
+        "pbf_21_bench963",
+        "pbf_22_bench971",
+        "pbf_23_bench988",
+        "pbf_24_bench990",
+        "pbf_25_ench1027",
+        "pbf_26_ench1090",
+        "pbf_27_ench1108",
+        "pbf_28_ench1110",
+        "pbf_29_bench271",
+        "pbf_30_bench327",
+        "pbf_31_bench330",
+        "pbf_32_bench335",
+        "pbf_33_bench542",
+        "pbf_34_bench543",
+        "pbf_35_bench545",
+        "pbf_36_bench570",
+        "pbf_37_bench673",
+        "pbf_38_bench675",
+        "pbf_39_bench682",
+        "pbf_40_bench712",
+        "pbf_41_bench743",
+        "pbf_42_bench747",
+        "pbf_43_bench759",
+        "pbf_44_bench795",
+        "pbf_45_bench810",
+        "pbf_46_bench818",
+        "pbf_47_bench836",
+        "pbf_48_bench939",
+        "pbf_49_ebench96",
+        "pbf_50_bench989"
+      ],
+      "case_stats": {
+        "visible_total": 100,
+        "hidden_total": 175,
+        "visible_median": 2,
+        "hidden_median": 3,
+        "visible_min": 2,
+        "hidden_min": 3
+      },
+      "finalize": {
+        "gauge_pass_n": 49,
+        "rendered_n": 50,
+        "kept_n": 25,
+        "target_n": 25,
+        "short_of_target": 0,
+        "kept": [
+          "pbf_01_ebench19",
+          "pbf_02_bench273",
+          "pbf_03_bench310",
+          "pbf_04_bench324",
+          "pbf_05_bench326",
+          "pbf_06_bench346",
+          "pbf_07_bench368",
+          "pbf_08_bench454",
+          "pbf_09_bench592",
+          "pbf_10_bench594",
+          "pbf_11_bench720",
+          "pbf_12_bench765",
+          "pbf_13_bench771",
+          "pbf_14_bench777",
+          "pbf_15_bench785",
+          "pbf_16_bench800",
+          "pbf_17_bench854",
+          "pbf_18_bench857",
+          "pbf_20_bench928",
+          "pbf_21_bench963",
+          "pbf_22_bench971",
+          "pbf_23_bench988",
+          "pbf_24_bench990",
+          "pbf_25_ench1027",
+          "pbf_26_ench1090"
+        ],
+        "dropped": [
+          {
+            "task_id": "pbf_19_bench906",
+            "why": "壞樁沒被擋：bad_negate.py"
+          },
+          {
+            "task_id": "pbf_27_ench1108",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_28_ench1110",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_29_bench271",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_30_bench327",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_31_bench330",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_32_bench335",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_33_bench542",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_34_bench543",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_35_bench545",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_36_bench570",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_37_bench673",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_38_bench675",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_39_bench682",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_40_bench712",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_41_bench743",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_42_bench747",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_43_bench759",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_44_bench795",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_45_bench810",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_46_bench818",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_47_bench836",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_48_bench939",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_49_ebench96",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbf_50_bench989",
+            "why": "超出目標題數（量具過了但用不到）"
+          }
+        ]
+      }
+    },
+    "pbc": {
+      "source_ids": [
+        "ClassEval_0",
+        "ClassEval_12",
+        "ClassEval_15",
+        "ClassEval_18",
+        "ClassEval_21",
+        "ClassEval_23",
+        "ClassEval_24",
+        "ClassEval_26",
+        "ClassEval_3",
+        "ClassEval_31",
+        "ClassEval_32",
+        "ClassEval_33",
+        "ClassEval_35",
+        "ClassEval_36",
+        "ClassEval_40",
+        "ClassEval_41",
+        "ClassEval_42",
+        "ClassEval_49",
+        "ClassEval_50",
+        "ClassEval_54",
+        "ClassEval_60",
+        "ClassEval_61",
+        "ClassEval_65",
+        "ClassEval_73",
+        "ClassEval_76",
+        "ClassEval_77",
+        "ClassEval_79",
+        "ClassEval_8",
+        "ClassEval_81",
+        "ClassEval_83",
+        "ClassEval_85",
+        "ClassEval_87",
+        "ClassEval_88",
+        "ClassEval_89",
+        "ClassEval_9",
+        "ClassEval_90",
+        "ClassEval_94",
+        "ClassEval_95",
+        "ClassEval_96",
+        "ClassEval_99"
+      ],
+      "n": 40,
+      "target_n": 20,
+      "selection": {
+        "eligible": 76,
+        "rejected": {
+          "imports_3rd": 12,
+          "few_methods": 9,
+          "parse": 2,
+          "network": 1
+        }
+      },
+      "tasks": [
+        {
+          "task_id": "pbc_01_asseval0",
+          "source_id": "ClassEval_0",
+          "template_bytes": 9430,
+          "visible_cases": 13,
+          "hidden_cases": 6,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_02_sseval12",
+          "source_id": "ClassEval_12",
+          "template_bytes": 7204,
+          "visible_cases": 5,
+          "hidden_cases": 13,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_03_sseval15",
+          "source_id": "ClassEval_15",
+          "template_bytes": 5805,
+          "visible_cases": 5,
+          "hidden_cases": 11,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_04_sseval18",
+          "source_id": "ClassEval_18",
+          "template_bytes": 10102,
+          "visible_cases": 15,
+          "hidden_cases": 22,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_05_sseval21",
+          "source_id": "ClassEval_21",
+          "template_bytes": 9484,
+          "visible_cases": 12,
+          "hidden_cases": 12,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_06_sseval23",
+          "source_id": "ClassEval_23",
+          "template_bytes": 7737,
+          "visible_cases": 10,
+          "hidden_cases": 16,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_07_sseval24",
+          "source_id": "ClassEval_24",
+          "template_bytes": 6859,
+          "visible_cases": 10,
+          "hidden_cases": 11,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbc_09_asseval3",
+          "source_id": "ClassEval_3",
+          "template_bytes": 7333,
+          "visible_cases": 10,
+          "hidden_cases": 17,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_11_sseval32",
+          "source_id": "ClassEval_32",
+          "template_bytes": 5935,
+          "visible_cases": 7,
+          "hidden_cases": 12,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_12_sseval33",
+          "source_id": "ClassEval_33",
+          "template_bytes": 11023,
+          "visible_cases": 10,
+          "hidden_cases": 16,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_13_sseval35",
+          "source_id": "ClassEval_35",
+          "template_bytes": 8529,
+          "visible_cases": 10,
+          "hidden_cases": 11,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_14_sseval36",
+          "source_id": "ClassEval_36",
+          "template_bytes": 12143,
+          "visible_cases": 10,
+          "hidden_cases": 16,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_16_sseval41",
+          "source_id": "ClassEval_41",
+          "template_bytes": 7683,
+          "visible_cases": 5,
+          "hidden_cases": 11,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_17_sseval42",
+          "source_id": "ClassEval_42",
+          "template_bytes": 10798,
+          "visible_cases": 12,
+          "hidden_cases": 11,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_18_sseval49",
+          "source_id": "ClassEval_49",
+          "template_bytes": 14166,
+          "visible_cases": 10,
+          "hidden_cases": 26,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_20_sseval54",
+          "source_id": "ClassEval_54",
+          "template_bytes": 11376,
+          "visible_cases": 11,
+          "hidden_cases": 17,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_23_sseval65",
+          "source_id": "ClassEval_65",
+          "template_bytes": 8857,
+          "visible_cases": 12,
+          "hidden_cases": 16,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_24_sseval73",
+          "source_id": "ClassEval_73",
+          "template_bytes": 8340,
+          "visible_cases": 10,
+          "hidden_cases": 16,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_25_sseval76",
+          "source_id": "ClassEval_76",
+          "template_bytes": 7606,
+          "visible_cases": 10,
+          "hidden_cases": 16,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pbc_26_sseval77",
+          "source_id": "ClassEval_77",
+          "template_bytes": 9693,
+          "visible_cases": 10,
+          "hidden_cases": 11,
+          "gauge_bad_n": 4
+        }
+      ],
+      "dropped": [],
+      "rendered_n": 40,
+      "rendered_ids": [
+        "pbc_01_asseval0",
+        "pbc_02_sseval12",
+        "pbc_03_sseval15",
+        "pbc_04_sseval18",
+        "pbc_05_sseval21",
+        "pbc_06_sseval23",
+        "pbc_07_sseval24",
+        "pbc_08_sseval26",
+        "pbc_09_asseval3",
+        "pbc_10_sseval31",
+        "pbc_11_sseval32",
+        "pbc_12_sseval33",
+        "pbc_13_sseval35",
+        "pbc_14_sseval36",
+        "pbc_15_sseval40",
+        "pbc_16_sseval41",
+        "pbc_17_sseval42",
+        "pbc_18_sseval49",
+        "pbc_19_sseval50",
+        "pbc_20_sseval54",
+        "pbc_21_sseval60",
+        "pbc_22_sseval61",
+        "pbc_23_sseval65",
+        "pbc_24_sseval73",
+        "pbc_25_sseval76",
+        "pbc_26_sseval77",
+        "pbc_27_sseval79",
+        "pbc_28_asseval8",
+        "pbc_29_sseval81",
+        "pbc_30_sseval83",
+        "pbc_31_sseval85",
+        "pbc_32_sseval87",
+        "pbc_33_sseval88",
+        "pbc_34_sseval89",
+        "pbc_35_asseval9",
+        "pbc_36_sseval90",
+        "pbc_37_sseval94",
+        "pbc_38_sseval95",
+        "pbc_39_sseval96",
+        "pbc_40_sseval99"
+      ],
+      "case_stats": {
+        "visible_total": 409,
+        "hidden_total": 580,
+        "visible_median": 10,
+        "hidden_median": 13,
+        "visible_min": 5,
+        "hidden_min": 6
+      },
+      "finalize": {
+        "gauge_pass_n": 32,
+        "rendered_n": 40,
+        "kept_n": 20,
+        "target_n": 20,
+        "short_of_target": 0,
+        "kept": [
+          "pbc_01_asseval0",
+          "pbc_02_sseval12",
+          "pbc_03_sseval15",
+          "pbc_04_sseval18",
+          "pbc_05_sseval21",
+          "pbc_06_sseval23",
+          "pbc_07_sseval24",
+          "pbc_09_asseval3",
+          "pbc_11_sseval32",
+          "pbc_12_sseval33",
+          "pbc_13_sseval35",
+          "pbc_14_sseval36",
+          "pbc_16_sseval41",
+          "pbc_17_sseval42",
+          "pbc_18_sseval49",
+          "pbc_20_sseval54",
+          "pbc_23_sseval65",
+          "pbc_24_sseval73",
+          "pbc_25_sseval76",
+          "pbc_26_sseval77"
+        ],
+        "dropped": [
+          {
+            "task_id": "pbc_08_sseval26",
+            "why": "good 沒全過 visible=5/5 hidden=7/12"
+          },
+          {
+            "task_id": "pbc_10_sseval31",
+            "why": "good 沒全過 visible=9/10 hidden=11/11"
+          },
+          {
+            "task_id": "pbc_15_sseval40",
+            "why": "壞樁沒被擋：bad_negate.py"
+          },
+          {
+            "task_id": "pbc_19_sseval50",
+            "why": "good 沒全過 visible=5/5 hidden=6/11"
+          },
+          {
+            "task_id": "pbc_21_sseval60",
+            "why": "good 沒全過 visible=0/10 hidden=0/6"
+          },
+          {
+            "task_id": "pbc_22_sseval61",
+            "why": "壞樁沒被擋：bad_negate.py"
+          },
+          {
+            "task_id": "pbc_27_sseval79",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_28_asseval8",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_29_sseval81",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_30_sseval83",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_31_sseval85",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_32_sseval87",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_33_sseval88",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_34_sseval89",
+            "why": "壞樁沒被擋：bad_negate.py"
+          },
+          {
+            "task_id": "pbc_35_asseval9",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_36_sseval90",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_37_sseval94",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_38_sseval95",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_39_sseval96",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbc_40_sseval99",
+            "why": "good 沒全過 visible=2/12 hidden=2/13"
+          }
+        ]
+      }
+    },
+    "pba": {
+      "source_ids": [
+        "lcb_2728",
+        "lcb_2730",
+        "lcb_2754",
+        "lcb_2755",
+        "lcb_2757",
+        "lcb_2779",
+        "lcb_2784",
+        "lcb_2786",
+        "lcb_2792",
+        "lcb_2802",
+        "lcb_2808",
+        "lcb_2810"
+      ],
+      "n": 12,
+      "target_n": 20,
+      "selection": {
+        "eligible": 12,
+        "with_reference_solution": 12,
+        "bank_n": 189,
+        "target_unreachable": true
+      },
+      "tasks": [
+        {
+          "task_id": "pba_01_lcb2728",
+          "source_id": "lcb_2728",
+          "template_bytes": 3208,
+          "visible_cases": 2,
+          "hidden_cases": 9,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pba_02_lcb2730",
+          "source_id": "lcb_2730",
+          "template_bytes": 3085,
+          "visible_cases": 2,
+          "hidden_cases": 9,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pba_03_lcb2754",
+          "source_id": "lcb_2754",
+          "template_bytes": 3159,
+          "visible_cases": 2,
+          "hidden_cases": 12,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pba_04_lcb2755",
+          "source_id": "lcb_2755",
+          "template_bytes": 3467,
+          "visible_cases": 2,
+          "hidden_cases": 12,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pba_05_lcb2757",
+          "source_id": "lcb_2757",
+          "template_bytes": 3093,
+          "visible_cases": 2,
+          "hidden_cases": 12,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pba_06_lcb2779",
+          "source_id": "lcb_2779",
+          "template_bytes": 3957,
+          "visible_cases": 2,
+          "hidden_cases": 9,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pba_07_lcb2784",
+          "source_id": "lcb_2784",
+          "template_bytes": 3456,
+          "visible_cases": 2,
+          "hidden_cases": 9,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pba_08_lcb2786",
+          "source_id": "lcb_2786",
+          "template_bytes": 3260,
+          "visible_cases": 3,
+          "hidden_cases": 12,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pba_09_lcb2792",
+          "source_id": "lcb_2792",
+          "template_bytes": 3616,
+          "visible_cases": 3,
+          "hidden_cases": 11,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pba_10_lcb2802",
+          "source_id": "lcb_2802",
+          "template_bytes": 3365,
+          "visible_cases": 2,
+          "hidden_cases": 12,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pba_11_lcb2808",
+          "source_id": "lcb_2808",
+          "template_bytes": 3546,
+          "visible_cases": 2,
+          "hidden_cases": 12,
+          "gauge_bad_n": 4
+        },
+        {
+          "task_id": "pba_12_lcb2810",
+          "source_id": "lcb_2810",
+          "template_bytes": 3699,
+          "visible_cases": 2,
+          "hidden_cases": 12,
+          "gauge_bad_n": 4
+        }
+      ],
+      "dropped": [],
+      "rendered_n": 12,
+      "rendered_ids": [
+        "pba_01_lcb2728",
+        "pba_02_lcb2730",
+        "pba_03_lcb2754",
+        "pba_04_lcb2755",
+        "pba_05_lcb2757",
+        "pba_06_lcb2779",
+        "pba_07_lcb2784",
+        "pba_08_lcb2786",
+        "pba_09_lcb2792",
+        "pba_10_lcb2802",
+        "pba_11_lcb2808",
+        "pba_12_lcb2810"
+      ],
+      "case_stats": {
+        "visible_total": 26,
+        "hidden_total": 131,
+        "visible_median": 2,
+        "hidden_median": 12,
+        "visible_min": 2,
+        "hidden_min": 9
+      },
+      "finalize": {
+        "gauge_pass_n": 12,
+        "rendered_n": 12,
+        "kept_n": 12,
+        "target_n": 20,
+        "short_of_target": 8,
+        "kept": [
+          "pba_01_lcb2728",
+          "pba_02_lcb2730",
+          "pba_03_lcb2754",
+          "pba_04_lcb2755",
+          "pba_05_lcb2757",
+          "pba_06_lcb2779",
+          "pba_07_lcb2784",
+          "pba_08_lcb2786",
+          "pba_09_lcb2792",
+          "pba_10_lcb2802",
+          "pba_11_lcb2808",
+          "pba_12_lcb2810"
+        ],
+        "dropped": []
+      }
+    },
+    "pbd": {
+      "source_ids": [
+        "1579_A. Casimir's String Solitaire",
+        "1581_A. CQXYM Count Permutations",
+        "1582_A. Luntik and Concerts",
+        "1582_B. Luntik and Subsequences",
+        "1586_A. Windblume Ode",
+        "1591_A. Life of a Flower",
+        "1591_B. Array Eversion",
+        "1594_A. Consecutive Sum Riddle",
+        "1598_A. Computer Game",
+        "1598_B. Groups",
+        "1604_A. Era",
+        "1606_A. AB Balance",
+        "1607_A. Linear Keyboard",
+        "1607_B. Odd Grasshopper",
+        "1607_C. Minimum Extraction",
+        "1608_A. Find Array",
+        "1613_A. Long Comparison",
+        "1613_B. Absent Remainder",
+        "1615_A. Closing The Gap",
+        "1617_A. Forbidden Subsequence",
+        "1617_B. GCD Problem",
+        "1618_A. Polycarp and Sums of Subsequences",
+        "1618_B. Missing Bigram",
+        "1619_A. Square String?",
+        "1619_B. Squares and Cubes",
+        "1620_A. Equal or Not Equal",
+        "1620_B. Triangles on a Rectangle",
+        "1622_A. Construct a Rectangle",
+        "1622_B. Berland Music",
+        "1623_A. Robot Cleaner"
+      ],
+      "n": 30,
+      "target_n": 15,
+      "selection": {
+        "eligible": 122,
+        "rejected": {
+          "no_py3": 43,
+          "no_public": 0,
+          "few_hidden": 0,
+          "huge": 0
+        },
+        "rating_range": [
+          800,
+          800
+        ]
+      },
+      "tasks": [
+        {
+          "task_id": "pbd_01_olitaire",
+          "source_id": "1579_A. Casimir's String Solitaire",
+          "template_bytes": 4587,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_02_utations",
+          "source_id": "1581_A. CQXYM Count Permutations",
+          "template_bytes": 4597,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_03_concerts",
+          "source_id": "1582_A. Luntik and Concerts",
+          "template_bytes": 4181,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_06_faflower",
+          "source_id": "1591_A. Life of a Flower",
+          "template_bytes": 3988,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_07_eversion",
+          "source_id": "1591_B. Array Eversion",
+          "template_bytes": 4934,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_09_utergame",
+          "source_id": "1598_A. Computer Game",
+          "template_bytes": 4722,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_10_8bgroups",
+          "source_id": "1598_B. Groups",
+          "template_bytes": 5249,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_11_1604aera",
+          "source_id": "1604_A. Era",
+          "template_bytes": 4862,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_13_keyboard",
+          "source_id": "1607_A. Linear Keyboard",
+          "template_bytes": 4951,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_14_sshopper",
+          "source_id": "1607_B. Odd Grasshopper",
+          "template_bytes": 5093,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_15_traction",
+          "source_id": "1607_C. Minimum Extraction",
+          "template_bytes": 5625,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_16_indarray",
+          "source_id": "1608_A. Find Array",
+          "template_bytes": 3936,
+          "visible_cases": 1,
+          "hidden_cases": 3,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_17_mparison",
+          "source_id": "1613_A. Long Comparison",
+          "template_bytes": 3791,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_18_emainder",
+          "source_id": "1613_B. Absent Remainder",
+          "template_bytes": 4858,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        },
+        {
+          "task_id": "pbd_19_ngthegap",
+          "source_id": "1615_A. Closing The Gap",
+          "template_bytes": 4461,
+          "visible_cases": 1,
+          "hidden_cases": 15,
+          "gauge_bad_n": 3
+        }
+      ],
+      "dropped": [],
+      "rendered_n": 30,
+      "rendered_ids": [
+        "pbd_01_olitaire",
+        "pbd_02_utations",
+        "pbd_03_concerts",
+        "pbd_04_equences",
+        "pbd_05_blumeode",
+        "pbd_06_faflower",
+        "pbd_07_eversion",
+        "pbd_08_umriddle",
+        "pbd_09_utergame",
+        "pbd_10_8bgroups",
+        "pbd_11_1604aera",
+        "pbd_12_bbalance",
+        "pbd_13_keyboard",
+        "pbd_14_sshopper",
+        "pbd_15_traction",
+        "pbd_16_indarray",
+        "pbd_17_mparison",
+        "pbd_18_emainder",
+        "pbd_19_ngthegap",
+        "pbd_20_sequence",
+        "pbd_21_dproblem",
+        "pbd_22_equences",
+        "pbd_23_ngbigram",
+        "pbd_24_restring",
+        "pbd_25_andcubes",
+        "pbd_26_notequal",
+        "pbd_27_ectangle",
+        "pbd_28_ectangle",
+        "pbd_29_andmusic",
+        "pbd_30_tcleaner"
+      ],
+      "case_stats": {
+        "visible_total": 30,
+        "hidden_total": 438,
+        "visible_median": 1,
+        "hidden_median": 15,
+        "visible_min": 1,
+        "hidden_min": 3
+      },
+      "finalize": {
+        "gauge_pass_n": 26,
+        "rendered_n": 30,
+        "kept_n": 15,
+        "target_n": 15,
+        "short_of_target": 0,
+        "kept": [
+          "pbd_01_olitaire",
+          "pbd_02_utations",
+          "pbd_03_concerts",
+          "pbd_06_faflower",
+          "pbd_07_eversion",
+          "pbd_09_utergame",
+          "pbd_10_8bgroups",
+          "pbd_11_1604aera",
+          "pbd_13_keyboard",
+          "pbd_14_sshopper",
+          "pbd_15_traction",
+          "pbd_16_indarray",
+          "pbd_17_mparison",
+          "pbd_18_emainder",
+          "pbd_19_ngthegap"
+        ],
+        "dropped": [
+          {
+            "task_id": "pbd_04_equences",
+            "why": "good 沒全過 visible=1/1 hidden=13/15"
+          },
+          {
+            "task_id": "pbd_05_blumeode",
+            "why": "good 沒全過 visible=0/1 hidden=0/15"
+          },
+          {
+            "task_id": "pbd_08_umriddle",
+            "why": "good 沒全過 visible=0/1 hidden=0/15"
+          },
+          {
+            "task_id": "pbd_12_bbalance",
+            "why": "good 沒全過 visible=0/1 hidden=0/15"
+          },
+          {
+            "task_id": "pbd_20_sequence",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_21_dproblem",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_22_equences",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_23_ngbigram",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_24_restring",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_25_andcubes",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_26_notequal",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_27_ectangle",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_28_ectangle",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_29_andmusic",
+            "why": "超出目標題數（量具過了但用不到）"
+          },
+          {
+            "task_id": "pbd_30_tcleaner",
+            "why": "超出目標題數（量具過了但用不到）"
+          }
+        ]
+      }
+    }
+  }
+}

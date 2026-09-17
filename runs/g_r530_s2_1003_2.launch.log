@@ -1,0 +1,20 @@
+
+=== 2026-09-14T06:29:07Z flock -n /home/user1/.launch_r530_r530s210032.lock python3 ops/gain/r530/run_r530.py --out runs/g_r530_s2_1003_2 --decision DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md --task-set ow_10_dedupe,ow_12_bytesize,ow_14_statemachine,ow_20_slugify,ow_17_diffpatch --arms A-SOLO,A-CONF,A-GATE --seed g-r530-s2 --backend unshare --model gemma-4-12b-it-qat --reasoning-effort none --request-timeout-s 900 --gauge-scope bank --tool-protocol native --sandbox-uid 65534 --sandbox-gid 65534
+── R530 g_r530_s2_1003_2　題 5 × 臂 3 ＝ 15 格　sandbox=unshare
+   [A-SOLO  ow_10_dedupe        ] accepted=True hidden=13/13 calls=14 stop=declared_done
+   [A-CONF  ow_10_dedupe        ] accepted=True hidden=13/13 calls=24 stop=visible_pass
+   [A-GATE  ow_10_dedupe        ] accepted=True hidden=13/13 calls=15 stop=visible_pass
+   [A-SOLO  ow_12_bytesize      ] accepted=True hidden=13/13 calls=29 stop=declared_done
+   [A-CONF  ow_12_bytesize      ] accepted=True hidden=12/13 calls=14 stop=visible_pass
+   [A-GATE  ow_12_bytesize      ] accepted=True hidden=12/13 calls=9 stop=visible_pass
+   [A-SOLO  ow_14_statemachine  ] accepted=True hidden=12/12 calls=10 stop=declared_done
+   [A-CONF  ow_14_statemachine  ] accepted=True hidden=12/12 calls=5 stop=visible_pass
+   [A-GATE  ow_14_statemachine  ] accepted=True hidden=12/12 calls=7 stop=visible_pass
+   [A-SOLO  ow_20_slugify       ] accepted=True hidden=6/7 calls=16 stop=declared_done
+   [A-CONF  ow_20_slugify       ] accepted=True hidden=7/7 calls=36 stop=visible_pass
+   [A-GATE  ow_20_slugify       ] accepted=True hidden=7/7 calls=22 stop=visible_pass
+   [A-SOLO  ow_17_diffpatch     ] accepted=True hidden=11/12 calls=23 stop=declared_done
+   [A-CONF  ow_17_diffpatch     ] accepted=True hidden=12/12 calls=17 stop=visible_pass
+   [A-GATE  ow_17_diffpatch     ] accepted=True hidden=10/12 calls=17 stop=visible_pass
+── 收工　12632.6s　A-SOLO: 3/5 deliv　A-CONF: 4/5 deliv　A-GATE: 3/5 deliv
+── /home/user1/vacant/Vacant/runs/g_r530_s2_1003_2

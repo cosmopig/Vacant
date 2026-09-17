@@ -1,0 +1,20 @@
+
+=== 2026-09-14T06:29:07Z flock -n /home/user1/.launch_r530_r530s210031.lock python3 ops/gain/r530/run_r530.py --out runs/g_r530_s2_1003_1 --decision DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md --task-set ow_02_ratelimit,ow_18_taskorder,ow_05_router,ow_07_retrypolicy,ow_09_minitemplate --arms A-SOLO,A-CONF,A-GATE --seed g-r530-s2 --backend unshare --model gemma-4-12b-it-qat --reasoning-effort none --request-timeout-s 900 --gauge-scope bank --tool-protocol native --sandbox-uid 65534 --sandbox-gid 65534
+── R530 g_r530_s2_1003_1　題 5 × 臂 3 ＝ 15 格　sandbox=unshare
+   [A-SOLO  ow_02_ratelimit     ] accepted=True hidden=15/15 calls=10 stop=declared_done
+   [A-CONF  ow_02_ratelimit     ] accepted=True hidden=15/15 calls=12 stop=visible_pass
+   [A-GATE  ow_02_ratelimit     ] accepted=True hidden=15/15 calls=10 stop=visible_pass
+   [A-SOLO  ow_18_taskorder     ] accepted=True hidden=6/6 calls=5 stop=declared_done
+   [A-CONF  ow_18_taskorder     ] accepted=True hidden=6/6 calls=5 stop=visible_pass
+   [A-GATE  ow_18_taskorder     ] accepted=True hidden=6/6 calls=5 stop=visible_pass
+   [A-SOLO  ow_05_router        ] accepted=True hidden=0/15 calls=72 stop=budget_calls
+   [A-CONF  ow_05_router        ] accepted=True hidden=15/15 calls=18 stop=visible_pass
+   [A-GATE  ow_05_router        ] accepted=False hidden=0/15 calls=72 stop=budget_calls
+   [A-SOLO  ow_07_retrypolicy   ] accepted=True hidden=13/13 calls=22 stop=declared_done
+   [A-CONF  ow_07_retrypolicy   ] accepted=True hidden=13/13 calls=11 stop=visible_pass
+   [A-GATE  ow_07_retrypolicy   ] accepted=True hidden=13/13 calls=14 stop=visible_pass
+   [A-SOLO  ow_09_minitemplate  ] infra_void: r530-worker 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request
+   [A-CONF  ow_09_minitemplate  ] accepted=False hidden=0/1 calls=71 stop=attempts_exhausted
+   [A-GATE  ow_09_minitemplate  ] accepted=False hidden=11/13 calls=72 stop=budget_calls
+── 收工　16066.3s　A-SOLO: 3/5 deliv　A-CONF: 4/5 deliv　A-GATE: 3/5 deliv
+── /home/user1/vacant/Vacant/runs/g_r530_s2_1003_1

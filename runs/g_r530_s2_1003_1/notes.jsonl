@@ -1,0 +1,1 @@
+{"arm": "A-SOLO", "task_id": "ow_09_minitemplate", "infra_void": "r530-worker 重試 4 次仍失敗：HTTPError: HTTP Error 400: Bad Request", "ts_ms": 1789376749704}
