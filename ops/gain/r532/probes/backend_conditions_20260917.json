@@ -11,25 +11,31 @@
   },
   "load_params_both_hosts": {
     "context_length": 65536,
-    "parallel": 2,
-    "per_slot_context": 32768,
+    "parallel": 1,
+    "per_slot_context": 65536,
+    "headroom_vs_max_tokens_32000": 2.048,
     "gpu": "max",
     "ttlMs": null,
-    "identifier": "qwen3-27b"
+    "identifier": "qwen3-27b",
+    "matches_12b_per_slot": true,
+    "note": "12B：ctx 262144 / parallel 4 = 每槽 65536，同一個值"
   },
   "hosts": {
     "1003": {
       "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
       "lmstudio": "0.4.24.0",
       "loaded_utc": "2026-09-17T~02:5xZ",
-      "note": "人類 2026-09-17 讓出；原本是 ctx 100096 / parallel 1，已重載對齊"
+      "note": "人類 2026-09-17 讓出；原本是 ctx 100096 / parallel 1，已重載對齊",
+      "vram_used_mib": 22201,
+      "reloaded_utc": "2026-09-17T03:12:24Z"
     },
     "1004": {
       "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
       "lmstudio": "0.4.17.0",
       "loaded_utc": "2026-09-17T~02:3xZ",
       "vram_used_mib": 22361,
-      "vram_total_mib": 24576
+      "vram_total_mib": 24576,
+      "reloaded_utc": "2026-09-17T03:12:24Z"
     }
   },
   "reasoning_probes": {
@@ -75,7 +81,34 @@
         "reasoning_tokens": 32,
         "completion": 36
       }
-    ]
+    ],
+    "after_context_change": {
+      "1003": [
+        {
+          "case": "none",
+          "reasoning_tokens": 0,
+          "completion": 2
+        },
+        {
+          "case": "no flag (control)",
+          "reasoning_tokens": 32,
+          "completion": 36
+        }
+      ],
+      "1004": [
+        {
+          "case": "none",
+          "reasoning_tokens": 0,
+          "completion": 2
+        },
+        {
+          "case": "no flag (control)",
+          "reasoning_tokens": 32,
+          "completion": 36
+        }
+      ],
+      "note": "換 context 與 parallel 之後重驗，兩台四格結果與換之前相同"
+    }
   },
   "throughput_probe_1004": {
     "prompt_tokens": 68,
@@ -100,5 +133,8 @@
       48.7
     ]
   },
-  "ruling": "R532 主 run 以非 thinking 條件執行，與 12B 五個題組的條件對齊（唯一變因＝模型）。thinking 版本若要比，須另開一輪並讓 12B 也開 thinking 跑一次，才對稱。"
+  "ruling": "R532 主 run 以非 thinking 條件執行，與 12B 五個題組的條件對齊（唯一變因＝模型）。thinking 版本若要比，須另開一輪並讓 12B 也開 thinking 跑一次，才對稱。",
+  "revised_utc": "2026-09-17T03:12:24Z",
+  "revision_reason": "代理指出 context 擠壓混淆：ctx 65536／parallel 2 ⇒ 每槽 32,768，對 32,000 的 max_tokens 只有 1.02 倍餘裕；12B 那輪是 262144／parallel 4 ⇒ 每槽 65,536、餘裕 2.05 倍。擠壓只打唯一的多輪臂 HMIX，方向把 Δ_C 壓小，與本輪的事前預測同向 ⇒ 混淆會偽裝成結果。Fable 裁決：改為每槽 65,536，與 12B 逐項相同，把混淆消除而不是設界。",
+  "throughput_note": "每台從 2 串降為 1 串 ⇒ 總並行 4 串降為 2 串，牆鐘約加倍（代理原估 4 串 10.3 h，2 串約 20 h，仍低於事前寫死的 48 h 分批門檻）。這是為了消除 context 擠壓混淆付的代價，事前記錄。"
 }
