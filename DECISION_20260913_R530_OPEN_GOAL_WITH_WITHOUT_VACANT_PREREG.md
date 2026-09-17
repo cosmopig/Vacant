@@ -3679,3 +3679,53 @@ R530_BLOCK: g_r530_s3_1004_2 tasks=ow_10_dedupe,ow_12_bytesize,ow_14_statemachin
 - 8 塊槽分配：r1003#1–4 ＝ s1_1003_1、s1_1003_2、s2_1003_1、s2_1003_2；r1004#1–4 ＝ s1_1004_2、s2_1004_1、s2_1004_2、s1_1004_1；排程器 pid 3294795；佇列剩 4 塊（s3）等槽。每塊 E-3（整個 bank 量具）、E-9、E-11 於任何實驗呼叫前通過。
 - 程式碼＝F1′ 0b58ad7bc266（vacant-dev `~/vacant/Vacant` at 91d9644，ops/ 內容與 0b58ad7 相同）；工作區根 `/var/tmp/vacant_r530_work`。
 - 時程：依 smoke9 單串 T（A-SOLO 28.2／A-CONF 13.9／A-GATE 18.7 s/通）粗估 20–40 h；併發下 T 會變大（未量過倍率），收官以 summary.json 實測回填。
+
+## 附錄 AMEND2-E　排程器第二次猝死與再凍結（2026-09-14，Fable）
+
+- **09:58:37Z 排程器猝死**：第一塊寫出 `summary.json` 的瞬間，沿用的 `classify_summary` 把 R530 的 `summary["arms"]`（list；逐臂統計在 `arms_stats`）當 dict ⇒ `AttributeError`。與 AMEND2-C 同類（沿用吃外部狀態的函式），但這次要等第一塊收官才炸，排程器先安靜跑了三個半小時。
+- **資料無損**：DONE 2（`g_r530_s1_1004_1`、`g_r530_s2_1003_2`，皆 verdict ok、void 0）、RUNNING 6（runner 不依賴排程器，自行跑完）、PENDING 4（尚未發射）、`_aborted/` 空。停擺代價只有吞吐（兩個空槽閒置）。
+- **修正**：R530 自己的 `classify_summary_r530`／`block_state_r530`／`void_rates_r530`（讀 `arms_stats`；E-11 收官 broken ⇒ VOID）＋7 條測試（含「沿用那支對 R530 summary 必須 raise」的釘死）。併入主線 `0ebdd791f875`；**runner（run_r530.py／臂／驗收／沙箱）一行未改**，已完成與在跑的 8 塊條件不變。
+- **再凍結**：F1″ ＝ `0ebdd791f875`（只動排程器）；F2–F5、F7 不變；F6 不變（06:29:07Z 的發射仍有效，8 塊條件相同）；排程器重啟時間戳記於下方。
+- 教訓寫進 `schedule_r530.py` 註解：**沿用得起來的只有吃參數的純函式；吃外部狀態（ps、summary.json 形狀）的一律自己寫並附負控。**
+- **排程器重啟：2026-09-14T10:34:23Z**（同佇列、log append）。活體確認通過：3 DONE 判 DONE、8 RUNNING 判 RUNNING、`_aborted/` 無新增；補發 3 塊（s3_1003_1／s3_1004_1／s3_1004_2，pid 3314122／3314121／3314124，E-3／E-9／E-11 皆綠），`s3_1003_2` 等 1003 空槽（不挪卡）。已知小瑕疵：真跑時 `gate_e11.json.enforced` 為 null（閘門實際有強制），留待下次凍結修，跑中不併碼。
+
+## 附錄 AMEND2-F　1003 後端停擺、四塊作廢與第三次嘗試（2026-09-14 → 15，Fable 裁決）
+
+**事件**：2026-09-14 13:37–13:43Z，1003 的 LM Studio 變成「沒有載入任何模型」（機器與 port 正常，`lms ps` 顯示 no models loaded；`/v1/chat/completions` 回 400 "No models loaded"）。當時在 1003 上的四塊 `g_r530_s1_1003_1`／`s1_1003_2`／`s3_1003_1`／`s3_1003_2` 連續 VOID，排程器重排兩次用完 `MAX_ATTEMPTS`，於 16:14:31Z 記「留給人裁決」後退出。1004 的六塊全部正常收官。
+
+**當時結果**：DONE 8 塊（1004 六塊＋1003 的 s2 兩塊）、118 列；作廢資料一列不計。
+
+**裁決（§一〇「留給人裁決」）：授權第三次嘗試**，條件如下，全部核對過：
+- 註冊行逐字相同（同 seed、同題、同臂、同 endpoint）——佇列與 sha 未變（`5d9e3092…`）。
+- 程式碼未變：F1″ `0ebdd791f875`；vacant-dev `~/vacant/Vacant` at `cde7c1a`（含 F1″）且工作樹乾淨。分支上的 `cae538a`（`gate_e11.json.enforced` 描述性欄位）**刻意未併**，避免前後塊跑在不同碼上。
+- 後端條件回復：2026-09-15T01:37:48Z 於 1003 重載 `gemma-4-12b-it-qat`，`context 262144／parallel 4／gpu max／ttlMs null`，VRAM 13,339 MiB，與前次逐項相同；E-11 式探針（**帶 tools**、`reasoning_effort=none`）回 `finish_reason=tool_calls`、`reasoning_tokens=0`。
+- 舊作廢紀錄移出 `runs/_aborted/` 到 `runs/_aborted_r530_1003_outage_20260914/`（附 README），理由：`aborted_counts()` 數的就是那個目錄，留在原地會讓第三次嘗試立刻被放棄。**那裡的資料一列都不進證據。**
+
+**第三次嘗試發射**：2026-09-15T01:39:01Z，四塊各佔 r1003#1–4（1004 已全數收官，不再佔槽）。
+
+**同時記一次操作事故**：發射命令被執行兩次 ⇒ 一度有兩個排程器行程（3343580、3343989）。runner 未重複（每塊的 `flock` 擋住，逐塊只有一個 runner），01:40Z 以 pid 殺掉後者、保留前者。**對資料無影響**，記錄於此以免日後從 log 的重複「發射」行誤判為雙跑。
+
+**效力**：本次補跑的四塊與先前八塊在同一份程式碼、同一套題庫、同一組註冊行、同一種後端參數下執行；差別是**時間**（相隔約 12 小時）與**1003 曾經重載模型**。收官時 §八-11 的逐後端描述照舊，另加一句「s1／s3 的 1003 半邊是補跑的」。
+
+
+## 附錄 AMEND2-G　1003 被人類佔用，剩餘四塊改在 1004 重跑（2026-09-16，Fable 裁決）
+
+**事實**：AMEND2-F 的第三次嘗試於 2026-09-15T01:39Z 發射後，10:47／11:24／19:00–19:02Z 連續 VOID（呼叫回 HTTP 400），排程器 19:02:21Z 用完重排額度退出。2026-09-16T01:35Z 查 1003：載入的是 `qwen/qwen3.8-27b`、狀態 `PROCESSING PROMPT` ⇒ **那台是人類自己的工作機，qwen 27B（17.74 GB）把 gemma（13 GB）擠出 24 GB 顯存**。1003 在 36 小時內兩次掉模型，都是這個原因。**不再向人類要回 1003。**
+
+**裁決**：剩餘四塊（`g_r530_s1_1003_1`／`s1_1003_2`／`s3_1003_1`／`s3_1003_2`）**整塊改到 1004** 重跑，題目、臂、seed、程式碼（F1″ `0ebdd791f875`）、題庫（`1eae5f19…`）、預算一律不變，只換 endpoint。塊名保留原字串（含 `1003`），以免與已發生的紀錄對不上；真正的後端以 `backend_meta.json` 與下列註冊行為準。
+
+**排程器拒絕這個拓撲，是它該做的事**：`abort_all_blocks_one_host` 判「seed g-r530-s1 的 2 塊全在 1004 ⇒ 題在兩台輪流沒有兌現」。該護欄是為了**設計階段**不要做出後端與題號共線的佇列；本次是機器被收回後的復原，且後果相反——s1／s3 之內後端變成**常數**（不是共線），塊內三臂仍同台，逐 seed 分析、不併 n ⇒ 主指標不受影響。**處置：不改護欄、不改任何程式碼，改為直接發 runner（與 smoke9 相同的發法），並在此逐字記錄這次繞過。**
+
+**必須跟著結果走的後果**（§八-11 逐後端描述照舊，另加）：
+- seed **s1 與 s3 的 20 題全部在 1004**；seed **s2** 是 1003 十題＋1004 十題（1003 那十題在 09-14 停擺前就已收官）。
+- 跨 seed 的絕對值因此混了不同後端組成；本 run 本來就不併 seed，引用時逐 seed 註明後端組成。
+- s1／s3 的補跑與其他八塊相隔約兩天，模型檔、參數、程式碼皆未變（1004 自始至終是同一份 gemma、context 262144、parallel 4、無 TTL）。
+
+**復原佇列**：`ops/gain/r530/queues/r530_recovery_1004.json`，sha256 `0e796c0115fdd3077892a416a44e8b0921148d2304518f49427186bb227a38da`。四條註冊行（`run_r530.py` 逐字比對）：
+
+```
+R530_BLOCK: g_r530_s1_1003_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_04_layerconf,ow_06_verrange,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s1_1003_2 tasks=ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s1 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s3_1003_1 tasks=ow_01_csvjson,ow_03_mdtable,ow_04_layerconf,ow_06_verrange,ow_08_logscan arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
+R530_BLOCK: g_r530_s3_1003_2 tasks=ow_19_redact,ow_11_reflow,ow_13_timespans,ow_15_tomlsub,ow_16_pathglob arms=A-SOLO,A-CONF,A-GATE seed=g-r530-s3 endpoint=http://100.86.226.21:1234/v1/chat/completions
+```

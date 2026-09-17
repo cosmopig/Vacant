@@ -1,0 +1,96 @@
+{
+  "name": "r530_recovery_1004",
+  "decision": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+  "launcher": "ops/gain/r530/run_r530.py",
+  "arms": "A-SOLO,A-CONF,A-GATE",
+  "backend": "unshare",
+  "request_timeout_s": 900,
+  "reasoning_effort": "none",
+  "model": "gemma-4-12b-it-qat",
+  "gauge_scope": "bank",
+  "tool_protocol": "native",
+  "sandbox_uid": 65534,
+  "sandbox_gid": 65534,
+  "backends": {
+    "http://100.119.113.56:1234/v1/chat/completions": {
+      "host": "1003",
+      "lmstudio_version": "0.4.24.0",
+      "version_source": "人回報（Fable 2026-09-11 在該機上 `lms version`）；runner 查證不到 ⇒ 這是宣稱不是量測",
+      "measured_2026_09_14": {
+        "reasoning_tokens_under_tools": 0,
+        "cold_prefill_ms_per_1k": 1509,
+        "warm_prefill_ms_per_1k": 144,
+        "generation_ms_per_token": 22.6
+      }
+    },
+    "http://100.86.226.21:1234/v1/chat/completions": {
+      "host": "1004",
+      "lmstudio_version": "0.4.17.0",
+      "version_source": "人回報；runner 查證不到 ⇒ 這是宣稱不是量測",
+      "measured_2026_09_14": {
+        "reasoning_tokens_under_tools": 0,
+        "cold_prefill_ms_per_1k": 481,
+        "warm_prefill_ms_per_1k": 78,
+        "generation_ms_per_token": 14.4
+      }
+    }
+  },
+  "blocks": [
+    {
+      "name": "g_r530_s1_1003_1",
+      "tasks": [
+        "ow_01_csvjson",
+        "ow_03_mdtable",
+        "ow_04_layerconf",
+        "ow_06_verrange",
+        "ow_08_logscan"
+      ],
+      "seed": "g-r530-s1",
+      "tag": "r530s110031",
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "note": "seed g-r530-s1／1003／第 1 塊；tight 5／loose 0；2026-09-16 AMEND2-G：1003 被人類的 qwen 27B 佔用，整塊改到 1004（同塊三臂仍同台）"
+    },
+    {
+      "name": "g_r530_s1_1003_2",
+      "tasks": [
+        "ow_19_redact",
+        "ow_11_reflow",
+        "ow_13_timespans",
+        "ow_15_tomlsub",
+        "ow_16_pathglob"
+      ],
+      "seed": "g-r530-s1",
+      "tag": "r530s110032",
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "note": "seed g-r530-s1／1003／第 2 塊；tight 4／loose 1；2026-09-16 AMEND2-G：1003 被人類的 qwen 27B 佔用，整塊改到 1004（同塊三臂仍同台）"
+    },
+    {
+      "name": "g_r530_s3_1003_1",
+      "tasks": [
+        "ow_01_csvjson",
+        "ow_03_mdtable",
+        "ow_04_layerconf",
+        "ow_06_verrange",
+        "ow_08_logscan"
+      ],
+      "seed": "g-r530-s3",
+      "tag": "r530s310031",
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "note": "seed g-r530-s3／1003／第 1 塊；tight 5／loose 0；2026-09-16 AMEND2-G：1003 被人類的 qwen 27B 佔用，整塊改到 1004（同塊三臂仍同台）"
+    },
+    {
+      "name": "g_r530_s3_1003_2",
+      "tasks": [
+        "ow_19_redact",
+        "ow_11_reflow",
+        "ow_13_timespans",
+        "ow_15_tomlsub",
+        "ow_16_pathglob"
+      ],
+      "seed": "g-r530-s3",
+      "tag": "r530s310032",
+      "endpoint": "http://100.86.226.21:1234/v1/chat/completions",
+      "note": "seed g-r530-s3／1003／第 2 塊；tight 4／loose 1；2026-09-16 AMEND2-G：1003 被人類的 qwen 27B 佔用，整塊改到 1004（同塊三臂仍同台）"
+    }
+  ]
+}
