@@ -46,6 +46,53 @@ tool_call 或訊息**——那會在 agent 的歷史裡留下模型從沒說過�
 2. **KS-1（鐵律 1）**：回饋文字禁止「你有責任／會被懲罰」類措辭。
    `vacant/memory.py::assert_ks1_clean` 在本模組 import 時就跑，繞不過去。
 
+## V2 ＝ 同一份回饋也放進 **argv**（`--feedback-into prompt|both`）
+
+V1 的回饋是寫一個檔（`VACANT_FEEDBACK.md`）到工作區，而上面 `FEEDBACK_FILENAME`
+的註解自己就承認了那條路的洞：**「我們沒有辦法在它的 prompt 裡講『去讀某某檔』」**
+⇒ 模型可以不讀它。人類的要求是「Vacant 在開啟的狀態下不要被 LLM 忽略，
+它基本上就是 harness 的一環才行」。
+
+### 為什麼是 argv 而不是 wire
+
+proxy **擁有一次 HTTP 往返的讀寫權，不擁有 agent 的迴圈狀態，也不擁有工具執行器**。
+三條 wire 上的路各自撞死在那個邊界上：
+
+  · 改 `tools` ⇒ **L0**：proxy 宣告得了工具、**執行不了**——`tool_result`
+    只能由 agent 自己的執行器產生，我們生不出來。
+  · 改 `system` ⇒ wire 上的紀錄會與框架自己的 transcript 講不同的話
+    （**直接傷害「紀錄忠實」的立論根基**）。
+  · 插一則 user 訊息 ⇒ 它**只存在於那一通 request**，agent 的歷史裡沒有，
+    下一通就不一致。
+
+**launcher 擁有 argv，而 argv 就是那一則 user 訊息。** 零協定破解、零偽造發言。
+`wireproxy.WireProxy.on_wire()` 在 V2 仍然**恆回 `None`（永不改寫）**——
+V2 一個位元都沒有碰 wire。
+
+### 三條規則，每一條都有理由
+
+  1. **placeholder 必須是該 argv 元素的結尾**，否則 `SystemExit`。
+     尾端 append 才保得住 provider 的**前綴快取**；插在中間會讓整段快取失效，
+     而那個成本不會出現在任何一個我們落盤的欄位裡。
+  2. **第 1 次嘗試把 placeholder 換成空字串** ⇒ 第一次的 prompt 與
+     「沒有 Vacant」時**逐位元相同**。這是兩臂可比性的基礎，
+     形狀與 wire 那條「兩臂 body 逐位元相同」同一個用意。
+  3. 之後才換成 `"\n\n" + 回饋`，並對 **`new_argv` 全文**再跑一次
+     `assert_ks1_clean`（鐵律 1 不因為換了管道就放鬆）。
+
+### V2 的誠實邊界（**不准淡化**）
+
+  1. **不能說「不可忽略」。** 能說的是「**回饋一定出現在模型的輸入裡**」。
+     **看得到 ≠ 照做**——能強制的只有「沒過就不出貨」（閘門本身）。
+  2. **不能說 V2 提高了通過率。** V1 實跑 n=1、三次重改一次都沒改對；
+     R534 真模型上「沒過→重改」與拒交出現 **0 次**。
+     **V2 改的是機制性質（回饋一定在輸入裡），不是效果量測。**
+  3. **不得與 R530／R532／R534 併表**：prompt 不是我們寫的、工具面由框架決定、
+     預算形狀不同。三個變因都不一樣。
+  4. **預設仍是 `"file"`** ＝ V1 的行為逐字不變；要 argv 就要明講
+     `--feedback-into prompt|both`，而且 argv 裡沒有 placeholder 就**死在畫面上**，
+     **不安靜退回檔案模式**——「我以為在 prompt 模式」的錯不准在資料裡活著。
+
 ## 誠實邊界（改碼請保留；完整版在 `docs/VACANT_RUN.md` §7）
 
 1. **重試不是免費的。** 每一次嘗試都燒一整個 agent 行程的 token 與時間，
@@ -179,6 +226,116 @@ def restore_origin(origin: pathlib.Path, workspace: pathlib.Path) -> None:
     shutil.copytree(origin, workspace, symlinks=True, dirs_exist_ok=True)
 
 
+# ══ V2：把同一份回饋放進 argv（＝那一則 user 訊息）════════════════════════
+
+#: argv 裡的佔位符。**固定字面值**：它是使用者寫在自己那條 agent 命令裡的東西，
+#: 所以必須是文件上的一個約定（`docs/VACANT_RUN.md` §8），不是每次跑都不同的臨時名。
+#: 與 `FEEDBACK_FILENAME` 的差別在於**誰擁有它**：檔名是我們寫進工作區的東西，
+#: agent 可以不去讀；placeholder 在 argv 裡，而 argv 就是模型的輸入本身。
+FEEDBACK_PLACEHOLDER = "{VACANT_FEEDBACK}"
+
+#: 回饋的投遞管道。**封閉集合**——多一個就是規格變更，不准在別處臨時造字串。
+#: `"file"` ＝ V1 逐字不變（預設）；`"prompt"` ＝ 只進 argv；`"both"` ＝ 兩邊都給。
+DELIVERY_MODES = ("file", "prompt", "both")
+
+#: 哪些 mode 會把回饋放進 argv／哪些會寫檔。**兩個集合是上面那個封閉集合的
+#: 唯一解讀方式**——不要在別處用 `mode == "prompt"` 之類的字串比對，
+#: `"both"` 會被那種寫法安靜漏掉。
+_PROMPT_MODES = frozenset({"prompt", "both"})
+_FILE_MODES = frozenset({"file", "both"})
+
+
+def delivers_to_prompt(mode: str) -> bool:
+    """這個 mode 會不會把回饋放進 argv。"""
+    return mode in _PROMPT_MODES
+
+
+def delivers_to_file(mode: str) -> bool:
+    """這個 mode 會不會把回饋寫成工作區裡的檔。"""
+    return mode in _FILE_MODES
+
+
+def argv_sha256(argv: list[str]) -> str:
+    """argv 的指紋。**用 NUL 分隔**：空白分隔的話 `["a b"]` 與 `["a", "b"]`
+    會雜湊成同一個值，而那兩條命令不是同一條。
+    """
+    return hashlib.sha256("\0".join(argv).encode("utf-8")).hexdigest()
+
+
+def check_argv_has_placeholder(argv: list[str], mode: str) -> None:
+    """`--feedback-into` ＋ argv → 壞組合一律 **fail-visible**。
+
+    口氣與 `launcher.resolve_max_attempts` 同一條：
+    `--feedback-into prompt` 而 argv 裡沒有 `{VACANT_FEEDBACK}`，不是
+    「保守的預設」，是**使用者以為回饋會進 prompt 但它不會**。
+
+    ⚠ **不准安靜退回檔案模式。** 安靜退回會讓「我以為在 prompt 模式」的錯
+    在資料裡活著：那一跑的收據會寫 `feedback_delivery="prompt"`，
+    而模型的輸入裡一個字都沒有。那種錯要死在畫面上。
+
+    反向也擋（argv 有 placeholder 但 mode 是 `"file"`）：那一格我們**不會**替換它，
+    literal `{VACANT_FEEDBACK}` 會原樣送給 agent 看——同一個「我以為開了」的錯，
+    只是方向相反。
+    """
+    if mode not in DELIVERY_MODES:
+        raise SystemExit(f"--feedback-into 只認 {list(DELIVERY_MODES)}，"
+                         f"拿到 {mode!r}。停。")
+    hits = [a for a in argv if FEEDBACK_PLACEHOLDER in a]
+    if delivers_to_prompt(mode) and not hits:
+        raise SystemExit(
+            f"--feedback-into {mode} 要把回饋放進 agent 命令，但那條命令裡沒有 "
+            f"{FEEDBACK_PLACEHOLDER}。把它接在提示詞的**結尾**，例如：\n"
+            f"    -- pi -p \"把 solution.py 寫完{FEEDBACK_PLACEHOLDER}\"\n"
+            "（不安靜退回檔案模式：那會讓收據說 prompt、模型的輸入裡卻什麼都沒有。）停。")
+    if hits and not delivers_to_prompt(mode):
+        raise SystemExit(
+            f"agent 命令裡有 {FEEDBACK_PLACEHOLDER}，但 --feedback-into {mode} "
+            "不會替換它——那串字會原樣送給 agent 看。"
+            "要回饋進 prompt 就給 --feedback-into prompt（或 both）。停。")
+
+
+def render_argv(argv: list[str], feedback_text: str, *,
+                mode: str) -> tuple[list[str], str, int]:
+    """把回饋接到 argv 的 placeholder 上。回 `(new_argv, argv_sha256, 替換次數)`。
+
+    · `mode` 不投遞到 prompt ⇒ **argv 一個位元都不動**（V1 逐字不變）。
+    · `feedback_text` 為空（＝**第 1 次嘗試**）⇒ placeholder 換成 **空字串**，
+      所以第一次的命令與「沒有 Vacant」時**逐位元相同**。
+      這是兩臂可比性的基礎：第一次就不一樣的話，後面量到的差別有一半是
+      「第一次的 prompt 本來就不同」。
+    · 之後 ⇒ 換成 `"\n\n" + feedback_text`。
+
+    ⚠ **placeholder 必須是該元素的結尾**，否則 `SystemExit`：
+      尾端 append 才保得住 provider 的前綴快取，插在中間會讓整段失效。
+      同一個元素裡出現兩次也擋（前面那一次就不在結尾）。
+
+    ⚠ 只有**真的會動 argv** 的 mode 才對 `new_argv` 跑 `assert_ks1_clean`：
+      `"file"` 模式下那條命令是使用者自己寫的、我們一個字都沒加，
+      替它判 KS-1 等於改掉既有使用者的行為。
+    """
+    out = list(argv)
+    if not delivers_to_prompt(mode):
+        return out, argv_sha256(out), 0
+    check_argv_has_placeholder(argv, mode)
+    tail = "" if not feedback_text else "\n\n" + feedback_text
+    new: list[str] = []
+    n_sub = 0
+    for a in out:
+        cnt = a.count(FEEDBACK_PLACEHOLDER)
+        if cnt == 0:
+            new.append(a)
+            continue
+        if cnt > 1 or not a.endswith(FEEDBACK_PLACEHOLDER):
+            raise SystemExit(
+                f"{FEEDBACK_PLACEHOLDER} 必須是該參數的**結尾**（拿到 {a!r}）："
+                "回饋是往尾端 append 的，插在中間會讓 provider 的前綴快取整段失效。停。")
+        new.append(a[: -len(FEEDBACK_PLACEHOLDER)] + tail)
+        n_sub += 1
+    # 鐵律 1 不因為換了管道就放鬆：**整條命令**的全文再驗一次。
+    assert_ks1_clean("\n".join(new))
+    return new, argv_sha256(new), n_sub
+
+
 def constants_manifest() -> dict:
     """凍結常數的指紋。落進 `run_<ARM>.json`，改了文字在資料上看得見。
 
@@ -192,4 +349,7 @@ def constants_manifest() -> dict:
             hashlib.sha256(FEEDBACK_TEMPLATE.encode("utf-8")).hexdigest(),
         "feedback_body_sha256":
             hashlib.sha256(FEEDBACK_BODY.encode("utf-8")).hexdigest(),
+        # ── V2：投遞管道（改了字面值在資料上看得見）──────────────────
+        "feedback_placeholder": FEEDBACK_PLACEHOLDER,
+        "delivery_modes": list(DELIVERY_MODES),
     }
