@@ -429,6 +429,12 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
             #   與 `False`（量了、群組已空）**不可以同形**。
             rec["orphans_killed"] = _kill_group(proc) if new_session else None
             rec["agent_wall_s"] = round(time.time() - t_a, 3)
+            # ⚠ **讀 `stats` 之前先把 proxy 排空。** `requests_seen` 是在回應
+            #   送出**之後**才加的，所以 agent 拿到回應、寫完檔、退出時，
+            #   handler 執行緒可能還沒跑到那一行 ⇒ 這裡會少算。2026-09-18 在 CI
+            #   （ubuntu py3.13）上實際發生過：逐次 [1, 1, 0]，而第三通有發生。
+            #   排不空就**落盤說排不空**，不可以把不完整的數字當成就是這麼多通。
+            rec["wire_quiesced"] = proxy.quiesce()
             # **等預算＝上限相同、實際用量落盤**（R530 的裁決），不是用滿。
             rec["requests_seen"] = proxy.stats["requests_seen"] - seen_before
             rec["requests_seen_cumulative"] = proxy.stats["requests_seen"]
