@@ -78,6 +78,14 @@ R532 為此誤發兩次打到雲端（產物留在 `runs/_falsestart_20260917_*`
   RF 比 RS 高但 `M7_file = 0` 時，用它分辨「保留工作區被讀到了」
   還是「我們的機制模型解釋不了」。**分類器的原始清單一起落盤**
   （`m7_ws_calls`），所以事後可以離線重新分類，不必重跑。
+* **`M7_ws_solution`** ——上面那一票裡「**讀自己上一份 `solution.py`**」的比例
+  （`read solution.py`，**或** `bash` 內含 `cat`／`sed`／`head`／`tail`／`less`
+  指向它）。`M7_ws` 說的是「看了目錄」，這一條說的是「**讀了自己的錯碼**」
+  ——**後者才是「保留工作區」的實際通道**。而那條通道的效果**兩個符號都可能**：
+  `v1_real_pi` 三次嘗試寫出同一份 `add_numbers`，模型看到自己上一份錯碼會
+  **錨定在上面**，`resample` 重置反而拿到乾淨的重抽 ⇒ **`RF < RS` 不是異常**。
+  **不進任何判準**（狀態表仍以 `M7_ws` 分支），但收官句會引它；
+  分母與 `M7_file`／`M7_ws` 相同，`null` 的規則也相同。
 * **`F6`** ——RP 臂的每個第 ≥2 次嘗試 `feedback_in_prompt_bytes > 0`。
 
 ## 發射順序：**題塊 × 四臂交錯**，不是「先發一臂」（2026-09-19 裁決）
@@ -138,6 +146,9 @@ R532 為此誤發兩次打到雲端（產物留在 `runs/_falsestart_20260917_*`
     run/                      `--run-dir`：收據、wire、`_frozen_*`、run_RUN-ON.json
     piconf/                   `PI_CODING_AGENT_DIR`（models.json）
     io.jsonl                  這一格的 driver I/O（逐事件）
+    tools.jsonl               **工具呼叫序列**（一通一列：attempt／seq／
+                              tool／args_head 前 80 字／call_id）。
+                              **一律落盤**，不是只在特定狀態才寫
     cell.json                 **邊跑邊寫**；`run_complete` 最後才翻 true
 ```
 
@@ -676,28 +687,113 @@ def measure_m7_file(run_dir: pathlib.Path, arm_name: str, summary: dict,
     return res
 
 
-def _tool_calls_from_body(blob: bytes) -> list[dict] | None:
-    """從一通 request body 裡撈出**這一段對話目前為止的所有工具呼叫**。
+def _tool_calls_from_body(blob: bytes) -> tuple[list[dict] | None, dict]:
+    """從一通 request body 撈出**這一段對話目前為止的所有工具呼叫**。
 
     每一通請求都把完整上文重放一次（`docs/AGENT_COMPAT.md` §4.1 對 pi／Codex
     都實測過），所以一次嘗試的最後一通就帶著那一次的全部工具呼叫。
-    parse 不動就回 `None`（**不回空陣列**——那會和「真的沒有工具呼叫」同形）。
+    parse 不動就回 `(None, …)`（**不回空陣列**——那會和「真的沒有工具呼叫」同形）。
+
+    ⚠ **第二個回傳值是「我有沒有看到我解不動的工具痕跡」**，而它是整支
+    `M7_ws` 可信度的地基。`M7_ws = 0` 有兩個成因：
+    (a) agent 真的只做了 read TASK.md／write solution.py；
+    (b) **解析器沒認出這個框架的工具呼叫形狀**。
+    兩者在舊版的輸出上完全同形（都是一個空陣列），而 (b) 會把「量具壞了」
+    報成「機制沒被觸發」。所以這裡另外數 `role == "tool"` 的訊息與
+    `tool_use`／`tool_result` 這類 content block：**有痕跡卻撈不到呼叫 ⇒
+    判 `unparsable`**，`M7_ws` 落 `null` 不落 `false`。
     """
+    ev = {"tool_role_msgs": 0, "tool_use_blocks": 0, "unparsable": False}
     try:
         body = json.loads(blob.decode("utf-8"))
     except Exception:                        # noqa: BLE001
-        return None
+        return None, ev
     if not isinstance(body, dict):
-        return None
+        return None, ev
     calls: list[dict] = []
     for m in body.get("messages") or []:
         if not isinstance(m, dict):
             continue
+        if m.get("role") == "tool":
+            ev["tool_role_msgs"] += 1
+        content = m.get("content")
+        if isinstance(content, list):
+            for blk in content:
+                if isinstance(blk, dict) and str(blk.get("type", "")) in (
+                        "tool_use", "tool_result", "function_call",
+                        "function_call_output"):
+                    ev["tool_use_blocks"] += 1
         for tc in m.get("tool_calls") or []:
             fn = (tc.get("function") or {}) if isinstance(tc, dict) else {}
             calls.append({"name": fn.get("name"),
-                          "args": str(fn.get("arguments") or "")[:400]})
-    return calls
+                          "args": str(fn.get("arguments") or "")[:400],
+                          "tool_call_id": (tc.get("id")
+                                           if isinstance(tc, dict) else None)})
+    if not calls and (ev["tool_role_msgs"] or ev["tool_use_blocks"]):
+        ev["unparsable"] = True
+    return calls, ev
+
+
+def _tool_calls_from_response(blob: bytes) -> list[dict]:
+    """最後一通**回應**裡新開的工具呼叫（SSE delta 拼起來）。
+
+    為什麼要多這一段：一次嘗試的最後一通回應如果是工具呼叫，那一次呼叫**不會**
+    出現在任何後續 request 的 history 裡（行程在那之後就結束了，例如撞逾時）。
+    只讀 request 會漏掉那一筆，而它常常正是「最後一次改了什麼」。
+    """
+    parts: dict[int, dict] = {}
+    for line in blob.split(b"\n"):
+        s = line.strip()
+        if not s.startswith(b"data:"):
+            continue
+        payload = s[5:].strip()
+        if payload == b"[DONE]":
+            continue
+        try:
+            d = json.loads(payload.decode("utf-8"))
+        except Exception:                    # noqa: BLE001
+            continue
+        for ch in (d.get("choices") or []):
+            for tc in ((ch.get("delta") or {}).get("tool_calls") or []):
+                i = tc.get("index", 0)
+                slot = parts.setdefault(i, {"name": None, "args": "",
+                                            "tool_call_id": None})
+                fn = tc.get("function") or {}
+                if fn.get("name"):
+                    slot["name"] = fn["name"]
+                if fn.get("arguments"):
+                    slot["args"] += str(fn["arguments"])
+                if tc.get("id"):
+                    slot["tool_call_id"] = tc["id"]
+    return [{**v, "args": v["args"][:400]} for _, v in sorted(parts.items())
+            if v["name"]]
+
+
+#: 「用 shell 讀檔」的指令。`bash cat solution.py` 與 `read solution.py` 在
+#: 機制上是同一件事——**讀了自己上一份錯碼**——但工具名完全不同。
+_SHELL_READERS = ("cat", "sed", "head", "tail", "less", "more", "nl", "bat")
+
+
+def reads_own_solution(name: str | None, args: str) -> bool:
+    """這一通是不是「**讀自己上一份 `solution.py`**」。
+
+    兩條路都算（裁決 2026-09-19）：
+      · `read solution.py`（或等價的 read 工具指向它）
+      · `bash` 內含 `cat`／`sed`／`head`／`tail`／`less` 指向 `solution.py`
+
+    ⚠ 它與 `M7_ws` 的差別是承重的：`M7_ws` 說的是「看了目錄」，
+    這一條說的是「**讀了自己的錯碼**」——**後者才是「保留工作區」的實際通道**。
+    """
+    if "solution.py" not in args:
+        return False
+    low = (name or "").lower()
+    if any(v in low for v in _READ_VERBS):
+        return True
+    if any(v in low for v in ("bash", "shell", "exec", "run_command",
+                             "execute", "terminal")):
+        return any(f" {r} " in f" {args} " or f"{r} " in args
+                   for r in _SHELL_READERS)
+    return False
 
 
 def classify_call(name: str | None, args: str) -> str:
@@ -712,24 +808,54 @@ def classify_call(name: str | None, args: str) -> str:
 
 
 def measure_m7_ws(run_dir: pathlib.Path, summary: dict,
-                  slices: dict[int, list[str]], slice_meta: dict) -> dict:
-    """`M7_ws`：第 ≥2 次嘗試裡「`read TASK.md`／`write solution.py` 以外」的比例。
+                  slices: dict[int, list[str]], slice_meta: dict,
+                  *, tools_path: pathlib.Path | None = None) -> dict:
+    """`M7_ws`：第 ≥2 次嘗試裡「`read TASK.md`／`write solution.py` 以外」的比例，
+    外加子指標 `M7_ws_solution`：其中「**讀自己上一份 `solution.py`**」的比例。
 
-    **原始清單一起落盤**（`m7_ws_calls`）：分類器是我們猜的，證據不是。
-    事後要換分類規則，用那份清單離線重算即可，不必重跑任何一格。
+    ## 為什麼要拆出子指標（2026-09-19 裁決）
+
+    `M7_ws` 說的是「看了目錄」，`M7_ws_solution` 說的是「**讀了自己的錯碼**」
+    ——**後者才是「保留工作區」的實際通道**。而那條通道的效果**兩個符號都可能**：
+    `v1_real_pi` 三次嘗試寫出同一份 `add_numbers`，模型看到自己上一份錯碼會
+    **錨定在上面**，`resample` 重置反而拿到乾淨的重抽 ⇒ `RF < RS` 不是異常。
+    子指標**不進任何判準**（狀態表仍以 `M7_ws` 分支，不再開分支），
+    但收官句會引它。分母與 `M7_file`／`M7_ws` **相同**。
+
+    ## 三種 `null`，一種都不可以寫成 `false`
+
+    `no_second_attempt`（不適用）／`wire_unmappable`（對不起來）／
+    `unparsable_tool_shape`（**看得到工具痕跡但解不動**——量具壞了不是機制沒被
+    觸發，見 `_tool_calls_from_body`）。外加 `no_tool_calls_in_attempt_ge2`
+    ＝真的一通工具呼叫都沒有，那時 ratio 的分母是 0，`M7_ws` 照樣落 `null`。
+
+    ## 工具序列一律落盤
+
+    `tools_path` 給了就把**每次嘗試的每一通工具呼叫**寫成一列 JSONL
+    （`attempt`／`seq`／`tool`／`args_head`／`call_id`…）。**不是只在特定狀態才寫**
+    ——解析器本來就要解那段 wire，多寫一個檔零成本，而它讓「pi 到底看了什麼」
+    變成一張可查的表，不是一個標籤。
     """
     arm = summary["arm"]
     attempts = summary.get("attempts") or []
     res: dict = {"m7_ws": None, "m7_ws_reason": None, "m7_ws_ratio": None,
-                 "m7_ws_counts": {}, "m7_ws_calls": []}
+                 "m7_ws_counts": {}, "m7_ws_calls": [],
+                 "m7_ws_solution": None, "m7_ws_solution_reason": None,
+                 "m7_ws_solution_ratio": None, "m7_ws_solution_n": 0,
+                 "m7_ws_source": "last_request_per_attempt+last_response",
+                 "m7_ws_unparsable_evidence": None}
     if len(attempts) < 2:
-        res["m7_ws_reason"] = "no_second_attempt"
+        res["m7_ws_reason"] = res["m7_ws_solution_reason"] = "no_second_attempt"
         return res
     if not slice_meta.get("ok"):
-        res["m7_ws_reason"] = f"wire_unmappable: {slice_meta.get('reason')}"
+        why = f"wire_unmappable: {slice_meta.get('reason')}"
+        res["m7_ws_reason"] = res["m7_ws_solution_reason"] = why
         return res
     counts: dict[str, int] = {}
-    total, parsed_any = 0, False
+    total, sol_n, parsed_any = 0, 0, False
+    unparsable: list[dict] = []
+    seq = 0
+    rows: list[dict] = []
     for rec in attempts:
         n = rec["attempt"]
         if n < 2:
@@ -740,32 +866,60 @@ def measure_m7_ws(run_dir: pathlib.Path, summary: dict,
         blob = _req_blobs(run_dir, arm, ids[-1:])
         if not blob:
             continue
-        calls = _tool_calls_from_body(blob[0])
+        calls, ev = _tool_calls_from_body(blob[0])
         if calls is None:
             continue
+        if ev.get("unparsable"):
+            unparsable.append({"attempt": n, "call_id": ids[-1], **ev})
+        # 最後一通**回應**裡新開的那一筆（行程在它之後就結束了，不會回到 request）
+        tail = run_dir / f"wire_{arm}" / f"{ids[-1]}.resp.bin"
+        extra = _tool_calls_from_response(tail.read_bytes()) \
+            if tail.exists() else []
         parsed_any = True
-        for c in calls:
+        for c, src in ([(c, "request_history") for c in calls]
+                       + [(c, "last_response") for c in extra]):
             kind = classify_call(c["name"], c["args"])
+            is_sol = reads_own_solution(c["name"], c["args"])
             counts[kind] = counts.get(kind, 0) + 1
             total += 1
+            sol_n += 1 if is_sol else 0
+            seq += 1
+            rows.append({"attempt": n, "seq": seq, "call_id": ids[-1],
+                         "tool_call_id": c.get("tool_call_id"),
+                         "tool": c["name"], "kind": kind,
+                         "reads_own_solution": is_sol, "source": src,
+                         "args_head": c["args"][:80]})
             res["m7_ws_calls"].append(
                 {"attempt": n, "name": c["name"], "kind": kind,
-                 "args": c["args"][:200]})
+                 "reads_own_solution": is_sol, "args": c["args"][:200]})
+    if tools_path is not None:
+        # **一律落盤**：覆寫成這一次解析的結果（wire 是原始資料，這個檔是衍生物）
+        tools_path.write_text(
+            "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
+            encoding="utf-8")
+    if unparsable:
+        # **量具壞了不是機制沒被觸發。** 看得到工具痕跡卻撈不到呼叫 ⇒ null。
+        res["m7_ws_unparsable_evidence"] = unparsable
+        res["m7_ws_reason"] = res["m7_ws_solution_reason"] = \
+            "unparsable_tool_shape"
+        return res
     if not parsed_any:
-        res["m7_ws_reason"] = "no_parsable_request_body"
+        res["m7_ws_reason"] = res["m7_ws_solution_reason"] = \
+            "no_parsable_request_body"
         return res
     other = total - counts.get("read_task", 0) - counts.get(
         "write_solution", 0)
-    res["m7_ws_counts"] = {**counts, "total": total, "other_total": other}
-    res["m7_ws_ratio"] = (other / total) if total else None
+    res["m7_ws_counts"] = {**counts, "total": total, "other_total": other,
+                           "reads_own_solution": sol_n}
+    res["m7_ws_solution_n"] = sol_n
     if total == 0:
-        res["m7_ws_reason"] = "no_tool_calls_in_attempt_ge2"
+        res["m7_ws_reason"] = res["m7_ws_solution_reason"] = \
+            "no_tool_calls_in_attempt_ge2"
         return res
+    res["m7_ws_ratio"] = other / total
+    res["m7_ws_solution_ratio"] = sol_n / total
     res["m7_ws"] = bool(other > 0)
-    #: 取樣方式要落盤：我們讀的是**每一次嘗試的最後一通**（那一通帶著該次的
-    #: 完整上文）。框架如果做了脈絡壓縮，早期的工具呼叫會不在裡面——
-    #: 那是這個量測的已知上界，不是 bug，但看數字的人要知道。
-    res["m7_ws_source"] = "last_request_per_attempt"
+    res["m7_ws_solution"] = bool(sol_n > 0)
     return res
 
 
@@ -790,6 +944,134 @@ def measure_f6(arm_name: str, summary: dict) -> dict:
         return res
     res["f6"] = all(v > 0 for v in vals)
     return res
+
+
+#: `--selftest` 用的合成 wire。**不是從真跑抄來的**（真跑的 body 有 16 KB 的
+#: system prompt，看不出在驗什麼），但形狀逐欄照 pi 0.85.1 實測的 request body
+#: （`messages[].tool_calls[].function.{name,arguments}`，2026-09-18 vacant-dev）。
+def _selftest_wire_openai() -> bytes:
+    """一段**已知含 `ls` 與 `cat solution.py`** 的 wire。解析器認不出來就要紅。"""
+    def tc(i, name, args):
+        return {"id": f"call_{i}", "type": "function",
+                "function": {"name": name, "arguments": json.dumps(args)}}
+    return json.dumps({
+        "model": "m", "stream": True,
+        "messages": [
+            {"role": "system", "content": "…"},
+            {"role": "user", "content": "Read TASK.md and do what it says."},
+            {"role": "assistant", "tool_calls": [tc(1, "read", {"path": "TASK.md"})]},
+            {"role": "tool", "tool_call_id": "call_1", "content": "# Task…"},
+            {"role": "assistant", "tool_calls": [tc(2, "bash", {"command": "ls -R"})]},
+            {"role": "tool", "tool_call_id": "call_2", "content": "TASK.md\nsolution.py"},
+            {"role": "assistant", "tool_calls": [tc(3, "bash", {"command": "cat solution.py"})]},
+            {"role": "tool", "tool_call_id": "call_3", "content": "def add…"},
+            {"role": "assistant", "tool_calls": [tc(4, "read", {"path": "solution.py"})]},
+            {"role": "tool", "tool_call_id": "call_4", "content": "def add…"},
+            {"role": "assistant", "tool_calls": [
+                tc(5, "write", {"path": "solution.py", "content": "def add(a,b): return a+b"})]},
+            {"role": "tool", "tool_call_id": "call_5", "content": "ok"},
+        ]}).encode("utf-8")
+
+
+def _selftest_wire_unknown_shape() -> bytes:
+    """**有工具痕跡但形狀我們解不動**（Anthropic 式 content block）。
+
+    這是整支 selftest 的**牙齒**：舊版對這一段會安靜回一個空陣列 ⇒ `M7_ws = 0`
+    ⇒「機制沒被觸發」。正確答案是 `unparsable`。
+    """
+    return json.dumps({
+        "model": "m",
+        "messages": [
+            {"role": "user", "content": "go"},
+            {"role": "assistant", "content": [
+                {"type": "tool_use", "id": "t1", "name": "bash",
+                 "input": {"command": "ls -R"}}]},
+            {"role": "user", "content": [
+                {"type": "tool_result", "tool_use_id": "t1",
+                 "content": "TASK.md"}]},
+        ]}).encode("utf-8")
+
+
+def _selftest_wire_no_tools() -> bytes:
+    """**真的一通工具呼叫都沒有**（純文字對話）。
+
+    正確答案不是 `False` 也不是 `unparsable`，是 **0 通呼叫**——
+    而 `M7_ws` 對 0 通的分母落 `null`（`no_tool_calls_in_attempt_ge2`）。
+    """
+    return json.dumps({
+        "model": "m",
+        "messages": [
+            {"role": "user", "content": "Read TASK.md and do what it says."},
+            {"role": "assistant", "content": "I cannot access files."},
+        ]}).encode("utf-8")
+
+
+def selftest_m7_ws(verbose: bool = True) -> dict:
+    """`m7_ws` 解析器的自檢。**它現在是判定路徑的一部分**（護欄表第二列）：
+
+        RF ≠ RS 顯著 ∧ M7_ws = 0 ⇒ 先跑這支 --selftest：
+          紅 ⇒ M7_ws 這個指標判 INVALID（**不是 breach，是量具壞了**）
+          綠 ⇒ MECHANISM_BREACH
+
+    ⚠ **NOTHINK 下量到 `M7_ws = 0` 本身就與冒煙不符**——2026-09-18 vacant-dev
+    的四臂冒煙裡，RS／RF 在不思考下的 `m7_ws` 都是 `true`（多了 `ls` 之類的呼叫）。
+    所以真的量到 0 的時候，**最可能的成因是解析器沒認出工具呼叫**，不是模型變乖了。
+    這支就是為了把那兩件事分開而存在。
+
+    輸出（兩種都給，`state_r535.py` 挑一個用）：
+      · **stdout 印一包 JSON**，`{"green": bool, "cases": [...]}`；
+      · **回傳碼**：綠 `0`／紅 `1`。
+    """
+    cases: list[dict] = []
+
+    calls, ev = _tool_calls_from_body(_selftest_wire_openai())
+    names = [c["name"] for c in (calls or [])]
+    kinds = [classify_call(c["name"], c["args"]) for c in (calls or [])]
+    sols = [reads_own_solution(c["name"], c["args"]) for c in (calls or [])]
+    ok1 = (calls is not None and len(calls) == 5
+           and names == ["read", "bash", "bash", "read", "write"]
+           and kinds == ["read_task", "other", "other", "other",
+                         "write_solution"]
+           # `cat solution.py`（bash）與 `read solution.py` 兩條路都要認得
+           and sols == [False, False, True, True, False]
+           and not ev["unparsable"])
+    cases.append({"case": "openai_shape_with_ls_and_cat_solution", "ok": ok1,
+                 "want": "5 通、kinds=[read_task,other,other,other,"
+                         "write_solution]、reads_own_solution=[F,F,T,T,F]",
+                  "got": {"n": len(calls or []), "names": names,
+                          "kinds": kinds, "reads_own_solution": sols,
+                          "evidence": ev}})
+
+    calls2, ev2 = _tool_calls_from_body(_selftest_wire_unknown_shape())
+    ok2 = bool(ev2.get("unparsable")) and not calls2
+    cases.append({"case": "unknown_tool_shape_must_say_unparsable", "ok": ok2,
+                  "want": "unparsable=True（**不可以安靜回 0 通**）",
+                  "got": {"n": len(calls2 or []), "evidence": ev2}})
+
+    calls3, ev3 = _tool_calls_from_body(_selftest_wire_no_tools())
+    ok3 = (calls3 is not None and len(calls3) == 0
+           and not ev3.get("unparsable"))
+    cases.append({"case": "genuinely_no_tool_calls", "ok": ok3,
+                  "want": "0 通且 unparsable=False ⇒ M7_ws 落 null"
+                          "（no_tool_calls_in_attempt_ge2），不是 false",
+                  "got": {"n": len(calls3 or []), "evidence": ev3}})
+
+    calls4, _ = _tool_calls_from_body(b"{not json")
+    ok4 = calls4 is None
+    cases.append({"case": "unparsable_bytes_return_None_not_empty", "ok": ok4,
+                  "want": "None（**不是空陣列**——那會和「真的沒有呼叫」同形）",
+                  "got": {"is_none": calls4 is None}})
+
+    doc = {"selftest": "m7_ws_parser", "ts": now_iso(),
+           "green": all(c["ok"] for c in cases), "cases": cases,
+           "meaning": ("紅 ⇒ M7_ws 判 INVALID（量具壞了，不是 MECHANISM_BREACH）；"
+                       "綠 ⇒ M7_ws = 0 才讀得成 MECHANISM_BREACH。"),
+           "nothink_note": ("NOTHINK 下量到 M7_ws = 0 本身就與 2026-09-18 的"
+                            "四臂冒煙不符（那批 RS／RF 都是 true），"
+                            "最可能是解析器沒認出工具呼叫。")}
+    if verbose:
+        print(json.dumps(doc, ensure_ascii=False, indent=2))
+    return doc
 
 
 def sse_usage(blob: bytes) -> dict | None:
@@ -1204,7 +1486,8 @@ class Driver:
         ) if out["wire_upstreams"] else None
         out.update(measure_m7_file(run_dir, arm_name, summary, slices,
                                    slice_meta))
-        out.update(measure_m7_ws(run_dir, summary, slices, slice_meta))
+        out.update(measure_m7_ws(run_dir, summary, slices, slice_meta,
+                                 tools_path=cell / "tools.jsonl"))
         out.update(measure_f6(arm_name, summary))
         out.update(measure_f3(run_dir, arm, expect=self.a.reasoning_effort))
         out.update(measure_suspect_timeout(run_dir, arm))
@@ -1224,7 +1507,8 @@ class Driver:
     def row_of(state: dict) -> dict:
         keys = ("cell", "task_id", "arm", "stratum", "cell_status", "accepted",
                 "stop_reason", "attempts_used", "requests_seen", "m7_file",
-                "m7_file_reason", "m7_ws", "m7_ws_ratio", "f6",
+                "m7_file_reason", "m7_ws", "m7_ws_ratio",
+                "m7_ws_solution", "m7_ws_solution_ratio", "f6",
                 "f3_verdict", "reasoning_effort", "probe_invalid",
                 "agent_timed_out_n", "suspect_timeout", "infra_void",
                 "wall_s", "run_complete")
@@ -1781,6 +2065,68 @@ def compute_interim(out: pathlib.Path, manifest: dict,
     }
 
 
+def rescan(out: pathlib.Path, args) -> int:
+    """從**已經落盤的 wire** 重算衍生指標，零模型呼叫、不碰任何原始資料。
+
+    為什麼這支存在：`wire_*/`＋`run_RUN-ON.json` 是原始資料，`cell.json` 的
+    `m7_*`／`f3_*` 是**衍生物**。分類規則改了、解析器修好了（selftest 從紅轉綠）、
+    或裁決新增了一個子指標——這些都不該花機時重跑，重算就好。
+
+    只覆寫衍生欄位，並蓋一個 `rescanned_at`；`accepted`／`stop_reason`／
+    `attempts` 這些**跑出來的東西一個位元都不動**。
+    """
+    cells_dir = out / "cells"
+    if not cells_dir.is_dir():
+        raise SystemExit(f"找不到 {cells_dir}")
+    derived = [k for k in (
+        "m7_file", "m7_file_reason", "m7_file_by_attempt",
+        "m7_file_leaky_needles", "m7_ws", "m7_ws_reason", "m7_ws_ratio",
+        "m7_ws_counts", "m7_ws_calls", "m7_ws_source", "m7_ws_solution",
+        "m7_ws_solution_reason", "m7_ws_solution_ratio", "m7_ws_solution_n",
+        "m7_ws_unparsable_evidence", "f6", "f6_reason", "f6_bytes_by_attempt",
+        "f3_verdict", "f3_calls", "f3_req_ok", "f3_req_bad", "f3_resp_zero",
+        "f3_resp_nonzero", "f3_resp_unmeasured", "f3_violations", "f3_expect",
+        "suspect_timeout", "suspect_timeout_hits", "wire_slice_meta")]
+    n_ok, n_skip, changed = 0, 0, []
+    for cell in sorted(p for p in cells_dir.iterdir() if p.is_dir()):
+        cj, sp = cell / "cell.json", cell / "run" / "run_RUN-ON.json"
+        if not cj.exists() or not sp.exists():
+            n_skip += 1
+            continue
+        st = json.loads(cj.read_text(encoding="utf-8"))
+        summary = json.loads(sp.read_text(encoding="utf-8"))
+        arm_name, arm = st.get("arm"), summary.get("arm", "RUN-ON")
+        run_dir = cell / "run"
+        attempts = summary.get("attempts") or []
+        slices, slice_meta = wire_slices(run_dir, arm, attempts)
+        before = {k: st.get(k) for k in derived}
+        new: dict = {"wire_slice_meta": slice_meta}
+        new.update(measure_m7_file(run_dir, arm_name, summary, slices,
+                                   slice_meta))
+        new.update(measure_m7_ws(run_dir, summary, slices, slice_meta,
+                                 tools_path=cell / "tools.jsonl"))
+        new.update(measure_f6(arm_name, summary))
+        new.update(measure_f3(run_dir, arm, expect=st.get(
+            "reasoning_effort") or args.reasoning_effort))
+        new.update(measure_suspect_timeout(run_dir, arm))
+        st.update(new)
+        st["rescanned_at"] = now_iso()
+        Driver.write_cell(cell, st)
+        n_ok += 1
+        diff = [k for k in derived if before.get(k) != st.get(k)]
+        if diff:
+            changed.append({"cell": cell.name,
+                            "fields": [k for k in diff
+                                       if not k.endswith(("_calls", "_hits",
+                                                          "_by_attempt",
+                                                          "_needles",
+                                                          "_violations"))]})
+    print(json.dumps({"rescanned": n_ok, "skipped": n_skip,
+                      "changed": changed}, ensure_ascii=False, indent=2))
+    print(f"→ {cells_dir}/*/cell.json（衍生欄位）＋ tools.jsonl", file=sys.stderr)
+    return 0
+
+
 def reconcile(out: pathlib.Path, manifest: dict, msha: str,
               expect_effort: str = DEFAULT_REASONING_EFFORT) -> int:
     """收官對帳：**360 格每格都必須「有一列」或「明寫 void 原因」**。
@@ -1932,7 +2278,8 @@ def build_parser() -> argparse.ArgumentParser:
             "端點：`VACANT_GAIN_API=http://<host>:1234/v1/chat/completions`"
             "（**不是** VACANT_ENDPOINT）。\n"
             "「我設了設定」不是證據——要看逐格的 `requests_seen`。"))
-    ap.add_argument("--out", required=True, help="run 目錄（plan／cells／日誌都在這）")
+    ap.add_argument("--out", default=None,
+                    help="run 目錄（plan／cells／日誌都在這）。`--selftest` 以外都必填")
     ap.add_argument("--bank-manifest", default=str(HERE / "bank_manifest.json"),
                     help="題庫 manifest（預設 ops/gain/r535/bank_manifest.json）")
     ap.add_argument("--expect-manifest-sha256", default=EXPECTED_MANIFEST_SHA256,
@@ -1984,6 +2331,15 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--reconcile", action="store_true",
                     help="收官對帳：360 格每格都要「有一列」或「明寫 void 原因」，"
                          "少一格或多一格都判 INVALID（零模型呼叫）")
+    ap.add_argument("--selftest", action="store_true",
+                    help="跑 `m7_ws` 解析器自檢（零模型呼叫）。**它在判定路徑上**："
+                         "RF ≠ RS 顯著 ∧ M7_ws = 0 時，紅 ⇒ M7_ws 判 INVALID"
+                         "（量具壞了）／綠 ⇒ MECHANISM_BREACH。"
+                         "stdout 一包 JSON，回傳碼 0＝綠 1＝紅")
+    ap.add_argument("--rescan", action="store_true",
+                    help="不跑模型，只從**已經落盤的 wire** 重算 M7_*／F3 並補寫 "
+                         "tools.jsonl（wire 是原始資料，cell.json 是衍生物）。"
+                         "換了分類規則或修了解析器之後用這個，不要重跑機時")
     ap.add_argument("--interim", default=None, choices=["S1", "S2"],
                     help="印那一層的期中判定（**只讀不寫**，不會定案；"
                          "定案是 driver 在觸發點自己 O_EXCL 寫一次）")
@@ -2022,6 +2378,11 @@ def select(rows: list[dict], args) -> list[dict]:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.selftest:
+        # **零模型呼叫、不碰 run 目錄**：它驗的是解析器本身，不是某一次跑。
+        return 0 if selftest_m7_ws()["green"] else 1
+    if not args.out:
+        raise SystemExit("要給 --out（只有 --selftest 不用）。停。")
     mpath = pathlib.Path(args.bank_manifest).resolve()
     manifest, msha = load_manifest(mpath, expect_sha=args.expect_manifest_sha256)
 
@@ -2029,6 +2390,8 @@ def main(argv: list[str] | None = None) -> int:
         return preflight(args, mpath, manifest, msha)
 
     out = pathlib.Path(args.out).resolve()
+    if args.rescan:
+        return rescan(out, args)
     if args.reconcile:
         return reconcile(out, manifest, msha,
                          expect_effort=args.reasoning_effort)
