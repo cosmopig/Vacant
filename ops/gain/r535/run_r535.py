@@ -1280,7 +1280,7 @@ def preflight(args, manifest_path: pathlib.Path, manifest: dict,
 
 # ── CLI ───────────────────────────────────────────────────────────────────
 
-def reconcile(out: pathlib.Path, manifest: dict) -> int:
+def reconcile(out: pathlib.Path, manifest: dict, msha: str) -> int:
     """收官對帳：**360 格每格都必須「有一列」或「明寫 void 原因」**。
 
     少一格或多一格都判 `INVALID`（裁決 2026-09-19）。零模型呼叫。
@@ -1295,7 +1295,13 @@ def reconcile(out: pathlib.Path, manifest: dict) -> int:
         if cells_dir.is_dir() else set()
     buckets: dict[str, list[str]] = {
         "measured": [], "infra_void": [], "claimed_not_complete": [],
-        "never_started": [], "not_in_plan": sorted(have - want)}
+        "never_started": [], "not_in_plan": sorted(have - want),
+        # ⚠ 下面兩桶查的是「**跑的時候到底是不是這一臂／這一份題庫**」。
+        #   `plan.jsonl` 只釘住「跑哪 360 格」，釘不住「怎麼跑」——一格被標成
+        #   `RS` 卻用 RF 的旗標跑（中途改 `ARMS`、某條流用了舊 checkout、
+        #   手動補跑時打錯旗標），舊版對帳照樣說 OK。整個實驗的立論是
+        #   「除了旗標以外全部相同」，所以這一條不是形式檢查。
+        "flags_mismatch": [], "bank_mismatch": []}
     detail: list[dict] = []
     for r in rows:
         cell = cells_dir / r["cell"]
@@ -1314,24 +1320,44 @@ def reconcile(out: pathlib.Path, manifest: dict) -> int:
             detail.append({**r, "state": "not_complete",
                            "cell_status": st.get("cell_status")})
             continue
+        want_flags = list(ARMS[r["arm"]]["flags"])
+        got_flags = list(st.get("arm_flags") or [])
+        if got_flags != want_flags:
+            buckets["flags_mismatch"].append(r["cell"])
+            detail.append({**r, "state": "flags_mismatch",
+                           "want_flags": want_flags, "got_flags": got_flags})
+            continue
+        got_bank = st.get("bank_manifest_sha256")
+        if got_bank != msha:
+            buckets["bank_mismatch"].append(r["cell"])
+            detail.append({**r, "state": "bank_mismatch",
+                           "want_bank": msha,
+                           "got_bank": got_bank})
+            continue
         kind = ("measured" if st.get("cell_status") == "measured"
                 else "infra_void")
         buckets[kind].append(r["cell"])
         detail.append({**r, "state": kind, "accepted": st.get("accepted"),
                        "stop_reason": st.get("stop_reason"),
                        "infra_void": st.get("infra_void"),
-                       "requests_seen": st.get("requests_seen")})
+                       "requests_seen": st.get("requests_seen"),
+                       "arm_flags": got_flags})
     ok = (len(rows) == len(plan_rows(manifest))
           and not buckets["not_in_plan"]
           and not buckets["never_started"]
-          and not buckets["claimed_not_complete"])
+          and not buckets["claimed_not_complete"]
+          and not buckets["flags_mismatch"]
+          and not buckets["bank_mismatch"])
     doc = {"run": "R535", "ts": now_iso(), "out": str(out),
            "plan_sha256": plan_sha, "plan_chain": chain,
            "n_plan": len(rows), "n_expected": len(plan_rows(manifest)),
            "counts": {k: len(v) for k, v in buckets.items()},
            "verdict": "OK" if ok else "INVALID",
            "rule": ("360 格每格都必須「有一列」或「明寫 void 原因」，"
-                    "少一格或多一格都判 INVALID。"),
+                    "少一格或多一格都判 INVALID；"
+                    "另外每一格落盤的 arm_flags 與 bank_manifest_sha256 "
+                    "都必須與本檔的釘值逐位元相同——plan 釘住「跑哪些格」，"
+                    "這兩桶釘住「怎麼跑的、用哪份題庫」。"),
            "buckets": buckets, "cells": detail}
     (out / "reconcile.json").write_text(
         json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -1442,7 +1468,7 @@ def main(argv: list[str] | None = None) -> int:
 
     out = pathlib.Path(args.out).resolve()
     if args.reconcile:
-        return reconcile(out, manifest)
+        return reconcile(out, manifest, msha)
     if args.write_plan:
         info = write_plan(out, manifest, msha, force=args.force_plan)
         print(json.dumps(info, ensure_ascii=False, indent=2))
