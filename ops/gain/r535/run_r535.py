@@ -128,6 +128,11 @@ R532 為此誤發兩次打到雲端（產物留在 `runs/_falsestart_20260917_*`
 <out>/plan_receipt.pub.json   公鑰（私鑰不落盤，RECORD_SPEC §7）
 <out>/driver_<stream>.jsonl   driver 事件（含每 15 分鐘一筆 uptime）
 <out>/cells.jsonl             每格收完 append 一列（對帳用）
+<out>/probes.jsonl            塊邊界探針（model id ＋ reasoning_tokens）
+<out>/probe_baseline.json     第一次探針看到的 model id（O_EXCL，之後拿它比）
+<out>/interim_<層>.json       期中判定。**O_EXCL 寫一次就定案**
+<out>/HALT.json               探針或 F3 舉的旗；在就不派工，只有人 --ack-halt 解得開
+<out>/reconcile.json          收官對帳（`--reconcile`）
 <out>/cells/<task>__<ARM>/
     ws/                       agent 的工作區（只有 TASK.md）
     run/                      `--run-dir`：收據、wire、`_frozen_*`、run_RUN-ON.json
