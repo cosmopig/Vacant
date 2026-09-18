@@ -7,6 +7,45 @@ Anything that imported `vacant.core`, `vacant.protocol`, `vacant.runtime`, `vaca
 `vacant.client` or `vacant.composite` will not work. Those modules are gone. Pin `0.6.0`
 if you depend on them.
 
+### Added — `vacant run`: a receiving desk for any agent's delivery
+
+- **`vacant run -- <any agent command>`** wraps an agent process. It records the workspace
+  tree hash, spawns the agent, waits for it to **exit**, runs the client's visible acceptance
+  suite against a **frozen snapshot**, signs a receipt chain, and makes the **exit code reflect
+  the verdict — not what the agent said about itself**. `VACANT=0` passes bytes through
+  untouched (request bodies are byte-identical to an unwrapped run, proven by
+  `ops/vacantrun/selftest.py`) while still recording every call verbatim.
+
+- **`--retry resample|revise` (V1)** — when acceptance fails, run the agent again.
+  `resample` resets the workspace and withholds the failure text; `revise` keeps the workspace
+  and hands the failure text back. Every attempt signs its own `ws_attempt`; the closing
+  verdict signs `ws_verdict`. **No protocol is touched and no model utterance is fabricated**:
+  a retry is a new process, not an injected message.
+
+- **`--feedback-into file|prompt|both` (V2)** — deliver the failure text by **appending it to
+  the next spawn's prompt** instead of writing a file the model may never read. The placeholder
+  `{VACANT_FEEDBACK}` must sit at the **end** of its argument, so attempt 1 is byte-identical
+  to an unwrapped run and later attempts are a byte-exact prefix plus the feedback — which also
+  keeps the provider's prefix cache warm. **What this buys is that the feedback is present in
+  the model's input. It does not make the model act on it**; the only thing that is enforced is
+  that work which fails acceptance is not delivered.
+
+- **`vacant demo gate`** — zero setup, zero model endpoint, zero API key, zero network.
+  A stub agent declares success, the client's acceptance says otherwise, delivery is refused
+  (exit 20), and the receipt is verifiable — with the verifier's own negative control run first.
+
+- **Agent compatibility, measured rather than assumed** (`docs/AGENT_COMPAT.md`).
+  Claude Code 2.1.276 and OpenCode 1.18.31 attach through a single environment variable;
+  Codex 0.153.2 (API key) and pi 0.85.1 attach through their config files.
+  **Codex under `codex login` cannot be attached at all** — its model channel is a hard-coded
+  `wss://` endpoint, so verbatim recording does not hold on that path. **Hermes is untested**
+  (not installed on any machine we have). The only evidence that an agent is actually mediated
+  is `requests_seen`, not the fact that an environment variable was set.
+
+- **CI now has the seven required status checks** it has always declared, including a
+  `pip install`-from-wheel smoke test that runs `vacant demo gate` **from outside the
+  repository** — because running it inside the repo imports the source tree, not the package.
+
 ### Packaging
 
 - Distribution renamed to **`vacant-network`** on PyPI. The import name is still `vacant`.
