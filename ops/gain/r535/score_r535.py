@@ -134,6 +134,9 @@ def score_cell(sb, cell: pathlib.Path, bank: pathlib.Path, *,
         "requests_seen": state.get("requests_seen"),
         "m7_file": state.get("m7_file"), "m7_file_reason": state.get("m7_file_reason"),
         "m7_ws": state.get("m7_ws"), "m7_ws_ratio": state.get("m7_ws_ratio"),
+        "m7_ws_solution": state.get("m7_ws_solution"),
+        "m7_ws_solution_ratio": state.get("m7_ws_solution_ratio"),
+        "m7_ws_reason": state.get("m7_ws_reason"),
         "f6": state.get("f6"), "suspect_timeout": state.get("suspect_timeout"),
         "infra_void": state.get("infra_void"),
         # 推論模式與預算：兩個都是「不可以只在啟動時看一次」的東西
@@ -271,6 +274,16 @@ def summarise(rows: list[dict]) -> dict:
                 "m7_ws_true": sum(1 for r in sel if r.get("m7_ws") is True),
                 "m7_ws_false": sum(1 for r in sel if r.get("m7_ws") is False),
                 "m7_ws_null": sum(1 for r in sel if r.get("m7_ws") is None),
+                # 子指標：**不進判準**，收官句引它（讀了自己的錯碼＝保留工作區的實際通道）
+                "m7_ws_solution_true": sum(
+                    1 for r in sel if r.get("m7_ws_solution") is True),
+                "m7_ws_solution_false": sum(
+                    1 for r in sel if r.get("m7_ws_solution") is False),
+                "m7_ws_solution_null": sum(
+                    1 for r in sel if r.get("m7_ws_solution") is None),
+                "m7_ws_unparsable": sum(
+                    1 for r in sel
+                    if r.get("m7_ws_reason") == "unparsable_tool_shape"),
                 "f6_true": sum(1 for r in sel if r.get("f6") is True),
                 "f6_false": sum(1 for r in sel if r.get("f6") is False),
                 # ── 預算約束：**逾時不 void，但要看得見** ──────────────
@@ -303,6 +316,17 @@ def summarise(rows: list[dict]) -> dict:
         + (f"**下列臂-層 > 20%，收官必須寫「該比較受預算約束」**：{hot}"
            if hot else "目前沒有臂-層超過 20%。"))
     out["_budget_over_20pct"] = hot
+    # `M7_ws` 的可信度先於它的值：解析器沒認出工具呼叫時，`0` 會偽裝成
+    # 「機制沒被觸發」。所以只要有 unparsable 就在這裡講一句。
+    unp = sum(out[s][a].get("m7_ws_unparsable", 0)
+              for s in ("S1", "S2") for a in ("RS", "RF", "RP", "PC"))
+    out["_m7_ws_note"] = (
+        "M7_ws = 0 有兩個成因：agent 真的只做了 read TASK.md／write solution.py，"
+        "或**解析器沒認出這個框架的工具呼叫形狀**。護欄表第二列因此要求先跑 "
+        "`run_r535.py --selftest`（紅 ⇒ M7_ws 判 INVALID，不是 MECHANISM_BREACH）。"
+        "M7_ws_solution（讀了自己的錯碼）**不進判準**，收官句引它。"
+        + (f"⚠ 本輪有 {unp} 格 unparsable_tool_shape，那些格的 M7_ws 是 null "
+           f"不是 0。" if unp else ""))
     out["_attempt1_note"] = (
         "免費的單發基線只包含 **RS／RF／RP** 的 attempt 1："
         "那三臂第 1 次的 argv 逐位元相同（V2 的 placeholder 換成空字串）"
