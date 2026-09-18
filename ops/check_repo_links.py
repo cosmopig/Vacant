@@ -107,6 +107,11 @@ _NAMED_EXCLUSIONS: dict[str, str] = {
     "ops/gain/data/_r498_mut_tmp.json": "R498 突變檢查的輸出檔，跑完即刪",
     "D.md": "`tests/test_r530_scheduler.py` 合成的假 `ps` 輸出，不是真路徑",
     "DECISION_20260913_R530_….md": "`run_r530.py` docstring 的用法示例，含刪節號的佔位符",
+    "ops/gain/data/r480_cert_gate_probe.json":
+        "`tests/test_no_repo_pollution.py` **斷言它不存在**（2026-09-19 刪除）。"
+        "它曾經是 `cert_gate()` 把探針輸出寫回 repo 的落點，"
+        "而那會讓探針失敗時把陳年快照當成量到的結果。"
+        "⚠ 這一筆一旦消失就代表那支擋門也沒了——兩者要一起看。",
 }
 
 # markdown 連結：排除 http(s)/mailto/純錨點
