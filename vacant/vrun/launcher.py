@@ -346,7 +346,15 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
 
             # ── 2') 這一次嘗試之前：重置（resample）或留著（revise）───
             if attempt > 1 and retry_arm == "resample":
-                retrypolicy.restore_origin(origin_dir, workspace)
+                # `type: ignore[arg-type]`：`origin_dir` 在
+                # `retry_arm == "resample" and n_max > 1` 時才被建起來，而
+                # `attempt` 只跑 `range(1, n_max + 1)` ⇒ **`attempt > 1` 蘊含
+                # `n_max > 1`**，加上這裡的 `retry_arm == "resample"`，兩個
+                # 前提就是上面那個 if 的條件，所以到得了這一行時 `origin_dir`
+                # 必為 Path。型別系統不追蹤「迴圈變數的值域 ⇒ 另一個變數已被
+                # 指派」這種蘊含。**不加 assert**：`python -O` 會把它拿掉，
+                # 而且那會把一個不可能發生的狀況變成一個新的失敗模式。
+                retrypolicy.restore_origin(origin_dir, workspace)  # type: ignore[arg-type]
                 back = wshash.tree_hash(workspace)
                 rec["reset"] = {"kind": "resample", "ws_sha256": back,
                                 "back_to_start": back == ws_start}
@@ -472,8 +480,15 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                 summary["sandbox"] = {k: backend_meta.get(k)
                                       for k in ("backend", "sandbox",
                                                 "requested")}
+            # `type: ignore[arg-type]`：`has_suite` 的定義（見上面）第一個
+            # 連言就是 `suite_dir is not None`，而上一段 `if not has_suite:`
+            # 已經 `break` 掉了 False 的情形 ⇒ 到得了這一行時 `suite_dir`
+            # 必不為 None。型別系統不會把一個 bool 變數的真值回推成它的
+            # 連言成分。**不改成 `if not has_suite or suite_dir is None`**：
+            # 那等於為了討好檢查器而寫一段永遠為假的判斷。
             result = acceptance.run_suite(
-                sandbox, frozen_dir, suite_dir, suite="visible",
+                sandbox, frozen_dir, suite_dir,  # type: ignore[arg-type]
+                suite="visible",
                 task_id=task_id, verify_root=run_dir / "_verify",
                 timeout_s=test_timeout_s)
             (run_dir / f"visible_{arm}{suffix}.json").write_text(
