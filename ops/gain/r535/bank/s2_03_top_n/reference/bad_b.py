@@ -1,0 +1,3 @@
+def top_n(counts, n):
+    ranked = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    return ranked[:n]
