@@ -104,6 +104,9 @@ class _Stats(TypedDict):
     errors: int
     request_sha256: list[str]
     response_sha256: list[str | None]
+    #: `stop()` 排空逾時 ⇒ 這份統計**不完整**（少算的通數不明）。
+    #: `False` ＝排空成功，不是「沒檢查」。
+    quiesce_timeout: bool
 
 
 def join_upstream(base: str, path: str) -> str:
@@ -138,12 +141,21 @@ class WireProxy:
         self.mode = mode
         self.timeout_s = timeout_s
         self._lock = threading.Lock()
+        # ⚠ 「手上還有幾通沒處理完」。`requests_seen` 是在**回應送出之後**才加的，
+        #   所以 agent 拿到回應、寫完檔、退出時，handler 執行緒可能還沒跑到那一行
+        #   ⇒ 呼叫端這時候讀 `stats` 會**少算**。2026-09-18 在 CI（ubuntu py3.13）
+        #   上實際發生過：`requests_seen` 逐次是 [1, 1, 0]，而第三通其實有發生。
+        #   少算 `requests_seen` 特別嚴重，因為它是我們宣稱「中介真的發生了」的
+        #   **唯一**證據（§4.5：「我設了設定」不是證據）。
+        self._inflight = 0
+        self._idle = threading.Condition()
         self._srv: ThreadingHTTPServer | None = None
         self._thread: threading.Thread | None = None
         self._host, self._port = host, port
         #: 收據要用的統計。**不含 body**——body 在檔案裡。
         self.stats: _Stats = {"requests_seen": 0, "by_wire": {}, "errors": 0,
-                              "request_sha256": [], "response_sha256": []}
+                              "request_sha256": [], "response_sha256": [],
+                              "quiesce_timeout": False}
 
     # ── 生命週期 ──────────────────────────────────────────────────────
     @property
@@ -187,6 +199,13 @@ class WireProxy:
         return self
 
     def stop(self) -> None:
+        # ⚠ 先排空再關。`shutdown()` 只停掉 accept 迴圈，**不等在途的 handler
+        #   執行緒**（`ThreadingHTTPServer` 的 daemon 執行緒會被直接丟掉）⇒
+        #   關完才讀 `stats` 一樣會少算。排不空就記在 `stats["quiesce_timeout"]`，
+        #   讓「這份統計不完整」在收據裡看得到，而不是靜悄悄少一通。
+        if not self.quiesce():
+            with self._lock:
+                self.stats["quiesce_timeout"] = True
         if self._srv is not None:
             self._srv.shutdown()
             self._srv.server_close()
@@ -238,6 +257,33 @@ class WireProxy:
         return h.rfile.read(length) if length else b""
 
     def _handle(self, h: BaseHTTPRequestHandler, method: str) -> None:
+        with self._idle:
+            self._inflight += 1
+        try:
+            self._handle_inner(h, method)
+        finally:
+            with self._idle:
+                self._inflight -= 1
+                self._idle.notify_all()
+
+    def quiesce(self, timeout_s: float = 10.0) -> bool:
+        """等到手上沒有未處理完的請求為止。回 `True`＝真的排空了。
+
+        呼叫端在讀 `stats` **之前**必須先呼叫這支，否則會少算（見 `_inflight`
+        的註解）。回 `False` 代表逾時仍有在途請求——那時候 `stats` 是不完整的，
+        **呼叫端要把這件事落盤**，不可以當成「就是這麼多通」。
+        `infra_void` 的同一條紀律：沒量完不等於量到了。
+        """
+        deadline = time.time() + timeout_s
+        with self._idle:
+            while self._inflight > 0:
+                remaining = deadline - time.time()
+                if remaining <= 0:
+                    return False
+                self._idle.wait(remaining)
+        return True
+
+    def _handle_inner(self, h: BaseHTTPRequestHandler, method: str) -> None:
         call_id = uuid.uuid4().hex
         t0 = time.time()
         wire = route(h.path)
