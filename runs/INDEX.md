@@ -235,13 +235,13 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `g_r460_harness_lcb2_b3` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
 | `g_r530_s1_1003_1` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
 | `g_r530_s1_1003_2` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
-| `g_r530_s1_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
+| `g_r530_s1_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 2 | 1 |
 | `g_r530_s1_1004_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
-| `g_r530_s2_1003_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
+| `g_r530_s2_1003_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 2 | 1 |
 | `g_r530_s2_1003_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
 | `g_r530_s2_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
-| `g_r530_s2_1004_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
-| `g_r530_s3_1003_1` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
+| `g_r530_s2_1004_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 2 | 1 |
+| `g_r530_s3_1003_1` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 2 | 1 |
 | `g_r530_s3_1003_2` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
 | `g_r530_s3_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
 | `g_r530_s3_1004_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |

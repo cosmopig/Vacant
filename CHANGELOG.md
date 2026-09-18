@@ -107,6 +107,26 @@ output.**
   into each entry does not help, because `seq` already is the count); the acceptance gate
   still admitted 14.8% false deliveries in R532; and the reconciliation in
   `ops/gain/replay/verify_run_receipts.py` is same-origin, so it catches bugs and not malice.
+- **A coverage gap in our own audit was found, published, and then closed.** We had claimed
+  R532 was "V/GT 43/43 CLEAN". It was false: `ops/gain/harness_vgt_audit.py:746` is
+  `if arm not in VARIANTS: continue` and `ops/gain/harness_arms.py:65` sets
+  `VARIANTS = ("HPI", "HOC", "HMIX")`, so the classical seven arms — `OFF` and `CONFORM`
+  included — had never been scanned. The fix includes **changing the default to a full
+  audit**: a green light obtained by forgetting to pass a flag is exactly the condition that
+  let the hole exist. The retroactive sweep completed 2026-09-18 and is recorded in
+  `ops/gain/vgt_retro_audit_20260918.json` (scope v3 = ten arms, per-arm fail-closed):
+  **179 archived runs, 165 CLEAN / 10 UNVERIFIABLE / 4 VIOLATION, 3,486,403 needles
+  checked**, with the four cited batches CLEAN on every arm (R460 6/6, R460R 30/30, R529
+  37/37, R532 43/43), including **R532's 1,122 `CONFORM` records audited dynamically for the
+  first time**. The 10 UNVERIFIABLE are aborted runs with preflight only and no audit target
+  — an honest verdict, neither clean nor dirty. The 4 VIOLATION are all in R530 under
+  `hidden_file_in_workspace` and, on inspection, are the model's own same-named test files;
+  whether to tighten that rule is **unresolved**. Boundaries that travel with these numbers:
+  `CLEAN` covers only the literal repr of `hidden \ visible` in harness-authored prompt text
+  (semantic paraphrase is not detected), the bank is inferred rather than recorded for runs
+  predating R529, and `analyze_r529.py`'s `vgt_gate()` / `analyze_r532.py`'s `gates_post()`
+  still read the HMIX-only `vgt_v2_<block>.json`, so the gates have **not** all caught up.
+  Full text in `AGENTS.md` §7 H-0.
 - `vacant/__init__.py`'s summary line no longer says "強制信任" (mandatory trust). It said
   two wrong things at once: the project's terminology is *accountability*, not trust, and
   "mandatory" is more optimistic than `vacant/controller.py:7-8`, which states that the
