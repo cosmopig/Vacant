@@ -29,8 +29,17 @@ Everything here is meant to be checkable without trusting us: the receipt chains
 offline (`ops/gain/replay/verify_run_receipts.py --selftest` runs negative controls first),
 the task banks are sha256-pinned, and every conclusion can be recounted from
 `runs/g_*/rows.jsonl`. That includes our own mistakes: we claimed R532 was "V/GT 43/43
-CLEAN" and it was false — the audit tool scans only the H arm, so `OFF` and `CONFORM` were
-never scanned. See `AGENTS.md` §7 H-0.
+CLEAN" and it was false — the audit tool scanned only the H arm, so the classical seven
+arms, `OFF` and `CONFORM` included, were never scanned. The retroactive sweep completed on
+2026-09-18 (`ops/gain/vgt_retro_audit_20260918.json`, scope v3 = ten arms, per-arm
+fail-closed): 179 archived runs, **165 CLEAN / 10 UNVERIFIABLE / 4 VIOLATION**, 3,486,403
+needles checked, with the four cited batches CLEAN on every arm (R460 6/6, R460R 30/30,
+R529 37/37, R532 43/43 — the last including R532's 1,122 CONFORM records, audited
+dynamically for the first time). The 10 UNVERIFIABLE are aborted runs with no audit target;
+the 4 VIOLATION are all in R530 and are the model's own same-named test files, which leaves
+whether to tighten that rule **unresolved**. `CLEAN` covers only the literal repr, the bank
+is inferred, and the R529/R532 closing analyzers still read the old HMIX-only artifacts.
+See `AGENTS.md` §7 H-0 for all of it, boundaries included.
 
 ## Start here
 

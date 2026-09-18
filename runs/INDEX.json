@@ -28206,9 +28206,12 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+        "decisions/DECISION_20260918_ACCOUNTABILITY_AUDIT_AND_POSSESSION_RESEARCH.md"
       ],
-      "verdict_decisions": [],
+      "verdict_decisions": [
+        "decisions/DECISION_20260918_ACCOUNTABILITY_AUDIT_AND_POSSESSION_RESEARCH.md"
+      ],
       "related_settlements": [],
       "headline": null,
       "headline_from": null,
@@ -28728,9 +28731,12 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+        "decisions/DECISION_20260918_ACCOUNTABILITY_AUDIT_AND_POSSESSION_RESEARCH.md"
       ],
-      "verdict_decisions": [],
+      "verdict_decisions": [
+        "decisions/DECISION_20260918_ACCOUNTABILITY_AUDIT_AND_POSSESSION_RESEARCH.md"
+      ],
       "related_settlements": [],
       "headline": null,
       "headline_from": null,
@@ -29577,9 +29583,12 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+        "decisions/DECISION_20260918_ACCOUNTABILITY_AUDIT_AND_POSSESSION_RESEARCH.md"
       ],
-      "verdict_decisions": [],
+      "verdict_decisions": [
+        "decisions/DECISION_20260918_ACCOUNTABILITY_AUDIT_AND_POSSESSION_RESEARCH.md"
+      ],
       "related_settlements": [],
       "headline": null,
       "headline_from": null,
@@ -29872,9 +29881,12 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+        "decisions/DECISION_20260918_ACCOUNTABILITY_AUDIT_AND_POSSESSION_RESEARCH.md"
       ],
-      "verdict_decisions": [],
+      "verdict_decisions": [
+        "decisions/DECISION_20260918_ACCOUNTABILITY_AUDIT_AND_POSSESSION_RESEARCH.md"
+      ],
       "related_settlements": [],
       "headline": null,
       "headline_from": null,
