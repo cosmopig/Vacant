@@ -714,6 +714,24 @@ def test_v2_missing_placeholder_with_prompt_mode_is_a_hard_stop(tmp_path,
              max_attempts=None, ws_name="ws_none", run_name="run_none")
 
 
+def test_v2_resample_with_prompt_mode_is_an_honest_no_op(tmp_path, upstream):
+    """`resample` ＋ `prompt` **刻意不擋**，而且文件講的那句話要是真的。
+
+    那一臂本來就不給失敗原文，但兩條臂要能用**同一條命令**跑（第 1 次的 argv
+    才逐位元相同），所以它必須吃得下 placeholder、把它換成空字串。
+    ⇒ 每一次的 `feedback_in_prompt_bytes` 都是 0，每一次的 argv 都一樣。
+    「政策上沒有回饋」與「以為有卻沒送到」因此在資料上分得開。
+    """
+    r = _go2(tmp_path, mode="always_bad", feedback_into="prompt",
+             retry_arm="resample", max_attempts=2,
+             ws_name="ws_res2", run_name="run_res2")
+    s = r["summary"]
+    assert s["stop_reason"] == "attempts_exhausted"
+    assert [a["feedback_in_prompt_bytes"] for a in s["attempts"]] == [0, 0]
+    assert len({a["argv_sha256"] for a in s["attempts"]}) == 1
+    assert r["trace"][0]["prompt"] == r["trace"][1]["prompt"] == _PROMPT_PLAIN
+
+
 def test_v2_ks1_applies_to_the_users_own_command(tmp_path, upstream):
     """鐵律 1 不因為換了管道就放鬆：**責任修辭在 argv 裡一樣不准送出去。**
 
