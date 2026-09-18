@@ -1,0 +1,39 @@
+# 分支保護要求的第七個 check：`lint-pr-title`。
+#
+# 為什麼獨立一個檔：它只在 pull_request 上有意義（push 事件沒有 PR 標題）。
+# 放在 ci.yml 裡就得用 `if:` 把它在 push 時跳過，而「被跳過的必要 check」
+# 在分支保護上的行為比「這個 workflow 在 push 時根本不存在」更容易讓人誤判。
+#
+# ⚠ job 的 `name:` 必須逐字是 `lint-pr-title`（分支保護用名字比對）。
+# ⚠ `types:` 要包含 `edited`：標題改對之後要能重跑，不然改了也還是紅的。
+# ⚠ PR 標題是**外部輸入**：用 env 交給腳本，不做 `${{ }}` 的 shell 內插
+#    （內插會讓標題裡的 `$(...)`／反引號在 runner 上被執行）。
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  lint-pr-title:
+    name: "lint-pr-title"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 判準自己的牙齒（該過的過、該擋的擋）
+        run: python .github/scripts/check_pr_title.py --selftest
+      - name: 檢查這個 PR 的標題
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: python .github/scripts/check_pr_title.py
