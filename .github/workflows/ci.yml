@@ -167,11 +167,53 @@ jobs:
           python -m venv "$RUNNER_TEMP/runtimeenv"
           "$RUNNER_TEMP/runtimeenv/bin/python" -m pip install --upgrade pip
           "$RUNNER_TEMP/runtimeenv/bin/python" -m pip install .
-          # 濾掉本專案自己（`pip freeze` 對本地安裝可能寫成 `vacant==0.1.0`
-          # 也可能寫成 `vacant @ file:///…`，兩種 pip-audit 都查不到）。
           "$RUNNER_TEMP/runtimeenv/bin/python" -m pip freeze --exclude-editable \
-            | grep -viE '^vacant( |==|@)' > "$RUNNER_TEMP/runtime-freeze.txt"
-          echo "── 實際會裝進去的東西 ──"
+            > "$RUNNER_TEMP/freeze-all.txt"
+
+          # 從送去稽核的清單裡**移除本專案自己**。理由不是「它有漏洞要藏」，是兩條：
+          #   (1) 職責邊界：pip-audit 比對的是 OSV／PyPI 漏洞資料庫，那裡面只會有
+          #       **第三方套件**。本專案自己的原始碼由上面 (a) 的 bandit 兩格負責，
+          #       丟進 pip-audit 永遠只會得到「查無此版本」而不是任何保證。
+          #   (2) 它會讓整格失敗：`pip install .` 是本地路徑安裝，`pip freeze` 因此
+          #       寫成 `vacant-network @ file:///home/runner/work/Vacant/Vacant`
+          #       （direct URL，`--exclude-editable` 只擋 `-e` 不擋這種），pip-audit
+          #       拒絕處理**整份**清單：
+          #         `vacant-network: URL requirements cannot be pinned to a specific package version`
+          #       ⇒ exit 1。本機不一定踩得到，因為 freeze 檔的產生方式可能不同。
+          # 發布名是 `vacant-network`，import 名才是 `vacant`（見 pyproject 第一段註解）
+          # ——舊版這裡寫 `^vacant( |==|@)`，用的是 import 名，所以從來沒有命中過。
+          # PEP 503 正規化下底線與連字號等價、大小寫不分，三種寫法一起蓋。
+          grep_rc=0
+          grep -viE '^vacant[-_]network([[:space:]]|==|@|$)' \
+            "$RUNNER_TEMP/freeze-all.txt" > "$RUNNER_TEMP/runtime-freeze.txt" || grep_rc=$?
+          if [ "$grep_rc" -gt 1 ]; then
+            echo "::error::過濾第三方清單時 grep 自己失敗（rc=$grep_rc）"
+            exit 1
+          fi
+
+          # ⚠ 這是**移除一個不該被稽核的項目**，不是放寬判準，所以它必須是可稽核的：
+          #    濾掉的行數要**正好 1**。少了＝自己那一行換了寫法沒被命中（清單照樣會被
+          #    pip-audit 整份拒絕）；多了＝連第三方依賴一起濾掉了，清單變短＝少查了
+          #    東西，而那正是這道門最不該安靜發生的事。兩種都紅。
+          before=$(wc -l < "$RUNNER_TEMP/freeze-all.txt")
+          after=$(wc -l < "$RUNNER_TEMP/runtime-freeze.txt")
+          removed=$(( before - after ))
+          echo "freeze 共 $before 行 → 濾掉 $removed 行（應為 1：本專案自己）→ 送審 $after 行"
+          if [ "$removed" -ne 1 ]; then
+            echo "::error::期望正好濾掉 1 行（本專案自己），實際濾掉 $removed 行"
+            echo "── 未過濾的 freeze 全文 ──"
+            cat "$RUNNER_TEMP/freeze-all.txt"
+            exit 1
+          fi
+
+          # 殘留的 URL requirement 一樣會讓 pip-audit 整份拒絕。這裡點名它而不是
+          # 順手多濾一行：多出來的 URL 依賴代表依賴宣告變了，要人看過，不是自動消失。
+          if grep -nE '[[:space:]]@[[:space:]]' "$RUNNER_TEMP/runtime-freeze.txt"; then
+            echo "::error::清單裡還有 URL 形式的 requirement（上面那幾行）——pip-audit 會拒絕整份清單"
+            exit 1
+          fi
+
+          echo "── 實際會裝進去的第三方依賴（$after 個）──"
           cat "$RUNNER_TEMP/runtime-freeze.txt"
           python -m pip_audit --no-deps --disable-pip --strict \
             --progress-spinner off -r "$RUNNER_TEMP/runtime-freeze.txt"
