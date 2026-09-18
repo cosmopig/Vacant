@@ -1,14 +1,17 @@
-# `vacant run -- <任何 agent 命令>`（V0）
+# `vacant run -- <任何 agent 命令>`（V0 ＋ V1 迴圈）
 
 > 一句話：把任意 agent 包起來，中介它的模型通道，**在它的行程結束那一刻**
-> 跑客戶的驗收、簽一張可驗證收據、沒過就擋下交付。
+> 跑客戶的驗收、簽一張可驗證收據、沒過就擋下交付——
+> **V1 再多一件事：沒過就重置或回饋，再 spawn 一次。**
 
 程式碼：[`ops/vacantrun/`](../ops/vacantrun/)
 （[`launcher.py`](../ops/vacantrun/launcher.py)、
+[`retry.py`](../ops/vacantrun/retry.py)、
 [`wireproxy.py`](../ops/vacantrun/wireproxy.py)、
 [`envmap.py`](../ops/vacantrun/envmap.py)、
 [`selftest.py`](../ops/vacantrun/selftest.py)）
-· 測試：[`tests/test_vacant_run.py`](../tests/test_vacant_run.py)
+· 測試：[`tests/test_vacant_run.py`](../tests/test_vacant_run.py)、
+[`tests/test_vacant_run_retry.py`](../tests/test_vacant_run_retry.py)
 
 ---
 
@@ -33,7 +36,14 @@
    沒有人說過的話，那是自毀。真要做，必須先有一個「這一則是 Vacant 插進去的」
    的可驗證標記，而那個標記的設計本身要另外裁決。
 
-`wireproxy.WireProxy.on_wire()` 是那個掛鉤的位置，**V0 恆回 `None`（永不改寫）**。
+`wireproxy.WireProxy.on_wire()` 是那個掛鉤的位置，**V0／V1 都恆回 `None`（永不改寫）**。
+
+### V1 怎麼在不注入的前提下拿到迴圈
+
+上面那兩個理由**一個字都沒有鬆動**。V1 靠的是同一個洞察再走一步：
+既然觸發點是**行程結束**，重試就不必在對話裡發生——
+**重置工作區或把失敗原文寫成一個檔，然後再 spawn 一次 agent 就好。**
+零協定破解、零偽造發言、跨所有框架。完整規格見 §7。
 
 ---
 
@@ -47,6 +57,10 @@ vacant demo gate                       # ops/vacantrun/demo.py
 vacant run --suite tests_visible --run-dir ~/.vacant-run/demo -- \
     pi -p "把 solution.py 寫完"
 
+# V1：沒過就重試（兩條臂，見 §7）
+vacant run --suite tests_visible --retry revise   --max-attempts 3 -- <cmd>
+vacant run --suite tests_visible --retry resample --max-attempts 3 -- <cmd>
+
 # 純觀測（不 gate），但 wire 照樣逐字落盤
 VACANT=0 vacant run --run-dir ~/.vacant-run/demo -- <cmd>
 
@@ -59,23 +73,29 @@ python3 ops/vacantrun/launcher.py --suite tests_visible --run-dir /tmp/r -- <cmd
 | 退出碼 | 意思 |
 |---|---|
 | `0` | `visible_pass`／`ungated`（`--allow-no-suite`）⇒ 交付 |
-| `20` | `visible_fail`／`no_suite` ⇒ **拒交** |
-| `22` | `infra_void`（TOCTOU、agent 起不來）⇒ 不判交付也不判拒交 |
+| `20` | `visible_fail`／`attempts_exhausted`／`no_suite` ⇒ **拒交** |
+| `22` | `infra_void`（TOCTOU、`ws_reset_failed`、`ks1_violation`、agent 起不來）⇒ 不判交付也不判拒交 |
 | 其他 | `VACANT=0` 那一臂：透傳 agent 自己的退出碼 |
 
 落盤形狀（`--run-dir`）：
 
 ```
 rows.jsonl                    一臂一列（arm ∈ {RUN-ON, RUN-OFF}）
-receipts_RUN-ON.ndjson        Ed25519 簽章鏈（ws_attempt + ws_verdict）
+receipts_RUN-ON.ndjson        Ed25519 簽章鏈（ws_attempt ×N + ws_verdict ×1）
 receipts_RUN-ON.pub.json      公鑰（私鑰不落盤，RECORD_SPEC §7）
 wire_RUN-ON/index.jsonl       一通一列的 wire 索引（含 body sha256）
 wire_RUN-ON/<call>.req.bin    request body **原始位元組**
 wire_RUN-ON/<call>.resp.bin   response body **原始位元組**
-visible_RUN-ON.json           驗收的完整結果
-run_RUN-ON.json               summary（含 env 改了哪些、拿掉哪些）
-_frozen_RUN-ON/               驗收跑的那份凍結快照
+visible_RUN-ON.json           第 1 次嘗試的驗收結果
+visible_RUN-ON_a2.json        第 2 次以後（V1）
+run_RUN-ON.json               summary（含 env 改了哪些、拿掉哪些、`attempts` 陣列）
+_frozen_RUN-ON/               第 1 次嘗試驗收跑的那份凍結快照
+_frozen_RUN-ON_a2/            第 2 次以後（V1）
+_origin/                      `--retry resample` 的起點完整副本（含 `.git`）
 ```
+
+**第 1 次嘗試的檔名與 V0 逐字相同**，第 2 次以後才加 `_a<n>` 後綴。
+哪一次是最後一次由 `run_RUN-ON.json` 的 `attempts` 陣列說了算，不要用檔名猜。
 
 收據用**既有的那把尺**驗，不准另寫第二把：
 
@@ -273,12 +293,165 @@ IPv6、既有的長連線、raw socket 都要另外量；量不到就寫「沒�
 | `ops/gain/r530/wshash.py` | 工作區樹雜湊（起點／終點） |
 | `ops/gain/r530/sandbox.py` | 驗收跑在沙箱裡（`make_sandbox`） |
 | `ops/gain/r534/wire_tap.py` | `wireproxy.py` 的前身（本檔 §3 那條鐵律的來源） |
+| `ops/gain/r534/piarms.py` | `FEEDBACK_TEMPLATE` 的形狀（§7.3 逐字沿用） |
+| `ops/gain/harness_arms.py` | 回饋迴圈的做法（`render_feedback`／截斷／落全文簽雜湊） |
 | `ops/gain/replay/verify_run_receipts.py` | 驗收據——**唯一那把尺** |
+| `vacant/memory.py::assert_ks1_clean` | KS-1 可執行防呆（鐵律 1） |
 | `vacant/logbook.py`、`vacant/identity.py`、`vacant/crypto.py` | 簽章鏈 |
 
 `ops/gain/r534/sidecar.py` 的**判斷層**（`hello`／`turn_end`／`settled`／
-`message`／`event`／`final` 六個 op）與 pi 無關、可原封不動搬過來——但**V0 用不到**：
-那六個 op 全都需要一個會主動來問的框架擴充，而 V0 的整個重點是
-**不需要框架配合**。它們會在 V1（注入回對話）回到場上。
-V0 實際沿用的是 sidecar 的形狀：判斷全在 Python 這一邊、
+`message`／`event`／`final` 六個 op）與 pi 無關、可原封不動搬過來——但**用不到**：
+那六個 op 全都需要一個會主動來問的框架擴充，而整個重點是
+**不需要框架配合**。V1 的迴圈也沒有讓它們回到場上——重試靠的是重新 spawn，
+不是在對話裡插話（§7）。實際沿用的是 sidecar 的形狀：判斷全在 Python 這一邊、
 `final` 簽一筆 `ws_verdict`、鏈上放雜湊全文放檔案。
+
+---
+
+## 7. V1：閘門的重試迴圈
+
+V0 只能「跑一次 → 驗收 → 過或拒交」。**那只是收件口，不是 Vacant 的機制。**
+R530／R532 量到增益的那個東西是**閘門＋重抽／重改**（CONFORM 對單發
++14～+19 pp、五次複製都過 Holm）。沒有迴圈，`vacant run` 交付不出那個增益。
+
+V1 便宜的原因只有一句：**觸發點是行程結束，所以重試不用碰協定**（§1）。
+
+### 7.1 兩條臂
+
+| 臂 | 沒過之後 | 對應既有實驗 |
+|---|---|---|
+| `--retry resample` | **全新工作區**（整個重置回起點）、全新 agent 行程，**不給失敗原文** | R530 A-CONF／R532 CONFORM |
+| `--retry revise` | **保留工作區**、把失敗原文寫進 `VACANT_FEEDBACK.md`、再跑一次 | R530 A-GATE／R532 HMIX |
+| `--retry none` | 不重試（**預設**，＝V0 的行為逐字不變） | — |
+
+⚠ **`resample` 的重置連 `.git/` 一起清。** `wshash.EXCLUDED_DIRS` 把 `.git/`
+排除在樹雜湊之外——但它排除不了 agent 的眼睛。上一次嘗試如果 commit 過，
+留著 `.git` 就等於偷偷把失敗原文留在現場，那樣兩條臂的差別會消失，
+**而且消失的方式在樹雜湊上完全看不出來**。還原完會再量一次樹雜湊，
+對不回起點 ⇒ 判 `ws_reset_failed`（`infra_void`），不判拒交也不判通過。
+可執行證明：`tests/test_vacant_run_retry.py::test_resample_really_resets_the_workspace`
+（假 agent 把「我開始時看到什麼」寫到**工作區外**——工作區裡的證據會被重置一起清掉）。
+
+### 7.2 `--max-attempts` 預設 3
+
+R530 用的是「A-CONF 最多 3 份、A-GATE 最多 5 輪」。**V1 不照抄 5**：
+那個 5 是給「同一段對話裡多說一輪」訂的，單位成本是幾則訊息；
+V1 的一次嘗試是**整個 agent 行程重跑**（重讀任務、重建脈絡、重跑工具），
+成本高一個量級。3 同時是 A-CONF 那條的下限，兩條臂都涵蓋得住。
+展場與無人值守要的是一個**小**的成本上限。要更多就明講 `--max-attempts`。
+
+`--retry none --max-attempts 3` 是**壞組合，一律 fail-visible**（`SystemExit`）：
+安靜地當成 1 會讓一次不重試的跑看起來像重試過。
+
+### 7.3 回饋檔逐字
+
+寫到工作區的 `VACANT_FEEDBACK.md`（固定檔名——agent 命令是使用者給的，
+我們沒辦法在它的 prompt 裡講「去讀某某檔」，所以這個名字必須是文件上的約定）：
+
+```
+<!-- Written by `vacant run` between attempts.
+     This is machine output, not a person. It is not part of the deliverable. -->
+
+# Acceptance feedback (attempt {attempt} of {max_attempts})
+
+The checks that ship with this task were run against your
+working directory. They did not all pass.
+
+{block}
+
+Fix the working directory. The checks run again when this process exits.
+```
+
+**正文（第 5 行起）逐字沿用 `ops/gain/r534/piarms.py::FEEDBACK_TEMPLATE`**，
+連硬折行的位置都照抄——那一段已經在 R534 的真模型上跑過，換字就是引入一個
+沒有被量過的變因。**唯一的改寫是最後一句**（R534 寫的是
+`When you consider it finished, reply with a short plain-text summary and do not
+call any tool.`）：那句話講的是 pi 在同一段對話裡怎麼宣告完成，
+而 V1 的觸發點是行程結束，照抄會是對 agent 說一句在這裡不成立的話。
+表頭是 V1 新加的，用意取自 `piarms.TOOL_RESULT_HEADER`
+（"This is machine output, not a person."）——訊息可以靠位置說明自己是什麼，
+檔案不行。`{block}` 由 `ops/gain/r530/acceptance.render_failures()` 渲染。
+
+⚠ **`{block}` 裡的路徑指的是凍結快照**（`_frozen_RUN-ON_a2/solution.py`），
+不是 agent 自己那個檔。這是 V0 就有的性質（README 印的 demo 輸出同款），
+V1 沒有改 `render_failures`（凍結碼）。實測的 12B 沒有因此改對名字，
+但**「路徑看起來不是它的檔」有沒有害到它，本輪沒有量**——寫成沒量，不要寫成沒有。
+
+### 7.4 兩條紅線
+
+1. **V/GT**：回饋只吃 `run_suite(suite="visible")` 的結果，
+   隱藏驗收的存在、條數、內容一律不進這個檔。
+   可執行防呆＝`tests/test_vacant_run_retry.py::test_feedback_file_never_contains_hidden_testdata`
+   （canary 種在 hidden 側，掃 feedback 檔零命中）＋**負向控制**
+   `test_vgt_canary_scan_has_teeth`（把 hidden 當成可見套件餵進去，
+   同一支掃描必須翻紅）。沒有負控的「零命中」跟把掃描關掉在輸出上同形。
+2. **KS-1（鐵律 1）**：回饋文字禁止「你有責任／會被懲罰」類措辭。
+   `vacant/memory.py::assert_ks1_clean` 在 `ops/vacantrun/retry.py` import 時
+   就跑一次（模板），每次渲染再跑一次（**含插進去的失敗原文**）。
+   責任修辭如果是從客戶測試的訊息帶進來的，判 `ks1_violation`＝`infra_void`
+   ——鐵律 1 說的是「違反＝run 作廢」，不是「拒交」。
+
+### 7.5 收據：`attempt 數 ≥ verdict 數`
+
+**R530 踩過的坑**：只在 happy path 簽 attempt ⇒ 撞預算的格子 0 筆 attempt、
+1 筆 verdict ⇒ **鏈沒壞，壞的是「鏈說得出這一格發生過什麼」**。
+所以 V1 在**每一次嘗試結束時**就簽一筆 `ws_attempt`（含沒有驗收套件那一次，
+`verdict_sha256=None` ＝這一輪沒跑驗收），最後簽**一筆** `ws_verdict`。
+一次 `run()` 只交付一次 ⇒ `rows.jsonl` 也只有一列。
+
+`infra_void` **整條鏈都不落盤**（V0 的語意：基建事件不是裁決）。
+已經簽過的 attempt 不會憑空消失——全文在 `run_<ARM>.json` 的 `attempts` 陣列裡，
+只是沒有簽章背書。理由是對帳規則：那一列 row 沒有 verdict，
+鏈只要落盤就會被判 `verdict_count_ne_rows`，而那會把「基建壞了」報成「鏈壞了」。
+
+```bash
+python3 ops/gain/replay/verify_run_receipts.py --selftest      # 先證明它抓得到壞鏈
+python3 ops/gain/replay/verify_run_receipts.py --glob ~/.vacant-run/<你的 run 目錄>
+```
+
+### 7.6 等預算＝上限相同、實際用量落盤
+
+R530 的裁決是「**上限相同、實際用量落盤**」，不是強制用滿。
+每一次嘗試的 `requests_seen`、`agent_wall_s`、`agent_rc`、
+`ws_start_sha256`／`ws_end_sha256`、回饋的 sha256 全部逐次落進
+`run_<ARM>.json` 的 `attempts`，並且簽進對應的 `ws_attempt`。
+
+### 7.7 誠實邊界（**不准淡化**）
+
+1. **重試不是免費的。** 每一次嘗試都燒一整個 agent 行程的 token 與時間。
+   `--max-attempts` 是**成本上限不是目標值**。
+2. **`revise` 會讓 agent 看到自己的失敗**，那是設計；
+   但**它看不到隱藏測資**，這條由 §7.4 的 V/GT 測試守，不是由「我們很小心」守。
+3. **R534 實測：真模型上「沒過→重改」與拒交出現 0 次**（6 格次裡 2 次宣告完成
+   都第一輪過、2 次燒光 token、2 次撞脈絡上限）⇒ **V1 讓這條路存在，
+   不代表它在你的工作負載上會被觸發。** 沒被觸發的迴圈不產生增益。
+4. **本輪的數字不得與 R530／R532／R534 併表**：prompt 不是我們寫的
+   （agent 命令由使用者給）、工具面由框架自己決定、預算形狀是「整個行程重跑」
+   而不是「同一段對話多說一輪」。三個變因都不同。
+5. 迴圈**不改變**驗收是單邊保證這件事（§4.7）：重試到過，只代表
+   「客戶給的那幾條過了」，不代表做對了。
+
+### 7.8 真 agent 實跑一次（2026-09-18，vacant-dev）
+
+pi 0.85.1 ＋ 1003 的 `gemma-4-12b-it-qat`（`http://100.119.113.56:1234/v1`）。
+pi 不吃環境變數 ⇒ 用 `--port 8877` ＋ `PI_CODING_AGENT_DIR` 底下一份
+`models.json` 把 provider `baseUrl` 指向 proxy（§4.5 講的那條路）。
+**兩跑都零機時爭議：模型端點本來就在跑，一次 3 通 wire。**
+
+| run | 任務敘述 | 結果 |
+|---|---|---|
+| `v1_real_pi` | TASK.md **只講白話**（「一個相加、一個相乘」），可見驗收在工作區外 ⇒ agent 看不到 | **拒交**（`attempts_exhausted`，3/3 次、9 通 wire、exit 20）。三次都寫成 `add_numbers`／`multiply_numbers`，讀了回饋也沒改名 |
+| `v1_real_pi_explicit` | TASK.md **明講** `add(a,b)`／`mul(a,b)` | **交付**（`visible_pass`，1/3 次、3 通 wire、exit 0） |
+
+兩條鏈都過既有那把尺（`ws_attempt` 3+1 與 1+1、`verdict` 各 1、
+`chain_ok` 與 `logbook_verify_chain` 一致）。
+
+⚠ **這兩跑是機制示範不是量測**：n=1、任務是挑出來讓閘門有東西可擋的、
+零統計。它證明的是「迴圈真的會跑、收據真的驗得過、拒交真的擋得住」，
+**不證明 revise 在真模型上會提高通過率**——第一跑的三次重改一次都沒改對，
+正是 §7.7-3 那條邊界的現場版本。
+
+另外有一跑因為 `--port` 給了 8878 而 pi 的 `models.json` 寫的是 8877，
+**agent 完全沒被中介到**（`requests_seen` = 0），而畫面上只有 pi 自己的
+`Connection error.`。那正是 §4.5 的現場版本：**「我設了設定」不是證據，
+`requests_seen` 才是。**
