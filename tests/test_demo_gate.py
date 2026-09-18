@@ -10,8 +10,9 @@
       畫面上那句 `ImportError: cannot import name 'mul'` 必須是驗收
       driver 當場抓到的例外——所以 `demo.py` 的原始碼裡**不准**有那句話。
   · `test_receipt_is_real_and_verifies_with_the_existing_ruler`
-      收據是真的 Ed25519 鏈，而且用**既有的** `verify_run_receipts`
-      驗得過（不准另寫第二把尺）。
+      收據是真的 Ed25519 鏈，而且用**既有的**驗章器（`vacant.vrun.verify_receipts`
+      ＝`ops/gain/replay/verify_run_receipts.py` 的同一支）驗得過。
+      不准另寫第二把尺。
   · `test_demo_agent_makes_no_network_call`
       「沒有網路也跑得完」的可執行版本：假 agent 的原始碼裡不准出現任何
       連線用的模組，而且真跑的 `requests_seen` 必須是 0。
@@ -39,8 +40,8 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from ops.gain.replay import verify_run_receipts as vrr           # noqa: E402
-from ops.vacantrun import demo, launcher                         # noqa: E402
+from vacant.vrun import demo, launcher                           # noqa: E402
+from vacant.vrun import verify_receipts as vrr                   # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -60,7 +61,7 @@ def test_gate_really_refuses_the_delivery(ran):
 
 def test_failure_text_is_really_raised_not_a_string_literal(ran):
     assert "cannot import name 'mul'" in ran["failures"]
-    src = (ROOT / "ops" / "vacantrun" / "demo.py").read_text(encoding="utf-8")
+    src = (ROOT / "vacant" / "vrun" / "demo.py").read_text(encoding="utf-8")
     # 那句話只准出現在**模組 docstring**裡（說明 V0 實測長什麼樣），
     # 不准出現在任何一行會被執行的碼上——否則畫面上那句就是印死字串。
     lines = src.splitlines()

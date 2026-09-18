@@ -23,6 +23,23 @@ if you depend on them.
 - `requires-python`, classifiers, `project.urls`, SPDX license metadata and a
   `py3-none-any` wheel + sdist that pass `twine check`.
 - Version has a single source of truth: `vacant.__version__`, read by setuptools.
+- **`vacant demo gate` and `vacant run -- <cmd>` no longer need a clone.** Their judgement
+  layer used to live in `ops/`, which is deliberately not in the wheel, so `pip install
+  vacant-network` gave you a library and a message telling you to clone. Fixed by **moving
+  and inverting the dependency**, not by copying: the implementation now lives in
+  `vacant/vrun/` (`acceptance`, `sandbox`, `wshash`, `receipts`, `verify_receipts`,
+  `launcher`, `wireproxy`, `envmap`, `demo`), and `ops/gain/r530/*`,
+  `ops/gain/replay/verify_run_receipts.py` and `ops/vacantrun/*` are re-exports that alias
+  `sys.modules` to it. The old import paths and the old script paths keep working and
+  resolve to **the same module object**, so there is still exactly one ruler — a second
+  copy is what `vacant/suitegauge.py` and `conform_failure_detail` both forbid in writing.
+  `tests/test_vrun_reexport.py` is the executable guard (identity by `is`, no `ops.*`
+  dependency inside the package, `packages` actually lists `vacant.vrun`).
+  The top-level `ops` package is still kept out of the wheel on purpose: `ops` on PyPI is
+  Juju's package, and the collision would silently overwrite files.
+  `ops/vacantrun/envmap.py` has no re-export — it moved outright, because a list whose
+  failure mode is "that path was not mediated and there is no error message" must have
+  exactly one home.
 
 ### Fixed — two defects that only bit at call time
 
@@ -47,7 +64,7 @@ output.**
 - **`vacant bench` reported a comparison it had never measured.** With every model call
   failing (endpoint down), all calls were silently counted as wrong answers and rendered as
   "plain 0%, vacant 0%, +0%", exit 0. That violates the project's own `infra_void` rule
-  (09 §3.5; already enforced by `ops/gain/r530/acceptance.py` and by `vacant record check`):
+  (09 §3.5; already enforced by `vacant/vrun/acceptance.py` and by `vacant record check`):
   **a cell that was not measured is not a cell that measured zero.** `bench` now separates
   right / wrong / **not measured**, refuses to print any comparison number when either arm
   has zero measured cells (exit 2, with the endpoint, the per-arm denominators and the first

@@ -27,7 +27,7 @@ pip install vacant-network        # 函式庫（import 名仍然是 vacant）
 [![Python](https://img.shields.io/badge/python-3.11%2B-f26b1d)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT-f26b1d)](LICENSE)
 [![deps](https://img.shields.io/badge/runtime%20deps-3-f26b1d)](pyproject.toml)
-[![tests](https://img.shields.io/badge/tests-78%20files-f26b1d)](tests)
+[![tests](https://img.shields.io/badge/tests-86%20files-f26b1d)](tests)
 [![receipts](https://img.shields.io/badge/receipts-0%20failed-f26b1d)](ops/gain/replay)
 [![for AI](https://img.shields.io/badge/for%20AI-AGENTS.md-f26b1d)](AGENTS.md)
 
@@ -46,10 +46,12 @@ pip install vacant-network        # 函式庫（import 名仍然是 vacant）
 零設定、零模型端點、零 API key、零網路。
 
 ```bash
-git clone https://github.com/cosmopig/Vacant.git && cd Vacant
-python3 -m venv .venv && .venv/bin/pip install -e .
-.venv/bin/vacant demo gate
+pip install vacant-network
+vacant demo gate
 ```
+
+**不需要 clone。**（2026-09-18 起：閘門的判斷層搬進套件了——同一份，不是複製；
+`ops/gain/r530/*` 現在 re-export 到 `vacant/vrun/*`，R530 實驗跑的仍然是這一支。）
 
 一隻假 agent 宣告它完成了，客戶的驗收說沒有（實跑輸出摘錄；家目錄縮成 `~`，其餘逐字）：
 
@@ -70,20 +72,33 @@ $ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
 
 **agent 說它做完了，客戶的驗收說沒有。** 沒有 Vacant，上面那份 `solution.py` 已經交出去了。
 
-畫面上每一個數字都是當場跑出來的：假 agent 是真子行程、閘門是 `ops/gain/r530/acceptance.py`
-那一支、那句 `ImportError` 是驗收 driver 當場抓到的例外原文、`20` 是 `vacant run` 這個真
-子行程的退出碼。`ops/vacantrun/demo.py::_assert_not_a_performance` 與
+畫面上每一個數字都是當場跑出來的：假 agent 是真子行程、閘門是 `vacant/vrun/acceptance.py`
+那一支（R530 實驗跑的同一支）、那句 `ImportError` 是驗收 driver 當場抓到的例外原文、
+`20` 是 `vacant run` 這個真子行程的退出碼。`vacant/vrun/demo.py::_assert_not_a_performance` 與
 [`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
 擋著它不准退化成印死字串。收據當場用同一支驗章器驗過一次，你也可以自己再驗：
 
 ```bash
-.venv/bin/python ops/gain/replay/verify_run_receipts.py --selftest      # 先證明驗章器抓得到壞鏈
-.venv/bin/python ops/gain/replay/verify_run_receipts.py --glob ~/.vacant-run/demo-gate/receipts
+python3 -m vacant.vrun.verify_receipts --selftest      # 先證明驗章器抓得到壞鏈
+python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 ```
 
-⚠ `vacant demo gate` 與 `vacant run` 需要 clone：它們的判斷層住在 `ops/`，與 R530 實驗
-共用同一份 `acceptance`／`receipts`／`wshash`，**複製一份進 wheel 就是第二把尺**。
-`pip install vacant-network` 裝到的是函式庫（下面那段 quickstart）。
+（clone 之後 `python3 ops/gain/replay/verify_run_receipts.py …` 是**同一支**——
+那個路徑現在是 re-export，R460R／R529／R532 的鏈驗的就是它。）
+
+### 還需要 clone 的部分（逐條寫出來，不含糊帶過）
+
+`vacant demo gate`、`vacant run`、收據驗章**都不需要**。下面這些才需要：
+
+| 需要 clone 的 | 為什麼不在 wheel 裡 |
+|---|---|
+| [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)（V3 出網封鎖）＋ `verify_egress_block.py` | 要 root 一次的**維運動作**，不是產品功能；而且它改的是整台機器的網路規則 |
+| `ops/vacantrun/selftest.py` | 端到端自檢，會去讀 repo 的 `runs/` |
+| `ops/gain/**`、`runs/**` | R529／R530／R532／R534 的 runner、題庫、**隱藏驗收**、judge、排程器與落盤資料。要**重算實驗數字**必須 clone（見下面〈從原始碼跑〉） |
+| `examples/**`、`decisions/**`、`docs/**` | 展件、裁決檔、規格文件 |
+
+⚠ 不把頂層 `ops` 打進 wheel 是刻意的：PyPI 上 `ops` 是 Juju 的套件，
+**同名會在別人的 `site-packages` 裡安靜覆蓋檔案**——那是很糟的失敗方式。
 
 ---
 
@@ -100,7 +115,7 @@ vacant run --suite tests_visible -- <你平常怎麼跑 agent 就怎麼打>
 完整用法與落盤形狀見 [`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md)。
 
 **「一個開關」的正確講法。** `vacant run` 把模型通道轉向到自己的 proxy，靠的是一份
-**環境變數名單**（[`ops/vacantrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/envmap.py)：
+**環境變數名單**（[`vacant/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant/vrun/envmap.py)：
 OpenAI 家族／Anthropic 家族／OpenRouter／Groq／Together／DeepSeek／Ollama／LM Studio…）
 ——**涵蓋大多數框架，用設定檔的框架要改設定檔**。實測：pi
 （`@earendil-works/pi-coding-agent`）的 provider `baseUrl` 寫在 `models.json` 裡，
@@ -122,7 +137,7 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 1. **proxy 單獨只有 L3。** 它證明「這些 bytes 經過我」，不阻止 agent 自己開一條連線。
    要「agent 逃不掉」必須再加出網封鎖
    （[`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)，
-   要 root 一次）。`vacant/controller.py:7-8` 那句逐字適用：無法阻止同一 OS 使用者繞過本命令。
+   要 root 一次；**那支只在 repo checkout 裡**，見上面〈還需要 clone 的部分〉）。`vacant/controller.py:7-8` 那句逐字適用：無法阻止同一 OS 使用者繞過本命令。
 2. **中介的是「模型通道」，不是 agent 的行為。** 框架自己發起的動作——自動 lint、
    git checkpoint、內建重試、本機工具呼叫——不經過模型通道，proxy 看不到也擋不到。
    收據能說「模型通道上發生了什麼」與「工作區最後長這樣」，不能說「agent 做了什麼」。
@@ -409,7 +424,7 @@ needle——**跳過 ≠ 檢查過**。
   *"the candidate worker cannot see this test code"*。**候選碼結構上看不到測試碼**，
   不是「被擋下來」。
 - **「量不到不是通過」寫成了程式碼**：`"all_pass": bool(total > 0 and passed == total)`
-  （`ops/gain/r530/acceptance.py:272`）；量具同理，`n_broken >= 1` 才算數，空的壞樁集合
+  （`vacant/vrun/acceptance.py:268`）；量具同理，`n_broken >= 1` 才算數，空的壞樁集合
   不能空洞地成立。
 - **拒交是真的會發生**：R532 那 836 題裡，閘門臂拒交 25 件、迴圈臂拒交 68 件，
   而且拒交算在每一個比率的分母裡。
@@ -447,7 +462,8 @@ needle——**跳過 ≠ 檢查過**。
 
 ## 從原始碼跑（實驗與重算）
 
-PyPI 的輪子**不含 `ops/`**（那是實驗 runner）。要重算實驗數字必須 clone。
+PyPI 的輪子含 `vacant/vrun/`（閘門、proxy、驗章器），**不含 `ops/`**（實驗 runner
+與題庫）。要**重算實驗數字**必須 clone。
 
 ```bash
 git clone https://github.com/cosmopig/Vacant.git && cd Vacant
@@ -542,7 +558,7 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 - **I-3 自我宣稱從不被採信**：生態跑一次 verifier（`ecosystem.py:531`），controller 再獨立跑一次
   （`controller.py:299-300`）。
 - **I-4 「量不到不是通過」寫成了程式碼**：`bool(total > 0 and passed == total)`
-  （`ops/gain/r530/acceptance.py:272`）；量具要求 `n_broken >= 1`。
+  （`vacant/vrun/acceptance.py:268`）；量具要求 `n_broken >= 1`。
 - **I-5 量具是雙向的**：`ok` 同時要求參考解通過**與**每個已知壞樁被擋。
 - **I-6 渲染是確定的**：`suitespec.render(spec)` 是 spec 的純函式 ⇒ `render_sha256` 跨機可比。
 - **I-7 拒交真的會發生**：R532 836 題，閘門臂拒交 25、迴圈臂拒交 68，且計入分母。

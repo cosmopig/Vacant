@@ -29,7 +29,7 @@ pip install vacant-network        # ライブラリ（import 名は従来どお�
 [![Python](https://img.shields.io/badge/python-3.11%2B-f26b1d)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT-f26b1d)](LICENSE)
 [![deps](https://img.shields.io/badge/runtime%20deps-3-f26b1d)](pyproject.toml)
-[![tests](https://img.shields.io/badge/tests-78%20files-f26b1d)](tests)
+[![tests](https://img.shields.io/badge/tests-86%20files-f26b1d)](tests)
 [![receipts](https://img.shields.io/badge/receipts-0%20failed-f26b1d)](ops/gain/replay)
 [![for AI](https://img.shields.io/badge/for%20AI-AGENTS.md-f26b1d)](AGENTS.md)
 
@@ -49,10 +49,13 @@ pip install vacant-network        # ライブラリ（import 名は従来どお�
 設定ゼロ、モデルのエンドポイントなし、API キーなし、ネットワークなし。
 
 ```bash
-git clone https://github.com/cosmopig/Vacant.git && cd Vacant
-python3 -m venv .venv && .venv/bin/pip install -e .
-.venv/bin/vacant demo gate
+pip install vacant-network
+vacant demo gate
 ```
+
+**clone は不要。**（2026-09-18 から、ゲートの判定層はパッケージの中に住む——複製ではなく
+同一の一本である：`ops/gain/r530/*` は現在 `vacant/vrun/*` への re-export であり、
+R530 実験が走らせているのもこの同じコードである。）
 
 偽の agent が「完了した」と宣言し、顧客の受入テストは「していない」と言う
 （実行結果の抜粋。`$HOME` を `~` に縮めた以外は逐語）：
@@ -78,22 +81,34 @@ $ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
 なければ、その `solution.py` はもう出荷されている。
 
 画面上の数値はすべてその場で出たものである：偽 agent は本物の子プロセス、ゲートは
-`ops/gain/r530/acceptance.py`、あの `ImportError` は受入 driver が実際に捕まえた例外の
-原文、`20` は `vacant run` という本物の子プロセスの終了コード。
-`ops/vacantrun/demo.py::_assert_not_a_performance` と
+`vacant/vrun/acceptance.py`（R530 実験が走らせているのと同じファイル）、あの `ImportError`
+は受入 driver が実際に捕まえた例外の原文、`20` は `vacant run` という本物の子プロセスの
+終了コード。`vacant/vrun/demo.py::_assert_not_a_performance` と
 [`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
 が、これが文字列リテラルの印字へ退化することを禁じている。領収書はその場で同じ検証器に
 かけてある。自分でもう一度検証できる：
 
 ```bash
-.venv/bin/python ops/gain/replay/verify_run_receipts.py --selftest      # まず検証器が壊れた鎖を捕まえることを示す
-.venv/bin/python ops/gain/replay/verify_run_receipts.py --glob ~/.vacant-run/demo-gate/receipts
+python3 -m vacant.vrun.verify_receipts --selftest      # まず検証器が壊れた鎖を捕まえることを示す
+python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 ```
 
-⚠ `vacant demo gate` と `vacant run` は clone が要る：判定層は `ops/` に住み、R530 実験と
-`acceptance`／`receipts`／`wshash` の同一の一部を共有している——**wheel に複製を入れれば
-それは二本目の物差しになる**。`pip install vacant-network` で入るのはライブラリ（下の
-クイックスタート）。
+（clone 後の `python3 ops/gain/replay/verify_run_receipts.py …` は**同一のファイル**である
+——あの経路は現在 re-export であり、R460R／R529／R532 の鎖を検証したのもこれである。）
+
+### それでも clone が要るもの（ぼかさず逐条で書く）
+
+`vacant demo gate`、`vacant run`、領収書の検証は**不要**である。要るのは以下：
+
+| clone が要るもの | なぜ wheel に入らないか |
+|---|---|
+| [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)（V3 出口遮断）＋ `verify_egress_block.py` | root が一度必要な**運用動作**であって製品機能ではない。機械全体のネットワーク規則を書き換える |
+| `ops/vacantrun/selftest.py` | 端から端までの自己点検。repo の `runs/` を読む |
+| `ops/gain/**`、`runs/**` | R529／R530／R532／R534 の runner、問題バンク、**隠し受入**、judge、スケジューラと落盤データ。**実験の数値を再計算するには clone が要る**（下の〈ソースから動かす〉） |
+| `examples/**`、`decisions/**`、`docs/**` | 展示物、裁定記録、仕様文書 |
+
+⚠ トップレベルの `ops` を wheel に入れないのは意図的である：PyPI の `ops` は Juju の
+パッケージであり、**名前衝突は他人の `site-packages` のファイルを黙って上書きする**。
 
 ---
 
@@ -113,7 +128,7 @@ vacant run --suite tests_visible -- <普段 agent を動かすときのコマン
 
 **「スイッチ一つ」の正確な言い方。** `vacant run` はモデル経路を自前の proxy へ向け直す。
 その手段は**環境変数の一覧**
-（[`ops/vacantrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/envmap.py)：
+（[`vacant/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant/vrun/envmap.py)：
 OpenAI 系／Anthropic 系／OpenRouter／Groq／Together／DeepSeek／Ollama／LM Studio…）
 ——**大半のフレームワークを覆うが、設定ファイルを読むフレームワークは設定ファイルを直す**。
 実測：pi（`@earendil-works/pi-coding-agent`）は provider の `baseUrl` を `models.json` に
@@ -139,7 +154,8 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 1. **proxy 単体では L3 止まり。** 「このバイト列は私を通った」は示すが、agent が自分で
    接続を開くことは止めない。「agent は逃げられない」が本当になるのは、出口遮断
    （[`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)、
-   root が一度必要）を足したときだけ。`vacant/controller.py:7-8` が逐語で当てはまる：
+   root が一度必要。**あのスクリプトは repo checkout にしかない**——上の
+   〈それでも clone が要るもの〉を見よ）を足したときだけ。`vacant/controller.py:7-8` が逐語で当てはまる：
    同一 OS ユーザーが本コマンドを迂回することは防げない。
 2. **仲介されるのは「モデル経路」であって agent の振る舞いではない。** フレームワークが
    自分で起こす動作——自動 lint、git checkpoint、内蔵リトライ、ローカルのツール呼び出し
@@ -465,7 +481,7 @@ flowchart LR
   `ops/gain/gain_run.py:957` のコメント逐語：*"the candidate worker cannot see this test code"*。
   候補コードは**構造的にテストコードを見られない**——ブロックリストではない。
 - **「計測できていないことは通過ではない」がコードになっている**：
-  `"all_pass": bool(total > 0 and passed == total)`（`ops/gain/r530/acceptance.py:272`）。
+  `"all_pass": bool(total > 0 and passed == total)`（`vacant/vrun/acceptance.py:268`）。
   ゲージも同様に `n_broken >= 1` を要求し、空のスタブ集合では空虚に成立しない。
 - **拒否は実際に起きる**：R532 の 836 問でゲート腕は 25 件、ループ腕は 68 件を拒否し、
   拒否はすべての比率の分母に入っている。
@@ -602,7 +618,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
   literal-only RPC（`vacant/checks.py:577-600`、`444-457`）。
 - **I-3** 自己申告は採用されない（`ecosystem.py:531`、さらに `controller.py:299-300` で独立に再実行）。
 - **I-4** 「計測できていない＝不通過」がコードになっている：
-  `bool(total > 0 and passed == total)`（`ops/gain/r530/acceptance.py:272`）。ゲージは `n_broken >= 1` を要求。
+  `bool(total > 0 and passed == total)`（`vacant/vrun/acceptance.py:268`）。ゲージは `n_broken >= 1` を要求。
 - **I-5** ゲージは両側：参照解が通ること**かつ**既知の壊れたスタブがすべて弾かれること。
 - **I-6** `suitespec.render(spec)` は決定的なので `render_sha256` はマシン横断で比較できる。
 - **I-7** 拒否は実際に起き、分母に数えられる：R532 836 問でゲート腕 25 件、ループ腕 68 件。

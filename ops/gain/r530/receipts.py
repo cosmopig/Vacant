@@ -1,118 +1,29 @@
 #!/usr/bin/env python3
-"""R530 的收據：兩種新事件別，**簽 digest、全文進 `calls.jsonl`**。
+"""R530 的收據（`ws_attempt`／`ws_verdict`）。**實作已搬進 `vacant/vrun/receipts.py`。**
 
-這支在架構裡承重什麼（`DECISION_20260913_R530_…_PREREG.md` §五-4）：
+這支在架構裡承重什麼：**維持 `ops.gain.r530.receipts` 這個 import 路徑**。
+2026-09-18 判斷層搬進套件（`vacant.vrun.receipts`），理由是 `pip install
+vacant-network` 的人也要跑得動 `vacant demo gate` 與 `vacant run`——`ops/` 不進
+wheel，所以判斷層留在 `ops/` 底下就等於「下載的人拿不到閘門」。
 
-既有收據（`harness_attempt`／`conform_verdict`）簽的是「模型說了什麼、判了什麼」。
-R530 的處理是**一個目錄**，所以收據要多簽一樣東西：**工作區當時的樹雜湊**
-（`ops/gain/r530/wshash.py`）。沒有它，鏈能說「這段對話沒被改過」，
-說不了「當時交出去的目錄長這樣」。
+⚠ **這是 re-export，不是第二份。** `sys.modules[__name__] = _impl` 讓
+`ops.gain.r530.receipts` 與 `vacant.vrun.receipts` 在同一個行程裡是**同一個 module 物件**
+（`importlib._bootstrap._load` 明文支援模組替換自己），所以
+`isinstance`、模組級狀態、常數全都對得起來，而且**沒有第二把會漂的尺**
+（`vacant/suitegauge.py` 的 docstring 與 `conform_failure_detail` 兩處都禁止這件事）。
 
-兩種事件別（`etype` 是自由字串，`vacant/logbook.py` 一個字都不用改）：
-
-  · `ws_attempt` ——**每一個閘門輪／每一次重抽嘗試各一筆**。
-  · `ws_verdict` ——**每格一筆**（每題每臂）。
-
-⚠ **為什麼是 digest 不是全文**：`vacant/logbook.py:34` 的
-`MAX_PAYLOAD_BYTES = 64 KiB` 是硬限制，而一輪工作區記錄（指令、完整
-stdout/stderr、樹的逐檔葉子）動輒超過。手法逐字沿用
-`harness_arms._append_turn`（把 `fail_message` 換成 `fail_message_full_sha256`）：
-**鏈上放雜湊，全文放 `calls.jsonl`／`rows.jsonl`**。
-兩邊對得起來才算數——`ops/gain/replay/verify_run_receipts.py` 的條數對帳
-（verdict 數 == 該臂 row 數、attempt 數 ≥ verdict 數）認得這兩個新型別。
-
-⚠ **誠實邊界（逐字沿用 `gain_run.save_receipts`，不准刪）**：
-金鑰是一次性的匿名身分、私鑰不落盤（RECORD_SPEC §7）。這條鏈能說的是
-**「事後沒有被改過」**（要改就得重簽，而私鑰隨行程消失），
-**不是**「由某個已知的人簽的」。收據的究責宣稱只能講到這裡。
-
-⚠ 還有一條 R530 專屬的邊界：樹雜湊證明的是「這棵樹的內容在被雜湊的當下是這樣」，
-不證明**中間沒有被改過又改回來**。逐輪簽進鏈之後，時間次序由鏈承接，
-但鏈本身只能說「這個次序事後沒被改過」。
+搬的是**位置不是判準**：改到的只有 import 那幾行與「`__file__` 往上數幾層」
+（搬家的必要結果，每一處都在新檔的 docstring 裡寫明），判準一個字沒動。
+R530／R531／R534 的既有引用
+（`from ops.gain.r530.receipts import …`、`python3 ops/gain/r530/receipts.py`）照樣可用。
 """
 from __future__ import annotations
 
-import hashlib
-import json
 import pathlib
 import sys
-import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3]))
 
-from vacant.logbook import Logbook  # noqa: E402
+from vacant.vrun import receipts as _impl                    # noqa: E402
 
-#: 兩種新事件別。**逐字凍結**——`verify_run_receipts.py` 與
-#: `tests/test_r530_receipts.py` 引用的是這兩個常數，不是字面字串。
-WS_ATTEMPT = "ws_attempt"
-WS_VERDICT = "ws_verdict"
-
-#: `ws_attempt` 的 payload 必備欄位（少一個就不是一筆合格的收據）。
-ATTEMPT_FIELDS = ("task_id", "arm", "attempt", "gate_round",
-                  "ws_sha256", "verdict_sha256", "conversation_sha256")
-#: `ws_verdict` 的 payload 必備欄位。
-VERDICT_FIELDS = ("task_id", "arm", "accepted", "ws_start_sha256",
-                  "ws_end_sha256", "verdict_sha256", "conversation_sha256",
-                  "stop_reason")
-
-
-def conversation_digest(messages: list[dict]) -> str:
-    """整段對話的 sha256。
-
-    只取 `role` 與 `content` 兩個欄位、依原順序——`tool_call_id` 之類的
-    傳輸細節每次都不同，算進去會讓同一段對話得到不同的雜湊。
-    """
-    reduced = [{"role": m.get("role"), "content": m.get("content", "")}
-               for m in (messages or [])]
-    return hashlib.sha256(
-        json.dumps(reduced, sort_keys=False, separators=(",", ":"),
-                   ensure_ascii=False).encode("utf-8")).hexdigest()
-
-
-def _append(book: Logbook, ident, etype: str, payload: dict,
-            required: tuple[str, ...]):
-    missing = [k for k in required if k not in payload]
-    if missing:
-        raise ValueError(f"{etype} 收據缺欄位 {missing}——不完整的收據不是收據")
-    entry = book.append(etype, payload, ident, ts_ms=int(time.time() * 1000))
-    return entry
-
-
-def append_attempt(book: Logbook, ident, *, task_id: str, arm: str,
-                   attempt: int, gate_round: int, ws_sha256: str,
-                   verdict_sha256: str | None,
-                   conversation_sha256: str, **extra):
-    """一輪／一次嘗試的收據。回 `LogEntry`（呼叫端把 `entry.hash()` 落進 row）。
-
-    `verdict_sha256` 為 None ＝ **這一輪沒有跑驗收**（`A-SOLO` 的每一輪、
-    以及還沒宣告完成的中間輪）。None 與「跑了但全錯」是兩件事，不可合併。
-    """
-    payload = {
-        "task_id": task_id, "arm": arm, "attempt": attempt,
-        "gate_round": gate_round, "ws_sha256": ws_sha256,
-        "verdict_sha256": verdict_sha256,
-        "conversation_sha256": conversation_sha256,
-        **extra,
-    }
-    return _append(book, ident, WS_ATTEMPT, payload, ATTEMPT_FIELDS)
-
-
-def append_verdict(book: Logbook, ident, *, task_id: str, arm: str,
-                   accepted: bool, ws_start_sha256: str, ws_end_sha256: str,
-                   verdict_sha256: str | None, conversation_sha256: str,
-                   stop_reason: str | None, **extra):
-    """每格一筆的裁決收據。
-
-    ⚠ `A-SOLO` 的 `accepted` **恆為 True**（它沒有拒交語意）。
-      這一格照樣落盤成 True，而**每一次引用都要跟著講這句**
-      （§六-0、§八-4）——那是結構差不是量測差。
-    """
-    payload = {
-        "task_id": task_id, "arm": arm, "accepted": bool(accepted),
-        "ws_start_sha256": ws_start_sha256, "ws_end_sha256": ws_end_sha256,
-        "verdict_sha256": verdict_sha256,
-        "conversation_sha256": conversation_sha256,
-        "stop_reason": stop_reason,
-        **extra,
-    }
-    return _append(book, ident, WS_VERDICT, payload, VERDICT_FIELDS)
+sys.modules[__name__] = _impl

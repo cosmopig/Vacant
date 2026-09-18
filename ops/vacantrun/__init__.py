@@ -1,13 +1,20 @@
-"""`vacant run -- <任何 agent 命令>` 的 V0 實作（launcher ＋ wire proxy）。
+"""`vacant run` V0 的**維運側**：實作已搬進 `vacant/vrun/`（2026-09-18）。
 
-這一包在架構裡承重什麼：把 Vacant 的可究責層從「要 agent 配合呼叫我們」
-變成「把 agent 包起來」。承重的洞察只有一句：
+這一包在架構裡承重什麼：兩件事，**只有兩件**。
 
-    「宣告完成」之所以難偵測，是因為只有要**注入回對話**時才需要它。
-    如果只是要**攔下交付**，觸發點根本不在 wire 上——在 agent 行程結束的那一刻。
+1. **維持 `ops.vacantrun.*` 這個 import 路徑**。`launcher`／`wireproxy`／`demo`
+   在這裡是 re-export（`sys.modules[__name__] = vacant.vrun.<同名>`），所以
+   既有的 `from ops.vacantrun import launcher`、
+   `python3 ops/vacantrun/launcher.py …` 照樣可用，而且**沒有第二份**。
+   ⚠ `envmap` **沒有**留 re-export：它現在只住在 `vacant/vrun/envmap.py`。
+     那份名單漏一格的後果是「那條路沒被中介，而且不會有錯誤訊息」，
+     再放一個看起來也是名單的檔案在這裡，就是給未來的人一個改錯地方的機會。
 
-那個訊號 100% 可靠、零協定知識、零 token 成本、跨所有框架。所以 V0 不碰
-「注入回對話」（見 `docs/VACANT_RUN.md` §為什麼 V0 不做注入）。
+2. **放真的只能住在 repo 裡的東西**：`block_egress.sh`（V3 出網封鎖，要 root
+   一次）、`verify_egress_block.py`（封鎖有沒有生效的實測）、`selftest.py`
+   （端到端自檢，要用到 repo 的 `runs/`）。這三樣進不了 wheel 也不該進——
+   它們是維運動作不是產品功能。README 的「還需要 clone 的部分」逐條列了它們。
 
-誠實邊界一律寫在 `docs/VACANT_RUN.md`，各模組的 docstring 只重述與自己相關的那幾條。
+為什麼搬：`ops/` 不進 wheel，判斷層留在這裡就等於
+`pip install vacant-network` 的人拿不到閘門。完整理由見 `vacant/vrun/__init__.py`。
 """
