@@ -207,10 +207,13 @@ jobs:
           assert html, "wheel 裡沒有 vacant/web/*.html——package-data 漏了"
           PY
 
-      # 全新 venv 裝 wheel，而且**在 repo 以外**跑最小 quickstart：
+      # 全新 venv 裝 wheel，而且**在 repo 以外**跑最小 quickstart ＋ 第一屏：
       # 在 repo 根目錄跑的話 `import vacant` 會讀到原始碼，「依賴宣告漏了」
-      # 與「package-data 漏了」兩種壞法都測不到（腳本自己會擋這件事）。
-      - name: 全新 venv 裝 wheel ＋ 最小 quickstart
+      # 「package-data 漏了」「第一屏跑不動」三種壞法都測不到
+      #（腳本自己會擋在 repo 裡執行這件事）。
+      # 第一屏＝`vacant demo gate`：2026-09-18 把判斷層搬進 `vacant/vrun/` 的
+      # 全部目的就是它在 `pip install` 之後跑得動，所以它要有 CI 守著。
+      - name: 全新 venv 裝 wheel ＋ 最小 quickstart ＋ vacant demo gate
         run: |
           python -m venv "$RUNNER_TEMP/smoke"
           "$RUNNER_TEMP/smoke/bin/python" -m pip install --upgrade pip
