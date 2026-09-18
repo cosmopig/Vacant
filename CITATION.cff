@@ -45,11 +45,24 @@ abstract: >-
   most of the measured gain is attributable to the executable acceptance gate plus resampling.
   9,841 receipt entries across 67 runs were re-verified entry by entry with zero failures. The
   hidden-test leakage audit reported zero violations on all 67 blocks under its v2 scope, but that
-  audit covers only the loop arms: its filter skips any arm outside (HPI, HOC, HMIX), so the
+  audit covered only the loop arms: its filter skips any arm outside (HPI, HOC, HMIX), so the
   single-shot and gate arms were never scanned at all, and it additionally skips trivial needles
   (in R460R r1-r3, 57,248 of 95,090 needles were actually checked and 37,842 (39.8%) were skipped).
-  A retroactive sweep of the unscanned arms is in progress and its result is not yet in, so no claim
-  of hidden-test separation across arms is made here.
+  The retroactive sweep of the unscanned arms completed on 2026-09-18 and is recorded in
+  ops/gain/vgt_retro_audit_20260918.json under a v3 scope (ten arms, per-arm fail-closed): across
+  179 archived runs it returned 165 CLEAN, 10 UNVERIFIABLE and 4 VIOLATION, checking 3,486,403
+  needles, and the four batches cited here are CLEAN on every arm (R460 6/6, R460R 30/30, R529
+  37/37, R532 43/43, the last including 1,122 CONFORM records audited dynamically for the first
+  time). The 10 UNVERIFIABLE are aborted runs holding only preflight records, so they have no
+  audit target; UNVERIFIABLE is neither clean nor dirty. The 4 VIOLATION are all in R530 under the
+  rule hidden_file_in_workspace and, on inspection, are the model's own same-named test files
+  (differing sha256, near-zero non-trivial overlap, and different content for the same task across
+  seeds), which leaves whether to tighten that rule unresolved. The sweep's guarantee is bounded:
+  CLEAN covers only the literal representation of the held-out minus visible tests appearing in
+  harness-authored prompt text, semantic paraphrase is not detected, the task bank is inferred
+  rather than recorded for runs predating R529, and the R529 and R532 closing analyzers still read
+  the earlier HMIX-only artifacts, so no claim of hidden-test separation beyond those four batches
+  and that scope is made here.
   Every delivery-effect figure is stated under the premise that requirements
   can be compiled into executable acceptance tests; where they cannot, the mechanism has no free
   judge. The receipt chain provides integrity, not completeness: a truncated tail is a valid prefix

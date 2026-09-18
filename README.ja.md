@@ -221,16 +221,56 @@ flowchart LR
    Vacant は**改竄耐性**と**検証できるほど小さいこと**を満たすが、
    **complete mediation（完全媒介）を満たさない**。これはバグではなく、
    「任意のものは完全媒介できない」ことの必然的帰結である。強制層と書けばそれは嘘になる。
-3. **昨日、対外的に誤ったことを述べた。ここで訂正する。** 我々は R532 について
-   「V/GT レッドライン 43/43 CLEAN」と書いた。**この文は誤りである。**
+3. **対外的に誤ったことを述べた。ここで訂正し、その後に行った遡及走査の結果を併記する。**
+   我々は R532 について「V/GT レッドライン 43/43 CLEAN」と書いた。**この文は誤りである。**
    `ops/gain/harness_vgt_audit.py:746` は `if arm not in VARIANTS: continue` であり、
-   `harness_arms.py:65` の `VARIANTS = ("HPI", "HOC", "HMIX")` ⇒ **`OFF` と `CONFORM` の
-   2 腕は一度も走査されていない**。各ブロックの `per_arm` は `{'HMIX': N}` だけである。
-   正しい言い方は「**H-MIX 腕が 43/43 CLEAN、他の 2 腕は未監査**」。
-   179 件のアーカイブ済み run の遡及走査は**進行中で結果は出ていない**。それまで本プロジェクトの
-   どの文書も「V/GT は全腕クリーン」と書いてはならない。この項を残すのは、
-   自分の監査の被覆漏れを自分で見つけて公開することが、どんな性能数値よりも
-   「説明責任は実行可能か」に答えるからである。
+   `ops/gain/harness_arms.py:65` の `VARIANTS = ("HPI", "HOC", "HMIX")` ⇒
+   **`OFF` と `CONFORM` を含む古典 7 腕は一度も走査されていない**。各ブロックの `per_arm` は
+   `{'HMIX': N}` だけである。当時の正しい言い方は「**H-MIX 腕が 43/43 CLEAN、他の 2 腕は未監査**」。
+   修正には**既定値を完全監査に変えること**を含む。理由は逐語で：
+   *引数を渡し忘れることで 1 腕だけの走査から緑信号を得られること、それ自体がこの穴の成立条件である。*
+   **遡及走査は 2026-09-18 に完了**し、`ops/gain/vgt_retro_audit_20260918.json` に落とした
+   （`generated_at` 2026-09-18T11:58:32+0800、scope `v3`＝10 腕・腕ごとに fail-closed）。
+   以下の数値はすべてそのファイルから数え直せる：
+   - **179 件**のアーカイブ済み run：**165 CLEAN／10 UNVERIFIABLE／4 VIOLATION**、
+     needles 検査 **3,486,403** 件。
+   - 対外的に引用している 4 バッチは**全腕 CLEAN**：
+
+     | バッチ | ブロック数 | 腕ごとの監査件数 |
+     |---|---:|---|
+     | R460 | 6/6 | OFF 120、CONFORM 196、OFF5 602、HPI 187、HOC 283、HMIX 163 |
+     | R460R | 30/30 | OFF 608、CONFORM 1029、OFF5 3032、HPI 958、HOC 1488、HMIX 890 |
+     | R529 | 37/37 | OFF 717、CONFORM 936、HMIX 844 |
+     | R532 | 43/43 | OFF 836、CONFORM 1122、HMIX 1144 |
+
+   - **R532 の `CONFORM` 1,122 件が初めて動的監査を通り、違反ゼロ。** これは Δ_C の減数である。
+     HMIX しか走査していなかった間は「CONFORM が漏洩していれば Δ_C はより負になり、
+     観測方向と同符号になる」という対抗解釈を排除できなかったが、**いまは排除できる**。
+   - **10 件の UNVERIFIABLE** はすべて preflight のみ・arm 記録ゼロの中断 run であり、
+     監査対象が存在しない。**これは壊れているのではなく誠実な verdict である**——
+     `UNVERIFIABLE` は「クリーン」でも「汚い」でもない。
+   - **4 件の VIOLATION はすべて R530**（`g_r530_s1_1004_1`、`g_r530_s2_1003_1`、
+     `g_r530_s2_1004_2`、`g_r530_s3_1003_1`）で、規則はすべて `hidden_file_in_workspace`。
+     開封して突き合わせた結果、**モデル自身が作った同名ファイル**であった：sha256 は固定済みの
+     隠しテストと異なり、非自明行の重複はゼロか `got = solution.redact(line)` のような
+     どのテストでも書く API 呼び出し 2–3 行のみ、しかも**同じ問題で s1 と s2 の内容が完全に異なる**
+     （本物の GT なら run をまたいでも同一になる）。この規則は「このようなファイルを置けるのは
+     harness だけ」と仮定しており、**モデルが自分のテストファイルを `test_hidden.py` と
+     名付けることを想定していなかった**。判定を厳しくするかどうかは**未決**である。
+   これらの数値と必ず一緒に読むべき境界が 4 つある。良い知らせだけを引用してはならない：
+   （a）**`CLEAN` が保証するのは**、`hidden \ visible` の**文字どおりの repr** が harness 自身の
+   書いた system／user テキストに現れないことだけであり、**意味的に等価な言い換え、および
+   免除規則が覆う分は、このツールでは検出できない**。（b）**bank は推論された値**
+   （`bank_inference` フィールド）であって run 自身の記録ではない——R529 より前の run には
+   `--record-bank-field` がない。（c）**R529／R532 の総括アナライザは古い証拠を読んだままである**：
+   `analyze_r529.py` の `vgt_gate()` と `analyze_r532.py` の `gates_post()` は
+   `vgt_v2_<block>.json` を読み、その `per_arm` は HMIX のみである ⇒
+   **現時点の代替証拠は `vgt_retro_audit_20260918.json` であり、その 2 本は未更新、
+   ゲートがすべて追随したわけではない**。（d）**179 件すべてがクリーンではない**：
+   4 VIOLATION と 10 UNVERIFIABLE が残っている。したがって「V/GT 全腕クリーン」は
+   上で名指しした 4 バッチについてのみ、かつ scope とこれらの境界を併記した上でのみ成り立つ。
+   この一連の経緯——穴を自分で見つけ、走査し切り、走査後に何が残ったか——を残すのは、
+   それがどんな性能数値よりも「説明責任は実行可能か」に答えるからである。
 4. **ゲートが保証するのは「書かれたテストを通った」ことであり、「真の要求を満たした」ことではない。**
    `vacant/suitegauge.py:30-33` の片側保証は逐語で：壊れたスタブを弾けることは、その受入テストが
    何でも通すわけではないことを示すだけで、**真の要求を覆っていることは証明しない**。実測：
@@ -535,10 +575,38 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
   },
   "retracted_claim": {
     "was": "R532 V/GT 43/43 CLEAN (read as: across the run)",
-    "is": "the HMIX arm is 43/43 CLEAN; OFF and CONFORM were never scanned",
-    "cause": "ops/gain/harness_vgt_audit.py:746 skips any arm not in VARIANTS = (HPI, HOC, HMIX)",
-    "status": "retroactive sweep of 179 archived runs in progress, result not in",
-    "do_not_claim": "V/GT clean across arms"
+    "is": "the HMIX arm is 43/43 CLEAN; the classical seven arms, OFF and CONFORM included, were never scanned",
+    "cause": "ops/gain/harness_vgt_audit.py:746 skips any arm not in VARIANTS = (HPI, HOC, HMIX) at ops/gain/harness_arms.py:65",
+    "fix": "default changed to full audit: a green light obtained by forgetting a flag is the condition that let the hole exist",
+    "status": "retroactive sweep complete 2026-09-18T11:58:32+0800",
+    "evidence": "ops/gain/vgt_retro_audit_20260918.json",
+    "sweep": {
+      "scope": "v3 (ten arms, per-arm fail-closed)",
+      "runs": 179, "CLEAN": 165, "UNVERIFIABLE": 10, "VIOLATION": 4,
+      "needles_checked": 3486403,
+      "cited_batches_clean_per_arm": {
+        "R460": {"blocks": "6/6", "per_arm": {"OFF": 120, "CONFORM": 196, "OFF5": 602, "HPI": 187, "HOC": 283, "HMIX": 163}},
+        "R460R": {"blocks": "30/30", "per_arm": {"OFF": 608, "CONFORM": 1029, "OFF5": 3032, "HPI": 958, "HOC": 1488, "HMIX": 890}},
+        "R529": {"blocks": "37/37", "per_arm": {"OFF": 717, "CONFORM": 936, "HMIX": 844}},
+        "R532": {"blocks": "43/43", "per_arm": {"OFF": 836, "CONFORM": 1122, "HMIX": 1144}}
+      },
+      "newly_closed": "R532 CONFORM, 1122 records, first ever dynamic audit, zero violations; CONFORM is the subtrahend of delta_C, so the rival reading 'a CONFORM leak would push delta_C more negative, same direction as observed' is now ruled out",
+      "UNVERIFIABLE_detail": "all 10 are aborted runs with preflight only and zero arm records, so there is nothing to audit; UNVERIFIABLE is an honest verdict, neither clean nor dirty",
+      "VIOLATION_detail": {
+        "where": ["runs/g_r530_s1_1004_1", "runs/g_r530_s2_1003_1", "runs/g_r530_s2_1004_2", "runs/g_r530_s3_1003_1"],
+        "rule": "hidden_file_in_workspace",
+        "on_inspection": "the model's own same-named test files: sha256 differs from the pinned hidden tests, non-trivial-line overlap is zero or 2-3 lines of the form `got = solution.redact(line)`, and the same task yields entirely different content in s1 vs s2 (real GT would be identical across runs)",
+        "rule_assumption": "only the harness can place such a file; it did not anticipate a model naming its own test file test_hidden.py",
+        "tighten_the_rule": "UNRESOLVED"
+      }
+    },
+    "bounds": [
+      "CLEAN only guarantees that the literal repr of `hidden \\ visible` does not appear in harness-authored system/user text; semantic paraphrase, and whatever the excuse rules cover, are not detected",
+      "bank is inferred (bank_inference field), not recorded by the run; runs before R529 had no --record-bank-field",
+      "the closing analyzers still read the old evidence: analyze_r529.py vgt_gate() and analyze_r532.py gates_post() read vgt_v2_<block>.json whose per_arm is HMIX only; the standing substitute evidence is ops/gain/vgt_retro_audit_20260918.json and those two analyzers have not been updated",
+      "the 179 are not all clean: 4 VIOLATION and 10 UNVERIFIABLE remain"
+    ],
+    "do_not_claim": "V/GT clean across all 179 archived runs; per-arm CLEAN is established only for R460, R460R, R529 and R532, and only with the scope and bounds above stated alongside"
   },
   "denominators": {"HumanEval+": "156, not 164", "MBPP+": "371 of 378",
                    "LCB v2": 120, "LCB v3 medium": 135, "LCB v3 hard": 54}
