@@ -24,7 +24,7 @@ An existing pattern, not one we invented: supply-chain security does the same th
 **in-toto / SLSA / Sigstore** — an artifact without a valid attestation is rejected at intake.
 
 ```bash
-pip install vacant-network        # the import name is still `vacant`
+pip install vacant-network        # the library (the import name is still `vacant`)
 ```
 
 [![PyPI](https://img.shields.io/pypi/v/vacant-network?color=f26b1d)](https://pypi.org/project/vacant-network/)
@@ -47,9 +47,126 @@ pip install vacant-network        # the import name is still `vacant`
 
 ---
 
-## 30-second quickstart
+## 30 seconds: watch the gate refuse a delivery
 
-No model call, no network, no clone.
+No setup, no model endpoint, no API key, no network.
+
+```bash
+git clone https://github.com/cosmopig/Vacant.git && cd Vacant
+python3 -m venv .venv && .venv/bin/pip install -e .
+.venv/bin/vacant demo gate
+```
+
+A fake agent declares it is done; the customer's acceptance suite says otherwise
+(excerpt of a real run; `$HOME` shortened to `~`, everything else verbatim):
+
+```
+$ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
+    --suite ~/.vacant-run/demo-gate/tests_visible --run-dir ~/.vacant-run/demo-gate/receipts -- …
+  Done. I have created solution.py with add() and multiply().
+  All requirements are implemented and the code is ready to use.
+  [vacant run] RUN-ON　拒交（visible_fail）　ws e5241309c23b→76c38272981f　wire 0 通　收據 ~/.vacant-run/demo-gate/receipts
+  test_visible.py::check_mul — exception: ImportError: cannot import name 'mul' from 'solution' (~/.vacant-run/demo-gate/receipts/_frozen_RUN-ON/solution.py) [test_visible.py:7: from solution import mul]
+
+  agent exit code     : 0     <- the agent says it succeeded
+  customer acceptance : 1/2 passed
+  verdict             : refused (visible_fail)
+  vacant run exit code: 20    <- the exit code reflects the verdict, not the agent's claim
+  receipt             : a 2-entry Ed25519 signature chain
+```
+
+(The CLI's own summary line is in Chinese: `拒交` = refused, `收據` = receipt, `通` = calls.)
+
+**The agent said it was done. The customer's acceptance said it was not.** Without Vacant,
+that `solution.py` would already have shipped.
+
+Every number on that screen is produced on the spot: the fake agent is a real subprocess,
+the gate is `ops/gain/r530/acceptance.py`, that `ImportError` is the exception the acceptance
+driver actually caught, and `20` is the real exit code of the `vacant run` subprocess.
+`ops/vacantrun/demo.py::_assert_not_a_performance` and
+[`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
+stop it from ever degrading into printed string literals. The receipt is verified on the spot
+with the same verifier; you can re-verify it yourself:
+
+```bash
+.venv/bin/python ops/gain/replay/verify_run_receipts.py --selftest      # first prove the verifier catches broken chains
+.venv/bin/python ops/gain/replay/verify_run_receipts.py --glob ~/.vacant-run/demo-gate/receipts
+```
+
+⚠ `vacant demo gate` and `vacant run` need the clone: their judgement layer lives in `ops/`
+and shares one copy of `acceptance` / `receipts` / `wshash` with the R530 experiments —
+**a copy inside the wheel would be a second ruler**. `pip install vacant-network` gives you
+the library (the quickstart further down).
+
+---
+
+## Wire up your own agent
+
+Whatever you normally type to run your agent goes after `--`; `vacant run` does not need to
+know which framework it is:
+
+```bash
+vacant run --suite tests_visible -- <however you normally run your agent>
+```
+
+The trigger is **the moment the agent process exits** — not recognising "I am done" on the
+wire. That signal is 100% reliable, needs zero protocol knowledge and costs zero tokens.
+Exit codes: `0` shipped, `20` refused, `22` `infra_void`. Full usage and on-disk shape in
+[`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md).
+
+**What "one switch" actually means.** `vacant run` redirects the model channel to its own
+proxy through **one list of environment variables**
+([`ops/vacantrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/envmap.py):
+the OpenAI family, the Anthropic family, OpenRouter, Groq, Together, DeepSeek, Ollama,
+LM Studio, …) — **that list covers most frameworks; a framework that reads a config file
+needs its config file changed.** Measured: pi (`@earendil-works/pi-coding-agent`) keeps its
+provider `baseUrl` in `models.json`, and for built-in providers the baseUrl is even compiled
+into the bundle — environment variables have no effect at all on that path. For such a
+framework, pin a port with `--port` and point its config file at it.
+
+⚠ **"I set the environment variable" is not evidence of mediation. `requests_seen` is.**
+Self-check:
+
+```bash
+vacant run --allow-no-suite --run-dir /tmp/vr -- <your agent command>
+python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['requests_seen'])"
+# non-zero -> the model channel really went through Vacant; 0 -> not mediated
+#             (config-file framework, or that run made no model call at all).
+```
+
+A variable missing from the list means that path was not mediated — **and there is no error
+message**. That is V0's known residual risk.
+
+### Three boundaries that belong on this screen, not in an appendix
+
+1. **The proxy alone is only L3.** It proves "these bytes went through me"; it does not stop
+   the agent from opening its own connection. "The agent cannot escape" is only true with
+   egress blocking on top
+   ([`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh),
+   root once). `vacant/controller.py:7-8` applies verbatim: it cannot stop the same OS user
+   from bypassing this command.
+2. **What is mediated is the model channel, not the agent's behaviour.** Actions the
+   framework starts by itself — auto-lint, git checkpoints, built-in retries, local tool
+   calls — never touch the model channel, so the proxy neither sees nor blocks them. The
+   receipt can say what happened on the model channel and what the workspace ended up as;
+   it cannot say what the agent did.
+3. **Acceptance is a one-sided guarantee.**
+   [`vacant/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant/suitegauge.py)
+   verbatim: blocking known-bad solutions does **not** prove the suite covers the real
+   requirement. `accepted=true` only means "the few checks the customer wrote down passed".
+   Measured: across R532's 836 tasks the gate accepted 811, of which 120 (14.8%) passed the
+   visible suite but failed the hidden one.
+
+The remaining boundaries (TOCTOU, the logging gap of the Responses API with `store:true`,
+models that never touch HTTP, Bedrock SigV4, why we do not do transparent MITM) are in
+[`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md) §4.
+**Not one of them has been left out.**
+
+---
+
+## Library quickstart (no clone)
+
+No model call, no network.
 
 ```python
 from vacant.checks import run_python_check

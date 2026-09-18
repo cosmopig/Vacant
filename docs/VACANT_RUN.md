@@ -40,6 +40,9 @@
 ## 2. 用法
 
 ```bash
+# 先看一次它擋下來：零設定、零模型端點、零 API key、零網路，約 2 秒
+vacant demo gate                       # ops/vacantrun/demo.py
+
 # 最小：把 agent 包起來，用 tests_visible/ 當驗收
 vacant run --suite tests_visible --run-dir ~/.vacant-run/demo -- \
     pi -p "把 solution.py 寫完"
@@ -77,8 +80,26 @@ _frozen_RUN-ON/               驗收跑的那份凍結快照
 收據用**既有的那把尺**驗，不准另寫第二把：
 
 ```bash
+python3 ops/gain/replay/verify_run_receipts.py --selftest                 # 先證明它抓得到壞鏈
 python3 ops/gain/replay/verify_run_receipts.py --glob 'runs/<你的 run 目錄>'
+python3 ops/gain/replay/verify_run_receipts.py --glob ~/.vacant-run/demo-gate/receipts
 ```
+
+`--glob` 的相對 pattern 以 repo 根為基準，**絕對 pattern 照絕對解**——`--run-dir`
+本來就多半落在 repo 外（預設 `~/.vacant-run/<task_id>`），少了這條，畫面上印給使用者
+複製的那行驗證指令就是一行跑不動的字。
+
+### 自檢：你的 agent 真的被中介到了嗎
+
+**「我設了環境變數」不是證據，`requests_seen` 才是**（§4.5）：
+
+```bash
+vacant run --allow-no-suite --run-dir /tmp/vr -- <你的 agent 命令>
+python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['requests_seen'])"
+# 非 0 ⇒ 模型通道真的經過 Vacant；0 ⇒ 沒被中介到（框架用設定檔，或那一跑根本沒呼叫模型）。
+```
+
+可執行證明在 `tests/test_demo_gate.py::test_selfcheck_requests_seen_is_the_evidence`。
 
 ---
 

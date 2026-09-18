@@ -46,8 +46,12 @@ See `AGENTS.md` §7 H-0 for all of it, boundaries included.
 - [AGENTS.md](AGENTS.md): the full machine-facing integration contract — API surface with
   signatures, the four deployment shapes and which are binding, verifiable invariants,
   honest boundaries, common mistakes, and a stable machine-readable facts block.
-- [README.md](README.md): human overview in Traditional Chinese, with a 30-second
-  quickstart and the current results. [English](README.en.md) · [日本語](README.ja.md).
+- [README.md](README.md): human overview in Traditional Chinese — a 30-second offline demo
+  of the gate refusing a delivery (`vacant demo gate`), how to wrap your own agent
+  (`vacant run -- <cmd>`), and the current results.
+  [English](README.en.md) · [日本語](README.ja.md).
+- [docs/VACANT_RUN.md](docs/VACANT_RUN.md): `vacant run -- <any agent command>` — what it
+  mediates, what it does not, exit codes, on-disk shape, and every honest boundary.
 - [pyproject.toml](pyproject.toml): package name, version, and the three runtime dependencies.
 
 ## Results and how they were obtained
