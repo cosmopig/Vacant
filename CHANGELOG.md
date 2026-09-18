@@ -41,6 +41,31 @@ if you depend on them.
   failure mode is "that path was not mediated and there is no error message" must have
   exactly one home.
 
+### Verified — the wheel itself, installed, from outside the repository (2026-09-18)
+
+"No clone needed" was written down before anyone had installed the wheel. It is now
+measured. The measurement has to happen **outside a repo checkout**: inside one,
+`import vacant` finds the source tree rather than the installed package, so a check run
+there cannot tell a working wheel from a broken one.
+
+- `python -m build` produces `vacant_network-0.7.0-py3-none-any.whl` and the sdist;
+  `twine check` PASSED on both. The wheel's `top_level.txt` is `vacant` alone, and its 70
+  entries include the nine `vacant/vrun/*` modules and `vacant/web/app.{html,css,js}`.
+- Fresh venv (Python 3.13) with **only** that wheel installed, working directory outside
+  the repository: `vacant demo gate` plays the whole first screen — the gate refuses the
+  delivery (`visible_fail`), the inner `vacant run` subprocess exits `20`, the two-entry
+  Ed25519 chain verifies (`verdict=OK`) and the verifier's own negative control passes
+  first. `vacant run -- <cmd>` in the same venv: `20` on refusal, `0` on `visible_pass`,
+  and `VACANT=0` passes the agent's own exit code through.
+- Receipts written by the installed wheel were then re-verified by
+  `ops/gain/replay/verify_run_receipts.py` from a repo checkout: `run 3　鏈 2　entries 4　
+  驗過 4　失敗 0　壞鏈 0 … 總判：OK`. One ruler, two install shapes.
+- **The name collision was measured, not assumed.** Juju's `ops` (3.8.2) and
+  `vacant-network` 0.7.0 were installed into one venv in both orders. Both import,
+  `ops.CharmBase` and `ops.model.Model` still resolve, `vacant demo gate` still runs, and
+  the intersection of the two distributions' `RECORD` file lists is **empty** — neither
+  package overwrites a file of the other.
+
 ### Fixed — two defects that only bit at call time
 
 - `vacant/peerexec.py::sandbox_probe` and `vacant/suitegauge.py::default_runner` imported
