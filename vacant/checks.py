@@ -534,12 +534,17 @@ def _vacant_call(function, *args, **kwargs):
 try:
 {chr(10).join("    " + line for line in (test_code or "").splitlines())}
 finally:
+    # 收尾在 finally 裡，例外從這裡逃出去會**蓋掉真正的結果**。
     if _worker.poll() is None:
-        _worker.terminate()
         try:
+            _worker.terminate()
             _worker.wait(timeout=0.5)
-        except subprocess.TimeoutExpired:
-            _worker.kill()
+        except Exception:
+            try:
+                _worker.kill()
+                _worker.wait(timeout=0.5)
+            except Exception:
+                pass
 '''
 
 
@@ -608,15 +613,33 @@ def _run_sandboxed(
             out, _ = proc.communicate(timeout=timeout)
             return proc.returncode, out
         except subprocess.TimeoutExpired:
+            # ⚠ **收尾不准把逾時判定弄丟。** 舊版只 catch `ProcessLookupError`，
+            #   而 `killpg` 還會丟 `PermissionError: [Errno 1]`——子行程在
+            #   `communicate` 逾時與這一行之間結束掉，`proc.pid` 那個 pgid 就
+            #   可能已經不屬於我們了（2026-09-19 在 macOS CI 上實際炸過：
+            #   `vacant/checks.py:614: PermissionError`）。例外從這裡逃出去，
+            #   呼叫端收到的不是「超時」而是一個爆炸 ⇒ **超時被記成別的東西**。
+            #   `proc.communicate()` 也不給逾時：殺不掉的話它會永遠等下去。
             if proc is not None:
                 if os.name == "posix":
                     try:
                         os.killpg(proc.pid, signal.SIGKILL)
-                    except ProcessLookupError:
+                    except (ProcessLookupError, PermissionError):
                         pass
-                else:  # pragma: no cover - Windows
-                    proc.kill()
-                proc.communicate()
+                    except Exception:                        # noqa: BLE001
+                        pass
+                try:
+                    proc.kill()          # killpg 沒吃到就退回單一行程
+                except Exception:                            # noqa: BLE001
+                    pass
+                try:
+                    proc.communicate(timeout=5)
+                except Exception:                            # noqa: BLE001
+                    pass
+            # ⚠ **單邊保證**：收尾失敗在這裡是**看不見的**——這支的契約只有
+            #   `(rc, out)`，沒有地方記「殺沒殺掉」。要看得見的版本在
+            #   `vacant/vrun/sandbox.py`（`SandboxResult.kill_status`）。
+            #   這裡只保證「不會炸、不會卡」，不保證「一定清乾淨」。
             return None, ""
         except CheckInfraError:
             raise
