@@ -31,6 +31,30 @@
   · `test_retry_none_is_still_exactly_v0`
       預設不改既有使用者的行為。
 
+V2（`--feedback-into prompt|both`，回饋接到**下一次 spawn 的 argv 尾端**）另外五條：
+
+  · `test_v2_first_attempt_argv_is_byte_identical_to_no_vacant`
+      第 1 次的 argv 與「沒有 Vacant」時**逐位元相同**（placeholder 換成空字串）。
+      兩端都驗：收據落的 `argv_sha256`，與 agent 行程**真的收到**的那條 argv。
+  · `test_v2_second_attempt_argv_is_the_first_plus_the_feedback`
+      第 2 次是第 1 次的**逐位元前綴 ＋ `"\\n\\n" ＋ 回饋**。尾端 append 才保得住
+      provider 的前綴快取，所以「是前綴」這件事是規格不是巧合。
+  · `test_v2_an_agent_that_only_reads_argv_passes_in_prompt_mode_and_fails_in_file_mode`
+      **承重的那一條**：假 agent 只看 argv、一個字都不讀 `VACANT_FEEDBACK.md`。
+      `prompt` 模式第 2 次就過；`file` 模式燒完額度都沒過（**負向控制**）。
+      ⚠ 而且證明它不是因為檔沒寫出來才失敗——檔在、內容也對、agent 也看得到它存在。
+  · `test_v2_missing_placeholder_with_prompt_mode_is_a_hard_stop`
+      缺 placeholder ＋ `prompt` ⇒ `SystemExit`，**不准安靜退回檔案模式**
+      （連 run 目錄都不准開始寫）。反向（有 placeholder 但 mode 是 `file`）、
+      沒有下一次 spawn（`--retry none`）、打錯 mode 一律同辦。
+  · `test_v2_feedback_in_prompt_never_contains_hidden_testdata` ＋
+    `test_v2_vgt_canary_scan_has_teeth_in_argv`
+      V/GT 紅線換到 argv 這條管道上再驗一次，**配同一形狀的負向控制**。
+
+兩件小事各一條：`test_suite_under_the_workspace_is_refused`（agent 改得到的驗收
+不是驗收）、`test_grandchildren_are_killed_before_the_freeze`（`wait()` 只等直接
+子行程 ⇒ 孫行程可以在凍結之後繼續寫）。
+
 ⚠ 本檔零模型呼叫、零機時：上游是一個本機假 server，agent 是一支 40 行的
   Python，驗收沙箱走 `none`。
 """
@@ -40,6 +64,7 @@ import json
 import pathlib
 import sys
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
@@ -485,3 +510,351 @@ def test_cli_exposes_both_arms_and_the_ceiling():
         ["--retry", "revise", "--max-attempts", "4", "--", "echo", "hi"])
     assert args.retry == "revise" and args.max_attempts == 4
     assert launcher.build_parser().parse_args(["--", "x"]).retry == "none"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  V2：回饋走 argv（`--feedback-into prompt|both`）
+# ══════════════════════════════════════════════════════════════════════════
+
+PH = retrypolicy.FEEDBACK_PLACEHOLDER
+
+#: 使用者那條 agent 命令的最後一個參數。**placeholder 一定在結尾**（V2 的硬規則：
+#: 尾端 append 才保得住 provider 的前綴快取）。
+_PROMPT_PLAIN = "write add(a, b) into solution.py"
+_PROMPT_WITH_PH = _PROMPT_PLAIN + PH
+
+#: V2 的假 agent：**只看 argv，一個字都不讀 `VACANT_FEEDBACK.md`**。
+#: 它就是負向控制的本體——V1 的檔案管道在它身上一定失敗，而那不是因為我們把
+#: 檔案關掉了（trace 與工作區都證明檔在、內容也對），是因為**沒有人保證
+#: agent 會去讀它**。那個洞正是 V2 要補的那一個。
+_ARGV_AGENT = r'''
+import json, os, pathlib, sys, urllib.request
+
+MODE, TRACE, PROMPT = sys.argv[1], pathlib.Path(sys.argv[2]), sys.argv[3]
+ws = pathlib.Path.cwd()
+fb = ws / "VACANT_FEEDBACK.md"
+with TRACE.open("a", encoding="utf-8") as f:
+    f.write(json.dumps({
+        "argv": list(sys.argv[1:]),
+        "prompt": PROMPT,
+        # ⚠ 只記「那個檔在不在」，**刻意不讀它的內容**：這支 agent 的決定
+        #   完全來自 argv，讀了就不是負向控制了。
+        "feedback_file_exists": fb.exists(),
+    }, ensure_ascii=False) + "\n")
+
+base = os.environ["OPENAI_BASE_URL"]
+req = urllib.request.Request(base.rstrip("/") + "/chat/completions",
+                             data=b'{"model":"m","messages":[]}', method="POST")
+req.add_header("Content-Type", "application/json")
+with urllib.request.urlopen(req, timeout=30) as r:
+    r.read()
+
+GOOD = "def add(a, b):\n    return a + b\n"
+BAD = "def add(a, b):\n    return a - b\n"
+code = BAD if MODE == "always_bad" else (GOOD if "check_add" in PROMPT else BAD)
+(ws / "solution.py").write_text(code, encoding="utf-8")
+'''
+
+
+def _argv_agent(tmp: pathlib.Path, mode: str, trace: pathlib.Path,
+                prompt: str) -> list[str]:
+    p = tmp / "argv_agent.py"
+    p.write_text(_ARGV_AGENT, encoding="utf-8")
+    return [sys.executable, str(p), mode, str(trace), prompt]
+
+
+def _go2(tmp: pathlib.Path, *, mode: str = "fix_when_told_in_argv",
+         feedback_into: str = "prompt", retry_arm: str = "revise",
+         max_attempts: int | None = 3, placeholder: bool = True,
+         suite: pathlib.Path | None = None, ws_name: str = "ws2",
+         run_name: str = "run2") -> dict:
+    """V2 的場地。回 summary ＋ agent **真的收到**的那幾條 argv。
+
+    `plain_argv` ＝「沒有 Vacant」時使用者會打的那一條（沒有 placeholder）——
+    第 1 次的逐位元比對就是對著它比，不是對著我們自己算的東西比。
+    """
+    ws = _ws(tmp, ws_name)
+    trace = tmp / f"trace_{ws_name}.jsonl"
+    run_dir = tmp / run_name
+    argv = _argv_agent(tmp, mode, trace,
+                       _PROMPT_WITH_PH if placeholder else _PROMPT_PLAIN)
+    plain_argv = _argv_agent(tmp, mode, trace, _PROMPT_PLAIN)
+    summary = launcher.run(
+        argv, workspace=ws, run_dir=run_dir,
+        suite_dir=(_suite(tmp) if suite is None else suite),
+        vacant_on=True, task_id=f"t_{ws_name}", sandbox_name="none",
+        retry_arm=retry_arm, max_attempts=max_attempts,
+        feedback_into=feedback_into)
+    return {"summary": summary, "ws": ws, "run_dir": run_dir, "argv": argv,
+            "plain_argv": plain_argv,
+            "trace": [json.loads(x) for x in
+                      trace.read_text(encoding="utf-8").splitlines() if x]}
+
+
+# ── V2-1) 第 1 次的 argv 與「沒有 Vacant」時逐位元相同 ────────────────────
+def test_v2_first_attempt_argv_is_byte_identical_to_no_vacant(tmp_path,
+                                                              upstream):
+    """兩臂可比性的基礎：第一次就不一樣的話，後面量到的差別有一半是
+
+    「第一次的 prompt 本來就不同」。形狀與 wire 那條「兩臂 body 逐位元相同」
+    同一個用意。
+    """
+    r = _go2(tmp_path, max_attempts=2)
+    s = r["summary"]
+
+    assert r["argv"][-1].endswith(PH)          # 使用者寫的那條**有** placeholder
+    a1 = s["attempts"][0]
+    assert a1["argv"] == r["plain_argv"]       # spawn 出去的那條**沒有**
+    assert a1["argv_sha256"] == retrypolicy.argv_sha256(r["plain_argv"])
+    assert a1["feedback_in_prompt_bytes"] == 0
+    assert a1["feedback_delivery"] == "prompt"
+
+    # agent 那一端收到的也是同一條（收據說的 ≠ 行程收到的，那收據就不算數）。
+    assert r["trace"][0]["prompt"] == _PROMPT_PLAIN
+    assert (r["trace"][0]["prompt"].encode("utf-8")
+            == _PROMPT_PLAIN.encode("utf-8"))
+    assert PH not in r["trace"][0]["prompt"]
+
+    # 簽進鏈裡的也是同一個指紋。
+    first = json.loads((r["run_dir"] / f"receipts_{launcher.ARM_ON}.ndjson")
+                       .read_text(encoding="utf-8").splitlines()[0])
+    assert first["type"] == "ws_attempt"
+    assert first["payload"]["argv_sha256"] == a1["argv_sha256"]
+    assert first["payload"]["feedback_delivery"] == "prompt"
+    _assert_ruler_is_happy(r["run_dir"])
+
+
+# ── V2-2) 第 2 次＝第 1 次的逐位元前綴 ＋ 回饋 ────────────────────────────
+def test_v2_second_attempt_argv_is_the_first_plus_the_feedback(tmp_path,
+                                                               upstream):
+    r = _go2(tmp_path, mode="always_bad", max_attempts=2,
+             ws_name="ws2_pref", run_name="run2_pref")
+    s = r["summary"]
+    a1, a2 = s["attempts"][0], s["attempts"][1]
+
+    assert a2["argv"][:-1] == a1["argv"][:-1]     # 其餘參數一個位元都沒動
+    p1, p2 = a1["argv"][-1], a2["argv"][-1]
+    assert p2.startswith(p1)                      # **逐位元前綴**
+    tail = p2[len(p1):]
+    assert tail == "\n\n" + a1["feedback"]["text"]
+    assert "check_add" in tail
+    assert a2["feedback_in_prompt_bytes"] == len(tail.encode("utf-8")) > 0
+
+    # agent 行程收到的也一樣（第 2 次是第 1 次的延長，不是另一條命令）。
+    assert r["trace"][1]["prompt"] == p2
+    assert r["trace"][1]["prompt"].startswith(r["trace"][0]["prompt"])
+
+
+# ── V2-3) 只看 argv 的 agent：prompt 過、file 不過（負向控制）─────────────
+def test_v2_an_agent_that_only_reads_argv_passes_in_prompt_mode_and_fails_in_file_mode(  # noqa: E501
+        tmp_path, upstream):
+    """**這一條是 V2 的全部理由。**
+
+    同一支 agent、同一份回饋、同樣的額度：回饋進 argv 就會被用到，
+    回饋只進檔案就不會。⚠ 能說的到此為止——「回饋一定出現在模型的輸入裡」，
+    **不是**「不可忽略」。這支假 agent 照做，是因為我們寫死它照做；
+    真模型看得到也可以不理（`docs/VACANT_RUN.md` §8 的誠實邊界 1）。
+    """
+    prompt_run = _go2(tmp_path, feedback_into="prompt", placeholder=True,
+                      ws_name="ws_p", run_name="run_p")
+    file_run = _go2(tmp_path, feedback_into="file", placeholder=False,
+                    ws_name="ws_f", run_name="run_f")
+
+    ps, fs = prompt_run["summary"], file_run["summary"]
+    assert ps["accepted"] is True and ps["stop_reason"] == "visible_pass"
+    assert ps["attempts_used"] == 2
+    assert fs["accepted"] is False and fs["stop_reason"] == "attempts_exhausted"
+    assert fs["attempts_used"] == 3 == fs["max_attempts"]
+
+    # ⚠ **檔案模式不是因為檔沒寫出來才失敗**：檔在、內容也對、agent 也看得到
+    #   它存在。差別只有一個——沒有人保證它會去讀。
+    fb = file_run["ws"] / retrypolicy.FEEDBACK_FILENAME
+    assert "check_add" in fb.read_text(encoding="utf-8")
+    assert file_run["trace"][1]["feedback_file_exists"] is True
+    assert file_run["trace"][2]["feedback_file_exists"] is True
+
+    # 反過來：prompt 模式**一個檔都沒往工作區寫**（交付物裡不多一個東西）。
+    assert not (prompt_run["ws"] / retrypolicy.FEEDBACK_FILENAME).exists()
+    assert all(t["feedback_file_exists"] is False for t in prompt_run["trace"])
+    assert "check_add" in prompt_run["trace"][1]["prompt"]
+    _assert_ruler_is_happy(prompt_run["run_dir"])
+    _assert_ruler_is_happy(file_run["run_dir"])
+
+
+def test_v2_both_delivers_to_the_file_and_the_prompt(tmp_path, upstream):
+    """`both` ＝兩邊都給。**不可以被寫成 if/else 漏掉一邊**（`retry.py` 的
+    `_PROMPT_MODES`／`_FILE_MODES` 就是為了不讓別處用字串比對）。"""
+    r = _go2(tmp_path, feedback_into="both", ws_name="ws_b", run_name="run_b")
+    s = r["summary"]
+    assert s["accepted"] is True and s["attempts_used"] == 2
+    assert "check_add" in r["trace"][1]["prompt"]               # 進了 argv
+    assert r["trace"][1]["feedback_file_exists"] is True        # 也進了檔
+    assert s["attempts"][0]["feedback"]["sha256"]               # 檔的 sha256 有落盤
+    assert s["attempts"][1]["feedback_in_prompt_bytes"] > 0
+
+
+# ── V2-4) 缺 placeholder ＋ prompt ⇒ SystemExit（不准安靜退回檔案模式）────
+def test_v2_missing_placeholder_with_prompt_mode_is_a_hard_stop(tmp_path,
+                                                                upstream):
+    with pytest.raises(SystemExit) as exc:
+        _go2(tmp_path, feedback_into="prompt", placeholder=False,
+             ws_name="ws_miss", run_name="run_miss")
+    assert PH in str(exc.value)
+    # ⚠ **安靜退回檔案模式的反面**：那一跑連 run 目錄都不准開始寫。
+    #   收據寫 `prompt` 而模型的輸入裡一個字都沒有，是這條擋門唯一要殺的東西。
+    assert not (tmp_path / "run_miss").exists()
+
+    # 反向：argv 有 placeholder 但 mode 是 file ⇒ 那串字會原樣送給 agent 看。
+    with pytest.raises(SystemExit):
+        _go2(tmp_path, feedback_into="file", placeholder=True,
+             ws_name="ws_lit", run_name="run_lit")
+    # 沒有下一次 spawn ⇒ 回饋永遠不會被產生。
+    with pytest.raises(SystemExit):
+        _go2(tmp_path, feedback_into="prompt", retry_arm="none",
+             max_attempts=None, ws_name="ws_none", run_name="run_none")
+
+
+def test_v2_placeholder_must_be_at_the_end_of_that_argument():
+    """插在中間會讓 provider 的前綴快取整段失效，**而那個成本不會出現在
+
+    任何一個我們落盤的欄位裡**——所以它要在畫面上死掉。
+    """
+    for bad in (f"a{PH}b", f"a{PH}{PH}", PH + "tail"):
+        with pytest.raises(SystemExit):
+            retrypolicy.render_argv(["pi", "-p", bad], "fb", mode="prompt")
+    # 打錯 mode 也要死在畫面上（`delivers_to_prompt()` 為 False 那條路
+    # 會安靜退回檔案模式——前一棒的 bug，擋門放在 early-return 後面）。
+    with pytest.raises(SystemExit):
+        retrypolicy.render_argv(["pi", "-p", f"x{PH}"], "fb", mode="prmopt")
+    with pytest.raises(SystemExit):
+        retrypolicy.render_argv(["pi", "-p", f"x{PH}"], "fb", mode="both\n")
+
+
+# ── V2-5) V/GT：hidden 不得出現在任何一次的 argv ──────────────────────────
+def _argv_texts(r: dict) -> list[str]:
+    """agent **真的收到**的每一個 argv 元素 ＋ 收據落盤的每一個。
+
+    兩份都掃：只掃落盤的那份，等於相信落盤的與 spawn 的是同一條。
+    """
+    seen = [x for t in r["trace"] for x in t["argv"]]
+    logged = [x for a in r["summary"]["attempts"] for x in a.get("argv", [])]
+    return seen + logged
+
+
+def test_v2_feedback_in_prompt_never_contains_hidden_testdata(tmp_path,
+                                                              upstream):
+    hidden = _suite(tmp_path, "hidden", _HIDDEN_TEST)
+    assert GT_CANARY in (hidden / "test_hidden.py").read_text(encoding="utf-8")
+    r = _go2(tmp_path, mode="always_bad", feedback_into="prompt",
+             max_attempts=3, suite=_suite(tmp_path),   # ← 餵的是 visible
+             ws_name="ws_vgt", run_name="run_vgt")
+
+    # ⚠ **量具要先證明它接上了**：一個字都沒寫進 argv 的情況下「掃描零命中」
+    #   是真的，但它證明的是量具沒接上，不是沒有洩漏。
+    texts = _argv_texts(r)
+    assert len(r["trace"]) == 3 and texts
+    assert "check_add" in r["trace"][1]["prompt"]
+    assert "check_add" in r["trace"][2]["prompt"]
+
+    assert _scan(texts) == []
+
+
+def test_v2_vgt_canary_scan_has_teeth_in_argv(tmp_path, upstream):
+    """負向控制：把 hidden **當成可見套件**餵進去，同一支掃描必須翻紅。
+
+    沒有這一條，上面那個「零命中」跟把掃描關掉在輸出上同形。
+    """
+    r = _go2(tmp_path, mode="always_bad", feedback_into="prompt",
+             max_attempts=2, suite=_suite(tmp_path, "hidden", _HIDDEN_TEST),
+             ws_name="ws_teeth", run_name="run_teeth")
+    assert _scan(_argv_texts(r)) == [GT_CANARY, NUM_CANARY]
+
+
+# ── V2 的門面：CLI ＋ 文件 ────────────────────────────────────────────────
+def test_v2_cli_exposes_feedback_into_and_defaults_to_file():
+    ap = launcher.build_parser()
+    assert ap.parse_args(["--", "x"]).feedback_into == "file"   # 預設＝V1
+    args = ap.parse_args(["--feedback-into", "prompt", "--retry", "revise",
+                          "--", "pi", "-p", f"go{PH}"])
+    assert args.feedback_into == "prompt"
+    with pytest.raises(SystemExit):        # 封閉集合，多一個就是規格變更
+        launcher.build_parser().parse_args(["--feedback-into", "wire", "--", "x"])
+
+
+def test_v2_docs_print_the_placeholder_that_ships(tmp_path):
+    """文件印一個 placeholder、程式認另一個，使用者那條命令就會安靜地不生效。"""
+    doc = (ROOT / "docs" / "VACANT_RUN.md").read_text(encoding="utf-8")
+    assert retrypolicy.FEEDBACK_PLACEHOLDER in doc
+    assert "--feedback-into" in doc
+    for mode in retrypolicy.DELIVERY_MODES:
+        assert f"`{mode}`" in doc
+
+
+# ══ 兩件小事 ══════════════════════════════════════════════════════════════
+def test_suite_under_the_workspace_is_refused(tmp_path):
+    """**agent 改得到的驗收不是驗收。**
+
+    不是「可能被繞過」，是量具與被量的東西放在同一個人手上 ⇒ `accepted=True`
+    退化成「它讓自己過了」。正解是 `demo.py::scaffold`：權威的那一份放工作區外，
+    要給 agent 看就另外**複製**一份進去。
+    """
+    ws = _ws(tmp_path, "ws_inside")
+    inside = _suite(ws, "tests_visible")          # ← 驗收放在工作區**裡面**
+    with pytest.raises(SystemExit) as exc:
+        launcher.run([sys.executable, "-c", "pass"], workspace=ws,
+                     run_dir=tmp_path / "run_inside", suite_dir=inside,
+                     vacant_on=True, task_id="inside", sandbox_name="none")
+    assert "--suite" in str(exc.value)
+    assert not (tmp_path / "run_inside").exists()
+
+    # 工作區外的同一份就過得去（擋的是位置，不是這個目錄）。
+    outside = _suite(tmp_path, "visible_outside")
+    launcher.run([sys.executable, "-c", "pass"], workspace=ws,
+                 run_dir=tmp_path / "run_outside", suite_dir=outside,
+                 vacant_on=True, task_id="outside", sandbox_name="none")
+
+
+_ORPHAN_CHILD = r'''
+import pathlib, sys, time
+time.sleep(float(sys.argv[1]))
+pathlib.Path(sys.argv[2]).write_text("written after the freeze\n",
+                                     encoding="utf-8")
+'''
+
+#: agent 把真正的工作 fork 出去就走（背景 lint／watcher／自己的 worker
+#: 都是這個形狀），**自己不等它**。
+_ORPHAN_AGENT = r'''
+import pathlib, subprocess, sys
+ws = pathlib.Path.cwd()
+subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2],
+                  str(ws / "sneaky.txt")])
+(ws / "solution.py").write_text("def add(a, b):\n    return a + b\n",
+                                encoding="utf-8")
+'''
+
+
+def test_grandchildren_are_killed_before_the_freeze(tmp_path):
+    """`proc.wait()` **只等直接子行程**，孫行程不會被等到。
+
+    那代表它可以在我們凍結之後繼續寫工作區——`ws_end_sha256` 就不再是
+    「交付當下」的雜湊，而 TOCTOU 那條擋門只在凍結的那一瞬間看得到。
+    所以 spawn 用 `start_new_session=True`，`wait()` 回來就 `killpg` 整組。
+    """
+    ws = _ws(tmp_path, "ws_orphan")
+    child = tmp_path / "orphan_child.py"
+    child.write_text(_ORPHAN_CHILD, encoding="utf-8")
+    agent = tmp_path / "orphan_agent.py"
+    agent.write_text(_ORPHAN_AGENT, encoding="utf-8")
+
+    s = launcher.run([sys.executable, str(agent), str(child), "1.5"],
+                     workspace=ws, run_dir=tmp_path / "run_orphan",
+                     suite_dir=_suite(tmp_path), vacant_on=True,
+                     task_id="orphan", sandbox_name="none")
+    # ⚠ **這一行是這條測試的牙齒**：`True` ＝ 直接子行程都結束了、群組裡還有
+    #   東西活著。沒有 `start_new_session` 的話這裡永遠是 False。
+    assert s["attempts"][0]["orphans_killed"] is True
+    assert s["accepted"] is True                     # 交付本身照樣成立
+
+    time.sleep(2.5)                                  # 給孫行程它要的那 1.5 秒
+    assert not (ws / "sneaky.txt").exists()          # 它沒能寫成
+    assert s["ws_end_sha256"] == launcher.wshash.tree_hash(ws)
