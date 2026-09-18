@@ -428,11 +428,28 @@ local=[]
 for pat in ['原文/*.pdf','2026-08-06_agent信任/pdf/*Kim*','2026-08-06_信任定義/pdf/*Koerber*']:
     for path in source_root.glob(pat):
         local.append({'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'used':not path.name.startswith('Final-Web')})
+def _evidence_path(rel):
+    """把 EVIDENCE 的鍵解成現在的實際位置。
+
+    `EVIDENCE` 的字串是 2026-09-14 出版當下的路徑；2026-09-18 把裁決檔搬進
+    `decisions/`。**鍵刻意不動**——動了 `internal`／`internal_sha256` 的鍵就跟著變，
+    已出版的 `source_manifest.json` 會變成不可重現。所以只在這裡解位置。
+
+    找不到就**大聲壞掉**。原本是 `if path.is_file(): ...`，搬家之後那個 if 會讓
+    13 份裁決證據安靜地從 `internal_sha256` 消失，而那份 manifest 正是「這些主張
+    有出處」的唯一憑據——安靜少講比壞掉更糟。
+    """
+    p=ROOT/rel
+    if p.is_file():return p
+    for sub in ('decisions','decisions/conclusions','decisions/criteria',
+                'decisions/prereg','decisions/notes'):
+        q=ROOT/sub/Path(rel).name
+        if q.is_file():return q
+    raise SystemExit(f'source_manifest：找不到證據檔 {rel}——不准安靜跳過')
 source_hashes={}
 for _,_,paths in EVIDENCE:
     for rel in paths:
-        path=ROOT/rel
-        if path.is_file():source_hashes[rel]=hashlib.sha256(path.read_bytes()).hexdigest()
+        source_hashes[rel]=hashlib.sha256(_evidence_path(rel).read_bytes()).hexdigest()
 (BASE/'source_manifest.json').write_text(json.dumps({'references':refs,'local_originals':local,'internal':EVIDENCE,'internal_sha256':source_hashes,'token_source_sha256':json.loads((BASE/'verified_tokens.json').read_text())['source_sha256'],'baseline_commit':'44be37fe52bac148ecd2835aa384c804c612ffea'},ensure_ascii=False,indent=2)+'\n')
 print('DOCX',BASE/(STEM+'.docx'))
 print('References',len(refs),'Tables',len(TABLES),'CJK characters',len(re.findall(r'[\u4e00-\u9fff]','\n'.join(expanded))))
