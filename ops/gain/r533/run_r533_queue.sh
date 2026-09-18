@@ -43,6 +43,9 @@ while read -r BLOCK; do
   if [ -f "$OUT/summary.json" ] && python3 -c "import json,sys; sys.exit(0 if json.load(open('$OUT/summary.json')).get('run_complete') else 1)" 2>/dev/null; then
     log "$BLOCK 已 run_complete，跳過"; continue
   fi
+  # 多流並行：目錄已存在＝別條流（可能在另一台）正在跑這塊。gain_run 看到目錄存在會拒跑，
+  # 若不在這裡跳過，整條序列會被誤判成失敗而停掉。跳過的塊由收官檢查逐塊對帳，不會漏。
+  if [ -d "$OUT" ]; then log "$BLOCK 目錄已存在（別條流在跑），跳過"; continue; fi
 
   # 逐塊參數一律從佇列 JSON 取，不在這支腳本裡重寫（避免兩份真相）
   eval "$(python3 - "$QUEUE" "$BLOCK" <<'PY'
