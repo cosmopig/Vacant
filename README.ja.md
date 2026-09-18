@@ -104,6 +104,7 @@ python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 |---|---|
 | [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)（V3 出口遮断）＋ `verify_egress_block.py` | root が一度必要な**運用動作**であって製品機能ではない。機械全体のネットワーク規則を書き換える |
 | `ops/vacantrun/selftest.py` | 端から端までの自己点検。repo の `runs/` を読む |
+| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh)（pi／Codex／OpenCode の配線） | この三つは base url を**設定ファイル**に持つため、配線は shell の一片であって製品機能ではない。環境変数を読む框架（Claude Code、内蔵 provider 経由の OpenCode）は**配線不要**。実測は [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
 | `ops/gain/**`、`runs/**` | R529／R530／R532／R534 の runner、問題バンク、**隠し受入**、judge、スケジューラと落盤データ。**実験の数値を再計算するには clone が要る**（下の〈ソースから動かす〉） |
 | `examples/**`、`decisions/**`、`docs/**` | 展示物、裁定記録、仕様文書 |
 

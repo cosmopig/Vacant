@@ -108,6 +108,7 @@ that path is now a re-export, and it is what verified the R460R / R529 / R532 ch
 |---|---|
 | [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh) (V3 egress blocking) + `verify_egress_block.py` | A root-once **operations action**, not a product feature; it rewrites the whole machine's network rules |
 | `ops/vacantrun/selftest.py` | End-to-end self-check; it reads the repo's `runs/` |
+| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh) (pi／Codex／OpenCode wiring) | Those three keep the base url in a **config file**, so the wiring is a shell snippet, not a product feature. Frameworks that read env vars (Claude Code; OpenCode via its built-in provider) need **no wiring** at all. Per-cell measurements: [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
 | `ops/gain/**`, `runs/**` | The R529 / R530 / R532 / R534 runners, task banks, **hidden acceptance suites**, judge, scheduler and on-disk data. **Re-computing the experiment numbers requires a clone** (see "Run from source" below) |
 | `examples/**`, `decisions/**`, `docs/**` | Exhibit pieces, verdict records, spec documents |
 

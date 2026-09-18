@@ -94,6 +94,7 @@ python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 |---|---|
 | [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)（V3 出網封鎖）＋ `verify_egress_block.py` | 要 root 一次的**維運動作**，不是產品功能；而且它改的是整台機器的網路規則 |
 | `ops/vacantrun/selftest.py` | 端到端自檢，會去讀 repo 的 `runs/` |
+| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh)（pi／Codex／OpenCode 的接線） | 那三個框架把 base url 寫在**設定檔**裡，接線是一段 shell 不是產品功能；吃環境變數的框架（Claude Code、走內建 provider 的 OpenCode）**零接線**、不需要它。逐格實測見 [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
 | `ops/gain/**`、`runs/**` | R529／R530／R532／R534 的 runner、題庫、**隱藏驗收**、judge、排程器與落盤資料。要**重算實驗數字**必須 clone（見下面〈從原始碼跑〉） |
 | `examples/**`、`decisions/**`、`docs/**` | 展件、裁決檔、規格文件 |
 
