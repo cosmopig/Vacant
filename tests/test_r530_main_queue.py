@@ -106,7 +106,9 @@ def test_launch_conditions_are_pinned_in_the_queue(q):
     assert q.reasoning_effort == "none", "E-11"
     assert q.model == "gemma-4-12b-it-qat"
     assert q.backend == "unshare"
-    assert q.decision.startswith("DECISION_20260913_R530")
+    # `decision` 是傳給 `--decision` 的**路徑**（2026-09-18 起 `decisions/...`），
+    # 這裡釘的是「指到哪一份」⇒ 比 basename。
+    assert pathlib.Path(q.decision).name.startswith("DECISION_20260913_R530")
 
 
 def test_launch_argv_carries_the_three_gates(q):

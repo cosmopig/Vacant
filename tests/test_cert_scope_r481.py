@@ -34,17 +34,39 @@ def test_scope_actually_extended():
 
 
 def test_additivity_against_pinned_precommit_tool():
-    """加法性對照釘**改動前的 commit**，不是 HEAD（釘 HEAD ＝ 拿自己比自己）。"""
+    """加法性對照釘**改動前的 commit**，不是 HEAD（釘 HEAD ＝ 拿自己比自己）。
+
+    ⚠ 2026-09-18：裁決檔 `git mv` 進 `decisions/` 之後，釘死的舊工具裡
+    `DOC_GLOB = "DECISION_*.md"` 是**寫死在原始碼裡的根目錄 glob**，它會掃到 0 份
+    ⇒ UNSCANNED、rc=2。若就這樣讓它掃 0 份，`old["counts"]` 與
+    `new["legacy_counts"]` 都是 `{}`，這條加法性對照會塌成 `{} == {}` 的空洞恆真句
+    ——測試看起來是綠的，實際上什麼都沒比。
+    所以這裡改成**匯入**那份釘死的原始碼、呼叫它自己的 `audit(doc_glob=...)`
+    （那個參數在舊版就存在），把新位置告訴它。比較的仍然是同一份工具碼、
+    同一批文件，只是告訴它語料搬到哪裡去了。
+    """
     old_src = subprocess.run(["git", "show", f"{BASE}:{TOOL}"], cwd=ROOT,
                              capture_output=True, text=True, timeout=120)
     assert old_src.returncode == 0 and old_src.stdout, old_src.stderr[-300:]
+    assert 'DOC_GLOB = "DECISION_*.md"' in old_src.stdout, \
+        "釘死的舊工具不再是那個根目錄 glob ⇒ 本測試的前提變了，要重看"
     tmp = ROOT / "ops" / "gain" / "_r481_test_base_gate.py"   # 同目錄＝同 import 環境
     outp = ROOT / "ops" / "gain" / "_r481_test_base.json"
+    driver = (
+        "import json,pathlib,sys;"
+        "sys.path.insert(0, str(pathlib.Path(%r).resolve().parent));"
+        "import _r481_test_base_gate as OLD;"
+        "rep = OLD.audit(doc_glob=%r);"
+        "pathlib.Path(%r).write_text("
+        "json.dumps(rep, ensure_ascii=False, indent=2, sort_keys=True), encoding='utf-8')"
+    ) % (str(tmp), G.DOC_GLOB, str(outp))
     try:
         tmp.write_text(old_src.stdout, encoding="utf-8")
-        p = _run([str(tmp), "--json", str(outp)])
-        assert p.returncode in (0, 1), (p.returncode, p.stderr[-300:])
+        p = _run(["-c", driver])
+        assert p.returncode == 0, (p.returncode, p.stderr[-500:])
         old = json.loads(outp.read_text(encoding="utf-8"))
+        # 空洞恆真句的擋門：舊工具**必須真的掃到東西**，否則下面全部白比
+        assert old["docs_scanned"] > 0 and old["cert_headings"] > 0, old
     finally:
         tmp.unlink(missing_ok=True)
         outp.unlink(missing_ok=True)

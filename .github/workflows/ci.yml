@@ -122,6 +122,12 @@ jobs:
       - name: runs/ 索引沒有漂
         run: python ops/gain/build_runs_index.py --check
 
+      # 2026-09-18 把 227 份實驗紀錄搬進 `decisions/` 之後，「引用還對不對」不能靠人眼。
+      # 四類引用（markdown 連結／`ROOT / "..."` 字面值／`--decision` 參數／GitHub 絕對網址）
+      # 指到不存在的檔案就紅。刻意不改的歷史紀錄是具名排除，`--verbose` 數得出來。
+      - name: 沒有死連結／死路徑
+        run: python ops/check_repo_links.py --verbose
+
       # `-rs` 把每一個 skip 的**理由**印出來。CI 上會看到
       # 「官方 HumanEval+ 包不在場」「官方 EvalPlus 包不在場（.vacant-private）」
       # 這類訊息——skip 是明示的缺量測，不是通過。

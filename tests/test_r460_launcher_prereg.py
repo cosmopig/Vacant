@@ -81,7 +81,7 @@ SEED_PRIOR_RUN = "runs/g_r447_conform_lcb2"
 # 那份預註冊 §二-3 的 `SEED_AUTHORIZED_SET:` 行是**發射前**的集合（E-16 是發射前
 # 擋門，`ops/gain/r532/check_seed_authorization.py` 的 docstring 講得很清楚），
 # 所以它照定義不含 R532 自己那六塊——授權的依據是 §二-2 的註冊行，不是那四行。
-SEED_REUSE_DEC_R532 = "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+SEED_REUSE_DEC_R532 = "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
 SEED_REUSE_RUNS_R532 = tuple(f"runs/g_r532_lcb2_a{i}" for i in range(1, 7))
 MODEL = "gemma-4-12b-it-qat"
 PRIOR_DEFAULT = "runs/g_r449c_eq5_lcb3"

@@ -41,7 +41,7 @@ set -u
 ROOT="${VACANT_ROOT:-$HOME/vacant}"; REPO="${VACANT_REPO:-$ROOT/Vacant}"
 LOG="$ROOT/logs/launch_harness_rep_block.log"
 MODEL="gemma-4-12b-it-qat"
-DEC="${DEC:-DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md}"
+DEC="${DEC:-decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md}"
 ARMS="OFF,CONFORM,OFF5,HPI,HOC,HMIX"
 BANK_FILE="ops/gain/data/lcb_bank_v2.jsonl"
 N_BLOCK=20
