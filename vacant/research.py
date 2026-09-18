@@ -24,6 +24,7 @@
 from __future__ import annotations
 
 import math
+import statistics
 import random
 from dataclasses import dataclass, field
 from typing import Callable, Sequence
@@ -367,17 +368,76 @@ def mcnemar_n_required(
     *,
     alpha: float = 0.05,
     power: float = 0.85,
-    n_max: int = 20000,
+    n_max: int = 2000,
 ) -> int:
-    """達到目標檢定力的最小 n（線性掃描；pilot 後 ψ 餵這裡決定 T，17 §P1-3）。"""
+    """達到目標檢定力的最小 n（倍增＋二分；pilot 後 ψ 餵這裡決定 T，17 §P1-3）。
+
+    ⚠ **為什麼不是線性掃描**（2026-09-19 改）：`mcnemar_power` 是全枚舉的精確檢定，
+      單次呼叫的成本隨 n 成長——實測 n=400 要 **2.98 秒**。從 n=1 掃到需要的
+      n≈1600（Δ=+5pp 那種格子）要跑到天荒地老，R535 寫預註冊時實際撞到兩次
+      「10 分鐘未收斂」。倍增找上界再二分，同一題秒級收斂。
+
+    ⚠ **這裡靠一個假設：`mcnemar_power` 對 n 非遞減。** 那**不是**精確檢定的通性
+      ——臨界域是整數，n 變大時它可以跳一格，理論上會有鋸齒。本實作實測沒有
+      （n=2..79，12 組 (p_disc, ψ, α) 參數，0 次下降），但「實測沒看到」不是證明。
+      所以回傳前**驗一次 `n-1` 確實達不到**：二分若因鋸齒落在某個凹陷之上，
+      這一步會抓到並退回線性掃描。代價是一次額外呼叫。
+
+    ⚠ **`n_max` 預設從 20000 降到 2000（2026-09-19）。** 20000 從來不是一個
+      可用的值：`mcnemar_power` 大致是 O(n²)（實測 n=400 要 2.98 s），
+      單次 n=20000 的呼叫要數小時 ⇒ 舊預設在「答案不存在」那條路徑上等於當掉。
+      2000 是「這台機器一次呼叫約一分鐘」的量級。**需要更大就自己傳**，
+      而傳之前請先算一下那一次呼叫要跑多久。
+    """
     if not 0.0 < power <= 1.0:
         raise ValueError(f"目標 power 必須在 (0,1]：{power}")
     if psi == 0.5:
         raise ValueError("ψ=0.5 是 H0：任何 n 都達不到目標 power")
-    for n in range(1, n_max + 1):
-        if mcnemar_power(n, p_disc, psi, alpha=alpha) >= power:
-            return n
-    raise ValueError(f"n≤{n_max} 內達不到 power={power}（p_disc={p_disc}, ψ={psi}）")
+
+    def ok(n: int) -> bool:
+        return mcnemar_power(n, p_disc, psi, alpha=alpha) >= power
+
+    # 0) ⚠ **常態近似只進錯誤訊息，不進判斷。** 一開始我想用
+    #    「近似 n > n_max ⇒ 精確 n > n_max」來快速失敗，實測發現**那是錯的**：
+    #        p_disc=0.40  ψ=0.875（Δ=+30pp）  近似 42.2  精確 41
+    #    近似**會高估**（另兩格 +20pp 95.1<98、+10pp 380.2<394 則低估）⇒ 方向不固定，
+    #    拿它當單邊守衛會把「其實做得到」誤判成「做不到」。所以它只用來把
+    #    「大概要多少」寫進例外訊息，幫呼叫端決定要不要提高 n_max。
+    delta = p_disc * (2.0 * psi - 1.0)
+    hint = ""
+    if delta != 0.0:
+        nd = statistics.NormalDist()
+        n_approx = ((nd.inv_cdf(1.0 - alpha / 2.0)
+                     + nd.inv_cdf(min(power, 1.0 - 1e-12))) ** 2) * p_disc / (delta ** 2)
+        hint = f"；常態近似約需 n≈{n_approx:.0f}（近似會高估也會低估，只供參考）"
+
+    # 1) 倍增找一個達標的上界
+    hi = 1
+    while hi <= n_max and not ok(hi):
+        hi *= 2
+    if hi > n_max:
+        # 上界超出範圍，但 n_max 自己可能達標（倍增會跳過它）
+        if n_max >= 1 and ok(n_max):
+            hi = n_max
+        else:
+            raise ValueError(
+                f"n≤{n_max} 內達不到 power={power}（p_disc={p_disc}, ψ={psi}）{hint}")
+    lo = max(1, hi // 2)                 # lo 已知不達標（除非 hi==1）
+
+    # 2) 在 [lo, hi] 二分
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if ok(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+
+    # 3) ⚠ 驗最小性：鋸齒若存在，二分可能落在凹陷之上。
+    if lo > 1 and ok(lo - 1):
+        for n in range(1, lo):          # 退回線性（只掃比它小的，仍然比原版快）
+            if ok(n):
+                return n
+    return lo
 
 
 # === R529：跨題庫的分層配對精確檢定 ==========================================
