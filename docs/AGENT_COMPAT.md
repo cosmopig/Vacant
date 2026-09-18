@@ -4,9 +4,14 @@
 > 一個**沒量**（Hermes，三台機器上都沒裝）。Codex 有一條**設定也救不了的路**：
 > ChatGPT 登入時模型通道是寫死的 `wss://`，HTTP 反向代理在那條路上不存在。
 
-量具與判準：[`ops/vacantrun/`](../ops/vacantrun/)（V0，見
+量具與判準：[`vacant/vrun/`](../vacant/vrun/)（V0，見
 [`docs/VACANT_RUN.md`](VACANT_RUN.md)）。
-名單的單一真相：[`ops/vacantrun/envmap.py`](../ops/vacantrun/envmap.py)。
+名單的單一真相：[`vacant/vrun/envmap.py`](../vacant/vrun/envmap.py)。
+
+> ⚠ **本文的實測是在搬家之前跑的**（判斷層當時住在 `ops/vacantrun/`）。
+> 判準一個字沒動、`ops.vacantrun.launcher` 是同一個 module 物件，所以下面的
+> `requests_seen` 與退出碼照樣成立；但 `envmap` **沒有**留 re-export，
+> 名單只住在 `vacant/vrun/envmap.py` 一個地方。
 
 ---
 
@@ -80,10 +85,15 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
 四個 agent 各一段，**每段都在 runtime 讀 `$VACANT_RUN_PROXY`**：
 
 ```bash
-python3 ops/vacantrun/launcher.py --suite tests_visible --run-dir ~/.vacant-run/x -- \
+python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir ~/.vacant-run/x -- \
     "$PWD/ops/vacantrun/wrap_agent.sh" pi "把 solution.py 寫完"
 #                                      ^^^^ pi | codex | opencode | claude
 ```
+
+⚠ **`--suite` 要指到工作區外**（上面寫 `../tests_visible` 的原因）。這條擋門是
+V2 才加的，比本文的實測晚：`--suite` 落在工作區底下 ⇒ `SystemExit`，因為
+**agent 改得到的驗收不是驗收**。本文 §3 的原始 argv 紀錄保留當時逐字的樣子，
+沒有回頭改寫——那是跑過的東西，不是能照抄的指令。
 
 ⚠ **`--` 之後要給絕對路徑**：launcher 用 `cwd=<workspace>` spawn，相對路徑會
 解析到工作區底下 ⇒ `agent_spawn_failed`／exit 22（實測過；那是 `infra_void`，
@@ -113,7 +123,7 @@ launcher **不判交付也不判拒交**，行為正確但訊息容易看漏）�
 `ANTHROPIC_BASE_URL` 已經在 `envmap.REDIRECT_VARS` 裡，直接包起來就好：
 
 ```bash
-python3 ops/vacantrun/launcher.py --suite tests_visible --run-dir ~/.vacant-run/cc -- \
+python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir ~/.vacant-run/cc -- \
     claude -p "把 solution.py 寫完" --dangerously-skip-permissions
 ```
 
@@ -136,7 +146,7 @@ unset CLAUDE_CODE_USE_OPENAI                    # 有設的話它會改走 OpenA
 ### 2.2 Codex —— 一串 `-c` 旗標（不寫檔）
 
 ```bash
-python3 ops/vacantrun/launcher.py --suite tests_visible --run-dir ~/.vacant-run/cx -- \
+python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir ~/.vacant-run/cx -- \
   env CODEX_HOME=/tmp/codex-isolated \
   codex exec --skip-git-repo-check \
     -c "model_providers.vacantproxy.name=\"vacant proxy\"" \
@@ -169,7 +179,7 @@ python3 ops/vacantrun/launcher.py --suite tests_visible --run-dir ~/.vacant-run/
 ### 2.3 OpenCode —— 零接線（走內建 openai provider）
 
 ```bash
-python3 ops/vacantrun/launcher.py --suite tests_visible --run-dir ~/.vacant-run/oc -- \
+python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir ~/.vacant-run/oc -- \
     opencode run --pure --log-level ERROR -m openai/gpt-4o-mini "把 solution.py 寫完"
 ```
 
