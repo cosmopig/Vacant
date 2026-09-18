@@ -1,0 +1,230 @@
+# main 的分支保護要求七個 status check，而 `.github/workflows/` 一直是空的
+# ⇒ 沒有東西回報那七個名字，任何 PR 都會永遠停在 Waiting。本檔補上其中六個
+# （第七個 `lint-pr-title` 在 pr-title.yml，因為它只在 pull_request 上有意義）。
+#
+# ⚠ **job 的 `name:` 是對外的 check 名字，必須與分支保護的字串逐字相同**
+#    （包含空格與括號）。改名字＝那個 check 消失＝PR 又卡在 Waiting。
+#    目前要求的七個：
+#      lint + types (3.12, ubuntu)
+#      tests (ubuntu-latest, py3.12)
+#      tests (ubuntu-latest, py3.13)
+#      tests (macos-latest, py3.12)
+#      security scan
+#      build wheel + sdist + smoke install
+#      lint-pr-title
+#
+# 紀律（與 repo 其他量具同一套）：
+#   * **不為了變綠而空跑**。每一個 job 都有可能真的紅；判準寫在 job 裡或
+#     `.github/scripts/` 的腳本裡，本機可以用同一支重跑。
+#   * **量不到不是通過**（鐵律 3）。需要 `.vacant-private/` 官方包的測試在
+#     檔案缺席時 **skip 並印出原因**（`-rs`），不是刪掉也不是假裝過。
+#   * 私有資料**不轉散布**：CI 上不會有 `.vacant-private/`，而且有一格在
+#     檢查它沒有被 commit 進來。
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: "lint + types (3.12, ubuntu)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安裝量具（版本釘死——量具自己改版不該讓別人的 PR 變紅）
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "ruff==0.15.12" "mypy==1.20.2"
+
+      # ruff：只選**真的會在執行期炸開**的那一組（語法錯、undefined name、
+      # 永遠為真的比較、f-string 用錯）。
+      # ⚠ 為什麼不開全套 E/F：全套在本 repo 有 794 個發現，其中 231 個 E702
+      # （分號）、189 個 E401（一行多 import）——那是風格不是 bug，而且
+      # **改不得**：`ops/gain/gain_run.py` 是凍結碼（`FROZEN_SOURCE_SHA` 釘
+      # 11 個具名函式），`ops/gain/r493_appendix_prose_census.py` 還用**絕對
+      # 行號**釘死 `gain_run.py:588` 與 `:1586`。讓 formatter 動那個檔會把
+      # 兩個既有的稽核釘子一起弄斷。要擴規則請連同那兩個釘子一起處理。
+      - name: ruff（會炸的那組，全 repo）
+        run: ruff check --no-cache --select E9,F63,F7,F82 vacant ops examples tests
+
+      # mypy：範圍是 `vacant/` 裡**目前乾淨的 39 個模組**。
+      # 排除的 11 個是既有債（2026-09-18 實測：entrycost 50、ecosystem 10、
+      # research 3、cli 2、checks 2、agent／channels／collusion／memory／
+      # multiway／peerexec 各 1）。把它們塞進門只會逼人加 `--ignore-errors`，
+      # 那就退化成空跑。**這個排除清單只准縮短不准變長**：新模組預設要乾淨。
+      - name: mypy（vacant 的 39 個乾淨模組）
+        run: |
+          mypy --ignore-missing-imports --follow-imports=silent \
+            --exclude '^vacant/(agent|channels|checks|cli|collusion|ecosystem|entrycost|memory|multiway|peerexec|research)\.py$' \
+            vacant
+
+  tests:
+    name: "tests (${{ matrix.os }}, py${{ matrix.python }})"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.12"
+          - os: ubuntu-latest
+            python: "3.13"
+          - os: macos-latest
+            python: "3.12"
+    steps:
+      # fetch-depth: 0 —— `ops/gain/build_runs_index.py` 的 `_git_first_seen()`
+      # 用 `git log --diff-filter=A` 決定每個 run 目錄**最早進版控**的日期
+      # （mtime 在 checkout 之後全是同一個值，沒有資訊）。淺複製會讓那一欄
+      # 整批變成 fallback，索引因此比資料**少講**。
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      # `.vacant-private/` 是**不轉散布**的授權官方包（`.gitignore` 擋住整個
+      # 目錄）。它出現在 CI 的 checkout 裡只有一種可能：被 commit 進去了。
+      - name: 私有題庫不准進版控
+        shell: bash
+        run: |
+          if [ -e .vacant-private ]; then
+            echo "::error::.vacant-private/ 出現在 checkout 裡——不轉散布的官方包被 commit 了"
+            exit 1
+          fi
+          echo "OK：.vacant-private/ 不在 checkout 裡（需要它的測試會 skip 並印出原因）"
+
+      # 逐字用 README §「安裝與最小可跑範例」那一行的裝法（`.[dev]`），
+      # CI 才會是**那份說明的可執行版本**；說明書壞了這裡就會紅。
+      - name: 安裝
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      # 索引的產生器與 `--check` 是 CLAUDE.md 明文要求「引用任何 run／題庫／log
+      # 之前先讀」那份東西的執行力所在：產生器壞了、索引漂了，都要在這裡看得見。
+      # ⚠ 放在 pytest **之前**：測試會寫幾個落盤產物（例如
+      #   `ops/gain/data/r480_cert_gate_probe.json`），在乾淨的 checkout 上驗才乾淨。
+      - name: runs/ 索引沒有漂
+        run: python ops/gain/build_runs_index.py --check
+
+      # `-rs` 把每一個 skip 的**理由**印出來。CI 上會看到
+      # 「官方 HumanEval+ 包不在場」「官方 EvalPlus 包不在場（.vacant-private）」
+      # 這類訊息——skip 是明示的缺量測，不是通過。
+      - name: pytest
+        run: python -m pytest tests/ -rs
+
+  security:
+    name: "security scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安裝量具
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "bandit==1.9.4" "pip-audit==2.10.0"
+
+      # (a) 原始碼：HIGH 嚴重度一個都不准新增；現存三個逐項具名＋寫明理由。
+      #     判準與名單在腳本裡，本機可用同一支重跑（`--selftest` 驗它自己的牙齒）。
+      - name: bandit 判準自己的牙齒
+        run: python .github/scripts/security_scan.py --selftest
+      - name: bandit（HIGH 嚴重度，含具名例外）
+        run: python .github/scripts/security_scan.py
+
+      # (b) 依賴：拿**實際會被裝進去的那一組**去比 CVE 資料庫，不是拿
+      #     pyproject 的下界字串。所以先在全新 venv 裡 `pip install .`
+      #     讓 resolver 決定版本，再 freeze 出精確版本交給 pip-audit
+      #     （`--no-deps` ⇒ 不再解析一次，`--disable-pip` ⇒ 不另建 venv）。
+      # ⚠ 依賴出現新 CVE 時這一格會紅，而它是**必要 check** ⇒ 會擋住合併。
+      #    那是這道門的用途不是故障：處理方式是升版；真的不能升，就用
+      #    `--ignore-vuln <ID>` 並在這裡寫下為什麼——不要把這一格刪掉。
+      - name: pip-audit（runtime 依賴的實際解析結果）
+        run: |
+          python -m venv "$RUNNER_TEMP/runtimeenv"
+          "$RUNNER_TEMP/runtimeenv/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/runtimeenv/bin/python" -m pip install .
+          # 濾掉本專案自己（`pip freeze` 對本地安裝可能寫成 `vacant==0.1.0`
+          # 也可能寫成 `vacant @ file:///…`，兩種 pip-audit 都查不到）。
+          "$RUNNER_TEMP/runtimeenv/bin/python" -m pip freeze --exclude-editable \
+            | grep -viE '^vacant( |==|@)' > "$RUNNER_TEMP/runtime-freeze.txt"
+          echo "── 實際會裝進去的東西 ──"
+          cat "$RUNNER_TEMP/runtime-freeze.txt"
+          python -m pip_audit --no-deps --disable-pip --strict \
+            --progress-spinner off -r "$RUNNER_TEMP/runtime-freeze.txt"
+
+  build:
+    name: "build wheel + sdist + smoke install"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安裝打包工具
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "build==1.6.1"
+
+      - name: python -m build（wheel ＋ sdist）
+        run: python -m build
+
+      - name: 兩種產物都要在，而且 wheel 裡要有觀測台的靜態檔
+        run: |
+          ls -l dist
+          test "$(ls dist/*.whl | wc -l)" -eq 1
+          test "$(ls dist/*.tar.gz | wc -l)" -eq 1
+          python - <<'PY'
+          import glob, zipfile
+          whl = glob.glob("dist/*.whl")[0]
+          names = zipfile.ZipFile(whl).namelist()
+          html = [n for n in names if n.startswith("vacant/web/") and n.endswith(".html")]
+          print(f"{whl}：{len(names)} 個檔，其中 vacant/web/*.html {len(html)} 個")
+          assert html, "wheel 裡沒有 vacant/web/*.html——package-data 漏了"
+          PY
+
+      # 全新 venv 裝 wheel，而且**在 repo 以外**跑最小 quickstart：
+      # 在 repo 根目錄跑的話 `import vacant` 會讀到原始碼，「依賴宣告漏了」
+      # 與「package-data 漏了」兩種壞法都測不到（腳本自己會擋這件事）。
+      - name: 全新 venv 裝 wheel ＋ 最小 quickstart
+        run: |
+          python -m venv "$RUNNER_TEMP/smoke"
+          "$RUNNER_TEMP/smoke/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/smoke/bin/python" -m pip install dist/*.whl
+          cp .github/scripts/smoke_install.py "$RUNNER_TEMP/smoke_install.py"
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/smoke/bin/python" "$RUNNER_TEMP/smoke_install.py"
+          "$RUNNER_TEMP/smoke/bin/vacant" --help > /dev/null
+          echo 'console script：vacant --help 也活著'
+
+      - name: sdist 也要裝得起來（少檔的話這裡才會炸）
+        run: |
+          python -m venv "$RUNNER_TEMP/sdistenv"
+          "$RUNNER_TEMP/sdistenv/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/sdistenv/bin/python" -m pip install dist/*.tar.gz
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/sdistenv/bin/python" -c "import vacant; print(vacant.__file__)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 14
