@@ -13,9 +13,11 @@
   · `test_vrun_is_self_contained`
       套件裡的碼不准 import `ops.*`——那會讓 wheel 裝起來但一跑就 ImportError。
       這是「wheel 裝得到」這句話的可執行版本（比 `pip install` 早一步抓到）。
-  · `test_pyproject_ships_vrun`
+  · `test_pyproject_ships_vrun`／`test_pyproject_ships_every_subpackage`
       漏了 `packages` 這一行，wheel 就少一整包，而且**不會有任何錯誤訊息**
-      ——安裝成功、跑起來才炸。
+      ——安裝成功、跑起來才炸。前者釘死 `vacant.vrun` 這一格（它是本次搬家的主體），
+      後者是**下一次**的擋門：`packages` 是手寫名單（刻意的，見 pyproject 的註解），
+      而手寫名單的失敗方式就是「下一個子套件沒人記得加」。
   · `test_the_ruler_is_still_runnable_at_its_old_path`
       `ops/gain/replay/verify_run_receipts.py` 是 repo 裡到處被引用的那把尺
       （README×3、AGENTS.md、裁決檔、佇列腳本）。它必須**還是那個路徑、
@@ -117,6 +119,38 @@ def test_pyproject_ships_vrun():
     assert '"vacant.vrun"' in txt, "pyproject 的 packages 少了 vacant.vrun ⇒ wheel 會少一整包"
     # 反面：頂層 `ops` 不准進 wheel（PyPI 上 `ops` 是 Juju 的套件，會撞名）
     assert '"ops"' not in txt and "'ops'" not in txt
+
+
+def test_pyproject_ships_every_subpackage():
+    """`vacant/` 底下每一個可 import 的子套件都必須列進 `packages`。
+
+    這支在架構裡承重什麼：`[tool.setuptools] packages` 是**手寫名單**（刻意的：
+    pyproject 的註解寫了為什麼不用 find——頂層 `ops` 不准被自動掃進去）。手寫名單
+    只有一種失敗方式，而它很安靜：下一個子套件沒人記得加 ⇒ wheel 少一整包 ⇒
+    `pip install` 成功、`import` 成功、**呼叫到那一包才炸**。0.7.0 已經被這個形狀
+    咬過一次（`vacant.suitegauge` 的 `import ops.gain.gain_run`）。
+
+    反向也查：名單裡寫了但磁碟上不存在的項目（改名／刪除之後沒同步）——setuptools
+    對那種項目**不會報錯**，它只是什麼都不打包。
+    """
+    import tomllib
+
+    cfg = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    listed = set(cfg["tool"]["setuptools"]["packages"])
+
+    found = set()
+    for init in (ROOT / "vacant").rglob("__init__.py"):
+        if "__pycache__" in init.parts:
+            continue
+        found.add(".".join(init.parent.relative_to(ROOT).parts))
+    missing = sorted(found - listed)
+    assert not missing, (
+        "這些子套件不在 pyproject 的 packages 裡，wheel 會少掉它們（且沒有錯誤訊息）："
+        + ", ".join(missing))
+
+    ghosts = sorted(p for p in listed
+                    if not (ROOT / pathlib.Path(*p.split("."))).is_dir())
+    assert not ghosts, f"packages 列了磁碟上不存在的目錄：{', '.join(ghosts)}"
 
 
 def test_the_ruler_is_still_runnable_at_its_old_path():
