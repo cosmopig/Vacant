@@ -92,8 +92,10 @@ $ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
 `--` 後面照你平常怎麼跑 agent 就怎麼打，`vacant run` 不需要知道那是什麼框架：
 
 ```bash
-vacant run --suite tests_visible -- <你平常怎麼跑 agent 就怎麼打>
+vacant run --suite ../tests_visible -- <你平常怎麼跑 agent 就怎麼打>
 ```
+
+⚠ **驗收目錄不可以在工作區底下**（`--suite` 與 `--run-dir` 都會擋，`SystemExit`）：agent 改得到的驗收不是驗收。要給 agent 看就另外複製一份進去。
 
 觸發點在 **agent 行程結束的那一刻**（不是在 wire 上認「它宣告完成了」）：那個訊號
 100% 可靠、零協定知識、零 token 成本。退出碼 `0`＝交付、`20`＝拒交、`22`＝`infra_void`。

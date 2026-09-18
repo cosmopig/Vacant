@@ -106,8 +106,10 @@ Whatever you normally type to run your agent goes after `--`; `vacant run` does 
 know which framework it is:
 
 ```bash
-vacant run --suite tests_visible -- <however you normally run your agent>
+vacant run --suite ../tests_visible -- <however you normally run your agent>
 ```
+
+⚠ **The suite directory must not live inside the workspace** (both `--suite` and `--run-dir` are refused with `SystemExit`): checks the agent can edit are not checks. Copy a second copy in if the agent should see them.
 
 The trigger is **the moment the agent process exits** — not recognising "I am done" on the
 wire. That signal is 100% reliable, needs zero protocol knowledge and costs zero tokens.

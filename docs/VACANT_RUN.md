@@ -1,8 +1,9 @@
-# `vacant run -- <任何 agent 命令>`（V0 ＋ V1 迴圈）
+# `vacant run -- <任何 agent 命令>`（V0 ＋ V1 迴圈 ＋ V2 回饋進 prompt）
 
 > 一句話：把任意 agent 包起來，中介它的模型通道，**在它的行程結束那一刻**
 > 跑客戶的驗收、簽一張可驗證收據、沒過就擋下交付——
 > **V1 再多一件事：沒過就重置或回饋，再 spawn 一次。**
+> **V2 再多一件事：那份回饋可以直接接在下一次 spawn 的 prompt 尾端（§8）。**
 
 程式碼：[`ops/vacantrun/`](../ops/vacantrun/)
 （[`launcher.py`](../ops/vacantrun/launcher.py)、
@@ -53,20 +54,31 @@
 # 先看一次它擋下來：零設定、零模型端點、零 API key、零網路，約 2 秒
 vacant demo gate                       # ops/vacantrun/demo.py
 
-# 最小：把 agent 包起來，用 tests_visible/ 當驗收
-vacant run --suite tests_visible --run-dir ~/.vacant-run/demo -- \
+# 最小：把 agent 包起來，用**工作區外**的 tests_visible/ 當驗收
+vacant run --suite ../tests_visible --run-dir ~/.vacant-run/demo -- \
     pi -p "把 solution.py 寫完"
 
 # V1：沒過就重試（兩條臂，見 §7）
-vacant run --suite tests_visible --retry revise   --max-attempts 3 -- <cmd>
-vacant run --suite tests_visible --retry resample --max-attempts 3 -- <cmd>
+vacant run --suite ../tests_visible --retry revise   --max-attempts 3 -- <cmd>
+vacant run --suite ../tests_visible --retry resample --max-attempts 3 -- <cmd>
+
+# V2：回饋接到下一次 spawn 的 prompt 尾端（見 §8；placeholder 必須在結尾）
+vacant run --suite ../tests_visible --retry revise --feedback-into prompt -- \
+    pi -p "把 solution.py 寫完{VACANT_FEEDBACK}"
 
 # 純觀測（不 gate），但 wire 照樣逐字落盤
 VACANT=0 vacant run --run-dir ~/.vacant-run/demo -- <cmd>
 
 # 不透過 CLI（repo checkout 裡）
-python3 ops/vacantrun/launcher.py --suite tests_visible --run-dir /tmp/r -- <cmd>
+python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir /tmp/r -- <cmd>
 ```
+
+⚠ **`--suite` 與 `--run-dir` 都不可以在工作區底下**，兩條擋門都是 `SystemExit`，
+理由各自不同：`--run-dir` 是收據自己在長大，放進去會讓 `ws_end_sha256` 變成
+「收據寫了多少」的函數；`--suite` 是**agent 改得到的驗收不是驗收**——那不是
+「可能被繞過」，是量具與被量的東西放在同一個人手上，`accepted=True` 會退化成
+「它讓自己過了」。要給 agent 看驗收就**另外複製一份**進工作區
+（`ops/vacantrun/demo.py::scaffold` 就是這樣做的：權威的那一份在外面）。
 
 退出碼**反映裁決**，不是 agent 自己的退出碼：
 
@@ -212,6 +224,17 @@ Anthropic Messages／Google GenAI）**。V0 只實作前面兩條路由的**轉�
 
 另外：`--run-dir` **不可以在工作區底下**（launcher 會擋）。收據自己在長大，
 放在工作區裡會讓 `ws_end_sha256` 變成「收據寫了多少」的函數。
+
+⚠ **孫行程是同一條漏洞的另一個入口。** `proc.wait()` 只等**直接子行程**；
+框架把真正的工作 fork 出去（背景 lint、watcher、自己的 worker）時，那些孫行程
+不會被等到，於是它們可以在我們**凍結之後**繼續寫工作區。所以 agent 用
+`start_new_session=True` spawn（自成一個行程群組），`wait()` 回來就 `killpg`
+整組，**在凍結之前**。那一格落 `attempts[i].orphans_killed`：`true` ＝直接
+子行程都結束了、群組裡**還有東西活著**（這個框架真的會留孤兒）。
+`--stdin inherit` 是例外——分家會讓互動式 agent 失去控制終端——那一格
+`orphans_killed` 落 `null`＝**沒量**，不是 `false`＝沒有。
+可執行證明：`tests/test_vacant_run_retry.py::test_grandchildren_are_killed_before_the_freeze`
+（孫行程睡 1.5 秒之後才往工作區寫，測試等 2.5 秒再看那個檔在不在）。
 
 ### 4.7 驗收是單邊保證
 
@@ -455,3 +478,111 @@ pi 不吃環境變數 ⇒ 用 `--port 8877` ＋ `PI_CODING_AGENT_DIR` 底下一�
 **agent 完全沒被中介到**（`requests_seen` = 0），而畫面上只有 pi 自己的
 `Connection error.`。那正是 §4.5 的現場版本：**「我設了設定」不是證據，
 `requests_seen` 才是。**
+
+---
+
+## 8. V2：同一份回饋走 argv（`--feedback-into prompt|both`）
+
+V1 的回饋是寫一個檔（`VACANT_FEEDBACK.md`）到工作區，而 §7.3 自己就承認了那條路
+的洞：**我們沒有辦法在 agent 的 prompt 裡講「去讀某某檔」**（那條命令是使用者給
+的）⇒ **模型可以不讀它**。V2 把同一份文字接到 agent 命令裡 `{VACANT_FEEDBACK}`
+那個參數的**尾端**。
+
+```bash
+vacant run --suite ../tests_visible --retry revise --feedback-into prompt -- \
+    pi -p "把 solution.py 寫完{VACANT_FEEDBACK}"
+```
+
+| `--feedback-into` | 回饋去哪 |
+|---|---|
+| `file` | 工作區的 `VACANT_FEEDBACK.md`（**預設**，＝V1 的行為逐字不變） |
+| `prompt` | **只**接到下一次 spawn 的 argv 尾端，工作區一個檔都不多 |
+| `both` | 兩邊都給 |
+
+### 8.1 為什麼是 argv 而不是 wire
+
+proxy **擁有一次 HTTP 往返的讀寫權，不擁有 agent 的迴圈狀態，也不擁有工具執行器**。
+三條 wire 上的路各自撞死在那個邊界上：
+
+* 改 `tools` ⇒ **L0**：proxy 宣告得了工具、**執行不了**——`tool_result` 只能由
+  agent 自己的執行器產生，我們生不出來。
+* 改 `system` ⇒ wire 上的紀錄會與框架自己的 transcript 講不同的話，
+  **直接傷害「紀錄忠實」的立論根基**（§1）。
+* 插一則 user 訊息 ⇒ 它**只存在於那一通 request**，agent 的歷史裡沒有，下一通就不一致。
+
+**launcher 擁有 argv，而 argv 就是那一則 user 訊息。** 零協定破解、零偽造發言、
+跨所有框架。`wireproxy.WireProxy.on_wire()` 在 V2 仍然**恆回 `None`（永不改寫）**
+——**V2 一個位元都沒有碰 wire**（`wireproxy.py`／`envmap.py` 兩支這一輪零改動）。
+
+### 8.2 三條規則，每一條都有理由
+
+1. **placeholder 必須是那個參數的結尾**，否則 `SystemExit`。
+   尾端 append 才保得住 provider 的**前綴快取**；插在中間會讓整段快取失效，
+   **而那個成本不會出現在任何一個我們落盤的欄位裡**（同一個參數裡出現兩次也擋——
+   前面那一次就不在結尾）。
+2. **第 1 次嘗試把 placeholder 換成空字串** ⇒ 第一次的命令與「沒有 Vacant」時
+   **逐位元相同**。這是兩臂可比性的基礎，形狀與 wire 那條「兩臂 body 逐位元相同」
+   同一個用意。第 2 次起才換成 `"\n\n"` ＋ 回饋，所以**第 2 次的 argv 是第 1 次的
+   逐位元前綴**。
+3. 換了管道不放鬆鐵律 1：**整條命令的全文**再跑一次
+   `vacant/memory.py::assert_ks1_clean`（責任修辭如果是使用者自己寫在命令裡的，
+   判 `ks1_violation`＝`infra_void`）。
+
+### 8.3 壞組合一律 fail-visible，**不准安靜退回檔案模式**
+
+| 組合 | 結果 |
+|---|---|
+| `--feedback-into prompt` 而 argv 裡沒有 `{VACANT_FEEDBACK}` | `SystemExit` |
+| argv 裡有 `{VACANT_FEEDBACK}` 而 `--feedback-into file` | `SystemExit`（那串字會原樣送給 agent 看） |
+| `--feedback-into prompt --retry none` | `SystemExit`（沒有下一次 spawn，回饋永遠不會產生） |
+| `--feedback-into` 給了不在 `{file, prompt, both}` 裡的字 | `SystemExit` |
+
+安靜退回檔案模式會讓「我以為在 prompt 模式」的錯**在資料裡活著**：那一跑的收據
+會寫 `feedback_delivery="prompt"`，而模型的輸入裡一個字都沒有。那種錯要死在畫面上。
+
+⚠ **`--retry resample --feedback-into prompt` 刻意不擋。** 那一臂本來就不給失敗
+原文，但兩條臂要能用**同一條命令**跑（第 1 次的 argv 才逐位元相同），所以它必須
+吃得下 placeholder、把它換成空字串。那一格每一次的 `feedback_in_prompt_bytes`
+都是 `0`——「政策上沒有回饋」與「以為有卻沒送到」因此在資料上分得開。
+
+### 8.4 落盤與收據
+
+每一次嘗試多落四個欄位（`run_<ARM>.json` 的 `attempts[i]`）：
+
+```
+argv                     這一次**真的 spawn 出去**的那條命令（頂層 `argv` 是使用者給的原文）
+argv_sha256              它的指紋（NUL 分隔——空白分隔的話 ["a b"] 與 ["a","b"] 會同形）
+feedback_delivery        file / prompt / both
+feedback_in_prompt_bytes 回饋真的進了幾個位元組。**第 1 次恆為 0**
+```
+
+前兩個之中的 `argv_sha256` 與 `feedback_delivery` 也**簽進 `ws_attempt`**
+（`ops/gain/r530/receipts.py::append_attempt` 收 `**extra`，**那一支一個字都沒改**）。
+沒有它們的話，「回饋進了 prompt」這件事在鏈上完全沒有痕跡。
+
+### 8.5 誠實邊界（**不准淡化**）
+
+1. **不能說「不可忽略」。** 能說的是「**回饋一定出現在模型的輸入裡**」。
+   **看得到 ≠ 照做**——V2 保證的是投遞，不是遵從；能強制的只有
+   **「沒過就不出貨」**（閘門本身，§4.7 的單邊保證仍然逐字適用）。
+2. **不能說 V2 提高了通過率。** V1 實跑 n=1、三次重改一次都沒改對（§7.8）；
+   R534 真模型上「沒過→重改」與拒交出現 **0 次**。
+   **V2 改的是機制性質（回饋一定在輸入裡），不是效果量測。** 本輪零真模型跑。
+3. **不得與 R530／R532／R534 併表**：prompt 不是我們寫的（agent 命令由使用者給）、
+   工具面由框架自己決定、預算形狀是「整個行程重跑」而不是「同一段對話多說一輪」。
+   三個變因都不同，併表就是把三件事講成一件事。
+4. `tests/test_vacant_run_retry.py` 裡那支「只看 argv 的假 agent」在 `prompt`
+   模式會過、在 `file` 模式不會過——**那是可執行的機制差，不是效果量測**。
+   它照做是因為我們寫死它照做（`code = GOOD if "check_add" in PROMPT else BAD`）。
+   真模型看得到也可以不理，那正是第 1 條。
+5. **預設仍是 `file`** ＝ V1 的行為逐字不變。要 argv 就要明講。
+
+### 8.6 可執行證明
+
+| 斷言 | 測試 |
+|---|---|
+| 第 1 次的 argv 與「沒有 Vacant」時逐位元相同（兩端都驗：收據的 `argv_sha256`、agent 行程真的收到的那條） | `test_v2_first_attempt_argv_is_byte_identical_to_no_vacant` |
+| 第 2 次＝第 1 次的逐位元前綴 ＋ `"\n\n"` ＋ 回饋 | `test_v2_second_attempt_argv_is_the_first_plus_the_feedback` |
+| 只看 argv 的 agent：`prompt` 會過、`file` 不會過（**負向控制**，且證明檔案模式不是因為檔沒寫出來才失敗） | `test_v2_an_agent_that_only_reads_argv_passes_in_prompt_mode_and_fails_in_file_mode` |
+| 缺 placeholder ＋ `prompt` ⇒ `SystemExit`，連 run 目錄都不開始寫 | `test_v2_missing_placeholder_with_prompt_mode_is_a_hard_stop` |
+| hidden 測資不出現在**任何一次的 argv**，**＋負向控制** | `test_v2_feedback_in_prompt_never_contains_hidden_testdata`、`test_v2_vgt_canary_scan_has_teeth_in_argv` |

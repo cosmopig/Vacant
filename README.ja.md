@@ -103,8 +103,10 @@ $ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
 それがどのフレームワークかを知る必要がない：
 
 ```bash
-vacant run --suite tests_visible -- <普段 agent を動かすときのコマンド>
+vacant run --suite ../tests_visible -- <普段 agent を動かすときのコマンド>
 ```
+
+⚠ **受け入れディレクトリはワークスペースの下に置けない**（`--suite` も `--run-dir` も `SystemExit` で弾く）：agent が書き換えられる受け入れは受け入れではない。agent に見せたいなら別途コピーを置く。
 
 トリガは **agent プロセスが終了したその瞬間**（wire 上で「完了宣言」を認識するのではない）。
 その信号は 100% 確実で、プロトコル知識ゼロ、トークン費用ゼロ。終了コードは `0`＝出荷、
