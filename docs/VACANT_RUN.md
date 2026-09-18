@@ -524,9 +524,20 @@ proxy **擁有一次 HTTP 往返的讀寫權，不擁有 agent 的迴圈狀態�
    **逐位元相同**。這是兩臂可比性的基礎，形狀與 wire 那條「兩臂 body 逐位元相同」
    同一個用意。第 2 次起才換成 `"\n\n"` ＋ 回饋，所以**第 2 次的 argv 是第 1 次的
    逐位元前綴**。
-3. 換了管道不放鬆鐵律 1：**整條命令的全文**再跑一次
-   `vacant/memory.py::assert_ks1_clean`（責任修辭如果是使用者自己寫在命令裡的，
-   判 `ks1_violation`＝`infra_void`）。
+3. 換了管道不放鬆鐵律 1：**我們接上去的那一段**再跑一次
+   `vacant/memory.py::assert_ks1_clean`（髒了就判 `ks1_violation`＝`infra_void`
+   ——鐵律 1 說的是「違反＝run 作廢」，不是「拒交」）。
+
+   ⚠ **範圍是「我們寫的字」，不是整條命令**（2026-09-18 人類裁決）。
+   KS-1 的立法意旨是「**我們的** prompt 模板不准用責任措辭」，因為那會污染實驗
+   條件（三臂模板必須逐字相同，唯一差異是 MemoryManager 注入的記憶區塊）——
+   **它不是內容審查**。使用者那條命令是他自己的業務：
+   `-p "You are responsible for the migration"` 是一句完全正常的話，掃它等於
+   **用一個誤判殺掉整跑**，代價與 KS-1 要防的東西不成比例。
+   兩個方向各有一條測試——`test_v2_ks1_scope_is_our_text_not_the_users`
+   （使用者那句話照常跑完、不作廢）與
+   `test_v2_ks1_still_voids_when_our_own_feedback_is_dirty`
+   （我們的回饋髒了仍然作廢）。**只證明「收得住」不夠，還要證明「沒收掉」。**
 
 ### 8.3 壞組合一律 fail-visible，**不准安靜退回檔案模式**
 

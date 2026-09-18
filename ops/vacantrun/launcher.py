@@ -368,8 +368,14 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                 argv_i, argv_sha, n_sub = retrypolicy.render_argv(
                     argv, pending_feedback, mode=feedback_into)
             except KS1Violation as exc:
-                # 鐵律 1 對 argv 這條管道一樣成立（責任修辭有可能是使用者自己
-                # 寫在命令裡的）。判 `infra_void`：那一格沒有量到任何東西。
+                # 鐵律 1 對 argv 這條管道一樣成立，**但範圍是我們接上去的那一段**
+                # ——不是使用者自己的 prompt（`retry.render_argv` 的 ⚠，
+                # 2026-09-18 人類裁決）。判 `infra_void`：那一格沒有量到任何東西。
+                # ⚠ 這是**第二道網**：回饋在 `render_feedback` 就已經驗過一次，
+                #   所以正常路徑構不到這裡。留著是因為 `render_argv` 是公開函式，
+                #   而這是那段文字**真的進到模型輸入之前**的最後一關。
+                #   可執行證明＝`test_v2_ks1_still_voids_when_our_own_feedback_is_dirty`
+                #   （把第一道網拔掉，這一道要接得住）。
                 rec["stop_reason"] = "ks1_violation"
                 summary["attempts"].append(rec)
                 summary.update({"stop_reason": "ks1_violation",

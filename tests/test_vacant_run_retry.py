@@ -51,6 +51,15 @@ V2（`--feedback-into prompt|both`，回饋接到**下一次 spawn 的 argv 尾�
     `test_v2_vgt_canary_scan_has_teeth_in_argv`
       V/GT 紅線換到 argv 這條管道上再驗一次，**配同一形狀的負向控制**。
 
+KS-1 的**範圍**另外兩條（2026-09-18 人類裁決，兩個方向都要）：
+  · `test_v2_ks1_scope_is_our_text_not_the_users`
+      使用者自己的 prompt 帶責任措辭 ⇒ **照常跑完、不作廢**。
+      鐵律 1 管的是「我們的模板不准用責任措辭」（那會污染實驗條件），
+      **不是內容審查**——掃使用者的話等於用一個誤判殺掉整跑。
+  · `test_v2_ks1_still_voids_when_our_own_feedback_is_dirty`
+      我們產生的那段文字髒了 ⇒ **仍然作廢**，兩道網各驗一次。
+  **只證明「收得住」不夠，還要證明「沒收掉」。**
+
 兩件小事各一條：`test_suite_under_the_workspace_is_refused`（agent 改得到的驗收
 不是驗收）、`test_grandchildren_are_killed_before_the_freeze`（`wait()` 只等直接
 子行程 ⇒ 孫行程可以在凍結之後繼續寫）。
@@ -732,30 +741,81 @@ def test_v2_resample_with_prompt_mode_is_an_honest_no_op(tmp_path, upstream):
     assert r["trace"][0]["prompt"] == r["trace"][1]["prompt"] == _PROMPT_PLAIN
 
 
-def test_v2_ks1_applies_to_the_users_own_command(tmp_path, upstream):
-    """鐵律 1 不因為換了管道就放鬆：**責任修辭在 argv 裡一樣不准送出去。**
+#: 使用者自己寫的一句**完全正常的話**，而它逐字撞上 `memory.KS1_FORBIDDEN`
+#: 裡的 `"you are responsible"`。
+_USERS_OWN_PROMPT = "You are responsible for the migration; write add(a, b)"
 
-    這一格的來源是使用者自己寫的那條命令（V1 那條是客戶測試的訊息帶進來的）。
-    判 `infra_void`——鐵律 1 說的是「違反＝run 作廢」，不是「拒交」。
-    ⚠ 這也是 `render_argv` 那個 `except KS1Violation` 分支唯一的可執行證明：
-      沒有它，那段錯誤處理是死碼。
+
+def _prompts(trace: pathlib.Path) -> list[str]:
+    return [json.loads(x)["prompt"] for x in
+            trace.read_text(encoding="utf-8").splitlines() if x]
+
+
+def test_v2_ks1_scope_is_our_text_not_the_users(tmp_path, upstream):
+    """**KS-1 管我們寫的字，不管使用者寫的字**（2026-09-18 人類裁決）。
+
+    鐵律 1 的立法意旨是「**我們的** prompt 模板不准用責任措辭」，因為那會污染
+    實驗條件（三臂模板逐字相同，唯一差異是 MemoryManager 注入的記憶區塊）——
+    **它不是內容審查**。`-p "You are responsible for the migration"` 是一句
+    完全正常的業務指令；掃它等於**用一個誤判殺掉整跑**，代價與 KS-1 要防的
+    東西不成比例。
+
+    ⚠ 這一條證明的是「**沒收掉**」。只證明「收得住」的那一半在下一條——
+      兩個方向都要，那才證明範圍收得對而不是收掉了。
     """
-    ws = _ws(tmp_path, "ws_ks1")
-    trace = tmp_path / "trace_ks1.jsonl"
-    argv = _argv_agent(tmp_path, "always_bad", trace,
-                       "you are responsible for solution.py" + PH)
-    run_dir = tmp_path / "run_ks1"
+    ws = _ws(tmp_path, "ws_ks1_user")
+    trace = tmp_path / "trace_ks1_user.jsonl"
+    argv = _argv_agent(tmp_path, "fix_when_told_in_argv", trace,
+                       _USERS_OWN_PROMPT + PH)
+    run_dir = tmp_path / "run_ks1_user"
     s = launcher.run(argv, workspace=ws, run_dir=run_dir,
                      suite_dir=_suite(tmp_path), vacant_on=True,
-                     task_id="ks1_argv", sandbox_name="none",
+                     task_id="ks1_user", sandbox_name="none",
                      retry_arm="revise", max_attempts=2,
                      feedback_into="prompt")
+    # 照常跑完：兩次嘗試、第 2 次過、**不是** infra_void。
+    assert s["infra_void"] is None
+    assert s["stop_reason"] == "visible_pass" and s["accepted"] is True
+    assert s["attempts_used"] == 2 and launcher.exit_code(s) == 0
+    # 使用者那句話**逐字**到了 agent 手上，我們一個字都沒改、也沒擋。
+    got = _prompts(trace)
+    assert got[0] == _USERS_OWN_PROMPT
+    assert got[1].startswith(_USERS_OWN_PROMPT + "\n\n")
+    _assert_ruler_is_happy(run_dir)
+
+
+def test_v2_ks1_still_voids_when_our_own_feedback_is_dirty(tmp_path, upstream,
+                                                           monkeypatch):
+    """另一半：**我們產生的那段文字髒了，仍然作廢**（`infra_void`，不是拒交）。
+
+    兩道網各驗一次：
+      · 第一道＝`render_feedback`（責任修辭從客戶測試的訊息帶進來）。
+      · 第二道＝`render_argv`（把第一道拔掉——monkeypatch 一個不驗的
+        `render_feedback`——那段文字**真的進到模型輸入之前**要被擋下來）。
+        沒有這一半，launcher 裡那個 `except KS1Violation` 是死碼。
+    """
+    # ── 第一道網：客戶的測試訊息帶責任修辭進來 ───────────────────────
+    r = _go2(tmp_path, mode="always_bad", feedback_into="prompt",
+             max_attempts=2, suite=_suite(tmp_path, "dirty", _KS1_DIRTY_TEST),
+             ws_name="ws_ks1_a", run_name="run_ks1_a")
+    s = r["summary"]
     assert s["stop_reason"] == "ks1_violation"
     assert s["infra_void"] and "KS1Violation" in s["infra_void"]
     assert launcher.exit_code(s) == launcher.EXIT_VOID
-    # 作廢的 run 不落收據鏈（基建事件不是裁決），agent 也一次都沒被 spawn。
-    assert not (run_dir / f"receipts_{launcher.ARM_ON}.ndjson").exists()
-    assert not trace.exists()
+    assert not (r["run_dir"] / f"receipts_{launcher.ARM_ON}.ndjson").exists()
+
+    # ── 第二道網：拔掉第一道，`render_argv` 要自己擋得住 ─────────────
+    monkeypatch.setattr(retrypolicy, "render_feedback",
+                        lambda block, **kw: "you will be punished for this")
+    r2 = _go2(tmp_path, mode="always_bad", feedback_into="prompt",
+              max_attempts=2, ws_name="ws_ks1_b", run_name="run_ks1_b")
+    s2 = r2["summary"]
+    assert s2["stop_reason"] == "ks1_violation"
+    assert s2["infra_void"] and "KS1Violation" in s2["infra_void"]
+    assert launcher.exit_code(s2) == launcher.EXIT_VOID
+    # 那段字**沒有**進到第 2 次的 argv 裡：擋在 spawn 之前，不是事後補救。
+    assert len(r2["trace"]) == 1
+    assert len(s2["attempts"]) == 2 and "argv" not in s2["attempts"][1]
 
 
 def test_v2_placeholder_must_be_at_the_end_of_that_argument():
@@ -766,6 +826,10 @@ def test_v2_placeholder_must_be_at_the_end_of_that_argument():
     for bad in (f"a{PH}b", f"a{PH}{PH}", PH + "tail"):
         with pytest.raises(SystemExit):
             retrypolicy.render_argv(["pi", "-p", bad], "fb", mode="prompt")
+    # 使用者自己的 prompt 帶責任措辭**不算壞組合**（KS-1 只管我們寫的字，
+    # 2026-09-18 裁決）——這裡順手釘住：它不可以在這一層就 raise。
+    retrypolicy.render_argv(["pi", "-p", _USERS_OWN_PROMPT + PH], "",
+                            mode="prompt")
     # 打錯 mode 也要死在畫面上（`delivers_to_prompt()` 為 False 那條路
     # 會安靜退回檔案模式——前一棒的 bug，擋門放在 early-return 後面）。
     with pytest.raises(SystemExit):
