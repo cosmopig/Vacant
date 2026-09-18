@@ -13,6 +13,8 @@
       ⚠ `.git/` **不進樹雜湊**（`wshash.EXCLUDED_DIRS`）⇒ 光看雜湊看不出
       它有沒有被清掉。所以假 agent 把「我開始的時候看到什麼」寫到
       **工作區外**的一份 trace，那份東西重置殺不掉，是唯一的證據。
+      **配一條負向控制** `test_reset_that_does_not_return_to_start_is_infra_void`
+      （把 `restore_origin` 換成 no-op ⇒ 重置後的複查必須判 `ws_reset_failed`）。
   · `test_attempts_exhausted_is_a_refusal_with_its_own_name`
       用完額度仍沒過 ⇒ 拒交、退出碼非 0、收據記 `attempts_exhausted`。
   · `test_receipts_reconcile_for_every_ending`
@@ -21,6 +23,9 @@
       這一條對**每一種收尾**都跑既有的那把尺
       （`ops/gain/replay/verify_run_receipts.py`，不准另寫第二把），
       並逐格斷言 `attempt 數 ≥ verdict 數`。
+      **配一條負向控制** `test_the_ruler_catches_the_r530_hole_in_this_code`
+      （把 `_sign_attempt` 換成 no-op ＝當年那個 bug 本身 ⇒ 鏈仍完整、
+      總判必須 BROKEN）。沒有它，上面那些「尺說 OK」跟把尺拔掉在輸出上同形。
   · `test_feedback_file_never_contains_hidden_testdata`
       V/GT 紅線的可執行版本，形狀照抄 `tests/test_gain_vgt_canary.py`：
       canary 種在 hidden 側，掃 feedback 檔要零命中。**配一條負向控制**
@@ -274,6 +279,28 @@ def test_resample_really_resets_the_workspace(tmp_path, upstream):
     _assert_ruler_is_happy(r["run_dir"])
 
 
+def test_reset_that_does_not_return_to_start_is_infra_void(tmp_path, upstream,
+                                                          monkeypatch):
+    """負向控制：重置沒回到起點 ⇒ `ws_reset_failed`＝`infra_void`，**不判拒交也不判通過**。
+
+    `retry.py` 的 docstring 寫「還原完會再量一次樹雜湊，對不回起點 ⇒ 判
+    `infra_void`」。把 `restore_origin` 換成 no-op，那句話才變成可執行的——
+    否則上面那條「每次都回到起點」證明的是這支假 agent 的行為，
+    不是**那道複查真的在看**。
+    """
+    monkeypatch.setattr(retrypolicy, "restore_origin", lambda *a, **k: None)
+    r = _go(tmp_path, mode="always_bad", retry_arm="resample", max_attempts=3)
+    s = r["summary"]
+    assert s["stop_reason"] == "ws_reset_failed"
+    assert s["infra_void"] and s["infra_void"].startswith("reset=")
+    assert launcher.exit_code(s) == launcher.EXIT_VOID
+    # 第二次嘗試在 spawn **之前**就停了 ⇒ agent 只跑過一次。
+    assert len(r["trace"]) == 1
+    assert s["attempts"][-1]["reset"]["back_to_start"] is False
+    # `infra_void` 整條鏈都不落盤（基建事件不是裁決）。
+    assert not (r["run_dir"] / f"receipts_{launcher.ARM_ON}.ndjson").exists()
+
+
 def test_resample_agent_never_sees_the_previous_failure(tmp_path, upstream):
     """負向控制：同一支 agent 在 `revise` 底下看得到，在 `resample` 底下看不到。
 
@@ -359,6 +386,32 @@ def test_receipts_reconcile_for_every_ending(tmp_path, upstream):
                            .read_text(encoding="utf-8").splitlines()[0])
         assert first["type"] == "ws_attempt"
         assert first["payload"]["verdict_sha256"] is None
+
+
+def test_the_ruler_catches_the_r530_hole_in_this_code(tmp_path, upstream,
+                                                     monkeypatch):
+    """負向控制：把 `_sign_attempt` 變回 no-op（＝R530 當年那個 bug），那把尺必須翻紅。
+
+    上面每一條都在斷言「尺說 OK」。**沒有這一條，那些 OK 跟把尺拔掉在輸出上同形**
+    ——只證明鏈是完整的，不證明「0 筆 attempt／1 筆 verdict」會被抓到。
+
+    這一條同時把那句話變成可執行的：斷言 `chain_ok` 與 `logbook_verify_chain`
+    **都是 True**（鏈真的沒壞），而總判仍是 BROKEN、理由是
+    `attempt_fewer_than_verdict`。壞的不是鏈，是**鏈說得出這一格發生過什麼**。
+    """
+    monkeypatch.setattr(launcher, "_sign_attempt", lambda *a, **k: None)
+    r = _go(tmp_path, mode="always_bad", retry_arm="revise", max_attempts=3)
+    assert r["summary"]["stop_reason"] == "attempts_exhausted"
+    assert r["summary"]["attempts_used"] == 3        # 真的燒了三次
+    assert _chain_types(r["run_dir"]) == {"ws_verdict": 1}
+
+    out = vrr.verify_run(r["run_dir"])
+    assert len(out) == 1
+    rec = out[0]
+    assert rec["chain_ok"] is True and rec["logbook_verify_chain"] is True
+    assert rec["attempt_n"] == 0 and rec["verdict_n"] == 1
+    assert rec["verdict"] == "BROKEN"
+    assert [f["reason"] for f in rec["failures"]] == ["attempt_fewer_than_verdict"]
 
 
 def test_actual_spend_is_recorded_per_attempt(tmp_path, upstream):
