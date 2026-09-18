@@ -46,12 +46,12 @@ never scanned. See `AGENTS.md` §7 H-0.
 - [docs/VACANT_COMPLETE_2026-09-12.md](docs/VACANT_COMPLETE_2026-09-12.md): single entry
   point for every number — what exists, what was measured, the honest boundaries, how to
   re-verify it yourself.
-- [DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md](DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md):
+- [DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md](decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md):
   five same-task replications, closing audit. The pre-registered claim rule and why the
   result is reported replication-by-replication instead of pooled.
-- [DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md](DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md):
+- [DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md](decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md):
   four mutually exclusive task sets, three real sources, 716 tasks.
-- [DECISION_20260917_R532_STRONGER_MODEL_PREREG.md](DECISION_20260917_R532_STRONGER_MODEL_PREREG.md):
+- [DECISION_20260917_R532_STRONGER_MODEL_PREREG.md](decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md):
   a different 27B model on 836 tasks, plus two amendments written after seeing the data —
   the state table had no direction guard, and the run's own premise ("a stronger model")
   is not supported by its own data.

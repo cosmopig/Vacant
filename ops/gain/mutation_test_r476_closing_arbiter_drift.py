@@ -19,7 +19,7 @@ import subprocess
 import sys
 
 REL = "ops/gain/r476_closing_arbiter_drift.py"
-PREREG_REL = "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"   # 工具的 PREREG 指向 R461（附錄逐字期望值住在那裡）
+PREREG_REL = "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"   # 工具的 PREREG 指向 R461（附錄逐字期望值住在那裡）
 
 MUTANTS = {
     # M1：投影擋門整段拿掉 ⇒「夾具沒讀到」又會被記成工具漂移（本輪要修的正是這個）
@@ -99,6 +99,9 @@ def build_worktree(wt: pathlib.Path, root: pathlib.Path) -> None:
         shutil.rmtree(wt)
     (wt / "ops" / "gain").mkdir(parents=True)
     shutil.copy2(root / REL, wt / REL)
+    # 2026-09-18：預註冊檔從 repo 根搬進 `decisions/` ⇒ 目的地目錄要先造出來，
+    # 否則 copy2 直接 FileNotFoundError（以前是根目錄，不需要這一行）。
+    (wt / PREREG_REL).parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(root / PREREG_REL, wt / PREREG_REL)
 
 

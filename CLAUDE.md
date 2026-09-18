@@ -96,6 +96,22 @@
   §二 R529 跨題庫 37 塊、§三 R460R 三次同題複製 18 塊——它們的 `headline` 是 `—`
   但**不代表沒被稽核**（裁決檔用 glob 點名整批）。產生器
   `ops/gain/build_runs_index.py`（`--check` 可驗索引沒漂）。
+- `decisions/` — **實驗紀錄的家**（2026-09-18 從 repo 根搬進來，227 份，純 `git mv`、
+  內容一個 byte 沒動）。根目錄留給「這個專案是什麼」，外人打開 repo 第一眼要看得到
+  `vacant/`。配置：`decisions/`＝`DECISION_*.md`（205）、`decisions/criteria/`＝
+  `CRITERION_*.md`（14）、`decisions/conclusions/`＝`CONCLUSION_*.md`＋`FINDINGS_*.md`（4）、
+  `decisions/prereg/`＝`PREREG_*.md`（2）、`decisions/notes/`＝日期型一次性筆記（2）。
+  **新的裁決／預註冊一律寫進 `decisions/`，不要再寫回根目錄。**
+- **發射指令的路徑**：R440G 閘門（`gain_run.py`，凍結碼）只認 `--decision <路徑>` 能不能
+  開啟，所以現在要寫 `--decision decisions/DECISION_xxx.md`。
+  ⚠ **各份預註冊檔內文裡的逐塊指令仍寫著舊的根目錄路徑，那是刻意不改的**——
+  預註冊的重點是發射前凍結，事後改寫它記載的指令等於讓紀錄描述一個沒下過的指令；
+  而且 `docs/paper_2026-09-14/source_manifest.json` 對其中 13 份釘了 sha256。
+  照抄會被閘門擋下（`拒絕啟動：DECISION 檔不存在`，fail-closed 不是安靜跑錯），
+  自己補 `decisions/` 前綴即可。實際在跑的 `ops/gain/r5xx/*_queue.sh` 已經是新路徑。
+- `ops/check_repo_links.py` — 死連結／死路徑擋門（markdown 連結、`ROOT / "..."` 字面值、
+  `--decision` 參數、GitHub 絕對網址四類）。上面那兩類「刻意不改」的東西是**具名排除**、
+  `--verbose` 數得出來，不是安靜跳過。
 
 ### 展件可直接複用的（實體場地，秒級互動）
 

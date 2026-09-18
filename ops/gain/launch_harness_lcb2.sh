@@ -95,7 +95,7 @@
 set -u
 ROOT="$HOME/vacant"; REPO="$ROOT/Vacant"; LOG="$ROOT/logs/launch_harness_lcb2.log"
 MODEL="gemma-4-12b-it-qat"
-DEC="DECISION_20260907_R460_HARNESS_PREREG.md"
+DEC="decisions/DECISION_20260907_R460_HARNESS_PREREG.md"
 SEED="g-r440-lcb2"
 ARMS="OFF,CONFORM,OFF5,HPI,HOC,HMIX"
 BANK_FILE="ops/gain/data/lcb_bank_v2.jsonl"

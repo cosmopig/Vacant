@@ -11,7 +11,12 @@ import pathlib, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "ops" / "gain"))
 import cert_drift_gate as G
 
+# ⚠ 兩個都要：`PREREG` 是 **basename**，因為 `cert_drift_gate` 的 `g["doc"]` 一直是
+#   basename（R481 §二刻意保留的舊欄位）；`PREREG_REL` 才是 2026-09-18 搬進
+#   `decisions/` 之後的真路徑。拿 rel 去比 `g["doc"]` 會永遠不相等 ⇒ 下面那條
+#   `== []` 變成空洞的恆真句。
 PREREG = "DECISION_20260905_R478_CERT_SELF_RECORDED_SHA.md"
+PREREG_REL = "decisions/" + PREREG
 
 
 def test_recorded_sha_is_preferred_and_measured():
@@ -51,7 +56,7 @@ def test_fabricated_recorded_sha_is_broken_not_silent():
 
 def test_marker_literal_does_not_match_itself():
     """判準檔自己含有標記字面卻沒有認證標題 ⇒ 不准貢獻任何群組（memory：會匹配到自己）。"""
-    doc = pathlib.Path(G.ROOT) / PREREG
+    doc = pathlib.Path(G.ROOT) / PREREG_REL
     assert doc.exists() and ("CERT-" + "BLOB") in doc.read_text(encoding="utf-8")
     assert [g for g in G.audit()["groups"] if g["doc"] == PREREG] == []
 

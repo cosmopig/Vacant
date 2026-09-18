@@ -28,7 +28,7 @@ from ops.gain.analyze_r529 import (  # noqa: E402
     mutation_check, paired, primary, refutation, selftest, tokens_by_arm,
 )
 
-DECISION = ROOT / "DECISION_20260911_R529_CROSS_BANK_PREREG.md"
+DECISION = ROOT / "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md"
 
 
 def test_selftest_passes():

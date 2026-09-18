@@ -201,10 +201,10 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260907_R460_HARNESS_PREREG.md",
-        "DECISION_20260908_R460_FABLE_LAUNCH_NOTES.md",
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md",
+        "decisions/DECISION_20260908_R460_FABLE_LAUNCH_NOTES.md",
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -275,29 +275,29 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        "CRITERION_20260903_R675_POOLED_DELIV.md",
-        "CRITERION_20260904_R687_R445_SETTLEMENT.md",
-        "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
-        "DECISION_20260827_R140_PREREG.md",
-        "DECISION_20260827_R146_PREREG.md",
-        "DECISION_20260903_R662_VOID_ROOT_CAUSE.md",
-        "DECISION_20260904_R446_FABLE_AUDIT.md",
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+        "decisions/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
+        "decisions/DECISION_20260827_R140_PREREG.md",
+        "decisions/DECISION_20260827_R146_PREREG.md",
+        "decisions/DECISION_20260903_R662_VOID_ROOT_CAUSE.md",
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md",
+        "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "decisions/criteria/CRITERION_20260903_R675_POOLED_DELIV.md",
+        "decisions/criteria/CRITERION_20260904_R687_R445_SETTLEMENT.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        "DECISION_20260904_R446_FABLE_AUDIT.md"
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
       "related_settlements": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        "DECISION_20260904_R446_FABLE_AUDIT.md"
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md",
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md、DECISION_20260904_R446_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260904_R446_FABLE_AUDIT.md、decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "_analysis_r138",
@@ -360,7 +360,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md"
+        "decisions/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -542,7 +542,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260827_R140_PREREG.md"
+        "decisions/DECISION_20260827_R140_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -775,7 +775,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260827_R146_PREREG.md"
+        "decisions/DECISION_20260827_R146_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -8571,20 +8571,20 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        "CRITERION_20260904_R687_R445_SETTLEMENT.md"
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "decisions/criteria/CRITERION_20260904_R687_R445_SETTLEMENT.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "related_settlements": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "_analysis_r446",
@@ -8647,19 +8647,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260904_R446_FABLE_AUDIT.md"
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260904_R446_FABLE_AUDIT.md"
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
       "related_settlements": [
-        "DECISION_20260904_R446_FABLE_AUDIT.md"
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260904_R446_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260904_R446_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "_analysis_r650",
@@ -9379,7 +9379,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260903_R662_VOID_ROOT_CAUSE.md"
+        "decisions/DECISION_20260903_R662_VOID_ROOT_CAUSE.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -10218,7 +10218,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CRITERION_20260903_R675_POOLED_DELIV.md"
+        "decisions/criteria/CRITERION_20260903_R675_POOLED_DELIV.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -10481,11 +10481,11 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        "CRITERION_20260904_R687_R445_SETTLEMENT.md"
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "decisions/criteria/CRITERION_20260904_R687_R445_SETTLEMENT.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "related_settlements": [],
       "headline": null,
@@ -10890,7 +10890,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md"
+        "decisions/DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -11111,7 +11111,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md"
+        "decisions/DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -11206,19 +11206,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
+        "decisions/DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
+        "decisions/DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
       ],
       "related_settlements": [
-        "DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
+        "decisions/DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260902_R523_ACURVE_FABLE_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "analysis_round525_final_recompute",
@@ -11812,10 +11812,10 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260902_R440F_ROGUE_E2Q_RUN_AND_1004_SWAP.md",
-        "DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
-        "DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md",
-        "DECISION_20260902_R467_RECONCILE_R440F_AND_TERMINATE_E2Q.md"
+        "decisions/DECISION_20260902_R440F_ROGUE_E2Q_RUN_AND_1004_SWAP.md",
+        "decisions/DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
+        "decisions/DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md",
+        "decisions/DECISION_20260902_R467_RECONCILE_R440F_AND_TERMINATE_E2Q.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -11908,27 +11908,27 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260829_R263_GEMMA_REVIVED.md",
-        "DECISION_20260829_R278_INTERLEAVE_ARMS.md",
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
+        "decisions/DECISION_20260829_R263_GEMMA_REVIVED.md",
+        "decisions/DECISION_20260829_R278_INTERLEAVE_ARMS.md",
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "decisions/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
       "related_settlements": [
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_het2_r271_20260829",
@@ -12003,23 +12003,23 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260829_REVIEW_TIMEOUT_TOO_SHORT_FOR_HET_POOL.md",
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-        "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
+        "decisions/DECISION_20260829_REVIEW_TIMEOUT_TOO_SHORT_FOR_HET_POOL.md",
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
+        "decisions/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
       "related_settlements": [
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_het2_r274_20260829",
@@ -12104,9 +12104,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260829_R278_INTERLEAVE_ARMS.md",
-        "DECISION_20260829_REVIEW_TIMEOUT_TOO_SHORT_FOR_HET_POOL.md",
-        "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
+        "decisions/DECISION_20260829_R278_INTERLEAVE_ARMS.md",
+        "decisions/DECISION_20260829_REVIEW_TIMEOUT_TOO_SHORT_FOR_HET_POOL.md",
+        "decisions/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -12201,19 +12201,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260829_R278_INTERLEAVE_ARMS.md",
-        "DECISION_20260829_R296_HTTP400_NONRETRY_REVIEW.md",
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        "DECISION_20260830_R317_INTERIM_STATUS_G_HET3.md",
-        "DECISION_20260830_R345_REVIEWER_SPECIFICITY.md",
-        "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        "DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
-        "DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md"
+        "decisions/DECISION_20260829_R278_INTERLEAVE_ARMS.md",
+        "decisions/DECISION_20260829_R296_HTTP400_NONRETRY_REVIEW.md",
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260830_R317_INTERIM_STATUS_G_HET3.md",
+        "decisions/DECISION_20260830_R345_REVIEWER_SPECIFICITY.md",
+        "decisions/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
+        "decisions/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
+        "decisions/DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
       "related_settlements": [],
       "headline": null,
@@ -12352,7 +12352,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260828_R211_HET_POOL_ABORT.md"
+        "decisions/DECISION_20260828_R211_HET_POOL_ABORT.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -12439,9 +12439,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_BACKEND_SWITCH.md",
-        "DECISION_20260824_LOCAL_ENDPOINT.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
+        "decisions/DECISION_20260824_BACKEND_SWITCH.md",
+        "decisions/DECISION_20260824_LOCAL_ENDPOINT.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -12540,23 +12540,23 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
-        "DECISION_20260827_R146_PREREG.md",
-        "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
-        "DECISION_20260828_R212_BUDGET_DECOMPOSITION_PREREG.md",
-        "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
+        "decisions/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
+        "decisions/DECISION_20260827_R146_PREREG.md",
+        "decisions/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260828_R212_BUDGET_DECOMPOSITION_PREREG.md",
+        "decisions/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "decisions/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
         "ops/gain/DECISION_20260825_ROUND109_ON_VOID_RATE_CONFOUND.md",
         "ops/gain/DECISION_20260825_ROUND110_BOUNDS_ADAPTED_FOR_VOIDY_BASELINE.md",
         "ops/gain/DECISION_20260825_ROUND78_FULLBANK_OFF.md",
         "ops/gain/DECISION_20260825_ROUND82_GEMMA_PROBE_INCIDENT.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
-        "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
       "related_settlements": [],
       "headline": null,
@@ -12642,12 +12642,12 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md",
-        "DECISION_20260901_R456_SCALE_FOR_POWER.md",
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md",
+        "decisions/DECISION_20260901_R456_SCALE_FOR_POWER.md",
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [],
       "headline": null,
@@ -12725,11 +12725,11 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_BACKEND_SWITCH.md",
-        "DECISION_20260824_ENDPOINT_BLOCKED.md",
-        "DECISION_20260824_OFF_BASELINE.md",
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        "DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md"
+        "decisions/DECISION_20260824_BACKEND_SWITCH.md",
+        "decisions/DECISION_20260824_ENDPOINT_BLOCKED.md",
+        "decisions/DECISION_20260824_OFF_BASELINE.md",
+        "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "decisions/DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -12816,10 +12816,10 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_BACKEND_SWITCH.md",
-        "DECISION_20260824_LOCAL_ENDPOINT.md",
-        "DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
+        "decisions/DECISION_20260824_BACKEND_SWITCH.md",
+        "decisions/DECISION_20260824_LOCAL_ENDPOINT.md",
+        "decisions/DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -12906,11 +12906,11 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_ANALYZE_ONOFF5.md",
-        "DECISION_20260824_F_THRESHOLD_REACHED.md",
-        "DECISION_20260824_NEMOTRON_UNAVAILABLE.md",
-        "DECISION_20260824_REVIEW_TIMEOUT_BUG.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "decisions/DECISION_20260824_ANALYZE_ONOFF5.md",
+        "decisions/DECISION_20260824_F_THRESHOLD_REACHED.md",
+        "decisions/DECISION_20260824_NEMOTRON_UNAVAILABLE.md",
+        "decisions/DECISION_20260824_REVIEW_TIMEOUT_BUG.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
         "ops/gain/DECISION_20260824_REVISE_COUNTERFACTUAL.md",
         "ops/gain/DECISION_20260825_ROUND110_BOUNDS_ADAPTED_FOR_VOIDY_BASELINE.md",
         "ops/gain/DECISION_20260825_ROUND77_BOUNDS_OVER_BACKFILL.md",
@@ -13078,9 +13078,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_NEMOTRON_UNAVAILABLE.md",
-        "DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
+        "decisions/DECISION_20260824_NEMOTRON_UNAVAILABLE.md",
+        "decisions/DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -13167,14 +13167,14 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_BACKEND_SWITCH.md",
-        "DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        "DECISION_20260907_R460_HARNESS_PREREG.md"
+        "decisions/DECISION_20260824_BACKEND_SWITCH.md",
+        "decisions/DECISION_20260824_RELAUNCH_AFTER_404FIX.md",
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260830_R278_ENDPOINT_VERDICT.md"
+        "decisions/DECISION_20260830_R278_ENDPOINT_VERDICT.md"
       ],
       "related_settlements": [],
       "headline": null,
@@ -13244,20 +13244,20 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [],
       "headline": "round460 決定：殺掉孤兒 OFF run `g_off_failure_rate_20260901c`，只留 scale2 ON",
-      "headline_from": "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
+      "headline_from": "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
       "headline_source": "named_in_title",
       "headline_candidates": [
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
     },
@@ -13322,19 +13322,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_off_failure_rate_20260901c",
@@ -13413,17 +13413,17 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [],
       "headline": "round460 決定：殺掉孤兒 OFF run `g_off_failure_rate_20260901c`，只留 scale2 ON",
-      "headline_from": "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
+      "headline_from": "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
       "headline_source": "named_in_title",
       "headline_candidates": [
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "headline_note": null
     },
@@ -13488,8 +13488,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
-        "DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md"
+        "decisions/DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
+        "decisions/DECISION_20260902_R466_E2Q_QWEN_ONLY_LCB_WHILE_1004_BLOCKED.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -13576,20 +13576,20 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
-        "DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md"
+        "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
+        "decisions/DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
+        "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
       "related_settlements": [
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
+        "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_on371_20260825",
@@ -13668,9 +13668,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
-        "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
-        "DECISION_20260830_R345_REVIEWER_SPECIFICITY.md",
+        "decisions/DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
+        "decisions/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
+        "decisions/DECISION_20260830_R345_REVIEWER_SPECIFICITY.md",
         "ops/gain/DECISION_20260825_ROUND109_ON_VOID_RATE_CONFOUND.md",
         "ops/gain/DECISION_20260825_ROUND110_BOUNDS_ADAPTED_FOR_VOIDY_BASELINE.md"
       ],
@@ -13759,8 +13759,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md",
-        "DECISION_20260901_R456_SCALE_FOR_POWER.md"
+        "decisions/DECISION_20260901_R447_QWEN_ONLY_STANDARD_POOL.md",
+        "decisions/DECISION_20260901_R456_SCALE_FOR_POWER.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -13847,26 +13847,26 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R456_SCALE_FOR_POWER.md",
-        "DECISION_20260901_R459_SCALE2_VOID_RATE_CHECK.md",
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
-        "DECISION_20260902_R440C_E1_QUEUE_GEMMA_BACKEND.md",
-        "DECISION_20260902_R440D_SCALE2_VOID_VS_PREREG_ABORT.md",
-        "DECISION_20260902_R461_VOID_RATE_RECHECK.md",
-        "DECISION_20260902_R462_400_VOID_ATTRIBUTION_CHECK.md",
-        "DECISION_20260902_R463_VOID_PLATEAU_CONFIRM.md"
+        "decisions/DECISION_20260901_R456_SCALE_FOR_POWER.md",
+        "decisions/DECISION_20260901_R459_SCALE2_VOID_RATE_CHECK.md",
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md",
+        "decisions/DECISION_20260902_R440C_E1_QUEUE_GEMMA_BACKEND.md",
+        "decisions/DECISION_20260902_R440D_SCALE2_VOID_VS_PREREG_ABORT.md",
+        "decisions/DECISION_20260902_R461_VOID_RATE_RECHECK.md",
+        "decisions/DECISION_20260902_R462_400_VOID_ATTRIBUTION_CHECK.md",
+        "decisions/DECISION_20260902_R463_VOID_PLATEAU_CONFIRM.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "related_settlements": [
-        "DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
+        "decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260901_R460_ORPHAN_OFF_RUN_KILL.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_onoff5_371_r123_20260825",
@@ -13947,31 +13947,31 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
-        "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
-        "DECISION_20260827_R140_PREREG.md",
-        "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
-        "DECISION_20260828_R212_BUDGET_DECOMPOSITION_PREREG.md",
-        "DECISION_20260829_R278_INTERLEAVE_ARMS.md",
-        "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
-        "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        "DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
-        "DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
-        "DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
-        "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
+        "decisions/DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md",
+        "decisions/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
+        "decisions/DECISION_20260827_R140_PREREG.md",
+        "decisions/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260828_R212_BUDGET_DECOMPOSITION_PREREG.md",
+        "decisions/DECISION_20260829_R278_INTERLEAVE_ARMS.md",
+        "decisions/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md",
+        "decisions/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
+        "decisions/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
+        "decisions/DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
+        "decisions/DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
+        "decisions/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
-        "DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
+        "decisions/DECISION_20260830_R342_VOID_REVIEW_VERDICT.md"
       ],
       "related_settlements": [],
       "headline": "R146-S 終點裁決：判準 2／3 定案（round208，2026-08-28 UTC ~11:00-11:10）",
-      "headline_from": "DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
+      "headline_from": "decisions/DECISION_20260828_R146S_ENDPOINT_VERDICT.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        "DECISION_20260828_R146S_ENDPOINT_VERDICT.md"
+        "decisions/DECISION_20260828_R146S_ENDPOINT_VERDICT.md"
       ],
       "headline_note": null
     },
@@ -14042,8 +14042,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_F_THRESHOLD_REACHED.md",
-        "DECISION_20260824_REVIEW_TIMEOUT_BUG.md"
+        "decisions/DECISION_20260824_F_THRESHOLD_REACHED.md",
+        "decisions/DECISION_20260824_REVIEW_TIMEOUT_BUG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -14130,10 +14130,10 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_ANALYZE_ONOFF5.md",
-        "DECISION_20260824_REVIEW_CONCURRENCY_CONTENTION.md",
-        "DECISION_20260824_REVIEW_TIMEOUT_BUG.md",
-        "DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md"
+        "decisions/DECISION_20260824_ANALYZE_ONOFF5.md",
+        "decisions/DECISION_20260824_REVIEW_CONCURRENCY_CONTENTION.md",
+        "decisions/DECISION_20260824_REVIEW_TIMEOUT_BUG.md",
+        "decisions/DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -14252,8 +14252,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md",
-        "DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
+        "decisions/DECISION_20260824_SERIALIZE_CONCURRENT_CALLS.md",
+        "decisions/DECISION_20260826_PAIRED_ANALYSIS_AND_ARM_ORDER.md",
         "ops/gain/DECISION_20260825_ROUND77_BOUNDS_OVER_BACKFILL.md",
         "ops/gain/DECISION_20260825_V3_NEAR_COMPLETE_INFRA_VOID_GAP.md"
       ],
@@ -14342,8 +14342,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260828_ROUND237_ONR_STANDALONE.md",
-        "DECISION_20260829_R260_POOL_HOMOGENEITY_CEILING.md"
+        "decisions/DECISION_20260828_ROUND237_ONR_STANDALONE.md",
+        "decisions/DECISION_20260829_R260_POOL_HOMOGENEITY_CEILING.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -14430,12 +14430,12 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260828_R219_DRIFT_CHECK_CLARIFICATION.md",
-        "DECISION_20260828_ROUND237_ONR_STANDALONE.md",
-        "DECISION_20260829_R260_POOL_HOMOGENEITY_CEILING.md",
-        "DECISION_20260829_R263_GEMMA_REVIVED.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
+        "decisions/DECISION_20260828_R219_DRIFT_CHECK_CLARIFICATION.md",
+        "decisions/DECISION_20260828_ROUND237_ONR_STANDALONE.md",
+        "decisions/DECISION_20260829_R260_POOL_HOMOGENEITY_CEILING.md",
+        "decisions/DECISION_20260829_R263_GEMMA_REVIVED.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "decisions/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -14565,7 +14565,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md"
+        "decisions/DECISION_20260825_REVIEW_TIMEOUT_REGRESSION.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -14662,10 +14662,10 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260830_R342_3ARM_PREREG.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        "DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md"
+        "decisions/DECISION_20260830_R342_3ARM_PREREG.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "decisions/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
+        "decisions/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -14756,11 +14756,11 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260830_R347_CONTRACT_DEDENT_BUG.md",
-        "DECISION_20260830_R348_RESTART_POSTFIX_3ARM.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        "DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md"
+        "decisions/DECISION_20260830_R347_CONTRACT_DEDENT_BUG.md",
+        "decisions/DECISION_20260830_R348_RESTART_POSTFIX_3ARM.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "decisions/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
+        "decisions/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -14851,11 +14851,11 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260830_R348_RESTART_POSTFIX_3ARM.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
-        "DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
-        "DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
-        "DECISION_20260830_R356_HTTP400_RETRY_REVERSAL.md"
+        "decisions/DECISION_20260830_R348_RESTART_POSTFIX_3ARM.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "decisions/DECISION_20260830_R352_REVIEWER_FAMILY_BLINDSPOT.md",
+        "decisions/DECISION_20260830_R353_OFF5_GATE_COUNTERFACTUAL.md",
+        "decisions/DECISION_20260830_R356_HTTP400_RETRY_REVERSAL.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -15408,44 +15408,44 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
-        "DECISION_20260830_R368_LOCALAGENT_MODEL_UNLOADED.md",
-        "DECISION_20260831_R371_VOID_GATE_ON_STRUCTURAL.md",
-        "DECISION_20260831_R377_OFF5_LEAD_DIRECTIONAL.md",
-        "DECISION_20260831_R381_ON_VOID_RETRY_BUDGET_ASYMMETRY.md",
-        "DECISION_20260831_R411_ON_VS_OFF5_EQUAL_BUDGET_CONCLUSION.md",
-        "DECISION_20260831_R419_GEMMA_BACKEND_TEMPORAL_DEGRADATION.md",
-        "DECISION_20260901_R428_OFF5V_RECONCILIATION.md",
-        "DECISION_20260901_R429_OFF5VA_AUDIT_CONFOUND_REAFFIRMED.md",
-        "DECISION_20260901_R437_DECISIVE_RUN_COMPLETE_FINAL.md",
-        "DECISION_20260901_R438_HARD_SUBSET_AND_REVISE_MECHANISM.md",
-        "DECISION_20260901_R439_REVISE_SELECTION_COUNTEREXAMPLE_CHECK.md",
-        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        "DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
-        "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260830_R357_R278_VOID_BOUND_CAVEAT.md",
+        "decisions/DECISION_20260830_R368_LOCALAGENT_MODEL_UNLOADED.md",
+        "decisions/DECISION_20260831_R371_VOID_GATE_ON_STRUCTURAL.md",
+        "decisions/DECISION_20260831_R377_OFF5_LEAD_DIRECTIONAL.md",
+        "decisions/DECISION_20260831_R381_ON_VOID_RETRY_BUDGET_ASYMMETRY.md",
+        "decisions/DECISION_20260831_R411_ON_VS_OFF5_EQUAL_BUDGET_CONCLUSION.md",
+        "decisions/DECISION_20260831_R419_GEMMA_BACKEND_TEMPORAL_DEGRADATION.md",
+        "decisions/DECISION_20260901_R428_OFF5V_RECONCILIATION.md",
+        "decisions/DECISION_20260901_R429_OFF5VA_AUDIT_CONFOUND_REAFFIRMED.md",
+        "decisions/DECISION_20260901_R437_DECISIVE_RUN_COMPLETE_FINAL.md",
+        "decisions/DECISION_20260901_R438_HARD_SUBSET_AND_REVISE_MECHANISM.md",
+        "decisions/DECISION_20260901_R439_REVISE_SELECTION_COUNTEREXAMPLE_CHECK.md",
+        "decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+        "decisions/DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
+        "decisions/DECISION_20260903_R440P_CONFORMANCE_GATE.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
         "ops/gain/DECISION_20260831_R391_POWER_BOUND_R356.md",
         "ops/gain/DECISION_20260831_R393_TYPING_IMPORT_WHITELIST_BUG.md",
         "ops/gain/DECISION_20260831_R394_REANALYSIS_UPDATE.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        "DECISION_20260901_R429_OFF5VA_AUDIT_CONFOUND_REAFFIRMED.md",
-        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md"
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260901_R429_OFF5VA_AUDIT_CONFOUND_REAFFIRMED.md",
+        "decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md"
       ],
       "related_settlements": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md"
+        "decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260830_G_EXPERIMENT.md、DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md、decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r439_revcheck_20260901",
@@ -15528,19 +15528,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
+        "decisions/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
+        "decisions/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
       ],
       "related_settlements": [
-        "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
+        "decisions/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r441_gemma_only_mbpp",
@@ -15605,42 +15605,42 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md",
-        "DECISION_20260901_R441_LCB_PROBE_GAUGE_GAP.md",
-        "DECISION_20260902_R440C_E1_QUEUE_GEMMA_BACKEND.md",
-        "DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md",
-        "DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
-        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        "DECISION_20260902_R517_E1_TERMINATION_ROOT_CAUSE.md",
-        "DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
-        "DECISION_20260902_R519_CEILING_AUDIT.md",
-        "DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
-        "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
-        "DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
-        "DECISION_20260903_R528_CONFIRMED_STATUS_CRASH_SPLIT.md",
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md"
+        "decisions/DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md",
+        "decisions/DECISION_20260901_R441_LCB_PROBE_GAUGE_GAP.md",
+        "decisions/DECISION_20260902_R440C_E1_QUEUE_GEMMA_BACKEND.md",
+        "decisions/DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md",
+        "decisions/DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
+        "decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+        "decisions/DECISION_20260902_R517_E1_TERMINATION_ROOT_CAUSE.md",
+        "decisions/DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
+        "decisions/DECISION_20260902_R519_CEILING_AUDIT.md",
+        "decisions/DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
+        "decisions/DECISION_20260903_R440P_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
+        "decisions/DECISION_20260903_R528_CONFIRMED_STATUS_CRASH_SPLIT.md",
+        "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        "DECISION_20260902_R519_CEILING_AUDIT.md"
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+        "decisions/DECISION_20260902_R519_CEILING_AUDIT.md"
       ],
       "related_settlements": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        "DECISION_20260902_R519_CEILING_AUDIT.md"
+        "decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+        "decisions/DECISION_20260902_R519_CEILING_AUDIT.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260830_G_EXPERIMENT.md、DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md、DECISION_20260902_R516_E1_FINAL_WRAPUP.md、DECISION_20260902_R519_CEILING_AUDIT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md、decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md、decisions/DECISION_20260902_R519_CEILING_AUDIT.md、decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r441_gemma_only_mbpp_b",
@@ -15797,38 +15797,38 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md",
-        "DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
-        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        "DECISION_20260902_R517_E1_TERMINATION_ROOT_CAUSE.md",
-        "DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
-        "DECISION_20260902_R519_CEILING_AUDIT.md",
-        "DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
-        "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
-        "DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
-        "DECISION_20260903_R528_CONFIRMED_STATUS_CRASH_SPLIT.md",
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md"
+        "decisions/DECISION_20260902_R440E_E1_PRELAUNCH_REVIEW_AND_1004_BLOCKER.md",
+        "decisions/DECISION_20260902_R440I_OVERNIGHT_HANDOFF_FROM_MAC.md",
+        "decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+        "decisions/DECISION_20260902_R517_E1_TERMINATION_ROOT_CAUSE.md",
+        "decisions/DECISION_20260902_R518_COUNTEREXAMPLE_VETO_REPLAY.md",
+        "decisions/DECISION_20260902_R519_CEILING_AUDIT.md",
+        "decisions/DECISION_20260902_R522_A_CURVE_ACROSS_REVIEWER_MODELS.md",
+        "decisions/DECISION_20260903_R440P_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
+        "decisions/DECISION_20260903_R528_CONFIRMED_STATUS_CRASH_SPLIT.md",
+        "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
-        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        "DECISION_20260902_R519_CEILING_AUDIT.md"
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+        "decisions/DECISION_20260902_R519_CEILING_AUDIT.md"
       ],
       "related_settlements": [
-        "CONCLUSION_20260830_G_EXPERIMENT.md",
-        "DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md"
+        "decisions/DECISION_20260902_R483_E1_A3_INTERIM_AUDIT.md",
+        "decisions/conclusions/CONCLUSION_20260830_G_EXPERIMENT.md"
       ],
       "headline": "DECISION R516（2026-09-02 21:00 UTC，Fable 5.1 稽核輪）：E1 收官——照 R483 §3d 寫死的判準裁決",
-      "headline_from": "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+      "headline_from": "decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        "DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
-        "DECISION_20260902_R519_CEILING_AUDIT.md"
+        "decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md",
+        "decisions/DECISION_20260902_R519_CEILING_AUDIT.md"
       ],
       "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
     },
@@ -15909,19 +15909,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
+        "decisions/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
+        "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
+        "decisions/DECISION_20260901_R442_ON_VOID_COLLAPSE_KILL_RELAUNCH.md",
+        "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
       "related_settlements": [],
       "headline": "DECISION 2026-09-01 round446: gemma-4-12b-it-qat 掛了，殺掉 g_r442_ononly_20260901",
-      "headline_from": "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
+      "headline_from": "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md",
       "headline_source": "named_in_title",
       "headline_candidates": [
-        "DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
+        "decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md"
       ],
       "headline_note": null
     },
@@ -16009,27 +16009,27 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md",
-        "DECISION_20260903_R440O_E3_LCB_PREREG.md",
-        "DECISION_20260903_R440P_CONFORMANCE_GATE.md",
-        "DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
-        "DECISION_20260903_R440T_LCB_UNPASSABLE_TASKS.md",
-        "DECISION_20260903_R440U_GATE_COST_PREREG.md",
-        "DECISION_20260904_R440T_E3_WRAPUP.md",
-        "DECISION_20260904_R447_CTX400_ATTRIBUTION.md",
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md"
+        "decisions/DECISION_20260901_R440_HUMAN_DIRECTIVE_GEMMA_ONLY_AND_HARD_BENCH.md",
+        "decisions/DECISION_20260903_R440O_E3_LCB_PREREG.md",
+        "decisions/DECISION_20260903_R440P_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
+        "decisions/DECISION_20260903_R440T_LCB_UNPASSABLE_TASKS.md",
+        "decisions/DECISION_20260903_R440U_GATE_COST_PREREG.md",
+        "decisions/DECISION_20260904_R440T_E3_WRAPUP.md",
+        "decisions/DECISION_20260904_R447_CTX400_ATTRIBUTION.md",
+        "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        "DECISION_20260904_R440T_E3_WRAPUP.md"
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260904_R440T_E3_WRAPUP.md"
       ],
       "related_settlements": [],
       "headline": "R440T：E3 收官——H-B（題目太簡單）被排除；評審在難題上翻成「幾乎一律說錯」",
-      "headline_from": "DECISION_20260904_R440T_E3_WRAPUP.md",
+      "headline_from": "decisions/DECISION_20260904_R440T_E3_WRAPUP.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        "DECISION_20260904_R440T_E3_WRAPUP.md"
+        "decisions/DECISION_20260904_R440T_E3_WRAPUP.md"
       ],
       "headline_note": null
     },
@@ -16116,36 +16116,36 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        "CRITERION_20260903_R666_RECEIPT_CHAIN_UNVERIFIABLE.md",
-        "CRITERION_20260903_R667_CONFORM_SETTLEMENT_ARITHMETIC.md",
-        "CRITERION_20260903_R671_VISIBLE_GAUGE_WIRING.md",
-        "CRITERION_20260903_R678_POWER_PROJECTION.md",
-        "CRITERION_20260903_R680_POOL_PRECONDITIONS.md",
-        "CRITERION_20260904_R687_R445_SETTLEMENT.md",
-        "DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
-        "DECISION_20260903_R440T_LCB_UNPASSABLE_TASKS.md",
-        "DECISION_20260903_R440V_TEST_SUITE_AUDIT_PREREG.md",
-        "DECISION_20260903_R440W_VISIBLE_GATE_GAUGE_PREREG.md",
-        "DECISION_20260903_R662_VOID_ROOT_CAUSE.md",
-        "DECISION_20260904_R440T_E3_WRAPUP.md",
-        "DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
-        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md"
+        "decisions/DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md",
+        "decisions/DECISION_20260903_R440T_LCB_UNPASSABLE_TASKS.md",
+        "decisions/DECISION_20260903_R440V_TEST_SUITE_AUDIT_PREREG.md",
+        "decisions/DECISION_20260903_R440W_VISIBLE_GATE_GAUGE_PREREG.md",
+        "decisions/DECISION_20260903_R662_VOID_ROOT_CAUSE.md",
+        "decisions/DECISION_20260904_R440T_E3_WRAPUP.md",
+        "decisions/DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
+        "decisions/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/criteria/CRITERION_20260903_R666_RECEIPT_CHAIN_UNVERIFIABLE.md",
+        "decisions/criteria/CRITERION_20260903_R667_CONFORM_SETTLEMENT_ARITHMETIC.md",
+        "decisions/criteria/CRITERION_20260903_R671_VISIBLE_GAUGE_WIRING.md",
+        "decisions/criteria/CRITERION_20260903_R678_POWER_PROJECTION.md",
+        "decisions/criteria/CRITERION_20260903_R680_POOL_PRECONDITIONS.md",
+        "decisions/criteria/CRITERION_20260904_R687_R445_SETTLEMENT.md"
       ],
       "verdict_decisions": [
-        "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        "DECISION_20260904_R440T_E3_WRAPUP.md",
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260904_R440T_E3_WRAPUP.md",
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "related_settlements": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "headline": null,
       "headline_from": null,
       "headline_source": "no_settlement_decision",
       "headline_candidates": [],
-      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
+      "headline_note": "沒有專門收官這個 run 的裁決檔。過了「標題／前言點名」門檻的只有 decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md，但那份的對象是別的 run 或併庫後的集合體，**不硬配**。"
     },
     {
       "name": "g_r445_conform_mbpp_ext",
@@ -16242,29 +16242,29 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
-        "CRITERION_20260903_R675_POOLED_DELIV.md",
-        "CRITERION_20260904_R684_EQUAL_BUDGET_FRAMING.md",
-        "CRITERION_20260904_R686_DELIVERY_DENOMINATOR.md",
-        "CRITERION_20260904_R687_R445_SETTLEMENT.md",
-        "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
-        "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
-        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md"
+        "decisions/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md",
+        "decisions/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
+        "decisions/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/criteria/CRITERION_20260903_R675_POOLED_DELIV.md",
+        "decisions/criteria/CRITERION_20260904_R684_EQUAL_BUDGET_FRAMING.md",
+        "decisions/criteria/CRITERION_20260904_R686_DELIVERY_DENOMINATOR.md",
+        "decisions/criteria/CRITERION_20260904_R687_R445_SETTLEMENT.md"
       ],
       "verdict_decisions": [
-        "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "related_settlements": [
-        "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
+        "decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"
       ],
       "headline": "R440X：r445 的獨立稽核——併庫區間排除 0 我複核成立；但真正紮實的發現是「五倍預算買不到東西」",
-      "headline_from": "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
+      "headline_from": "decisions/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md"
+        "decisions/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md"
       ],
       "headline_note": null
     },
@@ -16359,29 +16359,29 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
-        "DECISION_20260904_R440Z_LCB2_PREREG.md",
-        "DECISION_20260904_R446_AMEND1_SAME_CHOICE.md",
-        "DECISION_20260904_R446_EQUAL_BUDGET_ARM.md",
-        "DECISION_20260904_R446_FABLE_AUDIT.md",
-        "DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
-        "DECISION_20260904_R739_R446_TEST_WITNESS_PREREG.md",
-        "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md",
-        "DECISION_20260906_R453_REAL_MULTIPARTY_PREREG.md",
-        "DECISION_20260906_R454_NAMED_DISSENT_PREREG.md"
+        "decisions/DECISION_20260904_R440Z_LCB2_PREREG.md",
+        "decisions/DECISION_20260904_R446_AMEND1_SAME_CHOICE.md",
+        "decisions/DECISION_20260904_R446_EQUAL_BUDGET_ARM.md",
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md",
+        "decisions/DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
+        "decisions/DECISION_20260904_R739_R446_TEST_WITNESS_PREREG.md",
+        "decisions/DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md",
+        "decisions/DECISION_20260906_R453_REAL_MULTIPARTY_PREREG.md",
+        "decisions/DECISION_20260906_R454_NAMED_DISSENT_PREREG.md",
+        "decisions/conclusions/CONCLUSION_20260904_R446_EQUAL_BUDGET.md"
       ],
       "verdict_decisions": [
-        "CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
-        "DECISION_20260904_R446_FABLE_AUDIT.md",
-        "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md",
+        "decisions/conclusions/CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
+        "decisions/DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
       ],
       "related_settlements": [],
       "headline": "R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死",
-      "headline_from": "DECISION_20260904_R446_FABLE_AUDIT.md",
+      "headline_from": "decisions/DECISION_20260904_R446_FABLE_AUDIT.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        "CONCLUSION_20260904_R446_EQUAL_BUDGET.md",
-        "DECISION_20260904_R446_FABLE_AUDIT.md"
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md",
+        "decisions/conclusions/CONCLUSION_20260904_R446_EQUAL_BUDGET.md"
       ],
       "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
     },
@@ -16482,49 +16482,49 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260904_R440Z_LCB2_PREREG.md",
-        "DECISION_20260904_R446_FABLE_AUDIT.md",
-        "DECISION_20260904_R447_CTX400_ATTRIBUTION.md",
-        "DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
-        "DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
-        "DECISION_20260904_R450_GAUGE_CAPABILITY_CENSUS.md",
-        "DECISION_20260904_R451_OFF5_POWER_SYMMETRY.md",
-        "DECISION_20260904_R452_LCB2_EQ5_OFFLINE_RECONSTRUCTION.md",
-        "DECISION_20260904_R453_PREREG_FALSIFIABILITY_CENSUS.md",
-        "DECISION_20260904_R454_R450_FALSIFIABILITY_EXTENSION.md",
-        "DECISION_20260904_R455_R452_FALSIFIABILITY_EXTENSION.md",
-        "DECISION_20260904_R458_WU3_UNBLOCK.md",
-        "DECISION_20260904_R459_R447_SETTLEMENT.md",
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        "DECISION_20260904_R463_PAIRED_CI_KEY_GAP.md",
-        "DECISION_20260904_R464_EQ5_BANK_FLAG_GAP.md",
-        "DECISION_20260904_R465_R461_SEC6_GAUGE_ARBITER_GAP.md",
-        "DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
-        "DECISION_20260904_R471_VERDICT_GATE_TEETH_PREREG.md",
-        "DECISION_20260904_R472_GAUGE_CAPABILITY_RUNDIR_GATES_PREREG.md",
-        "DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
-        "DECISION_20260905_R440Z_WRAPUP_LCB2.md",
-        "DECISION_20260905_R493_R461_APPENDIX_PROSE_CENSUS.md",
-        "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
-        "DECISION_20260907_R460_HARNESS_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md"
+        "decisions/DECISION_20260904_R440Z_LCB2_PREREG.md",
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md",
+        "decisions/DECISION_20260904_R447_CTX400_ATTRIBUTION.md",
+        "decisions/DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
+        "decisions/DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
+        "decisions/DECISION_20260904_R450_GAUGE_CAPABILITY_CENSUS.md",
+        "decisions/DECISION_20260904_R451_OFF5_POWER_SYMMETRY.md",
+        "decisions/DECISION_20260904_R452_LCB2_EQ5_OFFLINE_RECONSTRUCTION.md",
+        "decisions/DECISION_20260904_R453_PREREG_FALSIFIABILITY_CENSUS.md",
+        "decisions/DECISION_20260904_R454_R450_FALSIFIABILITY_EXTENSION.md",
+        "decisions/DECISION_20260904_R455_R452_FALSIFIABILITY_EXTENSION.md",
+        "decisions/DECISION_20260904_R458_WU3_UNBLOCK.md",
+        "decisions/DECISION_20260904_R459_R447_SETTLEMENT.md",
+        "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "decisions/DECISION_20260904_R463_PAIRED_CI_KEY_GAP.md",
+        "decisions/DECISION_20260904_R464_EQ5_BANK_FLAG_GAP.md",
+        "decisions/DECISION_20260904_R465_R461_SEC6_GAUGE_ARBITER_GAP.md",
+        "decisions/DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
+        "decisions/DECISION_20260904_R471_VERDICT_GATE_TEETH_PREREG.md",
+        "decisions/DECISION_20260904_R472_GAUGE_CAPABILITY_RUNDIR_GATES_PREREG.md",
+        "decisions/DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
+        "decisions/DECISION_20260905_R440Z_WRAPUP_LCB2.md",
+        "decisions/DECISION_20260905_R493_R461_APPENDIX_PROSE_CENSUS.md",
+        "decisions/DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        "DECISION_20260904_R446_FABLE_AUDIT.md",
-        "DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
-        "DECISION_20260904_R459_R447_SETTLEMENT.md",
-        "DECISION_20260905_R440Z_WRAPUP_LCB2.md"
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260904_R446_FABLE_AUDIT.md",
+        "decisions/DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
+        "decisions/DECISION_20260904_R459_R447_SETTLEMENT.md",
+        "decisions/DECISION_20260905_R440Z_WRAPUP_LCB2.md"
       ],
       "related_settlements": [],
       "headline": "R459：`runs/g_r447_conform_lcb2` 收官裁決（Fable 5.1 稽核輪，round726）",
-      "headline_from": "DECISION_20260904_R459_R447_SETTLEMENT.md",
+      "headline_from": "decisions/DECISION_20260904_R459_R447_SETTLEMENT.md",
       "headline_source": "named_in_title",
       "headline_candidates": [
-        "DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
-        "DECISION_20260904_R459_R447_SETTLEMENT.md",
-        "DECISION_20260905_R440Z_WRAPUP_LCB2.md"
+        "decisions/DECISION_20260904_R447_FABLE_AUDIT_RETRY_RULING.md",
+        "decisions/DECISION_20260904_R459_R447_SETTLEMENT.md",
+        "decisions/DECISION_20260905_R440Z_WRAPUP_LCB2.md"
       ],
       "headline_note": "宣告區點名這個 run 的裁決檔不只一份（見 headline_candidates）；依「標題點名 → 檔名輪次號相符 → 份量（收官>獨立稽核>其餘>期中）→ 較新」挑出這一份。"
     },
@@ -16601,22 +16601,22 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
-        "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
-        "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
-        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
+        "decisions/DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md",
+        "decisions/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
+        "decisions/DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
+        "decisions/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
+        "decisions/DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
-        "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
+        "decisions/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
+        "decisions/DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md"
       ],
       "related_settlements": [],
       "headline": "R448 稽核：EQ5 在全新 seed 上的獨立複製——判定 REPLICATED",
-      "headline_from": "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
+      "headline_from": "decisions/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        "DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md"
+        "decisions/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md"
       ],
       "headline_note": null
     },
@@ -16713,19 +16713,19 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
-        "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
-        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md"
+        "decisions/DECISION_20260906_R449B_EQ5_LCB2_PREREG.md",
+        "decisions/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
+        "decisions/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md"
+        "decisions/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md"
       ],
       "related_settlements": [],
       "headline": "R449B 稽核：EQ5 在 LCB v2 難題上——判定 REPLICATED_ON_HARD",
-      "headline_from": "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
+      "headline_from": "decisions/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md"
+        "decisions/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md"
       ],
       "headline_note": null
     },
@@ -16822,18 +16822,18 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
+        "decisions/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
+        "decisions/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
       ],
       "verdict_decisions": [
-        "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
+        "decisions/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
       ],
       "related_settlements": [],
       "headline": "R449C 稽核：EQ5 在 lcb3（189 題）——判定 UNRESOLVED：同號（+4.23pp、b/c=13/5）但下界 −0.66 沒過 0",
-      "headline_from": "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md",
+      "headline_from": "decisions/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        "DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
+        "decisions/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md"
       ],
       "headline_note": null
     },
@@ -16976,8 +16976,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260907_R460_HARNESS_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -17126,8 +17126,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260907_R460_HARNESS_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -17276,8 +17276,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260907_R460_HARNESS_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -17426,8 +17426,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260907_R460_HARNESS_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -17576,8 +17576,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260907_R460_HARNESS_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -17726,8 +17726,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260907_R460_HARNESS_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -17877,8 +17877,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -18028,7 +18028,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -18178,7 +18178,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -18328,7 +18328,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -18478,7 +18478,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -18628,7 +18628,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -18778,7 +18778,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -18928,7 +18928,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -19078,7 +19078,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -19228,7 +19228,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -19378,7 +19378,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -19528,7 +19528,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -19678,7 +19678,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -19828,7 +19828,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -19978,7 +19978,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -20128,7 +20128,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -20278,7 +20278,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -20428,7 +20428,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -20578,7 +20578,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -20728,7 +20728,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -20878,7 +20878,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -21028,7 +21028,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -21178,7 +21178,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -21328,7 +21328,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -21478,7 +21478,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -21628,7 +21628,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -21778,7 +21778,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -21928,7 +21928,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -22078,7 +22078,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -22228,7 +22228,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -22315,64 +22315,64 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        "DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md",
-        "DECISION_20260904_R463_PAIRED_CI_KEY_GAP.md",
-        "DECISION_20260904_R464_EQ5_BANK_FLAG_GAP.md",
-        "DECISION_20260904_R465_R461_SEC6_GAUGE_ARBITER_GAP.md",
-        "DECISION_20260904_R466_R461_SEC2_SEC6_FALSIFIABILITY_CENSUS.md",
-        "DECISION_20260904_R467_VERIFY_LCB_BANK_PROBE_PATH_FIX.md",
-        "DECISION_20260904_R469_SHIM_BLIND_SPOTS_PREREG.md",
-        "DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
-        "DECISION_20260904_R471_VERDICT_GATE_TEETH_PREREG.md",
-        "DECISION_20260904_R472_GAUGE_CAPABILITY_RUNDIR_GATES_PREREG.md",
-        "DECISION_20260904_R473_R466_CENSUS_MUTATION_PREREG.md",
-        "DECISION_20260904_R474_SPEC_TWOWAY_GAUGE_CENSUS.md",
-        "DECISION_20260904_R475_ORACLE_SWEEP_POSITIVE_DIRECTION.md",
-        "DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
-        "DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md",
-        "DECISION_20260904_R739_R446_TEST_WITNESS_PREREG.md",
-        "DECISION_20260905_R477_CERT_DRIFT_EXECUTABLE_GATE.md",
-        "DECISION_20260905_R478_CERT_SELF_RECORDED_SHA.md",
-        "DECISION_20260905_R479_R461_APPENDIX_OBLIGATION_CENSUS.md",
-        "DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md",
-        "DECISION_20260905_R481_CERT_SCOPE_EXTENSION.md",
-        "DECISION_20260905_R482_CORPUS_SENSITIVITY_PREREG.md",
-        "DECISION_20260905_R483_WORKTREE_MUTATION_CENSUS_PREREG.md",
-        "DECISION_20260905_R484_RUN_SLOWNESS_ATTRIBUTION_PREREG.md",
-        "DECISION_20260905_R485_RUNAWAY_GENERATION_STRATA_PREREG.md",
-        "DECISION_20260905_R485_RUNAWAY_GENERATION_STRATA_RESULTS.md",
-        "DECISION_20260905_R486_LONGREQ_TIME_ATTRIBUTION_PREREG.md",
-        "DECISION_20260905_R487_CONCURRENCY_TAX_PREREG.md",
-        "DECISION_20260905_R488_POINTWISE_CONCURRENCY_PREREG.md",
-        "DECISION_20260905_R488_RESULTS.md",
-        "DECISION_20260905_R489_RESULTS.md",
-        "DECISION_20260905_R490_LEVELED_PLACEBO_PREREG.md",
-        "DECISION_20260905_R490_RESULTS.md",
-        "DECISION_20260905_R491_R484_R485_FALSIFIABILITY_CENSUS_PREREG.md",
-        "DECISION_20260905_R492_R461_CLOSING_CONJUNCT_INFORMATIVENESS.md",
-        "DECISION_20260905_R493_R461_APPENDIX_PROSE_CENSUS.md",
-        "DECISION_20260905_R494_R486_R490_FALSIFIABILITY_CENSUS_PREREG.md",
-        "DECISION_20260905_R495_R486_R490_EMPIRICAL_CENSUS_PREREG.md",
-        "DECISION_20260905_R497_SEGMENT_COMPOSITION_PREREG.md",
-        "DECISION_20260905_R498_EQUAL_CHAT_N_PREREG.md",
-        "DECISION_20260905_R502_TRIPLE_CONSTRAINED_LADDER_PREREG.md",
-        "DECISION_20260905_R503_R495_WALL_DELETION_PREREG.md",
-        "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
-        "DECISION_20260906_R461_FABLE_AUDIT.md",
-        "DECISION_20260907_R460_HARNESS_PREREG.md",
-        "FINDINGS_20260905_CONFORMANCE_GATE.md"
+        "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "decisions/DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md",
+        "decisions/DECISION_20260904_R463_PAIRED_CI_KEY_GAP.md",
+        "decisions/DECISION_20260904_R464_EQ5_BANK_FLAG_GAP.md",
+        "decisions/DECISION_20260904_R465_R461_SEC6_GAUGE_ARBITER_GAP.md",
+        "decisions/DECISION_20260904_R466_R461_SEC2_SEC6_FALSIFIABILITY_CENSUS.md",
+        "decisions/DECISION_20260904_R467_VERIFY_LCB_BANK_PROBE_PATH_FIX.md",
+        "decisions/DECISION_20260904_R469_SHIM_BLIND_SPOTS_PREREG.md",
+        "decisions/DECISION_20260904_R470_PAIRED_CI_TEETH_PREREG.md",
+        "decisions/DECISION_20260904_R471_VERDICT_GATE_TEETH_PREREG.md",
+        "decisions/DECISION_20260904_R472_GAUGE_CAPABILITY_RUNDIR_GATES_PREREG.md",
+        "decisions/DECISION_20260904_R473_R466_CENSUS_MUTATION_PREREG.md",
+        "decisions/DECISION_20260904_R474_SPEC_TWOWAY_GAUGE_CENSUS.md",
+        "decisions/DECISION_20260904_R475_ORACLE_SWEEP_POSITIVE_DIRECTION.md",
+        "decisions/DECISION_20260904_R476_R461_CLOSING_ARBITER_DRIFT.md",
+        "decisions/DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md",
+        "decisions/DECISION_20260904_R739_R446_TEST_WITNESS_PREREG.md",
+        "decisions/DECISION_20260905_R477_CERT_DRIFT_EXECUTABLE_GATE.md",
+        "decisions/DECISION_20260905_R478_CERT_SELF_RECORDED_SHA.md",
+        "decisions/DECISION_20260905_R479_R461_APPENDIX_OBLIGATION_CENSUS.md",
+        "decisions/DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md",
+        "decisions/DECISION_20260905_R481_CERT_SCOPE_EXTENSION.md",
+        "decisions/DECISION_20260905_R482_CORPUS_SENSITIVITY_PREREG.md",
+        "decisions/DECISION_20260905_R483_WORKTREE_MUTATION_CENSUS_PREREG.md",
+        "decisions/DECISION_20260905_R484_RUN_SLOWNESS_ATTRIBUTION_PREREG.md",
+        "decisions/DECISION_20260905_R485_RUNAWAY_GENERATION_STRATA_PREREG.md",
+        "decisions/DECISION_20260905_R485_RUNAWAY_GENERATION_STRATA_RESULTS.md",
+        "decisions/DECISION_20260905_R486_LONGREQ_TIME_ATTRIBUTION_PREREG.md",
+        "decisions/DECISION_20260905_R487_CONCURRENCY_TAX_PREREG.md",
+        "decisions/DECISION_20260905_R488_POINTWISE_CONCURRENCY_PREREG.md",
+        "decisions/DECISION_20260905_R488_RESULTS.md",
+        "decisions/DECISION_20260905_R489_RESULTS.md",
+        "decisions/DECISION_20260905_R490_LEVELED_PLACEBO_PREREG.md",
+        "decisions/DECISION_20260905_R490_RESULTS.md",
+        "decisions/DECISION_20260905_R491_R484_R485_FALSIFIABILITY_CENSUS_PREREG.md",
+        "decisions/DECISION_20260905_R492_R461_CLOSING_CONJUNCT_INFORMATIVENESS.md",
+        "decisions/DECISION_20260905_R493_R461_APPENDIX_PROSE_CENSUS.md",
+        "decisions/DECISION_20260905_R494_R486_R490_FALSIFIABILITY_CENSUS_PREREG.md",
+        "decisions/DECISION_20260905_R495_R486_R490_EMPIRICAL_CENSUS_PREREG.md",
+        "decisions/DECISION_20260905_R497_SEGMENT_COMPOSITION_PREREG.md",
+        "decisions/DECISION_20260905_R498_EQUAL_CHAT_N_PREREG.md",
+        "decisions/DECISION_20260905_R502_TRIPLE_CONSTRAINED_LADDER_PREREG.md",
+        "decisions/DECISION_20260905_R503_R495_WALL_DELETION_PREREG.md",
+        "decisions/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md",
+        "decisions/DECISION_20260906_R461_FABLE_AUDIT.md",
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md",
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md"
       ],
       "verdict_decisions": [
-        "FINDINGS_20260905_CONFORMANCE_GATE.md",
-        "DECISION_20260906_R461_FABLE_AUDIT.md"
+        "decisions/conclusions/FINDINGS_20260905_CONFORMANCE_GATE.md",
+        "decisions/DECISION_20260906_R461_FABLE_AUDIT.md"
       ],
       "related_settlements": [],
       "headline": "R461 稽核：CONFORM 在 LCB v3（189 題）三臂——獨立重算",
-      "headline_from": "DECISION_20260906_R461_FABLE_AUDIT.md",
+      "headline_from": "decisions/DECISION_20260906_R461_FABLE_AUDIT.md",
       "headline_source": "sole_subject_of_opening",
       "headline_candidates": [
-        "DECISION_20260906_R461_FABLE_AUDIT.md"
+        "decisions/DECISION_20260906_R461_FABLE_AUDIT.md"
       ],
       "headline_note": null
     },
@@ -22457,9 +22457,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        "DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md",
-        "DECISION_20260907_R460_HARNESS_PREREG.md"
+        "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "decisions/DECISION_20260904_R462_R461_PREREG_FALSIFIABILITY_CENSUS.md",
+        "decisions/DECISION_20260907_R460_HARNESS_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -22524,8 +22524,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
-        "DECISION_20260904_R468_TESTS_SWEEP_PREREG.md"
+        "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md",
+        "decisions/DECISION_20260904_R468_TESTS_SWEEP_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -22654,9 +22654,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -22785,9 +22785,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -22915,9 +22915,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -23045,9 +23045,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -23176,9 +23176,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -23307,9 +23307,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -23438,9 +23438,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -23568,9 +23568,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -23701,9 +23701,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -23833,9 +23833,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -23966,9 +23966,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -24099,10 +24099,10 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -24233,9 +24233,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -24366,9 +24366,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -24498,9 +24498,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -24630,9 +24630,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -24762,9 +24762,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -24895,9 +24895,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -25026,9 +25026,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -25157,9 +25157,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -25287,9 +25287,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -25418,9 +25418,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -25548,9 +25548,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -25678,9 +25678,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -25809,9 +25809,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -25940,9 +25940,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -26070,9 +26070,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -26201,9 +26201,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -26332,9 +26332,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -26463,9 +26463,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -26594,9 +26594,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -26725,9 +26725,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -26855,9 +26855,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -26985,9 +26985,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -27116,9 +27116,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -27247,9 +27247,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -27377,9 +27377,9 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
-        "DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+        "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+        "decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -27662,7 +27662,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -27933,7 +27933,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -28206,7 +28206,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -28467,7 +28467,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -28728,7 +28728,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -28989,7 +28989,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -29280,7 +29280,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -29577,7 +29577,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -29872,7 +29872,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -30155,7 +30155,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -30410,7 +30410,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -30677,7 +30677,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -30792,7 +30792,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -30907,7 +30907,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -31022,7 +31022,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -31137,7 +31137,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -31252,7 +31252,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -31367,7 +31367,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -31482,7 +31482,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -31597,7 +31597,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -31714,7 +31714,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -31831,7 +31831,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -31948,7 +31948,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -32065,7 +32065,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -32182,7 +32182,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -32299,7 +32299,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -32416,7 +32416,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -32533,7 +32533,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -32650,7 +32650,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -32767,7 +32767,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -32884,7 +32884,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -33001,7 +33001,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -33118,7 +33118,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -33235,7 +33235,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -33352,7 +33352,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -33469,7 +33469,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -33584,7 +33584,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -33699,7 +33699,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -33814,7 +33814,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -33929,7 +33929,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -34044,7 +34044,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -34159,7 +34159,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -34274,7 +34274,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -34389,7 +34389,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -34504,7 +34504,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -34619,7 +34619,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -34734,7 +34734,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -34849,7 +34849,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -34964,7 +34964,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -35079,7 +35079,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -35194,7 +35194,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -35309,7 +35309,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -35424,7 +35424,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -35539,7 +35539,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -35654,7 +35654,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+        "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -35757,8 +35757,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_20260824_OFF_BASELINE.md",
-        "DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
+        "decisions/DECISION_20260824_OFF_BASELINE.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -36336,7 +36336,7 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "DECISION_SLASH.md"
+        "decisions/DECISION_SLASH.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],

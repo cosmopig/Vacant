@@ -10,7 +10,7 @@ import json, os, pathlib, shutil, subprocess, sys, tempfile
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 SEED = "g-r212-route-20260828"
-DEC = "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
+DEC = "decisions/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
 RUN = "g_r445_conform_mbpp_ext"          # 名字要與 DECISION 內文相符（R440G 閘門）
 ENV = {**os.environ,
        "VACANT_EVALPLUS_PATH": ".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz",

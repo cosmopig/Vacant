@@ -23,7 +23,11 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 LIVE = "g_r461_lcb3_three_arm"          # 主 run：本檔一個 byte 都不准讀
 _LIVE_READS = 0                          # G-LIVE 計數（永遠應為 0）
 
-DOC_GLOB = "DECISION_*.md"
+# 2026-09-18：裁決檔從 repo 根搬進 `decisions/`（純 `git mv`，內容一個 byte 沒動）。
+# 這個 glob 跟著搬——它代表的是「R481 之前的舊範圍」這個**集合**，不是「根目錄」
+# 這個位置。留在 `"DECISION_*.md"` 會讓舊範圍安靜地縮成 0 份，
+# `docs_scanned_legacy` 歸零、加法性對照變成 0==0 的空洞恆真句。
+DOC_GLOB = "decisions/DECISION_*.md"
 LS_FILES_GLOB = "*.md"                   # R481 §一：新範圍 ＝ 舊 glob ∪ git 追蹤的所有 *.md
 # R481 §一：具名排除（不是安靜跳過）。本擋門對它們**結構上**判不了 FRESH/STALE。
 OUT_OF_SCOPE_NAMED = [

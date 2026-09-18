@@ -12,7 +12,7 @@ ROOT="$HOME/vacant"; REPO="$ROOT/Vacant"; LOG="$ROOT/logs/launch_lcb2.log"
 HUB="http://100.119.113.56:8765/v1/chat/completions"
 MODEL="gemma-4-12b-it-qat"
 OUT="runs/g_r447_conform_lcb2"
-DEC="DECISION_20260904_R440Z_LCB2_PREREG.md"
+DEC="decisions/DECISION_20260904_R440Z_LCB2_PREREG.md"
 WAIT_PAT="^python3 ops/gain/gain_run\.py --out runs/g_r446_eq5_mbpp"
 
 mkdir -p "$ROOT/logs"

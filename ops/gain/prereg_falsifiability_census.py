@@ -40,7 +40,7 @@ MUTANT = ""
 LAST_FAILS: list[str] = []
 
 MIN_TASKS = 20                      # B4
-PREREG = ROOT / "DECISION_20260904_R440Z_LCB2_PREREG.md"
+PREREG = ROOT / "decisions/DECISION_20260904_R440Z_LCB2_PREREG.md"
 
 # R440Z §三 的窗口。**每一條都要在 R440Z 原文裡逐字找得到**（見 _windows_in_prereg），
 # 否則就是我在這裡自己發明窗口——那正是「量完再訂判準」。
@@ -239,7 +239,7 @@ def classify(identity: bool, witnesses: int, *, forced_on_parsed: bool = False) 
 # R454：把普查延伸到 R450（DECISION_20260904_R454_R450_FALSIFIABILITY_EXTENSION.md）
 # 加法式：不改 R453 既有 12 筆記錄的任何值，只新增鍵。
 # ──────────────────────────────────────────────────────────────────────
-R450_DOC = ROOT / "DECISION_20260904_R450_GAUGE_CAPABILITY_CENSUS.md"
+R450_DOC = ROOT / "decisions/DECISION_20260904_R450_GAUGE_CAPABILITY_CENSUS.md"
 
 # §三 事前預測表（R454 §三）。量完照實對帳，**錯了不准回頭改**。
 R454_PREDICTIONS = {

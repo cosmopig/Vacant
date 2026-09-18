@@ -43,7 +43,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 SH = ROOT / "ops" / "gain" / "launch_eq5_lcb3.sh"
-DEC = ROOT / "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md"
+DEC = ROOT / "decisions/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md"
 ANALYZER = ROOT / "ops" / "gain" / "analyze_eq5.py"
 
 RUN_NAME = "g_r449c_eq5_lcb3"

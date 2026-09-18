@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT))
 from ops.gain.power_paired import exact_mcnemar_p                       # noqa: E402
 
 MUTANT = ""
-PREREG = ROOT / "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+PREREG = ROOT / "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
 FORBIDDEN_RUN = "g_r461_off_gate_lcb3"          # B6
 
 # ── 釘死的判準檔字面（B3）。每一條都要在 R461 原文裡逐字找得到。

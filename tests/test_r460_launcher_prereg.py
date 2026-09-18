@@ -46,7 +46,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 SH = ROOT / "ops" / "gain" / "launch_harness_lcb2.sh"
-DEC = ROOT / "DECISION_20260907_R460_HARNESS_PREREG.md"
+DEC = ROOT / "decisions/DECISION_20260907_R460_HARNESS_PREREG.md"
 ANALYZER = ROOT / "ops" / "gain" / "analyze_r460.py"
 STUDY = ROOT / "docs" / "HARNESS_STUDY_2026-09-07.md"
 VGT = ROOT / "ops" / "gain" / "harness_vgt_audit.py"
