@@ -77,8 +77,13 @@ V2 一個位元都沒有碰 wire。
   2. **第 1 次嘗試把 placeholder 換成空字串** ⇒ 第一次的 prompt 與
      「沒有 Vacant」時**逐位元相同**。這是兩臂可比性的基礎，
      形狀與 wire 那條「兩臂 body 逐位元相同」同一個用意。
-  3. 之後才換成 `"\n\n" + 回饋`，並對 **`new_argv` 全文**再跑一次
+  3. 之後才換成 `"\n\n" + 回饋`，並對**接上去的那一段**再跑一次
      `assert_ks1_clean`（鐵律 1 不因為換了管道就放鬆）。
+     ⚠ **範圍是「我們寫的字」，不是整條命令。** KS-1 的立法意旨是
+     「我們的 prompt 模板不准用責任措辭」——那會污染實驗條件（三臂模板逐字
+     相同，唯一差異是記憶區塊）——**不是內容審查**。使用者自己的 prompt
+     是他的業務：`-p "You are responsible for the migration"` 完全正常，
+     掃它等於用一個誤判殺掉整跑。（2026-09-18 人類裁決。）
 
 ### V2 的誠實邊界（**不准淡化**）
 
@@ -309,9 +314,16 @@ def render_argv(argv: list[str], feedback_text: str, *,
       尾端 append 才保得住 provider 的前綴快取，插在中間會讓整段失效。
       同一個元素裡出現兩次也擋（前面那一次就不在結尾）。
 
-    ⚠ 只有**真的會動 argv** 的 mode 才對 `new_argv` 跑 `assert_ks1_clean`：
-      `"file"` 模式下那條命令是使用者自己寫的、我們一個字都沒加，
-      替它判 KS-1 等於改掉既有使用者的行為。
+    ⚠ **KS-1 只掃我們接上去的那一段（`tail`），不掃使用者自己的 prompt。**
+      鐵律 1 的立法意旨是「**我們的** prompt 模板不准用責任措辭」——理由是那會
+      污染實驗條件（三臂模板必須逐字相同，唯一差異是記憶區塊），
+      **不是內容審查**。使用者那條命令是他自己的業務：
+      `-p "You are responsible for the migration"` 是一句完全正常的話，
+      掃它等於用一個誤判殺掉整跑，代價與 KS-1 要防的東西不成比例。
+      回饋文字本身仍然逐字受管——那是我們產生的，該管。
+      兩個方向各有一條測試（`test_v2_ks1_scope_is_our_text_not_the_users`／
+      `test_v2_ks1_still_voids_when_our_own_feedback_is_dirty`）：
+      **只證明「收得住」不夠，還要證明「沒收掉」**。
     """
     # ⚠ **擋門在 early-return 之前**，不在之後：放在後面的話，
     #   `--feedback-into prmopt`（打錯一個字）會走 `delivers_to_prompt()` 為 False
@@ -322,6 +334,9 @@ def render_argv(argv: list[str], feedback_text: str, *,
     if not delivers_to_prompt(mode):
         return out, argv_sha256(out), 0
     tail = "" if not feedback_text else "\n\n" + feedback_text
+    # 鐵律 1 不因為換了管道就放鬆——**但它管的是我們寫的字**（上面那條 ⚠）。
+    # 掃 `tail` 不掃 `"\n".join(new)`：後者含使用者自己的 prompt。
+    assert_ks1_clean(tail)
     new: list[str] = []
     n_sub = 0
     for a in out:
@@ -335,8 +350,6 @@ def render_argv(argv: list[str], feedback_text: str, *,
                 "回饋是往尾端 append 的，插在中間會讓 provider 的前綴快取整段失效。停。")
         new.append(a[: -len(FEEDBACK_PLACEHOLDER)] + tail)
         n_sub += 1
-    # 鐵律 1 不因為換了管道就放鬆：**整條命令**的全文再驗一次。
-    assert_ks1_clean("\n".join(new))
     return new, argv_sha256(new), n_sub
 
 
