@@ -86,6 +86,7 @@ import signal
 import subprocess
 import sys
 import time
+from typing import Any
 
 #: 記憶體上限（Fable 裁決：512 MiB）。
 DEFAULT_MEMORY_BYTES = 512 * 1024 * 1024
@@ -558,7 +559,10 @@ def make_sandbox(name: str = "auto", *, workdir: str | os.PathLike,
     order = BACKEND_NAMES if name == "auto" else (name,)
     chosen: Sandbox | None = None
     for bname in order:
-        kwargs = {"memory_bytes": memory_bytes}
+        # `dict[str, Any]`：這是一包**要餵給不同後端建構子**的參數，值的型別
+        # 本來就不齊（int／bool／`int | None`）。不寫 `Any` 會被推成
+        # `dict[str, int]`，然後 `reuid=None`（＝不換 uid）就被當成型別錯誤。
+        kwargs: dict[str, Any] = {"memory_bytes": memory_bytes}
         if bname == "bwrap":
             kwargs["use_sudo"] = use_sudo_bwrap
         if bname == "unshare":

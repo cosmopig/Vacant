@@ -127,6 +127,9 @@ def verify_chain_detailed(book: Logbook, who: PublicIdentity) -> list[dict]:
         if e.seq > 1 and e.branch_id != expected_branch:
             fails.append({"seq": e.seq, "type": e.type, "reason": "branch_id_mismatch",
                           "got": e.branch_id, "want": expected_branch})
+        #: 驗簽失敗時的例外原文；沒有例外就是 None。純宣告，**執行期不產生
+        #: 任何指令**（函式內的裸標註只進 AST 不進 bytecode）。
+        exc_s: str | None
         try:
             sig_ok = who.verify(
                 _signed_bytes(e.stream_id, e.branch_id, e.seq, e.prev_hash,

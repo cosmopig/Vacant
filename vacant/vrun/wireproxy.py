@@ -67,6 +67,7 @@ import time
 import urllib.parse
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from typing import Any, TypedDict, cast
 
 from . import envmap
 
@@ -89,6 +90,20 @@ def route(path: str) -> str:
     if p.startswith("/v1/messages") or p.startswith("/v1/complete"):
         return "anthropic"
     return "openai"
+
+
+class _Stats(TypedDict):
+    """`WireProxy.stats` 的形狀。**只在型別層存在**：執行期仍是一個普通 dict，
+    一個位元組都沒有多寫。寫出來的理由是 `response_sha256` 那一欄——它**允許
+    `None`**（infra_void：上游沒回話那一通），而 `wire_digest()` 簽的就是這串
+    含 `None` 的配對。少寫這個 `| None` 會讓型別檢查誤以為那一欄不會有洞，
+    而那個洞正是收據裡要看得見的東西。
+    """
+    requests_seen: int
+    by_wire: dict[str, int]
+    errors: int
+    request_sha256: list[str]
+    response_sha256: list[str | None]
 
 
 def join_upstream(base: str, path: str) -> str:
@@ -127,15 +142,19 @@ class WireProxy:
         self._thread: threading.Thread | None = None
         self._host, self._port = host, port
         #: 收據要用的統計。**不含 body**——body 在檔案裡。
-        self.stats = {"requests_seen": 0, "by_wire": {}, "errors": 0,
-                      "request_sha256": [], "response_sha256": []}
+        self.stats: _Stats = {"requests_seen": 0, "by_wire": {}, "errors": 0,
+                              "request_sha256": [], "response_sha256": []}
 
     # ── 生命週期 ──────────────────────────────────────────────────────
     @property
     def url(self) -> str:
         if self._srv is None:
             raise RuntimeError("proxy 還沒 start()")
-        h, p = self._srv.server_address[:2]
+        # typeshed 把 `server_address` 的主機欄寫成 `str | bytes | bytearray`
+        # （AF_UNIX 那一支用得到 bytes）。本 proxy 只綁 AF_INET／AF_INET6，
+        # `getsockname()` 在那兩支一定回 `(str, int)` ⇒ 這裡 cast 而不是
+        # `type: ignore`，f-string 的其餘部分照樣被檢查。**執行期是恆等函式。**
+        h, p = cast("tuple[str, int]", self._srv.server_address[:2])
         return f"http://{h}:{p}"
 
     def start(self) -> "WireProxy":
@@ -262,16 +281,26 @@ class WireProxy:
 
         target = join_upstream(self.upstreams[wire], h.path)
         u = urllib.parse.urlsplit(target)
-        rec = {"call_id": call_id, "ts": t0, "mode": self.mode, "wire": wire,
-               "method": method, "path": h.path, "upstream": target,
-               "request_sha256": req_sha, "request_bytes": len(sent),
-               "body_rewritten": rewritten}
+        # `dict[str, Any]`：一列索引裡混了 str／int／float／bool／None，
+        # 不標的話會被推成 `dict[str, object]`，接著 `rec.get("response_sha256")`
+        # 就不能餵回 `stats`。標註**不改任何值**。
+        rec: dict[str, Any] = {
+            "call_id": call_id, "ts": t0, "mode": self.mode, "wire": wire,
+            "method": method, "path": h.path, "upstream": target,
+            "request_sha256": req_sha, "request_bytes": len(sent),
+            "body_rewritten": rewritten}
 
         conn = None
         try:
             cls = (http.client.HTTPSConnection if u.scheme == "https"
                    else http.client.HTTPConnection)
-            conn = cls(u.hostname, u.port, timeout=self.timeout_s)
+            # `type: ignore[arg-type]`：`urlsplit().hostname` 的靜態型別是
+            # `str | None`（沒有 netloc 時為 None），而 http.client 只收 str。
+            # **不補 `or ""` 之類的預設值**：upstream base_url 沒有主機名就是
+            # 設定錯誤，補了會把「設定錯」悄悄變成「連到別的地方」。讓它照原樣
+            # 炸在這裡、由外層的 except 寫成 `error` 落盤（鐵律 3）。
+            conn = cls(u.hostname, u.port,  # type: ignore[arg-type]
+                       timeout=self.timeout_s)
             conn.request(method, u.path + (f"?{u.query}" if u.query else ""),
                          body=sent, headers=dict(out_headers))
             resp = conn.getresponse()
