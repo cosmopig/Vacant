@@ -20,7 +20,7 @@
 ——「沒有合法 attestation 的 artifact，在收件時被拒」。
 
 ```bash
-pip install vacant-network        # import 名仍然是 vacant
+pip install vacant-network        # 函式庫（import 名仍然是 vacant）
 ```
 
 [![PyPI](https://img.shields.io/pypi/v/vacant-network?color=f26b1d)](https://pypi.org/project/vacant-network/)
@@ -41,9 +41,104 @@ pip install vacant-network        # import 名仍然是 vacant
 
 ---
 
-## 30 秒 quickstart
+## 30 秒：先看一次閘門把交付擋下來
 
-零模型呼叫、零網路、不用 clone。
+零設定、零模型端點、零 API key、零網路。
+
+```bash
+git clone https://github.com/cosmopig/Vacant.git && cd Vacant
+python3 -m venv .venv && .venv/bin/pip install -e .
+.venv/bin/vacant demo gate
+```
+
+一隻假 agent 宣告它完成了，客戶的驗收說沒有（實跑輸出摘錄；家目錄縮成 `~`，其餘逐字）：
+
+```
+$ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
+    --suite ~/.vacant-run/demo-gate/tests_visible --run-dir ~/.vacant-run/demo-gate/receipts -- …
+  Done. I have created solution.py with add() and multiply().
+  All requirements are implemented and the code is ready to use.
+  [vacant run] RUN-ON　拒交（visible_fail）　ws e5241309c23b→76c38272981f　wire 0 通　收據 ~/.vacant-run/demo-gate/receipts
+  test_visible.py::check_mul — exception: ImportError: cannot import name 'mul' from 'solution' (~/.vacant-run/demo-gate/receipts/_frozen_RUN-ON/solution.py) [test_visible.py:7: from solution import mul]
+
+  agent 退出碼　　　　：0　　← agent 自己說它成功了
+  客戶的驗收　　　　　：1/2 通過
+  裁決　　　　　　　　：拒交（visible_fail）
+  vacant run 退出碼　 ：20　　← 退出碼反映裁決，不反映 agent 的說法
+  收據　　　　　　　　：2 筆 Ed25519 簽章鏈
+```
+
+**agent 說它做完了，客戶的驗收說沒有。** 沒有 Vacant，上面那份 `solution.py` 已經交出去了。
+
+畫面上每一個數字都是當場跑出來的：假 agent 是真子行程、閘門是 `ops/gain/r530/acceptance.py`
+那一支、那句 `ImportError` 是驗收 driver 當場抓到的例外原文、`20` 是 `vacant run` 這個真
+子行程的退出碼。`ops/vacantrun/demo.py::_assert_not_a_performance` 與
+[`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
+擋著它不准退化成印死字串。收據當場用同一支驗章器驗過一次，你也可以自己再驗：
+
+```bash
+.venv/bin/python ops/gain/replay/verify_run_receipts.py --selftest      # 先證明驗章器抓得到壞鏈
+.venv/bin/python ops/gain/replay/verify_run_receipts.py --glob ~/.vacant-run/demo-gate/receipts
+```
+
+⚠ `vacant demo gate` 與 `vacant run` 需要 clone：它們的判斷層住在 `ops/`，與 R530 實驗
+共用同一份 `acceptance`／`receipts`／`wshash`，**複製一份進 wheel 就是第二把尺**。
+`pip install vacant-network` 裝到的是函式庫（下面那段 quickstart）。
+
+---
+
+## 接上你自己的 agent
+
+`--` 後面照你平常怎麼跑 agent 就怎麼打，`vacant run` 不需要知道那是什麼框架：
+
+```bash
+vacant run --suite tests_visible -- <你平常怎麼跑 agent 就怎麼打>
+```
+
+觸發點在 **agent 行程結束的那一刻**（不是在 wire 上認「它宣告完成了」）：那個訊號
+100% 可靠、零協定知識、零 token 成本。退出碼 `0`＝交付、`20`＝拒交、`22`＝`infra_void`。
+完整用法與落盤形狀見 [`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md)。
+
+**「一個開關」的正確講法。** `vacant run` 把模型通道轉向到自己的 proxy，靠的是一份
+**環境變數名單**（[`ops/vacantrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/envmap.py)：
+OpenAI 家族／Anthropic 家族／OpenRouter／Groq／Together／DeepSeek／Ollama／LM Studio…）
+——**涵蓋大多數框架，用設定檔的框架要改設定檔**。實測：pi
+（`@earendil-works/pi-coding-agent`）的 provider `baseUrl` 寫在 `models.json` 裡，
+內建 provider 的 baseUrl 甚至編進 bundle，環境變數在那條路上完全沒有作用。
+那種框架用 `--port` 給一個固定埠，再把它的設定檔指過來。
+
+⚠ **「我設了環境變數」不是被中介的證據，`requests_seen` 才是。** 自檢：
+
+```bash
+vacant run --allow-no-suite --run-dir /tmp/vr -- <你的 agent 命令>
+python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['requests_seen'])"
+# 非 0 ⇒ 模型通道真的經過 Vacant；0 ⇒ 沒被中介到（框架用設定檔，或那一跑根本沒呼叫模型）。
+```
+
+名單漏一個變數＝那條路沒被中介，而且**不會有任何錯誤訊息**——這是 V0 已知的殘餘風險。
+
+### 這三條要跟上面那一幕一起讀（不准淡化）
+
+1. **proxy 單獨只有 L3。** 它證明「這些 bytes 經過我」，不阻止 agent 自己開一條連線。
+   要「agent 逃不掉」必須再加出網封鎖
+   （[`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)，
+   要 root 一次）。`vacant/controller.py:7-8` 那句逐字適用：無法阻止同一 OS 使用者繞過本命令。
+2. **中介的是「模型通道」，不是 agent 的行為。** 框架自己發起的動作——自動 lint、
+   git checkpoint、內建重試、本機工具呼叫——不經過模型通道，proxy 看不到也擋不到。
+   收據能說「模型通道上發生了什麼」與「工作區最後長這樣」，不能說「agent 做了什麼」。
+3. **驗收是單邊保證。** [`vacant/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant/suitegauge.py)
+   逐字：擋得住已知壞解**不證明**涵蓋真需求。`accepted=true` 只代表「客戶寫下來的那幾條過了」。
+   實測：R532 那 836 題裡閘門接受了 811 件，其中 120 件（14.8%）過了可見驗收卻沒過隱藏驗收。
+
+其餘邊界（TOCTOU、Responses API ＋ `store:true` 的落盤缺口、不走 HTTP 的模型、
+Bedrock SigV4、為什麼不做透明 MITM）在
+[`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md) §4，**一條都沒有被省略**。
+
+---
+
+## 函式庫 quickstart（不用 clone）
+
+零模型呼叫、零網路。
 
 ```python
 from vacant.checks import run_python_check

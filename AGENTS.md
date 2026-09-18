@@ -112,6 +112,25 @@ Zero network, zero model calls, no clone required. `pip install vacant-network` 
 30 packages (`mcp` accounts for most of them; `cryptography` and `jsonschema` are the
 rest).
 
+To wrap an arbitrary agent command instead of calling the library, you need the clone —
+`vacant run` and `vacant demo gate` live in `ops/`, which is deliberately not in the wheel
+(it shares one copy of `acceptance` / `receipts` / `wshash` with the R530 experiments, and
+a second copy would be a second ruler):
+
+```bash
+git clone https://github.com/cosmopig/Vacant.git && cd Vacant
+python3 -m venv .venv && .venv/bin/pip install -e .
+.venv/bin/vacant demo gate    # ~2s, offline: a fake agent declares done, the gate refuses
+vacant run --suite <dir> -- <your agent command>
+```
+
+Exit codes from `vacant run`: `0` shipped, `20` refused, `22` `infra_void`. The trigger is
+the moment the agent process exits, not a "done" message on the wire. **`requests_seen` in
+`run_<ARM>.json` is the only evidence that the model channel was actually mediated** —
+setting an environment variable is not (a framework that keeps its base url in a config
+file is redirected by neither, and fails silently). Full contract and every boundary:
+[`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md).
+
 ---
 
 ## 3. Sixty-second integration

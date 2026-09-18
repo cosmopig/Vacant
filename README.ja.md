@@ -22,7 +22,7 @@ Vacant の仕事ではない（`vacant/controller.py:7-8` には以前から逐�
 **in-toto／SLSA／Sigstore** も同じ——正当な attestation を伴わない artifact は受入時に拒否される。
 
 ```bash
-pip install vacant-network        # import 名は従来どおり vacant
+pip install vacant-network        # ライブラリ（import 名は従来どおり vacant）
 ```
 
 [![PyPI](https://img.shields.io/pypi/v/vacant-network?color=f26b1d)](https://pypi.org/project/vacant-network/)
@@ -44,9 +44,125 @@ pip install vacant-network        # import 名は従来どおり vacant
 
 ---
 
-## 30 秒クイックスタート
+## 30 秒：ゲートが納品を止める瞬間を見る
 
-モデル呼び出しゼロ、ネットワークなし、clone 不要。
+設定ゼロ、モデルのエンドポイントなし、API キーなし、ネットワークなし。
+
+```bash
+git clone https://github.com/cosmopig/Vacant.git && cd Vacant
+python3 -m venv .venv && .venv/bin/pip install -e .
+.venv/bin/vacant demo gate
+```
+
+偽の agent が「完了した」と宣言し、顧客の受入テストは「していない」と言う
+（実行結果の抜粋。`$HOME` を `~` に縮めた以外は逐語）：
+
+```
+$ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
+    --suite ~/.vacant-run/demo-gate/tests_visible --run-dir ~/.vacant-run/demo-gate/receipts -- …
+  Done. I have created solution.py with add() and multiply().
+  All requirements are implemented and the code is ready to use.
+  [vacant run] RUN-ON　拒交（visible_fail）　ws e5241309c23b→76c38272981f　wire 0 通　收據 ~/.vacant-run/demo-gate/receipts
+  test_visible.py::check_mul — exception: ImportError: cannot import name 'mul' from 'solution' (~/.vacant-run/demo-gate/receipts/_frozen_RUN-ON/solution.py) [test_visible.py:7: from solution import mul]
+
+  agent の終了コード      : 0     ← agent 自身は成功したと言っている
+  顧客の受入              : 1/2 通過
+  裁定                    : 拒否（visible_fail）
+  vacant run の終了コード : 20    ← 終了コードは裁定を映す。agent の主張ではない
+  領収書                  : 2 件の Ed25519 署名チェーン
+```
+
+（CLI の要約行は中国語である：`拒交`＝拒否、`收據`＝領収書、`通`＝呼び出し回数。）
+
+**agent は「終わった」と言い、顧客の受入は「終わっていない」と言った。** Vacant が
+なければ、その `solution.py` はもう出荷されている。
+
+画面上の数値はすべてその場で出たものである：偽 agent は本物の子プロセス、ゲートは
+`ops/gain/r530/acceptance.py`、あの `ImportError` は受入 driver が実際に捕まえた例外の
+原文、`20` は `vacant run` という本物の子プロセスの終了コード。
+`ops/vacantrun/demo.py::_assert_not_a_performance` と
+[`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
+が、これが文字列リテラルの印字へ退化することを禁じている。領収書はその場で同じ検証器に
+かけてある。自分でもう一度検証できる：
+
+```bash
+.venv/bin/python ops/gain/replay/verify_run_receipts.py --selftest      # まず検証器が壊れた鎖を捕まえることを示す
+.venv/bin/python ops/gain/replay/verify_run_receipts.py --glob ~/.vacant-run/demo-gate/receipts
+```
+
+⚠ `vacant demo gate` と `vacant run` は clone が要る：判定層は `ops/` に住み、R530 実験と
+`acceptance`／`receipts`／`wshash` の同一の一部を共有している——**wheel に複製を入れれば
+それは二本目の物差しになる**。`pip install vacant-network` で入るのはライブラリ（下の
+クイックスタート）。
+
+---
+
+## 自分の agent をつなぐ
+
+`--` の後ろには、普段 agent を動かすときに打っているものをそのまま書く。`vacant run` は
+それがどのフレームワークかを知る必要がない：
+
+```bash
+vacant run --suite tests_visible -- <普段 agent を動かすときのコマンド>
+```
+
+トリガは **agent プロセスが終了したその瞬間**（wire 上で「完了宣言」を認識するのではない）。
+その信号は 100% 確実で、プロトコル知識ゼロ、トークン費用ゼロ。終了コードは `0`＝出荷、
+`20`＝拒否、`22`＝`infra_void`。用法と落盤形状の全容は
+[`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md)。
+
+**「スイッチ一つ」の正確な言い方。** `vacant run` はモデル経路を自前の proxy へ向け直す。
+その手段は**環境変数の一覧**
+（[`ops/vacantrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/envmap.py)：
+OpenAI 系／Anthropic 系／OpenRouter／Groq／Together／DeepSeek／Ollama／LM Studio…）
+——**大半のフレームワークを覆うが、設定ファイルを読むフレームワークは設定ファイルを直す**。
+実測：pi（`@earendil-works/pi-coding-agent`）は provider の `baseUrl` を `models.json` に
+持ち、内蔵 provider の baseUrl は bundle にコンパイルされてすらいる。その経路で環境変数は
+まったく効かない。そういうフレームワークは `--port` で固定ポートを与え、設定ファイルを
+そこへ向ける。
+
+⚠ **「環境変数を設定した」は仲介された証拠ではない。`requests_seen` が証拠である。**
+自己点検：
+
+```bash
+vacant run --allow-no-suite --run-dir /tmp/vr -- <あなたの agent のコマンド>
+python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['requests_seen'])"
+# 0 以外 ⇒ モデル経路は本当に Vacant を通った。0 ⇒ 仲介されていない
+#          （設定ファイル型のフレームワーク、またはその実行がモデルを呼んでいない）。
+```
+
+一覧から変数が一つ漏れればその経路は仲介されず、**エラーメッセージは一切出ない**。
+これは V0 の既知の残余リスクである。
+
+### この三条は付録ではなく、この画面に置く
+
+1. **proxy 単体では L3 止まり。** 「このバイト列は私を通った」は示すが、agent が自分で
+   接続を開くことは止めない。「agent は逃げられない」が本当になるのは、出口遮断
+   （[`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)、
+   root が一度必要）を足したときだけ。`vacant/controller.py:7-8` が逐語で当てはまる：
+   同一 OS ユーザーが本コマンドを迂回することは防げない。
+2. **仲介されるのは「モデル経路」であって agent の振る舞いではない。** フレームワークが
+   自分で起こす動作——自動 lint、git checkpoint、内蔵リトライ、ローカルのツール呼び出し
+   ——はモデル経路を通らないので、proxy には見えないし止められない。領収書が言えるのは
+   「モデル経路で何が起きたか」と「作業領域が最後どうなったか」であり、「agent が何を
+   したか」ではない。
+3. **受入は片側保証である。**
+   [`vacant/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant/suitegauge.py)
+   逐語：既知の不正解を止められることは、真の要求を覆うことを**証明しない**。
+   `accepted=true` は「顧客が書き下したその数条が通った」だけを意味する。実測：R532 の
+   836 問でゲートは 811 件を受理し、そのうち 120 件（14.8%）は可視受入を通ったが隠し受入を
+   通らなかった。
+
+残りの境界（TOCTOU、Responses API ＋ `store:true` の落盤の穴、HTTP を通らないモデル、
+Bedrock SigV4、透過型 MITM をやらない理由）は
+[`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md) §4 に。
+**一条も省いていない。**
+
+---
+
+## ライブラリのクイックスタート（clone 不要）
+
+モデル呼び出しゼロ、ネットワークなし。
 
 ```python
 from vacant.checks import run_python_check

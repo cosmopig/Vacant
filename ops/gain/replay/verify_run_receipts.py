@@ -202,8 +202,27 @@ def verify_run(run: pathlib.Path) -> list[dict]:
     return out
 
 
+def _glob_dirs(pattern: str) -> list[pathlib.Path]:
+    """相對 pattern 以 repo 根為基準；**絕對 pattern 照絕對解**。
+
+    絕對那條是給 repo 以外的 run 目錄用的（`vacant run --run-dir ~/…`、
+    `vacant demo gate`）。少了它，畫面上印給使用者複製的那行驗證指令
+    就是一行跑不動的字——**能複製貼上才叫「你自己驗得出來」**。
+    `pathlib.Path.glob` 在 3.11／3.12 不吃絕對 pattern（3.13 才吃），
+    所以這裡自己把 anchor 切開，不靠版本差異。
+    """
+    p = pathlib.Path(pattern)
+    if p.is_absolute():
+        rel = str(p.relative_to(p.anchor))
+        base = pathlib.Path(p.anchor)
+        # 沒有萬用字元就不必 glob（也避開路徑裡有 `[` 之類字元時的誤判）
+        cand = [p] if not any(c in rel for c in "*?[") else list(base.glob(rel))
+        return sorted(d for d in cand if d.is_dir())
+    return sorted(d for d in ROOT.glob(pattern) if d.is_dir())
+
+
 def run_glob(pattern: str) -> dict:
-    dirs = sorted(d for d in ROOT.glob(pattern) if d.is_dir())
+    dirs = _glob_dirs(pattern)
     rows: list[dict] = []
     for d in dirs:
         rows += verify_run(d)

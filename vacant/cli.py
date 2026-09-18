@@ -6,7 +6,9 @@
     vacant init <name> [--niche reverse --niche caesar3] [--root DIR]
     vacant info  <name> [--root DIR]
     vacant call  <caller> <niche> --input <s> [--root DIR]   # 需先 init 出 caller + 一個能解該 niche 的 expert
-    vacant demo  [--root DIR]                                 # 跑 §11 對照實驗
+    vacant demo gate                                          # 30 秒：假 agent 宣告完成 → 閘門拒交 → 收據
+                                                              # （零設定／零模型／零網路；ops/vacantrun/demo.py）
+    vacant demo                                               # 跑 §11 對照實驗（原樣保留，預設 kind=eco）
     vacant selftest                                           # 端到端冒煙測試（暫存目錄）
 
 預設 root = ~/.vacant（`trust/` 金鑰與究責紀錄 + HERMES_HOME 都在此；睡著的 vacant 就是這包檔）。
@@ -521,6 +523,8 @@ def cmd_call(args: argparse.Namespace) -> int:
 
 
 def cmd_demo(args: argparse.Namespace) -> int:
+    if getattr(args, "kind", "eco") == "gate":
+        return _demo_gate(args)
     from .experiment import run
 
     # 寫進全新暫存目錄（實驗是拋棄式的）：不污染、也不 rmtree 使用者的 ~/.vacant。
@@ -528,6 +532,46 @@ def cmd_demo(args: argparse.Namespace) -> int:
     print(run(root))
     print(f"\n（實驗資料寫在暫存目錄：{root}）")
     return 0
+
+
+def _demo_gate(args: argparse.Namespace) -> int:
+    """`vacant demo gate`：裝完之後的第一幕（`ops/vacantrun/demo.py`）。
+
+    ⚠ 與 `vacant run -- <cmd>` 同一條路徑限制：判斷層住在 `ops/`（與 R530
+      共用同一份 `acceptance`／`receipts`／`wshash`，**不准另寫第二把尺**），
+      而 `ops/` 不進 wheel ⇒ 這一條只在 repo checkout 裡有。裝在別處要給
+      看得懂的訊息，不要丟一個裸的 ImportError。
+    """
+    argv: list[str] = ["--sandbox", args.sandbox]
+    if args.root:
+        argv += ["--root", args.root]
+    if args.demo_json:
+        argv.append("--json")
+    return _ops_entry("ops.vacantrun.demo", "vacant demo gate")(argv)
+
+
+def _ops_entry(module: str, label: str):
+    """把 `ops/` 底下的進入點接起來；接不上就給一句話說得清楚的錯誤。"""
+    import importlib
+    import sys as _sys
+    from pathlib import Path as _Path
+
+    repo = _Path(__file__).resolve().parents[1]
+    if str(repo) not in _sys.path:
+        _sys.path.insert(0, str(repo))
+    try:
+        return importlib.import_module(module).main
+    except ModuleNotFoundError as exc:                       # pragma: no cover
+        def _fail(argv: list[str]) -> int:
+            print(
+                f"`{label}` 需要 repo checkout（找不到 {module}）：{exc}\n"
+                "  git clone https://github.com/cosmopig/Vacant && cd Vacant\n"
+                "  pip install -e .\n"
+                f"  {label}\n"
+                "理由：它的判斷層與 R530 實驗共用同一份程式碼（ops/gain/r530/），"
+                "複製一份進 wheel 就是第二把尺。", file=sys.stderr)
+            return 2
+        return _fail
 
 
 def cmd_selftest(args: argparse.Namespace) -> int:
@@ -575,7 +619,17 @@ def build_parser() -> argparse.ArgumentParser:
     pc.add_argument("--mode", default="reputation", choices=["reputation", "random"])
     pc.set_defaults(func=cmd_call)
 
-    pd = sub.add_parser("demo", help="跑 §11 C0/C1/C2/C3 對照實驗")
+    # `demo` 的 `kind` 是**位置引數＋預設值**而不是巢狀子命令：`vacant demo`
+    # （生態對照實驗）在外面被引用了好幾年，改成必給子命令會把它打斷。
+    pd = sub.add_parser(
+        "demo", help="gate＝30 秒看到閘門擋下交付（預設 eco＝§11 C0/C1/C2/C3 對照實驗）")
+    pd.add_argument("kind", nargs="?", choices=["eco", "gate"], default="eco",
+                    help="gate：零設定零模型零網路，假 agent 走完整條 `vacant run` 路徑")
+    pd.add_argument("--root", default=None, help="（gate）落點，每次執行會先清空")
+    pd.add_argument("--sandbox", default="auto",
+                    help="（gate）驗收沙箱後端：auto／bwrap／unshare／none")
+    pd.add_argument("--json", dest="demo_json", action="store_true",
+                    help="（gate）只印 JSON summary")
     pd.set_defaults(func=cmd_demo)
 
     ps = sub.add_parser("selftest", help="端到端冒煙測試（暫存目錄）")
@@ -962,19 +1016,7 @@ def _agent_run_shim(argv: list[str]) -> int:
       所以這條路徑**只在 repo checkout 裡有**；裝在別處要給清楚的訊息，
       不要丟一個看不懂的 ImportError。
     """
-    import sys as _sys
-    from pathlib import Path as _Path
-
-    repo = _Path(__file__).resolve().parents[1]
-    if str(repo) not in _sys.path:
-        _sys.path.insert(0, str(repo))
-    try:
-        from ops.vacantrun.launcher import main as _launcher_main
-    except ModuleNotFoundError as exc:                       # pragma: no cover
-        print(f"`vacant run -- <cmd>` 需要 repo checkout（找不到 ops/vacantrun）："
-              f"{exc}", file=sys.stderr)
-        return 2
-    return _launcher_main(argv)
+    return _ops_entry("ops.vacantrun.launcher", "vacant run -- <cmd>")(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
