@@ -84,3 +84,50 @@ LCB v3 hard 62.0%、LCB v3 medium 51.2%。
 - 本輪是**單後端**，沒有跨後端變異估計。
 - 重做的是 12B 基線，**不改 R532 的任何內部結論**（Δ_C −3.23 pp 那組是同輪同模型配對，不受影響）。
 - 禁語沿用：不准寫「複製失敗」「效果消失」「等價」「多數支持」「複製穩定」。
+
+---
+
+## 附錄 A　逐塊註冊（R440G 閘門逐字比對；37 塊／716 題）
+
+每一行的 `(bank, filter, n, offset, seed)` **逐字照抄 R529 的同名塊**（`source` 欄）。
+```
+R533_BLOCK: g_r533_hep_a1 bank=humanevalplus filter=- n=20 offset=0 seed=g-r529-he source=g_r529_hep_a1
+R533_BLOCK: g_r533_hep_a2 bank=humanevalplus filter=- n=20 offset=20 seed=g-r529-he source=g_r529_hep_a2
+R533_BLOCK: g_r533_hep_a3 bank=humanevalplus filter=- n=20 offset=40 seed=g-r529-he source=g_r529_hep_a3
+R533_BLOCK: g_r533_hep_a4 bank=humanevalplus filter=- n=20 offset=60 seed=g-r529-he source=g_r529_hep_a4
+R533_BLOCK: g_r533_hep_a5 bank=humanevalplus filter=- n=20 offset=80 seed=g-r529-he source=g_r529_hep_a5
+R533_BLOCK: g_r533_hep_a6 bank=humanevalplus filter=- n=20 offset=100 seed=g-r529-he source=g_r529_hep_a6
+R533_BLOCK: g_r533_hep_a7 bank=humanevalplus filter=- n=20 offset=120 seed=g-r529-he source=g_r529_hep_a7
+R533_BLOCK: g_r533_hep_a8 bank=humanevalplus filter=- n=16 offset=140 seed=g-r529-he source=g_r529_hep_a8
+R533_BLOCK: g_r533_lcb3h_a1 bank=lcb3 filter=difficulty=hard n=20 offset=0 seed=g-r529-lcb3 source=g_r529_lcb3h_a1
+R533_BLOCK: g_r533_lcb3h_a2 bank=lcb3 filter=difficulty=hard n=20 offset=20 seed=g-r529-lcb3 source=g_r529_lcb3h_a2
+R533_BLOCK: g_r533_lcb3h_a3 bank=lcb3 filter=difficulty=hard n=14 offset=40 seed=g-r529-lcb3 source=g_r529_lcb3h_a3
+R533_BLOCK: g_r533_lcb3m_a1 bank=lcb3 filter=difficulty=medium n=20 offset=0 seed=g-r529-lcb3 source=g_r529_lcb3m_a1
+R533_BLOCK: g_r533_lcb3m_a2 bank=lcb3 filter=difficulty=medium n=20 offset=20 seed=g-r529-lcb3 source=g_r529_lcb3m_a2
+R533_BLOCK: g_r533_lcb3m_a3 bank=lcb3 filter=difficulty=medium n=20 offset=40 seed=g-r529-lcb3 source=g_r529_lcb3m_a3
+R533_BLOCK: g_r533_lcb3m_a4 bank=lcb3 filter=difficulty=medium n=20 offset=60 seed=g-r529-lcb3 source=g_r529_lcb3m_a4
+R533_BLOCK: g_r533_lcb3m_a5 bank=lcb3 filter=difficulty=medium n=20 offset=80 seed=g-r529-lcb3 source=g_r529_lcb3m_a5
+R533_BLOCK: g_r533_lcb3m_a6 bank=lcb3 filter=difficulty=medium n=20 offset=100 seed=g-r529-lcb3 source=g_r529_lcb3m_a6
+R533_BLOCK: g_r533_lcb3m_a7 bank=lcb3 filter=difficulty=medium n=15 offset=120 seed=g-r529-lcb3 source=g_r529_lcb3m_a7
+R533_BLOCK: g_r533_mbpp_a1 bank=evalplus filter=- n=20 offset=0 seed=g-r529-mbpp source=g_r529_mbpp_a1
+R533_BLOCK: g_r533_mbpp_a10 bank=evalplus filter=- n=20 offset=180 seed=g-r529-mbpp source=g_r529_mbpp_a10
+R533_BLOCK: g_r533_mbpp_a11 bank=evalplus filter=- n=20 offset=200 seed=g-r529-mbpp source=g_r529_mbpp_a11
+R533_BLOCK: g_r533_mbpp_a12 bank=evalplus filter=- n=20 offset=220 seed=g-r529-mbpp source=g_r529_mbpp_a12
+R533_BLOCK: g_r533_mbpp_a13 bank=evalplus filter=- n=20 offset=240 seed=g-r529-mbpp source=g_r529_mbpp_a13
+R533_BLOCK: g_r533_mbpp_a14 bank=evalplus filter=- n=20 offset=260 seed=g-r529-mbpp source=g_r529_mbpp_a14
+R533_BLOCK: g_r533_mbpp_a15 bank=evalplus filter=- n=20 offset=280 seed=g-r529-mbpp source=g_r529_mbpp_a15
+R533_BLOCK: g_r533_mbpp_a16 bank=evalplus filter=- n=20 offset=300 seed=g-r529-mbpp source=g_r529_mbpp_a16
+R533_BLOCK: g_r533_mbpp_a17 bank=evalplus filter=- n=20 offset=320 seed=g-r529-mbpp source=g_r529_mbpp_a17
+R533_BLOCK: g_r533_mbpp_a18 bank=evalplus filter=- n=20 offset=340 seed=g-r529-mbpp source=g_r529_mbpp_a18
+R533_BLOCK: g_r533_mbpp_a19 bank=evalplus filter=- n=11 offset=360 seed=g-r529-mbpp source=g_r529_mbpp_a19
+R533_BLOCK: g_r533_mbpp_a2 bank=evalplus filter=- n=20 offset=20 seed=g-r529-mbpp source=g_r529_mbpp_a2
+R533_BLOCK: g_r533_mbpp_a3 bank=evalplus filter=- n=20 offset=40 seed=g-r529-mbpp source=g_r529_mbpp_a3
+R533_BLOCK: g_r533_mbpp_a4 bank=evalplus filter=- n=20 offset=60 seed=g-r529-mbpp source=g_r529_mbpp_a4
+R533_BLOCK: g_r533_mbpp_a5 bank=evalplus filter=- n=20 offset=80 seed=g-r529-mbpp source=g_r529_mbpp_a5
+R533_BLOCK: g_r533_mbpp_a6 bank=evalplus filter=- n=20 offset=100 seed=g-r529-mbpp source=g_r529_mbpp_a6
+R533_BLOCK: g_r533_mbpp_a7 bank=evalplus filter=- n=20 offset=120 seed=g-r529-mbpp source=g_r529_mbpp_a7
+R533_BLOCK: g_r533_mbpp_a8 bank=evalplus filter=- n=20 offset=140 seed=g-r529-mbpp source=g_r529_mbpp_a8
+R533_BLOCK: g_r533_mbpp_a9 bank=evalplus filter=- n=20 offset=160 seed=g-r529-mbpp source=g_r529_mbpp_a9
+```
+
+佇列 `ops/gain/queues/r533.json` sha256 **d5e767ebfa9c9ec2…**（37 塊／716 題）。
