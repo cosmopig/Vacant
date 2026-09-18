@@ -33,6 +33,22 @@ V0 只是**收件口**，不是 Vacant 的機制。R530／R532 量到增益的�
 對帳規則 `attempt 數 ≥ verdict 數` 由 `ops/gain/replay/verify_run_receipts.py`
 守著，`tests/test_vacant_run_retry.py` 對每一種收尾都驗一次。
 
+## V2 ＝ 同一份回饋也可以走 argv（`--feedback-into prompt|both`）
+
+V1 的回饋是寫一個檔（`VACANT_FEEDBACK.md`）到工作區，而那條路有一個洞：
+**我們沒有辦法在 agent 的 prompt 裡講「去讀某某檔」**（那條命令是使用者給的）
+⇒ 模型可以不讀它。V2 把同一份文字接到 **argv** 的 `{VACANT_FEEDBACK}` 尾端。
+
+**launcher 擁有 argv，而 argv 就是那一則 user 訊息**——零協定破解、零偽造發言，
+`wireproxy.WireProxy.on_wire()` 在 V2 仍然**恆回 `None`**（一個位元都沒碰 wire）。
+規則、理由與誠實邊界在 `ops/vacantrun/retry.py` 的模組 docstring；
+這一支只負責接線：每一次嘗試 spawn 之前 `render_argv()`、用它 spawn、
+把 `argv_sha256`／`feedback_delivery`／`feedback_in_prompt_bytes` 逐次落盤並簽進收據。
+
+⚠ **第 1 次嘗試的 argv 與「沒有 Vacant」時逐位元相同**（placeholder 換成空字串），
+  可執行證明＝`tests/test_vacant_run_retry.py::test_v2_first_attempt_argv_is_byte_identical_to_no_vacant`。
+⚠ **預設仍是 `"file"`**＝V1 的行為逐字不變。
+
 ## 開關＝ `VACANT=0|1`
 
   · `VACANT=0` ——proxy 走純 tee（bytes 原樣轉送、不 parse 不重序列化），
@@ -75,6 +91,10 @@ run 目錄的形狀也照抄：`rows.jsonl` ＋ `receipts_<ARM>.ndjson` ＋ `.pu
 9. **R534 實測：真模型上「沒過→重改」與拒交出現 0 次**（6 格次裡 2 次宣告完成
    都第一輪過、2 次燒光 token、2 次撞脈絡上限）⇒ **V1 讓這條路存在，
    不代表它在你的工作負載上會被觸發。**
+10. **V2（`--feedback-into prompt`）能說的是「回饋一定出現在模型的輸入裡」，
+    不能說「不可忽略」。** **看得到 ≠ 照做**——能強制的只有「沒過就不出貨」。
+    也**不能說 V2 提高了通過率**：V1 實跑 n=1、三次重改一次都沒改對，
+    R534 真模型上「沒過→重改」與拒交 0 次。**V2 改的是機制性質不是效果量測。**
 """
 from __future__ import annotations
 
@@ -83,6 +103,7 @@ import json
 import os
 import pathlib
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -139,12 +160,46 @@ def _freeze(workspace: pathlib.Path, dest: pathlib.Path) -> tuple[str, str]:
     return wshash.tree_hash(dest), wshash.tree_hash(workspace)
 
 
+def _kill_group(proc: subprocess.Popen) -> bool:
+    """把 agent 的**整個行程群組**殺掉。回「群組裡還有活的嗎」。
+
+    `proc.wait()` 只等**直接子行程**。框架把真正的工作 fork 出去（背景 lint、
+    watcher、自己的 worker）時，那些孫行程不會被等到，於是它們可以在我們
+    **凍結之後**繼續寫工作區——`ws_end_sha256` 就不再是「交付當下」的雜湊，
+    而 TOCTOU 那條擋門（`frozen != live_after`）只在凍結的那一瞬間看得到。
+
+    所以 spawn 用 `start_new_session=True`（子行程自成一個 group，
+    `pgid == pid`，殺它不會波及我們自己），`wait()` 回來就把整個 group 收掉。
+
+    ⚠ **回傳值是資料不是副作用**：`True` ＝ 直接子行程都結束了、群組裡**還有東西活著**
+      （＝真的有孫行程在跑）。那一格會落進 `attempts[i].orphans_killed`，
+      「這個框架會不會留孤兒」因此在資料上看得見，而不是靠猜。
+    ⚠ **只准在 `start_new_session=True` spawn 出來的行程上呼叫。** 沒有分家的話
+      子行程與**我們自己**同一個群組，`killpg` 就是自殺（或殺到剛好撞號的別人）。
+      呼叫端用同一個旗標決定要不要叫，不要在這裡猜。
+    ⚠ POSIX 限定（`os.killpg`）。非 POSIX 上這一步是 no-op，回 `False`——
+      **不是「沒有孤兒」，是「這台機器上我們量不到」**。展場機器是 Linux VM。
+    """
+    if not hasattr(os, "killpg"):
+        return False
+    try:
+        os.killpg(proc.pid, signal.SIGKILL)
+    except (ProcessLookupError, PermissionError, OSError):
+        return False        # 群組已經空了（常態）／不是我們的群組
+    return True
+
+
 def _sign_attempt(book, ident, *, task_id: str, arm: str, rec: dict,
                   retry_arm: str, n_max: int) -> None:
     """簽一筆 `ws_attempt`。**每一次嘗試都要走這裡，沒有 happy path 例外。**
 
     `verdict_sha256=None` ＝ 這一輪沒有跑驗收（R530 的語意，逐字沿用）——
     與「跑了但全錯」是兩件事，不可合併。
+
+    ⚠ V2 多簽兩個欄位：`argv_sha256`（**這一次真的 spawn 出去的那條命令**）與
+      `feedback_delivery`（回饋走哪條管道）。沒有前者的話，「回饋進了 prompt」
+      這件事在鏈上完全沒有痕跡——收據要說得出那一次 agent 收到的是哪一條命令。
+      `ops/gain/r530/receipts.py::append_attempt` 收 `**extra`，**那一支一個字都沒改**。
     """
     receipts.append_attempt(
         book, ident, task_id=task_id, arm=arm, attempt=rec["attempt"],
@@ -155,7 +210,9 @@ def _sign_attempt(book, ident, *, task_id: str, arm: str, rec: dict,
         requests_seen=rec["requests_seen"], retry=retry_arm,
         max_attempts=n_max, accepted=rec.get("accepted"),
         ws_start_sha256=rec["ws_start_sha256"],
-        agent_rc=rec.get("agent_rc"), stop_reason=rec.get("stop_reason"))
+        agent_rc=rec.get("agent_rc"), stop_reason=rec.get("stop_reason"),
+        argv_sha256=rec.get("argv_sha256"),
+        feedback_delivery=rec.get("feedback_delivery"))
 
 
 def resolve_max_attempts(retry_arm: str, max_attempts: int | None) -> int:
@@ -184,11 +241,13 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
         sandbox_name: str = "auto", allow_no_suite: bool = False,
         port: int = 0, timeout_s: float | None = None,
         test_timeout_s: float = 10.0, inherit_stdin: bool = False,
-        retry_arm: str = "none", max_attempts: int | None = None) -> dict:
+        retry_arm: str = "none", max_attempts: int | None = None,
+        feedback_into: str = "file") -> dict:
     """跑一次（V1：最多 `max_attempts` 次嘗試）。回一份可落盤的 summary。
 
-    **預設 `retry_arm="none"` ＝ V0 的行為逐字不變**：一次嘗試、一筆
-    `ws_attempt`、一筆 `ws_verdict`、`visible_fail` 還是叫 `visible_fail`。
+    **預設 `retry_arm="none"`／`feedback_into="file"` ＝ V0／V1 的行為逐字不變**：
+    一次嘗試、一筆 `ws_attempt`、一筆 `ws_verdict`、`visible_fail` 還是叫
+    `visible_fail`，argv 一個位元都不動。
     """
     workspace, run_dir = workspace.resolve(), run_dir.resolve()
     # 收據落在工作區裡會把自己算進樹雜湊（wire log 每一通都在長大）⇒
@@ -197,7 +256,31 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
         raise SystemExit(
             f"--run-dir 不可以在工作區底下（{run_dir} ⊂ {workspace}）："
             "收據會把自己算進樹雜湊。換一個工作區外的路徑。停。")
+    # 同一條擋門的第二個面，理由不同：**驗收套件在工作區裡 ⇒ agent 改得到它。**
+    # 那不是「可能被繞過」而是「量具與被量的東西放在同一個人手上」——
+    # `accepted=True` 會退化成「它讓自己過了」。demo 的做法是正解：權威的那一份
+    # 放在工作區外，要給 agent 看就另外**複製**一份進去（`demo.py::scaffold`）。
+    if suite_dir is not None:
+        _suite = pathlib.Path(suite_dir).resolve()
+        if _suite == workspace or workspace in _suite.parents:
+            raise SystemExit(
+                f"--suite 不可以在工作區底下（{_suite} ⊂ {workspace}）："
+                "agent 改得到的驗收不是驗收。權威的那一份放工作區外，"
+                "要給 agent 看就複製一份進去。停。")
     n_max = resolve_max_attempts(retry_arm, max_attempts)
+    # ── V2：argv ＋ `--feedback-into` 的壞組合，一律 fail-visible ──────────
+    #  `check_argv_has_placeholder` 擋的是「mode 說要進 prompt 但 argv 裡沒有
+    #  placeholder」與它的反面；這裡多擋一格它看不到的：**沒有重試就沒有第二次
+    #  spawn**，回饋永遠不會被產生，收據卻會寫 `feedback_delivery="prompt"`。
+    #  ⚠ `resample` **刻意不擋**：那一臂本來就不給失敗原文，但兩臂要能用
+    #    **同一條命令**跑（第 1 次的 argv 才逐位元相同），所以它必須吃得下
+    #    placeholder、把它換成空字串。那一格每一次的 `feedback_in_prompt_bytes`
+    #    都是 0——「政策上沒有回饋」與「以為有卻沒送到」在資料上因此分得開。
+    retrypolicy.check_argv_has_placeholder(argv, feedback_into)
+    if feedback_into != "file" and retry_arm == "none":
+        raise SystemExit(
+            f"--feedback-into {feedback_into} 要把回饋接到下一次 spawn 的 prompt 上，"
+            "但 --retry none 不會有下一次。要迴圈就給 --retry revise。停。")
     if retry_arm != "none" and not vacant_on:
         # OFF＝純 tee，**沒有裁決**可以拿來決定要不要再跑一次。在那裡開迴圈
         # 等於用一個不存在的判準重試。
@@ -231,6 +314,11 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
         # ── V1 ────────────────────────────────────────────────────────
         "retry": retry_arm, "max_attempts": n_max, "attempts_used": 0,
         "attempts": [], "retry_constants": retrypolicy.constants_manifest(),
+        # ── V2 ────────────────────────────────────────────────────────
+        #  `argv` 上面那一欄是**使用者給的原文**（含 placeholder）；
+        #  每一次真的 spawn 出去的那一條落在 `attempts[i].argv`。兩個都要，
+        #  因為「使用者打了什麼」與「模型收到什麼」在 V2 底下不是同一件事。
+        "feedback_into": feedback_into,
     }
     # 收據鏈在**迴圈之前**開，好讓每一次嘗試結束時就簽得下去（見模組 docstring
     # 的 R530 坑）。OFF 臂沒有收據這回事 ⇒ 兩個都是 None。
@@ -240,6 +328,12 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                  and any(pathlib.Path(suite_dir).glob("test_*.py")))
     sandbox = None
     origin_dir = None
+    #: V2：下一次 spawn 要接到 prompt 尾端的回饋。**第 1 次一定是空字串**
+    #: ⇒ placeholder 換成 `""` ⇒ 那一次的 argv 與「沒有 Vacant」時逐位元相同。
+    pending_feedback = ""
+    #: agent 要不要自成一個 session（＝孫行程收得掉）。互動式那一格不行，
+    #: 理由與代價見 spawn 處與 `_kill_group` 的 docstring。
+    new_session = not inherit_stdin
     try:
         if retry_arm == "resample" and n_max > 1:
             # 起點的**完整**副本（含 `.git`）。理由見 `retry.py`：
@@ -269,15 +363,42 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                     break
             rec["ws_start_sha256"] = wshash.tree_hash(workspace)
 
+            # ── 2'') V2：把回饋接到這一次的 argv 上（第 1 次接的是空字串）──
+            try:
+                argv_i, argv_sha, n_sub = retrypolicy.render_argv(
+                    argv, pending_feedback, mode=feedback_into)
+            except KS1Violation as exc:
+                # 鐵律 1 對 argv 這條管道一樣成立（責任修辭有可能是使用者自己
+                # 寫在命令裡的）。判 `infra_void`：那一格沒有量到任何東西。
+                rec["stop_reason"] = "ks1_violation"
+                summary["attempts"].append(rec)
+                summary.update({"stop_reason": "ks1_violation",
+                                "infra_void": repr(exc)})
+                break
+            rec["argv"] = argv_i
+            rec["argv_sha256"] = argv_sha
+            rec["feedback_delivery"] = feedback_into
+            # **回饋真的進了幾個位元組**。第 1 次恆為 0 ⇒ 「逐位元相同」這件事
+            # 在資料上自己說得出來，不必靠讀 code 相信。
+            rec["feedback_in_prompt_bytes"] = (
+                n_sub * len(("\n\n" + pending_feedback).encode("utf-8"))
+                if pending_feedback else 0)
+
             # ── 3) spawn agent，等它結束。**那一刻就是交付點。** ──────
             t_a = time.time()
             try:
                 proc = subprocess.Popen(
-                    argv, cwd=str(workspace), env=child_env,
+                    argv_i, cwd=str(workspace), env=child_env,
                     # ⚠ 預設把 stdin 接到 /dev/null：`pi -p` 不給
                     #   `< /dev/null` 會永久卡住（2026-09-18 實測）。
                     #   要互動式 agent 才給 `--stdin inherit`。
-                    stdin=(None if inherit_stdin else subprocess.DEVNULL))
+                    stdin=(None if inherit_stdin else subprocess.DEVNULL),
+                    # ⚠ 自成一個 session／行程群組，好讓 `_kill_group` 收得掉
+                    #   孫行程（`wait()` 只等直接子行程）。
+                    #   **`--stdin inherit` 例外**：分家會讓子行程失去控制終端，
+                    #   互動式 agent 讀 tty 會直接 EIO。那一格我們就量不到孤兒，
+                    #   `orphans_killed` 落 `None`（＝沒量），不是 `False`（＝沒有）。
+                    start_new_session=new_session)
             except OSError as exc:
                 rec["stop_reason"] = "agent_spawn_failed"
                 summary["attempts"].append(rec)
@@ -291,6 +412,11 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                 proc.kill()
                 rec["agent_rc"] = proc.wait()
                 rec["agent_timed_out"] = True
+            # ⚠ **凍結之前**把整個群組收掉：孫行程沒被等到就還寫得動工作區，
+            #   那樣 `ws_end_sha256` 綁的就不是交付當下的那棵樹。
+            #   `None` ＝ 這一格沒分家（`--stdin inherit`）所以沒量，
+            #   與 `False`（量了、群組已空）**不可以同形**。
+            rec["orphans_killed"] = _kill_group(proc) if new_session else None
             rec["agent_wall_s"] = round(time.time() - t_a, 3)
             # **等預算＝上限相同、實際用量落盤**（R530 的裁決），不是用滿。
             rec["requests_seen"] = proxy.stats["requests_seen"] - seen_before
@@ -383,8 +509,18 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                     summary.update({"stop_reason": "ks1_violation",
                                     "infra_void": repr(exc)})
                     break
-                meta = retrypolicy.write_feedback(workspace, text)
-                rec["feedback"] = {**meta, "text": text}
+                # ── V2：同一份文字，兩條管道各自獨立開關 ─────────────
+                #  `file`／`both` ⇒ 寫進工作區（V1 逐字不變）。
+                #  `prompt`／`both` ⇒ 交給下一輪的 `render_argv`。
+                #  ⚠ **不是二選一的 if/else**：`both` 會被那種寫法漏掉一邊，
+                #    所以兩個判斷各問各的（`retry.py` 的 `_PROMPT_MODES`／
+                #    `_FILE_MODES` 就是為了不讓別處用字串比對）。
+                meta = (retrypolicy.write_feedback(workspace, text)
+                        if retrypolicy.delivers_to_file(feedback_into) else {})
+                if retrypolicy.delivers_to_prompt(feedback_into):
+                    pending_feedback = text
+                rec["feedback"] = {**meta, "text": text,
+                                   "delivery": feedback_into}
     finally:
         proxy.stop()
 
@@ -456,6 +592,7 @@ def _persist(run_dir: pathlib.Path, summary: dict, arm: str | None,
     row["retry"] = summary.get("retry")
     row["attempts_used"] = summary.get("attempts_used")
     row["max_attempts"] = summary.get("max_attempts")
+    row["feedback_into"] = summary.get("feedback_into")
     with (run_dir / "rows.jsonl").open("a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
     (run_dir / f"run_{summary['arm']}.json").write_text(
@@ -535,6 +672,14 @@ def build_parser() -> argparse.ArgumentParser:
                          f"{retrypolicy.DEFAULT_MAX_ATTEMPTS}）。"
                          "**這是成本上限不是目標值**：每一次嘗試都燒一整個 "
                          "agent 行程的 token 與時間，實際用量逐次落盤")
+    ap.add_argument("--feedback-into", choices=list(retrypolicy.DELIVERY_MODES),
+                    default="file",
+                    help="回饋走哪條管道：file＝寫進工作區的 "
+                         f"{retrypolicy.FEEDBACK_FILENAME}（**預設**，＝V1 的行為"
+                         "逐字不變；agent 可以不讀它）／prompt＝接到下一次 spawn 的 "
+                         f"prompt 尾端（agent 命令裡要有 {retrypolicy.FEEDBACK_PLACEHOLDER}"
+                         "，而且它必須是那個參數的結尾）／both＝兩邊都給。"
+                         "⚠ 能說的是「回饋一定出現在模型的輸入裡」，不是「不可忽略」")
     ap.add_argument("--json", action="store_true", help="把 summary 印成 JSON")
     ap.add_argument("cmd", nargs=argparse.REMAINDER,
                     help="`--` 之後的整條 agent 命令")
@@ -562,7 +707,8 @@ def main(argv: list[str] | None = None) -> int:
                   port=args.port, timeout_s=args.timeout,
                   test_timeout_s=args.test_timeout,
                   inherit_stdin=(args.stdin == "inherit"),
-                  retry_arm=args.retry, max_attempts=args.max_attempts)
+                  retry_arm=args.retry, max_attempts=args.max_attempts,
+                  feedback_into=args.feedback_into)
     if args.json:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     else:
@@ -574,7 +720,11 @@ def main(argv: list[str] | None = None) -> int:
         # 只在「有重試過」的時候才提，等於把成本做成一個要去別處查的東西。
         tries = f"{summary['attempts_used']}/{summary['max_attempts']} 次"
         if summary.get("retry") != "none":
-            tries += f"（{summary['retry']}）"
+            # 回饋走哪條管道只在**不是預設**時才印：`file` 是 V1 的行為，
+            # 那一行的輸出對既有使用者逐字不變。
+            into = summary.get("feedback_into")
+            tries += f"（{summary['retry']}" + (
+                f"→{into}）" if into != "file" else "）")
         print(f"[vacant run] {summary['arm']}　{mark}（{v}）　{tries}　"
               f"ws {summary['ws_start_sha256'][:12]}→"
               f"{(summary['ws_end_sha256'] or '')[:12]}　"
