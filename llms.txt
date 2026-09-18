@@ -1,0 +1,82 @@
+# Vacant
+
+> Vacant is not a mandatory layer wrapped around an AI agent, and it is not another agent
+> framework. It is a receiving desk: a delivery without a verifiable receipt is not
+> accepted. It looks only at the deliverable and not at how the agent ran, so output from
+> any framework can be fed into it. It runs the customer's own
+> executable acceptance tests against a candidate, decides ship-or-refuse on the result,
+> and signs every attempt — failures included — into an append-only Ed25519 hash chain
+> that anyone with the public key can re-verify offline. Install: `pip install vacant-network`
+> (import name `vacant`). Python >= 3.11. MIT.
+
+The word is **accountability**, not trust: the classical definitions (Gambetta 1988,
+Mayer 1995) make "acting without monitoring" necessary for trust, and monitoring is the
+entire content of this system. Do not describe Vacant as a trust layer.
+
+Four things to know before using anything here. (1) **The premise**: the whole mechanism
+assumes a requirement can be compiled into an executable acceptance suite; where it
+cannot, there is no free referee. (2) **Enforcement is at acceptance time, not execution
+time.** The intake check cannot be routed around, but making Vacant the single exit on a
+machine takes containers, ACLs or egress policy — the deployment layer's job. In
+reference-monitor terms (Saltzer & Schroeder 1975) Vacant is tamper-proof and small
+enough to verify, and does **not** satisfy complete mediation. Same pattern as in-toto /
+SLSA / Sigstore. (3) **The chain gives integrity, not completeness**: a truncated tail is
+a valid prefix and verifies (truncation/omission attack, Ma & Tsudik 2009), and the
+checkpoint chain has the same hole. (4) **Passing the acceptance suite is not meeting the
+requirement** — measured false delivery is 14.8% even with the gate.
+
+Everything here is meant to be checkable without trusting us: the receipt chains re-verify
+offline (`ops/gain/replay/verify_run_receipts.py --selftest` runs negative controls first),
+the task banks are sha256-pinned, and every conclusion can be recounted from
+`runs/g_*/rows.jsonl`. That includes our own mistakes: we claimed R532 was "V/GT 43/43
+CLEAN" and it was false — the audit tool scans only the H arm, so `OFF` and `CONFORM` were
+never scanned. See `AGENTS.md` §7 H-0.
+
+## Start here
+
+- [AGENTS.md](AGENTS.md): the full machine-facing integration contract — API surface with
+  signatures, the four deployment shapes and which are binding, verifiable invariants,
+  honest boundaries, common mistakes, and a stable machine-readable facts block.
+- [README.md](README.md): human overview in Traditional Chinese, with a 30-second
+  quickstart and the current results. [English](README.en.md) · [日本語](README.ja.md).
+- [pyproject.toml](pyproject.toml): package name, version, and the three runtime dependencies.
+
+## Results and how they were obtained
+
+- [docs/VACANT_COMPLETE_2026-09-12.md](docs/VACANT_COMPLETE_2026-09-12.md): single entry
+  point for every number — what exists, what was measured, the honest boundaries, how to
+  re-verify it yourself.
+- [DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md](DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md):
+  five same-task replications, closing audit. The pre-registered claim rule and why the
+  result is reported replication-by-replication instead of pooled.
+- [DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md](DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md):
+  four mutually exclusive task sets, three real sources, 716 tasks.
+- [DECISION_20260917_R532_STRONGER_MODEL_PREREG.md](DECISION_20260917_R532_STRONGER_MODEL_PREREG.md):
+  a different 27B model on 836 tasks, plus two amendments written after seeing the data —
+  the state table had no direction guard, and the run's own premise ("a stronger model")
+  is not supported by its own data.
+- [ops/gain/r532/results_r532.json](ops/gain/r532/results_r532.json): the analyzer's output,
+  the citable source for every R532 figure.
+- [examples/verdicts.py](examples/verdicts.py): the single source of truth for which
+  claims are held, unresolved, overstated, or refuted. Refuted ones are kept, not deleted.
+- [runs/INDEX.md](runs/INDEX.md): read before citing any run, task bank, or log — which
+  entries are evidence, which are smoke or aborted, and which 136 `_analysis_*`
+  directories are derived artefacts that must not be cited as source data.
+- [docs/BANKS_HOWTO.md](docs/BANKS_HOWTO.md): how to re-run the task banks yourself.
+
+## Architecture
+
+- [docs/VACANT_ARCHITECTURE_AND_RESULTS_2026-09-07.md](docs/VACANT_ARCHITECTURE_AND_RESULTS_2026-09-07.md): the canonical architecture document.
+- [docs/HMIX_ARCHITECTURE_2026-09-11.md](docs/HMIX_ARCHITECTURE_2026-09-11.md): the feedback loop — its six parts, its verbatim prompts, and what it cannot do.
+- [docs/HARNESS_STUDY_2026-09-07.md](docs/HARNESS_STUDY_2026-09-07.md): source-level facts about an external harness, and nine folk claims checked one by one.
+- [SPEC_GAIN.md](SPEC_GAIN.md): the experiment specification — hidden/visible test separation, fixed task subsets, the definition of each arm.
+- [docs/RECORD_SPEC.md](docs/RECORD_SPEC.md): the evidence-pack format.
+- [CLAUDE.md](CLAUDE.md): working constraints — red lines, terminology, deferred work.
+
+## Optional
+
+- [docs/PREREG_V2.md](docs/PREREG_V2.md): the claim ladder. Draft, not yet signed or frozen.
+- [CITATION.cff](CITATION.cff): how to cite.
+- [examples/receipt_viewer_multiparty.html](examples/receipt_viewer_multiparty.html):
+  single-file offline receipt viewer — three real signed chains, verified in the browser
+  from genesis to head, no external resources.

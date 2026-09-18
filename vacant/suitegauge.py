@@ -38,8 +38,9 @@ R449（`DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md`）§三-3 量到�
 from __future__ import annotations
 
 import hashlib
+import importlib
 from dataclasses import dataclass
-from typing import Callable, Sequence
+from typing import Any, Callable, Sequence
 
 GAUGE_VERSION = 1
 
@@ -49,6 +50,59 @@ GAUGE_VERSION = 1
 CheckRunner = Callable[[str, str, "str | None", int], "tuple[bool, str]"]
 
 DEFAULT_TIMEOUT_S = 10
+
+
+class OpsRunnerUnavailable(RuntimeError):
+    """預設判準（`ops.gain.gain_run`）不在 import path 上。
+
+    **這不是 bug，是發布邊界。** `vacant` 的預設 runner／probe 是實驗 runner
+    `ops/gain/gain_run.py` 的 `meets_demand`，而那支帶著 G 實驗自己的政策
+    （`_GAIN_ALLOWED_IMPORTS` 白名單、`InfraVoid` 的作廢語意）。那組政策屬於
+    那個實驗，不屬於函式庫——把它抄進 `vacant` 等於讓套件替使用者宣告一份它
+    沒同意過的沙箱政策，而且會多出**第二套判準**，和出貨閘門漂移。那正是
+    `suitegauge` 模組 docstring 與 `conform_failure_detail` 都已經寫過的坑。
+
+    所以發布輪（PyPI `vacant-network`）不含 `ops/`，這條路徑要嘛從 repo 原始碼跑，
+    要嘛由呼叫端注入自己的判準——兩個注入點本來就在公開簽章上：
+    `gauge_suite(..., runner=...)` 與 `peerexec.Executor.new(..., probe=...)`。
+
+    以前這裡是裸的 `ModuleNotFoundError: No module named 'ops'`：import 時不會壞、
+    **呼叫時才炸**，而且訊息不告訴使用者該做什麼。
+    """
+
+
+_OPS_HINT = (
+    "vacant's default acceptance runner lives in the experiment runner "
+    "`ops/gain/gain_run.py`, which is NOT part of the published "
+    "`vacant-network` distribution (it carries the G-experiment's own sandbox "
+    "import allow-list and infra_void semantics; copying it into the library "
+    "would create a second, drifting copy of the acceptance criterion).\n"
+    "Do one of:\n"
+    "  1. Inject your own criterion -- this is the supported path:\n"
+    "       vacant.suitegauge.gauge_suite(..., runner=my_runner)\n"
+    "       vacant.peerexec.Executor.new(..., probe=my_probe)\n"
+    "     `runner(code, check_code, entry_point, timeout_s) -> (ok, message)`;\n"
+    "     `vacant.checks.run_python_check` is a ready sandbox to build it on.\n"
+    "  2. Run from a clone of https://github.com/cosmopig/Vacant with the repo "
+    "root on sys.path, which makes `ops.gain.gain_run` importable."
+)
+
+
+def _import_gain_run(*names: str) -> tuple[Any, ...]:
+    """取實驗 runner 的判準函式；取不到就給**說得出該做什麼**的錯誤。
+
+    只把「`ops` 這棵樹本身不存在」翻譯成 `OpsRunnerUnavailable`。
+    `ops.gain.gain_run` 存在但它自己缺相依時的 ImportError **原樣往上拋**——
+    把那種錯誤也吞成「沒安裝 ops」會讓真正的壞掉看起來像設定問題。
+    """
+    try:
+        mod = importlib.import_module("ops.gain.gain_run")
+    except ModuleNotFoundError as exc:
+        missing = (exc.name or "")
+        if missing != "ops" and not missing.startswith("ops."):
+            raise
+        raise OpsRunnerUnavailable(_OPS_HINT) from exc
+    return tuple(getattr(mod, n) for n in names)
 
 
 def sha256_hex(text: str) -> str:
@@ -74,10 +128,11 @@ def default_runner(
     """預設跑法＝`gain_run.meets_demand`，lazy import。
 
     lazy 的理由與 `peerexec.sandbox_probe` 同一條：`ops.gain` 是實驗 runner，不是
-    `vacant` 的相依。本模組在沒有 ops 的環境（展件）仍然 import 得起來。
+    `vacant` 的相依。本模組在沒有 ops 的環境（展件、PyPI 安裝）仍然 import 得起來。
+    ⚠ 在那些環境呼叫本函式會拋 `OpsRunnerUnavailable`（不是裸 ImportError）——
+    見該例外的 docstring：注入 `runner=` 才是發布輪的正路。
     """
-    from ops.gain.gain_run import meets_demand  # noqa: PLC0415
-
+    (meets_demand,) = _import_gain_run("meets_demand")
     return meets_demand(code, check_code, timeout_s, entry_point=entry_point)
 
 

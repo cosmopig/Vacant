@@ -142,7 +142,14 @@ from . import logbook as _lb
 from .canonical import canonical_bytes
 from .identity import Identity, PublicIdentity
 from .logbook import Logbook, review_commitment
-from .suitegauge import CheckRunner, broken_stub, gauge_suite, sha256_hex
+from .suitegauge import (
+    CheckRunner,
+    OpsRunnerUnavailable,  # noqa: F401 — 轉出：`sandbox_probe` 拋的就是它
+    _import_gain_run,
+    broken_stub,
+    gauge_suite,
+    sha256_hex,
+)
 from .suitespec import SuiteSpec, SuiteSpecError
 from .suitespec import validate as validate_suite
 
@@ -255,11 +262,18 @@ def sandbox_probe(draft_code: str, task: Mapping[str, Any], *, timeout_s: int = 
       交來的原始碼。探針本身不知道差別（它只會跑一段碼），差別在**誰寫的**。
 
     為什麼是 lazy import：`ops.gain.gain_run` 是實驗 runner，不是 `vacant` 的相依；
-    把 import 留在函式內，本模組在沒有 ops 的環境（例如展件）仍然 import 得起來，
-    而測試可以注入自己的 probe。**判定邏輯不重寫**——重寫等於多出第二套判準，
+    把 import 留在函式內，本模組在沒有 ops 的環境（例如展件、PyPI 安裝）仍然 import
+    得起來，而測試可以注入自己的 probe。**判定邏輯不重寫**——重寫等於多出第二套判準，
     和出貨閘門漂移，那正是 `conform_failure_detail` 的 docstring 已經寫過的坑。
+
+    ⚠ 在沒有 ops 的環境**呼叫**本函式會拋 `suitegauge.OpsRunnerUnavailable`
+      （不是裸的 `ModuleNotFoundError: No module named 'ops'`）。發布輪的正路是
+      `Executor.new(executor_id, probe=my_probe)` 注入自己的探針；理由與做法全寫在
+      那個例外的 docstring 裡。
     """
-    from ops.gain.gain_run import conform_failure_detail, meets_demand  # noqa: PLC0415
+    conform_failure_detail, meets_demand = _import_gain_run(
+        "conform_failure_detail", "meets_demand",
+    )
 
     check_code = ((task.get("visible_check") or {}).get("code")) or ""
     ep = task.get("entry_point")
@@ -267,8 +281,7 @@ def sandbox_probe(draft_code: str, task: Mapping[str, Any], *, timeout_s: int = 
     if ok:
         sl = None
         try:
-            from ops.gain.gain_run import _visible_test_slicer  # noqa: PLC0415
-
+            (_visible_test_slicer,) = _import_gain_run("_visible_test_slicer")
             sl = _visible_test_slicer(check_code)
         except Exception:  # noqa: BLE001
             sl = None
