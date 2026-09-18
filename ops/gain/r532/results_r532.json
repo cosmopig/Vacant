@@ -1,0 +1,4184 @@
+{
+ "run": "R532",
+ "decision": "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+ "analyzer": "ops/gain/r532/analyze_r532.py",
+ "worker_model": "qwen/qwen3.8-27b (Q4_K_M, non-thinking)",
+ "arms": [
+  "OFF",
+  "CONFORM",
+  "HMIX"
+ ],
+ "sets_expected": [
+  "lcb2",
+  "lcb3_medium",
+  "lcb3_hard",
+  "humanevalplus",
+  "evalplus"
+ ],
+ "sets_included_in_primary": [
+  "lcb2",
+  "lcb3_medium",
+  "lcb3_hard",
+  "humanevalplus",
+  "evalplus"
+ ],
+ "delivery_definition": "deliv = accepted ∧ meets_demand（隱藏測資判定，**不是** visible_ok、**不是**只看 accepted）",
+ "gates": {
+  "E11_inference_mode": {
+   "inference_mode": "non_thinking",
+   "reasoning_call_pp": 0.0,
+   "reasoning_tokens_total": 0,
+   "calls_ok": 3145,
+   "red": false,
+   "criterion": "§四-2 INVALID 的觸發條件之一：事後發現 reasoning ≠ 0",
+   "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+  },
+  "E13a_context_pressure": {
+   "budget_or_context_rejects_by_arm": {
+    "OFF": 0,
+    "CONFORM": 0,
+    "HMIX": 0
+   },
+   "calls_not_ok": 0,
+   "calls_finish_reason_length": 0,
+   "prompt_tokens_max": 11728,
+   "context_per_slot": 65536,
+   "max_tokens_budget": 32000,
+   "red": false,
+   "gate_status": "事後查核，不自動判 INVALID（§八-2 發射前已修正 context 對齊）",
+   "note": "P-10 讀這一格：12B 那輪每臂 ≤2 件。"
+  },
+  "vgt": {
+   "applied": false,
+   "dir": null,
+   "blocks_expected": 43,
+   "clean_n": 0,
+   "not_clean": [],
+   "clean": null,
+   "red": false,
+   "note": "analyzer 只讀 rows/calls/summary，**結構上看不到隱藏測資有沒有洩漏** ⇒ 沒給 --vgt-dir 時這一格是「沒量」不是 CLEAN。⚠ 這道閘門是**單邊**的：全 CLEAN 只代表那一套 needle 沒命中，不代表沒有洩漏。"
+  },
+  "data_integrity": {
+   "broken_sets": {},
+   "red": false,
+   "note": "任一集 BROKEN（缺欄位／帳對不上／未 terminal／void 超線）⇒ 那一集不進主指標；**五集全 BROKEN** 才會讓整個 run INVALID。"
+  }
+ },
+ "per_set": {
+  "lcb2": {
+   "label": "S0 LCB v2",
+   "n_tasks": 120,
+   "n_tasks_expected": 120,
+   "blocks_present": 6,
+   "blocks_expected": 6,
+   "broken_reasons": [],
+   "valid": true,
+   "per_arm": {
+    "OFF": {
+     "n_measured": 120,
+     "deliv_n": 59,
+     "correct_delivery_rate": 0.49166666666666664,
+     "deliv_pp": 49.166666666666664,
+     "accepted_n": 120,
+     "meets_demand_n": 59,
+     "visible_ok_n": 80,
+     "false_delivery_n": 61,
+     "false_delivery_pp": 50.833333333333336,
+     "calls_logical_total": 120,
+     "calls_per_task": 1.0,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 61
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "CONFORM": {
+     "n_measured": 120,
+     "deliv_n": 82,
+     "correct_delivery_rate": 0.6833333333333333,
+     "deliv_pp": 68.33333333333333,
+     "accepted_n": 114,
+     "meets_demand_n": 82,
+     "visible_ok_n": 114,
+     "false_delivery_n": 32,
+     "false_delivery_pp": 26.666666666666668,
+     "calls_logical_total": 191,
+     "calls_per_task": 1.5916666666666666,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 38
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "HMIX": {
+     "n_measured": 120,
+     "deliv_n": 75,
+     "correct_delivery_rate": 0.625,
+     "deliv_pp": 62.5,
+     "accepted_n": 102,
+     "meets_demand_n": 75,
+     "visible_ok_n": 102,
+     "false_delivery_n": 27,
+     "false_delivery_pp": 22.5,
+     "calls_logical_total": 194,
+     "calls_per_task": 1.6166666666666667,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 45
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    }
+   },
+   "tokens": {
+    "OFF": {
+     "tokens_total": 302859,
+     "tokens_incl_void": 302859,
+     "calls_wire_total": 120,
+     "calls_wire_ok": 120,
+     "calls_logical_total": 120,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 2523.825,
+     "tpc_incl_void": 5133.203389830508,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "CONFORM": {
+     "tokens_total": 645598,
+     "tokens_incl_void": 645598,
+     "calls_wire_total": 191,
+     "calls_wire_ok": 191,
+     "calls_logical_total": 191,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 5379.983333333334,
+     "tpc_incl_void": 7873.1463414634145,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "HMIX": {
+     "tokens_total": 510383,
+     "tokens_incl_void": 510383,
+     "calls_wire_total": 200,
+     "calls_wire_ok": 200,
+     "calls_logical_total": 194,
+     "wire_probe_calls": 6,
+     "wire_probe_tokens": 294,
+     "wire_probe_share_pp": 0.05760379949959148,
+     "tokens_per_task": 4253.191666666667,
+     "tpc_incl_void": 6805.106666666667,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    }
+   },
+   "paired": {
+    "HMIX_vs_CONFORM": {
+     "b": 13,
+     "c": 20,
+     "n_discordant": 33,
+     "n_common": 120,
+     "p_disc": 0.275,
+     "delta_pp": -5.833333333333333,
+     "ci95_lo_pp": -14.901356889968984,
+     "ci95_hi_pp": 4.32334532364623,
+     "p_mcnemar_exact": 0.296206368599087,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "lcb_3485",
+      "lcb_3562",
+      "lcb_3580",
+      "lcb_3583",
+      "lcb_3657",
+      "lcb_3675",
+      "lcb_3716",
+      "lcb_3721",
+      "lcb_3770",
+      "lcb_3777",
+      "lcb_3781",
+      "lcb_3783",
+      "lcb_3789"
+     ],
+     "c_only_task_ids": [
+      "lcb_3495",
+      "lcb_3510",
+      "lcb_3528",
+      "lcb_3551",
+      "lcb_3593",
+      "lcb_3603",
+      "lcb_3629",
+      "lcb_3649",
+      "lcb_3658",
+      "lcb_3677",
+      "lcb_3682",
+      "lcb_3683",
+      "lcb_3690",
+      "lcb_3696",
+      "lcb_3717",
+      "lcb_3722",
+      "lcb_3748",
+      "lcb_3754",
+      "lcb_3786",
+      "lcb_3805"
+     ]
+    },
+    "HMIX_vs_OFF": {
+     "b": 31,
+     "c": 15,
+     "n_discordant": 46,
+     "n_common": 120,
+     "p_disc": 0.38333333333333336,
+     "delta_pp": 13.333333333333334,
+     "ci95_lo_pp": 1.5201435511223897,
+     "ci95_hi_pp": 23.358383188334784,
+     "p_mcnemar_exact": 0.02589608179323477,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "lcb_3487",
+      "lcb_3522",
+      "lcb_3534",
+      "lcb_3548",
+      "lcb_3560",
+      "lcb_3562",
+      "lcb_3580",
+      "lcb_3588",
+      "lcb_3604",
+      "lcb_3627",
+      "lcb_3631",
+      "lcb_3657",
+      "lcb_3674",
+      "lcb_3675",
+      "lcb_3681",
+      "lcb_3687",
+      "lcb_3688",
+      "lcb_3715",
+      "lcb_3716",
+      "lcb_3733",
+      "lcb_3739",
+      "lcb_3744",
+      "lcb_3770",
+      "lcb_3771",
+      "lcb_3777",
+      "lcb_3779",
+      "lcb_3781",
+      "lcb_3783",
+      "lcb_3789",
+      "lcb_3791",
+      "lcb_3809"
+     ],
+     "c_only_task_ids": [
+      "lcb_3495",
+      "lcb_3510",
+      "lcb_3550",
+      "lcb_3571",
+      "lcb_3584",
+      "lcb_3593",
+      "lcb_3607",
+      "lcb_3658",
+      "lcb_3677",
+      "lcb_3682",
+      "lcb_3717",
+      "lcb_3722",
+      "lcb_3754",
+      "lcb_3786",
+      "lcb_3805"
+     ]
+    },
+    "CONFORM_vs_OFF": {
+     "b": 30,
+     "c": 7,
+     "n_discordant": 37,
+     "n_common": 120,
+     "p_disc": 0.30833333333333335,
+     "delta_pp": 19.166666666666668,
+     "ci95_lo_pp": 9.154270000562903,
+     "ci95_hi_pp": 25.923364214072603,
+     "p_mcnemar_exact": 0.00019107642583549023,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "lcb_3487",
+      "lcb_3522",
+      "lcb_3528",
+      "lcb_3534",
+      "lcb_3548",
+      "lcb_3551",
+      "lcb_3560",
+      "lcb_3588",
+      "lcb_3603",
+      "lcb_3604",
+      "lcb_3627",
+      "lcb_3629",
+      "lcb_3631",
+      "lcb_3649",
+      "lcb_3674",
+      "lcb_3681",
+      "lcb_3683",
+      "lcb_3687",
+      "lcb_3688",
+      "lcb_3690",
+      "lcb_3696",
+      "lcb_3715",
+      "lcb_3733",
+      "lcb_3739",
+      "lcb_3744",
+      "lcb_3748",
+      "lcb_3771",
+      "lcb_3779",
+      "lcb_3791",
+      "lcb_3809"
+     ],
+     "c_only_task_ids": [
+      "lcb_3485",
+      "lcb_3550",
+      "lcb_3571",
+      "lcb_3583",
+      "lcb_3584",
+      "lcb_3607",
+      "lcb_3721"
+     ],
+     "outside_preregistered_family": true,
+     "p_is_uncorrected": true,
+     "note": "`CONFORM − OFF`（Δ_G，閘門＋重抽買到的東西）**不在** DECISION §四-2 的預註冊家族裡（家族只有 HMIX−CONFORM 與 HMIX−OFF）⇒ 這裡的 p **未經多重比較校正**，區間也沒有。引用時必須寫出這一句（先例：manuscript.md 對同一個對比的處置）。把它塞進 Holm 家族會讓兩個已凍結的 p_adj 變大＝事後改家族，明文禁止。"
+    }
+   },
+   "token_wilcoxon": {
+    "HMIX_vs_CONFORM": {
+     "n": 120.0,
+     "median_diff_tokens": 136.0,
+     "mean_diff_tokens": -1126.7916666666667,
+     "w_plus": 3818.0,
+     "p": 0.6233991556337557,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": false,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "HMIX_vs_OFF": {
+     "n": 120.0,
+     "median_diff_tokens": 468.0,
+     "mean_diff_tokens": 1729.3666666666666,
+     "w_plus": 5357.0,
+     "p": 6.140836333212718e-06,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "CONFORM_vs_OFF": {
+     "n": 120.0,
+     "median_diff_tokens": 351.0,
+     "mean_diff_tokens": 2856.1583333333333,
+     "w_plus": 5337.5,
+     "p": 7.806855550462899e-06,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    }
+   },
+   "blocks": [
+    {
+     "block": "g_r532_lcb2_a1",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r440-lcb2",
+     "offset": 0,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb2_a2",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r440-lcb2",
+     "offset": 20,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb2_a3",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r440-lcb2",
+     "offset": 40,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb2_a4",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r440-lcb2",
+     "offset": 60,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb2_a5",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r440-lcb2",
+     "offset": 80,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb2_a6",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r440-lcb2",
+     "offset": 100,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    }
+   ],
+   "arbiter_note": "逐題組**不下裁決**，只給數字（§四-2「次指標只當描述」）。"
+  },
+  "lcb3_medium": {
+   "label": "S1 LCB v3 medium",
+   "n_tasks": 135,
+   "n_tasks_expected": 135,
+   "blocks_present": 7,
+   "blocks_expected": 7,
+   "broken_reasons": [],
+   "valid": true,
+   "per_arm": {
+    "OFF": {
+     "n_measured": 135,
+     "deliv_n": 102,
+     "correct_delivery_rate": 0.7555555555555555,
+     "deliv_pp": 75.55555555555556,
+     "accepted_n": 135,
+     "meets_demand_n": 102,
+     "visible_ok_n": 107,
+     "false_delivery_n": 33,
+     "false_delivery_pp": 24.444444444444443,
+     "calls_logical_total": 135,
+     "calls_per_task": 1.0,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 33
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "CONFORM": {
+     "n_measured": 135,
+     "deliv_n": 124,
+     "correct_delivery_rate": 0.9185185185185185,
+     "deliv_pp": 91.85185185185185,
+     "accepted_n": 134,
+     "meets_demand_n": 124,
+     "visible_ok_n": 134,
+     "false_delivery_n": 10,
+     "false_delivery_pp": 7.407407407407407,
+     "calls_logical_total": 179,
+     "calls_per_task": 1.325925925925926,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 11
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "HMIX": {
+     "n_measured": 135,
+     "deliv_n": 117,
+     "correct_delivery_rate": 0.8666666666666667,
+     "deliv_pp": 86.66666666666667,
+     "accepted_n": 124,
+     "meets_demand_n": 117,
+     "visible_ok_n": 124,
+     "false_delivery_n": 7,
+     "false_delivery_pp": 5.185185185185185,
+     "calls_logical_total": 190,
+     "calls_per_task": 1.4074074074074074,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 18
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    }
+   },
+   "tokens": {
+    "OFF": {
+     "tokens_total": 198014,
+     "tokens_incl_void": 198014,
+     "calls_wire_total": 135,
+     "calls_wire_ok": 135,
+     "calls_logical_total": 135,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 1466.7703703703703,
+     "tpc_incl_void": 1941.313725490196,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "CONFORM": {
+     "tokens_total": 339952,
+     "tokens_incl_void": 339952,
+     "calls_wire_total": 179,
+     "calls_wire_ok": 179,
+     "calls_logical_total": 179,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 2518.162962962963,
+     "tpc_incl_void": 2741.548387096774,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "HMIX": {
+     "tokens_total": 324179,
+     "tokens_incl_void": 324179,
+     "calls_wire_total": 197,
+     "calls_wire_ok": 197,
+     "calls_logical_total": 190,
+     "wire_probe_calls": 7,
+     "wire_probe_tokens": 392,
+     "wire_probe_share_pp": 0.12092084928388329,
+     "tokens_per_task": 2401.3259259259257,
+     "tpc_incl_void": 2770.7606837606836,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    }
+   },
+   "paired": {
+    "HMIX_vs_CONFORM": {
+     "b": 4,
+     "c": 11,
+     "n_discordant": 15,
+     "n_common": 135,
+     "p_disc": 0.1111111111111111,
+     "delta_pp": -5.185185185185185,
+     "ci95_lo_pp": -9.380632304643479,
+     "ci95_hi_pp": 1.1334053563771374,
+     "p_mcnemar_exact": 0.11846923828125,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "lcb_2920",
+      "lcb_3046",
+      "lcb_3239",
+      "lcb_3244"
+     ],
+     "c_only_task_ids": [
+      "lcb_2850",
+      "lcb_2877",
+      "lcb_3081",
+      "lcb_3166",
+      "lcb_3240",
+      "lcb_3346",
+      "lcb_3354",
+      "lcb_3455",
+      "lcb_3479",
+      "lcb_3492",
+      "lcb_3517"
+     ]
+    },
+    "HMIX_vs_OFF": {
+     "b": 21,
+     "c": 6,
+     "n_discordant": 27,
+     "n_common": 135,
+     "p_disc": 0.2,
+     "delta_pp": 11.11111111111111,
+     "ci95_lo_pp": 3.096677598224762,
+     "ci95_hi_pp": 16.55132240209733,
+     "p_mcnemar_exact": 0.005924612283706665,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "lcb_2834",
+      "lcb_2845",
+      "lcb_2867",
+      "lcb_3046",
+      "lcb_3104",
+      "lcb_3114",
+      "lcb_3190",
+      "lcb_3195",
+      "lcb_3209",
+      "lcb_3213",
+      "lcb_3228",
+      "lcb_3244",
+      "lcb_3291",
+      "lcb_3297",
+      "lcb_3317",
+      "lcb_3351",
+      "lcb_3388",
+      "lcb_3394",
+      "lcb_3456",
+      "lcb_3493",
+      "lcb_3498"
+     ],
+     "c_only_task_ids": [
+      "lcb_3240",
+      "lcb_3308",
+      "lcb_3346",
+      "lcb_3406",
+      "lcb_3455",
+      "lcb_3479"
+     ]
+    },
+    "CONFORM_vs_OFF": {
+     "b": 26,
+     "c": 4,
+     "n_discordant": 30,
+     "n_common": 135,
+     "p_disc": 0.2222222222222222,
+     "delta_pp": 16.296296296296298,
+     "ci95_lo_pp": 8.568073321060982,
+     "ci95_hi_pp": 20.553177940517187,
+     "p_mcnemar_exact": 5.947612226009369e-05,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "lcb_2834",
+      "lcb_2845",
+      "lcb_2850",
+      "lcb_2867",
+      "lcb_2877",
+      "lcb_3081",
+      "lcb_3104",
+      "lcb_3114",
+      "lcb_3166",
+      "lcb_3190",
+      "lcb_3195",
+      "lcb_3209",
+      "lcb_3213",
+      "lcb_3228",
+      "lcb_3291",
+      "lcb_3297",
+      "lcb_3317",
+      "lcb_3351",
+      "lcb_3354",
+      "lcb_3388",
+      "lcb_3394",
+      "lcb_3456",
+      "lcb_3492",
+      "lcb_3493",
+      "lcb_3498",
+      "lcb_3517"
+     ],
+     "c_only_task_ids": [
+      "lcb_2920",
+      "lcb_3239",
+      "lcb_3308",
+      "lcb_3406"
+     ],
+     "outside_preregistered_family": true,
+     "p_is_uncorrected": true,
+     "note": "`CONFORM − OFF`（Δ_G，閘門＋重抽買到的東西）**不在** DECISION §四-2 的預註冊家族裡（家族只有 HMIX−CONFORM 與 HMIX−OFF）⇒ 這裡的 p **未經多重比較校正**，區間也沒有。引用時必須寫出這一句（先例：manuscript.md 對同一個對比的處置）。把它塞進 Holm 家族會讓兩個已凍結的 p_adj 變大＝事後改家族，明文禁止。"
+    }
+   },
+   "token_wilcoxon": {
+    "HMIX_vs_CONFORM": {
+     "n": 135.0,
+     "median_diff_tokens": 92.0,
+     "mean_diff_tokens": -116.83703703703704,
+     "w_plus": 4878.0,
+     "p": 0.5277612496132462,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": false,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "HMIX_vs_OFF": {
+     "n": 135.0,
+     "median_diff_tokens": 160.0,
+     "mean_diff_tokens": 934.5555555555555,
+     "w_plus": 6601.5,
+     "p": 1.0021677501192983e-05,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "CONFORM_vs_OFF": {
+     "n": 134.0,
+     "median_diff_tokens": 71.0,
+     "mean_diff_tokens": 1051.3925925925926,
+     "w_plus": 6356.0,
+     "p": 4.686308388790472e-05,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    }
+   },
+   "blocks": [
+    {
+     "block": "g_r532_lcb3m_a1",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 0,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb3m_a2",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 20,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb3m_a3",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 40,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb3m_a4",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 60,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb3m_a5",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 80,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb3m_a6",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 100,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb3m_a7",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 45,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 120,
+     "n": 15,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    }
+   ],
+   "arbiter_note": "逐題組**不下裁決**，只給數字（§四-2「次指標只當描述」）。"
+  },
+  "lcb3_hard": {
+   "label": "S2 LCB v3 hard",
+   "n_tasks": 54,
+   "n_tasks_expected": 54,
+   "blocks_present": 3,
+   "blocks_expected": 3,
+   "broken_reasons": [],
+   "valid": true,
+   "per_arm": {
+    "OFF": {
+     "n_measured": 54,
+     "deliv_n": 36,
+     "correct_delivery_rate": 0.6666666666666666,
+     "deliv_pp": 66.66666666666667,
+     "accepted_n": 54,
+     "meets_demand_n": 36,
+     "visible_ok_n": 39,
+     "false_delivery_n": 18,
+     "false_delivery_pp": 33.333333333333336,
+     "calls_logical_total": 54,
+     "calls_per_task": 1.0,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 18
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "CONFORM": {
+     "n_measured": 54,
+     "deliv_n": 44,
+     "correct_delivery_rate": 0.8148148148148148,
+     "deliv_pp": 81.48148148148148,
+     "accepted_n": 53,
+     "meets_demand_n": 44,
+     "visible_ok_n": 53,
+     "false_delivery_n": 9,
+     "false_delivery_pp": 16.666666666666668,
+     "calls_logical_total": 93,
+     "calls_per_task": 1.7222222222222223,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 10
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "HMIX": {
+     "n_measured": 54,
+     "deliv_n": 35,
+     "correct_delivery_rate": 0.6481481481481481,
+     "deliv_pp": 64.81481481481481,
+     "accepted_n": 49,
+     "meets_demand_n": 35,
+     "visible_ok_n": 49,
+     "false_delivery_n": 14,
+     "false_delivery_pp": 25.925925925925927,
+     "calls_logical_total": 88,
+     "calls_per_task": 1.6296296296296295,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 19
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    }
+   },
+   "tokens": {
+    "OFF": {
+     "tokens_total": 122517,
+     "tokens_incl_void": 122517,
+     "calls_wire_total": 54,
+     "calls_wire_ok": 54,
+     "calls_logical_total": 54,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 2268.8333333333335,
+     "tpc_incl_void": 3403.25,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "CONFORM": {
+     "tokens_total": 294094,
+     "tokens_incl_void": 294094,
+     "calls_wire_total": 93,
+     "calls_wire_ok": 93,
+     "calls_logical_total": 93,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 5446.185185185185,
+     "tpc_incl_void": 6683.954545454545,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "HMIX": {
+     "tokens_total": 215619,
+     "tokens_incl_void": 215619,
+     "calls_wire_total": 91,
+     "calls_wire_ok": 91,
+     "calls_logical_total": 88,
+     "wire_probe_calls": 3,
+     "wire_probe_tokens": 168,
+     "wire_probe_share_pp": 0.0779152115537128,
+     "tokens_per_task": 3992.9444444444443,
+     "tpc_incl_void": 6160.542857142857,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    }
+   },
+   "paired": {
+    "HMIX_vs_CONFORM": {
+     "b": 1,
+     "c": 10,
+     "n_discordant": 11,
+     "n_common": 54,
+     "p_disc": 0.2037037037037037,
+     "delta_pp": -16.666666666666664,
+     "ci95_lo_pp": -20.276708539437198,
+     "ci95_hi_pp": -3.553410789362187,
+     "p_mcnemar_exact": 0.01171875,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "lcb_3364"
+     ],
+     "c_only_task_ids": [
+      "lcb_2808",
+      "lcb_2952",
+      "lcb_3261",
+      "lcb_3316",
+      "lcb_3344",
+      "lcb_3362",
+      "lcb_3402",
+      "lcb_3411",
+      "lcb_3454",
+      "lcb_3460"
+     ]
+    },
+    "HMIX_vs_OFF": {
+     "b": 9,
+     "c": 10,
+     "n_discordant": 19,
+     "n_common": 54,
+     "p_disc": 0.35185185185185186,
+     "delta_pp": -1.8518518518518516,
+     "ci95_lo_pp": -17.981410741267663,
+     "ci95_hi_pp": 14.873252924359337,
+     "p_mcnemar_exact": 1.0,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "lcb_2784",
+      "lcb_2919",
+      "lcb_2921",
+      "lcb_3032",
+      "lcb_3091",
+      "lcb_3184",
+      "lcb_3203",
+      "lcb_3382",
+      "lcb_3436"
+     ],
+     "c_only_task_ids": [
+      "lcb_2808",
+      "lcb_2952",
+      "lcb_3261",
+      "lcb_3313",
+      "lcb_3344",
+      "lcb_3362",
+      "lcb_3414",
+      "lcb_3454",
+      "lcb_3460",
+      "lcb_3527"
+     ]
+    },
+    "CONFORM_vs_OFF": {
+     "b": 12,
+     "c": 4,
+     "n_discordant": 16,
+     "n_common": 54,
+     "p_disc": 0.2962962962962963,
+     "delta_pp": 14.814814814814813,
+     "ci95_lo_pp": -1.4086411790298305,
+     "ci95_hi_pp": 25.32373106649587,
+     "p_mcnemar_exact": 0.076812744140625,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "lcb_2784",
+      "lcb_2919",
+      "lcb_2921",
+      "lcb_3032",
+      "lcb_3091",
+      "lcb_3184",
+      "lcb_3203",
+      "lcb_3316",
+      "lcb_3382",
+      "lcb_3402",
+      "lcb_3411",
+      "lcb_3436"
+     ],
+     "c_only_task_ids": [
+      "lcb_3313",
+      "lcb_3364",
+      "lcb_3414",
+      "lcb_3527"
+     ],
+     "outside_preregistered_family": true,
+     "p_is_uncorrected": true,
+     "note": "`CONFORM − OFF`（Δ_G，閘門＋重抽買到的東西）**不在** DECISION §四-2 的預註冊家族裡（家族只有 HMIX−CONFORM 與 HMIX−OFF）⇒ 這裡的 p **未經多重比較校正**，區間也沒有。引用時必須寫出這一句（先例：manuscript.md 對同一個對比的處置）。把它塞進 Holm 家族會讓兩個已凍結的 p_adj 變大＝事後改家族，明文禁止。"
+    }
+   },
+   "token_wilcoxon": {
+    "HMIX_vs_CONFORM": {
+     "n": 54.0,
+     "median_diff_tokens": -596.0,
+     "mean_diff_tokens": -1453.2407407407406,
+     "w_plus": 468.0,
+     "p": 0.018314395584944076,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "HMIX_vs_OFF": {
+     "n": 54.0,
+     "median_diff_tokens": 402.0,
+     "mean_diff_tokens": 1724.111111111111,
+     "w_plus": 1123.0,
+     "p": 0.0010683383818879122,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "CONFORM_vs_OFF": {
+     "n": 54.0,
+     "median_diff_tokens": 1152.0,
+     "mean_diff_tokens": 3177.3518518518517,
+     "w_plus": 1228.0,
+     "p": 2.9673753169312533e-05,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    }
+   },
+   "blocks": [
+    {
+     "block": "g_r532_lcb3h_a1",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 0,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb3h_a2",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 20,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_lcb3h_a3",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 42,
+     "run_complete": true,
+     "seed": "g-r529-lcb3",
+     "offset": 40,
+     "n": 14,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    }
+   ],
+   "arbiter_note": "逐題組**不下裁決**，只給數字（§四-2「次指標只當描述」）。"
+  },
+  "humanevalplus": {
+   "label": "S3 HumanEval+",
+   "n_tasks": 156,
+   "n_tasks_expected": 156,
+   "blocks_present": 8,
+   "blocks_expected": 8,
+   "broken_reasons": [],
+   "valid": true,
+   "per_arm": {
+    "OFF": {
+     "n_measured": 156,
+     "deliv_n": 140,
+     "correct_delivery_rate": 0.8974358974358975,
+     "deliv_pp": 89.74358974358974,
+     "accepted_n": 156,
+     "meets_demand_n": 140,
+     "visible_ok_n": 146,
+     "false_delivery_n": 16,
+     "false_delivery_pp": 10.256410256410257,
+     "calls_logical_total": 156,
+     "calls_per_task": 1.0,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 16
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "CONFORM": {
+     "n_measured": 156,
+     "deliv_n": 143,
+     "correct_delivery_rate": 0.9166666666666666,
+     "deliv_pp": 91.66666666666667,
+     "accepted_n": 153,
+     "meets_demand_n": 143,
+     "visible_ok_n": 153,
+     "false_delivery_n": 10,
+     "false_delivery_pp": 6.410256410256411,
+     "calls_logical_total": 187,
+     "calls_per_task": 1.1987179487179487,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 13
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "HMIX": {
+     "n_measured": 156,
+     "deliv_n": 141,
+     "correct_delivery_rate": 0.9038461538461539,
+     "deliv_pp": 90.38461538461539,
+     "accepted_n": 147,
+     "meets_demand_n": 141,
+     "visible_ok_n": 147,
+     "false_delivery_n": 6,
+     "false_delivery_pp": 3.8461538461538463,
+     "calls_logical_total": 181,
+     "calls_per_task": 1.1602564102564104,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 15
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    }
+   },
+   "tokens": {
+    "OFF": {
+     "tokens_total": 86354,
+     "tokens_incl_void": 86354,
+     "calls_wire_total": 156,
+     "calls_wire_ok": 156,
+     "calls_logical_total": 156,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 553.5512820512821,
+     "tpc_incl_void": 616.8142857142857,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "CONFORM": {
+     "tokens_total": 96294,
+     "tokens_incl_void": 96294,
+     "calls_wire_total": 187,
+     "calls_wire_ok": 187,
+     "calls_logical_total": 187,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 617.2692307692307,
+     "tpc_incl_void": 673.3846153846154,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "HMIX": {
+     "tokens_total": 96314,
+     "tokens_incl_void": 96314,
+     "calls_wire_total": 189,
+     "calls_wire_ok": 189,
+     "calls_logical_total": 181,
+     "wire_probe_calls": 8,
+     "wire_probe_tokens": 648,
+     "wire_probe_share_pp": 0.6727993853437714,
+     "tokens_per_task": 617.3974358974359,
+     "tpc_incl_void": 683.0780141843971,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    }
+   },
+   "paired": {
+    "HMIX_vs_CONFORM": {
+     "b": 5,
+     "c": 7,
+     "n_discordant": 12,
+     "n_common": 156,
+     "p_disc": 0.07692307692307693,
+     "delta_pp": -1.282051282051282,
+     "ci95_lo_pp": -5.359196464485697,
+     "ci95_hi_pp": 3.4358509895060645,
+     "p_mcnemar_exact": 0.7744140625,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "humanevalplus_HumanEval/108",
+      "humanevalplus_HumanEval/122",
+      "humanevalplus_HumanEval/141",
+      "humanevalplus_HumanEval/55",
+      "humanevalplus_HumanEval/70"
+     ],
+     "c_only_task_ids": [
+      "humanevalplus_HumanEval/103",
+      "humanevalplus_HumanEval/115",
+      "humanevalplus_HumanEval/116",
+      "humanevalplus_HumanEval/127",
+      "humanevalplus_HumanEval/140",
+      "humanevalplus_HumanEval/163",
+      "humanevalplus_HumanEval/93"
+     ]
+    },
+    "HMIX_vs_OFF": {
+     "b": 10,
+     "c": 9,
+     "n_discordant": 19,
+     "n_common": 156,
+     "p_disc": 0.12179487179487179,
+     "delta_pp": 0.641025641025641,
+     "ci95_lo_pp": -5.148433704585918,
+     "ci95_hi_pp": 6.224334487361893,
+     "p_mcnemar_exact": 1.0,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "humanevalplus_HumanEval/1",
+      "humanevalplus_HumanEval/141",
+      "humanevalplus_HumanEval/154",
+      "humanevalplus_HumanEval/17",
+      "humanevalplus_HumanEval/28",
+      "humanevalplus_HumanEval/41",
+      "humanevalplus_HumanEval/6",
+      "humanevalplus_HumanEval/86",
+      "humanevalplus_HumanEval/92",
+      "humanevalplus_HumanEval/95"
+     ],
+     "c_only_task_ids": [
+      "humanevalplus_HumanEval/101",
+      "humanevalplus_HumanEval/103",
+      "humanevalplus_HumanEval/115",
+      "humanevalplus_HumanEval/116",
+      "humanevalplus_HumanEval/127",
+      "humanevalplus_HumanEval/140",
+      "humanevalplus_HumanEval/151",
+      "humanevalplus_HumanEval/163",
+      "humanevalplus_HumanEval/93"
+     ]
+    },
+    "CONFORM_vs_OFF": {
+     "b": 9,
+     "c": 6,
+     "n_discordant": 15,
+     "n_common": 156,
+     "p_disc": 0.09615384615384616,
+     "delta_pp": 1.9230769230769231,
+     "ci95_lo_pp": -3.4063506498791876,
+     "ci95_hi_pp": 6.473763002701668,
+     "p_mcnemar_exact": 0.60723876953125,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "humanevalplus_HumanEval/1",
+      "humanevalplus_HumanEval/154",
+      "humanevalplus_HumanEval/17",
+      "humanevalplus_HumanEval/28",
+      "humanevalplus_HumanEval/41",
+      "humanevalplus_HumanEval/6",
+      "humanevalplus_HumanEval/86",
+      "humanevalplus_HumanEval/92",
+      "humanevalplus_HumanEval/95"
+     ],
+     "c_only_task_ids": [
+      "humanevalplus_HumanEval/101",
+      "humanevalplus_HumanEval/108",
+      "humanevalplus_HumanEval/122",
+      "humanevalplus_HumanEval/151",
+      "humanevalplus_HumanEval/55",
+      "humanevalplus_HumanEval/70"
+     ],
+     "outside_preregistered_family": true,
+     "p_is_uncorrected": true,
+     "note": "`CONFORM − OFF`（Δ_G，閘門＋重抽買到的東西）**不在** DECISION §四-2 的預註冊家族裡（家族只有 HMIX−CONFORM 與 HMIX−OFF）⇒ 這裡的 p **未經多重比較校正**，區間也沒有。引用時必須寫出這一句（先例：manuscript.md 對同一個對比的處置）。把它塞進 Holm 家族會讓兩個已凍結的 p_adj 變大＝事後改家族，明文禁止。"
+    }
+   },
+   "token_wilcoxon": {
+    "HMIX_vs_CONFORM": {
+     "n": 155.0,
+     "median_diff_tokens": 72.0,
+     "mean_diff_tokens": 0.1282051282051282,
+     "w_plus": 7258.5,
+     "p": 0.030233984286064164,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "HMIX_vs_OFF": {
+     "n": 156.0,
+     "median_diff_tokens": 52.0,
+     "mean_diff_tokens": 63.84615384615385,
+     "w_plus": 6580.0,
+     "p": 0.41924778630471327,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": false,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "CONFORM_vs_OFF": {
+     "n": 150.0,
+     "median_diff_tokens": -4.0,
+     "mean_diff_tokens": 63.717948717948715,
+     "w_plus": 5189.5,
+     "p": 0.3753326364136018,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": false,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    }
+   },
+   "blocks": [
+    {
+     "block": "g_r532_hep_a1",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-he",
+     "offset": 0,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_hep_a2",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-he",
+     "offset": 20,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_hep_a3",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-he",
+     "offset": 40,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_hep_a4",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-he",
+     "offset": 60,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_hep_a5",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-he",
+     "offset": 80,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_hep_a6",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-he",
+     "offset": 100,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_hep_a7",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-he",
+     "offset": 120,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_hep_a8",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 48,
+     "run_complete": true,
+     "seed": "g-r529-he",
+     "offset": 140,
+     "n": 16,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    }
+   ],
+   "arbiter_note": "逐題組**不下裁決**，只給數字（§四-2「次指標只當描述」）。"
+  },
+  "evalplus": {
+   "label": "S4 MBPP+",
+   "n_tasks": 371,
+   "n_tasks_expected": 371,
+   "blocks_present": 19,
+   "blocks_expected": 19,
+   "broken_reasons": [],
+   "valid": true,
+   "per_arm": {
+    "OFF": {
+     "n_measured": 371,
+     "deliv_n": 288,
+     "correct_delivery_rate": 0.7762803234501348,
+     "deliv_pp": 77.62803234501348,
+     "accepted_n": 371,
+     "meets_demand_n": 288,
+     "visible_ok_n": 333,
+     "false_delivery_n": 83,
+     "false_delivery_pp": 22.371967654986523,
+     "calls_logical_total": 371,
+     "calls_per_task": 1.0,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 83
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "CONFORM": {
+     "n_measured": 371,
+     "deliv_n": 298,
+     "correct_delivery_rate": 0.8032345013477089,
+     "deliv_pp": 80.3234501347709,
+     "accepted_n": 357,
+     "meets_demand_n": 298,
+     "visible_ok_n": 357,
+     "false_delivery_n": 59,
+     "false_delivery_pp": 15.902964959568733,
+     "calls_logical_total": 472,
+     "calls_per_task": 1.2722371967654986,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 73
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    },
+    "HMIX": {
+     "n_measured": 371,
+     "deliv_n": 296,
+     "correct_delivery_rate": 0.7978436657681941,
+     "deliv_pp": 79.78436657681941,
+     "accepted_n": 346,
+     "meets_demand_n": 296,
+     "visible_ok_n": 346,
+     "false_delivery_n": 50,
+     "false_delivery_pp": 13.477088948787062,
+     "calls_logical_total": 448,
+     "calls_per_task": 1.2075471698113207,
+     "reject_reasons": {
+      "by_err": {
+       "sandbox_check_failed": 75
+      },
+      "budget_or_context_n": 0,
+      "note": "桶子是字串比對，比對不到不等於沒發生（單邊）。"
+     }
+    }
+   },
+   "tokens": {
+    "OFF": {
+     "tokens_total": 177204,
+     "tokens_incl_void": 177204,
+     "calls_wire_total": 371,
+     "calls_wire_ok": 371,
+     "calls_logical_total": 371,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 477.6388140161725,
+     "tpc_incl_void": 615.2916666666666,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "CONFORM": {
+     "tokens_total": 218946,
+     "tokens_incl_void": 218946,
+     "calls_wire_total": 472,
+     "calls_wire_ok": 472,
+     "calls_logical_total": 472,
+     "wire_probe_calls": 0,
+     "wire_probe_tokens": 0,
+     "wire_probe_share_pp": 0.0,
+     "tokens_per_task": 590.1509433962265,
+     "tpc_incl_void": 734.7181208053692,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    },
+    "HMIX": {
+     "tokens_total": 205396,
+     "tokens_incl_void": 205396,
+     "calls_wire_total": 467,
+     "calls_wire_ok": 467,
+     "calls_logical_total": 448,
+     "wire_probe_calls": 19,
+     "wire_probe_tokens": 1368,
+     "wire_probe_share_pp": 0.6660304971859238,
+     "tokens_per_task": 553.6280323450135,
+     "tpc_incl_void": 693.9054054054054,
+     "calls_source_note": "`calls_wire_total`＝`calls.jsonl` 的列數（含 `wire_probe`、含失敗後的每一次重試）；`calls_logical_total`＝`rows.calls_used` 的和（臂在預算帳上花掉的呼叫數）＝`calls_per_task` × `n_measured`。兩個都對、**意思不同**，引用時要指名是哪一個。"
+    }
+   },
+   "paired": {
+    "HMIX_vs_CONFORM": {
+     "b": 15,
+     "c": 17,
+     "n_discordant": 32,
+     "n_common": 371,
+     "p_disc": 0.0862533692722372,
+     "delta_pp": -0.5390835579514826,
+     "ci95_lo_pp": -3.6064289310013633,
+     "ci95_hi_pp": 2.631817845194301,
+     "p_mcnemar_exact": 0.860050065908581,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "mbppplus_Mbpp/129",
+      "mbppplus_Mbpp/170",
+      "mbppplus_Mbpp/306",
+      "mbppplus_Mbpp/391",
+      "mbppplus_Mbpp/410",
+      "mbppplus_Mbpp/445",
+      "mbppplus_Mbpp/451",
+      "mbppplus_Mbpp/564",
+      "mbppplus_Mbpp/606",
+      "mbppplus_Mbpp/638",
+      "mbppplus_Mbpp/734",
+      "mbppplus_Mbpp/741",
+      "mbppplus_Mbpp/800",
+      "mbppplus_Mbpp/92",
+      "mbppplus_Mbpp/99"
+     ],
+     "c_only_task_ids": [
+      "mbppplus_Mbpp/116",
+      "mbppplus_Mbpp/137",
+      "mbppplus_Mbpp/20",
+      "mbppplus_Mbpp/235",
+      "mbppplus_Mbpp/244",
+      "mbppplus_Mbpp/286",
+      "mbppplus_Mbpp/301",
+      "mbppplus_Mbpp/310",
+      "mbppplus_Mbpp/390",
+      "mbppplus_Mbpp/473",
+      "mbppplus_Mbpp/580",
+      "mbppplus_Mbpp/581",
+      "mbppplus_Mbpp/583",
+      "mbppplus_Mbpp/602",
+      "mbppplus_Mbpp/626",
+      "mbppplus_Mbpp/773",
+      "mbppplus_Mbpp/787"
+     ]
+    },
+    "HMIX_vs_OFF": {
+     "b": 21,
+     "c": 13,
+     "n_discordant": 34,
+     "n_common": 371,
+     "p_disc": 0.09164420485175202,
+     "delta_pp": 2.15633423180593,
+     "ci95_lo_pp": -1.1796494877481638,
+     "ci95_hi_pp": 5.101550062282,
+     "p_mcnemar_exact": 0.22948101302608848,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "mbppplus_Mbpp/123",
+      "mbppplus_Mbpp/126",
+      "mbppplus_Mbpp/129",
+      "mbppplus_Mbpp/170",
+      "mbppplus_Mbpp/237",
+      "mbppplus_Mbpp/429",
+      "mbppplus_Mbpp/437",
+      "mbppplus_Mbpp/451",
+      "mbppplus_Mbpp/462",
+      "mbppplus_Mbpp/56",
+      "mbppplus_Mbpp/606",
+      "mbppplus_Mbpp/638",
+      "mbppplus_Mbpp/734",
+      "mbppplus_Mbpp/749",
+      "mbppplus_Mbpp/752",
+      "mbppplus_Mbpp/800",
+      "mbppplus_Mbpp/801",
+      "mbppplus_Mbpp/89",
+      "mbppplus_Mbpp/92",
+      "mbppplus_Mbpp/93",
+      "mbppplus_Mbpp/99"
+     ],
+     "c_only_task_ids": [
+      "mbppplus_Mbpp/109",
+      "mbppplus_Mbpp/116",
+      "mbppplus_Mbpp/20",
+      "mbppplus_Mbpp/235",
+      "mbppplus_Mbpp/244",
+      "mbppplus_Mbpp/286",
+      "mbppplus_Mbpp/390",
+      "mbppplus_Mbpp/576",
+      "mbppplus_Mbpp/580",
+      "mbppplus_Mbpp/626",
+      "mbppplus_Mbpp/757",
+      "mbppplus_Mbpp/773",
+      "mbppplus_Mbpp/787"
+     ]
+    },
+    "CONFORM_vs_OFF": {
+     "b": 19,
+     "c": 9,
+     "n_discordant": 28,
+     "n_common": 371,
+     "p_disc": 0.07547169811320754,
+     "delta_pp": 2.6954177897574128,
+     "ci95_lo_pp": -0.3549646295791475,
+     "ci95_hi_pp": 5.150550371529754,
+     "p_mcnemar_exact": 0.08715855330228806,
+     "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+     "b_only_task_ids": [
+      "mbppplus_Mbpp/123",
+      "mbppplus_Mbpp/126",
+      "mbppplus_Mbpp/137",
+      "mbppplus_Mbpp/237",
+      "mbppplus_Mbpp/301",
+      "mbppplus_Mbpp/310",
+      "mbppplus_Mbpp/429",
+      "mbppplus_Mbpp/437",
+      "mbppplus_Mbpp/462",
+      "mbppplus_Mbpp/473",
+      "mbppplus_Mbpp/56",
+      "mbppplus_Mbpp/581",
+      "mbppplus_Mbpp/583",
+      "mbppplus_Mbpp/602",
+      "mbppplus_Mbpp/749",
+      "mbppplus_Mbpp/752",
+      "mbppplus_Mbpp/801",
+      "mbppplus_Mbpp/89",
+      "mbppplus_Mbpp/93"
+     ],
+     "c_only_task_ids": [
+      "mbppplus_Mbpp/109",
+      "mbppplus_Mbpp/306",
+      "mbppplus_Mbpp/391",
+      "mbppplus_Mbpp/410",
+      "mbppplus_Mbpp/445",
+      "mbppplus_Mbpp/564",
+      "mbppplus_Mbpp/576",
+      "mbppplus_Mbpp/741",
+      "mbppplus_Mbpp/757"
+     ],
+     "outside_preregistered_family": true,
+     "p_is_uncorrected": true,
+     "note": "`CONFORM − OFF`（Δ_G，閘門＋重抽買到的東西）**不在** DECISION §四-2 的預註冊家族裡（家族只有 HMIX−CONFORM 與 HMIX−OFF）⇒ 這裡的 p **未經多重比較校正**，區間也沒有。引用時必須寫出這一句（先例：manuscript.md 對同一個對比的處置）。把它塞進 Holm 家族會讓兩個已凍結的 p_adj 變大＝事後改家族，明文禁止。"
+    }
+   },
+   "token_wilcoxon": {
+    "HMIX_vs_CONFORM": {
+     "n": 371.0,
+     "median_diff_tokens": 79.0,
+     "mean_diff_tokens": -36.52291105121294,
+     "w_plus": 49773.5,
+     "p": 1.496580637194711e-13,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "HMIX_vs_OFF": {
+     "n": 370.0,
+     "median_diff_tokens": 85.0,
+     "mean_diff_tokens": 75.98921832884098,
+     "w_plus": 56663.0,
+     "p": 0.0,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    },
+    "CONFORM_vs_OFF": {
+     "n": 365.0,
+     "median_diff_tokens": 11.0,
+     "mean_diff_tokens": 112.5121293800539,
+     "w_plus": 39598.0,
+     "p": 0.0021144997754070083,
+     "method": "normal_approx",
+     "alpha": 0.05,
+     "reject": true,
+     "note": "逐題 token 差的配對檢定，**不是**交付率的主指標；未進 Holm 家族。"
+    }
+   },
+   "blocks": [
+    {
+     "block": "g_r532_mbpp_a1",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 0,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a2",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 20,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a3",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 40,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a4",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 60,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a5",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 80,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a6",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 100,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a7",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 120,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a8",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 140,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a9",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 160,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a10",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 180,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a11",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 200,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a12",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 220,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a13",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 240,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a14",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 260,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a15",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 280,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a16",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 300,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a17",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 320,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a18",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 60,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 340,
+     "n": 20,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    },
+    {
+     "block": "g_r532_mbpp_a19",
+     "present": true,
+     "terminal": true,
+     "void_rate_max": 0.0,
+     "n_rows": 33,
+     "run_complete": true,
+     "seed": "g-r529-mbpp",
+     "offset": 360,
+     "n": 11,
+     "gauge_scope": "bank",
+     "reasoning_effort": "none",
+     "infra_void_total": 0
+    }
+   ],
+   "arbiter_note": "逐題組**不下裁決**，只給數字（§四-2「次指標只當描述」）。"
+  }
+ },
+ "tokens_pooled": {
+  "OFF": {
+   "tokens_total": 886948,
+   "deliv_n": 625,
+   "n_measured": 836,
+   "deliv_pp": 74.76076555023923,
+   "tpc_incl_void": 1419.1168,
+   "tokens_per_task": 1060.9425837320575
+  },
+  "CONFORM": {
+   "tokens_total": 1594884,
+   "deliv_n": 691,
+   "n_measured": 836,
+   "deliv_pp": 82.6555023923445,
+   "tpc_incl_void": 2308.081041968162,
+   "tokens_per_task": 1907.755980861244
+  },
+  "HMIX": {
+   "tokens_total": 1351891,
+   "deliv_n": 664,
+   "n_measured": 836,
+   "deliv_pp": 79.42583732057416,
+   "tpc_incl_void": 2035.980421686747,
+   "tokens_per_task": 1617.0944976076555
+  }
+ },
+ "primary": {
+  "HMIX_vs_CONFORM": {
+   "b": 38,
+   "c": 65,
+   "n_discordant": 103,
+   "n_common": 836,
+   "p_disc": 0.12320574162679426,
+   "delta_pp": -3.2296650717703352,
+   "ci95_lo_pp": -5.52094198721541,
+   "ci95_hi_pp": -0.7474825350095704,
+   "p": 0.010063333265586337,
+   "k_strata": 5,
+   "sets_included": [
+    "lcb2",
+    "lcb3_medium",
+    "lcb3_hard",
+    "humanevalplus",
+    "evalplus"
+   ],
+   "per_stratum": [
+    {
+     "set": "lcb2",
+     "label": "S0 LCB v2",
+     "b": 13,
+     "c": 20,
+     "n_common": 120,
+     "delta_pp": -5.833333333333333,
+     "p_unadjusted": 0.296206368599087
+    },
+    {
+     "set": "lcb3_medium",
+     "label": "S1 LCB v3 medium",
+     "b": 4,
+     "c": 11,
+     "n_common": 135,
+     "delta_pp": -5.185185185185185,
+     "p_unadjusted": 0.11846923828125
+    },
+    {
+     "set": "lcb3_hard",
+     "label": "S2 LCB v3 hard",
+     "b": 1,
+     "c": 10,
+     "n_common": 54,
+     "delta_pp": -16.666666666666664,
+     "p_unadjusted": 0.01171875
+    },
+    {
+     "set": "humanevalplus",
+     "label": "S3 HumanEval+",
+     "b": 5,
+     "c": 7,
+     "n_common": 156,
+     "delta_pp": -1.282051282051282,
+     "p_unadjusted": 0.7744140625
+    },
+    {
+     "set": "evalplus",
+     "label": "S4 MBPP+",
+     "b": 15,
+     "c": 17,
+     "n_common": 371,
+     "delta_pp": -0.5390835579514826,
+     "p_unadjusted": 0.860050065908581
+    }
+   ],
+   "pooling_identity_check": 0.010063333265586337,
+   "pooling_identity_note": "分層統計量與「把五集的不一致對直接加起來做一次 McNemar」**數值相同**；分層買到的是解釋（H0＝每一集都沒有效果、逐集必須照實列、異質性另外量），不是更嚴的檢定。不准寫成「我們做了分層校正所以比較穩」。",
+   "heterogeneity": {
+    "chi2": 5.9013259876088835,
+    "df": 4,
+    "p": 0.20663949326794118,
+    "min_expected": 4.058252427184466,
+    "degenerate": false,
+    "note": "描述性：2×K 的 b/c 卡方沒有精確版本，期望次數小的時候近似本來就不準（min_expected 一起印，<5 要在報告裡講）。不進 Holm 家族、不改任何一格裁決。"
+   },
+   "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+   "p_adj": 0.010063333265586337,
+   "significant": true
+  },
+  "HMIX_vs_OFF": {
+   "b": 92,
+   "c": 53,
+   "n_discordant": 145,
+   "n_common": 836,
+   "p_disc": 0.173444976076555,
+   "delta_pp": 4.6650717703349285,
+   "ci95_lo_pp": 1.752972164535489,
+   "ci95_hi_pp": 7.382330961803252,
+   "p": 0.0015119110192637676,
+   "k_strata": 5,
+   "sets_included": [
+    "lcb2",
+    "lcb3_medium",
+    "lcb3_hard",
+    "humanevalplus",
+    "evalplus"
+   ],
+   "per_stratum": [
+    {
+     "set": "lcb2",
+     "label": "S0 LCB v2",
+     "b": 31,
+     "c": 15,
+     "n_common": 120,
+     "delta_pp": 13.333333333333334,
+     "p_unadjusted": 0.02589608179323477
+    },
+    {
+     "set": "lcb3_medium",
+     "label": "S1 LCB v3 medium",
+     "b": 21,
+     "c": 6,
+     "n_common": 135,
+     "delta_pp": 11.11111111111111,
+     "p_unadjusted": 0.005924612283706665
+    },
+    {
+     "set": "lcb3_hard",
+     "label": "S2 LCB v3 hard",
+     "b": 9,
+     "c": 10,
+     "n_common": 54,
+     "delta_pp": -1.8518518518518516,
+     "p_unadjusted": 1.0
+    },
+    {
+     "set": "humanevalplus",
+     "label": "S3 HumanEval+",
+     "b": 10,
+     "c": 9,
+     "n_common": 156,
+     "delta_pp": 0.641025641025641,
+     "p_unadjusted": 1.0
+    },
+    {
+     "set": "evalplus",
+     "label": "S4 MBPP+",
+     "b": 21,
+     "c": 13,
+     "n_common": 371,
+     "delta_pp": 2.15633423180593,
+     "p_unadjusted": 0.22948101302608848
+    }
+   ],
+   "pooling_identity_check": 0.0015119110192637676,
+   "pooling_identity_note": "分層統計量與「把五集的不一致對直接加起來做一次 McNemar」**數值相同**；分層買到的是解釋（H0＝每一集都沒有效果、逐集必須照實列、異質性另外量），不是更嚴的檢定。不准寫成「我們做了分層校正所以比較穩」。",
+   "heterogeneity": {
+    "chi2": 5.817353233617687,
+    "df": 4,
+    "p": 0.21320998341195063,
+    "min_expected": 6.9448275862068956,
+    "degenerate": false,
+    "note": "描述性：2×K 的 b/c 卡方沒有精確版本，期望次數小的時候近似本來就不準（min_expected 一起印，<5 要在報告裡講）。不進 Holm 家族、不改任何一格裁決。"
+   },
+   "ci_note": "區間未做多重比較調整；仲裁以 analyzer 的 primary 區塊為準",
+   "p_adj": 0.003023822038527535,
+   "significant": true
+  },
+  "family_size": 2,
+  "alpha": 0.05,
+  "family_note": "家族固定 2（HMIX−CONFORM、HMIX−OFF），由 DECISION §四-2 凍結。某一集 INVALID 只把它從 N 裡拿掉，**不改家族大小**；`CONFORM−OFF` 在家族外（見 secondary_outside_family）。"
+ },
+ "secondary_outside_family": {
+  "CONFORM_vs_OFF": {
+   "b": 96,
+   "c": 30,
+   "n_discordant": 126,
+   "n_common": 836,
+   "delta_pp": 7.894736842105263,
+   "ci95_lo_pp": 5.3617225519416145,
+   "ci95_hi_pp": 10.044742117343002,
+   "p_unadjusted": 3.044627417985441e-09,
+   "p_adj": null,
+   "outside_preregistered_family": true,
+   "per_stratum": [
+    {
+     "set": "lcb2",
+     "label": "S0 LCB v2",
+     "b": 30,
+     "c": 7,
+     "n_common": 120,
+     "delta_pp": 19.166666666666668,
+     "p_unadjusted": 0.00019107642583549023
+    },
+    {
+     "set": "lcb3_medium",
+     "label": "S1 LCB v3 medium",
+     "b": 26,
+     "c": 4,
+     "n_common": 135,
+     "delta_pp": 16.296296296296298,
+     "p_unadjusted": 5.947612226009369e-05
+    },
+    {
+     "set": "lcb3_hard",
+     "label": "S2 LCB v3 hard",
+     "b": 12,
+     "c": 4,
+     "n_common": 54,
+     "delta_pp": 14.814814814814813,
+     "p_unadjusted": 0.076812744140625
+    },
+    {
+     "set": "humanevalplus",
+     "label": "S3 HumanEval+",
+     "b": 9,
+     "c": 6,
+     "n_common": 156,
+     "delta_pp": 1.9230769230769231,
+     "p_unadjusted": 0.60723876953125
+    },
+    {
+     "set": "evalplus",
+     "label": "S4 MBPP+",
+     "b": 19,
+     "c": 9,
+     "n_common": 371,
+     "delta_pp": 2.6954177897574128,
+     "p_unadjusted": 0.08715855330228806
+    }
+   ],
+   "note": "`CONFORM − OFF`（Δ_G，閘門＋重抽買到的東西）**不在** DECISION §四-2 的預註冊家族裡（家族只有 HMIX−CONFORM 與 HMIX−OFF）⇒ 這裡的 p **未經多重比較校正**，區間也沒有。引用時必須寫出這一句（先例：manuscript.md 對同一個對比的處置）。把它塞進 Holm 家族會讓兩個已凍結的 p_adj 變大＝事後改家族，明文禁止。"
+  }
+ },
+ "power": {
+  "prereg": {
+   "note": "事前檢定力；p_disc 取 12B 實測不一致率，ψ 由 Δ = p_disc*(2ψ−1) 反解",
+   "alpha": 0.05,
+   "rows": [
+    {
+     "set": "S0 LCB v2",
+     "n": 120,
+     "p_disc": 0.1917,
+     "psi_2pp": 0.5522,
+     "power_2pp": 0.05,
+     "psi_5pp": 0.6304,
+     "power_5pp": 0.1759
+    },
+    {
+     "set": "S1 LCB v3 medium",
+     "n": 135,
+     "p_disc": 0.0815,
+     "psi_2pp": 0.6227,
+     "power_2pp": 0.0718,
+     "psi_5pp": 0.8068,
+     "power_5pp": 0.4292
+    },
+    {
+     "set": "S2 LCB v3 hard",
+     "n": 54,
+     "p_disc": 0.1481,
+     "psi_2pp": 0.5675,
+     "power_2pp": 0.0269,
+     "psi_5pp": 0.6687,
+     "power_5pp": 0.0786
+    },
+    {
+     "set": "S3 HumanEval+",
+     "n": 156,
+     "p_disc": 0.0577,
+     "psi_2pp": 0.6733,
+     "power_2pp": 0.098,
+     "psi_5pp": 0.9333,
+     "power_5pp": 0.7011
+    },
+    {
+     "set": "S4 MBPP+",
+     "n": 371,
+     "p_disc": 0.0701,
+     "psi_2pp": 0.6427,
+     "power_2pp": 0.2367,
+     "psi_5pp": 0.8567,
+     "power_5pp": 0.9612
+    }
+   ]
+  },
+  "observed": [
+   {
+    "set": "S0 LCB v2",
+    "key": "lcb2",
+    "n": 120,
+    "p_disc_observed": 0.275,
+    "psi_2pp": 0.5363636363636364,
+    "power_2pp": 0.04684454473501353,
+    "psi_5pp": 0.5909090909090909,
+    "power_5pp": 0.13490544387378595,
+    "mde_at_n_pp_power80": 13.857421875000004,
+    "mde_max_reachable_pp": 27.500000000000004,
+    "mde_resolution_pp": 0.10742187500000001,
+    "mde_note": "在實測不一致率下要有 80% 檢定力所需的真效果（pp）；None＝即使 ψ=1（每一對不一致都倒向 HMIX）也達不到。"
+   },
+   {
+    "set": "S1 LCB v3 medium",
+    "key": "lcb3_medium",
+    "n": 135,
+    "p_disc_observed": 0.1111111111111111,
+    "psi_2pp": 0.59,
+    "power_2pp": 0.06601195810083528,
+    "psi_5pp": 0.7250000000000001,
+    "power_5pp": 0.3263165881078297,
+    "mde_at_n_pp_power80": 8.159722222222221,
+    "mde_max_reachable_pp": 11.11111111111111,
+    "mde_resolution_pp": 0.043402777777777776,
+    "mde_note": "在實測不一致率下要有 80% 檢定力所需的真效果（pp）；None＝即使 ψ=1（每一對不一致都倒向 HMIX）也達不到。"
+   },
+   {
+    "set": "S2 LCB v3 hard",
+    "key": "lcb3_hard",
+    "n": 54,
+    "p_disc_observed": 0.2037037037037037,
+    "psi_2pp": 0.5490909090909091,
+    "power_2pp": 0.030385903741160476,
+    "psi_5pp": 0.6227272727272728,
+    "power_5pp": 0.07170023362113304,
+    "mde_at_n_pp_power80": 17.1875,
+    "mde_max_reachable_pp": 20.37037037037037,
+    "mde_resolution_pp": 0.07957175925925926,
+    "mde_note": "在實測不一致率下要有 80% 檢定力所需的真效果（pp）；None＝即使 ψ=1（每一對不一致都倒向 HMIX）也達不到。"
+   },
+   {
+    "set": "S3 HumanEval+",
+    "key": "humanevalplus",
+    "n": 156,
+    "p_disc_observed": 0.07692307692307693,
+    "psi_2pp": 0.63,
+    "power_2pp": 0.08700002563200883,
+    "psi_5pp": 0.825,
+    "power_5pp": 0.5350090346531148,
+    "mde_at_n_pp_power80": 6.280048076923077,
+    "mde_max_reachable_pp": 7.6923076923076925,
+    "mde_resolution_pp": 0.030048076923076924,
+    "mde_note": "在實測不一致率下要有 80% 檢定力所需的真效果（pp）；None＝即使 ψ=1（每一對不一致都倒向 HMIX）也達不到。"
+   },
+   {
+    "set": "S4 MBPP+",
+    "key": "evalplus",
+    "n": 371,
+    "p_disc_observed": 0.0862533692722372,
+    "psi_2pp": 0.6159375,
+    "power_2pp": 0.2004291275031998,
+    "psi_5pp": 0.78984375,
+    "power_5pp": 0.898613633224713,
+    "mde_at_n_pp_power80": 4.447439353099731,
+    "mde_max_reachable_pp": 8.62533692722372,
+    "mde_resolution_pp": 0.03369272237196766,
+    "mde_note": "在實測不一致率下要有 80% 檢定力所需的真效果（pp）；None＝即使 ψ=1（每一對不一致都倒向 HMIX）也達不到。"
+   }
+  ],
+  "note": "§十 事前檢定力（12B 的 p_disc）：+2 pp 的真效果在五個題組**全部測不出來**（0.027–0.237）；+5 pp 只有 MBPP+（0.961）與 HumanEval+（0.701）有牙齒。⇒ 「沒顯著」在大部分格子是**事前就註定的**，**不得**讀成「沒有效果」。`observed` 那一張用本 run 實測的不一致率重算（§十-3 要求兩張並列）。",
+  "ceiling_note": "§四-1 寫死：S1（lcb3 medium）與 S3（HumanEval+）的 Δ_C **幾乎沒有鑑別力**——對照的 CONFORM 已在 85–95%，天花板讓大的正差在算術上幾乎不可能發生。收官**不准**拿 S1／S3 的小數字當「增益不見了的證據」。S2（lcb3 hard，n=54）事前即宣告無鑑別力（檢定力 0.079 @+5pp）。"
+ },
+ "token_ratios": {
+  "note": "token＝後端回報的 `usage.total_tokens`（prompt＋completion，含 reasoning）。`wire_probe` 只出現在 HMIX ⇒ 對 HMIX 的成本**單邊上偏**（占比一起印）。`tpc`＝每一件**正確交付**的 token（分母是 deliv_n，不是 n）。本 run infra_void＝0 ⇒ 含／不含 void 兩版相同。",
+  "by_set": {
+   "lcb2": {
+    "label": "S0 LCB v2",
+    "tokens_per_task": {
+     "OFF": 2523.825,
+     "CONFORM": 5379.983333333334,
+     "HMIX": 4253.191666666667
+    },
+    "tpc_incl_void": {
+     "OFF": 5133.203389830508,
+     "CONFORM": 7873.1463414634145,
+     "HMIX": 6805.106666666667
+    },
+    "hmix_over_off_per_task": 1.6852165529173644,
+    "hmix_over_off_tpc": 1.3257036882949933,
+    "hmix_over_conform_per_task": 0.7905585209371776,
+    "hmix_over_conform_tpc": 0.8643439828913142,
+    "conform_over_off_tpc": 1.5337686320906478
+   },
+   "lcb3_medium": {
+    "label": "S1 LCB v3 medium",
+    "tokens_per_task": {
+     "OFF": 1466.7703703703703,
+     "CONFORM": 2518.162962962963,
+     "HMIX": 2401.3259259259257
+    },
+    "tpc_incl_void": {
+     "OFF": 1941.313725490196,
+     "CONFORM": 2741.548387096774,
+     "HMIX": 2770.7606837606836
+    },
+    "hmix_over_off_per_task": 1.6371519185512136,
+    "hmix_over_off_tpc": 1.4272606469420837,
+    "hmix_over_conform_per_task": 0.9536022732621076,
+    "hmix_over_conform_tpc": 1.0106554007222337,
+    "conform_over_off_tpc": 1.4122129520330429
+   },
+   "lcb3_hard": {
+    "label": "S2 LCB v3 hard",
+    "tokens_per_task": {
+     "OFF": 2268.8333333333335,
+     "CONFORM": 5446.185185185185,
+     "HMIX": 3992.9444444444443
+    },
+    "tpc_incl_void": {
+     "OFF": 3403.25,
+     "CONFORM": 6683.954545454545,
+     "HMIX": 6160.542857142857
+    },
+    "hmix_over_off_per_task": 1.7599108695119858,
+    "hmix_over_off_tpc": 1.8101940372123286,
+    "hmix_over_conform_per_task": 0.7331635463491264,
+    "hmix_over_conform_tpc": 0.9216913154103306,
+    "conform_over_off_tpc": 1.9639916390081673
+   },
+   "humanevalplus": {
+    "label": "S3 HumanEval+",
+    "tokens_per_task": {
+     "OFF": 553.5512820512821,
+     "CONFORM": 617.2692307692307,
+     "HMIX": 617.3974358974359
+    },
+    "tpc_incl_void": {
+     "OFF": 616.8142857142857,
+     "CONFORM": 673.3846153846154,
+     "HMIX": 683.0780141843971
+    },
+    "hmix_over_off_per_task": 1.1153391852143502,
+    "hmix_over_off_tpc": 1.1074289782270144,
+    "hmix_over_conform_per_task": 1.0002076972604732,
+    "hmix_over_conform_tpc": 1.014395040484026,
+    "conform_over_off_tpc": 1.0917137151011667
+   },
+   "evalplus": {
+    "label": "S4 MBPP+",
+    "tokens_per_task": {
+     "OFF": 477.6388140161725,
+     "CONFORM": 590.1509433962265,
+     "HMIX": 553.6280323450135
+    },
+    "tpc_incl_void": {
+     "OFF": 615.2916666666666,
+     "CONFORM": 734.7181208053692,
+     "HMIX": 693.9054054054054
+    },
+    "hmix_over_off_per_task": 1.1590934741879417,
+    "hmix_over_off_tpc": 1.1277666235342134,
+    "hmix_over_conform_per_task": 0.938112593972943,
+    "hmix_over_conform_tpc": 0.9444511925808684,
+    "conform_over_off_tpc": 1.1940973047557975
+   }
+  },
+  "pooled": {
+   "hmix_over_off_per_task": 1.5242054776604714,
+   "hmix_over_off_tpc": 1.4346813607496909,
+   "hmix_over_conform_per_task": 0.8476422109695751,
+   "hmix_over_conform_tpc": 0.882109590030085
+  },
+  "twelve_b_r460r_band": {
+   "reps": {
+    "r1": {
+     "hmix_over_off_per_task": 2.2298016388915607,
+     "hmix_over_off_tpc": 1.654368957887287,
+     "deliv_pp": {
+      "OFF": 57.5,
+      "CONFORM": 71.66666666666667,
+      "HMIX": 77.5
+     },
+     "not_a_test": true
+    },
+    "r2": {
+     "hmix_over_off_per_task": 2.4069330573035614,
+     "hmix_over_off_tpc": 1.7005505296166468,
+     "deliv_pp": {
+      "OFF": 54.166666666666664,
+      "CONFORM": 72.5,
+      "HMIX": 76.66666666666667
+     },
+     "not_a_test": true
+    },
+    "r3": {
+     "hmix_over_off_per_task": 2.7801141381887358,
+     "hmix_over_off_tpc": 2.1079986322529978,
+     "deliv_pp": {
+      "OFF": 57.5,
+      "CONFORM": 75.0,
+      "HMIX": 75.83333333333333
+     },
+     "not_a_test": true
+    },
+    "r4": {
+     "hmix_over_off_per_task": 2.5766119796337947,
+     "hmix_over_off_tpc": 1.8153402583783553,
+     "deliv_pp": {
+      "OFF": 51.666666666666664,
+      "CONFORM": 70.83333333333333,
+      "HMIX": 73.33333333333333
+     },
+     "not_a_test": true
+    },
+    "r5": {
+     "hmix_over_off_per_task": 2.569714409035321,
+     "hmix_over_off_tpc": 1.7612649320354448,
+     "deliv_pp": {
+      "OFF": 51.260504201680675,
+      "CONFORM": 70.94017094017094,
+      "HMIX": 74.78991596638656
+     },
+     "not_a_test": true
+    }
+   },
+   "source": "R460R 五次複製（**換過 seed**，同一個 120 題 lcb2 題庫）——manuscript.md 摘要引的 2.23–2.78×（每題 token）與 1.65–2.11×（每件正確交付）就是這五次，本檔重算不抄。",
+   "hmix_over_off_per_task_range": [
+    2.2298016388915607,
+    2.7801141381887358
+   ],
+   "hmix_over_off_tpc_range": [
+    1.654368957887287,
+    2.1079986322529978
+   ],
+   "not_a_test": true,
+   "caveat": "R460R 換過 seed ⇒ 與 R532 的 lcb2 **不是同一批配對**，只是同一個題庫的 12B 成本帶。跨模型比值一律不是檢定。"
+  }
+ },
+ "decision_state": {
+  "state": "EFFECTIVE",
+  "states_verbatim": {
+   "INVALID": "§五 任一擋門紅（含 V/GT 有 violation、E-11 事後發現 reasoning ≠ 0、E-13 context 偏斜）⇒「這個 run 不當資料用」",
+   "EFFECTIVE": "兩個主指標 Holm 後**都**成立，**且**合併 `tpc` HMIX ≤ CONFORM",
+   "RULED_OUT": "`primary.HMIX_vs_CONFORM.ci95_hi_pp` < +2.0 pp ⇒「排除了 ≥+2 pp 的實務增益」。**這是結論不是失敗**",
+   "INCONCLUSIVE": "其餘 ⇒「**沒量出來**，不是沒有差異」——必須同時報 `mde_at_n_pp` 與事前檢定力"
+  },
+  "gates_red": [],
+  "cond_i_both_primary_holm": true,
+  "cond_ii_tpc_hmix_le_conform": true,
+  "ruled_out_condition_ci_hi_lt_2pp": true,
+  "ci95_hi_pp_HMIX_vs_CONFORM": -0.7474825350095704,
+  "ruled_out_line_pp": 2.0,
+  "tpc_incl_void": {
+   "HMIX": 2035.980421686747,
+   "CONFORM": 2308.081041968162
+  },
+  "costly_but_real_shape": false,
+  "costly_but_real_note": "`costly_but_real_shape`＝R529 §六-3 的第三狀態（兩個主指標 Holm 都過、但合併 tpc HMIX > CONFORM）。**R532 §四-2 的四狀態表沒有這一格**，所以它不是本 run 的裁決值，只是描述；真正的裁決在 `state`。",
+  "note": "R532 四狀態逐字照抄 DECISION_20260917 §四-2，**與 R460 §六-(4)、R529 §六-3 的同名狀態不是同一個東西**（本 run 無 OFF5 臂、RULED_OUT 的線是 +2.0 pp），不可互引。",
+  "pooled_tpc_note": "合併 tpc 是本檔**唯一**一處把五集加起來算比值的地方，而且只用來判一個布林值；不准被引用成「HMIX 的成本是 CONFORM 的 x 倍」——那個比值逐集差很多。"
+ },
+ "predictions": {
+  "P-1": {
+   "text": "五個題組的 OFF 交付率全部上升，且至少 4/5 上升 ≥ +5 pp",
+   "field": "per_set.<s>.per_arm.OFF.correct_delivery_rate",
+   "values_pp": {
+    "lcb2": 49.166666666666664,
+    "lcb3_medium": 75.55555555555556,
+    "lcb3_hard": 66.66666666666667,
+    "humanevalplus": 89.74358974358974,
+    "evalplus": 77.62803234501348
+   },
+   "diff_vs_anchor_pp": {
+    "lcb2": -9.163333333333334,
+    "lcb3_medium": -1.1444444444444457,
+    "lcb3_hard": 1.6666666666666714,
+    "humanevalplus": 14.743589743589737,
+    "evalplus": 4.028032345013486
+   },
+   "all_up": false,
+   "n_ge_5pp": 1,
+   "hit": false,
+   "anchor_note": "§四-0 的錨用 **1004-only（非 thinking）** 那一半：R529 稽核 §十一 已證實 S1–S4 的絕對值是 1003（thinking）與 1004（非 thinking）的混合物，而 R532 跑非 thinking。⚠ 1004-only 的 n 很小（20–140），那幾個數字是**描述性 b−c**，不是檢定。"
+  },
+  "P-2": {
+   "text": "五個題組的 Δ_O（HMIX−OFF）全部縮小（小於 §四-0 的 1004-only 值），但仍全部 > 0",
+   "field": "per_set.<s>.paired.HMIX_vs_OFF.delta_pp",
+   "values_pp": {
+    "lcb2": 13.333333333333334,
+    "lcb3_medium": 11.11111111111111,
+    "lcb3_hard": -1.8518518518518516,
+    "humanevalplus": 0.641025641025641,
+    "evalplus": 2.15633423180593
+   },
+   "anchor_pp": {
+    "lcb2": 25.83,
+    "lcb3_medium": 10.0,
+    "lcb3_hard": 10.0,
+    "humanevalplus": 21.4,
+    "evalplus": 6.4
+   },
+   "smaller_than_anchor": {
+    "lcb2": true,
+    "lcb3_medium": false,
+    "lcb3_hard": true,
+    "humanevalplus": true,
+    "evalplus": true
+   },
+   "all_positive": false,
+   "hit": false
+  },
+  "P-3": {
+   "text": "五個題組的 Δ_C 全部 ≤ +3.0 pp（點估計）",
+   "field": "per_set.<s>.paired.HMIX_vs_CONFORM.delta_pp",
+   "values_pp": {
+    "lcb2": -5.833333333333333,
+    "lcb3_medium": -5.185185185185185,
+    "lcb3_hard": -16.666666666666664,
+    "humanevalplus": -1.282051282051282,
+    "evalplus": -0.5390835579514826
+   },
+   "hit": true
+  },
+  "P-4": {
+   "text": "合併 Δ_C 的 95% 區間上界 < +5.0 pp",
+   "field": "primary.HMIX_vs_CONFORM.ci95_hi_pp",
+   "value_pp": -0.7474825350095704,
+   "hit": true
+  },
+  "P-5": {
+   "text": "合併 Δ_C 的 Holm p_adj 不顯著（≥ 0.05）",
+   "field": "primary.HMIX_vs_CONFORM.p_adj",
+   "value": 0.010063333265586337,
+   "hit": false,
+   "power_caveat": "§十 事前檢定力（12B 的 p_disc）：+2 pp 的真效果在五個題組**全部測不出來**（0.027–0.237）；+5 pp 只有 MBPP+（0.961）與 HumanEval+（0.701）有牙齒。⇒ 「沒顯著」在大部分格子是**事前就註定的**，**不得**讀成「沒有效果」。`observed` 那一張用本 run 實測的不一致率重算（§十-3 要求兩張並列）。"
+  },
+  "P-6": {
+   "text": "合併 Δ_O 的 Holm p_adj 仍顯著（< 0.05）",
+   "field": "primary.HMIX_vs_OFF.p_adj",
+   "value": 0.003023822038527535,
+   "hit": true
+  },
+  "P-7": {
+   "text": "CONFORM−OFF 五集全部 > 0，且至少 3/5 小於對照值",
+   "field": "per_set.<s>.paired.CONFORM_vs_OFF.delta_pp",
+   "values_pp": {
+    "lcb2": 19.166666666666668,
+    "lcb3_medium": 16.296296296296298,
+    "lcb3_hard": 14.814814814814813,
+    "humanevalplus": 1.9230769230769231,
+    "evalplus": 2.6954177897574128
+   },
+   "anchor_pp": {
+    "lcb2": 12.5,
+    "lcb3_medium": 8.299999999999997,
+    "lcb3_hard": 10.0,
+    "humanevalplus": 19.599999999999994,
+    "evalplus": 5.700000000000003
+   },
+   "smaller_than_anchor": {
+    "lcb2": false,
+    "lcb3_medium": false,
+    "lcb3_hard": false,
+    "humanevalplus": true,
+    "evalplus": true
+   },
+   "n_smaller": 2,
+   "hit": false,
+   "outside_family_note": "`CONFORM − OFF`（Δ_G，閘門＋重抽買到的東西）**不在** DECISION §四-2 的預註冊家族裡（家族只有 HMIX−CONFORM 與 HMIX−OFF）⇒ 這裡的 p **未經多重比較校正**，區間也沒有。引用時必須寫出這一句（先例：manuscript.md 對同一個對比的處置）。把它塞進 Holm 家族會讓兩個已凍結的 p_adj 變大＝事後改家族，明文禁止。"
+  },
+  "P-8": {
+   "text": "假交付（accepted 但隱藏測資不過）五集全部下降",
+   "field": "per_set.<s>.per_arm.<arm>.false_delivery_pp",
+   "values_pp": {
+    "lcb2": {
+     "OFF": 50.833333333333336,
+     "CONFORM": 26.666666666666668,
+     "HMIX": 22.5
+    },
+    "lcb3_medium": {
+     "OFF": 24.444444444444443,
+     "CONFORM": 7.407407407407407,
+     "HMIX": 5.185185185185185
+    },
+    "lcb3_hard": {
+     "OFF": 33.333333333333336,
+     "CONFORM": 16.666666666666668,
+     "HMIX": 25.925925925925927
+    },
+    "humanevalplus": {
+     "OFF": 10.256410256410257,
+     "CONFORM": 6.410256410256411,
+     "HMIX": 3.8461538461538463
+    },
+    "evalplus": {
+     "OFF": 22.371967654986523,
+     "CONFORM": 15.902964959568733,
+     "HMIX": 13.477088948787062
+    }
+   },
+   "hit": null,
+   "note": "需要 12B 的逐集假交付率當對照 ⇒ 見 vs_12b；此處只落盤本 run 的值，不自行宣稱 HIT／MISS（§四-1 沒有寫死對照的數字）。"
+  },
+  "P-9": {
+   "text": "token_per_correct 五集全部下降（分母變大）",
+   "field": "per_set.<s>.tokens.<arm>.tpc_incl_void",
+   "values": {
+    "lcb2": {
+     "OFF": 5133.203389830508,
+     "CONFORM": 7873.1463414634145,
+     "HMIX": 6805.106666666667
+    },
+    "lcb3_medium": {
+     "OFF": 1941.313725490196,
+     "CONFORM": 2741.548387096774,
+     "HMIX": 2770.7606837606836
+    },
+    "lcb3_hard": {
+     "OFF": 3403.25,
+     "CONFORM": 6683.954545454545,
+     "HMIX": 6160.542857142857
+    },
+    "humanevalplus": {
+     "OFF": 616.8142857142857,
+     "CONFORM": 673.3846153846154,
+     "HMIX": 683.0780141843971
+    },
+    "evalplus": {
+     "OFF": 615.2916666666666,
+     "CONFORM": 734.7181208053692,
+     "HMIX": 693.9054054054054
+    }
+   },
+   "hit": null,
+   "note": "對照＝12B 那輪的逐集 tpc（見 vs_12b.by_set.<s>.arms_12b）；跨 run 比值**不是檢定**。"
+  },
+  "P-10": {
+   "text": "context／預算相關的拒交上升：至少一個題組的 HMIX budget_tokens ＋ context 錯誤合計 ≥ 5 件（12B 那輪每臂 ≤2 件）",
+   "field": "per_set.<s>.per_arm.<arm>.reject_reasons",
+   "by_arm_total": {
+    "OFF": 0,
+    "CONFORM": 0,
+    "HMIX": 0
+   },
+   "calls_not_ok": 0,
+   "calls_finish_reason_length": 0,
+   "hit": false
+  },
+  "P-11": {
+   "text": "逐塊 infra_void ≤ 5%",
+   "field": "arms.<arm>.infra_void",
+   "infra_void_total_by_set": {
+    "lcb2": 0,
+    "lcb3_medium": 0,
+    "lcb3_hard": 0,
+    "humanevalplus": 0,
+    "evalplus": 0
+   },
+   "worst_block_void_rate": 0.0,
+   "hit": true
+  },
+  "_tally": {
+   "hit": [
+    "P-3",
+    "P-4",
+    "P-6",
+    "P-11"
+   ],
+   "miss": [
+    "P-1",
+    "P-2",
+    "P-5",
+    "P-7",
+    "P-10"
+   ],
+   "not_adjudicated": [
+    "P-8",
+    "P-9"
+   ],
+   "note": "照實記。MISS 不是壞消息，預註冊的用處就在這裡。"
+  }
+ },
+ "aggregate": {
+  "n_sets_counted": 5,
+  "delta_c_pp_by_set": {
+   "lcb2": -5.833333333333333,
+   "lcb3_medium": -5.185185185185185,
+   "lcb3_hard": -16.666666666666664,
+   "humanevalplus": -1.282051282051282,
+   "evalplus": -0.5390835579514826
+  },
+  "delta_o_pp_by_set": {
+   "lcb2": 13.333333333333334,
+   "lcb3_medium": 11.11111111111111,
+   "lcb3_hard": -1.8518518518518516,
+   "humanevalplus": 0.641025641025641,
+   "evalplus": 2.15633423180593
+  },
+  "delta_g_pp_by_set": {
+   "lcb2": 19.166666666666668,
+   "lcb3_medium": 16.296296296296298,
+   "lcb3_hard": 14.814814814814813,
+   "humanevalplus": 1.9230769230769231,
+   "evalplus": 2.6954177897574128
+  },
+  "direction_positive_c": 0,
+  "direction_positive_o": 4,
+  "direction_positive_g": 5,
+  "statement": "§四-6 第一句：主指標 Holm 後成立 ⇒ 可以寫「在 836 題五個題組上，迴圈對同預算重抽的差值為 +X pp」，同一段必須寫出逐集五個數字、§四-1 的 S1／S3 天花板限制、§八 的全部誠實邊界，以及「這是一次 run，不是複製」。",
+  "四之四_不縮小判準": {
+   "text": "§四-4：S0／S2／S4 三集裡至少兩集的 Δ_C ≥ +3.0 pp，且合併 Δ_C 的 95% 區間下界 > 0",
+   "sets_ge_3pp": [],
+   "pooled_ci_lo_pp": -5.52094198721541,
+   "met": false
+  },
+  "四之五_縮小到零判準": {
+   "text": "§四-5：五集的 Δ_C 全部 ≤ +1.0 pp，或合併 Δ_C 的 95% 區間上界 < +2.0 pp（＝RULED_OUT）",
+   "all_le_1pp": true,
+   "pooled_ci_hi_pp": -0.7474825350095704,
+   "met": true
+  },
+  "no_meta_analysis_note": "沒有隨機效應模型、沒有 meta-analysis、沒有合併效果量；五集的點估計**不准平均**（難度組成、來源、n、量具強度都不同）。",
+  "winners_curse": "winner's curse：R460 的 +13.33 pp 是**能被判顯著**的點估計 ⇒ 上偏；它的五次複製掉到 +0.83～+5.83。R532 是**一次** run（§八-9），每一個點估計都要當單次值讀，不是複製。",
+  "ceiling_note": "§四-1 寫死：S1（lcb3 medium）與 S3（HumanEval+）的 Δ_C **幾乎沒有鑑別力**——對照的 CONFORM 已在 85–95%，天花板讓大的正差在算術上幾乎不可能發生。收官**不准**拿 S1／S3 的小數字當「增益不見了的證據」。S2（lcb3 hard，n=54）事前即宣告無鑑別力（檢定力 0.079 @+5pp）。",
+  "r440p": "R440P 前提句：整件事建立在「需求可被編譯成可執行的驗收測資」之上。沒有可執行驗收的需求，本檔量到的任何差值都不適用。"
+ },
+ "vs_12b": {
+  "note": "跨模型（27B vs 12B）的差值**不是檢定**：它跨 run、跨時間、跨後端負載、跨 context 大小，混淆項多到 p 值沒有意義（§四-3-2）。**不准**把兩輪的 836 題併成 1,672 題的 n，**不准**把五集的點估計平均成一個數，**不准**用 R532 的結果去改 R460／R460R／R529 的既有裁決。",
+  "by_set": {
+   "lcb2": {
+    "available": true,
+    "label": "S0 LCB v2",
+    "source_12b": "R460 主 run（DECISION_20260907_R460_HARNESS_PREREG.md）",
+    "blocks_12b": [
+     "g_r460_harness_lcb2_a1",
+     "g_r460_harness_lcb2_a2",
+     "g_r460_harness_lcb2_a3",
+     "g_r460_harness_lcb2_b1",
+     "g_r460_harness_lcb2_b2",
+     "g_r460_harness_lcb2_b3"
+    ],
+    "task_id_overlap": 120,
+    "task_id_n_12b": 120,
+    "task_id_n_27b": 120,
+    "same_seed": [
+     "g-r440-lcb2"
+    ],
+    "arms_27b": {
+     "OFF": {
+      "n_measured": 120,
+      "deliv_n": 59,
+      "deliv_pp": 49.166666666666664,
+      "tokens_per_task": 2523.825,
+      "tpc_incl_void": 5133.203389830508
+     },
+     "CONFORM": {
+      "n_measured": 120,
+      "deliv_n": 82,
+      "deliv_pp": 68.33333333333333,
+      "tokens_per_task": 5379.983333333334,
+      "tpc_incl_void": 7873.1463414634145
+     },
+     "HMIX": {
+      "n_measured": 120,
+      "deliv_n": 75,
+      "deliv_pp": 62.5,
+      "tokens_per_task": 4253.191666666667,
+      "tpc_incl_void": 6805.106666666667
+     }
+    },
+    "arms_12b": {
+     "OFF": {
+      "n_measured": 120,
+      "deliv_n": 70,
+      "deliv_pp": 58.333333333333336,
+      "tokens_total": 349570,
+      "tokens_per_task": 2913.0833333333335,
+      "tpc_incl_void": 4993.857142857143
+     },
+     "CONFORM": {
+      "n_measured": 120,
+      "deliv_n": 85,
+      "deliv_pp": 70.83333333333333,
+      "tokens_total": 696594,
+      "tokens_per_task": 5804.95,
+      "tpc_incl_void": 8195.223529411765
+     },
+     "HMIX": {
+      "n_measured": 120,
+      "deliv_n": 101,
+      "deliv_pp": 84.16666666666667,
+      "tokens_total": 681279,
+      "tokens_per_task": 5677.325,
+      "tpc_incl_void": 6745.336633663366
+     }
+    },
+    "deliv_pp_diff_27b_minus_12b": {
+     "OFF": -9.166666666666671,
+     "CONFORM": -2.5,
+     "HMIX": -21.66666666666667
+    },
+    "delta_c_pp": {
+     "r532_27b": -5.833333333333333,
+     "r_12b": 13.333333333333334
+    },
+    "delta_g_pp": {
+     "r532_27b": 19.166666666666668,
+     "r_12b": 12.5
+    },
+    "delta_o_pp": {
+     "r532_27b": 13.333333333333334,
+     "r_12b": 25.833333333333336
+    },
+    "not_a_test": true,
+    "contamination_note": "§八-3：污染這次比 12B 那輪嚴重。LCB v3 的日期窗是 ≤2024-08-10、LCB v2 是2023-08-26→2025-04-05；Qwen3.6／3.8 的訓練資料截止時間**查不到**但顯然遠晚於 gemma-4；HumanEval+／MBPP+（2021）幾乎確定在所有現代模型的訓練集裡。⇒ 交付率上升**無法區分**「模型更強」與「這批題進了訓練集」。本 run 的主張只能是「增益如何隨單發強度變化」，不能是「模型 A 比模型 B 強」。"
+   },
+   "lcb3_medium": {
+    "available": true,
+    "label": "S1 LCB v3 medium",
+    "source_12b": "R529（DECISION_20260911_R529_CROSS_BANK_PREREG.md）",
+    "blocks_12b": [
+     "g_r529_lcb3m_a1",
+     "g_r529_lcb3m_a2",
+     "g_r529_lcb3m_a3",
+     "g_r529_lcb3m_a4",
+     "g_r529_lcb3m_a5",
+     "g_r529_lcb3m_a6",
+     "g_r529_lcb3m_a7"
+    ],
+    "task_id_overlap": 135,
+    "task_id_n_12b": 135,
+    "task_id_n_27b": 135,
+    "same_seed": [
+     "g-r529-lcb3"
+    ],
+    "arms_27b": {
+     "OFF": {
+      "n_measured": 135,
+      "deliv_n": 102,
+      "deliv_pp": 75.55555555555556,
+      "tokens_per_task": 1466.7703703703703,
+      "tpc_incl_void": 1941.313725490196
+     },
+     "CONFORM": {
+      "n_measured": 135,
+      "deliv_n": 124,
+      "deliv_pp": 91.85185185185185,
+      "tokens_per_task": 2518.162962962963,
+      "tpc_incl_void": 2741.548387096774
+     },
+     "HMIX": {
+      "n_measured": 135,
+      "deliv_n": 117,
+      "deliv_pp": 86.66666666666667,
+      "tokens_per_task": 2401.3259259259257,
+      "tpc_incl_void": 2770.7606837606836
+     }
+    },
+    "arms_12b": {
+     "OFF": {
+      "n_measured": 135,
+      "deliv_n": 115,
+      "deliv_pp": 85.18518518518519,
+      "tokens_total": 605089,
+      "tokens_per_task": 4482.1407407407405,
+      "tpc_incl_void": 5261.643478260869
+     },
+     "CONFORM": {
+      "n_measured": 135,
+      "deliv_n": 125,
+      "deliv_pp": 92.5925925925926,
+      "tokens_total": 750088,
+      "tokens_per_task": 5556.207407407407,
+      "tpc_incl_void": 6000.704
+     },
+     "HMIX": {
+      "n_measured": 135,
+      "deliv_n": 126,
+      "deliv_pp": 93.33333333333333,
+      "tokens_total": 1024068,
+      "tokens_per_task": 7585.688888888889,
+      "tpc_incl_void": 8127.523809523809
+     }
+    },
+    "deliv_pp_diff_27b_minus_12b": {
+     "OFF": -9.629629629629633,
+     "CONFORM": -0.7407407407407476,
+     "HMIX": -6.666666666666657
+    },
+    "delta_c_pp": {
+     "r532_27b": -5.185185185185185,
+     "r_12b": 0.7407407407407408
+    },
+    "delta_g_pp": {
+     "r532_27b": 16.296296296296298,
+     "r_12b": 7.4074074074074066
+    },
+    "delta_o_pp": {
+     "r532_27b": 11.11111111111111,
+     "r_12b": 8.148148148148149
+    },
+    "not_a_test": true,
+    "contamination_note": "§八-3：污染這次比 12B 那輪嚴重。LCB v3 的日期窗是 ≤2024-08-10、LCB v2 是2023-08-26→2025-04-05；Qwen3.6／3.8 的訓練資料截止時間**查不到**但顯然遠晚於 gemma-4；HumanEval+／MBPP+（2021）幾乎確定在所有現代模型的訓練集裡。⇒ 交付率上升**無法區分**「模型更強」與「這批題進了訓練集」。本 run 的主張只能是「增益如何隨單發強度變化」，不能是「模型 A 比模型 B 強」。"
+   },
+   "lcb3_hard": {
+    "available": true,
+    "label": "S2 LCB v3 hard",
+    "source_12b": "R529",
+    "blocks_12b": [
+     "g_r529_lcb3h_a1",
+     "g_r529_lcb3h_a2",
+     "g_r529_lcb3h_a3"
+    ],
+    "task_id_overlap": 54,
+    "task_id_n_12b": 54,
+    "task_id_n_27b": 54,
+    "same_seed": [
+     "g-r529-lcb3"
+    ],
+    "arms_27b": {
+     "OFF": {
+      "n_measured": 54,
+      "deliv_n": 36,
+      "deliv_pp": 66.66666666666667,
+      "tokens_per_task": 2268.8333333333335,
+      "tpc_incl_void": 3403.25
+     },
+     "CONFORM": {
+      "n_measured": 54,
+      "deliv_n": 44,
+      "deliv_pp": 81.48148148148148,
+      "tokens_per_task": 5446.185185185185,
+      "tpc_incl_void": 6683.954545454545
+     },
+     "HMIX": {
+      "n_measured": 54,
+      "deliv_n": 35,
+      "deliv_pp": 64.81481481481481,
+      "tokens_per_task": 3992.9444444444443,
+      "tpc_incl_void": 6160.542857142857
+     }
+    },
+    "arms_12b": {
+     "OFF": {
+      "n_measured": 54,
+      "deliv_n": 38,
+      "deliv_pp": 70.37037037037037,
+      "tokens_total": 454259,
+      "tokens_per_task": 8412.203703703704,
+      "tpc_incl_void": 11954.184210526315
+     },
+     "CONFORM": {
+      "n_measured": 54,
+      "deliv_n": 41,
+      "deliv_pp": 75.92592592592592,
+      "tokens_total": 720058,
+      "tokens_per_task": 13334.407407407407,
+      "tpc_incl_void": 17562.39024390244
+     },
+     "HMIX": {
+      "n_measured": 54,
+      "deliv_n": 43,
+      "deliv_pp": 79.62962962962963,
+      "tokens_total": 773171,
+      "tokens_per_task": 14317.981481481482,
+      "tpc_incl_void": 17980.720930232557
+     }
+    },
+    "deliv_pp_diff_27b_minus_12b": {
+     "OFF": -3.7037037037036953,
+     "CONFORM": 5.555555555555557,
+     "HMIX": -14.814814814814824
+    },
+    "delta_c_pp": {
+     "r532_27b": -16.666666666666664,
+     "r_12b": 3.7037037037037033
+    },
+    "delta_g_pp": {
+     "r532_27b": 14.814814814814813,
+     "r_12b": 5.555555555555555
+    },
+    "delta_o_pp": {
+     "r532_27b": -1.8518518518518516,
+     "r_12b": 9.25925925925926
+    },
+    "not_a_test": true,
+    "contamination_note": "§八-3：污染這次比 12B 那輪嚴重。LCB v3 的日期窗是 ≤2024-08-10、LCB v2 是2023-08-26→2025-04-05；Qwen3.6／3.8 的訓練資料截止時間**查不到**但顯然遠晚於 gemma-4；HumanEval+／MBPP+（2021）幾乎確定在所有現代模型的訓練集裡。⇒ 交付率上升**無法區分**「模型更強」與「這批題進了訓練集」。本 run 的主張只能是「增益如何隨單發強度變化」，不能是「模型 A 比模型 B 強」。"
+   },
+   "humanevalplus": {
+    "available": true,
+    "label": "S3 HumanEval+",
+    "source_12b": "R529",
+    "blocks_12b": [
+     "g_r529_hep_a1",
+     "g_r529_hep_a2",
+     "g_r529_hep_a3",
+     "g_r529_hep_a4",
+     "g_r529_hep_a5",
+     "g_r529_hep_a6",
+     "g_r529_hep_a7",
+     "g_r529_hep_a8"
+    ],
+    "task_id_overlap": 156,
+    "task_id_n_12b": 156,
+    "task_id_n_27b": 156,
+    "same_seed": [
+     "g-r529-he"
+    ],
+    "arms_27b": {
+     "OFF": {
+      "n_measured": 156,
+      "deliv_n": 140,
+      "deliv_pp": 89.74358974358974,
+      "tokens_per_task": 553.5512820512821,
+      "tpc_incl_void": 616.8142857142857
+     },
+     "CONFORM": {
+      "n_measured": 156,
+      "deliv_n": 143,
+      "deliv_pp": 91.66666666666667,
+      "tokens_per_task": 617.2692307692307,
+      "tpc_incl_void": 673.3846153846154
+     },
+     "HMIX": {
+      "n_measured": 156,
+      "deliv_n": 141,
+      "deliv_pp": 90.38461538461539,
+      "tokens_per_task": 617.3974358974359,
+      "tpc_incl_void": 683.0780141843971
+     }
+    },
+    "arms_12b": {
+     "OFF": {
+      "n_measured": 156,
+      "deliv_n": 129,
+      "deliv_pp": 82.6923076923077,
+      "tokens_total": 250371,
+      "tokens_per_task": 1604.9423076923076,
+      "tpc_incl_void": 1940.860465116279
+     },
+     "CONFORM": {
+      "n_measured": 156,
+      "deliv_n": 147,
+      "deliv_pp": 94.23076923076923,
+      "tokens_total": 288698,
+      "tokens_per_task": 1850.628205128205,
+      "tpc_incl_void": 1963.9319727891157
+     },
+     "HMIX": {
+      "n_measured": 156,
+      "deliv_n": 148,
+      "deliv_pp": 94.87179487179488,
+      "tokens_total": 488586,
+      "tokens_per_task": 3131.9615384615386,
+      "tpc_incl_void": 3301.2567567567567
+     }
+    },
+    "deliv_pp_diff_27b_minus_12b": {
+     "OFF": 7.051282051282044,
+     "CONFORM": -2.564102564102555,
+     "HMIX": -4.487179487179489
+    },
+    "delta_c_pp": {
+     "r532_27b": -1.282051282051282,
+     "r_12b": 0.641025641025641
+    },
+    "delta_g_pp": {
+     "r532_27b": 1.9230769230769231,
+     "r_12b": 11.538461538461538
+    },
+    "delta_o_pp": {
+     "r532_27b": 0.641025641025641,
+     "r_12b": 12.179487179487179
+    },
+    "not_a_test": true,
+    "contamination_note": "§八-3：污染這次比 12B 那輪嚴重。LCB v3 的日期窗是 ≤2024-08-10、LCB v2 是2023-08-26→2025-04-05；Qwen3.6／3.8 的訓練資料截止時間**查不到**但顯然遠晚於 gemma-4；HumanEval+／MBPP+（2021）幾乎確定在所有現代模型的訓練集裡。⇒ 交付率上升**無法區分**「模型更強」與「這批題進了訓練集」。本 run 的主張只能是「增益如何隨單發強度變化」，不能是「模型 A 比模型 B 強」。"
+   },
+   "evalplus": {
+    "available": true,
+    "label": "S4 MBPP+",
+    "source_12b": "R529",
+    "blocks_12b": [
+     "g_r529_mbpp_a1",
+     "g_r529_mbpp_a2",
+     "g_r529_mbpp_a3",
+     "g_r529_mbpp_a4",
+     "g_r529_mbpp_a5",
+     "g_r529_mbpp_a6",
+     "g_r529_mbpp_a7",
+     "g_r529_mbpp_a8",
+     "g_r529_mbpp_a9",
+     "g_r529_mbpp_a10",
+     "g_r529_mbpp_a11",
+     "g_r529_mbpp_a12",
+     "g_r529_mbpp_a13",
+     "g_r529_mbpp_a14",
+     "g_r529_mbpp_a15",
+     "g_r529_mbpp_a16",
+     "g_r529_mbpp_a17",
+     "g_r529_mbpp_a18",
+     "g_r529_mbpp_a19"
+    ],
+    "task_id_overlap": 371,
+    "task_id_n_12b": 371,
+    "task_id_n_27b": 371,
+    "same_seed": [
+     "g-r529-mbpp"
+    ],
+    "arms_27b": {
+     "OFF": {
+      "n_measured": 371,
+      "deliv_n": 288,
+      "deliv_pp": 77.62803234501348,
+      "tokens_per_task": 477.6388140161725,
+      "tpc_incl_void": 615.2916666666666
+     },
+     "CONFORM": {
+      "n_measured": 371,
+      "deliv_n": 298,
+      "deliv_pp": 80.3234501347709,
+      "tokens_per_task": 590.1509433962265,
+      "tpc_incl_void": 734.7181208053692
+     },
+     "HMIX": {
+      "n_measured": 371,
+      "deliv_n": 296,
+      "deliv_pp": 79.78436657681941,
+      "tokens_per_task": 553.6280323450135,
+      "tpc_incl_void": 693.9054054054054
+     }
+    },
+    "arms_12b": {
+     "OFF": {
+      "n_measured": 371,
+      "deliv_n": 277,
+      "deliv_pp": 74.66307277628033,
+      "tokens_total": 545279,
+      "tokens_per_task": 1469.754716981132,
+      "tpc_incl_void": 1968.5162454873646
+     },
+     "CONFORM": {
+      "n_measured": 371,
+      "deliv_n": 295,
+      "deliv_pp": 79.51482479784367,
+      "tokens_total": 819620,
+      "tokens_per_task": 2209.2183288409706,
+      "tpc_incl_void": 2778.3728813559323
+     },
+     "HMIX": {
+      "n_measured": 371,
+      "deliv_n": 299,
+      "deliv_pp": 80.59299191374663,
+      "tokens_total": 1326736,
+      "tokens_per_task": 3576.10781671159,
+      "tpc_incl_void": 4437.244147157191
+     }
+    },
+    "deliv_pp_diff_27b_minus_12b": {
+     "OFF": 2.96495956873315,
+     "CONFORM": 0.8086253369272214,
+     "HMIX": -0.8086253369272214
+    },
+    "delta_c_pp": {
+     "r532_27b": -0.5390835579514826,
+     "r_12b": 1.078167115902965
+    },
+    "delta_g_pp": {
+     "r532_27b": 2.6954177897574128,
+     "r_12b": 4.8517520215633425
+    },
+    "delta_o_pp": {
+     "r532_27b": 2.15633423180593,
+     "r_12b": 5.929919137466308
+    },
+    "not_a_test": true,
+    "contamination_note": "§八-3：污染這次比 12B 那輪嚴重。LCB v3 的日期窗是 ≤2024-08-10、LCB v2 是2023-08-26→2025-04-05；Qwen3.6／3.8 的訓練資料截止時間**查不到**但顯然遠晚於 gemma-4；HumanEval+／MBPP+（2021）幾乎確定在所有現代模型的訓練集裡。⇒ 交付率上升**無法區分**「模型更強」與「這批題進了訓練集」。本 run 的主張只能是「增益如何隨單發強度變化」，不能是「模型 A 比模型 B 強」。"
+   }
+  }
+ },
+ "per_backend": {
+  "lcb2": {
+   "1003": {
+    "host": "1003",
+    "lmstudio_version": "0.4.24.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_lcb2_a1",
+     "g_r532_lcb2_a2",
+     "g_r532_lcb2_a4",
+     "g_r532_lcb2_a5",
+     "g_r532_lcb2_a6"
+    ],
+    "blocks_n": 5,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 100,
+      "deliv_n": 49,
+      "deliv_pp": 49.0,
+      "deliv_fraction": "49/100",
+      "tokens_total": 250766,
+      "tokens_per_task": 2507.66,
+      "tpc_incl_void": 5117.673469387755
+     },
+     "CONFORM": {
+      "n_measured": 100,
+      "deliv_n": 69,
+      "deliv_pp": 69.0,
+      "deliv_fraction": "69/100",
+      "tokens_total": 568778,
+      "tokens_per_task": 5687.78,
+      "tpc_incl_void": 8243.159420289856
+     },
+     "HMIX": {
+      "n_measured": 100,
+      "deliv_n": 62,
+      "deliv_pp": 62.0,
+      "deliv_fraction": "62/100",
+      "tokens_total": 450243,
+      "tokens_per_task": 4502.43,
+      "tpc_incl_void": 7261.9838709677415
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 11,
+      "c": 18,
+      "b_minus_c_descriptive": -7,
+      "n_common": 100,
+      "delta_pp": -7.000000000000001,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 27,
+      "c": 14,
+      "b_minus_c_descriptive": 13,
+      "n_common": 100,
+      "delta_pp": 13.0,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 26,
+      "c": 6,
+      "b_minus_c_descriptive": 20,
+      "n_common": 100,
+      "delta_pp": 20.0,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 440,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 2092.184090909091,
+     "total_tokens_mean": 2886.2204545454547,
+     "prompt_tokens_max": 8750,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   },
+   "1004": {
+    "host": "1004",
+    "lmstudio_version": "0.4.17.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_lcb2_a3"
+    ],
+    "blocks_n": 1,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 20,
+      "deliv_n": 10,
+      "deliv_pp": 50.0,
+      "deliv_fraction": "10/20",
+      "tokens_total": 52093,
+      "tokens_per_task": 2604.65,
+      "tpc_incl_void": 5209.3
+     },
+     "CONFORM": {
+      "n_measured": 20,
+      "deliv_n": 13,
+      "deliv_pp": 65.0,
+      "deliv_fraction": "13/20",
+      "tokens_total": 76820,
+      "tokens_per_task": 3841.0,
+      "tpc_incl_void": 5909.2307692307695
+     },
+     "HMIX": {
+      "n_measured": 20,
+      "deliv_n": 13,
+      "deliv_pp": 65.0,
+      "deliv_fraction": "13/20",
+      "tokens_total": 60140,
+      "tokens_per_task": 3007.0,
+      "tpc_incl_void": 4626.153846153846
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 2,
+      "c": 2,
+      "b_minus_c_descriptive": 0,
+      "n_common": 20,
+      "delta_pp": 0.0,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 4,
+      "c": 1,
+      "b_minus_c_descriptive": 3,
+      "n_common": 20,
+      "delta_pp": 15.0,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 4,
+      "c": 1,
+      "b_minus_c_descriptive": 3,
+      "n_common": 20,
+      "delta_pp": 15.0,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 77,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 1853.2077922077922,
+     "total_tokens_mean": 2455.6233766233768,
+     "prompt_tokens_max": 3445,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   }
+  },
+  "lcb3_medium": {
+   "1003": {
+    "host": "1003",
+    "lmstudio_version": "0.4.24.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_lcb3m_a3",
+     "g_r532_lcb3m_a7"
+    ],
+    "blocks_n": 2,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 35,
+      "deliv_n": 28,
+      "deliv_pp": 80.0,
+      "deliv_fraction": "28/35",
+      "tokens_total": 59992,
+      "tokens_per_task": 1714.057142857143,
+      "tpc_incl_void": 2142.5714285714284
+     },
+     "CONFORM": {
+      "n_measured": 35,
+      "deliv_n": 33,
+      "deliv_pp": 94.28571428571429,
+      "deliv_fraction": "33/35",
+      "tokens_total": 100974,
+      "tokens_per_task": 2884.9714285714285,
+      "tpc_incl_void": 3059.818181818182
+     },
+     "HMIX": {
+      "n_measured": 35,
+      "deliv_n": 28,
+      "deliv_pp": 80.0,
+      "deliv_fraction": "28/35",
+      "tokens_total": 111477,
+      "tokens_per_task": 3185.057142857143,
+      "tpc_incl_void": 3981.3214285714284
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 0,
+      "c": 5,
+      "b_minus_c_descriptive": -5,
+      "n_common": 35,
+      "delta_pp": -14.285714285714285,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 5,
+      "c": 5,
+      "b_minus_c_descriptive": 0,
+      "n_common": 35,
+      "delta_pp": 0.0,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 7,
+      "c": 2,
+      "b_minus_c_descriptive": 5,
+      "n_common": 35,
+      "delta_pp": 14.285714285714285,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 135,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 1321.2074074074073,
+     "total_tokens_mean": 2018.5407407407408,
+     "prompt_tokens_max": 11728,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   },
+   "1004": {
+    "host": "1004",
+    "lmstudio_version": "0.4.17.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_lcb3m_a1",
+     "g_r532_lcb3m_a2",
+     "g_r532_lcb3m_a4",
+     "g_r532_lcb3m_a5",
+     "g_r532_lcb3m_a6"
+    ],
+    "blocks_n": 5,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 100,
+      "deliv_n": 74,
+      "deliv_pp": 74.0,
+      "deliv_fraction": "74/100",
+      "tokens_total": 138022,
+      "tokens_per_task": 1380.22,
+      "tpc_incl_void": 1865.162162162162
+     },
+     "CONFORM": {
+      "n_measured": 100,
+      "deliv_n": 91,
+      "deliv_pp": 91.0,
+      "deliv_fraction": "91/100",
+      "tokens_total": 238978,
+      "tokens_per_task": 2389.78,
+      "tpc_incl_void": 2626.131868131868
+     },
+     "HMIX": {
+      "n_measured": 100,
+      "deliv_n": 89,
+      "deliv_pp": 89.0,
+      "deliv_fraction": "89/100",
+      "tokens_total": 212702,
+      "tokens_per_task": 2127.02,
+      "tpc_incl_void": 2389.9101123595506
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 4,
+      "c": 6,
+      "b_minus_c_descriptive": -2,
+      "n_common": 100,
+      "delta_pp": -2.0,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 16,
+      "c": 1,
+      "b_minus_c_descriptive": 15,
+      "n_common": 100,
+      "delta_pp": 15.0,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 19,
+      "c": 2,
+      "b_minus_c_descriptive": 17,
+      "n_common": 100,
+      "delta_pp": 17.0,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 383,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 953.8485639686684,
+     "total_tokens_mean": 1540.083550913838,
+     "prompt_tokens_max": 5066,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   }
+  },
+  "lcb3_hard": {
+   "1003": {
+    "host": "1003",
+    "lmstudio_version": "0.4.24.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_lcb3h_a1",
+     "g_r532_lcb3h_a2"
+    ],
+    "blocks_n": 2,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 40,
+      "deliv_n": 28,
+      "deliv_pp": 70.0,
+      "deliv_fraction": "28/40",
+      "tokens_total": 91467,
+      "tokens_per_task": 2286.675,
+      "tpc_incl_void": 3266.6785714285716
+     },
+     "CONFORM": {
+      "n_measured": 40,
+      "deliv_n": 33,
+      "deliv_pp": 82.5,
+      "deliv_fraction": "33/40",
+      "tokens_total": 244191,
+      "tokens_per_task": 6104.775,
+      "tpc_incl_void": 7399.727272727273
+     },
+     "HMIX": {
+      "n_measured": 40,
+      "deliv_n": 25,
+      "deliv_pp": 62.5,
+      "deliv_fraction": "25/40",
+      "tokens_total": 175345,
+      "tokens_per_task": 4383.625,
+      "tpc_incl_void": 7013.8
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 1,
+      "c": 9,
+      "b_minus_c_descriptive": -8,
+      "n_common": 40,
+      "delta_pp": -20.0,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 6,
+      "c": 9,
+      "b_minus_c_descriptive": -3,
+      "n_common": 40,
+      "delta_pp": -7.5,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 9,
+      "c": 4,
+      "b_minus_c_descriptive": 5,
+      "n_common": 40,
+      "delta_pp": 12.5,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 181,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 2007.3093922651933,
+     "total_tokens_mean": 2823.5524861878453,
+     "prompt_tokens_max": 7417,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   },
+   "1004": {
+    "host": "1004",
+    "lmstudio_version": "0.4.17.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_lcb3h_a3"
+    ],
+    "blocks_n": 1,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 14,
+      "deliv_n": 8,
+      "deliv_pp": 57.142857142857146,
+      "deliv_fraction": "8/14",
+      "tokens_total": 31050,
+      "tokens_per_task": 2217.8571428571427,
+      "tpc_incl_void": 3881.25
+     },
+     "CONFORM": {
+      "n_measured": 14,
+      "deliv_n": 11,
+      "deliv_pp": 78.57142857142857,
+      "deliv_fraction": "11/14",
+      "tokens_total": 49903,
+      "tokens_per_task": 3564.5,
+      "tpc_incl_void": 4536.636363636364
+     },
+     "HMIX": {
+      "n_measured": 14,
+      "deliv_n": 10,
+      "deliv_pp": 71.42857142857143,
+      "deliv_fraction": "10/14",
+      "tokens_total": 40274,
+      "tokens_per_task": 2876.714285714286,
+      "tpc_incl_void": 4027.4
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 0,
+      "c": 1,
+      "b_minus_c_descriptive": -1,
+      "n_common": 14,
+      "delta_pp": -7.142857142857142,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 3,
+      "c": 1,
+      "b_minus_c_descriptive": 2,
+      "n_common": 14,
+      "delta_pp": 14.285714285714285,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 3,
+      "c": 0,
+      "b_minus_c_descriptive": 3,
+      "n_common": 14,
+      "delta_pp": 21.428571428571427,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 60,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 1268.9,
+     "total_tokens_mean": 2020.95,
+     "prompt_tokens_max": 1823,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   }
+  },
+  "humanevalplus": {
+   "1003": {
+    "host": "1003",
+    "lmstudio_version": "0.4.24.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_hep_a1",
+     "g_r532_hep_a3",
+     "g_r532_hep_a4",
+     "g_r532_hep_a5",
+     "g_r532_hep_a6"
+    ],
+    "blocks_n": 5,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 100,
+      "deliv_n": 92,
+      "deliv_pp": 92.0,
+      "deliv_fraction": "92/100",
+      "tokens_total": 53609,
+      "tokens_per_task": 536.09,
+      "tpc_incl_void": 582.7065217391304
+     },
+     "CONFORM": {
+      "n_measured": 100,
+      "deliv_n": 94,
+      "deliv_pp": 94.0,
+      "deliv_fraction": "94/100",
+      "tokens_total": 50772,
+      "tokens_per_task": 507.72,
+      "tpc_incl_void": 540.1276595744681
+     },
+     "HMIX": {
+      "n_measured": 100,
+      "deliv_n": 92,
+      "deliv_pp": 92.0,
+      "deliv_fraction": "92/100",
+      "tokens_total": 55567,
+      "tokens_per_task": 555.67,
+      "tpc_incl_void": 603.9891304347826
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 3,
+      "c": 5,
+      "b_minus_c_descriptive": -2,
+      "n_common": 100,
+      "delta_pp": -2.0,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 5,
+      "c": 5,
+      "b_minus_c_descriptive": 0,
+      "n_common": 100,
+      "delta_pp": 0.0,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 5,
+      "c": 3,
+      "b_minus_c_descriptive": 2,
+      "n_common": 100,
+      "delta_pp": 2.0,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 336,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 249.19345238095238,
+     "total_tokens_mean": 476.48214285714283,
+     "prompt_tokens_max": 685,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   },
+   "1004": {
+    "host": "1004",
+    "lmstudio_version": "0.4.17.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_hep_a2",
+     "g_r532_hep_a7",
+     "g_r532_hep_a8"
+    ],
+    "blocks_n": 3,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 56,
+      "deliv_n": 48,
+      "deliv_pp": 85.71428571428571,
+      "deliv_fraction": "48/56",
+      "tokens_total": 32745,
+      "tokens_per_task": 584.7321428571429,
+      "tpc_incl_void": 682.1875
+     },
+     "CONFORM": {
+      "n_measured": 56,
+      "deliv_n": 49,
+      "deliv_pp": 87.5,
+      "deliv_fraction": "49/56",
+      "tokens_total": 45522,
+      "tokens_per_task": 812.8928571428571,
+      "tpc_incl_void": 929.0204081632653
+     },
+     "HMIX": {
+      "n_measured": 56,
+      "deliv_n": 49,
+      "deliv_pp": 87.5,
+      "deliv_fraction": "49/56",
+      "tokens_total": 40747,
+      "tokens_per_task": 727.625,
+      "tpc_incl_void": 831.5714285714286
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 2,
+      "c": 2,
+      "b_minus_c_descriptive": 0,
+      "n_common": 56,
+      "delta_pp": 0.0,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 5,
+      "c": 4,
+      "b_minus_c_descriptive": 1,
+      "n_common": 56,
+      "delta_pp": 1.7857142857142856,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 4,
+      "c": 3,
+      "b_minus_c_descriptive": 1,
+      "n_common": 56,
+      "delta_pp": 1.7857142857142856,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 204,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 319.25,
+     "total_tokens_mean": 583.843137254902,
+     "prompt_tokens_max": 2473,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   }
+  },
+  "evalplus": {
+   "1003": {
+    "host": "1003",
+    "lmstudio_version": "0.4.24.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_mbpp_a10",
+     "g_r532_mbpp_a12",
+     "g_r532_mbpp_a14",
+     "g_r532_mbpp_a16",
+     "g_r532_mbpp_a18",
+     "g_r532_mbpp_a2",
+     "g_r532_mbpp_a7",
+     "g_r532_mbpp_a8"
+    ],
+    "blocks_n": 8,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 160,
+      "deliv_n": 129,
+      "deliv_pp": 80.625,
+      "deliv_fraction": "129/160",
+      "tokens_total": 89922,
+      "tokens_per_task": 562.0125,
+      "tpc_incl_void": 697.0697674418604
+     },
+     "CONFORM": {
+      "n_measured": 160,
+      "deliv_n": 133,
+      "deliv_pp": 83.125,
+      "deliv_fraction": "133/160",
+      "tokens_total": 73793,
+      "tokens_per_task": 461.20625,
+      "tpc_incl_void": 554.8345864661654
+     },
+     "HMIX": {
+      "n_measured": 160,
+      "deliv_n": 133,
+      "deliv_pp": 83.125,
+      "deliv_fraction": "133/160",
+      "tokens_total": 82649,
+      "tokens_per_task": 516.55625,
+      "tpc_incl_void": 621.421052631579
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 8,
+      "c": 8,
+      "b_minus_c_descriptive": 0,
+      "n_common": 160,
+      "delta_pp": 0.0,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 10,
+      "c": 6,
+      "b_minus_c_descriptive": 4,
+      "n_common": 160,
+      "delta_pp": 2.5,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 7,
+      "c": 3,
+      "b_minus_c_descriptive": 4,
+      "n_common": 160,
+      "delta_pp": 2.5,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 568,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 235.08274647887325,
+     "total_tokens_mean": 434.1619718309859,
+     "prompt_tokens_max": 1343,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   },
+   "1004": {
+    "host": "1004",
+    "lmstudio_version": "0.4.17.0",
+    "lmstudio_version_source": "人回報的宣稱（`lms version`），analyzer 查證不到",
+    "blocks": [
+     "g_r532_mbpp_a1",
+     "g_r532_mbpp_a11",
+     "g_r532_mbpp_a13",
+     "g_r532_mbpp_a15",
+     "g_r532_mbpp_a17",
+     "g_r532_mbpp_a19",
+     "g_r532_mbpp_a3",
+     "g_r532_mbpp_a4",
+     "g_r532_mbpp_a5",
+     "g_r532_mbpp_a6",
+     "g_r532_mbpp_a9"
+    ],
+    "blocks_n": 11,
+    "per_arm": {
+     "OFF": {
+      "n_measured": 211,
+      "deliv_n": 159,
+      "deliv_pp": 75.35545023696683,
+      "deliv_fraction": "159/211",
+      "tokens_total": 87282,
+      "tokens_per_task": 413.65876777251185,
+      "tpc_incl_void": 548.9433962264151
+     },
+     "CONFORM": {
+      "n_measured": 211,
+      "deliv_n": 165,
+      "deliv_pp": 78.19905213270142,
+      "deliv_fraction": "165/211",
+      "tokens_total": 145153,
+      "tokens_per_task": 687.9289099526067,
+      "tpc_incl_void": 879.7151515151515
+     },
+     "HMIX": {
+      "n_measured": 211,
+      "deliv_n": 163,
+      "deliv_pp": 77.25118483412322,
+      "deliv_fraction": "163/211",
+      "tokens_total": 122747,
+      "tokens_per_task": 581.739336492891,
+      "tpc_incl_void": 753.0490797546013
+     }
+    },
+    "paired": {
+     "HMIX_vs_CONFORM": {
+      "b": 7,
+      "c": 9,
+      "b_minus_c_descriptive": -2,
+      "n_common": 211,
+      "delta_pp": -0.9478672985781991,
+      "not_a_test": true
+     },
+     "HMIX_vs_OFF": {
+      "b": 11,
+      "c": 7,
+      "b_minus_c_descriptive": 4,
+      "n_common": 211,
+      "delta_pp": 1.8957345971563981,
+      "not_a_test": true
+     },
+     "CONFORM_vs_OFF": {
+      "b": 12,
+      "c": 6,
+      "b_minus_c_descriptive": 6,
+      "n_common": 211,
+      "delta_pp": 2.843601895734597,
+      "not_a_test": true
+     }
+    },
+    "reasoning": {
+     "calls_ok": 761,
+     "calls_with_reasoning": 0,
+     "reasoning_call_pp": 0.0,
+     "reasoning_tokens_total": 0,
+     "reasoning_tokens_mean": 0.0,
+     "completion_tokens_mean": 259.57818659658346,
+     "total_tokens_mean": 467.16425755584754,
+     "prompt_tokens_max": 3657,
+     "inference_mode": "non_thinking",
+     "note": "`inference_mode` 是從 `usage.completion_tokens_details.reasoning_tokens` **推斷**的，不是後端自己報的設定：>0 的呼叫占比 ≥50% ⇒ thinking、==0% ⇒ non_thinking、其間 ⇒ mixed；一通成功呼叫都沒有 ⇒ unknown（**不是** non_thinking——量不到不是通過）。這一格是 E-11 的事後查核：非 non_thinking ⇒ §四-2 的 INVALID。"
+    },
+    "not_a_test": true,
+    "note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。"
+   }
+  }
+ },
+ "per_backend_note": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。",
+ "honesty_bounds": {
+  "八之一_兩台版本不同": "**描述性，不進任何仲裁**：本區塊的每一個數字都不改 primary／decision_state／aggregate 的任何一格。它存在的理由是 §八-1：兩台 LM Studio 版本不同（1003 `0.4.24.0`／1004 `0.4.17.0`），已驗一致的只有推論模式，不是所有版本差。⚠ 配對主指標不受影響：每一塊的三臂跑在**同一台**上，b/c 是塊內配對。",
+  "八之三_污染": "§八-3：污染這次比 12B 那輪嚴重。LCB v3 的日期窗是 ≤2024-08-10、LCB v2 是2023-08-26→2025-04-05；Qwen3.6／3.8 的訓練資料截止時間**查不到**但顯然遠晚於 gemma-4；HumanEval+／MBPP+（2021）幾乎確定在所有現代模型的訓練集裡。⇒ 交付率上升**無法區分**「模型更強」與「這批題進了訓練集」。本 run 的主張只能是「增益如何隨單發強度變化」，不能是「模型 A 比模型 B 強」。",
+  "八之四_更強只在這五集這顆量化這個harness": "「更強」只在本專題的五個題組上、這一顆量化（Q4_K_M）、這一個 harness、這一組預算、非 thinking 條件下成立。公開評測（Qwen 官方自報 LiveCodeBench v6 = 90.3）是 thinking＋agentic harness＋avg@3＋256K context 量的，不是同一件事，不得引用來預測本 run 的 OFF 交付率。",
+  "八之五_非thinking是選擇": "非 thinking 是一個選擇不是這顆模型的自然狀態（對照組實測 reasoning_tokens=32 ⇒ 它預設會 thinking）。⇒ **我們量的不是這顆模型最強的樣子**。",
+  "八之六_分母": "HumanEval+ 156/164（8 題沙箱信封排除）、MBPP+ 371/378（7 題資源信封排除），與 12B 那輪逐字相同。",
+  "八之七_量具單邊": "量具是單邊保證；`lcb3_hard` 只有 3 題被參考解直接驗過（gauge_in_filter_n=3）。擋得住已知壞解 ≠ 涵蓋真需求。",
+  "八之八_VGT只掃H臂": "V/GT 工具設計上只掃 H 臂，其餘三臂要靠獨立掃描補；被跳過的瑣碎 needle **不算檢查過**。",
+  "八之九_一次run不是複製": "winner's curse：R460 的 +13.33 pp 是**能被判顯著**的點估計 ⇒ 上偏；它的五次複製掉到 +0.83～+5.83。R532 是**一次** run（§八-9），每一個點估計都要當單次值讀，不是複製。",
+  "四之三_不得併n": "跨模型（27B vs 12B）的差值**不是檢定**：它跨 run、跨時間、跨後端負載、跨 context 大小，混淆項多到 p 值沒有意義（§四-3-2）。**不准**把兩輪的 836 題併成 1,672 題的 n，**不准**把五集的點估計平均成一個數，**不准**用 R532 的結果去改 R460／R460R／R529 的既有裁決。",
+  "r440p": "R440P 前提句：整件事建立在「需求可被編譯成可執行的驗收測資」之上。沒有可執行驗收的需求，本檔量到的任何差值都不適用。",
+  "wording": "禁語（§四-6）：不准寫「複製失敗」「效果消失」「等價」「打平」「迴圈沒用」「多數支持」「趨勢明顯」；差值就寫差值，不要寫成 improvement／提升。"
+ }
+}
