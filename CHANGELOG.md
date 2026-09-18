@@ -64,7 +64,16 @@ there cannot tell a working wheel from a broken one.
   `vacant-network` 0.7.0 were installed into one venv in both orders. Both import,
   `ops.CharmBase` and `ops.model.Model` still resolve, `vacant demo gate` still runs, and
   the intersection of the two distributions' `RECORD` file lists is **empty** — neither
-  package overwrites a file of the other.
+  package overwrites a file of the other. All 61 modules of the wheel import cleanly in
+  that venv too, so nothing inside `vacant` accidentally resolves to Juju's `ops`.
+- **And the counterfactual was measured as well**, because the reason for keeping a
+  top-level `ops` out of the wheel has to be the real failure mode: a throwaway wheel that
+  *does* ship a top-level `ops` was installed on top of Juju's. pip printed
+  `Successfully installed`, no warning, and afterwards `ops/__init__.py` belonged to the
+  new package (`ops.CharmBase` gone) while `pip` still reported `ops 3.8.2` as installed.
+  Silent overwrite, exactly as the READMEs say.
+- Installing from the **sdist** works too, and so does Python **3.11**, the declared
+  minimum (`vacant demo gate` end to end, gate refuses, chain OK, on 3.11.13 and 3.13.1).
 
 ### Fixed — two defects that only bit at call time
 
