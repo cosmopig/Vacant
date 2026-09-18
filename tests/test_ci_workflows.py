@@ -48,8 +48,48 @@ def sources() -> dict[str, str]:
     return {p.name: p.read_text(encoding="utf-8") for p in sorted(WF.glob("*.yml"))}
 
 
-def test_workflow_files_exist(sources):
-    assert set(sources) == {"ci.yml", "pr-title.yml"}, sorted(sources)
+#: 承載那七個必要 check 的兩個檔。**缺一個，七個 check 就有一個不會被回報。**
+_CHECK_BEARING = {"ci.yml", "pr-title.yml"}
+
+
+def test_the_check_bearing_workflows_exist(sources):
+    missing = _CHECK_BEARING - set(sources)
+    assert not missing, f"少了 {sorted(missing)}——必要 check 會變成永遠 pending"
+
+
+def test_extra_workflows_do_not_impersonate_a_required_check(sources):
+    """⚠ 這條取代原本的「集合相等」（2026-09-19）。
+
+    原本寫的是 `set(sources) == {"ci.yml", "pr-title.yml"}`，那把兩件事混在一起：
+    「七個必要 check 完好」與「不准有任何別的 workflow」。後者太強——
+    加一支 `publish.yml` 就會紅，而它與那七個 check 無關。
+
+    真正要擋的是**冒充**：別的 workflow 宣告了與必要 check 同名的 job，
+    分支保護用名字比對 ⇒ 兩個 job 搶同一個名字，綠不綠會變成看誰先跑完。
+    """
+    for name, blob in sources.items():
+        if name in _CHECK_BEARING:
+            continue
+        for check in REQUIRED_CHECKS:
+            assert f'name: "{check}"' not in blob, (
+                f"{name} 宣告了必要 check 的名字 {check!r}——"
+                f"分支保護會分不清是哪一個 job")
+
+
+def test_publish_workflow_never_fires_on_push_or_pr(sources):
+    """發布流程**只准人手動觸發**。
+
+    它若在 `push`／`pull_request` 上跑，兩件壞事：每個 PR 都會建一次
+    artifact（噪音），而且哪天有人把 `publish-pypi` 的條件寫鬆，
+    一個 push 就會把東西發出去。
+    """
+    pub = sources.get("publish.yml")
+    if pub is None:
+        pytest.skip("這個 repo 沒有 publish.yml")
+    head = pub.split("jobs:", 1)[0]
+    for bad in ("push:", "pull_request:", "schedule:"):
+        assert bad not in head, f"publish.yml 的觸發條件含 {bad}——它只准人手動觸發"
+    assert "release:" in head and "workflow_dispatch:" in head
 
 
 @pytest.mark.parametrize("check", [c for c in REQUIRED_CHECKS
