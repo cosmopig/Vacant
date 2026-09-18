@@ -462,7 +462,7 @@ pi 不吃環境變數 ⇒ 用 `--port 8877` ＋ `PI_CODING_AGENT_DIR` 底下一�
 `Connection error.`。那正是 §4.5 的現場版本：**「我設了設定」不是證據，
 `requests_seen` 才是。**
 
-#### 7.8.1 獨立複驗（2026-09-18 下午，另一個 agent，`/tmp/vr2`）
+#### 7.8.1 獨立複驗（2026-09-18 下午，另一個 agent）
 
 上面兩跑寫進文件時，交出它們的那一輪被看門狗中斷，commit 訊息寫的是
 「接手前不要假設它會動」。所以整批驗收又跑了一次，真 agent 那一項**另外發三跑**
@@ -474,8 +474,17 @@ pi 不吃環境變數 ⇒ 用 `--port 8877` ＋ `PI_CODING_AGENT_DIR` 底下一�
 | `v1_verify_revise3` | `slugify(s)`；三條邊界（大小寫、頭尾連字號、連續分隔符塌縮）都只寫在驗收裡 | **交付**（`visible_pass`，1/3 次、3 通 wire、exit 0） |
 | `v1_verify_revise4` | `stats(xs)`；驗收要求鍵**恰好**是 `mean`／`median`／`mode` | **拒交**（`attempts_exhausted`，3/3 次、9 通 wire、exit 20） |
 
-三條鏈都過既有那把尺（`/tmp/vr2/run*`，entries 2／2／4，`verdict` 各 1，
+三條鏈都過既有那把尺（entries 2／2／4，`verdict` 各 1，
 `chain_ok` 與 `logbook_verify_chain` 一致）。
+
+五跑的收據與工作區都搬到 vacant-dev 的 **`/var/tmp/vacant_v1_verify/`**
+（`run`／`run3`／`run4` ＝本節三跑，`vr1_run`／`vr1_run2` ＝ §7.8 那兩跑），
+五條鏈一起驗：`run 5　鏈 5　entries 14　驗過 14　失敗 0　壞鏈 0　總判：OK`。
+原始落點 `/tmp/vr1`、`/tmp/vr2` 留著但**不要引用**——`/tmp` 會被清掉。
+
+```bash
+python3 ops/gain/replay/verify_run_receipts.py --glob "/var/tmp/vacant_v1_verify/*run*"
+```
 
 ⚠ **這三跑的挑法本身要講清楚**：前兩個任務是為了「讓迴圈被觸發」而設計的
 （把規格缺口留在驗收裡），**結果它們第一輪就過了** ——
@@ -485,6 +494,6 @@ pi 不吃環境變數 ⇒ 用 `--port 8877` ＋ `PI_CODING_AGENT_DIR` 底下一�
 第三跑是目前手上**唯一一份「agent 真的讀了回饋、真的改了行為」的落盤證據**：
 第 1 次回的鍵是 `count/sum/mean/min/max`，回饋裡有
 `KeyError: 'median'`；**第 2 次就把 `median` 加進去了**
-（`/tmp/vr2/run4/_frozen_RUN-ON_a2/solution.py`），第 3 次又自己加了
+（`/var/tmp/vacant_v1_verify/run4/_frozen_RUN-ON_a2/solution.py`），第 3 次又自己加了
 `variance`／`std_dev`。三次都沒過——它沒有一次去掉多餘的鍵，也沒有一次寫出
 `mode`。**「會改」與「會改對」是兩件事，本輪只量到前者，而且 n=1。**
