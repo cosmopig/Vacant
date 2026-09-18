@@ -9,6 +9,7 @@
 [`envmap.py`](../ops/vacantrun/envmap.py)、
 [`selftest.py`](../ops/vacantrun/selftest.py)）
 · 測試：[`tests/test_vacant_run.py`](../tests/test_vacant_run.py)
+· **哪些 agent 真的接得上（逐格實測）：[`docs/AGENT_COMPAT.md`](AGENT_COMPAT.md)**
 
 ---
 
@@ -131,14 +132,32 @@ $ python3 ops/vacantrun/selftest.py
 
 ### 4.3 原理上的洞（三個，都沒補）
 
-1. **OpenAI Responses API ＋ `store:true` ＋ `previous_response_id`**：
-   對話狀態存在 OpenAI 的伺服器上，後續請求只帶一個 id。
-   ⇒ **鐵律 3 的逐字落盤在那條路上直接破功**（Codex CLI 走這條）。
-   proxy 會記到那一通請求，但記不到「上文是什麼」。
-2. **不走 HTTP 的模型**：llama.cpp in-process、MLX、任何把權重載進 agent 自己
-   行程的做法——**根本沒有 wire**，proxy 在那裡不存在。
-3. **Bedrock SigV4**：請求用 body 算簽章，換 Authorization header 會毀簽章。
+1. **不走 HTTP 的模型通道**：兩種都見過。
+   (a) **WebSocket**——Codex CLI 用 `codex login`（ChatGPT 帳號）時，模型通道是
+   **寫死的 `wss://chatgpt.com/backend-api/codex/responses`**，
+   `OPENAI_BASE_URL` 無效、`chatgpt_base_url` 也只搬得動它的外掛／遙測／設定
+   那幾條 HTTP 請求（2026-09-18 實測，`RUST_LOG` trace 留檔）。
+   一個 request/response 一來一回的反向代理在那條路上**不存在**。
+   (b) **權重載進 agent 自己的行程**——llama.cpp in-process、MLX：
+   **根本沒有 wire**。
+   ⇒ 兩種都讓鐵律 3 的逐字落盤在那條路上不成立。
+   唯一的結構性補法是出網封鎖（§5）：封鎖之後那條路會**連不上**
+   而不是**偷偷連上**。
+2. **Bedrock SigV4**：請求用 body 算簽章，換 Authorization header 會毀簽章。
    本工具不改 body，但金鑰替換那一步在 SigV4 上不成立。
+3. **`requests_seen` 會把非模型流量也算進去**。上面 (a) 那一格實測時，假上游
+   收到 **16 通**（外掛清單、遙測、使用者設定），**但沒有一通是模型請求**。
+   ⇒ 「proxy 有流量」不等於「模型通道被中介到」；要下那個結論得看
+   `wire_*/index.jsonl` 的 `path`。
+
+> ⚠ **舊版這裡寫的是「OpenAI Responses API ＋ `store:true` ＋
+> `previous_response_id` ⇒ 逐字落盤破功（Codex CLI 走這條）」。那個描述量錯了。**
+> 2026-09-18 實測 codex-cli 0.153.2（自訂 provider ＋ API key）：
+> `store=false`、沒有 `previous_response_id`、**每一通都重放完整上文**
+> （第 2 通 input 有 5 個 item，含 `function_call` 與 `function_call_output`）。
+> 在那條路上**逐字落盤是成立的**。真正破功的是上面 1(a)，
+> 而它比原本預期的更硬——不是「只看得到 delta」，是**什麼都看不到**。
+> 逐格證據見 [`docs/AGENT_COMPAT.md`](AGENT_COMPAT.md)。
 
 ### 4.4 「一個開關」有一個星號
 
@@ -162,6 +181,18 @@ Anthropic Messages／Google GenAI）**。V0 只實作前面兩條路由的**轉�
 ⇒ **「我設了環境變數」不是證據。** 證據是 `run_*.json` 裡的 `requests_seen`
 與 `wire_*/index.jsonl` 有沒有東西。這個殘餘風險唯一的結構性補法是 §5：
 封鎖之後，沒被中介到的那條路會**連不上**，而不是**偷偷連上**。
+
+2026-09-18 把這一條**兩個方向都量出來了**（[`docs/AGENT_COMPAT.md`](AGENT_COMPAT.md)）：
+
+- **確認**：pi 0.85.1 只設 `OPENAI_BASE_URL` ⇒ 假上游 **0 通**，它跑去
+  `api.openai.com` 拿了一個 401。Codex 0.153.2 同樣 0 通。
+- **打臉靜態推論**：OpenCode 1.18.31 的 binary 裡 grep 不到 `OPENAI_BASE_URL`，
+  照字串判會寫「不吃環境變數」——**實測它吃**（讀變數的是 runtime 才載入的
+  `@ai-sdk/openai`，不是 opencode 自己）。**掃 binary 不算量。**
+- **好消息**：設定檔框架也不必動使用者的檔案。pi 有 `PI_CODING_AGENT_DIR`、
+  Codex 有 `CODEX_HOME`、OpenCode 有 `OPENCODE_CONFIG_CONTENT`——
+  一支讀 `$VACANT_RUN_PROXY` 的 wrapper 就接得上，連 `--port` 都不必。
+  這份名單在 `envmap.CONFIG_ROUTE`。
 
 ### 4.6 TOCTOU
 
