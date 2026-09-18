@@ -8,9 +8,14 @@
 Fable 裁決（2026-09-19）：四臂、兩層題庫、確認性檢定只有 H1、H2 是控制檢查、
 H3 降為描述、`--sandbox none` ＋ `--test-timeout 30` ＋ 時序門 ＋ 汙染規則。
 
-**題庫已於 2026-09-19 造完並釘值**（分支 `bank/r535`，見 §二-1）。
-本檔仍有兩處 `<<TODO-FREEZE: …>>` 佔位（沙箱修法併進 main 之後的 sha、展開器路徑），
-**凍結時由人類補上並簽入**。佔位符沒補完就不准發射。
+**題庫已於 2026-09-19 造完並釘值**（`bank_manifest.json` sha256 見 §二-1）。
+**三個基建修法已併進 main 並釘死 sha**（§九 L-1：`cad1001`／`9420d81`／`e88c147`；
+本檔凍結時 main HEAD ＝ `e88c147`）。
+
+**剩一處 `<<TODO-FREEZE: …>>`**：`ops/gain/r535/` 底下那支**展開器**的檔名與 sha。
+本檔只凍結它**必須滿足的規格**（§十三-1 的兩道牙齒）；實作由發射驅動那一側落地
+（`ops/gain/r535/run_r535.py`），交件後由人類把檔名與 sha 補進來並簽入。
+**佔位符沒補完就不准發射。**
 
 ---
 
@@ -635,44 +640,75 @@ n=40 ⇒ se=0.1000、90% CI 半寬 16.4 pp、95% CI 半寬 19.6 pp。
 [`ops/gain/r535/ORPHAN_CLEANUP_NEEDED.md`](../ops/gain/r535/ORPHAN_CLEANUP_NEEDED.md)。
 **發射前先讀它。**
 
-> ⚠ 本檔寫成時該檔在分支 `fix/sandbox-kill-leak`（commit `013f927`）上，**尚未併進 main**，
-> 所以 `ops/check_repo_links.py` 在併入前會對這一條連結判紅。**那是預期的**，
-> 不得為了讓它綠而改寫這個引用——引用要指向它該在的地方。
+> 本檔草稿寫成時該檔還在分支 `fix/sandbox-kill-leak` 上、`ops/check_repo_links.py` 對這條連結判紅；
+> **2026-09-19 已隨 `cad1001` 併進 main，連結現在是綠的。**（留下這段是因為當時的
+> 處置方式本身是紀律：引用要指向它該在的地方，不得為了讓 CI 綠而改寫引用。）
 
 ### L-0　pi 接線自檢（**不是「我設了設定」，是 `requests_seen`**）
 
 先跑一格冒煙，確認 `requests_seen > 0`。`--port` 與 `models.json` 的埠必須是同一個數字。
 2026-09-18 有一跑因為差一號而完全沒被中介到，畫面上只有 pi 的 `Connection error.`。
 
-### L-1　`--sandbox none`，**且釘死 commit sha**
+### L-1　`--sandbox none`，**且釘死三個 commit sha**
 
 - **`--sandbox none`**：不降權到別的 uid ⇒ **不會再造跨 uid 孤兒**。
 - **`kill_status` 照樣落盤**（`SandboxResult.kill_status`：`""`／`"reaped"`／`"leaked:<試了什麼>"`）。
-  ⚠ 這個欄位是 `fix/sandbox-kill-leak`（`013f927`）加的；**在那之前 main 上只有
-  `attempts[i].orphans_killed`**，兩者不同形，對帳器要認得出來。
-- **釘的 commit sha ＝ 沙箱修法＋6 條測試綠之後的那一個**：
-  `013f927`（分支 `fix/sandbox-kill-leak`），
-  或**它併進 main 之後的 sha**：`<<TODO-FREEZE: main 上的 sha>>`。
-- **同一條分支上另有一個修法要一起釘：`f7d0351`（wireproxy 的競態）。**
-  它修的是 `requests_seen` 會少算——而 `requests_seen` 是「中介真的發生了」的**唯一**證據
-  （L-0 與 I-5 都靠它）。CI 上紅過。**這個修法會影響本輪資料**：少算會讓 I-5 誤判 `infra_void`，
-  也會讓 §三 M7_file 的分段（`requests_seen_cumulative`）對錯段。⇒ **發射前必須在這個修法之後。**
-- 6 條測試在 `tests/test_sandbox_kill.py`：
-  `test_timeout_kills_the_whole_group_and_records_it`、
-  `test_no_timeout_leaves_kill_status_empty`、
-  `test_group_alive_reports_true_when_we_lack_permission`、
-  `test_unkillable_group_is_reported_as_leaked`、
-  `test_sudo_path_is_attempted_for_unshare_backend`、
-  `test_unshare_backend_overrides_the_kill_path`。
-  **負控制 3 條轉紅**（把修法拿掉，那 3 條要翻紅）——沒有負控的「全綠」跟把測試關掉在輸出上同形。
-- ⚠ **註明：修法不影響本輪資料。** 本輪走 `--sandbox none`，
-  修法動的是 `UnshareSandbox` 的收尾路徑；`none` 後端不經過那條路。
-  釘 sha 是為了**可重現**（跑的是哪一版的碼），不是因為本輪依賴那個修法。
+  ⚠ 這個欄位是下表第 1 列加的；**在那之前 main 上只有 `attempts[i].orphans_killed`**，
+  兩者不同形，對帳器要認得出來。
+
+#### 三個要釘的 sha（**全部已在 main，`--rebase` 併入所以與分支上的不同號**）
+
+| # | 修法 | 分支上的 | **main 上的（釘這個）** | 對本輪資料的地位 |
+|---:|---|---|---|---|
+| 1 | 沙箱 `_kill_group`／`kill_status`（跨 uid `killpg` 被 EPERM 擋下還被吞掉） | `013f927` | **`cad1001`** | **不影響本輪資料** |
+| 2 | wireproxy `quiesce`／`requests_seen` 少算 | `f7d0351` | **`9420d81`** | **會影響本輪資料** |
+| 3 | 測試逾時（超時被記成答錯） | `a221e41` | **`e88c147`** | 不改 runtime，但**是 L-4 的證據** |
+
+**發射的 commit 必須在這三個之後。** 本檔凍結時 main 的 HEAD ＝ `e88c147`。
+
+#### 為什麼三者的地位不一樣（**不要都寫「不影響」**）
+
+- **第 1（沙箱）：不影響本輪資料。** 本輪走 `--sandbox none`，不降權到別的 uid ⇒
+  修法動的 `UnshareSandbox` 收尾路徑**不會被走到**。
+  **釘 sha 是為了讓後人知道本輪的 `kill_status` 欄位是哪一版產生的**，
+  不是因為本輪依賴那個修法。
+- **第 2（wireproxy）：會影響本輪資料**，兩條理由都是承重的：
+  ① `requests_seen` 少算會讓 **I-5 誤判 `infra_void`**（`requests_seen == 0`
+     ＝「agent 根本沒被中介到」，那是 L-0 與 I-5 的判準）；
+  ② `requests_seen_cumulative` 是 **`M7_file`／`M7_ws` 的分段依據**（§三），
+     少算會把某一次嘗試的 wire 歸到錯的 attempt 上。
+  而 **`M7_file` 是 §〇 主要交付的第一個數字** ⇒ **發射前必須在這個修法之後。**
+- **第 3（測試逾時）：不改 runtime，但它是 L-4 的證據。**
+  它改的是 `_run` 的預設 `sandbox_timeout_s` 3 → 30 與 `test_t4` 的逐案例逾時。
+  它證明了「**超時被記成答錯**」這個失效模式**在本 repo 真的會發生**——
+  同一份測試單獨跑會過、全套跑就紅，因為機器一忙連跑一個 trivial 函式都可能超過 3 秒。
+  **L-4 的汙染規則就是為它寫的**，引用 L-4 時指向 `e88c147` 比指向一段描述有力。
+  它也是 §九 L-2（`--test-timeout 30`）那個數字的來源：
+  「30 s 足以抓到無窮迴圈」是關於**迴圈**的敘述（成立）；
+  「3 s 足以跑完一個 trivial 函式」是關於**機器負載**的敘述（不成立）。
+
+#### 6 條測試 ＋ 負控制
+
+`tests/test_sandbox_kill.py`：
+`test_timeout_kills_the_whole_group_and_records_it`、
+`test_no_timeout_leaves_kill_status_empty`、
+`test_group_alive_reports_true_when_we_lack_permission`、
+`test_unkillable_group_is_reported_as_leaked`、
+`test_sudo_path_is_attempted_for_unshare_backend`、
+`test_unshare_backend_overrides_the_kill_path`。
+**負控制 3 條轉紅**（把修法拿掉，那 3 條要翻紅）——
+沒有負控的「全綠」跟把測試關掉在輸出上同形。
 
 ### L-2　`--test-timeout 30`
 
 微型題參考解 < 1 s，30 s 仍抓得到無窮迴圈。
 （預設是 10 s，那是 R530 凍結的常數；本輪明講改成 30 是因為要在 load 71 下發。）
+
+⚠ **這個數字有實證出處，不是拍的**：`e88c147`（L-1 第 3 列）把 `_run` 的預設
+`sandbox_timeout_s` 從 3 改成 30，正是因為「全套跑就紅、單獨跑會過」——
+機器一忙，連跑一個 trivial 函式都可能超過 3 秒，`logic`／`exc` 被判成 `timeout`。
+**「30 s 足以抓到無窮迴圈」是關於迴圈的敘述（成立）；
+「3 s 足以跑完一個 trivial 函式」是關於機器負載的敘述（不成立）。**
 
 ### L-3　**F8 時序門**（發射前，用參考解）
 
@@ -687,6 +723,11 @@ n=40 ⇒ se=0.1000、90% CI 半寬 16.4 pp、95% CI 半寬 19.6 pp。
 **不保證** agent 那一側不會因為負載而變慢。後者靠 L-4 的汙染規則接住。
 
 ### L-4　汙染規則（**凍結**）
+
+> **這條規則有一個已發生的先例，不是假想的風險**：`e88c147`（L-1 第 3 列）
+> 就是「超時被記成答錯」發生在本 repo 自己的測試套件裡——
+> `test_t4_four_failure_kinds_and_two_distinct_loader_reasons` 全套跑會紅、單獨跑會過。
+> **引用本節時指向那個 commit，不要只指向這段描述。**
 
 ```
 任一嘗試的可見結果含 kind == "timeout"
@@ -896,7 +937,8 @@ runs/r535/<block_id>/<tid>/
 | 項 | 值 |
 |---|---|
 | `bank_manifest.json` sha256 | **`5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794`** |
-| 展開器 | `<<TODO-FREEZE: ops/gain/r535/expand_blocks.py（尚未存在；凍結時落地並簽入）>>` |
+| 展開器 | `<<TODO-FREEZE: ops/gain/r535/run_r535.py 的展開段（發射驅動那一側正在造）＋它的 sha>>` |
+| 展開器必須滿足的規格 | **本檔凍結的是規格不是實作**：下面「牙齒一／牙齒二」兩節。實作落在發射驅動側，交件後補檔名與 sha |
 
 **S1 的 50 個 `<tid>`（逐字，照這個順序）**：
 
@@ -931,7 +973,7 @@ s2_36_mask         s2_37_column       s2_38_in_range     s2_39_strip_comments s2
 
 #### 牙齒一：發射前把計畫落盤並簽進收據
 
-展開器（`expand_blocks.py`）必須**讀 manifest 而不是讀本檔**，並且：
+展開器（落在 `ops/gain/r535/run_r535.py`）必須**讀 manifest 而不是讀本檔**，並且：
 
 1. 把 `bank_manifest.json` 的 sha256 與 §十三-1 釘的值**逐位元比對**——不相等就拒絕啟動；
 2. 把 **360 格（4 臂 × 90 題）的完整計畫寫成 `plan.jsonl`**，落在 run 目錄根
@@ -958,17 +1000,18 @@ s2_36_mask         s2_37_column       s2_38_in_range     s2_39_strip_comments s2
 
 ## 十四、發射前檢查清單（**逐條打勾才准發**）
 
-- [ ] 所有 `<<TODO-FREEZE: …>>` 佔位都補完（剩兩處：main 上的沙箱修法 sha、`expand_blocks.py`）
+- [ ] 唯一剩下的 `<<TODO-FREEZE: …>>` 補完（展開器的檔名與 sha，§十三-1）
 - [x] `bank_manifest.json` sha256 釘死＝`5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794`
+- [x] 三個基建修法都在 main：`cad1001`（沙箱）／`9420d81`（wireproxy）／`e88c147`（測試逾時）
 - [x] `gauge_bank.py` **七項 90/90 全綠**（作者一次、稽核者獨立重跑一次）
 - [ ] `build_bank.py --check` 在**發射當下的 checkout** 上重跑一次，確認題庫沒漂
-- [ ] 分支 `bank/r535` 併進 main
+- [ ] 分支 `bank/r535` 併進 main（題庫 810 個檔）
 - [x] §五-2 的護欄表已定案（RS 更正為 `--retry resample` 之後，草稿提的三個選項作廢；
       新增 `M7_ws` 與 `STALE_WORKSPACE_EFFECT`）
-- [ ] `expand_blocks.py` 落地：manifest sha 比對 ＋ 寫 `plan.jsonl` ＋ sha 簽進第一筆收據
+- [ ] 展開器落地（發射驅動側）：manifest sha 比對 ＋ 寫 `plan.jsonl` ＋ sha 簽進第一筆收據
 - [ ] `m7_ws` 解析器落地並 `--selftest` 翻紅（餵已知含 `ls` 的 wire）
 - [ ] L-0 pi 接線自檢：`requests_seen > 0`
-- [ ] L-1 沙箱修法 `013f927` ＋ wireproxy 競態修法 `f7d0351` 都在發射的 commit 之前
+- [ ] L-1 發射的 commit 在 `cad1001`／`9420d81`／`e88c147` **三者之後**（本檔凍結時 main HEAD ＝ `e88c147`）
 - [ ] L-1 `tests/test_sandbox_kill.py` 6 條綠、負控 3 條紅
 - [ ] L-3 F8 時序門：S1/S2 每題可見＋隱藏各 ≤ 2 s
 - [ ] L-5 冒煙 12 格：I-1～I-8 全過（含 RS 的 I-7 重置回得到起點、I-8 工作區無回饋檔）
