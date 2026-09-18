@@ -27,6 +27,27 @@ launcher 第 1 次不注入任何東西）⇒ S1 有 n=150 個單發觀測，零
 所以本檔**逐次嘗試**落盤（`attempts[]` 每一筆都帶可見判定），
 不是只落最後一次——那個免費的基線就是靠這個拿到的。
 
+## 推論模式：**送 `reasoning_effort: "none"`**（NOTHINK，2026-09-19 裁決）
+
+**「不送」不是選擇一個模式，是把模式交給後端版本決定。** 1003（0.4.24）預設思考、
+1004（0.4.17）預設不思考，**同一份 gguf**——所謂「真實 pi 使用者拿到的預設」在這裡
+不是 pi 的性質，是那台 LM Studio 的性質，而那正是 **R529 的混淆形狀**。
+送旗標是唯一讓模式成為「我們送出的輸入」而不是「機器的狀態」的做法。
+另外 THINK 在 pi 上有已知病態（R534 A1/B1 四格全部 `nudge_exhausted`，每通 400+ s、
+宣告完成但工作區沒動），在 `--timeout` 底下會變成「被砍→可見失敗→重試」，
+**把「思考燒掉時間」混進管道比較**。
+
+走 **R534 驗過的那條**：`models.json` 的
+`samplingParams: {"reasoning_effort": "none"}`（形狀照 `ops/gain/r534/models.json`
+的 `lms1003nothink`）。**不用 pi 的 `--thinking off`**——compat 標
+`supportsReasoningEffort: false`，那條路沒驗過。
+
+**F3 是兩半，兩半都要**（`measure_f3`）：
+① 每通 request body 含 `"reasoning_effort":"none"`；② 每通 response
+`reasoning_tokens == 0`。任一違反 ⇒ 該格 `INVALID`；累計 > 0 格 ⇒
+**driver 暫停等人**，不自己續跑。第三種狀態是 **`unmeasured`**（那一通沒報 usage）
+——它與「量到 0」不可以同形，所以分開記、不當成通過。
+
 ## 模型端點怎麼接（照 `docs/VACANT_RUN.md` §7.8 那兩跑重現）
 
 pi 0.85.1 ＋ 1003 的 `gemma-4-12b-it-qat`。**pi 不吃環境變數**（§4.5／
@@ -59,6 +80,46 @@ R532 為此誤發兩次打到雲端（產物留在 `runs/_falsestart_20260917_*`
   （`m7_ws_calls`），所以事後可以離線重新分類，不必重跑。
 * **`F6`** ——RP 臂的每個第 ≥2 次嘗試 `feedback_in_prompt_bytes > 0`。
 
+## 發射順序：**題塊 × 四臂交錯**，不是「先發一臂」（2026-09-19 裁決）
+
+「先只發 RS 90 格」**被否決**：RS 全部在 T₁ 跑、其餘在 T₂ 跑 ⇒ 後端任何漂移
+（重載、TTL、負載）都變成 **RS 與別臂之間的時間混淆**，而 H2 的預測正是「可交換」
+——最怕的就是這種混淆（R534 §九「同一題四格同時發」就是為此）。
+
+所以 `plan.jsonl` 把**同一題的四格排在相鄰四列**，臂序按 `task_index mod 4` 輪轉。
+配上 `--shard k:4`（分片用的是**計畫裡的列號**不是過濾後的位置）⇒
+第 k 條流拿到每一題的第 k 個位置 ⇒ **四條流同時在跑同一題的四個臂**，
+而且每條流四個臂的量都一樣。
+
+### 唯一一次期中看（格數、量、方向全部寫死，只能停不能改）
+
+| 層 | 量 | 期中 n | 期中停止線 | 終判線（不變） |
+|---|---|---:|---|---|
+| S1 | RS/RF/RP 合併 attempt-1 可見失敗率 | 45 | < 0.45 ⇒ 停 S1，`NOT_TRIGGERED` | < 0.6，n=150 |
+| S1 | PC attempt-1 通過率 | 15 | < 0.30 ⇒ 停 S1，`CEILING_TOO_LOW` | < 0.5，n=50 |
+| S2 | 同上合併失敗率 | 36 | < 0.15 ⇒ 停 S2 | < 0.3，n=120 |
+| S2 | PC 通過率 | 12 | < 0.30 ⇒ 停 S2 | < 0.5，n=40 |
+
+觸發點：S1 **前 15 題 × 4 臂 = 60 格**跑完、S2 **前 12 題 × 4 臂 = 48 格**跑完。
+停止線比終判線寬是**刻意的 futility boundary**：真值 0.6 時 n=45 的觀測 SD ≈ 0.073，
+0.45 在 2 SD 之外，誤停約 2%；設計意圖 0.8 時誤停 ≈ 0。
+**落在停止線與終判線之間 ⇒ 續發**，由終判在 n=150 裁。
+
+⚠ **期中看只有一次。**
+⚠ **格數固定。**
+⚠ **量固定。**
+⚠ **方向固定（只能停，不能改任何門檻或臂）。**
+
+判定寫成 `interim_<層>.json`，**`O_EXCL` 寫一次就不再重算**——「只看一次」不是
+自律，是檔案系統的語意。資料不齊（有 void 格）時**不寫**，因為寫了就定案了。
+
+### 塊邊界探針
+
+每 15 題（S2 每 12 題）driver 對上游打一通 1-token 探針，落盤 model id 與
+`reasoning_tokens`。model id 變了或 `reasoning_tokens > 0` ⇒ 寫 `HALT.json`、
+**driver 暫停**，之後的格標 `probe_invalid` 直到人 `--ack-halt` 確認。
+這把「載的是哪份 gguf」那條人的義務縮到只剩**載入參數與檔案內容**（見誠實邊界 5）。
+
 ## 落盤與斷點續跑
 
 ```
@@ -90,6 +151,15 @@ R532 為此誤發兩次打到雲端（產物留在 `runs/_falsestart_20260917_*`
 4. 本檔量的是**這一份 harness 上的**通過率。`vacant run` 的 prompt 不是我們寫的、
    工具面由 pi 決定、預算形狀是「整個行程重跑」——**不得與 R530／R532／R534 併表**
    （`docs/VACANT_RUN.md` §7.7-4、§8.5-3）。
+5. 驅動證明得了 wire 去了哪台機器（`wire_upstreams`），**證明不了那台載的是哪一份
+   gguf、用什麼載入參數**。塊邊界探針接住了「model id 變了」與「開始思考了」，
+   **接不住「同一個 model id、同一個推論模式，但檔案內容或載入參數換了」**
+   ——那一條仍然是人的義務。
+6. **牆鐘方差大（實測同一臂相鄰兩題 10 s 對 314 s）⇒ 逐格牆鐘印分佈不印均值。**
+   「等預算」的意思仍然是**上限相同、實際用量落盤**，不是用滿。
+7. **`agent_timed_out=true` 是正常的嘗試結果，不 void**：那是 agent 自己在預算內
+   沒做完，四臂一視同仁。逐臂逐層印比例；任一臂-層 > 20% ⇒ 收官必須寫
+   「該比較受預算約束」。把它當 `infra_void` 剔掉會**系統性地偏袒慢的那一臂**。
 """
 from __future__ import annotations
 
@@ -154,6 +224,28 @@ EXIT_ACCEPTED, EXIT_REFUSED, EXIT_INFRA_VOID = 0, 20, 22
 #: 基建失敗重試次數（鐵律 3：retry×4）。
 INFRA_RETRIES = 4
 
+#: **推論模式的釘值**（2026-09-19 裁決：NOTHINK）。`"backend-default"` ＝不送旗標
+#: ＝把模式交給後端版本決定，那是 R529 的混淆形狀，所以它不是預設而是要明講的偏離。
+DEFAULT_REASONING_EFFORT = "none"
+REASONING_CHOICES = ("none", "low", "medium", "high", "backend-default")
+
+#: 期中看：**只有一次、格數固定、量固定、方向固定（只能停）**。
+#: `tasks` ＝觸發點（那一層的前幾題，每題四格都要跑完）。
+INTERIM: dict[str, dict] = {
+    "S1": {"tasks": 15, "fail_n": 45, "fail_floor": 0.45,
+           "pc_n": 15, "pc_floor": 0.30},
+    "S2": {"tasks": 12, "fail_n": 36, "fail_floor": 0.15,
+           "pc_n": 12, "pc_floor": 0.30},
+}
+#: 終判線（**不變**，收官時用；本檔不執行終判，只把它印在期中判定旁邊，
+#: 免得有人把期中的寬線當成終判的線）。
+FINAL_LINES: dict[str, dict] = {
+    "S1": {"fail_n": 150, "fail_floor": 0.60, "pc_n": 50, "pc_floor": 0.50},
+    "S2": {"fail_n": 120, "fail_floor": 0.30, "pc_n": 40, "pc_floor": 0.50},
+}
+#: 塊邊界探針的間隔（題數）。
+PROBE_EVERY: dict[str, int] = {"S1": 15, "S2": 12}
+
 #: 1 分鐘 load 超過這個值就**暫停派工**（不是砍 run）。
 DEFAULT_LOAD_PAUSE = 80.0
 
@@ -190,6 +282,17 @@ def sha256_file(path: pathlib.Path) -> str:
 
 def sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
+
+
+def effort_or_none(effort: str | None) -> str | None:
+    """`"backend-default"` ＝**不送旗標**；其餘照送。
+
+    ⚠ 「不送」不是選擇一個模式，是把模式交給後端版本決定——
+    1003（0.4.24）預設思考、1004（0.4.17）預設不思考，**同一份 gguf**。
+    這個轉換只有這一個地方做，免得別處把 `"backend-default"` 當成一個
+    真的可以送出去的值（那會讓 LM Studio 收到一個它不認得的字串）。
+    """
+    return None if effort in (None, "backend-default") else effort
 
 
 def now_iso() -> str:
@@ -240,13 +343,28 @@ def bank_dir(manifest_path: pathlib.Path, manifest: dict) -> pathlib.Path:
 
 
 def plan_rows(manifest: dict) -> list[dict]:
-    """360 格的計畫。**確定性**：臂照 `ARM_ORDER`、題照 manifest 的 `task_ids`。"""
+    """360 格的計畫。**確定性**：題照 manifest 的 `task_ids`、臂照輪轉。
+
+    **題塊 × 四臂交錯**（2026-09-19 裁決）：同一題的四格**相鄰**，臂序按
+    `task_index mod 4` 輪轉。配上 `--shard k:4`（分片用計畫裡的列號）⇒
+    四條流同時在跑同一題的四個臂，而且每條流四臂的量一樣。
+
+    ⚠ 這不是排版偏好。「先發一臂」會讓後端漂移（重載、TTL、負載）變成
+    **臂與臂之間的時間混淆**，而 H2 的預測正是「可交換」。
+    """
     rows: list[dict] = []
+    idx = 0
     for stratum in ("S1", "S2"):
-        for tid in manifest["strata"][stratum]["task_ids"]:
-            for arm in ARM_ORDER:
+        for pos_in_stratum, tid in enumerate(
+                manifest["strata"][stratum]["task_ids"]):
+            r = idx % len(ARM_ORDER)
+            order = ARM_ORDER[r:] + ARM_ORDER[:r]
+            for arm_pos, arm in enumerate(order):
                 rows.append({"cell": f"{tid}__{arm}", "task_id": tid,
-                             "arm": arm, "stratum": stratum})
+                             "arm": arm, "stratum": stratum,
+                             "task_index": idx, "task_pos": pos_in_stratum,
+                             "arm_pos": arm_pos})
+            idx += 1
     return rows
 
 
@@ -307,8 +425,14 @@ def read_plan(out: pathlib.Path) -> tuple[list[dict], str, int]:
     if not p.exists():
         raise SystemExit(f"找不到 {p}。先跑一次 `--write-plan`。")
     blob = p.read_bytes()
-    rows = [json.loads(line) for line in blob.decode("utf-8").splitlines()
-            if line.strip()]
+    rows = []
+    for k, line in enumerate(blob.decode("utf-8").splitlines()):
+        if line.strip():
+            # `plan_index` ＝**計畫裡的列號**。`--shard` 分的是它，不是過濾後的
+            # 位置——同一題的四格相鄰 ⇒ `plan_index % 4` 就是 `arm_pos` ⇒
+            # `--shard k:4` 拿到的是每一題的第 k 個臂。用過濾後的位置分片，
+            # 只要有人加了 `--tasks` 就會把四流跑成四個不同的題集。
+            rows.append({**json.loads(line), "plan_index": k})
     return rows, sha256_bytes(blob), len(blob)
 
 
@@ -663,6 +787,116 @@ def measure_f6(arm_name: str, summary: dict) -> dict:
     return res
 
 
+def sse_usage(blob: bytes) -> dict | None:
+    """從 SSE 回應裡撈 `usage`。撈不到回 `None`（**不是 `{}`**，不是 0）。
+
+    pi 送的是 `stream:true` ＋ `stream_options:{include_usage:true}`，所以最後
+    一個 `data:` chunk 帶 `usage`（實測 vacant-dev 2026-09-18）。但這裡**不假設
+    它一定在**：撈不到就是撈不到，回 `None` 讓上層記成 `unmeasured`。
+    「沒量到」與「量到 0」在本輪是兩件不同的事——F3 的整個用處就是分開它們。
+    """
+    found = None
+    for line in blob.split(b"\n"):
+        s = line.strip()
+        if not s.startswith(b"data:"):
+            continue
+        payload = s[5:].strip()
+        if payload == b"[DONE]":
+            continue
+        try:
+            d = json.loads(payload.decode("utf-8"))
+        except Exception:                    # noqa: BLE001
+            continue
+        if isinstance(d, dict) and d.get("usage"):
+            found = d["usage"]
+    if found is None:
+        try:                                 # 非串流的情況（body 就是一包 JSON）
+            d = json.loads(blob.decode("utf-8"))
+            if isinstance(d, dict) and d.get("usage"):
+                found = d["usage"]
+        except Exception:                    # noqa: BLE001
+            return None
+    return found
+
+
+def reasoning_tokens_of(usage: dict | None) -> int | None:
+    if not usage:
+        return None
+    det = usage.get("completion_tokens_details") or {}
+    v = det.get("reasoning_tokens", usage.get("reasoning_tokens"))
+    return v if isinstance(v, int) else None
+
+
+def measure_f3(run_dir: pathlib.Path, arm: str, *, expect: str) -> dict:
+    """**F3 兩半，兩半都要**（2026-09-19 裁決）。
+
+    ① 每通 request body 含 `"reasoning_effort": "<expect>"`；
+    ② 每通 response `reasoning_tokens == 0`。
+
+    任一違反 ⇒ 該格 `INVALID`。第三種狀態是 `unmeasured`（那一通沒報 usage，
+    或 request 根本不該有那個欄位）——**不當成通過**，分開記。
+
+    ⚠ 這一支**逐通掃**，不是只看第一通。R529 的混淆就是「設定對了 ⇒ 全程都對」
+    這個推論——中途換模型／換設定的那一通不會自己舉手。
+    """
+    idx = run_dir / f"wire_{arm}" / "index.jsonl"
+    res: dict = {"f3_verdict": None, "f3_expect": expect,
+                 "f3_calls": 0, "f3_req_ok": 0, "f3_req_bad": 0,
+                 "f3_resp_zero": 0, "f3_resp_nonzero": 0,
+                 "f3_resp_unmeasured": 0, "f3_violations": []}
+    if not idx.exists():
+        res["f3_verdict"] = "unmeasured"
+        res["f3_reason"] = "wire index 不存在"
+        return res
+    lines = [json.loads(s) for s in idx.read_text(
+        encoding="utf-8").splitlines() if s.strip()]
+    wdir = run_dir / f"wire_{arm}"
+    for rec in lines:
+        cid = rec.get("call_id")
+        req, resp = wdir / f"{cid}.req.bin", wdir / f"{cid}.resp.bin"
+        if not req.exists():
+            res["f3_resp_unmeasured"] += 1
+            continue
+        res["f3_calls"] += 1
+        got = None
+        try:
+            body = json.loads(req.read_bytes().decode("utf-8"))
+            got = body.get("reasoning_effort")
+        except Exception:                    # noqa: BLE001
+            got = "<req 不是 JSON>"
+        want = None if expect == "backend-default" else expect
+        if got == want:
+            res["f3_req_ok"] += 1
+        else:
+            res["f3_req_bad"] += 1
+            if len(res["f3_violations"]) < 8:
+                res["f3_violations"].append(
+                    {"call_id": cid, "half": "request",
+                     "want": want, "got": got})
+        rt = reasoning_tokens_of(sse_usage(resp.read_bytes())
+                                 if resp.exists() else None)
+        if rt is None:
+            res["f3_resp_unmeasured"] += 1
+        elif rt == 0:
+            res["f3_resp_zero"] += 1
+        else:
+            res["f3_resp_nonzero"] += 1
+            if len(res["f3_violations"]) < 8:
+                res["f3_violations"].append(
+                    {"call_id": cid, "half": "response",
+                     "reasoning_tokens": rt})
+    if res["f3_calls"] == 0:
+        res["f3_verdict"] = "unmeasured"
+    elif res["f3_req_bad"] or res["f3_resp_nonzero"]:
+        res["f3_verdict"] = "violated"
+    elif res["f3_resp_unmeasured"]:
+        # 有通過的、也有沒量到的 ⇒ **不報 ok**。
+        res["f3_verdict"] = "unmeasured"
+    else:
+        res["f3_verdict"] = "ok"
+    return res
+
+
 def measure_suspect_timeout(run_dir: pathlib.Path, arm: str) -> dict:
     """任一嘗試的可見結果含 `kind == "timeout"` ⇒ 標記，**不當場剔除**。"""
     hits = []
@@ -778,6 +1012,14 @@ class Driver:
             "arm_flags": ARMS[arm]["flags"], "prompt": PI_PROMPT,
             "prompt_has_placeholder": ARMS[arm]["placeholder"],
             "stream": self.a.stream, "pi_port": self.a.pi_port,
+            # **逐格落盤推論模式**，不是只在啟動時檢查一次：
+            # `--reconcile` 會拿它跟釘值逐位元比（同 `arm_flags` 的形狀）。
+            "reasoning_effort": self.a.reasoning_effort,
+            "agent_timeout_s": self.a.agent_timeout,
+            "task_index": row.get("task_index"), "task_pos": row.get("task_pos"),
+            "arm_pos": row.get("arm_pos"), "plan_index": row.get("plan_index"),
+            # HALT 期間跑出來的格子要看得出來（探針說後端換了之後的觀測）。
+            "probe_invalid": bool(self.halted()),
         }
         self.write_cell(cell, state)
 
@@ -785,7 +1027,8 @@ class Driver:
                                 self.manifest)
         write_pi_config(cell / "piconf", port=self.a.pi_port,
                         model_id=self.a.model,
-                        reasoning_effort=self.a.reasoning_effort)
+                        reasoning_effort=effort_or_none(
+                            self.a.reasoning_effort))
         state["workspace_files"] = landed
         argv = self.cell_argv(cell, task_id, arm)
         state["launcher_argv"] = argv
@@ -873,8 +1116,22 @@ class Driver:
 
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
         state.update(self.harvest(cell, summary, arm))
+        # 這一格跑的期間有人（可能是別條流）舉了 HALT ⇒ 它是「後端換了之後」的觀測。
+        state["probe_invalid"] = bool(state.get("probe_invalid")
+                                      or self.halted())
+        status = "measured"
+        if state.get("f3_verdict") == "violated":
+            # **F3 任一違反 ⇒ 該格 INVALID**，而且 driver 暫停等人（累計 > 0 格）。
+            status = "invalid_f3"
+            self.raise_halt("F3 違反（推論模式不是我們送的那個）", {
+                "cell": row["cell"], "f3": {k: state.get(k) for k in
+                                            ("f3_verdict", "f3_expect",
+                                             "f3_calls", "f3_req_bad",
+                                             "f3_resp_nonzero",
+                                             "f3_resp_unmeasured",
+                                             "f3_violations")}})
         state.update({"wall_s": round(time.time() - started, 3),
-                      "cell_status": "measured", "finished": now_iso(),
+                      "cell_status": status, "finished": now_iso(),
                       "run_complete": True})
         self.write_cell(cell, state)
         jsonl_append(self.out / "cells.jsonl", self.row_of(state))
@@ -944,7 +1201,14 @@ class Driver:
                                    slice_meta))
         out.update(measure_m7_ws(run_dir, summary, slices, slice_meta))
         out.update(measure_f6(arm_name, summary))
+        out.update(measure_f3(run_dir, arm, expect=self.a.reasoning_effort))
         out.update(measure_suspect_timeout(run_dir, arm))
+        # `agent_timed_out` 是**正常的嘗試結果不 void**（誠實邊界 7）：
+        # 逐次落盤、逐格彙總，收官逐臂逐層印比例。
+        out["agent_timed_out_any"] = any(
+            bool(a.get("agent_timed_out")) for a in attempts)
+        out["agent_timed_out_n"] = sum(
+            1 for a in attempts if a.get("agent_timed_out"))
         # `requests_seen == 0` ＝ **agent 根本沒被中介到**（§4.5）。
         # 那不是「模型不想講話」，是接線壞了——當場標出來。
         if not out.get("requests_seen"):
@@ -956,7 +1220,9 @@ class Driver:
         keys = ("cell", "task_id", "arm", "stratum", "cell_status", "accepted",
                 "stop_reason", "attempts_used", "requests_seen", "m7_file",
                 "m7_file_reason", "m7_ws", "m7_ws_ratio", "f6",
-                "suspect_timeout", "infra_void", "wall_s", "run_complete")
+                "f3_verdict", "reasoning_effort", "probe_invalid",
+                "agent_timed_out_n", "suspect_timeout", "infra_void",
+                "wall_s", "run_complete")
         return {"ts": now_iso(), **{k: state.get(k) for k in keys}}
 
     @staticmethod
@@ -977,6 +1243,90 @@ class Driver:
                                    ).get("run_complete"))
         except Exception:                    # noqa: BLE001
             return False
+
+    # -- 塊邊界探針 ＋ HALT ------------------------------------------------
+    def halt_path(self) -> pathlib.Path:
+        return self.out / "HALT.json"
+
+    def halted(self) -> dict | None:
+        p = self.halt_path()
+        if not p.exists():
+            return None
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:                    # noqa: BLE001
+            return {"reason": "HALT.json 讀不動，保守當成 HALT"}
+
+    def raise_halt(self, reason: str, detail: dict) -> None:
+        """**暫停等人**，不是自己續跑。之後的格標 `probe_invalid` 直到人確認。"""
+        doc = {"ts": now_iso(), "stream": self.a.stream, "reason": reason,
+               "detail": detail,
+               "how_to_resume": ("人確認過後端沒換之後跑 "
+                                 "`run_r535.py --ack-halt '<理由>' --out <OUT>`；"
+                                 "HALT 期間跑出來的格子在 --reconcile 會落在 "
+                                 "probe_invalid 桶，非空即 INVALID。")}
+        try:
+            fd = os.open(self.halt_path(), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(doc, fh, ensure_ascii=False, indent=2)
+        except FileExistsError:
+            pass                              # 別條流先寫了，內容一樣重要
+        self.ev("halt", **doc)
+
+    def probe(self, stratum: str, task_pos: int) -> dict:
+        """1-token 探針：落盤 model id 與 `reasoning_tokens`。
+
+        ⚠ 這把「那台機器上載的是什麼」從**人的義務**縮成一個落盤欄位——
+        但它接不住「同一個 model id、同一個推論模式，檔案內容或載入參數換了」。
+        那一條仍然在誠實邊界 5 裡。
+        """
+        eff = effort_or_none(self.a.reasoning_effort)
+        ok, lines, info = probe_endpoint(self.a.endpoint, self.a.model,
+                                         reasoning_effort=eff)
+        rec = {"ts": now_iso(), "stream": self.a.stream, "stratum": stratum,
+               "task_pos": task_pos, "ok": ok, **info}
+        jsonl_append(self.out / "probes.jsonl", rec)
+        base_p = self.out / "probe_baseline.json"
+        if not ok:
+            self.raise_halt("探針打不通", rec)
+            return rec
+        try:
+            fd = os.open(base_p, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump({"model": info.get("model"),
+                           "reasoning_effort_sent": eff,
+                           "first_seen": rec["ts"]}, fh, ensure_ascii=False)
+        except FileExistsError:
+            pass
+        base = json.loads(base_p.read_text(encoding="utf-8"))
+        if info.get("model") != base.get("model"):
+            self.raise_halt("model id 變了", {**rec, "baseline": base})
+        elif eff is not None and (info.get("reasoning_tokens") or 0) > 0:
+            self.raise_halt("reasoning_tokens > 0（後端開始思考了）", rec)
+        return rec
+
+    # -- 期中看（只有一次）------------------------------------------------
+    def interim_gate(self, stratum: str) -> dict | None:
+        """觸發點到了就算一次，**`O_EXCL` 寫一次就定案**；回判定或 `None`。"""
+        p = self.out / f"interim_{stratum}.json"
+        if p.exists():
+            return json.loads(p.read_text(encoding="utf-8"))
+        doc = compute_interim(self.out, self.manifest, stratum)
+        if doc is None or doc["verdict"] == "NOT_YET":
+            return None
+        if doc["verdict"] == "UNEVALUABLE":
+            # **不寫檔**：寫了就定案了，而資料還沒齊（有 void 格）。
+            self.ev("interim_unevaluable", stratum=stratum, **doc["counts"])
+            return None
+        try:
+            fd = os.open(p, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(doc, fh, ensure_ascii=False, indent=2)
+            self.ev("interim_written", stratum=stratum,
+                    verdict=doc["verdict"], reasons=doc["reasons"])
+        except FileExistsError:
+            doc = json.loads(p.read_text(encoding="utf-8"))
+        return doc
 
     # -- 埠獨佔鎖 ---------------------------------------------------------
     def lock_port(self):
@@ -1015,11 +1365,38 @@ class Driver:
                 reasoning_effort=self.a.reasoning_effort,
                 load1=load1(), uptime=uptime_line())
         n_done = 0
+        probed: set[tuple[str, int]] = set()
         try:
             for row in rows:
                 if self.a.limit and n_done >= self.a.limit:
                     self.ev("limit_reached", limit=self.a.limit)
                     break
+                # ── HALT：探針說後端換了 ⇒ **暫停等人**，不是自己續跑 ──
+                h = self.halted()
+                if h:
+                    self.ev("halted_stop", reason=h.get("reason"),
+                            cell=row["cell"])
+                    print(f"[r535] HALT：{h.get('reason')}。"
+                          f"人確認後跑 --ack-halt。停。", file=sys.stderr)
+                    break
+                # ── 期中看：觸發點到了就算一次，STOP 就不再派這一層 ──
+                iv = self.interim_gate(row["stratum"])
+                if iv and iv.get("verdict") == "STOP":
+                    self.ev("interim_stop", stratum=row["stratum"],
+                            reasons=iv.get("reasons"), cell=row["cell"])
+                    print(f"[r535] 期中判定：停 {row['stratum']}"
+                          f"（{[r['code'] for r in iv['reasons']]}）。跳過這一層。",
+                          file=sys.stderr)
+                    continue
+                # ── 塊邊界探針（S1 每 15 題、S2 每 12 題）──────────────
+                key = (row["stratum"],
+                       row.get("task_pos", 0) // PROBE_EVERY[row["stratum"]])
+                if row.get("task_pos", 0) % PROBE_EVERY[row["stratum"]] == 0 \
+                        and key not in probed:
+                    probed.add(key)
+                    self.probe(row["stratum"], row.get("task_pos", 0))
+                    if self.halted():
+                        continue
                 self.wait_for_load()
                 st = self.run_cell(row)
                 if st is not None:
@@ -1117,18 +1494,19 @@ def gate_timing(manifest_path: pathlib.Path, manifest: dict, *,
     return (not over and not refbad), lines
 
 
-def gate_endpoint(endpoint: str, model: str, *,
-                  reasoning_effort: str | None,
-                  timeout_s: float = 120.0) -> tuple[bool, list[str]]:
-    """② 端點活著（**一次 trivial 呼叫**），印出實際 model id 與 `reasoning_tokens`。
+def probe_endpoint(endpoint: str, model: str, *,
+                   reasoning_effort: str | None, max_tokens: int = 32,
+                   timeout_s: float = 120.0) -> tuple[bool, list[str], dict]:
+    """打一通 trivial 呼叫，回 `(ok, 給人看的幾行, 可落盤的 info)`。
 
     ⚠ 1003（0.4.24）是 thinking 模式、1004（0.4.17）不是，**同一份 gguf 也會不同**
     ——跨機之前要比的就是這個數字，不是「我載了同一個模型」。
+    同一支同時給 `--preflight` 的第 ② 門與**塊邊界探針**用（一份判準，不是兩份）。
     """
     import urllib.request
     payload: dict = {"model": model,
                      "messages": [{"role": "user", "content": "Say OK."}],
-                     "max_tokens": 32, "stream": False}
+                     "max_tokens": max_tokens, "stream": False}
     if reasoning_effort:
         payload["reasoning_effort"] = reasoning_effort
     req = urllib.request.Request(
@@ -1140,15 +1518,20 @@ def gate_endpoint(endpoint: str, model: str, *,
         with urllib.request.urlopen(req, timeout=timeout_s) as resp:
             body = json.loads(resp.read().decode("utf-8"))
     except Exception as exc:                 # noqa: BLE001
-        return False, [f"端點打不通：{endpoint}", f"  {exc!r}"]
+        return (False, [f"端點打不通：{endpoint}", f"  {exc!r}"],
+                {"endpoint": endpoint, "error": repr(exc),
+                 "reasoning_effort_sent": reasoning_effort})
     usage = body.get("usage") or {}
-    det = usage.get("completion_tokens_details") or {}
-    rt = det.get("reasoning_tokens", usage.get("reasoning_tokens"))
+    rt = reasoning_tokens_of(usage)
     txt = ((body.get("choices") or [{}])[0].get("message") or {}).get(
         "content") or ""
-    return True, [
+    info = {"endpoint": endpoint, "model": body.get("model"),
+            "model_wanted": model, "reasoning_tokens": rt,
+            "reasoning_effort_sent": reasoning_effort, "usage": usage,
+            "elapsed_s": round(time.time() - t0, 2)}
+    lines = [
         f"端點 {endpoint}",
-        f"  回話 {round(time.time() - t0, 2)} s",
+        f"  回話 {info['elapsed_s']} s",
         f"  實際 model id      = {body.get('model')!r}（要的是 {model!r}）",
         f"  reasoning_tokens   = {rt!r}"
         f"（None＝這個後端沒報；0＝真的沒思考）",
@@ -1156,6 +1539,37 @@ def gate_endpoint(endpoint: str, model: str, *,
         f"  usage = {json.dumps(usage, ensure_ascii=False)}",
         f"  content[:60] = {txt[:60]!r}",
     ]
+    return True, lines, info
+
+
+def gate_endpoint(endpoint: str, model: str, *,
+                  reasoning_effort: str | None) -> tuple[bool, list[str]]:
+    """② 端點活著＋model id＋`reasoning_tokens`。
+
+    **NOTHINK 那一輪這一門要求 `reasoning_tokens == 0`**：送了旗標而後端照樣
+    思考，代表旗標沒被吃——那件事要死在發射前，不是死在 360 格的資料裡。
+    """
+    ok, lines, info = probe_endpoint(endpoint, model,
+                                     reasoning_effort=reasoning_effort)
+    if not ok:
+        return False, lines
+    if reasoning_effort is not None:
+        rt = info.get("reasoning_tokens")
+        if rt is None:
+            lines.append("  ✗ 後端沒報 reasoning_tokens ⇒ F3 的第二半量不到。"
+                         "**沒量到不是通過。**")
+            return False, lines
+        if rt > 0:
+            lines.append(f"  ✗ 送了 reasoning_effort={reasoning_effort!r} "
+                         f"但 reasoning_tokens={rt} > 0 ⇒ 旗標沒被吃。停。")
+            return False, lines
+        lines.append(f"  ✓ 送了 {reasoning_effort!r} 且 reasoning_tokens=0")
+    else:
+        lines.append("  ⚠ `--reasoning-effort backend-default`＝**不送旗標**＝"
+                     "把模式交給後端版本決定。那是 R529 的混淆形狀，"
+                     "2026-09-19 裁決是送 `none`。這一門因此判 FAIL。")
+        return False, lines
+    return True, lines
 
 
 def gate_pi(pi_bin: str) -> tuple[bool, list[str]]:
@@ -1244,7 +1658,8 @@ def preflight(args, manifest_path: pathlib.Path, manifest: dict,
                        "  沒量不是通過（鐵律 3 的 infra_void 同一條）。"]))
     else:
         ok, lines = gate_endpoint(args.endpoint, args.model,
-                                  reasoning_effort=args.reasoning_effort)
+                                  reasoning_effort=effort_or_none(
+                                      args.reasoning_effort))
         gates.append(("② 端點活著＋model id＋reasoning_tokens", ok, lines))
 
     if args.skip_timing:
@@ -1280,7 +1695,89 @@ def preflight(args, manifest_path: pathlib.Path, manifest: dict,
 
 # ── CLI ───────────────────────────────────────────────────────────────────
 
-def reconcile(out: pathlib.Path, manifest: dict, msha: str) -> int:
+def compute_interim(out: pathlib.Path, manifest: dict,
+                    stratum: str) -> dict | None:
+    """算那一層的期中判定。**只算，不決定要不要寫檔**（寫檔＝定案）。
+
+    回 `verdict` ∈ {`NOT_YET`（觸發點還沒到）、`UNEVALUABLE`（跑完了但有 void 格，
+    分母不是釘死的那個數）、`STOP`、`CONTINUE`}。
+
+    ⚠ 四句話，一句都不准改：
+      **期中看只有一次。格數固定。量固定。方向固定（只能停，不能改門檻或臂）。**
+    """
+    cfg = INTERIM[stratum]
+    tasks = manifest["strata"][stratum]["task_ids"][: cfg["tasks"]]
+    cells_dir = out / "cells"
+    fail_hits, fail_n, pc_hits, pc_n = 0, 0, 0, 0
+    not_complete, unmeasured = [], []
+    for tid in tasks:
+        for arm in ARM_ORDER:
+            cj = cells_dir / f"{tid}__{arm}" / "cell.json"
+            if not cj.exists():
+                not_complete.append(f"{tid}__{arm}")
+                continue
+            st = json.loads(cj.read_text(encoding="utf-8"))
+            if not st.get("run_complete"):
+                not_complete.append(f"{tid}__{arm}")
+                continue
+            atts = st.get("attempts") or []
+            a1 = atts[0] if atts else None
+            if st.get("cell_status") != "measured" or a1 is None \
+                    or a1.get("accepted") is None:
+                unmeasured.append(f"{tid}__{arm}")
+                continue
+            if arm == "PC":
+                pc_n += 1
+                pc_hits += 1 if a1["accepted"] else 0
+            else:
+                fail_n += 1
+                fail_hits += 1 if not a1["accepted"] else 0
+    if not_complete:
+        return {"verdict": "NOT_YET", "stratum": stratum,
+                "counts": {"missing": len(not_complete)}}
+    counts = {"fail_n": fail_n, "fail_expected": cfg["fail_n"],
+              "pc_n": pc_n, "pc_expected": cfg["pc_n"],
+              "unmeasured": len(unmeasured)}
+    if fail_n != cfg["fail_n"] or pc_n != cfg["pc_n"]:
+        return {"verdict": "UNEVALUABLE", "stratum": stratum,
+                "counts": counts, "unmeasured": unmeasured,
+                "why": ("格數固定＝分母釘死。有 void 格就不是那個分母，"
+                        "**這時候不准寫判定**——寫了就定案了。"
+                        "把 void 的格子重跑齊再說。")}
+    fail_rate = fail_hits / fail_n
+    pc_rate = pc_hits / pc_n
+    reasons = []
+    if fail_rate < cfg["fail_floor"]:
+        reasons.append({"code": "NOT_TRIGGERED",
+                        "metric": "RS/RF/RP 合併 attempt-1 可見失敗率",
+                        "value": round(fail_rate, 4), "n": fail_n,
+                        "floor": cfg["fail_floor"],
+                        "say": (f"停 {stratum}，記 NOT_TRIGGERED"
+                                f"（期中，n={fail_n}）")})
+    if pc_rate < cfg["pc_floor"]:
+        reasons.append({"code": "CEILING_TOO_LOW",
+                        "metric": "PC attempt-1 通過率",
+                        "value": round(pc_rate, 4), "n": pc_n,
+                        "floor": cfg["pc_floor"],
+                        "say": (f"停 {stratum}，記 CEILING_TOO_LOW"
+                                f"（期中，n={pc_n}）")})
+    return {
+        "verdict": "STOP" if reasons else "CONTINUE",
+        "stratum": stratum, "ts": now_iso(),
+        "fail_rate": round(fail_rate, 4), "fail_hits": fail_hits,
+        "pc_rate": round(pc_rate, 4), "pc_hits": pc_hits,
+        "counts": counts, "reasons": reasons,
+        "interim_lines": cfg, "final_lines": FINAL_LINES[stratum],
+        "rule": ("期中看只有一次。格數固定。量固定。方向固定（只能停，"
+                 "不能改任何門檻或臂）。落在停止線與終判線之間 ⇒ 續發，"
+                 "由終判裁。停止線比終判線寬是刻意的 futility boundary："
+                 "真值 0.6 時 n=45 的觀測 SD ≈ 0.073，0.45 在 2 SD 之外，"
+                 "誤停約 2%；設計意圖 0.8 時誤停 ≈ 0。"),
+    }
+
+
+def reconcile(out: pathlib.Path, manifest: dict, msha: str,
+              expect_effort: str = DEFAULT_REASONING_EFFORT) -> int:
     """收官對帳：**360 格每格都必須「有一列」或「明寫 void 原因」**。
 
     少一格或多一格都判 `INVALID`（裁決 2026-09-19）。零模型呼叫。
@@ -1301,7 +1798,14 @@ def reconcile(out: pathlib.Path, manifest: dict, msha: str) -> int:
         #   `RS` 卻用 RF 的旗標跑（中途改 `ARMS`、某條流用了舊 checkout、
         #   手動補跑時打錯旗標），舊版對帳照樣說 OK。整個實驗的立論是
         #   「除了旗標以外全部相同」，所以這一條不是形式檢查。
-        "flags_mismatch": [], "bank_mismatch": []}
+        "flags_mismatch": [], "bank_mismatch": [],
+        # ⚠ 同一個形狀再用三次（2026-09-19 裁決：「不要只在啟動時檢查一次」）：
+        #   資料本來就逐格落在 `cell.json`，這裡負責**比對**。
+        #   `effort_mismatch`＝這一格跑的推論模式不是釘死的那個；
+        #   `f3_violation`＝那一格的 wire 逐通掃出來「送的／回的」對不上；
+        #   `probe_invalid`＝塊邊界探針舉了 HALT 之後才跑出來的觀測。
+        "effort_mismatch": [], "f3_violation": [], "f3_unmeasured": [],
+        "probe_invalid": []}
     detail: list[dict] = []
     for r in rows:
         cell = cells_dir / r["cell"]
@@ -1334,6 +1838,28 @@ def reconcile(out: pathlib.Path, manifest: dict, msha: str) -> int:
                            "want_bank": msha,
                            "got_bank": got_bank})
             continue
+        got_eff = st.get("reasoning_effort")
+        if got_eff != expect_effort:
+            buckets["effort_mismatch"].append(r["cell"])
+            detail.append({**r, "state": "effort_mismatch",
+                           "want_effort": expect_effort, "got_effort": got_eff})
+            continue
+        if st.get("probe_invalid"):
+            buckets["probe_invalid"].append(r["cell"])
+            detail.append({**r, "state": "probe_invalid",
+                           "note": "塊邊界探針舉了 HALT 之後才跑出來的觀測"})
+            continue
+        f3v = st.get("f3_verdict")
+        if f3v == "violated":
+            buckets["f3_violation"].append(r["cell"])
+            detail.append({**r, "state": "f3_violation",
+                           "f3": {k: st.get(k) for k in
+                                  ("f3_calls", "f3_req_bad", "f3_resp_nonzero",
+                                   "f3_violations")}})
+            continue
+        if f3v == "unmeasured" and st.get("cell_status") == "measured":
+            # **沒量到不是通過**，但也不是違反——分開一桶，不判紅、要人看見。
+            buckets["f3_unmeasured"].append(r["cell"])
         kind = ("measured" if st.get("cell_status") == "measured"
                 else "infra_void")
         buckets[kind].append(r["cell"])
@@ -1347,7 +1873,10 @@ def reconcile(out: pathlib.Path, manifest: dict, msha: str) -> int:
           and not buckets["never_started"]
           and not buckets["claimed_not_complete"]
           and not buckets["flags_mismatch"]
-          and not buckets["bank_mismatch"])
+          and not buckets["bank_mismatch"]
+          and not buckets["effort_mismatch"]
+          and not buckets["f3_violation"]
+          and not buckets["probe_invalid"])
     doc = {"run": "R535", "ts": now_iso(), "out": str(out),
            "plan_sha256": plan_sha, "plan_chain": chain,
            "n_plan": len(rows), "n_expected": len(plan_rows(manifest)),
@@ -1357,14 +1886,25 @@ def reconcile(out: pathlib.Path, manifest: dict, msha: str) -> int:
                     "少一格或多一格都判 INVALID；"
                     "另外每一格落盤的 arm_flags 與 bank_manifest_sha256 "
                     "都必須與本檔的釘值逐位元相同——plan 釘住「跑哪些格」，"
-                    "這兩桶釘住「怎麼跑的、用哪份題庫」。"),
+                    "這兩桶釘住「怎麼跑的、用哪份題庫」；"
+                    "effort_mismatch／f3_violation／probe_invalid 三桶釘住"
+                    "「跑的時候後端是不是同一個推論模式、同一台機器」。"
+                    "f3_unmeasured 不判紅但要人看見——沒量到不是通過。"),
+           "expect_reasoning_effort": expect_effort,
+           "interim": {s: (json.loads((out / f"interim_{s}.json").read_text(
+               encoding="utf-8")) if (out / f"interim_{s}.json").exists()
+               else None) for s in ("S1", "S2")},
+           "halt": (json.loads((out / "HALT.json").read_text(encoding="utf-8"))
+                    if (out / "HALT.json").exists() else None),
            "buckets": buckets, "cells": detail}
     (out / "reconcile.json").write_text(
         json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({k: doc[k] for k in
                       ("n_plan", "n_expected", "counts", "verdict")},
                      ensure_ascii=False, indent=2))
-    for k in ("never_started", "claimed_not_complete", "not_in_plan"):
+    for k in ("never_started", "claimed_not_complete", "not_in_plan",
+              "flags_mismatch", "bank_mismatch", "effort_mismatch",
+              "f3_violation", "f3_unmeasured", "probe_invalid"):
         if buckets[k]:
             print(f"  {k}（{len(buckets[k])}）：{buckets[k][:12]}")
     print(f"→ {out / 'reconcile.json'}")
@@ -1396,10 +1936,13 @@ def build_parser() -> argparse.ArgumentParser:
                     help="完整的 http://<host>:1234/v1/chat/completions"
                          "（預設讀 $VACANT_GAIN_API）")
     ap.add_argument("--model", default="gemma-4-12b-it-qat")
-    ap.add_argument("--reasoning-effort", default=None,
-                    choices=["none", "low", "medium", "high"],
-                    help="送進 models.json 的 samplingParams（不給＝照後端預設；"
-                         "1003 預設是思考模式）")
+    ap.add_argument("--reasoning-effort", default=DEFAULT_REASONING_EFFORT,
+                    choices=list(REASONING_CHOICES),
+                    help="送進 models.json 的 samplingParams。"
+                         f"**預設 {DEFAULT_REASONING_EFFORT!r}**（2026-09-19 裁決："
+                         "NOTHINK）。`backend-default`＝不送旗標＝把模式交給後端"
+                         "版本決定（1003 預設思考、1004 預設不思考，同一份 gguf）"
+                         "——那是 R529 的混淆形狀，preflight 會判 FAIL")
     ap.add_argument("--pi-bin", default="pi", help="pi 執行檔（0.85.1）")
     ap.add_argument("--pi-port", type=int, default=8877,
                     help="proxy 固定埠（§7.8 用 8877）。**每條並行流要不同的埠**"
@@ -1407,8 +1950,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--sandbox", default="none",
                     help="驗收沙箱後端（裁決：R535 用 none，不降權 ⇒ 不再造跨 uid 孤兒）")
     ap.add_argument("--test-timeout", type=float, default=30.0)
-    ap.add_argument("--agent-timeout", type=float, default=900.0,
-                    help="單次嘗試的 agent 逾時（秒）")
+    ap.add_argument("--agent-timeout", type=float, default=300.0,
+                    help="單次嘗試的 agent 逾時（秒，**預設 300**）。"
+                         "`agent_timed_out=true` 是**正常的嘗試結果不 void**"
+                         "（四臂一視同仁）；逐臂逐層的比例任一格超過兩成 ⇒ "
+                         "收官必須寫「該比較受預算約束」")
     ap.add_argument("--stream", default="s1", help="這條流的名字（日誌檔名用）")
     ap.add_argument("--shard", default=None,
                     help="把計畫切給多條流：`i:n`（例 0:4）。與『目錄存在就跳過』"
@@ -1429,6 +1975,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--reconcile", action="store_true",
                     help="收官對帳：360 格每格都要「有一列」或「明寫 void 原因」，"
                          "少一格或多一格都判 INVALID（零模型呼叫）")
+    ap.add_argument("--interim", default=None, choices=["S1", "S2"],
+                    help="印那一層的期中判定（**只讀不寫**，不會定案；"
+                         "定案是 driver 在觸發點自己 O_EXCL 寫一次）")
+    ap.add_argument("--ack-halt", default=None, metavar="理由",
+                    help="人確認過後端沒換 ⇒ 解除 HALT（把 HALT.json 改名存證，"
+                         "理由寫進去）。**只有人能下這個，driver 不會自己解**")
     ap.add_argument("--force-plan", action="store_true")
     ap.add_argument("--timing-limit-s", type=float, default=2.0)
     ap.add_argument("--skip-timing", action="store_true",
@@ -1454,7 +2006,8 @@ def select(rows: list[dict], args) -> list[dict]:
         i, n = (int(x) for x in args.shard.split(":"))
         if not (0 <= i < n):
             raise SystemExit(f"--shard {args.shard} 不合法（要 0 <= i < n）")
-        out = [r for k, r in enumerate(out) if k % n == i]
+        # **用計畫裡的列號分**（見 `read_plan`）：`--shard k:4` ⇒ 每一題的第 k 個臂。
+        out = [r for r in out if r.get("plan_index", 0) % n == i]
     return out
 
 
@@ -1468,7 +2021,32 @@ def main(argv: list[str] | None = None) -> int:
 
     out = pathlib.Path(args.out).resolve()
     if args.reconcile:
-        return reconcile(out, manifest, msha)
+        return reconcile(out, manifest, msha,
+                         expect_effort=args.reasoning_effort)
+    if args.interim:
+        doc = compute_interim(out, manifest, args.interim)
+        print(json.dumps(doc, ensure_ascii=False, indent=2))
+        p = out / f"interim_{args.interim}.json"
+        print(f"（**只讀不寫**。已定案的判定："
+              f"{p if p.exists() else '還沒有'}）", file=sys.stderr)
+        return 0 if (doc or {}).get("verdict") in ("CONTINUE", "NOT_YET") else 1
+    if args.ack_halt:
+        p = out / "HALT.json"
+        if not p.exists():
+            print("沒有 HALT.json，不用解。", file=sys.stderr)
+            return 0
+        doc = json.loads(p.read_text(encoding="utf-8"))
+        doc["acked"] = {"ts": now_iso(), "by": "human", "why": args.ack_halt}
+        dst = out / f"HALT_acked_{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.json"
+        dst.write_text(json.dumps(doc, ensure_ascii=False, indent=2),
+                       encoding="utf-8")
+        p.unlink()
+        # ⚠ **HALT 期間跑出來的格子不會因此變乾淨**：它們的 `probe_invalid`
+        #   已經落盤，`--reconcile` 照樣把它們算進那一桶。解除的是「能不能繼續派工」。
+        print(f"HALT 已解除，存證 → {dst}\n"
+              f"⚠ HALT 期間已經跑出來的格子仍然標著 probe_invalid，"
+              f"--reconcile 照樣判 INVALID。那是設計。")
+        return 0
     if args.write_plan:
         info = write_plan(out, manifest, msha, force=args.force_plan)
         print(json.dumps(info, ensure_ascii=False, indent=2))

@@ -136,6 +136,13 @@ def score_cell(sb, cell: pathlib.Path, bank: pathlib.Path, *,
         "m7_ws": state.get("m7_ws"), "m7_ws_ratio": state.get("m7_ws_ratio"),
         "f6": state.get("f6"), "suspect_timeout": state.get("suspect_timeout"),
         "infra_void": state.get("infra_void"),
+        # 推論模式與預算：兩個都是「不可以只在啟動時看一次」的東西
+        "f3_verdict": state.get("f3_verdict"),
+        "reasoning_effort": state.get("reasoning_effort"),
+        "probe_invalid": state.get("probe_invalid"),
+        "agent_timed_out_n": state.get("agent_timed_out_n"),
+        "agent_timed_out_any": state.get("agent_timed_out_any"),
+        "wall_s": state.get("wall_s"),
         "hidden_pass": None, "hidden_passed": None, "hidden_total": None,
         "hidden_result_sha256": None, "by_attempt": [],
         "deterministic": None, "status": None,
@@ -206,6 +213,29 @@ def score_cell(sb, cell: pathlib.Path, bank: pathlib.Path, *,
     return rec
 
 
+def wall_distribution(vals: list[float]) -> dict | None:
+    """牆鐘**印分佈不印均值**（誠實邊界 6）。
+
+    實測同一臂相鄰兩題 10 s 對 314 s——均值在這種分佈上是一個沒有人經歷過的數字，
+    而且它會把「有幾格慢到撞預算」藏起來。
+    """
+    v = sorted(x for x in vals if isinstance(x, (int, float)))
+    if not v:
+        return None
+
+    def q(p: float) -> float:
+        if len(v) == 1:
+            return round(float(v[0]), 1)
+        i = p * (len(v) - 1)
+        lo, hi = int(i), min(int(i) + 1, len(v) - 1)
+        return round(float(v[lo] + (v[hi] - v[lo]) * (i - lo)), 1)
+
+    return {"n": len(v), "min": round(float(v[0]), 1), "p25": q(0.25),
+            "median": q(0.5), "p75": q(0.75), "p90": q(0.9),
+            "max": round(float(v[-1]), 1),
+            "note": "分佈不印均值：實測 10 s 對 314 s，均值沒有人經歷過。"}
+
+
 def summarise(rows: list[dict]) -> dict:
     """**S1 與 S2 分開報，不合併**（manifest 的 `report_rule`＝裁決）。"""
     out: dict = {}
@@ -243,12 +273,36 @@ def summarise(rows: list[dict]) -> dict:
                 "m7_ws_null": sum(1 for r in sel if r.get("m7_ws") is None),
                 "f6_true": sum(1 for r in sel if r.get("f6") is True),
                 "f6_false": sum(1 for r in sel if r.get("f6") is False),
+                # ── 預算約束：**逾時不 void，但要看得見** ──────────────
+                "agent_timed_out_cells": sum(
+                    1 for r in sel if r.get("agent_timed_out_any")),
+                "agent_timed_out_rate": (
+                    round(sum(1 for r in sel if r.get("agent_timed_out_any"))
+                          / len(sel), 4) if sel else None),
+                # ── 推論模式：逐格落盤，這裡只是把它數出來 ─────────────
+                "f3_ok": sum(1 for r in sel if r.get("f3_verdict") == "ok"),
+                "f3_violated": sum(1 for r in sel
+                                   if r.get("f3_verdict") == "violated"),
+                "f3_unmeasured": sum(1 for r in sel
+                                     if r.get("f3_verdict") == "unmeasured"),
+                "probe_invalid": sum(1 for r in sel if r.get("probe_invalid")),
+                "wall_s": wall_distribution([r.get("wall_s") for r in sel]),
             }
         out[stratum] = per
     out["_note"] = (
         "S1 與 S2 分開報，不合併（裁決）。分母是 n_scored 不是 n_cells——"
         "void 的格子沒量到，不可以當成 0 分。"
         "PC < 0.5 ⇒ 該層判 CEILING_TOO_LOW（題目對這顆模型太難）。")
+    # **任一臂-層 > 20% ⇒ 收官必須寫「該比較受預算約束」**（誠實邊界 7）。
+    hot = [f"{s}/{a}: {out[s][a]['agent_timed_out_rate']}"
+           for s in ("S1", "S2") for a in ("RS", "RF", "RP", "PC")
+           if (out[s][a].get("agent_timed_out_rate") or 0) > 0.20]
+    out["_budget_note"] = (
+        "agent_timed_out=true 是**正常的嘗試結果不 void**（agent 自己在預算內沒做完，"
+        "四臂一視同仁；當 infra_void 剔掉會系統性偏袒慢的那一臂）。"
+        + (f"**下列臂-層 > 20%，收官必須寫「該比較受預算約束」**：{hot}"
+           if hot else "目前沒有臂-層超過 20%。"))
+    out["_budget_over_20pct"] = hot
     out["_attempt1_note"] = (
         "免費的單發基線只包含 **RS／RF／RP** 的 attempt 1："
         "那三臂第 1 次的 argv 逐位元相同（V2 的 placeholder 換成空字串）"
