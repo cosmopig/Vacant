@@ -28,9 +28,14 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
    的 path、退出碼、以及收據。
 
 任務固定：工作區一個 `README.md`（「寫出 `solution.py`，內含 `add(a,b)`」），
-驗收套件一條 `check_add()`。**假上游只會回一句 `done`，不會動工作區**
-⇒ 正常結果就是 `visible_fail`／exit 20。那正是要驗的東西：**閘門有牙齒**。
-交付那一格（exit 0）另外用一個會回工具呼叫的假上游量過（見 §Codex）。
+驗收套件一條 `check_add()`。每個 agent 量**兩格**：
+
+- **拒交格**：假上游只回一句 `done`，不會動工作區 ⇒ `visible_fail`／**exit 20**。
+  驗的是**閘門有牙齒**。
+- **交付格**：假上游回一個寫檔的工具呼叫 ⇒ `visible_pass`／**exit 0**。
+  驗的是**閘門不是永遠說不**（一個永遠拒交的閘門跟沒有閘門一樣沒用）。
+
+兩格一起才算數。只有拒交格＝量不出「量具會不會永遠回同一個答案」。
 
 ⚠ **這裡量到的是通道與閘門，不是模型能力。** 假上游站在模型的位置上，
 所以本文件任何一格都**不能**讀成「這個 agent 用 Vacant 做得好」。
@@ -39,22 +44,64 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
 
 ## 1. 矩陣
 
-| agent | ① wire 協定 | ② 怎麼指過來 | ③ `requests_seen` | ④ 閘門 |
+| agent | ① wire 協定 | ② 怎麼指過來 | ③ `requests_seen` | ④ 閘門（拒交／交付） |
 |---|---|---|---|---|
-| **Claude Code** 2.1.276 | `POST /v1/messages?beta=true`（Anthropic Messages，SSE） | **環境變數** `ANTHROPIC_BASE_URL`（launcher 已內建） | **3**（anthropic 2 ＋ `HEAD /api/hello` 1） | ✅ `visible_fail`、**exit 20**、收據 2 筆驗過 |
-| **Codex CLI** 0.153.2（API key／自訂 provider） | `POST /v1/responses`（Responses API，SSE） | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`）。**不吃 `OPENAI_BASE_URL`** | **1**（拒交格）／**2**（交付格） | ✅ 兩條路都走到：**exit 20** 與 **exit 0** |
-| **Codex CLI** 0.153.2（`codex login`／ChatGPT 帳號） | `wss://chatgpt.com/backend-api/codex/responses`（**WebSocket**） | ❌ **沒有辦法**。`chatgpt_base_url` 只搬得動外掛／遙測／設定那幾條 | **0**（模型那一條完全沒經過 proxy） | ❌ 閘門仍會跑（行程結束就是交付點），但**逐字落盤在那條路上不成立** |
-| **OpenCode** 1.18.31 | (a) `POST /v1/responses`（內建 `openai` provider）<br>(b) `POST /v1/chat/completions`（自訂 openai-compatible provider） | (a) **環境變數** `OPENAI_BASE_URL`（launcher 已內建，**零額外接線**）<br>(b) 設定 `OPENCODE_CONFIG_CONTENT` | **2**（兩條路各量一次都是 2） | ✅ 兩條路都 `visible_fail`、**exit 20** |
-| **pi** 0.85.1 | `POST /v1/chat/completions`（OpenAI Chat Completions，SSE，`store:false`） | **設定**：`PI_CODING_AGENT_DIR` 指到一個暫時目錄＋寫 `models.json`。**不吃 `OPENAI_BASE_URL`**（實測反例見下） | **1** | ✅ `visible_fail`、**exit 20** |
+| **Claude Code** 2.1.276 | `POST /v1/messages?beta=true`（Anthropic Messages，SSE） | **環境變數** `ANTHROPIC_BASE_URL`（launcher 已內建，**零接線**） | **3**（拒交格）／**4**（交付格） | ✅ **exit 20** `visible_fail` ／ ✅ **exit 0** `visible_pass` |
+| **Codex CLI** 0.153.2（API key／自訂 provider） | `POST /v1/responses`（Responses API，SSE） | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`）。**不吃 `OPENAI_BASE_URL`** | **1**（拒交格）／**2**（交付格） | ✅ **exit 20** ／ ✅ **exit 0** |
+| **Codex CLI** 0.153.2（`codex login`／ChatGPT 帳號） | `wss://chatgpt.com/backend-api/codex/responses`（**WebSocket**） | ❌ **沒有辦法**。`chatgpt_base_url` 只搬得動外掛／遙測／設定那幾條 | **0**（模型那一條完全沒經過 proxy） | ⚠ 閘門**照跑**（觸發點在行程結束不在 wire 上），但**逐字落盤在那條路上不成立** |
+| **OpenCode** 1.18.31 | (a) `POST /v1/responses`（內建 `openai` provider）<br>(b) `POST /v1/chat/completions`（自訂 openai-compatible provider） | (a) **環境變數** `OPENAI_BASE_URL`（launcher 已內建，**零接線**）<br>(b) 設定 `OPENCODE_CONFIG_CONTENT` | (a) **2** ／ (b) **2**（拒交格）、**3**（交付格） | ✅ 兩條路都 **exit 20**；(b) 另有 ✅ **exit 0** |
+| **pi** 0.85.1 | `POST /v1/chat/completions`（OpenAI Chat Completions，SSE，`store:false`） | **設定**：`PI_CODING_AGENT_DIR` 指到一個暫時目錄＋寫 `models.json`。**不吃 `OPENAI_BASE_URL`**（實測反例見 §3） | **1**（拒交格）／**2**（交付格） | ✅ **exit 20** ／ ✅ **exit 0** |
 | **Hermes** | **未測**（推論：OpenAI-compatible，`model.base_url`／`CUSTOM_BASE_URL`） | **未測** | **未測** | **未測** |
 
-收據：上表每一格 `vacant run` 的 `receipts_RUN-ON.ndjson` 都是
-`entries_n=2 / verified_n=2 / failed_n=0 / chain_ok=true`，
+收據：上表每一格 `vacant run`（共 10 個 run 目錄）的 `receipts_RUN-ON.ndjson`
+都是 `entries_n=2 / verified_n=2 / failed_n=0 / chain_ok=true`，
 用的是既有那把尺 `ops/gain/replay/verify_run_receipts.py`（沒有另寫第二把）。
+
+**「交付」那一格是怎麼量的**（不要讀成模型會寫程式）：假上游在**帶著工具清單
+的那一通**回一個 `bash`／`Bash`／`exec_command` 工具呼叫，內容是
+`printf 'def add(a, b):\n    return a + b\n' > solution.py`。四個框架的 shell 工具
+都吃 `{"command": str}`（Codex 是 `{"cmd": str}`），所以同一招四個都適用。
+⇒ 它證明的是**工具呼叫真的穿過 proxy 回到 agent、agent 真的改了工作區、
+驗收真的在凍結快照上跑出 `visible_pass`**，**不是**模型能力。
+
+踩到的一個坑值得記：**不能用「第一通」當判準**。OpenCode 的第一通是
+**title generator**（沒有 `tools` 欄位），工具呼叫給了它等於掉進一個不會執行的
+子代理裡，整格看起來像「接上了但沒動工」——那正是會被誤讀成「閘門壞了」的假象。
+判準要是「這一通帶不帶 `tools`」。
 
 ---
 
 ## 2. 可複製貼上的接線
+
+### 2.0 最短的那一條：`ops/vacantrun/wrap_agent.sh`
+
+下面 §2.1–§2.4 那四段接線已經寫成一支
+[`ops/vacantrun/wrap_agent.sh`](../ops/vacantrun/wrap_agent.sh)，
+四個 agent 各一段，**每段都在 runtime 讀 `$VACANT_RUN_PROXY`**：
+
+```bash
+python3 ops/vacantrun/launcher.py --suite tests_visible --run-dir ~/.vacant-run/x -- \
+    "$PWD/ops/vacantrun/wrap_agent.sh" pi "把 solution.py 寫完"
+#                                      ^^^^ pi | codex | opencode | claude
+```
+
+⚠ **`--` 之後要給絕對路徑**：launcher 用 `cwd=<workspace>` spawn，相對路徑會
+解析到工作區底下 ⇒ `agent_spawn_failed`／exit 22（實測過；那是 `infra_void`，
+launcher **不判交付也不判拒交**，行為正確但訊息容易看漏）。
+
+四段全部實測過（2026-09-18，假上游回寫檔工具呼叫）：
+
+| | `requests_seen` | proxy 收到的 path | 裁決 |
+|---|---|---|---|
+| `wrap_agent.sh pi` | 2 | `POST /v1/chat/completions` ×2 | `visible_pass`、**exit 0** |
+| `wrap_agent.sh codex` | 2 | `POST /v1/responses` ×2 | `visible_pass`、**exit 0** |
+| `wrap_agent.sh opencode` | 3 | `POST /v1/chat/completions` ×3 | `visible_pass`、**exit 0** |
+| `wrap_agent.sh claude` | 4 | `POST /v1/messages?beta=true` ×3 ＋ `HEAD /api/hello` | `visible_pass`、**exit 0** |
+
+模型用 `VACANT_AGENT_MODEL` 換；Codex 的 wire 用 `VACANT_CODEX_WIRE`
+（`responses`｜`chat`）換。下面幾節是同樣的東西攤開來，要自己改的時候看。
+
+### 2.0.1 底層機制
 
 共通前提：`$P` ＝ proxy 的 base url。在 `vacant run` 底下，launcher 會把它
 注入成 **`$VACANT_RUN_PROXY`**，所以 wrapper 可以在 runtime 讀它現寫設定——
@@ -297,10 +344,13 @@ repo 裡的兩支相關程式碼**還在**、也還說得通，但它們是**呼
 
 - 量的是**通道與閘門**，不是模型能力，也不是「用 Vacant 做得比較好」。
   假上游站在模型的位置上。
-- 交付（exit 0）那一格**只在 Codex 上實測過**（用一個會回 `exec_command`
-  工具呼叫的假上游，讓它真的寫出 `solution.py`）。其餘三個只實測到**拒交**。
-  閘門那一段與 agent 無關（同一支 `ops/gain/r530/acceptance.py`），
-  但**沒測到就是沒測到**。
+- **沒有一格用真模型跑過。** 四個 agent 的拒交／交付都是假上游驅動的。
+  「這個 agent 配 Vacant 在真任務上表現如何」是另一個實驗，這裡一個字都沒說。
+- OpenCode 的**環境變數路線**（內建 `openai` provider，`/v1/responses`）
+  只量到拒交格；交付格量的是**設定路線**（`/v1/chat/completions`）。
+  原因是 Responses 那條的假上游工具呼叫寫的是 Codex 的 `exec_command` 工具名，
+  OpenCode 沒有那個工具。**沒測到就是沒測到**，不要因為同一個 agent 另一條路
+  過了就把這一格填綠。
 - 版本綁死在上面那幾個號碼。上游改版這份表就會漂，
   **漂了的徵兆是 `requests_seen == 0`，不是這份文件變紅。**
 - `vacant run` 單獨只有 L3：proxy **records，不 verifies**，也不阻止 agent
@@ -321,6 +371,21 @@ repo 裡的兩支相關程式碼**還在**、也還說得通，但它們是**呼
 臨時量具（同樣只活在 scratchpad，未進 repo）：`mockup.py`（假上游，三條 wire）、
 `probe.sh`（包 `vacant run` 跑一格）、`direct.sh`（不經 `vacant run` 的直測）、
 `agent_{claude,codex,opencode,pi}.sh`（四支接線 wrapper，內容已逐字寫進 §2）。
+
+### `claude-gate-accept`
+
+```
+argv            = bash /private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/agent_claude.sh read README.md and do what it says
+requests_seen   = 4   wire_by_protocol = {'openai': 1, 'anthropic': 3}   wire_errors = 0
+proxy paths     = {'HEAD /api/hello -> 501': 1, 'POST /v1/messages?beta=true -> 200': 3}
+stop_reason     = visible_pass   accepted = True   refused = False
+agent_rc        = 0   agent_wall_s = 2.119
+ws_start_sha256 = 95264f3cd640714ff7a2fbb971d1e7639d516839d752ae1644d708bc817d310e
+ws_end_sha256   = e9cd0206d7eac65515768bf6d3fd50566311056dba236753253b3bea96562961
+wire_digest     = f12a4841339ddfee81a3cd11bda805dd1d37cfe90e5a7af7450a64e0212899fa
+verdict_hash    = d4f611cb15ce10a6d2eb65092f054e503d085f02ec1efe4c779125d87c039828
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
 
 ### `claude-gate-refuse`
 
@@ -397,6 +462,21 @@ verdict_hash    = 2a37f52d69a47a20a5be4ba89a713f596f8c45e1782700d9d97a8604af6afa
 receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
 ```
 
+### `opencode-gate-accept`
+
+```
+argv            = bash /private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/agent_opencode.sh read README.md and do what it says
+requests_seen   = 3   wire_by_protocol = {'openai': 3}   wire_errors = 0
+proxy paths     = {'POST /v1/chat/completions -> 200': 3}
+stop_reason     = visible_pass   accepted = True   refused = False
+agent_rc        = 0   agent_wall_s = 6.151
+ws_start_sha256 = 95264f3cd640714ff7a2fbb971d1e7639d516839d752ae1644d708bc817d310e
+ws_end_sha256   = e9cd0206d7eac65515768bf6d3fd50566311056dba236753253b3bea96562961
+wire_digest     = ba06d6f82bf59317eed5c4c33c9250edb0e275e7fa17991e63e14d13e06f8d8b
+verdict_hash    = 8ad83cdbd640893c34472c43a524e2eea627c50ffad5dca852787d0685fe9cf5
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
 ### `opencode-gate-refuse`
 
 ```
@@ -412,6 +492,21 @@ verdict_hash    = d3fe10adb965f48421de3aa60f00dceadd042aaf10bd838b34b92216c4156f
 receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
 ```
 
+### `pi-gate-accept`
+
+```
+argv            = bash /private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/agent_pi.sh read README.md and do what it says
+requests_seen   = 2   wire_by_protocol = {'openai': 2}   wire_errors = 0
+proxy paths     = {'POST /v1/chat/completions -> 200': 2}
+stop_reason     = visible_pass   accepted = True   refused = False
+agent_rc        = 0   agent_wall_s = 0.92
+ws_start_sha256 = 95264f3cd640714ff7a2fbb971d1e7639d516839d752ae1644d708bc817d310e
+ws_end_sha256   = e9cd0206d7eac65515768bf6d3fd50566311056dba236753253b3bea96562961
+wire_digest     = 9e2aa30129fef944b73474dbbe5f882c0b47f343084763136a3f029c2a158c56
+verdict_hash    = 6261cbf43d68481a5fa987b045dd3e4e728a3c20d5c932840d7cba46eb6bdf07
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
 ### `pi-gate-refuse`
 
 ```
@@ -424,6 +519,66 @@ ws_start_sha256 = 95264f3cd640714ff7a2fbb971d1e7639d516839d752ae1644d708bc817d31
 ws_end_sha256   = 95264f3cd640714ff7a2fbb971d1e7639d516839d752ae1644d708bc817d310e
 wire_digest     = ab10b00f19c531e3a94e0d9bcaad15eb3e98fac41286e3f215e188ffa58116f8
 verdict_hash    = 7946881fc1a4e62ede51078566318ab14b4b098850546a98fcb296a78edf2f8d
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+### `wrap-claude`
+
+```
+argv            = /Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a1025f660b68d0e85/ops/vacantrun/wrap_agent.sh claude read README.md and do what it says
+requests_seen   = 4   wire_by_protocol = {'openai': 1, 'anthropic': 3}   wire_errors = 0
+proxy paths     = {'HEAD /api/hello -> 501': 1, 'POST /v1/messages?beta=true -> 200': 3}
+stop_reason     = visible_pass   accepted = True   refused = False
+agent_rc        = 0   agent_wall_s = 2.112
+ws_start_sha256 = 95264f3cd640714ff7a2fbb971d1e7639d516839d752ae1644d708bc817d310e
+ws_end_sha256   = e9cd0206d7eac65515768bf6d3fd50566311056dba236753253b3bea96562961
+wire_digest     = b81cfa95098c2aaffd19edbfe97e2db6f65716b0b792336bc310ae1321fae214
+verdict_hash    = 37ff74a0559d7f8115ad7fb4b427443e23bf84480b7a3e830971cbc3cd993206
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+### `wrap-codex`
+
+```
+argv            = /Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a1025f660b68d0e85/ops/vacantrun/wrap_agent.sh codex read README.md and do what it says
+requests_seen   = 2   wire_by_protocol = {'openai': 2}   wire_errors = 0
+proxy paths     = {'POST /v1/responses -> 200': 2}
+stop_reason     = visible_pass   accepted = True   refused = False
+agent_rc        = 0   agent_wall_s = 1.059
+ws_start_sha256 = 95264f3cd640714ff7a2fbb971d1e7639d516839d752ae1644d708bc817d310e
+ws_end_sha256   = e9cd0206d7eac65515768bf6d3fd50566311056dba236753253b3bea96562961
+wire_digest     = 42232cab63d2ff023abe40acb3971b0e55e76eeafb3598a05ef0371b4f62e9a8
+verdict_hash    = 5ac4a4e1d9afe5f29fea8be6f7af0af312d80a23919fef37a6715852f77e1232
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+### `wrap-opencode`
+
+```
+argv            = /Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a1025f660b68d0e85/ops/vacantrun/wrap_agent.sh opencode read README.md and do what it says
+requests_seen   = 3   wire_by_protocol = {'openai': 3}   wire_errors = 0
+proxy paths     = {'POST /v1/chat/completions -> 200': 3}
+stop_reason     = visible_pass   accepted = True   refused = False
+agent_rc        = 0   agent_wall_s = 6.979
+ws_start_sha256 = 95264f3cd640714ff7a2fbb971d1e7639d516839d752ae1644d708bc817d310e
+ws_end_sha256   = e9cd0206d7eac65515768bf6d3fd50566311056dba236753253b3bea96562961
+wire_digest     = 12926d0e304d395b737afd13c622385e16961df16718c6d64c85772c3300f1f6
+verdict_hash    = 664afd2199cc2ee989b653543a26da0eac5e6b7627c6e4699e235acf8c92c734
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+### `wrap-pi`
+
+```
+argv            = /Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a1025f660b68d0e85/ops/vacantrun/wrap_agent.sh pi read README.md and do what it says
+requests_seen   = 2   wire_by_protocol = {'openai': 2}   wire_errors = 0
+proxy paths     = {'POST /v1/chat/completions -> 200': 2}
+stop_reason     = visible_pass   accepted = True   refused = False
+agent_rc        = 0   agent_wall_s = 1.023
+ws_start_sha256 = 95264f3cd640714ff7a2fbb971d1e7639d516839d752ae1644d708bc817d310e
+ws_end_sha256   = e9cd0206d7eac65515768bf6d3fd50566311056dba236753253b3bea96562961
+wire_digest     = d6237e11c889f291c81afeff0fc066a7c0e00b9e0689a1c68f32838f9171418c
+verdict_hash    = ca4726b4966735ab5c3467652c405c9f6b59ed4e860aeb6a7e54da76471dcd65
 receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
 ```
 
