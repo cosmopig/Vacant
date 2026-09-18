@@ -1,4 +1,4 @@
-"""Vacant — AI agent 前面的強制信任、客觀驗證與可究責交付層。
+"""Vacant — 接在任何 AI agent 外面的可究責層（accountability layer）。
 
 產品入口 `VacantFirstController` 直接 delegate、驗 receipt/trust card、重跑 objective
 check，全部通過後才啟動 Hermes 或任意 CLI agent。底層同時保留研究需要的信譽路由、
@@ -44,7 +44,7 @@ from .reputation import Reputation
 from .substrate import EchoSubstrate, HermesACPSubstrate, LMStudioSubstrate, Substrate, SubstrateResult
 from .waker import Waker, WakeResult
 
-__version__ = "0.1.0"
+__version__ = "0.7.0"
 
 __all__ = [
     "Vacant",
