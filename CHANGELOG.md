@@ -67,8 +67,15 @@ output.**
   incomplete — it listed only the two English phrasings — so 「信任」／「信任層」 were added
   to it, together with the scope (output and prose, never identifiers) and the test that
   now enforces it. The MCP tool docstrings in
-  `vacant/mcp_server.py` were deliberately **not** touched — that text enters an agent's
-  prompt, so editing it changes behaviour and breaks comparability with existing runs.
+  `vacant/mcp_server.py` were held back in this pass — that text enters an agent's prompt,
+  so editing it changes behaviour; **ruled 2026-09-18** (`DECISION_20260918_MCP_WORDING.md`):
+  no archived evidence run uses the MCP path (`runs/INDEX.md` has zero hits for
+  `mcp`/`delegate`/`verify_fix`; nothing under `ops/` imports `mcp_server`), so the one
+  non-identifier word — `trusted` in `delegate`'s docstring, which in this repo means
+  "not checked, assumed" (`vacant/peerexec.py:186,196`) and so says the opposite of what
+  the ecosystem it describes does — was **removed**, and the module docstring's
+  「信任閘道」／「信任生態」 became 「究責閘道」／「究責生態」. Identifiers and their prose
+  names (`trust card`, `trust OFF vs ON`, 「信任狀」) stay.
 - **Three "follow the docs and it breaks" gaps**, one of which disguised itself as a
   refusal: `select_by_quorum`'s `drafts` is `Sequence[tuple[str, str]]` and the order was
   documented nowhere. Passing `(worker_id, code)` is not a type error — every "draft" fails

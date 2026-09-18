@@ -1,10 +1,10 @@
-"""Vacant MCP server — 工具面 v2（12 §3：把信任閘道生態暴露成 MCP 工具）。
+"""Vacant MCP server — 工具面 v2（12 §3：把究責閘道生態暴露成 MCP 工具）。
 
 入口 agent（Hermes / Claude / 任一 MCP client）在自己的 config 把這支註冊成
 mcp_server，於是它「有」了 vacant：不改一行碼，只靠設定連上一個更好+可究責的腦。
 
 工具面 v2（12 §3）：
-  - delegate    ：主工具。把有客觀 check 的 coding 子任務交給信任生態，回答案＋信任狀。
+  - delegate    ：主工具。把有客觀 check 的 coding 子任務交給究責生態，回答案＋信任狀。
   - trust_card  ：取某次 delegate 的完整信任狀 JSON。
   - receipt     ：取某次 delegate 的 task/check/answer 綁定簽章收據。
   - residents   ：名冊（信用/觀測/flags，INSUFFICIENT_DATA/PROBATION 如實顯示）。
@@ -184,7 +184,7 @@ def _scoreboard_impl() -> str:
 @mcp.tool()
 def delegate(task: str, tests: dict, risk: str = "normal", attempts: int = 3) -> str:
     """THE PREFERRED PATH for any coding subtask with an objective check. Instead of
-    writing the code yourself, hand it to Vacant's trusted, accountable resident
+    writing the code yourself, hand it to Vacant's accountable resident
     ecosystem: the task is routed (by reputation) to a resident, generated on Vacant's
     local model with relevant memory injected, cross-reviewed by K signed peer
     reviewers, probabilistically audited, and delivered WITH a trust card (who

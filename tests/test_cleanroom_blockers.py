@@ -300,6 +300,71 @@ def test_no_banned_term_in_the_bench_void_diagnostic():
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# 阻擋項二之二（2026-09-18 裁決，`DECISION_20260918_MCP_WORDING.md`）：
+# 禁語的第四個出口——MCP 工具 description，也就是**模型**看的輸出
+# ══════════════════════════════════════════════════════════════════════════
+def _mcp_tool_descriptions() -> dict[str, str]:
+    """FastMCP 實際會送進 `tools/list` 的那份文字（不是原始碼，是 client 看到的）。"""
+    from vacant import mcp_server
+
+    return {t.name: (t.description or "")
+            for t in mcp_server.mcp._tool_manager.list_tools()}
+
+
+def test_no_banned_term_in_any_mcp_tool_description():
+    """禁語的第四個出口：MCP 工具的 description。
+
+    `--help`／`demo`／`init`／`up` 是**人**看的輸出，這一條掃的是**模型**看的輸出。
+    `AGENTS.md:59` 把 MCP 這個形態定性為 persuasion only——整個形態就只有這段文字在
+    出力，所以它比 CLI 的字串更該守禁語，不是更寬鬆。2026-09-18
+    （`DECISION_20260918_MCP_WORDING.md`）把 `delegate` 的 `trusted` 拿掉、模組
+    docstring 的「信任閘道／信任生態」改成「究責閘道／究責生態」之後，這一條防回流。
+    """
+    hits: list[str] = []
+    for name, desc in _mcp_tool_descriptions().items():
+        hits.extend(_scan(desc, f"mcp tool {name}"))
+    assert hits == [], "MCP 工具 description 出現禁語：\n" + "\n".join(hits)
+
+
+def test_the_word_trusted_alone_is_not_and_must_not_be_in_the_banned_list():
+    """**誤殺防線**：`trusted` 單獨一個字**不准**進 `BANNED`。
+
+    本 repo 對 `trusted` 有一個精確且正當的用法——TCB 語意的「不驗、直接假設」：
+    `vacant/peerexec.py:186,196` 的 `the executor's own trusted renderer` 與
+    `the renderer and the sandbox ... remain a trusted input`，以及 `AGENTS.md:451`
+    的 H-8。那是誠實邊界句，是規格的一部分（CLAUDE.md 慣例第三條），機械掃字會把它
+    一起殺掉，而殺掉它會讓收據看起來比實際乾淨。
+
+    所以 `delegate` 那一處只能用**逐點釘子**（下一條），不能用整字黑名單。
+    """
+    assert "trusted" not in BANNED, (
+        "把 `trusted` 整字加進 BANNED 會誤殺 peerexec 的 TCB 用法——"
+        "那不是行銷詞，是誠實邊界句"
+    )
+    from vacant import peerexec
+
+    # 負向控制：正當用法還活著。掃字黑名單一旦上場，這一行會先燒起來。
+    assert "trusted renderer" in peerexec.SUITE_FIXED_POINT_NOTE
+    assert "remain a trusted input" in peerexec.SUITE_FIXED_POINT_NOTE
+
+
+def test_delegate_docstring_does_not_call_the_ecosystem_trusted():
+    """逐點釘子（2026-09-18 裁決）：`delegate` 的 description 不准出現 `trusted`。
+
+    範圍只有這一支 docstring。理由不是禁語表，是**同字反義**：同一個 repo 用
+    `trusted` 表示「不驗、直接假設」，而居民生態恰恰是唯一被路由、互審、稽核、
+    簽章綁定的東西——寫 `trusted, accountable` 等於讓 docstring 對它自己描述的機制
+    說錯話，而且與同一片語裡的 `accountable` 自相矛盾（所以當時是**刪**不是換）。
+    """
+    desc = _mcp_tool_descriptions()["delegate"]
+    assert "trusted" not in desc, f"delegate description 又出現 trusted：\n{desc}"
+    # 負向控制：這一條釘的是形容詞，不是整段文案——該留的都還在。
+    assert "accountable resident" in desc
+    assert "accountable, accountable" not in desc      # 當初若「換」而不是「刪」的樣子
+    assert "trust card" in desc                        # `trust_card` 工具名的自然語言寫法
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # 阻擋項三：三個「照文件寫會壞」的地方
 # ══════════════════════════════════════════════════════════════════════════
 SPEC = ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "f",
