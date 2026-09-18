@@ -19,8 +19,9 @@
 body 拿掉 `reasoning_effort` 與 cache key 之後 sha256 逐位元相同）。
 `tests/test_vacant_run.py::test_body_bytes_identical_off_vs_on` 是它的可執行版本。
 
-本檔用 `assert` 把這條寫進程式碼：`_forward` 收到的 `body` 物件就是送出去的
-那一個物件（`id()` 相同），中間沒有任何一步碰過它。
+本檔把這條**寫進程式碼**（`_handle` 裡的那個 `raise RuntimeError`，不是 `assert`
+——`python -O` 會把 assert 拿掉，而這是規格不是偵錯）：送出去的 `body` 物件
+必須就是讀進來的那一個（`is` 相同），中間沒有任何一步碰過它。
 
 ## 兩臂的差別**不在 wire 上**
 
@@ -230,7 +231,10 @@ class WireProxy:
             hooked = self.on_wire(wire, h.path, body)
             if hooked is not None:              # pragma: no cover - V0 到不了
                 sent, rewritten = hooked, True
-        assert rewritten or sent is body, "OFF/ON 都不准重序列化 body"
+        # ⚠ **不用 `assert`**：`python -O` 會把 assert 整行拿掉，而這一條是規格
+        #   不是偵錯——它被拿掉的那一天，body 被悄悄重序列化也不會有人知道。
+        if not rewritten and sent is not body:
+            raise RuntimeError("OFF/ON 都不准重序列化 body：body 物件被換過了")
 
         req_sha = hashlib.sha256(sent).hexdigest()
         (self.wire_dir / f"{call_id}.req.bin").write_bytes(sent)
@@ -288,7 +292,10 @@ class WireProxy:
             total = 0
             with (self.wire_dir / f"{call_id}.resp.bin").open("wb") as f:
                 while True:
-                    chunk = resp.read(_CHUNK)   # 記憶體只有這一塊
+                    # `read1` 而不是 `read`：`read(n)` 會**等到湊滿 n 個位元組**
+                    # 才回來，SSE 上那等於把 token 累積到 64 KiB 才吐給 client。
+                    # `read1` 一個 syscall 有多少給多少 ⇒ 串流是真的串流。
+                    chunk = resp.read1(_CHUNK)  # 記憶體只有這一塊
                     if not chunk:
                         break
                     sha.update(chunk)
