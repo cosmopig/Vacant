@@ -14,6 +14,7 @@ import os
 import pathlib
 import subprocess
 import sys
+import tempfile
 from collections import Counter
 from math import comb
 
@@ -209,10 +210,19 @@ def b33(keys: tuple = DEN_KEYS) -> dict:
 def cert_gate() -> dict:
     if MUTANT == "M2_empty_targets":
         return {"rc": None, "counts": {}, "docs": 0, "cert_headings": 0, "ran": False}
-    tmp = ROOT / "ops/gain/data/r480_cert_gate_probe.json"
-    pr = subprocess.run([sys.executable, str(CERT_GATE), "--json", str(tmp)],
-                        capture_output=True, text=True, cwd=str(ROOT), timeout=180)
-    d = json.loads(tmp.read_text(encoding="utf-8")) if tmp.exists() else {}
+    # ⚠ 探針的輸出寫到**真的暫存檔**，不寫回 repo（2026-09-19）。舊版寫的是
+    #   `ops/gain/data/r480_cert_gate_probe.json`，有兩個後果：
+    #   1. 跑一次測試就改一個被追蹤的檔 ⇒ `git status` 永遠不乾淨，
+    #      CI 得靠「把索引檢查排在 pytest 之前」繞開它。
+    #   2. **更糟**：探針失敗時 `tmp.exists()` 仍為真（那是上次 commit 進去的
+    #      舊快照），於是 `ran` 是 True、數字是陳年的——**沒量到被記成量到了**，
+    #      正是 `infra_void`（09 §3.5）禁止的那件事。
+    #   換成一次性暫存檔之後，探針沒寫出東西就是 `ran: False`。
+    with tempfile.TemporaryDirectory() as td:
+        tmp = pathlib.Path(td) / "cert_gate_probe.json"
+        pr = subprocess.run([sys.executable, str(CERT_GATE), "--json", str(tmp)],
+                            capture_output=True, text=True, cwd=str(ROOT), timeout=180)
+        d = json.loads(tmp.read_text(encoding="utf-8")) if tmp.exists() else {}
     return {"rc": pr.returncode, "counts": d.get("counts", {}),
             "docs": d.get("docs_scanned"), "cert_headings": d.get("cert_headings"),
             "has_mismatch_field": "cert_sha_mismatches" in d,

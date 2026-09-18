@@ -518,16 +518,47 @@ pi 不吃環境變數 ⇒ 用 `--port 8877` ＋ `PI_CODING_AGENT_DIR` 底下一�
 
 | run | 任務敘述 | 結果 |
 |---|---|---|
-| `v1_real_pi` | TASK.md **只講白話**（「一個相加、一個相乘」），可見驗收在工作區外 ⇒ agent 看不到 | **拒交**（`attempts_exhausted`，3/3 次、9 通 wire、exit 20）。三次都寫成 `add_numbers`／`multiply_numbers`，讀了回饋也沒改名 |
+| `v1_real_pi` | TASK.md **只講白話**（「一個相加、一個相乘」），可見驗收在工作區外 ⇒ agent 看不到 | **拒交**（`attempts_exhausted`，3/3 次、9 通 wire、exit 20）。三次都寫成 `add_numbers`／`multiply_numbers` |
 | `v1_real_pi_explicit` | TASK.md **明講** `add(a,b)`／`mul(a,b)` | **交付**（`visible_pass`，1/3 次、3 通 wire、exit 0） |
 
 兩條鏈都過既有那把尺（`ws_attempt` 3+1 與 1+1、`verdict` 各 1、
 `chain_ok` 與 `logbook_verify_chain` 一致）。
 
-⚠ **這兩跑是機制示範不是量測**：n=1、任務是挑出來讓閘門有東西可擋的、
-零統計。它證明的是「迴圈真的會跑、收據真的驗得過、拒交真的擋得住」，
-**不證明 revise 在真模型上會提高通過率**——第一跑的三次重改一次都沒改對，
-正是 §7.7-3 那條邊界的現場版本。
+⚠ **這兩跑是機制示範不是量測**：任務是挑出來讓閘門有東西可擋的、零統計。
+它證明的是「迴圈真的會跑、收據真的驗得過、拒交真的擋得住」，
+**不證明 revise 在真模型上會提高通過率**。
+
+#### 為什麼第一跑三次都沒改對——**它根本沒讀到回饋**
+
+原本這裡寫「讀了回饋也沒改名」。**那句話與 wire 矛盾，已於 2026-09-19 更正。**
+把兩跑全部 18 通請求逐一解開（`wire_RUN-ON/*.req.bin`）：
+
+```
+vr1_run : 9 個請求   含 "Acceptance feedback" 0   含 "VACANT_FEEDBACK" 0   含 "feedback"(不分大小寫) 0
+run4    : 9 個請求   含 "Acceptance feedback" 0   含 "VACANT_FEEDBACK" 0   含 "feedback"(不分大小寫) 0
+```
+
+回饋檔**確實寫出來了**而且內容足以決定修法
+（`_frozen_RUN-ON_a2/VACANT_FEEDBACK.md`，713 bytes，逐字點名
+`ImportError: cannot import name 'add' from 'solution'`）。沒被讀到的是它。
+原因在請求本身：三次嘗試各是**一段全新對話**（roles 都從 `system,user` 開始），
+user 訊息三次逐字相同——
+
+```
+Read TASK.md and do what it says. Use your tools to write the file.
+```
+
+pi 讀 `TASK.md`、寫 `solution.py`、結束。**它沒有 `ls` 過工作區**，
+所以工作區裡多一個檔案對它等於沒發生。
+
+⚠ 這條的教訓比「模型不夠聰明」重要得多：**V1 的檔案投遞對「每次重試都是
+新對話」的 agent 是結構性失效**——不是它讀了不改，是那份回饋從來沒進過
+context。「我把回饋寫到工作區了」不是證據，**請求裡找得到那段文字才是**，
+與 §4.5 `requests_seen` 同一條紀律。
+
+⇒ 這正是 §8 V2（`--feedback-into prompt|both`，把同一份回饋放進 argv）
+存在的理由：argv 一定會被 agent 的 CLI 吃進去，不依賴它自己想去看。
+**引用第一跑時不可以寫成「重改沒用」**——那一跑沒有測到重改。
 
 另外有一跑因為 `--port` 給了 8878 而 pi 的 `models.json` 寫的是 8877，
 **agent 完全沒被中介到**（`requests_seen` = 0），而畫面上只有 pi 自己的
@@ -631,7 +662,8 @@ feedback_in_prompt_bytes 回饋真的進了幾個位元組。**第 1 次恆為 0
 1. **不能說「不可忽略」。** 能說的是「**回饋一定出現在模型的輸入裡**」。
    **看得到 ≠ 照做**——V2 保證的是投遞，不是遵從；能強制的只有
    **「沒過就不出貨」**（閘門本身，§4.7 的單邊保證仍然逐字適用）。
-2. **不能說 V2 提高了通過率。** V1 實跑 n=1、三次重改一次都沒改對（§7.8）；
+2. **不能說 V2 提高了通過率。** V1 實跑三次都沒改對，但 wire 顯示回饋
+   **從未進過 context**（§7.8）⇒ 那一跑沒有測到重改，不是重改無效；
    R534 真模型上「沒過→重改」與拒交出現 **0 次**。
    **V2 改的是機制性質（回饋一定在輸入裡），不是效果量測。** 本輪零真模型跑。
 3. **不得與 R530／R532／R534 併表**：prompt 不是我們寫的（agent 命令由使用者給）、

@@ -71,3 +71,11 @@ runs/_smoke/
 ops/gain/r530/templates/pb[fcad]_*/
 ops/gain/r530/hidden/pb[fcad]_*/
 ops/gain/r530/gauge/pb[fcad]_*/
+
+# `docs/paper_2026-09-14/build_paper.py` 的建置暫存（2026-09-19）。
+# 這底下曾經被 commit 進去 135 MB：325 張逐頁 PNG ＋ 同一份 PDF 的 8 個版本
+# （render／render_v2..v5／render_final／render_delivery／render_tokens）。
+# 成品的單一真相在 `docs/paper_2026-09-14/`，這裡全部重跑得出來。
+# ⚠ 文獻全文（原 `source_text/`）**不是**建置產物，已搬到
+#   `docs/paper_2026-09-14/source_text/`——引用過的東西要有落盤證據（CLAUDE.md）。
+tmp/
