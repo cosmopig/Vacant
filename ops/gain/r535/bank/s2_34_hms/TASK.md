@@ -1,0 +1,12 @@
+# Task
+
+`hms(seconds)` writes a whole number of seconds as a clock-style
+label with colons between the parts.
+
+The labels sit under a progress bar for clips that are usually under a minute
+but occasionally run for hours, and the bar is narrow. The number arrives as
+the difference between two timestamps that are not guaranteed to be in
+order.
+
+Write the code in a file called `solution.py` in this directory.
+Nothing else is needed and nothing else is read.
