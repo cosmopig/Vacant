@@ -633,6 +633,10 @@ def measure_m7_ws(run_dir: pathlib.Path, summary: dict,
         res["m7_ws_reason"] = "no_tool_calls_in_attempt_ge2"
         return res
     res["m7_ws"] = bool(other > 0)
+    #: 取樣方式要落盤：我們讀的是**每一次嘗試的最後一通**（那一通帶著該次的
+    #: 完整上文）。框架如果做了脈絡壓縮，早期的工具呼叫會不在裡面——
+    #: 那是這個量測的已知上界，不是 bug，但看數字的人要知道。
+    res["m7_ws_source"] = "last_request_per_attempt"
     return res
 
 
@@ -735,7 +739,9 @@ class Driver:
         env["VACANT"] = "1"
         # proxy 的真上游。**這是 `VACANT_GAIN_API` 唯一該去的地方。**
         env["VACANT_RUN_UPSTREAM_OPENAI"] = self.upstream
-        env.setdefault("OPENAI_API_KEY", "lmstudio")
+        # **寫死，不 setdefault**：父行程如果有一把真的雲端金鑰，setdefault 會把它
+        # 原封不動轉給本機端點。沒有人會因此收到帳單，但那把鑰匙就留在別人的 log 裡了。
+        env["OPENAI_API_KEY"] = "lmstudio"
         env["PI_CODING_AGENT_DIR"] = str(cell / "piconf")
         env["PI_OFFLINE"] = "1"
         env["PI_SKIP_VERSION_CHECK"] = "1"
@@ -816,7 +822,27 @@ class Driver:
                               "wall_s": round(time.time() - t0, 3),
                               "stderr_tail": (proc.stderr or "")[-600:]})
             if rc in (EXIT_ACCEPTED, EXIT_REFUSED):
-                break
+                # ── `requests_seen == 0` ＝ **agent 根本沒被中介到**，不是量測 ──
+                #  §4.5 的現場版本：`--port` 給 8878 而 `models.json` 寫 8877 ⇒
+                #  畫面上只有 pi 自己的 `Connection error.`，而那一格看起來像
+                #  「模型答錯了」。判 `infra_void` 並重試，接線壞掉才不會偽裝成 0 分。
+                sp = cell / "run" / "run_RUN-ON.json"
+                seen = None
+                if sp.exists():
+                    try:
+                        seen = json.loads(sp.read_text(encoding="utf-8")
+                                          ).get("requests_seen")
+                    except Exception:        # noqa: BLE001
+                        seen = None
+                if seen:
+                    break
+                void_reason = (f"requests_seen={seen!r}：agent 沒被中介到"
+                               f"（pi 的 models.json 指的埠與 --port "
+                               f"{self.a.pi_port} 對不上？），第 {i} 次")
+                jsonl_append(io, {"ts": now_iso(), "event": "not_mediated",
+                                  "try": i, "requests_seen": seen})
+                rc = None
+                continue
             if rc == 2:
                 # 參數壞了＝驅動的 bug，每一格都會一樣。**停整條流**，不要刷屏。
                 void_reason = f"launcher 拒收參數（rc=2）：{(proc.stderr or '')[-400:]}"
@@ -940,8 +966,32 @@ class Driver:
         except Exception:                    # noqa: BLE001
             return False
 
+    # -- 埠獨佔鎖 ---------------------------------------------------------
+    def lock_port(self):
+        """一個 `--pi-port` 同時只准有一條流。
+
+        pi 吃的是 `models.json` 裡寫死的埠。兩條流共用同一個埠 ⇒ 第二個 proxy
+        綁不上，或者更糟——**綁上了，於是 A 流的 agent 打到 B 流的 proxy**，
+        兩格的 wire 混在一起而畫面上什麼都看不出來。所以這裡拿一把檔案鎖，
+        拿不到就**當場停**，不是警告。
+        """
+        import fcntl
+        p = pathlib.Path(f"/tmp/r535_port_{self.a.pi_port}.lock")
+        fh = open(p, "w", encoding="utf-8")
+        try:
+            fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            raise SystemExit(
+                f"--pi-port {self.a.pi_port} 已經被另一條流佔著（{p}）。\n"
+                "  每條並行流要一個自己的埠——共用會讓兩格的 wire 混在一起，"
+                "而那件事在資料上看不出來。停。")
+        fh.write(f"{os.getpid()} {self.a.stream} {now_iso()}\n")
+        fh.flush()
+        return fh
+
     # -- 主迴圈 -----------------------------------------------------------
     def drive(self, rows: list[dict]) -> int:
+        self._portlock = self.lock_port()
         th = threading.Thread(target=self._uptime_thread, daemon=True)
         th.start()
         self.ev("driver_start", n_rows=len(rows), out=str(self.out),
@@ -1218,6 +1268,71 @@ def preflight(args, manifest_path: pathlib.Path, manifest: dict,
 
 # ── CLI ───────────────────────────────────────────────────────────────────
 
+def reconcile(out: pathlib.Path, manifest: dict) -> int:
+    """收官對帳：**360 格每格都必須「有一列」或「明寫 void 原因」**。
+
+    少一格或多一格都判 `INVALID`（裁決 2026-09-19）。零模型呼叫。
+    這一支刻意不看分數——分數是 `score_r535.py` 的事，這裡只問「跑過了沒有、
+    沒跑的話說不說得出為什麼」。
+    """
+    rows, plan_sha, _ = read_plan(out)
+    chain = check_plan_receipt(out, plan_sha)
+    want = {r["cell"] for r in rows}
+    cells_dir = out / "cells"
+    have = {p.name for p in cells_dir.iterdir() if p.is_dir()} \
+        if cells_dir.is_dir() else set()
+    buckets: dict[str, list[str]] = {
+        "measured": [], "infra_void": [], "claimed_not_complete": [],
+        "never_started": [], "not_in_plan": sorted(have - want)}
+    detail: list[dict] = []
+    for r in rows:
+        cell = cells_dir / r["cell"]
+        if not cell.is_dir():
+            buckets["never_started"].append(r["cell"])
+            detail.append({**r, "state": "never_started"})
+            continue
+        cj = cell / "cell.json"
+        if not cj.exists():
+            buckets["claimed_not_complete"].append(r["cell"])
+            detail.append({**r, "state": "claimed_no_cell_json"})
+            continue
+        st = json.loads(cj.read_text(encoding="utf-8"))
+        if not st.get("run_complete"):
+            buckets["claimed_not_complete"].append(r["cell"])
+            detail.append({**r, "state": "not_complete",
+                           "cell_status": st.get("cell_status")})
+            continue
+        kind = ("measured" if st.get("cell_status") == "measured"
+                else "infra_void")
+        buckets[kind].append(r["cell"])
+        detail.append({**r, "state": kind, "accepted": st.get("accepted"),
+                       "stop_reason": st.get("stop_reason"),
+                       "infra_void": st.get("infra_void"),
+                       "requests_seen": st.get("requests_seen")})
+    ok = (len(rows) == len(plan_rows(manifest))
+          and not buckets["not_in_plan"]
+          and not buckets["never_started"]
+          and not buckets["claimed_not_complete"])
+    doc = {"run": "R535", "ts": now_iso(), "out": str(out),
+           "plan_sha256": plan_sha, "plan_chain": chain,
+           "n_plan": len(rows), "n_expected": len(plan_rows(manifest)),
+           "counts": {k: len(v) for k, v in buckets.items()},
+           "verdict": "OK" if ok else "INVALID",
+           "rule": ("360 格每格都必須「有一列」或「明寫 void 原因」，"
+                    "少一格或多一格都判 INVALID。"),
+           "buckets": buckets, "cells": detail}
+    (out / "reconcile.json").write_text(
+        json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps({k: doc[k] for k in
+                      ("n_plan", "n_expected", "counts", "verdict")},
+                     ensure_ascii=False, indent=2))
+    for k in ("never_started", "claimed_not_complete", "not_in_plan"):
+        if buckets[k]:
+            print(f"  {k}（{len(buckets[k])}）：{buckets[k][:12]}")
+    print(f"→ {out / 'reconcile.json'}")
+    return 0 if ok else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="run_r535.py",
@@ -1273,6 +1388,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--preflight", action="store_true", help="只跑發射前擋門")
     ap.add_argument("--write-plan", action="store_true",
                     help="產 plan.jsonl ＋ 簽第一筆收據（**不覆寫**既有的）")
+    ap.add_argument("--reconcile", action="store_true",
+                    help="收官對帳：360 格每格都要「有一列」或「明寫 void 原因」，"
+                         "少一格或多一格都判 INVALID（零模型呼叫）")
     ap.add_argument("--force-plan", action="store_true")
     ap.add_argument("--timing-limit-s", type=float, default=2.0)
     ap.add_argument("--skip-timing", action="store_true",
@@ -1311,6 +1429,8 @@ def main(argv: list[str] | None = None) -> int:
         return preflight(args, mpath, manifest, msha)
 
     out = pathlib.Path(args.out).resolve()
+    if args.reconcile:
+        return reconcile(out, manifest)
     if args.write_plan:
         info = write_plan(out, manifest, msha, force=args.force_plan)
         print(json.dumps(info, ensure_ascii=False, indent=2))
