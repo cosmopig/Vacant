@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import collections
 import inspect
+import pathlib
 
 import pytest
 
@@ -35,7 +36,38 @@ from ops.gain.gain_run import (
     load_tasks,
     parse_bank_filter,
 )
-from vacant.codebench import LCB_STRATUM_KEYS, lcb_strata
+from vacant.codebench import (
+    EVALPLUS_DEFAULT_PATH,
+    EVALPLUS_HUMANEVAL_DEFAULT_PATH,
+    LCB_STRATUM_KEYS,
+    lcb_strata,
+)
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+#: 需要**私有官方包**才載得動的 bank。`.vacant-private/` 是不轉散布的授權資料
+#: （`.gitignore` 擋住整個目錄），所以它在 CI 上與大部分 checkout 上都不會有。
+_PRIVATE_PACK_OF = {"evalplus": EVALPLUS_DEFAULT_PATH,
+                    "humanevalplus": EVALPLUS_HUMANEVAL_DEFAULT_PATH}
+
+
+def _skip_if_private_pack_absent(bank: str) -> None:
+    """官方包不在場就 skip 並講原因——**不假裝驗過，也不放寬判準**。
+
+    為什麼需要這一層：`load_tasks` 是**先把題庫載進來、再驗 filter**
+    （`gain_run.py:153` 建 loader，:186 才走 `if bank_filter`）。所以
+    `--bank-filter difficulty=hard --bank evalplus` 在官方包在場時拿到的是
+    預期的 `SystemExit`（「不成立」），不在場時拿到的是 loader 的
+    `FileNotFoundError`。**兩者差的是環境不是行為**：這條紅線在 VM 上仍然
+    逐字驗得到（CLAUDE.md「整合門在本機 skip——官方包在 VM」）。
+
+    ⚠ 判準沒有被放寬：skip 掉的是**這一格**，不是這條規則；`builtin` 那一格
+    不需要私有包，照樣在每一台機器上驗 `--bank-filter` 對它不成立。
+    """
+    rel = _PRIVATE_PACK_OF.get(bank)
+    if rel and not (ROOT / rel).exists():
+        pytest.skip(f"官方包不在場（{rel}）——本機略過需要真題庫的那一格；"
+                    "這條紅線仍由 VM 上的同一格驗")
 
 
 # ── 一、分層選的是對的集合 ────────────────────────────────────────
@@ -111,6 +143,7 @@ def test_family_field_already_carries_the_stratum_label():
     ("lcb3", "=hard", "是空的"),
 ])
 def test_bad_filters_stop_instead_of_quietly_selecting_something(bank, spec, needle):
+    _skip_if_private_pack_absent(bank)
     with pytest.raises(SystemExit) as e:
         load_tasks(bank, "s", 5, bank_filter=spec)
     assert needle in str(e.value)
