@@ -249,6 +249,13 @@ def summarise(rows: list[dict]) -> dict:
         "S1 與 S2 分開報，不合併（裁決）。分母是 n_scored 不是 n_cells——"
         "void 的格子沒量到，不可以當成 0 分。"
         "PC < 0.5 ⇒ 該層判 CEILING_TOO_LOW（題目對這顆模型太難）。")
+    out["_attempt1_note"] = (
+        "免費的單發基線只包含 **RS／RF／RP** 的 attempt 1："
+        "那三臂第 1 次的 argv 逐位元相同（V2 的 placeholder 換成空字串）"
+        "**而且 TASK.md 也相同** ⇒ 可以合起來當 n=3×題數 的單發觀測。"
+        "**PC 的 attempt 1 不可以併進去**：它的 argv 雖然一樣，"
+        "工作區的 TASK.md 換成了 TASK_explicit.md ——那是另一個條件，"
+        "併表就是把天花板當成基線。")
     return out
 
 
