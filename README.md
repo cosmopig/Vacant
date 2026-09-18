@@ -36,7 +36,7 @@ pip install vacant-network        # import 名仍然是 vacant
 > 裁判，會退化成『問一個模型』，而那正是量出來很差的東西。
 > （逐字出自 `DECISION_20260903_R440P_CONFORMANCE_GATE.md`§五-1）
 
-**給 AI agent 的整合契約在 [`AGENTS.md`](AGENTS.md)**（索引：[`llms.txt`](llms.txt)）。
+**給 AI agent 的整合契約在 [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md)**（索引：[`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt)）。
 本頁下半部 [§給 AI 讀](#給-ai-讀) 是同一份契約的散文版。
 
 ---
@@ -99,9 +99,9 @@ vacant --help                     # 安裝後可用的 CLI
 | 要驗什麼 | 自己跑 | 為什麼這樣就夠 |
 |---|---|---|
 | 收據鏈沒被動過 | `verify_run_receipts.py --selftest`（先過負控制）再 `--glob 'runs/g_r532_*'` | 先證明驗章器抓得到壞鏈，再拿它驗真鏈。R532：**86 條鏈 3,895 筆、0 失敗** |
-| 題目不是我們挑的 | [`docs/BANKS_HOWTO.md`](docs/BANKS_HOWTO.md) | 題庫 sha256 釘死；日期窗與已知壞題寫在 [`runs/INDEX.md`](runs/INDEX.md) |
+| 題目不是我們挑的 | [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | 題庫 sha256 釘死；日期窗與已知壞題寫在 [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) |
 | 結論不是分析器編的 | 直接數 `runs/g_*/rows.jsonl` | 一列＝一題一臂，`deliv = accepted ∧ meets_demand` |
-| 我們有沒有藏錯 | [`examples/verdicts.py`](examples/verdicts.py) ＋下面的〈誠實邊界〉 | 被推翻的宣稱不刪；**我們自己抓到的稽核缺口也在裡面**（邊界 3） |
+| 我們有沒有藏錯 | [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) ＋下面的〈誠實邊界〉 | 被推翻的宣稱不刪；**我們自己抓到的稽核缺口也在裡面**（邊界 3） |
 
 ---
 
@@ -133,8 +133,8 @@ flowchart LR
 ## 最新成果
 
 **所有數字都帶分母，且都在上面那句前提之下。** 單一數字入口是
-[`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md)；
-裁決的單一真相來源是 [`examples/verdicts.py`](examples/verdicts.py)。
+[`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md)；
+裁決的單一真相來源是 [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py)。
 
 ### 一句話的主體結論
 
@@ -185,7 +185,7 @@ LiveCodeBench 題組全部更差**（−9.2／−9.6／−3.7 pp），只有兩�
 needle——**跳過 ≠ 檢查過**。
 ⚠ 該量具 **沒有在「真的有洩漏」的真實 run 上驗過**，負控全是人工植入的。
 
-**怎麼自己重跑整批**：見 [`docs/BANKS_HOWTO.md`](docs/BANKS_HOWTO.md)。
+**怎麼自己重跑整批**：見 [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md)。
 
 ---
 
@@ -258,7 +258,7 @@ needle——**跳過 ≠ 檢查過**。
 19. **不是證明**：demo 只能說「看得到提升」；「證明提升」保留給預註冊 batch run。
 
 完整清單（B0–B20、H1–H9 與各 run 的收官邊界）見
-[`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md)§四。
+[`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md)§四。
 
 ### 可以寫強的地方
 
@@ -331,14 +331,14 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 ```
 
 ⚠ `runs/` 底下 **136 個 `_analysis_*` 目錄是衍生物不是證據**——它們的輸入就是
-`runs/g_*/rows.jsonl`。引用任何 run 之前先讀 [`runs/INDEX.md`](runs/INDEX.md)。
+`runs/g_*/rows.jsonl`。引用任何 run 之前先讀 [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md)。
 
 ---
 
 # 給 AI 讀
 
 以下是給 coding agent 的整合契約。完整版（含全部函式簽章與機器可讀事實區塊）在
-[`AGENTS.md`](AGENTS.md)；索引在 [`llms.txt`](llms.txt)。
+[`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md)；索引在 [`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt)。
 
 ## A. 哪一種形態才是強制的
 
@@ -517,7 +517,7 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 5. **倫理是第一線需求不是附錄**：Hollanek 2024 指出**捐贈者同意不夠，互動者也必須能同意**。
    同一套 `logbook`／`checkpoint` 機制也用來做展覽自己的同意／刪除證明。
 
-展件：[`examples/receipt_viewer_multiparty.html`](examples/receipt_viewer_multiparty.html)——
+展件：[`examples/receipt_viewer_multiparty.html`](https://github.com/cosmopig/Vacant/blob/main/examples/receipt_viewer_multiparty.html)——
 內嵌三條完整簽章鏈（5,579 筆），瀏覽器內從創世驗到鏈頭、逐格重算裁決／指名／出貨，
 零外部資源、`file://` 直開。
 
@@ -531,7 +531,7 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 - **複製**：宣稱規則事前寫死，達不到就逐次照實列。
   **「先跑三次」與「只跑三次就下結論」是兩件事。**
 - **對抗式複驗**：每條對外宣稱都送給一個獨立 agent，任務是推翻它。第一輪 12 條裡
-  **3 條被推翻、3 條被判說太滿**，全部留在 [`examples/verdicts.py`](examples/verdicts.py) 裡，
+  **3 條被推翻、3 條被判說太滿**，全部留在 [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) 裡，
   舊的不刪。
 - **事後修正也寫進紀錄**：R532 的四狀態表沒有守方向、它自己的「更強模型」前提不成立——
   兩件都是看到資料之後才發現的，兩件都逐字留在 DECISION 檔裡（AMEND1／AMEND2），
@@ -544,25 +544,25 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 
 | 檔案 | 內容 |
 |---|---|
-| [`AGENTS.md`](AGENTS.md) ／ [`llms.txt`](llms.txt) | **給 AI 的整合契約**與索引 |
-| [`CHANGELOG.md`](CHANGELOG.md) | 版本變更（0.6.0 → 0.7.0 是不同的 codebase） |
-| [`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md) | **現況總表**：數字的唯一入口 |
-| [`docs/BANKS_HOWTO.md`](docs/BANKS_HOWTO.md) | 怎麼自己重跑題庫 |
-| [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](docs/HMIX_ARCHITECTURE_2026-09-11.md) | 迴圈：六個零件、逐字 prompt、它做不到什麼 |
-| [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | 五次複製收官稽核 |
-| [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | 跨題庫收官稽核 |
-| [`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md`](DECISION_20260917_R532_STRONGER_MODEL_PREREG.md) | 27B 那一輪＋AMEND1／AMEND2 |
-| [`ops/gain/r532/results_r532.json`](ops/gain/r532/results_r532.json) | R532 每一個數字的可引用來源 |
-| [`SPEC_GAIN.md`](SPEC_GAIN.md) | 實驗規格：V/GT 分離、固定子集、臂的定義 |
-| [`runs/INDEX.md`](runs/INDEX.md) | run 索引：哪些是證據、哪些是衍生物 |
-| [`examples/verdicts.py`](examples/verdicts.py) | **裁決的單一真相來源** |
-| [`CLAUDE.md`](CLAUDE.md) | 工作約束：鐵律、口徑、後推項 |
+| [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md) ／ [`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt) | **給 AI 的整合契約**與索引 |
+| [`CHANGELOG.md`](https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md) | 版本變更（0.6.0 → 0.7.0 是不同的 codebase） |
+| [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) | **現況總表**：數字的唯一入口 |
+| [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | 怎麼自己重跑題庫 |
+| [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](https://github.com/cosmopig/Vacant/blob/main/docs/HMIX_ARCHITECTURE_2026-09-11.md) | 迴圈：六個零件、逐字 prompt、它做不到什麼 |
+| [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](https://github.com/cosmopig/Vacant/blob/main/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | 五次複製收官稽核 |
+| [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](https://github.com/cosmopig/Vacant/blob/main/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | 跨題庫收官稽核 |
+| [`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md`](https://github.com/cosmopig/Vacant/blob/main/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md) | 27B 那一輪＋AMEND1／AMEND2 |
+| [`ops/gain/r532/results_r532.json`](https://github.com/cosmopig/Vacant/blob/main/ops/gain/r532/results_r532.json) | R532 每一個數字的可引用來源 |
+| [`SPEC_GAIN.md`](https://github.com/cosmopig/Vacant/blob/main/SPEC_GAIN.md) | 實驗規格：V/GT 分離、固定子集、臂的定義 |
+| [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) | run 索引：哪些是證據、哪些是衍生物 |
+| [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) | **裁決的單一真相來源** |
+| [`CLAUDE.md`](https://github.com/cosmopig/Vacant/blob/main/CLAUDE.md) | 工作約束：鐵律、口徑、後推項 |
 
 ---
 
 ## 引用
 
-見 [`CITATION.cff`](CITATION.cff)。
+見 [`CITATION.cff`](https://github.com/cosmopig/Vacant/blob/main/CITATION.cff)。
 
 ```bibtex
 @software{vacant_2026,
@@ -575,4 +575,4 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 
 ## 授權
 
-[MIT](LICENSE)。
+[MIT](https://github.com/cosmopig/Vacant/blob/main/LICENSE)。

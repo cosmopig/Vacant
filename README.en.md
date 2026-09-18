@@ -41,8 +41,8 @@ pip install vacant-network        # the import name is still `vacant`
 > degrades into "ask a model" — which is exactly the thing that measured badly.
 > (Verbatim from `DECISION_20260903_R440P_CONFORMANCE_GATE.md` §五-1.)
 
-**The integration contract for AI agents is [`AGENTS.md`](AGENTS.md)**
-(index: [`llms.txt`](llms.txt)). The lower half of this page,
+**The integration contract for AI agents is [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md)**
+(index: [`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt)). The lower half of this page,
 [§For AI](#for-ai), is the prose version of the same contract.
 
 ---
@@ -107,9 +107,9 @@ A system that claims accountability and cannot be checked from outside has no co
 | What to check | Run it yourself | Why that is enough |
 |---|---|---|
 | The receipt chains were not touched | `verify_run_receipts.py --selftest` (negative controls first), then `--glob 'runs/g_r532_*'` | First prove the verifier catches a broken chain, then point it at the real ones. R532: **86 chains, 3,895 entries, 0 failures** |
-| The tasks were not cherry-picked | [`docs/BANKS_HOWTO.md`](docs/BANKS_HOWTO.md) | Bank sha256 is pinned; date windows and known-bad tasks are in [`runs/INDEX.md`](runs/INDEX.md) |
+| The tasks were not cherry-picked | [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | Bank sha256 is pinned; date windows and known-bad tasks are in [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) |
 | The conclusions are not the analyzer's invention | Count `runs/g_*/rows.jsonl` yourself | One row = one task on one arm; `deliv = accepted AND meets_demand` |
-| Whether we are hiding mistakes | [`examples/verdicts.py`](examples/verdicts.py) and the honest boundaries below | Refuted claims are kept; **so are the coverage gaps we found in our own audit** (boundary 3) |
+| Whether we are hiding mistakes | [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) and the honest boundaries below | Refuted claims are kept; **so are the coverage gaps we found in our own audit** (boundary 3) |
 
 ---
 
@@ -145,8 +145,8 @@ flowchart LR
 ## Current results
 
 **Every number carries its denominator, and all of them sit under the premise above.**
-Single entry point for numbers: [`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md).
-Single source of truth for verdicts: [`examples/verdicts.py`](examples/verdicts.py).
+Single entry point for numbers: [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md).
+Single source of truth for verdicts: [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py).
 
 ### The headline, in one sentence
 
@@ -208,7 +208,7 @@ difference as a difference; do not write it as an *improvement*.
 ⚠ That gauge has **never been validated on a run that really leaked**; every negative
 control is hand-planted.
 
-**To re-run the whole thing**, see [`docs/BANKS_HOWTO.md`](docs/BANKS_HOWTO.md).
+**To re-run the whole thing**, see [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md).
 
 ---
 
@@ -309,7 +309,7 @@ Part of the specification, not a disclaimer. Quote them with the numbers.
 19. **Not a proof.** A demo may say "you can see an improvement"; "proves an improvement" is
     reserved for a pre-registered batch run.
 
-Full list in [`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md) §四.
+Full list in [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) §四.
 
 ### Where it is fair to be strong
 
@@ -392,7 +392,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 ```
 
 ⚠ The **136 `_analysis_*` directories under `runs/` are derived artefacts, not evidence** —
-their input is `runs/g_*/rows.jsonl`. Read [`runs/INDEX.md`](runs/INDEX.md) before citing
+their input is `runs/g_*/rows.jsonl`. Read [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) before citing
 any run.
 
 ---
@@ -400,8 +400,8 @@ any run.
 # For AI
 
 The integration contract for coding agents. The **full version, with every signature and a
-machine-readable facts block, is [`AGENTS.md`](AGENTS.md)**; the index is
-[`llms.txt`](llms.txt). What follows is the part you should not miss.
+machine-readable facts block, is [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md)**; the index is
+[`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt). What follows is the part you should not miss.
 
 ## A. Which shape is actually binding
 
@@ -506,7 +506,7 @@ All 19 above apply. The four that will bite you:
 
 ## F. Machine-readable facts
 
-The full block is [`AGENTS.md` §9](AGENTS.md#9-machine-readable-facts). Summary:
+The full block is [`AGENTS.md` §9](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md#9-machine-readable-facts). Summary:
 
 ```json
 {
@@ -573,7 +573,7 @@ The full block is [`AGENTS.md` §9](AGENTS.md#9-machine-readable-facts). Summary
   different things.**
 - **Adversarial re-checking.** Every outward claim is handed to an independent agent whose
   job is to refute it. In the first round, 3 of 12 were refuted and 3 judged overstated; all
-  of them stay in [`examples/verdicts.py`](examples/verdicts.py).
+  of them stay in [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py).
 - **After-the-fact corrections are recorded too.** R532's state table had no direction guard
   and its own "stronger model" premise did not hold — both were found after seeing the data,
   and both are written verbatim into the DECISION file (AMEND1 / AMEND2). The frozen
@@ -587,23 +587,23 @@ The full block is [`AGENTS.md` §9](AGENTS.md#9-machine-readable-facts). Summary
 
 | File | Contents |
 |---|---|
-| [`AGENTS.md`](AGENTS.md) / [`llms.txt`](llms.txt) | **the integration contract for AI** and its index |
-| [`CHANGELOG.md`](CHANGELOG.md) | 0.6.0 → 0.7.0 is a different codebase |
-| [`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md) | the single entry point for numbers |
-| [`docs/BANKS_HOWTO.md`](docs/BANKS_HOWTO.md) | how to re-run the task banks |
-| [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](docs/HMIX_ARCHITECTURE_2026-09-11.md) | the loop: six parts, verbatim prompts, what it cannot do |
-| [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | five-replication closing audit |
-| [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | cross-bank closing audit |
-| [`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md`](DECISION_20260917_R532_STRONGER_MODEL_PREREG.md) | the 27B round + AMEND1 / AMEND2 |
-| [`ops/gain/r532/results_r532.json`](ops/gain/r532/results_r532.json) | citable source for every R532 figure |
-| [`runs/INDEX.md`](runs/INDEX.md) | which runs are evidence and which are derived |
-| [`examples/verdicts.py`](examples/verdicts.py) | **single source of truth for verdicts** |
+| [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md) / [`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt) | **the integration contract for AI** and its index |
+| [`CHANGELOG.md`](https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md) | 0.6.0 → 0.7.0 is a different codebase |
+| [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) | the single entry point for numbers |
+| [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | how to re-run the task banks |
+| [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](https://github.com/cosmopig/Vacant/blob/main/docs/HMIX_ARCHITECTURE_2026-09-11.md) | the loop: six parts, verbatim prompts, what it cannot do |
+| [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](https://github.com/cosmopig/Vacant/blob/main/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | five-replication closing audit |
+| [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](https://github.com/cosmopig/Vacant/blob/main/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | cross-bank closing audit |
+| [`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md`](https://github.com/cosmopig/Vacant/blob/main/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md) | the 27B round + AMEND1 / AMEND2 |
+| [`ops/gain/r532/results_r532.json`](https://github.com/cosmopig/Vacant/blob/main/ops/gain/r532/results_r532.json) | citable source for every R532 figure |
+| [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) | which runs are evidence and which are derived |
+| [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) | **single source of truth for verdicts** |
 
 ---
 
 ## Citation
 
-See [`CITATION.cff`](CITATION.cff).
+See [`CITATION.cff`](https://github.com/cosmopig/Vacant/blob/main/CITATION.cff).
 
 ```bibtex
 @software{vacant_2026,
@@ -616,4 +616,4 @@ See [`CITATION.cff`](CITATION.cff).
 
 ## License
 
-[MIT](LICENSE).
+[MIT](https://github.com/cosmopig/Vacant/blob/main/LICENSE).

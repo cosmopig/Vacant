@@ -39,7 +39,7 @@ pip install vacant-network        # import 名は従来どおり vacant
 > まさに計測結果の悪かったものである。
 > （`DECISION_20260903_R440P_CONFORMANCE_GATE.md` §五-1 より逐語）
 
-**AI エージェント向けの統合契約は [`AGENTS.md`](AGENTS.md)**（索引：[`llms.txt`](llms.txt)）。
+**AI エージェント向けの統合契約は [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md)**（索引：[`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt)）。
 本ページ後半の [§AI 向け](#ai-向け) は同じ契約の散文版。
 
 ---
@@ -104,9 +104,9 @@ vacant --help                     # インストール後に使える CLI
 | 何を検証するか | 自分で走らせる | それで足りる理由 |
 |---|---|---|
 | 領収書チェーンが触られていないこと | `verify_run_receipts.py --selftest`（先に陰性対照）→ `--glob 'runs/g_r532_*'` | まず検証器が壊れた鎖を捕らえることを示し、そのうえで本物に向ける。R532：**86 本 3,895 件、失敗 0** |
-| 問題を我々が選んでいないこと | [`docs/BANKS_HOWTO.md`](docs/BANKS_HOWTO.md) | 問題集の sha256 は固定。日付窓と既知の不良問題は [`runs/INDEX.md`](runs/INDEX.md) にある |
+| 問題を我々が選んでいないこと | [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | 問題集の sha256 は固定。日付窓と既知の不良問題は [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) にある |
 | 結論が解析器の作り話でないこと | `runs/g_*/rows.jsonl` を自分で数える | 1 行＝1 問 1 腕、`deliv = accepted ∧ meets_demand` |
-| 我々が誤りを隠していないこと | [`examples/verdicts.py`](examples/verdicts.py) と下の〈誠実な境界〉 | 反証された主張は消さない。**自分の監査で見つけた被覆漏れも載せている**（境界 3） |
+| 我々が誤りを隠していないこと | [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) と下の〈誠実な境界〉 | 反証された主張は消さない。**自分の監査で見つけた被覆漏れも載せている**（境界 3） |
 
 ---
 
@@ -141,8 +141,8 @@ flowchart LR
 ## 最新の結果
 
 **すべての数字は分母を伴い、かつ上記の前提の下にある。** 数字の単一入口は
-[`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md)、
-裁定の単一の真実の源は [`examples/verdicts.py`](examples/verdicts.py)。
+[`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md)、
+裁定の単一の真実の源は [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py)。
 
 ### 一文で言う主結論
 
@@ -197,7 +197,7 @@ flowchart LR
 （境界 3）、些末な needle をスキップする——**スキップは検査ではない**。
 ⚠ このゲージは**本当に漏洩した実 run で検証されたことがない**。陰性対照はすべて人手で植えたもの。
 
-**一括で再実行する方法**は [`docs/BANKS_HOWTO.md`](docs/BANKS_HOWTO.md) を参照。
+**一括で再実行する方法**は [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) を参照。
 
 ---
 
@@ -288,7 +288,7 @@ flowchart LR
 19. **証明ではない**：デモで言えるのは「向上が見える」まで。「向上を証明する」は事前登録した
     バッチ run のために取ってある。
 
-完全な一覧は [`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md) §四。
+完全な一覧は [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) §四。
 
 ### 強く書いてよいところ
 
@@ -366,14 +366,14 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 
 ⚠ `runs/` 下の **136 個の `_analysis_*` ディレクトリは派生物であって証拠ではない**——入力が
 `runs/g_*/rows.jsonl` そのものだからである。run を引用する前に
-[`runs/INDEX.md`](runs/INDEX.md) を読むこと。
+[`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) を読むこと。
 
 ---
 
 # AI 向け
 
 コーディングエージェント向けの統合契約。**全関数シグネチャと機械可読な事実ブロックを含む
-完全版は [`AGENTS.md`](AGENTS.md)**（英語）、索引は [`llms.txt`](llms.txt)。
+完全版は [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md)**（英語）、索引は [`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt)。
 
 ## A. どの形態が本当に強制なのか
 
@@ -468,7 +468,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 
 ## F. 機械可読な事実
 
-完全版は [`AGENTS.md` §9](AGENTS.md#9-machine-readable-facts)。要約：
+完全版は [`AGENTS.md` §9](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md#9-machine-readable-facts)。要約：
 
 ```json
 {
@@ -533,7 +533,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
   **「まず 3 回走らせる」と「3 回だけで結論する」は別物である。**
 - **敵対的な再検証**：対外的な主張はすべて、それを反証する任務の独立エージェントへ渡される。
   第 1 ラウンドでは 12 件中 **3 件が反証、3 件が言い過ぎと判定**され、すべて
-  [`examples/verdicts.py`](examples/verdicts.py) に残っている。
+  [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) に残っている。
 - **事後の修正も記録に残す**：R532 の 4 状態表に方向のガードが無かったこと、その回自身の
   「より強いモデル」という前提が成立していなかったこと——どちらもデータを見た後に判明し、
   どちらも DECISION ファイルへ逐語で残されている（AMEND1／AMEND2）。結果が意に沿わないからと
@@ -547,23 +547,23 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 
 | ファイル | 内容 |
 |---|---|
-| [`AGENTS.md`](AGENTS.md) ／ [`llms.txt`](llms.txt) | **AI 向け統合契約**と索引 |
-| [`CHANGELOG.md`](CHANGELOG.md) | 0.6.0 → 0.7.0 は別のコードベース |
-| [`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md) | 数字の単一入口 |
-| [`docs/BANKS_HOWTO.md`](docs/BANKS_HOWTO.md) | 問題集を自分で再実行する方法 |
-| [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](docs/HMIX_ARCHITECTURE_2026-09-11.md) | ループ：6 つの部品、逐語プロンプト、できないこと |
-| [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | 5 回反復の収束監査 |
-| [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | 問題集横断の収束監査 |
-| [`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md`](DECISION_20260917_R532_STRONGER_MODEL_PREREG.md) | 27B の回＋AMEND1／AMEND2 |
-| [`ops/gain/r532/results_r532.json`](ops/gain/r532/results_r532.json) | R532 の各数字の引用可能な出典 |
-| [`runs/INDEX.md`](runs/INDEX.md) | どの run が証拠でどれが派生物か |
-| [`examples/verdicts.py`](examples/verdicts.py) | **裁定の単一の真実の源** |
+| [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md) ／ [`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt) | **AI 向け統合契約**と索引 |
+| [`CHANGELOG.md`](https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md) | 0.6.0 → 0.7.0 は別のコードベース |
+| [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) | 数字の単一入口 |
+| [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | 問題集を自分で再実行する方法 |
+| [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](https://github.com/cosmopig/Vacant/blob/main/docs/HMIX_ARCHITECTURE_2026-09-11.md) | ループ：6 つの部品、逐語プロンプト、できないこと |
+| [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](https://github.com/cosmopig/Vacant/blob/main/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | 5 回反復の収束監査 |
+| [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](https://github.com/cosmopig/Vacant/blob/main/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | 問題集横断の収束監査 |
+| [`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md`](https://github.com/cosmopig/Vacant/blob/main/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md) | 27B の回＋AMEND1／AMEND2 |
+| [`ops/gain/r532/results_r532.json`](https://github.com/cosmopig/Vacant/blob/main/ops/gain/r532/results_r532.json) | R532 の各数字の引用可能な出典 |
+| [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) | どの run が証拠でどれが派生物か |
+| [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) | **裁定の単一の真実の源** |
 
 ---
 
 ## 引用
 
-[`CITATION.cff`](CITATION.cff) を参照。
+[`CITATION.cff`](https://github.com/cosmopig/Vacant/blob/main/CITATION.cff) を参照。
 
 ```bibtex
 @software{vacant_2026,
@@ -576,4 +576,4 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 
 ## ライセンス
 
-[MIT](LICENSE)。
+[MIT](https://github.com/cosmopig/Vacant/blob/main/LICENSE)。
