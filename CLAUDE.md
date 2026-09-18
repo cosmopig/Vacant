@@ -66,6 +66,13 @@
 - `vacant/suitegauge.py` — 驗收套件的量具（參考解要過、每個已知壞樁都要被擋）；
   `gain_run.probe_instrument` 與 `peerexec.commit_suite` 共用這一份判準，**單邊保證**
   （擋得住已知壞解 ≠ 涵蓋真需求）寫在 docstring，不准讀成「套件固定點已解」
+- `vacant/suitemutate.py` — 純 AST 變異器（零新依賴），把 suitegauge 的刻度從
+  「擋得住 1 個壞樁」細到「擋得住 N 種我們造得出來的錯」。致死率**另外算、
+  不綁 `GaugeOutcome.ok`**（綁了＝改掉閘門語意，r452c 那批歸檔資料會失去可比性）；
+  且**永遠是下界**（運算子表有限＋等價變異體不可判定）。實跑：
+  `ops/gain/mutation_score_banks.py` ＋ `ops/gain/data/suite_mutation_*.json`
+  ——LCB v2 有參考解的 12 題中位數 0.78／最低 0.60，MBPP+／HumanEval+ 抽樣 20 題
+  中位數 1.00／最低 0.61（但其中 6 題的變異體只有 ≤2 個，解析度本來就低）
 - `vacant/suitespec.py` — **驗收套件是資料不是程式**（R452）：SuiteSpec（entry_point＋
   字面值 (args, expected)＋比對設定）＋確定性渲染器；執行器只跑自己渲染的碼，
   有狀態／雜湊黑名單／擬態三種攻擊**不可表達**，殘餘＝覆蓋不足＋比對旗標

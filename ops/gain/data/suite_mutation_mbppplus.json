@@ -1,0 +1,380 @@
+{
+  "summary": {
+    "bank": "evalplus",
+    "seed": "r535_mutation",
+    "limit": 20,
+    "n_tasks": 10,
+    "n_scored": 10,
+    "n_ref_fail": 0,
+    "n_norm_fail": 0,
+    "median": 1.0,
+    "mean": 0.9316993464052288,
+    "min": 0.6111111111111112,
+    "max": 1.0,
+    "perfect": 7,
+    "total_seconds": 16.35,
+    "total_runs": 89,
+    "seconds_per_run": 0.184
+  },
+  "rows": [
+    {
+      "v": 1,
+      "suite_sha256": "5646620176fb6e5002f777b5f33dec5a6de7f2a12353b8643abafac617cba182",
+      "ref_sha256": "dd70345c3640f796a2043bb883e3ddf60ebf1989bcb8b092015d8ac0ace912da",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 2,
+      "total": 2,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "return_const": [
+          1,
+          1
+        ],
+        "str_truncate": [
+          1,
+          1
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/725",
+      "entry_point": "extract_quotation",
+      "seconds": 0.88
+    },
+    {
+      "v": 1,
+      "suite_sha256": "87ea490cd4e50af1fac89f715c03bf60dfd0dff1f98e1d427548d0ecd2cc5349",
+      "ref_sha256": "a2fed5fdf1d425d322addb08a4d426f2a399458297f0efc698a839ea2d287914",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 2,
+      "total": 2,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "bin_op_swap": [
+          1,
+          1
+        ],
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/273",
+      "entry_point": "substract_elements",
+      "seconds": 0.87
+    },
+    {
+      "v": 1,
+      "suite_sha256": "4c32719da66a73221f1539a7cac87be1138988037e6d5286937529f2c2c5e99e",
+      "ref_sha256": "6d0314a9e2348ad74b02ee8d2eba39bfd2c79bbba7bc7ab98cbfffc442ec8775",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 1,
+      "total": 1,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/251",
+      "entry_point": "insert_element",
+      "seconds": 0.6
+    },
+    {
+      "v": 1,
+      "suite_sha256": "f4ee96fda47e3393d02009467a7af014bdaba0d25bfd002333f16ba672a242e0",
+      "ref_sha256": "e5e08a73de10a4df7fd01cf26b2fa6a2ca1a6fe29e392dad0972cf6d4f322179",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 13,
+      "total": 17,
+      "score": 0.7647058823529411,
+      "survivors": [
+        {
+          "index": 4,
+          "operator": "num_plus_1",
+          "lineno": 8,
+          "before": "dp[0][j] = dp[0][j - 1] + cost[0][j]",
+          "after": "dp[1][j] = dp[0][j - 1] + cost[0][j]"
+        },
+        {
+          "index": 7,
+          "operator": "num_minus_1",
+          "lineno": 8,
+          "before": "dp[0][j] = dp[0][j - 1] + cost[0][j]",
+          "after": "dp[0][j] = dp[-1][j - 1] + cost[0][j]"
+        },
+        {
+          "index": 9,
+          "operator": "num_minus_1",
+          "lineno": 5,
+          "before": "for i in range(1, N):",
+          "after": "for i in range(0, N):"
+        },
+        {
+          "index": 11,
+          "operator": "num_plus_1",
+          "lineno": 8,
+          "before": "dp[0][j] = dp[0][j - 1] + cost[0][j]",
+          "after": "dp[0][j] = dp[0][j - 1] + cost[1][j]"
+        }
+      ],
+      "by_operator": {
+        "bin_op_swap": [
+          3,
+          3
+        ],
+        "num_minus_1": [
+          4,
+          6
+        ],
+        "num_plus_1": [
+          5,
+          7
+        ],
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/721",
+      "entry_point": "maxAverageOfPath",
+      "seconds": 3.73
+    },
+    {
+      "v": 1,
+      "suite_sha256": "4fac6676e2d8f1bcb3a5df29910dd43990ab5c44cc2778304346b20c1e5f448a",
+      "ref_sha256": "c74ccdf73645d984e22cc60707533ce56e2672c6fd7ae1ed6e045594b293db77",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 2,
+      "total": 2,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "bin_op_swap": [
+          1,
+          1
+        ],
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/623",
+      "entry_point": "nth_nums",
+      "seconds": 0.72
+    },
+    {
+      "v": 1,
+      "suite_sha256": "2b731ec8207f55b0655f3856da66a6d8f8029018568733d20d3e296ea6744a87",
+      "ref_sha256": "3ca8af129c3d88fb8ab51a2b27dbd06e46439a683f56b2f272555a738957050d",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 1,
+      "total": 1,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/90",
+      "entry_point": "len_log",
+      "seconds": 0.51
+    },
+    {
+      "v": 1,
+      "suite_sha256": "889974e2e2861c2f0d6fb21af1b0d4be165f728553617ccb3a597037c6844864",
+      "ref_sha256": "6802c27be33acdd6fb42fd43a8b2e157b4a113efdc7d4dff8a1632858f18cce7",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 8,
+      "total": 8,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "bin_op_swap": [
+          1,
+          1
+        ],
+        "num_minus_1": [
+          3,
+          3
+        ],
+        "num_plus_1": [
+          3,
+          3
+        ],
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/740",
+      "entry_point": "tuple_to_dict",
+      "seconds": 1.77
+    },
+    {
+      "v": 1,
+      "suite_sha256": "0a756fb3ef6317b7644d57348697c3c1a3e4a22619e03c6669d945126b893827",
+      "ref_sha256": "655e3be3c94787d5e9a7b1c804a5bc52d753964c9ff79351ffe7964f78ff20a4",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 1,
+      "total": 1,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/723",
+      "entry_point": "count_same_pair",
+      "seconds": 0.56
+    },
+    {
+      "v": 1,
+      "suite_sha256": "e0805db0c5f36cc081d04951d846d6911ee9524cba4fca31d5fe752be35fc6d8",
+      "ref_sha256": "a08bcbc1cca8835b3b10b53491c7c66b066fe6e542d2f1544278afccd2cecdca",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 16,
+      "total": 17,
+      "score": 0.9411764705882353,
+      "survivors": [
+        {
+          "index": 4,
+          "operator": "num_plus_1",
+          "lineno": 5,
+          "before": "return int(round(windchill, 0))",
+          "after": "return int(round(windchill, 1))"
+        }
+      ],
+      "by_operator": {
+        "bin_op_swap": [
+          3,
+          3
+        ],
+        "num_minus_1": [
+          6,
+          6
+        ],
+        "num_plus_1": [
+          6,
+          7
+        ],
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/638",
+      "entry_point": "wind_chill",
+      "seconds": 3.37
+    },
+    {
+      "v": 1,
+      "suite_sha256": "c2a9e927c793027e8f5949d624d2e22a775832f8b13f744fcda17c9eb9c8fbf7",
+      "ref_sha256": "2990433473b05f61e691ee4121e67b0a14b9190323d45cf1e9b561282a2d82ff",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 11,
+      "total": 18,
+      "score": 0.6111111111111112,
+      "survivors": [
+        {
+          "index": 0,
+          "operator": "num_plus_1",
+          "lineno": 3,
+          "before": "return 1",
+          "after": "return 2"
+        },
+        {
+          "index": 1,
+          "operator": "num_minus_1",
+          "lineno": 6,
+          "before": "c = 1",
+          "after": "c = 0"
+        },
+        {
+          "index": 3,
+          "operator": "bool_op_swap",
+          "lineno": 2,
+          "before": "if n == 0 or n == 1:",
+          "after": "if n == 0 and n == 1:"
+        },
+        {
+          "index": 9,
+          "operator": "return_const",
+          "lineno": 3,
+          "before": "return 1",
+          "after": "return None"
+        },
+        {
+          "index": 11,
+          "operator": "num_minus_1",
+          "lineno": 2,
+          "before": "if n == 0 or n == 1:",
+          "after": "if n == -1 or n == 1:"
+        },
+        {
+          "index": 16,
+          "operator": "num_minus_1",
+          "lineno": 3,
+          "before": "return 1",
+          "after": "return 0"
+        },
+        {
+          "index": 17,
+          "operator": "num_plus_1",
+          "lineno": 6,
+          "before": "c = 1",
+          "after": "c = 2"
+        }
+      ],
+      "by_operator": {
+        "bin_op_swap": [
+          2,
+          2
+        ],
+        "bool_op_swap": [
+          0,
+          1
+        ],
+        "cmp_flip": [
+          1,
+          1
+        ],
+        "not_insert": [
+          1,
+          1
+        ],
+        "num_minus_1": [
+          2,
+          5
+        ],
+        "num_plus_1": [
+          4,
+          6
+        ],
+        "return_const": [
+          1,
+          2
+        ]
+      },
+      "task_id": "mbppplus_Mbpp/260",
+      "entry_point": "newman_prime",
+      "seconds": 3.34
+    }
+  ]
+}
