@@ -202,7 +202,8 @@ def test_launcher_is_executable() -> None:
 # ── R440G 閘門 ─────────────────────────────────────────────────────────
 def test_decision_authorizes_the_run_name(sh: str, dec: str) -> None:
     """D9／A1：授權的是**六個**塊名；不帶塊名與兩塊時代的舊名字都不在授權內。"""
-    assert _var(sh, "DEC") == DEC.name
+    # 發射器帶的是**路徑**（2026-09-18 起 `decisions/...`），不是 basename。
+    assert _var(sh, "DEC") == DEC.relative_to(ROOT).as_posix()
     for tag, run in zip(BLOCKS, RUNS):
         assert _var(sh, f"OUT_{tag.upper()}") == run
         assert run in dec, f"DECISION 沒有授權塊名 {run}"
