@@ -1,4 +1,4 @@
-"""vacant CLI — 產品強制入口、信任生態維運、demo 與自我檢測。
+"""vacant CLI — 產品強制入口、究責生態維運、demo 與自我檢測。
 
     vacant run "<task>" --test "assert ..." [--agent hermes]
     vacant init <name> [--niche reverse --niche caesar3] [--root DIR]
@@ -7,9 +7,9 @@
     vacant demo  [--root DIR]                                 # 跑 §11 對照實驗
     vacant selftest                                           # 端到端冒煙測試（暫存目錄）
 
-預設 root = ~/.vacant（信任庫 + HERMES_HOME 都在此；睡著的 vacant 就是這包檔）。
+預設 root = ~/.vacant（`trust/` 金鑰與究責紀錄 + HERMES_HOME 都在此；睡著的 vacant 就是這包檔）。
 
-生態子命令（12 §5；MCP 信任閘道的整個居民生態變成可跑 CLI，預設 root=~/.vacant-mcp）：
+生態子命令（12 §5；MCP 究責閘道的整個居民生態變成可跑 CLI，預設 root=~/.vacant-mcp）：
     vacant up [--port 7777] [--no-dashboard]   # 建 6 居民生態 ＋ 前景 dashboard
     vacant toggle on|off                       # 翻 state.json 的 trust 開關
     vacant status                              # trust 開關 ＋ roster 表格
@@ -45,7 +45,7 @@ def _load_host_with_existing(root: Path) -> Host:
     return h
 
 
-# --- 生態子命令（12 §5：把信任閘道的整個生態變成可跑的 CLI）------------------
+# --- 生態子命令（12 §5：把究責閘道的整個生態變成可跑的 CLI）------------------
 # 生態預設 root（與單體 vacant 的 ~/.vacant 分開；MCP 閘道的居民住這）。
 def _eco_default_root() -> Path:
     return Path.home() / ".vacant-mcp"
@@ -220,7 +220,7 @@ class EchoLikeBrain:
     """離線用的內建確定性假腦（未設模型端點時的 fallback）。
 
     誠實邊界：這**不是**推理模型，只是把輸入反轉包成 `solve`，讓 delegate 全迴圈
-    離線可跑、可驗、可上鏈——用來看信任機制（路由/互審/稽核/信譽），不是看腦力。"""
+    離線可跑、可驗、可上鏈——用來看究責機制（路由/互審/稽核/信譽），不是看腦力。"""
 
     name = "echo-like(offline)"
 
@@ -239,7 +239,7 @@ def _build_brain():
 
         return LMStudioBrain(base, model)
     print("offline brain：未設 VACANT_MCP_MODEL/VACANT_MCP_BASE，改用內建確定性假腦"
-          "（只驗信任機制，非腦力）", file=sys.stderr)
+          "（只驗究責機制，非腦力）", file=sys.stderr)
     return EchoLikeBrain()
 
 
@@ -462,7 +462,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     print(f"  vacant_id : {body.identity.vacant_id}")
     print(f"  niches    : {body.card.niches or '（無）'}")
     print(f"  身體位置  : {body.dir}")
-    print(f"    trust/  信任庫（keypair / logbook / reputation）")
+    print(f"    trust/  金鑰與究責紀錄（keypair / logbook / reputation）")
     print(f"    home/   HERMES_HOME（skills / memory，agent 的能力庫）")
     return 0
 
@@ -587,7 +587,7 @@ def build_parser() -> argparse.ArgumentParser:
     prun.add_argument("task", nargs="?", help="任務文字；長任務可改用 --task-file")
     prun.add_argument("--task-file", help="UTF-8 任務檔")
     prun.add_argument("--root", dest="eco_root", default=str(_eco_default_root()),
-                      help="產品信任生態目錄（預設 ~/.vacant-mcp）")
+                      help="產品究責生態目錄（預設 ~/.vacant-mcp）")
     prun.add_argument("--base", default=None,
                       help="模型端點；預設 VACANT_MCP_BASE 或 http://localhost:1234")
     prun.add_argument("--model", default=None,
@@ -746,7 +746,43 @@ def cmd_record_check(args: argparse.Namespace) -> int:
     return 1
 
 
+def _bench_void_report(args: argparse.Namespace, rep: dict, brain_name: str) -> None:
+    """一次都沒量到時的診斷（寫 stderr）。訊息品質對齊 `vacant record check`。
+
+    為什麼要這麼囉唆：使用者第一次跑 `vacant bench` 用的是預設 `--base`
+    （`http://localhost:1234`），端點沒開是**最可能**的第一次體驗。這一段必須
+    當場說出「哪個端點、失敗幾次、錯誤原文是什麼」，否則「沒量到」會被讀成
+    「模型很爛」。
+    """
+    n = rep["n"]
+    sys.stdout.flush()   # 讓逐題表與診斷在終端機上仍是這個順序（stdout/stderr 兩條管）
+    print("✗ FAIL：一次都沒量到（infra_void，09 §3.5），不輸出任何比較數字",
+          file=sys.stderr)
+    print(f"  · 端點        : {args.base}   模型 {args.model!r}   brain={brain_name}",
+          file=sys.stderr)
+    print(f"  · 題數        : {n}", file=sys.stderr)
+    print(f"  · plain 臂    : 量到 {rep['plain_measured']}/{n}，沒量到 {rep['plain_void']}/{n}",
+          file=sys.stderr)
+    print(f"  · vacant 臂   : 量到 {rep['vacant_measured']}/{n}，沒量到 {rep['vacant_void']}/{n}",
+          file=sys.stderr)
+    print(f"  · 兩臂都量到  : {rep['paired_measured']}/{n}（成對比較的分母）",
+          file=sys.stderr)
+    print(f"  · 第一個錯誤  : {rep['first_error'] or '（無——題數為 0？）'}",
+          file=sys.stderr)
+    print("  提示：確認端點起著（LM Studio 預設 http://localhost:1234）、模型 id 正確；"
+          "換端點用 --base，換模型用 --model。", file=sys.stderr)
+    print("  「沒量到」與「量到 0%」是兩件事：前者是基建故障，後者是資料。"
+          "本次全部是前者，所以這裡沒有正確率可以印。", file=sys.stderr)
+
+
 def cmd_bench(args: argparse.Namespace) -> int:
+    """量 plain vs vacant。**一次都沒量到 ⇒ 不印比較數字、exit 非 0**（09 §3.5）。
+
+    這支在架構裡承重的是「對外那一個可以被截圖的數字」。所以它要守的紅線跟
+    `vacant record check` 同一條：`infra_void`（這一格沒有量到）不准被折進
+    「量到 0」。把端點關著的一次跑渲染成「兩臂各 0%、差 +0%」並 exit 0，
+    是用一個沒發生的量測去支撐一個比較——那比不印還糟。
+    """
     from .agent import Vacant, checkable_cases
     from .brains import HermesBrain, LMStudioBrain, OpenAIBrain
     from .codebench import code_cases, code_system_prompt
@@ -764,12 +800,29 @@ def cmd_bench(args: argparse.Namespace) -> int:
     print(f"brain={brain.name}  suite={args.suite}  n={args.n}  k={args.k}  （量 plain vs vacant verify-fix）", flush=True)
     v = Vacant(brain, k=args.k)
     rep = v.bench(cases, k=args.k)
-    for prompt, pv, vv, calls in rep["rows"]:
-        print(f"  {('OK' if vv else 'x'):2} (plain {'OK' if pv else 'x '}) {calls}calls  {prompt}")
+    for prompt, pv, vv, calls, p_void, v_void in rep["rows"]:
+        # 三種結局要在同一張表上分得開：OK＝答對、x＝答錯、—＝這一格沒量到。
+        vm = "—" if v_void else ("OK" if vv else "x")
+        pm = "— " if p_void else ("OK" if pv else "x ")
+        print(f"  {vm:2} (plain {pm}) {calls}calls  {prompt}")
+    if rep["infra_void"]:
+        _bench_void_report(args, rep, brain.name)
+        return 2
+    n = rep["n"]
     print("\n================ 結果 ================")
-    print(f"  plain（無 vacant）   正確率 {rep['plain_acc']*100:3.0f}%   算力 {rep['plain_calls_per']:.1f} 次/題")
-    print(f"  vacant（verify-fix） 正確率 {rep['vacant_acc']*100:3.0f}%   算力 {rep['vacant_calls_per']:.1f} 次/題")
-    print(f"  → vacant 讓你的模型 {rep['gain']*100:+.0f}%（簽章鏈究責：{v.verify_chain()}）")
+    print(f"  plain（無 vacant）   正確率 {rep['plain_acc']*100:3.0f}%"
+          f"（{rep['plain_measured']}/{n} 量到）   算力 {rep['plain_calls_per']:.1f} 次/題")
+    print(f"  vacant（verify-fix） 正確率 {rep['vacant_acc']*100:3.0f}%"
+          f"（{rep['vacant_measured']}/{n} 量到）   算力 {rep['vacant_calls_per']:.1f} 次/題")
+    print(f"  → vacant 讓你的模型 {rep['gain']*100:+.0f}%"
+          f"（成對分母 {rep['paired_measured']}/{n}；簽章鏈究責：{v.verify_chain()}）")
+    # infra_void 的格數**單獨印**，而且講明分母是哪一個——折進正確率就等於
+    # 把「沒量到」講成「量到 0」。
+    if rep["plain_void"] or rep["vacant_void"]:
+        print(f"  ⚠ infra_void（沒量到，不進上面任何分子分母）："
+              f"plain {rep['plain_void']}/{n}、vacant {rep['vacant_void']}/{n}")
+        print(f"     第一個錯誤：{rep['first_error']}")
+        print(f"     端點 {args.base}；「沒量到」是基建故障，不是模型答錯。")
     return 0
 
 
@@ -792,7 +845,7 @@ def cmd_audit(args: argparse.Namespace) -> int:
 
 
 def cmd_verify_att(args: argparse.Namespace) -> int:
-    """獨立驗一張 attestation 憑證 —— 不必信任送方，只靠票上的 pub + 簽章。"""
+    """獨立驗一張 attestation 憑證 —— 不必採信送方，只靠票上的 pub + 簽章。"""
     import json
 
     from .attest import verify_attestation

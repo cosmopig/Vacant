@@ -371,6 +371,30 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
    供應者無法把「一段程式」偽裝成「一組測試」。
 4. **要 k 方獨立同意** → `peerexec.select_by_quorum`，每個執行器各自持鑰、各自成鏈；
    不一致時**指名是哪一把金鑰**。
+
+   ⚠ 三個照文件寫會踩到的坑，先講清楚：
+
+   - `drafts` 的每一格是 **`(code, worker_id)`**（先程式碼、後 worker 名字），兩格都是
+     `str`。**傳反不會有型別錯誤**：每一份「草稿」都跑不過驗收 ⇒ 三方一致投沒過 ⇒
+     你拿到 `refused=True`、`shipped_index=None`、三條簽章鏈全部驗得過——與「機制正確
+     地拒絕了爛交付」在畫面上一模一樣，而拒交正是本系統的合法輸出。
+     `select_by_quorum` 進門會做一次**啟發式**形狀檢查，疑似反了就丟
+     `peerexec.DraftOrderError`；它**有偽陰性**（兩格都像碼、或草稿本身沒有換行也沒有
+     `def ` 就抓不到），不要讀成「順序錯一定會被抓到」。
+   - `task` 必須有 **`entry_point`**（要驗的函式名）。entry point 屬於**題目**不屬於套件，
+     套件上的那一個只拿來**核對**。少了這一格會得到
+     `SuiteSpecError(code="entry_point_unbound")`，**即使你傳進去的 `SuiteSpec` 帶著
+     `entry_point='solve'`**。
+   - 用 mapping 寫套件時 **`v: 1` 是必填**（`SuiteSpec` 的版本，唯一合法值是 1）：
+
+     ```python
+     suite = {"v": 1, "dialect": "mbpp", "entry_point": "solve",
+              "tests": [{"args": "[1, 2]", "expected": "3"}], "cmp": {}}
+     ```
+
+     漏了就是 `bad_version:None`。`SuiteSpecError` 有兩個欄位：`.code`（機器讀，會原樣
+     進收據與 `refusal_reason`）與 `.hint`（人讀）——**程式要分支請比對 `.code`，不要
+     比對 `str(exc)`**。
 5. **要 agent 不可能交出未驗證的東西** → `VacantFirstController` ＋ OS 層邊界（見 §A）。
 
 **agent 必須配合的事**：回傳**定義了宣告的 entry point** 的程式碼（閘門是呼叫

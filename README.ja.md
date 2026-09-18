@@ -406,6 +406,31 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
    `commit_suite_with_gauge` でチェーンへ載せる。以後、実行器は spec から自分でレンダリング
    したコードしか走らせないため、供給側が「プログラム」を「テスト」に偽装できない。
 4. **k 者の独立合意が欲しい** → `peerexec.select_by_quorum`。不一致は**鍵を名指しする**。
+
+   シグネチャからは読み取れない落とし穴が三つある：
+
+   - `drafts` の各要素は **`(code, worker_id)`**（先にソース、後に名前）。どちらも `str`
+     なので**逆に渡しても型エラーにならない**：すべての「草案」が受入に落ちて三者一致で
+     不可となり、`refused=True` / `shipped_index=None`、三本の署名チェーンはすべて検証を
+     通る。これは「機構が正しく不良納品を拒否した」状態と画面上まったく同じであり、
+     拒否は本システムの正当な出力である。`select_by_quorum` は入口で**発見的な**形状
+     チェックを行い、逆転が疑われる場合 `peerexec.DraftOrderError` を投げる。
+     ただし**偽陰性がある**（両方がコードに見える場合、草案に改行も `def ` も無い場合）
+     ので「順序を間違えれば必ず捕まる」とは読まないこと。
+   - `task` には **`entry_point`**（受入が呼ぶ関数名）が必須。エントリポイントは**題目**
+     に属し、スイート側のそれは**照合**にしか使われない。欠けていると
+     `SuiteSpecError(code="entry_point_unbound")` になる——**渡した `SuiteSpec` が
+     `entry_point='solve'` を持っていても**である。
+   - mapping で受入スイートを書くときは **`v: 1` が必須**（spec のバージョン。合法値は 1 のみ）：
+
+     ```python
+     suite = {"v": 1, "dialect": "mbpp", "entry_point": "solve",
+              "tests": [{"args": "[1, 2]", "expected": "3"}], "cmp": {}}
+     ```
+
+     欠けると `bad_version:None`。`SuiteSpecError` は `.code`（機械可読。チェーンと
+     `refusal_reason` にそのまま載る）と `.hint`（人間可読）を持つ。**分岐は `.code` で
+     行い、`str(exc)` では行わないこと。**
 5. **エージェントが未検証のものを出せないようにしたい** → `VacantFirstController` ＋ OS 境界（§A）。
 
 **エージェント側に必要な協力**：宣言されたエントリポイントを**定義する**コードを返すこと
