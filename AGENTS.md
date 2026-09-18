@@ -112,17 +112,25 @@ Zero network, zero model calls, no clone required. `pip install vacant-network` 
 30 packages (`mcp` accounts for most of them; `cryptography` and `jsonschema` are the
 rest).
 
-To wrap an arbitrary agent command instead of calling the library, you need the clone —
-`vacant run` and `vacant demo gate` live in `ops/`, which is deliberately not in the wheel
-(it shares one copy of `acceptance` / `receipts` / `wshash` with the R530 experiments, and
-a second copy would be a second ruler):
+Wrapping an arbitrary agent command needs no clone either (since 2026-09-18):
 
 ```bash
-git clone https://github.com/cosmopig/Vacant.git && cd Vacant
-python3 -m venv .venv && .venv/bin/pip install -e .
-.venv/bin/vacant demo gate    # ~2s, offline: a fake agent declares done, the gate refuses
+vacant demo gate              # ~2s, offline: a fake agent declares done, the gate refuses
 vacant run --suite <dir> -- <your agent command>
 ```
+
+The judgement layer lives in `vacant/vrun/` and is **the same one copy** the R530
+experiments run: `ops/gain/r530/{acceptance,receipts,wshash,sandbox}` and
+`ops/gain/replay/verify_run_receipts.py` are now re-exports of it
+(`sys.modules` aliasing — the same module object, so there is no second ruler).
+The top-level `ops` package is still deliberately kept out of the wheel: on PyPI, `ops` is
+Juju's package and the name collision would silently overwrite files.
+
+What still needs a clone, named: `ops/vacantrun/block_egress.sh` (V3 egress blocking, root
+once) and `verify_egress_block.py`; `ops/vacantrun/selftest.py`; `ops/gain/**` and `runs/**`
+(experiment runners, task banks, hidden acceptance suites, judge, scheduler, on-disk data —
+re-computing the experiment numbers requires the clone); `examples/**`, `decisions/**`,
+`docs/**`.
 
 Exit codes from `vacant run`: `0` shipped, `20` refused, `22` `infra_void`. The trigger is
 the moment the agent process exits, not a "done" message on the wire. **`requests_seen` in
@@ -372,7 +380,7 @@ Each one is falsifiable; the check is given.
   independently, before any launch (`vacant/controller.py:299-300` →
   `GateRejected("local objective re-check rejected the delivered answer")`).
 - **I-4 — "Not measured" is not "passed", and it is written as code.**
-  `"all_pass": bool(total > 0 and passed == total)` (`ops/gain/r530/acceptance.py:272`) —
+  `"all_pass": bool(total > 0 and passed == total)` (`vacant/vrun/acceptance.py:268`) —
   a suite that reported zero tests fails. Same shape in the library: `GaugeOutcome.ok`
   requires `n_broken >= 1`, so an empty set of known-bad stubs cannot satisfy
   `all_rejected` vacuously (that would be fail-open).

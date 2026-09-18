@@ -31,7 +31,7 @@ pip install vacant-network        # the library (the import name is still `vacan
 [![Python](https://img.shields.io/badge/python-3.11%2B-f26b1d)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT-f26b1d)](LICENSE)
 [![deps](https://img.shields.io/badge/runtime%20deps-3-f26b1d)](pyproject.toml)
-[![tests](https://img.shields.io/badge/tests-78%20files-f26b1d)](tests)
+[![tests](https://img.shields.io/badge/tests-86%20files-f26b1d)](tests)
 [![receipts](https://img.shields.io/badge/receipts-0%20failed-f26b1d)](ops/gain/replay)
 [![for AI](https://img.shields.io/badge/for%20AI-AGENTS.md-f26b1d)](AGENTS.md)
 
@@ -52,10 +52,13 @@ pip install vacant-network        # the library (the import name is still `vacan
 No setup, no model endpoint, no API key, no network.
 
 ```bash
-git clone https://github.com/cosmopig/Vacant.git && cd Vacant
-python3 -m venv .venv && .venv/bin/pip install -e .
-.venv/bin/vacant demo gate
+pip install vacant-network
+vacant demo gate
 ```
+
+**No clone needed.** (Since 2026-09-18 the gate's judgement layer lives inside the package —
+the same one copy, not a duplicate: `ops/gain/r530/*` now re-exports `vacant/vrun/*`, and the
+R530 experiments run that same code.)
 
 A fake agent declares it is done; the customer's acceptance suite says otherwise
 (excerpt of a real run; `$HOME` shortened to `~`, everything else verbatim):
@@ -81,22 +84,35 @@ $ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
 that `solution.py` would already have shipped.
 
 Every number on that screen is produced on the spot: the fake agent is a real subprocess,
-the gate is `ops/gain/r530/acceptance.py`, that `ImportError` is the exception the acceptance
-driver actually caught, and `20` is the real exit code of the `vacant run` subprocess.
-`ops/vacantrun/demo.py::_assert_not_a_performance` and
+the gate is `vacant/vrun/acceptance.py` (the very file the R530 experiments run), that
+`ImportError` is the exception the acceptance driver actually caught, and `20` is the real
+exit code of the `vacant run` subprocess.
+`vacant/vrun/demo.py::_assert_not_a_performance` and
 [`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
 stop it from ever degrading into printed string literals. The receipt is verified on the spot
 with the same verifier; you can re-verify it yourself:
 
 ```bash
-.venv/bin/python ops/gain/replay/verify_run_receipts.py --selftest      # first prove the verifier catches broken chains
-.venv/bin/python ops/gain/replay/verify_run_receipts.py --glob ~/.vacant-run/demo-gate/receipts
+python3 -m vacant.vrun.verify_receipts --selftest      # first prove the verifier catches broken chains
+python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 ```
 
-⚠ `vacant demo gate` and `vacant run` need the clone: their judgement layer lives in `ops/`
-and shares one copy of `acceptance` / `receipts` / `wshash` with the R530 experiments —
-**a copy inside the wheel would be a second ruler**. `pip install vacant-network` gives you
-the library (the quickstart further down).
+(After a clone, `python3 ops/gain/replay/verify_run_receipts.py …` is **the same file** —
+that path is now a re-export, and it is what verified the R460R / R529 / R532 chains.)
+
+### What still needs a clone (named, not hand-waved)
+
+`vacant demo gate`, `vacant run` and receipt verification **do not**. These do:
+
+| Needs a clone | Why it is not in the wheel |
+|---|---|
+| [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh) (V3 egress blocking) + `verify_egress_block.py` | A root-once **operations action**, not a product feature; it rewrites the whole machine's network rules |
+| `ops/vacantrun/selftest.py` | End-to-end self-check; it reads the repo's `runs/` |
+| `ops/gain/**`, `runs/**` | The R529 / R530 / R532 / R534 runners, task banks, **hidden acceptance suites**, judge, scheduler and on-disk data. **Re-computing the experiment numbers requires a clone** (see "Run from source" below) |
+| `examples/**`, `decisions/**`, `docs/**` | Exhibit pieces, verdict records, spec documents |
+
+⚠ Not shipping a top-level `ops` package is deliberate: on PyPI, `ops` is Juju's package, and
+**the name collision would silently overwrite files** in someone else's `site-packages`.
 
 ---
 
@@ -118,7 +134,7 @@ Exit codes: `0` shipped, `20` refused, `22` `infra_void`. Full usage and on-disk
 
 **What "one switch" actually means.** `vacant run` redirects the model channel to its own
 proxy through **one list of environment variables**
-([`ops/vacantrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/envmap.py):
+([`vacant/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant/vrun/envmap.py):
 the OpenAI family, the Anthropic family, OpenRouter, Groq, Together, DeepSeek, Ollama,
 LM Studio, …) — **that list covers most frameworks; a framework that reads a config file
 needs its config file changed.** Measured: pi (`@earendil-works/pi-coding-agent`) keeps its
@@ -145,7 +161,8 @@ message**. That is V0's known residual risk.
    the agent from opening its own connection. "The agent cannot escape" is only true with
    egress blocking on top
    ([`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh),
-   root once). `vacant/controller.py:7-8` applies verbatim: it cannot stop the same OS user
+   root once; **that script only exists in a repo checkout** — see "What still needs a clone"
+   above). `vacant/controller.py:7-8` applies verbatim: it cannot stop the same OS user
    from bypassing this command.
 2. **What is mediated is the model channel, not the agent's behaviour.** Actions the
    framework starts by itself — auto-lint, git checkpoints, built-in retries, local tool
@@ -495,7 +512,7 @@ These are true and have code behind them:
   see this test code"*. The candidate **structurally cannot read the tests** — it is not a
   blocklist.
 - **"Not measured is not passed" is written as code**:
-  `"all_pass": bool(total > 0 and passed == total)` (`ops/gain/r530/acceptance.py:272`);
+  `"all_pass": bool(total > 0 and passed == total)` (`vacant/vrun/acceptance.py:268`);
   likewise the gauge requires `n_broken >= 1`, so an empty stub set cannot succeed vacuously.
 - **Refusal really happens**: in R532's 836 tasks the gated arm refused 25 deliveries and
   the loop arm 68 — and refusals are in the denominator of every rate.
@@ -643,7 +660,7 @@ red line A4).
 - **I-3** Self-reported success is never taken on faith (`ecosystem.py:531`, then
   `controller.py:299-300` independently).
 - **I-4** "Not measured" is failure, in code:
-  `bool(total > 0 and passed == total)` (`ops/gain/r530/acceptance.py:272`); the gauge
+  `bool(total > 0 and passed == total)` (`vacant/vrun/acceptance.py:268`); the gauge
   requires `n_broken >= 1`.
 - **I-5** The gauge is two-sided: the reference must pass **and** every known-bad stub must
   be rejected.

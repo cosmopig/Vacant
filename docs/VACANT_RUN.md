@@ -5,14 +5,30 @@
 > **V1 再多一件事：沒過就重置或回饋，再 spawn 一次。**
 > **V2 再多一件事：那份回饋可以直接接在下一次 spawn 的 prompt 尾端（§8）。**
 
-程式碼：[`ops/vacantrun/`](../ops/vacantrun/)
-（[`launcher.py`](../ops/vacantrun/launcher.py)、
-[`retry.py`](../ops/vacantrun/retry.py)、
-[`wireproxy.py`](../ops/vacantrun/wireproxy.py)、
-[`envmap.py`](../ops/vacantrun/envmap.py)、
-[`selftest.py`](../ops/vacantrun/selftest.py)）
+程式碼：[`vacant/vrun/`](../vacant/vrun/)
+（[`launcher.py`](../vacant/vrun/launcher.py)、
+[`retry.py`](../vacant/vrun/retry.py)、
+[`wireproxy.py`](../vacant/vrun/wireproxy.py)、
+[`envmap.py`](../vacant/vrun/envmap.py)、
+[`demo.py`](../vacant/vrun/demo.py)、
+[`verify_receipts.py`](../vacant/vrun/verify_receipts.py)）
+· 維運側留在 repo：[`ops/vacantrun/`](../ops/vacantrun/)
+（[`selftest.py`](../ops/vacantrun/selftest.py)、
+[`block_egress.sh`](../ops/vacantrun/block_egress.sh)、
+[`wrap_agent.sh`](../ops/vacantrun/wrap_agent.sh)）
 · 測試：[`tests/test_vacant_run.py`](../tests/test_vacant_run.py)、
-[`tests/test_vacant_run_retry.py`](../tests/test_vacant_run_retry.py)
+[`tests/test_vacant_run_retry.py`](../tests/test_vacant_run_retry.py)、
+[`tests/test_vrun_reexport.py`](../tests/test_vrun_reexport.py)
+
+> **2026-09-18 搬家**：判斷層原本住在 `ops/vacantrun/` 與 `ops/gain/r530/`，而 `ops/`
+> 不進 wheel ⇒ `pip install vacant-network` 的人跑不動 `vacant run`。改成**搬家＋反轉
+> 依賴**：實作進 `vacant/vrun/`，`ops/gain/r530/*` 與 `ops/vacantrun/*` 留 re-export
+> （`sys.modules` 指過去，**同一個 module 物件**）。所以既有的 83 處 `ops.gain.r530.*`
+> 引用一行都沒改，而且**判準仍然只有一份**。理由與清單見
+> [`vacant/vrun/__init__.py`](../vacant/vrun/__init__.py)。
+> V1／V2 的政策層 `retry.py` 跟著 `launcher.py` 一起搬——套件不准依賴 `ops/`
+> （`tests/test_vrun_reexport.py::test_vrun_is_self_contained`），
+> 舊路徑 `ops/vacantrun/retry.py` 同樣是 re-export。
 
 ---
 
@@ -52,7 +68,7 @@
 
 ```bash
 # 先看一次它擋下來：零設定、零模型端點、零 API key、零網路，約 2 秒
-vacant demo gate                       # ops/vacantrun/demo.py
+vacant demo gate                       # vacant/vrun/demo.py
 
 # 最小：把 agent 包起來，用**工作區外**的 tests_visible/ 當驗收
 vacant run --suite ../tests_visible --run-dir ~/.vacant-run/demo -- \
@@ -69,7 +85,9 @@ vacant run --suite ../tests_visible --retry revise --feedback-into prompt -- \
 # 純觀測（不 gate），但 wire 照樣逐字落盤
 VACANT=0 vacant run --run-dir ~/.vacant-run/demo -- <cmd>
 
-# 不透過 CLI（repo checkout 裡）
+# 不透過 CLI（模組形式，pip 裝完就能用）
+python3 -m vacant.vrun.launcher --suite ../tests_visible --run-dir /tmp/r -- <cmd>
+# repo checkout 裡這一行是同一支（re-export）
 python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir /tmp/r -- <cmd>
 ```
 
@@ -78,7 +96,7 @@ python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir /tmp/r -- <
 「收據寫了多少」的函數；`--suite` 是**agent 改得到的驗收不是驗收**——那不是
 「可能被繞過」，是量具與被量的東西放在同一個人手上，`accepted=True` 會退化成
 「它讓自己過了」。要給 agent 看驗收就**另外複製一份**進工作區
-（`ops/vacantrun/demo.py::scaffold` 就是這樣做的：權威的那一份在外面）。
+（`vacant/vrun/demo.py::scaffold` 就是這樣做的：權威的那一份在外面）。
 
 退出碼**反映裁決**，不是 agent 自己的退出碼：
 
@@ -112,9 +130,11 @@ _origin/                      `--retry resample` 的起點完整副本（含 `.g
 收據用**既有的那把尺**驗，不准另寫第二把：
 
 ```bash
-python3 ops/gain/replay/verify_run_receipts.py --selftest                 # 先證明它抓得到壞鏈
+python3 -m vacant.vrun.verify_receipts --selftest                 # 先證明它抓得到壞鏈
+python3 -m vacant.vrun.verify_receipts --glob 'runs/<你的 run 目錄>'
+python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
+# repo checkout 裡這一行是同一支（re-export，R460R／R529／R532 的鏈驗的就是它）
 python3 ops/gain/replay/verify_run_receipts.py --glob 'runs/<你的 run 目錄>'
-python3 ops/gain/replay/verify_run_receipts.py --glob ~/.vacant-run/demo-gate/receipts
 ```
 
 `--glob` 的相對 pattern 以 repo 根為基準，**絕對 pattern 照絕對解**——`--run-dir`
@@ -311,14 +331,14 @@ IPv6、既有的長連線、raw socket 都要另外量；量不到就寫「沒�
 
 | 複用 | 用在哪 |
 |---|---|
-| `ops/gain/r530/acceptance.py` | 目錄級驗收（`run_suite(suite="visible")`、`render_failures`） |
-| `ops/gain/r530/receipts.py` | `ws_attempt`／`ws_verdict` 兩種事件別，**一個字沒改** |
-| `ops/gain/r530/wshash.py` | 工作區樹雜湊（起點／終點） |
-| `ops/gain/r530/sandbox.py` | 驗收跑在沙箱裡（`make_sandbox`） |
+| `vacant/vrun/acceptance.py` | 目錄級驗收（`run_suite(suite="visible")`、`render_failures`）。舊路徑 `ops/gain/r530/acceptance.py` 是 re-export |
+| `vacant/vrun/receipts.py` | `ws_attempt`／`ws_verdict` 兩種事件別，**判準一個字沒改**（舊路徑 `ops/gain/r530/receipts.py`） |
+| `vacant/vrun/wshash.py` | 工作區樹雜湊（起點／終點）（舊路徑 `ops/gain/r530/wshash.py`） |
+| `vacant/vrun/sandbox.py` | 驗收跑在沙箱裡（`make_sandbox`）（舊路徑 `ops/gain/r530/sandbox.py`） |
 | `ops/gain/r534/wire_tap.py` | `wireproxy.py` 的前身（本檔 §3 那條鐵律的來源） |
 | `ops/gain/r534/piarms.py` | `FEEDBACK_TEMPLATE` 的形狀（§7.3 逐字沿用） |
 | `ops/gain/harness_arms.py` | 回饋迴圈的做法（`render_feedback`／截斷／落全文簽雜湊） |
-| `ops/gain/replay/verify_run_receipts.py` | 驗收據——**唯一那把尺** |
+| `vacant/vrun/verify_receipts.py` | 驗收據——**唯一那把尺**（舊路徑 `ops/gain/replay/verify_run_receipts.py` 是 re-export，仍可直接執行） |
 | `vacant/memory.py::assert_ks1_clean` | KS-1 可執行防呆（鐵律 1） |
 | `vacant/logbook.py`、`vacant/identity.py`、`vacant/crypto.py` | 簽章鏈 |
 
@@ -409,7 +429,7 @@ V1 沒有改 `render_failures`（凍結碼）。實測的 12B 沒有因此改對
    `test_vgt_canary_scan_has_teeth`（把 hidden 當成可見套件餵進去，
    同一支掃描必須翻紅）。沒有負控的「零命中」跟把掃描關掉在輸出上同形。
 2. **KS-1（鐵律 1）**：回饋文字禁止「你有責任／會被懲罰」類措辭。
-   `vacant/memory.py::assert_ks1_clean` 在 `ops/vacantrun/retry.py` import 時
+   `vacant/memory.py::assert_ks1_clean` 在 `vacant/vrun/retry.py` import 時
    就跑一次（模板），每次渲染再跑一次（**含插進去的失敗原文**）。
    責任修辭如果是從客戶測試的訊息帶進來的，判 `ks1_violation`＝`infra_void`
    ——鐵律 1 說的是「違反＝run 作廢」，不是「拒交」。

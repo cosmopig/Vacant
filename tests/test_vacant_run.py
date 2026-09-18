@@ -11,7 +11,8 @@
       拒交路徑：驗收沒過 ⇒ 退出碼非 0 ⇒ 收據記 refused。
       量不到（沒有套件）也算拒交，不算通過。
   · `test_receipts_verify_with_the_existing_ruler`
-      收據要被**既有的** `ops/gain/replay/verify_run_receipts.py` 驗過。
+      收據要被**既有的**驗章器驗過（`vacant/vrun/verify_receipts.py`；
+      `ops/gain/replay/verify_run_receipts.py` 是同一支的 re-export）。
       **不准另寫第二把尺**——所以這條直接 import 那一支。
   · `test_upstream_and_keys_are_not_in_agent_env`
       真上游與真鑰只留在 proxy 行程。
@@ -32,9 +33,9 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from ops.gain.replay import verify_run_receipts as vrr           # noqa: E402
-from ops.vacantrun import envmap, launcher                       # noqa: E402
-from ops.vacantrun.wireproxy import WireProxy, join_upstream, route  # noqa: E402
+from vacant.vrun import envmap, launcher                         # noqa: E402
+from vacant.vrun import verify_receipts as vrr                   # noqa: E402
+from vacant.vrun.wireproxy import WireProxy, join_upstream, route  # noqa: E402
 
 #: agent 送出去的 body。**key 的順序刻意不是字典序、空白刻意不規則**——
 #: 任何一次 `json.loads`→`json.dumps` 都會把這兩件事抹平，於是 sha256 變掉。
