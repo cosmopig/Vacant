@@ -603,6 +603,35 @@ def _backend_for_run(name: str) -> dict[str, Any]:
     return out
 
 
+def _arm_stats(summary: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
+    """把 summary.json 的**兩種臂版面**收斂成同一個 (臂名, 逐臂統計)。
+
+    這支在架構裡承重什麼：索引要回答「這個 run 有幾臂、出了幾次 infra_void、
+    跑完沒」，而 runner 有兩代版面：
+
+      * `ops/gain/gain_run.py`（:1839-1844）把逐臂統計**直接掛在**
+        `summary["arms"]` 底下 —— arm → stats 的 dict。
+      * `ops/gain/r530/run_r530.py`（:465、:500）把 `summary["arms"]` 改成
+        **臂名清單**，逐臂統計另外放在 `summary["arms_stats"]`。
+
+    只認 dict 版的話，R530 那 12 塊會在 `sorted(arm_map)` 之後對一個 list
+    呼叫 `.values()` ⇒ `AttributeError`，整份索引根本產不出來。**這不是「有
+    例外就吞掉」的地方**：`arms_stats` 裡有完整的 processed／infra_void，
+    list 版該有的資訊一個都不少，吞掉等於讓 R530 在索引裡變成「沒有臂、
+    不知道 void」——索引比資料悲觀跟比資料樂觀是同一種說謊。
+    """
+    arm_map = summary.get("arms")
+    if isinstance(arm_map, dict):
+        return sorted(arm_map), {k: v for k, v in arm_map.items()
+                                 if isinstance(v, dict)}
+    names = [a for a in arm_map if isinstance(a, str)] \
+        if isinstance(arm_map, list) else []
+    stats = summary.get("arms_stats")
+    per = {k: v for k, v in stats.items()
+           if isinstance(v, dict)} if isinstance(stats, dict) else {}
+    return sorted(set(names) | set(per)), per
+
+
 def build_run_entry(d: Path, banks: dict[str, Any],
                     decisions: list[dict[str, Any]],
                     git_first: dict[str, str],
@@ -649,8 +678,7 @@ def build_run_entry(d: Path, banks: dict[str, Any],
     seed: str | None = None
     if summary:
         seed = summary.get("seed")
-        arm_map = summary.get("arms") or {}
-        arms = sorted(arm_map)
+        arms, arm_map = _arm_stats(summary)
         if arm_map:
             infra_void = sum(int(a.get("infra_void") or 0)
                              for a in arm_map.values())
@@ -664,12 +692,34 @@ def build_run_entry(d: Path, banks: dict[str, Any],
         if complete is None and arm_map and all(
                 "complete" in a for a in arm_map.values()):
             complete = all(bool(a.get("complete")) for a in arm_map.values())
+        # R530 版面的逐臂統計只有 processed／infra_void，完成旗標寫在 run 層級
+        # ——而 `run_complete` 它根本沒寫。用 `gain_run.py:1839/1844` 的**同一條
+        # 定義**（terminal＝每題都處理過；complete＝再加上零 void）從同樣的數字
+        # 補算，不是另立一套判準。少了這一段，R530 的 s1_1003_1 那格
+        # 「A-CONF 出了 1 次 infra_void」在索引上會看不出對完成度的影響。
+        n_tasks = summary.get("n_tasks")
+        if arm_map and isinstance(n_tasks, int) and all(
+                isinstance(a.get("processed"), int) for a in arm_map.values()):
+            all_processed = all(a["processed"] == n_tasks
+                                for a in arm_map.values())
+            if terminal is None:
+                terminal = all_processed
+            if complete is None:
+                complete = all_processed and all(
+                    int(a.get("infra_void") or 0) == 0
+                    for a in arm_map.values())
     if seed is None:
         seed = row_seed
     if not arms:
         arms = sorted(k for k in rows_by_arm if k != "?")
 
-    runner_git = (summary or {}).get("runner_git") or {}
+    # R530 的 runner 把同一份東西寫成 `runner_git_info`（`run_r530.py:498`）。
+    # 只認舊 key ⇒ 那 12 塊的 runner sha 在索引裡整排是 null，而「這份資料是
+    # 哪個 commit 跑出來的」正是索引存在的理由之一。
+    runner_git = ((summary or {}).get("runner_git")
+                  or (summary or {}).get("runner_git_info") or {})
+    if not isinstance(runner_git, dict):
+        runner_git = {}
     return {
         "name": d.name,
         "kind": kind,
