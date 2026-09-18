@@ -15,7 +15,7 @@ H3 降為描述、`--sandbox none` ＋ `--test-timeout 30` ＋ 時序門 ＋ 汙
 **發射驅動已併進 main**：`ops/gain/r535/run_r535.py`，sha **`ff28540`**；
 §十三-1 的兩道牙齒（`--write-plan`／`--reconcile`）**都已實測**，三個負控制都轉紅。
 
-**剩一處 `<<TODO-FREEZE: …>>`**：**收官器 `ops/gain/r535/state_r535.py` 的 sha**（正在造）。
+**本檔已無 `<<TODO-FREEZE>>`**：收官器 `ops/gain/r535/state_r535.py` 已於 main **`16f7ce4`** 落地（44 條測試 ＋ `--mutation-check` 12 條全綠）。
 **它綠之前不准發射**——本檔 §十一 已寫死「不准資料出來之後才寫收官器」。
 
 ---
@@ -91,13 +91,35 @@ pi 讀 `TASK.md`、寫 `solution.py`、結束，**從不 `ls` 工作區**。
 上面這一句是對**這一條 argv、這一個 agent、這一個版本**的結論，
 **不是對 `file` 模式的普遍結論**。至少三種情形不在它的射程內：
 
-1. 會主動 `ls` 或掃工作區的 agent（Claude Code、Codex 的預設行為與 pi 不同）；
-2. 使用者自己在 prompt 裡寫了「先看一下目錄有沒有新檔案」；
-3. 把重試接在**同一段對話**裡的框架（pi 的 `-p` 是每次新對話）。
+1. 使用者自己在 prompt 裡寫了「先看一下目錄有沒有新檔案」；
+2. 把重試接在**同一段對話**裡的框架（pi 的 `-p` 是每次新對話）。
+
+### ⚠ 原本列在這裡的第 1 點已被實測推翻（2026-09-19，發射前）
+
+草稿寫的是「**會主動 `ls` 或掃工作區的 agent** 不在射程內（Claude Code、Codex
+的預設行為與 pi 不同）」——那句話的前提是「pi 不看工作區」。**NOTHINK 冒煙推翻了它**：
+
+```
+RF 的 ls -F  ⇒  solution.py\nTASK.md\nVACANT_FEEDBACK.md
+RS 的 ls -F  ⇒  TASK.md
+```
+
+pi **`ls` 了**，目錄列表**逐字回了 `VACANT_FEEDBACK.md`**，
+然後它回頭讀 `TASK.md`、覆寫成同一份錯碼——
+**最後交付的 `solution.py` 與 RS sha256 逐位元相同**（`754afb968c01043d…`）。
+
+⇒ 失效的機制**比草稿寫的更強也更準**：
+
+> **不是因為 agent 看不到工作區（它 `ls` 了、目錄列表回了檔名），
+> 而是因為「看到檔名」不構成「讀它」的理由。**
+
+⇒ 「會 `ls` 的 agent 就不適用」這個豁免**不成立**，不可以拿它去縮小結論的射程。
+全跑用 **(`M7_name`, `M7_file`)** 那一對把這件事量化（§三）。
+⚠ 這是 **n=1 的冒煙觀測**，寫進來是為了**修掉一個錯的豁免**，不是當成結果。
 
 本輪量的是「在這個限定條件下，換管道有沒有差」。
 **收官不得寫成「檔案投遞沒有用」，只能寫成「對這個 agent、這條 argv，檔案投遞的回饋
-在第 ≥2 次嘗試的請求裡出現 0 次」。**
+在第 ≥2 次嘗試的請求裡出現 0 次（而檔名出現了 <M7_name>）」。**
 
 ---
 
@@ -387,14 +409,49 @@ PC 量到的天花板會混進「prompt 換了字」。
 1. 從 `<rd>/run_*.json` 取 `attempts[i].requests_seen_cumulative`，
    得到「第 i 次嘗試對應 `wire/index.jsonl` 的哪一段」；
 2. 取 **i ≥ 2** 那幾段的每一通 `wire/<call_id>.req.bin`（**原始位元組**，不是有損的 JSONL）；
-3. 在那些位元組裡找三個字串（UTF-8）：
-   `Acceptance feedback`、`VACANT_FEEDBACK`、以及該格那一次回饋文字的**前 64 個位元組**；
+3. 在那些位元組裡找**只屬於回饋內容**的字串（UTF-8）：
+   `Acceptance feedback (attempt`、`The checks that ship with this task were run against your`、
+   以及該格那一次回饋文字的**前 64 個位元組**；
 4. 任一命中 ⇒ 該格計 1。`M7_file` ＝ 命中的格數 ÷ RF 有第 ≥2 次嘗試的格數。
+
+⚠ **`VACANT_FEEDBACK` 不是 needle（2026-09-19 發射前更正）。**
+本檔草稿把它列進去過，那是錯的，而且**方向是反的**：
+
+> **回饋檔的內容裡一個字都沒有提到自己叫什麼。** `FEEDBACK_HEADER` 是
+> ``<!-- Written by `vacant run` … -->`` ＋ ``# Acceptance feedback (attempt X of Y)``，
+> `FEEDBACK_BODY` 也沒有（三個樣板常數實測都是 `False`）。
+> ⇒ 那個 needle **只可能命中檔名**。而 NOTHINK 下 agent 一跑 `ls`，tool result 就回
+> ``solution.py\nTASK.md\nVACANT_FEEDBACK.md`` ⇒ 照草稿字面算，
+> RF 的 `M7_file` 會是 **≈100%**，**把「看見檔名沒讀」記成「讀了」**——
+> 而那是 §〇 三個主要交付數字的**第一個**。
+
+發射驅動的實作**一直都只用內容字串**（`_TEMPLATE_NEEDLES`），所以是**文件錯、實作對**；
+冒煙算出 `m7_file=false` 就是因為實作沒用那個 needle。
+更正的擋門在 `tests/test_r535_m7_name.py`（把 `VACANT_FEEDBACK` 加回 needle ⇒ 轉紅）。
+
+### M7_name 的可執行定義（**與 M7_file 分工**）
+
+步驟 1、2 與 `M7_file` 相同；步驟 3 找的是**檔名** `VACANT_FEEDBACK.md`。
+分母**與 `M7_file` 相同**。NOTHINK 下的事前預期 **≈ 100%**。
+
+| | 量什麼 | 事前預期 |
+|---|---|---|
+| `M7_name` | **檔名**出現在 wire | ≈ 100% |
+| `M7_file` | **內容**出現在 wire | 0 |
+| `M7_ws_solution` | **讀了自己上一份 `solution.py`** | 見 §二-2 |
+
+⚠ **三層一起印，而且全跑的精確標題句就是前兩個的那一對**：
+**`M7_name = <a>`、`M7_file = <b>` ＝「看見了檔名、沒有讀」。**
+單看任何一個都說不出這件事——`M7_file = 0` 也可能是「**根本沒看到**」，
+`M7_name` 高本身也不代表沒讀。
+
+⚠ `M7_name` 有一道**鑑別力檢查**：檔名若在 **attempt 1** 就出現（那時回饋檔還不存在）
+⇒ 判 `needle_not_discriminative_appears_in_attempt1`、落 `null`，**不照算**。
 
 ⚠ **分母是「有第 ≥2 次嘗試的格數」，不是 n。** 第 1 次就過的格子沒有第 2 次可以看，
 把它們算進分母會把「沒被觸發」偽裝成「被讀到了」。分子分母都要逐層落盤。
 
-⚠ **這是單邊的。** 命中 0 只說明「這三個字串沒出現在請求 body 裡」，
+⚠ **這是單邊的。** 命中 0 只說明「那幾個**內容**字串沒出現在請求 body 裡」，
 不說明「agent 沒有以任何方式受到那個檔的影響」（例如它 `ls` 過但沒把內容貼進 prompt）。
 **收官要寫成「回饋文字沒有出現在模型輸入裡」，不是「agent 沒看到回饋」。**
 ⇒ 這個洞正是 **M7_ws** 要補的那一半。
@@ -1193,6 +1250,38 @@ RS 全在一條流上跑完，後端漂移就變成 RS 與別臂的差異，
 
 ## 十、誠實邊界（**收官必帶，現在就寫**）
 
+### ⚠ 零之一、兩句話不可互換（2026-09-19 加，因為它最容易被寫錯）
+
+NOTHINK 下 **RF 與 RS 的輸入從第 2 次嘗試起就不同**：RF 的 `ls` 回
+`solution.py\nTASK.md\nVACANT_FEEDBACK.md`，RS 只回 `TASK.md`。
+
+| | |
+|---|---|
+| **不可寫** | 「RF 與 RS 的輸入相同」 |
+| **只可寫** | 「多出來的那些位元組在這 \<n\> 格上沒有產生可觀測的差異（最終 `solution.py` sha 逐位元相同的格數 \<k\>/\<n\>）」 |
+
+⇒ **可交換不是結構性質，是逐格的經驗宣稱。**
+
+配套：`STALE_WORKSPACE_EFFECT` 這個標籤**不自帶機制主張**——
+落進去時 `M7_ws_solution > 0` ⇒ 授權寫「保留的工作區被讀到」；
+`= 0` ⇒ **只**授權寫「差異來源未定（兩臂只有目錄列表不同）」。
+
+### ⚠ 零之二、兩個描述性指標（不進任何判準）
+
+| 代號 | 量什麼 | 為什麼要有 |
+|---|---|---|
+| **M8** | 各臂**三次嘗試的 `solution.py` sha 全同**的格數比例 | 冒煙裡 RS 的 att1=att2=att3 **逐字相同**、RS 與 RF 最終 sha 也相同 ⇒ 這個模型在這個溫度下**重抽幾乎不產生變異**。M8 直接說明 `R_indep = 1−(1−p₁)³`（§四-1）**高估到什麼程度**，也讓「抽樣參數未釘」那條誠實邊界**有數字可掛**。 |
+| **M9** | 各臂第 ≥2 次嘗試含**自我驗證呼叫**（`bash python3 -c …`／`python3 solution.py`）的比例 | 冒煙裡**只有 RP** 自己跑了 `python3 -c "from solution import add, mul"` ⇒ 回饋進 prompt 之後**行為形狀也跟著變**，不只是改對名字。 |
+
+⚠ **M9 與「回饋被消費」是同一件事的兩個側面，不得當成獨立證據**
+（把它另外拿來背書 H1，等於用同一件事支撐兩次）。
+⚠ RP 的 prompt 多了一整段文字 ⇒ **行為形狀改變不能歸因到「內容」與「有附加文字」
+哪一個**——那是管道的一部分，本輪不拆。
+
+⚠ 兩者都是 `--rescan` **從已落盤的 wire 與快照回算**得到的（sha 本來就在 `attempts[]` 裡、
+工具呼叫在 `tools.jsonl` 裡）⇒ **零機時、不影響發射**。
+
+
 1. **n 小、單一模型、單一 agent、單一題庫 ⇒ 不可外推。**
    S1 n=50、S2 n=40；模型只有 `gemma-4-12b-it-qat`（Q4_0）；agent 只有 pi 0.85.1；
    題庫是**為這個問題自造的**。本輪的任何數字都是「這四件事同時成立時」的數字。
@@ -1331,7 +1420,7 @@ RS 全在一條流上跑完，後端漂移就變成 RS 與別臂的差異，
 | 產物 | 內容 |
 |---|---|
 | **§〇 的三個數字** | **M7_file（含 M7_ws，附 rule-of-three 上界）／第 1 次可見失敗率（S1、S2 分開，n=150／120）／S1 的 H1 點估計＋95% 區間（`M1` ＝ `accepted ∧ hidden`）**。摘要與收官都照這三個講；另附 `M1_vis` 與 **M6** |
-| **`ops/gain/r535/state_r535.py`** ＋ 它的 sha `<<TODO-FREEZE: 併進 main 之後的 sha>>` | **狀態表的唯一實作**（§六）。`NOT_TRIGGERED`／`CEILING_TOO_LOW`／`CONFIRMED_POSITIVE`／`CONFIRMED_NEGATIVE`／`RULED_OUT`／`INCONCLUSIVE`／`MECHANISM_BREACH`／`STALE_WORKSPACE_EFFECT` 照 §六-1 的求值順序，方向守衛照 §六-2 與 §五-1a。**必須帶負控制測試**：餵「RF 贏」要出 `CONFIRMED_NEGATIVE`；餵「RF>RS 且 `m7_ws`>0」要出 `STALE_WORKSPACE_EFFECT(+)`；**餵「RF<RS 且 `m7_ws`>0」要出 `STALE_WORKSPACE_EFFECT(−)` 而不是 `MECHANISM_BREACH`**；**餵「RF≠RS 且 `m7_ws`=0 且 selftest 紅」要出 `M7_ws INVALID` 而不是 breach**；**把 PC 的 attempt-1 混進觸發率要翻紅**；**`m7_file` 的 `null` 不可當 `false` 算進分母**。⚠ **不准資料出來之後才寫收官器** |
+| **`ops/gain/r535/state_r535.py`** ＋ 它在 main 上的 sha **`16f7ce4`** | **狀態表的唯一實作**（§六）。`NOT_TRIGGERED`／`CEILING_TOO_LOW`／`CONFIRMED_POSITIVE`／`CONFIRMED_NEGATIVE`／`RULED_OUT`／`INCONCLUSIVE`／`MECHANISM_BREACH`／`STALE_WORKSPACE_EFFECT` 照 §六-1 的求值順序，方向守衛照 §六-2 與 §五-1a。**必須帶負控制測試**：餵「RF 贏」要出 `CONFIRMED_NEGATIVE`；餵「RF>RS 且 `m7_ws`>0」要出 `STALE_WORKSPACE_EFFECT(+)`；**餵「RF<RS 且 `m7_ws`>0」要出 `STALE_WORKSPACE_EFFECT(−)` 而不是 `MECHANISM_BREACH`**；**餵「RF≠RS 且 `m7_ws`=0 且 selftest 紅」要出 `M7_ws INVALID` 而不是 breach**；**把 PC 的 attempt-1 混進觸發率要翻紅**；**`m7_file` 的 `null` 不可當 `false` 算進分母**。⚠ **不准資料出來之後才寫收官器** |
 | `ops/gain/r535/analyze_r535.py` | 兩層 × 四臂；`primary`（家族 2、Holm）、`per_stratum`、`m7_file`／**`m7_ws`**（逐題、逐通、命中字串或工具呼叫）、`f6`、**`mc1`**（`RS_attempt1`／`RS_final`／`R_indep` 三數並排，**不做檢定**）、`cost`（`attempts_used` 分佈）、`hidden`（描述性、每列 `not_a_test`）、`decision_state`（§六 求值順序寫死，含 `STALE_WORKSPACE_EFFECT`）、`ci95`（`boot_ci` 2.5/97.5）、`tost`（含禁語檢查）；`--selftest` ＋ `--mutation-check` |
 | **`M1`／`M1_vis`／`M6` 三聯表** | 逐臂逐層並列。`M1 ≤ M1_vis` 恆成立；兩者的差＝M6。**任何一格違反這個序 ⇒ 標 `inconsistent`、重算，不准靜默計入**（§六-3） |
 | **`m7_ws` 解析器的 `--selftest`** | 餵一段已知含 `ls` 的 wire 必須翻紅。**沒有它，「M7_ws = 0」跟「解析器沒認出任何工具呼叫」在輸出上同形**。⚠ 它現在是 §五-2 第二列的**前置步驟**：selftest 紅 ⇒ `M7_ws` 判 `INVALID`（量具壞了），**不是** `MECHANISM_BREACH` |
@@ -1511,7 +1600,7 @@ s2_36_mask         s2_37_column       s2_38_in_range     s2_39_strip_comments s2
 ## 十四、發射前檢查清單（**逐條打勾才准發**）
 
 - [x] 展開器 sha 釘死＝**`ff28540`**（`run_r535.py`，已在 main）
-- [ ] 唯一剩下的 `<<TODO-FREEZE: …>>` 補完（`state_r535.py` 的 sha，§十一）
+- [x] 唯一剩下的 `<<TODO-FREEZE: …>>` 補完（`state_r535.py` 的 sha ＝ **`16f7ce4`**，§十一）——**本檔自此無 TODO，可凍結**
 - [x] `bank_manifest.json` sha256 釘死＝`5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794`
 - [x] 四個基建修法都在 main：`cad1001`（沙箱）／`9420d81`（wireproxy）／`e88c147`（測試逾時）／`d44cbcb`（killpg `PermissionError` 三處）
 - [x] `gauge_bank.py` **七項 90/90 全綠**（作者一次、稽核者獨立重跑一次）
