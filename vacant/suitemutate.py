@@ -47,7 +47,7 @@ import ast
 import difflib
 import random
 from dataclasses import dataclass, field
-from typing import Any, Callable, Sequence
+from typing import Any, Callable, Sequence, cast
 
 from vacant.suitegauge import DEFAULT_TIMEOUT_S, CheckRunner, sha256_hex
 
@@ -126,6 +126,19 @@ def _docstring_ids(tree: ast.AST) -> set[int]:
     return out
 
 
+def _kval(n: ast.AST) -> Any:
+    """變異函式收到的那個節點的常數值。
+
+    **只在型別層做事**（`typing.cast` 執行期是恆等函式，一個位元都不改）。
+    下面那幾個 lambda 是在 `isinstance(node, ast.Constant)` 的分支裡註冊的，
+    `_Patch` 也只會把它們套回**同一個 `_mut_id`** 的那個節點上 ⇒ 收到的一定是
+    常數節點，而且是註冊時那個守衛（bool／int、float／str）挑中的那一種。
+    回 `Any` 就是因為**是哪一種由註冊處的守衛決定**，而「註冊時的守衛決定
+    lambda 會收到什麼」這件事型別系統表達不了；它是這支的結構保證，不是希望。
+    """
+    return cast(ast.Constant, n).value
+
+
 def _sites(source: str) -> list[tuple[str, int, Callable[[ast.AST], Any]]]:
     """列出所有變異點（運算子名, 節點 id, 套用函式）。"""
     tree = _indexed(source)
@@ -139,15 +152,15 @@ def _sites(source: str) -> list[tuple[str, int, Callable[[ast.AST], Any]]]:
             v = node.value
             if isinstance(v, bool):
                 out.append(("bool_const_flip", nid,
-                            lambda n: ast.Constant(value=not n.value)))
+                            lambda n: ast.Constant(value=not _kval(n))))
             elif isinstance(v, (int, float)):
                 out.append(("num_plus_1", nid,
-                            lambda n: ast.Constant(value=n.value + 1)))
+                            lambda n: ast.Constant(value=_kval(n) + 1)))
                 out.append(("num_minus_1", nid,
-                            lambda n: ast.Constant(value=n.value - 1)))
+                            lambda n: ast.Constant(value=_kval(n) - 1)))
             elif isinstance(v, str) and len(v) >= 2:
                 out.append(("str_truncate", nid,
-                            lambda n: ast.Constant(value=n.value[:-1])))
+                            lambda n: ast.Constant(value=_kval(n)[:-1])))
         elif type(node) in _CMP_FLIP:
             out.append(("cmp_flip", nid, lambda n: _CMP_FLIP[type(n)]()))
         elif type(node) in _BIN_SWAP:
@@ -156,7 +169,10 @@ def _sites(source: str) -> list[tuple[str, int, Callable[[ast.AST], Any]]]:
             out.append(("bool_op_swap", nid,
                         lambda n: ast.Or() if isinstance(n, ast.And) else ast.And()))
         elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
-            out.append(("not_remove", nid, lambda n: n.operand))
+            # cast 的理由同 `_kval`：這個 lambda 只會被套回這個
+            # `ast.UnaryOp` 節點。執行期是恆等函式。
+            out.append(("not_remove", nid,
+                        lambda n: cast(ast.UnaryOp, n).operand))
         elif isinstance(node, ast.Continue):
             out.append(("continue_to_pass", nid, lambda n: ast.Pass()))
         elif isinstance(node, ast.Break):
@@ -164,8 +180,11 @@ def _sites(source: str) -> list[tuple[str, int, Callable[[ast.AST], Any]]]:
         elif isinstance(node, ast.Return) and node.value is not None:
             out.append(("return_const", nid, _degrade_return))
         if nid in tests:
+            # `tests` 收的是 `ast.If`／`ast.While` 的 `.test`，那一欄的型別
+            # 就是 `ast.expr` ⇒ 包成 `not <expr>` 合法。cast 執行期是恆等函式。
             out.append(("not_insert", nid,
-                        lambda n: ast.UnaryOp(op=ast.Not(), operand=n)))
+                        lambda n: ast.UnaryOp(op=ast.Not(),
+                                              operand=cast(ast.expr, n))))
     return out
 
 
