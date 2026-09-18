@@ -1,13 +1,13 @@
-"""G7 驗證實驗 — C0/C1/C2/C3 等算力對照 + 信任性質演示。架構總規格 §11 / §10。
+"""G7 驗證實驗 — C0/C1/C2/C3 等算力對照 + 可究責性質演示。架構總規格 §11 / §10。
 
-頭條指標：隨輪數的學習曲線 + 路由收斂。C3 − C2 = 信任層淨貢獻
-（把 AutoHarness 引擎的功勞與信任層的功勞分開）。
+頭條指標：隨輪數的學習曲線 + 路由收斂。C3 − C2 = 可究責層淨貢獻
+（把 AutoHarness 引擎的功勞與可究責層的功勞分開）。
 
 對照（等算力＝同呼叫次數、同一顆 substrate、可檢查任務、固定種子可重現）：
   C0 裸 substrate 單次          —— 無閘道、無持久、無路由
   C1 naive orchestration        —— 隨機路由、無信譽、無累積（每輪換新身體）
   C2 +自合成/累積               —— 持久累積開（skill 越學越多），但路由隨機
-  C3 +Vacant 信任組合           —— 持久累積 + UCB 信譽路由 + 互查 + 究責
+  C3 +Vacant 究責組合           —— 持久累積 + UCB 信譽路由 + 互查 + 究責
 
 本機（Intel Mac 無 GPU）跑 EchoSubstrate（A 層機制模擬）；換 HermesACPSubstrate
 即為 3090 上的 B 層系統消融。全程零 API、零 GPU、完全確定性。
@@ -76,7 +76,7 @@ def _run_hosted(root: Path, mode: str) -> tuple[list[int], list[str]]:
 
 
 def run_c2(root: Path) -> list[int]:
-    """C2：持久累積開，但路由隨機（無信任層）。"""
+    """C2：持久累積開，但路由隨機（無可究責層）。"""
     return _run_hosted(root, "random")[0]
 
 
@@ -85,7 +85,7 @@ def run_c3(root: Path) -> tuple[list[int], list[str]]:
     return _run_hosted(root, "reputation")
 
 
-# === 信任性質演示（§10：prevents / detects）================================
+# === 可究責性質演示（§10：prevents / detects）================================
 @dataclass
 class TrustChecks:
     impersonation_rejected: bool
@@ -167,7 +167,7 @@ def run(root: Path) -> str:
     P("Vacant Phase 1 — 驗證實驗（A 層機制模擬，CPU、零 GPU、零 API）")
     P("=" * 64)
     P("")
-    P("【信任性質】§10 prevents / detects（key custody 假設下）")
+    P("【可究責性質】§10 prevents / detects（key custody 假設下）")
     P(f"  冒名被拒（簽章）         : {'✓' if checks.impersonation_rejected else '✗'}")
     P(f"  replay 被拒（seq 單調）  : {'✓' if checks.replay_rejected else '✗'}")
     P(f"  竄改被抓（hash chain）   : {'✓' if checks.tamper_detected else '✗'}")
@@ -179,7 +179,7 @@ def run(root: Path) -> str:
         ("C0 裸 substrate 單次", c0),
         ("C1 naive（隨機+無累積）", c1),
         ("C2 +累積（隨機路由）", c2),
-        ("C3 +Vacant 信任組合", c3),
+        ("C3 +Vacant 究責組合", c3),
     ]:
         early = _window_acc(seq, 0.0, 1 / 3)
         late = _window_acc(seq, 2 / 3, 1.0)
@@ -187,7 +187,7 @@ def run(root: Path) -> str:
         P(f"  {name:<24}{early:>8.0%}{late:>8.0%}{overall:>8.0%}")
     net = _window_acc(c3, 2 / 3, 1.0) - _window_acc(c2, 2 / 3, 1.0)
     P("")
-    P(f"  C3 − C2（後 1/3）= 信任層淨貢獻 ≈ {net:+.0%}")
+    P(f"  C3 − C2（後 1/3）= 可究責層淨貢獻 ≈ {net:+.0%}")
     P("")
     P("【路由收斂】C3 後 20 題各 expert 被選次數")
     tail = picks[-20:]

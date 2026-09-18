@@ -435,6 +435,33 @@ accountable", not "the agent is constrained".
    `commit_suite_with_gauge` *before* any candidate exists. The executor then runs only the
    code it rendered from the spec, so a supplier cannot disguise a program as a test.
 4. **k independent parties** → `peerexec.select_by_quorum`; disagreement names the key.
+
+   Three things the signatures do not tell you, and one of them costs you an afternoon:
+
+   - `drafts` elements are **`(code, worker_id)`** — source first, name second. Both are
+     `str`, so **swapping them is not a type error**: every "draft" fails the suite, the
+     panel agrees unanimously, and you get `refused=True` / `shipped_index=None` with
+     three chains that all verify. That is indistinguishable from the mechanism correctly
+     rejecting bad work — and refusal is a legitimate output of this system.
+     `select_by_quorum` applies a cheap **heuristic** shape check and raises
+     `peerexec.DraftOrderError` when the order looks reversed. It **has false negatives**
+     (both slots looking like code, or a draft with no newline and no `def `), so do not
+     read it as "the wrong order is always caught".
+   - `task` must carry **`entry_point`** (the function the suite exercises). The entry
+     point belongs to the *task*; the suite's copy is only checked against it. Without it
+     you get `SuiteSpecError(code="entry_point_unbound")` — **even when the `SuiteSpec`
+     you passed in declares `entry_point='solve'`**.
+   - A suite written as a mapping **requires `"v": 1`** (the spec version; 1 is its only
+     legal value):
+
+     ```python
+     suite = {"v": 1, "dialect": "mbpp", "entry_point": "solve",
+              "tests": [{"args": "[1, 2]", "expected": "3"}], "cmp": {}}
+     ```
+
+     Omitting it gives `bad_version:None`. `SuiteSpecError` carries `.code`
+     (machine-readable; this is what lands on the chain and in `refusal_reason`) and
+     `.hint` (human-readable). **Branch on `.code`, never on `str(exc)`.**
 5. **The agent must not be able to ship unverified work** → `VacantFirstController` plus an
    OS boundary (§A).
 

@@ -38,6 +38,52 @@ if you depend on them.
 - The build no longer warns about `vacant/web`, and the dashboard assets are confirmed
   present in the wheel.
 
+### Fixed — three blockers found by a clean-room verification (2026-09-18)
+
+An external agent was given the wheel and the READMEs only — no source — and ran 0.7.0 on
+Ubuntu. Three defects, all of the same shape: **the failure looks exactly like a normal
+output.**
+
+- **`vacant bench` reported a comparison it had never measured.** With every model call
+  failing (endpoint down), all calls were silently counted as wrong answers and rendered as
+  "plain 0%, vacant 0%, +0%", exit 0. That violates the project's own `infra_void` rule
+  (09 §3.5; already enforced by `ops/gain/r530/acceptance.py` and by `vacant record check`):
+  **a cell that was not measured is not a cell that measured zero.** `bench` now separates
+  right / wrong / **not measured**, refuses to print any comparison number when either arm
+  has zero measured cells (exit 2, with the endpoint, the per-arm denominators and the first
+  error verbatim), and prints the `infra_void` count separately when the failure is partial.
+  `Vacant.bench` gained `plain_void` / `vacant_void` / `plain_measured` / `vacant_measured` /
+  `paired_measured` / `infra_void` / `first_error`; the three rates are `None`, not `0.0`,
+  when their denominator is zero. `SolveResult` gained `ok_calls` / `failed_calls` /
+  `first_error` and the `infra_void` / `measured` properties.
+- **Our own banned terminology appeared in our own CLI output.** `llms.txt` says "do not
+  describe Vacant as a trust layer" and the `AGENTS.md` facts block carries a `never_use`
+  list, yet `vacant demo`
+  printed 「信任性質」/「信任層淨貢獻」, `vacant init` printed 「信任庫」and `vacant up`
+  printed 「信任機制」. Every user-visible string is now accountability-phrased. **Only
+  strings changed**: `trust_dir`, `trust_card`, `trust_on`, the `--trust` flag and the
+  `trust/` directory name are API surface and are untouched (the path is still spelled
+  `trust/` in the output, now glossed as "金鑰與究責紀錄"). The `never_use` list itself was
+  incomplete — it listed only the two English phrasings — so 「信任」／「信任層」 were added
+  to it, together with the scope (output and prose, never identifiers) and the test that
+  now enforces it. The MCP tool docstrings in
+  `vacant/mcp_server.py` were deliberately **not** touched — that text enters an agent's
+  prompt, so editing it changes behaviour and breaks comparability with existing runs.
+- **Three "follow the docs and it breaks" gaps**, one of which disguised itself as a
+  refusal: `select_by_quorum`'s `drafts` is `Sequence[tuple[str, str]]` and the order was
+  documented nowhere. Passing `(worker_id, code)` is not a type error — every "draft" fails
+  the suite, the panel agrees unanimously, and you get `refused=True` with three chains that
+  all verify, which is indistinguishable from the mechanism correctly rejecting bad work.
+  `select_by_quorum` now applies a cheap **heuristic** shape check and raises
+  `peerexec.DraftOrderError`; the heuristic has false negatives and says so, in the
+  docstring, in the exception text and in a test that pins one. `SuiteSpec` mappings require
+  `"v": 1` and the old message (`bad_version:None`) named neither the field nor its legal
+  value; `Executor.attest` requires `task["entry_point"]` and reported
+  `entry_point_unbound` even when the `SuiteSpec` passed in did declare one. Both messages
+  now say what to fix. `SuiteSpecError` was split into `.code` (machine-readable — this is
+  what goes on the chain and into `Selection.refusal_reason`, and it is **byte-for-byte
+  unchanged**) and `.hint` (human-readable, `str(exc)` only).
+
 ### Documentation
 
 - `README.md` / `README.en.md` / `README.ja.md` rewritten: a short human part
@@ -68,5 +114,9 @@ if you depend on them.
 
 ### Not changed
 
-No experiment code and no runtime behaviour. The acceptance sandbox, the chain format,
-the gauge, the arbiter and every recorded run are byte-for-byte what they were.
+No experiment code. The acceptance sandbox, the chain format, the gauge, the arbiter and
+every recorded run are byte-for-byte what they were. The clean-room fixes above changed
+runtime behaviour in exactly two places, both of them refusals that used to be silent:
+`vacant bench` now exits non-zero instead of printing an unmeasured comparison, and
+`select_by_quorum` raises on a reversed `drafts` argument. Every wire-facing string
+(`refusal_reason`, `SuiteSpecError.code`, attestation payloads) is unchanged.

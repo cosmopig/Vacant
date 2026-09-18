@@ -196,7 +196,23 @@ class SuiteSpecError(ValueError):
 
     刻意用例外而不是回傳 None：一個安靜回 None 的 validator 會讓呼叫端在
     `if spec:` 之外的路徑上繼續渲染，而那正是 fail-open。
+
+    兩個欄位，兩種讀者（2026-09-18 乾淨室驗證的產物）：
+
+    - `code`：**機器讀**的理由字串。它會原樣進收據、進 `Selection.refusal_reason`、
+      進 `BINDING_REFUSAL_REASONS` 的比對。**不准隨訊息一起漂**——它是 wire 面。
+    - `hint`：**人讀**的一句話，只在 `str(exc)`（也就是 traceback 那一行）出現。
+
+    為什麼要分開：`bad_version:None` 對機器是完整的資訊，對第一次照文件寫的人
+    什麼都沒說（欄位叫什麼？該填什麼？合法值有哪些？）。把提示塞進 `code` 會讓
+    收據字串隨文案改動而變；把提示拿掉則讓錯誤訊息變成謎語。所以兩個都留，
+    呼叫端要哪一個就取哪一個——**機器一律用 `.code`，不要用 `str()`**。
     """
+
+    def __init__(self, code: str, hint: str = "") -> None:
+        super().__init__(f"{code} — {hint}" if hint else code)
+        self.code = code
+        self.hint = hint
 
 
 # ── 字面值：解析、型別走訪、正規重寫 ────────────────────────────────────────
@@ -560,7 +576,15 @@ def _validate(obj: Any, entry_point: Any) -> SuiteSpec:
     if not isinstance(obj, Mapping):
         raise SuiteSpecError(f"spec_must_be_mapping:{type(obj).__name__}")
     if obj.get("v") != SPEC_VERSION:
-        raise SuiteSpecError(f"bad_version:{obj.get('v')!r}")
+        raise SuiteSpecError(
+            f"bad_version:{obj.get('v')!r}",
+            f"mapping 形態的第一個必填欄位是 `v`（SuiteSpec 版本），唯一合法值是 "
+            f"{SPEC_VERSION!r}；本次拿到 {obj.get('v')!r}"
+            f"{'（整個欄位漏了）' if 'v' not in obj else ''}。"
+            "最小合法形狀："
+            "{'v': 1, 'dialect': 'mbpp', 'entry_point': 'solve', "
+            "'tests': [{'args': '[1, 2]', 'expected': '3'}], 'cmp': {}}。"
+            "版本不相容一律拒收、不做相容轉換（CLAUDE.md 鐵律 6）")
     dialect = obj.get("dialect", "mbpp")
     if dialect not in DIALECTS:
         raise SuiteSpecError(f"unknown_dialect:{dialect!r}")
@@ -573,7 +597,14 @@ def _validate(obj: Any, entry_point: Any) -> SuiteSpec:
         # 打在一個沒有那個欄位的題目上）。**沒有東西可以綁 ⇒ 拒**，不准當成
         # 「這次不檢查」。與 `mismatch` 分開報，是因為兩者要修的地方不同：
         # mismatch 是套件在說謊，unbound 是題目資料不全。
-        raise SuiteSpecError("entry_point_unbound")
+        raise SuiteSpecError(
+            "entry_point_unbound",
+            "題目（task）少了 `entry_point`：請設 task['entry_point'] = "
+            f"{ep!r}（＝這份套件要驗的函式名）。"
+            "**不會**改用套件自己宣告的那一個——entry_point 屬於題目不屬於套件，"
+            "讓套件自己決定要驗哪個函式就是 R452b 的走私路徑。"
+            "`Executor.attest(task, ...)`／`select_by_quorum(task, ...)`／"
+            "`suite_gate(..., entry_point=...)` 讀的都是題目那一格")
     if entry_point is not _UNBOUND and ep != entry_point:
         # entry_point 是**題目**的欄位。套件敢跟題目不一樣，就是它在替客戶決定
         # 「要驗的是哪一個函式」——那是 R452b 那條走私管道的第一步。
@@ -827,7 +858,9 @@ def parse_check_code(check_code: str) -> dict[str, Any]:
         try:
             return _parse_lcb(check_code)
         except SuiteSpecError as lc:
-            raise SuiteSpecError(f"unrecognized_suite_shape(mbpp:{mb};lcb:{lc})") from lc
+            # 用 `.code` 不用 `str()`：這個字串本身也是理由通道，不准把人讀提示串進去。
+            raise SuiteSpecError(
+                f"unrecognized_suite_shape(mbpp:{mb.code};lcb:{lc.code})") from lc
 
 
 #: `compute(reference, entry_point, args_literals) -> list[(ok, literal_or_reason)]`
@@ -913,14 +946,14 @@ def from_task(task: Mapping[str, Any], *,
     try:
         parsed = parse_check_code(code)
     except SuiteSpecError as exc:
-        return Conversion(tid, None, f"unparsable:{exc}")
+        return Conversion(tid, None, f"unparsable:{exc.code}")
     if parsed["dialect"] == "lcb":
         try:
             spec = validate({"v": SPEC_VERSION, "dialect": "lcb",
                              "entry_point": parsed["entry_point"],
                              "tests": parsed["tests"], "cmp": {}}, entry_point=ep)
         except SuiteSpecError as exc:
-            return Conversion(tid, None, f"invalid_spec:{exc}")
+            return Conversion(tid, None, f"invalid_spec:{exc.code}")
         return Conversion(tid, spec, "", "", spec.n_tests)
 
     run = compute or (lambda r, e, a: subprocess_expected(r, e, a, timeout_s=timeout_s))
@@ -942,5 +975,5 @@ def from_task(task: Mapping[str, Any], *,
                     "regex_predicate": parsed["regex_predicate"]},
         }, entry_point=ep)
     except SuiteSpecError as exc:
-        return Conversion(tid, None, f"invalid_spec:{exc}", parsed["reference"])
+        return Conversion(tid, None, f"invalid_spec:{exc.code}", parsed["reference"])
     return Conversion(tid, spec, "", parsed["reference"], spec.n_tests)
