@@ -313,10 +313,14 @@ def render_argv(argv: list[str], feedback_text: str, *,
       `"file"` 模式下那條命令是使用者自己寫的、我們一個字都沒加，
       替它判 KS-1 等於改掉既有使用者的行為。
     """
+    # ⚠ **擋門在 early-return 之前**，不在之後：放在後面的話，
+    #   `--feedback-into prmopt`（打錯一個字）會走 `delivers_to_prompt()` 為 False
+    #   那條路，argv 原樣回去、零錯誤——**那正是本模組禁止的「安靜退回檔案模式」**，
+    #   而且收據還會照樣寫使用者以為的那個 mode。壞 mode 要死在這裡。
+    check_argv_has_placeholder(argv, mode)
     out = list(argv)
     if not delivers_to_prompt(mode):
         return out, argv_sha256(out), 0
-    check_argv_has_placeholder(argv, mode)
     tail = "" if not feedback_text else "\n\n" + feedback_text
     new: list[str] = []
     n_sub = 0
