@@ -1,0 +1,367 @@
+{
+  "seed": "g-r440-lcb2",
+  "n": 20,
+  "offset": 100,
+  "runner_git": {
+    "sha": "d8a308fced22d5df83bea297f2239cc8667aa576",
+    "dirty": true,
+    "branch": "feat/v2-four-stages"
+  },
+  "n_tasks_loaded": 20,
+  "gauge_scope": "bank",
+  "bank": "lcb2",
+  "bank_filter": null,
+  "run_complete": true,
+  "run_terminal": true,
+  "request_policy": {
+    "timeout_s": 900,
+    "retries": 4,
+    "backoff_s": 5.0,
+    "review_timeout_s": 380,
+    "review_retries": 2,
+    "reasoning_effort": "none",
+    "reasoning_effort_applies_to": "generate() and chat() (all arms)"
+  },
+  "pool": [
+    {
+      "agent_id": "careful-1",
+      "model": "qwen3-27b"
+    },
+    {
+      "agent_id": "careful-2",
+      "model": "qwen3-27b"
+    },
+    {
+      "agent_id": "plain-1",
+      "model": "qwen3-27b"
+    },
+    {
+      "agent_id": "plain-2",
+      "model": "qwen3-27b"
+    },
+    {
+      "agent_id": "hasty-1",
+      "model": "qwen3-27b"
+    },
+    {
+      "agent_id": "hasty-2",
+      "model": "qwen3-27b"
+    }
+  ],
+  "instrument": {
+    "n": 12,
+    "ref_pass": 12,
+    "broken_rejected": 12,
+    "detail": [
+      {
+        "task_id": "lcb_3771",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3805",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3779",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3607",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3653",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3809",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3737",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3760",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3594",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3629",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3791",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3793",
+        "ref_pass": true,
+        "broken_rejected": true,
+        "err": ""
+      }
+    ],
+    "visible_n": 12,
+    "visible_ref_pass": 12,
+    "visible_stub_rejected": 12,
+    "visible_detail": [
+      {
+        "task_id": "lcb_3771",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3805",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3779",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3607",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3653",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3809",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3737",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3760",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3594",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3629",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3791",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      },
+      {
+        "task_id": "lcb_3793",
+        "ref_pass": true,
+        "stub_rejected": true,
+        "err": ""
+      }
+    ],
+    "coverage_n": 20,
+    "coverage_visible_n": 20,
+    "coverage_missing_visible": []
+  },
+  "calibration": null,
+  "arms": {
+    "OFF": {
+      "tasks": 20,
+      "calls": 20,
+      "infra_void": 0,
+      "complete": true,
+      "terminal": true,
+      "processed": 20,
+      "accepted": 20,
+      "accepted_and_meets_demand": 11,
+      "demand_equals_output_rate": 0.55,
+      "coverage": 1.0,
+      "correct_delivery_rate": 0.55,
+      "raw_final_accuracy": 0.55,
+      "calls_per_task": 1.0,
+      "calls_per_correct_delivery": 1.8181818181818181,
+      "leaked": 9,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "eq5_gate_delivery_rate": null,
+      "eq5_vote_delivery_rate": null,
+      "eq5_same_choice_rate": null,
+      "eq5_same_choice_effective_rate": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 20,
+          "p50": 20033,
+          "p95": 61343,
+          "max": 143591
+        },
+        "by_role": {
+          "gen": {
+            "n": 20,
+            "p50": 20033,
+            "p95": 61343,
+            "max": 143591
+          }
+        },
+        "failed_attempts": 0
+      },
+      "wall_s": 618.7,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    },
+    "CONFORM": {
+      "tasks": 20,
+      "calls": 35,
+      "infra_void": 0,
+      "complete": true,
+      "terminal": true,
+      "processed": 20,
+      "accepted": 19,
+      "accepted_and_meets_demand": 12,
+      "demand_equals_output_rate": 0.631578947368421,
+      "coverage": 0.95,
+      "correct_delivery_rate": 0.6,
+      "raw_final_accuracy": 0.6,
+      "calls_per_task": 1.75,
+      "calls_per_correct_delivery": 2.9166666666666665,
+      "leaked": 7,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "eq5_gate_delivery_rate": null,
+      "eq5_vote_delivery_rate": null,
+      "eq5_same_choice_rate": null,
+      "eq5_same_choice_effective_rate": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 35,
+          "p50": 29445,
+          "p95": 78408,
+          "max": 159474
+        },
+        "by_role": {
+          "gen": {
+            "n": 35,
+            "p50": 29445,
+            "p95": 78408,
+            "max": 159474
+          }
+        },
+        "failed_attempts": 0
+      },
+      "wall_s": 1303.1,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    },
+    "HMIX": {
+      "tasks": 20,
+      "calls": 37,
+      "infra_void": 0,
+      "complete": true,
+      "terminal": true,
+      "processed": 20,
+      "accepted": 16,
+      "accepted_and_meets_demand": 11,
+      "demand_equals_output_rate": 0.6875,
+      "coverage": 0.8,
+      "correct_delivery_rate": 0.55,
+      "raw_final_accuracy": 0.55,
+      "calls_per_task": 1.85,
+      "calls_per_correct_delivery": 3.3636363636363638,
+      "leaked": 5,
+      "reviewer_accuracy": null,
+      "raw_reviewer_accuracy": null,
+      "reviewer_votes": 0,
+      "review_fail_claims": 0,
+      "machine_confirmed_counterexamples": 0,
+      "confirmed_counterexample_precision_against_hidden_truth": null,
+      "revision_transitions": null,
+      "eq5_gate_delivery_rate": null,
+      "eq5_vote_delivery_rate": null,
+      "eq5_same_choice_rate": null,
+      "eq5_same_choice_effective_rate": null,
+      "endpoint_latency_ms": {
+        "all": {
+          "n": 38,
+          "p50": 15758,
+          "p95": 70596,
+          "max": 87837
+        },
+        "by_role": {
+          "gen": {
+            "n": 37,
+            "p50": 15875,
+            "p95": 70596,
+            "max": 87837
+          },
+          "wire_probe": {
+            "n": 1,
+            "p50": 573,
+            "p95": 573,
+            "max": 573
+          }
+        },
+        "failed_attempts": 0
+      },
+      "wall_s": 767.0,
+      "cost_usd": 0.0,
+      "market_cost_usd": 0.0,
+      "market_cost_per_correct_delivery": 0.0
+    }
+  },
+  "equal_budget_comparison_valid": false
+}
