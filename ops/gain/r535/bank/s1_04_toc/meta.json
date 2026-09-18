@@ -1,0 +1,37 @@
+{
+  "expected_first_attempt_visible_fail": ">= 0.8",
+  "expected_is_design_intent_not_measurement": true,
+  "explicit_block_lines": 4,
+  "explicit_lines": [
+    "to_c(f) -> float"
+  ],
+  "hidden_is_superset_of_visible": true,
+  "hidden_n": 7,
+  "honesty": "擋得住已知壞解 ≠ 涵蓋真需求。參考解全過＋每個已知壞樁都被擋是**單邊**保證：它不代表可見套件涵蓋了 TASK.md 說的全部需求，也不准讀成「驗收套件固定點已解」。",
+  "origin": "authored 2026-09-19 for R535; not derived from LiveCodeBench, ops/gain/r530/bank, or vacant/codebench.py",
+  "required_names": [
+    "to_c"
+  ],
+  "source_data": "ops/gain/r535/tasks_s1.py",
+  "stakes": {
+    "bad_a.py": "right names, wrong behaviour",
+    "bad_b.py": "third stake (usually the wrong return shape)",
+    "bad_c.py": "wrong name: to_c not defined"
+  },
+  "stratum": "S1",
+  "task_id": "s1_04_toc",
+  "title": "Fahrenheit onto the Celsius scale",
+  "trap": "name (fahrenheit_to_celsius is the natural guess) + the rounding",
+  "visible_n": 2,
+  "withheld": [],
+  "workspace_template": [
+    "TASK.md"
+  ],
+  "workspace_template_pc": [
+    "TASK_explicit.md"
+  ],
+  "workspace_template_pc_note": "PC 臂把 TASK_explicit.md 複製進工作區**取代 TASK.md**（落地時改名成 TASK.md），其餘位元組與別的臂逐字相同 —— 否則 PC 不是同一題的天花板。",
+  "wrong_name_stake_missing_names": [
+    "to_c"
+  ]
+}
