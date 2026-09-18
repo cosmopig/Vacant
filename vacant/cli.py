@@ -1,6 +1,8 @@
 """vacant CLI — 產品強制入口、究責生態維運、demo 與自我檢測。
 
     vacant run "<task>" --test "assert ..." [--agent hermes]
+    vacant run -- <任何 agent 命令>                            # V0 launcher，見 docs/VACANT_RUN.md
+                                                              # （有裸 `--` 就走這條；ops/vacantrun/launcher.py）
     vacant init <name> [--niche reverse --niche caesar3] [--root DIR]
     vacant info  <name> [--root DIR]
     vacant call  <caller> <niche> --input <s> [--root DIR]   # 需先 init 出 caller + 一個能解該 niche 的 expert
@@ -947,8 +949,39 @@ def cmd_trace(args: argparse.Namespace) -> int:
     return 0
 
 
+def _agent_run_shim(argv: list[str]) -> int:
+    """`vacant run -- <任何 agent 命令>`：V0 launcher 的入口。
+
+    **為什麼用 `--` 當分岔而不是新開一個子命令名**：`vacant run "<task>"`
+    （controller 那條產品入口）已經佔著 `run` 這個名字，而人類要的介面字面上
+    就是 `vacant run -- <cmd>`。兩者用 `--` 分得開——controller 那條從來不需要
+    一個裸的 `--`（它的下游 argv 走 `--agent-argv` 的 JSON 陣列）。
+
+    ⚠ launcher 住在 `ops/vacantrun/`（不是 `vacant/` 套件裡），因為它的判斷層
+      複用 `ops/gain/r530/{acceptance,receipts,wshash}`，而 `ops/` 不進 wheel。
+      所以這條路徑**只在 repo checkout 裡有**；裝在別處要給清楚的訊息，
+      不要丟一個看不懂的 ImportError。
+    """
+    import sys as _sys
+    from pathlib import Path as _Path
+
+    repo = _Path(__file__).resolve().parents[1]
+    if str(repo) not in _sys.path:
+        _sys.path.insert(0, str(repo))
+    try:
+        from ops.vacantrun.launcher import main as _launcher_main
+    except ModuleNotFoundError as exc:                       # pragma: no cover
+        print(f"`vacant run -- <cmd>` 需要 repo checkout（找不到 ops/vacantrun）："
+              f"{exc}", file=sys.stderr)
+        return 2
+    return _launcher_main(argv)
+
+
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    raw = list(sys.argv[1:] if argv is None else argv)
+    if raw[:1] == ["run"] and "--" in raw[1:]:
+        return _agent_run_shim(raw[1:])
+    args = build_parser().parse_args(raw)
     return args.func(args)
 
 
