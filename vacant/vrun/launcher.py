@@ -157,7 +157,7 @@ def _freeze(workspace: pathlib.Path, dest: pathlib.Path) -> tuple[str, str]:
     return wshash.tree_hash(dest), wshash.tree_hash(workspace)
 
 
-def _kill_group(proc: subprocess.Popen) -> bool:
+def _kill_group(proc: subprocess.Popen) -> tuple[bool, str | None]:
     """把 agent 的**整個行程群組**殺掉。回「群組裡還有活的嗎」。
 
     `proc.wait()` 只等**直接子行程**。框架把真正的工作 fork 出去（背景 lint、
@@ -178,12 +178,20 @@ def _kill_group(proc: subprocess.Popen) -> bool:
       **不是「沒有孤兒」，是「這台機器上我們量不到」**。展場機器是 Linux VM。
     """
     if not hasattr(os, "killpg"):
-        return False
+        return False, "no-killpg"
     try:
         os.killpg(proc.pid, signal.SIGKILL)
-    except (ProcessLookupError, PermissionError, OSError):
-        return False        # 群組已經空了（常態）／不是我們的群組
-    return True
+    except ProcessLookupError:
+        return False, None          # 群組已經空了——**常態**，不是問題
+    except PermissionError as e:
+        # ⚠ **這不是「沒有孤兒」。** 送不到訊號代表「它還在而且我們管不到」，
+        #   是最糟的情況。舊版把它與「群組空了」一起記成 `False`，於是收據上
+        #   兩種完全相反的處境同形。同一個混淆在 `vrun/sandbox.py` 造成過
+        #   vacant-dev 上 72 個孤兒（跨 uid `killpg` 拿 EPERM 被吞掉）。
+        return False, f"PermissionError:{e.errno}"
+    except OSError as e:
+        return False, f"{type(e).__name__}:{e.errno}"
+    return True, None
 
 
 def _sign_attempt(book, ident, *, task_id: str, arm: str, rec: dict,
@@ -427,7 +435,10 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
             #   那樣 `ws_end_sha256` 綁的就不是交付當下的那棵樹。
             #   `None` ＝ 這一格沒分家（`--stdin inherit`）所以沒量，
             #   與 `False`（量了、群組已空）**不可以同形**。
-            rec["orphans_killed"] = _kill_group(proc) if new_session else None
+            if new_session:
+                rec["orphans_killed"], rec["orphan_kill_error"] = _kill_group(proc)
+            else:
+                rec["orphans_killed"], rec["orphan_kill_error"] = None, None
             rec["agent_wall_s"] = round(time.time() - t_a, 3)
             # ⚠ **讀 `stats` 之前先把 proxy 排空。** `requests_seen` 是在回應
             #   送出**之後**才加的，所以 agent 拿到回應、寫完檔、退出時，

@@ -199,14 +199,27 @@ def _run_agent_process(
         try:
             returncode = process.wait(timeout=timeout)
         except subprocess.TimeoutExpired as exc:
+            # ⚠ 收尾不准把逾時判定弄丟：`killpg` 除了 `ProcessLookupError`
+            #   還會丟 `PermissionError`（子行程在 `wait` 逾時與這一行之間結束，
+            #   `process.pid` 那個 pgid 就可能已經不屬於我們了）。例外從這裡逃出去，
+            #   呼叫端收到的就不是 `TimeoutExpired` 而是一個爆炸。
+            #   `process.wait()` 也不給逾時：殺不掉的話它會永遠等下去。
+            #   2026-09-19 在 macOS CI 上從 `vacant/checks.py` 的同一形狀實際炸過。
             if os.name == "posix":
                 try:
                     os.killpg(process.pid, signal.SIGKILL)
-                except ProcessLookupError:
+                except (ProcessLookupError, PermissionError):
                     pass
-            else:  # pragma: no cover - Windows
-                process.kill()
-            process.wait()
+                except Exception:                            # noqa: BLE001
+                    pass
+            try:
+                process.kill()          # killpg 沒吃到就退回單一行程
+            except Exception:                                # noqa: BLE001
+                pass
+            try:
+                process.wait(timeout=5)
+            except Exception:                                # noqa: BLE001
+                pass
             stdout_file.seek(0)
             stderr_file.seek(0)
             raise subprocess.TimeoutExpired(

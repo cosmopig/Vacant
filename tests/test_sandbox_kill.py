@@ -123,3 +123,59 @@ def test_sudo_path_is_attempted_for_unshare_backend(monkeypatch):
 def test_unshare_backend_overrides_the_kill_path():
     """擋門：有人把覆寫拿掉，這條就紅。"""
     assert sb.UnshareSandbox._kill_group is not sb.Sandbox._kill_group
+
+
+# ══ 同一個 bug 的另外三處（2026-09-19 一起收）══════════════════════════════
+def test_checks_timeout_survives_a_permission_error(monkeypatch, tmp_path):
+    """`vacant/checks.py` 的逾時收尾**不准把逾時判定弄丟**。
+
+    2026-09-19 在 macOS CI 上實際炸過：`vacant/checks.py:614: PermissionError`。
+    舊版只 catch `ProcessLookupError`，於是子行程在 `communicate` 逾時與 `killpg`
+    之間結束掉時，例外會從逾時處理器逃出去——呼叫端收到的不是「超時」而是爆炸。
+    """
+    from vacant import checks
+
+    src = checks.__loader__.get_source("vacant.checks") or ""
+    # ⚠ 錨在 `os.killpg` 上，不要錨在 `except subprocess.TimeoutExpired:`——
+    #   那個字串在 runner **樣板的字串常值**裡也出現一次，`index` 會先找到它。
+    i = src.index("os.killpg(proc.pid")
+    seg = src[max(0, i - 400):i + 1400]
+    assert "PermissionError" in seg, "逾時收尾沒有處理 PermissionError"
+    assert "proc.communicate(timeout=" in seg, "communicate 沒給逾時，殺不掉就會卡住"
+
+
+def test_controller_timeout_survives_a_permission_error():
+    """`vacant/controller.py` 是同一個形狀的第三處。"""
+    from vacant import controller
+
+    src = controller.__loader__.get_source("vacant.controller") or ""
+    i = src.index("except subprocess.TimeoutExpired as exc:")
+    seg = src[i:i + 1600]
+    assert "PermissionError" in seg
+    assert "process.wait(timeout=" in seg, "wait 沒給逾時，殺不掉就會卡住"
+
+
+def test_launcher_distinguishes_empty_group_from_not_ours(monkeypatch):
+    """⚠ 「群組空了」與「不是我們的群組」**不可以同形**。
+
+    舊版兩者都記成 `orphans_killed=False`，於是收據上兩種完全相反的處境
+    長得一模一樣。送不到訊號代表「它還在而且我們管不到」，是最糟的情況。
+    """
+    from vacant.vrun import launcher
+
+    class _P:
+        pid = 424242
+
+    monkeypatch.setattr(launcher.os, "killpg",
+                        lambda *_: (_ for _ in ()).throw(ProcessLookupError()))
+    assert launcher._kill_group(_P()) == (False, None), "群組空了不該記成錯誤"
+
+    monkeypatch.setattr(
+        launcher.os, "killpg",
+        lambda *_: (_ for _ in ()).throw(PermissionError(1, "Operation not permitted")))
+    killed, err = launcher._kill_group(_P())
+    assert killed is False
+    assert err and "PermissionError" in err, "管不到卻沒留下痕跡"
+
+    monkeypatch.setattr(launcher.os, "killpg", lambda *_: None)
+    assert launcher._kill_group(_P()) == (True, None)
