@@ -1,6 +1,6 @@
 {
   "name": "r532_stronger_model",
-  "decision": "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
+  "decision": "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md",
   "launcher": "ops/gain/launch_r532_block.sh",
   "arms": "OFF,CONFORM,HMIX",
   "request_timeout_s": 900,

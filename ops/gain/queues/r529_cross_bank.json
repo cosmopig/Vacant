@@ -1,6 +1,6 @@
 {
   "name": "r529_cross_bank",
-  "decision": "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+  "decision": "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
   "launcher": "ops/gain/launch_r529_block.sh",
   "arms": "OFF,CONFORM,HMIX",
   "request_timeout_s": 900,
