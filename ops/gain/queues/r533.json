@@ -1,0 +1,312 @@
+{
+ "queue": "r533",
+ "note": "逐塊照抄 R529 的 (bank,filter,seed,offset,n)；只換推論模式與後端",
+ "blocks": [
+  {
+   "name": "g_r533_hep_a1",
+   "source_r529_block": "g_r529_hep_a1",
+   "bank": "humanevalplus",
+   "n": 20,
+   "offset": 0,
+   "seed": "g-r529-he"
+  },
+  {
+   "name": "g_r533_hep_a2",
+   "source_r529_block": "g_r529_hep_a2",
+   "bank": "humanevalplus",
+   "n": 20,
+   "offset": 20,
+   "seed": "g-r529-he"
+  },
+  {
+   "name": "g_r533_hep_a3",
+   "source_r529_block": "g_r529_hep_a3",
+   "bank": "humanevalplus",
+   "n": 20,
+   "offset": 40,
+   "seed": "g-r529-he"
+  },
+  {
+   "name": "g_r533_hep_a4",
+   "source_r529_block": "g_r529_hep_a4",
+   "bank": "humanevalplus",
+   "n": 20,
+   "offset": 60,
+   "seed": "g-r529-he"
+  },
+  {
+   "name": "g_r533_hep_a5",
+   "source_r529_block": "g_r529_hep_a5",
+   "bank": "humanevalplus",
+   "n": 20,
+   "offset": 80,
+   "seed": "g-r529-he"
+  },
+  {
+   "name": "g_r533_hep_a6",
+   "source_r529_block": "g_r529_hep_a6",
+   "bank": "humanevalplus",
+   "n": 20,
+   "offset": 100,
+   "seed": "g-r529-he"
+  },
+  {
+   "name": "g_r533_hep_a7",
+   "source_r529_block": "g_r529_hep_a7",
+   "bank": "humanevalplus",
+   "n": 20,
+   "offset": 120,
+   "seed": "g-r529-he"
+  },
+  {
+   "name": "g_r533_hep_a8",
+   "source_r529_block": "g_r529_hep_a8",
+   "bank": "humanevalplus",
+   "n": 16,
+   "offset": 140,
+   "seed": "g-r529-he"
+  },
+  {
+   "name": "g_r533_lcb3h_a1",
+   "source_r529_block": "g_r529_lcb3h_a1",
+   "bank": "lcb3",
+   "n": 20,
+   "offset": 0,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=hard"
+  },
+  {
+   "name": "g_r533_lcb3h_a2",
+   "source_r529_block": "g_r529_lcb3h_a2",
+   "bank": "lcb3",
+   "n": 20,
+   "offset": 20,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=hard"
+  },
+  {
+   "name": "g_r533_lcb3h_a3",
+   "source_r529_block": "g_r529_lcb3h_a3",
+   "bank": "lcb3",
+   "n": 14,
+   "offset": 40,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=hard"
+  },
+  {
+   "name": "g_r533_lcb3m_a1",
+   "source_r529_block": "g_r529_lcb3m_a1",
+   "bank": "lcb3",
+   "n": 20,
+   "offset": 0,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=medium"
+  },
+  {
+   "name": "g_r533_lcb3m_a2",
+   "source_r529_block": "g_r529_lcb3m_a2",
+   "bank": "lcb3",
+   "n": 20,
+   "offset": 20,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=medium"
+  },
+  {
+   "name": "g_r533_lcb3m_a3",
+   "source_r529_block": "g_r529_lcb3m_a3",
+   "bank": "lcb3",
+   "n": 20,
+   "offset": 40,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=medium"
+  },
+  {
+   "name": "g_r533_lcb3m_a4",
+   "source_r529_block": "g_r529_lcb3m_a4",
+   "bank": "lcb3",
+   "n": 20,
+   "offset": 60,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=medium"
+  },
+  {
+   "name": "g_r533_lcb3m_a5",
+   "source_r529_block": "g_r529_lcb3m_a5",
+   "bank": "lcb3",
+   "n": 20,
+   "offset": 80,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=medium"
+  },
+  {
+   "name": "g_r533_lcb3m_a6",
+   "source_r529_block": "g_r529_lcb3m_a6",
+   "bank": "lcb3",
+   "n": 20,
+   "offset": 100,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=medium"
+  },
+  {
+   "name": "g_r533_lcb3m_a7",
+   "source_r529_block": "g_r529_lcb3m_a7",
+   "bank": "lcb3",
+   "n": 15,
+   "offset": 120,
+   "seed": "g-r529-lcb3",
+   "bank_filter": "difficulty=medium"
+  },
+  {
+   "name": "g_r533_mbpp_a1",
+   "source_r529_block": "g_r529_mbpp_a1",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 0,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a10",
+   "source_r529_block": "g_r529_mbpp_a10",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 180,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a11",
+   "source_r529_block": "g_r529_mbpp_a11",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 200,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a12",
+   "source_r529_block": "g_r529_mbpp_a12",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 220,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a13",
+   "source_r529_block": "g_r529_mbpp_a13",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 240,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a14",
+   "source_r529_block": "g_r529_mbpp_a14",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 260,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a15",
+   "source_r529_block": "g_r529_mbpp_a15",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 280,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a16",
+   "source_r529_block": "g_r529_mbpp_a16",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 300,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a17",
+   "source_r529_block": "g_r529_mbpp_a17",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 320,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a18",
+   "source_r529_block": "g_r529_mbpp_a18",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 340,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a19",
+   "source_r529_block": "g_r529_mbpp_a19",
+   "bank": "evalplus",
+   "n": 11,
+   "offset": 360,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a2",
+   "source_r529_block": "g_r529_mbpp_a2",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 20,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a3",
+   "source_r529_block": "g_r529_mbpp_a3",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 40,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a4",
+   "source_r529_block": "g_r529_mbpp_a4",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 60,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a5",
+   "source_r529_block": "g_r529_mbpp_a5",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 80,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a6",
+   "source_r529_block": "g_r529_mbpp_a6",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 100,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a7",
+   "source_r529_block": "g_r529_mbpp_a7",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 120,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a8",
+   "source_r529_block": "g_r529_mbpp_a8",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 140,
+   "seed": "g-r529-mbpp"
+  },
+  {
+   "name": "g_r533_mbpp_a9",
+   "source_r529_block": "g_r529_mbpp_a9",
+   "bank": "evalplus",
+   "n": 20,
+   "offset": 160,
+   "seed": "g-r529-mbpp"
+  }
+ ]
+}
