@@ -714,6 +714,32 @@ def test_v2_missing_placeholder_with_prompt_mode_is_a_hard_stop(tmp_path,
              max_attempts=None, ws_name="ws_none", run_name="run_none")
 
 
+def test_v2_ks1_applies_to_the_users_own_command(tmp_path, upstream):
+    """鐵律 1 不因為換了管道就放鬆：**責任修辭在 argv 裡一樣不准送出去。**
+
+    這一格的來源是使用者自己寫的那條命令（V1 那條是客戶測試的訊息帶進來的）。
+    判 `infra_void`——鐵律 1 說的是「違反＝run 作廢」，不是「拒交」。
+    ⚠ 這也是 `render_argv` 那個 `except KS1Violation` 分支唯一的可執行證明：
+      沒有它，那段錯誤處理是死碼。
+    """
+    ws = _ws(tmp_path, "ws_ks1")
+    trace = tmp_path / "trace_ks1.jsonl"
+    argv = _argv_agent(tmp_path, "always_bad", trace,
+                       "you are responsible for solution.py" + PH)
+    run_dir = tmp_path / "run_ks1"
+    s = launcher.run(argv, workspace=ws, run_dir=run_dir,
+                     suite_dir=_suite(tmp_path), vacant_on=True,
+                     task_id="ks1_argv", sandbox_name="none",
+                     retry_arm="revise", max_attempts=2,
+                     feedback_into="prompt")
+    assert s["stop_reason"] == "ks1_violation"
+    assert s["infra_void"] and "KS1Violation" in s["infra_void"]
+    assert launcher.exit_code(s) == launcher.EXIT_VOID
+    # 作廢的 run 不落收據鏈（基建事件不是裁決），agent 也一次都沒被 spawn。
+    assert not (run_dir / f"receipts_{launcher.ARM_ON}.ndjson").exists()
+    assert not trace.exists()
+
+
 def test_v2_placeholder_must_be_at_the_end_of_that_argument():
     """插在中間會讓 provider 的前綴快取整段失效，**而那個成本不會出現在
 
