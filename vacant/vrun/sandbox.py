@@ -360,9 +360,10 @@ def host_tree_root() -> pathlib.Path:
     「往上數幾層」不再有唯一答案：repo checkout 底下是 repo 根，
     `pip install` 之後是 site-packages。**兩種情況要問的是同一個問題**
     （宿主那棵樹看不看得到），所以這裡兩種都認：認得出 repo 就用 repo 根
-    （裡面才有 `ops/gain/r530/hidden/`），認不出就退回套件安裝目錄的上一層。
+    （裡面才有 `ops/gain/r530/hidden/`），認不出就退回**本套件自己的安裝目錄**
+    （`<site-packages>/vacant`，即 `__file__` 往上兩層）。
 
-    ⚠ 誠實邊界：退回那一條問的是「site-packages 看不看得到」，
+    ⚠ 誠實邊界：退回那一條問的是「`<site-packages>/vacant` 這個目錄看不看得到」，
       **不是**「hidden/ 看不看得到」——`pip install` 的機器上根本沒有 `hidden/`。
       兩者都是「宿主檔案系統有沒有漏進沙箱」的指標，但只有前者直接對著 V/GT
       紅線。落盤的 `probe_detail.repo_visible.path` 寫的是實際問的那個路徑，
