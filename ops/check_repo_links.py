@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""死連結／死路徑擋門：repo 裡指向不存在檔案的引用，一個都不准有。
+"""死連結／死路徑擋門＋實驗紀錄歸位：repo 裡指向不存在檔案的引用，一個都不准有。
 
 這支在架構裡承重什麼：2026-09-18 把 227 份實驗紀錄從根目錄搬進 `decisions/`
 之後，「引用還對不對」不能靠人眼。本檔把四類引用各自變成可執行的檢查：
@@ -27,9 +27,16 @@
      自己補上 `decisions/` 前綴即可。新一輪的實際發射走的是
      `ops/gain/r5xx/*_queue.sh`，那些已經指向新路徑。
 
+第二件事：**根目錄不准有實驗紀錄檔**。2026-09-18 把 227 份搬進 `decisions/` 之後，
+規則是「檔名前綴決定它住哪」（`_RECORD_HOME`），不是一次性的 `git mv` 清單。
+別的分支在搬家之前新建的裁決檔會以**根目錄路徑**合併進來而落單，所以這支同時是
+擋門也是搬運工：`--relocate` 用當下根目錄的 glob 把落單的一行歸位（`git mv`，
+保留歷史），不吃任何寫死的檔名清單。
+
 用法：
-  python3 ops/check_repo_links.py            # rc=0 全過；rc=1 有死連結
-  python3 ops/check_repo_links.py --verbose  # 連歷史紀錄與統計一起印
+  python3 ops/check_repo_links.py             # rc=0 全過；rc=1 有死連結或有落單紀錄檔
+  python3 ops/check_repo_links.py --verbose   # 連歷史／凍結紀錄一起印
+  python3 ops/check_repo_links.py --relocate  # 把根目錄落單的紀錄檔 git mv 進 decisions/
 """
 from __future__ import annotations
 
@@ -47,6 +54,47 @@ _HISTORICAL = (".launch.log", ".log", ".jsonl")
 # 凍結的紀錄目錄：裡面的 `--decision` 舊路徑不判紅（理由見模組 docstring 第 2 點）。
 # ⚠ 只赦免 `launch` 這一類。同一份檔案裡的 markdown 死連結照樣判紅。
 _FROZEN_RECORD_DIRS = ("decisions/",)
+
+# **規則，不是清單**：檔名前綴 -> 它該住的目錄。新增前綴就加在這裡，
+# 不要在別處再寫一份對照表。`--relocate` 與根目錄擋門都只讀這一份。
+_RECORD_HOME: dict[str, str] = {
+    "DECISION_": "decisions",
+    "CRITERION_": "decisions/criteria",
+    "CONCLUSION_": "decisions/conclusions",
+    "FINDINGS_": "decisions/conclusions",
+    "PREREG_": "decisions/prereg",
+    "MORNING_": "decisions/notes",
+    "TASKS_OVERNIGHT_": "decisions/notes",
+}
+
+
+def strays() -> list[tuple[str, str]]:
+    """根目錄落單的實驗紀錄檔 -> (現在的路徑, 該去的路徑)。用 glob 掃當下的樹。"""
+    out = []
+    for p in sorted(ROOT.glob("*.md")):
+        for prefix, home in _RECORD_HOME.items():
+            if p.name.startswith(prefix):
+                out.append((p.name, f"{home}/{p.name}"))
+                break
+    return out
+
+
+def relocate() -> int:
+    moved = strays()
+    if not moved:
+        print("OK：根目錄沒有落單的實驗紀錄檔，不用搬")
+        return 0
+    for src, dst in moved:
+        (ROOT / dst).parent.mkdir(parents=True, exist_ok=True)
+        r = subprocess.run(["git", "-C", str(ROOT), "mv", src, dst],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            print(f"搬不動 {src} -> {dst}：{r.stderr.strip()}")
+            return 1
+        print(f"git mv {src} -> {dst}")
+    print(f"共搬了 {len(moved)} 份。記得檢查有沒有引用指著舊路徑："
+          "`python3 ops/check_repo_links.py`")
+    return 0
 
 # 具名排除（不是安靜跳過）：這些目標**本來就不該存在於工作樹**。
 # 每一筆都要寫得出理由，沒理由的不准進這張表。
@@ -120,8 +168,10 @@ def scan() -> tuple[list[tuple], list[tuple]]:
 
             for kind, target, mode in found:
                 tgt = target.split("#", 1)[0].strip()
-                if not tgt or tgt.startswith(("<", "$", "{")):
-                    continue             # 樣板佔位符
+                # 樣板佔位符：`<OUT>`、`$VAR`、`{name}`、`DECISION_xxx.md`、含刪節號的
+                if (not tgt or tgt.startswith(("<", "$", "{"))
+                        or "xxx" in tgt or "…" in tgt or "..." in tgt):
+                    continue
                 if tgt in _NAMED_EXCLUSIONS:
                     continue             # 具名排除，理由在 _NAMED_EXCLUSIONS
                 if mode == "rel":
@@ -144,7 +194,13 @@ def scan() -> tuple[list[tuple], list[tuple]]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--relocate", action="store_true",
+                    help="把根目錄落單的實驗紀錄檔 git mv 進 decisions/（規則見 _RECORD_HOME）")
     a = ap.parse_args()
+    if a.relocate:
+        return relocate()
+
+    loose = strays()
     dead, historical = scan()
 
     if a.verbose and historical:
@@ -153,11 +209,18 @@ def main() -> int:
             print(f"  [{kind}] {f}:{i} -> {tgt}")
         print()
 
+    if loose:
+        print(f"根目錄有 {len(loose)} 份落單的實驗紀錄檔（根目錄留給「這個專案是什麼」）：")
+        for src, dst in loose:
+            print(f"  {src}  ->  {dst}")
+        print("跑 `python3 ops/check_repo_links.py --relocate` 一行歸位（git mv，保留歷史）。")
+
     if dead:
         print(f"死連結 {len(dead)} 筆：")
         for kind, f, i, tgt, line in dead:
             print(f"  [{kind}] {f}:{i} -> {tgt}")
             print(f"        {line}")
+    if dead or loose:
         return 1
 
     n_hist = (f"（另有 {len(historical)} 筆歷史／凍結紀錄，具名不判紅，"

@@ -252,16 +252,18 @@ def test_headline_must_be_about_this_run(idx):
     assert r444["headline"] is None
     assert r444["headline_from"] is None
     assert r444["headline_source"] == "no_settlement_decision"
-    assert r444["related_settlements"] == [
+    assert [pathlib.Path(x).name for x in r444["related_settlements"]] == [
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"]
     assert "E3_WRAPUP" not in json.dumps(
         [r444["headline_from"], r444["related_settlements"]])
 
-    assert (by["g_r445_conform_mbpp_ext"]["headline_from"]
+    # `headline_from` 是**相對 repo 根的路徑**（2026-09-18 起 `decisions/...`）。
+    # 這裡釘的是「是哪一份文件」，所以比 basename。
+    assert (pathlib.Path(by["g_r445_conform_mbpp_ext"]["headline_from"]).name
             == "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md")
-    assert (by["g_r449_eq5_lcb2"]["headline_from"]
+    assert (pathlib.Path(by["g_r449_eq5_lcb2"]["headline_from"]).name
             == "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md")
-    assert (by["g_r441_gemma_only_mbpp_b"]["headline_from"]
+    assert (pathlib.Path(by["g_r441_gemma_only_mbpp_b"]["headline_from"]).name
             == "DECISION_20260902_R516_E1_FINAL_WRAPUP.md")
 
     # 通則：有 headline 就必須真的被那份文件點名（標題或宣告區）。
@@ -285,8 +287,12 @@ def test_prereg_is_never_a_verdict(idx):
     """
     for r in idx["runs"]:
         for rel in r["verdict_decisions"] + [r["headline_from"] or ""]:
-            assert "PREREG" not in rel.upper(), (r["name"], rel)
-            assert not rel.startswith("CRITERION"), (r["name"], rel)
+            # ⚠ 一定要比 **basename**：搬進 `decisions/criteria/` 之後，
+            #   `rel.startswith("CRITERION")` 永遠是 False ⇒ 這條會安靜地變成
+            #   恆真句，CRITERION 混進裁決也擋不住。
+            name = pathlib.Path(rel).name
+            assert "PREREG" not in name.upper(), (r["name"], rel)
+            assert not name.startswith("CRITERION"), (r["name"], rel)
 
 
 def test_analysis_dirs_are_not_evidence(idx):
@@ -317,7 +323,8 @@ def test_decisions_are_found_even_from_inside_a_worktree(idx):
     釘法：跨 checkout 都成立的事實（r444 的併庫收官一定被掃到）。
     """
     by = {r["name"]: r for r in idx["runs"]}
-    assert by["g_r444_conform_mbpp"]["related_settlements"] == [
+    assert [pathlib.Path(x).name
+            for x in by["g_r444_conform_mbpp"]["related_settlements"]] == [
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"]
     n_with_refs = sum(1 for r in idx["runs"] if r["decision_refs"])
     assert n_with_refs > 50, (

@@ -111,7 +111,11 @@
   自己補 `decisions/` 前綴即可。實際在跑的 `ops/gain/r5xx/*_queue.sh` 已經是新路徑。
 - `ops/check_repo_links.py` — 死連結／死路徑擋門（markdown 連結、`ROOT / "..."` 字面值、
   `--decision` 參數、GitHub 絕對網址四類）。上面那兩類「刻意不改」的東西是**具名排除**、
-  `--verbose` 數得出來，不是安靜跳過。
+  `--verbose` 數得出來，不是安靜跳過。它同時擋「根目錄有落單的紀錄檔」：
+  **住哪裡由檔名前綴決定**（`_RECORD_HOME`，單一真相來源），不是一次性的搬家清單。
+  在搬家之前開的分支合併進來時，那份新裁決會以根目錄路徑落單——
+  `python3 ops/check_repo_links.py --relocate` 一行歸位（glob 掃當下的樹＋`git mv`，
+  不吃寫死的檔名），CI 也會在落單時就紅。
 
 ### 展件可直接複用的（實體場地，秒級互動）
 
