@@ -66,7 +66,14 @@ version = { attr = "vacant.__version__" }
 # `vacant.web` 是資產目錄（沒有 __init__.py，不是可 import 的模組），但必須
 # 列在這裡：只寫 package-data 的話 setuptools 會警告「vacant.web 不在 packages」。
 # 內容由下面的 package-data 決定（已驗：wheel 內有 vacant/web/app.{html,css,js}）。
-packages = ["vacant", "vacant.web"]
+#
+# `vacant.vrun`＝`vacant demo gate` 與 `vacant run -- <cmd>` 的判斷層＋執行層
+# （2026-09-18 從 `ops/vacantrun/` 與 `ops/gain/r530/` 搬進來）。**它必須在
+# wheel 裡**：不在的話 `pip install vacant-network` 的人跑第一屏只會拿到一句
+# 「請先 clone」。`ops/` 底下留的是 re-export，所以判準仍然只有一份。
+# ⚠ 刻意**不**把頂層 `ops` 打進 wheel：PyPI 上 `ops` 是 Juju 的套件，
+#   同名會在別人的 site-packages 裡安靜覆蓋檔案——失敗方式很糟。
+packages = ["vacant", "vacant.vrun", "vacant.web"]
 
 [tool.setuptools.package-data]
 # 觀測台的靜態資產隨套件安裝（無 build step；dashboard 由 /static/ 供應）

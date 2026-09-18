@@ -2,12 +2,12 @@
 
     vacant run "<task>" --test "assert ..." [--agent hermes]
     vacant run -- <任何 agent 命令>                            # V0 launcher，見 docs/VACANT_RUN.md
-                                                              # （有裸 `--` 就走這條；ops/vacantrun/launcher.py）
+                                                              # （有裸 `--` 就走這條；vacant/vrun/launcher.py）
     vacant init <name> [--niche reverse --niche caesar3] [--root DIR]
     vacant info  <name> [--root DIR]
     vacant call  <caller> <niche> --input <s> [--root DIR]   # 需先 init 出 caller + 一個能解該 niche 的 expert
     vacant demo gate                                          # 30 秒：假 agent 宣告完成 → 閘門拒交 → 收據
-                                                              # （零設定／零模型／零網路；ops/vacantrun/demo.py）
+                                                              # （零設定／零模型／零網路；vacant/vrun/demo.py）
     vacant demo                                               # 跑 §11 對照實驗（原樣保留，預設 kind=eco）
     vacant selftest                                           # 端到端冒煙測試（暫存目錄）
 
@@ -535,43 +535,21 @@ def cmd_demo(args: argparse.Namespace) -> int:
 
 
 def _demo_gate(args: argparse.Namespace) -> int:
-    """`vacant demo gate`：裝完之後的第一幕（`ops/vacantrun/demo.py`）。
+    """`vacant demo gate`：裝完之後的第一幕（`vacant/vrun/demo.py`）。
 
-    ⚠ 與 `vacant run -- <cmd>` 同一條路徑限制：判斷層住在 `ops/`（與 R530
-      共用同一份 `acceptance`／`receipts`／`wshash`，**不准另寫第二把尺**），
-      而 `ops/` 不進 wheel ⇒ 這一條只在 repo checkout 裡有。裝在別處要給
-      看得懂的訊息，不要丟一個裸的 ImportError。
+    2026-09-18 之前這條路徑只在 repo checkout 裡有（判斷層住在 `ops/`，
+    而 `ops/` 不進 wheel）。現在判斷層住在 `vacant/vrun/`，**`pip install
+    vacant-network` 就跑得動**——而且與 R530 共用的仍然是同一份
+    `acceptance`／`receipts`／`wshash`（`ops/gain/r530/*` 改成 re-export），
+    **沒有第二把尺**。
     """
     argv: list[str] = ["--sandbox", args.sandbox]
     if args.root:
         argv += ["--root", args.root]
     if args.demo_json:
         argv.append("--json")
-    return _ops_entry("ops.vacantrun.demo", "vacant demo gate")(argv)
-
-
-def _ops_entry(module: str, label: str):
-    """把 `ops/` 底下的進入點接起來；接不上就給一句話說得清楚的錯誤。"""
-    import importlib
-    import sys as _sys
-    from pathlib import Path as _Path
-
-    repo = _Path(__file__).resolve().parents[1]
-    if str(repo) not in _sys.path:
-        _sys.path.insert(0, str(repo))
-    try:
-        return importlib.import_module(module).main
-    except ModuleNotFoundError as exc:                       # pragma: no cover
-        def _fail(argv: list[str]) -> int:
-            print(
-                f"`{label}` 需要 repo checkout（找不到 {module}）：{exc}\n"
-                "  git clone https://github.com/cosmopig/Vacant && cd Vacant\n"
-                "  pip install -e .\n"
-                f"  {label}\n"
-                "理由：它的判斷層與 R530 實驗共用同一份程式碼（ops/gain/r530/），"
-                "複製一份進 wheel 就是第二把尺。", file=sys.stderr)
-            return 2
-        return _fail
+    from .vrun.demo import main as _main
+    return _main(argv)
 
 
 def cmd_selftest(args: argparse.Namespace) -> int:
@@ -1011,12 +989,13 @@ def _agent_run_shim(argv: list[str]) -> int:
     就是 `vacant run -- <cmd>`。兩者用 `--` 分得開——controller 那條從來不需要
     一個裸的 `--`（它的下游 argv 走 `--agent-argv` 的 JSON 陣列）。
 
-    ⚠ launcher 住在 `ops/vacantrun/`（不是 `vacant/` 套件裡），因為它的判斷層
-      複用 `ops/gain/r530/{acceptance,receipts,wshash}`，而 `ops/` 不進 wheel。
-      所以這條路徑**只在 repo checkout 裡有**；裝在別處要給清楚的訊息，
-      不要丟一個看不懂的 ImportError。
+    launcher 住在 `vacant/vrun/launcher.py`（2026-09-18 從 `ops/vacantrun/`
+    搬進套件）。它的判斷層仍然與 R530 實驗共用同一份程式碼——只是方向反過來：
+    `ops/gain/r530/{acceptance,receipts,wshash}` 現在 re-export 到
+    `vacant/vrun/`，所以 `pip install` 的人跑得動，而判準只有一份。
     """
-    return _ops_entry("ops.vacantrun.launcher", "vacant run -- <cmd>")(argv)
+    from .vrun.launcher import main as _main
+    return _main(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
