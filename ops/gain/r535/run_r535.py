@@ -687,6 +687,73 @@ def measure_m7_file(run_dir: pathlib.Path, arm_name: str, summary: dict,
     return res
 
 
+#: `M7_name` 的 needle。**它只可能命中檔名**——回饋檔的內容（`FEEDBACK_HEADER`
+#: ＋ `FEEDBACK_BODY`）裡一個字都沒有提到自己叫什麼（2026-09-19 實測三個樣板
+#: 常數都是 False）。這正是它與 `M7_file` 的分工。
+_FEEDBACK_FILENAME_NEEDLE = "VACANT_FEEDBACK.md"
+
+
+def measure_m7_name(run_dir: pathlib.Path, arm_name: str, summary: dict,
+                    slices: dict[int, list[str]], slice_meta: dict) -> dict:
+    """`M7_name`：**檔名**有沒有出現在第 ≥2 次嘗試的任一通 wire。
+
+    ⚠ **為什麼要跟 `M7_file` 分開量**（2026-09-19，發射前改）：
+      預註冊草稿把 `VACANT_FEEDBACK` 列進 `M7_file` 的 needle。但回饋檔的
+      **內容**裡沒有自己的檔名 ⇒ 那個 needle **只會命中檔名**，
+      而 NOTHINK 下 agent 一跑 `ls` ，tool result 就回
+      `solution.py\nTASK.md\nVACANT_FEEDBACK.md` ⇒ 照字面算，
+      RF 的 `M7_file` 會變成 ≈100%，**把「看見檔名沒讀」記成「讀了」，方向正好相反**，
+      而且它灌爆的是本輪三個主要交付數字的第一個。
+
+    ⚠ 分開之後，兩個數字合起來才是那句精確的話：
+      **`M7_name` 高 ＋ `M7_file` = 0 ＝「看見了檔名，沒有讀」。**
+      單看任何一個都說不出這件事——`M7_file = 0` 可能是「沒看到」，
+      `M7_name` 高本身不代表沒讀。
+
+    `null` 的理由與 `M7_file` 同一套紀律，**一種都不寫成 False**。
+    """
+    arm = summary["arm"]
+    attempts = summary.get("attempts") or []
+    res: dict = {"m7_name": None, "m7_name_reason": None,
+                 "m7_name_by_attempt": [], "m7_name_leaky": False}
+    if len(attempts) < 2:
+        res["m7_name_reason"] = "no_second_attempt"
+        return res
+    if arm_name == "RS":
+        # RS 走 `resample`，工作區每次重置 ⇒ 那個檔案從來不存在（I-8）。
+        res["m7_name_reason"] = "arm_has_no_feedback_by_policy"
+        return res
+    if not slice_meta.get("ok"):
+        res["m7_name_reason"] = f"wire_unmappable: {slice_meta.get('reason')}"
+        return res
+
+    # ⚠ 鑑別力檢查：第 1 次嘗試時回饋檔**還不存在**，所以它不該出現在 attempt 1
+    #   的 wire 裡。出現了就代表這個 needle 在本輪沒有鑑別力（例如 argv 或
+    #   system prompt 裡提到了它），要記下來而不是靜靜地照算。
+    first_blobs = _req_blobs(run_dir, arm, slices.get(1, []))
+    if _hit(first_blobs, _FEEDBACK_FILENAME_NEEDLE):
+        res["m7_name_leaky"] = True
+        res["m7_name_reason"] = "needle_not_discriminative_appears_in_attempt1"
+        return res
+
+    any_true, any_checked = False, False
+    for rec in attempts:
+        n = rec["attempt"]
+        if n < 2:
+            continue
+        blobs = _req_blobs(run_dir, arm, slices.get(n, []))
+        found = _hit(blobs, _FEEDBACK_FILENAME_NEEDLE)
+        res["m7_name_by_attempt"].append(
+            {"attempt": n, "found": found, "n_req": len(slices.get(n, []))})
+        any_checked = True
+        any_true = any_true or found
+    if not any_checked:
+        res["m7_name_reason"] = "no_usable_attempt"
+        return res
+    res["m7_name"] = bool(any_true)
+    return res
+
+
 def _tool_calls_from_body(blob: bytes) -> tuple[list[dict] | None, dict]:
     """從一通 request body 撈出**這一段對話目前為止的所有工具呼叫**。
 
@@ -1392,6 +1459,7 @@ class Driver:
                 "cell_status": "infra_void", "accepted": None,
                 "infra_void": void_reason or "run_RUN-ON.json 不存在",
                 "m7_file": None, "m7_file_reason": "infra_void",
+                "m7_name": None, "m7_name_reason": "infra_void",
                 "m7_ws": None, "m7_ws_reason": "infra_void",
                 "f6": None, "f6_reason": "infra_void",
                 "wall_s": round(time.time() - started, 3),
@@ -1486,6 +1554,8 @@ class Driver:
         ) if out["wire_upstreams"] else None
         out.update(measure_m7_file(run_dir, arm_name, summary, slices,
                                    slice_meta))
+        out.update(measure_m7_name(run_dir, arm_name, summary, slices,
+                                   slice_meta))
         out.update(measure_m7_ws(run_dir, summary, slices, slice_meta,
                                  tools_path=cell / "tools.jsonl"))
         out.update(measure_f6(arm_name, summary))
@@ -1507,7 +1577,8 @@ class Driver:
     def row_of(state: dict) -> dict:
         keys = ("cell", "task_id", "arm", "stratum", "cell_status", "accepted",
                 "stop_reason", "attempts_used", "requests_seen", "m7_file",
-                "m7_file_reason", "m7_ws", "m7_ws_ratio",
+                "m7_file_reason", "m7_name", "m7_name_reason",
+                "m7_ws", "m7_ws_ratio",
                 "m7_ws_solution", "m7_ws_solution_ratio", "f6",
                 "f3_verdict", "reasoning_effort", "probe_invalid",
                 "agent_timed_out_n", "suspect_timeout", "infra_void",
@@ -2080,7 +2151,9 @@ def rescan(out: pathlib.Path, args) -> int:
         raise SystemExit(f"找不到 {cells_dir}")
     derived = [k for k in (
         "m7_file", "m7_file_reason", "m7_file_by_attempt",
-        "m7_file_leaky_needles", "m7_ws", "m7_ws_reason", "m7_ws_ratio",
+        "m7_file_leaky_needles",
+        "m7_name", "m7_name_reason", "m7_name_by_attempt", "m7_name_leaky",
+        "m7_ws", "m7_ws_reason", "m7_ws_ratio",
         "m7_ws_counts", "m7_ws_calls", "m7_ws_source", "m7_ws_solution",
         "m7_ws_solution_reason", "m7_ws_solution_ratio", "m7_ws_solution_n",
         "m7_ws_unparsable_evidence", "f6", "f6_reason", "f6_bytes_by_attempt",
@@ -2102,6 +2175,8 @@ def rescan(out: pathlib.Path, args) -> int:
         before = {k: st.get(k) for k in derived}
         new: dict = {"wire_slice_meta": slice_meta}
         new.update(measure_m7_file(run_dir, arm_name, summary, slices,
+                                   slice_meta))
+        new.update(measure_m7_name(run_dir, arm_name, summary, slices,
                                    slice_meta))
         new.update(measure_m7_ws(run_dir, summary, slices, slice_meta,
                                  tools_path=cell / "tools.jsonl"))
