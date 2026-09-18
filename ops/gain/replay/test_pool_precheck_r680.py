@@ -19,7 +19,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 TOOL = ROOT / "ops/gain/replay/pool_precheck.py"
-CRIT = ROOT / "CRITERION_20260903_R680_POOL_PRECONDITIONS.md"
+CRIT = ROOT / "decisions/criteria/CRITERION_20260903_R680_POOL_PRECONDITIONS.md"
 ATTEST = ROOT / "runs/_analysis_r680/CODE_ATTEST.md"
 REAL = [ROOT / "runs/g_r444_conform_mbpp", ROOT / "runs/g_r445_conform_mbpp_ext"]
 WORK = pathlib.Path("/dev/shm/r680_pool")

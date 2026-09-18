@@ -30,7 +30,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import conform_settle as _cs  # noqa: E402
 
-DECISION_DEFAULT = "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
+DECISION_DEFAULT = "decisions/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
 
 # 突變點（植入缺陷測試用，由 test_r445_predcheck_r677.py 設環境變數注入）。
 # 正式路徑一律 None——`R445_PREDCHECK_MUTANT` 沒設就是 None。

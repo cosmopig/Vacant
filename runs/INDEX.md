@@ -51,17 +51,17 @@
 
 | run | 日期 | 題庫 | 臂 | n（列／題） | 跑到底 | 零 void | void | 裁決（逐字抄自 DECISION 標題） |
 |---|---|---|---|---:|---|---|---:|---|
-| `g_r441_gemma_only_mbpp_b` | 2026-09-02 | MBPP+ v0.2.0 | OFF/OFF5/ON | 525／179 | — | 否 | 12 | DECISION R516（2026-09-02 21:00 UTC，Fable 5.1 稽核輪）：E1 收官——照 R483 §3d 寫死的判準裁決<br>[DECISION_20260902_R516_E1_FINAL_WRAPUP.md](../DECISION_20260902_R516_E1_FINAL_WRAPUP.md) |
-| `g_r442_ononly_20260901` | 2026-09-01 | MBPP+ v0.2.0 | ON | 11／11 | — | 否 | 2 | DECISION 2026-09-01 round446: gemma-4-12b-it-qat 掛了，殺掉 g_r442_ononly_20260901<br>[DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md](../DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md) |
-| `g_r443_gemma_lcb` | 2026-09-03 | lcb v1 | OFF/OFF5/ON | 269／91 | 是 | 否 | 4 | R440T：E3 收官——H-B（題目太簡單）被排除；評審在難題上翻成「幾乎一律說錯」<br>[DECISION_20260904_R440T_E3_WRAPUP.md](../DECISION_20260904_R440T_E3_WRAPUP.md) |
-| `g_r444_conform_mbpp` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 537／179 | 是 | 是 | 0 | —<br>（無專屬裁決；相關收官：[CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md](../CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md)） |
-| `g_r445_conform_mbpp_ext` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 576／192 | 是 | 是 | 0 | R440X：r445 的獨立稽核——併庫區間排除 0 我複核成立；但真正紮實的發現是「五倍預算買不到東西」<br>[DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md](../DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md) |
-| `g_r446_eq5_mbpp` | 2026-09-04 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死<br>[DECISION_20260904_R446_FABLE_AUDIT.md](../DECISION_20260904_R446_FABLE_AUDIT.md) |
-| `g_r447_conform_lcb2` | 2026-09-04 | lcb v2 | CONFORM/OFF/OFF5 | 360／120 | 是 | 是 | 0 | R459：`runs/g_r447_conform_lcb2` 收官裁決（Fable 5.1 稽核輪，round726）<br>[DECISION_20260904_R459_R447_SETTLEMENT.md](../DECISION_20260904_R459_R447_SETTLEMENT.md) |
-| `g_r448_eq5_mbpp_seed2` | 2026-09-06 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R448 稽核：EQ5 在全新 seed 上的獨立複製——判定 REPLICATED<br>[DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md](../DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md) |
-| `g_r449_eq5_lcb2` | 2026-09-06 | lcb v2 | EQ5 | 120／120 | 是 | 是 | 0 | R449B 稽核：EQ5 在 LCB v2 難題上——判定 REPLICATED_ON_HARD<br>[DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md](../DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md) |
-| `g_r449c_eq5_lcb3` | 2026-09-06 | lcb v3 | EQ5 | 189／189 | 是 | 是 | 0 | R449C 稽核：EQ5 在 lcb3（189 題）——判定 UNRESOLVED：同號（+4.23pp、b/c=13/5）但下界 −0.66 沒過 0<br>[DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md](../DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md) |
-| `g_r461_lcb3_three_arm` | 2026-09-06 | lcb v3 | CONFORM/OFF/OFF5 | 567／189 | 是 | 是 | 0 | R461 稽核：CONFORM 在 LCB v3（189 題）三臂——獨立重算<br>[DECISION_20260906_R461_FABLE_AUDIT.md](../DECISION_20260906_R461_FABLE_AUDIT.md) |
+| `g_r441_gemma_only_mbpp_b` | 2026-09-02 | MBPP+ v0.2.0 | OFF/OFF5/ON | 525／179 | — | 否 | 12 | DECISION R516（2026-09-02 21:00 UTC，Fable 5.1 稽核輪）：E1 收官——照 R483 §3d 寫死的判準裁決<br>[DECISION_20260902_R516_E1_FINAL_WRAPUP.md](../decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md) |
+| `g_r442_ononly_20260901` | 2026-09-01 | MBPP+ v0.2.0 | ON | 11／11 | — | 否 | 2 | DECISION 2026-09-01 round446: gemma-4-12b-it-qat 掛了，殺掉 g_r442_ononly_20260901<br>[DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md](../decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md) |
+| `g_r443_gemma_lcb` | 2026-09-03 | lcb v1 | OFF/OFF5/ON | 269／91 | 是 | 否 | 4 | R440T：E3 收官——H-B（題目太簡單）被排除；評審在難題上翻成「幾乎一律說錯」<br>[DECISION_20260904_R440T_E3_WRAPUP.md](../decisions/DECISION_20260904_R440T_E3_WRAPUP.md) |
+| `g_r444_conform_mbpp` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 537／179 | 是 | 是 | 0 | —<br>（無專屬裁決；相關收官：[CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md](../decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md)） |
+| `g_r445_conform_mbpp_ext` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 576／192 | 是 | 是 | 0 | R440X：r445 的獨立稽核——併庫區間排除 0 我複核成立；但真正紮實的發現是「五倍預算買不到東西」<br>[DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md](../decisions/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md) |
+| `g_r446_eq5_mbpp` | 2026-09-04 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死<br>[DECISION_20260904_R446_FABLE_AUDIT.md](../decisions/DECISION_20260904_R446_FABLE_AUDIT.md) |
+| `g_r447_conform_lcb2` | 2026-09-04 | lcb v2 | CONFORM/OFF/OFF5 | 360／120 | 是 | 是 | 0 | R459：`runs/g_r447_conform_lcb2` 收官裁決（Fable 5.1 稽核輪，round726）<br>[DECISION_20260904_R459_R447_SETTLEMENT.md](../decisions/DECISION_20260904_R459_R447_SETTLEMENT.md) |
+| `g_r448_eq5_mbpp_seed2` | 2026-09-06 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R448 稽核：EQ5 在全新 seed 上的獨立複製——判定 REPLICATED<br>[DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md](../decisions/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md) |
+| `g_r449_eq5_lcb2` | 2026-09-06 | lcb v2 | EQ5 | 120／120 | 是 | 是 | 0 | R449B 稽核：EQ5 在 LCB v2 難題上——判定 REPLICATED_ON_HARD<br>[DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md](../decisions/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md) |
+| `g_r449c_eq5_lcb3` | 2026-09-06 | lcb v3 | EQ5 | 189／189 | 是 | 是 | 0 | R449C 稽核：EQ5 在 lcb3（189 題）——判定 UNRESOLVED：同號（+4.23pp、b/c=13/5）但下界 −0.66 沒過 0<br>[DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md](../decisions/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md) |
+| `g_r461_lcb3_three_arm` | 2026-09-06 | lcb v3 | CONFORM/OFF/OFF5 | 567／189 | 是 | 是 | 0 | R461 稽核：CONFORM 在 LCB v3（189 題）三臂——獨立重算<br>[DECISION_20260906_R461_FABLE_AUDIT.md](../decisions/DECISION_20260906_R461_FABLE_AUDIT.md) |
 | `g_r461_off_gate_lcb3` | 2026-09-04 | lcb v3 | OFF | 189／189 | 是 | 是 | 0 | —<br>— |
 
 > `n（列／題）`＝`rows.jsonl` 的列數／去重後的 `task_id` 數。多臂 run 的列數是**各臂相加**，不是樣本數；配對檢定的 n 要看 `task_id`。逐臂列數在 `INDEX.json` 的 `n_rows_by_arm`。
@@ -78,8 +78,8 @@ HMIX 回饋迴圈）、每塊 20 題。合起來 716 題 × 3 臂 ＝ 2,148 列�
 （裁決 §三 宣稱句第三句寫死：主指標未成立 ⇒ 逐集照實列）。
 四集裡 `lcb3_medium` 與 `lcb3_hard` 是**同一個來源的難度切片**，真來源＝3。
 
-**裁決**：R529 收官稽核（Fable，2026-09-12）：跨題庫之下，H-MIX 贏單發、不贏重抽　[DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md](../DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md)
-**預註冊**：[DECISION_20260911_R529_CROSS_BANK_PREREG.md](../DECISION_20260911_R529_CROSS_BANK_PREREG.md)
+**裁決**：R529 收官稽核（Fable，2026-09-12）：跨題庫之下，H-MIX 贏單發、不贏重抽　[DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md](../decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md)
+**預註冊**：[DECISION_20260911_R529_CROSS_BANK_PREREG.md](../decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md)
 
 > **一份裁決管 37 塊。** 這 37 個目錄在 `INDEX.json` 裡的
 > `headline` 都是 `—`，因為裁決檔的宣告區寫的是 `runs/g_*` 這種 glob
@@ -128,8 +128,8 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 所以「rows 少了 7 列」與「有 7 次 infra_void」是同一件事的兩面，不是資料遺失。
 同一批事故的機制說明見 R529 稽核 §十一。
 
-**裁決**：R460R 收官稽核（Fable，2026-09-12；r4／r5 見同檔 §八 補記 2026-09-13）：五次 Δ_C 同號、**0/5 通過 Holm** ⇒ 逐次照實列　[DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md](../DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md)
-**預註冊**：[DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md](../DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md)
+**裁決**：R460R 收官稽核（Fable，2026-09-12；r4／r5 見同檔 §八 補記 2026-09-13）：五次 Δ_C 同號、**0/5 通過 Holm** ⇒ 逐次照實列　[DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md](../decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md)
+**預註冊**：[DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md](../decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md)
 
 > **一份裁決管 30 塊。** 這 30 個目錄在 `INDEX.json` 裡的
 > `headline` 都是 `—`，因為裁決檔的宣告區寫的是 `runs/g_*` 這種 glob

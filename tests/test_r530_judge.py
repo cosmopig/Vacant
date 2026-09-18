@@ -35,7 +35,7 @@ from ops.gain.r530.judge_r530 import (  # noqa: E402
 from ops.gain.brain_cline import InfraVoid  # noqa: E402
 from vacant.memory import KS1Violation, assert_ks1_clean  # noqa: E402
 
-PREREG = ROOT / "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
+PREREG = ROOT / "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
 
 #: 送出去的 prompt 裡**一個字都不准**出現的字樣（Fable 2026-09-13 指名的那五個
 #: ＋題目識別）。這一條是本檔最重要的紅線：它擋的不是當機，是「盲評其實沒有盲」。

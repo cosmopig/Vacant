@@ -29,7 +29,7 @@ import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SH = ROOT / "ops" / "gain" / "launch_eq5_lcb2.sh"
-DEC = ROOT / "DECISION_20260906_R449B_EQ5_LCB2_PREREG.md"
+DEC = ROOT / "decisions/DECISION_20260906_R449B_EQ5_LCB2_PREREG.md"
 
 RUN_NAME = "g_r449_eq5_lcb2"
 SEED = "g-r449-eq5-lcb2"

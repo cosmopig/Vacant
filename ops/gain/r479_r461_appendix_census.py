@@ -11,8 +11,8 @@ from __future__ import annotations
 import argparse, ast, json, os, pathlib, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PREREG = ROOT / "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
-SELF_PREREG = ROOT / "DECISION_20260905_R479_R461_APPENDIX_OBLIGATION_CENSUS.md"
+PREREG = ROOT / "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+SELF_PREREG = ROOT / "decisions/DECISION_20260905_R479_R461_APPENDIX_OBLIGATION_CENSUS.md"
 FORBIDDEN_RUN = "g_r461_lcb3_three_arm"                       # B3
 
 MUTANT = os.environ.get("R479_MUTANT", "")                    # 模組層讀，import 與 __main__ 都生效

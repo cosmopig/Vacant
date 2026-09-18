@@ -16,7 +16,7 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 TOOL = HERE / "r445_predcheck.py"
-DECISION = REPO / "DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
+DECISION = REPO / "decisions/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
 R445 = REPO / "runs" / "g_r445_conform_mbpp_ext"
 R444 = REPO / "runs" / "g_r444_conform_mbpp"
 WORK = pathlib.Path("/dev/shm/r677/test")

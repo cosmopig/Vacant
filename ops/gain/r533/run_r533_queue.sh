@@ -22,7 +22,7 @@ case "$ENDPOINT" in
 esac
 PLAN="ops/gain/r533/plan_${HOST_LABEL}.txt"
 QUEUE="ops/gain/queues/r533.json"
-DEC="DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
+DEC="decisions/DECISION_20260918_R533_12B_NONTHINKING_REDO_PREREG.md"
 LOGDIR="$HOME/vacant/logs"; mkdir -p "$LOGDIR"
 DRIVER_LOG="$LOGDIR/r533_driver_${HOST_LABEL}.log"
 

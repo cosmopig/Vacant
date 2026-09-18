@@ -30,7 +30,7 @@ WINDOW_HI = 60.0
 MARGINAL_LO = 30.0        # 30–40% ⇒ GATE_MARGINAL
 VOID_MAX = 20.0           # 任一臂 infra_void > 20% ⇒ GATE_UNSCANNED
 EXPECTED_N = 189          # lcb_bank_v3 題數（codebench.LCB_BANK_V3_COUNT）
-DECISION = "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+DECISION = "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
 
 
 def verdict_for(fail_pct: float) -> str:

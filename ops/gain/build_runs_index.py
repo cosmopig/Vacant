@@ -376,7 +376,7 @@ def _bank_for_run(d: Path, banks: dict[str, Any]) -> dict[str, Any]:
 
 # ── 裁決檔 ──────────────────────────────────────────────────────────
 def _decision_texts() -> list[dict[str, Any]]:
-    """掃 repo 根目錄的判準／裁決檔。
+    """掃判準／裁決檔（2026-09-18 起住在 `decisions/`，本函式用 `rglob` 所以搬家免改）。
 
     四種前綴都要掃：`DECISION_` 之外，收官結論也可能寫成 `CONCLUSION_`／
     `FINDINGS_`，事前判準寫成 `CRITERION_`。只掃 `DECISION_` 會漏掉整份收官
@@ -1052,8 +1052,11 @@ _GROUPED_RUNS: list[dict[str, Any]] = [
     {
         "key": "R529",
         "title": "R529 跨題庫收官（37 塊、716 題、三臂）",
-        "decision": "DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md",
-        "prereg": "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        # ⚠ 值是**相對 repo 根的路徑**（2026-09-18 起裁決檔住在 `decisions/`），
+        #   不是 basename——下面 `../{...}` 直接接這個字串當連結。顯示文字另外取
+        #   `Path(...).name`，所以表格上看到的仍是檔名。
+        "decision": "decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md",
+        "prereg": "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
         "headline": "R529 收官稽核（Fable，2026-09-12）：跨題庫之下，"
                     "H-MIX 贏單發、不贏重抽",
         "intro": [
@@ -1080,8 +1083,8 @@ _GROUPED_RUNS: list[dict[str, Any]] = [
         # 在此之前這裡是 `None`，理由寫在舊註解裡：寫一個不存在的 DECISION 檔名
         # 會讓索引憑空生出一份裁決。現在反過來——檔案在了還寫 `None`，
         # 索引就會比資料**悲觀**（「收官還沒寫」是假的），同樣是說謊。
-        "decision": "DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md",
-        "prereg": "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
+        "decision": "decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md",
+        "prereg": "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
         # ⚠ 裁決檔的**標題**還停在「三次複製；r4／r5 補跑中」——r4／r5 的收官
         # 在同一份檔案的 §八 補記（2026-09-13）。引用時要指名 §八，
         # 光看標題會以為這批只有三次。
@@ -1258,10 +1261,10 @@ def render_md(idx: dict[str, Any]) -> str:
         A("")
         if g["decision"]:
             A(f"**裁決**：{g['headline']}"
-              f"　[{g['decision']}](../{g['decision']})")
+              f"　[{Path(g['decision']).name}](../{g['decision']})")
         else:
             A(f"**裁決**：{g['headline']}")
-        A(f"**預註冊**：[{g['prereg']}](../{g['prereg']})")
+        A(f"**預註冊**：[{Path(g['prereg']).name}](../{g['prereg']})")
         A("")
         if g["decision"]:
             A(f"> **一份裁決管 {len(members)} 塊。** 這 {len(members)} 個目錄在 "

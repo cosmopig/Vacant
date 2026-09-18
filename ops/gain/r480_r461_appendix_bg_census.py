@@ -18,8 +18,8 @@ from collections import Counter
 from math import comb
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PREREG = ROOT / "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
-SELF_PREREG = ROOT / "DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md"
+PREREG = ROOT / "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+SELF_PREREG = ROOT / "decisions/DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md"
 RAW_DIR = pathlib.Path.home() / "vacant" / ".raw_lcb"
 FORBIDDEN_RUN = "g_r461_lcb3_three_arm"                 # G-LIVE
 BANK = {"v2": ROOT / "ops/gain/data/lcb_bank_v2.jsonl",

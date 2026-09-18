@@ -23,7 +23,7 @@ import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SH = ROOT / "ops" / "gain" / "launch_eq5_seed2.sh"
-DEC = ROOT / "DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md"
+DEC = ROOT / "decisions/DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md"
 
 RUN_NAME = "g_r448_eq5_mbpp_seed2"
 SEED = "g-r448-eq5-seed2"

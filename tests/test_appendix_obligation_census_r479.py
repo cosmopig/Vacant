@@ -57,7 +57,7 @@ def test_live_run_read_is_blocked():
 
 def test_predictions_match_committed_prereg():
     """事前預測表必須與判準檔 §四 逐格相同（防「量完再改預測」）。"""
-    txt = (ROOT / "DECISION_20260905_R479_R461_APPENDIX_OBLIGATION_CENSUS.md").read_text()
+    txt = (ROOT / "decisions/DECISION_20260905_R479_R461_APPENDIX_OBLIGATION_CENSUS.md").read_text()
     assert txt.count("| C5-1 |") == 1, "判準 §四 的表不見了＝夾具過期，不是通過"
     for cid, klass in C.PRED_CLASS.items():
         row = [l for l in txt.splitlines() if l.startswith(f"| {cid} |")]
