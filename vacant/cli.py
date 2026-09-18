@@ -872,10 +872,27 @@ def cmd_audit(args: argparse.Namespace) -> int:
     kinds: dict[str, int] = {}
     for e in body.logbook.entries:
         kinds[e.type] = kinds.get(e.type, 0) + 1
+    n = len(body.logbook)
     print(f"vacant     : {args.name}  (…{body.identity.vacant_id[-12:]})")
-    print(f"logbook    : {len(body.logbook)} 筆  事件分布 {kinds or '（空）'}")
-    print(f"簽章鏈究責 : {'✓ PASS（seq 連續、prev_hash 串對、每筆簽章過）' if ok else '✗ FAIL（鏈被竄改或不完整）'}")
-    return 0 if ok else 1
+    print(f"logbook    : {n} 筆  事件分布 {kinds or '（空）'}")
+    if not ok:
+        print("簽章鏈究責 : ✗ FAIL（鏈被竄改或不完整）")
+        return 1
+    if n == 0:
+        # ⚠ 空鏈是**恆真**的：沒有東西可以驗，不是「驗過了」。
+        #   印成 `✓ PASS（…每筆簽章過）` 會讓外人以為究責發生過——
+        #   那是「沒量到」被寫成「量到 0」的同一種混淆（09 §3.5）。
+        #   仍然回 0：剛 `init` 出來的身體本來就是空的，那不是錯誤。
+        print("簽章鏈究責 : —（空鏈，沒有東西可驗；這不是通過，是沒發生）")
+        return 0
+    print(f"簽章鏈究責 : ✓ PASS（{n} 筆：seq 連續、prev_hash 串對、每筆簽章過）")
+    # ⚠ **驗不到的那一半也要說。** `verify_chain` 沒有長度承諾也沒有外部錨點
+    #   ⇒ 從**鏈尾**砍掉幾筆之後它照樣 PASS（截斷／省略攻擊，
+    #   Ma & Tsudik 2009，DOI 10.1145/1502777.1502779：完整性 ≠ 完備性）。
+    #   抓得到的是**竄改與抽掉中間**，抓不到的是**尾巴被剪短**。
+    print("　　　　　　 ⚠ 抓得到竄改與抽掉中間；**抓不到從鏈尾截斷**"
+          "（無長度承諾／無外部錨點）")
+    return 0
 
 
 def cmd_verify_att(args: argparse.Namespace) -> int:
