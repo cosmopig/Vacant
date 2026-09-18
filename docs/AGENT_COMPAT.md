@@ -53,7 +53,7 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
 | **pi** 0.85.1 | `POST /v1/chat/completions`（OpenAI Chat Completions，SSE，`store:false`） | **設定**：`PI_CODING_AGENT_DIR` 指到一個暫時目錄＋寫 `models.json`。**不吃 `OPENAI_BASE_URL`**（實測反例見 §3） | **1**（拒交格）／**2**（交付格） | ✅ **exit 20** ／ ✅ **exit 0** |
 | **Hermes** | **未測**（推論：OpenAI-compatible，`model.base_url`／`CUSTOM_BASE_URL`） | **未測** | **未測** | **未測** |
 
-收據：上表每一格 `vacant run`（共 10 個 run 目錄）的 `receipts_RUN-ON.ndjson`
+收據：本次所有 `vacant run`（**14 個 run 目錄**，見附錄 A）的 `receipts_RUN-ON.ndjson`
 都是 `entries_n=2 / verified_n=2 / failed_n=0 / chain_ok=true`，
 用的是既有那把尺 `ops/gain/replay/verify_run_receipts.py`（沒有另寫第二把）。
 
