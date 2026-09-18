@@ -101,9 +101,13 @@ python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 python3 ops/gain/replay/verify_run_receipts.py --glob 'runs/<你的 run 目錄>'
 ```
 
-`--glob` 的相對 pattern 以 repo 根為基準，**絕對 pattern 照絕對解**——`--run-dir`
-本來就多半落在 repo 外（預設 `~/.vacant-run/<task_id>`），少了這條，畫面上印給使用者
-複製的那行驗證指令就是一行跑不動的字。
+`--glob` 的相對 pattern：在 repo checkout 裡以 **repo 根**為基準（`runs/g_*` 那種寫法
+照舊），`pip install` 之後以 **cwd** 為基準（`vacant/vrun/verify_receipts.py::_glob_base`）。
+搬進套件之後不能再無條件往上數四層——那會指到 site-packages，而那裡沒有 `runs/`，
+於是 `--glob 'runs/…'` 會**靜靜地零筆命中**，零筆命中在本檔的判準裡是 `UNVERIFIABLE`
+不是錯誤。**絕對 pattern 兩種情況都照絕對解**——`--run-dir` 本來就多半落在 repo 外
+（預設 `~/.vacant-run/<task_id>`），少了這條，畫面上印給使用者複製的那行驗證指令
+就是一行跑不動的字。
 
 ### 自檢：你的 agent 真的被中介到了嗎
 
