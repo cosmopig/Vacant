@@ -8,13 +8,17 @@
 
 本檔是 (b) 的那份名單，而且是**唯一**一份（launcher 不准另外寫死變數名）。
 
-三個角色分開列，因為它們的語意不同：
+四個角色分開列，因為它們的語意不同：
 
   · `REDIRECT_VARS`  ——要被指向 proxy 的 base-url 變數。值有兩種形狀
     （`/v1` 結尾與根結尾），寫成 `(name, suffix)` 而不是靠呼叫端記得加。
   · `UPSTREAM_VARS`  ——從**父行程**讀真正上游位址用的（讀完就從子環境拿掉）。
   · `SECRET_VARS`    ——金鑰類。**從 agent 的 env 裡整個拿掉**，只留在 proxy
     行程裡；agent 拿到的是一個 sentinel 字串，proxy 在轉送時換回真鑰。
+  · `CONFIG_ROUTE`   ——**吃設定不吃 base-url 變數的框架**那一份名單（2026-09-18
+    加）。它不是 (b) 的例外，是 (a) 縮到最小：每一格只記「哪個變數能把設定
+    整包搬走、要寫哪一個欄位」，接線仍然是一支讀 `$VACANT_RUN_PROXY` 的
+    wrapper，不是 per-framework 的程式碼。
 
 ⚠ **誠實邊界（改碼請保留）**：
 
@@ -25,12 +29,26 @@
    （`vacant run --port` 給一個固定埠就是為了這個），要嘛就沒被中介到。
    **「設了環境變數」不等於「被中介了」**——真正的證據是 proxy 的 wire log
    有沒有東西（`launcher` 會把 `requests_seen` 落進收據）。
+
+   2026-09-18 把這一條**量出來**了（`docs/AGENT_COMPAT.md` 有逐格證據）：
+   pi 0.85.1 只設 `OPENAI_BASE_URL` ⇒ 假上游 0 通，它跑去 `api.openai.com`
+   拿了一個 401 回來。**反過來也有一格打臉靜態推論**：OpenCode 1.18.31 的
+   binary 裡沒有 `OPENAI_BASE_URL` 這個字串，照 grep 會判「不吃環境變數」，
+   實測卻**吃**——它的 provider 是 runtime 才載入的 `@ai-sdk/openai`，
+   讀變數的是那包 SDK 不是 opencode 自己。⇒ **靜態掃字串不算證據，
+   只有 wire log 算。**
 2. 名單漏一個變數＝那條路沒被中介，而且**不會有任何錯誤訊息**。這是 V0 已知
    的殘餘風險，唯一的結構性補法是出網封鎖（`block_egress.sh`，V3）：
    封鎖之後漏掉的那條路會**連不上**而不是**偷偷連上**。
 3. 拿掉金鑰**不是**安全邊界：同一個 OS 使用者可以自己去讀 `~/.config`、
    keychain、或任何一個 agent 自己存的憑證。它降低的是「不小心直連」的機率，
    不是「刻意繞過」的可能（`vacant/controller.py:7-8` 的同一條邊界）。
+4. **有一條路連設定都救不了**：Codex CLI 用 ChatGPT 登入時，模型通道是
+   **寫死的 `wss://chatgpt.com/backend-api/codex/responses`**——WebSocket，
+   而且 `chatgpt_base_url` 只搬得動它的外掛／遙測／設定那幾條 HTTP 請求，
+   搬不動模型那一條（2026-09-18 實測，`RUST_LOG` trace 逐字留檔）。
+   那一格**不是「還沒支援」，是本工具的邊界**：一個 HTTP 反向代理在那條路上
+   不存在。詳見 `docs/AGENT_COMPAT.md` §Codex。
 """
 from __future__ import annotations
 
@@ -58,7 +76,15 @@ REDIRECT_VARS: tuple[tuple[str, str], ...] = (
     ("FIREWORKS_BASE_URL", "/v1"),
     ("CEREBRAS_BASE_URL", "/v1"),
     ("OLLAMA_HOST", ""),
-    # Anthropic 家族（Claude Code 認 ANTHROPIC_BASE_URL）
+    # Hermes Agent（本 repo 的 `vacant/hermes_substrate.py` 與
+    # `vacant/brains.py::HermesBrain` 都是設這一個）。
+    # ⚠ **未經 wire 實測**：Hermes 在 Mac 與 vacant-dev、vacant-clean1 上都沒裝
+    #   （2026-09-18 查），所以這一格的證據等級是「本 repo 自己的呼叫端這樣寫」，
+    #   不是「假上游看到過一通」。名單多一個變數只是多設一個環境變數（無害），
+    #   漏一個才會靜靜地沒被中介——所以放進來，但不准讀成已驗證。
+    ("CUSTOM_BASE_URL", "/v1"),
+    # Anthropic 家族（Claude Code 認 ANTHROPIC_BASE_URL——2026-09-18 實測：
+    # 假上游收到 `POST /v1/messages?beta=true`，逐通完整 messages 陣列）
     ("ANTHROPIC_BASE_URL", ""),
     ("ANTHROPIC_API_URL", ""),
     # 本 repo 自己的腦（`vacant/brains.py`、`vacant/cli.py`）
@@ -105,6 +131,62 @@ AUTH_HEADERS: dict[str, tuple[str, str]] = {
 KEY_VARS: dict[str, tuple[str, ...]] = {
     "openai": ("OPENAI_API_KEY", "VACANT_MCP_API_KEY", "VACANT_API_KEY"),
     "anthropic": ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"),
+}
+
+#: **吃設定不吃 base-url 變數的框架**：一格記一個 agent，值是「怎麼把它指過來」。
+#:
+#: 為什麼這也放在 envmap 而不是散在各處：本檔的承重是**一份名單**。
+#: 名單漏一格的後果（那條路沒被中介、而且沒有錯誤訊息）對設定檔路線一模一樣，
+#: 所以它該跟環境變數住在同一個檔，被同一雙眼睛看。
+#:
+#: 每一格的欄位：
+#:   `relocate` ——把整份設定搬到別處的環境變數。**有這個就不必動使用者的檔案**，
+#:                也不必 `--port` 固定埠：wrapper 在 runtime 讀 `$VACANT_RUN_PROXY`
+#:                現寫一份。`None` ＝只能改使用者自己那份（那才需要固定埠）。
+#:   `file`     ——要寫的檔名（相對 `relocate` 指的目錄）；`None` ＝設定直接是變數值。
+#:   `field`    ——base url 落在哪個欄位。
+#:   `wire`     ——實測到的 wire protocol。
+#:   `measured` ——**實測日期**。空字串＝沒量過，不准當成可用。
+#:
+#: ⚠ 這份表是**觀測紀錄**不是規格：上游改版它就漂。漂了的徵兆是
+#:   `requests_seen == 0`，不是這裡的字串變紅。
+CONFIG_ROUTE: dict[str, dict[str, str | None]] = {
+    # pi（@earendil-works/pi-coding-agent）0.85.1
+    "pi": {
+        "relocate": "PI_CODING_AGENT_DIR",      # 預設 ~/.pi/agent
+        "file": "models.json",
+        "field": 'providers.<id>.baseUrl（＋ api="openai-completions"）',
+        "wire": "openai",
+        "measured": "2026-09-18",
+    },
+    # Codex CLI 0.153.2。⚠ 只有 **API key／自訂 provider** 那條路；
+    # ChatGPT 登入那條是寫死的 wss://，設定搬不動（見本檔誠實邊界 4）。
+    "codex": {
+        "relocate": "CODEX_HOME",               # 預設 ~/.codex
+        "file": "config.toml",
+        "field": 'model_providers.<新 id>.base_url（＋ wire_api="responses"｜"chat"；'
+                 "內建 id `openai` 不准覆寫，會 fail-closed 報錯)",
+        "wire": "openai",
+        "measured": "2026-09-18",
+    },
+    # OpenCode 1.18.31。它**也**吃 OPENAI_BASE_URL（見誠實邊界 1），
+    # 這一格是「要指定自訂 provider／不想動內建那條」時用的。
+    "opencode": {
+        "relocate": "OPENCODE_CONFIG_CONTENT",  # 值直接就是整份 JSON
+        "file": None,
+        "field": "provider.<id>.options.baseURL",
+        "wire": "openai",
+        "measured": "2026-09-18",
+    },
+    # Hermes Agent。**沒量過**——三台機器上都沒裝（2026-09-18）。
+    # 欄位是從 `vacant/hermes_substrate.py::CONFIG_YAML` 反推的。
+    "hermes": {
+        "relocate": "HERMES_HOME",
+        "file": "config.yaml",
+        "field": "model.base_url（另有 CUSTOM_BASE_URL 環境變數，同樣未實測）",
+        "wire": "openai",
+        "measured": "",
+    },
 }
 
 
