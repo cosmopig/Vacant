@@ -28,7 +28,7 @@ if you depend on them.
   vacant-network` gave you a library and a message telling you to clone. Fixed by **moving
   and inverting the dependency**, not by copying: the implementation now lives in
   `vacant/vrun/` (`acceptance`, `sandbox`, `wshash`, `receipts`, `verify_receipts`,
-  `launcher`, `wireproxy`, `envmap`, `demo`), and `ops/gain/r530/*`,
+  `launcher`, `retry`, `wireproxy`, `envmap`, `demo`), and `ops/gain/r530/*`,
   `ops/gain/replay/verify_run_receipts.py` and `ops/vacantrun/*` are re-exports that alias
   `sys.modules` to it. The old import paths and the old script paths keep working and
   resolve to **the same module object**, so there is still exactly one ruler — a second
@@ -49,8 +49,8 @@ measured. The measurement has to happen **outside a repo checkout**: inside one,
 there cannot tell a working wheel from a broken one.
 
 - `python -m build` produces `vacant_network-0.7.0-py3-none-any.whl` and the sdist;
-  `twine check` PASSED on both. The wheel's `top_level.txt` is `vacant` alone, and its 70
-  entries include the nine `vacant/vrun/*` modules and `vacant/web/app.{html,css,js}`.
+  `twine check` PASSED on both. The wheel's `top_level.txt` is `vacant` alone, and its 71
+  entries include the ten `vacant/vrun/*` modules and `vacant/web/app.{html,css,js}`.
 - Fresh venv (Python 3.13) with **only** that wheel installed, working directory outside
   the repository: `vacant demo gate` plays the whole first screen — the gate refuses the
   delivery (`visible_fail`), the inner `vacant run` subprocess exits `20`, the two-entry
