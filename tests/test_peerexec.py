@@ -1113,7 +1113,10 @@ def test_a_task_without_an_entry_point_refuses_at_every_door(door):
     try:
         out = call(book, ident, execs)
     except SuiteSpecError as exc:
-        assert str(exc) == "entry_point_unbound"
+        # `.code` 是 wire 面（會上鏈、會進 refusal_reason），加了人讀提示之後仍逐字不變；
+        # `str()` 另外帶提示，所以這裡比 `.code` 不比 `str()`。
+        assert exc.code == "entry_point_unbound"
+        assert "task['entry_point']" in str(exc)
     except BaseException as exc:                      # noqa: BLE001
         raise AssertionError(f"{door} 漏出 {type(exc).__name__}: {exc}") from exc
     else:

@@ -637,7 +637,8 @@ def test_none_entry_point_means_unbound_not_skip():
         ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "helper",
                      "tests": [{"args": "[1]", "expected": "2"}], "cmp": {}},
                     entry_point=None)
-    assert str(e.value) == "entry_point_unbound"
+    assert e.value.code == "entry_point_unbound"        # wire 面逐字不變
+    assert "task['entry_point']" in str(e.value)       # 人讀提示只在 str() 裡
     # 省略參數 ＝ 未綁定（工具與測試專用），照舊過。
     assert spec().entry_point == "f"
     assert ss.validate({"v": 1, "dialect": "mbpp", "entry_point": "helper",

@@ -232,6 +232,17 @@ validate(obj: Any, *, entry_point: Any = <unbound>) -> SuiteSpec
 render(spec: SuiteSpec) -> str                   # deterministic: same spec -> same bytes
 from_task(task: Mapping, *, compute=None, timeout_s: float = 30.0) -> Conversion
 
+# A suite as a mapping. `v` is REQUIRED and its only legal value is 1.
+# Omitting it raises SuiteSpecError(code="bad_version:None").
+{"v": 1,                       # spec version -- required, must be exactly 1
+ "dialect": "mbpp",            # "mbpp" | "lcb"; default "mbpp"
+ "entry_point": "solve",       # must equal task["entry_point"]
+ "tests": [{"args": "[1, 2]",  # literal list/tuple of POSITIONAL args, as source text
+            "expected": "3"}], # any literal, as source text
+ "cmp": {}}                    # mbpp only: atol / set_equivalent / regex_predicate
+# SuiteSpecError carries `.code` (machine-readable, goes on the chain and into
+# Selection.refusal_reason) and `.hint` (human-readable). Compare `.code`, never str(exc).
+
 # vacant.suitegauge
 gauge_suite(check_code: str, reference: str, broken_stubs: Sequence[str] = (), *,
             entry_point: str | None = None, runner: CheckRunner | None = None,
@@ -243,11 +254,24 @@ broken_stub(entry_point: str | None) -> str
 Executor.new(executor_id: str, *, probe: Probe = sandbox_probe) -> Executor
 Executor.attest(task: Mapping, draft_code: str, *,
                 suite: SuiteSpec | Mapping | bytes, ts_ms: int | None = None) -> Attestation
+# task REQUIRES "entry_point" (the function name the suite must exercise) and normally
+# carries "task_id". The entry point belongs to the TASK, not to the suite: the suite's
+# own entry_point is only CHECKED against it. A task without that key raises
+# SuiteSpecError(code="entry_point_unbound") before any sandbox run -- even when the
+# SuiteSpec you passed in does carry entry_point="solve".
 verify_attestation(att, roster, *, task_id=None, draft_sha256=None,
                    suite_sha256=None, render_sha256=None) -> tuple[bool, str]
 form_verdict(attestations, roster, *, task_id, draft_sha256, suite_sha256,
              quorum: int = 1, gauged_suites=None, render_sha256=None) -> Verdict
 select_by_quorum(task, drafts, executors, *, suite, roster=None, quorum=None, ...) -> Selection
+# drafts: Sequence[tuple[str, str]] -- each element is (code, worker_id) IN THAT ORDER.
+#   [0] the candidate's Python source; [1] the name of the worker that produced it.
+# Swapping them is not a type error: every "draft" then fails the suite, the panel agrees
+# unanimously, and you get refused=True / shipped_index=None with three chains that all
+# verify -- indistinguishable from the mechanism correctly rejecting bad work.
+# select_by_quorum applies a cheap HEURISTIC shape check and raises
+# peerexec.DraftOrderError when the order looks reversed. It has false negatives
+# (see its docstring); the signature above is the only guarantee.
 commit_suite_with_gauge(book, identity, *, task_id, suite, nonce, reference,
                         entry_point, broken_stubs=None, runner=None, ...) -> LogEntry
 challenge_rerun(task, draft_code, panel, original, *, suite, ...) -> Challenge
@@ -457,7 +481,12 @@ comfortable, and do not drop them when quoting a number.
 | Treating `verify_run_receipts.py` reconciliation as an independent audit | Treat it as a same-origin self-check | H-11: both sides are written by the same process. |
 | Calling Vacant a "mandatory layer" | "receiving desk": a delivery without a verifiable receipt is not accepted | It does not satisfy complete mediation; a machine-wide single exit is the deployment layer's job. |
 | `pip install vacant` | `pip install vacant-network` | `vacant` on PyPI is an unrelated DNS tool by another author. The **import** name is still `vacant`. |
-| Calling `Executor.new(id).attest(...)` from the wheel and catching `ImportError` | Inject a probe: `Executor.new(id, probe=my_probe)` | H-5. The exception is `OpsRunnerUnavailable`, and its message contains the fix. |
+| Calling `Executor.new(id).attest(...)` from the wheel and catching `ImportError` | Inject a probe: `Executor.new(id, probe=my_probe)` | H-5. **Once the task validates**, the exception is `OpsRunnerUnavailable` and its message contains the fix. Validation runs first, so a malformed `task`/`suite` raises `SuiteSpecError` before the probe is ever reached. |
+| Calling `attest` / `select_by_quorum` with a task that has no `entry_point` | `task = {"task_id": ..., "entry_point": "solve", ...}` | The entry point belongs to the task; the suite's copy is only checked against it. Otherwise `SuiteSpecError(code="entry_point_unbound")`, *even if the suite declares one*. |
+| Writing a suite mapping without `"v": 1` | `{"v": 1, "dialect": "mbpp", "entry_point": ..., "tests": [...], "cmp": {}}` | `v` is the spec version and 1 is its only legal value; omitting it gives `bad_version:None`. No compatibility conversion, by rule 6. |
+| `select_by_quorum(task, [(worker_id, code), ...], ...)` | `select_by_quorum(task, [(code, worker_id), ...], ...)` | Both are `str`, so the wrong order type-checks. The result is a clean, fully-signed **refusal** -- the same shape the docs teach you to trust. The built-in check is a heuristic with false negatives. |
+| Reading `str(exc)` off a `SuiteSpecError` to branch on | `exc.code` | `str()` also carries the human hint and may be reworded; `.code` is the wire-facing string that goes on the chain. |
+| Treating `vacant bench` output as a measurement without reading its exit code | Non-zero exit means **nothing was measured** (`infra_void`) | A failed model call is neither a right answer nor a wrong one. `bench` refuses to print any comparison when either arm measured zero cells, and prints the void count separately when it is partial. |
 | Shipping the last candidate when the budget runs out | Refuse, and count the refusal as a failure | Ship-on-exhaustion deletes the only thing the gate does. |
 | Feeding hidden-test text back into a retry prompt | Feed the *shape* of the failure | Repo rule A4. Quoting held-out test data invalidates the measurement. |
 | Calling it a "trust layer" | "accountability layer" | See §0. |
@@ -486,8 +515,10 @@ carries the file that produced it.
   },
   "terminology": {
     "use": "accountability",
-    "never_use": ["trust layer", "trusted layer"],
-    "reason": "Gambetta 1988 / Mayer 1995 put 'acting without monitoring' into the necessary conditions for trust; monitoring is the whole system."
+    "never_use": ["trust layer", "trusted layer", "信任", "信任層"],
+    "reason": "Gambetta 1988 / Mayer 1995 put 'acting without monitoring' into the necessary conditions for trust; monitoring is the whole system.",
+    "scope": "user-visible output and prose. Identifiers are API surface and keep their names: trust_dir, trust_card, trust_on, --trust, and the trust/ directory.",
+    "enforced_by": "tests/test_cleanroom_blockers.py -- scans every argparse help text and the stdout/stderr of demo, init, up and bench"
   },
   "enforcement": {
     "model": "receiving desk, not a mandatory wrapper and not an agent framework",
