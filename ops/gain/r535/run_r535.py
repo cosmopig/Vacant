@@ -928,6 +928,18 @@ class Driver:
                 "reset": a.get("reset"),
             } for a in attempts],
         }
+        # **wire 真的去了哪**：`requests_seen > 0` 只證明「有被中介」，
+        # 不證明「中介到了對的機器」。端點設錯（R532 的雲端誤發）在
+        # `requests_seen` 上完全看不出來，在這一欄看得出來。
+        out["wire_upstreams"] = sorted({
+            json.loads(s)["upstream"].rsplit("/v1", 1)[0]
+            for s in (run_dir / f"wire_{arm}" / "index.jsonl").read_text(
+                encoding="utf-8").splitlines() if s.strip()
+        }) if (run_dir / f"wire_{arm}" / "index.jsonl").exists() else []
+        out["upstream_expected"] = self.upstream
+        out["upstream_matches"] = all(
+            self.upstream.startswith(u) for u in out["wire_upstreams"]
+        ) if out["wire_upstreams"] else None
         out.update(measure_m7_file(run_dir, arm_name, summary, slices,
                                    slice_meta))
         out.update(measure_m7_ws(run_dir, summary, slices, slice_meta))
