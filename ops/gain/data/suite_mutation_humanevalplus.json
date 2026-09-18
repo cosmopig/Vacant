@@ -1,0 +1,504 @@
+{
+  "summary": {
+    "bank": "humanevalplus",
+    "seed": "r535_mutation",
+    "limit": 20,
+    "n_tasks": 10,
+    "n_scored": 10,
+    "n_ref_fail": 0,
+    "n_norm_fail": 0,
+    "median": 0.9666666666666667,
+    "mean": 0.9169287802840435,
+    "min": 0.6875,
+    "max": 1.0,
+    "perfect": 5,
+    "total_seconds": 28.77,
+    "total_runs": 154,
+    "seconds_per_run": 0.187
+  },
+  "rows": [
+    {
+      "v": 1,
+      "suite_sha256": "069c80b2529431fb123ccca770511c19876f9404191a1d11b3dbf6c9808790ce",
+      "ref_sha256": "1ca6b655a271322e9496b2c9845515d620d80c57eff3f7d9689eaabf22451b6f",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 4,
+      "total": 4,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "bin_op_swap": [
+          1,
+          1
+        ],
+        "num_minus_1": [
+          1,
+          1
+        ],
+        "num_plus_1": [
+          1,
+          1
+        ],
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/42",
+      "entry_point": "incr_list",
+      "seconds": 1.01
+    },
+    {
+      "v": 1,
+      "suite_sha256": "4fb2ffb7520525e7a91ee5497168bbd9a8337e128f589eb5410705c375a9f770",
+      "ref_sha256": "b7134b4b6c071a8fdae5d279f543b0307fbd43f8dfb228ef1f5aaf8c451512b2",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 19,
+      "total": 19,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "cmp_flip": [
+          2,
+          2
+        ],
+        "not_insert": [
+          1,
+          1
+        ],
+        "num_minus_1": [
+          7,
+          7
+        ],
+        "num_plus_1": [
+          7,
+          7
+        ],
+        "return_const": [
+          2,
+          2
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/108",
+      "entry_point": "count_nums",
+      "seconds": 3.41
+    },
+    {
+      "v": 1,
+      "suite_sha256": "afba84ac5d32209d8ae6c2ae464ca1bbdce7409b9984d278461561bc8a9c40a8",
+      "ref_sha256": "4cadffe18b6eaf6f5c9baa1fd187a705db3b1c78dc32a05c4d1f4cf762bf94bf",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 11,
+      "total": 16,
+      "score": 0.6875,
+      "survivors": [
+        {
+          "index": 1,
+          "operator": "num_minus_1",
+          "lineno": 15,
+          "before": "for i in range(0, len(b)):",
+          "after": "for i in range(-1, len(b)):"
+        },
+        {
+          "index": 6,
+          "operator": "return_const",
+          "lineno": 12,
+          "before": "return True",
+          "after": "return None"
+        },
+        {
+          "index": 7,
+          "operator": "bool_const_flip",
+          "lineno": 12,
+          "before": "return True",
+          "after": "return False"
+        },
+        {
+          "index": 10,
+          "operator": "return_const",
+          "lineno": 14,
+          "before": "return True",
+          "after": "return None"
+        },
+        {
+          "index": 14,
+          "operator": "bool_const_flip",
+          "lineno": 14,
+          "before": "return True",
+          "after": "return False"
+        }
+      ],
+      "by_operator": {
+        "bin_op_swap": [
+          1,
+          1
+        ],
+        "bool_const_flip": [
+          2,
+          4
+        ],
+        "cmp_flip": [
+          2,
+          2
+        ],
+        "not_insert": [
+          3,
+          3
+        ],
+        "num_minus_1": [
+          0,
+          1
+        ],
+        "num_plus_1": [
+          1,
+          1
+        ],
+        "return_const": [
+          2,
+          4
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/154",
+      "entry_point": "cycpattern_check",
+      "seconds": 2.84
+    },
+    {
+      "v": 1,
+      "suite_sha256": "336a5807946d28f7e525ed676bc70253c919e7486a315e64bf8499501f76cd29",
+      "ref_sha256": "aa6650873fac80b65cee3df3aa88a5415510b1256935b1d0456cef8f906b579d",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 13,
+      "total": 14,
+      "score": 0.9285714285714286,
+      "survivors": [
+        {
+          "index": 4,
+          "operator": "bin_op_swap",
+          "lineno": 18,
+          "before": "return sorted(array, reverse=(array[0] + array[-1]) % 2 == 0)",
+          "after": "return sorted(array, reverse=(array[0] - array[-1]) % 2 == 0)"
+        }
+      ],
+      "by_operator": {
+        "bin_op_swap": [
+          1,
+          2
+        ],
+        "cmp_flip": [
+          1,
+          1
+        ],
+        "not_insert": [
+          1,
+          1
+        ],
+        "num_minus_1": [
+          4,
+          4
+        ],
+        "num_plus_1": [
+          4,
+          4
+        ],
+        "return_const": [
+          2,
+          2
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/88",
+      "entry_point": "sort_array",
+      "seconds": 2.62
+    },
+    {
+      "v": 1,
+      "suite_sha256": "9d29ab2386f7cbc1e7212ff6b8228137458db9bfaea69802e36557241609bb36",
+      "ref_sha256": "3d9eabb15662d81ce9b78ff0c4251ce50d96132f4eccc66d99242febaae64c9c",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 16,
+      "total": 19,
+      "score": 0.8421052631578947,
+      "survivors": [
+        {
+          "index": 4,
+          "operator": "str_truncate",
+          "lineno": 36,
+          "before": "return 'Six'",
+          "after": "return 'Si'"
+        },
+        {
+          "index": 16,
+          "operator": "return_const",
+          "lineno": 38,
+          "before": "return 'Seven'",
+          "after": "return None"
+        },
+        {
+          "index": 18,
+          "operator": "num_minus_1",
+          "lineno": 45,
+          "before": "if 1 <= x <= 9:",
+          "after": "if 0 <= x <= 9:"
+        }
+      ],
+      "by_operator": {
+        "cmp_flip": [
+          2,
+          2
+        ],
+        "not_insert": [
+          3,
+          3
+        ],
+        "num_minus_1": [
+          3,
+          4
+        ],
+        "num_plus_1": [
+          4,
+          4
+        ],
+        "return_const": [
+          2,
+          3
+        ],
+        "str_truncate": [
+          2,
+          3
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/105",
+      "entry_point": "by_length",
+      "seconds": 3.93
+    },
+    {
+      "v": 1,
+      "suite_sha256": "6e73db1efc3170b761d12068de61e80c9f5bacac6899043c039ee8072be4951e",
+      "ref_sha256": "3cd473a372e93e25e741bc6502385b2da29505427d1832079800ef8dcbc5aae0",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 14,
+      "total": 15,
+      "score": 0.9333333333333333,
+      "survivors": [
+        {
+          "index": 10,
+          "operator": "str_truncate",
+          "lineno": 12,
+          "before": "if ch in '13579':",
+          "after": "if ch in '1357':"
+        }
+      ],
+      "by_operator": {
+        "bin_op_swap": [
+          1,
+          1
+        ],
+        "cmp_flip": [
+          1,
+          1
+        ],
+        "not_insert": [
+          2,
+          2
+        ],
+        "num_minus_1": [
+          4,
+          4
+        ],
+        "num_plus_1": [
+          4,
+          4
+        ],
+        "return_const": [
+          1,
+          1
+        ],
+        "str_truncate": [
+          1,
+          2
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/155",
+      "entry_point": "even_odd_count",
+      "seconds": 4.05
+    },
+    {
+      "v": 1,
+      "suite_sha256": "d3bed194402b8b99416e853c7b95a2bf41b2b32c8bac1294e1ef1f0c92620565",
+      "ref_sha256": "0446fa4caae44cf9378d5868073ba36b9317ddaf0500f5dccca5339d17e499b0",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 14,
+      "total": 18,
+      "score": 0.7777777777777778,
+      "survivors": [
+        {
+          "index": 0,
+          "operator": "num_plus_1",
+          "lineno": 15,
+          "before": "return [1, 2]",
+          "after": "return [2, 2]"
+        },
+        {
+          "index": 10,
+          "operator": "return_const",
+          "lineno": 15,
+          "before": "return [1, 2]",
+          "after": "return None"
+        },
+        {
+          "index": 15,
+          "operator": "return_const",
+          "lineno": 11,
+          "before": "return []",
+          "after": "return None"
+        },
+        {
+          "index": 17,
+          "operator": "num_minus_1",
+          "lineno": 10,
+          "before": "if n == 0:",
+          "after": "if n == -1:"
+        }
+      ],
+      "by_operator": {
+        "bin_op_swap": [
+          3,
+          3
+        ],
+        "cmp_flip": [
+          1,
+          1
+        ],
+        "not_insert": [
+          3,
+          3
+        ],
+        "num_minus_1": [
+          3,
+          4
+        ],
+        "num_plus_1": [
+          3,
+          4
+        ],
+        "return_const": [
+          1,
+          3
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/106",
+      "entry_point": "f",
+      "seconds": 4.0
+    },
+    {
+      "v": 1,
+      "suite_sha256": "eee8f82bcfdcb9ad30ab976442d2e40bd98f1825c9dfed3536f52c91edf9e8e7",
+      "ref_sha256": "0acc68c6405673a4927851c07db654e9bf74455d9f12d07d8c46ff87b3429115",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 5,
+      "total": 5,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "bin_op_swap": [
+          2,
+          2
+        ],
+        "num_minus_1": [
+          1,
+          1
+        ],
+        "num_plus_1": [
+          1,
+          1
+        ],
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/45",
+      "entry_point": "triangle_area",
+      "seconds": 1.44
+    },
+    {
+      "v": 1,
+      "suite_sha256": "ee16affa888051fe452523d783abf9ed97c1f3ad2e115552efc0de3d5b2dcd50",
+      "ref_sha256": "364fe596b927206ed05fc9723bd10fcd5bfce5651505e5720d3d249289f54288",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 7,
+      "total": 7,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "cmp_flip": [
+          3,
+          3
+        ],
+        "not_insert": [
+          2,
+          2
+        ],
+        "return_const": [
+          1,
+          1
+        ],
+        "str_truncate": [
+          1,
+          1
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/117",
+      "entry_point": "select_words",
+      "seconds": 1.79
+    },
+    {
+      "v": 1,
+      "suite_sha256": "2d256b2310efabc0f7135dc4b40860c0bb383cbde245a0e073d3434357c7b7f0",
+      "ref_sha256": "36ddb74e4ab50e4d11d4f9b9703693d7d7256549649e7a5844d88de504019e5b",
+      "ref_passed": true,
+      "normalized_passed": true,
+      "killed": 17,
+      "total": 17,
+      "score": 1.0,
+      "survivors": [],
+      "by_operator": {
+        "bin_op_swap": [
+          2,
+          2
+        ],
+        "cmp_flip": [
+          1,
+          1
+        ],
+        "not_insert": [
+          2,
+          2
+        ],
+        "num_minus_1": [
+          5,
+          5
+        ],
+        "num_plus_1": [
+          6,
+          6
+        ],
+        "return_const": [
+          1,
+          1
+        ]
+      },
+      "task_id": "humanevalplus_HumanEval/107",
+      "entry_point": "even_odd_palindrome",
+      "seconds": 3.66
+    }
+  ]
+}
