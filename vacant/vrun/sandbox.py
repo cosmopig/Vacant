@@ -119,6 +119,12 @@ class SandboxResult:
     timed_out: bool
     wall_ms: int
     argv: list[str]
+    # ⚠ 逾時收尾的**實測結果**，不是「我送了 SIGKILL」。
+    #   `""`＝沒逾時所以沒收尾；`"reaped"`＝送完訊號後行程組真的不見了；
+    #   `"leaked:<原因>"`＝**訊號送不到或送了還在**——那代表這一格之後整台機器
+    #   多了一群吃 CPU 的孤兒，後面每一格的計時都被汙染。
+    #   `infra_void` 的同一條紀律：沒殺到不可以記成殺到了。
+    kill_status: str = ""
 
     def to_json(self) -> dict:
         return dataclasses.asdict(self)
@@ -177,6 +183,24 @@ class Sandbox:
         """這個後端在這台機器上起不起得來。回 `(ok, 原因)`。"""
         return True, ""
 
+    def _kill_group(self, proc: subprocess.Popen) -> list[str]:
+        """逾時收尾**的送訊號那一半**；確認交給 `_verify_reaped`。
+
+        ⚠ 這支是可覆寫的，因為**送得出訊號不等於殺得掉**。
+        `UnshareSandbox` 經過 `sudo` 提權再 `setpriv` 降權到別的 uid，
+        於是 `Popen` 記到的 pid 是 `sudo`（root 的），而我們是無特權使用者
+        ⇒ `killpg` 與 `kill` 都會拿到 `PermissionError: [Errno 1]`
+        （2026-09-19 在 vacant-dev 用 `signal 0` 實測）。
+        舊版把這個例外 `except Exception: pass` 吞掉，逾時因此**什麼都沒殺**，
+        累積成 72 個 `python3 -m solution` 孤兒、load 71——
+        而那又會讓後面每一格的逾時虛發，再生更多孤兒。
+
+        ⚠ 同一個提權轉換也讓 `_rlimits` 的 `RLIMIT_CPU` backstop 失效
+        （`sudo` 走 PAM 會重設 rlimit）。所以這兩道防線是**同一個根因**，
+        不是兩個獨立的洞。
+        """
+        return _send_kill(proc.pid, sudo=False)
+
     # ── 共同執行路徑 ──────────────────────────────────────────────────
     def run(self, command: str, *, workspace: str | os.PathLike,
             timeout_s: float = DEFAULT_TOOL_TIMEOUT_S,
@@ -210,15 +234,21 @@ class Sandbox:
                                  int((time.time() - t0) * 1000), argv)
         except subprocess.TimeoutExpired:
             if proc is not None:
-                _kill_group(proc)
+                sent = self._kill_group(proc)
+                # ⚠ **收割要排在驗證之前**：`communicate` 之前組長是殭屍，
+                #   而殭屍對 `killpg(pgid, 0)` 是「存在」⇒ 不先 wait 就驗，
+                #   每一次逾時都會被誤判成 leaked。
                 try:
                     out, err = proc.communicate(timeout=5)
                 except Exception:                            # noqa: BLE001
                     out, err = "", ""
+                kill_status = _verify_reaped(proc.pid, sent)
             else:                                            # pragma: no cover
                 out, err = "", ""
+                kill_status = "leaked:no-proc"
             return SandboxResult(None, out, err, True,
-                                 int((time.time() - t0) * 1000), argv)
+                                 int((time.time() - t0) * 1000), argv,
+                                 kill_status)
         except OSError as e:
             # 連沙箱都起不來＝基建故障，不是候選的錯（`checks.CheckInfraError`
             # 的同一條紀律）。呼叫端把它翻成 infra_void。
@@ -299,19 +329,77 @@ class SandboxInfraError(RuntimeError):
     """沙箱本身起不來（不是被跑的東西的錯）。呼叫端翻成 `infra_void`。"""
 
 
-def _kill_group(proc: subprocess.Popen) -> None:
-    if os.name == "posix":
-        try:
-            os.killpg(proc.pid, signal.SIGKILL)
-            return
-        except ProcessLookupError:
-            return
-        except Exception:                                    # noqa: BLE001
-            pass
+def _group_alive(pgid: int) -> bool:
+    """行程組還在不在。`signal 0` 只查權限與存在，不送訊號。
+
+    ⚠ `PermissionError` 回 **True**：送不到訊號代表**它還在而且我們管不到**，
+    那是最糟的情況，不可以當成「已經沒了」。
+    """
     try:
-        proc.kill()
+        os.killpg(pgid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
     except Exception:                                        # noqa: BLE001
-        pass
+        return True
+
+
+def _send_kill(pgid: int, *, sudo: bool) -> list[str]:
+    """對整個行程組送 SIGKILL，回「試了哪些、各自結果」。**不丟例外。**
+
+    `sudo=True` 時先走 `sudo -n kill`——提權過再降權的行程組**只有 root
+    殺得掉**，這是 `UnshareSandbox` 唯一有效的路。無論成敗都再直接
+    `killpg` 一次：`sudo` 可能沒設 NOPASSWD，而直接送對同 uid 的組有效。
+    """
+    tried: list[str] = []
+    if sudo:
+        try:
+            r = subprocess.run(
+                ["sudo", "-n", "kill", "-9", "--", f"-{pgid}"],
+                capture_output=True, text=True, timeout=10)
+            tried.append(f"sudo-kill rc={r.returncode}")
+        except Exception as e:                               # noqa: BLE001
+            tried.append(f"sudo-kill {type(e).__name__}")
+    try:
+        os.killpg(pgid, signal.SIGKILL)
+        tried.append("killpg ok")
+    except ProcessLookupError:
+        tried.append("killpg gone")
+    except Exception as e:                                   # noqa: BLE001
+        tried.append(f"killpg {type(e).__name__}")
+    return tried
+
+
+def _verify_reaped(pgid: int, sent: list[str],
+                   grace_s: float = 2.0) -> str:
+    """送完訊號之後**回頭確認行程組真的不見了**。
+
+    回 `"reaped"` 或 `"leaked:<試過什麼>"`。**永遠不丟例外**——收尾失敗是
+    要被記錄的事實，不是要被吞掉的例外，也不該讓呼叫端的錯誤路徑再炸一次。
+
+    ⚠ 呼叫端必須**先 wait 掉組長**再進來（見 `run()` 的註解），否則殭屍
+    會被讀成「還活著」。
+    """
+    if os.name != "posix":                                   # pragma: no cover
+        return "leaked:not-posix"
+    deadline = time.time() + grace_s
+    while True:
+        if not _group_alive(pgid):
+            return "reaped"
+        if time.time() >= deadline:
+            return "leaked:" + ",".join(sent)
+        time.sleep(0.05)
+
+
+def _kill_and_verify(pgid: int, *, sudo: bool,
+                     grace_s: float = 2.0) -> str:
+    """送 ＋ 確認，一次做完。**只給沒有組長要收割的呼叫端用**
+    （`run()` 走的是拆開的兩段，因為它夾著 `communicate`）。"""
+    if os.name != "posix":                                   # pragma: no cover
+        return "leaked:not-posix"
+    return _verify_reaped(pgid, _send_kill(pgid, sudo=sudo), grace_s)
 
 
 def _py() -> str:
@@ -516,6 +604,10 @@ class UnshareSandbox(Sandbox):
             #   ⚠ 它對三條臂**一視同仁**，所以不是臂層級的差異。
             _abs("bash"), "-lc", f"umask 0000; {command}",
         ]
+
+    def _kill_group(self, proc: subprocess.Popen) -> list[str]:
+        """訊號也要**走 sudo**——理由見基底類別的 docstring。"""
+        return _send_kill(proc.pid, sudo=True)
 
     def available(self) -> tuple[bool, str]:
         for tool in ("sudo", "unshare", "setpriv"):
