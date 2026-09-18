@@ -1955,8 +1955,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--sandbox", default="none",
                     help="驗收沙箱後端（裁決：R535 用 none，不降權 ⇒ 不再造跨 uid 孤兒）")
     ap.add_argument("--test-timeout", type=float, default=30.0)
-    ap.add_argument("--agent-timeout", type=float, default=300.0,
-                    help="單次嘗試的 agent 逾時（秒，**預設 300**）。"
+    ap.add_argument("--agent-timeout", type=float, default=600.0,
+                    help="單次嘗試的 agent 逾時（秒，**預設 600**＝裁決值）。"
+                         "300 會砍掉冒煙量到的 314 s 那一格（THINK 下的 ls -R）；"
+                         "900 的最壞情況是 360×900/4 約 22 小時。600 ＝ 2x 最壞觀測。"
+                         "⚠ 不對稱：太小 ⇒ **假逾時汙染量測**（把「超時」記成「答錯」，"
+                         "那正是本輪白跑風險第一名）；太大 ⇒ 一格卡住占一條流 10 分鐘。"
                          "`agent_timed_out=true` 是**正常的嘗試結果不 void**"
                          "（四臂一視同仁）；逐臂逐層的比例任一格超過兩成 ⇒ "
                          "收官必須寫「該比較受預算約束」")
