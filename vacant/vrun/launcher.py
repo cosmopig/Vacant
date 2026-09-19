@@ -297,8 +297,11 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
     wire_dir = run_dir / f"wire_{arm}"
     sentinel = "vacant-run-" + uuid.uuid4().hex
 
+    # ⚠ 連「這個上游位址是誰指定的」一起留下來——沒人指定就是公開 API 的預設值，
+    #   而那可能是使用者這一跑根本沒在用的廠商（見 `describe_upstreams`）。
+    upstream_desc = envmap.describe_upstreams()
     proxy = WireProxy(wire_dir=wire_dir,
-                      upstreams=envmap.discover_upstreams(),
+                      upstreams={w: v["url"] for w, v in upstream_desc.items()},
                       keys=envmap.discover_keys(), sentinel=sentinel,
                       mode=("act" if vacant_on else "tee"), port=port)
     proxy.start()
@@ -580,6 +583,11 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
         proxy.stop()
 
     summary["attempts_used"] = len(summary["attempts"])
+    # **每一條 wire 的上游位址與它的來歷**，逐跑落盤。
+    # `defaulted: true` ＝ 沒有人指定，走的是公開 API 的預設值。
+    summary["upstreams"] = upstream_desc
+    summary["upstreams_defaulted"] = sorted(
+        w for w, v in upstream_desc.items() if v["defaulted"])
     summary["requests_seen"] = proxy.stats["requests_seen"]
     summary["wire_by_protocol"] = dict(proxy.stats["by_wire"])
     summary["wire_errors"] = proxy.stats["errors"]

@@ -233,11 +233,43 @@ CONFIG_ROUTE: dict[str, dict[str, str | None]] = {
 
 def discover_upstreams(env: dict[str, str] | None = None) -> dict[str, str]:
     """從父行程的環境變數推出兩條路由各自的真上游。找不到就用預設。"""
+    return {w: v["url"] for w, v in describe_upstreams(env).items()}
+
+
+def describe_upstreams(env: dict[str, str] | None = None) -> dict[str, dict]:
+    """同上，但**連「這個位址是誰指定的」一起回**。
+
+    ⚠ **為什麼要有這一支**（2026-09-19）：`vacant run` 的全部意義是中介，
+    但收據原本**沒有記 bytes 去了誰的伺服器、那個位址是誰指定的**。
+    於是這件事發生了而沒有人看得到——
+
+      Claude Code 啟動時會探 `$ANTHROPIC_BASE_URL/api/hello`。
+      `route()` 只把 `/v1/messages`／`/v1/complete` 判給 anthropic，
+      其餘一律落到 openai ⇒ 那一通用的是 **openai 的上游**。
+      而使用者只指定了 anthropic（→ 本機 1003），openai 沒指定
+      ⇒ 它走 `DEFAULT_UPSTREAM["openai"]` ＝ **`https://api.openai.com`**，
+      **真的出網，去了一家使用者這一跑根本沒在用的廠商。**
+
+    那一通是空的 HEAD、金鑰是 sentinel，所以沒有洩漏內容。
+    **但「這次沒洩漏」與「這條路不會洩漏」是兩件事**，而原本的收據
+    連「有這麼一通」都說不出來。
+
+    `source` 的三種值：
+      `"env:<VAR>"`  使用者（或 wrapper）明講的
+      `"default"`    **沒有人指定，用的是公開 API 的預設值**
+      本函式不判斷哪一種比較好——它只負責讓那個差別**寫得出來**。
+    """
     e = dict(os.environ if env is None else env)
-    out: dict[str, str] = {}
+    out: dict[str, dict] = {}
     for wire, names in UPSTREAM_VARS:
-        val = next((e[n].strip() for n in names if e.get(n, "").strip()), "")
-        out[wire] = val or DEFAULT_UPSTREAM[wire]
+        src, val = "", ""
+        for n in names:
+            if e.get(n, "").strip():
+                src, val = f"env:{n}", e[n].strip()
+                break
+        out[wire] = ({"url": val, "source": src, "defaulted": False} if val
+                     else {"url": DEFAULT_UPSTREAM[wire],
+                           "source": "default", "defaulted": True})
     return out
 
 
