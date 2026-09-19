@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_22_digit_list_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 66,
+      "cases": [
+        {
+          "case": "check_01_digit_list",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'digit_list' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_22_digit_list__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import digit_list",
+          "output": ""
+        },
+        {
+          "case": "check_02_digit_list",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'digit_list' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_22_digit_list__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import digit_list",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "1bdeeaa7e136f9a4a9fde6ac1bb5909d6ed0ac2b544db1d083cdd4c9a6118bba"
+}

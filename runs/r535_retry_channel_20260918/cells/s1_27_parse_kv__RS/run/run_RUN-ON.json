@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s1_27_parse_kv_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/ws",
+  "proxy_url": "http://127.0.0.1:8879",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8879",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "1d062eba5fb29a0e754a0b4ca87cc21ccb509a4225b09db4b40e69daead2bf8f",
+  "ws_end_sha256": "6457025c7a6376e531736ac62ed355719308fcb570e1a5e08d2ab58557e44b11",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 15,
+  "wire_by_protocol": {
+    "openai": 15
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "27f30adc93ec4416d6ebadb7a4619711cc24fbb8f058d0fe25d827925121b41f",
+  "verdict_hash": "79a700cbc9bf95311eb38b2bf94d2c3cda784561cd9ebde69e0ccac4c7620278",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "1d062eba5fb29a0e754a0b4ca87cc21ccb509a4225b09db4b40e69daead2bf8f",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 84.52,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 5,
+      "wire_digest": "45b3dc44467b12e71a970a60b0a67f6861e3770180b8a2cdfc6a363e8ab535a4",
+      "ws_end_sha256": "884391e5cbfb10121e21ea1d38cc4473cf0b853d175b0a04342c5a00460efad1",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "27f30adc93ec4416d6ebadb7a4619711cc24fbb8f058d0fe25d827925121b41f",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_parse_kv — exception: ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import parse_kv]\ntest_visible.py::check_02_parse_kv — exception: ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import parse_kv]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "1d062eba5fb29a0e754a0b4ca87cc21ccb509a4225b09db4b40e69daead2bf8f",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "1d062eba5fb29a0e754a0b4ca87cc21ccb509a4225b09db4b40e69daead2bf8f",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 119.206,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 10,
+      "wire_digest": "b1f86196ec90b003b989c2433a111283418d63049783776bf9e74bbc0606bad6",
+      "ws_end_sha256": "4f04caf3f048c6be66b344de327c862bf70cc800b72e90f4ea6acd6548edb066",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "27f30adc93ec4416d6ebadb7a4619711cc24fbb8f058d0fe25d827925121b41f",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_parse_kv — exception: ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import parse_kv]\ntest_visible.py::check_02_parse_kv — exception: ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import parse_kv]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "1d062eba5fb29a0e754a0b4ca87cc21ccb509a4225b09db4b40e69daead2bf8f",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "1d062eba5fb29a0e754a0b4ca87cc21ccb509a4225b09db4b40e69daead2bf8f",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 39.159,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 15,
+      "wire_digest": "76caef03b8a75d083134cd2829d8964adaabcd55904d6247d562cfe445714057",
+      "ws_end_sha256": "6457025c7a6376e531736ac62ed355719308fcb570e1a5e08d2ab58557e44b11",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "27f30adc93ec4416d6ebadb7a4619711cc24fbb8f058d0fe25d827925121b41f",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_parse_kv — exception: ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import parse_kv]\ntest_visible.py::check_02_parse_kv — exception: ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import parse_kv]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_origin",
+    "ws_sha256": "1d062eba5fb29a0e754a0b4ca87cc21ccb509a4225b09db4b40e69daead2bf8f"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "76caef03b8a75d083134cd2829d8964adaabcd55904d6247d562cfe445714057",
+  "run_wall_s": 243.506,
+  "agent_wall_s": 39.159,
+  "failures": "test_visible.py::check_01_parse_kv — exception: ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import parse_kv]\ntest_visible.py::check_02_parse_kv — exception: ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import parse_kv]"
+}

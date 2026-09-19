@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_30_ord_suffix_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 81,
+      "cases": [
+        {
+          "case": "check_01_ord_suffix",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'ord_suffix' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_30_ord_suffix__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import ord_suffix",
+          "output": ""
+        },
+        {
+          "case": "check_02_ord_suffix",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'ord_suffix' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_30_ord_suffix__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import ord_suffix",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "d3210a29c1e858df468c08453c476b623eb9e0ecda5f762b49670a9fb3afbd65"
+}

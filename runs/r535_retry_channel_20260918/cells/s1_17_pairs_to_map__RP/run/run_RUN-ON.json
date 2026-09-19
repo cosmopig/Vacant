@@ -1,0 +1,174 @@
+{
+  "task_id": "r535_s1_17_pairs_to_map_RP",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file.{VACANT_FEEDBACK}"
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/ws",
+  "proxy_url": "http://127.0.0.1:8879",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8879",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "8f6634f9a0895aac92bc7fef12b2c5deecb248f34d22ae2ae691fa463b3c94cf",
+  "ws_end_sha256": "995420c36bf05d7f56d1acc3f0fab4debf7abece6a8e68eda242027f0ec2e5ba",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 9,
+  "wire_by_protocol": {
+    "openai": 9
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "2f1e4af79c03bc2f311a008844f0d9c931db6fde8ce90d9966a38ff572ca4116",
+  "verdict_hash": "4fe2d89c7dee0f6cca838c3bad680f7b60fdf250353ff98b5c5ee55ca77f50fc",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 2,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_pairs_to_map — exception: ImportError: cannot import name 'pairs_to_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import pairs_to_map]\ntest_visible.py::check_02_pairs_to_map — exception: ImportError: cannot import name 'pairs_to_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import pairs_to_map]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "prompt"
+      },
+      "ws_start_sha256": "8f6634f9a0895aac92bc7fef12b2c5deecb248f34d22ae2ae691fa463b3c94cf",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 62.979,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 4,
+      "wire_digest": "30bc8b948e72dc4e0c12d5cf44a7e7f0721c0566dbdd479a11b0fb704291f9c7",
+      "ws_end_sha256": "77314f2cf6d7dda8d1c94c4ae11eab8a1f3ac97299e4e26b24dbdf98c18304e9",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "c5d31ac4acf66c68f548e8068816f0b9728233055773f83e0fa78e17de32e07f",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_pairs_to_map — exception: ImportError: cannot import name 'pairs_to_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import pairs_to_map]\ntest_visible.py::check_02_pairs_to_map — exception: ImportError: cannot import name 'pairs_to_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import pairs_to_map]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "77314f2cf6d7dda8d1c94c4ae11eab8a1f3ac97299e4e26b24dbdf98c18304e9",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file.\n\n<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_pairs_to_map — exception: ImportError: cannot import name 'pairs_to_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import pairs_to_map]\ntest_visible.py::check_02_pairs_to_map — exception: ImportError: cannot import name 'pairs_to_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import pairs_to_map]\n\nFix the working directory. The checks run again when this process exits.\n"
+      ],
+      "argv_sha256": "9f91a8ffc92942671e091a4ab92418dd54707c9095face94e1f51497983668de",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 867,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 49.795,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 9,
+      "wire_digest": "ba00b70afc38744cd159d8dcc80e6420b7438b9bcd7bb2f8c810872ea368df60",
+      "ws_end_sha256": "995420c36bf05d7f56d1acc3f0fab4debf7abece6a8e68eda242027f0ec2e5ba",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/_frozen_RUN-ON_a2",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "2f1e4af79c03bc2f311a008844f0d9c931db6fde8ce90d9966a38ff572ca4116",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RP/run/visible_RUN-ON_a2.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "prompt",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "ba00b70afc38744cd159d8dcc80e6420b7438b9bcd7bb2f8c810872ea368df60",
+  "run_wall_s": 113.448,
+  "agent_wall_s": 49.795,
+  "failures": ""
+}

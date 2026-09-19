@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s2_13_parse_int_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s2_13_parse_int__RS/ws",
+  "proxy_url": "http://127.0.0.1:8879",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8879",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "64809c765ff7ee48ba88ed1f53257aea1b9c8806892d8a0234197a037742c6ff",
+  "ws_end_sha256": "b4c8530ae9a6295b53a7f3347174dd96e31becc126125251145e33850774fa46",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 27,
+  "wire_by_protocol": {
+    "openai": 27
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "verdict_sha256": "d61ac1fa11cd4245bd97527ec42107af7dc1439e4cf22d0a0ca228a2f713d6a7",
+  "verdict_hash": "41c5779a8a46005cdca0b121208d5756a96ca9684d6f4ed8f2f195fbf9a75f3c",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "64809c765ff7ee48ba88ed1f53257aea1b9c8806892d8a0234197a037742c6ff",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 217.499,
+      "wire_quiesced": true,
+      "requests_seen": 7,
+      "requests_seen_cumulative": 7,
+      "wire_digest": "f16b67bdfa404a732c054899b8983bd11f93b581a63c35d006802eeaedff3eca",
+      "ws_end_sha256": "931efede52dffa2f222316682a2febce640f4a1878194c004179204f4bbfc3d2",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_13_parse_int__RS/run/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "d61ac1fa11cd4245bd97527ec42107af7dc1439e4cf22d0a0ca228a2f713d6a7",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_13_parse_int__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_parse_int — assert: parse_int args=(5,) got=AttributeError('int' object has no attribute 'strip') want=TypeError [test_visible.py:25: raise AssertionError(\"parse_int args=%r got=%s(%s) want=TypeError\" %]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "64809c765ff7ee48ba88ed1f53257aea1b9c8806892d8a0234197a037742c6ff",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "64809c765ff7ee48ba88ed1f53257aea1b9c8806892d8a0234197a037742c6ff",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": -9,
+      "agent_timed_out": true,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 600.08,
+      "wire_quiesced": false,
+      "requests_seen": 15,
+      "requests_seen_cumulative": 22,
+      "wire_digest": "57655cd60201932d9aa1fc772f35d907cd5fa817c5d9c62668367b57dfa182e7",
+      "ws_end_sha256": "d23880ecdb61d337bd4ae0dadb706c33f34838e0a72cd39e87669c675a0481eb",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_13_parse_int__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "d61ac1fa11cd4245bd97527ec42107af7dc1439e4cf22d0a0ca228a2f713d6a7",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_13_parse_int__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_parse_int — assert: parse_int args=(5,) got=AttributeError('int' object has no attribute 'strip') want=TypeError [test_visible.py:25: raise AssertionError(\"parse_int args=%r got=%s(%s) want=TypeError\" %]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "64809c765ff7ee48ba88ed1f53257aea1b9c8806892d8a0234197a037742c6ff",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "64809c765ff7ee48ba88ed1f53257aea1b9c8806892d8a0234197a037742c6ff",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 63.642,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 27,
+      "wire_digest": "3c1cee7b54b0d938eb9ee1d73e082a86ed5e9ec2b2e17629a1fc9238eb0000eb",
+      "ws_end_sha256": "b4c8530ae9a6295b53a7f3347174dd96e31becc126125251145e33850774fa46",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_13_parse_int__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "d61ac1fa11cd4245bd97527ec42107af7dc1439e4cf22d0a0ca228a2f713d6a7",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_13_parse_int__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_parse_int — assert: parse_int args=(5,) got=AttributeError('int' object has no attribute 'strip') want=TypeError [test_visible.py:25: raise AssertionError(\"parse_int args=%r got=%s(%s) want=TypeError\" %]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s2_13_parse_int__RS/run/_origin",
+    "ws_sha256": "64809c765ff7ee48ba88ed1f53257aea1b9c8806892d8a0234197a037742c6ff"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 1,
+  "wire_digest": "3c1cee7b54b0d938eb9ee1d73e082a86ed5e9ec2b2e17629a1fc9238eb0000eb",
+  "run_wall_s": 892.072,
+  "agent_wall_s": 63.642,
+  "failures": "test_visible.py::check_02_parse_int — assert: parse_int args=(5,) got=AttributeError('int' object has no attribute 'strip') want=TypeError [test_visible.py:25: raise AssertionError(\"parse_int args=%r got=%s(%s) want=TypeError\" %]"
+}

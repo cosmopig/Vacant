@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_44_by_length_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 120,
+      "cases": [
+        {
+          "case": "check_01_by_length",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'by_length' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_44_by_length__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import by_length",
+          "output": ""
+        },
+        {
+          "case": "check_02_by_length",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'by_length' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_44_by_length__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import by_length",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "f7cdb1d5d79065ed97bbf4609116ddd302196c5755207cb14c27a3bd60b6df76"
+}

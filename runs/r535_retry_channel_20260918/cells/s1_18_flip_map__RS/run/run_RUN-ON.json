@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s1_18_flip_map_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/ws",
+  "proxy_url": "http://127.0.0.1:8880",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8880",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "1afc2e769f4a03f0e0df219e3812e48988963f13331c9484ca65266c57017df5",
+  "ws_end_sha256": "c9a55033a8f3a6b398649ff793867f039b29296962a75722d696c99fe7b53ff5",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 16,
+  "wire_by_protocol": {
+    "openai": 16
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "d614f8d004d8f9614b3869c4118c71fce7ebdd9bdd5a83763e860e4ec0040517",
+  "verdict_hash": "5f38357bdbd62e7907c21c35272783c2b03c5f2702ff38e9f78ac4fb1d1d66bb",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "1afc2e769f4a03f0e0df219e3812e48988963f13331c9484ca65266c57017df5",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 210.244,
+      "wire_quiesced": true,
+      "requests_seen": 6,
+      "requests_seen_cumulative": 6,
+      "wire_digest": "2099aae3ceda458c7b42dbc86d1fc49b728116188641d28d5cde43d03903e2ca",
+      "ws_end_sha256": "25d132f3e390695fa1f139886dab76f07c4007b2630b393b3218590cadf5d33a",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "d614f8d004d8f9614b3869c4118c71fce7ebdd9bdd5a83763e860e4ec0040517",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_flip_map — exception: ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import flip_map]\ntest_visible.py::check_02_flip_map — exception: ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import flip_map]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "1afc2e769f4a03f0e0df219e3812e48988963f13331c9484ca65266c57017df5",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "1afc2e769f4a03f0e0df219e3812e48988963f13331c9484ca65266c57017df5",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 127.815,
+      "wire_quiesced": true,
+      "requests_seen": 6,
+      "requests_seen_cumulative": 12,
+      "wire_digest": "b2918d98166547023dd770cb28bd82b5d010e3fec2142ccdaa8f37aaf4fe327b",
+      "ws_end_sha256": "c7b0e1886f3006dbfe1d66d8c1a92fd45db23c21a056c3f20500a3dc1cfbac58",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "d614f8d004d8f9614b3869c4118c71fce7ebdd9bdd5a83763e860e4ec0040517",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_flip_map — exception: ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import flip_map]\ntest_visible.py::check_02_flip_map — exception: ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import flip_map]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "1afc2e769f4a03f0e0df219e3812e48988963f13331c9484ca65266c57017df5",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "1afc2e769f4a03f0e0df219e3812e48988963f13331c9484ca65266c57017df5",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 127.937,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 16,
+      "wire_digest": "952f2651adc5b768a55269ec3dd2a0d66330061f13497bb16e565b9d7cb49a3d",
+      "ws_end_sha256": "c9a55033a8f3a6b398649ff793867f039b29296962a75722d696c99fe7b53ff5",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "d614f8d004d8f9614b3869c4118c71fce7ebdd9bdd5a83763e860e4ec0040517",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_flip_map — exception: ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import flip_map]\ntest_visible.py::check_02_flip_map — exception: ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import flip_map]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_origin",
+    "ws_sha256": "1afc2e769f4a03f0e0df219e3812e48988963f13331c9484ca65266c57017df5"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "952f2651adc5b768a55269ec3dd2a0d66330061f13497bb16e565b9d7cb49a3d",
+  "run_wall_s": 466.672,
+  "agent_wall_s": 127.937,
+  "failures": "test_visible.py::check_01_flip_map — exception: ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import flip_map]\ntest_visible.py::check_02_flip_map — exception: ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import flip_map]"
+}

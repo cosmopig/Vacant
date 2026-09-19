@@ -1,0 +1,134 @@
+{
+  "task_id": "r535_s1_11_caps_PC",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_11_caps__PC/ws",
+  "proxy_url": "http://127.0.0.1:8878",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8878",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "21ef784d5e988a8df3b5838e5a8c6a375430f3f7fc676299f249785b7c6e585b",
+  "ws_end_sha256": "2bd03c6323fa3f38e8368a621f9d811f0b8d68dbbd41d2ea7205b31e6952e9c4",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 14,
+  "wire_by_protocol": {
+    "openai": 14
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "8b6c7a2875858f56876f0fa48714d5e0752e472106b07fd1dc8ac620bd193a34",
+  "verdict_hash": "93bbe132770c81153f7fd18a983e3ca30e01d97b6b16f97f301b51be0c3bec27",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "21ef784d5e988a8df3b5838e5a8c6a375430f3f7fc676299f249785b7c6e585b",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 145.521,
+      "wire_quiesced": true,
+      "requests_seen": 14,
+      "requests_seen_cumulative": 14,
+      "wire_digest": "3c1c20169039decdfafb1280bc2964b8fc6518d9589dac535169b10d57ff8b31",
+      "ws_end_sha256": "2bd03c6323fa3f38e8368a621f9d811f0b8d68dbbd41d2ea7205b31e6952e9c4",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_11_caps__PC/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "8b6c7a2875858f56876f0fa48714d5e0752e472106b07fd1dc8ac620bd193a34",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_11_caps__PC/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_caps — assert: caps args=('hello world',) got='HeLlO WoRlD' want='Hello World' [test_visible.py:14: assert got == want, \"caps args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_caps — assert: caps args=(\"mcADAM o'neil\",) got=\"McAdAm O'NeIl\" want=\"Mcadam O'neil\" [test_visible.py:22: assert got == want, \"caps args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "3c1c20169039decdfafb1280bc2964b8fc6518d9589dac535169b10d57ff8b31",
+  "run_wall_s": 145.911,
+  "agent_wall_s": 145.521,
+  "failures": "test_visible.py::check_01_caps — assert: caps args=('hello world',) got='HeLlO WoRlD' want='Hello World' [test_visible.py:14: assert got == want, \"caps args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_caps — assert: caps args=(\"mcADAM o'neil\",) got=\"McAdAm O'NeIl\" want=\"Mcadam O'neil\" [test_visible.py:22: assert got == want, \"caps args=%r got=%r want=%r\" % (args, got, want)]"
+}

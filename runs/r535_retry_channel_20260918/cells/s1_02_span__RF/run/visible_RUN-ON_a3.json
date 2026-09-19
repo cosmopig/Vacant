@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_02_span_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 63,
+      "cases": [
+        {
+          "case": "check_01_span",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'span' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_02_span__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import span",
+          "output": ""
+        },
+        {
+          "case": "check_02_span",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'span' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_02_span__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import span",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "cebaecc13929e9eabe53bb2c12a5ee4bb51fec983b4792288259eb6d35e06b50"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_36_longest_run_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 314,
+      "cases": [
+        {
+          "case": "check_01_longest_run",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'longest_run' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_36_longest_run__RS/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import longest_run",
+          "output": ""
+        },
+        {
+          "case": "check_02_longest_run",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'longest_run' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_36_longest_run__RS/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import longest_run",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "23c62563f8852f4b1a36675b0705ae41537f10664107d4447a832cab6daf6791"
+}

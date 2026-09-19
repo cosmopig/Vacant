@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_27_parse_kv_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 110,
+      "cases": [
+        {
+          "case": "check_01_parse_kv",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import parse_kv",
+          "output": ""
+        },
+        {
+          "case": "check_02_parse_kv",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'parse_kv' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_27_parse_kv__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import parse_kv",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "46666667de1020680b2bc333027b7ce04f7e14b59ff15a0749dd347525e6e2d6"
+}

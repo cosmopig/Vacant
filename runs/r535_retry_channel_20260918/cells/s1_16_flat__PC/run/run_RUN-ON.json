@@ -1,0 +1,134 @@
+{
+  "task_id": "r535_s1_16_flat_PC",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_16_flat__PC/ws",
+  "proxy_url": "http://127.0.0.1:8877",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8877",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "873df2f986d1336b6fcf3cd34567743583070e88ca03cd7d9a2ec48840ddfbb3",
+  "ws_end_sha256": "dea86ae2c54bb935749d6a471aaeee0227d63433e8ef5e5862c7fbc70e6dcb68",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 4,
+  "wire_by_protocol": {
+    "openai": 4
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "b3511e4090e87e5a99f9175c2aa960cb434a85c69da9768a4bce8e1469a276bd",
+  "verdict_hash": "2af78fca2259f991192c34f215c0391493d4dd56f324cee3491a740e2fce7141",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "873df2f986d1336b6fcf3cd34567743583070e88ca03cd7d9a2ec48840ddfbb3",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 52.908,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 4,
+      "wire_digest": "cb758933f2d80527bfc14e82a364a99c2310b2f2ccb2c20c14b4db40e338ac30",
+      "ws_end_sha256": "dea86ae2c54bb935749d6a471aaeee0227d63433e8ef5e5862c7fbc70e6dcb68",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_16_flat__PC/run/_frozen_RUN-ON",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "b3511e4090e87e5a99f9175c2aa960cb434a85c69da9768a4bce8e1469a276bd",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_16_flat__PC/run/visible_RUN-ON.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "cb758933f2d80527bfc14e82a364a99c2310b2f2ccb2c20c14b4db40e338ac30",
+  "run_wall_s": 53.35,
+  "agent_wall_s": 52.908,
+  "failures": ""
+}

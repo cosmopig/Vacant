@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_34_days_in_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 194,
+      "cases": [
+        {
+          "case": "check_01_days_in",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'days_in' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_34_days_in__RS/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import days_in",
+          "output": ""
+        },
+        {
+          "case": "check_02_days_in",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'days_in' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_34_days_in__RS/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import days_in",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "311e680be8cba471df830c22c940f6613d1727777cebd1c2d55c24b6dfaadcdf"
+}

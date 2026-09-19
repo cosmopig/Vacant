@@ -1,0 +1,77 @@
+{
+  "run": "R535",
+  "note": "這一份記的是**沒有進 repo 的東西**：在哪、多大、幾個檔、為什麼不帶、怎麼取得。「拿不到也要記下拿不到」是這個 repo 的紀律（CLAUDE.md）。",
+  "source_host": {
+    "ssh": "user1@100.124.254.83",
+    "path": "/var/tmp/vacant_r535/run",
+    "total_bytes": 165057811,
+    "total_human": "157.41 MB（19,200 個檔；`du -sh` 因為區塊對齊會報 220 MB）",
+    "caveat": "`/var/tmp` 會被作業系統清掉。這台機器上的資料**不保證長期存在**；本歸檔（21.6 MB）才是長期的那一份。"
+  },
+  "how_to_fetch": [
+    "rsync -a --files-from=<清單> user1@100.124.254.83:/var/tmp/vacant_r535/run/ ./r535_full/",
+    "取回之後用下面每一類的 manifest_sha256 驗：把該類檔案依路徑 LC_ALL=C 排序，逐行寫成 '<sha256>  <相對路徑>\\n'，整串的 sha256 要等於 manifest_sha256。"
+  ],
+  "excluded": [
+    {
+      "glob": "cells/*/piconf/**",
+      "n_files": 1791,
+      "bytes": 8402677,
+      "manifest_sha256": "30e0fb1edf471d66815a44dc99de6290b52b30e415a8b28dc6a586496018a1f5",
+      "what": "pi（agent harness）自己的設定與 session 逐字稿（models.json／auth.json／sessions/*.jsonl）。",
+      "why_not_shipped": "session 逐字稿是 wire 的重述——同一段對話的位元組已經在 `wire.tar.gz` 裡，而 wire 才是收據簽的那一份。設定檔是機器本地狀態（埠號、絕對路徑）。auth.json 實測是空物件 `{}`，沒有憑證外流風險，但也沒有帶的理由。"
+    },
+    {
+      "glob": "cells/*/ws/**",
+      "n_files": 899,
+      "bytes": 456085,
+      "manifest_sha256": "e5af61b9e98c5e4e7f35d046f8ec5a3305fa2e064d10e3533904a5cadb67eccf",
+      "what": "跑完之後留在工作區的活檔（solution.py、TASK.md、agent 自己寫的暫存測試、__pycache__）。",
+      "why_not_shipped": "同一份內容的**釘死副本**已經帶了：`cells/*/run/_frozen_RUN-ON*/`（逐次嘗試各一份，`ws_end_sha256` 寫在 `cell.json` 與收據 payload 裡）。活工作區沒有雜湊背書，帶它反而多一個沒人保證的副本。"
+    },
+    {
+      "glob": "cells/*/launcher_stdout_1.json",
+      "n_files": 360,
+      "bytes": 2921382,
+      "manifest_sha256": "f8ebb57bb10b5584c907225d4322c4e1f8e4aaf72252ad11dea391a124d9befc",
+      "what": "pi 的 console 輸出（**副檔名叫 .json 但不是 JSON**：前面是人讀的逐行輸出，最後才接一段 JSON 摘要）。",
+      "why_not_shipped": "那段 JSON 摘要就是 `cells/*/run/run_RUN-ON.json`（已帶）；前面的人讀輸出是模型回應的重述，位元組在 `wire.tar.gz` 的 `*.resp.bin` 裡。"
+    },
+    {
+      "glob": "cells/*/launcher_stderr_1.log",
+      "n_files": 360,
+      "bytes": 0,
+      "manifest_sha256": "664e905d2dfb4ca9d4ad1e0c1984810c8e82f1fc483085ea8cf6c849d61c2a28",
+      "what": "launcher 的 stderr。",
+      "why_not_shipped": "360 個檔全部是 0 位元組。記下來是因為「全空」本身是一件要說出口的事，不是省略。"
+    },
+    {
+      "glob": "scores.json",
+      "n_files": 1,
+      "bytes": 1995900,
+      "sha256": "36a28b9eaa4cdb4749faa991379456f70d0e401da5ba076693e30bcdc12a437b",
+      "manifest_sha256": "bcc16fc7fce1fb787164ac109ab154c04b025a1f49cff548e3c2ed98016bd5a7",
+      "what": "第一次評分（`scored_at` 2026-09-19T06:50:58Z）。歸檔帶的是 53 秒後的第二次（`scores_20260919T065151Z.json`，`state_r535.py` 的 `newest_scores()` 也是挑它）。",
+      "why_not_shipped": "兩份逐欄位比對過：**只有 `scored_at` 與逐次的 `score_wall_s`（計時）不同**，360 格的 `visible_accepted`／`hidden_pass`／`hidden_passed`／`hidden_total`／`hidden_result_sha256`／`status`／`delivered_attempt`／`visible_pass_hidden_fail`／`m7_file`／`m7_ws`／`f6`／`attempts_used` 一格都沒變。⚠ 這一句本歸檔**驗不動**（那個檔不在這裡），要驗就照 how_to_fetch 取回來自己比。"
+    },
+    {
+      "glob": "_preflight/_verify/",
+      "n_files": 0,
+      "bytes": 0,
+      "manifest_sha256": null,
+      "what": "發射前檢查留下的空目錄。",
+      "why_not_shipped": "裡面沒有檔案。"
+    }
+  ],
+  "shipped_but_packed": [
+    {
+      "path": "wire.tar.gz",
+      "members": 10664,
+      "raw_bytes": 136724767,
+      "packed_bytes": 8118558,
+      "sha256": "4f70953a82fead5aeb82fd79d26c12405ec102067eb429d63eaa60a818d30892",
+      "what": "**全部 360 格、全部 5,332 通呼叫的 request 與 response body 原始位元組**（`cells/<cell>/run/wire_RUN-ON/<call_id>.{req,resp}.bin`）。",
+      "why_packed": "130 MB 的散檔不該逐個進版控（R532 曾把 416 MB 推上 GitHub 留在歷史裡）。打包成一個 8.1 MB 的確定性 tarball（`tar --sort=name --owner=0 --group=0 --numeric-owner --mtime=@1789776000` ＋ `gzip -9 -n`）。解開之後每一個 body 的 sha256 都對得上 `wire_RUN-ON/index.jsonl`，而 index 又被簽章鏈綁住——見 README §怎麼驗。"
+    }
+  ]
+}

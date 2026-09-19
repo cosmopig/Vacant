@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_24_is_pal_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 102,
+      "cases": [
+        {
+          "case": "check_01_is_pal",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'is_pal' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_24_is_pal__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import is_pal",
+          "output": ""
+        },
+        {
+          "case": "check_02_is_pal",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'is_pal' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_24_is_pal__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import is_pal",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "000de8812b9e9e45932708f2c79c12f6cb593631ac5880f8a5153e521a6b7af9"
+}

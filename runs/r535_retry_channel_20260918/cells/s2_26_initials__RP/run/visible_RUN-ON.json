@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_26_initials_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 56,
+      "cases": [
+        {
+          "case": "check_01_initials",
+          "ok": false,
+          "kind": "assert",
+          "message": "initials args=('ada lovelace',) got='AL' want='A.L.'",
+          "where": "test_visible.py:14: assert got == want, \"initials args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_initials",
+          "ok": false,
+          "kind": "assert",
+          "message": "initials args=('jean-luc picard',) got='JLP' want='J.L.P.'",
+          "where": "test_visible.py:22: assert got == want, \"initials args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "0fa02cd06b225a669a8f719812f10e75f49096fa608ef044c5a87d18901376d8"
+}

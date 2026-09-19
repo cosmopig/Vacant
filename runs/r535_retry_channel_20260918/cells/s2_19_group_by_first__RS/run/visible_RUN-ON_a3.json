@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_19_group_by_first_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 73,
+      "cases": [
+        {
+          "case": "check_01_group_by_first",
+          "ok": false,
+          "kind": "assert",
+          "message": "group_by_first args=(['Apple', 'ant', 'Bee'],) got={'A': ['Apple'], 'a': ['ant'], 'B': ['Bee']} want={'a': ['Apple', 'ant'], 'b': ['Bee']}",
+          "where": "test_visible.py:14: assert got == want, \"group_by_first args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_group_by_first",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "41210be8ebbd4671861f368830178f86389237f576e3c83ad7308898a17ff6ba"
+}

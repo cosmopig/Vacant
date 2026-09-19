@@ -1,0 +1,20 @@
+def days_in(y, m):
+    if m in [1, 3, 5, 7, 8, 10, 12]:
+        return 31
+    elif m in [4, 6, 9, 11]:
+        return 30
+    elif m == 2:
+        if (y % 4 == 0 and y % 100 != 0) or (y % 400 == 0):
+            return 29
+        else:
+            return 28
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) == 3:
+        try:
+            year = int(sys.argv[1])
+            month = int(sys.argv[2])
+            print(days_in(year, month))
+        except ValueError:
+            pass

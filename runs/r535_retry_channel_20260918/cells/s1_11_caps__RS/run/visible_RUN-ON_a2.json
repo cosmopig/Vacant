@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_11_caps_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 42,
+      "cases": [
+        {
+          "case": "check_01_caps",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'caps' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_11_caps__RS/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import caps",
+          "output": ""
+        },
+        {
+          "case": "check_02_caps",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'caps' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_11_caps__RS/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import caps",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "8f6e517e49f149f2063236c50a673705543d873a9d9ac3447826232d376192db"
+}

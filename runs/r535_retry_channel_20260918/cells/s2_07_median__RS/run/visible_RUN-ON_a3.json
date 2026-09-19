@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_07_median_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 65,
+      "cases": [
+        {
+          "case": "check_01_median",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_median",
+          "ok": false,
+          "kind": "assert",
+          "message": "median args=([],) got=None want=ValueError to be raised",
+          "where": "test_visible.py:27: raise AssertionError(\"median args=%r got=%r want=ValueError to be raised\" %",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "1e434e1df7b96709f9be19ac16810eba18f0dd10deb7812d142edf8b296e44f0"
+}

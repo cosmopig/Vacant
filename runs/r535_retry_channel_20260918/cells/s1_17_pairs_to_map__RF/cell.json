@@ -1,0 +1,298 @@
+{
+  "cell": "s1_17_pairs_to_map__RF",
+  "task_id": "s1_17_pairs_to_map",
+  "arm": "RF",
+  "stratum": "S1",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T00:27:41Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "s1",
+  "pi_port": 8878,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 16,
+  "task_pos": 16,
+  "arm_pos": 1,
+  "plan_index": 65,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RF/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RF/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s1_17_pairs_to_map/tests_visible",
+    "--task-id",
+    "r535_s1_17_pairs_to_map_RF",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8878",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 105.406
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 14,
+  "agent_wall_s": 38.538,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "ws_start_sha256": "8f6634f9a0895aac92bc7fef12b2c5deecb248f34d22ae2ae691fa463b3c94cf",
+  "ws_end_sha256": "826bc514519c139e3532b8cf1df2f130d11225521d1f34900df2921661b76664",
+  "verdict_sha256": "fef84715c6de80b81f484c0a5622d61b2df9448cd042231b1dc3e574fb18f0c2",
+  "verdict_hash": "d032a8a40d3b69a723986d2b71c1a5c0ee0eac80c401854c3acb20e6f635f0a6",
+  "wire_digest": "902e998cb420c2abb5254fa627eaf5658532566dadf3323186b79a492d62cef7",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RF/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 14
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 27.502,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "b1f93107c1adc852d266aab6010e8df9797800785b5cef821742e162d4900b5d",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RF/run/_frozen_RUN-ON",
+      "ws_end_sha256": "77314f2cf6d7dda8d1c94c4ae11eab8a1f3ac97299e4e26b24dbdf98c18304e9",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 38.555,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "94eb3db2fd2cf68c21c8315e95223b689a9d8d6359046a7a39e0119f55a19f2d",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RF/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "5411cf0a4b8464c58557ff503f12ad655112e6c33681b1bb8044ffca72a81385",
+      "reset": null
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 38.538,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RF/run/_frozen_RUN-ON_a3",
+      "ws_end_sha256": "826bc514519c139e3532b8cf1df2f130d11225521d1f34900df2921661b76664",
+      "reset": null
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": false,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "matched": [],
+      "n_req": 5
+    },
+    {
+      "attempt": 3,
+      "found": false,
+      "matched": [],
+      "n_req": 5
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": true,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "n_req": 5
+    },
+    {
+      "attempt": 3,
+      "found": true,
+      "n_req": 5
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.5,
+  "m7_ws_counts": {
+    "other": 4,
+    "read_task": 2,
+    "write_solution": 2,
+    "total": 8,
+    "other_total": 4,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def solution(keys, values):\\n    lookup = {}\\n    for key, value in zip(keys, values):\\n        lookup[key] = value\\n    return lookup\\n\\nif __name__ == \\\"__main__\\\":\\n    # Example usage:"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 solution.py\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def solution(keys, values):\\n    lookup = {}\\n    for i in range(len(keys)):\\n        lookup[keys[i]] = values[i]\\n    return lookup\\n\\nif __name__ == \\\"__main__\\\":\\n    # Example usage:\\n"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 solution.py\"}"
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": null,
+  "f6_reason": "arm_is_not_RP",
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "feedback_in_prompt_bytes": 0
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 14,
+  "f3_req_ok": 14,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 14,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 105.426,
+  "finished": "2026-09-19T00:29:27Z"
+}

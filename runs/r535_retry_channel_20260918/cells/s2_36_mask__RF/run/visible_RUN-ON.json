@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_36_mask_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 77,
+      "cases": [
+        {
+          "case": "check_01_mask",
+          "ok": false,
+          "kind": "exception",
+          "message": "ModuleNotFoundError: No module named 'solution'",
+          "where": "test_visible.py:10: from solution import mask",
+          "output": ""
+        },
+        {
+          "case": "check_02_mask",
+          "ok": false,
+          "kind": "exception",
+          "message": "ModuleNotFoundError: No module named 'solution'",
+          "where": "test_visible.py:18: from solution import mask",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "a2ffa9c0e471e3f6a6546f0742b8bded329161b409da2067c2c741c8c6c41f2b"
+}

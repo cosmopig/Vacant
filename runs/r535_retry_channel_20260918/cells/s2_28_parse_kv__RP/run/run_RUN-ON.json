@@ -1,0 +1,174 @@
+{
+  "task_id": "r535_s2_28_parse_kv_RP",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file.{VACANT_FEEDBACK}"
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RP/ws",
+  "proxy_url": "http://127.0.0.1:8878",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8878",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "9482ccb1766a659ec856a8a91b73e5fc083f434a4e65e8026fe63cd40876cbb1",
+  "ws_end_sha256": "3c6967141570af1d7a3b78fb185247f70a4c9ca2fc563944871345d91ca45aca",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 14,
+  "wire_by_protocol": {
+    "openai": 14
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "cd95e209e043519d9bb47a5af05fc6691209669899ca795c0fd0116bb8566ebd",
+  "verdict_hash": "7fa8f928d490b983358cb29c702c13941e98d367ba5894e26736c6600e4a5235",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 2,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_02_parse_kv — assert: parse_kv args=('bare',) got={} want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"parse_kv args=%r got=%r want=ValueError to be raised\" %]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "prompt"
+      },
+      "ws_start_sha256": "9482ccb1766a659ec856a8a91b73e5fc083f434a4e65e8026fe63cd40876cbb1",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 62.35,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 5,
+      "wire_digest": "2c868a0f88250d7402f3ba85ea3cf26ac18703ed739743c8e0b002d89a3e20df",
+      "ws_end_sha256": "55ec259e9eea87c31dfb319ab8f18bbb7985fbf89962ebbc5ce2ed1b43616cf5",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RP/run/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "7b3c944afc7e1acf903ee58d576276ecdac84146a22ee3b515344e7f4949009b",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RP/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_parse_kv — assert: parse_kv args=('bare',) got={} want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"parse_kv args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "55ec259e9eea87c31dfb319ab8f18bbb7985fbf89962ebbc5ce2ed1b43616cf5",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file.\n\n<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_02_parse_kv — assert: parse_kv args=('bare',) got={} want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"parse_kv args=%r got=%r want=ValueError to be raised\" %]\n\nFix the working directory. The checks run again when this process exits.\n"
+      ],
+      "argv_sha256": "01f4be041b867ae79f1420e663e0f76d8d073643c10925a723ad5e3e7e8d2137",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 554,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 132.059,
+      "wire_quiesced": true,
+      "requests_seen": 9,
+      "requests_seen_cumulative": 14,
+      "wire_digest": "2fe9c4cc7c1d7c8c4dbb7446b885faea555cc46b0a922131a036512c8ccc44c6",
+      "ws_end_sha256": "3c6967141570af1d7a3b78fb185247f70a4c9ca2fc563944871345d91ca45aca",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RP/run/_frozen_RUN-ON_a2",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "cd95e209e043519d9bb47a5af05fc6691209669899ca795c0fd0116bb8566ebd",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RP/run/visible_RUN-ON_a2.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "prompt",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "2fe9c4cc7c1d7c8c4dbb7446b885faea555cc46b0a922131a036512c8ccc44c6",
+  "run_wall_s": 195.429,
+  "agent_wall_s": 132.059,
+  "failures": ""
+}

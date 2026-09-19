@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_43_camelise_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 40,
+      "cases": [
+        {
+          "case": "check_01_camelise",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'camelise' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_43_camelise__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import camelise",
+          "output": ""
+        },
+        {
+          "case": "check_02_camelise",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'camelise' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_43_camelise__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import camelise",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "71ca7aa1495a010e0372ab0949daaf6b584167735c90ee971139e3bcb0089be1"
+}

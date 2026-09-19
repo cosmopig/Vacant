@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_13_parse_int_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 180,
+      "cases": [
+        {
+          "case": "check_01_parse_int",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_parse_int",
+          "ok": false,
+          "kind": "assert",
+          "message": "parse_int args=(5,) got=AttributeError('int' object has no attribute 'strip') want=TypeError",
+          "where": "test_visible.py:25: raise AssertionError(\"parse_int args=%r got=%s(%s) want=TypeError\" %",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "d61ac1fa11cd4245bd97527ec42107af7dc1439e4cf22d0a0ca228a2f713d6a7"
+}

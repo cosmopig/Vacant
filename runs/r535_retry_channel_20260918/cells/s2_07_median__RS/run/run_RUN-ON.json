@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s2_07_median_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s2_07_median__RS/ws",
+  "proxy_url": "http://127.0.0.1:8877",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8877",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "e5eaa597a23d168903c71e5d4a6f5455d05706319f2cdde069a0416c39997dee",
+  "ws_end_sha256": "ac2890e452a4a44fb1c5bf48c460f80db89d221b9cd28e0ce52d8ff5158db5ff",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 12,
+  "wire_by_protocol": {
+    "openai": 12
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "verdict_sha256": "1e434e1df7b96709f9be19ac16810eba18f0dd10deb7812d142edf8b296e44f0",
+  "verdict_hash": "ca37f081c4ac126ee85a4886efc367b95bf1d77b5eb49f811b2f0f43d3fe0ea0",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "e5eaa597a23d168903c71e5d4a6f5455d05706319f2cdde069a0416c39997dee",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 26.416,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 4,
+      "wire_digest": "f7e519cbb0789c8164498143fa6f73a79ed56a522a674d2ef79b1fd8274b07f1",
+      "ws_end_sha256": "ac2890e452a4a44fb1c5bf48c460f80db89d221b9cd28e0ce52d8ff5158db5ff",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_07_median__RS/run/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "1e434e1df7b96709f9be19ac16810eba18f0dd10deb7812d142edf8b296e44f0",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_07_median__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_median — assert: median args=([],) got=None want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"median args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "e5eaa597a23d168903c71e5d4a6f5455d05706319f2cdde069a0416c39997dee",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "e5eaa597a23d168903c71e5d4a6f5455d05706319f2cdde069a0416c39997dee",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 31.249,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 8,
+      "wire_digest": "951feb54110c9c2a598090053616fd8b21c899b26afe601751dfb155178d0b1e",
+      "ws_end_sha256": "ac2890e452a4a44fb1c5bf48c460f80db89d221b9cd28e0ce52d8ff5158db5ff",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_07_median__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "1e434e1df7b96709f9be19ac16810eba18f0dd10deb7812d142edf8b296e44f0",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_07_median__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_median — assert: median args=([],) got=None want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"median args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "e5eaa597a23d168903c71e5d4a6f5455d05706319f2cdde069a0416c39997dee",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "e5eaa597a23d168903c71e5d4a6f5455d05706319f2cdde069a0416c39997dee",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 29.33,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 12,
+      "wire_digest": "1645820b113e310f965b555f44f2497cc89c98e00f8373f89b718a1f65fd3f63",
+      "ws_end_sha256": "ac2890e452a4a44fb1c5bf48c460f80db89d221b9cd28e0ce52d8ff5158db5ff",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_07_median__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "1e434e1df7b96709f9be19ac16810eba18f0dd10deb7812d142edf8b296e44f0",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_07_median__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_median — assert: median args=([],) got=None want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"median args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s2_07_median__RS/run/_origin",
+    "ws_sha256": "e5eaa597a23d168903c71e5d4a6f5455d05706319f2cdde069a0416c39997dee"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "1645820b113e310f965b555f44f2497cc89c98e00f8373f89b718a1f65fd3f63",
+  "run_wall_s": 87.842,
+  "agent_wall_s": 29.33,
+  "failures": "test_visible.py::check_02_median — assert: median args=([],) got=None want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"median args=%r got=%r want=ValueError to be raised\" %]"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_04_split_csv_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 107,
+      "cases": [
+        {
+          "case": "check_01_split_csv",
+          "ok": false,
+          "kind": "assert",
+          "message": "split_csv args=('a, b ,c',) got=['a', ' b ', 'c'] want=['a', 'b', 'c']",
+          "where": "test_visible.py:14: assert got == want, \"split_csv args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_split_csv",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "c68973822441e241b63f0f3bd8bbe89eda8fcd180bf7825fc5bc5e5322056409"
+}

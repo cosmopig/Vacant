@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_19_tally_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 73,
+      "cases": [
+        {
+          "case": "check_01_tally",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'tally' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_19_tally__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import tally",
+          "output": ""
+        },
+        {
+          "case": "check_02_tally",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'tally' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_19_tally__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import tally",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "474373d34c5e0192e9665b9fa79eb6f631c5829767e1d7fd43ad38a0dd1d6f55"
+}

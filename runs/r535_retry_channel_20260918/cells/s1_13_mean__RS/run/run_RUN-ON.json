@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s1_13_mean_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/ws",
+  "proxy_url": "http://127.0.0.1:8877",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8877",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "ac14c1fd78eca9c1e65a27b565860fd62bffa31e1bd424fc7cc0b8c9a46d6112",
+  "ws_end_sha256": "20123884f10cb51e901118717809513c68b0407a127466a3b94b1eb636aa916d",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 12,
+  "wire_by_protocol": {
+    "openai": 12
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "2db47c08e529bb5f8fa303103f4ed05c52f85cb9ea0c58f2d3d3ba5215b12c9c",
+  "verdict_hash": "ecd35120e6023eb1f101475d03b2c2549cf4d20c657b255755603394c2c90fe6",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "ac14c1fd78eca9c1e65a27b565860fd62bffa31e1bd424fc7cc0b8c9a46d6112",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 27.998,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 4,
+      "wire_digest": "54f99aff90da99831a32b7af0f082cc0cdc738bd9cb679860cf1deaea892e76f",
+      "ws_end_sha256": "812e234f7f757f137f135ae2f553809d869f418c62486934b847d43dddf0d0c2",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "2db47c08e529bb5f8fa303103f4ed05c52f85cb9ea0c58f2d3d3ba5215b12c9c",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_mean — exception: ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import mean]\ntest_visible.py::check_02_mean — exception: ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import mean]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "ac14c1fd78eca9c1e65a27b565860fd62bffa31e1bd424fc7cc0b8c9a46d6112",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "ac14c1fd78eca9c1e65a27b565860fd62bffa31e1bd424fc7cc0b8c9a46d6112",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 12.332,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 8,
+      "wire_digest": "3acad25de7261256e22f331ec514d83330bf6293105ab070a0db1041051d1aa3",
+      "ws_end_sha256": "812e234f7f757f137f135ae2f553809d869f418c62486934b847d43dddf0d0c2",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "2db47c08e529bb5f8fa303103f4ed05c52f85cb9ea0c58f2d3d3ba5215b12c9c",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_mean — exception: ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import mean]\ntest_visible.py::check_02_mean — exception: ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import mean]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "ac14c1fd78eca9c1e65a27b565860fd62bffa31e1bd424fc7cc0b8c9a46d6112",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "ac14c1fd78eca9c1e65a27b565860fd62bffa31e1bd424fc7cc0b8c9a46d6112",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 19.939,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 12,
+      "wire_digest": "f0e84fa6c82b488b998e91d9ae65eba42909f0e888a9a7cb15a46add9283d556",
+      "ws_end_sha256": "20123884f10cb51e901118717809513c68b0407a127466a3b94b1eb636aa916d",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "2db47c08e529bb5f8fa303103f4ed05c52f85cb9ea0c58f2d3d3ba5215b12c9c",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_mean — exception: ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import mean]\ntest_visible.py::check_02_mean — exception: ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import mean]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_origin",
+    "ws_sha256": "ac14c1fd78eca9c1e65a27b565860fd62bffa31e1bd424fc7cc0b8c9a46d6112"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "f0e84fa6c82b488b998e91d9ae65eba42909f0e888a9a7cb15a46add9283d556",
+  "run_wall_s": 60.749,
+  "agent_wall_s": 19.939,
+  "failures": "test_visible.py::check_01_mean — exception: ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import mean]\ntest_visible.py::check_02_mean — exception: ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import mean]"
+}

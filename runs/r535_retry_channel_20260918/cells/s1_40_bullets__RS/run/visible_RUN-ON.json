@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_40_bullets_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 44,
+      "cases": [
+        {
+          "case": "check_01_bullets",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'bullets' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_40_bullets__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import bullets",
+          "output": ""
+        },
+        {
+          "case": "check_02_bullets",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'bullets' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_40_bullets__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import bullets",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "55211ef2cccd7b9211b13b6ab92fb3b886a46a9d6f19ad1865518aedf21a5e7e"
+}

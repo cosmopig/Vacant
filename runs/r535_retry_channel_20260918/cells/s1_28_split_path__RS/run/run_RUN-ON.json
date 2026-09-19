@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s1_28_split_path_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_28_split_path__RS/ws",
+  "proxy_url": "http://127.0.0.1:8878",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8878",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "0d5c7e3ac20a34106ba677f399a31e56412ee1770b4846432c3fb04c6a85995d",
+  "ws_end_sha256": "ca4049a8d8499ff2587584df15cd0e27e3bbf415fe6b233bc8f880fe4c22ce36",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 17,
+  "wire_by_protocol": {
+    "openai": 17
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "4d9b65126e2ef9e211f67ef13b2081efd7516825273028ee4d4a7515bd1767ea",
+  "verdict_hash": "19bcbca4770b1e38effe9b026d0c70a1a37f8c3b185cff32dad1e52c697f7c2b",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "0d5c7e3ac20a34106ba677f399a31e56412ee1770b4846432c3fb04c6a85995d",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 57.104,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 5,
+      "wire_digest": "4e1db92cba24b9ed9a546501d1f8ca484d97c1fae291d4d1973bf4f0f5bb9447",
+      "ws_end_sha256": "5c40514ba8c9569e05f1f7f86cdd484d3386f05a3937cf3c256408ee6ddbdd84",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_28_split_path__RS/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "4d9b65126e2ef9e211f67ef13b2081efd7516825273028ee4d4a7515bd1767ea",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_28_split_path__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_split_path — assert: split_path args=('a/b/c.txt',) got={'folder': 'a/b', 'name': 'c', 'extension': 'txt'} want={'dir': 'a/b', 'name': 'c', 'ext': 'txt'} [test_visible.py:14: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_split_path — assert: split_path args=('readme',) got={'folder': '', 'name': 'readme', 'extension': ''} want={'dir': '', 'name': 'readme', 'ext': ''} [test_visible.py:22: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "0d5c7e3ac20a34106ba677f399a31e56412ee1770b4846432c3fb04c6a85995d",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "0d5c7e3ac20a34106ba677f399a31e56412ee1770b4846432c3fb04c6a85995d",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 303.114,
+      "wire_quiesced": true,
+      "requests_seen": 8,
+      "requests_seen_cumulative": 13,
+      "wire_digest": "086b774268637cdef7fe5fde6dc2263368a87f7a8a5b87cf80f69aa259a8a195",
+      "ws_end_sha256": "5712d928da326b19ac6b39624168b9a3bcc4ef4fb62bd38cd6b75a9e4b958bbf",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_28_split_path__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "4d9b65126e2ef9e211f67ef13b2081efd7516825273028ee4d4a7515bd1767ea",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_28_split_path__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_split_path — assert: split_path args=('a/b/c.txt',) got={'folder': 'a/b', 'name': 'c', 'extension': 'txt'} want={'dir': 'a/b', 'name': 'c', 'ext': 'txt'} [test_visible.py:14: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_split_path — assert: split_path args=('readme',) got={'folder': '', 'name': 'readme', 'extension': ''} want={'dir': '', 'name': 'readme', 'ext': ''} [test_visible.py:22: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "0d5c7e3ac20a34106ba677f399a31e56412ee1770b4846432c3fb04c6a85995d",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "0d5c7e3ac20a34106ba677f399a31e56412ee1770b4846432c3fb04c6a85995d",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 52.759,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 17,
+      "wire_digest": "48deb57c5d8853d26191b3e08a79b3996171c17f43b0ada470aacf59f31526f8",
+      "ws_end_sha256": "ca4049a8d8499ff2587584df15cd0e27e3bbf415fe6b233bc8f880fe4c22ce36",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_28_split_path__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "4d9b65126e2ef9e211f67ef13b2081efd7516825273028ee4d4a7515bd1767ea",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_28_split_path__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_split_path — assert: split_path args=('a/b/c.txt',) got={'folder': 'a/b', 'name': 'c', 'extension': 'txt'} want={'dir': 'a/b', 'name': 'c', 'ext': 'txt'} [test_visible.py:14: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_split_path — assert: split_path args=('readme',) got={'folder': '', 'name': 'readme', 'extension': ''} want={'dir': '', 'name': 'readme', 'ext': ''} [test_visible.py:22: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s1_28_split_path__RS/run/_origin",
+    "ws_sha256": "0d5c7e3ac20a34106ba677f399a31e56412ee1770b4846432c3fb04c6a85995d"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "48deb57c5d8853d26191b3e08a79b3996171c17f43b0ada470aacf59f31526f8",
+  "run_wall_s": 414.206,
+  "agent_wall_s": 52.759,
+  "failures": "test_visible.py::check_01_split_path — assert: split_path args=('a/b/c.txt',) got={'folder': 'a/b', 'name': 'c', 'extension': 'txt'} want={'dir': 'a/b', 'name': 'c', 'ext': 'txt'} [test_visible.py:14: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_split_path — assert: split_path args=('readme',) got={'folder': '', 'name': 'readme', 'extension': ''} want={'dir': '', 'name': 'readme', 'ext': ''} [test_visible.py:22: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)]"
+}

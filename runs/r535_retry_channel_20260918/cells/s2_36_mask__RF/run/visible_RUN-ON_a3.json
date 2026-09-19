@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_36_mask_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 245,
+      "cases": [
+        {
+          "case": "check_01_mask",
+          "ok": false,
+          "kind": "assert",
+          "message": "mask args=('1234567890', 4) got='12345*7*9*' want='******7890'",
+          "where": "test_visible.py:14: assert got == want, \"mask args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_mask",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "2443aa2fd1ddc491b64a80c39a8c8b0d277ba74cb3683fb0eeaae0ba325cf3e6"
+}
