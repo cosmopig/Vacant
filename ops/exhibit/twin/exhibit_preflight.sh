@@ -52,9 +52,11 @@ warn() { echo "[preflight] ! $*" >&2; }
 
 # ── 二、import 得起來嗎 ─────────────────────────────────────────
 # ⚠ 這一關擋的是 `cryptography`。`serve_twin.py` 自己只有 stdlib，但它 import 的
-#   `to_events` 會拉 `vacant.logbook`，而那個要 `cryptography`——**一個原生 wheel**。
+#   `to_events` 會拉 `vacant_network.logbook`，而那個要 `cryptography`——**一個原生 wheel**。
 #   乾淨的展場機不保證有（DECISION_20260919_EXHIBIT_LINUX.md §1 的那一段）。
-#   直接 import 真正要跑的那一支，比逐個猜套件名可靠。
+#   ⚠ **故意不寫套件名。** 直接 import 真正要跑的那一支，比逐個猜套件名可靠——
+#     而且套件名真的會變：2026-09-20 的 `fb7f4bfb` 把 `vacant` 改名成
+#     `vacant_network`，這一關**一個字都不用改**就照樣是對的。
 if IMPORT_ERR=$("$PY" -c "
 import sys
 sys.path.insert(0, '$REPO')

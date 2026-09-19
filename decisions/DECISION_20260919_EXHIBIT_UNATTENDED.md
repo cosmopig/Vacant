@@ -117,7 +117,7 @@ vacant-exhibit-kiosk.service    **user** unit、要圖形工作階段（全螢�
 | 題 | 怎麼處理 | 為什麼 |
 |---|---|---|
 | **字型** | 開機時**只警告不擋**；`install.sh` 時**擋**；`venue_check.sh` 第五節維持硬傷 | 開機的時候沒有人能去跑 apt。**豆腐字的展件比黑畫面近可用得多**。裝的時候有人在——那是最後一個「有人站在鍵盤前面」的時刻 |
-| **`cryptography`** | 開機時**硬擋**（preflight 直接 `import serve_twin`，不逐個猜套件名） | 它根本起不來。`serve_twin` 自己只有 stdlib，但 `to_events` 會拉 `vacant.logbook` ⇒ `cryptography`（原生 wheel，乾淨的展場機不保證有） |
+| **`cryptography`** | 開機時**硬擋**（preflight 直接 `import serve_twin`，不逐個猜套件名） | 它根本起不來。`serve_twin` 自己只有 stdlib，但 `to_events` 會拉 `vacant_network.logbook`（2026-09-20 的 `fb7f4bfb` 把套件從 `vacant` 改名成 `vacant_network`；preflight 不受影響，因為它 **import 真正要跑的那一支**、不逐個猜套件名） ⇒ `cryptography`（原生 wheel，乾淨的展場機不保證有） |
 | **埠被佔** | 佔用者的 cmdline 對得上 `serve_twin.py`／`http.server` ⇒ `VACANT_EXHIBIT_KILL_STALE=1` 砍掉重來（unit 裡預設開）；**對不上就失敗並印出 pid 與 cmdline** | 「上一次開機留下來的自己」是真實情境；「別人的服務」不是展件可以拿來當理由去砍的東西 |
 | **失敗要不要重試** | `Restart=always`＋`RestartSec=10`＋**`StartLimitIntervalSec=0`** | 預設是「10 秒內失敗 5 次就永久放棄」。開機時網路還沒好正好會連續失敗 ⇒ 放棄之後**一整天都不會再起來，而且只是黑的**。展場要的是「一直試」 |
 
