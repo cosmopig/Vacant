@@ -40,10 +40,25 @@ def test_events_satisfy_the_tv_contract(events):
     assert to_events.validate(events) == []
 
 
-def test_events_do_not_invent_steps_that_did_not_happen(events):
+def test_events_do_not_invent_layers_that_do_not_exist(events):
+    """`vacant run` **沒有**評審層、**沒有**抽樣稽核層 ⇒ 永遠不發。
+
+    ⚠ v1 把 `revised` 也列在這一串裡，那是把兩件事混成一件：
+    `review_vote`／`audited` 是「**這條路上沒有這一層**」，
+    而 `revised` 只是「**這一批沒發生**」（`--retry none`，18 格都 1 次過關）。
+    混在一起的後果是：真的用 `--retry revise` 跑之後，這條測試會把
+    「機制終於演出來了」判成退步。兩條分開寫。
+    """
     kinds = {e["type"] for e in events}
-    for never in ("review_vote", "revised", "audited"):
+    for never in to_events.NEVER:
         assert never not in kinds, never
+
+
+def test_this_batch_has_no_revision_because_retry_was_none(pack, events):
+    """這一批**沒發生**重改（不是不存在）：18 格都 `--retry none` 且一次定生死。"""
+    assert all((c.get("retry") or "none") == "none" for c in pack["cells"])
+    assert all(c["attempts_used"] == 1 for c in pack["cells"])
+    assert not [e for e in events if e["type"] == "revised"]
 
 
 def test_events_never_claim_reputation_routing(events):
