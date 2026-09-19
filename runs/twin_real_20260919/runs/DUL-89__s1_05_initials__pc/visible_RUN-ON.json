@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_05_initials:pc",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 85,
+      "cases": [
+        {
+          "case": "check_01_initials",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_initials",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "6156f9f168a20dc1074770a366af0b37f6fbf43f5dd51a62d91739612269feda"
+}

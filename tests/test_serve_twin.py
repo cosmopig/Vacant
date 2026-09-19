@@ -114,10 +114,18 @@ def test_both_sides_of_one_pair_are_playable(server):
     evs = [json.loads(x) for x in out.read_text(encoding="utf-8").split("\n") if x.strip()]
     ids = [e["task_id"] for e in evs if e["type"] == "task_opened"]
     assert ids == [held, pc]
-    # 反事實的兩邊在資料上真的不一樣：一邊擋下、一邊交付。
-    verdicts = {e["task_id"]: e for e in evs if e["type"] == "verdict"}
-    assert verdicts[held]["accepted"] is False
-    assert verdicts[pc]["accepted"] is True
+    # ⚠ **一格現在有兩串事件**（ON／OFF），所以要指名 ON 那一臂。
+    #   不指名的話後發的 OFF 會蓋掉 ON——而 OFF 的 `accepted` 恆為 null
+    #   （那一臂沒有閘門、沒有裁決）。這個坑電視那一端也踩過同一次。
+    def on_verdict(tid):
+        return next(e for e in evs if e["type"] == "verdict"
+                    and e["task_id"] == tid and e.get("arm", "ON") == "ON")
+    assert on_verdict(held)["accepted"] is False
+    assert on_verdict(pc)["accepted"] is True
+    # 而 OFF 那一臂**不准**有裁決
+    for e in evs:
+        if e["type"] == "verdict" and e.get("arm") == "OFF":
+            assert e["accepted"] is None
 
 
 def test_events_are_deduplicable_by_the_tv_key(server):

@@ -1,0 +1,129 @@
+{
+  "task_id": "s1_01_addmul:held",
+  "arm": "RUN-OFF",
+  "vacant": 0,
+  "argv": [
+    "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nA small numeric helper module is needed.\n\nTwo operations:\n\n- given two numbers, give back their sum;\n- given two numbers, give back the result of multiplying them together.\n\nEach one takes the two numbers as its two positional arguments and gives\nback a single number.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_twinreal/out/ws/KAL-52__s1_01_addmul__held__off",
+  "proxy_url": "http://127.0.0.1:35389",
+  "env": {
+    "proxy_url": "http://127.0.0.1:35389",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61",
+  "ws_end_sha256": "39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 2,
+  "wire_by_protocol": {
+    "openai": 2
+  },
+  "accepted": null,
+  "refused": false,
+  "stop_reason": "ungated",
+  "infra_void": null,
+  "visible_passed": null,
+  "visible_total": null,
+  "verdict_sha256": null,
+  "verdict_hash": null,
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61",
+      "argv": [
+        "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nA small numeric helper module is needed.\n\nTwo operations:\n\n- given two numbers, give back their sum;\n- given two numbers, give back the result of multiplying them together.\n\nEach one takes the two numbers as its two positional arguments and gives\nback a single number.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "9ec2a16dfbbab5c49f350b815d0ff36d716257ec999a04e6e4777cfcc70a8b7a",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 23.429,
+      "wire_quiesced": true,
+      "requests_seen": 2,
+      "requests_seen_cumulative": 2,
+      "wire_digest": "b1c068d5efb35f054498f32480f531e754ee791a20f12c191a432471ef20b83c",
+      "ws_end_sha256": "39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3",
+      "frozen_path": "/var/tmp/vacant_twinreal/out/runs/KAL-52__s1_01_addmul__held/_frozen_RUN-OFF",
+      "stop_reason": "ungated",
+      "accepted": null
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "default",
+      "defaulted": true
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "wire_errors": 0,
+  "wire_digest": "b1c068d5efb35f054498f32480f531e754ee791a20f12c191a432471ef20b83c",
+  "run_wall_s": 23.541,
+  "agent_wall_s": 23.429,
+  "failures": ""
+}

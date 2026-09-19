@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-xjhv92pem3dt2x2cy0i3j","object":"chat.completion.chunk","created":1789814234,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"169002221","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xjhv92pem3dt2x2cy0i3j","object":"chat.completion.chunk","created":1789814234,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def solution(name: str) -> str:\\n    parts = name.split()\\n    initials = [part[0].upper() for part in parts if part]\\n    return \\\"\\\".join(initials)\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    input_data = sys.stdin.read().strip()\\n    if input_data:\\n        print(solution(input_data))\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xjhv92pem3dt2x2cy0i3j","object":"chat.completion.chunk","created":1789814234,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-xjhv92pem3dt2x2cy0i3j","object":"chat.completion.chunk","created":1789814234,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1477,"completion_tokens":111,"total_tokens":1588,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

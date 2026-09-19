@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-6qrlqt0p2xeft8pvurlcl4","object":"chat.completion.chunk","created":1789814278,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"542820808","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-6qrlqt0p2xeft8pvurlcl4","object":"chat.completion.chunk","created":1789814278,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def rgb(code):\\n    # Remove the hash character\\n    hex_str = code[1:]\\n    \\n    # Convert hex to integers for each channel\\n    r = int(hex_str[0:2], 16)\\n    g = int(hex_str[2:4], 16)\\n    b = int(hex_str[4:6], 16)\\n    \\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-6qrlqt0p2xeft8pvurlcl4","object":"chat.completion.chunk","created":1789814278,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-6qrlqt0p2xeft8pvurlcl4","object":"chat.completion.chunk","created":1789814278,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1515,"completion_tokens":129,"total_tokens":1644,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

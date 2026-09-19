@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-gy80t886yq6nvmdp8gcgx","object":"chat.completion.chunk","created":1789816455,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-gy80t886yq6nvmdp8gcgx","object":"chat.completion.chunk","created":1789816455,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-gy80t886yq6nvmdp8gcgx","object":"chat.completion.chunk","created":1789816455,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-gy80t886yq6nvmdp8gcgx","object":"chat.completion.chunk","created":1789816455,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-gy80t886yq6nvmdp8gcgx","object":"chat.completion.chunk","created":1789816455,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"595148054","type":"function","function":{"name":"bash","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-gy80t886yq6nvmdp8gcgx","object":"chat.completion.chunk","created":1789816455,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"command\":\"cat << 'EOF' > test_cases.py\\ndef is_palindrome(text):\\n    filtered_chars = [char.lower() for char in text if char.isalnum()]\\n    return filtered_chars == filtered_chars[::-1]\\n\\ntest_cases = [\\n    (\\\"A man, a plan, a canal: Panama\\\", True),\\n    (\\\"race a car\\\", False),\\n    (\\\" \\\", True),\\n    (\\\"No 'x' in Nixon\\\", True),\\n    (\\\"Was it a car or a cat I saw?\\\", True),\\n    (\\\"12321\\\", True),\\n    (\\\"123456\\\", False),\\n    (\\\"!@#$%^&*()\\\", True),\\n    (\\\"Never odd or even\\\", True),\\n    (\\\"Hello World\\\", False)\\n]\\n\\nfor text, expected in test_cases:\\n    result = is_palindrome(text)\\n    assert result == expected, f\\\"Failed for '{text}': expected {expected}, got {result}\\\"\\n\\nprint(\\\"All tests passed!\\\")\\nEOF\\npython3 test_cases.py\\n\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-gy80t886yq6nvmdp8gcgx","object":"chat.completion.chunk","created":1789816455,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-gy80t886yq6nvmdp8gcgx","object":"chat.completion.chunk","created":1789816455,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1745,"completion_tokens":249,"total_tokens":1994,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_12_hms:pc",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 33,
+      "cases": [
+        {
+          "case": "check_01_hms",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_hms",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "a7a70da4011572cef3689e0e39769048f05bc6b56b5fadc94a9fcdd8a1a4a14d"
+}

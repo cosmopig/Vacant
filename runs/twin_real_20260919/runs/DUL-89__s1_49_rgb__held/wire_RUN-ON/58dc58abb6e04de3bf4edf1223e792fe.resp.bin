@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-o2epcekabz54r4b6jpvl9","object":"chat.completion.chunk","created":1789816317,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-o2epcekabz54r4b6jpvl9","object":"chat.completion.chunk","created":1789816317,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-o2epcekabz54r4b6jpvl9","object":"chat.completion.chunk","created":1789816317,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-o2epcekabz54r4b6jpvl9","object":"chat.completion.chunk","created":1789816317,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-o2epcekabz54r4b6jpvl9","object":"chat.completion.chunk","created":1789816317,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"218338491","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-o2epcekabz54r4b6jpvl9","object":"chat.completion.chunk","created":1789816317,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def hex_to_rgb(hex_color):\\n    hex_str = hex_color.lstrip('#')\\n    r = int(hex_str[0:2], 16)\\n    g = int(hex_str[2:4], 16)\\n    b = int(hex_str[4:6], 16)\\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    if len(sys.argv) > 1:\\n        print(hex_to_rgb(sys.argv[1]))\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-o2epcekabz54r4b6jpvl9","object":"chat.completion.chunk","created":1789816317,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-o2epcekabz54r4b6jpvl9","object":"chat.completion.chunk","created":1789816317,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2023,"completion_tokens":164,"total_tokens":2187,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

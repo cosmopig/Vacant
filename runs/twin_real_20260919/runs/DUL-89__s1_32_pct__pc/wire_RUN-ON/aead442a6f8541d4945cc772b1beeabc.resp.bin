@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-vlls8sqihnnbw28weyu04h","object":"chat.completion.chunk","created":1789814604,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"663635407","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-vlls8sqihnnbw28weyu04h","object":"chat.completion.chunk","created":1789814604,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def pct(part, whole):\\n    if whole == 0 or whole is None:\\n        return None\\n    return round((part / whole) * 100, 1)\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-vlls8sqihnnbw28weyu04h","object":"chat.completion.chunk","created":1789814604,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-vlls8sqihnnbw28weyu04h","object":"chat.completion.chunk","created":1789814604,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1477,"completion_tokens":62,"total_tokens":1539,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

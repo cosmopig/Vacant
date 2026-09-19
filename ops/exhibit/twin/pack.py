@@ -59,6 +59,9 @@ from ops.exhibit.twin import roster as rosterlib  # noqa: E402
 
 BANK = REPO / "ops" / "gain" / "r535" / "bank"
 ARM = "RUN-ON"
+#: 反事實那一臂。**它真的跑過**（2026-09-19 起），不是推算出來的。
+#: 它沒有收據、沒有驗收、沒有裁決——那正是「沒有這一層」的字面意思。
+ARM_OFF = "RUN-OFF"
 
 #: 證據等級的說明。頁面直接印這幾句，不自己另外寫一套措辭。
 #: ⚠ **對觀眾寫「AI」，不要寫「模型」。** 展場的畫面上滿滿都是黏土公仔，
@@ -81,12 +84,15 @@ def _read_json(p: pathlib.Path):
     return json.loads(p.read_text(encoding="utf-8"))
 
 
-def model_from_wire(run_dir: pathlib.Path) -> str:
+def model_from_wire(run_dir: pathlib.Path, arm: str = ARM) -> str:
     """從 proxy 逐字落盤的第一通 request body 讀 `model`。讀不到回空字串。
 
     刻意讀 `.req.bin` 而不是任何摘要：那是 agent 真的送出去的位元組。
+    `arm` 兩臂都要讀得到：OFF 臂雖然不驗收，wire 照樣逐字落盤（鐵律 3
+    對兩臂都成立），所以「OFF 那一格真的有模型參與」一樣驗得出來。
     """
-    idx = run_dir / f"wire_{ARM}" / "index.jsonl"
+    wire = run_dir / f"wire_{arm}"
+    idx = wire / "index.jsonl"
     if not idx.exists():
         return ""
     for line in idx.read_text(encoding="utf-8").split("\n"):
@@ -101,9 +107,9 @@ def model_from_wire(run_dir: pathlib.Path) -> str:
             name = rec.get(key)
             if not isinstance(name, str):
                 continue
-            cand = run_dir / f"wire_{ARM}" / name
+            cand = wire / name
             if not cand.exists():
-                cand = run_dir / f"wire_{ARM}" / f"{name}.req.bin"
+                cand = wire / f"{name}.req.bin"
             if cand.exists():
                 try:
                     body = json.loads(cand.read_bytes().decode("utf-8", "replace"))
@@ -113,7 +119,7 @@ def model_from_wire(run_dir: pathlib.Path) -> str:
                 if isinstance(m, str) and m:
                     return m
     # index 的欄位名不認得就直接掃檔案（欄位名漂掉不該讓證據消失）
-    for cand in sorted((run_dir / f"wire_{ARM}").glob("*.req.bin")):
+    for cand in sorted(wire.glob("*.req.bin")):
         try:
             body = json.loads(cand.read_bytes().decode("utf-8", "replace"))
         except ValueError:
@@ -169,17 +175,21 @@ def redact_paths(text: str, run_dir: pathlib.Path) -> str:
     """
     if not text:
         return text
-    out = text.replace(str(run_dir / f"_frozen_{ARM}"), "<凍結快照>")
+    out = text
+    for arm in (ARM, ARM_OFF):
+        out = out.replace(str(run_dir / f"_frozen_{arm}"), "<凍結快照>")
     out = out.replace(str(run_dir), "<run 目錄>")
-    # 與位置無關的第二道：`/任何/地方/_frozen_RUN-ON[_aN]` → `<凍結快照>`
-    out = re.sub(r"/[^\s'\"()\[\]]*/_frozen_" + re.escape(ARM) + r"(_a\d+)?",
-                 "<凍結快照>", out)
+    # 與位置無關的第二道：`/任何/地方/_frozen_RUN-{ON,OFF}[_aN]` → `<凍結快照>`
+    # ⚠ 兩臂都要掃。只掃 ON 的話，OFF 的事後稽核訊息會把建置機器的路徑
+    #   整串印上展場螢幕——與 2026-09-19 那次漏出一模一樣的形狀，只是換一臂。
+    out = re.sub(r"/[^\s'\"()\[\]]*/_frozen_(?:%s|%s)(_a\d+)?"
+                 % (re.escape(ARM), re.escape(ARM_OFF)), "<凍結快照>", out)
     out = out.replace(str(REPO), "<repo>")
     return out
 
 
 def delivery_of(run_dir: pathlib.Path, ws_end_sha256: str,
-                attempts_used: int | None = None) -> dict:
+                attempts_used: int | None = None, arm: str = ARM) -> dict:
     """它**交出來的那份東西**——凍結快照裡的檔案，逐檔帶內容與 sha256。
 
     為什麼要帶內容：展件的靈魂是「觀眾看得到它想交、但被擋下來」。
@@ -204,11 +214,11 @@ def delivery_of(run_dir: pathlib.Path, ws_end_sha256: str,
     #   **就躺在那裡**，而 `solution.py` 三次一模一樣——
     #   R535 那個「看見了檔名、沒有讀」的發現，變成畫面上看得到的東西。
     n = attempts_used if isinstance(attempts_used, int) and attempts_used > 1 else None
-    frozen = run_dir / (f"_frozen_{ARM}_a{n}" if n else f"_frozen_{ARM}")
+    frozen = run_dir / (f"_frozen_{arm}_a{n}" if n else f"_frozen_{arm}")
     if not frozen.is_dir():
         # 退回第 1 次那份，但**不准假裝算得出來**——
         # 算不回 `root_claimed` 的話 `recomputable` 會是 False，頁面照實說。
-        frozen = run_dir / f"_frozen_{ARM}"
+        frozen = run_dir / f"_frozen_{arm}"
     files: list[dict] = []
     recomputable = frozen.is_dir()
     if frozen.is_dir():
@@ -304,6 +314,13 @@ def attempts_of(run_dir: pathlib.Path, summary: dict) -> list[dict]:
             "attempt": n,
             "requests_seen": int(rec.get("requests_seen") or 0),
             "agent_rc": rec.get("agent_rc"),
+            # ⚠ **被我們的 `--timeout` 砍掉**與**它自己跑完但沒過**是兩個故事。
+            #   兩者的 `stop_reason` 都是 `visible_fail`（工作區照樣凍結、照樣送驗收），
+            #   所以不另外帶這一欄的話，展場會把「我們沒等它」講成「它做不出來」。
+            #   實際發生過：`s1_30_ord_suffix__held` 三位居民共 8 次嘗試全部是
+            #   300 秒被砍，那一題的「拒交」有一半是我們的上限造成的。
+            "agent_timed_out": bool(rec.get("agent_timed_out")),
+            "agent_wall_s": rec.get("agent_wall_s"),
             "accepted": rec.get("accepted"),
             "stop_reason": rec.get("stop_reason"),
             # 回饋真的進了幾個位元組（第 1 次恆為 0＝與「沒有 Vacant」逐位元相同）
@@ -316,6 +333,88 @@ def attempts_of(run_dir: pathlib.Path, summary: dict) -> list[dict]:
                          "cases": visible_cases(vis, run_dir)} if vis else None),
         })
     return out
+
+
+def pack_off(run_dir: pathlib.Path, meta: dict, on_summary: dict) -> dict | None:
+    """反事實那一臂：**同一題、關掉這一層**。沒跑過就回 `None`。
+
+    ## 這一段在展件上承重什麼
+
+    展場的主視覺是一組反事實對照。在 2026-09-19 之前，電視的監視器印著
+    「同題關掉這層：**也擋下**」，而那一臂**一次都沒跑過**（`liveAssemble`
+    寫死 `OFF: null`，`t.OFF || {}` 讓 `off.accepted` 是 undefined）
+    ——那是替一個沒發生的反事實作證，展場版鐵律 5 的正面違反。
+    這一段就是那句話的證據來源：它現在是真的跑出來的。
+
+    ## 三個不可以被壓平的欄位
+
+    1. **`accepted` 恆為 `null`。** OFF 臂沒有裁決可言：proxy 只做 tee，
+       不驗收、不簽收據、不拒交。`null` ＝**沒量**，與「量了，沒過」不同形
+       （誠實邊界 6 的同一條）。壓成 `false` 就是把「沒有這一層」演成
+       「這一層在另一邊也判了」。
+    2. **`has_receipt` 恆為 `false`。** 這是展件最值得看的一格差別：
+       ON 那一邊有一條從創世驗得到鏈頭的簽章鏈，OFF 這一邊**什麼都沒有**。
+       不是鏈短，是沒有鏈。
+    3. **`postaudit` 是事後補的，不是裁決。** 它自己帶著
+       `when="after_the_run"`／`is_verdict=false`／`signed=false`。
+       頁面要印它可以，但必須印成「我們**事後**用同一把尺量的」，
+       不可以印成「OFF 也被擋下」——後者會讓觀眾以為關掉這一層還是有人在擋。
+
+    ## 誠實邊界
+
+    · `same_start_as_on` ＝ 兩臂的工作區起點逐位元相同（`ws_start_sha256` 相等）。
+      這一格為真，「唯一差別是那一層」這句話才說得出口；為假就要照實說。
+    · OFF 臂的 `attempts_used` 恆為 1：那一臂**沒有**重試迴圈可言，
+      不是我們讓它少跑（`launcher.run` 會直接拒絕 `--retry` 配 `--vacant 0`）。
+    """
+    p = run_dir / f"run_{ARM_OFF}.json"
+    if not p.exists():
+        return None
+    s = _read_json(p)
+    void = s.get("infra_void")
+    requests_seen = int(s.get("requests_seen") or 0)
+    pa_path = run_dir / f"postaudit_{ARM_OFF}.json"
+    postaudit = None
+    if pa_path.exists():
+        raw = _read_json(pa_path)
+        postaudit = {
+            "when": raw.get("when"), "is_verdict": bool(raw.get("is_verdict")),
+            "signed": bool(raw.get("signed")), "ruler": raw.get("ruler"),
+            "note": raw.get("note"), "sandbox": raw.get("sandbox"),
+            "passed": raw.get("passed"), "total": raw.get("total"),
+            "all_pass": bool(raw.get("all_pass")),
+            "cases": visible_cases(raw, run_dir),
+        }
+    return {
+        "ran": True,
+        "arm": ARM_OFF,
+        # 鐵律 3：「沒量到」≠「量到 0」。跑掛了就說跑掛了。
+        "infra_void": void,
+        "agent_rc": s.get("agent_rc"),
+        "agent_timed_out": bool(s.get("agent_timed_out")),
+        "exit_code": meta.get("arms", {}).get("OFF", {}).get("exit_code"),
+        "requests_seen": requests_seen,
+        "wire_by_protocol": s.get("wire_by_protocol") or {},
+        "model_id": model_from_wire(run_dir, ARM_OFF),
+        "evidence": evidence_level(requests_seen=requests_seen,
+                                   declared=meta.get("declared_evidence", "")),
+        "stop_reason": s.get("stop_reason"),
+        # ⚠ 三值裡的 null：**沒量**。不是「量了沒過」。
+        "accepted": None,
+        "accepted_note": "`--vacant 0` 這一臂不驗收也不拒交 ⇒ 沒有裁決。"
+                         "`null` 是「沒量」，不是「量了沒過」。",
+        "has_receipt": (run_dir / f"receipts_{ARM_OFF}.ndjson").exists(),
+        "has_receipt_note": "OFF 臂不簽收據：觀眾在這一邊沒有任何東西可以自己重驗。",
+        "attempts_used": s.get("attempts_used"),
+        "ws_start_sha256": s.get("ws_start_sha256"),
+        "ws_end_sha256": s.get("ws_end_sha256"),
+        "same_start_as_on": (s.get("ws_start_sha256")
+                             == on_summary.get("ws_start_sha256")),
+        "sandbox": (s.get("sandbox") or {}).get("backend"),
+        "delivery": delivery_of(run_dir, s.get("ws_end_sha256") or "",
+                                None, arm=ARM_OFF),
+        "postaudit": postaudit,
+    }
 
 
 def pack_cell(run_dir: pathlib.Path) -> dict:
@@ -348,8 +447,16 @@ def pack_cell(run_dir: pathlib.Path) -> dict:
         "accepted": summary.get("accepted"),
         "refused": bool(summary.get("refused")),
         "stop_reason": summary.get("stop_reason"),
+        # 鐵律 3：跑掛的格子要**標記**，不可當成失敗格。ON 臂真的掛掉的格
+        # 根本不會走到這裡（`build` 會把它抽進 `void_cells`），這個欄位留著
+        # 是為了讓「沒有 infra_void」這件事也在資料上看得見。
+        "infra_void": summary.get("infra_void"),
         "attempts_used": summary.get("attempts_used"),
         "attempts": attempts,
+        # 這一格有沒有任何一次嘗試是被牆鐘上限砍掉的。**展場要標出來**：
+        # 被砍掉的那幾次，「拒交」有一部分是我們沒等它，不是它做不出來。
+        "any_attempt_timed_out": any(a.get("agent_timed_out") for a in attempts),
+        "agent_timed_out": bool(summary.get("agent_timed_out")),
         "retry": summary.get("retry"),
         "requests_seen": requests_seen,
         "wire_by_protocol": summary.get("wire_by_protocol") or {},
@@ -370,18 +477,48 @@ def pack_cell(run_dir: pathlib.Path) -> dict:
                                 summary.get("attempts_used")),
         "chain": [ln for ln in chain_text.split("\n") if ln.strip()],
         "pub": {"vacant_id": pub["vacant_id"], "pub_hex": pub["pub_hex"]},
+        # 同一題、關掉這一層。**真的跑過**（沒跑就是 None，不許補一個看起來
+        # 很合理的值上去）。
+        "off": pack_off(run_dir, meta, summary),
     }
 
 
 def build(runs_root: pathlib.Path) -> dict:
+    """把一批 run 目錄收成展件資料包。**跑掛的格不進 `cells`，進 `void_cells`。**
+
+    鐵律 3 的 `infra_void` 規則：「沒量到」≠「量到 0」。一格 ON 臂 `infra_void`
+    （agent 沒生起來、工作區在凍結途中被動、KS-1 違反…）**沒有裁決、沒有收據鏈**
+    ——`launcher._persist` 刻意整條鏈都不落盤。把它當成「拒交格」就是把
+    基建壞掉報成機制擋下來，展場上會變成「Vacant 擋住了一件根本沒發生的交付」。
+
+    ⇒ 它被抽出來放進 `void_cells`（帶著 `infra_void` 原文），
+      **不進 `cells`、不進 `evidence_counts`、不進電視的事件流**。
+      不進事件流還有第二個理由：`to_events` 的契約要求每一格都走到 `verdict`，
+      而無裁決的格發不出 `verdict`；漏一格 ⇒ 電視的 `liveAssemble` 只看
+      `pending[0]`，**整個佇列從此卡死**（忠實度對照表 D2）。
+    """
     idx = _read_json(runs_root / "twin_index.json")
-    cells = []
+    cells, void_cells = [], []
     for m in idx["cells"]:
         run_dir = runs_root / "runs" / m["cell_id"]
         if not run_dir.is_dir():
             raise SystemExit(f"run 目錄不見了：{run_dir}")
+        on = _read_json(run_dir / f"run_{ARM}.json") \
+            if (run_dir / f"run_{ARM}.json").exists() else {}
+        if on.get("infra_void") or not (run_dir / f"receipts_{ARM}.ndjson").exists():
+            void_cells.append({
+                "cell_id": m["cell_id"], "resident": m.get("resident"),
+                "task_id": m.get("task_id"), "explicit": bool(m.get("explicit")),
+                "exit_code": m.get("exit_code"),
+                "infra_void": on.get("infra_void"),
+                "stop_reason": on.get("stop_reason"),
+                "note": "基建事件不是裁決：這一格**沒有量到任何東西**，"
+                        "不可以當成拒交格，也不進展件。",
+            })
+            continue
         cells.append(pack_cell(run_dir))
     cells.sort(key=lambda c: c["cell_id"])
+    void_cells.sort(key=lambda c: c["cell_id"])
 
     by_resident: dict[str, list[str]] = {}
     for c in cells:
@@ -410,20 +547,34 @@ def build(runs_root: pathlib.Path) -> dict:
     for c in cells:
         levels[c["evidence"]] = levels.get(c["evidence"], 0) + 1
 
+    off_levels: dict[str, int] = {}
+    for c in cells:
+        o = c.get("off")
+        if o and o.get("ran") and not o.get("infra_void"):
+            off_levels[o["evidence"]] = off_levels.get(o["evidence"], 0) + 1
+
     return {
-        "v": 1,
+        "v": 2,
         "source": {
             "runs": str(runs_root.relative_to(REPO)) if runs_root.is_relative_to(REPO)
                     else str(runs_root),
             "arm": ARM,
+            "arm_off": ARM_OFF,
             "ruler": "vacant/vrun/verify_receipts.py（沒有第二把尺）",
-            "note": "每一格都是 `vacant run` 當時落盤的原值，未經加工。",
+            "note": "每一格都是 `vacant run` 當時落盤的原值，未經加工。"
+                    "一格兩跑：ON（閘門＋重試迴圈）與 OFF（`--vacant 0`，"
+                    "不驗收、不簽收據）。",
         },
         "evidence_text": EVIDENCE_TEXT,
         "evidence_counts": dict(sorted(levels.items())),
+        "evidence_counts_off": dict(sorted(off_levels.items())),
         "delivered": sum(1 for c in cells if c["exit_code"] == 0),
         "refused": sum(1 for c in cells if c["exit_code"] == 20),
-        "void": sum(1 for c in cells if c["exit_code"] not in (0, 20)),
+        # ⚠ `void` 數的是 **`void_cells`**，不是 `cells` 裡退出碼奇怪的格。
+        #   跑掛的格根本不進 `cells`（鐵律 3），所以從 `cells` 數永遠是 0，
+        #   那會讓「這一批有幾格沒量到」這個數字從紀錄裡消失。
+        "void": len(void_cells),
+        "void_cells": void_cells,
         "residents": residents,
         "cells": cells,
         "consent": consent,

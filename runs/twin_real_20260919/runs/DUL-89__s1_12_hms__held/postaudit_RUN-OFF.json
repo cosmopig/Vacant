@@ -1,0 +1,44 @@
+{
+  "when": "after_the_run",
+  "is_verdict": false,
+  "signed": false,
+  "ruler": "vacant/vrun/acceptance.py::run_suite(suite='visible')——與 ON 臂同一把尺、同一份 tests_visible",
+  "note": "OFF 臂當場沒有量過任何東西。這個判定是事後補的，沒有進收據鏈，也沒有影響那一跑的任何一個位元。",
+  "sandbox": "bwrap",
+  "suite": "visible",
+  "task_id": "s1_12_hms:postaudit-off",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 68,
+      "cases": [
+        {
+          "case": "check_01_hms",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'hms' from 'solution' (/var/tmp/vacant_twinreal/out/runs/DUL-89__s1_12_hms__held/_frozen_RUN-OFF/solution.py)",
+          "where": "test_visible.py:10: from solution import hms",
+          "output": ""
+        },
+        {
+          "case": "check_02_hms",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'hms' from 'solution' (/var/tmp/vacant_twinreal/out/runs/DUL-89__s1_12_hms__held/_frozen_RUN-OFF/solution.py)",
+          "where": "test_visible.py:18: from solution import hms",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "1f2db58f3713728b3be1d78e559d9eefc92c44f63e9604bf8cf4bf3cbb718660"
+}

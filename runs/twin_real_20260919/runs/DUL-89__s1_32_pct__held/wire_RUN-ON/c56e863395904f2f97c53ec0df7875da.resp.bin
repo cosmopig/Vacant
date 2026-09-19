@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-elner9n1so9n4ptwv2rmg","object":"chat.completion.chunk","created":1789815958,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-elner9n1so9n4ptwv2rmg","object":"chat.completion.chunk","created":1789815958,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-elner9n1so9n4ptwv2rmg","object":"chat.completion.chunk","created":1789815958,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-elner9n1so9n4ptwv2rmg","object":"chat.completion.chunk","created":1789815958,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-elner9n1so9n4ptwv2rmg","object":"chat.completion.chunk","created":1789815958,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"618609760","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-elner9n1so9n4ptwv2rmg","object":"chat.completion.chunk","created":1789815958,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef solve():\\n    input_data = sys.stdin.read().split()\\n    if len(input_data) < 2:\\n        return\\n    \\n    try:\\n        quantity1 = float(input_data[0])\\n        quantity2 = float(input_data[1])\\n\\n        if quantity2 == 0:\\n            print(\\\"\\\")\\n        else:\\n            percentage = (quantity1 / quantity2) * 100\\n            # Using format to ensure one decimal place even if it's .0\\n            print(f\\\"{round(percentage, 1):.1f}\\\")\\n    except ValueError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-elner9n1so9n4ptwv2rmg","object":"chat.completion.chunk","created":1789815958,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-elner9n1so9n4ptwv2rmg","object":"chat.completion.chunk","created":1789815958,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1982,"completion_tokens":181,"total_tokens":2163,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

@@ -54,11 +54,33 @@ def test_events_do_not_invent_layers_that_do_not_exist(events):
         assert never not in kinds, never
 
 
-def test_this_batch_has_no_revision_because_retry_was_none(pack, events):
-    """這一批**沒發生**重改（不是不存在）：18 格都 `--retry none` 且一次定生死。"""
-    assert all((c.get("retry") or "none") == "none" for c in pack["cells"])
-    assert all(c["attempts_used"] == 1 for c in pack["cells"])
-    assert not [e for e in events if e["type"] == "revised"]
+def test_this_batch_really_ran_the_retry_loop(pack, events):
+    """這一批跑的是 `--retry revise`，所以**迴圈要在事件上看得見**。
+
+    ⚠ 這條測試在 2026-09-19 傍晚換過方向。舊版寫的是
+    `test_this_batch_has_no_revision_because_retry_was_none`——那描述的是
+    fixture 批（18 格都 `--retry none`、一次定生死）。**真跑的批把那個前提換掉了**，
+    所以連帶把測試換掉，而不是把測試繞過去：測試描述的是「這一批是什麼」，
+    批換了它就該換。
+
+    ⚠ 但**不准**寫成「一定要有 N 次重改」。重改幾次是 agent 的行為不是我們的
+    設定；一次過關的格子沒有 `revised` 是對的。這裡守的是兩件可執行的事：
+    (a) 這一批的臂真的是 `revise`；(b) 只要有一格用了 2 次以上嘗試，
+    那一格就**必須**發得出 `revised`、而且每一次嘗試各有自己的 `gate_ran`。
+    """
+    arms = {(c.get("retry") or "none") for c in pack["cells"]}
+    assert arms == {"revise"}, f"這一批的重試臂是 {arms}"
+    looped = [c for c in pack["cells"] if (c["attempts_used"] or 1) > 1]
+    for c in looped:
+        evs = [e for e in events if e["task_id"] == c["cell_id"]]
+        gates = [e for e in evs if e["type"] == "gate_ran"
+                 and e.get("arm") == to_events.ARM_ON]
+        revs = [e for e in evs if e["type"] == "revised"]
+        assert len(gates) == c["attempts_used"], c["cell_id"]
+        assert len(revs) == c["attempts_used"] - 1, c["cell_id"]
+    if not looped:
+        # 一格都沒進迴圈也是一種結果，但**要說出來**，不可以靜靜地過。
+        pytest.skip("這一批沒有任何一格用到第 2 次嘗試（迴圈沒被觸發）")
 
 
 def test_events_never_claim_reputation_routing(events):
@@ -83,7 +105,9 @@ def test_event_verdict_comes_from_the_signed_entry(pack, events):
                 signed[c["cell_id"]] = bool(d["payload"]["accepted"])
     seen = 0
     for e in events:
-        if e["type"] == "verdict":
+        # ⚠ 只比 **ON 臂**的裁決。OFF 臂根本沒有 `ws_verdict` 可以比——
+        #   它不驗收也不簽收據，`accepted` 恆為 null（那是「沒量」）。
+        if e["type"] == "verdict" and e.get("arm") == to_events.ARM_ON:
             assert e["accepted"] == signed[e["task_id"]], e["task_id"]
             seen += 1
     assert seen == len(pack["cells"])

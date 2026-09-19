@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-1g72tz6hs05djjp2qugy2","object":"chat.completion.chunk","created":1789817439,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"447421494","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1g72tz6hs05djjp2qugy2","object":"chat.completion.chunk","created":1789817439,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def is_leap(year):\\n    if year % 400 == 0:\\n        return True\\n    if year % 100 == 0:\\n        return False\\n    if year % 4 == 0:\\n        return True\\n    return False\\n\\ndef days_in_month(year, month):\\n    if month in [1, 3, 5, 7, 8, 10, 12]:\\n        return 31\\n    elif month == 2:\\n        return 29 if is_leap(year) else 28\\n    elif month in [4, 6, 9, 11]:\\n        return 30\\n    else:\\n        return None\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    if len(sys.argv) == 3:\\n        year = int(sys.argv[1])\\n        month = int(sys.argv[2])\\n        print(days_in_month(year, month))\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1g72tz6hs05djjp2qugy2","object":"chat.completion.chunk","created":1789817439,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-1g72tz6hs05djjp2qugy2","object":"chat.completion.chunk","created":1789817439,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1482,"completion_tokens":248,"total_tokens":1730,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

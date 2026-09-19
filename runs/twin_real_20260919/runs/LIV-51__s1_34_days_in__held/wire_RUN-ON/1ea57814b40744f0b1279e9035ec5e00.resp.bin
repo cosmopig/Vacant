@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-rffsq452fz3khdpeg4k2i","object":"chat.completion.chunk","created":1789818493,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-rffsq452fz3khdpeg4k2i","object":"chat.completion.chunk","created":1789818493,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-rffsq452fz3khdpeg4k2i","object":"chat.completion.chunk","created":1789818493,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-rffsq452fz3khdpeg4k2i","object":"chat.completion.chunk","created":1789818493,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-rffsq452fz3khdpeg4k2i","object":"chat.completion.chunk","created":1789818493,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"393625341","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-rffsq452fz3khdpeg4k2i","object":"chat.completion.chunk","created":1789818493,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef solve():\\n    line = sys.stdin.read().split()\\n    if not line:\\n        return\\n    year = int(line[0])\\n    month = int(line[1])\\n    \\n    # Days in each month for a non-leap year\\n    days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]\\n    \\n    # Check for leap year\\n    if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):\\n        days_in_month[1] = 29\\n        \\n    print(days_in_month[month - 1])\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-rffsq452fz3khdpeg4k2i","object":"chat.completion.chunk","created":1789818493,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-rffsq452fz3khdpeg4k2i","object":"chat.completion.chunk","created":1789818493,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1974,"completion_tokens":230,"total_tokens":2204,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

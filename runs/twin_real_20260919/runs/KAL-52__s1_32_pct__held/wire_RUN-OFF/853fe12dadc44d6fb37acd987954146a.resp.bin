@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-cvud4c4putfrg62d0fht","object":"chat.completion.chunk","created":1789815237,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cvud4c4putfrg62d0fht","object":"chat.completion.chunk","created":1789815237,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cvud4c4putfrg62d0fht","object":"chat.completion.chunk","created":1789815237,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cvud4c4putfrg62d0fht","object":"chat.completion.chunk","created":1789815237,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cvud4c4putfrg62d0fht","object":"chat.completion.chunk","created":1789815237,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"726258503","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cvud4c4putfrg62d0fht","object":"chat.completion.chunk","created":1789815237,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def solve(quantity1, quantity2):\\n    if quantity2 == 0:\\n        return None\\n    percentage = (quantity1 / quantity2) * 100\\n    return round(float(percentage), 1)\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    input_data = sys.stdin.read().split()\\n    if len(input_data) >= 2:\\n        try:\\n            q1 = float(input_data[0])\\n            q2 = float(input_data[1])\\n            result = solve(q1, q2)\\n            if result is not None:\\n                print(f\\\"{result:.1f}\\\")\\n        except ValueError:\\n            pass\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cvud4c4putfrg62d0fht","object":"chat.completion.chunk","created":1789815237,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-cvud4c4putfrg62d0fht","object":"chat.completion.chunk","created":1789815237,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2977,"completion_tokens":184,"total_tokens":3161,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

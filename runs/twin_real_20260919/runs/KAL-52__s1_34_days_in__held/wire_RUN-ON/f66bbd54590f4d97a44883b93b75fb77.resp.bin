@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-cpeieadin2c6xapckhfvw","object":"chat.completion.chunk","created":1789815790,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cpeieadin2c6xapckhfvw","object":"chat.completion.chunk","created":1789815790,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cpeieadin2c6xapckhfvw","object":"chat.completion.chunk","created":1789815790,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cpeieadin2c6xapckhfvw","object":"chat.completion.chunk","created":1789815790,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cpeieadin2c6xapckhfvw","object":"chat.completion.chunk","created":1789815790,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"376593700","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cpeieadin2c6xapckhfvw","object":"chat.completion.chunk","created":1789815790,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import datetime\\nimport sys\\n\\ndef solve():\\n    # The problem says \\\"The year is the first argument and the month is the second\\\"\\n    # This usually means command-line arguments in these types of tasks.\\n    if len(sys.argv) == 3:\\n        year = int(sys.argv[1])\\n        month = int(sys.argv[2])\\n    else:\\n        # Fallback to stdin if no arguments are provided\\n        input_data = sys.stdin.read().split()\\n        if len(input_data) < 2:\\n            return\\n        year = int(input_data[0])\\n        month = int(input_data[1])\\n\\n    # Use datetime to find the last day of the month\\n    if month == 12:\\n        next_month = datetime.date(year + 1, 1, 1)\\n    else:\\n        next_month = datetime.date(year, month + 1, 1)\\n        \\n    # The day before the first day of next month is the last day of current month\\n    last_day = (next_month - datetime.timedelta(days=1)).day\\n    print(last_day)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cpeieadin2c6xapckhfvw","object":"chat.completion.chunk","created":1789815790,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-cpeieadin2c6xapckhfvw","object":"chat.completion.chunk","created":1789815790,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":4086,"completion_tokens":306,"total_tokens":4392,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

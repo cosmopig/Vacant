@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-tvl1pwyxq3nkd34p2z5w7a","object":"chat.completion.chunk","created":1789817852,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-tvl1pwyxq3nkd34p2z5w7a","object":"chat.completion.chunk","created":1789817852,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-tvl1pwyxq3nkd34p2z5w7a","object":"chat.completion.chunk","created":1789817852,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-tvl1pwyxq3nkd34p2z5w7a","object":"chat.completion.chunk","created":1789817852,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-tvl1pwyxq3nkd34p2z5w7a","object":"chat.completion.chunk","created":1789817852,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"293078756","type":"function","function":{"name":"bash","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-tvl1pwyxq3nkd34p2z5w7a","object":"chat.completion.chunk","created":1789817852,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"command\":\"cat << 'EOF' > solution.py\\ndef solve(n):\\n    if n == 1: return \\\"first\\\"\\n    if n == 2: return \\\"second\\\"\\n    if n == 3: return \\\"third\\\"\\n    # Wait, the prompt says \\\"the number itself followed by the two-letter ending\\\".\\n    # This suggests something like \\\"one\\\" + \\\"st\\\" = \\\"onest\\\"? No.\\n    # Let's re-read carefully: \\\"Write a positive whole number the way it is said when counting positions: \\n    # the number itself followed by the two-letter ending that goes with it.\\\"\\n    # Maybe it means \\\"first\\\", \\\"second\\\", \\\"third\\\" are NOT what they want.\\n    # They want \\\"one\\\" + \\\"st\\\"? No, that's not how we say it.\\n    # What if it's about a different language? \\n    # Or maybe it's just ordinal numbers but the prompt is poorly phrased?\\n    pass\\nEOF\\n\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-tvl1pwyxq3nkd34p2z5w7a","object":"chat.completion.chunk","created":1789817852,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-tvl1pwyxq3nkd34p2z5w7a","object":"chat.completion.chunk","created":1789817852,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":3452,"completion_tokens":236,"total_tokens":3688,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+
