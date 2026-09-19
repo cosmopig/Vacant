@@ -37,6 +37,13 @@
    實測卻**吃**——它的 provider 是 runtime 才載入的 `@ai-sdk/openai`，
    讀變數的是那包 SDK 不是 opencode 自己。⇒ **靜態掃字串不算證據，
    只有 wire log 算。**
+
+   2026-09-19 補一刀，**方向相反**：OpenCode 那一格「吃環境變數」是真的，
+   但**只對 models.dev 註冊表裡的模型 id 成立**。拿本地模型的 id
+   （`gemma-4-12b-it-qat`）給內建 `openai` provider，它在**送出任何請求之前**
+   就死在模型解析 ⇒ `requests_seen == 0`；換成 `gpt-4o-mini` ⇒ 9 通。
+   ⇒ **「這個框架吃環境變數」本身不是一格布林值**，它跟模型 id 綁在一起。
+   接本地模型仍然要走 `CONFIG_ROUTE`。
 2. 名單漏一個變數＝那條路沒被中介，而且**不會有任何錯誤訊息**。這是 V0 已知
    的殘餘風險，唯一的結構性補法是出網封鎖（`block_egress.sh`，V3）：
    封鎖之後漏掉的那條路會**連不上**而不是**偷偷連上**。
@@ -169,14 +176,19 @@ CONFIG_ROUTE: dict[str, dict[str, str | None]] = {
         "wire": "openai",
         "measured": "2026-09-18",
     },
-    # OpenCode 1.18.31。它**也**吃 OPENAI_BASE_URL（見誠實邊界 1），
-    # 這一格是「要指定自訂 provider／不想動內建那條」時用的。
+    # OpenCode 1.18.31。它**也**吃 OPENAI_BASE_URL（見誠實邊界 1），所以這一格
+    # 本來記成「要指定自訂 provider 時才用」。**2026-09-19 用真模型量完要改口徑**：
+    # 內建 `openai` provider 只吃 models.dev 註冊表裡的模型 id，拿到本地模型的 id
+    # （LM Studio 的 `gemma-4-12b-it-qat`）會在**送出任何請求之前**死在模型解析
+    # ⇒ `requests_seen == 0`。⇒ **要指到本地模型，這一格不是選項是必經之路。**
+    # 真模型的拒交／交付兩格（exit 20 ／ exit 0）走的就是這一條，
+    # 逐字落盤見 `docs/AGENT_COMPAT.md` §8。
     "opencode": {
         "relocate": "OPENCODE_CONFIG_CONTENT",  # 值直接就是整份 JSON
         "file": None,
         "field": "provider.<id>.options.baseURL",
         "wire": "openai",
-        "measured": "2026-09-18",
+        "measured": "2026-09-19（真模型；2026-09-18 假上游）",
     },
     # Hermes Agent。**沒量過**——三台機器上都沒裝（2026-09-18）。
     # 欄位是從 `vacant/hermes_substrate.py::CONFIG_YAML` 反推的。
