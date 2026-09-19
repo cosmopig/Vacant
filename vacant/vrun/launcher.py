@@ -246,6 +246,7 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
         sandbox_name: str = "auto", allow_no_suite: bool = False,
         port: int = 0, timeout_s: float | None = None,
         test_timeout_s: float = 10.0, inherit_stdin: bool = False,
+        capture_agent_stdout: bool = False,
         retry_arm: str = "none", max_attempts: int | None = None,
         feedback_into: str = "file") -> dict:
     """跑一次（V1：最多 `max_attempts` 次嘗試）。回一份可落盤的 summary。
@@ -405,6 +406,10 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
 
             # ── 3) spawn agent，等它結束。**那一刻就是交付點。** ──────
             t_a = time.time()
+            agent_out_fh = None
+            if capture_agent_stdout:
+                agent_out_fh = (run_dir / "agent_stdout.log").open(
+                    "ab", buffering=0)
             try:
                 proc = subprocess.Popen(
                     argv_i, cwd=str(workspace), env=child_env,
@@ -412,6 +417,15 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                     #   `< /dev/null` 會永久卡住（2026-09-18 實測）。
                     #   要互動式 agent 才給 `--stdin inherit`。
                     stdin=(None if inherit_stdin else subprocess.DEVNULL),
+                    # ⚠ **`--json` 下 agent 的 stdout 不准流到我們的 stdout。**
+                    #   agent 會在那裡印自己的話（OpenCode 收尾那句
+                    #   "I have created solution.py…"），而它印在 summary JSON
+                    #   **前面** ⇒ 呼叫端 `json.load(stdout)` 直接 JSONDecodeError。
+                    #   2026-09-19 實測重現。`--json` 的用途就是機器讀，
+                    #   一個會被任意子行程汙染的機器輸出是壞的。
+                    #   ⇒ 導進 `<run_dir>/agent_stdout.log`，**一個位元組都沒丟**，
+                    #     而且 stderr 照樣繼承（進度與錯誤看得見）。
+                    stdout=(agent_out_fh if agent_out_fh is not None else None),
                     # ⚠ 自成一個 session／行程群組，好讓 `_kill_group` 收得掉
                     #   孫行程（`wait()` 只等直接子行程）。
                     #   **`--stdin inherit` 例外**：分家會讓子行程失去控制終端，
@@ -439,6 +453,12 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                 rec["orphans_killed"], rec["orphan_kill_error"] = _kill_group(proc)
             else:
                 rec["orphans_killed"], rec["orphan_kill_error"] = None, None
+            if agent_out_fh is not None:
+                try:
+                    agent_out_fh.close()
+                except Exception:                            # noqa: BLE001
+                    pass
+                agent_out_fh = None
             rec["agent_wall_s"] = round(time.time() - t_a, 3)
             # ⚠ **讀 `stats` 之前先把 proxy 排空。** `requests_seen` 是在回應
             #   送出**之後**才加的，所以 agent 拿到回應、寫完檔、退出時，
@@ -742,6 +762,8 @@ def main(argv: list[str] | None = None) -> int:
                   port=args.port, timeout_s=args.timeout,
                   test_timeout_s=args.test_timeout,
                   inherit_stdin=(args.stdin == "inherit"),
+                  # `--json` ⇒ agent 的 stdout 導進檔案，stdout 只剩純 JSON
+                  capture_agent_stdout=bool(args.json),
                   retry_arm=args.retry, max_attempts=args.max_attempts,
                   feedback_into=args.feedback_into)
     if args.json:
