@@ -311,3 +311,21 @@ def test_phone_press_moves_the_autoplay_cursor(pack, tmp_path):
     stage.press("pc")                       # 手機把第 0 對的「寫明」那邊叫上來
     nxt = stage.advance()["now"]["cell_id"]  # 放手之後輪播接下去
     assert nxt == stage.pl.pair(1)["held"]
+
+
+def test_phone_node_check_is_runnable_offline():
+    """手機頁那一段判準有自己的 node check，而且離線也跑得過。
+
+    ⚠ 這一條只保證「那一支存在而且跑得動」。它說的每一句話在
+    `ops/exhibit/twin/phone_node_check.mjs` 裡，不在這裡重寫一份——
+    兩份判準遲早會分岔，而分岔的時候沒有人會發現。
+    """
+    import shutil
+    import subprocess
+    if not shutil.which("node"):
+        pytest.skip("沒有 node")
+    r = subprocess.run(
+        ["node", str(ROOT / "ops" / "exhibit" / "twin" / "phone_node_check.mjs")],
+        capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "全部通過" in r.stdout
