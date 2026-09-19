@@ -478,8 +478,9 @@ def reconcile(*, relay_calls: list[dict] | None,
         "canary_calls": None, "refused_path": None,
         "unexplained_detail": None,
         "method": ("貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的"
-                   "回合開端事件（session_start／canary／user_prompt_submit／"
-                   "post_tool_use）"),
+                   "回合開端事件（" + "／".join(TURN_OPENING_EVENTS) + "）。"
+                   "⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，"
+                   "算進來會讓多出來的那一通被一個空額度吸收掉"),
         "reason": "",
     }
     if relay_calls is None:

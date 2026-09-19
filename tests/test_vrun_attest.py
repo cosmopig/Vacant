@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import pathlib
 import socket
 import sys
@@ -520,3 +521,66 @@ def test_old_chains_without_tier_are_unmeasured_not_failed(tmp_path, upstream,
     assert out["chains_without_tier_n"] == 1
     assert out["attested_chains_n"] == 0 and out["unattested_chains_n"] == 0
     assert out["verdict"] == "OK"
+
+
+# ── 9. `gateshim` 那條路：裝掛鉤 → 沒燒 → 收據自動降級（端到端）────────
+
+_STUB_AGENT = '''#!/bin/sh
+exec {py} -c 'import os,urllib.request;b=os.environ["VACANT_RUN_PROXY"].rstrip("/");urllib.request.urlopen(b+"/v1/messages",data=b"{{}}",timeout=30).read()'
+'''
+
+
+def test_gateshim_installs_hooks_and_downgrades_when_they_do_not_fire(
+        tmp_path, upstream):
+    """端到端：`gateshim` 會寫掛鉤設定，**但那不算數**——沒燒就降級。
+
+    這一格是 §三-1 那條紀律的整條路：
+      · `hook_install.json` 說「我們試過了」（正控制：檔真的在、target 在
+        per-run 設定目錄裡）；
+      · 而 `canary_fired` 仍然是 **`False`**，因為那個樁 agent 不會去跑掛鉤
+        ——**不准用「我們裝過了」推論「它在」**。
+    ⚠ 這不是「Claude Code 的掛鉤不會燒」：樁不是 Claude Code。
+      真 agent 那一格在 `evidence/opencode_hook_20260920/`。
+    """
+    import subprocess
+    home = tmp_path / "home"
+    ws = tmp_path / "ws"
+    (ws / ".git").mkdir(parents=True)
+    home.mkdir()
+    (tmp_path / "tmp").mkdir()
+    sd = tmp_path / "suite"
+    sd.mkdir()
+    (sd / "test_v.py").write_text("def check_ok():\n    pass\n", encoding="utf-8")
+    binp = tmp_path / "claudebin"
+    binp.write_text(_STUB_AGENT.format(py=sys.executable), encoding="utf-8")
+    binp.chmod(0o755)
+    env = dict(os.environ)
+    env.update({"PYTHONPATH": str(ROOT), "HOME": str(home),
+                "TMPDIR": str(tmp_path / "tmp"),
+                "VACANT_POSSESS_TMPROOT": str(tmp_path / "tmp"),
+                "VACANT_POSSESS_REAL_BIN": str(binp),
+                "VACANT_RUN_UPSTREAM_OPENAI": upstream,
+                "VACANT_RUN_UPSTREAM_ANTHROPIC": upstream,
+                "VACANT_SUITE": str(sd), "VACANT_ATTEST": "warn",
+                "VACANT_TEST_TIMEOUT": "60"})
+    r = subprocess.run([sys.executable, "-m", "vacant_network.vrun.gateshim",
+                        "claude", "-p", "hi"], cwd=ws, env=env,
+                       stdin=subprocess.DEVNULL, capture_output=True,
+                       text=True, timeout=600)
+    assert r.returncode == 0, r.stderr[-800:]
+    rd = sorted((home / ".vacant-run").glob("possess_*"))[-1]
+    rep = json.loads((rd / "hook_install.json").read_text("utf-8"))
+    assert rep["attempted"] is True and rep["report"]["agent"] == "claude"
+    att = json.loads((rd / "possess.json").read_text("utf-8"))["attestation"]
+    assert att["framework_hook"]["install_attempted"] is True
+    assert att["framework_hook"]["canary_fired"] is False, "裝了 ≠ 它在"
+    assert att["framework_hook"]["contract_version"] is None
+    assert att["reconciled"]["relay_calls"] == 1
+    assert att["reconciled"]["hook_events"] is None      # 沒量到，不是 0
+    assert att["reconciled"]["unexplained"] is None
+    assert att["attested"] is False
+    # 而且它簽進鏈了
+    chain = json.loads((rd / f"receipts_{launcher.ARM_ON}.ndjson"
+                        ).read_text("utf-8").splitlines()[-1])
+    assert chain["payload"]["tier"] == att["tier"]
+    assert chain["payload"]["canary_fired"] is False
