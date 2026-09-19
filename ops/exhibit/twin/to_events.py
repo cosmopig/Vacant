@@ -44,6 +44,19 @@ VACANT 的邏輯忠實呈現。」對照表與逐條理由在
 **一個都不發**，`counters` 也**不發 `audited`**——「這條路上沒有這一層」
 與「抽了 0 次」不是同一件事，發一個 `audited: 0` 就是把沒有的層畫成有。
 
+## v2.1（2026-09-19 傍晚）：反事實那一臂**真的跑了**
+
+在此之前展件只有 ON 臂，`liveAssemble` 寫死 `OFF: null`，而電視的監視器照樣印
+「同題關掉這層：**也擋下**」——替一個沒發生的反事實作證（對照表 A4，
+「展場的主視覺就是這個對照，這條錯得最貴」）。現在每一格都有一串 `arm: "OFF"`
+的事件，來自 `vacant run --vacant 0` 的真跑。
+
+那一臂發 `draft_done` ＋ `verdict(accepted: null, stop_reason: "ungated")`，
+**不發 `gate_ran`**（沒有閘門）、**不發 `receipt`**（不簽收據），
+另外發一筆契約外的 `postaudit`＝**事後**用同一把尺量 OFF 那份交付的結果，
+自己帶著 `when="after_the_run"`／`is_verdict=false`／`signed=false`。
+逐條理由見 `off_events` 的 docstring，可執行判準在 `validate`。
+
 ⚠ **但不發事件擋不住電視自己編。** 電視在沒有 `review_vote` 的時候仍然會進
 s07 演「三人同儕評審：0/0 判可」、在沒有 `audited` 的時候仍然印「沒抽中」。
 那六條要電視端改，提案（未套用）在 `ops/exhibit/twin/world3_patch/`。
@@ -99,8 +112,13 @@ ARM = packlib.ARM
 REQUIRED = ("type", "ts", "task_id")
 
 #: 本支發得出來的 type。沒列在這裡的一律不發（誠實規則：沒發生就不發）。
+#: `postaudit` 是 2026-09-19 加的，**不是契約裡的步驟**——見 `OFF_ARM` 那一節。
 EMITTED = ("task_opened", "routed", "draft_done", "gate_ran", "revised",
-           "verdict", "receipt", "counters")
+           "verdict", "receipt", "counters", "postaudit")
+
+#: 事件的 `arm` 欄位。契約（LIVE_INTERFACE.md §一）本來只把它用在去重鍵上，
+#: 沒有規定值。這裡把它定成兩個字串，因為從 2026-09-19 起**一格有兩串事件**。
+ARM_ON, ARM_OFF = "ON", "OFF"
 
 #: **這條路上不存在的層**。發了就是把沒有的東西畫出來。
 NEVER = ("review_vote", "audited")
@@ -113,6 +131,15 @@ BLOCKED_BY = {
     "no_suite": "gate",              # 沒有驗收套件 ⇒ fail-closed，閘門擋的
     "visible_pass": None,            # 收下了
     "ungated": None,                 # **沒量**：不是被擋，是沒有量具
+}
+
+#: 回饋**走哪一條管道**。展場上這一句不能省：`feedback_in_prompt_bytes = 0`
+#: 在 `file` 管道底下是**每一次都 0**，而那不代表「沒有回饋」。
+FEEDBACK_NOTE = {
+    "file": "回饋寫進工作區的 VACANT_FEEDBACK.md。**它有沒有去讀是另一回事**"
+            "——R535 量過檔案這條管道在 wire 上零命中。",
+    "prompt": "回饋接在下一次 spawn 的 prompt 尾端（位元組數在 feedback_bytes）。",
+    "both": "回饋同時寫進工作區的檔案、並接在下一次 spawn 的 prompt 尾端。",
 }
 
 #: 重試臂 → 一句話說清楚「下一次是在什麼條件下跑的」。
@@ -143,11 +170,79 @@ def _signed_accepted(cell: dict):
     return accepted
 
 
+def off_events(cell: dict, tid: str, ev) -> None:
+    """反事實那一臂：**同一題、關掉這一層**。沒跑過就一個事件都不發。
+
+    ## 為什麼這一段存在
+
+    電視的監視器印著「同題關掉這層：**也擋下**」，而在 2026-09-19 之前
+    那一臂**一次都沒跑過**（`liveAssemble` 寫死 `OFF: null`）——
+    替一個沒發生的反事實作證。**現在它是真的跑出來的**，所以那句話
+    第一次有東西可以指。
+
+    ## 這一臂發什麼、不發什麼（每一條都是誠實規則，不是美觀選擇）
+
+    | 發 | 不發 | 理由 |
+    |---|---|---|
+    | `draft_done` | — | 它真的做了一份東西，`calls_used` 是真的通數 |
+    | — | **`gate_ran`** | **這一臂沒有閘門**。發一筆 `passed:false` 就是把「沒有這一層」演成「這一層也判了」 |
+    | `verdict`（`accepted: null`） | — | 三值裡的 null ＝**沒量**。`stop_reason` 恆為 `ungated` |
+    | — | **`receipt`** | **這一臂不簽收據**。觀眾在這一邊沒有任何東西可以自己重驗——那正是展件要讓人看見的那一格差別 |
+    | `postaudit` | — | 事後用同一把尺量的，自己帶著「事後、非裁決、未簽章」三個旗標 |
+
+    ⚠ `postaudit` **不在 LIVE_INTERFACE.md 的契約裡**。電視不認得它 ⇒ 會忽略它
+      （`liveAssemble` 只 `get()` 它認得的 type），所以加它不會讓現在的電視變壞；
+      但電視要印出「關掉這層會怎樣」就**只能**讀它，而它的名字與旗標讓
+      「事後稽核」與「當場裁決」在資料上永遠分得開。
+    """
+    off = cell.get("off")
+    if not off or not off.get("ran"):
+        return
+    if off.get("infra_void"):
+        # 鐵律 3：跑掛的那一臂**不發事件**。「沒量到」不可以長成一個數字。
+        ev("verdict", arm=ARM_OFF, accepted=None, meets_demand=None,
+           blocked_by=None, stop_reason="infra_void",
+           infra_void=str(off.get("infra_void")),
+           note="這一臂的基建壞了 ⇒ 沒有量到任何東西。不是「沒過」，是「沒跑成」。",
+           attempts_used=off.get("attempts_used"), retry="none")
+        return
+    ev("draft_done", arm=ARM_OFF, worker=cell["resident"],
+       calls_used=int(off.get("requests_seen") or 0),
+       attempt=1, of=1, feedback_bytes=0,
+       note="沒有 Vacant 的那一臂：一次 spawn、沒有閘門、沒有回饋、沒有第二次。")
+    # ⚠ **不發 `gate_ran`**：這一臂沒有閘門。
+    ev("verdict", arm=ARM_OFF,
+       accepted=None,          # 沒量（不是量到 false）
+       meets_demand=None,
+       blocked_by=None,        # 沒有東西擋它
+       stop_reason=off.get("stop_reason") or "ungated",
+       accepted_note=off.get("accepted_note", ""),
+       has_receipt=bool(off.get("has_receipt")),
+       has_receipt_note=off.get("has_receipt_note", ""),
+       attempts_used=off.get("attempts_used"), retry="none")
+    pa = off.get("postaudit")
+    if pa:
+        ev("postaudit", arm=ARM_OFF,
+           # ⚠ 三個旗標一起走，缺一個就會被讀成裁決。
+           when=pa.get("when"), is_verdict=False, signed=False,
+           all_pass=bool(pa.get("all_pass")),
+           passed=pa.get("passed"), n_tests=pa.get("total"),
+           failed_case=next((c["case"] for c in (pa.get("cases") or [])
+                             if not c["ok"]), None),
+           ruler=pa.get("ruler"), note=pa.get("note"))
+
+
 def events_for_cell(cell: dict, *, verify_url: str, ts_ms: int) -> list[dict]:
     """一格 → 一串事件。`cell` 是 `pack.pack_cell()` 的輸出。
 
     `task_id` 用 `cell_id`：電視的去重鍵是 `ts|type|task_id|arm|reviewer`，
     同一題在不同居民手上是**不同的一格**，共用 task_id 會被去重吃掉一格。
+
+    ⚠ **順序是 ON 全部、然後 OFF 全部**，不是交錯。理由是現在那台電視
+      （未套 patch）的 `liveAssemble` 用 `evs.find(e => e.type === t)` 取
+      **第一個**符合的事件 ⇒ ON 先發 ⇒ 它組出來的仍然是 ON 臂那一筆，
+      與加 OFF 之前逐位元同義。**加資料不准讓現況變壞**；
+      要讀得到 OFF 是電視端那一條 patch 的事（忠實度對照表 P10）。
     """
     tid = cell["cell_id"]
     out: list[dict] = []
@@ -187,31 +282,47 @@ def events_for_cell(cell: dict, *, verify_url: str, ts_ms: int) -> list[dict]:
     retry_arm = cell.get("retry") or "none"
     for i, a in enumerate(attempts):
         n = int(a.get("attempt") or (i + 1))
-        ev("draft_done", worker=cell["resident"],
+        ev("draft_done", arm=ARM_ON, worker=cell["resident"],
            calls_used=int(a.get("requests_seen") or 0),
            attempt=n, of=n_total,
            # 回饋真的進了幾個位元組。第 1 次恆為 0 ⇒「與沒有 Vacant 時逐位元
            # 相同」這件事在資料上自己說得出來。
-           feedback_bytes=a.get("feedback_in_prompt_bytes"))
+           feedback_bytes=a.get("feedback_in_prompt_bytes"),
+           # ⚠ **沒有這個欄位，上面那個 0 會說謊。**
+           #   `--feedback-into file`（預設）＝回饋寫進工作區的
+           #   `VACANT_FEEDBACK.md`，**不進 prompt** ⇒ 每一次嘗試的
+           #   `feedback_in_prompt_bytes` 都是 0。畫面上只看到一串 0，
+           #   會被讀成「根本沒給它回饋」——而回饋其實給了，只是走檔案。
+           #   兩件事在展場上差很多：一個是機制沒動，一個是機制動了而
+           #   agent 沒去讀（R535 量到的正是後者：檔案投遞在 wire 上零命中）。
+           feedback_delivery=a.get("feedback_delivery"),
+           feedback_note=FEEDBACK_NOTE.get(a.get("feedback_delivery") or "", ""))
         vis = a.get("visible")
         if vis is None:
             # 沒有閘門結果（沒有驗收套件／基建中止）⇒ **不發 gate_ran**。
             continue
         failed = next((c["case"] for c in (vis.get("cases") or [])
                        if not c["ok"]), None)
-        ev("gate_ran", passed=bool(vis.get("all_pass")),
+        ev("gate_ran", arm=ARM_ON, passed=bool(vis.get("all_pass")),
            n_tests=vis.get("total"), failed_case=failed,
            attempt=n, of=n_total)
         if i + 1 < n_total:
             # 下一次嘗試存在 ⇒ 這一次沒過而且還有額度。
             # ⚠ reviser ＝ **同一個 worker**（誠實邊界 4）。
-            ev("revised", reviser=cell["resident"],
+            # ⚠ **`arm` 與 `retry_arm` 是兩個不同的東西，2026-09-19 才分開。**
+            #   v2 把重試臂（`revise`／`resample`）寫在一個叫 `arm` 的欄位裡，
+            #   而電視的去重鍵是 `ts|type|task_id|arm|reviewer`——同一個欄位
+            #   同時要當「ON 還是 OFF」與「revise 還是 resample」用。
+            #   加了 OFF 臂之後這就會壞：patch 過的電視按 `arm` 分組時，
+            #   `revised` 會掉進一個叫 `"revise"` 的第三組，那一格的重改拍
+            #   就從 ON 那一串裡消失。⇒ 重試臂改名 `retry_arm`，`arm` 專職分臂。
+            ev("revised", arm=ARM_ON, reviser=cell["resident"],
                transition=TRANSITION.get(retry_arm, retry_arm),
-               arm=retry_arm, attempt=n + 1, of=n_total)
+               retry_arm=retry_arm, attempt=n + 1, of=n_total)
 
     accepted = _signed_accepted(cell)
     stop = cell.get("stop_reason") or ""
-    ev("verdict",
+    ev("verdict", arm=ARM_ON,
        # 三值，不做 bool()：null ＝ 沒量（誠實邊界 3）
        accepted=accepted,
        # meets_demand 要隱藏測資才答得出來，而隱藏測資不進展件 ⇒ 留 null（誠實邊界 2）
@@ -225,13 +336,18 @@ def events_for_cell(cell: dict, *, verify_url: str, ts_ms: int) -> list[dict]:
     if cell["chain"]:
         from vacant.logbook import LogEntry
         head = LogEntry.from_json(json.loads(cell["chain"][-1])).hash()
-    ev("receipt", sha256=head, chain_head=head, verify_url=verify_url,
+    ev("receipt", arm=ARM_ON, sha256=head, chain_head=head, verify_url=verify_url,
        # ⚠ 契約的 `sha256` 是**收據**的，電視 v1 卻把它塞進一個叫
        #   `prompt_sha256` 的欄位（world3_patch 的第 2 條）。這兩個
        #   hash 各自帶一份，patch 過的電視才有東西可以分開顯示。
        prompt_sha256=hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
        verdict_sha256=cell.get("verdict_sha256"),
        ws_end_sha256=cell.get("ws_end_sha256"))
+
+    # ── 反事實那一臂，**接在 ON 全部發完之後** ───────────────────────
+    #  順序的理由寫在本函式的 docstring：未套 patch 的電視取「第一個」，
+    #  ON 先發 ⇒ 它組出來的還是 ON 那一筆，加資料沒有讓現況變壞。
+    off_events(cell, tid, ev)
     return out
 
 
@@ -249,12 +365,30 @@ def build(pack: dict, *, verify_url: str, t0_ms: int) -> list[dict]:
     levels: dict[str, int] = {}
     for c in pack["cells"]:
         levels[c["evidence"]] = levels.get(c["evidence"], 0) + 1
-    evs.append({
+    ctr = {
         "type": "counters", "ts": iso(ts), "task_id": "-",
         "blocked": pack["refused"], "total": len(pack["cells"]),
         "delivered": pack["delivered"],
         "evidence_counts": dict(sorted(levels.items())),
-    })
+    }
+    # 反事實那一臂的累計。**欄名刻意又臭又長**：`off_postaudit_not_all_pass`
+    # 讀起來就是「事後用可見驗收量，沒有全過的格數」，沒有辦法被誤讀成
+    # `off_leaked`（那要隱藏測資才答得出來，而隱藏測資不進展件）。
+    offs = [c["off"] for c in pack["cells"] if c.get("off")
+            and c["off"].get("ran") and not c["off"].get("infra_void")]
+    if offs:
+        audited = [o for o in offs if o.get("postaudit")]
+        ctr.update({
+            "off_ran": len(offs),
+            "off_with_receipt": sum(1 for o in offs if o.get("has_receipt")),
+            "off_postaudited": len(audited),
+            "off_postaudit_not_all_pass": sum(
+                1 for o in audited if not o["postaudit"].get("all_pass")),
+            "off_counters_note":
+                "OFF 臂沒有裁決可以計數（它不驗收）。這幾欄是**事後**用同一份"
+                "可見驗收量出來的，不是那一跑當場的判定。",
+        })
+    evs.append(ctr)
     return evs
 
 
@@ -285,6 +419,26 @@ def validate(evs: list[dict]) -> list[str]:
                        "（`vacant run` 沒有路由層）")
         if e.get("type") == "revised" and e.get("reviser") is None:
             bad.append(f"第 {i + 1} 個事件：revised 沒有 reviser")
+        # ── 反事實那一臂的三條硬規則 ────────────────────────────────
+        if e.get("arm") == ARM_OFF:
+            if e.get("type") == "gate_ran":
+                bad.append(f"第 {i + 1} 個事件：OFF 臂發了 gate_ran——"
+                           "**那一臂沒有閘門**，發了就是把「沒有這一層」"
+                           "演成「這一層也判了」")
+            if e.get("type") == "receipt":
+                bad.append(f"第 {i + 1} 個事件：OFF 臂發了 receipt——"
+                           "**那一臂不簽收據**，觀眾在這一邊沒有東西可以自己重驗")
+            if e.get("type") == "verdict" and e.get("accepted") is not None:
+                bad.append(f"第 {i + 1} 個事件：OFF 臂的 accepted 不是 null——"
+                           "那一臂不驗收也不拒交，沒有裁決可言")
+        # 事後稽核不准長得像裁決：三個旗標缺一不可。
+        if e.get("type") == "postaudit":
+            if e.get("is_verdict") is not False or e.get("signed") is not False:
+                bad.append(f"第 {i + 1} 個事件：postaudit 必須自己說 "
+                           "`is_verdict=false`＋`signed=false`，"
+                           "否則它與當場的裁決在資料上分不開")
+            if e.get("when") != "after_the_run":
+                bad.append(f"第 {i + 1} 個事件：postaudit 沒說它是事後量的")
     # 電視的去重鍵：ts|type|task_id|arm|reviewer。撞鍵 ⇒ 那一格會被靜靜吃掉。
     keys = ["%s|%s|%s|%s|%s" % (e.get("ts"), e.get("type"), e.get("task_id"),
                                 e.get("arm", ""), e.get("reviewer", "")) for e in evs]

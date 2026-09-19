@@ -182,5 +182,36 @@ for (const c of PACK.cells) {
         `${names.length} 張；缺 ${missing.length}`);
 }
 
+// N13 —— 反事實那一臂**真的跑過**，而且沒有被畫成一個裁決
+//
+//  展場的主視覺是「同題關掉這層會怎樣」。2026-09-19 以前那一臂一次都沒跑過，
+//  電視卻照樣印「也擋下」——替一個沒發生的反事實作證。這一條守兩件事：
+//  (a) 頁面裡的 OFF 臂有真通數（requests_seen > 0）；
+//  (b) 它**沒有收據、accepted 是 null**——沒有這一層就是沒有這一層。
+{
+  const offs = PACK.cells.map((c) => c.off).filter((o) => o && o.ran);
+  const live = offs.filter((o) => !o.infra_void);
+  const noCalls = live.filter((o) => !(o.requests_seen > 0));
+  const faking = live.filter((o) => o.accepted !== null || o.has_receipt);
+  check("N13 反事實那一臂真的跑過，且沒有裁決也沒有收據",
+        offs.length === PACK.cells.length && live.length > 0 &&
+        noCalls.length === 0 && faking.length === 0,
+        `${offs.length}/${PACK.cells.length} 格有 OFF；零通數 ${noCalls.length}；` +
+        `被畫成有裁決／有收據 ${faking.length}`);
+}
+
+// N14 —— 事後稽核不准被當成當場的判定
+//
+//  OFF 那份交付過不過，`vacant run --vacant 0` 答不出來（它當場沒量）。
+//  那個數字是**事後**用同一把尺補量的，所以它必須自己帶著三個旗標。
+//  少一個，頁面遲早會把它印成「OFF 也被擋下」。
+{
+  const pas = PACK.cells.map((c) => c.off && c.off.postaudit).filter(Boolean);
+  const bad = pas.filter((p) => p.when !== "after_the_run" ||
+                                p.is_verdict !== false || p.signed !== false);
+  check("N14 事後稽核自己說它是事後的、非裁決、未簽章",
+        pas.length > 0 && bad.length === 0, `${pas.length} 筆，違規 ${bad.length}`);
+}
+
 console.log(fail ? `\n${fail} 項 BROKEN` : "\n全部通過");
 process.exit(fail ? 1 : 0);

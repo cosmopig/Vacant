@@ -126,9 +126,13 @@ def test_retry_loop_is_visible_one_gate_per_attempt(pack):
     """
     c = _two_attempt_cell(pack)
     evs = to_events.events_for_cell(c, verify_url="x", ts_ms=0)
-    gates = [e for e in evs if e["type"] == "gate_ran"]
-    drafts = [e for e in evs if e["type"] == "draft_done"]
-    revised = [e for e in evs if e["type"] == "revised"]
+    # ⚠ 只數 **ON 臂**。2026-09-19 起同一格還有一串 `arm: "OFF"` 的事件
+    #   （反事實那一臂，一次 spawn、沒有閘門）。不濾就會把 OFF 的那一筆
+    #   `draft_done` 算進 ON 的迴圈裡。
+    on = [e for e in evs if e.get("arm") == to_events.ARM_ON]
+    gates = [e for e in on if e["type"] == "gate_ran"]
+    drafts = [e for e in on if e["type"] == "draft_done"]
+    revised = [e for e in on if e["type"] == "revised"]
     assert [g["passed"] for g in gates] == [False, True], "兩次閘門要各說各的"
     assert [g["attempt"] for g in gates] == [1, 2]
     assert len(drafts) == 2 and [d["attempt"] for d in drafts] == [1, 2]
@@ -150,7 +154,11 @@ def test_reviser_is_the_same_worker_never_someone_else(pack):
     rv = [e for e in evs if e["type"] == "revised"]
     assert rv and all(e["reviser"] == c["resident"] for e in rv)
     assert "VACANT_FEEDBACK" in rv[0]["transition"], "哪一條臂要逐字寫出來"
-    assert rv[0]["arm"] == "revise"
+    # ⚠ 2026-09-19 改名：重試臂在 `retry_arm`，`arm` 專職分 ON／OFF。
+    #   兩個意思擠在同一個欄位裡，patch 過的電視按 `arm` 分組時
+    #   `revised` 會掉進第三組，那一格的重改拍就從 ON 那一串裡消失。
+    assert rv[0]["retry_arm"] == "revise"
+    assert rv[0]["arm"] == to_events.ARM_ON, "重改是 ON 臂的事，OFF 臂沒有迴圈"
 
 
 def test_resample_and_revise_do_not_say_the_same_thing(pack):
@@ -270,3 +278,105 @@ def test_redaction_survives_a_moved_run_dir(tmp_path):
     assert "/Users/" not in out
     assert "<凍結快照>" in out
     assert "cannot import name 'mul'" in out, "訊息本體一個字都不准少"
+    # 兩臂都要清。只清 ON 的話，OFF 的事後稽核訊息會把路徑整串印上展場螢幕。
+    off = msg.replace("_frozen_RUN-ON", "_frozen_RUN-OFF")
+    out2 = packlib.redact_paths(off, tmp_path / "elsewhere")
+    assert "/Users/" not in out2, "OFF 臂的路徑沒有被清掉"
+
+
+# ── 七、反事實那一臂：**跑過**，而且不准長得像裁決（2026-09-19 傍晚）──────
+
+def test_the_counterfactual_arm_was_actually_run(pack):
+    """展場主視覺的那句「同題關掉這層」，底下要真的有一跑。
+
+    在此之前電視印「同題關掉這層：**也擋下**」，而 `liveAssemble` 寫死
+    `OFF: null`——那一臂**一次都沒跑過**。`t.OFF || {}` 讓 `off.accepted`
+    是 undefined，畫面照樣印出「也擋下」。**替一個沒發生的反事實作證**
+    （對照表 A4：「展場的主視覺就是這個對照，這條錯得最貴」）。
+    """
+    offs = [c.get("off") for c in pack["cells"]]
+    assert all(o and o.get("ran") for o in offs), "有格子沒有 OFF 臂"
+    for c in pack["cells"]:
+        o = c["off"]
+        if o.get("infra_void"):
+            continue
+        assert o["requests_seen"] > 0, \
+            f"{c['cell_id']}：OFF 臂沒有任何一通被中介到，證明不了它真的跑過"
+        assert o["same_start_as_on"], \
+            f"{c['cell_id']}：兩臂的起點不同 ⇒「唯一差別是那一層」這句話說不出口"
+
+
+def test_the_off_arm_has_no_verdict_and_no_receipt(pack):
+    """OFF ＝ 沒有這一層。它**沒有裁決、沒有收據**，這兩件事要在資料上看得見。
+
+    · `accepted` 恆為 `null`（＝沒量）。壓成 `false` 就是把「沒有這一層」
+      演成「這一層在另一邊也判了」——那會讓觀眾以為關掉之後還是有人在擋。
+    · `has_receipt` 恆為 `false`。這是展件最值得看的一格差別：
+      ON 那邊有一條從創世驗得到鏈頭的鏈，OFF 這邊**什麼都沒有**。
+    """
+    for c in pack["cells"]:
+        o = c["off"]
+        assert o["accepted"] is None, c["cell_id"]
+        assert o["has_receipt"] is False, c["cell_id"]
+        if not o.get("infra_void"):
+            assert o["stop_reason"] == "ungated", c["cell_id"]
+
+
+def test_the_post_hoc_audit_never_pretends_to_be_a_verdict(pack, events):
+    """事後稽核要自己說它是事後的，否則它與當場的裁決在資料上分不開。"""
+    for c in pack["cells"]:
+        pa = (c["off"] or {}).get("postaudit")
+        if pa is None:
+            continue
+        assert pa["when"] == "after_the_run"
+        assert pa["is_verdict"] is False and pa["signed"] is False
+        assert "事後" in pa["note"]
+    pas = [e for e in events if e["type"] == "postaudit"]
+    assert pas, "OFF 臂跑了卻一筆事後稽核都沒有 ⇒ 展場沒有東西可以對照"
+    for e in pas:
+        assert e["arm"] == to_events.ARM_OFF
+        assert e["is_verdict"] is False and e["signed"] is False
+
+
+def test_validate_rejects_an_off_arm_that_claims_a_gate_or_a_receipt(events):
+    """負控制：把 OFF 臂寫成有閘門／有收據／有裁決，契約自檢要咬人。"""
+    for bad_ev in (
+        {"type": "gate_ran", "ts": "9999", "task_id": "x",
+         "arm": to_events.ARM_OFF, "passed": False},
+        {"type": "receipt", "ts": "9999", "task_id": "x",
+         "arm": to_events.ARM_OFF, "sha256": "deadbeef"},
+        {"type": "verdict", "ts": "9999", "task_id": "x",
+         "arm": to_events.ARM_OFF, "accepted": False, "meets_demand": None},
+    ):
+        assert to_events.validate(events + [bad_ev]), bad_ev["type"]
+
+
+def test_evidence_level_is_derived_per_cell_never_declared(pack):
+    """證據等級**逐格**從落盤資料推，宣告蓋不過去（展場版鐵律 5）。
+
+    `requests_seen == 0` ⇒ L-none，即使這一批宣告 `--evidence L-real`。
+    這一條是可執行的 fail-closed，不是一句承諾。
+    """
+    for c in pack["cells"]:
+        assert c["evidence"] == packlib.evidence_level(
+            requests_seen=c["requests_seen"],
+            declared=c["declared_evidence"]), c["cell_id"]
+        if c["requests_seen"] == 0:
+            assert c["evidence"] == "L-none", c["cell_id"]
+    # fail-closed 的負控制：宣告 L-real 配 0 通，還是 L-none。
+    assert packlib.evidence_level(requests_seen=0, declared="L-real") == "L-none"
+    assert packlib.evidence_level(requests_seen=3, declared="") == "L-unknown"
+
+
+def test_infra_void_cells_are_marked_not_counted_as_refusals(pack):
+    """鐵律 3：「沒量到」≠「量到 0」。跑掛的格**不進 `cells`**，進 `void_cells`。
+
+    把 `infra_void` 當成拒交格，展場上就會變成
+    「Vacant 擋住了一件**根本沒發生**的交付」。
+    """
+    assert "void_cells" in pack, "資料包要說得出哪些格跑掛了"
+    for c in pack["cells"]:
+        assert not c.get("infra_void"), c["cell_id"]
+    for v in pack["void_cells"]:
+        assert v["infra_void"] or v["stop_reason"], v["cell_id"]
+    assert pack["void"] == len(pack["void_cells"])
