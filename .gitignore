@@ -18,7 +18,13 @@ var/
 .vacant-private/
 
 # session/agent 工作目錄
-.claude/
+# ⚠ 寫 `.claude/` 會讓 git **不下潛**，裡面的 `!` 例外一律失效（2026-09-19 踩過）。
+# 要放行子目錄就得忽略「內容」而不是「目錄本身」：
+.claude/*
+# ……但 slash command 是專案資產不是 session 產物。
+# `/goal`（第一優先目標的可量測定義）原本只活在一台 Mac 上：沒備份、沒版本，
+# 而且 worktree 裡的 agent 讀不到也改不到它——2026-09-19 就因此要人工代改。
+!.claude/commands/
 
 # 外部生圖工具產物（素材本體不進 repo）
 higgsfield_output/

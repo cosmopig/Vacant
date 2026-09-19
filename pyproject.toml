@@ -54,6 +54,21 @@ Issues = "https://github.com/cosmopig/Vacant/issues"
 
 [project.scripts]
 vacant = "vacant.cli:main"
+# ⚠ **不要以為加第二個指令名就能躲開撞名——實測過，沒有用。**
+#
+# PyPI 上的 `vacant`（alltuner/vacant，DNS 工具）跟我們用**同一個頂層目錄名
+# `vacant/`**，pip 逐檔覆蓋 ⇒ 它的 `cli.py` 蓋掉我們的。所以即使多給一個
+# `vacant-run = "vacant.cli:main"`，那支腳本**照樣 import 到對方的碼**。
+# 2026-09-19 用真的 wheel 驗過：裝了對方之後兩支都變成 DNS 工具的介面。
+#
+#   pip list       → 兩個都列著，vacant-network 0.7.0「還裝著」
+#   import vacant  → AttributeError: no attribute '__version__'
+#   vacant --help  → 對方的介面
+#   **四種安裝順序全部零錯誤訊息。**
+#
+# 唯一真正的修法是**改掉我們的 import 套件名**（`vacant` → 例如 `vacant_network`），
+# 那是破壞性變更，要人決定。在那之前 README 最前面有醒目警告，
+# 判別式 `python3 -c "import vacant; print(vacant.__version__)"`。
 
 [build-system]
 requires = ["setuptools>=77"]   # >=77：PEP 639 的 license／license-files
