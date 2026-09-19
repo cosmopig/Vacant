@@ -21,7 +21,7 @@
 | H1 點估計＋區間 | `accepted` 取自 `run_RUN-ON.json`；`hidden` 取自 `scores_*.json`；b/c、McNemar、bootstrap 全部自己算 | `state_r535.py` 的 `bc_counts`／`ci_of` |
 
 兩條路撞在一起才算數。**`hidden` 只有一個來源**（隱藏套件的執行結果只寫在
-`scores_*.json` 裡），這一條本檔驗不動，見 §「驗不到什麼」與 `--strict` 的輸出。
+`scores_*.json` 裡），這一條本檔驗不動，報表最後兩行會把它印出來（「驗得到／驗不到」）。
 
 ## 它怎麼證明 wire 沒有被換掉（M7 的可究責性在這裡）
 
@@ -59,6 +59,9 @@ M7 是唯一一個**必須看原始位元組**的數字。歸檔把那些位元�
     python3 ops/gain/verify_r535_archive.py --archive DIR
     python3 ops/gain/verify_r535_archive.py --no-wire       # 不解 wire（M7 轉 na）
     python3 ops/gain/verify_r535_archive.py --json out.json
+
+回傳碼：全綠 0，任何一條紅 1。`na`（拿不到的量具）**不算綠也不判紅**，
+在總判定那一行逐項列出——「拿不到」與「通過了」不可以在輸出上同形。
 """
 from __future__ import annotations
 
@@ -92,7 +95,8 @@ BOOT_SEED = 0
 
 # ── M7 的 needle（`run_r535.py` 的凍結常數，本檔重抄一份）─────────────────
 # ⚠ 重抄不是複製貼上圖方便：本檔的立論是「不靠 run_r535 當時算的結果」。
-#   但**抄歪了會靜靜地回 False**，所以 `--drift-guard`（預設開）會在
+#   但**抄歪了會靜靜地回 False**，所以 drift guard（預設開，`--no-drift-guard`
+#   才關）會在
 #   `ops/gain/r535/run_r535.py` 匯得進來的時候，逐字比對這三個常數。
 BLOCK_PREFIX = "working directory. They did not all pass.\n\n"
 BLOCK_SUFFIX = "\n\nFix the working directory."
@@ -810,9 +814,19 @@ def render(doc: dict) -> str:
                 if doc["diction"]["hits"] else ""))
     L.append(f"總判定：{doc['verdict']}")
     L.append("")
-    L.append("驗得到：計畫與題庫的釘值、360 格齊不齊、簽章鏈、wire 位元組"
-             "與簽章的綁定、M7 從位元組重算、第 1 次可見失敗率、H1 的 b/c／"
-             "點估計／區間。")
+    got = ["計畫與題庫的釘值", "360 格齊不齊"]
+    if doc["A5"]["ok"] is True:
+        got.append("簽章鏈")
+    if doc["A6"]["ok"] is True:
+        got.append("wire 清單與簽章的綁定")
+    if doc["A7"]["ok"] is True:
+        got.append("wire 位元組")
+    if doc["B1"]["ok"] is True:
+        got.append("M7 從位元組重算")
+    got += ["第 1 次可見失敗率", "H1 的 b/c／點估計／區間"]
+    L.append("驗得到：" + "、".join(got) + "。"
+             + ("　⚠ 這一次**沒有**解 wire ⇒ M7 只是照抄我們記的值，"
+                "不是重算。" if doc["B1"]["ok"] is None else ""))
     L.append("驗不到：隱藏套件的執行結果只有一個來源（`scores_*.json`），"
              "本檔只做內部一致性檢查，沒有重跑那些測試；"
              "M7 是單邊量；模型那一端的行為本身不可重現（溫度、後端版本）。")
