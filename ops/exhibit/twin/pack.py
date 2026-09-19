@@ -155,7 +155,8 @@ def redact_paths(text: str, run_dir: pathlib.Path) -> str:
     return out
 
 
-def delivery_of(run_dir: pathlib.Path, ws_end_sha256: str) -> dict:
+def delivery_of(run_dir: pathlib.Path, ws_end_sha256: str,
+                attempts_used: int | None = None) -> dict:
     """它**交出來的那份東西**——凍結快照裡的檔案，逐檔帶內容與 sha256。
 
     為什麼要帶內容：展件的靈魂是「觀眾看得到它想交、但被擋下來」。
@@ -168,7 +169,23 @@ def delivery_of(run_dir: pathlib.Path, ws_end_sha256: str) -> dict:
     做不做得到的誠實旗標：任何一個檔案的位元組不是 UTF-8 往返不變，
     就整格標成不可重算，而不是算一個看起來很像的值。
     """
-    frozen = run_dir / f"_frozen_{ARM}"
+    # ⚠ **要讀的是最後一次嘗試的快照，不是第一次。**
+    #   `root_claimed` 用的是 `summary["ws_end_sha256"]`，而那是**最後一次**
+    #   凍結的樹雜湊。舊版永遠讀 `_frozen_{ARM}`（＝第 1 次）：
+    #   單次嘗試的格剛好相等所以看不出來，**三次嘗試的格就對不上**
+    #   ⇒ 2026-09-19 的 18 格真跑上，N4「交付物樹雜湊＝鏈上的 ws_end_sha256」
+    #   只過 9/18，**而失敗的正好是 9 格拒交**——展件的靈魂那一半。
+    #
+    #   ⚠ 順帶一個對展件有利的後果：最後一次的工作區裡**有 `VACANT_FEEDBACK.md`**
+    #   （`revise` 在每次判定之後寫的）。讀對快照之後，觀眾會看到那個檔
+    #   **就躺在那裡**，而 `solution.py` 三次一模一樣——
+    #   R535 那個「看見了檔名、沒有讀」的發現，變成畫面上看得到的東西。
+    n = attempts_used if isinstance(attempts_used, int) and attempts_used > 1 else None
+    frozen = run_dir / (f"_frozen_{ARM}_a{n}" if n else f"_frozen_{ARM}")
+    if not frozen.is_dir():
+        # 退回第 1 次那份，但**不准假裝算得出來**——
+        # 算不回 `root_claimed` 的話 `recomputable` 會是 False，頁面照實說。
+        frozen = run_dir / f"_frozen_{ARM}"
     files: list[dict] = []
     recomputable = frozen.is_dir()
     if frozen.is_dir():
@@ -272,7 +289,8 @@ def pack_cell(run_dir: pathlib.Path) -> dict:
         "sandbox": (summary.get("sandbox") or {}).get("backend"),
         "visible": {"passed": visible.get("passed"), "total": visible.get("total"),
                     "all_pass": bool(visible.get("all_pass")), "cases": cases},
-        "delivery": delivery_of(run_dir, summary.get("ws_end_sha256") or ""),
+        "delivery": delivery_of(run_dir, summary.get("ws_end_sha256") or "",
+                                summary.get("attempts_used")),
         "chain": [ln for ln in chain_text.split("\n") if ln.strip()],
         "pub": {"vacant_id": pub["vacant_id"], "pub_hex": pub["pub_hex"]},
     }
