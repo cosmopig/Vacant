@@ -1,0 +1,284 @@
+{
+  "cell": "s1_01_addmul__RF",
+  "task_id": "s1_01_addmul",
+  "arm": "RF",
+  "stratum": "S1",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-18T23:56:44Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "s1",
+  "pi_port": 8878,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 0,
+  "task_pos": 0,
+  "arm_pos": 1,
+  "plan_index": 1,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s1_01_addmul__RF/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s1_01_addmul__RF/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s1_01_addmul/tests_visible",
+    "--task-id",
+    "r535_s1_01_addmul_RF",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8878",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 61.198
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 12,
+  "agent_wall_s": 19.946,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "ws_start_sha256": "03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61",
+  "ws_end_sha256": "0bfc5ec3179fd12baf4df996fc58b8bcd80e8a40baee1db779f98f6e164b1183",
+  "verdict_sha256": "9ca9688ab8b28cac4c98c1103b2565c0e6ac756d7669ea6d23f250dec255de98",
+  "verdict_hash": "c4a1d7a2ab3ac26251851459f07807b7ad952bd0792f0a7af7ea2103a7030c43",
+  "wire_digest": "fb4725eea6cbc0266cc948b4e4db4b2b48bd459b8fba469e455fea13b20e5f6e",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s1_01_addmul__RF/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 12
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 18.105,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "3465ad3440c487212ffd310a7abe41cec668ae2ac79ae981e695a66ed163749b",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_01_addmul__RF/run/_frozen_RUN-ON",
+      "ws_end_sha256": "39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 21.289,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "57a6962b493c72bc078d0345fe1f4f00ede9f4b97bce8e4cd836ebab8a751f85",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_01_addmul__RF/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "bef25bb665304c5a10d58e1552e0694a93a6277f5b3ebed55470464c787fbed8",
+      "reset": null
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 19.946,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_01_addmul__RF/run/_frozen_RUN-ON_a3",
+      "ws_end_sha256": "0bfc5ec3179fd12baf4df996fc58b8bcd80e8a40baee1db779f98f6e164b1183",
+      "reset": null
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": false,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "matched": [],
+      "n_req": 4
+    },
+    {
+      "attempt": 3,
+      "found": false,
+      "matched": [],
+      "n_req": 4
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": true,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "n_req": 4
+    },
+    {
+      "attempt": 3,
+      "found": true,
+      "n_req": 4
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.3333333333333333,
+  "m7_ws_counts": {
+    "other": 2,
+    "read_task": 2,
+    "write_solution": 2,
+    "total": 6,
+    "other_total": 2,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def add(a, b):\\n    return a + b\\n\\ndef multiply(a, b):\\n    return a * b\\n\",\"path\":\"solution.py\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def add(a, b):\\n    return a + b\\n\\ndef multiply(a, b):\\n    return a * b\\n\",\"path\":\"solution.py\"}"
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": null,
+  "f6_reason": "arm_is_not_RP",
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "feedback_in_prompt_bytes": 0
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 12,
+  "f3_req_ok": 12,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 12,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 61.209,
+  "finished": "2026-09-18T23:57:46Z"
+}

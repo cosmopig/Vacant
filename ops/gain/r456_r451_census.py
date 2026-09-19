@@ -27,7 +27,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 MUTANT = ""
-DECISION = ROOT / "DECISION_20260904_R456_R451_FALSIFIABILITY_EXTENSION.md"
+DECISION = ROOT / "decisions/DECISION_20260904_R456_R451_FALSIFIABILITY_EXTENSION.md"
 # R451 §四A 凍結快照（DECISION §五-3）
 SNAP_ROWS_SHA16 = "39d3b5dc50a6ba44"
 SNAP_ROWS_LINES = 229
@@ -295,8 +295,15 @@ PRE_R458_COMMIT = "6a8aa7a"   # R458 判準 commit＝本尺改動前的最後一
 R451_COMMIT = "113f747"          # R451 判準落地時的 commit（兩件文字證物的基準版本）
 W3_BANKS = {"lcb2": "ops/gain/data/lcb_bank_v2.jsonl",
             "lcb1": "ops/gain/data/lcb_bank_v1.jsonl"}
-W3_DOCS = [("DECISION_20260904_R440Z_LCB2_PREREG.md", "P-Z3"),
-           ("CRITERION_20260903_R670_DELIV_DIFFERENCE_INTERVAL.md", "UNINFORMATIVE")]
+# (R451 當時的路徑, 現在的路徑, needle)
+# ⚠ 兩個路徑都要留著：左邊那個餵 `git show {R451_COMMIT}:<路徑>`（那棵樹裡檔案還在
+#   repo 根目錄），右邊那個讀**現況**（2026-09-18 起住在 `decisions/`）。
+#   用同一個字串會二選一壞掉：不是 `git_show_failed` 就是 `missing_now`。
+W3_DOCS = [("DECISION_20260904_R440Z_LCB2_PREREG.md",
+            "decisions/DECISION_20260904_R440Z_LCB2_PREREG.md", "P-Z3"),
+           ("CRITERION_20260903_R670_DELIV_DIFFERENCE_INTERVAL.md",
+            "decisions/criteria/CRITERION_20260903_R670_DELIV_DIFFERENCE_INTERVAL.md",
+            "UNINFORMATIVE")]
 
 
 def w3_trigger(n_needed: int, bank_size: int) -> bool:
@@ -314,15 +321,16 @@ def w3_doc_witness(pairs: list[tuple] | None = None) -> dict:
     """證物 A／B：逐行比對 R451 落地版本與現況。pairs 只給自檢用（合成）。"""
     if pairs is None:
         pairs = []
-        for path, needle in W3_DOCS:
-            r = subprocess.run(["git", "show", f"{R451_COMMIT}:{path}"],
+        for old_path, now_path, needle in W3_DOCS:
+            r = subprocess.run(["git", "show", f"{R451_COMMIT}:{old_path}"],
                                cwd=ROOT, capture_output=True, text=True)
             if r.returncode != 0:
-                return {"checked": False, "reason": f"SOURCE_DRIFT:git_show_failed:{path}"}
-            cur = ROOT / path
+                return {"checked": False, "reason": f"SOURCE_DRIFT:git_show_failed:{old_path}"}
+            cur = ROOT / now_path
             if not cur.exists():
-                return {"checked": False, "reason": f"SOURCE_DRIFT:missing_now:{path}"}
-            pairs.append((path, needle, r.stdout, cur.read_text(encoding="utf-8")))
+                return {"checked": False, "reason": f"SOURCE_DRIFT:missing_now:{now_path}"}
+            # `detail` 的鍵沿用 R451 當時的路徑（basename 不變），落盤欄位不因搬家而漂
+            pairs.append((old_path, needle, r.stdout, cur.read_text(encoding="utf-8")))
     changed, empty, detail = [], [], {}
     for name, needle, old_t, new_t in pairs:
         o, n = _lines_with(old_t, needle), _lines_with(new_t, needle)

@@ -1,26 +1,79 @@
 [project]
-name = "vacant"
-version = "0.1.0"
-description = "Vacant-first trust and verification gateway for AI agents"
+# 發布名＝`vacant-network`（PyPI 上 `vacant` 是別人的 DNS 工具，不是本專案）。
+# import 名仍然是 `vacant`。
+name = "vacant-network"
+dynamic = ["version"]          # 單一真相＝`vacant/__init__.py::__version__`
+description = "An accountability layer that sits outside any AI agent: runs the customer's executable acceptance tests, gates delivery, and signs every attempt into a verifiable hash chain."
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "cosmopig" }]
+keywords = [
+    "accountability", "audit", "hash-chain", "ed25519", "receipts",
+    "llm", "agent", "code-generation", "evaluation", "acceptance-tests",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+]
+
+# 執行期依賴＝**實際被 import 的三個**，不多不少（AST 掃過整個 `vacant/`）：
+#   cryptography  Ed25519 簽章／驗章（logbook、identity、envelope 的地基）
+#   mcp           `vacant/mcp_server.py` 的 MCP 相容層
+#   jsonschema    `vacant/checks.py` 的 json_schema check——見下面那條註解
+# `jsonschema` 過去是「裝了就用、沒裝退回自帶的最小驗證器」。那個 fallback 比標準
+# 驗證器**寬鬆**，所以同一份 schema check 在兩台機器上可能給出不同判定。一個把
+# 「判定可被重算」當成主張的系統不能容許判準隨環境漂移 ⇒ 改成硬相依。
 dependencies = [
     "cryptography>=42",
     "mcp>=1.26,<2",
+    "jsonschema>=4.21",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "build>=1.2", "twine>=5"]
+
+[project.urls]
+Homepage = "https://github.com/cosmopig/Vacant"
+Repository = "https://github.com/cosmopig/Vacant"
+Documentation = "https://github.com/cosmopig/Vacant/blob/main/README.md"
+"For AI agents" = "https://github.com/cosmopig/Vacant/blob/main/AGENTS.md"
+Changelog = "https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md"
+Issues = "https://github.com/cosmopig/Vacant/issues"
 
 [project.scripts]
 vacant = "vacant.cli:main"
 
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]   # >=77：PEP 639 的 license／license-files
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.dynamic]
+version = { attr = "vacant.__version__" }
+
 [tool.setuptools]
-packages = ["vacant"]
+# `vacant.web` 是資產目錄（沒有 __init__.py，不是可 import 的模組），但必須
+# 列在這裡：只寫 package-data 的話 setuptools 會警告「vacant.web 不在 packages」。
+# 內容由下面的 package-data 決定（已驗：wheel 內有 vacant/web/app.{html,css,js}）。
+#
+# `vacant.vrun`＝`vacant demo gate` 與 `vacant run -- <cmd>` 的判斷層＋執行層
+# （2026-09-18 從 `ops/vacantrun/` 與 `ops/gain/r530/` 搬進來）。**它必須在
+# wheel 裡**：不在的話 `pip install vacant-network` 的人跑第一屏只會拿到一句
+# 「請先 clone」。`ops/` 底下留的是 re-export，所以判準仍然只有一份。
+# ⚠ 刻意**不**把頂層 `ops` 打進 wheel：PyPI 上 `ops` 是 Juju 的套件，
+#   同名會在別人的 site-packages 裡安靜覆蓋檔案——失敗方式很糟。
+packages = ["vacant", "vacant.vrun", "vacant.web"]
 
 [tool.setuptools.package-data]
 # 觀測台的靜態資產隨套件安裝（無 build step；dashboard 由 /static/ 供應）

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "pi_refuse_r2",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 28,
+      "cases": [
+        {
+          "case": "check_01_add",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_mul",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'mul' from 'solution' (/var/tmp/vacant_v1matrix/rd_pi_refuse_r2/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import mul",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "6d81ea1b14c228a048516672fcadc6151401a6791f0fb7120846522ded2b258c"
+}

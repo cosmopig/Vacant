@@ -25,7 +25,7 @@ from __future__ import annotations
 import argparse, json, pathlib, re, shutil, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PREREG = ROOT / "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+PREREG = ROOT / "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
 TWIN = "runs/g_r447_conform_lcb2"          # 已收官的結構孿生
 LIVE = "g_r461_lcb3_three_arm"             # 主 run：本輪一個 byte 都不准讀
 MUTANT = ""

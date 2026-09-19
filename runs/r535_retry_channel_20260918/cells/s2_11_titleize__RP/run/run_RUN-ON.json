@@ -1,0 +1,174 @@
+{
+  "task_id": "r535_s2_11_titleize_RP",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file.{VACANT_FEEDBACK}"
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s2_11_titleize__RP/ws",
+  "proxy_url": "http://127.0.0.1:8879",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8879",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "27abc9213d16ba133b8d06d864fc0e3c98f7c43dac6c6ec33f05ea68c6e5b88a",
+  "ws_end_sha256": "a1491b25f6cb22a2012d0d58164815dd13cec372509821ff4581835d31aa83ac",
+  "agent_rc": -9,
+  "agent_timed_out": true,
+  "requests_seen": 34,
+  "wire_by_protocol": {
+    "openai": 34
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "811cab0871bd34681249da0fe831944c018da41ca35f433e01d41be9008a051d",
+  "verdict_hash": "6cd8c5d3e9c3c8c55075c49f64bf1ad97fc6b46beb61a2c12c9415286e63d065",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 2,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_titleize — assert: titleize args=('the NASA report',) got='The Nasa Report' want='The NASA Report' [test_visible.py:14: assert got == want, \"titleize args=%r got=%r want=%r\" % (args, got, want)]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "prompt"
+      },
+      "ws_start_sha256": "27abc9213d16ba133b8d06d864fc0e3c98f7c43dac6c6ec33f05ea68c6e5b88a",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 104.693,
+      "wire_quiesced": true,
+      "requests_seen": 6,
+      "requests_seen_cumulative": 6,
+      "wire_digest": "f92c207780fade212248afb821b20afb5c6933676a6158e53b7c60b7a0bfeb8b",
+      "ws_end_sha256": "288a12e4c0985892ce49e5d3cee339ce6d52f8215a1aac7dffdd3c3329eb9c3d",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_11_titleize__RP/run/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "12351156a20f432ce076f7240c480527e5dc6d38fc49bc6b0a3b5037a383a014",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_11_titleize__RP/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_titleize — assert: titleize args=('the NASA report',) got='The Nasa Report' want='The NASA Report' [test_visible.py:14: assert got == want, \"titleize args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "288a12e4c0985892ce49e5d3cee339ce6d52f8215a1aac7dffdd3c3329eb9c3d",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file.\n\n<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_titleize — assert: titleize args=('the NASA report',) got='The Nasa Report' want='The NASA Report' [test_visible.py:14: assert got == want, \"titleize args=%r got=%r want=%r\" % (args, got, want)]\n\nFix the working directory. The checks run again when this process exits.\n"
+      ],
+      "argv_sha256": "5972a1a4f509c1bf00a5eec5b095ea70f49747f6fbb08a0941dcbdbb5c07da99",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 570,
+      "agent_rc": -9,
+      "agent_timed_out": true,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 600.069,
+      "wire_quiesced": false,
+      "requests_seen": 27,
+      "requests_seen_cumulative": 33,
+      "wire_digest": "b0e673e456f81ef468cb5f5d22801b5cac4a7529c129a2f70b256eddc2c6fe10",
+      "ws_end_sha256": "a1491b25f6cb22a2012d0d58164815dd13cec372509821ff4581835d31aa83ac",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_11_titleize__RP/run/_frozen_RUN-ON_a2",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "811cab0871bd34681249da0fe831944c018da41ca35f433e01d41be9008a051d",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_11_titleize__RP/run/visible_RUN-ON_a2.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "prompt",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 1,
+  "wire_digest": "b22b7e17d75c37f9fc43962c56714ea643fdc981fe4cb3038db3481c5783aa81",
+  "run_wall_s": 715.882,
+  "agent_wall_s": 600.069,
+  "failures": ""
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_29_rle_PC",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 83,
+      "cases": [
+        {
+          "case": "check_01_rle",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_rle",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "4d1d5bc3dff5cbf184eb9600a164d8857aada71fd81690a79d77d99ec7be6827"
+}

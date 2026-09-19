@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_28_parse_kv_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 71,
+      "cases": [
+        {
+          "case": "check_01_parse_kv",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_parse_kv",
+          "ok": false,
+          "kind": "assert",
+          "message": "parse_kv args=('bare',) got={} want=ValueError to be raised",
+          "where": "test_visible.py:27: raise AssertionError(\"parse_kv args=%r got=%r want=ValueError to be raised\" %",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "fcdbee336e8a838a63d55b8f0bfaf7c0bb630e6ab8645d70ab67328654b64255"
+}

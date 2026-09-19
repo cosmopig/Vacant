@@ -117,10 +117,63 @@
   ⚠ v1 **沒有被刪掉**：`--scope v1` 逐字重現 R460 那 90 筆，
   收官紀錄因此仍然可重跑（`tests/test_r460r_scheduler.py` 對釘兩個 scope 的數字）。
 
+⚠⚠ **round534：v1／v2 從來只掃過 H 臂——那不是設計取捨，是一個洞**（2026-09-18）。
+  `audit_run()` 開頭那句 `if arm not in VARIANTS: continue` 把 `OFF`／`OFF5`／
+  `CONFORM`／`EQ5`／`ON`／`ONR`／`CALIBRATION` **安靜地**跳過。本模組的標題寫的是
+  「H 臂的 V/GT 洩漏動態稽核」，所以那句 filter 在**寫的當下**是自洽的；
+  不自洽的是後來拿它的輸出去講**整個 run** 的話。R532 每一塊的 `per_arm` 實測
+  都只有 `{'HMIX': N}`，而對外的句子是「43/43 塊 V/GT 紅線 CLEAN」——
+  **那句話把「HMIX 這一臂乾淨」講成了「這個 run 乾淨」**。
+  方向上這不是中性的：Δ_C ＝ HMIX − CONFORM，沒驗過的是**被減數那一側**；
+  CONFORM 若有洩漏會讓它分數偏高 ⇒ Δ_C 更負 ⇒ 與觀察到的方向同向，排除不掉。
+
+  **為什麼會躲這麼久**：跳過是**靜音**的。`per_arm` 只記「掃到的」，
+  不記「在檔案裡但沒掃的」，所以輸出裡沒有任何一格會因為少掃一臂而變紅。
+  這與 round460e 那次是同一個形狀的錯（「沒有檢查」冒充「沒有違規」），
+  只是換了一個維度：那次是 needle 被跳過，這次是**整條臂**被跳過。
+
+  **不是形狀問題**（先查過才改）：古典臂的 `calls.jsonl` 記錄形狀是
+  `system` ＋ `prompt`（沒有 `messages`），而 `classify_texts()` 本來就有
+  `elif rec.get("prompt")` 那一條分支在接它 ⇒ 分類器**認得**古典臂，
+  一格都不用補。實測 179 份 `calls.jsonl` 裡的七個古典臂全部走這個形狀。
+  所以修法是「把 filter 放寬」，不是「為古典臂另寫一支解析器」。
+
+  v3 ＝ v2 的判準（誰寫的）＋三件事：
+    · **臂的範圍改成 `AUDITED_ARMS`**（七個古典臂＋三個 H 臂）。
+    · **`arms_present` 逐臂落盤，並且 fail-closed**：某一臂在 `calls.jsonl` 裡
+      有紀錄、卻有 0 筆進稽核 ⇒ verdict 是 `UNVERIFIABLE`**不是** `CLEAN`；
+      一筆都沒稽核到（`records_audited == 0`）也是 `UNVERIFIABLE`
+      （r530 那條路徑 2026-09-13 就有這一格，`audit_run` 當時漏掉）。
+    · 多一條豁免 `model_own_output_quoted`，只為 `ON` 臂而存在：
+      `arm_on` 的評審 prompt 逐字嵌入 `initial_code`、修訂 prompt 逐字嵌入
+      三份評審全文（`gain_run.arm_on`）。那幾段是**模型自己寫的**，只是被
+      harness 引號括起來搬進一則 user 訊息——與 v2 的 (b)「assistant 訊息不查」
+      同一個作者歸屬論證，不是新的寬容。判準收得與 SELFTEST 那條一樣緊：
+      needle 的**每一次出現**都必須落在某一段「與本 run 稍早某筆同臂同題的
+      模型回覆（或其 `extract_code` 結果）逐字相等」的區間之內，才算豁免；
+      有任何一次出現在區間之外就是違規。
+      ⚠ 這條豁免**對 `CODE_NEEDLES` 也適用**，與 round460r-2 第 2 點的
+        `got=` 不同——差別在論證的種類：`got=` 撐的是「值層級」，
+        撐不住識別字；這一條撐的是**作者**，而作者論證對識別字一樣成立
+        （模型自己寫 `exec(` 不是 harness 洩漏；R460 v1 那 90 筆裡就有一筆
+        正是這個）。鏈是閉的：harness 若真的把驗收碼送進模型，**第一次送出**
+        那一筆自己會紅，模型之後怎麼回聲都補不回來。
+      ⚠ 已知弱點，照 R530 tool 回聲那條逐字沿用：「模型自己算出同一個值」
+        與「模型看到了那個值」在字面比對下同形。所以豁免**逐筆留證**
+        （`excused`），不是塗掉。
+    · v3 對同一題的 needle 先去重再掃（v1／v2 不去重，因為 R460 那 90 筆的
+      逐筆數字釘在重複計數上）。`needles_checked`／`needles_unique` 兩個數都印。
+
+  **v1／v2 的臂範圍維持凍結**（只有 H 臂），因為 R460 收官的 90／0 對帳表與
+  `tests/test_r460r_scheduler.py` 的 `V1_EXPECTED`／`V2_EXCUSED_BY_RULE` 釘在
+  它們身上。兩個 scope 現在照樣吐 `arms_present_not_audited`——
+  **舊判準可以凍結，但不准繼續靜音**。
+
 用法（D9：**六塊各跑一次，六塊都要綠才算過**）：
     for b in a1 a2 a3 b1 b2 b3; do
       python3 ops/gain/harness_vgt_audit.py --run runs/g_r460_harness_lcb2_$b --bank lcb2
     done
+（`--scope` 預設 **v3**；要重現 R460 收官那兩個數字才給 `--scope v1`／`v2`。）
 """
 from __future__ import annotations
 
@@ -135,6 +188,19 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 from ops.gain.harness_arms import (FLATTEN_HEADER,  # noqa: E402
                                    RULES_NO_CALL_LINE, VARIANTS, _RULES)
+
+#: G 實驗的**古典臂**（`gain_run.KNOWN_ARMS` ＋ `calibrate_pool` 的 CALIBRATION）。
+#: 這七個的 `calls.jsonl` 形狀都是 `system` ＋ `prompt`（沒有 `messages`），
+#: `classify_texts()` 的 `elif rec.get("prompt")` 那條分支本來就接得住。
+#: ⚠ `CALIBRATION` 一定要在裡面：`gain_run.calibrate_pool` 的 `run_one` 是一條
+#:   **真的送 prompt 出去**的路徑（`role="calibration"`），它與六個臂共用同一份
+#:   `task["prompt"]`，沒有理由不掃。漏掉它就是把同一個洞留一個小號。
+CLASSIC_ARMS = ("OFF", "OFF5", "CONFORM", "EQ5", "ON", "ONR", "CALIBRATION")
+
+#: v3 的稽核對象＝古典七臂＋H 三臂。**這份名單是 fail-closed 的分母**：
+#: `calls.jsonl` 裡出現了不在這份名單上的臂（例如 R530 的 `A-SOLO`），
+#: v3 會判 `UNVERIFIABLE` 而不是安靜跳過——那代表 scope 拿錯了，不是通過。
+AUDITED_ARMS = CLASSIC_ARMS + tuple(VARIANTS)
 
 # 驗收碼專屬的識別字。`exec(` 是最弱的一條（凍結常數會撞到，見上面的例外說明），
 # 其餘三個只可能來自驗收碼本身。
@@ -187,7 +253,16 @@ def sent_texts(rec: dict) -> list[str]:
 # 實驗形狀的稽核（多輪工作區對話、needle 來源是 `hidden/` 目錄的字面值、
 # 多一個 `tool` role、多一個工作區檔案掃描）——所以走 `audit_run_r530()`
 # 這條獨立的路徑，`audit_run()` 的 v1／v2 行為**一個字都沒動**。
-AUDIT_SCOPES = ("v1", "v2", "r530")
+AUDIT_SCOPES = ("v1", "v2", "v3", "r530")
+
+
+def scope_arms(scope: str) -> tuple[str, ...]:
+    """這個 scope 掃哪幾條臂。**v1／v2 只掃 H 臂是凍結的歷史，不是完整稽核。**
+
+    v1／v2 的臂範圍不准動：R460 收官那 90／0 的逐筆對帳表釘在它們身上
+    （`tests/test_r460r_scheduler.py`）。要完整稽核就用 v3。
+    """
+    return AUDITED_ARMS if scope == "v3" else tuple(VARIANTS)
 
 #: R530 的工具結果表頭。**這是 `ops/gain/r530/openwork_arms.TOOL_RESULT_HEADER`
 #: 的副本**——這裡不 import 那支（它 import 時會跑 KS-1 與 prompt 同一性斷言，
@@ -281,6 +356,84 @@ GOT_ECHO_EXCUSE = "got_sandbox_echo"
 #: 三條豁免規則的名字，`excused_by_rule` 的鍵**逐字**是這個 tuple。
 EXCUSE_RULES = ("visible_check_source", "model_own_selftest_same_request",
                 GOT_ECHO_EXCUSE)
+
+#: round534 的第四條豁免，**只在 v3 存在**（v1／v2 的 `excused_by_rule` 鍵不准多一個，
+#: 否則 `ops/gain/replay/r460/vgt_v2_*.json` 那份落盤證據會對不上）。
+MODEL_QUOTE_EXCUSE = "model_own_output_quoted"
+
+#: v3 的豁免名單＝v2 三條＋作者歸屬那一條。
+V3_EXCUSE_RULES = EXCUSE_RULES + (MODEL_QUOTE_EXCUSE,)
+
+
+def quoted_spans(hay: str, quotes: tuple[str, ...]) -> list[tuple[int, int]]:
+    """`hay` 裡每一段**與某則模型回覆逐字相等**的區間 `[start, end)`。
+
+    這是 `MODEL_QUOTE_EXCUSE` 的機械判準。`gain_run.arm_on` 把
+    `initial_code`（＝某次回覆的 `extract_code`）與三份評審全文原封不動嵌進
+    自己寫的 user 訊息裡；那幾段的作者是模型不是 harness，與 v2 的 (b)
+    「assistant 訊息不查」是同一條規則，只是文字搬了家。
+
+    ⚠ 為什麼用**區間**不用「掃描前 replace 掉」：replace 會把區間邊界上的
+      字接起來，可能憑空造出或抹掉一個 needle 命中
+      （round460r-2 第 3 點的教訓是「豁免不准靜音」，這裡再加一條
+      「豁免不准改動被掃的文字」）。區間包含關係是可逐筆覆核的。
+    """
+    spans: list[tuple[int, int]] = []
+    for q in quotes:
+        if not q:
+            continue
+        start = hay.find(q)
+        while start != -1:
+            spans.append((start, start + len(q)))
+            start = hay.find(q, start + 1)
+    return spans
+
+
+def needle_only_inside_quotes(hay: str, needle: str,
+                              spans: list[tuple[int, int]]) -> bool:
+    """needle 的**每一次**出現都被某個引文區間完整包住 ⇒ 可以豁免。
+
+    「每一次」是刻意的：只要有一次出現在引文之外，那一次就是 harness 自己寫的，
+    整筆判違規。這與 `model_own_selftest_same_request` 用相等而不用子字串
+    是同一個收緊方向——豁免面要小於它的論證所能撐住的範圍。
+    """
+    if not spans:
+        return False
+    pos = hay.find(needle)
+    if pos == -1:
+        return False
+    while pos != -1:
+        end = pos + len(needle)
+        if not any(s <= pos and end <= e for s, e in spans):
+            return False
+        pos = hay.find(needle, pos + 1)
+    return True
+
+
+def model_quotes_of(rec: dict) -> list[str]:
+    """一筆 `calls.jsonl` 紀錄裡**模型寫的**那些文字（回覆全文＋其中的程式碼）。
+
+    供 `quoted_spans` 當引文來源。兩者都收：`arm_on` 的修訂 prompt 嵌的是
+    評審**全文**，評審 prompt 嵌的是 `extract_code(回覆)`。
+    `extract_code` 從 `gain_run` 現場 import（模組層 import 會循環）——
+    **一定要是同一支**，自己重寫一個 fence 解析器就會與被稽核的那條路徑漂掉。
+    """
+    from ops.gain.gain_run import extract_code
+    out: list[str] = []
+    resp = rec.get("response")
+    if isinstance(resp, str) and resp:
+        out.append(resp)
+        code = extract_code(resp)
+        if code and code != resp:
+            out.append(code)
+    msgs = rec.get("messages")
+    if isinstance(msgs, list):
+        for m in msgs:
+            if isinstance(m, dict) and m.get("role") == "assistant":
+                c = m.get("content")
+                if isinstance(c, str) and c:
+                    out.append(c)
+    return out
 
 
 def strip_not_harness_written(text: str, task: dict | None) -> str:
@@ -721,29 +874,45 @@ def audit_run_r530(run_dir: pathlib.Path, tasks: dict[str, dict]) -> dict:
 
 
 def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
-              scope: str = "v2") -> dict:
+              scope: str = "v3") -> dict:
     """回一份可落盤的稽核結果；`violations` 非空 ⇒ 整個 run 作廢。
 
     `scope="v1"` ＝ round460e 的讀法（整段送出文字都掃）——留著只為了讓
-    R460 收官那 90 筆逐字可重跑。`scope="v2"` ＝ round460r 起的正式判準
-    （只掃 harness 自己寫的 system／user 文字，見模組 docstring）。
+    R460 收官那 90 筆逐字可重跑。`scope="v2"` ＝ round460r 的判準
+    （只掃 harness 自己寫的 system／user 文字），**臂的範圍凍結在 H 三臂**。
+    `scope="v3"`（預設，round534）＝同一個判準擴到 `AUDITED_ARMS` 十條臂，
+    加上逐臂 fail-closed 與 `model_own_output_quoted` 豁免；見模組 docstring。
+
+    ⚠ **預設從 v2 改成 v3 是刻意的**：預設值必須是完整稽核。要凍結的舊數字
+      得**明寫** `scope="v1"`／`"v2"`，不能靠「忘了給參數」拿到一份只掃一臂的
+      綠燈——那正是 round534 這個洞能存在的條件。
     """
     if scope not in AUDIT_SCOPES:
         raise SystemExit(f"unknown audit scope: {scope}（可用 {list(AUDIT_SCOPES)}）")
     calls_path = run_dir / "calls.jsonl"
     if not calls_path.exists():
         raise SystemExit(f"{calls_path} 不存在——沒有 calls 就沒有稽核對象。停。")
+    arms_in_scope = scope_arms(scope)
     violations: list[dict] = []
     excused: list[dict] = []
     n_records = n_texts = n_skipped = n_checked = n_texts_scanned = 0
+    n_unique = 0
     cache: dict[str, tuple[list[str], list[str]]] = {}
     unknown_tasks: set[str] = set()
     per_arm: dict[str, int] = {}
+    #: 檔案裡**出現過**的每一條臂（不管有沒有被掃）。fail-closed 的分母。
+    arms_present: dict[str, int] = {}
+    #: 逐 (arm, task_id) 累積、**只往前看**的模型回覆，供
+    #: `MODEL_QUOTE_EXCUSE` 當引文來源。只收本筆之前已經落盤的回覆：
+    #: 引用必然晚於被引用者，這一條讓豁免面比「整個 run 的回覆」更小。
+    model_quotes: dict[tuple[str, str], list[str]] = {}
     with calls_path.open(encoding="utf-8") as f:
         for ln, line in enumerate(f, 1):
             rec = json.loads(line)
             arm = (rec.get("meta") or {}).get("arm")
-            if arm not in VARIANTS:
+            if arm:
+                arms_present[arm] = arms_present.get(arm, 0) + 1
+            if arm not in arms_in_scope:
                 continue
             n_records += 1
             per_arm[arm] = per_arm.get(arm, 0) + 1
@@ -754,7 +923,9 @@ def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
             # (b) assistant 訊息完全不查——但先留一份，(c) 的豁免要用它。
             assistant_texts = [t for role, _i, t in classified if role == "assistant"]
             selftest_reprs = (model_selftest_reprs(assistant_texts)
-                              if scope == "v2" else set())
+                              if scope in ("v2", "v3") else set())
+            quotes = (tuple(model_quotes.get((arm, str(task_id)), ()))
+                      if scope == "v3" else ())
             # 每一格帶三份文字：
             #   raw  ＝ 原文（v1 的掃描對象）
             #   base ＝ (a)＋(d) 扣掉、**沒有** got= 塗抹 ⇒ `CODE_NEEDLES` 掃這份
@@ -772,26 +943,52 @@ def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
                     full = base if role == "system" else redact_got_echo(base)
                     targets.append((role, i, t, base, full))
             n_texts_scanned += len(targets)
+            #: 每一格 haystack 的引文區間只算一次（needle 迴圈會重複用它）。
+            #: 鍵用字串本身不用 `id()`：`id` 會在物件被回收後重用，
+            #: 拿它當快取鍵是一個會隨 GC 時機改變結果的量具。
+            span_cache: dict[str, list[tuple[int, int]]] = {}
+
+            def spans_for(hay: str, _cache=span_cache, _q=quotes):
+                if hay not in _cache:
+                    _cache[hay] = quoted_spans(hay, _q) if _q else []
+                return _cache[hay]
 
             for role, i, raw, base, _full in targets:
                 scrubbed = strip_frozen_constants(raw) if scope == "v1" else base
                 for needle in CODE_NEEDLES:
-                    if needle in scrubbed:
-                        violations.append({
-                            "line": ln, "arm": arm, "rule": "check_code_identifier",
-                            "needle": needle, "message_index": i, "role": role,
-                            "task_id": task_id,
-                            "excerpt": scrubbed[max(0, scrubbed.find(needle) - 80):
-                                                scrubbed.find(needle) + 80]})
+                    if needle not in scrubbed:
+                        continue
+                    hit = {
+                        "line": ln, "arm": arm, "rule": "check_code_identifier",
+                        "needle": needle, "message_index": i, "role": role,
+                        "task_id": task_id,
+                        "excerpt": scrubbed[max(0, scrubbed.find(needle) - 80):
+                                            scrubbed.find(needle) + 80]}
+                    # round534：識別字也吃作者歸屬豁免（模組 docstring 的 ⚠）。
+                    # `system` 一格豁免都不給，這一條也不例外。
+                    if (scope == "v3" and role != "system"
+                            and needle_only_inside_quotes(
+                                scrubbed, needle, spans_for(scrubbed))):
+                        hit["excused_as"] = MODEL_QUOTE_EXCUSE
+                        excused.append(hit)
+                    else:
+                        violations.append(hit)
             if task is None:
                 unknown_tasks.add(str(task_id))
+                if scope == "v3":
+                    for q in model_quotes_of(rec):
+                        model_quotes.setdefault((arm, str(task_id)), []).append(q)
                 continue
             if task_id not in cache:
                 cache[task_id] = hidden_only_needles(task)
             needles, skipped = cache[task_id]
             n_skipped += len(skipped)
             n_checked += len(needles)
-            for needle in needles:
+            # v3 去重：同一個 repr 出現兩次不會多驗到任何東西，只會讓同一筆命中
+            # 被記兩遍。v1／v2 **不准**去重——R460 那 90 筆的逐塊數字含重複計數。
+            scan_needles = list(dict.fromkeys(needles)) if scope == "v3" else needles
+            n_unique += len(scan_needles)
+            for needle in scan_needles:
                 for role, i, raw, base, full in targets:
                     if scope == "v1":
                         hay, why = raw, None
@@ -809,6 +1006,10 @@ def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
                         hay, why = base, GOT_ECHO_EXCUSE
                     else:
                         continue
+                    if (why is None and scope == "v3" and role != "system"
+                            and needle_only_inside_quotes(
+                                hay, needle, spans_for(hay))):
+                        why = MODEL_QUOTE_EXCUSE
                     hit = {"line": ln, "arm": arm, "rule": "hidden_case_leak",
                            "needle": needle, "message_index": i, "role": role,
                            "task_id": task_id,
@@ -819,14 +1020,39 @@ def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
                         excused.append(hit)
                     else:
                         violations.append(hit)
+            if scope == "v3":
+                for q in model_quotes_of(rec):
+                    model_quotes.setdefault((arm, str(task_id)), []).append(q)
+    # ── 逐臂 fail-closed（round534）───────────────────────────────────────
+    # 「在檔案裡但一筆都沒進稽核」的臂。v1／v2 之下這一格一定非空（它們只掃
+    # H 臂），所以它**不是**那兩個 scope 的判準，只是把被跳過的東西說出來
+    # ——舊判準可以凍結，但不准繼續靜音。
+    arms_not_audited = sorted(a for a, n in arms_present.items()
+                              if n and not per_arm.get(a))
+    if scope == "v3" and n_records == 0:
+        verdict = "UNVERIFIABLE"
+    elif scope == "v3" and arms_not_audited:
+        verdict = "UNVERIFIABLE"
+    elif violations or unknown_tasks:
+        verdict = "VIOLATION"
+    else:
+        verdict = "CLEAN"
+    excuse_rules = V3_EXCUSE_RULES if scope == "v3" else EXCUSE_RULES
     out = {
         "run": str(run_dir), "scope": scope, "records_audited": n_records,
         "texts_audited": n_texts, "texts_scanned": n_texts_scanned,
+        "arms_in_scope": list(arms_in_scope),
+        # `arms_present` ＝ 檔案裡出現過的每一條臂（掃了幾筆見 `per_arm`）。
+        # 兩份都要落盤：只印 `per_arm` 正是 round534 那個洞躲了這麼久的原因
+        # ——被跳過的臂在輸出裡完全不留痕跡。
+        "arms_present": arms_present,
         "per_arm": per_arm,
+        "arms_present_not_audited": arms_not_audited,
         # 檢查了幾個 needle、跳過幾個——跳過的要說出來，
         # 不能讓「沒有違規」順手把「沒有檢查」蓋掉（見模組 docstring 的誠實邊界）。
         # `needles_skipped_trivial` ＝ 落在 TRIVIAL_NEEDLE_REPRS 或長度 < 6 的那些。
         "needles_checked": n_checked,
+        "needles_unique_scanned": n_unique,
         "needles_skipped_trivial": n_skipped,
         # v2 專屬：被 (c) 豁免掉的命中要**逐筆留著**，不准只留一個總數——
         # 「豁免了什麼」跟「違規了什麼」一樣是稽核證據。
@@ -834,24 +1060,39 @@ def audit_run(run_dir: pathlib.Path, tasks: dict[str, dict], *,
         "excused": excused,
         "excused_by_rule": {
             k: sum(1 for e in excused if e.get("excused_as") == k)
-            for k in EXCUSE_RULES},
+            for k in excuse_rules},
         "unknown_task_ids": sorted(unknown_tasks),
         "violations": violations,
-        "verdict": "CLEAN" if not violations and not unknown_tasks else "VIOLATION",
+        "verdict": verdict,
+        "honest_bounds": [
+            "`records_audited == 0`、或有任何一條臂在 `calls.jsonl` 裡有紀錄卻"
+            "0 筆進稽核 ⇒ verdict 是 `UNVERIFIABLE` 不是 `CLEAN`（v3）。"
+            "沒掃過不等於掃過是乾淨的。",
+            "`scope` 是 v1／v2 時 `arms_in_scope` 只有 H 三臂，"
+            "`arms_present_not_audited` 列的就是**沒被稽核過**的臂——"
+            "那兩個 scope 的 CLEAN 只能講那三條臂，不能講整個 run。",
+            "`model_own_output_quoted` 是作者歸屬豁免，不是機制保證："
+            "「模型自己算出同一個值」與「模型看到了那個值」在字面比對下同形。"
+            "逐筆留在 `excused` 裡讓人看。",
+            "擋得住已知的洩漏形狀 ≠ 涵蓋所有洩漏形狀：這支只比對"
+            "`hidden \\\\ visible` 的字面 repr，語意等價的改寫它認不出來。",
+        ],
     }
     return out
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="H 臂 V/GT 洩漏動態稽核（零模型呼叫）")
+    ap = argparse.ArgumentParser(description="V/GT 洩漏動態稽核（零模型呼叫）")
     ap.add_argument("--run", required=True)
     ap.add_argument("--bank", default="lcb2",
                     help="題庫名（summary.json 沒有記 bank，必須顯式給，不猜）")
     ap.add_argument("--seed", default=None, help="預設讀 summary.json 的 seed")
     ap.add_argument("--out", default=None, help="稽核結果 JSON 落盤路徑")
-    ap.add_argument("--scope", default="v2", choices=list(AUDIT_SCOPES),
-                    help="v2（預設，round460r）只查 harness 自己寫的文字；"
-                         "v1 是 round460e 的讀法，留著讓 R460 那 90 筆可重跑")
+    ap.add_argument("--scope", default="v3", choices=list(AUDIT_SCOPES),
+                    help="v3（預設，round534）＝v2 的判準擴到全部十條臂＋逐臂"
+                         "fail-closed；v2 是 round460r 的判準但**只掃 H 三臂**；"
+                         "v1 是 round460e 的讀法，兩個都留著讓 R460 收官的"
+                         "90／0 逐塊可重跑")
     args = ap.parse_args()
 
     run_dir = pathlib.Path(args.run)
@@ -877,9 +1118,12 @@ def main() -> None:
     if args.out:
         pathlib.Path(args.out).write_text(text + "\n", encoding="utf-8")
     if result["verdict"] == "UNVERIFIABLE":
+        missed = result.get("arms_present_not_audited") or []
         raise SystemExit(
-            "V/GT 稽核**不可結算**：一筆模型呼叫都沒稽核到"
-            f"（{run_dir}/calls.jsonl）。量具沒接上不是通過。停。")
+            "V/GT 稽核**不可結算**："
+            + (f"這些臂在 calls.jsonl 裡有紀錄卻 0 筆進稽核：{missed}"
+               if missed else "一筆模型呼叫都沒稽核到")
+            + f"（{run_dir}/calls.jsonl）。量具沒接上不是通過。停。")
     if result["verdict"] != "CLEAN":
         raise SystemExit(
             f"V/GT 稽核不通過：{len(result['violations'])} 筆違規／"

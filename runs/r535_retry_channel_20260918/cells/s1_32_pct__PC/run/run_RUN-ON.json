@@ -1,0 +1,134 @@
+{
+  "task_id": "r535_s1_32_pct_PC",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_32_pct__PC/ws",
+  "proxy_url": "http://127.0.0.1:8877",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8877",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "1fe35c0de0630890ed5baa1ffc06cdd80ccd0dee629644e264c63c59b65ba99f",
+  "ws_end_sha256": "00d63e2fc6788eb5713037862c837322d680f421284bd6a36cd2da0efb2e1e9c",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 8,
+  "wire_by_protocol": {
+    "openai": 8
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "infra_void": null,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "verdict_sha256": "5a8e2922ad0a218e065976f4cd9468de81097bf0a6c4eca1c4b4a32609716387",
+  "verdict_hash": "6335e86b99f360d34d24ab547a3fe9b2e1c5f33dd25005666ffecffebef47d5a",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "1fe35c0de0630890ed5baa1ffc06cdd80ccd0dee629644e264c63c59b65ba99f",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 191.159,
+      "wire_quiesced": true,
+      "requests_seen": 8,
+      "requests_seen_cumulative": 8,
+      "wire_digest": "72ff4f19999bdd55cb87e96333359d8d206035e57f3dabde5075e39d94f0eba0",
+      "ws_end_sha256": "00d63e2fc6788eb5713037862c837322d680f421284bd6a36cd2da0efb2e1e9c",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_32_pct__PC/run/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "5a8e2922ad0a218e065976f4cd9468de81097bf0a6c4eca1c4b4a32609716387",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_32_pct__PC/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_pct — assert: pct args=(0, 0) got=None want=0.0 [test_visible.py:22: assert got == want, \"pct args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "72ff4f19999bdd55cb87e96333359d8d206035e57f3dabde5075e39d94f0eba0",
+  "run_wall_s": 191.586,
+  "agent_wall_s": 191.159,
+  "failures": "test_visible.py::check_02_pct — assert: pct args=(0, 0) got=None want=0.0 [test_visible.py:22: assert got == want, \"pct args=%r got=%r want=%r\" % (args, got, want)]"
+}

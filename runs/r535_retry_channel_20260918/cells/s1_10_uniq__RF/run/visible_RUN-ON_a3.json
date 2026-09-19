@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_10_uniq_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 69,
+      "cases": [
+        {
+          "case": "check_01_uniq",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'uniq' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_10_uniq__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import uniq",
+          "output": ""
+        },
+        {
+          "case": "check_02_uniq",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'uniq' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_10_uniq__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import uniq",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "eb54a46cf7aa19e7f08a453bbed9345b3656d3e8597080f81ce1761cfe64a92a"
+}

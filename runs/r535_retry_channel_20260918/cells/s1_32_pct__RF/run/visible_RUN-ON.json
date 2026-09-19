@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_32_pct_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 56,
+      "cases": [
+        {
+          "case": "check_01_pct",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_32_pct__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import pct",
+          "output": ""
+        },
+        {
+          "case": "check_02_pct",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_32_pct__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import pct",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "a65a8e800ac039f6dbd9928c4e056e50a7201d5cab7b05730077ac5e7ca16da3"
+}

@@ -36,7 +36,7 @@ import re
 import socket
 import sys
 
-DEFAULT_DECISION = "DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+DEFAULT_DECISION = "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
 # §二-3 點名的四顆 seed；只有這四顆進判定，其餘 seed 只印出來當資訊。
 JUDGED_SEEDS = ["g-r440-lcb2", "g-r529-lcb3", "g-r529-he", "g-r529-mbpp"]
 

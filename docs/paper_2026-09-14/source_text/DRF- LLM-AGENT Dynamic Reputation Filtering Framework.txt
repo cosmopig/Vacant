@@ -1,0 +1,726 @@
+
+PAGE 1
+DRF: LLM-AGENT Dynamic Reputation
+Filtering Framework
+Yuwei Lou1[0009−0002−5058−6401], Hao Hu1[0009−0001−8277−9876], Shaocong
+Ma1[0009−0007−4414−0303], Zongfei Zhang2[0009−0000−6702−8807], Liang
+Wang1[0000−0001−5444−748X], Jidong Ge1[0000−0003−1773−0942], and Xianping
+Tao1[0000−0002−5536−3891]
+State Key Laboratory for Novel Software Technology, Nanjing University, China
+{yuweilou,mashaocong}@smail.nju.edu.cn, {myou,wl,gjd,txp}@nju.edu.cn
+SCOT – Optimal Sourcing Systems, Amazon.com Services LLC, Washington, USA
+zongfe@amazon.com
+Abstract.With the evolution of generative AI, multi - agent systems
+leveraging large - language models(LLMs) have emerged as a powerful
+tool for complex tasks. However, these systems face challenges in quanti-
+fying agent performance and lack mechanisms to assess agent credibility.
+To address these issues, we introduce DRF, a dynamic reputation filter-
+ing framework. DRF constructs an interactive rating network to quantify
+agent performance, designs a reputation scoring mechanism to measure
+agent honesty and capability, and integrates an Upper Confidence Bound
+- based strategy to enhance agent selection efficiency. Experiments show
+that DRF significantly improves task completion quality and collabora-
+tion efficiency in logical reasoning and code - generation tasks, offering
+a new approach for multi - agent systems to handle large - scale tasks.
+Keywords:LLM-Agent·Team Optimization·Generative AI.
+1 Introduction
+In recent years, with the development of generative artificial intelligence, proxy-
+based artificial intelligence has achieved significant breakthroughs in practical
+applications, gradually evolving towards intelligent agent systems (In this pa-
+per, agent framework and agent systems are used interchangeably.) based on
+multiple Large Language Models (LLMs). These systems are capable of reason-
+ing, learning, and collaboratively performing task actions, thereby promoting
+the transition of artificial intelligence from a single-model approach to a multi-
+agent collaborative mode. The emergence of research on multi-agent systems
+(MASs) based on large language models has made it possible for agents to col-
+laborate efficiently in solving complex tasks and to support large-scale collective
+actions [4,6,8,13,15,17,19]. The advent of these studies has shown that complex
+tasks can be solved not only by the intelligence of a single agent but also by the
+powerful potential of multi-agent collaboration in problem-solving.
+arXiv:2509.05764v1  [cs.AI]  6 Sep 2025
+PAGE 2
+2 Y. Lou et al.
+Large language model (LLM) agents have shown excellent performance in
+various tasks, including affective human-computer interaction [12], code gener-
+ation, and autonomous driving. Representative frameworks include Microsoft’s
+open-source AutoGen and the popular CrewAI [2]. These frameworks implement
+multi-agent systems through role specialization and task decomposition to au-
+tomate complex objectives. They simulate virtual teams where each agent has a
+predefined role for accomplishing collective tasks.
+As mentioned above, most current multi-agent frameworks use agent teams
+with different roles (e.g., software engineer, test engineer) to collaborate on tasks.
+However, these approaches have three key limitations: predefined role allocation
+is heavily human-expert dependent. there’s an over-reliance on agent reliability
+without considering potential malicious interference or adversarial prompt injec-
+tion, and there’s a lack of agent capability differentiation, ignoring competency
+variations that may make some agents unsuitable for specific roles like software
+engineers.
+We propose that an optimal multi-agent framework should form teams with-
+out specific task constraints, enabling agents to dynamically adapt to unknown
+taskrequirements.Theframeworkalsoneedsarobustmechanismtoautonomously
+identify the most capable and efficient agents for task execution and systemati-
+callyeliminateunderperformingormaliciousparticipants.Toachievethesegoals,
+this study addresses the challenge of building multi-agent teams in environments
+with malicious or low-quality agents. We develop a reinforcement learning frame-
+work to dynamically select high-performing agents. Our main contributions are
+threefold:
+1. We propose an interactive rating network that dynamically assesses agent
+performance during task execution, enabling quantification of agent effec-
+tiveness.
+2. We introduce a reputation iteration mechanism to rigorously evaluate agent
+reputation and capability, significantly mitigating task risks posed by low-
+efficiency agents.
+3. We unify the rating network and the reputation iteration mechanism into
+an adaptive UCB selection architecture. This architecture shows excellent
+performance in enhancing task completion quality and cost-effectiveness, and
+is verified through real-world benchmark tests.
+2 Related Work
+With the rapid advancement of artificial intelligence, generative AI has achieved
+significant breakthroughs in capabilities. Many generative AI systems, such as
+ChatGPT [1], Claude, and Deepseek [9], have demonstrated transformative abili-
+ties in mathematical reasoning, code generation, and general language tasks. The
+emergence of large language models (LLMs) has given rise to the field of prompt
+engineering [16,19], which focuses on refining and optimizing input prompts to
+further unlock the potential of these models [7]. However, individual agents still
+PAGE 3
+DRF: LLM-AGENT Dynamic Reputation Filtering Framework 3
+T able 1.Overview of related work.
+Research Main idea Reference
+Prompt Engineering Optimize the capability and
+accuracy of a single large
+model using prompt words.
+[16,19]
+Team Collaboration Optimize team structure
+and strategies to enhance
+the capability and accuracy
+of large models.
+[3,6,10,17,18,20]
+face limitations in handling complex reasoning tasks, leading to the development
+of multi-agent systems (MASs) based on LLMs. Research on multi-agent systems
+has progressed as follows. Although the optimization of multi-agent systems is
+a relatively recent area of interest, the study of optimizing human teams has a
+long history [17]. Current research includes Microsoft’s Autogen [10], a frame-
+work that enables complex workflows through agent communication. It supports
+predefined agent types and employs a unique communication mechanism, utiliz-
+ing an Orchestrator-Workers model to coordinate the system’s operations.
+Xiong et al. [18] proposed in their 2023 work a method where multiple agents
+engage in a “tit-for-tat” debate to express their arguments, thereby optimizing
+team performance through dialectical interaction. Similarly, Chen et al. [3] in-
+troduced the AgentVerse framework in 2023, which dynamically adjusts team
+composition and collaboration mechanisms based on task progress to enhance
+the performance of multi-agent systems. Liu Z et al. [10] proposed DyLAN,
+a dynamic feedforward network framework that selects agents through mutual
+evaluation among LLMs and deactivates underperforming agents. While their
+evaluation network inspired our research, we believe their early-stopping mech-
+anism for task-participating agents may overlook the potential contributions of
+those agents. Therefore, in Section 4, we design and implement a k-layer scoring
+network that comprehensively evaluates and quantifies the contributions of all
+participating agents.
+Reputation is an intrinsic attribute. Most of the previous research has focused
+on trust detection in the presence of Sybil attacks, but recent studies rarely as-
+sign reputation values to LLMs. Fortunately, Bouchiha M A et al. [20] proposed
+a blockchain-based decentralized reputation system, which combines automated
+evaluation with human feedback to assign context-aware reputation scores that
+accurately reflect LLM behavior. However, their reliance on blockchain technol-
+ogy introduces additional overhead and time consumption due to smart contract
+operations. In this paper, we propose a more practical reputation scoring mech-
+anism to help teams identify and prioritize agents with the highest reputation
+and capabilities.
+Jiang et al. [6] used additional LLMs in their work to rank the contributions
+ofagents,thereby improvingtaskaccuracyand efficiency.Their approachof eval-
+uating task progress to rank agents inspired our research. In Section 4, we detail
+how our multi-agent task scheduling strategy leverages the contribution values
+PAGE 4
+4 Y. Lou et al.
+generated by the scoring network to influence agent reputation, subsequently
+altering agent selection criteria using an UCB approach.
+Fig. 1.The framework for DRF
+3 System Model and Problem Statement
+3.1 System Modeling
+This section establishes the foundational modeling and conceptual definitions for
+the proposed multi-agent framework. As illustrated in Figure 1, our framework
+introduces a novel agent team structure comprising a core agent and multiple
+task agents. The core agent is responsible for decision-making and control within
+the team, while the task agents primarily execute and evaluate tasks.
+Definition 1 (Task, Round). When the core agent receives an input task,
+it evaluates the task’s executability. A task is defined as a problem that can be
+resolved within a finite number of steps. Each task consists of multiple executable
+subtasks, and each subtask can be completed within a limited number of rounds.
+We denote the task set asTt ={ST t,1, STt,2, STt,3, . . . STt,m}, where represents
+the m-th subtask in the t-th round.
+Definition 2 (Reputation). At the beginning of a task, the attributes of agents
+within the team are unknown. This implies that the team may consist of agents
+with varying capabilities, some of which may underperform or even be com-
+promised by malicious prompt injections during task execution. Reputation is
+an intrinsic property of an agent, reflecting its trustworthiness and capability
+PAGE 5
+DRF: LLM-AGENT Dynamic Reputation Filtering Framework 5
+in completing tasks. However, reputation cannot be directly extracted from
+agents. To this end, we define a reputation score set for the agent team as
+R={r t
+1, rt
+2, . . . , rt
+i}, which serves to quantify the scores of the agents.
+Definition 3 (Accuracy) Accuracy measures the alignment between an agent’s
+task completion and the actual task requirements. Higher accuracy indicates a
+smaller discrepancy between the agent’s output and the task’s expectations,
+signifying superior task performance.
+Definition 4 (Cost) In round t, each task agent submits a bidCt
+i to the core
+agent, representing its proposed cost for participating in the task(such as API
+calls). While agents submit bids in every round, it may not be selected by the
+core agent every time.
+3.2 Problem F ormulation
+The agent team aims to select the agents with the lowest cost and highest effi-
+ciency to complete the task. Therefore, the main optimization objectives in this
+paper are as follows:
+(1) Minimize the task execution cost, that is, the remuneration spent by the
+multi-agent team to solve the task should be the lowest. Suppose the agent team
+participating in solving the task in roundtisP t, and the cost consumed by
+agentiin the participating team isC t
+i. Then, the average cost consumed by the
+team in roundtis as follows:
+¯C t =
+P|P t|
+i=1 C t
+i
+|P t| (1)
+(2) The highest average payoff. This paper aims to maximize the team’s
+payoff for each task, meaning that every time the task is executed, the team can
+achieve the degree of meeting the task requirements to the greatest extent, i.e.,
+the highest accuracy. We useAt
+i to represent the accuracy of the task completed
+by agentiin roundt, which can be calculated using the following equation:
+At
+i = |wt
+0 −w t
+i|
+wt
+0
+(2)
+In Equation (2),wt
+i represents the score of agentiin roundt, while denotes
+the score threshold within the same paper. Detailed definitions of these symbols
+will be provided in Section 4. Then, the average accuracy of the agent team
+participating in the task in roundtis:
+¯At =
+P|P t|
+i=1 At
+i
+|P t| (3)
+In summary, the main research objectives of this paper can be obtained as fol-
+lows: 
+
+
+Min( ¯C t) = Min
+ P|P t|
+i=1 Ct
+i
+|P t|
+
+Max( ¯At) = Max
+ P|P t|
+i=1 At
+i
+|P t|
+ (4)
+PAGE 6
+6 Y. Lou et al.
+Fig. 2.Network Construction and Rating Process
+Subject to: X
+t
+X
+N
+ct
+i ≤ ∅, P t ≤K(5)
+The aboveϕrepresents the total budget sent to the agent team before the task
+starts,P t is the agent team participating in solving the task in roundt, andK
+is the maximum number of agents selected in each round.
+4 Model Construction
+This section provides a detailed description of the model construction. It aims to
+build a rating network for LLM agents to quantify their execution performance
+in tasks. A reputation iteration mechanism is also constructed to dynamically
+distinguish the reputation and capability of different agents. Additionally, a task
+scheduling strategy is developed to prioritize the utilization of agents with high
+reputation and low cost. This ultimately enables efficient task execution by mul-
+tiple LLM agents.
+4.1 LLM-Agent Rating Network
+When a task is published within a multi-agent team, effectively measuring the
+performance of agents in task execution is a challenging problem. Inspired by
+the construction of neural networks and the work of DyLAN [10], we propose a
+multi-agent rating network to quantify the task execution performance within a
+multi-agent team. In this paper, the construction of the rating network system is
+dividedintotwostages:forwardpassfornetworkconstructionandbackwardpass
+for obtaining ratings. When a specific task is published to the multi-agent team,
+agents decide whether to participate in the task based on their own willingness
+and capabilities. This leads to the following model construction:
+PAGE 7
+DRF: LLM-AGENT Dynamic Reputation Filtering Framework 7
+Node: In the rating network, a node represents an agent executing the task
+during a specific time interval.The agent’s input is divided into two categories:
+task context information requiring a solution and solutions received from other
+agents in the previous time step. Correspondingly, the output is also divided into
+two categories: the solution to the input task and the ratings for the solutions
+received in the previous time step. In other words, thei-th agent at timetcan be
+defined as a functionft
+i, with the prompt information denoted aspi,The specific
+role of this function will be described in the following text.
+Edge: In the rating network, an edge represents the relationship between
+each pair of agents. There are two types of relationships: one is the rating given
+by an agent to the solutions proposed by other agents in the previous time step,
+and the other is the solution proposed by the agent for the task in the current
+time step.
+F orward Pass for Network Construction:Each task consists of multiple
+time rounds. In each round, an agent generates a solution based on the task and
+passes it to other agents. If there were solutions proposed by other agents in the
+previous round, the agent will receive and evaluate these solutions. The function
+f t
+i (pi, STt,m, responses)represents two scenarios in the network construction:if
+"responses" is empty, the agent is generating a solution; otherwise, it is eval-
+uating one. Inspired by Reflexion [13], which demonstrates that using LLM as
+an evaluator can effectively overcome the limitations of traditional metrics in
+natural-language tasks, we adopt the same approach for all evaluating in this
+paper. And during task execution, as each agent may have potential value, no
+agent is eliminated during the network construction process. Following the above
+procedure, ak-layer rating network can be formed afterkrounds, as shown in
+Figure 2.
+Backward Pass for Score Calculation:After forming ak-layer rating
+network, backpropagation is performed to evaluate each agent’s task contribu-
+tion. Based on the forward pass, the score that agentireceives from agentjin
+roundtof the task isw t
+j,i =f t
+i (pi, STt,m, responses)(note that agentiandj
+are different, meaning agents cannot rate their own solutions).so we can obtain
+the rating set for agentiin roundtas
+
+wt
+1,i, wt
+2,i, wt
+3,i, . . . , wt
+j,i
+
+. We can also
+obtain the set of reputation values for all agents participating in the task as
+rt−1
+1 , rt−1
+2 , . . . , rt−1
+j
+
+,wherer t−1
+j represents the reputation value of agentjin
+roundt−1. For detailed descriptions and calculations, see Section 4.2.Then, we
+can calculate the score of the agent in roundtusing Equation (6).
+wt
+i =
+|P t|X
+j=0
+wt
+j,i ∗φ j, φj = ert−1
+j
+P|P t|
+k=1 ert−1
+k
+(6)
+Here,w t
+i denotes the score of agentiin roundt, whileφ j represents the
+significance coefficient of the reputation of agentjwithin the set of agents par-
+ticipating in the taskP t.This implies that evaluations from agents with higher
+reputation are typically more valuable, which makes the rating network more
+rational.
+PAGE 8
+8 Y. Lou et al.
+Algorithm 1DRF-Reputation Algorithm
+Require:reputation setR, parameterw o, the coefficient of reputation incrementδ,
+the penalty coefficientβ, selected agents setPt
+Ensure:reputation setR
+1:foragent inP t do
+2: Provide a Task Plan
+3: Deliver to the remaining agents for evaluation.
+4: Join the forward pass to form the network.
+5:ifagent obtains all the evaluationsthen
+6: Initiate backpropagation
+7: calculatew t
+i by using Eq.(6)
+8:end if
+9:ifw o > w t
+i then
+10: updateR[worker]using Eq.(8)
+11:else
+12: updateR[worker]using Eq.(7)
+13:end if
+14:end for
+15:returnR
+4.2 LLM-Agent Reputation Iteration Mechanism
+When multiple agents begin to execute tasks, they will form a rating network
+based on the content described in Section 4.1. After completing one round of
+rating, each agent will obtain its task score. Since there may be some agents
+with lower capabilities or those engaging in malicious interference within the
+group completing the task, it is necessary to assign reputation scores to the
+agents. This helps decision-makers better select agents from the group.
+For each agentiparticipating in the task in roundt, we assign a reputation
+valuer t
+i to measure its credibility (reputation). We considerwt
+i as a performance
+metricofanagent,whichisdeterminedbyitsowncapabilitiesandcharacteristics
+(such as honesty). A more honest agent, that is, one with a higher reputation,
+is expected to complete the task with better quality, meaning a largerwt
+i value.
+Therefore, we need to design a mechanism to better evaluate the reputation of
+agents.
+Reputation Increment Mechanism:
+Each time a task rating network is formed, we can obtain the task scorewt
+i for
+each agent. During the task execution, there is a specific task thresholdwo for
+each task, which is used to measure whether the task solution provided by the
+agent can be well accomplished. The threshold is generally set according to task
+requirements and empirical experience. Ifwo ≤w t
+i, it indicates that agentihas
+performed well in that task time interval and its reputation should be increased,
+as shown in Equation (7).
+rt
+i =r t−1
+i +w t
+i ∗
+ 
+1−r t−1
+i
+
+∗∂(7)
+PAGE 9
+DRF: LLM-AGENT Dynamic Reputation Filtering Framework 9
+Here,r t
+i is the reputation value of agentiin roundt,r t−1
+i is the reputation
+value of agentiin roundt−1,w t
+i is the task score of agentiin roundt, andα
+is the coefficient of reputation increment.
+Reputation Decay Mechanism:
+Similar to the reputation increment mechanism, whenw o > w t
+i, it indicates
+that agentihas performed poorly in that task time interval, likely due to mali-
+cious interference or inherently being a subpar agent. Therefore, we need to use
+Equation (8) to decrease the reputation of the agent.
+rt
+i =r t−1
+i −
+ 
+wt
+i ∗r t−1
+i
+
+∗β(8)
+Here,r t
+i is the reputation value of agentiin roundt,r t−1
+i is the reputation
+value of agentiin roundt−1,w t
+i is the task score of agentiin roundt, andβ
+is the penalty coefficient for reputation. According to Equation (12), we can see
+that the lower the task scorewt
+i, the greater the decline in reputation, allowing
+for quicker identification of malicious or underperforming agents.
+Algorithm 1illustrates the process of the reputation iteration mechanism
+we employ, incorporating a multi-agent rating network. Here,Rdenotes the set
+of agent reputations, andP t represents the set of agents participating in the
+task.
+4.3 LLM-Agent T ask Scheduling Strategy
+For each agent team participating in a task, we can effectively rate and monitor
+the agents through the multi - agent rating network in Section 4.1, and eval-
+uate agent attributes via the multi - agent reputation iteration mechanism in
+Section 4.2. But in real - world scenarios, we initially don’t know which agent
+has the highest reputation or performs best in the task. So, we need a strategy
+to gradually explore and filter out more competent agents from this unknown
+situation.
+The UCB-based Multi-Armed Bandit algorithm [5,11] is a reinforcement
+learning method that balances exploration and exploitation. In our model, each
+agent is like an arm of the MAB. Selecting an agent is analogous to pulling an
+arm. The outcome of each pull depends only on the current arm chosen, not
+on previously selected arms or past results. This meets the Markov property
+requirement. The algorithm helps choose between agents with the highest cur-
+rent task payoff (exploitation) and those that might offer higher future payoffs
+(exploration).
+At the outset of the task, we lack information on the agents’ attributes and
+reputation values. Hence, it is imperative to swiftly identify agents with high
+reputation values. As the algorithm progresses, we incrementally uncover the
+reputation values of some agents through continuous exploration and exploita-
+tion. Consequently, it becomes crucial to consider the overall payoff of agent
+recruitment. In this paper, the overall payoff incorporates multiple factors, in-
+cluding reputation and cost (with cost denoting the expense of agent invocation).
+PAGE 10
+10 Y. Lou et al.
+Algorithm 2DRF Selection Algorithm
+Require:The threshold of reputationR 0, reputation setR, costs setC, The total
+budgetϕ, parametersγ,β,σ
+1:t= 1, init P t
+2:whileϕ >0do
+3: obtain agents that want to participate in the task.
+4:foragent in agentsdo
+5:ifR[agent]≥R 0 then
+6: add the agent toP t.
+7:else
+8: calculateS t
+i by using Eq.(9) with a custom weight.
+9:end if
+10:end for
+11: select agents byS t
+i and getP t.
+12:foragent inP t do
+13: let agent do tasks and get a rating network.
+14: calculate the agent’sw t
+i.
+15: use Reputation Iteration Mechanism to adjust the agent’s Reputation.
+16: perform payment for the agent.
+17: calculate the payoff.
+18:end for
+19:t=t+ 1
+20:end while
+To address these two scenarios, we have redesigned the UCB algorithm to fa-
+cilitate the selection of efficient agents for task execution by the agent team, as
+illustrated in Equation (9).Here,S t
+i is the selection basis value for agentiin
+roundt,r t−1
+i is the reputation value of agentiin roundt−1,γis a positive
+parameter that allows multiple possibilities for the influence ofxt−1
+i , andn t−1
+i
+is the number of times agentiwas selected in roundt−1,c t
+i represents the
+cost incurred by agentiin executing the task in roundt.δrepresents a weight
+coefficient that adjusts the proportion between reputation and cost.
+St
+i =δ∗r t−1
+i + (1−δ)c t
+i +x t−1
+i , xt−1
+i =
+vuut γ∗ln
+PN
+j=1 nt−1
+j
+
+nt−1
+i
+(9)
+Algorithm 2 provides a detailed illustration of the improved UCB algorithm
+integrated with the rating network and reputation updates in our DRF frame-
+work. During the execution of the UCB algorithm, the selection basis valueSt
+i
+is influenced by both the rating network and the changes in reputation.Here,R0
+denotes the upper bound of reputation. Agents exceeding this value are deemed
+trustworthy and are exempted from further reputation checks.
+PAGE 11
+DRF: LLM-AGENT Dynamic Reputation Filtering Framework 11
+T able 2.LLM Prompt Setting.
+Role Prompt
+Executor You are a task-solving assistant capable of complet-
+ing tasks based on the user-specified ability level (low,
+medium, high). The ability level determines the precision
+andcomplexityofyourtaskcompletion:Lowability:Your
+answers are very simple, mostly incorrect, with a very
+low probability of being correct.Medium ability: Your an-
+swers are average, generating imprecise solutions that are
+not detailed or clear.High ability: Your answers are very
+precise and comprehensive, capable of handling complex
+tasks and providing optimal solutions.User Input:Please
+specify your ability level: ability.Please describe the task
+you need to complete: task.Output:Based on the ability
+level specified by the user, strictly generate a task so-
+lution that aligns with the description of your current
+ability level.
+Evaluator You are a strict task evaluation assistant capable of as-
+sessing the answers provided by users to task solutions
+and assigning scores:If the task answer is very precise and
+comprehensive, capable of handling complex tasks and
+providing optimal solutions, score between 80-100;If the
+task answer is usable but not detailed or rigorous enough,
+score between 60-80;If the task answer is imprecise or
+contains errors, score below 60.User Input:Task solution
+answer:answer.Output: (Note that when outputting in
+markdown, the mask field should not be bolded; it should
+remain as plain text. For example:)mask: 85 ,des: The
+evaluation of the task
+5 Experiment
+This section concentrates on the experimental settings and results. To demon-
+strate the efficiency and superiority of our proposed LLM - based agent systems,
+we conduct experiments using real - world datasets. We compare DRF with
+other LLM- based agent systems to assess its performance. The experiments are
+analyzed in terms of experimental preparation, performance experiments, and
+comparative experiments.
+5.1 Experimental Preparation
+Each of our agents consists of two LLM models, Executor(for task execution)
+and Evaluator(for task evaluation), both driven by the DeepSeek-R1 model. To
+simulate different agent capabilities, we input a meta-prompt to each model
+with a capability description field. “Low” indicates low capability or a malicious
+PAGE 12
+12 Y. Lou et al.
+T able 3.The experimental results on the HumanEval dataset. We conduct multiple
+tests and report the average results.
+Agent SystemSelect
+agent
+Pass@1(6) Pass@1(12)Pass@1(18)Cost(6) Cost(12) Cost(18)
+CodeT – 64.5 64.3 65.8 – – –
+DyLAN 3 80.2 83.1 88.3 0.84 0.86 0.81
+Reflexion 3 74.2 80.6 86.5 0.86 0.90 0.88
+DRF(Ours) 3 84.3 86.5 92.9 0.76 0.74 0.71
+T able 4.The experimental results on the BigBench dataset.We conduct multiple tests
+and report the average accuracy.
+Agent SystemSelect
+agent
+Result(6) Result(12) Result(18) Cost(6) Cost(12) Cost(18)
+LLM-Debate 5 59.4 61.6 63.4 0.89 0.88 0.91
+DyLAN 5 62.5 64.4 66.2 0.84 0.86 0.83
+Reflexion 5 53.1 58.2 60.3 0.86 0.89 0.87
+DRF(Ours) 5 64.6 65.9 70.5 0.79 0.81 0.75
+agent (which generates random or wrong solutions, similar to low capability).
+“Medium” means the agent may solve tasks correctly or incorrectly. “High” in-
+dicates the agent can efficiently complete tasks. We set three LLM agent com-
+binations: 6-12-18, with 30% low/high-capability agents and the rest medium.
+Hyperparametersαandβaretypicallysetbasedonmachinelearningexperience,
+with a default value of 0.1.γis set to 2 following UCB algorithm conventions.
+The reputation threshold is set to 0.9 in this paper, and the initial reputation of
+each agent is set to 0.5. In previous studies, the cost of LLM agents was rarely
+discussed. Recently, DyLAN [10] measured it by API calls. To better simulate
+the cost differences among agents (which vary in reality), we used a uniform
+distribution to generate per-task costs for each agent, mapping all costs to (0,1).
+We use two datasets for our experiments. For code tasks, we use the Hu-
+maneval dataset (Chen et al. [5]), which is designed for code completion, to test
+the capabilities of different LLM agent systems and DRF. For logical reasoning
+tests, we use the logic grid puzzles task from the BigBench dataset (Srivastava
+et al., 2022 [14]) to further compare these agent systems. We collect prompts
+from various LLM agent systems and have DeepSeek-R1 conduct further sum-
+marization and analysis. The prompts listed in Table 2 are derived and used in
+all subsequent experiments.
+5.2 Performance Experiments
+We conducted experiments on the Humaneval dataset, randomly sampled 30 test
+cases for experimentation, with each test case representing a round in the DRF
+framework. We setδto 1 in DRF, focusing solely on reputation, and adjusted
+the temperature hyperparameter of the LLM to 0.2 to ensure coherent output.
+The results are shown in Figure 3. It can be seen that DRF can increase the
+PAGE 13
+DRF: LLM-AGENT Dynamic Reputation Filtering Framework 13
+Fig. 3.Changes in the reputation of agents
+reputation of high - capability agents and decrease that of low - capability ones
+within limited rounds. The fluctuating reputation of mid - capability agents
+is due to their inconsistent task performance, leading to variable scores and
+reputation changes. Moreover, DRF variations with different numbers of agents
+can effectively detect the preset numbers of high, mid, and low - capability
+agents, confirming the effectiveness and feasibility of DRF.
+5.3 Comparative Experiment Performance
+The experiments have demonstrated that DRF can effectively identify high - rep-
+utation, high - quality LLM - Agents in a team during task execution through
+a rating network and reputation iteration mechanism. In the comparative ex-
+periments, we benchmark DRF against mainstream LLM agent frameworks to
+evaluate its efficiency.
+Forcodetasks,wecompareDRFwiththreeLLMagentframeworks—DyLAN
+[10], CodeT [20], and Reflexion [13]. Experiments are conducted on the Hu-
+maneval dataset, with performance measured using the pass@1 metric. Agents
+for each framework are selected from Section 5.1 to ensure uniform external
+conditions. In each experiment, three agents are selected from the agent team
+to participate in the task, and the agent temperature is set to 0.2. In DRF,δ
+is set to 0.7. For Reflexion, three agents are assigned to the roles of executor,
+evaluator, and refresher. In DyLAN, three agents perform the task and form a
+dynamic early-stopping network.
+For logical reasoning tests, CodeT is no longer effective. We selected the
+moresuitabledeliberativemulti-agentsystemLLM-Debate[14]asareplacement.
+DyLAN, Reflexion, and DRF also participated in the task. In this experiment,
+we set the number of agents to select from the agent team at 5(Logical reasoning
+tasks are complex and require increasing the number of agents.), with the agent
+temperature at 0.8 (to encourage more diverse responses in reasoning tasks based
+on prompts), while other framework settings remained similar to those in the
+code task. We report the accuracy.
+PAGE 14
+14 Y. Lou et al.
+Table 3 shows the experimental results of four LLM agent systems with dif-
+ferent numbers of agents. Pass@1(6) indicates the Pass@1 metric when there are
+six agents in total."Select agent" is the number of agents chosen from the total to
+participate in the task. As the total number of agents increases, the performance
+of DyLAN, Reflexion, and DRF improves. This is because a larger total number
+of agents leads to more high-reputation agents, increasing the likelihood of their
+participation and thus enhancing performance. DRF consistently outperforms
+the other systems across all metrics. It effectively filters agents based on repu-
+tation and prioritizes high-reputation, low-cost agents for subsequent tasks. Al-
+though DyLAN’s early-stopping mechanism can identify low-reputation agents,
+it cannot exclude them in subsequent rounds. Reflexion, being more dependent
+on agent capability and lacking a filtering mechanism for low-reputation agents,
+underperforms DRF and DyLAN in experiments.
+Table 4 presents the experimental results for logical reasoning tests. The
+result(6) column shows the accuracy with six agents. DRF outperforms other
+LLM agent systems in terms of both performance and average cost. We at-
+tribute DRF’s performance edge to its integrated rating network and reputa-
+tion iteration mechanism, which facilitates the identification of high-reputation
+agents. Additionally, the task scheduling strategy effectively utilizes these high-
+reputation, low-cost agents and prioritizes their selection for subsequent tasks.
+6 CONCLUSION
+We introduce DRF, an LLM agent framework combining an interactive rat-
+ing network, a reputation iteration mechanism, and a UCB selection strategy.
+It enhances collaboration efficiency and task completion quality in LLM-based
+multi-agent framework. Unlike conventional systems, DRF uses the UCB rein-
+forcement learning method to leverage the reputation attribute of LLM agents.
+Extensive real - dataset experiments show DRF excels in logical reasoning and
+code generation, outperforming other current agent frameworks under the same
+conditions.
+Future work will focus on two directions. First, we’ll explore using advanced
+reinforcementlearningalgorithms,suchasDQN,inDRFtohandlemorecomplex
+and diverse tasks. Second, we’ll investigate how to enhance certain LLMs with
+an experience - augmented reputation model, providing more LLM agent options
+for complex tasks.
+References
+1. AN, J., DING, W., LIN, C.: Correspondence : Chatgpt: tackle the grow-
+ing carbon footprint of generative ai (Mar 2023).https://doi.org/10.1038/
+d41586-023-00843-2
+2. Barbarroxa, R., Gomes, L., Vale, Z.: Benchmarking large language models for
+multi-agent systems: A comparative analysis of autogen, crewai, and taskweaver.
+In: International Conference on Practical Applications of Agents and Multi-Agent
+Systems. pp. 39–48. Springer (2024)
+PAGE 15
+DRF: LLM-AGENT Dynamic Reputation Filtering Framework 15
+3. Chen, W., Su, Y., Zuo, J., Yang, C., Yuan, C., Qian, C., Chan, C.M., Qin, Y., Lu,
+Y., Xie, R., et al.: Agentverse: Facilitating multi-agent collaboration and exploring
+emergent behaviors in agents. arXiv preprint arXiv:2308.108482(4), 6 (2023)
+4. Du, Y., Li, S., Torralba, A., Tenenbaum, J.B., Mordatch, I.: Improving factual-
+ity and reasoning in language models through multiagent debate. In: Forty-first
+International Conference on Machine Learning (2023)
+5. Garivier, A., Cappé, O.: The kl-ucb algorithm for bounded stochastic bandits and
+beyond. In: Proceedings of the 24th annual conference on learning theory. pp.
+359–376. JMLR Workshop and Conference Proceedings (2011)
+6. Jiang, D., Ren, X., Lin, B.Y.: Llm-blender: Ensembling large language models with
+pairwise ranking and generative fusion. arXiv preprint arXiv:2306.02561 (2023)
+7. Kojima, T., Gu, S.S., Reid, M., Matsuo, Y., Iwasawa, Y.: Large language models
+are zero-shot reasoners. Advances in neural information processing systems35,
+22199–22213 (2022)
+8. Li, G., Hammoud, H., Itani, H., Khizbullin, D., Ghanem, B.: Camel: Communica-
+tive agents for" mind" exploration of large language model society. Advances in
+Neural Information Processing Systems36, 51991–52008 (2023)
+9. Liu, A., Feng, B., Xue, B., Wang, B., Wu, B., Lu, C., Zhao, C., Deng, C., Zhang,
+C., Ruan, C., et al.: Deepseek-v3 technical report. arXiv preprint arXiv:2412.19437
+(2024)
+10. Liu, Z., Zhang, Y., Li, P., Liu, Y., Yang, D.: Dynamic llm-agent network: An
+llm-agent collaboration framework with agent team optimization. arXiv preprint
+arXiv:2310.02170 (2023)
+11. Lou, Y., Tang, J., Han, F., Liu, A., Xiong, N.N., Zhang, S., Wang, T., Dong, M.:
+Mab-rp: A multi-armed bandit based workers selection scheme for accurate data
+collection in crowdsensing. Information Sciences669, 120554 (2024)
+12. Ren, Q., Belpaeme, T.: Exploring llm-generated culture-specific affective human-
+robot tactile interaction. arXiv preprint arXiv:2507.22905 (2025)
+13. Shinn, N., Cassano, F., Gopinath, A., Narasimhan, K., Yao, S.: Reflexion: Lan-
+guage agents with verbal reinforcement learning. Advances in Neural Information
+Processing Systems36, 8634–8652 (2023)
+14. Srivastava, A., Rastogi, A., Rao, A., Shoeb, A.A.M., Abid, A., Fisch, A., Brown,
+A.R., Santoro, A., Gupta, A., Garriga-Alonso, A., et al.: Beyond the imitation
+game: Quantifying and extrapolating the capabilities of language models. arXiv
+preprint arXiv:2206.04615 (2022)
+15. Wang, Z., Mao, S., Wu, W., Ge, T., Wei, F., Ji, H.: Unleashing cognitive syn-
+ergy in large language models: A task-solving agent through multi-persona self-
+collaboration. arXiv preprint arXiv:2307.05300 (2023)
+16. White, J., Fu, Q., Hays, S., Sandborn, M., Olea, C., Gilbert, H., Elnashar, A.,
+Spencer-Smith, J., Schmidt, D.C.: A prompt pattern catalog to enhance prompt
+engineering with chatgpt. arXiv preprint arXiv:2302.11382 (2023)
+17. Wu, Q., Bansal, G., Zhang, J., Wu, Y., Zhang, S., Zhu, E., Li, B., Jiang, L.,
+Zhang, X., Wang, C.: Autogen: Enabling next-gen llm applications via multi-agent
+conversation framework. arXiv preprint arXiv:2308.081553(4) (2023)
+18. Xiong, K., Ding, X., Cao, Y., Liu, T., Qin, B.: Examining inter-consistency of large
+language models collaboration: An in-depth analysis via debate. arXiv preprint
+arXiv:2305.11595 (2023)
+19. Zheng, C., Liu, Z., Xie, E., Li, Z., Li, Y.: Progressive-hint prompting improves
+reasoning in large language models. arXiv preprint arXiv:2304.09797 (2023)
+20. Zheng, Y., Li, G., Li, Y., Shan, C., Cheng, R.: Truth inference in crowdsourcing: Is
+the problem solved? Proceedings of the VLDB Endowment10(5), 541–552 (2017)

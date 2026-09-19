@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_46_merge_spans_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 124,
+      "cases": [
+        {
+          "case": "check_01_merge_spans",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'merge_spans' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_46_merge_spans__RS/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import merge_spans",
+          "output": ""
+        },
+        {
+          "case": "check_02_merge_spans",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'merge_spans' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_46_merge_spans__RS/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import merge_spans",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "c2bbe6fca014cabafc1e2c9aab4588bd7b0e8a8aa7709b8ae787efe9e67e547f"
+}

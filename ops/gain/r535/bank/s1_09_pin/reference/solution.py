@@ -1,0 +1,6 @@
+def pin(x, low, high):
+    if x < low:
+        return low
+    if x > high:
+        return high
+    return x

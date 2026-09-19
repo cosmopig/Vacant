@@ -33,7 +33,7 @@ from ops.gain.analyze_r460 import (ENDPOINT_1003,  # noqa: E402
                                    ENDPOINT_CONCURRENCY_CAPS,
                                    REPLICATION_BLOCKS, REPLICATION_SEEDS)
 
-DEC = ROOT / "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+DEC = ROOT / "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
 LAUNCHER = ROOT / "ops" / "gain" / "launch_harness_rep_block.sh"
 SCHEDULER = ROOT / "ops" / "gain" / "schedule_harness_reps.py"
 R460_BLOCKS = ("a1", "a2", "a3", "b1", "b2", "b3")

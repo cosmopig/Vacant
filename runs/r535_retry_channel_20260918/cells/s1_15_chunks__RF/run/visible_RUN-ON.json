@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_15_chunks_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 67,
+      "cases": [
+        {
+          "case": "check_01_chunks",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'chunks' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_15_chunks__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import chunks",
+          "output": ""
+        },
+        {
+          "case": "check_02_chunks",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'chunks' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_15_chunks__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import chunks",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "838722322e8258e3907b7684c3a3b00d5f94b14aea2411c7f0dc823100b0680c"
+}

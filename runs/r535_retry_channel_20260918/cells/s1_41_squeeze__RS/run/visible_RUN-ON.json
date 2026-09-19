@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_41_squeeze_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 73,
+      "cases": [
+        {
+          "case": "check_01_squeeze",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'squeeze' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_41_squeeze__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import squeeze",
+          "output": ""
+        },
+        {
+          "case": "check_02_squeeze",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'squeeze' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_41_squeeze__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import squeeze",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "2dd9405c33d9e070cfdceeb1ce40aeed7c9a1b2881f07a135b2ce915a9bf4d25"
+}

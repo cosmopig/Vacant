@@ -1,15 +1,19 @@
-"""vacant CLI — 產品強制入口、信任生態維運、demo 與自我檢測。
+"""vacant CLI — 產品強制入口、究責生態維運、demo 與自我檢測。
 
     vacant run "<task>" --test "assert ..." [--agent hermes]
+    vacant run -- <任何 agent 命令>                            # V0 launcher，見 docs/VACANT_RUN.md
+                                                              # （有裸 `--` 就走這條；vacant/vrun/launcher.py）
     vacant init <name> [--niche reverse --niche caesar3] [--root DIR]
     vacant info  <name> [--root DIR]
     vacant call  <caller> <niche> --input <s> [--root DIR]   # 需先 init 出 caller + 一個能解該 niche 的 expert
-    vacant demo  [--root DIR]                                 # 跑 §11 對照實驗
+    vacant demo gate                                          # 30 秒：假 agent 宣告完成 → 閘門拒交 → 收據
+                                                              # （零設定／零模型／零網路；vacant/vrun/demo.py）
+    vacant demo                                               # 跑 §11 對照實驗（原樣保留，預設 kind=eco）
     vacant selftest                                           # 端到端冒煙測試（暫存目錄）
 
-預設 root = ~/.vacant（信任庫 + HERMES_HOME 都在此；睡著的 vacant 就是這包檔）。
+預設 root = ~/.vacant（`trust/` 金鑰與究責紀錄 + HERMES_HOME 都在此；睡著的 vacant 就是這包檔）。
 
-生態子命令（12 §5；MCP 信任閘道的整個居民生態變成可跑 CLI，預設 root=~/.vacant-mcp）：
+生態子命令（12 §5；MCP 究責閘道的整個居民生態變成可跑 CLI，預設 root=~/.vacant-mcp）：
     vacant up [--port 7777] [--no-dashboard]   # 建 6 居民生態 ＋ 前景 dashboard
     vacant toggle on|off                       # 翻 state.json 的 trust 開關
     vacant status                              # trust 開關 ＋ roster 表格
@@ -45,7 +49,7 @@ def _load_host_with_existing(root: Path) -> Host:
     return h
 
 
-# --- 生態子命令（12 §5：把信任閘道的整個生態變成可跑的 CLI）------------------
+# --- 生態子命令（12 §5：把究責閘道的整個生態變成可跑的 CLI）------------------
 # 生態預設 root（與單體 vacant 的 ~/.vacant 分開；MCP 閘道的居民住這）。
 def _eco_default_root() -> Path:
     return Path.home() / ".vacant-mcp"
@@ -220,7 +224,7 @@ class EchoLikeBrain:
     """離線用的內建確定性假腦（未設模型端點時的 fallback）。
 
     誠實邊界：這**不是**推理模型，只是把輸入反轉包成 `solve`，讓 delegate 全迴圈
-    離線可跑、可驗、可上鏈——用來看信任機制（路由/互審/稽核/信譽），不是看腦力。"""
+    離線可跑、可驗、可上鏈——用來看究責機制（路由/互審/稽核/信譽），不是看腦力。"""
 
     name = "echo-like(offline)"
 
@@ -239,7 +243,7 @@ def _build_brain():
 
         return LMStudioBrain(base, model)
     print("offline brain：未設 VACANT_MCP_MODEL/VACANT_MCP_BASE，改用內建確定性假腦"
-          "（只驗信任機制，非腦力）", file=sys.stderr)
+          "（只驗究責機制，非腦力）", file=sys.stderr)
     return EchoLikeBrain()
 
 
@@ -462,7 +466,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     print(f"  vacant_id : {body.identity.vacant_id}")
     print(f"  niches    : {body.card.niches or '（無）'}")
     print(f"  身體位置  : {body.dir}")
-    print(f"    trust/  信任庫（keypair / logbook / reputation）")
+    print(f"    trust/  金鑰與究責紀錄（keypair / logbook / reputation）")
     print(f"    home/   HERMES_HOME（skills / memory，agent 的能力庫）")
     return 0
 
@@ -519,6 +523,8 @@ def cmd_call(args: argparse.Namespace) -> int:
 
 
 def cmd_demo(args: argparse.Namespace) -> int:
+    if getattr(args, "kind", "eco") == "gate":
+        return _demo_gate(args)
     from .experiment import run
 
     # 寫進全新暫存目錄（實驗是拋棄式的）：不污染、也不 rmtree 使用者的 ~/.vacant。
@@ -526,6 +532,24 @@ def cmd_demo(args: argparse.Namespace) -> int:
     print(run(root))
     print(f"\n（實驗資料寫在暫存目錄：{root}）")
     return 0
+
+
+def _demo_gate(args: argparse.Namespace) -> int:
+    """`vacant demo gate`：裝完之後的第一幕（`vacant/vrun/demo.py`）。
+
+    2026-09-18 之前這條路徑只在 repo checkout 裡有（判斷層住在 `ops/`，
+    而 `ops/` 不進 wheel）。現在判斷層住在 `vacant/vrun/`，**`pip install
+    vacant-network` 就跑得動**——而且與 R530 共用的仍然是同一份
+    `acceptance`／`receipts`／`wshash`（`ops/gain/r530/*` 改成 re-export），
+    **沒有第二把尺**。
+    """
+    argv: list[str] = ["--sandbox", args.sandbox]
+    if args.root:
+        argv += ["--root", args.root]
+    if args.demo_json:
+        argv.append("--json")
+    from .vrun.demo import main as _main
+    return _main(argv)
 
 
 def cmd_selftest(args: argparse.Namespace) -> int:
@@ -573,21 +597,54 @@ def build_parser() -> argparse.ArgumentParser:
     pc.add_argument("--mode", default="reputation", choices=["reputation", "random"])
     pc.set_defaults(func=cmd_call)
 
-    pd = sub.add_parser("demo", help="跑 §11 C0/C1/C2/C3 對照實驗")
+    # `demo` 的 `kind` 是**位置引數＋預設值**而不是巢狀子命令：`vacant demo`
+    # （生態對照實驗）在外面被引用了好幾年，改成必給子命令會把它打斷。
+    pd = sub.add_parser(
+        "demo", help="gate＝30 秒看到閘門擋下交付（預設 eco＝§11 C0/C1/C2/C3 對照實驗）")
+    pd.add_argument("kind", nargs="?", choices=["eco", "gate"], default="eco",
+                    help="gate：零設定零模型零網路，假 agent 走完整條 `vacant run` 路徑")
+    pd.add_argument("--root", default=None, help="（gate）落點，每次執行會先清空")
+    pd.add_argument("--sandbox", default="auto",
+                    help="（gate）驗收沙箱後端：auto／bwrap／unshare／none")
+    pd.add_argument("--json", dest="demo_json", action="store_true",
+                    help="（gate）只印 JSON summary")
     pd.set_defaults(func=cmd_demo)
 
     ps = sub.add_parser("selftest", help="端到端冒煙測試（暫存目錄）")
     ps.set_defaults(func=cmd_selftest)
 
     # 產品主入口：Vacant 自己先 delegate，簽章 gate 過後才啟動外部 agent。
+    # ⚠ `vacant run` 有**兩種模式**，分水嶺是 argv 裡有沒有 `--`（見 `main()`）：
+    #   有 `--` ⇒ 包住任意 CLI agent 的收件口（`vacant/vrun/launcher.py`）
+    #   沒有   ⇒ 下面這個舊的 eco 版
+    #   ⚠ `--help` 只印得出其中一個（argparse 在看到 `--help` 時就停了），
+    #     而它印的是舊的那個 ⇒ **外人照著 help 讀永遠找不到收件口**。
+    #     所以把另一條路寫進 description，`vacant run --help` 一定看得到。
     prun = sub.add_parser(
         "run",
-        help="Vacant-first 強制入口：先驗證交付，再啟動 Hermes／任意 CLI agent",
+        help="包住任意 CLI agent：先驗證交付才放行（用 `--` 分隔）；"
+             "不給 `--` 則走舊的 eco 版",
+        description=(
+            "vacant run 有兩種模式，分水嶺是 argv 裡有沒有 `--`。\n"
+            "\n"
+            "【一】收件口（V0/V1/V2，**主要用法**）——`--` 之後是整條 agent 命令：\n"
+            "\n"
+            "    vacant run --workspace ./ws --suite ./acceptance -- pi -p '做這件事'\n"
+            "\n"
+            "  它把 agent 包起來、中介模型通道、在行程結束那一刻跑驗收、簽收據、\n"
+            "  沒過就擋下交付（exit 20）。旗標有 --workspace/--suite/--run-dir/\n"
+            "  --retry/--max-attempts/--feedback-into/--sandbox/--json 等。\n"
+            "  ⚠ **完整說明要用** `python -m vacant.vrun.launcher --help`\n"
+            "     （argparse 在這裡看到 --help 就停了，印不出那一組）。\n"
+            "  文件：docs/VACANT_RUN.md\n"
+            "\n"
+            "【二】舊的 eco 版（沒有 `--` 時走這條）——下面列的就是它的旗標。\n"),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     prun.add_argument("task", nargs="?", help="任務文字；長任務可改用 --task-file")
     prun.add_argument("--task-file", help="UTF-8 任務檔")
     prun.add_argument("--root", dest="eco_root", default=str(_eco_default_root()),
-                      help="產品信任生態目錄（預設 ~/.vacant-mcp）")
+                      help="產品究責生態目錄（預設 ~/.vacant-mcp）")
     prun.add_argument("--base", default=None,
                       help="模型端點；預設 VACANT_MCP_BASE 或 http://localhost:1234")
     prun.add_argument("--model", default=None,
@@ -746,7 +803,43 @@ def cmd_record_check(args: argparse.Namespace) -> int:
     return 1
 
 
+def _bench_void_report(args: argparse.Namespace, rep: dict, brain_name: str) -> None:
+    """一次都沒量到時的診斷（寫 stderr）。訊息品質對齊 `vacant record check`。
+
+    為什麼要這麼囉唆：使用者第一次跑 `vacant bench` 用的是預設 `--base`
+    （`http://localhost:1234`），端點沒開是**最可能**的第一次體驗。這一段必須
+    當場說出「哪個端點、失敗幾次、錯誤原文是什麼」，否則「沒量到」會被讀成
+    「模型很爛」。
+    """
+    n = rep["n"]
+    sys.stdout.flush()   # 讓逐題表與診斷在終端機上仍是這個順序（stdout/stderr 兩條管）
+    print("✗ FAIL：一次都沒量到（infra_void，09 §3.5），不輸出任何比較數字",
+          file=sys.stderr)
+    print(f"  · 端點        : {args.base}   模型 {args.model!r}   brain={brain_name}",
+          file=sys.stderr)
+    print(f"  · 題數        : {n}", file=sys.stderr)
+    print(f"  · plain 臂    : 量到 {rep['plain_measured']}/{n}，沒量到 {rep['plain_void']}/{n}",
+          file=sys.stderr)
+    print(f"  · vacant 臂   : 量到 {rep['vacant_measured']}/{n}，沒量到 {rep['vacant_void']}/{n}",
+          file=sys.stderr)
+    print(f"  · 兩臂都量到  : {rep['paired_measured']}/{n}（成對比較的分母）",
+          file=sys.stderr)
+    print(f"  · 第一個錯誤  : {rep['first_error'] or '（無——題數為 0？）'}",
+          file=sys.stderr)
+    print("  提示：確認端點起著（LM Studio 預設 http://localhost:1234）、模型 id 正確；"
+          "換端點用 --base，換模型用 --model。", file=sys.stderr)
+    print("  「沒量到」與「量到 0%」是兩件事：前者是基建故障，後者是資料。"
+          "本次全部是前者，所以這裡沒有正確率可以印。", file=sys.stderr)
+
+
 def cmd_bench(args: argparse.Namespace) -> int:
+    """量 plain vs vacant。**一次都沒量到 ⇒ 不印比較數字、exit 非 0**（09 §3.5）。
+
+    這支在架構裡承重的是「對外那一個可以被截圖的數字」。所以它要守的紅線跟
+    `vacant record check` 同一條：`infra_void`（這一格沒有量到）不准被折進
+    「量到 0」。把端點關著的一次跑渲染成「兩臂各 0%、差 +0%」並 exit 0，
+    是用一個沒發生的量測去支撐一個比較——那比不印還糟。
+    """
     from .agent import Vacant, checkable_cases
     from .brains import HermesBrain, LMStudioBrain, OpenAIBrain
     from .codebench import code_cases, code_system_prompt
@@ -764,12 +857,29 @@ def cmd_bench(args: argparse.Namespace) -> int:
     print(f"brain={brain.name}  suite={args.suite}  n={args.n}  k={args.k}  （量 plain vs vacant verify-fix）", flush=True)
     v = Vacant(brain, k=args.k)
     rep = v.bench(cases, k=args.k)
-    for prompt, pv, vv, calls in rep["rows"]:
-        print(f"  {('OK' if vv else 'x'):2} (plain {'OK' if pv else 'x '}) {calls}calls  {prompt}")
+    for prompt, pv, vv, calls, p_void, v_void in rep["rows"]:
+        # 三種結局要在同一張表上分得開：OK＝答對、x＝答錯、—＝這一格沒量到。
+        vm = "—" if v_void else ("OK" if vv else "x")
+        pm = "— " if p_void else ("OK" if pv else "x ")
+        print(f"  {vm:2} (plain {pm}) {calls}calls  {prompt}")
+    if rep["infra_void"]:
+        _bench_void_report(args, rep, brain.name)
+        return 2
+    n = rep["n"]
     print("\n================ 結果 ================")
-    print(f"  plain（無 vacant）   正確率 {rep['plain_acc']*100:3.0f}%   算力 {rep['plain_calls_per']:.1f} 次/題")
-    print(f"  vacant（verify-fix） 正確率 {rep['vacant_acc']*100:3.0f}%   算力 {rep['vacant_calls_per']:.1f} 次/題")
-    print(f"  → vacant 讓你的模型 {rep['gain']*100:+.0f}%（簽章鏈究責：{v.verify_chain()}）")
+    print(f"  plain（無 vacant）   正確率 {rep['plain_acc']*100:3.0f}%"
+          f"（{rep['plain_measured']}/{n} 量到）   算力 {rep['plain_calls_per']:.1f} 次/題")
+    print(f"  vacant（verify-fix） 正確率 {rep['vacant_acc']*100:3.0f}%"
+          f"（{rep['vacant_measured']}/{n} 量到）   算力 {rep['vacant_calls_per']:.1f} 次/題")
+    print(f"  → vacant 讓你的模型 {rep['gain']*100:+.0f}%"
+          f"（成對分母 {rep['paired_measured']}/{n}；簽章鏈究責：{v.verify_chain()}）")
+    # infra_void 的格數**單獨印**，而且講明分母是哪一個——折進正確率就等於
+    # 把「沒量到」講成「量到 0」。
+    if rep["plain_void"] or rep["vacant_void"]:
+        print(f"  ⚠ infra_void（沒量到，不進上面任何分子分母）："
+              f"plain {rep['plain_void']}/{n}、vacant {rep['vacant_void']}/{n}")
+        print(f"     第一個錯誤：{rep['first_error']}")
+        print(f"     端點 {args.base}；「沒量到」是基建故障，不是模型答錯。")
     return 0
 
 
@@ -785,14 +895,31 @@ def cmd_audit(args: argparse.Namespace) -> int:
     kinds: dict[str, int] = {}
     for e in body.logbook.entries:
         kinds[e.type] = kinds.get(e.type, 0) + 1
+    n = len(body.logbook)
     print(f"vacant     : {args.name}  (…{body.identity.vacant_id[-12:]})")
-    print(f"logbook    : {len(body.logbook)} 筆  事件分布 {kinds or '（空）'}")
-    print(f"簽章鏈究責 : {'✓ PASS（seq 連續、prev_hash 串對、每筆簽章過）' if ok else '✗ FAIL（鏈被竄改或不完整）'}")
-    return 0 if ok else 1
+    print(f"logbook    : {n} 筆  事件分布 {kinds or '（空）'}")
+    if not ok:
+        print("簽章鏈究責 : ✗ FAIL（鏈被竄改或不完整）")
+        return 1
+    if n == 0:
+        # ⚠ 空鏈是**恆真**的：沒有東西可以驗，不是「驗過了」。
+        #   印成 `✓ PASS（…每筆簽章過）` 會讓外人以為究責發生過——
+        #   那是「沒量到」被寫成「量到 0」的同一種混淆（09 §3.5）。
+        #   仍然回 0：剛 `init` 出來的身體本來就是空的，那不是錯誤。
+        print("簽章鏈究責 : —（空鏈，沒有東西可驗；這不是通過，是沒發生）")
+        return 0
+    print(f"簽章鏈究責 : ✓ PASS（{n} 筆：seq 連續、prev_hash 串對、每筆簽章過）")
+    # ⚠ **驗不到的那一半也要說。** `verify_chain` 沒有長度承諾也沒有外部錨點
+    #   ⇒ 從**鏈尾**砍掉幾筆之後它照樣 PASS（截斷／省略攻擊，
+    #   Ma & Tsudik 2009，DOI 10.1145/1502777.1502779：完整性 ≠ 完備性）。
+    #   抓得到的是**竄改與抽掉中間**，抓不到的是**尾巴被剪短**。
+    print("　　　　　　 ⚠ 抓得到竄改與抽掉中間；**抓不到從鏈尾截斷**"
+          "（無長度承諾／無外部錨點）")
+    return 0
 
 
 def cmd_verify_att(args: argparse.Namespace) -> int:
-    """獨立驗一張 attestation 憑證 —— 不必信任送方，只靠票上的 pub + 簽章。"""
+    """獨立驗一張 attestation 憑證 —— 不必採信送方，只靠票上的 pub + 簽章。"""
     import json
 
     from .attest import verify_attestation
@@ -894,8 +1021,28 @@ def cmd_trace(args: argparse.Namespace) -> int:
     return 0
 
 
+def _agent_run_shim(argv: list[str]) -> int:
+    """`vacant run -- <任何 agent 命令>`：V0 launcher 的入口。
+
+    **為什麼用 `--` 當分岔而不是新開一個子命令名**：`vacant run "<task>"`
+    （controller 那條產品入口）已經佔著 `run` 這個名字，而人類要的介面字面上
+    就是 `vacant run -- <cmd>`。兩者用 `--` 分得開——controller 那條從來不需要
+    一個裸的 `--`（它的下游 argv 走 `--agent-argv` 的 JSON 陣列）。
+
+    launcher 住在 `vacant/vrun/launcher.py`（2026-09-18 從 `ops/vacantrun/`
+    搬進套件）。它的判斷層仍然與 R530 實驗共用同一份程式碼——只是方向反過來：
+    `ops/gain/r530/{acceptance,receipts,wshash}` 現在 re-export 到
+    `vacant/vrun/`，所以 `pip install` 的人跑得動，而判準只有一份。
+    """
+    from .vrun.launcher import main as _main
+    return _main(argv)
+
+
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    raw = list(sys.argv[1:] if argv is None else argv)
+    if raw[:1] == ["run"] and "--" in raw[1:]:
+        return _agent_run_shim(raw[1:])
+    args = build_parser().parse_args(raw)
     return args.func(args)
 
 

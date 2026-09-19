@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use Vacant, or cite the measurements in this repository, please cite it as below."
 title: "Vacant: an accountability layer for AI agents"
 type: software
-version: "0.1.0"
-date-released: "2026-09-13"
+version: "0.7.0"
+date-released: "2026-09-18"
 license: MIT
 repository-code: "https://github.com/cosmopig/Vacant"
 url: "https://vacant.cosmopig.com"
@@ -26,8 +26,10 @@ keywords:
   - McNemar
   - Holm correction
 abstract: >-
-  Vacant is an accountability layer that wraps any AI agent: it runs the client's own executable
-  acceptance tests, gates delivery on the result (shipping only what passes and refusing otherwise,
+  Vacant is an accountability layer that sits at the delivery exit of any AI agent -- a receiving
+  desk rather than a mandatory wrapper, and not an agent framework: because it inspects only the
+  deliverable and not how the agent ran, output from any framework can be fed into it. It runs the
+  client's own executable acceptance tests, gates delivery on the result (shipping only what passes and refusing otherwise,
   where a refusal counts as a failure), and signs every attempt into an append-only Ed25519 hash
   chain that anyone holding the public key can re-verify offline, including a multi-party mode in
   which k keys each execute and each sign so that a disagreement names the dissenting key. The
@@ -41,10 +43,28 @@ abstract: >-
   no per-set uncorrected p reached significance and the pooled Holm-adjusted p was 0.34), so its
   magnitude is reported as unresolved rather than established;
   most of the measured gain is attributable to the executable acceptance gate plus resampling.
-  9,841 receipt entries across 67 runs were re-verified entry by entry with zero failures, and the
-  hidden-test leakage audit reported zero violations on all 67 blocks under its v2 scope (the tool
-  scans the loop arms and skips trivial needles: in R460R r1-r3, 57,248 of 95,090 needles were
-  actually checked and 37,842 (39.8%) were skipped; the remainder is covered by manual sampling).
+  9,841 receipt entries across 67 runs were re-verified entry by entry with zero failures. The
+  hidden-test leakage audit reported zero violations on all 67 blocks under its v2 scope, but that
+  audit covered only the loop arms: its filter skips any arm outside (HPI, HOC, HMIX), so the
+  single-shot and gate arms were never scanned at all, and it additionally skips trivial needles
+  (in R460R r1-r3, 57,248 of 95,090 needles were actually checked and 37,842 (39.8%) were skipped).
+  The retroactive sweep of the unscanned arms completed on 2026-09-18 and is recorded in
+  ops/gain/vgt_retro_audit_20260918.json under a v3 scope (ten arms, per-arm fail-closed): across
+  179 archived runs it returned 165 CLEAN, 10 UNVERIFIABLE and 4 VIOLATION, checking 3,486,403
+  needles, and the four batches cited here are CLEAN on every arm (R460 6/6, R460R 30/30, R529
+  37/37, R532 43/43, the last including 1,122 CONFORM records audited dynamically for the first
+  time). The 10 UNVERIFIABLE are aborted runs holding only preflight records, so they have no
+  audit target; UNVERIFIABLE is neither clean nor dirty. The 4 VIOLATION are all in R530 under the
+  rule hidden_file_in_workspace and, on inspection, are the model's own same-named test files
+  (differing sha256, near-zero non-trivial overlap, and different content for the same task across
+  seeds), which leaves whether to tighten that rule unresolved. The sweep's guarantee is bounded:
+  CLEAN covers only the literal representation of the held-out minus visible tests appearing in
+  harness-authored prompt text, semantic paraphrase is not detected, the task bank is inferred
+  rather than recorded for runs predating R529, and the R529 and R532 closing analyzers still read
+  the earlier HMIX-only artifacts, so no claim of hidden-test separation beyond those four batches
+  and that scope is made here.
   Every delivery-effect figure is stated under the premise that requirements
   can be compiled into executable acceptance tests; where they cannot, the mechanism has no free
-  judge. The deliverable of the project is a physical exhibition, not a paper.
+  judge. The receipt chain provides integrity, not completeness: a truncated tail is a valid prefix
+  and verifies (a truncation/omission attack), so detecting omission requires an exogenous
+  commitment such as externally published chain heads. The deliverable of the project is a physical exhibition, not a paper.

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_41_squeeze_PC",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 56,
+      "cases": [
+        {
+          "case": "check_01_squeeze",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_squeeze",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "3bee89633bba9e51e82ff57852ce2a40b1394efdfe311c74412cb033538509e9"
+}

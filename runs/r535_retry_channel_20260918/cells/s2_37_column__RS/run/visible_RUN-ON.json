@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_37_column_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 39,
+      "cases": [
+        {
+          "case": "check_01_column",
+          "ok": false,
+          "kind": "assert",
+          "message": "column args=([{'a': 1}, {'b': 2}], 'a') got=[1] want=[1, None]",
+          "where": "test_visible.py:14: assert got == want, \"column args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_column",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "ad96894346499aa5eda21b78fc6002b3feea387694a339b8cfd6b243414d5210"
+}

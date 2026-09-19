@@ -8,7 +8,7 @@ ROOT="$HOME/vacant"; REPO="$ROOT/Vacant"; LOG="$ROOT/logs/launch_r445.log"
 HUB="http://100.119.113.56:8765/v1/chat/completions"
 MODEL="gemma-4-12b-it-qat"
 OUT="runs/g_r445_conform_mbpp_ext"
-DEC="DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
+DEC="decisions/DECISION_20260903_R445_CONFORM_BANK_EXTENSION.md"
 
 mkdir -p "$ROOT/logs"
 say()    { printf '%s  %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$*" | tee -a "$LOG"; }

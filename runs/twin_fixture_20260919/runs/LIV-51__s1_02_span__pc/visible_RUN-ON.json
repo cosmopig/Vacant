@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_02_span:pc",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 119,
+      "cases": [
+        {
+          "case": "check_01_span",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_span",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "9f60d4fc772cf8f2bc6a78a8483737390ced88b7012a1855259f2338cb6e4a48"
+}

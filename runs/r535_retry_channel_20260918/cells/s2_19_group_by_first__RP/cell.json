@@ -1,0 +1,323 @@
+{
+  "cell": "s2_19_group_by_first__RP",
+  "task_id": "s2_19_group_by_first",
+  "arm": "RP",
+  "stratum": "S2",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T04:38:29Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "prompt"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": true,
+  "stream": "s2",
+  "pi_port": 8879,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 68,
+  "task_pos": 18,
+  "arm_pos": 2,
+  "plan_index": 274,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s2_19_group_by_first__RP/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s2_19_group_by_first__RP/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s2_19_group_by_first/tests_visible",
+    "--task-id",
+    "r535_s2_19_group_by_first_RP",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8879",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "prompt",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file.{VACANT_FEEDBACK}"
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 0,
+      "wall_s": 147.915
+    }
+  ],
+  "launcher_rc": 0,
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "attempts_used": 2,
+  "max_attempts": 3,
+  "requests_seen": 21,
+  "agent_wall_s": 109.598,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "ws_start_sha256": "bb46695c0eeb9ef9699589dfbb7b69686378be6d725d2b723575df8575efcc40",
+  "ws_end_sha256": "2326f675d4d1c3ef3375e021c34539524a21b1df7aca2cb3d93d9a1d1728e91f",
+  "verdict_sha256": "a42e381bae7b387de7bd1f69045b28b38a377433f3b9e69c2060836672b3189e",
+  "verdict_hash": "91be3e0ff872b3c7eb4992ed010c3de01c1a41228c2232769b4715744a0a6d99",
+  "wire_digest": "75e8acd3f3951d40e35e37fc0090a91c43508cfc5efbb8223c2067de7bb17a99",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s2_19_group_by_first__RP/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 21
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 6,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 36.965,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_19_group_by_first__RP/run/_frozen_RUN-ON",
+      "ws_end_sha256": "c8df47202b0ce51fa62fff45a6aff4ba10d292975b5ab14db69184f3741c0729",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": true,
+      "stop_reason": "visible_pass",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "requests_seen": 15,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 109.598,
+      "argv_sha256": "3fa9ebacae24bbe99d8fd0312dfc78da4236fff7f89b99228e5b7d40c9a39062",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 641,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_19_group_by_first__RP/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "2326f675d4d1c3ef3375e021c34539524a21b1df7aca2cb3d93d9a1d1728e91f",
+      "reset": null
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": true,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "matched": [
+        {
+          "kind": "header",
+          "text": "Acceptance feedback (attempt"
+        },
+        {
+          "kind": "body",
+          "text": "The checks that ship with this task were run against your"
+        },
+        {
+          "kind": "block",
+          "text": "test_visible.py::check_01_group_by_first — assert: group_by_first args=(['Apple', 'ant', 'Bee'],) got={'A': ['Apple'], 'a': ['ant'], 'B': ['Bee']} want={'a': ['"
+        },
+        {
+          "kind": "block_line",
+          "text": "test_visible.py::check_01_group_by_first — assert: group_by_first args=(['Apple', 'ant', 'Bee'],) got={'A': ['Apple'], 'a': ['ant'], 'B': ['Bee']} want={'a': ['"
+        }
+      ],
+      "n_req": 15
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": false,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "n_req": 15
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.8571428571428571,
+  "m7_ws_counts": {
+    "other": 12,
+    "read_task": 2,
+    "total": 14,
+    "other_total": 12,
+    "reads_own_solution": 1
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -R\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "other",
+      "reads_own_solution": true,
+      "args": "{\"path\":\"solution.py\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import group_by_first; print(group_by_first(['Apple', 'ant', 'Bee']))\\\"\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"test_visible.py\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -a\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import group_by_first; print(group_by_first(['Apple', 'ant', 'Bee']))\\\" | grep -v \\\"---\\\" > test_output.txt\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import group_by_first; print(group_by_first(['Apple', 'ant', 'Bee']))\\\" > test_output.txt\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import group_by_first; print(group_by_first(['Apple', 'ant', 'Bee']))\\\"\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import group_by_first; print(group_by_first(['Apple', 'ant', 'Bee']))\\\" | sed 's/\\\\{.*\\\\}/{\\\"a\\\": [\\\"Apple\\\", \\\"ant\\\"], \\\"b\\\": [\\\"Bee\\\"]}/'\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import group_by_first; print(group_by_first(['Apple', 'ant', 'Bee']))\\\"\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "edit",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"edits\":[{\"newText\":\"def group_by_first(words):\\n    groups = {}\\n    for word in words:\\n        if not word:\\n            continue\\n        first_char = word[0].lower()\\n        if first_char not i"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import group_by_first; print(group_by_first(['Apple', 'ant', 'Bee']))\\\"\"}"
+    }
+  ],
+  "m7_ws_solution": true,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.07142857142857142,
+  "m7_ws_solution_n": 1,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": true,
+  "f6_reason": null,
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 641
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 21,
+  "f3_req_ok": 21,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 21,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 148.06,
+  "finished": "2026-09-19T04:40:57Z"
+}

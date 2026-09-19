@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_03_top_n_PC",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 43,
+      "cases": [
+        {
+          "case": "check_01_top_n",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_top_n",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "9870e7d7762e2ceb43540eb20f978278cc4e11a371545c79f0e67d27ca8ffffd"
+}

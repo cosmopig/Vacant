@@ -21,7 +21,7 @@ from vacant.codebench import LCB_BANKS                                  # noqa: 
 MUTANT = ""
 LAST_FAILS: list[str] = []
 
-PREREG = ROOT / "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+PREREG = ROOT / "decisions/DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
 R461_PREREG_COMMIT = "a3036573ce529a62f9b77793b0f0961a0cf61a67"   # 預測落筆當時（DECISION §二.1）
 FORBIDDEN_RUN = "g_r461_lcb3_three_arm"                          # B3
 # ── round735（R467）：`SOURCE_CLAIMS` 的原始碼字面**釘在這支普查所稽核的那個 commit**，
@@ -37,6 +37,9 @@ R466_SOURCE_COMMIT = "952f883f798744e32158bb11bdf67b940f51a8db"   # R466 量測 
 #   或讓 evidence 級強制綠燈的警告安靜少一筆（R473 實測 X2／X3：D1 十九條全綠）。
 #   釘的是**預測落筆當時的 commit**，不是 HEAD（memory：判強制綠燈的時點是預測落筆當時；
 #   釘 HEAD＝拿自己比自己）。
+# ⚠ 這一條**故意**留在舊的根目錄路徑：它只用在 `git show <釘死的 commit>:<路徑>`，
+#   而那個 commit 早於 2026-09-18 的 `decisions/` 搬遷 ⇒ 在那棵樹裡檔案就在根目錄。
+#   改成 `decisions/...` 會讓 `git show` 找不到物件（PREREG_PIN_UNREADABLE）。
 R466_PREREG_REL = "DECISION_20260904_R466_R461_SEC2_SEC6_FALSIFIABILITY_CENSUS.md"
 R466_PREREG_COMMIT = "99ec6cb5d6f4abf2fea91668caa6d9e224ffbc6d"   # R466 判準 commit（預測落筆）
 TWIN_RUN = ROOT / "runs" / "g_r447_conform_lcb2"                  # 已收官的結構孿生（S6-2 用）

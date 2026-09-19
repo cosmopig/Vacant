@@ -1,0 +1,9 @@
+═══ 收據鏈驗證 /var/tmp/vacant_v1matrix/rdctl_* ═══
+run 2　鏈 2　entries 4　驗過 4　失敗 0　壞鏈 0
+
+run                           arm          條數    驗過    失敗 verdict  rows  chain_head
+rdctl_ctl_norequest_deliver   RUN-ON        2     2     0       1     1  b286cb63483ef47c…  OK
+rdctl_ctl_norequest_refuse    RUN-ON        2     2     0       1     1  90d6a2f3ea464d66…  OK
+
+總判：OK
+每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。

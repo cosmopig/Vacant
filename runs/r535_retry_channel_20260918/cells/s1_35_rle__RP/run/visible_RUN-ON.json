@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_35_rle_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 63,
+      "cases": [
+        {
+          "case": "check_01_rle",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'rle' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_35_rle__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import rle",
+          "output": ""
+        },
+        {
+          "case": "check_02_rle",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'rle' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_35_rle__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import rle",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "5ed80b8febb2e9e32ccca16b6acdb042a99b0b97d9b4d050590187cf4cbf16ce"
+}

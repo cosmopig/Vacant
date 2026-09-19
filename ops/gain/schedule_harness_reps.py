@@ -81,7 +81,7 @@ import time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-DECISION = "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
+DECISION = "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md"
 LAUNCHER = "ops/gain/launch_harness_rep_block.sh"
 
 # ── 凍結的設定（改這裡＝改事前註冊 ⇒ 不准）──────────────────────────────

@@ -1,0 +1,7 @@
+# This is a comment
+key = value # This is an inline comment
+  key2 = value2   # Trailing spaces before comment
+no_comment_line
+    indented_line
+# Another full line comment
+some_text # more text

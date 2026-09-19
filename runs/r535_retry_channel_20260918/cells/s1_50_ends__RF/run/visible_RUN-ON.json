@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_50_ends_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 64,
+      "cases": [
+        {
+          "case": "check_01_ends",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'ends' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_50_ends__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import ends",
+          "output": ""
+        },
+        {
+          "case": "check_02_ends",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'ends' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_50_ends__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import ends",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "fd40f0f194671b71ff5e2487ad1320a9b2c3f716862d9b948f4f04dcfad19915"
+}

@@ -1,0 +1,7 @@
+
+key = value
+  key2 = value2
+no_comment_line
+    indented_line
+
+some_text

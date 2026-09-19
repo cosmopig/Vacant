@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_05_clamp_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 47,
+      "cases": [
+        {
+          "case": "check_01_clamp",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_clamp",
+          "ok": false,
+          "kind": "assert",
+          "message": "clamp args=(1, 10, 0) got=1 want=ValueError to be raised",
+          "where": "test_visible.py:27: raise AssertionError(\"clamp args=%r got=%r want=ValueError to be raised\" %",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "22eaa9ac68a4f2a4996a3de2862e44fd7efa103be30dbd93701b5e2a913a5ecc"
+}

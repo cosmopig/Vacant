@@ -46,7 +46,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 SH = ROOT / "ops" / "gain" / "launch_harness_lcb2.sh"
-DEC = ROOT / "DECISION_20260907_R460_HARNESS_PREREG.md"
+DEC = ROOT / "decisions/DECISION_20260907_R460_HARNESS_PREREG.md"
 ANALYZER = ROOT / "ops" / "gain" / "analyze_r460.py"
 STUDY = ROOT / "docs" / "HARNESS_STUDY_2026-09-07.md"
 VGT = ROOT / "ops" / "gain" / "harness_vgt_audit.py"
@@ -76,6 +76,13 @@ ENDPOINT_ENV = "VACANT_GAIN_API"
 REQUEST_TIMEOUT_S = 1200
 SEED = "g-r440-lcb2"
 SEED_PRIOR_RUN = "runs/g_r447_conform_lcb2"
+# round532：R532 也**授權重用**這顆 seed（`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md`
+# §二-3「四顆全部沿用」），六塊 lcb2 逐字註冊在 §二-2 的 `R532_BLOCK:` 行上。
+# 那份預註冊 §二-3 的 `SEED_AUTHORIZED_SET:` 行是**發射前**的集合（E-16 是發射前
+# 擋門，`ops/gain/r532/check_seed_authorization.py` 的 docstring 講得很清楚），
+# 所以它照定義不含 R532 自己那六塊——授權的依據是 §二-2 的註冊行，不是那四行。
+SEED_REUSE_DEC_R532 = "decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md"
+SEED_REUSE_RUNS_R532 = tuple(f"runs/g_r532_lcb2_a{i}" for i in range(1, 7))
 MODEL = "gemma-4-12b-it-qat"
 PRIOR_DEFAULT = "runs/g_r449c_eq5_lcb3"
 BANK_FILE = "ops/gain/data/lcb_bank_v2.jsonl"
@@ -195,7 +202,8 @@ def test_launcher_is_executable() -> None:
 # ── R440G 閘門 ─────────────────────────────────────────────────────────
 def test_decision_authorizes_the_run_name(sh: str, dec: str) -> None:
     """D9／A1：授權的是**六個**塊名；不帶塊名與兩塊時代的舊名字都不在授權內。"""
-    assert _var(sh, "DEC") == DEC.name
+    # 發射器帶的是**路徑**（2026-09-18 起 `decisions/...`），不是 basename。
+    assert _var(sh, "DEC") == DEC.relative_to(ROOT).as_posix()
     for tag, run in zip(BLOCKS, RUNS):
         assert _var(sh, f"OUT_{tag.upper()}") == run
         assert run in dec, f"DECISION 沒有授權塊名 {run}"
@@ -334,11 +342,26 @@ def test_seed_is_used_by_exactly_the_authorized_run() -> None:
     這一條是同一種寫法的漏網之魚。
 
     ⚠ **放寬的是釘子不是牙齒**：授權集合仍然是**逐字列舉**的
-    （r447 ＋ R460 六塊），集合相等而不是「包含」⇒ 任何**第七個**
-    用到這顆 seed 的 run 照樣把這條打紅。發射器那一側的同一條規則
+    （r447 ＋ R460 六塊 ＋ R532 六塊），集合相等而不是「包含」⇒ 任何
+    **第十四個**用到這顆 seed 的 run 照樣把這條打紅。發射器那一側的同一條規則
     （`SEED_AUTHORIZED_SET` 集合相等）沒有被動到。
+
+    ⚠ **round532：同一個釘子第二次到期。** R532 的六塊 lcb2 也沿用這顆 seed
+    （`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md` §二-3「四顆全部沿用」），
+    它們一跑完這條就必然變紅。**正確的修法是把授權集合補上，不是把斷言放寬**
+    ——這個釘子存在的目的就是「有人重用 seed 時要被逼著明示授權」。
+    所以補進來的六個名字在這裡**還要再對預註冊驗一次**：每一個都必須在 §二-2
+    帶著 `seed=g-r440-lcb2` 逐字註冊過。少了這一步，「更新授權集合」就退化成
+    「把紅的那幾個名字抄進白名單」，那跟關掉這條測試沒有差別。
     """
-    authorized = sorted({SEED_PRIOR_RUN, *RUNS})
+    dec532 = (ROOT / SEED_REUSE_DEC_R532).read_text(encoding="utf-8")
+    for run in SEED_REUSE_RUNS_R532:
+        name = run.split("/")[-1]
+        assert re.search(rf"^R532_BLOCK: {re.escape(name)} .*\bseed={re.escape(SEED)}\s*$",
+                         dec532, re.M), \
+            f"{run} 沒有帶著 seed={SEED} 註冊在 {SEED_REUSE_DEC_R532} §二-2"
+        assert f"`{run}`" in dec532, f"{run} 不在 {SEED_REUSE_DEC_R532} 的 43 塊清單裡"
+    authorized = sorted({SEED_PRIOR_RUN, *RUNS, *SEED_REUSE_RUNS_R532})
     files = sorted(glob.glob(str(ROOT / "runs" / "*" / "summary.json")))
     assert files, "一個 runs/*/summary.json 都沒掃到——量不到不是通過"
     used = []

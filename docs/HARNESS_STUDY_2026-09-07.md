@@ -930,7 +930,7 @@ elif arm in ("HPI", "HOC", "HMIX"):
 #   runs/g_r460_harness_lcb2_b3 --offset 100
 python3 ops/gain/gain_run.py \
   --out <OUT> \
-  --decision DECISION_20260907_R460_HARNESS_PREREG.md \
+  --decision decisions/DECISION_20260907_R460_HARNESS_PREREG.md \
   --bank lcb2 --n 20 --offset <OFFSET> --seed g-r440-lcb2 \
   --arms OFF,CONFORM,OFF5,HPI,HOC,HMIX \
   --models gemma-4-12b-it-qat \

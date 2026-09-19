@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_31_money_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 61,
+      "cases": [
+        {
+          "case": "check_01_money",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_31_money__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import money",
+          "output": ""
+        },
+        {
+          "case": "check_02_money",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_31_money__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import money",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "ad409d14b192888f350638d73d105cc53b5dd14dfe849ef1913d7ffeb70c2c01"
+}

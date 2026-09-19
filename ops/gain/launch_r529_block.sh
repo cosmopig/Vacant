@@ -41,7 +41,7 @@
 set -u
 ROOT="${VACANT_ROOT:-$HOME/vacant}"; REPO="${VACANT_REPO:-$ROOT/Vacant}"
 LOG="$ROOT/logs/launch_r529_block.log"
-DEC="${DEC:-DECISION_20260911_R529_CROSS_BANK_PREREG.md}"
+DEC="${DEC:-decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md}"
 PROBE_MAX_TOKENS=512          # round460e-2；與 harness_arms.WIRE_PROBE_MAX_TOKENS 對齊
 HUB_MARK="8765"
 

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_06_pct_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 72,
+      "cases": [
+        {
+          "case": "check_01_pct",
+          "ok": false,
+          "kind": "assert",
+          "message": "pct args=(1, 3) got=33.33333333333333 want=33.3",
+          "where": "test_visible.py:14: assert got == want, \"pct args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_pct",
+          "ok": false,
+          "kind": "exception",
+          "message": "ZeroDivisionError: division by zero",
+          "where": "test_visible.py:20: got = pct(*args)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "a824685b9fd3a20e4f1d08d2a2183b9e0476262aec7f3672f832cb1691b58e64"
+}

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+    "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+  ],
+  "built_ms": 1789798629962,
+  "cell_id": "DUL-89__s1_03_nwords__held",
+  "declared_evidence": "",
+  "declared_model": "",
+  "declared_upstream": "",
+  "exit_code": 20,
+  "explicit": false,
+  "resident": "DUL-89",
+  "run_dir": "runs/twin_fixture_20260919/runs/DUL-89__s1_03_nwords__held",
+  "task_id": "s1_03_nwords",
+  "v": 1
+}

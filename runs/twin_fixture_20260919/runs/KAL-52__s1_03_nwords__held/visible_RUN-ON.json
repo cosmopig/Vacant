@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_03_nwords:held",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 125,
+      "cases": [
+        {
+          "case": "check_01_n_words",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'n_words' from 'solution' (/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/runs/KAL-52__s1_03_nwords__held/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import n_words",
+          "output": ""
+        },
+        {
+          "case": "check_02_n_words",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'n_words' from 'solution' (/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/runs/KAL-52__s1_03_nwords__held/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import n_words",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "7ce75e67c157760c974a33ff76fbf6a745a37ba329d5356fcdf475d31589c69c"
+}

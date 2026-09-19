@@ -1,6 +1,6 @@
 {
   "name": "r530_openwork_example",
-  "decision": "DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+  "decision": "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
   "launcher": "ops/gain/r530/run_r530.py",
   "arms": "A-SOLO,A-CONF,A-GATE",
   "backend": "bwrap",

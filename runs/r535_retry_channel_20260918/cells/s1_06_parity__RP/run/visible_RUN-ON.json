@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_06_parity_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 85,
+      "cases": [
+        {
+          "case": "check_01_split_parity",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_06_parity__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import split_parity",
+          "output": ""
+        },
+        {
+          "case": "check_02_split_parity",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_06_parity__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import split_parity",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "80a2ba73c75ac8c9734366100c1aee261980fa1c2171681ff49d036fa21da9a4"
+}

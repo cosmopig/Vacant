@@ -1,6 +1,6 @@
 {
   "name": "r531_main",
-  "decision": "DECISION_20260915_R531_PUBLIC_BENCH_PLAIN_VS_VACANT_PREREG.md",
+  "decision": "decisions/DECISION_20260915_R531_PUBLIC_BENCH_PLAIN_VS_VACANT_PREREG.md",
   "launcher": "ops/gain/r530/run_r530.py",
   "arms": "A-SOLO,A-GATE",
   "backend": "unshare",

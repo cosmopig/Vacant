@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_17_pairs_to_map_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 71,
+      "cases": [
+        {
+          "case": "check_01_pairs_to_map",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pairs_to_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import pairs_to_map",
+          "output": ""
+        },
+        {
+          "case": "check_02_pairs_to_map",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pairs_to_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_17_pairs_to_map__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import pairs_to_map",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "fef84715c6de80b81f484c0a5622d61b2df9448cd042231b1dc3e574fb18f0c2"
+}

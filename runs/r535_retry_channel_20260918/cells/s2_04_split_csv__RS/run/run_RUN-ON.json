@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s2_04_split_csv_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s2_04_split_csv__RS/ws",
+  "proxy_url": "http://127.0.0.1:8880",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8880",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "c8d79146c2e8f469522d1a005e99bc8662438bbd2cf2ae05ed03e95704ff059e",
+  "ws_end_sha256": "25dcc36f472218868a45ff1ff693d14be2901071ef5ae0984f7d8fb63615b4c7",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 20,
+  "wire_by_protocol": {
+    "openai": 20
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "verdict_sha256": "73d387d190619b5a3bad1d8e1a15ed61fd4277becb0b711e53441a257f250b9d",
+  "verdict_hash": "2352a3d6585a2166a53b1ff694ab777e78457eea665e27e327ab7e30ffb4f816",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "c8d79146c2e8f469522d1a005e99bc8662438bbd2cf2ae05ed03e95704ff059e",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 38.862,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 5,
+      "wire_digest": "d28a6bcab46e53c9f18e6308dacc8d8a4c654be39903ae7e7e6ea36b790e8e01",
+      "ws_end_sha256": "123ae059aaf077211bd393470b732277b552b950c4f83cecc2ddd85ae002bcce",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_04_split_csv__RS/run/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "73d387d190619b5a3bad1d8e1a15ed61fd4277becb0b711e53441a257f250b9d",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_04_split_csv__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_split_csv — assert: split_csv args=('a, b ,c',) got=['a', ' b ', 'c'] want=['a', 'b', 'c'] [test_visible.py:14: assert got == want, \"split_csv args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "c8d79146c2e8f469522d1a005e99bc8662438bbd2cf2ae05ed03e95704ff059e",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "c8d79146c2e8f469522d1a005e99bc8662438bbd2cf2ae05ed03e95704ff059e",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 449.897,
+      "wire_quiesced": false,
+      "requests_seen": 7,
+      "requests_seen_cumulative": 12,
+      "wire_digest": "46868653ee70e953c8980f19f501f29fe66e0d668d5f973aac6b98fc281f439d",
+      "ws_end_sha256": "e4b44d639b576d9329f7f1db3fd7ceb8914bfe176af6c1681b37f4b5de617ffb",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_04_split_csv__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "73d387d190619b5a3bad1d8e1a15ed61fd4277becb0b711e53441a257f250b9d",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_04_split_csv__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_split_csv — assert: split_csv args=('a, b ,c',) got=['a', ' b ', 'c'] want=['a', 'b', 'c'] [test_visible.py:14: assert got == want, \"split_csv args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "c8d79146c2e8f469522d1a005e99bc8662438bbd2cf2ae05ed03e95704ff059e",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "c8d79146c2e8f469522d1a005e99bc8662438bbd2cf2ae05ed03e95704ff059e",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 213.331,
+      "wire_quiesced": false,
+      "requests_seen": 8,
+      "requests_seen_cumulative": 20,
+      "wire_digest": "583ae02d193add816d49a6a21028c7541889eee3e4a8eb3752a7d2f0c6f82e74",
+      "ws_end_sha256": "25dcc36f472218868a45ff1ff693d14be2901071ef5ae0984f7d8fb63615b4c7",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_04_split_csv__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "73d387d190619b5a3bad1d8e1a15ed61fd4277becb0b711e53441a257f250b9d",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_04_split_csv__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_split_csv — assert: split_csv args=('a, b ,c',) got=['a', ' b ', 'c'] want=['a', 'b', 'c'] [test_visible.py:14: assert got == want, \"split_csv args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s2_04_split_csv__RS/run/_origin",
+    "ws_sha256": "c8d79146c2e8f469522d1a005e99bc8662438bbd2cf2ae05ed03e95704ff059e"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "583ae02d193add816d49a6a21028c7541889eee3e4a8eb3752a7d2f0c6f82e74",
+  "run_wall_s": 732.733,
+  "agent_wall_s": 213.331,
+  "failures": "test_visible.py::check_01_split_csv — assert: split_csv args=('a, b ,c',) got=['a', ' b ', 'c'] want=['a', 'b', 'c'] [test_visible.py:14: assert got == want, \"split_csv args=%r got=%r want=%r\" % (args, got, want)]"
+}

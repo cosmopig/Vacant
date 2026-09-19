@@ -1,0 +1,284 @@
+{
+  "cell": "s2_03_top_n__RF",
+  "task_id": "s2_03_top_n",
+  "arm": "RF",
+  "stratum": "S2",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T02:58:07Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "s1",
+  "pi_port": 8878,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 52,
+  "task_pos": 2,
+  "arm_pos": 1,
+  "plan_index": 209,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s2_03_top_n__RF/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s2_03_top_n__RF/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s2_03_top_n/tests_visible",
+    "--task-id",
+    "r535_s2_03_top_n_RF",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8878",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 106.088
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 12,
+  "agent_wall_s": 26.883,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "ws_start_sha256": "9eb326102637ce0e7e52188641ada5c58a6e1934a1affceb06187ac21bfe9a9b",
+  "ws_end_sha256": "a2962a4270adda02a8885316e3ebbde719dc99910539af11af609f0968d6cb6b",
+  "verdict_sha256": "8b3deb6215f0e6bfff329a4de615860a1c4cd6fd6e9509a9ab84b908d55d6f16",
+  "verdict_hash": "950be7004fb75b2d8cd5040c4381cb14e8fa172558786e616909f604bcfc0b52",
+  "wire_digest": "4915de843d24d5ad341906dc7b4c7c92228abeff2b88b019c23b660de9085c72",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s2_03_top_n__RF/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 12
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 45.699,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "3908c1927874f04f54cc35b6c09b825bdc477c50006399d821bdeeb93e429319",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_03_top_n__RF/run/_frozen_RUN-ON",
+      "ws_end_sha256": "e2fcfa3e439023737e447e9c751e34571bee0d9e4d95630d0c71849712c175d5",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 32.762,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "113eb1572c9680c604753bcfcb617340cf0ee633a2924e467d0839c18329f990",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_03_top_n__RF/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "4b9d526429c94973ddb74543bd43d160f7857cd5ae3bbb03a69cf9539d01e3de",
+      "reset": null
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 26.883,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_03_top_n__RF/run/_frozen_RUN-ON_a3",
+      "ws_end_sha256": "a2962a4270adda02a8885316e3ebbde719dc99910539af11af609f0968d6cb6b",
+      "reset": null
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": false,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "matched": [],
+      "n_req": 4
+    },
+    {
+      "attempt": 3,
+      "found": false,
+      "matched": [],
+      "n_req": 4
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": true,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "n_req": 4
+    },
+    {
+      "attempt": 3,
+      "found": true,
+      "n_req": 4
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.3333333333333333,
+  "m7_ws_counts": {
+    "other": 2,
+    "read_task": 2,
+    "write_solution": 2,
+    "total": 6,
+    "other_total": 2,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def top_n(counts, n):\\n    # Sort items by count descending, then return names\\n    sorted_items = sorted(counts.items(), key=lambda item: item[1], reverse=True)\\n    return [name for name"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def top_n(counts, n):\\n    # Sort items by count in descending order\\n    sorted_counts = sorted(counts.items(), key=lambda item: item[1], reverse=True)\\n    # Extract the first n names fr"
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": null,
+  "f6_reason": "arm_is_not_RP",
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "feedback_in_prompt_bytes": 0
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 12,
+  "f3_req_ok": 12,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 12,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 106.12,
+  "finished": "2026-09-19T02:59:53Z"
+}

@@ -1,0 +1,29 @@
+═══ 收據鏈驗證 /var/tmp/vacant_v1matrix/rd_* ═══
+run 20　鏈 20　entries 40　驗過 40　失敗 0　壞鏈 0
+
+run                           arm          條數    驗過    失敗 verdict  rows  chain_head
+rd_claude_deliver_r1          RUN-ON        2     2     0       1     1  d3d23150a6dff70a…  OK
+rd_claude_deliver_r2          RUN-ON        2     2     0       1     1  9e75dbbc952d4d78…  OK
+rd_claude_refuse_r1           RUN-ON        2     2     0       1     1  93d996cecb6d9805…  OK
+rd_claude_refuse_r2           RUN-ON        2     2     0       1     1  ea4bb63e9fc22fe8…  OK
+rd_codex_deliver_r1           RUN-ON        2     2     0       1     1  b66e2377bf11116f…  OK
+rd_codex_deliver_r2           RUN-ON        2     2     0       1     1  85436ddc3fee3850…  OK
+rd_codex_refuse_r1            RUN-ON        2     2     0       1     1  01c3b1c3fb068491…  OK
+rd_codex_refuse_r2            RUN-ON        2     2     0       1     1  82b22918fc6794af…  OK
+rd_hermes_deliver_r1          RUN-ON        2     2     0       1     1  3542cd65d0105fb7…  OK
+rd_hermes_deliver_r2          RUN-ON        2     2     0       1     1  1cfa88316e72056f…  OK
+rd_hermes_refuse_r1           RUN-ON        2     2     0       1     1  32f06bfc7e0d5e0d…  OK
+rd_hermes_refuse_r2           RUN-ON        2     2     0       1     1  1e4a84cbde606f18…  OK
+rd_opencode_deliver_r1        RUN-ON        2     2     0       1     1  4582d08641662cee…  OK
+rd_opencode_deliver_r2        RUN-ON        2     2     0       1     1  bc691fbea091f3c9…  OK
+rd_opencode_refuse_r1         RUN-ON        2     2     0       1     1  63eb61bbe06083ca…  OK
+rd_opencode_refuse_r2         RUN-ON        2     2     0       1     1  63cc4cb673a481dd…  OK
+rd_pi_deliver_r1              RUN-ON        2     2     0       1     1  425704b387616dc3…  OK
+rd_pi_deliver_r2              RUN-ON        2     2     0       1     1  84aafe7074397764…  OK
+rd_pi_refuse_r1               RUN-ON        2     2     0       1     1  363ebca3a3e7b94c…  OK
+rd_pi_refuse_r2               RUN-ON        2     2     0       1     1  2f450b890be7f65f…  OK
+
+總判：OK
+每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。
+
+JSON → /var/tmp/vacant_v1matrix/archive/receipts_verify.json

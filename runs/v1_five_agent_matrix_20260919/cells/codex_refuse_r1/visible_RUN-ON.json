@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "codex_refuse_r1",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 27,
+      "cases": [
+        {
+          "case": "check_01_add",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_mul",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'mul' from 'solution' (/var/tmp/vacant_v1matrix/rd_codex_refuse_r1/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import mul",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "097d021f0ee5581cbea5a323a7ef97398fcd1ef8a3258aaf94e9cce1f5b5d815"
+}

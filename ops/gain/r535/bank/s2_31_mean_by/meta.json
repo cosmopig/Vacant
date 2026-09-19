@@ -1,0 +1,44 @@
+{
+  "expected_first_attempt_visible_fail": "0.4 - 0.8",
+  "expected_is_design_intent_not_measurement": true,
+  "explicit_block_lines": 5,
+  "explicit_lines": [
+    "rows that do not carry the field are passed over;",
+    "when no row carries it, the answer is 0.0."
+  ],
+  "hidden_is_superset_of_visible": true,
+  "hidden_n": 7,
+  "honesty": "擋得住已知壞解 ≠ 涵蓋真需求。參考解全過＋每個已知壞樁都被擋是**單邊**保證：它不代表可見套件涵蓋了 TASK.md 說的全部需求，也不准讀成「驗收套件固定點已解」。",
+  "origin": "authored 2026-09-19 for R535; not derived from LiveCodeBench, ops/gain/r530/bank, or vacant/codebench.py",
+  "required_names": [
+    "mean_by"
+  ],
+  "source_data": "ops/gain/r535/tasks_s2.py",
+  "stakes": {
+    "bad_a.py": "right names, wrong behaviour",
+    "bad_b.py": "third stake (usually the wrong return shape)",
+    "bad_c.py": "wrong name: mean_by not defined"
+  },
+  "stratum": "S2",
+  "task_id": "s2_31_mean_by",
+  "title": "mean_by(rows, field)",
+  "trap": "withheld: rows without the field are passed over; no usable row gives 0.0",
+  "visible_n": 2,
+  "withheld": [
+    "skip",
+    "missing",
+    "0.0",
+    "KeyError",
+    "absent"
+  ],
+  "workspace_template": [
+    "TASK.md"
+  ],
+  "workspace_template_pc": [
+    "TASK_explicit.md"
+  ],
+  "workspace_template_pc_note": "PC 臂把 TASK_explicit.md 複製進工作區**取代 TASK.md**（落地時改名成 TASK.md），其餘位元組與別的臂逐字相同 —— 否則 PC 不是同一題的天花板。",
+  "wrong_name_stake_missing_names": [
+    "mean_by"
+  ]
+}

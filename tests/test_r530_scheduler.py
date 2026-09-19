@@ -171,6 +171,8 @@ def test_given_up_after_max_attempts():
 def test_check_prereg_reports_the_missing_lines(tmp_path):
     q = sch.load_queue(EXAMPLE)
     fake_root = tmp_path
+    # `q.decision` 從 2026-09-18 起是 `decisions/...`（有目錄），假 repo 要先把目錄造出來
+    (fake_root / q.decision).parent.mkdir(parents=True, exist_ok=True)
     (fake_root / q.decision).write_text("nothing\n", encoding="utf-8")
     miss = sch.check_prereg(q, fake_root)
     assert len(miss) == len(q.blocks)

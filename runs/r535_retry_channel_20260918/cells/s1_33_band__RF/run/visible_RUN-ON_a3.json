@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_33_band_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 71,
+      "cases": [
+        {
+          "case": "check_01_band",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'band' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_33_band__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import band",
+          "output": ""
+        },
+        {
+          "case": "check_02_band",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'band' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_33_band__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import band",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "3647df75eaef365c8af2532726d5bfd7497c49af65aa05fe7b79239ff041bef2"
+}

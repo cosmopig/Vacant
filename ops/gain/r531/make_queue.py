@@ -33,7 +33,7 @@ TASKLIST = REPO / "ops" / "gain" / "r531" / "tasks_r531.json"
 OUT = REPO / "ops" / "gain" / "r531" / "queues" / "r531_main.json"
 
 EP_1004 = "http://100.86.226.21:1234/v1/chat/completions"
-DECISION = "DECISION_20260915_R531_PUBLIC_BENCH_PLAIN_VS_VACANT_PREREG.md"
+DECISION = "decisions/DECISION_20260915_R531_PUBLIC_BENCH_PLAIN_VS_VACANT_PREREG.md"
 N_STREAMS = 4
 
 

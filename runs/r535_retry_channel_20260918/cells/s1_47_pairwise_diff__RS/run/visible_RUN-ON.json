@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_47_pairwise_diff_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 51,
+      "cases": [
+        {
+          "case": "check_01_pairwise_diff",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pairwise_diff' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_47_pairwise_diff__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import pairwise_diff",
+          "output": ""
+        },
+        {
+          "case": "check_02_pairwise_diff",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pairwise_diff' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_47_pairwise_diff__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import pairwise_diff",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "8dcc2d9fd4cee8f1877649b095804af821912fd7cc2fb2ef27fcc35cb36ef409"
+}

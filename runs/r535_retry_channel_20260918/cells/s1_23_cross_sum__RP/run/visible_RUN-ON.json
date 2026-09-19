@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_23_cross_sum_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 130,
+      "cases": [
+        {
+          "case": "check_01_cross_sum",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'cross_sum' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_23_cross_sum__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import cross_sum",
+          "output": ""
+        },
+        {
+          "case": "check_02_cross_sum",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'cross_sum' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_23_cross_sum__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import cross_sum",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "301e2cedfa9c0be9597369111aa769e6a1ad304d1af30d66b53695b564d4ce1c"
+}

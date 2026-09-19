@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/vacant-8bit.svg" width="720" alt="VACANT"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/cosmopig/Vacant/main/docs/assets/vacant-8bit.svg" width="720" alt="VACANT"></p>
 
 <p align="center">
   <a href="README.md">繁體中文</a> ·
@@ -6,456 +6,840 @@
   <a href="README.ja.md">日本語</a>
 </p>
 
-<details>
-<summary>ASCII wordmark (where SVG does not render)</summary>
-
-```text
-█   █  ███   ███   ███  █   █ █████
-█   █ █   █ █   █ █   █ ██  █   █
-█   █ █   █ █     █   █ ██  █   █
-█   █ █████ █     █████ █ █ █   █
-█   █ █   █ █     █   █ █  ██   █
- █ █  █   █ █   █ █   █ █  ██   █
-  █   █   █  ███  █   █ █   █   █
-```
-
-</details>
-
 # Vacant
 
-**An accountability layer that wraps any AI agent: run the client's executable acceptance tests,
-decide whether to ship, and sign every step into a receipt.**
+**Vacant is not a mandatory layer wrapped around an agent, and it is not another agent
+framework. It is a receiving desk: a delivery without a verifiable receipt is not
+accepted. Because it looks only at the deliverable and does not care how the agent ran,
+output from any framework can be fed into it.**
 
-Vacant is an **accountability layer** for AI agents: it runs the client's own **executable acceptance
-tests**, gates delivery on the result, and signs every attempt into a **hash chain** of verifiable
-**signed receipts**. Every measurement is **pre-registered**, and the headline comparison was re-run as
-**five same-bank replications** plus a four-set cross-benchmark run on **LLM code generation**
-(LiveCodeBench, HumanEval+, MBPP+); **all five are listed below one by one**, never pooled into a single
-number.
+It runs the customer's own executable acceptance tests, decides ship-or-refuse on the
+result, and signs every attempt — failures included — into a hash chain anyone can
+re-verify offline. Making it the **single exit on a machine** takes containers, ACLs or
+egress policy — that is the deployment layer's job, not Vacant's
+(`vacant/controller.py:7-8` has said so verbatim all along; it had simply never appeared
+in anything outward-facing).
 
+An existing pattern, not one we invented: supply-chain security does the same thing with
+**in-toto / SLSA / Sigstore** — an artifact without a valid attestation is rejected at intake.
+
+```bash
+pip install vacant-network        # the library (the import name is still `vacant`)
+```
+
+[![PyPI](https://img.shields.io/pypi/v/vacant-network?color=f26b1d)](https://pypi.org/project/vacant-network/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-f26b1d)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT-f26b1d)](LICENSE)
-[![tests](https://img.shields.io/badge/tests-1507%20collected%20%2F%2068%20files-f26b1d)](tests)
-[![runs](https://img.shields.io/badge/runs-110%20real__run%20%2F%20646%20entries-f26b1d)](runs/INDEX.md)
-[![receipts](https://img.shields.io/badge/receipts-9%2C841%20verified%20%2F%200%20failed-f26b1d)](ops/gain/replay)
-[![pre-registered](https://img.shields.io/badge/pre--registered-Holm%20%2B%20complete--case-f26b1d)](DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md)
+[![deps](https://img.shields.io/badge/runtime%20deps-3-f26b1d)](pyproject.toml)
+[![tests](https://img.shields.io/badge/tests-86%20files-f26b1d)](tests)
+[![receipts](https://img.shields.io/badge/receipts-0%20failed-f26b1d)](ops/gain/replay)
+[![for AI](https://img.shields.io/badge/for%20AI-AGENTS.md-f26b1d)](AGENTS.md)
 
-> **The premise sentence (every delivery-effect claim must carry it)**
-> The whole thing rests on "requirements can be compiled into executable acceptance tests."
-> Where requirements cannot be executed, this mechanism has no free judge and degenerates into
-> "ask another model" — which is exactly the thing that measured badly.
-> (English rendering of the verbatim Chinese in `DECISION_20260903_R440P_CONFORMANCE_GATE.md` §5-1.)
+> **The premise. Every delivery claim must be quoted together with it.**
+> All of this rests on "the requirement can be compiled into an executable acceptance
+> suite". Where the requirement will not run, this mechanism has no free referee and
+> degrades into "ask a model" — which is exactly the thing that measured badly.
+> (Verbatim from `DECISION_20260903_R440P_CONFORMANCE_GATE.md` §五-1.)
+
+**The integration contract for AI agents is [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md)**
+(index: [`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt)). The lower half of this page,
+[§For AI](#for-ai), is the prose version of the same contract.
 
 ---
 
-## In 60 seconds
+## 30 seconds: watch the gate refuse a delivery
+
+No setup, no model endpoint, no API key, no network.
+
+```bash
+pip install vacant-network
+vacant demo gate
+```
+
+**No clone needed.** (Since 2026-09-18 the gate's judgement layer lives inside the package —
+the same one copy, not a duplicate: `ops/gain/r530/*` now re-exports `vacant/vrun/*`, and the
+R530 experiments run that same code.)
+
+A fake agent declares it is done; the customer's acceptance suite says otherwise
+(excerpt of a real run; `$HOME` shortened to `~`, everything else verbatim):
+
+```
+$ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
+    --suite ~/.vacant-run/demo-gate/tests_visible --run-dir ~/.vacant-run/demo-gate/receipts -- …
+  Done. I have created solution.py with add() and multiply().
+  All requirements are implemented and the code is ready to use.
+  [vacant run] RUN-ON　拒交（visible_fail）　ws e5241309c23b→76c38272981f　wire 0 通　收據 ~/.vacant-run/demo-gate/receipts
+  test_visible.py::check_mul — exception: ImportError: cannot import name 'mul' from 'solution' (~/.vacant-run/demo-gate/receipts/_frozen_RUN-ON/solution.py) [test_visible.py:7: from solution import mul]
+
+  agent exit code     : 0     <- the agent says it succeeded
+  customer acceptance : 1/2 passed
+  verdict             : refused (visible_fail)
+  vacant run exit code: 20    <- the exit code reflects the verdict, not the agent's claim
+  receipt             : a 2-entry Ed25519 signature chain
+```
+
+(The CLI's own summary line is in Chinese: `拒交` = refused, `收據` = receipt, `通` = calls.)
+
+**The agent said it was done. The customer's acceptance said it was not.** Without Vacant,
+that `solution.py` would already have shipped.
+
+Every number on that screen is produced on the spot: the fake agent is a real subprocess,
+the gate is `vacant/vrun/acceptance.py` (the very file the R530 experiments run), that
+`ImportError` is the exception the acceptance driver actually caught, and `20` is the real
+exit code of the `vacant run` subprocess.
+`vacant/vrun/demo.py::_assert_not_a_performance` and
+[`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
+stop it from ever degrading into printed string literals. The receipt is verified on the spot
+with the same verifier; you can re-verify it yourself:
+
+```bash
+python3 -m vacant.vrun.verify_receipts --selftest      # first prove the verifier catches broken chains
+python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
+```
+
+(After a clone, `python3 ops/gain/replay/verify_run_receipts.py …` is **the same file** —
+that path is now a re-export, and it is what verified the R460R / R529 / R532 chains.)
+
+### What still needs a clone (named, not hand-waved)
+
+`vacant demo gate`, `vacant run` and receipt verification **do not**. These do:
+
+| Needs a clone | Why it is not in the wheel |
+|---|---|
+| [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh) (V3 egress blocking) + `verify_egress_block.py` | A root-once **operations action**, not a product feature; it rewrites the whole machine's network rules |
+| `ops/vacantrun/selftest.py` | End-to-end self-check; it reads the repo's `runs/` |
+| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh) (pi／Codex／OpenCode wiring) | Those three keep the base url in a **config file**, so the wiring is a shell snippet, not a product feature. Frameworks that read env vars (Claude Code; OpenCode via its built-in provider) need **no wiring** at all. Per-cell measurements: [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
+| `ops/gain/**`, `runs/**` | The R529 / R530 / R532 / R534 runners, task banks, **hidden acceptance suites**, judge, scheduler and on-disk data. **Re-computing the experiment numbers requires a clone** (see "Run from source" below) |
+| `examples/**`, `decisions/**`, `docs/**` | Exhibit pieces, verdict records, spec documents |
+
+⚠ Not shipping a top-level `ops` package is deliberate: on PyPI, `ops` is Juju's package, and
+**the name collision would silently overwrite files** in someone else's `site-packages`.
+
+---
+
+## Wire up your own agent
+
+Whatever you normally type to run your agent goes after `--`; `vacant run` does not need to
+know which framework it is:
+
+```bash
+vacant run --suite ../tests_visible -- <however you normally run your agent>
+```
+
+⚠ **The suite directory must not live inside the workspace** (both `--suite` and `--run-dir` are refused with `SystemExit`): checks the agent can edit are not checks. Copy a second copy in if the agent should see them.
+
+The trigger is **the moment the agent process exits** — not recognising "I am done" on the
+wire. That signal is 100% reliable, needs zero protocol knowledge and costs zero tokens.
+Exit codes: `0` shipped, `20` refused, `22` `infra_void`. Full usage and on-disk shape in
+[`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md).
+
+**What "one switch" actually means.** `vacant run` redirects the model channel to its own
+proxy through **one list of environment variables**
+([`vacant/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant/vrun/envmap.py):
+the OpenAI family, the Anthropic family, OpenRouter, Groq, Together, DeepSeek, Ollama,
+LM Studio, …) — **that list covers most frameworks; a framework that reads a config file
+needs its config file changed.** Measured: pi (`@earendil-works/pi-coding-agent`) keeps its
+provider `baseUrl` in `models.json`, and for built-in providers the baseUrl is even compiled
+into the bundle — environment variables have no effect at all on that path. For such a
+framework, pin a port with `--port` and point its config file at it.
+
+⚠ **"I set the environment variable" is not evidence of mediation. `requests_seen` is.**
+Self-check:
+
+```bash
+vacant run --allow-no-suite --run-dir /tmp/vr -- <your agent command>
+python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['requests_seen'])"
+# non-zero -> the model channel really went through Vacant; 0 -> not mediated
+#             (config-file framework, or that run made no model call at all).
+```
+
+A variable missing from the list means that path was not mediated — **and there is no error
+message**. That is V0's known residual risk.
+
+### Three boundaries that belong on this screen, not in an appendix
+
+1. **The proxy alone is only L3.** It proves "these bytes went through me"; it does not stop
+   the agent from opening its own connection. "The agent cannot escape" is only true with
+   egress blocking on top
+   ([`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh),
+   root once; **that script only exists in a repo checkout** — see "What still needs a clone"
+   above). `vacant/controller.py:7-8` applies verbatim: it cannot stop the same OS user
+   from bypassing this command.
+2. **What is mediated is the model channel, not the agent's behaviour.** Actions the
+   framework starts by itself — auto-lint, git checkpoints, built-in retries, local tool
+   calls — never touch the model channel, so the proxy neither sees nor blocks them. The
+   receipt can say what happened on the model channel and what the workspace ended up as;
+   it cannot say what the agent did.
+3. **Acceptance is a one-sided guarantee.**
+   [`vacant/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant/suitegauge.py)
+   verbatim: blocking known-bad solutions does **not** prove the suite covers the real
+   requirement. `accepted=true` only means "the few checks the customer wrote down passed".
+   Measured: across R532's 836 tasks the gate accepted 811, of which 120 (14.8%) passed the
+   visible suite but failed the hidden one.
+
+The remaining boundaries (TOCTOU, the logging gap of the Responses API with `store:true`,
+models that never touch HTTP, Bedrock SigV4, why we do not do transparent MITM) are in
+[`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md) §4.
+**Not one of them has been left out.**
+
+---
+
+## Library quickstart (no clone)
+
+No model call, no network.
+
+```python
+from vacant.checks import run_python_check
+from vacant.identity import Identity, PublicIdentity
+from vacant.logbook import Logbook
+
+# 1) Acceptance: the tests run in the runner process, the candidate in a separate worker
+tests = "assert solve([1, 2, 3, 4]) == 6\nassert solve([]) == 0\n"
+good  = "def solve(nums):\n    return sum(n for n in nums if n % 2 == 0)\n"
+cheat = "def solve(nums):\n    import os; os._exit(0)\n"      # tries to fake "all tests passed"
+
+print(run_python_check(good,  tests, allowed_entry_points=("solve",)))   # True
+print(run_python_check(cheat, tests, allowed_entry_points=("solve",)))   # False
+
+# 2) Receipts: every attempt is signed into an append-only hash chain
+me, book = Identity.generate(), Logbook()
+who = PublicIdentity(vacant_id=me.vacant_id, pub=me.pub)
+book.append("attempt", {"draft": "sha256:aaa", "visible_ok": False}, me, ts_ms=1_700_000_000_000)
+book.append("attempt", {"draft": "sha256:bbb", "visible_ok": True},  me, ts_ms=1_700_000_000_001)
+book.append("shipped", {"accepted": True, "draft": "sha256:bbb"},    me, ts_ms=1_700_000_000_002)
+print(book.verify_chain(who))                                            # True
+
+# 3) Tamper with an interior entry -> verification fails
+import copy
+from vacant.logbook import LogEntry
+forged = Logbook([copy.deepcopy(e) for e in book.entries])
+e = forged.entries[1]
+forged.entries[1] = LogEntry(e.stream_id, e.branch_id, e.seq, e.prev_hash, e.ts_ms, e.type,
+                             {"draft": "sha256:aaa", "visible_ok": True}, e.sig)  # False -> True
+print(forged.verify_chain(who))                                          # False
+
+# 4) Honest boundary: a truncated tail is a valid prefix, and this does NOT catch it
+print(Logbook(list(book.entries[:2])).verify_chain(who))                 # True <- not detected
+```
+
+Step 4 is not a demonstration of a bug; it is **the boundary of this chain**.
+`verify_chain` checks sequence continuity, `prev_hash` linkage and per-entry signatures.
+There is **no length commitment and no external anchor**, so a valid prefix verifies — a
+**truncation / omission attack** (Ma & Tsudik 2009). The chain gives **integrity (nothing
+was altered), not completeness (nothing is missing)**. If you need truncation-evidence you
+must publish heads (`Logbook.head()`) externally or have them countersigned — Vacant will
+not do it for you.
+
+```bash
+vacant --help                     # CLI available after install
+```
+
+---
+
+## You do not have to trust us
+
+A system that claims accountability and cannot be checked from outside has no content.
+**An outside user can run all four of these**, without believing anything we say:
+
+| What to check | Run it yourself | Why that is enough |
+|---|---|---|
+| The receipt chains were not touched | `verify_run_receipts.py --selftest` (negative controls first), then `--glob 'runs/g_r532_*'` | First prove the verifier catches a broken chain, then point it at the real ones. R532: **86 chains, 3,895 entries, 0 failures** |
+| The tasks were not cherry-picked | [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | Bank sha256 is pinned; date windows and known-bad tasks are in [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) |
+| The conclusions are not the analyzer's invention | Count `runs/g_*/rows.jsonl` yourself | One row = one task on one arm; `deliv = accepted AND meets_demand` |
+| Whether we are hiding mistakes | [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) and the honest boundaries below | Refuted claims are kept; **so are the coverage gaps we found in our own audit** (boundary 3) |
+
+---
+
+## The idea in 60 seconds
 
 Three steps: **acceptance → gate → receipt**.
 
 ```mermaid
 flowchart LR
-  A["Requirement<br/>prompt + the client's executable acceptance tests"] --> B["Any agent<br/>writes one candidate"]
-  B --> C{"Acceptance<br/>run visible_check in a sandbox"}
-  C -- "pass" --> D["Ship<br/>accepted = true"]
-  C -- "fail: resample, or paste the failure text back and revise" --> B
-  C -- "budget exhausted, still failing" --> E["Refuse<br/>accepted = false (a refusal counts as a failure)"]
-  D --> F["Receipt<br/>every attempt signed into a hash chain"]
+  A["requirement<br/>prompt + the customer's own executable acceptance suite"] --> B["any agent<br/>writes a candidate"]
+  B --> C{"acceptance<br/>run visible_check in a sandbox"}
+  C -- "passes" --> D["ship<br/>accepted = true"]
+  C -- "fails: try another, or paste the failure back and revise" --> B
+  C -- "budget exhausted, still failing" --> E["refuse<br/>accepted = false (a refusal counts as a failure)"]
+  D --> F["receipt<br/>every attempt signed into the hash chain"]
   E --> F
-  F --> G["Offline re-verification<br/>verify_chain / recomputed in the browser"]
-  H["hidden_check<br/>scored only afterwards"] -. "V/GT separation: neither selection nor feedback touches it" .-> C
+  F --> G["offline re-verification<br/>verify_chain / recomputed in the browser"]
+  H["hidden_check<br/>scored only after the fact"] -. "V/GT separation: neither selection nor feedback touched it" .-> C
 ```
 
-1. **Acceptance**: the client's acceptance suite is **data, not code** (`SuiteSpec` = entry point plus
-   literal `(args, expected)` pairs); the executor only runs code its own renderer produced. Before it
-   goes on-chain it must pass the gauge: the reference solution passes ∧ every known bad stub is caught.
-2. **Gate**: ship only what passes acceptance; if nothing passes within budget, **refuse** — and a
-   **refusal counts as a failure** (the denominator is all tasks).
-3. **Receipt**: every attempt (not just the successful one) is signed into an append-only hash chain;
-   anyone holding the public key can re-verify it offline. In the multi-party version, k keys each run
-   and each sign, and a disagreement **names which key** dissented.
+1. **Acceptance.** The customer's suite is **data, not code** (`SuiteSpec` = entry point
+   plus literal `(args, expected)`); the executor only runs code it rendered itself. Before
+   a suite goes on the chain it must clear a gauge: the reference solution passes **and**
+   every known-bad stub is rejected.
+2. **Gate.** Only what passes ships. If nothing passes within budget, the delivery is
+   **refused**, and a refusal counts as a failure (the denominator is every task).
+3. **Receipt.** Every attempt — not only the successful one — is signed into an append-only
+   hash chain that anyone holding the public key can re-verify offline. The multi-party
+   version has k keys each running and signing independently; disagreement **names the key**.
 
 ---
 
-## What was measured
+## Current results
 
-**Every number carries its denominator, and all of them sit under the premise sentence above.**
-The single entry point for numbers is
-[`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md); the single source of truth
-for verdicts is [`examples/verdicts.py`](examples/verdicts.py).
+**Every number carries its denominator, and all of them sit under the premise above.**
+Single entry point for numbers: [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md).
+Single source of truth for verdicts: [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py).
 
-### A. Five same-bank replications (LCB v2, 120 tasks, gemma-4-12b-it-qat, six arms interleaved, five-call equal budget)
+### The headline, in one sentence
 
-| Arm | R460 main run | r1 | r2 | r3 | r4 | r5 |
-|---|---:|---:|---:|---:|---:|---:|
-| Single shot (OFF) | 58.33% | 57.50% | 54.17% | 57.50% | 51.67% | 51.26% |
-| Gate + resample (CONFORM) | 70.83% | 71.67% | 72.50% | 75.00% | 70.83% | 70.94% |
-| Five-way vote (OFF5) | 65.00% | 60.83% | 61.67% | 59.17% | 66.67% | 68.64% |
-| Loop (H-MIX) | 84.17% | 77.50% | 76.67% | 75.83% | 73.33% | 74.79% |
-| **H-MIX − CONFORM** | **+13.33 pp** | +5.83 | +4.17 | +0.83 | +2.50 | +4.31 |
-| b/c | 22/6 | 15/8 | 17/12 | 12/11 | 13/10 | 14/9 |
-| 95% interval (unadjusted) | [4.22, 19.46] | [−2.79, 12.89] | [−5.35, 12.80] | [−7.44, 8.89] | [−5.94, 10.28] | [−4.54, 12.01] |
-| Holm p_adj (family of 6) | 0.011 | 0.630 | 0.917 | 1.000 | 0.678 | 0.922 |
+**The bulk of the gain is the executable acceptance gate plus resampling — not the
+feedback loop.**
 
-Denominators are 120 throughout **except r5**: after the backend model crashed on 2026-09-13 it was
-JIT-reloaded with a 1-hour TTL (unloading every hour), producing 7 `infra_void` rows. The r5 column
-therefore uses **per-arm denominators** (OFF 119 / CONFORM 117 / OFF5 118 / H-PI 120 / H-OC 120 /
-H-MIX 119), and the primary metric H-MIX − CONFORM uses **complete-case n=116**; voided rows are not
-back-filled. (Source: `DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md` §8-1.)
+| Comparison | 12B (gemma-4-12b-it-qat) | 27B (qwen3.8-27b, non-thinking) |
+|---|---|---|
+| **gate+resample − one-shot** (Δ_G) | five same-task replications: **+14.17 / +18.33 / +17.50 / +19.17 / +18.97 pp** (n=120, every p_raw < 0.002) | 836 tasks, 5 sets, pooled: **+7.89 pp** [5.36, 10.04], p=3.0e-9 |
+| **loop − one-shot** (Δ_O) | **15/15 cells pass Holm**, +17.5 to +29.2 pp | **+4.67 pp** [1.75, 7.38], p=0.0015 (Holm p_adj 0.0030) |
+| **loop − gate+resample** (Δ_C) | five reps +5.83 / +4.17 / +0.83 / +2.50 / +4.31 pp, **0/5 pass Holm**; four cross-bank sets pooled +1.12 pp, Holm p_adj **0.341** | all five sets **negative** −5.83 / −5.19 / −16.67 / −1.28 / −0.54, pooled **−3.23 pp** [−5.52, −0.75], p=0.0101 |
 
-**The pre-registered claim rule, verbatim**: "5/5 same sign (Δ_C > 0) and ≥4/5 Holm-significant ⇒ you
-may write 'replication is stable'; otherwise list every replication as it came out." Same sign 5/5
-holds; Holm-significant **0/5** does not ⇒ **list every replication as it came out**. The only
-sentence available is:
+⚠ Δ_G is **outside the pre-registered family** (the family is Δ_C and Δ_O only), so its p
+is **not multiplicity-corrected** and it has no corrected interval. That sentence must
+travel with the number.
 
-> The five Δ_C values are +5.83 / +4.17 / +0.83 / +2.50 / +4.31 pp, of which **0 pass Holm**.
+### What may and may not be said
 
-Five things must appear in the same paragraph (leaving one out is cherry-picking):
-(1) five out of five have the same sign; (2) 0/5 pass Holm; (3) all five unadjusted intervals
-**intersect R460's [4.22, 19.46]** — by interval, not one replication is disjoint from R460;
-(4) all five upper bounds (12.89 / 12.80 / 8.89 / 10.28 / 12.01) are **below** R460's point estimate of
-13.33 (a description, not a test); (5) the power written down in advance — n=120 against +10 pp has
-power **0.43–0.63**, so **2–3 of five** were expected to pass; if the true effect really were +10 pp,
-seeing 0/5 has probability ≈0.007–0.06, i.e. **the lower tail** (a lower tail is not a disproof).
+**May be said: the loop beats one-shot, and that is stable.** 15/15 cells pass Holm on
+12B; +4.67 pp passes on 27B.
 
-**⚠ Do not quote "84%" on its own.** R460's 84.17% / +13.33 pp is a **single-run, upward-biased point
-estimate** (winner's curse: an estimate that can be declared significant is truncated above the MDE),
-and it **did not recur in any of the nine later measurements**.
-**Do not write**: replication is stable, mostly supported, replication failed, the effect vanished,
-equivalent, a tie, the loop is useless. **Do not** pool n, average, or pick one replication.
-`RULED_OUT` (r3) means **≥+10 pp is excluded**, not "any effect is excluded".
+**May not be said: the loop beats equal-budget resampling.** That is **not established**.
+On 12B all nine data points share a sign (+0.64 to +5.83 pp), but 0/5 pass Holm in the
+replications and the four-set pooled comparison has Holm p_adj 0.341. On 27B all five sets
+flip **negative** and the pooled comparison is significant. **Same sign with nothing
+passing correction is unresolved — it is neither a positive nor a negative result.**
+(Per-set power against +10 pp is only 0.14–0.55 at n=54–156.)
 
-**Two things that did hold in all five**:
-- **A loop beats a single shot**: H-MIX / H-PI / H-OC against OFF — **all fifteen cells pass Holm**
-  (+17.5 to +29.2 pp).
-- **False delivery (shipped but wrong) is lower for H-MIX than for CONFORM**: 5/5.
+The quotable state for the 27B run is **`RULED_OUT`**: on these 836 tasks, a practical gain
+of ≥ +2 pp for the loop over equal-budget resampling is excluded. **`EFFECTIVE` must not be
+quoted** — the pre-registered four-state table had no direction guard, so a significant
+result in the **opposite** direction was labelled `EFFECTIVE`, and the sentence that label
+authorizes is false on this data (`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md`
+AMEND1). "Reverse and significant" has **no pre-registered state to land in**, so no "the
+loop is harmful" conclusion is drawn either.
 
-### B. Cross-benchmark (R529: four mutually exclusive task sets, three real sources, three arms)
+**Honest boundary that must be written: the 27B run's own premise — "a stronger model" —
+is not supported by its own data.** The `OFF` arm is bare model strength with no harness:
+27B 74.8% vs 12B 75.2%, and **all three LiveCodeBench sets are worse** (−9.2 / −9.6 / −3.7
+pp); only the two EvalPlus sets are better. So what was measured is **a different model**,
+not a stronger one. "The loop stops helping once the model gets stronger" is not a
+sentence this data supports (AMEND2).
 
-| Task set | n | OFF | CONFORM | H-MIX | H−C (b/c) | H−O (b/c) |
-|---|---:|---:|---:|---:|---|---|
-| LCB v3 medium | 135 | 115/135 = 85.19% | 125/135 = 92.59% | 126/135 = 93.33% | +0.74 pp (6/5) | +8.15 pp (17/6) |
-| LCB v3 hard | 54 | 38/54 = 70.37% | 41/54 = 75.93% | 43/54 = 79.63% | +3.70 pp (5/3) | +9.26 pp (7/2) |
-| HumanEval+ | 156 | 129/156 = 82.69% | 147/156 = 94.23% | 148/156 = 94.87% | +0.64 pp (5/4) | +12.18 pp (24/5) |
-| MBPP+ | 371 | 277/371 = 74.66% | 295/371 = 79.51% | 299/371 = 80.59% | +1.08 pp (15/11) | +5.93 pp (31/9) |
-| **Pooled** | **716** | 559/716 = 78.07% | 608/716 = 84.92% | 616/716 = 86.03% | +1.12 pp (31/23, Holm **p_adj 0.341**) | +7.96 pp (79/22, Holm **p_adj 2.0e-8**) |
+**Banned phrasings**: replication failed, effect disappeared, equivalent, tied, majority
+supports, replication stable, the loop is useless, the trend is clear. Write the
+difference as a difference; do not write it as an *improvement*.
 
-- **Sayable**: the feedback loop's advantage **over a single shot** holds across benchmarks
-  (all four sets positive; pooled p_adj 2.0e-8).
-- **Sayable**: the feedback loop's advantage **over same-budget resampling** is **too small to measure**
-  on these four sets (+0.6 to +3.7 pp; pooled p 0.341).
-- **Not sayable**: "H-MIX beats resampling across benchmarks" — and equally **not** the reverse,
-  "H-MIX does nothing against resampling": **same sign but unresolved ≠ no difference**
-  (single-set power at n=54–156 against +10 pp is only 0.14–0.55).
-- HumanEval+'s denominator is **156, not 164** (8 tasks excluded by the sandbox envelope); two of the
-  four sets are difficulty slices of one source ⇒ **three real sources, not four**.
-- ⚠ **The two backends were not the same inference condition**: 1003 (LM Studio 0.4.24) had thinking
-  enabled for gemma-4, 1004 (0.4.17) did not — same model file, probe: 59 completion tokens
-  (53 reasoning) vs 2 (0). Paired primary metrics are unaffected (each block ran three arms on one
-  machine), but **per-set absolute values and token/tpc are a mixture of two inference conditions and
-  must no longer be quoted on their own**.
-  (Source: `DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md` §11.)
-
-### C. Where the gain actually comes from (audit judgement, not a pre-registered primary metric)
-
-Decompose "loop beats single shot" and **the executable acceptance gate plus resampling already takes
-most of it**:
-
-- CONFORM − OFF across the five replications: **+14.17 / +18.33 / +17.50 / +19.17 / +18.97 pp**
-  (all p_raw < 0.002, **uncorrected**); R529's four sets: +4.85 to +11.54 pp.
-- On the same data, H-MIX adds only +5.83 / +4.17 / +0.83 / +2.50 / +4.31 pp on top of CONFORM (0/5 pass Holm).
-- **A decomposition is not a causal claim**: CONFORM and H-MIX are two arms that each ran on their own,
-  not a two-stage "gate first, then loop"; "+14 pp from the gate, +4 pp from the loop" is **arithmetic
-  subtraction**, not a component the experiment separated.
-- **Majority vote loses to the gate**: OFF5 − CONFORM across five replications is
-  −10.83 / −10.83 / −15.83 / −4.17 / −1.74 pp — **5/5 same sign but only 3/5 significant**, and the two
-  cleanest runs (no co-tenancy on the backend) are the non-significant ones ⇒ **same sign, unresolved**;
-  it may not be written as "wins".
-
-### D. What the accountability layer itself was checked against
+### Scale and integrity (the R532 round)
 
 | Quantity | Number | Recompute it yourself |
 |---|---|---|
-| Receipt chains | **9,841 entries** (67 runs / 194 chains), every Ed25519 signature and chain link **verified, 0 failures, 0 broken chains** | `ops/gain/replay/verify_run_receipts.py --glob 'runs/g_r460r*'` (30 runs / 120 chains / 6,674 entries) **plus** `--glob 'runs/g_r529_*'` (37 runs / 74 chains / 3,167 entries); the two add up to 9,841 — `--glob` takes a single pattern, so one invocation cannot cover both |
-| V/GT separation (zero hidden-test leakage) | `--scope v2`: **67/67 blocks CLEAN**, 0 violations | `ops/gain/harness_vgt_audit.py --run <run> --bank <bank> --scope v2` (bank names: `evalplus` = MBPP+, `humanevalplus`, `lcb2`, `lcb3`) |
-| Teeth on the instrument itself | `--selftest` PASS, `--mutation-check` **9/9 caught** | `ops/gain/analyze_r529.py --mutation-check` |
-| Index has not drifted | `OK: index agrees with the data (290 dirs, 117 with summary.json)` | `ops/gain/build_runs_index.py --check` |
+| Scale | 5 task sets, **836 tasks**, **43 blocks**, 2,508 rows, **zero `infra_void`** | `ops/gain/r532/results_r532.json` |
+| Hidden-test leakage (**one arm only**) | V/GT `--scope v2`: **the H-MIX arm is 43/43 CLEAN** (199,019 fingerprints); `OFF` and `CONFORM` were **never scanned** (boundary 3) | `ops/gain/harness_vgt_audit.py --run <run> --bank <bank> --scope v2` |
+| Receipt chains | **86 chains, 3,895 entries**, every Ed25519 signature and link verified, **0 failures** | `python3 ops/gain/replay/verify_run_receipts.py --glob 'runs/g_r532_*'` |
+| The arbiter's own teeth | `--selftest` PASS (12/12 hand-computed cases) | `python3 ops/gain/r532/analyze_r532.py --selftest` |
 
-⚠ The V/GT tool **only scans the H arms** and skips trivial needles (R460R r1–r3: 95,090 needles in
-total, 57,248 actually checked, 37,842 skipped = 39.8%) — **skipped is not checked**; the remainder is
-covered by manual sampling.
-⚠ Gauge v2 has **never been validated on a run that really did leak**; all negative controls are
-manually planted.
+⚠ **Do not write "V/GT is clean on all arms".** The tool structurally scans only the H arm
+(boundary 3) and skips trivial needles — **skipped is not checked**.
+⚠ That gauge has **never been validated on a run that really leaked**; every negative
+control is hand-planted.
 
----
-
-## What this is not
-
-- **Not an agent.** It wraps **any** agent: gate, receipt, multi-party attestation. Who writes the code
-  is not its business.
-- **Not a prompt trick.** The feedback template, truncation rules, sandbox and timeout of the three loop
-  arms are **verbatim identical** (ironclad rule KS-1 has an executable guard); the only difference is the
-  mechanism. R460's offline attribution puts the gain in the loop: Δ(final − first turn) landed at
-  **+16 to +19 pp** in both replays, while the pi-style arm's first-turn prompt effect is
-  **approximately zero (within ±2 pp, moving with replay machine load)**.
-  ⚠ The attribution is an offline recomputation (`--rescore-turn1`): **R460's two replays differ by 1–3
-  tasks per arm** (R460R r1's three local re-scorings differ by 1 task in 120); say which re-scoring a
-  number came from.
-- **Not "trust".** The register is **accountability / making your reliance well-founded**. Classic
-  definitions (Gambetta 1988, Mayer 1995) make "not depending on monitoring" a necessary condition of
-  trust — and monitoring is the entirety of this system, so the word "trust" is never used here.
-- **Not a security boundary.** `run_python` runs in a separate process with a temporary cwd, CPU limit
-  and timeout; it catches early `exit(0)`, reading the hidden tests out of the same file, and common
-  process/file APIs, but it is **not a complete malicious-code boundary**. Untrusted code belongs in a
-  container, gVisor, or a separate VM.
-- **Not a proof.** A demo may only say "an improvement is visible"; "proves an improvement" is reserved
-  for pre-registered batch runs, and both antecedents of C-3 in `docs/PREREG_V2.md` are still missing.
-
----
-
-## Architecture and code map
-
-| Layer | Modules | What it carries |
-|---|---|---|
-| L0 crypto | `vacant/canonical.py`, `identity.py`, `crypto.py` | the one serialization rule that makes signatures verify across machines; Ed25519 keypair + `vacant_id` (private key at the gateway; agent inference never sees the identity) |
-| L1 the ledger | `vacant/logbook.py`, `envelope.py`, `checkpoint.py`, `attest.py`, `receipt.py`, `trustcard.py` | append-only hash chain (`stream_id` = genesis hash, real `head()`); signed envelopes + `ReviewEnvelope`; V1 checkpoints that themselves form a chain; portable attestations and delegation receipts |
-| L2 accountability | `vacant/registry.py`, `reputation.py`, `router.py`, `auditor.py`, `memory.py`, `dashboard.py` | discovery + reputation index (**not** a central router); five-dimensional Beta keyed by (stream, branch, substrate) so credit follows the memory, not the body; one on/off switch; deterministic re-verification; MemoryManager M0/M1/M2; observatory (**the dashboard is not the source of accountability**) |
-| L3 banks and gauges | `vacant/codebench.py`, `suitespec.py`, `suitegauge.py` | MBPP+ (sha256-pinned, fixed 371-task subset) + LiveCodeBench v1/v2/v3 + HumanEval+; **the acceptance suite is data, not code**; the gauge = reference solution passes ∧ every known bad stub caught (**a one-sided guarantee**) |
-| L4 experiment rig | `ops/gain/gain_run.py`, `harness_arms.py`, `analyze_r460.py`, `analyze_r460r.py`, `analyze_r529.py`, `vacant/peerexec.py`, `record.py`, `research.py` | the nine-arm runner (OFF / ON / OFF5 / CONFORM / EQ5 / ONR + H-PI / H-OC / H-MIX); arbiters (four states, Holm, intervals, gatekeeping metrics, `--selftest` / `--mutation-check`); "execute together, don't review together" attestation layer; RECORD_SPEC evidence packs; McNemar + bootstrap + four pre-registered statistical functions |
-| L5 exhibition | `vacant/entrycost.py`, `examples/receipt_viewer_multiparty.html`, `examples/e10_mediator.py`, `examples/publish_*.py`, `examples/verdicts.py` | mechanism simulation (seconds-scale on site); offline single-file receipt viewer (r454's three chains, 5,579 entries); recomputation of the E10 routing sequences; publication scripts and the **single source of truth for verdicts** |
-
-**The nine arms**: `OFF` (single shot, 1.00 calls), `ON` (reputation routing + K=3 peer review + one
-revision, ≈5 calls), `OFF5` (five-way vote, 5.00), `CONFORM` (acceptance gate with early stop, 1.3–1.7, bank-dependent),
-`EQ5` (equal budget, always 5.00), `ONR` (routing isolated), `H-PI` / `H-OC` / `H-MIX` (three revision loops).
-**Why OFF5 has to exist**: ON beating OFF is nearly automatic because it spends five times the calls —
-claiming "the mechanism works" by comparing 1 call against 5 is passing cost off as mechanism.
-
----
-
-## Install and a minimal runnable example
-
-Python 3.11+. The only runtime dependency is `cryptography` (plus `mcp` for the MCP compatibility surface).
-
-```bash
-git clone https://github.com/cosmopig/Vacant.git
-cd Vacant
-python3 -m venv .venv
-.venv/bin/pip install -e '.[dev]'
-.venv/bin/python -m pytest tests/ -q      # 1,507 collected tests
-```
-
-### Things you can see with zero model calls
-
-```bash
-# 1) Receipt viewer (offline single file, opens over file://, zero external resources)
-open examples/receipt_viewer_multiparty.html     # Linux: xdg-open
-
-# 2) Re-verify receipt chains entry by entry (Ed25519 + chain links; it names the failing seq)
-#    --glob takes one pattern, so it takes two runs to cover all 9,841 entries (6,674 + 3,167)
-.venv/bin/python ops/gain/replay/verify_run_receipts.py --glob 'runs/g_r460r*'
-.venv/bin/python ops/gain/replay/verify_run_receipts.py --glob 'runs/g_r529_*'
-
-# 3) The arbiter's own teeth
-.venv/bin/python ops/gain/analyze_r460r.py --selftest
-.venv/bin/python ops/gain/analyze_r529.py --selftest
-.venv/bin/python ops/gain/analyze_r529.py --mutation-check
-
-# 4) The run index has not drifted
-.venv/bin/python ops/gain/build_runs_index.py --check
-```
-
-### To actually run the gate once (needs an OpenAI-compatible endpoint)
-
-```bash
-export VACANT_MCP_BASE=http://localhost:1234
-export VACANT_MCP_MODEL=your-model
-export VACANT_MCP_API=openai
-
-.venv/bin/vacant run \
-  "Write solve(nums), returning the sum of all even integers." \
-  --test "assert solve([1, 2, 3, 4]) == 6" \
-  --test "assert solve([]) == 0"
-```
-
-The flow: generate at most three times (only redo when the previous draft failed the objective check) →
-signed peer review by other residents plus a deterministic auditor re-running the check → an Ed25519
-receipt bound to task / check / answer / trust card → **re-run the check locally**; the gate passes only
-if everything holds. `--agent` or `--agent-argv` hands the verified delivery to a downstream CLI agent
-(JSON argv, `shell=False`, no placeholder allowed in `argv[0]`).
-
-⚠ **Only `equals`, `json_schema` and `run_python` are strong enough to authorize an agent launch.**
-`contains` / `regex` are fine for exploration but cannot carry a delivery.
-
----
-
-## Recompute it yourself
-
-```bash
-# The five-replication aggregate (--selftest pins known answers on R460's six blocks)
-python3 ops/gain/analyze_r460r.py --reps 1 2 3 4 5 --bank lcb2 --json /tmp/r460r.json
-
-# R460's six-arm settlement
-python3 ops/gain/analyze_r460.py \
-  --run runs/g_r460_harness_lcb2_{a1,a2,a3,b1,b2,b3} \
-  --bank lcb2 --rescore-turn1 --json /tmp/r460.json
-
-# The four cross-benchmark sets
-python3 ops/gain/analyze_r529.py --json /tmp/r529.json
-
-# V/GT audit (v2 should be CLEAN everywhere; --scope v1 reproduces R460's 90 false positives verbatim)
-# ⚠ MBPP+'s bank name is `evalplus`. `--bank` has no choices list, so a wrong name falls through to the
-#   builtin infinite generator: no error, the command just hangs.
-python3 ops/gain/harness_vgt_audit.py --run runs/g_r529_mbpp_a1 --bank evalplus --scope v2 --out /tmp/vgt.json
-
-# The two E10 routing sequences (the exhibition's main visual; reads archived JSONL only, zero GPU time)
-python3 examples/e10_mediator.py
-
-# The 8-bit wordmark at the top of this README (rebuild = re-run the generator; never hand-edit the SVG)
-python3 docs/assets/make_vacant_8bit.py --check
-```
-
-⚠ `examples/e10_mediator.py` reads an archived dataset that lives in iCloud, **not in this repo**;
-outside users cannot run it, and that is expected, not a bug.
-⚠ The **136 `_analysis_*` directories under `runs/` are derivatives, not evidence** — their input is
-`runs/g_*/rows.jsonl`, so citing them as raw data feeds your own conclusion back to you. Read
-[`runs/INDEX.md`](runs/INDEX.md) before citing any run.
-⚠ The `PREREG` constant in `ops/gain/analyze_r447.py` must not be edited — it is somebody else's
-pre-registration.
+**To re-run the whole thing**, see [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md).
 
 ---
 
 ## Honest boundaries
 
-1. **The premise (it overrides everything below)**: requirements must compile into executable acceptance
-   tests; requirements that cannot be executed have no free judge.
-2. **n is not enough**: LCB v2 at n=120 only separates differences of roughly 12 pp; getting the interval
-   to ±5 pp would need 278 tasks.
-3. **Bank properties**: "visible filtering is lossless" is partly a property of these banks (in MBPP+ and
-   LCB the `hidden_check` structurally contains the visible one). Where the acceptance suite is not a
-   subset of the real requirement, refusals will kill good answers.
-4. **The five replications share the same 120 tasks**: the seed only changes task order, persona
-   assignment and sampling — **not the tasks** ⇒ task-level effects are perfectly correlated across the
-   five, so bank idiosyncrasy cannot be replicated away.
-5. **The five runs did not see the same backend load** (co-tenancy with another run at 8.5 / 71.3 / 2.1 /
-   0 / 0%; r5 straddles a model crash and four unloads) — described, not corrected for, and **differences
-   between replications must not all be attributed to sampling**.
-6. **Two backends = two inference conditions** (thinking / non-thinking), not merely two version numbers.
-7. **Majority vote has a mathematical bound**: it tolerates at most ⌊(k−1)/2⌋ corrupt executors; past
-   that the naming flips, and **the mechanism cannot know which side of the threshold it is on**.
-8. **No defence at all against a corrupt acceptance suite**: replace the suite with "if it imports, it
-   passes" and every vote is honest, every chain verifies, every indicator is green — while the system
-   ships garbage. The residual is always reported as **two numbers**: realizable +2.72 pp, hindsight
-   upper bound +4.35 pp.
-9. **The renderer and the sandbox remain trusted inputs**: trust is relocated, not abolished — a buggy
-   renderer makes k machines wrong **consistently**, and the dispute rate stays 0.
-10. **A signature identifies a key, not a subject**: a receipt proves "this key said this and it was not
-    changed afterwards", **not** "this is true".
-11. **Same-origin / Sybil resistance raises cost; it does not prevent**: **minting a new identity
-    currently costs nothing** — that is the boundary of the mechanism, not a parameter to tune.
-12. **Key custody is a deployment assumption**: where the same OS user or root can read the private key,
-    software cannot prevent forgery.
-13. **The software gate only covers processes the controller launched**: running the downstream agent
-    directly bypasses it, by construction.
-14. **The Windows sandbox does not run** (the non-posix branch of `vacant/checks.py`); the exhibition
-    machine is a Linux VM, so this does not affect it.
-15. **`g_*` run directories are not RECORD_SPEC evidence packs**: only `blayer_1000_v2` and `v3` currently
-    satisfy every required item.
-16. **An evidence pack guarantees internal consistency, not truth**: `SHA256SUMS` **detects** tampering
-    after the fact; it does not **prevent** it.
+Part of the specification, not a disclaimer. Quote them with the numbers.
 
-The full list (B0–B20, H1–H9, and each settlement's own boundaries) is in
-[`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md) §4.
+1. **The premise, overriding everything below.** The requirement must compile into an
+   executable acceptance suite; where it will not run, there is no free referee.
+2. **Vacant is not a mandatory layer that takes effect merely by being installed.** As a
+   library (`vacant/agent.py:51-103`, `self.brain` is a public attribute) or as an MCP tool
+   (`vacant/mcp_server.py:184-210`, whose tool docstring only *persuades*), it is
+   **voluntary** — an agent that does not call it is not involved with it at all, and
+   nothing notices. Only as a controller (`vacant/controller.py:304-530`) or with the
+   harness owning the agent loop is it binding, and then only on the subprocess it spawns
+   itself. Verbatim, `vacant/controller.py:7-8`: *the guarantee covers only child processes
+   launched through this controller; it cannot stop the same OS user from running the agent
+   directly. A machine-wide single exit requires containers, ACLs, or egress policy.*
+   Nothing on this page may be read as more optimistic than that sentence.
+   Stated precisely: of Saltzer & Schroeder's (1975) three reference-monitor conditions,
+   Vacant satisfies **tamper-proof** and **small enough to be verified**, and does **not**
+   satisfy **complete mediation**. That is not a bug; it is the unavoidable consequence of
+   something being optional. Calling it a mandatory layer would be a lie.
+3. **We said something wrong; this is the correction, with the result of the sweep that
+   followed it.** We wrote that R532 was "V/GT 43/43 CLEAN". **That statement is false.**
+   `ops/gain/harness_vgt_audit.py:746` reads `if arm not in VARIANTS: continue`, and
+   `ops/gain/harness_arms.py:65` sets `VARIANTS = ("HPI", "HOC", "HMIX")` — so the
+   **classical seven arms, `OFF` and `CONFORM` included, were never scanned at all**; every
+   block's `per_arm` contains only `{'HMIX': N}`. The accurate statement at the time was
+   "**the H-MIX arm is 43/43 CLEAN; the other two arms are unaudited**". The fix includes
+   **changing the default to a full audit**, verbatim reason: *a green light obtained by
+   forgetting to pass a flag is exactly the condition that let this hole exist.*
+   **The retroactive sweep completed on 2026-09-18** and landed in
+   `ops/gain/vgt_retro_audit_20260918.json` (`generated_at` 2026-09-18T11:58:32+0800, scope
+   `v3` = ten arms, per-arm fail-closed). Every number below can be recounted from that file:
+   - **179 archived runs: 165 CLEAN / 10 UNVERIFIABLE / 4 VIOLATION**, with
+     **3,486,403** needles checked.
+   - The four batches we cite outwardly are **CLEAN on every arm**:
+
+     | Batch | Blocks | Records audited per arm |
+     |---|---:|---|
+     | R460 | 6/6 | OFF 120, CONFORM 196, OFF5 602, HPI 187, HOC 283, HMIX 163 |
+     | R460R | 30/30 | OFF 608, CONFORM 1029, OFF5 3032, HPI 958, HOC 1488, HMIX 890 |
+     | R529 | 37/37 | OFF 717, CONFORM 936, HMIX 844 |
+     | R532 | 43/43 | OFF 836, CONFORM 1122, HMIX 1144 |
+
+   - **R532's `CONFORM` arm — 1,122 records — was dynamically audited for the first time,
+     with zero violations.** CONFORM is the subtrahend of Δ_C; while only HMIX was scanned,
+     the rival reading "a CONFORM leak would push Δ_C more negative, the same direction as
+     observed" could not be ruled out. **It can now.**
+   - **All 10 UNVERIFIABLE** are aborted runs with preflight only and zero arm records, so
+     there is nothing to audit. **That is an honest verdict, not a breakage** —
+     `UNVERIFIABLE` is neither "clean" nor "dirty".
+   - **All 4 VIOLATION are in R530** (`g_r530_s1_1004_1`, `g_r530_s2_1003_1`,
+     `g_r530_s2_1004_2`, `g_r530_s3_1003_1`), every one under the rule
+     `hidden_file_in_workspace`. Opened and compared, they are **the model's own
+     same-named test files**: sha256 differs from the pinned hidden tests; non-trivial-line
+     overlap is zero, or 2–3 lines of the form `got = solution.redact(line)`, which any test
+     would write; and **the same task yields entirely different content in s1 and in s2**
+     (real GT would be identical across runs). That rule assumes only the harness can place
+     such a file; **it did not anticipate a model naming its own test file `test_hidden.py`**.
+     Whether to tighten the criterion is **unresolved**.
+   Four boundaries must be read alongside those numbers — quoting only the good news is not
+   allowed: (a) **`CLEAN` guarantees only** that the **literal repr** of `hidden \ visible`
+   does not appear in the system/user text the harness itself wrote; **semantic paraphrase,
+   and whatever the excuse rules cover, this tool cannot detect**. (b) **The bank is
+   inferred** (`bank_inference` field), not recorded by the run — runs before R529 had no
+   `--record-bank-field`. (c) **The closing analyzers still read the old evidence**:
+   `analyze_r529.py`'s `vgt_gate()` and `analyze_r532.py`'s `gates_post()` read
+   `vgt_v2_<block>.json`, whose `per_arm` contains HMIX only ⇒ **the standing substitute
+   evidence is `vgt_retro_audit_20260918.json`; those two analyzers have not been updated,
+   so the gates have not all caught up**. (d) **The 179 are not all clean**: 4 VIOLATION and
+   10 UNVERIFIABLE remain, so "V/GT clean across arms" holds only for the four batches named
+   above, and only when stated together with the scope and these boundaries.
+   This whole passage stays — how the gap was found by us, how it was swept, and what is
+   left after the sweep — because it says more about whether accountability is workable than
+   any performance number does.
+4. **The gate guarantees "passed the tests that were written down", not "met the real
+   requirement".** Verbatim from `vacant/suitegauge.py:30-33`: blocking known-bad stubs
+   proves only that the suite does not pass everything; it **does not** prove the suite
+   covers the real requirement. Measured: of the 811 deliveries the gate accepted in R532,
+   **120 (14.8%) passed the visible suite and still failed the hidden check**. Ungated it
+   is 211/836 = 25.2%. The gate roughly **halves** false delivery; it does not remove it.
+5. **The chain gives integrity (nothing was altered), not completeness (nothing is
+   missing).** `vacant/logbook.py:168-195` checks sequence continuity, `prev_hash` linkage
+   and per-entry signatures — no length commitment, no external anchor — so **a valid prefix
+   verifies** (quickstart step 4). The literature has a name for this: a
+   **truncation / omission attack** (Ma & Tsudik 2009). Three things must be said together:
+   - **`vacant/checkpoint.py:144-155` has the same hole one level up.**
+     `verify_checkpoint_chain` only walks `prev_checkpoint_sig` backwards and requires the
+     first to be null; **drop the last few checkpoints and the rest still passes**
+     (measured: 4 of 4 pass, dropping the last 2 still passes, removing an interior one
+     fails, removing the first fails).
+   - **Signing the count into every entry does not help.** `seq` already *is* the count, and
+     every entry of a truncated prefix remains self-consistent. **A length commitment only
+     works if it is exogenous** — held by someone else, or timestamped before the truncation.
+   - To detect it, publish `Logbook.head()` externally or have it countersigned. Vacant does
+     not do this for you.
+6. **A signature identifies a key — not a person, and not the truth.** A receipt proves
+   "this key said this and it has not been altered since"; it does **not** prove the
+   statement is true (`vacant/peerexec.py:117-120`). On the product path the receipt is
+   signed by the **delivering party itself** (`vacant/ecosystem.py:641-642`), and the
+   private key is a plaintext PEM readable by the same OS user (`vacant/body.py:160` calls
+   `identity.save` with no passphrase). Key custody is a deployment assumption; software
+   cannot *prevent* forgery by root.
+7. **Not a security boundary.** `run_python` runs in a separate process, a scratch cwd,
+   under CPU limit and timeout; it blocks the common early `exit(0)`, same-file hidden-test
+   reads and process/file APIs, but it is **not** a complete malicious-code boundary.
+   Untrusted code belongs in a container, gVisor, or a separate VM. There is no working
+   Windows sandbox branch in `vacant/checks.py`.
+8. **Majority vote has a mathematical ceiling**: at most ⌊(k−1)/2⌋ corrupted executors.
+   Past that the mechanism inverts, and **it cannot know which side of the threshold it is
+   on**.
+9. **No defence against corruption of the acceptance suite itself**: replace the suite with
+   "it loads, therefore it passes" and every vote is honest, every chain verifies, every
+   metric is full — while the system ships garbage. The residual is always reported as
+   **two numbers**: +2.72 pp achievable, +4.35 pp hindsight ceiling.
+10. **The renderer and the sandbox remain trusted inputs.** Trust is relocated, not
+   abolished: a renderer bug makes k machines wrong **consistently**, and the dispute rate
+   stays 0.
+11. **Sybil resistance raises cost; it does not prevent.** Minting a new identity currently
+    costs nothing.
+12. **n is small.** LCB v2 at n=120 resolves roughly 12 pp differences; ±5 pp needs 278 tasks.
+13. **Bank characteristics.** "Visible filtering is lossless" is partly a property of these
+    banks. Where the acceptance suite is not a subset of the real requirement, refusal will
+    kill good answers.
+14. **The five replications share the same 120 tasks.** Seeds change ordering, persona and
+    sampling — not the tasks. Bank-specific effects do not replicate away.
+15. **Two backends are two inference conditions** (thinking / non-thinking), not just two
+    version numbers. Per-set absolute values and token counts are a mixture of the two.
+16. **Contamination cannot be ruled out.** HumanEval+ / MBPP+ (2021) are almost certainly in
+    every modern model's training set; a higher delivery rate **cannot be distinguished**
+    from "these tasks entered the training set".
+17. **An evidence pack is self-consistent, not true.** `SHA256SUMS` **detects** tampering
+    after the fact; it does not **prevent** it.
+18. **The reconciliation is same-origin.** The three reconciliation rules in
+    `ops/gain/replay/verify_run_receipts.py` (verdict count == row count, task_id sets equal,
+    attempt count >= verdict count) compare **two records written by the same process**. They
+    catch asymmetric omissions (bugs); they **cannot** catch both sides failing to write
+    together (malice). Real reconciliation requires at least one end held by a party with
+    different interests — that is not in place.
+19. **Not a proof.** A demo may say "you can see an improvement"; "proves an improvement" is
+    reserved for a pre-registered batch run.
+
+Full list in [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) §四.
+
+### Where it is fair to be strong
+
+These are true and have code behind them:
+
+- **The intake check cannot be routed around.** `vacant/receipt.py` plus
+  `controller.verify_delivery` **recompute five sha256 digests** (request, task, tests,
+  answer, trust card), verify the Ed25519 signature, compare `chain_head` / `stream_id` /
+  `branch_id` against the **chain as it stands right now**, confirm every review is bound to
+  this exact delivery, and only then `policy.admit`. The launch right is claimed with
+  `os.O_EXCL` (`vacant/controller.py:372`), so **a receipt can be consumed exactly once**.
+  Enforcement happens at **acceptance time**, not execution time — and that part really works.
+
+- **A self-report is never taken on faith.** The ecosystem runs the verifier itself
+  (`vacant/ecosystem.py:531`), and the controller runs it **again, independently**, before
+  launching anything downstream (`vacant/controller.py:299-300`).
+- **The acceptance sandbox is two processes.** Test code in the runner, candidate code in a
+  separate worker, talking over stdin/stdout with a nonce (`vacant/checks.py:577-600`,
+  `444-457`). Verbatim comment at `ops/gain/gain_run.py:957`: *"the candidate worker cannot
+  see this test code"*. The candidate **structurally cannot read the tests** — it is not a
+  blocklist.
+- **"Not measured is not passed" is written as code**:
+  `"all_pass": bool(total > 0 and passed == total)` (`vacant/vrun/acceptance.py:268`);
+  likewise the gauge requires `n_broken >= 1`, so an empty stub set cannot succeed vacuously.
+- **Refusal really happens**: in R532's 836 tasks the gated arm refused 25 deliveries and
+  the loop arm 68 — and refusals are in the denominator of every rate.
 
 ---
 
-## The physical exhibition
+## What it is not
 
-**The only deliverable is a physical exhibition. No thesis, no paper submission.** The question asked of
-any piece of work is "does this make a difference when a visitor is standing in front of it?" The hard
-constraints that follow each change a technical decision:
+- **Not an agent.** It stands at the delivery exit of *any* agent: gate, receipts, multi-party attestation.
+  Who writes the code is not its business.
+- **Not a prompting trick.** The three loop arms share verbatim identical feedback
+  templates, truncation rules, sandbox and timeouts (red line KS-1 has an executable
+  guard); the only difference is the mechanism.
+- **Not "trust".** The terminology is **accountability**. The classical definitions
+  (Gambetta 1988, Mayer 1995) put "acting without monitoring" into the necessary conditions
+  for trust, and monitoring is the entire content of this system.
 
-1. **Seconds-scale interaction**: a real model takes about 114 s per task — nobody waits for that on
-   site ⇒ the exhibit runs a mechanism simulation (`vacant/entrycost.py`) or a pre-computed replay, and
-   **the screen must say "this is a mechanism simulation"** — calling a simulation a proof is the
-   exhibition version of ironclad rule 5.
-2. **Runs offline, unattended**: assume no network and no docent; anything depending on an external
-   endpoint needs a fallback. (The same reason turned the harness's "doom-loop: ask a human" into an
-   automatic refusal.)
-3. **Prior work still matters, but the reason is that we must not tell visitors something false**: pulse
-   attacks were named in 2005 (Srivatsa) and entry fees were shown not to work in 2001 (Friedman &
-   Resnick) — we rediscovered these, we did not discover them.
-4. **Statistical power need not reach publication standards**: a counterfactual a layperson can read at a
-   glance matters more than a p-value.
-5. **Ethics is a front-line requirement, not an appendix**: the exhibition generates personas from real
-   people's data, and Hollanek 2024 points out that **donor consent is not enough — the people
-   interacting must be able to consent too**; a zoo is by nature something other people watch. The same
-   `logbook` / `checkpoint` machinery provides the exhibition's own consent and deletion proofs: proving
-   we keep our word with the very mechanism we are exhibiting.
+---
 
-The exhibit: [`examples/receipt_viewer_multiparty.html`](examples/receipt_viewer_multiparty.html)
-(4.48 MB, embedding three complete chains from the real r454 run = 5,579 entries; the browser verifies
-from genesis to head, recomputes each verdict / naming / shipping decision, and demonstrates that
-flipping a vote turns the signature red, that one missing honest vote produces a tie with no naming, and
-that changing a platform string does nothing at all). On the exhibition's Linux VM, headless Chrome
-renders it over `file://` in a measured **2.1 s**.
-**The docent must know**: that receipt (`Mbpp/100`, draft 0) is **the first lying cell in sort order, not
-a cherry-picked one**.
+## Architecture
+
+| Layer | Modules | What it carries |
+|---|---|---|
+| L0 crypto | `vacant/canonical.py`, `identity.py`, `crypto.py` | the one serialization every signature uses; Ed25519 keypair + `vacant_id` |
+| L1 ledger | `vacant/logbook.py`, `envelope.py`, `checkpoint.py`, `attest.py`, `receipt.py` | append-only hash chain (`stream_id` = genesis hash); signed envelopes; checkpoints that chain to each other |
+| L2 accountability | `vacant/registry.py`, `reputation.py`, `router.py`, `auditor.py`, `memory.py`, `dashboard.py` | discovery + reputation index, 5-dimensional Beta, on/off switch, deterministic re-audit (**the dashboard is not a source of accountability**) |
+| L3 banks and gauge | `vacant/codebench.py`, `suitespec.py`, `suitegauge.py` | MBPP+, LiveCodeBench v1–v3, HumanEval+; **acceptance suites are data, not code**; the gauge is two-sided (**one-sided guarantee**) |
+| L4 experiment | `ops/gain/*`, `vacant/peerexec.py`, `record.py`, `research.py` | nine-arm runner, arbiter (four states, Holm, intervals, `--selftest` / `--mutation-check`), attestation layer, RECORD_SPEC packs |
+| L5 exhibit | `vacant/entrycost.py`, `examples/receipt_viewer_multiparty.html` | mechanism simulation (sub-second on site), single-file offline receipt viewer |
+
+**Nine arms**: `OFF` (one-shot, 1.00 calls), `ON` (reputation routing + K=3 review + one
+revision, ≈5), `OFF5` (five-way vote, 5.00), `CONFORM` (acceptance gate with early stop,
+1.3–1.7), `EQ5` (equal budget, exactly 5.00), `ONR` (routing isolated), `H-PI` / `H-OC` /
+`H-MIX` (three revision loops).
+**Why `OFF5` and `EQ5` must exist**: `ON` beating `OFF` is nearly guaranteed because it
+spends five times the calls. Claiming "the mechanism works" from 1 call versus 5 is passing
+off cost as mechanism.
+
+---
+
+## Running from source
+
+The PyPI wheel **does not include `ops/`** (the experiment runner). Recomputing experiment
+numbers requires a clone.
+
+```bash
+git clone https://github.com/cosmopig/Vacant.git && cd Vacant
+python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
+.venv/bin/python -m pytest tests/ -q
+
+# things you can see with zero model calls
+open examples/receipt_viewer_multiparty.html                       # Linux: xdg-open
+.venv/bin/python ops/gain/replay/verify_run_receipts.py --glob 'runs/g_r532_*'
+.venv/bin/python ops/gain/analyze_r529.py --selftest
+.venv/bin/python ops/gain/analyze_r529.py --mutation-check
+.venv/bin/python ops/gain/r532/analyze_r532.py --selftest
+```
+
+⚠ The **136 `_analysis_*` directories under `runs/` are derived artefacts, not evidence** —
+their input is `runs/g_*/rows.jsonl`. Read [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) before citing
+any run.
+
+---
+
+# For AI
+
+The integration contract for coding agents. The **full version, with every signature and a
+machine-readable facts block, is [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md)**; the index is
+[`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt). What follows is the part you should not miss.
+
+## A. Which shape is actually binding
+
+| Shape | Entry point | Binding on the agent? |
+|---|---|---|
+| **Library** | `vacant.agent.Vacant` (`vacant/agent.py:51-103`) | **No — voluntary.** `self.brain` is a public attribute; code that does not call Vacant does not involve Vacant. |
+| **MCP tool** | `vacant.mcp_server` (`vacant/mcp_server.py:184-210`) | **No — persuasion only.** The `delegate` docstring says "THE PREFERRED PATH". A model that ignores it is not intercepted and nothing detects that. |
+| **Controller** | `VacantFirstController.delegate_then_run` (`vacant/controller.py:304-530`) | **Yes — for the subprocess it spawns itself.** Verified delivery first, then `shell=False` exec. |
+| **Harness owns the loop** | e.g. `ops/gain/r530/openwork_arms.py:642-696` | **Yes — the harness is the loop.** |
+
+**The right framing is "receiving desk", not "mandatory layer".** Enforcement happens at
+**acceptance time** — a delivery without a verifiable receipt is not accepted, and **that
+check cannot be routed around** (`vacant/receipt.py` + `controller.verify_delivery`
+recompute five sha256 digests, verify Ed25519, compare `chain_head`, and `os.O_EXCL` makes a
+receipt consumable exactly once). Enforcement does **not** happen at execution time: making
+Vacant the single exit on a machine takes containers, ACLs or egress policy, which is the
+deployment layer's job. Same pattern as in-toto / SLSA / Sigstore in supply-chain security.
+
+Precisely: of Saltzer & Schroeder's (1975) three reference-monitor conditions, Vacant
+satisfies **tamper-proof** and **small enough to be verified** and does **not** satisfy
+**complete mediation** — the unavoidable consequence of being optional, not a defect. With
+the library or MCP shapes the honest description is "the agent's verified work is
+accountable", not "the agent is constrained".
+
+## B. Where to intercept
+
+1. **Just a pass/fail bar** → call `vacant.checks.run_python_check`. No identities, no
+   chain, no configuration.
+2. **An audit trail of attempts** → add a `Logbook` and append every attempt.
+3. **A tamper-evident suite** → express it as a `SuiteSpec` and commit it with
+   `commit_suite_with_gauge` *before* any candidate exists. The executor then runs only the
+   code it rendered from the spec, so a supplier cannot disguise a program as a test.
+4. **k independent parties** → `peerexec.select_by_quorum`; disagreement names the key.
+
+   Three things the signatures do not tell you, and one of them costs you an afternoon:
+
+   - `drafts` elements are **`(code, worker_id)`** — source first, name second. Both are
+     `str`, so **swapping them is not a type error**: every "draft" fails the suite, the
+     panel agrees unanimously, and you get `refused=True` / `shipped_index=None` with
+     three chains that all verify. That is indistinguishable from the mechanism correctly
+     rejecting bad work — and refusal is a legitimate output of this system.
+     `select_by_quorum` applies a cheap **heuristic** shape check and raises
+     `peerexec.DraftOrderError` when the order looks reversed. It **has false negatives**
+     (both slots looking like code, or a draft with no newline and no `def `), so do not
+     read it as "the wrong order is always caught".
+   - `task` must carry **`entry_point`** (the function the suite exercises). The entry
+     point belongs to the *task*; the suite's copy is only checked against it. Without it
+     you get `SuiteSpecError(code="entry_point_unbound")` — **even when the `SuiteSpec`
+     you passed in declares `entry_point='solve'`**.
+   - A suite written as a mapping **requires `"v": 1`** (the spec version; 1 is its only
+     legal value):
+
+     ```python
+     suite = {"v": 1, "dialect": "mbpp", "entry_point": "solve",
+              "tests": [{"args": "[1, 2]", "expected": "3"}], "cmp": {}}
+     ```
+
+     Omitting it gives `bad_version:None`. `SuiteSpecError` carries `.code`
+     (machine-readable; this is what lands on the chain and in `refusal_reason`) and
+     `.hint` (human-readable). **Branch on `.code`, never on `str(exc)`.**
+5. **The agent must not be able to ship unverified work** → `VacantFirstController` plus an
+   OS boundary (§A).
+
+**What the agent has to cooperate with**: return code that **defines the declared entry
+point** (the gate calls `entry_point(*args)`; it does not read prose); **tolerate refusal**
+(an exhausted budget is a refusal, and shipping the last candidate anyway deletes the only
+thing the gate does); **never receive the hidden tests** (held-out data must not enter a
+prompt, a retry message or a lesson — feedback abstracts to the *shape* of the failure,
+red line A4).
+
+## C. Verifiable invariants
+
+- **I-1** Edits and interior deletions are caught; so is removing genesis.
+- **I-2** The candidate **structurally cannot read the test code** — separate processes, a
+  nonce-tagged literal-only RPC (`vacant/checks.py:577-600`, `444-457`).
+- **I-3** Self-reported success is never taken on faith (`ecosystem.py:531`, then
+  `controller.py:299-300` independently).
+- **I-4** "Not measured" is failure, in code:
+  `bool(total > 0 and passed == total)` (`vacant/vrun/acceptance.py:268`); the gauge
+  requires `n_broken >= 1`.
+- **I-5** The gauge is two-sided: the reference must pass **and** every known-bad stub must
+  be rejected.
+- **I-6** `suitespec.render(spec)` is deterministic, so `render_sha256` is comparable across
+  machines.
+- **I-7** Refusal really happens and is counted: R532, 836 tasks — 25 gated refusals, 68
+  loop refusals.
+
+## D. Boundaries that bite integrations
+
+All 19 above apply. The four that will bite you:
+
+- **H-1** The premise: no executable acceptance suite, no free referee.
+- **H-2** Passing the suite is not meeting the requirement
+  (`suitegauge.py:30-33`, one-sided guarantee). Measured: 14.8% false delivery even gated.
+- **H-3** The chain gives **integrity, not completeness**: it **does not detect truncation**
+  (a truncation / omission attack, Ma & Tsudik 2009). `checkpoint.py:144-155` has the same
+  hole. Signing the count into each entry **does not help** (`seq` already is the count; a
+  truncated prefix stays self-consistent) — a length commitment must be **exogenous**.
+  Publish `Logbook.head()` externally or countersign.
+- **H-5** **The published wheel has no default acceptance criterion.**
+  `suitegauge.default_runner` and `peerexec.sandbox_probe` delegate to
+  `ops.gain.gain_run.meets_demand`, which ships only in the git repository — it carries the
+  experiment's own sandbox import allow-list and `infra_void` semantics, and a second copy
+  of the acceptance criterion is exactly the drift both docstrings forbid. Without `ops/`
+  they raise `vacant.suitegauge.OpsRunnerUnavailable`, whose message contains the fix.
+  **Inject instead**: `gauge_suite(..., runner=my_runner)`,
+  `Executor.new(..., probe=my_probe)`, where
+  `runner(code, check_code, entry_point, timeout_s) -> (ok, message)`;
+  `vacant.checks.run_python_check` is a ready foundation.
+
+## E. Common mistakes
+
+| Wrong | Right | Why |
+|---|---|---|
+| `VACANT_ENDPOINT=http://host:8765` for the experiment runner | `VACANT_GAIN_API=http://host:8765/v1/chat/completions` | Three variables, three shapes. `VACANT_GAIN_API` (`ops/gain/brain_cline.py:134`) is the **full path**; `VACANT_ENDPOINT` (`vacant/substrate.py:171`) is a base URL; the CLI uses `VACANT_MCP_BASE` + `VACANT_MCP_MODEL` + `VACANT_MCP_API`, and the last must be exactly `responses` or `openai`. |
+| Gating on `contains` / `regex` | `equals` / `json_schema` / `run_python` | The first two are exploration checks; they cannot carry a delivery or authorize a launch. |
+| Recording only successes | Append every attempt | A success-only chain answers no interesting question. |
+| Reading a valid chain as "the work is correct" | Read it as "the record is unaltered" | Boundary 6: a signature identifies a key, not the truth. |
+| Reading a valid chain as "nothing is missing" | Publish heads or countersign | H-3: integrity != completeness. |
+| Using `seq` / an entry count as truncation protection | An exogenous length commitment (held elsewhere, or timestamped earlier) | `seq` is the count; a truncated prefix stays self-consistent. |
+| Treating `verify_run_receipts.py` reconciliation as an independent audit | Treat it as a same-origin self-check | Both sides are written by the same process: catches bugs, not malice. |
+| Calling Vacant a "mandatory layer" | "receiving desk": a delivery without a verifiable receipt is not accepted | It does not satisfy complete mediation; a machine-wide single exit is the deployment layer's job. |
+| `pip install vacant` | `pip install vacant-network` | `vacant` on PyPI is an unrelated DNS tool. The **import** name is still `vacant`. |
+| Catching `ImportError` around `Executor.new(id).attest(...)` | Inject: `Executor.new(id, probe=...)` | H-5; the exception is `OpsRunnerUnavailable`. |
+| Shipping the last candidate on exhaustion | Refuse, and count it as a failure | It deletes the only thing the gate does. |
+| Pasting hidden-test text into a retry prompt | Feed the *shape* of the failure | Red line A4; quoting held-out data invalidates the measurement. |
+| Calling it a "trust layer" | "accountability layer" | See above. |
+| Citing `runs/_analysis_*` as source data | Cite `runs/g_*/rows.jsonl` | Those 136 directories are **derived**; citing them feeds a conclusion back to itself. |
+
+## F. Machine-readable facts
+
+The full block is [`AGENTS.md` §9](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md#9-machine-readable-facts). Summary:
+
+```json
+{
+  "schema": "vacant.facts/1",
+  "package": {"pypi_name": "vacant-network", "import_name": "vacant", "version": "0.7.0",
+              "requires_python": ">=3.11",
+              "runtime_dependencies": ["cryptography>=42", "mcp>=1.26,<2", "jsonschema>=4.21"],
+              "license": "MIT", "console_script": "vacant", "module_count": 50, "test_files": 78},
+  "terminology": {"use": "accountability", "never_use": ["trust layer"]},
+  "enforcement": {"model": "receiving desk, not a mandatory wrapper and not an agent framework",
+                  "framework_agnostic": "operates on the deliverable, not on how the agent ran",
+                  "recommended_shapes": ["library", "mcp_tool", "controller"],
+                  "not_recommended_for_integrators": "harness_owns_loop",
+                  "enforced_at": "acceptance time", "not_enforced_at": "execution time",
+                  "prior_art": ["in-toto", "SLSA", "Sigstore"],
+                  "reference_monitor_Saltzer_Schroeder_1975": {
+                    "tamper_proof": true, "small_enough_to_verify": true,
+                    "complete_mediation": false},
+                  "library": "voluntary", "mcp_tool": "advisory",
+                  "controller": "binding on its own spawned subprocess only",
+                  "harness_owns_loop": "binding",
+                  "machine_wide": "requires container / ACL / egress policy"},
+  "chain_guarantees": {"integrity": true, "completeness": false,
+                       "truncation_attack": "not detected (Ma & Tsudik 2009)",
+                       "also_affects": "vacant/checkpoint.py:144-155",
+                       "seq_does_not_help": true,
+                       "fix": "an exogenous length commitment"},
+  "reconciliation": {"tool": "ops/gain/replay/verify_run_receipts.py", "same_origin": true,
+                     "catches": "asymmetric omissions (bugs)",
+                     "does_not_catch": "both sides omitting together (malice)"},
+  "headline": {
+    "gate_plus_resample_vs_one_shot_pp": {"12b_five_reps": [14.17, 18.33, 17.50, 19.17, 18.97],
+                                          "27b_pooled": 7.89},
+    "loop_vs_one_shot": {"12b": "15/15 Holm, +17.5..+29.2 pp", "27b_pooled_pp": 4.67},
+    "loop_vs_resample": {"status": "not established",
+                         "12b_reps_pp": [5.83, 4.17, 0.83, 2.50, 4.31], "12b_holm": "0/5",
+                         "27b_pooled_pp": -3.23, "27b_quotable_state": "RULED_OUT"},
+    "false_delivery_pp": {"ungated": 25.24, "gated": 14.80, "n": 836}
+  },
+  "retracted_claim": {
+    "was": "R532 V/GT 43/43 CLEAN (read as: across the run)",
+    "is": "the HMIX arm is 43/43 CLEAN; the classical seven arms, OFF and CONFORM included, were never scanned",
+    "cause": "ops/gain/harness_vgt_audit.py:746 skips any arm not in VARIANTS = (HPI, HOC, HMIX) at ops/gain/harness_arms.py:65",
+    "fix": "default changed to full audit: a green light obtained by forgetting a flag is the condition that let the hole exist",
+    "status": "retroactive sweep complete 2026-09-18T11:58:32+0800",
+    "evidence": "ops/gain/vgt_retro_audit_20260918.json",
+    "sweep": {
+      "scope": "v3 (ten arms, per-arm fail-closed)",
+      "runs": 179, "CLEAN": 165, "UNVERIFIABLE": 10, "VIOLATION": 4,
+      "needles_checked": 3486403,
+      "cited_batches_clean_per_arm": {
+        "R460": {"blocks": "6/6", "per_arm": {"OFF": 120, "CONFORM": 196, "OFF5": 602, "HPI": 187, "HOC": 283, "HMIX": 163}},
+        "R460R": {"blocks": "30/30", "per_arm": {"OFF": 608, "CONFORM": 1029, "OFF5": 3032, "HPI": 958, "HOC": 1488, "HMIX": 890}},
+        "R529": {"blocks": "37/37", "per_arm": {"OFF": 717, "CONFORM": 936, "HMIX": 844}},
+        "R532": {"blocks": "43/43", "per_arm": {"OFF": 836, "CONFORM": 1122, "HMIX": 1144}}
+      },
+      "newly_closed": "R532 CONFORM, 1122 records, first ever dynamic audit, zero violations; CONFORM is the subtrahend of delta_C, so the rival reading 'a CONFORM leak would push delta_C more negative, same direction as observed' is now ruled out",
+      "UNVERIFIABLE_detail": "all 10 are aborted runs with preflight only and zero arm records, so there is nothing to audit; UNVERIFIABLE is an honest verdict, neither clean nor dirty",
+      "VIOLATION_detail": {
+        "where": ["runs/g_r530_s1_1004_1", "runs/g_r530_s2_1003_1", "runs/g_r530_s2_1004_2", "runs/g_r530_s3_1003_1"],
+        "rule": "hidden_file_in_workspace",
+        "on_inspection": "the model's own same-named test files: sha256 differs from the pinned hidden tests, non-trivial-line overlap is zero or 2-3 lines of the form `got = solution.redact(line)`, and the same task yields entirely different content in s1 vs s2 (real GT would be identical across runs)",
+        "rule_assumption": "only the harness can place such a file; it did not anticipate a model naming its own test file test_hidden.py",
+        "tighten_the_rule": "UNRESOLVED"
+      }
+    },
+    "bounds": [
+      "CLEAN only guarantees that the literal repr of `hidden \\ visible` does not appear in harness-authored system/user text; semantic paraphrase, and whatever the excuse rules cover, are not detected",
+      "bank is inferred (bank_inference field), not recorded by the run; runs before R529 had no --record-bank-field",
+      "the closing analyzers still read the old evidence: analyze_r529.py vgt_gate() and analyze_r532.py gates_post() read vgt_v2_<block>.json whose per_arm is HMIX only; the standing substitute evidence is ops/gain/vgt_retro_audit_20260918.json and those two analyzers have not been updated",
+      "the 179 are not all clean: 4 VIOLATION and 10 UNVERIFIABLE remain"
+    ],
+    "do_not_claim": "V/GT clean across all 179 archived runs; per-arm CLEAN is established only for R460, R460R, R529 and R532, and only with the scope and bounds above stated alongside"
+  },
+  "denominators": {"HumanEval+": "156, not 164", "MBPP+": "371 of 378",
+                   "LCB v2": 120, "LCB v3 medium": 135, "LCB v3 hard": 54}
+}
+```
 
 ---
 
 ## Research discipline
 
-- **Pre-registration**: thresholds, families, denominators, interval method, the four states and the
-  **refutation keys** are frozen before the data exists; before launch every `summary.json` is scanned to
-  confirm the seeds have never been used (the hit set must be **exactly** the authorized set — one too
-  few also stops the launch, because "not measurable" is not "passed").
-- **Holm**: the family is the 6 tests **within one replication**; the 30 tests of five replications must
-  **not** be thrown into one Holm — that would quietly turn "replication" into "one n=600 experiment".
-- **Complete-case**: `infra_void` rows are not back-filled; r5's primary denominator is **116, not 120**,
-  and the worst-case bound is reported alongside.
-- **Replication**: the claim rule is fixed in advance (only 5/5 same sign and ≥4/5 Holm-significant earns
-  "replication is stable"); when it is not met, every replication is listed as it came out.
-  **"Run three first" and "conclude from three" are two different things.**
-- **Adversarial re-verification**: every outward claim is handed to an independent agent whose job is to
-  refute it. In the first round, **3 of 12 were refuted and 3 were judged overstated**; all of them stay
-  in `examples/verdicts.py`, nothing is deleted. R452's first version claimed "three attacks are
-  inexpressible" — that **was wrong**: `entry_point="exec"` punched straight through (368/371 on chain,
-  31.5% false delivery), and that failure stays on the record too.
-- **Incident disclosure**: 1003 hit `bad alloc` and `Context size has been exceeded` twice (the voided
-  blocks were moved wholesale into `runs/_aborted/` as evidence and enter no analysis); a scheduler died
-  of `UnicodeDecodeError` (the launcher truncated Chinese by bytes); the V/GT gauge v1 reported 90
-  violations that were **all false positives once classified one by one** (a noisy gauge drowns the real
-  signal); the analyzer's concurrency window once treated completion timestamps as dispatch timestamps ⇒
-  phantom oversubscription — after the fix **every arbitration value was bit-identical**.
-- **What was refuted stays**: a system that claims to be accountable and cannot be accountable about
-  itself has no claim at all.
+- **Pre-registration.** Thresholds, families, denominators, interval methods, the state
+  table and the **falsification conditions** are frozen before the data exists.
+- **Holm.** The family is the tests *within one replication*. Throwing five replications'
+  tests into one Holm would quietly turn "replication" into "one experiment with n=600".
+- **Complete-case.** `infra_void` rows are never back-filled; worst-case bounds are reported
+  alongside.
+- **Replication.** The claim rule is fixed in advance; when it is not met, the results are
+  listed one by one. **"Run it three times first" and "conclude from three runs" are
+  different things.**
+- **Adversarial re-checking.** Every outward claim is handed to an independent agent whose
+  job is to refute it. In the first round, 3 of 12 were refuted and 3 judged overstated; all
+  of them stay in [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py).
+- **After-the-fact corrections are recorded too.** R532's state table had no direction guard
+  and its own "stronger model" premise did not hold — both were found after seeing the data,
+  and both are written verbatim into the DECISION file (AMEND1 / AMEND2). The frozen
+  criteria were not changed to suit the result.
+- **Refuted claims are kept.** A system that claims accountability and cannot be held
+  accountable for its own claims has no content.
 
 ---
 
-## Document index
+## Documents
 
 | File | Contents |
 |---|---|
-| [`docs/VACANT_COMPLETE_2026-09-12.md`](docs/VACANT_COMPLETE_2026-09-12.md) | **The state of things**: what exists, what was measured, honest boundaries, how to verify it yourself (the single entry point for numbers) |
-| [`docs/VACANT_ARCHITECTURE_AND_RESULTS_2026-09-07.md`](docs/VACANT_ARCHITECTURE_AND_RESULTS_2026-09-07.md) | The canon up to R455 / R461 (carried over verbatim, not superseded) |
-| [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](docs/HMIX_ARCHITECTURE_2026-09-11.md) | The H-MIX loop: six parts, the verbatim prompt, what it cannot do |
-| [`docs/HARNESS_STUDY_2026-09-07.md`](docs/HARNESS_STUDY_2026-09-07.md) | Source-code facts about external harnesses and the "nine legends" checked one by one |
-| [`DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md`](DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md) | Five-replication pre-registration (claim rule, prohibitions, abort criteria) |
-| [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | Five-replication settlement audit (§8 = all five are in) |
-| [`DECISION_20260911_R529_CROSS_BANK_PREREG.md`](DECISION_20260911_R529_CROSS_BANK_PREREG.md) | Cross-benchmark pre-registration |
-| [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | Cross-benchmark settlement audit (§11 = the two backends ran different inference modes) |
-| [`DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md`](DECISION_20260911_R460_FABLE_AUDIT_HARNESS.md) | R460's six-arm settlement (four states, gatekeeping metrics, winner's-curse disclaimer) |
-| [`DECISION_20260903_R440P_CONFORMANCE_GATE.md`](DECISION_20260903_R440P_CONFORMANCE_GATE.md) | Where the premise sentence comes from + the candidate-pool ceiling (17–19% of tasks have all five candidates wrong) |
-| [`SPEC_GAIN.md`](SPEC_GAIN.md) | G-experiment spec: V/GT separation, fixed bank subsets, arm definitions |
-| [`docs/RECORD_SPEC.md`](docs/RECORD_SPEC.md) / [`docs/PREREG_V2.md`](docs/PREREG_V2.md) | Evidence-pack spec / claim ladder (**awaiting a human signature to freeze**) |
-| [`runs/INDEX.md`](runs/INDEX.md) | Run index: what is evidence, what is a derivative, bank sha256s and known-bad tasks |
-| [`examples/verdicts.py`](examples/verdicts.py) | **The single source of truth for verdicts** (held / unresolved / no_effect / overstated / refuted) |
-| [`CLAUDE.md`](CLAUDE.md) | Working constraints: ironclad rules, register, deferred items |
+| [`AGENTS.md`](https://github.com/cosmopig/Vacant/blob/main/AGENTS.md) / [`llms.txt`](https://github.com/cosmopig/Vacant/blob/main/llms.txt) | **the integration contract for AI** and its index |
+| [`CHANGELOG.md`](https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md) | 0.6.0 → 0.7.0 is a different codebase |
+| [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) | the single entry point for numbers |
+| [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | how to re-run the task banks |
+| [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](https://github.com/cosmopig/Vacant/blob/main/docs/HMIX_ARCHITECTURE_2026-09-11.md) | the loop: six parts, verbatim prompts, what it cannot do |
+| [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | five-replication closing audit |
+| [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | cross-bank closing audit |
+| [`DECISION_20260917_R532_STRONGER_MODEL_PREREG.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260917_R532_STRONGER_MODEL_PREREG.md) | the 27B round + AMEND1 / AMEND2 |
+| [`ops/gain/r532/results_r532.json`](https://github.com/cosmopig/Vacant/blob/main/ops/gain/r532/results_r532.json) | citable source for every R532 figure |
+| [`runs/INDEX.md`](https://github.com/cosmopig/Vacant/blob/main/runs/INDEX.md) | which runs are evidence and which are derived |
+| [`examples/verdicts.py`](https://github.com/cosmopig/Vacant/blob/main/examples/verdicts.py) | **single source of truth for verdicts** |
 
 ---
 
 ## Citation
 
-See [`CITATION.cff`](CITATION.cff).
+See [`CITATION.cff`](https://github.com/cosmopig/Vacant/blob/main/CITATION.cff).
 
 ```bibtex
 @software{vacant_2026,
@@ -468,4 +852,4 @@ See [`CITATION.cff`](CITATION.cff).
 
 ## License
 
-[MIT](LICENSE).
+[MIT](https://github.com/cosmopig/Vacant/blob/main/LICENSE).

@@ -1,0 +1,297 @@
+{
+  "cell": "s1_33_band__RF",
+  "task_id": "s1_33_band",
+  "arm": "RF",
+  "stratum": "S1",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T01:47:28Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "s1",
+  "pi_port": 8878,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 32,
+  "task_pos": 32,
+  "arm_pos": 1,
+  "plan_index": 129,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s1_33_band__RF/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s1_33_band__RF/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s1_33_band/tests_visible",
+    "--task-id",
+    "r535_s1_33_band_RF",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8878",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 486.446
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 17,
+  "agent_wall_s": 137.571,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "ws_start_sha256": "618bb9981830a82de13471f636e2664e0971ae496842056e1173a2a6a8095171",
+  "ws_end_sha256": "60d7db1cd7b9977f966193f70d7d6fad3be05823e824b5966883f55e1773fad5",
+  "verdict_sha256": "3647df75eaef365c8af2532726d5bfd7497c49af65aa05fe7b79239ff041bef2",
+  "verdict_hash": "518a66b1a0d864174a4009393b478f237f312c92d8ecfdb9c3a15d6615273540",
+  "wire_digest": "f28903561362182f7b856f9ab059bebf21c753524dc15d61810f3255451334d2",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s1_33_band__RF/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 17
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 7,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 197.838,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "e1135843a192a17800ab44d58874363afef81aa944be99e024ecddf0491c02c3",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_33_band__RF/run/_frozen_RUN-ON",
+      "ws_end_sha256": "70657915c4cdd07ecfc602d5620d87aaff7262eff6f177c18938a748d782026e",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 150.339,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "706d7f9899b6df9acf5549618c8dfac6163fcc25835d96fb8d7c97997fe88d58",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_33_band__RF/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "ca19e825fcd510a80b1fb116f69721aacc447424a33fa626b8ee6ebf0d63eb7b",
+      "reset": null
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 137.571,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_33_band__RF/run/_frozen_RUN-ON_a3",
+      "ws_end_sha256": "60d7db1cd7b9977f966193f70d7d6fad3be05823e824b5966883f55e1773fad5",
+      "reset": null
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": false,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "matched": [],
+      "n_req": 5
+    },
+    {
+      "attempt": 3,
+      "found": false,
+      "matched": [],
+      "n_req": 5
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": true,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "n_req": 5
+    },
+    {
+      "attempt": 3,
+      "found": true,
+      "n_req": 5
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.75,
+  "m7_ws_counts": {
+    "other": 6,
+    "read_task": 2,
+    "total": 8,
+    "other_total": 6,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def solution():\\n    import sys\\n    input_data = sys.stdin.read().strip()\\n    if not input_data:\\n        return\\n    \\n    try:\\n        score = int(input_data)\\n    except ValueError:\\"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 solution.py << 'EOF'\\n95\\nEOF\\npython3 solution.py << 'EOF'\\n85\\nEOF\\npython3 solution.py << 'EOF'\\n75\\nEOF\\npython3 solution.py << 'EOF'\\n65\\nEOF\\npython3 solution.py << 'EOF'\\n40"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def solution():\\n    import sys\\n    input_data = sys.stdin.read().strip()\\n    if not input_data:\\n        return\\n    \\n    score = int(input_data)\\n    \\n    if score >= 90:\\n        pr"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 solution.py << 'EOF'\\n95\\nEOF\\npython3 solution.py << 'EOF'\\n85\\nEOF\\npython3 solution.py << 'EOF'\\n75\\nEOF\\npython3 solution.py << 'EOF'\\n65\\nEOF\\npython3 solution.py << 'EOF'\\n50"
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": null,
+  "f6_reason": "arm_is_not_RP",
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "feedback_in_prompt_bytes": 0
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 17,
+  "f3_req_ok": 17,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 17,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 486.473,
+  "finished": "2026-09-19T01:55:34Z"
+}

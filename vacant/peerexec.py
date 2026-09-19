@@ -142,7 +142,14 @@ from . import logbook as _lb
 from .canonical import canonical_bytes
 from .identity import Identity, PublicIdentity
 from .logbook import Logbook, review_commitment
-from .suitegauge import CheckRunner, broken_stub, gauge_suite, sha256_hex
+from .suitegauge import (
+    CheckRunner,
+    OpsRunnerUnavailable,  # noqa: F401 — 轉出：`sandbox_probe` 拋的就是它
+    _import_gain_run,
+    broken_stub,
+    gauge_suite,
+    sha256_hex,
+)
 from .suitespec import SuiteSpec, SuiteSpecError
 from .suitespec import validate as validate_suite
 
@@ -255,11 +262,18 @@ def sandbox_probe(draft_code: str, task: Mapping[str, Any], *, timeout_s: int = 
       交來的原始碼。探針本身不知道差別（它只會跑一段碼），差別在**誰寫的**。
 
     為什麼是 lazy import：`ops.gain.gain_run` 是實驗 runner，不是 `vacant` 的相依；
-    把 import 留在函式內，本模組在沒有 ops 的環境（例如展件）仍然 import 得起來，
-    而測試可以注入自己的 probe。**判定邏輯不重寫**——重寫等於多出第二套判準，
+    把 import 留在函式內，本模組在沒有 ops 的環境（例如展件、PyPI 安裝）仍然 import
+    得起來，而測試可以注入自己的 probe。**判定邏輯不重寫**——重寫等於多出第二套判準，
     和出貨閘門漂移，那正是 `conform_failure_detail` 的 docstring 已經寫過的坑。
+
+    ⚠ 在沒有 ops 的環境**呼叫**本函式會拋 `suitegauge.OpsRunnerUnavailable`
+      （不是裸的 `ModuleNotFoundError: No module named 'ops'`）。發布輪的正路是
+      `Executor.new(executor_id, probe=my_probe)` 注入自己的探針；理由與做法全寫在
+      那個例外的 docstring 裡。
     """
-    from ops.gain.gain_run import conform_failure_detail, meets_demand  # noqa: PLC0415
+    conform_failure_detail, meets_demand = _import_gain_run(
+        "conform_failure_detail", "meets_demand",
+    )
 
     check_code = ((task.get("visible_check") or {}).get("code")) or ""
     ep = task.get("entry_point")
@@ -267,8 +281,7 @@ def sandbox_probe(draft_code: str, task: Mapping[str, Any], *, timeout_s: int = 
     if ok:
         sl = None
         try:
-            from ops.gain.gain_run import _visible_test_slicer  # noqa: PLC0415
-
+            (_visible_test_slicer,) = _import_gain_run("_visible_test_slicer")
             sl = _visible_test_slicer(check_code)
         except Exception:  # noqa: BLE001
             sl = None
@@ -693,6 +706,67 @@ class Selection:
         }
 
 
+class DraftOrderError(ValueError):
+    """`drafts` 的 tuple 疑似前後顛倒。**啟發式**，不是型別檢查。
+
+    為什麼這個錯誤值得一個專屬型別：`select_by_quorum` 的 `drafts` 是
+    `Sequence[tuple[str, str]]`，兩格都是 `str`，順序錯了不會有任何型別錯誤——
+    每一份「草稿」（其實是 worker id）都跑不過驗收，於是三方一致投「沒過」，
+    機制回傳 `refused=True`、三條簽章鏈全部驗得過。**而拒交是本系統的合法輸出**：
+    整份文件都在教人相信它。「我把參數傳反了」與「機制正確地拒絕了爛交付」
+    在畫面上長得一模一樣，這比一般的 API 陷阱嚴重一級。
+    """
+
+
+#: 「這串字看起來像 Python 原始碼嗎」的廉價指標。
+#:
+#: ⚠ 刻意保守：只認幾個幾乎不會出現在 worker id 裡、卻幾乎一定出現在一份可交付
+#: 程式碼裡的記號。寧可漏抓（偽陰性）也不要誤判一次合法呼叫（偽陽性）——
+#: 誤判會把一條正常的出貨路徑變成例外，那比沒抓到更糟。
+_CODE_MARKERS = ("\n", "def ", "class ", "import ", "lambda", "return ")
+
+
+def _looks_like_code(s: Any) -> bool:
+    return isinstance(s, str) and any(m in s for m in _CODE_MARKERS)
+
+
+def _assert_draft_order(drafts: Sequence[tuple[str, str]]) -> None:
+    """`drafts` 的每一格是 `(code, worker_id)`。順序疑似反了就當場吵。
+
+    判準（兩個條件都成立才吵）：
+      - 第 0 格（應該是 code）**沒有一個**看起來像原始碼
+      - 第 1 格（應該是 worker_id）**每一個**都看起來像原始碼
+
+    ⚠ **這是啟發式，有偽陰性，不可以讀成「順序錯一定會被抓到」。** 已知漏網：
+      - 只有一份草稿、而那份草稿本身沒有換行也沒有 `def `（例如
+        `solve=lambda s:s` 寫成一行又剛好不含 `lambda`）；
+      - worker id 裡剛好含換行或 `def `（兩格都像碼 ⇒ 不吵）；
+      - 兩格內容都不像碼（例如草稿是空字串——模型什麼都沒回）。
+      真正的保證只有一條：**看文件**（AGENTS.md §4 的簽章欄、README §B-4）。
+      這道檢查是把最常見的那一種錯從「安靜的拒交」提升成「當場的例外」，
+      不是把它變成不可能。
+    """
+    if not drafts:
+        return
+    try:
+        first = [d[0] for d in drafts]
+        second = [d[1] for d in drafts]
+    except (TypeError, IndexError, KeyError):
+        return          # 形狀根本不對，留給下面的解包報原本的錯
+    if any(_looks_like_code(x) for x in first):
+        return
+    if not all(_looks_like_code(x) for x in second):
+        return
+    raise DraftOrderError(
+        "drafts 的順序疑似反了：每一格必須是 (code, worker_id)——第 0 格是候選的 "
+        "Python 原始碼，第 1 格是交出它的 worker 名字。本次第 0 格沒有一個看起來像"
+        "原始碼，而第 1 格每一個都像。\n"
+        "  正確：select_by_quorum(task, [(code, 'w_good'), ...], executors, suite=spec)\n"
+        "  傳反的後果不是例外，是 refused=True、shipped_index=None、三條簽章鏈全部驗得過"
+        "——與「機制正確地拒絕了爛交付」在畫面上一模一樣，所以這裡要當場吵。\n"
+        "  （這道檢查是啟發式，會有漏網的情況；順序的正式定義在 AGENTS.md §4。）")
+
+
 def select_by_quorum(
     task: Mapping[str, Any],
     drafts: Sequence[tuple[str, str]],
@@ -721,7 +795,12 @@ def select_by_quorum(
       （例如把 `n_broken` 從 1 改成 99）在內容上照樣「合格」，只有簽章抓得到
       （`tests/test_peerexec.py::test_tampering_the_gauge_record_breaks_chain_verification`）。
       出貨路徑請把承諾者的公鑰一起帶進來；不帶就等於信任遞交承諾的那條管道。
+
+    `drafts` 的每一格是 **`(code, worker_id)`**，兩格都是 `str`。傳反不會有型別錯誤，
+    只會安靜地變成一次「三方一致拒交」——所以進門先過 `_assert_draft_order`
+    的啟發式形狀檢查（有偽陰性，看它的 docstring）。
     """
+    _assert_draft_order(drafts)
     ep = task.get("entry_point")
     try:
         spec = as_suite_spec(suite, ep)
@@ -729,9 +808,10 @@ def select_by_quorum(
         # entry_point 不是套件可以自己決定的欄位。這裡**一次沙箱都不花**就拒交，
         # 理由原樣進收據。其餘的 spec 錯誤照舊丟出去——「這根本不是一份 spec」
         # 與「這份 spec 驗的不是這一題」是兩件事，收據不准把它們寫成同一件。
-        if str(exc) not in BINDING_REFUSAL_REASONS:
+        if exc.code not in BINDING_REFUSAL_REASONS:
             raise
-        return Selection(task.get("task_id"), None, None, None, True, (), 0, str(exc))
+        # 收據上的理由用 `.code`（wire 面，不隨人讀文案漂）；`exc.hint` 只給人看。
+        return Selection(task.get("task_id"), None, None, None, True, (), 0, exc.code)
     ros = dict(roster) if roster is not None else roster_of(executors)
     ssha = spec.suite_sha256
     rsha = sha256_hex(spec.render())
@@ -961,8 +1041,8 @@ def suite_gate(
     try:
         spec = as_suite_spec(suite, entry_point)
     except SuiteSpecError as exc:
-        if str(exc) in BINDING_REFUSAL_REASONS:
-            return False, str(exc)
+        if exc.code in BINDING_REFUSAL_REASONS:
+            return False, exc.code
         raise
     p = entry.payload if isinstance(entry.payload, dict) else {}
     if p.get("entry_point") != spec.entry_point:

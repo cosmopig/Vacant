@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_24_round_money_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 91,
+      "cases": [
+        {
+          "case": "check_01_round_money",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_round_money",
+          "ok": false,
+          "kind": "assert",
+          "message": "round_money args=(0.125,) got=0.12 want=0.13",
+          "where": "test_visible.py:22: assert got == want, \"round_money args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "1dd613192bd3844f1e1a842eff00d9f7551f3da4b53307102d80d5ccdcbececd"
+}

@@ -23,7 +23,7 @@ import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SH = ROOT / "ops" / "gain" / "launch_eq5_seed2.sh"
-DEC = ROOT / "DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md"
+DEC = ROOT / "decisions/DECISION_20260904_R448_EQ5_REPLICATION_PREREG.md"
 
 RUN_NAME = "g_r448_eq5_mbpp_seed2"
 SEED = "g-r448-eq5-seed2"
@@ -58,7 +58,8 @@ def test_launcher_is_valid_bash(sh: str) -> None:
 
 # ── R440G 閘門：DECISION 必須真的授權這個 run 名字 ──────────────────────
 def test_decision_file_exists_and_authorizes_the_run_name(sh: str, dec: str) -> None:
-    assert _var(sh, "DEC") == DEC.name
+    # 發射器帶的是**路徑**（2026-09-18 起 `decisions/...`），不是 basename。
+    assert _var(sh, "DEC") == DEC.relative_to(ROOT).as_posix()
     # gain_run.py 的閘門條件逐字：run 名字要出現在 DECISION 內文裡。
     assert RUN_NAME in dec
     assert _var(sh, "OUT") == f"runs/{RUN_NAME}"

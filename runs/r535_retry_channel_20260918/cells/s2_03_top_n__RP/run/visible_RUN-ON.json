@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_03_top_n_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 67,
+      "cases": [
+        {
+          "case": "check_01_top_n",
+          "ok": false,
+          "kind": "assert",
+          "message": "top_n args=({'b': 2, 'a': 2, 'c': 1}, 2) got=['b', 'a'] want=['a', 'b']",
+          "where": "test_visible.py:14: assert got == want, \"top_n args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_top_n",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "fecdcea9dee8afe4258ea9d9bea1ec1e0a26b676bacc6473ef7544b26b5eea73"
+}

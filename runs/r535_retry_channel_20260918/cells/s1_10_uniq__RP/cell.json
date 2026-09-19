@@ -1,0 +1,257 @@
+{
+  "cell": "s1_10_uniq__RP",
+  "task_id": "s1_10_uniq",
+  "arm": "RP",
+  "stratum": "S1",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T00:11:56Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "prompt"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": true,
+  "stream": "s1",
+  "pi_port": 8878,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 9,
+  "task_pos": 9,
+  "arm_pos": 1,
+  "plan_index": 37,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RP/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RP/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s1_10_uniq/tests_visible",
+    "--task-id",
+    "r535_s1_10_uniq_RP",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8878",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "prompt",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file.{VACANT_FEEDBACK}"
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 0,
+      "wall_s": 63.179
+    }
+  ],
+  "launcher_rc": 0,
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "attempts_used": 2,
+  "max_attempts": 3,
+  "requests_seen": 9,
+  "agent_wall_s": 45.971,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "ws_start_sha256": "386ce83226bd271a5574d4272392b6dcbc605305022716bceab04f91c85dcf7e",
+  "ws_end_sha256": "3ff17fc33a0a859070285b74c56ea9773ed0bd94dff1137d5c6a507fda7f2e5c",
+  "verdict_sha256": "c0b83dbd898770dbcf2c3feeba98028471cece5be363dcc85161231840907442",
+  "verdict_hash": "73ecca2a1c2ca6cbb5a1399b60ec5cd8e4b71644b59d70b2e4c5ec82461607d2",
+  "wire_digest": "557b647584f057860cd8086b59f9cd9aee3c55010dfda02994d45665562a90ea",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RP/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 9
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 16.613,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RP/run/_frozen_RUN-ON",
+      "ws_end_sha256": "005dfb26dedf2c8cc41ce27cacac39ca63b601fba01564c8d9e4f67ded863952",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": true,
+      "stop_reason": "visible_pass",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 45.971,
+      "argv_sha256": "33d40779c7b8fad5f07215334011974f03f7e56a8ef2d6a0ec9295039730fd6f",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 803,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RP/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "3ff17fc33a0a859070285b74c56ea9773ed0bd94dff1137d5c6a507fda7f2e5c",
+      "reset": null
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": true,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "matched": [
+        {
+          "kind": "header",
+          "text": "Acceptance feedback (attempt"
+        },
+        {
+          "kind": "body",
+          "text": "The checks that ship with this task were run against your"
+        },
+        {
+          "kind": "block",
+          "text": "test_visible.py::check_01_uniq — exception: ImportError: cannot import name 'uniq' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_10_uniq__RP/run/_frozen_RU"
+        },
+        {
+          "kind": "block_line",
+          "text": "test_visible.py::check_01_uniq — exception: ImportError: cannot import name 'uniq' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_10_uniq__RP/run/_frozen_RU"
+        },
+        {
+          "kind": "block_line",
+          "text": "test_visible.py::check_02_uniq — exception: ImportError: cannot import name 'uniq' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_10_uniq__RP/run/_frozen_RU"
+        }
+      ],
+      "n_req": 5
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": false,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "n_req": 5
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.75,
+  "m7_ws_counts": {
+    "other": 3,
+    "read_task": 1,
+    "total": 4,
+    "other_total": 3,
+    "reads_own_solution": 1
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -R\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "other",
+      "reads_own_solution": true,
+      "args": "{\"path\":\"solution.py\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "edit",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"edits\":[{\"newText\":\"def uniq(items):\\n    seen = set()\\n    result = []\\n    for item in items:\\n        if item not in seen:\\n            result.append(item)\\n            seen.add(item)\\n    return"
+    }
+  ],
+  "m7_ws_solution": true,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.25,
+  "m7_ws_solution_n": 1,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": true,
+  "f6_reason": null,
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 803
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 9,
+  "f3_req_ok": 9,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 9,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 63.211,
+  "finished": "2026-09-19T00:13:00Z"
+}

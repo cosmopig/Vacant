@@ -43,7 +43,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 SH = ROOT / "ops" / "gain" / "launch_eq5_lcb3.sh"
-DEC = ROOT / "DECISION_20260906_R449C_EQ5_LCB3_PREREG.md"
+DEC = ROOT / "decisions/DECISION_20260906_R449C_EQ5_LCB3_PREREG.md"
 ANALYZER = ROOT / "ops" / "gain" / "analyze_eq5.py"
 
 RUN_NAME = "g_r449c_eq5_lcb3"
@@ -121,7 +121,8 @@ def test_launcher_is_executable() -> None:
 
 # ── R440G 閘門：DECISION 必須真的授權這個 run 名字 ──────────────────────
 def test_decision_file_exists_and_authorizes_the_run_name(sh: str, dec: str) -> None:
-    assert _var(sh, "DEC") == DEC.name
+    # 發射器帶的是**路徑**（2026-09-18 起 `decisions/...`），不是 basename。
+    assert _var(sh, "DEC") == DEC.relative_to(ROOT).as_posix()
     # gain_run.py 的閘門條件逐字：run 名字要出現在 DECISION 內文裡。
     assert RUN_NAME in dec
     assert _var(sh, "OUT") == f"runs/{RUN_NAME}"

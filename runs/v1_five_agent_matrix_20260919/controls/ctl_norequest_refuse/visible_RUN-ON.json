@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "ctl_norequest_refuse",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 27,
+      "cases": [
+        {
+          "case": "check_01_add",
+          "ok": false,
+          "kind": "exception",
+          "message": "ModuleNotFoundError: No module named 'solution'",
+          "where": "test_visible.py:10: from solution import add",
+          "output": ""
+        },
+        {
+          "case": "check_02_mul",
+          "ok": false,
+          "kind": "exception",
+          "message": "ModuleNotFoundError: No module named 'solution'",
+          "where": "test_visible.py:18: from solution import mul",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "001c9e0f1eb2c5726ce6f450848591f6e6bf1180503f4f7ee9b3ea19503265b4"
+}

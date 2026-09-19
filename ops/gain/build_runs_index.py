@@ -61,7 +61,10 @@ RUNS = ROOT / "runs"
 #
 # kind 的值域刻意只有六個，因為索引的用途是「這東西能不能當證據」，
 # 不是把每個目錄講清楚。更細的性質放 subkind，不影響判讀。
-KIND_REAL = "real_run"      # 真跑過模型、有 summary.json 與 rows.jsonl
+# ⚠ real_run 的判準是「真跑過模型、資料留得住」，**不是「長得像 gain_run」**。
+#   gain_run 版面（summary.json＋rows.jsonl）與 cell-grid 版面（reconcile.json＋
+#   cells.jsonl，一格一個目錄）都算，差別記在 subkind。
+KIND_REAL = "real_run"      # 真跑過模型、資料留得住
 KIND_SMOKE = "smoke"        # 冒煙／探針／量具檢查——不進統計
 KIND_ABORTED = "aborted"    # 發射過但沒收官（被殺、掛掉、或只剩 calls/notes）
 KIND_ANALYSIS = "analysis"  # 事後重算的工作目錄——衍生物，不是證據
@@ -325,8 +328,13 @@ def _bank_for_run(d: Path, banks: dict[str, Any]) -> dict[str, Any]:
     """
     rows = d / "rows.jsonl"
     if not rows.exists():
-        return {"family": None, "version": None, "match": "no_rows",
-                "n_task_ids": 0, "candidates": []}
+        # cell-grid 版面（R535）把逐格一列寫在 `cells.jsonl`。少了這一句，
+        # 題庫欄會是 `no_rows`——那是「沒資料」，不是「沒有題庫」。
+        if (d / "cells.jsonl").exists():
+            rows = d / "cells.jsonl"
+        else:
+            return {"family": None, "version": None, "match": "no_rows",
+                    "n_task_ids": 0, "candidates": []}
     ids: set[str] = set()
     fams: set[str] = set()
     with rows.open() as fh:
@@ -376,7 +384,7 @@ def _bank_for_run(d: Path, banks: dict[str, Any]) -> dict[str, Any]:
 
 # ── 裁決檔 ──────────────────────────────────────────────────────────
 def _decision_texts() -> list[dict[str, Any]]:
-    """掃 repo 根目錄的判準／裁決檔。
+    """掃判準／裁決檔（2026-09-18 起住在 `decisions/`，本函式用 `rglob` 所以搬家免改）。
 
     四種前綴都要掃：`DECISION_` 之外，收官結論也可能寫成 `CONCLUSION_`／
     `FINDINGS_`，事前判準寫成 `CRITERION_`。只掃 `DECISION_` 會漏掉整份收官
@@ -545,6 +553,24 @@ def _classify(d: Path, summary: dict[str, Any] | None,
         return KIND_SMOKE, "probe_or_smoke"
     if summary is not None and n_rows > 0:
         return KIND_REAL, "gain_run"
+    # R535 的版面不是 gain_run：它沒有頂層 `summary.json`／`rows.jsonl`，
+    # 一格一個目錄，收官對帳寫在 `reconcile.json`、逐格摘要寫在 `cells.jsonl`。
+    # 只認 gain_run 的版面 ⇒ 它會被標成 `other/unclassified`，而它是真跑過模型、
+    # 360 格零 void 的證據級 run。索引的用途是「這東西能不能當證據」，
+    # 把證據標成 unclassified 正是它最不該犯的錯，所以這裡按**資料的形狀**認。
+    if (d / "reconcile.json").exists() and (d / "cells.jsonl").exists() \
+            and any(d.glob("scores_*.json")):
+        return KIND_REAL, "cell_grid_run"
+    # `vacant run` 的相容性矩陣（2026-09-19 的五 agent × 兩格 × 兩次）又是第三種
+    # 版面：沒有 `summary.json`／`rows.jsonl`／`scores_*.json`，一格一個目錄住在
+    # `cells/`，彙整寫在 `matrix.json`，收據驗證輸出另外落盤。它**真跑過模型**
+    # （每格 `requests_seen` 4–6 通，wire 原始位元組都在），所以同 R535 那一條的
+    # 理由：按資料的形狀認，不要把證據標成 unclassified。
+    # ⚠ 三個條件要**同時**成立才算——`matrix.json` 這個檔名太通用，
+    #   單看它會把別人的彙整檔誤判成 run。
+    if (d / "matrix.json").exists() and (d / "cells").is_dir() \
+            and any(d.glob("receipts_verify.*")):
+        return KIND_REAL, "agent_matrix_run"
     if summary is not None:
         # 有 summary 沒 rows＝收官寫了但一列都沒產出（例如 n=0 或全 void）。
         return KIND_ABORTED, "summary_without_rows"
@@ -603,6 +629,35 @@ def _backend_for_run(name: str) -> dict[str, Any]:
     return out
 
 
+def _arm_stats(summary: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
+    """把 summary.json 的**兩種臂版面**收斂成同一個 (臂名, 逐臂統計)。
+
+    這支在架構裡承重什麼：索引要回答「這個 run 有幾臂、出了幾次 infra_void、
+    跑完沒」，而 runner 有兩代版面：
+
+      * `ops/gain/gain_run.py`（:1839-1844）把逐臂統計**直接掛在**
+        `summary["arms"]` 底下 —— arm → stats 的 dict。
+      * `ops/gain/r530/run_r530.py`（:465、:500）把 `summary["arms"]` 改成
+        **臂名清單**，逐臂統計另外放在 `summary["arms_stats"]`。
+
+    只認 dict 版的話，R530 那 12 塊會在 `sorted(arm_map)` 之後對一個 list
+    呼叫 `.values()` ⇒ `AttributeError`，整份索引根本產不出來。**這不是「有
+    例外就吞掉」的地方**：`arms_stats` 裡有完整的 processed／infra_void，
+    list 版該有的資訊一個都不少，吞掉等於讓 R530 在索引裡變成「沒有臂、
+    不知道 void」——索引比資料悲觀跟比資料樂觀是同一種說謊。
+    """
+    arm_map = summary.get("arms")
+    if isinstance(arm_map, dict):
+        return sorted(arm_map), {k: v for k, v in arm_map.items()
+                                 if isinstance(v, dict)}
+    names = [a for a in arm_map if isinstance(a, str)] \
+        if isinstance(arm_map, list) else []
+    stats = summary.get("arms_stats")
+    per = {k: v for k, v in stats.items()
+           if isinstance(v, dict)} if isinstance(stats, dict) else {}
+    return sorted(set(names) | set(per)), per
+
+
 def build_run_entry(d: Path, banks: dict[str, Any],
                     decisions: list[dict[str, Any]],
                     git_first: dict[str, str],
@@ -649,8 +704,7 @@ def build_run_entry(d: Path, banks: dict[str, Any],
     seed: str | None = None
     if summary:
         seed = summary.get("seed")
-        arm_map = summary.get("arms") or {}
-        arms = sorted(arm_map)
+        arms, arm_map = _arm_stats(summary)
         if arm_map:
             infra_void = sum(int(a.get("infra_void") or 0)
                              for a in arm_map.values())
@@ -664,12 +718,69 @@ def build_run_entry(d: Path, banks: dict[str, Any],
         if complete is None and arm_map and all(
                 "complete" in a for a in arm_map.values()):
             complete = all(bool(a.get("complete")) for a in arm_map.values())
+        # R530 版面的逐臂統計只有 processed／infra_void，完成旗標寫在 run 層級
+        # ——而 `run_complete` 它根本沒寫。用 `gain_run.py:1839/1844` 的**同一條
+        # 定義**（terminal＝每題都處理過；complete＝再加上零 void）從同樣的數字
+        # 補算，不是另立一套判準。少了這一段，R530 的 s1_1003_1 那格
+        # 「A-CONF 出了 1 次 infra_void」在索引上會看不出對完成度的影響。
+        n_tasks = summary.get("n_tasks")
+        if arm_map and isinstance(n_tasks, int) and all(
+                isinstance(a.get("processed"), int) for a in arm_map.values()):
+            all_processed = all(a["processed"] == n_tasks
+                                for a in arm_map.values())
+            if terminal is None:
+                terminal = all_processed
+            if complete is None:
+                complete = all_processed and all(
+                    int(a.get("infra_void") or 0) == 0
+                    for a in arm_map.values())
+    # ── cell-grid 版面（R535）：同樣的欄位，換一個來源算 ─────────────────
+    # ⚠ 這一段**不是**在替它造一份假的 summary.json：`cells.jsonl` 是驅動逐格
+    #   落盤的原件，`reconcile.json` 是收官對帳的原件。少了這一段，索引會把一個
+    #   360 格零 void 的 run 印成「n=0、臂＝—、跑到底＝—」，比資料悲觀得離譜。
+    if summary is None and (d / "cells.jsonl").exists():
+        grid: list[dict[str, Any]] = []
+        for line in (d / "cells.jsonl").read_text().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                grid.append(json.loads(line))
+            except ValueError:
+                continue
+        if grid:
+            n_rows = len(grid)
+            for r in grid:
+                a = r.get("arm") or "?"
+                rows_by_arm[a] = rows_by_arm.get(a, 0) + 1
+                if r.get("task_id"):
+                    task_ids.add(r["task_id"])
+            infra_void = sum(1 for r in grid if r.get("infra_void"))
+            terminal = all(r.get("cell_status") is not None for r in grid)
+            rec_p = d / "reconcile.json"
+            if rec_p.exists():
+                try:
+                    rec = json.loads(rec_p.read_text())
+                except ValueError:
+                    rec = {}
+                # `verdict == "OK"` 的定義就是「360 格每格都有一列或明寫
+                # void」，與 gain_run 的 run_complete 同義，但它是**對帳器**
+                # 寫的，不是 runner 自己說的。
+                terminal = rec.get("verdict") == "OK"
+                complete = (rec.get("verdict") == "OK" and infra_void == 0)
+
     if seed is None:
         seed = row_seed
     if not arms:
         arms = sorted(k for k in rows_by_arm if k != "?")
 
-    runner_git = (summary or {}).get("runner_git") or {}
+    # R530 的 runner 把同一份東西寫成 `runner_git_info`（`run_r530.py:498`）。
+    # 只認舊 key ⇒ 那 12 塊的 runner sha 在索引裡整排是 null，而「這份資料是
+    # 哪個 commit 跑出來的」正是索引存在的理由之一。
+    runner_git = ((summary or {}).get("runner_git")
+                  or (summary or {}).get("runner_git_info") or {})
+    if not isinstance(runner_git, dict):
+        runner_git = {}
     return {
         "name": d.name,
         "kind": kind,
@@ -1002,8 +1113,11 @@ _GROUPED_RUNS: list[dict[str, Any]] = [
     {
         "key": "R529",
         "title": "R529 跨題庫收官（37 塊、716 題、三臂）",
-        "decision": "DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md",
-        "prereg": "DECISION_20260911_R529_CROSS_BANK_PREREG.md",
+        # ⚠ 值是**相對 repo 根的路徑**（2026-09-18 起裁決檔住在 `decisions/`），
+        #   不是 basename——下面 `../{...}` 直接接這個字串當連結。顯示文字另外取
+        #   `Path(...).name`，所以表格上看到的仍是檔名。
+        "decision": "decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md",
+        "prereg": "decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md",
         "headline": "R529 收官稽核（Fable，2026-09-12）：跨題庫之下，"
                     "H-MIX 贏單發、不贏重抽",
         "intro": [
@@ -1030,8 +1144,8 @@ _GROUPED_RUNS: list[dict[str, Any]] = [
         # 在此之前這裡是 `None`，理由寫在舊註解裡：寫一個不存在的 DECISION 檔名
         # 會讓索引憑空生出一份裁決。現在反過來——檔案在了還寫 `None`，
         # 索引就會比資料**悲觀**（「收官還沒寫」是假的），同樣是說謊。
-        "decision": "DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md",
-        "prereg": "DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
+        "decision": "decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md",
+        "prereg": "decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md",
         # ⚠ 裁決檔的**標題**還停在「三次複製；r4／r5 補跑中」——r4／r5 的收官
         # 在同一份檔案的 §八 補記（2026-09-13）。引用時要指名 §八，
         # 光看標題會以為這批只有三次。
@@ -1119,7 +1233,10 @@ def render_md(idx: dict[str, Any]) -> str:
     A("| kind | 個數 | 意思 |")
     A("|---|---:|---|")
     meaning = {
-        KIND_REAL: "真跑過模型、有 summary.json 與 rows.jsonl——這些才是證據",
+        KIND_REAL: ("真跑過模型、資料留得住——這些才是證據"
+                    "（`gain_run` 是 summary.json＋rows.jsonl；"
+                    "`cell_grid_run` 是 reconcile.json＋cells.jsonl；"
+                    "`agent_matrix_run` 是 matrix.json＋cells/）"),
         KIND_SMOKE: "冒煙／探針／量具檢查——**不進統計**",
         KIND_ABORTED: "發射過但沒收官（被殺、掛掉、或只有 calls/notes）",
         KIND_ANALYSIS: "迴圈每輪的重算工作目錄——**衍生物，不是證據**",
@@ -1208,10 +1325,10 @@ def render_md(idx: dict[str, Any]) -> str:
         A("")
         if g["decision"]:
             A(f"**裁決**：{g['headline']}"
-              f"　[{g['decision']}](../{g['decision']})")
+              f"　[{Path(g['decision']).name}](../{g['decision']})")
         else:
             A(f"**裁決**：{g['headline']}")
-        A(f"**預註冊**：[{g['prereg']}](../{g['prereg']})")
+        A(f"**預註冊**：[{Path(g['prereg']).name}](../{g['prereg']})")
         A("")
         if g["decision"]:
             A(f"> **一份裁決管 {len(members)} 塊。** 這 {len(members)} 個目錄在 "
@@ -1299,8 +1416,32 @@ def render_md(idx: dict[str, Any]) -> str:
     if real_unaudited:
         A("## 五、跑完但沒被獨立稽核的 run")
         A("")
-        A("有 `summary.json` 也有 `rows.jsonl`，但**不在上面那幾段裡**——都是 2026-08 到")
-        A("09 初的探索期 run：為了決定下一步怎麼跑而跑的，不是為了得到一個可以拿去講的結論。")
+        # ⚠ 這一段的前言原本寫死「都是 2026-08 到 09 初的探索期 run」。
+        # 2026-09-18 補上 R530（12 塊）與 R532（43 塊）之後那句就不成立了：
+        # 它們是有預註冊、跑完、零／低 void 的主線批次，只是收官裁決還沒寫。
+        # 把它們講成「探索期」是索引在說謊——而且是最難發現的那種，因為表格
+        # 本身是對的。日期範圍改成從資料算，不手寫。
+        _dates = sorted(x["date"] for x in real_unaudited if x["date"])
+        A("跑過模型、資料留得住，但**不在上面那幾段裡**"
+          + (f"（日期跨 {_dates[0]}–{_dates[-1]}）" if _dates else "")
+          + "。四種東西混在這張表：")
+        A("")
+        A("  1. **探索期** run（2026-08 到 09 初）——為了決定下一步怎麼跑而跑的，")
+        A("     不是為了得到一個可以拿去講的結論；")
+        A("  2. 跑完了、預註冊也在，但**收官裁決檔還沒寫**的批次；")
+        A("  3. `subkind` 是 `cell_grid_run` 的——那些**沒有頂層 "
+          "`summary.json`／`rows.jsonl`**，")
+        A("     一格一個目錄，收官對帳在 `reconcile.json`、逐格摘要在 "
+          "`cells.jsonl`（R535 就是這種）；")
+        A("  4. `subkind` 是 `agent_matrix_run` 的——`vacant run` 的相容性矩陣，")
+        A("     一格一個目錄住在 `cells/`，彙整在 `matrix.json`。**同樣沒有頂層 "
+          "`rows.jsonl`**，")
+        A("     所以本表的 `列／題`、`跑到底`、`零 void` 三欄對它是 `0／0` 與 `—`")
+        A("     ——那是**欄位不適用**，不是「跑了零列」。逐格欄位看它自己的 "
+          "`README.md`。")
+        A("")
+        A("⚠ 索引分不出這幾種：它只看得到「有沒有一份裁決檔在標題或宣告區點名它」。")
+        A("**「沒被稽核」不等於「探索期」**——引用第 2 種之前要去讀它自己的預註冊。")
         A("")
         # 塊數從 _GROUPED_RUNS 自己數，不手寫——手寫的數字在補跑進來時會悄悄變假
         # （2026-09-13：R460R 從 18 塊變 30 塊，這一行原本寫死 18）。

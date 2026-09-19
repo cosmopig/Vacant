@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_33_is_leap_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 113,
+      "cases": [
+        {
+          "case": "check_01_is_leap",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_is_leap",
+          "ok": false,
+          "kind": "assert",
+          "message": "is_leap args=(0,) got=True want=ValueError to be raised",
+          "where": "test_visible.py:27: raise AssertionError(\"is_leap args=%r got=%r want=ValueError to be raised\" %",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "a80230c1441afea6784f647aeafd6bb41f4211532a2c4774e85904683466ca74"
+}

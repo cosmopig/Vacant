@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "ctl_norequest_deliver",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 28,
+      "cases": [
+        {
+          "case": "check_01_add",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_mul",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "1bca3e22aea66b5e70d477842f094e4442322deee330364c01aafd2d716b8196"
+}

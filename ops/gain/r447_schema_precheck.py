@@ -28,7 +28,7 @@ import argparse, ast, hashlib, json, pathlib, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ANALYZER = ROOT / "ops" / "gain" / "analyze_r447.py"
-DECISION = ROOT / "DECISION_20260904_R440Z_LCB2_PREREG.md"
+DECISION = ROOT / "decisions/DECISION_20260904_R440Z_LCB2_PREREG.md"
 DECISION_SHA256 = "7150d9db8e4018533344ad223f3beed54ccb68f599acde12498842c03c28b9e5"
 
 MUTANT = ""

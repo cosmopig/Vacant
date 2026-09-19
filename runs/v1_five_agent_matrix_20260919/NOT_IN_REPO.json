@@ -1,0 +1,55 @@
+{
+  "run": "v1_five_agent_matrix_20260919",
+  "note": "這一份記的是**沒有進 repo 的東西**：在哪、多大、幾個檔、為什麼不帶、怎麼取得。「拿不到也要記下拿不到」是這個 repo 的紀律（CLAUDE.md 鐵律 3）。",
+  "source_host": {
+    "ssh": "user1@100.124.254.83",
+    "path": "/var/tmp/vacant_v1matrix",
+    "total_bytes": 214258314,
+    "total_human": "204.3 MB，其中 204.3 MB 是 Hermes 的 venv",
+    "caveat": "`/var/tmp` 會被作業系統清掉，而且這台機器 2026-09-19 只剩 3.3 GB 可用——**本目錄（2.4 MB）才是長期的那一份**。派工前 3.5 G／派工後 3.3 G 的差是本輪自己佔的（venv 204 MB ＋ 落盤 7.5 MB），已在收工後清掉。"
+  },
+  "excluded": [
+    {
+      "glob": "hv/**",
+      "n_files": 9900,
+      "bytes": 204324111,
+      "what": "Hermes Agent 0.19.0 的 venv（`python3 -m venv` ＋ `pip install hermes-agent`）。",
+      "why_not_shipped": "是**上游套件**不是本輪的資料，而且 204 MB。重建是兩行、不需要官方的 curl|bash：`python3 -m venv <dir> && <dir>/bin/pip install hermes-agent`（⚠ PyPI 上的名字是 `hermes-agent` 不是 `hermes`）。版本逐字：`Hermes Agent v0.19.0 (2026.7.20)`。"
+    },
+    {
+      "glob": "repo/**",
+      "n_files": 119,
+      "bytes": 1815049,
+      "what": "派到執行端的 repo 子集（`vacant/`＋`ops/vacantrun/`＋`ops/gain/r535/bank/s1_01_addmul/`）。",
+      "why_not_shipped": "它就是本 repo 的一個子集，commit `8ae0318b`。重建：`git archive --format=tar 8ae0318b vacant ops/vacantrun ops/gain/r535/bank/s1_01_addmul | gzip -9`，該 tgz 的 sha256 ＝ `be0e715690d412817401a887a2e29a6e0b210bfa1119c9ff702b238a55e1430c`（gzip -9、GNU tar 格式；換工具鏈會漂，所以這個值只當交叉檢查用，不是判準）。"
+    },
+    {
+      "glob": "ws_*/** wsctl_*/**",
+      "n_files": 43,
+      "bytes": 11001,
+      "what": "跑完之後留在工作區的活檔（TASK.md ＋ agent 寫的 solution.py）。",
+      "why_not_shipped": "同一份內容的**釘死副本**已經帶了：`cells/*/frozen/`（驗收實際跑的那一份，`ws_end_sha256` 寫在 `run_RUN-ON.json` 與收據 payload 裡）。活工作區沒有雜湊背書，帶它反而多一個沒人保證的副本。`solution.py` 的原文另外也逐字收在 `matrix.json` 的 `solution_text`／`solution_sha256`。"
+    },
+    {
+      "glob": "logs/*.stdout logs/*.stderr",
+      "n_files": 44,
+      "bytes": 112516,
+      "what": "launcher 的 stdout（`--json` 摘要）與 stderr（agent 的警告，例如 Claude Code 的 `unrecognized_model`）。",
+      "why_not_shipped": "stdout 的那段 JSON 就是 `cells/*/run_RUN-ON.json`（已帶，而且那一份才是乾淨的）；agent 自己的輸出已帶（`cells/*/agent_stdout.log`）。stderr 只剩框架警告，`MATRIX.log` 已經記了每一格的 BEGIN/END 與退出碼。"
+    }
+  ],
+  "shipped_but_compressed": [
+    {
+      "path": "wire.tar.gz",
+      "what": "20 格的 wire 原始位元組 `rd_*/wire_RUN-ON/*.req.bin`、`*.resp.bin`（未壓 6.2 MB）。",
+      "why": "收據簽的就是這些位元組（`wire_digest`）。`index.jsonl` 另外以未壓形式放在 `cells/*/wire/`，因為那是最常被讀的一份。"
+    }
+  ],
+  "not_measured_this_round": [
+    "網路層出網封鎖（`ops/vacantrun/block_egress.sh`）——本輪只把兩條上游都釘到 1004，proxy 記錄到的流量全部留在本機，但 proxy records 不 verifies。",
+    "隱藏測試（本題 7 題）——本輪只跑 `tests_visible`（2 題）。",
+    "Codex 的 `codex login`（ChatGPT 帳號）那條 `wss://` 路。",
+    "Hermes 需要憑證的 provider。",
+    "長任務下 Claude Code 的 auto-compact（200k 假設）。"
+  ]
+}

@@ -57,7 +57,7 @@ def test_live_run_read_is_loud():
 
 def test_predictions_match_committed_prereg():
     """事前預測表必須與判準檔 §三 逐格相同（防「量完再改預測」）。"""
-    doc = (ROOT / "DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md").read_text()
+    doc = (ROOT / "decisions/DECISION_20260905_R480_R461_APPENDIX_A4_B3_G_CENSUS.md").read_text()
     # ⚠ §一 也有一張 `| A4-1 |` 開頭的表 ⇒ 必須切到 §三 之後再比，否則 count==2 假紅
     assert "## 三、事前預測" in doc, "判準 §三 的標題不見了＝夾具過期，不是通過"
     txt = doc.split("## 三、事前預測", 1)[1].split("## 四、", 1)[0]

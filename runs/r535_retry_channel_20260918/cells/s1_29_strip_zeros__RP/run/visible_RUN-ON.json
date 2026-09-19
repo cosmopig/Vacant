@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_29_strip_zeros_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 56,
+      "cases": [
+        {
+          "case": "check_01_strip_zeros",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'strip_zeros' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_29_strip_zeros__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import strip_zeros",
+          "output": ""
+        },
+        {
+          "case": "check_02_strip_zeros",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'strip_zeros' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_29_strip_zeros__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import strip_zeros",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "15707b40d480f589d0d934512624941a7294f75dadd5f9a8a5388e698bdafa89"
+}

@@ -1,0 +1,88 @@
+# 上游後端探針（vacant-dev → 1004 `http://100.86.226.21:1234`），2026-09-19 UTC 13:2x
+# 這一份是**量到的**不是宣稱的。三件事：
+#   1. 端點載著哪些模型（本輪用 gemma-4-12b-it-qat）。
+#   2. **1004 不是 thinking 模式**——判準是 `choices[0].message.reasoning_content`
+#      （空字串）與巢狀的 `usage.completion_tokens_details.reasoning_tokens`（0）。
+#      ⚠ 頂層 `usage.reasoning_tokens` **不在回應裡**，讀它永遠 None，不可以當判準。
+#   3. `/v1/messages`（Anthropic Messages）**原生支援**——Claude Code 那一格不需要
+#      協定轉換就是因為這個（`wireproxy.py` 是反向代理不是協定轉換器）。
+# ⚠ 原本第一行的 UTC 時戳被終端的跳脫字元吃掉了；本檔開頭這幾行是事後補的說明，
+#   **不是量到的欄位**。下面 `===` 之後才是逐字回應。
+
+
+=== GET /v1/models ===
+{
+  "data": [
+    {
+      "id": "gemma-4-12b-it-qat",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "qwen/qwen3.8-27b",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "qwen_qwen3.6-35b-a3b",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "text-embedding-nomic-embed-text-v1.5",
+      "object": "model",
+      "owned_by": "organization_owner"
+    }
+  ],
+  "object": "list"
+}
+=== POST /v1/chat/completions（判準：reasoning_content 在不在、usage.completion_tokens_details.reasoning_tokens）===
+{
+  "id": "chatcmpl-fr63qckjju7iq357kz5lq",
+  "object": "chat.completion",
+  "created": 1789825059,
+  "model": "gemma-4-12b-it-qat",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hi there! How can I help you today?",
+        "reasoning_content": "",
+        "tool_calls": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 15,
+    "completion_tokens": 11,
+    "total_tokens": 26,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "stats": {},
+  "system_fingerprint": "gemma-4-12b-it-qat"
+}
+=== POST /v1/messages（Anthropic Messages 原生支援與否）===
+{
+  "id": "msg_q59mjc9emrbhdjx1lyvmm",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "Hi there! How can I help you today?"
+    }
+  ],
+  "model": "gemma-4-12b-it-qat",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 11,
+    "cache_read_input_tokens": 10
+  }
+}]7;file://MacBookPro/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3a97046584368d9f

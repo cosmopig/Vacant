@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s1_38_shared_start_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/ws",
+  "proxy_url": "http://127.0.0.1:8880",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8880",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "cd66992a5dbc32ffecdce1e9908ce2cbf0744289e27381c7fc0673f638d7805b",
+  "ws_end_sha256": "e5bfad409d93b53d7f98173369c25d3f0eac60e3327d60d97ee43249122bc4e6",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 21,
+  "wire_by_protocol": {
+    "openai": 21
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "323f173b935860328b2273f636b0fa43926a72283b7514f81616d2b776cdea04",
+  "verdict_hash": "fca858e71c907024968e80f1306dff180bae9605f6a7c93b6635482d9ba195e5",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "cd66992a5dbc32ffecdce1e9908ce2cbf0744289e27381c7fc0673f638d7805b",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 135.943,
+      "wire_quiesced": true,
+      "requests_seen": 8,
+      "requests_seen_cumulative": 8,
+      "wire_digest": "d1eb086136c7be513648e00076a877016df63b4b6b1ab2f38e5386b46da6a0c5",
+      "ws_end_sha256": "4e45e216aa5ab5c282d27d068be8949e5bbef6f2725616262da25eaa66a7b15f",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "323f173b935860328b2273f636b0fa43926a72283b7514f81616d2b776cdea04",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_shared_start — exception: ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import shared_start]\ntest_visible.py::check_02_shared_start — exception: ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import shared_start]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "cd66992a5dbc32ffecdce1e9908ce2cbf0744289e27381c7fc0673f638d7805b",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "cd66992a5dbc32ffecdce1e9908ce2cbf0744289e27381c7fc0673f638d7805b",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 82.179,
+      "wire_quiesced": true,
+      "requests_seen": 7,
+      "requests_seen_cumulative": 15,
+      "wire_digest": "93f8f53d746cdc8723f6346758943ec486c55678e5abb0098cb17e0fd3a90523",
+      "ws_end_sha256": "9af2ce951e2ded1923966068f2df28a0a6903e1da2714126e5e5bbb30be0c38b",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "323f173b935860328b2273f636b0fa43926a72283b7514f81616d2b776cdea04",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_shared_start — exception: ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import shared_start]\ntest_visible.py::check_02_shared_start — exception: ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import shared_start]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "cd66992a5dbc32ffecdce1e9908ce2cbf0744289e27381c7fc0673f638d7805b",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "cd66992a5dbc32ffecdce1e9908ce2cbf0744289e27381c7fc0673f638d7805b",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 106.141,
+      "wire_quiesced": true,
+      "requests_seen": 6,
+      "requests_seen_cumulative": 21,
+      "wire_digest": "6fa326a8ff3b0799a1e19422f24e073a09924ab4e2f2e606673b4ed9543aaab1",
+      "ws_end_sha256": "e5bfad409d93b53d7f98173369c25d3f0eac60e3327d60d97ee43249122bc4e6",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "323f173b935860328b2273f636b0fa43926a72283b7514f81616d2b776cdea04",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_shared_start — exception: ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import shared_start]\ntest_visible.py::check_02_shared_start — exception: ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import shared_start]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_origin",
+    "ws_sha256": "cd66992a5dbc32ffecdce1e9908ce2cbf0744289e27381c7fc0673f638d7805b"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "6fa326a8ff3b0799a1e19422f24e073a09924ab4e2f2e606673b4ed9543aaab1",
+  "run_wall_s": 324.81,
+  "agent_wall_s": 106.141,
+  "failures": "test_visible.py::check_01_shared_start — exception: ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import shared_start]\ntest_visible.py::check_02_shared_start — exception: ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import shared_start]"
+}

@@ -4,7 +4,7 @@
 用的五個題組逐字重建、驗證釘值、並自己跑一塊出來對帳。
 所有數字都可以在自己的 checkout 上算出來，不必相信我們的話。
 
-對應的實驗紀錄在 `runs/INDEX.md` §七（題庫）與各 `DECISION_*.md`。
+對應的實驗紀錄在 `runs/INDEX.md` §七（題庫）與各 `decisions/DECISION_*.md`。
 
 ---
 

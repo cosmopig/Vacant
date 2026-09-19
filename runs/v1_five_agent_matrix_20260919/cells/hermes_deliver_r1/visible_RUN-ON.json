@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "hermes_deliver_r1",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 30,
+      "cases": [
+        {
+          "case": "check_01_add",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_mul",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "0b7022e9e09f71d2911ad6996969dde7a9f63896647506cf3c7cdae13c88d690"
+}

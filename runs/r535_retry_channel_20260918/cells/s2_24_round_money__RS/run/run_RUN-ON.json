@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s2_24_round_money_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/ws",
+  "proxy_url": "http://127.0.0.1:8880",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8880",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d",
+  "ws_end_sha256": "e5ad5670be72db34b9df32df5ffb4384af2b93ba45fad876cd110ab4e9a099d4",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 14,
+  "wire_by_protocol": {
+    "openai": 14
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "65a5c1d0ca199dee446dcdd3c68efa017999dc7c7849e08e855916b9bf24a547",
+  "verdict_hash": "64457276cb761b7c930a179f1addd0bdef50a80c7b2e585238d27aa67f8ed4cd",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 185.68,
+      "wire_quiesced": true,
+      "requests_seen": 6,
+      "requests_seen_cumulative": 6,
+      "wire_digest": "98af1d5a6209b79c0746de49177169432d55217808e7ef7a8e989e0b7d8cee67",
+      "ws_end_sha256": "baa9cdb04bd674369ea3182d01d7bdcce2b9ab6c83bb9de4d2c8f07c11a2936b",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "65a5c1d0ca199dee446dcdd3c68efa017999dc7c7849e08e855916b9bf24a547",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_round_money — assert: round_money args=(2.675,) got=2.67 want=2.68 [test_visible.py:14: assert got == want, \"round_money args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_round_money — assert: round_money args=(0.125,) got=0.12 want=0.13 [test_visible.py:22: assert got == want, \"round_money args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 92.442,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 10,
+      "wire_digest": "67eccc49c269123e259b6edb30c781966c241f5615957789a44f1b8ce0a6aece",
+      "ws_end_sha256": "bcc58566edbb3bc40e5cb2a630bf8d1b265f5e6133dd53ffa6a9f51414d39a95",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "65a5c1d0ca199dee446dcdd3c68efa017999dc7c7849e08e855916b9bf24a547",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_round_money — assert: round_money args=(2.675,) got=2.67 want=2.68 [test_visible.py:14: assert got == want, \"round_money args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_round_money — assert: round_money args=(0.125,) got=0.12 want=0.13 [test_visible.py:22: assert got == want, \"round_money args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 69.621,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 14,
+      "wire_digest": "d5959927107c86aab09595dd98fb391c6611570c36bbe067d0521c5969d28fc0",
+      "ws_end_sha256": "e5ad5670be72db34b9df32df5ffb4384af2b93ba45fad876cd110ab4e9a099d4",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "65a5c1d0ca199dee446dcdd3c68efa017999dc7c7849e08e855916b9bf24a547",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_round_money — assert: round_money args=(2.675,) got=2.67 want=2.68 [test_visible.py:14: assert got == want, \"round_money args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_round_money — assert: round_money args=(0.125,) got=0.12 want=0.13 [test_visible.py:22: assert got == want, \"round_money args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/_origin",
+    "ws_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "d5959927107c86aab09595dd98fb391c6611570c36bbe067d0521c5969d28fc0",
+  "run_wall_s": 348.345,
+  "agent_wall_s": 69.621,
+  "failures": "test_visible.py::check_01_round_money — assert: round_money args=(2.675,) got=2.67 want=2.68 [test_visible.py:14: assert got == want, \"round_money args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_02_round_money — assert: round_money args=(0.125,) got=0.12 want=0.13 [test_visible.py:22: assert got == want, \"round_money args=%r got=%r want=%r\" % (args, got, want)]"
+}

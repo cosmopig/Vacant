@@ -1,0 +1,6000 @@
+{
+ "generated_at": "2026-09-18T11:58:32+0800",
+ "scope": "v3（round534：十條臂＋逐臂 fail-closed）",
+ "runs": 179,
+ "tally": {
+  "UNVERIFIABLE": 10,
+  "CLEAN": 165,
+  "VIOLATION": 4
+ },
+ "wall_s": 289.6,
+ "honest_bounds": [
+  "`UNVERIFIABLE` 不是「乾淨」也不是「髒」——它是「這一份在這套量具下沒有可稽核的對象」（只有 preflight／題庫推不出來／arm 不在名單上）。",
+  "`CLEAN` 只保證：`hidden \\\\ visible` 的**字面 repr** 沒有出現在harness 自己寫的 system／user 文字裡。語意等價的改寫、以及`excused` 裡那些作者歸屬豁免，這支都認不出來。",
+  "bank 是**推斷**出來的（見 `bank_inference` 欄位），不是 run 自己記的；R529 之前的 run 沒有 `--record-bank-field`，`summary.json` 沒有 bank 欄位。"
+ ],
+ "rows": [
+  {
+   "run": "runs/_smoke_het_r210",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  },
+  {
+   "run": "runs/g_e2q_off_lcb_qwenonly_20260902",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係（多重命中 ['lcb2', 'lcb']，取 BANK_PREFERENCE 第一個）",
+   "n_task_ids": 1,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 1,
+   "texts_scanned": 2,
+   "arms_present": {
+    "OFF": 1
+   },
+   "per_arm": {
+    "OFF": 1
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 24,
+   "needles_unique_scanned": 18,
+   "needles_skipped_trivial": 24,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_het2_r263_20260829",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 191,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 251,
+   "texts_scanned": 502,
+   "arms_present": {
+    "CALIBRATION": 72,
+    "OFF": 179
+   },
+   "per_arm": {
+    "CALIBRATION": 72,
+    "OFF": 179
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 23474,
+   "needles_unique_scanned": 23474,
+   "needles_skipped_trivial": 2896,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_het2_r271_20260829",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 19,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 98,
+   "texts_scanned": 196,
+   "arms_present": {
+    "CALIBRATION": 72,
+    "ON": 26
+   },
+   "per_arm": {
+    "CALIBRATION": 72,
+    "ON": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 10210,
+   "needles_unique_scanned": 10210,
+   "needles_skipped_trivial": 322,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_het2_r274_20260829",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 21,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 119,
+   "texts_scanned": 238,
+   "arms_present": {
+    "CALIBRATION": 72,
+    "ON": 47
+   },
+   "per_arm": {
+    "CALIBRATION": 72,
+    "ON": 47
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 12372,
+   "needles_unique_scanned": 12372,
+   "needles_skipped_trivial": 584,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_het3_r278_20260829",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 191,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 1425,
+   "texts_scanned": 2850,
+   "arms_present": {
+    "CALIBRATION": 72,
+    "ON": 672,
+    "OFF5": 681
+   },
+   "per_arm": {
+    "CALIBRATION": 72,
+    "ON": 672,
+    "OFF5": 681
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 130388,
+   "needles_unique_scanned": 130388,
+   "needles_skipped_trivial": 18516,
+   "excused_n": 4,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 4
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_het_off_r262_20260829",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  },
+  {
+   "run": "runs/g_het_r210_20260828",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 1,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 12,
+   "texts_scanned": 24,
+   "arms_present": {
+    "CALIBRATION": 12
+   },
+   "per_arm": {
+    "CALIBRATION": 12
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 780,
+   "needles_unique_scanned": 780,
+   "needles_skipped_trivial": 504,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_local_smoke_20260824",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 3,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 3,
+   "texts_scanned": 6,
+   "arms_present": {
+    "OFF": 3
+   },
+   "per_arm": {
+    "OFF": 3
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 264,
+   "needles_unique_scanned": 264,
+   "needles_skipped_trivial": 53,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_off371_20260825",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 371,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 379,
+   "texts_scanned": 758,
+   "arms_present": {
+    "OFF": 379
+   },
+   "per_arm": {
+    "OFF": 379
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 34327,
+   "needles_unique_scanned": 34327,
+   "needles_skipped_trivial": 5326,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_off5_qwen_only_20260901",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 60,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 314,
+   "texts_scanned": 628,
+   "arms_present": {
+    "OFF5": 314
+   },
+   "per_arm": {
+    "OFF5": 314
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 27498,
+   "needles_unique_scanned": 27498,
+   "needles_skipped_trivial": 5126,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_off60_20260824",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 60,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 60,
+   "texts_scanned": 120,
+   "arms_present": {
+    "OFF": 60
+   },
+   "per_arm": {
+    "OFF": 60
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5279,
+   "needles_unique_scanned": 5279,
+   "needles_skipped_trivial": 986,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_off60_local_20260824",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 13,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 14,
+   "texts_scanned": 28,
+   "arms_present": {
+    "OFF": 14
+   },
+   "per_arm": {
+    "OFF": 14
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1147,
+   "needles_unique_scanned": 1147,
+   "needles_skipped_trivial": 159,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_off60_qwenonly_20260824",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 60,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 60,
+   "texts_scanned": 120,
+   "arms_present": {
+    "OFF": 60
+   },
+   "per_arm": {
+    "OFF": 60
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5279,
+   "needles_unique_scanned": 5279,
+   "needles_skipped_trivial": 986,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_off60_r345_20260830",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  },
+  {
+   "run": "runs/g_off60_relay2_20260824",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 14,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 32,
+   "texts_scanned": 64,
+   "arms_present": {
+    "OFF": 32
+   },
+   "per_arm": {
+    "OFF": 32
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2681,
+   "needles_unique_scanned": 2681,
+   "needles_skipped_trivial": 320,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_off60_relay_20260824",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 60,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 60,
+   "texts_scanned": 120,
+   "arms_present": {
+    "OFF": 60
+   },
+   "per_arm": {
+    "OFF": 60
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5279,
+   "needles_unique_scanned": 5279,
+   "needles_skipped_trivial": 986,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_off_failure_rate_20260901",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  },
+  {
+   "run": "runs/g_off_failure_rate_20260901b",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  },
+  {
+   "run": "runs/g_off_failure_rate_20260901c",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 16,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 19,
+   "texts_scanned": 38,
+   "arms_present": {
+    "OFF": 19
+   },
+   "per_arm": {
+    "OFF": 19
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1915,
+   "needles_unique_scanned": 1915,
+   "needles_skipped_trivial": 158,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_off_probe_20260902_n60",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  },
+  {
+   "run": "runs/g_off_qwen_only_20260901",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 60,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 74,
+   "texts_scanned": 148,
+   "arms_present": {
+    "OFF": 74
+   },
+   "per_arm": {
+    "OFF": 74
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6019,
+   "needles_unique_scanned": 6019,
+   "needles_skipped_trivial": 1545,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_on371_20260825",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 240,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 1088,
+   "texts_scanned": 2176,
+   "arms_present": {
+    "ON": 1088
+   },
+   "per_arm": {
+    "ON": 1088
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 98937,
+   "needles_unique_scanned": 98937,
+   "needles_skipped_trivial": 14362,
+   "excused_n": 4,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 4
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_on_qwen_only_20260901",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 60,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 290,
+   "texts_scanned": 580,
+   "arms_present": {
+    "ON": 290
+   },
+   "per_arm": {
+    "ON": 290
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 25586,
+   "needles_unique_scanned": 25586,
+   "needles_skipped_trivial": 4706,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_on_qwen_only_scale2_20260901",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 60,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 241,
+   "texts_scanned": 482,
+   "arms_present": {
+    "ON": 241
+   },
+   "per_arm": {
+    "ON": 241
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 22426,
+   "needles_unique_scanned": 22426,
+   "needles_skipped_trivial": 3184,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_onoff5_371_r123_20260825",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 371,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 3687,
+   "texts_scanned": 7374,
+   "arms_present": {
+    "ON": 1861,
+    "OFF5": 1826
+   },
+   "per_arm": {
+    "ON": 1861,
+    "OFF5": 1826
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 337616,
+   "needles_unique_scanned": 337616,
+   "needles_skipped_trivial": 48243,
+   "excused_n": 4,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 4
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_onoff5_qwenonly_20260824",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 2,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 11,
+   "texts_scanned": 22,
+   "arms_present": {
+    "ON": 11
+   },
+   "per_arm": {
+    "ON": 11
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1163,
+   "needles_unique_scanned": 1163,
+   "needles_skipped_trivial": 4,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_onoff5_qwenonly_v2_20260824",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 7,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 41,
+   "texts_scanned": 82,
+   "arms_present": {
+    "ON": 41
+   },
+   "per_arm": {
+    "ON": 41
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2724,
+   "needles_unique_scanned": 2724,
+   "needles_skipped_trivial": 856,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_onoff5_qwenonly_v3_20260824",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 60,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 602,
+   "texts_scanned": 1204,
+   "arms_present": {
+    "ON": 304,
+    "OFF5": 298
+   },
+   "per_arm": {
+    "ON": 304,
+    "OFF5": 298
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 52459,
+   "needles_unique_scanned": 52459,
+   "needles_skipped_trivial": 10303,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_onr_only_r237_20260828",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 188,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 188,
+   "texts_scanned": 376,
+   "arms_present": {
+    "ONR": 188
+   },
+   "per_arm": {
+    "ONR": 188
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 16820,
+   "needles_unique_scanned": 16820,
+   "needles_skipped_trivial": 2777,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_onr_r212_20260828",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 187,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 191,
+   "texts_scanned": 382,
+   "arms_present": {
+    "OFF": 191
+   },
+   "per_arm": {
+    "OFF": 191
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 17133,
+   "needles_unique_scanned": 17133,
+   "needles_skipped_trivial": 2778,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r342_3arm_20260830",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 9,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 53,
+   "texts_scanned": 106,
+   "arms_present": {
+    "OFF": 10,
+    "ON": 22,
+    "OFF5": 21
+   },
+   "per_arm": {
+    "OFF": 10,
+    "ON": 22,
+    "OFF5": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5572,
+   "needles_unique_scanned": 5572,
+   "needles_skipped_trivial": 334,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r345_3arm_20260830",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 6,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 65,
+   "texts_scanned": 130,
+   "arms_present": {
+    "OFF": 6,
+    "ON": 32,
+    "OFF5": 27
+   },
+   "per_arm": {
+    "OFF": 6,
+    "ON": 32,
+    "OFF5": 27
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6148,
+   "needles_unique_scanned": 6148,
+   "needles_skipped_trivial": 779,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r348_3arm_20260830",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 24,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 176,
+   "texts_scanned": 352,
+   "arms_present": {
+    "OFF": 25,
+    "ON": 78,
+    "OFF5": 73
+   },
+   "per_arm": {
+    "OFF": 25,
+    "ON": 78,
+    "OFF5": 73
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 15718,
+   "needles_unique_scanned": 15718,
+   "needles_skipped_trivial": 3370,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r356_3arm_20260830",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 178,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 2160,
+   "texts_scanned": 4320,
+   "arms_present": {
+    "OFF": 234,
+    "ON": 827,
+    "OFF5": 1099
+   },
+   "per_arm": {
+    "OFF": 234,
+    "ON": 827,
+    "OFF5": 1099
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 190130,
+   "needles_unique_scanned": 190130,
+   "needles_skipped_trivial": 34128,
+   "excused_n": 9,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 9
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r439_revcheck_20260901",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 13,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 164,
+   "texts_scanned": 328,
+   "arms_present": {
+    "OFF": 18,
+    "ON": 60,
+    "OFF5": 86
+   },
+   "per_arm": {
+    "OFF": 18,
+    "ON": 60,
+    "OFF5": 86
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 16073,
+   "needles_unique_scanned": 16073,
+   "needles_skipped_trivial": 2095,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r441_gemma_only_mbpp",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  },
+  {
+   "run": "runs/g_r441_gemma_only_mbpp_b",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 179,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 1985,
+   "texts_scanned": 3970,
+   "arms_present": {
+    "OFF": 179,
+    "ON": 911,
+    "OFF5": 895
+   },
+   "per_arm": {
+    "OFF": 179,
+    "ON": 911,
+    "OFF5": 895
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 176296,
+   "needles_unique_scanned": 176296,
+   "needles_skipped_trivial": 30312,
+   "excused_n": 4,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 4
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r442_ononly_20260901",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 14,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 116,
+   "texts_scanned": 232,
+   "arms_present": {
+    "ON": 116
+   },
+   "per_arm": {
+    "ON": 116
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 10729,
+   "needles_unique_scanned": 10729,
+   "needles_skipped_trivial": 2207,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r443_gemma_lcb",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係（多重命中 ['lcb2', 'lcb']，取 BANK_PREFERENCE 第一個）",
+   "n_task_ids": 91,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 1024,
+   "texts_scanned": 2048,
+   "arms_present": {
+    "OFF": 91,
+    "ON": 465,
+    "OFF5": 468
+   },
+   "per_arm": {
+    "OFF": 91,
+    "ON": 465,
+    "OFF5": 468
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 29222,
+   "needles_unique_scanned": 27967,
+   "needles_skipped_trivial": 19580,
+   "excused_n": 5,
+   "excused_by_rule": {
+    "visible_check_source": 4,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 1
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r444_conform_mbpp",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 179,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 1326,
+   "texts_scanned": 2652,
+   "arms_present": {
+    "OFF": 179,
+    "CONFORM": 249,
+    "OFF5": 898
+   },
+   "per_arm": {
+    "OFF": 179,
+    "CONFORM": 249,
+    "OFF5": 898
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 117339,
+   "needles_unique_scanned": 117339,
+   "needles_skipped_trivial": 21006,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r445_conform_mbpp_ext",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 192,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 1444,
+   "texts_scanned": 2888,
+   "arms_present": {
+    "OFF": 192,
+    "CONFORM": 290,
+    "OFF5": 962
+   },
+   "per_arm": {
+    "OFF": 192,
+    "CONFORM": 290,
+    "OFF5": 962
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 136680,
+   "needles_unique_scanned": 136680,
+   "needles_skipped_trivial": 15431,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r446_eq5_mbpp",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 371,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 1856,
+   "texts_scanned": 3712,
+   "arms_present": {
+    "EQ5": 1856
+   },
+   "per_arm": {
+    "EQ5": 1856
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 170405,
+   "needles_unique_scanned": 170405,
+   "needles_skipped_trivial": 23902,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r447_conform_lcb2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 120,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 931,
+   "texts_scanned": 1862,
+   "arms_present": {
+    "OFF": 121,
+    "CONFORM": 208,
+    "OFF5": 602
+   },
+   "per_arm": {
+    "OFF": 121,
+    "CONFORM": 208,
+    "OFF5": 602
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 26748,
+   "needles_unique_scanned": 25688,
+   "needles_skipped_trivial": 17602,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r449_eq5_lcb2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 120,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 602,
+   "texts_scanned": 1204,
+   "arms_present": {
+    "EQ5": 602
+   },
+   "per_arm": {
+    "EQ5": 602
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 17267,
+   "needles_unique_scanned": 16602,
+   "needles_skipped_trivial": 11399,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r449c_eq5_lcb3",
+   "bank": "lcb3",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 189,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 953,
+   "texts_scanned": 1906,
+   "arms_present": {
+    "EQ5": 953
+   },
+   "per_arm": {
+    "EQ5": 953
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 14541,
+   "needles_unique_scanned": 14275,
+   "needles_skipped_trivial": 10351,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460_harness_lcb2_a1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 271,
+   "texts_scanned": 613,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 42,
+    "OFF5": 100,
+    "HPI": 36,
+    "HOC": 46,
+    "HMIX": 27
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 42,
+    "OFF5": 100,
+    "HPI": 36,
+    "HOC": 46,
+    "HMIX": 27
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7541,
+   "needles_unique_scanned": 7391,
+   "needles_skipped_trivial": 5467,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460_harness_lcb2_a2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 234,
+   "texts_scanned": 494,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "OFF5": 100,
+    "HPI": 23,
+    "HOC": 41,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "OFF5": 100,
+    "HPI": 23,
+    "HOC": 41,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6901,
+   "needles_unique_scanned": 6719,
+   "needles_skipped_trivial": 4259,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460_harness_lcb2_a3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 251,
+   "texts_scanned": 563,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "OFF5": 101,
+    "HPI": 32,
+    "HOC": 44,
+    "HMIX": 28
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "OFF5": 101,
+    "HPI": 32,
+    "HOC": 44,
+    "HMIX": 28
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6843,
+   "needles_unique_scanned": 6643,
+   "needles_skipped_trivial": 5205,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460_harness_lcb2_b1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 265,
+   "texts_scanned": 593,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 39,
+    "OFF5": 100,
+    "HPI": 33,
+    "HOC": 46,
+    "HMIX": 27
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 39,
+    "OFF5": 100,
+    "HPI": 33,
+    "HOC": 46,
+    "HMIX": 27
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7906,
+   "needles_unique_scanned": 7463,
+   "needles_skipped_trivial": 4726,
+   "excused_n": 11,
+   "excused_by_rule": {
+    "visible_check_source": 4,
+    "model_own_selftest_same_request": 6,
+    "got_sandbox_echo": 1,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460_harness_lcb2_b2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 261,
+   "texts_scanned": 612,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "OFF5": 100,
+    "HPI": 35,
+    "HOC": 53,
+    "HMIX": 28
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "OFF5": 100,
+    "HPI": 35,
+    "HOC": 53,
+    "HMIX": 28
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7310,
+   "needles_unique_scanned": 6918,
+   "needles_skipped_trivial": 4820,
+   "excused_n": 2,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 2,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460_harness_lcb2_b3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 269,
+   "texts_scanned": 613,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 35,
+    "OFF5": 101,
+    "HPI": 28,
+    "HOC": 53,
+    "HMIX": 32
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 35,
+    "OFF5": 101,
+    "HPI": 28,
+    "HOC": 53,
+    "HMIX": 32
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7952,
+   "needles_unique_scanned": 7541,
+   "needles_skipped_trivial": 4870,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r1_harness_lcb2_a1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 246,
+   "texts_scanned": 547,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "OFF5": 100,
+    "HPI": 26,
+    "HOC": 47,
+    "HMIX": 28
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "OFF5": 100,
+    "HPI": 26,
+    "HOC": 47,
+    "HMIX": 28
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7069,
+   "needles_unique_scanned": 6462,
+   "needles_skipped_trivial": 4689,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r1_harness_lcb2_a2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 266,
+   "texts_scanned": 585,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 40,
+    "OFF5": 100,
+    "HPI": 33,
+    "HOC": 42,
+    "HMIX": 31
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 40,
+    "OFF5": 100,
+    "HPI": 33,
+    "HOC": 42,
+    "HMIX": 31
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7399,
+   "needles_unique_scanned": 7313,
+   "needles_skipped_trivial": 5369,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r1_harness_lcb2_a3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 280,
+   "texts_scanned": 649,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 39,
+    "OFF5": 101,
+    "HPI": 31,
+    "HOC": 54,
+    "HMIX": 35
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 39,
+    "OFF5": 101,
+    "HPI": 31,
+    "HOC": 54,
+    "HMIX": 35
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8274,
+   "needles_unique_scanned": 7996,
+   "needles_skipped_trivial": 5100,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r1_harness_lcb2_b1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 245,
+   "texts_scanned": 536,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "OFF5": 101,
+    "HPI": 29,
+    "HOC": 44,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "OFF5": 101,
+    "HPI": 29,
+    "HOC": 44,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7149,
+   "needles_unique_scanned": 7087,
+   "needles_skipped_trivial": 4589,
+   "excused_n": 1,
+   "excused_by_rule": {
+    "visible_check_source": 1,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r1_harness_lcb2_b2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 295,
+   "texts_scanned": 713,
+   "arms_present": {
+    "OFF": 21,
+    "CONFORM": 45,
+    "OFF5": 100,
+    "HPI": 43,
+    "HOC": 60,
+    "HMIX": 26
+   },
+   "per_arm": {
+    "OFF": 21,
+    "CONFORM": 45,
+    "OFF5": 100,
+    "HPI": 43,
+    "HOC": 60,
+    "HMIX": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8715,
+   "needles_unique_scanned": 8380,
+   "needles_skipped_trivial": 5381,
+   "excused_n": 9,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 9,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r1_harness_lcb2_b3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 278,
+   "texts_scanned": 656,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 35,
+    "OFF5": 103,
+    "HPI": 39,
+    "HOC": 53,
+    "HMIX": 28
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 35,
+    "OFF5": 103,
+    "HPI": 39,
+    "HOC": 53,
+    "HMIX": 28
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7590,
+   "needles_unique_scanned": 7120,
+   "needles_skipped_trivial": 5258,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r2_harness_lcb2_a1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 266,
+   "texts_scanned": 608,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "OFF5": 100,
+    "HPI": 29,
+    "HOC": 50,
+    "HMIX": 36
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "OFF5": 100,
+    "HPI": 29,
+    "HOC": 50,
+    "HMIX": 36
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7511,
+   "needles_unique_scanned": 7354,
+   "needles_skipped_trivial": 5191,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r2_harness_lcb2_a2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 279,
+   "texts_scanned": 649,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 40,
+    "OFF5": 100,
+    "HPI": 31,
+    "HOC": 55,
+    "HMIX": 33
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 40,
+    "OFF5": 100,
+    "HPI": 31,
+    "HOC": 55,
+    "HMIX": 33
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8221,
+   "needles_unique_scanned": 7897,
+   "needles_skipped_trivial": 5171,
+   "excused_n": 6,
+   "excused_by_rule": {
+    "visible_check_source": 6,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r2_harness_lcb2_a3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 248,
+   "texts_scanned": 540,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "OFF5": 100,
+    "HPI": 27,
+    "HOC": 43,
+    "HMIX": 26
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "OFF5": 100,
+    "HPI": 27,
+    "HOC": 43,
+    "HMIX": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6676,
+   "needles_unique_scanned": 6281,
+   "needles_skipped_trivial": 4958,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r2_harness_lcb2_b1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 266,
+   "texts_scanned": 614,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "OFF5": 100,
+    "HPI": 31,
+    "HOC": 52,
+    "HMIX": 31
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "OFF5": 100,
+    "HPI": 31,
+    "HOC": 52,
+    "HMIX": 31
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8395,
+   "needles_unique_scanned": 8097,
+   "needles_skipped_trivial": 4279,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r2_harness_lcb2_b2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 278,
+   "texts_scanned": 625,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 42,
+    "OFF5": 104,
+    "HPI": 28,
+    "HOC": 55,
+    "HMIX": 29
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 42,
+    "OFF5": 104,
+    "HPI": 28,
+    "HOC": 55,
+    "HMIX": 29
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8191,
+   "needles_unique_scanned": 7858,
+   "needles_skipped_trivial": 4945,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r2_harness_lcb2_b3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 259,
+   "texts_scanned": 594,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "OFF5": 100,
+    "HPI": 31,
+    "HOC": 51,
+    "HMIX": 29
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "OFF5": 100,
+    "HPI": 31,
+    "HOC": 51,
+    "HMIX": 29
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6823,
+   "needles_unique_scanned": 6521,
+   "needles_skipped_trivial": 5587,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r3_harness_lcb2_a1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 243,
+   "texts_scanned": 522,
+   "arms_present": {
+    "OFF": 21,
+    "CONFORM": 27,
+    "OFF5": 102,
+    "HPI": 26,
+    "HOC": 43,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 21,
+    "CONFORM": 27,
+    "OFF5": 102,
+    "HPI": 26,
+    "HOC": 43,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6604,
+   "needles_unique_scanned": 6398,
+   "needles_skipped_trivial": 5060,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r3_harness_lcb2_a2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 273,
+   "texts_scanned": 636,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 36,
+    "OFF5": 100,
+    "HPI": 36,
+    "HOC": 52,
+    "HMIX": 29
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 36,
+    "OFF5": 100,
+    "HPI": 36,
+    "HOC": 52,
+    "HMIX": 29
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8646,
+   "needles_unique_scanned": 8140,
+   "needles_skipped_trivial": 4238,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r3_harness_lcb2_a3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 266,
+   "texts_scanned": 604,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 34,
+    "OFF5": 100,
+    "HPI": 33,
+    "HOC": 47,
+    "HMIX": 32
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 34,
+    "OFF5": 100,
+    "HPI": 33,
+    "HOC": 47,
+    "HMIX": 32
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7492,
+   "needles_unique_scanned": 7292,
+   "needles_skipped_trivial": 5232,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r3_harness_lcb2_b1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 262,
+   "texts_scanned": 585,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "OFF5": 101,
+    "HPI": 36,
+    "HOC": 45,
+    "HMIX": 29
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "OFF5": 101,
+    "HPI": 36,
+    "HOC": 45,
+    "HMIX": 29
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8161,
+   "needles_unique_scanned": 8047,
+   "needles_skipped_trivial": 4265,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r3_harness_lcb2_b2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 272,
+   "texts_scanned": 643,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "OFF5": 100,
+    "HPI": 43,
+    "HOC": 51,
+    "HMIX": 32
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "OFF5": 100,
+    "HPI": 43,
+    "HOC": 51,
+    "HMIX": 32
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7101,
+   "needles_unique_scanned": 6558,
+   "needles_skipped_trivial": 5733,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r3_harness_lcb2_b3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 254,
+   "texts_scanned": 567,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "OFF5": 100,
+    "HPI": 26,
+    "HOC": 49,
+    "HMIX": 30
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "OFF5": 100,
+    "HPI": 26,
+    "HOC": 49,
+    "HMIX": 30
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6967,
+   "needles_unique_scanned": 6617,
+   "needles_skipped_trivial": 5193,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r4_harness_lcb2_a1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 276,
+   "texts_scanned": 636,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 37,
+    "OFF5": 101,
+    "HPI": 35,
+    "HOC": 51,
+    "HMIX": 32
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 37,
+    "OFF5": 101,
+    "HPI": 35,
+    "HOC": 51,
+    "HMIX": 32
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 9522,
+   "needles_unique_scanned": 9206,
+   "needles_skipped_trivial": 3726,
+   "excused_n": 7,
+   "excused_by_rule": {
+    "visible_check_source": 2,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 5,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r4_harness_lcb2_a2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 258,
+   "texts_scanned": 584,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "OFF5": 100,
+    "HPI": 28,
+    "HOC": 50,
+    "HMIX": 31
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "OFF5": 100,
+    "HPI": 28,
+    "HOC": 50,
+    "HMIX": 31
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7168,
+   "needles_unique_scanned": 7020,
+   "needles_skipped_trivial": 5172,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r4_harness_lcb2_a3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 263,
+   "texts_scanned": 589,
+   "arms_present": {
+    "OFF": 21,
+    "CONFORM": 32,
+    "OFF5": 102,
+    "HPI": 31,
+    "HOC": 48,
+    "HMIX": 29
+   },
+   "per_arm": {
+    "OFF": 21,
+    "CONFORM": 32,
+    "OFF5": 102,
+    "HPI": 31,
+    "HOC": 48,
+    "HMIX": 29
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7475,
+   "needles_unique_scanned": 7145,
+   "needles_skipped_trivial": 5121,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r4_harness_lcb2_b1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 259,
+   "texts_scanned": 572,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 36,
+    "OFF5": 100,
+    "HPI": 29,
+    "HOC": 48,
+    "HMIX": 26
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 36,
+    "OFF5": 100,
+    "HPI": 29,
+    "HOC": 48,
+    "HMIX": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7108,
+   "needles_unique_scanned": 6842,
+   "needles_skipped_trivial": 5324,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r4_harness_lcb2_b2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 270,
+   "texts_scanned": 625,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 36,
+    "OFF5": 101,
+    "HPI": 35,
+    "HOC": 52,
+    "HMIX": 26
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 36,
+    "OFF5": 101,
+    "HPI": 35,
+    "HOC": 52,
+    "HMIX": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7594,
+   "needles_unique_scanned": 7019,
+   "needles_skipped_trivial": 4970,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r4_harness_lcb2_b3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 268,
+   "texts_scanned": 611,
+   "arms_present": {
+    "OFF": 21,
+    "CONFORM": 33,
+    "OFF5": 100,
+    "HPI": 30,
+    "HOC": 51,
+    "HMIX": 33
+   },
+   "per_arm": {
+    "OFF": 21,
+    "CONFORM": 33,
+    "OFF5": 100,
+    "HPI": 30,
+    "HOC": 51,
+    "HMIX": 33
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6935,
+   "needles_unique_scanned": 6721,
+   "needles_skipped_trivial": 5737,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r5_harness_lcb2_a1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 266,
+   "texts_scanned": 612,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "OFF5": 100,
+    "HPI": 35,
+    "HOC": 49,
+    "HMIX": 30
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "OFF5": 100,
+    "HPI": 35,
+    "HOC": 49,
+    "HMIX": 30
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8593,
+   "needles_unique_scanned": 8356,
+   "needles_skipped_trivial": 4175,
+   "excused_n": 9,
+   "excused_by_rule": {
+    "visible_check_source": 3,
+    "model_own_selftest_same_request": 6,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r5_harness_lcb2_a2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 249,
+   "texts_scanned": 544,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "OFF5": 100,
+    "HPI": 29,
+    "HOC": 43,
+    "HMIX": 27
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "OFF5": 100,
+    "HPI": 29,
+    "HOC": 43,
+    "HMIX": 27
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7091,
+   "needles_unique_scanned": 6861,
+   "needles_skipped_trivial": 4731,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r5_harness_lcb2_a3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 279,
+   "texts_scanned": 646,
+   "arms_present": {
+    "OFF": 21,
+    "CONFORM": 31,
+    "OFF5": 103,
+    "HPI": 35,
+    "HOC": 53,
+    "HMIX": 36
+   },
+   "per_arm": {
+    "OFF": 21,
+    "CONFORM": 31,
+    "OFF5": 103,
+    "HPI": 35,
+    "HOC": 53,
+    "HMIX": 36
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8036,
+   "needles_unique_scanned": 7309,
+   "needles_skipped_trivial": 5298,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r5_harness_lcb2_b1",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 296,
+   "texts_scanned": 687,
+   "arms_present": {
+    "OFF": 23,
+    "CONFORM": 46,
+    "OFF5": 105,
+    "HPI": 35,
+    "HOC": 52,
+    "HMIX": 35
+   },
+   "per_arm": {
+    "OFF": 23,
+    "CONFORM": 46,
+    "OFF5": 105,
+    "HPI": 35,
+    "HOC": 52,
+    "HMIX": 35
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8519,
+   "needles_unique_scanned": 8296,
+   "needles_skipped_trivial": 5413,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r5_harness_lcb2_b2",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 280,
+   "texts_scanned": 640,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 44,
+    "OFF5": 104,
+    "HPI": 30,
+    "HOC": 53,
+    "HMIX": 29
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 44,
+    "OFF5": 104,
+    "HPI": 30,
+    "HOC": 53,
+    "HMIX": 29
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7259,
+   "needles_unique_scanned": 6927,
+   "needles_skipped_trivial": 5885,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r460r5_harness_lcb2_b3",
+   "bank": "lcb2",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 265,
+   "texts_scanned": 582,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 41,
+    "OFF5": 104,
+    "HPI": 28,
+    "HOC": 45,
+    "HMIX": 27
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 41,
+    "OFF5": 104,
+    "HPI": 28,
+    "HOC": 45,
+    "HMIX": 27
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7207,
+   "needles_unique_scanned": 6982,
+   "needles_skipped_trivial": 5487,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r461_off_gate_lcb3",
+   "bank": "lcb3",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 189,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 190,
+   "texts_scanned": 380,
+   "arms_present": {
+    "OFF": 190
+   },
+   "per_arm": {
+    "OFF": 190
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2913,
+   "needles_unique_scanned": 2860,
+   "needles_skipped_trivial": 2079,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_hep_a1",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 63,
+   "texts_scanned": 127,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 22,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 22,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 41384,
+   "needles_unique_scanned": 41384,
+   "needles_skipped_trivial": 1917,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_hep_a2",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 71,
+   "texts_scanned": 145,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 49612,
+   "needles_unique_scanned": 49612,
+   "needles_skipped_trivial": 1212,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_hep_a3",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 69,
+   "texts_scanned": 143,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 25
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 25
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 58615,
+   "needles_unique_scanned": 58615,
+   "needles_skipped_trivial": 331,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_hep_a4",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 71,
+   "texts_scanned": 144,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "HMIX": 22
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "HMIX": 22
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 53197,
+   "needles_unique_scanned": 53197,
+   "needles_skipped_trivial": 1033,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_hep_a5",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 63,
+   "texts_scanned": 127,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 22,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 22,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 52776,
+   "needles_unique_scanned": 52776,
+   "needles_skipped_trivial": 1350,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_hep_a6",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 66,
+   "texts_scanned": 133,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 44095,
+   "needles_unique_scanned": 44095,
+   "needles_skipped_trivial": 1423,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_hep_a7",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 65,
+   "texts_scanned": 133,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 22,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 22,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 52091,
+   "needles_unique_scanned": 52091,
+   "needles_skipped_trivial": 816,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_hep_a8",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 16,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 66,
+   "texts_scanned": 138,
+   "arms_present": {
+    "OFF": 16,
+    "CONFORM": 28,
+    "HMIX": 22
+   },
+   "per_arm": {
+    "OFF": 16,
+    "CONFORM": 28,
+    "HMIX": 22
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 57027,
+   "needles_unique_scanned": 57027,
+   "needles_skipped_trivial": 351,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3h_a1",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 70,
+   "texts_scanned": 144,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1183,
+   "needles_unique_scanned": 1148,
+   "needles_skipped_trivial": 707,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3h_a2",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 80,
+   "texts_scanned": 167,
+   "arms_present": {
+    "OFF": 21,
+    "CONFORM": 32,
+    "HMIX": 27
+   },
+   "per_arm": {
+    "OFF": 21,
+    "CONFORM": 32,
+    "HMIX": 27
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1671,
+   "needles_unique_scanned": 1658,
+   "needles_skipped_trivial": 763,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3h_a3",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 14,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 55,
+   "texts_scanned": 115,
+   "arms_present": {
+    "OFF": 14,
+    "CONFORM": 22,
+    "HMIX": 19
+   },
+   "per_arm": {
+    "OFF": 14,
+    "CONFORM": 22,
+    "HMIX": 19
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 773,
+   "needles_unique_scanned": 770,
+   "needles_skipped_trivial": 605,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3m_a1",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 62,
+   "texts_scanned": 125,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 799,
+   "needles_unique_scanned": 799,
+   "needles_skipped_trivial": 685,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3m_a2",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 61,
+   "texts_scanned": 123,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 20,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 20,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 799,
+   "needles_unique_scanned": 757,
+   "needles_skipped_trivial": 765,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3m_a3",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 66,
+   "texts_scanned": 134,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1056,
+   "needles_unique_scanned": 1017,
+   "needles_skipped_trivial": 702,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3m_a4",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 72,
+   "texts_scanned": 153,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 29
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 29
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1236,
+   "needles_unique_scanned": 1202,
+   "needles_skipped_trivial": 924,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3m_a5",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 81,
+   "texts_scanned": 170,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 33,
+    "HMIX": 28
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 33,
+    "HMIX": 28
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1030,
+   "needles_unique_scanned": 1021,
+   "needles_skipped_trivial": 832,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3m_a6",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 69,
+   "texts_scanned": 142,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1133,
+   "needles_unique_scanned": 1130,
+   "needles_skipped_trivial": 713,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_lcb3m_a7",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 15,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 46,
+   "texts_scanned": 93,
+   "arms_present": {
+    "OFF": 15,
+    "CONFORM": 15,
+    "HMIX": 16
+   },
+   "per_arm": {
+    "OFF": 15,
+    "CONFORM": 15,
+    "HMIX": 16
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 643,
+   "needles_unique_scanned": 643,
+   "needles_skipped_trivial": 527,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a1",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 66,
+   "texts_scanned": 133,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6371,
+   "needles_unique_scanned": 6371,
+   "needles_skipped_trivial": 735,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a10",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 68,
+   "texts_scanned": 138,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 22
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 22
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5819,
+   "needles_unique_scanned": 5819,
+   "needles_skipped_trivial": 1168,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a11",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 79,
+   "texts_scanned": 163,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 34,
+    "HMIX": 25
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 34,
+    "HMIX": 25
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7457,
+   "needles_unique_scanned": 7457,
+   "needles_skipped_trivial": 1066,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a12",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 83,
+   "texts_scanned": 175,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 34,
+    "HMIX": 29
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 34,
+    "HMIX": 29
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 8245,
+   "needles_unique_scanned": 8245,
+   "needles_skipped_trivial": 821,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a13",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 62,
+   "texts_scanned": 125,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5928,
+   "needles_unique_scanned": 5928,
+   "needles_skipped_trivial": 528,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a14",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 73,
+   "texts_scanned": 150,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "HMIX": 25
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "HMIX": 25
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5296,
+   "needles_unique_scanned": 5296,
+   "needles_skipped_trivial": 2368,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a15",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 67,
+   "texts_scanned": 135,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6112,
+   "needles_unique_scanned": 6112,
+   "needles_skipped_trivial": 894,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a16",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 66,
+   "texts_scanned": 135,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6447,
+   "needles_unique_scanned": 6447,
+   "needles_skipped_trivial": 665,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a17",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 75,
+   "texts_scanned": 154,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7209,
+   "needles_unique_scanned": 7209,
+   "needles_skipped_trivial": 625,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a18",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 69,
+   "texts_scanned": 141,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6822,
+   "needles_unique_scanned": 6822,
+   "needles_skipped_trivial": 234,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a19",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 11,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 44,
+   "texts_scanned": 92,
+   "arms_present": {
+    "OFF": 11,
+    "CONFORM": 18,
+    "HMIX": 15
+   },
+   "per_arm": {
+    "OFF": 11,
+    "CONFORM": 18,
+    "HMIX": 15
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2776,
+   "needles_unique_scanned": 2776,
+   "needles_skipped_trivial": 1570,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a2",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 68,
+   "texts_scanned": 137,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6675,
+   "needles_unique_scanned": 6675,
+   "needles_skipped_trivial": 617,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a3",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 70,
+   "texts_scanned": 143,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6855,
+   "needles_unique_scanned": 6855,
+   "needles_skipped_trivial": 487,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a4",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 67,
+   "texts_scanned": 136,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 22
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 22
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5807,
+   "needles_unique_scanned": 5807,
+   "needles_skipped_trivial": 903,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a5",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 68,
+   "texts_scanned": 139,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5923,
+   "needles_unique_scanned": 5923,
+   "needles_skipped_trivial": 1131,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a6",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 73,
+   "texts_scanned": 153,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 27
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 27
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5746,
+   "needles_unique_scanned": 5746,
+   "needles_skipped_trivial": 1526,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a7",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 65,
+   "texts_scanned": 131,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6519,
+   "needles_unique_scanned": 6519,
+   "needles_skipped_trivial": 295,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a8",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 69,
+   "texts_scanned": 141,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6136,
+   "needles_unique_scanned": 6136,
+   "needles_skipped_trivial": 1313,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r529_mbpp_a9",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 69,
+   "texts_scanned": 143,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 25
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 25
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6437,
+   "needles_unique_scanned": 6437,
+   "needles_skipped_trivial": 960,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r530_s1_1003_1",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "CLEAN",
+   "records_audited": 369,
+   "per_arm": {
+    "A-SOLO": 88,
+    "A-CONF": 168,
+    "A-GATE": 113
+   },
+   "needles_checked": 24873,
+   "needles_skipped_trivial": 7612,
+   "excused_n": 283,
+   "excused_by_rule": {
+    "tool_output_echo": 283,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 0,
+   "violations": [],
+   "workspace_needle_hits_n": 2,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s1_1003_2",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "CLEAN",
+   "records_audited": 459,
+   "per_arm": {
+    "A-SOLO": 101,
+    "A-CONF": 192,
+    "A-GATE": 166
+   },
+   "needles_checked": 40731,
+   "needles_skipped_trivial": 8171,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "tool_output_echo": 0,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 0,
+   "violations": [],
+   "workspace_needle_hits_n": 0,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s1_1004_1",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "VIOLATION",
+   "records_audited": 283,
+   "per_arm": {
+    "A-SOLO": 58,
+    "A-CONF": 155,
+    "A-GATE": 70
+   },
+   "needles_checked": 19857,
+   "needles_skipped_trivial": 7398,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "tool_output_echo": 0,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 1,
+   "violations": [
+    {
+     "rule": "hidden_file_in_workspace",
+     "archive": "ow_09_minitemplate__A-CONF__a2.tar.gz",
+     "member": "ow_09_minitemplate__A-CONF__g-r530-s1/tests_visible/test_hidden.py"
+    }
+   ],
+   "workspace_needle_hits_n": 0,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s1_1004_2",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "CLEAN",
+   "records_audited": 317,
+   "per_arm": {
+    "A-SOLO": 119,
+    "A-CONF": 69,
+    "A-GATE": 129
+   },
+   "needles_checked": 22373,
+   "needles_skipped_trivial": 9460,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "tool_output_echo": 0,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 0,
+   "violations": [],
+   "workspace_needle_hits_n": 0,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s2_1003_1",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "VIOLATION",
+   "records_audited": 474,
+   "per_arm": {
+    "A-SOLO": 179,
+    "A-CONF": 119,
+    "A-GATE": 176
+   },
+   "needles_checked": 35627,
+   "needles_skipped_trivial": 11934,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "tool_output_echo": 0,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 1,
+   "violations": [
+    {
+     "rule": "hidden_file_in_workspace",
+     "archive": "ow_09_minitemplate__A-CONF__a2.tar.gz",
+     "member": "ow_09_minitemplate__A-CONF__g-r530-s2/tests_hidden.py"
+    }
+   ],
+   "workspace_needle_hits_n": 0,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s2_1003_2",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "CLEAN",
+   "records_audited": 262,
+   "per_arm": {
+    "A-SOLO": 96,
+    "A-CONF": 96,
+    "A-GATE": 70
+   },
+   "needles_checked": 17549,
+   "needles_skipped_trivial": 6609,
+   "excused_n": 147,
+   "excused_by_rule": {
+    "tool_output_echo": 147,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 0,
+   "violations": [],
+   "workspace_needle_hits_n": 0,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s2_1004_1",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "CLEAN",
+   "records_audited": 456,
+   "per_arm": {
+    "A-SOLO": 96,
+    "A-CONF": 226,
+    "A-GATE": 134
+   },
+   "needles_checked": 30732,
+   "needles_skipped_trivial": 8804,
+   "excused_n": 91,
+   "excused_by_rule": {
+    "tool_output_echo": 91,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 0,
+   "violations": [],
+   "workspace_needle_hits_n": 1,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s2_1004_2",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "VIOLATION",
+   "records_audited": 507,
+   "per_arm": {
+    "A-SOLO": 103,
+    "A-CONF": 258,
+    "A-GATE": 146
+   },
+   "needles_checked": 39239,
+   "needles_skipped_trivial": 9407,
+   "excused_n": 59,
+   "excused_by_rule": {
+    "tool_output_echo": 59,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 1,
+   "violations": [
+    {
+     "rule": "hidden_file_in_workspace",
+     "archive": "ow_19_redact__A-GATE__a1.tar.gz",
+     "member": "ow_19_redact__A-GATE__g-r530-s2/tests_visible/test_hidden.py"
+    }
+   ],
+   "workspace_needle_hits_n": 1,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s3_1003_1",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "VIOLATION",
+   "records_audited": 468,
+   "per_arm": {
+    "A-SOLO": 92,
+    "A-CONF": 239,
+    "A-GATE": 137
+   },
+   "needles_checked": 31535,
+   "needles_skipped_trivial": 8981,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "tool_output_echo": 0,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 1,
+   "violations": [
+    {
+     "rule": "hidden_file_in_workspace",
+     "archive": "ow_04_layerconf__A-GATE__a1.tar.gz",
+     "member": "ow_04_layerconf__A-GATE__g-r530-s3/tests_hidden.py"
+    }
+   ],
+   "workspace_needle_hits_n": 0,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s3_1003_2",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "CLEAN",
+   "records_audited": 412,
+   "per_arm": {
+    "A-SOLO": 94,
+    "A-CONF": 206,
+    "A-GATE": 112
+   },
+   "needles_checked": 34206,
+   "needles_skipped_trivial": 8337,
+   "excused_n": 207,
+   "excused_by_rule": {
+    "tool_output_echo": 207,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 0,
+   "violations": [],
+   "workspace_needle_hits_n": 4,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s3_1004_1",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "CLEAN",
+   "records_audited": 282,
+   "per_arm": {
+    "A-SOLO": 58,
+    "A-CONF": 92,
+    "A-GATE": 132
+   },
+   "needles_checked": 18696,
+   "needles_skipped_trivial": 7437,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "tool_output_echo": 0,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 0,
+   "violations": [],
+   "workspace_needle_hits_n": 0,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r530_s3_1004_2",
+   "bank": "r530",
+   "bank_inference": "task_id 全部是 ow_*（R530 工作區題目）",
+   "n_task_ids": 5,
+   "scope": "r530",
+   "verdict": "CLEAN",
+   "records_audited": 312,
+   "per_arm": {
+    "A-SOLO": 65,
+    "A-CONF": 102,
+    "A-GATE": 145
+   },
+   "needles_checked": 21604,
+   "needles_skipped_trivial": 8995,
+   "excused_n": 35,
+   "excused_by_rule": {
+    "tool_output_echo": 35,
+    "task_prose": 0
+   },
+   "unknown_task_ids": [],
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_unique_scanned": null,
+   "violations_n": 0,
+   "violations": [],
+   "workspace_needle_hits_n": 1,
+   "deny_hidden_read_n": 0
+  },
+  {
+   "run": "runs/g_r532_hep_a1",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 69,
+   "texts_scanned": 142,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 46348,
+   "needles_unique_scanned": 46348,
+   "needles_skipped_trivial": 1946,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_hep_a2",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 71,
+   "texts_scanned": 146,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 50101,
+   "needles_unique_scanned": 50101,
+   "needles_skipped_trivial": 1212,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_hep_a3",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 67,
+   "texts_scanned": 138,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 56739,
+   "needles_unique_scanned": 56739,
+   "needles_skipped_trivial": 283,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_hep_a4",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 66,
+   "texts_scanned": 137,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 25
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 25
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 47947,
+   "needles_unique_scanned": 47947,
+   "needles_skipped_trivial": 995,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_hep_a5",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 64,
+   "texts_scanned": 131,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 53625,
+   "needles_unique_scanned": 53625,
+   "needles_skipped_trivial": 1354,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_hep_a6",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 65,
+   "texts_scanned": 134,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 47017,
+   "needles_unique_scanned": 47017,
+   "needles_skipped_trivial": 1272,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_hep_a7",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 71,
+   "texts_scanned": 146,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 56472,
+   "needles_unique_scanned": 56472,
+   "needles_skipped_trivial": 775,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_hep_a8",
+   "bank": "humanevalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 16,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 59,
+   "texts_scanned": 123,
+   "arms_present": {
+    "OFF": 16,
+    "CONFORM": 22,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 16,
+    "CONFORM": 22,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 48263,
+   "needles_unique_scanned": 48263,
+   "needles_skipped_trivial": 404,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb2_a1",
+   "bank": "lcb2",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 84,
+   "texts_scanned": 181,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "HMIX": 33
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "HMIX": 33
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2346,
+   "needles_unique_scanned": 2297,
+   "needles_skipped_trivial": 1686,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb2_a2",
+   "bank": "lcb2",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 84,
+   "texts_scanned": 182,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "HMIX": 34
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "HMIX": 34
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2555,
+   "needles_unique_scanned": 2482,
+   "needles_skipped_trivial": 1451,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb2_a3",
+   "bank": "lcb2",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 76,
+   "texts_scanned": 158,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "HMIX": 26
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "HMIX": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2084,
+   "needles_unique_scanned": 2027,
+   "needles_skipped_trivial": 1564,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb2_a4",
+   "bank": "lcb2",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 91,
+   "texts_scanned": 200,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 33,
+    "HMIX": 38
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 33,
+    "HMIX": 38
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2639,
+   "needles_unique_scanned": 2514,
+   "needles_skipped_trivial": 1703,
+   "excused_n": 1,
+   "excused_by_rule": {
+    "visible_check_source": 1,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb2_a5",
+   "bank": "lcb2",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 83,
+   "texts_scanned": 177,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "HMIX": 31
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "HMIX": 31
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2418,
+   "needles_unique_scanned": 2279,
+   "needles_skipped_trivial": 1466,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb2_a6",
+   "bank": "lcb2",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 93,
+   "texts_scanned": 204,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 35,
+    "HMIX": 38
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 35,
+    "HMIX": 38
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2803,
+   "needles_unique_scanned": 2577,
+   "needles_skipped_trivial": 1615,
+   "excused_n": 1,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 1,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3h_a1",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 90,
+   "texts_scanned": 191,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 39,
+    "HMIX": 31
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 39,
+    "HMIX": 31
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1453,
+   "needles_unique_scanned": 1417,
+   "needles_skipped_trivial": 949,
+   "excused_n": 1,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 1,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3h_a2",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 89,
+   "texts_scanned": 195,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "HMIX": 37
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "HMIX": 37
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1857,
+   "needles_unique_scanned": 1833,
+   "needles_skipped_trivial": 885,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3h_a3",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 14,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 59,
+   "texts_scanned": 127,
+   "arms_present": {
+    "OFF": 14,
+    "CONFORM": 22,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 14,
+    "CONFORM": 22,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 812,
+   "needles_unique_scanned": 809,
+   "needles_skipped_trivial": 644,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3m_a1",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 72,
+   "texts_scanned": 150,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 26
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 930,
+   "needles_unique_scanned": 930,
+   "needles_skipped_trivial": 784,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3m_a2",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 72,
+   "texts_scanned": 152,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 28
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 28
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 917,
+   "needles_unique_scanned": 855,
+   "needles_skipped_trivial": 911,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3m_a3",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 78,
+   "texts_scanned": 167,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 31
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 31
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1482,
+   "needles_unique_scanned": 1415,
+   "needles_skipped_trivial": 840,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3m_a4",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 81,
+   "texts_scanned": 177,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 35
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 35
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1431,
+   "needles_unique_scanned": 1397,
+   "needles_skipped_trivial": 1075,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3m_a5",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 75,
+   "texts_scanned": 158,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 28
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 28
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 914,
+   "needles_unique_scanned": 903,
+   "needles_skipped_trivial": 756,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3m_a6",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 78,
+   "texts_scanned": 163,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "HMIX": 27
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 31,
+    "HMIX": 27
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 1207,
+   "needles_unique_scanned": 1204,
+   "needles_skipped_trivial": 807,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_lcb3m_a7",
+   "bank": "lcb3",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 15,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 55,
+   "texts_scanned": 117,
+   "arms_present": {
+    "OFF": 15,
+    "CONFORM": 18,
+    "HMIX": 22
+   },
+   "per_arm": {
+    "OFF": 15,
+    "CONFORM": 18,
+    "HMIX": 22
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 811,
+   "needles_unique_scanned": 811,
+   "needles_skipped_trivial": 641,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a1",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 70,
+   "texts_scanned": 141,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "HMIX": 21
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 29,
+    "HMIX": 21
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6796,
+   "needles_unique_scanned": 6796,
+   "needles_skipped_trivial": 741,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a10",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 69,
+   "texts_scanned": 143,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 25
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 25
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6058,
+   "needles_unique_scanned": 6058,
+   "needles_skipped_trivial": 1042,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a11",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 72,
+   "texts_scanned": 150,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 26
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6870,
+   "needles_unique_scanned": 6870,
+   "needles_skipped_trivial": 913,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a12",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 76,
+   "texts_scanned": 160,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "HMIX": 28
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "HMIX": 28
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7819,
+   "needles_unique_scanned": 7819,
+   "needles_skipped_trivial": 575,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a13",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 64,
+   "texts_scanned": 131,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6142,
+   "needles_unique_scanned": 6142,
+   "needles_skipped_trivial": 530,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a14",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 64,
+   "texts_scanned": 131,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 21,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 4826,
+   "needles_unique_scanned": 4826,
+   "needles_skipped_trivial": 1896,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a15",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 69,
+   "texts_scanned": 143,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 25
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 25
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6116,
+   "needles_unique_scanned": 6116,
+   "needles_skipped_trivial": 1093,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a16",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 68,
+   "texts_scanned": 140,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6643,
+   "needles_unique_scanned": 6643,
+   "needles_skipped_trivial": 671,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a17",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 79,
+   "texts_scanned": 165,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "HMIX": 27
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 32,
+    "HMIX": 27
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7550,
+   "needles_unique_scanned": 7550,
+   "needles_skipped_trivial": 702,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a18",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 70,
+   "texts_scanned": 145,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 25
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 25
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6620,
+   "needles_unique_scanned": 6620,
+   "needles_skipped_trivial": 273,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a19",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 11,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 40,
+   "texts_scanned": 85,
+   "arms_present": {
+    "OFF": 11,
+    "CONFORM": 13,
+    "HMIX": 16
+   },
+   "per_arm": {
+    "OFF": 11,
+    "CONFORM": 13,
+    "HMIX": 16
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 2744,
+   "needles_unique_scanned": 2744,
+   "needles_skipped_trivial": 1205,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a2",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 67,
+   "texts_scanned": 137,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 24,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6655,
+   "needles_unique_scanned": 6655,
+   "needles_skipped_trivial": 523,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a3",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 76,
+   "texts_scanned": 158,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "HMIX": 26
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 30,
+    "HMIX": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7569,
+   "needles_unique_scanned": 7569,
+   "needles_skipped_trivial": 418,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a4",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 71,
+   "texts_scanned": 148,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 26
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 25,
+    "HMIX": 26
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6050,
+   "needles_unique_scanned": 6050,
+   "needles_skipped_trivial": 1179,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a5",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 68,
+   "texts_scanned": 141,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 25
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 23,
+    "HMIX": 25
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5918,
+   "needles_unique_scanned": 5918,
+   "needles_skipped_trivial": 1133,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a6",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 70,
+   "texts_scanned": 144,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 24
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 26,
+    "HMIX": 24
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 5493,
+   "needles_unique_scanned": 5493,
+   "needles_skipped_trivial": 1447,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a7",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 75,
+   "texts_scanned": 158,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 28
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 27,
+    "HMIX": 28
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 7533,
+   "needles_unique_scanned": 7533,
+   "needles_skipped_trivial": 335,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a8",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 71,
+   "texts_scanned": 145,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "HMIX": 23
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 28,
+    "HMIX": 23
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6208,
+   "needles_unique_scanned": 6208,
+   "needles_skipped_trivial": 1441,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_r532_mbpp_a9",
+   "bank": "evalplus",
+   "bank_inference": "summary.json:bank",
+   "n_task_ids": 20,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 71,
+   "texts_scanned": 151,
+   "arms_present": {
+    "OFF": 20,
+    "CONFORM": 22,
+    "HMIX": 29
+   },
+   "per_arm": {
+    "OFF": 20,
+    "CONFORM": 22,
+    "HMIX": 29
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6655,
+   "needles_unique_scanned": 6655,
+   "needles_skipped_trivial": 962,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/g_smoke_20260820",
+   "bank": "evalplus",
+   "bank_inference": "task_id 集合包含關係",
+   "n_task_ids": 9,
+   "scope": "v3",
+   "verdict": "CLEAN",
+   "records_audited": 86,
+   "texts_scanned": 172,
+   "arms_present": {
+    "CALIBRATION": 18,
+    "OFF": 6,
+    "ON": 32,
+    "OFF5": 30
+   },
+   "per_arm": {
+    "CALIBRATION": 18,
+    "OFF": 6,
+    "ON": 32,
+    "OFF5": 30
+   },
+   "arms_present_not_audited": [],
+   "needles_checked": 6720,
+   "needles_unique_scanned": 6720,
+   "needles_skipped_trivial": 1727,
+   "excused_n": 0,
+   "excused_by_rule": {
+    "visible_check_source": 0,
+    "model_own_selftest_same_request": 0,
+    "got_sandbox_echo": 0,
+    "model_own_output_quoted": 0
+   },
+   "unknown_task_ids": [],
+   "violations_n": 0,
+   "violations": []
+  },
+  {
+   "run": "runs/off_probe_n60_20260902",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  },
+  {
+   "run": "runs/off_probe_n60_20260902_test",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  },
+  {
+   "run": "runs/probe_verify_20260901",
+   "bank": null,
+   "bank_inference": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "n_task_ids": 0,
+   "verdict": "UNVERIFIABLE",
+   "scope": null,
+   "reason": "calls.jsonl 裡一個 task_id 都沒有（多半是只有 preflight 的中止 run）",
+   "per_arm": {},
+   "arms_present": {},
+   "arms_present_not_audited": [],
+   "needles_checked": 0,
+   "texts_scanned": 0,
+   "unknown_task_ids": [],
+   "violations": []
+  }
+ ]
+}

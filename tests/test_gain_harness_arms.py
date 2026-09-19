@@ -118,7 +118,11 @@ def _run(task, variant, script, *, budget=None, fence=True):
     rng = random.Random(0)
     rng.choice = lambda seq: agent          # 一題一個 worker，固定成 w0
     book, ident, calls = Logbook(), Identity.generate(), [0]
-    bud = {"sandbox_timeout_s": 3}
+    # ⚠ **30 秒不是慷慨，是正確性。** 逾時只在有東西掛住時才被消耗掉，所以放寬
+    #   不會讓任何通過的案例變慢；但放不寬，機器一忙就會把跑得完的候選判成
+    #   `timeout` ⇒ 「超時被記成答錯」。2026-09-18 全套跑過一次紅的就是這個
+    #   （`test_t4_...` 第 173 行）。真的要逼出逾時的地方自己傳 3 秒。
+    bud = {"sandbox_timeout_s": 30}
     bud.update(budget or {})
     code, worker, involved, extra = run_harness_arm(
         task, [agent], rng, calls, book, ident, variant=variant,
@@ -162,14 +166,28 @@ def test_t3_refusal_returns_the_last_draft_like_arm_conform(task):
 
 # ── T4 四種 fail_kind ＋ 兩種 loader reason ──────────────────────────────
 def test_t4_four_failure_kinds_and_two_distinct_loader_reasons(task):
+    # ⚠ 逾時值**按案例分開**（2026-09-19）。原本五個案例共用 3 秒，於是機器一忙，
+    #   連跑一個 trivial 函式都可能超過 3 秒 ⇒ `logic`／`exc` 被誤判成 `timeout`。
+    #   那正是「**超時被記成答錯**」——我們在 R535 白跑風險裡列為第一條的那件事，
+    #   在自己的測試套件裡發生了（2026-09-18 跑全套時紅過一次）。
+    #   「3 秒足以抓到無窮迴圈」是關於**迴圈**的敘述，成立；
+    #   「3 秒足以跑完一個 trivial 函式」是關於**機器負載**的敘述，不成立。
+    #   只有 `loop` 需要短逾時，其餘給寬的。
     kinds = {}
     reasons = {}
-    for name, code in (("logic", LOGIC_BAD), ("exc", EXC_BAD), ("loop", LOOP_BAD),
-                       ("imp", IMPORT_BAD), ("syn", SYNTAX_BAD)):
-        r = _run(task, "HPI", [code])
+    for name, code, timeout_s in (("logic", LOGIC_BAD, 30), ("exc", EXC_BAD, 30),
+                                  ("loop", LOOP_BAD, 3), ("imp", IMPORT_BAD, 30),
+                                  ("syn", SYNTAX_BAD, 30)):
+        r = _run(task, "HPI", [code], budget={"sandbox_timeout_s": timeout_s})
         t0 = r["extra"]["harness_turns"][0]
         kinds[name] = t0["fail_kind"]
         reasons[name] = t0["precheck_reason"]
+    # 非迴圈案例被判成 timeout ＝ **基建問題不是判定問題**，要說得出來
+    # （`infra_void` 的同一條紀律：機器忙不是候選答錯）。
+    spurious = [n for n, k in kinds.items() if n != "loop" and k == "timeout"]
+    assert not spurious, (
+        f"{spurious} 在 30 秒逾時下仍被判 timeout——那是機器過載，不是分類錯。"
+        f"完整結果：{kinds}")
     assert kinds == {"logic": "assert", "exc": "exception", "loop": "timeout",
                      "imp": "loader", "syn": "loader"}
     assert reasons["imp"] == "forbidden_import" and reasons["syn"] == "syntax_error"

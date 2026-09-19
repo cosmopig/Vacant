@@ -142,9 +142,22 @@ def test_bank_is_in_the_cli_choices():
     assert '"evalplus", "humanevalplus", "builtin"' in src
 
 
-def test_bank_filter_does_not_apply_to_humanevalplus():
-    """它沒有平台原生標籤——`family` 是我們自己貼的啟發式，不准拿來切層。"""
+def test_bank_strata_is_empty_for_humanevalplus():
+    """`bank_strata` 不碰題庫檔（`gain_run.py:127` 只查 `LCB_BANK_VERSION`）
+    ⇒ 官方包不在場的機器上也**驗得到**，所以這半條不掛 `needs_pack`。"""
     assert bank_strata("humanevalplus") == {}
+
+
+@needs_pack
+def test_bank_filter_does_not_apply_to_humanevalplus():
+    """它沒有平台原生標籤——`family` 是我們自己貼的啟發式，不准拿來切層。
+
+    ⚠ 這一條原本漏掛 `@needs_pack`（R529 落地時的漏網，本檔開頭的
+    「官方包不在場時，需要真資料的那幾條 skip」就是在講它）：`load_tasks`
+    **先建 loader 再驗 filter**（`gain_run.py:153` vs :186），所以官方包不在場
+    時它拿到的是 `FileNotFoundError` 而不是 `SystemExit`。差的是**環境**不是
+    行為——缺席就 skip，不改判準、也不去動凍結的 runner。
+    """
     with pytest.raises(SystemExit, match="不成立"):
         load_tasks("humanevalplus", "s", 5, bank_filter="difficulty=hard")
 

@@ -23,7 +23,11 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 LIVE = "g_r461_lcb3_three_arm"          # 主 run：本檔一個 byte 都不准讀
 _LIVE_READS = 0                          # G-LIVE 計數（永遠應為 0）
 
-DOC_GLOB = "DECISION_*.md"
+# 2026-09-18：裁決檔從 repo 根搬進 `decisions/`（純 `git mv`，內容一個 byte 沒動）。
+# 這個 glob 跟著搬——它代表的是「R481 之前的舊範圍」這個**集合**，不是「根目錄」
+# 這個位置。留在 `"DECISION_*.md"` 會讓舊範圍安靜地縮成 0 份，
+# `docs_scanned_legacy` 歸零、加法性對照變成 0==0 的空洞恆真句。
+DOC_GLOB = "decisions/DECISION_*.md"
 LS_FILES_GLOB = "*.md"                   # R481 §一：新範圍 ＝ 舊 glob ∪ git 追蹤的所有 *.md
 # R481 §一：具名排除（不是安靜跳過）。本擋門對它們**結構上**判不了 FRESH/STALE。
 OUT_OF_SCOPE_NAMED = [
@@ -207,6 +211,30 @@ def scan_doc(doc: pathlib.Path) -> list[dict]:
 
 
 # ── 認證時刻：把該標題寫進檔案的那個 commit（判準 §二.4）──────────────────
+def historical_paths(doc_name: str) -> list[str]:
+    """這份文件在 git 歷史上用過的所有路徑（新到舊都算）。
+
+    2026-09-18 把 227 份裁決檔 `git mv` 進 `decisions/` 之後，只拿**現在的**路徑去
+    `git log -S` 會塌到搬家那個 commit——因為在它之前，`decisions/<檔名>` 這條路徑
+    的 diff 是空的，而搬家那一次新路徑的內容從無到有，pickaxe 必中。
+    結果就是每一格的認證時刻都變成「今天」⇒ `b_derived` 等於當前 blob ⇒
+    自記值與反推值打架（`cert_sha_mismatch`）⇒ 整個擋門 BROKEN。
+
+    ⚠ `--follow` 不能跟 `--reverse` 併用（實測回 0 筆），所以這裡分兩步：
+      先用 `--follow --name-only` 把改名鏈上的路徑撈出來，
+      再把**所有**路徑一起餵給原本那條 `--reverse -S` 查詢。
+    語意與搬家前逐字相同：同一份檔案、同一個 pickaxe、取最早那一筆。
+    """
+    paths = {doc_name}
+    rc, out = git("log", "--follow", "--name-only", "--format=%x00", "--", doc_name)
+    if rc == 0:
+        for ln in out.split("\n"):
+            ln = ln.strip()
+            if ln and not ln.startswith("\x00"):
+                paths.add(ln)
+    return sorted(paths)
+
+
 def introducing_commit(doc_name: str, heading_text: str) -> tuple[str | None, int | None]:
     if _has("M9_HEADING_REWRITTEN"):
         # 標題被改寫後 `-S<新字串>` 只匹配得到改寫那一次 ⇒ 認證時刻塌到最近的 commit。
@@ -216,7 +244,8 @@ def introducing_commit(doc_name: str, heading_text: str) -> tuple[str | None, in
             h, ct = out.strip().split()[:2]
             return h, int(ct)
         return None, None
-    rc, out = git("log", "--reverse", "--format=%H %ct", f"-S{heading_text}", "--", doc_name)
+    rc, out = git("log", "--reverse", "--format=%H %ct", f"-S{heading_text}",
+                  "--", *historical_paths(doc_name))
     if rc != 0 or not out.strip():
         return None, None
     h, ct = out.strip().splitlines()[0].split()
@@ -545,10 +574,14 @@ def selftest() -> int:
     add("M5_deleting_blob_compare_goes_red", m5["ok"], m5["detail"])
 
     # ── R478（判準 §六）────────────────────────────────────────────
+    # ⚠ 兩個都要：`prereg_doc` 是 basename（`g["doc"]` 一直是 basename），
+    #   `prereg_rel` 才是 2026-09-18 搬進 `decisions/` 之後的真路徑。
+    #   混用會讓 `has_literal` 永遠 False（檔案在根目錄找不到）而把 S1 判成紅的。
     prereg_doc = "DECISION_20260905_R478_CERT_SELF_RECORDED_SHA.md"
+    prereg_rel = f"decisions/{prereg_doc}"
     # S1 自我匹配擋門：判準檔含 CERT-BLOB 字面，但沒有認證標題 ⇒ 不准貢獻群組
-    has_literal = (ROOT / prereg_doc).exists() and \
-        ("CERT-" + "BLOB") in (ROOT / prereg_doc).read_text(encoding="utf-8")
+    has_literal = (ROOT / prereg_rel).exists() and \
+        ("CERT-" + "BLOB") in (ROOT / prereg_rel).read_text(encoding="utf-8")
     contributed = [g for g in base["groups"] if g["doc"] == prereg_doc]
     add("S1_prereg_has_literal_but_no_group", has_literal and not contributed,
         f"字面存在={has_literal} 貢獻群組={len(contributed)}")
@@ -599,6 +632,9 @@ def selftest() -> int:
 
     fx_rel = "ops/gain/_r481_fixture_scope.md"
     dup_name = "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
+    # 2026-09-18：本尊搬進 `decisions/`。夾具要的是「同 basename、不同目錄」，
+    # 所以 `dup_name`（basename）不動，只有讀本尊內容時要走新路徑。
+    dup_src = f"decisions/{dup_name}"
     dup_rel = f"ops/gain/_r481_dup/{dup_name}"
     try:
         # F1 正方向：非 root-DECISION 的檔、認證**標題** ⇒ 必須多出一個群組並抓到工具
@@ -618,7 +654,7 @@ def selftest() -> int:
             f"groups={len(_group_for(f2, fx_rel))} heads={f2['cert_headings']}")
         # M14 basename 污染：同名檔在子目錄。乾淨版靠相對路徑 ⇒ 反推不到認證時刻；
         #                    M14 用 basename ⇒ 會撿到**root 那份**的認證時刻＝假的。
-        dupdoc = _fixture_doc(dup_rel, (ROOT / dup_name).read_text(encoding="utf-8"))
+        dupdoc = _fixture_doc(dup_rel, (ROOT / dup_src).read_text(encoding="utf-8"))
         c14 = audit(extra_docs=[dupdoc])
         g14c = _group_for(c14, dup_rel)
         m14 = _with_mutant("M14_BASENAME", extra_docs=[dupdoc])

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_06_parity_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 55,
+      "cases": [
+        {
+          "case": "check_01_split_parity",
+          "ok": false,
+          "kind": "assert",
+          "message": "split_parity args=([1, 2, 3, 4],) got=[[2, 4], [1, 3]] want={'even': [2, 4], 'odd': [1, 3]}",
+          "where": "test_visible.py:14: assert got == want, \"split_parity args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_split_parity",
+          "ok": false,
+          "kind": "assert",
+          "message": "split_parity args=([],) got=[[], []] want={'even': [], 'odd': []}",
+          "where": "test_visible.py:22: assert got == want, \"split_parity args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "2cee59d373bc3da55212becd5893b236da63b46802ed4a8028d0f5275892f139"
+}

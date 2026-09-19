@@ -3,7 +3,7 @@
 > 這一份由 `ops/gain/build_runs_index.py` 從 `runs/INDEX.json` **同一次執行**
 > 產生。要改內容改產生器，不要手改本檔——手改會在下一次 `--check` 被抓到。
 
-`runs/` 共 **646** 個項目：290 個目錄 ＋ 356 個頂層檔案，合計 266 MB。其中 **117 個目錄有 `summary.json`**。
+`runs/` 共 **720** 個項目：348 個目錄 ＋ 372 個頂層檔案，合計 753 MB。其中 **172 個目錄有 `summary.json`**。
 
 分類統計：
 
@@ -11,8 +11,8 @@
 |---|---:|---|
 | `aborted` | 9 | 發射過但沒收官（被殺、掛掉、或只有 calls/notes） |
 | `analysis` | 136 | 迴圈每輪的重算工作目錄——**衍生物，不是證據** |
-| `other` | 22 | B 層掃描、展件抓圖、唯讀快照等 |
-| `real_run` | 110 | 真跑過模型、有 summary.json 與 rows.jsonl——這些才是證據 |
+| `other` | 23 | B 層掃描、展件抓圖、唯讀快照等 |
+| `real_run` | 167 | 真跑過模型、資料留得住——這些才是證據（`gain_run` 是 summary.json＋rows.jsonl；`cell_grid_run` 是 reconcile.json＋cells.jsonl；`agent_matrix_run` 是 matrix.json＋cells/） |
 | `replay` | 1 | 離線重放產物 |
 | `smoke` | 12 | 冒煙／探針／量具檢查——**不進統計** |
 
@@ -51,17 +51,17 @@
 
 | run | 日期 | 題庫 | 臂 | n（列／題） | 跑到底 | 零 void | void | 裁決（逐字抄自 DECISION 標題） |
 |---|---|---|---|---:|---|---|---:|---|
-| `g_r441_gemma_only_mbpp_b` | 2026-09-02 | MBPP+ v0.2.0 | OFF/OFF5/ON | 525／179 | — | 否 | 12 | DECISION R516（2026-09-02 21:00 UTC，Fable 5.1 稽核輪）：E1 收官——照 R483 §3d 寫死的判準裁決<br>[DECISION_20260902_R516_E1_FINAL_WRAPUP.md](../DECISION_20260902_R516_E1_FINAL_WRAPUP.md) |
-| `g_r442_ononly_20260901` | 2026-09-01 | MBPP+ v0.2.0 | ON | 11／11 | — | 否 | 2 | DECISION 2026-09-01 round446: gemma-4-12b-it-qat 掛了，殺掉 g_r442_ononly_20260901<br>[DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md](../DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md) |
-| `g_r443_gemma_lcb` | 2026-09-03 | lcb v1 | OFF/OFF5/ON | 269／91 | 是 | 否 | 4 | R440T：E3 收官——H-B（題目太簡單）被排除；評審在難題上翻成「幾乎一律說錯」<br>[DECISION_20260904_R440T_E3_WRAPUP.md](../DECISION_20260904_R440T_E3_WRAPUP.md) |
-| `g_r444_conform_mbpp` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 537／179 | 是 | 是 | 0 | —<br>（無專屬裁決；相關收官：[CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md](../CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md)） |
-| `g_r445_conform_mbpp_ext` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 576／192 | 是 | 是 | 0 | R440X：r445 的獨立稽核——併庫區間排除 0 我複核成立；但真正紮實的發現是「五倍預算買不到東西」<br>[DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md](../DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md) |
-| `g_r446_eq5_mbpp` | 2026-09-04 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死<br>[DECISION_20260904_R446_FABLE_AUDIT.md](../DECISION_20260904_R446_FABLE_AUDIT.md) |
-| `g_r447_conform_lcb2` | 2026-09-04 | lcb v2 | CONFORM/OFF/OFF5 | 360／120 | 是 | 是 | 0 | R459：`runs/g_r447_conform_lcb2` 收官裁決（Fable 5.1 稽核輪，round726）<br>[DECISION_20260904_R459_R447_SETTLEMENT.md](../DECISION_20260904_R459_R447_SETTLEMENT.md) |
-| `g_r448_eq5_mbpp_seed2` | 2026-09-06 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R448 稽核：EQ5 在全新 seed 上的獨立複製——判定 REPLICATED<br>[DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md](../DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md) |
-| `g_r449_eq5_lcb2` | 2026-09-06 | lcb v2 | EQ5 | 120／120 | 是 | 是 | 0 | R449B 稽核：EQ5 在 LCB v2 難題上——判定 REPLICATED_ON_HARD<br>[DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md](../DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md) |
-| `g_r449c_eq5_lcb3` | 2026-09-06 | lcb v3 | EQ5 | 189／189 | 是 | 是 | 0 | R449C 稽核：EQ5 在 lcb3（189 題）——判定 UNRESOLVED：同號（+4.23pp、b/c=13/5）但下界 −0.66 沒過 0<br>[DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md](../DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md) |
-| `g_r461_lcb3_three_arm` | 2026-09-06 | lcb v3 | CONFORM/OFF/OFF5 | 567／189 | 是 | 是 | 0 | R461 稽核：CONFORM 在 LCB v3（189 題）三臂——獨立重算<br>[DECISION_20260906_R461_FABLE_AUDIT.md](../DECISION_20260906_R461_FABLE_AUDIT.md) |
+| `g_r441_gemma_only_mbpp_b` | 2026-09-02 | MBPP+ v0.2.0 | OFF/OFF5/ON | 525／179 | — | 否 | 12 | DECISION R516（2026-09-02 21:00 UTC，Fable 5.1 稽核輪）：E1 收官——照 R483 §3d 寫死的判準裁決<br>[DECISION_20260902_R516_E1_FINAL_WRAPUP.md](../decisions/DECISION_20260902_R516_E1_FINAL_WRAPUP.md) |
+| `g_r442_ononly_20260901` | 2026-09-01 | MBPP+ v0.2.0 | ON | 11／11 | — | 否 | 2 | DECISION 2026-09-01 round446: gemma-4-12b-it-qat 掛了，殺掉 g_r442_ononly_20260901<br>[DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md](../decisions/DECISION_20260901_R446_GEMMA_OUTAGE_KILL_R442.md) |
+| `g_r443_gemma_lcb` | 2026-09-03 | lcb v1 | OFF/OFF5/ON | 269／91 | 是 | 否 | 4 | R440T：E3 收官——H-B（題目太簡單）被排除；評審在難題上翻成「幾乎一律說錯」<br>[DECISION_20260904_R440T_E3_WRAPUP.md](../decisions/DECISION_20260904_R440T_E3_WRAPUP.md) |
+| `g_r444_conform_mbpp` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 537／179 | 是 | 是 | 0 | —<br>（無專屬裁決；相關收官：[CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md](../decisions/conclusions/CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md)） |
+| `g_r445_conform_mbpp_ext` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 576／192 | 是 | 是 | 0 | R440X：r445 的獨立稽核——併庫區間排除 0 我複核成立；但真正紮實的發現是「五倍預算買不到東西」<br>[DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md](../decisions/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md) |
+| `g_r446_eq5_mbpp` | 2026-09-04 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死<br>[DECISION_20260904_R446_FABLE_AUDIT.md](../decisions/DECISION_20260904_R446_FABLE_AUDIT.md) |
+| `g_r447_conform_lcb2` | 2026-09-04 | lcb v2 | CONFORM/OFF/OFF5 | 360／120 | 是 | 是 | 0 | R459：`runs/g_r447_conform_lcb2` 收官裁決（Fable 5.1 稽核輪，round726）<br>[DECISION_20260904_R459_R447_SETTLEMENT.md](../decisions/DECISION_20260904_R459_R447_SETTLEMENT.md) |
+| `g_r448_eq5_mbpp_seed2` | 2026-09-06 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R448 稽核：EQ5 在全新 seed 上的獨立複製——判定 REPLICATED<br>[DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md](../decisions/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md) |
+| `g_r449_eq5_lcb2` | 2026-09-06 | lcb v2 | EQ5 | 120／120 | 是 | 是 | 0 | R449B 稽核：EQ5 在 LCB v2 難題上——判定 REPLICATED_ON_HARD<br>[DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md](../decisions/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md) |
+| `g_r449c_eq5_lcb3` | 2026-09-06 | lcb v3 | EQ5 | 189／189 | 是 | 是 | 0 | R449C 稽核：EQ5 在 lcb3（189 題）——判定 UNRESOLVED：同號（+4.23pp、b/c=13/5）但下界 −0.66 沒過 0<br>[DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md](../decisions/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md) |
+| `g_r461_lcb3_three_arm` | 2026-09-06 | lcb v3 | CONFORM/OFF/OFF5 | 567／189 | 是 | 是 | 0 | R461 稽核：CONFORM 在 LCB v3（189 題）三臂——獨立重算<br>[DECISION_20260906_R461_FABLE_AUDIT.md](../decisions/DECISION_20260906_R461_FABLE_AUDIT.md) |
 | `g_r461_off_gate_lcb3` | 2026-09-04 | lcb v3 | OFF | 189／189 | 是 | 是 | 0 | —<br>— |
 
 > `n（列／題）`＝`rows.jsonl` 的列數／去重後的 `task_id` 數。多臂 run 的列數是**各臂相加**，不是樣本數；配對檢定的 n 要看 `task_id`。逐臂列數在 `INDEX.json` 的 `n_rows_by_arm`。
@@ -78,8 +78,8 @@ HMIX 回饋迴圈）、每塊 20 題。合起來 716 題 × 3 臂 ＝ 2,148 列�
 （裁決 §三 宣稱句第三句寫死：主指標未成立 ⇒ 逐集照實列）。
 四集裡 `lcb3_medium` 與 `lcb3_hard` 是**同一個來源的難度切片**，真來源＝3。
 
-**裁決**：R529 收官稽核（Fable，2026-09-12）：跨題庫之下，H-MIX 贏單發、不贏重抽　[DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md](../DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md)
-**預註冊**：[DECISION_20260911_R529_CROSS_BANK_PREREG.md](../DECISION_20260911_R529_CROSS_BANK_PREREG.md)
+**裁決**：R529 收官稽核（Fable，2026-09-12）：跨題庫之下，H-MIX 贏單發、不贏重抽　[DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md](../decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md)
+**預註冊**：[DECISION_20260911_R529_CROSS_BANK_PREREG.md](../decisions/DECISION_20260911_R529_CROSS_BANK_PREREG.md)
 
 > **一份裁決管 37 塊。** 這 37 個目錄在 `INDEX.json` 裡的
 > `headline` 都是 `—`，因為裁決檔的宣告區寫的是 `runs/g_*` 這種 glob
@@ -128,8 +128,8 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 所以「rows 少了 7 列」與「有 7 次 infra_void」是同一件事的兩面，不是資料遺失。
 同一批事故的機制說明見 R529 稽核 §十一。
 
-**裁決**：R460R 收官稽核（Fable，2026-09-12；r4／r5 見同檔 §八 補記 2026-09-13）：五次 Δ_C 同號、**0/5 通過 Holm** ⇒ 逐次照實列　[DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md](../DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md)
-**預註冊**：[DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md](../DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md)
+**裁決**：R460R 收官稽核（Fable，2026-09-12；r4／r5 見同檔 §八 補記 2026-09-13）：五次 Δ_C 同號、**0/5 通過 Holm** ⇒ 逐次照實列　[DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md](../decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md)
+**預註冊**：[DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md](../decisions/DECISION_20260911_R460R_FIVE_REPLICATIONS_PREREG.md)
 
 > **一份裁決管 30 塊。** 這 30 個目錄在 `INDEX.json` 裡的
 > `headline` 都是 `—`，因為裁決檔的宣告區寫的是 `runs/g_*` 這種 glob
@@ -182,14 +182,26 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 
 ## 五、跑完但沒被獨立稽核的 run
 
-有 `summary.json` 也有 `rows.jsonl`，但**不在上面那幾段裡**——都是 2026-08 到
-09 初的探索期 run：為了決定下一步怎麼跑而跑的，不是為了得到一個可以拿去講的結論。
+跑過模型、資料留得住，但**不在上面那幾段裡**（日期跨 2026-08-24–2026-09-19）。四種東西混在這張表：
+
+  1. **探索期** run（2026-08 到 09 初）——為了決定下一步怎麼跑而跑的，
+     不是為了得到一個可以拿去講的結論；
+  2. 跑完了、預註冊也在，但**收官裁決檔還沒寫**的批次；
+  3. `subkind` 是 `cell_grid_run` 的——那些**沒有頂層 `summary.json`／`rows.jsonl`**，
+     一格一個目錄，收官對帳在 `reconcile.json`、逐格摘要在 `cells.jsonl`（R535 就是這種）；
+  4. `subkind` 是 `agent_matrix_run` 的——`vacant run` 的相容性矩陣，
+     一格一個目錄住在 `cells/`，彙整在 `matrix.json`。**同樣沒有頂層 `rows.jsonl`**，
+     所以本表的 `列／題`、`跑到底`、`零 void` 三欄對它是 `0／0` 與 `—`
+     ——那是**欄位不適用**，不是「跑了零列」。逐格欄位看它自己的 `README.md`。
+
+⚠ 索引分不出這幾種：它只看得到「有沒有一份裁決檔在標題或宣告區點名它」。
+**「沒被稽核」不等於「探索期」**——引用第 2 種之前要去讀它自己的預註冊。
 
 > **R529 的 37 塊與 R460R 的 30 塊不在這張表裡**（§二、§三）。它們的 `headline`
 > 同樣是 `—`，但那是「裁決檔用 glob 點名整批」造成的，不是沒被稽核——
 > 把它們留在這張表會讓索引**比資料悲觀**，讀的人會以為證據比實際少。
 
-這 31 個裡，`跑到底` 有 25 個是 `—`（那個時期的 runner 還沒寫 `run_terminal` 欄位，所以是**不知道**，不是跑完了）；`零 void` 是 `否` 的有 24 個。
+這 88 個裡，`跑到底` 有 26 個是 `—`（那個時期的 runner 還沒寫 `run_terminal` 欄位，所以是**不知道**，不是跑完了）；`零 void` 是 `否` 的有 28 個。
 
 **沒被稽核不等於不成立，也不等於成立——就是沒複核過。** 引用其中任何一個數字，
 都要把這一句一起講出去。
@@ -221,12 +233,69 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `g_r348_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 33／20 | — | 否 | 38 | 5 | 0 |
 | `g_r356_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 432／178 | — | 否 | 101 | 21 | 5 |
 | `g_r439_revcheck_20260901` | 2026-09-01 | MBPP+ v0.2.0 | OFF/OFF5/ON | 23／13 | — | 否 | 14 | 1 | 1 |
-| `g_r460_harness_lcb2_a1` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r460_harness_lcb2_a2` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r460_harness_lcb2_a3` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r460_harness_lcb2_b1` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r460_harness_lcb2_b2` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r460_harness_lcb2_b3` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r460_harness_lcb2_a1` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_a2` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_a3` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_b1` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_b2` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_b3` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r530_s1_1003_1` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
+| `g_r530_s1_1003_2` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
+| `g_r530_s1_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 2 | 1 |
+| `g_r530_s1_1004_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
+| `g_r530_s2_1003_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 2 | 1 |
+| `g_r530_s2_1003_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
+| `g_r530_s2_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
+| `g_r530_s2_1004_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 2 | 1 |
+| `g_r530_s3_1003_1` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 2 | 1 |
+| `g_r530_s3_1003_2` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
+| `g_r530_s3_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
+| `g_r530_s3_1004_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a1` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a2` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a3` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a4` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a5` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a6` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a7` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a8` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 48／16 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a1` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a2` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a3` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a4` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a5` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a6` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3h_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3h_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3h_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 42／14 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a4` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a5` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a6` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a7` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 45／15 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a1` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a10` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a11` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a12` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a13` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a14` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a15` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a16` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a17` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a18` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a19` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 33／11 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a2` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a3` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a4` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a5` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a6` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a7` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a8` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a9` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `r535_retry_channel_20260918` | 2026-09-18 | other | PC/RF/RP/RS | 360／90 | 是 | 是 | 0 | 0 | 0 |
+| `v1_five_agent_matrix_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 1 | 0 |
 
 > `其中屬裁決檔`＝檔名帶 AUDIT／WRAPUP／SETTLEMENT／VERDICT／KILL 的那些（PREREG／CRITERION 是**量測之前**寫的判準，不算裁決，已排除）。數字大於 0 只代表「有裁決檔提到它」，不代表那份裁決是在裁決它——`INDEX.json` 的 `verdict_decisions` 列出是哪幾份，自己打開看。
 
@@ -260,10 +329,10 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | 題庫 | 檔案 | 題數 | sha256 符合 codebench 釘值 | task_id 範圍 | contest_date 區間 | 難度 | 有參考解 | 已知壞題 | 用過它的 run |
 |---|---|---:|---|---|---|---|---|---|---|
 | **lcb v1** | `ops/gain/data/lcb_bank_v1.jsonl` | 91 | 是 | lcb_3487–lcb_3809 | 2024-10-12 → 2025-04-05 | hard 37／medium 54 | 12/91（13.2%） | lcb_3613、lcb_3763 | `g_e2q_off_lcb_qwenonly_20260902`、`g_r443_gemma_lcb` |
-| **lcb v2** | `ops/gain/data/lcb_bank_v2.jsonl` | 120 | 是 | lcb_3026–lcb_3809 | 2023-08-26 → 2025-04-05 | hard 48／medium 72 | 12/120（10.0%） | lcb_3613、lcb_3763 | `g_r447_conform_lcb2`、`g_r449_eq5_lcb2`、`g_r460_harness_lcb2_a1`、`g_r460_harness_lcb2_a2`、`g_r460_harness_lcb2_a3`、`g_r460_harness_lcb2_b1`、`g_r460_harness_lcb2_b2`、`g_r460_harness_lcb2_b3`、`g_r460r1_harness_lcb2_a1`、`g_r460r1_harness_lcb2_a2`、`g_r460r1_harness_lcb2_a3`、`g_r460r1_harness_lcb2_b1`、`g_r460r1_harness_lcb2_b2`、`g_r460r1_harness_lcb2_b3`、`g_r460r2_harness_lcb2_a1`、`g_r460r2_harness_lcb2_a2`、`g_r460r2_harness_lcb2_a3`、`g_r460r2_harness_lcb2_b1`、`g_r460r2_harness_lcb2_b2`、`g_r460r2_harness_lcb2_b3`、`g_r460r3_harness_lcb2_a1`、`g_r460r3_harness_lcb2_a2`、`g_r460r3_harness_lcb2_a3`、`g_r460r3_harness_lcb2_b1`、`g_r460r3_harness_lcb2_b2`、`g_r460r3_harness_lcb2_b3`、`g_r460r4_harness_lcb2_a1`、`g_r460r4_harness_lcb2_a2`、`g_r460r4_harness_lcb2_a3`、`g_r460r4_harness_lcb2_b1`、`g_r460r4_harness_lcb2_b2`、`g_r460r4_harness_lcb2_b3`、`g_r460r5_harness_lcb2_a1`、`g_r460r5_harness_lcb2_a2`、`g_r460r5_harness_lcb2_a3`、`g_r460r5_harness_lcb2_b1`、`g_r460r5_harness_lcb2_b2`、`g_r460r5_harness_lcb2_b3` |
-| **lcb v3** | `ops/gain/data/lcb_bank_v3.jsonl` | 189 | 是 | lcb_2728–lcb_3535 | 2023-05-07 → 2024-08-10 | hard 54／medium 135 | 12/189（6.3%） | 無 | `g_r449c_eq5_lcb3`、`g_r461_lcb3_three_arm`、`g_r461_off_gate_lcb3`、`g_r529_lcb3h_a1`、`g_r529_lcb3h_a2`、`g_r529_lcb3h_a3`、`g_r529_lcb3m_a1`、`g_r529_lcb3m_a2`、`g_r529_lcb3m_a3`、`g_r529_lcb3m_a4`、`g_r529_lcb3m_a5`、`g_r529_lcb3m_a6`、`g_r529_lcb3m_a7` |
-| **MBPP+ v0.2.0** | `.vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz`（**私有、不轉散布**） | 378 | 釘值 `af43697e8791c4c1…` | `mbppplus_*` | — | — | 官方 GT | — | 52 個 |
-| **HumanEval+ v0.1.10** | `.vacant-private/evalplus/HumanEvalPlus-v0.1.10.jsonl.gz`（**私有、不轉散布**） | 164（**可用 156**） | 釘值 `272720b90ac37550…` | `humanevalplus_HumanEval/*` | — | — | 官方 GT | **8 題排除，見下** | 8 個 |
+| **lcb v2** | `ops/gain/data/lcb_bank_v2.jsonl` | 120 | 是 | lcb_3026–lcb_3809 | 2023-08-26 → 2025-04-05 | hard 48／medium 72 | 12/120（10.0%） | lcb_3613、lcb_3763 | `g_r447_conform_lcb2`、`g_r449_eq5_lcb2`、`g_r460_harness_lcb2_a1`、`g_r460_harness_lcb2_a2`、`g_r460_harness_lcb2_a3`、`g_r460_harness_lcb2_b1`、`g_r460_harness_lcb2_b2`、`g_r460_harness_lcb2_b3`、`g_r460r1_harness_lcb2_a1`、`g_r460r1_harness_lcb2_a2`、`g_r460r1_harness_lcb2_a3`、`g_r460r1_harness_lcb2_b1`、`g_r460r1_harness_lcb2_b2`、`g_r460r1_harness_lcb2_b3`、`g_r460r2_harness_lcb2_a1`、`g_r460r2_harness_lcb2_a2`、`g_r460r2_harness_lcb2_a3`、`g_r460r2_harness_lcb2_b1`、`g_r460r2_harness_lcb2_b2`、`g_r460r2_harness_lcb2_b3`、`g_r460r3_harness_lcb2_a1`、`g_r460r3_harness_lcb2_a2`、`g_r460r3_harness_lcb2_a3`、`g_r460r3_harness_lcb2_b1`、`g_r460r3_harness_lcb2_b2`、`g_r460r3_harness_lcb2_b3`、`g_r460r4_harness_lcb2_a1`、`g_r460r4_harness_lcb2_a2`、`g_r460r4_harness_lcb2_a3`、`g_r460r4_harness_lcb2_b1`、`g_r460r4_harness_lcb2_b2`、`g_r460r4_harness_lcb2_b3`、`g_r460r5_harness_lcb2_a1`、`g_r460r5_harness_lcb2_a2`、`g_r460r5_harness_lcb2_a3`、`g_r460r5_harness_lcb2_b1`、`g_r460r5_harness_lcb2_b2`、`g_r460r5_harness_lcb2_b3`、`g_r532_lcb2_a1`、`g_r532_lcb2_a2`、`g_r532_lcb2_a3`、`g_r532_lcb2_a4`、`g_r532_lcb2_a5`、`g_r532_lcb2_a6` |
+| **lcb v3** | `ops/gain/data/lcb_bank_v3.jsonl` | 189 | 是 | lcb_2728–lcb_3535 | 2023-05-07 → 2024-08-10 | hard 54／medium 135 | 12/189（6.3%） | 無 | `g_r449c_eq5_lcb3`、`g_r461_lcb3_three_arm`、`g_r461_off_gate_lcb3`、`g_r529_lcb3h_a1`、`g_r529_lcb3h_a2`、`g_r529_lcb3h_a3`、`g_r529_lcb3m_a1`、`g_r529_lcb3m_a2`、`g_r529_lcb3m_a3`、`g_r529_lcb3m_a4`、`g_r529_lcb3m_a5`、`g_r529_lcb3m_a6`、`g_r529_lcb3m_a7`、`g_r532_lcb3h_a1`、`g_r532_lcb3h_a2`、`g_r532_lcb3h_a3`、`g_r532_lcb3m_a1`、`g_r532_lcb3m_a2`、`g_r532_lcb3m_a3`、`g_r532_lcb3m_a4`、`g_r532_lcb3m_a5`、`g_r532_lcb3m_a6`、`g_r532_lcb3m_a7` |
+| **MBPP+ v0.2.0** | `.vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz`（**私有、不轉散布**） | 378 | 釘值 `af43697e8791c4c1…` | `mbppplus_*` | — | — | 官方 GT | — | 71 個 |
+| **HumanEval+ v0.1.10** | `.vacant-private/evalplus/HumanEvalPlus-v0.1.10.jsonl.gz`（**私有、不轉散布**） | 164（**可用 156**） | 釘值 `272720b90ac37550…` | `humanevalplus_HumanEval/*` | — | — | 官方 GT | **8 題排除，見下** | 16 個 |
 
 - **版本關係**：v1 ⊂ v2（`True`）；v2 ∩ v3 = 0 題、聯集 309 題——v3 是刻意造出來的**樣本外**複製集，不是 v2 的超集。
 - **v3 的警語**：v3 的 contest_date 全部不晚於 2024-08-10，**不能**宣稱晚於訓練截止；污染風險比 v1/v2 高（R460 C3 判定，vacant/codebench.py 有同一句）。

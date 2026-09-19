@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_37_column_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 65,
+      "cases": [
+        {
+          "case": "check_01_column",
+          "ok": false,
+          "kind": "exception",
+          "message": "KeyError: 'a'",
+          "where": "test_visible.py:12: got = column(*args)",
+          "output": ""
+        },
+        {
+          "case": "check_02_column",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "b9d46e13a9335f4fe744b2289c793415f4703c0a6ef83b3faccaab8508970204"
+}

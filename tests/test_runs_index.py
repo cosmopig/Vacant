@@ -61,12 +61,32 @@ def test_dirs_with_summary_json_is_117(idx):
     seed；r4 720 列 void 0、r5 713 列**含 7 列 `infra_void`**（後端 JIT 重載事故，
     見 `runs/INDEX.md` §三）。五次跑齊 ⇒ 預註冊的宣稱規則可以判了：
     同號 5/5 成立、Holm 顯著 0/5 不成立 ⇒ 逐次照實列。
+
+    117 → 172 的那 55 個是 R530 的 12 塊 ＋ R532 的 43 塊（2026-09-18 逐塊核對
+    過，都是真的多了 run，沒有一個是分類漂掉）：
+      * **R530 開放目標 12 塊** `g_r530_s{1,2,3}_{1003,1004}_{1,2}`——三臂
+        A-SOLO／A-CONF／A-GATE、每塊 5 題。它們的 `summary.json` 用的是**另一種
+        臂版面**（`arms` 是臂名清單、統計在 `arms_stats`），產生器
+        2026-09-18 之前對著它呼叫 `.values()` ⇒ `AttributeError`，整份索引
+        產不出來。四塊的 `complete` 是 `False`（各 1 次 `infra_void`）。
+      * **R532 換強模型 43 塊** `g_r532_{lcb2_a1..a6, lcb3m_a1..a7,
+        lcb3h_a1..a3, hep_a1..a8, mbpp_a1..a19}`——三臂 OFF／CONFORM／HMIX、
+        836 題（2508 列）、零 void。逐塊註冊行在
+        `DECISION_20260917_R532_STRONGER_MODEL_PREREG.md` §二-2。
     """
-    assert idx["counts"]["dirs_with_summary_json"] == 117
+    assert idx["counts"]["dirs_with_summary_json"] == 172
     counted = sum(1 for r in idx["runs"]
                   if any(f["name"] == "summary.json" for f in r["files"]))
-    assert counted == 117
+    assert counted == 172
     names = {r["name"] for r in idx["runs"]}
+    # R530 的 12 塊與 R532 的 43 塊也逐名釘住（理由同下：只釘總數會被互相抵銷）。
+    assert {f"g_r530_s{s}_{h}_{i}"
+            for s in (1, 2, 3) for h in (1003, 1004) for i in (1, 2)} <= names
+    assert {f"g_r532_lcb2_a{i}" for i in range(1, 7)} <= names
+    assert {f"g_r532_lcb3m_a{i}" for i in range(1, 8)} <= names
+    assert {f"g_r532_lcb3h_a{i}" for i in range(1, 4)} <= names
+    assert {f"g_r532_hep_a{i}" for i in range(1, 9)} <= names
+    assert {f"g_r532_mbpp_a{i}" for i in range(1, 20)} <= names
     assert {f"g_r460_harness_lcb2_{t}" for t in ("a1", "a2", "a3", "b1", "b2", "b3")} <= names
     # R529 的 37 塊與 R460R 的 30 塊逐名釘住——只釘總數的話，「少了 R529 一塊、
     # 多了一個別的目錄」會剛好抵銷而測試照樣綠。
@@ -102,6 +122,41 @@ def test_r460r5_void_rows_are_recorded_not_dropped(idx):
            for t in ("a1", "a2", "a3", "b1", "b2", "b3")]
     assert sum(r["n_rows"] for r in r14) == 2880
     assert sum(r["infra_void"] or 0 for r in r14) == 0
+
+
+def test_r530_list_shaped_arms_are_really_parsed(idx):
+    """R530 的另一種臂版面要**真的解析出來**，不是被 try/except 吞掉。
+
+    `run_r530.py:465/500` 把 `summary["arms"]` 寫成臂名清單、統計另放
+    `arms_stats`；`gain_run.py:1839` 那一代是 `arms` 直接掛 arm → stats。
+    產生器只認 dict 版的時候，`sorted(arm_map)` 之後對 list 呼叫 `.values()`
+    ⇒ `AttributeError`，`runs/INDEX.md` 這份「引用任何 run 之前先讀」的東西
+    整份產不出來，`--check` 也跟著失去執行力。
+
+    這一條釘的是「吃得下」與「吃對了」是兩件事：三臂要在、void 要數對、
+    `complete` 要用 `gain_run.py:1839` 的同一條定義（零 void 且每題都處理過）
+    算出來、runner sha 要跟著 `runner_git_info` 一起進來。**吞掉例外也能讓
+    產生器跑完**，但那會讓這 12 塊在索引裡變成「沒有臂、不知道 void」。
+    """
+    by = {r["name"]: r for r in idx["runs"]}
+    blocks = [by[f"g_r530_s{s}_{h}_{i}"]
+              for s in (1, 2, 3) for h in (1003, 1004) for i in (1, 2)]
+    assert len(blocks) == 12
+    for r in blocks:
+        assert r["arms"] == ["A-CONF", "A-GATE", "A-SOLO"], r["name"]
+        assert r["kind"] == "real_run", r["name"]
+        assert r["terminal"] is True, r["name"]
+        assert len(r["runner_git"]["sha"] or "") == 40, r["name"]
+    # 四塊各出過一次 infra_void ⇒ 那四塊 complete=False，其餘八塊 True。
+    # rows 少的那幾列與 void 是同一件事的兩面（`len(rows) == processed − void`，
+    # `run_r530.py` 開頭那一行）：12 塊共 15×12 − 4 = 176 列。
+    voided = sorted(r["name"] for r in blocks if r["infra_void"])
+    assert voided == ["g_r530_s1_1003_1", "g_r530_s2_1003_1",
+                      "g_r530_s2_1004_2", "g_r530_s3_1003_2"]
+    assert sum(r["infra_void"] for r in blocks) == 4
+    assert sum(r["n_rows"] for r in blocks) == 176
+    assert all(r["complete"] is False for r in blocks if r["infra_void"])
+    assert all(r["complete"] is True for r in blocks if not r["infra_void"])
 
 
 def test_r449c_n_rows_is_189(idx):
@@ -197,16 +252,18 @@ def test_headline_must_be_about_this_run(idx):
     assert r444["headline"] is None
     assert r444["headline_from"] is None
     assert r444["headline_source"] == "no_settlement_decision"
-    assert r444["related_settlements"] == [
+    assert [pathlib.Path(x).name for x in r444["related_settlements"]] == [
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"]
     assert "E3_WRAPUP" not in json.dumps(
         [r444["headline_from"], r444["related_settlements"]])
 
-    assert (by["g_r445_conform_mbpp_ext"]["headline_from"]
+    # `headline_from` 是**相對 repo 根的路徑**（2026-09-18 起 `decisions/...`）。
+    # 這裡釘的是「是哪一份文件」，所以比 basename。
+    assert (pathlib.Path(by["g_r445_conform_mbpp_ext"]["headline_from"]).name
             == "DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md")
-    assert (by["g_r449_eq5_lcb2"]["headline_from"]
+    assert (pathlib.Path(by["g_r449_eq5_lcb2"]["headline_from"]).name
             == "DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md")
-    assert (by["g_r441_gemma_only_mbpp_b"]["headline_from"]
+    assert (pathlib.Path(by["g_r441_gemma_only_mbpp_b"]["headline_from"]).name
             == "DECISION_20260902_R516_E1_FINAL_WRAPUP.md")
 
     # 通則：有 headline 就必須真的被那份文件點名（標題或宣告區）。
@@ -230,8 +287,12 @@ def test_prereg_is_never_a_verdict(idx):
     """
     for r in idx["runs"]:
         for rel in r["verdict_decisions"] + [r["headline_from"] or ""]:
-            assert "PREREG" not in rel.upper(), (r["name"], rel)
-            assert not rel.startswith("CRITERION"), (r["name"], rel)
+            # ⚠ 一定要比 **basename**：搬進 `decisions/criteria/` 之後，
+            #   `rel.startswith("CRITERION")` 永遠是 False ⇒ 這條會安靜地變成
+            #   恆真句，CRITERION 混進裁決也擋不住。
+            name = pathlib.Path(rel).name
+            assert "PREREG" not in name.upper(), (r["name"], rel)
+            assert not name.startswith("CRITERION"), (r["name"], rel)
 
 
 def test_analysis_dirs_are_not_evidence(idx):
@@ -262,7 +323,8 @@ def test_decisions_are_found_even_from_inside_a_worktree(idx):
     釘法：跨 checkout 都成立的事實（r444 的併庫收官一定被掃到）。
     """
     by = {r["name"]: r for r in idx["runs"]}
-    assert by["g_r444_conform_mbpp"]["related_settlements"] == [
+    assert [pathlib.Path(x).name
+            for x in by["g_r444_conform_mbpp"]["related_settlements"]] == [
         "CONCLUSION_20260904_R445_CONFORM_SETTLEMENT.md"]
     n_with_refs = sum(1 for r in idx["runs"] if r["decision_refs"])
     assert n_with_refs > 50, (
@@ -316,8 +378,11 @@ def test_humaneval_plus_bank_is_pinned(idx):
     for tid, why in hp["excluded_task_ids"].items():
         assert tid.startswith("humanevalplus_HumanEval/"), tid
         assert why.strip(), tid
-    assert len(hp["used_by_runs"]) == 8
-    assert all(n.startswith("g_r529_hep_") for n in hp["used_by_runs"])
+    # 2026-09-18：R532 的 8 塊 hep 也用這個題庫（換模型不換題目）⇒ 8 → 16。
+    # 兩批都逐名列出：只釘總數的話，「R529 少一塊、別的 run 多一塊」會抵銷。
+    assert sorted(hp["used_by_runs"]) == sorted(
+        [f"g_r529_hep_a{i}" for i in range(1, 9)]
+        + [f"g_r532_hep_a{i}" for i in range(1, 9)])
     # 釘值抓得到（`EVALPLUS_HUMANEVAL_PLUS_SHA256` 是括號換行寫法，
     # 單行 regex 抓不到會靜靜變成 None）。
     assert (hp["sha256_pin_in_codebench"] or "").startswith("272720b90ac37550")
@@ -349,4 +414,4 @@ def test_generator_runs_as_a_script(tmp_path):
         capture_output=True, text=True, cwd=str(ROOT), timeout=300)
     assert r.returncode == 0, r.stderr
     data = json.loads((out / "INDEX.json").read_text())
-    assert data["counts"]["dirs_with_summary_json"] == 117
+    assert data["counts"]["dirs_with_summary_json"] == 172

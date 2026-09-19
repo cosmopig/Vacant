@@ -1,0 +1,277 @@
+{
+  "cell": "s1_14_mid__RS",
+  "task_id": "s1_14_mid",
+  "arm": "RS",
+  "stratum": "S1",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T00:28:57Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "resample",
+    "--max-attempts",
+    "3"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "s3",
+  "pi_port": 8880,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 13,
+  "task_pos": 13,
+  "arm_pos": 3,
+  "plan_index": 55,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s1_14_mid__RS/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s1_14_mid__RS/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s1_14_mid/tests_visible",
+    "--task-id",
+    "r535_s1_14_mid_RS",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8880",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "resample",
+    "--max-attempts",
+    "3",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 214.575
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 14,
+  "agent_wall_s": 150.61,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "ws_start_sha256": "35b45af259575391a46fb0313c9556a1e314d43b2aa7c6dd3c12bdc58b812f5a",
+  "ws_end_sha256": "7167233574fc6182b0b726abeb93fd970f46f1ba0598d9f98b8735a59c78a2b1",
+  "verdict_sha256": "8103472e03a78ce4f1a1f21d0a722fb1aa416b33f314701d175bc727fbc4c907",
+  "verdict_hash": "3861904879df2df161cfa71712ff19293cf717fa6a33124516bc5ab34d83e3e0",
+  "wire_digest": "2db25f45ce1d3871c83c40c56c2d1d2aef32773d7a24fab427fe69b9a4a89411",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s1_14_mid__RS/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 14
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 29.673,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_14_mid__RS/run/_frozen_RUN-ON",
+      "ws_end_sha256": "f8c3b78629ba32b92aab3b256f2e457876aace8f921230381dd8134174788309",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 33.357,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_14_mid__RS/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "cdd9e834ea60fcb3639c761e4dfe03e5e56e452341f0f5f664fe18638e11ef0c",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "35b45af259575391a46fb0313c9556a1e314d43b2aa7c6dd3c12bdc58b812f5a",
+        "back_to_start": true
+      }
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 6,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 150.61,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_14_mid__RS/run/_frozen_RUN-ON_a3",
+      "ws_end_sha256": "7167233574fc6182b0b726abeb93fd970f46f1ba0598d9f98b8735a59c78a2b1",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "35b45af259575391a46fb0313c9556a1e314d43b2aa7c6dd3c12bdc58b812f5a",
+        "back_to_start": true
+      }
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": null,
+  "m7_file_reason": "arm_has_no_feedback_by_policy",
+  "m7_file_by_attempt": [],
+  "m7_file_leaky_needles": [],
+  "m7_name": null,
+  "m7_name_reason": "arm_has_no_feedback_by_policy",
+  "m7_name_by_attempt": [],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.625,
+  "m7_ws_counts": {
+    "other": 5,
+    "read_task": 3,
+    "total": 8,
+    "other_total": 5,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def find_middle(numbers):\\n    if not numbers:\\n        return None\\n    \\n    sorted_nums = sorted(numbers)\\n    n = len(sorted_nums)\\n    mid = n // 2\\n    \\n    if n % 2 == 1:\\n        "
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def find_middle(numbers):\\n    if not numbers:\\n        return None\\n    \\n    sorted_nums = sorted(numbers)\\n    n = len(sorted_nums)\\n    mid = n // 2\\n    \\n    if n % 2 == 1:\\n        "
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "edit",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"edits\":[{\"newText\":\"def find_middle(numbers):\\n    sorted_nums = sorted(numbers)\\n    n = len(sorted_nums)\\n    mid = n // 2\\n    \\n    if n % 2 == 1:\\n        return float(sorted_nums[mid])\\n    el"
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": null,
+  "f6_reason": "arm_is_not_RP",
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "feedback_in_prompt_bytes": 0
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 14,
+  "f3_req_ok": 14,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 14,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 214.596,
+  "finished": "2026-09-19T00:32:31Z"
+}

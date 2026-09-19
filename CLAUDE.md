@@ -66,6 +66,19 @@
 - `vacant/suitegauge.py` — 驗收套件的量具（參考解要過、每個已知壞樁都要被擋）；
   `gain_run.probe_instrument` 與 `peerexec.commit_suite` 共用這一份判準，**單邊保證**
   （擋得住已知壞解 ≠ 涵蓋真需求）寫在 docstring，不准讀成「套件固定點已解」
+- `vacant/suitemutate.py` — 純 AST 變異器（零新依賴），把 suitegauge 的刻度從
+  「擋得住 1 個壞樁」細到「擋得住 N 種我們造得出來的錯」。致死率**另外算、
+  不綁 `GaugeOutcome.ok`**（綁了＝改掉閘門語意，r452c 那批歸檔資料會失去可比性）；
+  且**永遠是下界**（運算子表有限＋等價變異體不可判定）。實跑：
+  `ops/gain/mutation_score_banks.py` ＋ `ops/gain/data/suite_mutation_*.json`
+  ——LCB v2 有參考解的 12 題中位數 0.784／最低 0.600（12 題裡 11 題不滿分）；
+  MBPP+ 抽樣 10 題中位數 1.000／最低 0.611、HumanEval+ 抽樣 10 題中位數 0.967／最低 0.688。
+  ⚠ **MBPP+ 的 1.000 不是強度證據**：那 10 題裡有 6 題的變異體只有 ≤2 個
+  （變異體數 1,1,1,2,2,2,8,17,17,18），分母小到量表沒有解析度；HumanEval+ 最低也有 4 個。
+  **有解析度的是 LCB**（每題 9–20 個）。兩個題庫的數字不可混講成一個。
+  ⚠ **`return None`（量具自己用的那個退化樁）在某些分支上活著**：
+  `mbppplus_Mbpp/260` L3、`humanevalplus_HumanEval/154` L12/L14、`/106` L11/L15
+  ——整支函式回 None 會被擋，**某一條分支回 None 擋不住**，代表可見測資沒走到那條路徑
 - `vacant/suitespec.py` — **驗收套件是資料不是程式**（R452）：SuiteSpec（entry_point＋
   字面值 (args, expected)＋比對設定）＋確定性渲染器；執行器只跑自己渲染的碼，
   有狀態／雜湊黑名單／擬態三種攻擊**不可表達**，殘餘＝覆蓋不足＋比對旗標
@@ -89,6 +102,26 @@
   §二 R529 跨題庫 37 塊、§三 R460R 三次同題複製 18 塊——它們的 `headline` 是 `—`
   但**不代表沒被稽核**（裁決檔用 glob 點名整批）。產生器
   `ops/gain/build_runs_index.py`（`--check` 可驗索引沒漂）。
+- `decisions/` — **實驗紀錄的家**（2026-09-18 從 repo 根搬進來，227 份，純 `git mv`、
+  內容一個 byte 沒動）。根目錄留給「這個專案是什麼」，外人打開 repo 第一眼要看得到
+  `vacant/`。配置：`decisions/`＝`DECISION_*.md`（205）、`decisions/criteria/`＝
+  `CRITERION_*.md`（14）、`decisions/conclusions/`＝`CONCLUSION_*.md`＋`FINDINGS_*.md`（4）、
+  `decisions/prereg/`＝`PREREG_*.md`（2）、`decisions/notes/`＝日期型一次性筆記（2）。
+  **新的裁決／預註冊一律寫進 `decisions/`，不要再寫回根目錄。**
+- **發射指令的路徑**：R440G 閘門（`gain_run.py`，凍結碼）只認 `--decision <路徑>` 能不能
+  開啟，所以現在要寫 `--decision decisions/DECISION_xxx.md`。
+  ⚠ **各份預註冊檔內文裡的逐塊指令仍寫著舊的根目錄路徑，那是刻意不改的**——
+  預註冊的重點是發射前凍結，事後改寫它記載的指令等於讓紀錄描述一個沒下過的指令；
+  而且 `docs/paper_2026-09-14/source_manifest.json` 對其中 13 份釘了 sha256。
+  照抄會被閘門擋下（`拒絕啟動：DECISION 檔不存在`，fail-closed 不是安靜跑錯），
+  自己補 `decisions/` 前綴即可。實際在跑的 `ops/gain/r5xx/*_queue.sh` 已經是新路徑。
+- `ops/check_repo_links.py` — 死連結／死路徑擋門（markdown 連結、`ROOT / "..."` 字面值、
+  `--decision` 參數、GitHub 絕對網址四類）。上面那兩類「刻意不改」的東西是**具名排除**、
+  `--verbose` 數得出來，不是安靜跳過。它同時擋「根目錄有落單的紀錄檔」：
+  **住哪裡由檔名前綴決定**（`_RECORD_HOME`，單一真相來源），不是一次性的搬家清單。
+  在搬家之前開的分支合併進來時，那份新裁決會以根目錄路徑落單——
+  `python3 ops/check_repo_links.py --relocate` 一行歸位（glob 掃當下的樹＋`git mv`，
+  不吃寫死的檔名），CI 也會在落單時就紅。
 
 ### 展件可直接複用的（實體場地，秒級互動）
 

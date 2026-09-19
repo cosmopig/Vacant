@@ -13,7 +13,7 @@ ROOT="$HOME/vacant"; REPO="$ROOT/Vacant"; LOG="$ROOT/logs/launch_conform.log"
 HUB="http://100.119.113.56:8765/v1/chat/completions"
 MODEL="gemma-4-12b-it-qat"
 OUT="runs/g_r444_conform_mbpp"
-DEC="DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md"
+DEC="decisions/DECISION_20260903_R440R_CONFORM_LIVE_PREREG.md"
 # ⚠ 一定要錨行首。未錨版 `ps -eo cmd | grep -q "gain_run.py --out runs/..."`
 #   會匹配到 **grep 自己的命令列**（它就長成 `grep -q gain_run.py --out runs/...`），
 #   於是條件恆為真、這個迴圈永遠不會結束＝排程器安靜地永遠不發射。

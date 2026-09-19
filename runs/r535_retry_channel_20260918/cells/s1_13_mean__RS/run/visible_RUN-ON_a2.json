@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_13_mean_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 91,
+      "cases": [
+        {
+          "case": "check_01_mean",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import mean",
+          "output": ""
+        },
+        {
+          "case": "check_02_mean",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'mean' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_13_mean__RS/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import mean",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "2db47c08e529bb5f8fa303103f4ed05c52f85cb9ea0c58f2d3d3ba5215b12c9c"
+}
