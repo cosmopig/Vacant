@@ -235,11 +235,22 @@ def events_for_cell(cell: dict, *, verify_url: str, ts_ms: int) -> list[dict]:
     return out
 
 
+def cell_verify_url(template: str, cell_id: str) -> str:
+    """`verify_url` 的 per-cell 版（C4）。
+
+    ⚠ 全批共用一個字串是舊版的錯：觀眾在電視上看到第 7 格，手機打開收據頁卻落在
+    第 1 格。`{cell}` 佔位符讓每一格指到自己那一頁；沒有佔位符就維持舊行為
+    （離線 `file://` 直開整頁的那種用法仍然成立）。
+    """
+    return template.replace("{cell}", cell_id) if "{cell}" in template else template
+
+
 def build(pack: dict, *, verify_url: str, t0_ms: int) -> list[dict]:
     evs: list[dict] = []
     ts = t0_ms
     for cell in pack["cells"]:
-        block = events_for_cell(cell, verify_url=verify_url, ts_ms=ts)
+        block = events_for_cell(
+            cell, verify_url=cell_verify_url(verify_url, cell["cell_id"]), ts_ms=ts)
         evs.extend(block)
         ts += (len(block) + 2) * 1000
     # counters 是真實累計值，不是估計（LIVE_INTERFACE.md 的硬性規則）。
@@ -299,6 +310,50 @@ def validate(evs: list[dict]) -> list[str]:
     return bad
 
 
+def follow(pack: dict, out: pathlib.Path, *, verify_url: str, interval: float,
+           loop: bool = False, sleep=None) -> int:
+    """**逐格吐出**（活模式的時間軸）：一次追加一格，隔 `interval` 秒再下一格。
+
+    展場正式的排程在 `serve_twin.py`（它還要吃手機的按鍵）。這一支是**沒有伺服器
+    也能驗時間軸**的那條路：`--follow` 產生的檔案可以直接餵給電視的
+    `?live=file://…`（同機靜態伺服器）或給測試讀。
+
+    ⚠ 一格過不了契約自檢就**跳過並印出原因**，不中斷整批（D2：`infra_void` 的格子
+    不簽收據也不發裁決，電視的 `liveAssemble` 只看 `pending[0]` ⇒ 卡住整個佇列）。
+    """
+    import time as _time
+    sleep = sleep or _time.sleep
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("", encoding="utf-8")
+    ts = int(_time.time() * 1000)
+    n_ok = n_skip = 0
+    cells = list(pack["cells"])
+    while True:
+        for cell in cells:
+            evs = events_for_cell(
+                cell, verify_url=cell_verify_url(verify_url, cell["cell_id"]),
+                ts_ms=ts)
+            ts += (len(evs) + 2) * 1000
+            bad = validate(evs)
+            if bad:
+                n_skip += 1
+                print(f"[SKIP] {cell['cell_id']}：{bad[0]}")
+                continue
+            with out.open("a", encoding="utf-8") as fh:
+                for e in evs:
+                    fh.write(json.dumps(e, ensure_ascii=False, sort_keys=True) + "\n")
+            n_ok += 1
+            print(f"[{n_ok}] {cell['cell_id']} ＋{len(evs)} 個事件")
+            sleep(interval)
+        if not loop:
+            break
+        # 一圈播完截檔：電視的去重鍵含 ts，下一圈 ts 是新的 ⇒ 不會重播舊的。
+        out.write_text("", encoding="utf-8")
+        ts = max(ts, int(_time.time() * 1000))
+    print(f"逐格吐出結束：{n_ok} 格、跳過 {n_skip} 格")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
         description="把 twin run 目錄轉成人類動物園電視吃的 world event JSONL")
@@ -306,8 +361,13 @@ def main(argv=None) -> int:
     ap.add_argument("--pack", default=None, help="或直接給 twin_pack.json")
     ap.add_argument("--out", required=True)
     ap.add_argument("--verify-url", default="twin_viewer.html",
-                    help="觀眾自己重驗收據的那一頁（LIVE_INTERFACE.md §四的缺口）")
+                    help="觀眾自己重驗收據的那一頁；`{cell}` 會換成 cell_id（C4）")
     ap.add_argument("--t0-ms", type=int, default=1_789_000_000_000)
+    ap.add_argument("--follow", action="store_true",
+                    help="逐格吐出（活模式的時間軸），不是一次吐完整批")
+    ap.add_argument("--interval", type=float, default=30.0, help="--follow 的每格間隔秒")
+    ap.add_argument("--loop", action="store_true", help="--follow 播完一圈就重來")
+    ap.add_argument("--cell", default=None, help="只吐這一格（cell_id）")
     a = ap.parse_args(argv)
 
     if a.pack:
@@ -316,6 +376,16 @@ def main(argv=None) -> int:
         pack = packlib.build(pathlib.Path(a.runs).resolve())
     else:
         raise SystemExit("--runs 或 --pack 要給一個")
+
+    if a.cell:
+        picked = [c for c in pack["cells"] if c["cell_id"] == a.cell]
+        if not picked:
+            raise SystemExit(f"沒有這一格：{a.cell}")
+        pack = {**pack, "cells": picked}
+
+    if a.follow:
+        return follow(pack, pathlib.Path(a.out), verify_url=a.verify_url,
+                      interval=a.interval, loop=a.loop)
 
     evs = build(pack, verify_url=a.verify_url, t0_ms=a.t0_ms)
     bad = validate(evs)

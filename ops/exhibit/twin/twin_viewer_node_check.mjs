@@ -36,6 +36,7 @@ const logicSrc = slice("/* === LOGIC-BEGIN ===", "/* === LOGIC-END === */");
 const ctx = {
   TextEncoder, JSON, Math, Number, Array, Object, String, Uint8Array, Uint32Array,
   DataView, Error, parseInt, Map, Set, Promise, setTimeout, crypto, console,
+  URLSearchParams,
 };
 vm.createContext(ctx);
 vm.runInContext(
@@ -43,7 +44,7 @@ vm.runInContext(
   + "\n;globalThis.__api={entryHash,signedBytes,canonicalString,canonicalBytes,hexToBytes,"
   + "bytesToHex,sha256Bytes,lineHasOnlySafeIntegers,ZERO64,cmpCodePoint,parseBook,"
   + "verifyChain,revalidateAt,treeRoot,checkDelivery,verdictFromChain,summaryMismatch,"
-  + "consentAudit,vacantIdFromPubHex,laneSummary};", ctx);
+  + "consentAudit,vacantIdFromPubHex,laneSummary,hashTarget};", ctx);
 const api = ctx.__api;
 console.log(`抽出 CANON ${canonSrc.length} ＋ LOGIC ${logicSrc.length} 字元`);
 
@@ -180,6 +181,18 @@ for (const c of PACK.cells) {
   const missing = need.filter((n) => !ASSETS[n]);
   check("N12 素材內嵌且居民都有像", allData && missing.length === 0,
         `${names.length} 張；缺 ${missing.length}`);
+}
+
+// N13 —— `#cell=<id>` 指得到每一格（C4：手機從電視那一格點過來）
+{
+  const ids = PACK.cells.map((c) => c.cell_id);
+  const ok = ids.every((id) => api.hashTarget(`#cell=${id}`).cell === id);
+  const t = api.hashTarget("#cell=" + ids[0] + "&tamper=1");
+  const none = api.hashTarget("");
+  check("N13 #cell= 指得到每一格、tamper 旗標讀得出、沒給就是 null",
+        ok && t.tamper === true && t.cell === ids[0]
+        && none.cell === null && none.tamper === false,
+        `${ids.length} 格`);
 }
 
 console.log(fail ? `\n${fail} 項 BROKEN` : "\n全部通過");

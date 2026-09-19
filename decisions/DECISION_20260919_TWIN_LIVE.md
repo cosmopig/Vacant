@@ -1,0 +1,329 @@
+# DECISION 2026-09-19（三）— 手機真實連動電視：活模式從「一格播不出來」到「按一下就演」
+
+人類原話（同一句話的第一件事，前一份裁決先做了第三件）：
+
+> B 線記得我下一版新的是**手機要可以真實的連動電視**。
+
+前一份 `DECISION_20260919_TWIN_V2_FIDELITY.md` 是稽核：18 處「畫面演的」與
+「真正做的」不一樣，其中 D1「**活模式一格都播不出來**」是頭號路障，
+§四 列了 13 條要電視端改的提案（P1–P13）。本文是那一份的**施工紀錄**：
+接口契約、13 條各自做了沒、手機三顆鍵對應哪些真資料、以及**還不能說的話**。
+
+⚠ **本輪零機時**。一通模型都沒有打——整條線上的每一格都是先跑完、簽好章的真資料。
+
+分支（**都沒有 push**）：
+
+```
+Vacant      twin/v2-live-mobile   （從 twin/v2-live 起跑）
+vacant_hm   twin/live-mobile      （從 main 起跑；未追蹤的 design/ 一個字沒動）
+```
+
+---
+
+## 一、手機是什麼角色（已拍板，本文只記錄實作後果）
+
+**手機 ＝ C 導播端 ＋ B 稽核端**（不是委託端）。理由在前一份裁決 §二，四條：
+只有 C 同時滿足「真的連動」與「秒級互動」；我們手上最好懂的是一組反事實對照，
+而排程本來就是「同一題 × 扣住／寫明」兩格一組；B 單向、只滿足一半；
+A（觀眾下任務）卡在未定的倫理線上。
+
+**做出來之後多了一條**：C 的「真的連動」是**雙向**的——手機按鍵改變電視演什麼
+（`/control` → 事件流），電視演到哪一格又決定手機那顆「翻一個位元」指向誰
+（`/state` → `/r/<cell_id>`）。這一圈閉起來之後，`/state` 也順手解掉了
+「電視要怎麼說出『有人正在重驗』而不說謊」的問題（見 §五-2）。
+
+---
+
+## 二、接口契約
+
+```
+  手機 phone.html              serve_twin.py :8899            電視 world3/index.html :8420
+  ┌──────────────┐  POST /control   ┌──────────────┐  GET /live/events.jsonl  ┌────────┐
+  │ 介面扣住      │ ───────────────▶ │ 排程＋逐格吐出 │ ───────────────────────▶ │ 演那一格 │
+  │ 介面寫明      │                  │              │  GET /state（導播狀態）   └────────┘
+  │ 翻一個位元    │ ─ GET /r/<cell> ▶│              │
+  └──────────────┘   （收據頁：在他自己的瀏覽器裡從創世重算到鏈頭）
+```
+
+| 端點 | 方法 | 回什麼 | 誰用 |
+|---|---|---|---|
+| `/live/events.jsonl` | GET | 已吐出的事件（JSONL，**逐格追加**），`Access-Control-Allow-Origin: *` | 電視 |
+| `/state` | GET | 現在演到哪一格、三顆鍵各自指誰、翻位元狀態、跳過的格子、誠實句 | 手機＋電視導播列 |
+| `/control` | POST | `{"action": "held"｜"pc"｜"tamper"｜"next"｜"resume"｜"untamper"}` | 手機 |
+| `/r/<cell_id>` | GET | **302 → `/viewer.html#cell=<cell_id>`**（`?tamper=1` ⇒ 多帶 `&tamper=1`） | 手機 |
+| `/viewer.html` | GET | 收據頁（`examples/twin_viewer.html`，0.77 MB，離線） | 手機 |
+| `/phone.html` | GET | 手機頁（導播＋稽核兩個分頁） | 手機 |
+
+電視接法：
+
+```
+world3/index.html?live=http://<展場機>:8899/live/events.jsonl&poll=2000
+# state 可省略：電視會自己把 /live/events.jsonl 換成 /state
+```
+
+**`#` 之後的東西不會送到伺服器。** 所以 `/r/<cell_id>` 只做 302，觀眾手上那一頁
+要開哪一格是他瀏覽器自己的事——伺服器不需要、也不應該知道他在看哪一格。
+同一條規則讓收據頁在 `file://` 直接開的時候行為一模一樣。
+
+### 事件契約的四個 v2 變更（`world3/docs/LIVE_INTERFACE.md` v2）
+
+1. `task_opened` 必帶 **`evidence`**（逐格證據等級）。沒帶 ⇒ 電視印
+   「證據等級沒有跟著事件過來」，**不會自己假設是真的**。
+2. `draft_done`／`gate_ran` **每一次嘗試各發一筆**（`attempt`/`of`）；
+   電視的 `visible_ok` 取**最後一筆**（與 `verdict` 同一次）。
+3. `accepted`／`meets_demand` 是**三值**，兩端都不准 `bool()`／`!!`。
+4. `receipt.verify_url` 是 **per-cell** 的（`to_events.py --verify-url '/r/{cell}'`）。
+
+---
+
+## 三、13 條提案：做了沒
+
+| # | 對應 | 做了沒 | 怎麼做的 | 可執行判準 |
+|---|---|---|---|---|
+| P1 | D1 | ✅ | `castKeyFor()`＋`director.bindCast()`：名字對不上就**借一個空著的造型**（確定性、彼此不撞臉），畫面上一律用真名；借不到才放棄，而且 `console.warn` ＋記進 `LIVE.dropped`。**絕不靜靜丟掉。** | L1／L2／E3／E6 |
+| P2 | B1 | ✅ | `tri()`：`meets_demand` 三值一路保到畫面 | L5 |
+| P3 | B2 | ✅ | 同上，`accepted` 三值 | L5／L14 |
+| P4 | B3 | ✅ | 監視器拆成「題面雜湊」「收據鏈頭」兩行；事件各帶一份 | L11／L15c |
+| P5 | B1 | ✅ | `verdictRow()`／`verdictBig()`：`meets_demand === null` ⇒ 「收下 · **符合需求未量**」，中性色 | L5 |
+| P6 | A6、C2 | ✅ | `liveBanner()`／`liveHonesty()`：橫幅、右下誠實列、右上徽章**三處**都改讀 `evidence`。`L-real` 才准講「正在發生」 | L7／L7b／L13d／E7 |
+| P7 | A1、A2 | ✅ | `reviewRow()`／`auditRow()`：沒有那一層 ⇒ 「**這條路上沒有這一層**」；有那一層但沒抽中 ⇒ 「沒抽中」。兩件事分開 | L8／L8b |
+| P8 | A1 | ✅ **（做法不同）** | 提案寫「跳過 s07」。**改成演閘門**（`gateBeat()`）——那才是這條路上第 7 拍真正發生的事。不是少演一拍，是**把憑空多出來的那一層換成真的那一層** | L14b |
+| P9 | A5、C3 | ✅ | `stopReasonText()`：四種停止理由各講各的；沒有就印「理由未提供」。**沒有一種是評審** | L9／L9b |
+| P10 | A4 | ✅ | `offRow()`／`offLine()`：`OFF` 是 null ⇒ 「**沒有跑過這個對照**」「沒跑過就是沒跑過」 | L6 |
+| P11 | A3 | ✅ | `routeText()`：`random` ⇒ 「這條路上沒有路由層：誰做這一格是人指定的」。「依信譽紀錄」**只剩一處**，被 `basis === "reputation"` 守著 | L10／L15b／L17b |
+| P12 | C1 | ✅ | `reviseBeat()`：「**閘門擋下 → 把失敗原文給它 → 它自己再跑一次**」，逐字寫出是哪一條臂。不再是「被推翻／X 重寫一版」 | L13b |
+| P13 | C1、E1 | ✅ | `gates[]` 逐次收；`visible_ok` 取最後一筆；多次嘗試時監視器多一行「N 次（閘門讀最後一次）」 | L13／L13c |
+
+**額外做的（提案沒列，但不做就過不了展場鐵律）**：
+
+- **D2**：`liveAssemble` 不再只看 `pending[0]`——掃過所有 task_id 找收尾了的那一筆；
+  收不了尾的等 8 輪之後放掉並記進 `LIVE.dropped`。生產端也擋一道：
+  `serve_twin` 追加之前先過 `to_events.validate`，過不了就**不播、跳過、
+  把原因寫進 `/state.skipped`**。（L3／L3b、`test_a_cell_that_never_settles_is_skipped_not_stuck`）
+- **D3**：去重集合有上限（4000），一圈播完截檔重來。
+  （L4、`test_autoplay_walks_pairs_and_truncates_each_lap`）
+- **CORS**：電視在 8420、事件流在 8899 是**跨來源**，沒有 `Access-Control-Allow-Origin`
+  一個字都拿不到。（E1、`test_cors_header_is_present`）
+- **凍結重放走同一組判準**：`normalizeTask()`／`normalizeReplayRow()`。
+  差別由**資料**決定，不由模式決定——G 實驗那一批真的有評審層、抽樣稽核層、
+  OFF 臂，所以它照實說有。（L15／L15b／L15c）
+
+---
+
+## 四、手機三顆鍵對應哪些真資料
+
+資料來源：`runs/twin_fixture_20260919`（18 格 `vacant run`）→ `pack.py` →
+`ops/exhibit/twin/twin_pack.json`。排程攤平成 **9 對 × 2 邊**：
+一位居民（DUL-89／KAL-52／LIV-51）× 一題（s1_01_addmul／s1_02_span／s1_03_nwords）
+× 兩種題面。
+
+| 鍵 | `/control` | 落到哪一格 | 那一格的真資料 | 畫面上會說 |
+|---|---|---|---|---|
+| **介面扣住** | `{"action":"held"}` | `<居民>__<題>__held`（`explicit=false`） | `exit_code 20`、`stop_reason visible_fail`、驗收 1/2 過、`check_02_mul` 失敗（`ImportError: cannot import name 'mul'`） | 「擋下（沒過客戶的驗收測資）」 |
+| **介面寫明** | `{"action":"pc"}` | `<居民>__<題>__pc`（`explicit=true`） | `exit_code 0`、`stop_reason visible_pass`、驗收 2/2 過 | 「收下 · 符合需求未量」 |
+| **翻一個位元** | `{"action":"tamper"}` | 剛剛那一格的 `/r/<cell_id>?tamper=1` | 那一格自己的簽章鏈（2 筆／格、Ed25519） | 手機上：從創世重算到鏈頭；電視上：「有人正在自己的手機上重算 … 的收據（**這台電視不驗簽章**）」 |
+
+**唯一的差別是題面裡有沒有那一段 `## Interface`。** 同一位居民、同一支 agent、
+同一套驗收——一邊被擋下、一邊交付。那就是展場要給觀眾看的那一組反事實。
+（實測輸出見 §六 的端到端紀錄 E5。）
+
+按下去到電視有反應 ＝ 一次 HTTP POST ＋ 一次輪詢（預設 2 秒）。**零模型呼叫。**
+沒人按的時候 `serve_twin` 自己照排程輪播（`--dwell` 秒一格），有人按就插隊。
+
+---
+
+## 五、兩個判斷（與提案不同，理由寫在這裡）
+
+### 1. P8 不是「跳過 s07」，是「演閘門」
+
+提案寫 `votes.length === 0` ⇒ 跳過 s07，直接走閘門那一拍。照做的話那一拍**沒有畫面**。
+但 `LIVE_INTERFACE.md` 自己就把 `gate_ran` 標成「步 7 主戲」——`vacant run` 這條路上
+第 7 拍真正發生的事就是閘門。所以改成：同一個場景、同一個時間點，
+把三個人舉牌換成**一個人跑客戶的驗收測資**，字幕逐字講出幾條、哪一條沒過，
+並補一句「這條路上沒有同儕評審：擋下來的是閘門，不是某一個人」。
+
+**少演一拍是把真的東西藏起來，這跟演一個假的東西一樣是失真。**
+
+### 2. 「翻一個位元」**不在電視上演**
+
+前一份裁決 §二-C 寫「第三顆按鈕是『翻掉一個位元』，**電視當場演簽章對不上**」。
+**沒有照做，而且不打算照做。** 理由：
+
+- 事件流**本身沒有簽章**（`LIVE_INTERFACE.md` §四／`to_events` 誠實邊界 5）。
+  電視收到的是一串 JSON，它**沒有能力驗任何東西**。
+- 要讓電視喊「簽章對不上」，只有兩條路：（a）伺服器算完把結論告訴它——
+  那就是要觀眾**依賴**一個他驗不到的宣告，正是這個展件在反對的東西；
+  （b）把整條簽章鏈塞進事件流讓電視自己算——那是把展示端改成證據端，
+  而且一格 0.77 MB。
+- repo 裡已經有這條紀律的先例：`vacant/dashboard.py` 的
+  「**面板非信任來源**」。
+
+⇒ **電視只說關於現場發生什麼的事實**（「有人正在自己的手機上重算這一格的收據」），
+並在同一行明講「**這台電視不驗簽章**」。真正的翻、真正的重算、真正看到簽章紅，
+發生在**觀眾自己手上那一頁**——那一頁是 `file://` 直開、離線、
+`twin_viewer_node_check.mjs` 14 條驗過的。
+
+這個改動讓展件**更強**不是更弱：觀眾不是看我們演一次失敗，是自己動手弄壞它。
+`/control` 的 `tamper` 只交出網址，`serve_twin` 的 `/state` 裡一個驗證結論都沒有
+（`test_tamper_does_not_claim_any_verification_result` 守這條）。
+收據頁的 `?tamper=1` 也**只是把那一段捲到眼前並標起來，不自動翻**——
+一頁自己把資料改掉再說「你看簽章紅了」，那是表演不是稽核。
+
+---
+
+## 六、證據：活模式真的播得出來
+
+全部可重跑，零機時。
+
+### 生產端（Vacant repo）
+
+```
+.venv/bin/python -m pytest tests/test_twin_*.py tests/test_consent.py tests/test_serve_twin.py -q
+  → 79 passed（其中 test_serve_twin.py 17 條）
+node ops/exhibit/twin/twin_viewer_node_check.mjs
+  → 14/14 OK（N13 新增：#cell= 指得到 18 格中的每一格）
+```
+
+### 電視端（vacant_hm）
+
+```
+node tools/livecheck.mjs        → 23 條全過
+```
+把 `world3/index.html` 裡 `LIVE-BEGIN … LIVE-END` **整段抽出來**，餵
+`world3/live/twin_events.jsonl`（18 格真事件）跑一次。挑幾條：
+
+```
+[OK] L1  18 格真事件全部組得成可播的紀錄        組出 18／開了 18
+[OK] L2  居民真名借得到造型、彼此不撞臉、確定性   DUL-89／KAL-52／LIV-51 → plain-2／hasty-2／careful-1
+[OK] L3  第一格沒有 verdict，後面 17 格照播      播出 17 格
+[OK] L5  meets_demand 全是 null ⇒ 沒有一格被宣告成「其實漏出」
+[OK] L6  沒跑過 OFF 臂 ⇒ 不准印「也擋下」        沒有跑過這個對照
+[OK] L7  18 格全是 L-none ⇒ 橫幅一律「機制模擬」，一格都沒喊「正在發生」
+[OK] L9  擋下的 9 格講「沒過客戶的驗收測資」，沒有一格說「評審否決」
+[OK] L10 basis=random ⇒ 一格都沒寫「依信譽紀錄」
+[OK] L18 繪圖側呼叫的判準函數全部在 LIVE 區段裡定義著   用到 16 個
+```
+
+### 整條線（真的起一台伺服器，真的按鍵）
+
+```
+python3 ops/exhibit/twin/serve_twin.py --port 8899 --dwell 9999   # 另一個 shell
+node tools/live_e2e.mjs http://127.0.0.1:8899                     → 10 條全過
+```
+這一支用的是 `index.html` 裡**逐字那一段**程式碼（不是複製品），
+對一台跑起來的伺服器做完整的「手機按 → 電視演」：
+
+```
+[OK] E1  CORS 標頭在                       *
+[OK] E2  POST /control 回 200 而且指到那一格  DUL-89__s1_01_addmul__held
+[OK] E3  電視真的把那一格組起來播了          播出 1 格
+[OK] E4  同一題的另一邊也播得出來
+[OK] E5  兩邊的判決在畫面上真的不一樣
+         扣住「擋下（沒過客戶的驗收測資）」／寫明「收下 · 符合需求未量」
+[OK] E6  D1 居民真名上得了台                DUL-89 → plain-2
+[OK] E8  翻一個位元 ⇒ 手機拿到那一格自己的收據網址
+[OK] E10 /r/<cell_id> → 302 /viewer.html#cell=DUL-89__s1_01_addmul__pc
+```
+
+`live_e2e.mjs` 最後會把**電視右上角監視器實際會印的每一行**倒出來。
+`DUL-89__s1_01_addmul__held` 那一格：
+
+```
+  任務       DUL-89__s1_01_addmul__held
+  交給誰     DUL-89
+  同儕評審   這條路上沒有這一層
+  抽樣稽核   這條路上沒有這一層
+  題面雜湊   8257ace29752
+  收據鏈頭   57f12d1f7d64
+  判決       擋下（沒過客戶的驗收測資）
+  同題關掉這層  沒有跑過這個對照
+  累計漏出   開 — · 關 —
+  路由那一拍：… 這條路上沒有路由層：誰做這一格是人指定的（DUL-89）
+  誠實列　　：背景活動＝機制模擬 · 判決與數字＝真跑過的驗收與收據（這一格沒有模型參與）
+```
+
+**舊版這一格會印**：同儕票 0/0 判可 · 抽樣稽核 沒抽中 · 收據雜湊（其實是題面的）·
+擋下（評審否決）· 同題關掉這層 也擋下 · 大橫幅「正在發生／真的 Vacant agent
+此刻做的」——而且實際上**這一格根本上不了台**（D1）。
+
+---
+
+## 七、展場鐵律怎麼守
+
+| 鐵律 | 怎麼守的 | 守門的 |
+|---|---|---|
+| 秒級互動（真模型 114 秒等不起） | 全部預跑，**現場零模型呼叫**。按下去＝一次 POST | `test_no_model_call_anywhere_in_this_path`（`serve_twin.py` 連 `urllib.request` 都沒 import） |
+| 離線可跑 | 整條線在 localhost；手機頁／收據頁零外部資源 | `test_phone_page_has_no_external_resource`、`test_twin_viewer.py` 的離線紅線 |
+| `file://` 的 CORS 坑 | **寫進開機腳本** `ops/exhibit/twin/exhibit_boot.sh`（8420 電視站＋8899 事件流一起起） | 腳本自己會擋掉找不到頁面／資料包的情況 |
+| 無人值守循環 | 沒人按就輪播；一圈截檔；一格收不了尾就跳過並記下 | `test_autoplay_…`、`test_a_cell_that_never_settles_…`、L3／L3b／L4 |
+| 鐵律 5（模擬不准講成證明） | 證據等級**逐格**跟著事件走，橫幅／誠實列／徽章三處都讀它 | L7／L7b／L13d／E7 |
+| 口徑「可究責性」不用「信任」 | `/state`、手機頁全文掃 | `test_state_never_says_trust` |
+| 隱藏測資不進展件 | 本輪一個 byte 都沒碰 `hidden/`；`meets_demand` 一律 null | `to_events.validate`＋L5 |
+
+⚠ **展場要讓手機連得到，`serve_twin` 必須綁 `0.0.0.0`**（`exhibit_boot.sh --lan`）。
+那一刻起**同一個區網上的任何人都按得動這台電視**——`/control` 沒有驗身分
+（`--token` 是可選的）。這是展場的現實，寫在這裡不是為了嚇人，是因為
+布展那天一定會有人問「別人會不會亂按」，答案是「會，而且我們知道」。
+
+---
+
+## 八、動了哪些檔
+
+### Vacant（`twin/v2-live-mobile`）
+
+```
+ops/exhibit/twin/serve_twin.py     新增：四個端點＋輪播＋插隊＋跳過沒收尾的格
+ops/exhibit/twin/phone.html        新增：導播（三顆鍵）＋稽核（18 格收據）兩個分頁
+ops/exhibit/twin/exhibit_boot.sh   新增：展場開機（8420 電視站＋8899 事件流）
+ops/exhibit/twin/to_events.py      --follow 逐格吐出、--cell、--loop；verify_url 吃 {cell}
+examples/twin_viewer.html          `hashTarget()`＋`openFromHash()`：#cell=<id>[&tamper=1]
+ops/exhibit/twin/twin_viewer_node_check.mjs   ＋N13
+tests/test_serve_twin.py           新增 17 條
+```
+
+`vacant/` **一個字都沒動**。`twin_pack.json` 沒有重生（本輪沒有新的 run）。
+
+### vacant_hm（`twin/live-mobile`）
+
+```
+world3/index.html                  活模式重寫：LIVE-BEGIN…LIVE-END 純函數區（判準全部在裡面）
+                                   ＋導演側改接 bindCast／castOf／normalizeTask／monitorRows
+world3/docs/LIVE_INTERFACE.md      v2：三值、逐次嘗試、evidence、per-cell verify_url、導播通道
+world3/live/twin_events.jsonl      18 格真事件（livecheck 的資料源）
+tools/livecheck.mjs                新增 23 條
+tools/live_e2e.mjs                 新增 10 條（對真的跑起來的伺服器）
+```
+
+未追蹤的 `design/` **一個字都沒碰**。
+
+---
+
+## 九、還不能說的話
+
+1. **「活模式在真模型上跑過」——不能說。** 那 18 格全是 `L-none`
+   （`requests_seen = 0`）：通道、閘門、簽章鏈、收據都是真跑的，**模型沒有參與**。
+   橫幅會照實印「機制模擬」。本輪零機時，一通模型都沒打。
+2. **「電視驗證了收據」——不能說。** 電視不驗簽章，也沒有能力驗
+   （事件流沒有簽章）。可驗的那一份是觀眾手上那一頁。
+3. **「手機按鍵讓 agent 開始工作」——不能說。** 那一格**早就跑完了**。
+   手機決定的是**要看哪一格**，不是要跑哪一格。展場的措辭必須是
+   「你來決定要看哪一邊」，不是「你來派工」。
+4. **「觀眾看到的是同一題的完整反事實」——只能說一半。** 扣住／寫明這一組是
+   真的同題對照（同一位居民、同一支 agent、同一套驗收，只差題面那一段介面）。
+   但**「有 Vacant／沒有 Vacant」那一組對照沒有跑過**——OFF 臂一格都沒有，
+   監視器會印「沒有跑過這個對照」。有同事正在 1004 上跑；**在資料到位之前，
+   那一行不准改**。
+5. **「13 條提案全部照原樣做了」——不精確。** P8 做法不同（演閘門，不是跳過），
+   「翻一個位元電視當場演簽章對不上」**沒做而且不打算做**（§五-2）。
+6. **「電視播得出來」＝ node check 與端到端檢查全過，不是「在瀏覽器裡看過」。**
+   本輪**沒有拿到瀏覽器截圖**：Chrome 153 拿掉了 `--headless=old`，
+   `--headless=new` 對一個 `requestAnimationFrame` 不停的頁面不會自己結束，
+   而 claude-in-chrome 擴充套件對 `127.0.0.1` 沒有站台權限。
+   ⇒ **canvas 實際畫出來的樣子還沒有人看過。** 判準函數說的每一句話都驗過了，
+   版面會不會擠、監視器多一行會不會撞到邊，**沒驗過**。
+   布展前要有人真的用瀏覽器開一次（`ops/exhibit/twin/exhibit_boot.sh`）。
+7. **`/control` 沒有驗身分、事件流沒有簽章。** §七 末段那一條。
+8. **`ops/pipeline/rows_to_events.py`（v1 的轉接器）沒有跟著改 v2。**
+   它發的事件沒有 `evidence`、沒有 `attempt/of`、`accepted` 是兩值。
+   電視收得下（該說「說不出來」的地方會說），但**那條路本輪沒有驗過**。
+9. **前一份裁決 §六 的五條「不能說」全部仍然成立。**

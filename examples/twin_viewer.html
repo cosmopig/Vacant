@@ -50,6 +50,8 @@
 
   .panel{border:1px solid var(--line);border-radius:3px;background:var(--ink-2);
          padding:18px 20px;margin:0 0 20px}
+  /* 從手機 `#cell=…&tamper=1` 指過來的那一格：只是標起來，不自動翻 */
+  .panel.armed{border-color:var(--bad,#c0523c);box-shadow:0 0 0 1px var(--bad,#c0523c) inset}
   .note{color:var(--muted);font-size:13.5px;max-width:84ch;margin:10px 0 0}
 
   .folk{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
@@ -670,6 +672,24 @@ function laneSummary(pack) {
   return out;
 }
 
+/* ---- 手機要指到電視現在那一格（C4）---------------------------------------- */
+/**
+ * `#cell=<cell_id>[&tamper=1]` → 這一頁要開哪一格、要不要先把翻位元那一段擺好。
+ *
+ * 為什麼是 fragment 不是 query：`#` 之後的東西**不會送到伺服器**。展場機上的
+ * `serve_twin.py` 只做 302，觀眾手上那一頁要開哪一格是他的瀏覽器自己的事——
+ * 伺服器不需要、也不應該知道他在看哪一格。同一條規則讓這一頁在 `file://`
+ * 直接開的時候行為一模一樣（展場鐵律：離線可跑）。
+ *
+ * ⚠ `tamper=1` 只是**把那一段捲到眼前並標示出來**，不會自動翻。翻不翻是觀眾按的；
+ *   一頁自己把資料改掉再說「你看簽章紅了」，那是表演不是稽核。
+ */
+function hashTarget(hash) {
+  const q = new URLSearchParams(String(hash || "").replace(/^#/, ""));
+  const cell = q.get("cell");
+  return { cell: cell || null, tamper: q.get("tamper") === "1" };
+}
+
 /* === LOGIC-END === */
 
 /* ---- 內嵌資料 ------------------------------------------------------------- */
@@ -1017,6 +1037,31 @@ async function selectCell(cellId) {
   renderReceipt();
 }
 
+/** `#cell=…` → 開那一格。開得成回 true，開不成回 false（而且說出來）。 */
+async function openFromHash(hash) {
+  const want = hashTarget(hash);
+  if (!want.cell) return false;
+  const c = CELLS.get(want.cell);
+  if (!c) {
+    $("tagline").textContent =
+      `這一頁裡沒有 ${want.cell} 這一格——網址指到的東西不在這份資料包裡。`;
+    return false;
+  }
+  STATE.resident = c.resident;
+  renderFolk(); renderDay();
+  await selectCell(c.cell_id);
+  const panel = $("tamper-panel");
+  if (want.tamper && panel) {
+    // 只是把它擺到眼前並標起來。**不自動翻**——翻不翻是觀眾按的。
+    panel.classList.add("armed");
+    $("tamper-state").textContent =
+      "從手機指過來的：這一格就是電視剛剛演的那一格。按下去之後，"
+      + "下面每一個紅字都是你這台裝置自己重算出來的。";
+    if (panel.scrollIntoView) panel.scrollIntoView({ block: "center" });
+  }
+  return true;
+}
+
 async function flipAccepted() {
   const c = CELLS.get(STATE.cell);
   if (!c) return;
@@ -1121,8 +1166,13 @@ function renderMethod() {
   renderFolk();
   renderConsent();
   renderMethod();
-  const r0 = (PACK.residents || [])[0];
-  if (r0) await selectResident(r0.codename);
+  // 手機從電視那一格點過來（C4）：`#cell=<cell_id>`。認不得就退回第一位居民，
+  // 而且**在畫面上說清楚為什麼**——不要靜靜跳到別格，那就是換了一張收據。
+  if (!(await openFromHash(location.hash))) {
+    const r0 = (PACK.residents || [])[0];
+    if (r0) await selectResident(r0.codename);
+  }
+  window.addEventListener("hashchange", () => { openFromHash(location.hash); });
   await verifyAllAndRenderVerdict();
   $("btn-flip").addEventListener("click", flipAccepted);
   $("btn-restore").addEventListener("click", restoreCell);
