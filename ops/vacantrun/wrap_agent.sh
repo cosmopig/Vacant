@@ -2,20 +2,21 @@
 # 這支在架構裡承重什麼：**把 `envmap.CONFIG_ROUTE` 那份名單變成可執行的**。
 #
 # `vacant run` 的模型通道轉向對「讀環境變數決定 base url」的框架是零接線
-# （`envmap.REDIRECT_VARS` 已經設好了）。但有三個常用 agent 不是那種：
-# pi、Codex、OpenCode 的 base url 在設定裡。本檔就是那三段接線，
+# （`envmap.REDIRECT_VARS` 已經設好了）。但有四個常用 agent 不是那種：
+# pi、Codex、OpenCode、Hermes 的 base url 在設定裡。本檔就是那四段接線，
 # **每段都在 runtime 讀 `$VACANT_RUN_PROXY`**——所以：
 #
 #   · 不必 `--port` 固定埠（launcher 用 ephemeral port 就好）；
 #   · 不必動使用者自己的 `~/.pi/agent/models.json`／`~/.codex/config.toml`／
-#     `~/.config/opencode/opencode.json`（各自都有「把設定目錄整個搬走」的變數）。
+#     `~/.config/opencode/opencode.json`／`~/.hermes/config.yaml`
+#     （各自都有「把設定目錄整個搬走」的變數）。
 #
 # 用法（`--` 之後就是這一支）：
 #
 #   python3 ops/vacantrun/launcher.py --suite tests_visible --run-dir ~/.vacant-run/x -- \
 #       ops/vacantrun/wrap_agent.sh pi "把 solution.py 寫完"
 #
-#   第一個參數 ∈ {pi, codex, opencode, claude}；其餘原樣當成 prompt。
+#   第一個參數 ∈ {pi, codex, opencode, claude, hermes}；其餘原樣當成 prompt。
 #   模型用 `VACANT_AGENT_MODEL` 指定（預設見各段）。
 #
 # ⚠ **誠實邊界（改碼請保留）**
@@ -30,14 +31,16 @@
 # 3. 這裡的版本是 2026-09-18 假上游實測的那幾個（pi 0.85.1、codex-cli 0.153.2、
 #    opencode 1.18.31、Claude Code 2.1.276）；2026-09-19 的真模型輪用的是
 #    opencode 1.18.31、Claude Code 2.1.278、**codex-cli 0.147.0**（vacant-dev
-#    上本來就有的那一份）。**同一格兩個版本號不可以混寫成一個。**
+#    上本來就有的那一份）、**Hermes Agent 0.19.0**（2026-09-19 用 pip 裝進
+#    `/var/tmp/vacant_hermes/hv`，vacant-dev 上本來沒有）。
+#    **同一格兩個版本號不可以混寫成一個。**
 #    **上游改版這支就會漂，漂了的徵兆是 `requests_seen == 0`，不是這支報錯。**
 set -uo pipefail
 
 AGENT="${1:-}"
 shift || true
 if [ -z "$AGENT" ] || [ $# -eq 0 ]; then
-    echo "用法：wrap_agent.sh <pi|codex|opencode|claude> <prompt...>" >&2
+    echo "用法：wrap_agent.sh <pi|codex|opencode|claude|hermes> <prompt...>" >&2
     exit 2
 fi
 PROMPT="$*"
@@ -144,8 +147,48 @@ claude)
     [ -n "${VACANT_AGENT_MODEL:-}" ] && export ANTHROPIC_MODEL="$VACANT_AGENT_MODEL"
     exec claude -p "$PROMPT" --dangerously-skip-permissions < /dev/null
     ;;
+hermes)
+    # `envmap.CONFIG_ROUTE["hermes"]`：HERMES_HOME ＋ config.yaml（Hermes Agent 0.19.0）。
+    #
+    # ⚠ **`provider: custom` 這一行是必要的，不是裝飾。** HERMES_HOME 全新、
+    #    只有 launcher 設好的 `CUSTOM_BASE_URL` 而**沒有 provider** ⇒ Hermes
+    #    在送出任何請求之前就停在
+    #    `No LLM provider configured. Run \`hermes model\` …`
+    #    ⇒ `requests_seen = 0`、`agent_rc = 1`，而閘門照樣判 `visible_fail`／exit 20。
+    #    **那是假的拒交格**（L-none），不准讀成閘門有牙齒。實測見
+    #    `docs/AGENT_COMPAT.md` §12.2 的對照 A。
+    #
+    # ⚠ **base_url 也寫進 config，即使 `CUSTOM_BASE_URL` 實測會蓋過它**（§12.2 的
+    #    smoke D）。理由是**失效方向**：Hermes 0.19.0 解 base_url 的順序是
+    #      `--base-url` → `CUSTOM_BASE_URL` → config 的 `base_url`
+    #      → `OPENROUTER_BASE_URL` → **編死的 `https://openrouter.ai/api/v1`**
+    #      （`hermes_constants.py:1259`）。
+    #    兩個都沒有的話它**不報錯，安靜地去打公開 API**——實測對照 C：
+    #    `requests_seen = 0`、`agent_rc = 0`、agent 印 `HTTP 401: Missing
+    #    Authentication header`。**那是 `envmap` 誠實邊界 2 的活體標本。**
+    #    config 寫死 base_url 就把這條 fail-open 的尾巴堵回 proxy。
+    MODEL="${VACANT_AGENT_MODEL:-gemma-4-12b-it-qat}"
+    # Hermes 自己要求 agent 用途至少 64,000 context，低於就在啟動時拒絕。
+    CTX="${VACANT_HERMES_CONTEXT:-65536}"
+    HERMES_BIN="${VACANT_HERMES_BIN:-hermes}"
+    export HERMES_HOME="$CFG"
+    cat > "$CFG/config.yaml" <<EOF
+model:
+  provider: custom
+  default: $MODEL
+  base_url: $BASE/v1
+  context_length: $CTX
+EOF
+    # `-z` ＝ one-shot（無 TTY、approvals 自動放行）；`--yolo` 再把危險指令的
+    # 確認關掉。工具集用預設（實測預設的 17 個工具裡 `write_file` 就夠寫檔）。
+    exec "$HERMES_BIN" -z "$PROMPT" --yolo < /dev/null
+    ;;
 *)
-    echo "不認得的 agent：$AGENT（有 pi｜codex｜opencode｜claude）。停。" >&2
+    # ⚠ `${AGENT}` 的大括號不是風格：緊接在後面的是全形「（」，
+    #   macOS 的 bash 3.2 會把那幾個 byte 併進變數名 ⇒ `set -u` 直接
+    #   `AGENT?: unbound variable`，**原本要印的那行說明反而印不出來**
+    #   （2026-09-19 實測；這是既有的坑，不是新的）。
+    echo "不認得的 agent：${AGENT}（有 pi｜codex｜opencode｜claude｜hermes）。停。" >&2
     exit 2
     ;;
 esac

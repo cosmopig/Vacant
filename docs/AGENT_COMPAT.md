@@ -1,22 +1,28 @@
-# 通用 agent 相容性矩陣（`vacant run` V0 實測，2026-09-18；**OpenCode／Claude Code／Codex(API key) 真模型 2026-09-19**；**§11 第二輪 2026-09-19**）
+# 通用 agent 相容性矩陣（`vacant run` V0 實測，2026-09-18；**OpenCode／Claude Code／Codex(API key) 真模型 2026-09-19**；**§11 第二輪、§12 Hermes 2026-09-19**）
 
-> 一句話：五個 agent，**四個接通了**（Claude Code／Codex／OpenCode／pi），
-> **其中四個都有真模型證據**（§8–§10；pi 靠 R535），一個**沒量**
-> （Hermes，三台機器上都沒裝）。Codex 有一條**設定也救不了的路**：
-> ChatGPT 登入時模型通道是寫死的 `wss://`，HTTP 反向代理在那條路上不存在。
+> 一句話：五個 agent，**五個都接通了、五個都有真模型證據**
+> （Claude Code／Codex／OpenCode／pi／**Hermes**，§8–§10 與 **§12**；pi 靠 R535）。
+> **矩陣裡不再有「完全沒量過」的 agent。**
+> 仍然空著的是**同一個 agent 的另一條路**，不是另一個 agent：
+> Codex 的 `codex login`（模型通道是寫死的 `wss://`，HTTP 反向代理在那條路上
+> 不存在）與 Codex 的 `wire_api=chat`（§11.1，0.147.0 在設定層就退件）。
 
 ## 證據等級（**不可混講**，`.claude/commands/goal.md` 的同一張表）
 
 | 級 | 意思 | 誰 |
 |---|---|---|
-| **L-real** | **真模型**真跑，拒交格與交付格都過，收據可重驗 | **pi**（R535）、**OpenCode**（§8）、**Claude Code**（§9）、**Codex（API key／自訂 provider）**（§10）——四個都是 2026-09-19 |
+| **L-real** | **真模型**真跑，拒交格與交付格都過，收據可重驗 | **pi**（R535）、**OpenCode**（§8）、**Claude Code**（§9）、**Codex（API key／自訂 provider）**（§10）、**Hermes**（§12）——五個都是 2026-09-19 |
 | **L-fake** | 假上游（`mockup.py`）只驗通道與閘門 | （目前沒有只停在這一級的 agent；§1–§6 的假上游格仍然只算這一級） |
-| **L-none** | 沒量 | Hermes ／ **Codex（`codex login`／ChatGPT 帳號）** ／ **Codex × chat/completions wire**（§11.1：0.147.0 設定層退件，`requests_seen=0`） |
+| **L-none** | 沒量 | **Codex（`codex login`／ChatGPT 帳號）** ／ **Codex × chat/completions wire**（§11.1：0.147.0 設定層退件，`requests_seen=0`） |
 
 ⚠ **L-fake 不能寫成「這個 agent 可以用 Vacant」。** 假上游碰不到 SSE 分塊、
 工具呼叫格式、逾時、上下文長度。§1 的矩陣量的是**通道與閘門**；
-真模型只在 §8（OpenCode）、§9（Claude Code）、§10（Codex API key）三節，
-其餘各格仍然是假上游。
+真模型只在 §8（OpenCode）、§9（Claude Code）、§10（Codex API key）、
+§12（Hermes）四節，其餘各格仍然是假上游。
+
+⚠ **Hermes 從 L-none 直接跳到 L-real，中間沒有經過 L-fake**——它從來沒被假上游
+量過，這一格的證據**全部**是真模型。所以引用 §1–§6 講 Hermes 時要小心：
+那幾節的假上游結論**不涵蓋它**。
 
 量具與判準：[`vacant/vrun/`](../vacant/vrun/)（V0，見
 [`docs/VACANT_RUN.md`](VACANT_RUN.md)）。
@@ -70,7 +76,7 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
 | **Codex CLI** 0.153.2（`codex login`／ChatGPT 帳號，**L-none**） | `wss://chatgpt.com/backend-api/codex/responses`（**WebSocket**） | ❌ **沒有辦法**。`chatgpt_base_url` 只搬得動外掛／遙測／設定那幾條 | **0**（模型那一條完全沒經過 proxy） | ⚠ 閘門**照跑**（觸發點在行程結束不在 wire 上），但**逐字落盤在那條路上不成立** |
 | **OpenCode** 1.18.31 | (a) `POST /v1/responses`（內建 `openai` provider）<br>(b) `POST /v1/chat/completions`（自訂 openai-compatible provider） | (a) **環境變數** `OPENAI_BASE_URL`（launcher 已內建，**零接線**——但**只在模型 id 是 models.dev 註冊表裡的那些**時成立，見 §2.3 ⚠）<br>(b) 設定 `OPENCODE_CONFIG_CONTENT`／`wrap_agent.sh opencode`。**真模型走這條** | (a) **2**（假上游）／ (b) **2**（拒交格）、**3**（交付格）<br>**真模型：5 ／ 5**（§8） | ✅ 兩條路都 **exit 20**；(b) 另有 ✅ **exit 0**<br>**真模型 (b)：✅ exit 20 ／ ✅ exit 0（L-real，§8）** |
 | **pi** 0.85.1 | `POST /v1/chat/completions`（OpenAI Chat Completions，SSE，`store:false`） | **設定**：`PI_CODING_AGENT_DIR` 指到一個暫時目錄＋寫 `models.json`。**不吃 `OPENAI_BASE_URL`**（實測反例見 §3） | **1**（拒交格）／**2**（交付格） | ✅ **exit 20** ／ ✅ **exit 0** |
-| **Hermes** | **未測**（推論：OpenAI-compatible，`model.base_url`／`CUSTOM_BASE_URL`） | **未測** | **未測** | **未測** |
+| **Hermes Agent** 0.19.0（Nous Research，PyPI `hermes-agent`） | `POST /v1/chat/completions`（OpenAI Chat Completions，SSE，`stream:true`）<br>**另有**每跑 2 通 `GET /api/v1/models` 探測（§12.4） | **設定**：`HERMES_HOME` ＋ `config.yaml` 的 `model.provider: custom` **＋** `model.base_url`。<br>`CUSTOM_BASE_URL`（launcher 已內建）**蓋得過 base_url，但蓋不掉 provider** ⇒ **不是零接線**，最小接線＝一個 `--provider custom`（§12.2） | **真模型：6 ／ 6**（§12）<br>⚠ 這 6 通裡 **2 通是 models 探測**，模型通道是 4 通 | ✅ **exit 20** `visible_fail`（`visible 1/2`）／ ✅ **exit 0** `visible_pass`（`visible 2/2`）<br>**（L-real，§12）** |
 
 ⚠ **Claude Code 那一格的「零接線」有一個不在 `vacant run` 裡的前提**：
 **上游必須自己會講 Anthropic Messages（`POST /v1/messages`）**。
@@ -105,12 +111,13 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
 
 下面 §2.1–§2.4 那四段接線已經寫成一支
 [`ops/vacantrun/wrap_agent.sh`](../ops/vacantrun/wrap_agent.sh)，
-四個 agent 各一段，**每段都在 runtime 讀 `$VACANT_RUN_PROXY`**：
+**2026-09-19 加上第五段 `hermes`**（§12），每段都在 runtime 讀
+`$VACANT_RUN_PROXY`：
 
 ```bash
 python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir ~/.vacant-run/x -- \
     "$PWD/ops/vacantrun/wrap_agent.sh" pi "把 solution.py 寫完"
-#                                      ^^^^ pi | codex | opencode | claude
+#                                      ^^^^ pi | codex | opencode | claude | hermes
 ```
 
 ⚠ **`--suite` 要指到工作區外**（上面寫 `../tests_visible` 的原因）。這條擋門是
@@ -131,7 +138,15 @@ launcher **不判交付也不判拒交**，行為正確但訊息容易看漏）�
 | `wrap_agent.sh opencode` | 3 | `POST /v1/chat/completions` ×3 | `visible_pass`、**exit 0** |
 | `wrap_agent.sh claude` | 4 | `POST /v1/messages?beta=true` ×3 ＋ `HEAD /api/hello` | `visible_pass`、**exit 0** |
 
-模型用 `VACANT_AGENT_MODEL` 換；Codex 的 wire 用 `VACANT_CODEX_WIRE`
+第五段是後來加的，而且**沒有假上游那一輪**——它的證據直接是真模型（§12）：
+
+| | `requests_seen` | proxy 收到的 path | 裁決 |
+|---|---|---|---|
+| `wrap_agent.sh hermes`（**真模型**，2026-09-19） | 6 | `POST /v1/chat/completions` ×4 ＋ `GET /api/v1/models` ×2 | `visible_pass`、**exit 0**（交付格）／`visible_fail`、**exit 20**（拒交格） |
+
+模型用 `VACANT_AGENT_MODEL` 換；Hermes 的上下文用 `VACANT_HERMES_CONTEXT`
+（預設 65536——Hermes 自己要求 ≥64,000）、執行檔用 `VACANT_HERMES_BIN`
+（裝在 venv 裡沒進 PATH 時用）；Codex 的 wire 用 `VACANT_CODEX_WIRE`
 （`responses`｜`chat`）換；Codex 另有一個**預設不設**的
 `VACANT_CODEX_REASONING_EFFORT`（為什麼要有它：§10.7 的 runaway）。
 下面幾節是同樣的東西攤開來，要自己改的時候看。
@@ -358,7 +373,18 @@ POST /v1/responses   store=false   previous_response_id=<不存在>   stream=tru
 
 ---
 
-## 5. Hermes：沒量到，寫沒量到
+## 5. Hermes：~~沒量到，寫沒量到~~ → **2026-09-19 量掉了，見 §12**
+
+> **這一節保留 2026-09-18 當天的原文**，因為它本身是一筆有用的紀錄：
+> 「沒量到」跟「量到 0」不是同一件事，而且下面那段**反推**後來被實測改了兩處
+> （見 §12.2）。原文不回頭改寫，改的話就看不出反推錯在哪。
+>
+> **一句話結論（2026-09-19）**：Hermes **裝得起來**（`pip install hermes-agent`，
+> 0.19.0，208 MB venv，不需要官方的 `curl | bash` 安裝器），
+> 而且真模型兩格都拿到了（exit 20 ／ exit 0，`requests_seen` 6 ／ 6）。
+> 它是**設定路線**，不是零接線。
+
+### 5.0 原文（2026-09-18）
 
 - Mac：`hermes` 不在 PATH，`~/hermes-agent` 不存在。
 - vacant-dev（100.124.254.83）：同上。
@@ -382,6 +408,23 @@ repo 裡的兩支相關程式碼**還在**、也還說得通，但它們是**呼
 名單多一個變數只是多設一個環境變數（無害），漏一個才會靜靜地沒被中介。
 **要裝了 Hermes 才能把這一格填掉，在那之前它是「未測」不是「可用」。**
 
+### 5.1 那段反推後來錯在哪（2026-09-19 回填）
+
+「設定檔框架 ＋ 有 `CUSTOM_BASE_URL`」這個**大方向對了**，但兩個細節是錯的，
+而且錯的方向剛好相反——**這就是為什麼靜態反推要標「未實測」**：
+
+1. **反推少寫了 `provider`。** 上面只講 `model.base_url`，而實測顯示
+   **光有 base_url（或光有 `CUSTOM_BASE_URL`）是不夠的**：沒選 provider 的話
+   Hermes 在送出任何請求之前就停在 `No LLM provider configured`
+   ⇒ `requests_seen = 0`（§12.2 對照 A）。⇒ **反推漏掉的那一半正好是
+   「會不會被中介到」的決定性那一半。**
+2. **反推低估了 `CUSTOM_BASE_URL`。** 它不只是「另外也會讀」——它的優先序
+   **高於** config 的 `base_url`（§12.2 smoke D 實測：config 指到死埠、
+   環境變數指到真上游 ⇒ 走環境變數）。⇒ 對**已經設好自訂 provider** 的使用者，
+   `vacant run` 確實是零接線。
+3. 另外，`hermes_substrate.py` 寫的 `provider: vllm` 在 0.19.0 是 `custom` 的
+   **別名**（`hermes_cli/auth.resolve_provider`），不是獨立 provider。
+
 ---
 
 ## 6. 順手量到的三件小事
@@ -397,6 +440,8 @@ repo 裡的兩支相關程式碼**還在**、也還說得通，但它們是**呼
 3. **四個接上的 agent 全部是 `store:false` 或沒有 `store` 欄位**，
    而且每一通都重放完整上文。`previous_response_id` 一次都沒出現過。
    ⇒ 「Responses API ⇒ 狀態在伺服器上」不是 API 的性質，是**客戶端選擇**的性質。
+   **2026-09-19 補第五個**：Hermes 0.19.0 也一樣（沒有 `store`、
+   `n_messages` 2→4→6→8 逐通重放，§12.5）。**五個五個都是。**
 
 ---
 
@@ -418,6 +463,9 @@ repo 裡的兩支相關程式碼**還在**、也還說得通，但它們是**呼
   **漂了的徵兆是 `requests_seen == 0`，不是這份文件變紅。**
 - `vacant run` 單獨只有 L3：proxy **records，不 verifies**，也不阻止 agent
   自己開一條連線（`docs/VACANT_RUN.md` §4.1，逐字適用）。
+- **§5 的 Hermes「未測」已於 2026-09-19 失效**（→ §12），
+  但那一節的原文保留著，因為它記的是「反推錯在哪」（§5.1）。
+  ⚠ **Hermes 沒有假上游那一輪**：§1–§6 任何一句關於假上游的結論**不涵蓋它**。
 
 ---
 
@@ -1640,6 +1688,405 @@ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex_chat/rd_resp
 8. **收據鏈驗得過不代表跑過**：chat 那兩格的收據一樣是
    `verified_n=2 / chain_ok=true`（§11.6）。**收據證明的是「這份紀錄沒被改過」，
    不是「裡面記的事情發生過」。** 要判有沒有發生，看 `requests_seen`。
+
+---
+
+## 12. Hermes Agent × 真模型（L-none → **L-real**，2026-09-19）
+
+**矩陣最後一個完全沒量過的 agent。** 跟 §8／§9／§10 同一個形狀（同一題、
+同一個判斷層、同一把驗章尺），差別在三處：**(a) 它從來沒被假上游量過**，
+所以這一節是它唯一的證據；**(b) 上游是 1004 不是 1003**；
+**(c) 它在這台機器上本來不存在，是本次裝的。**
+
+- 機器：vacant-dev（`100.124.254.83`）· **Hermes Agent 0.19.0**（`2026.7.20` build）
+  **本次安裝**：`python3 -m venv --without-pip` ＋ `get-pip.py` ＋
+  `pip install hermes-agent`（**沒有**用官方的 `curl … install.sh | bash`，
+  那支會另外裝 uv／Python 3.11／Node.js／ripgrep／ffmpeg）。
+  裝在 `/var/tmp/vacant_hermes/hv`，**208 MB**，零編譯、無 GPU 依賴
+  （`hermes-agent` 的 120 條 `requires_dist` 幾乎全是 extras，base 只有
+  openai／httpx／pydantic／rich 那一類）。
+  ⚠ vacant-dev 的 `python3 -m venv` **會失敗**（沒裝 `python3-venv`／ensurepip），
+  `--without-pip` ＋ `get-pip.py` 是繞過它的無 sudo 解。
+- 上游：`http://100.86.226.21:1234/v1`（**1004**，載著 `gemma-4-12b-it-qat`）。
+  用 1004 不用 1003 是因為 **1003 當時 4 串滿載**（r530vrun）。
+  ⚠ **1004 不是 thinking 模式**（1003 是）——判準是回應裡有沒有
+  `choices[0].message.reasoning_content`，**不是** `usage.reasoning_tokens`
+  （兩台都回 `None`，那個欄位是壞的）。所以 §10.7 那種 reasoning runaway
+  在這一節**不可能觀察到**，這裡沒遇到不算證據。
+- 接線：**設定路線**（`wrap_agent.sh hermes` ⇒ `HERMES_HOME` ＋ `config.yaml`）。
+  **不是零接線**，理由見 §12.2。
+- 題目：**現成的** `ops/gain/r535/bank/s1_01_addmul`（沒有為了這次新造題）
+- 判斷層：`vacant/vrun/launcher.py`，`--suite` 指到**工作區外**的 bank 路徑
+- 落盤：vacant-dev 的 `/var/tmp/vacant_hermes/rd_*`（收據、`rows.jsonl`、
+  `wire_RUN-ON/{index.jsonl,*.req.bin,*.resp.bin}`、`_frozen_RUN-ON/`）。
+  **`/var/tmp` 沒有備份、會被清**——下面抄的是關鍵欄位不是原始 bytes（同附錄 A 的規矩）。
+  repo 也不是完整 checkout：只 `git archive` 了 `vacant/` ＋ `ops/vacantrun/` ＋
+  那一題的 bank（**1.4 MB**），因為 vacant-dev 當時只剩 4.9 G，
+  **一份 worktree 要 789 MB**。
+
+### 12.0 先解決那個**以為會是障礙的障礙**：上游要會講什麼
+
+§9 的 Claude Code 靠「LM Studio 原生吃 `/v1/messages`」，§10 的 Codex 靠
+「LM Studio 有開 `/v1/responses`」。Hermes 走的是**最普通的那一條**——
+`POST /v1/chat/completions`——所以這一格的可搬運性是三者裡最高的：
+任何 OpenAI 相容端點都講這條。
+
+**但它多要了一樣東西**，而且是 Hermes 自己的硬條件：
+
+> Hermes Agent 對 agent 用途**要求至少 64,000 tokens 的上下文**，
+> 小於就在啟動時拒絕（官方 providers 文件寫在 Ollama 那一段）。
+
+1004 的 `gemma-4-12b-it-qat` 是 `context_length: 262144` ÷ 4 槽 ＝ 每槽 65,536，
+剛好過線。`wrap_agent.sh` 寫進 config 的 `context_length: 65536` 就是這個數字，
+可用 `VACANT_HERMES_CONTEXT` 改。
+⚠ **「過線」是本次這個配置過線**，不是「Hermes 配任何本地模型都過線」。
+
+### 12.1 `command -v` 說沒裝——這次是真的沒裝（第三次量同一件事，結論相反）
+
+§9.7（Claude Code）與 §10.1（Codex）都記過「`command -v` 空白只是 PATH 假象」。
+這一格**先按那個教訓查了，然後結論仍然是沒裝**：
+
+```
+$ ssh user1@vacant-dev 'bash -lic "command -v hermes; ls -d ~/hermes-agent"'
+（空）
+ls: cannot access '/home/user1/hermes-agent': No such file or directory
+$ ls ~/.local/bin
+chrome-headless-shell
+claude
+codex
+```
+
+⇒ **「沒量到」與「量到 0」的差別在這裡具體化**：前兩次用錯方法得到的「沒裝」
+是假的，這一次用對方法得到的「沒裝」是真的。**方法對了才有資格說沒有。**
+然後才有下一步——**裝它**，因為「裝不裝得起來」本身就是相容性矩陣要回答的問題。
+
+### 12.2 **這一節最重要的一段**：Hermes 是「一個旗標」而不是「零接線」
+
+`CUSTOM_BASE_URL` 2026-09-18 就在 `envmap.REDIRECT_VARS` 裡了（標記未實測）。
+問題是：**它一個人夠不夠？** 四格實測，答案是**不夠，但只差一點點**。
+
+Hermes 0.19.0 解 base_url 的順序（`hermes_cli/runtime_provider.py`，
+`hermes_constants.py:1259`）：
+
+```
+--base-url → CUSTOM_BASE_URL → config.yaml 的 model.base_url
+           → OPENROUTER_BASE_URL → 編死的 https://openrouter.ai/api/v1
+```
+
+**但在這條鏈之前還有一道閘：有沒有選 provider。** 四格：
+
+| 格 | 設定 | 結果 |
+|---|---|---|
+| **A**（直測，無 proxy） | 全新 `HERMES_HOME`，只有 `CUSTOM_BASE_URL`，`-m <模型>` | ❌ `hermes -z: agent failed: No inference provider configured. Run 'hermes model' to choose a provider, or set an API key (OPENROUTER_API_KEY, OPENAI_API_KEY, etc.) in ~/.hermes/.env.` |
+| **B**（直測） | ＋ `--provider custom`，**不寫 config.yaml** | ✅ `PONG` |
+| **C**（直測） | config 只有 `provider: custom`（**沒有 base_url**）＋ `CUSTOM_BASE_URL` | ✅ `PONG` |
+| **D**（直測） | config `provider: custom` ＋ `base_url: http://127.0.0.1:9/v1`（**死埠**）＋ `CUSTOM_BASE_URL` 指真上游 | ✅ `PONG` ⇒ **環境變數蓋過 config** |
+
+⇒ 兩句話都要講，**只講一句就會誤導**：
+
+1. **對全新環境：不是零接線。** 少了 provider 就 `requests_seen = 0`。
+   最小接線是**一個 CLI 旗標** `--provider custom`（B 格），比 pi／Codex／
+   OpenCode 的「寫一份設定檔」都輕，但**不是零**。
+2. **對已經設好自訂 provider 的使用者：是零接線。** `CUSTOM_BASE_URL`
+   優先序高於他自己 config 裡的 `base_url`（D 格），`vacant run` 包上去就轉向了，
+   **不必動他的 `~/.hermes/config.yaml`**。
+
+#### 對照 A（經 proxy）：**假拒交格長什麼樣**
+
+把 A 格放進 `vacant run` 跑一次，因為這正是今天另一條線在 Codex chat wire 上
+踩到的那個坑：
+
+```
+task_id         = hermes_ctl_noprovider
+accepted        = false   stop_reason = visible_fail   退出碼 = 20
+requests_seen   = 0       wire_by_protocol = {}        agent_rc = 1
+agent_wall_s    = 0.721   visible = 0 / 2
+agent stderr    = hermes -z: agent failed: No LLM provider configured.
+                  Run `hermes model` to select a provider, or run `hermes setup`
+                  for first-time configuration.
+```
+
+`visible_fail` ＋ exit 20 **看起來**像閘門有牙齒，但 `requests_seen = 0`
+＋ `agent_rc = 1` ⇒ **中介從來沒發生，閘門擋的是一個從來沒產生過的東西**。
+**等級是 L-none 不是 L-fake。**
+
+#### 對照 C（經 proxy）：**fail-open 才是真正嚇人的那一格**
+
+把 `CUSTOM_BASE_URL` 拿掉、config 也不寫 base_url，只留 `--provider custom`：
+
+```
+task_id         = hermes_ctl_nocustom
+accepted        = false   stop_reason = visible_fail   退出碼 = 20
+requests_seen   = 0       wire_by_protocol = {}        agent_rc = 0    ← **0**
+agent_wall_s    = 2.435   visible = 0 / 2
+agent stdout    = HTTP 401: Missing Authentication header
+```
+
+⇒ Hermes **沒有報錯**，它安靜地走到鏈尾、去打編死的
+`https://openrouter.ai/api/v1`，拿了一個 401 回來。
+**這一格跟一個真的拒交格在收據上只差 `requests_seen` 一個欄位**
+（連 `agent_rc` 都是 0，跟 §8–§10 三個真拒交格一樣）。
+⇒ **`envmap` 誠實邊界 2「名單漏一個變數不會有任何錯誤訊息」的活體標本。**
+結構性補法仍然是 `block_egress.sh`（V3），**沒量過**。
+
+**金鑰有沒有跟著漏出去？** 把 `OPENROUTER_BASE_URL` 指到一個本機 sink
+（不出網）重跑，逐字收到 **21 通**，每一通的標頭都是：
+
+```
+authorization: Bearer no-key-required
+```
+
+launcher 的 sentinel（`vacant-run-<uuid>`）**一次都沒出現**。
+⚠ **但那是 Hermes 自己的 host-gate 做的**（`base_url_host_matches`，
+GHSA-76xc-57q6-vm5m／#28660：迴圈位址與 IP 不給任何廠商金鑰），
+**不是 Vacant 給的保證**。上游換成一個 hostname 像 `openai.com` 的位址時，
+同一段程式碼**會**把 `OPENAI_API_KEY` 送出去——那一格**沒量**。
+
+那 21 通同時揭露一件 §12.4 會用到的事：Hermes 在第一通模型請求之前會
+**嗅探上游是哪一種 server**——`/api/v1/models`、`/api/api/tags`（Ollama）、
+`/api/v1/props`＋`/api/props`（llama.cpp）、`/api/version`、`/api/api/show`，
+用三種 HTTP client（`httpx`、`requests`、`OpenAI/Python`）。
+sink 每通都回 401 所以它重試了三輪；**真上游答得出來就只剩 2 通**（§12.4）。
+
+### 12.3 模型 id：**第四個資料點，也是放行——而且連警告都沒有**
+
+§2.3＝OpenCode 擋、§9.1＝Claude Code 印警告後放行、§10.2＝Codex 印警告後放行。
+Hermes 是第四個：
+
+- `gemma-4-12b-it-qat` 原樣出現在 wire 的 `model` 欄位（§12.5 逐字），
+- **沒有任何警告**，六通全部 200。
+
+⇒ 四家在這一格是 **3 放行 ∶ 1 擋**。
+⚠ **但這不是同一個位置的同一個問題，不可以直接加總。** OpenCode 擋的是
+**內建 provider**（models.dev 註冊表）配上不在表裡的 id；Hermes 這一格走的是
+**自訂 provider，本來就沒有註冊表可查**，所以「放行」幾乎是定義使然。
+「Hermes 對內建 provider（openrouter／nous portal）餵陌生 id 會怎樣」**沒量**
+——那條路要憑證，本次一律不碰。
+**仍然是四次實測，不是一條規則；第五家還是要自己量。**
+
+### 12.4 出廠接線與逐字落盤
+
+```
+指令（兩格只差工作區裡那一份 TASK.md）
+  export PATH=/var/tmp/vacant_hermes/hv/bin:$PATH
+  export VACANT_RUN_UPSTREAM_OPENAI=http://100.86.226.21:1234/v1
+  export VACANT_AGENT_MODEL=gemma-4-12b-it-qat
+  python3 -m vacant.vrun.launcher \
+      --workspace <ws> --run-dir <rd> \
+      --suite <repo>/ops/gain/r535/bank/s1_01_addmul/tests_visible \
+      --task-id hermes_real_<cell> --sandbox none --test-timeout 30 \
+      --timeout 1200 --json \
+      -- <repo>/ops/vacantrun/wrap_agent.sh hermes \
+         "Read TASK.md and do what it says. Use your tools to write the file."
+```
+
+#### `hermes_real_asis`（拒交格）
+
+```
+task_id         = hermes_real_asis
+accepted        = false   refused = true   stop_reason = visible_fail
+退出碼           = 20
+requests_seen   = 6   wire_by_protocol = {'openai': 6}   wire_errors = 0
+proxy paths     = {'GET /api/v1/models -> 200 [openai]': 2,
+                   'POST /v1/chat/completions -> 200 [openai]': 4}
+upstreams_seen  = ['http://100.86.226.21:1234/api/v1/models',
+                   'http://100.86.226.21:1234/v1/chat/completions']
+upstreams_defaulted = ['anthropic']   ← **這一跑沒有任何一通走 anthropic**（同 §10.6）
+visible         = 1 / 2   ← **不是 0/2**，見下
+agent_rc        = 0       ← Hermes 自己說成功了，閘門說沒有
+agent_wall_s    = 13.334  run_wall_s = 13.659   retry = none   attempts_used = 1
+ws_start_sha256 = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+ws_end_sha256   = 64de4ddf8c6cb02c4698fa8f6e03d402d5a308f3fc17dcc430946f20d29f1fc7
+wire_digest     = d7d609d8caee2a58360224163717c454d9fda501876702704dc5339e10c81215
+verdict_sha256  = 4574954a58cd23f6218a5eb259a5537f906ae3e466a7614326024a4512ae4ebf
+verdict_hash    = 2e89b17f1d22214b93c89515bdd7582be64b45485122382b9e70acfc8eb50045
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+failures        = test_visible.py::check_02_mul — exception: ImportError:
+                  cannot import name 'mul' from 'solution'
+```
+
+落地的檔案逐字（Hermes 自己寫的，工作區進去時只有 `TASK.md`）：
+
+```python
+def add(a: float, b: float) -> float:
+    return a + b
+
+def multiply(a: float, b: float) -> float:
+    return a * b
+```
+
+**`agent_rc = 0` 第四次出現。** §8（OpenCode）、§9（Claude Code）、§10（Codex）
+各一次，現在 Hermes 也一次：**四個不同 agent、三條不同 wire，拒交格全部是
+「agent 宣告完成、退出碼 0，閘門在行程結束那一刻擋下來」。**
+
+⚠ **這一格是四個裡唯一的「半對」**：`add` 對了、`mul` 寫成 `multiply`
+⇒ `visible 1/2`。另外三家都是 0/2。
+⇒ §10.3 那句「敘述含糊時錯法會分岔」再加一個例子，而且分岔到**部分通過**
+這個新的形狀。**n=1，不是效果量。**
+
+#### `hermes_real_deliver`（交付格）
+
+```
+task_id         = hermes_real_deliver
+accepted        = true    refused = false   stop_reason = visible_pass
+退出碼           = 0
+requests_seen   = 6   wire_by_protocol = {'openai': 6}   wire_errors = 0
+proxy paths     = {'GET /api/v1/models -> 200 [openai]': 2,
+                   'POST /v1/chat/completions -> 200 [openai]': 4}
+visible         = 2 / 2
+agent_rc        = 0   agent_wall_s = 12.787  run_wall_s = 12.986
+retry = none   attempts_used = 1
+ws_start_sha256 = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+ws_end_sha256   = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+wire_digest     = aa79b4db2a7c6eca1cf7c1c56dc75224d7463ea842076e1b15e2f32c7efd67e0
+verdict_sha256  = 29402d2f81445b7af2fd81e38ad624b635bcb95ea41c83b2e5bcf2e1ececbd78
+verdict_hash    = aad3f72a08bdc1c70cc636710525e4e663629762f5beea1540591700a0cd2d97
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+**交付格的 `ws_end_sha256` ＝ `d1ed637b…`，與 §8 OpenCode、§9 Claude Code、
+§10 Codex 的交付格逐位元相同。** 四個 agent、三條 wire 協定、兩台不同的
+LM Studio 機器（1003／1004）、同一個模型、同一題——交付格落地的東西一樣。
+
+#### 對照 B（經 proxy）：**環境變數那條路也通**
+
+`--provider custom` ＋ launcher 設的 `CUSTOM_BASE_URL`，**完全不寫 config.yaml**：
+
+```
+task_id         = hermes_ctl_envonly
+accepted        = true   stop_reason = visible_pass   退出碼 = 0
+requests_seen   = 6   wire_by_protocol = {'openai': 6}   agent_rc = 0
+visible         = 2 / 2   agent_wall_s = 12.576
+ws_end_sha256   = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+verdict_hash    = 8d739fb00853d89572a8dd825031edfaee18e8db86bade3a94af3cf3072e821c
+```
+
+⇒ **`envmap.REDIRECT_VARS` 裡那個 `CUSTOM_BASE_URL` 是真的有用的**，
+這是它從 2026-09-18 加進去以來的第一個 wire 證據。
+
+#### 複製一次：**用最後 commit 的那一份 wrapper 重跑**
+
+上面兩格是用還沒定稿的 `wrap_agent.sh` 跑的（可執行的幾行相同，註解不同）。
+**「文件裡的數字是用 repo 裡那一份跑出來的」不能靠讀 diff 保證**，所以定稿之後
+原封不動再跑一次：
+
+| | 第一跑 | 第二跑（定稿版） |
+|---|---|---|
+| 拒交格 `ws_end_sha256` | `64de4ddf…` | **`64de4ddf…`（逐位元相同）** |
+| 拒交格 | exit 20 · `rs=6` · `agent_rc=0` · `visible 1/2` | exit 20 · `rs=6` · `agent_rc=0` · `visible 1/2` |
+| 交付格 `ws_end_sha256` | `d1ed637b…` | **`d1ed637b…`（逐位元相同）** |
+| 交付格 | exit 0 · `rs=6` · `agent_rc=0` · `visible 2/2` | exit 0 · `rs=6` · `agent_rc=0` · `visible 2/2` |
+| 牆鐘 | 13.334 ／ 12.787 s | 21.787 ／ 13.116 s |
+| 收據 | `--selftest` PASS，兩跑 `chain_ok` | `--selftest` PASS，兩跑 `chain_ok` |
+
+第二跑的 `verdict_hash` 不同（`6886fa72…`／`c0ddfec9…`）——**那是對的**：
+收據鏈綁 run 的身分與時間，不是只綁工作區。
+⚠ **牆鐘差 8 秒不是效能數字**（1004 上當時還有別的東西）。
+⚠ **n=2 仍然是 n=2。** 落地檔案兩次相同不代表這個模型在這題上是決定性的。
+
+### 12.5 wire 逐字（拆 `*.req.bin`）——**鐵律 3 在第三條 chat/completions 上成立**
+
+```
+hermes_real_asis（拒交格）
+  GET  /api/v1/models      200  req=0      resp=2949   0.0065s
+  POST /v1/chat/completions 200  req=48496  resp=1318   5.979s
+        model='gemma-4-12b-it-qat' stream=True n_messages=2 (system=1) tools=17
+        other={'max_tokens': 65536, 'stream_options': dict}
+  GET  /api/v1/models      200  req=0      resp=2949   0.0073s
+  POST /v1/chat/completions 200  req=48804  resp=2342   0.773s   n_messages=4
+  POST /v1/chat/completions 200  req=49646  resp=2490   1.554s   n_messages=6
+  POST /v1/chat/completions 200  req=50315  resp=29376  2.211s   n_messages=8
+
+hermes_real_deliver（交付格）
+  同樣的形狀：GET ×2 ＋ POST ×4，n_messages = 2 → 4 → 6 → 8，tools 固定 17
+```
+
+- **每一通重放完整 `messages` 陣列**（2→4→6→8，`system` 恆為 1），
+  **沒有** `store`、**沒有**任何伺服器端 session id
+  ⇒ **逐字落盤成立，鐵律 3 沒有破**（與 §8 chat/completions、§9 Messages、
+  §10 Responses 同結論；chat/completions 這條**第二個 agent** 也驗過了）。
+- `tools` 固定 17 個：`clarify, delegate_task, execute_code, memory, patch,
+  process, read_file, search_files, session_search, skill_manage, skill_view,
+  skills_list, terminal, text_to_speech, todo, vision_analyze, write_file`。
+  **寫檔走的是 `write_file`，不是 shell**——這跟 §1 那句「四個框架的 shell 工具
+  都吃 `{"command": str}`」是不同的路，Hermes 是第五個而且**不走 shell**。
+- `max_tokens: 65536` 每通都帶（來自 config 的 `context_length`）。
+  ⚠ 那是**要求上游一次最多吐 65,536 token**，對小一點的 server 可能被退件；
+  本節沒量過那種上游。
+
+#### `GET /api/v1/models` 那兩通：**一個看得見但沒踩到的洞**
+
+base_url 是 `<proxy>/v1`，但探測打的是 **`<proxy>/api/v1/models`**
+——**不在設定的 base 底下**。它在 LM Studio 上回 200，是因為 LM Studio 自己
+另有一套 `/api/v1` REST API（回的是 `{"models":[{"key":…,"max_context_length":…}]}`，
+**跟 `/v1/models` 的 `{"data":[{"id":…}]}` 是兩種 schema**）。
+
+⇒ 三件事要分開講：
+
+1. **這一跑沒出網**：`upstreams_seen` 只有 1004 那一台，`wire_by_protocol`
+   裡沒有 anthropic。跟 §10.6 一樣，`upstreams_defaulted = ['anthropic']`
+   說的是「那條路沒人指定」，**不是**「已經出網了」。
+2. **`requests_seen = 6` 裡有 2 通不是模型通道**（§6.2 那條規則的第四個例子）。
+   要下「模型通道被中介到了」的結論看的是 `path`，不是計數。
+3. **換一個嚴格的 OpenAI 相容上游，那兩通會 404**。會不會因此壞掉
+   **本節沒量**——這一格跟 §6.1 的 `HEAD /api/hello` 是同一型的未知。
+
+### 12.6 收據驗證（先負控制再驗該跑）
+
+```
+$ python3 -m vacant.vrun.verify_receipts --selftest
+selftest: PASS                                          ← 負控制：它抓得到壞鏈
+
+$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_hermes/rd_hermes_real_asis
+rd_hermes_real_asis      RUN-ON   2   2   0   1   1   2e89b17f1d22214b…  OK   總判：OK
+$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_hermes/rd_hermes_real_deliver
+rd_hermes_real_deliver   RUN-ON   2   2   0   1   1   aad3f72a08bdc1c7…  OK   總判：OK
+```
+
+### 12.7 這一節**沒有**說的事
+
+1. **不是**「Hermes 配 Vacant 寫程式比較好」。兩格各跑 **2 次**（定稿前後各一，
+   落地檔案逐位元相同），沒有對照組、沒有換題、沒有換模型。
+   **存在性證明，不是效果量。**
+2. **不是**「零接線」。最小接線是 `--provider custom`（§12.2）。
+   **只有在使用者已經設好自訂 provider 的前提下**才是零接線。
+3. **不是**「Hermes 的所有 provider 都行」。量到的只有 `provider: custom`。
+   Nous Portal、OpenRouter、Anthropic OAuth、Copilot 那些**要憑證的路一條都沒碰**
+   （紅線：不動任何人的登入憑證）。其中 **Copilot ACP** 那條特別值得警告——
+   它 spawn 一個外部行程講 ACP，**跟 Codex 的 `wss://` 是同一型的邊界嫌疑**，
+   但**沒量，不准寫成已知**。
+4. **不是**「全部流量都留在本機」的保證。本節兩格**實際上**沒有一通出網，
+   但 §12.2 的對照 C 證明**漏一個變數就會出網而且沒有錯誤訊息**。
+5. **不是**「Hermes 只打模型通道」。它會探 `/api/v1/models`（§12.5），
+   而且 `hermes postinstall` 會去抓 node／browser／ripgrep／ffmpeg
+   ——**本次沒跑那支**，預設工具集不需要它。
+   **「Hermes 在 `vacant run` 底下有沒有開 proxy 看不到的第二條連線」沒量**
+   （V3 `block_egress.sh` 之前對五個 agent 都一樣沒量）。
+6. **不是**「0.16.0 也是這樣」。`examples/run_hermes.py` 印的是
+   `Hermes Agent v0.16.0`，本節量的是 **0.19.0**。
+   `vacant/hermes_substrate.py` 的 `provider: vllm` 在 0.19.0 是 `custom` 的別名。
+7. **1004 不是 thinking 模式** ⇒ §10.7 那種 reasoning runaway 在這一節
+   **不可能被觀察到**。「Hermes 在 1003 上會不會 runaway」**沒量**。
+8. 沿用 §7 的所有邊界：proxy **records，不 verifies**；
+   `vacant run` 單獨只有 L3。
+
+### 12.8 踩到的坑
+
+- **`command -v` 空白這次是真的**（§12.1）——但**要先用 `bash -lic` 才有資格說**。
+- **vacant-dev 的 `python3 -m venv` 是壞的**（缺 `python3-venv`）：
+  `Error: Command '[…/hv/bin/python3', '-Im', 'ensurepip', …]' returned non-zero`。
+  無 sudo 解＝`--without-pip` ＋ `get-pip.py`。
+- **`hermes -z` 的退出碼不可信**：對照 A／C 兩格 agent 都失敗了，
+  一格 `rc=1`、另一格 **`rc=0`**。⇒ **判交付要看閘門與 `requests_seen`，
+  不是 agent 自己的退出碼**（這也是 §12.4 `agent_rc=0` 那一段的另一面）。
+- **管線會吃掉退出碼**：`hermes … | tail` 之後 `$?` 是 `tail` 的。
+  第一次量 A 格時就這樣印出 `RC_A=0`，差點把「失敗」讀成「成功」。
+- **遠端 shell 的 OSC 跳脫序列會混進 stdout**（`]7;ssh://…`）。
+  本節所有數字都是從 `run_RUN-ON.json`／`rows.jsonl` 用 Python 讀的，
+  不是從終端文字剖出來的。
+- **`~/.hermes` 從頭到尾沒有被建立**：`wrap_agent.sh` 每跑 `mktemp -d` 一個新的
+  `HERMES_HOME`。使用者自己的 Hermes 狀態（sessions／skills／`.env` 憑證）
+  **一個 byte 都沒碰到**，這也是為什麼走的一定是 config 裡那個 `custom` provider。
 
 ---
 

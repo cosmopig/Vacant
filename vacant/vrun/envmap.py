@@ -77,6 +77,15 @@
      不知道那個數字也有辦法：**自己 `-c model_context_window=<真視窗>` 釘死**，
      跟 Claude Code 那格設 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 同一招。
 
+   **第四個資料點（2026-09-19，Hermes Agent 0.19.0）：也是放行，而且連警告都沒有。**
+   `provider: custom` 之下 Hermes 不查任何註冊表，`gemma-4-12b-it-qat` 原樣
+   出現在 wire 的 `model` 欄位、六通全部 200（`docs/AGENT_COMPAT.md` §12.3）。
+   ⇒ 四家在這一格是 **3 放行 ∶ 1 擋**。
+   ⚠ **但那不是同一個位置的同一個問題**：OpenCode 擋的是**內建 provider**
+   配上不在 models.dev 裡的 id；Hermes 這一格走的是自訂 provider，**本來就沒有
+   註冊表可查**。「Hermes 對內建 provider 餵陌生 id 會怎樣」**沒量**。
+   **仍然不准從任何一格推另一格。**
+
    同一天還踩到一個**量錯**，記在這裡因為它是本條的同型：用
    `strings -a <binary> | grep -c` 掃 Claude Code 的原生 binary，十三個變數
    **全是 0**，看起來像「不吃任何 `ANTHROPIC_*`」；真因是那台機器**沒有
@@ -86,6 +95,17 @@
 2. 名單漏一個變數＝那條路沒被中介，而且**不會有任何錯誤訊息**。這是 V0 已知
    的殘餘風險，唯一的結構性補法是出網封鎖（`block_egress.sh`，V3）：
    封鎖之後漏掉的那條路會**連不上**而不是**偷偷連上**。
+
+   **2026-09-19 有了活體標本**（`docs/AGENT_COMPAT.md` §12.2 對照 C）：
+   在 `vacant run` 底下把 `CUSTOM_BASE_URL` 拿掉、config 也不寫 base_url，
+   Hermes **不報錯**，直接去打它編死的預設 `https://openrouter.ai/api/v1`：
+   `requests_seen = 0`、`wire_by_protocol = {}`、**`agent_rc = 0`**、
+   閘門照樣 `visible_fail`／exit 20。
+   ⇒ **那一格跟一個真的拒交格在收據上只差 `requests_seen` 一個欄位。**
+   這正是為什麼「我設了環境變數」不是證據、而 `requests_seen` 是。
+   （那一通送出去的是 `Authorization: Bearer no-key-required`，
+   launcher 的 sentinel 一次都沒出現——但**那是 Hermes 自己的 host-gate
+   做的**（GHSA-76xc-57q6-vm5m／#28660），**不是 Vacant 給的保證**。）
 3. 拿掉金鑰**不是**安全邊界：同一個 OS 使用者可以自己去讀 `~/.config`、
    keychain、或任何一個 agent 自己存的憑證。它降低的是「不小心直連」的機率，
    不是「刻意繞過」的可能（`vacant/controller.py:7-8` 的同一條邊界）。
@@ -126,10 +146,22 @@ REDIRECT_VARS: tuple[tuple[str, str], ...] = (
     ("OLLAMA_HOST", ""),
     # Hermes Agent（本 repo 的 `vacant/hermes_substrate.py` 與
     # `vacant/brains.py::HermesBrain` 都是設這一個）。
-    # ⚠ **未經 wire 實測**：Hermes 在 Mac 與 vacant-dev、vacant-clean1 上都沒裝
-    #   （2026-09-18 查），所以這一格的證據等級是「本 repo 自己的呼叫端這樣寫」，
-    #   不是「假上游看到過一通」。名單多一個變數只是多設一個環境變數（無害），
-    #   漏一個才會靜靜地沒被中介——所以放進來，但不准讀成已驗證。
+    # ~~未經 wire 實測~~ **2026-09-19 量掉了**：Hermes Agent **0.19.0**
+    # （pip 裝進 vacant-dev 的 `/var/tmp/vacant_hermes/hv`，之前三台都沒有）×
+    # `gemma-4-12b-it-qat`（LM Studio @1004）。拒交格 exit 20 ／交付格 exit 0、
+    # `requests_seen` 6 ／ 6、收據 `--selftest` 先過再驗兩跑。逐字見
+    # `docs/AGENT_COMPAT.md` §12。
+    # ⚠ **這個變數一個人擋不住整條路**，它跟 `CONFIG_ROUTE["hermes"]` 是**一組**：
+    #   Hermes 解 base_url 的順序是 `CUSTOM_BASE_URL` → config 的 `base_url`
+    #   → `OPENROUTER_BASE_URL` → 編死的 `https://openrouter.ai/api/v1`，
+    #   **但在那之前還有一道「有沒有選 provider」的閘**。HERMES_HOME 全新、
+    #   只設本變數而沒有 provider ⇒ 停在 `No LLM provider configured`、
+    #   `requests_seen == 0`（§12.2 對照 A）。**加一個 `--provider custom`
+    #   或 config 一行 `provider: custom` 就夠**——那也是這一格與
+    #   Claude Code 的「零接線」不同的地方。
+    # ⚠ **好消息在另一個方向**：使用者本來就設好自訂 provider 時，本變數
+    #   **蓋得過他 config 裡的 `base_url`**（§12.2 smoke D 實測）⇒ 那種情況
+    #   確實是零接線。**兩句話都要講，不可以只講一句。**
     ("CUSTOM_BASE_URL", "/v1"),
     # Anthropic 家族（Claude Code 認 ANTHROPIC_BASE_URL——2026-09-18 假上游實測：
     # 收到 `POST /v1/messages?beta=true`，逐通完整 messages 陣列。
@@ -270,14 +302,34 @@ CONFIG_ROUTE: dict[str, dict[str, str | None]] = {
         "wire": "openai",
         "measured": "2026-09-19（真模型；2026-09-18 假上游）",
     },
-    # Hermes Agent。**沒量過**——三台機器上都沒裝（2026-09-18）。
-    # 欄位是從 `vacant/hermes_substrate.py::CONFIG_YAML` 反推的。
+    # Hermes Agent（Nous Research，PyPI `hermes-agent`）**0.19.0**。
+    # ~~沒量過~~ **2026-09-19 用真模型量掉了**（`docs/AGENT_COMPAT.md` §12）：
+    # vacant-dev ＋ 1004 的 `gemma-4-12b-it-qat`，拒交格 exit 20（`requests_seen=6`、
+    # `visible 1/2`）／交付格 exit 0（`requests_seen=6`、`visible 2/2`）。
+    #
+    # ⚠ 三個欄位的口徑，每一個都是實測不是推論：
+    # 1. `relocate`＝`HERMES_HOME`：整份設定＋sessions＋skills 都搬走，
+    #    跑完 `~/.hermes` **不存在**（實測：那台機器上從頭到尾沒有這個目錄）
+    #    ⇒ 使用者自己的 Hermes 狀態與憑證一個 byte 都沒碰到。
+    # 2. `field`＝`model.provider` **和** `model.base_url`，**兩個一起才成立**。
+    #    舊註解只寫了 base_url，那是從 `hermes_substrate.py::CONFIG_YAML` 反推的，
+    #    **反推漏了 provider 那一半**：少了它會停在 `No LLM provider configured`、
+    #    `requests_seen == 0`（§12.2 對照 A）。
+    #    ⚠ 舊註解裡的 `provider: vllm` 在 0.19.0 是 `custom` 的別名
+    #    （`auth.resolve_provider`），不是獨立 provider。
+    # 3. `wire`＝`openai`：實測 `POST /v1/chat/completions`（SSE、`stream:true`、
+    #    17 個 tools、每通重放完整 messages），**外加** 每跑兩通
+    #    `GET /api/v1/models` 的探測——那條 path **不在** 設定的 base_url 底下
+    #    （base 是 `<proxy>/v1`，它打的是 `<proxy>/api/v1/models`）。
+    #    在 LM Studio 上回 200 是因為 LM Studio 自己有一套 `/api/v1` REST API；
+    #    **換一個嚴格的 OpenAI 相容上游那一通會 404**，本節沒量過那樣會不會壞。
     "hermes": {
         "relocate": "HERMES_HOME",
         "file": "config.yaml",
-        "field": "model.base_url（另有 CUSTOM_BASE_URL 環境變數，同樣未實測）",
+        "field": "model.provider: custom ＋ model.base_url"
+                 "（CUSTOM_BASE_URL 環境變數蓋得過 base_url，但蓋不掉 provider）",
         "wire": "openai",
-        "measured": "",
+        "measured": "2026-09-19（真模型，Hermes Agent 0.19.0）",
     },
 }
 
