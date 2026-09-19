@@ -10,6 +10,10 @@
 - 量測日期：**2026-09-19**（UTC **12:49:22 → 12:55:05**，20 格；負控制 12:57:44–45）
 - 執行端：vacant-dev `user1@100.124.254.83`
 - 上游：**1004** `http://100.86.226.21:1234`，`gemma-4-12b-it-qat`
+  ——**不是 thinking 模式**，而且 `/v1/messages` 原生支援。兩件事都**量過**不是宣稱，
+  逐字在 [`backend_probe.txt`](backend_probe.txt)（判準＝`reasoning_content` 空字串
+  ＋巢狀 `usage.completion_tokens_details.reasoning_tokens = 0`；
+  ⚠ 頂層 `usage.reasoning_tokens` 不在回應裡，讀它永遠 None）
 - 判斷層：`vacant/vrun/launcher.py` @ commit `8ae0318b`
 - 題目：`ops/gain/r535/bank/s1_01_addmul`，**一個位元組都沒改**
 - 證據等級：**L-real**（真模型；五個 agent 的拒交格與交付格都過，收據可重驗）
@@ -285,6 +289,7 @@ collect.py                  matrix.json 的產生器
 controls.sh                 第五節兩個零網路負控制的腳本，逐字
 controls/<cell>/            兩個負控制的落盤（同 cells/ 的結構）
 controls_receipts_verify.txt
+backend_probe.txt           上游後端探針（載了哪些模型／非 thinking／原生講 Messages）
 receipts_selftest.txt       負控制：驗章器自己抓得到壞鏈
 receipts_verify.{txt,json}  20 條收據鏈的驗證輸出
 cells/<cell>/

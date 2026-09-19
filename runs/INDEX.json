@@ -29,7 +29,7 @@
       "replay": 1,
       "smoke": 12
     },
-    "total_bytes": 752742775
+    "total_bytes": 752746063
   },
   "runs": [
     {
@@ -69428,8 +69428,8 @@
         "dirty": null,
         "branch": null
       },
-      "n_files": 230,
-      "bytes": 1774556,
+      "n_files": 231,
+      "bytes": 1777844,
       "files": [
         {
           "name": "MATRIX.log",
@@ -69445,15 +69445,21 @@
         },
         {
           "name": "README.md",
-          "bytes": 18368,
-          "sha256": "a8c7e6c83e918c89c46f4c1236f3ba47f1424dbb2679aafaa15a8978f0a0f592",
-          "lines": 303
+          "bytes": 18828,
+          "sha256": "716c57eae87bff113ca3bf6234ca6707141cf7800ffbda5dac6c943dffb656a1",
+          "lines": 308
         },
         {
           "name": "SHA256SUMS",
-          "bytes": 24919,
-          "sha256": "e3c82674e1d7f4e69ee10c9cd1b1cfb436b1bb11454fbf7b9b50a5ef35646d01",
-          "lines": 229
+          "bytes": 25005,
+          "sha256": "7f3d680c15892d02b821e212759776fb96ae683f7527bfdab8e0d9c33405b85a",
+          "lines": 230
+        },
+        {
+          "name": "backend_probe.txt",
+          "bytes": 2742,
+          "sha256": "fce7c04a95b1da6488c082a3b6c527daae607e9a7f2ac9985e2bcd8b09d38d34",
+          "lines": 87
         },
         {
           "name": "cells/claude_deliver_r1/_launcher_exit_code.txt",
