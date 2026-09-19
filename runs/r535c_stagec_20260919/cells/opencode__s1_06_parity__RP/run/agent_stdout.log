@@ -1,0 +1,2 @@
+I have read `TASK.md` and created `solution.py` with the requested logic to split a list of numbers into even and odd groups while preserving their original order.
+I have created `solution.py` with the `split_parity` function as specified in `TASK.md`.

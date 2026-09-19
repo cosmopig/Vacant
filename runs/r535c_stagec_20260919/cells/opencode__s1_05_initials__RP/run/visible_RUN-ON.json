@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_opencode_s1_05_initials_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 31,
+      "cases": [
+        {
+          "case": "check_01_initials",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_05_initials__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import initials",
+          "output": ""
+        },
+        {
+          "case": "check_02_initials",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_05_initials__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import initials",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "420442697606ffd696cc3356f065ee4e8d6a2656156eb0a5f0793d16eb6efc33"
+}

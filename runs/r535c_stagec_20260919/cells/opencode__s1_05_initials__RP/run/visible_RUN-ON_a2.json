@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_opencode_s1_05_initials_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 51,
+      "cases": [
+        {
+          "case": "check_01_initials",
+          "ok": false,
+          "kind": "assert",
+          "message": "initials args=('ada lovelace',) got='AL' want=['A', 'L']",
+          "where": "test_visible.py:14: assert got == want, \"initials args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_initials",
+          "ok": false,
+          "kind": "assert",
+          "message": "initials args=('Grace Brewster Hopper',) got='GBH' want=['G', 'B', 'H']",
+          "where": "test_visible.py:22: assert got == want, \"initials args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "1072d598017f0c28ce9467d13e33b14e1f700b9414135abb7fc106da1f114c23"
+}

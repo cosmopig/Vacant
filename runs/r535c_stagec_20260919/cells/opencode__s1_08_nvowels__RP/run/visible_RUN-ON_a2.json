@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_opencode_s1_08_nvowels_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 29,
+      "cases": [
+        {
+          "case": "check_01_n_vowels",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_n_vowels",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "1cc57f77cb1239461e4dae041ff7c28a88b28f2e03e7830263d9a0f500f3c2c1"
+}

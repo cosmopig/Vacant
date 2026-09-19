@@ -1,0 +1,14 @@
+I have created the `solution.py` file as requested in `TASK.md`. It contains a function that counts English vowels (case-insensitive) and reads from standard input.
+I have written the code for `solution.py` as requested in `TASK.md`. The script reads text from standard input and counts all English vowels (a, e, i, o, u) regardless of case.
+The task in `TASK.md` has been completed. I have written the vowel-counting logic to `solution.py`.
+
+```python
+def count_vowels(text):
+    vowels = "aeiouAEIOU"
+    return sum(1 for char in text if char in vowels)
+
+if __name__ == "__main__":
+    import sys
+    input_text = sys.stdin.read()
+    print(count_vowels(input_text))
+```

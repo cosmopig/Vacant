@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_claude_s1_08_nvowels_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 28,
+      "cases": [
+        {
+          "case": "check_01_n_vowels",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_n_vowels",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "2ceb9048609e29c688a28a61d6c1f0f5a5d8835856521dbe8707b9ebe288dc9f"
+}

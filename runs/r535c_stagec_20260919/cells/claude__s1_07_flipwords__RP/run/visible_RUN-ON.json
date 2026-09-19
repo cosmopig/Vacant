@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_claude_s1_07_flipwords_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 34,
+      "cases": [
+        {
+          "case": "check_01_flip_words",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'flip_words' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_07_flipwords__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import flip_words",
+          "output": ""
+        },
+        {
+          "case": "check_02_flip_words",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'flip_words' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_07_flipwords__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import flip_words",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "a55335be4c1165440643ca8a70b87b89644a77a08c933826e5e30438d5659e47"
+}

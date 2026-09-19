@@ -1,0 +1,295 @@
+{
+  "cell": "opencode__s1_05_initials__RF",
+  "task_id": "s1_05_initials",
+  "arm": "RF",
+  "agent": "opencode",
+  "agent_version": "1.18.31",
+  "stratum": "S1",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T09:43:19Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "c2",
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 4,
+  "arm_pos": 0,
+  "plan_index": 8,
+  "not_a_test": "Stage C 照預註冊 L-6 是**選配、不進預註冊** ⇒ 本檔的數字**只能描述**：「在這 10 題上，agent X 的 M7_file 是 a/b」。不准做假說檢定、不准與 S1／S2 合併、不准說「效果複製了／沒複製」。",
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_stagec/run/cells/opencode__s1_05_initials__RF/ws",
+    "--run-dir",
+    "/var/tmp/vacant_stagec/run/cells/opencode__s1_05_initials__RF/run",
+    "--suite",
+    "/var/tmp/vacant_stagec/repo/ops/gain/r535/bank/s1_05_initials/tests_visible",
+    "--task-id",
+    "r535c_opencode_s1_05_initials_RF",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file",
+    "--",
+    "/var/tmp/vacant_stagec/repo/ops/vacantrun/wrap_agent.sh",
+    "opencode",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 261.749
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 15,
+  "wire_by_protocol": {
+    "openai": 15
+  },
+  "wire_errors": 0,
+  "upstreams": {
+    "openai": {
+      "url": "http://127.0.0.1:36757/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "http://127.0.0.1:36757",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false
+    }
+  },
+  "upstreams_defaulted": [],
+  "agent_wall_s": 82.639,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "ws_start_sha256": "7259e12e68beeb4eb7bafccae36ffd85a92b09c6ff7fdfab48b2ac93f42a4b62",
+  "ws_end_sha256": "43e9cc5c6923a1d94d392bbd3650d61efebe46631f63c98d48b31442d5672355",
+  "verdict_sha256": "f7f8bf9f522ba5d596699be7ca34dc47f8206f67c3362d2ee1c061b120c204a6",
+  "wire_digest": "c05c7f5f4e583807b68b6aaa6b4953b09147451b0df8da81bc856ad1b617478e",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_stagec/run/cells/opencode__s1_05_initials__RF/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 15
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 105.75,
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "4845647c3d6587846e61887b501b0d100443ee9026a80509fa77abd211a2a986",
+      "ws_end_sha256": "b95898ebcd319d9533835f4dd97649998902c07acfc88f66a19b2d5f4582a1bb"
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 72.527,
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "2be4157238aaa71c8cb18c051a61bdc8c15122d207f990456684c266722be8e1",
+      "ws_end_sha256": "2a168c25bb8cb92863cfc0bb2fbd082c6fc47b5d43ad6aef7ec7f4765be7267e"
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 82.639,
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "ws_end_sha256": "43e9cc5c6923a1d94d392bbd3650d61efebe46631f63c98d48b31442d5672355"
+    }
+  ],
+  "wire_upstreams": [
+    "http://127.0.0.1:36757"
+  ],
+  "m7_file": false,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "matched": [],
+      "n_req": 5
+    },
+    {
+      "attempt": 3,
+      "found": false,
+      "matched": [],
+      "n_req": 5
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": false,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "n_req": 5
+    },
+    {
+      "attempt": 3,
+      "found": false,
+      "n_req": 5
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.3333333333333333,
+  "m7_ws_counts": {
+    "other": 2,
+    "read_task": 2,
+    "write_solution": 2,
+    "total": 6,
+    "other_total": 2,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "glob",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"pattern\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"filePath\":\"/var/tmp/vacant_stagec/run/cells/opencode__s1_05_initials__RF/ws/TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def get_initials(full_name: str) -> str:\\n    parts = full_name.split()\\n    return \\\"\\\".join(part[0].upper() for part in parts if part)\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n  "
+    },
+    {
+      "attempt": 3,
+      "name": "glob",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"pattern\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"filePath\":\"/var/tmp/vacant_stagec/run/cells/opencode__s1_05_initials__RF/ws/TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def get_initials(full_name: str) -> str:\\n    parts = full_name.split()\\n    return \\\"\\\".join(part[0].upper() for part in parts if part)\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n  "
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_shapes": [
+    {
+      "attempt": 2,
+      "shape": "openai"
+    },
+    {
+      "attempt": 3,
+      "shape": "openai"
+    }
+  ],
+  "m7_ws_unparsable_evidence": null,
+  "effort_expect": "none",
+  "effort_calls": 15,
+  "effort_in_agent_request": 0,
+  "reasoning_tokens_values": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "rt_zero": 15,
+  "rt_nonzero": 0,
+  "rt_unmeasured": 0,
+  "effort_verdict": "ok",
+  "shim_model_calls": 15,
+  "shim_injected": 15,
+  "shim_already_correct": 0,
+  "shim_errors": 0,
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_n": 0,
+  "wall_s": 261.816,
+  "finished": "2026-09-19T09:47:41Z"
+}

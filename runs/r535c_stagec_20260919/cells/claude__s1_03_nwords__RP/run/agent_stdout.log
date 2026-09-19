@@ -1,0 +1,33 @@
+I have created the `solution.py` file as requested in `TASK.md`.
+
+```python
+import sys
+
+def count_words(text):
+    # .split() without arguments splits by any whitespace and removes empty strings,
+    # which correctly handles leading/trailing whitespace and multiple spaces between words.
+    return len(text.split())
+
+if __name__ == "__main__":
+    # Read the entire input from stdin (or just one line if that's what's expected)
+    # The task says "a line of text", so we read one line.
+    line = sys.stdin.readline()
+    if line:
+        print(count_words(line))
+```
+The task was to write a function `n_words` in `solution.py` that counts the number of words in a line of text, where words are separated by whitespace and leading/trailing whitespace is ignored.
+
+I have implemented this using Python's `.split()` method without arguments, which correctly handles multiple whitespaces and strips leading/trailing whitespace automatically.
+
+```python
+def n_words(text: str) -> int:
+    """
+    Report how many words a line of text contains.
+    Words are separated by runs of whitespace. Whitespace at the start or the end
+    of the line does not create extra words, and a line made of nothing but
+    whitespace contains none at all.
+    """
+    return len(text.split())
+```
+
+I have written this to `/var/tmp/vacant_stagec/run/cells/claude__s1_03_nwords__RP/ws/solution.py`.

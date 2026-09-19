@@ -1,0 +1,34 @@
+I have created the `solution.py` file as requested in `TASK.md`.
+
+```python
+def fahrenheit_to_celsius(fahrenheit):
+    celsius = (fahrenheit - 32) * 5 / 9
+    return round(celsius, 1)
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        try:
+            f_val = float(sys.argv[1])
+            print(fahrenheit_to_celsius(f_val))
+        except ValueError:
+            pass
+```
+The task was to convert a temperature from Fahrenheit to Celsius and round the result to one decimal place, writing the code to `solution.py`. I have updated `solution.py` with the following implementation:
+
+```python
+import sys
+
+def fahrenheit_to_celsius(fahrenheit):
+    celsius = (fahrenheit - 32) * 5 / 9
+    return round(celsius, 1)
+
+if __name__ == "__main__":
+    for line in sys.stdin:
+        try:
+            f_val = float(line.strip())
+            print(fahrenheit_to_celsius(f_val))
+        except ValueError:
+            pass
+```
+I have written the code for converting Fahrenheit to Celsius in `solution.py`. The script reads a temperature from standard input, performs the conversion using the formula $C = (F - 32) \times \frac{5}{9}$, and prints the result rounded to one decimal place.

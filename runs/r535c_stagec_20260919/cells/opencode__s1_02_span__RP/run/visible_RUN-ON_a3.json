@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_opencode_s1_02_span_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 52,
+      "cases": [
+        {
+          "case": "check_01_span",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_span",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "4bcecdcdaf66b1314e77436c9b4dc579f9d389f78315d7984a2558042ce0b993"
+}

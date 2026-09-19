@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_claude_s1_04_toc_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 29,
+      "cases": [
+        {
+          "case": "check_01_to_c",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'to_c' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import to_c",
+          "output": ""
+        },
+        {
+          "case": "check_02_to_c",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'to_c' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import to_c",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "b5b4f62f98b92e1db41e15f240dd29c8a72e182c4fec4e4c99236abe152d400f"
+}

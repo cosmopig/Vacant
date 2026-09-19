@@ -1,0 +1,217 @@
+{
+  "task_id": "r535c_opencode_s1_06_parity_RF",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_stagec/repo/ops/vacantrun/wrap_agent.sh",
+    "opencode",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/ws",
+  "proxy_url": "http://127.0.0.1:40595",
+  "env": {
+    "proxy_url": "http://127.0.0.1:40595",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "9587a90ac91b1892826923e797d25dbdea62baa8970a93481f3177891601d726",
+  "ws_end_sha256": "e4a46eef43c328cd7d015680cbdff53ba78bc29ecf3ebf58fb3428c67a49d13e",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 15,
+  "wire_by_protocol": {
+    "openai": 15
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "a65ae42e95f65e0a56f6721b656246f5efc597ca562d55485552ee032fe15dd5",
+  "verdict_hash": "26bf4751e25057e7b336327ebbe60443383ec3e13f0dd9a2f2b168bb263b5df6",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "path": "/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/ws/VACANT_FEEDBACK.md",
+        "bytes": 877,
+        "sha256": "abdc5351f37ee60ed792975171c5ed64d7688fb7094a664d14dabb3ee957b6dc",
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import split_parity]\ntest_visible.py::check_02_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import split_parity]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "file"
+      },
+      "ws_start_sha256": "9587a90ac91b1892826923e797d25dbdea62baa8970a93481f3177891601d726",
+      "argv": [
+        "/var/tmp/vacant_stagec/repo/ops/vacantrun/wrap_agent.sh",
+        "opencode",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "1a0fbc44c32535d825cccb7ab5bc69f559abe6f40436f450f781e07bed46e630",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 58.857,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 5,
+      "wire_digest": "97727ef5247ab59cc5bbe55814a824a35e141d94cdbe8add9e9f6cf6e11e429c",
+      "ws_end_sha256": "2a784dd1156eb40b565bb5fcec4eee94858b8271133021c118c4213c52397cb2",
+      "frozen_path": "/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "a65ae42e95f65e0a56f6721b656246f5efc597ca562d55485552ee032fe15dd5",
+      "visible_path": "/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import split_parity]\ntest_visible.py::check_02_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import split_parity]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "path": "/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/ws/VACANT_FEEDBACK.md",
+        "bytes": 883,
+        "sha256": "8d83f5c2a5eacfb5650c4100fc8712628fcaa1b4bce0032ad357a36785a3ac8e",
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 2 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import split_parity]\ntest_visible.py::check_02_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import split_parity]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "file"
+      },
+      "ws_start_sha256": "f4ccb1d2301599126a997e566494e7f5ad2d23a26920bec7b5adb4578b261f0b",
+      "argv": [
+        "/var/tmp/vacant_stagec/repo/ops/vacantrun/wrap_agent.sh",
+        "opencode",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "1a0fbc44c32535d825cccb7ab5bc69f559abe6f40436f450f781e07bed46e630",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 58.342,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 10,
+      "wire_digest": "ee6633a63b0a53817d9e0cae2a810b6e9148240e5d4048464688b45a137efed9",
+      "ws_end_sha256": "f4ccb1d2301599126a997e566494e7f5ad2d23a26920bec7b5adb4578b261f0b",
+      "frozen_path": "/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "a65ae42e95f65e0a56f6721b656246f5efc597ca562d55485552ee032fe15dd5",
+      "visible_path": "/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import split_parity]\ntest_visible.py::check_02_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import split_parity]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "e4a46eef43c328cd7d015680cbdff53ba78bc29ecf3ebf58fb3428c67a49d13e",
+      "argv": [
+        "/var/tmp/vacant_stagec/repo/ops/vacantrun/wrap_agent.sh",
+        "opencode",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "1a0fbc44c32535d825cccb7ab5bc69f559abe6f40436f450f781e07bed46e630",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 21.449,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 15,
+      "wire_digest": "0694509f28f1ace6178f4c9d0237b92a5722c56cc6aeac46f9f7464255c3a7e2",
+      "ws_end_sha256": "e4a46eef43c328cd7d015680cbdff53ba78bc29ecf3ebf58fb3428c67a49d13e",
+      "frozen_path": "/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "a65ae42e95f65e0a56f6721b656246f5efc597ca562d55485552ee032fe15dd5",
+      "visible_path": "/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import split_parity]\ntest_visible.py::check_02_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import split_parity]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://127.0.0.1:36757/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "http://127.0.0.1:36757",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false
+    }
+  },
+  "upstreams_defaulted": [],
+  "wire_errors": 0,
+  "wire_digest": "0694509f28f1ace6178f4c9d0237b92a5722c56cc6aeac46f9f7464255c3a7e2",
+  "run_wall_s": 139.063,
+  "agent_wall_s": 21.449,
+  "failures": "test_visible.py::check_01_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import split_parity]\ntest_visible.py::check_02_split_parity — exception: ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import split_parity]"
+}

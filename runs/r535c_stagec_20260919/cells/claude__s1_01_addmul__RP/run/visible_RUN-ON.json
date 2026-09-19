@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_claude_s1_01_addmul_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 28,
+      "cases": [
+        {
+          "case": "check_01_add",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_mul",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'mul' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_01_addmul__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import mul",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "8b1448f7c79b2e07643321357b9edfd512cd77eb6f1355094ad10065a2783be3"
+}

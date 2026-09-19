@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_claude_s1_08_nvowels_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 29,
+      "cases": [
+        {
+          "case": "check_01_n_vowels",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'n_vowels' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_08_nvowels__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import n_vowels",
+          "output": ""
+        },
+        {
+          "case": "check_02_n_vowels",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'n_vowels' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_08_nvowels__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import n_vowels",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "90a99ad91ef8b6a8a4165d87e381dc26f994be3cea081d633e428d01a7cf9376"
+}

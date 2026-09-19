@@ -1,0 +1,10 @@
+I have created the `solution.py` file with the requested `add` and `multiply` functions as specified in `TASK.md`.
+The `solution.py` file has been updated to include the `mul` function as required by the task and requested by the test feedback.
+
+```python
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```
