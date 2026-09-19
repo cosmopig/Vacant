@@ -1,0 +1,152 @@
+{
+  "providers": {
+    "lms1003think": {
+      "baseUrl": "http://100.119.113.56:1234/v1",
+      "api": "openai-completions",
+      "apiKey": "lmstudio",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma4-12b-1003-think",
+          "contextWindow": 262144,
+          "maxTokens": 16384
+        }
+      ]
+    },
+    "lms1003nothink": {
+      "baseUrl": "http://100.119.113.56:1234/v1",
+      "api": "openai-completions",
+      "apiKey": "lmstudio",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma4-12b-1003-nothink",
+          "contextWindow": 262144,
+          "maxTokens": 16384,
+          "samplingParams": {
+            "reasoning_effort": "none"
+          }
+        }
+      ]
+    },
+    "lms1004think": {
+      "baseUrl": "http://100.86.226.21:1234/v1",
+      "api": "openai-completions",
+      "apiKey": "lmstudio",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma4-12b-1004-think",
+          "contextWindow": 262144,
+          "maxTokens": 16384
+        }
+      ]
+    },
+    "lms1004nothink": {
+      "baseUrl": "http://100.86.226.21:1234/v1",
+      "api": "openai-completions",
+      "apiKey": "lmstudio",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma4-12b-1004-nothink",
+          "contextWindow": 262144,
+          "maxTokens": 16384,
+          "samplingParams": {
+            "reasoning_effort": "none"
+          }
+        }
+      ]
+    },
+    "tap1003think": {
+      "baseUrl": "http://127.0.0.1:8802/v1",
+      "api": "openai-completions",
+      "apiKey": "lmstudio",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma4-12b-tap1003-think",
+          "contextWindow": 262144,
+          "maxTokens": 16384
+        }
+      ]
+    },
+    "tap1003nothink": {
+      "baseUrl": "http://127.0.0.1:8802/v1",
+      "api": "openai-completions",
+      "apiKey": "lmstudio",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma4-12b-tap1003-nothink",
+          "contextWindow": 262144,
+          "maxTokens": 16384,
+          "samplingParams": {
+            "reasoning_effort": "none"
+          }
+        }
+      ]
+    },
+    "tap1004think": {
+      "baseUrl": "http://127.0.0.1:8801/v1",
+      "api": "openai-completions",
+      "apiKey": "lmstudio",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma4-12b-tap1004-think",
+          "contextWindow": 262144,
+          "maxTokens": 16384
+        }
+      ]
+    },
+    "tap1004nothink": {
+      "baseUrl": "http://127.0.0.1:8801/v1",
+      "api": "openai-completions",
+      "apiKey": "lmstudio",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma4-12b-tap1004-nothink",
+          "contextWindow": 262144,
+          "maxTokens": 16384,
+          "samplingParams": {
+            "reasoning_effort": "none"
+          }
+        }
+      ]
+    }
+  }
+}

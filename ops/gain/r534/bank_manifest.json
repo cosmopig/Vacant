@@ -1,0 +1,1271 @@
+{
+  "bank": {
+    "eligible_n": 118,
+    "known_bad_excluded": [
+      "lcb_3613",
+      "lcb_3763"
+    ],
+    "n": 120,
+    "path": "ops/gain/data/lcb_bank_v2.jsonl",
+    "sha256": "b98f027213e2469a0a41bed813d99f029d3d6e2fac64e0fa18887c42c865b9ba"
+  },
+  "comparator": "vacant/codebench.py::_lcb_check_code 的 __aeq（逐行同義，渲染成每個測試檔裡的 _aeq）",
+  "evidence_sources": {
+    "12B": [
+      "runs/g_r460_harness_lcb2_a1/rows.jsonl",
+      "runs/g_r460_harness_lcb2_a2/rows.jsonl",
+      "runs/g_r460_harness_lcb2_a3/rows.jsonl",
+      "runs/g_r460_harness_lcb2_b1/rows.jsonl",
+      "runs/g_r460_harness_lcb2_b2/rows.jsonl",
+      "runs/g_r460_harness_lcb2_b3/rows.jsonl"
+    ],
+    "27B": [
+      "runs/g_r532_lcb2_a1/rows.jsonl",
+      "runs/g_r532_lcb2_a2/rows.jsonl",
+      "runs/g_r532_lcb2_a3/rows.jsonl",
+      "runs/g_r532_lcb2_a4/rows.jsonl",
+      "runs/g_r532_lcb2_a5/rows.jsonl",
+      "runs/g_r532_lcb2_a6/rows.jsonl"
+    ]
+  },
+  "generated_by": "ops/gain/r534/build_bank.py",
+  "hidden_case_composition": "visible_tests + hidden_tests（超集），與 LiveCodeBenchLoader.hidden_check 同一組 ⇒ 分子與 r460／r532 的 meets_demand 可比",
+  "honesty_bounds": [
+    "LCB 沒有 canonical solution ⇒ 這 20 題沒有參考解正控制；r530 的雙向量具（參考解全過／壞樁全擋）在這裡做不到。",
+    "any_arm_passed_hidden=false 的題，歸檔資料裡沒有任何臂通過過 ⇒ 我們沒有證據證明一個正確解會被判過。",
+    "A 層是條件在過去結果上挑的 ⇒ 差值上偏；B 層抽的是扣掉 A 層後的剩餘 ⇒ 差值偏保守。兩層分開報，不合併。",
+    "每題每臂在每個歸檔層只有一個觀測，D_net 是帶雜訊的排序鍵。"
+  ],
+  "layer_b_seed": "r534-layerB-lcb2-2026-09-18",
+  "layer_order": {
+    "A_high_divergence": [
+      "lcb_3534",
+      "lcb_3548",
+      "lcb_3779",
+      "lcb_3627",
+      "lcb_3649",
+      "lcb_3657",
+      "lcb_3687",
+      "lcb_3715",
+      "lcb_3783",
+      "lcb_3789"
+    ],
+    "B_random": [
+      "lcb_3522",
+      "lcb_3583",
+      "lcb_3584",
+      "lcb_3637",
+      "lcb_3654",
+      "lcb_3681",
+      "lcb_3686",
+      "lcb_3700",
+      "lcb_3764",
+      "lcb_3794"
+    ]
+  },
+  "layers": {
+    "A_high_divergence": [
+      "lcb_3534",
+      "lcb_3548",
+      "lcb_3627",
+      "lcb_3649",
+      "lcb_3657",
+      "lcb_3687",
+      "lcb_3715",
+      "lcb_3779",
+      "lcb_3783",
+      "lcb_3789"
+    ],
+    "B_random": [
+      "lcb_3522",
+      "lcb_3583",
+      "lcb_3584",
+      "lcb_3637",
+      "lcb_3654",
+      "lcb_3681",
+      "lcb_3686",
+      "lcb_3700",
+      "lcb_3764",
+      "lcb_3794"
+    ]
+  },
+  "n_tasks": 20,
+  "run_id": "r534",
+  "scoring": {
+    "primary_numerator": "gain_run.meets_demand(code, codebench._lcb_check_code(entry_point, visible_tests + hidden_tests), entry_point=entry_point)",
+    "rendered_hidden_file_is": "同一組 case、同一個比對器，但**沒有沙箱的 AST 政策**（vacant/checks.py 的 _FORBIDDEN_ATTRS 連 list.remove 都擋、_GAIN_ALLOWED_IMPORTS 擋 typing 以外的第三方 import）⇒ 對用到那些東西的碼，渲染檔比既有判準**寬**。ops/gain/r534/gauge_bank.py 的實測：政策收得下的 100 份已歸檔候選碼上兩條路徑 100/100 一致；另有 12 份被政策擋掉，那 12 份上兩條路徑本來就會不同（例：lcb_3783 的 list.remove）。",
+    "rule": "兩條路徑的數字不可混報：報表要指名每個數字走的是哪一條。",
+    "why": "主指標走既有那條沙箱路徑，R534 的分子才與 r460／r532 是同一把尺。"
+  },
+  "selection_rule": "R534 選題規則（事前寫死；對已歸檔資料的確定性函式）\n\nR0 母體：ops/gain/data/lcb_bank_v2.jsonl 的 120 題，sha256 釘死\n   b98f027213e2469a0a41bed813d99f029d3d6e2fac64e0fa18887c42c865b9ba。\n\nR1 排除：check_bank_precision.py::KNOWN_BAD[\"lcb2\"] 的 lcb_3613、lcb_3763。\n   合格母體 ＝ 118 題。\n\nR2 證據：只讀已歸檔 rows.jsonl，不重跑任何模型。\n   12B 層 ＝ runs/g_r460_harness_lcb2_{a1,a2,a3,b1,b2,b3}（gemma-4-12b-it-qat，\n   seed g-r440-lcb2，六臂）；27B 層 ＝ runs/g_r532_lcb2_a{1..6}（qwen3-27b，三臂）。\n   讀的欄位只有 task_id／arm／meets_demand（隱藏測資判定）。\n\nR3 閘門對：12B 層取 (OFF, CONFORM)、(OFF, HPI)、(OFF, HOC)、(OFF, HMIX)；\n   27B 層取 (OFF, CONFORM)、(OFF, HMIX)。共 6 對。\n   OFF5 不列入——它是「五次呼叫多數決」的等預算對照，沒有驗收閘門語意，\n   把它算進來會讓「分歧」混進「多花錢」。\n\nR4 逐題分歧度：對每一對，\n     d = +1  若 OFF.meets_demand=False 且 gated.meets_demand=True\n     d = -1  若 OFF.meets_demand=True  且 gated.meets_demand=False\n     d =  0  其餘\n   D_plus ＝ (+1) 的對數，D_minus ＝ (-1) 的對數，D_net ＝ D_plus - D_minus，\n   值域 [-6, +6]。\n\nR5 A 層（高分歧，10 題）：合格母體依\n     (D_net 由大到小, D_plus 由大到小, OFF 通過次數由小到大, task_id 字典序)\n   排序，取前 10。⚠ 這一層條件在過去結果上 ⇒ 差值上偏，只能單獨報。\n\nR6 B 層（隨機，10 題）：從 118 題扣掉 A 層的 10 題之後的 108 題裡，\n   以 random.Random(\"r534-layerB-lcb2-2026-09-18\").sample(sorted(剩餘), 10) 抽出。\n   種子字串寫死在 select_tasks.py::LAYER_B_SEED。\n\nR7 報告紀律：A 層與 B 層的結果**分開報**，不合併成一個數字，也不加權平均。\n   B 層抽的是「扣掉 A 層之後」的剩餘 ⇒ 高分歧題已被抽走一部分，\n   B 層的差值是偏保守的那一側；報告要寫出這件事。\n\nR8 誠實邊界：每題每臂在每一層只有一個觀測，D_net 是帶抽樣雜訊的排序鍵，\n   不是「這題閘門一定有效」的證據。A 層預期會有向均值回歸。\n",
+  "selection_rule_sha256": "231971f3bad306f64818b6ee8204e7326c973ca3b2d256d8ea880e2eccf8903b",
+  "strata": {
+    "12B": {
+      "baseline_arm": "OFF",
+      "gated_arms": [
+        "CONFORM",
+        "HPI",
+        "HOC",
+        "HMIX"
+      ],
+      "model": "gemma-4-12b-it-qat",
+      "run_family": "g_r460_harness_lcb2"
+    },
+    "27B": {
+      "baseline_arm": "OFF",
+      "gated_arms": [
+        "CONFORM",
+        "HMIX"
+      ],
+      "model": "qwen3-27b",
+      "run_family": "g_r532_lcb2"
+    }
+  },
+  "tasks": {
+    "lcb_3522": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2024-08-17T07:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 2,
+        "D_plus": 2,
+        "off_pass_count": 1
+      },
+      "entry_point": "resultsArray",
+      "layer": "B_random",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "ef8c051512b1860967ec8d7620671980c69e5ee64d120d85f5d99ef8e66bfa0b",
+      "sha256": {
+        "contract.md": "9e972e7a1fbc391074dad91ba0279e3f046115c748375c7688b5b536eb9e6abc",
+        "goal.md": "ef8c051512b1860967ec8d7620671980c69e5ee64d120d85f5d99ef8e66bfa0b",
+        "hidden/lcb_3522/test_hidden.py": "12423b195b8ec0fa4e533d9315487824968cfbfd11cf89e79b1bc3b9a50f9bf7",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "89a8b4cbbebd237421dcadcab48c803d06266606e066023dad1a56cb2ab75461"
+      },
+      "task_id": "lcb_3522",
+      "template_bytes": 4795
+    },
+    "lcb_3534": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": false
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2024-08-24T19:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 6,
+        "D_plus": 6,
+        "off_pass_count": 0
+      },
+      "entry_point": "countPairs",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "20d6e17544bb020cc3bdf59c08a02cbc3393a402f468694f2c3f4a0ba515ee9c",
+      "sha256": {
+        "contract.md": "0ed29bf6f931ffd505f7c8e0709a5eb0ee661e3d2e8d470503273c0f3d37b0c7",
+        "goal.md": "20d6e17544bb020cc3bdf59c08a02cbc3393a402f468694f2c3f4a0ba515ee9c",
+        "hidden/lcb_3534/test_hidden.py": "2b296e39ff43244275f4b588c95eada155f6f53bb68d47547f56a4c17462951f",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "5258f1220c2a5b83a7dc8981fa386d3a6b629fdcc87dd3ca06d7896ec9e0f25d"
+      },
+      "task_id": "lcb_3534",
+      "template_bytes": 4759
+    },
+    "lcb_3548": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2024-08-31T07:30:00",
+      "difficulty": "hard",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 6,
+        "D_plus": 6,
+        "off_pass_count": 0
+      },
+      "entry_point": "countGoodIntegers",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "ddb90b446913faab10e43634e0f024c7882bfbf64b027c2561d2ac60726c9559",
+      "sha256": {
+        "contract.md": "2e6f0993887ec5fa889a75d6001c754ffe1520ef290648303f38d9b7fca1782f",
+        "goal.md": "ddb90b446913faab10e43634e0f024c7882bfbf64b027c2561d2ac60726c9559",
+        "hidden/lcb_3548/test_hidden.py": "0418e2e9cfd311570b93d4be42f8624710fc669bc6eb60fc53af655a5b16695e",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "94c052ac42963b71113f8f9be38f8209e95481a7562aa61d623aad7622294159"
+      },
+      "task_id": "lcb_3548",
+      "template_bytes": 4715
+    },
+    "lcb_3583": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "contest_date": "2024-10-05T19:30:00",
+      "difficulty": "hard",
+      "divergence": {
+        "D_minus": 1,
+        "D_net": -1,
+        "D_plus": 0,
+        "off_pass_count": 2
+      },
+      "entry_point": "gcdValues",
+      "layer": "B_random",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 30,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "64fbd562b7d0184a2f22bc56418fb16c6c7593a0c3d6f711071e3c437060d401",
+      "sha256": {
+        "contract.md": "832f3df43992f3093d15d8b0b37ffe5715e54be1dfdf022181bf7e5d25306468",
+        "goal.md": "64fbd562b7d0184a2f22bc56418fb16c6c7593a0c3d6f711071e3c437060d401",
+        "hidden/lcb_3583/test_hidden.py": "cba354a5643f4e854698ef920cb650aa23c2da131c37449b921d2015e11d8958",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "8fd54d5f72276879f28e3d9489b9631f6bcd7e282ea4ae5c0c18d95d8630b01f"
+      },
+      "task_id": "lcb_3583",
+      "template_bytes": 5044
+    },
+    "lcb_3584": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": false,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": false,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": false,
+          "HPI": false,
+          "OFF": false,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": false,
+          "OFF": true
+        }
+      },
+      "contest_date": "2024-09-28T07:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 2,
+        "D_net": 0,
+        "D_plus": 2,
+        "off_pass_count": 1
+      },
+      "entry_point": "validSequence",
+      "layer": "B_random",
+      "n_hidden_cases_full": 28,
+      "n_hidden_total_upstream": 25,
+      "n_visible_cases": 4,
+      "platform": "leetcode",
+      "prompt_sha256": "8728efb382695d82bb6547881d4d4eb2c38097f1ac4c91294257c47120106a24",
+      "sha256": {
+        "contract.md": "ffb2f7ee5ba1253f2fe581c663378f8a6e656606d59db068efb12019254931d4",
+        "goal.md": "8728efb382695d82bb6547881d4d4eb2c38097f1ac4c91294257c47120106a24",
+        "hidden/lcb_3584/test_hidden.py": "f0dcfb491e084f0dd8e8851f810e3de7acdb33b985be723b2347ad511c41c104",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "1786983fae886031b17b3f6239d3fa89f7a1630c0a2591a0271354847a619ed3"
+      },
+      "task_id": "lcb_3584",
+      "template_bytes": 5421
+    },
+    "lcb_3627": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": false,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": false
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2024-11-02T19:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 5,
+        "D_plus": 5,
+        "off_pass_count": 0
+      },
+      "entry_point": "minTimeToReach",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 39,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "f7390bb082861cdba1adb5924090166f1591962e55ebe0e5e4945cb1146274f1",
+      "sha256": {
+        "contract.md": "a9e2112dfff88e4e8211b34a834a7c82514efe8cf100142d71d637d64347d1c9",
+        "goal.md": "f7390bb082861cdba1adb5924090166f1591962e55ebe0e5e4945cb1146274f1",
+        "hidden/lcb_3627/test_hidden.py": "d868c4c6b65a9024fe67a6106a3fac121f91be565517a6778d3e6731868c91b7",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "14bc9b41d97344e6360cefd7a0ab975c305c38f6ab4c20891462edf329f550c6"
+      },
+      "task_id": "lcb_3627",
+      "template_bytes": 5035
+    },
+    "lcb_3637": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "contest_date": "2024-11-02T19:30:00",
+      "difficulty": "hard",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 4,
+        "D_plus": 4,
+        "off_pass_count": 1
+      },
+      "entry_point": "countBalancedPermutations",
+      "layer": "B_random",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "264773646deed3698f6b050383c0b4d1134c1c0bcac364a45782edced45ade37",
+      "sha256": {
+        "contract.md": "bdf8145056f7c2a25fcc02a80cb52b8881507a14e9ee6ca9558798847fb20a66",
+        "goal.md": "264773646deed3698f6b050383c0b4d1134c1c0bcac364a45782edced45ade37",
+        "hidden/lcb_3637/test_hidden.py": "087afb1ad4c340870ac4f5ce29872de2f42d53283b902e1fac55519e07e4b1d5",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "3c0820b3c7228111f0c7af04c43ba4be75902ad62ee44e784026efe72f39bef7"
+      },
+      "task_id": "lcb_3637",
+      "template_bytes": 4843
+    },
+    "lcb_3649": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": false,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": false,
+          "OFF": false
+        }
+      },
+      "contest_date": "2024-12-07T06:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 5,
+        "D_plus": 5,
+        "off_pass_count": 0
+      },
+      "entry_point": "findMinimumTime",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 26,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 2,
+      "platform": "leetcode",
+      "prompt_sha256": "a4a201bcb15e0a3fd92b0841691a2494ab9b6e5906b48ee1b60631f2568cb775",
+      "sha256": {
+        "contract.md": "e98e0e678206c49bc1c01306714b4b4f3b391a8e8ed1769c2f25ed680b7d4fa1",
+        "goal.md": "a4a201bcb15e0a3fd92b0841691a2494ab9b6e5906b48ee1b60631f2568cb775",
+        "hidden/lcb_3649/test_hidden.py": "cdf783ee182330b76638c4168568bd3685bd3e5157a8c8679bacc2ffa53913bc",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "cc4e5b92d527f5a87d6424bf78aca059c5aae812c37fd0a5d7194f0a69f77313"
+      },
+      "task_id": "lcb_3649",
+      "template_bytes": 5184
+    },
+    "lcb_3654": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": false,
+          "HPI": false,
+          "OFF": true,
+          "OFF5": false
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "contest_date": "2024-11-23T18:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 2,
+        "D_net": -2,
+        "D_plus": 0,
+        "off_pass_count": 2
+      },
+      "entry_point": "minArraySum",
+      "layer": "B_random",
+      "n_hidden_cases_full": 26,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 2,
+      "platform": "leetcode",
+      "prompt_sha256": "9ccb6664f70d5976c62ec914cda8686a13ff477e8d0451c813ab9b8a0e62057a",
+      "sha256": {
+        "contract.md": "af9be32a6683f2713e47ceb89e505ba3539f83b669f91eabd9399afc23817d4e",
+        "goal.md": "9ccb6664f70d5976c62ec914cda8686a13ff477e8d0451c813ab9b8a0e62057a",
+        "hidden/lcb_3654/test_hidden.py": "62bf0b468d6c4cecff04428dd0b0fa6746e599ce05af4ca78c11f645e06cd581",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "f198f2932c20d3c214677c2ca3dbecd74899adcef288ed612374c20b665acfc4"
+      },
+      "task_id": "lcb_3654",
+      "template_bytes": 5105
+    },
+    "lcb_3657": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": false
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2024-12-21T06:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 5,
+        "D_plus": 5,
+        "off_pass_count": 0
+      },
+      "entry_point": "checkValidCuts",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 35,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "9ec4bc949d9ada837d038e36d05bf46f03fbecdb87d5a0ba66f48641761fde67",
+      "sha256": {
+        "contract.md": "2891cc25280fe94eb4da46e98eb2593fa2467df158d25f93a2fc724cadaed5cb",
+        "goal.md": "9ec4bc949d9ada837d038e36d05bf46f03fbecdb87d5a0ba66f48641761fde67",
+        "hidden/lcb_3657/test_hidden.py": "7dd22ae8c3d6893c02cdf4424cd2e2b275317a714dbe626ab3702b3f14a457b5",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "c9194fed46e745d3b9943c511807c80061b2ba7446e3ab1a8b8792474989a626"
+      },
+      "task_id": "lcb_3657",
+      "template_bytes": 5582
+    },
+    "lcb_3681": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2024-12-07T18:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 2,
+        "D_plus": 2,
+        "off_pass_count": 1
+      },
+      "entry_point": "maxRectangleArea",
+      "layer": "B_random",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "b45f83054f2f7f118de65a7e92b2a933c5f9bcb5a223843139c70287b10fa8a2",
+      "sha256": {
+        "contract.md": "5b5e5ce79ac3943bb0f2a800ce8c5947f0d34d8e06b9bf19109d7f631f42383e",
+        "goal.md": "b45f83054f2f7f118de65a7e92b2a933c5f9bcb5a223843139c70287b10fa8a2",
+        "hidden/lcb_3681/test_hidden.py": "129233de922fb31ef1e86461ea74d775ae0a7163dbf1adc3493452c9db2a11db",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "cbf148f1f5b708daf9b6ec848bac865b98cbb80f03bbd3e18b8b51874a4cc0e9"
+      },
+      "task_id": "lcb_3681",
+      "template_bytes": 5191
+    },
+    "lcb_3686": {
+      "any_arm_passed_hidden": false,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": false,
+          "HMIX": false,
+          "HOC": false,
+          "HPI": false,
+          "OFF": false,
+          "OFF5": false
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": false,
+          "OFF": false
+        }
+      },
+      "contest_date": "2024-12-14T18:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 0,
+        "D_plus": 0,
+        "off_pass_count": 0
+      },
+      "entry_point": "beautifulSplits",
+      "layer": "B_random",
+      "n_hidden_cases_full": 26,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 2,
+      "platform": "leetcode",
+      "prompt_sha256": "e5893d082deb19d3cb251451353244d9097adbab35b9303486286ed501935cf8",
+      "sha256": {
+        "contract.md": "8860d081321832360b60fab615c572eadce9c0dad5424f1f921d73cda853c88b",
+        "goal.md": "e5893d082deb19d3cb251451353244d9097adbab35b9303486286ed501935cf8",
+        "hidden/lcb_3686/test_hidden.py": "b86ce792800de83b914afda51e8f3a7fde569389ddcbd79fc5570dbbf1bc8cd7",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "f19f192edf5d2d15c17b56a7e2b0820bd9e04e369f86b514ac1543fefc51dbf8"
+      },
+      "task_id": "lcb_3686",
+      "template_bytes": 4315
+    },
+    "lcb_3687": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": false,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": false
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2025-01-18T06:30:00",
+      "difficulty": "hard",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 5,
+        "D_plus": 5,
+        "off_pass_count": 0
+      },
+      "entry_point": "longestSpecialPath",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 26,
+      "n_hidden_total_upstream": 27,
+      "n_visible_cases": 2,
+      "platform": "leetcode",
+      "prompt_sha256": "9597fbac099491b80221c89b57c90d7bce1e30f6b8695d7f6e1d5eed7ad9d5e9",
+      "sha256": {
+        "contract.md": "12218e689471b010fb6b066dffc12feafc32f3b2be60650863ce1c25f51f14c3",
+        "goal.md": "9597fbac099491b80221c89b57c90d7bce1e30f6b8695d7f6e1d5eed7ad9d5e9",
+        "hidden/lcb_3687/test_hidden.py": "bb6b6761d2908cdab6911a8e4529200b77f4bde953586546c529c9adbe36da6e",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "7638c4af8757923f9c48f2786a67fbef7fe2bbb69d97db55aab405e33fcafc87"
+      },
+      "task_id": "lcb_3687",
+      "template_bytes": 5229
+    },
+    "lcb_3700": {
+      "any_arm_passed_hidden": false,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": false,
+          "HOC": true,
+          "HPI": false,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": false,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": false,
+          "HMIX": false,
+          "HOC": false,
+          "HPI": false,
+          "OFF": false,
+          "OFF5": false
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": false,
+          "OFF": false
+        }
+      },
+      "contest_date": "2024-12-21T06:30:00",
+      "difficulty": "hard",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 0,
+        "D_plus": 0,
+        "off_pass_count": 0
+      },
+      "entry_point": "subsequencesWithMiddleMode",
+      "layer": "B_random",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "dacfdc0aa1644b3706331427018856201c2777bac765a480adc1432ce0ced273",
+      "sha256": {
+        "contract.md": "ee4c0d3c4b1da7ce0dcc1d1a7abcb3b5b27c9d0e03b248c4fc156b0c9d0a6a7e",
+        "goal.md": "dacfdc0aa1644b3706331427018856201c2777bac765a480adc1432ce0ced273",
+        "hidden/lcb_3700/test_hidden.py": "176115df7f9f7695d81018f6516077d3c0cd46dc29fee0b1582c4b5fb1319bf7",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "b7ee988e6688ced5fb5a264a5a14d2e3f0a9061287804310009b4fb79a52d252"
+      },
+      "task_id": "lcb_3700",
+      "template_bytes": 5094
+    },
+    "lcb_3715": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": false,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2025-01-04T18:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 5,
+        "D_plus": 5,
+        "off_pass_count": 0
+      },
+      "entry_point": "maximumCoins",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 26,
+      "n_hidden_total_upstream": 37,
+      "n_visible_cases": 2,
+      "platform": "leetcode",
+      "prompt_sha256": "76d0e6646704b2c21b33612112a2530f4de968ff375d8125aaa8458748c1fe60",
+      "sha256": {
+        "contract.md": "097ef299fd9d753777f5197f82a150b4e69c262affe93361fa16d398d999dd97",
+        "goal.md": "76d0e6646704b2c21b33612112a2530f4de968ff375d8125aaa8458748c1fe60",
+        "hidden/lcb_3715/test_hidden.py": "905681aabf316134525c1469d88430d599ce0553f576140dd4616308a5f033c2",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "ac71a2cb28def15aca11fd9697e1b43fe174a5492aa657174f2ff67946c4512a"
+      },
+      "task_id": "lcb_3715",
+      "template_bytes": 4557
+    },
+    "lcb_3764": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "contest_date": "2025-02-22T18:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 0,
+        "D_plus": 0,
+        "off_pass_count": 2
+      },
+      "entry_point": "maxSum",
+      "layer": "B_random",
+      "n_hidden_cases_full": 26,
+      "n_hidden_total_upstream": 26,
+      "n_visible_cases": 2,
+      "platform": "leetcode",
+      "prompt_sha256": "7d2c10449a3416c81aa01f5af96a27c3e170e7de7a27c4833ab178440e799dcb",
+      "sha256": {
+        "contract.md": "3dcf7e0e377ac5c2e19cec59179fb0b5111b5761ca555800b18760f70aaa9c9f",
+        "goal.md": "7d2c10449a3416c81aa01f5af96a27c3e170e7de7a27c4833ab178440e799dcb",
+        "hidden/lcb_3764/test_hidden.py": "5159e5f5da7514d9c209804d94b6898163d9a05c204fccb695a0d2fe05fa3b34",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "100633f7bc13cd9c1d4932a1e6ac781217b78288d4b69ca042839c3678dc5fdc"
+      },
+      "task_id": "lcb_3764",
+      "template_bytes": 4691
+    },
+    "lcb_3779": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": false
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2025-02-15T18:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 6,
+        "D_plus": 6,
+        "off_pass_count": 0
+      },
+      "entry_point": "maxWeight",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 26,
+      "n_hidden_total_upstream": 30,
+      "n_visible_cases": 2,
+      "platform": "leetcode",
+      "prompt_sha256": "47397b613b0f065ea769452f836dce41c85711fdbe67d4ee14e7303fc47cbcfc",
+      "sha256": {
+        "contract.md": "e49b9d6007f2b77a0d46ef4c0652f88030b94b442c56b8f12ae74d24500641c4",
+        "goal.md": "47397b613b0f065ea769452f836dce41c85711fdbe67d4ee14e7303fc47cbcfc",
+        "hidden/lcb_3779/test_hidden.py": "f8547029eeb0ac40cd166896b95a1d5f9807937135e0a77d08b2c35e4c386ab4",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "85102f78d853e69750235c141b260ecf1ee0468298ae1912b0c19110968906eb"
+      },
+      "task_id": "lcb_3779",
+      "template_bytes": 4903
+    },
+    "lcb_3783": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2025-03-01T06:30:00",
+      "difficulty": "hard",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 5,
+        "D_plus": 5,
+        "off_pass_count": 0
+      },
+      "entry_point": "permute",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 40,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "27be15845da0bdfc54ad3bc1658019bc4c1f6514253361afa4fecd123f87af99",
+      "sha256": {
+        "contract.md": "3894942d1d21c26fccc76f12209428bff1e53e157cae9c323be578544b797cf5",
+        "goal.md": "27be15845da0bdfc54ad3bc1658019bc4c1f6514253361afa4fecd123f87af99",
+        "hidden/lcb_3783/test_hidden.py": "cd553d2d8104370cc84f2e328a1eba9b310a59b927ae0dc3e43a2cad001b3b0e",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "709f83b8f18434ee08b770b5a89c1cae73c0d5c93384004a653019154960009a"
+      },
+      "task_id": "lcb_3783",
+      "template_bytes": 4877
+    },
+    "lcb_3789": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": false,
+          "OFF5": false
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": true,
+          "OFF": false
+        }
+      },
+      "contest_date": "2025-03-08T18:30:00",
+      "difficulty": "hard",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 5,
+        "D_plus": 5,
+        "off_pass_count": 0
+      },
+      "entry_point": "maxSubarrays",
+      "layer": "A_high_divergence",
+      "n_hidden_cases_full": 26,
+      "n_hidden_total_upstream": 34,
+      "n_visible_cases": 2,
+      "platform": "leetcode",
+      "prompt_sha256": "31f1518353892ac2ca5667458a26c2688f3c012c487111876b5256ac10e035aa",
+      "sha256": {
+        "contract.md": "298dd0b98e0a9ace02a753b67295fb5ca49796d1d5517002c0c6d60de3c04a17",
+        "goal.md": "31f1518353892ac2ca5667458a26c2688f3c012c487111876b5256ac10e035aa",
+        "hidden/lcb_3789/test_hidden.py": "817dd9a4aad36bc1376d535adb368f64f768fff97b9f5c8821d0bfdd30f282c3",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "addf005d58dde076d86df9b924d18341ccb2217ad9957e75e46a3e26d20d46c5"
+      },
+      "task_id": "lcb_3789",
+      "template_bytes": 5113
+    },
+    "lcb_3794": {
+      "any_arm_passed_hidden": true,
+      "archived_accepted": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": false,
+          "OFF": true
+        }
+      },
+      "archived_meets_demand": {
+        "12B": {
+          "CONFORM": true,
+          "HMIX": true,
+          "HOC": true,
+          "HPI": true,
+          "OFF": true,
+          "OFF5": true
+        },
+        "27B": {
+          "CONFORM": false,
+          "HMIX": false,
+          "OFF": false
+        }
+      },
+      "contest_date": "2025-03-22T19:30:00",
+      "difficulty": "medium",
+      "divergence": {
+        "D_minus": 0,
+        "D_net": 0,
+        "D_plus": 0,
+        "off_pass_count": 1
+      },
+      "entry_point": "minTime",
+      "layer": "B_random",
+      "n_hidden_cases_full": 27,
+      "n_hidden_total_upstream": 37,
+      "n_visible_cases": 3,
+      "platform": "leetcode",
+      "prompt_sha256": "e5c9c05849206faef2ba97eddb0717302d0ede0cc1570b70ad1303d753333b2c",
+      "sha256": {
+        "contract.md": "5fb39bfe84ec491f72557405b96f1ba7dbfa49c2be59f8b6c1dc9af616f0130e",
+        "goal.md": "e5c9c05849206faef2ba97eddb0717302d0ede0cc1570b70ad1303d753333b2c",
+        "hidden/lcb_3794/test_hidden.py": "901508d76b923f94f9576616d7a250bea654c6bfea57e8ba021a683abd58ff3e",
+        "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+        "tests_visible/test_visible.py": "19eab20bd278ff2ab97fa44f1e07e765e014883c71e98b92a66049be248e5c3b"
+      },
+      "task_id": "lcb_3794",
+      "template_bytes": 5539
+    }
+  },
+  "trees": {
+    "red_line": "hidden/ 不是工作區的子目錄，永遠不複製進工作區；任何把隱藏測資或其失敗訊息回饋給模型的路徑都作廢這一批資料。",
+    "scoring_only": "ops/gain/r534/hidden/<task_id>/",
+    "workspace_template": "ops/gain/r534/templates/<task_id>/"
+  }
+}
