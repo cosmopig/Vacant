@@ -179,15 +179,20 @@ world3/index.html?live=http://<展場機>:8899/live/events.jsonl&poll=2000
 
 ```
 .venv/bin/python -m pytest tests/test_twin_*.py tests/test_consent.py tests/test_serve_twin.py -q
-  → 79 passed（其中 test_serve_twin.py 17 條）
-node ops/exhibit/twin/twin_viewer_node_check.mjs
-  → 14/14 OK（N13 新增：#cell= 指得到 18 格中的每一格）
+  → 81 passed（其中 test_serve_twin.py 19 條）
+node ops/exhibit/twin/twin_viewer_node_check.mjs   → 14/14（N13 新增：#cell= 指得到每一格）
+node ops/exhibit/twin/phone_node_check.mjs         → 9 條（手機頁那一段判準；
+                                                      給網址就對真的 /state 跑）
 ```
+
+⚠ **全套 `pytest tests/ -q` 本輪沒有跑完**（跑了 20 分鐘還在跑，是既有的長跑套件）。
+本輪 `vacant/` 一個字都沒動，改的是 `ops/exhibit/twin/`、`examples/twin_viewer.html`
+與新增的測試；相關的那幾支全過。**全套綠燈這件事本輪沒有驗到，不要說它綠。**
 
 ### 電視端（vacant_hm）
 
 ```
-node tools/livecheck.mjs        → 23 條全過
+node tools/livecheck.mjs        → 32 條全過
 ```
 把 `world3/index.html` 裡 `LIVE-BEGIN … LIVE-END` **整段抽出來**，餵
 `world3/live/twin_events.jsonl`（18 格真事件）跑一次。挑幾條：
@@ -278,7 +283,8 @@ ops/exhibit/twin/exhibit_boot.sh   新增：展場開機（8420 電視站＋8899
 ops/exhibit/twin/to_events.py      --follow 逐格吐出、--cell、--loop；verify_url 吃 {cell}
 examples/twin_viewer.html          `hashTarget()`＋`openFromHash()`：#cell=<id>[&tamper=1]
 ops/exhibit/twin/twin_viewer_node_check.mjs   ＋N13
-tests/test_serve_twin.py           新增 17 條
+ops/exhibit/twin/phone_node_check.mjs         新增 9 條（手機頁的措辭）
+tests/test_serve_twin.py           新增 19 條
 ```
 
 `vacant/` **一個字都沒動**。`twin_pack.json` 沒有重生（本輪沒有新的 run）。
@@ -290,7 +296,7 @@ world3/index.html                  活模式重寫：LIVE-BEGIN…LIVE-END 純�
                                    ＋導演側改接 bindCast／castOf／normalizeTask／monitorRows
 world3/docs/LIVE_INTERFACE.md      v2：三值、逐次嘗試、evidence、per-cell verify_url、導播通道
 world3/live/twin_events.jsonl      18 格真事件（livecheck 的資料源）
-tools/livecheck.mjs                新增 23 條
+tools/livecheck.mjs                新增 32 條
 tools/live_e2e.mjs                 新增 10 條（對真的跑起來的伺服器）
 ```
 
@@ -315,15 +321,18 @@ tools/live_e2e.mjs                 新增 10 條（對真的跑起來的伺服�
    那一行不准改**。
 5. **「13 條提案全部照原樣做了」——不精確。** P8 做法不同（演閘門，不是跳過），
    「翻一個位元電視當場演簽章對不上」**沒做而且不打算做**（§五-2）。
-6. **「電視播得出來」＝ node check 與端到端檢查全過，不是「在瀏覽器裡看過」。**
+6. **「全套測試綠」——不能說。** 本輪只跑完了 twin 相關的那幾支（81 passed）
+   ＋`ops/check_repo_links.py`。全套 `pytest tests/ -q` 跑了 20 分鐘還沒結束，
+   本輪沒有等到它。
+7. **「電視播得出來」＝ node check 與端到端檢查全過，不是「在瀏覽器裡看過」。**
    本輪**沒有拿到瀏覽器截圖**：Chrome 153 拿掉了 `--headless=old`，
    `--headless=new` 對一個 `requestAnimationFrame` 不停的頁面不會自己結束，
    而 claude-in-chrome 擴充套件對 `127.0.0.1` 沒有站台權限。
    ⇒ **canvas 實際畫出來的樣子還沒有人看過。** 判準函數說的每一句話都驗過了，
    版面會不會擠、監視器多一行會不會撞到邊，**沒驗過**。
    布展前要有人真的用瀏覽器開一次（`ops/exhibit/twin/exhibit_boot.sh`）。
-7. **`/control` 沒有驗身分、事件流沒有簽章。** §七 末段那一條。
-8. **`ops/pipeline/rows_to_events.py`（v1 的轉接器）沒有跟著改 v2。**
+8. **`/control` 沒有驗身分、事件流沒有簽章。** §七 末段那一條。
+9. **`ops/pipeline/rows_to_events.py`（v1 的轉接器）沒有跟著改 v2。**
    它發的事件沒有 `evidence`、沒有 `attempt/of`、`accepted` 是兩值。
    電視收得下（該說「說不出來」的地方會說），但**那條路本輪沒有驗過**。
-9. **前一份裁決 §六 的五條「不能說」全部仍然成立。**
+10. **前一份裁決 §六 的五條「不能說」全部仍然成立。**
