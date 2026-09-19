@@ -11,7 +11,7 @@
 | agent | pi 0.85.1，`/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi` |
 | node | `export PATH=/home/user1/.local/opt/node-v22.23.2-linux-x64/bin:$PATH` |
 | 沙箱 | `auto` → **bwrap**（`network_isolated: true`、`write_confined: true`、`repo_visible: REPO_ABSENT`） |
-| 併發 | **2 串**（`--shard 0:2`／`1:2`，埠 8880／8881）。吞吐 4 串封頂，同時間 Codex 的 L-real 與 Stage C 也在用這台 |
+| 併發 | 起跑 **2 串**（`--shard 0:2`／`1:2`，埠 8880／8881）；**10:48 加寬到 4 串**（`2:4`／`3:4`，埠 8882／8883），見下面「加寬」一節 |
 
 ⚠ **不碰**別的 agent 的目錄（`/var/tmp/vacant_codex/`、`/var/tmp/vacant_cc/`、
 `/var/tmp/vacant_opencode/`），也**不碰** `ops/gain/r530/`、`ops/gain/r535/`、`vacant/`。
@@ -55,7 +55,40 @@ python3 ops/gain/r530vrun/score_r530vrun.py --out /var/tmp/vacant_r530vrun/run
 python3 -m vacant.vrun.verify_receipts \
     --glob '/var/tmp/vacant_r530vrun/run/cells/*/run' \
     --json /var/tmp/vacant_r530vrun/run/receipts_verify.json
+
+# 7. 收工：把 repo 副本清掉（證據留著，副本不留）
+#    ⚠ 只刪 repo 與 _scratch，**不要刪 run/**——那是證據。
+rm -rf /var/tmp/vacant_r530vrun/repo /var/tmp/vacant_r530vrun/repo.tgz
 ```
+
+## 加寬：2 串 → 4 串（2026-09-19 10:48，**不重啟**）
+
+Stage C 收官把 1003 讓出來，1003 的 parallel 上限是 4 ⇒ 加到 4 是**填滿不是超派**
+（第 5、6 槽會讓每串慢 1.76 倍，不要再往上）。
+
+**做法是「加兩串」不是「改 shard 重跑」**，理由值得記：
+
+* 分片是對**凍結的 `plan.jsonl` 的 `plan_index`** 做純過濾
+  （`select()`），而「這一格歸誰」是 `cell.mkdir(parents=True)` 的
+  `FileExistsError` **原子地**決定的。⇒ **改 shard 數不會讓任何已完成的格子作廢**，
+  重疊也安全（先 mkdir 的贏，其餘 `skip`）。
+* **但不可以重啟 s0／s1。** 在跑的那兩格目錄**已經存在**而 `run_complete` 還是
+  false；重啟之後每一條流都會 `skip`（`dir_exists_not_complete`），那兩格
+  **永遠不會再被跑**。所以只加、不停。
+
+```bash
+for i in 2 3; do
+  python3 ops/gain/r530vrun/run_r530vrun.py --out $OUT --shard $i:4 \
+    --stream s$i --pi-port 888$i --pi-bin $PI \
+    --test-timeout 20 --agent-timeout 900 --load-pause 8 &
+done
+```
+
+加寬前先補了一個競爭：`freeze_suites()` 改成**內容相同就不重寫**。
+後加入的流會再跑一次 `write_plan`，而**同時**可能有一個 launcher 正在把那份
+驗收複製進它的 `_verify/`；覆寫同樣的位元組看起來無害，但中途被讀到就是一個
+截斷的檔案 ⇒ 那一格的 `driver_error` 會被讀成「模型寫壞了」。
+加寬後逐題比對 `manifest.json` 的 `suites[*].sha256`：**drift: none**。
 
 ## 兩個發射前踩到的東西（留著，免得下一個人再踩）
 

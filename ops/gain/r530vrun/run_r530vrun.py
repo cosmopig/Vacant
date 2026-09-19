@@ -254,8 +254,17 @@ def freeze_suites(out: pathlib.Path, tasks: list[str]) -> dict:
         dst.mkdir(parents=True, exist_ok=True)
         src = TEMPLATES / task_id / "tests_visible"
         for p in sorted(src.iterdir()):
-            if p.is_file():
-                shutil.copy2(p, dst / p.name)
+            if not p.is_file():
+                continue
+            # **內容相同就不要重寫**（2026-09-19 加寬到 4 串時發現的競爭）：
+            # 後加入的流會再跑一次 `write_plan`，而**同時**可能有一個
+            # launcher 正在把這一份驗收複製進它的 `_verify/`。覆寫同樣的位元組
+            # 看起來無害，但中途被讀到就是一個截斷的檔案 ⇒ 那一格的
+            # `driver_error` 會被讀成「模型寫壞了」。冪等就沒有這個窗口。
+            target = dst / p.name
+            if target.is_file() and sha256_file(target) == sha256_file(p):
+                continue
+            shutil.copy2(p, target)
         pinned[task_id] = {"suite_dir": str(dst), "sha256": sha256_dir(dst),
                            "files": sorted(p.name for p in dst.iterdir())}
     return pinned

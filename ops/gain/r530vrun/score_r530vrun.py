@@ -357,6 +357,13 @@ def main(argv: list[str] | None = None) -> int:
 
     add("## M7 三層（**`null` 不併進 `false`**：沒量到 ≠ 量到 0）")
     add("")
+    add("⚠⚠ **這一整張表是 `pi` 的性質，不是「agent 的性質」。**"
+        "2026-09-19 Stage C 收官 40/40 量到：R535 的頭條數字"
+        "（「只有 ~2% 讀回饋檔」）**不跨基質**——同一個量具下 OpenCode 與 "
+        "Claude Code 都是 **50%**，pi 才是 ~2% 的那一個。本輪用的是 pi，"
+        "所以下面的 `M7_file` 只能寫成「**在這 20 題上、用 pi**，M7_file 是 a/b」。"
+        "**任何跨 agent 的宣稱都要連 agent 一起講**，不可以寫成通性。")
+    add("")
     add("| 層 | 臂 | true | false | null | null 的理由 |")
     add("|---|---|---:|---:|---:|---|")
     for key, label in (("m7_file", "M7_file（回饋文字進 wire）"),
