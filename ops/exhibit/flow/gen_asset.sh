@@ -112,7 +112,11 @@ fail() { local code="$1"; shift; say "✗ $*"; printf '{"ok":false,"exit":%s,"id
          "$code" "$ID" "$(python3 -c 'import json,sys;print(json.dumps(sys.argv[1]))' "$*")" "$LOG_DIR"; exit "$code"; }
 # 跑一個步驟：stdout 存檔、回傳其 exit code。stderr 也收進同一個檔尾。
 step() { local name="$1"; shift; say "→ $name: $*"; "$@" >"$LOG_DIR/$name.json" 2>>"$LOG_DIR/trace.log"; local rc=$?;
-         say "   $name rc=$rc $(head -c 200 "$LOG_DIR/$name.json" | tr '\n' ' ')"; return $rc; }
+         # ⚠ `LC_ALL=C`：`head -c 200` 會把中文字元**切在半路**，UTF-8 locale 下的
+         #   `tr` 就吐 `Illegal byte sequence`（2026-09-20 實測，s10-video-ref-1 那跑印了兩次）。
+         #   那是假錯誤，日誌看起來像出事了其實沒有——**而假錯誤正是遮蔽真錯誤的方式**。
+         #   按位元組處理就沒這問題。
+         say "   $name rc=$rc $(head -c 200 "$LOG_DIR/$name.json" | LC_ALL=C tr '\n' ' ')"; return $rc; }
 jget() { python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));
 k=sys.argv[2]
 for p in k.split("."):
@@ -278,4 +282,4 @@ print(json.dumps({
     "verified_by": "ffprobe(format+streams) + ffmpeg 真的解出一格像素（每一份都驗）",
 }, ensure_ascii=False, indent=2))
 PY
-say "✓ 完成（$NCAND 份）：$(printf '%s' "$FILES" | tr '\n' ' ')"
+say "✓ 完成（$NCAND 份）：$(printf '%s' "$FILES" | LC_ALL=C tr '\n' ' ')"
