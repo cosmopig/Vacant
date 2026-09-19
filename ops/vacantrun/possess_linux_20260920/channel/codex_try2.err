@@ -1,0 +1,69 @@
+Reading additional input from stdin...
+2026-09-19T17:15:11.161198Z ERROR codex_models_manager::manager: failed to refresh available models: stream disconnected before completion: failed to decode models response: missing field `models` at line 25 column 1; body: {
+  "data": [
+    {
+      "id": "gemma-4-12b-it-qat",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "qwen/qwen3.8-27b",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "qwen_qwen3.6-35b-a3b",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "text-embedding-nomic-embed-text-v1.5",
+      "object": "model",
+      "owned_by": "organization_owner"
+    }
+  ],
+  "object": "list"
+}
+2026-09-19T17:15:11.165648Z ERROR codex_models_manager::manager: failed to refresh available models: stream disconnected before completion: failed to decode models response: missing field `models` at line 25 column 1; body: {
+  "data": [
+    {
+      "id": "gemma-4-12b-it-qat",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "qwen/qwen3.8-27b",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "qwen_qwen3.6-35b-a3b",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "text-embedding-nomic-embed-text-v1.5",
+      "object": "model",
+      "owned_by": "organization_owner"
+    }
+  ],
+  "object": "list"
+}
+OpenAI Codex v0.147.0
+--------
+workdir: /tmp/chan_codex
+model: gemma-4-12b-it-qat
+provider: vacant
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a0baaa-31be-7a31-b7d0-41852c46c392
+--------
+user
+Reply with the single word OK.
+warning: Model metadata for `gemma-4-12b-it-qat` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.
+codex
+OK
+tokens used
+8,103

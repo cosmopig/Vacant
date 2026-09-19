@@ -1,0 +1,17 @@
+{
+  "possess_agent": "codex",
+  "suite_source": "dir:tests_visible",
+  "suite_dir": "/tmp/g_refuse/tests_visible",
+  "gate": "ran",
+  "requests_seen": 6,
+  "stop_reason": "visible_fail",
+  "accepted": false,
+  "shim_exit": 20,
+  "argv": [
+    "exec",
+    "--skip-git-repo-check",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "real_binary": "/home/user1/.local/bin/codex",
+  "cwd": "/tmp/g_refuse"
+}

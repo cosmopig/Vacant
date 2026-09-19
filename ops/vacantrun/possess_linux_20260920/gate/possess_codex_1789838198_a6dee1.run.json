@@ -1,0 +1,152 @@
+{
+  "task_id": "possess_codex_1789838198_a6dee1",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant_network.vrun.gateshim",
+    "--exec",
+    "codex",
+    "exec",
+    "--skip-git-repo-check",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/tmp/g_rs0",
+  "proxy_url": "http://127.0.0.1:38653",
+  "env": {
+    "proxy_url": "http://127.0.0.1:38653",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "61cd3e7b87a34d03a0f034d56b5822f53e249e72c713f9372a85e161dbd3a96b",
+  "ws_end_sha256": "61cd3e7b87a34d03a0f034d56b5822f53e249e72c713f9372a85e161dbd3a96b",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 0,
+  "wire_by_protocol": {},
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "64660d58915eeade2827d3ff4b235ed57040f29ab3e3157a4786592a2bf0b6aa",
+  "verdict_hash": "74b91c6bc9452e1fb7649e8a07765a099fb76953aa4eb2bb36e7f35136aa95a1",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "61cd3e7b87a34d03a0f034d56b5822f53e249e72c713f9372a85e161dbd3a96b",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "vacant_network.vrun.gateshim",
+        "--exec",
+        "codex",
+        "exec",
+        "--skip-git-repo-check",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "a6664b7cda944b337b6104fcb5ee89a0596a2151e077d196a967efcae9390ab1",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 0.114,
+      "wire_quiesced": true,
+      "requests_seen": 0,
+      "requests_seen_cumulative": 0,
+      "wire_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "ws_end_sha256": "61cd3e7b87a34d03a0f034d56b5822f53e249e72c713f9372a85e161dbd3a96b",
+      "frozen_path": "/home/user1/.vacant-run/possess_codex_1789838198_a6dee1/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "64660d58915eeade2827d3ff4b235ed57040f29ab3e3157a4786592a2bf0b6aa",
+      "visible_path": "/home/user1/.vacant-run/possess_codex_1789838198_a6dee1/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_ops.py::check_add — exception: ModuleNotFoundError: No module named 'solution' [test_ops.py:2: import solution]\ntest_ops.py::check_mul — exception: ModuleNotFoundError: No module named 'solution' [test_ops.py:6: import solution]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false,
+      "fallback": null
+    }
+  },
+  "upstreams_defaulted": [],
+  "upstreams_sinked": [],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "run_wall_s": 0.401,
+  "agent_wall_s": 0.114,
+  "failures": "test_ops.py::check_add — exception: ModuleNotFoundError: No module named 'solution' [test_ops.py:2: import solution]\ntest_ops.py::check_mul — exception: ModuleNotFoundError: No module named 'solution' [test_ops.py:6: import solution]"
+}

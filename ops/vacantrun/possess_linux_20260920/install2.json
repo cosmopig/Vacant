@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "installed_at": 1789838271.986476,
+  "installed_at_iso": "2026-09-19T17:17:51+0000",
+  "home": "/home/user1",
+  "python": "/usr/bin/python3",
+  "port": 8787,
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234/v1",
+      "source": "--upstream"
+    },
+    "anthropic": {
+      "url": "http://100.86.226.21:1234",
+      "source": "--upstream"
+    }
+  },
+  "agents": [
+    "codex"
+  ],
+  "not_detected": [],
+  "detected": {
+    "claude": {
+      "agent": "claude",
+      "config_dir": "/home/user1/.claude",
+      "config_file_exists": true,
+      "binary": "/home/user1/.local/bin/claude",
+      "binary_via": "hint",
+      "version": "2.1.259 (Claude Code)",
+      "present": true
+    },
+    "codex": {
+      "agent": "codex",
+      "config_dir": "/home/user1/.codex",
+      "config_file_exists": true,
+      "binary": "/home/user1/.local/bin/codex",
+      "binary_via": "hint",
+      "version": "codex-cli 0.147.0",
+      "present": true
+    },
+    "opencode": {
+      "agent": "opencode",
+      "config_dir": "/home/user1/.config/opencode",
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": true
+    },
+    "pi": {
+      "agent": "pi",
+      "config_dir": "/home/user1/.pi/agent",
+      "config_file_exists": true,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": true
+    },
+    "hermes": {
+      "agent": "hermes",
+      "config_dir": "/home/user1/.hermes",
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": true
+    }
+  },
+  "channel": {
+    "codex": {
+      "ok": true,
+      "files": [
+        {
+          "path": "/home/user1/.codex/config.toml",
+          "action": "modify",
+          "before_sha256": "979430dfff01f8d34019b4b23535264a1d52f4bae1d059bfcd21c3d2485307b9",
+          "after_sha256": "020d15d077bb9ac8fe5cc70c8c584dad74a7d93acb2039f889d4aa2e25d76977",
+          "backup": "/home/user1/.vacant/possess/backups/config.toml.979430dfff01.bak",
+          "note": "model_provider + [model_providers.vacant]"
+        }
+      ],
+      "measured": "2026-09-19（macOS，codex-cli 0.153.2，5 通）",
+      "verified": true
+    }
+  },
+  "shim_dir": "/home/user1/.vacant/possess/bin",
+  "shims": [
+    "/home/user1/.vacant/possess/bin/codex"
+  ],
+  "service": {
+    "backend": "systemd",
+    "unit": "vacant-proxyd.service",
+    "unit_file": "/home/user1/.config/systemd/user/vacant-proxyd.service",
+    "supervised": true,
+    "boot_persistent": true,
+    "linger_rc": 0,
+    "rc": 0,
+    "stderr": "Created symlink /home/user1/.config/systemd/user/default.target.wants/vacant-proxyd.service → /home/user1/.config/systemd/user/vacant-proxyd.service.\n",
+    "changes": [
+      {
+        "path": "/home/user1/.config/systemd/user/vacant-proxyd.service",
+        "action": "create",
+        "before_sha256": null,
+        "after_sha256": "fd7e26b56b0b694c272e45da7656e78ef46cc7e641d3c05f514fd29d6e8f14b5",
+        "backup": null,
+        "note": "systemd --user unit（Restart=always）"
+      }
+    ]
+  },
+  "preflight": {
+    "listening": true,
+    "roundtrip": 200,
+    "detail": "上游回應了"
+  },
+  "files": [
+    {
+      "path": "/home/user1/.config/systemd/user/vacant-proxyd.service",
+      "action": "create",
+      "before_sha256": null,
+      "after_sha256": "fd7e26b56b0b694c272e45da7656e78ef46cc7e641d3c05f514fd29d6e8f14b5",
+      "backup": null,
+      "note": "systemd --user unit（Restart=always）"
+    },
+    {
+      "path": "/home/user1/.codex/config.toml",
+      "action": "modify",
+      "before_sha256": "979430dfff01f8d34019b4b23535264a1d52f4bae1d059bfcd21c3d2485307b9",
+      "after_sha256": "020d15d077bb9ac8fe5cc70c8c584dad74a7d93acb2039f889d4aa2e25d76977",
+      "backup": "/home/user1/.vacant/possess/backups/config.toml.979430dfff01.bak",
+      "note": "model_provider + [model_providers.vacant]"
+    }
+  ]
+}

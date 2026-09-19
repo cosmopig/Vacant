@@ -1,6 +1,6 @@
 # `vacant install` 逐格落盤（2026-09-19，macOS）
 
-裁決檔：[`decisions/DECISION_20260919_DEFAULT_ON_INSTALL.md`](../../decisions/DECISION_20260919_DEFAULT_ON_INSTALL.md)
+裁決檔：[`decisions/DECISION_20260919_DEFAULT_ON_INSTALL.md`](../../../decisions/DECISION_20260919_DEFAULT_ON_INSTALL.md)
 
 ⚠ **這裡只有摘要與索引，沒有原始 bytes。** `*.req.bin`／`*.resp.bin` 與備份檔
 都留在 session 的 scratchpad（會被清掉），需要原始 bytes 要重跑。

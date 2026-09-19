@@ -1,0 +1,19 @@
+Reading additional input from stdin...
+2026-09-19T17:14:56.348268Z ERROR codex_models_manager::manager: failed to refresh available models: Missing environment variable: `OPENAI_API_KEY`.
+2026-09-19T17:14:56.394922Z ERROR codex_models_manager::manager: failed to refresh available models: Missing environment variable: `OPENAI_API_KEY`.
+OpenAI Codex v0.147.0
+--------
+workdir: /tmp/chan_codex
+model: gemma-4-12b-it-qat
+provider: vacant
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a0baa9-f80e-70a1-8908-335f0f32f5b5
+--------
+user
+Reply with the single word OK.
+warning: Model metadata for `gemma-4-12b-it-qat` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.
+ERROR: Missing environment variable: `OPENAI_API_KEY`.
+ERROR: Missing environment variable: `OPENAI_API_KEY`.

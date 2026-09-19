@@ -1,0 +1,5 @@
+979430dfff01f8d34019b4b23535264a1d52f4bae1d059bfcd21c3d2485307b9  /home/user1/.codex/config.toml
+6efa6ea043327299611be9dde2d43a1572980d85991eb569b7f47e375a6d5f37  /home/user1/.pi/agent/models.json
+aed5bdae796b2c2bb0aed83ae718fbd02fcd81af9d3e6ae4faca26bbd91e1442  /home/user1/.bashrc
+28b4a453b68dde64f814e94bab14ee651f4f162e15dd9920490aa1d49f05d2a4  /home/user1/.profile
+5dfc7785c6e0b42717d044283cd4c3ea2be36dc7c4a9ad0e19fdecd5c29cb3b2  /home/user1/.claude/settings.json

@@ -1,0 +1,154 @@
+{
+  "task_id": "possess_codex_1789838181_54e187",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant_network.vrun.gateshim",
+    "--exec",
+    "codex",
+    "exec",
+    "--skip-git-repo-check",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/tmp/g_deliver",
+  "proxy_url": "http://127.0.0.1:42477",
+  "env": {
+    "proxy_url": "http://127.0.0.1:42477",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "c8ab44157c65a785ce9c45ff535ff86625bbdd3c0e5a4f3482ca1b310d2d7be2",
+  "ws_end_sha256": "32405e75381c3062ed5859767ff9be7168d6f045aadbf9a2575d281b6aa5dbbd",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 5,
+  "wire_by_protocol": {
+    "openai": 5
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "7d713a554130b6d11c09b17e7c9a88342c0f730d906648a91670320928e57dad",
+  "verdict_hash": "baab576b58bdf891df16c5b0f4c81c7a9381e233c3bc117d0bbd3cfcf9919e31",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "c8ab44157c65a785ce9c45ff535ff86625bbdd3c0e5a4f3482ca1b310d2d7be2",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "vacant_network.vrun.gateshim",
+        "--exec",
+        "codex",
+        "exec",
+        "--skip-git-repo-check",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "a6664b7cda944b337b6104fcb5ee89a0596a2151e077d196a967efcae9390ab1",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 8.307,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 5,
+      "wire_digest": "9ed0a2147e4f5ee576ec2efcc968ac92b84ef61ff1cac9790264a9c49c864060",
+      "ws_end_sha256": "32405e75381c3062ed5859767ff9be7168d6f045aadbf9a2575d281b6aa5dbbd",
+      "frozen_path": "/home/user1/.vacant-run/possess_codex_1789838181_54e187/_frozen_RUN-ON",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "7d713a554130b6d11c09b17e7c9a88342c0f730d906648a91670320928e57dad",
+      "visible_path": "/home/user1/.vacant-run/possess_codex_1789838181_54e187/visible_RUN-ON.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false,
+      "fallback": null
+    }
+  },
+  "upstreams_defaulted": [],
+  "upstreams_sinked": [],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "9ed0a2147e4f5ee576ec2efcc968ac92b84ef61ff1cac9790264a9c49c864060",
+  "run_wall_s": 8.476,
+  "agent_wall_s": 8.307,
+  "failures": ""
+}

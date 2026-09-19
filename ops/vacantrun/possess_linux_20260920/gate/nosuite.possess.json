@@ -1,0 +1,17 @@
+{
+  "possess_agent": "codex",
+  "suite_source": "none",
+  "suite_dir": null,
+  "gate": "skipped",
+  "requests_seen": 5,
+  "stop_reason": "ungated",
+  "accepted": null,
+  "shim_exit": 21,
+  "argv": [
+    "exec",
+    "--skip-git-repo-check",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "real_binary": "/home/user1/.local/bin/codex",
+  "cwd": "/tmp/g_nosuite"
+}

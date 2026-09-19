@@ -1,0 +1,7 @@
+<|channel>thought
+<channel|>I've created `solution.py` with the `add` and `mul` functions as requested in `TASK.md`.
+
+**Summary of Changes**
+- Created `solution.py` containing:
+  - `add(a, b)`: returns $a + b$
+  - `mul(a, b)`: returns $a * b$

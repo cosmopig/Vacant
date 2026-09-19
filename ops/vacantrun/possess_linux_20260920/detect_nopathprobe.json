@@ -1,0 +1,47 @@
+{
+  "claude": {
+    "agent": "claude",
+    "config_dir": "/home/user1/.claude",
+    "config_file_exists": true,
+    "binary": "/home/user1/.local/bin/claude",
+    "binary_via": "hint",
+    "version": "2.1.259 (Claude Code)",
+    "present": true
+  },
+  "codex": {
+    "agent": "codex",
+    "config_dir": "/home/user1/.codex",
+    "config_file_exists": true,
+    "binary": "/home/user1/.local/bin/codex",
+    "binary_via": "hint",
+    "version": "codex-cli 0.147.0",
+    "present": true
+  },
+  "opencode": {
+    "agent": "opencode",
+    "config_dir": "/home/user1/.config/opencode",
+    "config_file_exists": false,
+    "binary": null,
+    "binary_via": "none",
+    "version": null,
+    "present": true
+  },
+  "pi": {
+    "agent": "pi",
+    "config_dir": "/home/user1/.pi/agent",
+    "config_file_exists": true,
+    "binary": null,
+    "binary_via": "none",
+    "version": null,
+    "present": true
+  },
+  "hermes": {
+    "agent": "hermes",
+    "config_dir": "/home/user1/.hermes",
+    "config_file_exists": false,
+    "binary": null,
+    "binary_via": "none",
+    "version": null,
+    "present": true
+  }
+}

@@ -1,0 +1,4 @@
+ABSENT  /home/user1/.config/opencode/opencode.json
+ABSENT  /home/user1/.hermes/config.yaml
+ABSENT  /home/user1/.config/systemd/user/vacant-proxyd.service
+ABSENT  /home/user1/.vacant/possess/state.json

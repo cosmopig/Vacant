@@ -1,0 +1,40 @@
+{
+  "agents": [
+    "claude",
+    "codex",
+    "opencode",
+    "pi",
+    "hermes"
+  ],
+  "not_detected": [],
+  "upstreams": {
+    "openai": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "sink（沒有人指定）"
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "sink（沒有人指定）"
+    }
+  },
+  "will_write": [
+    "/home/user1/.claude/settings.json",
+    "/home/user1/.codex/config.toml",
+    "/home/user1/.config/opencode/opencode.json",
+    "/home/user1/.pi/agent/models.json",
+    "/home/user1/.hermes/config.yaml"
+  ],
+  "will_write_shims": [
+    "/home/user1/.vacant/possess/bin/claude",
+    "/home/user1/.vacant/possess/bin/codex",
+    "/home/user1/.vacant/possess/bin/opencode",
+    "/home/user1/.vacant/possess/bin/pi",
+    "/home/user1/.vacant/possess/bin/hermes"
+  ],
+  "will_touch_rc": [
+    "~/.bashrc",
+    "~/.profile"
+  ],
+  "port_requested": 8787,
+  "python": "/usr/bin/python3"
+}
