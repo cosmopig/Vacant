@@ -54,6 +54,14 @@
    設 `CLAUDE_CODE_MAX_CONTEXT_TOKENS`——而 auto-compact 會改變送出去的
    messages，也就是改變「逐字落盤」的內容（那一格**沒量過**）。
 
+   同一天的**第三個資料點**：**Codex CLI 0.147.0 也是放行**——
+   `warning: Model metadata for gemma-4-12b-it-qat not found. Defaulting to
+   fallback metadata; …` 印完照送，六通全部 200
+   （`docs/AGENT_COMPAT.md` §10.2 有逐字警告）。
+   ⇒ 三家在這一格是 **2 放行 ∶ 1 擋**。那是三次實測不是一條規則，
+   **第四家仍然要自己量**。而且「fallback metadata 退到什麼」**沒量**，
+   它跟 Claude Code 的 200k 假設是同型的洞。
+
    同一天還踩到一個**量錯**，記在這裡因為它是本條的同型：用
    `strings -a <binary> | grep -c` 掃 Claude Code 的原生 binary，十三個變數
    **全是 0**，看起來像「不吃任何 `ANTHROPIC_*`」；真因是那台機器**沒有
@@ -66,7 +74,9 @@
 3. 拿掉金鑰**不是**安全邊界：同一個 OS 使用者可以自己去讀 `~/.config`、
    keychain、或任何一個 agent 自己存的憑證。它降低的是「不小心直連」的機率，
    不是「刻意繞過」的可能（`vacant/controller.py:7-8` 的同一條邊界）。
-4. **有一條路連設定都救不了**：Codex CLI 用 ChatGPT 登入時，模型通道是
+4. **有一條路連設定都救不了**（⚠ 這一條**只講 ChatGPT 登入那一條**；
+   API key／自訂 provider 那條 2026-09-19 已經是 L-real，見 `CONFIG_ROUTE["codex"]`）：
+   Codex CLI 用 ChatGPT 登入時，模型通道是
    **寫死的 `wss://chatgpt.com/backend-api/codex/responses`**——WebSocket，
    而且 `chatgpt_base_url` 只搬得動它的外掛／遙測／設定那幾條 HTTP 請求，
    搬不動模型那一條（2026-09-18 實測，`RUST_LOG` trace 逐字留檔）。
@@ -195,15 +205,32 @@ CONFIG_ROUTE: dict[str, dict[str, str | None]] = {
         "wire": "openai",
         "measured": "2026-09-18",
     },
-    # Codex CLI 0.153.2。⚠ 只有 **API key／自訂 provider** 那條路；
+    # Codex CLI。⚠ 只有 **API key／自訂 provider** 那條路；
     # ChatGPT 登入那條是寫死的 wss://，設定搬不動（見本檔誠實邊界 4）。
+    # **2026-09-19 升到真模型**：codex-cli **0.147.0**（vacant-dev 上本來就有的那一份）
+    # × `gemma-4-12b-it-qat`（LM Studio @1003），拒交格 exit 20 ／交付格 exit 0，
+    # `requests_seen` 4 ／ 5，wire 全部是 `POST /v1/responses -> 200`。
+    # 逐字落盤見 `docs/AGENT_COMPAT.md` §10。
+    # ⚠ **版本要連機器一起講**：假上游那一輪量的是 0.153.2（別台），真模型這一輪是
+    #   0.147.0。同一格兩個版本號不可以混寫成一個。
+    # ⚠ **那一格成立的前提不在本檔裡**：上游必須自己會講 **Responses API**
+    #   （`POST /v1/responses`）。`wireproxy` 是反向代理不是協定轉換器，`route()`
+    #   只是把「不是 /v1/messages 也不是 /v1/complete」的 path 歸到 openai 照轉。
+    #   1003 的 LM Studio 原生吃 `/v1/responses`（含 SSE 與 function tool）所以不需要
+    #   shim；只有 chat/completions 的上游要改 `VACANT_CODEX_WIRE=chat`，**沒量過**。
+    # ⚠ **一種跑不完的失敗**：1003 預設開思考，而 Codex 的 body 帶
+    #   `reasoning: {"summary": "auto"}` 沒有 `effort` ⇒ 三跑裡有一跑在推理裡繞圈
+    #   （94,776 個 `reasoning_text.delta`、0 個 `output_text`、713 秒沒收尾）。
+    #   `wrap_agent.sh` 的 `VACANT_CODEX_REASONING_EFFORT`（**預設不設**）可以關掉推理，
+    #   已驗兩格都收得了工——但那是**觀測到的緩解不是保證**（n 很小，而且它把推理整個
+    #   關掉，別的題可能因此答得更差）。詳見 `docs/AGENT_COMPAT.md` §10.7。
     "codex": {
         "relocate": "CODEX_HOME",               # 預設 ~/.codex
         "file": "config.toml",
         "field": 'model_providers.<新 id>.base_url（＋ wire_api="responses"｜"chat"；'
                  "內建 id `openai` 不准覆寫，會 fail-closed 報錯)",
         "wire": "openai",
-        "measured": "2026-09-18",
+        "measured": "2026-09-19（真模型 0.147.0；2026-09-18 假上游 0.153.2）",
     },
     # OpenCode 1.18.31。它**也**吃 OPENAI_BASE_URL（見誠實邊界 1），所以這一格
     # 本來記成「要指定自訂 provider 時才用」。**2026-09-19 用真模型量完要改口徑**：
