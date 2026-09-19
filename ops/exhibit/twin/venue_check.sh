@@ -130,18 +130,40 @@ grep -rlE "^\s*(import|from)\s+(urllib|requests|httpx)" \
   | grep -q . && bad "serve_twin/to_events 匯入了對外連線的模組" \
   || ok "serve_twin／to_events 沒有匯入 urllib／requests／httpx"
 
-head_ "七、--control 沒有身分驗證（--lan 的時候這是展場現實）"
+head_ "七、/control 的門檻（--lan 的時候這是展場現實）"
+# ⚠ 這一節在 2026-09-19 從「warn」升成「硬傷」：`--lan` 現在**一定**會有 token
+#   （自動生），所以綁在 0.0.0.0 卻按得動＝有人明講了 `--no-token`，
+#   那是一個決定，不是一個預設，要在布展當天被擋下來重新確認。
 LISTEN=$(ss -ltn 2>/dev/null | grep ":$TWIN_PORT" | awk '{print $4}' | head -1)
 case "$LISTEN" in
   0.0.0.0*|\[::\]*|\*:*)
     R=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 8 -X POST \
         -H 'content-type: application/json' -d '{"action":"next"}' "$B/control" 2>/dev/null)
     if [ "$R" = "403" ]; then
-      ok "綁在 $LISTEN，但 --token 有開（沒帶 token → 403）"
+      ok "綁在 $LISTEN，沒帶 token → 403（門檻在）"
     else
-      warn "綁在 $LISTEN 而且沒有 token：同一個區網上任何人都按得動這台電視（回 $R）"
-      warn "布展建議：--lan 一定要配 --token，或改用只有展場手機連得到的獨立熱點"
-    fi ;;
+      bad "綁在 $LISTEN 而且**按得動**（回 $R）：同一個區網上任何人都按得動這台電視"
+      bad "  ⇒ 去掉 --no-token，或改用只有展場手機連得到的獨立熱點"
+    fi
+    # 電視拿不拿得到 token（拿不到＝QR 沒有 token＝全場一顆鍵都按不動）。
+    # 電視在這台機器上，所以從這裡打就是電視的視角——這一條量得到。
+    MINE=$(curl -sS --max-time 8 "$B/state" 2>/dev/null \
+           | python3 -c 'import json,sys;print(json.load(sys.stdin).get("phone_url",""))' \
+             2>/dev/null || echo "?")
+    case "$MINE" in
+      *"t="*) ok "電視這一端的 phone_url 帶著 token（QR 掃進去按得動）" ;;
+      "?"|"") warn "讀不到 /state 的 phone_url，沒量到電視拿不拿得到 token" ;;
+      *)      bad "有 token 但電視這一端的 phone_url **沒有帶**（$MINE）"
+              bad "  ⇒ QR 掃進去是沒有 token 的網址，全場三顆鍵都按不動" ;;
+    esac
+    # ⚠ 「token 會不會外流給區網上的其他人」**這台機器量不到**。
+    #   判準是「對端位址＝本端位址」（serve_twin docstring §4），而從這台機器
+    #   打自己的區網位址，對端就是本端 ⇒ 一定拿得到 token。
+    #   要量得換一台裝置。**沒量到不是量到 0**（鐵律 3）。
+    warn "「token 會不會外流給區網上的其他人」沒量到：這台機器量不到（對端＝本端）"
+    warn "  要量：拿另一台連同一個網路的裝置跑"
+    warn "  curl -s http://$HOST:$TWIN_PORT/state | grep -o 'phone_url[^,]*'"
+    warn "  看得到 t= 就是外流了（那代表 token 只是一個 GET 的距離）" ;;
   *) ok "只綁 $LISTEN（手機連不到；展場要手機互動才需要 --lan）" ;;
 esac
 

@@ -1,0 +1,49 @@
+[Unit]
+# 展場機上那一顆全螢幕瀏覽器。**這是 user unit，不是 system unit。**
+#
+# 為什麼分開（DECISION_20260919_EXHIBIT_UNATTENDED.md §二）：伺服器那一半
+# （`vacant-exhibit.service`）不需要有人登入就能活。瀏覽器需要一個圖形工作階段，
+# 所以它只能跟著那個工作階段走。把兩者綁在一起＝伺服器也要等登入，
+# 而登入是展場最容易壞的一環（自動登入被關掉、螢幕鎖、更新後停在密碼畫面）。
+#
+# 裝法（在展場機上、以展場那個使用者身分）：
+#   systemctl --user enable --now vacant-exhibit-kiosk.service
+#   sudo loginctl enable-linger @@USER@@     # ← 沒有這一行，重開機不會自己起來
+#
+# ⚠ **`enable-linger` 不會給你一個圖形工作階段。** 它只是讓 user manager 在
+#   開機時就起來。瀏覽器還是需要 `DISPLAY`／`WAYLAND_DISPLAY`，也就是**自動登入
+#   必須是開的**。這兩件事要分開確認，不要以為 enable-linger 就夠了。
+Description=Vacant 展件 · 全螢幕瀏覽器（電視）
+After=graphical-session.target vacant-exhibit.service
+PartOf=graphical-session.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+# 伺服器還沒起來就開瀏覽器＝一張錯誤頁停在那裡不會自己重整。
+# 這一行**等到電視那一頁真的回 200 才往下走**。
+ExecStartPre=/bin/sh -c 'for i in $(seq 1 60); do curl -fsS --max-time 2 "http://127.0.0.1:8420/world3/index.html" >/dev/null 2>&1 && exit 0; sleep 2; done; echo "等不到電視那一頁（8420）" >&2; exit 1'
+# ⚠ `--disable-background-networking` 那幾個**不是潔癖**。2026-09-19 實測：
+#   在這台機器上開一顆乾淨的 chromium，log 裡就有
+#   `google_apis/gcm/engine/registration_request.cc … DEPRECATED_ENDPOINT`
+#   ——**瀏覽器自己在對外連線**。展件本身一通都不打（`serve_twin` 連 urllib
+#   都沒 import），但 `venue_check.sh` 第六節數到的「對外連線」會是這幾條，
+#   而展場的離線宣告是對觀眾講的話，不該由瀏覽器去破它。
+ExecStart=@@CHROME@@ \
+  --kiosk --incognito --noerrdialogs \
+  --disable-session-crashed-bubble --disable-infobars \
+  --disable-features=Translate,TranslateUI \
+  --autoplay-policy=no-user-gesture-required \
+  --check-for-update-interval=31536000 \
+  --disable-background-networking \
+  --disable-component-update \
+  --disable-domain-reliability \
+  --disable-sync \
+  --no-first-run --no-default-browser-check \
+  --user-data-dir=%t/vacant-twin-kiosk \
+  "http://127.0.0.1:8420/world3/index.html?live=http://127.0.0.1:8899/live/events.jsonl&poll=2000"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

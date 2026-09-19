@@ -56,16 +56,28 @@
    「有人要翻這一格」並把收據頁的網址給他；真正翻、真正重算、真正看到簽章對不上，
    發生在**他手上那一頁**。電視只說「有人正在手機上重驗這一格」——
    那是關於現場發生什麼的陳述，不是關於密碼學結果的宣告。
-3. **`/control` 沒有驗證**（`--token` 是可選的）。預設只綁 loopback。
-   展場要讓手機連得到就得 `--bind 0.0.0.0`，那一刻起同一個區網上的任何人
-   都按得動這台電視——那是展場的現實，不是可以靜靜略過的細節。
-4. 排程順序是**確定性**的（cell_id 排序後配對），不是隨機。
+3. **`/control` 的門檻是「看得到 QR」，不是身分驗證。**
+   非 loopback 綁定（展場的 `--bind 0.0.0.0`）**預設自動生一把 token**，
+   編進 QR 的網址裡；沒帶或帶錯一律 403。但那把 token 就印在電視上——
+   **在場所有看得到那台電視的人都按得動它**，而且拍一張照就帶得走。
+   它擋掉的是「連上同一個 hotspot、但沒站在展件前面」的人，不是現場的人。
+   **不要把它讀成身分驗證、授權或防竄改。**
+   要完全關掉得明講 `--no-token`（開機橫幅會一直吼）。
+4. **token 不會透過 `/state`／`/qr.png` 外流給區網上的其他人。**
+   電視跟展件跑在同一台機器上，所以電視畫得出帶 token 的 QR；
+   從別台機器打 `/state` 拿到的 `phone_url` 是**沒有 token 的**。
+   否則 token 只是一個 GET 的距離，等於沒有。
+   判準是 `Handler._is_same_machine`：**對端位址 ＝ 本端位址**，
+   不是「對端是 127.0.0.1」——電視連的是這台機器的區網位址
+   （`?live=http://<區網IP>:8899/...`），只看 loopback 會把電視自己擋在外面。
+5. 排程順序是**確定性**的（cell_id 排序後配對），不是隨機。
    同一份 pack 起兩次，播出來的順序一模一樣。
 
 用法：
     python3 ops/exhibit/twin/serve_twin.py                     # 127.0.0.1:8899
-    python3 ops/exhibit/twin/serve_twin.py --bind 0.0.0.0      # 展場（手機要連得到）
+    python3 ops/exhibit/twin/serve_twin.py --bind 0.0.0.0      # 展場（自動生 token）
     python3 ops/exhibit/twin/serve_twin.py --dwell 25 --token abc
+    python3 ops/exhibit/twin/serve_twin.py --bind 0.0.0.0 --no-token  # 明知故犯
 
 電視：
     world3/index.html?live=http://<展場機>:8899/live/events.jsonl&poll=2000
@@ -76,6 +88,7 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import secrets
 import sys
 import threading
 import time
@@ -132,6 +145,21 @@ def iso_now() -> str:
     return datetime.now(tz=timezone.utc).isoformat()
 
 
+def _query_token(query: str) -> str:
+    """從 query string 撈出 `t=`。
+
+    ⚠ **故意不用 `urllib.parse`。** `venue_check.sh` 第六節用一條很笨的 grep
+    擋「這一支有沒有匯入對外連線的模組」，而 `urllib` 整個名字都在它的名單上。
+    `urllib.parse` 確實不會連線，但把那條 grep 改精細＝把一道擋門變薄，
+    而這裡要的只是切三個字元。**不值得為了省三行去動那道門。**
+    """
+    for part in query.split("&"):
+        k, _, v = part.partition("=")
+        if k == "t":
+            return v.replace("+", " ")
+    return ""
+
+
 class Playlist:
     """把 pack 的格子配成「同一題 × 扣住／寫明」的對，並記住現在演到哪一對。
 
@@ -164,12 +192,16 @@ class Stage:
     """導播台：誰在演、下一個是誰、事件檔寫到哪。所有狀態變更都走這裡。"""
 
     def __init__(self, pack: dict, *, out: pathlib.Path, dwell: float,
-                 base_url: str):
+                 base_url: str, token: str = ""):
         self.lock = threading.RLock()
         self.pl = Playlist(pack)
         self.out = out
         self.dwell = dwell
         self.base_url = base_url.rstrip("/")
+        #: `/control` 的共享密鑰。空字串＝沒有門檻。它只會出現在
+        #: **同一台機器**上的客戶端（＝電視）看到的 `phone_url`／QR 裡
+        #: （見模組 docstring §4 與 `Handler._is_same_machine`）。
+        self.token = token
         # 排程攤平成一條確定性的清單：同一對先扣住、再寫明，然後換下一對。
         # 配不成對的格子（只有一邊跑過）仍然在清單裡，但 `/state.pair.paired`
         # 會標 false——**不要讓畫面上出現一個不存在的對照**。
@@ -196,14 +228,19 @@ class Stage:
     def verify_url(self, cell_id: str) -> str:
         return f"{self.base_url}/r/{cell_id}"
 
-    def phone_url(self) -> str:
+    def phone_url(self, *, with_token: bool = True) -> str:
         """手機要連的那個網址。**`base_url` 是什麼，這裡就是什麼**——
 
         不要在這裡自己組 `127.0.0.1`：那是展場當天最容易壞的一格
         （電視上顯示 `127.0.0.1`，觀眾的手機連不到自己的迴路位址）。
         `exhibit_boot.sh --lan` 會把區網 IP 從命令列傳進來。
+
+        `with_token=False` 時**不帶 token**。呼叫端是 `/state` 與 `/qr.png`：
+        非 loopback 的客戶端拿到的是沒有 token 的那一版，否則 token 只是
+        一個 GET 的距離（模組 docstring §4）。
         """
-        return f"{self.base_url}/phone.html"
+        base = f"{self.base_url}/phone.html"
+        return f"{base}?t={self.token}" if (with_token and self.token) else base
 
     def _block(self, cell_id: str) -> list[dict]:
         cell = self.pl.cells[cell_id]
@@ -354,7 +391,7 @@ class Stage:
             self.tamper = None
             self.tamper_mono = 0.0
 
-    def state(self) -> dict:
+    def state(self, *, with_token: bool = True) -> dict:
         with self.lock:
             self._expire_tamper((self.now or {}).get("cell_id"))
             pair = self.pl.pair(self.pair_idx)
@@ -388,8 +425,13 @@ class Stage:
                 "next_in_s": round(max(0.0, self.deadline - time.monotonic()), 1),
                 # 電視要拿這個去畫 QR／印在螢幕上。**沒有這一格的時候電視是瞎的**
                 # （它只知道事件流的網址，不知道手機該連哪裡）。
-                "phone_url": self.phone_url(),
+                # ⚠ `with_token` 由**請求端的位址**決定（Handler）：電視在本機，
+                #   區網上的其他人拿到的是沒有 token 的那一版。
+                "phone_url": self.phone_url(with_token=with_token),
                 "qr_url": f"{self.base_url}/qr.png",
+                # 手機／稽核腳本要知道「這台機器有沒有門檻」。
+                # 只回布林，**不回 token 本身**。
+                "control_token_required": bool(self.token),
                 "evidence_counts": self.pack_counts(),
                 "pairs": self.pl.pairs,
                 # 整批格子的**原值**。手機的稽核分頁逐格印它——
@@ -449,9 +491,42 @@ INDEX_HTML = """<!doctype html>
 
 class Handler(BaseHTTPRequestHandler):
     stage: Stage = None       # type: ignore[assignment]
-    token: str = ""
     quiet: bool = False
     server_version = "serve_twin/1"
+
+    @property
+    def token(self) -> str:
+        """單一真相來源是 `Stage.token`，不要在 Handler 上再存一份。
+
+        （舊版兩邊各存一份，改一邊就會出現「QR 帶著 A、伺服器認 B」
+        這種只在展場才看得到的錯。）
+        """
+        return self.stage.token if self.stage else ""
+
+    def _is_same_machine(self) -> bool:
+        """請求是不是從**這台機器自己**來的（電視就是這種）。
+
+        判準是「這條連線的對端位址 ＝ 本端位址」，不是「對端是 127.0.0.1」。
+
+        ⚠ 為什麼不能只看 loopback——這一條差點在展場當天才會現形：
+          電視開的網址是 `?live=http://<區網IP>:8899/...`，而 QR 那張圖
+          （`stage.qr_url`）也是 `http://<區網IP>:8899/qr.png`。
+          瀏覽器連到**自己這台機器的區網位址**時，核心挑的來源位址是那個
+          區網位址，不是 127.0.0.1 ⇒ 只看 loopback 會把電視自己也當成外人，
+          **電視畫出來的 QR 會沒有 token，全場一顆鍵都按不動**。
+          對端＝本端這個判準對兩種接法（127.0.0.1 與區網 IP）都成立。
+
+        ⚠ 這不是安全邊界，是**不要把 token 白送出去**的一道分流。
+          要騙過它得偽造來源位址，而偽造之後收不到回包。
+          **真正的門檻一直是「看得到那台電視」**，這裡只是不要連那個都省掉。
+        """
+        peer = (self.client_address or ("",))[0]
+        if peer.startswith("127.") or peer in ("::1", "::ffff:127.0.0.1", ""):
+            return True
+        try:
+            return peer == self.connection.getsockname()[0]
+        except OSError:
+            return False
 
     # ── 共用 ────────────────────────────────────────────────────
     def log_message(self, fmt, *args):     # noqa: A003
@@ -501,10 +576,10 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/live/events.jsonl":
             self._send(200, st.out.read_bytes(), "text/plain; charset=utf-8")
         elif path == "/state":
-            self._json(st.state())
+            self._json(st.state(with_token=self._is_same_machine()))
         elif path in ("/qr.png", "/qr.svg"):
             # 內容＝這一台**真正綁在哪裡**，不是開發時寫死的那個。
-            url = st.phone_url()
+            url = st.phone_url(with_token=self._is_same_machine())
             try:
                 if path.endswith(".svg"):
                     self._send(200, qrlib.to_svg(url).encode("utf-8"),
@@ -537,7 +612,7 @@ class Handler(BaseHTTPRequestHandler):
 
     # ── POST ───────────────────────────────────────────────────
     def do_POST(self):     # noqa: N802
-        path, _, _q = self.path.partition("?")
+        path, _, query = self.path.partition("?")
         if path != "/control":
             self._json({"error": "沒有這個端點", "path": path}, 404)
             return
@@ -547,9 +622,16 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError:
             self._json({"ok": False, "error": "body 不是 JSON"}, 400)
             return
-        if self.token and body.get("token") != self.token:
-            self._json({"ok": False, "error": "token 不對"}, 403)
-            return
+        if self.token:
+            # 三個地方都收：body（手機頁走這條）、query string（curl／稽核腳本）、
+            # header（反向代理）。**少一條就會在展場當天變成「怎麼按都沒反應」**。
+            got = (str(body.get("token") or "")
+                   or _query_token(query)
+                   or self.headers.get("X-Twin-Token", ""))
+            if not secrets.compare_digest(got, self.token):
+                self._json({"ok": False,
+                            "error": "token 不對：請重新掃電視上的 QR"}, 403)
+                return
         action = str(body.get("action") or "")
         kw = {k: v for k, v in body.items() if k in ("cell_id",)}
         res = self.stage.press(action, **kw)
@@ -570,12 +652,46 @@ def make_server(pack: dict, *, bind: str, port: int, out: pathlib.Path,
                 base_url: str = "") -> tuple[ThreadingHTTPServer, Stage]:
     srv = ThreadingHTTPServer((bind, port), Handler)
     host = bind if bind not in ("0.0.0.0", "") else "127.0.0.1"
-    stage = Stage(pack, out=out, dwell=dwell,
+    stage = Stage(pack, out=out, dwell=dwell, token=token,
                   base_url=base_url or f"http://{host}:{srv.server_address[1]}")
     Handler.stage = stage
-    Handler.token = token
     Handler.quiet = quiet
     return srv, stage
+
+
+#: 非 loopback 綁定卻沒給 `--token` 時，自動生一把的長度（bytes → urlsafe base64）。
+#: 9 bytes ＝ 12 個字元。夠短，QR 不會因此變密；夠長，猜不到。
+AUTO_TOKEN_BYTES = 9
+
+
+def resolve_token(bind: str, token: str, no_token: bool) -> tuple[str, str]:
+    """決定這一次要不要有 token，以及是誰決定的。
+
+    回 `(token, why)`，`why` ∈ {`"given"`, `"auto"`, `"off-loopback"`,
+    `"off-explicit"`}。**這是一個純函數**，因為它是這一塊唯一的判準，
+    而判準要可以被 `tests/test_serve_twin.py` 逐條釘住。
+
+    規則：
+
+    1. 明確給了 `--token` ⇒ 用它（`given`）。
+    2. `--no-token` ⇒ 沒有門檻（`off-explicit`）。橫幅會一直吼。
+    3. 只綁 loopback ⇒ 沒有門檻（`off-loopback`）。手機本來就連不到，
+       加一道門只是讓本機開發變麻煩。
+    4. 其他（展場的 `--bind 0.0.0.0`）⇒ **自動生一把**（`auto`）。
+
+    為什麼是「自動生」不是「拒絕啟動」：拒絕啟動在**有人在場**的時候是對的，
+    在無人值守的開機流程裡是致命的——`systemd` 每 10 秒重試一次、每次都以
+    同一個理由失敗，展場的電視就是一整天黑的。而自動生達成的是同一個保證
+    （**不存在沒有門檻的區網監聽**），代價只是 token 每次開機會換。
+    完整理由寫在 `decisions/DECISION_20260919_EXHIBIT_UNATTENDED.md` §一。
+    """
+    if token:
+        return token, "given"
+    if no_token:
+        return "", "off-explicit"
+    if bind in ("127.0.0.1", "::1", "localhost", ""):
+        return "", "off-loopback"
+    return secrets.token_urlsafe(AUTO_TOKEN_BYTES), "auto"
 
 
 def main(argv=None) -> int:
@@ -586,7 +702,10 @@ def main(argv=None) -> int:
     ap.add_argument("--port", type=int, default=8899)
     ap.add_argument("--out", default=None, help="events.jsonl 的落點")
     ap.add_argument("--dwell", type=float, default=30.0, help="沒人按的時候幾秒換一格")
-    ap.add_argument("--token", default="", help="可選：/control 的共享密鑰")
+    ap.add_argument("--token", default="",
+                    help="/control 的共享密鑰。非 loopback 綁定沒給就自動生一把")
+    ap.add_argument("--no-token", action="store_true",
+                    help="明確關掉 token（非 loopback 綁定＝區網上任何人都按得動）")
     ap.add_argument("--base-url", default="",
                     help="手機看得到的位址前綴（收據與 QR 都用它）。"
                          "展場一定要給區網 IP，不然 QR 會指到 127.0.0.1")
@@ -594,8 +713,9 @@ def main(argv=None) -> int:
 
     pack = json.loads(pathlib.Path(a.pack).read_text(encoding="utf-8"))
     out = pathlib.Path(a.out) if a.out else TWIN / "live" / "events.jsonl"
+    token, why = resolve_token(a.bind, a.token, a.no_token)
     srv, stage = make_server(pack, bind=a.bind, port=a.port, out=out,
-                             dwell=a.dwell, token=a.token, base_url=a.base_url)
+                             dwell=a.dwell, token=token, base_url=a.base_url)
     stop = threading.Event()
     threading.Thread(target=autoplay, args=(stage, stop), daemon=True).start()
     host = a.bind if a.bind != "0.0.0.0" else "127.0.0.1"
@@ -607,11 +727,20 @@ def main(argv=None) -> int:
     print(f"  {len(stage.pl.pairs)} 對（同一題 × 扣住／寫明）、"
           f"{len(stage.pl.cells)} 格、{a.dwell:g} 秒輪播一格")
     print("  ⚠ 這一支不驗簽章也不宣告驗證結果：可驗的那一份是收據頁（/r/<cell_id>）")
+    if why == "auto":
+        print(f"  ✓ /control 的 token（這次開機自動生的）：{token}")
+        print("    它已經編進上面那一行手機頁的網址與 QR 裡。**重開就會換一把。**")
+        print("    ⚠ 它擋的是「連上同一個 hotspot 但沒站在展件前面」的人。"
+              "看得到電視的人都按得動——這不是身分驗證。")
+    elif why == "given":
+        print("  ✓ /control 要 token（`--token` 指定的），已編進手機頁的網址與 QR")
+    elif why == "off-explicit" and a.bind != "127.0.0.1":
+        print("  ⚠⚠ `--no-token` ＋ 非 loopback 綁定："
+              "**同一個區網上的任何人都按得動這台電視**。")
+        print("     只有在「展件自己一台獨立熱點、沒有別人連得上」時才是對的。")
     if a.bind == "0.0.0.0" and "127.0.0.1" in stage.base_url:
         print("  ⚠ 綁在 0.0.0.0 但 --base-url 還是 127.0.0.1："
               "QR 會指到手機自己的迴路位址，掃了一定連不到。用 --base-url 給區網 IP。")
-    if a.bind == "0.0.0.0" and not a.token:
-        print("  ⚠ 綁在 0.0.0.0 而且沒有 --token：同一個區網上的任何人都按得動這台電視")
     stage.advance()
     try:
         srv.serve_forever()

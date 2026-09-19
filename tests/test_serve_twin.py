@@ -447,3 +447,127 @@ def test_receipt_urls_use_the_same_base_as_the_qr(pack, tmp_path):
     res = stage.advance()
     assert res["now"]["receipt_url"].startswith("http://10.0.0.7:8899/r/")
     assert stage.phone_url().startswith("http://10.0.0.7:8899/")
+
+
+# ── `--token` 預設開啟（DECISION_20260919_EXHIBIT_UNATTENDED.md §一）──────────
+#
+# 展場的 `exhibit_boot.sh --lan` 把 serve_twin 綁到 0.0.0.0。舊的預設是
+# 「`--token` 可選、預設空＝不驗」⇒ 同一個區網（展場 hotspot）上任何人都按得動
+# 那台電視。這一組把新的預設釘死。
+#
+# ⚠ 口徑：token **不是身分驗證**。看得到電視的人都拿得到它（它就印在 QR 裡）。
+#   它擋的是「連上同一個 hotspot、但沒站在展件前面」的人。測試只測這件事。
+
+def test_lan_bind_gets_a_token_without_anybody_asking():
+    """展場的那一種綁法，沒給 token 也**一定**會有一把。"""
+    tok, why = S.resolve_token("0.0.0.0", "", False)
+    assert why == "auto"
+    assert len(tok) >= 10          # secrets.token_urlsafe(9)
+    # 每一次都不一樣（不是寫死的一把）
+    assert tok != S.resolve_token("0.0.0.0", "", False)[0]
+
+
+def test_loopback_bind_stays_tokenless_so_local_dev_is_not_annoying():
+    for bind in ("127.0.0.1", "::1", "localhost"):
+        assert S.resolve_token(bind, "", False) == ("", "off-loopback")
+
+
+def test_an_explicit_token_wins_and_no_token_must_be_explicit():
+    assert S.resolve_token("0.0.0.0", "abc", False) == ("abc", "given")
+    assert S.resolve_token("0.0.0.0", "", True) == ("", "off-explicit")
+    # `--token` 與 `--no-token` 同時給：明確給的那把贏（不要靜靜關掉門檻）
+    assert S.resolve_token("0.0.0.0", "abc", True) == ("abc", "given")
+
+
+def _tokened(pack, tmp_path, token="s3cr3t", base="http://192.168.1.23:8899"):
+    out = tmp_path / "ev.jsonl"
+    srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
+                               dwell=10_000, quiet=True, token=token,
+                               base_url=base)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv, stage, Client(f"http://127.0.0.1:{srv.server_address[1]}")
+
+
+def test_control_is_403_without_the_token_and_200_with_it(pack, tmp_path):
+    srv, _stage, c = _tokened(pack, tmp_path)
+    try:
+        code, res = c.post({"action": "next"})
+        assert code == 403 and res["ok"] is False
+        code, res = c.post({"action": "next", "token": "wrong"})
+        assert code == 403
+        code, res = c.post({"action": "next", "token": "s3cr3t"})
+        assert code == 200 and res["ok"] is True
+    finally:
+        srv.shutdown(); srv.server_close()
+
+
+def test_the_qr_carries_the_token_or_the_phone_cannot_press_anything(pack, tmp_path):
+    """QR 是觀眾唯一的入口。token 沒編進去＝掃了進來一顆鍵都按不動。"""
+    srv, stage, c = _tokened(pack, tmp_path)
+    try:
+        assert stage.phone_url() == "http://192.168.1.23:8899/phone.html?t=s3cr3t"
+        st = c.get_json("/state")                     # 從 loopback 打（＝電視）
+        assert st["phone_url"].endswith("?t=s3cr3t")
+        assert st["control_token_required"] is True
+    finally:
+        srv.shutdown(); srv.server_close()
+
+
+def test_state_does_not_hand_the_token_to_the_rest_of_the_lan(pack, tmp_path):
+    """否則 token 只是**一個 GET 的距離**，等於沒有。
+
+    這裡直接測那個純函數的分流（`with_token=False`）：整合層的判準是
+    `venue_check.sh` 第七節，它從這台機器的區網位址真的打一次 `/state`。
+    """
+    _srv, stage, _c = _tokened(pack, tmp_path)
+    try:
+        assert "t=" not in stage.phone_url(with_token=False)
+        assert "t=" not in stage.state(with_token=False)["phone_url"]
+        # 但「有沒有門檻」這件事可以講（不講手機不知道要帶什麼）
+        assert stage.state(with_token=False)["control_token_required"] is True
+    finally:
+        _srv.shutdown(); _srv.server_close()
+
+
+def test_token_also_accepted_from_query_and_header(pack, tmp_path):
+    """少一條，展場當天就是「怎麼按都沒反應」。"""
+    srv, _stage, c = _tokened(pack, tmp_path)
+    try:
+        req = urllib.request.Request(
+            c.base + "/control?t=s3cr3t",
+            data=json.dumps({"action": "next"}).encode(),
+            headers={"content-type": "application/json"})
+        with urllib.request.urlopen(req) as r:
+            assert r.status == 200
+        req = urllib.request.Request(
+            c.base + "/control", data=json.dumps({"action": "next"}).encode(),
+            headers={"content-type": "application/json",
+                     "X-Twin-Token": "s3cr3t"})
+        with urllib.request.urlopen(req) as r:
+            assert r.status == 200
+    finally:
+        srv.shutdown(); srv.server_close()
+
+
+def test_read_only_endpoints_stay_open_because_the_tv_has_no_token(pack, tmp_path):
+    """電視、收據頁、事件流都不帶 token。把讀也擋住＝電視自己黑掉。"""
+    srv, _stage, c = _tokened(pack, tmp_path)
+    try:
+        for p in ("/state", "/live/events.jsonl", "/phone.html", "/viewer.html",
+                  "/qr.png"):
+            assert c.get(p)[0] == 200, p
+    finally:
+        srv.shutdown(); srv.server_close()
+
+
+def test_phone_page_sends_the_token_it_was_scanned_with():
+    """`phone.html` 一定要從自己的網址讀 `t=` 並帶進 POST。
+
+    漏掉這一行＝伺服器有門檻、手機沒有鑰匙，展場現象是「三顆鍵全部按不動」，
+    而畫面上不會說是為什麼。
+    """
+    html = (ROOT / "ops" / "exhibit" / "twin" / "phone.html").read_text("utf-8")
+    assert 'URLSearchParams(location.search).get("t")' in html
+    assert "JSON.stringify({ action, token: TOKEN })" in html
+    # 403 要講人話（那一定是「上一次開機留下來的分頁」）
+    assert "重新掃電視上的 QR" in html

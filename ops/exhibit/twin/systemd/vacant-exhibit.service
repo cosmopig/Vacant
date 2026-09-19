@@ -1,0 +1,51 @@
+[Unit]
+# 展場機開機之後，把展件叫回來。
+#
+# 為什麼要它（DECISION_20260919_EXHIBIT_UNATTENDED.md §二）：展期裡機器會重開
+# ——斷電、清潔人員、排程更新。在這一份之前，**重開之後沒有任何東西會把展件
+# 叫回來**，而且沒有人會發現，因為電視只是變成一片黑。
+#
+# 這一份**只管兩台伺服器**（電視的靜態站 ＋ 展件伺服器）。瀏覽器不在這裡：
+# 它要一個圖形工作階段，那是 `vacant-exhibit-kiosk.service`（user unit）的事。
+# 分開是故意的：伺服器這一半不需要有人登入就能活，把它綁在圖形工作階段上
+# ＝ 多一個會壞的東西。
+Description=Vacant 展件（電視靜態站 + 展件伺服器）
+Documentation=file://@@REPO@@/decisions/DECISION_20260919_EXHIBIT_UNATTENDED.md
+# --lan 要抓區網 IP 畫 QR。網路還沒起來就抓不到，exhibit_boot.sh 會 exit 2。
+# 有 Restart 接著，但先等一下比較不吵。
+# ⚠ **一定要關掉啟動速率限制。** 預設是「10 秒內失敗 5 次就永久放棄」，
+#   而「開機時網路還沒好」正好會連續失敗——放棄之後展件一整天都不會再起來，
+#   而且畫面上看不出來（只是黑的）。展場要的是「一直試」。
+StartLimitIntervalSec=0
+
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@@USER@@
+Group=@@USER@@
+WorkingDirectory=@@REPO@@
+Environment=VACANT_HM=@@HM@@
+Environment=PYTHONUNBUFFERED=1
+# 埠被**上一次自己留下來的**行程佔著就砍掉重來。只砍 cmdline 對得上
+# serve_twin.py／http.server 的；對不上照樣失敗（preflight 裡寫死）。
+Environment=VACANT_EXHIBIT_KILL_STALE=1
+
+ExecStartPre=@@REPO@@/ops/exhibit/twin/exhibit_preflight.sh --twin-port 8899 --tv-port 8420
+ExecStart=@@REPO@@/ops/exhibit/twin/exhibit_boot.sh --lan --dwell 30
+
+# 掉了就拉回來。展期一整天沒有人在看 exit code。
+Restart=always
+RestartSec=10
+# exhibit_boot.sh 會 fork 兩個子行程再 wait。control-group 保證停的時候
+# 兩個都一起走（不然下一次 ExecStartPre 會抱怨埠被佔）。
+KillMode=control-group
+TimeoutStopSec=15
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=vacant-exhibit
+
+[Install]
+WantedBy=multi-user.target

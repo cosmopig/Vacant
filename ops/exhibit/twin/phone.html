@@ -186,6 +186,15 @@ function evidenceText(level){ return EV_TEXT[level] || (level || "—"); }
 const $ = id => document.getElementById(id);
 let STATE = null, busy = false;
 
+/* `/control` 的 token：**只從這一頁自己的網址來**。
+ *
+ *  ⚠ 不要改成「跟伺服器要一把」——那等於沒有門檻。這一頁是掃 QR 進來的，
+ *    而 QR 是展件伺服器執行期畫的、內容就是帶 token 的這一行網址
+ *    （`serve_twin.py` 的 `Stage.phone_url`）。
+ *  ⚠ 這不是身分驗證：在場看得到電視的人都拿得到這把 token。
+ *    它擋的是「連上同一個 hotspot、但沒站在展件前面」的人。 */
+const TOKEN = new URLSearchParams(location.search).get("t") || "";
+
 function showTab(which){
   $("tab-d").setAttribute("aria-selected", which === "d");
   $("tab-a").setAttribute("aria-selected", which === "a");
@@ -212,9 +221,15 @@ async function press(action){
   try {
     const r = await fetch("/control", {
       method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action }),
+      body: JSON.stringify({ action, token: TOKEN }),
     });
     const j = await r.json();
+    if (r.status === 403){
+      // 403 的真實情境：這一頁是**上一次開機**留下來的書籤／分頁，
+      // 而 token 每次開機會換。講「按不動」會讓人一直按。
+      $("err").textContent = "這個連結過期了——請重新掃電視上的 QR。";
+      return;
+    }
     if (j.state) { STATE = j.state; render(); }
     if (!j.ok) $("err").textContent = j.error || "按不動";
     else $("err").textContent = "";

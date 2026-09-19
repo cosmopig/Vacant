@@ -13,9 +13,15 @@
 # 那是展場的現實，不是可以靜靜略過的細節。
 #
 #   ./exhibit_boot.sh                       本機兩台都起來
-#   ./exhibit_boot.sh --lan                 手機連得到（區網）
+#   ./exhibit_boot.sh --lan                 手機連得到（區網）＋自動生 token
+#   ./exhibit_boot.sh --lan --no-token      明知故犯：區網上任何人都按得動
 #   ./exhibit_boot.sh --hm /path/vacant_hm  vacant_hm 不在預設位置
 #   ./exhibit_boot.sh --dwell 25            沒人按的時候幾秒換一格
+#
+# ⚠ `--lan` **一定會有 token**（2026-09-19 起）。沒給 `--token`／`VACANT_TWIN_TOKEN`
+#   就這一次開機自動生一把，編進 QR 的網址裡。要關得明講 `--no-token`。
+#   為什麼是自動生不是拒絕啟動：見
+#   `decisions/DECISION_20260919_EXHIBIT_UNATTENDED.md` §一。
 #
 # 全程**零模型呼叫、零外網**。起來之後拔掉網路線照跑。
 set -euo pipefail
@@ -29,6 +35,8 @@ TWIN_PORT=8899
 DWELL=30
 BIND=127.0.0.1
 KIOSK=0
+TOKEN="${VACANT_TWIN_TOKEN:-}"
+NO_TOKEN=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -37,6 +45,8 @@ while [ $# -gt 0 ]; do
     --dwell)  DWELL="$2"; shift ;;
     --tv-port)   TV_PORT="$2"; shift ;;
     --twin-port) TWIN_PORT="$2"; shift ;;
+    --token)  TOKEN="$2"; shift ;;
+    --no-token)  NO_TOKEN=1 ;;
     --kiosk)  KIOSK=1 ;;
     *) echo "不認得的參數：$1" >&2; exit 2 ;;
   esac
@@ -62,14 +72,29 @@ fi
 HOST=127.0.0.1
 if [ "$BIND" = "0.0.0.0" ]; then
   LAN_IP="${VACANT_LAN_IP:-}"
+  # macOS：介面名字是 en0／en1，`ipconfig getifaddr` 只吐 IPv4。
   if [ -z "$LAN_IP" ]; then
-    for IF in en0 en1 eth0 wlan0; do
+    for IF in en0 en1; do
       LAN_IP="$(ipconfig getifaddr "$IF" 2>/dev/null || true)"
       [ -n "$LAN_IP" ] && break
-      LAN_IP="$(ip -4 -o addr show "$IF" 2>/dev/null \
-                | awk '{print $4}' | cut -d/ -f1 | head -1)"
-      [ -n "$LAN_IP" ] && break
     done
+  fi
+  # Linux：**不要猜介面名字。**
+  #
+  # ⚠ 2026-09-19 在 vacant-dev（Ubuntu 24.04）實測到的兩個坑，兩個都會
+  #   讓展場當天壞掉而且**畫面上看不出來**：
+  #   (a) 舊版寫死 `en0 en1 eth0 wlan0`，而這台的介面叫 `ens33`
+  #       ——名單全部落空。展場機叫什麼沒有人保證得了。
+  #   (b) 更糟的是舊版那一行 `LAN_IP="$(ip ... | awk | cut | head)"`
+  #       **沒有 `|| true`**，而這支腳本開著 `set -o pipefail`：
+  #       `ip` 對不存在的介面回 1 ⇒ 整條管線回 1 ⇒ `set -e` 當場結束腳本，
+  #       **exit 1、一個字都不印**，連下面那個 `hostname -I` 的退路都走不到。
+  #       在 systemd 底下就是每 10 秒重啟一次、journal 裡只有 status=1/FAILURE。
+  #   ⇒ 改成列出**真的存在的** global scope IPv4，並跳過不是區網的那幾類介面。
+  if [ -z "$LAN_IP" ] && command -v ip >/dev/null 2>&1; then
+    LAN_IP="$(ip -4 -o addr show scope global 2>/dev/null \
+              | awk '$2 !~ /^(tailscale|docker|veth|br-|virbr|zt|wg)/ {print $4}' \
+              | cut -d/ -f1 | head -1 || true)"
   fi
   if [ -z "$LAN_IP" ]; then
     LAN_IP="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
@@ -80,8 +105,34 @@ if [ "$BIND" = "0.0.0.0" ]; then
       echo "手機會連不到 ⇒ **不啟動**，免得展場掛一張掃不開的 QR。" >&2
       echo "用 VACANT_LAN_IP=<位址> 指定，或先把網路接好。" >&2
       exit 2 ;;
+    100.6[4-9].*|100.[7-9]?.*|100.1[01]?.*|100.12[0-7].*)
+      # 100.64.0.0/10 ＝ CGNAT，Tailscale 就住在這裡。展場 hotspot 上的手機
+      # **連不到這種位址**。這一條只警告不擋：有些場地真的用得到。
+      echo "⚠ 抓到的是 $LAN_IP（100.64.0.0/10＝CGNAT／Tailscale 那一段）。" >&2
+      echo "  展場 hotspot 上的手機多半連不到它 ⇒ QR 會掃不開。" >&2
+      echo "  要指定就用 VACANT_LAN_IP=<展場那張網卡的位址>。" >&2 ;;
   esac
   HOST="$LAN_IP"
+fi
+
+# token：**這一支自己決定，不要交給 serve_twin 自己生**。
+#
+# 理由很實際：QR 與開機橫幅都是這一支印的，而 serve_twin 自動生的那一把
+# 只活在它自己的 stdout 裡。兩邊各生一把＝橫幅印 A、伺服器認 B，
+# 而那個錯只有在展場有人按下去的時候才看得出來。
+# （serve_twin 那一端的自動生仍然留著，那是給「直接跑 serve_twin.py」的人的
+#   第二道保險，不是這條線的來源。）
+TOKEN_WHY=none
+if [ "$NO_TOKEN" = "1" ]; then
+  TOKEN=""
+  TOKEN_WHY=off-explicit
+elif [ -n "$TOKEN" ]; then
+  TOKEN_WHY=given
+elif [ "$BIND" = "0.0.0.0" ]; then
+  TOKEN="$("$PY" -c 'import secrets;print(secrets.token_urlsafe(9))')"
+  TOKEN_WHY=auto
+else
+  TOKEN_WHY=off-loopback
 fi
 
 cleanup(){ kill ${TV_PID:-} ${TWIN_PID:-} 2>/dev/null || true; }
@@ -91,9 +142,14 @@ trap cleanup EXIT INT TERM
 TV_PID=$!
 
 # --base-url 就是 QR 會編進去的東西。**一定要傳**，預設值是 127.0.0.1。
-"$PY" "$REPO/ops/exhibit/twin/serve_twin.py" \
-  --bind "$BIND" --port "$TWIN_PORT" --dwell "$DWELL" \
-  --base-url "http://$HOST:$TWIN_PORT" &
+TWIN_ARGS=(--bind "$BIND" --port "$TWIN_PORT" --dwell "$DWELL"
+           --base-url "http://$HOST:$TWIN_PORT")
+if [ -n "$TOKEN" ]; then
+  TWIN_ARGS+=(--token "$TOKEN")
+else
+  TWIN_ARGS+=(--no-token)
+fi
+"$PY" "$REPO/ops/exhibit/twin/serve_twin.py" "${TWIN_ARGS[@]}" &
 TWIN_PID=$!
 
 sleep 1
@@ -109,18 +165,28 @@ echo "  ✓ http://$HOST:$TWIN_PORT 自己連得到（QR 指的就是這個）"
 
 LIVE="http://$HOST:$TWIN_PORT/live/events.jsonl"
 TV_URL="http://127.0.0.1:$TV_PORT/world3/index.html?live=$LIVE&poll=2000"
+PHONE_URL="http://$HOST:$TWIN_PORT/phone.html"
+[ -n "$TOKEN" ] && PHONE_URL="$PHONE_URL?t=$TOKEN"
 
 echo
 echo "───────────────────────────────────────────────"
 echo " 電視 　$TV_URL"
-echo " 手機 　http://$HOST:$TWIN_PORT/phone.html   ← QR 編的就是這一行"
+echo " 手機 　$PHONE_URL   ← QR 編的就是這一行"
 echo " 收據 　http://$HOST:$TWIN_PORT/viewer.html"
 echo " QR   　http://$HOST:$TWIN_PORT/qr.png（執行期畫的）"
 echo "───────────────────────────────────────────────"
 if [ "$BIND" != "0.0.0.0" ]; then
   echo " ⚠ 只綁本機：手機連不到。展場要用 --lan。"
 else
-  echo " ⚠ 綁在 0.0.0.0：同一個區網上的任何人都按得動這台電視。"
+  case "$TOKEN_WHY" in
+    auto)  echo " ✓ /control 要 token（這次開機自動生的）：$TOKEN"
+           echo "   重開就會換一把。舊的分頁會收到 403，頁面上會叫他重掃。"
+           echo "   ⚠ 這不是身分驗證：看得到電視的人都按得動。它擋的是"
+           echo "     「連上同一個 hotspot、但沒站在展件前面」的人。" ;;
+    given) echo " ✓ /control 要 token（外面指定的），已編進 QR" ;;
+    *)     echo " ⚠⚠ --no-token：同一個區網上的任何人都按得動這台電視。"
+           echo "    只有在「展件自己一台獨立熱點」時才是對的。" ;;
+  esac
 fi
 echo " （Ctrl-C 結束）"
 echo
