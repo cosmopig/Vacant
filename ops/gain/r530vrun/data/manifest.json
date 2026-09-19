@@ -1,0 +1,199 @@
+{
+  "generated": "2026-09-19T09:50:53Z",
+  "not_preregistered": true,
+  "reading_discipline": "沒有預註冊 ⇒ 這些數字不可以當假說檢定；不准做統計檢定、不准與 R535／R530 原始結果合併、不准寫「複製」「效果消失」「等價」。能說的只有：在這 20 題上，X 是 a/b。",
+  "bank": "/var/tmp/vacant_r530vrun/repo/ops/gain/r530/bank",
+  "bank_sha256": "5672dd9eeff9313c212863990ed1ca18ffd82b39f14f9cb5c33e099d16b964e0",
+  "templates_sha256": "be18e4dcc74b7988bc612a9009b5f2899f6c94997060cadab6f60fcb7677def9",
+  "tasks": [
+    "ow_01_csvjson",
+    "ow_02_ratelimit",
+    "ow_03_mdtable",
+    "ow_04_layerconf",
+    "ow_05_router",
+    "ow_06_verrange",
+    "ow_07_retrypolicy",
+    "ow_08_logscan",
+    "ow_09_minitemplate",
+    "ow_10_dedupe",
+    "ow_11_reflow",
+    "ow_12_bytesize",
+    "ow_13_timespans",
+    "ow_14_statemachine",
+    "ow_15_tomlsub",
+    "ow_16_pathglob",
+    "ow_17_diffpatch",
+    "ow_18_taskorder",
+    "ow_19_redact",
+    "ow_20_slugify"
+  ],
+  "cells_n": 40,
+  "arms": {
+    "RF": [
+      "--retry",
+      "revise",
+      "--max-attempts",
+      "3",
+      "--feedback-into",
+      "file"
+    ],
+    "RP": [
+      "--retry",
+      "revise",
+      "--max-attempts",
+      "3",
+      "--feedback-into",
+      "prompt"
+    ]
+  },
+  "prompt": "Read goal.md and contract.md and do what they say. Use your tools to write the files.",
+  "model": "gemma-4-12b-it-qat",
+  "reasoning_effort": "none",
+  "test_timeout_s": 20.0,
+  "test_timeout_source": "probe_timeout.py: n=200 觀測，floor 0.030s / median 0.035s / p99 0.175s / max 0.369s；規則值 ceil(0.369x3)=2s **不使用**（理由見 RESULTS.md），作業值 20s = 54x 量到的最大值",
+  "agent_timeout_s": 900.0,
+  "sandbox": "auto",
+  "load_pause": 8.0,
+  "suites": {
+    "ow_01_csvjson": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_01_csvjson/tests_visible",
+      "sha256": "120b035baf9b584b4b981fa579315a2e354c03abe276861af6c0c45a6532902e",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_02_ratelimit": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_02_ratelimit/tests_visible",
+      "sha256": "72f0aa67627ee78900d6ac99abbae48961b81ddfdc0907b22b79c797645f8962",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_03_mdtable": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_03_mdtable/tests_visible",
+      "sha256": "a116643b68469cb08899c85103841ac13fc270bd37c83bac4f38df2d626f7ceb",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_04_layerconf": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_04_layerconf/tests_visible",
+      "sha256": "4a3ccc38a82558f28744364016358fb35d4ed2040be4900145c1e641f09e4408",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_05_router": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_05_router/tests_visible",
+      "sha256": "9ff375485abbd12724020e72c5f5d8987bf4bfa77316a868be967eb77a48b7bd",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_06_verrange": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_06_verrange/tests_visible",
+      "sha256": "ee1960330c59c46093f0f77e67ed5e5005f68369282014a8a760efc5d4292b59",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_07_retrypolicy": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_07_retrypolicy/tests_visible",
+      "sha256": "b968ea3063eabf431603e9885422bb051b2a78f36de1f708e8f09f494ea3375e",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_08_logscan": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_08_logscan/tests_visible",
+      "sha256": "654711a1abe0dd829e8c91ce1162d2c0291a7127c3a33bc5c271d8f9d6a854a1",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_09_minitemplate": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_09_minitemplate/tests_visible",
+      "sha256": "6276657885ee5319cd884812e89d2720db7c03e4e4b73f9c69091139c4d6866d",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_10_dedupe": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_10_dedupe/tests_visible",
+      "sha256": "b91443f9b57f30bc6f494035e7a87d383380aff70c926882bd615b7caf494ecc",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_11_reflow": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_11_reflow/tests_visible",
+      "sha256": "723dc62f3ff5db2312be027c4f3d79330665c11013951df9d28bd9f83ff62901",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_12_bytesize": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_12_bytesize/tests_visible",
+      "sha256": "67ba80680eb635e0aed903be222ea990b903132003503cc9b20c79b758ad9909",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_13_timespans": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_13_timespans/tests_visible",
+      "sha256": "b52e0319ec19a35102dfffdde0718fa83514b24f242b34cd5dd6b5586f963ac5",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_14_statemachine": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_14_statemachine/tests_visible",
+      "sha256": "58ed57f1f4cde75321214d810339d2ba824f0fd77e30a6f25df86dccf8325b29",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_15_tomlsub": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_15_tomlsub/tests_visible",
+      "sha256": "70be74c63af8cddd14f047116639b1c45ad02ebe591c13dfbe62239036466c39",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_16_pathglob": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_16_pathglob/tests_visible",
+      "sha256": "93dd4343fe91479e34121eccf3fb3618e8b328569075e686b489647ab62ae3d6",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_17_diffpatch": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_17_diffpatch/tests_visible",
+      "sha256": "17e8181a509477521b2610bbc6f484b6fc58ef0ffd12bea89980c9f52d112219",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_18_taskorder": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_18_taskorder/tests_visible",
+      "sha256": "4828e82799da6f2f159392f6bf159f734c7e1fd6981710b94f0f5948234778bb",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_19_redact": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_19_redact/tests_visible",
+      "sha256": "424791ec5d4786af6dbd9c1e9ef86b1513a734ae5ed7d680bc3a323e65eed36b",
+      "files": [
+        "test_visible.py"
+      ]
+    },
+    "ow_20_slugify": {
+      "suite_dir": "/var/tmp/vacant_r530vrun/run/suites/ow_20_slugify/tests_visible",
+      "sha256": "3ea6289d5053be279b594979b7454ee54a4a1db12210c712d1137d6acc8eb4a0",
+      "files": [
+        "test_visible.py"
+      ]
+    }
+  }
+}

@@ -171,9 +171,15 @@ def visible_timing(out: pathlib.Path, cell: dict) -> dict:
                         "timed_out": bool(f.get("timed_out")),
                         "kinds": sorted({c.get("kind")
                                          for c in f.get("cases", [])})})
+    # **餘裕要用「沒有逾時的那些」算**：逾時那一檔的牆鐘恆等於上限，
+    # 把它算進 max ⇒ 餘裕永遠是 1×，這個統計量在**一有逾時就退化**，
+    # 剛好在最需要它的時候失去意義。逾時另外點名。
+    ok_walls = [ (f["wall_s"]) for f in per if not f["timed_out"] ]
     return {"visible_suite_runs": len(per),
             "visible_suite_timeouts": n_timeout,
             "visible_suite_max_wall_s": round(max(walls), 3) if walls else None,
+            "visible_suite_max_wall_ok_s": (round(max(ok_walls), 3)
+                                            if ok_walls else None),
             "visible_suite_walls_s": [round(w, 3) for w in walls],
             "visible_suite_detail": per}
 
@@ -193,11 +199,22 @@ def ws_added(out: pathlib.Path, cell: dict) -> dict:
     `tests_visible/__pycache__` 存在 ⇒ 那組檢查被 import 過（跑過）。
     工作區裡多出 `test_*.py`／`*_test.py` ⇒ 他自己寫了一套。
     兩件事**可以同時發生**，也可以都不發生。**這是觀測不是判準。**
+
+    ⚠⚠ **這一支讀的是 live `ws/`，不是凍結快照**（2026-09-19 收官時抓到的
+    量測 bug）。`launcher._freeze()` 用
+    `shutil.copytree(..., ignore=shutil.ignore_patterns(*wshash.EXCLUDED_DIRS))`，
+    而 `EXCLUDED_DIRS` 含 `__pycache__` ⇒ **凍結快照裡永遠沒有 `__pycache__`**
+    ⇒ 在快照上問「跑過沒有」**結構上恆為 False**。第一版就是這樣算的，
+    印出 `0/40`，而 live 工作區其實有 **32/40**。
+    **一個結構上不可能為真的量測，印出來的 0 不是發現，是 bug。**
+    （隱藏驗收仍然跑在**凍結快照**上——那是閘門判決時看到的位元組，兩者用途不同。）
     """
-    src, how = graded_dir(out, cell)
+    live = out / "cells" / cell["cell"] / "ws"
+    src = live if live.is_dir() else None
+    how = "live_ws"
     if src is None:
         return {"ws_added_files": None, "ws_ran_shipped_checks": None,
-                "ws_wrote_own_tests": None}
+                "ws_wrote_own_tests": None, "ws_snapshot": "missing"}
     names = sorted(str(p.relative_to(src)) for p in src.rglob("*")
                    if p.is_file()
                    and "__pycache__" not in p.relative_to(src).parts)
@@ -330,6 +347,12 @@ def main(argv: list[str] | None = None) -> int:
     measured = [c for c in cells if c.get("cell_status") == "measured"]
     void = [c for c in cells if c.get("cell_status") == "infra_void"]
     add(f"## 逐臂（measured {len(measured)} 格、infra_void {len(void)} 格）")
+    add("")
+    add("⚠ **`infra_void` 不是失敗格**（鐵律 3）：它的 `accepted` 落 `null` 不落 "
+        "`false`，**不進下表任何分母**。`requests_seen == 0` ＝ agent 根本沒被"
+        "中介到，那是接線壞了不是模型答不出來。"
+        + (f"　本批 infra_void：{', '.join(c['cell'] for c in void)}"
+           if void else "　本批 infra_void ＝ 0 格。"))
     add("")
     add("| 臂 | n | accepted | 單發過（att1） | stop_reason 分佈 | "
         "hidden 全過 | 逾時嘗試 |")
@@ -495,16 +518,19 @@ def main(argv: list[str] | None = None) -> int:
     vt = [c["cell"] for c in cells if c.get("visible_suite_timeouts")]
     ht = [c["cell"] for c in cells
           if any(f.get("timed_out") for f in (c.get("hidden_files") or []))]
-    vw = dist([c.get("visible_suite_max_wall_s") for c in cells])
+    vw = dist([c.get("visible_suite_max_wall_ok_s") for c in cells])
     add(f"* **可見驗收逾時**（真跑，`--test-timeout` {timeout_s}s）："
         f"{len(vt)} 格{'：' + ', '.join(vt) if vt else ''}")
     add(f"* **隱藏驗收逾時**（事後計分，同一個值）："
         f"{len(ht)} 格{'：' + ', '.join(ht) if ht else ''}")
-    if vw:
-        add(f"* 可見驗收**實際用掉**的單檔牆鐘（n={vw['n']} 格的最大值）："
-            f"min {vw['min']} / median {vw['median']} / p90 {vw['p90']} / "
-            f"max {vw['max']} 秒 ⇒ 相對 {timeout_s}s 的餘裕 "
-            f"{(timeout_s / vw['max']):.0f}×" if vw["max"] else "")
+    if vw and vw.get("max"):
+        add(f"* 可見驗收**實際用掉**的單檔牆鐘（**只算沒有逾時的**，"
+            f"n={vw['n']} 格的最大值）：min {vw['min']} / median {vw['median']} "
+            f"/ p90 {vw['p90']} / max {vw['max']} 秒 ⇒ 相對 {timeout_s}s 的餘裕 "
+            f"{(timeout_s / vw['max']):.0f}×")
+        add("  ⚠ 餘裕**刻意排除逾時的那些**：逾時那一檔的牆鐘恆等於上限，"
+            "算進去餘裕就永遠是 1×——那個統計量會在**一有逾時就退化**，"
+            "剛好在最需要它的時候失去意義。")
     orph = sum(1 for c in measured for a in (c.get("attempts") or [])
                if a.get("orphans_killed"))
     add(f"* `orphans_killed`（框架留孤兒行程的嘗試數）：{orph}")

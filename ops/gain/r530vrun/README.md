@@ -141,4 +141,4 @@ python3 ops/gain/r530vrun/score_r530vrun.py --out $OUT
 
 ## 結果
 
-見 `RESULTS.md`（同目錄）。
+見 `RESULTS.md`（同目錄）；落盤證據在 `data/`（`data/README.md` 說明每一份是什麼、怎麼重算）。
