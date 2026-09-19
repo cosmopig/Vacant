@@ -85,6 +85,60 @@
 - `vacant_network/blayer.py` — B 層機制驗收六情境（0→70% 步進 × on/off 雙組，判準寫死）
 - `vacant_network/checkpoint.py` — V1 存檔點認證＋回溯稽核（18 §2；存檔點自身成鏈）
 - `vacant_network/dashboard.py` — 觀測台＋/api/roster/scoreboard/**snapshot**（面板非信任來源）
+
+### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）
+
+⚠ **這 15 支在 2026-09-20 之前完全沒有出現在這張地圖上**，而它現在是「**Vacant 附身在
+任何 agent 上**」的全部實作。裁決在 `decisions/DECISION_20260920_*.md` 五份。
+
+- `possess.py` — **`vacant install`**：把 proxy 端點寫進五個 agent **自己的常駐設定檔**
+  ⇒ 通道層做得到**真正的預設**（關掉終端機、重開機、打完整路徑都還在）。
+  `NEVER_TOUCH` 守住所有 `auth.json`。也釘 Codex 的 `sandbox_mode` 並把
+  `agent_posture{sandbox_mode, approval_policy, flags[]}` 寫進收據
+  （讀不出來寫 `null` **不寫空字串**）。
+- `gateshim.py` — 閘門那一側（PATH shim）。退出碼 `0`／`20` 拒交／**`21` 沒有驗收可跑**
+  （`accepted=null`）／`22` infra_void／**`23` `requests_seen==0` 裁決不可歸因**
+  ／**`24` B 級**／**`25` B′ 級**／**`26` C 級拒發收據**。
+  ⚠ **`21`／`23` 的既有語意不可以動**；級別**不准蓋 `22`**。
+  ⚠ PATH shim **打完整路徑就繞過**，而且對 `bash -c`（腳本／cron／`ExecStart=`）**收不到**
+  ——那條**修不掉、只能明講**。**它不承重**，承重的是下面那兩層。
+- `wireproxy.py` ＋ `proxyd.py` — 中介與常駐反向代理。**`sentinel=""`：Authorization 原樣穿透，
+  proxyd 永不持有金鑰**（改碼要保住，有兩面測試＋正控制）。
+  `proxyd` 有 **AF_UNIX listener**（`--port` 與 `--unix` 是 xor）＝ enclosure 那扇門；
+  `path_policy` 跟著聽法走（`--unix` ⇒ `model` fail-closed、`--port` ⇒ `any` ＝舊行為），
+  非模型 path **在開任何連線之前**回 403、另計 `refused_path`（**刻意不併進 `blocked`**）。
+  ⚠ **政策在 path 層不在內容層**：擋得住 `/admin` ≠ 擋得住
+  「把資料裝進一個合法的模型請求帶出去」。
+- `sandbox.py` — `BwrapSandbox`。⚠ **這支的招式是整個方案的關鍵**：最小 rootfs 之下
+  那條通道**不可表達**，而不是「存在但我們不准」。**同一招用在網路上就是 enclosure**
+  （netns ＋ mount ns）。⚠ **`unshare -n` 單獨不夠**——只殺抽象 socket，
+  **路徑型 socket 要 mount ns**。分辨錯整個結論就垮。
+- `attest.py` ＋ `hookcli.py` — 收據認證。四個欄位
+  `enclosure{ns_id,policy_sha256,applied}`／`framework_hook{canary_fired}`／
+  `reconciled{unexplained}`／`tier`，簽進 `ws_verdict`。
+  **級別由探針決定，不准用「我們裝過了」推論「它在」**（`canary_fired=null` ＝沒裝過、
+  `=false` ＝裝了沒燒）。三態防呆可執行：**`0` 混進布林欄位會炸**、
+  數字欄位**先把 `bool` 踢掉**（`isinstance(True,int)` 為真）。
+  ⚠ `VACANT_ATTEST` **預設 `warn` 不是 `fail`**（macOS 沒 bwrap ⇒ 預設 fail 等於
+  Mac 上每跑都拒發收據）。**展場那條線必須 `VACANT_ATTEST=fail`。**
+- `verify_receipts.py` — `mediation_of()`／`attestation_of()`／`--require-tier`（**預設關**）。
+  四值裁決 OK→0、VOID→3、BROKEN→1、UNVERIFIABLE→1。
+- `envmap.py` — `SINK_UPSTREAM`／`is_sink`：**未指定 upstream 要 fail-closed**，
+  不可以安靜地去打公開 API（`envmap` 誠實邊界 2 有活體標本）。
+
+**證據落盤**：`ops/vacantrun/enclosure_20260920/`（圍牆＋門，兩支一鍵重跑，
+`run_probes.sh` **一定先跑負控制**）、`ops/vacantrun/codex_managed_20260920/`
+（Codex managed requirements，26 個 probe 檔）、`ops/vacantrun/possess_linux_20260920/`。
+
+🔴 **口徑（不准漂）**：
+- ❌ 「不會被繞過」——圍牆**外面**什麼都連得到。
+- ❌ 「**這個 agent** 是 A 級」——級別是**這一跑**的屬性。
+- ❌ 「閘門擋下 X 格」——那個數字**綁在那一個框架＋那一個後端上**
+  （三家判決方向一致只有 4/10 題）。
+- ✅ 「**A 級的那一跑**，每一通模型呼叫都經過 Vacant，且都對得上一個工具事件。」
+- ✅ 跨框架成立的那句：「**agent 自己宣告完成、退出碼 0 走人，閘門仍在行程結束那一刻擋下來**」
+  （11 個拒交格裡 9 格如此，三個框架都出現）。
+
 - `examples/x1_pilot.py` — 遷移 pilot 進入點（--loader x1|builtin|evalplus、--stub 閘門）
 - `examples/b_layer.py` — B 層六情境掃描 runner（預設每格 1000 seeds）
 - `docs/PREREG_V2.md` — 預註冊凍結總表（草稿待人類簽字＋ledger 簽入）
