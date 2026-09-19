@@ -17,19 +17,19 @@
   ],
   "caveat_record_spec": "G 系列 run 目錄（`g_*`）**不是** RECORD_SPEC §1 的證據包——它們沒有 manifest.json / ledger_events.jsonl / chain_verify.txt / anomalies.md / SHA256SUMS，用的是 gain_run.py 自己的 summary.json + rows/calls/notes 版面。符合 RECORD_SPEC 的只有 `blayer_*` 那幾個 B 層掃描。每個目錄的 `record_spec` 欄位逐項列出缺哪些。",
   "counts": {
-    "entries": 717,
-    "dirs": 345,
+    "entries": 718,
+    "dirs": 346,
     "top_level_files": 372,
     "dirs_with_summary_json": 172,
     "by_kind": {
       "aborted": 9,
       "analysis": 136,
-      "other": 22,
+      "other": 23,
       "real_run": 165,
       "replay": 1,
       "smoke": 12
     },
-    "total_bytes": 727480453
+    "total_bytes": 727690891
   },
   "runs": [
     {
@@ -37127,7 +37127,9 @@
         ],
         "is_record_spec_pack": false
       },
-      "decision_refs": [],
+      "decision_refs": [
+        "decisions/DECISION_20260919_TWIN_EXHIBIT.md"
+      ],
       "verdict_decisions": [],
       "related_settlements": [],
       "headline": null,
@@ -37572,6 +37574,947 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "twin_fixture_20260919",
+      "kind": "other",
+      "subkind": "unclassified",
+      "date": "2026-09-19",
+      "date_source": "run_name",
+      "seed": null,
+      "backend": {
+        "endpoint": null,
+        "slot_host": null,
+        "server_model": null,
+        "declared": null,
+        "sidecars": []
+      },
+      "bank": {
+        "family": null,
+        "version": null,
+        "match": "no_rows",
+        "n_task_ids": 0,
+        "candidates": []
+      },
+      "arms": [],
+      "n_rows": 0,
+      "n_rows_by_arm": {},
+      "n_distinct_task_ids": 0,
+      "terminal": null,
+      "complete": null,
+      "infra_void": null,
+      "runner_git": {
+        "sha": null,
+        "dirty": null,
+        "branch": null
+      },
+      "n_files": 147,
+      "bytes": 210438,
+      "files": [
+        {
+          "name": "events.jsonl",
+          "bytes": 26759,
+          "sha256": "e3ad685e770ce6de59c3955d20b6205447034123c27987c574698f4879793372",
+          "lines": 109
+        },
+        {
+          "name": "fixture_agent.py",
+          "bytes": 839,
+          "sha256": "0e95224092d9c6b07a9ee05386e2114a8aec058db8eeea400a373d3e16d63555",
+          "lines": 16
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__held/_frozen_RUN-ON/TASK.md",
+          "bytes": 392,
+          "sha256": "8257ace297526128b6508eae7deec0b4d3b09e5ea2b9fc4361adb6d1ab6883a3",
+          "lines": 14
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__held/_frozen_RUN-ON/solution.py",
+          "bytes": 71,
+          "sha256": "e7f018d15cf4f7906638bfd1b52b2d18263b491ffd555320de3eb0b9cc970c3a",
+          "lines": 6
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__held/receipts_RUN-ON.ndjson",
+          "bytes": 2038,
+          "sha256": "5ec4b0ae0912d5c6fd0d4ad21e2fef5ad280e8b116088b104509b3d721b827f4",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__held/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "0f21f8c392839ff0772f326e9d4b7fbc88f93683770cede6d76f98a4bca6fc8f",
+          "lines": 0
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__held/rows.jsonl",
+          "bytes": 438,
+          "sha256": "20dfd7a43bfa3433bee4c8b7bb90ac7d7a7f57cb7c9db2eb59007e4a646a09e0",
+          "lines": 1
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__held/run_RUN-ON.json",
+          "bytes": 5022,
+          "sha256": "cecbd0be6d77a3fbe9cf852773380991a7bc12e1890d4aff5bc1fb0a6d1fea0a",
+          "lines": 121
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__held/twin_cell.json",
+          "bytes": 544,
+          "sha256": "e16d45642c344d92dca74425f389469baecf9e99f35882ff5f6d1091ce78ab82",
+          "lines": 17
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__held/visible_RUN-ON.json",
+          "bytes": 1054,
+          "sha256": "7c346df0f3169df0db2cd2a4219285ba791a1f10ba60d99fd147eb2854e0328d",
+          "lines": 37
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__pc/_frozen_RUN-ON/TASK.md",
+          "bytes": 455,
+          "sha256": "8a8e09baaa8f62653ad6cebcc1459174c7231e34c7b6be6f7f0a17d0604485e6",
+          "lines": 19
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__pc/_frozen_RUN-ON/solution.py",
+          "bytes": 66,
+          "sha256": "0825f76e4924c2e610b2ac94d5f2cc4d708272ee7bded5f40955d62e19b18871",
+          "lines": 6
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__pc/receipts_RUN-ON.ndjson",
+          "bytes": 2032,
+          "sha256": "9d2475715add1773e1741ed5419b339788eef99bdbdefd8f4228aea62f33e85d",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__pc/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "ab10d1e51515d1a4ce9af3262c635d94396c29f81c92a92958833e1d89b06aa5",
+          "lines": 0
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__pc/rows.jsonl",
+          "bytes": 436,
+          "sha256": "3eb12032b4b37448edf7543cdb0159bfc4e284deacf7788f1cf7e1204e4d3ca5",
+          "lines": 1
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__pc/run_RUN-ON.json",
+          "bytes": 4383,
+          "sha256": "1c1bdb3135d81350e810f045ab151e553f2362d7ef9143f52444c2b089b49cb6",
+          "lines": 121
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__pc/twin_cell.json",
+          "bytes": 538,
+          "sha256": "1fa1ef492a70931a3cc03b7f44c9d62050a98eca3ee24ac08739665cd1eda8b1",
+          "lines": 17
+        },
+        {
+          "name": "runs/DUL-89__s1_01_addmul__pc/visible_RUN-ON.json",
+          "bytes": 780,
+          "sha256": "1ac2af8c6b2b4c66a3abed2847654a84f5750cacc4817c5f1f35c703f27dc1f2",
+          "lines": 37
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__held/_frozen_RUN-ON/TASK.md",
+          "bytes": 385,
+          "sha256": "0766dc303239d2f7c31e0e7a1d46e86734c3f259b370b2b498997f7726bc4f31",
+          "lines": 10
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__held/_frozen_RUN-ON/solution.py",
+          "bytes": 58,
+          "sha256": "5b10bb580931da59ad174661dd91565e3df99ee651269be8c9927298002fe471",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__held/receipts_RUN-ON.ndjson",
+          "bytes": 2034,
+          "sha256": "ec425cab300d01ee2e1d2b06a34ce3aae531a108481c0e15c140ca3de2853714",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__held/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "e98698e6fca383a5f8c8e8c56c5ca7c15ee8bdd92ef649d89eaae77512fa4b82",
+          "lines": 0
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__held/rows.jsonl",
+          "bytes": 436,
+          "sha256": "7b212a95c8ffe1ced135ae3110873736a02782c772d5ae77397a2f92eea9a7f8",
+          "lines": 1
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__held/run_RUN-ON.json",
+          "bytes": 5652,
+          "sha256": "631af633bfc1fd27dfabe324b43fb905bee42eac9fe0de21c9421e8f20192a21",
+          "lines": 121
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__held/twin_cell.json",
+          "bytes": 538,
+          "sha256": "f4a7dea2a4aa81a8003c1810d921cbbe30c90da025bb4275b226adbb51916e25",
+          "lines": 17
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__held/visible_RUN-ON.json",
+          "bytes": 1325,
+          "sha256": "ea5dc08c55ccabc49baba4e18078805b78cddc316bc16f3fa69650ba82d6877f",
+          "lines": 37
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__pc/_frozen_RUN-ON/TASK.md",
+          "bytes": 452,
+          "sha256": "ae558d8969f9bf1a97c6e44633ee6b527a4bc4c5eaa43764e47c953e77720143",
+          "lines": 14
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__pc/_frozen_RUN-ON/solution.py",
+          "bytes": 56,
+          "sha256": "e118f0cc837bfcd2a329349805e7a18e0dc14c2fc009fe64c2221dd2a91a8935",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__pc/receipts_RUN-ON.ndjson",
+          "bytes": 2028,
+          "sha256": "12b65197b5c8e454756ca72f419729a84c2eebb266e8c39b0e41f20c99772510",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__pc/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "36ed92e4dcbb278c541736f1dbd84a92bb655bd175208ecf26e4917577e4554f",
+          "lines": 0
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__pc/rows.jsonl",
+          "bytes": 434,
+          "sha256": "29e8cc2e5213b00068fc4f3f3814a5664b63c538139159abc1dc1b41477c53a8",
+          "lines": 1
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__pc/run_RUN-ON.json",
+          "bytes": 4375,
+          "sha256": "5d046a6f101bfb1f25d8504c12befec7a03d1bac88a0e430b59578af837e6928",
+          "lines": 121
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__pc/twin_cell.json",
+          "bytes": 532,
+          "sha256": "14f3713dba15b995965afa057944fee93b937aa596dd9921379f4ad4fa71c930",
+          "lines": 17
+        },
+        {
+          "name": "runs/DUL-89__s1_02_span__pc/visible_RUN-ON.json",
+          "bytes": 780,
+          "sha256": "d53dee317cfdb95826571585cb2bdfe04c92034de0b543d872def271e1788a88",
+          "lines": 37
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__held/_frozen_RUN-ON/TASK.md",
+          "bytes": 354,
+          "sha256": "676804e1d9c95c0a0bae3eef4867fca8efe591629c47bc7a98a6f85eded6287c",
+          "lines": 10
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__held/_frozen_RUN-ON/solution.py",
+          "bytes": 52,
+          "sha256": "fc0daec6c00ee42a36abde60c7a395a2e496c59c59617a980c653cea880ffa88",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__held/receipts_RUN-ON.ndjson",
+          "bytes": 2038,
+          "sha256": "4bdf2c68aa8fabe75d86e42456e260952517c16498a25aa3b1134286bd2dfcad",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__held/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "f14f22151c4c47fbd7fe5bb6ab2a64defe4539b28e67f8532d3195d224f5ae7f",
+          "lines": 0
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__held/rows.jsonl",
+          "bytes": 438,
+          "sha256": "5d5ea7b570142fdfc04a7be02f581b82a01a94b8d58721be49795ec3e33d522e",
+          "lines": 1
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__held/run_RUN-ON.json",
+          "bytes": 5702,
+          "sha256": "5de8c5289e7a371709529f15f260a924f2e6212f1723441b023737eebed93cc7",
+          "lines": 121
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__held/twin_cell.json",
+          "bytes": 544,
+          "sha256": "5d9119fa4efa2e9fd0336cf7b4b3a5e256985014da8578ece4534bb37160fdf5",
+          "lines": 17
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__held/visible_RUN-ON.json",
+          "bytes": 1349,
+          "sha256": "73b33bd407d415d1b0bb04e5cec5e152f808ef198f2f75cba5f71cdcc7e48a01",
+          "lines": 37
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__pc/_frozen_RUN-ON/TASK.md",
+          "bytes": 394,
+          "sha256": "b9aff2c7ff118ff4feb679de443666b2a08f0fdee2a329eee361f80e2bd86844",
+          "lines": 14
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__pc/_frozen_RUN-ON/solution.py",
+          "bytes": 48,
+          "sha256": "1988be51c2df3020cbd77c0a8f7fb40f227c54e6d055ad862e17213cbcdd1d46",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__pc/receipts_RUN-ON.ndjson",
+          "bytes": 2032,
+          "sha256": "f61b7ec8bc0156152a3e959861d63452034a4428934aecec747afb621c5e1001",
+          "lines": 2
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__pc/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "587ec735700a172dca1b4600a8f6d501917193e910299e4fa8fe43c1d9d44493",
+          "lines": 0
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__pc/rows.jsonl",
+          "bytes": 436,
+          "sha256": "070c025cb9ea059f651b602955e14ae2a6ce5889c86c81bdecf06f939e66960e",
+          "lines": 1
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__pc/run_RUN-ON.json",
+          "bytes": 4383,
+          "sha256": "388591631296ca019d878a6873b93ba2fd6ab4c24e3a67f80a7ac772df058b0f",
+          "lines": 121
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__pc/twin_cell.json",
+          "bytes": 538,
+          "sha256": "49adc24dcd4e0372b94acea3e8fbff87dca58785934dbdd47ad2328768cb19e8",
+          "lines": 17
+        },
+        {
+          "name": "runs/DUL-89__s1_03_nwords__pc/visible_RUN-ON.json",
+          "bytes": 788,
+          "sha256": "819158e0f6f5949f0b86003f280f5fe238a30268b6b9fb49c1e8c637464a5d40",
+          "lines": 37
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__held/_frozen_RUN-ON/TASK.md",
+          "bytes": 392,
+          "sha256": "8257ace297526128b6508eae7deec0b4d3b09e5ea2b9fc4361adb6d1ab6883a3",
+          "lines": 14
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__held/_frozen_RUN-ON/solution.py",
+          "bytes": 71,
+          "sha256": "e7f018d15cf4f7906638bfd1b52b2d18263b491ffd555320de3eb0b9cc970c3a",
+          "lines": 6
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__held/receipts_RUN-ON.ndjson",
+          "bytes": 2038,
+          "sha256": "ffed33fc167244496ddbb6734fb9211052d8bf2e741a2969f3edf0997b297e1b",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__held/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "5995d4b4bdd58de86ce8045604c5c04e5acef3ca6b9f0e66b4443d2b871114d7",
+          "lines": 0
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__held/rows.jsonl",
+          "bytes": 438,
+          "sha256": "20dfd7a43bfa3433bee4c8b7bb90ac7d7a7f57cb7c9db2eb59007e4a646a09e0",
+          "lines": 1
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__held/run_RUN-ON.json",
+          "bytes": 5022,
+          "sha256": "0b06daab8a22f2da85b444e67d90a51c42814ac86c30404402aacf3df000e907",
+          "lines": 121
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__held/twin_cell.json",
+          "bytes": 544,
+          "sha256": "d79f127a1d177ddb09e6fb4f055649c09120b0d09956c2214d1309e9b7345f44",
+          "lines": 17
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__held/visible_RUN-ON.json",
+          "bytes": 1054,
+          "sha256": "80ec7fb56157ba96584b3d4a35e64b7c8d2d403e8034f5500ed588ec8d7ec79c",
+          "lines": 37
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__pc/_frozen_RUN-ON/TASK.md",
+          "bytes": 455,
+          "sha256": "8a8e09baaa8f62653ad6cebcc1459174c7231e34c7b6be6f7f0a17d0604485e6",
+          "lines": 19
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__pc/_frozen_RUN-ON/solution.py",
+          "bytes": 66,
+          "sha256": "0825f76e4924c2e610b2ac94d5f2cc4d708272ee7bded5f40955d62e19b18871",
+          "lines": 6
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__pc/receipts_RUN-ON.ndjson",
+          "bytes": 2032,
+          "sha256": "0bff9da83b5baded391761e2bbd05f5e7f0ba309c2ebe5a92001cdad9c168c12",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__pc/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "200293c51d29148a8a0641c6e56df5ba2f1dea99e7d48e2766d59d7dc6a1914c",
+          "lines": 0
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__pc/rows.jsonl",
+          "bytes": 436,
+          "sha256": "3eb12032b4b37448edf7543cdb0159bfc4e284deacf7788f1cf7e1204e4d3ca5",
+          "lines": 1
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__pc/run_RUN-ON.json",
+          "bytes": 4383,
+          "sha256": "52736e0679450db88ad5cabb29ad42a8a60306566d9bbf4b3d0e1be765b99bc4",
+          "lines": 121
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__pc/twin_cell.json",
+          "bytes": 538,
+          "sha256": "d928d1b93b7242670e31e1ab38bdcb794a4dd4e9c0e2ef80fed4615265deadb2",
+          "lines": 17
+        },
+        {
+          "name": "runs/KAL-52__s1_01_addmul__pc/visible_RUN-ON.json",
+          "bytes": 780,
+          "sha256": "a590b05f3412f8f33656488a96952ce50e1532d158d1671c1ba11ac2ec3ea00e",
+          "lines": 37
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__held/_frozen_RUN-ON/TASK.md",
+          "bytes": 385,
+          "sha256": "0766dc303239d2f7c31e0e7a1d46e86734c3f259b370b2b498997f7726bc4f31",
+          "lines": 10
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__held/_frozen_RUN-ON/solution.py",
+          "bytes": 58,
+          "sha256": "5b10bb580931da59ad174661dd91565e3df99ee651269be8c9927298002fe471",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__held/receipts_RUN-ON.ndjson",
+          "bytes": 2034,
+          "sha256": "57989cc9e9444dfcdca8483b2efa483da6ba10712d9c59996f9ceff12129475a",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__held/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "ebbe1ffba46d07fd19372773d637812f3bd1772f0836dd40198cca4188cce492",
+          "lines": 0
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__held/rows.jsonl",
+          "bytes": 436,
+          "sha256": "7b212a95c8ffe1ced135ae3110873736a02782c772d5ae77397a2f92eea9a7f8",
+          "lines": 1
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__held/run_RUN-ON.json",
+          "bytes": 5652,
+          "sha256": "84bf10bf79c39fbbfb54c64b85d1d9236061f0ef8e45cb8a3ab0c5f640e54b5e",
+          "lines": 121
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__held/twin_cell.json",
+          "bytes": 538,
+          "sha256": "4969f64dbfbab4b0e96430ca7a8cb4bfdd5df76e37731c0a97b8856f586354e8",
+          "lines": 17
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__held/visible_RUN-ON.json",
+          "bytes": 1325,
+          "sha256": "db994869ee6157fb258192cae0812660c8e903be366577e162a32c952f4aa584",
+          "lines": 37
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__pc/_frozen_RUN-ON/TASK.md",
+          "bytes": 452,
+          "sha256": "ae558d8969f9bf1a97c6e44633ee6b527a4bc4c5eaa43764e47c953e77720143",
+          "lines": 14
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__pc/_frozen_RUN-ON/solution.py",
+          "bytes": 56,
+          "sha256": "e118f0cc837bfcd2a329349805e7a18e0dc14c2fc009fe64c2221dd2a91a8935",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__pc/receipts_RUN-ON.ndjson",
+          "bytes": 2028,
+          "sha256": "20a692778762d4a74856b84bbc11bbadb74ae786887339720cd9b276e954e102",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__pc/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "5c3870aea4ff37401b5cc61eab26de9269452382cbb6bc655cded329be072663",
+          "lines": 0
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__pc/rows.jsonl",
+          "bytes": 434,
+          "sha256": "29e8cc2e5213b00068fc4f3f3814a5664b63c538139159abc1dc1b41477c53a8",
+          "lines": 1
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__pc/run_RUN-ON.json",
+          "bytes": 4373,
+          "sha256": "b3eb92d567c3aa9d93522d810e200ea0862a60d65d48d6c9b009bd08f55bd8a3",
+          "lines": 121
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__pc/twin_cell.json",
+          "bytes": 532,
+          "sha256": "89814d20e7af7c692b2ebd76b1bce6f14ccb4cf1af9cf95959a6449aa1958214",
+          "lines": 17
+        },
+        {
+          "name": "runs/KAL-52__s1_02_span__pc/visible_RUN-ON.json",
+          "bytes": 780,
+          "sha256": "34085c3f034f5d5ae84164c15c1d4584f924971b499a4a14ff68e893a8811057",
+          "lines": 37
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__held/_frozen_RUN-ON/TASK.md",
+          "bytes": 354,
+          "sha256": "676804e1d9c95c0a0bae3eef4867fca8efe591629c47bc7a98a6f85eded6287c",
+          "lines": 10
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__held/_frozen_RUN-ON/solution.py",
+          "bytes": 52,
+          "sha256": "fc0daec6c00ee42a36abde60c7a395a2e496c59c59617a980c653cea880ffa88",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__held/receipts_RUN-ON.ndjson",
+          "bytes": 2038,
+          "sha256": "0b9def7341508a05ccfba645823938dae81a8170957e7274bd264b4ba7ae2b82",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__held/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "7d64887036dc13d794843ea1c4dba5e56a97d99425060f0bc5b5651e7d1eb281",
+          "lines": 0
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__held/rows.jsonl",
+          "bytes": 438,
+          "sha256": "5d5ea7b570142fdfc04a7be02f581b82a01a94b8d58721be49795ec3e33d522e",
+          "lines": 1
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__held/run_RUN-ON.json",
+          "bytes": 5704,
+          "sha256": "6d939aff9d0cce1c5f3f05044e650502e33bac1cdfdb7dc758b334cefaf59e1a",
+          "lines": 121
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__held/twin_cell.json",
+          "bytes": 544,
+          "sha256": "87f67eb85ecd2f903d236d51f5a1ca1f2ed447953ba364fa23be2875ec271109",
+          "lines": 17
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__held/visible_RUN-ON.json",
+          "bytes": 1349,
+          "sha256": "48309e02fa898bdefd4365c70e57379f9d92480c2d9039bfb036c315d39e2e46",
+          "lines": 37
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__pc/_frozen_RUN-ON/TASK.md",
+          "bytes": 394,
+          "sha256": "b9aff2c7ff118ff4feb679de443666b2a08f0fdee2a329eee361f80e2bd86844",
+          "lines": 14
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__pc/_frozen_RUN-ON/solution.py",
+          "bytes": 48,
+          "sha256": "1988be51c2df3020cbd77c0a8f7fb40f227c54e6d055ad862e17213cbcdd1d46",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__pc/receipts_RUN-ON.ndjson",
+          "bytes": 2032,
+          "sha256": "eed0eef49dcf0b797744889c95eb86e4348331287fef2eefc29e5c10fae24904",
+          "lines": 2
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__pc/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "142ed33a7eb469ef1fd9cd64dd2c4cfbc9f14ce12f94f3cb9dda5860db29b114",
+          "lines": 0
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__pc/rows.jsonl",
+          "bytes": 436,
+          "sha256": "070c025cb9ea059f651b602955e14ae2a6ce5889c86c81bdecf06f939e66960e",
+          "lines": 1
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__pc/run_RUN-ON.json",
+          "bytes": 4383,
+          "sha256": "e77a62b2b2fd8b2d39551667576825d6432cc4afefb70c0c90095b83b093c1b2",
+          "lines": 121
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__pc/twin_cell.json",
+          "bytes": 538,
+          "sha256": "cad0e10966493293744433ed59d41aae50403045fa129d383b61ff94c5f00e0b",
+          "lines": 17
+        },
+        {
+          "name": "runs/KAL-52__s1_03_nwords__pc/visible_RUN-ON.json",
+          "bytes": 788,
+          "sha256": "ba5bd5688c7eec5d7df15901978f6c0dc5cf1bd99fb929cc15a3f14c72c0b14a",
+          "lines": 37
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__held/_frozen_RUN-ON/TASK.md",
+          "bytes": 392,
+          "sha256": "8257ace297526128b6508eae7deec0b4d3b09e5ea2b9fc4361adb6d1ab6883a3",
+          "lines": 14
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__held/_frozen_RUN-ON/solution.py",
+          "bytes": 71,
+          "sha256": "e7f018d15cf4f7906638bfd1b52b2d18263b491ffd555320de3eb0b9cc970c3a",
+          "lines": 6
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__held/receipts_RUN-ON.ndjson",
+          "bytes": 2038,
+          "sha256": "952380b305fdcc3b679c9ed292a3f1a81eaf65b427935e1e8cf8fa57b3faf805",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__held/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "3f999d71d2db54f99918b1903786872f8bb749a12101e86558789232aa6a0423",
+          "lines": 0
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__held/rows.jsonl",
+          "bytes": 438,
+          "sha256": "20dfd7a43bfa3433bee4c8b7bb90ac7d7a7f57cb7c9db2eb59007e4a646a09e0",
+          "lines": 1
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__held/run_RUN-ON.json",
+          "bytes": 5022,
+          "sha256": "53757b1231f308e89035fd3a69f6029dccfa36726fb0fdb209c8b4c54bd56fdb",
+          "lines": 121
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__held/twin_cell.json",
+          "bytes": 544,
+          "sha256": "4717c11a74880d1a6412c227f3b842f03235409c2325f79e061044c18319bd7d",
+          "lines": 17
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__held/visible_RUN-ON.json",
+          "bytes": 1054,
+          "sha256": "ab36a132366722eddb05d5a59855e9bc8cedd79301c4fdcd5bd1ac6809c75440",
+          "lines": 37
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__pc/_frozen_RUN-ON/TASK.md",
+          "bytes": 455,
+          "sha256": "8a8e09baaa8f62653ad6cebcc1459174c7231e34c7b6be6f7f0a17d0604485e6",
+          "lines": 19
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__pc/_frozen_RUN-ON/solution.py",
+          "bytes": 66,
+          "sha256": "0825f76e4924c2e610b2ac94d5f2cc4d708272ee7bded5f40955d62e19b18871",
+          "lines": 6
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__pc/receipts_RUN-ON.ndjson",
+          "bytes": 2032,
+          "sha256": "1777fc983b0df25ead51aeb2f85f171e68cc351dcfb985ae83aae6ca4cd80918",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__pc/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "c1a1a70fdec41b281da5d918a654c925c936edaaad74020188e68020b7b6f347",
+          "lines": 0
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__pc/rows.jsonl",
+          "bytes": 436,
+          "sha256": "3eb12032b4b37448edf7543cdb0159bfc4e284deacf7788f1cf7e1204e4d3ca5",
+          "lines": 1
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__pc/run_RUN-ON.json",
+          "bytes": 4383,
+          "sha256": "8915e73fd392727b2c063122947db0957472d1b5228ed1ce1b6e510d779c7edb",
+          "lines": 121
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__pc/twin_cell.json",
+          "bytes": 538,
+          "sha256": "9203896e12fcdb95f47076591f06dc00263b05664dc2ce61060607878e429298",
+          "lines": 17
+        },
+        {
+          "name": "runs/LIV-51__s1_01_addmul__pc/visible_RUN-ON.json",
+          "bytes": 780,
+          "sha256": "ddebcd0fb808fa65ff859b6a8b611810b91a7621e8e757d36be364b2a5e41961",
+          "lines": 37
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__held/_frozen_RUN-ON/TASK.md",
+          "bytes": 385,
+          "sha256": "0766dc303239d2f7c31e0e7a1d46e86734c3f259b370b2b498997f7726bc4f31",
+          "lines": 10
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__held/_frozen_RUN-ON/solution.py",
+          "bytes": 58,
+          "sha256": "5b10bb580931da59ad174661dd91565e3df99ee651269be8c9927298002fe471",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__held/receipts_RUN-ON.ndjson",
+          "bytes": 2034,
+          "sha256": "2c2d30fc3ec057dd40d2a9417e451c6f021cb3f3b3e373de6fc9bf740f2f0802",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__held/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "38b001a57f6748d21a0164f4a56b151a7300b473e13bfa7aabfd0a4957dcd933",
+          "lines": 0
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__held/rows.jsonl",
+          "bytes": 436,
+          "sha256": "7b212a95c8ffe1ced135ae3110873736a02782c772d5ae77397a2f92eea9a7f8",
+          "lines": 1
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__held/run_RUN-ON.json",
+          "bytes": 5652,
+          "sha256": "a9640052b56d89ac81cc772586c0d7b00d5f1dbeba1946fa837b109805a83dbc",
+          "lines": 121
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__held/twin_cell.json",
+          "bytes": 538,
+          "sha256": "6c566020bd24ff772f8206951eb2e6cc9861b4bc89e2da3666d1bc05f356188b",
+          "lines": 17
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__held/visible_RUN-ON.json",
+          "bytes": 1325,
+          "sha256": "f3d03e0f3905fea7f3e343b2e5a410c72c0f22eb55b1e6b88cf97d05aeecd95a",
+          "lines": 37
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__pc/_frozen_RUN-ON/TASK.md",
+          "bytes": 452,
+          "sha256": "ae558d8969f9bf1a97c6e44633ee6b527a4bc4c5eaa43764e47c953e77720143",
+          "lines": 14
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__pc/_frozen_RUN-ON/solution.py",
+          "bytes": 56,
+          "sha256": "e118f0cc837bfcd2a329349805e7a18e0dc14c2fc009fe64c2221dd2a91a8935",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__pc/receipts_RUN-ON.ndjson",
+          "bytes": 2028,
+          "sha256": "3f68b6f56e6f1a93d297503a07b145c4ff45df0f4c3390dd01f31ea5be256fa9",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__pc/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "3421127d2704b4927f6e34532049098951c018a0e1af0beea0d60eb1073cade0",
+          "lines": 0
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__pc/rows.jsonl",
+          "bytes": 434,
+          "sha256": "29e8cc2e5213b00068fc4f3f3814a5664b63c538139159abc1dc1b41477c53a8",
+          "lines": 1
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__pc/run_RUN-ON.json",
+          "bytes": 4375,
+          "sha256": "d73f1814018ef6ac3e5f40654c0d993e20e64be0780c63b7ac45936a2070571d",
+          "lines": 121
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__pc/twin_cell.json",
+          "bytes": 532,
+          "sha256": "2566bf4f3e363ff296c2044060e9cec75758b867c2ba7f3f7992047a286c022e",
+          "lines": 17
+        },
+        {
+          "name": "runs/LIV-51__s1_02_span__pc/visible_RUN-ON.json",
+          "bytes": 780,
+          "sha256": "10b4d96ab08735a3860f6ac4abb24421bb8e97d2cbfa6504c963096c6daf26fe",
+          "lines": 37
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__held/_frozen_RUN-ON/TASK.md",
+          "bytes": 354,
+          "sha256": "676804e1d9c95c0a0bae3eef4867fca8efe591629c47bc7a98a6f85eded6287c",
+          "lines": 10
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__held/_frozen_RUN-ON/solution.py",
+          "bytes": 52,
+          "sha256": "fc0daec6c00ee42a36abde60c7a395a2e496c59c59617a980c653cea880ffa88",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__held/receipts_RUN-ON.ndjson",
+          "bytes": 2038,
+          "sha256": "749bb038a8e628b9302c558d0023ab930e456082cfdae8d8293bc8b508d44604",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__held/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "d5f82a4350f810ec100a427acd8fa704d525eda229aaf6a196a91610bb8958ca",
+          "lines": 0
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__held/rows.jsonl",
+          "bytes": 438,
+          "sha256": "5d5ea7b570142fdfc04a7be02f581b82a01a94b8d58721be49795ec3e33d522e",
+          "lines": 1
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__held/run_RUN-ON.json",
+          "bytes": 5704,
+          "sha256": "f51a44482e3d88612ae45bc2ebb753fff2622b6a50643f3b374dd81c781fe86f",
+          "lines": 121
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__held/twin_cell.json",
+          "bytes": 544,
+          "sha256": "ff2015ea1bc569c82ff14be845df0cbb5c1d76099c9e6522615c13561e6d8b19",
+          "lines": 17
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__held/visible_RUN-ON.json",
+          "bytes": 1349,
+          "sha256": "077e8affd727b92e1cc725fcbb5e354cd786d23cc988b138b6b1038591f6ae50",
+          "lines": 37
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__pc/_frozen_RUN-ON/TASK.md",
+          "bytes": 394,
+          "sha256": "b9aff2c7ff118ff4feb679de443666b2a08f0fdee2a329eee361f80e2bd86844",
+          "lines": 14
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__pc/_frozen_RUN-ON/solution.py",
+          "bytes": 48,
+          "sha256": "1988be51c2df3020cbd77c0a8f7fb40f227c54e6d055ad862e17213cbcdd1d46",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__pc/receipts_RUN-ON.ndjson",
+          "bytes": 2032,
+          "sha256": "a4c8b8859e21562313642c9cb24259bdec755b2ec990c07917a47a9f35049432",
+          "lines": 2
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__pc/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "5c6879e41fd8453bc77fa72bc1f5c92b208318c04026321048c233ab5a090397",
+          "lines": 0
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__pc/rows.jsonl",
+          "bytes": 436,
+          "sha256": "070c025cb9ea059f651b602955e14ae2a6ce5889c86c81bdecf06f939e66960e",
+          "lines": 1
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__pc/run_RUN-ON.json",
+          "bytes": 4383,
+          "sha256": "8f5348e4cf7122cb7c7ee7c26a8ce64ba16ade4e4d1f10c491155da408927450",
+          "lines": 121
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__pc/twin_cell.json",
+          "bytes": 538,
+          "sha256": "9a6e25c9f0703b3aa70070d431537946d4f637a3becd9b9713a5d7a8571863a5",
+          "lines": 17
+        },
+        {
+          "name": "runs/LIV-51__s1_03_nwords__pc/visible_RUN-ON.json",
+          "bytes": 788,
+          "sha256": "59ce5a8cc45170f637487b97aad47e71893b8c707b9ee0cad67f8cf62a45d4ae",
+          "lines": 37
+        },
+        {
+          "name": "twin_index.json",
+          "bytes": 10974,
+          "sha256": "1ccc11d9c38ae51f6a50e955a6c214fd6946ef1fd3c226219c8c39a53aba8759",
+          "lines": 311
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "decisions/DECISION_20260919_TWIN_EXHIBIT.md"
+      ],
       "verdict_decisions": [],
       "related_settlements": [],
       "headline": null,
@@ -40134,8 +41077,8 @@
     },
     "mac_repo": {
       "runs_dir": "runs/",
-      "entries": 717,
-      "dirs": 345,
+      "entries": 718,
+      "dirs": 346,
       "top_level_files": 372,
       "all_tracked_in_git": true
     },
