@@ -234,12 +234,12 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `g_r348_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 33／20 | — | 否 | 38 | 5 | 0 |
 | `g_r356_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 432／178 | — | 否 | 101 | 21 | 5 |
 | `g_r439_revcheck_20260901` | 2026-09-01 | MBPP+ v0.2.0 | OFF/OFF5/ON | 23／13 | — | 否 | 14 | 1 | 1 |
-| `g_r460_harness_lcb2_a1` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
-| `g_r460_harness_lcb2_a2` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
-| `g_r460_harness_lcb2_a3` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
-| `g_r460_harness_lcb2_b1` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
-| `g_r460_harness_lcb2_b2` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
-| `g_r460_harness_lcb2_b3` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
+| `g_r460_harness_lcb2_a1` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_a2` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_a3` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_b1` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_b2` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_b3` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
 | `g_r530_s1_1003_1` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
 | `g_r530_s1_1003_2` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
 | `g_r530_s1_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 2 | 1 |
@@ -252,49 +252,49 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `g_r530_s3_1003_2` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
 | `g_r530_s3_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
 | `g_r530_s3_1004_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_hep_a1` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_hep_a2` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_hep_a3` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_hep_a4` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_hep_a5` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_hep_a6` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_hep_a7` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_hep_a8` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 48／16 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb2_a1` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb2_a2` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb2_a3` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb2_a4` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb2_a5` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb2_a6` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3h_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3h_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3h_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 42／14 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3m_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3m_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3m_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3m_a4` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3m_a5` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3m_a6` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_lcb3m_a7` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 45／15 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a1` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a10` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a11` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a12` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a13` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a14` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a15` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a16` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a17` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a18` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a19` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 33／11 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a2` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a3` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a4` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a5` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a6` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a7` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a8` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r532_mbpp_a9` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_hep_a1` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a2` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a3` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a4` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a5` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a6` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a7` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a8` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 48／16 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a1` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a2` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a3` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a4` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a5` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb2_a6` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3h_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3h_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3h_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 42／14 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a4` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a5` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a6` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_lcb3m_a7` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 45／15 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a1` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a10` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a11` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a12` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a13` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a14` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a15` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a16` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a17` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a18` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a19` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 33／11 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a2` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a3` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a4` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a5` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a6` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a7` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a8` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_mbpp_a9` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
 | `r535_retry_channel_20260918` | 2026-09-18 | other | PC/RF/RP/RS | 360／90 | 是 | 是 | 0 | 0 | 0 |
 | `twin_real_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 1 | 0 |
 | `v1_five_agent_matrix_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 1 | 0 |
