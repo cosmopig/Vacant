@@ -455,8 +455,26 @@ def main(argv: list[str] | None = None) -> int:
     for c in measured:
         k = c.get("f3_verdict") or "?"
         f3[k] = f3.get(k, 0) + 1
-    add(f"* F3（送出去的推論模式）：" + ", ".join(f"`{k}`×{v}"
+    add("* F3（送出去的推論模式）：" + ", ".join(f"`{k}`×{v}"
                                              for k, v in sorted(f3.items())))
+    # **F3 的 `unmeasured` 與 agent 逾時是同一件事**（本輪量到的新失效模式）：
+    # agent 被砍的那一刻有一通 request 還在飛，它的 usage 永遠不會回來 ⇒
+    # 那一通算 `unmeasured`。逐格印出「逾時次數 vs unmeasured 通數」，
+    # 相等就代表 F3 的降級**不是推論模式變了**，是 agent 預算咬到了。
+    pairs = [(c["cell"], int(c.get("agent_timed_out_n") or 0),
+              int(c.get("f3_resp_unmeasured") or 0)) for c in measured]
+    eq = sum(1 for _, t, u in pairs if t == u)
+    nz = [p for p in pairs if p[1] or p[2]]
+    add(f"  * `agent_timed_out_n == f3_resp_unmeasured`："
+        f"{frac_str(eq, len(pairs))}"
+        f"（兩者都非零的格子 {len(nz)} 個）。**相等 ⇒ F3 降成 `unmeasured` 是"
+        "「agent 被砍時有一通還在飛」，不是推論模式變了。** R535 的 driver "
+        "把 F3 非 `ok` 當成暫停等人的條件——這個題庫會因此停一個與推論模式"
+        "無關的原因。")
+    if nz:
+        add("  * 明細（cell / 逾時次數 / unmeasured 通數）："
+            + "；".join(f"`{n}` {t}/{u}" for n, t, u in nz[:8])
+            + ("…" if len(nz) > 8 else ""))
     st = [c["cell"] for c in measured if c.get("suspect_timeout")]
     add(f"* `suspect_timeout`：{len(st)} 格{'：' + ', '.join(st) if st else ''}")
     # **驗收逾時**（`--test-timeout` 有沒有製造假逾時）：本輪最實用的檢查。
