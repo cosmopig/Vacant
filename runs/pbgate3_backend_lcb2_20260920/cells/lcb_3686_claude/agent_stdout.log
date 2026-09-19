@@ -1,0 +1,11 @@
+<|channel>thought
+<channel|>The task is complete. I have implemented the `beautifulSplits` function in `solution.py` according to the requirements in `goal.md` and `contract.md`.
+
+### Summary of changes:
+- Created `solution.py` with a top-level Python function `beautifulSplits(nums: List[int])`.
+- The logic iterates through all possible split points for three non-empty subarrays (`nums1`, `nums2`, `nums3`).
+- It checks the two conditions:
+    1. `nums1` is a prefix of `nums2`.
+    2. `nums2` is a prefix of `nums3`.
+- The solution correctly handles the "OR" condition and avoids double-counting if both are true for a single split point configuration.
+- Verified the implementation by running `sh run_tests.sh`, which passed all tests.

@@ -1,0 +1,80 @@
+{
+  "run": "pbgate3_backend_lcb2_20260920",
+  "note": "這一份記的是**沒有進 repo 的東西**：在哪、多大、幾個檔、為什麼不帶、怎麼取得。「拿不到也要記下拿不到」是這個 repo 的紀律（CLAUDE.md 鐵律 3）。格式沿用 runs/pbgate2_agents_lcb2_20260920/NOT_IN_REPO.json。",
+  "source_host": {
+    "ssh": "user1@100.124.254.83（vacant-dev）",
+    "path": "/var/tmp/vacant_pbgate3",
+    "total_bytes": 27037136,
+    "total_human": "33 MB（其中 16.3 MB 是 wire 原始位元組、5.8 MB 是 repo 子集）",
+    "df_before": "1.6G avail (98% used)",
+    "df_after": "0.9G avail (98% used)",
+    "df_caveat": "⚠ **這個前後差值不是本輪的佔用量，本輪自己只用了 33 MB。** 同一段時間這台上有別的 session 在寫——`/tmp` 底下有 9.6 GB 的工作樹（memory「vacant-dev 磁碟陷阱」那條：每個工作目錄各帶一份 786 MB 的 repo clone）。**磁碟不是獨佔的。** 本輪一個不是自己建的路徑都沒動。",
+    "cleanup": "收官後 `rm -rf /var/tmp/vacant_pbgate3 /var/tmp/pbgate3_repo.tgz /var/tmp/pbgate3_evidence.tgz`。⚠ 這三個路徑**都是本輪自己建的**（2026-09-19T22:0x 之後）；`/var/tmp` 底下其他 `vacant_*` 目錄是別輪的，一個都沒動。發射前的冒煙目錄 `/var/tmp/vacant_pbgate3_smoke` 與題庫量具的負控制副本 `/var/tmp/pbgate3_negctl` 在發射前就已經各自刪掉。⚠ `/var/tmp` 本來就會被作業系統清掉，而這台只剩不到 1 GB ⇒ **本目錄（約 5 MB）才是長期的那一份**。"
+  },
+  "excluded": [
+    {
+      "glob": "repo/**",
+      "n_files": 548,
+      "bytes": 5837709,
+      "what": "派到執行端的 repo 子集：`vacant_network/`＋`ops/gain/r534/`（含已渲染的 `templates/` 與 `hidden/`）＋`ops/vacantrun/`＋`ops/gain/data/lcb_bank_v2.jsonl`＋`ops/gain/check_bank_precision.py`＋`pyproject.toml`。⚠ 548 是**跑完之後**的檔數；`git archive` 出來是 **513** 檔，差的 35 個是執行時產生的 `__pycache__/*.pyc`。",
+      "why_not_shipped": "它就是本 repo 的一個子集，commit `b5654eac66f103a1355ad1a4b44efb6d38a912ea`（**刻意與 pbgate2 同一個 commit**，理由見 manifest 的 `design.repo_subset_commit_rationale`）。**不 clone 也不開 worktree**（各要 786／789 MB，執行端只剩 1.6 GB），用 `git archive` 出子集。",
+      "how_to_rebuild": "`git archive --format=tar b5654eac vacant_network ops/gain/r534 ops/vacantrun ops/gain/data/lcb_bank_v2.jsonl ops/gain/check_bank_precision.py pyproject.toml | gzip -9`。⚠ **不要拿 tgz 的 sha256 當判準**：pbgate2 記的是 `6bd53bb3…`，本輪在 macOS 上用同一個 commit 重建出來是 `54bc3099…`——**那是 gzip／tar 實作的差別不是內容的差別**。內容的判準用 git 的 tree／blob id（實作無關），逐項釘在 manifest 的 `execution.repo_subset_tree_ids`。"
+    },
+    {
+      "glob": "repo/ops/gain/r534/{templates,hidden}/**",
+      "n_files": 100,
+      "bytes": 606079,
+      "what": "公開題庫渲染出來的 20 題樹：`templates/<id>/{goal.md,contract.md,run_tests.sh,tests_visible/test_visible.py}` 與 `hidden/<id>/test_hidden.py`。",
+      "why_not_shipped": "**它在版控裡**（commit `fb7f4bfb` 收進去的），所以本目錄不再複製一份。⚠ LCB 的授權只寫 `cc` 未指明 BY/SA/NC，這棵樹是衍生物；它進版控這件事**不是本輪決定的**，本輪只是引用它。",
+      "how_to_verify": "`python3 runs/pbgate3_backend_lcb2_20260920/verify_bank_tree.py .` ——比對 100 個檔與 `ops/gain/r534/bank_manifest.json` 的釘值（執行端實測 OK：manifest sha 對得上、files checked 100、tasks 20；負控制：副本加 1 byte → FAIL 並印出 MISMATCH）。**不要**用 `build_bank.py --check`：那支會 FAIL，因為改名 commit 把渲染器的樣板字串改掉了（pbgate2 README §十一，本輪是第三個目擊者）。"
+    },
+    {
+      "glob": "rd_*/wire_RUN-ON/*.req.bin, *.resp.bin",
+      "n_files": 528,
+      "bytes": 16258575,
+      "what": "30 格 wire 的原始位元組（未壓 16.3 MB）。",
+      "why_not_shipped": "**有帶，只是壓縮過** ⇒ 見 shipped_but_compressed。"
+    },
+    {
+      "glob": "ws_*/**",
+      "n_files": 173,
+      "bytes": 287476,
+      "what": "跑完之後留在工作區的活檔（題庫樣板 ＋ agent 寫的 `solution.py`）。",
+      "why_not_shipped": "同一份內容的**釘死副本**已經帶了：`cells/*/solution.py` 是驗收實際跑的那一份（從 `_frozen_RUN-ON/` 複製，`ws_end_sha256` 寫在 `run_RUN-ON.json` 與收據 payload 裡），原文另外也逐字收在 `matrix.json` 的 `solution_text`／`solution_sha256`。活工作區沒有雜湊背書。"
+    },
+    {
+      "glob": "logs/*.stdout, logs/*.stderr",
+      "n_files": 60,
+      "bytes": 149519,
+      "what": "launcher 的 stdout（`--json` 摘要）與 stderr。",
+      "why_not_shipped": "stdout 那段 JSON 就是 `cells/*/run_RUN-ON.json`（已帶，而且那一份才是乾淨的）；agent 自己的輸出已帶（`cells/*/agent_stdout.log`）；`MATRIX.log` 已經逐格記了 BEGIN/END、退出碼與所有關鍵欄位（含 `upstreams_seen`）。"
+    },
+    {
+      "glob": "/var/tmp/vacant_pbgate3_smoke/**",
+      "n_files": null,
+      "bytes": 13000000,
+      "what": "發射前的三格冒煙（`lcb_3534`，**R534 A 層、不在被量的 10 題裡**，V 臂參數，pi／Claude Code／OpenCode 各一格，2026-09-19T22:11–22:17Z）。三格的 `requests_seen` 是 8／5／11，`upstreams_seen` 逐格都是 `http://100.86.226.21:1234`，交付與拒交兩個方向都出得來。",
+      "why_not_shipped": "**冒煙不是證據**（CLAUDE.md 鐵律 5）。它只回答兩個發射前的問題：三個 agent 在 1004 上接得上嗎、兩個判決方向都出得來嗎。一行摘要留在 `smoke_prelaunch.txt`，逐格落盤不帶，跑完即刪。"
+    }
+  ],
+  "shipped_but_compressed": [
+    {
+      "path": "wire.tar.gz",
+      "what": "30 格的 wire 原始位元組 `rd_*/wire_RUN-ON/*.req.bin`、`*.resp.bin`（未壓 16.3 MB，528 個檔），壓縮後 2.8 MB。",
+      "why": "收據簽的就是這些位元組（`wire_digest`）。`index.jsonl` 另外以未壓形式放在 `cells/*/wire/`。**第五節那個「length 出現 0 次」的每一個數字都是從這些位元組重算出來的**，外人可以自己重算。"
+    }
+  ],
+  "not_measured_this_round": [
+    "出網封鎖（本輪沒有）",
+    "codex：**刻意不跑**——pbgate2 為了避開 1003 的 thinking runaway 沒跑它，本輪要與 pbgate2 逐格可對照所以也不跑。⚠ 這**不代表** codex 在 1004 上跑不動，本輪沒量。",
+    "hermes：**跑不了**（vacant-dev 上現在沒裝，發射前實測 `command -v hermes` 是 MISSING）",
+    "N 臂（本輪只跑 V 臂）",
+    "V1 重試迴圈（`--retry none`）",
+    "R534 的 A 層 10 題",
+    "MBPP+／HumanEval+／LCB v1／LCB v3",
+    "**1004 的 LM Studio 版本**——這台沒有從 Mac 或 vacant-dev 可用的 SSH（`Host key verification failed`；本輪不去動金鑰），HTTP 回應頭也沒有版本。`runs/pbgate_lcb2_20260919` 在 2026-09-19 對同一台量到 `0.4.17.0`／`lms` commit `6041ae0`——**那是前一批的量測不是本輪的**。",
+    "**把 `wrap_agent.sh` 的 pi `maxTokens` 改成 32000、在 1003 上重跑那 10 題**——這是把歸因從「thinking 後端」進一步縮到「那個常數」的關鍵對照，**本輪沒做**（改它會影響 r535／展件那批用 pi 的歸檔資料的可比性，不在本輪授權範圍）。",
+    "Claude Code 單通 prompt 有沒有碰到 auto-compact（`CLAUDE_CODE_MAX_CONTEXT_TOKENS` 刻意不設）",
+    "「為什麼 pi 在 1004 上要打 17／37 通」——`lcb_3637_pi`／`lcb_3700_pi` 兩格被牆鐘砍掉的機制，每格只有一個觀測，**不可歸因**"
+  ]
+}

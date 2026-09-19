@@ -1,0 +1,11 @@
+<|channel>thought
+<channel|>I have implemented the `gcdValues` function in `solution.py`.
+
+### Implementation Details:
+1.  **Frequency Counting**: I first count the occurrences of each number in the input array using a `Counter`.
+2.  **Divisor Counting**: For every possible divisor $d$ up to the maximum value in `nums` ($50,000$), I calculate how many numbers in `nums` are divisible by $d$. This is done efficiently by iterating through multiples of $d$.
+3.  **GCD Frequency Calculation**: Using the principle of inclusion-exclusion (specifically, a Mobius-like approach), I calculate the exact number of pairs $(i, j)$ whose greatest common divisor is exactly $g$ ($F(g)$). This is done by starting from the maximum possible value and working downwards:
+    $$F(g) = \text{count\_pairs}(g) - \sum_{k=2, k \cdot g \le M} F(k \cdot g)$$
+4.  **Query Handling**: Since the total number of pairs can be up to $5 \times 10^9$, I cannot expand the `gcdPairs` array. Instead, I build a mapping of cumulative counts for each unique GCD value. For each query, I use binary search (`bisect_right`) on this mapping to find the correct GCD value in $O(\log M)$ time per query.
+
+The overall complexity is approximately $O(M \log M + Q \log M)$, where $M$ is the maximum value in `nums` and $Q$ is the number of queries, which fits well within the constraints.

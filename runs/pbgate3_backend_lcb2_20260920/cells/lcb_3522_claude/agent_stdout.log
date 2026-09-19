@@ -1,0 +1,29 @@
+<|channel>thought
+<channel|>I have read `goal.md` and `contract.md`. Based on the requirements, I have implemented the `resultsArray` function in `solution.py`.
+
+The logic checks each subarray of size `k` to see if its elements are consecutive and sorted in ascending order (i.e., $subarray[j] = subarray[0] + j$ for all $j$). If they are, it returns the maximum element; otherwise, it returns -1.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    results = []
+
+    for i in range(n - k + 1):
+        subarray = nums[i : i + k]
+        # Check if the subarray is consecutive and sorted in ascending order.
+        is_valid = True
+        for j in range(k):
+            if subarray[j] != subarray[0] + j:
+                is_valid = False
+                break
+
+        if is_valid:
+            # The maximum element of a sorted consecutive array is the last one.
+            results.append(subarray[-1])
+        else:
+            results.append(-1)
+
+    return results
+```

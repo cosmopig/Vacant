@@ -1,0 +1,396 @@
+{
+  "run_id": "pbgate3_backend_lcb2_20260920",
+  "title": "公開題庫上的 `vacant run` 閘門 —— **換後端**第三輪（LCB v2 ×10 題 × 3 個 agent × 1004 ＝ 30 格）",
+  "one_line": "把 pbgate2 那 30 格逐格重跑一次，**唯一被變的東西是後端**（1003 thinking → 1004 非 thinking），用來拆開 pbgate2 自己點名『拆不開』的那一條：框架差異 vs 框架×thinking 差異。",
+  "extends": "runs/pbgate2_agents_lcb2_20260920（commit ae9cd4b4）。那一批誠實邊界第 9 條寫：『三個 agent 全部只在 1003 跑過，沒量 1004 上的 Claude Code／OpenCode ⇒ 拆不開框架差異與框架×thinking 差異』。本輪補的就是這一條。",
+  "RED_LINE_not_preregistered": {
+    "status": "非預註冊",
+    "why": "這一批是為了補 pbgate2 自己列的『拆不開』那一條而開的，選題／臂／agent／旗標／prompt 在發射前寫死（逐字沿用 pbgate2），但**沒有預註冊檔、沒有人類簽字**。",
+    "what_this_forbids": [
+      "不做假說檢定（沒有 p 值、沒有效果量、沒有信賴區間當結論）。",
+      "不與 R535／R530／R534／G 實驗的任何數字合併、平均或對照。",
+      "**也不與 runs/pbgate2_agents_lcb2_20260920 或 runs/pbgate_lcb2_20260919 相減當效果量**——三批都非預註冊，兩個描述性觀測相減不會變成檢定。第六節的跨批對照是**逐格列一樣／不一樣**，不是效果量。",
+      "不准寫「複製」「效果消失」「顯著」「優於」。",
+      "收官句只能是描述性的：『在這 30 格上，閘門的判決逐格長這樣』。"
+    ]
+  },
+  "design": {
+    "what_varies": "**後端**（1003 thinking → 1004 非 thinking）。題目、臂、agent、版本、旗標、prompt、接線參數全部固定。",
+    "what_is_fixed": "10 題（R534 B 層全取，與 pbgate2／pbgate 同一組）／臂 V／pi 0.85.1・Claude Code 2.1.278・OpenCode 1.18.31（與 pbgate2 同版本，實測）／`--sandbox none --test-timeout 120 --timeout 900 --retry none --json`／外層 `timeout 1200`／prompt 逐字相同／**`ops/vacantrun/wrap_agent.sh` 一個字沒動（含 pi 段那個 `maxTokens: 16384`）**。",
+    "n_cells": 30,
+    "why_keep_16384": "**保住它才驗得到假說。** pbgate2 §四 的機制是「我們自己設的 16384 × thinking 後端」的交互作用。把 16384 改掉就等於同時動了兩個東西，那條假說就驗不了。本輪刻意不改，換一台非 thinking 的後端去看它還咬不咬人。",
+    "repo_subset_commit_rationale": "**刻意用與 pbgate2 同一個 commit `b5654eac`，不是本分支的 HEAD。** `ae9cd4b4` 之後 `vacant_network/vrun/{launcher,wireproxy,verify_receipts,proxyd,sandbox}.py` 都改了（加了 attestation 維度），用新的等於同時動了後端與 harness 兩個東西。`ops/vacantrun/wrap_agent.sh` 與 `ops/gain/r534/` 在兩個 commit 之間**逐位元相同**（`git diff --stat` 空）。"
+  },
+  "agents": [
+    {
+      "name": "pi",
+      "version": "0.85.1",
+      "path": "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+      "wire": "POST /v1/chat/completions（OpenAI Chat Completions, SSE）",
+      "wiring": "ops/vacantrun/wrap_agent.sh 的 pi 段（PI_CODING_AGENT_DIR ＋ models.json）",
+      "invocation": "pi -p --provider vacantproxy --model m \"$PROMPT\" < /dev/null",
+      "output_cap": "`maxTokens: 16384`，**寫在 wrap_agent.sh 的 models.json 裡（是我們的接線參數，不是 pi 的預設）**；實測 request body 的 `max_completion_tokens` 就是 16384"
+    },
+    {
+      "name": "claude",
+      "framework": "Claude Code",
+      "version": "2.1.278",
+      "wire": "POST /v1/messages?beta=true（Anthropic Messages, SSE）＋ 1 通 HEAD /api/hello",
+      "wiring": "**零接線**——ANTHROPIC_BASE_URL 在 envmap.REDIRECT_VARS 裡，launcher 自己設；wrap_agent.sh 的 claude 段只做行程隔離",
+      "invocation": "claude -p \"$PROMPT\" --dangerously-skip-permissions < /dev/null",
+      "output_cap": "實測 request body `max_tokens: 32000`（框架自己的預設，我們沒設）",
+      "note_not_set": "`CLAUDE_CODE_MAX_CONTEXT_TOKENS` **刻意不設**（設了就不再是零接線）。本輪最大 prompt_tokens 單格 267,068 是 10 通的**總和**，不是單通；沒有量單通有沒有碰到 auto-compact。"
+    },
+    {
+      "name": "opencode",
+      "version": "1.18.31",
+      "wire": "POST /v1/chat/completions（OpenAI Chat Completions, SSE）",
+      "wiring": "ops/vacantrun/wrap_agent.sh 的 opencode 段（OPENCODE_CONFIG_CONTENT 自訂 openai-compatible provider）",
+      "invocation": "opencode run --pure --log-level ERROR -m vacantproxy/<model> \"$PROMPT\" < /dev/null",
+      "output_cap": "實測 request body `max_tokens: 32000`（框架自己的預設，我們沒設）"
+    }
+  ],
+  "agents_not_run": {
+    "codex": "**刻意不跑。** 與 pbgate2 同一個理由的延伸：pbgate2 為了避開 1003 的 thinking runaway 沒跑 codex，本輪要與 pbgate2 **逐格可對照**，所以這一批也不跑。⚠ 這不代表 codex 在 1004 上跑不動——**本輪沒量到**。",
+    "hermes": "**跑不了。** vacant-dev 上現在沒有（發射前實測 `command -v hermes` 是 MISSING）。沒有裝。**沒量到，不是量到 0。**"
+  },
+  "backend": {
+    "host": "1004",
+    "endpoint_openai": "http://100.86.226.21:1234/v1",
+    "endpoint_anthropic": "http://100.86.226.21:1234",
+    "model": "gemma-4-12b-it-qat",
+    "same_gguf_as_1003": "發射前 `/api/v0/models` 實測兩台都是 `quantization=Q4_0`、`arch=gemma4`、`max_context_length=262144`、`state=loaded`、`loaded_context_length=262144` ⇒ **同一份 gguf、同一個載入脈絡長度**。",
+    "models_on_host": [
+      "gemma-4-12b-it-qat",
+      "qwen/qwen3.8-27b",
+      "qwen_qwen3.6-35b-a3b",
+      "text-embedding-nomic-embed-text-v1.5"
+    ],
+    "lm_studio_version": "⚠ **本輪沒量到。** 這台沒有從 Mac 或 vacant-dev 可用的 SSH（`Host key verification failed`，本輪不去動金鑰），HTTP 回應頭也沒有版本。`runs/pbgate_lcb2_20260919/manifest.json` 在 2026-09-19 對同一台量到 `0.4.17.0（FileVersion 0.4.17+4）`／`lms` CLI commit `6041ae0`——**那是前一批的量測，不是本輪的**，本輪只是引用。",
+    "thinking": {
+      "verdict": "**否**（非 thinking 模式）",
+      "criterion": "`choices[0].message.reasoning_content` 的字元數 ＋ 巢狀 `usage.completion_tokens_details.reasoning_tokens`。",
+      "prelaunch_probe_1004": {
+        "reasoning_content_len": 0,
+        "nested_reasoning_tokens": 0
+      },
+      "positive_control_1003": {
+        "reasoning_content_len": 588,
+        "nested_reasoning_tokens": 267,
+        "why": "**同一支探針、同一次執行**對 1003 跑一次。它讀得出 1003 的 588 字元／267 tokens **而且**讀得出 1004 的 0／0 ⇒ 1004 的那個 0 是量到的 0，不是量具壞掉。"
+      },
+      "TOP_LEVEL_usage_reasoning_tokens": "兩台都是 **None**（不在回應裡）。⚠ **不可以拿它當判準**——讀它永遠 None。本輪第三次確認。",
+      "batch_evidence": "全批 264 通逐位元重算：OpenAI 那條 wire 上 reasoning_tokens 合計 **0**、reasoning_content 合計 **0 字元**（pbgate2 在 1003 上是 93,095／242,918）。",
+      "anthropic_path_second_indicator": "Anthropic 那條 wire 上的 `content_block_start(type=thinking)` 區塊數 ＝ **0**（pbgate2 在 1003 上同一支解析器數到 **11**）⇒ 這是**第二個、獨立於 OpenAI 那條 wire 的** thinking 指標，也讀到 0。⚠ 它與 `reasoning_tokens` **不是同一個量**，不可相加、不可換算。"
+    },
+    "messages_api": "1004 原生支援 `POST /v1/messages`（含 tool_use）；發射前直測 `stop_reason=tool_use`、`block_types=['tool_use']`。這是 Claude Code 零接線的前提，在 1004 上**也**成立。",
+    "concurrency": "三條 lane 同時跑 ⇒ 同時最多 3 串打 1004（吞吐 4 串封頂，沒有超過）。**與 pbgate2 同一個併發條件**；與 pbgate（2026-09-19，嚴格序列）不同。"
+  },
+  "bank": {
+    "name": "LiveCodeBench v2（公開）",
+    "is_public": true,
+    "source_path": "ops/gain/data/lcb_bank_v2.jsonl（**在版控裡**）",
+    "source_sha256": "b98f027213e2469a0a41bed813d99f029d3d6e2fac64e0fa18887c42c865b9ba（執行端實測 sha256sum，與 runs/INDEX.md §七 的釘值相同）",
+    "source_n": 120,
+    "eligible_n": 118,
+    "known_bad_excluded": [
+      "lcb_3613",
+      "lcb_3763"
+    ],
+    "renderer": "ops/gain/r534/build_bank.py（既有，沒有重寫載入器）",
+    "bank_manifest": "ops/gain/r534/bank_manifest.json",
+    "bank_manifest_sha256": "e92ac8b810081b32de253d886bc70b634d933d4c30a92f5778762aae204995b7",
+    "selection_rule_sha256": "231971f3bad306f64818b6ee8204e7326c973ca3b2d256d8ea880e2eccf8903b",
+    "layer_b_seed": "r534-layerB-lcb2-2026-09-18",
+    "task_ids": [
+      "lcb_3522",
+      "lcb_3583",
+      "lcb_3584",
+      "lcb_3637",
+      "lcb_3654",
+      "lcb_3681",
+      "lcb_3686",
+      "lcb_3700",
+      "lcb_3764",
+      "lcb_3794"
+    ],
+    "task_subset_rule": "R534 的 **B 層 10 題全取**，一題不挑（與上一輪逐字相同）。A 層刻意不取：R534 自己的 manifest 寫 A 層是「條件在過去結果上」挑的高分歧題。",
+    "tree_verification": {
+      "how": "runs/pbgate2_agents_lcb2_20260920/verify_bank_tree.py（沿用上一輪那一支），比對 templates/ 與 hidden/ 的 100 個檔對上 bank_manifest 的釘值",
+      "result": "執行端實測 **OK**：manifest sha256 對得上、files checked = 100、tasks = 20",
+      "negative_control": "在副本上對 templates/lcb_3522/goal.md 加兩行，量具 **FAIL** 並逐字印出 MISMATCH ⇒ 它抓得到。副本跑完就刪。",
+      "WARNING_renderer_drift": "⚠ `python3 ops/gain/r534/build_bank.py --check` 在**本機是 FAIL**。原因**不是資料漂了，是渲染器漂了**：commit fb7f4bfb（套件改名 vacant → vacant_network）的 sed 掃過 build_bank.py 的樣板字串，把渲染出來的註解從 `vacant/codebench.py` 改成 `vacant_network/codebench.py`。⇒ 重新渲染會產生**新的**位元組；而 `templates/`＋`hidden/` 在磁碟上的 100 個檔與 `bank_manifest.json` 的釘值**逐位元相同**（也與上一輪 runs/pbgate_lcb2_20260919/manifest.json 記的 sha 相同）。**本輪用的是磁碟上那一份凍結的，沒有重新渲染。** 這與 commit c7feccb4 記的「改名打破了兩樣凍結的東西」是同一件事。"
+    },
+    "tasks": {
+      "lcb_3522": {
+        "layer": "B_random",
+        "difficulty": "medium",
+        "entry_point": "resultsArray",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-08-17T07:30:00",
+        "prompt_sha256": "ef8c051512b1860967ec8d7620671980c69e5ee64d120d85f5d99ef8e66bfa0b",
+        "rendered_sha256": {
+          "contract.md": "9e972e7a1fbc391074dad91ba0279e3f046115c748375c7688b5b536eb9e6abc",
+          "goal.md": "ef8c051512b1860967ec8d7620671980c69e5ee64d120d85f5d99ef8e66bfa0b",
+          "hidden/lcb_3522/test_hidden.py": "12423b195b8ec0fa4e533d9315487824968cfbfd11cf89e79b1bc3b9a50f9bf7",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "89a8b4cbbebd237421dcadcab48c803d06266606e066023dad1a56cb2ab75461"
+        }
+      },
+      "lcb_3583": {
+        "layer": "B_random",
+        "difficulty": "hard",
+        "entry_point": "gcdValues",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-10-05T19:30:00",
+        "prompt_sha256": "64fbd562b7d0184a2f22bc56418fb16c6c7593a0c3d6f711071e3c437060d401",
+        "rendered_sha256": {
+          "contract.md": "832f3df43992f3093d15d8b0b37ffe5715e54be1dfdf022181bf7e5d25306468",
+          "goal.md": "64fbd562b7d0184a2f22bc56418fb16c6c7593a0c3d6f711071e3c437060d401",
+          "hidden/lcb_3583/test_hidden.py": "cba354a5643f4e854698ef920cb650aa23c2da131c37449b921d2015e11d8958",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "8fd54d5f72276879f28e3d9489b9631f6bcd7e282ea4ae5c0c18d95d8630b01f"
+        }
+      },
+      "lcb_3584": {
+        "layer": "B_random",
+        "difficulty": "medium",
+        "entry_point": "validSequence",
+        "n_visible_cases": 4,
+        "n_hidden_cases_full": 28,
+        "contest_date": "2024-09-28T07:30:00",
+        "prompt_sha256": "8728efb382695d82bb6547881d4d4eb2c38097f1ac4c91294257c47120106a24",
+        "rendered_sha256": {
+          "contract.md": "ffb2f7ee5ba1253f2fe581c663378f8a6e656606d59db068efb12019254931d4",
+          "goal.md": "8728efb382695d82bb6547881d4d4eb2c38097f1ac4c91294257c47120106a24",
+          "hidden/lcb_3584/test_hidden.py": "f0dcfb491e084f0dd8e8851f810e3de7acdb33b985be723b2347ad511c41c104",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "1786983fae886031b17b3f6239d3fa89f7a1630c0a2591a0271354847a619ed3"
+        }
+      },
+      "lcb_3637": {
+        "layer": "B_random",
+        "difficulty": "hard",
+        "entry_point": "countBalancedPermutations",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-11-02T19:30:00",
+        "prompt_sha256": "264773646deed3698f6b050383c0b4d1134c1c0bcac364a45782edced45ade37",
+        "rendered_sha256": {
+          "contract.md": "bdf8145056f7c2a25fcc02a80cb52b8881507a14e9ee6ca9558798847fb20a66",
+          "goal.md": "264773646deed3698f6b050383c0b4d1134c1c0bcac364a45782edced45ade37",
+          "hidden/lcb_3637/test_hidden.py": "087afb1ad4c340870ac4f5ce29872de2f42d53283b902e1fac55519e07e4b1d5",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "3c0820b3c7228111f0c7af04c43ba4be75902ad62ee44e784026efe72f39bef7"
+        }
+      },
+      "lcb_3654": {
+        "layer": "B_random",
+        "difficulty": "medium",
+        "entry_point": "minArraySum",
+        "n_visible_cases": 2,
+        "n_hidden_cases_full": 26,
+        "contest_date": "2024-11-23T18:30:00",
+        "prompt_sha256": "9ccb6664f70d5976c62ec914cda8686a13ff477e8d0451c813ab9b8a0e62057a",
+        "rendered_sha256": {
+          "contract.md": "af9be32a6683f2713e47ceb89e505ba3539f83b669f91eabd9399afc23817d4e",
+          "goal.md": "9ccb6664f70d5976c62ec914cda8686a13ff477e8d0451c813ab9b8a0e62057a",
+          "hidden/lcb_3654/test_hidden.py": "62bf0b468d6c4cecff04428dd0b0fa6746e599ce05af4ca78c11f645e06cd581",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "f198f2932c20d3c214677c2ca3dbecd74899adcef288ed612374c20b665acfc4"
+        }
+      },
+      "lcb_3681": {
+        "layer": "B_random",
+        "difficulty": "medium",
+        "entry_point": "maxRectangleArea",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-12-07T18:30:00",
+        "prompt_sha256": "b45f83054f2f7f118de65a7e92b2a933c5f9bcb5a223843139c70287b10fa8a2",
+        "rendered_sha256": {
+          "contract.md": "5b5e5ce79ac3943bb0f2a800ce8c5947f0d34d8e06b9bf19109d7f631f42383e",
+          "goal.md": "b45f83054f2f7f118de65a7e92b2a933c5f9bcb5a223843139c70287b10fa8a2",
+          "hidden/lcb_3681/test_hidden.py": "129233de922fb31ef1e86461ea74d775ae0a7163dbf1adc3493452c9db2a11db",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "cbf148f1f5b708daf9b6ec848bac865b98cbb80f03bbd3e18b8b51874a4cc0e9"
+        }
+      },
+      "lcb_3686": {
+        "layer": "B_random",
+        "difficulty": "medium",
+        "entry_point": "beautifulSplits",
+        "n_visible_cases": 2,
+        "n_hidden_cases_full": 26,
+        "contest_date": "2024-12-14T18:30:00",
+        "prompt_sha256": "e5893d082deb19d3cb251451353244d9097adbab35b9303486286ed501935cf8",
+        "rendered_sha256": {
+          "contract.md": "8860d081321832360b60fab615c572eadce9c0dad5424f1f921d73cda853c88b",
+          "goal.md": "e5893d082deb19d3cb251451353244d9097adbab35b9303486286ed501935cf8",
+          "hidden/lcb_3686/test_hidden.py": "b86ce792800de83b914afda51e8f3a7fde569389ddcbd79fc5570dbbf1bc8cd7",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "f19f192edf5d2d15c17b56a7e2b0820bd9e04e369f86b514ac1543fefc51dbf8"
+        }
+      },
+      "lcb_3700": {
+        "layer": "B_random",
+        "difficulty": "hard",
+        "entry_point": "subsequencesWithMiddleMode",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-12-21T06:30:00",
+        "prompt_sha256": "dacfdc0aa1644b3706331427018856201c2777bac765a480adc1432ce0ced273",
+        "rendered_sha256": {
+          "contract.md": "ee4c0d3c4b1da7ce0dcc1d1a7abcb3b5b27c9d0e03b248c4fc156b0c9d0a6a7e",
+          "goal.md": "dacfdc0aa1644b3706331427018856201c2777bac765a480adc1432ce0ced273",
+          "hidden/lcb_3700/test_hidden.py": "176115df7f9f7695d81018f6516077d3c0cd46dc29fee0b1582c4b5fb1319bf7",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "b7ee988e6688ced5fb5a264a5a14d2e3f0a9061287804310009b4fb79a52d252"
+        }
+      },
+      "lcb_3764": {
+        "layer": "B_random",
+        "difficulty": "medium",
+        "entry_point": "maxSum",
+        "n_visible_cases": 2,
+        "n_hidden_cases_full": 26,
+        "contest_date": "2025-02-22T18:30:00",
+        "prompt_sha256": "7d2c10449a3416c81aa01f5af96a27c3e170e7de7a27c4833ab178440e799dcb",
+        "rendered_sha256": {
+          "contract.md": "3dcf7e0e377ac5c2e19cec59179fb0b5111b5761ca555800b18760f70aaa9c9f",
+          "goal.md": "7d2c10449a3416c81aa01f5af96a27c3e170e7de7a27c4833ab178440e799dcb",
+          "hidden/lcb_3764/test_hidden.py": "5159e5f5da7514d9c209804d94b6898163d9a05c204fccb695a0d2fe05fa3b34",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "100633f7bc13cd9c1d4932a1e6ac781217b78288d4b69ca042839c3678dc5fdc"
+        }
+      },
+      "lcb_3794": {
+        "layer": "B_random",
+        "difficulty": "medium",
+        "entry_point": "minTime",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2025-03-22T19:30:00",
+        "prompt_sha256": "e5c9c05849206faef2ba97eddb0717302d0ede0cc1570b70ad1303d753333b2c",
+        "rendered_sha256": {
+          "contract.md": "5fb39bfe84ec491f72557405b96f1ba7dbfa49c2be59f8b6c1dc9af616f0130e",
+          "goal.md": "e5c9c05849206faef2ba97eddb0717302d0ede0cc1570b70ad1303d753333b2c",
+          "hidden/lcb_3794/test_hidden.py": "901508d76b923f94f9576616d7a250bea654c6bfea57e8ba021a683abd58ff3e",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "19eab20bd278ff2ab97fa44f1e07e765e014883c71e98b92a66049be248e5c3b"
+        }
+      }
+    }
+  },
+  "flags": {
+    "launcher": "python3 -m vacant_network.vrun.launcher",
+    "per_cell": [
+      "--workspace <ws>",
+      "--run-dir <rd>",
+      "--suite <repo>/ops/gain/r534/templates/<tid>/tests_visible",
+      "--task-id pbgate3_<tid>_<agent>",
+      "--sandbox none",
+      "--test-timeout 120",
+      "--timeout 900",
+      "--retry none",
+      "--json",
+      "-- <repo>/ops/vacantrun/wrap_agent.sh <agent> '<PROMPT>'"
+    ],
+    "max_attempts": "預設 1（`--retry none`）；實測 30 格 `attempts_used` 全部 ＝ 1",
+    "wrapper": "timeout 1200",
+    "prompt": "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.（三個 agent 逐字相同，與 pbgate2／pbgate 逐字相同）",
+    "env": {
+      "VACANT_RUN_UPSTREAM_OPENAI": "http://100.86.226.21:1234/v1",
+      "VACANT_RUN_UPSTREAM_ANTHROPIC": "http://100.86.226.21:1234",
+      "VACANT_AGENT_MODEL": "gemma-4-12b-it-qat",
+      "VACANT": "(unset, launcher 預設 1)",
+      "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "(unset, 刻意)",
+      "VACANT_CODEX_REASONING_EFFORT": "(不適用，本輪沒跑 codex)"
+    },
+    "diff_vs_pbgate2_cell_sh": "`diff pbgate2_cell.sh pbgate3_cell.sh` 只有四處：註解、`ROOT`、兩個上游 URL、`--task-id` 前綴。**沒有第五處。**",
+    "per_cell_argv_verbatim": "cells/<cell>/argv.txt（30 份，逐格）",
+    "test_timeout_rationale": "本輪 30 個驗收檔的 `wall_ms` 最大 **29 ms**，120 秒是它的約 4,100 倍 ⇒ 沒有任何一格因為 test-timeout 被判掉（逐格在 matrix.json 的 `visible_wall_ms`）。"
+  },
+  "execution": {
+    "host": "vacant-dev user1@100.124.254.83（Linux 6.8.0-137-generic x86_64）",
+    "repo_subset_commit": "b5654eac66f103a1355ad1a4b44efb6d38a912ea（**與 pbgate2 同一個**）",
+    "repo_subset_tree_ids": {
+      "vacant_network": "602561b9ee2d61eda26703c0b9116078ce62dac8",
+      "ops/gain/r534": "597f9e013800fe05808e86c2754796827423a0ce",
+      "ops/vacantrun": "8cec7fe0099c1eca6ede7e889ec75e5d5e324268",
+      "ops/gain/data/lcb_bank_v2.jsonl": "25bd4e28b1d5c356f23e66462bd5512ff82a8048",
+      "note": "git 的 tree／blob id 是**實作無關**的內容指紋 ⇒ 比 tar.gz 的 sha256 可靠。pbgate2 記的 tgz sha `6bd53bb3…` 本輪重建出來是 `54bc3099…`，**那是 gzip／tar 實作的差別不是內容的差別**（pbgate2 自己已經寫了這個 caveat）。"
+    },
+    "repo_subset_files": 513,
+    "python": "/usr/bin/python3 3.12.3",
+    "node": "v22.23.2",
+    "root": "/var/tmp/vacant_pbgate3",
+    "launch_window_utc": {
+      "start_all_lanes": "2026-09-19T22:18:31Z",
+      "opencode_lane_done": "2026-09-19T22:51:19Z",
+      "claude_lane_done": "2026-09-19T23:01:05Z",
+      "pi_lane_done": "2026-09-19T23:13:22Z",
+      "total_span": "約 55 分鐘"
+    },
+    "CONCURRENCY_NOTE": "三條 lane 同時跑（一個 agent 一條，序列跑自己那 10 題）⇒ **與 pbgate2 同一個併發條件，牆鐘可以跟 pbgate2 比**；與 pbgate（嚴格序列）不可比。⚠ 本輪 6 個拒交格裡有 **3 格**是被 `--timeout 900` 砍的（pbgate2 是 11 個裡 2 格）——牆鐘型失效在本輪比例較高，**跨批解讀牆鐘型拒交要帶這一句**。",
+    "prelaunch_smoke": "lcb_3534（R534 **A 層**，**不在被量的 10 題裡**）× 3 個 agent，各 1 格。三格都被中介到 1004（`requests_seen` 8／5／11），交付與拒交兩個方向都出得來。落在 /var/tmp/vacant_pbgate3_smoke，**不進證據**，跑完即刪；一行摘要在 smoke_prelaunch.txt。",
+    "disk_note": "⚠ vacant-dev 發射時只剩 1.6 GB。**本輪自己的佔用是 28 MB**（含 6.8 MB repo 子集；wire 未壓 17 MB）。同一段時間磁碟從 1.6 GB 掉到 0.9 GB，那**不是本輪造成的**——`/tmp` 上有別的 session 的 9.6 GB 工作樹。本輪一個不是自己建的路徑都沒動。"
+  },
+  "gauges_and_controls": {
+    "bank_sha256": "執行端 `sha256sum` 實測 `b98f0272…`，與 `ops/gain/r534/bank_manifest.json` 的釘值、與 pbgate2／pbgate 記的值相同。",
+    "bank_tree": "verify_bank_tree.py 在執行端實測 **OK**（manifest sha 對得上、files checked 100、tasks 20）。**負控制**：在副本上對 `templates/lcb_3522/goal.md` 加 1 byte ⇒ **FAIL** 並逐字印出 MISMATCH ⇒ 它抓得到。副本跑完即刪。",
+    "receipts": "`verify_receipts --selftest` **先 PASS**（負控制，證明它抓得到壞鏈），再驗這一批：`run 30　鏈 30　entries 60　驗過 60　失敗 0　壞鏈 0`、`中介：有 30　零請求 0`。歸檔副本上再驗一次，同一行。",
+    "thinking_probe": "見 backend.thinking：1004 讀到 0／0（負控制成立），**同一支探針同一次執行**對 1003 讀到 588／267（正控制成立）。",
+    "hidden_scorer": "退化樁 `def <entry_point>(*a, **k): return None` **10/10 題被擋下來**（hidden_scorer_negative_control.json）。沒有這一條，『24 個交付格隱藏測資全過』不可信。",
+    "finish_reason_census_positive_control": "⚠ 本輪最關鍵的數字是一個 **0**（`length` 出現 0 次）⇒ 必須先證明量具讀得到非 0。**兩個獨立量法各自帶正控制**：(1) 同一支 `census3.py` 的解析器跑在 **pbgate2 歸檔的 1003 wire 位元組**上，讀出 `length` 在 **6 格**（與 pbgate2 記的 6 格逐格相同）；(2) 不靠解析器，直接對 `*.resp.bin` 原始位元組 `LC_ALL=C grep '\"finish_reason\":\"length\"'`，對本輪 528 個檔命中 **0**，對一個手造的必中輸入命中 **1**。⇒ **這個 0 是量到的 0。**",
+    "vgt": "V/GT 分離掃描 30 格 wire ＋ 工作區，**TOTAL_HITS = 0**。"
+  },
+  "results_headline": {
+    "verdicts": "**24 交付 ∶ 6 拒交**（pi 8∶2、Claude Code 7∶3、OpenCode 9∶1）",
+    "finish_reason_length": "**0 格**（30 格、264 通、528 個原始位元組檔）。pi 的 `max_completion_tokens=16384` 逐格仍在 request body 裡（census 逐格印得出來），**它在這台後端上沒有咬到任何一格**。",
+    "pi_five_length_cells_on_1003": "1003 上撞 `length` 的 5 個 pi 格 → 1004 上 **4 格變成交付**（`lcb_3522`／`lcb_3584`／`lcb_3686`／`lcb_3794`），第 5 格（`lcb_3700`）**仍是拒交但機制換了**：沒有 `length`，改成打了 37 通之後被 `--timeout 900` 砍掉。",
+    "cross_agent_agreement_on_1004": "三家方向一致 **7/10** 題（6 題全交付、1 題全拒交）；1003 那批是 4/10。",
+    "flips_vs_1003": "30 格裡 **同 21、翻 9**（pi 翻 5、Claude Code 翻 2、OpenCode 翻 2）。"
+  },
+  "honesty_bounds": [
+    "**不是效果量。** 每格 n=1、10 題、一個模型、一台後端。24∶6 與 1003 的 19∶11 **不可以相減**。",
+    "**8∶7∶9 不是框架能力排名**，理由與 pbgate2 §四同一條（每格 n=1、我們自己的接線參數在場）。",
+    "**假說只被驗掉一條。** 驗到的是「`finish_reason=length` 在非 thinking 後端上 0 次出現」⇒ pbgate2 那 5 格的直接機制**不會**在 1004 上重現。**沒有**驗到「pi 與另外兩家一樣好」——那需要預註冊與樣本數。",
+    "**牆鐘型失效反而變多。** 本輪 6 個拒交格有 3 格是 `timeout_killed`（`lcb_3637_pi`／`lcb_3700_pi`／`lcb_3700_opencode`），pbgate2 是 11 個裡 2 格。⚠ `--timeout 900` **也是我們自己的參數**——失效模式從「token 上限吃掉工具呼叫」換成「工具呼叫迴圈吃掉牆鐘」，兩個都不是「agent 比較差」。",
+    "**proxy records，不 verifies。** 它證明這些 bytes 經過它，不證明上游照著跑，也不阻止 agent 自己開一條連線（docs/VACANT_RUN.md §4.1）。本輪**沒有出網封鎖**。",
+    "**中介的是模型通道不是 agent 的行為。** 框架自己發起的本機工具呼叫、內建重試不經過模型通道，proxy 看不到也擋不到。",
+    "**`--sandbox none`**：驗收沒有跑在沙箱裡。這會改變「驗收有多硬」，要跟數字一起講。",
+    "**量的是閘門本身，不是 V1 重試迴圈的增益。** `--retry none`、每格只有一次 agent 行程（30 格 `attempts_used` 全部 1）。",
+    "**不是模型能力評測。** 量的是通道與閘門；`visible_passed` 是「過了我們渲染的那幾條」，不是「做對了幾成」。",
+    "**LCB v2 的 contest_date 落在 2023-08-26 → 2025-04-05**（本輪 10 題是 2024-08-17 → 2025-03-22）；**不能**宣稱晚於任何模型的訓練截止。污染風險沒有被排除。",
+    "**token 是下界**：wire 上逐位元落盤 **264 通**（`*.resp.bin` 264 個、`*.req.bin` 264 個），而 proxy 的 `index.jsonl` 只有 **261** 行 ⇒ **3 通在被 SIGKILL 的那一刻只寫得出檔案、來不及寫索引**（對得上 3 個 `timeout_killed` 格）。264 通裡 **17 通沒有 `usage`**：**13 個 resp.bin 是 0 位元組**（其中 10 個是 Claude Code 每格必打一次的 `HEAD /api/hello`——沒有 body；另 3 個是 `lcb_3584_claude` 與 `lcb_3700_opencode` 被中斷在飛的那幾通），其餘 4 通是 SSE 被截斷、解不出 `usage`。`unparsed_chunks = 15` ＝ 13 個空檔 ＋ 2 個截斷片段。⇒ **prompt 4,074,830／completion 149,728 是下界，不是總數。「沒量到」≠「量到 0」**（鐵律 3）。",
+    "**1004 的 LM Studio 版本本輪沒量到**（沒有可用的 SSH，HTTP 頭也沒有）。引用 `0.4.17` 時要說那是 `runs/pbgate_lcb2_20260919` 在 2026-09-19 量的。",
+    "**沒量到 ≠ 量到 0**：沒量出網封鎖、沒量 codex（**刻意**，為了與 pbgate2 同組）、沒量 hermes（沒裝）、沒量 N 臂、沒量重試迴圈、沒量 R534 的 A 層 10 題、沒量 MBPP+／HumanEval+／LCB v1／v3、沒量「把 16384 改掉之後 1003 上會怎樣」（**那是下一個該做的對照，本輪沒做**）。",
+    "口徑用「**可究責性 / 讓依賴有根據**」，不用「信任」。"
+  ],
+  "generated_by": "手動組裝（本檔）；逐格數字來自 matrix.json，matrix.json 來自 collect3.py（零模型呼叫）",
+  "wire_accounting": {
+    "proxy_index_lines": 261,
+    "resp_bin_files": 264,
+    "req_bin_files": 264,
+    "paths": {
+      "POST /v1/chat/completions": 201,
+      "POST /v1/messages?beta=true": 50,
+      "HEAD /api/hello": 10
+    },
+    "empty_resp_bin": 13,
+    "no_usage": 17,
+    "unparsed_chunks": 15,
+    "wire_errors": 4,
+    "wire_errors_cells": [
+      "lcb_3584_pi",
+      "lcb_3637_pi",
+      "lcb_3700_pi",
+      "lcb_3700_opencode"
+    ],
+    "requests_seen_sum": 261,
+    "note": "`requests_seen` 合計 261 ＝ `index.jsonl` 的行數（**不是** 264）。兩個數字差 3 是因為被 SIGKILL 的格有 3 通只落了檔沒落索引。**兩個都報出來**才看得出這件事。"
+  }
+}

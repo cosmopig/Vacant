@@ -1,0 +1,13 @@
+<|channel>thought
+<channel|>I have implemented the solution in `solution.py`. 
+
+The logic iterates through each possible middle element of a subsequence of size 5. For each middle element, it counts how many ways we can pick two elements from its left and two from its right such that the middle element is the unique mode. This involves:
+1. Counting occurrences of values to the left and right of the current index.
+2. Calculating the number of pairs on each side with 0, 1, or 2 occurrences of the middle value.
+3. For each combination of counts (x from left, y from right), calculating the total frequency $F = 1 + x + y$.
+4. Validating if $F$ is a unique mode by subtracting cases where any other value $v$ appears $\ge F$ times.
+
+You can run the tests using:
+```bash
+sh run_tests.sh
+```

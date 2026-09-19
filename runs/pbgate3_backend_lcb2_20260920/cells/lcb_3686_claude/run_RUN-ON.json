@@ -1,0 +1,143 @@
+{
+  "task_id": "pbgate3_lcb_3686_claude",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_pbgate3/repo/ops/vacantrun/wrap_agent.sh",
+    "claude",
+    "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_pbgate3/ws_lcb_3686_claude",
+  "proxy_url": "http://127.0.0.1:40633",
+  "env": {
+    "proxy_url": "http://127.0.0.1:40633",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "d7f34e236619d7e28d610ac59bef306ef8fc4ff5912b24cb57a3200978d0a453",
+  "ws_end_sha256": "d5fa7b236ea0823249a78913294b1236b9be7d850a661f19c15af2cfb405e8fb",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 6,
+  "wire_by_protocol": {
+    "openai": 1,
+    "anthropic": 5
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "a663ad1842ad733c5ee1e1a80b5ce874cdeea816e9aa400a583229533cdc23aa",
+  "verdict_hash": "8525b41370103cd325666cbe833e7724722bb252cab51be81684b573a917d7c1",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "d7f34e236619d7e28d610ac59bef306ef8fc4ff5912b24cb57a3200978d0a453",
+      "argv": [
+        "/var/tmp/vacant_pbgate3/repo/ops/vacantrun/wrap_agent.sh",
+        "claude",
+        "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+      ],
+      "argv_sha256": "b5d825d1ad7a02f57189c1c41995240e53afa5af8c6403abad342786a1449bab",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 164.425,
+      "wire_quiesced": true,
+      "requests_seen": 6,
+      "requests_seen_cumulative": 6,
+      "wire_digest": "76552b1885971da952ddcb8b2ae992086d22b5fd3e913082745e95b731f642f6",
+      "ws_end_sha256": "d5fa7b236ea0823249a78913294b1236b9be7d850a661f19c15af2cfb405e8fb",
+      "frozen_path": "/var/tmp/vacant_pbgate3/rd_lcb_3686_claude/_frozen_RUN-ON",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "a663ad1842ad733c5ee1e1a80b5ce874cdeea816e9aa400a583229533cdc23aa",
+      "visible_path": "/var/tmp/vacant_pbgate3/rd_lcb_3686_claude/visible_RUN-ON.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false,
+      "fallback": null
+    }
+  },
+  "upstreams_defaulted": [],
+  "upstreams_sinked": [],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "76552b1885971da952ddcb8b2ae992086d22b5fd3e913082745e95b731f642f6",
+  "run_wall_s": 164.634,
+  "agent_wall_s": 164.425,
+  "failures": ""
+}

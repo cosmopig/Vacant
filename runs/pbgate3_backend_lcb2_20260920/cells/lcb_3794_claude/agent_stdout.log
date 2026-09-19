@@ -1,0 +1,10 @@
+<|channel>thought
+<channel|>I have implemented the solution in `solution.py` based on the requirements in `goal.md` and `contract.md`.
+
+The logic follows these steps:
+1.  **Prefix Sums**: Calculate $P[i]$, the cumulative skill of wizards up to index $i-1$.
+2.  **Dynamic Programming / Greedy Approach**: Determine the earliest start time $T(0, j)$ for each potion $j$ at wizard 0. The constraint that a wizard cannot work on two potions simultaneously leads to the recurrence:
+    $$T(0, j) = \max_{i=0 \dots n-1} (T(0, j-1) + P[i+1] \times mana[j-1] - P[i] \times mana[j])$$
+3.  **Final Result**: The total time is the completion time of the last potion by the last wizard: $T(0, m-1) + P[n] \times mana[m-1]$.
+
+You can now run the tests using `sh run_tests.sh`.

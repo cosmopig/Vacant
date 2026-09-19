@@ -1,0 +1,14 @@
+<|channel>thought
+<channel|>The task is completed. I have implemented the `resultsArray` function in `solution.py` according to the requirements in `goal.md` and `contract.md`. The solution correctly identifies subarrays that are consecutive and sorted in ascending order (i.e., each element is exactly 1 greater than the previous one) and returns their maximum element, otherwise returning -1.
+
+I verified the solution by running the provided test script:
+```bash
+sh run_tests.sh
+```
+The output confirmed all tests passed:
+```
+pass test_visible.py::check_visible_01
+pass test_visible.py::check_visible_02
+pass test_visible.py::check_visible_03
+0 check(s) failed
+```

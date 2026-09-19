@@ -1,0 +1,32 @@
+# 第五節那個 0 的兩個正控制（衍生物，零模型呼叫）
+# 為什麼要有這一份：本輪最關鍵的數字是「finish_reason=length 出現 0 次」。
+# 一個永遠讀不到 length 的量具會印出一模一樣的 0。所以先證明量具讀得到非 0。
+
+## 控制 1：同一支 census3.py 的解析器，跑在 pbgate2 歸檔的 1003 wire 位元組上
+## （runs/pbgate2_agents_lcb2_20260920/wire.tar.gz，207 通）
+## 期望：讀出 6 格 length，且與 pbgate2/finish_reason_census.txt 逐格相同
+
+lcb_3522_pi            openai={'length': 1, 'tool_calls': 3}                 anthropic={}                                 req_cap=['max_completion_tokens=16384']
+lcb_3584_pi            openai={'tool_calls': 3, 'length': 1}                 anthropic={}                                 req_cap=['max_completion_tokens=16384']
+lcb_3686_pi            openai={'tool_calls': 3, 'length': 1}                 anthropic={}                                 req_cap=['max_completion_tokens=16384']
+lcb_3700_opencode      openai={'tool_calls': 4, 'length': 1, 'stop': 1}      anthropic={}                                 req_cap=['max_tokens=32000']
+lcb_3700_pi            openai={'tool_calls': 3, 'length': 1}                 anthropic={}                                 req_cap=['max_completion_tokens=16384']
+lcb_3794_pi            openai={'tool_calls': 3, 'length': 1}                 anthropic={}                                 req_cap=['max_completion_tokens=16384']
+
+含 length 的格數 = 6  （pbgate2 自己記的也是 6）
+
+## 控制 2：不靠解析器，直接對原始位元組 grep（在執行端跑的）
+
+  $ LC_ALL=C grep -rlo "\"finish_reason\":\"length\"" rd_*/wire_RUN-ON/*.resp.bin | wc -l
+  1004 這批（528 個 *.bin）：0
+  必中的手造輸入：1        ← 這條 grep 本身是活的
+
+## 本輪 finish_reason 出現過的所有值（同一條 grep，對本批原始位元組）
+  $ LC_ALL=C grep -rho "\"finish_reason\":\"[a-z_]*\"" rd_*/wire_RUN-ON/*.resp.bin | sort | uniq -c
+      172 "finish_reason":"tool_calls"
+       27 "finish_reason":"stop"
+      （沒有 length 這一列）
+
+## 第三個獨立指標（Anthropic 那條 wire）
+  content_block_start(type=thinking) 區塊數：本輪 1004 ＝ 0；pbgate2 在 1003 上同一支解析器 ＝ 11
+  ⚠ 它與 reasoning_tokens 不是同一個量，不可相加、不可換算。
