@@ -90,6 +90,8 @@ REPO = HERE.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
+from vacant.vrun import wshash                            # noqa: E402
+
 R530 = REPO / "ops" / "gain" / "r530"
 BANK = R530 / "bank"
 TEMPLATES = R530 / "templates"
@@ -166,14 +168,24 @@ def sha256_file(path: pathlib.Path) -> str:
 
 
 def sha256_dir(d: pathlib.Path) -> str:
-    """目錄雜湊：`(相對路徑, 檔案 sha256)` 依路徑排序後再雜湊一次。"""
+    """目錄雜湊：`(相對路徑, 檔案 sha256)` 依路徑排序後再雜湊一次。
+
+    ⚠ **排除 `wshash.EXCLUDED_DIRS`**（`__pycache__` 等）。2026-09-19 冒煙踩到：
+    worker 真的跑了工作區裡那一份可見驗收 ⇒ 生出 `tests_visible/__pycache__/`
+    ⇒ 不排除的話 `ws_suite_sha256 != suite_sha256`，而那一行的意思是
+    「agent 動過驗收」。**一個會誤報的旗標比沒有旗標更糟。**
+    `__pycache__` 本身是有用的觀測，另外記成 `ws_suite_pycache`。
+    """
     h = hashlib.sha256()
     for p in sorted(d.rglob("*")):
-        if p.is_file():
-            h.update(str(p.relative_to(d)).encode("utf-8"))
-            h.update(b"\0")
-            h.update(sha256_file(p).encode("ascii"))
-            h.update(b"\n")
+        if not p.is_file():
+            continue
+        if any(part in wshash.EXCLUDED_DIRS for part in p.relative_to(d).parts):
+            continue
+        h.update(str(p.relative_to(d)).encode("utf-8"))
+        h.update(b"\0")
+        h.update(sha256_file(p).encode("ascii"))
+        h.update(b"\n")
     return h.hexdigest()
 
 
@@ -475,6 +487,12 @@ class Driver:
         # （計分用的是工作區外那一份，所以動了也騙不到閘門）。
         ws_suite = cell / "ws" / "tests_visible"
         out["ws_suite_sha256"] = sha256_dir(ws_suite) if ws_suite.is_dir() else None
+        # **worker 有沒有真的去跑題庫附給他的那組驗收**：`__pycache__` 是執行的
+        # 副產物，只有 import 過才會有。這是 R530 題庫特有的觀測（R535 的
+        # 工作區裡根本沒有驗收，量不到這件事），**不是**判準。
+        out["ws_suite_pycache"] = (ws_suite / "__pycache__").is_dir() \
+            if ws_suite.is_dir() else None
+        out["ws_has_run_tests_sh"] = (cell / "ws" / "run_tests.sh").is_file()
         if not out.get("requests_seen"):
             out["not_mediated"] = True
         return out
@@ -488,8 +506,8 @@ class Driver:
                 "m7_ws_solution_ratio", "f6", "f3_verdict", "reasoning_effort",
                 "agent_timed_out_n", "suspect_timeout", "visible_passed",
                 "visible_total", "upstreams_defaulted", "ws_suite_sha256",
-                "suite_sha256", "infra_void", "wall_s", "agent_wall_s",
-                "run_complete")
+                "ws_suite_pycache", "suite_sha256", "infra_void", "wall_s",
+                "agent_wall_s", "run_complete")
         return {"ts": now_iso(), **{k: state.get(k) for k in keys}}
 
     def run_cell(self, row: dict) -> dict | None:

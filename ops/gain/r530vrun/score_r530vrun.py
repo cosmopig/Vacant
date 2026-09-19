@@ -128,6 +128,39 @@ def score_hidden(out: pathlib.Path, cell: dict, *, timeout_s: float,
     }
 
 
+def visible_timing(out: pathlib.Path, cell: dict) -> dict:
+    """從 launcher 逐次落盤的 `visible_RUN-ON*.json` 把**驗收自己的時間**讀回來。
+
+    這是「`--test-timeout` 有沒有製造假逾時」的**直接證據**，而且它是離線的：
+    跑完之後才算，所以發射時不必先想到要量。
+    `kind == "timeout"` ＝ 那一檔沒在期限內跑完；`max_wall_ms` ＝ 實際用掉多少。
+    """
+    rd = out / "cells" / cell["cell"] / "run"
+    files = sorted(rd.glob("visible_RUN-ON*.json")) if rd.is_dir() else []
+    walls: list[float] = []
+    n_timeout = 0
+    per: list[dict] = []
+    for p in files:
+        try:
+            r = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:                                  # noqa: BLE001
+            continue
+        for f in r.get("files", []):
+            walls.append((f.get("wall_ms") or 0) / 1000.0)
+            if f.get("timed_out"):
+                n_timeout += 1
+            per.append({"json": p.name, "file": f.get("file"),
+                        "wall_s": round((f.get("wall_ms") or 0) / 1000.0, 3),
+                        "timed_out": bool(f.get("timed_out")),
+                        "kinds": sorted({c.get("kind")
+                                         for c in f.get("cases", [])})})
+    return {"visible_suite_runs": len(per),
+            "visible_suite_timeouts": n_timeout,
+            "visible_suite_max_wall_s": round(max(walls), 3) if walls else None,
+            "visible_suite_walls_s": [round(w, 3) for w in walls],
+            "visible_suite_detail": per}
+
+
 def dist(vals: list[float]) -> dict | None:
     """**印分佈不印均值**（人類指令）。"""
     v = sorted(x for x in vals if x is not None)
@@ -178,6 +211,11 @@ def main(argv: list[str] | None = None) -> int:
     cells = load_cells(out)
     scratch = out / "_score_scratch"
     scratch.mkdir(exist_ok=True)
+
+    # 可見驗收的**時間**是離線讀回來的（launcher 已經逐次落盤），
+    # 所以不管跑的時候有沒有想到要量，這一條都補得回來。
+    for c in cells:
+        c.update(visible_timing(out, c))
 
     if not args.no_hidden:
         print(f"# 隱藏驗收計分（timeout={timeout_s}s，**只計分不回饋**）",
@@ -299,6 +337,32 @@ def main(argv: list[str] | None = None) -> int:
             f"p75 {d['p75']} / p90 {d['p90']} / max {d['max']} 秒。")
     add("")
 
+    add("## 回饋體積（重量級題庫才問得出來的那一條）")
+    add("")
+    add("R535 的微型題回饋只有幾百位元組；這個題庫的斷言訊息逐字帶 "
+        "`args=… got=… want=…`，回饋可以大很多。`--feedback-into prompt` 把它接在 "
+        "**argv** 尾端 ⇒ 夠大就會撞 `ARG_MAX`，那會長成 `agent_spawn_failed`／"
+        "`infra_void`，**不是** 0 分。所以體積要印出來。")
+    add("")
+    add("| 量 | 臂 | n | min | p25 | median | p75 | p90 | max |")
+    add("|---|---|---:|---:|---:|---:|---:|---:|---:|")
+    for arm in ARM_ORDER:
+        sub = [c for c in measured if c["arm"] == arm]
+        fb = [a.get("feedback_in_prompt_bytes") for c in sub
+              for a in (c.get("attempts") or [])
+              if a.get("feedback_in_prompt_bytes")]
+        d2 = dist(fb)
+        if d2:
+            add(f"| `feedback_in_prompt_bytes` | {arm} | {d2['n']} | "
+                f"{d2['min']} | {d2['p25']} | {d2['median']} | {d2['p75']} | "
+                f"{d2['p90']} | {d2['max']} |")
+    spawn_fail = [c["cell"] for c in cells
+                  if c.get("stop_reason") == "agent_spawn_failed"]
+    add("")
+    add(f"`agent_spawn_failed`：{len(spawn_fail)} 格"
+        f"{'：' + ', '.join(spawn_fail) if spawn_fail else ''}")
+    add("")
+
     add("## 紀律欄位")
     add("")
     nm = [c["cell"] for c in cells if c.get("not_mediated")]
@@ -314,6 +378,10 @@ def main(argv: list[str] | None = None) -> int:
     add(f"* 工作區裡那一份可見驗收被動過的格子：{len(ws_moved)} 格"
         f"{'：' + ', '.join(ws_moved) if ws_moved else ''}"
         "（計分用的是工作區外那一份，所以動了也騙不到閘門——這是觀測不是錯誤）")
+    pc = [c for c in measured if c.get("ws_suite_pycache")]
+    add(f"* worker 真的跑過題庫附給他的那組可見驗收"
+        f"（`tests_visible/__pycache__` 存在）：{frac_str(len(pc), len(measured))}"
+        "。**R535 量不到這件事**——它的工作區裡根本沒有驗收。這是觀測不是判準。")
     f3 = {}
     for c in measured:
         k = c.get("f3_verdict") or "?"
@@ -322,6 +390,28 @@ def main(argv: list[str] | None = None) -> int:
                                              for k, v in sorted(f3.items())))
     st = [c["cell"] for c in measured if c.get("suspect_timeout")]
     add(f"* `suspect_timeout`：{len(st)} 格{'：' + ', '.join(st) if st else ''}")
+    # **驗收逾時**（`--test-timeout` 有沒有製造假逾時）：本輪最實用的檢查。
+    vt = [c["cell"] for c in cells if c.get("visible_suite_timeouts")]
+    ht = [c["cell"] for c in cells
+          if any(f.get("timed_out") for f in (c.get("hidden_files") or []))]
+    vw = dist([c.get("visible_suite_max_wall_s") for c in cells])
+    add(f"* **可見驗收逾時**（真跑，`--test-timeout` {timeout_s}s）："
+        f"{len(vt)} 格{'：' + ', '.join(vt) if vt else ''}")
+    add(f"* **隱藏驗收逾時**（事後計分，同一個值）："
+        f"{len(ht)} 格{'：' + ', '.join(ht) if ht else ''}")
+    if vw:
+        add(f"* 可見驗收**實際用掉**的單檔牆鐘（n={vw['n']} 格的最大值）："
+            f"min {vw['min']} / median {vw['median']} / p90 {vw['p90']} / "
+            f"max {vw['max']} 秒 ⇒ 相對 {timeout_s}s 的餘裕 "
+            f"{(timeout_s / vw['max']):.0f}×" if vw["max"] else "")
+    orph = sum(1 for c in measured for a in (c.get("attempts") or [])
+               if a.get("orphans_killed"))
+    add(f"* `orphans_killed`（框架留孤兒行程的嘗試數）：{orph}")
+    ws_moved_freeze = [c["cell"] for c in cells
+                       if c.get("stop_reason") == "ws_moved_during_freeze"]
+    add(f"* `ws_moved_during_freeze`（凍結期間工作區被動過，TOCTOU）："
+        f"{len(ws_moved_freeze)} 格"
+        f"{'：' + ', '.join(ws_moved_freeze) if ws_moved_freeze else ''}")
     add("")
     add("## 誠實邊界")
     add("")

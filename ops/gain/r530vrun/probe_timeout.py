@@ -85,15 +85,22 @@ def task_ids() -> list[str]:
 
 
 def one_measure(task_id: str, suite: str, ceiling_s: float,
-                sandbox_name: str, scratch: pathlib.Path) -> dict:
-    """一題一組驗收跑一次，回 per-file 的牆鐘與是否全過。"""
+                sandbox_name: str, scratch: pathlib.Path,
+                solution: str = "good.py") -> dict:
+    """一題一組驗收跑一次，回 per-file 的牆鐘與是否全過。
+
+    `solution` 預設 `good.py`（參考解）。傳 `bad_*.py` 就是拿**已知壞樁**去量——
+    那是手上唯一「不是正確解」的真實樣本，而正式跑要擋的風險（模型寫出來的東西
+    比參考解慢）只在那種樣本上看得到。壞樁**本來就不會全過**，所以它們的
+    `all_pass` 不當擋門，只看時間。
+    """
     work = pathlib.Path(tempfile.mkdtemp(prefix=f"p_{task_id}_{suite}_",
                                          dir=str(scratch)))
     ws = work / "ws"
     ws.mkdir()
     # 參考解 ＝ `gauge/<task>/good.py`（`export_bank.py` 從 `reference/solution.py`
     # 投影出來的同一份位元組）。工作區只放它——驗收自己 `import solution`。
-    shutil.copy2(GAUGE / task_id / "good.py", ws / "solution.py")
+    shutil.copy2(GAUGE / task_id / solution, ws / "solution.py")
     suite_dir = (TEMPLATES / task_id / "tests_visible") if suite == "visible" \
         else (HIDDEN / task_id)
     # `make_sandbox` 回 `(sandbox, backend_meta)`，與 launcher 同一條路徑
@@ -111,6 +118,7 @@ def one_measure(task_id: str, suite: str, ceiling_s: float,
     shutil.rmtree(work, ignore_errors=True)
     return {
         "task_id": task_id, "suite": suite, "backend": backend,
+        "solution": solution,
         "all_pass": res.get("all_pass"), "passed": res.get("passed"),
         "total": res.get("total"), "files": files,
         "suite_wall_s": round(wall_s, 3),
@@ -159,6 +167,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--parallel", type=int, default=2,
                     help="並行條件用幾條流（正式跑打算開幾條就填幾條）")
     ap.add_argument("--serial-only", action="store_true")
+    ap.add_argument("--include-bad", action="store_true",
+                    help="連 `gauge/<task>/bad_*.py` 也量（唯一「不是正確解」"
+                         "的真實樣本；只量時間，不當擋門）")
     args = ap.parse_args(argv)
 
     out = pathlib.Path(args.out).resolve()
@@ -182,15 +193,44 @@ def main(argv: list[str] | None = None) -> int:
                          scratch=scratch, parallel=args.parallel,
                          label=f"parallel{args.parallel}")
 
+    # ── 條件 C：**已知壞樁**（不是參考解）──────────────────────────────
+    # 正式跑要擋的風險是「模型寫的東西比參考解慢」。手上唯一不是正確解的
+    # 真實樣本就是 `gauge/<task>/bad_*.py`。它們**不參與 `all_pass` 擋門**，
+    # 也**不進 recommended 的分母**（下面另外印），只回答一個問題：
+    # 一份錯的解會不會在這組驗收上跑得久很多。
+    stake_records: list[dict] = []
+    if args.include_bad:
+        print("## 條件 C：已知壞樁（時間用，不當擋門）", flush=True)
+        for task_id in tasks:
+            stakes = sorted(p.name for p in (GAUGE / task_id).iterdir()
+                            if p.name.startswith("bad_") and p.suffix == ".py")
+            for name in stakes:
+                for suite in ("visible", "hidden"):
+                    rec = one_measure(task_id, suite, args.ceiling,
+                                      args.sandbox, scratch, solution=name)
+                    rec["condition"] = "bad_stake"
+                    stake_records.append(rec)
+            worst_here = max((r["max_file_wall_s"] for r in stake_records
+                              if r["task_id"] == task_id), default=0.0)
+            print(f"  [bad] {task_id:<20} {len(stakes)} 樁  "
+                  f"worst {worst_here:>7.3f}s", flush=True)
+
     bad = [r for r in records if not r["all_pass"]]
     ok = [r for r in records if r["all_pass"]]
     worst = max(ok, key=lambda r: r["max_file_wall_s"]) if ok else None
     recommended = (math.ceil(worst["max_file_wall_s"] * args.multiplier)
                    if worst else None)
     by_cond: dict[str, float] = {}
-    for r in ok:
+    for r in ok + stake_records:
         by_cond[r["condition"]] = max(by_cond.get(r["condition"], 0.0),
                                       r["max_file_wall_s"])
+    # **解析度**：所有觀測裡最小的那一個 ≒ `python3` 啟動 ＋ 沙箱進出的地板。
+    # 量到的最大值如果只比地板大一點點，那代表這個量**測不到題目**，
+    # ×3 規則在這種資料上算出來的是地板的三倍不是題目的三倍。**要講出來。**
+    all_for_floor = ok + stake_records
+    floor_s = min((r["max_file_wall_s"] for r in all_for_floor), default=0.0)
+    worst_all = max(all_for_floor, key=lambda r: r["max_file_wall_s"]) \
+        if all_for_floor else None
 
     report = {
         "generated": now_iso(),
@@ -204,13 +244,22 @@ def main(argv: list[str] | None = None) -> int:
              "condition": r["condition"], "passed": r["passed"],
              "total": r["total"]} for r in bad],
         "max_file_wall_s_by_condition": by_cond,
-        "worst": worst,
+        "worst_reference": worst,
+        "worst_any": worst_all,
+        "resolution_floor_s": floor_s,
+        "floor_dominated": (bool(worst_all)
+                            and worst_all["max_file_wall_s"] < floor_s * 10),
+        "rule_value_test_timeout_s": recommended,
         "recommended_test_timeout_s": recommended,
+        "bad_stake_records": stake_records,
         "records": records,
         "honest_bounds": [
-            "量的是參考解，不是模型寫的解——3 倍是工程餘裕不是上界。",
+            "量的是參考解與已知壞樁，不是模型寫的解——3 倍是工程餘裕不是上界。",
             "逾時格仍然可能出現；出現時是觀測不是 bug。",
             "這個數字只對 ops/gain/r530/bank/ 這 20 題成立。",
+            "`floor_dominated` 為真 ⇒ 這個量**測不到題目**，量到的是 python3 "
+            "啟動與沙箱進出的地板。那種情形下 ×3 規則算出來的是地板的三倍，"
+            "**不可以直接當作業值**——要講明白為什麼改用別的數字。",
         ],
     }
     (out / "timeout_probe.json").write_text(
@@ -221,10 +270,22 @@ def main(argv: list[str] | None = None) -> int:
     print("max_file_wall_s by condition: "
           + "  ".join(f"{k}={v:.3f}s" for k, v in sorted(by_cond.items())))
     if worst:
-        print(f"worst = {worst['task_id']} / {worst['suite']} / "
+        print(f"worst(reference) = {worst['task_id']} / {worst['suite']} / "
               f"{worst['condition']} = {worst['max_file_wall_s']:.3f}s")
-    print(f"RECOMMENDED --test-timeout = {recommended}  "
+    if worst_all:
+        print(f"worst(any incl. bad stakes) = {worst_all['task_id']} / "
+              f"{worst_all['suite']} / {worst_all.get('solution')} = "
+              f"{worst_all['max_file_wall_s']:.3f}s")
+    print(f"resolution floor = {floor_s:.3f}s  "
+          f"(python3 啟動＋沙箱進出；量到的最大值只有它的 "
+          f"{(worst_all['max_file_wall_s'] / floor_s):.1f}× "
+          f"⇒ floor_dominated={report['floor_dominated']})"
+          if worst_all and floor_s else "")
+    print(f"RULE VALUE --test-timeout = {recommended}  "
           f"(= ceil(worst × {args.multiplier}))")
+    if report["floor_dominated"]:
+        print("⚠ floor_dominated：這個量測不到題目，"
+              "×3 規則的值**不可以直接當作業值**。報告要講明用了什麼、為什麼。")
     if bad:
         print(f"⚠ 參考解沒有全過的有 {len(bad)} 組——那不是「跑太慢」，"
               f"是驗收與契約對不起來。停。")
