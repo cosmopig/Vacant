@@ -9,7 +9,10 @@
 #           --kind video|image|any（預設 any——**模態是 Flow 自己判的**）、
 #           --ref <圖檔>（把參考圖掛進提示詞，走「新增素材 → 上傳媒體檔案」；
 #             Flow 會先要人做「我具備必要權限」的聲明，本腳本**預設取消**，
-#             人同意了才加 --accept-upload-rights）、
+#             人同意了才加 --accept-upload-rights；或加 --pause-at-rights 把對話框
+#             **留在畫面上等人自己按**（15 分鐘，逾時也不取消，按完 --resume 續跑）。
+#             ⚠ 參考圖不是選配：沒掛參考圖生出來的板與既有板**不是同一個系列**
+#             （2026-09-20 實測 s10 vs s03，箱型／質感／機位／符號四項全變）），
 #           --max-candidates N（一次准收幾份；Flow 的代理設定可設 x1–x4，
 #             這台影片 x1、**圖像 x2**。超過就停下來交給人，不猜）、
 #           --no-submit（只跑到 prepare 就停，不花額度）、
@@ -69,7 +72,7 @@ CLI="$FLOW_HOME/src/cli.js"
 
 PROMPT_FILE=""; PROMPT_TEXT=""; ID=""; OUT=""; TIMEOUT=900
 QUALITY="原始大小"; RESUME=0; ALLOW_UPSCALE=""; STRICT_PROMPT=0; LOG_DIR=""; NO_SUBMIT=0
-KIND="any"; REF=""; MAXC=1; ACCEPT_RIGHTS=""
+KIND="any"; REF=""; MAXC=1; ACCEPT_RIGHTS=""; PAUSE_RIGHTS=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --prompt-file) PROMPT_FILE="$2"; shift 2;;
@@ -82,6 +85,7 @@ while [ $# -gt 0 ]; do
     --ref) REF="$2"; shift 2;;        # 參考圖（圖生圖／i2v）；掛進提示詞後才送出
     --max-candidates) MAXC="$2"; shift 2;;   # 一次准收幾份（圖像預設設定是 x2）
     --accept-upload-rights) ACCEPT_RIGHTS="--accept-upload-rights"; shift;;  # 人已授權才給
+    --pause-at-rights) PAUSE_RIGHTS="--pause-at-rights"; shift;;  # 對話框留著等人自己按（15 分鐘）
     --log-dir) LOG_DIR="$2"; shift 2;;
     --resume) RESUME=1; shift;;
     --strict-prompt) STRICT_PROMPT=1; shift;;
@@ -147,7 +151,7 @@ else
   else fail 64 "--prompt-file 或 --prompt 要給一個"; fi
   if [ -n "$REF" ]; then
     [ -f "$REF" ] || fail 64 "--ref 檔案不存在：$REF"
-    step 04b_attach node "$UI" attach --ref "$REF" $ACCEPT_RIGHTS \
+    step 04b_attach node "$UI" attach --ref "$REF" $ACCEPT_RIGHTS $PAUSE_RIGHTS \
       || fail 4 "參考圖掛不上去：$(jget "$LOG_DIR/04b_attach.json" error)（看 04b_attach.json）"
   fi
   # 提示詞正規化。實測（2026-09-19）：提示詞欄位是 ProseMirror contenteditable，

@@ -68,6 +68,7 @@ const {values: v, positionals: [sub = 'help']} = parseArgs({
     trace: {type: 'string'}, out: {type: 'string'}, kind: {type: 'string'},
     ref: {type: 'string'}, 'max-candidates': {type: 'string'},
     'allow-upscale': {type: 'boolean'}, 'accept-upload-rights': {type: 'boolean'},
+    'pause-at-rights': {type: 'boolean'},
   },
   allowPositionals: true, strict: true,
 });
@@ -409,19 +410,50 @@ if (sub === 'attach') {
       // --accept-upload-rights 才按同意。（人按過一次之後可能就不再問。）
       const agree = () => page.locator(`${OV} button`).filter({hasText: /^我同意$|^I agree$/i});
       const cancel = () => page.locator(`${OV} button`).filter({hasText: /^取消$|^Cancel$/i});
-      for (let i = 0; i < 40 && idx < 0; i++) {
+      // `--pause-at-rights`：**既不替人按，也不替人取消**——把對話框留在畫面上等人自己按。
+      //
+      // 加這個模式的理由是量出來的，不是方便性：2026-09-20 比對 `s10-green-1`
+      // （純文字提示、**沒掛參考圖**）與參考板 `world3/plates/s03.jpg`，箱型（高圓角→矮寬銳邊）、
+      // 質感（粗顆粒→光滑）、機位（低平偏右→俯角置中）、符號（信封＋橫線→只有信封）**四項全變**
+      // ⇒ 不掛參考圖就不是同一個系列。而掛參考圖一定觸發這個聲明
+      // ⇒ **聲明是「同一個系列」的唯一途徑，不是可跳過的步驟；取消掉＝放棄系列一致性。**
+      //
+      // ⚠ 這支**永遠不替人做那個聲明**。三種模式的差別只在「不同意的時候怎麼辦」：
+      //   預設              取消 ＋ 立刻回報（原本的行為，不變）
+      //   --pause-at-rights 留著 ＋ 等人按（本模式）
+      //   --accept-upload-rights  人已經在別處明示授權，才由腳本代按
+      const PAUSE = !!v['pause-at-rights'] && !v['accept-upload-rights'];
+      const MAXI = PAUSE ? 600 : 40;                       // 600 × 1.5s = 15 分鐘
+      let announced = false;
+      for (let i = 0; i < MAXI && idx < 0; i++) {
         if (await agree().count() >= 1) {
-          if (!v['accept-upload-rights']) {
+          if (v['accept-upload-rights']) {
+            await agree().first().click();
+          } else if (PAUSE) {
+            if (!announced) {
+              announced = true;
+              // 走 stderr：呼叫端看得到，且不污染 stdout 的 JSON 契約
+              process.stderr.write('WAITING_FOR_HUMAN_RIGHTS_CONSENT '
+                + JSON.stringify({file, deadline_s: MAXI * 1.5}) + '\n');
+            }
+            // 什麼都不做——對話框留在畫面上
+          } else {
             await cancel().first().click().catch(() => {});
             await page.keyboard.press('Escape');
             return {ok: false, error: 'UPLOAD_NEEDS_RIGHTS_CONSENT', file,
               note: 'Flow 上傳前要人聲明「具備必要權限可使用這個檔案」。這支不替人做那個聲明。'
-                  + ' 人同意了就加 --accept-upload-rights（gen_asset.sh 也有同名旗標），或請人在瀏覽器裡按一次。'};
+                  + ' 人同意了就加 --accept-upload-rights（gen_asset.sh 也有同名旗標），或請人在瀏覽器裡按一次，'
+                  + '或用 --pause-at-rights 把對話框留著等人按。'};
           }
-          await agree().first().click();
         }
         await page.waitForTimeout(1500);
         idx = await find();
+      }
+      // ⚠ 逾時**不取消對話框**：人可能正要按。留著，讓人按完再 --resume。
+      if (idx < 0 && PAUSE && announced) {
+        return {ok: false, error: 'RIGHTS_CONSENT_TIMEOUT', file, waited_s: MAXI * 1.5,
+                note: `等了 ${MAXI * 1.5} 秒沒人按「我同意」。對話框**沒有被我取消**，`
+                    + '人按完之後用 --resume 續跑即可（不會重送、不會再花額度）。'};
       }
       if (idx < 0) { await page.keyboard.press('Escape');
         return {ok: false, error: 'UPLOAD_NOT_VISIBLE_AFTER_60s', stem,
