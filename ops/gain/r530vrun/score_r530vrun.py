@@ -62,16 +62,33 @@ def now_iso() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
 
-def load_cells(out: pathlib.Path) -> list[dict]:
-    cells = []
+def load_cells(out: pathlib.Path) -> tuple[list[dict], list[str]]:
+    """回 `(跑完的格子, 還在跑的格子名)`。
+
+    ⚠ `cell.json` 是**邊跑邊寫**的，所以「檔案存在」不等於「這一格跑完了」。
+    只收 `run_complete: true`；在跑的那些**另外列名**，不混進任何表。
+    把它們混進去會讓分母說謊——而分母說謊比沒有分母更糟。
+    """
+    cells: list[dict] = []
+    inflight: list[str] = []
     d = out / "cells"
     if not d.is_dir():
         raise SystemExit(f"沒有 {d}。停。")
     for p in sorted(d.iterdir()):
         f = p / "cell.json"
-        if f.is_file():
-            cells.append(json.loads(f.read_text(encoding="utf-8")))
-    return cells
+        if not f.is_file():
+            inflight.append(p.name)
+            continue
+        try:
+            rec = json.loads(f.read_text(encoding="utf-8"))
+        except Exception:                                  # noqa: BLE001
+            inflight.append(p.name)
+            continue
+        if rec.get("run_complete"):
+            cells.append(rec)
+        else:
+            inflight.append(p.name)
+    return cells, inflight
 
 
 def graded_dir(out: pathlib.Path, cell: dict) -> tuple[pathlib.Path | None, str]:
@@ -208,7 +225,9 @@ def main(argv: list[str] | None = None) -> int:
     out = pathlib.Path(args.out).resolve()
     manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
     timeout_s = args.test_timeout or manifest.get("test_timeout_s") or 30.0
-    cells = load_cells(out)
+    cells, inflight = load_cells(out)
+    planned = sum(1 for _ in (out / "plan.jsonl").read_text(
+        encoding="utf-8").splitlines() if _.strip())
     scratch = out / "_score_scratch"
     scratch.mkdir(exist_ok=True)
 
@@ -247,8 +266,15 @@ def main(argv: list[str] | None = None) -> int:
         "不准與 R535／R530 原始結果合併、不准寫「複製」「效果消失」「等價」。")
     add("")
     add(f"# r530vrun 收官表　{now_iso()}　"
-        f"cells={len(cells)}　test_timeout={timeout_s}s")
+        f"cells={len(cells)}/{planned}　test_timeout={timeout_s}s")
     add("")
+    if inflight:
+        add(f"⚠ **這是期中表，不是收官表**：計畫 {planned} 格，跑完 "
+            f"{len(cells)} 格，**{len(inflight)} 格還在跑**"
+            f"（{', '.join(sorted(inflight))}）。下面所有比例的分母都是**跑完的**"
+            "那些，不是 40。發射順序是 `ow_01` → `ow_20`，而 `ow_18`–`ow_20` 是 "
+            "`loose` 層 ⇒ **期中的子集偏向難的那一端**，不可以當成全題庫的樣子。")
+        add("")
     add("| cell | arm | 層 | accepted | stop_reason | att | req | "
         "vis | hidden | M7_file | M7_ws | M7_ws_sol | to | wall_s |")
     add("|---|---|---|---|---|---:|---:|---|---|---|---|---|---:|---:|")
