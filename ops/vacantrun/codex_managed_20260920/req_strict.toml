@@ -1,0 +1,24 @@
+default_permissions = "vacant"
+allowed_permission_profiles = { vacant = true }
+
+[feature_requirements]
+network_proxy = true
+
+[experimental_network]
+enabled = true
+allowed_domains = ["100.119.113.56"]
+managed_allowed_domains_only = true
+
+[permissions.vacant]
+description = "Vacant egress only"
+
+[permissions.vacant.filesystem]
+"/" = "read"
+"/var/tmp/nwkey" = "write"
+
+[permissions.vacant.network]
+enabled = true
+mode = "limited"
+
+[permissions.vacant.network.domains]
+"100.119.113.56" = "allow"

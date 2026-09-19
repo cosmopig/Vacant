@@ -1,0 +1,12 @@
+ts=2026-09-19T18:41:20+00:00
+netns=net:[4026532792]
+CODEX_NETWORK_PROXY_ACTIVE=[1]
+HTTP_PROXY=[http://127.0.0.1:46027]
+ALL_PROXY=[socks5h://127.0.0.1:37093]
+GET http://100.119.113.56:1234/v1/models -> http=200 rc=0 body[0:160]=<{  "data": [    {      "id": "gemma-4-12b-it-qat",      "object": "model",      "owned_by": "organization_owner"    }  ],  "object": "list"}__HTTP__20>
+GET http://1.1.1.1/ -> http=301 rc=0 body[0:160]=<<html><head><title>301 Moved Permanently</title></head><body><center><h1>301 Moved Permanently</h1></center><hr><center>cloudflare</center></body></>
+GET http://104.20.23.154/ -> http=403 rc=0 body[0:160]=<error code: 1003__HTTP__403>
+GET http://example.com/ -> http=200 rc=0 body[0:160]=<<!doctype html><html lang="en"><head><title>Example Domain</title><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scal>
+GET https://example.com/ -> http=200 rc=0 body[0:160]=<<!doctype html><html lang="en"><head><title>Example Domain</title><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scal>
+rawsock 1.1.1.1:443 OSError [Errno 101] Network is unreachable
+rawsock 100.119.113.56:1234 OSError [Errno 101] Network is unreachable

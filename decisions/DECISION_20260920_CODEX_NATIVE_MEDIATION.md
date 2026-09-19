@@ -320,6 +320,65 @@ schema：`allowed_permission_profiles` 是 **name→bool 的 map**（且需同�
 
 ---
 
+## 七之三、✅ 下半也接上了（2026-09-20 深夜，Linux 實測）
+
+§三 的「❌ 只接上一半：能關死出口，還不能開一個洞給 Vacant 的收件口」**已經解決**。
+完整落盤：**`ops/vacantrun/codex_managed_20260920/`**（README ＋ 26 個 probe 檔 ＋ 三支腳本）。
+
+先前卡住的**不是少一個鍵名，是兩件事**：
+
+1. **`[permissions.<name>]` 要寫在 `requirements.toml` 自己裡面**，
+   不是 `/etc/codex/managed_config.toml`——那是 legacy 層，profile 放那裡**不會被採納**，
+   所以會安靜地掉回 `read-only`。binary 裡的決定性一句：
+   > `` `permissions.filesystem` is reserved for requirements-level filesystem constraints and cannot define a profile ``
+2. 網域天花板的鍵是 **`[experimental_network]`**（top-level，`RawNetworkRequirementsToml`）
+   ——**不是** `[network_proxy]`、**不是** `[permission_profiles.x]`。
+
+```toml
+[feature_requirements]
+network_proxy = true
+[experimental_network]
+enabled = true
+allowed_domains = ["100.119.113.56"]
+managed_allowed_domains_only = true      # ← 必須跟 allowed_domains 一起寫
+```
+
+**`codex exec` 真 agent 用自己的 shell 工具跑，讀落盤檔**：
+`netns=4026532792`（主機是 `4026531840`）、`CODEX_NETWORK_PROXY_ACTIVE=1`、
+**1003 → 200（真的模型清單 JSON）**、`1.1.1.1`／`104.20.23.154`／`example.com` **全部 403**
+（body 是 codex 自己的 `{"status":"blocked","source":"baseline_policy"}`）、
+**raw socket 三個目標全 ENETUNREACH——包含 1003**
+⇒ **連 Vacant 也不能裸連，唯一出口是 codex 的 loopback MITM proxy。**
+
+**十條使用者反抗路徑全部擋下**，含 `--dangerously-bypass-approvals-and-sandbox`（O5）、
+**專案層 `./.codex/config.toml`**（O9）、以及自建同名 profile 想劫持（**拒絕啟動**）。
+
+**負控制 N5 是關鍵**：`/etc/codex` 移走時，拿來打的那份 `wide` config **真的放行 example.com**
+⇒ 那些「擋下」是 requirements 擋的，**不是攻擊 config 寫壞**。
+
+### ⚠ 兩個量具問題，第二個差點造成假陽性
+
+1. 🔴 **啟動橫幅十次全說謊**：example.com 被 403、raw socket ENETUNREACH 時，
+   橫幅照印 `sandbox: custom permissions (network access enabled)`。
+   **判準只能看子行程的 netns ＋ `CODEX_NETWORK_PROXY_ACTIVE`。**
+2. 🔴 **TOML 表作用域陷阱**：用 `>>` 把 `default_permissions = "wide"` 接在使用者 config 尾端，
+   而尾端是 `[model_providers.vacantproxy]` 表 ⇒ 變成
+   `model_providers.vacantproxy.default_permissions`、**被靜默忽略** ⇒ **第一版是假的通過**。
+
+**根因**：requirements top-level **沒有 `deny_unknown_fields`**
+⇒ **打錯的鍵靜默忽略，只有型別錯才會吐訊號**（§三那輪的 `[network_proxy] allowed_domains` 就是死在這）。
+
+### 🔴 誠實邊界（引用時必須一起帶）
+
+1. **`experimental_` 這個前綴**：上游改名／改語意的機率不低，而**徵兆是靜默失效不是報錯**
+   ⇒ **收據必須實證 `CODEX_NETWORK_PROXY_ACTIVE=1` ＋ netns ≠ 主機**，不能只檢查設定檔。
+2. **只量了裸 IP ＋ 純 HTTP。** TLS 端點、萬用網域、`mode="full"` 在天花板下的行為**都沒量**。
+3. **上游只看得到 `CONNECT host:port`，看不到 body**（承接 §七.3）。
+4. **n = 1 台**，只在 0.147.0 / Ubuntu 6.8.0-137 上量過。
+5. **這一格擋的是 agent 的 shell。Codex 自己的模型呼叫不走這條路**（父行程不在沙箱裡）。
+
+---
+
 ## 八、要補什麼才敢說「夠了」
 
 - [ ] **Linux VM 上重跑 F/G/H/I/J ＋ unix socket 四格**（已派）

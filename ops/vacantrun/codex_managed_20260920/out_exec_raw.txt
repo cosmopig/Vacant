@@ -1,0 +1,5 @@
+netns=net:[4026532792]
+CODEX_NETWORK_PROXY_ACTIVE=[1]
+rawsock 1.1.1.1:443 OSError [Errno 101] Network is unreachable
+rawsock 104.20.23.154:80 OSError [Errno 101] Network is unreachable
+rawsock 100.119.113.56:1234 OSError [Errno 101] Network is unreachable

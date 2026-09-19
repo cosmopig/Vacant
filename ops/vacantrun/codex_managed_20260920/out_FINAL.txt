@@ -1,0 +1,12 @@
+ts=2026-09-19T18:42:48+00:00  host_netns_for_reference=net:[4026531840]
+netns=net:[4026532792]
+CODEX_NETWORK_PROXY_ACTIVE=[1]
+HTTP_PROXY=[http://127.0.0.1:35243]  ALL_PROXY=[socks5h://127.0.0.1:39825]
+rawsock 1.1.1.1:443 OSError [Errno 101] Network is unreachable
+rawsock 104.20.23.154:80 OSError [Errno 101] Network is unreachable
+rawsock 100.119.113.56:1234 OSError [Errno 101] Network is unreachable
+GET http://100.119.113.56:1234/v1/models -> http=200 rc=0 body=<{  "data": [    {      "id": "gemma-4-12b-it-qat",      "object": "model",      "owned_by": "organization_owner"  >
+GET http://1.1.1.1/ -> http=403 rc=0 body=<{"status":"blocked","host":"1.1.1.1","reason":"not_allowed","decision":"deny","source":"baseline_policy","protocol":"htt>
+GET http://104.20.23.154/ -> http=403 rc=0 body=<{"status":"blocked","host":"104.20.23.154","reason":"not_allowed","decision":"deny","source":"baseline_policy","protocol>
+GET http://example.com/ -> http=403 rc=0 body=<{"status":"blocked","host":"example.com","reason":"not_allowed","decision":"deny","source":"baseline_policy","protocol":>
+GET https://example.com/ -> http=000 rc=56 body=<__HTTP__000>

@@ -1,0 +1,11 @@
+model = "gemma-4-12b-it-qat"
+model_provider = "vacantproxy"
+approval_policy = "never"
+model_reasoning_effort = "none"
+
+[model_providers.vacantproxy]
+name = "vacant proxy"
+base_url = "http://100.119.113.56:1234/v1"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"
+

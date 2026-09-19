@@ -1,0 +1,28 @@
+model = "gemma-4-12b-it-qat"
+model_provider = "vacantproxy"
+approval_policy = "never"
+model_reasoning_effort = "none"
+default_permissions = "wide"
+
+[permissions.wide]
+description = "user wide"
+
+[permissions.wide.filesystem]
+"/" = "read"
+"/var/tmp/nwkey" = "write"
+
+[permissions.wide.network]
+enabled = true
+mode = "limited"
+
+[permissions.wide.network.domains]
+"example.com" = "allow"
+"1.1.1.1" = "allow"
+"104.20.23.154" = "allow"
+"100.119.113.56" = "allow"
+
+[model_providers.vacantproxy]
+name = "vacant proxy"
+base_url = "http://100.119.113.56:1234/v1"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"

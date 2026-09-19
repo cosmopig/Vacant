@@ -1,0 +1,13 @@
+ts=2026-09-19T18:30:10+00:00
+netns=net:[4026532792]
+CODEX_NETWORK_PROXY_ACTIVE=[1]
+HTTP_PROXY=[http://127.0.0.1:43143]
+HTTPS_PROXY=[http://127.0.0.1:43143]
+ALL_PROXY=[socks5h://127.0.0.1:34765]
+GET http://100.119.113.56:1234/v1/models -> http=200 rc=0
+GET http://1.1.1.1/ -> http=403 rc=0
+GET http://104.20.23.154/ -> http=403 rc=0
+GET http://example.com/ -> http=403 rc=0
+GET https://example.com/ -> http=000 rc=56
+rawsock 1.1.1.1:443 OSError [Errno 101] Network is unreachable
+rawsock 100.119.113.56:1234 OSError [Errno 101] Network is unreachable
