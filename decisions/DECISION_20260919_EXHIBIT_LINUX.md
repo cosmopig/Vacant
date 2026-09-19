@@ -42,6 +42,25 @@ Python 3.12.3、磁碟當時剩 4.8 G。
 `LAN_IP` 那一行的 macOS 專用 `ipconfig getifaddr en0` 會失敗、正確 fall back 到
 `hostname -I | awk '{print $1}'`，量到 `192.168.76.135`。
 
+> ## ⚠ 更正（2026-09-20）：**上面這一段是讀碼讀出來的，不是量出來的**
+>
+> **原文一個字都沒改**——改掉它等於讓紀錄描述一件沒發生過的事。這裡只加註。
+>
+> 上面那句「正確 fall back 到 `hostname -I`」**從來沒有被執行過**。
+> `LAN_IP` 那一整塊在 `if [ "$BIND" = "0.0.0.0" ]` 底下，**只有加 `--lan`
+> 才會跑**，而這一輪跑的是不帶 `--lan` 的版本（腳本最後印的是
+> 「⚠ 只綁本機：手機連不到。展場要用 --lan。」）。
+>
+> 真的跑下去的結果是 **exit 1、一個字都不印**：這台只有 `lo`／`ens33`／
+> `tailscale0`，`ip -4 -o addr show en0` 回 1，而腳本開著 `set -o pipefail`
+> ⇒ 整條管線回 1 ⇒ `set -e` 當場結束，連 `hostname -I` 那一行都到不了。
+> 在 `systemd` 底下就是每 10 秒重啟、journal 只有 `status=1/FAILURE`。
+>
+> 修法、實測與**新加的可執行判準**（`--print-host`、`preflight --lan`、
+> 四條測試）在 `DECISION_20260919_EXHIBIT_UNATTENDED.md` §五-1。
+>
+> 留下來的那一句：**從讀碼描述一條路徑，不等於量過它。**
+
 **第一次起不來**：`to_events.py:226` `from vacant.logbook import LogEntry` →
 `ModuleNotFoundError: No module named 'vacant'`。
 

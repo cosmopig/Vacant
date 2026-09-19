@@ -28,6 +28,7 @@ HM="${VACANT_HM:-$(cd "$REPO/.." && pwd)/vacant_hm}"
 PY="${PYTHON:-python3}"
 TV_PORT=8420
 TWIN_PORT=8899
+LAN=0
 FAIL=0
 
 while [ $# -gt 0 ]; do
@@ -35,6 +36,8 @@ while [ $# -gt 0 ]; do
     --tv-port)   TV_PORT="$2"; shift ;;
     --twin-port) TWIN_PORT="$2"; shift ;;
     --hm)        HM="$2"; shift ;;
+    # 待會 ExecStart 會用 --lan ⇒ 先在這裡把「區網 IP 抓不抓得到」量一次。
+    --lan)       LAN=1 ;;
     *) echo "preflight：不認得的參數 $1" >&2; exit 2 ;;
   esac
   shift
@@ -95,7 +98,30 @@ for p in "$TV_PORT" "$TWIN_PORT"; do
   esac
 done
 
-# ── 四、中文字型（警告，不擋）─────────────────────────────────────
+# ── 四、區網 IP（只有 --lan 才量）────────────────────────────────
+# ⚠ **這一節是一個事故的遺物。** 2026-09-19 之前，這一段偵測邏輯
+#   **從來沒有被執行過**——它只有加 `--lan` 才會跑，而當時的驗證跑的是
+#   不帶 `--lan` 的版本，紀錄裡那句「會正確 fall back 到 hostname -I」
+#   是**讀碼讀出來的描述，不是量出來的結果**。真的跑下去是
+#   `set -euo pipefail` 底下當場斷掉：**exit 1、一個字都不印**，
+#   在 systemd 底下就是每 10 秒重啟、journal 只有 status=1/FAILURE。
+#   ⇒ 現在它有 `--print-host`，而這一節**每次開機都把它跑一遍**。
+#     從讀碼描述一條路徑，不等於量過它。
+if [ "$LAN" = "1" ]; then
+  if HOSTOUT=$("$HERE/exhibit_boot.sh" --lan --print-host 2>&1); then
+    say "✓ 區網 IP 抓得到：$(echo "$HOSTOUT" | tail -1)（QR 會指到這裡）"
+    case "$(echo "$HOSTOUT" | tail -1)" in
+      100.6[4-9].*|100.[7-9]?.*|100.1[01]?.*|100.12[0-7].*)
+        warn "那是 CGNAT／Tailscale 那一段，展場 hotspot 上的手機多半連不到" ;;
+    esac
+  else
+    RC=$?
+    bad "區網 IP 抓不到（exhibit_boot.sh --print-host 回 $RC）：$(echo "$HOSTOUT" | tr '\n' ' ')"
+    [ "$RC" = "1" ] && bad "  ⚠ 回 1 而不是 2 ＝ 腳本在某處當場斷掉沒說話，那是 bug 不是環境問題"
+  fi
+fi
+
+# ── 五、中文字型（警告，不擋）─────────────────────────────────────
 if ! command -v fc-list >/dev/null 2>&1; then
   warn "沒有 fc-list，量不到字型（＝沒量到，不是量到 0）"
 else

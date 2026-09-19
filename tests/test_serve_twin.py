@@ -571,3 +571,85 @@ def test_phone_page_sends_the_token_it_was_scanned_with():
     assert "JSON.stringify({ action, token: TOKEN })" in html
     # 403 要講人話（那一定是「上一次開機留下來的分頁」）
     assert "重新掃電視上的 QR" in html
+
+
+# ── 區網 IP 偵測（DECISION_20260919_EXHIBIT_UNATTENDED.md §五-1）────────────
+#
+# 這一組守的是一個**真的發生過**的事故形狀：`exhibit_boot.sh` 裡算區網 IP 的
+# 那一段在 2026-09-19 之前**從來沒有被執行過**（它只有加 `--lan` 才會跑），
+# 只被「讀碼讀出來」寫進紀錄。真的跑下去是 `set -euo pipefail` 底下當場斷掉
+# ——**exit 1、一個字都不印**，在 systemd 底下就是無限重啟而 journal 什麼都沒有。
+#
+# 所以這裡釘的不是「它抓到哪個位址」（那跟跑測試的機器有關，釘不得），
+# 而是**離開碼的契約**：0＝抓到並印出來、2＝抓不到但說了為什麼。
+# **1 永遠是 bug**：那代表又有一條路徑安靜地斷掉了。
+
+BOOT_SH = ROOT / "ops" / "exhibit" / "twin" / "exhibit_boot.sh"
+
+
+def _print_host(*args):
+    import subprocess
+    return subprocess.run(
+        ["bash", str(BOOT_SH), "--print-host", *args],
+        capture_output=True, text=True, timeout=60)
+
+
+@pytest.mark.skipif(not BOOT_SH.exists(), reason="沒有 exhibit_boot.sh")
+def test_lan_detection_never_dies_silently():
+    """**這一條就是那個 bug 的形狀。**
+
+    `exit 1` ＋ 空輸出 ＝ 腳本在某處被 `set -e` 砍掉而沒有人知道。
+    fail-closed 的意思是「拒絕啟動**並說明**」，不是「安靜地不見」。
+    """
+    r = _print_host("--lan")
+    assert r.returncode in (0, 2), (
+        f"--lan --print-host 回 {r.returncode}（只准 0 或 2）\n"
+        f"stdout={r.stdout!r} stderr={r.stderr!r}")
+    if r.returncode == 2:
+        assert r.stderr.strip(), "抓不到區網 IP 的時候**一定要說為什麼**"
+    else:
+        assert r.stdout.strip(), "回 0 就一定要把位址印在 stdout"
+
+
+@pytest.mark.skipif(not BOOT_SH.exists(), reason="沒有 exhibit_boot.sh")
+def test_loopback_mode_prints_loopback():
+    """不帶 `--lan` 就不該去碰那一整段（那是展場才用的路徑）。"""
+    r = _print_host()
+    assert r.returncode == 0
+    assert r.stdout.strip() == "127.0.0.1"
+
+
+@pytest.mark.skipif(not BOOT_SH.exists(), reason="沒有 exhibit_boot.sh")
+def test_unusable_address_is_refused_with_a_reason_not_a_silent_death():
+    """指定一個**不能用**的位址 ⇒ 2 ＋ 講理由，不是 1 ＋ 沉默。
+
+    169.254.0.0/16 ＝ link-local。展場手機連不到 ⇒ QR 掃不開 ⇒ 寧可不啟動。
+    """
+    import os
+    env = dict(os.environ, VACANT_LAN_IP="169.254.7.7")
+    import subprocess
+    r = subprocess.run(["bash", str(BOOT_SH), "--lan", "--print-host"],
+                       capture_output=True, text=True, timeout=60, env=env)
+    assert r.returncode == 2, f"回了 {r.returncode}"
+    assert "抓不到可用的區網 IP" in r.stderr
+
+
+@pytest.mark.skipif(not BOOT_SH.exists(), reason="沒有 exhibit_boot.sh")
+def test_interface_names_are_not_hardcoded_on_linux():
+    """不准再靠猜介面名字。
+
+    舊版寫死 `en0 en1 eth0 wlan0`，而 vacant-dev 的介面叫 `ens33`
+    ——名單全部落空。展場機的網卡叫什麼**沒有人保證得了**。
+    """
+    src = BOOT_SH.read_text(encoding="utf-8")
+    assert "addr show scope global" in src, "Linux 那一段要列真的存在的位址"
+    # ⚠ 只看**程式碼**，不看註解：解釋那個 bug 的註解裡本來就會寫 `eth0 wlan0`，
+    #   那段字**應該留著**（它是為什麼要這樣寫的理由）。把註解一起掃進來，
+    #   這一條就會逼人把歷史刪掉才會綠——那是拿判準去換紀錄。
+    code = "\n".join(ln for ln in src.splitlines()
+                     if not ln.lstrip().startswith("#"))
+    assert "eth0" not in code and "wlan0" not in code, "不要再寫死介面名字"
+    # 而且那條管線一定要有退路（沒有 `|| true` ＝ pipefail 之下當場斷掉）
+    assert "| cut -d/ -f1 | head -1 || true)" in src, (
+        "`ip …` 那條管線少了 `|| true`：`ip` 對不存在的介面回 1，"
+        "在 `set -o pipefail` 底下會讓整支腳本 exit 1 而且一個字都不印")

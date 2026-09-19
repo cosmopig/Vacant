@@ -17,6 +17,8 @@
 #   ./exhibit_boot.sh --lan --no-token      明知故犯：區網上任何人都按得動
 #   ./exhibit_boot.sh --hm /path/vacant_hm  vacant_hm 不在預設位置
 #   ./exhibit_boot.sh --dwell 25            沒人按的時候幾秒換一格
+#   ./exhibit_boot.sh --lan --print-host    只印「區網 IP 抓到什麼」就結束
+#                                           （0＝抓到、2＝抓不到並說明；1 是 bug）
 #
 # ⚠ `--lan` **一定會有 token**（2026-09-19 起）。沒給 `--token`／`VACANT_TWIN_TOKEN`
 #   就這一次開機自動生一把，編進 QR 的網址裡。要關得明講 `--no-token`。
@@ -37,10 +39,21 @@ BIND=127.0.0.1
 KIOSK=0
 TOKEN="${VACANT_TWIN_TOKEN:-}"
 NO_TOKEN=0
+PRINT_HOST=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --lan)    BIND=0.0.0.0 ;;
+    # 只跑「這台機器的區網 IP 抓不抓得到」然後印出來就結束，什麼都不啟動。
+    # ⚠ **這一格的存在理由是一個真實事故**：區網 IP 偵測那一段以前
+    #   **從來沒有被執行過**，只被「讀碼讀出來」寫進紀錄
+    #   （DECISION_20260919_EXHIBIT_LINUX.md §1 說它會 fall back 到
+    #   `hostname -I`——那句話是讀出來的，不是量出來的；`--lan` 那一整塊
+    #   只有加 `--lan` 才會跑，而那一份跑的是不帶 `--lan` 的版本）。
+    #   真的跑下去是 **exit 1、一個字都不印**。
+    #   ⇒ 有了這一格，那一段就**量得到**了（`exhibit_preflight.sh --lan`
+    #     與 `tests/test_serve_twin.py` 都在用它）。
+    --print-host) PRINT_HOST=1 ;;
     --hm)     HM="$2"; shift ;;
     --dwell)  DWELL="$2"; shift ;;
     --tv-port)   TV_PORT="$2"; shift ;;
@@ -53,12 +66,12 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-if [ ! -f "$HM/world3/index.html" ]; then
+if [ "$PRINT_HOST" = "0" ] && [ ! -f "$HM/world3/index.html" ]; then
   echo "找不到電視那一頁：$HM/world3/index.html" >&2
   echo "用 --hm <路徑> 指過去，或設 VACANT_HM 環境變數。" >&2
   exit 2
 fi
-if [ ! -f "$REPO/ops/exhibit/twin/twin_pack.json" ]; then
+if [ "$PRINT_HOST" = "0" ] && [ ! -f "$REPO/ops/exhibit/twin/twin_pack.json" ]; then
   echo "找不到資料包：$REPO/ops/exhibit/twin/twin_pack.json" >&2
   echo "先跑：$PY $REPO/ops/exhibit/twin/pack.py --runs <run 目錄>" >&2
   exit 2
@@ -113,6 +126,17 @@ if [ "$BIND" = "0.0.0.0" ]; then
       echo "  要指定就用 VACANT_LAN_IP=<展場那張網卡的位址>。" >&2 ;;
   esac
   HOST="$LAN_IP"
+fi
+
+# `--print-host`：到這裡就結束。**這一行是那一段偵測唯一的可執行判準。**
+# 離開碼的語意是契約，測試釘著它：
+#   0 ＝ 抓到了（stdout 就是那個位址）
+#   2 ＝ 抓不到，而且**上面已經印了為什麼**（fail-closed，不是安靜跑錯）
+#   1 ＝ **不該出現**。真的出現就代表又有一條路徑在 `set -euo pipefail`
+#        底下當場斷掉、一個字都不印——那正是 2026-09-19 那個 bug 的形狀。
+if [ "$PRINT_HOST" = "1" ]; then
+  echo "$HOST"
+  exit 0
 fi
 
 # token：**這一支自己決定，不要交給 serve_twin 自己生**。
