@@ -27,6 +27,7 @@
 ## 一、Linux 實跑（vacant-dev，2026-09-20，上游 1003）
 
 `bash ops/vacantrun/enclosure_20260920/run_attest.sh` ⇒ **`fail=0`（13/13）**。
+⚠ 這一組的 canary 是**直接呼叫契約**，不是某個 agent 的掛鉤（真 agent 那一格見 §一之二）。
 四組跑在同一台機器、同一分鐘、**同一支探針**，唯一的差別就是那一個變因。
 證據：`ops/vacantrun/enclosure_20260920/evidence/attest_20260920/`。
 
@@ -40,6 +41,41 @@
 `policy_sha256` 兩面驗：圍牆裡讀到的 == 主機上那一份（`9080c1e1…`），
 且**換一份政策就換一個雜湊**（enc `9080c1e1` ≠ nohook `a6b4bc6f`）
 ——不然「對得上」有可能只是常數對常數。
+
+---
+
+## 一之二、**真 agent 的掛鉤真的燒了一次**（OpenCode 1.18.31，真模型）
+
+`ops/vacantrun/enclosure_20260920/evidence/opencode_hook_20260920/`。
+vacant-dev、上游 1003、`gemma-4-12b-it-qat`、**沒有**套 enclosure（單獨量掛鉤）。
+安裝的是 `hookcli.install_opencode` 寫的那份 plugin（`<CONFIG_DIR>/plugin/vacant.js`），
+agent 真的寫出了 `solution.py`。
+
+```
+session_start  ts …800.599
+canary         ts …800.607   ← framework_hook.canary_fired 的唯一依據
+canary_result  ts …800.631   relay_canary.status = 200（**實證 proxy 在跑**）
+pre_tool_use   ts …821.514   tool="write"
+post_tool_use  ts …821.619   tool="write"
+```
+
+⇒ `framework_hook = {agent: "opencode", contract_version: "vacant-hook/1",
+canary_fired: **true**, events_n: 5}`，`version_drift: false`。
+**這是第一次有一個真 agent 框架的掛鉤走完 Vacant 的契約。**
+
+但那一跑的級別是 **B′（`channel_not_enclosed`）**，而且 `unexplained = 3 / 5`：
+
+| relay 那 5 通 | 對得上嗎 |
+|---|---|
+| `GET /v1/models`（測試腳本自己的暖機） | ✗ 沒有工具事件 ⇒ **對帳抓到了**（它本來就不是 agent 打的） |
+| `GET /v1/models?vacant_canary=oc1` | ✓ 對上 `canary` |
+| `POST /v1/chat/completions`（status 0，2.5 KB） | ✗ |
+| `POST /v1/chat/completions`（200，30 KB） | ✗ |
+| `POST /v1/chat/completions`（200，31 KB） | ✓ 對上 `post_tool_use` |
+
+原因是 §二-1 那條誠實邊界的實例：**OpenCode 的 plugin API 沒有一個
+「使用者送出提示／一個回合開始了」的事件**，所以第一通模型呼叫沒有額度可配。
+⇒ **OpenCode 在補上對應事件之前到不了 A 級。** 那是量出來的結果，不是要繞過去的麻煩。
 
 ---
 
@@ -115,12 +151,15 @@
 
 ## 五、**沒做的那一半**（不要讀成做完了）
 
-1. 🔴 **沒有任何一個 agent 框架的掛鉤真的燒過。**
-   `run_attest.sh` 的 canary 是**直接呼叫契約**（`hookcli session_start`），
-   證明的是「契約與兩個探針在真的圍牆裡會動」，**不是**「Claude Code／
-   OpenCode／Codex 的掛鉤會燒」。安裝器只寫了 `claude` 與 `opencode` 兩份
-   （`hookcli.INSTALLERS`），**兩份都沒有跟真 agent 跑過一次**。
-   ⇒ 在那之前，真實世界的 agent 跑出來會是 **B 級**，不是 A 級。
+1. 🔴 **「真 agent 的掛鉤 ＋ 圍牆」這兩件事還沒有在同一跑裡同時成立。**
+   · A 級那一格（§一）的 canary 是**直接呼叫契約**（`hookcli session_start`），
+     證明的是「契約與兩個探針在真的圍牆裡會動」，**不是**某個 agent 的掛鉤；
+   · 真 agent 那一格（§一之二）有真掛鉤但**沒有套 enclosure**，而且
+     `unexplained=3` ⇒ **B′**。
+   ⇒ **今天沒有任何一個真 agent 跑出過 A 級。** 展場要的是 A 級，
+     所以這條線還沒有到展場可用。缺的是兩步：把 OpenCode 的回合開端事件補上
+     （`chat.message` 之類，未驗），以及把真 agent 放進 enclosure 再量一次。
+   · `install_claude` 寫得出設定，但**沒有跟真的 Claude Code 跑過一次**。
 2. `codex`／`pi`／`hermes` 的安裝器沒寫 ⇒ 那三個的 `canary_fired` 是
    `null`（沒量到）不是 `false`。
 3. **`attestation` 的全文不在鏈上**，鏈上只有 `tier`／`attested`／

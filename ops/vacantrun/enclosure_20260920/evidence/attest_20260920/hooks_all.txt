@@ -1,10 +1,10 @@
-]7;ssh://100.124.254.83=== enc ===
+=== enc ===
 {"contract": "vacant-hook/1", "run_id": "enc", "agent": "probe", "event": "session_start", "ts": 1789844286.440362, "pid": 10, "payload_sha256": null}
 {"contract": "vacant-hook/1", "run_id": "enc", "agent": "probe", "event": "canary", "ts": 1789844286.44372, "pid": 10, "note": "這一行就是 `framework_hook.canary_fired` 的唯一依據——讀的是掛鉤自己寫的，不是「我們裝過了」"}
 {"contract": "vacant-hook/1", "run_id": "enc", "agent": "probe", "event": "canary_result", "ts": 1789844286.4652982, "pid": 10, "relay_canary": {"attempted": true, "url": "http://127.0.0.1:8787/v1/models?vacant_canary=enc", "status": 200, "error": null}}
 === nohook ===
+(沒有這個檔——nohook 那一格掛鉤根本沒跑)
 === rogue ===
 {"contract": "vacant-hook/1", "run_id": "rogue", "agent": "probe", "event": "session_start", "ts": 1789844287.0694077, "pid": 10, "payload_sha256": null}
 {"contract": "vacant-hook/1", "run_id": "rogue", "agent": "probe", "event": "canary", "ts": 1789844287.071145, "pid": 10, "note": "這一行就是 `framework_hook.canary_fired` 的唯一依據——讀的是掛鉤自己寫的，不是「我們裝過了」"}
 {"contract": "vacant-hook/1", "run_id": "rogue", "agent": "probe", "event": "canary_result", "ts": 1789844287.094302, "pid": 10, "relay_canary": {"attempted": true, "url": "http://127.0.0.1:8787/v1/models?vacant_canary=rogue", "status": 200, "error": null}}
-]7;file://MacBookPro/private/tmp/encfields/ops/vacantrun/enclosure_20260920/evidence/attest_20260920
