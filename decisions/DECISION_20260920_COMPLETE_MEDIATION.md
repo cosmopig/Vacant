@@ -136,6 +136,8 @@ C 類的 `curl http://<IP>:1234`（IP 字面值、不留 DNS）只會有兩種�
   擋掉非特權 bwrap（`sandbox.py` docstring 已量過並**刻意沒自己決定**）。
   **展場機器是我們的，就決定它。**
 - **P0 收據對帳 ＋ fail-closed 分級。** 沒有這個，enclosure 只產生資料不產生宣稱。
+  🔴 **2026-09-20 現況：機制那一半做完了，這一半一個欄位都還沒有。**
+  ⇒ 收據上**看不出這一跑有沒有在圍牆裡跑過** ⇒ **新口徑現在還不能講。**
   新欄位：`enclosure{ns_id, policy_sha256, applied}`、
   `framework_hook{agent, contract_version, canary_fired}`、
   `reconciled{relay_calls, hook_events, unexplained}`、`tier`。
@@ -243,10 +245,16 @@ C 類 5/5 繞過而收據一個字沒變；unix socket 在封鎖之下 200 OK �
 
 ## 五、資訊不足、發射前必須補的六項
 
-1. **五個 agent 進得了 enclosure 嗎（完全沒量）。** R530 的 bwrap 只跑過短指令，
-   沒跑過需要 node／npm cache／自己設定目錄的完整 agent。
-   要量：每個 agent 在「只有中繼到得了」之下能不能跑完一題，還是直接硬失敗。
-   **這是整個方案的單點風險。**
+1. ~~**五個 agent 進得了 enclosure 嗎（完全沒量）。**~~
+   ✅ **2026-09-20 量完：五個全部進得去、零硬失敗。**
+   落盤 `DECISION_20260920_ENCLOSURE_MEASURED.md` ＋ `ops/vacantrun/enclosure_20260920/`
+   （兩支一鍵重跑：`run_probes.sh` **一定先跑負控制**、`run_agent.sh <agent>`）。
+   **沒有單點風險。**
+   ⚠ 後續補上：門從 byte pipe 升級成**會終結 HTTP 的 proxyd**（AF_UNIX listener，
+   非模型 path 回 403 且**上游收到 0 次**，負控制 policy=any 與 byte pipe 各收到 1 次）。
+   ⚠ **仍然沒量**：互動 TTY、MCP、`npx` 動態下載、長任務、並行多格。
+   ⚠ **門的 path 政策是 path 層不是內容層**——`/v1/chat/completions` 之下的 body 它不管。
+   **擋得住 `/admin` ≠ 擋得住「把資料裝進一個合法的模型請求帶出去」。**
 2. **掛鉤到底會不會燒、擋不擋得下來（完全沒量）。**
    矩陣：5 agent × {事件有燒／能 deny／在 `--dangerously-skip-permissions`／`--yolo` 之下仍然燒／
    managed policy 蓋得住}。
@@ -254,13 +262,20 @@ C 類 5/5 繞過而收據一個字沒變；unix socket 在封鎖之下 200 OK �
    能不能被 managed settings 釘死——**這格決定框架切面是 L3 還是 L5**。
 3. **Codex `[features].hooks` 的預設與持久性。** Otty 必須自己去翻它 ⇒ 預設關。
    升級會不會被蓋掉？`managed_dir` 的 `requirements.toml` 能不能強制它？
-4. **Codex 內建的 `NetworkMitm` / `NetworkDomainPermissions` / `NetworkUnixSocketPermissions`
-   到底是什麼。** 如果它就是廠商支援的「所有流量走我們的中繼、逐網域白名單」，
-   Codex 這格可能根本不需要我們自己的圍牆。
-   **這是目前投報率最高的一次調查，成本只有讀文件。**
-5. **展場 VM 的 AppArmor 決定。** `kernel.apparmor_restrict_unprivileged_userns=1` 底下裸 bwrap 起不來；
-   兩個選項（只放行 `/usr/bin/bwrap` 的 profile，或走 `sudo -n bwrap` 並把工作區放 `/var/tmp`）
-   `sandbox.py` 已量過，**要一個人類決定**。
+4. ~~**Codex 內建的 `NetworkMitm` …**~~
+   ✅ **查完並在 macOS ＋ Linux 兩邊實測**，落盤 `DECISION_20260920_CODEX_NATIVE_MEDIATION.md`。
+   結論：**Codex 自己在核心層堵死 C 類**（macOS seatbelt／Linux 獨立 netns），
+   **而且 `codex exec` 會一律載入 `/etc/codex/requirements.toml`——零旗標、fail-closed
+   ⇒ 那是「保證」不是「預設值」**（五條使用者反抗路徑全部擋下或拒絕啟動）。
+   最小充分集只要兩行 `[feature_requirements] network_proxy = true`。
+   ❌ **但只接上一半**：能把出口**關死**，還不能**開一個洞給 Vacant 的收件口**
+   （網域白名單四種寫法都沒生效，現在連自己的模型上游都直連不到）。**仍在查。**
+5. ~~**展場 VM 的 AppArmor 決定。**~~
+   ✅ **這個問題五天前就不存在了**：`/etc/apparmor.d/bwrap`（**Sep 15 01:43**，經人類授權）
+   已經在，`aa-status` 認得，裸 `bwrap --unshare-all` rc=0
+   ——**選項 (1) 早就走了，零成本、只放行 `/usr/bin/bwrap` 一支、sysctl 沒關**。
+   ⚠ `vacant_network/vrun/sandbox.py` 的 docstring 曾經以現在式寫「起不來」（09-13 的實測），
+   已於 09-20 標明時態。
 6. **行程內模型的正面偵測訊號。** 現在只有「沒有外部封包」，推不出「有被中介」。
    缺一個正面判據（例如中繼那端 session 計數 > 0 才准發 A 級收據）。
 
