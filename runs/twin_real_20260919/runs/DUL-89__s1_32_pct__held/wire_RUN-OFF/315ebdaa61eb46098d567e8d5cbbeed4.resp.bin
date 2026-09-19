@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-9wi0oytaq2aa9s62oa596","object":"chat.completion.chunk","created":1789816053,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"472360498","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-9wi0oytaq2aa9s62oa596","object":"chat.completion.chunk","created":1789816053,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def solve(quantity1, quantity2):\\n    if quantity2 == 0:\\n        return None\\n    percentage = (quantity1 / quantity2) * 100\\n    return round(percentage, 1)\\n\\n# Example usage:\\n# print(solve(50, 200))  # Expected: 25.0\\n# print(solve(10, 0))    # Expected: None\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-9wi0oytaq2aa9s62oa596","object":"chat.completion.chunk","created":1789816053,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-9wi0oytaq2aa9s62oa596","object":"chat.completion.chunk","created":1789816053,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1466,"completion_tokens":114,"total_tokens":1580,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

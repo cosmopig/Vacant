@@ -309,6 +309,13 @@ def attempts_of(run_dir: pathlib.Path, summary: dict) -> list[dict]:
             "attempt": n,
             "requests_seen": int(rec.get("requests_seen") or 0),
             "agent_rc": rec.get("agent_rc"),
+            # ⚠ **被我們的 `--timeout` 砍掉**與**它自己跑完但沒過**是兩個故事。
+            #   兩者的 `stop_reason` 都是 `visible_fail`（工作區照樣凍結、照樣送驗收），
+            #   所以不另外帶這一欄的話，展場會把「我們沒等它」講成「它做不出來」。
+            #   實際發生過：`s1_30_ord_suffix__held` 三位居民共 8 次嘗試全部是
+            #   300 秒被砍，那一題的「拒交」有一半是我們的上限造成的。
+            "agent_timed_out": bool(rec.get("agent_timed_out")),
+            "agent_wall_s": rec.get("agent_wall_s"),
             "accepted": rec.get("accepted"),
             "stop_reason": rec.get("stop_reason"),
             # 回饋真的進了幾個位元組（第 1 次恆為 0＝與「沒有 Vacant」逐位元相同）
@@ -441,6 +448,10 @@ def pack_cell(run_dir: pathlib.Path) -> dict:
         "infra_void": summary.get("infra_void"),
         "attempts_used": summary.get("attempts_used"),
         "attempts": attempts,
+        # 這一格有沒有任何一次嘗試是被牆鐘上限砍掉的。**展場要標出來**：
+        # 被砍掉的那幾次，「拒交」有一部分是我們沒等它，不是它做不出來。
+        "any_attempt_timed_out": any(a.get("agent_timed_out") for a in attempts),
+        "agent_timed_out": bool(summary.get("agent_timed_out")),
         "retry": summary.get("retry"),
         "requests_seen": requests_seen,
         "wire_by_protocol": summary.get("wire_by_protocol") or {},

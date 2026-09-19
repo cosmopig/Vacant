@@ -209,6 +209,10 @@ def off_events(cell: dict, tid: str, ev) -> None:
     ev("draft_done", arm=ARM_OFF, worker=cell["resident"],
        calls_used=int(off.get("requests_seen") or 0),
        attempt=1, of=1, feedback_bytes=0,
+       timed_out=bool(off.get("agent_timed_out")),
+       timed_out_note=("這一臂也是跑到牆鐘上限被砍掉的：事後稽核量到的是"
+                       "它寫到一半的工作區。"
+                       if off.get("agent_timed_out") else ""),
        note="沒有 Vacant 的那一臂：一次 spawn、沒有閘門、沒有回饋、沒有第二次。")
     # ⚠ **不發 `gate_ran`**：這一臂沒有閘門。
     ev("verdict", arm=ARM_OFF,
@@ -296,7 +300,15 @@ def events_for_cell(cell: dict, *, verify_url: str, ts_ms: int) -> list[dict]:
            #   兩件事在展場上差很多：一個是機制沒動，一個是機制動了而
            #   agent 沒去讀（R535 量到的正是後者：檔案投遞在 wire 上零命中）。
            feedback_delivery=a.get("feedback_delivery"),
-           feedback_note=FEEDBACK_NOTE.get(a.get("feedback_delivery") or "", ""))
+           feedback_note=FEEDBACK_NOTE.get(a.get("feedback_delivery") or "", ""),
+           # ⚠ **被牆鐘上限砍掉**與**自己跑完但沒過**是兩個故事，而兩者的
+           #   `stop_reason` 都是 `visible_fail`（工作區照樣凍結、照樣送驗收）。
+           #   不帶這一欄，電視會把「我們沒等它」演成「它做不出來」。
+           timed_out=bool(a.get("agent_timed_out")),
+           timed_out_note=("這一次是跑到牆鐘上限被砍掉的：交出去驗收的是它當下"
+                           "寫到一半的工作區。「沒過」有一部分是我們沒等它。"
+                           if a.get("agent_timed_out") else ""),
+           agent_wall_s=a.get("agent_wall_s"))
         vis = a.get("visible")
         if vis is None:
             # 沒有閘門結果（沒有驗收套件／基建中止）⇒ **不發 gate_ran**。

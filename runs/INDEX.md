@@ -3,7 +3,7 @@
 > 這一份由 `ops/gain/build_runs_index.py` 從 `runs/INDEX.json` **同一次執行**
 > 產生。要改內容改產生器，不要手改本檔——手改會在下一次 `--check` 被抓到。
 
-`runs/` 共 **719** 個項目：347 個目錄 ＋ 372 個頂層檔案，合計 731 MB。其中 **172 個目錄有 `summary.json`**。
+`runs/` 共 **720** 個項目：348 個目錄 ＋ 372 個頂層檔案，合計 742 MB。其中 **172 個目錄有 `summary.json`**。
 
 分類統計：
 
@@ -14,7 +14,7 @@
 | `other` | 23 | B 層掃描、展件抓圖、唯讀快照等 |
 | `real_run` | 166 | 真跑過模型、有 summary.json 與 rows.jsonl——這些才是證據 |
 | `replay` | 1 | 離線重放產物 |
-| `smoke` | 12 | 冒煙／探針／量具檢查——**不進統計** |
+| `smoke` | 13 | 冒煙／探針／量具檢查——**不進統計** |
 
 ### `INDEX.json` 的形狀（先看這個再寫 parser）
 
@@ -160,6 +160,7 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 |---|---|---|---|---:|---|---|
 | `_probe_r210` | `smoke` | 2026-08-28 | — | 0 | 否 | probe_or_smoke |
 | `_probe_r212` | `smoke` | 2026-08-28 | — | 0 | 否 | probe_or_smoke |
+| `_smoke` | `smoke` | — | — | 0 | 否 | probe_or_smoke |
 | `_smoke_het_r210` | `smoke` | 2026-08-28 | — | 0 | 否 | probe_or_smoke |
 | `g_het2_r271_20260829` | `aborted` | 2026-08-29 | — | 0 | 是 | summary_without_rows |
 | `g_het_off_r262_20260829` | `aborted` | 2026-08-29 | — | 0 | 否 | no_summary |

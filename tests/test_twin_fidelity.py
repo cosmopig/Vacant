@@ -18,6 +18,7 @@
   · `pack.visible` 要與 `accepted` 是同一次嘗試的結果
 """
 import json
+import re
 import pathlib
 import sys
 
@@ -366,6 +367,63 @@ def test_evidence_level_is_derived_per_cell_never_declared(pack):
     # fail-closed 的負控制：宣告 L-real 配 0 通，還是 L-none。
     assert packlib.evidence_level(requests_seen=0, declared="L-real") == "L-none"
     assert packlib.evidence_level(requests_seen=3, declared="") == "L-unknown"
+
+
+def test_the_withheld_name_really_is_withheld(pack):
+    """展件的整個故事都壓在這一句上：**客戶要的那個名字沒寫在需求裡**。
+
+    「扣住／寫明」那一組反事實，差別必須**就是**那個名字：
+    `TASK.md` 裡沒有它、`TASK_explicit.md` 裡有它。哪一題其實寫了，
+    那一格在展場上講的故事就是假的——而那不是頁面的錯，是題庫選錯了，
+    所以判準放在這裡，不放在頁面。
+
+    ⚠ 只讀 `TASK.md`／`TASK_explicit.md` 與 `meta.json`，
+      **不讀 `hidden/` 一個 byte**（V/GT 紅線）。
+    """
+    bank = REPO / "ops" / "gain" / "r535" / "bank"
+    seen = 0
+    for task_id in sorted({c["task_id"] for c in pack["cells"]}):
+        d = bank / task_id
+        if not d.is_dir():
+            pytest.skip(f"題庫不在這個工作樹裡：{task_id}")
+        meta = json.loads((d / "meta.json").read_text(encoding="utf-8"))
+        held = (d / "TASK.md").read_text(encoding="utf-8")
+        explicit = (d / "TASK_explicit.md").read_text(encoding="utf-8")
+        for name in meta["required_names"]:
+            word = re.compile(r"\b%s\b" % re.escape(name))
+            assert not word.search(held), \
+                f"{task_id}：扣住版的題面裡其實寫了 {name!r}，那一格的故事是假的"
+            assert word.search(explicit), \
+                f"{task_id}：寫明版的題面裡反而沒有 {name!r}"
+            seen += 1
+    assert seen, "一個名字都沒檢查到"
+
+
+def test_a_killed_attempt_is_distinguishable_from_one_that_just_failed(pack, events):
+    """**被牆鐘上限砍掉**與**自己跑完但沒過**不可以在資料上同形。
+
+    兩者的 `stop_reason` 都是 `visible_fail`——launcher 砍掉 agent 之後照樣凍結
+    工作區、照樣送驗收，那是對的（它交出來的就是那些位元組）。但展場上這是
+    兩個故事：一個是「它做不出來」，一個是「**我們沒等它**」。
+    只有 `stop_reason` 的話，第二個會被講成第一個。
+
+    真的發生過：`s1_30_ord_suffix__held` 三位居民共 8 次嘗試全部 300 秒被砍，
+    那一題的「拒交」有一部分是我們的 `--timeout` 造成的，不是模型的行為。
+    """
+    for c in pack["cells"]:
+        assert "any_attempt_timed_out" in c, c["cell_id"]
+        for a in c["attempts"]:
+            assert "agent_timed_out" in a, c["cell_id"]
+        assert c["any_attempt_timed_out"] == any(
+            a["agent_timed_out"] for a in c["attempts"]), c["cell_id"]
+    # 事件流上也要帶著，否則電視拿不到資料就只能照 stop_reason 講
+    drafts = [e for e in events if e["type"] == "draft_done"]
+    assert drafts and all("timed_out" in e for e in drafts)
+    killed = [e for e in drafts if e["timed_out"]]
+    for e in killed:
+        assert e["timed_out_note"], "被砍掉的那一次要講得出它為什麼沒過"
+    # 負控制：這一批真的有被砍掉的格，這條測試才不是空轉
+    assert killed, "這一批沒有任何一次被砍掉——若屬實請改掉這條測試的敘述"
 
 
 def test_infra_void_cells_are_marked_not_counted_as_refusals(pack):

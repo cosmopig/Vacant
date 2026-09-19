@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-k4hb8u29k8oc4onvg28ej","object":"chat.completion.chunk","created":1789818489,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"728893102","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-k4hb8u29k8oc4onvg28ej","object":"chat.completion.chunk","created":1789818489,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import datetime\\n\\ndef solve():\\n    try:\\n        year = int(input().split()[0])\\n        month = int(input().split()[1])\\n        \\n        # Use a dummy day (1) to get the first day of the month\\n        # Then find the first day of the next month\\n        if month == 12:\\n            next_month_date = datetime.date(year + 1, 1, 1)\\n        else:\\n            next_month_date = datetime.date(year, month + 1, 1)\\n            \\n        current_month_date = datetime.date(year, month, 1)\\n        \\n        # The number of days is the difference between the first day of next month and first day of current month\\n        delta = next_month_date - current_month_date\\n        print(delta.days)\\n    except EOFError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-k4hb8u29k8oc4onvg28ej","object":"chat.completion.chunk","created":1789818489,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-k4hb8u29k8oc4onvg28ej","object":"chat.completion.chunk","created":1789818489,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1482,"completion_tokens":236,"total_tokens":1718,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

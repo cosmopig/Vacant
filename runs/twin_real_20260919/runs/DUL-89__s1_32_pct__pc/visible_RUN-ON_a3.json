@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_32_pct:pc",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 42,
+      "cases": [
+        {
+          "case": "check_01_pct",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_pct",
+          "ok": false,
+          "kind": "assert",
+          "message": "pct args=(0, 0) got=None want=0.0",
+          "where": "test_visible.py:22: assert got == want, \"pct args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "73896fd49025154f8195265256bb779e3bfe20fce17916cfad67fd448ae94e4d"
+}

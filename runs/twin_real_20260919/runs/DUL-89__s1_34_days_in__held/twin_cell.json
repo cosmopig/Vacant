@@ -1,0 +1,36 @@
+{
+  "argv": [
+    "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "{TASK}"
+  ],
+  "arms": {
+    "OFF": {
+      "attempts_used": 1,
+      "exit_code": 0,
+      "infra_void": null,
+      "postaudit_all_pass": false,
+      "requests_seen": 7,
+      "stop_reason": "ungated"
+    },
+    "ON": {
+      "attempts_used": 3,
+      "exit_code": 20,
+      "infra_void": null,
+      "requests_seen": 11,
+      "stop_reason": "attempts_exhausted"
+    }
+  },
+  "built_ms": 1789817497899,
+  "cell_id": "DUL-89__s1_34_days_in__held",
+  "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+  "declared_evidence": "L-real",
+  "declared_model": "gemma-4-12b-it-qat",
+  "declared_upstream": "http://100.86.226.21:1234",
+  "exit_code": 20,
+  "explicit": false,
+  "resident": "DUL-89",
+  "run_dir": "/var/tmp/vacant_twinreal/out/runs/DUL-89__s1_34_days_in__held",
+  "task_id": "s1_34_days_in",
+  "v": 2
+}

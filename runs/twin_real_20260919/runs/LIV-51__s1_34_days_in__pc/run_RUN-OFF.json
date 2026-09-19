@@ -1,0 +1,129 @@
+{
+  "task_id": "s1_34_days_in:pc",
+  "arm": "RUN-OFF",
+  "vacant": 0,
+  "argv": [
+    "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nReport how many days a given month of a given year has.\n\nThe year is the first argument and the month is the second, written as a\nnumber from one to twelve. February follows the usual rule about years\ndivisible by four, by one hundred and by four hundred.\n\n## Interface\n\n    days_in(y, m) -> int\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_twinreal/out/ws/LIV-51__s1_34_days_in__pc__off",
+  "proxy_url": "http://127.0.0.1:35937",
+  "env": {
+    "proxy_url": "http://127.0.0.1:35937",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "12d6109f14ebc49bdbb7c9b7fbe9042ee792f36f687101f16dd141147770cea8",
+  "ws_end_sha256": "5a48f5924339d73840213fa8d7e5b98301cd409a79365852f960841257aa4b46",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 3,
+  "wire_by_protocol": {
+    "openai": 3
+  },
+  "accepted": null,
+  "refused": false,
+  "stop_reason": "ungated",
+  "infra_void": null,
+  "visible_passed": null,
+  "visible_total": null,
+  "verdict_sha256": null,
+  "verdict_hash": null,
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "12d6109f14ebc49bdbb7c9b7fbe9042ee792f36f687101f16dd141147770cea8",
+      "argv": [
+        "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nReport how many days a given month of a given year has.\n\nThe year is the first argument and the month is the second, written as a\nnumber from one to twelve. February follows the usual rule about years\ndivisible by four, by one hundred and by four hundred.\n\n## Interface\n\n    days_in(y, m) -> int\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "aac60b8e76bf8a13461cd240751524ec4528fddc0401970d37b5d5deda19c899",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 79.231,
+      "wire_quiesced": true,
+      "requests_seen": 3,
+      "requests_seen_cumulative": 3,
+      "wire_digest": "18929d7f01739dfae8084c4d3e61ef4f010d557c4e7a79336e41fcc4afe485ab",
+      "ws_end_sha256": "5a48f5924339d73840213fa8d7e5b98301cd409a79365852f960841257aa4b46",
+      "frozen_path": "/var/tmp/vacant_twinreal/out/runs/LIV-51__s1_34_days_in__pc/_frozen_RUN-OFF",
+      "stop_reason": "ungated",
+      "accepted": null
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "default",
+      "defaulted": true
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "wire_errors": 0,
+  "wire_digest": "18929d7f01739dfae8084c4d3e61ef4f010d557c4e7a79336e41fcc4afe485ab",
+  "run_wall_s": 79.349,
+  "agent_wall_s": 79.231,
+  "failures": ""
+}

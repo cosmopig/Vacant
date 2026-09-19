@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-lq0ht30gydk083eggb516dv","object":"chat.completion.chunk","created":1789818508,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-lq0ht30gydk083eggb516dv","object":"chat.completion.chunk","created":1789818508,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-lq0ht30gydk083eggb516dv","object":"chat.completion.chunk","created":1789818508,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-lq0ht30gydk083eggb516dv","object":"chat.completion.chunk","created":1789818508,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-lq0ht30gydk083eggb516dv","object":"chat.completion.chunk","created":1789818508,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"825882935","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-lq0ht30gydk083eggb516dv","object":"chat.completion.chunk","created":1789818508,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\nfrom calendar import monthrange\\n\\ndef main():\\n    if len(sys.argv) >= 3:\\n        year = int(sys.argv[1])\\n        month = int(sys.argv[2])\\n    else:\\n        line = sys.stdin.readline()\\n        if not line:\\n            return\\n        parts = line.split()\\n        if len(parts) < 2:\\n            return\\n        year = int(parts[0])\\n        month = int(parts[1])\\n\\n    # monthrange returns (first_day_of_week, number_of_days_in_month)\\n    _, days = monthrange(year, month)\\n    print(days)\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-lq0ht30gydk083eggb516dv","object":"chat.completion.chunk","created":1789818508,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-lq0ht30gydk083eggb516dv","object":"chat.completion.chunk","created":1789818508,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2526,"completion_tokens":195,"total_tokens":2721,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_34_days_in:pc",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 36,
+      "cases": [
+        {
+          "case": "check_01_days_in",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_days_in",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "55fa017898c7a1c4f96d3618fa42dfe4015872ad2e86de39fe22153fc676c2d5"
+}

@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-734x1cnay6fxo8nn4dkj3","object":"chat.completion.chunk","created":1789816273,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-734x1cnay6fxo8nn4dkj3","object":"chat.completion.chunk","created":1789816273,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-734x1cnay6fxo8nn4dkj3","object":"chat.completion.chunk","created":1789816273,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-734x1cnay6fxo8nn4dkj3","object":"chat.completion.chunk","created":1789816273,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-734x1cnay6fxo8nn4dkj3","object":"chat.completion.chunk","created":1789816273,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"706169521","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-734x1cnay6fxo8nn4dkj3","object":"chat.completion.chunk","created":1789816273,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef hex_to_rgb(hex_code):\\n    # Remove the hash character if present\\n    hex_code = hex_code.lstrip('#')\\n    \\n    # Convert hexadecimal to integer and then to RGB components\\n    # Using int(hex_code, 16) handles both upper and lower case automatically\\n    rgb = tuple(int(hex_code[i:i+2], 16) for i in (0, 2, 4))\\n    \\n    return {\\n        \\\"red\\\": rgb[0],\\n        \\\"green\\\": rgb[1],\\n        \\\"blue\\\": rgb[2]\\n    }\\n\\nif __name__ == \\\"__main__\\\":\\n    for line in sys.stdin:\\n        line = line.strip()\\n        if line:\\n            # The task asks to report the three channel values as an object.\\n            # In Python, a dictionary is the standard way to represent such an object.\\n            result = hex_to_rgb(line)\\n            print(result)\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-734x1cnay6fxo8nn4dkj3","object":"chat.completion.chunk","created":1789816273,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-734x1cnay6fxo8nn4dkj3","object":"chat.completion.chunk","created":1789816273,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":4185,"completion_tokens":250,"total_tokens":4435,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

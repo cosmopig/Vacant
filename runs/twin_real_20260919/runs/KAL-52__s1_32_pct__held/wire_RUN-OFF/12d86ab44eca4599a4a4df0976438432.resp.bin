@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-04g2a9idqvdklcxj97jquht","object":"chat.completion.chunk","created":1789815180,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-04g2a9idqvdklcxj97jquht","object":"chat.completion.chunk","created":1789815180,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-04g2a9idqvdklcxj97jquht","object":"chat.completion.chunk","created":1789815180,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-04g2a9idqvdklcxj97jquht","object":"chat.completion.chunk","created":1789815180,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-04g2a9idqvdklcxj97jquht","object":"chat.completion.chunk","created":1789815180,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"500239113","type":"function","function":{"name":"edit","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-04g2a9idqvdklcxj97jquht","object":"chat.completion.chunk","created":1789815180,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"edits\":[{\"newText\":\"def solve(quantity1, quantity2):\\n    if quantity2 == 0:\\n        return None\\n    percentage = (quantity1 / quantity2) * 100\\n    return round(float(percentage), 1)\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    input_data = sys.stdin.read().split()\\n    if len(input_data) >= 2:\\n        try:\\n            q1 = float(input_data[0])\\n            q2 = float(input_data[1])\\n            result = solve(q1, q2)\\n            if result is not None:\\n                print(f\\\"{result:.1f}\\\")\\n        except ValueError:\\n            pass\\n\",\"oldText\":\"def solve(quantity1, quantity2):\\n    if quantity2 == 0:\\n        return None\\n    percentage = (quantity1 / quantity2) * 100\\n    return round(float(percentage), 1)\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    input_data = sys.stdin.read().split()\\n    if len(input_data) >= 2:\\n        try:\\n            q1 = float(input_data[0])\\n            q2 = float(input_data[1])\\n            result = solve(q1, q2)\\n            if result is not None:\\n                print(f\\\"{result:.1f}\\\")\\n        except ValueError:\\n            pass\\n\",\"path\":\"solution.py\"}],\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-04g2a9idqvdklcxj97jquht","object":"chat.completion.chunk","created":1789815180,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-04g2a9idqvdklcxj97jquht","object":"chat.completion.chunk","created":1789815180,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2575,"completion_tokens":363,"total_tokens":2938,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

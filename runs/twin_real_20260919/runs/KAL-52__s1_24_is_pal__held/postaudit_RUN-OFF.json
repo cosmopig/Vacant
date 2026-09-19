@@ -1,0 +1,44 @@
+{
+  "when": "after_the_run",
+  "is_verdict": false,
+  "signed": false,
+  "ruler": "vacant/vrun/acceptance.py::run_suite(suite='visible')——與 ON 臂同一把尺、同一份 tests_visible",
+  "note": "OFF 臂當場沒有量過任何東西。這個判定是事後補的，沒有進收據鏈，也沒有影響那一跑的任何一個位元。",
+  "sandbox": "bwrap",
+  "suite": "visible",
+  "task_id": "s1_24_is_pal:postaudit-off",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 70,
+      "cases": [
+        {
+          "case": "check_01_is_pal",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'is_pal' from 'solution' (/var/tmp/vacant_twinreal/out/runs/KAL-52__s1_24_is_pal__held/_frozen_RUN-OFF/solution.py)",
+          "where": "test_visible.py:10: from solution import is_pal",
+          "output": ""
+        },
+        {
+          "case": "check_02_is_pal",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'is_pal' from 'solution' (/var/tmp/vacant_twinreal/out/runs/KAL-52__s1_24_is_pal__held/_frozen_RUN-OFF/solution.py)",
+          "where": "test_visible.py:18: from solution import is_pal",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "9b4e9270b6569319bcffd5303b310b4327dbc3382461fe29db8ef0ad24e5f258"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_32_pct:held",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 76,
+      "cases": [
+        {
+          "case": "check_01_pct",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_twinreal/out/runs/LIV-51__s1_32_pct__held/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import pct",
+          "output": ""
+        },
+        {
+          "case": "check_02_pct",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_twinreal/out/runs/LIV-51__s1_32_pct__held/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import pct",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "31c381537dcf550e476b72686e2d3e957fac539b179d3c75efbdf12ad496c671"
+}

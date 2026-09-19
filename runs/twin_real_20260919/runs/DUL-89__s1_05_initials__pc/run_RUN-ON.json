@@ -1,0 +1,139 @@
+{
+  "task_id": "s1_05_initials:pc",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nTake a person's full name and pull out the initial of each part of\nit. The parts of a name are separated by spaces.\n\nGive them back as a sequence of single upper-case characters, one per\npart, in the order the parts appear.\n\n## Interface\n\n    initials(full_name) -> list[str]\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_twinreal/out/ws/DUL-89__s1_05_initials__pc",
+  "proxy_url": "http://127.0.0.1:39175",
+  "env": {
+    "proxy_url": "http://127.0.0.1:39175",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "f4e436a9a526855fc9f4b9a61c701e23390d86fc35a2db6fae289591c978071a",
+  "ws_end_sha256": "6f50f7af6e873e1aebabc1d7cefd322d953057ff976f8691d810a557cfa85c90",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 2,
+  "wire_by_protocol": {
+    "openai": 2
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "6156f9f168a20dc1074770a366af0b37f6fbf43f5dd51a62d91739612269feda",
+  "verdict_hash": "706b33e3f60e05b0b6c111cd21178a15cd5de5153e7309858fdcda6c3d900cfb",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "f4e436a9a526855fc9f4b9a61c701e23390d86fc35a2db6fae289591c978071a",
+      "argv": [
+        "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nTake a person's full name and pull out the initial of each part of\nit. The parts of a name are separated by spaces.\n\nGive them back as a sequence of single upper-case characters, one per\npart, in the order the parts appear.\n\n## Interface\n\n    initials(full_name) -> list[str]\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "7bfc061f4659c30c5de477201324f076be9c695af052f794a06ad4192290f648",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 46.34,
+      "wire_quiesced": true,
+      "requests_seen": 2,
+      "requests_seen_cumulative": 2,
+      "wire_digest": "1f247431515f87e6c116db573a93fdf1fff90c6d474e229b88371f28cb4e77de",
+      "ws_end_sha256": "6f50f7af6e873e1aebabc1d7cefd322d953057ff976f8691d810a557cfa85c90",
+      "frozen_path": "/var/tmp/vacant_twinreal/out/runs/DUL-89__s1_05_initials__pc/_frozen_RUN-ON",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "6156f9f168a20dc1074770a366af0b37f6fbf43f5dd51a62d91739612269feda",
+      "visible_path": "/var/tmp/vacant_twinreal/out/runs/DUL-89__s1_05_initials__pc/visible_RUN-ON.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "bwrap",
+    "sandbox": "bwrap",
+    "requested": "auto"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "default",
+      "defaulted": true
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "wire_errors": 0,
+  "wire_digest": "1f247431515f87e6c116db573a93fdf1fff90c6d474e229b88371f28cb4e77de",
+  "run_wall_s": 46.735,
+  "agent_wall_s": 46.34,
+  "failures": ""
+}

@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-1goc1ggs8pr69cg4diql2q","object":"chat.completion.chunk","created":1789814766,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"731956548","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1goc1ggs8pr69cg4diql2q","object":"chat.completion.chunk","created":1789814766,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def rgb(code):\\n    # Remove the '#' prefix if it exists\\n    hex_code = code[1:] if code.startswith('#') else code\\n    \\n    # Convert hex string to integer\\n    rgb_int = int(hex_code, 16)\\n    \\n    # Extract r, g, b components\\n    r = (rgb_int >> 16) & 0xFF\\n    g = (rgb_int >> 8) & 0xFF\\n    b = rgb_int & 0xFF\\n    \\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1goc1ggs8pr69cg4diql2q","object":"chat.completion.chunk","created":1789814766,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-1goc1ggs8pr69cg4diql2q","object":"chat.completion.chunk","created":1789814766,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1516,"completion_tokens":156,"total_tokens":1672,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

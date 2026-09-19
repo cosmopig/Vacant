@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-0acijz7u51vk7eriqy3s2m5","object":"chat.completion.chunk","created":1789816486,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-0acijz7u51vk7eriqy3s2m5","object":"chat.completion.chunk","created":1789816486,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-0acijz7u51vk7eriqy3s2m5","object":"chat.completion.chunk","created":1789816486,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-0acijz7u51vk7eriqy3s2m5","object":"chat.completion.chunk","created":1789816486,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-0acijz7u51vk7eriqy3s2m5","object":"chat.completion.chunk","created":1789816486,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"967432805","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-0acijz7u51vk7eriqy3s2m5","object":"chat.completion.chunk","created":1789816486,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def is_palindrome(text: str) -> bool:\\n    filtered_chars = [char.lower() for char in text if char.isalnum()]\\n    return filtered_chars == filtered_chars[::-1]\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    input_data = sys.stdin.read()\\n    print(is_palindrome(input_data))\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-0acijz7u51vk7eriqy3s2m5","object":"chat.completion.chunk","created":1789816486,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-0acijz7u51vk7eriqy3s2m5","object":"chat.completion.chunk","created":1789816486,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2076,"completion_tokens":108,"total_tokens":2184,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

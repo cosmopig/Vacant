@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_24_is_pal:held",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 40,
+      "cases": [
+        {
+          "case": "check_01_is_pal",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'is_pal' from 'solution' (/var/tmp/vacant_twinreal/out/runs/LIV-51__s1_24_is_pal__held/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import is_pal",
+          "output": ""
+        },
+        {
+          "case": "check_02_is_pal",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'is_pal' from 'solution' (/var/tmp/vacant_twinreal/out/runs/LIV-51__s1_24_is_pal__held/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import is_pal",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "44ae9a90eb8e3e1689027d4ff75dc1315a9a5411938657badfb40b3f3887cef6"
+}

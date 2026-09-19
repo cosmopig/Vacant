@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-hgm7fmjwhie7zdc6n0wjcg","object":"chat.completion.chunk","created":1789814733,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"341321671","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-hgm7fmjwhie7zdc6n0wjcg","object":"chat.completion.chunk","created":1789814733,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def pct(part, whole):\\n    if whole == 0:\\n        return None\\n    return round((part / whole) * 100, 1)\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-hgm7fmjwhie7zdc6n0wjcg","object":"chat.completion.chunk","created":1789814733,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-hgm7fmjwhie7zdc6n0wjcg","object":"chat.completion.chunk","created":1789814733,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1477,"completion_tokens":58,"total_tokens":1535,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+
