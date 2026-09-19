@@ -406,8 +406,8 @@ vacant --help                     # 安裝後可用的 CLI
 
 | 症狀 | 發生了什麼 | 怎麼辦 |
 |---|---|---|
-| 裝完之後 `import vacant_network` 或 `vacant --help` 完全不是這個專案 | **`pip install vacant` 裝到的是別人的套件**（authoritative-DNS 工具的 Rust bindings，7.5 MB 原生 wheel）。它**也**佔用 `vacant` 這個 import 名、**也**裝一支叫 `vacant` 的指令；先裝我們的再裝它 ⇒ **它靜靜蓋過去，零錯誤訊息** | 判別：`python3 -c "import vacant_network; print(vacant_network.__version__)"`——我們的印 `0.7.0`，對方丟 `AttributeError`。`vacant --help` 第一行有 `{init,info,call,demo,…}` 才是我們的 |
-| `pip uninstall -y vacant` 之後 `vacant` 這個指令整個不見了，`pip list` 卻還說 `vacant-network==0.7.0` 裝著 | 兩個套件寫到同一批路徑，解除安裝對方時**把共用的那支指令一起帶走**；pip 不知道我們的被挖空了 | `pip install --force-reinstall --no-deps vacant-network`（實測可完整救回：指令回來、`vacant_network.__version__` 回到 `0.7.0`） |
+| `vacant --help` 印的是 authoritative-DNS 工具的介面 | **`pip install vacant` 裝到的是別人的套件**（Rust bindings，7.5 MB 原生 wheel），它也裝一支叫 `vacant` 的指令，後裝的蓋過先裝的。**0.8.0 之後只剩這一項會撞**——`import` 那一半已經修掉了 | 改打 `vacant-network --help` 或 `python3 -m vacant_network --help`，兩者都 import `vacant_network.cli`，對方蓋不到。判別：`python3 -c "import vacant_network; print(vacant_network.__version__)"` 印 `0.8.0` |
+| `pip uninstall -y vacant` 之後 `vacant` 這個指令整個不見了，`pip list` 卻還說 `vacant-network` 裝著 | 兩個套件共用 `bin/vacant` 這支腳本，解除安裝對方時**把它一起帶走**；pip 不知道 | **0.8.0 起不必救**：`vacant-network` 與 `python3 -m vacant_network` 照常活著（四種安裝順序實測）。真要把 `vacant` 這支拿回來：`pip install --force-reinstall --no-deps vacant-network` |
 | `python3 -m venv …` ⇒ `The virtual environment was not created successfully because ensurepip is not available.` | Debian／Ubuntu 把 `ensurepip` 拆成獨立套件，原廠映像檔沒有。`venv` 這個 module 本身是在的，死的是它底下的 `ensurepip` | `sudo apt-get install -y python3-venv`（訊息裡寫的是 `python3.12-venv`），然後**重建一次 venv**。實測 5.5 秒，**不必重開機** |
 | 系統上根本沒有 `pip` / `pip3` | 同一個原因，`python3` 是裸的 | 同上。venv 建起來之後裡面自帶 pip 24.0 |
 | 一條 `pip install` 之後 site-packages 多了 30 個 wheel、60 MB | `mcp` 一個人拖進 `pydantic`／`starlette`／`uvicorn`／`httpx`／`sse-starlette`… | 目前**沒有**「只要閘門」的 extras，裝了就是全裝。閘門與收據那條路（`vacant_network.vrun.*`）其實用不到 `mcp` |
