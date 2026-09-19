@@ -1,0 +1,409 @@
+{
+  "run_id": "pbgate_lcb2_20260919",
+  "title": "公開題庫上的 `vacant run` 閘門（LCB v2 ×10 題 × 2 臂 × 1 次 ＝ 20 格）",
+  "one_line": "把 `vacant run` 的交付閘門放到一個**公開**題庫上，量它會不會動、擋不擋得對。",
+  "RED_LINE_not_preregistered": {
+    "status": "非預註冊",
+    "what_this_forbids": [
+      "不做假說檢定（沒有 p 值、沒有效果量、沒有信賴區間當結論）。",
+      "不與 R535／R530／R534／G 實驗的任何數字合併、平均或對照。",
+      "不准寫「複製」「效果消失」「顯著」「優於」這類字。",
+      "收官句只能是描述性的：『在這 20 格上，閘門的判決逐格長這樣』。"
+    ],
+    "why": "這一批是為了補『所有閘門證據都跑在自造題庫上』這個缺口而開的，選題與臂的設計在發射前寫死，但**沒有預註冊檔、沒有人類簽字**。"
+  },
+  "bank": {
+    "name": "LiveCodeBench v2 (via ops/gain/r534)",
+    "is_public": true,
+    "why_this_bank": "今天所有 `vacant run` 的閘門證據都跑在自造題庫上（r535 bank 9 題、r530 開放目標題庫）。LCB v2 是**公開**題庫、在版控裡、sha256 釘死、而且已經有一支經過量具驗證的轉換器（R534），不必重寫載入器。",
+    "source_path": "ops/gain/data/lcb_bank_v2.jsonl",
+    "source_sha256": "b98f027213e2469a0a41bed813d99f029d3d6e2fac64e0fa18887c42c865b9ba",
+    "source_n": 120,
+    "eligible_n": 118,
+    "known_bad_excluded": [
+      "lcb_3613",
+      "lcb_3763"
+    ],
+    "renderer": "ops/gain/r534/build_bank.py",
+    "renderer_gauge": "ops/gain/r534/gauge_bank.py",
+    "bank_manifest": "ops/gain/r534/bank_manifest.json",
+    "bank_manifest_sha256": "e92ac8b810081b32de253d886bc70b634d933d4c30a92f5778762aae204995b7",
+    "selection_rule_sha256": "231971f3bad306f64818b6ee8204e7326c973ca3b2d256d8ea880e2eccf8903b",
+    "task_ids": [
+      "lcb_3522",
+      "lcb_3583",
+      "lcb_3584",
+      "lcb_3637",
+      "lcb_3654",
+      "lcb_3681",
+      "lcb_3686",
+      "lcb_3700",
+      "lcb_3764",
+      "lcb_3794"
+    ],
+    "task_subset_rule": "R534 的 **B 層**（10 題）全取，一題不挑。B 層是 `random.Random('r534-layerB-lcb2-2026-09-18').sample(...)` 從扣掉 A 層之後的 108 題抽的。**A 層（另 10 題）刻意不取**：R534 自己的 manifest 寫著 A 層是「條件在過去結果上」挑出來的高分歧題 ⇒ 差值結構性上偏。本輪不需要那個偏誤。",
+    "tasks": {
+      "lcb_3522": {
+        "difficulty": "medium",
+        "entry_point": "resultsArray",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-08-17T07:30:00",
+        "prompt_sha256": "ef8c051512b1860967ec8d7620671980c69e5ee64d120d85f5d99ef8e66bfa0b",
+        "rendered_sha256": {
+          "contract.md": "9e972e7a1fbc391074dad91ba0279e3f046115c748375c7688b5b536eb9e6abc",
+          "goal.md": "ef8c051512b1860967ec8d7620671980c69e5ee64d120d85f5d99ef8e66bfa0b",
+          "hidden/lcb_3522/test_hidden.py": "12423b195b8ec0fa4e533d9315487824968cfbfd11cf89e79b1bc3b9a50f9bf7",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "89a8b4cbbebd237421dcadcab48c803d06266606e066023dad1a56cb2ab75461"
+        }
+      },
+      "lcb_3583": {
+        "difficulty": "hard",
+        "entry_point": "gcdValues",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-10-05T19:30:00",
+        "prompt_sha256": "64fbd562b7d0184a2f22bc56418fb16c6c7593a0c3d6f711071e3c437060d401",
+        "rendered_sha256": {
+          "contract.md": "832f3df43992f3093d15d8b0b37ffe5715e54be1dfdf022181bf7e5d25306468",
+          "goal.md": "64fbd562b7d0184a2f22bc56418fb16c6c7593a0c3d6f711071e3c437060d401",
+          "hidden/lcb_3583/test_hidden.py": "cba354a5643f4e854698ef920cb650aa23c2da131c37449b921d2015e11d8958",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "8fd54d5f72276879f28e3d9489b9631f6bcd7e282ea4ae5c0c18d95d8630b01f"
+        }
+      },
+      "lcb_3584": {
+        "difficulty": "medium",
+        "entry_point": "validSequence",
+        "n_visible_cases": 4,
+        "n_hidden_cases_full": 28,
+        "contest_date": "2024-09-28T07:30:00",
+        "prompt_sha256": "8728efb382695d82bb6547881d4d4eb2c38097f1ac4c91294257c47120106a24",
+        "rendered_sha256": {
+          "contract.md": "ffb2f7ee5ba1253f2fe581c663378f8a6e656606d59db068efb12019254931d4",
+          "goal.md": "8728efb382695d82bb6547881d4d4eb2c38097f1ac4c91294257c47120106a24",
+          "hidden/lcb_3584/test_hidden.py": "f0dcfb491e084f0dd8e8851f810e3de7acdb33b985be723b2347ad511c41c104",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "1786983fae886031b17b3f6239d3fa89f7a1630c0a2591a0271354847a619ed3"
+        }
+      },
+      "lcb_3637": {
+        "difficulty": "hard",
+        "entry_point": "countBalancedPermutations",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-11-02T19:30:00",
+        "prompt_sha256": "264773646deed3698f6b050383c0b4d1134c1c0bcac364a45782edced45ade37",
+        "rendered_sha256": {
+          "contract.md": "bdf8145056f7c2a25fcc02a80cb52b8881507a14e9ee6ca9558798847fb20a66",
+          "goal.md": "264773646deed3698f6b050383c0b4d1134c1c0bcac364a45782edced45ade37",
+          "hidden/lcb_3637/test_hidden.py": "087afb1ad4c340870ac4f5ce29872de2f42d53283b902e1fac55519e07e4b1d5",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "3c0820b3c7228111f0c7af04c43ba4be75902ad62ee44e784026efe72f39bef7"
+        }
+      },
+      "lcb_3654": {
+        "difficulty": "medium",
+        "entry_point": "minArraySum",
+        "n_visible_cases": 2,
+        "n_hidden_cases_full": 26,
+        "contest_date": "2024-11-23T18:30:00",
+        "prompt_sha256": "9ccb6664f70d5976c62ec914cda8686a13ff477e8d0451c813ab9b8a0e62057a",
+        "rendered_sha256": {
+          "contract.md": "af9be32a6683f2713e47ceb89e505ba3539f83b669f91eabd9399afc23817d4e",
+          "goal.md": "9ccb6664f70d5976c62ec914cda8686a13ff477e8d0451c813ab9b8a0e62057a",
+          "hidden/lcb_3654/test_hidden.py": "62bf0b468d6c4cecff04428dd0b0fa6746e599ce05af4ca78c11f645e06cd581",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "f198f2932c20d3c214677c2ca3dbecd74899adcef288ed612374c20b665acfc4"
+        }
+      },
+      "lcb_3681": {
+        "difficulty": "medium",
+        "entry_point": "maxRectangleArea",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-12-07T18:30:00",
+        "prompt_sha256": "b45f83054f2f7f118de65a7e92b2a933c5f9bcb5a223843139c70287b10fa8a2",
+        "rendered_sha256": {
+          "contract.md": "5b5e5ce79ac3943bb0f2a800ce8c5947f0d34d8e06b9bf19109d7f631f42383e",
+          "goal.md": "b45f83054f2f7f118de65a7e92b2a933c5f9bcb5a223843139c70287b10fa8a2",
+          "hidden/lcb_3681/test_hidden.py": "129233de922fb31ef1e86461ea74d775ae0a7163dbf1adc3493452c9db2a11db",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "cbf148f1f5b708daf9b6ec848bac865b98cbb80f03bbd3e18b8b51874a4cc0e9"
+        }
+      },
+      "lcb_3686": {
+        "difficulty": "medium",
+        "entry_point": "beautifulSplits",
+        "n_visible_cases": 2,
+        "n_hidden_cases_full": 26,
+        "contest_date": "2024-12-14T18:30:00",
+        "prompt_sha256": "e5893d082deb19d3cb251451353244d9097adbab35b9303486286ed501935cf8",
+        "rendered_sha256": {
+          "contract.md": "8860d081321832360b60fab615c572eadce9c0dad5424f1f921d73cda853c88b",
+          "goal.md": "e5893d082deb19d3cb251451353244d9097adbab35b9303486286ed501935cf8",
+          "hidden/lcb_3686/test_hidden.py": "b86ce792800de83b914afda51e8f3a7fde569389ddcbd79fc5570dbbf1bc8cd7",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "f19f192edf5d2d15c17b56a7e2b0820bd9e04e369f86b514ac1543fefc51dbf8"
+        }
+      },
+      "lcb_3700": {
+        "difficulty": "hard",
+        "entry_point": "subsequencesWithMiddleMode",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2024-12-21T06:30:00",
+        "prompt_sha256": "dacfdc0aa1644b3706331427018856201c2777bac765a480adc1432ce0ced273",
+        "rendered_sha256": {
+          "contract.md": "ee4c0d3c4b1da7ce0dcc1d1a7abcb3b5b27c9d0e03b248c4fc156b0c9d0a6a7e",
+          "goal.md": "dacfdc0aa1644b3706331427018856201c2777bac765a480adc1432ce0ced273",
+          "hidden/lcb_3700/test_hidden.py": "176115df7f9f7695d81018f6516077d3c0cd46dc29fee0b1582c4b5fb1319bf7",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "b7ee988e6688ced5fb5a264a5a14d2e3f0a9061287804310009b4fb79a52d252"
+        }
+      },
+      "lcb_3764": {
+        "difficulty": "medium",
+        "entry_point": "maxSum",
+        "n_visible_cases": 2,
+        "n_hidden_cases_full": 26,
+        "contest_date": "2025-02-22T18:30:00",
+        "prompt_sha256": "7d2c10449a3416c81aa01f5af96a27c3e170e7de7a27c4833ab178440e799dcb",
+        "rendered_sha256": {
+          "contract.md": "3dcf7e0e377ac5c2e19cec59179fb0b5111b5761ca555800b18760f70aaa9c9f",
+          "goal.md": "7d2c10449a3416c81aa01f5af96a27c3e170e7de7a27c4833ab178440e799dcb",
+          "hidden/lcb_3764/test_hidden.py": "5159e5f5da7514d9c209804d94b6898163d9a05c204fccb695a0d2fe05fa3b34",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "100633f7bc13cd9c1d4932a1e6ac781217b78288d4b69ca042839c3678dc5fdc"
+        }
+      },
+      "lcb_3794": {
+        "difficulty": "medium",
+        "entry_point": "minTime",
+        "n_visible_cases": 3,
+        "n_hidden_cases_full": 27,
+        "contest_date": "2025-03-22T19:30:00",
+        "prompt_sha256": "e5c9c05849206faef2ba97eddb0717302d0ede0cc1570b70ad1303d753333b2c",
+        "rendered_sha256": {
+          "contract.md": "5fb39bfe84ec491f72557405b96f1ba7dbfa49c2be59f8b6c1dc9af616f0130e",
+          "goal.md": "e5c9c05849206faef2ba97eddb0717302d0ede0cc1570b70ad1303d753333b2c",
+          "hidden/lcb_3794/test_hidden.py": "901508d76b923f94f9576616d7a250bea654c6bfea57e8ba021a683abd58ff3e",
+          "run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+          "tests_visible/test_visible.py": "19eab20bd278ff2ab97fa44f1e07e765e014883c71e98b92a66049be248e5c3b"
+        }
+      }
+    },
+    "bank_caveats_inherited_from_r534": [
+      "LCB 沒有 canonical solution ⇒ 這 20 題沒有參考解正控制；r530 的雙向量具（參考解全過／壞樁全擋）在這裡做不到。",
+      "any_arm_passed_hidden=false 的題，歸檔資料裡沒有任何臂通過過 ⇒ 我們沒有證據證明一個正確解會被判過。",
+      "A 層是條件在過去結果上挑的 ⇒ 差值上偏；B 層抽的是扣掉 A 層後的剩餘 ⇒ 差值偏保守。兩層分開報，不合併。",
+      "每題每臂在每個歸檔層只有一個觀測，D_net 是帶雜訊的排序鍵。",
+      "LCB v2 的 contest_date 落在 2023-08-26 → 2025-04-05；**不能**宣稱晚於任何模型的訓練截止。",
+      "本輪 10 題的 contest_date 落在 2024-08-17 → 2025-03-22。"
+    ]
+  },
+  "agent": {
+    "name": "pi",
+    "package": "@earendil-works/pi-coding-agent",
+    "version": "0.85.1",
+    "wrapper": "ops/vacantrun/wrap_agent.sh pi",
+    "wiring_route": "設定路線（`PI_CODING_AGENT_DIR` ＋ 每跑一份新的 models.json），不是零接線；`wrap_agent.sh` 每跑 `mktemp -d` 一個新設定目錄，使用者自己的 `~/.pi/agent/models.json` 一個位元組都沒動。",
+    "why_this_agent": "原則三「跑在既有 agent 框架上不自造 agent」。pi 是 /goal 優先序並列第一的兩個之一，而且是 vacant-dev 上本來就裝著的那一個（另外三個是別輪裝的）。它也是五個框架裡每格牆鐘最短的，符合原則一「低 token」。",
+    "prompt_verbatim": "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.",
+    "ks1": "prompt 裡沒有任何「你有責任／會被懲罰」類措辭（鐵律 1）。兩個臂的 prompt **逐字相同**，唯一差異是工作區裡有沒有 tests_visible/。"
+  },
+  "backend": {
+    "host_label": "1004",
+    "endpoint": "http://100.86.226.21:1234/v1",
+    "anthropic_endpoint": "http://100.86.226.21:1234",
+    "model_id": "gemma-4-12b-it-qat",
+    "lm_studio_version": "0.4.17.0 (FileVersion 0.4.17+4)",
+    "lms_cli_commit": "6041ae0",
+    "context_length": 262144,
+    "parallel_slots": 4,
+    "ttl": null,
+    "thinking": false,
+    "thinking_criterion": "`choices[0].message.reasoning_content` ＝ 空字串，且巢狀的 `usage.completion_tokens_details.reasoning_tokens` ＝ 0。⚠ 頂層 `usage.reasoning_tokens` **不在回應裡**，讀它永遠 None，不可以當判準。",
+    "thinking_evidence": {
+      "probe": "backend_probe_raw.txt（發射前，逐字回應）",
+      "whole_batch": "20 格全部 226 通回應的 reasoning_tokens 總和 ＝ 0（從逐位元落盤的 `*.resp.bin` 重算，不是另外問後端）"
+    },
+    "why_this_host": "兩台不是同一個推論條件（1003 的 LM Studio 0.4.24 把同一份 gguf 跑成 thinking、1004 的 0.4.17 不是）⇒ **一個實驗的所有格必須在同一台**。選 1004 有兩個理由：非 thinking ⇒ token 便宜（原則一）；而且它就是 v1 五 agent 矩陣那一輪的機器，條件說得清楚。",
+    "why_not_merge_across_hosts": "本輪 20 格**全部**在 1004，沒有任何一格在 1003。"
+  },
+  "launcher": {
+    "module": "python3 -m vacant.vrun.launcher",
+    "repo_commit": "eb655a380d5a0e8a9e0d2a9f0ef0a1f3d4c6b7e8",
+    "flags": {
+      "--sandbox": "none",
+      "--test-timeout": 120,
+      "--timeout": 900,
+      "--retry": "none",
+      "--max-attempts": 1,
+      "--json": true,
+      "--stdin": "devnull（預設）",
+      "--port": "0（ephemeral，預設）",
+      "--vacant": "未給 ⇒ VACANT=1（驗收＋收據＋拒交）"
+    },
+    "wrapper_timeout_s": 1200,
+    "env": {
+      "VACANT_RUN_UPSTREAM_OPENAI": "http://100.86.226.21:1234/v1",
+      "VACANT_RUN_UPSTREAM_ANTHROPIC": "http://100.86.226.21:1234",
+      "VACANT_AGENT_MODEL": "gemma-4-12b-it-qat"
+    },
+    "per_cell_argv": "cells/<cell>/argv.txt（逐格完整 argv，含 cwd 與工作區檔案清單）",
+    "why_test_timeout_120": "**不抄別人的數字。** 規則值（參考解耗時 ×N）在這種題庫上會算出1–2 秒的地板，而模型寫的解可以是參考解的上百倍 ⇒ 規則值會把通過的交付記成 `timeout` ＝ **假拒交**。第一輪刻意用寬值，跑完用實際分佈定第二輪。本輪實測：20 個驗收檔的 wall_ms 最大 35、中位數 28 ⇒ 120 秒在這批上綽綽有餘，**沒有任何一格因為 test-timeout 被判掉**。",
+    "why_retry_none": "本輪量的是**閘門本身**，不是 V1 重試迴圈的增益。那是兩件事，`--retry none` 讓它們分得開：每格只有一次 agent 行程。",
+    "module_rename_caveat": "本 run 發射時（commit `eb655a38`）套件叫 `vacant/` ⇒ 逐格 argv 與 MATRIX.log 裡逐字寫的是 `python3 -m vacant.vrun.launcher`。**那是當時真的下過的指令，不改。** commit `a8fb56ff` 起套件改名 `vacant_network/`。同一批歸檔收據用新名重驗過，結論相同（receipts_verify_archived_copy.txt）。"
+  },
+  "design": {
+    "cells": 20,
+    "tasks": 10,
+    "arms": 2,
+    "reps_per_cell": 1,
+    "execution": "序列（同一時間只有一格在跑），不是平行。1004 有 4 個 parallel 槽，本輪只用 1 個 ⇒ 20 格面對的是同一種佇列條件。",
+    "arm_definitions": {
+      "N": "工作區 ＝ goal.md ＋ contract.md ＋ run_tests.sh（**沒有** tests_visible/）",
+      "V": "工作區 ＝ 上面三個 ＋ tests_visible/test_visible.py（＝ R534 題庫本來的工作區形狀，agent 跑得到那份可見檢查）"
+    },
+    "arm_caveat_MUST_STATE": "⚠ **兩個臂拿到的『資訊』其實一樣。** LCB 的 `visible_tests` 就是題目敘述裡的那幾個 Example，逐字渲染成程式碼 ⇒ N 臂的 agent 在 goal.md 裡**照樣讀得到同一組 (輸入, 期望)**，只是不能按一個鍵把它跑起來。所以兩臂的差別是**「能不能執行檢查」不是「有沒有檢查」**，不准寫成「N 臂沒有驗收資訊」。實測佐證：N 臂的 agent 在 stdout 裡明講`run_tests.sh` 要的 tests_visible 目錄不在，改用 goal.md 的 Example 自己對答案。",
+    "arm_known_defect": "N 臂的 contract.md 是題庫渲染出來的**原文逐位元**，裡面那句「The checks that ship with this task are in `tests_visible/`」在 N 臂是**懸空的**（那個目錄不存在）。選擇不改它：改了工作區就不再等於公開題庫的渲染結果，`ws_start_sha256` 也就不再對得上釘值。"
+  },
+  "what_is_measured": {
+    "deliver_cell": "`accepted=true` ＋ `stop_reason=visible_pass` ＋ **exit 0**",
+    "refuse_cell": "`accepted=false` ＋ `stop_reason=visible_fail` ＋ **exit 20**",
+    "three_mandatory_side_checks": [
+      "`requests_seen > 0` —— **唯一**能證明中介真的發生的欄位。一個假拒交格與真拒交格在收據上可以只差這一個（exit 20／accepted=false／stop_reason=visible_fail／agent_rc=0／chain_ok=true 全部都可以在零通模型呼叫下成立）。⇒ **逐格查，不要只看退出碼。**",
+      "`verify_receipts --selftest` 先 PASS（負控制，證明驗章器抓得到壞鏈），再驗這一批。",
+      "證據等級標明：本輪 ＝ **L-real**（真模型），不與 L-fake 混講。"
+    ],
+    "gate_direction_is_not_designed_by_us": "公開題庫沒有「扣住介面」那種人造陷阱（那是 r535 bank 的 `trap` 欄位在做的事）。這裡 contract.md 把 entry_point 寫死，題目就是題目：agent 做得出來就過、做不出來就被擋。**哪一格往哪個方向走不是我們設計的。**"
+  },
+  "posthoc_hidden_scoring": {
+    "what": "跑完之後，用 `ops/gain/r534/hidden/<task_id>/test_hidden.py`（可見 ∪ 隱藏，26–28 條）對每一格 frozen 下來的 solution.py 再算一次分。",
+    "zero_model_calls": true,
+    "why": "把 `vacant/suitegauge.py` 那句**單邊保證**（「擋得住已知壞解 ≠ 涵蓋真需求」）在公開題庫上量成一個數字。",
+    "vgt_separation": "隱藏測資只在計分的那一瞬間出現在一個 /tmp 暫存目錄，跑完立刻刪。工作區、回饋、argv 三個地方都沒有它。全批 wire 原始位元組掃 `test_hidden`／`/hidden/`／`r534/templates` 三個字串 ⇒ 0 命中（逐格記在 vgt_scan.txt）。",
+    "IS_DERIVED_NOT_THE_MEASUREMENT": "⚠ 這是**衍生物**，不是被量的東西。它沒有在跑的時候影響任何一格。報表裡兩個數字必須分開講。",
+    "comparator_caveat": "渲染出來的 test_hidden.py **比既有判準寬**：`vacant/checks.py` 的 AST 政策（`_FORBIDDEN_ATTRS` 連 list.remove 都擋、第三方 import 一律擋）在這條路徑上沒有套用。這一條逐字沿用 R534 manifest 的 `scoring.rendered_hidden_file_is`。**本輪的隱藏分與 r460／r532 的 `meets_demand` 不可互引。**"
+  },
+  "cost": {
+    "cells": 20,
+    "wall_clock_total_agent_s": 4153.5,
+    "wall_clock_median_cell_s": 72.3,
+    "wall_clock_max_cell_s": 900.0,
+    "model_calls_total": 226,
+    "prompt_tokens_total": 1876842,
+    "completion_tokens_total": 237409,
+    "reasoning_tokens_total": 0,
+    "token_source": "逐位元落盤的 `wire_RUN-ON/*.resp.bin` 裡的 `usage`，重算而來；不是向後端另外問的。"
+  },
+  "window_utc": {
+    "launch": "2026-09-19T15:29:42Z",
+    "all_done": "2026-09-19T16:39:19Z",
+    "driver_pid": 3910041,
+    "order": "先 N 臂 10 格（3522→3794），再 V 臂 10 格（同順序）"
+  },
+  "negative_controls": [
+    {
+      "what": "收據驗章器 selftest",
+      "when": "發射前（MATRIX.log 第 2 行）與收官時各一次",
+      "result": "PASS（它抓得到壞鏈）",
+      "file": "receipts_verify.txt"
+    },
+    {
+      "what": "題庫樹比對釘值",
+      "when": "發射前",
+      "result": "100 個檔全對，manifest sha256 相符",
+      "file": "verify_bank_tree.py"
+    },
+    {
+      "what": "事後隱藏計分器的退化樁",
+      "when": "收官",
+      "result": "10/10 題都擋住 `return None`",
+      "file": "hidden_scorer_negative_control.json",
+      "why": "沒有這一條，『每個交付格的隱藏測資都全過』是一句不可信的話——一個永遠說 pass 的計分器會印出一模一樣的結果。"
+    },
+    {
+      "what": "V/GT 分離掃描",
+      "when": "收官",
+      "result": "20 格 wire ＋ 工作區，0 命中",
+      "file": "vgt_scan.txt"
+    },
+    {
+      "what": "歸檔副本（repo 裡的 cells/*）用改名後的套件重驗",
+      "when": "收官（2026-09-20 UTC）",
+      "result": "selftest PASS ＋ run 20　鏈 20　entries 40　驗過 40　失敗 0　壞鏈 0",
+      "file": "receipts_verify_archived_copy.txt",
+      "why": "證明搬進 repo 的那一份收據**自己**驗得過，不是只有執行端那一份驗得過。"
+    }
+  ],
+  "refusal_taxonomy": {
+    "why": "**只看退出碼分不出拒交格的種類。** 一個假拒交格與一個真拒交格可以只差 `requests_seen` 一個欄位；而一個被 `--timeout` 砍掉的格，`stop_reason` 跟正常失敗一樣是 `visible_fail`（r530vrun 踩過：三格 10 次全被 300 秒砍）。所以每一個拒交格都要標形狀。",
+    "shapes": {
+      "true_refuse": "agent 交了東西、驗收沒過（失敗 case 的 kind ＝ assert／exception）⇒「**交了但不對**」",
+      "no_delivery": "`requests_seen > 0`（真的打了模型）但工作區裡**沒有 solution.py**（失敗 case 的 kind ＝ import／nofile）⇒「**它根本沒交**」",
+      "timeout_killed": "agent 被 `--timeout 900` 砍掉（`agent_timed_out=true`、`agent_rc=-9`）⇒ 那一格的拒交**部分是我們把它砍短造成的**，不可讀成純粹的能力判定",
+      "fake_refuse": "`requests_seen == 0` 且 `wire_by_protocol` 空 ⇒ **中介根本沒發生**；除了 `requests_seen`，每個欄位都跟合法拒交格一樣"
+    },
+    "separable_on_the_receipt": "是。`visible_RUN-ON.json` 的 `cases[].kind` 逐條記了`import` 還是 `assert`；`run_RUN-ON.json` 的 `agent_timed_out`／`agent_rc` 分得出有沒有被砍。三件事各有各的欄位，不必猜。",
+    "observed_this_batch": {
+      "refuse_cells": 5,
+      "of_20": true,
+      "fake_refuse": 0,
+      "true_refuse": [
+        "lcb_3584_N",
+        "lcb_3700_N",
+        "lcb_3584_V"
+      ],
+      "no_delivery": [
+        "lcb_3583_V",
+        "lcb_3700_V"
+      ],
+      "timeout_killed": [
+        "lcb_3584_N",
+        "lcb_3584_V",
+        "lcb_3700_V"
+      ],
+      "clean_not_timeout_killed": {
+        "true_refuse": [
+          "lcb_3700_N"
+        ],
+        "no_delivery": [
+          "lcb_3583_V"
+        ]
+      },
+      "reading": "5 個拒交格裡 **2 個是 no_delivery**（agent 打了 12–13 通模型、`agent_rc=0` 或被砍，但工作區裡連 solution.py 都沒有）、**3 個是 true_refuse**。**3 個同時是 timeout_killed** ⇒ 只有 2 格（`lcb_3700_N` true_refuse、`lcb_3583_V` no_delivery）是**agent 自己宣告完成、退出碼 0、閘門在行程結束那一刻擋下來**的乾淨樣本。",
+      "MUST_NOT_SAY": "不准把 5 個拒交格講成「閘門擋下 5 次錯誤交付」——其中 3 格的直接原因是我們設的 900 秒上限。"
+    }
+  },
+  "wire_accounting_caveat": {
+    "calls_total": 226,
+    "with_usage": 223,
+    "no_usage": 3,
+    "what_the_3_are": "3 通沒有 `usage` 欄位的回應，逐格對上 3 個 timeout_killed 格（lcb_3584_N／lcb_3584_V／lcb_3700_V），也對得上它們的 `wire_errors`（1／2／1）——agent 被 SIGKILL 時正在飛的那一通被切斷。",
+    "honesty": "**「沒量到」≠「量到 0」**（鐵律 3）：那 3 通的 token 沒有被算進總數，所以下面的 token 總計是**下界**。"
+  },
+  "honesty_bounds": [
+    "**不是效果量。** 沒有對照臂、每格 n=1、一個模型、一個 agent、10 題。",
+    "**不是模型能力評測。** 量的是通道與閘門；`visible_passed` 是「過了我們渲染的那幾條」，不是「做對了幾成」。",
+    "**proxy records，不 verifies。** 它證明這些 bytes 經過它，不證明上游照著跑，也不阻止 agent 自己開一條連線（`docs/VACANT_RUN.md` §4.1）。本輪 `--sandbox none`、**沒有出網封鎖**。",
+    "**中介的是模型通道不是 agent 的行為。** 框架自己發起的動作不經過模型通道。",
+    "**`--sandbox none`**：驗收沒有跑在沙箱裡（vacant-dev 上 unshare 後端的逾時從未生效，而且孤兒行程要 sudo 才清得掉）。這一條會改變「驗收有多硬」，要跟著數字一起講。",
+    "**沒量到 ≠ 量到 0**（鐵律 3）：本輪沒量出網封鎖、沒量其他四個 agent、沒量 1003（thinking）、沒量重試迴圈、沒量 A 層 10 題、沒量 MBPP+／HumanEval+。",
+    "**3 個拒交格是被 `--timeout 900` 砍掉的**，那一部分是我們設的上限造成的，不是模型的能力判定。",
+    "**`lcb_3686` 在本輪兩臂都通過隱藏 26/26，而 R534 的歸檔資料說它「歷史上沒有任何一個臂通過過」。** 那**不是**「我們贏了歸檔資料」：兩邊的量法不同（這裡是 agent 迴圈＋contract 釘死介面＋一個行程內多次嘗試，歸檔那邊是 gain_run 單發），隱藏檔的比對路徑也不同（本輪沒有 `vacant/checks.py` 的 AST 政策）。非預註冊 ⇒ **不准合併、不准寫成複製或反駁**。"
+  ],
+  "diction": "口徑用「可究責性 / 讓依賴有根據」，不用「信任」。",
+  "provenance": {
+    "executed_on": "vacant-dev user1@100.124.254.83（Ubuntu, Python 3.12.3）",
+    "work_dir_on_exec_host": "/var/tmp/vacant_pbgate（跑完清掉，見 NOT_IN_REPO.json）",
+    "repo_subset_shipped": "git archive <HEAD> vacant ops/gain/r534 ops/vacantrun ops/gain/data/lcb_bank_v2.jsonl ops/gain/check_bank_precision.py pyproject.toml（1.2 MB）＋ 渲染好的題庫樹（140 KB）",
+    "bank_tree_verified_on_exec_host": "verify_bank_tree.py：100 個檔逐份比對 bank_manifest.json 的釘值 ⇒ OK",
+    "df_before": "2.0G avail (95% used) @ 發射前",
+    "df_after": "2.5G avail (94% used) @ 收工後",
+    "df_note": "跑完把 /var/tmp/vacant_pbgate 整個清掉（見 NOT_IN_REPO.json 的 cleanup）。⚠ 期間有另一個 session 清了 656 MB 的 Playwright 快取，所以前後差值**不是**本輪自己的佔用量，不可以那樣讀。",
+    "incident_before_launch": "第一次發射被 macOS 的 `._*` AppleDouble 殘留污染（tar 帶進來的 162 個檔跟著 cp 進工作區）⇒ 當場砍掉、清乾淨、重驗題庫樹、重新發射，並在 `pbgate_cell.sh` 加了**工作區純度擋門**（fail-closed）。被污染的那兩格冒煙留在 smoke/，**不計入矩陣**。"
+  }
+}

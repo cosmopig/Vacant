@@ -1,0 +1,18 @@
+cwd=/var/tmp/vacant_pbgate/repo
+/usr/bin/python3 -m vacant.vrun.launcher \
+  --workspace /var/tmp/vacant_pbgate/ws_lcb_3794_V \
+  --run-dir /var/tmp/vacant_pbgate/rd_lcb_3794_V \
+  --suite /var/tmp/vacant_pbgate/repo/ops/gain/r534/templates/lcb_3794/tests_visible \
+  --task-id pbgate_lcb_3794_V \
+  --sandbox none \
+  --test-timeout 120 \
+  --timeout 900 \
+  --retry none \
+  --json \
+  -- /var/tmp/vacant_pbgate/repo/ops/vacantrun/wrap_agent.sh pi 'Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.'
+wrapper=timeout 1200
+arm=V  workspace_files=./contract.md ./goal.md ./run_tests.sh ./tests_visible/test_visible.py 
+ENV VACANT_RUN_UPSTREAM_OPENAI=http://100.86.226.21:1234/v1
+ENV VACANT_RUN_UPSTREAM_ANTHROPIC=http://100.86.226.21:1234
+ENV VACANT_AGENT_MODEL=gemma-4-12b-it-qat
+ENV VACANT=(unset, launcher 預設 1)

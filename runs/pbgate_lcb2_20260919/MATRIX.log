@@ -1,0 +1,591 @@
+#### 負控制：收據驗章器 selftest（發射前）
+selftest: PASS
+#### df 派工前
+/dev/mapper/ubuntu--vg-ubuntu--lv   38G   34G  2.0G  95% /
+#### 版本
+pi        0.85.1
+python3   Python 3.12.3
+#### LAUNCH 2026-09-19T15:29:42Z  driver_pid=3910041
+=== BEGIN lcb_3522_N 2026-09-19T15:29:42.774855591Z ===
+exit_code=0
+cell_wall_s=20.62
+  task_id             = pbgate_lcb_3522_N
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 9
+  wire_by_protocol    = {'openai': 9}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 20.251
+  run_wall_s          = 20.527
+  visible_passed      = 3
+  visible_total       = 3
+  ws_start_sha256     = 476056964be95e1b2cff01c8d10d10707702a9f683fc1d326650e1917a0a1d08
+  ws_end_sha256       = b31b3ab03fc089a2c3ff4ebc4aaa7527dad07ab5cc5cba16f4ab83e6178389e1
+  wire_digest         = 8d09a829422464953df16e9792b4b7d97c0d4299d3a9c70ce96c48d4dd1c0201
+  verdict_sha256      = 62443b5309d4228e18fce43a9509bf0ce55c9fffcf617156aab6aeb34ee35dd9
+  verdict_hash        = edca1213f0893d3dfe7a48aeb9b08684fe8133314b954eab565bc6e7d3190495
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 9}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+707
+=== END lcb_3522_N 2026-09-19T15:30:03.424562938Z ===
+
+=== BEGIN lcb_3583_N 2026-09-19T15:30:03.435188254Z ===
+exit_code=0
+cell_wall_s=62.23
+  task_id             = pbgate_lcb_3583_N
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 10
+  wire_by_protocol    = {'openai': 10}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 61.891
+  run_wall_s          = 62.139
+  visible_passed      = 3
+  visible_total       = 3
+  ws_start_sha256     = 73c26e77056b4796f81d782e738ec3025661136c000cffad8a57932625b022b4
+  ws_end_sha256       = d3df124b7f31bd509caccc8567f685abd81f08942901dd299e80bb6394c89f52
+  wire_digest         = f0958c0be045d5219607e7f8c2f6fda88e4c40c6bee507bfa73b7d18554854da
+  verdict_sha256      = 69f2b94891d01e8d2782c59975f6bf5c42d7b03f17407c1b66fce7025c9eb08f
+  verdict_hash        = 0177fd75cfa75e9f7e487ffb077a64bd8053440144fd019cd5c2239fcbe3d996
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 10}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+4482
+=== END lcb_3583_N 2026-09-19T15:31:05.690441230Z ===
+
+=== BEGIN lcb_3584_N 2026-09-19T15:31:05.700484948Z ===
+exit_code=20
+cell_wall_s=907.53
+  task_id             = pbgate_lcb_3584_N
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 12
+  wire_by_protocol    = {'openai': 12}
+  wire_errors         = 1
+  agent_rc            = -9
+  agent_wall_s        = 900.005
+  run_wall_s          = 907.437
+  visible_passed      = 1
+  visible_total       = 4
+  ws_start_sha256     = 1be3344e52b78f189da225d24a8de212183c6204d7203e889d5dcfe1cdfc0b66
+  ws_end_sha256       = 9da2ab2154a21d88af34f695189f68a49540559d855240f3afd915617ae2c134
+  wire_digest         = 4e68854a49d152abd03d8be21c68384164d262f30255c35dd66855a877e48797
+  verdict_sha256      = 84374cea7979cd9dd6e301b6ee9f90906669090e912e40eca7a43b7ee89dd724
+  verdict_hash        = 25753974d7bb5d22c3bee4fca06bdfeb51b7a86bd25b3087022fdcf77b85b359
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 11, 'POST /v1/chat/completions -> 0 [openai]': 1}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+15764
+=== END lcb_3584_N 2026-09-19T15:46:13.253357119Z ===
+
+=== BEGIN lcb_3637_N 2026-09-19T15:46:13.264376403Z ===
+exit_code=0
+cell_wall_s=91.72
+  task_id             = pbgate_lcb_3637_N
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 12
+  wire_by_protocol    = {'openai': 12}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 91.404
+  run_wall_s          = 91.63
+  visible_passed      = 3
+  visible_total       = 3
+  ws_start_sha256     = c7448c78bdc99e1232bb57396aaeb5503dd6bfd97e18973cb0b9f2da1a9bfc6a
+  ws_end_sha256       = ec31bc117542ca2f50c305014d781ae86faff6e746886793021aef639038fd8f
+  wire_digest         = 6c117432f412c6aa4c7e12d0ed4a92705ff6996c287f7fddafe29094d82a5e03
+  verdict_sha256      = f048275ebe2eb0f72d91bcaa37b300c0ff754bcb620021e22969010eb6ae1dad
+  verdict_hash        = 70c01f1fbce836e8d86e24b1673a35bfd24a8f74b7973a6fcc4015f47ef4bf39
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 12}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+2372
+=== END lcb_3637_N 2026-09-19T15:47:45.008030099Z ===
+
+=== BEGIN lcb_3654_N 2026-09-19T15:47:45.018574571Z ===
+exit_code=0
+cell_wall_s=56.02
+  task_id             = pbgate_lcb_3654_N
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 10
+  wire_by_protocol    = {'openai': 10}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 55.627
+  run_wall_s          = 55.933
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 92d6164cb7daca2a14cd0d30a254e8652d2ee7d238225a5539bc10d0eb06f0f5
+  ws_end_sha256       = 12b5091d716f27545201dc5a54b987dbb6b0d774c8ae3d16491664ab6ffa5cdb
+  wire_digest         = 747fd0c01718e8753fa3079c3de5669e2b2c00ceddd16be51115c593914876b4
+  verdict_sha256      = a144c829a30d15535f73c704044a286e62a461ed8b17e2b401491d6c38d7726e
+  verdict_hash        = b54c2232fc493337513ec00c0f349c2caf8e9e932c1d2f3e49089e8bd5b2cbda
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 10}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+1854
+=== END lcb_3654_N 2026-09-19T15:48:41.068375426Z ===
+
+=== BEGIN lcb_3681_N 2026-09-19T15:48:41.078653524Z ===
+exit_code=0
+cell_wall_s=38.68
+  task_id             = pbgate_lcb_3681_N
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 10
+  wire_by_protocol    = {'openai': 10}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 38.305
+  run_wall_s          = 38.58
+  visible_passed      = 3
+  visible_total       = 3
+  ws_start_sha256     = 2eac661d9bed9203464c8b8578c6fa5a14c332931c2274ce7742aeb3dcb01b03
+  ws_end_sha256       = 2e9772ff35bcde736431bd0fc2da3d4a26d984f192ba342dad19763509fe624c
+  wire_digest         = b0522dbee07769d9686f131263d74a0fba63c4e8a8357c3c6c36c78435ffba13
+  verdict_sha256      = bb62611f879b9f806f73415246bfe8714f02992ac030c89a8b22efbb1a176866
+  verdict_hash        = 5ad14bc7539daf90b0cbed050daacc4e92fb9e416dc6d8578773158977b5660f
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 10}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+2395
+=== END lcb_3681_N 2026-09-19T15:49:19.785252709Z ===
+
+=== BEGIN lcb_3686_N 2026-09-19T15:49:19.795719906Z ===
+exit_code=0
+cell_wall_s=206.17
+  task_id             = pbgate_lcb_3686_N
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 20
+  wire_by_protocol    = {'openai': 20}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 205.783
+  run_wall_s          = 206.077
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 2236da861bf73297738caf1bcc5579edfc957d90c5d521879a9352faf01f21f9
+  ws_end_sha256       = 37eeb31a1141c95dbc146f37fa898e87c420e9dd879548c0d7ce71ee4cfbcc98
+  wire_digest         = 7a410d5798104f1fbec7bce84f0b8f5636baa5884c0e613e6608eb97d5d37f6b
+  verdict_sha256      = e2bd89040eaf57d50003b127c4cd0f3c60ccb8d59a14e8be9f31415d999ea00f
+  verdict_hash        = 345839b47fa6fe584ce2a21f232f7419c256fe73ebc845ff6128cea9782475c5
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 20}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+1490
+=== END lcb_3686_N 2026-09-19T15:52:45.993368389Z ===
+
+=== BEGIN lcb_3700_N 2026-09-19T15:52:46.003206500Z ===
+exit_code=20
+cell_wall_s=358.69
+  task_id             = pbgate_lcb_3700_N
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 15
+  wire_by_protocol    = {'openai': 15}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 358.275
+  run_wall_s          = 358.593
+  visible_passed      = 0
+  visible_total       = 3
+  ws_start_sha256     = c7abb9a6ecb3281cb888b435a3e99588aee4e23fa5be21e578dbf632ce0d6b8c
+  ws_end_sha256       = ea8d512bace87806a39ab65f69348c8830b45ba0bf899925d2179dd352fc36b7
+  wire_digest         = cf56a92c8c0bd7e5260346a8cebd7a1dd98a404dd66e534a5316bf61cea70f8f
+  verdict_sha256      = f3de9b2d44341cbe143d964f1af9f6f8799e6b6b7ebf9ea89861e79fb6b4d98a
+  verdict_hash        = 0c6cfeda463c1c47a68315a823ae5f068d19440fed0d0aafdf8525125b11ea81
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 15}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+25852
+=== END lcb_3700_N 2026-09-19T15:58:44.721268115Z ===
+
+=== BEGIN lcb_3764_N 2026-09-19T15:58:44.731174945Z ===
+exit_code=0
+cell_wall_s=20.24
+  task_id             = pbgate_lcb_3764_N
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 7
+  wire_by_protocol    = {'openai': 7}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 19.893
+  run_wall_s          = 20.141
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = d3e65c82542b5e62dcda164dde7be0a6188438765242a26e70e008b70664435f
+  ws_end_sha256       = 4e3bd24975bfe6b90151c2629a77f93801a21e3b8185b8ebe68a098445dedbaf
+  wire_digest         = 047990133bf7bf3e9e0c80083f07f7bc808889d7d2b48d8708fdcee1e35e56ea
+  verdict_sha256      = 37f9378429a1b52db2446028c94bb58cbab8813bc2fe2fcfaa5fbd3f83af4fed
+  verdict_hash        = 626fa184f2a418e522095c956a923ea9df5bafa8da91096f31e3683521d1bfe9
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 7}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+1517
+=== END lcb_3764_N 2026-09-19T15:59:04.997416869Z ===
+
+=== BEGIN lcb_3794_N 2026-09-19T15:59:05.008389480Z ===
+exit_code=0
+cell_wall_s=59.55
+  task_id             = pbgate_lcb_3794_N
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 10
+  wire_by_protocol    = {'openai': 10}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 59.164
+  run_wall_s          = 59.417
+  visible_passed      = 3
+  visible_total       = 3
+  ws_start_sha256     = 6b06ccf1c08f5ad707324c066a58be2afcd069285d83cca6c77ddce03e726662
+  ws_end_sha256       = 93beb008ebe2abc42a3ffe6c7b0156335c744987d1ed5e8c8a281d6d5f70c4e4
+  wire_digest         = 35880c9be15cb33aad232428d207fec98c5dae4b7f05962fafe26047fe276478
+  verdict_sha256      = 4e686c7751995368431e2aac60d72cee2fcb91709d511ffa837d8d93afb76519
+  verdict_hash        = 2928771e1c44124d8360a2d657deaf6981a4e5f06f5d936cb36c49785e32f5c8
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 10}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+571
+=== END lcb_3794_N 2026-09-19T16:00:04.586108094Z ===
+
+=== BEGIN lcb_3522_V 2026-09-19T16:00:04.600290742Z ===
+exit_code=0
+cell_wall_s=15.82
+  task_id             = pbgate_lcb_3522_V
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 6
+  wire_by_protocol    = {'openai': 6}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 15.413
+  run_wall_s          = 15.728
+  visible_passed      = 3
+  visible_total       = 3
+  ws_start_sha256     = 897e6def3e97257cbe9d5e8f29a7ab01e11f5fb170caafda627cf341237a4f6e
+  ws_end_sha256       = 52cab2b5cba9a762a76883751102066586f7fbabdf99af50339637c9df035606
+  wire_digest         = 0ea092e3b4286ee347edeaa758e8bd26eadb0395d95d4f5bbaba8b272750261e
+  verdict_sha256      = 3debaf985e9aed4372d27a68b65c3c37bf2fe8d249b2c48f99c983b320ec5a23
+  verdict_hash        = ea0c5e668ace1268bace9439c0ba663fabe97bc70e90d56b960e5b73812fead3
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 6}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+1922
+=== END lcb_3522_V 2026-09-19T16:00:20.450007562Z ===
+
+=== BEGIN lcb_3583_V 2026-09-19T16:00:20.461003991Z ===
+exit_code=20
+cell_wall_s=177.52
+  task_id             = pbgate_lcb_3583_V
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 12
+  wire_by_protocol    = {'openai': 12}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 177.202
+  run_wall_s          = 177.424
+  visible_passed      = 0
+  visible_total       = 1
+  ws_start_sha256     = 7edbc0d978ea94507578c4bcb1362c5f65ae793e95cf2108111c424a757d759f
+  ws_end_sha256       = 7edbc0d978ea94507578c4bcb1362c5f65ae793e95cf2108111c424a757d759f
+  wire_digest         = b86fdecbd2b637177ec0c1b5aa147d3d13490f31034e2232f9ab9aae1d5991ce
+  verdict_sha256      = e26f6657174f67c75b103a5677cc55dbb94e0f9eb62fc8b59c1a010048265955
+  verdict_hash        = eac7c3cd117fca33cf0057631ed511a798463b17f5e5efa5e4fbbfbd4785172a
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 12}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+(none)
+=== END lcb_3583_V 2026-09-19T16:03:18.011094469Z ===
+
+=== BEGIN lcb_3584_V 2026-09-19T16:03:18.036265268Z ===
+exit_code=20
+cell_wall_s=904.40
+  task_id             = pbgate_lcb_3584_V
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 26
+  wire_by_protocol    = {'openai': 26}
+  wire_errors         = 2
+  agent_rc            = -9
+  agent_wall_s        = 900.005
+  run_wall_s          = 904.307
+  visible_passed      = 2
+  visible_total       = 4
+  ws_start_sha256     = 1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691
+  ws_end_sha256       = eab5517d3975a7e8f2850806c4bac67859ed758e27a05deac130d87ccb7deff8
+  wire_digest         = c8635c0144bbd9d2ca0927d28246d748ef759de2de027973aa10499b5da1b4db
+  verdict_sha256      = 8640a974ec0a23c55d2270cee7563643fb73ebdb2f90626df67880cf31ac4c92
+  verdict_hash        = c10f6645fbffaad8ebf65a26229ce66a24bbaf3540446e19d14a6babbcc3e4f2
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 24, 'POST /v1/chat/completions -> 0 [openai]': 2}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+2160
+=== END lcb_3584_V 2026-09-19T16:18:22.467491876Z ===
+
+=== BEGIN lcb_3637_V 2026-09-19T16:18:22.477999821Z ===
+exit_code=0
+cell_wall_s=82.90
+  task_id             = pbgate_lcb_3637_V
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 7
+  wire_by_protocol    = {'openai': 7}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 82.672
+  run_wall_s          = 82.815
+  visible_passed      = 3
+  visible_total       = 3
+  ws_start_sha256     = e59885ab2aa1ed7022e93d3cccad23659d56d5199909f2750ca83da9e2caa2ee
+  ws_end_sha256       = f7f2ab4dce9f5e9934edd423775aa0797171acd70f8876dd125f88c29532621c
+  wire_digest         = af836a2b305e690f558caaeffa117a87cad5fb285a1ffc0ae968111559a369a6
+  verdict_sha256      = cd22f8c9bfb6d846486747738b94a953970012ece646c64c0dfeed8e4b6a16e8
+  verdict_hash        = 74d2a76ac17a53a2a9b9923b24072884b9f6b5f55b525a17302dd87ce84c554e
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 7}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+1716
+=== END lcb_3637_V 2026-09-19T16:19:45.405766899Z ===
+
+=== BEGIN lcb_3654_V 2026-09-19T16:19:45.416718373Z ===
+exit_code=0
+cell_wall_s=87.47
+  task_id             = pbgate_lcb_3654_V
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 12
+  wire_by_protocol    = {'openai': 12}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 87.215
+  run_wall_s          = 87.381
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = f86085bb11b5c68ca3878ba439326b54359e8feb919fd7ad4c595427e068e984
+  ws_end_sha256       = 4369465901cc552c1ff2f32de16207aee5f0090e24ed6ec15be1963c3f063b88
+  wire_digest         = 7b5595331b13d09d99f2e083e581629537da38e1b61615172ac7e0a2fe46f5a4
+  verdict_sha256      = 7f4f5b5ff06ea8306edc0e4b26c224e19f3ca3c2a6412ebd1b76cf5bd71eb19e
+  verdict_hash        = 36094637762c3cb4a526ff0bf95a1598a262221cb48dfc5f2fcea8116b027387
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 12}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+1522
+=== END lcb_3654_V 2026-09-19T16:21:12.910158935Z ===
+
+=== BEGIN lcb_3681_V 2026-09-19T16:21:12.921533587Z ===
+exit_code=0
+cell_wall_s=26.22
+  task_id             = pbgate_lcb_3681_V
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 6
+  wire_by_protocol    = {'openai': 6}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 25.812
+  run_wall_s          = 26.136
+  visible_passed      = 3
+  visible_total       = 3
+  ws_start_sha256     = ae98524251379445be2660769745d5a4df48121328b3cc3399786b90aa5678a6
+  ws_end_sha256       = 85ba4a51f64acf9be0dbced3bd96fc64730c2800145e1a577603d62660a4344c
+  wire_digest         = 6a515ce93e498d50bc02156d280938be0fa21b224f915983082032b0275e4c21
+  verdict_sha256      = ca5a3d84e8351f3cf84bb909bcd18f7594fcc69e352b4f05d85ca013d3b03768
+  verdict_hash        = fa99e8d112d1b6b540b66f4d2b65eabdc58215ae93bfdb17e17d4bb3bcc48651
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 6}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+2255
+=== END lcb_3681_V 2026-09-19T16:21:39.170486280Z ===
+
+=== BEGIN lcb_3686_V 2026-09-19T16:21:39.181116602Z ===
+exit_code=0
+cell_wall_s=49.74
+  task_id             = pbgate_lcb_3686_V
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 13
+  wire_by_protocol    = {'openai': 13}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 49.415
+  run_wall_s          = 49.655
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = d7f34e236619d7e28d610ac59bef306ef8fc4ff5912b24cb57a3200978d0a453
+  ws_end_sha256       = 648130399efe1fd0d0f13df6d58d382f1daae79c069c2d692d84ed3da569874f
+  wire_digest         = 4648711211fc817e232398facf19594071c57794420e4f1e82130b95e519ad7e
+  verdict_sha256      = 99a96becbbce31e9743a8b1e6b9481c6265ad2604d0559a82b0f8199f9ab1e59
+  verdict_hash        = 1097dcd92f6d021ff959b025ba6778f5e00345cbe9c6e8f994983382ca8fa61e
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 13}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+1715
+=== END lcb_3686_V 2026-09-19T16:22:28.959673597Z ===
+
+=== BEGIN lcb_3700_V 2026-09-19T16:22:28.973423724Z ===
+exit_code=20
+cell_wall_s=904.05
+  task_id             = pbgate_lcb_3700_V
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 13
+  wire_by_protocol    = {'openai': 13}
+  wire_errors         = 1
+  agent_rc            = -9
+  agent_wall_s        = 900.006
+  run_wall_s          = 903.952
+  visible_passed      = 0
+  visible_total       = 1
+  ws_start_sha256     = 53bb8c87d4b432dc1aaa2eae682faf59db8c13e2f449dfe725822b0bf58f16f0
+  ws_end_sha256       = 53bb8c87d4b432dc1aaa2eae682faf59db8c13e2f449dfe725822b0bf58f16f0
+  wire_digest         = 33ad53e35dad1ec0bdfc9936a1da68a449a364c30c10a80d9de1faa705d70476
+  verdict_sha256      = 8f47622adcb783f733d9efba9f391bd44bf5445973679229efba85f9ffe52ad9
+  verdict_hash        = 55d6b5476938579084cadc20fa1657836ab44a52145c6173366add68c95c33d9
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 12, 'POST /v1/chat/completions -> 0 [openai]': 1}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+(none)
+=== END lcb_3700_V 2026-09-19T16:37:33.053351065Z ===
+
+=== BEGIN lcb_3764_V 2026-09-19T16:37:33.064599952Z ===
+exit_code=0
+cell_wall_s=15.98
+  task_id             = pbgate_lcb_3764_V
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 6
+  wire_by_protocol    = {'openai': 6}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 15.67
+  run_wall_s          = 15.898
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = f2b9b4dd027ae15f33609d881eba24ead1e2a1a95c4b258a73d88082b1be5a0c
+  ws_end_sha256       = be9cfd30a2cf0f8fcdca2e4fecdcba7824a92a6651efd92add5f90a3b93a25f5
+  wire_digest         = 5d18f84a8e354b711a57c7a91ce6053c35d67cff6775872493f83d5e3bbba420
+  verdict_sha256      = feedca828e531120b12253ce12c43f175ed6483774468c2ac80fdde07b9892d5
+  verdict_hash        = 82192a0cfcc27b53a235bcdc2b7a7eacaad15fec746aa1893d9538494f1318a6
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 6}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+1682
+=== END lcb_3764_V 2026-09-19T16:37:49.075447461Z ===
+
+=== BEGIN lcb_3794_V 2026-09-19T16:37:49.085974592Z ===
+exit_code=0
+cell_wall_s=89.92
+  task_id             = pbgate_lcb_3794_V
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 10
+  wire_by_protocol    = {'openai': 10}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 89.533
+  run_wall_s          = 89.831
+  visible_passed      = 3
+  visible_total       = 3
+  ws_start_sha256     = ba2d151760d8fd03bd39308fd0cbb50b5a519c47344407df178d53940bd8b2a2
+  ws_end_sha256       = ca4bf26e4942781724ceb15767d41ce50e873c1bf266d9ac6b02817d45c3bbf9
+  wire_digest         = 8008b8af7cf5d014add513da3efda1da8c7976ff167ed79e32f9cf624cd4dbf9
+  verdict_sha256      = 899c8ef90105cdcc933d3c81982be0b738df54d5e07b1f74998a3c284947b624
+  verdict_hash        = 72dd7a530d7bee07c98ebf7a7baf62a0e22a868f9df1139ad8fccc8a89d3e539
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 10}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py exists? ---
+1367
+=== END lcb_3794_V 2026-09-19T16:39:19.033412591Z ===
+
+#### df 收工後
+/dev/mapper/ubuntu--vg-ubuntu--lv   38G   34G  2.5G  94% /
+#### ALL DONE 2026-09-19T16:39:19Z

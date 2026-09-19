@@ -1,0 +1,86 @@
+<|channel>thought
+<channel|>The `run_tests.sh` script expects a `tests_visible` directory which is missing from the current workspace. However, I have implemented the solution in `solution.py` based on the requirements in `goal.md` and `contract.md`.
+
+Since I cannot run the tests due to the missing environment, I will double-check my logic:
+1.  **Balanced Condition**: Sum of digits at even indices == sum of digits at odd indices.
+2.  **Total Sum**: Must be even for a balanced permutation to exist (since `sum(even) + sum(odd) = total_sum` and `sum(even) == sum(odd)` implies `total_sum = 2 * sum(even)`).
+3.  **Combinatorics**: The number of distinct permutations is calculated by distributing the available digits into two sets (Even indices set $E$ and Odd indices set $O$) such that $|E| = \lceil n/2 \rceil$, $|O| = \lfloor n/2 \rfloor$, and $\sum E = \sum O$.
+4.  **Multinomial Coefficient**: For a specific distribution of digits $\{k_0, k_1, \dots, k_9\}$ into set $E$ (where $k_i$ is the count of digit $i$), the number of distinct permutations is:
+    $$\left( \frac{n_{even}!}{\prod k_i!} \right) \times \left( \frac{n_{odd}!}{\prod (count_i - k_i)!} \right)$$
+5.  **DP State**: `dp[i][j]` stores the sum of $\prod \frac{1}{k_i! (count_i - k_i)!}$ for all valid distributions where $i$ digits are used in set $E$ and their sum is $j$.
+6.  **Complexity**: The DP table size is $(n_{even}+1) \times (\text{target\_sum}+1)$. With $n=80$, $n_{even}=40$, and max target sum $\approx 80 \times 9 / 2 = 360$. This is well within limits.
+
+The code in `solution.py` correctly implements this logic using modular arithmetic.
+
+```python
+from collections import Counter
+
+def countBalancedPermutations(num: str):
+    velunexorai = num
+    n = len(velunexorai)
+    counts = Counter(velunexorai)
+    MOD = 10**9 + 7
+    
+    # Let n_even be the number of digits at even indices (0, 2, 4, ...)
+    # Let n_odd be the number of digits at odd indices (1, 3, 5, ...)
+    n_even = (n + 1) // 2
+    n_odd = n // 2
+    
+    total_sum = sum(int(d) for d in velunexorai)
+    if total_sum % 2 != 0:
+        return 0
+    
+    target_sum = total_sum // 2
+    
+    # dp[i][j] is the sum of (1 / product(ki!)) * (1 / product((count_i - ki)!))
+    # for all distributions where sum(ki) = i and sum(ki*digit_i) = j.
+    dp = [[0] * (target_sum + 1) for _ in range(n_even + 1)]
+    dp[0][0] = 1
+    
+    # Precompute factorials and their modular inverses
+    fact = [1] * (n + 1)
+    for i in range(2, n + 1):
+        fact[i] = (fact[i-1] * i) % MOD
+        
+    def power(a, b):
+        res = 1
+        a %= MOD
+        while b > 0:
+            if b % 2 == 1:
+                res = (res * a) % MOD
+            a = (a * a) % MOD
+            b //= 2
+        return res
+
+    def modInverse(x):
+        return power(x, MOD - 2)
+
+    inv_fact = [1] * (n + 1)
+    for i in range(2, n + 1):
+        inv_fact[i] = modInverse(fact[i])
+
+    # Iterate through each unique digit and its count
+    sorted_digits = sorted(counts.keys())
+    for digit_char in sorted_digits:
+        digit = int(digit_char)
+        count = counts[digit_char]
+        new_dp = [[0] * (target_sum + 1) for _ in range(n_even + 1)]
+        for i in range(n_even + 1):
+            for s in range(target_sum + 1):
+                if dp[i][s] == 0:
+                    continue
+                # k is the number of this digit to put into Set E (even indices)
+                # count - k will be in Set O (odd indices)
+                for k in range(min(count, n_even - i) + 1):
+                    if (count - k) <= n_odd:
+                        new_s = s + k * digit
+                        if new_s <= target_sum:
+                            term = (dp[i][s] * inv_fact[k]) % MOD
+                            term = (term * inv_fact[count - k]) % MOD
+                            new_dp[i + k][new_s] = (new_dp[i + k][new_s] + term) % MOD
+        dp = new_dp
+
+    ans = (dp[n_even][target_sum] * fact[n_even]) % MOD
+    ans = (ans * fact[n_odd]) % MOD
+    return ans
+```

@@ -1,0 +1,87 @@
+# probe 2026-09-19T15:13:52Z  host=100.86.226.21 (1004)
+=== GET /v1/models ===
+{
+  "data": [
+    {
+      "id": "gemma-4-12b-it-qat",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "qwen/qwen3.8-27b",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "qwen_qwen3.6-35b-a3b",
+      "object": "model",
+      "owned_by": "organization_owner"
+    },
+    {
+      "id": "text-embedding-nomic-embed-text-v1.5",
+      "object": "model",
+      "owned_by": "organization_owner"
+    }
+  ],
+  "object": "list"
+}
+=== GET /api/v0/models (LM Studio 版本線索) ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 1372
+ETag: W/"55c-2ei0VhBboi1cMgYFvUq9W5DwpKk"
+Date: Sat, 19 Sep 2026 15:13:52 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+=== POST /v1/chat/completions ===
+{
+  "id": "chatcmpl-uy307366pkp8tcc8wg1kg5",
+  "object": "chat.completion",
+  "created": 1789830832,
+  "model": "gemma-4-12b-it-qat",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello! How can I help you today?",
+        "reasoning_content": "",
+        "tool_calls": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 14,
+    "completion_tokens": 10,
+    "total_tokens": 24,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "stats": {},
+  "system_fingerprint": "gemma-4-12b-it-qat"
+}
+=== POST /v1/messages ===
+{
+  "id": "msg_tm1ziqx0ygaypzaybcnize",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "Hello! How can I help you today?"
+    }
+  ],
+  "model": "gemma-4-12b-it-qat",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 14,
+    "output_tokens": 10,
+    "cache_read_input_tokens": 9
+  }
+}

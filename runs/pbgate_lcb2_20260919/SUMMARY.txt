@@ -1,0 +1,21 @@
+cell | arm | exit | accepted | stop | rs | rc | vis | hidden(事後) | agent_s | tok_out | reas
+lcb_3522_N | N | 0 | True | visible_pass | 9 | 0 | 3/3 | 27/27 | 20.3 | 1078 | 0 | -
+lcb_3583_N | N | 0 | True | visible_pass | 10 | 0 | 3/3 | 27/27 | 61.9 | 3798 | 0 | -
+lcb_3584_N | N | 20 | False | visible_fail | 12 | -9 | 1/4 | 9/28 | 900.0 | 57590 | 0 | timeout_killed,true_refuse
+lcb_3637_N | N | 0 | True | visible_pass | 12 | 0 | 3/3 | 27/27 | 91.4 | 5654 | 0 | -
+lcb_3654_N | N | 0 | True | visible_pass | 10 | 0 | 2/2 | 26/26 | 55.6 | 3354 | 0 | -
+lcb_3681_N | N | 0 | True | visible_pass | 10 | 0 | 3/3 | 27/27 | 38.3 | 2277 | 0 | -
+lcb_3686_N | N | 0 | True | visible_pass | 20 | 0 | 2/2 | 26/26 | 205.8 | 13305 | 0 | -
+lcb_3700_N | N | 20 | False | visible_fail | 15 | 0 | 0/3 | 0/27 | 358.3 | 22356 | 0 | true_refuse
+lcb_3764_N | N | 0 | True | visible_pass | 7 | 0 | 2/2 | 26/26 | 19.9 | 1053 | 0 | -
+lcb_3794_N | N | 0 | True | visible_pass | 10 | 0 | 3/3 | 27/27 | 59.2 | 3564 | 0 | -
+lcb_3522_V | V | 0 | True | visible_pass | 6 | 0 | 3/3 | 27/27 | 15.4 | 834 | 0 | -
+lcb_3583_V | V | 20 | False | visible_fail | 12 | 0 | 0/1 | no_solution | 177.2 | 10690 | 0 | no_delivery
+lcb_3584_V | V | 20 | False | visible_fail | 26 | -9 | 2/4 | 22/28 | 900.0 | 34951 | 0 | timeout_killed,true_refuse
+lcb_3637_V | V | 0 | True | visible_pass | 7 | 0 | 3/3 | 27/27 | 82.7 | 5136 | 0 | -
+lcb_3654_V | V | 0 | True | visible_pass | 12 | 0 | 2/2 | 26/26 | 87.2 | 5342 | 0 | -
+lcb_3681_V | V | 0 | True | visible_pass | 6 | 0 | 3/3 | 27/27 | 25.8 | 1566 | 0 | -
+lcb_3686_V | V | 0 | True | visible_pass | 13 | 0 | 2/2 | 26/26 | 49.4 | 2914 | 0 | -
+lcb_3700_V | V | 20 | False | visible_fail | 13 | -9 | 0/1 | no_solution | 900.0 | 55607 | 0 | timeout_killed,no_delivery
+lcb_3764_V | V | 0 | True | visible_pass | 6 | 0 | 2/2 | 26/26 | 15.7 | 801 | 0 | -
+lcb_3794_V | V | 0 | True | visible_pass | 10 | 0 | 3/3 | 27/27 | 89.5 | 5539 | 0 | -

@@ -1,0 +1,32 @@
+# 收據鏈驗證  2026-09-19T17:05:40Z
+## 負控制（先證明驗章器抓得到壞鏈）
+selftest: PASS
+
+## 本批 20 格
+═══ 收據鏈驗證 /var/tmp/vacant_pbgate/rd_* ═══
+run 20　鏈 20　entries 40　驗過 40　失敗 0　壞鏈 0
+
+run                           arm          條數    驗過    失敗 verdict  rows  chain_head
+rd_lcb_3522_N                 RUN-ON        2     2     0       1     1  edca1213f0893d3d…  OK
+rd_lcb_3522_V                 RUN-ON        2     2     0       1     1  ea0c5e668ace1268…  OK
+rd_lcb_3583_N                 RUN-ON        2     2     0       1     1  0177fd75cfa75e9f…  OK
+rd_lcb_3583_V                 RUN-ON        2     2     0       1     1  eac7c3cd117fca33…  OK
+rd_lcb_3584_N                 RUN-ON        2     2     0       1     1  25753974d7bb5d22…  OK
+rd_lcb_3584_V                 RUN-ON        2     2     0       1     1  c10f6645fbffaad8…  OK
+rd_lcb_3637_N                 RUN-ON        2     2     0       1     1  70c01f1fbce836e8…  OK
+rd_lcb_3637_V                 RUN-ON        2     2     0       1     1  74d2a76ac17a53a2…  OK
+rd_lcb_3654_N                 RUN-ON        2     2     0       1     1  b54c2232fc493337…  OK
+rd_lcb_3654_V                 RUN-ON        2     2     0       1     1  36094637762c3cb4…  OK
+rd_lcb_3681_N                 RUN-ON        2     2     0       1     1  5ad14bc7539daf90…  OK
+rd_lcb_3681_V                 RUN-ON        2     2     0       1     1  fa99e8d112d1b6b5…  OK
+rd_lcb_3686_N                 RUN-ON        2     2     0       1     1  345839b47fa6fe58…  OK
+rd_lcb_3686_V                 RUN-ON        2     2     0       1     1  1097dcd92f6d021f…  OK
+rd_lcb_3700_N                 RUN-ON        2     2     0       1     1  0c6cfeda463c1c47…  OK
+rd_lcb_3700_V                 RUN-ON        2     2     0       1     1  55d6b54769385790…  OK
+rd_lcb_3764_N                 RUN-ON        2     2     0       1     1  626fa184f2a418e5…  OK
+rd_lcb_3764_V                 RUN-ON        2     2     0       1     1  82192a0cfcc27b53…  OK
+rd_lcb_3794_N                 RUN-ON        2     2     0       1     1  2928771e1c44124d…  OK
+rd_lcb_3794_V                 RUN-ON        2     2     0       1     1  72dd7a530d7bee07…  OK
+
+總判：OK
+每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。

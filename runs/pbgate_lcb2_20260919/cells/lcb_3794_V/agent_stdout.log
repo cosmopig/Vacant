@@ -1,0 +1,51 @@
+<|channel>thought
+<channel|>The problem asks for the minimum time to brew $m$ potions by $n$ wizards sequentially. 
+Each potion $j$ has a mana capacity `mana[j]`. The time taken by wizard $i$ on potion $j$ is $T_{i,j} = \text{skill}[i] \times \text{mana}[j]$.
+A potion must be passed to the next wizard immediately. This means for a fixed potion $j$, if it starts at time $S_j$:
+- Wizard 0 finishes at $F_{0,j} = S_j + P_0 \cdot \text{mana}[j]$ (where $P_i = \sum_{k=0}^i \text{skill}[k]$).
+- Wizard $i$ finishes at $F_{i,j} = S_j + P_i \cdot \text{mana}[j]$.
+
+The constraint is that a wizard cannot work on two potions simultaneously. For any wizard $i$, the finish time of potion $j-1$ must be less than or equal to the start time of potion $j$.
+Specifically:
+- For wizard 0: $F_{0,j-1} \le S_j \implies S_{j-1} + P_0 \cdot \text{mana}[j-1] \le S_j$
+- For wizard $i > 0$: $F_{i,j-1} \le F_{i-1,j} \implies S_{j-1} + P_i \cdot \text{mana}[j-1] \le S_j + P_{i-1} \cdot \text{mana}[j]$
+
+Rearranging for $S_j$:
+$S_j \ge S_{j-1} + P_i \cdot \text{mana}[j-1] - P_{i-1} \cdot \text{mana}[j]$ (with $P_{-1}=0$).
+
+To minimize the total time, we take the smallest possible $S_j$ at each step:
+$S_j = S_{j-1} + \max_{i=0 \dots n-1} (P_i \cdot \text{mana}[j-1] - P_{i-1} \cdot \text{mana}[j])$.
+
+The total time is $F_{n-1, m-1} = S_{m-1} + P_{n-1} \cdot \text{mana}[m-1]$.
+
+I have implemented this in `solution.py` and verified it against the provided examples using `run_tests.sh`. The complexity is $O(n \cdot m)$, which fits within the constraints ($5000 \times 5000 = 2.5 \times 10^7$ operations).
+
+```python
+from typing import List
+
+def minTime(skill: List[int], mana: List[int]) -> int:
+    n = len(skill)
+    m = len(mana)
+    
+    P = [0] * n
+    curr_p = 0
+    for i in range(n):
+        curr_p += skill[i]
+        P[i] = curr_p
+        
+    S = [0] * m
+    # S_j = S_{j-1} + max_{i=0...n-1} (P_i * mana[j-1] - P_{i-1} * mana[j])
+    for j in range(1, m):
+        m_prev = mana[j-1]
+        m_curr = mana[j]
+        max_q = -float('inf')
+        
+        for i in range(n):
+            p_prev = P[i-1] if i > 0 else 0
+            val = P[i] * m_prev - p_prev * m_curr
+            if val > max_q:
+                max_q = val
+        S[j] = S[j-1] + max_q
+        
+    return S[m-1] + P[n-1] * mana[m-1]
+```

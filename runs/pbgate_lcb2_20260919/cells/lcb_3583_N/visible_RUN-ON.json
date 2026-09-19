@@ -1,0 +1,46 @@
+{
+  "suite": "visible",
+  "task_id": "pbgate_lcb_3583_N",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 29,
+      "cases": [
+        {
+          "case": "check_visible_01",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_visible_02",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_visible_03",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 3,
+      "total": 3,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 3,
+  "total": 3,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "69f2b94891d01e8d2782c59975f6bf5c42d7b03f17407c1b66fce7025c9eb08f"
+}

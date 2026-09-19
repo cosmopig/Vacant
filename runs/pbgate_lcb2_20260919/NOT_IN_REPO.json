@@ -1,0 +1,85 @@
+{
+  "run": "pbgate_lcb2_20260919",
+  "note": "這一份記的是**沒有進 repo 的東西**：在哪、多大、幾個檔、為什麼不帶、怎麼取得。「拿不到也要記下拿不到」是這個 repo 的紀律（CLAUDE.md 鐵律 3）。",
+  "source_host": {
+    "ssh": "user1@100.124.254.83（vacant-dev）",
+    "path": "/var/tmp/vacant_pbgate",
+    "total_bytes": 21770370,
+    "total_human": "20.8 MB",
+    "df_before": "2.0G avail (95% used)",
+    "df_after": "2.5G avail (94% used)",
+    "df_caveat": "期間有另一個 session 清了 656 MB 的 Playwright 快取，所以前後差值**不是**本輪自己的佔用量，不可以那樣讀。本輪自己的佔用量是上面的 total_bytes（20.8 MB）。",
+    "cleanup": "收官後 `rm -rf /var/tmp/vacant_pbgate /var/tmp/pbgate_repo.tgz /var/tmp/r534_tree.tgz /var/tmp/verify_bank_tree.py /var/tmp/pbgate_evidence.tgz`。⚠ `/var/tmp` 本來就會被作業系統清掉，而這台 2026-09-19 只剩 2–3 GB ⇒ **本目錄（2.3 MB）才是長期的那一份**。"
+  },
+  "excluded": [
+    {
+      "glob": "repo/**",
+      "n_files": 229,
+      "bytes": 5036524,
+      "what": "派到執行端的 repo 子集：`vacant/`＋`ops/gain/r534/`＋`ops/vacantrun/`＋`ops/gain/data/lcb_bank_v2.jsonl`＋`ops/gain/check_bank_precision.py`＋`pyproject.toml`，再加上**在 Mac 上渲染好**的題庫樹 `ops/gain/r534/{templates,hidden}`。",
+      "why_not_shipped": "它就是本 repo 的一個子集，commit `eb655a38`。**不 clone 也不開 worktree**（各要 786／789 MB，執行端只剩 2–3 GB），用 `git archive` 出子集。",
+      "how_to_rebuild": "`git archive --format=tar eb655a38 vacant ops/gain/r534 ops/vacantrun ops/gain/data/lcb_bank_v2.jsonl ops/gain/check_bank_precision.py pyproject.toml | gzip -9`（1.2 MB，sha256 `03420556bc54960f4f6376ab21282ba97a458ea8ccf85724785245ad204af503`；⚠ gzip 版本／tar 實作換了這個值就會漂，只當交叉檢查用不是判準），再 `python3 ops/gain/r534/build_bank.py` 渲染題庫樹。"
+    },
+    {
+      "glob": "ops/gain/r534/{templates,hidden}/**",
+      "n_files": 100,
+      "bytes": 139562,
+      "bytes_note": "壓縮後 140 KB（`r534_tree.tgz`，sha256 `ad1541037c83eea0c0e7ad0e46c2e39b00413de0eceadf082d825610da72411b`）",
+      "what": "公開題庫渲染出來的 20 題樹：`templates/<id>/{goal.md,contract.md,run_tests.sh,tests_visible/test_visible.py}` 與 `hidden/<id>/test_hidden.py`。",
+      "why_not_shipped": "**刻意不進版控**（沿用 R531 §三-4 與 R534 最近一次 commit 的作法）：LCB 的授權只寫 `cc` 未指明 BY/SA/NC ⇒ 轉出來的樹是衍生物，不轉散布。repo 裡只有轉換器與 manifest。",
+      "how_to_rebuild": "`python3 ops/gain/r534/build_bank.py`（確定性，需要 `runs/g_r460_harness_lcb2_*` 與 `runs/g_r532_lcb2_*` 才跑得了選題那一步），`--check` 驗沒漂。不想搬 runs/ 的話用本目錄的 `verify_bank_tree.py`：它只比對渲染結果與 `bank_manifest.json` 的 100 個釘值（本輪在執行端實測 OK）。"
+    },
+    {
+      "glob": "rd_*/wire_RUN-ON/*.req.bin, *.resp.bin",
+      "n_files": 472,
+      "bytes": 13495311,
+      "what": "20 格 wire 的原始位元組（未壓 13.5 MB）。",
+      "why_not_shipped": "**有帶，只是壓縮過** ⇒ 見 shipped_but_compressed。"
+    },
+    {
+      "glob": "ws_*/**",
+      "n_files": 105,
+      "bytes": 193191,
+      "what": "跑完之後留在工作區的活檔（題庫樣板 ＋ agent 寫的 solution.py）。",
+      "why_not_shipped": "同一份內容的**釘死副本**已經帶了：`cells/*/solution.py` 是驗收實際跑的那一份（從 `_frozen_RUN-ON/` 複製，`ws_end_sha256` 寫在 `run_RUN-ON.json` 與收據 payload 裡），原文另外也逐字收在 `matrix.json` 的 `solution_text`／`solution_sha256`。活工作區沒有雜湊背書，帶它反而多一個沒人保證的副本。"
+    },
+    {
+      "glob": "logs/*.stdout, logs/*.stderr",
+      "n_files": 40,
+      "bytes": 91313,
+      "what": "launcher 的 stdout（`--json` 摘要）與 stderr。",
+      "why_not_shipped": "stdout 那段 JSON 就是 `cells/*/run_RUN-ON.json`（已帶，而且那一份才是乾淨的）；agent 自己的輸出已帶（`cells/*/agent_stdout.log`）；`MATRIX.log` 已經逐格記了 BEGIN/END、退出碼與所有關鍵欄位。"
+    },
+    {
+      "glob": "smoke/**",
+      "n_files": 96,
+      "bytes": 764301,
+      "what": "發射前的兩格冒煙（`lcb_3764`、`lcb_3686`，V 臂參數，2026-09-19T15:14–15:24Z）。",
+      "why_not_shipped": "**它們的工作區被 macOS 的 `._*` AppleDouble 殘留污染**（在 Mac 上 `tar czf` 帶進來的 162 個檔跟著 `cp -r` 進了工作區）⇒ `ws_start_sha256` 不等於「公開題庫渲染出來的樣板」。**不計入矩陣，也不帶進 repo。** 它的用途已經達成（證明 harness 端到端會動、量出每格牆鐘、發現這個污染）。修法：`pbgate_cell.sh` 加了**工作區純度擋門**（fail-closed，逐字在本目錄的那一份裡），矩陣的 20 格全部通過那道門。"
+    },
+    {
+      "glob": "/var/tmp/pbgate_evidence.tgz",
+      "n_files": 1,
+      "bytes": 1210583,
+      "what": "把 evidence/ 打包搬回 Mac 用的暫存 tarball。",
+      "why_not_shipped": "它的內容就是本目錄。"
+    }
+  ],
+  "shipped_but_compressed": [
+    {
+      "path": "wire.tar.gz",
+      "what": "20 格的 wire 原始位元組 `rd_*/wire_RUN-ON/*.req.bin`、`*.resp.bin`（未壓 13.5 MB，472 個檔）。",
+      "why": "收據簽的就是這些位元組（`wire_digest`）。`index.jsonl` 另外以未壓形式放在 `cells/*/wire/`，因為那是最常被讀的一份。"
+    }
+  ],
+  "not_measured_this_round": [
+    "出網封鎖（`ops/vacantrun/block_egress.sh`）——本輪只把兩條上游都釘到 1004，proxy 記錄到的流量全部留在本機，但 **proxy records 不 verifies**。",
+    "其他四個 agent（OpenCode／Claude Code／Codex／Hermes）在公開題庫上的閘門——本輪只有 pi。",
+    "1003（thinking 模式）——本輪 20 格全部在 1004（非 thinking）。",
+    "V1 重試迴圈（`--retry resample|revise`）——本輪 `--retry none`、`--max-attempts 1`。",
+    "R534 的 A 層 10 題——刻意不取（條件在過去結果上挑的，差值結構性上偏）。",
+    "MBPP+／HumanEval+（`.vacant-private/evalplus`，私有不轉散布）——本輪只用 LCB v2。",
+    "沙箱（`--sandbox none`）——驗收沒有跑在沙箱裡。",
+    "被 SIGKILL 切斷的那 3 通回應的 token（沒有 `usage` 欄位）⇒ token 總計是**下界**，不是「那 3 通用了 0 個 token」。"
+  ]
+}

@@ -1,0 +1,18 @@
+非預註冊 —— 這一格能被怎麼引用
+==============================
+這一格屬於 runs/pbgate_lcb2_20260919（LCB v2 公開題庫 × `vacant run` 閘門，2026-09-19）。
+這一批**沒有預註冊檔、沒有人類簽字**，所以：
+
+  · 不做假說檢定（沒有 p 值、沒有效果量、沒有信賴區間當結論）
+  · **不與 R535／R530／R534／G 實驗的任何數字合併、平均或對照**
+  · 不准寫「複製」「效果消失」「顯著」「優於」
+  · 收官句只能是描述性的：「在這一格上，閘門的判決長這樣」
+
+⚠ 只看退出碼分不出拒交格的種類。這一格的形狀記在 matrix.json 的 `refusal_shape`：
+  true_refuse（交了但不對）／no_delivery（根本沒交）／timeout_killed（被 --timeout 砍掉）／
+  fake_refuse（requests_seen==0，中介根本沒發生）。
+⚠ `hidden_posthoc` 是**事後衍生物**，零模型呼叫，沒有在跑的時候影響這一格。
+  它與 r460／r532 的 `meets_demand` **不可互引**（比對路徑沒有 vacant/checks.py 的 AST 政策）。
+
+全部參數在 ../../manifest.json；逐條說明在 ../../README.md；
+裁決在 decisions/DECISION_20260919_PUBLIC_BENCH_GATE.md。

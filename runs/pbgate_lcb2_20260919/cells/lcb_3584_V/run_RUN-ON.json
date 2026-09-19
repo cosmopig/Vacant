@@ -1,0 +1,137 @@
+{
+  "task_id": "pbgate_lcb_3584_V",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_pbgate/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_pbgate/ws_lcb_3584_V",
+  "proxy_url": "http://127.0.0.1:39999",
+  "env": {
+    "proxy_url": "http://127.0.0.1:39999",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+  "ws_end_sha256": "eab5517d3975a7e8f2850806c4bac67859ed758e27a05deac130d87ccb7deff8",
+  "agent_rc": -9,
+  "agent_timed_out": true,
+  "requests_seen": 26,
+  "wire_by_protocol": {
+    "openai": 26
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 4,
+  "verdict_sha256": "8640a974ec0a23c55d2270cee7563643fb73ebdb2f90626df67880cf31ac4c92",
+  "verdict_hash": "c10f6645fbffaad8ebf65a26229ce66a24bbaf3540446e19d14a6babbcc3e4f2",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+      "argv": [
+        "/var/tmp/vacant_pbgate/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+      ],
+      "argv_sha256": "d4f747be8358534e590617136bedd85bbb200e07da7447363d3b0cdfc2aeb138",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": -9,
+      "agent_timed_out": true,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 900.005,
+      "wire_quiesced": true,
+      "requests_seen": 26,
+      "requests_seen_cumulative": 26,
+      "wire_digest": "c8635c0144bbd9d2ca0927d28246d748ef759de2de027973aa10499b5da1b4db",
+      "ws_end_sha256": "eab5517d3975a7e8f2850806c4bac67859ed758e27a05deac130d87ccb7deff8",
+      "frozen_path": "/var/tmp/vacant_pbgate/rd_lcb_3584_V/_frozen_RUN-ON",
+      "visible_passed": 2,
+      "visible_total": 4,
+      "verdict_sha256": "8640a974ec0a23c55d2270cee7563643fb73ebdb2f90626df67880cf31ac4c92",
+      "visible_path": "/var/tmp/vacant_pbgate/rd_lcb_3584_V/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_visible_01 — assert: args=['vbcca', 'abc'] got=[] want=[0, 1, 2] [test_visible.py:30: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_visible_02 — assert: args=['bacdc', 'abc'] got=[] want=[1, 2, 4] [test_visible.py:37: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false
+    }
+  },
+  "upstreams_defaulted": [],
+  "wire_errors": 2,
+  "wire_digest": "c8635c0144bbd9d2ca0927d28246d748ef759de2de027973aa10499b5da1b4db",
+  "run_wall_s": 904.307,
+  "agent_wall_s": 900.005,
+  "failures": "test_visible.py::check_visible_01 — assert: args=['vbcca', 'abc'] got=[] want=[0, 1, 2] [test_visible.py:30: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_visible_02 — assert: args=['bacdc', 'abc'] got=[] want=[1, 2, 4] [test_visible.py:37: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)]"
+}

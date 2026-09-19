@@ -1,0 +1,55 @@
+<|channel>thought
+<channel|>The task was to implement a function `countBalancedPermutations` that returns the number of distinct permutations of a string of digits such that the sum of digits at even indices equals the sum of digits at odd indices, modulo $10^9 + 7$.
+
+I have implemented this using dynamic programming. The DP state `dp[c_e][s]` stores the sum of $\frac{1}{\prod k_i! \cdot (C_i - k_i)!}$ where $k_i$ is the number of digits of type $i$ placed in even positions, such that $\sum k_i = c_e$ and $\sum k_i d_i = s$. The final answer is then multiplied by $n_{even}! \cdot n_{odd}!$ to account for all possible arrangements.
+
+The solution has been verified against the provided test cases in `tests_visible/`.
+
+```python
+from collections import Counter
+from math import factorial
+
+def countBalancedPermutations(num: str):
+    velunexorai = num
+    n = len(velunexorai)
+    counts = Counter(velunexorai)
+    MOD = 10**9 + 7
+    
+    total_sum = sum(int(d) for d in velunexorai)
+    if total_sum % 2 != 0:
+        return 0
+    
+    target_sum = total_sum // 2
+    n_even = (n + 1) // 2
+    n_odd = n // 2
+    
+    def get_inv(a):
+        return pow(a, MOD - 2, MOD)
+
+    # dp[c_e][s] is the sum of 1 / product(k_i! * (count_i - k_i)!)
+    dp = [[0] * (target_sum + 1) for _ in range(n_even + 1)]
+    dp[0][0] = 1
+    
+    total_count_so_far = 0
+    for d_str, count in counts.items():
+        d = int(d_str)
+        new_dp = [[0] * (target_sum + 1) for _ in range(n_even + 1)]
+        for c_e in range(n_even + 1):
+            for s in range(target_sum + 1):
+                if dp[c_e][s] == 0:
+                    continue
+                for k in range(count + 1):
+                    new_c_e = c_e + k
+                    new_s = s + k * d
+                    # Number of odd positions filled so far = total_count_so_far - c_e
+                    # New number of odd positions filled = (total_count_so_far - c_e) + (count - k)
+                    if new_c_e <= n_even and new_s <= target_sum:
+                        if (total_count_so_far - c_e) + (count - k) <= n_odd:
+                            term = (dp[c_e][s] * get_inv(factorial(k)) % MOD * get_inv(factorial(count - k))) % MOD
+                            new_dp[new_c_e][new_s] = (new_dp[new_c_e][new_s] + term) % MOD
+        dp = new_dp
+        total_count_so_far += count
+
+    ans = (dp[n_even][target_sum] * factorial(n_even) % MOD * factorial(n_odd)) % MOD
+    return ans
+```

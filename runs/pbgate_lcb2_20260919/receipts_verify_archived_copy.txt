@@ -1,0 +1,37 @@
+# 歸檔副本的重驗（在 Mac repo 上，2026-09-20 UTC）
+# ⚠ 套件在 commit a8fb56ff 從 `vacant/` 改名成 `vacant_network/`；
+#   本 run 發射時（eb655a38）叫 `vacant`，所以 MATRIX.log 與 receipts_verify.txt 裡是舊名。
+#   這一份用新名重驗同一批歸檔副本，結論相同。
+
+## 負控制
+selftest: PASS
+
+## runs/pbgate_lcb2_20260919/cells/*
+═══ 收據鏈驗證 runs/pbgate_lcb2_20260919/cells/* ═══
+run 20　鏈 20　entries 40　驗過 40　失敗 0　壞鏈 0
+中介：有 20　**零請求 0**　沒記這件事 0（舊鏈；沒量到≠量到 0）
+
+run                           arm          條數    驗過    失敗 verdict  rows  chain_head
+lcb_3522_N                    RUN-ON        2     2     0       1     1  edca1213f0893d3d…  OK
+lcb_3522_V                    RUN-ON        2     2     0       1     1  ea0c5e668ace1268…  OK
+lcb_3583_N                    RUN-ON        2     2     0       1     1  0177fd75cfa75e9f…  OK
+lcb_3583_V                    RUN-ON        2     2     0       1     1  eac7c3cd117fca33…  OK
+lcb_3584_N                    RUN-ON        2     2     0       1     1  25753974d7bb5d22…  OK
+lcb_3584_V                    RUN-ON        2     2     0       1     1  c10f6645fbffaad8…  OK
+lcb_3637_N                    RUN-ON        2     2     0       1     1  70c01f1fbce836e8…  OK
+lcb_3637_V                    RUN-ON        2     2     0       1     1  74d2a76ac17a53a2…  OK
+lcb_3654_N                    RUN-ON        2     2     0       1     1  b54c2232fc493337…  OK
+lcb_3654_V                    RUN-ON        2     2     0       1     1  36094637762c3cb4…  OK
+lcb_3681_N                    RUN-ON        2     2     0       1     1  5ad14bc7539daf90…  OK
+lcb_3681_V                    RUN-ON        2     2     0       1     1  fa99e8d112d1b6b5…  OK
+lcb_3686_N                    RUN-ON        2     2     0       1     1  345839b47fa6fe58…  OK
+lcb_3686_V                    RUN-ON        2     2     0       1     1  1097dcd92f6d021f…  OK
+lcb_3700_N                    RUN-ON        2     2     0       1     1  0c6cfeda463c1c47…  OK
+lcb_3700_V                    RUN-ON        2     2     0       1     1  55d6b54769385790…  OK
+lcb_3764_N                    RUN-ON        2     2     0       1     1  626fa184f2a418e5…  OK
+lcb_3764_V                    RUN-ON        2     2     0       1     1  82192a0cfcc27b53…  OK
+lcb_3794_N                    RUN-ON        2     2     0       1     1  2928771e1c44124d…  OK
+lcb_3794_V                    RUN-ON        2     2     0       1     1  72dd7a530d7bee07…  OK
+
+總判：OK
+每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant_network/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。`mediated` 是**另一個維度**：鏈完整不代表中介發生過。VOID＝鏈是好的、但那一格 `requests_seen == 0`，所以它不是「模型通道被中介了」的證據。`mediated=null`＝這條鏈沒記這件事（舊鏈），**沒量到 ≠ 量到 0**。⚠ 這個維度擋得住「完全沒打」，擋不住「打了但打到別的地方」——那要看 run_<ARM>.json 的 wire_by_protocol 與 upstreams，而那兩個欄位不在簽章鏈上。

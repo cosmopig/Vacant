@@ -1,0 +1,27 @@
+# V/GT 分離掃描  2026-09-19T17:05:38Z
+# 掃三個字串：test_hidden / "/hidden/" / r534/templates
+# 範圍：每格的 wire_RUN-ON/*.req.bin ＋ *.resp.bin ＋ index.jsonl ＋ 最終工作區全部檔案
+
+lcb_3522_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3522_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3583_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3583_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3584_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3584_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3637_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3637_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3654_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3654_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3681_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3681_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3686_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3686_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3700_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3700_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3764_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3764_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3794_N         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+lcb_3794_V         wire_hits=0 workspace_hits=0 hidden_files_in_ws=0
+
+TOTAL_HITS=0
+verdict = OK（隱藏測資沒有出現在工作區、回饋或 wire 上）

@@ -1,0 +1,105 @@
+<|channel>thought
+<channel|>The problem asks to count the number of subsequences of size 5 with a unique middle mode. A subsequence $(v_1, v_2, v_3, v_4, v_5)$ has a unique middle mode if $v_3$ is the unique element that appears most frequently in the subsequence.
+
+I have implemented the solution by iterating over all possible middle indices `i3` and their corresponding values `c = nums[i3]`. For each fixed `i3`, I count how many ways to choose two elements from the left (`nums[:i3]`) and two from the right (`nums[i3+1:]`) such that $c$ is a unique mode.
+
+The conditions for $c$ being a unique mode in a sequence of size 5 are:
+- If $c$ appears 5 times, it's always a unique mode.
+- If $c$ appears 4 times, the other element must be different from $c$.
+- If $c$ appears 3 times, the other two elements can be same or different (as long as they are not $c$).
+- If $c$ appears 2 times, the other three elements must all be distinct and none equal to $c$.
+- If $c$ appears 1 time, it's impossible for it to be a unique mode in a sequence of size 5.
+
+The implementation uses prefix and suffix counters to efficiently calculate these counts in $O(n^2)$ total time complexity.
+
+```python
+from typing import List
+from collections import Counter
+
+def subsequencesWithMiddleMode(nums: List[int]) -> int:
+    MOD = 10**9 + 7
+    n = len(nums)
+    if n < 5:
+        return 0
+
+    # Pre-calculate prefix and suffix counts
+    prefix_counts = [Counter() for _ in range(n + 1)]
+    for i in range(n):
+        prefix_counts[i+1] = prefix_counts[i].copy()
+        prefix_counts[i+1][nums[i]] += 1
+
+    suffix_counts = [Counter() for _ in range(n + 1)]
+    for i in range(n - 1, -1, -1):
+        suffix_counts[i] = suffix_counts[i+1].copy()
+        suffix_counts[i][nums[i]] += 1
+
+    total_good = 0
+    # Pre-calculate C(n, k)
+    def nCr(n, r):
+        if r < 0 or r > n:
+            return 0
+        if r == 0 or r == n:
+            return 1
+        if r > n // 2:
+            r = n - r
+        
+        num = 1
+        for i in range(r):
+            num = num * (n - i) // (i + 1)
+        return num
+
+    # Iterate over all possible middle indices i3
+    for i3 in range(2, n - 2):
+        c = nums[i3]
+        L_vals = prefix_counts[i3]
+        R_vals = suffix_counts[i3+1]
+        
+        countL = L_vals[c]
+        countR = R_vals[c]
+        othersL = i3 - countL
+        othersR = (n - 1 - i3) - countR
+
+        # Pre-calculate sums for K=2 cases
+        sum_C_v_2_R = 0
+        for v, count in R_vals.items():
+            if v != c:
+                sum_C_v_2_R += nCr(count, 2)
+
+        sum_C_v_2_L = 0
+        for v, count in L_vals.items():
+            if v != c:
+                sum_C_v_2_L += nCr(count, 2)
+
+        # K >= 3 cases (c appears 3, 4, or 5 times)
+        # K = kL + kR + 1 where kL is count of c in left, kR in right
+        for kL in range(3):
+            for kR in range(3):
+                K = kL + kR + 1
+                m_left = 2 - kL
+                m_right = 2 - kR
+                if K >= 3:
+                    ways = nCr(countL, kL) * nCr(othersL, m_left) * nCr(countR, kR) * nCr(othersR, m_right)
+                    total_good = (total_good + ways) % MOD
+
+        # K = 2 cases (c appears exactly twice)
+        # For c to be unique mode, the other 3 elements must be distinct and != c.
+        # Case 1: kL=1, kR=0 => m_left=1, m_right=2
+        if countL >= 1 and othersR >= 2:
+            for x, countX in L_vals.items():
+                if x != c:
+                    countXR = R_vals[x]
+                    # Ways to pick 2 from othersR such that they are distinct and not equal to x
+                    ways = (nCr(othersR, 2) - sum_C_v_2_R - countXR * (othersR - countXR)) % MOD
+                    total_good = (total_good + nCr(countL, 1) * ways * nCr(countR, 0)) % MOD
+
+        # Case 2: kL=0, kR=1 => m_left=2, m_right=1
+        if countR >= 1 and othersL >= 2:
+            for z, countZ in R_vals.items():
+                if z != c:
+                    countZL = L_vals[z]
+                    # Ways to pick 2 from othersL such that they are distinct and not equal to z
+                    ways = (nCr(othersL, 2) - sum_C_v_2_L - countZL * (othersL - countZL)) % MOD
+                    total_good = (total_good + nCr(countL, 0) * ways * nCr(countR, 1)) % MOD
+
+    return total_good % MOD
+```
