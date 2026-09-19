@@ -453,7 +453,7 @@ a2d674fadef1ea547a009d3574cc0b4f96dbc5f3b66c81157039853c5060f8f9  standby_frozen
 |---|---|
 | `test_gain_harness_arms.py::test_t12_existing_arms_and_generate_are_byte_identical` | `arm_conform` 的 sha256 從 `b987a2fa…` 變成 `7f4d1e8b…`。那條 pin 的訊息是「**H 臂不准動既有臂**」。`ops/gain/harness_arms.py` 最後一次被改就是 `fb7f4bfb`，現在裡面有 8 處 `vacant_network` |
 | `test_gain_harness_arms.py::test_visible_report_classifies_the_five_documented_outcomes` | 同一支 |
-| `test_r449c_launcher_prereg.py`（2 條） | 測試逐字比對 R449c 那份**預註冊**裡的 `git diff … -- <四個檔>` 指令，而那份文件裡的路徑被改名改成了 `vacant_network/checks.py` |
+| `test_r449c_launcher_prereg.py`（2 條） | ~~那份文件裡的路徑被改名改成了 `vacant_network/checks.py`~~ ⚠ **這句反了，2026-09-19 由 Fable 在 worktree 上實測更正**：那份預註冊**根本沒被改**（最後一次改動是 2026-09-18 搬家 `36366aff`；改名 commit `fb7f4bfb` 沒碰 `decisions/` 任何舊檔）。被改的是**測試**——它跑去要求一份凍結文件改內容。修法＝把測試那兩條逐字期望還原成 `vacant/`（`79a0a689` 之後的收尾 commit） |
 | `test_cert_drift_gate_r477.py::test_selftest_passes` | `G.selftest()` 回 3（應為 0） |
 
 > ⚠ 前兩條的份量不只是「測試紅了」。那條 sha256 pin 存在的理由是**跨 run 可比性**
@@ -464,18 +464,23 @@ a2d674fadef1ea547a009d3574cc0b4f96dbc5f3b66c81157039853c5060f8f9  standby_frozen
 > ⚠ R449c 那兩條撞的是 CLAUDE.md 白紙黑字的規矩：「**各份預註冊檔內文裡的逐塊指令
 > 是刻意不改的**——事後改寫它記載的指令等於讓紀錄描述一個沒下過的指令」。
 
-**2）`docs/paper_2026-09-14/source_manifest.json` 的凍結 sha256 有 3 份**對不上了**——
-不是漂了，是**那個路徑不存在了**：
+**2）~~`docs/paper_2026-09-14/source_manifest.json` 的凍結 sha256 有 3 份對不上了~~**
 
-```
-釘了 29 份 → 對上 23、漂了 1、缺檔 5
-  缺檔  vacant/logbook.py · vacant/canonical.py · vacant/codebench.py   ← 改名造成的
-  缺檔  CONCLUSION_20260904_R445_… · CONCLUSION_20260904_R446_…        ← 2026-09-18 搬進 decisions/，與改名無關
-  漂了  runs/INDEX.md                                                   ← 與改名無關
-```
+⚠ **這一節的數字是錯的，2026-09-19 由 Fable 更正。** 上面那張表是拿**裸路徑**去數的，
+但那份 manifest 從搬家那天起就不是那樣讀的：它自帶 `baseline_commit:
+44be37fe`，而 `build_paper.py::_evidence_path` 是它的解析器——鍵刻意不動、
+只在解析器裡解位置（`decisions/`、`decisions/conclusions/`…）。按它自己的語意
+**當時是 28/29，現在補一行 `vacant/` → `vacant_network/` 映射之後仍然是 28/29**，
+唯一不符的 `runs/INDEX.md` 是改名前就存在的已知項（`ops/check_repo_links.py`
+docstring 逐字寫著「現況 28/29 相符」）。
 
-那三份 pin 現在**連驗都驗不了**。是要把 pin 指到新路徑（等於承認凍結的東西會跟著改名走），
-還是別的做法，是人的決定。
+而且「路徑不存在了」**不是改名造成的新狀態**：2026-09-18 的搬家已經讓 13 份裁決檔
+處在同一狀態十天，當時的處置就是 `_evidence_path` 這個解析器。它原本只認
+`decisions/*` 不認 `vacant_network/`，所以重跑會 `SystemExit`——**那是設計上的
+fail-closed，不是 pin 壞掉**。補一行映射即可（已補）。
+
+⚠ 三份 `vacant/*.py` 的**內容逐位元組沒變**（`git mv` 而已，已驗），所以
+`internal_sha256` 的值重算出來相同——**`source_manifest.json` 一個 byte 都不用動**。
 
 **方法備註**：這兩件都是「我以為在跑全套 pytest」才撞到的。全套在這一輪
 **從來沒有乾淨跑完過**——兩次都跑到一半被平行 agent 的 commit 換掉腳下的樹

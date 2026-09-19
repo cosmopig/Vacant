@@ -477,7 +477,7 @@ def test_decision_carries_the_lcb3_honesty_boundaries(dec: str) -> None:
 
 
 def test_decision_g4_diff_list_covers_the_sandbox_runner_template(dec: str) -> None:
-    """G-4 的檔案清單必須是**四個**——`vacant_network/checks.py` 不准漏。
+    """G-4 的檔案清單必須是**四個**——`vacant/checks.py` 不准漏。
 
     r446/r448/r449b 沿用的三檔清單（gain_run／brain_cline／codebench）漏掉了沙箱本體。
     EQ5 的出貨閘門與計分都走
@@ -487,16 +487,26 @@ def test_decision_g4_diff_list_covers_the_sandbox_runner_template(dec: str) -> N
     """
     m = re.search(r"git diff [0-9a-f]{40} <r449c 的 runner_git\.sha> -- ([^`|]+)", dec)
     assert m, "找不到 G-4 的 diff 指令"
+    # ⚠ **這四個字串是預註冊檔的逐字內容，不准跟著 0.8.0 改名一起改。**
+    # 那份檔最後一次改動是 2026-09-18 的搬家（`36366aff`），改名 commit `fb7f4bfb`
+    # 一個 byte 都沒碰 `decisions/` 的舊檔。要求一份凍結文件改內容＝讓紀錄描述一個
+    # 沒下過的指令；漂掉的是這支測試，不是那份文件。
     assert m.group(1).split() == [
         "ops/gain/gain_run.py", "ops/gain/brain_cline.py",
-        "vacant_network/codebench.py", "vacant_network/checks.py",
+        "vacant/codebench.py", "vacant/checks.py",
     ], "G-4 的檔案清單漂了"
     # 理由必須寫出來，不能只是清單裡多一個檔名。
     assert "_test_runner_source" in dec and "run_python_check" in dec
 
 
 def test_g4_call_chain_claim_matches_the_source() -> None:
-    """把 §四 G-4-α 那條呼叫鏈在原始碼上驗一次——敘述不准只是敘述。"""
+    """把 §四 G-4-α 那條呼叫鏈在原始碼上驗一次——敘述不准只是敘述。
+
+    ⚠ **跨 0.8.0 改名做 G-4 的收官 `git diff` 時**：要加 `-M`，並且把預註冊檔裡的
+    `vacant/codebench.py vacant/checks.py` 手動映射到 `vacant_network/…`。
+    不加 `-M` 的話 git 會把 `git mv` 顯示成「刪除 + 新增」，那條 diff 看起來像是
+    「臂路徑被整個砍掉」——**綠燈與紅燈都會是假的**。
+    """
     gr = (ROOT / "ops" / "gain" / "gain_run.py").read_text(encoding="utf-8")
     ck = (ROOT / "vacant_network" / "checks.py").read_text(encoding="utf-8")
     assert "def run_python_check(" in ck, "checks.py 沒有 run_python_check"
@@ -514,7 +524,7 @@ def test_decision_g4_stat_evidence_is_pasted_and_honest(dec: str) -> None:
     assert "git diff --stat 63f20d580c87cf5c44d11f4c54f1d66220eabb6e b3c8514" in dec
     assert "2 files changed, 59 insertions(+), 9 deletions(-)" in dec, \
         "G-4-β 沒有貼 --stat 的實測輸出"
-    assert "brain_cline.py` 與 `vacant_network/codebench.py` 這段期間零改動" in dec, \
+    assert "brain_cline.py` 與 `vacant/codebench.py` 這段期間零改動" in dec, \
         "沒有寫出「哪兩個檔沒動」——那是初稿憑印象寫錯的那半句"
 
 

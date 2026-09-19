@@ -435,12 +435,21 @@ def _evidence_path(rel):
     `decisions/`。**鍵刻意不動**——動了 `internal`／`internal_sha256` 的鍵就跟著變，
     已出版的 `source_manifest.json` 會變成不可重現。所以只在這裡解位置。
 
+    2026-09-19（0.8.0）把 import 套件目錄 `vacant/` 改名成 `vacant_network/`，
+    三個鍵（`vacant/logbook.py`／`vacant/canonical.py`／`vacant/codebench.py`）
+    處境與搬家那 13 份**完全一樣**：鍵不動、位置改了 ⇒ 同樣在這裡解。
+    ⚠ 這三份檔的**內容逐位元組沒變**（`git mv` 而已，已驗），所以
+    `internal_sha256` 的值重算出來仍然相同——manifest 一個 byte 都不用改。
+
     找不到就**大聲壞掉**。原本是 `if path.is_file(): ...`，搬家之後那個 if 會讓
     13 份裁決證據安靜地從 `internal_sha256` 消失，而那份 manifest 正是「這些主張
     有出處」的唯一憑據——安靜少講比壞掉更糟。
     """
     p=ROOT/rel
     if p.is_file():return p
+    if rel.startswith('vacant/'):
+        q=ROOT/('vacant_network/'+rel[len('vacant/'):])
+        if q.is_file():return q
     for sub in ('decisions','decisions/conclusions','decisions/criteria',
                 'decisions/prereg','decisions/notes'):
         q=ROOT/sub/Path(rel).name

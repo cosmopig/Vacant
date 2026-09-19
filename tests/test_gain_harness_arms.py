@@ -431,8 +431,11 @@ FROZEN_SOURCE_SHA = {
 #   meets_demand:       from vacant.checks import CheckInfraError, run_python_check
 #   behavior_signature: from vacant.checks import CheckInfraError, run_python_capture
 # 這兩行是**真的 import**，不還原模組就跑不起來（`vacant` 這個套件已經不存在）。
-# 行為、落盤欄位、判準一個字沒動；`vacant_network.checks` 與舊的 `vacant.checks`
-# 是同一份檔案，只是目錄名不同（`git mv`，內容逐位元組相同）。
+# 行為、落盤欄位、判準一個字沒動。
+# ⚠ 被 import 的那份檔（`vacant_network/checks.py`）**不是**與舊的 `vacant/checks.py`
+#   逐位元組相同——實測 `diff` 差 **4 行註解**（L34／L214／L620／L641，都是散文裡的
+#   路徑字串跟著改名）、**可執行碼零改動**。這句話要準：凍結釘子的理由本身就是
+#   未來收官者唯一的判斷依據，寫寬一格就等於把「沒驗過的東西」講成驗過。
 # 舊值（round460b–0.7.0）：
 #   meets_demand       0df188d5dd6626622e6cd6b44691937ae727700d74cb61d6fd85411678059b7e
 #   behavior_signature a5bc15ad665ef31873b50c920e7b7116c61eb682ffffd460f9529780111ad53a
