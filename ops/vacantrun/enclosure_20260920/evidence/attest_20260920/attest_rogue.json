@@ -1,0 +1,61 @@
+{
+  "schema": "vacant-attest/1",
+  "run_id": "rogue",
+  "agent": "probe",
+  "enclosure": {
+    "applied": true,
+    "ns_id": "net:[4026532736]",
+    "policy_sha256": "0a239fa66f3febd06d142217392d1b951692827c7544ad460464f531a6b13678",
+    "probe": {
+      "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+      "interfaces": [
+        "lo"
+      ],
+      "outer_net_ns": "net:[4026531840]",
+      "ns_differs_from_outer": true,
+      "policy_path": "/run/vacant/policy.json",
+      "policy_present": true,
+      "door_sock": "/run/vacant/relay.sock",
+      "door_reachable": true,
+      "reason": "只有 loopback 一張介面，而且 netns 與圍牆外面不同（硬證據）",
+      "probed_at": 1789844286.992332,
+      "probed_by_pid": 9
+    }
+  },
+  "framework_hook": {
+    "agent": "probe",
+    "contract_version": "vacant-hook/1",
+    "canary_fired": true,
+    "events_n": 3,
+    "log": "/var/tmp/vacant-attest-20260920/ws_rogue/hooks.jsonl",
+    "install_attempted": true,
+    "version_drift": false,
+    "reason": "掛鉤日誌裡有 1 筆 canary ⇒ 掛鉤真的燒了"
+  },
+  "reconciled": {
+    "relay_calls": 2,
+    "hook_events": 3,
+    "unexplained": 1,
+    "canary_calls": 1,
+    "refused_path": 0,
+    "unexplained_detail": [
+      {
+        "call_id": "67f128b8856d40b284699c32fc5a0762",
+        "path": "/v1/chat/completions",
+        "ts": 1789844287.1578083,
+        "status": 415
+      }
+    ],
+    "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（session_start／canary／user_prompt_submit／post_tool_use）",
+    "reason": "2 通中繼、1 個回合開端事件 ⇒ 1 通對不上"
+  },
+  "tier": "B",
+  "attested": false,
+  "b_prime_kind": null,
+  "tier_sentence": "每一個離開這個行程的位元組都留下紀錄；**但分不出哪一通是模型叫的、哪一通是框架自己叫的**。",
+  "tier_reasons": [
+    "圍牆成立、掛鉤也燒了，**但對帳沒過**（unexplained=1）⇒ 降到 B：位元組都留下紀錄，但說不出每一通各對應哪一個工具事件"
+  ],
+  "in_process_model": null,
+  "assembled_at": 1789844287.2599175
+}

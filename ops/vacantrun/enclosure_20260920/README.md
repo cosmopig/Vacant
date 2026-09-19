@@ -26,7 +26,18 @@ bash ops/vacantrun/enclosure_20260920/run_probes.sh
 # 一個 agent 在 enclosure 裡跑完一題
 bash ops/vacantrun/enclosure_20260920/run_agent.sh codex
 bash ops/vacantrun/enclosure_20260920/run_agent.sh opencode
+# **收據的四個欄位與分級**（四組，含三個負控制；約 10 秒）
+bash ops/vacantrun/enclosure_20260920/run_attest.sh
 ```
+
+`run_attest.sh` 是 `DECISION_20260920_RECEIPT_ATTESTATION.md` 的可重跑版本：
+`enclosure{ns_id, policy_sha256, applied}`／`framework_hook{…, canary_fired}`／
+`reconciled{relay_calls, hook_events, unexplained}`／`tier` 四個欄位，
+每一格配一個負控制（不套 enc.sh ⇒ `applied=false`；掛鉤拆掉 ⇒ `canary_fired=false`
+＋降級；多一通沒有工具事件的 ⇒ `unexplained>0` ＋降級）。
+收尾印 `RUN_ATTEST_DONE fail=<n>`，**fail=0 才算過**。
+⚠ 它的 canary 是**直接呼叫契約**（`hookcli session_start`），
+**不是**某個 agent 框架的掛鉤——兩件事不可以混講。
 
 只有 enclosure 那一組會讓人以為「那些目標本來就關著」，所以
 `run_probes.sh` **一定**先在同一台機器、同一分鐘、用同一支探針跑一次

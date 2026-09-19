@@ -219,7 +219,8 @@ def test_door_holds_no_key_and_authorization_passes_through(tmp_path,
     assert px.keys == {} and px.sentinel == ""
     try:
         c = _UnixHTTPConnection(str(sockdir / "relay.sock"))
-        c.request("POST", "/v1/messages", body=b"{}",
+        # ⚠ body 裡放一個**一定會上碟**的標記（正控制用，見下）
+        c.request("POST", "/v1/messages", body=b'{"m":"BODY-MARKER-ON-DISK"}',
                   headers={"Authorization": "Bearer CALLER-OWNED-KEY"})
         c.getresponse().read()
         c.close()
@@ -231,6 +232,13 @@ def test_door_holds_no_key_and_authorization_passes_through(tmp_path,
     # 而且它沒有上碟：整個 wire 目錄掃不到那一串
     blob = b"".join(p.read_bytes() for p in (tmp_path / "w").rglob("*")
                     if p.is_file())
+    # ⚠ **「掃不到」要先證明掃得到**：一個空的 blob 會讓下一行無條件通過，
+    #   而那正是「`grep -c` 沒命中印 0 又回 1」那一類量具說謊的形狀。
+    #   所以先驗兩件事：blob 真的有東西、而且**那個一定在裡面的標記真的在**。
+    assert blob, "wire 目錄一個 byte 都沒有 ⇒ 下一行的『掃不到』沒有意義"
+    assert b"BODY-MARKER-ON-DISK" in blob, (
+        "正控制：這個字串一定有落盤（request body 逐位元落盤是鐵律 3）。"
+        "它掃不到 ⇒ 是這支掃描壞了，不是金鑰沒上碟")
     assert b"CALLER-OWNED-KEY" not in blob
 
 

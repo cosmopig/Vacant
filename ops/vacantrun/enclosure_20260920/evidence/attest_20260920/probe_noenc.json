@@ -1,0 +1,22 @@
+{
+  "applied": false,
+  "ns_id": "net:[4026531840]",
+  "policy_sha256": null,
+  "probe": {
+    "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+    "interfaces": [
+      "ens33",
+      "lo",
+      "tailscale0"
+    ],
+    "outer_net_ns": null,
+    "ns_differs_from_outer": null,
+    "policy_path": "/var/tmp/vacant-attest-20260920/door/policy.json",
+    "policy_present": false,
+    "door_sock": "/var/tmp/vacant-attest-20260920/door/relay.sock",
+    "door_reachable": true,
+    "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+    "probed_at": 1789844286.1013026,
+    "probed_by_pid": 3992079
+  }
+}

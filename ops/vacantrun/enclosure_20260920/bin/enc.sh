@@ -62,4 +62,19 @@ if [ -n "${ENC_DOOR:-}" ]; then
   fi
 fi
 for kv in ${ENC_SETENV:-}; do ARGS+=(--setenv "${kv%%=*}" "${kv#*=}"); done
+
+# -- 政策檔：**圍牆裡面那支探針唯一的參照物**（收據的 `policy_sha256`）-----
+#   為什麼要有它：探針在圍牆裡量到「只有 lo」，那只說「這個行程沒有別的
+#   介面」；要說「我進到了一個**新的** netns」得跟**外面那一個**比，而
+#   外面那一個只有在 bwrap 之前讀得到。
+#   ⚠ 內容刻意**不帶時間戳**：同一份政策要雜湊出同一個值，否則
+#     「這一跑用的是哪一份政策」沒辦法跨跑比對。
+#   ⚠ 它跟門一起被 `--ro-bind` 進去 ⇒ 圍牆裡面**改不掉**。
+if [ -n "${ENC_DOOR:-}" ]; then
+  "${ENC_PY:-/usr/bin/python3}" "$(dirname "${BASH_SOURCE[0]}")/write_policy.py" \
+      "$ENC_DOOR/policy.json" \
+      "$(readlink /proc/self/ns/net 2>/dev/null || true)" "${ARGS[@]}" \
+    || { echo "enc.sh: 政策檔寫不出來 ⇒ 圍牆裡的探針會少一個參照物。停。" >&2; exit 3; }
+fi
+
 exec bwrap "${ARGS[@]}" "$@"
