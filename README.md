@@ -20,8 +20,23 @@
 ——「沒有合法 attestation 的 artifact，在收件時被拒」。
 
 ```bash
-pip install vacant-network        # 函式庫（import 名仍然是 vacant）
+pip install vacant-network        # ⚠ 是 vacant-network，不是 vacant
+vacant --help                     # 裝完之後，指令的名字叫 vacant
 ```
+
+> ⚠ **`pip install vacant` 裝到的不是這個專案。** PyPI 上的 `vacant`（實測 2026-09-19
+> 為 0.4.15，一個 7.5 MB 的 `cp311-abi3-manylinux` 原生 wheel）是**別人的** Rust engine
+> bindings，而且**不會報錯**，會安安靜靜地裝好。三個名字要分開記：
+> **套件名 `vacant-network`**、**指令名 `vacant`**、**import 名 `vacant`**。
+>
+> **Python 3.11+。** 一條 `pip install` 會拉進 **30 個 wheel、60 MB**——`pyproject.toml`
+> 宣告的 runtime 相依只有 3 個（`cryptography`／`mcp`／`jsonschema`），其餘是 `mcp`
+> 拖進來的（`pydantic`／`starlette`／`uvicorn`／`httpx`…）。閘門與收據那條路
+> （`vacant.vrun.*`）用不到 `mcp`，但目前沒有「只要閘門」的 extras，裝了就是全裝。
+>
+> 從零開始、含卡住點的逐字安裝紀錄：
+> [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md)
+> （原廠 Ubuntu 24.04，端到端 27 秒）。常見的坑整理在下面〈[你可能會遇到](#你可能會遇到)〉。
 
 [![PyPI](https://img.shields.io/pypi/v/vacant-network?color=f26b1d)](https://pypi.org/project/vacant-network/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-f26b1d)](pyproject.toml)
@@ -47,8 +62,21 @@ pip install vacant-network        # 函式庫（import 名仍然是 vacant）
 
 ```bash
 pip install vacant-network
-vacant demo gate
+vacant selftest          # 先確認這份安裝是活的（端到端迴圈＋兩條簽章鏈）
+vacant demo gate         # 再看閘門把一次交付擋下來
 ```
+
+`vacant selftest` 的逐字輸出（vacant-dev，Ubuntu 24.04／Python 3.12.3，**0.3 秒**）：
+
+```
+端到端迴圈    : ✓（6 次呼叫無例外，4/6 答對）
+expert 鏈驗   : ✓
+requester 鏈驗: ✓
+暫存目錄      : /tmp/vacant-selftest-_bqraq82
+```
+
+⚠ **`4/6` 不是判準、也不是效能數字**（同一版在 macOS 上印 `3/6`）。`selftest` 驗的是
+「端到端迴圈不丟例外」＋「兩條簽章鏈驗得過」，答對幾題不算數。
 
 **不需要 clone。**（2026-09-18 起：閘門的判斷層搬進套件了——同一份，不是複製；
 `ops/gain/r530/*` 現在 re-export 到 `vacant/vrun/*`，R530 實驗跑的仍然是這一支。）
@@ -103,6 +131,90 @@ python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 
 ---
 
+## 你自己的驗收：兩格都要跑過
+
+`vacant demo gate` 演的是**拒交格**。只有拒交格是不夠的——**一個永遠拒交的閘門跟
+沒有閘門一樣沒用**，所以交付格是規格的一部分，不是完整性。下面這一段零模型、零網路、
+零 API key，假 agent 就是一行 `printf`，**兩格只差它寫出來的東西**。
+逐字出自 vacant-dev 的 clean-room 跑
+（[`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md) §9–§11）。
+
+```bash
+# 客戶的驗收。⚠ 一定要放在工作區外——agent 改得到的驗收不是驗收。
+mkdir -p ~/vacant-try/ws ~/vacant-try/tests_visible
+cat > ~/vacant-try/tests_visible/test_visible.py <<'PY'
+def check_add():
+    from solution import add
+    assert add(2, 3) == 5
+
+def check_mul():
+    from solution import mul
+    assert mul(2, 3) == 6
+PY
+```
+
+驗收檔的形狀（`vacant/vrun/acceptance.py` 的執行語意，**不依賴 pytest**）：一個 `.py`
+裡放一組零引數的 `check_*()`，**每個函式一條 case**、依定義順序跑，**正常回傳＝過、
+丟任何例外＝不過**；或者只放一個 `main()`，整個檔案算一條。兩種寫法一個檔案裡只准有一種。
+
+**拒交格**——假 agent 只寫了 `add()`，卻宣告完成：
+
+```
+$ vacant run --workspace ~/vacant-try/ws --suite ~/vacant-try/tests_visible \
+      --run-dir ~/vacant-try/receipts_refuse -- \
+    sh -c 'printf "def add(a, b):\n    return a + b\n" > solution.py; echo "Done. solution.py is complete."'
+Done. solution.py is complete.
+[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws 4f53cda18c2b→c18ac5771908　wire 0 通　收據 /home/user1/vacant-try/receipts_refuse
+test_visible.py::check_mul — exception: ImportError: cannot import name 'mul' from 'solution' (/home/user1/vacant-try/receipts_refuse/_frozen_RUN-ON/solution.py) [test_visible.py:6: from solution import mul]
+exit=20
+```
+
+**交付格**——同一份驗收、同一條指令，只有假 agent 寫出來的東西不一樣
+（先 `rm -rf ~/vacant-try/ws && mkdir -p ~/vacant-try/ws` 換一個乾淨的工作區）：
+
+```
+$ vacant run --workspace ~/vacant-try/ws --suite ~/vacant-try/tests_visible \
+      --run-dir ~/vacant-try/receipts_deliver -- \
+    sh -c 'printf "def add(a, b):\n    return a + b\n\ndef mul(a, b):\n    return a * b\n" > solution.py; echo "Done. solution.py is complete."'
+Done. solution.py is complete.
+[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 4f53cda18c2b→bf906ec43e3b　wire 0 通　收據 /home/user1/vacant-try/receipts_deliver
+exit=0
+```
+
+兩格的 `run_RUN-ON.json`（逐字讀出來的，不是轉述）：
+
+| | `accepted` | `stop_reason` | `agent_rc` | 可見驗收 | `vacant run` 退出碼 |
+|---|---|---|---|---|---|
+| **拒交格** | `false` | `visible_fail` | **0** | 1/2 | **20** |
+| **交付格** | `true` | `visible_pass` | **0** | 2/2 | **0** |
+
+**兩格的 `agent_rc` 都是 `0`**：agent 兩次都說自己成功了。裁決的差別**完全來自客戶
+的驗收**，不來自 agent 的說法。退出碼還有第三個：`22`＝`infra_void`（基礎設施壞了，
+**既不判交付也不判拒交**）。
+
+驗這兩張收據（**負控制先過**）：
+
+```
+$ python3 -m vacant.vrun.verify_receipts --selftest
+selftest: PASS
+$ python3 -m vacant.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
+═══ 收據鏈驗證 /home/user1/vacant-try/receipts_deliver ═══
+run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
+
+run                           arm          條數    驗過    失敗 verdict  rows  chain_head
+receipts_deliver              RUN-ON        2     2     0       1     1  9a3abd1bd71c31cd…  OK
+
+總判：OK
+```
+
+`--selftest` 必須**先**跑：它證明這把尺抓得到壞鏈。沒過負控制的驗章器，
+拿去驗真鏈只會得到一個沒有內容的 `OK`。
+
+⚠ 上面那條 `OK` 的旁邊還有一個數字：這一跑的 **`requests_seen` 是 0**
+（假 agent 不呼叫模型）。**鏈驗得過，不代表該發生的事發生過**——見〈誠實邊界〉第 21 條。
+
+---
+
 ## 接上你自己的 agent
 
 `--` 後面照你平常怎麼跑 agent 就怎麼打，`vacant run` 不需要知道那是什麼框架：
@@ -134,6 +246,45 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 ```
 
 名單漏一個變數＝那條路沒被中介，而且**不會有任何錯誤訊息**——這是 V0 已知的殘餘風險。
+
+### 四個 agent 的接線（都有實測，等級不可混講）
+
+判準的單一真相是
+[`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md)
+——下表是它 §1 矩陣的摘要，**沒有另寫一套判準**，可複製貼上的完整接線在它的 §2。
+**證據等級**：`L-real`＝真模型真跑、拒交格與交付格都過、收據可重驗；
+`L-fake`＝假上游（`mockup.py`）只驗通道與閘門；`L-none`＝沒量。
+⚠ **`L-fake` 不能寫成「這個 agent 可以用 Vacant」**：假上游碰不到 SSE 分塊、
+工具呼叫格式、逾時、上下文長度。
+
+| agent | 怎麼接 | 等級 | 拒交／交付 |
+|---|---|---|---|
+| **Claude Code** 2.1.278 | **環境變數 `ANTHROPIC_BASE_URL` ⇒ 零接線**（已在 `envmap` 名單裡，launcher 自己注入） | **L-real** | ✅ exit 20 ／ ✅ exit 0 |
+| **OpenCode** 1.18.31 | 走內建 `openai` provider ＝ **環境變數 `OPENAI_BASE_URL` ⇒ 零接線**；指到本地模型必須改走設定（`OPENCODE_CONFIG_CONTENT`） | **L-real**（真模型那兩格走的是設定那條） | ✅ exit 20 ／ ✅ exit 0 |
+| **pi** 0.85.1 | **設定檔**：`PI_CODING_AGENT_DIR` 指到暫存目錄＋寫一份 `models.json`。**不吃 `OPENAI_BASE_URL`** | **L-real**（R535） | ✅ exit 20 ／ ✅ exit 0 |
+| **Codex CLI** 0.153.2（API key／自訂 provider） | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`）。**不吃 `OPENAI_BASE_URL`** | **L-fake** | ✅ exit 20 ／ ✅ exit 0 |
+| **Codex CLI** 0.153.2（`codex login`／ChatGPT 帳號） | ❌ **沒有辦法**：模型通道是寫死的 `wss://chatgpt.com/backend-api/codex/responses`，HTTP 反向代理在那條路上不存在 | — | 閘門**照跑**（觸發點在行程結束不在 wire 上），但**逐字落盤在那條路上不成立** |
+| **Hermes** | **未測** | **L-none** | **未測** |
+
+⇒ **吃環境變數的兩個（Claude Code、雲端模型的 OpenCode）零接線；吃設定檔的兩個
+（pi、Codex）要多做事**，那是品質比較差的一種附身。兩個「零接線」都有前提，
+不寫出來就是誇大：
+
+- ⚠ **Claude Code 的零接線建在「上游自己會講 Anthropic Messages（`POST /v1/messages`）」
+  這一個功能上。** `vacant/vrun/wireproxy.py` 是**反向代理不是協定轉換器**——它照 path
+  路由，不把 `/v1/messages` 改寫成 `/v1/chat/completions`。實測那台 LM Studio 原生就吃
+  `/v1/messages`（含 SSE 與 `tool_use`）所以不需要 shim；換一個只講 OpenAI 的上游
+  （純 llama.cpp server、vLLM 預設）就**必須**自備轉換層，而那一層不是本 repo 的東西。
+- ⚠ **OpenCode 的零接線只對雲端模型成立。** 內建 `openai` provider 拿到 models.dev
+  註冊表以外的模型 id（例如本地 LM Studio 的 `gemma-4-12b-it-qat`）會在**送出任何請求
+  之前**就死在模型解析 ⇒ `requests_seen = 0`——那是 `infra_void` 不是 0 分。
+  指到本地模型必須走設定路線。
+
+那四段接線已經寫成一支 `ops/vacantrun/wrap_agent.sh`（四個 agent 各一段，每段在
+runtime 讀 `$VACANT_RUN_PROXY`，所以不必固定埠也不必動使用者的設定檔）。
+⚠ **它只在 repo checkout 裡**，pip 裝的版本沒有它——見上面〈還需要 clone 的部分〉。
+⚠ **`--` 之後要給絕對路徑**：launcher 用 `cwd=<workspace>` spawn 子行程，相對路徑會
+解析到工作區底下 ⇒ `agent_spawn_failed`／exit 22。
 
 ### 這三條要跟上面那一幕一起讀（不准淡化）
 
@@ -201,6 +352,33 @@ print(Logbook(list(book.entries[:2])).verify_chain(who))                 # True 
 ```bash
 vacant --help                     # 安裝後可用的 CLI
 ```
+
+---
+
+## 你可能會遇到
+
+這一節不是想像出來的：2026-09-19 在一台**原廠 Ubuntu 24.04**（沒有 pip、沒有
+`python3-venv`）上從零裝一次，下面每一列都真的撞到。逐字紀錄（含每一步花多久）在
+[`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md)。
+
+| 症狀 | 發生了什麼 | 怎麼辦 |
+|---|---|---|
+| 裝完之後 `import vacant` 完全不是這個專案 | **`pip install vacant` 裝到的是別人的套件**（Rust engine bindings，7.5 MB 原生 wheel），而且它**也**佔用 `vacant` 這個 import 名，**不報錯** | 判別：`python3 -c "import vacant; print(vacant.__version__)"`——我們的印 `0.7.0`，別人的丟 `AttributeError`。修法：`pip uninstall -y vacant` 再 `pip install vacant-network` |
+| `python3 -m venv …` ⇒ `The virtual environment was not created successfully because ensurepip is not available.` | Debian／Ubuntu 把 `ensurepip` 拆成獨立套件，原廠映像檔沒有。`venv` 這個 module 本身是在的，死的是它底下的 `ensurepip` | `sudo apt-get install -y python3-venv`（訊息裡寫的是 `python3.12-venv`），然後**重建一次 venv**。實測 5.5 秒，**不必重開機** |
+| 系統上根本沒有 `pip` / `pip3` | 同一個原因，`python3` 是裸的 | 同上。venv 建起來之後裡面自帶 pip 24.0 |
+| 一條 `pip install` 之後 site-packages 多了 30 個 wheel、60 MB | `mcp` 一個人拖進 `pydantic`／`starlette`／`uvicorn`／`httpx`／`sse-starlette`… | 目前**沒有**「只要閘門」的 extras，裝了就是全裝。閘門與收據那條路（`vacant.vrun.*`）其實用不到 `mcp` |
+| `pip show … \| head` 噴 `BrokenPipeError` | pip 對 SIGPIPE 的處理。**不是安裝失敗**（`exit=0`） | 忽略它，或不要接 `head` |
+| `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | **fail-closed 擋門**，不是你的路徑打錯 | 權威的驗收目錄放在工作區**外面**；要給 agent 看就另外複製一份進去 |
+| `vacant run` 回 `22`（`infra_void`） | 基礎設施壞了，**既不判交付也不判拒交**。最常見的原因是 `--` 之後給了相對路徑——launcher 用 `cwd=<workspace>` spawn，相對路徑會解析到工作區底下 | `--` 之後改成絕對路徑 |
+| 接上了自己的 agent，但 `requests_seen` 是 `0` | 那條模型通道**沒有被中介到**（框架把 base url 寫在設定檔裡），或那一跑根本沒呼叫模型。**不會有任何錯誤訊息** | 看〈四個 agent 的接線〉；環境變數名單的單一真相是 `vacant/vrun/envmap.py` |
+| `vacant selftest` 印的「答對」數字每次不一樣 | 那不是判準（Linux 印 `4/6`、macOS 印 `3/6`） | 只看 `✓` 那三行有沒有全過 |
+| `run_RUN-ON.json` 裡找不到 `upstreams_defaulted` | **PyPI 的 `vacant-network` 0.7.0 還沒有那兩個欄位**，repo HEAD 有——版本號沒有跟著 bump | 需要那個欄位就從原始碼裝（`pip install -e .`） |
+| Windows | **完全沒量**。而且 `vacant/checks.py` 沒有可用的 Windows 沙箱分支 | 用 Linux／macOS，或放進容器 |
+
+⚠ 最後一列是鐵律 3 的形狀：**「沒量到」≠「量到 0」**。
+這份 log 只證明了 Ubuntu 24.04／Python 3.12.3 那一條路；macOS 只跑過
+`pip install`／`selftest`／`demo gate`／兩格 `vacant run`（Python 3.13.1，都過），
+**沒有做 clean-room**。
 
 ---
 
@@ -406,6 +584,32 @@ needle——**跳過 ≠ 檢查過**。
     寫出來的**。它抓得到不對稱的疏漏（bug），**抓不到兩邊一起不寫**（malice）。
     真正的對帳要求至少一端握在利益不同的人手上——那件事目前沒有做。
 19. **不是證明**：demo 只能說「看得到提升」；「證明提升」保留給預註冊 batch run。
+20. **`vacant run` 的 proxy 擋不住刻意繞過。** `vacant/vrun/wireproxy.py:45-47` 自己
+    逐字寫著：「**records，不 verifies**：proxy 只證明『這些 bytes 經過我』，不證明上游
+    真的照著跑，也**不阻止 agent 走別的路徑繞過它**。」用第 2 條的正式名詞講：
+    **Saltzer & Schroeder 1975 的 complete mediation（完全中介），本系統不滿足。**
+    要讓「接上就逃不掉」為真必須再加出網封鎖（`ops/vacantrun/block_egress.sh`，
+    要 root 一次，**只在 repo checkout 裡**）。
+21. **鏈的完整性 ≠ 完備性，而且「零請求的跑」照樣 `chain_ok=true`。**
+    2026-09-19 的 clean-room 實測：一隻假 agent（`sh -c printf`，一通模型呼叫都沒有）
+    的收據鏈是 `entries 2／驗過 2／失敗 0／chain_ok=true`，而同一份 `run_RUN-ON.json`
+    的 `requests_seen` 是 **0**。⇒ **鏈保證的是「我記下來的沒被動過」，不是「該發生的
+    都發生了」**——這與第 5 條的 truncation／omission attack
+    （Ma & Tsudik 2009，DOI [10.1145/1502777.1502779](https://doi.org/10.1145/1502777.1502779)）
+    是同一件事的兩個面向。所以 **`requests_seen > 0` 是收據上唯一能證明中介真的發生過
+    的欄位**，「我設了環境變數」不是。逐字見
+    [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md) §12。
+22. **`model` 欄位不是證據；未命名的 wire 會落到公開 API 的預設值。**
+    - **LM Studio 不檢查 model id**：拿 `gpt-4o-mini` 去問，回來的 body 裡是
+      `"model": "gemma-4-12b-it-qat"`，**沒有任何環節會報錯**
+      （[`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) §2.3
+      實測）。收據上的 `model` 只記「誰宣稱的」，不是「誰答的」。也因此
+      **「為了接線而謊報模型名」是被禁止的**：它會讓收據失真，與可究責性口徑直接相衝。
+    - **沒有被指定上游的那條 wire 會轉送到公開 API 的預設值。** repo HEAD 的
+      `vacant/vrun/launcher.py:586-590` 把這件事逐跑落盤成 `upstreams`／
+      `upstreams_defaulted`——但**那只是讓洞看得見，不是把它補起來**。
+      ⚠ 而且 **PyPI 上的 `vacant-network` 0.7.0 還沒有這兩個欄位**（版本號沒有跟著
+      bump），pip 裝的那一份 `run_RUN-ON.json` 裡找不到它們。
 
 完整清單（B0–B20、H1–H9 與各 run 的收官邊界）見
 [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md)§四。
@@ -751,6 +955,9 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 | [`CHANGELOG.md`](https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md) | 版本變更（0.6.0 → 0.7.0 是不同的 codebase） |
 | [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) | **現況總表**：數字的唯一入口 |
 | [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | 怎麼自己重跑題庫 |
+| [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md) | **從零安裝的逐字紀錄**：原廠 Ubuntu 24.04、端到端 27 秒、三個卡住點 |
+| [`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md) | `vacant run` 完整用法、落盤形狀、§4 誠實邊界（一條都沒省略） |
+| [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) | 四個 agent 逐格實測與接線；**證據等級 L-real／L-fake／L-none 的單一真相** |
 | [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](https://github.com/cosmopig/Vacant/blob/main/docs/HMIX_ARCHITECTURE_2026-09-11.md) | 迴圈：六個零件、逐字 prompt、它做不到什麼 |
 | [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | 五次複製收官稽核 |
 | [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | 跨題庫收官稽核 |
