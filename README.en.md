@@ -418,7 +418,9 @@ vacant --help                     # CLI available after install
 
 This section is not imagined. On 2026-09-19 the package was installed from scratch on a
 **stock Ubuntu 24.04** box (no pip, no `python3-venv`) and every row below was actually
-hit. The verbatim transcript, with per-step timings, is
+hit — **the name-collision detail in the first two rows was measured the same day on
+macOS** (log §5.1); everything else came from that Ubuntu box. The verbatim transcript,
+with per-step timings, is
 [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md).
 
 | symptom | what happened | what to do |

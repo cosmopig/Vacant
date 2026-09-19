@@ -366,7 +366,8 @@ vacant --help                     # 安裝後可用的 CLI
 ## 你可能會遇到
 
 這一節不是想像出來的：2026-09-19 在一台**原廠 Ubuntu 24.04**（沒有 pip、沒有
-`python3-venv`）上從零裝一次，下面每一列都真的撞到。逐字紀錄（含每一步花多久）在
+`python3-venv`）上從零裝一次，下面每一列都真的撞到——**頭兩列的套件撞名細節是同一天
+在 macOS 上補量的**（log §5.1），其餘都在那台 Ubuntu 上。逐字紀錄（含每一步花多久）在
 [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md)。
 
 | 症狀 | 發生了什麼 | 怎麼辦 |
