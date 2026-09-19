@@ -40,10 +40,47 @@ def test_events_satisfy_the_tv_contract(events):
     assert to_events.validate(events) == []
 
 
-def test_events_do_not_invent_steps_that_did_not_happen(events):
+def test_events_do_not_invent_layers_that_do_not_exist(events):
+    """`vacant run` **沒有**評審層、**沒有**抽樣稽核層 ⇒ 永遠不發。
+
+    ⚠ v1 把 `revised` 也列在這一串裡，那是把兩件事混成一件：
+    `review_vote`／`audited` 是「**這條路上沒有這一層**」，
+    而 `revised` 只是「**這一批沒發生**」（`--retry none`，18 格都 1 次過關）。
+    混在一起的後果是：真的用 `--retry revise` 跑之後，這條測試會把
+    「機制終於演出來了」判成退步。兩條分開寫。
+    """
     kinds = {e["type"] for e in events}
-    for never in ("review_vote", "revised", "audited"):
+    for never in to_events.NEVER:
         assert never not in kinds, never
+
+
+def test_this_batch_really_ran_the_retry_loop(pack, events):
+    """這一批跑的是 `--retry revise`，所以**迴圈要在事件上看得見**。
+
+    ⚠ 這條測試在 2026-09-19 傍晚換過方向。舊版寫的是
+    `test_this_batch_has_no_revision_because_retry_was_none`——那描述的是
+    fixture 批（18 格都 `--retry none`、一次定生死）。**真跑的批把那個前提換掉了**，
+    所以連帶把測試換掉，而不是把測試繞過去：測試描述的是「這一批是什麼」，
+    批換了它就該換。
+
+    ⚠ 但**不准**寫成「一定要有 N 次重改」。重改幾次是 agent 的行為不是我們的
+    設定；一次過關的格子沒有 `revised` 是對的。這裡守的是兩件可執行的事：
+    (a) 這一批的臂真的是 `revise`；(b) 只要有一格用了 2 次以上嘗試，
+    那一格就**必須**發得出 `revised`、而且每一次嘗試各有自己的 `gate_ran`。
+    """
+    arms = {(c.get("retry") or "none") for c in pack["cells"]}
+    assert arms == {"revise"}, f"這一批的重試臂是 {arms}"
+    looped = [c for c in pack["cells"] if (c["attempts_used"] or 1) > 1]
+    for c in looped:
+        evs = [e for e in events if e["task_id"] == c["cell_id"]]
+        gates = [e for e in evs if e["type"] == "gate_ran"
+                 and e.get("arm") == to_events.ARM_ON]
+        revs = [e for e in evs if e["type"] == "revised"]
+        assert len(gates) == c["attempts_used"], c["cell_id"]
+        assert len(revs) == c["attempts_used"] - 1, c["cell_id"]
+    if not looped:
+        # 一格都沒進迴圈也是一種結果，但**要說出來**，不可以靜靜地過。
+        pytest.skip("這一批沒有任何一格用到第 2 次嘗試（迴圈沒被觸發）")
 
 
 def test_events_never_claim_reputation_routing(events):
@@ -68,7 +105,9 @@ def test_event_verdict_comes_from_the_signed_entry(pack, events):
                 signed[c["cell_id"]] = bool(d["payload"]["accepted"])
     seen = 0
     for e in events:
-        if e["type"] == "verdict":
+        # ⚠ 只比 **ON 臂**的裁決。OFF 臂根本沒有 `ws_verdict` 可以比——
+        #   它不驗收也不簽收據，`accepted` 恆為 null（那是「沒量」）。
+        if e["type"] == "verdict" and e.get("arm") == to_events.ARM_ON:
             assert e["accepted"] == signed[e["task_id"]], e["task_id"]
             seen += 1
     assert seen == len(pack["cells"])

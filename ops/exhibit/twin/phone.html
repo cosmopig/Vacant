@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vacant 展件 · 你手上的那一半</title>
+<!--
+  手機頁 ＝ C 導播端 ＋ B 稽核端（DECISION_20260919_TWIN_V2_FIDELITY.md §二）。
+
+  導播（C）：三顆鍵。前兩顆是**同一題的兩邊**——介面扣住／介面寫明。
+             按下去 ⇒ POST /control ⇒ 伺服器把那一格的事件追加進串流 ⇒ 電視演它。
+             每一次按壓落在**已經跑完、簽好章的真資料**上，所以是毫秒級的。
+  稽核（B）：每一格自己的收據頁。從創世重算到鏈頭，算的是**你這支手機**，
+             不是我們的伺服器。
+
+  ⚠ 這一頁不驗簽章，也不宣告任何驗證結果。它只是把收據頁的網址交到你手上。
+  ⚠ 零外部資源：沒有字體、沒有圖、沒有框架。展場沒有網路。
+-->
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#12100c; --ink:#efe7d8; --dim:#efe7d899; --line:#efe7d826;
+  --good:#bedcbe; --bad:#e47c66; --warn:#d8c48a; --card:#1b1712;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:16px/1.65 system-ui,-apple-system,"Noto Sans TC","PingFang TC",sans-serif;
+     padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{padding:18px 18px 10px}
+h1{font-size:19px;margin:0 0 2px;letter-spacing:.02em}
+.sub{color:var(--dim);font-size:13px;margin:0}
+nav{display:flex;gap:0;border-bottom:1px solid var(--line);margin:10px 0 0}
+nav button{flex:1;background:none;border:0;border-bottom:2px solid transparent;
+  color:var(--dim);font:600 15px/1 inherit;padding:13px 0;cursor:pointer}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--good)}
+main{padding:16px 18px 40px}
+section[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+      padding:14px;margin:0 0 12px}
+.k{color:var(--dim);font-size:12.5px;letter-spacing:.04em}
+.v{font-size:16px;font-weight:600;margin-top:2px;word-break:break-all}
+.row{display:flex;justify-content:space-between;gap:10px;padding:5px 0}
+.row .v{font-weight:500;text-align:right}
+.btn{display:block;width:100%;border:1px solid var(--line);border-radius:12px;
+  background:#241e17;color:var(--ink);padding:16px 14px;margin:0 0 10px;
+  font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btn:active{background:#2f2720}
+.btn:disabled{opacity:.42}
+.btn b{display:block;font-size:18px;letter-spacing:.03em}
+.btn span{display:block;color:var(--dim);font-size:13px;margin-top:3px}
+.btn.on{border-color:var(--good);box-shadow:inset 0 0 0 1px #bedcbe55}
+.btn.flip{border-color:#e47c6655}
+.note{color:var(--dim);font-size:12.5px;margin:10px 0 0}
+.note b{color:var(--ink);font-weight:600}
+ul{margin:8px 0 0;padding-left:18px;color:var(--dim);font-size:12.5px}
+a{color:var(--good)}
+.cell{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border-bottom:1px solid var(--line);padding:11px 0;text-decoration:none;color:inherit}
+.cell:last-child{border-bottom:0}
+.cell .id{font-size:13.5px;word-break:break-all}
+.cell .tag{flex:none;font-size:12px;padding:3px 8px;border-radius:999px;
+  border:1px solid var(--line);color:var(--dim)}
+.tag.block{color:var(--good);border-color:#bedcbe55}
+.tag.pass{color:var(--ink)}
+.ev{display:inline-block;font-size:11.5px;padding:2px 7px;border-radius:999px;
+  border:1px solid var(--warn);color:var(--warn);margin-left:6px}
+.err{color:var(--bad);font-size:13px}
+.pill{font-size:12px;color:var(--dim)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>你手上的那一半</h1>
+  <!-- ⚠ 不要寫「左邊那台電視」：手機不知道觀眾站在哪裡。 -->
+  <p class="sub">電視上演的是已經跑完的真紀錄。<b>要演哪一邊，你決定。</b></p>
+  <nav>
+    <button id="tab-d" aria-selected="true">導播</button>
+    <button id="tab-a" aria-selected="false">稽核</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ── 導播 ───────────────────────────────────────────────── -->
+<section id="pane-d">
+  <div class="card">
+    <div class="k">現在這一對</div>
+    <div class="v" id="pair-title">讀取中…</div>
+    <div class="row"><span class="k">電視正在演</span><span class="v" id="now-cell">—</span></div>
+    <div class="row"><span class="k">這一格哪一邊</span><span class="v" id="now-side">—</span></div>
+    <div class="row"><span class="k">證據等級</span><span class="v" id="now-ev">—</span></div>
+    <div class="row"><span class="k">接下來</span><span class="v" id="now-next">—</span></div>
+  </div>
+
+  <!-- ⚠ 鍵名用**觀眾的詞**。「介面」在一般人耳裡是 UI、「扣住」不知道扣什麼、
+       「位元」沒人懂、「函式」「居民」也不是走進展場那個人的詞。 -->
+  <button class="btn" id="b-held">
+    <b>不告訴它名字</b>
+    <span>客戶只說要什麼功能，沒說要叫什麼名字。看它交出什麼、機器怎麼判。</span>
+  </button>
+
+  <button class="btn" id="b-pc">
+    <b>告訴它名字</b>
+    <span>一模一樣的題目、一模一樣的 agent，<b>只差客戶把名字寫進需求裡</b>。</span>
+  </button>
+
+  <button class="btn flip" id="b-flip">
+    <b>自己驗一次收據</b>
+    <span>在<b>你自己的手機上</b>把收據裡的一個字改掉，看它自己算出對不上。</span>
+  </button>
+
+  <p class="note" id="flip-link"></p>
+  <p class="err" id="err"></p>
+
+  <div class="card">
+    <div class="k">這一頁證明不了什麼</div>
+    <ul id="honesty"></ul>
+  </div>
+</section>
+
+<!-- ── 稽核 ───────────────────────────────────────────────── -->
+<section id="pane-a" hidden>
+  <div class="card">
+    <div class="k">你不必相信我們，你自己算</div>
+    <p class="note">
+      每一格都有自己的一條簽章鏈。點一格，收據頁會在<b>這支手機的瀏覽器裡</b>
+      從創世那一筆重算到鏈頭——逐筆重算 hash、檢查 <code>prev_hash</code> 串得上、
+      驗每一個 Ed25519 簽章。算的是你的手機，不是我們的伺服器。
+      頁面上還有一顆「翻掉一個字」：翻完之後這一筆的 hash 會變、簽章對不上、
+      下一筆接不上——那些紅字是<b>算出來的</b>，不是寫死的。
+    </p>
+  </div>
+  <div class="card" id="cells"></div>
+  <p class="note">
+    <b>能拿走的是這個。</b>收據頁是一個檔案，離線、直接開得起來。
+    它讓「這件事到底做了沒」變成你自己驗得出來的事，而不是要你依賴我們的說法。
+  </p>
+</section>
+
+</main>
+
+<script>
+/* === PHONE-BEGIN === 以下到 PHONE-END 之間不碰網路，純函數，可單獨測 === */
+
+/** 一格 → 稽核分頁上那一行要說的話。
+ *
+ *  ⚠ 結果**只從 `exit_code` 讀**，不從 `side` 猜。「介面扣住」不等於一定被擋下——
+ *  從一個欄位反推另一個欄位正是這一輪在修的那一類錯。
+ *  `exit_code` 0＝交付、20＝驗收沒過被擋下、其他＝沒收尾（沒有裁決也沒有收據）。 */
+function cellLine(c){
+  const tag = c.exit_code === 20 ? ["擋下", "block"]
+            : c.exit_code === 0  ? ["交付", "pass"]
+            : ["沒收尾", ""];
+  return { id: c.cell_id, side: c.side === "held" ? "沒告訴它名字" : "告訴它名字",
+           tag: tag[0], cls: tag[1], evidence: c.evidence || "" };
+}
+
+/** 「接下來」那一行。
+ *
+ *  ⚠ 舊版一律印「N 秒後自己換下一格」，包括**他剛剛才按完**的時候——
+ *  等於告訴他「你選的東西 20 秒後會被蓋掉」，擁有感歸零。
+ *  人按出來的那一格伺服器會多停一段（`HOLD_AFTER_PRESS_S`），
+ *  這裡就照實說「停著」。 */
+function nextText(s){
+  if (!s || s.next_in_s == null) return "—";
+  const secs = Math.max(0, Math.round(s.next_in_s));
+  const mine = s.now && /^phone/.test(String(s.now.why || ""));
+  if (mine) return `你選的這一格停著（${secs} 秒後才換）`;
+  return `${secs} 秒後自己換下一格`;
+}
+
+/** 證據等級 → 展場措辭。**L-none 不准講成「正在發生」**（鐵律 5 的展場版）。 */
+// ⚠ 對觀眾寫「AI」不要寫「模型」（畫面上滿滿都是黏土公仔，
+//   「沒有模型參與」可以讀成「沒有公仔參與」）。
+const EV_TEXT = {
+  "L-real":    "AI 真的動手了",
+  "L-fake":    "AI 沒有動手（假上游）",
+  "L-none":    "AI 沒有動手，交件是腳本寫的",
+  "L-unknown": "有 AI 通訊，上游沒留紀錄",
+};
+function evidenceText(level){ return EV_TEXT[level] || (level || "—"); }
+
+/* === PHONE-END === */
+
+const $ = id => document.getElementById(id);
+let STATE = null, busy = false;
+
+function showTab(which){
+  $("tab-d").setAttribute("aria-selected", which === "d");
+  $("tab-a").setAttribute("aria-selected", which === "a");
+  $("pane-d").hidden = which !== "d";
+  $("pane-a").hidden = which !== "a";
+}
+$("tab-d").addEventListener("click", () => showTab("d"));
+$("tab-a").addEventListener("click", () => showTab("a"));
+
+async function pull(){
+  try {
+    const r = await fetch("/state", { cache: "no-store" });
+    STATE = await r.json();
+    $("err").textContent = "";
+    render();
+  } catch (e){
+    $("err").textContent = "連不上展場機（" + String(e).slice(0, 60) + "）";
+  }
+}
+
+async function press(action){
+  if (busy) return;
+  busy = true;
+  try {
+    const r = await fetch("/control", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action }),
+    });
+    const j = await r.json();
+    if (j.state) { STATE = j.state; render(); }
+    if (!j.ok) $("err").textContent = j.error || "按不動";
+    else $("err").textContent = "";
+    if (action === "tamper" && j.tamper){
+      $("flip-link").innerHTML =
+        '在這支手機上開：<a href="' + j.tamper.url + '">' + j.tamper.cell_id + ' 的收據</a>'
+        + '<br><b>翻位元與重算都發生在你的瀏覽器裡。</b>這台機器沒有驗，電視也沒有驗。';
+    }
+  } catch (e){
+    $("err").textContent = "送不出去（" + String(e).slice(0, 60) + "）";
+  } finally { busy = false; }
+}
+$("b-held").addEventListener("click", () => press("held"));
+$("b-pc").addEventListener("click", () => press("pc"));
+$("b-flip").addEventListener("click", () => press("tamper"));
+
+function render(){
+  const s = STATE; if (!s) return;
+  const p = s.pair || {};
+  $("pair-title").textContent =
+    `${p.resident || "—"} · ${p.task_id || "—"}` + (p.title ? `（${p.title}）` : "");
+  const now = s.now || {};
+  $("now-cell").textContent = now.cell_id || "—";
+  $("now-side").textContent = now.side_label
+    || (now.side ? (now.side === "held" ? "沒告訴它名字" : "告訴它名字") : "—");
+  $("now-ev").textContent = evidenceText(now.evidence);
+  $("now-next").textContent = nextText(s);
+  for (const b of (s.buttons || [])){
+    const el = { held: $("b-held"), pc: $("b-pc"), tamper: $("b-flip") }[b.action];
+    if (!el) continue;
+    el.disabled = !b.cell_id;
+    el.classList.toggle("on", !!now.side && b.action === now.side);
+    // 按鈕上直接掛伺服器給的字（鍵名只有一份真相，不要兩邊各寫各的）
+    if (b.label && el.querySelector("b")) el.querySelector("b").textContent = b.label;
+  }
+  if (!p.paired){
+    $("err").textContent = "這一題只有一邊跑過——另一邊沒跑過就是沒跑過，不給按。";
+  }
+  const hon = $("honesty"); hon.innerHTML = "";
+  for (const line of (s.honesty || [])){
+    const li = document.createElement("li"); li.textContent = line; hon.appendChild(li);
+  }
+  if ((s.skipped || []).length){
+    const li = document.createElement("li");
+    li.textContent = `有 ${s.skipped.length} 格沒有收尾（沒有裁決也沒有收據），`
+      + "所以不播。跳過的格子記在 /state 裡。";
+    hon.appendChild(li);
+  }
+  // 稽核分頁：整批的格子（不只現在這一對）。結果讀 /state 的原值。
+  const box = $("cells"); box.innerHTML = "";
+  for (const c of (s.cells || [])){
+    const ln = cellLine(c);
+    const a = document.createElement("a");
+    a.className = "cell"; a.href = "/r/" + encodeURIComponent(ln.id);
+    a.innerHTML = '<span class="id">' + ln.id + '<br><span class="pill">' + ln.side
+      + ' · ' + evidenceText(ln.evidence) + '</span></span>'
+      + '<span class="tag ' + ln.cls + '">' + ln.tag + '</span>';
+    box.appendChild(a);
+  }
+}
+
+pull();
+setInterval(pull, 2000);
+</script>
+</body>
+</html>

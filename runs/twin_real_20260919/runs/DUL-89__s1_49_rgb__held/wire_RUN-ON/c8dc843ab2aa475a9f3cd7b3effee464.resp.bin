@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-uxv783qhu4b4eawkoi1md","object":"chat.completion.chunk","created":1789816192,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"713620462","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-uxv783qhu4b4eawkoi1md","object":"chat.completion.chunk","created":1789816192,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def hex_to_rgb(hex_code):\\n    # Remove the hash character if present\\n    hex_code = hex_code.lstrip('#')\\n    \\n    # Convert hexadecimal to integer and then to RGB components\\n    # Using int(hex_code, 16) handles both upper and lower case automatically\\n    rgb = tuple(int(hex_code[i:i+2], 16) for i in (0, 2, 4))\\n    \\n    return {\\n        \\\"red\\\": rgb[0],\\n        \\\"green\\\": rgb[1],\\n        \\\"blue\\\": rgb[2]\\n    }\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    # The task doesn't specify how to receive input, \\n    # but usually it's from stdin or a function call.\\n    # I will provide the logic in a way that can be easily tested.\\n    for line in sys.stdin:\\n        line = line.strip()\\n        if line:\\n            print(hex_to_rgb(line))\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-uxv783qhu4b4eawkoi1md","object":"chat.completion.chunk","created":1789816192,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-uxv783qhu4b4eawkoi1md","object":"chat.completion.chunk","created":1789816192,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1491,"completion_tokens":254,"total_tokens":1745,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

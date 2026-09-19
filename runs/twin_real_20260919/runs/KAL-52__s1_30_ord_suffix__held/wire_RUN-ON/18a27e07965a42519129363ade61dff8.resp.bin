@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-df1t37y8bvqivag2mp9v","object":"chat.completion.chunk","created":1789814570,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-df1t37y8bvqivag2mp9v","object":"chat.completion.chunk","created":1789814570,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-df1t37y8bvqivag2mp9v","object":"chat.completion.chunk","created":1789814570,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-df1t37y8bvqivag2mp9v","object":"chat.completion.chunk","created":1789814570,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-df1t37y8bvqivag2mp9v","object":"chat.completion.chunk","created":1789814570,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"266038853","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-df1t37y8bvqivag2mp9v","object":"chat.completion.chunk","created":1789814570,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def solve(n):\\n    if n == 11 or n == 12 or n == 13:\\n        return str(n)\\n    \\n    if n % 100 in [11, 12, 13]:\\n        # This part might be needed if it's for larger numbers too, but the prompt says \\\"the three teens\\\"\\n        pass\\n\\n    last_digit = n % 10\\n    if last_digit == 1:\\n        return f\\\"{n}st\\\"\\n    elif last_digit == 2:\\n        return f\\\"{n}nd\\\"\\n    elif last_digit == 3:\\n        return f\\\"{n}rd\\\"\\n    else:\\n        return f\\\"{n}th\\\"\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    if len(sys.argv) > 1:\\n        print(solve(int(sys.argv[1])))\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-df1t37y8bvqivag2mp9v","object":"chat.completion.chunk","created":1789814570,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-df1t37y8bvqivag2mp9v","object":"chat.completion.chunk","created":1789814570,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":3034,"completion_tokens":232,"total_tokens":3266,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

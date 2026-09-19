@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-42dfvtldn7hj83auff8vcc","object":"chat.completion.chunk","created":1789817485,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-42dfvtldn7hj83auff8vcc","object":"chat.completion.chunk","created":1789817485,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-42dfvtldn7hj83auff8vcc","object":"chat.completion.chunk","created":1789817485,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-42dfvtldn7hj83auff8vcc","object":"chat.completion.chunk","created":1789817485,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-42dfvtldn7hj83auff8vcc","object":"chat.completion.chunk","created":1789817485,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"729969053","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-42dfvtldn7hj83auff8vcc","object":"chat.completion.chunk","created":1789817485,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\nfrom datetime import date, timedelta\\n\\ndef solve():\\n    line = sys.stdin.readline()\\n    if not line:\\n        return\\n    parts = line.split()\\n    if len(parts) < 2:\\n        return\\n    \\n    year = int(parts[0])\\n    month = int(parts[1])\\n\\n    # Determine the first day of the next month\\n    if month == 12:\\n        next_month_date = date(year + 1, 1, 1)\\n    else:\\n        next_month_date = date(year, month + 1, 1)\\n\\n    # The last day is one day before the first of next month\\n    last_day_date = next_month_date - timedelta(days=1)\\n    print(last_day_date.day)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-42dfvtldn7hj83auff8vcc","object":"chat.completion.chunk","created":1789817485,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-42dfvtldn7hj83auff8vcc","object":"chat.completion.chunk","created":1789817485,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2044,"completion_tokens":226,"total_tokens":2270,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

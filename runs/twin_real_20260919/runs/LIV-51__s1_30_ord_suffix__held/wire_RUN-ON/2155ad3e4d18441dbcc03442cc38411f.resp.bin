@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-r1akg2rl1kd6s50q2a6ao","object":"chat.completion.chunk","created":1789817537,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-r1akg2rl1kd6s50q2a6ao","object":"chat.completion.chunk","created":1789817537,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-r1akg2rl1kd6s50q2a6ao","object":"chat.completion.chunk","created":1789817537,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-r1akg2rl1kd6s50q2a6ao","object":"chat.completion.chunk","created":1789817537,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-r1akg2rl1kd6s50q2a6ao","object":"chat.completion.chunk","created":1789817537,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"211612243","type":"function","function":{"name":"bash","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-r1akg2rl1kd6s50q2a6ao","object":"chat.completion.chunk","created":1789817537,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"command\":\"grep -r \\\"Write a positive whole number the way it is said when counting positions\\\" .\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-r1akg2rl1kd6s50q2a6ao","object":"chat.completion.chunk","created":1789817537,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-r1akg2rl1kd6s50q2a6ao","object":"chat.completion.chunk","created":1789817537,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2458,"completion_tokens":35,"total_tokens":2493,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

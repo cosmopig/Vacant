@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-zno5rcjurdoi08qm0qur","object":"chat.completion.chunk","created":1789818539,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-zno5rcjurdoi08qm0qur","object":"chat.completion.chunk","created":1789818539,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-zno5rcjurdoi08qm0qur","object":"chat.completion.chunk","created":1789818539,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-zno5rcjurdoi08qm0qur","object":"chat.completion.chunk","created":1789818539,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-zno5rcjurdoi08qm0qur","object":"chat.completion.chunk","created":1789818539,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"547602415","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-zno5rcjurdoi08qm0qur","object":"chat.completion.chunk","created":1789818539,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import datetime\\nimport sys\\n\\ndef solve():\\n    input_data = sys.stdin.read().split()\\n    if not input_data:\\n        return\\n    year = int(input_data[0])\\n    month = int(input_data[1])\\n    \\n    # Use datetime to find the last day of the month\\n    # If it's December, the next month is January of the next year\\n    if month == 12:\\n        next_month = datetime.date(year + 1, 1, 1)\\n    else:\\n        next_month = datetime.date(year, month + 1, 1)\\n        \\n    # The day before the first day of next month is the last day of current month\\n    last_day = (next_month - datetime.timedelta(days=1)).day\\n    print(last_day)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-zno5rcjurdoi08qm0qur","object":"chat.completion.chunk","created":1789818539,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-zno5rcjurdoi08qm0qur","object":"chat.completion.chunk","created":1789818539,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":4007,"completion_tokens":232,"total_tokens":4239,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

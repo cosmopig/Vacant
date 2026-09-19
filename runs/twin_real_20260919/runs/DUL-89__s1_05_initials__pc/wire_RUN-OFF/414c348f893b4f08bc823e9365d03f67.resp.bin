@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-zdtb6dt727nyjf8lxrho","object":"chat.completion.chunk","created":1789814943,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"842821598","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-zdtb6dt727nyjf8lxrho","object":"chat.completion.chunk","created":1789814943,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def initials(full_name: str) -> list[str]:\\n    \\\"\\\"\\\"\\n    Takes a person's full name and pulls out the initial of each part of it.\\n    The parts of a name are separated by spaces.\\n\\n    Returns them as a sequence of single upper-case characters, one per\\n    part, in the order the parts appear.\\n    \\\"\\\"\\\"\\n    return [part[0].upper() for part in full_name.split() if part]\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-zdtb6dt727nyjf8lxrho","object":"chat.completion.chunk","created":1789814943,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-zdtb6dt727nyjf8lxrho","object":"chat.completion.chunk","created":1789814943,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1497,"completion_tokens":122,"total_tokens":1619,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

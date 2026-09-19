@@ -576,7 +576,38 @@ def _classify(d: Path, summary: dict[str, Any] | None,
         return KIND_ABORTED, "summary_without_rows"
     if is_g:
         return KIND_ABORTED, "no_summary"
+    if (d / "twin_index.json").exists():
+        return _classify_twin(d)
     return KIND_OTHER, "unclassified"
+
+
+def _classify_twin(d: pathlib.Path) -> tuple[str, str]:
+    """展件（`ops/exhibit/twin/`）那一種 run 根目錄的分類。
+
+    它的形狀與 G 實驗不同——沒有頂層的 `summary.json`／`rows.jsonl`，
+    而是 `twin_index.json` ＋ 一格一個 `runs/<cell_id>/`。照原本的規則它會掉進
+    `unclassified` ⇒ `other`，而 `other` 的說明是「B 層掃描、展件抓圖、唯讀快照」。
+
+    ⚠ **那會讓真跑過模型的批在索引上被低報。** CLAUDE.md 把這份索引定成
+    「要引用任何 run 之前先讀的那一份」，所以索引比實際樂觀固然糟，
+    **比實際悲觀一樣糟**——它會讓下一個人以為沒有這份證據。
+
+    判準與別處一致：**看 `requests_seen`，不看名字也不看宣告**
+    （`twin/pack.py` 的 `evidence_level` 是同一條 fail-closed 規則）。
+    兩臂任一格有通數 ⇒ 真跑；全部 0 通 ⇒ 那是 `--fixture` 的機制自檢，
+    **不是模型證據**，留在 `other`。
+    """
+    try:
+        idx = json.loads((d / "twin_index.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return KIND_OTHER, "twin_index_unreadable"
+    calls = 0
+    for cell in idx.get("cells") or []:
+        for arm in (cell.get("arms") or {}).values():
+            calls += int(arm.get("requests_seen") or 0)
+    if calls > 0:
+        return KIND_REAL, "twin_exhibit_run"
+    return KIND_OTHER, "twin_exhibit_fixture_zero_model"
 
 
 def _record_spec_state(files: list[dict[str, Any]]) -> dict[str, Any]:

@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-amfbycxxa1py19ibrv0gan","object":"chat.completion.chunk","created":1789813284,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-amfbycxxa1py19ibrv0gan","object":"chat.completion.chunk","created":1789813284,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-amfbycxxa1py19ibrv0gan","object":"chat.completion.chunk","created":1789813284,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-amfbycxxa1py19ibrv0gan","object":"chat.completion.chunk","created":1789813284,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-amfbycxxa1py19ibrv0gan","object":"chat.completion.chunk","created":1789813284,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"500630164","type":"function","function":{"name":"edit","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-amfbycxxa1py19ibrv0gan","object":"chat.completion.chunk","created":1789813284,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"edits\":[{\"newText\":\"def format_cents(cents):\\n    dollars = cents // 100\\n    remaining_cents = cents % 100\\n    return f\\\"${dollars}.{remaining_cents:02d}\\\"\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    if len(sys.argv) > 1:\\n        amount = int(sys.argv[1])\\n        print(format_cents(amount))\\n\",\"oldText\":\"def format_cents(cents):\\n    dollars = cents // 100\\n    remaining_cents = cents % 100\\n    return f\\\"${dollars}.{remaining_cents:02d}\\\"\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    if len(sys.argv) > 1:\\n        try:\\n            amount = int(sys.argv[1])\\n            print(format_cents(amount))\\n        except ValueError:\\n            pass\\n\",\"path\":\"solution.py\"}],\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-amfbycxxa1py19ibrv0gan","object":"chat.completion.chunk","created":1789813284,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-amfbycxxa1py19ibrv0gan","object":"chat.completion.chunk","created":1789813284,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1738,"completion_tokens":243,"total_tokens":1981,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

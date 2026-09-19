@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# 展場機開機腳本：手機 ↔ 電視那一整條線，一行起來。
+#
+# 為什麼要這一支（D3）：電視在 `file://` 下 `fetch` 會被 CORS 擋，**一個字都拿不到**。
+# 所以展場一定要有一個本機靜態伺服器。這件事以前只活在某個人的記憶裡，
+# 現在寫進開機腳本。
+#
+#   ┌ 8420  vacant_hm 的靜態站（電視）      ← python3 -m http.server
+#   └ 8899  serve_twin.py（事件流＋/state＋/control＋/r/<cell>＋手機頁）
+#
+# 兩支都只綁在本機。要讓**手機**連得到，加 --lan：那會把 serve_twin 綁到
+# 0.0.0.0，同一個區網（展場的 hotspot）上的任何人都按得動這台電視——
+# 那是展場的現實，不是可以靜靜略過的細節。
+#
+#   ./exhibit_boot.sh                       本機兩台都起來
+#   ./exhibit_boot.sh --lan                 手機連得到（區網）
+#   ./exhibit_boot.sh --hm /path/vacant_hm  vacant_hm 不在預設位置
+#   ./exhibit_boot.sh --dwell 25            沒人按的時候幾秒換一格
+#
+# 全程**零模型呼叫、零外網**。起來之後拔掉網路線照跑。
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+REPO="$(cd "$HERE/../../.." && pwd)"
+HM="${VACANT_HM:-$(cd "$REPO/.." && pwd)/vacant_hm}"
+PY="${PYTHON:-python3}"
+TV_PORT=8420
+TWIN_PORT=8899
+DWELL=30
+BIND=127.0.0.1
+KIOSK=0
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --lan)    BIND=0.0.0.0 ;;
+    --hm)     HM="$2"; shift ;;
+    --dwell)  DWELL="$2"; shift ;;
+    --tv-port)   TV_PORT="$2"; shift ;;
+    --twin-port) TWIN_PORT="$2"; shift ;;
+    --kiosk)  KIOSK=1 ;;
+    *) echo "不認得的參數：$1" >&2; exit 2 ;;
+  esac
+  shift
+done
+
+if [ ! -f "$HM/world3/index.html" ]; then
+  echo "找不到電視那一頁：$HM/world3/index.html" >&2
+  echo "用 --hm <路徑> 指過去，或設 VACANT_HM 環境變數。" >&2
+  exit 2
+fi
+if [ ! -f "$REPO/ops/exhibit/twin/twin_pack.json" ]; then
+  echo "找不到資料包：$REPO/ops/exhibit/twin/twin_pack.json" >&2
+  echo "先跑：$PY $REPO/ops/exhibit/twin/pack.py --runs <run 目錄>" >&2
+  exit 2
+fi
+
+# 展場機自己看得到的位址。--lan 的時候手機要用這一台的**區網 IP**。
+#
+# ⚠ 這個值不是拿來印好看的：`serve_twin` 用它畫 QR，而 QR 是觀眾唯一的入口。
+#   抓錯（或抓到 127.0.0.1）＝ QR 指到手機自己的迴路位址 ⇒ 掃了一定連不到，
+#   而且現場沒有人會回報，只會看到人掃完就走掉。
+HOST=127.0.0.1
+if [ "$BIND" = "0.0.0.0" ]; then
+  LAN_IP="${VACANT_LAN_IP:-}"
+  if [ -z "$LAN_IP" ]; then
+    for IF in en0 en1 eth0 wlan0; do
+      LAN_IP="$(ipconfig getifaddr "$IF" 2>/dev/null || true)"
+      [ -n "$LAN_IP" ] && break
+      LAN_IP="$(ip -4 -o addr show "$IF" 2>/dev/null \
+                | awk '{print $4}' | cut -d/ -f1 | head -1)"
+      [ -n "$LAN_IP" ] && break
+    done
+  fi
+  if [ -z "$LAN_IP" ]; then
+    LAN_IP="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
+  fi
+  case "$LAN_IP" in
+    ""|127.*|169.254.*)
+      echo "抓不到可用的區網 IP（抓到 '${LAN_IP:-空}'）。" >&2
+      echo "手機會連不到 ⇒ **不啟動**，免得展場掛一張掃不開的 QR。" >&2
+      echo "用 VACANT_LAN_IP=<位址> 指定，或先把網路接好。" >&2
+      exit 2 ;;
+  esac
+  HOST="$LAN_IP"
+fi
+
+cleanup(){ kill ${TV_PID:-} ${TWIN_PID:-} 2>/dev/null || true; }
+trap cleanup EXIT INT TERM
+
+( cd "$HM" && exec "$PY" -m http.server "$TV_PORT" --bind 127.0.0.1 >/dev/null 2>&1 ) &
+TV_PID=$!
+
+# --base-url 就是 QR 會編進去的東西。**一定要傳**，預設值是 127.0.0.1。
+"$PY" "$REPO/ops/exhibit/twin/serve_twin.py" \
+  --bind "$BIND" --port "$TWIN_PORT" --dwell "$DWELL" \
+  --base-url "http://$HOST:$TWIN_PORT" &
+TWIN_PID=$!
+
+sleep 1
+
+# ⚠ **驗那個位址真的連得到**，不是只印出來。換一個網路環境、介面抓錯、
+#   防火牆擋住——三種都會讓 QR 變成一張掃不開的圖，而畫面照樣叫人掃。
+if ! curl -fsS --max-time 3 "http://$HOST:$TWIN_PORT/state" >/dev/null 2>&1; then
+  echo "起來了，但 http://$HOST:$TWIN_PORT/state 連不到自己。" >&2
+  echo "QR 會指到一個連不到的位址 ⇒ **不繼續**。" >&2
+  exit 2
+fi
+echo "  ✓ http://$HOST:$TWIN_PORT 自己連得到（QR 指的就是這個）"
+
+LIVE="http://$HOST:$TWIN_PORT/live/events.jsonl"
+TV_URL="http://127.0.0.1:$TV_PORT/world3/index.html?live=$LIVE&poll=2000"
+
+echo
+echo "───────────────────────────────────────────────"
+echo " 電視 　$TV_URL"
+echo " 手機 　http://$HOST:$TWIN_PORT/phone.html   ← QR 編的就是這一行"
+echo " 收據 　http://$HOST:$TWIN_PORT/viewer.html"
+echo " QR   　http://$HOST:$TWIN_PORT/qr.png（執行期畫的）"
+echo "───────────────────────────────────────────────"
+if [ "$BIND" != "0.0.0.0" ]; then
+  echo " ⚠ 只綁本機：手機連不到。展場要用 --lan。"
+else
+  echo " ⚠ 綁在 0.0.0.0：同一個區網上的任何人都按得動這台電視。"
+fi
+echo " （Ctrl-C 結束）"
+echo
+
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+if [ "$KIOSK" = "1" ] && [ -x "$CHROME" ]; then
+  "$CHROME" --kiosk --incognito --noerrdialogs \
+    --disable-session-crashed-bubble --disable-infobars \
+    --autoplay-policy=no-user-gesture-required \
+    --user-data-dir=/tmp/vacant-twin-kiosk "$TV_URL" >/dev/null 2>&1 &
+fi
+
+wait $TWIN_PID

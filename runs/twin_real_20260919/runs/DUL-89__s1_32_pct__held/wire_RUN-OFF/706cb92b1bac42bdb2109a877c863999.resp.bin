@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-l5n6upc77p3xodndto38q","object":"chat.completion.chunk","created":1789816076,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-l5n6upc77p3xodndto38q","object":"chat.completion.chunk","created":1789816076,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-l5n6upc77p3xodndto38q","object":"chat.completion.chunk","created":1789816076,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-l5n6upc77p3xodndto38q","object":"chat.completion.chunk","created":1789816076,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-l5n6upc77p3xodndto38q","object":"chat.completion.chunk","created":1789816076,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"230984058","type":"function","function":{"name":"edit","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-l5n6upc77p3xodndto38q","object":"chat.completion.chunk","created":1789816076,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"edits\":[{\"newText\":\"def solve(quantity1, quantity2):\\n    if quantity2 == 0:\\n        return None\\n    percentage = (quantity1 / quantity2) * 100\\n    return round(float(percentage), 1)\\n\",\"oldText\":\"def solve(quantity1, quantity2):\\n    if quantity2 == 0:\\n        return None\\n    percentage = (quantity1 / quantity2) * 100\\n    return round(percentage, 1)\\n\\n# Example usage:\\n# print(solve(50, 200))  # Expected: 25.0\\n# print(solve(10, 0))    # Expected: None\\n\",\"path\":\"solution.py\"}],\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-l5n6upc77p3xodndto38q","object":"chat.completion.chunk","created":1789816076,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-l5n6upc77p3xodndto38q","object":"chat.completion.chunk","created":1789816076,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1669,"completion_tokens":188,"total_tokens":1857,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

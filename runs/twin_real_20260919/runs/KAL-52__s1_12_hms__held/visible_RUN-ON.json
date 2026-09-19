@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_12_hms:held",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 45,
+      "cases": [
+        {
+          "case": "check_01_hms",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'hms' from 'solution' (/var/tmp/vacant_twinreal/out/runs/KAL-52__s1_12_hms__held/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import hms",
+          "output": ""
+        },
+        {
+          "case": "check_02_hms",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'hms' from 'solution' (/var/tmp/vacant_twinreal/out/runs/KAL-52__s1_12_hms__held/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import hms",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "5bc60c5fcc0bf9723911831da3cfc2eb7672a0f34b9490b32fffa0ec8c35cd22"
+}

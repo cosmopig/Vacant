@@ -1,0 +1,139 @@
+{
+  "task_id": "s1_31_money:pc",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nShow an amount given as a whole number of cents the way it appears on\na receipt in dollars: a dollar sign, then the whole dollars, then a dot, then\nalways exactly two digits of cents.\n\nAmounts below one dollar still show a single zero in front of the dot. Amounts\nare never negative, and the answer is text.\n\n## Interface\n\n    money(cents) -> str\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_twinreal/out/ws/KAL-52__s1_31_money__pc",
+  "proxy_url": "http://127.0.0.1:38067",
+  "env": {
+    "proxy_url": "http://127.0.0.1:38067",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "cec8c51b7cbdb6fac2f46656318e085d5ca3dd5fb62c77a623d5c7e87d5cc3ec",
+  "ws_end_sha256": "aa5081133a4f43b86b963f2872eae6cde3354af5f3e857350e33db112a1e42dc",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 2,
+  "wire_by_protocol": {
+    "openai": 2
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "c00b28f7555b8406ebd5db88c63cdf9fb022f2a228a9d26b410a2aeb4a0a21ca",
+  "verdict_hash": "b7d9c375278c444a9844af5c2b77b47d5c494a8cc3b873afb20eca4fa30f1bbb",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "cec8c51b7cbdb6fac2f46656318e085d5ca3dd5fb62c77a623d5c7e87d5cc3ec",
+      "argv": [
+        "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nShow an amount given as a whole number of cents the way it appears on\na receipt in dollars: a dollar sign, then the whole dollars, then a dot, then\nalways exactly two digits of cents.\n\nAmounts below one dollar still show a single zero in front of the dot. Amounts\nare never negative, and the answer is text.\n\n## Interface\n\n    money(cents) -> str\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "2b93d8e5ca3cec7fb30d1a29056fbadab1ada7f7979bdc8d3627ce0efc9eb133",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 43.746,
+      "wire_quiesced": true,
+      "requests_seen": 2,
+      "requests_seen_cumulative": 2,
+      "wire_digest": "d8baf1eb1eb51de1bc81b0426c5ce7a78a283b129e46473e369491bc3ffa4241",
+      "ws_end_sha256": "aa5081133a4f43b86b963f2872eae6cde3354af5f3e857350e33db112a1e42dc",
+      "frozen_path": "/var/tmp/vacant_twinreal/out/runs/KAL-52__s1_31_money__pc/_frozen_RUN-ON",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "c00b28f7555b8406ebd5db88c63cdf9fb022f2a228a9d26b410a2aeb4a0a21ca",
+      "visible_path": "/var/tmp/vacant_twinreal/out/runs/KAL-52__s1_31_money__pc/visible_RUN-ON.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "bwrap",
+    "sandbox": "bwrap",
+    "requested": "auto"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "default",
+      "defaulted": true
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "wire_errors": 0,
+  "wire_digest": "d8baf1eb1eb51de1bc81b0426c5ce7a78a283b129e46473e369491bc3ffa4241",
+  "run_wall_s": 44.127,
+  "agent_wall_s": 43.746,
+  "failures": ""
+}

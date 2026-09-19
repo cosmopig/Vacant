@@ -1,0 +1,129 @@
+{
+  "task_id": "s1_24_is_pal:held",
+  "arm": "RUN-OFF",
+  "vacant": 0,
+  "argv": [
+    "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nDecide whether a piece of text reads the same forwards and\nbackwards, once letters and digits are the only characters looked at and the\ndifference between upper and lower case is set aside.\n\nText with no letters or digits in it at all counts as reading the same. The\nanswer is a true or false value.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_twinreal/out/ws/KAL-52__s1_24_is_pal__held__off",
+  "proxy_url": "http://127.0.0.1:33091",
+  "env": {
+    "proxy_url": "http://127.0.0.1:33091",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "93953935e6486068bd371700e730b18ebe7a3f6b39df2c3ac4e37aa4495414b2",
+  "ws_end_sha256": "029c0fa9b038b7bdb0d3bba6ea5a59bb181323348f2fc9226b00499c509da92d",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 13,
+  "wire_by_protocol": {
+    "openai": 13
+  },
+  "accepted": null,
+  "refused": false,
+  "stop_reason": "ungated",
+  "infra_void": null,
+  "visible_passed": null,
+  "visible_total": null,
+  "verdict_sha256": null,
+  "verdict_hash": null,
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "93953935e6486068bd371700e730b18ebe7a3f6b39df2c3ac4e37aa4495414b2",
+      "argv": [
+        "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nDecide whether a piece of text reads the same forwards and\nbackwards, once letters and digits are the only characters looked at and the\ndifference between upper and lower case is set aside.\n\nText with no letters or digits in it at all counts as reading the same. The\nanswer is a true or false value.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "75a7f47e5a262d67801dce5ec5e8e579cc90cd2950fd5456790c59355be83c4d",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 192.21,
+      "wire_quiesced": true,
+      "requests_seen": 13,
+      "requests_seen_cumulative": 13,
+      "wire_digest": "3aa645fa5531816912c4f836ff6ab3614da40a13e751c8b9b2c3c330a199573e",
+      "ws_end_sha256": "029c0fa9b038b7bdb0d3bba6ea5a59bb181323348f2fc9226b00499c509da92d",
+      "frozen_path": "/var/tmp/vacant_twinreal/out/runs/KAL-52__s1_24_is_pal__held/_frozen_RUN-OFF",
+      "stop_reason": "ungated",
+      "accepted": null
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "default",
+      "defaulted": true
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "wire_errors": 0,
+  "wire_digest": "3aa645fa5531816912c4f836ff6ab3614da40a13e751c8b9b2c3c330a199573e",
+  "run_wall_s": 192.252,
+  "agent_wall_s": 192.21,
+  "failures": ""
+}

@@ -1,0 +1,44 @@
+{
+  "when": "after_the_run",
+  "is_verdict": false,
+  "signed": false,
+  "ruler": "vacant/vrun/acceptance.py::run_suite(suite='visible')——與 ON 臂同一把尺、同一份 tests_visible",
+  "note": "OFF 臂當場沒有量過任何東西。這個判定是事後補的，沒有進收據鏈，也沒有影響那一跑的任何一個位元。",
+  "sandbox": "bwrap",
+  "suite": "visible",
+  "task_id": "s1_05_initials:postaudit-off",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 75,
+      "cases": [
+        {
+          "case": "check_01_initials",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_initials",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "107ee426cd26ea286f8ec94859f8b59a5ee8dc34a121754400170c2f1b9f66d2"
+}

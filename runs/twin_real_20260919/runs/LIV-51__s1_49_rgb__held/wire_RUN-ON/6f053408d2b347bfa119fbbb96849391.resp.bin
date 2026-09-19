@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-msmas1osvgnz3ik01ik5ds","object":"chat.completion.chunk","created":1789816634,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"859540493","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-msmas1osvgnz3ik01ik5ds","object":"chat.completion.chunk","created":1789816634,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def hex_to_rgb(hex_color):\\n    # Remove the hash character if present\\n    hex_color = hex_color.lstrip('#')\\n    \\n    # Convert hexadecimal to integer and then to RGB components\\n    r = int(hex_color[0:2], 16)\\n    g = int(hex_color[2:4], 16)\\n    b = int(hex_color[4:6], 16)\\n    \\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\\n# Example usage (can be removed or kept depending on requirements):\\n# print(hex_to_rgb(\\\"#FFFFFF\\\"))  # {'r': 255, 'g': 255, 'b': 255}\\n# print(hex_to_rgb(\\\"000000\\\"))   # {'r': 0, 'g': 0, 'b': 0}\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-msmas1osvgnz3ik01ik5ds","object":"chat.completion.chunk","created":1789816634,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-msmas1osvgnz3ik01ik5ds","object":"chat.completion.chunk","created":1789816634,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1491,"completion_tokens":232,"total_tokens":1723,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

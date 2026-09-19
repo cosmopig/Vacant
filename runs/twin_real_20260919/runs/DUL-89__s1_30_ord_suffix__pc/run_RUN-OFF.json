@@ -1,0 +1,129 @@
+{
+  "task_id": "s1_30_ord_suffix:pc",
+  "arm": "RUN-OFF",
+  "vacant": 0,
+  "argv": [
+    "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nWrite a positive whole number the way it is said when counting\npositions: the number itself followed by the two-letter ending that goes with\nit.\n\nThe three teens that sit between ten and fourteen are the well-known exception\nand take the plain ending. The answer is text.\n\n## Interface\n\n    ord_suffix(n) -> str\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_twinreal/out/ws/DUL-89__s1_30_ord_suffix__pc__off",
+  "proxy_url": "http://127.0.0.1:43013",
+  "env": {
+    "proxy_url": "http://127.0.0.1:43013",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "eaf1c760c9e08f263a3594d8aa19fb125d6251f805dca02f50f8accc2325096a",
+  "ws_end_sha256": "dd2980fbd0fb3ec974a482d5bb56d205ece4241b8705924e4ecc4a05b66c8231",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 4,
+  "wire_by_protocol": {
+    "openai": 4
+  },
+  "accepted": null,
+  "refused": false,
+  "stop_reason": "ungated",
+  "infra_void": null,
+  "visible_passed": null,
+  "visible_total": null,
+  "verdict_sha256": null,
+  "verdict_hash": null,
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "eaf1c760c9e08f263a3594d8aa19fb125d6251f805dca02f50f8accc2325096a",
+      "argv": [
+        "/var/tmp/vacant_twinreal/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nWrite a positive whole number the way it is said when counting\npositions: the number itself followed by the two-letter ending that goes with\nit.\n\nThe three teens that sit between ten and fourteen are the well-known exception\nand take the plain ending. The answer is text.\n\n## Interface\n\n    ord_suffix(n) -> str\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "316f886f9521f993c959ab26e7179928702c025dc378c664acd92bdc1bbc830a",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 132.136,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 4,
+      "wire_digest": "f6a78cb959d89fe0c344236794d07f4f3d78ddd7061ee4f0aaf68bea8ee91d4e",
+      "ws_end_sha256": "dd2980fbd0fb3ec974a482d5bb56d205ece4241b8705924e4ecc4a05b66c8231",
+      "frozen_path": "/var/tmp/vacant_twinreal/out/runs/DUL-89__s1_30_ord_suffix__pc/_frozen_RUN-OFF",
+      "stop_reason": "ungated",
+      "accepted": null
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "default",
+      "defaulted": true
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "wire_errors": 0,
+  "wire_digest": "f6a78cb959d89fe0c344236794d07f4f3d78ddd7061ee4f0aaf68bea8ee91d4e",
+  "run_wall_s": 132.286,
+  "agent_wall_s": 132.136,
+  "failures": ""
+}

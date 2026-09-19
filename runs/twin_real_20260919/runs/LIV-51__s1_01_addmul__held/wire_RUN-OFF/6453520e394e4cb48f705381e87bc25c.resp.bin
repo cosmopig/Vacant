@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-ck96i215my5fbf5pd8tup8","object":"chat.completion.chunk","created":1789813312,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"346206665","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ck96i215my5fbf5pd8tup8","object":"chat.completion.chunk","created":1789813312,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def add(a, b):\\n    return a + b\\n\\ndef multiply(a, b):\\n    return a * b\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ck96i215my5fbf5pd8tup8","object":"chat.completion.chunk","created":1789813312,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-ck96i215my5fbf5pd8tup8","object":"chat.completion.chunk","created":1789813312,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1483,"completion_tokens":48,"total_tokens":1531,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

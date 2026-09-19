@@ -3,7 +3,7 @@
 > 這一份由 `ops/gain/build_runs_index.py` 從 `runs/INDEX.json` **同一次執行**
 > 產生。要改內容改產生器，不要手改本檔——手改會在下一次 `--check` 被抓到。
 
-`runs/` 共 **720** 個項目：348 個目錄 ＋ 372 個頂層檔案，合計 753 MB。其中 **172 個目錄有 `summary.json`**。
+`runs/` 共 **723** 個項目：351 個目錄 ＋ 372 個頂層檔案，合計 776 MB。其中 **172 個目錄有 `summary.json`**。
 
 分類統計：
 
@@ -11,10 +11,10 @@
 |---|---:|---|
 | `aborted` | 9 | 發射過但沒收官（被殺、掛掉、或只有 calls/notes） |
 | `analysis` | 136 | 迴圈每輪的重算工作目錄——**衍生物，不是證據** |
-| `other` | 23 | B 層掃描、展件抓圖、唯讀快照等 |
-| `real_run` | 167 | 真跑過模型、資料留得住——這些才是證據（`gain_run` 是 summary.json＋rows.jsonl；`cell_grid_run` 是 reconcile.json＋cells.jsonl；`agent_matrix_run` 是 matrix.json＋cells/） |
+| `other` | 24 | B 層掃描、展件抓圖、唯讀快照等 |
+| `real_run` | 168 | 真跑過模型、資料留得住——這些才是證據（`gain_run` 是 summary.json＋rows.jsonl；`cell_grid_run` 是 reconcile.json＋cells.jsonl；`agent_matrix_run` 是 matrix.json＋cells/） |
 | `replay` | 1 | 離線重放產物 |
-| `smoke` | 12 | 冒煙／探針／量具檢查——**不進統計** |
+| `smoke` | 13 | 冒煙／探針／量具檢查——**不進統計** |
 
 ### `INDEX.json` 的形狀（先看這個再寫 parser）
 
@@ -160,6 +160,7 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 |---|---|---|---|---:|---|---|
 | `_probe_r210` | `smoke` | 2026-08-28 | — | 0 | 否 | probe_or_smoke |
 | `_probe_r212` | `smoke` | 2026-08-28 | — | 0 | 否 | probe_or_smoke |
+| `_smoke` | `smoke` | — | — | 0 | 否 | probe_or_smoke |
 | `_smoke_het_r210` | `smoke` | 2026-08-28 | — | 0 | 否 | probe_or_smoke |
 | `g_het2_r271_20260829` | `aborted` | 2026-08-29 | — | 0 | 是 | summary_without_rows |
 | `g_het_off_r262_20260829` | `aborted` | 2026-08-29 | — | 0 | 否 | no_summary |
@@ -201,7 +202,7 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 > 同樣是 `—`，但那是「裁決檔用 glob 點名整批」造成的，不是沒被稽核——
 > 把它們留在這張表會讓索引**比資料悲觀**，讀的人會以為證據比實際少。
 
-這 88 個裡，`跑到底` 有 26 個是 `—`（那個時期的 runner 還沒寫 `run_terminal` 欄位，所以是**不知道**，不是跑完了）；`零 void` 是 `否` 的有 28 個。
+這 89 個裡，`跑到底` 有 27 個是 `—`（那個時期的 runner 還沒寫 `run_terminal` 欄位，所以是**不知道**，不是跑完了）；`零 void` 是 `否` 的有 28 個。
 
 **沒被稽核不等於不成立，也不等於成立——就是沒複核過。** 引用其中任何一個數字，
 都要把這一句一起講出去。
@@ -233,12 +234,12 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `g_r348_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 33／20 | — | 否 | 38 | 5 | 0 |
 | `g_r356_3arm_20260830` | 2026-08-30 | MBPP+ v0.2.0 | OFF/OFF5/ON | 432／178 | — | 否 | 101 | 21 | 5 |
 | `g_r439_revcheck_20260901` | 2026-09-01 | MBPP+ v0.2.0 | OFF/OFF5/ON | 23／13 | — | 否 | 14 | 1 | 1 |
-| `g_r460_harness_lcb2_a1` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r460_harness_lcb2_a2` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r460_harness_lcb2_a3` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r460_harness_lcb2_b1` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r460_harness_lcb2_b2` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
-| `g_r460_harness_lcb2_b3` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r460_harness_lcb2_a1` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
+| `g_r460_harness_lcb2_a2` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
+| `g_r460_harness_lcb2_a3` | 2026-09-09 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
+| `g_r460_harness_lcb2_b1` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
+| `g_r460_harness_lcb2_b2` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
+| `g_r460_harness_lcb2_b3` | 2026-09-08 | lcb v2（子集） | CONFORM/HMIX/HOC/HPI/OFF/OFF5 | 120／20 | 是 | 是 | 0 | 3 | 0 |
 | `g_r530_s1_1003_1` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
 | `g_r530_s1_1003_2` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
 | `g_r530_s1_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 2 | 1 |
@@ -251,50 +252,51 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `g_r530_s3_1003_2` | 2026-09-16 | other | A-CONF/A-GATE/A-SOLO | 14／5 | 是 | 否 | 1 | 1 | 0 |
 | `g_r530_s3_1004_1` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
 | `g_r530_s3_1004_2` | 2026-09-14 | other | A-CONF/A-GATE/A-SOLO | 15／5 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_hep_a1` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_hep_a2` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_hep_a3` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_hep_a4` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_hep_a5` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_hep_a6` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_hep_a7` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_hep_a8` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 48／16 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb2_a1` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb2_a2` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb2_a3` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb2_a4` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb2_a5` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb2_a6` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3h_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3h_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3h_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 42／14 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3m_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3m_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3m_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3m_a4` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3m_a5` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3m_a6` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_lcb3m_a7` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 45／15 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a1` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a10` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a11` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a12` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a13` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a14` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a15` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a16` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a17` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a18` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a19` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 33／11 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a2` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a3` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a4` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a5` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a6` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a7` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a8` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `g_r532_mbpp_a9` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
+| `g_r532_hep_a1` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_hep_a2` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_hep_a3` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_hep_a4` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_hep_a5` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_hep_a6` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_hep_a7` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_hep_a8` | 2026-09-17 | HumanEval+ v0.1.10 | CONFORM/HMIX/OFF | 48／16 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb2_a1` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb2_a2` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb2_a3` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb2_a4` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb2_a5` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb2_a6` | 2026-09-17 | lcb v2（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3h_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3h_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3h_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 42／14 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3m_a1` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3m_a2` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3m_a3` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3m_a4` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3m_a5` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3m_a6` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_lcb3m_a7` | 2026-09-17 | lcb v3（子集） | CONFORM/HMIX/OFF | 45／15 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a1` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a10` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a11` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a12` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a13` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a14` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a15` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a16` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a17` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a18` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a19` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 33／11 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a2` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a3` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a4` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a5` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a6` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a7` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a8` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
+| `g_r532_mbpp_a9` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 2 | 0 |
 | `r535_retry_channel_20260918` | 2026-09-18 | other | PC/RF/RP/RS | 360／90 | 是 | 是 | 0 | 0 | 0 |
+| `twin_real_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 1 | 0 |
 | `v1_five_agent_matrix_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 1 | 0 |
 
 > `其中屬裁決檔`＝檔名帶 AUDIT／WRAPUP／SETTLEMENT／VERDICT／KILL 的那些（PREREG／CRITERION 是**量測之前**寫的判準，不算裁決，已排除）。數字大於 0 只代表「有裁決檔提到它」，不代表那份裁決是在裁決它——`INDEX.json` 的 `verdict_decisions` 列出是哪幾份，自己打開看。

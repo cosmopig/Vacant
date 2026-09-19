@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-w3wa8llu9ala1wvy1kh7d","object":"chat.completion.chunk","created":1789816425,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-w3wa8llu9ala1wvy1kh7d","object":"chat.completion.chunk","created":1789816425,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-w3wa8llu9ala1wvy1kh7d","object":"chat.completion.chunk","created":1789816425,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-w3wa8llu9ala1wvy1kh7d","object":"chat.completion.chunk","created":1789816425,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-w3wa8llu9ala1wvy1kh7d","object":"chat.completion.chunk","created":1789816425,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"120049454","type":"function","function":{"name":"edit","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-w3wa8llu9ala1wvy1kh7d","object":"chat.completion.chunk","created":1789816425,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"edits\":[{\"newText\":\"def hex_to_rgb(hex_code):\\n    hex_code = hex_code.lstrip('#')\\n    r = int(hex_code[0:2], 16)\\n    g = int(hex_code[2:4], 16)\\n    b = int(hex_code[4:6], 16)\\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    for line in sys.stdin:\\n        line = line.strip()\\n        if line:\\n            print(hex_to_rgb(line))\\n\",\"oldText\":\"def hex_to_rgb(hex_code):\\n    # Remove the hash character if present\\n    hex_code = hex_code.lstrip('#')\\n    \\n    # Convert hexadecimal to integer and then to RGB components\\n    # The input is expected to be 6 hex digits (e.g., \\\"FFFFFF\\\" or \\\"000000\\\")\\n    r = int(hex_code[0:2], 16)\\n    g = int(hex_code[2:4], 16)\\n    b = int(hex_code[4:6], 16)\\n    \\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    # Read from stdin if needed, or just provide a way to call the function.\\n    # The prompt doesn't specify how input is provided, but usually it's via stdin.\\n    for line in sys.stdin:\\n        line = line.strip()\\n        if line:\\n            print(hex_to_rgb(line))\\n\",\"path\":\"solution.py\"}],\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-w3wa8llu9ala1wvy1kh7d","object":"chat.completion.chunk","created":1789816425,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-w3wa8llu9ala1wvy1kh7d","object":"chat.completion.chunk","created":1789816425,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2035,"completion_tokens":429,"total_tokens":2464,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+
