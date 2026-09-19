@@ -1,0 +1,8 @@
+[
+  {
+    "path": "/run/vacant",
+    "writable": true,
+    "errno": null,
+    "detail": "wrote+unlinked"
+  }
+]

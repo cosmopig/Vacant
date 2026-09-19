@@ -1,0 +1,9 @@
+DOOR_PROBE_START n=7 uid=1000
+DOOR relay_models           GET   /v1/models                 got=200  want=200   match=True  '{\n  "data": [\n    {\n      "id": "gemma-4-12b-it-qat",\n      "object": '
+DOOR relay_admin            GET   /admin                     got=403  want=403   match=True  '{\n  "error": "vacant_door_non_model_path",\n  "wire": "openai",\n  "path'
+DOOR echo_admin             GET   /admin                     got=403  want=403   match=True  '{\n  "error": "vacant_door_non_model_path",\n  "wire": "openai",\n  "path'
+DOOR echo_chat              POST  /v1/chat/completions       got=200  want=200   match=True  '{"echo_upstream": true, "path": "/v1/chat/completions"}'
+DOOR echo_any_admin         GET   /admin                     got=200  want=200   match=True  '{"echo_upstream": true, "path": "/admin"}'
+DOOR echo_pipe_admin        GET   /admin                     got=200  want=200   match=True  '{"echo_upstream": true, "path": "/admin"}'
+DOOR echo_lookalike         GET   /v1/modelsX                got=403  want=403   match=True  '{\n  "error": "vacant_door_non_model_path",\n  "wire": "openai",\n  "path'
+DOOR_PROBE_DONE rows=7 mismatched=0

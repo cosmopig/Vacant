@@ -1,0 +1,239 @@
+{
+  "fail": 0,
+  "probe_negctl": [
+    {
+      "target": "ext_ip_upstream",
+      "kind": "http",
+      "reachable": true,
+      "detail": "HTTP/1.1 200 OK",
+      "ms": 3,
+      "want": true
+    },
+    {
+      "target": "ext_ip_cloudflare",
+      "kind": "tcp",
+      "reachable": true,
+      "detail": "connected",
+      "ms": 2,
+      "want": true
+    },
+    {
+      "target": "loopback_own",
+      "kind": "tcp",
+      "reachable": true,
+      "detail": "connected",
+      "ms": 0,
+      "want": true
+    },
+    {
+      "target": "unix_path_tmp",
+      "kind": "unix",
+      "reachable": true,
+      "detail": "connected",
+      "ms": 0,
+      "want": true
+    },
+    {
+      "target": "unix_abstract",
+      "kind": "abstract",
+      "reachable": true,
+      "detail": "connected",
+      "ms": 0,
+      "want": true
+    },
+    {
+      "target": "dns_example",
+      "kind": "dns",
+      "reachable": true,
+      "detail": "('104.20.23.154', 80)",
+      "ms": 1,
+      "want": true
+    },
+    {
+      "target": "door_relay_sock",
+      "kind": "unix",
+      "reachable": true,
+      "detail": "connected",
+      "ms": 0,
+      "want": true
+    }
+  ],
+  "probe_enclosure": [
+    {
+      "target": "ext_ip_upstream",
+      "kind": "http",
+      "reachable": false,
+      "detail": "OSError: [Errno 101] Network is unreachable",
+      "ms": 0,
+      "want": false
+    },
+    {
+      "target": "ext_ip_cloudflare",
+      "kind": "tcp",
+      "reachable": false,
+      "detail": "OSError: [Errno 101] Network is unreachable",
+      "ms": 0,
+      "want": false
+    },
+    {
+      "target": "loopback_own",
+      "kind": "tcp",
+      "reachable": false,
+      "detail": "ConnectionRefusedError: [Errno 111] Connection refused",
+      "ms": 0,
+      "want": false
+    },
+    {
+      "target": "unix_path_tmp",
+      "kind": "unix",
+      "reachable": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory",
+      "ms": 0,
+      "want": false
+    },
+    {
+      "target": "unix_abstract",
+      "kind": "abstract",
+      "reachable": false,
+      "detail": "ConnectionRefusedError: [Errno 111] Connection refused",
+      "ms": 0,
+      "want": false
+    },
+    {
+      "target": "dns_example",
+      "kind": "dns",
+      "reachable": false,
+      "detail": "gaierror: [Errno -3] Temporary failure in name resolution",
+      "ms": 0,
+      "want": false
+    },
+    {
+      "target": "door_relay_sock",
+      "kind": "unix",
+      "reachable": true,
+      "detail": "connected",
+      "ms": 0,
+      "want": true
+    }
+  ],
+  "door_probe": [
+    {
+      "name": "relay_models",
+      "sock": "/run/vacant/relay.sock",
+      "method": "GET",
+      "path": "/v1/models",
+      "want_status": 200,
+      "status": 200,
+      "snippet": "{\n  \"data\": [\n    {\n      \"id\": \"gemma-4-12b-it-qat\",\n      \"object\": \"model\",\n      \"owned_by\": \"organization_owner\"\n    },\n    {\n      \"id\": \"qwen/qwen3.8-27b\",\n      \"object\": \"model\",\n      \"owned",
+      "error": null,
+      "ms": 5,
+      "match": true
+    },
+    {
+      "name": "relay_admin",
+      "sock": "/run/vacant/relay.sock",
+      "method": "GET",
+      "path": "/admin",
+      "want_status": 403,
+      "status": 403,
+      "snippet": "{\n  \"error\": \"vacant_door_non_model_path\",\n  \"wire\": \"openai\",\n  \"path\": \"/admin\",\n  \"method\": \"GET\",\n  \"message\": \"這扇門只轉送模型 API 的 path，`/admin` 不在名單上，所以這一通�",
+      "error": null,
+      "ms": 1,
+      "match": true
+    },
+    {
+      "name": "echo_admin",
+      "sock": "/run/vacant/echo.sock",
+      "method": "GET",
+      "path": "/admin",
+      "want_status": 403,
+      "status": 403,
+      "snippet": "{\n  \"error\": \"vacant_door_non_model_path\",\n  \"wire\": \"openai\",\n  \"path\": \"/admin\",\n  \"method\": \"GET\",\n  \"message\": \"這扇門只轉送模型 API 的 path，`/admin` 不在名單上，所以這一通�",
+      "error": null,
+      "ms": 1,
+      "match": true
+    },
+    {
+      "name": "echo_chat",
+      "sock": "/run/vacant/echo.sock",
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "want_status": 200,
+      "status": 200,
+      "snippet": "{\"echo_upstream\": true, \"path\": \"/v1/chat/completions\"}",
+      "error": null,
+      "ms": 2,
+      "match": true
+    },
+    {
+      "name": "echo_any_admin",
+      "sock": "/run/vacant/echo_any.sock",
+      "method": "GET",
+      "path": "/admin",
+      "want_status": 200,
+      "status": 200,
+      "snippet": "{\"echo_upstream\": true, \"path\": \"/admin\"}",
+      "error": null,
+      "ms": 2,
+      "match": true
+    },
+    {
+      "name": "echo_pipe_admin",
+      "sock": "/run/vacant/echo_pipe.sock",
+      "method": "GET",
+      "path": "/admin",
+      "want_status": 200,
+      "status": 200,
+      "snippet": "{\"echo_upstream\": true, \"path\": \"/admin\"}",
+      "error": null,
+      "ms": 4,
+      "match": true
+    },
+    {
+      "name": "echo_lookalike",
+      "sock": "/run/vacant/echo.sock",
+      "method": "GET",
+      "path": "/v1/modelsX",
+      "want_status": 403,
+      "status": 403,
+      "snippet": "{\n  \"error\": \"vacant_door_non_model_path\",\n  \"wire\": \"openai\",\n  \"path\": \"/v1/modelsX\",\n  \"method\": \"GET\",\n  \"message\": \"這扇門只轉送模型 API 的 path，`/v1/modelsX` 不在名單上，所以�",
+      "error": null,
+      "ms": 0,
+      "match": true
+    }
+  ],
+  "write_ro": [
+    {
+      "path": "/run/vacant",
+      "writable": false,
+      "errno": "EROFS",
+      "detail": "[Errno 30] Read-only file system: '/run/vacant/_vacant_write_probe_2'"
+    },
+    {
+      "path": "/tmp",
+      "writable": true,
+      "errno": null,
+      "detail": "wrote+unlinked"
+    },
+    {
+      "path": "/var/tmp/vacant-enclosure-20260920c/ws/probe",
+      "writable": true,
+      "errno": null,
+      "detail": "wrote+unlinked"
+    },
+    {
+      "path": "/usr",
+      "writable": false,
+      "errno": "EROFS",
+      "detail": "[Errno 30] Read-only file system: '/usr/_vacant_write_probe_2'"
+    }
+  ],
+  "write_rw": [
+    {
+      "path": "/run/vacant",
+      "writable": true,
+      "errno": null,
+      "detail": "wrote+unlinked"
+    }
+  ]
+}

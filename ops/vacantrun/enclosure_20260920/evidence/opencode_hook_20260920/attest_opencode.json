@@ -1,0 +1,75 @@
+{
+  "schema": "vacant-attest/1",
+  "run_id": "oc1",
+  "agent": "opencode",
+  "enclosure": {
+    "applied": false,
+    "ns_id": "net:[4026531840]",
+    "policy_sha256": null,
+    "probe": {
+      "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+      "interfaces": [
+        "ens33",
+        "lo",
+        "tailscale0"
+      ],
+      "outer_net_ns": null,
+      "ns_differs_from_outer": null,
+      "policy_path": "/run/vacant/policy.json",
+      "policy_present": false,
+      "door_sock": null,
+      "door_reachable": null,
+      "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+      "probed_at": 1789844835.148486,
+      "probed_by_pid": 3993602
+    }
+  },
+  "framework_hook": {
+    "agent": "opencode",
+    "contract_version": "vacant-hook/1",
+    "canary_fired": true,
+    "events_n": 5,
+    "log": "/var/tmp/vhooktest/hooks.jsonl",
+    "install_attempted": true,
+    "version_drift": false,
+    "reason": "掛鉤日誌裡有 1 筆 canary ⇒ 掛鉤真的燒了"
+  },
+  "reconciled": {
+    "relay_calls": 5,
+    "hook_events": 5,
+    "unexplained": 3,
+    "canary_calls": 1,
+    "refused_path": 0,
+    "unexplained_detail": [
+      {
+        "call_id": "ac4fc48f15a0469292ce8c941aaeb4ec",
+        "path": "/v1/models",
+        "ts": 1789844789.5095067,
+        "status": 200
+      },
+      {
+        "call_id": "02d5763577ff491b8ce95c0c6f30474d",
+        "path": "/v1/chat/completions",
+        "ts": 1789844803.2226617,
+        "status": 0
+      },
+      {
+        "call_id": "55b4aae6d5e94d2b8090e4861e680472",
+        "path": "/v1/chat/completions",
+        "ts": 1789844803.8249135,
+        "status": 200
+      }
+    ],
+    "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（session_start／canary／user_prompt_submit／post_tool_use）",
+    "reason": "5 通中繼、2 個回合開端事件 ⇒ 3 通對不上"
+  },
+  "tier": "B'",
+  "attested": false,
+  "b_prime_kind": "channel_not_enclosed",
+  "tier_sentence": "工具層每一次都有紀錄；**模型通道 Vacant 沒有（完整）看到**。",
+  "tier_reasons": [
+    "掛鉤燒了但**圍牆不成立**（enclosure.applied=False）⇒ 模型通道在網路上，但不保證每一通都經過 Vacant"
+  ],
+  "in_process_model": null,
+  "assembled_at": 1789844835.1487179
+}

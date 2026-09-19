@@ -1,0 +1,58 @@
+[
+  {
+    "target": "ext_ip_upstream",
+    "kind": "http",
+    "reachable": false,
+    "detail": "OSError: [Errno 101] Network is unreachable",
+    "ms": 0,
+    "want": false
+  },
+  {
+    "target": "ext_ip_cloudflare",
+    "kind": "tcp",
+    "reachable": false,
+    "detail": "OSError: [Errno 101] Network is unreachable",
+    "ms": 0,
+    "want": false
+  },
+  {
+    "target": "loopback_own",
+    "kind": "tcp",
+    "reachable": false,
+    "detail": "ConnectionRefusedError: [Errno 111] Connection refused",
+    "ms": 0,
+    "want": false
+  },
+  {
+    "target": "unix_path_tmp",
+    "kind": "unix",
+    "reachable": false,
+    "detail": "FileNotFoundError: [Errno 2] No such file or directory",
+    "ms": 0,
+    "want": false
+  },
+  {
+    "target": "unix_abstract",
+    "kind": "abstract",
+    "reachable": false,
+    "detail": "ConnectionRefusedError: [Errno 111] Connection refused",
+    "ms": 0,
+    "want": false
+  },
+  {
+    "target": "dns_example",
+    "kind": "dns",
+    "reachable": false,
+    "detail": "gaierror: [Errno -3] Temporary failure in name resolution",
+    "ms": 0,
+    "want": false
+  },
+  {
+    "target": "door_relay_sock",
+    "kind": "unix",
+    "reachable": true,
+    "detail": "connected",
+    "ms": 0,
+    "want": true
+  }
+]

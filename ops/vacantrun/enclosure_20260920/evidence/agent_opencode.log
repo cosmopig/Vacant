@@ -1,0 +1,12 @@
+--- agent stdout/stderr ---
+[0m
+> build · gemma-4-12b-it-qat
+[0m
+[0m← [0mWrite solution.py
+Wrote file successfully.
+[0m
+<|channel>thought
+<channel|>OK.
+agent_pipe_rc=0
+--- door_guest.log ---
+DOOR_GUEST_READY port=8787 sock=/run/vacant/relay.sock

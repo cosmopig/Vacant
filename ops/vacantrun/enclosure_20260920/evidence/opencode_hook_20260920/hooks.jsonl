@@ -1,0 +1,5 @@
+{"contract": "vacant-hook/1", "run_id": "oc1", "agent": "opencode", "event": "session_start", "ts": 1789844800.599053, "pid": 3993484, "payload_sha256": "15ba5a56b5bcc1bb3a32eb96ee7625ba3b820e14f37d6450d4fb9d6d45a410b2"}
+{"contract": "vacant-hook/1", "run_id": "oc1", "agent": "opencode", "event": "canary", "ts": 1789844800.6074667, "pid": 3993484, "note": "這一行就是 `framework_hook.canary_fired` 的唯一依據——讀的是掛鉤自己寫的，不是「我們裝過了」"}
+{"contract": "vacant-hook/1", "run_id": "oc1", "agent": "opencode", "event": "canary_result", "ts": 1789844800.6313758, "pid": 3993484, "relay_canary": {"attempted": true, "url": "http://127.0.0.1:8799/v1/models?vacant_canary=oc1", "status": 200, "error": null}}
+{"contract": "vacant-hook/1", "run_id": "oc1", "agent": "opencode", "event": "pre_tool_use", "ts": 1789844821.5147076, "pid": 3993521, "payload_sha256": "e4bd987fef7f7de9b2a85dbeb273c091537bcf9c24462f0e078f106c6ab0e5a2", "tool": "write"}
+{"contract": "vacant-hook/1", "run_id": "oc1", "agent": "opencode", "event": "post_tool_use", "ts": 1789844821.6199095, "pid": 3993522, "payload_sha256": "e569aae126e0fc688b66a5607a15e82fa8a70ae4bb8745836e04f6eeea49fa33", "tool": "write"}

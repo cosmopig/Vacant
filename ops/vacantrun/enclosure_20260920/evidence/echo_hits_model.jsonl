@@ -1,0 +1,1 @@
+{"method": "POST", "path": "/v1/chat/completions", "auth": "Bearer ENCLOSURE-CALLER-KEY", "body_bytes": 2}

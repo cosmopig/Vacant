@@ -1,0 +1,5 @@
+WRITE EROFS     /run/vacant  [Errno 30] Read-only file system: '/run/vacant/_vacant_write_probe_2'
+WRITE WROTE     /tmp  wrote+unlinked
+WRITE WROTE     /var/tmp/vacant-enclosure-20260920c/ws/probe  wrote+unlinked
+WRITE EROFS     /usr  [Errno 30] Read-only file system: '/usr/_vacant_write_probe_2'
+WRITE_PROBE_DONE rows=4

@@ -1,0 +1,15 @@
+{
+  "pid": 3958191,
+  "url": "unix:/var/tmp/vacant-enclosure-20260920c/door/relay.sock",
+  "endpoint": "unix:/var/tmp/vacant-enclosure-20260920c/door/relay.sock",
+  "listen": "unix",
+  "port": null,
+  "unix_path": "/var/tmp/vacant-enclosure-20260920c/door/relay.sock",
+  "path_policy": "model",
+  "started_at": 1789841763.6336951,
+  "upstreams": {
+    "openai": "http://100.86.226.21:1234",
+    "anthropic": "http://100.86.226.21:1234"
+  },
+  "python": "/usr/bin/python3"
+}

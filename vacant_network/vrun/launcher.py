@@ -111,6 +111,7 @@ run 目錄的形狀也照抄：`rows.jsonl` ＋ `receipts_<ARM>.ndjson` ＋ `.pu
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import pathlib
@@ -121,7 +122,8 @@ import sys
 import time
 import uuid
 
-from . import acceptance, envmap, receipts, retry as retrypolicy, wshash
+from . import (acceptance, attest as attestmod, envmap, receipts,
+               retry as retrypolicy, wshash)
 from .sandbox import make_sandbox
 from .wireproxy import WireProxy
 from ..crypto import pub_to_hex
@@ -617,6 +619,26 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
     summary["wire_errors"] = proxy.stats["errors"]
     summary["wire_digest"] = proxy.wire_digest()
     summary["run_wall_s"] = round(time.time() - t0, 3)
+    # ── 認證：**這一跑有沒有在圍牆裡跑過**（裁決 §二 P0）─────────────────
+    #   放在這裡（而不是呼叫端）的理由只有一個：**它要進簽章鏈**。
+    #   一個落在 run 目錄裡的未簽章 JSON 改得掉，而「這一跑受不受控」正是
+    #   最值得被改掉的那一欄。所以它跟 `requests_seen` 一樣簽進 `ws_verdict`。
+    #   ⚠ 探針跑在**這個行程**（agent 的父行程、同一個 namespace）。
+    #   ⚠ `VACANT_ATTEST=off` ⇒ `None` ＝**沒量到**，不是「量到沒有」。
+    #      舊鏈沒有這幾個欄位，讀出來也是「沒量到」——一個 byte 都不會變。
+    summary["attestation"] = None
+    if (os.environ.get("VACANT_ATTEST") or "warn").strip().lower() != "off":
+        try:
+            summary["attestation"] = attestmod.attest(
+                agent=os.environ.get("VACANT_HOOK_AGENT") or None,
+                run_id=task_id,
+                hook_log=os.environ.get("VACANT_HOOK_LOG"),
+                install_attempted=_hook_install_attempted(run_dir),
+                relay_index=wire_dir / "index.jsonl")
+        except Exception as e:                      # noqa: BLE001
+            # 認證自己壞掉不可以弄死一整跑——但也不可以靜默地變成「沒量到」。
+            summary["attestation"] = {"error": f"{type(e).__name__}: {e}",
+                                      "tier": None, "attested": None}
     _rollup(summary, n_max)
     assert summary["stop_reason"] in STOP_REASONS, summary["stop_reason"]
     _persist(run_dir, summary, arm if vacant_on else None, ident, book)
@@ -655,6 +677,21 @@ def _rollup(summary: dict, n_max: int) -> None:
         "stop_reason": ("visible_pass" if ok else
                         "visible_fail" if n_max == 1 else "attempts_exhausted"),
     })
+
+
+def _hook_install_attempted(run_dir: pathlib.Path) -> bool | None:
+    """我們有沒有**試著**裝掛鉤。回 `None` ＝不知道（**不是「沒裝」**）。
+
+    ⚠ 這一欄唯一的用途是分辨「沒量到」與「量到 false」，
+      **它不影響 `canary_fired`**——那一欄只讀掛鉤自己寫的日誌（裁決 §三-1）。
+    """
+    p = run_dir / "hook_install.json"
+    if not p.is_file():
+        return None
+    try:
+        return bool(json.loads(p.read_text("utf-8")).get("attempted"))
+    except (OSError, ValueError):
+        return None
 
 
 def _persist(run_dir: pathlib.Path, summary: dict, arm: str | None,
@@ -703,7 +740,21 @@ def _persist(run_dir: pathlib.Path, summary: dict, arm: str | None,
         agent_rc=summary["agent_rc"], requests_seen=summary["requests_seen"],
         # 迴圈的成本落在裁決上：這一格總共燒了幾次整個 agent 行程。
         retry=summary["retry"], attempts_used=summary["attempts_used"],
-        max_attempts=summary["max_attempts"])
+        max_attempts=summary["max_attempts"],
+        # ── 認證維度（裁決 §二 P0）。**三態**：`None` ＝沒量到。 ──────────
+        #   簽進鏈的是「級別」與「那一塊的雜湊」，不是整塊——
+        #   `logbook.MAX_PAYLOAD_BYTES` 是 64 KiB 硬限制，而 `attestation`
+        #   帶著探針原始資料會長。全文落在 `run_<ARM>.json`，手法逐字沿用
+        #   `receipts.py` 的「鏈上放雜湊、全文放旁邊」。
+        tier=(summary.get("attestation") or {}).get("tier"),
+        attested=(summary.get("attestation") or {}).get("attested"),
+        enclosure_applied=(((summary.get("attestation") or {})
+                            .get("enclosure") or {}).get("applied")),
+        canary_fired=(((summary.get("attestation") or {})
+                       .get("framework_hook") or {}).get("canary_fired")),
+        unexplained=(((summary.get("attestation") or {})
+                      .get("reconciled") or {}).get("unexplained")),
+        attestation_sha256=_attestation_digest(summary.get("attestation")))
     summary["verdict_hash"] = entry.hash()
     book.save(run_dir / f"receipts_{arm}.ndjson")
     (run_dir / f"receipts_{arm}.pub.json").write_text(json.dumps(
@@ -711,6 +762,19 @@ def _persist(run_dir: pathlib.Path, summary: dict, arm: str | None,
         ensure_ascii=False), encoding="utf-8")
     (run_dir / f"run_{summary['arm']}.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _attestation_digest(att: dict | None) -> str | None:
+    """整塊 `attestation` 的 sha256（`None` ⇒ `None`，不是空字串的雜湊）。
+
+    鏈上放這一個、全文放 `run_<ARM>.json` ⇒ 事後有人改了那份全文，
+    雜湊對不上就看得出來。
+    """
+    if att is None:
+        return None
+    return hashlib.sha256(json.dumps(att, sort_keys=True, ensure_ascii=False,
+                                     separators=(",", ":")
+                                     ).encode("utf-8")).hexdigest()
 
 
 def exit_code(summary: dict) -> int:

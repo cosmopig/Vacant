@@ -32,7 +32,36 @@ shim `exec` 進本模組，本模組才去找真正的 `pi` 並且把它包進 `
 | `21` | **沒有驗收可跑**：只中介、沒閘門（`stop_reason="ungated"`） |
 | `22` | `infra_void`（`launcher.EXIT_VOID`） |
 | `23` | **`requests_seen == 0`**：這一跑沒有任何模型呼叫經過 proxy |
+| `24` | **B 級**：圍牆成立、工具層未閘門（`attest.TIER_B`） |
+| `25` | **B′ 級**：工具層有紀錄、模型通道沒（完整）被看到（`attest.TIER_B_PRIME`） |
+| `26` | **C 級**：未受控 ⇒ **拒發收據**（`attest.TIER_C`） |
 | 其他 | passthrough 模式：原樣透傳真 binary 的退出碼 |
+
+`24`／`25`／`26` 是 2026-09-20 加的（`DECISION_20260920_COMPLETE_MEDIATION.md`
+§三）。**`0`／`20`／`21`／`22`／`23` 的語意一個字都沒動**——那五個碼回答的是
+「這一跑的**裁決**是什麼」，新的三個回答的是「這一跑的**紀錄能不能拿來
+究責**」，兩個維度正交。新碼只有在 `VACANT_ATTEST=fail` 之下才會蓋過去。
+
+## 認證模式 `VACANT_ATTEST`（⚠ 預設 `warn`，而那是一個**明講的偏離**）
+
+| 值 | 收據 | 退出碼 |
+|---|---|---|
+| `off` | 有 `attestation` 但 `tier=null`＝**沒量到** | 完全不受影響 |
+| `warn`（預設） | 有 `attestation` ＋ `attested: false`＝**未認證** | **不受影響**（印警告） |
+| `fail` | C 級**拒發收據**（改落一份 `NOT_CERTIFIED.json`） | B→24、B′→25、C→26 |
+
+裁決 §二 P0 的原文是「任一不成立 ⇒ 收據寫『未認證』、**退出碼不是 0**」，
+也就是預設應該是 `fail`。這裡預設 `warn`，理由要寫清楚、不要假裝沒有：
+
+  · 沒有 root 的 macOS **永遠**到不了 A 級（沒有 bwrap ⇒ 沒有圍牆），
+    預設 `fail` 等於今天起 macOS 上每一跑都拒發收據——那是產品層級的停擺，
+    而裁決講的是展場那條線（§三-3「展場只允許 A 級」）。
+  · 而且它會動到既有退出碼的實際行為，那是本輪驗收第 6 項明文禁止的。
+
+⇒ **「未認證」那一半照做**（`warn` 之下收據照樣帶 `attested: false` ＋ `tier`
+  ＋ 那一級**能說的那句話**，沒有人讀得成「這張是認證過的」）；
+  **「退出碼不是 0」那一半要明講才打開**。
+  **展場的 profile 必須設 `VACANT_ATTEST=fail`。**
 
 `21` 是 2026-09-19 人類點名要的那一格：**「只中介不跑閘門」不可以長得像
 「跑了驗收而且過了」**。`launcher.exit_code()` 現在把 `ungated` 判成 0
@@ -103,10 +132,42 @@ import sys
 import time
 import uuid
 
-from . import launcher, possess
+from . import attest, hookcli, launcher, possess
 
 EXIT_UNGATED = 21
 EXIT_NO_MEDIATION = 23
+
+#: 分級的三個新碼（裁決 §三）。**不可以重用 0／20／21／22／23**——那五個是
+#: 「裁決是什麼」，這三個是「紀錄能不能拿來究責」，混在一起就分不出來了。
+EXIT_TIER_B = 24
+EXIT_TIER_B_PRIME = 25
+EXIT_TIER_C = 26
+
+#: 認證模式。**預設 `warn`**，理由與偏離寫在本模組 docstring。
+ATTEST_MODES = ("off", "warn", "fail")
+
+
+def attest_mode() -> str:
+    m = (os.environ.get("VACANT_ATTEST") or "warn").strip().lower()
+    return m if m in ATTEST_MODES else "warn"
+
+
+def apply_tier_exit(verdict: int, tier: str | None, mode: str) -> int:
+    """級別要不要蓋掉裁決的退出碼。**純函式，因為這一條規則要被逐格驗。**
+
+    三條規則，每一條都有理由：
+
+      1. 只有 `mode == "fail"` 才蓋。`warn`／`off` 之下退出碼一個字不動
+         （本模組 docstring 的「明講的偏離」）。
+      2. **A 級不蓋**（`attest.TIER_EXIT[A] is None`）：受控的那一跑，
+         退出碼就是它的裁決。
+      3. **`22`（`infra_void`）不蓋。** 那一格什麼都沒量到，在它上面再貼一個
+         級別等於用一個沒發生的跑去講受不受控。紀律逐字沿用 `23`
+         （`23` 蓋 `0`／`20`／`21`，唯獨不蓋 `22`）。
+    """
+    if tier is None or mode != "fail" or verdict == launcher.EXIT_VOID:
+        return verdict          # 沒量到級別 ⇒ 不蓋（鐵律 3）
+    return attest.TIER_EXIT.get(tier) or verdict
 
 #: per-run 設定目錄的**專屬父目錄**（在 `$TMPDIR` 底下）。
 #: ⚠ 掃地機只掃這底下——**不掃 `$TMPDIR` 本身**，免得刪到不是自己建的東西。
@@ -544,6 +605,31 @@ def exec_inner(agent: str, argv: list[str]) -> int:
         env["DISABLE_AUTOUPDATER"] = "1"
         if model:
             env["ANTHROPIC_MODEL"] = model
+
+    # ── 掛鉤：把這一跑的工具事件接到 Vacant 的契約上（裁決 §二 P1）────────
+    #   ⚠ **裝了不等於會燒**（裁決 §三-1）。這裡只做兩件事：寫設定、
+    #     把契約的環境變數交給 agent。「它到底有沒有燒」由收據端讀
+    #     `hooks.jsonl` 決定（`attest.probe_framework_hook`）。
+    #   `hook_install.json` 唯一的用途是分辨**「沒量到」與「量到 false」**：
+    #     試過了卻連日誌都沒有 ⇒ `canary_fired=False`（降級）；
+    #     根本沒試過 ⇒ `canary_fired=None`（沒量到）。
+    hook_log = env.get("VACANT_HOOK_LOG")
+    if hook_log:
+        rep = hookcli.install(agent, cfg, hook_log=hook_log,
+                              run_id=env.get("VACANT_RUN_ID", ""), proxy=base)
+        try:
+            pathlib.Path(hook_log).parent.mkdir(parents=True, exist_ok=True)
+            pathlib.Path(hook_log).with_name("hook_install.json").write_text(
+                json.dumps({"attempted": rep is not None, "agent": agent,
+                            "report": rep,
+                            "supported": list(hookcli.INSTALLERS),
+                            "note": ("`attempted` 只說我們試過，**不說它在**"
+                                     "——裁決 §三-1")},
+                           ensure_ascii=False, indent=2), encoding="utf-8")
+        except OSError:                             # pragma: no cover
+            pass
+        if rep:
+            env.update(rep.get("env") or {})
     try:
         os.execve(real, [real, *argv], env)
     except OSError as e:                        # pragma: no cover
@@ -623,6 +709,12 @@ def run_gate(agent: str, argv: list[str]) -> int:
     #   沒有 state（沒裝過、直接跑 gateshim）就維持原樣＝fail-closed。
     _inject_upstreams_from_state()
 
+    # ── 掛鉤契約的環境：內層 `--exec` 讀得到，它才裝得起來 ────────────────
+    #   ⚠ 只是「把契約的位置講清楚」，**不是**宣稱掛鉤會燒。
+    os.environ["VACANT_HOOK_LOG"] = str(run_dir / "hooks.jsonl")
+    os.environ["VACANT_RUN_ID"] = task_id
+    os.environ["VACANT_HOOK_AGENT"] = agent
+
     inner = [sys.executable, "-m", "vacant_network.vrun.gateshim", "--exec",
              agent, *argv]
     os.environ["VACANT_POSSESS_REAL_BIN"] = real
@@ -667,6 +759,26 @@ def run_gate(agent: str, argv: list[str]) -> int:
         if rs0_mode not in ("warn", "0", "off"):
             verdict = EXIT_NO_MEDIATION
 
+    # ── 認證：這一跑有沒有在圍牆裡跑過、工具事件對不對得上 ────────────────
+    #   ⚠ 這一段與上面的裁決**正交**：它回答的不是「交付還是拒交」，
+    #     而是「這張收據能不能拿來究責」。
+    a_mode = attest_mode()
+    # ⚠ **這一份是 `launcher` 量的、而且已經簽進鏈了**（`ws_verdict` 的
+    #   `tier`／`attested`／`attestation_sha256`）。本層不重算——重算會得到
+    #   一份跟鏈上那個雜湊對不起來的第二版本，而「兩份都自稱是這一跑的認證」
+    #   正是收據最不該有的東西。
+    #   ⚠ **不可以在這裡改寫它任何一個欄位**：鏈上那個 `attestation_sha256`
+    #     是對這一份的雜湊，動一個字就對不上了。
+    attestation: dict | None = summary.get("attestation")
+    if a_mode != "off" and attestation is not None:
+        if not attestation.get("attested"):
+            print(f"[vacant] ⚠ 未認證（tier {attestation.get('tier')}）："
+                  f"{attestation.get('tier_sentence') or attestation.get('error')}",
+                  file=sys.stderr)
+            for r in attestation.get("tier_reasons") or []:
+                print(f"[vacant]   · {r}", file=sys.stderr)
+        verdict = apply_tier_exit(verdict, attestation.get("tier"), a_mode)
+
     extra = {
         "possess_agent": agent, "suite_source": suite_source,
         "suite_dir": str(suite) if suite else None,
@@ -681,14 +793,47 @@ def run_gate(agent: str, argv: list[str]) -> int:
         #   `danger-full-access` 下的 `accepted=true` 在收據上長得一模一樣
         #   ——那正是 A 類假拒交那四格的病。讀不出來寫 `null`，不寫空字串。
         "agent_posture": inner_posture(agent, argv),
+        # ⚠ **這一跑有沒有在圍牆裡跑過**（裁決 §二 P0）。`attest_mode=off`
+        #   之下是 `null` ＝**沒量到**，不是「量到沒有」（鐵律 3）。
+        "attestation": attestation,
+        "attest_mode": a_mode,
+        "tier": (attestation or {}).get("tier"),
+        "attested": (attestation or {}).get("attested"),
     }
-    (run_dir / "possess.json").write_text(
-        json.dumps(extra, ensure_ascii=False, indent=2), encoding="utf-8")
+    # ── C 級不發收據（裁決 §三-2）────────────────────────────────────────
+    #   「意思不明的收據比沒有更糟：它會讓『拒交』與『沒跑過』長得一樣。」
+    #   ⚠ 所以拒發的時候要落一份**長得不像收據**的東西，而且檔名就說它不是。
+    #     兩件事都要：`possess.json` **不存在**（下游拿不到一張弱收據），
+    #     `NOT_CERTIFIED.json` 存在（「拒發」與「這一跑沒發生」分得開）。
+    if (a_mode == "fail" and attestation is not None
+            and attestation.get("tier") == attest.TIER_C):
+        (run_dir / "NOT_CERTIFIED.json").write_text(json.dumps({
+            "not_a_receipt": True,
+            "why": ("C 級＝既沒有圍牆也沒有掛鉤 ⇒ 這一跑的紀錄不足以究責。"
+                    "發一張弱收據會讓「拒交」與「沒跑過」長得一樣，"
+                    "那正是繞過壓測 A 類那四格的病（裁決 §三-2）。"),
+            "tier": attestation.get("tier"),
+            "tier_reasons": attestation.get("tier_reasons"),
+            "attestation": attestation,
+            "possess_json_written": False,
+            "diagnostics": {k: extra[k] for k in
+                            ("possess_agent", "suite_source", "requests_seen",
+                             "stop_reason", "shim_exit", "cwd")},
+        }, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"[vacant] ⛔ C 級 ⇒ **拒發收據**。"
+              f"（{run_dir / 'NOT_CERTIFIED.json'}）", file=sys.stderr)
+    else:
+        (run_dir / "possess.json").write_text(
+            json.dumps(extra, ensure_ascii=False, indent=2), encoding="utf-8")
     mark = {0: "交付", 20: "拒交", EXIT_UNGATED: "**沒有閘門（只中介）**",
             launcher.EXIT_VOID: "infra_void",
-            EXIT_NO_MEDIATION: "**沒量到中介**"}.get(verdict, str(verdict))
+            EXIT_NO_MEDIATION: "**沒量到中介**",
+            EXIT_TIER_B: "**B 級（工具層未閘門）**",
+            EXIT_TIER_B_PRIME: "**B′ 級（模型通道沒看全）**",
+            EXIT_TIER_C: "**C 級（未受控，拒發收據）**"}.get(verdict, str(verdict))
+    tier_mark = (f"　級別 {attestation.get('tier')}" if attestation else "")
     print(f"[vacant] {agent}　{mark}　驗收來源 {suite_source}　"
-          f"wire {rs} 通　收據 {run_dir}", file=sys.stderr)
+          f"wire {rs} 通{tier_mark}　收據 {run_dir}", file=sys.stderr)
     return verdict
 
 

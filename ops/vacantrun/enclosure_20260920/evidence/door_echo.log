@@ -1,0 +1,1 @@
+[vacant proxyd] listening unix:/var/tmp/vacant-enclosure-20260920c/door/echo.sock  path_policy=model  upstreams={'openai': 'http://127.0.0.1:34201', 'anthropic': 'http://127.0.0.1:34201'}

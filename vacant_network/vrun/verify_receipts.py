@@ -145,6 +145,12 @@ MEDIATION_FIELD = "requests_seen"
 #: `--allow-no-suite` 那一格的指紋。**它不是假拒交格**——見模組 docstring。
 UNGATED_STOP_REASONS = ("no_suite", "ungated")
 
+#: 認證維度（2026-09-20，`DECISION_20260920_COMPLETE_MEDIATION` §二 P0）。
+#: 跟 `MEDIATION_FIELD` 同一個模式：**舊鏈沒有這一欄 ⇒ `None`＝沒量到**，
+#: 一筆已歸檔資料都不會因為本檔多讀一個欄位而改判。
+TIER_FIELD = "tier"
+ATTESTED_FIELD = "attested"
+
 #: 總判 → 退出碼。**單一真相來源**：`vacant_network/vrun/demo.py` 的防呆拿它當判準，
 #: 不准在別處寫死第二份（同 `launcher.EXIT_REFUSED` 的作法）。
 EXIT_OK, EXIT_BROKEN, EXIT_VOID = 0, 1, 3
@@ -256,6 +262,47 @@ def mediation_of(verdicts: list) -> dict:
     return out
 
 
+def attestation_of(verdicts: list) -> dict:
+    """從 verdict 收據推出**認證維度**。與 `chain_ok`、`mediated` 都正交。
+
+    三種結論，**三種都要分得開**（跟 `mediation_of` 同一條紀律）：
+
+      `attested=None`   這條鏈沒有記 `tier`（舊鏈，或 `VACANT_ATTEST=off`）
+                        ⇒ **沒量到**。不是「不合格」——把沒說過的話塞進
+                        已歸檔資料是另一種說謊。
+      `attested=False`  有記，而且**有格子不是 A 級** ⇒ 那一格的紀錄不足以
+                        究責（`unattested_task_ids` 點名是哪幾格）。
+      `attested=True`   有記，而且每一格都是 A 級。
+
+    ⚠ 本函式**不動 `verdict`**。理由跟 `mediated` 當初一樣：級別低不代表鏈壞
+      了，兩個維度混成一個就分不出「鏈被改過」與「這一跑沒受控」。
+      要讓級別有牙齒用 `run_glob(..., require_tier="A")`（**預設關**）。
+    """
+    declared = absent = 0
+    tiers: dict[str, int] = {}
+    bad_ids: list = []
+    for e in verdicts:
+        pl = e.payload if isinstance(e.payload, dict) else {}
+        t = pl.get(TIER_FIELD)
+        if not isinstance(t, str):
+            absent += 1
+            continue
+        declared += 1
+        tiers[t] = tiers.get(t, 0) + 1
+        if t != "A":
+            bad_ids.append(pl.get("task_id"))
+    out: dict = {
+        "attested": None, "tier": None, "tiers": tiers,
+        "verdicts_with_tier": declared, "verdicts_without_tier": absent,
+        "unattested_task_ids": sorted(x for x in bad_ids if x is not None),
+    }
+    if declared == 0:
+        return out                      # attested 維持 None＝沒量到
+    out["tier"] = (next(iter(tiers)) if len(tiers) == 1 else "mixed")
+    out["attested"] = not bad_ids
+    return out
+
+
 def verify_arm(run: pathlib.Path, arm: str, rows: list[dict]) -> dict:
     """一個 run 的一條臂鏈。回一列報表（含失敗原文）。"""
     chain = run / f"receipts_{arm}.ndjson"
@@ -268,6 +315,9 @@ def verify_arm(run: pathlib.Path, arm: str, rows: list[dict]) -> dict:
                  # 中介維度（與 `chain_ok` 正交）。提早不到這裡的兩條路
                  # （沒公鑰、空鏈）也要有這兩欄，否則呼叫端會看到欄位忽有忽無。
                  "mediated": None, "void_reason": None,
+                 # 認證維度（與 `chain_ok`、`mediated` 都正交）。
+                 # 提早回去的兩條路也要有這兩欄，否則呼叫端會看到欄位忽有忽無。
+                 "attested": None, "tier": None,
                  "type_counts": {}, "failures": [], "verdict": "UNVERIFIABLE"}
     if not pub.exists():
         rec["failures"].append({"reason": "pubkey_file_missing", "path": str(pub)})
@@ -329,6 +379,10 @@ def verify_arm(run: pathlib.Path, arm: str, rows: list[dict]) -> dict:
     #    是另一種說謊；這裡新增的是一個獨立的維度，讓「鏈完整」與
     #    「中介發生過」分開講。
     rec.update(mediation_of(vt))
+    # ── 認證維度 ──────────────────────────────────────────────────────
+    #  ⚠ 同樣**一個字都不動 `chain_ok`**，也不動 `verdict`：級別低不代表
+    #    鏈壞了。要讓級別有牙齒得明講（`run_glob(require_tier=...)`）。
+    rec.update(attestation_of(vt))
     rec["verdict"] = ("BROKEN" if rec["failures"] else
                       "VOID" if rec["mediated"] is False else "OK")
     return rec
@@ -367,11 +421,27 @@ def _glob_dirs(pattern: str) -> list[pathlib.Path]:
     return sorted(d for d in ROOT.glob(pattern) if d.is_dir())
 
 
-def run_glob(pattern: str) -> dict:
+def run_glob(pattern: str, *, require_tier: str | None = None) -> dict:
+    """驗一批 run。
+
+    `require_tier="A"` ＝ **展場那條線**（裁決 §三-3「展場只允許 A 級」）：
+    每一條鏈都要是 A 級，不是就多一筆 `tier_below_required` 的失敗 ⇒ BROKEN。
+    **預設 `None` ＝不要求**，所以既有 98 個歸檔 run 的判決逐字不變
+    （它們連 `tier` 欄位都沒有 ⇒ `attested=None`＝沒量到）。
+    """
     dirs = _glob_dirs(pattern)
     rows: list[dict] = []
     for d in dirs:
         rows += verify_run(d)
+    if require_tier:
+        for r in rows:
+            if r.get("tier") != require_tier:
+                r["failures"].append({
+                    "reason": "tier_below_required",
+                    "required": require_tier, "got": r.get("tier"),
+                    "note": ("`tier=null` ＝**沒量到**，不是「不合格」——"
+                             "但在要求級別的那條線上，沒量到一樣過不了")})
+                r["verdict"] = "BROKEN"
     # `VOID` 不算進 `broken_chains_n`：那一欄的語意是「鏈壞了」，而 VOID 的鏈
     # 沒壞。**舊資料一筆都不會變**——沒有 `requests_seen` 欄位就不可能 VOID。
     broken = [r for r in rows if r["verdict"] not in ("OK", "VOID")]
@@ -390,6 +460,17 @@ def run_glob(pattern: str) -> dict:
             1 for r in rows if r.get("mediated") is None),
         "unmediated_task_ids": sorted(
             {t for r in rows for t in r.get("unmediated_task_ids", [])}),
+        # ── 認證維度的總帳（三種結論分開數，不可合併）────────────────
+        "require_tier": require_tier,
+        "attested_chains_n": sum(1 for r in rows if r.get("attested") is True),
+        "unattested_chains_n": sum(1 for r in rows
+                                   if r.get("attested") is False),
+        "chains_without_tier_n": sum(1 for r in rows
+                                     if r.get("attested") is None),
+        "tier_histogram": {
+            t: sum(1 for r in rows if r.get("tier") == t)
+            for t in sorted(str(x) for x in {r.get("tier") for r in rows}
+                            if x is not None)},
         # 一批裡只要有一條零請求的鏈，**總判就不准是乾淨的 OK**。
         "verdict": ("UNVERIFIABLE" if not rows else
                     "BROKEN" if broken else
@@ -405,7 +486,12 @@ def run_glob(pattern: str) -> dict:
                  "**沒量到 ≠ 量到 0**。"
                  "⚠ 這個維度擋得住「完全沒打」，擋不住「打了但打到別的地方」"
                  "——那要看 run_<ARM>.json 的 wire_by_protocol 與 upstreams，"
-                 "而那兩個欄位不在簽章鏈上。"),
+                 "而那兩個欄位不在簽章鏈上。"
+                 "`tier`／`attested` 是**第三個維度**：這一跑有沒有在圍牆裡跑過、"
+                 "每一通有沒有對得上一個工具事件（A／B／B'／C，"
+                 "`DECISION_20260920_COMPLETE_MEDIATION` §三）。"
+                 "`tier=null`＝這條鏈沒記（舊鏈或 VACANT_ATTEST=off）＝**沒量到**。"
+                 "⚠ 級別**不影響** verdict，除非明講 --require-tier。"),
         "chains": rows,
     }
 
@@ -680,6 +766,11 @@ def render(out: dict) -> str:
                  f"{r.get('rows_n', 0):>6}  {(r['head'] or '')[:16]}…  {r['verdict']}")
         for f in r["failures"]:
             L.append(f"    ! {json.dumps(f, ensure_ascii=False)}")
+        if r.get("attested") is False:
+            L.append(f"    ! 未認證 tier={r.get('tier')}：這條鏈的 "
+                     f"{len(r['unattested_task_ids'])} 格不是 A 級"
+                     f"（{', '.join(r['unattested_task_ids'][:6]) or '—'}）"
+                     "——鏈可以是完整的，但那幾格的紀錄不足以究責")
         if r.get("mediated") is False:
             L.append(f"    ! VOID {r['void_reason']}：這條鏈的 "
                      f"{len(r['unmediated_task_ids'])} 格 requests_seen == 0"
@@ -704,13 +795,16 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--glob", help="run 目錄的 glob（相對 repo 根），例如 'runs/g_r529_*'")
     ap.add_argument("--json", help="把報表寫成 JSON")
+    ap.add_argument("--require-tier", choices=("A", "B", "B'"), default=None,
+                    help="要求每一條鏈都到這一級（展場用 A）。"
+                         "**預設不要求**——既有歸檔 run 的判決逐字不變。")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()
     if args.selftest:
         return selftest()
     if not args.glob:
         ap.error("要給 --glob 或 --selftest")
-    out = run_glob(args.glob)
+    out = run_glob(args.glob, require_tier=args.require_tier)
     print(render(out))
     if args.json:
         p = pathlib.Path(args.json)

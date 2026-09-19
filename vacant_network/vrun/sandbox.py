@@ -37,26 +37,43 @@ ro-bind 進去（`acceptance.py`），跑完就沒有了。
 
 ## ⚠ 2026-09-13 在 vacant-dev 上的實測（這一段不准被後來的人當成過時註解刪掉）
 
+**⚠ 先讀這一句：下面第 (2)／(3) 點描述的是 2026-09-13 的狀態，
+2026-09-15 裝了 AppArmor profile 之後**不再成立**——現在
+`/etc/apparmor.d/bwrap` 已安裝、`aa-status` 認得、非特權**裸 `bwrap` rc=0**
+（2026-09-20 在 `ops/vacantrun/enclosure_20260920/run_probes.sh` 的量具檢查裡
+又跑了一次）。保留原文是因為它記載的是**前提為什麼是錯的**，
+那件事沒有過期。**不要把「曾經如此」讀成「現在如此」。**
+
 預註冊 §三-3 寫的是「`sudo apt install bubblewrap`，套件自帶 AppArmor profile
-應可用」。**那個前提是錯的**，逐條：
+應可用」。**那個前提是錯的**，逐條（時態＝2026-09-13）：
 
   · `bubblewrap 0.9.0-1ubuntu0.1` 的 `dpkg -L` 裡**沒有任何 `/etc/apparmor.d/` 檔案**
     ——它只帶 `/usr/lib/sysctl.d/50-bubblewrap.conf`（設 `unprivileged_userns_clone=1`，
     對 Ubuntu 24.04 的限制**無效**，因為擋門是 AppArmor 不是那個 sysctl）。
+    **這一條今天仍然成立**（套件沒變，是我們自己補了一份 profile）。
   · `kernel.apparmor_restrict_unprivileged_userns=1` ⇒ 非特權 `bwrap` 建 userns 時
     會轉進 `unprivileged_userns` profile，接著寫 `/proc/<pid>/uid_map` 被 DENIED
     （`dmesg` 逐字：`apparmor="DENIED" operation="open" … name="proc/…/uid_map"`）
-    ⇒ **裸 `bwrap` 在這台機器上起不來**。
+    ⇒ **當時**裸 `bwrap` 在這台機器上起不來。**09-15 之後不再如此。**
   · `sudo bwrap` 起得來（root 建 ns），但同一條 profile 轉換會拿掉 `dac_override`
     ⇒ 綁 `/home/user1/**` 會 `Permission denied`（`/home/user1` 是 `drwxr-x---`）。
     ⇒ 走 `sudo bwrap` 的話**工作區根目錄必須放在世界可穿越的路徑**
     （`/var/tmp/...`），不能放 `~/vacant/r530_work`。
+    **這一條只約束 `sudo bwrap` 那條路**；裝了 profile 之後走非特權 `bwrap`，
+    自己的 DAC 還在，`--ro-bind /home/user1/...` 是通的（2026-09-20 實測）。
 
-⇒ 要讓 `bwrap` 後端在 vacant-dev 上真的可用，需要**其中一項主機政策改動**：
+⇒ 當時的結論是：要讓 `bwrap` 後端在 vacant-dev 上真的可用，需要**其中一項
+  主機政策改動**：
   (1) 裝一份只放行 `/usr/bin/bwrap` 的 AppArmor profile（Ubuntu 官方建議的做法），或
   (2) 把工作區根改到 `/var/tmp` 並以 `sudo -n bwrap` 執行。
 兩者都不是「裝個套件」，所以**由人類或 Fable 決定**，這支不自己決定：
 `probe()` 誠實回報每個後端能不能用，`auto` 依序退，退到哪一級寫進 `backend_meta`。
+
+**2026-09-15（人類授權「好裝」）走的是 (1)**：`/etc/apparmor.d/bwrap`
+（內容＝`ops/gain/r530/bwrap.apparmor`）已 `apparmor_parser -r` 載入。
+⇒ 本模組在 vacant-dev 上的 `bwrap` 後端**現在是可用的**，
+`ops/vacantrun/enclosure_20260920/` 整套就跑在它上面。
+⚠ 仍然**不要**把這句話推廣到別台機器：`probe()` 每台自己量。
 
 ## 共同的收緊（三個後端都套用）
 
