@@ -178,6 +178,41 @@ def visible_timing(out: pathlib.Path, cell: dict) -> dict:
             "visible_suite_detail": per}
 
 
+#: 工作區樣板一定有的四個檔（`ops/gain/r530/templates/<task>/`）。
+TEMPLATE_FILES = frozenset({"goal.md", "contract.md", "run_tests.sh",
+                            "tests_visible/test_visible.py"})
+
+
+def ws_added(out: pathlib.Path, cell: dict) -> dict:
+    """**worker 在工作區裡多放了什麼**——只有這個題庫問得出來的觀測。
+
+    R530 的樣板附了 `tests_visible/` 與 `run_tests.sh`（`TASK_FORMAT.md` §八-5：
+    worker 看得到、跑得到）。所以可以問一件 R535 問不出來的事：
+    **他用我們給他的檢查，還是自己另外造一套？**
+
+    `tests_visible/__pycache__` 存在 ⇒ 那組檢查被 import 過（跑過）。
+    工作區裡多出 `test_*.py`／`*_test.py` ⇒ 他自己寫了一套。
+    兩件事**可以同時發生**，也可以都不發生。**這是觀測不是判準。**
+    """
+    src, how = graded_dir(out, cell)
+    if src is None:
+        return {"ws_added_files": None, "ws_ran_shipped_checks": None,
+                "ws_wrote_own_tests": None}
+    names = sorted(str(p.relative_to(src)) for p in src.rglob("*")
+                   if p.is_file()
+                   and "__pycache__" not in p.relative_to(src).parts)
+    added = [n for n in names if n not in TEMPLATE_FILES]
+    return {
+        "ws_added_files": added,
+        "ws_snapshot": how,
+        "ws_ran_shipped_checks": (src / "tests_visible" / "__pycache__").is_dir(),
+        "ws_wrote_own_tests": [
+            n for n in added
+            if pathlib.PurePath(n).name.startswith("test_")
+            or pathlib.PurePath(n).name.endswith(("_test.py", "_tests.py"))],
+    }
+
+
 def dist(vals: list[float]) -> dict | None:
     """**印分佈不印均值**（人類指令）。"""
     v = sorted(x for x in vals if x is not None)
@@ -235,6 +270,7 @@ def main(argv: list[str] | None = None) -> int:
     # 所以不管跑的時候有沒有想到要量，這一條都補得回來。
     for c in cells:
         c.update(visible_timing(out, c))
+        c.update(ws_added(out, c))
 
     if not args.no_hidden:
         print(f"# 隱藏驗收計分（timeout={timeout_s}s，**只計分不回饋**）",
@@ -404,10 +440,17 @@ def main(argv: list[str] | None = None) -> int:
     add(f"* 工作區裡那一份可見驗收被動過的格子：{len(ws_moved)} 格"
         f"{'：' + ', '.join(ws_moved) if ws_moved else ''}"
         "（計分用的是工作區外那一份，所以動了也騙不到閘門——這是觀測不是錯誤）")
-    pc = [c for c in measured if c.get("ws_suite_pycache")]
-    add(f"* worker 真的跑過題庫附給他的那組可見驗收"
-        f"（`tests_visible/__pycache__` 存在）：{frac_str(len(pc), len(measured))}"
-        "。**R535 量不到這件事**——它的工作區裡根本沒有驗收。這是觀測不是判準。")
+    ran = [c for c in measured if c.get("ws_ran_shipped_checks")]
+    own = [c for c in measured if c.get("ws_wrote_own_tests")]
+    add(f"* worker 跑過題庫附給他的那組可見驗收"
+        f"（`tests_visible/__pycache__` 存在）：{frac_str(len(ran), len(measured))}")
+    add(f"* worker **自己另外寫了一套測試**："
+        f"{frac_str(len(own), len(measured))}"
+        + ("（例：" + ", ".join(
+            f"`{c['cell']}`→{c['ws_wrote_own_tests']}" for c in own[:4]) + "）"
+           if own else ""))
+    add("  ⇒ 這兩條 **R535 都量不到**——它的工作區裡根本沒有驗收。"
+        "兩件事可以同時發生也可以都不發生，**是觀測不是判準**。")
     f3 = {}
     for c in measured:
         k = c.get("f3_verdict") or "?"
