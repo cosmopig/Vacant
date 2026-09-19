@@ -1,0 +1,4472 @@
+{
+  "generated": "2026-09-19T09:38:44Z",
+  "tasks_n": 20,
+  "measurements_n": 80,
+  "sandbox_requested": "auto",
+  "ceiling_s": 300.0,
+  "multiplier": 3.0,
+  "reference_not_all_pass": [],
+  "max_file_wall_s_by_condition": {
+    "serial": 0.369,
+    "parallel2": 0.175,
+    "bad_stake": 0.179
+  },
+  "worst_reference": {
+    "task_id": "ow_11_reflow",
+    "suite": "visible",
+    "backend": "bwrap",
+    "solution": "good.py",
+    "all_pass": true,
+    "passed": 3,
+    "total": 3,
+    "files": [
+      {
+        "file": "test_visible.py",
+        "wall_ms": 369,
+        "timed_out": false,
+        "rc": 0,
+        "passed": 3,
+        "total": 3
+      }
+    ],
+    "suite_wall_s": 0.371,
+    "max_file_wall_s": 0.369,
+    "condition": "serial"
+  },
+  "worst_any": {
+    "task_id": "ow_11_reflow",
+    "suite": "visible",
+    "backend": "bwrap",
+    "solution": "good.py",
+    "all_pass": true,
+    "passed": 3,
+    "total": 3,
+    "files": [
+      {
+        "file": "test_visible.py",
+        "wall_ms": 369,
+        "timed_out": false,
+        "rc": 0,
+        "passed": 3,
+        "total": 3
+      }
+    ],
+    "suite_wall_s": 0.371,
+    "max_file_wall_s": 0.369,
+    "condition": "serial"
+  },
+  "resolution_floor_s": 0.03,
+  "floor_dominated": false,
+  "rule_value_test_timeout_s": 2,
+  "recommended_test_timeout_s": 2,
+  "bad_stake_records": [
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 83,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.085,
+      "max_file_wall_s": 0.083,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 6,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 111,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.113,
+      "max_file_wall_s": 0.111,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 89,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.091,
+      "max_file_wall_s": 0.089,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 10,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 114,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 10,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.115,
+      "max_file_wall_s": 0.114,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 59,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.061,
+      "max_file_wall_s": 0.059,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 160,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.161,
+      "max_file_wall_s": 0.16,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 6,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.032,
+      "max_file_wall_s": 0.031,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 7,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 7,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.038,
+      "max_file_wall_s": 0.036,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 4,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 7,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 7,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 9,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 9,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 9,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 9,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 3,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 9,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 9,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.031,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 38,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.038,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 7,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 41,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 7,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.043,
+      "max_file_wall_s": 0.041,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 38,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.038,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 8,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 8,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 6,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 68,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.071,
+      "max_file_wall_s": 0.068,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 58,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.061,
+      "max_file_wall_s": 0.058,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 6,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.032,
+      "max_file_wall_s": 0.031,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 9,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 9,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 43,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.045,
+      "max_file_wall_s": 0.043,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 5,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 5,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 4,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.032,
+      "max_file_wall_s": 0.031,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 8,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 8,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.031,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 5,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 5,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 4,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 54,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 4
+        }
+      ],
+      "suite_wall_s": 0.056,
+      "max_file_wall_s": 0.054,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 6,
+      "total": 16,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 69,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 16
+        }
+      ],
+      "suite_wall_s": 0.071,
+      "max_file_wall_s": 0.069,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 3,
+      "total": 4,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 53,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 4
+        }
+      ],
+      "suite_wall_s": 0.054,
+      "max_file_wall_s": 0.053,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 9,
+      "total": 16,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 73,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 9,
+          "total": 16
+        }
+      ],
+      "suite_wall_s": 0.075,
+      "max_file_wall_s": 0.073,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 4,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 51,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 4
+        }
+      ],
+      "suite_wall_s": 0.053,
+      "max_file_wall_s": 0.051,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 16,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 66,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 16
+        }
+      ],
+      "suite_wall_s": 0.067,
+      "max_file_wall_s": 0.066,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 30,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.032,
+      "max_file_wall_s": 0.03,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 37,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.037,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 7,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 40,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 7,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.042,
+      "max_file_wall_s": 0.04,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.032,
+      "max_file_wall_s": 0.031,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 4,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 9,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 9,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.036,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.038,
+      "max_file_wall_s": 0.036,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.036,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 9,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 42,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 9,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.044,
+      "max_file_wall_s": 0.042,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.038,
+      "max_file_wall_s": 0.036,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 8,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 8,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.036,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.031,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 3,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 37,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.037,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 6,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 45,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.047,
+      "max_file_wall_s": 0.045,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 3,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 67,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.07,
+      "max_file_wall_s": 0.067,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.031,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 40,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.042,
+      "max_file_wall_s": 0.04,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 10,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 43,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 10,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.044,
+      "max_file_wall_s": 0.043,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 44,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.045,
+      "max_file_wall_s": 0.044,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 4,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 61,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.063,
+      "max_file_wall_s": 0.061,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 7,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 51,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 7,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.055,
+      "max_file_wall_s": 0.051,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 4,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 38,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.04,
+      "max_file_wall_s": 0.038,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 38,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.041,
+      "max_file_wall_s": 0.038,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 37,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.037,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 67,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.07,
+      "max_file_wall_s": 0.067,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 8,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 8,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 41,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.042,
+      "max_file_wall_s": 0.041,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 54,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.055,
+      "max_file_wall_s": 0.054,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 40,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.044,
+      "max_file_wall_s": 0.04,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 5,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 50,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 5,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.052,
+      "max_file_wall_s": 0.05,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 7,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 43,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 7,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.045,
+      "max_file_wall_s": 0.043,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 3,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.036,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 5,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 41,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 5,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.043,
+      "max_file_wall_s": 0.041,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 7,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 7,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 40,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.042,
+      "max_file_wall_s": 0.04,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 45,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.047,
+      "max_file_wall_s": 0.045,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 4,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 0,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 0,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.031,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": true,
+      "passed": 2,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 55,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.058,
+      "max_file_wall_s": 0.055,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 4,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 179,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.181,
+      "max_file_wall_s": 0.179,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 2,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 39,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.041,
+      "max_file_wall_s": 0.039,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": true,
+      "passed": 2,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 86,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.088,
+      "max_file_wall_s": 0.086,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_a.py",
+      "all_pass": false,
+      "passed": 4,
+      "total": 7,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 63,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 7
+        }
+      ],
+      "suite_wall_s": 0.065,
+      "max_file_wall_s": 0.063,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 56,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.057,
+      "max_file_wall_s": 0.056,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_b.py",
+      "all_pass": false,
+      "passed": 5,
+      "total": 7,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 42,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 5,
+          "total": 7
+        }
+      ],
+      "suite_wall_s": 0.043,
+      "max_file_wall_s": 0.042,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 1,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 38,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 1,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.04,
+      "max_file_wall_s": 0.038,
+      "condition": "bad_stake"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "bad_c.py",
+      "all_pass": false,
+      "passed": 3,
+      "total": 7,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 7
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "bad_stake"
+    }
+  ],
+  "records": [
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 79,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.082,
+      "max_file_wall_s": 0.079,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 14,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 109,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 14,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.111,
+      "max_file_wall_s": 0.109,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 15,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 15,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 14,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 14,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 15,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 15,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 49,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.051,
+      "max_file_wall_s": 0.049,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 15,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 15,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 45,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.053,
+      "max_file_wall_s": 0.045,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 14,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 14,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.031,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 4,
+      "total": 4,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 58,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 4
+        }
+      ],
+      "suite_wall_s": 0.06,
+      "max_file_wall_s": 0.058,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 16,
+      "total": 16,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 76,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 16,
+          "total": 16
+        }
+      ],
+      "suite_wall_s": 0.078,
+      "max_file_wall_s": 0.076,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 42,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.045,
+      "max_file_wall_s": 0.042,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 50,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.066,
+      "max_file_wall_s": 0.05,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 369,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.371,
+      "max_file_wall_s": 0.369,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 14,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 52,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 14,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.054,
+      "max_file_wall_s": 0.052,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.032,
+      "max_file_wall_s": 0.031,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 57,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.06,
+      "max_file_wall_s": 0.057,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 66,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.07,
+      "max_file_wall_s": 0.066,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 37,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.037,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 12,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 50,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 12,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.054,
+      "max_file_wall_s": 0.05,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 49,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.051,
+      "max_file_wall_s": 0.049,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 77,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.079,
+      "max_file_wall_s": 0.077,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 40,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.042,
+      "max_file_wall_s": 0.04,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.034,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 12,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 44,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 12,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.046,
+      "max_file_wall_s": 0.044,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 2,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 6,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 2,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 30,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.032,
+      "max_file_wall_s": 0.03,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 6,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.032,
+      "max_file_wall_s": 0.031,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 2,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 7,
+      "total": 7,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 7,
+          "total": 7
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "serial"
+    },
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 14,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 175,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 14,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.177,
+      "max_file_wall_s": 0.175,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_01_csvjson",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 137,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.138,
+      "max_file_wall_s": 0.137,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 15,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 15,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.038,
+      "max_file_wall_s": 0.036,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_02_ratelimit",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 14,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 14,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.035,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_03_mdtable",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.034,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 15,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 15,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.034,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_04_layerconf",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.035,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 15,
+      "total": 15,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 15,
+          "total": 15
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_05_router",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.031,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 14,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 14,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_06_verrange",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.031,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 34,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.034,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_07_retrypolicy",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.032,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 16,
+      "total": 16,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 80,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 16,
+          "total": 16
+        }
+      ],
+      "suite_wall_s": 0.082,
+      "max_file_wall_s": 0.08,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_08_logscan",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 4,
+      "total": 4,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 75,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 4,
+          "total": 4
+        }
+      ],
+      "suite_wall_s": 0.077,
+      "max_file_wall_s": 0.075,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 44,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.046,
+      "max_file_wall_s": 0.044,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_09_minitemplate",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.032,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_10_dedupe",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 14,
+      "total": 14,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 14,
+          "total": 14
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_11_reflow",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 31,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.033,
+      "max_file_wall_s": 0.031,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.035,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_12_bytesize",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 32,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.032,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.037,
+      "max_file_wall_s": 0.035,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_13_timespans",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.038,
+      "max_file_wall_s": 0.036,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 12,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 12,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.035,
+      "max_file_wall_s": 0.033,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_14_statemachine",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.038,
+      "max_file_wall_s": 0.035,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 37,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.037,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_15_tomlsub",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 13,
+      "total": 13,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 41,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 13,
+          "total": 13
+        }
+      ],
+      "suite_wall_s": 0.043,
+      "max_file_wall_s": 0.041,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_16_pathglob",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 33,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.034,
+      "max_file_wall_s": 0.033,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 12,
+      "total": 12,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 41,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 12,
+          "total": 12
+        }
+      ],
+      "suite_wall_s": 0.042,
+      "max_file_wall_s": 0.041,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_17_diffpatch",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 3,
+      "total": 3,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 3,
+          "total": 3
+        }
+      ],
+      "suite_wall_s": 0.036,
+      "max_file_wall_s": 0.035,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 6,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 43,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.046,
+      "max_file_wall_s": 0.043,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_18_taskorder",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 2,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 36,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.036,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 6,
+      "total": 6,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 35,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 6,
+          "total": 6
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.035,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_19_redact",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 2,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 38,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.038,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "hidden",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 7,
+      "total": 7,
+      "files": [
+        {
+          "file": "test_hidden.py",
+          "wall_ms": 38,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 7,
+          "total": 7
+        }
+      ],
+      "suite_wall_s": 0.039,
+      "max_file_wall_s": 0.038,
+      "condition": "parallel2"
+    },
+    {
+      "task_id": "ow_20_slugify",
+      "suite": "visible",
+      "backend": "bwrap",
+      "solution": "good.py",
+      "all_pass": true,
+      "passed": 2,
+      "total": 2,
+      "files": [
+        {
+          "file": "test_visible.py",
+          "wall_ms": 53,
+          "timed_out": false,
+          "rc": 0,
+          "passed": 2,
+          "total": 2
+        }
+      ],
+      "suite_wall_s": 0.055,
+      "max_file_wall_s": 0.053,
+      "condition": "parallel2"
+    }
+  ],
+  "honest_bounds": [
+    "量的是參考解與已知壞樁，不是模型寫的解——3 倍是工程餘裕不是上界。",
+    "逾時格仍然可能出現；出現時是觀測不是 bug。",
+    "這個數字只對 ops/gain/r530/bank/ 這 20 題成立。",
+    "`floor_dominated` 為真 ⇒ 這個量**測不到題目**，量到的是 python3 啟動與沙箱進出的地板。那種情形下 ×3 規則算出來的是地板的三倍，**不可以直接當作業值**——要講明白為什麼改用別的數字。"
+  ]
+}
