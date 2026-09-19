@@ -503,8 +503,29 @@ if (sub === 'attach') {
                 items: await items.allInnerTexts()}; }
       uploaded = true;
     }
+    const chipsBefore = await chips().count();
     await items.nth(idx).click();
     await page.waitForTimeout(600);
+
+    // ⚠ **判準是「提示詞列上多了一個 chip」，不是「那顆按鈕被按了」。**
+    //   2026-09-20 實測（s12-video-ref-2）：點素材那一下**就直接掛上去了**
+    //   ——`chipsOnBar` 從 0 變 1，而 `button.detail-add-to-prompt-btn` 的 count 是 0。
+    //   舊碼把「按鈕不在」當成 UI 改版而失敗，其實**事情已經做完了**。
+    //   ⇒ 先看可觀測的結果（chip 數），結果對了就收工，不再堅持某一顆按鈕存在。
+    for (let k = 0; k < 10 && (await chips().count()) <= chipsBefore; k++) {
+      await page.waitForTimeout(400);
+    }
+    if ((await chips().count()) > chipsBefore) {
+      await page.keyboard.press('Escape');
+      await page.mouse.move(4, 4);
+      return {ok: true, status: 'attached', file, stem, uploaded, via: 'item_click',
+              chipsBefore, chipsAfter: await chips().count(),
+              assetLabel: label((await items.allInnerTexts())[idx] || ''),
+              note: '點素材就直接掛上了（沒有經過「新增至提示詞」那顆按鈕）。'
+                  + 'chip 數 ' + chipsBefore + ' → ' + (await chips().count()) + ' 是可觀測的證據。'};
+    }
+
+    // chip 沒有增加才回頭找那顆按鈕（舊版 UI 的路徑）
     const addBtn = page.locator(`${OV} button.detail-add-to-prompt-btn`);
     if (await addBtn.count() !== 1) { await page.keyboard.press('Escape');
       // ⚠ 這顆在「提示詞列上已經有 chip」的狀態下也不存在。上面的清 chip 那段
