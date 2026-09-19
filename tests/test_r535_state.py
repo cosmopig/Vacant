@@ -570,3 +570,45 @@ def test_alpha_and_thresholds_are_frozen():
     assert CEILING_PASS_THRESHOLD == 0.50
     assert VOID_RATE_MAX == 0.10
     assert TOST_DELTA == 0.15 and RULED_OUT_UPPER == 0.15
+
+
+# ══ I-4：RS 不是單發臂（2026-09-19 修）══════════════════════════════════
+def test_i4_does_not_flag_rs_for_retrying():
+    """⚠ RS 是 `--retry resample --max-attempts 3`，**跑 3 次是正常的**。
+
+    舊版的 I-4 把 RS 與 PC 一起要求 `attempts_used == 1`，理由寫著
+    「它們是 `--retry none`」——那是本輪最早那次轉述錯誤（RS 被寫成
+    `--retry none`）的殘留。預註冊已經更正，**收官器沒跟著改**。
+
+    在 R535 的真資料上它誤報 69 格（S1）＋23 格（S2），**全部都是 RS**，
+    而 PC 是 90/90 剛好 1 次。誤報不會改狀態（本檔只出聲），
+    但它會讓讀報告的人以為資料有問題。
+    """
+    from ops.gain.r535 import state_r535 as S
+
+    cells = [
+        {"cell": "t1__RS", "stratum": "S1", "arm": "RS",
+         "attempts_used": 3, "requests_seen": 9, "void": False},
+        {"cell": "t1__RF", "stratum": "S1", "arm": "RF",
+         "attempts_used": 3, "requests_seen": 9, "void": False},
+        {"cell": "t1__PC", "stratum": "S1", "arm": "PC",
+         "attempts_used": 1, "requests_seen": 3, "void": False},
+    ]
+    iv = S.invariants(cells, "S1")
+    assert iv["i4_single_shot_arms_retried"]["n"] == 0, (
+        f"RS 跑 3 次被當成違反了：{iv['i4_single_shot_arms_retried']['cells']}")
+
+
+def test_i4_still_catches_pc_retrying():
+    """PC 是唯一的單發臂 ⇒ 它 > 1 才是真違反（負控制）。"""
+    from ops.gain.r535 import state_r535 as S
+
+    cells = [
+        {"cell": "t1__RS", "stratum": "S1", "arm": "RS",
+         "attempts_used": 3, "requests_seen": 9, "void": False},
+        {"cell": "t1__PC", "stratum": "S1", "arm": "PC",
+         "attempts_used": 2, "requests_seen": 6, "void": False},
+    ]
+    iv = S.invariants(cells, "S1")
+    assert iv["i4_single_shot_arms_retried"]["n"] == 1
+    assert iv["i4_single_shot_arms_retried"]["cells"] == ["t1__PC"]

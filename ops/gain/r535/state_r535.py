@@ -469,9 +469,14 @@ def inconsistent_stats(cells: list[dict], stratum: str) -> dict:
 def invariants(cells: list[dict], stratum: str) -> dict:
     """預註冊 §二-5 的可驗不變量裡，**本檔讀得到的那兩條**。
 
-    * **I-4**：RS／PC 的 `attempts_used == 1`。它們是 `--retry none`；
-      看到 3 就代表那一格不是用該臂的旗標跑的——RS 不再是單發基線，
-      H2（RF vs RS）就變成「3 次 vs 3 次」，而那件事在分數上看不出來。
+    * **I-4**：**只有 PC** 的 `attempts_used == 1`。
+      ⚠ **這裡原本把 RS 一起算進去，那是錯的**（2026-09-19 修）。
+      RS 是 `--retry resample --max-attempts 3`，**不是** `--retry none`——
+      它本來就可以跑到 3 次。舊版的 I-4 於是在 R535 的真資料上誤報
+      69 格（S1）＋23 格（S2），**全部都是 RS**，而 PC 是 90/90 剛好 1 次。
+      那個錯誤定義是本輪最早那次轉述錯誤（RS 被寫成 `--retry none`）
+      的殘留：預註冊已經更正，**收官器沒跟著改**。
+      ⇒ 只有 PC 看到 > 1 才是真違反（那代表它不是用該臂的旗標跑的）。
     * **I-5**：每格 `requests_seen > 0`。`== 0` ＝ agent 根本沒被中介到
       （§二-3 那個埠差一號的坑），那不是「模型不想講話」。
 
@@ -481,8 +486,9 @@ def invariants(cells: list[dict], stratum: str) -> dict:
     由 `--reconcile` 與 `ops/gain/replay/verify_run_receipts.py` 各自負責。
     """
     sel = [c for c in cells if c["stratum"] == stratum and not c["void"]]
+    # ⚠ **只有 PC**。RS 是 `--retry resample --max-attempts 3`，>1 是正常的。
     i4 = sorted(c["cell"] for c in sel
-                if c["arm"] in ("RS", "PC") and c["attempts_used"] not in (None, 1))
+                if c["arm"] == "PC" and c["attempts_used"] not in (None, 1))
     i5 = sorted(c["cell"] for c in sel if not c["requests_seen"])
     return {"i4_single_shot_arms_retried": {"n": len(i4), "cells": i4[:32]},
             "i5_not_mediated": {"n": len(i5), "cells": i5[:32]},
@@ -1546,7 +1552,7 @@ def render(doc: dict) -> str:
         iv = ps["invariants"]
         if iv["i4_single_shot_arms_retried"]["n"]:
             L.append(f"  ⚠ I-4 破：{iv['i4_single_shot_arms_retried']['n']} 格 "
-                     "RS／PC 的 attempts_used ≠ 1"
+                     "**PC** 的 attempts_used ≠ 1"
                      f"（{iv['i4_single_shot_arms_retried']['cells'][:4]}）"
                      "——那一格不是用該臂的旗標跑的。本檔只出聲不改狀態")
         if iv["i5_not_mediated"]["n"]:
