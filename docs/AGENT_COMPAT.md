@@ -1,20 +1,22 @@
-# 通用 agent 相容性矩陣（`vacant run` V0 實測，2026-09-18；**OpenCode 真模型 2026-09-19**；**Claude Code 真模型 2026-09-19**）
+# 通用 agent 相容性矩陣（`vacant run` V0 實測，2026-09-18；**OpenCode／Claude Code／Codex(API key) 真模型 2026-09-19**）
 
 > 一句話：五個 agent，**四個接通了**（Claude Code／Codex／OpenCode／pi），
-> 一個**沒量**（Hermes，三台機器上都沒裝）。Codex 有一條**設定也救不了的路**：
+> **其中四個都有真模型證據**（§8–§10；pi 靠 R535），一個**沒量**
+> （Hermes，三台機器上都沒裝）。Codex 有一條**設定也救不了的路**：
 > ChatGPT 登入時模型通道是寫死的 `wss://`，HTTP 反向代理在那條路上不存在。
 
 ## 證據等級（**不可混講**，`.claude/commands/goal.md` 的同一張表）
 
 | 級 | 意思 | 誰 |
 |---|---|---|
-| **L-real** | **真模型**真跑，拒交格與交付格都過，收據可重驗 | **pi**（R535）、**OpenCode**（2026-09-19，見 §8）、**Claude Code**（2026-09-19，見 §9） |
-| **L-fake** | 假上游（`mockup.py`）只驗通道與閘門 | Codex（API key 那條） |
-| **L-none** | 沒量 | Hermes |
+| **L-real** | **真模型**真跑，拒交格與交付格都過，收據可重驗 | **pi**（R535）、**OpenCode**（§8）、**Claude Code**（§9）、**Codex（API key／自訂 provider）**（§10）——四個都是 2026-09-19 |
+| **L-fake** | 假上游（`mockup.py`）只驗通道與閘門 | （目前沒有只停在這一級的 agent；§1–§6 的假上游格仍然只算這一級） |
+| **L-none** | 沒量 | Hermes ／ **Codex（`codex login`／ChatGPT 帳號）** |
 
 ⚠ **L-fake 不能寫成「這個 agent 可以用 Vacant」。** 假上游碰不到 SSE 分塊、
 工具呼叫格式、逾時、上下文長度。§1 的矩陣量的是**通道與閘門**；
-只有 §8（OpenCode）與 §9（Claude Code）那兩節是真模型。
+真模型只在 §8（OpenCode）、§9（Claude Code）、§10（Codex API key）三節，
+其餘各格仍然是假上游。
 
 量具與判準：[`vacant/vrun/`](../vacant/vrun/)（V0，見
 [`docs/VACANT_RUN.md`](VACANT_RUN.md)）。
@@ -64,8 +66,8 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
 | agent | ① wire 協定 | ② 怎麼指過來 | ③ `requests_seen` | ④ 閘門（拒交／交付） |
 |---|---|---|---|---|
 | **Claude Code** 2.1.276（假上游）／**2.1.278**（真模型） | `POST /v1/messages?beta=true`（Anthropic Messages，SSE） | **環境變數** `ANTHROPIC_BASE_URL`（launcher 已內建，**零接線**——**接本地模型也成立**，見 §9 與下面那一行 ⚠） | 假上游 **3**（拒交格）／**4**（交付格）<br>**真模型：5 ／ 4**（§9） | ✅ **exit 20** `visible_fail` ／ ✅ **exit 0** `visible_pass`<br>**真模型：✅ exit 20 ／ ✅ exit 0（L-real，§9）** |
-| **Codex CLI** 0.153.2（API key／自訂 provider） | `POST /v1/responses`（Responses API，SSE） | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`）。**不吃 `OPENAI_BASE_URL`** | **1**（拒交格）／**2**（交付格） | ✅ **exit 20** ／ ✅ **exit 0** |
-| **Codex CLI** 0.153.2（`codex login`／ChatGPT 帳號） | `wss://chatgpt.com/backend-api/codex/responses`（**WebSocket**） | ❌ **沒有辦法**。`chatgpt_base_url` 只搬得動外掛／遙測／設定那幾條 | **0**（模型那一條完全沒經過 proxy） | ⚠ 閘門**照跑**（觸發點在行程結束不在 wire 上），但**逐字落盤在那條路上不成立** |
+| **Codex CLI** 0.153.2（假上游）／**0.147.0**（真模型，vacant-dev）（API key／自訂 provider） | `POST /v1/responses`（Responses API，SSE） | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`／`wrap_agent.sh codex`）。**不吃 `OPENAI_BASE_URL`** | 假上游 **1**（拒交格）／**2**（交付格）<br>**真模型：4 ／ 5**（§10） | ✅ **exit 20** ／ ✅ **exit 0**<br>**真模型：✅ exit 20 ／ ✅ exit 0（L-real，§10）** |
+| **Codex CLI** 0.153.2（`codex login`／ChatGPT 帳號，**L-none**） | `wss://chatgpt.com/backend-api/codex/responses`（**WebSocket**） | ❌ **沒有辦法**。`chatgpt_base_url` 只搬得動外掛／遙測／設定那幾條 | **0**（模型那一條完全沒經過 proxy） | ⚠ 閘門**照跑**（觸發點在行程結束不在 wire 上），但**逐字落盤在那條路上不成立** |
 | **OpenCode** 1.18.31 | (a) `POST /v1/responses`（內建 `openai` provider）<br>(b) `POST /v1/chat/completions`（自訂 openai-compatible provider） | (a) **環境變數** `OPENAI_BASE_URL`（launcher 已內建，**零接線**——但**只在模型 id 是 models.dev 註冊表裡的那些**時成立，見 §2.3 ⚠）<br>(b) 設定 `OPENCODE_CONFIG_CONTENT`／`wrap_agent.sh opencode`。**真模型走這條** | (a) **2**（假上游）／ (b) **2**（拒交格）、**3**（交付格）<br>**真模型：5 ／ 5**（§8） | ✅ 兩條路都 **exit 20**；(b) 另有 ✅ **exit 0**<br>**真模型 (b)：✅ exit 20 ／ ✅ exit 0（L-real，§8）** |
 | **pi** 0.85.1 | `POST /v1/chat/completions`（OpenAI Chat Completions，SSE，`store:false`） | **設定**：`PI_CODING_AGENT_DIR` 指到一個暫時目錄＋寫 `models.json`。**不吃 `OPENAI_BASE_URL`**（實測反例見 §3） | **1**（拒交格）／**2**（交付格） | ✅ **exit 20** ／ ✅ **exit 0** |
 | **Hermes** | **未測**（推論：OpenAI-compatible，`model.base_url`／`CUSTOM_BASE_URL`） | **未測** | **未測** | **未測** |
@@ -130,7 +132,9 @@ launcher **不判交付也不判拒交**，行為正確但訊息容易看漏）�
 | `wrap_agent.sh claude` | 4 | `POST /v1/messages?beta=true` ×3 ＋ `HEAD /api/hello` | `visible_pass`、**exit 0** |
 
 模型用 `VACANT_AGENT_MODEL` 換；Codex 的 wire 用 `VACANT_CODEX_WIRE`
-（`responses`｜`chat`）換。下面幾節是同樣的東西攤開來，要自己改的時候看。
+（`responses`｜`chat`）換；Codex 另有一個**預設不設**的
+`VACANT_CODEX_REASONING_EFFORT`（為什麼要有它：§10.7 的 runaway）。
+下面幾節是同樣的東西攤開來，要自己改的時候看。
 
 ### 2.0.1 底層機制
 
@@ -288,6 +292,10 @@ pi -p --provider vacantproxy --model m "把 solution.py 寫完" < /dev/null
 
 ## 4. Codex 那一格（人類特別點名的）
 
+> ⚠ **本節是 2026-09-18 的假上游那一輪。** API key／自訂 provider 那條
+> **2026-09-19 已經升到 L-real**（真模型兩格，§10）；ChatGPT 登入那條
+> **一個字都沒動**，§4.2／§4.3 仍然逐字成立。
+
 ### 4.1 原本的預期，跟量到的不一樣
 
 預期是：Codex 走 Responses API ＋ `store:true` ＋ `previous_response_id`
@@ -328,8 +336,9 @@ POST /v1/responses   store=false   previous_response_id=<不存在>   stream=tru
 `wireproxy._handle` 也不處理（它是 request/response 一來一回的模型）。
 **有沒有繞法**：
 
-1. ✅ **改用自訂 provider ＋ API key**（§2.2）——這是目前唯一**證明有效**的繞法。
-   代價：不能用 ChatGPT 訂閱額度，要另外付 API 費用。
+1. ✅ **改用自訂 provider ＋ API key**（§2.2）——這是目前唯一**證明有效**的繞法，
+   **2026-09-19 已經在真模型上把兩格跑完**（§10）。
+   代價：不能用 ChatGPT 訂閱額度，要另外付 API 費用（或像 §10 那樣指到本地端點）。
 2. ⚠ **出網封鎖**（`block_egress.sh`，V3，要 root）——封鎖之後那條路會
    **連不上**而不是**偷偷連上**。它不能讓你看到 wire，但能讓
    「沒被中介到」變成一個**看得見的失敗**而不是一個沉默的洞。**沒量過。**
@@ -894,6 +903,359 @@ rd_deliver  RUN-ON   2   2   0   1   1   48a05fa5269fd1f1…  OK      總判：O
 - `--json` 的 stdout 汙染已經在 `88dbc00` 修掉了（agent 的 stdout 另外落在
   `<run-dir>/agent_stdout.log`），但 Claude Code 的 `unrecognized_model` 警告
   走 stderr，還是會混在終端輸出裡。**要讀就讀 `run_RUN-ON.json`。**
+
+---
+
+## 10. Codex CLI（API key／自訂 provider）× 真模型（L-real，2026-09-19）
+
+**跟 §8／§9 同一個形狀：上游是真模型不是 `mockup.py`。這一節補的是第三條 wire——
+`POST /v1/responses`（Responses API）。**
+
+⚠ **只有 API key／自訂 provider 那一條。`codex login`（ChatGPT 帳號）那條沒有動**
+——它的模型通道寫死 `wss://chatgpt.com/backend-api/codex/responses`，
+HTTP 反向代理在那條路上不存在（§4.2），人類另外排。
+
+- 機器：vacant-dev（`100.124.254.83`）· **codex-cli 0.147.0**
+  （`/home/user1/.local/bin/codex`，**機器上本來就有的那一份，本次沒有安裝任何東西**）
+  ⚠ 版本跟 §1 矩陣的 0.153.2 **不同**——那一格是 2026-09-18 在別處用假上游量的。
+  引用時要連機器一起講。
+- 上游：`http://100.119.113.56:1234/v1`（1003，載著 `gemma-4-12b-it-qat`）
+- 接線：**設定路線**（`wrap_agent.sh codex` ⇒ `CODEX_HOME` ＋ `config.toml` 裡一個
+  **新** provider id）。**不是零接線**——Codex 不吃 `OPENAI_BASE_URL`（§3 有否定證據）。
+- 題目：**現成的** `ops/gain/r535/bank/s1_01_addmul`（沒有為了這次新造題）
+- 判斷層：`vacant/vrun/launcher.py` @ `9eeb1d9`，`--suite` 指到**工作區外**的 bank 路徑
+- 落盤：vacant-dev 的 `/var/tmp/vacant_codex/rd_*`（收據、`rows.jsonl`、
+  `wire_RUN-ON/{index.jsonl,*.req.bin,*.resp.bin}`、`_frozen_RUN-ON/`，共 15 MB）。
+  **`/var/tmp` 沒有備份、會被清**——下面抄的是關鍵欄位不是原始 bytes（同附錄 A 的規矩）。
+  ⚠ **跑完之後那份工作樹已經移掉了**（vacant-dev 當時只剩 3.7 G，一份 checkout
+  佔 788 MB）。要重驗收據的話先把它加回來——**用 worktree，不要 clone**：
+
+  ```
+  cd ~/vacant/Vacant && git worktree add --detach /var/tmp/vacant_codex/repo 9eeb1d9
+  cd /var/tmp/vacant_codex/repo && python3 -m vacant.vrun.verify_receipts --selftest
+  ```
+
+### 10.0 先解決那個**以為會是障礙的障礙**：`/v1/responses` 上游支不支援
+
+§9.0 的 Claude Code 那一格靠「LM Studio 原生吃 `/v1/messages`」才成立。
+Codex 走的是第三條路，所以**先直測 1003 有沒有開 `/v1/responses`**
+（不經 `vacant run`）：
+
+```
+$ curl -s -X POST http://100.119.113.56:1234/v1/responses \
+    -H 'content-type: application/json' \
+    -d '{"model":"gemma-4-12b-it-qat","input":"say hi"}'
+{"id":"resp_7e9eba0c…","object":"response","status":"completed",
+ "model":"gemma-4-12b-it-qat",
+ "output":[{"type":"reasoning",…},{"type":"message","role":"assistant",
+            "content":[{"type":"output_text","text":"Hi! How can I help you today?"}]}]}
+```
+
+SSE ＋ function tool 也直測過，`response.output_item.added` 會帶
+`{"type":"function_call"}`、回應物件裡 `tool_choice:"auto"`、`parallel_tool_calls:true`。
+⇒ **這一節的可搬運性到「上游會講 Responses API」為止。** `wireproxy.route()` 把
+`/v1/responses` 歸到 `openai`（它不是 `/v1/messages` 也不是 `/v1/complete`）
+照 path 轉送，**不改寫 body**。上游只有 chat/completions 的話這條路要嘛自備 shim、
+要嘛改用 `VACANT_CODEX_WIRE=chat`——後者**本節沒有量過**。
+
+### 10.1 `command -v` 說沒裝，是 PATH 的假象（第二次踩同一個坑）
+
+`.claude/commands/goal.md` 寫「vacant-dev 上只裝了 pi」。§9.7 已經記過
+Claude Code 的反例，**Codex 也一樣**：
+
+```
+$ ssh user1@vacant-dev 'command -v codex'          # 非互動 shell
+（空）
+$ ssh user1@vacant-dev 'bash -lic "command -v codex; codex --version"'
+/home/user1/.local/bin/codex
+codex-cli 0.147.0
+```
+
+⇒ `~/.local/bin` 不在 SSH 非互動 shell 的預設 PATH 上。**本次沒有安裝 Codex。**
+
+### 10.2 模型 id：**Codex 是「放行＋警告」，跟 Claude Code 同向、跟 OpenCode 反向**
+
+這是同一個位置的**第三個資料點**（§2.3 ＝ OpenCode 擋、§9.1 ＝ Claude Code 放行）：
+
+```
+warning: Model metadata for `gemma-4-12b-it-qat` not found.
+Defaulting to fallback metadata; this can degrade performance and cause issues.
+```
+
+印完照送，六通全部 `200`。⇒ **三家在「不認得的模型 id」這一格是 2 放行 ∶ 1 擋。
+仍然不准從任何一格推另一格**——那是三次實測，不是一條規則。
+
+⚠ 「fallback metadata」具體退到什麼（上下文視窗、支不支援 reasoning summary）
+**本節沒有量**。它跟 §9.1 的 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 是同型的洞：
+長任務下它會改變送出去的 input，也就是改變「逐字落盤」的內容。
+
+順帶兩行**不是致命但會嚇人**的輸出，都在 stderr：
+
+```
+WARNING: proceeding, even though we could not create PATH aliases:
+  Refusing to create helper binaries under temporary dir "/tmp" (codex_home: …)
+ERROR codex_core::tools::router: error=failed to parse function arguments:
+  unknown variant `pending`,step:`, expected one of `pending`, `in_progress`, `completed`
+```
+
+第一行是 `wrap_agent.sh` 把 `CODEX_HOME` 放在 `mktemp -d` 底下的後果（**刻意的**：
+設定是這一次 run 的產物不是使用者的狀態）；第二行是模型自己吐壞了 `update_plan`
+的參數，Codex 記一筆繼續跑。**兩行都不影響裁決**，但看到它們不要當成接線壞了。
+
+### 10.3 兩格怎麼分開的——沿用 §8.1／§9.2，**題目一個位元組都沒改**
+
+| 格 | 工作區放的 TASK.md | 結果 |
+|---|---|---|
+| **拒交格** | `TASK.md`（散文只說 "sum"／"multiplying"） | 掉進 `meta.json` 寫好的 `trap`（套件要 `add`／`mul`） |
+| **交付格** | `TASK_explicit.md`（多五行 `## Interface`） | 兩題都過 |
+
+⚠ **兩格都是 Codex 自己跑出來的**——工作區進去時只有一個 `TASK.md`，
+**沒有預放 `solution.py`**。落地的檔案逐字：
+
+```python
+# 拒交格 —— Codex 寫的（掉進命名陷阱，而且比另外兩家掉得更深）
+def sum_numbers(a, b):
+    return a + b
+
+def multiply_numbers(a, b):
+    return a * b
+```
+```python
+# 交付格 —— Codex 寫的
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```
+
+**交付格的 `ws_end_sha256` ＝ `d1ed637b…`，與 §8 OpenCode、§9 Claude Code 的交付格
+逐位元相同。** 三個 agent、三條 wire 協定（chat/completions、Messages、Responses）、
+同一個模型、同一題，交付格落地的東西一樣。
+
+⚠ **拒交格反而三家都不一樣**：OpenCode 與 Claude Code 都寫 `add`／`multiply`
+（`39c19a7a…`），Codex 寫 `sum_numbers`／`multiply_numbers`（`b720ee87…`）。
+⇒ 「陷阱是題目的性質」（§9.2）那句話**只在敘述寫死介面時**表現成同一份檔案；
+敘述含糊時，**落地的錯法是會分岔的**。n=1，不是效果量。
+
+### 10.4 逐字落盤（**出廠接線**，零額外設定）
+
+```
+指令（兩格只差工作區裡那一份 TASK.md）
+  export PATH=/home/user1/.local/bin:/home/user1/.local/opt/node-v22.23.2-linux-x64/bin:$PATH
+  export VACANT_RUN_UPSTREAM_OPENAI=http://100.119.113.56:1234/v1
+  export VACANT_AGENT_MODEL=gemma-4-12b-it-qat
+  export VACANT_CODEX_WIRE=responses          # 也是預設值，寫出來只為了可讀
+  python3 -m vacant.vrun.launcher \
+      --workspace <ws> --run-dir <rd> \
+      --suite <repo>/ops/gain/r535/bank/s1_01_addmul/tests_visible \
+      --task-id codex_real_<cell> --sandbox none --test-timeout 30 \
+      --timeout 1200 --json \
+      -- <repo>/ops/vacantrun/wrap_agent.sh codex \
+         "Read TASK.md and do what it says. Use your tools to write the file."
+```
+
+### `codex_real_asis`（拒交格，出廠接線）
+
+```
+task_id         = codex_real_asis
+accepted        = false   refused = true   stop_reason = visible_fail
+退出碼           = 20
+requests_seen   = 4   wire_by_protocol = {'openai': 4}   wire_errors = 0
+proxy paths     = {'POST /v1/responses -> 200 [openai]': 4}
+upstream        = http://100.119.113.56:1234/v1/responses
+upstreams_defaulted = ['anthropic']   ← **這一跑沒有任何一通走 anthropic**，見 §10.6
+visible         = 0 / 2   （兩題都掛在 ImportError：`add`／`mul` 都不存在）
+agent_rc        = 0       ← Codex 自己說成功了，閘門說沒有
+agent_wall_s    = 145.116  run_wall_s = 145.540   retry = none   attempts_used = 1
+ws_start_sha256 = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+ws_end_sha256   = b720ee87df4a27f00d85f57636d71663d3be5da0ab6cac2dc6e23c7b80a356fd
+wire_digest     = e3aef31ba7cc6db26860a7796416d8649f1980117b15dfae9b62d4999a412157
+verdict_sha256  = f6e1198af74dc07391a597aaa05eb032c95f4f8ca84c5fb7153ad8f2f88dc4f9
+verdict_hash    = 28e8d32909f343f2163d8bb2706a016374a0730d9a08135b7efe4e0b396d2c5d
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+**`agent_rc = 0` 第三次出現。** §8（OpenCode）、§9（Claude Code）各一次，
+現在 Codex 也一次：**三個不同 agent、三條不同 wire，拒交格全部是
+「agent 宣告完成、退出碼 0，閘門在行程結束那一刻擋下來」。**
+那不是某一個框架的怪癖。
+
+### `codex_real_asis_deliver`（交付格，出廠接線）
+
+```
+task_id         = codex_real_asis_deliver
+accepted        = true    refused = false   stop_reason = visible_pass
+退出碼           = 0
+requests_seen   = 5   wire_by_protocol = {'openai': 5}   wire_errors = 0
+proxy paths     = {'POST /v1/responses -> 200 [openai]': 5}
+upstream        = http://100.119.113.56:1234/v1/responses
+visible         = 2 / 2
+agent_rc        = 0   agent_wall_s = 155.164  run_wall_s = 155.320
+retry = none   attempts_used = 1
+ws_start_sha256 = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+ws_end_sha256   = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+wire_digest     = 60ddfd3198a14d5a681ea50942febe18fb0d8108a8fdcd78707f81bcfe3a2abd
+verdict_sha256  = dcc800d011503c4dfb72c5664bf4798d0a3721070af9929e8b62b62517298271
+verdict_hash    = ebaf2218e3d6ce7c37352059972b6c87a365cee046600099b20a22ee01f7c169
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+### 10.5 wire 逐字（拆 `*.req.bin`）——**鐵律 3 在 Responses 這條路上成立**
+
+§4.1 用假上游量過「Codex 每通重放完整上文」。**真模型把它複驗了一次**：
+
+```
+codex_real_asis（拒交格）
+  POST /v1/responses 200  req=44261  n_input=3   tools=10  store=false  previous_response_id=<不存在>
+        input kinds: message ×3
+  POST /v1/responses 200  req=45474  n_input=6   tools=10
+        input kinds: message ×3, reasoning, function_call, function_call_output
+  POST /v1/responses 200  req=46500  n_input=9   tools=10
+  POST /v1/responses 200  req=47002  n_input=11  tools=10
+
+codex_real_asis_deliver（交付格）
+  POST /v1/responses 200  req=44277  n_input=3 → 7 → 9 → 12 → 14（tools=10 固定）
+```
+
+`store = false`、**沒有 `previous_response_id`**、`tools` 固定 10、
+每一通把完整 input 陣列重放一次。⇒ **逐字落盤成立，鐵律 3 沒有破**
+（與 §8 的 chat/completions、§9 的 Messages 同結論，**三條 wire 各驗過一次**）。
+
+⚠ 那是**這個版本、這個 provider 設定**下的觀測。Codex 只要改用
+`store: true` ＋ `previous_response_id`，對話狀態就會搬到伺服器端、proxy 只看得到
+delta ——§4.1 原本預期的就是那個。**它現在沒發生，不等於它不會發生。**
+
+### 10.6 `upstreams_defaulted` 看一眼：**這一格跟 Claude Code 不一樣**
+
+§9.4 的 Claude Code 會探 `HEAD /api/hello`，被 `route()` 判成 openai、
+落到公開 API 的預設上游、**真的出網**。**Codex 沒有這個行為**：
+
+```
+四跑的 proxy path 全表 = {'POST /v1/responses -> 200 [openai]': 4／5／6／6}
+upstreams_seen         = ['http://100.119.113.56:1234/v1/responses']   ← 只有這一個
+upstreams_defaulted    = ['anthropic']
+```
+
+`upstreams_defaulted` 仍然列著 `anthropic`，因為這一跑**沒有人指定**
+`VACANT_RUN_UPSTREAM_ANTHROPIC`。**但 `wire_by_protocol` 裡沒有 anthropic 這一項**
+——那條預設上游從頭到尾沒被用到。
+
+⇒ **`upstreams_defaulted` 的讀法**：它說的是「這條路由沒人指定，**萬一**有流量會去
+公開 API」，**不是**「已經出網了」。要判有沒有出網，看的是 `wire_by_protocol` 與
+`wire_*/index.jsonl` 的 `upstream` 欄位。§9.4 那一格兩者都成立（列了 ＋ 真的有一通），
+本節只成立前半。結構性補法仍然是 `block_egress.sh`（V3），**沒量過**。
+
+### 10.7 一種**跑不完**的失敗：思考模式下的 runaway（`codex_real_smoke`）
+
+**第一次冒煙就踩到，必須寫下來。** 同樣的指令、同樣的出廠接線，第 5 通：
+
+```
+POST /v1/responses   request_bytes = 47751
+  status = 0   error = BrokenPipeError(32, 'Broken pipe')   elapsed_s = 713.67
+  response_sha256 = null          ← infra_void 的那個洞，wire_digest 簽的就是含 null 的配對
+  已經落盤的 resp.bin = 9,340,297 bytes
+    response.reasoning_text.delta  = 94,776 個
+    response.output_text.delta     = 0 個
+    response.completed             = 0 個
+```
+
+模型在**推理裡繞圈**，一個 `output_text` 都沒吐、713 秒還沒收尾。
+（`BrokenPipe` 是人為中止造成的，`agent_rc = -15`——**這一格不算兩格之一**，
+它是一份故障紀錄。那一跑的閘門照樣動：`visible 1/2`、`exit 20`。）
+
+**為什麼會這樣**：1003 的 LM Studio **預設開思考**，而 Codex 的
+`/v1/responses` body 帶 `reasoning: {"summary": "auto"}`（**沒有 `effort`**）
+⇒ 思考照開。`ops/gain/r535/run_r535.py` 對同一個端點的紀律是 **NOTHINK**
+（送 `reasoning_effort: "none"`，2026-09-19 裁決），本節算是從另一條 wire 上
+撞到同一件事。
+
+⚠ **出廠接線本身沒壞**：同樣設定總共跑了三次拒交格，**兩次正常收工（145 秒／
+145 秒），一次 runaway**。§10.4 那兩格就是正常的那批。**1 / 3，n 很小。**
+
+**緩解（已驗，但是觀測不是保證）**：`wrap_agent.sh` 多了一個
+**預設不設**的鉤子 `VACANT_CODEX_REASONING_EFFORT`。沒設的話產生的
+`config.toml` 與之前**逐位元相同**；設 `none` 才多一行 `model_reasoning_effort`。
+
+```
+$ VACANT_CODEX_REASONING_EFFORT=none  …  wrap_agent.sh codex  （其餘與 §10.4 逐字相同）
+```
+
+```
+codex_real_nt_refuse    accepted=false  visible_fail  exit 20  requests_seen=6  agent_rc=0
+    visible 0/2   agent_wall_s=301.212  run_wall_s=301.473
+    ws_end_sha256  = b71ff60edca5e852136303340de62b5338e6266bf5b3da8af728f38301dfba8d
+    wire_digest    = 5391a12e5cc421abdbc678f6ec6f18f2a4149cc5759170daa14a31dc487265aa
+    verdict_hash   = 9df146b93fc2a820bfd9d6b45634b52c67bf617b8fc8ba26315224c274ea2a24
+    receipts       = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+codex_real_nt_deliver   accepted=true   visible_pass  exit 0   requests_seen=6  agent_rc=0
+    visible 2/2   agent_wall_s=336.015  run_wall_s=336.252
+    ws_end_sha256  = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+    wire_digest    = 478167c142af00aa8c4ce94c4978d847ed81c7a1c376f8c3749ed2e5b5c59a20
+    verdict_hash   = 29035207d34f5d606ab98958f89e5b22e71e0942cccb3319654237d6d5d697bc
+    receipts       = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+request body 變成 `reasoning: {"effort": "none", "summary": "auto"}`、
+回應的 `output_tokens_details.reasoning_tokens = 0`、`reasoning_text.delta = 0`，
+兩格都沒有 runaway。
+
+⚠ **交付格的 `ws_end_sha256` 跟出廠接線那一格逐位元相同（`d1ed637b…`），
+拒交格不同**（`b71ff60e…` 是 `sum`／`multiply`，`b720ee87…` 是
+`sum_numbers`／`multiply_numbers`）。同一個接線、同一題、只差推理開關，
+**錯法本來就會漂**——這正是 §10.3 那句話的第二個例子。
+
+⚠ 這個鉤子**把推理整個關掉**。它換來的是「跑得完」，代價是別的題上可能答得更差。
+**本節沒有量那個代價**，而且兩格各只跑一次。
+
+### 10.8 收據驗證（先負控制再驗該跑）
+
+```
+$ python3 -m vacant.vrun.verify_receipts --selftest
+selftest: PASS                                          ← 負控制：它抓得到壞鏈
+
+$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_asis
+rd_asis          RUN-ON   2   2   0   1   1   28e8d32909f343f2…  OK      總判：OK
+$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_asis_deliver
+rd_asis_deliver  RUN-ON   2   2   0   1   1   ebaf2218e3d6ce7c…  OK      總判：OK
+$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_nt_refuse
+rd_nt_refuse     RUN-ON   2   2   0   1   1   9df146b93fc2a820…  OK      總判：OK
+$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_nt_deliver
+rd_nt_deliver    RUN-ON   2   2   0   1   1   29035207d34f5d60…  OK      總判：OK
+```
+
+### 10.9 這一節**沒有**說的事
+
+1. **不是**「Codex 配 Vacant 寫程式比較好」。出廠接線的交付格跑 **1 次**、
+   拒交格跑 **3 次**（兩次正常＋一次 runaway）；NOTHINK 那組各 1 次。
+   沒有對照組、沒有換題、沒有換模型。**存在性證明，不是效果量。**
+2. **不是**「Codex 可以用 Vacant」——只有 **API key／自訂 provider** 那一條。
+   `codex login` 那條的模型通道是 `wss://`，**本次一個字都沒動**（§4.2 仍然成立）。
+3. **不是**「零接線」。Codex 不吃 `OPENAI_BASE_URL`（§3 的否定證據），
+   要寫 `CODEX_HOME/config.toml`。
+4. **不是**「任何 OpenAI 相容端點都行」。前提是上游會講 **Responses API**（§10.0）。
+   只有 chat/completions 的端點要改 `VACANT_CODEX_WIRE=chat`，**那條沒量過**。
+5. **不是**「全部流量都留在本機」的保證。本節四跑**實際上**沒有一通出網
+   （§10.6），但 `anthropic` 那條路由仍然是 `defaulted`。
+6. **不是**「0.153.2 也是這樣」。本節量的是 **0.147.0**。
+7. 沿用 §7 的所有邊界：proxy **records，不 verifies**；
+   `vacant run` 單獨只有 L3。
+
+### 10.10 踩到的坑
+
+- **`command -v codex` 空白不等於沒裝**（§10.1）。**第二次**在同一台機器上
+  用同一個方式量錯，先 `bash -lic`。
+- **`CODEX_HOME` 放在 `/tmp` 會被 codex 抱怨**（拒絕在暫時目錄下造 helper binary），
+  但它印完 `WARNING: proceeding` 就照跑。**不是錯誤。**
+- **`~/.codex/auth.json` 在那台機器上是存在的**（人類自己的登入）。
+  `wrap_agent.sh` 每次 `mktemp -d` 一個新的 `CODEX_HOME`，**本次沒有碰那一份**
+  ——這也是為什麼走的一定是 API key 那條路：新的 `CODEX_HOME` 裡沒有 `auth.json`，
+  provider 的 `env_key = "OPENAI_API_KEY"` 拿到的是 launcher 給的 sentinel。
+- **`--json` 要讀 `<run-dir>/run_RUN-ON.json`**，不要讀 stdout：Codex 把整個
+  對話逐格印在 stderr（`exec` ／ `succeeded in …`），終端上會混在一起。
+- **兩格並行跑會互相拖慢**：`nt_*` 那組兩格同時跑是 301／336 秒，
+  出廠接線那組分開跑是 145／155 秒，而且當時 1003 上還有**別的 session** 在用。
+  **牆鐘時間不可以當成效能數字。**
 
 ---
 

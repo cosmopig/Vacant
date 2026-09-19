@@ -27,9 +27,11 @@
 #    寫死的 `wss://chatgpt.com/backend-api/codex/responses`，設定搬不動。
 #    本檔走的是「自訂 provider ＋ API key」那條。沒有 `OPENAI_API_KEY` 就會
 #    401 而不是偷偷走回 ChatGPT——**那是刻意的，fail-visible 勝過沉默的洞**。
-# 3. 這裡的版本是 2026-09-18 實測的那幾個（pi 0.85.1、codex-cli 0.153.2、
-#    opencode 1.18.31、Claude Code 2.1.276）。**上游改版這支就會漂，
-#    漂了的徵兆是 `requests_seen == 0`，不是這支報錯。**
+# 3. 這裡的版本是 2026-09-18 假上游實測的那幾個（pi 0.85.1、codex-cli 0.153.2、
+#    opencode 1.18.31、Claude Code 2.1.276）；2026-09-19 的真模型輪用的是
+#    opencode 1.18.31、Claude Code 2.1.278、**codex-cli 0.147.0**（vacant-dev
+#    上本來就有的那一份）。**同一格兩個版本號不可以混寫成一個。**
+#    **上游改版這支就會漂，漂了的徵兆是 `requests_seen == 0`，不是這支報錯。**
 set -uo pipefail
 
 AGENT="${1:-}"
@@ -77,6 +79,24 @@ model = "$MODEL"
 model_provider = "vacantproxy"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
+EOF
+    # ⚠ **選用、預設不設**：`VACANT_CODEX_REASONING_EFFORT`。沒設的話上面那份
+    #   config.toml 與 2026-09-18／09-19 兩輪實測**逐位元相同**（這一段一個字都不寫）。
+    #   設了（例如 `none`）才多一行 `model_reasoning_effort`。
+    #   為什麼留這個鉤子：2026-09-19 在 1003（LM Studio ×`gemma-4-12b-it-qat`，
+    #   **預設開思考**）上量到，Codex 的 `/v1/responses` 這條路會有一種**跑不完**
+    #   的失敗——模型吐了 94,776 個 `response.reasoning_text.delta`、一個
+    #   `output_text` 都沒有、713 秒還沒 `response.completed`。
+    #   三跑裡踩到一次。`model_reasoning_effort = "none"` 之後 request body 變成
+    #   `reasoning: {"effort": "none", …}`、回應的 `reasoning_tokens` 落到 0，
+    #   拒交／交付兩格都收得了工。逐字見 `docs/AGENT_COMPAT.md` §10.7。
+    #   ⚠ 這是**觀測到的緩解**不是保證：n 很小，而且它把推理整個關掉，
+    #     換題換模型都可能不成立。
+    if [ -n "${VACANT_CODEX_REASONING_EFFORT:-}" ]; then
+        printf 'model_reasoning_effort = "%s"\n' \
+            "$VACANT_CODEX_REASONING_EFFORT" >> "$CFG/config.toml"
+    fi
+    cat >> "$CFG/config.toml" <<EOF
 
 [model_providers.vacantproxy]
 name = "vacant proxy"
