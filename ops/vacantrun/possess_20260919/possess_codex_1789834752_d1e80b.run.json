@@ -1,0 +1,20 @@
+{
+  "task_id": "possess_codex_1789834752_d1e80b",
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "requests_seen": 3,
+  "wire_by_protocol": {
+    "openai": 3
+  },
+  "wire_errors": 0,
+  "agent_rc": 0,
+  "visible_passed": 0,
+  "visible_total": 1,
+  "ws_start_sha256": "14d3a3c9f4348a121a9ed1714c9bd4f5231a06393f8c86c778c8ac01dc1143d7",
+  "ws_end_sha256": "16a58f2b766e96e624f910557cce442a54022837e90037be911e9c4df869b076",
+  "wire_digest": "18afdfea1d30d5cdcc5c39bba8b2c145a366598f77592fd45f13219df94c9144",
+  "verdict_hash": "1635eb553dc682a664d49f9eebba19e92d2c7c9b0d8964ff2852b088a73c8e0e",
+  "upstreams_defaulted": [],
+  "failures": "test_add.py::<module> — driver_error: test file defines neither check_*() nor main()"
+}

@@ -1,0 +1,47 @@
+{
+  "claude": {
+    "agent": "claude",
+    "config_dir": "/Users/cosmopig/.claude",
+    "config_file_exists": true,
+    "binary": "/Users/cosmopig/.local/bin/claude",
+    "binary_via": "login_shell",
+    "version": "2.1.278 (Claude Code)",
+    "present": true
+  },
+  "codex": {
+    "agent": "codex",
+    "config_dir": "/Users/cosmopig/.codex",
+    "config_file_exists": true,
+    "binary": "/Users/cosmopig/.local/bin/codex",
+    "binary_via": "login_shell",
+    "version": "codex-cli 0.153.2",
+    "present": true
+  },
+  "opencode": {
+    "agent": "opencode",
+    "config_dir": "/Users/cosmopig/.config/opencode",
+    "config_file_exists": true,
+    "binary": "/Users/cosmopig/.opencode/bin/opencode",
+    "binary_via": "login_shell",
+    "version": "1.18.31",
+    "present": true
+  },
+  "pi": {
+    "agent": "pi",
+    "config_dir": "/Users/cosmopig/.pi/agent",
+    "config_file_exists": false,
+    "binary": null,
+    "binary_via": "none",
+    "version": null,
+    "present": true
+  },
+  "hermes": {
+    "agent": "hermes",
+    "config_dir": null,
+    "config_file_exists": false,
+    "binary": null,
+    "binary_via": "none",
+    "version": null,
+    "present": false
+  }
+}

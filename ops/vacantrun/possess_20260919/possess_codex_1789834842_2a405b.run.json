@@ -1,0 +1,20 @@
+{
+  "task_id": "possess_codex_1789834842_2a405b",
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "requests_seen": 3,
+  "wire_by_protocol": {
+    "openai": 3
+  },
+  "wire_errors": 0,
+  "agent_rc": 0,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "ws_start_sha256": "ffc8f28a12571e1b28162776ef0e9611a4b751fe6542da55b1077c69c9b0be26",
+  "ws_end_sha256": "43d37a15a62ca9dbd5cd834d9497548e5bd439a939f586fb66f8c5b6ea19a57c",
+  "wire_digest": "9be19cf8a8b3ac706ed52e89a21a6ba9d59674de3a524381303ed224bb290d0b",
+  "verdict_hash": "553793c806e372102f82b695cfafc10204ef94009fe55a02f45ba3bcf1ab2c79",
+  "upstreams_defaulted": [],
+  "failures": ""
+}

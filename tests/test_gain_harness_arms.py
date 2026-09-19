@@ -421,11 +421,24 @@ FROZEN_SOURCE_SHA = {
     "arm_on": "9f67066153ed4894e644c09535d4558d0242792ce86c1716ecb20cb901eeb23f",
     "arm_onr": "9f8d86e2700953127a039697b4162ecd4a4898a4a5b8853af045c7f84ccb092f",
     "extract_code": "869e6e2cb10c15e00a81e9d9ddaac57c8cd60c08abdd3f08323bbed6107150cd",
-    "meets_demand": "0df188d5dd6626622e6cd6b44691937ae727700d74cb61d6fd85411678059b7e",
-    "behavior_signature": "a5bc15ad665ef31873b50c920e7b7116c61eb682ffffd460f9529780111ad53a",
+    "meets_demand": "870f4d4ddbb715cca06bbdab814db9c9b91e076babfd1bd3ed544ff500cc86c2",
+    "behavior_signature": "7c68db56aa331b708a8eaa8334da27918d8494e81ab8a0363374cced7d723b6e",
     "conform_failure_detail": "237992047d020e62ba1ea896aa88aa3992616f19f63d9ff4088b7508753206a0",
     "_visible_test_slicer": "e0efdd0277cf82401bb812936f16f88329b31697670d6eef4d9bd8eaef0f4178",
 }
+# 0.8.0（2026-09-19，套件改名 `vacant` -> `vacant_network`，人類授權＋Fable 裁決）：
+# `meets_demand` 與 `behavior_signature` 各**只有一行 import 換了套件名**——
+#   meets_demand:       from vacant.checks import CheckInfraError, run_python_check
+#   behavior_signature: from vacant.checks import CheckInfraError, run_python_capture
+# 這兩行是**真的 import**，不還原模組就跑不起來（`vacant` 這個套件已經不存在）。
+# 行為、落盤欄位、判準一個字沒動；`vacant_network.checks` 與舊的 `vacant.checks`
+# 是同一份檔案，只是目錄名不同（`git mv`，內容逐位元組相同）。
+# 舊值（round460b–0.7.0）：
+#   meets_demand       0df188d5dd6626622e6cd6b44691937ae727700d74cb61d6fd85411678059b7e
+#   behavior_signature a5bc15ad665ef31873b50c920e7b7116c61eb682ffffd460f9529780111ad53a
+# ⚠ **其餘九個函式的 sha 一個都沒動。** 改名掃描本來也碰到了 `_visible_test_slicer`
+#   與 `arm_conform` 的 docstring（純散文路徑），那兩處**已經還原**——一行註解不值得
+#   動一個凍結釘子，代價是那兩行指向一個不存在的路徑（同 108 個歸檔資料檔的取捨）。
 # round460e（2026-09-08，Fable A3）：`generate()` 的 sha 改過一次。
 # 改動是**純基建**——只在 urlopen 外面包一層 `_wall_clock_guard(timeout+60)`，
 # 給「OS 沒兌現 socket 逾時」那條路一個上界；正常路徑上的行為、落盤欄位、

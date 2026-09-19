@@ -1,0 +1,17 @@
+{
+  "possess_agent": "codex",
+  "suite_source": "none",
+  "suite_dir": null,
+  "gate": "skipped",
+  "requests_seen": 4,
+  "stop_reason": "ungated",
+  "accepted": null,
+  "shim_exit": 21,
+  "argv": [
+    "exec",
+    "--skip-git-repo-check",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "real_binary": "/Users/cosmopig/.local/bin/codex",
+  "cwd": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/possess/g_nosuite"
+}

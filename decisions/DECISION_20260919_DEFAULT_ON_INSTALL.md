@@ -17,6 +17,8 @@
   （⚠ 跟 `docs/AGENT_COMPAT.md` §10 的 codex **0.147.0** 不是同一個；
   **同一格兩個版本號不可以混寫成一個**）
 - 判斷層：`vacant_network/vrun/{possess,proxyd,gateshim}.py`（本輪新增）
+- 逐格落盤：[`ops/vacantrun/possess_20260919/`](../ops/vacantrun/possess_20260919/)
+  （⚠ 只有摘要與索引，原始 bytes 在會被清掉的 scratchpad 裡）
 - 證據等級：**L-real**（真 agent、真模型、真流量）——但只有 **3/5** 個 agent；
   pi 與 hermes 在那台機器上**沒有可執行檔**，只有設定目錄 ⇒ 接線碼跑過，
   **`requests_seen` 一通都沒有** ⇒ 那兩格是 **L-none**。

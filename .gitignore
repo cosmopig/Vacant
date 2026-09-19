@@ -88,3 +88,11 @@ tmp/
 
 # 展場伺服器的執行期輸出（serve_twin.py 的預設 --out），不是原始碼
 ops/exhibit/twin/live/
+
+# `ops/gain/cert_drift_gate.py::selftest` 的合成夾具（跑完即刪，名字帶 uuid）。
+# ⚠ 這兩條不是潔癖：夾具路徑**一旦進了 git 歷史就修不回來**——
+# `historical_paths()` 的 `--follow` 會把它接回 `decisions/` 的本尊，
+# M14_basename_fabricates_cert_commit 這條變異檢查就永久失效（從 HEAD 刪掉沒有用，
+# 實測過）。2026-09-19 真的被 `git add -A` 撞進去一次，見 commit a8fb56ff。
+ops/gain/_r481_fixture_scope_*.md
+ops/gain/_r481_dup_*/

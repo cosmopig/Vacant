@@ -1,0 +1,18 @@
+{
+  "task_id": "possess_codex_1789834940_afc98c",
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "requests_seen": 0,
+  "wire_by_protocol": {},
+  "wire_errors": 0,
+  "agent_rc": 0,
+  "visible_passed": 0,
+  "visible_total": 1,
+  "ws_start_sha256": "e87658c75d5882a18268c38ecaac989a99374edfa6418629f0cefeb4f38839a7",
+  "ws_end_sha256": "e87658c75d5882a18268c38ecaac989a99374edfa6418629f0cefeb4f38839a7",
+  "wire_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "verdict_hash": "46bc79e91a61c23385fac5ed7bf64056fcd20ea33e60bdd935f7dd3aa2c588da",
+  "upstreams_defaulted": [],
+  "failures": "test_visible.py::check_01 — exception: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import add]"
+}

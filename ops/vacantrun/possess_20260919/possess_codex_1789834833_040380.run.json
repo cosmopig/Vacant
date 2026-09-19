@@ -1,0 +1,20 @@
+{
+  "task_id": "possess_codex_1789834833_040380",
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "requests_seen": 3,
+  "wire_by_protocol": {
+    "openai": 3
+  },
+  "wire_errors": 0,
+  "agent_rc": 0,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "ws_start_sha256": "0a29a36d9699d9d8ccc935f3d0bb6d8b2882bca200115479d6cf44ff9d9eb887",
+  "ws_end_sha256": "8c694e32ae303957bfe5990b31b59bfc89764e4e38a818a6c6ce19c57c48d8a6",
+  "wire_digest": "b8299d137ba6891bffe58c8b6fab7722e20647fb4ea733f5f2a8c9647b7b22d7",
+  "verdict_hash": "ca2461a07c437e1f75ae01a1dcfb228191b887635dea3c3d09d49abca3c186a3",
+  "upstreams_defaulted": [],
+  "failures": "test_visible.py::check_02_mul — exception: ImportError: cannot import name 'mul' from 'solution' (/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/possess/home/.vacant-run/possess_codex_1789834833_040380/_frozen_RUN-ON/solution.py) [test_visible.py:6: from solution import mul]"
+}

@@ -1,0 +1,16 @@
+{
+  "possess_agent": "codex",
+  "suite_source": "dir:tests_visible",
+  "suite_dir": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/possess/g_rs0/tests_visible",
+  "gate": "ran",
+  "requests_seen": 0,
+  "stop_reason": "visible_fail",
+  "accepted": false,
+  "shim_exit": 23,
+  "argv": [
+    "exec",
+    "hi"
+  ],
+  "real_binary": "/bin/echo",
+  "cwd": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/possess/g_rs0"
+}

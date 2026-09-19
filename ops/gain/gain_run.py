@@ -546,7 +546,7 @@ def _visible_test_slicer(check_code: str):
     做法：切前綴、再交給**同一個** `meets_demand` 跑。「第 i 條沒過」因此和出貨閘門
     共用同一個執行器，不會多出第二套判準、也不會跟閘門漂移。
 
-    `vacant_network/codebench.py` 產生兩種形狀：
+    `vacant/codebench.py` 產生兩種形狀：
       A 扁平：尾端一串 top-level `assert ...`（`_check_code`，evalplus/MBPP+）
       B 迴圈：`__tests = [...]` 之後一個 for 迴圈（`_lcb_check_code`，LCB）
     認不出來就回 `None`，收據寫 null ＋ 理由——**不猜**。產生器改了形狀，
@@ -722,7 +722,7 @@ def arm_conform(task, agents, rng, calls, book, ident, k=5):
       （hidden ＝ base＋plus，可見沒過結構上蘊含隱藏沒過）。驗收測資不是真需求
       子集的部署裡，拒交會殺掉好答案。
 
-    收據：每一次嘗試都簽進 hash-chain（`vacant_network/logbook.py`），事後可獨立驗鏈。
+    收據：每一次嘗試都簽進 hash-chain（`vacant/logbook.py`），事後可獨立驗鏈。
     回傳的 `receipt_head` 是鏈頭 hash，`attempts` 是逐次的具名紀錄。
     """
     assigned = [rng.choice(agents) for _ in range(k)]

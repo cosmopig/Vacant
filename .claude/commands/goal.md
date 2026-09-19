@@ -50,6 +50,63 @@ pi -p "做這件事"         之後照舊，Vacant 已經在裡面
 
 ---
 
+### ✅ 2026-09-20：「裝一次就有」做出來了（macOS，3/5 通道）
+
+`python -m vacant_network.vrun.possess {install,uninstall,status,detect}`
+（cli 還沒接；裁決 `decisions/DECISION_20260919_DEFAULT_ON_INSTALL.md`）
+
+**通道層——命令列上零個 `vacant`，用完整路徑打真 binary：**
+
+| agent | proxy journal | 結果 |
+|---|---|---|
+| codex 0.153.2 | **5 通** `POST /v1/responses` | 寫出正確 `solution.py` |
+| opencode 1.18.31 | **2 通** | 回 `OK` |
+| Claude Code 2.1.278 | **2 通** `POST /v1/messages?beta=true → 200` | 回 `OK` |
+| pi ／ hermes | — | ⚠ **那台沒有可執行檔 ⇒ L-none，不是失敗** |
+
+**閘門層**（PATH 放 shim，命令列仍然零個 `vacant`）＋**兩個新退出碼**：
+
+| 碼 | 意思 |
+|---|---|
+| `0` | 驗收跑了而且過了 |
+| `20` | 跑了沒過 ⇒ 拒交 |
+| **`21`** | **沒有驗收可跑：只中介沒閘門**（`ungated`／`accepted=null`／`suite_source="none"`） |
+| `22` | infra_void |
+| **`23`** | **`requests_seen == 0`：沒量到中介 ⇒ 裁決不可歸因**（蓋過 0／20／21） |
+
+⇒ **`23` 是「假拒交格」的直接解法**——那個「除了 `requests_seen` 每個欄位都跟合法拒交格一樣」的問題。
+
+**設計決定**：常駐（launchd／`systemd --user`／`bare`）＋ **fail-closed**。
+決定性的理由：**技術上沒有誠實的 fail-open**——要回退直連，這工具就得在失敗當下
+**安靜地把自己解除安裝**。緩解是 **preflight**（先起 proxy、真打一通 round-trip，
+**過了才寫第一個設定檔**；實測擋下兩次，兩次都一個檔沒動）。
+
+**可逆**：備份後立刻驗 sha256 → `status` 逐檔列 `before→after→現在` →
+`uninstall` 逐位元還原**並自驗**。完整循環實測：改 6 檔 → 還原後六個檔 `diff` 零輸出、零殘留。
+⚠ **憑證紅線 `NEVER_TOUCH`**：`auth.json` 那幾支一次都沒讀過。
+
+### 🔴 還不能說的（這幾條是展件與 v1 的擋門）
+
+1. **不能說 Linux 成立**——`systemd --user` ＋ linger **程式碼寫了、一次都沒跑過**。
+   ⚠ **展場機器是 Linux VM** ⇒ 展件可用之前必須補。
+2. **不能說五個都接通**——通道 **3/5 L-real、2/5 L-none**。
+   pi 還多一個沒量的：`~/.pi/agent/` 底下 **`models.json` vs `models-store.json` 哪一份才是真相來源**。
+3. **不能說閘門在五個上都有牙齒**——本輪只量 codex（4 格）。
+4. **不能說重開機之後還在**——`RunAtLoad` 寫了、`launchctl print` 看得到，**沒有真的重開機驗**。
+5. **`status` 的 `wired` 與 `proven` 是兩欄，永遠不把前者說成後者**——
+   journal 只能說「通道層活著且有流量」，**不能說「這個 agent 被中介了」**。
+
+### ⚠ macOS 上一個一定會踩的坑
+
+**TCC 讓 launchd job 卡死而不是報錯。** `.venv` 在 `~/Documents/…` ⇒ job `state=running`、
+pid 有值、**埠沒人在聽、log 兩個都是 0 byte**；堆疊卡在
+`Py_InitializeFromConfig → getpath_readlines → open$NOCANCEL`——
+**python 直譯器在啟動階段的 `open()` 就不回來**（launchd agent 沒有 `~/Documents` 的 TCC 授權
+而且不能跳對話框）。**這不是偶爾失敗，是開發者 checkout 底下一定失敗**
+（正常 `pip install` 碰不到）。`possess.py` 的 `tcc_risky()` 會在動任何東西之前擋下。
+
+---
+
 ## 一、閘門的可量測定義（仍然有效）
 
 「閘門會動」是**兩格都成立**，而且**用真模型**：
