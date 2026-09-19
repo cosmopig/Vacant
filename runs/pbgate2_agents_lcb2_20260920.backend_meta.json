@@ -1,0 +1,43 @@
+{
+  "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+  "slot_host": "1003",
+  "note_two_wires": "⚠ 這一輪有**兩條 wire**：pi 與 OpenCode 走 `/v1/chat/completions`，Claude Code 走 `/v1/messages?beta=true`。`endpoint` 欄位只放得下一個，所以放使用最多的那一條；完整的兩條在 runs/pbgate2_agents_lcb2_20260920/manifest.json 的 agents[].wire。",
+  "declared": {
+    "host": "1003 / w401-win",
+    "lmstudio_version": "0.4.24+1（FileVersion）／0.4.24.0（ProductVersion）",
+    "version_source": "2026-09-19 由本輪自己在 w401-win 上跑 `powershell (Get-Item <LM Studio.exe>).VersionInfo` 讀出來的（不是 runner 從 HTTP 拿到的——/v1/models 與 header 都不帶版本）⇒ 這是**在該機上量到的檔案屬性**，不是 runner 的量測，也不是別人的口頭回報",
+    "lms_cli_commit": "ff50809",
+    "context": 262144,
+    "parallel": 4,
+    "ttl": null,
+    "lms_ps_verbatim": "gemma-4-12b-it-qat  gemma-4-12b-it-qat  IDLE  7.15 GB  262144  4  Local  (TTL 空)",
+    "concurrency_used": "本輪同時最多 3 串（三條 lane），未超過 parallel=4；發射前 `ss -tn dst 100.119.113.56:1234` 實測那時只有本輪自己的連線"
+  },
+  "thinking": {
+    "verdict": "是",
+    "criterion": "choices[0].message.reasoning_content 非空 ＋ usage.completion_tokens_details.reasoning_tokens > 0",
+    "probe_1003": {
+      "reasoning_content_len": 523,
+      "nested_reasoning_tokens": 241
+    },
+    "negative_control_1004": {
+      "reasoning_content_len": 0,
+      "nested_reasoning_tokens": 0
+    },
+    "TOP_LEVEL_usage_reasoning_tokens": "兩台都 None ⇒ 不可當判準",
+    "batch_total_reasoning_tokens_openai_wire": 93095,
+    "anthropic_wire_caveat": "Claude Code 那 10 格 reasoning_tokens 全 0＝這條 wire 沒有這個欄位，不是思考是 0；同批數得到 11 個 thinking 區塊。兩個數不可換算。"
+  },
+  "probed_models": {
+    "data": [
+      {
+        "id": "gemma-4-12b-it-qat",
+        "object": "model",
+        "owned_by": "organization_owner"
+      }
+    ],
+    "object": "list"
+  },
+  "probed_at_utc": "2026-09-19T18:07:03Z（檔案 mtime，發射前 12 分 53 秒；逐字在 runs/pbgate2_agents_lcb2_20260920/backend_probe_raw.json）",
+  "messages_api_native": "1003 原生支援 POST /v1/messages（含 tool_use）；這是 Claude Code 零接線的前提。wireproxy 只路由 path、不做協定轉換。"
+}

@@ -1,0 +1,56 @@
+{
+  "1003": {
+    "chat": {
+      "raw_first_600": "{\n  \"id\": \"chatcmpl-9y9uxi8hgf8hmmefemx24\",\n  \"object\": \"chat.completion\",\n  \"created\": 1789841218,\n  \"model\": \"gemma-4-12b-it-qat\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"391\",\n        \"reasoning_content\": \"The user wants to know the product of 17 and 23.\\n\\n    *   Method 1: Standard multiplication\\n        17 * 20 = 340\\n        17 * 3 = 51\\n        340 + 51 = 391\\n\\n    *   Method 2: Difference of squares (since 17 and 23 are equidistant from 20)\\n        (20 - 3)(20 + 3) = 20^2 - 3^2\\n        400 - 9 = 391\\n\\n    *   Meth",
+      "content": "391",
+      "reasoning_content_present": true,
+      "reasoning_content_len": 523,
+      "reasoning_content_first_200": "The user wants to know the product of 17 and 23.\n\n    *   Method 1: Standard multiplication\n        17 * 20 = 340\n        17 * 3 = 51\n        340 + 51 = 391\n\n    *   Method 2: Difference of squares (s",
+      "nested_reasoning_tokens": 241,
+      "TOP_LEVEL_usage_reasoning_tokens_DO_NOT_USE": null,
+      "usage": {
+        "prompt_tokens": 31,
+        "completion_tokens": 249,
+        "total_tokens": 280,
+        "completion_tokens_details": {
+          "reasoning_tokens": 241
+        }
+      }
+    },
+    "messages": {
+      "ok": true,
+      "stop_reason": "tool_use",
+      "block_types": [
+        "tool_use"
+      ],
+      "raw_first_400": "{\n  \"id\": \"msg_wut6b84ktkpz2nqjtod09\",\n  \"type\": \"message\",\n  \"role\": \"assistant\",\n  \"content\": [\n    {\n      \"type\": \"tool_use\",\n      \"id\": \"wx1uMo38sE03Y7lnOLEe4ZOIFRkenaUE\",\n      \"name\": \"Bash\",\n      \"input\": {\n        \"command\": \"echo hi\\n\"\n      }\n    }\n  ],\n  \"model\": \"gemma-4-12b-it-qat\",\n  \"stop_reason\": \"tool_use\",\n  \"stop_sequence\": null,\n  \"usage\": {\n    \"input_tokens\": 66,\n    \"outp"
+    }
+  },
+  "1004": {
+    "chat": {
+      "raw_first_600": "{\n  \"id\": \"chatcmpl-omuo1t6lnfnxwqtbpoltyb\",\n  \"object\": \"chat.completion\",\n  \"created\": 1789841222,\n  \"model\": \"gemma-4-12b-it-qat\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"391\",\n        \"reasoning_content\": \"\",\n        \"tool_calls\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 28,\n    \"completion_tokens\": 4,\n    \"total_tokens\": 32,\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0\n    }\n  },\n  \"stats\": {},\n  \"system_fingerprint\": \"gemma-4-12b-it-qa",
+      "content": "391",
+      "reasoning_content_present": true,
+      "reasoning_content_len": 0,
+      "reasoning_content_first_200": "",
+      "nested_reasoning_tokens": 0,
+      "TOP_LEVEL_usage_reasoning_tokens_DO_NOT_USE": null,
+      "usage": {
+        "prompt_tokens": 28,
+        "completion_tokens": 4,
+        "total_tokens": 32,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    "messages": {
+      "ok": true,
+      "stop_reason": "tool_use",
+      "block_types": [
+        "tool_use"
+      ],
+      "raw_first_400": "{\n  \"id\": \"msg_sd0lyufumynnhirg38u6se\",\n  \"type\": \"message\",\n  \"role\": \"assistant\",\n  \"content\": [\n    {\n      \"type\": \"tool_use\",\n      \"id\": \"418501077\",\n      \"name\": \"Bash\",\n      \"input\": {\n        \"command\": \"echo hi\\n\"\n      }\n    }\n  ],\n  \"model\": \"gemma-4-12b-it-qat\",\n  \"stop_reason\": \"tool_use\",\n  \"stop_sequence\": null,\n  \"usage\": {\n    \"input_tokens\": 66,\n    \"output_tokens\": 15,\n    \"c"
+    }
+  }
+}

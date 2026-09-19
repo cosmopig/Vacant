@@ -1,0 +1,14 @@
+I have read the `goal.md` and `contract.md` files and implemented the solution in `solution.py`.
+
+The problem asks to minimize the sum of an array by applying two types of operations:
+1.  **Operation 1**: Divide an element by 2 (rounding up), at most `op1` times total, once per index.
+2.  **Operation 2**: Subtract `k` from an element (if $\ge k$), at most `op2` times total, once per index.
+
+Both can be applied to the same index (at most once each).
+
+My implementation uses dynamic programming:
+-   `dp[j][l]` represents the minimum sum using exactly `j` of Operation 1 and `l` of Operation 2.
+-   For each number in the array, I calculate the potential reduction for four cases: no operation, Op1 only, Op2 only, and both operations (choosing the order that yields the maximum reduction).
+-   I then update the DP table for each element to find the minimum possible sum across all valid combinations of `op1` and `op2`.
+
+The solution is now in `solution.py`.

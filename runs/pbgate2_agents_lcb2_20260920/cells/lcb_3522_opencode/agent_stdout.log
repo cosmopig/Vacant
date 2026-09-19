@@ -1,0 +1,112 @@
+The task is to implement a Python function `resultsArray(nums: List[int], k: int)` in `solution.py`.
+
+**Goal Analysis:**
+- Input: An array of integers `nums` and a positive integer `k`.
+- Output: An array of "powers" for all subarrays of size `k`.
+- Power definition:
+    - If elements are consecutive and sorted in ascending order, the power is the maximum element.
+    - Otherwise, the power is -1.
+- Constraints: $n \le 500$, $nums[i] \le 10^5$, $k \le n$.
+
+**Implementation Details:**
+- A subarray of size `k` starting at index `i` is `nums[i : i+k]`.
+- To check if it's consecutive and sorted:
+    - The smallest element must be `min(subarray)`.
+    - The largest element must be `max(subarray)`.
+    - For a subarray of size $k$ to be consecutive, the difference between max and min must be $k - 1$.
+    - Also, all elements must be unique.
+    - And they must be sorted in ascending order (the problem says "consecutive and sorted in ascending order"). Wait, if it's sorted and consecutive, then `nums[j+1] == nums[j] + 1` for all $j$ from $i$ to $i+k-2$.
+
+Let's re-read: "Its maximum element if all of its elements are consecutive and sorted in ascending order. -1 otherwise."
+Example 1: `nums = [1,2,3,4,3,2,5], k = 3`
+Subarrays:
+- `[1, 2, 3]`: Sorted? Yes. Consecutive? Yes (1, 2, 3). Max is 3.
+- `[2, 3, 4]`: Sorted? Yes. Consecutive? Yes (2, 3, 4). Max is 4.
+- `[3, 4, 3]`: Not sorted. -1.
+- `[4, 3, 2]`: Sorted descending. -1.
+- `[3, 2, 5]`: Not sorted. -1.
+
+So the condition is:
+For a subarray $S = [x_0, x_1, \dots, x_{k-1}]$:
+1. It must be sorted: $x_0 < x_1 < \dots < x_{k-1}$.
+2. It must be consecutive: $x_{j+1} = x_j + 1$ for all $0 \le j < k-1$.
+
+Actually, if it's sorted and consecutive, then $x_0$ is the min, $x_{k-1}$ is the max, and $x_{k-1} - x_0 = k - 1$, AND all elements are unique.
+Wait, "consecutive" usually means they form a sequence like $n, n+1, n+2...$.
+If it's sorted in ascending order AND consecutive, then `nums[i+j] == nums[i] + j` for $j \in [0, k-1]$.
+
+Let's double check Example 3: `nums = [3,2,3,2,3,2], k = 2`
+Subarrays of size 2:
+- `[3, 2]`: Not sorted. -1.
+- `[2, 3]`: Sorted? Yes. Consecutive? Yes (2, 3). Max is 3.
+- `[3, 2]`: Not sorted. -1.
+- `[2, 3]`: Sorted? Yes. Consecutive? Yes (2, 3). Max is 3.
+- `[3, 2]`: Not sorted. -1.
+Output: `[-1, 3, -1, 3, -1]`. Correct.
+
+So the logic for a subarray starting at $i$ of length $k$:
+Check if `nums[j] == nums[i] + (j - i)` for all $j \in [i, i+k-1]$.
+If yes, return `nums[i+k-1]`. Else return -1.
+
+Wait, let's re-read Example 2: `nums = [2,2,2,2,2], k = 4`
+Subarrays of size 4:
+- `[2, 2, 2, 2]`: Sorted? Yes (non-strictly). Consecutive? No. Output -1.
+So it must be strictly increasing and consecutive.
+
+Implementation plan:
+1. Create `solution.py`.
+2. Define `resultsArray(nums, k)`.
+3. Iterate through all subarrays of size $k$.
+4. For each subarray, check the condition.
+5. Return results.
+
+I'll start by writing the code to `solution.py`.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    results = []
+    for i in range(n - k + 1):
+        subarray = nums[i : i + k]
+        is_consecutive_sorted = True
+        for j in range(k - 1):
+            if subarray[j+1] != subarray[j] + 1:
+                is_consecutive_sorted = False
+                break
+        
+        if is_consecutive_sorted:
+            results.append(subarray[-1])
+        else:
+            results.append(-1)
+    return results
+```
+
+Wait, the problem says "all of its elements are consecutive and sorted in ascending order".
+If they are consecutive and sorted in ascending order, then `subarray[j+1] == subarray[j] + 1` is sufficient because it implies both sorted (strictly increasing) and consecutive.
+
+Let's check constraints: $n \le 500$. $O(n \cdot k)$ is fine. $500^2 = 250,000$.
+
+I will write this to `solution.py`.
+Wait, I should check if there are any other requirements in `contract.md` or `goal.md`.
+- `resultsArray(*args)`: The checks pass arguments in order. `nums` then `k`.
+- Standard library only.
+- Return the answer.
+
+I'll write the file now.
+Actually, I should check if there are any existing files that might be relevant or if I should just create it. The prompt says "Write your answer in solution.py at the root of this workspace."
+
+I will use `write` to create `solution.py`. Since I haven't read it yet (it might not exist), I'll check first with `ls`.
+Actually, if it doesn't exist, `read` will fail. I can just try to write it. But the instructions say "NEVER proactively create documentation files... Only create documentation files if explicitly requested by the User." and "ALWAYS prefer editing existing files". However, the contract says "Write your answer in solution.py", which implies creating it if it doesn't exist.
+
+Let me check if `solution.py` exists first.
+The task is complete. I have implemented the `resultsArray` function in `solution.py` according to the specifications in `goal.md` and `contract.md`, and verified it using `run_tests.sh`.
+
+Summary of actions:
+1. Read `goal.md` to understand the problem (finding "power" of subarrays).
+2. Read `contract.md` to understand constraints and requirements (top-level function, return value, etc.).
+3. Created `solution.py` with the implementation.
+4. Verified the solution by running `run_tests.sh`.
+
+The tests passed successfully.

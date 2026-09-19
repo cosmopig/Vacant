@@ -1,0 +1,143 @@
+{
+  "task_id": "pbgate2_lcb_3700_claude",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_pbgate2/repo/ops/vacantrun/wrap_agent.sh",
+    "claude",
+    "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_pbgate2/ws_lcb_3700_claude",
+  "proxy_url": "http://127.0.0.1:38529",
+  "env": {
+    "proxy_url": "http://127.0.0.1:38529",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "53bb8c87d4b432dc1aaa2eae682faf59db8c13e2f449dfe725822b0bf58f16f0",
+  "ws_end_sha256": "8a23352ccad18411a13560cfbd5a53a3cef0a877ebb8735fef9d264607da7f36",
+  "agent_rc": -9,
+  "agent_timed_out": true,
+  "requests_seen": 10,
+  "wire_by_protocol": {
+    "openai": 1,
+    "anthropic": 9
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "infra_void": null,
+  "visible_passed": 1,
+  "visible_total": 3,
+  "verdict_sha256": "872ea086909776e9a5cecfc1265e9627236f4de043edb721df8c73a309d2edd3",
+  "verdict_hash": "fbbbc9aa75e9cb12ef50ad4115074c48d5274ca488bb7cdb4e9e5f3f83ad7295",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "53bb8c87d4b432dc1aaa2eae682faf59db8c13e2f449dfe725822b0bf58f16f0",
+      "argv": [
+        "/var/tmp/vacant_pbgate2/repo/ops/vacantrun/wrap_agent.sh",
+        "claude",
+        "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+      ],
+      "argv_sha256": "3ad206f50b967240eb43e16c074ea0a4b13881579b32063e3bd8a5c395643c3f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": -9,
+      "agent_timed_out": true,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 900.013,
+      "wire_quiesced": true,
+      "requests_seen": 10,
+      "requests_seen_cumulative": 10,
+      "wire_digest": "e63dcf6ca1045f5a5457cea54c65a4271eb7473a08ffe311fd85a915441d6921",
+      "ws_end_sha256": "8a23352ccad18411a13560cfbd5a53a3cef0a877ebb8735fef9d264607da7f36",
+      "frozen_path": "/var/tmp/vacant_pbgate2/rd_lcb_3700_claude/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 3,
+      "verdict_sha256": "872ea086909776e9a5cecfc1265e9627236f4de043edb721df8c73a309d2edd3",
+      "visible_path": "/var/tmp/vacant_pbgate2/rd_lcb_3700_claude/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_visible_02 — assert: args=[[1, 2, 2, 3, 3, 4]] got=8 want=4 [test_visible.py:37: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_visible_03 — assert: args=[[0, 1, 2, 3, 4, 5, 6, 7, 8]] got=252 want=0 [test_visible.py:44: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.119.113.56:1234/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://100.119.113.56:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false,
+      "fallback": null
+    }
+  },
+  "upstreams_defaulted": [],
+  "upstreams_sinked": [],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 1,
+  "wire_digest": "e63dcf6ca1045f5a5457cea54c65a4271eb7473a08ffe311fd85a915441d6921",
+  "run_wall_s": 900.173,
+  "agent_wall_s": 900.013,
+  "failures": "test_visible.py::check_visible_02 — assert: args=[[1, 2, 2, 3, 3, 4]] got=8 want=4 [test_visible.py:37: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)]\ntest_visible.py::check_visible_03 — assert: args=[[0, 1, 2, 3, 4, 5, 6, 7, 8]] got=252 want=0 [test_visible.py:44: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)]"
+}

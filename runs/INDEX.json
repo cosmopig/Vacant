@@ -18,19 +18,19 @@
   "caveat_import_rename": "**`runs/` 底下的腳本與紀錄引用的是舊的 import 名 `vacant.*`／路徑 `vacant/`。** 2026-09-19（0.8.0）套件改名為 `vacant_network`，但這裡**刻意不改**：歸檔的驅動腳本是「當時實際下了什麼指令」的證據，事後改寫等於讓紀錄描述一個沒下過的指令（同預註冊逐塊指令那條紀律）。**代價寫在這裡，不要假裝沒有**：`runs/s3_v1_analyze.py`、`runs/s7b_interact_dom.py` 這類腳本照抄會 `ModuleNotFoundError: No module named 'vacant'`——自己把 `vacant.` 換成 `vacant_network.` 即可。同一條理由也適用於 `decisions/**` 與 `docs/paper_2026-09-14/source_manifest.json` 釘住的那幾份。",
   "caveat_record_spec": "G 系列 run 目錄（`g_*`）**不是** RECORD_SPEC §1 的證據包——它們沒有 manifest.json / ledger_events.jsonl / chain_verify.txt / anomalies.md / SHA256SUMS，用的是 gain_run.py 自己的 summary.json + rows/calls/notes 版面。符合 RECORD_SPEC 的只有 `blayer_*` 那幾個 B 層掃描。每個目錄的 `record_spec` 欄位逐項列出缺哪些。",
   "counts": {
-    "entries": 724,
-    "dirs": 352,
-    "top_level_files": 372,
+    "entries": 727,
+    "dirs": 353,
+    "top_level_files": 374,
     "dirs_with_summary_json": 172,
     "by_kind": {
       "aborted": 9,
       "analysis": 136,
       "other": 24,
-      "real_run": 169,
+      "real_run": 170,
       "replay": 1,
       "smoke": 13
     },
-    "total_bytes": 778124155
+    "total_bytes": 782501690
   },
   "runs": [
     {
@@ -10955,6 +10955,7 @@
         "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
         "decisions/DECISION_20260904_R446_EQUAL_BUDGET_ARM.md",
         "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+        "decisions/DECISION_20260920_PUBLIC_BENCH_GATE_CROSSAGENT.md",
         "ops/exhibit/DECISION_PIPELINE.md"
       ],
       "verdict_decisions": [],
@@ -36028,6 +36029,2150 @@
       "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
     },
     {
+      "name": "pbgate2_agents_lcb2_20260920",
+      "kind": "real_run",
+      "subkind": "agent_matrix_run",
+      "date": "2026-09-20",
+      "date_source": "run_name",
+      "seed": null,
+      "backend": {
+        "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+        "slot_host": "1003",
+        "server_model": null,
+        "declared": {
+          "host": "1003 / w401-win",
+          "lmstudio_version": "0.4.24+1（FileVersion）／0.4.24.0（ProductVersion）",
+          "version_source": "2026-09-19 由本輪自己在 w401-win 上跑 `powershell (Get-Item <LM Studio.exe>).VersionInfo` 讀出來的（不是 runner 從 HTTP 拿到的——/v1/models 與 header 都不帶版本）⇒ 這是**在該機上量到的檔案屬性**，不是 runner 的量測，也不是別人的口頭回報",
+          "lms_cli_commit": "ff50809",
+          "context": 262144,
+          "parallel": 4,
+          "ttl": null,
+          "lms_ps_verbatim": "gemma-4-12b-it-qat  gemma-4-12b-it-qat  IDLE  7.15 GB  262144  4  Local  (TTL 空)",
+          "concurrency_used": "本輪同時最多 3 串（三條 lane），未超過 parallel=4；發射前 `ss -tn dst 100.119.113.56:1234` 實測那時只有本輪自己的連線"
+        },
+        "sidecars": [
+          "pbgate2_agents_lcb2_20260920.endpoint",
+          "pbgate2_agents_lcb2_20260920.backend_meta.json"
+        ],
+        "slot_id": null
+      },
+      "bank": {
+        "family": null,
+        "version": null,
+        "match": "no_rows",
+        "n_task_ids": 0,
+        "candidates": []
+      },
+      "arms": [],
+      "n_rows": 0,
+      "n_rows_by_arm": {},
+      "n_distinct_task_ids": 0,
+      "terminal": null,
+      "complete": null,
+      "infra_void": null,
+      "runner_git": {
+        "sha": null,
+        "dirty": null,
+        "branch": null
+      },
+      "n_files": 345,
+      "bytes": 4375036,
+      "files": [
+        {
+          "name": "MATRIX.log",
+          "bytes": 39161,
+          "sha256": "721fe6aa7c6b838df93be09ab06681c5845c65bb5c148de0ba9b7525c272d425",
+          "lines": 903
+        },
+        {
+          "name": "NOT_IN_REPO.json",
+          "bytes": 6724,
+          "sha256": "1bfe2b8be5d4b9971faa21372296d1446ddc7ac9552faf5bf597484588c2734a",
+          "lines": 78
+        },
+        {
+          "name": "README.md",
+          "bytes": 26820,
+          "sha256": "ce7ec4776af39110a25290f125f6000d96a98d08063d8a8a72941b9940f52da1",
+          "lines": 386
+        },
+        {
+          "name": "SHA256SUMS",
+          "bytes": 36477,
+          "sha256": "4fda9670cf6e2bac40661df647457202bd448f02de0781c7d65f63fdb1e12ef9",
+          "lines": 344
+        },
+        {
+          "name": "SUMMARY.txt",
+          "bytes": 3205,
+          "sha256": "a375360df402bd2b9a99304e04580fc17a09d07a02b709c42301359968e6a546",
+          "lines": 31
+        },
+        {
+          "name": "backend_probe_raw.json",
+          "bytes": 3787,
+          "sha256": "6ff9dcbad18d777b0a06f940151efc5c6555a5e81e54815a2770b1ea918587c3",
+          "lines": 56
+        },
+        {
+          "name": "cells/lcb_3522_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3522_claude/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3522_claude/agent_stdout.log",
+          "bytes": 568,
+          "sha256": "64898e8e233cd1f72498177f985e629120c9a0a1d24daddf7706d0bfd86052a4",
+          "lines": 11
+        },
+        {
+          "name": "cells/lcb_3522_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "fbc920ec3c619fcbe6e459f38e3aa54b9898bfb454c65cdab2dc85b54b43ae8e",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3522_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2048,
+          "sha256": "e907b1b727495fe75c106b12cc86e2c05e915af3e3876d86aa34a682f2777014",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3522_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "b372471fac3f39453b9af22433dd2b2fb313428fb544ec0ca076b340bb6a95ef",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3522_claude/rows.jsonl",
+          "bytes": 444,
+          "sha256": "c1cca256428afc5a18600f8ff08ec9254d702606084ded80f9adc06df7a68286",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3522_claude/run_RUN-ON.json",
+          "bytes": 4578,
+          "sha256": "9be0bcbee6969e62a3d4440de86ef13f51f07f9a1467da7cd12e8b30260fc122",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3522_claude/solution.py",
+          "bytes": 1495,
+          "sha256": "e92c10d4660ee125f4bc5068a48194a83c32aa80a74bd8ddcf51c610dd116cf1",
+          "lines": 36
+        },
+        {
+          "name": "cells/lcb_3522_claude/visible_RUN-ON.json",
+          "bytes": 975,
+          "sha256": "551003248046e68661c5627776b5b6ced982f676f4b5d3bfca90ac3624e3fa86",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3522_claude/wire/index.jsonl",
+          "bytes": 2670,
+          "sha256": "7e79f2e225a64a74bf63e8f375375857f37721340fbe28265fcb46fac6ed6bcd",
+          "lines": 5
+        },
+        {
+          "name": "cells/lcb_3522_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3522_opencode/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3522_opencode/agent_stdout.log",
+          "bytes": 5362,
+          "sha256": "0f608f21f41f4761fa7c6d0d7ebbe4e1c15e2f5bc6c097ccbac95f3c45381746",
+          "lines": 112
+        },
+        {
+          "name": "cells/lcb_3522_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "69233b8c13768c9a134fec2f3614dc59a2c730835f42c3f6cf03f01eead39ce9",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3522_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2054,
+          "sha256": "cf14473314c7a254e20b6e5b56e6ad9aa83477e1fb4c89485aa57a14ee785dbd",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3522_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "7f239524c0efc673d837ee9a2022cf81b5c3e86192b11ff0da5b2ce479108e14",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3522_opencode/rows.jsonl",
+          "bytes": 447,
+          "sha256": "ea2f5cbf8a0f4e71dbf9b662712e13b1eb7db7b2351a75b818899df30693dd3e",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3522_opencode/run_RUN-ON.json",
+          "bytes": 4577,
+          "sha256": "4bff2f442b8ddfced3916b743808dcaa1f996017d19882babbef33cddea91504",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3522_opencode/solution.py",
+          "bytes": 515,
+          "sha256": "bd20cd84de4cded2bc2293a86fe2e722abaeb79fb1bad565b39891544c1535ff",
+          "lines": 18
+        },
+        {
+          "name": "cells/lcb_3522_opencode/visible_RUN-ON.json",
+          "bytes": 977,
+          "sha256": "fd9846ad843e81ff2b563bbd9c6b3d2ae603d84dd795277eebb40e07b4cb193f",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3522_opencode/wire/index.jsonl",
+          "bytes": 7483,
+          "sha256": "22141878b963ef9096a7e44327ddf055262e8c4f66ea336c9e9498a727d347b0",
+          "lines": 14
+        },
+        {
+          "name": "cells/lcb_3522_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3522_pi/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3522_pi/agent_stdout.log",
+          "bytes": 52260,
+          "sha256": "bad82385455cdedafebb0e0669beef2a0a4e9533dafdc54ea7ae5f228c23e559",
+          "lines": 1419
+        },
+        {
+          "name": "cells/lcb_3522_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "9339a247e0d1806814f9d548a034ebdcd088cbcb05412d5ba69a4361942cc4a2",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3522_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2042,
+          "sha256": "9e8daf4e15e5e6ea35a718c37f1e1f6fc1a5f350d93986f575c54e63566c0e46",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3522_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "c44a3036b1a2c5e2f30166a3fb5670eb7bcaf225be86c9642bb08c9153cf3a76",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3522_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "6bb201491ca91534ca3c8ecde6206224ca995e11203458445e58f6450de9f3c5",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3522_pi/run_RUN-ON.json",
+          "bytes": 4782,
+          "sha256": "9000a93fa9f2bfce56a42f7f1a4c20d53c686b5e3526f63f97662e8220389862",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3522_pi/visible_RUN-ON.json",
+          "bytes": 686,
+          "sha256": "7043cdd8b27749e3b395b12548104feea801dd11e5a5bd81db6d5bb0472de4e5",
+          "lines": 29
+        },
+        {
+          "name": "cells/lcb_3522_pi/wire/index.jsonl",
+          "bytes": 2139,
+          "sha256": "39fc75d8437484a1948a91f9012fcad4e8151854f02fe5987c78b3cbd898ab4e",
+          "lines": 4
+        },
+        {
+          "name": "cells/lcb_3583_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3583_claude/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3583_claude/agent_stdout.log",
+          "bytes": 1034,
+          "sha256": "a717ad7728b0893e46c16b4ffd9818c64762329b6bd8e1b02564b5012782fc04",
+          "lines": 10
+        },
+        {
+          "name": "cells/lcb_3583_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "156db425f9cafc10563c58a28e9067efb11db6bd34e1851f1a5ea3dd51661902",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3583_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2050,
+          "sha256": "1f82cdd7bb6dd798610db879f4201c3d17d15d8d0f705ca0b3b4f9e0753417dd",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3583_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "f2b5b14d09ef43c8ef0316347abe621c0f78bb8157759cbf6782f6fc983bdfbd",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3583_claude/rows.jsonl",
+          "bytes": 444,
+          "sha256": "4e159b5c9fd3b18a0b501af20d9398b3a9bf818a77c844272a76e52ae5185768",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3583_claude/run_RUN-ON.json",
+          "bytes": 4829,
+          "sha256": "78e1f5c0729662c11da9502677b898a2c42575d898f6f66e44fb16634e7d6e69",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3583_claude/solution.py",
+          "bytes": 3029,
+          "sha256": "792239647c76df8b0f3eaea62b15c205b50a36379ac44eac7f571e7e0d93ffb5",
+          "lines": 78
+        },
+        {
+          "name": "cells/lcb_3583_claude/visible_RUN-ON.json",
+          "bytes": 693,
+          "sha256": "852346feb78e5dcd2e31369473809e418f3f5985cdaef3d031120a2a8b0efac1",
+          "lines": 29
+        },
+        {
+          "name": "cells/lcb_3583_claude/wire/index.jsonl",
+          "bytes": 2674,
+          "sha256": "54d8cdd2654e440ab244ce39d4ae9ecbf8ad009579e16e93b2352e2107321337",
+          "lines": 5
+        },
+        {
+          "name": "cells/lcb_3583_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3583_opencode/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3583_opencode/agent_stdout.log",
+          "bytes": 362,
+          "sha256": "900225ac7d2c9ce99faaa07fc465b9668288df055a729a108ad4bd6fd2f4754b",
+          "lines": 6
+        },
+        {
+          "name": "cells/lcb_3583_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "a119b961121b403eeec9b4aad58499ab09ac78939bed1822b93a94b3ec1596ec",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3583_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2052,
+          "sha256": "a081964d9791528da002a92ab98652931ca9514c04eb69d74a8e3ee7903a20b1",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3583_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "e9fa8ca110f0c775db80882f1b4d4bf9771239992169424eee2550521fd60dfd",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3583_opencode/rows.jsonl",
+          "bytes": 446,
+          "sha256": "509e48330b2b88f6332e4598dd679e845377353b97ba8157cdb43b849d0d0610",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3583_opencode/run_RUN-ON.json",
+          "bytes": 4573,
+          "sha256": "56b4ebb5429f3f961368f5fd26186f474175026a9ab12fbd6cae50e6576608f5",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3583_opencode/solution.py",
+          "bytes": 1578,
+          "sha256": "3624f38e3739f34ba20ead6f1bb35702f8abb3d374fb767549602a8fb7469877",
+          "lines": 47
+        },
+        {
+          "name": "cells/lcb_3583_opencode/visible_RUN-ON.json",
+          "bytes": 977,
+          "sha256": "8e306fe8c6c9e1d240b5b0a8ec194ee99ea847c837e31a9e6b90586be17c5d05",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3583_opencode/wire/index.jsonl",
+          "bytes": 4814,
+          "sha256": "e992906d5c5cdd96741e2a53c2f3015a73c00695ba4f099fed5e965bdbfef8bb",
+          "lines": 9
+        },
+        {
+          "name": "cells/lcb_3583_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3583_pi/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3583_pi/agent_stdout.log",
+          "bytes": 993,
+          "sha256": "e8976dc60328af6e1de553f60ccfb0226301c8e4f9ea283fd1ac720b1ac86c0f",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3583_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "21617b1da5ea787a49a03fece995338c3c6fe33a957685e59002a57a4bd4aa3d",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3583_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2040,
+          "sha256": "b842b029743c36e46560e6b1600f41f1c4d92edc4d1cd667da5a31498b310cb1",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3583_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "3f8bec0f000813377e71531138193025212c30ff744bf4dc713e5d5511e01120",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3583_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "4f0e5f8216b9eb8160e72ee51d2deabc98cfda902f7092eadf7d2b2958b9b035",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3583_pi/run_RUN-ON.json",
+          "bytes": 4537,
+          "sha256": "430a3f8b2fa446bc099f9b0ade20e17abc3bf5260ca9e7ffb5b66b2d1a2dd8ec",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3583_pi/solution.py",
+          "bytes": 1284,
+          "sha256": "a2ca0ac9f1c243950ac6f87459d4c850dd077838095483113fd794d2c0965566",
+          "lines": 41
+        },
+        {
+          "name": "cells/lcb_3583_pi/visible_RUN-ON.json",
+          "bytes": 971,
+          "sha256": "c8e0223c487df38708371e789e5b5e9019f4b6d08aa74c7a8ba84ba151332090",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3583_pi/wire/index.jsonl",
+          "bytes": 4275,
+          "sha256": "c5210851aca23b374f11c80d39e80ea69a44634a1ea074bab6bd72323245a986",
+          "lines": 8
+        },
+        {
+          "name": "cells/lcb_3584_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3584_claude/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3584_claude/agent_stdout.log",
+          "bytes": 836,
+          "sha256": "ba10b7c173da22aa5268e542d889a2a0edcf9ce2dc629b33b0eb28e703e1143f",
+          "lines": 8
+        },
+        {
+          "name": "cells/lcb_3584_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "b65c9bf09bc34da5b03663d83e2d996ebaaf63ef82f39b4c5ffcbfc6a69f06c0",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3584_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2048,
+          "sha256": "a5a0a68f2565b8600769eddd0d836e9940a5cb9d52a6118cba24983e2cfdfc9d",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3584_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "91a13844053bbe7836593d7a12f6486c81f9d70faf9628d98ba501de50923be1",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3584_claude/rows.jsonl",
+          "bytes": 444,
+          "sha256": "0a310a3e884252b08c95d48b4604ccd228901b41a304d48d7c360a0d24715721",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3584_claude/run_RUN-ON.json",
+          "bytes": 4581,
+          "sha256": "0779bff165d3dcffa1196fdab902df819a80e5e65bcd57f3826b40d8adf10996",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3584_claude/solution.py",
+          "bytes": 3214,
+          "sha256": "0f3099b5489f96a4cdb6a0ae8d2a9f3d2041d7ed54b9819dd16d26690532c2ee",
+          "lines": 82
+        },
+        {
+          "name": "cells/lcb_3584_claude/visible_RUN-ON.json",
+          "bytes": 1155,
+          "sha256": "02f3c77bc8e67a4ad95042021637f11d5b19c55eb174bccd48a0e2deeb313e5e",
+          "lines": 53
+        },
+        {
+          "name": "cells/lcb_3584_claude/wire/index.jsonl",
+          "bytes": 2673,
+          "sha256": "22a978c0855d878a16acfeb64dfde6e070cbbe198d9e1f2ce15957ee62e8a191",
+          "lines": 5
+        },
+        {
+          "name": "cells/lcb_3584_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3584_opencode/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3584_opencode/agent_stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3584_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "0105df138276589f3cd39d9776888280045afe6411664474ca51a49db73cd808",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3584_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2056,
+          "sha256": "21c28dc7ef6a3e73d231263434fd665a406215f82e3a0899821670e337110c63",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3584_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "2291b4cf5e6c9a932e89d8afd6840b9acd91ae07e314814f077f52512f61e996",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3584_opencode/rows.jsonl",
+          "bytes": 447,
+          "sha256": "3e2f797e509a71d5c41e00d832fff44fc4040a07b0c88bed96c510cbd4b1c87e",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3584_opencode/run_RUN-ON.json",
+          "bytes": 4817,
+          "sha256": "197bdf78dd2844c98969b71309359cce6f11fcf17cce61c604d28a84dc2102f2",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3584_opencode/visible_RUN-ON.json",
+          "bytes": 692,
+          "sha256": "010da5cdd05e3678775473d5a0e4f263fcbecd9d908a7226d49f111136bd8625",
+          "lines": 29
+        },
+        {
+          "name": "cells/lcb_3584_opencode/wire/index.jsonl",
+          "bytes": 3708,
+          "sha256": "305da4e01442038994062da93c5b2d217dce83d5349dcaa51df59ea5b42ea62e",
+          "lines": 7
+        },
+        {
+          "name": "cells/lcb_3584_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3584_pi/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3584_pi/agent_stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3584_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "40a09529fa12f6a410d20d67de68dcca7a66b5c180d9811b66091962c8f62f07",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3584_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2042,
+          "sha256": "dfd0a18af6e3d4c1028897b817da036c9172717dfdea2e62826cbd1defce7ea5",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3584_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "da0c987487bcff23518041c902cba3ee6604051bb3822a7120fefdc0c5a2ba68",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3584_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "2a0b36a66c1d642d48a04e3af825f2639d89f32cbd7a72080670b4bc64351229",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3584_pi/run_RUN-ON.json",
+          "bytes": 4782,
+          "sha256": "16d0f14443a21fdbdcf5e4a711399397aee7aaa873b9026c0bc381483f7d7ca0",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3584_pi/visible_RUN-ON.json",
+          "bytes": 686,
+          "sha256": "55d2be3fa6d0d08cbd081d21abdbb823fca679fca4e89cd9c2ffa82942dc919a",
+          "lines": 29
+        },
+        {
+          "name": "cells/lcb_3584_pi/wire/index.jsonl",
+          "bytes": 2137,
+          "sha256": "2baf64599b163a13828d2c1a664895045d0c2237bcf03ea4cdbdb36200b91c13",
+          "lines": 4
+        },
+        {
+          "name": "cells/lcb_3637_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3637_claude/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3637_claude/agent_stdout.log",
+          "bytes": 1026,
+          "sha256": "a46038df2709cf426f4a3813ceba4d9bf8c5c6d910e1896ed7130308958d153b",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3637_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "11f6457827d0b87bc59d88285d4ded7a2c0097b04b9bea85f033fdd2acb3d0ae",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3637_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2048,
+          "sha256": "529d58ee4c2b6b537f515fc299deab5de0599b1a3dd11aef2fbd3028ee254610",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3637_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "09789be4a95297b15dde6348e1a9ff3c1e1261ccda9b7fa66dc989bf6f2a433a",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3637_claude/rows.jsonl",
+          "bytes": 444,
+          "sha256": "89c70519a74e89a1f879f5767bead367d16ce70d90303cd51e9b7dda588a2671",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3637_claude/run_RUN-ON.json",
+          "bytes": 4581,
+          "sha256": "cdce7f95eb4fbaabf750ccf1e702cd6b3542f1e8dff4e83f17470606ac7ea143",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3637_claude/solution.py",
+          "bytes": 6470,
+          "sha256": "c1acdf8682bb57f0e801fdf6030743717c9d9a580f84d88b540b791e3b7ab692",
+          "lines": 128
+        },
+        {
+          "name": "cells/lcb_3637_claude/visible_RUN-ON.json",
+          "bytes": 976,
+          "sha256": "b088d47f86ce0c6f8d506d27b91d4dfe079c4cbe3ae1dd861150a1b623656da8",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3637_claude/wire/index.jsonl",
+          "bytes": 3218,
+          "sha256": "832f6a78096e713a8e069d1e23683c7cfde67198477c1a82ba3dae2527562ed1",
+          "lines": 6
+        },
+        {
+          "name": "cells/lcb_3637_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3637_opencode/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3637_opencode/agent_stdout.log",
+          "bytes": 9877,
+          "sha256": "d21fee76f11c0ce655045a083d76e55b931ee3332fe016c0d3479045aa019deb",
+          "lines": 192
+        },
+        {
+          "name": "cells/lcb_3637_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "b734d5a10e9845aaae221339e07490d5f4df4bd3ad2a9c076ab204a8040e95c7",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3637_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2052,
+          "sha256": "5cee6929c59d59151599f54c104da06b02ae3e8e57e13a0e57ca651818341db7",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3637_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "11edab54b7b3e440d2b817785a17c4481584d704bffb1db1f221007529a59487",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3637_opencode/rows.jsonl",
+          "bytes": 446,
+          "sha256": "452a1b440865dfc1da3ff7cc15fb1e76976d6d4a916a84cd41f997c1b434bcc8",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3637_opencode/run_RUN-ON.json",
+          "bytes": 4573,
+          "sha256": "c2b7c1e4b1a88d0c2ad05fce98ed51be9839c13f91847bdc644d441cc397fd36",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3637_opencode/solution.py",
+          "bytes": 1489,
+          "sha256": "92c66a749449387e3ee472cd17c51d62b217f269108f14c6dd952d92296d4cdc",
+          "lines": 47
+        },
+        {
+          "name": "cells/lcb_3637_opencode/visible_RUN-ON.json",
+          "bytes": 977,
+          "sha256": "d1af0d66ca9179ce3c8a9bd1891df002b58be8c955d32af4fad8e4df48d9edcb",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3637_opencode/wire/index.jsonl",
+          "bytes": 4809,
+          "sha256": "5199a783e54de9ab29c051febfde0dc137fc627d74d783dac343068289cb7cf6",
+          "lines": 9
+        },
+        {
+          "name": "cells/lcb_3637_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3637_pi/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3637_pi/agent_stdout.log",
+          "bytes": 1784,
+          "sha256": "d7da59617e63076cc35f7603e184d7b5fd586aba57ec9ce1db7c090824c4d1e7",
+          "lines": 15
+        },
+        {
+          "name": "cells/lcb_3637_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "919ebef89276347a29d8c4a820488627059223f300684b3d51c8f1c740b15d5e",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3637_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2040,
+          "sha256": "d8aba63d0690b7f10313180e14a0d61894b066f3b4b8e9bbeda8581b81b13415",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3637_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "6c66f10d48751335438a1c58271894c3e4180f034dab0b2c524f2d9ec1595d42",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3637_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "8da0c9e40343adfb9062d52561aa1e0dcdf8437ab138d46107d696bd3b7ddece",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3637_pi/run_RUN-ON.json",
+          "bytes": 4535,
+          "sha256": "ac63112bbe6cf9dbb4b80f8d8b9ab025d19e86dd3bcb70cba19834f7bd88f602",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3637_pi/solution.py",
+          "bytes": 2051,
+          "sha256": "b077d74020ca2189ebc9cc650402d63bd1bd2bb50b5642325242d539032e750f",
+          "lines": 66
+        },
+        {
+          "name": "cells/lcb_3637_pi/visible_RUN-ON.json",
+          "bytes": 971,
+          "sha256": "0240d2fd64ed96fd9eae898c894c961d0911e28a5ae86f488e92856b17afb5a0",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3637_pi/wire/index.jsonl",
+          "bytes": 3743,
+          "sha256": "483849eeadcb8f68f8f8ac1bc9a4aa43340a11f089a1f1a4e4ae91ec5497bca3",
+          "lines": 7
+        },
+        {
+          "name": "cells/lcb_3654_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3654_claude/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3654_claude/agent_stdout.log",
+          "bytes": 963,
+          "sha256": "aa41e687cf36235fa170ebb13db118b090e2010cb95a4d5816ebab22fc2977c2",
+          "lines": 14
+        },
+        {
+          "name": "cells/lcb_3654_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "6220db516f8b293cf292fd57561fc79292097f4124eebf0c2b315ec5ea0eaf45",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3654_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2050,
+          "sha256": "af706e9ad5ed22aea93f633e032323428b37c684c7fcc43eb2ccebc823a495e5",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3654_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "579340ca9cd847c934f0c7abf02e0ab81b056dee92fab9c49e9ba9f8ab0013ce",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3654_claude/rows.jsonl",
+          "bytes": 444,
+          "sha256": "5f53f455c554446d279f8caf5cf50f84cb8d11d4589f0449200d4ff5e31a5bc2",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3654_claude/run_RUN-ON.json",
+          "bytes": 5310,
+          "sha256": "4396c72d08252b2ed6147a06e37af6126c9f896e069ef563b2ffaa91718f7b39",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3654_claude/solution.py",
+          "bytes": 5370,
+          "sha256": "368dbb2634ad638183636d76c0afdfedd258145b8980f2836afd33d5e00d6e9c",
+          "lines": 114
+        },
+        {
+          "name": "cells/lcb_3654_claude/visible_RUN-ON.json",
+          "bytes": 1063,
+          "sha256": "8f02242fb680b905b35de5d640270cc73ac342690e3b7cc10f0130e2afd702d4",
+          "lines": 37
+        },
+        {
+          "name": "cells/lcb_3654_claude/wire/index.jsonl",
+          "bytes": 2672,
+          "sha256": "c8ea689655a410c6f2fac7fa49f5a01bfa241a146c8c113f0d5e35f502da53ca",
+          "lines": 5
+        },
+        {
+          "name": "cells/lcb_3654_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3654_opencode/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3654_opencode/agent_stdout.log",
+          "bytes": 19332,
+          "sha256": "5c62de800c4627ad74219237d64a0f27bdfd5e3d6b3070b6a01f0f6b46b316c0",
+          "lines": 395
+        },
+        {
+          "name": "cells/lcb_3654_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "15e0e97f07294449cb9c3c466026bc5ae2a55c6bb7b6e962cf3df90f213acff1",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3654_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2054,
+          "sha256": "b1d0eaff0949d0c41072b073463dcb564fd85ccd633b25abe0532830e32d052e",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3654_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "479d4df3b17485ecfb9ced5721e2f51021b2b8934f0247a587db3415c72a1145",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3654_opencode/rows.jsonl",
+          "bytes": 446,
+          "sha256": "7aa220eab118e2c7a0f7e89861fde997e29fe2921836aee0ea42fb0148467244",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3654_opencode/run_RUN-ON.json",
+          "bytes": 5302,
+          "sha256": "b44ecb25019db4155b95ea747a6ca986953b4370d65a3052fa3625719bb02ae4",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3654_opencode/solution.py",
+          "bytes": 1691,
+          "sha256": "69510ac83b2fdb5c6319aec5423d81c4f85bfeb702759f74713d7dc5f2951f67",
+          "lines": 53
+        },
+        {
+          "name": "cells/lcb_3654_opencode/visible_RUN-ON.json",
+          "bytes": 1064,
+          "sha256": "c3c3ff2ebdb2f3b59b83a823278925ae2402789511ad76e3f7be34b1a1aea07b",
+          "lines": 37
+        },
+        {
+          "name": "cells/lcb_3654_opencode/wire/index.jsonl",
+          "bytes": 4817,
+          "sha256": "c1614e1098a700ba9003f80a7c7f2e91fdfe0cffecc1807227a270ef46324662",
+          "lines": 9
+        },
+        {
+          "name": "cells/lcb_3654_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3654_pi/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3654_pi/agent_stdout.log",
+          "bytes": 444,
+          "sha256": "6eb512ad577c27a8ea96dccba9a348aa6243cf26a3ccb32f0ef24a76cd923d5e",
+          "lines": 4
+        },
+        {
+          "name": "cells/lcb_3654_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "1468f1f0dae0e1c5a328f40ce94fd3541c27ffe6acc354aabdc1ae5a3bfe7535",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3654_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2040,
+          "sha256": "e076a6a575b8fcc99c0f3f302cb83edc034c715c39931ad566b5243507b26e1c",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3654_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "a2721a0be0751aedbd88921835c46840b1dcae071e8d58c4b4cab7f62f3d77cb",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3654_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "8acd1f043098cab70f9bfee76348bef8c307ca3a4b40c726dc3f7904197ac647",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3654_pi/run_RUN-ON.json",
+          "bytes": 4537,
+          "sha256": "e8b46077a813a52e9fa833313a531ac4d5d7dc2e3026392b2cb09eba42484a98",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3654_pi/solution.py",
+          "bytes": 2052,
+          "sha256": "8781a07cd423ff4157e952ad721860ca938fb896aa0b2bd7c2ce0103eec277af",
+          "lines": 58
+        },
+        {
+          "name": "cells/lcb_3654_pi/visible_RUN-ON.json",
+          "bytes": 791,
+          "sha256": "e6a4b19b61886d68d97083289d412ea7db269fba4d0a998fdb6aa948413f22b1",
+          "lines": 37
+        },
+        {
+          "name": "cells/lcb_3654_pi/wire/index.jsonl",
+          "bytes": 4808,
+          "sha256": "e74d5964d952ae0923d3bfa3d677d5409a5f5804484ce4fb6f76826658aeafc7",
+          "lines": 9
+        },
+        {
+          "name": "cells/lcb_3681_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3681_claude/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3681_claude/agent_stdout.log",
+          "bytes": 670,
+          "sha256": "38ad725076f69d1be885b73be1d51d9411f7094208f6d4f5778e71494f2fab1b",
+          "lines": 10
+        },
+        {
+          "name": "cells/lcb_3681_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "af18ac7c589dac0a9ba912fb8c1f12ce5eb347ba119becfc023c88af1b1d3480",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3681_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2048,
+          "sha256": "51cd0ae5bcafcfcc2b6e768fc7d52a8a4712563f412c608ba07ea822fa93486a",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3681_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "75214209d8776d65516543a92fd472d58214c263d265540e7a285ac4948f75fb",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3681_claude/rows.jsonl",
+          "bytes": 444,
+          "sha256": "99de7ca4bbfd19fd6f18753c0c254ba3d97b0f4bb990910358626b47226cf76b",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3681_claude/run_RUN-ON.json",
+          "bytes": 4577,
+          "sha256": "b1bb5829fb4a128d25ce5930cddf6969113ea5b16cb95394e516a44ba610d1fb",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3681_claude/solution.py",
+          "bytes": 2558,
+          "sha256": "648f9b6037f0f8e805f7e7db3a56cfd92b47d98033ed23830b0034f9178dca07",
+          "lines": 55
+        },
+        {
+          "name": "cells/lcb_3681_claude/visible_RUN-ON.json",
+          "bytes": 975,
+          "sha256": "1a4b6bce9020159a98b151355e555f8b3fe2f3df39f30a2f13bf625f1ff3a7b3",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3681_claude/wire/index.jsonl",
+          "bytes": 2672,
+          "sha256": "1e4cacc6176bc93f62b85cc2572aca6aa05008644b19344822ab34c21e2fb9de",
+          "lines": 5
+        },
+        {
+          "name": "cells/lcb_3681_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3681_opencode/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3681_opencode/agent_stdout.log",
+          "bytes": 455,
+          "sha256": "ba08e07c431b1b08690fe79a46bc11cc63d30b23f28d0e0f33814a502870c0b7",
+          "lines": 4
+        },
+        {
+          "name": "cells/lcb_3681_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "ab55b3c8b0e24d2d131f9c9ac1e9711b30185f0be0a54fa7f7c3b2309e359310",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3681_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2052,
+          "sha256": "db8a5656cdc11b57c0d78afc32b568fe862532d0527b34f5233be78ec21e1021",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3681_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "dcb831907a40c69210192da838a817e920961c40dec4872d26182a5d7dc54570",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3681_opencode/rows.jsonl",
+          "bytes": 446,
+          "sha256": "5bc103be107474ee1f53c2ad666e89bb0af70dff4bd291730cd373371b06c1cc",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3681_opencode/run_RUN-ON.json",
+          "bytes": 4570,
+          "sha256": "5f0a99cc9b9670e313e2970ef6a317cd4a8de5ea35dfa1339a496622967ce27f",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3681_opencode/solution.py",
+          "bytes": 3393,
+          "sha256": "f282622d7ec04983da633772c967a8fc0d57a84d11ec33c2b501acbd75e12181",
+          "lines": 72
+        },
+        {
+          "name": "cells/lcb_3681_opencode/visible_RUN-ON.json",
+          "bytes": 977,
+          "sha256": "2470c72dde142147e3424a8210cf80e2727fede10d8e8140a7f6b6c536c8a036",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3681_opencode/wire/index.jsonl",
+          "bytes": 3740,
+          "sha256": "69fdd048c5c0a3e6fbb1a2c058ed3299efcc120953bed9f162d4f91897c996b2",
+          "lines": 7
+        },
+        {
+          "name": "cells/lcb_3681_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3681_pi/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3681_pi/agent_stdout.log",
+          "bytes": 694,
+          "sha256": "860d1e1e4cac33147da0b01756ce681a3e3e0fb3236bedcd3fc9dc38dc1c3eb4",
+          "lines": 9
+        },
+        {
+          "name": "cells/lcb_3681_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "73ec0c08364197c85b181bd5f3f9ca1f245aa93ceaceb95ae446433c056eabe5",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3681_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2040,
+          "sha256": "4e98f7faa20268e0efc9ed504f3bcc86f7c834bb5bc0454029dc0f131a8f767e",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3681_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "4504fb9f25caa50a7389e7896dc8d5c1a4caac05a0b64a58fb936d0c74113d53",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3681_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "90c3c692a349b9ee647cf4b6111737c0734ccd51bc26ac97773c0033327e09b7",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3681_pi/run_RUN-ON.json",
+          "bytes": 4534,
+          "sha256": "daa3dbe518e921d859ad66afcc01b21cb8f8f51c29adb8bde8737b28622d6d2f",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3681_pi/solution.py",
+          "bytes": 2214,
+          "sha256": "4dd19309cb02cb1906a26f61c0a449381770234a08b616f12452854624d5c6cc",
+          "lines": 49
+        },
+        {
+          "name": "cells/lcb_3681_pi/visible_RUN-ON.json",
+          "bytes": 971,
+          "sha256": "d8ff8391f108e5521d56a9e6cbf6eeeed867b68441b388c390ab71b70e404785",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3681_pi/wire/index.jsonl",
+          "bytes": 3738,
+          "sha256": "09a10e47d64b9c075470104c2a3af10f7eba61d30a02b983a4982ac9118d156d",
+          "lines": 7
+        },
+        {
+          "name": "cells/lcb_3686_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3686_claude/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3686_claude/agent_stdout.log",
+          "bytes": 590,
+          "sha256": "5c1a343635e97267d10811004e101f1180ff64f91b3efb90125d4f25b3b877d3",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3686_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "df71e57fcd59333ccc7bb835246368dcfbe4700d98ce548bda8ab439da4f0456",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3686_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2048,
+          "sha256": "1b53cbd6d9b70c19d792c5096b1648d8ada43ca0a0ec91cef4dcbda75405d234",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3686_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "c42ee81bf8c605941e7972f47b1a0c7405cd8f1442126d11b12ef8d5c052fa91",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3686_claude/rows.jsonl",
+          "bytes": 444,
+          "sha256": "44b8dbb66c9cb5b8772c775bf5dcc2de67279341b231403df3296748a4a94cf6",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3686_claude/run_RUN-ON.json",
+          "bytes": 4578,
+          "sha256": "fa064a870f4bc9a5830008e21b0059c3d5ad649928e456afdb6bb80661005485",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3686_claude/solution.py",
+          "bytes": 1335,
+          "sha256": "23395354861ab4576fb112f506fe813fbe4e8b35bcb3d2bbe1673fc3c58b103a",
+          "lines": 43
+        },
+        {
+          "name": "cells/lcb_3686_claude/visible_RUN-ON.json",
+          "bytes": 795,
+          "sha256": "7060b99df1ac7c47b4cf39e6267a43535247c5bfe99c1bbbd0ee9fd700dcc080",
+          "lines": 37
+        },
+        {
+          "name": "cells/lcb_3686_claude/wire/index.jsonl",
+          "bytes": 2674,
+          "sha256": "dc4862dc2533d0e48e94843f72fb2a4823dd7e5eab9d23844cbf386da325bbbb",
+          "lines": 5
+        },
+        {
+          "name": "cells/lcb_3686_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3686_opencode/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3686_opencode/agent_stdout.log",
+          "bytes": 24197,
+          "sha256": "f368ba44211a618f7d59c9effa706d12c21b3eeadb428bc10870c5f4092fa48e",
+          "lines": 506
+        },
+        {
+          "name": "cells/lcb_3686_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "e34c7a7ac08a037e23ce2deacf9d1e49a955ba9806d956c28a86a31eb72fdb56",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3686_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2054,
+          "sha256": "18887a50c7b76b8bd2e18e660adbd3f9d55257b00c9f8f5ea72011621e63e2a8",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3686_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "1a8a60d43a4c157c2b705435d3ca7072e742ecab95d8b0176174c85a4539d997",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3686_opencode/rows.jsonl",
+          "bytes": 447,
+          "sha256": "ed643ea53a49f3415a027680d2d12864f90aa882a18610f65ef6cadf83481ae6",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3686_opencode/run_RUN-ON.json",
+          "bytes": 4577,
+          "sha256": "523325f2cbd1286379bfb9eea70a6c4c4e2c7312ca3a11723fc704f4cf32ec93",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3686_opencode/solution.py",
+          "bytes": 1329,
+          "sha256": "6bc69798e4754388626960cebceab7659729fb16101bd9ad050450e6681d2735",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3686_opencode/visible_RUN-ON.json",
+          "bytes": 797,
+          "sha256": "f87f779c9b687583cfd525a39ffacdbb448d8d134b99b6070f34ae9a9d5756be",
+          "lines": 37
+        },
+        {
+          "name": "cells/lcb_3686_opencode/wire/index.jsonl",
+          "bytes": 6416,
+          "sha256": "252ac899063615f49e6f0204ed98b253e57597587fe3b8dc7bfd51b0cc54f02e",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3686_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3686_pi/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3686_pi/agent_stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3686_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "45aa5eba14a234514324e535ceec7cb4379df91287ec50b1a587926561bfe056",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3686_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2042,
+          "sha256": "5cdac1545d1208a445c68728314fb876a4a2cde359591b3d9551a6003cd2427e",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3686_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "ed77b7546eea82b5fe61a4d69b7f472107b90ca138da98676eadd4e13ba5cce1",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3686_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "c253c37c04877d751701ef40b5001c0cae6a8e74004fdef312b40208f3194fb4",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3686_pi/run_RUN-ON.json",
+          "bytes": 4782,
+          "sha256": "1bafedfaf4001961b398cf38f1965e74781ae68766f1b9fd6914ce80eb23a891",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3686_pi/visible_RUN-ON.json",
+          "bytes": 686,
+          "sha256": "0dd096b43b2595590117e8977aeea9f493bcbe6de8c2cc1aa856f005ad73467f",
+          "lines": 29
+        },
+        {
+          "name": "cells/lcb_3686_pi/wire/index.jsonl",
+          "bytes": 2134,
+          "sha256": "9082cc65249770d700e0e5a3baf678582831ecefca47811713ab5117e4efcbf3",
+          "lines": 4
+        },
+        {
+          "name": "cells/lcb_3700_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3700_claude/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3700_claude/agent_stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3700_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "1d51d5f27f8bd79733845e85ef72dc1a6213ff9d8d20a41d8dafe28c0a2b6b5c",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3700_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2054,
+          "sha256": "718f12a336dd9309d0b3b45bf783f8dec80f24704adb8615ecdb3c97368a265f",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3700_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "74fa11b34d2b1870b7c02ea06cbda40ae1ef63a337ab8471e2683a909700d944",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3700_claude/rows.jsonl",
+          "bytes": 446,
+          "sha256": "3d1209ce99a69e564bc6d2b5941533e63e7ff17fb585b1eedd266b9c9ed45dfd",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3700_claude/run_RUN-ON.json",
+          "bytes": 5319,
+          "sha256": "d445ebd0e41111c0e3a8b9bf56633bd5fc31b844c96edb7b450e6d925c8a302f",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3700_claude/solution.py",
+          "bytes": 4409,
+          "sha256": "c9b166a0864883576cab79e264a6abcf8a7c765b8cc79974776cdb9d9c92228e",
+          "lines": 124
+        },
+        {
+          "name": "cells/lcb_3700_claude/visible_RUN-ON.json",
+          "bytes": 1245,
+          "sha256": "61d4608d7e654a319171f2c693b52d1a7fbb2c0c258219b027f7e32ee0fd0476",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3700_claude/wire/index.jsonl",
+          "bytes": 5338,
+          "sha256": "796ff0598a5e087b335ff9297b86b107ed10aef81fd7ce8cdc16aa6b647f833f",
+          "lines": 10
+        },
+        {
+          "name": "cells/lcb_3700_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3700_opencode/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3700_opencode/agent_stdout.log",
+          "bytes": 80305,
+          "sha256": "188a14159f0661309a7f0abdd0d8e69c67120f968c4b9d8afc46344e082a769f",
+          "lines": 1481
+        },
+        {
+          "name": "cells/lcb_3700_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "7e743dd8bc89566cf30aef4aacee119c7b1c4ce870627600577aa3edb54e6ed3",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3700_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2054,
+          "sha256": "f94c4940a9e1a6ce921671f2c9b712dc8ef8d0c18f264a75a505f9b50959b339",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3700_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "3398fc15ec3696f1a2e73eca2ce221b61e2e4f1a5efb44f8127577ff87e60e70",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3700_opencode/rows.jsonl",
+          "bytes": 446,
+          "sha256": "5d788636d1e3742560a0644530c04846e4716212629244a0915895e6c4724261",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3700_opencode/run_RUN-ON.json",
+          "bytes": 4818,
+          "sha256": "117cb67046cc9ea0ca620795e2ba352ef759f4df4b043024baf634c8b0347b39",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3700_opencode/visible_RUN-ON.json",
+          "bytes": 692,
+          "sha256": "ed7f0f14062fe9db941d8b67060b53fb405abe12ced61284090af4c879060bfe",
+          "lines": 29
+        },
+        {
+          "name": "cells/lcb_3700_opencode/wire/index.jsonl",
+          "bytes": 3212,
+          "sha256": "4bc128151c66dd21701a6c5f32536781d5f3315ae09d7e62d4cf4d1cd6d12f03",
+          "lines": 6
+        },
+        {
+          "name": "cells/lcb_3700_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3700_pi/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3700_pi/agent_stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3700_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "125b7f3788140b02d36382142a75ced8d4fee99de3a5b9dbc2d93e1d8f39ca6d",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3700_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2042,
+          "sha256": "92bb268247a508048db56fbb7d83e499997293e8ddf13532dfc8f16674f700e2",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3700_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "387cb3b3b2c44d7fa776e47f8379dd14ce8633be32d41af8c33636946f3ebd34",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3700_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "2ac119cff9892d69d21791c820a2e635e55e7dbc41a6d238621349481d7d0c72",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3700_pi/run_RUN-ON.json",
+          "bytes": 4782,
+          "sha256": "13bf8be7ace3496babe575d486f3fe136c023caf5800a9bed01357f290f50f2a",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3700_pi/visible_RUN-ON.json",
+          "bytes": 686,
+          "sha256": "73484ab7c68c5499250d6c76fa88f9b27ed07edcc015f224dd996d6e87f0b326",
+          "lines": 29
+        },
+        {
+          "name": "cells/lcb_3700_pi/wire/index.jsonl",
+          "bytes": 2135,
+          "sha256": "67fac713f3ba1d47dd71af9773d1a959ef2fdeb1a68e0261c91c3a2ac33ca4d5",
+          "lines": 4
+        },
+        {
+          "name": "cells/lcb_3764_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3764_claude/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3764_claude/agent_stdout.log",
+          "bytes": 731,
+          "sha256": "f9514a130f50dc0d91eaa51844a92a47bcbfb8b8dcbe52ecfaf41d8dfdb0d454",
+          "lines": 9
+        },
+        {
+          "name": "cells/lcb_3764_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "dd839cb0e907394ee01b03a1f257c285243c46e9591e270c1a3c6724fb80368d",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3764_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2048,
+          "sha256": "2e1417b7f84bd04d7fdd4051fb3e89bbb901e8e8bea3fb21310e960aafcd6ab0",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3764_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "c16d526f165b7b14fa442165245da63a31eb8f9ae225603f0888b4fdca555955",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3764_claude/rows.jsonl",
+          "bytes": 444,
+          "sha256": "aa32e3610fb9bdb5f202276a0ccba6b01b1f3e6c7cc326d76a5ed2e01cf81a1b",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3764_claude/run_RUN-ON.json",
+          "bytes": 4578,
+          "sha256": "6fbee47265ec9ba53b8368ea2408d276b15f88297fb7270ef6c5e5e742396f41",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3764_claude/solution.py",
+          "bytes": 1648,
+          "sha256": "2a7ab39f78609d5d6bb208b48ce100ca26177772dcb442926f5e6d0b215ceca3",
+          "lines": 39
+        },
+        {
+          "name": "cells/lcb_3764_claude/visible_RUN-ON.json",
+          "bytes": 795,
+          "sha256": "11a9ec73d603e0becbcaa77378409ae487743134c91763b111cb8ade907ea055",
+          "lines": 37
+        },
+        {
+          "name": "cells/lcb_3764_claude/wire/index.jsonl",
+          "bytes": 2673,
+          "sha256": "fb227ebff31200ebba53758de358e47f427d3c5999bfce5408e42e01f2baa92b",
+          "lines": 5
+        },
+        {
+          "name": "cells/lcb_3764_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3764_opencode/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3764_opencode/agent_stdout.log",
+          "bytes": 3823,
+          "sha256": "e59b3614041d62d2a0192f2c9be3c091ed37528c897ec4fa9f6bbd89134aed7d",
+          "lines": 55
+        },
+        {
+          "name": "cells/lcb_3764_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "da66ee652c1e3a568db444b218d3294e6e9f802bd535fbd393d9b4d0aa2c7e5e",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3764_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2052,
+          "sha256": "8641b8e9ee5265369e58da3bef1f217ae31078f9fa73ad4d232f6276687884dd",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3764_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "07be155dcb3ddd543c99ec765bb7deb2a873211bc2ec99f6eda7864ddc90a8f3",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3764_opencode/rows.jsonl",
+          "bytes": 446,
+          "sha256": "ae7fd7c1efb96869feb882765228502bc43d029e9645a62c704356ede1a822d1",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3764_opencode/run_RUN-ON.json",
+          "bytes": 4570,
+          "sha256": "b6d950eac543b8a2e2925023b9a9d033c094f85681d3c5ae3b4211efafb7cf23",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3764_opencode/solution.py",
+          "bytes": 327,
+          "sha256": "923240225073680d54df13531f403b8f48e48aa934095c1f50a16025d22aa5e4",
+          "lines": 11
+        },
+        {
+          "name": "cells/lcb_3764_opencode/visible_RUN-ON.json",
+          "bytes": 797,
+          "sha256": "6a37553b379d7e5abb10bbd4bb6653a5ecbd3f5e50f78984356c7700045e0d96",
+          "lines": 37
+        },
+        {
+          "name": "cells/lcb_3764_opencode/wire/index.jsonl",
+          "bytes": 4815,
+          "sha256": "de76bd4f7f19bc3f62001af8b50dd9e3ecf2105ec70479b7f486639e1a884fb8",
+          "lines": 9
+        },
+        {
+          "name": "cells/lcb_3764_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3764_pi/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3764_pi/agent_stdout.log",
+          "bytes": 1320,
+          "sha256": "5eb99743ab5dc3b2a06a643a6703064cd9bad3cbc9c1d95fab833c5a1a66065c",
+          "lines": 29
+        },
+        {
+          "name": "cells/lcb_3764_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "b743562d64a14acd2661a96c53c48d892c8f4e216bd25e38a79cd037739d147a",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3764_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2040,
+          "sha256": "78d8b52a6e9e436d2e845c9f73815c0a5fc26dd85609953fffdaef734fa40420",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3764_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "48aa2f8316845bae6ff1e791ceb23e619a6685f8fa88e619ae937af51adfde2d",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3764_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "299871a7992d25edfc84364427b33c8717c3155bb2cf60428353762ae0b9ea5b",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3764_pi/run_RUN-ON.json",
+          "bytes": 4534,
+          "sha256": "faef4ef711d5a1994f674a059e6cf19f526a5b261a4e7eaf84bb2ad5c54f52bb",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3764_pi/solution.py",
+          "bytes": 666,
+          "sha256": "05ab3711ca3451c35952df6e1faadd927c2587f37022967ed8fad8795a60185c",
+          "lines": 16
+        },
+        {
+          "name": "cells/lcb_3764_pi/visible_RUN-ON.json",
+          "bytes": 791,
+          "sha256": "eff8c3a612016934fb6af8d83c363f652a9f1944c2c072ae457de4acec3dc460",
+          "lines": 37
+        },
+        {
+          "name": "cells/lcb_3764_pi/wire/index.jsonl",
+          "bytes": 3737,
+          "sha256": "b15957b09b3e99d5accd695e6168c29e379e45d1bba8a2186b36d7db26141d63",
+          "lines": 7
+        },
+        {
+          "name": "cells/lcb_3794_claude/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3794_claude/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3794_claude/agent_stdout.log",
+          "bytes": 1528,
+          "sha256": "d251e2c8328468973e792854790fe20c6a18072674082f1cfd3cdf5585081239",
+          "lines": 13
+        },
+        {
+          "name": "cells/lcb_3794_claude/argv.txt",
+          "bytes": 1017,
+          "sha256": "d5b9321c1f50b6df89cac9af4407c54fa5f4d4be8e64c00acec9b1286d594206",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3794_claude/receipts_RUN-ON.ndjson",
+          "bytes": 2048,
+          "sha256": "f37802e2c336e5be0d60d8840b0ef0940a781da7908048eaf6ab354576299112",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3794_claude/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "f66d897b0fe6eae9b8660b620c54a8137c04f2358dab5ac3ae442f5d2b8a722c",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3794_claude/rows.jsonl",
+          "bytes": 444,
+          "sha256": "4b5dc145aef0274468e3bb252203ace35646bf704887a4a5bfc994fc240e573e",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3794_claude/run_RUN-ON.json",
+          "bytes": 4579,
+          "sha256": "1464c5d00351f2e7c4431716905288a56a55dd7c0d62996dfb5dc04af5646afa",
+          "lines": 142
+        },
+        {
+          "name": "cells/lcb_3794_claude/solution.py",
+          "bytes": 811,
+          "sha256": "407b9b5aa3ace081283bdd6f58eaf76ea9e9f042a803ac6fa4c1890ac9c23fe1",
+          "lines": 32
+        },
+        {
+          "name": "cells/lcb_3794_claude/visible_RUN-ON.json",
+          "bytes": 975,
+          "sha256": "c3a087d7a145df5f5daddbcdc9e9b289f0116e8e9f9ae2a5f17e1622747c35f1",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3794_claude/wire/index.jsonl",
+          "bytes": 3219,
+          "sha256": "d9586922e5bc6f06475d2146bc5fd4d990d6ae910b5dc05b69150ea102e5d258",
+          "lines": 6
+        },
+        {
+          "name": "cells/lcb_3794_opencode/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3794_opencode/_launcher_exit_code.txt",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3794_opencode/agent_stdout.log",
+          "bytes": 32361,
+          "sha256": "18bff730e132541a20429df659427e1e4ce37f2b0d728bd8863e0d1450f411f9",
+          "lines": 542
+        },
+        {
+          "name": "cells/lcb_3794_opencode/argv.txt",
+          "bytes": 1027,
+          "sha256": "5f67393130c037f16545cb5c74117b23548d2fe4a37ef5c6c125860df5d6b54e",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3794_opencode/receipts_RUN-ON.ndjson",
+          "bytes": 2054,
+          "sha256": "54d23c668f3876016df47eae346544b58eef6c14ef662f9232980b0918b259f5",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3794_opencode/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "c9b0174bb13f1a9e258ea3146e1e615eb46b3377281f19b520cbc2031d24fb24",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3794_opencode/rows.jsonl",
+          "bytes": 447,
+          "sha256": "aaa931c51e3760d8b70caa3343d652f2a26121ce901a344656f9457381c8f04f",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3794_opencode/run_RUN-ON.json",
+          "bytes": 4577,
+          "sha256": "d3ca6c0c845a071e773f762245da1c6fb70c5a5e9e1b7af30604e79ac1d4ee5f",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3794_opencode/solution.py",
+          "bytes": 510,
+          "sha256": "99dcc4d871cf511449ed1ac14a5b342b70ffade8e23dc912688a75e881aa7941",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3794_opencode/visible_RUN-ON.json",
+          "bytes": 977,
+          "sha256": "5f81b76dbe7487e156f35ed5a242881acdfb23aba06776e7a180f08c06511b60",
+          "lines": 45
+        },
+        {
+          "name": "cells/lcb_3794_opencode/wire/index.jsonl",
+          "bytes": 5350,
+          "sha256": "f3aeda37992489cad692b0e04e4c9fa653dd197fd7e9eef0384a62da146da7e5",
+          "lines": 10
+        },
+        {
+          "name": "cells/lcb_3794_pi/_NOT_PREREGISTERED.txt",
+          "bytes": 690,
+          "sha256": "edf488f2696ff19ffc0e6db8b23830207492c59e68eb6169a8d32faab18cd023",
+          "lines": 12
+        },
+        {
+          "name": "cells/lcb_3794_pi/_launcher_exit_code.txt",
+          "bytes": 3,
+          "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3794_pi/agent_stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3794_pi/argv.txt",
+          "bytes": 997,
+          "sha256": "69de8460b098b29483cbdde13c4b07a91240dc41a75d88e40d57362a210d8cfe",
+          "lines": 19
+        },
+        {
+          "name": "cells/lcb_3794_pi/receipts_RUN-ON.ndjson",
+          "bytes": 2042,
+          "sha256": "41456604b0f635cae9ac8243efb525f3130202655da336a423708bac91ebebdf",
+          "lines": 2
+        },
+        {
+          "name": "cells/lcb_3794_pi/receipts_RUN-ON.pub.json",
+          "bytes": 143,
+          "sha256": "693a7de1efa89804fba9529eb6e7fc10b27f32f68bc96d9c9f5d1a254b3d042f",
+          "lines": 0
+        },
+        {
+          "name": "cells/lcb_3794_pi/rows.jsonl",
+          "bytes": 440,
+          "sha256": "3b265bb30dbfdbcc58930f3858c90bfe27bdca9b501b8914476cb66150509063",
+          "lines": 1
+        },
+        {
+          "name": "cells/lcb_3794_pi/run_RUN-ON.json",
+          "bytes": 4782,
+          "sha256": "d2b0fa5b383c4e81743efc369cd85ccfaa099a15be16fa0539a783f5798bac7c",
+          "lines": 141
+        },
+        {
+          "name": "cells/lcb_3794_pi/visible_RUN-ON.json",
+          "bytes": 686,
+          "sha256": "17088a3e90daff9b47ebba7d75c5cec3d1d3457ca1b79c10197b8fdd713abd98",
+          "lines": 29
+        },
+        {
+          "name": "cells/lcb_3794_pi/wire/index.jsonl",
+          "bytes": 2136,
+          "sha256": "a0acb54101860cface167c695e0fccfdd7acb8ce282220a013fe936f87032aaa",
+          "lines": 4
+        },
+        {
+          "name": "census.py",
+          "bytes": 2178,
+          "sha256": "10fd7d301b7e01ee6c96d1d642f8d2cd85d1c62316bc53395ae2a583f99fd84b",
+          "lines": 45
+        },
+        {
+          "name": "collect2.py",
+          "bytes": 20644,
+          "sha256": "b51b281d0ecb221cdb8f1de0c7e50a066a5d4a8163b9cab2987e2314434a236b",
+          "lines": 408
+        },
+        {
+          "name": "finish_reason_census.txt",
+          "bytes": 4966,
+          "sha256": "f57538ebd0baf4e13a2ea652aa861f5debd89a8d22aa7a40e1f06d0d948ab74a",
+          "lines": 34
+        },
+        {
+          "name": "hidden_scorer_negative_control.json",
+          "bytes": 1318,
+          "sha256": "9a8cc8ef30b464126ccd49f6ba48fccae425c85536873e9edf22dca416c2cfc5",
+          "lines": 69
+        },
+        {
+          "name": "manifest.json",
+          "bytes": 23333,
+          "sha256": "37cdfd023a14f17b94b5b62a1148bdf323bafaadcbbe9876fa0c9b426d23b4cd",
+          "lines": 337
+        },
+        {
+          "name": "matrix.json",
+          "bytes": 146392,
+          "sha256": "35e995963289e10e619f1f43de12e00365596b868f1b8af68a04aee4ef925f05",
+          "lines": 3255
+        },
+        {
+          "name": "pbgate2_cell.sh",
+          "bytes": 4748,
+          "sha256": "c669193367c856cb227582825613369ca76abfcdfc5ae0c251518072b9b3481a",
+          "lines": 98
+        },
+        {
+          "name": "pbgate2_matrix.sh",
+          "bytes": 797,
+          "sha256": "4693bef578ab24c5b878cf619eb399dcf5479ed8b2f89e191eb44cc64e6b6250",
+          "lines": 18
+        },
+        {
+          "name": "probe.py",
+          "bytes": 3233,
+          "sha256": "12aea8546980c511792e0376d301d5271d4a1b4d936239dab3819b12e62d4d30",
+          "lines": 72
+        },
+        {
+          "name": "receipts_verify.txt",
+          "bytes": 4185,
+          "sha256": "520233888e8315f6826b8a13b7f35231e75bdc8a37f1b1108895bb802d904be0",
+          "lines": 42
+        },
+        {
+          "name": "receipts_verify_archived_copy.txt",
+          "bytes": 4211,
+          "sha256": "3d5d78c7df6b861054d3d8545daebc3bf717edfa1c20dce7e1c2d888f5985a1b",
+          "lines": 42
+        },
+        {
+          "name": "smoke_prelaunch.txt",
+          "bytes": 562,
+          "sha256": "6f18ea365373698be07e34108d1a55712e72fb82e0eda441dc44ec1323f74100",
+          "lines": 22
+        },
+        {
+          "name": "verify_bank_tree.py",
+          "bytes": 2083,
+          "sha256": "e6fa081048ffe8bd5faa612df323e45c0f3b98c0016f2f917197ee885f6b00cb",
+          "lines": 49
+        },
+        {
+          "name": "vgt_scan.txt",
+          "bytes": 2371,
+          "sha256": "36d9c59a07a27584c91e9f2cbf0d5cacfd9da658780db2e31715747abcd0bb88",
+          "lines": 37
+        },
+        {
+          "name": "vgt_scan2.sh",
+          "bytes": 1185,
+          "sha256": "60072de04bb76974604bd0d555514ed0060267d9f4f11e43181e6e41d079f7c2",
+          "lines": 23
+        },
+        {
+          "name": "wire.tar.gz",
+          "bytes": 3337313,
+          "sha256": "81fe64d9f9696d8352acbcb5dbe42cd740e28217af5099c4f9ed05c49d637219",
+          "lines": null
+        }
+      ],
+      "record_spec": {
+        "required_present": [
+          "manifest.json",
+          "SHA256SUMS"
+        ],
+        "required_missing": [
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "decisions/DECISION_20260920_PUBLIC_BENCH_GATE_CROSSAGENT.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
       "name": "pbgate_lcb2_20260919",
       "kind": "real_run",
       "subkind": "agent_matrix_run",
@@ -37493,7 +39638,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "decisions/DECISION_20260919_PUBLIC_BENCH_GATE.md"
+        "decisions/DECISION_20260919_PUBLIC_BENCH_GATE.md",
+        "decisions/DECISION_20260920_PUBLIC_BENCH_GATE_CROSSAGENT.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -92366,6 +94512,18 @@
       "lines": 154
     },
     {
+      "name": "pbgate2_agents_lcb2_20260920.backend_meta.json",
+      "bytes": 2452,
+      "sha256": "c98bd8f5e8efbdd5aadc6d474e1fd74356312fddc2b1ae1ad31a96e99c69200e",
+      "lines": 43
+    },
+    {
+      "name": "pbgate2_agents_lcb2_20260920.endpoint",
+      "bytes": 47,
+      "sha256": "e0c546ce59a61b5ce9e4170b3db10b1d9730e9db47566909aee4568f707f13d6",
+      "lines": null
+    },
+    {
       "name": "s10_copy_verify.py",
       "bytes": 9476,
       "sha256": "37e0b5b683c52b79f6087c88413bb957ae453f7d004ea0d2abb363dc6e9d05c7",
@@ -92985,9 +95143,9 @@
     },
     "mac_repo": {
       "runs_dir": "runs/",
-      "entries": 724,
-      "dirs": 352,
-      "top_level_files": 372,
+      "entries": 727,
+      "dirs": 353,
+      "top_level_files": 374,
       "all_tracked_in_git": true
     },
     "not_mirrored_to_mac": [

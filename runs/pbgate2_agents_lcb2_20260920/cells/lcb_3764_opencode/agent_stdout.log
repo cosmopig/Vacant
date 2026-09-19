@@ -1,0 +1,55 @@
+The task is to implement a Python function `maxSum(grid, limits, k)` that finds the maximum sum of at most $k$ elements from a 2D matrix `grid` such that no more than `limits[i]` elements are taken from row $i$.
+
+Constraints:
+- $n, m \le 500$
+- $0 \le grid[i][j] \le 10^5$
+- $k \le \min(n \cdot m, \sum limits)$
+
+Approach:
+1. For each row $i$, sort the elements in descending order.
+2. We want to pick at most `limits[i]` elements from each row such that the total number of elements is $\le k$.
+3. Since we want the maximum sum, for each row $i$, if we decide to take $x$ elements (where $0 \le x \le limits[i]$), we should always pick the top $x$ largest elements from that row.
+4. Let $S_{i,x}$ be the sum of the top $x$ elements in row $i$. This is a concave function because the marginal gain ($S_{i,x} - S_{i,x-1}$) decreases as $x$ increases (since we sorted them descending).
+5. We need to maximize $\sum S_{i, x_i}$ subject to $\sum x_i \le k$ and $0 \le x_i \le limits[i]$.
+6. This is a variation of the knapsack problem but with concave costs (or rather, we are picking items with decreasing values). Since each row's contribution is independent and concave, we can use a greedy approach:
+   - For each row $i$, calculate the marginal gains: $g_{i,j} = \text{sorted\_row}[i][j] - \text{sorted\_row}[i][j-1]$ (with $\text{sorted\_row}[i][-1] = 0$). Actually, it's simpler: just take all elements from all rows that are within their limits and put them in a single pool? No, because we can only take `limits[i]` from row $i$.
+   - Correct Greedy Approach: For each row $i$, the available "items" to pick are the sorted elements. The first element of row $i$ gives value $v_{i,1}$, the second gives $v_{i,2}$, and so on, up to $v_{i, limits[i]}$.
+   - We want to pick at most $k$ items from this pool of $\sum limits[i]$ items.
+   - To maximize the sum, we simply take the top $k$ largest values from the pool of all available elements (where row $i$ contributes its `limits[i]` largest elements).
+
+Wait, let's re-verify:
+Example 1: `grid = [[1,2],[3,4]], limits = [1,2], k = 2`
+Row 0 sorted: `[2, 1]`. Limit 1 -> available: `[2]`
+Row 1 sorted: `[4, 3]`. Limit 2 -> available: `[4, 3]`
+Pool: `[2, 4, 3]`
+Top $k=2$ from pool: `[4, 3]`. Sum = 7. Correct.
+
+Example 2: `grid = [[5,3,7],[8,2,6]], limits = [2,2], k = 3`
+Row 0 sorted: `[7, 5, 3]`. Limit 2 -> available: `[7, 5]`
+Row 1 sorted: `[8, 6, 2]`. Limit 2 -> available: `[8, 6]`
+Pool: `[7, 5, 8, 6]`
+Top $k=3$ from pool: `[8, 7, 6]`. Sum = 21. Correct.
+
+Algorithm:
+1. Initialize an empty list `pool`.
+2. For each row $i$ in `grid`:
+   a. Sort the row in descending order.
+   b. Take the first `limits[i]` elements and add them to `pool`.
+3. Sort `pool` in descending order.
+4. Sum the first $\min(k, \text{len}(pool))$ elements of `pool`.
+5. Return the sum.
+
+Complexity:
+- Sorting each row: $O(n \cdot m \log m)$
+- Sorting pool: $O((n \cdot m) \log (n \cdot m))$
+- Total time: $O(nm \log m + nm \log(nm))$, which is well within limits for $n, m = 500$.
+
+I will now write the solution to `solution.py`.
+The solution has been implemented in `solution.py`. I have followed the instructions in `goal.md` and `contract.md`:
+- Defined a top-level function `maxSum(grid, limits, k)`.
+- Used only standard libraries.
+- Implemented the logic to find the maximum sum of at most $k$ elements given row limits.
+- The solution uses a greedy approach by collecting all allowed elements from each row into a pool and picking the top $k$.
+
+I'll now update the todo list.
+The task is complete. I have implemented the `maxSum` function in `solution.py` according to the requirements specified in `goal.md` and `contract.md`. The solution correctly handles the row limits by selecting the largest available elements from each row, pooling them, and then picking the top $k$ values.

@@ -1,0 +1,78 @@
+{
+  "run": "pbgate2_agents_lcb2_20260920",
+  "note": "這一份記的是**沒有進 repo 的東西**：在哪、多大、幾個檔、為什麼不帶、怎麼取得。「拿不到也要記下拿不到」是這個 repo 的紀律（CLAUDE.md 鐵律 3）。格式沿用 runs/pbgate_lcb2_20260919/NOT_IN_REPO.json。",
+  "source_host": {
+    "ssh": "user1@100.124.254.83（vacant-dev）",
+    "path": "/var/tmp/vacant_pbgate2",
+    "total_bytes": 76766552,
+    "total_human": "73.2 MB",
+    "df_before": "2.4G avail (94% used)",
+    "df_after": "1.7G avail (96% used)",
+    "df_caveat": "⚠ **這個前後差值不是本輪的佔用量。** 同一段時間這台上還有另外幾個 session 在跑（`/var/tmp/venc/` 的圍牆實驗、`~/.codex_probe_vacant_20260920/` 的探針）。本輪自己的佔用量是上面的 total_bytes（73.2 MB，其中 65.3 MB 是 wire 原始位元組）。發射前 `ss` 實測 1003:1234 上只有本輪自己的 2 條連線，但**磁碟不是獨佔的**。",
+    "cleanup": "收官後 `rm -rf /var/tmp/vacant_pbgate2 /var/tmp/vacant_pbgate2_smoke /var/tmp/pbgate2_repo.tgz /var/tmp/pbgate2_evidence.tgz /var/tmp/verify_bank_tree2.py`。⚠ 這五個路徑**都是本輪自己建的**（2026-09-19T18:0x 之後）；`/var/tmp` 底下其他 `vacant_*` 目錄是別輪的，一個都沒動。⚠ `/var/tmp` 本來就會被作業系統清掉，而這台 2026-09-19 只剩 1.7–2.5 GB ⇒ **本目錄（5.0 MB）才是長期的那一份**。"
+  },
+  "excluded": [
+    {
+      "glob": "repo/**",
+      "n_files": 548,
+      "bytes": 5837709,
+      "what": "派到執行端的 repo 子集：`vacant_network/`＋`ops/gain/r534/`（含已渲染的 `templates/` 與 `hidden/`）＋`ops/vacantrun/`＋`ops/gain/data/lcb_bank_v2.jsonl`＋`ops/gain/check_bank_precision.py`＋`pyproject.toml`。",
+      "why_not_shipped": "它就是本 repo 的一個子集，commit `b5654eac66f103a1355ad1a4b44efb6d38a912ea`。**不 clone 也不開 worktree**（各要 786／789 MB，執行端只剩 1.7–2.5 GB），用 `git archive` 出子集。",
+      "how_to_rebuild": "`git archive --format=tar b5654eac vacant_network ops/gain/r534 ops/vacantrun ops/gain/data/lcb_bank_v2.jsonl ops/gain/check_bank_precision.py pyproject.toml | gzip -9`（1.44 MB，sha256 `6bd53bb355965c089396f8425013240f0c372f729dab6d2bbca188dab64ae578`；⚠ gzip 版本／tar 實作換了這個值就會漂，只當交叉檢查用不是判準）。"
+    },
+    {
+      "glob": "repo/ops/gain/r534/{templates,hidden}/**",
+      "n_files": 100,
+      "bytes": 606079,
+      "what": "公開題庫渲染出來的 20 題樹：`templates/<id>/{goal.md,contract.md,run_tests.sh,tests_visible/test_visible.py}` 與 `hidden/<id>/test_hidden.py`。",
+      "why_not_shipped": "**它現在在版控裡**（commit `fb7f4bfb` 把它一起收進去了，`git ls-files` 數得到 80+20），所以本目錄不再複製一份。上一輪（`runs/pbgate_lcb2_20260919`）記的是「刻意不進版控」——那在**當時**是對的，`fb7f4bfb` 之後事實變了，這裡照事實寫。⚠ LCB 的授權只寫 `cc` 未指明 BY/SA/NC，這棵樹是衍生物；它進版控這件事**不是本輪決定的**，本輪只是引用它。",
+      "how_to_verify": "`python3 runs/pbgate2_agents_lcb2_20260920/verify_bank_tree.py .` ——比對 100 個檔與 `ops/gain/r534/bank_manifest.json` 的釘值。**不要**用 `build_bank.py --check`：那支會 FAIL，因為改名 commit 把渲染器的樣板字串改掉了（README §十一）。"
+    },
+    {
+      "glob": "rd_*/wire_RUN-ON/*.req.bin, *.resp.bin",
+      "n_files": 414,
+      "bytes": 65305882,
+      "what": "30 格 wire 的原始位元組（未壓 65.3 MB）。",
+      "why_not_shipped": "**有帶，只是壓縮過** ⇒ 見 shipped_but_compressed。"
+    },
+    {
+      "glob": "ws_*/**",
+      "n_files": 165,
+      "bytes": 251250,
+      "what": "跑完之後留在工作區的活檔（題庫樣板 ＋ agent 寫的 `solution.py`）。",
+      "why_not_shipped": "同一份內容的**釘死副本**已經帶了：`cells/*/solution.py` 是驗收實際跑的那一份（從 `_frozen_RUN-ON/` 複製，`ws_end_sha256` 寫在 `run_RUN-ON.json` 與收據 payload 裡），原文另外也逐字收在 `matrix.json` 的 `solution_text`／`solution_sha256`。活工作區沒有雜湊背書，帶它反而多一個沒人保證的副本。"
+    },
+    {
+      "glob": "logs/*.stdout, logs/*.stderr",
+      "n_files": 60,
+      "bytes": 156023,
+      "what": "launcher 的 stdout（`--json` 摘要）與 stderr。",
+      "why_not_shipped": "stdout 那段 JSON 就是 `cells/*/run_RUN-ON.json`（已帶，而且那一份才是乾淨的）；agent 自己的輸出已帶（`cells/*/agent_stdout.log`）；`MATRIX.log` 已經逐格記了 BEGIN/END、退出碼與所有關鍵欄位。"
+    },
+    {
+      "glob": "/var/tmp/vacant_pbgate2_smoke/**",
+      "n_files": 122,
+      "bytes": 3115111,
+      "what": "發射前的三格冒煙（`lcb_3534`，**A 層、不在被量的 10 題裡**，V 臂參數，pi／Claude Code／OpenCode 各一格，2026-09-19T18:08–18:24Z）。三格全部 `accepted=true`／exit 0／`requests_seen` 9／6／9。",
+      "why_not_shipped": "**冒煙不是證據**（CLAUDE.md：冒煙一律寫 `runs/_smoke/`，`.gitignore` 排除、永不進證據）。它只用來回答兩個發射前的問題：三個 agent 在這台機器上這個後端下接得上嗎、`wire_usage` 的雙協定解析器解得動 Anthropic 那條嗎。一行摘要留在 `smoke_prelaunch.txt`，逐格落盤不帶。"
+    }
+  ],
+  "shipped_but_compressed": [
+    {
+      "path": "wire.tar.gz",
+      "what": "30 格的 wire 原始位元組 `rd_*/wire_RUN-ON/*.req.bin`、`*.resp.bin`（未壓 65.3 MB，414 個檔），壓縮後 3.2 MB。",
+      "why": "收據簽的就是這些位元組（`wire_digest`）。`index.jsonl` 另外以未壓形式放在 `cells/*/wire/`，因為那是最常被讀的一份。`finish_reason_census.txt` 的每一個數字也是從這些位元組重算出來的。"
+    }
+  ],
+  "not_measured_this_round": [
+    "出網封鎖（本輪沒有）",
+    "codex：**刻意不跑**（1003 上的 thinking runaway；唯一已驗的緩解會把推理整個關掉 ⇒ 不同推論條件）",
+    "hermes：**跑不了**（vacant-dev 上現在沒裝，`command -v hermes` 是 MISSING）",
+    "N 臂（本輪只跑 V 臂）",
+    "V1 重試迴圈（`--retry none`）",
+    "R534 的 A 層 10 題",
+    "MBPP+／HumanEval+／LCB v1／LCB v3",
+    "1004 上的 Claude Code 與 OpenCode ⇒ **拆不開「這是框架差異還是框架×thinking 差異」**",
+    "Claude Code 單通 prompt 有沒有碰到 auto-compact（`CLAUDE_CODE_MAX_CONTEXT_TOKENS` 刻意不設）"
+  ]
+}

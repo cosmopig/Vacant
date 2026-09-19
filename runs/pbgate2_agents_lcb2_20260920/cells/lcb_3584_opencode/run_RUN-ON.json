@@ -1,0 +1,142 @@
+{
+  "task_id": "pbgate2_lcb_3584_opencode",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_pbgate2/repo/ops/vacantrun/wrap_agent.sh",
+    "opencode",
+    "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_pbgate2/ws_lcb_3584_opencode",
+  "proxy_url": "http://127.0.0.1:45439",
+  "env": {
+    "proxy_url": "http://127.0.0.1:45439",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+  "ws_end_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+  "agent_rc": -9,
+  "agent_timed_out": true,
+  "requests_seen": 7,
+  "wire_by_protocol": {
+    "openai": 7
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 1,
+  "verdict_sha256": "0b8e61b0af8e33112d04ca1740ce760b31dea119ce80e15a30de518774437dc1",
+  "verdict_hash": "05426c1e80eda06f96a08cc6f5ce1e0a380f62b7e8a673c447b2404014ba92a5",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+      "argv": [
+        "/var/tmp/vacant_pbgate2/repo/ops/vacantrun/wrap_agent.sh",
+        "opencode",
+        "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+      ],
+      "argv_sha256": "d3db3f489eb97d56849efd0d8fa8515cf62a62d24fda809cc8ce3a2df0e4a812",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": -9,
+      "agent_timed_out": true,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 900.049,
+      "wire_quiesced": true,
+      "requests_seen": 7,
+      "requests_seen_cumulative": 7,
+      "wire_digest": "779dca20a228d5be5d9042f231f91198b15c95e505baae5e0062661508513d2a",
+      "ws_end_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+      "frozen_path": "/var/tmp/vacant_pbgate2/rd_lcb_3584_opencode/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 1,
+      "verdict_sha256": "0b8e61b0af8e33112d04ca1740ce760b31dea119ce80e15a30de518774437dc1",
+      "visible_path": "/var/tmp/vacant_pbgate2/rd_lcb_3584_opencode/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:8: import solution]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.119.113.56:1234/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://100.119.113.56:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false,
+      "fallback": null
+    }
+  },
+  "upstreams_defaulted": [],
+  "upstreams_sinked": [],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 1,
+  "wire_digest": "779dca20a228d5be5d9042f231f91198b15c95e505baae5e0062661508513d2a",
+  "run_wall_s": 900.24,
+  "agent_wall_s": 900.049,
+  "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:8: import solution]"
+}

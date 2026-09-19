@@ -1,0 +1,30 @@
+{
+  "suite": "visible",
+  "task_id": "pbgate2_lcb_3583_claude",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 33,
+      "cases": [
+        {
+          "case": "<module>",
+          "ok": false,
+          "kind": "import",
+          "message": "SyntaxError: invalid syntax (solution.py, line 78)",
+          "where": "test_visible.py:8: import solution",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 1,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 1,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "44d8d47f5ad8bc9e7837610af412125ae73148a2633f05774e186baab3da577b"
+}

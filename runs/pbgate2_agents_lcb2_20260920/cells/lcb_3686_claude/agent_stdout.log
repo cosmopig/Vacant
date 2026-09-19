@@ -1,0 +1,12 @@
+I have read `goal.md` and `contract.md` and implemented the solution in `solution.py`.
+
+The logic follows these requirements:
+- The array is split into three non-empty subarrays: `nums1`, `nums2`, and `nums3`.
+- A split is "beautiful" if `nums1` is a prefix of `nums2` OR `nums2` is a prefix of `nums3`.
+- I used nested loops to iterate through all possible split points $i$ and $j$, ensuring each subarray has at least one element.
+- For each split, I checked the prefix conditions and incremented the count if either was met.
+
+You can now run the tests using:
+```bash
+sh run_tests.sh
+```

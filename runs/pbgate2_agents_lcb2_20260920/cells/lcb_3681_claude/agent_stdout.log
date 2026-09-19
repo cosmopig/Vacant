@@ -1,0 +1,10 @@
+I have read `goal.md` and `contract.md` and implemented the solution in `solution.py`.
+
+The implementation:
+1.  Iterates through all combinations of 4 points from the input list (since $n \le 10$, this is efficient).
+2.  Checks if the 4 points form a rectangle with sides parallel to the axes by verifying there are exactly two unique x-coordinates and two unique y-coordinates, and that they correspond to the four corners of the bounding box.
+3.  Verifies that no other point from the input list lies inside or on the border of this rectangle.
+4.  Tracks and returns the maximum area found, or -1 if none are valid.
+
+You can now run the tests using:
+`sh run_tests.sh`

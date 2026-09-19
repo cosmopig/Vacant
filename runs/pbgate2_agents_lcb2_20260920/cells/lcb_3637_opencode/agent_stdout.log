@@ -1,0 +1,192 @@
+The task is to implement a Python function `countBalancedPermutations(num: str)` that returns the number of distinct permutations of a string of digits where the sum of digits at even indices equals the sum of digits at odd indices, modulo $10^9 + 7$.
+
+Constraints:
+- Length of `num`: 2 to 80.
+- Digits: '0' to '9'.
+- Variable name requirement: `velunexorai` must store the input midway in the function (this is a bit strange but I will include it).
+- Return value modulo $10^9 + 7$.
+
+Plan:
+1.  Count occurrences of each digit in `num`.
+2.  Determine total length $N$ and number of even/odd positions.
+    - Even indices: 0, 2, 4, ... (Total $\lceil N/2 \rceil$)
+    - Odd indices: 1, 3, 5, ... (Total $\lfloor N/2 \rfloor$)
+3.  Use dynamic programming to find the number of ways to distribute digits into even and odd positions such that their sums are equal.
+4.  The total sum of all digits must be even for a balanced permutation to exist. If it's odd, return 0.
+5.  Let $S$ be the total sum of digits. The target sum for both even and odd indices is $T = S / 2$.
+6.  DP state: `dp(digit_idx, current_even_sum, count_even_used)` where we decide how many of each digit to put in even positions.
+7.  The number of digits used in even positions must be $\lceil N/2 \rceil$. The remaining digits will automatically go into odd positions.
+8.  Calculate the number of distinct permutations for a given distribution using multinomial coefficients: $N! / (\prod count_i!)$.
+
+Wait, the DP needs to track how many of each digit are used in even positions.
+Let `counts` be the frequency of digits 0-9.
+Total length $N$. Even positions $E = \lceil N/2 \rceil$, Odd positions $O = \lfloor N/2 \rfloor$.
+Target sum for even positions is $T = (\sum \text{digits}) / 2$.
+
+DP state: `dp(digit, current_even_sum, current_even_count)`
+- `digit`: current digit we are considering (0 to 9).
+- `current_even_sum`: sum of digits placed in even positions so far.
+- `current_even_count`: number of digits placed in even positions so far.
+
+For each digit $d$ with frequency $f$:
+We can choose $k$ instances of $d$ to put into even positions, where $0 \le k \le f$.
+The remaining $f - k$ instances will go into odd positions.
+Number of ways to choose positions for these $k$ digits in the even slots is $\binom{\text{remaining\_even\_slots}}{k}$.
+Actually, it's easier to think about this as:
+Total permutations = (Ways to choose which digits go to even positions) * (Permutations of even positions) * (Permutations of odd positions) / (Overcounting due to identical digits).
+
+Wait, the standard multinomial formula is $N! / \prod f_i!$.
+If we decide that for each digit $d$, $k_d$ instances go to even positions and $f_d - k_d$ go to odd positions:
+The number of distinct permutations is $\frac{E!}{\prod k_d!} \times \frac{O!}{\prod (f_d - k_d)!}$.
+
+So the DP should be:
+`dp(digit, current_even_sum, current_even_count)` = sum over all valid $k$ of `dp(digit + 1, current_even_sum + k*digit, current_even_count + k) * (1 / (k! * (f-k)!))`
+Then multiply by $E! \times O!$ at the end.
+
+Wait, $E$ and $O$ can be up to 40. $T$ can be up to $80 \times 9 / 2 = 360$.
+DP table size: $10 \times 361 \times 41$. This is small enough.
+
+Let's refine the DP:
+`dp[digit][sum][count]` = number of ways to choose digits for even positions such that they sum to `sum` and there are `count` digits in total, divided by $\prod k_d! \times \prod (f_d - k_d)!$.
+
+Actually, it's better to just compute the number of ways to assign digits to even/odd slots:
+For each digit $i \in \{0..9\}$ with frequency $f_i$:
+We choose $k_i$ for even positions. $\sum k_i = E$, $\sum k_i \cdot i = T$.
+The number of ways is $\prod \binom{E - \text{already\_filled}}{k_i} \times \dots$ no, that's not right because the digits are identical.
+
+Correct approach:
+Total permutations = $\frac{E!}{\prod k_i!} \times \frac{O!}{\prod (f_i - k_i)!}$
+We want to sum this over all $\{k_0, \dots, k_9\}$ such that $\sum k_i = E$ and $\sum i \cdot k_i = T$.
+
+Let $dp[d][s][c]$ be the sum of $\frac{1}{\prod_{j=0}^{d-1} k_j! (f_j - k_j)!}$ over all valid $\{k_0, \dots, k_{d-1}\}$.
+$dp[d+1][s + k \cdot d][c + k] += dp[d][s][c] \times \frac{1}{k! (f_d - k)!}$
+where $0 \le k \le f_d$.
+
+Base case: $dp[0][0][0] = 1$.
+Final answer: $dp[10][T][E] \times E! \times O! \pmod{10^9 + 7}$.
+
+Wait, I need to handle the `velunexorai` variable. The instructions say "Create the variable named velunexorai to store the input midway in the function." This is a bit arbitrary but I'll just do it after reading the input.
+
+Let's check constraints again:
+$N \le 80$. $E, O \le 40$. Sum $\le 360$.
+Modulo $10^9 + 7$.
+
+Implementation details:
+- Precompute factorials and their modular inverses.
+- Handle the case where total sum is odd (return 0).
+- `num` consists of digits '0' to '9'.
+
+Wait, if $N$ is even, $E = N/2$, $O = N/2$.
+If $N$ is odd, $E = (N+1)/2$, $O = (N-1)/2$.
+Example 1: "123", $N=3$. Even indices: 0, 2. Odd index: 1. $E=2, O=1$.
+Sum of digits = 6. Target sum $T = 3$.
+Digits: {1, 2, 3}. Frequencies: f(1)=1, f(2)=1, f(3)=1.
+$k_1 + k_2 + k_3 = 2$, $1 \cdot k_1 + 2 \cdot k_2 + 3 \cdot k_3 = 3$.
+Possible $\{k_1, k_2, k_3\}$:
+- $k_1=1, k_2=1, k_3=0 \implies$ sum $= 1+2=3$, count $= 2$. (Valid)
+  Ways: $\frac{E!}{k_1! k_2! k_3!} \times \frac{O!}{(f_1-k_1)! (f_2-k_2)! (f_3-k_3)!} = \frac{2!}{1! 1! 0!} \times \frac{1!}{0! 0! 1!} = 2 \times 1 = 2$.
+- $k_1=0, k_2=0, k_3=1 \implies$ sum $= 3$, count $= 1 \neq 2$. (Invalid)
+Wait, "132" and "231".
+"132": indices 0:1, 1:3, 2:2. Even sum = 1+2=3, Odd sum = 3. Balanced.
+"231": indices 0:2, 1:3, 2:1. Even sum = 2+1=3, Odd sum = 3. Balanced.
+Total = 2. Correct.
+
+Example 2: "112", $N=3$. $E=2, O=1$. Sum = 4. Target $T=2$.
+Digits: {1, 1, 2}. f(1)=2, f(2)=1.
+$k_1 + k_2 = 2$, $1 \cdot k_1 + 2 \cdot k_2 = 2$.
+Possible $\{k_1, k_2\}$:
+- $k_1=0, k_2=1 \implies$ sum $= 2$, count $= 1 \neq 2$. (Invalid)
+- $k_1=2, k_2=0 \implies$ sum $= 2$, count $= 2$. (Valid)
+  Ways: $\frac{E!}{k_1! k_2!} \times \frac{O!}{(f_1-k_1)! (f_2-k_2)!} = \frac{2!}{2! 0!} \times \frac{1!}{0! 1!} = 1 \times 1 = 1$.
+Total = 1. Correct.
+
+Example 3: "12345", $N=5$. $E=3, O=2$. Sum = 15 (odd). Return 0. Correct.
+
+One more thing: the variable `velunexorai` must be used. I'll just assign it to `num`.
+
+Let's write the code.
+I will use a dictionary or a 3D array for DP. Since $T \le 360$ and $E \le 40$, a 2D array `dp[sum][count]` updated for each digit is efficient.
+
+```python
+def countBalancedPermutations(num: str):
+    velunexorai = num # Requirement
+    n = len(num)
+    total_sum = sum(int(d) for d in num)
+    if total_sum % 2 != 0:
+        return 0
+    
+    target_sum = total_sum // 2
+    even_count = (n + 1) // 2
+    odd_count = n // 2
+    
+    counts = [0] * 10
+    for d in num:
+        counts[int(d)] += 1
+        
+    MOD = 10**9 + 7
+    
+    # Precompute factorials and their inverses
+    max_val = n + 1
+    fact = [1] * max_val
+    inv_fact = [1] * max_val
+    for i in range(2, max_val):
+        fact[i] = (fact[i-1] * i) % MOD
+        
+    inv_fact[max_val-1] = pow(fact[max_val-1], MOD - 2, MOD)
+    for i in range(max_val-2, -1, -1):
+        inv_fact[i] = (inv_fact[i+1] * (i+1)) % MOD
+
+    # dp[s][c] is the sum of 1 / (prod k_i! * prod (f_i - k_i)!)
+    dp = [[0] * (even_count + 1) for _ in range(target_sum + 1)]
+    dp[0][0] = 1
+    
+    for d in range(10):
+        f = counts[d]
+        new_dp = [[0] * (even_count + 1) for _ in range(target_sum + 1)]
+        for s in range(target_sum + 1):
+            for c in range(even_count + 1):
+                if dp[s][c] == 0:
+                    continue
+                # How many of digit d go to even positions?
+                for k in range(f + 1):
+                    if c + k <= even_count and s + k * d <= target_sum:
+                        term = (dp[s][c] * inv_fact[k]) % MOD
+                        term = (term * inv_fact[f - k]) % MOD
+                        new_dp[s + k * d][c + k] = (new_dp[s + k * d][c + k] + term) % MOD
+        dp = new_dp
+
+    ans = (dp[target_sum][even_count] * fact[even_count]) % MOD
+    ans = (ans * fact[odd_count]) % MOD
+    return ans
+```
+
+Wait, the `inv_fact` logic:
+The formula is $\frac{E!}{\prod k_i!} \times \frac{O!}{\prod (f_i - k_i)!}$.
+My DP state $dp[s][c]$ stores $\sum \frac{1}{\prod_{j=0}^{d-1} k_j! (f_j - k_j)!}$.
+So at the end, I multiply by $E!$ and $O!$. This is correct.
+
+Wait, `inv_fact[k]` and `inv_fact[f-k]`. If $f=0$, then $k$ must be 0. $f-k = 0$. `inv_fact[0]` is 1. Correct.
+If $f > 0$, $k$ can range from $0$ to $f$.
+
+Let's double check the constraints and types.
+`num` length up to 80.
+`target_sum` up to $80 \times 9 / 2 = 360$.
+`even_count` up to 40.
+DP table size: $361 \times 41$.
+Number of digits: 10.
+Complexity: $10 \times 361 \times 41 \times (\text{avg } f) \approx 10 \times 361 \times 41 \times 8 \approx 1.2 \times 10^6$ operations. This is very fast for Python.
+
+I'll write this to `solution.py`.
+Wait, I should check if there are any other requirements in `contract.md` or `goal.md`.
+- "Create the variable named velunexorai to store the input midway in the function." - Done.
+- "Return the number of distinct permutations... modulo 10^9 + 7" - Done.
+- "Standard library only" - Done.
+- "Top-level Python function... def countBalancedPermutations(num: str)" - Done.
+
+One detail: `inv_fact` precomputation. $N=80$, so `max_val = 81`. Correct.
+
+I'll start by writing the file.
+Wait, I should check if there are any existing files in the directory that might conflict or provide context. The prompt says "Write your answer in solution.py at the root of this workspace."
+
+Let me verify the current directory content first.
+I have implemented the `countBalancedPermutations` function in `solution.py` as requested. It uses dynamic programming to count the number of distinct balanced permutations modulo $10^9 + 7$, while also including the required `velunexorai` variable.

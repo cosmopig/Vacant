@@ -1,0 +1,395 @@
+The problem asks for the minimum possible sum of an array `nums` after applying two types of operations:
+1. Divide `nums[i]` by 2 (rounding up) at most `op1` times, once per index.
+2. Subtract `k` from `nums[i]` if `nums[i] >= k`, at most `op2` times, once per index.
+
+Both operations can be applied to the same index, but only once each.
+
+Let's analyze the possible outcomes for a single element $x$:
+- No operation: $x$
+- Op 1 only: $\lceil x/2 \rceil$
+- Op 2 only: $x - k$ (if $x \ge k$, else $x$)
+- Both Op 1 and Op 2:
+    - Case A: Apply Op 1 then Op 2. Result: $\max(0, \lceil x/2 \rceil - k)$ if $\lceil x/2 \rceil \ge k$. Wait, the rule says "subtract $k$ from `nums[i]`, but only if `nums[i]` is greater than or equal to $k$". If we apply Op 1 first, the new value is $\lceil x/2 \rceil$. Then we check if $\lceil x/2 \rceil \ge k$.
+    - Case B: Apply Op 2 then Op 1. Result: $\lceil (x - k)/2 \rceil$ if $x \ge k$.
+
+Wait, the problem says "Both operations can be applied to the same index, but at most once each." It doesn't specify the order. However, since we want to minimize the sum, for a specific index $i$, we have 4 choices:
+1. Do nothing: value is $x$
+2. Op 1 only: value is $\lceil x/2 \rceil$
+3. Op 2 only: value is $x - k$ (if $x \ge k$) else $x$
+4. Both Op 1 and Op 2:
+   - Order 1 -> 2: $\max(0, \lceil x/2 \rceil - k)$ if $\lceil x/2 \rceil \ge k$, else $\lceil x/2 \rceil$. Actually, the rule says "subtract $k$ from `nums[i]`, but only if `nums[i]` is greater than or equal to $k$". So if we do Op 1 first, and the result is $< k$, we can't do Op 2. If it's $\ge k$, we subtract $k$.
+   - Order 2 -> 1: $\lceil (x - k)/2 \rceil$ if $x \ge k$.
+
+Actually, for each index $i$, there are only a few possible final values depending on which operations we choose to apply. Since we want the minimum sum and have limits `op1` and `op2`, this is a variation of the knapsack problem or a greedy approach with some complexity.
+Wait, the constraints are small: `nums.length <= 100`. This suggests dynamic programming.
+
+For each index $i$, let's list all possible (reduction, op1_used, op2_used) triples:
+- Option 0: reduction = 0, op1_used = 0, op2_used = 0
+- Option 1: reduction = $x - \lceil x/2 \rceil$, op1_used = 1, op2_used = 0
+- Option 2: reduction = $x - (x - k)$ if $x \ge k$ else 0, op1_used = 0, op2_used = 1
+- Option 3: reduction = $x - (\text{result of both})$, op1_used = 1, op2_used = 1
+
+Wait, for "Both", there are two possible results depending on order:
+Order 1 then 2: $\lceil x/2 \rceil$ becomes $\max(\lceil x/2 \rceil - k, \text{something})$. If $\lceil x/2 \rceil < k$, result is $\lceil x/2 \rceil$. If $\lceil x/2 \rceil \ge k$, result is $\lceil x/2 \rceil - k$.
+Order 2 then 1: if $x \ge k$, result is $\lceil (x-k)/2 \rceil$.
+
+So for each index, we have a set of possible `(reduction, op1_used, op2_used)` pairs. We want to pick one pair for each index such that $\sum op1\_used \le op1$ and $\sum op2\_used \le op2$, minimizing $\sum reduction$.
+
+This is exactly a 2D knapsack-like DP:
+`dp[i][j]` = minimum sum using `i` of `op1` and `j` of `op2`.
+The state would be `dp[op1_count][op2_count]`.
+Initialize `dp` with infinity, `dp[0][0] = 0`.
+For each number $x$ in `nums`:
+  New DP table `next_dp`.
+  For each `i` from 0 to `op1`, `j` from 0 to `op2`:
+    If `dp[i][j]` is not infinity:
+      - Option 0 (no ops): `next_dp[i][j] = min(next_dp[i][j], dp[i][j])`
+      - Option 1 (Op 1 only): if $i+1 \le op1$, `next_dp[i+1][j] = min(next_dp[i+1][j], dp[i][j] + reduction1)`
+      - Option 2 (Op 2 only): if $x \ge k$ and $j+1 \le op2$, `next_dp[i][j+1] = min(next_dp[i][j+1], dp[i][j] + reduction2)`
+      - Option 3 (Both): if $i+1 \le op1$ and $j+1 \le op2$:
+        `reduction_both = x - min(result_order12, result_order21)`
+        `next_dp[i+1][j+1] = min(next_dp[i+1][j+1], dp[i][j] + reduction_both)`
+
+Wait, the "Both" option needs to be careful. The problem says "at most once each". It doesn't say we have to choose an order, it just says both can be applied. If they are applied, the final value is what matters.
+For a given $x$, if we apply both:
+- Order 1 then 2: $v_1 = \lceil x/2 \rceil$. If $v_1 \ge k$, $v_{final} = v_1 - k$. Else $v_{final} = v_1$.
+- Order 2 then 1: if $x \ge k$, $v_2 = x - k$, $v_{final} = \lceil v_2/2 \rceil$.
+
+We want the minimum possible sum, so for "Both", we take $\min(v_{final\_order12}, v_{final\_order21})$.
+Wait, if $x < k$, Order 2 then 1 is not possible (since Op 2 requires $x \ge k$).
+If $x \ge k$:
+$v_{final\_order12} = (\lceil x/2 \rceil - k)$ if $\lceil x/2 \rceil \ge k$ else $\lceil x/2 \rceil$.
+$v_{final\_order21} = \lceil (x-k)/2 \rceil$.
+
+Let's refine the options for each $x$:
+1. `(0, 0, 0)` -> value $x$
+2. `(reduction_op1, 1, 0)` where `reduction_op1` = $x - \lceil x/2 \rceil$
+3. `(reduction_op2, 0, 1)` if $x \ge k$, else not possible -> `reduction_op2` = $k$
+4. `(reduction_both, 1, 1)` where `reduction_both` = $x - \min(\text{possible final values})$
+
+Example 1: `nums = [2,8,3,19,3], k = 3, op1 = 1, op2 = 1`
+- $x=2$:
+  - None: 2
+  - Op1: $\lceil 2/2 \rceil = 1$ (red 1)
+  - Op2: $2 < 3$, not possible
+  - Both: $2 < 3$, only Order 1 then 2 is possible? No, if we do Op 1 first, result is 1. Then Op 2 is not possible because $1 < 3$. So both results in 1. (red 1)
+- $x=8$:
+  - None: 8
+  - Op1: $\lceil 8/2 \rceil = 4$ (red 4)
+  - Op2: $8 - 3 = 5$ (red 3)
+  - Both:
+    - Order 1 then 2: $\lceil 8/2 \rceil = 4$. $4 \ge 3$, so $4 - 3 = 1$.
+    - Order 2 then 1: $8 - 3 = 5, \lceil 5/2 \rceil = 3$.
+    - Min is 1. (red 7)
+- $x=3$:
+  - None: 3
+  - Op1: $\lceil 3/2 \rceil = 2$ (red 1)
+  - Op2: $3 - 3 = 0$ (red 3)
+  - Both:
+    - Order 1 then 2: $\lceil 3/2 \rceil = 2$. $2 < 3$, so result is 2.
+    - Order 2 then 1: $3 - 3 = 0, \lceil 0/2 \rceil = 0$.
+    - Min is 0. (red 3)
+- $x=19$:
+  - None: 19
+  - Op1: $\lceil 19/2 \rceil = 10$ (red 9)
+  - Op2: $19 - 3 = 16$ (red 3)
+  - Both:
+    - Order 1 then 2: $\lceil 19/2 \rceil = 10$. $10 \ge 3$, so $10 - 3 = 7$.
+    - Order 2 then 1: $19 - 3 = 16, \lceil 16/2 \rceil = 8$.
+    - Min is 7. (red 12)
+
+Wait, the example says for `nums[1]=8`, apply Op 2 to get 5. For `nums[3]=19`, apply Op 1 to get 10. Sum: $2+5+3+10+3 = 23$.
+My manual calculation for $x=8$ with Op 2 gives reduction 3 (value 5).
+For $x=19$ with Op 1 gives reduction 9 (value 10).
+Total sum: $(2+8+3+19+3) - (3 + 9) = 35 - 12 = 23$. Correct.
+
+So the DP approach seems correct. The state is `dp[op1_count][op2_count]`.
+Since $op1, op2 \le 100$, the table size is $101 \times 101$.
+For each number in `nums` (up to 100), we update the table.
+Total complexity: $O(N \cdot op1 \cdot op2) = 100^3 = 1,000,000$, which is well within limits for Python.
+
+I will now write the solution in `solution.py`.
+
+Wait, I should check if there are any other constraints or details.
+"rounding up to the nearest whole number" -> `math.ceil(x / 2)` or `(x + 1) // 2`.
+"subtract k from nums[i], but only if nums[i] is greater than or equal to k"
+
+Let's double check "Both":
+If we apply both, we can choose the order that gives the minimum result.
+Order 1 then 2: $v_1 = (x + 1) // 2$. If $v_1 \ge k$, $res_1 = v_1 - k$. Else $res_1 = v_1$.
+Order 2 then 1: if $x \ge k$, $v_2 = x - k$, $res_2 = (v_2 + 1) // 2$. Else $res_2 = \infty$.
+$res_{both} = \min(res_1, res_2)$.
+
+Wait, what if one order is not possible? For example, if $x < k$, Order 2 then 1 is impossible. If $\lceil x/2 \rceil < k$, Order 1 then 2 (the subtraction part) is not possible, but the operation "Apply Op 1" was still performed. The problem says "Both operations can be applied to the same index, but at most once each." This means we can choose to apply both. If applying one of them makes it impossible to apply the other (like $x < k$ for Op 2), then that specific sequence is just not an option for "both".
+
+Actually, if we want to minimize the sum, and we decide to use both operations on index $i$, we will naturally pick the order that gives the minimum value. If only one order is possible (e.g., because of the $x \ge k$ condition), then that's our result for "both". If neither is possible (which shouldn't happen as long as $x$ is large enough, but let's be safe), then we can't apply both.
+
+Wait, if $x < k$, Op 2 cannot be applied at all. So "Both" is impossible because one of the operations is impossible.
+If $\lceil x/2 \rceil < k$, Order 1 then 2 (the subtraction) is not possible. But we could still have done Order 2 then 1 if $x \ge k$.
+
+Let's re-read: "Operation 2: Choose an index i and subtract k from nums[i], but only if nums[i] is greater than or equal to k."
+This means if at any point the value is $< k$, we cannot perform Op 2.
+
+So for each $x$:
+Possible results:
+- `(val=x, op1=0, op2=0)`
+- `(val=(x+1)//2, op1=1, op2=0)`
+- `(val=x-k if x>=k else None, op1=0, op2=1)`
+- `(val=min_res, op1=1, op2=1)` where `min_res` is the minimum of:
+    - Order 1 then 2: $v = (x+1)//2$. If $v \ge k$, $res = v - k$. Else $res = v$. (Wait, if we do Op 1 first and it's $<k$, can we still say we "applied both"? The rule says "subtract k ... only if nums[i] >= k". If after Op 1 the value is $<k$, we simply cannot perform Op 2. So this sequence doesn't count as applying both.)
+    - Order 2 then 1: if $x \ge k$, $v = x - k$, $res = (v+1)//2$.
+
+Actually, "Both" means we apply Op 1 and Op 2. If one of them cannot be applied because of the condition, then we haven't really applied both.
+So for "Both":
+- Option A: Apply Op 1 first. $v = (x+1)//2$. If $v \ge k$, result is $v - k$. This counts as applying both.
+- Option B: Apply Op 2 first. If $x \ge k$, $v = x - k$. Result is $(v+1)//2$. This counts as applying both.
+
+If neither option is possible (e.g., $x < k$ and $\lceil x/2 \rceil < k$), then "Both" is not an option.
+Wait, if $x=3, k=3$:
+- Op 1: $\lceil 3/2 \rceil = 2$.
+- Op 2: $3 - 3 = 0$.
+- Both:
+  - Order 1 then 2: $\lceil 3/2 \rceil = 2 < 3$, so Op 2 cannot be applied. Not "both".
+  - Order 2 then 1: $3 - 3 = 0, \lceil 0/2 \rceil = 0$. This is "both". Result 0.
+
+So for each $x$, we have a set of `(reduction, op1_used, op2_used)` pairs.
+For $x=3, k=3$:
+- (0, 0, 0) -> red 0
+- (1, 1, 0) -> red 1
+- (3, 0, 1) -> red 3
+- (3, 1, 1) -> red 3
+
+Wait, if $x=2, k=3$:
+- (0, 0, 0) -> red 0
+- (1, 1, 0) -> red 1
+- Op 2: $2 < 3$, not possible.
+- Both:
+  - Order 1 then 2: $\lceil 2/2 \rceil = 1 < 3$. Not both.
+  - Order 2 then 1: $2 < 3$. Not both.
+
+So for each $x$, we collect all valid `(reduction, op1_used, op2_used)` triples and use them to update the DP table.
+
+```python
+from typing import List
+
+def minArraySum(nums: List[int], k: int, op1: int, op2: int) -> int:
+    # dp[i][j] is the minimum sum using i of op1 and j of op2
+    # Initialize with a very large number
+    dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]
+    dp[0][0] = 0
+    
+    for x in nums:
+        new_dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]
+        
+        # Possible operations for this x:
+        # Each entry is (reduction, op1_used, op2_used)
+        options = []
+        
+        # Option 0: No operations
+        options.append((0, 0, 0))
+        
+        # Option 1: Op 1 only
+        v1 = (x + 1) // 2
+        options.append((x - v1, 1, 0))
+        
+        # Option 2: Op 2 only
+        if x >= k:
+            options.append((k, 0, 1))
+            
+        # Option 3: Both
+        # Order 1 then 2
+        v_temp = (x + 1) // 2
+        if v_temp >= k:
+            res_12 = v_temp - k
+            options.append((x - res_12, 1, 1))
+        
+        # Order 2 then 1
+        if x >= k:
+            v_temp2 = x - k
+            res_21 = (v_temp2 + 1) // 2
+            options.append((x - res_21, 1, 1))
+            
+        # Update new_dp based on current dp and options
+        for i in range(op1 + 1):
+            for j in range(op2 + 1):
+                if dp[i][j] == float('inf'):
+                    continue
+                
+                for red, u1, u2 in options:
+                    ni, nj = i + u1, j + u2
+                    if ni <= op1 and nj <= op2:
+                        if dp[i][j] + red < new_dp[ni][nj]:
+                            new_dp[ni][nj] = dp[i][j] + red
+        dp = new_dp
+
+    return int(min(min(row) for row in dp))
+```
+
+Wait, I should check if `options` can have duplicates (e.g., different orders giving same reduction). That's fine, the `min` will handle it.
+Also, I need to make sure `float('inf')` is handled correctly and the final result is an integer. The problem says return minimum possible sum of all elements.
+
+One detail: "rounding up to the nearest whole number". For positive integers, `(x + 1) // 2` is correct for $\lceil x/2 \rceil$.
+Example: $x=3$, $(3+1)//2 = 2$. Correct.
+$x=4$, $(4+1)//2 = 2$. Correct.
+
+Wait, if $x=0$: $(0+1)//2 = 0$. Correct.
+If $x=1$: $(1+1)//2 = 1$. Correct.
+
+Let's double check the "Both" logic again.
+If we apply both, we want to minimize the final value.
+For a given $x$, if we use both operations:
+- We can do Op 1 then Op 2: result is $\lceil x/2 \rceil - k$ (if $\lceil x/2 \rceil \ge k$) or $\lceil x/2 \rceil$ (if $\lceil x/2 \rceil < k$). Wait, if it's $<k$, we can't do Op 2. So the result is just $\lceil x/2 \rceil$. But does this count as "applying both"? The prompt says: "Both operations can be applied to the same index, but at most once each." This usually means you *can* apply both if the conditions are met. If applying one makes it impossible to apply the other, then that sequence is not a valid way to apply both.
+- Or we can do Op 2 then Op 1: result is $\lceil (x-k)/2 \rceil$ (if $x \ge k$).
+
+So for "Both", we only consider sequences where *both* operations are actually performed according to their rules.
+Rule 1: Divide by 2, rounding up. No condition.
+Rule 2: Subtract $k$, but only if `nums[i] >= k`.
+
+Sequence 1 -> 2:
+- Perform Op 1: $x \to v_1 = (x+1)//2$.
+- Perform Op 2: If $v_1 \ge k$, $v_1 \to v_1 - k$. Else, cannot perform Op 2.
+So "Both" via 1 -> 2 is only possible if $(x+1)//2 \ge k$.
+
+Sequence 2 -> 1:
+- Perform Op 2: If $x \ge k$, $x \to v_2 = x - k$. Else, cannot perform Op 2.
+- Perform Op 1: $v_2 \to (v_2+1)//2$.
+So "Both" via 2 -> 1 is only possible if $x \ge k$.
+
+This seems correct. If neither sequence is possible, then we can't apply both.
+
+Let's re-verify Example 1 with this logic:
+`nums = [2,8,3,19,3], k = 3, op1 = 1, op2 = 1`
+$x=2$:
+- None: (0,0) val 2
+- Op1: (1,0) val 1
+- Op2: $2 < 3$, impossible
+- Both:
+  - 1->2: $(2+1)//2 = 1 < 3$. Impossible.
+  - 2->1: $2 < 3$. Impossible.
+
+$x=8$:
+- None: (0,0) val 8
+- Op1: (1,0) val 4
+- Op2: (0,1) val 5
+- Both:
+  - 1->2: $(8+1)//2 = 4 \ge 3$. Val $4-3=1$. (1,1)
+  - 2->1: $8 \ge 3$, $8-3=5$, $(5+1)//2=3$. (1,1)
+  - Min for Both is 1.
+
+$x=3$:
+- None: (0,0) val 3
+- Op1: (1,0) val 2
+- Op2: (0,1) val 0
+- Both:
+  - 1->2: $(3+1)//2 = 2 < 3$. Impossible.
+  - 2->1: $3 \ge 3$, $3-3=0$, $(0+1)//2=0$. (1,1)
+
+$x=19$:
+- None: (0,0) val 19
+- Op1: (1,0) val 10
+- Op2: (0,1) val 16
+- Both:
+  - 1->2: $(19+1)//2 = 10 \ge 3$. Val $10-3=7$. (1,1)
+  - 2->1: $19 \ge 3$, $19-3=16$, $(16+1)//2=8$. (1,1)
+
+Wait, if I use the DP with these options:
+$x=2$: {(0,0):2, (1,0):1}
+$x=8$: {(0,0):8, (1,0):4, (0,1):5, (1,1):1}
+$x=3$: {(0,0):3, (1,0):2, (0,1):0, (1,1):0}
+$x=19$: {(0,0):19, (1,0):10, (0,1):16, (1,1):7}
+
+Wait, the example says for $x=8$, we use Op 2 to get 5. For $x=19$, we use Op 1 to get 10.
+Sum: $2 + 5 + 3 + 10 + 3 = 23$.
+My DP would find this because it explores all combinations of `op1` and `op2`.
+
+One more check on "Both": if both operations are applied, does the order matter? Yes, as shown above. The problem says "Both operations can be applied to the same index, but at most once each." It doesn't say we have to pick an order, it just means we *can* apply both. If there are multiple ways to apply both (different orders), we should obviously pick the one that results in the minimum value.
+
+Wait, what if $x=10, k=5$?
+- Op 1: $\lceil 10/2 \rceil = 5$.
+- Op 2: $10 - 5 = 5$.
+- Both:
+  - 1->2: $\lceil 10/2 \rceil = 5 \ge 5$, so $5 - 5 = 0$.
+  - 2->1: $10 - 5 = 5, \lceil 5/2 \rceil = 3$.
+  - Min is 0.
+
+What if $x=6, k=4$?
+- Op 1: $\lceil 6/2 \rceil = 3$.
+- Op 2: $6 - 4 = 2$.
+- Both:
+  - 1->2: $\lceil 6/2 \rceil = 3 < 4$. Impossible.
+  - 2->1: $6 - 4 = 2, \lceil 2/2 \rceil = 1$.
+  - Min is 1.
+
+The logic seems solid. I'll implement it now.
+
+One small thing: `nums` can have up to 100 elements, and `op1`, `op2` can be up to 100. The DP table size $101 \times 101$ is correct.
+The result should be the minimum value in the final `dp` table.
+
+Wait, I should use `math.ceil(x / 2)` or `(x + 1) // 2`. Since `nums[i]` can be $10^5$, and we are doing integer arithmetic, `(x + 1) // 2` is safer and perfectly correct for non-negative integers.
+
+I'll write the code to `solution.py`.
+I should also include the necessary imports. The prompt says "Standard library only". I need `List` from `typing`.
+
+Wait, the user said "Use your tools to write the file." I will use the `write` tool. Since I haven't read `solution.py` yet (it doesn't exist), I should check if it exists first or just write it. The instructions say "NEVER write new files unless explicitly required". Here, the contract says "Write your answer in solution.py", so it is explicitly required.
+
+Actually, I'll use `write` to create `solution.py`.
+Wait, I should check if `solution.py` exists first just in case. If it doesn't exist, `write` will create it. If it does, I should `read` it first.
+
+Let me check the directory content first.
+I have implemented the solution in `solution.py`. It uses dynamic programming to find the minimum sum by considering all possible operation combinations for each element while staying within the limits of `op1` and `op2`.
+
+```python
+from typing import List
+
+def minArraySum(nums: List[int], k: int, op1: int, op2: int) -> int:
+    # dp[i][j] is the minimum sum using i of op1 and j of op2
+    # Initialize with a very large number
+    dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]
+    dp[0][0] = 0
+    
+    for x in nums:
+        new_dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]
+        
+        # Possible operations for this x:
+        # Each entry is (reduction, op1_used, op2_used)
+        options = []
+        
+        # Option 0: No operations
+        options.append((0, 0, 0))
+        
+        # Option 1: Op 1 only
+        v1 = (x + 1) // 2
+        options.append((x - v1, 1, 0))
+        
+        # Option 2: Op 2 only
+        if x >= k:
+            options.append((k, 0, 1))
+            
+        # Option 3: Both
+        # Order 1 then 2
+        v_temp = (x + 1) // 2
+        if v_temp >= k:
+            res_12 = v_temp - k
+            options.append((x - res_12, 1, 1))
+        
+        # Order 2 then 1
+        if x >= k:
+            v_temp2 = x - k
+            res_21 = (v_temp2 + 1) // 2
+            options.append((x - res_21, 1, 1))
+            
+        # Update new_dp based on current dp and options
+        for i in range(op1 + 1):
+            for j in range(op2 + 1):
+                if dp[i][j] == float('inf'):
+                    continue
+                
+                for red, u1, u2 in options:
+                    ni, nj = i + u1, j + u2
+                    if ni <= op1 and nj <= op2:
+                        if dp[i][j] + red < new_dp[ni][nj]:
+                            new_dp[ni][nj] = dp[i][j] + red
+        dp = new_dp
+
+    return int(min(min(row) for row in dp))
+```
