@@ -251,6 +251,60 @@ world3/index.html?live=http://<展場機>:8899/live/events.jsonl&poll=2000
 
 ---
 
+## 五之三、54 格兩臂真跑接上了（2026-09-19 深夜）
+
+另一條線把 **54 格 × ON／OFF 兩臂 × 全部 L-real** 跑完了（`void_cells` 0）。
+我先前寫「A4／A6 那兩行等資料到位就會自己改對，我不手動改」——`serve_twin`
+逐格呼叫 `events_for_cell`，所以那句話兌現了：換資料包，**證據徽章與
+OFF 那一行自己就變對**，電視端一行都不用為了這批資料改。
+
+### 硬規則：OFF 那一臂**沒有裁決**
+
+那一臂沒有閘門、不簽收據，`accepted` 恆為 null。畫面上唯一能講的是
+**「我們事後用同一把尺量：N/M」**，而且要看得出是事後的。
+
+⚠ **不准拿 `postaudit.all_pass` 去填 `accepted`。** 那會把「關掉這層」演成
+「另一邊也判了」——**是 A4 換個方向再犯一次**。事後稽核自己帶著三個旗標
+（`when="after_the_run"`／`is_verdict=false`／`signed=false`），缺一個就印
+「沒有事後量」，不印那個數字。
+
+另外加一行「**關掉這層有收據嗎 ⇒ 沒有（那一臂不簽收據）**」。
+那是展件最核心的一格差別，值得自己一行。
+
+⚠ 凍結重放（G 實驗）那一批的 OFF **真的被判過**，所以它照實說「也擋下／也收下」。
+**差別由資料決定（`accepted` 有沒有值），不由模式決定。**
+
+### 實際畫面（`DUL-89__s1_24_is_pal__held`，手機按「不告訴它名字」）
+
+```
+  證據等級        AI 真的動手了
+  判決            擋下（改了幾次還是沒過，額度用完）
+  同題關掉這層    事後量 0/2 過                     ← 紅
+  關掉這層有收據嗎 沒有（那一臂不簽收據）             ← 紅
+  大字            你按了「不告訴它名字」 → 閘門擋下了，沒有交出去
+  副標            …同一題關掉這層：沒有閘門、沒有收據；我們事後用同一把尺量，0/2 過
+```
+
+### 三個新欄位
+
+| 欄位 | 不接會怎樣 |
+|---|---|
+| `arm` → 分臂 | `all("draft_done")` 會把 OFF 那一筆數進 ON 的嘗試次數 |
+| `retry_arm`（本來叫 `arm`） | 電視的去重鍵就是 `arm` ⇒ **分臂之後重改拍會從 ON 那一串整個消失**；而且 `retry` 會讀到 `"ON"` |
+| `timed_out` | 3 格是跑到牆鐘上限被砍的，`stop_reason` 卻跟正常失敗一樣是 `visible_fail` ⇒ 把「我們沒等它」演成「它做不出來」 |
+| `feedback_delivery` | `file` 管道底下 `feedback_bytes` 每一次都是 0 ⇒ 被讀成「根本沒給回饋」 |
+
+⚠ 逾時那三格**不替它編原因**：為什麼跑那麼久，我們沒有量。畫面上就寫
+「送去驗收的是它寫到一半的工作區——它為什麼跑那麼久，我們沒有量，不要猜」。
+
+### 判準改成從資料推
+
+`livecheck.mjs` 裡的格數本來寫死 18／9，資料一換全部變紅。現在改成從事件流推，
+而 A6 那一條也從「驗橫幅講哪一句」改成**「驗橫幅逐格跟著證據等級走」**——
+等級變了話就該跟著變，那才是 A6 的意思。
+
+---
+
 ## 六、證據：活模式真的播得出來
 
 全部可重跑，零機時。
@@ -259,7 +313,7 @@ world3/index.html?live=http://<展場機>:8899/live/events.jsonl&poll=2000
 
 ```
 .venv/bin/python -m pytest tests/test_twin_*.py tests/test_consent.py tests/test_serve_twin.py -q
-  → 131 passed（test_serve_twin.py 25 條、test_qr.py 44 條）
+  → 139 passed（test_serve_twin.py 25 條、test_qr.py 44 條）
 node ops/exhibit/twin/twin_viewer_node_check.mjs   → 14/14（N13 新增：#cell= 指得到每一格）
 node ops/exhibit/twin/phone_node_check.mjs         → 9 條（手機頁那一段判準；
                                                       給網址就對真的 /state 跑）
@@ -272,7 +326,7 @@ node ops/exhibit/twin/phone_node_check.mjs         → 9 條（手機頁那一�
 ### 電視端（vacant_hm）
 
 ```
-node tools/livecheck.mjs        → 77 條全過
+node tools/livecheck.mjs        → 95 條全過
 ```
 把 `world3/index.html` 裡 `LIVE-BEGIN … LIVE-END` **整段抽出來**，餵
 `world3/live/twin_events.jsonl`（18 格真事件）跑一次。挑幾條：
@@ -293,7 +347,7 @@ node tools/livecheck.mjs        → 77 條全過
 
 ```
 python3 ops/exhibit/twin/serve_twin.py --port 8899 --dwell 9999   # 另一個 shell
-node tools/live_e2e.mjs http://127.0.0.1:8899                     → 12 條全過
+node tools/live_e2e.mjs http://127.0.0.1:8899                     → 14 條全過
 ```
 這一支用的是 `index.html` 裡**逐字那一段**程式碼（不是複製品），
 對一台跑起來的伺服器做完整的「手機按 → 電視演」：
@@ -376,7 +430,7 @@ world3/index.html                  活模式重寫：LIVE-BEGIN…LIVE-END 純�
                                    ＋導演側改接 bindCast／castOf／normalizeTask／monitorRows
 world3/docs/LIVE_INTERFACE.md      v2：三值、逐次嘗試、evidence、per-cell verify_url、導播通道
 world3/live/twin_events.jsonl      18 格真事件（livecheck 的資料源）
-tools/livecheck.mjs                新增 77 條（含實跑截圖抓到的 L19–L26）
+tools/livecheck.mjs                新增 95 條（含實跑截圖抓到的 L19–L26）
 tools/live_e2e.mjs                 新增 10 條（對真的跑起來的伺服器）
 ```
 
@@ -434,6 +488,14 @@ tools/live_e2e.mjs                 新增 10 條（對真的跑起來的伺服�
    它發的事件沒有 `evidence`、沒有 `attempt/of`、`accepted` 是兩值。
    電視收得下（該說「說不出來」的地方會說），但**那條路本輪沒有驗過**。
 13. **前一份裁決 §六 的五條「不能說」全部仍然成立。**
-14. **A4／A6 那兩行等真跑的資料到位就會自己改對**（另一條線 56 格已收完）。
-    **在資料到位之前不准手動改成「正在發生」或「也擋下」**——
-    那兩句話是由 `evidence` 與 `OFF` 欄位驅動的，改資料不改碼。
+14. ~~**A4／A6 那兩行等真跑的資料到位就會自己改對**~~ ——**已兌現**（§五之三）。
+    54 格兩臂全 L-real 接上之後，橫幅自己變成「AI 真的動手了」、
+    OFF 那一行自己變成「事後量 N/M 過」，**電視端沒有為了這批資料改過一行措辭**。
+15. **「有這一層比較好」——不能說。** 54 格裡 24 格兩臂結果一樣；
+    而且**迴圈救回 0/30**（兩臂交付物正確與否完全一致）。
+    展場那句話只能是「**沒有這一層，事後量起來不合格的東西出貨了；
+    有這一層它被擋下，而且留了一張你能自己重算的收據**」——
+    裡面沒有「Vacant 讓它做對了」，文案不准往那個方向漂。
+16. **「寫明介面就會過」——不能說。** `s1_32_pct` 寫明版三格全沒過。
+17. **`off_leaked` 接上 twin 資料後恆為 0，那是對的**——沒有隱藏測資就答不出漏出。
+    **不要為了數字好看改用 `postaudit` 去填它。**
