@@ -173,10 +173,20 @@ def test_t4_four_failure_kinds_and_two_distinct_loader_reasons(task):
     #   「3 秒足以抓到無窮迴圈」是關於**迴圈**的敘述，成立；
     #   「3 秒足以跑完一個 trivial 函式」是關於**機器負載**的敘述，不成立。
     #   只有 `loop` 需要短逾時，其餘給寬的。
+    #
+    # ⚠ **2026-09-20 補：上面那段防呆只擋了一個方向。**
+    #   「3 秒足以讓沙箱**啟動**並且偵測到迴圈」**也是**關於機器負載的敘述，一樣不成立。
+    #   機器忙的時候 `loop` 那格連沙箱都還沒起來就被砍 ⇒ 判成 **`loader`**（載入失敗）
+    #   而不是 `timeout`，於是下面的 `kinds == {...}` 只吐一個看不出所以然的 dict diff。
+    #   實測（load≈23 的 Mac，同一支探針三個預算）：
+    #     **3s → `loader` ／ 8s → `timeout` ／ 20s → `timeout`**
+    #   ⇒ 純粹是預算不夠讓沙箱啟動，**不是分類錯、也不是程式回歸**。
+    #   兩件都做：`loop` 從 3 秒放寬到 8 秒（量出來夠），**而且**把防呆擴到
+    #   `loop → loader` 這個方向——否則下次一樣只會看到 dict diff。
     kinds = {}
     reasons = {}
     for name, code, timeout_s in (("logic", LOGIC_BAD, 30), ("exc", EXC_BAD, 30),
-                                  ("loop", LOOP_BAD, 3), ("imp", IMPORT_BAD, 30),
+                                  ("loop", LOOP_BAD, 8), ("imp", IMPORT_BAD, 30),
                                   ("syn", SYNTAX_BAD, 30)):
         r = _run(task, "HPI", [code], budget={"sandbox_timeout_s": timeout_s})
         t0 = r["extra"]["harness_turns"][0]
@@ -188,6 +198,10 @@ def test_t4_four_failure_kinds_and_two_distinct_loader_reasons(task):
     assert not spurious, (
         f"{spurious} 在 30 秒逾時下仍被判 timeout——那是機器過載，不是分類錯。"
         f"完整結果：{kinds}")
+    # 另一個方向：`loop` 連沙箱都沒起來 ⇒ `loader`。同樣是機器過載，要說得出來。
+    assert kinds.get("loop") != "loader", (
+        "loop 在 8 秒逾時下被判 loader——沙箱還沒啟動就被砍，那是機器過載不是分類錯。"
+        f"完整結果：{kinds}（實測同機 3s→loader／8s→timeout／20s→timeout）")
     assert kinds == {"logic": "assert", "exc": "exception", "loop": "timeout",
                      "imp": "loader", "syn": "loader"}
     assert reasons["imp"] == "forbidden_import" and reasons["syn"] == "syntax_error"
@@ -608,10 +622,17 @@ def test_feedback_message_is_truncated_head_and_tail_but_logged_in_full():
 
 
 def test_visible_report_classifies_the_five_documented_outcomes(task):
+    # ⚠ `LOOP_BAD` 的預算跟 `test_t4` 同一個理由給 8 秒不是 3 秒：
+    #   3 秒之下沙箱來不及起來 ⇒ `visible_report` 回 `None`（載入失敗）
+    #   ⇒ 這一行變成 `TypeError: 'NoneType' object is not subscriptable`，
+    #   看起來像程式壞了，其實是機器過載。實測同機 3s→None／8s→TimeoutError。
+    #   其餘四個案例跑完就結束、不吃滿預算，維持 3 秒。
     assert visible_report(GOOD, task, 3)[0] == "pass"
     assert visible_report(LOGIC_BAD, task, 3)[1] == "AssertionError"
     assert visible_report(EXC_BAD, task, 3)[1] == "IndexError"
-    assert visible_report(LOOP_BAD, task, 3)[1] == "TimeoutError"
+    _loop = visible_report(LOOP_BAD, task, 8)
+    assert _loop is not None, "loop 在 8 秒下仍回 None——沙箱沒起來，機器過載不是程式錯"
+    assert _loop[1] == "TimeoutError"
     assert visible_report(IMPORT_BAD, task, 3) is None
     assert visible_report(SYNTAX_BAD, task, 3) is None
 
