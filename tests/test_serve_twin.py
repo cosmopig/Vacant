@@ -301,3 +301,13 @@ def test_verify_url_template_is_per_cell(pack):
     evs2 = tolib.build(pack, verify_url="twin_viewer.html", t0_ms=1_789_000_000_000)
     rec2 = [e for e in evs2 if e["type"] == "receipt"]
     assert {e["verify_url"] for e in rec2} == {"twin_viewer.html"}
+
+
+def test_phone_press_moves_the_autoplay_cursor(pack, tmp_path):
+    """人放手之後接下去播的是下一格，不是又回到他剛剛看過的那一格。"""
+    out = tmp_path / "ev.jsonl"
+    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
+                                dwell=10_000, quiet=True)
+    stage.press("pc")                       # 手機把第 0 對的「寫明」那邊叫上來
+    nxt = stage.advance()["now"]["cell_id"]  # 放手之後輪播接下去
+    assert nxt == stage.pl.pair(1)["held"]

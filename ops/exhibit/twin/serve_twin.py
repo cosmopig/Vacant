@@ -252,7 +252,15 @@ class Stage:
             if action in SIDES:
                 cid = kw.get("cell_id") or self.pl.cell_id(self.pair_idx, action)
                 if not cid:
+                    # 這一對只跑過一邊。**不給按**，而且說出來——
+                    # 生一個不存在的對照出來才是真正的錯。
                     return {"ok": False, "error": f"這一對沒有 {action} 那一邊"}
+                # 輪播的游標跟著移到這一格之後：人放手之後接下去播的是下一格，
+                # 不是又回到他剛剛看過的那一格。
+                for n, (i, side) in enumerate(self.flat):
+                    if i == self.pair_idx and side == action:
+                        self.cursor = n + 1
+                        break
                 return self.emit(cid, why="phone")
             if action == "next":
                 self._seek(self.pair_idx + 1)
