@@ -44,6 +44,22 @@
    就死在模型解析 ⇒ `requests_seen == 0`；換成 `gpt-4o-mini` ⇒ 9 通。
    ⇒ **「這個框架吃環境變數」本身不是一格布林值**，它跟模型 id 綁在一起。
    接本地模型仍然要走 `CONFIG_ROUTE`。
+
+   2026-09-19 再補一刀，**方向又相反**：同一個位置（把不認得的模型 id 交給
+   框架）**Claude Code 2.1.278 是放行不是擋**——它印一行
+   `[claude-code:unrecognized_model]` 警告然後照送，真模型兩格都拿到
+   （`docs/AGENT_COMPAT.md` §9.1 有逐字警告）。
+   ⇒ **OpenCode 的「擋」與 Claude Code 的「放行」都是實測，不准從其中一格
+   推另一格。** 代價是 Claude Code 會按 200k 假設做 auto-compact，長任務要自己
+   設 `CLAUDE_CODE_MAX_CONTEXT_TOKENS`——而 auto-compact 會改變送出去的
+   messages，也就是改變「逐字落盤」的內容（那一格**沒量過**）。
+
+   同一天還踩到一個**量錯**，記在這裡因為它是本條的同型：用
+   `strings -a <binary> | grep -c` 掃 Claude Code 的原生 binary，十三個變數
+   **全是 0**，看起來像「不吃任何 `ANTHROPIC_*`」；真因是那台機器**沒有
+   `strings`**，管線前段失敗、後段照樣印 0。改用 `grep -a` 直接掃，
+   `ANTHROPIC_BASE_URL` 有 54 筆。⇒ **靜態掃字串不算證據，而且掃出 0
+   之前要先確認掃得動。**
 2. 名單漏一個變數＝那條路沒被中介，而且**不會有任何錯誤訊息**。這是 V0 已知
    的殘餘風險，唯一的結構性補法是出網封鎖（`block_egress.sh`，V3）：
    封鎖之後漏掉的那條路會**連不上**而不是**偷偷連上**。
@@ -90,8 +106,21 @@ REDIRECT_VARS: tuple[tuple[str, str], ...] = (
     #   不是「假上游看到過一通」。名單多一個變數只是多設一個環境變數（無害），
     #   漏一個才會靜靜地沒被中介——所以放進來，但不准讀成已驗證。
     ("CUSTOM_BASE_URL", "/v1"),
-    # Anthropic 家族（Claude Code 認 ANTHROPIC_BASE_URL——2026-09-18 實測：
-    # 假上游收到 `POST /v1/messages?beta=true`，逐通完整 messages 陣列）
+    # Anthropic 家族（Claude Code 認 ANTHROPIC_BASE_URL——2026-09-18 假上游實測：
+    # 收到 `POST /v1/messages?beta=true`，逐通完整 messages 陣列。
+    # **2026-09-19 升到真模型**：Claude Code 2.1.278 ×
+    # `gemma-4-12b-it-qat`（LM Studio @1003），拒交格 exit 20 ／交付格 exit 0，
+    # `requests_seen` 5 ／ 4，零接線（本表這一格就是全部接線）。
+    # ⚠ **那一格成立的前提不在本檔裡**：上游必須自己會講 Anthropic Messages。
+    #    `wireproxy` 是反向代理**不是協定轉換器**，不會把 `/v1/messages` 改寫成
+    #    `/v1/chat/completions`。1003 的 LM Studio 原生吃 `/v1/messages`
+    #    （含 SSE 與 `tool_use`）所以不需要 shim；只講 OpenAI 的上游要自備轉換，
+    #    而那一層不在本 repo 裡、也沒被量過。逐字見 `docs/AGENT_COMPAT.md` §9.0。
+    # ⚠ **`/api/hello` 那一通會走 openai 路由出網**：Claude Code 啟動時探
+    #    `$ANTHROPIC_BASE_URL/api/hello`，`wireproxy.route()` 只把 `/v1/messages`
+    #    與 `/v1/complete` 判給 anthropic ⇒ 這一通落到 `VACANT_RUN_UPSTREAM_OPENAI`
+    #    的預設 `https://api.openai.com`。沒 body、金鑰是 sentinel，但**是真的出網**。
+    #    補法：`block_egress.sh`（V3），或把 openai 那條路也釘到本地（實測有效，§9.4）。
     ("ANTHROPIC_BASE_URL", ""),
     ("ANTHROPIC_API_URL", ""),
     # 本 repo 自己的腦（`vacant/brains.py`、`vacant/cli.py`）
