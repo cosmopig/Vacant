@@ -561,6 +561,16 @@ def _classify(d: Path, summary: dict[str, Any] | None,
     if (d / "reconcile.json").exists() and (d / "cells.jsonl").exists() \
             and any(d.glob("scores_*.json")):
         return KIND_REAL, "cell_grid_run"
+    # `vacant run` 的相容性矩陣（2026-09-19 的五 agent × 兩格 × 兩次）又是第三種
+    # 版面：沒有 `summary.json`／`rows.jsonl`／`scores_*.json`，一格一個目錄住在
+    # `cells/`，彙整寫在 `matrix.json`，收據驗證輸出另外落盤。它**真跑過模型**
+    # （每格 `requests_seen` 4–6 通，wire 原始位元組都在），所以同 R535 那一條的
+    # 理由：按資料的形狀認，不要把證據標成 unclassified。
+    # ⚠ 三個條件要**同時**成立才算——`matrix.json` 這個檔名太通用，
+    #   單看它會把別人的彙整檔誤判成 run。
+    if (d / "matrix.json").exists() and (d / "cells").is_dir() \
+            and any(d.glob("receipts_verify.*")):
+        return KIND_REAL, "agent_matrix_run"
     if summary is not None:
         # 有 summary 沒 rows＝收官寫了但一列都沒產出（例如 n=0 或全 void）。
         return KIND_ABORTED, "summary_without_rows"
@@ -1225,7 +1235,8 @@ def render_md(idx: dict[str, Any]) -> str:
     meaning = {
         KIND_REAL: ("真跑過模型、資料留得住——這些才是證據"
                     "（`gain_run` 是 summary.json＋rows.jsonl；"
-                    "`cell_grid_run` 是 reconcile.json＋cells.jsonl）"),
+                    "`cell_grid_run` 是 reconcile.json＋cells.jsonl；"
+                    "`agent_matrix_run` 是 matrix.json＋cells/）"),
         KIND_SMOKE: "冒煙／探針／量具檢查——**不進統計**",
         KIND_ABORTED: "發射過但沒收官（被殺、掛掉、或只有 calls/notes）",
         KIND_ANALYSIS: "迴圈每輪的重算工作目錄——**衍生物，不是證據**",
@@ -1413,7 +1424,7 @@ def render_md(idx: dict[str, Any]) -> str:
         _dates = sorted(x["date"] for x in real_unaudited if x["date"])
         A("跑過模型、資料留得住，但**不在上面那幾段裡**"
           + (f"（日期跨 {_dates[0]}–{_dates[-1]}）" if _dates else "")
-          + "。三種東西混在這張表：")
+          + "。四種東西混在這張表：")
         A("")
         A("  1. **探索期** run（2026-08 到 09 初）——為了決定下一步怎麼跑而跑的，")
         A("     不是為了得到一個可以拿去講的結論；")
@@ -1421,7 +1432,13 @@ def render_md(idx: dict[str, Any]) -> str:
         A("  3. `subkind` 是 `cell_grid_run` 的——那些**沒有頂層 "
           "`summary.json`／`rows.jsonl`**，")
         A("     一格一個目錄，收官對帳在 `reconcile.json`、逐格摘要在 "
-          "`cells.jsonl`（R535 就是這種）。")
+          "`cells.jsonl`（R535 就是這種）；")
+        A("  4. `subkind` 是 `agent_matrix_run` 的——`vacant run` 的相容性矩陣，")
+        A("     一格一個目錄住在 `cells/`，彙整在 `matrix.json`。**同樣沒有頂層 "
+          "`rows.jsonl`**，")
+        A("     所以本表的 `列／題`、`跑到底`、`零 void` 三欄對它是 `0／0` 與 `—`")
+        A("     ——那是**欄位不適用**，不是「跑了零列」。逐格欄位看它自己的 "
+          "`README.md`。")
         A("")
         A("⚠ 索引分不出這幾種：它只看得到「有沒有一份裁決檔在標題或宣告區點名它」。")
         A("**「沒被稽核」不等於「探索期」**——引用第 2 種之前要去讀它自己的預註冊。")

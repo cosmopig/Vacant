@@ -1,0 +1,7 @@
+<|channel>thought
+<channel|>I've created `solution.py` with the `add` and `mul` functions as requested in `TASK.md`.
+
+**Summary of changes:**
+- Created `solution.py` containing:
+  - `add(a, b)`: Returns the sum of two numbers.
+  - `mul(a, b)`: Returns the product of two numbers.

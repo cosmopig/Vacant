@@ -1,0 +1,11 @@
+<|channel>thought
+<channel|>I have read `TASK.md` and created the `solution.py` file with the required `add` and `mul` functions as specified.
+
+The content of `/var/tmp/vacant_v1matrix/ws_hermes_deliver_r2/solution.py` is:
+```python
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```

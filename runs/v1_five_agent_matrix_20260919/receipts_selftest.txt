@@ -1,0 +1,2 @@
+$ python3 -m vacant.vrun.verify_receipts --selftest
+selftest: PASS

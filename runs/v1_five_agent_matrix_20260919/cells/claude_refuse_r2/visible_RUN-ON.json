@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "claude_refuse_r2",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 29,
+      "cases": [
+        {
+          "case": "check_01_add",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_mul",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'mul' from 'solution' (/var/tmp/vacant_v1matrix/rd_claude_refuse_r2/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import mul",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "797717f74527f524bc4400a959587de9efd3db884f8d9883bb7aba5d461ee252"
+}

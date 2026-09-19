@@ -1,0 +1,10 @@
+<|channel>thought
+<channel|>I've created `solution.py` with the `add` and `mul` functions as specified in `TASK.md`.
+
+```python
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```

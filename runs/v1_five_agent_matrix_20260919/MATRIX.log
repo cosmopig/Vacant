@@ -1,0 +1,658 @@
+#### 負控制：收據驗章器 selftest（發射前）
+selftest: PASS
+#### df 派工前
+/dev/mapper/ubuntu--vg-ubuntu--lv   38G   33G  3.3G  91% /
+#### 版本
+0.85.1
+1.18.31
+2.1.278 (Claude Code)
+codex-cli 0.147.0
+Hermes Agent v0.19.0 (2026.7.20)
+
+=== BEGIN pi_refuse_r1 2026-09-19T12:49:22Z ===
+exit_code=20
+  task_id             = pi_refuse_r1
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 4
+  wire_by_protocol    = {'openai': 4}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 4.107
+  run_wall_s          = 4.257
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+  wire_digest         = 7c5cbf084196d3f245860b6f6907125e20661b37c5d5ded6078ab5e6f49234ec
+  verdict_sha256      = b6af074902aabed1d2bb8e245f3a341fb3eb7065283c25594388d314f6313ea0
+  verdict_hash        = 363ebca3a3e7b94ce3898c16b2e06b0721ef85426d438ffea6d863cb25e6c7d6
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+=== END pi_refuse_r1 2026-09-19T12:49:26Z ===
+
+=== BEGIN pi_deliver_r1 2026-09-19T12:49:26Z ===
+exit_code=0
+  task_id             = pi_deliver_r1
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 4
+  wire_by_protocol    = {'openai': 4}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 4.352
+  run_wall_s          = 4.528
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+  wire_digest         = ccda3ee8114bee82a9269ae1e13d49cd82d0805b7b6a7005b5255860c4e0ff54
+  verdict_sha256      = 20ee99b14d2201105bc2177274625e1f46b355dd15b8de0a19d9db1a674d1b3c
+  verdict_hash        = 425704b387616dc369f331fa3c64698fe683e90c361ef1815747060787f7cb9a
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+=== END pi_deliver_r1 2026-09-19T12:49:31Z ===
+
+=== BEGIN opencode_refuse_r1 2026-09-19T12:49:31Z ===
+exit_code=20
+  task_id             = opencode_refuse_r1
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 5}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 12.061
+  run_wall_s          = 12.348
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+  wire_digest         = d6dc3935999e92a81ae101ad33a8ab55b5d03cd620f6725e8976973fc0ad8631
+  verdict_sha256      = f9837919609327a611d7e1ed09ee2369152ca336711d12ea0d02e266e7fff283
+  verdict_hash        = 63eb61bbe06083cae765530647f1a8bf964a4de623daf8421411364fd7978579
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 5}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+=== END opencode_refuse_r1 2026-09-19T12:49:43Z ===
+
+=== BEGIN opencode_deliver_r1 2026-09-19T12:49:43Z ===
+exit_code=0
+  task_id             = opencode_deliver_r1
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 5}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 18.587
+  run_wall_s          = 18.997
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+  wire_digest         = 1bd98b6ef457e08edad1fc63897c115dc02f7ea5bd7fad180be4a1873e375f22
+  verdict_sha256      = 83a02a3dfb7599aff5cb1ce3ea224960a438e4f12d8ed0443df5648489bd7445
+  verdict_hash        = 4582d08641662cee7490d505ef915cf659e181649ae1c86b3574108e5cb0ebb8
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 5}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+=== END opencode_deliver_r1 2026-09-19T12:50:03Z ===
+
+=== BEGIN claude_refuse_r1 2026-09-19T12:50:03Z ===
+exit_code=20
+  task_id             = claude_refuse_r1
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 1, 'anthropic': 4}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 51.578
+  run_wall_s          = 53.294
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+  wire_digest         = eddede64f9e8cbc80c2bb5f1ebede70356ee7a98880912978bef94f216da3cc1
+  verdict_sha256      = 3809115f70721a3209b2839161e6b15732f76801f1606e45d1e5db5e7854b1aa
+  verdict_hash        = 93d996cecb6d9805b7b0a2b06ffb9a5266401b1e96952eef5e087dbae24df1b5
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'HEAD /api/hello -> 200 [openai]': 1, 'POST /v1/messages?beta=true -> 200 [anthropic]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/api/hello', 'http://100.86.226.21:1234/v1/messages?beta=true']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+=== END claude_refuse_r1 2026-09-19T12:50:56Z ===
+
+=== BEGIN claude_deliver_r1 2026-09-19T12:50:56Z ===
+exit_code=0
+  task_id             = claude_deliver_r1
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 1, 'anthropic': 4}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 37.738
+  run_wall_s          = 38.258
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = 143323827343cfb79d6008ee9dca709cf8f5f424d65dace9c285b37e1572fd1a
+  wire_digest         = dc2bef2ce83085b02cc9d492140a7b19fcd5f11e9614593adc6e9a7514f81ef8
+  verdict_sha256      = bc51a80baef77c581659fbdc8122a6e7e9d49256eadf1bcb7da8089a0c34d4b1
+  verdict_hash        = d3d23150a6dff70a1cab7030a5987497474a4fbff65b74d6a8c016867bcc0a98
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'HEAD /api/hello -> 200 [openai]': 1, 'POST /v1/messages?beta=true -> 200 [anthropic]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/api/hello', 'http://100.86.226.21:1234/v1/messages?beta=true']
+--- solution.py ---
+def add(a, b):
+    """Returns the sum of two numbers."""
+    return a + b
+
+def mul(a, b):
+    """Returns the product of two numbers."""
+    return a * b
+=== END claude_deliver_r1 2026-09-19T12:51:35Z ===
+
+=== BEGIN codex_refuse_r1 2026-09-19T12:51:35Z ===
+exit_code=20
+  task_id             = codex_refuse_r1
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 5}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 12.348
+  run_wall_s          = 12.561
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+  wire_digest         = 7eddde07f9ddefd540b54dcaace35fb1dc39219ed2777e00021e90d2c8c6ceef
+  verdict_sha256      = 097d021f0ee5581cbea5a323a7ef97398fcd1ef8a3258aaf94e9cce1f5b5d815
+  verdict_hash        = 01c3b1c3fb0684914c6f90c7b2b8a1c7c7f768152aed2b010ce6c7e6f553d88e
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/responses -> 200 [openai]': 5}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/responses']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+=== END codex_refuse_r1 2026-09-19T12:51:47Z ===
+
+=== BEGIN codex_deliver_r1 2026-09-19T12:51:47Z ===
+exit_code=0
+  task_id             = codex_deliver_r1
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 5}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 8.189
+  run_wall_s          = 8.424
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+  wire_digest         = 0b08879998070e3d0ff9dd709362b413b8343b1d1b51c953af3111c707553bd9
+  verdict_sha256      = 2790ea6986417c10c0a84c764258a4a12798628e105f62b999cbbd47221cd65f
+  verdict_hash        = b66e2377bf11116f5a70d5f8a82f464ae1610435462c21b6bfaff2fa0777c376
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/responses -> 200 [openai]': 5}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/responses']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+=== END codex_deliver_r1 2026-09-19T12:51:56Z ===
+
+=== BEGIN hermes_refuse_r1 2026-09-19T12:51:56Z ===
+exit_code=20
+  task_id             = hermes_refuse_r1
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 6
+  wire_by_protocol    = {'openai': 6}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 17.224
+  run_wall_s          = 17.521
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 64de4ddf8c6cb02c4698fa8f6e03d402d5a308f3fc17dcc430946f20d29f1fc7
+  wire_digest         = f86d1b4a6bad32370d0253ec37b9816339e75eea1f3ead7c368c3e5236224dc9
+  verdict_sha256      = 63cc57d4a0a7b8716846f815340b1c169f6104ff7cc9b7941d9acd921161cf43
+  verdict_hash        = 32f06bfc7e0d5e0d797ef4647dbaa48034237a82946b56f0e6fb1bdc1a462684
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'GET /api/v1/models -> 200 [openai]': 2, 'POST /v1/chat/completions -> 200 [openai]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/api/v1/models', 'http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a: float, b: float) -> float:
+    return a + b
+
+def multiply(a: float, b: float) -> float:
+    return a * b
+=== END hermes_refuse_r1 2026-09-19T12:52:14Z ===
+
+=== BEGIN hermes_deliver_r1 2026-09-19T12:52:14Z ===
+exit_code=0
+  task_id             = hermes_deliver_r1
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 6
+  wire_by_protocol    = {'openai': 6}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 12.674
+  run_wall_s          = 13.026
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+  wire_digest         = d0fe8bb765a1baab0326f963bb59997b8d023c2343ffc3a176f1872a8e536ac2
+  verdict_sha256      = 0b7022e9e09f71d2911ad6996969dde7a9f63896647506cf3c7cdae13c88d690
+  verdict_hash        = 3542cd65d0105fb7f7c12077dc4146d8fda743cb4958a7914ec8c2005db87ca5
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'GET /api/v1/models -> 200 [openai]': 2, 'POST /v1/chat/completions -> 200 [openai]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/api/v1/models', 'http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+=== END hermes_deliver_r1 2026-09-19T12:52:27Z ===
+
+=== BEGIN pi_refuse_r2 2026-09-19T12:52:27Z ===
+exit_code=20
+  task_id             = pi_refuse_r2
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 4
+  wire_by_protocol    = {'openai': 4}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 5.007
+  run_wall_s          = 5.171
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+  wire_digest         = b447f06f291cdd4f6b0fbf64f545cf67dad7c4449e89a191a57cc4a97aa7a62a
+  verdict_sha256      = 6d81ea1b14c228a048516672fcadc6151401a6791f0fb7120846522ded2b258c
+  verdict_hash        = 2f450b890be7f65fe34247059aafdfa301c9d1eea084ca610f7e8ea4bc2969cb
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+=== END pi_refuse_r2 2026-09-19T12:52:32Z ===
+
+=== BEGIN pi_deliver_r2 2026-09-19T12:52:32Z ===
+exit_code=0
+  task_id             = pi_deliver_r2
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 4
+  wire_by_protocol    = {'openai': 4}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 4.411
+  run_wall_s          = 4.609
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+  wire_digest         = 52aeef7bd34900a72f80d8c1c7f08d1152b679326da74a2ef52edcbce0627992
+  verdict_sha256      = 648ef44739467291bcd5d870bd6f39343956c1791b3276f0905aafd9504e727a
+  verdict_hash        = 84aafe70743977642933766c7fcbe4294e6cab16dfbe307fbcc98bdcc6542de3
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+=== END pi_deliver_r2 2026-09-19T12:52:37Z ===
+
+=== BEGIN opencode_refuse_r2 2026-09-19T12:52:37Z ===
+exit_code=20
+  task_id             = opencode_refuse_r2
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 5}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 11.514
+  run_wall_s          = 11.673
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+  wire_digest         = addac8cd96edec8d0449bec6d989d64b52fe803f8a44963a3a3a31eddd40d439
+  verdict_sha256      = 9746b4a803f61ce3998dbdf0c707a196e85c0f6db06d714a59e9609e24436ed0
+  verdict_hash        = 63cc4cb673a481dddc6696478fd621a8f426ded4a104059714b1dddbfee8b74a
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 5}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+=== END opencode_refuse_r2 2026-09-19T12:52:49Z ===
+
+=== BEGIN opencode_deliver_r2 2026-09-19T12:52:49Z ===
+exit_code=0
+  task_id             = opencode_deliver_r2
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 5}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 17.185
+  run_wall_s          = 17.392
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+  wire_digest         = c8aef766f3811303190f10d07446d1b2aba71660d804568b480ce6693f881c08
+  verdict_sha256      = 3d58a0e186bf96d86332450a5b14a1551d53df04e9642ad74d88325789eda66b
+  verdict_hash        = bc691fbea091f3c9b88950a0b9f8f92a66c63d3ec801337c4909bcdcf6e8ff2a
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/chat/completions -> 200 [openai]': 5}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+=== END opencode_deliver_r2 2026-09-19T12:53:06Z ===
+
+=== BEGIN claude_refuse_r2 2026-09-19T12:53:06Z ===
+exit_code=20
+  task_id             = claude_refuse_r2
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 1, 'anthropic': 4}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 34.635
+  run_wall_s          = 34.811
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+  wire_digest         = d2fe61e86f9bf87ecc4f8bf69815c38239d6a0b46c2f4589fdecdf91def919c2
+  verdict_sha256      = 797717f74527f524bc4400a959587de9efd3db884f8d9883bb7aba5d461ee252
+  verdict_hash        = ea4bb63e9fc22fe8dae9e63cf5671a7f88004198db8298f1d854dafa5065ab6c
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'HEAD /api/hello -> 200 [openai]': 1, 'POST /v1/messages?beta=true -> 200 [anthropic]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/api/hello', 'http://100.86.226.21:1234/v1/messages?beta=true']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+=== END claude_refuse_r2 2026-09-19T12:53:41Z ===
+
+=== BEGIN claude_deliver_r2 2026-09-19T12:53:41Z ===
+exit_code=0
+  task_id             = claude_deliver_r2
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 1, 'anthropic': 4}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 35.455
+  run_wall_s          = 35.794
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = 143323827343cfb79d6008ee9dca709cf8f5f424d65dace9c285b37e1572fd1a
+  wire_digest         = db0cfc3d5bb26a5b5f3352f3bd398231c03edb9484d1cbb03582809c063bfd4a
+  verdict_sha256      = 19c7f0a89ca67077263a7e08e68131e46c0d8da9be117a851ba967fbdbee0ecc
+  verdict_hash        = 9e75dbbc952d4d78cbf97332f50c614d509846ee8dac29cede692efde2a8c020
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'HEAD /api/hello -> 200 [openai]': 1, 'POST /v1/messages?beta=true -> 200 [anthropic]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/api/hello', 'http://100.86.226.21:1234/v1/messages?beta=true']
+--- solution.py ---
+def add(a, b):
+    """Returns the sum of two numbers."""
+    return a + b
+
+def mul(a, b):
+    """Returns the product of two numbers."""
+    return a * b
+=== END claude_deliver_r2 2026-09-19T12:54:17Z ===
+
+=== BEGIN codex_refuse_r2 2026-09-19T12:54:17Z ===
+exit_code=20
+  task_id             = codex_refuse_r2
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 6
+  wire_by_protocol    = {'openai': 6}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 11.468
+  run_wall_s          = 11.746
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+  wire_digest         = 218c14a9917ea8690276400d964a4a1f5dd004f0efb5f5a3c5d1552919b9d9d6
+  verdict_sha256      = 288c383f57146b4f004b2eacb425038aa06161711eb3ba70b63837737eb1b155
+  verdict_hash        = 82b22918fc6794afb7bf77e2893adbd3d97931a05dabd624fc4d3cd8389743ed
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/responses -> 200 [openai]': 6}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/responses']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+=== END codex_refuse_r2 2026-09-19T12:54:29Z ===
+
+=== BEGIN codex_deliver_r2 2026-09-19T12:54:29Z ===
+exit_code=0
+  task_id             = codex_deliver_r2
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 5
+  wire_by_protocol    = {'openai': 5}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 9.292
+  run_wall_s          = 9.517
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+  wire_digest         = 61b563784bdd6f04ab57c1c944bfca0aeea4534f1e6085a0e3c12a40cad3e312
+  verdict_sha256      = e7176c5827b8793ea6e99091b6f4287cc7026410cbf61a8dae2e4fc7bfc444f1
+  verdict_hash        = 85436ddc3fee3850ca2ce5d508d131b4e2906b112e835fc3e852197187052801
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'POST /v1/responses -> 200 [openai]': 5}
+  upstreams_seen      = ['http://100.86.226.21:1234/v1/responses']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+=== END codex_deliver_r2 2026-09-19T12:54:39Z ===
+
+=== BEGIN hermes_refuse_r2 2026-09-19T12:54:39Z ===
+exit_code=20
+  task_id             = hermes_refuse_r2
+  accepted            = False
+  refused             = True
+  stop_reason         = visible_fail
+  requests_seen       = 6
+  wire_by_protocol    = {'openai': 6}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 13.051
+  run_wall_s          = 13.382
+  visible_passed      = 1
+  visible_total       = 2
+  ws_start_sha256     = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+  ws_end_sha256       = 64de4ddf8c6cb02c4698fa8f6e03d402d5a308f3fc17dcc430946f20d29f1fc7
+  wire_digest         = 63c9b5cf682a866505306643c0e1e377dc1d4d24ea2a660d4b11e1fa4f5f3479
+  verdict_sha256      = bdf1d75ace0ff9873928e078b2434a27c6a3dd4e5ba55ede005de8eeda7bfd51
+  verdict_hash        = 1e4a84cbde606f18c98d716bbb8b5df9093e1b9f4cf67e19d2ea9aeea9e988ec
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'GET /api/v1/models -> 200 [openai]': 2, 'POST /v1/chat/completions -> 200 [openai]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/api/v1/models', 'http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a: float, b: float) -> float:
+    return a + b
+
+def multiply(a: float, b: float) -> float:
+    return a * b
+=== END hermes_refuse_r2 2026-09-19T12:54:52Z ===
+
+=== BEGIN hermes_deliver_r2 2026-09-19T12:54:52Z ===
+exit_code=0
+  task_id             = hermes_deliver_r2
+  accepted            = True
+  refused             = False
+  stop_reason         = visible_pass
+  requests_seen       = 6
+  wire_by_protocol    = {'openai': 6}
+  wire_errors         = 0
+  agent_rc            = 0
+  agent_wall_s        = 12.839
+  run_wall_s          = 12.996
+  visible_passed      = 2
+  visible_total       = 2
+  ws_start_sha256     = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+  ws_end_sha256       = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+  wire_digest         = 30008e0acd8abc13da3a7b27ff45e10a7941ebd4743d53ea93f2cceb45382c26
+  verdict_sha256      = c81cc45212c3c07764cb5b0deffc32ed5626e3bbb37c33609f3ac4070f6f81b6
+  verdict_hash        = 1cfa88316e72056f14b963e01406217f9ce6478ac8f9530beecff784c2b9628c
+  upstreams_defaulted = []
+  attempts_used       = 1
+  retry               = none
+  proxy_paths         = {'GET /api/v1/models -> 200 [openai]': 2, 'POST /v1/chat/completions -> 200 [openai]': 4}
+  upstreams_seen      = ['http://100.86.226.21:1234/api/v1/models', 'http://100.86.226.21:1234/v1/chat/completions']
+--- solution.py ---
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+=== END hermes_deliver_r2 2026-09-19T12:55:05Z ===
+
+#### df 收工後
+/dev/mapper/ubuntu--vg-ubuntu--lv   38G   33G  2.8G  93% /
+#### ALL DONE 2026-09-19T12:55:05Z

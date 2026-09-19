@@ -6,12 +6,18 @@
 > 仍然空著的是**同一個 agent 的另一條路**，不是另一個 agent：
 > Codex 的 `codex login`（模型通道是寫死的 `wss://`，HTTP 反向代理在那條路上
 > 不存在）與 Codex 的 `wire_api=chat`（§11.1，0.147.0 在設定層就退件）。
+>
+> ⚠ **§8–§12 那五格是分批、分機器、分時間量的，不是一張同條件的矩陣。**
+> 要一起引用的話用 **§13**：同一台機器、同一個模型、同一題、同一天，
+> 五個 agent × 兩格 × **兩次** ＝ 20 格全過，落盤進了 repo
+> （[`runs/v1_five_agent_matrix_20260919/`](../runs/v1_five_agent_matrix_20260919/)）。
+> §13.1 記了它**證偽**本文哪一句話。
 
 ## 證據等級（**不可混講**，`.claude/commands/goal.md` 的同一張表）
 
 | 級 | 意思 | 誰 |
 |---|---|---|
-| **L-real** | **真模型**真跑，拒交格與交付格都過，收據可重驗 | **pi**（R535）、**OpenCode**（§8）、**Claude Code**（§9）、**Codex（API key／自訂 provider）**（§10）、**Hermes**（§12）——五個都是 2026-09-19 |
+| **L-real** | **真模型**真跑，拒交格與交付格都過，收據可重驗 | **pi**（R535）、**OpenCode**（§8）、**Claude Code**（§9）、**Codex（API key／自訂 provider）**（§10）、**Hermes**（§12）——五個都是 2026-09-19；**五個在同一台機器上各複製兩次＝§13** |
 | **L-fake** | 假上游（`mockup.py`）只驗通道與閘門 | （目前沒有只停在這一級的 agent；§1–§6 的假上游格仍然只算這一級） |
 | **L-none** | 沒量 | **Codex（`codex login`／ChatGPT 帳號）** ／ **Codex × chat/completions wire**（§11.1：0.147.0 設定層退件，`requests_seen=0`） |
 
@@ -753,6 +759,11 @@ def mul(a, b):
 兩條不同 wire 協定，落在工作區的東西一樣。⇒ **那個陷阱是題目的性質，
 不是某一個 agent 的失誤。**（n=1，不是效果量。）
 
+⚠ **這一句的交付格那一半在 2026-09-19 傍晚被證偽了**（§13.1）：同一台機器
+（1004）上重跑，Claude Code 的交付格兩次都寫了 docstring，`ws_end` 是
+`14332382…` 而不是 `d1ed637b…`。**拒交格那一半（`39c19a7a…`）複製成功。**
+本段原文不改（那是當時跑出來的東西），引用時要連機器一起講。
+
 ### 9.3 逐字落盤
 
 ```
@@ -1089,6 +1100,11 @@ def mul(a, b):
 （`39c19a7a…`），Codex 寫 `sum_numbers`／`multiply_numbers`（`b720ee87…`）。
 ⇒ 「陷阱是題目的性質」（§9.2）那句話**只在敘述寫死介面時**表現成同一份檔案；
 敘述含糊時，**落地的錯法是會分岔的**。n=1，不是效果量。
+
+⚠⚠ **「分岔」這件事本身也不穩定**：2026-09-19 傍晚在 1004 上重跑（§13），
+Codex 的拒交格兩次都落在 `39c19a7a…`（`add`／`multiply`，`visible 1/2`），
+**與另外四家同一個檔**。本節這一格是在 1003 上跑的，1003 是 thinking 模式、
+1004 不是——**這條變因沒有被隔離**，不要把它讀成 thinking 造成的。
 
 ⚠ **§11.3 把這句話再收回一半**：同一題同一台同一個模型第三次跑，Codex 的拒交格
 落地成 `add`／`multiply`（`39c19a7a…`）——**正好就是 §8 OpenCode／§9 Claude Code
@@ -1948,6 +1964,11 @@ receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
 §10 Codex 的交付格逐位元相同。** 四個 agent、三條 wire 協定、兩台不同的
 LM Studio 機器（1003／1004）、同一個模型、同一題——交付格落地的東西一樣。
 
+⚠ **「四個 agent」這個數字在 2026-09-19 傍晚的同條件複製裡變成 4/5**（§13.1）：
+在 1004 上重跑五個 agent，pi／OpenCode／Codex／Hermes 都是 `d1ed637b…`，
+**Claude Code 兩次都是 `14332382…`**（多了兩行 docstring）。
+本段原文不改，但**不要把它引用成一條性質**——它是一次觀察。
+
 #### 對照 B（經 proxy）：**環境變數那條路也通**
 
 `--provider custom` ＋ launcher 設的 `CUSTOM_BASE_URL`，**完全不寫 config.yaml**：
@@ -2087,6 +2108,58 @@ rd_hermes_real_deliver   RUN-ON   2   2   0   1   1   aad3f72a08bdc1c7…  OK   
 - **`~/.hermes` 從頭到尾沒有被建立**：`wrap_agent.sh` 每跑 `mktemp -d` 一個新的
   `HERMES_HOME`。使用者自己的 Hermes 狀態（sessions／skills／`.env` 憑證）
   **一個 byte 都沒碰到**，這也是為什麼走的一定是 config 裡那個 `custom` provider。
+
+---
+
+## 13. 同條件複製：五個 agent × 兩格 × 兩次（2026-09-19 傍晚）
+
+**§8–§12 的五格是分批、分機器、分時間量出來的**（1003 thinking 與 1004 非
+thinking 混用、日期不同、有幾格先用假上游量過）。每一格單獨都成立，
+**但它們不是一個可以一起引用的矩陣**。本節把那個缺口補掉。
+
+- **同一台機器**（上游 1004 `http://100.86.226.21:1234`）、**同一個模型**
+  （`gemma-4-12b-it-qat`）、**同一題**（`s1_01_addmul`，未改）、**同一天**
+  （2026-09-19 UTC 12:49–12:58）
+- **五個 agent × 兩格 × 兩次 ＝ 20 格，全部通過判準**
+  （拒交 `accepted=false`／`visible_fail`／exit 20；交付 `accepted=true`／
+  `visible_pass`／exit 0），`requests_seen` 4–6，`wire_errors` 全 0，
+  20 條收據鏈 `--selftest` PASS 之後全部 `chain_ok`
+- 逐格落盤（**進了 repo，不會被 `/var/tmp` 清掉**）：
+  [`runs/v1_five_agent_matrix_20260919/`](../runs/v1_five_agent_matrix_20260919/)
+- 裁決：[`decisions/DECISION_20260919_FIVE_AGENT_MATRIX.md`](../decisions/DECISION_20260919_FIVE_AGENT_MATRIX.md)
+
+### 13.1 ⚠ 它**證偽**了本文兩處的一句話
+
+§9.2 與 §12.4 寫過「交付格的 `ws_end` 在四個 agent 上逐位元相同（`d1ed637b…`）」。
+在 1004 上重跑，**那句話只對 4/5 成立**：Claude Code 兩次都多寫了 docstring，
+交付格 `ws_end = 143323827343cfb79d6008ee9dca709cf8f5f424d65dace9c285b37e1572fd1a`。
+
+⇒ **「四個 agent 落地的東西一樣」是一次觀察，不是性質。** 換機器就變了。
+§9.2／§12.4 的原文**沒有回頭改寫**（那是當時跑出來的東西），
+但引用那句話時要連機器一起講。
+
+同型的第二例：§10 的 Codex 拒交格在 1003 上是 `visible 0/2`／`ws_end = b720ee87…`；
+在 1004 上是 `visible 1/2`／`39c19a7a…`（與另外三家同一個檔）。
+**敘述含糊時「錯法」不可重現**（§10.3 已經寫過）；1003 是 thinking、1004 不是，
+**這一條沒有被隔離，不要當成因果**。
+
+### 13.2 本輪自己做了負控制（零網路）
+
+`/bin/true` 與一行 `cp` 放在 agent 的位置，**一通模型都不打**：
+
+| | exit | accepted | stop_reason | **rs** | **wire** | `agent_rc` | `chain_ok` |
+|---|---|---|---|---|---|---|---|
+| `ctl_norequest_refuse` | **20** | false | `visible_fail` | **0** | **`{}`** | 0 | true |
+| `ctl_norequest_deliver` | **0** | true | `visible_pass` | **0** | **`{}`** | 0 | true |
+
+⇒ **退出碼、`accepted`、`stop_reason`、`agent_rc`、`chain_ok` 五個欄位在
+零通模型呼叫下全部成立。唯一分得出來的是 `requests_seen` 與 `wire_by_protocol`。**
+這是 `envmap` 誠實邊界 1 的可執行版本，也是 §12.2 對照 C 那個陷阱的通用形狀。
+
+### 13.3 這一節沒有說的事
+
+存在性證明不是效果量（無對照臂、一題、一模型、每格 n=2）；只跑可見套件（2 題）
+不含隱藏 7 題；`--sandbox none`；沒跑網路層出網封鎖。完整清單見裁決檔第七節。
 
 ---
 
