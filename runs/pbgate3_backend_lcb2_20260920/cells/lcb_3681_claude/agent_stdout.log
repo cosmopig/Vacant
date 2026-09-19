@@ -1,0 +1,13 @@
+<|channel>thought
+<channel|>I have read `goal.md` and `contract.md`. Based on the requirements, I have implemented the `maxRectangleArea` function in `solution.py`.
+
+The implementation:
+1.  Iterates through all pairs of points to identify potential diagonal corners of a rectangle with edges parallel to the axes.
+2.  Verifies that the other two required corners exist in the input set.
+3.  Checks if any other point from the input lies inside or on the boundary of the formed rectangle.
+4.  Tracks and returns the maximum area found, or -1 if no valid rectangle exists.
+
+You can now run the tests using:
+```bash
+sh run_tests.sh
+```

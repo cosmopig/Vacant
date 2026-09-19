@@ -1,0 +1,46 @@
+{
+  "suite": "visible",
+  "task_id": "pbgate3_lcb_3700_claude",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 28,
+      "cases": [
+        {
+          "case": "check_visible_01",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_visible_02",
+          "ok": false,
+          "kind": "assert",
+          "message": "args=[[1, 2, 2, 3, 3, 4]] got=6 want=4",
+          "where": "test_visible.py:37: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_visible_03",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 3,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 3,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "985f0e21d603d5acfbe603335837fc05fea1e9fe4469743b705e931eb05369f9"
+}

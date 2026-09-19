@@ -1,0 +1,69 @@
+{
+  "stub": "def <entry_point>(*a, **k): return None",
+  "per_task": {
+    "lcb_3522": {
+      "status": "ok",
+      "passed": 0,
+      "total": 27,
+      "all_pass": false
+    },
+    "lcb_3583": {
+      "status": "ok",
+      "passed": 0,
+      "total": 27,
+      "all_pass": false
+    },
+    "lcb_3584": {
+      "status": "ok",
+      "passed": 0,
+      "total": 28,
+      "all_pass": false
+    },
+    "lcb_3637": {
+      "status": "ok",
+      "passed": 0,
+      "total": 27,
+      "all_pass": false
+    },
+    "lcb_3654": {
+      "status": "ok",
+      "passed": 0,
+      "total": 26,
+      "all_pass": false
+    },
+    "lcb_3681": {
+      "status": "ok",
+      "passed": 0,
+      "total": 27,
+      "all_pass": false
+    },
+    "lcb_3686": {
+      "status": "ok",
+      "passed": 0,
+      "total": 26,
+      "all_pass": false
+    },
+    "lcb_3700": {
+      "status": "ok",
+      "passed": 0,
+      "total": 27,
+      "all_pass": false
+    },
+    "lcb_3764": {
+      "status": "ok",
+      "passed": 0,
+      "total": 26,
+      "all_pass": false
+    },
+    "lcb_3794": {
+      "status": "ok",
+      "passed": 0,
+      "total": 27,
+      "all_pass": false
+    }
+  },
+  "blocked_n": 10,
+  "tasks_n": 10,
+  "verdict": "OK",
+  "honesty": "單邊：擋得住這一個退化樁 ≠ 這份隱藏套件涵蓋了真需求。"
+}

@@ -1,0 +1,10 @@
+<|channel>thought
+<channel|>I have read `goal.md` and `contract.md` and implemented the solution in `solution.py`.
+
+The logic follows these steps:
+1. For each row $i$, I sort the elements in descending order.
+2. From each row, I take at most `limits[i]` of the largest elements (since all grid values are non-negative).
+3. All these selected "best" candidates from every row are collected into a single pool.
+4. The pool is sorted in descending order, and the sum of the top $k$ elements is returned.
+
+This ensures that we respect the per-row limits while maximizing the total sum for at most $k$ elements.

@@ -1,0 +1,19 @@
+<|channel>thought
+<channel|>I have implemented the `validSequence` function in `solution.py`.
+
+### Implementation Details:
+1.  **Precomputation**: 
+    *   `next_pos`: A 2D array where `next_pos[char][i]` stores the first occurrence of a character at or after index `i` in `word1`. This allows $O(1)$ lookup for greedy matching.
+    *   `max_starts`: An array where `max_starts[j]` stores the largest possible index in `word1` that can be used to match `word2[j]` such that all subsequent characters in `word2` can also be matched. This is computed using a backward pass and binary search on character indices.
+2.  **Algorithm**:
+    *   The function considers two main scenarios: an exact match (0 changes) and a single mismatch at some position $k \in [0, m-1]$.
+    *   For each possible mismatch position $k$:
+        *   It greedily picks the smallest indices for characters in `word2` before index $k$.
+        *   It then identifies the smallest possible index for the "mismatched" character at position $k$ (which is simply the next available index after the previous one).
+        *   It verifies if picking this index allows for a valid completion of the remaining characters in `word2` by checking against the precomputed `max_starts`.
+    *   The function tracks and returns the lexicographically smallest sequence found across all valid scenarios.
+
+You can now run the tests using:
+```bash
+sh run_tests.sh
+```

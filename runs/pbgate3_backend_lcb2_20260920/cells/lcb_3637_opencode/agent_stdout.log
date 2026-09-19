@@ -1,0 +1,17 @@
+<|channel>thought
+<channel|>
+<|channel>thought
+<channel|>
+<|channel>thought
+<channel|>
+<|channel>thought
+<channel|>
+<|channel>thought
+<channel|>I have implemented the `countBalancedPermutations` function in `solution.py`. 
+
+The implementation follows these steps:
+1.  Calculates the total sum of digits; if it's odd, it returns 0 immediately as a balanced permutation is impossible.
+2.  Identifies the target sum for even and odd positions (half of the total sum).
+3.  Uses dynamic programming to count the number of ways to distribute each digit between even and odd positions such that the sums match the targets.
+4.  The DP state `(current_sum, count_even)` stores the sum of $1 / \prod (k_i! \cdot (count_i - k_i)!)$ where $k_i$ is the number of digits of type $i$ in even positions.
+5.  Multiplies the final result by `num_even!` and `num_odd!` to get the total count of distinct permutations modulo $10^9 + 7$.

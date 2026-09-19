@@ -1,0 +1,45 @@
+<|channel>thought
+<channel|>The problem asks for the minimum time to brew $m$ potions by $n$ wizards sequentially. Each potion $j$ has a mana capacity `mana[j]` and each wizard $i$ has a skill level `skill[i]`. The time taken by wizard $i$ on potion $j$ is `skill[i] * mana[j]`. A potion must be passed to the next wizard immediately.
+
+Let $S_j$ be the start time of potion $j$.
+Wizard $i$ finishes potion $j$ at $F_{i,j} = S_j + P_i \cdot \text{mana}[j]$, where $P_i = \sum_{k=0}^i \text{skill}[k]$.
+The constraint is that wizard $i$ must finish potion $j-1$ before starting potion $j$.
+Wizard $i$ starts potion $j$ at time $T_{\text{start}, i, j} = S_j + P_{i-1} \cdot \text{mana}[j]$ (with $P_{-1}=0$).
+So, $S_j + P_{i-1} \cdot \text{mana}[j] \ge S_{j-1} + P_i \cdot \text{mana}[j-1]$.
+This gives $S_j \ge S_{j-1} + P_i \cdot \text{mana}[j-1] - P_{i-1} \cdot \text{mana}[j]$ for all $i \in [0, n-1]$.
+The minimum $S_j$ is $\max_{i=0}^{n-1} (S_{j-1} + P_i \cdot \text{mana}[j-1] - P_{i-1} \cdot \text{mana}[j])$.
+
+I have implemented this logic in `solution.py` and verified it with the provided tests.
+
+```python
+from typing import List
+
+def minTime(skill: List[int], mana: List[int]) -> int:
+    n = len(skill)
+    m = len(mana)
+    
+    if not skill or not mana:
+        return 0
+        
+    P = [0] * n
+    current_sum = 0
+    for i in range(n):
+        current_sum += skill[i]
+        P[i] = current_sum
+        
+    S = [0] * m
+    # S[0] is always 0.
+    for j in range(1, m):
+        max_val = -float('inf')
+        prev_mana = mana[j-1]
+        curr_mana = mana[j]
+        for i in range(n):
+            p_i = P[i]
+            p_prev = P[i-1] if i > 0 else 0
+            val = S[j-1] + p_i * prev_mana - p_prev * curr_mana
+            if val > max_val:
+                max_val = val
+        S[j] = max_val
+        
+    return int(S[m-1] + P[n-1] * mana[m-1])
+```

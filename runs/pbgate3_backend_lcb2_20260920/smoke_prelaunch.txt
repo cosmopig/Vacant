@@ -1,0 +1,7 @@
+# 發射前冒煙（不進證據）：lcb_3534（R534 **A 層**，不在被量的 10 題裡）× 3 個 agent，1004 後端
+# 只回答兩個發射前的問題：三個 agent 在 1004 上接得上嗎、兩個判決方向都出得來嗎
+pi: exit=20 accepted=False requests_seen=8 cell_wall_s=360.73 upstreams=['http://100.86.226.21:1234/v1/chat/completions']
+claude: exit=20 accepted=False requests_seen=5 cell_wall_s=89.34 upstreams=['http://100.86.226.21:1234/api/hello', 'http://100.86.226.21:1234/v1/messages?beta=true']
+opencode: exit=0 accepted=True requests_seen=11 cell_wall_s=166.23 upstreams=['http://100.86.226.21:1234/v1/chat/completions']
+# 結論：三個 agent 都被中介到 1004（rs 8／5／11），交付與拒交兩個方向都出得來 ⇒ 可以發射。
+# ⚠ 冒煙不是證據（CLAUDE.md 鐵律 5）。逐格落盤不帶，跑完即刪。

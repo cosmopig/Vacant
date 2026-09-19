@@ -1,0 +1,42 @@
+=== 負控制：selftest（要先 PASS，證明它抓得到壞鏈）===
+selftest: PASS
+
+=== 本批 30 條鏈 ===
+═══ 收據鏈驗證 /var/tmp/vacant_pbgate3/rd_* ═══
+run 30　鏈 30　entries 60　驗過 60　失敗 0　壞鏈 0
+中介：有 30　**零請求 0**　沒記這件事 0（舊鏈；沒量到≠量到 0）
+
+run                           arm          條數    驗過    失敗 verdict  rows  chain_head
+rd_lcb_3522_claude            RUN-ON        2     2     0       1     1  41a91d8c7ee5266f…  OK
+rd_lcb_3522_opencode          RUN-ON        2     2     0       1     1  e98f84231116ef40…  OK
+rd_lcb_3522_pi                RUN-ON        2     2     0       1     1  2b1db7f6f7de7d5d…  OK
+rd_lcb_3583_claude            RUN-ON        2     2     0       1     1  805e426f5c383910…  OK
+rd_lcb_3583_opencode          RUN-ON        2     2     0       1     1  1ad72994aee67689…  OK
+rd_lcb_3583_pi                RUN-ON        2     2     0       1     1  640fb656f88d68a2…  OK
+rd_lcb_3584_claude            RUN-ON        2     2     0       1     1  581e53230d460b88…  OK
+rd_lcb_3584_opencode          RUN-ON        2     2     0       1     1  2fb782de33239dd0…  OK
+rd_lcb_3584_pi                RUN-ON        2     2     0       1     1  a025fac1d5539c20…  OK
+rd_lcb_3637_claude            RUN-ON        2     2     0       1     1  68a6350ee004c36a…  OK
+rd_lcb_3637_opencode          RUN-ON        2     2     0       1     1  8f713245de177e4e…  OK
+rd_lcb_3637_pi                RUN-ON        2     2     0       1     1  00fc6ca2f1d14721…  OK
+rd_lcb_3654_claude            RUN-ON        2     2     0       1     1  733b74bdcbb31694…  OK
+rd_lcb_3654_opencode          RUN-ON        2     2     0       1     1  abdfceba85e6943c…  OK
+rd_lcb_3654_pi                RUN-ON        2     2     0       1     1  dee16d84d1a76299…  OK
+rd_lcb_3681_claude            RUN-ON        2     2     0       1     1  fa11073c21172060…  OK
+rd_lcb_3681_opencode          RUN-ON        2     2     0       1     1  b19c3b4e2aeabc4e…  OK
+rd_lcb_3681_pi                RUN-ON        2     2     0       1     1  63d0e9c94ce769df…  OK
+rd_lcb_3686_claude            RUN-ON        2     2     0       1     1  8525b41370103cd3…  OK
+rd_lcb_3686_opencode          RUN-ON        2     2     0       1     1  e254370cc436bb3a…  OK
+rd_lcb_3686_pi                RUN-ON        2     2     0       1     1  dbd387e3f9e76edb…  OK
+rd_lcb_3700_claude            RUN-ON        2     2     0       1     1  f1c24146260be267…  OK
+rd_lcb_3700_opencode          RUN-ON        2     2     0       1     1  e112c42be566a3d6…  OK
+rd_lcb_3700_pi                RUN-ON        2     2     0       1     1  8a289ed0ff79778c…  OK
+rd_lcb_3764_claude            RUN-ON        2     2     0       1     1  e80d25fea0bc26ca…  OK
+rd_lcb_3764_opencode          RUN-ON        2     2     0       1     1  fa84f9a8bf26f6e2…  OK
+rd_lcb_3764_pi                RUN-ON        2     2     0       1     1  ab2ffcac696995c8…  OK
+rd_lcb_3794_claude            RUN-ON        2     2     0       1     1  d01ee40a6440936c…  OK
+rd_lcb_3794_opencode          RUN-ON        2     2     0       1     1  c2572fbdc4685b3b…  OK
+rd_lcb_3794_pi                RUN-ON        2     2     0       1     1  15fb5fa245505ca0…  OK
+
+總判：OK
+每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant_network/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。`mediated` 是**另一個維度**：鏈完整不代表中介發生過。VOID＝鏈是好的、但那一格 `requests_seen == 0`，所以它不是「模型通道被中介了」的證據。`mediated=null`＝這條鏈沒記這件事（舊鏈），**沒量到 ≠ 量到 0**。⚠ 這個維度擋得住「完全沒打」，擋不住「打了但打到別的地方」——那要看 run_<ARM>.json 的 wire_by_protocol 與 upstreams，而那兩個欄位不在簽章鏈上。

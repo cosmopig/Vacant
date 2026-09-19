@@ -1,0 +1,13 @@
+<|channel>thought
+<channel|>The task was to implement a function `validSequence` that finds the lexicographically smallest sequence of indices in `word1` such that the characters at these indices form a string "almost equal" to `word2`. A string is almost equal if it can be made identical by changing at most one character.
+
+I have implemented this in `solution.py` using a greedy approach with precomputed prefix and suffix matches:
+- `pref[j]` stores the smallest index for `word2[j]` that follows `pref[j-1]`.
+- `suff[j]` stores the largest index for `word2[j]` that precedes `suff[j+1]`.
+- For each possible "change" position $k$ in `word2`, I construct the lexicographically smallest sequence of indices:
+    - Indices before $k$ are taken from `pref`.
+    - Index at $k$ is chosen as the smallest possible index (either 0 or `pref[k-1] + 1`).
+    - Indices after $k$ are greedily matched starting from the position after $k$.
+- I then compare all valid sequences and return the lexicographically smallest one.
+
+The solution passed all visible tests.

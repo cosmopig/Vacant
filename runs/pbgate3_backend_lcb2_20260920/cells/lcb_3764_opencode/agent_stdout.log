@@ -1,0 +1,10 @@
+<|channel>thought
+<channel|>
+<|channel>thought
+<channel|>
+<|channel>thought
+<channel|>
+<|channel>thought
+<channel|>
+<|channel>thought
+<channel|>I have implemented the `maxSum` function in `solution.py`. The solution sorts each row to identify the largest elements, collects up to the allowed limit for each row into a candidate list, and then returns the sum of the top `k` elements from that list.

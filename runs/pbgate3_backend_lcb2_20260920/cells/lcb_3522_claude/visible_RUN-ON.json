@@ -1,0 +1,46 @@
+{
+  "suite": "visible",
+  "task_id": "pbgate3_lcb_3522_claude",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 28,
+      "cases": [
+        {
+          "case": "check_visible_01",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_visible_02",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_visible_03",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 3,
+      "total": 3,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 3,
+  "total": 3,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "3bf53d769ec1affcd15d17acb5b7bc896acc0c3ab209c3388997fec837dcb57b"
+}
