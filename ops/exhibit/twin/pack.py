@@ -33,6 +33,11 @@ requests_seen  > 0 但沒有宣告             → L-unknown（頁面會照實�
 2. 本支不讀 `hidden/`，一個 byte 都不讀。展件上不會出現隱藏測資（V/GT 紅線）。
 3. `visible` 逐條搬過來，包含失敗訊息——那是 agent 自己也看得到的可見測資，
    不是隱藏測資。
+4. **`visible` 是最後一次嘗試的閘門結果**，與 `accepted` 同一次；每一次各自的
+   結果在 `attempts[*].visible`。舊版讀的是第 1 次那一份（`launcher.py:481`
+   的檔名規則），與最後一次的 `accepted` 擺在一起 ⇒ 一格「第 1 次沒過、
+   第 3 次過」的 run 在資料上會長成「驗收沒過 ＋ 收下了」。
+   1 次嘗試的格剛好相等所以看不出來，3 次嘗試的格就說謊。見 `attempts_of`。
 
 用法：
     python3 ops/exhibit/twin/pack.py --runs runs/twin_fixture_20260919 \\
@@ -43,6 +48,7 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import re
 import sys
 
 HERE = pathlib.Path(__file__).resolve()
@@ -146,11 +152,23 @@ def redact_paths(text: str, run_dir: pathlib.Path) -> str:
     (/Users/…/_frozen_RUN-ON/solution.py)`）。那串路徑對觀眾零資訊，卻把建置
     機器的目錄結構印在展場螢幕上。**只換前綴，不動訊息其他任何一個字**——
     `check_02_mul` 為什麼沒過，一個字都沒少。
+
+    ⚠ 2026-09-19：只比對「**現在的** `run_dir`」是不夠的。run 目錄是落盤資料，
+    它會被搬、會被另一個 worktree 重新 pack，而訊息裡那串路徑是**當初跑的時候**
+    那一台／那一個目錄的。兩者不相等 ⇒ 前綴比對整個失效 ⇒ 建置機器的路徑
+    直接印上展場螢幕。實際發生過：換一個 worktree 重跑 `pack.py`，
+    `/Users/…/.claude/worktrees/agent-a333…/` 就漏進 `twin_pack.json`。
+    ⇒ 前綴比對之後再補一道**與位置無關**的清洗：任何以 `_frozen_<ARM>` 收尾的
+      絕對路徑一律換掉，不管它現在在哪。守門的是
+      `tests/test_twin_viewer.py::test_pack_has_no_absolute_build_paths`。
     """
     if not text:
         return text
     out = text.replace(str(run_dir / f"_frozen_{ARM}"), "<凍結快照>")
     out = out.replace(str(run_dir), "<run 目錄>")
+    # 與位置無關的第二道：`/任何/地方/_frozen_RUN-ON[_aN]` → `<凍結快照>`
+    out = re.sub(r"/[^\s'\"()\[\]]*/_frozen_" + re.escape(ARM) + r"(_a\d+)?",
+                 "<凍結快照>", out)
     out = out.replace(str(REPO), "<repo>")
     return out
 
@@ -245,18 +263,8 @@ def task_meta(task_id: str) -> dict:
                               "visible_n", "hidden_n") if k in m}
 
 
-def pack_cell(run_dir: pathlib.Path) -> dict:
-    meta = _read_json(run_dir / "twin_cell.json")
-    summary = _read_json(run_dir / f"run_{ARM}.json")
-    visible = _read_json(run_dir / f"visible_{ARM}.json")
-    chain_text = (run_dir / f"receipts_{ARM}.ndjson").read_text(encoding="utf-8")
-    pub = _read_json(run_dir / f"receipts_{ARM}.pub.json")
-
-    requests_seen = int(summary.get("requests_seen") or 0)
-    model_id = model_from_wire(run_dir)
-    level = evidence_level(requests_seen=requests_seen,
-                           declared=meta.get("declared_evidence", ""))
-
+def visible_cases(visible: dict, run_dir: pathlib.Path) -> list[dict]:
+    """可見驗收的逐條結果（含失敗訊息）。隱藏測資一個 byte 都不讀。"""
     cases = []
     for f in visible.get("files", []):
         for c in f.get("cases", []):
@@ -264,6 +272,66 @@ def pack_cell(run_dir: pathlib.Path) -> dict:
                           "kind": c.get("kind"),
                           "message": redact_paths(c.get("message", ""), run_dir),
                           "where": redact_paths(c.get("where") or "", run_dir) or None})
+    return cases
+
+
+def attempts_of(run_dir: pathlib.Path, summary: dict) -> list[dict]:
+    """每一次嘗試一筆，**含那一次自己的閘門結果**。
+
+    ⚠ 2026-09-19 查出來的錯：`visible_{ARM}.json` 是**第 1 次嘗試**的結果
+    （`launcher.py:481` 的 `suffix = "" if attempt == 1 else f"_a{attempt}"`），
+    而 `summary["accepted"]` 是**最後一次**的。舊版 `pack_cell` 把前者當成
+    「這一格的閘門結果」、把後者當成「這一格的裁決」擺在一起
+    ⇒ 一格「第 1 次沒過、第 3 次過」的 run，資料上會長成
+    **「驗收沒過 ＋ 收下了」**——那正是「收下了，其實漏出」那句話的形狀。
+    單次嘗試的格剛好相等所以看不出來（fixture 全是 1 次），**三次嘗試的格就說謊**。
+    形狀與 `delivery_of` 的同一個坑（讀錯快照）一模一樣。
+
+    ⇒ 這裡逐次讀回各自的 `visible_{ARM}{suffix}.json`，
+      `pack_cell` 的 `visible` 改成**最後一次**那一份（與 `accepted` 同一次）。
+    """
+    out: list[dict] = []
+    for rec in summary.get("attempts", []):
+        n = int(rec.get("attempt") or 0)
+        vp = run_dir / f"visible_{ARM}{'' if n <= 1 else f'_a{n}'}.json"
+        vis = _read_json(vp) if vp.exists() else {}
+        out.append({
+            "attempt": n,
+            "requests_seen": int(rec.get("requests_seen") or 0),
+            "agent_rc": rec.get("agent_rc"),
+            "accepted": rec.get("accepted"),
+            "stop_reason": rec.get("stop_reason"),
+            # 回饋真的進了幾個位元組（第 1 次恆為 0＝與「沒有 Vacant」逐位元相同）
+            "feedback_delivery": rec.get("feedback_delivery"),
+            "feedback_in_prompt_bytes": rec.get("feedback_in_prompt_bytes"),
+            "reset": rec.get("reset"),
+            "ws_end_sha256": rec.get("ws_end_sha256"),
+            "visible": ({"passed": vis.get("passed"), "total": vis.get("total"),
+                         "all_pass": bool(vis.get("all_pass")),
+                         "cases": visible_cases(vis, run_dir)} if vis else None),
+        })
+    return out
+
+
+def pack_cell(run_dir: pathlib.Path) -> dict:
+    meta = _read_json(run_dir / "twin_cell.json")
+    summary = _read_json(run_dir / f"run_{ARM}.json")
+    chain_text = (run_dir / f"receipts_{ARM}.ndjson").read_text(encoding="utf-8")
+    pub = _read_json(run_dir / f"receipts_{ARM}.pub.json")
+
+    attempts = attempts_of(run_dir, summary)
+    # `visible` ＝ **最後一次**嘗試那一份（與 `accepted` 是同一次）。
+    n_last = int(summary.get("attempts_used") or 1)
+    vlast = run_dir / f"visible_{ARM}{'' if n_last <= 1 else f'_a{n_last}'}.json"
+    visible = _read_json(vlast) if vlast.exists() else _read_json(
+        run_dir / f"visible_{ARM}.json")
+
+    requests_seen = int(summary.get("requests_seen") or 0)
+    model_id = model_from_wire(run_dir)
+    level = evidence_level(requests_seen=requests_seen,
+                           declared=meta.get("declared_evidence", ""))
+
+    cases = visible_cases(visible, run_dir)
 
     return {
         "cell_id": meta["cell_id"],
@@ -276,6 +344,7 @@ def pack_cell(run_dir: pathlib.Path) -> dict:
         "refused": bool(summary.get("refused")),
         "stop_reason": summary.get("stop_reason"),
         "attempts_used": summary.get("attempts_used"),
+        "attempts": attempts,
         "retry": summary.get("retry"),
         "requests_seen": requests_seen,
         "wire_by_protocol": summary.get("wire_by_protocol") or {},
@@ -287,8 +356,11 @@ def pack_cell(run_dir: pathlib.Path) -> dict:
         "ws_end_sha256": summary.get("ws_end_sha256"),
         "verdict_sha256": summary.get("verdict_sha256"),
         "sandbox": (summary.get("sandbox") or {}).get("backend"),
+        # ⚠ 這是**最後一次**嘗試的閘門結果（與 `accepted` 同一次）。
+        #   每一次各自的結果在 `attempts[*].visible`。
         "visible": {"passed": visible.get("passed"), "total": visible.get("total"),
-                    "all_pass": bool(visible.get("all_pass")), "cases": cases},
+                    "all_pass": bool(visible.get("all_pass")), "cases": cases,
+                    "attempt": n_last},
         "delivery": delivery_of(run_dir, summary.get("ws_end_sha256") or "",
                                 summary.get("attempts_used")),
         "chain": [ln for ln in chain_text.split("\n") if ln.strip()],

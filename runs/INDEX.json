@@ -29,7 +29,7 @@
       "replay": 1,
       "smoke": 12
     },
-    "total_bytes": 727690891
+    "total_bytes": 727703546
   },
   "runs": [
     {
@@ -37616,12 +37616,12 @@
         "branch": null
       },
       "n_files": 147,
-      "bytes": 210438,
+      "bytes": 223093,
       "files": [
         {
           "name": "events.jsonl",
-          "bytes": 26759,
-          "sha256": "e3ad685e770ce6de59c3955d20b6205447034123c27987c574698f4879793372",
+          "bytes": 39414,
+          "sha256": "0be65c621ef24104e2b0019873c6d77ae82d8bacf718f6ae12bbacf2e277315b",
           "lines": 109
         },
         {
@@ -38513,7 +38513,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "decisions/DECISION_20260919_TWIN_EXHIBIT.md"
+        "decisions/DECISION_20260919_TWIN_EXHIBIT.md",
+        "decisions/DECISION_20260919_TWIN_V2_FIDELITY.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
