@@ -1,0 +1,311 @@
+{
+  "cells": [
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798621797,
+      "cell_id": "KAL-52__s1_01_addmul__held",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "runs/twin_fixture_20260919/runs/KAL-52__s1_01_addmul__held",
+      "task_id": "s1_01_addmul",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798622612,
+      "cell_id": "KAL-52__s1_01_addmul__pc",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "runs/twin_fixture_20260919/runs/KAL-52__s1_01_addmul__pc",
+      "task_id": "s1_01_addmul",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798623428,
+      "cell_id": "KAL-52__s1_02_span__held",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "runs/twin_fixture_20260919/runs/KAL-52__s1_02_span__held",
+      "task_id": "s1_02_span",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798624243,
+      "cell_id": "KAL-52__s1_02_span__pc",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "runs/twin_fixture_20260919/runs/KAL-52__s1_02_span__pc",
+      "task_id": "s1_02_span",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798625058,
+      "cell_id": "KAL-52__s1_03_nwords__held",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "runs/twin_fixture_20260919/runs/KAL-52__s1_03_nwords__held",
+      "task_id": "s1_03_nwords",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798625878,
+      "cell_id": "KAL-52__s1_03_nwords__pc",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "runs/twin_fixture_20260919/runs/KAL-52__s1_03_nwords__pc",
+      "task_id": "s1_03_nwords",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798626695,
+      "cell_id": "DUL-89__s1_01_addmul__held",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "runs/twin_fixture_20260919/runs/DUL-89__s1_01_addmul__held",
+      "task_id": "s1_01_addmul",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798627514,
+      "cell_id": "DUL-89__s1_01_addmul__pc",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "runs/twin_fixture_20260919/runs/DUL-89__s1_01_addmul__pc",
+      "task_id": "s1_01_addmul",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798628329,
+      "cell_id": "DUL-89__s1_02_span__held",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "runs/twin_fixture_20260919/runs/DUL-89__s1_02_span__held",
+      "task_id": "s1_02_span",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798629148,
+      "cell_id": "DUL-89__s1_02_span__pc",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "runs/twin_fixture_20260919/runs/DUL-89__s1_02_span__pc",
+      "task_id": "s1_02_span",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798629962,
+      "cell_id": "DUL-89__s1_03_nwords__held",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "runs/twin_fixture_20260919/runs/DUL-89__s1_03_nwords__held",
+      "task_id": "s1_03_nwords",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798630777,
+      "cell_id": "DUL-89__s1_03_nwords__pc",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "runs/twin_fixture_20260919/runs/DUL-89__s1_03_nwords__pc",
+      "task_id": "s1_03_nwords",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798631596,
+      "cell_id": "LIV-51__s1_01_addmul__held",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "runs/twin_fixture_20260919/runs/LIV-51__s1_01_addmul__held",
+      "task_id": "s1_01_addmul",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798632414,
+      "cell_id": "LIV-51__s1_01_addmul__pc",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "runs/twin_fixture_20260919/runs/LIV-51__s1_01_addmul__pc",
+      "task_id": "s1_01_addmul",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798633231,
+      "cell_id": "LIV-51__s1_02_span__held",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "runs/twin_fixture_20260919/runs/LIV-51__s1_02_span__held",
+      "task_id": "s1_02_span",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798634047,
+      "cell_id": "LIV-51__s1_02_span__pc",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "runs/twin_fixture_20260919/runs/LIV-51__s1_02_span__pc",
+      "task_id": "s1_02_span",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798634862,
+      "cell_id": "LIV-51__s1_03_nwords__held",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "runs/twin_fixture_20260919/runs/LIV-51__s1_03_nwords__held",
+      "task_id": "s1_03_nwords",
+      "v": 1
+    },
+    {
+      "argv": [
+        "/Users/cosmopig/Documents/GitHub/Vacant/.venv/bin/python",
+        "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/fixture_agent.py"
+      ],
+      "built_ms": 1789798635681,
+      "cell_id": "LIV-51__s1_03_nwords__pc",
+      "declared_evidence": "",
+      "declared_model": "",
+      "declared_upstream": "",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "runs/twin_fixture_20260919/runs/LIV-51__s1_03_nwords__pc",
+      "task_id": "s1_03_nwords",
+      "v": 1
+    }
+  ],
+  "v": 1
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_03_nwords:pc",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 125,
+      "cases": [
+        {
+          "case": "check_01_n_words",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_n_words",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "e8ad7e8391d22bc419ed8da0b05c442019c81755ac6101c23f5dc3e321a78cbd"
+}
