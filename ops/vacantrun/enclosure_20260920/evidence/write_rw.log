@@ -1,0 +1,3 @@
+enc.sh: ⚠ ENC_DOOR_RW=1 —— 門目錄是**可寫**的（只有負控制該這樣跑）
+WRITE WROTE     /run/vacant  wrote+unlinked
+WRITE_PROBE_DONE rows=1

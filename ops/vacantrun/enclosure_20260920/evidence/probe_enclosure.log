@@ -1,0 +1,9 @@
+PROBE_START uid=1000 py=3.12.3 cwd=/var/tmp/vacant-enclosure-20260920c/ws/probe
+RESULT ext_ip_upstream          kind=http      reachable=False want=False ms=    0 OSError: [Errno 101] Network is unreachable
+RESULT ext_ip_cloudflare        kind=tcp       reachable=False want=False ms=    0 OSError: [Errno 101] Network is unreachable
+RESULT loopback_own             kind=tcp       reachable=False want=False ms=    0 ConnectionRefusedError: [Errno 111] Connection refused
+RESULT unix_path_tmp            kind=unix      reachable=False want=False ms=    0 FileNotFoundError: [Errno 2] No such file or directory
+RESULT unix_abstract            kind=abstract  reachable=False want=False ms=    0 ConnectionRefusedError: [Errno 111] Connection refused
+RESULT dns_example              kind=dns       reachable=False want=False ms=    0 gaierror: [Errno -3] Temporary failure in name resolution
+RESULT door_relay_sock          kind=unix      reachable=True  want=True  ms=    0 connected
+PROBE_DONE rows=7 mismatched=0

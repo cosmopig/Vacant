@@ -1,0 +1,15 @@
+{
+  "pid": 3958194,
+  "url": "unix:/var/tmp/vacant-enclosure-20260920c/door/echo.sock",
+  "endpoint": "unix:/var/tmp/vacant-enclosure-20260920c/door/echo.sock",
+  "listen": "unix",
+  "port": null,
+  "unix_path": "/var/tmp/vacant-enclosure-20260920c/door/echo.sock",
+  "path_policy": "model",
+  "started_at": 1789841763.7330334,
+  "upstreams": {
+    "openai": "http://127.0.0.1:34201",
+    "anthropic": "http://127.0.0.1:34201"
+  },
+  "python": "/usr/bin/python3"
+}

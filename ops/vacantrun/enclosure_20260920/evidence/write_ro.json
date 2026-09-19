@@ -1,0 +1,26 @@
+[
+  {
+    "path": "/run/vacant",
+    "writable": false,
+    "errno": "EROFS",
+    "detail": "[Errno 30] Read-only file system: '/run/vacant/_vacant_write_probe_2'"
+  },
+  {
+    "path": "/tmp",
+    "writable": true,
+    "errno": null,
+    "detail": "wrote+unlinked"
+  },
+  {
+    "path": "/var/tmp/vacant-enclosure-20260920c/ws/probe",
+    "writable": true,
+    "errno": null,
+    "detail": "wrote+unlinked"
+  },
+  {
+    "path": "/usr",
+    "writable": false,
+    "errno": "EROFS",
+    "detail": "[Errno 30] Read-only file system: '/usr/_vacant_write_probe_2'"
+  }
+]

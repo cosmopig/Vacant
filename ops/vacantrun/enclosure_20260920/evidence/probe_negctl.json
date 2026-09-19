@@ -1,0 +1,58 @@
+[
+  {
+    "target": "ext_ip_upstream",
+    "kind": "http",
+    "reachable": true,
+    "detail": "HTTP/1.1 200 OK",
+    "ms": 3,
+    "want": true
+  },
+  {
+    "target": "ext_ip_cloudflare",
+    "kind": "tcp",
+    "reachable": true,
+    "detail": "connected",
+    "ms": 2,
+    "want": true
+  },
+  {
+    "target": "loopback_own",
+    "kind": "tcp",
+    "reachable": true,
+    "detail": "connected",
+    "ms": 0,
+    "want": true
+  },
+  {
+    "target": "unix_path_tmp",
+    "kind": "unix",
+    "reachable": true,
+    "detail": "connected",
+    "ms": 0,
+    "want": true
+  },
+  {
+    "target": "unix_abstract",
+    "kind": "abstract",
+    "reachable": true,
+    "detail": "connected",
+    "ms": 0,
+    "want": true
+  },
+  {
+    "target": "dns_example",
+    "kind": "dns",
+    "reachable": true,
+    "detail": "('104.20.23.154', 80)",
+    "ms": 1,
+    "want": true
+  },
+  {
+    "target": "door_relay_sock",
+    "kind": "unix",
+    "reachable": true,
+    "detail": "connected",
+    "ms": 0,
+    "want": true
+  }
+]

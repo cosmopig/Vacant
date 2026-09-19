@@ -1,0 +1,9 @@
+PROBE_START uid=1000 py=3.12.3 cwd=/var/tmp/venc
+RESULT ext_ip_upstream          kind=http      reachable=True  want=True  ms=    3 HTTP/1.1 200 OK
+RESULT ext_ip_cloudflare        kind=tcp       reachable=True  want=True  ms=    2 connected
+RESULT loopback_own             kind=tcp       reachable=True  want=True  ms=    0 connected
+RESULT unix_path_tmp            kind=unix      reachable=True  want=True  ms=    0 connected
+RESULT unix_abstract            kind=abstract  reachable=True  want=True  ms=    0 connected
+RESULT dns_example              kind=dns       reachable=True  want=True  ms=    1 ('104.20.23.154', 80)
+RESULT door_relay_sock          kind=unix      reachable=True  want=True  ms=    0 connected
+PROBE_DONE rows=7 mismatched=0

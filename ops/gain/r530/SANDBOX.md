@@ -171,4 +171,17 @@ sudo rm /etc/apparmor.d/bwrap
 
 存證：`ops/gain/r530/smoke9/probe_bwrap_20260915.json`。
 ⚠ **R530 正式 run 仍以 `unshare` 跑**（AMEND2-F 的四塊補跑中，跑中不換碼）；切換到 bwrap 留到下一次凍結。
-回滾：`sudo rm /etc/apparmor.d/bwrap && sudo apparmor_parser -R /etc/apparmor.d/bwrap`（或重開機後自然不載入）。
+回滾：`sudo apparmor_parser -R /etc/apparmor.d/bwrap && sudo rm /etc/apparmor.d/bwrap`
+（⚠ 順序：先卸載再刪檔。反過來寫的話 `apparmor_parser -R` 已經讀不到那個檔了。）
+
+⚠ **舊版這裡還寫著「（或重開機後自然不載入）」——那句已經拿掉。**
+`apparmor.service` 在 vacant-dev 上是 enabled ＋ active，它的 `ExecStart`
+會重載整個 `/etc/apparmor.d/`；只要檔案還在，重開機**應該還是會載入**，
+也就是那句話很可能是反的。
+**但這一條沒有經過重開機驗證**（人類明令不准重開），所以這裡不寫成肯定句：
+**未驗證，下次合法重開機時確認。** 在那之前，回滾就是上面那一行，
+不要指望重開機。
+
+2026-09-20 補一個**用得到它的地方**：`ops/vacantrun/enclosure_20260920/`
+（bwrap enclosure ＋ 唯一一扇 Vacant proxy 門）整套就跑在這份 profile 上，
+它的 `run_probes.sh` 開頭會先跑一次裸 `bwrap` 當量具檢查，profile 不在就當場停。

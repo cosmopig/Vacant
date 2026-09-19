@@ -1,0 +1,1 @@
+DOOR_HOST_READY sock=/var/tmp/vacant-enclosure-20260920c/door/echo_pipe.sock upstream=127.0.0.1:45501
