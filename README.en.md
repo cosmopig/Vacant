@@ -23,9 +23,43 @@ in anything outward-facing).
 An existing pattern, not one we invented: supply-chain security does the same thing with
 **in-toto / SLSA / Sigstore** — an artifact without a valid attestation is rejected at intake.
 
+## ⚠ Read this before installing: `pip install vacant` does not install this project
+
+The `vacant` name on PyPI (measured 2026-09-19: version 0.4.15, a 7.5 MB
+`cp311-abi3-manylinux` native wheel) is **somebody else's** package — its own Summary
+reads verbatim *"Python bindings for the vacant Rust engine — domain availability via
+authoritative DNS"* (author David Poblador i Garcia, `github.com/alltuner/vacant`).
+
+**Both names collide.** It **also** occupies the `vacant` import name and **also**
+installs a command called `vacant`; the two packages write to the same paths. Four
+install orders were measured and **every one of them is silent**:
+
+- **Whichever is installed second quietly wins.** `vacant-network` first, then `vacant`
+  ⇒ `vacant --help` becomes the DNS tool and `import vacant` loses `__version__`; the
+  other order and ours wins. `pip list` lists both.
+- **`pip uninstall -y vacant` takes the shared command with it**, while `pip list` still
+  reports `vacant-network==0.7.0` as installed.
+
 ```bash
-pip install vacant-network        # the library (the import name is still `vacant`)
+pip install vacant-network                              # this project. NOTE: not `vacant`
+
+python3 -c "import vacant; print(vacant.__version__)"   # discriminator: ours prints 0.7.0; theirs raises AttributeError
+pip install --force-reinstall --no-deps vacant-network  # recovery when it got overwritten (measured to restore fully)
 ```
+
+**Distribution `vacant-network`, command `vacant`, import `vacant`** — three names, two
+different owners.
+
+> **Python 3.11+.** One `pip install` pulls in **30 wheels, 60 MB** — `pyproject.toml`
+> declares only 3 runtime dependencies (`cryptography` / `mcp` / `jsonschema`); the rest
+> come in behind `mcp` (`pydantic` / `starlette` / `uvicorn` / `httpx`, …). The gate and
+> receipt path (`vacant.vrun.*`) does not use `mcp`, but there is currently no
+> "gate only" extra, so installing gets you all of it.
+>
+> A from-scratch install transcript, stuck points included:
+> [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md)
+> (stock Ubuntu 24.04, 27 seconds end to end). The common traps are collected under
+> [What you will run into](#what-you-will-run-into) below.
 
 [![PyPI](https://img.shields.io/pypi/v/vacant-network?color=f26b1d)](https://pypi.org/project/vacant-network/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-f26b1d)](pyproject.toml)
@@ -53,8 +87,22 @@ No setup, no model endpoint, no API key, no network.
 
 ```bash
 pip install vacant-network
-vacant demo gate
+vacant selftest          # first, confirm this install is alive (end-to-end loop + two chains)
+vacant demo gate         # then watch the gate refuse one delivery
 ```
+
+Verbatim output of `vacant selftest` (vacant-dev, Ubuntu 24.04 / Python 3.12.3, **0.3 s**):
+
+```
+端到端迴圈    : ✓（6 次呼叫無例外，4/6 答對）
+expert 鏈驗   : ✓
+requester 鏈驗: ✓
+暫存目錄      : /tmp/vacant-selftest-_bqraq82
+```
+
+⚠ **`4/6` is neither a criterion nor a performance number** (the same version prints
+`3/6` on macOS). `selftest` checks that the end-to-end loop throws nothing and that both
+signature chains verify; how many answers were right does not count.
 
 **No clone needed.** (Since 2026-09-18 the gate's judgement layer lives inside the package —
 the same one copy, not a duplicate: `ops/gain/r530/*` now re-exports `vacant/vrun/*`, and the
@@ -108,12 +156,102 @@ that path is now a re-export, and it is what verified the R460R / R529 / R532 ch
 |---|---|
 | [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh) (V3 egress blocking) + `verify_egress_block.py` | A root-once **operations action**, not a product feature; it rewrites the whole machine's network rules |
 | `ops/vacantrun/selftest.py` | End-to-end self-check; it reads the repo's `runs/` |
-| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh) (pi／Codex／OpenCode wiring) | Those three keep the base url in a **config file**, so the wiring is a shell snippet, not a product feature. Frameworks that read env vars (Claude Code; OpenCode via its built-in provider) need **no wiring** at all. Per-cell measurements: [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
+| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh) (pi／Codex／OpenCode／Hermes wiring) | Those keep the base url in a **config file** (Hermes needs one `--provider custom` flag), so the wiring is a shell snippet, not a product feature. Frameworks that read env vars (Claude Code; OpenCode via its built-in provider) need **no wiring** at all. Per-cell measurements: [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
 | `ops/gain/**`, `runs/**` | The R529 / R530 / R532 / R534 runners, task banks, **hidden acceptance suites**, judge, scheduler and on-disk data. **Re-computing the experiment numbers requires a clone** (see "Run from source" below) |
 | `examples/**`, `decisions/**`, `docs/**` | Exhibit pieces, verdict records, spec documents |
 
 ⚠ Not shipping a top-level `ops` package is deliberate: on PyPI, `ops` is Juju's package, and
 **the name collision would silently overwrite files** in someone else's `site-packages`.
+
+---
+
+## Your own suite: both cells have to run
+
+`vacant demo gate` shows the **refuse cell**. The refuse cell alone is not enough — **a
+gate that always refuses is as useless as no gate**, so the deliver cell is part of the
+spec, not a completeness nicety. What follows needs no model, no network and no API key;
+the fake agent is a single `printf`, and **the only difference between the two cells is
+what it writes**. Verbatim from the clean-room run on vacant-dev
+([`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md) §9–§11).
+
+```bash
+# The customer's acceptance suite. NOTE: it must live OUTSIDE the workspace —
+# a suite the agent can edit is not a suite.
+mkdir -p ~/vacant-try/ws ~/vacant-try/tests_visible
+cat > ~/vacant-try/tests_visible/test_visible.py <<'PY'
+def check_add():
+    from solution import add
+    assert add(2, 3) == 5
+
+def check_mul():
+    from solution import mul
+    assert mul(2, 3) == 6
+PY
+```
+
+The shape of a suite file (execution semantics of `vacant/vrun/acceptance.py`,
+**no pytest dependency**): one `.py` holding a set of zero-argument `check_*()`
+functions — **one case per function**, run in definition order, **returning normally =
+pass, raising anything = fail**; or a single `main()`, in which case the whole file is
+one case. One file may use one style, not both.
+
+**Refuse cell** — the fake agent wrote only `add()` and declared itself done:
+
+```
+$ vacant run --workspace ~/vacant-try/ws --suite ~/vacant-try/tests_visible \
+      --run-dir ~/vacant-try/receipts_refuse -- \
+    sh -c 'printf "def add(a, b):\n    return a + b\n" > solution.py; echo "Done. solution.py is complete."'
+Done. solution.py is complete.
+[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws 4f53cda18c2b→c18ac5771908　wire 0 通　收據 /home/user1/vacant-try/receipts_refuse
+test_visible.py::check_mul — exception: ImportError: cannot import name 'mul' from 'solution' (/home/user1/vacant-try/receipts_refuse/_frozen_RUN-ON/solution.py) [test_visible.py:6: from solution import mul]
+exit=20
+```
+
+**Deliver cell** — same suite, same command line, only what the fake agent wrote differs
+(start from a clean workspace first: `rm -rf ~/vacant-try/ws && mkdir -p ~/vacant-try/ws`):
+
+```
+$ vacant run --workspace ~/vacant-try/ws --suite ~/vacant-try/tests_visible \
+      --run-dir ~/vacant-try/receipts_deliver -- \
+    sh -c 'printf "def add(a, b):\n    return a + b\n\ndef mul(a, b):\n    return a * b\n" > solution.py; echo "Done. solution.py is complete."'
+Done. solution.py is complete.
+[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 4f53cda18c2b→bf906ec43e3b　wire 0 通　收據 /home/user1/vacant-try/receipts_deliver
+exit=0
+```
+
+`run_RUN-ON.json` for both cells (read out of the file, not paraphrased):
+
+| | `accepted` | `stop_reason` | `agent_rc` | visible suite | `vacant run` exit code |
+|---|---|---|---|---|---|
+| **refuse** | `false` | `visible_fail` | **0** | 1/2 | **20** |
+| **deliver** | `true` | `visible_pass` | **0** | 2/2 | **0** |
+
+**`agent_rc` is `0` in both cells**: the agent claimed success both times. The difference
+in verdict comes **entirely from the customer's suite**, not from what the agent said.
+There is a third exit code: `22` = `infra_void` (infrastructure broke; **neither delivery
+nor refusal is recorded**).
+
+Verify those two receipts (**negative control first**):
+
+```
+$ python3 -m vacant.vrun.verify_receipts --selftest
+selftest: PASS
+$ python3 -m vacant.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
+═══ 收據鏈驗證 /home/user1/vacant-try/receipts_deliver ═══
+run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
+
+run                           arm          條數    驗過    失敗 verdict  rows  chain_head
+receipts_deliver              RUN-ON        2     2     0       1     1  9a3abd1bd71c31cd…  OK
+
+總判：OK
+```
+
+`--selftest` has to run **first**: it proves the verifier catches a broken chain. A
+verifier that has not passed its negative control returns an `OK` with no content in it.
+
+⚠ There is another number next to that `OK`: this run's **`requests_seen` is 0** (the
+fake agent calls no model). **A chain that verifies does not mean the thing that should
+have happened happened** — see honest boundary 21.
 
 ---
 
@@ -155,6 +293,75 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 
 A variable missing from the list means that path was not mediated — **and there is no error
 message**. That is V0's known residual risk.
+
+### Wiring the five agents (**all five have real-model evidence**; the grades must not be blended)
+
+The single source of truth for the criteria is
+[`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md)
+— the table below summarises its §1 matrix and **does not invent a second set of
+criteria**; copy-pasteable wiring lives in its §2.
+**Evidence grades**: `L-real` = real model, real run, both the refuse and the deliver
+cell passed, receipts re-verifiable; `L-fake` = fake upstream (`mockup.py`), channel and
+gate only; `L-none` = not measured.
+⚠ **`L-fake` may not be written up as "this agent can use Vacant"**: a fake upstream
+never touches SSE chunking, tool-call formats, timeouts or context length.
+
+**Status as of 2026-09-19: five agents, all five wired up, all five with real-model
+evidence.** There is **no longer any agent in the matrix that was never measured**; the
+two remaining gaps are **two other routes into the same agent**, not two other agents.
+
+| agent | how it is wired | grade | refuse / deliver |
+|---|---|---|---|
+| **Claude Code** 2.1.278 | **env var `ANTHROPIC_BASE_URL` ⇒ zero wiring** (already in the `envmap` list; the launcher injects it) | **L-real** (§9) | ✅ exit 20 / ✅ exit 0 |
+| **OpenCode** 1.18.31 | via the built-in `openai` provider = **env var `OPENAI_BASE_URL` ⇒ zero wiring**; pointing at a local model requires the config route (`OPENCODE_CONFIG_CONTENT`) | **L-real** (§8; the real-model cells went through the config route) | ✅ exit 20 / ✅ exit 0 |
+| **pi** 0.85.1 | **config file**: point `PI_CODING_AGENT_DIR` at a temp dir and write a `models.json`. **Ignores `OPENAI_BASE_URL`** | **L-real** (R535) | ✅ exit 20 / ✅ exit 0 |
+| **Codex CLI** (API key / custom provider)<br>**0.147.0** = the real-model round (vacant-dev) / `0.153.2` = the fake-upstream round (a different machine) | **config**: `model_providers.<new id>.base_url` (`-c` flag or `config.toml`; the `wrap_agent.sh codex` shipped in the repo is enough — you do not have to write your own). **Ignores `OPENAI_BASE_URL`** | **L-real** (§10) | ✅ exit 20 / ✅ exit 0 |
+| **Hermes Agent** 0.19.0 (Nous Research, PyPI `hermes-agent`) | **one CLI flag**, `--provider custom`; `CUSTOM_BASE_URL` (already in the launcher) **overrides `base_url` but cannot override the provider**. Both halves of this belong together — see below | **L-real** (§12)<br>⚠ **it jumped from L-none straight to L-real, never passing through L-fake** | ✅ exit 20 / ✅ exit 0 |
+| Codex (`codex login` / ChatGPT account) | ❌ **no way**: the model channel is a hard-coded `wss://chatgpt.com/backend-api/codex/responses`; an HTTP reverse proxy does not exist on that path | **L-none** | the gate **still runs** (its trigger is process exit, not the wire), but **verbatim wire capture does not hold on that path** |
+| Codex × `wire_api="chat"` | ❌ 0.147.0 **rejects it while loading the config**; not a single request goes out ⇒ `requests_seen = 0` | **L-none** (§11.1) | — |
+
+⚠ **Both Codex version numbers are correct, neither is a typo**: `0.153.2` is the
+2026-09-18 **fake-upstream** round (a different machine), `0.147.0` is the 2026-09-19
+**real-model** round (vacant-dev). **Quote the machine along with the number.**
+
+⚠ **2 of Hermes's `requests_seen = 6` are not model calls**: it probes
+`GET /api/v1/models` before the first model request. **The model channel is 4 calls.**
+
+⇒ Wiring cost comes in three tiers: **the two that read environment variables (Claude
+Code, and OpenCode on a cloud model) need zero wiring; Hermes needs one CLI flag; the two
+that read config files (pi, Codex) need a config written** — the latter two are a
+lower-quality kind of possession. All three "light" cells carry a precondition, and
+leaving it out would overstate them:
+
+- ⚠ **Claude Code's zero wiring rests on one upstream feature: the upstream must speak
+  Anthropic Messages (`POST /v1/messages`) itself.** `vacant/vrun/wireproxy.py` is a
+  **reverse proxy, not a protocol translator** — it routes by path and does not rewrite
+  `/v1/messages` into `/v1/chat/completions`. The LM Studio instance we measured serves
+  `/v1/messages` natively (SSE and `tool_use` included), so no shim was needed; swap in
+  an upstream that only speaks OpenAI (plain llama.cpp server, vLLM defaults) and you
+  **must** supply your own translation layer, which is not part of this repo.
+- ⚠ **OpenCode's zero wiring only holds for cloud models.** The built-in `openai`
+  provider given a model id outside the models.dev registry (e.g. a local LM Studio
+  `gemma-4-12b-it-qat`) dies in model resolution **before sending any request** ⇒
+  `requests_seen = 0` — which is `infra_void`, not a score of 0. Pointing at a local
+  model means taking the config route.
+- ⚠ **Hermes needs both halves stated; one alone misleads** (`AGENT_COMPAT.md` §12.2):
+  1. **On a fresh environment it is not zero wiring.** Give it only `CUSTOM_BASE_URL`
+     with no provider selected and it dies on `No inference provider configured`,
+     `requests_seen = 0`. The minimum is **one CLI flag**, `--provider custom` — lighter
+     than the "write a config file" that pi / Codex / OpenCode need, **but not zero**.
+  2. **For a user who already has a custom provider configured it *is* zero wiring.**
+     `CUSTOM_BASE_URL` takes precedence **over** their own `model.base_url` in
+     `config.yaml` (measured, cell D), so wrapping with `vacant run` redirects them
+     **without touching their `~/.hermes/config.yaml`**.
+
+Those five wirings are packaged as `ops/vacantrun/wrap_agent.sh` (`pi | codex | opencode
+| claude | hermes`, one stanza each, reading `$VACANT_RUN_PROXY` at runtime, so neither a
+fixed port nor edits to the user's own config are needed).
+⚠ **It only exists in a repo checkout**, not in the pip wheel — see "What still needs a
+clone" above.
+⚠ **Give an absolute path after `--`**: the launcher spawns with `cwd=<workspace>`, so a
+relative path resolves under the workspace ⇒ `agent_spawn_failed` / exit 22.
 
 ### Three boundaries that belong on this screen, not in an appendix
 
@@ -233,6 +440,37 @@ not do it for you.
 ```bash
 vacant --help                     # CLI available after install
 ```
+
+---
+
+## What you will run into
+
+This section is not imagined. On 2026-09-19 the package was installed from scratch on a
+**stock Ubuntu 24.04** box (no pip, no `python3-venv`) and every row below was actually
+hit — **the name-collision detail in the first two rows was measured the same day on
+macOS** (log §5.1); everything else came from that Ubuntu box. The verbatim transcript,
+with per-step timings, is
+[`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md).
+
+| symptom | what happened | what to do |
+|---|---|---|
+| after installing, `import vacant` or `vacant --help` is not this project at all | **`pip install vacant` installs somebody else's package** (Rust bindings for an authoritative-DNS tool, 7.5 MB native wheel). It **also** occupies the `vacant` import name and **also** installs a `vacant` command; install ours first and theirs second and **theirs quietly wins, with no error message** | tell them apart with `python3 -c "import vacant; print(vacant.__version__)"` — ours prints `0.7.0`, theirs raises `AttributeError`. Ours is the `vacant --help` whose first line lists `{init,info,call,demo,…}` |
+| after `pip uninstall -y vacant` the `vacant` command is gone entirely, yet `pip list` still reports `vacant-network==0.7.0` | the two packages write to the same paths, so uninstalling theirs **takes the shared command with it**; pip has no idea ours was hollowed out | `pip install --force-reinstall --no-deps vacant-network` (measured to restore it fully: the command comes back and `vacant.__version__` is `0.7.0` again) |
+| `python3 -m venv …` ⇒ `The virtual environment was not created successfully because ensurepip is not available.` | Debian/Ubuntu split `ensurepip` into its own package and the stock image does not carry it. The `venv` module itself is present; what dies is `ensurepip` underneath it | `sudo apt-get install -y python3-venv` (the message calls it `python3.12-venv`), then **recreate the venv**. Measured at 5.5 s; **no reboot needed** |
+| there is no `pip` / `pip3` on the system at all | same cause — `python3` is bare | same fix. Once the venv exists it ships its own pip 24.0 |
+| one `pip install` adds 30 packages and 60 MB to site-packages | `mcp` alone drags in `pydantic` / `starlette` / `uvicorn` / `httpx` / `sse-starlette`, … | there is currently **no** "gate only" extra, so installing gets all of it. The gate and receipt path (`vacant.vrun.*`) does not actually use `mcp` |
+| `pip show … \| head` prints `BrokenPipeError` | pip's SIGPIPE handling. **Not an install failure** (`exit=0`) | ignore it, or do not pipe into `head` |
+| `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | a **fail-closed** guard, not a typo in your path | keep the authoritative suite **outside** the workspace; copy a version in if the agent should see one |
+| `vacant run` exits `22` (`infra_void`) | infrastructure broke, and **neither delivery nor refusal is recorded**. The most common cause is a relative path after `--`: the launcher spawns with `cwd=<workspace>`, so it resolves under the workspace | use an absolute path after `--` |
+| your agent is wired up but `requests_seen` is `0` | that model channel **was not mediated** (the framework keeps its base url in a config file), or that run made no model call at all. **There is no error message** — and every other field of that run will look exactly like a legitimate refuse cell (the live specimen in honest boundary 23) | see "Wiring the five agents"; the single source of truth for the variable list is `vacant/vrun/envmap.py` |
+| the "correct answers" count printed by `vacant selftest` changes between runs | it is not a criterion (Linux prints `4/6`, macOS `3/6`) | only look at whether the three `✓` lines all passed |
+| `upstreams_defaulted` is missing from `run_RUN-ON.json` | **`vacant-network` 0.7.0 on PyPI does not have those two fields yet**; repo HEAD does — the version was not bumped | install from source (`pip install -e .`) if you need that field |
+| Windows | **not measured at all**, and `vacant/checks.py` has no usable Windows sandbox branch | use Linux / macOS, or a container |
+
+⚠ That last row is the shape of iron rule 3: **"not measured" ≠ "measured as zero"**.
+This log only establishes the Ubuntu 24.04 / Python 3.12.3 path. On macOS only
+`pip install` / `selftest` / `demo gate` / the two `vacant run` cells were run (Python
+3.13.1, all passed) — **there was no clean room**.
 
 ---
 
@@ -489,6 +727,71 @@ Part of the specification, not a disclaimer. Quote them with the numbers.
     different interests — that is not in place.
 19. **Not a proof.** A demo may say "you can see an improvement"; "proves an improvement" is
     reserved for a pre-registered batch run.
+20. **The `vacant run` proxy cannot stop a deliberate bypass.**
+    `vacant/vrun/wireproxy.py:45-47` says so verbatim: "**records, does not verify**: the
+    proxy only proves 'these bytes went through me'; it does not prove the upstream
+    actually did as asked, and it **does not stop the agent from taking another route
+    around it**." In the formal vocabulary of boundary 2: **Saltzer & Schroeder 1975's
+    complete mediation is a condition this system does not satisfy.** Making "once wired
+    up, it cannot escape" true requires egress blocking on top
+    (`ops/vacantrun/block_egress.sh`, root once, **repo checkout only**).
+21. **Chain integrity ≠ completeness — and a run with zero requests still gets
+    `chain_ok=true`.** Measured in the 2026-09-19 clean room: a fake agent
+    (`sh -c printf`, not a single model call) produced a receipt chain of
+    `entries 2 / verified 2 / failed 0 / chain_ok=true`, while the same
+    `run_RUN-ON.json` reports `requests_seen` = **0**. ⇒ **The chain guarantees "what I
+    wrote down was not altered", not "everything that should have happened did"** — the
+    same thing as boundary 5's truncation / omission attack
+    (Ma & Tsudik 2009, DOI [10.1145/1502777.1502779](https://doi.org/10.1145/1502777.1502779))
+    seen from the other side. So **`requests_seen > 0` is the only field on the receipt
+    that proves mediation actually happened**; "I set the environment variable" is not.
+    Verbatim in
+    [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md) §12.
+22. **The `model` field is not evidence, and an unnamed wire falls through to a public
+    API default.**
+    - **LM Studio does not check the model id**: ask it as `gpt-4o-mini` and the response
+      body comes back with `"model": "gemma-4-12b-it-qat"` — **nothing anywhere errors**
+      (measured,
+      [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) §2.3).
+      `model` on a receipt records *who claimed what*, not *who answered*. Which is also
+      why **misreporting a model name in order to get wired up is forbidden**: it
+      falsifies the receipt and runs straight into the accountability framing.
+    - **A wire with no upstream named is forwarded to the public API default.** At repo
+      HEAD, `vacant/vrun/launcher.py:586-590` writes this down per run as `upstreams` /
+      `upstreams_defaulted` — but **that only makes the hole visible, it does not close
+      it**. ⚠ **Read `upstreams_defaulted` precisely** (`AGENT_COMPAT.md` §10.6): it says
+      "nobody named an upstream for this route, so traffic *would* go to the public API",
+      **not** "traffic already left the machine". To decide whether anything actually
+      went out, look at `wire_by_protocol` and the `upstream` field in
+      `wire_*/index.jsonl` — in the Codex run `upstreams_defaulted` listed `anthropic`
+      while **not one call used that route**; in the Claude Code run both were true
+      (listed, *and* one `HEAD /api/hello` really went out).
+      ⚠ And **`vacant-network` 0.7.0 on PyPI does not have those two fields yet**
+      (the version was not bumped), so you will not find them in a pip-installed
+      `run_RUN-ON.json`.
+23. **Miss one environment variable and you get a run where every field looks like a
+    legitimate refusal — while traffic really did leave for a third party.** This is not
+    an abstract risk; it is a live specimen caught on 2026-09-19 (`AGENT_COMPAT.md` §12.2,
+    control C): with `CUSTOM_BASE_URL` absent, Hermes **does not error**. It walks quietly
+    to the end of its resolution chain, hits the hard-coded
+    `https://openrouter.ai/api/v1`, and comes back with
+    `HTTP 401: Missing Authentication header`. That run's receipt reads:
+
+    ```
+    requests_seen = 0      wire_by_protocol = {}      agent_rc = 0
+    stop_reason   = visible_fail                      exit code = 20
+    ```
+
+    **Every field except `requests_seen` is identical to a legitimate refuse cell** —
+    `agent_rc` is `0`, exactly as in the three real refuse cells of §8–§10 — and by
+    boundary 21 (a zero-request run still gets `chain_ok=true`, which we measured
+    ourselves) **the chain verifies too**.
+    ⇒ This is the live specimen for `envmap` honest boundary 1 ("a variable missing from
+    the list means that path was not mediated, and there is no error message"), and it is
+    why boundary 21 matters: **`requests_seen` is the only field here that separates "the
+    gate stopped a real delivery" from "nothing happened and the traffic went to somebody
+    else's server."** The structural fix is still egress blocking
+    (`ops/vacantrun/block_egress.sh`, V3), **which has not been measured**.
 
 Full list in [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) §四.
 
@@ -827,6 +1130,9 @@ The full block is [`AGENTS.md` §9](https://github.com/cosmopig/Vacant/blob/main
 | [`CHANGELOG.md`](https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md) | 0.6.0 → 0.7.0 is a different codebase |
 | [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) | the single entry point for numbers |
 | [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | how to re-run the task banks |
+| [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md) | **verbatim from-scratch install transcript**: stock Ubuntu 24.04, 27 s end to end, three stuck points |
+| [`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md) | full `vacant run` usage, on-disk shapes, §4 honest boundaries (none omitted) |
+| [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) | per-cell measurements and wiring for five agents (§8–§12; all five have real-model evidence); **single source of truth for the L-real / L-fake / L-none grades** |
 | [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](https://github.com/cosmopig/Vacant/blob/main/docs/HMIX_ARCHITECTURE_2026-09-11.md) | the loop: six parts, verbatim prompts, what it cannot do |
 | [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | five-replication closing audit |
 | [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | cross-bank closing audit |
