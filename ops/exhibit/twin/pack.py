@@ -160,7 +160,7 @@ def redact_paths(text: str, run_dir: pathlib.Path) -> str:
     `/Users/…/.claude/worktrees/agent-a333…/` 就漏進 `twin_pack.json`。
     ⇒ 前綴比對之後再補一道**與位置無關**的清洗：任何以 `_frozen_<ARM>` 收尾的
       絕對路徑一律換掉，不管它現在在哪。守門的是
-      `tests/test_twin_viewer.py::test_pack_has_no_absolute_build_paths`。
+      `tests/test_twin_fidelity.py::test_pack_has_no_absolute_build_paths`。
     """
     if not text:
         return text
