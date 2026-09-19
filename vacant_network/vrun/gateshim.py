@@ -106,8 +106,37 @@ def resolve_suite(cwd: pathlib.Path) -> tuple[pathlib.Path | None, str]:
     return None, "none"
 
 
+def _inject_upstreams_from_state() -> dict[str, str]:
+    """把 `vacant install` 當時記下來的上游補進環境變數，給 `launcher` 用。
+
+    **只在那個變數還沒有值的時候補**——使用者明講的永遠優先。
+    """
+    out: dict[str, str] = {}
+    sp = possess.state_home() / "state.json"
+    if not sp.is_file():
+        return out
+    try:
+        st = json.loads(sp.read_text("utf-8"))
+    except (OSError, ValueError):
+        return out
+    for wire, var in (("openai", "VACANT_RUN_UPSTREAM_OPENAI"),
+                      ("anthropic", "VACANT_RUN_UPSTREAM_ANTHROPIC")):
+        url = ((st.get("upstreams") or {}).get(wire) or {}).get("url")
+        if url and not os.environ.get(var):
+            os.environ[var] = url
+            out[wire] = url
+    return out
+
+
 def real_binary(agent: str, shim_dir: str | None) -> str | None:
-    """找真正的可執行檔——**把 shim 目錄從 PATH 拿掉再找**，否則自己找到自己。"""
+    """找真正的可執行檔——**把 shim 目錄從 PATH 拿掉再找**，否則自己找到自己。
+
+    `VACANT_POSSESS_REAL_BIN` 明講的優先（agent 不在 PATH 上時用得到，
+    也是負控制把 `/bin/true` 放進 agent 位置的那個鉤子）。
+    """
+    explicit = os.environ.get("VACANT_POSSESS_REAL_BIN")
+    if explicit and os.path.isfile(explicit) and os.access(explicit, os.X_OK):
+        return explicit
     parts = [p for p in os.environ.get("PATH", "").split(os.pathsep)
              if p and (not shim_dir or os.path.abspath(p) !=
                        os.path.abspath(shim_dir))]
@@ -265,6 +294,13 @@ def run_gate(agent: str, argv: list[str]) -> int:
     if suite is not None:
         suite_arg = run_dir / "suite"
         shutil.copytree(suite, suite_arg, dirs_exist_ok=True)
+
+    # ⚠ **閘門那一跑用的是它自己的 ephemeral proxy，不是常駐那一支**
+    #   （收據的 wire log 才對得起來）。但 `launcher` 是從環境變數推上游的，
+    #   而使用者的 shell 裡通常什麼都沒有 ⇒ 會落到 `SINK_UPSTREAM`、
+    #   每一通都被擋在本機。**上游要從 install 當時記下來的 state 補進去。**
+    #   沒有 state（沒裝過、直接跑 gateshim）就維持原樣＝fail-closed。
+    _inject_upstreams_from_state()
 
     inner = [sys.executable, "-m", "vacant_network.vrun.gateshim", "--exec",
              agent, *argv]

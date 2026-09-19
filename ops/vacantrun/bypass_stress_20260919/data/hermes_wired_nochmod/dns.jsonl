@@ -1,0 +1,12 @@
+{"ts": 1789834484.206, "name": "pypi.org", "qtype": "A", "from": "127.0.0.1:48966", "bytes": 37, "forwarded": true, "answer_bytes": 101}
+{"ts": 1789834484.207, "name": "pypi.org", "qtype": "AAAA", "from": "127.0.0.1:48966", "bytes": 37, "forwarded": true, "answer_bytes": 149}
+{"ts": 1789834484.209, "name": "pypi.org", "qtype": "A", "from": "127.0.0.1:54073", "bytes": 37, "forwarded": true, "answer_bytes": 101}
+{"ts": 1789834484.209, "name": "pypi.org", "qtype": "AAAA", "from": "127.0.0.1:54073", "bytes": 37, "forwarded": true, "answer_bytes": 149}
+{"ts": 1789834484.711, "name": "pypi.org", "qtype": "A", "from": "127.0.0.1:34888", "bytes": 37, "forwarded": true, "answer_bytes": 101}
+{"ts": 1789834484.711, "name": "pypi.org", "qtype": "AAAA", "from": "127.0.0.1:34888", "bytes": 37, "forwarded": true, "answer_bytes": 149}
+{"ts": 1789834485.713, "name": "pypi.org", "qtype": "A", "from": "127.0.0.1:59836", "bytes": 37, "forwarded": true, "answer_bytes": 101}
+{"ts": 1789834485.714, "name": "pypi.org", "qtype": "AAAA", "from": "127.0.0.1:59836", "bytes": 37, "forwarded": true, "answer_bytes": 149}
+{"ts": 1789834487.716, "name": "pypi.org", "qtype": "A", "from": "127.0.0.1:51177", "bytes": 37, "forwarded": true, "answer_bytes": 101}
+{"ts": 1789834487.717, "name": "pypi.org", "qtype": "AAAA", "from": "127.0.0.1:51177", "bytes": 37, "forwarded": true, "answer_bytes": 149}
+{"ts": 1789834491.718, "name": "pypi.org", "qtype": "A", "from": "127.0.0.1:36128", "bytes": 37, "forwarded": true, "answer_bytes": 101}
+{"ts": 1789834491.72, "name": "pypi.org", "qtype": "AAAA", "from": "127.0.0.1:36128", "bytes": 37, "forwarded": true, "answer_bytes": 149}

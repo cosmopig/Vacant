@@ -1,0 +1,2 @@
+{"ts": 1789833958.101, "name": "api.anthropic.com", "qtype": "A", "from": "127.0.0.1:43817", "bytes": 46, "forwarded": true, "answer_bytes": 62}
+{"ts": 1789833958.103, "name": "api.anthropic.com", "qtype": "AAAA", "from": "127.0.0.1:43817", "bytes": 46, "forwarded": true, "answer_bytes": 74}

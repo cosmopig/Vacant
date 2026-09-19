@@ -157,10 +157,21 @@ def state_home(home: pathlib.Path | None = None) -> pathlib.Path:
 #:   自己那一份常駐設定檔、然後不經任何 Vacant 指令直接打 agent」那條路。
 #:   兩條路的失效方式不同（relocate 那條漏了會回到使用者的設定；本條漏了
 #:   會讓 agent 照舊直連），所以日期要分開記。空字串＝**沒量過**。
+#: ⚠ 版本**要連機器一起講**（AGENT_COMPAT §13.1 的教訓：換機器結論就變）。
+#:   下面三格全部是 2026-09-19 在**人類的 macOS 15（Darwin 24.6）**上量的，
+#:   上游＝1003 的 LM Studio（`gemma-4-12b-it-qat`），
+#:   量法＝**寫進常駐設定檔之後用完整路徑直接打 agent**，命令列上零個 vacant，
+#:   證據＝常駐 proxy journal 的通數（不是「我設了設定」）。
 CHANNEL_MEASURED: dict[str, str] = {
-    "codex": "",
-    "opencode": "",
-    "claude": "",
+    # codex-cli 0.153.2：`POST /v1/responses -> 200` ×4（另 1 通 400 後自行重試）
+    "codex": "2026-09-19（macOS，codex-cli 0.153.2，5 通）",
+    # opencode 1.18.31：走我們加的 `vacant` provider，2 通，模型回了 OK
+    "opencode": "2026-09-19（macOS，opencode 1.18.31，2 通）",
+    # Claude Code 2.1.278：`~/.claude/settings.json` 的 `env` 區塊，
+    # `POST /v1/messages?beta=true -> 200` ＋ 啟動探測 `HEAD /api/hello`
+    "claude": "2026-09-19（macOS，Claude Code 2.1.278，2 通）",
+    # ⚠ 這兩格**沒量**：那台機器上沒有 pi／hermes 的可執行檔（pi 只有設定目錄）。
+    #   寫進設定檔的碼跑過了，但**沒有任何 `requests_seen` 證實它有效**。
     "pi": "",
     "hermes": "",
 }
@@ -476,6 +487,16 @@ def wire_opencode(home: pathlib.Path, port: int, backups: pathlib.Path,
         providers[pid] = pv
         if pid not in touched:
             touched.append(pid)
+    # 再加一個**可以直接用**的 provider：改道既有 provider 只讓原本的模型換路，
+    # 使用者要指到本地模型仍然需要一個自訂 provider
+    # （`envmap.CONFIG_ROUTE["opencode"]`：內建 provider 只吃 models.dev 的 id）。
+    model = os.environ.get("VACANT_AGENT_MODEL", "gemma-4-12b-it-qat")
+    providers[PROVIDER_ID] = {
+        "name": "vacant possess", "npm": "@ai-sdk/openai-compatible",
+        "options": {"baseURL": base, "apiKey": "sk-vacant-possess"},
+        "models": {model: {"name": model}},
+    }
+    touched.append(PROVIDER_ID)
     doc["provider"] = providers
     data = (json.dumps(doc, ensure_ascii=False, indent=2) + "\n").encode()
     return [write_tracked(home, p, data, backups,
@@ -723,6 +744,11 @@ SHIM_TEMPLATE = """#!/bin/sh
 # ⚠ **打完整路徑就跳過這支。** 這一層做得到「預設會跑」，做不到「不會被繞過」。
 VACANT_POSSESS_SHIM_DIR={shim_dir}
 export VACANT_POSSESS_SHIM_DIR
+# ⚠ 這一行讓 shim **自己帶得動套件**：使用者的 shell 沒有 PYTHONPATH，
+#   而原始碼 checkout（沒 pip install）底下 `import vacant_network` 會失敗。
+#   已經 pip install 的情況下這一條是多餘但無害的。
+PYTHONPATH={pypath}${{PYTHONPATH:+:$PYTHONPATH}}
+export PYTHONPATH
 exec {python} -m vacant_network.vrun.gateshim {agent} "$@"
 """
 
@@ -736,7 +762,7 @@ def install_shims(state: pathlib.Path, agents: Iterable[str],
         p = shim_dir / a
         p.write_text(SHIM_TEMPLATE.format(
             shim_dir=_sh_quote(str(shim_dir)), python=_sh_quote(python),
-            agent=a), encoding="utf-8")
+            pypath=_sh_quote(package_path()), agent=a), encoding="utf-8")
         p.chmod(0o755)
         made.append(str(p))
     return shim_dir, made
@@ -823,6 +849,33 @@ def package_path() -> str:
     return str(pathlib.Path(__file__).resolve().parents[2])
 
 
+#: macOS 上 launchd agent **讀不到**的使用者目錄（TCC 隱私保護）。
+#: ⚠ 失效的樣子不是「權限錯誤」是**整個 python 直譯器卡在啟動**
+#:   （`_PyConfig_InitPathConfig` → `getpath_readlines` → `open()` 不回來），
+#:   stdout／stderr 一個字都沒有。2026-09-19 在人類的 Mac 上量到：
+#:   `.venv` 在 `~/Documents/GitHub/Vacant` ⇒ launchd job `state = running`、
+#:   `pid` 有值、**埠沒有人在聽、log 空的**；同一支 daemon 換成
+#:   `/Library/Frameworks/.../python3` ＋ 套件複製到 `/private/tmp` ⇒ 一秒內起來。
+#:   ⇒ 這不是「偶爾會失敗」，是**開發者 checkout 底下一定會失敗**。
+TCC_PROTECTED = ("Documents", "Desktop", "Downloads",
+                 "Library/Mobile Documents")
+
+
+def tcc_risky(path: str) -> str | None:
+    """這個路徑在 macOS 上會不會讓 launchd agent 卡死。回原因或 `None`。"""
+    if platform.system() != "Darwin":
+        return None
+    home = pathlib.Path.home().resolve()
+    try:
+        rel = pathlib.Path(path).resolve().relative_to(home).as_posix()
+    except ValueError:
+        return None
+    for prot in TCC_PROTECTED:
+        if rel == prot or rel.startswith(prot + "/"):
+            return f"~/{prot}"
+    return None
+
+
 def _daemon_argv(python: str, port: int, state: pathlib.Path,
                  upstreams: dict[str, dict]) -> list[str]:
     argv = [python, "-m", "vacant_network.vrun.proxyd",
@@ -834,7 +887,7 @@ def _daemon_argv(python: str, port: int, state: pathlib.Path,
 
 def install_service(state: pathlib.Path, python: str, port: int,
                     upstreams: dict[str, dict], home: pathlib.Path,
-                    backups: pathlib.Path) -> dict:
+                    backups: pathlib.Path, backend: str | None = None) -> dict:
     """裝一個由 OS 監督、開機就起來的常駐 proxy。
 
     ⚠ 三種後端，**能力不一樣，`install-status` 會照實講**：
@@ -848,7 +901,8 @@ def install_service(state: pathlib.Path, python: str, port: int,
     logs = state / "proxyd"
     logs.mkdir(parents=True, exist_ok=True)
     argv = _daemon_argv(python, port, state, upstreams)
-    system = platform.system()
+    system = platform.system() if backend in (None, "auto") else {
+        "launchd": "Darwin", "systemd": "Linux", "bare": "-"}.get(backend, "-")
     if system == "Darwin" and shutil.which("launchctl"):
         plist = home / "Library" / "LaunchAgents" / f"{LAUNCHD_LABEL}.plist"
         body = LAUNCHD_PLIST.format(
@@ -983,7 +1037,9 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
             agents: Iterable[str] | None = None, dry_run: bool = False,
             python: str | None = None, probe_shell: bool = True,
             upstream_overrides: dict[str, str] | None = None,
-            skip_path: bool = False, skip_service: bool = False) -> dict:
+            skip_path: bool = False, skip_service: bool = False,
+            allow_protected_path: bool = False,
+            service_backend: str | None = None) -> dict:
     h = (home or pathlib.Path.home()).expanduser()
     state = state_home(h)
     py = python or sys.executable
@@ -1014,6 +1070,22 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
         raise RuntimeError(f"已經裝過了（{state / 'state.json'}）。"
                            f"先 `vacant uninstall`，或用 --force 重裝。")
 
+    # ── 0. macOS TCC 擋門（fail-closed，而且**在動任何東西之前**）────────
+    if not skip_service and not allow_protected_path:
+        bad = [(w, r) for w, r in
+               (("python", tcc_risky(py)), ("套件", tcc_risky(package_path())))
+               if r]
+        if bad:
+            raise RuntimeError(
+                "macOS 的 launchd agent 讀不到 "
+                + "、".join(f"{w} 在 {r}" for w, r in bad)
+                + "（TCC 隱私保護）。**失效的樣子是整個直譯器卡在啟動、log 空的**，"
+                  "不是一個看得懂的錯誤，所以這裡先擋下來。三條路："
+                  "(1) 把 vacant-network 裝到不受保護的位置（一般 "
+                  "`pip install` 進 venv 就不在這幾個目錄裡）；"
+                  "(2) `--service bare`（自己 fork，**撐不過重開機**）；"
+                  "(3) `--allow-protected-path` 明講要試（preflight 還是會擋）。")
+
     state.mkdir(parents=True, exist_ok=True)
     backups = state / "backups"
     port = pick_port(port)
@@ -1022,7 +1094,8 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
     svc, pf = {"backend": "skipped", "supervised": False,
                "boot_persistent": False, "changes": []}, {"listening": None}
     if not skip_service:
-        svc = install_service(state, py, port, ups, h, backups)
+        svc = install_service(state, py, port, ups, h, backups,
+                              backend=service_backend)
         pf = preflight(port)
         if not pf.get("listening"):
             stop_service(svc, h)
@@ -1115,9 +1188,17 @@ def uninstall(*, home: pathlib.Path | None = None,
         shim_dir.rmdir()
     all_ok = all(r.get("ok") for r in restored) and \
         all(r.get("ok") for r in shim_removed)
+    # ⚠ `bootout`／`disable --now` 回來的時候行程**還沒退完**，馬上量會量到
+    #   「埠還開著」而其實它一秒後就關了。等一下再量——**這一格量錯會讓
+    #   uninstall 報告說謊**（說沒停掉，其實停了）。
+    _port = int(st.get("port") or 0)
+    for _ in range(12):
+        if not port_is_open(_port):
+            break
+        time.sleep(0.5)
     report = {"ok": all_ok, "restored": restored, "shims": shim_removed,
               "service": svc_res, "state": str(state),
-              "port_still_open": port_is_open(int(st.get("port") or 0))}
+              "port_still_open": port_is_open(_port)}
     (state / "uninstall_report.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     if all_ok:
@@ -1171,8 +1252,31 @@ def status(*, home: pathlib.Path | None = None) -> dict:
                      if not v.get("proven") else v.get("proven_note", "")),
             "error": v.get("error"),
         }
+    # 常駐 proxy 的 journal 總量。**這是機器層級的證據，不是 per-agent 的**：
+    # journal 分不出哪一通是誰打的（沒有 per-agent 標記），所以它只能回答
+    # 「通道層活著而且真的有流量」，不能回答「這個 agent 被中介了」。
+    # ⚠ 兩件事不可以混講——後者要 `channel[*].proven`。
+    jpath = state / "proxyd" / "wire" / "index.jsonl"
+    journal: dict[str, Any] = {"exists": jpath.is_file(), "requests_total": 0,
+                               "by_path": {}}
+    if jpath.is_file():
+        import collections
+        c: collections.Counter = collections.Counter()
+        n = 0
+        for line in jpath.read_text("utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                r = json.loads(line)
+            except ValueError:
+                continue
+            n += 1
+            c[f"{r.get('method')} {r.get('path')} [{r.get('wire')}]"] += 1
+        journal["requests_total"] = n
+        journal["by_path"] = dict(c)
     return {
         "installed": True, "home": st["home"], "state": str(state),
+        "resident_journal": journal,
         "port": port, "endpoint": f"http://127.0.0.1:{port}",
         "proxy_listening": port_is_open(port),
         "proxy_heartbeat": hb,
@@ -1258,6 +1362,12 @@ def main(argv: list[str] | None = None) -> int:
                     help="不裝常駐 proxy（**通道會連不上**，只給測試用）")
     ap.add_argument("--no-shell-probe", action="store_true",
                     help="偵測時不跑 `bash -lic`（快，但會漏掉不在 PATH 的）")
+    ap.add_argument("--python", default=None,
+                    help="常駐 proxy 用哪一支 python（預設 sys.executable）")
+    ap.add_argument("--service", choices=["auto", "launchd", "systemd", "bare"],
+                    default="auto", help="常駐後端；bare＝自己 fork，撐不過重開機")
+    ap.add_argument("--allow-protected-path", action="store_true",
+                    help="明講要在 macOS 的受保護目錄底下試（會卡死，見 TCC_PROTECTED）")
     ap.add_argument("--keep-backups", action="store_true")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
@@ -1283,7 +1393,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if r.get("ok") else 1
     r = install(home=home, port=a.port, agents=a.agent, dry_run=a.dry_run,
                 probe_shell=not a.no_shell_probe, upstream_overrides=ov,
-                skip_path=a.no_path, skip_service=a.no_service)
+                skip_path=a.no_path, skip_service=a.no_service,
+                python=a.python, service_backend=a.service,
+                allow_protected_path=a.allow_protected_path)
     print(json.dumps(r, ensure_ascii=False, indent=2) if a.json
           else _fmt_status(status(home=home)) if not a.dry_run
           else json.dumps(r, ensure_ascii=False, indent=2))

@@ -1,0 +1,36 @@
+--- /var/tmp/vbypass/out/launcher.py.orig	2026-09-19 16:16:24.412274712 +0000
++++ /var/tmp/vbypass/repo/vacant/vrun/launcher.py	2026-09-19 16:16:24.428275752 +0000
+@@ -133,6 +133,10 @@
+     "ws_moved_during_freeze",   # TOCTOU：凍結期間工作區被動過 ⇒ infra_void
+     "ws_reset_failed",     # `resample` 重置之後對不回起點 ⇒ infra_void
+     "agent_spawn_failed",  # agent 起不來 ⇒ infra_void
++    "freeze_failed",       # 凍結快照複製不了（權限／磁碟／檔案在動）⇒ infra_void
++                           # ⚠ 2026-09-19 的活體：agent 跑在專屬 uid 上、框架以
++                           #   0600 建檔 ⇒ copytree Permission denied。原本會讓
++                           #   整個行程死掉、**一張收據都不留**。
+     "ks1_violation",       # 回饋文字帶責任修辭 ⇒ 鐵律 1「run 作廢」⇒ infra_void
+ })
+ #: `visible_fail` 與 `attempts_exhausted` **刻意不同名**：後者多燒了 N−1 次
+@@ -480,7 +484,21 @@
+             #  陣列說了算，不要用檔名猜。
+             suffix = "" if attempt == 1 else f"_a{attempt}"
+             frozen_dir = run_dir / f"_frozen_{arm}{suffix}"
+-            frozen, live_after = _freeze(workspace, frozen_dir)
++            try:
++                frozen, live_after = _freeze(workspace, frozen_dir)
++            except Exception as exc:                         # noqa: BLE001
++                # 凍結失敗**不是裁決**：這一格沒有量到任何東西。
++                # 讓它落成 infra_void（與 ws_moved_during_freeze／
++                # agent_spawn_failed 同一個形狀），**而不是讓行程死掉**——
++                # 死掉等於連「這一格壞在哪」都沒有紀錄。
++                rec["stop_reason"] = "freeze_failed"
++                rec["ws_end_sha256"] = None
++                rec["frozen_path"] = str(frozen_dir)
++                summary["attempts"].append(rec)
++                summary.update({"stop_reason": "freeze_failed",
++                                "ws_end_sha256": None,
++                                "infra_void": repr(exc)})
++                break
+             rec["ws_end_sha256"] = frozen
+             rec["frozen_path"] = str(frozen_dir)
+             if frozen != live_after:

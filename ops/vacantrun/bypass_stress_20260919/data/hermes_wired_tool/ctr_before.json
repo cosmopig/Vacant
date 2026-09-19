@@ -1,0 +1,45 @@
+{
+  "ts": 1789834169.095941,
+  "v4": {
+    "available": true,
+    "chain": "VACANT_EG",
+    "packets": {
+      "mediated_proxy": 2097,
+      "dns_any": 0,
+      "dns_redirected": 107,
+      "loopback_other": 0,
+      "lo_other": 0,
+      "udp_offbox": 0,
+      "offbox": 51509
+    },
+    "bytes": {
+      "mediated_proxy": 2417952,
+      "dns_any": 0,
+      "dns_redirected": 7297,
+      "loopback_other": 0,
+      "lo_other": 0,
+      "udp_offbox": 0,
+      "offbox": 3389006
+    }
+  },
+  "v6": {
+    "available": true,
+    "chain": "VACANT_EG6",
+    "packets": {
+      "mediated_proxy": 0,
+      "dns_any": 0,
+      "loopback_other": 0,
+      "lo_other": 0,
+      "udp_offbox": 0,
+      "offbox": 15
+    },
+    "bytes": {
+      "mediated_proxy": 0,
+      "dns_any": 0,
+      "loopback_other": 0,
+      "lo_other": 0,
+      "udp_offbox": 0,
+      "offbox": 1140
+    }
+  }
+}

@@ -17,7 +17,7 @@ rc（判準 §六，寫死）：0 ＝ 掃到東西且全 FRESH；1 ＝ 有 STALE
   python3 ops/gain/cert_drift_gate.py --json ops/gain/data/r477_cert_drift.json
 """
 from __future__ import annotations
-import argparse, json, os, pathlib, re, subprocess, sys
+import argparse, json, os, pathlib, re, subprocess, sys, uuid
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 LIVE = "g_r461_lcb3_three_arm"          # 主 run：本檔一個 byte 都不准讀
@@ -630,12 +630,26 @@ def selftest() -> int:
         f"docs {base['docs_scanned']} -> {m13['docs_scanned']} "
         f"(legacy={base['docs_scanned_legacy']})")
 
-    fx_rel = "ops/gain/_r481_fixture_scope.md"
+    # ⚠ **夾具路徑必須是 git 從來沒見過的**，而且這件事要**當場驗**，不能靠寫死一個
+    # 名字然後祈禱。M14 的判準是「乾淨版靠相對路徑反推不到認證時刻
+    # （`cert_commit is None`）、M14 用 basename 才撿得到一個假的」——夾具路徑一旦
+    # 在 git 歷史裡出現過，`historical_paths()` 的 `--follow` 就會把它接回本尊，
+    # 乾淨版**真的**反推得到，變異體殺不掉、這條檢查安靜失效。
+    #
+    # 2026-09-19 真的發生過：改名那一輪的 `git add -A` 撞上另一個 session 正在跑
+    # selftest 的空檔，把 `ops/gain/_r481_dup/<dup_name>` 收進版控。從 HEAD 刪掉
+    # **沒有用**——`--follow` 走的是歷史，不是工作樹。⇒ 改成每次跑都換一個名字，
+    # 再加一道 fail-closed 前置檢查：驗不過就整支 selftest 紅，不准悄悄跑下去。
+    run_tag = uuid.uuid4().hex[:12]
+    fx_rel = f"ops/gain/_r481_fixture_scope_{run_tag}.md"
     dup_name = "DECISION_20260904_R461_LCB3_REPLICATION_PREREG.md"
     # 2026-09-18：本尊搬進 `decisions/`。夾具要的是「同 basename、不同目錄」，
     # 所以 `dup_name`（basename）不動，只有讀本尊內容時要走新路徑。
     dup_src = f"decisions/{dup_name}"
-    dup_rel = f"ops/gain/_r481_dup/{dup_name}"
+    dup_rel = f"ops/gain/_r481_dup_{run_tag}/{dup_name}"
+    add("P0_fixture_paths_have_no_git_history",
+        historical_paths(fx_rel) == [fx_rel] and historical_paths(dup_rel) == [dup_rel],
+        f"fx={historical_paths(fx_rel)} dup={historical_paths(dup_rel)}")
     try:
         # F1 正方向：非 root-DECISION 的檔、認證**標題** ⇒ 必須多出一個群組並抓到工具
         f1doc = _fixture_doc(fx_rel, FIX_HEAD + FIX_BODY)

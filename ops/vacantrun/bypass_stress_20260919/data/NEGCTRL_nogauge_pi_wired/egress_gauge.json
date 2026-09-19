@@ -1,0 +1,26 @@
+{
+  "available": false,
+  "reason": "iptables: No chain/target/match by that name.",
+  "off_mediation_packets": null,
+  "offbox_packets": null,
+  "onbox_other_packets": null,
+  "mediated_packets": null,
+  "v4": {
+    "available": false,
+    "reason": "iptables: No chain/target/match by that name.",
+    "packets": null,
+    "bytes": null
+  },
+  "v6": {
+    "available": false,
+    "reason": "ip6tables: No chain/target/match by that name.",
+    "packets": null,
+    "bytes": null
+  },
+  "blind_to": [
+    "unix_domain_socket（不經 netfilter，V3 實測 0.038s 200 OK）",
+    "已送出的位元組（計數器只說有，收不回來）",
+    "內容（這是封包計數不是內容擷取）"
+  ],
+  "note": "`off_mediation_packets` 是**可究責性**的欄位不是防護的欄位：它說得出「有東西走了中介以外的路」，說不出「沒有路可以走」。`null` ＝ 沒裝刻度 ⇒ **沒量到，不是量到 0**。"
+}

@@ -1,0 +1,2 @@
+]7;ssh://100.124.254.83還原已驗證：全量規則（filter/nat/mangle × v4/v6）與快照**逐行相同**。
+]7;file://MacBookPro/Users/cosmopig/Documents/GitHub/Vacant/ops/vacantrun/bypass_stress_20260919

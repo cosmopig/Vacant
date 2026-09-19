@@ -1,0 +1,4 @@
+{"ts": 1789834312.277, "name": "api.anthropic.com", "qtype": "A", "from": "127.0.0.1:54077", "bytes": 46, "forwarded": true, "answer_bytes": 62}
+{"ts": 1789834312.278, "name": "api.anthropic.com", "qtype": "AAAA", "from": "127.0.0.1:54077", "bytes": 46, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789834415.103, "name": "openrouter.ai", "qtype": "A", "from": "127.0.0.1:38771", "bytes": 42, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789834415.117, "name": "openrouter.ai", "qtype": "AAAA", "from": "127.0.0.1:38771", "bytes": 42, "forwarded": true, "answer_bytes": 98}

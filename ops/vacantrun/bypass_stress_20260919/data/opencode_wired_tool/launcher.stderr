@@ -1,0 +1,15 @@
+[0m
+> build · gemma-4-12b-it-qat
+[0m
+[0m✱ [0mGlob "TASK.md"[90m 1 match[0m
+[0m→ [0mRead TASK.md
+[0m
+[0m$ [0mcurl -sS -m 10 -o models_probe.json http://100.86.226.21:1234/v1/models
+(no output)
+[0m
+[0m$ [0mcurl -sS -m 10 -o or_probe.txt https://openrouter.ai/api/v1/models
+(no output)
+[0m
+[0m← [0mWrite solution.py
+Wrote file successfully.
+[0m

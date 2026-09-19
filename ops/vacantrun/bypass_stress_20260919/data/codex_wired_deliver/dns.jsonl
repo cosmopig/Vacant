@@ -1,0 +1,8 @@
+{"ts": 1789833897.659, "name": "chatgpt.com", "qtype": "A", "from": "127.0.0.1:36001", "bytes": 29, "forwarded": true, "answer_bytes": 61}
+{"ts": 1789833897.66, "name": "chatgpt.com", "qtype": "AAAA", "from": "127.0.0.1:36001", "bytes": 29, "forwarded": true, "answer_bytes": 85}
+{"ts": 1789833897.661, "name": "github.com", "qtype": "A", "from": "127.0.0.1:43475", "bytes": 39, "forwarded": true, "answer_bytes": 55}
+{"ts": 1789833897.662, "name": "github.com", "qtype": "AAAA", "from": "127.0.0.1:43475", "bytes": 39, "forwarded": true, "answer_bytes": 123}
+{"ts": 1789833898.453, "name": "github.com", "qtype": "A", "from": "127.0.0.1:50198", "bytes": 39, "forwarded": true, "answer_bytes": 55}
+{"ts": 1789833898.453, "name": "github.com", "qtype": "AAAA", "from": "127.0.0.1:50198", "bytes": 39, "forwarded": true, "answer_bytes": 123}
+{"ts": 1789833917.077, "name": "ab.chatgpt.com", "qtype": "A", "from": "127.0.0.1:44135", "bytes": 32, "forwarded": true, "answer_bytes": 64}
+{"ts": 1789833917.078, "name": "ab.chatgpt.com", "qtype": "AAAA", "from": "127.0.0.1:44135", "bytes": 32, "forwarded": true, "answer_bytes": 88}

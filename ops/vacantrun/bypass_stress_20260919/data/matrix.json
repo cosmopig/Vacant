@@ -1,0 +1,540 @@
+[
+ {
+  "cell": "NEGCTRL_nogauge_pi_wired",
+  "agent": "pi",
+  "variant": "wired",
+  "task": "deliver",
+  "launcher_exit": 0,
+  "wall_s": 12.78,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 4,
+  "wire_by_protocol": {
+   "openai": 4
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": false,
+  "off_mediation_packets": null,
+  "offbox_packets": null,
+  "onbox_other_packets": null,
+  "mediated_packets": null,
+  "offbox_bytes": null,
+  "dns_names": []
+ },
+ {
+  "cell": "claude_half_deliver",
+  "agent": "claude",
+  "variant": "half",
+  "task": "deliver",
+  "launcher_exit": 0,
+  "wall_s": 19.88,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 5,
+  "wire_by_protocol": {
+   "openai": 1,
+   "anthropic": 4
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 187,
+  "offbox_packets": 179,
+  "onbox_other_packets": 8,
+  "mediated_packets": 130,
+  "offbox_bytes": 59816,
+  "dns_names": [
+   "api.anthropic.com",
+   "http-intake.logs.us5.datadoghq.com"
+  ]
+ },
+ {
+  "cell": "claude_wired_deliver",
+  "agent": "claude",
+  "variant": "wired",
+  "task": "deliver",
+  "launcher_exit": 0,
+  "wall_s": 44.75,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 5,
+  "wire_by_protocol": {
+   "openai": 1,
+   "anthropic": 4
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 200,
+  "offbox_packets": 198,
+  "onbox_other_packets": 2,
+  "mediated_packets": 127,
+  "offbox_bytes": 14693,
+  "dns_names": [
+   "api.anthropic.com"
+  ]
+ },
+ {
+  "cell": "claude_wired_tool",
+  "agent": "claude",
+  "variant": "wired",
+  "task": "tool",
+  "launcher_exit": 0,
+  "wall_s": 85.84,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 7,
+  "wire_by_protocol": {
+   "openai": 1,
+   "anthropic": 6
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 609,
+  "offbox_packets": 605,
+  "onbox_other_packets": 4,
+  "mediated_packets": 236,
+  "offbox_bytes": 31912,
+  "dns_names": [
+   "api.anthropic.com",
+   "openrouter.ai"
+  ]
+ },
+ {
+  "cell": "claude_wired_tool_ENF",
+  "agent": "claude",
+  "variant": "wired",
+  "task": "tool",
+  "launcher_exit": 0,
+  "wall_s": 135.59,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 7,
+  "wire_by_protocol": {
+   "openai": 1,
+   "anthropic": 6
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 10,
+  "offbox_packets": 6,
+  "onbox_other_packets": 4,
+  "mediated_packets": 376,
+  "offbox_bytes": 360,
+  "dns_names": [
+   "api.anthropic.com",
+   "openrouter.ai"
+  ]
+ },
+ {
+  "cell": "codex_half_deliver",
+  "agent": "codex",
+  "variant": "half",
+  "task": "deliver",
+  "launcher_exit": 20,
+  "wall_s": 15.34,
+  "accepted": false,
+  "stop_reason": "visible_fail",
+  "requests_seen": 0,
+  "wire_by_protocol": {},
+  "agent_rc": 1,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 9935,
+  "offbox_packets": 9903,
+  "onbox_other_packets": 32,
+  "mediated_packets": 0,
+  "offbox_bytes": 779341,
+  "dns_names": [
+   "api.openai.com",
+   "chatgpt.com",
+   "github.com"
+  ]
+ },
+ {
+  "cell": "codex_wired_deliver",
+  "agent": "codex",
+  "variant": "wired",
+  "task": "deliver",
+  "launcher_exit": 0,
+  "wall_s": 20.23,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 6,
+  "wire_by_protocol": {
+   "openai": 6
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 9681,
+  "offbox_packets": 9673,
+  "onbox_other_packets": 8,
+  "mediated_packets": 440,
+  "offbox_bytes": 738042,
+  "dns_names": [
+   "ab.chatgpt.com",
+   "chatgpt.com",
+   "github.com"
+  ]
+ },
+ {
+  "cell": "codex_wired_tool",
+  "agent": "codex",
+  "variant": "wired",
+  "task": "tool",
+  "launcher_exit": 0,
+  "wall_s": 28.54,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 8,
+  "wire_by_protocol": {
+   "openai": 8
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 9839,
+  "offbox_packets": 9829,
+  "onbox_other_packets": 10,
+  "mediated_packets": 541,
+  "offbox_bytes": 713098,
+  "dns_names": [
+   "ab.chatgpt.com",
+   "chatgpt.com",
+   "github.com",
+   "openrouter.ai"
+  ]
+ },
+ {
+  "cell": "hermes_half_deliver",
+  "agent": "hermes",
+  "variant": "half",
+  "task": "deliver",
+  "launcher_exit": 20,
+  "wall_s": 6.51,
+  "accepted": false,
+  "stop_reason": "visible_fail",
+  "requests_seen": 0,
+  "wire_by_protocol": {},
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 2936,
+  "offbox_packets": 2926,
+  "onbox_other_packets": 10,
+  "mediated_packets": 0,
+  "offbox_bytes": 187152,
+  "dns_names": [
+   "files.pythonhosted.org",
+   "models.dev",
+   "openrouter.ai",
+   "pypi.org"
+  ]
+ },
+ {
+  "cell": "hermes_half_deliver_ENF",
+  "agent": "hermes",
+  "variant": "half",
+  "task": "deliver",
+  "launcher_exit": 20,
+  "wall_s": 17.74,
+  "accepted": false,
+  "stop_reason": "visible_fail",
+  "requests_seen": 0,
+  "wire_by_protocol": {},
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 61,
+  "offbox_packets": 37,
+  "onbox_other_packets": 24,
+  "mediated_packets": 0,
+  "offbox_bytes": 2220,
+  "dns_names": [
+   "models.dev",
+   "openrouter.ai",
+   "pypi.org"
+  ]
+ },
+ {
+  "cell": "hermes_wired_deliver",
+  "agent": "hermes",
+  "variant": "wired",
+  "task": "deliver",
+  "launcher_exit": 0,
+  "wall_s": 22.1,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 6,
+  "wire_by_protocol": {
+   "openai": 6
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 2561,
+  "offbox_packets": 2557,
+  "onbox_other_packets": 4,
+  "mediated_packets": 182,
+  "offbox_bytes": 122677,
+  "dns_names": [
+   "files.pythonhosted.org",
+   "pypi.org"
+  ]
+ },
+ {
+  "cell": "hermes_wired_deliver_ENF",
+  "agent": "hermes",
+  "variant": "wired",
+  "task": "deliver",
+  "launcher_exit": 0,
+  "wall_s": 26.78,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 6,
+  "wire_by_protocol": {
+   "openai": 6
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 36,
+  "offbox_packets": 24,
+  "onbox_other_packets": 12,
+  "mediated_packets": 168,
+  "offbox_bytes": 1440,
+  "dns_names": [
+   "pypi.org"
+  ]
+ },
+ {
+  "cell": "hermes_wired_nochmod",
+  "agent": "hermes",
+  "variant": "wired",
+  "task": "deliver",
+  "launcher_exit": 1,
+  "wall_s": 26.41,
+  "accepted": null,
+  "stop_reason": null,
+  "requests_seen": null,
+  "wire_by_protocol": null,
+  "agent_rc": null,
+  "has_receipt": false,
+  "egress_available": true,
+  "off_mediation_packets": 36,
+  "offbox_packets": 24,
+  "onbox_other_packets": 12,
+  "mediated_packets": 162,
+  "offbox_bytes": 1440,
+  "dns_names": [
+   "pypi.org"
+  ]
+ },
+ {
+  "cell": "hermes_wired_nochmod_PATCHED",
+  "agent": "hermes",
+  "variant": "wired",
+  "task": "deliver",
+  "launcher_exit": 22,
+  "wall_s": 24.87,
+  "accepted": null,
+  "stop_reason": "freeze_failed",
+  "requests_seen": 6,
+  "wire_by_protocol": {
+   "openai": 6
+  },
+  "agent_rc": null,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 36,
+  "offbox_packets": 24,
+  "onbox_other_packets": 12,
+  "mediated_packets": 155,
+  "offbox_bytes": 1440,
+  "dns_names": [
+   "pypi.org"
+  ]
+ },
+ {
+  "cell": "hermes_wired_tool",
+  "agent": "hermes",
+  "variant": "wired",
+  "task": "tool",
+  "launcher_exit": 0,
+  "wall_s": 30.5,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 8,
+  "wire_by_protocol": {
+   "openai": 8
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 3030,
+  "offbox_packets": 3024,
+  "onbox_other_packets": 6,
+  "mediated_packets": 168,
+  "offbox_bytes": 142296,
+  "dns_names": [
+   "files.pythonhosted.org",
+   "openrouter.ai",
+   "pypi.org"
+  ]
+ },
+ {
+  "cell": "opencode_half_deliver",
+  "agent": "opencode",
+  "variant": "half",
+  "task": "deliver",
+  "launcher_exit": 20,
+  "wall_s": 1.89,
+  "accepted": false,
+  "stop_reason": "visible_fail",
+  "requests_seen": 0,
+  "wire_by_protocol": {},
+  "agent_rc": 1,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 126,
+  "offbox_packets": 124,
+  "onbox_other_packets": 2,
+  "mediated_packets": 0,
+  "offbox_bytes": 5919,
+  "dns_names": [
+   "models.opencode.ai"
+  ]
+ },
+ {
+  "cell": "opencode_wired_deliver",
+  "agent": "opencode",
+  "variant": "wired",
+  "task": "deliver",
+  "launcher_exit": 0,
+  "wall_s": 11.97,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 5,
+  "wire_by_protocol": {
+   "openai": 5
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 14113,
+  "offbox_packets": 14105,
+  "onbox_other_packets": 8,
+  "mediated_packets": 77,
+  "offbox_bytes": 662076,
+  "dns_names": [
+   "github.com",
+   "models.opencode.ai",
+   "registry.npmjs.org",
+   "release-assets.githubusercontent.com"
+  ]
+ },
+ {
+  "cell": "opencode_wired_tool",
+  "agent": "opencode",
+  "variant": "wired",
+  "task": "tool",
+  "launcher_exit": 0,
+  "wall_s": 19.34,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 7,
+  "wire_by_protocol": {
+   "openai": 7
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 1110,
+  "offbox_packets": 1100,
+  "onbox_other_packets": 10,
+  "mediated_packets": 141,
+  "offbox_bytes": 51689,
+  "dns_names": [
+   "github.com",
+   "models.opencode.ai",
+   "openrouter.ai",
+   "registry.npmjs.org",
+   "release-assets.githubusercontent.com"
+  ]
+ },
+ {
+  "cell": "pi_half_deliver",
+  "agent": "pi",
+  "variant": "half",
+  "task": "deliver",
+  "launcher_exit": 20,
+  "wall_s": 0.89,
+  "accepted": false,
+  "stop_reason": "visible_fail",
+  "requests_seen": 0,
+  "wire_by_protocol": {},
+  "agent_rc": 1,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 10,
+  "offbox_packets": 8,
+  "onbox_other_packets": 2,
+  "mediated_packets": 0,
+  "offbox_bytes": 8729,
+  "dns_names": [
+   "api.anthropic.com"
+  ]
+ },
+ {
+  "cell": "pi_wired_deliver",
+  "agent": "pi",
+  "variant": "wired",
+  "task": "deliver",
+  "launcher_exit": 0,
+  "wall_s": 5.41,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 4,
+  "wire_by_protocol": {
+   "openai": 4
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 0,
+  "offbox_packets": 0,
+  "onbox_other_packets": 0,
+  "mediated_packets": 62,
+  "offbox_bytes": 0,
+  "dns_names": []
+ },
+ {
+  "cell": "pi_wired_tool",
+  "agent": "pi",
+  "variant": "wired",
+  "task": "tool",
+  "launcher_exit": 0,
+  "wall_s": 11.98,
+  "accepted": true,
+  "stop_reason": "visible_pass",
+  "requests_seen": 6,
+  "wire_by_protocol": {
+   "openai": 6
+  },
+  "agent_rc": 0,
+  "has_receipt": true,
+  "egress_available": true,
+  "off_mediation_packets": 285,
+  "offbox_packets": 283,
+  "onbox_other_packets": 2,
+  "mediated_packets": 161,
+  "offbox_bytes": 12259,
+  "dns_names": [
+   "openrouter.ai"
+  ]
+ }
+]

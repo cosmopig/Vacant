@@ -1,0 +1,10 @@
+{"ts": 1789833996.957, "name": "openrouter.ai", "qtype": "A", "from": "127.0.0.1:53299", "bytes": 42, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789833996.959, "name": "openrouter.ai", "qtype": "AAAA", "from": "127.0.0.1:53299", "bytes": 42, "forwarded": true, "answer_bytes": 98}
+{"ts": 1789833997.696, "name": "pypi.org", "qtype": "A", "from": "127.0.0.1:42298", "bytes": 37, "forwarded": true, "answer_bytes": 101}
+{"ts": 1789833997.697, "name": "pypi.org", "qtype": "AAAA", "from": "127.0.0.1:42298", "bytes": 37, "forwarded": true, "answer_bytes": 149}
+{"ts": 1789833997.864, "name": "files.pythonhosted.org", "qtype": "A", "from": "127.0.0.1:45476", "bytes": 51, "forwarded": true, "answer_bytes": 160}
+{"ts": 1789833997.886, "name": "files.pythonhosted.org", "qtype": "AAAA", "from": "127.0.0.1:45476", "bytes": 51, "forwarded": true, "answer_bytes": 272}
+{"ts": 1789834001.325, "name": "models.dev", "qtype": "A", "from": "127.0.0.1:51977", "bytes": 39, "forwarded": true, "answer_bytes": 87}
+{"ts": 1789834001.355, "name": "models.dev", "qtype": "AAAA", "from": "127.0.0.1:51977", "bytes": 39, "forwarded": true, "answer_bytes": 123}
+{"ts": 1789834002.408, "name": "openrouter.ai", "qtype": "A", "from": "127.0.0.1:35162", "bytes": 42, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789834002.409, "name": "openrouter.ai", "qtype": "AAAA", "from": "127.0.0.1:35162", "bytes": 42, "forwarded": true, "answer_bytes": 98}

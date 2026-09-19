@@ -1,0 +1,8 @@
+{"ts": 1789833961.036, "name": "api.anthropic.com", "qtype": "A", "from": "127.0.0.1:60944", "bytes": 46, "forwarded": true, "answer_bytes": 62}
+{"ts": 1789833961.036, "name": "api.anthropic.com", "qtype": "AAAA", "from": "127.0.0.1:60944", "bytes": 46, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789833962.471, "name": "api.anthropic.com", "qtype": "A", "from": "127.0.0.1:60652", "bytes": 46, "forwarded": true, "answer_bytes": 62}
+{"ts": 1789833962.472, "name": "api.anthropic.com", "qtype": "AAAA", "from": "127.0.0.1:60652", "bytes": 46, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789833962.514, "name": "api.anthropic.com", "qtype": "A", "from": "127.0.0.1:49534", "bytes": 46, "forwarded": true, "answer_bytes": 62}
+{"ts": 1789833962.515, "name": "api.anthropic.com", "qtype": "AAAA", "from": "127.0.0.1:49534", "bytes": 46, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789833977.488, "name": "http-intake.logs.us5.datadoghq.com", "qtype": "A", "from": "127.0.0.1:32861", "bytes": 63, "forwarded": true, "answer_bytes": 79}
+{"ts": 1789833977.497, "name": "http-intake.logs.us5.datadoghq.com", "qtype": "AAAA", "from": "127.0.0.1:32861", "bytes": 63, "forwarded": true, "answer_bytes": 91}

@@ -63,7 +63,7 @@ def off5_candidates(calls: list[dict]) -> dict[str, list[tuple[str, str]]]:
 def _test_items(check_code: str):
     """把一份 check code 拆成「一條驗收」的清單；認不出形狀就回 None（不猜）。
 
-    兩種形狀（`vacant_network/codebench.py` 產生器的兩支）：
+    兩種形狀（`vacant/codebench.py` 產生器的兩支）：
       A 扁平：尾端一串 top-level `assert ...`（`_check_code`，evalplus/MBPP+）
       B 迴圈：`__tests = [...]` 之後一個 for 迴圈（`_lcb_check_code`，LCB）
     A 的每一條用 `ast.get_source_segment` **逐字**取出（記憶鐵律：不准自己改寫一份）。

@@ -1,0 +1,51 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/var/tmp/vbypass/repo/vacant/vrun/launcher.py", line 804, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/var/tmp/vbypass/repo/vacant/vrun/launcher.py", line 766, in main
+    summary = run(cmd, workspace=workspace, run_dir=run_dir,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/tmp/vbypass/repo/vacant/vrun/launcher.py", line 483, in run
+    frozen, live_after = _freeze(workspace, frozen_dir)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/tmp/vbypass/repo/vacant/vrun/launcher.py", line 155, in _freeze
+    shutil.copytree(workspace, dest, symlinks=True,
+  File "/usr/lib/python3.12/shutil.py", line 600, in copytree
+    return _copytree(entries=entries, src=src, dst=dst, symlinks=symlinks,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/shutil.py", line 554, in _copytree
+    raise Error(errors)
+shutil.Error: [('/var/tmp/vbypass/ws/hermes_wired_nochmod/solution.py', '/var/tmp/vbypass/rd/hermes_wired_nochmod/_frozen_RUN-ON/solution.py', "[Errno 13] Permission denied: '/var/tmp/vbypass/ws/hermes_wired_nochmod/solution.py'")]
+Error in sys.excepthook:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 228, in partial_apport_excepthook
+    return apport_excepthook(binary, exc_type, exc_obj, exc_tb)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 114, in apport_excepthook
+    report["ExecutableTimestamp"] = str(int(os.stat(binary).st_mtime))
+                                            ^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/var/tmp/vbypass/repo/-m'
+
+Original exception was:
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/var/tmp/vbypass/repo/vacant/vrun/launcher.py", line 804, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/var/tmp/vbypass/repo/vacant/vrun/launcher.py", line 766, in main
+    summary = run(cmd, workspace=workspace, run_dir=run_dir,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/tmp/vbypass/repo/vacant/vrun/launcher.py", line 483, in run
+    frozen, live_after = _freeze(workspace, frozen_dir)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/tmp/vbypass/repo/vacant/vrun/launcher.py", line 155, in _freeze
+    shutil.copytree(workspace, dest, symlinks=True,
+  File "/usr/lib/python3.12/shutil.py", line 600, in copytree
+    return _copytree(entries=entries, src=src, dst=dst, symlinks=symlinks,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/shutil.py", line 554, in _copytree
+    raise Error(errors)
+shutil.Error: [('/var/tmp/vbypass/ws/hermes_wired_nochmod/solution.py', '/var/tmp/vbypass/rd/hermes_wired_nochmod/_frozen_RUN-ON/solution.py', "[Errno 13] Permission denied: '/var/tmp/vbypass/ws/hermes_wired_nochmod/solution.py'")]

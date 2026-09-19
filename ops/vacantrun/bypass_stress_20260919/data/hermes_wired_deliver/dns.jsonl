@@ -1,0 +1,4 @@
+{"ts": 1789833919.52, "name": "pypi.org", "qtype": "A", "from": "127.0.0.1:42404", "bytes": 37, "forwarded": true, "answer_bytes": 101}
+{"ts": 1789833919.522, "name": "pypi.org", "qtype": "AAAA", "from": "127.0.0.1:42404", "bytes": 37, "forwarded": true, "answer_bytes": 149}
+{"ts": 1789833919.691, "name": "files.pythonhosted.org", "qtype": "A", "from": "127.0.0.1:56250", "bytes": 51, "forwarded": true, "answer_bytes": 160}
+{"ts": 1789833919.713, "name": "files.pythonhosted.org", "qtype": "AAAA", "from": "127.0.0.1:56250", "bytes": 51, "forwarded": true, "answer_bytes": 272}

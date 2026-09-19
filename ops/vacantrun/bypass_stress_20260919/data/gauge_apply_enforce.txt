@@ -1,0 +1,1 @@
+刻度已上：uid=1001 proxy=127.0.0.1:18899 mode=enforce（v4 ＋ v6）

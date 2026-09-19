@@ -1,0 +1,80 @@
+這一份修的是什麼：**一個會讓整跑沒有收據的失敗模式。**
+
+2026-09-19 實測（`data/hermes_wired_nochmod/`）：agent 降到專屬 uid 之後，
+Hermes 0.19.0 以 **0600** 在工作區建檔（不吃 umask），而 launcher 是另一個 uid
+⇒ `_freeze()` 的 `shutil.copytree` 丟 `shutil.Error: [Errno 13] Permission denied`
+⇒ **例外一路往上冒出 `main()`，行程以 exit 1 死掉**：
+
+    run-dir 裡有 agent_stdout.log、wire_RUN-ON/、半個 _frozen_RUN-ON/，
+    **沒有 run_RUN-ON.json、沒有 receipts_*.ndjson、沒有 rows.jsonl。**
+
+那一跑其實跑完了（`solution.py` 寫出來了、模型通道 162 個封包都走了 proxy），
+但**收據是空的**。`vacant run` 的全部意義是「跑完會有一張可驗證的收據」，
+而這個路徑上連「這一格發生過什麼」都說不出來。
+
+修法**不是**讓它成功複製（權限問題不歸 launcher 管），而是讓它
+**落成 `infra_void`**——這個 repo 對「基建事件不是裁決」已經有現成語意
+（`ws_moved_during_freeze`、`agent_spawn_failed`、`ks1_violation` 三個先例
+都是這樣處理的），照抄那個形狀就好：
+
+  · `stop_reason = "freeze_failed"`（新的，加進 `STOP_REASONS`）
+  · `infra_void` 帶原始例外的 repr ⇒ 看得出是誰擋住的
+  · `exit 22`（EXIT_VOID），**不是** exit 0／20——它既不是交付也不是拒交
+  · 收據鏈**不簽**（`_sign_and_save` 本來就會對 `infra_void` 跳過）
+  · `run_RUN-ON.json` **會落盤** ⇒ 這一格從「什麼都沒有」變成「有一份說明它壞在哪的紀錄」
+
+⚠ 這只修「炸掉 ⇒ 沒有收據」，**不修**「agent 用別的 uid 建檔所以驗收看不到那個檔」。
+   後者是 `--agent-uid` 那條（見 README 的清單第 1 條），不在本 patch 範圍。
+
+---
+
+檔案：`vacant_network/vrun/launcher.py`
+（本輪實際驗證是在 `git archive eb655a38` 的 `vacant/vrun/launcher.py` 上跑的——
+ 兩邊是同一份檔案的改名前／後，改動的那幾行逐字相同。）
+
+```diff
+@@ STOP_REASONS @@
+     "ws_moved_during_freeze",   # TOCTOU：凍結期間工作區被動過 ⇒ infra_void
+     "ws_reset_failed",     # `resample` 重置之後對不回起點 ⇒ infra_void
+     "agent_spawn_failed",  # agent 起不來 ⇒ infra_void
++    "freeze_failed",       # 凍結快照複製不了（權限／磁碟／檔案在動）⇒ infra_void
++                           # ⚠ 2026-09-19 的活體：agent 跑在專屬 uid 上、框架以
++                           #   0600 建檔 ⇒ copytree Permission denied。原本會讓
++                           #   整個行程死掉、**一張收據都不留**。
+     "ks1_violation",       # 回饋文字帶責任修辭 ⇒ 鐵律 1「run 作廢」⇒ infra_void
+
+@@ run() 的凍結那一段 @@
+             suffix = "" if attempt == 1 else f"_a{attempt}"
+             frozen_dir = run_dir / f"_frozen_{arm}{suffix}"
+-            frozen, live_after = _freeze(workspace, frozen_dir)
++            try:
++                frozen, live_after = _freeze(workspace, frozen_dir)
++            except Exception as exc:                         # noqa: BLE001
++                # 凍結失敗**不是裁決**：這一格沒有量到任何東西。
++                # 讓它落成 infra_void（與 ws_moved_during_freeze／
++                # agent_spawn_failed 同一個形狀），**而不是讓行程死掉**——
++                # 死掉等於連「這一格壞在哪」都沒有紀錄。
++                rec["stop_reason"] = "freeze_failed"
++                rec["ws_end_sha256"] = None
++                rec["frozen_path"] = str(frozen_dir)
++                summary["attempts"].append(rec)
++                summary.update({"stop_reason": "freeze_failed",
++                                "ws_end_sha256": None,
++                                "infra_void": repr(exc)})
++                break
+             rec["ws_end_sha256"] = frozen
+             rec["frozen_path"] = str(frozen_dir)
+```
+
+---
+
+驗證（`data/hermes_wired_nochmod_PATCHED/`，同一個失敗條件再跑一次）：
+
+| | 修之前 | 修之後 |
+|---|---|---|
+| launcher 退出碼 | **1**（Python traceback） | **22**（EXIT_VOID） |
+| `run_RUN-ON.json` | **不存在** | 存在 |
+| `stop_reason` | —— | `freeze_failed` |
+| `infra_void` | —— | `shutil.Error([Errno 13] Permission denied …)` |
+| `accepted` | —— | `None`（不是 false——沒量到 ≠ 量到沒過） |
+| 收據鏈 | —— | 不簽（基建事件不是裁決，既有語意） |

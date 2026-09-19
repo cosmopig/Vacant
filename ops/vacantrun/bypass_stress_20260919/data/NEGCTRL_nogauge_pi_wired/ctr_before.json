@@ -1,0 +1,13 @@
+{
+  "ts": 1789834226.291007,
+  "v4": {
+    "available": false,
+    "reason": "iptables: No chain/target/match by that name.",
+    "rc": 1
+  },
+  "v6": {
+    "available": false,
+    "reason": "ip6tables: No chain/target/match by that name.",
+    "rc": 1
+  }
+}

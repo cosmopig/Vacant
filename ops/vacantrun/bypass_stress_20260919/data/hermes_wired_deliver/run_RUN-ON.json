@@ -1,0 +1,141 @@
+{
+  "task_id": "vb_hermes_wired_deliver",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vbypass/bin/outer.sh",
+    "/var/tmp/vbypass/bin/inner.sh",
+    "hermes",
+    "wired",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vbypass/ws/hermes_wired_deliver",
+  "proxy_url": "http://127.0.0.1:18899",
+  "env": {
+    "proxy_url": "http://127.0.0.1:18899",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb",
+  "ws_end_sha256": "86cceb2d03d30076829ff20a327642092c009ecd5229100d8b2b252de43a1094",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 6,
+  "wire_by_protocol": {
+    "openai": 6
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "a3d21f8af8347f9b4d6c1443f0d6e2037698514ab745a254fae0d7723ee16df6",
+  "verdict_hash": "cbe4c856952a62d0e0302ab7a1524d8223acf7f7caf2a8f26dea14a2a1aed3c7",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb",
+      "argv": [
+        "/var/tmp/vbypass/bin/outer.sh",
+        "/var/tmp/vbypass/bin/inner.sh",
+        "hermes",
+        "wired",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "9983a0fc863cd65f22e3190c6b66d1f60eb8969c8f53889a598e6fc2c24eebd5",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 21.806,
+      "wire_quiesced": true,
+      "requests_seen": 6,
+      "requests_seen_cumulative": 6,
+      "wire_digest": "914aabdf0dbf7a81d53e6be750acfc6e79ed68ef057bb7c5caa41fe896bcf989",
+      "ws_end_sha256": "86cceb2d03d30076829ff20a327642092c009ecd5229100d8b2b252de43a1094",
+      "frozen_path": "/var/tmp/vbypass/rd/hermes_wired_deliver/_frozen_RUN-ON",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "a3d21f8af8347f9b4d6c1443f0d6e2037698514ab745a254fae0d7723ee16df6",
+      "visible_path": "/var/tmp/vbypass/rd/hermes_wired_deliver/visible_RUN-ON.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false
+    }
+  },
+  "upstreams_defaulted": [],
+  "wire_errors": 0,
+  "wire_digest": "914aabdf0dbf7a81d53e6be750acfc6e79ed68ef057bb7c5caa41fe896bcf989",
+  "run_wall_s": 22.01,
+  "agent_wall_s": 21.806,
+  "failures": ""
+}

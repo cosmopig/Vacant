@@ -1,0 +1,10 @@
+{"ts": 1789834035.731, "name": "models.opencode.ai", "qtype": "A", "from": "127.0.0.1:60207", "bytes": 47, "forwarded": true, "answer_bytes": 79}
+{"ts": 1789834035.732, "name": "models.opencode.ai", "qtype": "AAAA", "from": "127.0.0.1:60207", "bytes": 47, "forwarded": true, "answer_bytes": 103}
+{"ts": 1789834038.267, "name": "registry.npmjs.org", "qtype": "A", "from": "127.0.0.1:60011", "bytes": 47, "forwarded": true, "answer_bytes": 239}
+{"ts": 1789834038.269, "name": "registry.npmjs.org", "qtype": "AAAA", "from": "127.0.0.1:60011", "bytes": 47, "forwarded": true, "answer_bytes": 383}
+{"ts": 1789834043.586, "name": "github.com", "qtype": "A", "from": "127.0.0.1:53122", "bytes": 39, "forwarded": true, "answer_bytes": 55}
+{"ts": 1789834043.598, "name": "github.com", "qtype": "AAAA", "from": "127.0.0.1:53122", "bytes": 39, "forwarded": true, "answer_bytes": 104}
+{"ts": 1789834043.738, "name": "release-assets.githubusercontent.com", "qtype": "A", "from": "127.0.0.1:33469", "bytes": 65, "forwarded": true, "answer_bytes": 129}
+{"ts": 1789834043.739, "name": "release-assets.githubusercontent.com", "qtype": "AAAA", "from": "127.0.0.1:33469", "bytes": 65, "forwarded": true, "answer_bytes": 147}
+{"ts": 1789834049.417, "name": "openrouter.ai", "qtype": "A", "from": "127.0.0.1:38393", "bytes": 42, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789834049.418, "name": "openrouter.ai", "qtype": "AAAA", "from": "127.0.0.1:38393", "bytes": 42, "forwarded": true, "answer_bytes": 98}

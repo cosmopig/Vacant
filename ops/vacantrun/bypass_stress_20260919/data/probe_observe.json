@@ -1,0 +1,72 @@
+{
+  "uid": 1001,
+  "ts": "2026-09-19T16:02:25+0000",
+  "probes": {
+    "tcp4_tailnet_1004": {
+      "ok": true,
+      "value": "connected ('100.86.226.21', 1234)",
+      "error": null,
+      "elapsed_s": 0.002
+    },
+    "tcp6_tailnet_1004": {
+      "ok": false,
+      "value": null,
+      "error": "TimeoutError: timed out",
+      "elapsed_s": 6.006
+    },
+    "tcp6_ssh_linux_peer": {
+      "ok": true,
+      "value": "connected v6, banner=b'SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.1'",
+      "error": null,
+      "elapsed_s": 0.028
+    },
+    "tcp6_ssh_1004": {
+      "ok": true,
+      "value": "connected v6, banner=b'SSH-2.0-OpenSSH_for_Windows_10.0 Win32-O'",
+      "error": null,
+      "elapsed_s": 0.017
+    },
+    "tcp4_public_ip_literal": {
+      "ok": true,
+      "value": "connected ('1.1.1.1', 443)",
+      "error": null,
+      "elapsed_s": 0.003
+    },
+    "tcp4_openrouter_dns": {
+      "ok": true,
+      "value": "connected ('104.18.2.115', 443)",
+      "error": null,
+      "elapsed_s": 0.02
+    },
+    "https_openrouter_models": {
+      "ok": true,
+      "value": "HTTP/1.1 200 OK",
+      "error": null,
+      "elapsed_s": 0.098
+    },
+    "dns_via_systemd_resolved": {
+      "ok": true,
+      "value": "162.159.140.245",
+      "error": null,
+      "elapsed_s": 0.009
+    },
+    "dns_udp_direct_8888": {
+      "ok": true,
+      "value": "answer 64 bytes",
+      "error": null,
+      "elapsed_s": 0.001
+    },
+    "icmp_ping_1111": {
+      "ok": true,
+      "value": "rc=0 rtt min/avg/max/mdev = 1.633/1.633/1.633/0.000 ms",
+      "error": null,
+      "elapsed_s": 0.003
+    },
+    "icmp6_ping_tailnet_1004": {
+      "ok": true,
+      "value": "rc=0 rtt min/avg/max/mdev = 0.869/0.869/0.869/0.000 ms",
+      "error": null,
+      "elapsed_s": 0.002
+    }
+  }
+}

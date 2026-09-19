@@ -1,0 +1,72 @@
+{
+  "uid": 1001,
+  "ts": "2026-09-19T16:10:53+0000",
+  "probes": {
+    "tcp4_tailnet_1004": {
+      "ok": false,
+      "value": null,
+      "error": "OSError: [Errno 113] No route to host",
+      "elapsed_s": 0.001
+    },
+    "tcp6_tailnet_1004": {
+      "ok": false,
+      "value": null,
+      "error": "PermissionError: [Errno 13] Permission denied",
+      "elapsed_s": 1.003
+    },
+    "tcp6_ssh_linux_peer": {
+      "ok": false,
+      "value": null,
+      "error": "PermissionError: [Errno 13] Permission denied",
+      "elapsed_s": 1.024
+    },
+    "tcp6_ssh_1004": {
+      "ok": false,
+      "value": null,
+      "error": "PermissionError: [Errno 13] Permission denied",
+      "elapsed_s": 1.024
+    },
+    "tcp4_public_ip_literal": {
+      "ok": false,
+      "value": null,
+      "error": "OSError: [Errno 113] No route to host",
+      "elapsed_s": 0.0
+    },
+    "tcp4_openrouter_dns": {
+      "ok": false,
+      "value": null,
+      "error": "OSError: [Errno 113] No route to host",
+      "elapsed_s": 0.002
+    },
+    "https_openrouter_models": {
+      "ok": false,
+      "value": null,
+      "error": "OSError: [Errno 101] Network is unreachable",
+      "elapsed_s": 0.013
+    },
+    "dns_via_systemd_resolved": {
+      "ok": true,
+      "value": "172.66.0.243",
+      "error": null,
+      "elapsed_s": 0.005
+    },
+    "dns_udp_direct_8888": {
+      "ok": true,
+      "value": "answer 64 bytes",
+      "error": null,
+      "elapsed_s": 0.0
+    },
+    "icmp_ping_1111": {
+      "ok": true,
+      "value": "rc=1 1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms",
+      "error": null,
+      "elapsed_s": 0.001
+    },
+    "icmp6_ping_tailnet_1004": {
+      "ok": true,
+      "value": "rc=1 1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms",
+      "error": null,
+      "elapsed_s": 1.065
+    }
+  }
+}

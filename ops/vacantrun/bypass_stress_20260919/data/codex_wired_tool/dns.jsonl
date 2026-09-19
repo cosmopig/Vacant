@@ -1,0 +1,10 @@
+{"ts": 1789834140.649, "name": "github.com", "qtype": "A", "from": "127.0.0.1:52948", "bytes": 39, "forwarded": true, "answer_bytes": 55}
+{"ts": 1789834140.674, "name": "github.com", "qtype": "AAAA", "from": "127.0.0.1:52948", "bytes": 39, "forwarded": true, "answer_bytes": 104}
+{"ts": 1789834140.675, "name": "chatgpt.com", "qtype": "A", "from": "127.0.0.1:44788", "bytes": 29, "forwarded": true, "answer_bytes": 61}
+{"ts": 1789834140.676, "name": "chatgpt.com", "qtype": "AAAA", "from": "127.0.0.1:44788", "bytes": 29, "forwarded": true, "answer_bytes": 85}
+{"ts": 1789834141.555, "name": "github.com", "qtype": "A", "from": "127.0.0.1:40717", "bytes": 39, "forwarded": true, "answer_bytes": 55}
+{"ts": 1789834141.555, "name": "github.com", "qtype": "AAAA", "from": "127.0.0.1:40717", "bytes": 39, "forwarded": true, "answer_bytes": 104}
+{"ts": 1789834155.646, "name": "openrouter.ai", "qtype": "A", "from": "127.0.0.1:56148", "bytes": 42, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789834155.647, "name": "openrouter.ai", "qtype": "AAAA", "from": "127.0.0.1:56148", "bytes": 42, "forwarded": true, "answer_bytes": 98}
+{"ts": 1789834168.625, "name": "ab.chatgpt.com", "qtype": "A", "from": "127.0.0.1:55821", "bytes": 32, "forwarded": true, "answer_bytes": 64}
+{"ts": 1789834168.627, "name": "ab.chatgpt.com", "qtype": "AAAA", "from": "127.0.0.1:55821", "bytes": 32, "forwarded": true, "answer_bytes": 88}

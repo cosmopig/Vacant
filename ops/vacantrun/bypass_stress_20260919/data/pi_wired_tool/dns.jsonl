@@ -1,0 +1,2 @@
+{"ts": 1789834029.773, "name": "openrouter.ai", "qtype": "A", "from": "127.0.0.1:44151", "bytes": 42, "forwarded": true, "answer_bytes": 74}
+{"ts": 1789834029.774, "name": "openrouter.ai", "qtype": "AAAA", "from": "127.0.0.1:44151", "bytes": 42, "forwarded": true, "answer_bytes": 98}

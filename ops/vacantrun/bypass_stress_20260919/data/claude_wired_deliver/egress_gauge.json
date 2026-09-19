@@ -1,0 +1,56 @@
+{
+  "available": true,
+  "reason": null,
+  "off_mediation_packets": 200,
+  "offbox_packets": 198,
+  "onbox_other_packets": 2,
+  "mediated_packets": 127,
+  "v4": {
+    "available": true,
+    "chain": "VACANT_EG",
+    "packets": {
+      "mediated_proxy": 127,
+      "dns_any": 0,
+      "dns_redirected": 2,
+      "loopback_other": 0,
+      "lo_other": 0,
+      "udp_offbox": 0,
+      "offbox": 198
+    },
+    "bytes": {
+      "mediated_proxy": 294149,
+      "dns_any": 0,
+      "dns_redirected": 148,
+      "loopback_other": 0,
+      "lo_other": 0,
+      "udp_offbox": 0,
+      "offbox": 14693
+    }
+  },
+  "v6": {
+    "available": true,
+    "chain": "VACANT_EG6",
+    "packets": {
+      "mediated_proxy": 0,
+      "dns_any": 0,
+      "loopback_other": 0,
+      "lo_other": 0,
+      "udp_offbox": 0,
+      "offbox": 0
+    },
+    "bytes": {
+      "mediated_proxy": 0,
+      "dns_any": 0,
+      "loopback_other": 0,
+      "lo_other": 0,
+      "udp_offbox": 0,
+      "offbox": 0
+    }
+  },
+  "blind_to": [
+    "unix_domain_socket（不經 netfilter，V3 實測 0.038s 200 OK）",
+    "已送出的位元組（計數器只說有，收不回來）",
+    "內容（這是封包計數不是內容擷取）"
+  ],
+  "note": "`off_mediation_packets` 是**可究責性**的欄位不是防護的欄位：它說得出「有東西走了中介以外的路」，說不出「沒有路可以走」。`null` ＝ 沒裝刻度 ⇒ **沒量到，不是量到 0**。"
+}

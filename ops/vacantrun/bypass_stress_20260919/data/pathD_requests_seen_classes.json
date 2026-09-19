@@ -1,0 +1,220 @@
+{
+ "what": "D 類：requests_seen 把非模型流量也算進去。這一份是逐 path 的分類。",
+ "source_A": "runs/v1_five_agent_matrix_20260919/wire.tar.gz（2026-09-19 五 agent 矩陣，20 格 L-real）",
+ "source_B": "ops/vacantrun/bypass_stress_20260919/data/*/wire/index.jsonl（本輪）",
+ "model_paths": [
+  "/v1/messages",
+  "/v1/complete",
+  "/v1/chat/completions",
+  "/v1/completions",
+  "/v1/responses"
+ ],
+ "by_agent": {
+  "claude": {
+   "cells": 4,
+   "requests_total": 20,
+   "non_model": 4,
+   "non_model_share": 0.2,
+   "per_cell_avg": 5.0,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/messages",
+     "wire": "anthropic",
+     "n": 16
+    },
+    {
+     "class": "non_model",
+     "method": "HEAD",
+     "path": "/api/hello",
+     "wire": "openai",
+     "n": 4
+    }
+   ]
+  },
+  "codex": {
+   "cells": 4,
+   "requests_total": 21,
+   "non_model": 0,
+   "non_model_share": 0.0,
+   "per_cell_avg": 5.25,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/responses",
+     "wire": "openai",
+     "n": 21
+    }
+   ]
+  },
+  "hermes": {
+   "cells": 4,
+   "requests_total": 24,
+   "non_model": 8,
+   "non_model_share": 0.333,
+   "per_cell_avg": 6.0,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "wire": "openai",
+     "n": 16
+    },
+    {
+     "class": "non_model",
+     "method": "GET",
+     "path": "/api/v1/models",
+     "wire": "openai",
+     "n": 8
+    }
+   ]
+  },
+  "opencode": {
+   "cells": 4,
+   "requests_total": 20,
+   "non_model": 0,
+   "non_model_share": 0.0,
+   "per_cell_avg": 5.0,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "wire": "openai",
+     "n": 20
+    }
+   ]
+  },
+  "pi": {
+   "cells": 4,
+   "requests_total": 16,
+   "non_model": 0,
+   "non_model_share": 0.0,
+   "per_cell_avg": 4.0,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "wire": "openai",
+     "n": 16
+    }
+   ]
+  }
+ },
+ "by_agent_this_round": {
+  "claude": {
+   "cells": [
+    "claude_half_deliver",
+    "claude_wired_deliver",
+    "claude_wired_tool",
+    "claude_wired_tool_ENF"
+   ],
+   "requests_total": 24,
+   "non_model": 4,
+   "non_model_share": 0.167,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/messages",
+     "wire": "anthropic",
+     "n": 20
+    },
+    {
+     "class": "non_model",
+     "method": "HEAD",
+     "path": "/api/hello",
+     "wire": "openai",
+     "n": 4
+    }
+   ]
+  },
+  "codex": {
+   "cells": [
+    "codex_wired_deliver",
+    "codex_wired_tool"
+   ],
+   "requests_total": 14,
+   "non_model": 0,
+   "non_model_share": 0.0,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/responses",
+     "wire": "openai",
+     "n": 14
+    }
+   ]
+  },
+  "hermes": {
+   "cells": [
+    "hermes_wired_deliver",
+    "hermes_wired_deliver_ENF",
+    "hermes_wired_nochmod",
+    "hermes_wired_nochmod_PATCHED",
+    "hermes_wired_tool"
+   ],
+   "requests_total": 32,
+   "non_model": 10,
+   "non_model_share": 0.312,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "wire": "openai",
+     "n": 22
+    },
+    {
+     "class": "non_model",
+     "method": "GET",
+     "path": "/api/v1/models",
+     "wire": "openai",
+     "n": 10
+    }
+   ]
+  },
+  "opencode": {
+   "cells": [
+    "opencode_wired_deliver",
+    "opencode_wired_tool"
+   ],
+   "requests_total": 12,
+   "non_model": 0,
+   "non_model_share": 0.0,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "wire": "openai",
+     "n": 12
+    }
+   ]
+  },
+  "pi": {
+   "cells": [
+    "NEGCTRL_nogauge_pi_wired",
+    "pi_wired_deliver",
+    "pi_wired_tool"
+   ],
+   "requests_total": 14,
+   "non_model": 0,
+   "non_model_share": 0.0,
+   "rows": [
+    {
+     "class": "model",
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "wire": "openai",
+     "n": 14
+    }
+   ]
+  }
+ }
+}

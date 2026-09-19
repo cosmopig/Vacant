@@ -33,6 +33,12 @@ DNS0=$(wc -l < "$R/logs/dns.jsonl" 2>/dev/null || echo 0)
 
 cd "$R/repo" || exit 2
 t0=$(date +%s.%N)
+# ⚠ `vacant.vrun.launcher` 這個模組名是**刻意不改的**：本輪跑的是
+#   `git archive eb655a38` 的樹，那棵樹上套件還叫 `vacant/`。
+#   改名（`fb7f4bfb`，vacant → vacant_network，0.8.0）是本輪收工**之後**才落地的。
+#   事後改寫這一行等於讓紀錄描述一個沒下過的指令（同 CLAUDE.md 對預註冊逐塊
+#   指令的處理）。**要在改名後的樹上重跑，把這一行換成
+#   `python3 -m vacant_network.vrun.launcher`，其餘一個字都不用動。**
 timeout 900 python3 -m vacant.vrun.launcher \
     --workspace "$ws" --run-dir "$rd" --suite "$BANK/tests_visible" \
     --task-id "vb_$CELL" --sandbox none --port "$PORT" \
