@@ -387,6 +387,43 @@ if (sub === 'attach') {
   const stem = base.replace(/\.[^.]+$/, '');
   const out = await withPage(async page => {
     const OV = '.cdk-overlay-container';
+
+    // ── 先把提示詞列上既有的素材 chip 清乾淨 ────────────────────────────
+    // 2026-09-20 實測：上一跑掛過參考圖之後，chip 會**留在提示詞輸入列上**，
+    // 而「新增至提示詞」那顆按鈕在那個狀態下不存在 ⇒ 下一跑報
+    // `UI_DRIFT_NO_ADD_TO_PROMPT_BUTTON`，看起來像 UI 改版，其實是**事情已經做完了**。
+    //
+    // ⚠ 為什麼不是「看到 chip 就當成功」：chip 的 `src` 是內容 URL，
+    //   **從檔名認不出掛的是不是同一份**。當成功＝可能拿上一次的參考圖去生這一次的圖，
+    //   而且不會有任何錯誤訊息。⇒ **先清乾淨再掛**，這樣 `attached` 永遠意味著
+    //   「我們掛的就是這個檔」。
+    //
+    // ⚠ 只清 `div.ingredient-bar-container`（提示詞輸入列）。
+    //   `flow-chat-ingredient-row` 底下那個是**聊天紀錄裡的歷史**，不准動。
+    const BAR = 'div.ingredient-bar-container';
+    const chips = () => page.locator(`${BAR} img.chip-image`);
+    const n0 = await chips().count();
+    if (n0 > 0) {
+      // 移除鈕是 hover 才出現的 `.hover-icon-overlay`（內含 mat-icon「cancel」）。
+      for (let k = 0; k < n0 + 2 && (await chips().count()) > 0; k++) {
+        const chip = page.locator(`${BAR} button.chip-container`).first();
+        if (await chip.count() === 0) break;
+        await chip.hover();
+        await page.waitForTimeout(300);
+        const x = page.locator(`${BAR} .hover-icon-overlay`).first();
+        if (await x.count() === 0) break;
+        await x.click().catch(() => {});
+        await page.waitForTimeout(600);
+      }
+      const left = await chips().count();
+      if (left > 0) {
+        await page.mouse.move(4, 4);
+        return {ok: false, error: 'UI_DRIFT_CANNOT_CLEAR_INGREDIENTS', had: n0, remaining: left,
+                note: '提示詞列上有清不掉的素材 chip。不能就這樣掛上去——'
+                    + '那會拿一份我們沒指定的參考圖去生成，而且不會有錯誤訊息。'};
+      }
+    }
+
     const add = page.locator('button[aria-label="在提示詞輸入框新增素材"]');
     if (await add.count() !== 1) return {ok: false, error: 'UI_DRIFT_NO_ADD_BUTTON', count: await add.count()};
     await add.click();
@@ -470,7 +507,11 @@ if (sub === 'attach') {
     await page.waitForTimeout(600);
     const addBtn = page.locator(`${OV} button.detail-add-to-prompt-btn`);
     if (await addBtn.count() !== 1) { await page.keyboard.press('Escape');
-      return {ok: false, error: 'UI_DRIFT_NO_ADD_TO_PROMPT_BUTTON'}; }
+      // ⚠ 這顆在「提示詞列上已經有 chip」的狀態下也不存在。上面的清 chip 那段
+      //   應該已經排除了那個原因 ⇒ 走到這裡才是真的 UI 改版。
+      return {ok: false, error: 'UI_DRIFT_NO_ADD_TO_PROMPT_BUTTON', count: await addBtn.count(),
+              chipsOnBar: await chips().count(),
+              note: '已經先清過提示詞列的 chip 了，所以這次不是「已經掛好」那個狀態。'}; }
     await addBtn.click();
     await page.waitForTimeout(2000);
     await page.mouse.move(4, 4);
