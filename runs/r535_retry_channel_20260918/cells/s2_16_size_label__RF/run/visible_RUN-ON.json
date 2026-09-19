@@ -1,0 +1,46 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_16_size_label_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 51,
+      "cases": [
+        {
+          "case": "check_01_size_label",
+          "ok": false,
+          "kind": "assert",
+          "message": "size_label args=(1536,) got='    1.5 KB' want='1.5 KB'",
+          "where": "test_visible.py:14: assert got == want, \"size_label args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_size_label",
+          "ok": false,
+          "kind": "assert",
+          "message": "size_label args=(512,) got='    512 B' want='512 B'",
+          "where": "test_visible.py:22: assert got == want, \"size_label args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_03_size_label",
+          "ok": false,
+          "kind": "assert",
+          "message": "size_label args=(1023,) got='   1023 B' want='1023 B'",
+          "where": "test_visible.py:30: assert got == want, \"size_label args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 3,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 3,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "3584673afb674fb29d9aa48d3d2e2ba9d06bd5106cdf1c6e654db632e2c5acf2"
+}

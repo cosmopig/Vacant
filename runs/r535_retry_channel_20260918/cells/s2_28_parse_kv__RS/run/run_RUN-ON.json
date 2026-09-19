@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s2_28_parse_kv_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RS/ws",
+  "proxy_url": "http://127.0.0.1:8880",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8880",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "9482ccb1766a659ec856a8a91b73e5fc083f434a4e65e8026fe63cd40876cbb1",
+  "ws_end_sha256": "0e6ae4058c6945ae8e6eea3c735eee567f099b5588b5ae52ac3b6a47664aa2ee",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 13,
+  "wire_by_protocol": {
+    "openai": 13
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "verdict_sha256": "fcdbee336e8a838a63d55b8f0bfaf7c0bb630e6ab8645d70ab67328654b64255",
+  "verdict_hash": "8dabe87856bdcb62145a4a7322a8a74cbb6513ea35f0cc3855e296a946005480",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "9482ccb1766a659ec856a8a91b73e5fc083f434a4e65e8026fe63cd40876cbb1",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 71.078,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 4,
+      "wire_digest": "5a250f51a70a405c839154f1d45649f0d8cddbba156eb8c8469ed1a12c609f91",
+      "ws_end_sha256": "27791482cacdc1e656c2a5f10b86074362a37fabe7a8cfa1d8183b14b89cf9b0",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RS/run/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "fcdbee336e8a838a63d55b8f0bfaf7c0bb630e6ab8645d70ab67328654b64255",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_parse_kv — assert: parse_kv args=('bare',) got={} want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"parse_kv args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "9482ccb1766a659ec856a8a91b73e5fc083f434a4e65e8026fe63cd40876cbb1",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "9482ccb1766a659ec856a8a91b73e5fc083f434a4e65e8026fe63cd40876cbb1",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 39.229,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 8,
+      "wire_digest": "965c20313358526825ca8533704838700172fe84cedc3536bc0cdec45bebdc7c",
+      "ws_end_sha256": "576a50e1aefa1a6da5ad9d8b6b72c87d9ec36e744c7e58d5ee68d9f036692fe2",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "fcdbee336e8a838a63d55b8f0bfaf7c0bb630e6ab8645d70ab67328654b64255",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_parse_kv — assert: parse_kv args=('bare',) got={} want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"parse_kv args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "9482ccb1766a659ec856a8a91b73e5fc083f434a4e65e8026fe63cd40876cbb1",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "9482ccb1766a659ec856a8a91b73e5fc083f434a4e65e8026fe63cd40876cbb1",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 25.165,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 13,
+      "wire_digest": "500adf4c6e3a3fba591f144912b25e35140acbe1233b23b4db161bb35ba31d8a",
+      "ws_end_sha256": "0e6ae4058c6945ae8e6eea3c735eee567f099b5588b5ae52ac3b6a47664aa2ee",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "fcdbee336e8a838a63d55b8f0bfaf7c0bb630e6ab8645d70ab67328654b64255",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_parse_kv — assert: parse_kv args=('bare',) got={} want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"parse_kv args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s2_28_parse_kv__RS/run/_origin",
+    "ws_sha256": "9482ccb1766a659ec856a8a91b73e5fc083f434a4e65e8026fe63cd40876cbb1"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "500adf4c6e3a3fba591f144912b25e35140acbe1233b23b4db161bb35ba31d8a",
+  "run_wall_s": 138.048,
+  "agent_wall_s": 25.165,
+  "failures": "test_visible.py::check_02_parse_kv — assert: parse_kv args=('bare',) got={} want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"parse_kv args=%r got=%r want=ValueError to be raised\" %]"
+}

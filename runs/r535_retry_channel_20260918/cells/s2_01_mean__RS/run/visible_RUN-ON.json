@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_01_mean_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 87,
+      "cases": [
+        {
+          "case": "check_01_mean",
+          "ok": false,
+          "kind": "assert",
+          "message": "mean args=([1, 2, 4],) got=2.3333333333333335 want=2.333",
+          "where": "test_visible.py:14: assert got == want, \"mean args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_mean",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "cafc6ca47230c5e8db1cf949052c28351160a696fccdc5a673c69f346259dbda"
+}

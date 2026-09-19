@@ -1,0 +1,291 @@
+{
+  "cell": "s2_06_pct__RF",
+  "task_id": "s2_06_pct",
+  "arm": "RF",
+  "stratum": "S2",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T03:16:20Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "s2",
+  "pi_port": 8879,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 55,
+  "task_pos": 5,
+  "arm_pos": 2,
+  "plan_index": 222,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s2_06_pct__RF/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s2_06_pct__RF/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s2_06_pct/tests_visible",
+    "--task-id",
+    "r535_s2_06_pct_RF",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8879",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 200.976
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 13,
+  "agent_wall_s": 57.901,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "ws_start_sha256": "78a597649f11bc4deb2ba660a2d226a1d36f956c970aec0884ae474b14034d99",
+  "ws_end_sha256": "de0a12110ad909a234d4550508cdc547b750ed4913487d65bb436f2b1f02070a",
+  "verdict_sha256": "c318195da78ba2456c4635d588e21331226fab7c2940a9e0c8bcfa2564044547",
+  "verdict_hash": "2711085370cbd9ecf4bd0b1d6187aef7b089bc0ddfbe9c649435f6f78f4bce8e",
+  "wire_digest": "56e816a6ca81382e8e5933f76bb399d1ff870af35bba32cf32819fdb1f4e5012",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s2_06_pct__RF/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 13
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 51.717,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "ee0b5083fe667608525b17fed3182ed17b6fafa6b826f0e37e940b50673bc3e5",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_06_pct__RF/run/_frozen_RUN-ON",
+      "ws_end_sha256": "9f0e06c29fa7911b66dbaff51ee27ff1c13a20d50fafd604dfef4f2fe6aaa124",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 90.685,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "9b1812838642e6a6e0ebf3a84fcd092648dd22d5c1aeef8a574f738c225e33cd",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_06_pct__RF/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "27db21990ee885cdb3ead151d89c3a6b99ff42a4178d0f65d536222a69a6a5e2",
+      "reset": null
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 57.901,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_06_pct__RF/run/_frozen_RUN-ON_a3",
+      "ws_end_sha256": "de0a12110ad909a234d4550508cdc547b750ed4913487d65bb436f2b1f02070a",
+      "reset": null
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": false,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "matched": [],
+      "n_req": 5
+    },
+    {
+      "attempt": 3,
+      "found": false,
+      "matched": [],
+      "n_req": 4
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": true,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "n_req": 5
+    },
+    {
+      "attempt": 3,
+      "found": true,
+      "n_req": 4
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.42857142857142855,
+  "m7_ws_counts": {
+    "other": 3,
+    "read_task": 2,
+    "write_solution": 2,
+    "total": 7,
+    "other_total": 3,
+    "reads_own_solution": 1
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "other",
+      "reads_own_solution": true,
+      "args": "{\"path\":\"solution.py\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def pct(part, whole):\\n    if whole == 0:\\n        return 0.0\\n    return (part / whole) * 100\\n\",\"path\":\"solution.py\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def pct(part, whole):\\n    return (part / whole) * 100\\n\",\"path\":\"solution.py\"}"
+    }
+  ],
+  "m7_ws_solution": true,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.14285714285714285,
+  "m7_ws_solution_n": 1,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": null,
+  "f6_reason": "arm_is_not_RP",
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "feedback_in_prompt_bytes": 0
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 13,
+  "f3_req_ok": 13,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 13,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 201.001,
+  "finished": "2026-09-19T03:19:41Z"
+}

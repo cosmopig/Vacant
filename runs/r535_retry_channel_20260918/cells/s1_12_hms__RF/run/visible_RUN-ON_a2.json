@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_12_hms_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 62,
+      "cases": [
+        {
+          "case": "check_01_hms",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'hms' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_12_hms__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import hms",
+          "output": ""
+        },
+        {
+          "case": "check_02_hms",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'hms' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_12_hms__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import hms",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "162dcedba04d434ed54f4fb5b4053df208537823dac881a1b3dd8d5f056e735d"
+}

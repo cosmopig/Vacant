@@ -1,0 +1,16 @@
+def titleize(s):
+    """
+    Capitalizes the first letter of each word in a string, 
+    where words are separated by single spaces.
+    """
+    if not s:
+        return ""
+    
+    words = s.split(' ')
+    titleized_words = [word.capitalize() for word in words]
+    return ' '.join(titleized_words)
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        print(titleize(" ".join(sys.argv[1:])))

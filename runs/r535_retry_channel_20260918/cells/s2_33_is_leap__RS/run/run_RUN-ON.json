@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s2_33_is_leap_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s2_33_is_leap__RS/ws",
+  "proxy_url": "http://127.0.0.1:8879",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8879",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "b56dcc0c38d20e1f2da67477b3460f3a3eb90e02e662ed2c626feb66881b925e",
+  "ws_end_sha256": "6ea2a967e30690cedce94bae357d1b2465153591c6836aa74e80977c9b49f453",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 12,
+  "wire_by_protocol": {
+    "openai": 12
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "verdict_sha256": "bb6ad6e644ab2a95b70b4532de7b5af8ff9c9744cb9f58b039fa6170ea56833b",
+  "verdict_hash": "3a756132bdce267e3eb65e6d3f4c98e0ab87871a6a0c99662d3054408f969ab5",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "b56dcc0c38d20e1f2da67477b3460f3a3eb90e02e662ed2c626feb66881b925e",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 79.116,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 4,
+      "wire_digest": "922932d3dda36e6c3fa307538109feb3f2145ceb2c068d120507346346efc689",
+      "ws_end_sha256": "6ea2a967e30690cedce94bae357d1b2465153591c6836aa74e80977c9b49f453",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_33_is_leap__RS/run/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "bb6ad6e644ab2a95b70b4532de7b5af8ff9c9744cb9f58b039fa6170ea56833b",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_33_is_leap__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_is_leap — assert: is_leap args=(0,) got=True want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"is_leap args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "b56dcc0c38d20e1f2da67477b3460f3a3eb90e02e662ed2c626feb66881b925e",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "b56dcc0c38d20e1f2da67477b3460f3a3eb90e02e662ed2c626feb66881b925e",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 57.098,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 8,
+      "wire_digest": "9842c8aee2f59c6d1ed845c60f465adb6507a9136f688dbd8026997df90fed33",
+      "ws_end_sha256": "52da1421589e24bf1dcc9237ca64e9121f5d679ea77d21f1c85863266971a37f",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_33_is_leap__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "bb6ad6e644ab2a95b70b4532de7b5af8ff9c9744cb9f58b039fa6170ea56833b",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_33_is_leap__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_is_leap — assert: is_leap args=(0,) got=True want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"is_leap args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "b56dcc0c38d20e1f2da67477b3460f3a3eb90e02e662ed2c626feb66881b925e",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "b56dcc0c38d20e1f2da67477b3460f3a3eb90e02e662ed2c626feb66881b925e",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 61.458,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 12,
+      "wire_digest": "a0d7a07bd0817d156c3b9b827f67eb610f232617442955c8c79ae6ca96cc430b",
+      "ws_end_sha256": "6ea2a967e30690cedce94bae357d1b2465153591c6836aa74e80977c9b49f453",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_33_is_leap__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "bb6ad6e644ab2a95b70b4532de7b5af8ff9c9744cb9f58b039fa6170ea56833b",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_33_is_leap__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_02_is_leap — assert: is_leap args=(0,) got=True want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"is_leap args=%r got=%r want=ValueError to be raised\" %]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s2_33_is_leap__RS/run/_origin",
+    "ws_sha256": "b56dcc0c38d20e1f2da67477b3460f3a3eb90e02e662ed2c626feb66881b925e"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "a0d7a07bd0817d156c3b9b827f67eb610f232617442955c8c79ae6ca96cc430b",
+  "run_wall_s": 198.332,
+  "agent_wall_s": 61.458,
+  "failures": "test_visible.py::check_02_is_leap — assert: is_leap args=(0,) got=True want=ValueError to be raised [test_visible.py:27: raise AssertionError(\"is_leap args=%r got=%r want=ValueError to be raised\" %]"
+}

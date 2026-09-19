@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_02_span_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 80,
+      "cases": [
+        {
+          "case": "check_01_span",
+          "ok": false,
+          "kind": "assert",
+          "message": "span args=([3, 1, 4],) got={'min': 1, 'max': 4} want={'lo': 1, 'hi': 4}",
+          "where": "test_visible.py:14: assert got == want, \"span args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_span",
+          "ok": false,
+          "kind": "assert",
+          "message": "span args=([7],) got={'min': 7, 'max': 7} want={'lo': 7, 'hi': 7}",
+          "where": "test_visible.py:22: assert got == want, \"span args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "d85d1fd9218be8eb173bd14e2bf07d4dcdaa74ea1b6322eed5d7ead29fd23dbf"
+}

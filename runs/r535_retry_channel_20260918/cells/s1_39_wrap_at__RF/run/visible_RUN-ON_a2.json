@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_39_wrap_at_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 46,
+      "cases": [
+        {
+          "case": "check_01_wrap_at",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'wrap_at' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_39_wrap_at__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import wrap_at",
+          "output": ""
+        },
+        {
+          "case": "check_02_wrap_at",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'wrap_at' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_39_wrap_at__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import wrap_at",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "32383dbb6b12ab6e2aaf35e3768a7c7c2efe98c2dfad73db99c80829ba7cdbe6"
+}

@@ -1,0 +1,346 @@
+{
+  "cell": "s2_10_wrap__RF",
+  "task_id": "s2_10_wrap",
+  "arm": "RF",
+  "stratum": "S2",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T03:24:34Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "s2",
+  "pi_port": 8879,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 59,
+  "task_pos": 9,
+  "arm_pos": 2,
+  "plan_index": 238,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s2_10_wrap__RF/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s2_10_wrap__RF/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s2_10_wrap/tests_visible",
+    "--task-id",
+    "r535_s2_10_wrap_RF",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8879",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 1292.627
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 36,
+  "agent_wall_s": 435.916,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "ws_start_sha256": "2b3a46e20d0abf4f3e87410ea7abdbb6be1fd1080bf7816ec9e718b30c7e2c47",
+  "ws_end_sha256": "7c679e5781573db99d4d5b1be6ff00eca4b12410a1f213cea9e79f876b73076c",
+  "verdict_sha256": "7532e6e1c9b658a44401b1ad49d8f79e60e6a8f6ff8c3deb11b5215e0836fadc",
+  "verdict_hash": "408888d0859de13160d8b68421b125e407fa49f99b41c153eaaa49bb4eb78e3a",
+  "wire_digest": "b5f76c1b0d844e960f024c6e76e274e5d4496f522f2959563891cccbe1e79852",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s2_10_wrap__RF/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 36
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 20,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 225.347,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "365ac3e67a429e31f2528a5efddd4f7de9b656437a80552cd26b629d26dbe9dc",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_10_wrap__RF/run/_frozen_RUN-ON",
+      "ws_end_sha256": "9a722104476eb3b31231f393b0ee8a735a512eb8d5a35ff23fba6c47f8656d87",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 7,
+      "agent_rc": -9,
+      "agent_timed_out": true,
+      "agent_wall_s": 600.009,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "529fcdbf187202d8513666af24eb07df9b6d3bf542c00f5bbf14bf6fadb56e6d",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_10_wrap__RF/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "335e32dec20536b6ff3cd3cfc45967d00c93ed81a8283af9ae6cdb72c6797157",
+      "reset": null
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "requests_seen": 9,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 435.916,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_10_wrap__RF/run/_frozen_RUN-ON_a3",
+      "ws_end_sha256": "7c679e5781573db99d4d5b1be6ff00eca4b12410a1f213cea9e79f876b73076c",
+      "reset": null
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": false,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "matched": [],
+      "n_req": 7
+    },
+    {
+      "attempt": 3,
+      "found": false,
+      "matched": [],
+      "n_req": 9
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": true,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "n_req": 7
+    },
+    {
+      "attempt": 3,
+      "found": true,
+      "n_req": 9
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.8666666666666667,
+  "m7_ws_counts": {
+    "other": 13,
+    "read_task": 2,
+    "total": 15,
+    "other_total": 13,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def wrap(s, width):\\n    words = s.split()\\n    if not words:\\n        return []\\n    \\n    result = []\\n    current_line = []\\n    current_length = 0\\n    \\n    for word in words:\\n      "
+    },
+    {
+      "attempt": 2,
+      "name": "edit",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"edits\":[{\"newText\":\"def wrap(s, width):\\n    words = s.split()\\n    if not words:\\n        return []\\n\\n    res = []\\n    current_line = \\\"\\\"\\n\\n    for word in words:\\n        # If the current line"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def wrap(s, width):\\n    words = s.split()\\n    if not words:\\n        return []\\n\\n    res = []\\n    current_line = \\\"\\\"\\n\\n    for word in words:\\n        # If the current line is empty,"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import wrap; print(wrap('This is a test sentence with some longwords.', 10))\\\"\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import wrap; print(wrap('This is a test sentence with some longwords.', 5))\\\"\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def wrap(s, width):\\n    words = s.split()\\n    if not words:\\n        return []\\n    \\n    result = []\\n    current_line = []\\n    current_length = 0\\n    \\n    for word in words:\\n      "
+    },
+    {
+      "attempt": 3,
+      "name": "edit",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"edits\":[{\"newText\":\"def wrap(s, width):\\n    words = s.split()\\n    if not words:\\n        return []\\n    \\n    result = []\\n    current_line = []\\n    current_length = 0\\n    \\n    for word in word"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def wrap(s, width):\\n    words = s.split()\\n    if not words:\\n        return []\\n\\n    result = []\\n    current_line = []\\n    current_length = 0\\n\\n    for word in words:\\n        if len"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import wrap; print(wrap('This is a test message with a verylongwordthatneedsbreaking', 10))\\\"\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import wrap; print(wrap('This is a test message with a verylongwordthatneedsbreaking', 10))\\\"\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"python3 -c \\\"from solution import wrap; print(wrap('Hello world', 5))\\\"\"}"
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": null,
+  "f6_reason": "arm_is_not_RP",
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "feedback_in_prompt_bytes": 0
+    }
+  ],
+  "f3_verdict": "unmeasured",
+  "f3_expect": "none",
+  "f3_calls": 36,
+  "f3_req_ok": 36,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 35,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 1,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": true,
+  "agent_timed_out_n": 1,
+  "wall_s": 1292.76,
+  "finished": "2026-09-19T03:46:06Z"
+}

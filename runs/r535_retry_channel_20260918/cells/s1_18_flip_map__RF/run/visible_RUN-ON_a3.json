@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_18_flip_map_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 74,
+      "cases": [
+        {
+          "case": "check_01_flip_map",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import flip_map",
+          "output": ""
+        },
+        {
+          "case": "check_02_flip_map",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'flip_map' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_18_flip_map__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import flip_map",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "730b4b5b8f60db92cde6d9e49e310720d301ff59b5877ec6f5fe675da3bbe18f"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_08_dedupe_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 84,
+      "cases": [
+        {
+          "case": "check_01_dedupe",
+          "ok": false,
+          "kind": "assert",
+          "message": "dedupe args=(['Ab', 'ab', 'b'],) got=['Ab', 'ab', 'b'] want=['Ab', 'b']",
+          "where": "test_visible.py:14: assert got == want, \"dedupe args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_dedupe",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "7c2f005acaaeabfef3bf29db52e1c81cf5590e982525455614c7d598363fa8f3"
+}

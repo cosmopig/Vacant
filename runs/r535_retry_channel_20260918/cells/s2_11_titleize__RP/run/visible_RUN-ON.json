@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_11_titleize_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 70,
+      "cases": [
+        {
+          "case": "check_01_titleize",
+          "ok": false,
+          "kind": "assert",
+          "message": "titleize args=('the NASA report',) got='The Nasa Report' want='The NASA Report'",
+          "where": "test_visible.py:14: assert got == want, \"titleize args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_titleize",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "12351156a20f432ce076f7240c480527e5dc6d38fc49bc6b0a3b5037a383a014"
+}

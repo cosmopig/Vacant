@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_20_top_key_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 51,
+      "cases": [
+        {
+          "case": "check_01_top_key",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'top_key' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_20_top_key__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import top_key",
+          "output": ""
+        },
+        {
+          "case": "check_02_top_key",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'top_key' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_20_top_key__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import top_key",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "6bb52da04f9e4d2ebde6e60cf8e914d5f5e37553f395154a30aa1cd3c65df339"
+}

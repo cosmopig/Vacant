@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_26_cells_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 67,
+      "cases": [
+        {
+          "case": "check_01_cells",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'cells' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_26_cells__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import cells",
+          "output": ""
+        },
+        {
+          "case": "check_02_cells",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'cells' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_26_cells__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import cells",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "fee42a3d0ff1ab284234972e74e2a8351bd040af441a5e65d0611ce8a6fdbeee"
+}

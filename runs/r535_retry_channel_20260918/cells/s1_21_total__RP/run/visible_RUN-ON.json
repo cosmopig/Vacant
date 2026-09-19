@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_21_total_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 86,
+      "cases": [
+        {
+          "case": "check_01_total",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'total' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_21_total__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import total",
+          "output": ""
+        },
+        {
+          "case": "check_02_total",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'total' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_21_total__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import total",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "b62524136025339be5d76546ec5614fe47301981bcb1904b23b6316df733042e"
+}

@@ -1,0 +1,174 @@
+{
+  "task_id": "r535_s1_43_camelise_RP",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file.{VACANT_FEEDBACK}"
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/ws",
+  "proxy_url": "http://127.0.0.1:8877",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8877",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "0be5c9826121b432fa59b9fd553e2347bba296ec190116bcae0f4dfab6097590",
+  "ws_end_sha256": "0de3acabed4b8f990b339b390e79ca6d1ca02bf3d68ec5765ca28d8bbf521a3f",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 9,
+  "wire_by_protocol": {
+    "openai": 9
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "b129a1dcac23635174075159aad41a9e13e96eab242f2447de84d41b96282da2",
+  "verdict_hash": "e40374ae6ef4cd44ff75ad1252f99cd231942cbaad00bc88556deef8bbd26f1b",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 2,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_camelise — exception: ImportError: cannot import name 'camelise' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import camelise]\ntest_visible.py::check_02_camelise — exception: ImportError: cannot import name 'camelise' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import camelise]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "prompt"
+      },
+      "ws_start_sha256": "0be5c9826121b432fa59b9fd553e2347bba296ec190116bcae0f4dfab6097590",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 74.005,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 4,
+      "wire_digest": "b2d45d83f6316e4e12a8040261fab0a8a7b0bf981de039c7b836ed440d036dd0",
+      "ws_end_sha256": "2c38caeb437987f233dec2c72eafc20ce23f07e46ed14f350503882ea166c55a",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "b5175eb845d487ed31bb435fb6f782c89125819193114d7a55f60a57c937bd1d",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_camelise — exception: ImportError: cannot import name 'camelise' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import camelise]\ntest_visible.py::check_02_camelise — exception: ImportError: cannot import name 'camelise' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import camelise]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "2c38caeb437987f233dec2c72eafc20ce23f07e46ed14f350503882ea166c55a",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file.\n\n<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_camelise — exception: ImportError: cannot import name 'camelise' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import camelise]\ntest_visible.py::check_02_camelise — exception: ImportError: cannot import name 'camelise' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import camelise]\n\nFix the working directory. The checks run again when this process exits.\n"
+      ],
+      "argv_sha256": "e7658e766513325c061dbca04209beac5795c5515e80b21f294def6fccadadb5",
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 835,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 34.952,
+      "wire_quiesced": true,
+      "requests_seen": 5,
+      "requests_seen_cumulative": 9,
+      "wire_digest": "5a6c7a0edfea01711bf9d13435179feab388da637dfef94069da3762e0fa13cf",
+      "ws_end_sha256": "0de3acabed4b8f990b339b390e79ca6d1ca02bf3d68ec5765ca28d8bbf521a3f",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/_frozen_RUN-ON_a2",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "b129a1dcac23635174075159aad41a9e13e96eab242f2447de84d41b96282da2",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s1_43_camelise__RP/run/visible_RUN-ON_a2.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "prompt",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 0,
+  "wire_digest": "5a6c7a0edfea01711bf9d13435179feab388da637dfef94069da3762e0fa13cf",
+  "run_wall_s": 109.389,
+  "agent_wall_s": 34.952,
+  "failures": ""
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_14_range_sum_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 103,
+      "cases": [
+        {
+          "case": "check_01_range_sum",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_range_sum",
+          "ok": false,
+          "kind": "assert",
+          "message": "range_sum args=(5, 1) got=15 want=0",
+          "where": "test_visible.py:22: assert got == want, \"range_sum args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "2c96b0dbefed789e97a19e173004253e38aa428eeccffc6dda2f8be81b865148"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_09_chunks_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 49,
+      "cases": [
+        {
+          "case": "check_01_chunks",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_chunks",
+          "ok": false,
+          "kind": "assert",
+          "message": "chunks args=([1], 0) got=[[1]] want=ValueError to be raised",
+          "where": "test_visible.py:27: raise AssertionError(\"chunks args=%r got=%r want=ValueError to be raised\" %",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "4716f57f2c091b39e4a14733d0153e4a8eff9f7faac84e39e2f0032b6a33df48"
+}

@@ -1,0 +1,264 @@
+{
+  "cell": "s1_10_uniq__RS",
+  "task_id": "s1_10_uniq",
+  "arm": "RS",
+  "stratum": "S1",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T00:08:10Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "resample",
+    "--max-attempts",
+    "3"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "s3",
+  "pi_port": 8880,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 9,
+  "task_pos": 9,
+  "arm_pos": 3,
+  "plan_index": 39,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RS/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RS/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s1_10_uniq/tests_visible",
+    "--task-id",
+    "r535_s1_10_uniq_RS",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8880",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "resample",
+    "--max-attempts",
+    "3",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 97.801
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 12,
+  "agent_wall_s": 39.767,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "ws_start_sha256": "386ce83226bd271a5574d4272392b6dcbc605305022716bceab04f91c85dcf7e",
+  "ws_end_sha256": "005dfb26dedf2c8cc41ce27cacac39ca63b601fba01564c8d9e4f67ded863952",
+  "verdict_sha256": "d8075c36da102dc54e137ee701c629e4dab647a511b49865deb777ad31561745",
+  "verdict_hash": "fa241c176861f266da5f752e979da46e9314da0a7ed68db728b545b4d6929f24",
+  "wire_digest": "246598770efe75f36fd83f38b9ef3d39b0dc9bed42b07393705b6643f515f576",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RS/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 12
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 27.487,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RS/run/_frozen_RUN-ON",
+      "ws_end_sha256": "155aa9e8235c94b153e2bb3d4a4664950de3803324506f81d58a58d6a0281884",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 29.99,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RS/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "155aa9e8235c94b153e2bb3d4a4664950de3803324506f81d58a58d6a0281884",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "386ce83226bd271a5574d4272392b6dcbc605305022716bceab04f91c85dcf7e",
+        "back_to_start": true
+      }
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 39.767,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s1_10_uniq__RS/run/_frozen_RUN-ON_a3",
+      "ws_end_sha256": "005dfb26dedf2c8cc41ce27cacac39ca63b601fba01564c8d9e4f67ded863952",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "386ce83226bd271a5574d4272392b6dcbc605305022716bceab04f91c85dcf7e",
+        "back_to_start": true
+      }
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": null,
+  "m7_file_reason": "arm_has_no_feedback_by_policy",
+  "m7_file_by_attempt": [],
+  "m7_file_leaky_needles": [],
+  "m7_name": null,
+  "m7_name_reason": "arm_has_no_feedback_by_policy",
+  "m7_name_by_attempt": [],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.3333333333333333,
+  "m7_ws_counts": {
+    "other": 2,
+    "read_task": 2,
+    "write_solution": 2,
+    "total": 6,
+    "other_total": 2,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def remove_repeats(items):\\n    seen = set()\\n    result = []\\n    for item in items:\\n        if item not in seen:\\n            result.append(item)\\n            seen.add(item)\\n    return"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def remove_repeats(items):\\n    seen = set()\\n    result = []\\n    for item in items:\\n        if item not in seen:\\n            result.append(item)\\n            seen.add(item)\\n    return"
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": null,
+  "f6_reason": "arm_is_not_RP",
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "feedback_in_prompt_bytes": 0
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 12,
+  "f3_req_ok": 12,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 12,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 97.822,
+  "finished": "2026-09-19T00:09:48Z"
+}

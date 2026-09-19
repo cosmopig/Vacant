@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_14_mid_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 62,
+      "cases": [
+        {
+          "case": "check_01_mid",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'mid' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_14_mid__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import mid",
+          "output": ""
+        },
+        {
+          "case": "check_02_mid",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'mid' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_14_mid__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import mid",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "ab68f9930977fbf1f7694d983ae74bdb44ef4f18fb2c4f86806d6c436f00e256"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_45_group_first_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 77,
+      "cases": [
+        {
+          "case": "check_01_group_first",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'group_first' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_45_group_first__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import group_first",
+          "output": ""
+        },
+        {
+          "case": "check_02_group_first",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'group_first' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_45_group_first__RS/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import group_first",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "98cfabe16dd9460ed90edb5a7acf0705aebae0b9459dc652aaa967c5dfe1d6fe"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_36_longest_run_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 205,
+      "cases": [
+        {
+          "case": "check_01_longest_run",
+          "ok": false,
+          "kind": "assert",
+          "message": "longest_run args=('aabbb',) got={'character': 'b', 'length': 3} want={'ch': 'b', 'n': 3}",
+          "where": "test_visible.py:14: assert got == want, \"longest_run args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_longest_run",
+          "ok": false,
+          "kind": "assert",
+          "message": "longest_run args=('aabb',) got={'character': 'a', 'length': 2} want={'ch': 'a', 'n': 2}",
+          "where": "test_visible.py:22: assert got == want, \"longest_run args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "4ba5bfb661b28b39ac7f36c7a22ba0ac0778a756c09f9d1a829ca37feb740b63"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_37_same_letters_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 1084,
+      "cases": [
+        {
+          "case": "check_01_same_letters",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'same_letters' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_37_same_letters__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import same_letters",
+          "output": ""
+        },
+        {
+          "case": "check_02_same_letters",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'same_letters' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_37_same_letters__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import same_letters",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "6263ff317c7f49615fe44d8a14ccf0a65aad333b9a3abb1e9bf590ca32066314"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_28_split_path_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 46,
+      "cases": [
+        {
+          "case": "check_01_split_path",
+          "ok": false,
+          "kind": "assert",
+          "message": "split_path args=('a/b/c.txt',) got={'folder': 'a/b', 'name': 'c', 'extension': 'txt'} want={'dir': 'a/b', 'name': 'c', 'ext': 'txt'}",
+          "where": "test_visible.py:14: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_split_path",
+          "ok": false,
+          "kind": "assert",
+          "message": "split_path args=('readme',) got={'folder': '', 'name': 'readme', 'extension': ''} want={'dir': '', 'name': 'readme', 'ext': ''}",
+          "where": "test_visible.py:22: assert got == want, \"split_path args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "4d9b65126e2ef9e211f67ef13b2081efd7516825273028ee4d4a7515bd1767ea"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_11_caps_PC",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 78,
+      "cases": [
+        {
+          "case": "check_01_caps",
+          "ok": false,
+          "kind": "assert",
+          "message": "caps args=('hello world',) got='HeLlO WoRlD' want='Hello World'",
+          "where": "test_visible.py:14: assert got == want, \"caps args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_caps",
+          "ok": false,
+          "kind": "assert",
+          "message": "caps args=(\"mcADAM o'neil\",) got=\"McAdAm O'NeIl\" want=\"Mcadam O'neil\"",
+          "where": "test_visible.py:22: assert got == want, \"caps args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "8b6c7a2875858f56876f0fa48714d5e0752e472106b07fd1dc8ac620bd193a34"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s2_10_wrap_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 111,
+      "cases": [
+        {
+          "case": "check_01_wrap",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_wrap",
+          "ok": false,
+          "kind": "assert",
+          "message": "wrap args=('enormous', 3) got=['eno', 'rmo', 'us'] want=['enormous']",
+          "where": "test_visible.py:22: assert got == want, \"wrap args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "d74a169996aed036ccb396c6f805f2d8ebb3ebfcbbe34a776c4d9643b4faf0f2"
+}

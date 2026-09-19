@@ -1,0 +1,31 @@
+{
+  "verdict": "CONTINUE",
+  "stratum": "S2",
+  "ts": "2026-09-19T04:49:22Z",
+  "fail_rate": 0.8333,
+  "fail_hits": 30,
+  "pc_rate": 1.0,
+  "pc_hits": 12,
+  "counts": {
+    "fail_n": 36,
+    "fail_expected": 36,
+    "pc_n": 12,
+    "pc_expected": 12,
+    "unmeasured": 0
+  },
+  "reasons": [],
+  "interim_lines": {
+    "tasks": 12,
+    "fail_n": 36,
+    "fail_floor": 0.15,
+    "pc_n": 12,
+    "pc_floor": 0.3
+  },
+  "final_lines": {
+    "fail_n": 120,
+    "fail_floor": 0.3,
+    "pc_n": 40,
+    "pc_floor": 0.5
+  },
+  "rule": "期中看只有一次。格數固定。量固定。方向固定（只能停，不能改任何門檻或臂）。落在停止線與終判線之間 ⇒ 續發，由終判裁。停止線比終判線寬是刻意的 futility boundary：真值 0.6 時 n=45 的觀測 SD ≈ 0.073，0.45 在 2 SD 之外，誤停約 2%；設計意圖 0.8 時誤停 ≈ 0。"
+}

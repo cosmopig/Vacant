@@ -1,0 +1,263 @@
+{
+  "cell": "s2_24_round_money__RS",
+  "task_id": "s2_24_round_money",
+  "arm": "RS",
+  "stratum": "S2",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T05:37:04Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "resample",
+    "--max-attempts",
+    "3"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "s3",
+  "pi_port": 8880,
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 73,
+  "task_pos": 23,
+  "arm_pos": 3,
+  "plan_index": 295,
+  "probe_invalid": false,
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/ws",
+    "--run-dir",
+    "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run",
+    "--suite",
+    "/var/tmp/vacant_r535/repo/ops/gain/r535/bank/s2_24_round_money/tests_visible",
+    "--task-id",
+    "r535_s2_24_round_money_RS",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--port",
+    "8880",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "resample",
+    "--max-attempts",
+    "3",
+    "--",
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 348.568
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 14,
+  "agent_wall_s": 69.621,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "ws_start_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d",
+  "ws_end_sha256": "e5ad5670be72db34b9df32df5ffb4384af2b93ba45fad876cd110ab4e9a099d4",
+  "verdict_sha256": "65a5c1d0ca199dee446dcdd3c68efa017999dc7c7849e08e855916b9bf24a547",
+  "verdict_hash": "64457276cb761b7c930a179f1addd0bdef50a80c7b2e585238d27aa67f8ed4cd",
+  "wire_digest": "d5959927107c86aab09595dd98fb391c6611570c36bbe067d0521c5969d28fc0",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 14
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 6,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 185.68,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/_frozen_RUN-ON",
+      "ws_end_sha256": "baa9cdb04bd674369ea3182d01d7bdcce2b9ab6c83bb9de4d2c8f07c11a2936b",
+      "reset": null
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 92.442,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/_frozen_RUN-ON_a2",
+      "ws_end_sha256": "bcc58566edbb3bc40e5cb2a630bf8d1b265f5e6133dd53ffa6a9f51414d39a95",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d",
+        "back_to_start": true
+      }
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 69.621,
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_24_round_money__RS/run/_frozen_RUN-ON_a3",
+      "ws_end_sha256": "e5ad5670be72db34b9df32df5ffb4384af2b93ba45fad876cd110ab4e9a099d4",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "d994ecc86e13e9eaf3f5a9650d69df567236dc2f026fc3e7ce5bba92df3f0f0d",
+        "back_to_start": true
+      }
+    }
+  ],
+  "wire_upstreams": [
+    "http://100.119.113.56:1234"
+  ],
+  "upstream_expected": "http://100.119.113.56:1234/v1",
+  "upstream_matches": true,
+  "m7_file": null,
+  "m7_file_reason": "arm_has_no_feedback_by_policy",
+  "m7_file_by_attempt": [],
+  "m7_file_leaky_needles": [],
+  "m7_name": null,
+  "m7_name_reason": "arm_has_no_feedback_by_policy",
+  "m7_name_by_attempt": [],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.6666666666666666,
+  "m7_ws_counts": {
+    "other": 4,
+    "read_task": 2,
+    "total": 6,
+    "other_total": 4,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def round_money(x):\\n    \\\"\\\"\\\"\\n    Rounds a number to 2 decimal places, rounding half to even (banker's rounding).\\n    This is the standard for financial calculations in many accounting"
+    },
+    {
+      "attempt": 3,
+      "name": "bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\":\"ls -F\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"path\":\"TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "write",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"content\":\"def round_money(x):\\n    \\\"\\\"\\\"\\n    Rounds a number to 2 decimal places, rounding half to even (banker's rounding).\\n    This is the standard for financial calculations in many accounting"
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_unparsable_evidence": null,
+  "f6": null,
+  "f6_reason": "arm_is_not_RP",
+  "f6_bytes_by_attempt": [
+    {
+      "attempt": 1,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "feedback_in_prompt_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "feedback_in_prompt_bytes": 0
+    }
+  ],
+  "f3_verdict": "ok",
+  "f3_expect": "none",
+  "f3_calls": 14,
+  "f3_req_ok": 14,
+  "f3_req_bad": 0,
+  "f3_resp_zero": 14,
+  "f3_resp_nonzero": 0,
+  "f3_resp_unmeasured": 0,
+  "f3_violations": [],
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_any": false,
+  "agent_timed_out_n": 0,
+  "wall_s": 348.589,
+  "finished": "2026-09-19T05:42:52Z"
+}

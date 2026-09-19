@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_49_rgb_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 45,
+      "cases": [
+        {
+          "case": "check_01_rgb",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'rgb' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_49_rgb__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import rgb",
+          "output": ""
+        },
+        {
+          "case": "check_02_rgb",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'rgb' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_49_rgb__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import rgb",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "3c0d9dd8aa5019eec68c73027ca4ce268ee17922b245d385da6557dc34cc80af"
+}

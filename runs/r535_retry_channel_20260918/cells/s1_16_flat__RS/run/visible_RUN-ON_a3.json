@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_16_flat_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 46,
+      "cases": [
+        {
+          "case": "check_01_flat",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'flat' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_16_flat__RS/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import flat",
+          "output": ""
+        },
+        {
+          "case": "check_02_flat",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'flat' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_16_flat__RS/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import flat",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "beae9394721a2ead4262903128e64236a90d920d7fc7c69834116d4f4491b300"
+}

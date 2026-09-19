@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535_s1_38_shared_start_RS",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 61,
+      "cases": [
+        {
+          "case": "check_01_shared_start",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import shared_start",
+          "output": ""
+        },
+        {
+          "case": "check_02_shared_start",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'shared_start' from 'solution' (/var/tmp/vacant_r535/run/cells/s1_38_shared_start__RS/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import shared_start",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "323f173b935860328b2273f636b0fa43926a72283b7514f81616d2b776cdea04"
+}

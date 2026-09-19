@@ -1,0 +1,220 @@
+{
+  "task_id": "r535_s2_36_mask_RS",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+    "-p",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_r535/run/cells/s2_36_mask__RS/ws",
+  "proxy_url": "http://127.0.0.1:8880",
+  "env": {
+    "proxy_url": "http://127.0.0.1:8880",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "c85eff14a90de7935d699e94aa922446cb74e0b907140f4450fd364552e61e3e",
+  "ws_end_sha256": "dc8877b69c7e2a2d2d0ab092c4f008c38d2f79fe03064fb52d699518fad882b4",
+  "agent_rc": -9,
+  "agent_timed_out": true,
+  "requests_seen": 196,
+  "wire_by_protocol": {
+    "openai": 196
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 1,
+  "visible_total": 2,
+  "verdict_sha256": "dc7738ba8f8f51555cd6c1a224e540ec0043324e3761139d1b42769428088944",
+  "verdict_hash": "3e2bcdb4bc1e81cc07138e4d874ddbf6af9bf5a674d1ce07599c5c691230e610",
+  "retry": "resample",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "resample",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "c85eff14a90de7935d699e94aa922446cb74e0b907140f4450fd364552e61e3e",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 82.225,
+      "wire_quiesced": true,
+      "requests_seen": 12,
+      "requests_seen_cumulative": 12,
+      "wire_digest": "000e4d953140ea19a3869fa3e0792f4f808f061bcdf96092d19a332aacd02715",
+      "ws_end_sha256": "1b9c2d6750efcdb3da6c9c819e52a1fd7fe57557c8d4914b9cfbcae9854086c1",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_36_mask__RS/run/_frozen_RUN-ON",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "dc7738ba8f8f51555cd6c1a224e540ec0043324e3761139d1b42769428088944",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_36_mask__RS/run/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_mask — assert: mask args=('1234567890', 4) got='1234***' want='******7890' [test_visible.py:14: assert got == want, \"mask args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "c85eff14a90de7935d699e94aa922446cb74e0b907140f4450fd364552e61e3e",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "c85eff14a90de7935d699e94aa922446cb74e0b907140f4450fd364552e61e3e",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 65.069,
+      "wire_quiesced": true,
+      "requests_seen": 9,
+      "requests_seen_cumulative": 21,
+      "wire_digest": "4f45809e207b8738f6470153fa525fe582b4cd2ef36ab5f4b27cbac6a7673e36",
+      "ws_end_sha256": "636294f99d995a054901dd4565001297ce0e400c549a505ceea9a1b6bac83d33",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_36_mask__RS/run/_frozen_RUN-ON_a2",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "dc7738ba8f8f51555cd6c1a224e540ec0043324e3761139d1b42769428088944",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_36_mask__RS/run/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_mask — assert: mask args=('1234567890', 4) got='1234***' want='******7890' [test_visible.py:14: assert got == want, \"mask args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "resample",
+      "reset": {
+        "kind": "resample",
+        "ws_sha256": "c85eff14a90de7935d699e94aa922446cb74e0b907140f4450fd364552e61e3e",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "ws_start_sha256": "c85eff14a90de7935d699e94aa922446cb74e0b907140f4450fd364552e61e3e",
+      "argv": [
+        "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi",
+        "-p",
+        "--provider",
+        "vacantproxy",
+        "--model",
+        "m",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "64ebd6a03ba4fb406c77c52d3e8e55098177ab8df210e1eff079b08b9047437f",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": -9,
+      "agent_timed_out": true,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 600.007,
+      "wire_quiesced": true,
+      "requests_seen": 175,
+      "requests_seen_cumulative": 196,
+      "wire_digest": "2b6e8c25d181640c66b234735c7a5d7470b525c4db0eb65a287340d12d2d1f18",
+      "ws_end_sha256": "dc8877b69c7e2a2d2d0ab092c4f008c38d2f79fe03064fb52d699518fad882b4",
+      "frozen_path": "/var/tmp/vacant_r535/run/cells/s2_36_mask__RS/run/_frozen_RUN-ON_a3",
+      "visible_passed": 1,
+      "visible_total": 2,
+      "verdict_sha256": "dc7738ba8f8f51555cd6c1a224e540ec0043324e3761139d1b42769428088944",
+      "visible_path": "/var/tmp/vacant_r535/run/cells/s2_36_mask__RS/run/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_mask — assert: mask args=('1234567890', 4) got='1234*6*8*0' want='******7890' [test_visible.py:14: assert got == want, \"mask args=%r got=%r want=%r\" % (args, got, want)]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/var/tmp/vacant_r535/run/cells/s2_36_mask__RS/run/_origin",
+    "ws_sha256": "c85eff14a90de7935d699e94aa922446cb74e0b907140f4450fd364552e61e3e"
+  },
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "wire_errors": 1,
+  "wire_digest": "2b6e8c25d181640c66b234735c7a5d7470b525c4db0eb65a287340d12d2d1f18",
+  "run_wall_s": 753.871,
+  "agent_wall_s": 600.007,
+  "failures": "test_visible.py::check_01_mask — assert: mask args=('1234567890', 4) got='1234*6*8*0' want='******7890' [test_visible.py:14: assert got == want, \"mask args=%r got=%r want=%r\" % (args, got, want)]"
+}
