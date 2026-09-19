@@ -209,10 +209,114 @@ Codex 自己的模型呼叫不走這條路。`codex doctor --json` 說 `"managed
 ⚠ binary 裡還有一句 Codex 自己的自白：
 `This terminal was launched outside the sandbox, bypassing any managed network proxy.`
 
-### 7.4 🔴 Linux 沒量到
+### 7.4 ~~Linux 沒量到~~ → **2026-09-20 補上了，見 §七之二**
 
-展場機器是 Linux VM，後端是 **bwrap / landlock 不是 seatbelt**。
-上面所有 `Errno 1` **都是 macOS 的證據**。
+展場機器是 Linux VM，後端是 **netns ＋ landlock/seccomp 不是 seatbelt**。
+上面所有 `Errno 1` 都是 macOS 的證據——**Linux 已另外實測**（結論相同、機制不同、unix socket 那格更硬）。
+
+---
+
+## 七之二、🐧 Linux 實測（2026-09-20，vacant-dev）——§七.4 那條缺口補掉了
+
+機器：`user1@100.124.254.83`，Ubuntu kernel **6.8.0-137**，**codex-cli 0.147.0**（musl 靜態 ELF）。
+⚠ 版本與 Mac 那台（0.153.2）**不同，不可混寫**。
+隔離 `CODEX_HOME`，既有 `~/.codex/config.toml` sha 前後同 `979430df…`，`auth.json` 只 `stat` 不 `cat`，
+沒碰 ChatGPT／`wss` 登入、**沒重開機**、只殺自己起的 listener，磁碟 2.5G → 2.5G 無漂。
+
+**量具活著的對照組（沙箱外）全通**：curl example.com=200、wikipedia=200、裸 IP=403(rc0)、
+`nc 104.20.23.154:80`=open、`nc 1.1.1.1:443`=open、python raw socket connect=OK、`dig @1.1.1.1` 解得出。
+⇒ **下面每一個「擋下」都是真的擋，不是本來就沒網路。**
+
+### 繞過電池（`--enable network_proxy -P probe`，allow example.com，`mode=limited`）
+
+| 格 | 沙箱內 | 對照組 |
+|---|---|---|
+| A 白名單 example.com | `http=200` rc=0 | 200 |
+| B 非白名單 wikipedia | `http=000 rc=56` **擋下** | 200 |
+| **F** `--noproxy` ＋ 裸 IP | `http=000 rc=7` **擋下** | 403 rc=0 |
+| **G** 清空 proxy 變數 ＋ `--noproxy` ＋ 裸 IP | `http=000 rc=7` **擋下** | 403 rc=0 |
+| **H** `nc 104.20.23.154:80` | rc=1 **擋下** | open |
+| **I** `nc 1.1.1.1:443` | rc=1 **擋下** | open |
+| **J** python raw socket | **`OSError [Errno 101] ENETUNREACH`** | connect OK |
+| K `dig @1.1.1.1` | `socket(): Operation not permitted`、rc=9 **擋下** | 解析成功 |
+
+**機制與 macOS 不同**：Linux 用**獨立 network namespace**
+（沙箱 `net:[4026532835]` vs 主機 `net:[4026531840]`，netlink 被封
+「Cannot open netlink socket: Operation not permitted」）＝核心強制、直連公網無路由
+⇒ 所以 J 是 `ENETUNREACH` 而不是 macOS 的 `Errno 1`。
+子行程環境：`CODEX_NETWORK_PROXY_ACTIVE=1`、`HTTP(S)_PROXY=127.0.0.1:46119`、
+`ALL_PROXY=socks5h://127.0.0.1:40073`、`CODEX_NETWORK_ALLOW_LOCAL_BINDING=0`。
+
+⚠ **§七.1 的 fail-open 在 Linux 也中**：profile 設了 allowlist 但沒 `--enable network_proxy`
+⇒ 非白名單 wikipedia **照樣 `http=200 rc=0`**、`CODEX_NETWORK_PROXY_ACTIVE` **unset**、無 proxy 環境變數。
+⇒ **收據必須實證 `CODEX_NETWORK_PROXY_ACTIVE=1`**（啟用時必有、未啟用時必無，可當判準）。
+
+### 🎉 unix socket：Linux 比 macOS 更硬
+
+對照組（沙箱外）path socket 與 abstract socket 都回 `PONG`（listener 活著）。
+
+| 格 | 設定 | `network_proxy` **開** | **關** |
+|---|---|---|---|
+| U1 | path socket，無 `unix_sockets` | **Errno 1 擋下** | CONNECT_OK |
+| U2 | path socket，`unix_sockets = allow` | **Errno 1 擋下** | CONNECT_OK |
+| U3 | `dangerously_allow_all_unix_sockets = true` | **Errno 1 擋下** | CONNECT_OK |
+| U4 | **abstract** socket（Linux 專有），base | **Errno 1 擋下** | CONNECT_OK |
+| U5 | **abstract** socket，allow_all | **Errno 1 擋下** | CONNECT_OK |
+
+⚠ **與 macOS 的關鍵差異**：在 Linux 上 `network_proxy` 一開，**所有 unix socket connect 一律 `Errno 1`**，
+`unix_sockets` allowlist 與 `dangerously_allow_all_unix_sockets` **都是 no-op**
+（macOS 那邊 allow 就會通）。**unix 出口在 Linux 是全有全無、綁死在 `network_proxy` 上。**
+⚠ **`--allow-unix-socket` 旗標在 0.147.0 不存在**（binary strings 與 `--help` 都查無）。
+
+⇒ **對 Vacant 是好消息**：`block_egress` V3 那條最補不起來的殘餘
+（封鎖之下 0.034 秒 200 OK、封包計數器 **0**）**在這裡一起焊死了。**
+
+### 🔴 `/etc/codex/requirements.toml`：權威，但在 `codex sandbox` 上是 opt-in
+
+（sudo 實建，跑完 `sudo rm -rf /etc/codex` 並驗證消失；建之前確認它不存在。）
+
+| caller | requirements 有沒有被採納 |
+|---|---|
+| **不加** `--include-managed-config` | **完全被忽略**——`-P probe_allsock`（不在 allowlist）照跑、`[feature_requirements] network_proxy=true` 強制無效（wiki=200、`PROXY_ACTIVE` unset）、**連格式錯的檔都不會被解析** |
+| **加** `--include-managed-config`（且**強制要 `-P`**） | 解析並**強制執行**：proxy 被強制開啟（wiki 擋下、`PROXY_ACTIVE=1`），使用者即使 `--disable network_proxy` **也蓋不掉** |
+
+binary 錯誤字串證實是**駁回並回落**不是合併：
+`default sandbox policy is disallowed by requirements; falling back to required default`
+（`-P probe_allsock` 在需求下沒硬報錯，而是**靜默回落**到 required default）。
+
+schema：`allowed_permission_profiles` 是 **name→bool 的 map**（且需同時設 `default_permissions`）；
+`allowed_sandbox_modes` 是**陣列**。
+
+⇒ **requirements 被採納時是權威的、使用者無法 override；但在 `codex sandbox` 這條路上，
+採納與否是 caller 用旗標決定、預設不採納** ⇒ 對 `codex sandbox` 而言它**不是獨立保證**
+（不懂或惡意的 caller 不加旗標就整個繞過）。
+
+⚠ **未測到**：**真正的 agent 執行路徑（`codex exec`）是否一律載入 managed requirements**
+——那條可能不是 opt-in。要驗需跑真 model session。**已派**（走 `wrap_agent.sh` 的
+`model_provider = "vacantproxy"` ＋ LM Studio ＋ 假 API key 那條路，**不碰 ChatGPT 登入**）。
+**這一題是「保證」與「只是預設值」的分界線。**
+
+### `sandbox_mode = "workspace-write"` ＋ `network_access`
+
+| 格 | 設定 | 沙箱內 | 對照組 |
+|---|---|---|---|
+| W1 | workspace-write，`network_access=false` | curl rc=6、raw socket **Errno 1 擋下** | 200 |
+| W2 | workspace-write，**`network_access=true`** | 裸 IP rc=7、nc 失敗、raw socket Errno 1——**仍全擋** | 通 |
+| W3 | read-only | 裸 IP rc=7 **擋下** | 通 |
+
+⇒ **`codex sandbox` 子指令在所有模式下一律擋死直連出口**（獨立 netns 無路由）。
+**預設 deny 確認**（`net=false` 擋網，符合「workspace-write 本來就不給 shell 網路」）；
+但 **`network_access=true` 在 `codex sandbox` 下是 no-op**——**它從不替你架出口**。
+⚠ **「grant 方向」**（真 agent 的 `codex exec` 會不會因 `network_access=true` 而放行 shell 網路）
+**本輪量不到**：`codex debug` 沒有 model-free 的 landlock/seccomp runner，`codex exec` 要 model auth。
+**明講沒量，不猜。** 已併進上面那一派。
+
+### 展場判斷：三個硬前提，缺一就破
+
+1. **`network_proxy` 必須每次被啟用**（預設 false）。關著＝fail-open，allowlist 靜默失效。
+2. **收據要驗 `CODEX_NETWORK_PROXY_ACTIVE=1`（proxy 實跑），不能只看設定檔。**
+3. **requirements.toml 能權威地強制開啟且使用者蓋不掉，但在 `codex sandbox` 路徑是 opt-in**
+   ⇒ 對手動 sandbox 呼叫不是保證；**真 agent 路徑是否恆採納未量到**。
 
 ---
 
