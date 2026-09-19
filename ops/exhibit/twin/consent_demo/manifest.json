@@ -1,0 +1,54 @@
+{
+  "head": "2b5a9bd9ee57bc74719e420410b2d0cfc696622ecfacee85e3e968a966f54386",
+  "honesty": [
+    "這是示範，不是資料：捐贈者是程序生成的，沒有任何真人參與。",
+    "鏈記的是「我們記下我們刪了，而且刪掉的位元組 sha256 是 X」，不是「世上沒有副本」。",
+    "撤回上鏈 ≠ 撤回被執行。鏈讓「撤回了但沒刪」看得見，它提高被發現的機率；刪除有沒有真的發生，鏈說不了。",
+    "刪除連 nonce 一起刪：只刪原文而留著 nonce，鏈上的 commitment 可以被窮舉回原文。"
+  ],
+  "n_entries": 5,
+  "records": [
+    {
+      "commitment": "43b3d741c4c41d77ab3aa22774ae97d17f37e8aa770c002ad7753423d4da347d",
+      "entry_hash": "0dab7ac3585eb93074e54e2959d66e2a3a33663be90027629052161c255dd5a3",
+      "event": "grant",
+      "subject_ref": "SYN-T1"
+    },
+    {
+      "commitment": "38f86a197a204373e504fdda9acc8ece5b1961a1474b161fb52db89d0314a83d",
+      "entry_hash": "121aa02895cbdf57af5ba2496e953213d06e4a7494cf6ca81eb90d7f34df02c0",
+      "event": "grant",
+      "subject_ref": "SYN-T2"
+    },
+    {
+      "commitment": "87988a8199a4bcb990cc2b7a6f4fa4edfe8fc3e296d33a79e714969a7eb61de8",
+      "entry_hash": "61a84e21f0011d6ae5886e1bcc02b0df464f2da3ca5f0c928c5d3edd1ed357b1",
+      "event": "grant",
+      "subject_ref": "SYN-T3"
+    },
+    {
+      "entry_hash": "110beefd95a8076308c0df2f22a541a02cebe697d783d2f87897ef4cd1875a5a",
+      "event": "withdraw",
+      "subject_ref": "SYN-T3"
+    },
+    {
+      "entry_hash": "2b5a9bd9ee57bc74719e420410b2d0cfc696622ecfacee85e3e968a966f54386",
+      "erased": [
+        "nonce_SYN-T3.bin",
+        "persona_SYN-T3.json"
+      ],
+      "event": "erase",
+      "subject_ref": "SYN-T3"
+    }
+  ],
+  "scope": "展覽期間用這四類欄位生成一位居民，並在會場公開展示它的工作紀錄",
+  "stream_id": "0dab7ac3585eb93074e54e2959d66e2a3a33663be90027629052161c255dd5a3",
+  "subjects": [
+    "SYN-T1",
+    "SYN-T2",
+    "SYN-T3"
+  ],
+  "synthetic": true,
+  "v": 1,
+  "what": "合成捐贈者的同意／撤回／刪除示範鏈"
+}

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_02_span:held",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 126,
+      "cases": [
+        {
+          "case": "check_01_span",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'span' from 'solution' (/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/runs/DUL-89__s1_02_span__held/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import span",
+          "output": ""
+        },
+        {
+          "case": "check_02_span",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'span' from 'solution' (/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-a3330865eb1e4d924/runs/twin_fixture_20260919/runs/DUL-89__s1_02_span__held/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import span",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "fb067c70f9bb097a5b1e5131a0fe77fa35e52a96162668291e0959f588f5bb50"
+}
