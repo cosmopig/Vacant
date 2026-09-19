@@ -1,8 +1,20 @@
-# 通用 agent 相容性矩陣（`vacant run` V0 實測，2026-09-18）
+# 通用 agent 相容性矩陣（`vacant run` V0 實測，2026-09-18；**OpenCode 真模型 2026-09-19**）
 
 > 一句話：五個 agent，**四個接通了**（Claude Code／Codex／OpenCode／pi），
 > 一個**沒量**（Hermes，三台機器上都沒裝）。Codex 有一條**設定也救不了的路**：
 > ChatGPT 登入時模型通道是寫死的 `wss://`，HTTP 反向代理在那條路上不存在。
+
+## 證據等級（**不可混講**，`.claude/commands/goal.md` 的同一張表）
+
+| 級 | 意思 | 誰 |
+|---|---|---|
+| **L-real** | **真模型**真跑，拒交格與交付格都過，收據可重驗 | **pi**（R535）、**OpenCode**（2026-09-19，見 §8） |
+| **L-fake** | 假上游（`mockup.py`）只驗通道與閘門 | Claude Code、Codex（API key 那條） |
+| **L-none** | 沒量 | Hermes |
+
+⚠ **L-fake 不能寫成「這個 agent 可以用 Vacant」。** 假上游碰不到 SSE 分塊、
+工具呼叫格式、逾時、上下文長度。§1 的矩陣量的是**通道與閘門**；
+只有 §8 那一節是真模型。
 
 量具與判準：[`vacant/vrun/`](../vacant/vrun/)（V0，見
 [`docs/VACANT_RUN.md`](VACANT_RUN.md)）。
@@ -54,7 +66,7 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
 | **Claude Code** 2.1.276 | `POST /v1/messages?beta=true`（Anthropic Messages，SSE） | **環境變數** `ANTHROPIC_BASE_URL`（launcher 已內建，**零接線**） | **3**（拒交格）／**4**（交付格） | ✅ **exit 20** `visible_fail` ／ ✅ **exit 0** `visible_pass` |
 | **Codex CLI** 0.153.2（API key／自訂 provider） | `POST /v1/responses`（Responses API，SSE） | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`）。**不吃 `OPENAI_BASE_URL`** | **1**（拒交格）／**2**（交付格） | ✅ **exit 20** ／ ✅ **exit 0** |
 | **Codex CLI** 0.153.2（`codex login`／ChatGPT 帳號） | `wss://chatgpt.com/backend-api/codex/responses`（**WebSocket**） | ❌ **沒有辦法**。`chatgpt_base_url` 只搬得動外掛／遙測／設定那幾條 | **0**（模型那一條完全沒經過 proxy） | ⚠ 閘門**照跑**（觸發點在行程結束不在 wire 上），但**逐字落盤在那條路上不成立** |
-| **OpenCode** 1.18.31 | (a) `POST /v1/responses`（內建 `openai` provider）<br>(b) `POST /v1/chat/completions`（自訂 openai-compatible provider） | (a) **環境變數** `OPENAI_BASE_URL`（launcher 已內建，**零接線**）<br>(b) 設定 `OPENCODE_CONFIG_CONTENT` | (a) **2** ／ (b) **2**（拒交格）、**3**（交付格） | ✅ 兩條路都 **exit 20**；(b) 另有 ✅ **exit 0** |
+| **OpenCode** 1.18.31 | (a) `POST /v1/responses`（內建 `openai` provider）<br>(b) `POST /v1/chat/completions`（自訂 openai-compatible provider） | (a) **環境變數** `OPENAI_BASE_URL`（launcher 已內建，**零接線**——但**只在模型 id 是 models.dev 註冊表裡的那些**時成立，見 §2.3 ⚠）<br>(b) 設定 `OPENCODE_CONFIG_CONTENT`／`wrap_agent.sh opencode`。**真模型走這條** | (a) **2**（假上游）／ (b) **2**（拒交格）、**3**（交付格）<br>**真模型：5 ／ 5**（§8） | ✅ 兩條路都 **exit 20**；(b) 另有 ✅ **exit 0**<br>**真模型 (b)：✅ exit 20 ／ ✅ exit 0（L-real，§8）** |
 | **pi** 0.85.1 | `POST /v1/chat/completions`（OpenAI Chat Completions，SSE，`store:false`） | **設定**：`PI_CODING_AGENT_DIR` 指到一個暫時目錄＋寫 `models.json`。**不吃 `OPENAI_BASE_URL`**（實測反例見 §3） | **1**（拒交格）／**2**（交付格） | ✅ **exit 20** ／ ✅ **exit 0** |
 | **Hermes** | **未測**（推論：OpenAI-compatible，`model.base_url`／`CUSTOM_BASE_URL`） | **未測** | **未測** | **未測** |
 
@@ -182,6 +194,26 @@ python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir ~/.vacant-r
 python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir ~/.vacant-run/oc -- \
     opencode run --pure --log-level ERROR -m openai/gpt-4o-mini "把 solution.py 寫完"
 ```
+
+⚠ **「零接線」有一條 2026-09-19 才量到的邊界：模型 id 必須是 models.dev
+註冊表裡認得的那些。** 內建 `openai` provider 拿到註冊表以外的 id（例如本地
+LM Studio 的 `gemma-4-12b-it-qat`）會在**送出任何請求之前**就死在模型解析：
+
+```
+$ opencode run -m openai/gemma-4-12b-it-qat "say hi"
+Error: {"name":"UnknownError","data":{"message":"Unexpected server error. …"}}
+⇒ requests_seen = 0      （proxy 一通都沒看到——那是 infra_void 不是 0 分）
+```
+
+同一支指令換成 `-m openai/gpt-4o-mini` ⇒ `requests_seen = 9`、
+`POST /v1/responses`。**所以「零接線」擋不掉的是：本地模型的 id 進不去。**
+要指到本地模型就得走下面的設定路線（§8 的真模型兩格走的就是這條）。
+
+> 順帶量到：LM Studio **不檢查** `model` 欄位——拿 `gpt-4o-mini` 去問，
+> 回來的 body 裡 `"model": "gemma-4-12b-it-qat"`。所以零接線那條路
+> *理論上*可以靠謊報模型名接到本地模型。**那條沒有量到兩格，不准當成可用**
+> ——而且「為了接線而謊報模型名」會讓收據裡的 `model` 欄位失真，
+> 跟本系統的可究責性口徑相衝。
 
 要用自訂 provider（例如指到本地模型）時，整份設定可以用環境變數餵進去，
 不必動 `~/.config/opencode/opencode.json`：
@@ -352,9 +384,12 @@ repo 裡的兩支相關程式碼**還在**、也還說得通，但它們是**呼
 
 ## 7. 這份文件的邊界
 
-- 量的是**通道與閘門**，不是模型能力，也不是「用 Vacant 做得比較好」。
+- §1–§6 量的是**通道與閘門**，不是模型能力，也不是「用 Vacant 做得比較好」。
   假上游站在模型的位置上。
-- **沒有一格用真模型跑過。** 四個 agent 的拒交／交付都是假上游驅動的。
+- ~~**沒有一格用真模型跑過。**~~ **2026-09-19 更正**：OpenCode 那一格已經用真模型
+  （1003 的 `gemma-4-12b-it-qat`）跑出拒交／交付兩格，見 **§8**。
+  **其餘三格仍然是假上游**（Claude Code、Codex、以及 OpenCode 的零接線那條路）。
+  即使是 §8，量到的也只是**這一題**上的通道與閘門；
   「這個 agent 配 Vacant 在真任務上表現如何」是另一個實驗，這裡一個字都沒說。
 - OpenCode 的**環境變數路線**（內建 `openai` provider，`/v1/responses`）
   只量到拒交格；交付格量的是**設定路線**（`/v1/chat/completions`）。
@@ -365,6 +400,162 @@ repo 裡的兩支相關程式碼**還在**、也還說得通，但它們是**呼
   **漂了的徵兆是 `requests_seen == 0`，不是這份文件變紅。**
 - `vacant run` 單獨只有 L3：proxy **records，不 verifies**，也不阻止 agent
   自己開一條連線（`docs/VACANT_RUN.md` §4.1，逐字適用）。
+
+---
+
+## 8. OpenCode × 真模型（L-real，2026-09-19）
+
+**這一節跟 §1–§6 的差別只有一個，但那一個就是全部：上游是真模型，不是 `mockup.py`。**
+
+- 機器：vacant-dev（`100.124.254.83`）· OpenCode **1.18.31**
+  （`npm i -g opencode-ai@1.18.31`，node v22.23.2）
+- 上游：`http://100.119.113.56:1234/v1`（1003，載著 `gemma-4-12b-it-qat`）
+- 接線：**設定路線**（`wrap_agent.sh opencode` ⇒ `OPENCODE_CONFIG_CONTENT`），
+  不是零接線——理由見 §2.3 ⚠
+- 題目：**現成的** `ops/gain/r535/bank/s1_01_addmul`（沒有為了這次新造題）
+- 判斷層：`vacant/vrun/launcher.py`，`--suite` 指到**工作區外**的 bank 路徑
+
+### 8.1 兩格怎麼分開的——**難度來自題庫本身，不是我們改了題**
+
+R535 的題庫本來就備了兩份敘述，其餘位元組逐字相同（`meta.json` 的
+`workspace_template` vs `workspace_template_pc`）：
+
+| 格 | 工作區放的 TASK.md | 為什麼會是這個結果 |
+|---|---|---|
+| **拒交格** | `TASK.md`（散文只說 "sum"／"multiplying"） | `meta.json` 的 `trap`：**套件要的是 `add`／`mul`**。這一題的設計預期就是 `expected_first_attempt_visible_fail >= 0.8` |
+| **交付格** | `TASK_explicit.md`（多五行 `## Interface`，把 `add(a,b)`／`mul(a,b)` 寫死） | 同一題的**天花板臂**（R535 的 PC 臂） |
+
+⚠ **兩格都是 OpenCode 自己跑出來的**——工作區進去時只有一個 `TASK.md`，
+**沒有預放 `solution.py`**。落地的檔案逐字如下：
+
+```python
+# 拒交格 —— OpenCode 寫的（掉進命名陷阱）
+def add(a, b):
+    return a + b
+
+def multiply(a, b):        # ← 套件要的是 mul
+    return a * b
+```
+```python
+# 交付格 —— OpenCode 寫的
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```
+
+**沒有動過 TASK 的難度**：兩份敘述都是 repo 裡本來就有的檔案，
+一個位元組都沒改（`cp bank/s1_01_addmul/TASK.md` 與
+`cp bank/s1_01_addmul/TASK_explicit.md`）。
+
+### 8.2 逐字落盤
+
+```
+指令（兩格只差工作區裡那一份 TASK.md）
+  export PATH=/home/user1/.local/opt/node-v22.23.2-linux-x64/bin:$PATH
+  export VACANT_RUN_UPSTREAM_OPENAI=http://100.119.113.56:1234/v1
+  export VACANT_AGENT_MODEL=gemma-4-12b-it-qat
+  python3 -m vacant.vrun.launcher \
+      --workspace <ws> --run-dir <rd> \
+      --suite <repo>/ops/gain/r535/bank/s1_01_addmul/tests_visible \
+      --task-id opencode_real_<cell> --sandbox none --test-timeout 30 \
+      --timeout 1200 --json \
+      -- <repo>/ops/vacantrun/wrap_agent.sh opencode \
+         "Read TASK.md and do what it says. Use your tools to write the file."
+```
+
+### `opencode-real-refuse`（拒交格）
+
+```
+task_id         = opencode_real_refuse
+accepted        = false   refused = true   stop_reason = visible_fail
+退出碼           = 20
+requests_seen   = 5   wire_by_protocol = {'openai': 5}   wire_errors = 0
+proxy paths     = {'POST /v1/chat/completions -> 200': 5}
+upstream        = http://100.119.113.56:1234/v1/chat/completions
+visible         = 1 / 2   （check_01_add 過；check_02_mul 掛在
+                  ImportError: cannot import name 'mul' from 'solution'）
+agent_rc        = 0       ← OpenCode 自己說成功了，閘門說沒有
+agent_wall_s    = 20.908  run_wall_s = 21.31   retry = none   attempts_used = 1
+ws_start_sha256 = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+ws_end_sha256   = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+wire_digest     = ab819bcb08e2c99ce3e2c31358017f37ef076f22bf538d4807d16a7fe80534c3
+verdict_sha256  = e9cc2ddb0abde551f5dcd20ae766b1fdbb434af58d32d4a1ab72d359cf150da5
+verdict_hash    = 11889f630ac27ec454a267ec3316f3b11db319ffc73932d9680f3535db9a9788
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+**這一格最值得看的是 `agent_rc = 0`。** OpenCode 的收尾原話是
+「I have created `solution.py` with the requested `add` and `multiply` functions
+as specified in `TASK.md`.」——**它宣告完成、退出碼 0、而且講得很有把握**。
+閘門在行程結束那一刻跑驗收，拒交。這正是
+`docs/VACANT_RUN.md` §1 那個洞察的真模型版本。
+
+### `opencode-real-deliver`（交付格）
+
+```
+task_id         = opencode_real_deliver
+accepted        = true    refused = false   stop_reason = visible_pass
+退出碼           = 0
+requests_seen   = 5   wire_by_protocol = {'openai': 5}   wire_errors = 1
+proxy paths     = {'POST /v1/chat/completions -> 200': 4,
+                   'POST /v1/chat/completions -> 0（BrokenPipe）': 1}
+upstream        = http://100.119.113.56:1234/v1/chat/completions
+visible         = 2 / 2
+agent_rc        = 0   agent_wall_s = 13.714  run_wall_s = 15.997
+retry = none   attempts_used = 1
+ws_start_sha256 = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+ws_end_sha256   = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+wire_digest     = cacc96253df04ef407045e8adb0a23479ebc0d2ecd2c82f6b557855bfd0a6b6e
+verdict_sha256  = 62d253ad5ac06216bb3d564e909f6a2af7873d4e92873fc3c6edd94a50555077
+verdict_hash    = 8ed10a3f3898e68306bc5c827ce365368782ed33e367d5ce5b5a268e80f719ff
+receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
+```
+
+**那一通 `BrokenPipeError`**（`elapsed_s = 13.5`、`request_bytes = 2521`）：
+OpenCode 在上游還在吐的時候把連線收掉了——它同時發了主對話與
+title generator 兩路，主對話先結束，另一路就被丟掉。**沒有影響裁決**
+（驗收跑的是凍結快照不是 wire），但它證明 `wire_errors > 0` **不等於接線壞了**，
+讀的時候要配 `index.jsonl` 的 `error` 欄位看。
+
+### 8.3 收據驗證（先負控制再驗該跑）
+
+```
+$ python3 -m vacant.vrun.verify_receipts --selftest
+selftest: PASS                                          ← 負控制：它抓得到壞鏈
+
+$ python3 -m vacant.vrun.verify_receipts --glob <refuse-run-dir>
+run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
+run   RUN-ON   2   2   0   1   1   11889f630ac27ec4…  OK      總判：OK
+
+$ python3 -m vacant.vrun.verify_receipts --glob <deliver-run-dir>
+run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
+run   RUN-ON   2   2   0   1   1   8ed10a3f3898e683…  OK      總判：OK
+```
+
+### 8.4 這一節**沒有**說的事
+
+1. **不是**「OpenCode 配 Vacant 寫程式比較好」。兩格各跑 **1 次**，n=1，
+   沒有對照組、沒有重複。它是**存在性證明**（通道與閘門在真模型上成立），
+   不是效果量。
+2. **不是**「零接線可用」。真模型這兩格走的是**設定路線**；
+   零接線那條在本地模型 id 上會死在模型解析（§2.3 ⚠）。
+3. **不是**「這一題有代表性」。`s1_01_addmul` 是 S1 層最簡單的一題，
+   而且交付格用的是**天花板臂**的敘述。換題、換層、換模型都會漂。
+4. 沿用 §7 的所有邊界：proxy **records，不 verifies**；
+   `vacant run` 單獨只有 L3。
+
+### 8.5 踩到的坑（會咬下一個人）
+
+- **`--json` 的 stdout 會被 agent 自己的 stdout 汙染。** launcher 讓 agent 繼承
+  stdout，所以 OpenCode 的收尾那句話會印在 summary JSON **前面**，
+  直接 `json.load(stdout)` 會 `JSONDecodeError`。
+  **要讀就讀 `<run-dir>/run_RUN-ON.json`**，那一份是乾淨的。
+- **node 不在預設 PATH 上**（`/home/user1/.local/opt/node-v22.23.2-linux-x64/bin`）。
+  不 export 的話 `opencode` 的 shebang 找不到 node——`pi` 當初也是栽在這個。
+- **`--` 之後要絕對路徑**（launcher 用 `cwd=<workspace>` spawn）；
+  `wrap_agent.sh` 也一樣。
 
 ---
 
