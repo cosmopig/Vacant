@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_opencode_s1_06_parity_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 33,
+      "cases": [
+        {
+          "case": "check_01_split_parity",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import split_parity",
+          "output": ""
+        },
+        {
+          "case": "check_02_split_parity",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'split_parity' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_06_parity__RF/run/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import split_parity",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "a65ae42e95f65e0a56f6721b656246f5efc597ca562d55485552ee032fe15dd5"
+}

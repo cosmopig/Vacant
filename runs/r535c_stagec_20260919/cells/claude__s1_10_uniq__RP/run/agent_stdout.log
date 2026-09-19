@@ -1,0 +1,26 @@
+I have created the `solution.py` file with the requested code.
+
+```python
+def remove_repeats(input_list):
+    seen = set()
+    result = []
+    for item in input_list:
+        if item not in seen:
+            result.append(item)
+            seen.add(item)
+    return result
+```
+The task was to implement a function that removes repeats from a list while preserving the original order of first appearances. I have created `solution.py` with the following implementation:
+
+```python
+def uniq(items):
+    seen = set()
+    result = []
+    for item in items:
+        if item not in seen:
+            seen.add(item)
+            result.append(item)
+    return result
+```
+
+This satisfies the requirements in `TASK.md`.

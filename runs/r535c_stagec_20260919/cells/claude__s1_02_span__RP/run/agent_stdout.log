@@ -1,0 +1,2 @@
+I have created `solution.py` with the requested functionality. It takes a list of numbers and returns an object (dictionary) containing both the minimum and maximum values in a single pass-friendly structure.
+The task was to write a function that returns the smallest and largest values of a list in one object. I have created `solution.py` with a `span` function that fulfills this requirement by iterating through the list once and returning a dictionary containing both the minimum and maximum values.

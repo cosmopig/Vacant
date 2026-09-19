@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_claude_s1_03_nwords_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 27,
+      "cases": [
+        {
+          "case": "check_01_n_words",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'n_words' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_03_nwords__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import n_words",
+          "output": ""
+        },
+        {
+          "case": "check_02_n_words",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'n_words' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_03_nwords__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import n_words",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "d0ac43452925ef81a4dd9710ba83b2890b2e3d1174ab99bf4bd00ed1d48d82bc"
+}

@@ -1,0 +1,2 @@
+I have created `solution.py` which counts the words in each line of text provided via standard input, as specified in `TASK.md`.
+The `ImportError` occurred because the test expected a function named `n_words`, but the code provided `count_words`. I have renamed the function to `n_words` in `solution.py`.

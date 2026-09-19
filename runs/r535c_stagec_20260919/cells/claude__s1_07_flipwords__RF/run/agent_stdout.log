@@ -1,0 +1,27 @@
+I have created the `solution.py` file as requested in `TASK.md`. The code takes a sentence, splits it into words based on whitespace, reverses the order of those words, and joins them back together with single spaces.
+
+```python
+def reverse_sentence(sentence: str) -> str:
+    words = sentence.split()
+    return " ".join(reversed(words))
+
+if __name__ == "__main__":
+    import sys
+    input_sentence = sys.stdin.read().strip()
+    print(reverse_sentence(input_sentence))
+```
+I have written the code for `solution.py` as requested in `TASK.md`. The script reads a sentence from standard input, reverses the order of its words (separated by whitespace), and prints them joined by a single space.
+I have updated `solution.py` with the code to reverse the order of words in a sentence as specified in `TASK.md`.
+
+```python
+import sys
+
+def reverse_sentence(sentence: str) -> str:
+    words = sentence.split()
+    return " ".join(reversed(words))
+
+if __name__ == "__main__":
+    input_data = sys.stdin.read().strip()
+    if input_data:
+        print(reverse_sentence(input_data))
+```

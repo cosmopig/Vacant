@@ -1,0 +1,32 @@
+{
+  "generated": "2026-09-19T09:36:35Z",
+  "not_a_test": "Stage C 照預註冊 L-6 是**選配、不進預註冊** ⇒ 本檔的數字**只能描述**：「在這 10 題上，agent X 的 M7_file 是 a/b」。不准做假說檢定、不准與 S1／S2 合併、不准說「效果複製了／沒複製」。",
+  "prereg": "decisions/DECISION_20260919_R535_RETRY_CHANNEL_PREREG.md L-6",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "model": "gemma-4-12b-it-qat",
+  "endpoint": "http://100.119.113.56:1234/v1/chat/completions",
+  "effort_injected": "none",
+  "agents": {
+    "opencode": "1.18.31",
+    "claude": "2.1.278 (Claude Code)"
+  },
+  "arms": {
+    "RF": [
+      "--retry",
+      "revise",
+      "--max-attempts",
+      "3",
+      "--feedback-into",
+      "file"
+    ],
+    "RP": [
+      "--retry",
+      "revise",
+      "--max-attempts",
+      "3",
+      "--feedback-into",
+      "prompt"
+    ]
+  },
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file."
+}

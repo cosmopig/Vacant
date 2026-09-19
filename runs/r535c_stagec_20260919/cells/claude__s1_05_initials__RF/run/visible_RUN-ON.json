@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_claude_s1_05_initials_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 39,
+      "cases": [
+        {
+          "case": "check_01_initials",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_05_initials__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import initials",
+          "output": ""
+        },
+        {
+          "case": "check_02_initials",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_05_initials__RF/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import initials",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "5e2073244c72da2bad821de7d6b9c925d8ce66125e1f983d3c4737a933f9e062"
+}

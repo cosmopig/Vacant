@@ -1,0 +1,295 @@
+{
+  "cell": "claude__s1_04_toc__RF",
+  "task_id": "s1_04_toc",
+  "arm": "RF",
+  "agent": "claude",
+  "agent_version": "2.1.278 (Claude Code)",
+  "stratum": "S1",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T10:10:28Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": false,
+  "stream": "c0",
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 3,
+  "arm_pos": 1,
+  "plan_index": 27,
+  "not_a_test": "Stage C 照預註冊 L-6 是**選配、不進預註冊** ⇒ 本檔的數字**只能描述**：「在這 10 題上，agent X 的 M7_file 是 a/b」。不准做假說檢定、不准與 S1／S2 合併、不准說「效果複製了／沒複製」。",
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/ws",
+    "--run-dir",
+    "/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/run",
+    "--suite",
+    "/var/tmp/vacant_stagec/repo/ops/gain/r535/bank/s1_04_toc/tests_visible",
+    "--task-id",
+    "r535c_claude_s1_04_toc_RF",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "file",
+    "--",
+    "/var/tmp/vacant_stagec/repo/ops/vacantrun/wrap_agent.sh",
+    "claude",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 20,
+      "wall_s": 511.435
+    }
+  ],
+  "launcher_rc": 20,
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "attempts_used": 3,
+  "max_attempts": 3,
+  "requests_seen": 17,
+  "wire_by_protocol": {
+    "openai": 3,
+    "anthropic": 14
+  },
+  "wire_errors": 0,
+  "upstreams": {
+    "openai": {
+      "url": "http://127.0.0.1:44887/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "http://127.0.0.1:44887",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false
+    }
+  },
+  "upstreams_defaulted": [],
+  "agent_wall_s": 151.348,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "ws_start_sha256": "b1030711d569a9ce0590200690b941d28a5cdf1edd6fbfcec588901a902c704f",
+  "ws_end_sha256": "1e3bc6255749eb71da3d1e86d763f68a3415bdfb9c5ec6848a1ebf645570f127",
+  "verdict_sha256": "b5b4f62f98b92e1db41e15f240dd29c8a72e182c4fec4e4c99236abe152d400f",
+  "wire_digest": "bd8087480a6496e4f88a53bf5bbe9888becd5126c58f2788fa2844c4ce516efa",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 17
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 120.562,
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "688a174243f0e21347d34c08f697a7f09facd3742cfccaaf9e8e3e05392fceb2",
+      "ws_end_sha256": "d57587beaca3c63e311664ec7b6ce3baa8859dcf2d25aeddc63c57bae79b38d9"
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 7,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 239.029,
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": "83d542007372a93b5867f6f54534a04261700a7a1a0f6ca0cd6c1dfef0b968e0",
+      "ws_end_sha256": "fb6fa28341405190abdc7ee878923275ca799ed6cc6e70c750b51d15dc75d1d1"
+    },
+    {
+      "attempt": 3,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 151.348,
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "ws_end_sha256": "1e3bc6255749eb71da3d1e86d763f68a3415bdfb9c5ec6848a1ebf645570f127"
+    }
+  ],
+  "wire_upstreams": [
+    "http://127.0.0.1:44887",
+    "http://127.0.0.1:44887/api/hello"
+  ],
+  "m7_file": false,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "matched": [],
+      "n_req": 7
+    },
+    {
+      "attempt": 3,
+      "found": false,
+      "matched": [],
+      "n_req": 5
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": true,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "n_req": 7
+    },
+    {
+      "attempt": 3,
+      "found": true,
+      "n_req": 5
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": true,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.5,
+  "m7_ws_counts": {
+    "other": 4,
+    "read_task": 2,
+    "write_solution": 2,
+    "total": 8,
+    "other_total": 4,
+    "reads_own_solution": 2
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "Bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\": \"ls -F\", \"description\": \"List files in the current directory to find TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "Read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"file_path\": \"/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/ws/TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "Read",
+      "kind": "other",
+      "reads_own_solution": true,
+      "args": "{\"file_path\": \"/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/ws/solution.py\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "Read",
+      "kind": "other",
+      "reads_own_solution": true,
+      "args": "{\"file_path\": \"/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/ws/solution.py\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "Write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"file_path\": \"/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/ws/solution.py\", \"content\": \"import sys\\n\\ndef fahrenheit_to_celsius(fahrenheit):\\n    celsius = (fahrenheit - 32) * 5 / 9\\n    re"
+    },
+    {
+      "attempt": 3,
+      "name": "Bash",
+      "kind": "other",
+      "reads_own_solution": false,
+      "args": "{\"command\": \"ls -F\", \"description\": \"List files in the current directory to find TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "Read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"file_path\": \"/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/ws/TASK.md\"}"
+    },
+    {
+      "attempt": 3,
+      "name": "Write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"file_path\": \"/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RF/ws/solution.py\", \"content\": \"def fahrenheit_to_celsius(fahrenheit: float) -> float:\\n    celsius = (fahrenheit - 32) * 5 / 9\\n    "
+    }
+  ],
+  "m7_ws_solution": true,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.25,
+  "m7_ws_solution_n": 2,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_shapes": [
+    {
+      "attempt": 2,
+      "shape": "anthropic"
+    },
+    {
+      "attempt": 3,
+      "shape": "anthropic"
+    }
+  ],
+  "m7_ws_unparsable_evidence": null,
+  "effort_expect": "none",
+  "effort_calls": 17,
+  "effort_in_agent_request": 0,
+  "reasoning_tokens_values": [],
+  "rt_zero": 0,
+  "rt_nonzero": 0,
+  "rt_unmeasured": 17,
+  "effort_verdict": "unmeasured_rt",
+  "shim_model_calls": 14,
+  "shim_injected": 14,
+  "shim_already_correct": 0,
+  "shim_errors": 0,
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_n": 0,
+  "wall_s": 511.463,
+  "finished": "2026-09-19T10:18:59Z"
+}

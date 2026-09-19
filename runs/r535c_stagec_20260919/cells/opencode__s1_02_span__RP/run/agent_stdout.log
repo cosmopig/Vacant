@@ -1,0 +1,3 @@
+I have created `solution.py` with the requested functionality to return both the smallest and largest values from a list in a single object.
+The `solution.py` file has been created with the `span` function as requested in `TASK.md`.
+The `TASK.md` file requires returning the smallest and largest values in an object so that a caller doesn't have to walk the list twice. The test feedback indicates that the keys should be `"lo"` and `"hi"` instead of `"smallest"` and `"largest"`. I have updated `solution.py` accordingly.

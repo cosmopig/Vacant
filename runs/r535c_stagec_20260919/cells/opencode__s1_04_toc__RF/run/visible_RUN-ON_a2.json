@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_opencode_s1_04_toc_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 96,
+      "cases": [
+        {
+          "case": "check_01_to_c",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'to_c' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_04_toc__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import to_c",
+          "output": ""
+        },
+        {
+          "case": "check_02_to_c",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'to_c' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_04_toc__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import to_c",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "9e1f88cdb7c6893a5e9941c2a8ee0984b9eaf9a662fe49061f66a527cf830444"
+}

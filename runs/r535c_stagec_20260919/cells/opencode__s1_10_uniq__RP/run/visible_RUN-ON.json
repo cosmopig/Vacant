@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_opencode_s1_10_uniq_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 28,
+      "cases": [
+        {
+          "case": "check_01_uniq",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'uniq' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_10_uniq__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import uniq",
+          "output": ""
+        },
+        {
+          "case": "check_02_uniq",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'uniq' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_10_uniq__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import uniq",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "91929febd4d4de323c1e3a938cf562e7987ecbc619bc1fabf1115b85bb8c57c8"
+}

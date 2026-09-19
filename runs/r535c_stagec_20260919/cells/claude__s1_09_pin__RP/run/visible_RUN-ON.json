@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_claude_s1_09_pin_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 29,
+      "cases": [
+        {
+          "case": "check_01_pin",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pin' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_09_pin__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:10: from solution import pin",
+          "output": ""
+        },
+        {
+          "case": "check_02_pin",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'pin' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_09_pin__RP/run/_frozen_RUN-ON/solution.py)",
+          "where": "test_visible.py:18: from solution import pin",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "6fcec016e7934d9506d6a3c1641daa3244d52f633ac86499c891ec37e4d6c00a"
+}

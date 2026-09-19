@@ -1,0 +1,243 @@
+{
+  "cell": "claude__s1_04_toc__RP",
+  "task_id": "s1_04_toc",
+  "arm": "RP",
+  "agent": "claude",
+  "agent_version": "2.1.278 (Claude Code)",
+  "stratum": "S1",
+  "run_complete": true,
+  "cell_status": "measured",
+  "started": "2026-09-19T10:06:09Z",
+  "bank_manifest_sha256": "5e727b2ee884d80b197ec42f63af2bf73ce939bdd53c48fc8fc29e46e49c0794",
+  "arm_flags": [
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "prompt"
+  ],
+  "prompt": "Read TASK.md and do what it says. Use your tools to write the file.",
+  "prompt_has_placeholder": true,
+  "stream": "c2",
+  "reasoning_effort": "none",
+  "agent_timeout_s": 600.0,
+  "task_index": 3,
+  "arm_pos": 0,
+  "plan_index": 26,
+  "not_a_test": "Stage C 照預註冊 L-6 是**選配、不進預註冊** ⇒ 本檔的數字**只能描述**：「在這 10 題上，agent X 的 M7_file 是 a/b」。不准做假說檢定、不准與 S1／S2 合併、不准說「效果複製了／沒複製」。",
+  "workspace_files": [
+    "TASK.md -> TASK.md"
+  ],
+  "launcher_argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RP/ws",
+    "--run-dir",
+    "/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RP/run",
+    "--suite",
+    "/var/tmp/vacant_stagec/repo/ops/gain/r535/bank/s1_04_toc/tests_visible",
+    "--task-id",
+    "r535c_claude_s1_04_toc_RP",
+    "--vacant",
+    "1",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "30.0",
+    "--timeout",
+    "600.0",
+    "--json",
+    "--retry",
+    "revise",
+    "--max-attempts",
+    "3",
+    "--feedback-into",
+    "prompt",
+    "--",
+    "/var/tmp/vacant_stagec/repo/ops/vacantrun/wrap_agent.sh",
+    "claude",
+    "Read TASK.md and do what it says. Use your tools to write the file.{VACANT_FEEDBACK}"
+  ],
+  "launcher_tries": [
+    {
+      "try": 1,
+      "rc": 0,
+      "wall_s": 290.223
+    }
+  ],
+  "launcher_rc": 0,
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "attempts_used": 2,
+  "max_attempts": 3,
+  "requests_seen": 9,
+  "wire_by_protocol": {
+    "openai": 2,
+    "anthropic": 7
+  },
+  "wire_errors": 0,
+  "upstreams": {
+    "openai": {
+      "url": "http://127.0.0.1:36757/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "http://127.0.0.1:36757",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false
+    }
+  },
+  "upstreams_defaulted": [],
+  "agent_wall_s": 129.537,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "ws_start_sha256": "b1030711d569a9ce0590200690b941d28a5cdf1edd6fbfcec588901a902c704f",
+  "ws_end_sha256": "cdb51c6ba8b2da8b0ac1218d9ffc31577be0b8e0aa1c6f26ba6e2d3d55766553",
+  "verdict_sha256": "7c1534e3f9fe9f38d8201d42de26836cfb92ad7a989ed0dc6c40f3a928f914cc",
+  "wire_digest": "4c367fa99e568518ec3a90c8f3cd873a414207ebc788e00d1f48db9c1488d119",
+  "wire_slice_meta": {
+    "index_path": "/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RP/run/wire_RUN-ON/index.jsonl",
+    "ok": true,
+    "reason": null,
+    "n_calls": 9
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "accepted": false,
+      "stop_reason": "visible_fail",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "requests_seen": 5,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 160.275,
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 0,
+      "feedback_sha256": null,
+      "ws_end_sha256": "f5713aca8de783eabef1e6a9e63510f123502b8bd8894773bd63f636ca8fea98"
+    },
+    {
+      "attempt": 2,
+      "accepted": true,
+      "stop_reason": "visible_pass",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "requests_seen": 4,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 129.537,
+      "feedback_delivery": "prompt",
+      "feedback_in_prompt_bytes": 821,
+      "feedback_sha256": null,
+      "ws_end_sha256": "cdb51c6ba8b2da8b0ac1218d9ffc31577be0b8e0aa1c6f26ba6e2d3d55766553"
+    }
+  ],
+  "wire_upstreams": [
+    "http://127.0.0.1:36757",
+    "http://127.0.0.1:36757/api/hello"
+  ],
+  "m7_file": true,
+  "m7_file_reason": null,
+  "m7_file_by_attempt": [
+    {
+      "attempt": 2,
+      "found": true,
+      "matched": [
+        {
+          "kind": "header",
+          "text": "Acceptance feedback (attempt"
+        },
+        {
+          "kind": "body",
+          "text": "The checks that ship with this task were run against your"
+        },
+        {
+          "kind": "block",
+          "text": "test_visible.py::check_01_to_c — exception: ImportError: cannot import name 'to_c' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RP/run/_"
+        },
+        {
+          "kind": "block_line",
+          "text": "test_visible.py::check_01_to_c — exception: ImportError: cannot import name 'to_c' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RP/run/_"
+        },
+        {
+          "kind": "block_line",
+          "text": "test_visible.py::check_02_to_c — exception: ImportError: cannot import name 'to_c' from 'solution' (/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RP/run/_"
+        }
+      ],
+      "n_req": 4
+    }
+  ],
+  "m7_file_leaky_needles": [],
+  "m7_name": false,
+  "m7_name_reason": null,
+  "m7_name_by_attempt": [
+    {
+      "attempt": 2,
+      "found": false,
+      "n_req": 4
+    }
+  ],
+  "m7_name_leaky": false,
+  "m7_ws": false,
+  "m7_ws_reason": null,
+  "m7_ws_ratio": 0.0,
+  "m7_ws_counts": {
+    "read_task": 1,
+    "write_solution": 1,
+    "total": 2,
+    "other_total": 0,
+    "reads_own_solution": 0
+  },
+  "m7_ws_calls": [
+    {
+      "attempt": 2,
+      "name": "Read",
+      "kind": "read_task",
+      "reads_own_solution": false,
+      "args": "{\"file_path\": \"/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RP/ws/TASK.md\"}"
+    },
+    {
+      "attempt": 2,
+      "name": "Write",
+      "kind": "write_solution",
+      "reads_own_solution": false,
+      "args": "{\"file_path\": \"/var/tmp/vacant_stagec/run/cells/claude__s1_04_toc__RP/ws/solution.py\", \"content\": \"def to_c(fahrenheit: float) -> float:\\n    \\\"\\\"\\\"Convert Fahrenheit to Celsius, rounded to one decima"
+    }
+  ],
+  "m7_ws_solution": false,
+  "m7_ws_solution_reason": null,
+  "m7_ws_solution_ratio": 0.0,
+  "m7_ws_solution_n": 0,
+  "m7_ws_source": "last_request_per_attempt+last_response",
+  "m7_ws_shapes": [
+    {
+      "attempt": 2,
+      "shape": "anthropic"
+    }
+  ],
+  "m7_ws_unparsable_evidence": null,
+  "effort_expect": "none",
+  "effort_calls": 9,
+  "effort_in_agent_request": 0,
+  "reasoning_tokens_values": [],
+  "rt_zero": 0,
+  "rt_nonzero": 0,
+  "rt_unmeasured": 9,
+  "effort_verdict": "unmeasured_rt",
+  "shim_model_calls": 7,
+  "shim_injected": 7,
+  "shim_already_correct": 0,
+  "shim_errors": 0,
+  "suspect_timeout": false,
+  "suspect_timeout_hits": [],
+  "agent_timed_out_n": 0,
+  "wall_s": 290.243,
+  "finished": "2026-09-19T10:10:59Z"
+}

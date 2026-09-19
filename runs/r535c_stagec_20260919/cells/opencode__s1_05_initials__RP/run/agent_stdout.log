@@ -1,0 +1,14 @@
+I have created `solution.py` which extracts the initials from a full name as specified in `TASK.md`.
+I have created `solution.py` with the `initials` function as specified in `TASK.md`.
+The test feedback indicates that `initials(('ada lovelace',))` is expected to return `['A', 'L']` (a list of characters), but it currently returns `'AL'` (a string).
+
+I will update `solution.py` to return a list of strings instead of a joined string.
+The `TASK.md` instructions say "Give them back as a sequence of single upper-case characters", which usually implies a string in Python, but the test feedback explicitly shows that for `('ada lovelace',)` it wants `['A', 'L']`.
+
+I have updated `solution.py` to return a list of characters.
+
+```python
+def initials(full_name):
+    parts = full_name.split()
+    return [part[0].upper() for part in parts if part]
+```

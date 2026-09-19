@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_opencode_s1_02_span_RP",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 31,
+      "cases": [
+        {
+          "case": "check_01_span",
+          "ok": false,
+          "kind": "assert",
+          "message": "span args=([3, 1, 4],) got={'smallest': 1, 'largest': 4} want={'lo': 1, 'hi': 4}",
+          "where": "test_visible.py:14: assert got == want, \"span args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_02_span",
+          "ok": false,
+          "kind": "assert",
+          "message": "span args=([7],) got={'smallest': 7, 'largest': 7} want={'lo': 7, 'hi': 7}",
+          "where": "test_visible.py:22: assert got == want, \"span args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "f4c700f7f04bc806864432e94c84fd384a588445630356b7f252334aac0ca4cf"
+}

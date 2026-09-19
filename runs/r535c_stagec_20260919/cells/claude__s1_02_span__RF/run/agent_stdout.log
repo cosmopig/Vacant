@@ -1,0 +1,40 @@
+I have created the `solution.py` file as requested in `TASK.md`. It contains a function that takes a list of numbers and returns both the minimum and maximum values in a single dictionary.
+
+```python
+def find_min_max(numbers):
+    """
+    Given a list of numbers, return the smallest and largest values.
+
+    Args:
+        numbers (list[float]): A non-empty list of numbers.
+
+    Returns:
+        dict: A dictionary containing 'min' and 'max' keys.
+    """
+    if not numbers:
+        raise ValueError("The list must contain at least one entry.")
+
+    return {
+        "min": min(numbers),
+        "max": max(numbers)
+    }
+```
+The code has been written to `solution.py`. It defines a function `get_min_max` that takes a list of numbers and returns a dictionary containing both the smallest and largest values, as requested in `TASK.md`.
+
+```python
+def get_min_max(numbers):
+    """
+    Given a list of numbers, report the smallest and largest values
+    together in one dictionary.
+    """
+    return {
+        "smallest": min(numbers),
+        "largest": max(numbers)
+    }
+
+if __name__ == "__main__":
+    # Example usage:
+    nums = [3, 1, 4, 2]
+    print(get_min_max(nums))
+```
+I have created the `solution.py` file as requested in `TASK.md`. It contains a function that returns both the minimum and maximum values of a non-empty list in a single dictionary.

@@ -1,0 +1,25 @@
+I have completed the task as specified in `TASK.md`. I created a file named `solution.py` that takes a full name, extracts the initial of each part (separated by spaces), and returns them as a sequence of single upper-case characters.
+
+```python
+def get_initials(full_name: str) -> str:
+    parts = full_name.split()
+    return "".join(part[0].upper() for part in parts if part)
+
+if __name__ == "__main__":
+    # Example usage:
+    print(get_initials("John Doe"))  # Output: JD
+    print(get_initials("Jane Mary Smith"))  # Output: JMS
+```
+I have read `TASK.md` and implemented the requested functionality in `solution.py`. The code takes a full name, splits it by spaces, extracts the first character of each part, converts them to uppercase, and joins them into a single string.
+I have created the `solution.py` file as requested. It takes a full name, extracts the initial of each part (separated by spaces), and returns them as a sequence of single upper-case characters.
+
+```python
+def get_initials(full_name: str) -> str:
+    parts = full_name.split()
+    return "".join(part[0].upper() for part in parts if part)
+
+if __name__ == "__main__":
+    # Example usage:
+    print(get_initials("John Doe"))  # Output: JD
+    print(get_initials("Alice Marie Smith"))  # Output: AMS
+```

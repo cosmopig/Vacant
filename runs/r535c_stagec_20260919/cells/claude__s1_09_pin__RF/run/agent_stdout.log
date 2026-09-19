@@ -1,0 +1,28 @@
+I have created `solution.py` with the logic described in `TASK.md`.
+
+```python
+def solution(value, lower, upper):
+    if lower <= value <= upper:
+        return value
+    elif value < lower:
+        return lower
+    else:
+        return upper
+```
+I have written the code for the task described in `TASK.md` into `solution.py`.
+
+```python
+def solution(value, lower, upper):
+    if lower <= value <= upper:
+        return value
+    elif value < lower:
+        return lower
+    else:
+        return upper
+```
+I have read `TASK.md` and implemented the requested logic in `solution.py`.
+
+The function `solution(value, lower, upper)` checks if a value is within the range `[lower, upper]`:
+- If it is inside, it returns the value.
+- If it is below the lower edge, it returns the lower edge.
+- If it is above the upper edge, it returns the upper edge.

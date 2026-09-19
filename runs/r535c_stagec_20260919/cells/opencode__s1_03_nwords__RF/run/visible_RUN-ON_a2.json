@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "r535c_opencode_s1_03_nwords_RF",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 41,
+      "cases": [
+        {
+          "case": "check_01_n_words",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'n_words' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_03_nwords__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import n_words",
+          "output": ""
+        },
+        {
+          "case": "check_02_n_words",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'n_words' from 'solution' (/var/tmp/vacant_stagec/run/cells/opencode__s1_03_nwords__RF/run/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import n_words",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "d9b9a7f63179d806062f5847bb56fb2b85fe57a04a844091e83c15d5447c1f99"
+}

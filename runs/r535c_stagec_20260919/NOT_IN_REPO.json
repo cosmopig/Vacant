@@ -1,0 +1,50 @@
+{
+  "run": "R535 Stage C（L-6，選配、不進預註冊）",
+  "note": "這一份記的是沒有進 repo 的東西：在哪、多大、幾個檔、為什麼不帶。拿不到也要記下拿不到（CLAUDE.md）。",
+  "source_host": {
+    "ssh": "user1@100.124.254.83",
+    "path": "/var/tmp/vacant_stagec/run",
+    "caveat": "/var/tmp 會被作業系統清掉；本歸檔才是長期的那一份。"
+  },
+  "excluded": [
+    {
+      "glob": "cells/*/launcher_stdout*",
+      "n_files": 40,
+      "bytes": 391603,
+      "manifest_sha256": "bda262a05802695a69b1dc789007d9c1e5c62ed2e2bcc1dd9dd6ada4babb3ba0",
+      "why_not_shipped": "agent 的 console 輸出（**副檔名叫 .json 但不是 JSON**）。那段 JSON 摘要就是 cells/*/run/run_RUN-ON.json（已帶），前面的人讀輸出是模型回應的重述，位元組在 wire.tar.gz 的 *.resp.bin 裡。"
+    },
+    {
+      "glob": "cells/*/launcher_stderr*",
+      "n_files": 40,
+      "bytes": 43031,
+      "manifest_sha256": "3f4d114766b124f706541b7adfb15b3b44c3bf33b101d3806986cf6532767c64",
+      "why_not_shipped": "launcher 的 stderr（Claude Code 的 unrecognized_model 警告走這裡）。內容是框架的警告不是量測；同一件事寫在 docs/AGENT_COMPAT.md §9.1。"
+    },
+    {
+      "glob": "cells/*/ws*",
+      "n_files": 100,
+      "bytes": 38671,
+      "manifest_sha256": "40aed3cffbc6d296dc15b861bcef1a7067f812796c16caa656a2a2143aa9a477",
+      "why_not_shipped": "跑完留在工作區的活檔。同一份內容的釘死副本已經帶了（cells/*/run/_frozen_RUN-ON*/，ws_end_sha256 在 cell.json 與收據 payload 裡）。活工作區沒有雜湊背書。"
+    },
+    {
+      "glob": "cells/*/_verify*",
+      "n_files": 0,
+      "bytes": 0,
+      "manifest_sha256": null,
+      "why_not_shipped": "launcher 自己的驗算暫存目錄。"
+    }
+  ],
+  "shipped_but_packed": [
+    {
+      "path": "wire.tar.gz",
+      "members": 1040,
+      "raw_bytes": 24327256,
+      "packed_bytes": 7421823,
+      "sha256": "614a3ac72fa1e2d53e2cd9fdf2a4adaa2770e0bba62b8796f45f814385ea8b7e",
+      "what": "全部 40 格、全部呼叫的 request 與 response body 原始位元組（cells/<cell>/run/wire_RUN-ON/<call_id>.{req,resp}.bin）。**M7 三層就是從這些位元組算出來的。**",
+      "why_packed": "散檔不該逐個進版控。確定性 tarball（sorted、uid/gid=0、mtime 釘死、gzip -9）。解開之後每個 body 的 sha256 都對得上 wire_RUN-ON/index.jsonl，而 index 被簽章鏈綁住。"
+    }
+  ]
+}
