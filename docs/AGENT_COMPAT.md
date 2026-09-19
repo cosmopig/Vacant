@@ -1,4 +1,4 @@
-# 通用 agent 相容性矩陣（`vacant run` V0 實測，2026-09-18；**OpenCode／Claude Code／Codex(API key) 真模型 2026-09-19**）
+# 通用 agent 相容性矩陣（`vacant run` V0 實測，2026-09-18；**OpenCode／Claude Code／Codex(API key) 真模型 2026-09-19**；**§11 第二輪 2026-09-19**）
 
 > 一句話：五個 agent，**四個接通了**（Claude Code／Codex／OpenCode／pi），
 > **其中四個都有真模型證據**（§8–§10；pi 靠 R535），一個**沒量**
@@ -11,7 +11,7 @@
 |---|---|---|
 | **L-real** | **真模型**真跑，拒交格與交付格都過，收據可重驗 | **pi**（R535）、**OpenCode**（§8）、**Claude Code**（§9）、**Codex（API key／自訂 provider）**（§10）——四個都是 2026-09-19 |
 | **L-fake** | 假上游（`mockup.py`）只驗通道與閘門 | （目前沒有只停在這一級的 agent；§1–§6 的假上游格仍然只算這一級） |
-| **L-none** | 沒量 | Hermes ／ **Codex（`codex login`／ChatGPT 帳號）** |
+| **L-none** | 沒量 | Hermes ／ **Codex（`codex login`／ChatGPT 帳號）** ／ **Codex × chat/completions wire**（§11.1：0.147.0 設定層退件，`requests_seen=0`） |
 
 ⚠ **L-fake 不能寫成「這個 agent 可以用 Vacant」。** 假上游碰不到 SSE 分塊、
 工具呼叫格式、逾時、上下文長度。§1 的矩陣量的是**通道與閘門**；
@@ -66,7 +66,7 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
 | agent | ① wire 協定 | ② 怎麼指過來 | ③ `requests_seen` | ④ 閘門（拒交／交付） |
 |---|---|---|---|---|
 | **Claude Code** 2.1.276（假上游）／**2.1.278**（真模型） | `POST /v1/messages?beta=true`（Anthropic Messages，SSE） | **環境變數** `ANTHROPIC_BASE_URL`（launcher 已內建，**零接線**——**接本地模型也成立**，見 §9 與下面那一行 ⚠） | 假上游 **3**（拒交格）／**4**（交付格）<br>**真模型：5 ／ 4**（§9） | ✅ **exit 20** `visible_fail` ／ ✅ **exit 0** `visible_pass`<br>**真模型：✅ exit 20 ／ ✅ exit 0（L-real，§9）** |
-| **Codex CLI** 0.153.2（假上游）／**0.147.0**（真模型，vacant-dev）（API key／自訂 provider） | `POST /v1/responses`（Responses API，SSE） | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`／`wrap_agent.sh codex`）。**不吃 `OPENAI_BASE_URL`** | 假上游 **1**（拒交格）／**2**（交付格）<br>**真模型：4 ／ 5**（§10） | ✅ **exit 20** ／ ✅ **exit 0**<br>**真模型：✅ exit 20 ／ ✅ exit 0（L-real，§10）** |
+| **Codex CLI** 0.153.2（假上游）／**0.147.0**（真模型，vacant-dev）（API key／自訂 provider） | `POST /v1/responses`（Responses API，SSE）<br>⚠ **chat/completions 那條在 0.147.0 上打不開**：`wire_api="chat"` 在設定層被退件、`requests_seen=0` ⇒ **L-none**（§11.1）。0.153.2 沒試過 | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`／`wrap_agent.sh codex`）。**不吃 `OPENAI_BASE_URL`** | 假上游 **1**（拒交格）／**2**（交付格）<br>**真模型：4 ／ 5**（§10） | ✅ **exit 20** ／ ✅ **exit 0**<br>**真模型：✅ exit 20 ／ ✅ exit 0（L-real，§10）** |
 | **Codex CLI** 0.153.2（`codex login`／ChatGPT 帳號，**L-none**） | `wss://chatgpt.com/backend-api/codex/responses`（**WebSocket**） | ❌ **沒有辦法**。`chatgpt_base_url` 只搬得動外掛／遙測／設定那幾條 | **0**（模型那一條完全沒經過 proxy） | ⚠ 閘門**照跑**（觸發點在行程結束不在 wire 上），但**逐字落盤在那條路上不成立** |
 | **OpenCode** 1.18.31 | (a) `POST /v1/responses`（內建 `openai` provider）<br>(b) `POST /v1/chat/completions`（自訂 openai-compatible provider） | (a) **環境變數** `OPENAI_BASE_URL`（launcher 已內建，**零接線**——但**只在模型 id 是 models.dev 註冊表裡的那些**時成立，見 §2.3 ⚠）<br>(b) 設定 `OPENCODE_CONFIG_CONTENT`／`wrap_agent.sh opencode`。**真模型走這條** | (a) **2**（假上游）／ (b) **2**（拒交格）、**3**（交付格）<br>**真模型：5 ／ 5**（§8） | ✅ 兩條路都 **exit 20**；(b) 另有 ✅ **exit 0**<br>**真模型 (b)：✅ exit 20 ／ ✅ exit 0（L-real，§8）** |
 | **pi** 0.85.1 | `POST /v1/chat/completions`（OpenAI Chat Completions，SSE，`store:false`） | **設定**：`PI_CODING_AGENT_DIR` 指到一個暫時目錄＋寫 `models.json`。**不吃 `OPENAI_BASE_URL`**（實測反例見 §3） | **1**（拒交格）／**2**（交付格） | ✅ **exit 20** ／ ✅ **exit 0** |
@@ -956,7 +956,8 @@ SSE ＋ function tool 也直測過，`response.output_item.added` 會帶
 ⇒ **這一節的可搬運性到「上游會講 Responses API」為止。** `wireproxy.route()` 把
 `/v1/responses` 歸到 `openai`（它不是 `/v1/messages` 也不是 `/v1/complete`）
 照 path 轉送，**不改寫 body**。上游只有 chat/completions 的話這條路要嘛自備 shim、
-要嘛改用 `VACANT_CODEX_WIRE=chat`——後者**本節沒有量過**。
+要嘛改用 `VACANT_CODEX_WIRE=chat`——後者本節沒有量過，**§11.1 把它量了：
+在 codex-cli 0.147.0 上那個設定值直接被退件（`requests_seen = 0`，等級 L-none）**。
 
 ### 10.1 `command -v` 說沒裝，是 PATH 的假象（第二次踩同一個坑）
 
@@ -988,6 +989,9 @@ Defaulting to fallback metadata; this can degrade performance and cause issues.
 ⚠ 「fallback metadata」具體退到什麼（上下文視窗、支不支援 reasoning summary）
 **本節沒有量**。它跟 §9.1 的 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 是同型的洞：
 長任務下它會改變送出去的 input，也就是改變「逐字落盤」的內容。
+**§11.4／§11.5 把這一格量了**：body 的**形狀**量到（退到 binary 裡編死的那一套，
+`instructions` 20,751 字元 vs 目錄那份 17,730 字元，`tools` 從頂層搬進 `input`），
+**上下文視窗那個數字沒量到，只量到下界 ≥ 32,768**。
 
 順帶兩行**不是致命但會嚇人**的輸出，都在 stderr：
 
@@ -1037,6 +1041,10 @@ def mul(a, b):
 （`39c19a7a…`），Codex 寫 `sum_numbers`／`multiply_numbers`（`b720ee87…`）。
 ⇒ 「陷阱是題目的性質」（§9.2）那句話**只在敘述寫死介面時**表現成同一份檔案；
 敘述含糊時，**落地的錯法是會分岔的**。n=1，不是效果量。
+
+⚠ **§11.3 把這句話再收回一半**：同一題同一台同一個模型第三次跑，Codex 的拒交格
+落地成 `add`／`multiply`（`39c19a7a…`）——**正好就是 §8 OpenCode／§9 Claude Code
+那一個值**。⇒ 「Codex 的錯法與別家不同」**不是一條性質**，三次跑出三種錯法。
 
 ### 10.4 逐字落盤（**出廠接線**，零額外設定）
 
@@ -1234,7 +1242,8 @@ rd_nt_deliver    RUN-ON   2   2   0   1   1   29035207d34f5d60…  OK      總�
 3. **不是**「零接線」。Codex 不吃 `OPENAI_BASE_URL`（§3 的否定證據），
    要寫 `CODEX_HOME/config.toml`。
 4. **不是**「任何 OpenAI 相容端點都行」。前提是上游會講 **Responses API**（§10.0）。
-   只有 chat/completions 的端點要改 `VACANT_CODEX_WIRE=chat`，**那條沒量過**。
+   只有 chat/completions 的端點要改 `VACANT_CODEX_WIRE=chat`——**§11.1 量完了：
+   那條在 0.147.0 上打不開（設定層退件），仍然是 L-none。**
 5. **不是**「全部流量都留在本機」的保證。本節四跑**實際上**沒有一通出網
    （§10.6），但 `anthropic` 那條路由仍然是 `defaulted`。
 6. **不是**「0.153.2 也是這樣」。本節量的是 **0.147.0**。
@@ -1256,6 +1265,381 @@ rd_nt_deliver    RUN-ON   2   2   0   1   1   29035207d34f5d60…  OK      總�
 - **兩格並行跑會互相拖慢**：`nt_*` 那組兩格同時跑是 301／336 秒，
   出廠接線那組分開跑是 145／155 秒，而且當時 1003 上還有**別的 session** 在用。
   **牆鐘時間不可以當成效能數字。**
+
+---
+
+## 11. 兩個空白格：`wire_api=chat` 與「fallback metadata 退到什麼」（2026-09-19 第二輪）
+
+**這一節填的是 §10 自己列出來的兩個洞**（§10.0／§10.9-4 的
+「`VACANT_CODEX_WIRE=chat` 那條沒量過」，與 §10.2／§10.9 的
+「fallback metadata 退到什麼沒量」）。**一個填成了，一個填成「量不到」**：
+
+1. **`VACANT_CODEX_WIRE=chat` ⇒ 仍然是 L-none（沒量到）。**
+   codex-cli 0.147.0 在**載入 config 的那一步**就拒絕 `wire_api = "chat"`，
+   `requests_seen = 0`、`agent_rc = 1`、一個 byte 都沒送出去。
+   **中介從來沒發生 ⇒ 沒有拒交格也沒有交付格可言。**
+   ⚠ **本節不會把它寫成 L-fake**：假上游那一級至少有通道與閘門的流量，
+   這裡連流量都沒有。**「沒量到」≠「量到 0」**（鐵律 3 的 `infra_void`）。
+2. **fallback metadata ⇒ 退到什麼「形狀」量到了，退到什麼「數字」沒量到。**
+   形狀：binary 裡編死的那一套，**確實改變了送出去的 bytes**，而且在這個上游上
+   **退化的那一版才是能用的那一版**（§11.4）。
+   數字（context window）：**只量得到一個下界**，那個值本身讀不出來（§11.5）。
+
+- 機器：vacant-dev（`100.124.254.83`）· **codex-cli 0.147.0**
+  （`/home/user1/.local/bin/codex` → `~/.codex/packages/standalone/releases/`
+  `0.147.0-x86_64-unknown-linux-musl`，**機器上本來就有的那一份，本次沒有安裝任何東西**）
+- 上游：**1003**（`http://100.119.113.56:1234/v1`，LM Studio × `gemma-4-12b-it-qat`）
+  ⚠ **1003 是 thinking 模式**，本輪四格全部帶 `VACANT_CODEX_REASONING_EFFORT=none`
+  （理由見 §10.7；**那是觀測到的緩解不是保證**，而且它把推理整個關掉、代價沒量）。
+  判準逐字：`POST /v1/chat/completions` 的 `choices[0].message.reasoning_content`
+  在 1003 上**有內容**（`'The user said "say hi".\n…'`，100 字元）。
+  ⚠ **不要拿頂層 `usage.reasoning_tokens` 當判準——那個欄位根本不在回應裡。**
+  有的是巢狀的 `usage.completion_tokens_details.reasoning_tokens`（1003 這一通＝25）。
+  兩個名字差一層，抄錯就會得到 `None` 然後把 thinking 模式判成不是。
+- 判斷層：`vacant/vrun/launcher.py` @ `9eeb1d9`（與 §10 同一份）
+- wrapper：`wrap_agent.sh` @ `feat/codex-real`（sha256
+  `6cce391df9e56c62223997f4b9bfb42b2a7e1548ea1ac8bdf8dfd8f64cbca32d`），
+  因為要用 §10.7 那個 `VACANT_CODEX_REASONING_EFFORT` 鉤子
+- 題目：**現成的** `ops/gain/r535/bank/s1_01_addmul`（沒有為了這次新造題）
+- 落盤：vacant-dev 的 `/var/tmp/vacant_codex_chat/{rd_*,ws_*}`。
+  **`/var/tmp` 沒有備份、會被清**——下面抄的是關鍵欄位不是原始 bytes（同附錄 A 的規矩）。
+
+### 11.1 空白格一：`requests_seen = 0`，所以這一格是 **L-none**
+
+**先把等級釘死，因為退出碼會騙人。** 下面 §11.2 那兩格
+`accepted=false`、`stop_reason=visible_fail`、`exit 20`——**看起來**像
+「閘門有牙齒」。配上 `requests_seen = 0`、`wire_by_protocol = {}`、
+`agent_rc = 1`、`ws_end` 與 `ws_start` 逐位元相同，它**不是**：
+
+> **閘門擋下來的是一個從來沒產生過的東西。**
+> `/goal` 把「`requests_seen > 0`」寫成拒交格的不可省旁證，就是為了擋這種
+> **假的拒交格**。⇒ **Codex × chat wire ＝ L-none。**
+
+**那接不通的原因是「我們接線接錯」還是「這個版本沒有這條路」？**
+這兩個結論在文件裡完全不同，所以分開查。查得到的兩個開關都查了：
+
+1. **設定值**——`wire_api` 這個 enum 現在只剩一個變體。serde 的錯誤訊息
+   會把**所有**已知變體列出來，而它列出來的只有 `responses`（§11.1a 逐字）。
+2. **feature flag**——`codex features list` 共 **104 個**旗標，
+   `grep -iE "chat|wire|completion|legacy|responses"` 只撈到
+   `responses_websockets`／`responses_websockets_v2`（兩個都 `removed`）與
+   `use_legacy_landlock`（`deprecated`）。**沒有任何一個能把 chat 打開。**
+
+3. **上游無關**——同一個 `wire_api = "chat"` 在**三個不同的 `base_url`** 上
+   得到逐字相同的退件：`http://100.86.226.21:1234/v1`（1004）、
+   `http://100.119.113.56:1234/v1`（1003）、`http://127.0.0.1:1/v1`（**根本連不上**）。
+   ⇒ **失敗發生在 codex 讀 config 的那一步，網路那一側完全沒有參與。**
+   換上游、換機器都不會變——所以**沒有在 1004 上重跑**（同一個 client 端 bug，
+   重跑只會多一份一樣的紀錄；四個正式格全部留在 1003，同一台同一個推論條件）。
+
+⇒ **在這個版本的兩個公開開關上都沒有 chat 這條路，而且那跟上游是誰無關。**
+⚠ 但**這仍然不是「Codex 不支援 chat/completions」**——那是關於
+**一個版本、兩個開關**的陳述。沒反編譯、沒試別的版本，
+**0.153.2 會怎樣本節不知道**（§11.8-1）。
+⚠ 也**不是**「`vacant run` 接不通 chat/completions」——**pi 與 OpenCode 的真模型格
+走的就是 chat/completions**（§1、§8）。**接不通的是 Codex 這一家的這個版本。**
+
+### 11.1a `wire_api = "chat"` 的逐字退件
+
+**直測（不經 `vacant run`，四個值各試一次）**：
+
+```
+wire_api = "chat"              exit 1
+  Error loading config.toml: `wire_api = "chat"` is no longer supported.
+  How to fix: set `wire_api = "responses"` in your provider config.
+  More info: https://github.com/openai/codex/discussions/7782
+  in `model_providers.vacantprobe.wire_api`
+wire_api = "chat_completions"  exit 1   unknown variant `chat_completions`, expected `responses`
+wire_api = "completions"       exit 1   unknown variant `completions`, expected `responses`
+wire_api = "responses"         exit 0   （正常啟動）
+```
+
+**`expected \`responses\`` ——那個 enum 現在只剩一個變體。** 這不是打錯字被擋：
+serde 的 `unknown variant` 訊息會把所有已知變體列出來，而它只列了一個。
+⚠ 精確的說法是「**0.147.0 的設定層只接受 `responses`**」，
+**不是**「這支 binary 裡沒有 chat 的程式碼」——後者我們沒有查（沒反編譯）。
+
+⇒ **`wrap_agent.sh` 的 `VACANT_CODEX_WIRE=chat` 在 0.147.0 上是一條死路**。
+它不會安靜跑錯：config 載入就停（fail-visible），`requests_seen` 是 **0**。
+
+### 11.2 那兩格實際跑出來的形狀（**兩格都 exit 20，但那不是拒交格**）
+
+四格同一台、同一個模型、同一題、同一個 effort，只差 `VACANT_CODEX_WIRE`
+與工作區裡那一份 TASK.md：
+
+| 格 | wire | 退出碼 | `accepted` | `stop_reason` | `requests_seen` | `agent_rc` | `visible` | `agent_wall_s` |
+|---|---|---|---|---|---|---|---|---|
+| `codex_chat_refuse` | chat | **20** | false | `visible_fail` | **0** | **1** | 0 / 2 | 0.034 |
+| `codex_chat_deliver` | chat | **20** | false | `visible_fail` | **0** | **1** | 0 / 2 | 0.033 |
+| `codex_resp_refuse`（對照） | responses | **20** | false | `visible_fail` | **6** | **0** | 1 / 2 | 17.559 |
+| `codex_resp_deliver`（對照） | responses | **0** | **true** | `visible_pass` | **6** | 0 | 2 / 2 | 18.012 |
+
+```
+codex_chat_refuse     ws_start = ws_end = 03aeefafe6f8bb75eee9006f14eb3f0eb436a03214ffac42bd28565e02228a61
+                      wire_by_protocol = {}   verdict_sha256 = 34aa50d78acd8b9b…  verdict_hash = 2691d9488ebc3d17…
+codex_chat_deliver    ws_start = ws_end = 1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb
+                      wire_by_protocol = {}   verdict_sha256 = 8779964b396f7177…  verdict_hash = df52af988c1c807b…
+chat 兩格的 wire_digest 同一個值 = 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
+  ＝**空 wire 的 digest**（`sha256("[]")`）。兩格連簽的東西都一樣，因為兩格都沒有 wire。
+codex_resp_refuse     ws_end = 39c19a7a2c38d254ad5fdd2ce61d95ccec16260e05e8efb90310a957711474a3
+                      wire_digest = ea1e65caeda0c982…  verdict_hash = ffd503694a4f47b5…
+                      proxy paths = {'POST /v1/responses -> 200 [openai]': 6}
+codex_resp_deliver    ws_end = d1ed637b7ae45b8f71ddc69e113d9f52a0a998cf8df3dd008bc0bc04c9488f18
+                      wire_digest = 88f6fbfb4b16482c…  verdict_hash = 9e7b5a66471a2769…
+                      proxy paths = {'POST /v1/responses -> 200 [openai]': 6}
+四格 upstreams = {"openai": env:VACANT_RUN_UPSTREAM_OPENAI → 1003, "anthropic": default（沒人指定）}
+四格 upstreams_defaulted = ['anthropic']；**四格的 wire_by_protocol 裡都沒有 anthropic**（§10.6 的讀法）
+```
+
+⚠ **不准寫的一句話**（它單看退出碼是真的，但會讓讀者以為中介發生過）：
+
+> ❌ 「Codex 的 chat wire 閘門正常運作，兩格都 exit 20。」
+
+**要寫的是**：chat 那兩格是 **假的拒交格**，理由在 §11.1 —— `requests_seen = 0`、
+`wire_by_protocol = {}`、`agent_rc = 1`、`ws_end` 與 `ws_start` 逐位元相同。
+閘門說「沒交出東西」是對的，但它擋下來的是**一個沒跑的 agent**，
+不是**一個跑完了卻沒過驗收的 agent**。兩者的退出碼一樣，
+**分得開它們的只有 `requests_seen`**。
+⇒ 這正是 §3「我設了環境變數不是證據」的鏡像：**退出碼也不是證據。**
+
+**交付格在 chat 那條路上也拿不到**（agent 沒跑 ⇒ 不會有 `solution.py`
+⇒ 永遠 `visible_fail`）。所以 §1 矩陣那一格是
+**❌（0.147.0 的設定層不接受）＋ L-none**，不是空白、不是 ✅、也不是 L-fake。
+
+**responses 那兩格是對照組，作用是「把失敗歸因給誰」**：同一支 wrapper、
+同一個 launcher、同一台機器、同一題、同一個 effort，只換 `wire_api` 就兩格都拿到
+（exit 20 ／ exit 0、`requests_seen` 6 ／ 6、`agent_rc` 0 ／ 0）。
+⇒ **量具本身沒壞**，chat 的 0 通不是 launcher／wrapper／題目的問題。
+至於 0 通的**原因**，不靠推論：codex 自己在 stderr 上講了（§11.1a），
+而且 `vacant run` 底下收到的那四行與直測到的那四行**逐字相同**
+（唯一差別是 provider id：直測叫 `vacantprobe`、`wrap_agent.sh` 叫 `vacantproxy`）。
+沒有這組對照，`requests_seen = 0` 這個數字是解釋不了的——
+**它跟「接線接錯」長得一模一樣。**
+
+### 11.2a 本輪五個 run 的分類（**哪些是證據、哪些是故障紀錄**）
+
+| run 目錄 | 是什麼 | 可以拿去引用嗎 |
+|---|---|---|
+| `rd_resp_refuse` | **證據**：責任格對照組，拒交格（`rs=6`、`rc=0`、`visible 1/2`、exit 20） | ✅ 但只證明**量具沒壞**，不是新的 Codex L-real（§10 才是） |
+| `rd_resp_deliver` | **證據**：同上，交付格（`rs=6`、`rc=0`、`visible 2/2`、exit 0） | ✅ 同上 |
+| `rd_chat_refuse` | **故障紀錄**：chat wire 接不通的形狀（`rs=0`、`rc=1`） | ⚠ 只能引用成 **L-none 的證據**，不可引用成拒交格 |
+| `rd_chat_deliver` | **故障紀錄**：同上 | ⚠ 同上 |
+| `rd_resp_refuse_catalogid` | **探針**：拿目錄模型 id（`gpt-5.6-sol`）只為了抓第一通 request body。`rs=1`、`rc=1`、上游 400 退件 | ⚠ **不是格子**。它的價值只在 §11.4 那張 body 對照表 |
+
+（同 §10 處理 `codex_real_smoke` 的規矩：**跑不完的那些也要留下來、也要標成故障紀錄**，
+但不准混進格子裡數。）
+
+### 11.3 對照組順手複驗到的三件事（都跟 §10 的敘述有出入）
+
+1. **`ws_end` 交付格又一次逐位元相同**：`d1ed637b…`，與 §8（OpenCode）、
+   §9（Claude Code）、§10（Codex）的交付格**同一個值**。這是第四次。
+2. **拒交格又漂到第三種寫法**。同一題、同一個模型、同一台機器，三輪的拒交格落地：
+
+   | 來源 | 落地的函式名 | `ws_end_sha256` | `visible` |
+   |---|---|---|---|
+   | §10.4（出廠接線，思考開） | `sum_numbers`／`multiply_numbers` | `b720ee87…` | 0 / 2 |
+   | §10.7（NOTHINK） | `sum`／`multiply` | `b71ff60e…` | 0 / 2 |
+   | **§11.2（NOTHINK，本輪）** | **`add`／`multiply`** | **`39c19a7a…`** | **1 / 2** |
+
+   ⚠ 第三列的 `39c19a7a…` **正好等於 §8 OpenCode 與 §9 Claude Code 的拒交格**。
+   ⇒ **不要把「Codex 的錯法與別家不同」寫成一條性質**（§10.3 那句話要收回一半）：
+   三次同設定跑出三種錯法，它是**會漂的**，n 各只有 1。
+   **跨 agent 的宣稱一定要連 agent 與那一跑一起講。**
+
+3. **牆鐘：17.6 ／ 18.0 秒**，而 §10.7 的同一組是 301 ／ 336 秒——**差 17–19 倍**。
+   差別不在程式：**§10.7 那組兩格並行跑、而且當時 1003 上有別的 session**，
+   本輪是 1003 剛收官、整台空的，四格循序跑。
+   ⇒ §10.10 那條「牆鐘時間不可以當成效能數字」**這一輪把它量成 17–19 倍**。
+   ⚠ 反過來也要小心：**不可以拿本輪的 17.6 秒去講「Codex 很快」**——
+   它量到的是「當時那台機器沒有人在用」。
+
+### 11.4 空白格二：fallback metadata 退到什麼
+
+**先講結論**：`codex debug models` 這支子指令會把**模型目錄**原樣吐成 JSON，
+`gemma-4-12b-it-qat` 不在裡面 ⇒ 走 fallback。fallback **不是「少一點設定」，
+是換一整套 request body 的形狀**。逐項對照（同一題、同一台、同一個 effort，
+比的是 `POST /v1/responses` 的**第一通** `*.req.bin`）：
+
+| body 欄位 | **fallback**（`gemma-4-12b-it-qat`） | **目錄模型**（`gpt-5.6-sol`） |
+|---|---|---|
+| `instructions`（頂層） | **有**，20,751 字元，`sha256 ac8ae107a0d72fe3476b430afb161ea4e67da2e446d778aefc44828160559807`，開頭 `You are a coding agent running in the Codex CLI, …` | **沒有這個欄位** |
+| `tools`（頂層） | **有**，10 個：`exec_command` `write_stdin` `update_plan` `request_user_input` `view_image` `multi_agent_v1` `get_goal` `create_goal` `update_goal` `web_search` | **沒有這個欄位**（改成 `input[0]` 的 `{"type":"additional_tools"}`） |
+| `input` | 11 項（developer skills 區塊 3,252 字元＋user 環境＋user prompt＋function_call…） | 7 項，且 `input[1]` 是一段 **17,730 字元**的 developer 訊息（＝目錄裡那一份 `base_instructions`，`sha256 cbefa6b0bede0e332d957fca70ccacf9f12f4c0ecdf81b819e5cbe1a3b16e265`，開頭 `You are Codex, an agent based on GPT-5. …`） |
+| `reasoning` | `{"effort":"none","summary":"auto"}` | `{"effort":"none","context":"all_turns"}` |
+| `text` | **沒有** | `{"verbosity":"low"}` |
+| 多代理區塊 | **沒有** | 多 2 段 developer 訊息：`You are /root, the primary agent…`（2,264 字元）＋`<multi_agent_mode>…`（271 字元） |
+| 兩邊逐位元相同的欄位 | `include`、`parallel_tool_calls`、`store`、`stream`、`tool_choice` | 同左 |
+
+**所以「退到什麼」的答案是：退到 binary 裡編死的那一套**
+（`grep -ac 'You are a coding agent running in the Codex CLI' <codex binary>` ＝ 2），
+而不是伺服器目錄那一套。兩份 prompt **不是同一份**（sha256 不同、長度差 3,021 字元）。
+
+**而且方向跟警告文字暗示的相反**。那行警告說 `this can degrade performance and
+cause issues`，但在**這個**上游上：
+
+```
+目錄模型（gpt-5.6-sol）的 body ⇒ LM Studio 直接退件
+  ERROR: {"error":{"message":"Invalid type for 'input'.","type":"invalid_request_error",
+                   "param":"input","code":"invalid_union"}}
+  requests_seen = 1   agent_rc = 1   agent_wall_s = 0.318   （run: codex_resp_refuse_catalogid）
+fallback（gemma-4-12b-it-qat）的 body ⇒ 六通全部 200，兩格都拿到
+```
+
+目錄模型的那一格帶著 `use_responses_lite: true`，body 走的是把工具與指示都塞進
+`input` 的那個形狀。**最可能的原因**是 `input[0].type = "additional_tools"` 這個
+項目型別——錯誤訊息指的 `param` 就是 `input`、`code` 是 `invalid_union`。
+⚠ **那一句是推論不是量到的**：我們沒有逐欄二分過是哪一項讓它解不開。
+**量到的只有**「這個 body 被退件、那個 body 沒有」。
+
+⇒ **在這個自架上游這一側，fallback 是走得通的那條路，目錄那套不是。**
+「fallback ＝ 比較差」**是那行警告文字的說法，不是我們量到的東西**。
+
+⚠ **不要把這句話擴大**：量到的是「**1003 上那一份 LM Studio**（版本本輪沒記，
+所以引用時不要寫版本號）退掉目錄模型的 body 形狀」，**不是**「responses-lite
+是壞的」，也不是「所有 OpenAI 相容端點都這樣」。換一個會講 responses-lite
+的上游，結論可能整個反過來。**n = 1 個上游、1 個模型 id、1 通請求。**
+
+### 11.5 fallback 的**上下文視窗**：量到的是一個下界，不是那個數字
+
+`vacant/vrun/envmap.py` 原本把這一格記成「跟 Claude Code 的 200k 假設同型的洞」。
+同型的部分成立（它會改變送出去的 input），**但這一格量得到的東西比較少**：
+
+**量得到的**——那個數字是**活的**，而且改它會改 bytes。`codex debug prompt-input`
+把「模型看得到的輸入」原樣吐出來，拿 `-c model_context_window=N` 掃一遍
+（同一台、同一份 config，只差那一個覆寫）：
+
+```
+            未覆寫（fallback）  items=2  total_chars=3675  skills_block=3332
+            cw=1000000／400000／272000／262144／131072／65536／32768
+                               items=2  total_chars=3675  skills_block=3332   ← 與未覆寫同長
+            cw=30000           items=2  total_chars=3326  skills_block=2983
+            cw=28672           items=2  total_chars=3326  skills_block=2983
+            cw=26000           items=2  total_chars=3194  skills_block=2851
+            cw=24576           items=2  total_chars=3078  skills_block=2735
+            cw=22000           items=2  total_chars=2874  skills_block=2531
+            cw=20480           items=2  total_chars=2750  skills_block=2407
+            cw=18432           items=2  total_chars=2586  skills_block=2243
+            cw=17408           items=2  total_chars=2506  skills_block=2163
+            cw=16384           items=2  total_chars=2430  skills_block=2087
+            cw=8192            items=2  total_chars=1776  skills_block=1433
+            cw=4096            items=2  total_chars=1448  skills_block=1105
+            cw=2048            items=2  total_chars=1265  skills_block= 922
+```
+
+視窗調小，`<skills_instructions>` 區塊就被砍短（codex 另外印一行
+`warning: Skill descriptions were shortened to fit the skills context budget.`）。
+⇒ **這個數字直接改變「逐字落盤」的內容，而且 `model_context_window` 這個覆寫鍵
+是活的**（binary 裡 27 筆、`--strict-config` 也不退件）。
+
+**量不到的，以及為什麼**——**fallback 實際用的那個數字，這裡讀不出來**：
+
+1. **wire 上沒有它。** request body 裡沒有任何 context/max-tokens 欄位
+   （上表逐欄比過）。proxy 只看得到 bytes，看不到 client 心裡的數字。
+2. **`codex debug models` 只吐目錄**（8 個 slug，全部 `context_window: 272000`、
+   `max_context_window: 272000`、`effective_context_window_percent: 95`、
+   `truncation_policy: {"mode":"tokens","limit":10000}`）。
+   **fallback 不在那份目錄裡**——它是 binary 裡的預設值，那支指令不吐它。
+3. **`codex doctor --json` 沒有這個欄位**（掃過 `.checks.*`，只有
+   `model = gemma-4-12b-it-qat`、`model provider = vacantprobe`）。
+4. **`codex exec --json` 的事件流也沒有**（`thread.started`／`turn.started`／
+   `item.completed`／`turn.completed` 四種事件，沒有任何 `context_window`／
+   `token_count` 欄位）。
+5. 上面那支量具**會飽和**：`skills_block` 在 **32,768 以上就固定在 3,332**，
+   而未覆寫的 fallback 也是 3,332。⇒ 只推得出 **fallback ≥ 32,768**（下界），
+   **推不出上界**，更推不出那個數字本身。
+   ⚠ 而且那個下界**帶一個假設**：量的其實是「skills 預算」不是視窗本身，
+   要它等價於視窗得假設預算對視窗單調。上表在 2,048–32,768 這段**實測是單調的**
+   （922 → 3,332 一路不回頭），但**單調性只在量過的那一段成立**。
+
+⇒ 照鐵律 3 的 `infra_void` 規矩寫死：**「fallback 的 context window ≥ 32,768」
+是量到的（帶上面那個單調性假設）；「fallback ＝ 128k／200k／272k」都沒量到，不准寫。**
+要拿掉這個不確定性有一個**不必知道那個數字**的辦法：
+**`-c model_context_window=<你自己上游的真視窗>` 自己釘死**，
+就跟 Claude Code 那格要自己設 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 一樣。
+⚠ **本節沒有量那個釘法在長任務上的效果**——本輪每格只有 **6 通**、
+第一通 46,558 bytes（fallback 那格），**離任何一個視窗都很遠，
+`shortened`／壓縮在四個正式格裡從頭到尾沒有觸發過**
+（那行 `shortened` 警告只在 `-c model_context_window` 刻意調小的探針上出現）。
+
+### 11.6 收據驗證（先負控制再驗該跑）
+
+```
+$ python3 -m vacant.vrun.verify_receipts --selftest
+selftest: PASS                                   ← 負控制：它抓得到壞鏈
+
+$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex_chat/rd_chat_refuse
+rd_chat_refuse            RUN-ON  2  2  0  1  1  2691d9488ebc3d17…  OK   總判：OK
+$ … rd_chat_deliver       RUN-ON  2  2  0  1  1  df52af988c1c807b…  OK   總判：OK
+$ … rd_resp_refuse        RUN-ON  2  2  0  1  1  ffd503694a4f47b5…  OK   總判：OK
+$ … rd_resp_deliver       RUN-ON  2  2  0  1  1  9e7b5a66471a2769…  OK   總判：OK
+$ … rd_resp_refuse_catalogid RUN-ON 2 2 0 1 1  1d5b6634350f191f…  OK   總判：OK
+```
+
+**五個 run 全部 `entries_n=2 / verified_n=2 / failed_n=0 / chain_ok=true`。**
+⚠ 連**沒送出任何請求**的那兩格也有完整收據鏈——
+**收據鏈驗得過不代表 agent 跑過**，那是兩件事。
+
+### 11.7 逐字落盤（可複製貼上）
+
+```
+# 共同環境（四格只差 VACANT_CODEX_WIRE 與工作區裡那份 TASK.md）
+export PATH=/home/user1/.local/bin:/home/user1/.local/opt/node-v22.23.2-linux-x64/bin:$PATH
+export VACANT_RUN_UPSTREAM_OPENAI=http://100.119.113.56:1234/v1     # 1003
+export VACANT_AGENT_MODEL=gemma-4-12b-it-qat
+export VACANT_CODEX_REASONING_EFFORT=none                            # 1003 是 thinking 模式
+VACANT_CODEX_WIRE=chat|responses python3 -m vacant.vrun.launcher \
+    --workspace <ws> --run-dir <rd> \
+    --suite <repo>/ops/gain/r535/bank/s1_01_addmul/tests_visible \
+    --task-id codex_<cell> --sandbox none --test-timeout 30 \
+    --timeout 300|1200 --json \
+    -- <wrap_agent.sh> codex "Read TASK.md and do what it says. Use your tools to write the file."
+
+# fallback 那一格（不碰真模型，端點指到 127.0.0.1:1 就夠）
+CODEX_HOME=<新的 mktemp -d> codex debug models                       # 目錄，JSON
+CODEX_HOME=<同上>           codex debug prompt-input                 # 模型看得到的輸入
+CODEX_HOME=<同上>           codex debug prompt-input -c model_context_window=16384
+```
+
+⚠ **工作樹是 `git worktree add --detach` 加的，跑完就 `git worktree remove` 了**
+（vacant-dev 當時只剩 3.6 G，一份 clone 788 MB；移掉之後回到 4.9 G）。
+收據還在（`/var/tmp/vacant_codex_chat/{rd_*,ws_*}` 共 2.5 MB），**但要重驗得先把碼加回來**：
+
+```
+cd ~/vacant/Vacant && git worktree add --detach /var/tmp/vacant_codex_chat/repo 9eeb1d9
+cd /var/tmp/vacant_codex_chat/repo && python3 -m vacant.vrun.verify_receipts --selftest
+python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex_chat/rd_resp_deliver
+```
+
+⚠ **`/var/tmp` 沒有備份、會被清。** 上面抄的是關鍵欄位不是原始 bytes（同附錄 A 的規矩）。
+
+### 11.8 這一節**沒有**說的事
+
+0. **最重要的那一條**：chat 那兩格 **不是拒交格／交付格**。
+   `requests_seen = 0` ⇒ **中介沒發生** ⇒ 等級是 **L-none**。
+   **不准寫成「兩格都 exit 20 所以閘門有牙齒」**（§11.1／§11.2）。
+   這一輪**沒有**讓 Codex 多拿到任何一格——`/goal` 的四家 L-real 名單**不變**。
+1. **不是**「Codex 不支援 chat/completions」——量到的是
+   **`codex-cli 0.147.0` 的設定層只接受 `wire_api = "responses"`**，
+   而且 `codex features list` 那 104 個旗標裡沒有能打開它的。
+   **沒有反編譯**，所以「binary 裡還有沒有那條程式碼」不知道。
+   §1 矩陣那一格寫的是 0.153.2（2026-09-18、別台、假上游），
+   **那一輪沒有試過 `wire_api="chat"`**，所以**不知道** 0.153.2 是不是一樣。
+   **兩個版本號不可以混寫成一個。**
+1a. **也不是**「`vacant run` 接不通 chat/completions」——pi 與 OpenCode 的格子
+   走的就是那條 wire（§1、§8）。接不通的是 **Codex 這一家的這個版本**。
+2. **不是**「fallback 比較好」。量到的是**在 LM Studio 這個上游上**，
+   目錄模型的 body 被退件而 fallback 的沒有。換上游可能反過來。
+3. **不是**「fallback 的 context window 是某某數字」。量到的只有 **≥ 32,768**。
+4. **不是**「effort=none 沒有代價」。本輪四格全帶著它跑（1003 是 thinking 模式），
+   **代價沒有量**，而且每格只跑 1 次。
+5. **不是** effect size。每一格 n=1，沒有對照組、沒有換題、沒有換模型。
+6. **跨 agent 的話一句都不要說**：本節只量了 Codex。§11.3 那個
+   `39c19a7a…` 撞號是**同一題同一個上游的巧合**，不是「三家會寫一樣的錯」。
+7. 沿用 §7 的所有邊界：proxy **records，不 verifies**；
+   `vacant run` 單獨只有 L3。
+8. **收據鏈驗得過不代表跑過**：chat 那兩格的收據一樣是
+   `verified_n=2 / chain_ok=true`（§11.6）。**收據證明的是「這份紀錄沒被改過」，
+   不是「裡面記的事情發生過」。** 要判有沒有發生，看 `requests_seen`。
 
 ---
 

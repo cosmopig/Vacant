@@ -59,8 +59,23 @@
    fallback metadata; …` 印完照送，六通全部 200
    （`docs/AGENT_COMPAT.md` §10.2 有逐字警告）。
    ⇒ 三家在這一格是 **2 放行 ∶ 1 擋**。那是三次實測不是一條規則，
-   **第四家仍然要自己量**。而且「fallback metadata 退到什麼」**沒量**，
-   它跟 Claude Code 的 200k 假設是同型的洞。
+   **第四家仍然要自己量**。
+
+   2026-09-19 把「fallback metadata 退到什麼」也量了（`docs/AGENT_COMPAT.md`
+   §11.4／§11.5），結論分兩半，**不可以混講**：
+   · **形狀量到了**——退到的是 binary 裡編死的那一套，不是伺服器目錄那一套：
+     頂層 `instructions` 20,751 字元（目錄那份是塞在 `input` 裡的 17,730 字元，
+     sha256 不同）、頂層 `tools` 10 個（目錄模型改用 `input[0].additional_tools`）、
+     `reasoning.summary="auto"`（目錄模型是 `reasoning.context="all_turns"`）、
+     沒有 `text.verbosity`、少兩段多代理 developer 訊息。**送出去的 bytes 真的不一樣。**
+     ⚠ 而且方向跟警告文字相反：在 LM Studio 這個上游上，**目錄模型那個 body 被退件
+       （`invalid_union`），fallback 那個才跑得完**。
+   · **數字沒量到**——fallback 假設的 context window **讀不出來**：wire body 裡沒有、
+     `codex debug models` 只吐目錄、`codex doctor --json` 沒有、`codex exec --json`
+     的事件流也沒有。用 `codex debug prompt-input` ＋ `-c model_context_window=N` 掃，
+     量具在 32,768 以上就飽和 ⇒ **只推得出 ≥ 32,768 這個下界**。
+     不知道那個數字也有辦法：**自己 `-c model_context_window=<真視窗>` 釘死**，
+     跟 Claude Code 那格設 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 同一招。
 
    同一天還踩到一個**量錯**，記在這裡因為它是本條的同型：用
    `strings -a <binary> | grep -c` 掃 Claude Code 的原生 binary，十三個變數
@@ -217,7 +232,14 @@ CONFIG_ROUTE: dict[str, dict[str, str | None]] = {
     #   （`POST /v1/responses`）。`wireproxy` 是反向代理不是協定轉換器，`route()`
     #   只是把「不是 /v1/messages 也不是 /v1/complete」的 path 歸到 openai 照轉。
     #   1003 的 LM Studio 原生吃 `/v1/responses`（含 SSE 與 function tool）所以不需要
-    #   shim；只有 chat/completions 的上游要改 `VACANT_CODEX_WIRE=chat`，**沒量過**。
+    #   shim；只有 chat/completions 的上游本來要改 `VACANT_CODEX_WIRE=chat`——
+    #   **2026-09-19 量了，那條打不開**：0.147.0 在**載入 config 的那一步**就退件
+    #   （`Error loading config.toml: \`wire_api = "chat"\` is no longer supported.`；
+    #   serde 的 `unknown variant` 只列得出 `responses` 一個變體；`codex features list`
+    #   104 個旗標裡也沒有相關的開關）。⇒ `requests_seen = 0`、`agent_rc = 1`，
+    #   **等級是 L-none 不是 L-fake**：中介從來沒發生，「沒量到」≠「量到 0」。
+    #   ⚠ 那是**關於 0.147.0 與兩個公開開關**的陳述，不是「Codex 不支援
+    #     chat/completions」，也不知道 0.153.2 會怎樣。逐字見 §11.1。
     # ⚠ **一種跑不完的失敗**：1003 預設開思考，而 Codex 的 body 帶
     #   `reasoning: {"summary": "auto"}` 沒有 `effort` ⇒ 三跑裡有一跑在推理裡繞圈
     #   （94,776 個 `reasoning_text.delta`、0 個 `output_text`、713 秒沒收尾）。
@@ -227,8 +249,10 @@ CONFIG_ROUTE: dict[str, dict[str, str | None]] = {
     "codex": {
         "relocate": "CODEX_HOME",               # 預設 ~/.codex
         "file": "config.toml",
-        "field": 'model_providers.<新 id>.base_url（＋ wire_api="responses"｜"chat"；'
-                 "內建 id `openai` 不准覆寫，會 fail-closed 報錯)",
+        # ⚠ `wire_api` 在 0.147.0 上**只剩 `"responses"` 一個值**（2026-09-19 實測，
+        #   §11.1）；`"chat"` 會在 config 載入時被退件。0.153.2 沒試過。
+        "field": 'model_providers.<新 id>.base_url（＋ wire_api="responses"；'
+                 '0.147.0 不收 "chat"；內建 id `openai` 不准覆寫，會 fail-closed 報錯)',
         "wire": "openai",
         "measured": "2026-09-19（真模型 0.147.0；2026-09-18 假上游 0.153.2）",
     },

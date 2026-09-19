@@ -72,7 +72,12 @@ codex)
     # `envmap.CONFIG_ROUTE["codex"]`：CODEX_HOME ＋ 一個**新** provider id。
     # 內建 id `openai` 不准覆寫（codex 會 fail-closed 報錯），所以取名 vacantproxy。
     MODEL="${VACANT_AGENT_MODEL:-gpt-5.6-sol}"
-    WIRE="${VACANT_CODEX_WIRE:-responses}"      # responses｜chat
+    # ⚠ `VACANT_CODEX_WIRE=chat` 在 **codex-cli 0.147.0 上打不開**（2026-09-19 實測）：
+    #   codex 在載入 config 的那一步就退件（`wire_api = "chat"` is no longer supported；
+    #   serde 只列得出 `responses` 一個變體），`requests_seen = 0`、`agent_rc = 1`。
+    #   **那是 L-none（中介沒發生）不是「閘門擋下來」**——逐字見 AGENT_COMPAT §11.1。
+    #   鉤子留著不動：behaviour 不改，換版本／換 codex 分支時它仍然是唯一的開關。
+    WIRE="${VACANT_CODEX_WIRE:-responses}"      # responses（0.147.0 只收這個）
     export CODEX_HOME="$CFG"
     cat > "$CFG/config.toml" <<EOF
 model = "$MODEL"
