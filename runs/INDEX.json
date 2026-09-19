@@ -17,8 +17,8 @@
   ],
   "caveat_record_spec": "G 系列 run 目錄（`g_*`）**不是** RECORD_SPEC §1 的證據包——它們沒有 manifest.json / ledger_events.jsonl / chain_verify.txt / anomalies.md / SHA256SUMS，用的是 gain_run.py 自己的 summary.json + rows/calls/notes 版面。符合 RECORD_SPEC 的只有 `blayer_*` 那幾個 B 層掃描。每個目錄的 `record_spec` 欄位逐項列出缺哪些。",
   "counts": {
-    "entries": 720,
-    "dirs": 348,
+    "entries": 721,
+    "dirs": 349,
     "top_level_files": 372,
     "dirs_with_summary_json": 172,
     "by_kind": {
@@ -27,9 +27,9 @@
       "other": 23,
       "real_run": 167,
       "replay": 1,
-      "smoke": 12
+      "smoke": 13
     },
-    "total_bytes": 752741639
+    "total_bytes": 753146579
   },
   "runs": [
     {
@@ -10891,6 +10891,161 @@
       },
       "decision_refs": [
         "decisions/DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md"
+      ],
+      "verdict_decisions": [],
+      "related_settlements": [],
+      "headline": null,
+      "headline_from": null,
+      "headline_source": "none",
+      "headline_candidates": [],
+      "headline_note": "沒有任何裁決檔在標題或前言點名這個 run 目錄。"
+    },
+    {
+      "name": "_smoke",
+      "kind": "smoke",
+      "subkind": "probe_or_smoke",
+      "date": null,
+      "date_source": "unknown",
+      "seed": null,
+      "backend": {
+        "endpoint": null,
+        "slot_host": null,
+        "server_model": null,
+        "declared": null,
+        "sidecars": []
+      },
+      "bank": {
+        "family": null,
+        "version": null,
+        "match": "no_rows",
+        "n_task_ids": 0,
+        "candidates": []
+      },
+      "arms": [],
+      "n_rows": 0,
+      "n_rows_by_arm": {},
+      "n_distinct_task_ids": 0,
+      "terminal": null,
+      "complete": null,
+      "infra_void": null,
+      "runner_git": {
+        "sha": null,
+        "dirty": null,
+        "branch": null
+      },
+      "n_files": 15,
+      "bytes": 403804,
+      "files": [
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/NOT_EVIDENCE",
+          "bytes": 202,
+          "sha256": "665035fb5896faf1a886ed0edba6238f461ea8e977632fd5ee9faa0e2f75e018",
+          "lines": 3
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/backend_meta.json",
+          "bytes": 1249,
+          "sha256": "ea12b4efe6bd45142df6f550ff6e63d4e00663b492d6ad6fcfd32f98d5ad423c",
+          "lines": 49
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/calls.jsonl",
+          "bytes": 228359,
+          "sha256": "d7b707b1aaf1476e7f8cf130f82c87d87f5e654f8fb06a989998860930babc2c",
+          "lines": 44
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/gate_e11.json",
+          "bytes": 125,
+          "sha256": "b8b71cb063ce827ade9ef075b1002b7a056a4cc13ccce0cf8258575f7ec3e7f2",
+          "lines": 6
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/gate_e9.json",
+          "bytes": 627,
+          "sha256": "64b6b865565f61da456e1b92bd3e9823b1706cd750b81b07c02b82d5779bb07f",
+          "lines": 12
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/notes.jsonl",
+          "bytes": 659,
+          "sha256": "1e1f7fb97a7e81eafe3b7e467e18165a9ae83e39031180ab3acdc2bc956dc535",
+          "lines": 5
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/rows.jsonl",
+          "bytes": 13540,
+          "sha256": "3a55ebdca9157ee50e07a2f1c791f09f9087b996b29db74c24aad307ba6a7fa0",
+          "lines": 5
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/ws/ow_01_csvjson__A-CONF__a1.tar.gz",
+          "bytes": 20072,
+          "sha256": "901a6c310748d1c565fcb7e70f0ec1e102fa123374f6e03174f85741da10041b",
+          "lines": null
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/ws/ow_01_csvjson__A-CONF__a2.tar.gz",
+          "bytes": 20682,
+          "sha256": "c45ecfa696872dd9475f4058a82f1093443c466fac1896d40d3c61b806cd0be0",
+          "lines": null
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/ws/ow_01_csvjson__A-GATE__a1.tar.gz",
+          "bytes": 20678,
+          "sha256": "6a70336c6f64f87314fee97dc9ac34c6ca2e2e27e4bb32313a268c7187530637",
+          "lines": null
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/ws/ow_01_csvjson__A-SOLO__a1.tar.gz",
+          "bytes": 20088,
+          "sha256": "b67a9a074cc22a6c86d96b018212082030735d123ab4fda56534b78754110db4",
+          "lines": null
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/ws/ow_02_ratelimit__A-CONF__a1.tar.gz",
+          "bytes": 19370,
+          "sha256": "970d92626dd8161d3cb08dd204322c67cfc2d8f1603abece743736c72cbb0d88",
+          "lines": null
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/ws/ow_02_ratelimit__A-CONF__a2.tar.gz",
+          "bytes": 19401,
+          "sha256": "4777b8890ca2ea2624ae3fb28522533993abffac63f983104dc88d507c807827",
+          "lines": null
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/ws/ow_02_ratelimit__A-CONF__a3.tar.gz",
+          "bytes": 19371,
+          "sha256": "1ec18c7659a27d0e6796eb1f999c4c123504f03cf45e5fed23e7a67a2abe7ed9",
+          "lines": null
+        },
+        {
+          "name": "checklist_probe_test_smoke_checklist_has_teeth0/ws/ow_02_ratelimit__A-SOLO__a1.tar.gz",
+          "bytes": 19381,
+          "sha256": "89f1fca02475cdbb8c9917c90a39664d07b745b622916ea9d9a47d87b7f297e8",
+          "lines": null
+        }
+      ],
+      "record_spec": {
+        "required_present": [],
+        "required_missing": [
+          "manifest.json",
+          "ledger_events.jsonl",
+          "chain_verify.txt",
+          "anomalies.md",
+          "SHA256SUMS"
+        ],
+        "is_record_spec_pack": false
+      },
+      "decision_refs": [
+        "decisions/DECISION_20260824_BACKEND_SWITCH.md",
+        "decisions/DECISION_20260824_LOCAL_ENDPOINT.md",
+        "decisions/DECISION_20260824_OFF_BASELINE.md",
+        "decisions/DECISION_20260830_R350_POOLED_OFF_BASELINE.md",
+        "decisions/DECISION_20260904_R446_EQUAL_BUDGET_ARM.md",
+        "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md",
+        "ops/exhibit/DECISION_PIPELINE.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -69429,7 +69584,7 @@
         "branch": null
       },
       "n_files": 230,
-      "bytes": 1773420,
+      "bytes": 1774556,
       "files": [
         {
           "name": "MATRIX.log",
@@ -69445,14 +69600,14 @@
         },
         {
           "name": "README.md",
-          "bytes": 17232,
-          "sha256": "0fb8c2ec817265c01e803501222ff82bd72abe414c9dd6efdb9558a6eb6286e3",
-          "lines": 281
+          "bytes": 18368,
+          "sha256": "a8c7e6c83e918c89c46f4c1236f3ba47f1424dbb2679aafaa15a8978f0a0f592",
+          "lines": 303
         },
         {
           "name": "SHA256SUMS",
           "bytes": 24919,
-          "sha256": "9682af46a49f625d910f0ea9894378873b689caba91da63e95649b0e53784d81",
+          "sha256": "e3c82674e1d7f4e69ee10c9cd1b1cfb436b1bb11454fbf7b9b50a5ef35646d01",
           "lines": 229
         },
         {
@@ -73389,8 +73544,8 @@
     },
     "mac_repo": {
       "runs_dir": "runs/",
-      "entries": 720,
-      "dirs": 348,
+      "entries": 721,
+      "dirs": 349,
       "top_level_files": 372,
       "all_tracked_in_git": true
     },

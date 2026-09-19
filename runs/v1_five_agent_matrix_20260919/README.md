@@ -84,6 +84,28 @@
 在 20 格全部相同。**`agent_rc = 0` 在 10 個拒交格全部出現**——
 五個 agent 都宣告完成、退出碼 0，閘門在行程結束那一刻擋下來。
 
+### 3.1 五個 agent 在拒交格的收尾原話（逐字，取自 `cells/*/agent_stdout.log`）
+
+> **pi**：I have created `solution.py` with the required `add` and `multiply`
+> functions as specified in `TASK.md`.
+>
+> **OpenCode**：I have created `solution.py` with the requested `add` and
+> `multiply` functions as specified in `TASK.md`.
+>
+> **Claude Code**：I have completed the task as specified in `TASK.md`.
+> I created a file named `solution.py` containing two functions: `add(a, b)`
+> for summing two numbers and `multiply(a, b)` for multiplying them.
+>
+> **Codex**：I have created `solution.py` with the requested numeric helper functions.
+>
+> **Hermes**：I have read `TASK.md` and created the `solution.py` file with the
+> required numeric helper functions (`add` and `multiply`).
+
+**五句話逐字都是真的，五句話也都不足以交付**——套件要的是 `mul` 不是 `multiply`。
+五個 agent 的退出碼都是 0，閘門的退出碼是 20。
+⚠ 這證明的是**閘門在行程結束那一刻有作用**，**不是**「這五個 agent 比較不可靠」
+（同一題、每格 n=2、無對照組）。
+
 逐格的 proxy path（這是「中介真的發生」的逐通證據）：
 
 | agent | proxy 收到的 path | wire 協定 |

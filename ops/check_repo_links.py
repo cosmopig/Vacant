@@ -120,6 +120,15 @@ _MD_LINK = re.compile(r"\[[^\]^]*\]\(\s*(?!https?:|mailto:|data:|#)([^)\s]+?)\s*
 # ⚠ 只認**指向 repo 根**的那兩個名字。`BASE` 之類是各腳本自己的子目錄錨點
 # （例如 `docs/paper_2026-09-14/build_paper.py` 的 `BASE`），拿 ROOT 去解會全部假紅。
 _PY_PATH = re.compile(r"\b(?:ROOT|REPO)\s*/\s*[\"']([^\"']+\.(?:md|py|json|txt|sh))[\"']")
+# ⚠ 同一個名字在別的檔裡可以是別的錨點。`runs/` 底下歸檔的驅動腳本是**在別台機器上
+#   跑過的東西逐字存起來**（例如 `runs/v1_five_agent_matrix_20260919/collect.py` 的
+#   `ROOT = pathlib.Path("/var/tmp/vacant_v1matrix")`）——那裡面的路徑字面值指的是
+#   執行端的路徑，不是 repo 根。拿 ROOT 去解會假紅，而**改那些檔等於讓紀錄描述一個
+#   沒跑過的指令**（同預註冊逐塊指令那條紀律）。
+#   判準寫成「這個檔自己把 ROOT／REPO 綁到一個絕對路徑」，不是寫死檔名清單——
+#   寫死清單下一份歸檔進來又會紅一次。命中的檔會在 `--verbose` 數得出來，不是安靜跳過。
+_PY_ABS_ROOT = re.compile(
+    r"^\s*(?:ROOT|REPO)\s*(?::[^=]+)?=\s*(?:pathlib\.)?(?:Path\(\s*)?[\"']/", re.M)
 # 發射指令
 _DECISION_ARG = re.compile(r"--decision[=\s]+([^\s\"'\\`]+\.md)")
 # GitHub 絕對網址（blob/tree）
@@ -143,7 +152,11 @@ def _exists(rel: str) -> bool:
 
 
 def scan() -> tuple[list[tuple], list[tuple]]:
-    """回傳 (dead, historical)。每筆 = (kind, file, lineno, target, line)。"""
+    """回傳 (dead, historical)。每筆 = (kind, file, lineno, target, line)。
+
+    `historical` 裡也收「自己把 ROOT／REPO 綁到絕對路徑的腳本」那一類
+    （`_PY_ABS_ROOT`）——它們不判紅，但**要數得出來**。
+    """
     dead: list[tuple] = []
     historical: list[tuple] = []
     for rel in tracked_files():
@@ -155,6 +168,8 @@ def scan() -> tuple[list[tuple], list[tuple]]:
         except (UnicodeDecodeError, OSError):
             continue
         is_hist = rel.endswith(_HISTORICAL)
+        # 這個檔自己把 ROOT／REPO 綁到絕對路徑 ⇒ 它的 `ROOT / "x"` 不是 repo 相對路徑
+        abs_root = bool(_PY_ABS_ROOT.search(text))
         base = Path(rel).parent
         for i, line in enumerate(text.split("\n"), 1):
             found: list[tuple[str, str, str]] = []   # (kind, target, resolve_base)
@@ -192,7 +207,9 @@ def scan() -> tuple[list[tuple], list[tuple]]:
                     continue
                 rec = (kind, rel, i, target, line.strip()[:160])
                 frozen = kind == "launch" and rel.startswith(_FROZEN_RECORD_DIRS)
-                (historical if (is_hist or frozen) else dead).append(rec)
+                foreign_root = kind == "py_path" and abs_root
+                (historical if (is_hist or frozen or foreign_root)
+                 else dead).append(rec)
     return dead, historical
 
 

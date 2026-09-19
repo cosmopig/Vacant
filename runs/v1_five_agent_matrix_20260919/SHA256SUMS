@@ -1,6 +1,6 @@
 0d430bd04f880f74930afa4dbc5d3f396424ad2e146844463a19861fde921fdc  ./MATRIX.log
 2fbf3d29465a7a22316fb364342709aa6a52ad3880eeb3288c114fedfaf20f41  ./NOT_IN_REPO.json
-0fb8c2ec817265c01e803501222ff82bd72abe414c9dd6efdb9558a6eb6286e3  ./README.md
+a8c7e6c83e918c89c46f4c1236f3ba47f1424dbb2679aafaa15a8978f0a0f592  ./README.md
 9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  ./cells/claude_deliver_r1/_launcher_exit_code.txt
 ca1e7c94ecd1537d65329d8dca9e90ffcff9b50236f5f8f9d5a7f2f1a946987a  ./cells/claude_deliver_r1/agent_stdout.log
 8a8e09baaa8f62653ad6cebcc1459174c7231e34c7b6be6f7f0a17d0604485e6  ./cells/claude_deliver_r1/frozen/TASK.md
