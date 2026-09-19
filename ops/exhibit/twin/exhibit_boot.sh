@@ -54,10 +54,35 @@ if [ ! -f "$REPO/ops/exhibit/twin/twin_pack.json" ]; then
   exit 2
 fi
 
-# 展場機自己看得到的位址。--lan 的時候手機要用這一台的區網 IP，下面會印出來。
+# 展場機自己看得到的位址。--lan 的時候手機要用這一台的**區網 IP**。
+#
+# ⚠ 這個值不是拿來印好看的：`serve_twin` 用它畫 QR，而 QR 是觀眾唯一的入口。
+#   抓錯（或抓到 127.0.0.1）＝ QR 指到手機自己的迴路位址 ⇒ 掃了一定連不到，
+#   而且現場沒有人會回報，只會看到人掃完就走掉。
 HOST=127.0.0.1
-LAN_IP="$( (ipconfig getifaddr en0 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}') || true)"
-[ "$BIND" = "0.0.0.0" ] && [ -n "$LAN_IP" ] && HOST="$LAN_IP"
+if [ "$BIND" = "0.0.0.0" ]; then
+  LAN_IP="${VACANT_LAN_IP:-}"
+  if [ -z "$LAN_IP" ]; then
+    for IF in en0 en1 eth0 wlan0; do
+      LAN_IP="$(ipconfig getifaddr "$IF" 2>/dev/null || true)"
+      [ -n "$LAN_IP" ] && break
+      LAN_IP="$(ip -4 -o addr show "$IF" 2>/dev/null \
+                | awk '{print $4}' | cut -d/ -f1 | head -1)"
+      [ -n "$LAN_IP" ] && break
+    done
+  fi
+  if [ -z "$LAN_IP" ]; then
+    LAN_IP="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
+  fi
+  case "$LAN_IP" in
+    ""|127.*|169.254.*)
+      echo "抓不到可用的區網 IP（抓到 '${LAN_IP:-空}'）。" >&2
+      echo "手機會連不到 ⇒ **不啟動**，免得展場掛一張掃不開的 QR。" >&2
+      echo "用 VACANT_LAN_IP=<位址> 指定，或先把網路接好。" >&2
+      exit 2 ;;
+  esac
+  HOST="$LAN_IP"
+fi
 
 cleanup(){ kill ${TV_PID:-} ${TWIN_PID:-} 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
@@ -65,20 +90,32 @@ trap cleanup EXIT INT TERM
 ( cd "$HM" && exec "$PY" -m http.server "$TV_PORT" --bind 127.0.0.1 >/dev/null 2>&1 ) &
 TV_PID=$!
 
+# --base-url 就是 QR 會編進去的東西。**一定要傳**，預設值是 127.0.0.1。
 "$PY" "$REPO/ops/exhibit/twin/serve_twin.py" \
   --bind "$BIND" --port "$TWIN_PORT" --dwell "$DWELL" \
   --base-url "http://$HOST:$TWIN_PORT" &
 TWIN_PID=$!
 
 sleep 1
+
+# ⚠ **驗那個位址真的連得到**，不是只印出來。換一個網路環境、介面抓錯、
+#   防火牆擋住——三種都會讓 QR 變成一張掃不開的圖，而畫面照樣叫人掃。
+if ! curl -fsS --max-time 3 "http://$HOST:$TWIN_PORT/state" >/dev/null 2>&1; then
+  echo "起來了，但 http://$HOST:$TWIN_PORT/state 連不到自己。" >&2
+  echo "QR 會指到一個連不到的位址 ⇒ **不繼續**。" >&2
+  exit 2
+fi
+echo "  ✓ http://$HOST:$TWIN_PORT 自己連得到（QR 指的就是這個）"
+
 LIVE="http://$HOST:$TWIN_PORT/live/events.jsonl"
 TV_URL="http://127.0.0.1:$TV_PORT/world3/index.html?live=$LIVE&poll=2000"
 
 echo
 echo "───────────────────────────────────────────────"
 echo " 電視 　$TV_URL"
-echo " 手機 　http://$HOST:$TWIN_PORT/phone.html"
+echo " 手機 　http://$HOST:$TWIN_PORT/phone.html   ← QR 編的就是這一行"
 echo " 收據 　http://$HOST:$TWIN_PORT/viewer.html"
+echo " QR   　http://$HOST:$TWIN_PORT/qr.png（執行期畫的）"
 echo "───────────────────────────────────────────────"
 if [ "$BIND" != "0.0.0.0" ]; then
   echo " ⚠ 只綁本機：手機連不到。展場要用 --lan。"

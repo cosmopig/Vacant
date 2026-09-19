@@ -72,7 +72,8 @@ a{color:var(--good)}
 
 <header>
   <h1>你手上的那一半</h1>
-  <p class="sub">左邊那台電視演的是已經跑完的真紀錄。<b>要演哪一邊，你決定。</b></p>
+  <!-- ⚠ 不要寫「左邊那台電視」：手機不知道觀眾站在哪裡。 -->
+  <p class="sub">電視上演的是已經跑完的真紀錄。<b>要演哪一邊，你決定。</b></p>
   <nav>
     <button id="tab-d" aria-selected="true">導播</button>
     <button id="tab-a" aria-selected="false">稽核</button>
@@ -89,22 +90,24 @@ a{color:var(--good)}
     <div class="row"><span class="k">電視正在演</span><span class="v" id="now-cell">—</span></div>
     <div class="row"><span class="k">這一格哪一邊</span><span class="v" id="now-side">—</span></div>
     <div class="row"><span class="k">證據等級</span><span class="v" id="now-ev">—</span></div>
-    <div class="row"><span class="k">沒人按的話</span><span class="v" id="now-next">—</span></div>
+    <div class="row"><span class="k">接下來</span><span class="v" id="now-next">—</span></div>
   </div>
 
+  <!-- ⚠ 鍵名用**觀眾的詞**。「介面」在一般人耳裡是 UI、「扣住」不知道扣什麼、
+       「位元」沒人懂、「函式」「居民」也不是走進展場那個人的詞。 -->
   <button class="btn" id="b-held">
-    <b>介面扣住</b>
-    <span>客戶沒講那兩個函式叫什麼名字。看它交出什麼、閘門怎麼判。</span>
+    <b>不告訴它名字</b>
+    <span>客戶只說要什麼功能，沒說要叫什麼名字。看它交出什麼、機器怎麼判。</span>
   </button>
 
   <button class="btn" id="b-pc">
-    <b>介面寫明</b>
-    <span>同一題、同一位居民，唯一的差別是客戶把名字寫在題目裡。</span>
+    <b>告訴它名字</b>
+    <span>一模一樣的題目、一模一樣的 agent，<b>只差客戶把名字寫進需求裡</b>。</span>
   </button>
 
   <button class="btn flip" id="b-flip">
-    <b>翻一個位元</b>
-    <span>在<b>你自己的手機上</b>把那一格收據裡的一個位元翻掉，自己重算一次看看。</span>
+    <b>自己驗一次收據</b>
+    <span>在<b>你自己的手機上</b>把收據裡的一個字改掉，看它自己算出對不上。</span>
   </button>
 
   <p class="note" id="flip-link"></p>
@@ -149,22 +152,32 @@ function cellLine(c){
   const tag = c.exit_code === 20 ? ["擋下", "block"]
             : c.exit_code === 0  ? ["交付", "pass"]
             : ["沒收尾", ""];
-  return { id: c.cell_id, side: c.side === "held" ? "介面扣住" : "介面寫明",
+  return { id: c.cell_id, side: c.side === "held" ? "沒告訴它名字" : "告訴它名字",
            tag: tag[0], cls: tag[1], evidence: c.evidence || "" };
 }
 
-/** 導播列那一行「沒人按的話」。 */
+/** 「接下來」那一行。
+ *
+ *  ⚠ 舊版一律印「N 秒後自己換下一格」，包括**他剛剛才按完**的時候——
+ *  等於告訴他「你選的東西 20 秒後會被蓋掉」，擁有感歸零。
+ *  人按出來的那一格伺服器會多停一段（`HOLD_AFTER_PRESS_S`），
+ *  這裡就照實說「停著」。 */
 function nextText(s){
   if (!s || s.next_in_s == null) return "—";
-  return `${Math.max(0, Math.round(s.next_in_s))} 秒後自己換下一格`;
+  const secs = Math.max(0, Math.round(s.next_in_s));
+  const mine = s.now && /^phone/.test(String(s.now.why || ""));
+  if (mine) return `你選的這一格停著（${secs} 秒後才換）`;
+  return `${secs} 秒後自己換下一格`;
 }
 
 /** 證據等級 → 展場措辭。**L-none 不准講成「正在發生」**（鐵律 5 的展場版）。 */
+// ⚠ 對觀眾寫「AI」不要寫「模型」（畫面上滿滿都是黏土公仔，
+//   「沒有模型參與」可以讀成「沒有公仔參與」）。
 const EV_TEXT = {
-  "L-real":    "真模型真跑",
-  "L-fake":    "假上游（通道真、模型不是）",
-  "L-none":    "這一格沒有模型參與",
-  "L-unknown": "有模型通訊，上游沒留紀錄",
+  "L-real":    "AI 真的動手了",
+  "L-fake":    "AI 沒有動手（假上游）",
+  "L-none":    "AI 沒有動手，交件是腳本寫的",
+  "L-unknown": "有 AI 通訊，上游沒留紀錄",
 };
 function evidenceText(level){ return EV_TEXT[level] || (level || "—"); }
 
@@ -225,8 +238,8 @@ function render(){
     `${p.resident || "—"} · ${p.task_id || "—"}` + (p.title ? `（${p.title}）` : "");
   const now = s.now || {};
   $("now-cell").textContent = now.cell_id || "—";
-  $("now-side").textContent = now.side
-    ? (now.side === "held" ? "介面扣住" : "介面寫明") : "—";
+  $("now-side").textContent = now.side_label
+    || (now.side ? (now.side === "held" ? "沒告訴它名字" : "告訴它名字") : "—");
   $("now-ev").textContent = evidenceText(now.evidence);
   $("now-next").textContent = nextText(s);
   for (const b of (s.buttons || [])){
@@ -234,9 +247,11 @@ function render(){
     if (!el) continue;
     el.disabled = !b.cell_id;
     el.classList.toggle("on", !!now.side && b.action === now.side);
+    // 按鈕上直接掛伺服器給的字（鍵名只有一份真相，不要兩邊各寫各的）
+    if (b.label && el.querySelector("b")) el.querySelector("b").textContent = b.label;
   }
   if (!p.paired){
-    $("err").textContent = "這一對只有一邊跑過——另一邊沒跑過就是沒跑過，不給按。";
+    $("err").textContent = "這一題只有一邊跑過——另一邊沒跑過就是沒跑過，不給按。";
   }
   const hon = $("honesty"); hon.innerHTML = "";
   for (const line of (s.honesty || [])){

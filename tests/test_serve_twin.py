@@ -329,3 +329,113 @@ def test_phone_node_check_is_runnable_offline():
         capture_output=True, text=True, timeout=60)
     assert r.returncode == 0, r.stdout + r.stderr
     assert "全部通過" in r.stdout
+
+
+# ── 翻位元的狀態會自己過期 ──────────────────────────────────────
+def test_tamper_clears_when_the_tv_moves_on(pack, tmp_path):
+    """實測抓到的謊：**舊狀態不會清**。
+
+    `tamper` 舊版只能靠明確呼叫 `untamper` 清掉，而無人值守的展場沒有人會按。
+    第一個觀眾按完走掉，導播列那一行留在螢幕上 4 分半，對後面每一位觀眾
+    指著一格他們沒看到的東西。它不是捏造，是沒有人來收。
+    """
+    out = tmp_path / "ev.jsonl"
+    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
+                                dwell=10_000, quiet=True)
+    stage.advance()
+    first = stage.now["cell_id"]
+    assert stage.press("tamper")["ok"]
+    assert stage.tamper["cell_id"] == first
+    # 同一格還在演 ⇒ 留著
+    assert stage.state()["tamper"]["cell_id"] == first
+    # 電視換格 ⇒ 當場清掉（那句話沒有指涉對象了）
+    stage.advance()
+    assert stage.now["cell_id"] != first
+    assert stage.tamper is None
+    assert stage.state()["tamper"] is None
+
+
+def test_tamper_expires_on_its_own(pack, tmp_path, monkeypatch):
+    """就算電視沒換格，翻位元也會過期：那是瞬間動作，不是狀態。"""
+    out = tmp_path / "ev.jsonl"
+    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
+                                dwell=10_000, quiet=True)
+    stage.advance()
+    stage.press("tamper")
+    assert stage.state()["tamper"] is not None
+    # 把時鐘往前撥超過 TTL（不真的等 45 秒）
+    stage.tamper_mono -= S.TAMPER_TTL_S + 1
+    assert stage.state()["tamper"] is None
+
+
+def test_tamper_state_always_matches_the_cell_on_screen(pack, tmp_path):
+    """`/state` 給出去的 tamper，`cell_id` 必定等於 `now.cell_id`（或為 None）。
+
+    這一條是那個謊的**通用形式**：電視與手機都從 `/state` 讀，
+    只要這個不變量成立，兩端都不可能指著一格沒人在看的東西。
+    """
+    out = tmp_path / "ev.jsonl"
+    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
+                                dwell=10_000, quiet=True)
+    for k in range(len(stage.flat)):
+        stage.advance()
+        if k % 3 == 0:
+            stage.press("tamper")
+        st = stage.state()
+        if st["tamper"]:
+            assert st["tamper"]["cell_id"] == st["now"]["cell_id"], k
+
+
+def test_now_carries_why_so_the_tv_can_tell_a_press_from_autoplay(pack, tmp_path):
+    """電視要分得出「人按的」與「機器自己播的」：人按的要插隊，輪播不插隊。"""
+    out = tmp_path / "ev.jsonl"
+    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
+                                dwell=10_000, quiet=True)
+    assert stage.advance()["now"]["why"] == "autoplay"
+    assert stage.press("held")["now"]["why"] == "phone"
+    assert stage.press("next")["now"]["why"] == "autoplay"   # next ⇒ 走排程
+    assert stage.state()["now"]["why"] in ("autoplay", "phone")
+
+
+# ── QR 一定要指到手機連得到的地方 ───────────────────────────────
+def test_qr_encodes_the_runtime_phone_url(pack, tmp_path):
+    """**展場當天最會壞的一格。**
+
+    舊的 `world3/qr.png` 是 2026-08-30 的靜態佔位圖（比 `phone.html` 早三個星期），
+    而 `--bind 0.0.0.0` 之後手機要連的是展場那台機器的區網 IP、每次開機可能不同。
+    ⇒ QR 的內容必須是**執行期** `base_url` 算出來的那一個網址。
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT))
+    from ops.exhibit.twin import qr as qrlib
+    out = tmp_path / "ev.jsonl"
+    srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out, dwell=10_000,
+                               quiet=True, base_url="http://192.168.1.23:8899")
+    t = threading.Thread(target=srv.serve_forever, daemon=True)
+    t.start()
+    try:
+        c = Client(f"http://127.0.0.1:{srv.server_address[1]}")
+        st = c.get_json("/state")
+        assert st["phone_url"] == "http://192.168.1.23:8899/phone.html"
+        assert "127.0.0.1" not in st["phone_url"]
+        code, headers, body = c.get("/qr.png")
+        assert code == 200 and headers["Content-Type"] == "image/png"
+        assert body[:8] == b"\x89PNG\r\n\x1a\n"
+        # 那張圖真的是那個網址畫出來的（逐 byte 相同）
+        assert body == qrlib.to_png(st["phone_url"], scale=8)
+        code, headers, body = c.get("/qr.svg")
+        assert code == 200 and "image/svg+xml" in headers["Content-Type"]
+        assert b"<svg" in body
+    finally:
+        srv.shutdown()
+        srv.server_close()
+
+
+def test_receipt_urls_use_the_same_base_as_the_qr(pack, tmp_path):
+    """收據網址與 QR 要指到同一台。兩邊各自組字串遲早會分岔。"""
+    out = tmp_path / "ev.jsonl"
+    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out, dwell=10_000,
+                                quiet=True, base_url="http://10.0.0.7:8899")
+    res = stage.advance()
+    assert res["now"]["receipt_url"].startswith("http://10.0.0.7:8899/r/")
+    assert stage.phone_url().startswith("http://10.0.0.7:8899/")

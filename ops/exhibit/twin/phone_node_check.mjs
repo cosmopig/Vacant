@@ -64,7 +64,8 @@ console.log(`資料來源：${live ? BASE + "/state（真的）" : "內建 SYNTH
         wrong.length === 0, `${bySide.length} 格，held 那一邊的標籤：${[...heldTags].join("／")}`);
   // 反面（SYNTH）：一格「扣住卻交付」的格子要印「交付」，不准印「擋下」
   const odd = api.cellLine({ cell_id: "SYNTH", side: "held", exit_code: 0 });
-  check("P1b SYNTH 扣住卻交付 ⇒ 照實印「交付」", odd.tag === "交付" && odd.side === "介面扣住",
+  check("P1b SYNTH「沒告訴它名字」卻交付 ⇒ 照實印「交付」",
+        odd.tag === "交付" && odd.side === "沒告訴它名字",
         `${odd.side} → ${odd.tag}`);
 }
 
@@ -79,9 +80,12 @@ console.log(`資料來源：${live ? BASE + "/state（真的）" : "內建 SYNTH
 {
   const t = ["L-real", "L-fake", "L-none", "L-unknown", "", null]
     .map((l) => api.evidenceText(l));
-  check("P3 L-none 的措辭是「這一格沒有模型參與」，沒有一個等級被講成「正在發生」",
-        api.evidenceText("L-none") === "這一格沒有模型參與"
+  // ⚠ 對觀眾寫「AI」不是「模型」：畫面上滿滿都是黏土公仔，
+  //   「沒有模型參與」可以讀成「沒有公仔參與」，剛好與要講的相反。
+  check("P3 L-none 講「AI 沒有動手」；沒有一個等級被講成「正在發生」，也不准出現「模型」",
+        /AI 沒有動手/.test(api.evidenceText("L-none"))
         && t.every((x) => !String(x).includes("正在發生"))
+        && t.every((x) => !String(x).includes("模型"))
         && api.evidenceText(null) === "—",
         t.slice(0, 4).join("／"));
 }

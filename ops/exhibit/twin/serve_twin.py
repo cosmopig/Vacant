@@ -26,8 +26,14 @@
 | `/state` | GET | 現在演到哪一格、下一步是什麼、翻位元的狀態 | 手機＋電視的導播列 |
 | `/control` | POST | `{"action": "held"｜"pc"｜"tamper"｜"next"｜"resume"｜"untamper"}` | 手機 |
 | `/r/<cell_id>` | GET | 302 → `/viewer.html#cell=<cell_id>`（C4：per-cell 收據） | 手機 |
+| `/qr.png`／`/qr.svg` | GET | **執行期畫的** QR，內容＝這一台真正綁在哪裡 | 電視 |
 
 附帶：`/viewer.html`（收據頁）、`/phone.html`（手機頁）、`/`（現場說明頁）。
+
+⚠ **QR 一定要執行期生成。** `vacant_hm/world3/qr.png` 是 2026-08-30 的靜態佔位圖
+（比 `phone.html` 早三個星期），而 `--bind 0.0.0.0` 之後手機要連的是展場那台機器的
+**區網 IP**，每次開機可能不同。烤死的 QR **必然指到錯的地方**，而畫面正在叫觀眾
+「掃一下」。編碼器在 `ops/exhibit/twin/qr.py`（stdlib only，判準見 `tests/test_qr.py`）。
 
 ## 展場鐵律怎麼守
 
@@ -80,6 +86,7 @@ HERE = pathlib.Path(__file__).resolve()
 REPO = HERE.parents[3]
 sys.path.insert(0, str(REPO))
 
+from ops.exhibit.twin import qr as qrlib  # noqa: E402
 from ops.exhibit.twin import to_events as tolib  # noqa: E402
 
 TWIN = HERE.parent
@@ -87,13 +94,33 @@ DEFAULT_PACK = TWIN / "twin_pack.json"
 VIEWER = REPO / "examples" / "twin_viewer.html"
 PHONE = TWIN / "phone.html"
 
+#: 有人按過之後，那一格至少停這麼久才輪播——**他的選擇不可以 20 秒就被蓋掉**。
+#: （Fable 的觀眾視角稽核：輪播把人的選擇蓋掉 ⇒ 擁有感歸零。）
+HOLD_AFTER_PRESS_S = 45.0
+
+#: 翻一個位元是一個**瞬間動作**，不是一種狀態。留這麼多秒就過期。
+#:
+#: ⚠ 為什麼一定要有這個：舊版的 `tamper` **只能靠明確呼叫 `untamper` 清掉**，
+#:   而無人值守的展場沒有人會去按。實測：第一個觀眾按完走掉，那行字
+#:   （「有人正在自己的手機上重算 KAL-52__… 的收據」）留在螢幕上 4 分半，
+#:   對後面每一位觀眾指著一格他們沒看到的東西。**它不是捏造，是舊狀態不會清。**
+#:   而且光看畫面看不出來——字在、格式對、措辭也對，要按下去同時讀 `/state`
+#:   比對 `cell_id` 才會現形。
+TAMPER_TTL_S = 45.0
+
 #: 兩顆導播鍵 → 那一格是哪一邊的反事實。
 #: `held`＝客戶沒講介面叫什麼（`explicit=False`）；`pc`＝寫明了（`explicit=True`）。
 SIDES = ("held", "pc")
 
+#: ⚠ **鍵名用觀眾的詞。** 「介面」在一般人耳裡是 UI、「扣住」不知道扣什麼、
+#: 「位元」沒人懂——這些是我們的詞，不是走進展場那個人的詞。
+SIDE_LABEL = {
+    "held": "不告訴它名字",
+    "pc": "告訴它名字",
+}
 SIDE_TEXT = {
-    "held": "介面扣住：客戶沒講那兩個函式叫什麼名字",
-    "pc": "介面寫明：客戶把函式名字寫在題目裡",
+    "held": "客戶沒說要寫成什麼名字，只說要什麼功能",
+    "pc": "客戶把要用的名字寫在需求裡了",
 }
 
 
@@ -160,6 +187,7 @@ class Stage:
         self.last_control: dict | None = None
         self.skipped: list[dict] = []
         self.tamper: dict | None = None
+        self.tamper_mono: float = 0.0
         self.deadline = time.monotonic() + dwell
         self.out.parent.mkdir(parents=True, exist_ok=True)
         self.out.write_text("", encoding="utf-8")
@@ -167,6 +195,15 @@ class Stage:
     # ── 事件 ────────────────────────────────────────────────────
     def verify_url(self, cell_id: str) -> str:
         return f"{self.base_url}/r/{cell_id}"
+
+    def phone_url(self) -> str:
+        """手機要連的那個網址。**`base_url` 是什麼，這裡就是什麼**——
+
+        不要在這裡自己組 `127.0.0.1`：那是展場當天最容易壞的一格
+        （電視上顯示 `127.0.0.1`，觀眾的手機連不到自己的迴路位址）。
+        `exhibit_boot.sh --lan` 會把區網 IP 從命令列傳進來。
+        """
+        return f"{self.base_url}/phone.html"
 
     def _block(self, cell_id: str) -> list[dict]:
         cell = self.pl.cells[cell_id]
@@ -199,6 +236,7 @@ class Stage:
                 "task_id": cell["task_id"],
                 "side": "pc" if cell["explicit"] else "held",
                 "side_text": SIDE_TEXT["pc" if cell["explicit"] else "held"],
+                "side_label": SIDE_LABEL["pc" if cell["explicit"] else "held"],
                 "evidence": cell["evidence"],
                 "evidence_note": tolib.packlib.EVIDENCE_TEXT.get(cell["evidence"], ""),
                 "exit_code": cell["exit_code"],
@@ -209,7 +247,12 @@ class Stage:
                 "at": iso_now(),
                 "n": self.n_emitted,
             }
-            self.deadline = time.monotonic() + self.dwell
+            # 人按出來的那一格停久一點：輪播 20 秒就把他的選擇蓋掉 ＝ 白按。
+            self.deadline = time.monotonic() + (
+                max(self.dwell, HOLD_AFTER_PRESS_S) if why.startswith("phone")
+                else self.dwell)
+            # 換格了 ⇒ 上一格的翻位元狀態沒有指涉對象了，當場清掉。
+            self._expire_tamper(cell_id)
             return {"ok": True, "now": self.now}
 
     # ── 排程 ────────────────────────────────────────────────────
@@ -271,9 +314,11 @@ class Stage:
                 cid = kw.get("cell_id") or (self.now or {}).get("cell_id")
                 if not cid or cid not in self.pl.cells:
                     return {"ok": False, "error": "還沒有一格可以翻"}
+                self.tamper_mono = time.monotonic()
                 self.tamper = {
                     "cell_id": cid,
                     "at": iso_now(),
+                    "ttl_s": TAMPER_TTL_S,
                     "url": self.verify_url(cid) + "?tamper=1",
                     # ⚠ 誠實邊界 2：這裡不宣告任何驗證結果。
                     "note": "翻位元與重算發生在觀眾自己的瀏覽器裡；這台機器沒有驗、"
@@ -282,11 +327,36 @@ class Stage:
                 return {"ok": True, "tamper": self.tamper}
             if action == "untamper":
                 self.tamper = None
+                self.tamper_mono = 0.0
                 return {"ok": True, "tamper": None}
             return {"ok": False, "error": f"不認得的 action：{action!r}"}
 
+    def _expire_tamper(self, playing: str | None = None) -> None:
+        """翻位元的狀態自己會過期，**不需要有人來按 `untamper`**。
+
+        兩條，滿足任一條就清掉：
+
+        1. **超過 TTL**（`TAMPER_TTL_S`）。翻位元是瞬間動作，不是狀態。
+        2. **電視換格了**。那行字講的是「有人正在重算**這一格**」；
+           電視都演到下一格了，那句話就沒有指涉對象了。
+
+        ⚠ 這件事一定要在**伺服器**這一端做，不能只靠電視端不印：
+        `/state` 是手機也在讀的，而手機那一頁上「翻一個位元」那顆鍵的狀態
+        也是從這裡來的。
+        """
+        if not self.tamper:
+            return
+        if time.monotonic() - self.tamper_mono > TAMPER_TTL_S:
+            self.tamper = None
+            self.tamper_mono = 0.0
+            return
+        if playing and self.tamper.get("cell_id") != playing:
+            self.tamper = None
+            self.tamper_mono = 0.0
+
     def state(self) -> dict:
         with self.lock:
+            self._expire_tamper((self.now or {}).get("cell_id"))
             pair = self.pl.pair(self.pair_idx)
             return {
                 "v": 1,
@@ -299,14 +369,14 @@ class Stage:
                     "of": len(self.pl.pairs),
                 },
                 "buttons": [
-                    {"action": "held", "label": "介面扣住", "text": SIDE_TEXT["held"],
-                     "cell_id": pair.get("held")},
-                    {"action": "pc", "label": "介面寫明", "text": SIDE_TEXT["pc"],
-                     "cell_id": pair.get("pc")},
+                    {"action": "held", "label": SIDE_LABEL["held"],
+                     "text": SIDE_TEXT["held"], "cell_id": pair.get("held")},
+                    {"action": "pc", "label": SIDE_LABEL["pc"],
+                     "text": SIDE_TEXT["pc"], "cell_id": pair.get("pc")},
                     # ⚠ 措辭：這裡**不准預告結果**。「翻掉就會紅」是一個宣告，
                     #   而這台機器沒有算過。要看的是他自己那一頁算出什麼。
-                    {"action": "tamper", "label": "翻一個位元",
-                     "text": "在你自己的手機上把收據裡的一個位元翻掉，自己重算一次看看",
+                    {"action": "tamper", "label": "自己驗一次收據",
+                     "text": "把收據裡的一個字改掉，看它自己算出對不上",
                      "cell_id": (self.now or {}).get("cell_id")},
                 ],
                 "tamper": self.tamper,
@@ -316,6 +386,10 @@ class Stage:
                 "laps": self.laps,
                 "dwell_s": self.dwell,
                 "next_in_s": round(max(0.0, self.deadline - time.monotonic()), 1),
+                # 電視要拿這個去畫 QR／印在螢幕上。**沒有這一格的時候電視是瞎的**
+                # （它只知道事件流的網址，不知道手機該連哪裡）。
+                "phone_url": self.phone_url(),
+                "qr_url": f"{self.base_url}/qr.png",
                 "evidence_counts": self.pack_counts(),
                 "pairs": self.pl.pairs,
                 # 整批格子的**原值**。手機的稽核分頁逐格印它——
@@ -424,6 +498,19 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, st.out.read_bytes(), "text/plain; charset=utf-8")
         elif path == "/state":
             self._json(st.state())
+        elif path in ("/qr.png", "/qr.svg"):
+            # 內容＝這一台**真正綁在哪裡**，不是開發時寫死的那個。
+            url = st.phone_url()
+            try:
+                if path.endswith(".svg"):
+                    self._send(200, qrlib.to_svg(url).encode("utf-8"),
+                               "image/svg+xml; charset=utf-8")
+                else:
+                    self._send(200, qrlib.to_png(url, scale=8),
+                               "image/png")
+            except ValueError as e:
+                # 網址太長畫不出來 ⇒ **明講**，不要吐一張掃不開的圖。
+                self._json({"error": str(e), "url": url}, 500)
         elif path == "/viewer.html":
             self._file(VIEWER, "text/html; charset=utf-8")
         elif path == "/phone.html":
@@ -496,7 +583,9 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=None, help="events.jsonl 的落點")
     ap.add_argument("--dwell", type=float, default=30.0, help="沒人按的時候幾秒換一格")
     ap.add_argument("--token", default="", help="可選：/control 的共享密鑰")
-    ap.add_argument("--base-url", default="", help="收據網址的前綴（手機看得到的那個）")
+    ap.add_argument("--base-url", default="",
+                    help="手機看得到的位址前綴（收據與 QR 都用它）。"
+                         "展場一定要給區網 IP，不然 QR 會指到 127.0.0.1")
     a = ap.parse_args(argv)
 
     pack = json.loads(pathlib.Path(a.pack).read_text(encoding="utf-8"))
@@ -507,12 +596,16 @@ def main(argv=None) -> int:
     threading.Thread(target=autoplay, args=(stage, stop), daemon=True).start()
     host = a.bind if a.bind != "0.0.0.0" else "127.0.0.1"
     print(f"展件伺服器 http://{host}:{srv.server_address[1]}/")
-    print(f"  手機頁   http://{host}:{srv.server_address[1]}/phone.html")
+    print(f"  手機頁   {stage.phone_url()}")
+    print(f"  QR       {stage.base_url}/qr.png（執行期畫的，內容就是上面那一行）")
     print(f"  電視接法 world3/index.html?live=http://{host}:"
           f"{srv.server_address[1]}/live/events.jsonl&poll=2000")
     print(f"  {len(stage.pl.pairs)} 對（同一題 × 扣住／寫明）、"
           f"{len(stage.pl.cells)} 格、{a.dwell:g} 秒輪播一格")
     print("  ⚠ 這一支不驗簽章也不宣告驗證結果：可驗的那一份是收據頁（/r/<cell_id>）")
+    if a.bind == "0.0.0.0" and "127.0.0.1" in stage.base_url:
+        print("  ⚠ 綁在 0.0.0.0 但 --base-url 還是 127.0.0.1："
+              "QR 會指到手機自己的迴路位址，掃了一定連不到。用 --base-url 給區網 IP。")
     if a.bind == "0.0.0.0" and not a.token:
         print("  ⚠ 綁在 0.0.0.0 而且沒有 --token：同一個區網上的任何人都按得動這台電視")
     stage.advance()
