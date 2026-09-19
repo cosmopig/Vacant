@@ -513,11 +513,28 @@ verdict_hash    = 8ed10a3f3898e68306bc5c827ce365368782ed33e367d5ce5b5a268e80f719
 receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
 ```
 
-**那一通 `BrokenPipeError`**（`elapsed_s = 13.5`、`request_bytes = 2521`）：
-OpenCode 在上游還在吐的時候把連線收掉了——它同時發了主對話與
-title generator 兩路，主對話先結束，另一路就被丟掉。**沒有影響裁決**
-（驗收跑的是凍結快照不是 wire），但它證明 `wire_errors > 0` **不等於接線壞了**，
-讀的時候要配 `index.jsonl` 的 `error` 欄位看。
+**那一通 `BrokenPipeError`**（`elapsed_s = 13.5`、`request_bytes = 2521`）
+**是 title generator，不是模型主通道**——拆 `*.req.bin` 逐通看就知道：
+
+```
+status=200  tools=10  n_msgs=2  model=gemma-4-12b-it-qat   "You are opencode, an interactive CLI tool…"
+status=200  tools=10  n_msgs=4  model=gemma-4-12b-it-qat
+status=200  tools=10  n_msgs=6  model=gemma-4-12b-it-qat
+status=200  tools=10  n_msgs=8  model=gemma-4-12b-it-qat
+status=0    tools=0   n_msgs=3  model=gemma-4-12b-it-qat   "You are a title generator. You output ONLY a thread title."
+```
+
+主對話先結束，OpenCode 就把還在跑的 title generator 連線收掉了。
+**沒有影響裁決**（驗收跑的是凍結快照不是 wire），但它證明
+`wire_errors > 0` **不等於接線壞了**，讀的時候要配 `index.jsonl` 的 `error`
+欄位與 `*.req.bin` 一起看。
+
+⚠ 同一份拆解也**重新踩到 §1 那個坑的反面**：這一跑的 title generator 是
+**最後一通**不是第一通。判準仍然是「這一通帶不帶 `tools`」，不是通次。
+
+順帶：上面 `n_msgs` 一路 2→4→6→8，**每一通都把完整上文重放一次**
+（`tools=10` 固定、沒有 `previous_response_id`）。
+⇒ 在 OpenCode 的 chat/completions 這條路上，**鐵律 3「逐字落盤」成立**。
 
 ### 8.3 收據驗證（先負控制再驗該跑）
 
