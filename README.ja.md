@@ -28,9 +28,18 @@ vacant --help                     # インストール後、コマンド名は v
 
 > ⚠ **`pip install vacant` で入るのは本プロジェクトではない。** PyPI の `vacant`
 > （2026-09-19 実測で 0.4.15、7.5 MB の `cp311-abi3-manylinux` ネイティブ wheel）は
-> **別人の** Rust engine bindings であり、しかも**エラーにならず**静かに入る。
+> **別人の**パッケージであり、その Summary は逐語で *"Python bindings for the vacant
+> Rust engine — domain availability via authoritative DNS"*（作者 David Poblador i
+> Garcia、`github.com/alltuner/vacant`）。しかも**エラーにならず**静かに入る。
 > 三つの名前を分けて覚えること：**配布名 `vacant-network`**、**コマンド名 `vacant`**、
 > **import 名 `vacant`**。
+>
+> ⚠ **しかも名前は二つとも衝突する。** 相手のパッケージ**も** `vacant` という import 名を
+> 占有し、**も** `vacant` という名のコマンドを入れる。同一 venv での実測：
+> `vacant-network` を先に、`vacant` を後に入れると**相手が静かに上書きする**——
+> `vacant --help` は DNS ツールになり、`import vacant` も相手のものになり、
+> 途中どこにもエラーは出ない。見分け方と復旧は
+> 〈[遭遇するかもしれないこと](#遭遇するかもしれないこと)〉の最初の二行。
 >
 > **Python 3.11+。** `pip install` 一回で **30 個の wheel、60 MB** が入る——
 > `pyproject.toml` が宣言する runtime 依存は 3 つだけ（`cryptography`／`mcp`／
@@ -404,7 +413,8 @@ vacant --help                     # インストール後に使える CLI
 
 | 症状 | 何が起きたか | どうするか |
 |---|---|---|
-| 入れた後の `import vacant` が本プロジェクトで全く無い | **`pip install vacant` で入るのは別人のパッケージ**（Rust engine bindings、7.5 MB のネイティブ wheel）で、それ**も** `vacant` という import 名を占有し、しかも**エラーにならない** | 見分け方：`python3 -c "import vacant; print(vacant.__version__)"`——本物は `0.7.0` を出力し、別人のものは `AttributeError` を投げる。修正：`pip uninstall -y vacant` の後 `pip install vacant-network` |
+| 入れた後の `import vacant` や `vacant --help` が本プロジェクトで全く無い | **`pip install vacant` で入るのは別人のパッケージ**（authoritative-DNS ツールの Rust bindings、7.5 MB のネイティブ wheel）。それ**も** `vacant` という import 名を占有し、**も** `vacant` というコマンドを入れる。本物を先・相手を後に入れると**相手が静かに上書きし、エラーは一切出ない** | 見分け方：`python3 -c "import vacant; print(vacant.__version__)"`——本物は `0.7.0` を出力し、相手は `AttributeError` を投げる。`vacant --help` の一行目に `{init,info,call,demo,…}` が並ぶのが本物 |
+| `pip uninstall -y vacant` の後に `vacant` コマンドが丸ごと消えるのに、`pip list` はまだ `vacant-network==0.7.0` が入っていると言う | 二つのパッケージが同じパスに書き込むため、相手を消すと**共有していたコマンドまで持って行かれる**。pip は本物が空洞化したことを知らない | `pip install --force-reinstall --no-deps vacant-network`（実測で完全に復旧：コマンドが戻り、`vacant.__version__` も `0.7.0` に戻る） |
 | `python3 -m venv …` ⇒ `The virtual environment was not created successfully because ensurepip is not available.` | Debian／Ubuntu が `ensurepip` を別パッケージに切り出しており、素のイメージには入っていない。`venv` モジュール自体はあり、落ちるのはその下の `ensurepip` | `sudo apt-get install -y python3-venv`（メッセージ上は `python3.12-venv`）を実行し、**venv を作り直す**。実測 5.5 秒、**再起動は不要** |
 | そもそもシステムに `pip` / `pip3` が無い | 同じ理由で `python3` が素のまま | 同上。venv を作れば中に pip 24.0 が付いてくる |
 | `pip install` 一回で site-packages に 30 個・60 MB 増える | `mcp` だけで `pydantic`／`starlette`／`uvicorn`／`httpx`／`sse-starlette` … を連れてくる | 現時点で「ゲートだけ」の extras は**無く**、入れれば全部入る。ゲートと領収書の経路（`vacant.vrun.*`）は実際には `mcp` を使わない |

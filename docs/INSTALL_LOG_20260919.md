@@ -196,6 +196,60 @@ Successfully downloaded vacant
 - **指令名是 `vacant`。**
 - 這兩個不一樣，而且分別屬於兩個不同的人。README 第一段就要講。
 
+### 5.1 追加實測（macOS，Python 3.13.1）：**兩個名字都撞，而且互相靜靜覆蓋**
+
+上面只證明了「裝到別人的東西」。回頭在 macOS 上補了四個一次性的 venv，量到的比那更糟。
+先看對方的 metadata（逐字）：
+
+```
+$ pip show -f vacant
+Name: vacant
+Version: 0.4.15
+Summary: Python bindings for the vacant Rust engine — domain availability via authoritative DNS.
+Home-page: https://github.com/alltuner/vacant
+Author-email: David Poblador i Garcia <david@poblador.com>
+License: MIT
+Files:
+  ../../../bin/vacant
+```
+
+**它也裝一支叫 `vacant` 的指令，也佔用 `vacant` 這個 import 名。** 兩個套件寫到同一批路徑。
+
+| 順序 | `vacant --help` 是誰的 | `import vacant.__version__` | 有沒有錯誤訊息 |
+|---|---|---|---|
+| 只裝 `vacant-network` | 我們的（`{init,info,call,demo,…}`） | `0.7.0` | — |
+| 只裝 `vacant` | 對方的（`[-o {jsonl,text}] [--concurrency …]`） | `AttributeError` | — |
+| 先 `vacant` 後 `vacant-network` | **我們的** | `0.7.0` | **零** |
+| 先 `vacant-network` 後 `vacant` | **對方的** | `AttributeError` | **零** |
+
+**後裝的那個靜靜蓋過先裝的**，四種情形一個警告都沒有，`pip list` 兩個都列著。
+
+更難發現的是解除安裝：
+
+```
+$ pip uninstall -y vacant
+Uninstalling vacant-0.4.15:
+  Successfully uninstalled vacant-0.4.15
+$ vacant --help
+zsh: no such file or directory: …/bin/vacant        ← 指令整個不見了
+$ pip list --format=freeze | grep -i vacant
+vacant-network==0.7.0                                ← pip 還說我們的裝著
+```
+
+⇒ **移除對方時把共用的那支指令一起帶走，而 pip 不知道我們的被挖空了。**
+救法實測有效：
+
+```
+$ pip install --force-reinstall --no-deps vacant-network
+$ vacant --help | head -1
+usage: vacant [-h] [--root ROOT]
+$ python3 -c "import vacant; print(vacant.__version__)"
+0.7.0
+```
+
+這一節是**判別式**的來源：`python3 -c "import vacant; print(vacant.__version__)"`
+——我們的印 `0.7.0`，對方丟 `AttributeError`。
+
 ---
 
 ## 6. CLI 在不在
@@ -461,9 +515,9 @@ $ date -Is
    `sh -c printf`。它證明的是**安裝、閘門、退出碼、收據鏈**，
    **不是**「某個 agent 用 Vacant 做得好」。真模型的四個 agent 逐格實測在
    [`docs/AGENT_COMPAT.md`](AGENT_COMPAT.md)。
-2. **沒有量 macOS 與 Windows 的完整路徑。** macOS 上只跑過
-   `pip install` ／ `selftest` ／ `demo gate` ／ 兩格 `vacant run`（都過，
-   Python 3.13.1），沒有做 clean-room。Windows **完全沒量**，而且
+2. **沒有量 macOS 與 Windows 的完整路徑。** macOS（Python 3.13.1）上只跑過
+   `pip install` ／ `selftest` ／ `demo gate` ／ 兩格 `vacant run`（都過）
+   ＋ §5.1 的套件撞名四格，**沒有做 clean-room**。Windows **完全沒量**，而且
    `vacant/checks.py` 本來就沒有可用的 Windows 沙箱分支。
 3. **沒有量「裝了之後跑 repo 的測試套件」。** 那需要 clone ＋ `pytest`，
    不在「外人照著 README 裝起來用」這條路徑上。

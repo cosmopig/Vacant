@@ -30,9 +30,18 @@ vacant --help                     # once installed, the command is called `vacan
 
 > ⚠ **`pip install vacant` does not install this project.** The `vacant` name on PyPI
 > (measured 2026-09-19: version 0.4.15, a 7.5 MB `cp311-abi3-manylinux` native wheel) is
-> **somebody else's** Rust engine bindings, and it **does not error** — it installs
-> quietly. Three names, keep them apart: **distribution `vacant-network`**,
-> **command `vacant`**, **import `vacant`**.
+> **somebody else's** package — its own Summary reads verbatim *"Python bindings for the
+> vacant Rust engine — domain availability via authoritative DNS"* (author David Poblador
+> i Garcia, `github.com/alltuner/vacant`). It **does not error**; it installs quietly.
+> Three names, keep them apart: **distribution `vacant-network`**, **command `vacant`**,
+> **import `vacant`**.
+>
+> ⚠ **And both names collide.** That package **also** occupies the `vacant` import name
+> and **also** installs a command called `vacant`. Measured in one venv: install
+> `vacant-network` first, then `vacant`, and **theirs quietly wins** — `vacant --help`
+> becomes the DNS tool and `import vacant` becomes theirs, with no error anywhere. How to
+> tell them apart and how to recover: the first two rows of
+> [What you will run into](#what-you-will-run-into).
 >
 > **Python 3.11+.** One `pip install` pulls in **30 wheels, 60 MB** — `pyproject.toml`
 > declares only 3 runtime dependencies (`cryptography` / `mcp` / `jsonschema`); the rest
@@ -414,7 +423,8 @@ hit. The verbatim transcript, with per-step timings, is
 
 | symptom | what happened | what to do |
 |---|---|---|
-| after installing, `import vacant` is not this project at all | **`pip install vacant` installs somebody else's package** (Rust engine bindings, 7.5 MB native wheel) which **also** occupies the `vacant` import name, and **does not error** | tell them apart with `python3 -c "import vacant; print(vacant.__version__)"` — ours prints `0.7.0`, theirs raises `AttributeError`. Fix: `pip uninstall -y vacant`, then `pip install vacant-network` |
+| after installing, `import vacant` or `vacant --help` is not this project at all | **`pip install vacant` installs somebody else's package** (Rust bindings for an authoritative-DNS tool, 7.5 MB native wheel). It **also** occupies the `vacant` import name and **also** installs a `vacant` command; install ours first and theirs second and **theirs quietly wins, with no error message** | tell them apart with `python3 -c "import vacant; print(vacant.__version__)"` — ours prints `0.7.0`, theirs raises `AttributeError`. Ours is the `vacant --help` whose first line lists `{init,info,call,demo,…}` |
+| after `pip uninstall -y vacant` the `vacant` command is gone entirely, yet `pip list` still reports `vacant-network==0.7.0` | the two packages write to the same paths, so uninstalling theirs **takes the shared command with it**; pip has no idea ours was hollowed out | `pip install --force-reinstall --no-deps vacant-network` (measured to restore it fully: the command comes back and `vacant.__version__` is `0.7.0` again) |
 | `python3 -m venv …` ⇒ `The virtual environment was not created successfully because ensurepip is not available.` | Debian/Ubuntu split `ensurepip` into its own package and the stock image does not carry it. The `venv` module itself is present; what dies is `ensurepip` underneath it | `sudo apt-get install -y python3-venv` (the message calls it `python3.12-venv`), then **recreate the venv**. Measured at 5.5 s; **no reboot needed** |
 | there is no `pip` / `pip3` on the system at all | same cause — `python3` is bare | same fix. Once the venv exists it ships its own pip 24.0 |
 | one `pip install` adds 30 packages and 60 MB to site-packages | `mcp` alone drags in `pydantic` / `starlette` / `uvicorn` / `httpx` / `sse-starlette`, … | there is currently **no** "gate only" extra, so installing gets all of it. The gate and receipt path (`vacant.vrun.*`) does not actually use `mcp` |
