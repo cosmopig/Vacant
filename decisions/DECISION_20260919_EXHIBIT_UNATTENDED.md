@@ -440,3 +440,44 @@ a2d674fadef1ea547a009d3574cc0b4f96dbc5f3b66c81157039853c5060f8f9  standby_frozen
   不再是上一次那兩個手動丟進 `~/.local/share/fonts/` 的檔。
 - 截圖在 `~/shots_20260919/`（27 張）。
 - 我起的兩顆 headless chromium（9223／9224）已經收掉。
+
+### 附帶回報：`fb7f4bfb`（`vacant` → `vacant_network`）打破了兩樣**凍結**的東西
+
+不是我的改動，**我也沒有動手修**——重新祝福一個凍結的 pin 是人的決定，
+不是清理工作。這裡只把量到的東西釘住，免得它變成「跑了但沒人回報」。
+
+**1）全套 `pytest` 有 5 條紅的，跟展件零重疊，全部指向同一次改名。**
+在**穩定後的樹**上單獨重跑仍然紅（所以不是 mid-run 污染）：
+
+| 紅的 | 量到的理由 |
+|---|---|
+| `test_gain_harness_arms.py::test_t12_existing_arms_and_generate_are_byte_identical` | `arm_conform` 的 sha256 從 `b987a2fa…` 變成 `7f4d1e8b…`。那條 pin 的訊息是「**H 臂不准動既有臂**」。`ops/gain/harness_arms.py` 最後一次被改就是 `fb7f4bfb`，現在裡面有 8 處 `vacant_network` |
+| `test_gain_harness_arms.py::test_visible_report_classifies_the_five_documented_outcomes` | 同一支 |
+| `test_r449c_launcher_prereg.py`（2 條） | 測試逐字比對 R449c 那份**預註冊**裡的 `git diff … -- <四個檔>` 指令，而那份文件裡的路徑被改名改成了 `vacant_network/checks.py` |
+| `test_cert_drift_gate_r477.py::test_selftest_passes` | `G.selftest()` 回 3（應為 0） |
+
+> ⚠ 前兩條的份量不只是「測試紅了」。那條 sha256 pin 存在的理由是**跨 run 可比性**
+> （同 CLAUDE.md 講 `suitemutate` 致死率不綁 `GaugeOutcome.ok` 的那個理由：
+> 一綁，r452c 那批歸檔資料就失去可比性）。既有臂的位元組變了 ⇒
+> **已經歸檔的 G 實驗 run 還能不能跟新的逐位元比，需要一個裁決，不是一次重新釘 hash。**
+>
+> ⚠ R449c 那兩條撞的是 CLAUDE.md 白紙黑字的規矩：「**各份預註冊檔內文裡的逐塊指令
+> 是刻意不改的**——事後改寫它記載的指令等於讓紀錄描述一個沒下過的指令」。
+
+**2）`docs/paper_2026-09-14/source_manifest.json` 的凍結 sha256 有 3 份**對不上了**——
+不是漂了，是**那個路徑不存在了**：
+
+```
+釘了 29 份 → 對上 23、漂了 1、缺檔 5
+  缺檔  vacant/logbook.py · vacant/canonical.py · vacant/codebench.py   ← 改名造成的
+  缺檔  CONCLUSION_20260904_R445_… · CONCLUSION_20260904_R446_…        ← 2026-09-18 搬進 decisions/，與改名無關
+  漂了  runs/INDEX.md                                                   ← 與改名無關
+```
+
+那三份 pin 現在**連驗都驗不了**。是要把 pin 指到新路徑（等於承認凍結的東西會跟著改名走），
+還是別的做法，是人的決定。
+
+**方法備註**：這兩件都是「我以為在跑全套 pytest」才撞到的。全套在這一輪
+**從來沒有乾淨跑完過**——兩次都跑到一半被平行 agent 的 commit 換掉腳下的樹
+（第一次是 `fb7f4bfb` 的 659 檔改名，第二次是 `8b309147` 刪掉 R481 夾具）。
+**在共用工作樹上跑全套 pytest 不會得到可信的結果**，這件事本身也是一個結論。
