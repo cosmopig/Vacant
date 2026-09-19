@@ -614,9 +614,32 @@ def build_parser() -> argparse.ArgumentParser:
     ps.set_defaults(func=cmd_selftest)
 
     # 產品主入口：Vacant 自己先 delegate，簽章 gate 過後才啟動外部 agent。
+    # ⚠ `vacant run` 有**兩種模式**，分水嶺是 argv 裡有沒有 `--`（見 `main()`）：
+    #   有 `--` ⇒ 包住任意 CLI agent 的收件口（`vacant/vrun/launcher.py`）
+    #   沒有   ⇒ 下面這個舊的 eco 版
+    #   ⚠ `--help` 只印得出其中一個（argparse 在看到 `--help` 時就停了），
+    #     而它印的是舊的那個 ⇒ **外人照著 help 讀永遠找不到收件口**。
+    #     所以把另一條路寫進 description，`vacant run --help` 一定看得到。
     prun = sub.add_parser(
         "run",
-        help="Vacant-first 強制入口：先驗證交付，再啟動 Hermes／任意 CLI agent",
+        help="包住任意 CLI agent：先驗證交付才放行（用 `--` 分隔）；"
+             "不給 `--` 則走舊的 eco 版",
+        description=(
+            "vacant run 有兩種模式，分水嶺是 argv 裡有沒有 `--`。\n"
+            "\n"
+            "【一】收件口（V0/V1/V2，**主要用法**）——`--` 之後是整條 agent 命令：\n"
+            "\n"
+            "    vacant run --workspace ./ws --suite ./acceptance -- pi -p '做這件事'\n"
+            "\n"
+            "  它把 agent 包起來、中介模型通道、在行程結束那一刻跑驗收、簽收據、\n"
+            "  沒過就擋下交付（exit 20）。旗標有 --workspace/--suite/--run-dir/\n"
+            "  --retry/--max-attempts/--feedback-into/--sandbox/--json 等。\n"
+            "  ⚠ **完整說明要用** `python -m vacant.vrun.launcher --help`\n"
+            "     （argparse 在這裡看到 --help 就停了，印不出那一組）。\n"
+            "  文件：docs/VACANT_RUN.md\n"
+            "\n"
+            "【二】舊的 eco 版（沒有 `--` 時走這條）——下面列的就是它的旗標。\n"),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     prun.add_argument("task", nargs="?", help="任務文字；長任務可改用 --task-file")
     prun.add_argument("--task-file", help="UTF-8 任務檔")
