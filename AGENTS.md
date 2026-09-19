@@ -7,7 +7,7 @@
 
 ```
 package        vacant-network        (PyPI)     import name: vacant
-version        0.7.0
+version        0.8.0
 python         >= 3.11
 runtime deps   cryptography>=42, mcp>=1.26,<2, jsonschema>=4.21
 license        MIT
@@ -55,12 +55,12 @@ word is *receiving desk*, not *mandatory layer*.
 
 | Shape | Entry point | Binding on the agent? |
 |---|---|---|
-| **Library** | `vacant.agent.Vacant` (`vacant/agent.py:51-103`) | **No — voluntary.** `self.brain` is a public attribute. Code that does not call Vacant simply does not involve Vacant. |
-| **MCP tool** | `vacant.mcp_server` (`vacant/mcp_server.py:184-210`) | **No — persuasion only.** The `delegate` tool docstring says "THE PREFERRED PATH". A model that ignores the tool is not intercepted, and nothing detects that. |
-| **Controller** | `vacant.controller.VacantFirstController.delegate_then_run` (`vacant/controller.py:304-530`) | **Yes — for the subprocess it spawns itself.** It obtains a verified delivery first, and only then execs the downstream agent with `shell=False`. |
+| **Library** | `vacant_network.agent.Vacant` (`vacant_network/agent.py:51-103`) | **No — voluntary.** `self.brain` is a public attribute. Code that does not call Vacant simply does not involve Vacant. |
+| **MCP tool** | `vacant_network.mcp_server` (`vacant_network/mcp_server.py:184-210`) | **No — persuasion only.** The `delegate` tool docstring says "THE PREFERRED PATH". A model that ignores the tool is not intercepted, and nothing detects that. |
+| **Controller** | `vacant_network.controller.VacantFirstController.delegate_then_run` (`vacant_network/controller.py:304-530`) | **Yes — for the subprocess it spawns itself.** It obtains a verified delivery first, and only then execs the downstream agent with `shell=False`. |
 | **Harness owns the loop** | e.g. `ops/gain/r530/openwork_arms.py:642-696` | **Yes — the harness *is* the loop.** The agent has no path that skips the gate. ⚠ This is the shape **we** use for experiments, not a recommended integration: it means writing the loop yourself, so you cannot use an off-the-shelf agent. |
 
-Verbatim honest boundary from `vacant/controller.py:7-8`, which nothing in this file may
+Verbatim honest boundary from `vacant_network/controller.py:7-8`, which nothing in this file may
 be read as softening:
 
 > 保證只涵蓋透過本 controller 啟動的子行程；無法阻止同一 OS 使用者繞過本命令直接執行
@@ -71,11 +71,11 @@ be read as softening:
 > exit requires containers, ACLs, or egress policy.)*
 
 **What *is* unconditional: the intake check itself cannot be routed around.**
-`vacant/receipt.py` plus `controller.verify_delivery` **recompute five sha256 digests**
+`vacant_network/receipt.py` plus `controller.verify_delivery` **recompute five sha256 digests**
 (request, task, tests, answer, trust card), verify the Ed25519 signature, compare
 `chain_head` / `stream_id` / `branch_id` against the chain as it stands **right now**,
 require every review to be bound to this exact delivery and answer, and only then
-`policy.admit`. The launch right is claimed with `os.O_EXCL` (`vacant/controller.py:372`),
+`policy.admit`. The launch right is claimed with `os.O_EXCL` (`vacant_network/controller.py:372`),
 so **a receipt is consumable exactly once**. Anything that reaches the desk without a
 receipt that survives all of that is rejected.
 
@@ -104,7 +104,7 @@ no cooperation from us:
 
 ```bash
 pip install vacant-network
-python -c "import vacant; print(vacant.__version__)"
+python -c "import vacant_network; print(vacant_network.__version__)"
 vacant --help                 # console script
 ```
 
@@ -119,7 +119,7 @@ vacant demo gate              # ~2s, offline: a fake agent declares done, the ga
 vacant run --suite <dir> -- <your agent command>
 ```
 
-The judgement layer lives in `vacant/vrun/` and is **the same one copy** the R530
+The judgement layer lives in `vacant_network/vrun/` and is **the same one copy** the R530
 experiments run: `ops/gain/r530/{acceptance,receipts,wshash,sandbox}` and
 `ops/gain/replay/verify_run_receipts.py` are now re-exports of it
 (`sys.modules` aliasing — the same module object, so there is no second ruler).
@@ -148,7 +148,7 @@ Two independent pieces. Use either alone.
 ### 3a. The gate — run the customer's acceptance tests
 
 ```python
-from vacant.checks import run_python_check
+from vacant_network.checks import run_python_check
 
 tests = "assert solve([1, 2, 3, 4]) == 6\nassert solve([]) == 0\n"
 candidate = agent_writes_some_code()
@@ -161,14 +161,14 @@ if not ok:
 
 `run_python_check` runs the **test code and the candidate code in two separate
 processes** and talks between them over stdin/stdout with a nonce-tagged, literal-only
-RPC (`vacant/checks.py:577-600`, `444-457`). The candidate does not receive the test
+RPC (`vacant_network/checks.py:577-600`, `444-457`). The candidate does not receive the test
 source at all — see invariant I-2.
 
 ### 3b. The receipt — sign every attempt into a chain
 
 ```python
-from vacant.identity import Identity, PublicIdentity
-from vacant.logbook import Logbook
+from vacant_network.identity import Identity, PublicIdentity
+from vacant_network.logbook import Logbook
 
 me   = Identity.generate()
 who  = PublicIdentity(vacant_id=me.vacant_id, pub=me.pub)
@@ -196,39 +196,39 @@ Everything else is either internal or experiment infrastructure.
 
 | Module | What it is for |
 |---|---|
-| `vacant.identity` | Ed25519 keypair + `vacant_id`; on-disk keystore. |
-| `vacant.logbook` | The append-only signed hash chain. `stream_id` = genesis hash. |
-| `vacant.checks` | Two-process acceptance sandbox + check-spec compiler. |
-| `vacant.suitespec` | **Acceptance suites are data, not code**: entry point + literal `(args, expected)` + comparison flags, plus a deterministic renderer. |
-| `vacant.suitegauge` | Gauge for a suite: reference solution must pass **and** every known-bad stub must be rejected. |
-| `vacant.envelope` | Signed `Envelope` / `ReviewEnvelope`, replay guard. |
-| `vacant.checkpoint` | Checkpoint certification + retro-audit; checkpoints form their own chain. |
-| `vacant.canonical` | The single serialization used for every signature. Change it and every chain in the world breaks. |
-| `vacant.record` | `RECORD_SPEC` evidence-pack pack/check (excludes `identity.key`). |
-| `vacant.research` | McNemar, bootstrap, Holm–Bonferroni, TOST, exact Wilcoxon, power. |
-| `vacant.entrycost` | Mechanism **simulation** (no model). Anything rendered from this must be labelled as simulation. |
+| `vacant_network.identity` | Ed25519 keypair + `vacant_id`; on-disk keystore. |
+| `vacant_network.logbook` | The append-only signed hash chain. `stream_id` = genesis hash. |
+| `vacant_network.checks` | Two-process acceptance sandbox + check-spec compiler. |
+| `vacant_network.suitespec` | **Acceptance suites are data, not code**: entry point + literal `(args, expected)` + comparison flags, plus a deterministic renderer. |
+| `vacant_network.suitegauge` | Gauge for a suite: reference solution must pass **and** every known-bad stub must be rejected. |
+| `vacant_network.envelope` | Signed `Envelope` / `ReviewEnvelope`, replay guard. |
+| `vacant_network.checkpoint` | Checkpoint certification + retro-audit; checkpoints form their own chain. |
+| `vacant_network.canonical` | The single serialization used for every signature. Change it and every chain in the world breaks. |
+| `vacant_network.record` | `RECORD_SPEC` evidence-pack pack/check (excludes `identity.key`). |
+| `vacant_network.research` | McNemar, bootstrap, Holm–Bonferroni, TOST, exact Wilcoxon, power. |
+| `vacant_network.entrycost` | Mechanism **simulation** (no model). Anything rendered from this must be labelled as simulation. |
 
 ### Multi-party — needs a criterion injected (see §7, H-5)
 
 | Module | What it is for |
 |---|---|
-| `vacant.peerexec` | k independent executors each run the suite and sign their own chain; verdict names *which key* dissented. |
-| `vacant.auditor` | Deterministic re-audit (sha256 sampling, sandbox, provable-fault). |
-| `vacant.registry` / `vacant.reputation` / `vacant.router` | Discovery index, 5-dimensional Beta reputation, on/off routing switch. |
+| `vacant_network.peerexec` | k independent executors each run the suite and sign their own chain; verdict names *which key* dissented. |
+| `vacant_network.auditor` | Deterministic re-audit (sha256 sampling, sandbox, provable-fault). |
+| `vacant_network.registry` / `vacant_network.reputation` / `vacant_network.router` | Discovery index, 5-dimensional Beta reputation, on/off routing switch. |
 
 ### Product path
 
 | Module | What it is for |
 |---|---|
-| `vacant.controller` | `VacantFirstController` — the only shape that is binding on a spawned subprocess. |
-| `vacant.ecosystem` | Resident ecosystem: route → generate → verify → cross-review → receipt. |
-| `vacant.mcp_server` | MCP server exposing `delegate` / `trust_card` / `report`. Advisory (see §1). |
-| `vacant.cli` | `vacant` console script. |
+| `vacant_network.controller` | `VacantFirstController` — the only shape that is binding on a spawned subprocess. |
+| `vacant_network.ecosystem` | Resident ecosystem: route → generate → verify → cross-review → receipt. |
+| `vacant_network.mcp_server` | MCP server exposing `delegate` / `trust_card` / `report`. Advisory (see §1). |
+| `vacant_network.cli` | `vacant` console script. |
 
 ### Signatures you will actually call
 
 ```python
-# vacant.checks
+# vacant_network.checks
 run_python_check(candidate_code: str, test_code: str, *, timeout: float = 8,
                  allowed_imports: tuple[str, ...] = (),
                  allowed_entry_points: tuple[str, ...] = ()) -> bool
@@ -237,14 +237,14 @@ run_python_capture(candidate_code: str, probe_code: str, *, timeout: float = 8,
 compile_check(spec: dict) -> Verifier            # Verifier(answer: str) -> bool
 project_checked_answer(answer: str, spec: dict) -> str
 
-# vacant.identity
+# vacant_network.identity
 Identity.generate() -> Identity
 Identity.save(dir_path: Path, *, passphrase: bytes | None = None) -> None
 Identity.load(dir_path: Path, *, passphrase: bytes | None = None) -> Identity
 PublicIdentity.from_hex(vacant_id: str, pub_hex: str) -> PublicIdentity
 PublicIdentity.verify(message: bytes, signature: bytes) -> bool
 
-# vacant.logbook
+# vacant_network.logbook
 Logbook.append(etype: str, payload: Any, identity: Identity, *, ts_ms: int,
                branch_id: str | None = None) -> LogEntry
 Logbook.verify_chain(who: PublicIdentity) -> bool
@@ -254,7 +254,7 @@ Logbook.save(path: Path) -> None
 Logbook.load(path: Path) -> Logbook
 verify_genesis(entry_json: dict, who: PublicIdentity) -> str | None
 
-# vacant.suitespec
+# vacant_network.suitespec
 validate(obj: Any, *, entry_point: Any = <unbound>) -> SuiteSpec
 render(spec: SuiteSpec) -> str                   # deterministic: same spec -> same bytes
 from_task(task: Mapping, *, compute=None, timeout_s: float = 30.0) -> Conversion
@@ -270,14 +270,14 @@ from_task(task: Mapping, *, compute=None, timeout_s: float = 30.0) -> Conversion
 # SuiteSpecError carries `.code` (machine-readable, goes on the chain and into
 # Selection.refusal_reason) and `.hint` (human-readable). Compare `.code`, never str(exc).
 
-# vacant.suitegauge
+# vacant_network.suitegauge
 gauge_suite(check_code: str, reference: str, broken_stubs: Sequence[str] = (), *,
             entry_point: str | None = None, runner: CheckRunner | None = None,
             timeout_s: int = 10) -> GaugeOutcome        # .ok is the only verdict
 broken_stub(entry_point: str | None) -> str
 # CheckRunner = (code, check_code, entry_point, timeout_s) -> (ok: bool, message: str)
 
-# vacant.peerexec
+# vacant_network.peerexec
 Executor.new(executor_id: str, *, probe: Probe = sandbox_probe) -> Executor
 Executor.attest(task: Mapping, draft_code: str, *,
                 suite: SuiteSpec | Mapping | bytes, ts_ms: int | None = None) -> Attestation
@@ -303,12 +303,12 @@ commit_suite_with_gauge(book, identity, *, task_id, suite, nonce, reference,
                         entry_point, broken_stubs=None, runner=None, ...) -> LogEntry
 challenge_rerun(task, draft_code, panel, original, *, suite, ...) -> Challenge
 
-# vacant.controller
+# vacant_network.controller
 VacantFirstController.delegate_then_run(*, task: str, tests: dict, risk: str = "normal",
         launch: ArgvTemplate | None = None, cwd=None, env=None,
         timeout: float = 900, require_agent_success: bool = True) -> ControllerResult
 
-# vacant.research
+# vacant_network.research
 mcnemar_exact(b: int, c: int) -> float
 holm_bonferroni(pvals: list[float]) -> list[float]
 tost_equiv_boot(diffs, delta, *, alpha=0.05, n_boot=2000, seed=0) -> dict
@@ -370,17 +370,17 @@ Each one is falsifiable; the check is given.
   return `False`. Check: tamper with `entries[k]` for `0 < k < len-1` and re-verify.
 - **I-2 — The candidate structurally cannot read the test code.** Test code lives in the
   runner process, candidate code in a separate worker; they communicate over a
-  nonce-tagged literal-only RPC (`vacant/checks.py:577-600`, `444-457`). Verbatim comment
+  nonce-tagged literal-only RPC (`vacant_network/checks.py:577-600`, `444-457`). Verbatim comment
   at `ops/gain/gain_run.py:957`: *"the candidate worker cannot see this test code"*. This
   is a structural property, not a blocklist. Check: a candidate that tries
   `open(__file__)` or `os._exit(0)` to fake success does not pass — the quickstart in
   `README.md` demonstrates the `os._exit(0)` case.
 - **I-3 — Self-reported success is never taken on faith.** The ecosystem runs the verifier
-  itself (`vacant/ecosystem.py:531`), and the controller then runs it **again**,
-  independently, before any launch (`vacant/controller.py:299-300` →
+  itself (`vacant_network/ecosystem.py:531`), and the controller then runs it **again**,
+  independently, before any launch (`vacant_network/controller.py:299-300` →
   `GateRejected("local objective re-check rejected the delivered answer")`).
 - **I-4 — "Not measured" is not "passed", and it is written as code.**
-  `"all_pass": bool(total > 0 and passed == total)` (`vacant/vrun/acceptance.py:268`) —
+  `"all_pass": bool(total > 0 and passed == total)` (`vacant_network/vrun/acceptance.py:268`) —
   a suite that reported zero tests fails. Same shape in the library: `GaugeOutcome.ok`
   requires `n_broken >= 1`, so an empty set of known-bad stubs cannot satisfy
   `all_rejected` vacuously (that would be fail-open).
@@ -461,7 +461,7 @@ comfortable, and do not drop them when quoting a number.
   that measured badly. (Verbatim source:
   `DECISION_20260903_R440P_CONFORMANCE_GATE.md` §五-1.)
 - **H-2 — Passing the suite is not meeting the requirement.** Verbatim from
-  `vacant/suitegauge.py:30-33`: blocking known-bad stubs proves only that the suite does
+  `vacant_network/suitegauge.py:30-33`: blocking known-bad stubs proves only that the suite does
   not pass everything; it **does not** prove the suite covers the real requirement. A
   suite with three asserts deleted down to one still passes the gauge. Measured: in R532,
   of the 811 deliveries the gate accepted, **120 (14.8%) passed the visible suite and
@@ -469,7 +469,7 @@ comfortable, and do not drop them when quoting a number.
   → 14.8% gated); it does not remove it.
 - **H-3 — The chain gives integrity, not completeness.** Integrity means nothing was
   altered. **Completeness — nothing is missing — is not provided.** `verify_chain`
-  (`vacant/logbook.py:168-195`) checks sequence continuity, `prev_hash` linkage, and
+  (`vacant_network/logbook.py:168-195`) checks sequence continuity, `prev_hash` linkage, and
   per-entry signatures. There is **no length commitment and no external anchor**, so a
   valid prefix verifies. The literature's name for this is a **truncation / omission
   attack** (Ma & Tsudik 2009). Reproduced:
@@ -484,7 +484,7 @@ comfortable, and do not drop them when quoting a number.
 
   Two consequences that must be stated with it:
   - **The checkpoint chain has the same hole, one level up.**
-    `verify_checkpoint_chain` (`vacant/checkpoint.py:144-155`) only walks
+    `verify_checkpoint_chain` (`vacant_network/checkpoint.py:144-155`) only walks
     `prev_checkpoint_sig` backwards and requires the first to be null, so **dropping the
     last few checkpoints leaves a chain that fully verifies**. Reproduced: 4/4 pass,
     dropping the last 2 still passes, removing an interior one fails, removing the first
@@ -498,10 +498,10 @@ comfortable, and do not drop them when quoting a number.
   or countersign — Vacant does not do it for you.
 - **H-4 — A signature identifies a key, not a person, and not the truth.** A receipt proves
   "this key said this, and it has not been altered since". It does not prove the statement
-  is true, and it does not prove who holds the key (`vacant/peerexec.py:117-120`). On the
+  is true, and it does not prove who holds the key (`vacant_network/peerexec.py:117-120`). On the
   product path the receipt is signed by the **delivering party itself**
-  (`vacant/ecosystem.py:641-642`), and the private key is a plaintext PEM readable by the
-  same OS user (`vacant/body.py:160` calls `identity.save` with no passphrase). Key
+  (`vacant_network/ecosystem.py:641-642`), and the private key is a plaintext PEM readable by the
+  same OS user (`vacant_network/body.py:160` calls `identity.save` with no passphrase). Key
   custody is a deployment assumption; software cannot *prevent* forgery by root.
 - **H-5 — The published wheel has no default acceptance criterion.** `suitegauge.default_runner`
   and `peerexec.sandbox_probe` delegate to `ops.gain.gain_run.meets_demand`, which ships
@@ -509,13 +509,13 @@ comfortable, and do not drop them when quoting a number.
   allow-list and `infra_void` semantics — the library must not assert a policy on your
   behalf, and a second copy of the acceptance criterion is exactly the drift both
   docstrings forbid. Calling them without `ops/` raises
-  `vacant.suitegauge.OpsRunnerUnavailable` with instructions. **Inject instead**:
+  `vacant_network.suitegauge.OpsRunnerUnavailable` with instructions. **Inject instead**:
   `gauge_suite(..., runner=my_runner)`, `Executor.new(..., probe=my_probe)`.
 - **H-6 — The sandbox is application hardening, not an OS security boundary.** It blocks
   the common `os._exit(0)`, same-file hidden-test reads, and process/file APIs, under
   `python -I`, clean env/cwd, CPU limit and wall timeout. It is **not** a complete
   malicious-code boundary. Untrusted code belongs in a container, gVisor, or a separate VM.
-  `vacant/checks.py` has no working Windows sandbox branch (posix only).
+  `vacant_network/checks.py` has no working Windows sandbox branch (posix only).
 - **H-7 — Majority vote has a mathematical ceiling.** k executors tolerate at most
   ⌊(k−1)/2⌋ corrupted ones. Past that the mechanism **inverts** — the corrupted majority
   names the honest executors as dissenters — and **the mechanism cannot tell which side of
@@ -544,7 +544,7 @@ comfortable, and do not drop them when quoting a number.
 
 | Wrong | Right | Why |
 |---|---|---|
-| `VACANT_ENDPOINT=http://host:8765` for the experiment runner | `VACANT_GAIN_API=http://host:8765/v1/chat/completions` | Three different variables with three different shapes. `VACANT_GAIN_API` (`ops/gain/brain_cline.py:134`) is the **full path**, not a base URL. `VACANT_ENDPOINT` (`vacant/substrate.py:171`) is a base URL for `vacant.substrate`. `VACANT_MCP_BASE` + `VACANT_MCP_MODEL` + `VACANT_MCP_API` drive the CLI, and `VACANT_MCP_API` must be exactly `responses` or `openai`. |
+| `VACANT_ENDPOINT=http://host:8765` for the experiment runner | `VACANT_GAIN_API=http://host:8765/v1/chat/completions` | Three different variables with three different shapes. `VACANT_GAIN_API` (`ops/gain/brain_cline.py:134`) is the **full path**, not a base URL. `VACANT_ENDPOINT` (`vacant_network/substrate.py:171`) is a base URL for `vacant_network.substrate`. `VACANT_MCP_BASE` + `VACANT_MCP_MODEL` + `VACANT_MCP_API` drive the CLI, and `VACANT_MCP_API` must be exactly `responses` or `openai`. |
 | Gating on `{"type": "contains", ...}` | `equals` / `json_schema` / `run_python` | `contains`/`regex` are exploration checks. They are not strong enough to authorize a delivery or an agent launch. |
 | Recording only successful attempts | Append every attempt, failures first | A success-only chain cannot answer "how many tries did this take" or "did it ever ship something wrong". |
 | Treating a passing chain as proof the work is correct | Treat it as proof the record is unaltered | H-4. |
@@ -576,8 +576,8 @@ carries the file that produced it.
   "schema": "vacant.facts/1",
   "package": {
     "pypi_name": "vacant-network",
-    "import_name": "vacant",
-    "version": "0.7.0",
+    "import_name": "vacant_network",
+    "version": "0.8.0",
     "requires_python": ">=3.11",
     "runtime_dependencies": ["cryptography>=42", "mcp>=1.26,<2", "jsonschema>=4.21"],
     "license": "MIT",
@@ -599,7 +599,7 @@ carries the file that produced it.
     "not_recommended_for_integrators": "harness_owns_loop -- that is our experiment shape; it requires writing your own agent loop",
     "enforced_at": "acceptance time: a delivery without a verifiable receipt is not accepted",
     "not_enforced_at": "execution time",
-    "intake_check": "vacant/receipt.py + controller.verify_delivery: 5 sha256 recomputed, Ed25519 verified, chain_head/stream_id/branch_id compared against the live chain, os.O_EXCL makes a receipt consumable once",
+    "intake_check": "vacant_network/receipt.py + controller.verify_delivery: 5 sha256 recomputed, Ed25519 verified, chain_head/stream_id/branch_id compared against the live chain, os.O_EXCL makes a receipt consumable once",
     "prior_art": ["in-toto", "SLSA", "Sigstore"],
     "reference_monitor_Saltzer_Schroeder_1975": {
       "tamper_proof": true,
@@ -610,13 +610,13 @@ carries the file that produced it.
     "mcp_tool": "advisory",
     "controller": "binding on its own spawned subprocess only",
     "harness_owns_loop": "binding",
-    "machine_wide": "requires container / ACL / egress policy (vacant/controller.py:7-8)"
+    "machine_wide": "requires container / ACL / egress policy (vacant_network/controller.py:7-8)"
   },
   "chain_guarantees": {
     "integrity": true,
     "completeness": false,
     "truncation_attack": "not detected -- truncation/omission attack, Ma & Tsudik 2009",
-    "also_affects": "vacant/checkpoint.py:144-155 verify_checkpoint_chain",
+    "also_affects": "vacant_network/checkpoint.py:144-155 verify_checkpoint_chain",
     "seq_does_not_help": "seq is already the entry count; a truncated prefix stays self-consistent",
     "fix": "an exogenous length commitment -- held by another party, or timestamped before the truncation"
   },
@@ -742,7 +742,7 @@ carries the file that produced it.
     }
   ],
   "red_lines": [
-    "KS-1: no prompt template may contain 'you are responsible' / 'you will be punished' wording; arm templates are verbatim identical. Executable guard: vacant.memory.assert_ks1_clean",
+    "KS-1: no prompt template may contain 'you are responsible' / 'you will be punished' wording; arm templates are verbatim identical. Executable guard: vacant_network.memory.assert_ks1_clean",
     "A4: feedback may abstract to the shape of a failure; quoting held-out test data is forbidden. Guard: lesson_leaks_test_data",
     "All I/O lands as JSONL; retry x4; infra_void rows are dropped, never back-filled",
     "Memory is never shared across arms; history-dependent behaviour must not be cached",

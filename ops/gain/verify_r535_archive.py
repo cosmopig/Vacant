@@ -29,10 +29,10 @@ M7 是唯一一個**必須看原始位元組**的數字。歸檔把那些位元�
 （`wire.tar.gz`，10,664 個 body、130 MB 原始 → 8.1 MB），而且它們被一條
 **跑的時候就簽好的 ed25519 鏈**綁住：
 
-    receipts_RUN-ON.ndjson（逐格簽章鏈，`vacant/logbook.py` 的 hash-chain）
+    receipts_RUN-ON.ndjson（逐格簽章鏈，`vacant_network/logbook.py` 的 hash-chain）
       └─ payload.conversation_sha256
            == sha256(json.dumps([[req_sha, resp_sha], …], separators=(",",":")))
-              （`vacant/vrun/wireproxy.py::wire_digest`，逐字）
+              （`vacant_network/vrun/wireproxy.py::wire_digest`，逐字）
            └─ 那串 sha256 逐筆寫在 wire_RUN-ON/index.jsonl
                 └─ 每一個 .req.bin／.resp.bin 的實際位元組
 
@@ -132,7 +132,7 @@ def mean(xs: list[float]) -> float:
 def mcnemar_exact(b: int, c: int) -> float:
     """配對二元的 McNemar 精確（雙尾）：不一致對 b vs c 的 p=0.5 二項檢定。
 
-    與 `vacant/research.py::mcnemar_exact` 同一條式子，重寫是為了讓歸檔在
+    與 `vacant_network/research.py::mcnemar_exact` 同一條式子，重寫是為了讓歸檔在
     **沒有這個 repo 的機器上**也算得出來。C1 會拿兩邊對算。
     """
     n = b + c
@@ -319,7 +319,7 @@ def a5_receipts(ar: Archive) -> dict:
     """
     try:
         sys.path.insert(0, str(REPO))
-        from vacant.vrun.verify_receipts import verify_run
+        from vacant_network.vrun.verify_receipts import verify_run
     except Exception as exc:                                # noqa: BLE001
         return {"ok": None, "detail": f"na：匯不進驗證器（{type(exc).__name__}）"}
     broken, n_entries = [], 0

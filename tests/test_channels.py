@@ -23,16 +23,16 @@ from __future__ import annotations
 
 import pytest
 
-from vacant import crypto
-from vacant.body import CapabilityCard
-from vacant.channels import (
+from vacant_network import crypto
+from vacant_network.body import CapabilityCard
+from vacant_network.channels import (
     SealConfig, SpecConfig, simulate_seal, simulate_specialty,
 )
-from vacant.envelope import ReviewEnvelope
-from vacant.identity import Identity, PublicIdentity
-from vacant.logbook import Logbook, review_commitment
-from vacant.registry import Registry, ReviewRejected
-from vacant.reputation import DIMS, Reputation
+from vacant_network.envelope import ReviewEnvelope
+from vacant_network.identity import Identity, PublicIdentity
+from vacant_network.logbook import Logbook, review_commitment
+from vacant_network.registry import Registry, ReviewRejected
+from vacant_network.reputation import DIMS, Reputation
 
 
 # ── 1. 相容性：後加的維度維持預設時，不准改變任何既有位元 ──────────────

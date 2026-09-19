@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from vacant import crypto
-from vacant.body import now_ms
-from vacant.envelope import ChannelGuard, Envelope, ReplayError
-from vacant.identity import Identity, PublicIdentity
-from vacant.logbook import Logbook
-from vacant.reputation import Reputation, ucb_score
+from vacant_network import crypto
+from vacant_network.body import now_ms
+from vacant_network.envelope import ChannelGuard, Envelope, ReplayError
+from vacant_network.identity import Identity, PublicIdentity
+from vacant_network.logbook import Logbook
+from vacant_network.reputation import Reputation, ucb_score
 
 
 # --- crypto / vacant_id ------------------------------------------------------

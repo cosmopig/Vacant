@@ -3,7 +3,7 @@
 #
 # proxy 單獨只是一個**建議**：agent 的 base_url 被指向它，但同一個 OS 使用者
 # 隨時可以自己開一條連線直連真上游，proxy 不會知道，也擋不住
-# （`vacant/controller.py:7-8` 原本就寫著這條）。
+# （`vacant_network/controller.py:7-8` 原本就寫著這條）。
 # 「agent 一旦被接上就逃不掉」要成為真的，唯一的辦法是讓**別的路徑連不上**：
 # 以 uid 為單位封鎖出網，只留 proxy 那個埠。
 #

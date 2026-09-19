@@ -7,10 +7,10 @@ try:
     print(f"B url={url}", flush=True)
 except Exception as e:
     print(f"B {url} fail {type(e).__name__}", flush=True)
-print("C import vacant", flush=True)
-from vacant.host import Host
-from vacant.openai_substrate import OpenAISubstrate
-from vacant.tasks import NICHES, make_task
+print("C import vacant_network", flush=True)
+from vacant_network.host import Host
+from vacant_network.openai_substrate import OpenAISubstrate
+from vacant_network.tasks import NICHES, make_task
 print("D build host", flush=True)
 h = Host(tempfile.mkdtemp(), substrate=OpenAISubstrate(url, model="google/gemma-4-e4b", timeout=60, temperature=0.7, learn=False))
 print("E mint", flush=True)

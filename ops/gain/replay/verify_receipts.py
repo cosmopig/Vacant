@@ -16,8 +16,8 @@ import sys
 REPO = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO))
 
-from vacant.identity import PublicIdentity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.identity import PublicIdentity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 
 def main(d: str) -> int:

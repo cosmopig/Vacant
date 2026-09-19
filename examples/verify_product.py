@@ -1,6 +1,6 @@
 import os
 
-from vacant import Vacant, LMStudioBrain
+from vacant_network import Vacant, LMStudioBrain
 
 # 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
 BASE = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/")

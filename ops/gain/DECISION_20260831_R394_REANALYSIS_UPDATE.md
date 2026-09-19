@@ -42,8 +42,8 @@ n_buckets=2`（5 份候選碼裡 4 份同票）；離線重放這 5 份已落盤
 2. **不是目前環境的沙箱非決定性**——把這 5 份候選碼在目前環境下重跑
    `behavior_signature` 三次，三次都得到一致的 `2+3` 分票，不是 `4+1`，
    排除「時序敏感、重跑會抖動」的假說。
-3. **不是決定性 run 存活期間 `vacant/checks.py` 被改過**——
-   `git log --since=2026-08-30 -- vacant/checks.py` 沒有任何提交；決定性
+3. **不是決定性 run 存活期間 `vacant_network/checks.py` 被改過**——
+   `git log --since=2026-08-30 -- vacant_network/checks.py` 沒有任何提交；決定性
    run 於 2026-08-30 17:53:48 UTC 啟動，`checks.py` 的沙箱邏輯全程未變。
 
 **成因仍未定**：唯一還沒排除的可能是決定性 run 實際執行當下的某種

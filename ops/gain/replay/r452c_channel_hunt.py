@@ -38,9 +38,9 @@ ROOT = HERE.parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(HERE))
 
-from vacant import checks as ck            # noqa: E402
-from vacant import peerexec as px          # noqa: E402
-from vacant import suitespec as ss         # noqa: E402
+from vacant_network import checks as ck            # noqa: E402
+from vacant_network import peerexec as px          # noqa: E402
+from vacant_network import suitespec as ss         # noqa: E402
 
 OUT = HERE / "r452c_channel_hunt.json"
 

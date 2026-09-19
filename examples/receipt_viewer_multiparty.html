@@ -10920,11 +10920,11 @@
  * 那個指名只有在「別人拿得到三條鏈、而且真的能自己重算一次」時才是可究責的證據。
  * 本頁就是那個重算端：零外部資源、file:// 直接開、不連任何伺服器。
  *
- * 位元組佈局必須與 vacant/logbook.py 完全一致（下面 CANON 區段整段從
+ * 位元組佈局必須與 vacant_network/logbook.py 完全一致（下面 CANON 區段整段從
  * examples/receipt_viewer.html 複製，由 ops/gain/replay/build_multiparty_viewer.py
  * 逐位元組複製過去，因此 receipt_viewer_node_check.mjs 的 N1–N5b 對這一頁同樣成立）：
  *   core    = {stream_id, branch_id, seq, prev_hash, ts_ms, type, payload}
- *   bytes   = canonical_bytes(core)   （vacant/canonical.py）
+ *   bytes   = canonical_bytes(core)   （vacant_network/canonical.py）
  *   hash    = sha256(bytes).hexdigest()          （LogEntry.hash）
  *   簽章覆蓋的訊息 = 同一份 bytes                （_signed_bytes）
  *
@@ -11010,7 +11010,7 @@ function sha256Bytes(msg) {
   return out;
 }
 
-/* ---- canonical JSON（對齊 vacant/canonical.py）-------------------------- */
+/* ---- canonical JSON（對齊 vacant_network/canonical.py）-------------------------- */
 
 const TEXT_ENCODER = new TextEncoder();
 
@@ -11122,7 +11122,7 @@ async function makeVerifier(pubHex) {
   return { fn, why: "" };
 }
 
-/* ---- vacant_id ＝ multibase(multihash(公鑰))（對齊 vacant/crypto.py）------
+/* ---- vacant_id ＝ multibase(multihash(公鑰))（對齊 vacant_network/crypto.py）------
  * 這一行讓公鑰檔裡的 vacant_id 從「那台機器自己填的字串」變成可以當場重算的值。
  * 平台字串沒有這個性質——它沒有進任何雜湊、也沒有進任何簽章。 */
 const B58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -11280,7 +11280,7 @@ async function revalidateAt(res, entries, pubHex, idx) {
   return relinkChain(res, entries);
 }
 
-/* ---- 證言與判決（對齊 vacant/peerexec.py）--------------------------------
+/* ---- 證言與判決（對齊 vacant_network/peerexec.py）--------------------------------
  * ATTEST_TYPE／ATTEST_VERSION 是 wire 常數，不是這一頁算出來的數字。
  * verifyAttestation 逐條抄 peerexec.verify_attestation 的採信條件；
  * formVerdict 逐條抄 peerexec.form_verdict 的四個步驟。 */

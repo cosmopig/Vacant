@@ -43,30 +43,30 @@
 
 ## 程式碼地圖（實驗承重件）
 
-- `vacant/logbook.py` — 簽章 hash-chain；stream_id＝創世 hash、真 head()（改動1）
-- `vacant/envelope.py` — Envelope＋**ReviewEnvelope**（改動3 的簽章 review）
-- `vacant/registry.py` — record_review 只收驗簽＋head 新鮮＋去重；weight 內生；
+- `vacant_network/logbook.py` — 簽章 hash-chain；stream_id＝創世 hash、真 head()（改動1）
+- `vacant_network/envelope.py` — Envelope＋**ReviewEnvelope**（改動3 的簽章 review）
+- `vacant_network/registry.py` — record_review 只收驗簽＋head 新鮮＋去重；weight 內生；
   同源非線性降權 floor/k＋**行為推斷同源降權**（鑑別題一致率，零 controller_id）
-- `vacant/reputation.py` — 五維 Beta；**改動2 三元組 key**(stream,branch,substrate)＋
+- `vacant_network/reputation.py` — 五維 Beta；**改動2 三元組 key**(stream,branch,substrate)＋
   牙齒（decay 半衰期 200 事件向先驗回歸、slash 乘法扣減）
-- `vacant/memory.py` — MemoryStream（episode 上鏈）＋MemoryManager M0/M1/M2
+- `vacant_network/memory.py` — MemoryStream（episode 上鏈）＋MemoryManager M0/M1/M2
   （X1 的實驗處理本身）＋KS-1／A4 可執行防呆
-- `vacant/auditor.py` — 確定性稽核（sha256 抽樣、checks.py 沙箱、provable-fault）
-- `vacant/router.py` — trust on/off 單開關（on＝UCB、off＝確定性隨機）；
+- `vacant_network/auditor.py` — 確定性稽核（sha256 抽樣、checks.py 沙箱、provable-fault）
+- `vacant_network/router.py` — trust on/off 單開關（on＝UCB、off＝確定性隨機）；
   probation 路由端牙齒（蓋 0.55＋每 10 筆見習配額）
-- `vacant/batch.py` — RunLedger 斷點續跑＋Watchdog（裁決 B4）
-- `vacant/x1.py` — X1 任務族＋run_x1 三臂迴圈＋transfer_curve＋pilot_report
+- `vacant_network/batch.py` — RunLedger 斷點續跑＋Watchdog（裁決 B4）
+- `vacant_network/x1.py` — X1 任務族＋run_x1 三臂迴圈＋transfer_curve＋pilot_report
   （一票否決）＋finalize_run_package（RECORD_SPEC 合格包）＋require_usage 成本紀律
-- `vacant/codebench.py` — 六坑型族程序生成＋**EvalPlusMBPPLoader**（378 題
+- `vacant_network/codebench.py` — 六坑型族程序生成＋**EvalPlusMBPPLoader**（378 題
   sha256 釘死、V/GT 分離、fail-closed）
-- `vacant/research.py` — M1–M6＋McNemar＋bootstrap＋**預註冊四函式**
+- `vacant_network/research.py` — M1–M6＋McNemar＋bootstrap＋**預註冊四函式**
   （holm_bonferroni／tost_equiv_boot／wilcoxon_signed_rank_exact／mcnemar_power）
-- `vacant/record.py` — RECORD_SPEC pack/check（紀錄紅線：不 pack＝沒跑過；
+- `vacant_network/record.py` — RECORD_SPEC pack/check（紀錄紅線：不 pack＝沒跑過；
   私鑰 identity.key 排除，SPEC §7）
-- `vacant/suitegauge.py` — 驗收套件的量具（參考解要過、每個已知壞樁都要被擋）；
+- `vacant_network/suitegauge.py` — 驗收套件的量具（參考解要過、每個已知壞樁都要被擋）；
   `gain_run.probe_instrument` 與 `peerexec.commit_suite` 共用這一份判準，**單邊保證**
   （擋得住已知壞解 ≠ 涵蓋真需求）寫在 docstring，不准讀成「套件固定點已解」
-- `vacant/suitemutate.py` — 純 AST 變異器（零新依賴），把 suitegauge 的刻度從
+- `vacant_network/suitemutate.py` — 純 AST 變異器（零新依賴），把 suitegauge 的刻度從
   「擋得住 1 個壞樁」細到「擋得住 N 種我們造得出來的錯」。致死率**另外算、
   不綁 `GaugeOutcome.ok`**（綁了＝改掉閘門語意，r452c 那批歸檔資料會失去可比性）；
   且**永遠是下界**（運算子表有限＋等價變異體不可判定）。實跑：
@@ -79,12 +79,12 @@
   ⚠ **`return None`（量具自己用的那個退化樁）在某些分支上活著**：
   `mbppplus_Mbpp/260` L3、`humanevalplus_HumanEval/154` L12/L14、`/106` L11/L15
   ——整支函式回 None 會被擋，**某一條分支回 None 擋不住**，代表可見測資沒走到那條路徑
-- `vacant/suitespec.py` — **驗收套件是資料不是程式**（R452）：SuiteSpec（entry_point＋
+- `vacant_network/suitespec.py` — **驗收套件是資料不是程式**（R452）：SuiteSpec（entry_point＋
   字面值 (args, expected)＋比對設定）＋確定性渲染器；執行器只跑自己渲染的碼，
   有狀態／雜湊黑名單／擬態三種攻擊**不可表達**，殘餘＝覆蓋不足＋比對旗標
-- `vacant/blayer.py` — B 層機制驗收六情境（0→70% 步進 × on/off 雙組，判準寫死）
-- `vacant/checkpoint.py` — V1 存檔點認證＋回溯稽核（18 §2；存檔點自身成鏈）
-- `vacant/dashboard.py` — 觀測台＋/api/roster/scoreboard/**snapshot**（面板非信任來源）
+- `vacant_network/blayer.py` — B 層機制驗收六情境（0→70% 步進 × on/off 雙組，判準寫死）
+- `vacant_network/checkpoint.py` — V1 存檔點認證＋回溯稽核（18 §2；存檔點自身成鏈）
+- `vacant_network/dashboard.py` — 觀測台＋/api/roster/scoreboard/**snapshot**（面板非信任來源）
 - `examples/x1_pilot.py` — 遷移 pilot 進入點（--loader x1|builtin|evalplus、--stub 閘門）
 - `examples/b_layer.py` — B 層六情境掃描 runner（預設每格 1000 seeds）
 - `docs/PREREG_V2.md` — 預註冊凍結總表（草稿待人類簽字＋ledger 簽入）
@@ -104,7 +104,7 @@
   `ops/gain/build_runs_index.py`（`--check` 可驗索引沒漂）。
 - `decisions/` — **實驗紀錄的家**（2026-09-18 從 repo 根搬進來，227 份，純 `git mv`、
   內容一個 byte 沒動）。根目錄留給「這個專案是什麼」，外人打開 repo 第一眼要看得到
-  `vacant/`。配置：`decisions/`＝`DECISION_*.md`（205）、`decisions/criteria/`＝
+  `vacant_network/`。配置：`decisions/`＝`DECISION_*.md`（205）、`decisions/criteria/`＝
   `CRITERION_*.md`（14）、`decisions/conclusions/`＝`CONCLUSION_*.md`＋`FINDINGS_*.md`（4）、
   `decisions/prereg/`＝`PREREG_*.md`（2）、`decisions/notes/`＝日期型一次性筆記（2）。
   **新的裁決／預註冊一律寫進 `decisions/`，不要再寫回根目錄。**
@@ -125,9 +125,9 @@
 
 ### 展件可直接複用的（實體場地，秒級互動）
 
-- `vacant/entrycost.py` — 機制模擬。**現場的雙世界對照跑這個**，不跑真模型
+- `vacant_network/entrycost.py` — 機制模擬。**現場的雙世界對照跑這個**，不跑真模型
   （真模型每題約 114 秒，展場等不起）。畫面上必須標明是機制模擬。
-- `vacant/logbook.py` ＋ `vacant/checkpoint.py` — 出口那張「可驗證收據」的機制；
+- `vacant_network/logbook.py` ＋ `vacant_network/checkpoint.py` — 出口那張「可驗證收據」的機制；
   同一套也用來做展覽自己的同意／刪除證明（用自己展示的機制證明自己守約）。
 - `真模型_2026-07-26/E10/{on,off}/rows.jsonl` — 主視覺的資料來源。兩行路由序列
   （`X`＝工作被交給破壞者）是手上最容易被外行看懂的東西，且是真模型真資料：

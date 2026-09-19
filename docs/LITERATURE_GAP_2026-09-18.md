@@ -310,7 +310,7 @@
 
 ## 限制 1：測試預言問題——「過了寫下來的測試」≠「達成真需求」
 
-> 我們的實測：即使有閘門，假交付率（accepted ∧ ¬hidden）OFF 49.2%、CONFORM 24.2%、OFF5 36.7%（`docs/HARNESS_STUDY_2026-09-07.md`）。`vacant/suitegauge.py` docstring 自己寫「單邊保證」。
+> 我們的實測：即使有閘門，假交付率（accepted ∧ ¬hidden）OFF 49.2%、CONFORM 24.2%、OFF5 36.7%（`docs/HARNESS_STUDY_2026-09-07.md`）。`vacant_network/suitegauge.py` docstring 自己寫「單邊保證」。
 
 ### The Oracle Problem in Software Testing: A Survey (2015) — 支持
 
@@ -456,7 +456,7 @@
 
 ## 限制 2：hash chain 擋得住改中間、擋不住砍尾巴
 
-> 我實測：砍掉尾巴 2 筆，`vacant/logbook.py::verify_chain` 仍回 True（它從創世逐筆檢查 seq/prev_hash/簽章，截斷後的前綴仍然自洽）。原因是**沒有長度承諾與外部錨**。
+> 我實測：砍掉尾巴 2 筆，`vacant_network/logbook.py::verify_chain` 仍回 True（它從創世逐筆檢查 seq/prev_hash/簽章，截斷後的前綴仍然自洽）。原因是**沒有長度承諾與外部錨**。
 
 ### A new approach to secure logging (2009) — 支持
 
@@ -874,7 +874,7 @@
    *Dissociative Identity: Language Model Agents Lack Grounding for Reputation Mechanisms*。
    ⇒ 這可能是真的窄縫，但也**可能只是我搜尋詞不對**；它不影響展場，建議不要在展場宣稱新穎。
 
-2. **「驗收套件是資料不是程式」（R452 / `vacant/suitespec.py`）當作安全性論證**。
+2. **「驗收套件是資料不是程式」（R452 / `vacant_network/suitespec.py`）當作安全性論證**。
    「限制表達力讓某類攻擊不可表達」在能力安全（capability security）與 DSL 設計裡是老觀念，
    但我找不到把它專門用在**去中心化執行的驗收套件**上的文獻。
    相鄰的 in-toto / SLSA 走的是簽章與佈局，不是表達力限制。

@@ -27,7 +27,7 @@ def test_tee_proxy_relays_and_logs_both_directions(tmp_path):
     req = ('{"jsonrpc": "2.0", "id": 1, "method": "tools/call", '
            '"params": {"name": "verify_fix", "arguments": {"prompt": "p"}}}\n')
     r = subprocess.run(
-        [sys.executable, "-m", "vacant.mcp_trace", str(log), "--", sys.executable, str(echo)],
+        [sys.executable, "-m", "vacant_network.mcp_trace", str(log), "--", sys.executable, str(echo)],
         input=req.encode(), capture_output=True, timeout=30,
         cwd=str(_ROOT), env={**os.environ, "PYTHONPATH": str(_ROOT)},
     )
@@ -40,7 +40,7 @@ def test_tee_proxy_relays_and_logs_both_directions(tmp_path):
 
 
 def test_on_step_fires_fail_then_pass():
-    from vacant.agent import Vacant
+    from vacant_network.agent import Vacant
 
     class FailThenPass:
         name = "ftp"
@@ -60,7 +60,7 @@ def test_on_step_fires_fail_then_pass():
 
 
 def test_trace_renderer_detects_vacant_call(tmp_path, capsys):
-    from vacant.cli import cmd_trace
+    from vacant_network.cli import cmd_trace
 
     log = tmp_path / "wire.jsonl"
     rows = [

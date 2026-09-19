@@ -24,13 +24,13 @@ from contextlib import redirect_stderr, redirect_stdout
 
 import pytest
 
-from vacant.agent import Vacant
-from vacant.identity import Identity
-from vacant.logbook import Logbook
-from vacant.peerexec import (DraftOrderError, Executor, ProbeResult, Selection,
+from vacant_network.agent import Vacant
+from vacant_network.identity import Identity
+from vacant_network.logbook import Logbook
+from vacant_network.peerexec import (DraftOrderError, Executor, ProbeResult, Selection,
                              select_by_quorum, sha256_hex)
-from vacant.suitespec import SuiteSpecError
-from vacant import suitespec as ss
+from vacant_network.suitespec import SuiteSpecError
+from vacant_network import suitespec as ss
 
 BANNED = ("信任", "trust layer", "trusted layer", "信任層")
 
@@ -163,7 +163,7 @@ def test_bench_denominator_excludes_the_void_cells():
 
 
 def _run_cli(argv: list[str]) -> tuple[int, str, str]:
-    from vacant.cli import main
+    from vacant_network.cli import main
 
     out, err = io.StringIO(), io.StringIO()
     with redirect_stdout(out), redirect_stderr(err):
@@ -195,7 +195,7 @@ def test_cli_bench_refuses_to_print_comparison_numbers_when_nothing_was_measured
 
 def test_cli_bench_still_prints_numbers_when_the_brain_answers(monkeypatch):
     """負向控制：擋門不是永遠都在擋——腦活著就要照印，而且 exit 0。"""
-    import vacant.brains as brains
+    import vacant_network.brains as brains
 
     class FakeLMStudio:
         name = "lmstudio:fake"
@@ -217,7 +217,7 @@ def test_cli_bench_still_prints_numbers_when_the_brain_answers(monkeypatch):
 
 def test_cli_bench_prints_the_void_count_separately_when_partial(monkeypatch):
     """部分故障：數字可以印，但 void 的格數要**單獨印**、分母要講清楚。"""
-    import vacant.brains as brains
+    import vacant_network.brains as brains
 
     class HalfDeadLMStudio:
         name = "lmstudio:halfdead"
@@ -260,7 +260,7 @@ def test_the_banned_word_scanner_actually_catches_something():
 
 def test_no_banned_term_in_any_cli_help_text():
     """`--help` 是使用者可見輸出，而且是 argparse 直接渲染的，最容易漏掉。"""
-    from vacant.cli import build_parser
+    from vacant_network.cli import build_parser
 
     hits: list[str] = []
 

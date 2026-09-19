@@ -26,7 +26,7 @@ os.environ.setdefault(
 )
 
 from ops.gain.gain_run import extract_code, meets_demand  # noqa: E402
-from vacant.codebench import EvalPlusMBPPLoader, LiveCodeBenchLoader  # noqa: E402
+from vacant_network.codebench import EvalPlusMBPPLoader, LiveCodeBenchLoader  # noqa: E402
 
 OUT = pathlib.Path(__file__).resolve().parent
 

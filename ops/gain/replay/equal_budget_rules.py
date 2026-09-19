@@ -69,7 +69,7 @@ from ops.gain.gain_run import (  # noqa: E402
     extract_code,
     meets_demand,
 )
-from vacant.codebench import EvalPlusMBPPLoader, LiveCodeBenchLoader  # noqa: E402
+from vacant_network.codebench import EvalPlusMBPPLoader, LiveCodeBenchLoader  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = pathlib.Path(__file__).resolve().parents[3]
@@ -257,7 +257,7 @@ def repair(run: str, bank: str, workers: int = 4) -> dict:
     """第二次量測，**只**重跑目前標成 False/None 的檢查，取 OR 寫回事實表。
 
     為什麼只往一個方向修（這不是選擇性報告，是量具的物理性質）：
-    `vacant/checks.py` 的沙箱是 fail-closed——逾時、CPU rlimit、worker 起不來
+    `vacant_network/checks.py` 的沙箱是 fail-closed——逾時、CPU rlimit、worker 起不來
     一律回 False。所以**假陰性**會發生（尤其機器負載高時），假陽性幾乎不可能
     （要碰巧通過整份 assert）。OR 因此是單調的去雜訊，而且對所有規則一視同仁：
     同一張表、同一批候選，任何規則都吃到同一份修正。

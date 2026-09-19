@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from vacant.entrycost import EntryPolicy, SimConfig, simulate
+from vacant_network.entrycost import EntryPolicy, SimConfig, simulate
 
 
 def test_simulation_is_deterministic():

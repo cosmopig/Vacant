@@ -196,7 +196,7 @@ def delivery_of(run_dir: pathlib.Path, ws_end_sha256: str,
     只給一個 hash 看不到那件事。
 
     為什麼可以帶：`ws_end_sha256` 已經在簽章 payload 裡，而樹雜湊的演算法
-    （`vacant/vrun/wshash.py`）是「排序過的 {path, sha256, exec} 清單的
+    （`vacant_network/vrun/wshash.py`）是「排序過的 {path, sha256, exec} 清單的
     canonical JSON 的 sha256」——頁面可以自己從這些內容重算一次，
     算出來不等於鏈上那個值就代表這一頁在說謊。`recomputable` 就是這件事
     做不做得到的誠實旗標：任何一個檔案的位元組不是 UTF-8 往返不變，
@@ -222,7 +222,7 @@ def delivery_of(run_dir: pathlib.Path, ws_end_sha256: str,
     files: list[dict] = []
     recomputable = frozen.is_dir()
     if frozen.is_dir():
-        from vacant.vrun import wshash
+        from vacant_network.vrun import wshash
         for leaf in wshash.tree_leaves(frozen):
             item = {"path": leaf["path"], "sha256": leaf["sha256"],
                     "exec": bool(leaf.get("exec")), "text": None, "truncated": False}
@@ -255,7 +255,7 @@ def delivery_of(run_dir: pathlib.Path, ws_end_sha256: str,
             files.append(item)
     return {
         "root_claimed": ws_end_sha256,
-        "algo": "sha256(canonical_json(sorted[{path,sha256,exec}])) — vacant/vrun/wshash.py",
+        "algo": "sha256(canonical_json(sorted[{path,sha256,exec}])) — vacant_network/vrun/wshash.py",
         "recomputable": recomputable,
         "files": files,
     }
@@ -560,7 +560,7 @@ def build(runs_root: pathlib.Path) -> dict:
                     else str(runs_root),
             "arm": ARM,
             "arm_off": ARM_OFF,
-            "ruler": "vacant/vrun/verify_receipts.py（沒有第二把尺）",
+            "ruler": "vacant_network/vrun/verify_receipts.py（沒有第二把尺）",
             "note": "每一格都是 `vacant run` 當時落盤的原值，未經加工。"
                     "一格兩跑：ON（閘門＋重試迴圈）與 OFF（`--vacant 0`，"
                     "不驗收、不簽收據）。",

@@ -1,6 +1,6 @@
 """peerexec 的確定性測試——不碰模型、不碰 runs/。
 
-每一條都對應 `vacant/peerexec.py` 的一句主張。主張與測試一一對照，
+每一條都對應 `vacant_network/peerexec.py` 的一句主張。主張與測試一一對照，
 「機制講得出來但測不出來」的東西不准留在 docstring 裡。
 
 ⚠ 沙箱：§1–§7 一行沙箱都不碰（探針是注入的替身）。§8（R449 §四-3 的套件量具閘）
@@ -18,10 +18,10 @@ os.environ.setdefault(
     "VACANT_EVALPLUS_PATH", ".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz"
 )
 
-from vacant.identity import Identity, PublicIdentity  # noqa: E402
-from vacant.logbook import LogEntry, Logbook  # noqa: E402
-from vacant import suitespec as ss  # noqa: E402
-from vacant.peerexec import (Attestation, Executor, GaugeRecord,  # noqa: E402
+from vacant_network.identity import Identity, PublicIdentity  # noqa: E402
+from vacant_network.logbook import LogEntry, Logbook  # noqa: E402
+from vacant_network import suitespec as ss  # noqa: E402
+from vacant_network.peerexec import (Attestation, Executor, GaugeRecord,  # noqa: E402
                              ProbeResult, SuiteGaugeError, as_suite_spec,
                              challenge_rerun,
                              commit_suite, commit_suite_with_gauge, form_verdict,
@@ -29,8 +29,8 @@ from vacant.peerexec import (Attestation, Executor, GaugeRecord,  # noqa: E402
                              run_suite_gauge, select_by_quorum, sha256_hex,
                              suite_gate, verify_attestation,
                              verify_executor_chain)
-from vacant.suitegauge import broken_stub  # noqa: E402
-from vacant.suitespec import SuiteSpecError  # noqa: E402
+from vacant_network.suitegauge import broken_stub  # noqa: E402
+from vacant_network.suitespec import SuiteSpecError  # noqa: E402
 
 TS = 1_700_000_000_000
 
@@ -85,7 +85,7 @@ def mk(n, probe):
 def rule_runner(fn):
     """量具用的確定性 runner 替身：`fn(code, check_code) -> 通過?`。
 
-    簽章與 `vacant.suitegauge.CheckRunner`／`gain_run.meets_demand` 對齊。
+    簽章與 `vacant_network.suitegauge.CheckRunner`／`gain_run.meets_demand` 對齊。
     §8 真正要證明量具有牙齒的那幾條**不用**這個，用真沙箱。
     """
     def run(code, check_code, entry_point=None, timeout_s=10):
@@ -330,7 +330,7 @@ def test_suite_commit_reveal_binds_the_suite_in_time():
     assert not open_suite(entry, SPEC_WEAK, nonce, entry_point="f")
     assert not open_suite(entry, SPEC, "f" * 32, entry_point="f")
     assert book.verify_chain(
-        __import__("vacant.identity", fromlist=["PublicIdentity"]).PublicIdentity(
+        __import__("vacant_network.identity", fromlist=["PublicIdentity"]).PublicIdentity(
             ident.vacant_id, ident.pub))
 
 
@@ -448,7 +448,7 @@ def spec_for(entry_point, tests, **cmp_over):
 @pytest.fixture(scope="module")
 def mbpp_task():
     """真 MBPP+ 的 similar_elements（官方包不在場就 skip，不假裝驗過）。"""
-    from vacant.codebench import EvalPlusMBPPLoader
+    from vacant_network.codebench import EvalPlusMBPPLoader
     try:
         tasks = EvalPlusMBPPLoader(expose_contract=True).iter_tasks("x")
     except FileNotFoundError:
@@ -794,7 +794,7 @@ def test_default_broken_stub_matches_probe_instrument():
 def test_a_suite_can_read_the_candidate_source_from_the_runner():
     """實測（不是假設）：**任意** Python 的驗收碼看得見候選的原始碼，不只是它的行為。
 
-    `vacant/checks.py::_test_runner_source` 把套件原文**內嵌**進 runner 行程，而
+    `vacant_network/checks.py::_test_runner_source` 把套件原文**內嵌**進 runner 行程，而
     `_worker`（跑候選的那個 `subprocess.Popen`）就在同一個命名空間裡，
     `_worker.args` 帶著 `candidate.py` 的路徑。AST 白名單只掃**候選**，不掃套件。
 

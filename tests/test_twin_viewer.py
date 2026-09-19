@@ -1,7 +1,7 @@
 """展件「一天的收據」（`examples/twin_viewer.html`）的驗收。
 
 這組測試存在的理由與收據牆那一組逐字相同：那一頁的整個宣稱是「觀眾眼前這台
-機器自己把這些鏈重算了一次」。如果頁內 JS 的位元組佈局跟 `vacant/logbook.py`
+機器自己把這些鏈重算了一次」。如果頁內 JS 的位元組佈局跟 `vacant_network/logbook.py`
 差一個字元，畫面會照樣顯示綠色的「驗證通過」——**一把會 PASS 的瞎尺**。
 
 所以：
@@ -32,9 +32,9 @@ sys.path.insert(0, str(REPO))
 
 from ops.exhibit.twin import build_viewer, pack as packlib, roster  # noqa: E402
 from ops.gain.replay import receipt_viewer_crosscheck as X  # noqa: E402
-from vacant.canonical import canonical_bytes  # noqa: E402
-from vacant.identity import PublicIdentity  # noqa: E402
-from vacant.logbook import LogEntry, Logbook  # noqa: E402
+from vacant_network.canonical import canonical_bytes  # noqa: E402
+from vacant_network.identity import PublicIdentity  # noqa: E402
+from vacant_network.logbook import LogEntry, Logbook  # noqa: E402
 
 VIEWER = REPO / "examples" / "twin_viewer.html"
 SOURCE_VIEWER = REPO / "examples" / "receipt_viewer.html"
@@ -234,7 +234,7 @@ def test_verdict_in_the_chain_agrees_with_the_summary(pack):
 
 
 def test_delivery_tree_hash_recomputes_to_the_signed_value(pack):
-    """把「它交出來的那份程式碼」綁回鏈上那一筆（vacant/vrun/wshash.py 的佈局）。"""
+    """把「它交出來的那份程式碼」綁回鏈上那一筆（vacant_network/vrun/wshash.py 的佈局）。"""
     import hashlib
     n = 0
     for c in pack["cells"]:
@@ -255,7 +255,7 @@ def test_delivery_tree_hash_recomputes_to_the_signed_value(pack):
 # --- 同意鏈 -----------------------------------------------------------------
 
 def test_consent_chain_verifies_and_has_an_erasure(pack):
-    from vacant import consent
+    from vacant_network import consent
     cn = pack["consent"]
     assert cn, "資料包裡沒有同意鏈"
     book = Logbook([LogEntry.from_json(json.loads(ln)) for ln in cn["chain"]])
@@ -272,7 +272,7 @@ def test_no_persona_plaintext_anywhere_in_the_page(html):
     居民卡上會顯示 persona 的值（那是展件本體），所以這一條只掃同意鏈本身：
     鏈是 append-only，上去就刪不掉。
     """
-    from vacant import consent
+    from vacant_network import consent
     pack = json.loads(build_viewer.extract_block(html, "twin-pack"))
     book = Logbook([LogEntry.from_json(json.loads(ln))
                     for ln in pack["consent"]["chain"]])
@@ -282,10 +282,10 @@ def test_no_persona_plaintext_anywhere_in_the_page(html):
 
 def test_residents_are_flagged_synthetic(pack):
     """倫理未定案之前，名冊上每一位都必須標成合成的。"""
-    from vacant import consent
+    from vacant_network import consent
     for r in pack["residents"]:
         assert r["synthetic"] is True, r["codename"]
-        # 只准 SPEC_v3 §四-1 那四類，不多不少——與 `vacant/consent.py` 同一份清單
+        # 只准 SPEC_v3 §四-1 那四類，不多不少——與 `vacant_network/consent.py` 同一份清單
         assert set(r["persona"]) == set(consent.ALLOWED_FIELDS), r["codename"]
         assert r["subject_ref"].startswith("SYN-"), r["subject_ref"]
     assert roster.BODIES, "體型清單是空的 ⇒ 居民沒有形象可用"

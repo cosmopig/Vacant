@@ -7,7 +7,7 @@
     python examples/b_layer.py --smoke
 
 產出：cells.jsonl（每格 value＋bootstrap 95% CI）＋ summary.md（一頁結果）。
-判準全部事前寫死在 vacant/blayer.py 的 `_verdict`；「拆掉數字沒變」＝裝飾、
+判準全部事前寫死在 vacant_network/blayer.py 的 `_verdict`；「拆掉數字沒變」＝裝飾、
 從一切主張移除（13 §3）。誠實邊界：這是確定性離線機制驗收，不是生態效果
 宣稱（效果屬 X 系列、C-3 門後）。
 """
@@ -18,7 +18,7 @@ import argparse
 import time
 from pathlib import Path
 
-from vacant.blayer import DEFAULT_N_SEEDS, SCENARIOS, finalize_run_package, run_all
+from vacant_network.blayer import DEFAULT_N_SEEDS, SCENARIOS, finalize_run_package, run_all
 
 
 def main() -> None:

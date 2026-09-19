@@ -11,7 +11,7 @@
   4. 索引裡不含 MBPP+ 的任何位元組      ← **私有資料外洩**（最嚴重的一種）
 
 第 4 條是 CLAUDE.md 的資料紀律：`.vacant-private/` 是不轉散布的官方包，
-索引只准記路徑字串與 `vacant/codebench.py` 裡的 sha256 釘值。
+索引只准記路徑字串與 `vacant_network/codebench.py` 裡的 sha256 釘值。
 
 另外釘「冪等」：同一份資料重跑兩次必須逐位元組相同，否則 `--check` 這個
 迴歸機制本身就是壞的。

@@ -26,12 +26,12 @@ from __future__ import annotations
 
 import pytest
 
-from vacant.collusion import CollusionConfig
-from vacant.collusion import simulate as collude_sim
-from vacant.entrycost import (KNOWN_STRATEGIES, SimConfig, _Agent, _geom,
+from vacant_network.collusion import CollusionConfig
+from vacant_network.collusion import simulate as collude_sim
+from vacant_network.entrycost import (KNOWN_STRATEGIES, SimConfig, _Agent, _geom,
                               _should_defect)
-from vacant.entrycost import simulate as entry_sim
-from vacant.registry import (PROBATION_EXPLORE_EVERY, PROBATION_SCORE_CAP,
+from vacant_network.entrycost import simulate as entry_sim
+from vacant_network.registry import (PROBATION_EXPLORE_EVERY, PROBATION_SCORE_CAP,
                              Registry, ReviewDefenses)
 
 OSC = ("pulse", "osc_exp", "osc_random", "osc_sine")

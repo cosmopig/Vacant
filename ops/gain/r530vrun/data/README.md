@@ -10,7 +10,7 @@
 | `manifest.json` | 這一跑的凍結參數：題庫 sha256、20 題的 `--suite` sha256、prompt、模型、推論模式、`test_timeout_source` | `run_r530vrun.py` 首次啟動時寫，之後不覆寫 |
 | `cells.jsonl` | **40 格的逐格原始列**（每格一列） | 發射時逐格 append |
 | `report_20260919T140446Z.md` | 機器產的收官表（逐格／逐臂／M7 三層／牆鐘分佈／紀律欄位） | `score_r530vrun.py --out <run 目錄>` |
-| `receipts_verify.json` | 收據鏈驗證：40 鏈 / 108 entries / 0 失敗 / 總判 OK | `python3 -m vacant.vrun.verify_receipts --glob '<run>/cells/*/run'` |
+| `receipts_verify.json` | 收據鏈驗證：40 鏈 / 108 entries / 0 失敗 / 總判 OK | `python3 -m vacant_network.vrun.verify_receipts --glob '<run>/cells/*/run'` |
 
 **沒有進 repo 的**：`scores_*.json`（515 KB，含每格 wire 分類的原始清單）與
 每格的 `ws/`／`run/`（wire 逐通全文、凍結快照、收據鏈）。

@@ -103,7 +103,7 @@ from dataclasses import asdict, dataclass, field
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3]))
 
 from ops.gain.brain_cline import ClineBrain, InfraVoid  # noqa: E402
-from vacant.memory import assert_ks1_clean  # noqa: E402
+from vacant_network.memory import assert_ks1_clean  # noqa: E402
 
 SCHEMA = "r530.rubric.v1"
 
@@ -1550,7 +1550,7 @@ def run_controls(graders: list[Grader], out_dir: pathlib.Path, *,
                  backoff_s: float = 5.0) -> dict:
     """把這把尺自己量一次：參考解、刻意寫壞的、帶洩漏字串的，各一份。
 
-    三條判準（沿用 `vacant/suitegauge.py` 的雙向紀律——參考解要過、已知壞樁
+    三條判準（沿用 `vacant_network/suitegauge.py` 的雙向紀律——參考解要過、已知壞樁
     要被擋）：
 
       1. **正控**：參考解的四維總分 **>** 刻意寫壞那一份（單一巨函式、裸
@@ -1560,7 +1560,7 @@ def run_controls(graders: list[Grader], out_dir: pathlib.Path, *,
          其實沒被做壞，硬要求方向會變成要求評審亂給分）。
       3. **負控**：帶 `A-GATE`／`receipt`／`.vacant` 字樣那一份**必須整包被擋**。
 
-    ⚠ 單邊保證（逐字沿用 `vacant/suitegauge.py`）：擋得住已知壞解 ≠ 涵蓋真需求。
+    ⚠ 單邊保證（逐字沿用 `vacant_network/suitegauge.py`）：擋得住已知壞解 ≠ 涵蓋真需求。
       這個探針綠了只代表「這把尺分得出我們刻意做出來的好壞差」，
       **不代表**它分得出 A-GATE 與 A-SOLO 之間的差。
     """
@@ -1595,7 +1595,7 @@ def run_controls(graders: list[Grader], out_dir: pathlib.Path, *,
         "negative_control_leaky_dropped": "CTRL-LEAKY" in dropped,
         "graders": [g.to_json() for g in graders],
         "by_grader": {}, "direction_ok": None, "notes": [
-            "單邊保證：擋得住已知壞解 ≠ 涵蓋真需求（vacant/suitegauge.py 逐字）。",
+            "單邊保證：擋得住已知壞解 ≠ 涵蓋真需求（vacant_network/suitegauge.py 逐字）。",
             "正控綠 ≠ 這把尺分得出 A-GATE 與 A-SOLO 的差。",
         ],
     }

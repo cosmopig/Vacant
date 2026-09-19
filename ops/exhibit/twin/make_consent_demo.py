@@ -7,7 +7,7 @@
 commitment、它被刪了」。本支就用**合成捐贈者**把那個機制真的跑一遍，
 讓展件現在就有一條可驗的同意鏈，而不必等倫理定案。
 
-流程逐字照 `vacant/consent.py`：
+流程逐字照 `vacant_network/consent.py`：
 
     persona（鏈外）＋ nonce（鏈外）
         → commitment  ──簽──→  CONSENT_GRANT
@@ -23,7 +23,7 @@ commitment、它被刪了」。本支就用**合成捐贈者**把那個機制真
 
 1. **捐贈者是合成的。** 這一條鏈證明機制接得起來，不證明任何關於真人的事。
    頁面上必須寫「這是示範，不是資料」。
-2. 刪除證明的射程見 `vacant/consent.py` 的四條誠實邊界，尤其第 1 條：
+2. 刪除證明的射程見 `vacant_network/consent.py` 的四條誠實邊界，尤其第 1 條：
    鏈記的是「我們刪了」，不是「世上沒有副本」。
 3. `ts_ms` 寫死，所以重跑只會換金鑰與簽章；產物進版控，
    `build_viewer.py --check` 比的是頁面與**磁碟上這一份**，不是重新產生的一份。
@@ -47,10 +47,10 @@ REPO = HERE.parents[3]
 sys.path.insert(0, str(REPO))
 
 from ops.exhibit.twin import roster as rosterlib  # noqa: E402
-from vacant import consent, crypto  # noqa: E402
-from vacant.canonical import canonical_bytes  # noqa: E402
-from vacant.identity import Identity, PublicIdentity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network import consent, crypto  # noqa: E402
+from vacant_network.canonical import canonical_bytes  # noqa: E402
+from vacant_network.identity import Identity, PublicIdentity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 OUT = HERE.parent / "consent_demo"
 CHAIN = OUT / "chain.ndjson"

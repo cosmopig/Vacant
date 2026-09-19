@@ -34,7 +34,7 @@ import tempfile
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
-from vacant.codebench import LCB_BANKS, LiveCodeBenchLoader  # noqa: E402
+from vacant_network.codebench import LCB_BANKS, LiveCodeBenchLoader  # noqa: E402
 
 PROBE_PATH = pathlib.Path(__file__).resolve().parent / "data" / "lcb_probe_solutions.json"
 # ⚠ round735（R467）：`PROBE_PATH` 這個名字**只**代表「v1/v2 的手寫解檔」，

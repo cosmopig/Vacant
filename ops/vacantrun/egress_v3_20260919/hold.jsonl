@@ -1,0 +1,78 @@
+{"ts": "15:22:34", "event": "connected", "peer": "('100.86.226.21', 1234)"}
+{"ts": "15:22:34", "i": 0, "ok": true, "first": "HTTP/1.1 200 OK\r\nX-Powered-By: Express\r\n"}
+{"ts": "15:22:39", "i": 1, "ok": true, "first": "keep-alive\r\nKeep-Alive: timeout=5\r\n\r\n{\n "}
+{"ts": "15:22:44", "i": 2, "ok": true, "first": "      \"object\": \"model\",\n      \"owned_by"}
+{"ts": "15:22:49", "i": 3, "ok": true, "first": ": \"text-embedding-nomic-embed-text-v1.5\""}
+{"ts": "15:22:54", "i": 4, "ok": true, "first": "on/json; charset=utf-8\r\nContent-Length: "}
+{"ts": "15:22:59", "i": 5, "ok": true, "first": "\"id\": \"gemma-4-12b-it-qat\",\n      \"objec"}
+{"ts": "15:23:04", "i": 6, "ok": true, "first": "\n    },\n    {\n      \"id\": \"qwen_qwen3.6-"}
+{"ts": "15:23:09", "i": 7, "ok": true, "first": "l\",\n      \"owned_by\": \"organization_owne"}
+{"ts": "15:23:14", "i": 8, "ok": true, "first": "jIFrq7pgC22mxgdfHgBxnE\"\r\nDate: Sat, 19 S"}
+{"ts": "15:23:19", "i": 9, "ok": true, "first": "ed_by\": \"organization_owner\"\n    },\n    "}
+{"ts": "15:23:24", "i": 10, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:23:29", "i": 11, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:23:34", "i": 12, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:23:39", "i": 13, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:23:44", "i": 14, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:23:49", "i": 15, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:23:54", "i": 16, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:23:59", "i": 17, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:04", "i": 18, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:09", "i": 19, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:14", "i": 20, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:19", "i": 21, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:24", "i": 22, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:29", "i": 23, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:34", "i": 24, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:39", "i": 25, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:44", "i": 26, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:49", "i": 27, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:54", "i": 28, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:24:59", "i": 29, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:04", "i": 30, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:09", "i": 31, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:14", "i": 32, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:19", "i": 33, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:24", "i": 34, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:29", "i": 35, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:34", "i": 36, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:39", "i": 37, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:44", "i": 38, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:49", "i": 39, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:54", "i": 40, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:25:59", "i": 41, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:04", "i": 42, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:09", "i": 43, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:14", "i": 44, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:19", "i": 45, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:24", "i": 46, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:29", "i": 47, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:34", "i": 48, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:39", "i": 49, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:44", "i": 50, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:49", "i": 51, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:54", "i": 52, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:26:59", "i": 53, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:04", "i": 54, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:09", "i": 55, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:14", "i": 56, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:19", "i": 57, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:24", "i": 58, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:29", "i": 59, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:34", "i": 60, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:39", "i": 61, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:44", "i": 62, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:49", "i": 63, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:54", "i": 64, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:27:59", "i": 65, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:04", "i": 66, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:09", "i": 67, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:14", "i": 68, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:19", "i": 69, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:24", "i": 70, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:29", "i": 71, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:34", "i": 72, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:39", "i": 73, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:44", "i": 74, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:49", "i": 75, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}
+{"ts": "15:28:54", "i": 76, "ok": false, "error": "BrokenPipeError: [Errno 32] Broken pipe"}

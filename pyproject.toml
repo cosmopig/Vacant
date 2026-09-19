@@ -1,8 +1,9 @@
 [project]
-# 發布名＝`vacant-network`（PyPI 上 `vacant` 是別人的 DNS 工具，不是本專案）。
-# import 名仍然是 `vacant`。
+# 發布名＝`vacant-network`，**import 名 0.8.0 起是 `vacant_network`**（原本是 `vacant`）。
+# PyPI 上的 `vacant` 是別人的套件（alltuner/vacant，authoritative-DNS 工具），
+# 0.7.0 之前我們跟它共用頂層目錄名 `vacant/`，pip 會逐檔覆蓋——見 `[project.scripts]`。
 name = "vacant-network"
-dynamic = ["version"]          # 單一真相＝`vacant/__init__.py::__version__`
+dynamic = ["version"]          # 單一真相＝`vacant_network/__init__.py::__version__`
 description = "An accountability layer that sits outside any AI agent: runs the customer's executable acceptance tests, gates delivery, and signs every attempt into a verifiable hash chain."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -28,10 +29,10 @@ classifiers = [
     "Topic :: Software Development :: Testing",
 ]
 
-# 執行期依賴＝**實際被 import 的三個**，不多不少（AST 掃過整個 `vacant/`）：
+# 執行期依賴＝**實際被 import 的三個**，不多不少（AST 掃過整個 `vacant_network/`）：
 #   cryptography  Ed25519 簽章／驗章（logbook、identity、envelope 的地基）
-#   mcp           `vacant/mcp_server.py` 的 MCP 相容層
-#   jsonschema    `vacant/checks.py` 的 json_schema check——見下面那條註解
+#   mcp           `vacant_network/mcp_server.py` 的 MCP 相容層
+#   jsonschema    `vacant_network/checks.py` 的 json_schema check——見下面那條註解
 # `jsonschema` 過去是「裝了就用、沒裝退回自帶的最小驗證器」。那個 fallback 比標準
 # 驗證器**寬鬆**，所以同一份 schema check 在兩台機器上可能給出不同判定。一個把
 # 「判定可被重算」當成主張的系統不能容許判準隨環境漂移 ⇒ 改成硬相依。
@@ -53,46 +54,47 @@ Changelog = "https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md"
 Issues = "https://github.com/cosmopig/Vacant/issues"
 
 [project.scripts]
-vacant = "vacant.cli:main"
-# ⚠ **不要以為加第二個指令名就能躲開撞名——實測過，沒有用。**
+vacant = "vacant_network.cli:main"
+vacant-network = "vacant_network.cli:main"
+# ⚠ **`vacant` 這個指令名仍然會跟別人撞，第二個指令名是為了這件事存在的。**
 #
-# PyPI 上的 `vacant`（alltuner/vacant，DNS 工具）跟我們用**同一個頂層目錄名
-# `vacant/`**，pip 逐檔覆蓋 ⇒ 它的 `cli.py` 蓋掉我們的。所以即使多給一個
-# `vacant-run = "vacant.cli:main"`，那支腳本**照樣 import 到對方的碼**。
-# 2026-09-19 用真的 wheel 驗過：裝了對方之後兩支都變成 DNS 工具的介面。
+# PyPI 上的 `vacant`（alltuner/vacant，DNS 工具）也裝一支叫 `vacant` 的指令，
+# 後裝的會蓋掉先裝的——**這一條沒有被 0.8.0 修掉，也修不掉**（同名 console script
+# 就是同一個檔案路徑）。0.8.0 修掉的是更嚴重的那一半：
 #
-#   pip list       → 兩個都列著，vacant-network 0.7.0「還裝著」
-#   import vacant  → AttributeError: no attribute '__version__'
-#   vacant --help  → 對方的介面
-#   **四種安裝順序全部零錯誤訊息。**
+#   0.7.0（import 名＝`vacant`）：兩個套件**共用頂層目錄 `vacant/`**，pip 逐檔覆蓋，
+#     所以連 `import vacant` 都會拿到對方的碼。2026-09-19 用真 wheel 驗過，即使
+#     另外加一支 `vacant-run = "vacant.cli:main"`，那支腳本**照樣 import 到對方的
+#     `vacant/cli.py`**——第二個指令名在那個世界裡沒有用。四種安裝順序全部零錯誤訊息。
+#   0.8.0（import 名＝`vacant_network`）：兩個套件不再共用任何檔案路徑（除了
+#     `bin/vacant` 這支腳本）。`vacant-network` 這支指令 import 的是
+#     `vacant_network.cli`，對方蓋不到 ⇒ **被蓋掉時打 `vacant-network` 就對了。**
 #
-# 唯一真正的修法是**改掉我們的 import 套件名**（`vacant` → 例如 `vacant_network`），
-# 那是破壞性變更，要人決定。在那之前 README 最前面有醒目警告，
-# 判別式 `python3 -c "import vacant; print(vacant.__version__)"`。
+# 判別式：`python3 -c "import vacant_network; print(vacant_network.__version__)"`。
 
 [build-system]
 requires = ["setuptools>=77"]   # >=77：PEP 639 的 license／license-files
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
-version = { attr = "vacant.__version__" }
+version = { attr = "vacant_network.__version__" }
 
 [tool.setuptools]
-# `vacant.web` 是資產目錄（沒有 __init__.py，不是可 import 的模組），但必須
-# 列在這裡：只寫 package-data 的話 setuptools 會警告「vacant.web 不在 packages」。
-# 內容由下面的 package-data 決定（已驗：wheel 內有 vacant/web/app.{html,css,js}）。
+# `vacant_network.web` 是資產目錄（沒有 __init__.py，不是可 import 的模組），但必須
+# 列在這裡：只寫 package-data 的話 setuptools 會警告「vacant_network.web 不在 packages」。
+# 內容由下面的 package-data 決定（已驗：wheel 內有 vacant_network/web/app.{html,css,js}）。
 #
-# `vacant.vrun`＝`vacant demo gate` 與 `vacant run -- <cmd>` 的判斷層＋執行層
+# `vacant_network.vrun`＝`vacant demo gate` 與 `vacant run -- <cmd>` 的判斷層＋執行層
 # （2026-09-18 從 `ops/vacantrun/` 與 `ops/gain/r530/` 搬進來）。**它必須在
 # wheel 裡**：不在的話 `pip install vacant-network` 的人跑第一屏只會拿到一句
 # 「請先 clone」。`ops/` 底下留的是 re-export，所以判準仍然只有一份。
 # ⚠ 刻意**不**把頂層 `ops` 打進 wheel：PyPI 上 `ops` 是 Juju 的套件，
 #   同名會在別人的 site-packages 裡安靜覆蓋檔案——失敗方式很糟。
-packages = ["vacant", "vacant.vrun", "vacant.web"]
+packages = ["vacant_network", "vacant_network.vrun", "vacant_network.web"]
 
 [tool.setuptools.package-data]
 # 觀測台的靜態資產隨套件安裝（無 build step；dashboard 由 /static/ 供應）
-vacant = ["web/*.html", "web/*.css", "web/*.js"]
+vacant_network = ["web/*.html", "web/*.css", "web/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

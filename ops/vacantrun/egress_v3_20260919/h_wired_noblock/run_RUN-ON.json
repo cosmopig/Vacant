@@ -1,0 +1,139 @@
+{
+  "task_id": "h_wired_noblock",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/v3egress/bin/outer.sh",
+    "/var/tmp/v3egress/bin/inner_wired.sh",
+    "Read TASK.md and do what it says. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/v3egress/ws_h_wired_noblock",
+  "proxy_url": "http://127.0.0.1:42835",
+  "env": {
+    "proxy_url": "http://127.0.0.1:42835",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb",
+  "ws_end_sha256": "86cceb2d03d30076829ff20a327642092c009ecd5229100d8b2b252de43a1094",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 6,
+  "wire_by_protocol": {
+    "openai": 6
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "7ccfd66b1ffe0a401cfdfdc46a5681da1b216b57d956302934af0526df975d48",
+  "verdict_hash": "88f3e92eefbdf508db4ad90866dd5e5d751795ccfcafcde7e21d157ab680b8b0",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "1407f6cb722df0ec646475116f735bc3c42a7cf8ff3937ca90219a8d9d9c4feb",
+      "argv": [
+        "/var/tmp/v3egress/bin/outer.sh",
+        "/var/tmp/v3egress/bin/inner_wired.sh",
+        "Read TASK.md and do what it says. Use your tools to write the file."
+      ],
+      "argv_sha256": "ce77c453280cadf2e730cc652f053fc336cefce19b50c1ad7efd65ee8b197609",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 14.892,
+      "wire_quiesced": true,
+      "requests_seen": 6,
+      "requests_seen_cumulative": 6,
+      "wire_digest": "c0ba7109fd22566b3790e5d180dd97980317228e5fcbc01b59792ff66a17d587",
+      "ws_end_sha256": "86cceb2d03d30076829ff20a327642092c009ecd5229100d8b2b252de43a1094",
+      "frozen_path": "/var/tmp/v3egress/rd_h_wired_noblock/_frozen_RUN-ON",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "7ccfd66b1ffe0a401cfdfdc46a5681da1b216b57d956302934af0526df975d48",
+      "visible_path": "/var/tmp/v3egress/rd_h_wired_noblock/visible_RUN-ON.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "default",
+      "defaulted": true
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "wire_errors": 0,
+  "wire_digest": "c0ba7109fd22566b3790e5d180dd97980317228e5fcbc01b59792ff66a17d587",
+  "run_wall_s": 15.034,
+  "agent_wall_s": 14.892,
+  "failures": ""
+}

@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from vacant.codebench import _PROBLEMS, code_cases
+from vacant_network.codebench import _PROBLEMS, code_cases
 
 # 每題一個正確參考解（人工確認）。測試要求：參考解通過自己的 verifier。
 _REF = {
@@ -157,8 +157,8 @@ import time
 
 import pytest
 
-from vacant.checks import compile_check
-from vacant.codebench import (
+from vacant_network.checks import compile_check
+from vacant_network.codebench import (
     FAMILIES,
     BuiltinSampleLoader,
     EvalPlusMBPPLoader,

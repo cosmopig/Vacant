@@ -7,7 +7,7 @@ import time
 
 import pytest
 
-from vacant.checks import compile_check, extract_code, run_python_capture, run_python_check
+from vacant_network.checks import compile_check, extract_code, run_python_capture, run_python_check
 
 
 def test_equals_normalizes():

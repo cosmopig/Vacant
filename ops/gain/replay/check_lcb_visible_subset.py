@@ -17,7 +17,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3]))
 
-from vacant.codebench import LiveCodeBenchLoader, _lcb_check_code  # noqa: E402
+from vacant_network.codebench import LiveCodeBenchLoader, _lcb_check_code  # noqa: E402
 
 MIN_TASKS = 91  # bank 釘死題數；量到比這少 = 安靜漏題，要 BROKEN 不是 PASS
 

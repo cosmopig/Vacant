@@ -46,7 +46,7 @@ from ops.gain.r535.state_r535 import (  # noqa: E402
     mutation_check, normalise_cell, read_m7ws_selftest, selftest,
     trigger_rate,
 )
-from vacant.research import discordance  # noqa: E402
+from vacant_network.research import discordance  # noqa: E402
 
 OFF = frozenset
 

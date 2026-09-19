@@ -33,7 +33,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Iterable
 
-from vacant.entrycost import SimConfig, simulate
+from vacant_network.entrycost import SimConfig, simulate
 
 # 落盤的數值欄位（rows.jsonl 一律全寫；聚合只對這些算 mean/sd）
 NUMERIC_KEYS = (

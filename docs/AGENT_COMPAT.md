@@ -30,14 +30,14 @@
 量過，這一格的證據**全部**是真模型。所以引用 §1–§6 講 Hermes 時要小心：
 那幾節的假上游結論**不涵蓋它**。
 
-量具與判準：[`vacant/vrun/`](../vacant/vrun/)（V0，見
+量具與判準：[`vacant_network/vrun/`](../vacant_network/vrun/)（V0，見
 [`docs/VACANT_RUN.md`](VACANT_RUN.md)）。
-名單的單一真相：[`vacant/vrun/envmap.py`](../vacant/vrun/envmap.py)。
+名單的單一真相：[`vacant_network/vrun/envmap.py`](../vacant_network/vrun/envmap.py)。
 
 > ⚠ **本文的實測是在搬家之前跑的**（判斷層當時住在 `ops/vacantrun/`）。
 > 判準一個字沒動、`ops.vacantrun.launcher` 是同一個 module 物件，所以下面的
 > `requests_seen` 與退出碼照樣成立；但 `envmap` **沒有**留 re-export，
-> 名單只住在 `vacant/vrun/envmap.py` 一個地方。
+> 名單只住在 `vacant_network/vrun/envmap.py` 一個地方。
 
 ---
 
@@ -86,7 +86,7 @@ docstring 就寫死的（`envmap` 誠實邊界 1），這份文件只是把它�
 
 ⚠ **Claude Code 那一格的「零接線」有一個不在 `vacant run` 裡的前提**：
 **上游必須自己會講 Anthropic Messages（`POST /v1/messages`）**。
-`vacant/vrun/wireproxy.py` 是**反向代理不是協定轉換器**——它照 path 路由，
+`vacant_network/vrun/wireproxy.py` 是**反向代理不是協定轉換器**——它照 path 路由，
 不把 `/v1/messages` 改寫成 `/v1/chat/completions`。1003 的 LM Studio
 **原生就吃 `/v1/messages`**（含 SSE 與 `tool_use`），所以這一格不需要 shim；
 換一個只講 OpenAI 的上游（純 llama.cpp server、vLLM 預設）就**必須**自備轉換
@@ -361,8 +361,11 @@ POST /v1/responses   store=false   previous_response_id=<不存在>   stream=tru
    **2026-09-19 已經在真模型上把兩格跑完**（§10）。
    代價：不能用 ChatGPT 訂閱額度，要另外付 API 費用（或像 §10 那樣指到本地端點）。
 2. ⚠ **出網封鎖**（`block_egress.sh`，V3，要 root）——封鎖之後那條路會
-   **連不上**而不是**偷偷連上**。它不能讓你看到 wire，但能讓
-   「沒被中介到」變成一個**看得見的失敗**而不是一個沉默的洞。**沒量過。**
+   **連不上**而不是**偷偷連上**。~~沒量過。~~ **2026-09-19 量了**（量過了：[`decisions/DECISION_20260919_BLOCK_EGRESS_V3.md`](../decisions/DECISION_20260919_BLOCK_EGRESS_V3.md)、[`docs/VACANT_RUN.md`](VACANT_RUN.md) §5.1）：
+   對外 TCP／TLS／直打外部 DNS 的 UDP／ICMP 都確實擋得住（有負向控制），
+   ⚠ **但「看得見的失敗」只對讀 agent 輸出的人成立，對收據不成立**——
+   洩漏格與被擋格的 `run_*.json` **26 個判斷欄位逐字相同**。
+   ⚠ **而且這一條對 Codex 的 `wss://` 那條路仍然沒量**（只量了 Hermes）。
 3. ❌ 在 proxy 加 WebSocket tee——技術上做得到，但那要 (a) 處理 `Upgrade`、
    (b) 解 WebSocket frame、(c) 而 `wss://chatgpt.com/...` 是寫死的網域，
    還是得靠 DNS／CA 層的透明攔截 ⇒ 撞到 V0 §4.10「不做透明 MITM」那條裁決。
@@ -398,12 +401,12 @@ POST /v1/responses   store=false   previous_response_id=<不存在>   stream=tru
 
 repo 裡的兩支相關程式碼**還在**、也還說得通，但它們是**呼叫端**不是證據：
 
-- [`vacant/hermes_substrate.py`](../vacant/hermes_substrate.py)：spawn
+- [`vacant_network/hermes_substrate.py`](../vacant_network/hermes_substrate.py)：spawn
   `hermes -z`、綁 `HERMES_HOME`、寫 `config.yaml`
   （`model.provider: vllm` ＋ `model.base_url: <...>/v1`）、
   另外設 `CUSTOM_BASE_URL` 環境變數。
-- [`vacant/brains.py::HermesBrain`](../vacant/brains.py)：同樣用 `CUSTOM_BASE_URL`。
-- [`vacant/mcp_trace.py`](../vacant/mcp_trace.py)：**stdio tee-proxy**，
+- [`vacant_network/brains.py::HermesBrain`](../vacant_network/brains.py)：同樣用 `CUSTOM_BASE_URL`。
+- [`vacant_network/mcp_trace.py`](../vacant_network/mcp_trace.py)：**stdio tee-proxy**，
   原本就是為 Hermes 寫的——它 tee 的是 **MCP JSON-RPC**（Hermes ↔ vacant MCP
   server），**不是模型通道**。兩者不可互相替代：`mcp_trace` 證明的是
   「Hermes 有沒有呼叫 vacant、問了什麼」，`wireproxy` 證明的是
@@ -485,7 +488,7 @@ repo 裡的兩支相關程式碼**還在**、也還說得通，但它們是**呼
 - 接線：**設定路線**（`wrap_agent.sh opencode` ⇒ `OPENCODE_CONFIG_CONTENT`），
   不是零接線——理由見 §2.3 ⚠
 - 題目：**現成的** `ops/gain/r535/bank/s1_01_addmul`（沒有為了這次新造題）
-- 判斷層：`vacant/vrun/launcher.py`，`--suite` 指到**工作區外**的 bank 路徑
+- 判斷層：`vacant_network/vrun/launcher.py`，`--suite` 指到**工作區外**的 bank 路徑
 
 ### 8.1 兩格怎麼分開的——**難度來自題庫本身，不是我們改了題**
 
@@ -528,7 +531,7 @@ def mul(a, b):
   export PATH=/home/user1/.local/opt/node-v22.23.2-linux-x64/bin:$PATH
   export VACANT_RUN_UPSTREAM_OPENAI=http://100.119.113.56:1234/v1
   export VACANT_AGENT_MODEL=gemma-4-12b-it-qat
-  python3 -m vacant.vrun.launcher \
+  python3 -m vacant_network.vrun.launcher \
       --workspace <ws> --run-dir <rd> \
       --suite <repo>/ops/gain/r535/bank/s1_01_addmul/tests_visible \
       --task-id opencode_real_<cell> --sandbox none --test-timeout 30 \
@@ -611,14 +614,14 @@ status=0    tools=0   n_msgs=3  model=gemma-4-12b-it-qat   "You are a title gene
 ### 8.3 收據驗證（先負控制再驗該跑）
 
 ```
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
 selftest: PASS                                          ← 負控制：它抓得到壞鏈
 
-$ python3 -m vacant.vrun.verify_receipts --glob <refuse-run-dir>
+$ python3 -m vacant_network.vrun.verify_receipts --glob <refuse-run-dir>
 run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
 run   RUN-ON   2   2   0   1   1   11889f630ac27ec4…  OK      總判：OK
 
-$ python3 -m vacant.vrun.verify_receipts --glob <deliver-run-dir>
+$ python3 -m vacant_network.vrun.verify_receipts --glob <deliver-run-dir>
 run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
 run   RUN-ON   2   2   0   1   1   8ed10a3f3898e683…  OK      總判：OK
 ```
@@ -665,7 +668,7 @@ Claude Code 走的是 Anthropic Messages，不是 OpenAI Chat Completions。**
   **沒有一行是在指 base url**。這是本矩陣裡**唯一一個真模型走零接線的 agent**
   ——pi／OpenCode 的真模型都走設定路線。
 - 題目：**現成的** `ops/gain/r535/bank/s1_01_addmul`（沒有為了這次新造題）
-- 判斷層：`vacant/vrun/launcher.py` @ `8eec09a`，`--suite` 指到**工作區外**的 bank 路徑
+- 判斷層：`vacant_network/vrun/launcher.py` @ `8eec09a`，`--suite` 指到**工作區外**的 bank 路徑
 
 ### 9.0 先解決那個**以為會是障礙的障礙**：協定轉換
 
@@ -771,7 +774,7 @@ def mul(a, b):
   export PATH=/home/user1/.local/opt/node-v22.23.2-linux-x64/bin:$PATH
   export VACANT_RUN_UPSTREAM_ANTHROPIC=http://100.119.113.56:1234
   export VACANT_AGENT_MODEL=gemma-4-12b-it-qat
-  python3 -m vacant.vrun.launcher \
+  python3 -m vacant_network.vrun.launcher \
       --workspace <ws> --run-dir <rd> \
       --suite <repo>/ops/gain/r535/bank/s1_01_addmul/tests_visible \
       --task-id claudecode_real_<cell> --sandbox none --test-timeout 30 \
@@ -878,6 +881,10 @@ receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
 兩個補法，第二個當場驗過：
 
 1. `ops/vacantrun/block_egress.sh`（V3）——出網封鎖，漏掉的路會**連不上**而不是偷偷連上。
+   **2026-09-19 量了**（量過了：[`decisions/DECISION_20260919_BLOCK_EGRESS_V3.md`](../decisions/DECISION_20260919_BLOCK_EGRESS_V3.md)、[`docs/VACANT_RUN.md`](VACANT_RUN.md) §5.1）：擋得住，**但收據上看不出差別**，
+   而且它自己有五條擋不住的（迴圈上其他 uid 的 listener、unix socket、
+   systemd-resolved 的 DNS、IPv6、已經送出去的位元組）。
+   ⚠ **Claude Code 在封鎖之下會怎樣沒量**——那次只量了 Hermes。
 2. **把 openai 那條路也釘到本地**。同一個拒交格加一行
    `export VACANT_RUN_UPSTREAM_OPENAI=http://100.119.113.56:1234/v1` 重跑
    （`claudecode_real_noleak`）：
@@ -892,19 +899,19 @@ receipts        = entries_n=2 verified_n=2 failed_n=0 chain_ok=true
    ```
 
    ⇒ **`route()` 沒有壞，是「按 path 猜家族」本來就猜不到 `/api/hello` 屬於誰。**
-   這是 V0 的邊界不是 bug，本次**沒有動 `vacant/vrun/` 一行**。
+   這是 V0 的邊界不是 bug，本次**沒有動 `vacant_network/vrun/` 一行**。
 
 ### 9.5 收據驗證（先負控制再驗該跑）
 
 ```
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
 selftest: PASS                                          ← 負控制：它抓得到壞鏈
 
-$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_cc/rd_refuse
+$ python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_cc/rd_refuse
 run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
 rd_refuse   RUN-ON   2   2   0   1   1   ca59a79e584b6a6c…  OK      總判：OK
 
-$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_cc/rd_deliver
+$ python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_cc/rd_deliver
 run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
 rd_deliver  RUN-ON   2   2   0   1   1   48a05fa5269fd1f1…  OK      總判：OK
 ```
@@ -982,7 +989,7 @@ HTTP 反向代理在那條路上不存在（§4.2），人類另外排。
 - 接線：**設定路線**（`wrap_agent.sh codex` ⇒ `CODEX_HOME` ＋ `config.toml` 裡一個
   **新** provider id）。**不是零接線**——Codex 不吃 `OPENAI_BASE_URL`（§3 有否定證據）。
 - 題目：**現成的** `ops/gain/r535/bank/s1_01_addmul`（沒有為了這次新造題）
-- 判斷層：`vacant/vrun/launcher.py` @ `9eeb1d9`，`--suite` 指到**工作區外**的 bank 路徑
+- 判斷層：`vacant_network/vrun/launcher.py` @ `9eeb1d9`，`--suite` 指到**工作區外**的 bank 路徑
 - 落盤：vacant-dev 的 `/var/tmp/vacant_codex/rd_*`（收據、`rows.jsonl`、
   `wire_RUN-ON/{index.jsonl,*.req.bin,*.resp.bin}`、`_frozen_RUN-ON/`，共 15 MB）。
   **`/var/tmp` 沒有備份、會被清**——下面抄的是關鍵欄位不是原始 bytes（同附錄 A 的規矩）。
@@ -991,7 +998,7 @@ HTTP 反向代理在那條路上不存在（§4.2），人類另外排。
 
   ```
   cd ~/vacant/Vacant && git worktree add --detach /var/tmp/vacant_codex/repo 9eeb1d9
-  cd /var/tmp/vacant_codex/repo && python3 -m vacant.vrun.verify_receipts --selftest
+  cd /var/tmp/vacant_codex/repo && python3 -m vacant_network.vrun.verify_receipts --selftest
   ```
 
 ### 10.0 先解決那個**以為會是障礙的障礙**：`/v1/responses` 上游支不支援
@@ -1118,7 +1125,7 @@ Codex 的拒交格兩次都落在 `39c19a7a…`（`add`／`multiply`，`visible 
   export VACANT_RUN_UPSTREAM_OPENAI=http://100.119.113.56:1234/v1
   export VACANT_AGENT_MODEL=gemma-4-12b-it-qat
   export VACANT_CODEX_WIRE=responses          # 也是預設值，寫出來只為了可讀
-  python3 -m vacant.vrun.launcher \
+  python3 -m vacant_network.vrun.launcher \
       --workspace <ws> --run-dir <rd> \
       --suite <repo>/ops/gain/r535/bank/s1_01_addmul/tests_visible \
       --task-id codex_real_<cell> --sandbox none --test-timeout 30 \
@@ -1216,7 +1223,10 @@ upstreams_defaulted    = ['anthropic']
 ⇒ **`upstreams_defaulted` 的讀法**：它說的是「這條路由沒人指定，**萬一**有流量會去
 公開 API」，**不是**「已經出網了」。要判有沒有出網，看的是 `wire_by_protocol` 與
 `wire_*/index.jsonl` 的 `upstream` 欄位。§9.4 那一格兩者都成立（列了 ＋ 真的有一通），
-本節只成立前半。結構性補法仍然是 `block_egress.sh`（V3），**沒量過**。
+本節只成立前半。結構性補法仍然是 `block_egress.sh`（V3），~~沒量過~~
+**2026-09-19 量了**（量過了：[`decisions/DECISION_20260919_BLOCK_EGRESS_V3.md`](../decisions/DECISION_20260919_BLOCK_EGRESS_V3.md)、[`docs/VACANT_RUN.md`](VACANT_RUN.md) §5.1）：它擋得住出網，
+**但擋不住「收據看不出差別」**——那要另外把 REJECT 規則的封包計數器寫進收據。
+⚠ **Codex 在封鎖之下沒量。**
 
 ### 10.7 一種**跑不完**的失敗：思考模式下的 runaway（`codex_real_smoke`）
 
@@ -1283,16 +1293,16 @@ request body 變成 `reasoning: {"effort": "none", "summary": "auto"}`、
 ### 10.8 收據驗證（先負控制再驗該跑）
 
 ```
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
 selftest: PASS                                          ← 負控制：它抓得到壞鏈
 
-$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_asis
+$ python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_asis
 rd_asis          RUN-ON   2   2   0   1   1   28e8d32909f343f2…  OK      總判：OK
-$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_asis_deliver
+$ python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_asis_deliver
 rd_asis_deliver  RUN-ON   2   2   0   1   1   ebaf2218e3d6ce7c…  OK      總判：OK
-$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_nt_refuse
+$ python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_nt_refuse
 rd_nt_refuse     RUN-ON   2   2   0   1   1   9df146b93fc2a820…  OK      總判：OK
-$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_nt_deliver
+$ python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_codex/rd_nt_deliver
 rd_nt_deliver    RUN-ON   2   2   0   1   1   29035207d34f5d60…  OK      總判：OK
 ```
 
@@ -1360,7 +1370,7 @@ rd_nt_deliver    RUN-ON   2   2   0   1   1   29035207d34f5d60…  OK      總�
   ⚠ **不要拿頂層 `usage.reasoning_tokens` 當判準——那個欄位根本不在回應裡。**
   有的是巢狀的 `usage.completion_tokens_details.reasoning_tokens`（1003 這一通＝25）。
   兩個名字差一層，抄錯就會得到 `None` 然後把 thinking 模式判成不是。
-- 判斷層：`vacant/vrun/launcher.py` @ `9eeb1d9`（與 §10 同一份）
+- 判斷層：`vacant_network/vrun/launcher.py` @ `9eeb1d9`（與 §10 同一份）
 - wrapper：`wrap_agent.sh` @ `feat/codex-real`（sha256
   `6cce391df9e56c62223997f4b9bfb42b2a7e1548ea1ac8bdf8dfd8f64cbca32d`），
   因為要用 §10.7 那個 `VACANT_CODEX_REASONING_EFFORT` 鉤子
@@ -1565,7 +1575,7 @@ fallback（gemma-4-12b-it-qat）的 body ⇒ 六通全部 200，兩格都拿到
 
 ### 11.5 fallback 的**上下文視窗**：量到的是一個下界，不是那個數字
 
-`vacant/vrun/envmap.py` 原本把這一格記成「跟 Claude Code 的 200k 假設同型的洞」。
+`vacant_network/vrun/envmap.py` 原本把這一格記成「跟 Claude Code 的 200k 假設同型的洞」。
 同型的部分成立（它會改變送出去的 input），**但這一格量得到的東西比較少**：
 
 **量得到的**——那個數字是**活的**，而且改它會改 bytes。`codex debug prompt-input`
@@ -1628,10 +1638,10 @@ fallback（gemma-4-12b-it-qat）的 body ⇒ 六通全部 200，兩格都拿到
 ### 11.6 收據驗證（先負控制再驗該跑）
 
 ```
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
 selftest: PASS                                   ← 負控制：它抓得到壞鏈
 
-$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex_chat/rd_chat_refuse
+$ python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_codex_chat/rd_chat_refuse
 rd_chat_refuse            RUN-ON  2  2  0  1  1  2691d9488ebc3d17…  OK   總判：OK
 $ … rd_chat_deliver       RUN-ON  2  2  0  1  1  df52af988c1c807b…  OK   總判：OK
 $ … rd_resp_refuse        RUN-ON  2  2  0  1  1  ffd503694a4f47b5…  OK   總判：OK
@@ -1651,7 +1661,7 @@ export PATH=/home/user1/.local/bin:/home/user1/.local/opt/node-v22.23.2-linux-x6
 export VACANT_RUN_UPSTREAM_OPENAI=http://100.119.113.56:1234/v1     # 1003
 export VACANT_AGENT_MODEL=gemma-4-12b-it-qat
 export VACANT_CODEX_REASONING_EFFORT=none                            # 1003 是 thinking 模式
-VACANT_CODEX_WIRE=chat|responses python3 -m vacant.vrun.launcher \
+VACANT_CODEX_WIRE=chat|responses python3 -m vacant_network.vrun.launcher \
     --workspace <ws> --run-dir <rd> \
     --suite <repo>/ops/gain/r535/bank/s1_01_addmul/tests_visible \
     --task-id codex_<cell> --sandbox none --test-timeout 30 \
@@ -1670,8 +1680,8 @@ CODEX_HOME=<同上>           codex debug prompt-input -c model_context_window=1
 
 ```
 cd ~/vacant/Vacant && git worktree add --detach /var/tmp/vacant_codex_chat/repo 9eeb1d9
-cd /var/tmp/vacant_codex_chat/repo && python3 -m vacant.vrun.verify_receipts --selftest
-python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex_chat/rd_resp_deliver
+cd /var/tmp/vacant_codex_chat/repo && python3 -m vacant_network.vrun.verify_receipts --selftest
+python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_codex_chat/rd_resp_deliver
 ```
 
 ⚠ **`/var/tmp` 沒有備份、會被清。** 上面抄的是關鍵欄位不是原始 bytes（同附錄 A 的規矩）。
@@ -1732,11 +1742,11 @@ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_codex_chat/rd_resp
 - 接線：**設定路線**（`wrap_agent.sh hermes` ⇒ `HERMES_HOME` ＋ `config.yaml`）。
   **不是零接線**，理由見 §12.2。
 - 題目：**現成的** `ops/gain/r535/bank/s1_01_addmul`（沒有為了這次新造題）
-- 判斷層：`vacant/vrun/launcher.py`，`--suite` 指到**工作區外**的 bank 路徑
+- 判斷層：`vacant_network/vrun/launcher.py`，`--suite` 指到**工作區外**的 bank 路徑
 - 落盤：vacant-dev 的 `/var/tmp/vacant_hermes/rd_*`（收據、`rows.jsonl`、
   `wire_RUN-ON/{index.jsonl,*.req.bin,*.resp.bin}`、`_frozen_RUN-ON/`）。
   **`/var/tmp` 沒有備份、會被清**——下面抄的是關鍵欄位不是原始 bytes（同附錄 A 的規矩）。
-  repo 也不是完整 checkout：只 `git archive` 了 `vacant/` ＋ `ops/vacantrun/` ＋
+  repo 也不是完整 checkout：只 `git archive` 了 `vacant_network/` ＋ `ops/vacantrun/` ＋
   那一題的 bank（**1.4 MB**），因為 vacant-dev 當時只剩 4.9 G，
   **一份 worktree 要 789 MB**。
 
@@ -1843,7 +1853,14 @@ agent stdout    = HTTP 401: Missing Authentication header
 **這一格跟一個真的拒交格在收據上只差 `requests_seen` 一個欄位**
 （連 `agent_rc` 都是 0，跟 §8–§10 三個真拒交格一樣）。
 ⇒ **`envmap` 誠實邊界 2「名單漏一個變數不會有任何錯誤訊息」的活體標本。**
-結構性補法仍然是 `block_egress.sh`（V3），**沒量過**。
+結構性補法仍然是 `block_egress.sh`（V3），~~沒量過~~
+**2026-09-19 就是拿這一格去量的**（量過了：[`decisions/DECISION_20260919_BLOCK_EGRESS_V3.md`](../decisions/DECISION_20260919_BLOCK_EGRESS_V3.md)、[`docs/VACANT_RUN.md`](VACANT_RUN.md) §5.1）：
+同一支 wrapper、同一個模型，封鎖之後 agent stdout 從 openrouter 回的
+`HTTP 401: Missing Authentication header` 變成 `API call failed after 3 retries:
+Connection error.` ⇒ **這條洩漏路徑被擋住了**。
+⚠ **但收據沒變**：兩格的 `run_*.json` 26 個判斷欄位（含 `accepted`／`stop_reason`／
+`requests_seen`／`agent_rc`／`ws_end_sha256`）**逐字相同**，
+差別只在 `agent_stdout.log` 與耗時。**V3 改變的是世界，不是收據。**
 
 **金鑰有沒有跟著漏出去？** 把 `OPENROUTER_BASE_URL` 指到一個本機 sink
 （不出網）重跑，逐字收到 **21 通**，每一通的標頭都是：
@@ -1887,7 +1904,7 @@ Hermes 是第四個：
   export PATH=/var/tmp/vacant_hermes/hv/bin:$PATH
   export VACANT_RUN_UPSTREAM_OPENAI=http://100.86.226.21:1234/v1
   export VACANT_AGENT_MODEL=gemma-4-12b-it-qat
-  python3 -m vacant.vrun.launcher \
+  python3 -m vacant_network.vrun.launcher \
       --workspace <ws> --run-dir <rd> \
       --suite <repo>/ops/gain/r535/bank/s1_01_addmul/tests_visible \
       --task-id hermes_real_<cell> --sandbox none --test-timeout 30 \
@@ -2055,12 +2072,12 @@ base_url 是 `<proxy>/v1`，但探測打的是 **`<proxy>/api/v1/models`**
 ### 12.6 收據驗證（先負控制再驗該跑）
 
 ```
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
 selftest: PASS                                          ← 負控制：它抓得到壞鏈
 
-$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_hermes/rd_hermes_real_asis
+$ python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_hermes/rd_hermes_real_asis
 rd_hermes_real_asis      RUN-ON   2   2   0   1   1   2e89b17f1d22214b…  OK   總判：OK
-$ python3 -m vacant.vrun.verify_receipts --glob /var/tmp/vacant_hermes/rd_hermes_real_deliver
+$ python3 -m vacant_network.vrun.verify_receipts --glob /var/tmp/vacant_hermes/rd_hermes_real_deliver
 rd_hermes_real_deliver   RUN-ON   2   2   0   1   1   aad3f72a08bdc1c7…  OK   總判：OK
 ```
 
@@ -2081,11 +2098,13 @@ rd_hermes_real_deliver   RUN-ON   2   2   0   1   1   aad3f72a08bdc1c7…  OK   
 5. **不是**「Hermes 只打模型通道」。它會探 `/api/v1/models`（§12.5），
    而且 `hermes postinstall` 會去抓 node／browser／ripgrep／ffmpeg
    ——**本次沒跑那支**，預設工具集不需要它。
-   **「Hermes 在 `vacant run` 底下有沒有開 proxy 看不到的第二條連線」沒量**
-   （V3 `block_egress.sh` 之前對五個 agent 都一樣沒量）。
+   **「Hermes 在 `vacant run` 底下有沒有開 proxy 看不到的第二條連線」沒量**。
+   ⚠ 2026-09-19 的 V3 量測（量過了：[`decisions/DECISION_20260919_BLOCK_EGRESS_V3.md`](../decisions/DECISION_20260919_BLOCK_EGRESS_V3.md)、[`docs/VACANT_RUN.md`](VACANT_RUN.md) §5.1）**也沒有回答這一題**：
+   它量的是「封鎖之後出不出得去」，不是「封鎖之前開了幾條連線」。
+   其餘四個 agent 在封鎖之下**一律沒量**。
 6. **不是**「0.16.0 也是這樣」。`examples/run_hermes.py` 印的是
    `Hermes Agent v0.16.0`，本節量的是 **0.19.0**。
-   `vacant/hermes_substrate.py` 的 `provider: vllm` 在 0.19.0 是 `custom` 的別名。
+   `vacant_network/hermes_substrate.py` 的 `provider: vllm` 在 0.19.0 是 `custom` 的別名。
 7. **1004 不是 thinking 模式** ⇒ §10.7 那種 reasoning runaway 在這一節
    **不可能被觀察到**。「Hermes 在 1003 上會不會 runaway」**沒量**。
 8. 沿用 §7 的所有邊界：proxy **records，不 verifies**；

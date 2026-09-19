@@ -11,7 +11,7 @@
  *            session（重改）、"stop" 就 ctx.shutdown()（重抽由 driver 重置工作區
  *            重開一份，或直接拒交）
  *   (3) 每一步簽進 Ed25519 hash chain 收據
- *         -> 由 sidecar 呼叫 vacant/logbook.py。私鑰只在 driver 行程的記憶體裡，
+ *         -> 由 sidecar 呼叫 vacant_network/logbook.py。私鑰只在 driver 行程的記憶體裡，
  *            不落盤（RECORD_SPEC §7）
  *
  * **為什麼判斷不寫在這裡**：沙箱、DENY 正則、驗收判準、預算判準在 Python 各只有

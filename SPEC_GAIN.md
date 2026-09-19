@@ -38,7 +38,7 @@ canonical solution、expected outputs 與 plus cases 才是不能進 prompt 的 
 
 **這個分離就是整件事的要害**：agent 可以通過看得到的測試（`visible_check`）
 卻不滿足真正的需求。那正是「產出看起來像需求但不是需求」的可操作形式。
-`vacant/codebench.py` 已經把兩者分開並用 sha256 釘死。
+`vacant_network/codebench.py` 已經把兩者分開並用 sha256 釘死。
 
 ## 三、三條臂——**第三條是這個實驗誠實與否的分水嶺**
 

@@ -714,13 +714,13 @@
 /* 收據牆 — 離線收據檢視器（examples/receipt_viewer.html）
  *
  * 這一頁在架構裡承重什麼（CLAUDE.md §唯一交付物、DECISION_20260903_R440P §四）：
- * CONFORM 閘門每一次具名嘗試與最終判決都簽進 vacant/logbook.py 的 hash-chain。
+ * CONFORM 閘門每一次具名嘗試與最終判決都簽進 vacant_network/logbook.py 的 hash-chain。
  * 那條鏈只有在「別人拿得到、而且真的能自己重算一次」時才是可究責的證據。
  * 本頁就是那個重算端：零外部資源、file:// 直接開、不連任何伺服器。
  *
- * 位元組佈局必須與 vacant/logbook.py 完全一致：
+ * 位元組佈局必須與 vacant_network/logbook.py 完全一致：
  *   core    = {stream_id, branch_id, seq, prev_hash, ts_ms, type, payload}
- *   bytes   = canonical_bytes(core)   （vacant/canonical.py：sort_keys、
+ *   bytes   = canonical_bytes(core)   （vacant_network/canonical.py：sort_keys、
  *             separators=(",",":")、ensure_ascii=False、UTF-8）
  *   hash    = sha256(bytes).hexdigest()          （LogEntry.hash）
  *   簽章覆蓋的訊息 = 同一份 bytes                （_signed_bytes）
@@ -805,7 +805,7 @@ function sha256Bytes(msg) {
   return out;
 }
 
-/* ---- canonical JSON（對齊 vacant/canonical.py）-------------------------- */
+/* ---- canonical JSON（對齊 vacant_network/canonical.py）-------------------------- */
 
 const TEXT_ENCODER = new TextEncoder();
 
@@ -1154,7 +1154,7 @@ function paintStats(entries, res) {
     + "整條驗證在 file:// 之下就跑得完。"
     + "<br>這一頁自己也被三支腳本檢查過："
     + "<code>ops/gain/replay/receipt_viewer_crosscheck.py --all</code>"
-    + "（用 vacant/logbook.py 對 g_r445 482 筆＋g_r447 325 筆逐筆重跑同一件事）、"
+    + "（用 vacant_network/logbook.py 對 g_r445 482 筆＋g_r447 325 筆逐筆重跑同一件事）、"
     + "<code>receipt_viewer_node_check.mjs</code>（把本頁的 JS 抽出來單獨跑）、"
     + "<code>receipt_viewer_render_check.mjs</code>（用瀏覽器從 file:// 開一次，"
     + "檢查畫面上真的寫了這些字、而且整場一個外部請求都沒有發）。";

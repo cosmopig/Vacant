@@ -18,7 +18,7 @@ from __future__ import annotations
 import threading
 import time
 
-from vacant.vrun import wireproxy
+from vacant_network.vrun import wireproxy
 
 
 class _SlowProxy(wireproxy.WireProxy):
@@ -90,8 +90,8 @@ def test_inflight_is_released_even_when_the_handler_raises(tmp_path):
 
 def test_launcher_records_whether_the_wire_was_quiesced():
     """`rec["wire_quiesced"]` 要真的被寫進每一次嘗試——沒有它就看不出少算。"""
-    from vacant.vrun import launcher
-    src = launcher.__loader__.get_source("vacant.vrun.launcher") or ""
+    from vacant_network.vrun import launcher
+    src = launcher.__loader__.get_source("vacant_network.vrun.launcher") or ""
     assert 'rec["wire_quiesced"] = proxy.quiesce()' in src
     i_q = src.index('rec["wire_quiesced"]')
     i_r = src.index('rec["requests_seen"] = proxy.stats')

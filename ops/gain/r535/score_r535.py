@@ -8,8 +8,8 @@ sha256**。混進驅動裡就做不到——驅動要有端點、要有 pi、要
 ## 它讀什麼
 
 每一格的 `_frozen_RUN-ON[_a<n>]/`＝**當時交付那一刻的凍結快照**
-（`vacant/vrun/launcher.py` 在驗收之前凍的那一份，`ws_end_sha256` 綁在收據裡）。
-計分跑的是同一支驗收 runner `vacant/vrun/acceptance.py::run_suite`
+（`vacant_network/vrun/launcher.py` 在驗收之前凍的那一份，`ws_end_sha256` 綁在收據裡）。
+計分跑的是同一支驗收 runner `vacant_network/vrun/acceptance.py::run_suite`
 （`bank_manifest.json`：**不准另寫第二把尺**），`suite="hidden"`。
 
 ## V/GT 紅線（這一支存在的全部理由）
@@ -36,7 +36,7 @@ sha256**。混進驅動裡就做不到——驅動要有端點、要有 pi、要
 並在輸出裡點名。**「跑一遍看起來對」不是確定性**，負向控制才是。
 
 ⚠ 誠實邊界：隱藏驗收通過**不代表題目做對了**。它與可見驗收一樣是單邊保證
-（`vacant/suitegauge.py`）：擋得住已知壞解 ≠ 涵蓋真需求。
+（`vacant_network/suitegauge.py`）：擋得住已知壞解 ≠ 涵蓋真需求。
 兩者的差別只是 agent 看不到它，所以它擋得住「照著可見測資寫死」。
 """
 from __future__ import annotations
@@ -55,8 +55,8 @@ REPO = HERE.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from vacant.vrun import acceptance                    # noqa: E402
-from vacant.vrun.sandbox import make_sandbox          # noqa: E402
+from vacant_network.vrun import acceptance                    # noqa: E402
+from vacant_network.vrun.sandbox import make_sandbox          # noqa: E402
 
 #: 隱藏 case 落盤時**只留這幾個欄位**。`message`／`output` 逐字含隱藏測資。
 SAFE_CASE_FIELDS = ("case", "ok", "kind")
@@ -414,7 +414,7 @@ def main(argv: list[str] | None = None) -> int:
         "test_timeout_s": args.test_timeout, "twice": bool(args.twice),
         "keep_messages": bool(args.unsafe_keep_messages),
         "scorer": "ops/gain/r535/score_r535.py",
-        "acceptance_runner": "vacant/vrun/acceptance.py::run_suite",
+        "acceptance_runner": "vacant_network/vrun/acceptance.py::run_suite",
         "vgt": ("harness 只用 visible_check；hidden_check 只計分不回饋。"
                 "隱藏 case 的 message／output 預設不落盤。"),
         "n_cells": len(rows), "summary": summarise(rows), "cells": rows,

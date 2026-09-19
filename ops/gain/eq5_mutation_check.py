@@ -79,8 +79,8 @@ def _load(path, name):
 
 
 def _one(mod, task, codes, seed):
-    from vacant.identity import Identity
-    from vacant.logbook import Logbook
+    from vacant_network.identity import Identity
+    from vacant_network.logbook import Logbook
     agents = [_FakeAgent(f"w{i}", c) for i, c in enumerate(codes)]
     calls = [0]
     gate_code, _w, _inv, extra = mod.arm_eq5(
@@ -117,7 +117,7 @@ def _fixture_ok() -> tuple[bool, list[int]]:
 
 
 def main() -> int:
-    from vacant.codebench import EvalPlusMBPPLoader
+    from vacant_network.codebench import EvalPlusMBPPLoader
     task = next(t for t in EvalPlusMBPPLoader(expose_contract=True).iter_tasks("x")
                 if t["entry_point"] == "similar_elements")
     src = SRC.read_text(encoding="utf-8")

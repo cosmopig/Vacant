@@ -45,11 +45,11 @@ import time
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
-from vacant.collusion import CollusionConfig
-from vacant.collusion import simulate as collude_sim
-from vacant.entrycost import SimConfig
-from vacant.entrycost import simulate as entry_sim
-from vacant.registry import ReviewDefenses
+from vacant_network.collusion import CollusionConfig
+from vacant_network.collusion import simulate as collude_sim
+from vacant_network.entrycost import SimConfig
+from vacant_network.entrycost import simulate as entry_sim
+from vacant_network.registry import ReviewDefenses
 
 ROUNDS = 600
 SEEDS = [f"a{i}" for i in range(12)]        # 交付端（entrycost）：12 seeds

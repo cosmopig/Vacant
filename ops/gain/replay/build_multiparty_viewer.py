@@ -45,7 +45,7 @@ import sys
 REPO = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO))
 
-from vacant.canonical import canonical_bytes  # noqa: E402
+from vacant_network.canonical import canonical_bytes  # noqa: E402
 
 R454 = REPO / "ops" / "gain" / "replay" / "r454"
 VIEWER = REPO / "examples" / "receipt_viewer_multiparty.html"

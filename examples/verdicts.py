@@ -294,14 +294,14 @@ VERDICTS: dict[str, dict[str, str]] = {
                 "跨 CPU 架構（arm64，正是 1 ULP 邊界來源）未測；量具白名單仍只在 Mac 一台算。"
                 "**機制無法知道自己在門檻哪一邊**。"
                 "耐心說謊者（只在不會被抓時說謊）四個 k、兩個題庫偵測率全部 0.000，真跑側完全沒量。"
-                "渲染器與它渲染給的沙箱（vacant/checks.py）現在是全體共用的**被信任輸入**："
+                "渲染器與它渲染給的沙箱（vacant_network/checks.py）現在是全體共用的**被信任輸入**："
                 "渲染器有 bug，k 台機器會一致地錯，爭議率仍是 0——本模組不提供也不宣稱提供實作多樣性。"
                 "Windows 沙箱跑不起來（win1003 未能參加 R453）。"
                 "簽章指認的是金鑰不是主體。前提句必帶（R440P §五-1，peerexec docstring 誠實邊界 1 同一條）。",
         "來源": "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md§二、§三；"
                 "DECISION_20260906_R453_FABLE_AUDIT_REAL_MULTIPARTY.md§二、§三；"
                 "DECISION_20260906_R454_FABLE_AUDIT_NAMED_DISSENT.md§二、§三；"
-                "vacant/peerexec.py docstring 誠實邊界 1、3、5",
+                "vacant_network/peerexec.py docstring 誠實邊界 1、3、5",
     },
     "peerexec.suite_fixed_point": {
         "verdict": "held",
@@ -334,7 +334,7 @@ VERDICTS: dict[str, dict[str, str]] = {
         "來源": "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md§三-3、§七-2；"
                 "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md§二、§三、§六；"
                 "DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md§二、§三、§四、§六；"
-                "vacant/suitegauge.py docstring 邊界 3；vacant/peerexec.py docstring 誠實邊界 2",
+                "vacant_network/suitegauge.py docstring 邊界 3；vacant_network/peerexec.py docstring 誠實邊界 2",
     },
     "peerexec.majority_bound": {
         "verdict": "held",
@@ -351,7 +351,7 @@ VERDICTS: dict[str, dict[str, str]] = {
                 "簽章指認的是金鑰、不是主體：收據不能證明背後是哪一個主體；"
                 "R455 的 T8（整條鏈用攻擊者自己的金鑰重鑄＋同步改內嵌收據）是離線單檔檢視器的"
                 "結構性界線，緩解是把三把金鑰的 vacant_id 印在**實體標示牌**上。",
-        "來源": "vacant/peerexec.py::MAJORITY_BOUND_NOTE 與 docstring 誠實邊界 5；"
+        "來源": "vacant_network/peerexec.py::MAJORITY_BOUND_NOTE 與 docstring 誠實邊界 5；"
                 "DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md§三-1；"
                 "DECISION_20260906_R454_FABLE_AUDIT_NAMED_DISSENT.md§三-3；"
                 "DECISION_20260906_R455_FABLE_AUDIT_VIEWER.md§二",

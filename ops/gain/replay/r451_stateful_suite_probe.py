@@ -8,7 +8,7 @@ mimic），把 `targeted`（逐字黑名單四個已知壞樁、其餘全放行�
 MBPP+ 交付 68.73%、假交付 31.27%，與「閘門關掉時的 trivial 套件」逐位元組相同。
 
 本檔測的是那個上限**成不成立**。`targeted` 是無狀態的，它的傷害天花板就是
-「盲目出第 0 份草稿」。但驗收套件跑在 runner 行程裡（`vacant/checks.py` 的
+「盲目出第 0 份草稿」。但驗收套件跑在 runner 行程裡（`vacant_network/checks.py` 的
 AST allowlist 只約束**候選碼**，不約束驗收碼），於是它能 `import os`、能在 /tmp
 留下跨行程的狀態。可行性兩條都是本機實測（見本檔 `--feasibility`）：
 
@@ -31,7 +31,7 @@ AST allowlist 只約束**候選碼**，不約束驗收碼），於是它能 `imp
   與「逐格量測」不是同一件事，所以這裡付全額。
 
 ⚠ round452 之後 `--gate` 跑不動了，**而那正是這支探針的結論被採納的樣子**：
-  `vacant/peerexec.py` 現在只接受 `SuiteSpec`（資料），`stateful_suite()` 產生的那段
+  `vacant_network/peerexec.py` 現在只接受 `SuiteSpec`（資料），`stateful_suite()` 產生的那段
   Python 沒有地方可以放。本檔的 `stateful_suite()` 留著不動，因為
   `tests/test_suitespec.py::test_r451_attack_suites_have_no_encoding` 拿它當輸入，
   證明它**不可表達**。已落盤的數字留在 `r451_stateful_gate.json`，不重算。
@@ -67,7 +67,7 @@ os.chdir(ROOT)
 
 import peer_exec_sim as sim  # noqa: E402  (同目錄)
 from ops.gain.gain_run import meets_demand  # noqa: E402
-from vacant.suitegauge import gauge_suite  # noqa: E402
+from vacant_network.suitegauge import gauge_suite  # noqa: E402
 
 RUN = "g_r446_eq5_mbpp"
 VARIANT = "stateful"

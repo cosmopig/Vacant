@@ -7,10 +7,10 @@
 
 from __future__ import annotations
 
-from vacant.body import VacantBody
-from vacant.substrate import EchoSubstrate, load_skills
-from vacant.tasks import make_task
-from vacant.waker import Waker
+from vacant_network.body import VacantBody
+from vacant_network.substrate import EchoSubstrate, load_skills
+from vacant_network.tasks import make_task
+from vacant_network.waker import Waker
 
 
 def test_revive_brings_back_learned_skill(tmp_path):

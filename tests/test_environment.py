@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from vacant.environment import (
+from vacant_network.environment import (
     CHANNELS,
     REJECTED_CHANNELS,
     CalibrationLedger,

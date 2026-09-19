@@ -20,7 +20,7 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO))
-from vacant.research import mcnemar_exact  # noqa: E402
+from vacant_network.research import mcnemar_exact  # noqa: E402
 
 CACHE = pathlib.Path(__file__).resolve().parent / "cache"
 

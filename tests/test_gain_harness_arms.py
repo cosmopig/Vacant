@@ -4,7 +4,7 @@
 與 `entry_point_missing` 單獨計數。
 
 假 agent 只實作 `chat(messages, …) -> (text, info)`，真的跑的是本機沙箱
-（`vacant/checks.py` 的受限 worker）與簽章鏈——所以這些測試驗的是**機制**，
+（`vacant_network/checks.py` 的受限 worker）與簽章鏈——所以這些測試驗的是**機制**，
 不是 mock 自己。題目用 LCB v2 的 `lcb_3634`（規格 §3.1／§3.2 的實跑用例就是它），
 拿不到題庫就 skip，不假裝通過。
 
@@ -34,9 +34,9 @@ from ops.gain.harness_arms import (DOOM_NUDGE, HARNESS_BUDGET,
                                    visible_report)
 from ops.gain.harness_vgt_audit import (CODE_NEEDLES, hidden_only_needles,
                                         strip_frozen_constants)
-from vacant.identity import Identity, PublicIdentity
-from vacant.logbook import Logbook
-from vacant.memory import KS1Violation, assert_ks1_clean
+from vacant_network.identity import Identity, PublicIdentity
+from vacant_network.logbook import Logbook
+from vacant_network.memory import KS1Violation, assert_ks1_clean
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 
@@ -70,7 +70,7 @@ def _fence(code):
 
 @pytest.fixture(scope="module")
 def task():
-    from vacant.codebench import LiveCodeBenchLoader
+    from vacant_network.codebench import LiveCodeBenchLoader
     try:
         tasks = list(LiveCodeBenchLoader(version="v2").iter_tasks("g-r440-lcb2"))
     except (FileNotFoundError, ValueError) as exc:      # pragma: no cover
@@ -211,7 +211,7 @@ _PRECHECK_CORPUS = [GOOD, LOGIC_BAD, EXC_BAD, LOOP_BAD, IMPORT_BAD, SYNTAX_BAD,
 
 
 def test_t5_static_precheck_agrees_with_the_sandbox_loader():
-    from vacant.checks import _candidate_functions
+    from vacant_network.checks import _candidate_functions
     for code in _PRECHECK_CORPUS:
         ok, reason = static_precheck(code, _GAIN_ALLOWED_IMPORTS, "calculateScore")
         sandbox_ok = _candidate_functions(
@@ -223,7 +223,7 @@ def test_t5_static_precheck_agrees_with_the_sandbox_loader():
 def test_t5b_entry_point_missing_is_the_one_documented_one_way_difference():
     """`entry_point_missing` 是唯一允許的方向差：沙箱載得進去（拿不到 proxy 才炸），
     我們**提前**擋下來並單獨計數（D4）。方向反過來就是 bug。"""
-    from vacant.checks import _candidate_functions
+    from vacant_network.checks import _candidate_functions
     ok, reason = static_precheck(NO_ENTRY, _GAIN_ALLOWED_IMPORTS, "calculateScore")
     assert (ok, reason) == (False, "entry_point_missing")
     assert _candidate_functions(
@@ -236,7 +236,7 @@ def test_t5c_static_precheck_matches_the_sandbox_on_the_925_archived_r447_drafts
     run = REPO / "runs" / "g_r447_conform_lcb2"
     if not (run / "calls.jsonl").exists():          # pragma: no cover
         pytest.skip("r447 歸檔不在本機")
-    from vacant.checks import _candidate_functions
+    from vacant_network.checks import _candidate_functions
     entry = {}
     with (run / "rows.jsonl").open(encoding="utf-8") as f:
         for line in f:

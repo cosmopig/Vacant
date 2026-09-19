@@ -18,8 +18,8 @@ from ops.gain.r530 import openwork_arms as oa  # noqa: E402
 from ops.gain.r530 import sandbox as sb, tasks as taskmod, wshash  # noqa: E402
 from ops.gain.r530.run_r530 import main as run_main  # noqa: E402
 from ops.gain.r530.stubbrain import StubBrain  # noqa: E402
-from vacant.identity import Identity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.identity import Identity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 
 class AlwaysBadBrain(StubBrain):

@@ -42,7 +42,7 @@ from ops.gain.harness_arms import VARIANTS  # noqa: E402
 @pytest.fixture(scope="module")
 def task():
     """一題真的 LCB v2 題目（本機就有，不必等 VM 的 EvalPlus 官方包）。"""
-    from vacant.codebench import LiveCodeBenchLoader
+    from vacant_network.codebench import LiveCodeBenchLoader
     try:
         tasks = list(LiveCodeBenchLoader(version="v2").iter_tasks("vgt-allarms"))
     except (FileNotFoundError, ValueError) as exc:               # pragma: no cover

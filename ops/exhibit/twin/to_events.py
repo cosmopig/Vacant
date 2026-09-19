@@ -346,7 +346,7 @@ def events_for_cell(cell: dict, *, verify_url: str, ts_ms: int) -> list[dict]:
 
     head = ""
     if cell["chain"]:
-        from vacant.logbook import LogEntry
+        from vacant_network.logbook import LogEntry
         head = LogEntry.from_json(json.loads(cell["chain"][-1])).hash()
     ev("receipt", arm=ARM_ON, sha256=head, chain_head=head, verify_url=verify_url,
        # ⚠ 契約的 `sha256` 是**收據**的，電視 v1 卻把它塞進一個叫

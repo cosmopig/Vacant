@@ -50,7 +50,7 @@ shasum -a 256 ops/gain/data/lcb_bank_v*.jsonl     # Linux 用 sha256sum
 .vacant-private/evalplus/HumanEvalPlus-v0.1.10.jsonl.gz   sha256 272720b90ac37550…
 ```
 
-釘值的單一真相在 `vacant/codebench.py`：
+釘值的單一真相在 `vacant_network/codebench.py`：
 `EVALPLUS_MBPP_PLUS_SHA256`（第 339 行）與 `EVALPLUS_HUMANEVAL_PLUS_SHA256`（第 735 行）。
 loader 是 **fail-closed** 的：sha256 不符就直接拋例外，不會默默用別的版本跑下去
 （負向測試在 `tests/test_x1_evalplus.py`）。
@@ -61,7 +61,7 @@ loader 是 **fail-closed** 的：sha256 不符就直接拋例外，不會默默�
 mkdir -p .vacant-private/evalplus
 # 放好檔案後驗釘值
 shasum -a 256 .vacant-private/evalplus/*.jsonl.gz
-python3 -c "from vacant.codebench import EVALPLUS_MBPP_PLUS_SHA256 as a, EVALPLUS_HUMANEVAL_PLUS_SHA256 as b; print(a); print(b)"
+python3 -c "from vacant_network.codebench import EVALPLUS_MBPP_PLUS_SHA256 as a, EVALPLUS_HUMANEVAL_PLUS_SHA256 as b; print(a); print(b)"
 ```
 
 兩邊逐字相同才算數。`.gitignore` 擋住整個 `.vacant-private/`，不會不小心提交上去。
@@ -95,7 +95,7 @@ MBPP+ 是 378 題、實際用 371，差額同理由自己跑 `--gauge-scope bank
 
 v3 的 `contest_date` 全部不晚於 **2024-08-10**。它是刻意造出來的**樣本外複製集**
 （v2 ∩ v3 ＝ 0 題），但污染風險比 v1／v2 高。這句警語同時寫在
-`vacant/codebench.py` 與 R460 C3 判定裡。
+`vacant_network/codebench.py` 與 R460 C3 判定裡。
 
 已知壞題：v2 有 `lcb_3613`、`lcb_3763` 兩題（v3 無）。白名單在
 `ops/gain/check_bank_precision.py::KNOWN_BAD`——**它是白名單不是消音器**，
@@ -136,7 +136,7 @@ python3 ops/gain/gain_run.py \
 ```
 
 ⚠ **端點環境變數是 `VACANT_GAIN_API`，不是 `VACANT_ENDPOINT`**。
-後者只管 `vacant/substrate.py`；`ops/gain/brain_cline.py:134` 讀的是前者，
+後者只管 `vacant_network/substrate.py`；`ops/gain/brain_cline.py:134` 讀的是前者，
 沒設會去打 `api.cline.bot` 雲端（我們 2026-09-17 為此誤發兩次）。
 值要是**完整的** `/v1/chat/completions`，不是基底 URL。
 

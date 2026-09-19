@@ -140,7 +140,7 @@ def load_dataset_records(path: str | None) -> dict[str, dict]:
     """
     import gzip
     import os
-    from vacant.codebench import EVALPLUS_DEFAULT_PATH
+    from vacant_network.codebench import EVALPLUS_DEFAULT_PATH
     p = Path(path or os.environ.get("VACANT_EVALPLUS_PATH", EVALPLUS_DEFAULT_PATH))
     out: dict[str, dict] = {}
     with gzip.open(p, "rt", encoding="utf-8") as f:

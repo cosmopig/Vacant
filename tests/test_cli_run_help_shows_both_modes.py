@@ -4,7 +4,7 @@
 ────────────────────
 `vacant run` 有兩種模式，分水嶺是 argv 裡有沒有 `--`（`cli.main()`）：
 
-- **有 `--`** ⇒ 收件口（`vacant/vrun/launcher.py`）——包住任意 CLI agent、
+- **有 `--`** ⇒ 收件口（`vacant_network/vrun/launcher.py`）——包住任意 CLI agent、
   中介模型通道、行程結束跑驗收、簽收據、沒過擋下交付（exit 20）。
   **那是 0.7.0 的主要功能。**
 - **沒有 `--`** ⇒ 舊的 eco 版。
@@ -33,7 +33,7 @@ import pytest
 
 
 def _help() -> str:
-    r = subprocess.run([sys.executable, "-m", "vacant.cli", "run", "--help"],
+    r = subprocess.run([sys.executable, "-m", "vacant_network.cli", "run", "--help"],
                        capture_output=True, text=True, timeout=120)
     assert r.returncode == 0, r.stderr
     return r.stdout
@@ -56,15 +56,15 @@ def test_help_shows_a_runnable_example():
 def test_help_points_at_the_full_flag_list():
     """argparse 印不出那一組 ⇒ 必須告訴讀者去哪裡看完整的。"""
     out = _help()
-    assert "vacant.vrun.launcher" in out, (
-        "沒指向 `python -m vacant.vrun.launcher --help`——"
+    assert "vacant_network.vrun.launcher" in out, (
+        "沒指向 `python -m vacant_network.vrun.launcher --help`——"
         "讀者看到這裡會以為那幾個旗標就是全部")
 
 
 def test_the_two_modes_really_are_split_by_dash_dash():
     """判準不是文件寫了什麼，是 `main()` 真的這樣分。"""
-    from vacant import cli
-    src = cli.__loader__.get_source("vacant.cli") or ""
+    from vacant_network import cli
+    src = cli.__loader__.get_source("vacant_network.cli") or ""
     assert 'raw[:1] == ["run"] and "--" in raw[1:]' in src, (
         "分水嶺的實作變了——上面那些 help 文字會變成假的")
 

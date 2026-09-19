@@ -5,7 +5,7 @@ import tomllib
 
 
 def test_runtime_dependencies_cover_imported_mcp_sdk():
-    """A clean install must be able to import ``vacant.mcp_server``."""
+    """A clean install must be able to import ``vacant_network.mcp_server``."""
     metadata = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
     dependencies = metadata["project"]["dependencies"]
 

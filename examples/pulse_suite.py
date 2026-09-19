@@ -51,7 +51,7 @@ import statistics as st
 import time
 from pathlib import Path
 
-from vacant.entrycost import SimConfig, simulate
+from vacant_network.entrycost import SimConfig, simulate
 
 ROUNDS = 600
 SEEDS = [f"p{i}" for i in range(30)]     # 每格 30 個 seed

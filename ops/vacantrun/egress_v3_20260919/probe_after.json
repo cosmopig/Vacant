@@ -1,0 +1,72 @@
+{
+  "uid": 1001,
+  "ts": "2026-09-19T15:23:30+0000",
+  "probes": {
+    "tcp4_tailnet_1004": {
+      "ok": false,
+      "value": null,
+      "error": "OSError: [Errno 113] No route to host",
+      "elapsed_s": 0.001
+    },
+    "tcp6_tailnet_1004": {
+      "ok": false,
+      "value": null,
+      "error": "TimeoutError: timed out",
+      "elapsed_s": 6.006
+    },
+    "tcp4_public_ip_literal": {
+      "ok": false,
+      "value": null,
+      "error": "OSError: [Errno 113] No route to host",
+      "elapsed_s": 0.001
+    },
+    "tcp4_openrouter_dns": {
+      "ok": false,
+      "value": null,
+      "error": "OSError: [Errno 113] No route to host",
+      "elapsed_s": 0.015
+    },
+    "https_openrouter_models": {
+      "ok": false,
+      "value": null,
+      "error": "OSError: [Errno 101] Network is unreachable",
+      "elapsed_s": 0.026
+    },
+    "dns_via_systemd_resolved": {
+      "ok": true,
+      "value": "172.66.0.243",
+      "error": null,
+      "elapsed_s": 0.009
+    },
+    "dns_udp_direct_8888": {
+      "ok": false,
+      "value": null,
+      "error": "PermissionError: [Errno 1] Operation not permitted",
+      "elapsed_s": 0.0
+    },
+    "icmp_ping_1111": {
+      "ok": true,
+      "value": "rc=1 1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms",
+      "error": null,
+      "elapsed_s": 0.002
+    },
+    "icmp6_ping_tailnet_1004": {
+      "ok": true,
+      "value": "rc=0 rtt min/avg/max/mdev = 1.001/1.001/1.001/0.000 ms",
+      "error": null,
+      "elapsed_s": 0.002
+    },
+    "proxy_port_loopback": {
+      "ok": true,
+      "value": "connected ('127.0.0.1', 8899)",
+      "error": null,
+      "elapsed_s": 0.0
+    },
+    "loopback_relay_to_openrouter": {
+      "ok": true,
+      "value": "HTTP/1.1 200 OK",
+      "error": null,
+      "elapsed_s": 0.088
+    }
+  }
+}

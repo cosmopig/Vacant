@@ -35,7 +35,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from vacant.channels import (  # noqa: E402
+from vacant_network.channels import (  # noqa: E402
     SealConfig, SpecConfig, simulate_seal, simulate_specialty,
 )
 

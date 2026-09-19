@@ -14,7 +14,7 @@
 ⚠ 名單改了要同步改分支保護：
     gh api repos/cosmopig/Vacant/branches/main/protection
 本檔只能保證「workflow 這一側有這七個名字」，**保證不了**保護設定那一側
-——那份設定不在版控裡（單邊保證，`vacant/suitegauge.py` 的同一句話）。
+——那份設定不在版控裡（單邊保證，`vacant_network/suitegauge.py` 的同一句話）。
 """
 from __future__ import annotations
 

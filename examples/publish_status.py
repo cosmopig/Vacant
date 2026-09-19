@@ -10,7 +10,7 @@
 
 紀律：
   - 只輸出可被獨立重算的量（ledger 滾動雜湊、驗鏈結果、事件計數）。
-  - 宣稱階梯的 met 由 vacant.dashboard.claim_ladder 決定，與觀測台同一份邏輯，
+  - 宣稱階梯的 met 由 vacant_network.dashboard.claim_ladder 決定，與觀測台同一份邏輯，
     不在這裡另寫一套（兩處判準不一致比沒有判準更糟）。
   - 不輸出任何交付內容、prompt、答案或私鑰——只有計數與雜湊。
 """
@@ -26,7 +26,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from vacant.dashboard import claim_ladder  # noqa: E402
+from vacant_network.dashboard import claim_ladder  # noqa: E402
 
 
 def _git(*args: str) -> str:
@@ -90,8 +90,8 @@ def _experiments(dirs: list[Path]) -> list[dict[str, object]]:
 
 def build_status(root: Path, *, run_tests: bool = False,
                  experiment_dirs: list[Path] | None = None) -> dict[str, object]:
-    from vacant.cli import EchoLikeBrain
-    from vacant.ecosystem import Ecosystem
+    from vacant_network.cli import EchoLikeBrain
+    from vacant_network.ecosystem import Ecosystem
 
     payload: dict[str, object] = {
         "generated_ms": time.time_ns() // 1_000_000,

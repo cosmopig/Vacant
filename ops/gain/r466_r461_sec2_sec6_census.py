@@ -16,7 +16,7 @@ import argparse, ast, hashlib, json, pathlib, re, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from vacant.codebench import LCB_BANKS                                  # noqa: E402
+from vacant_network.codebench import LCB_BANKS                                  # noqa: E402
 
 MUTANT = ""
 LAST_FAILS: list[str] = []
@@ -29,7 +29,7 @@ FORBIDDEN_RUN = "g_r461_lcb3_three_arm"                          # B3
 #   若這裡繼續讀 worktree，這份**已收官的歷史普查**重跑就會吐 `SOURCE_DRIFT`
 #   ——那是「被稽核的東西後來被改了」，不是「當初的稽核記錯了」。
 #   memory：加法性對照要釘改動前的 commit，不是釘 HEAD（釘 HEAD＝拿自己比自己）。
-#   ⚠ 只有 SOURCE_CLAIMS 走這個釘；bank 檔／判準檔／`vacant/codebench.py` 的
+#   ⚠ 只有 SOURCE_CLAIMS 走這個釘；bank 檔／判準檔／`vacant_network/codebench.py` 的
 #   「今天」那條仍讀 worktree（它們問的是現在的事實）。
 R466_SOURCE_COMMIT = "952f883f798744e32158bb11bdf67b940f51a8db"   # R466 量測 commit
 # ── round743（R473）：`PRED`／`INTENT`／`BLIND` 三個字典記的是**事前預測**，
@@ -73,7 +73,7 @@ SOURCE_CLAIMS = {
     "coverage_expr": ("ops/gain/verify_lcb_bank.py", "main",
         'covered = [r["task_id"] for r in records if r["task_id"] in probes]'),
     # 正對照要用的：載入器對 count 是 fail-closed
-    "loader_count_failclosed": ("vacant/codebench.py", "_load_verified",
+    "loader_count_failclosed": ("vacant_network/codebench.py", "_load_verified",
         "self.expected_count"),
 }
 
@@ -250,12 +250,12 @@ def probe_facts(banks: dict) -> dict:
 def prediction_time_pin() -> dict:
     """§二.1：判 forced 的時點是預測落筆當時，不是今天。"""
     try:
-        blob = subprocess.run(["git", "show", f"{R461_PREREG_COMMIT}:vacant/codebench.py"],
+        blob = subprocess.run(["git", "show", f"{R461_PREREG_COMMIT}:vacant_network/codebench.py"],
                               cwd=ROOT, capture_output=True, text=True, timeout=30)
         src = blob.stdout if blob.returncode == 0 else ""
     except Exception:
         src = ""
-    today = _safe_read(ROOT / "vacant/codebench.py")
+    today = _safe_read(ROOT / "vacant_network/codebench.py")
     return {"commit": R461_PREREG_COMMIT[:8],
             "v3_pin_existed_at_prediction_time": ("LCB_BANK_V3_COUNT" in src),
             "v3_pin_exists_today": ("LCB_BANK_V3_COUNT" in today),

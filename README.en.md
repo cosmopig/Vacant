@@ -17,7 +17,7 @@ It runs the customer's own executable acceptance tests, decides ship-or-refuse o
 result, and signs every attempt — failures included — into a hash chain anyone can
 re-verify offline. Making it the **single exit on a machine** takes containers, ACLs or
 egress policy — that is the deployment layer's job, not Vacant's
-(`vacant/controller.py:7-8` has said so verbatim all along; it had simply never appeared
+(`vacant_network/controller.py:7-8` has said so verbatim all along; it had simply never appeared
 in anything outward-facing).
 
 An existing pattern, not one we invented: supply-chain security does the same thing with
@@ -30,30 +30,35 @@ The `vacant` name on PyPI (measured 2026-09-19: version 0.4.15, a 7.5 MB
 reads verbatim *"Python bindings for the vacant Rust engine — domain availability via
 authoritative DNS"* (author David Poblador i Garcia, `github.com/alltuner/vacant`).
 
-**Both names collide.** It **also** occupies the `vacant` import name and **also**
-installs a command called `vacant`; the two packages write to the same paths. Four
-install orders were measured and **every one of them is silent**:
+**Up to 0.7.0 both names collided.** It **also** occupied the `vacant` import name and
+**also** installs a command called `vacant`; the two packages wrote to the same paths.
+Four install orders were measured and **every one of them was silent**.
 
-- **Whichever is installed second quietly wins.** `vacant-network` first, then `vacant`
-  ⇒ `vacant --help` becomes the DNS tool and `import vacant` loses `__version__`; the
-  other order and ours wins. `pip list` lists both.
-- **`pip uninstall -y vacant` takes the shared command with it**, while `pip list` still
-  reports `vacant-network==0.7.0` as installed.
+**0.8.0 renames the import package to `vacant_network`** (breaking change, see
+[`CHANGELOG.md`](https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md)).
+Keep what that fixed and what it did **not** fix apart:
+
+| | up to 0.7.0 | from 0.8.0 |
+|---|---|---|
+| `import` | both packages shared the `vacant/` directory, pip overwrote file by file ⇒ `import vacant` could hand you their code | **fixed**: the directory is `vacant_network/`, no module is shared any more |
+| the `vacant` command | whichever is installed second wins | **not fixed, and not fixable** — identical console-script names are the same file path |
+| recovery | `pip install --force-reinstall --no-deps vacant-network` | just use the `vacant-network` command, or `python3 -m vacant_network` |
 
 ```bash
 pip install vacant-network                              # this project. NOTE: not `vacant`
 
-python3 -c "import vacant; print(vacant.__version__)"   # discriminator: ours prints 0.7.0; theirs raises AttributeError
-pip install --force-reinstall --no-deps vacant-network  # recovery when it got overwritten (measured to restore fully)
+python3 -c "import vacant_network; print(vacant_network.__version__)"   # discriminator: prints 0.8.0
+vacant-network --help          # second command name; it imports vacant_network.cli, which they cannot shadow
+python3 -m vacant_network --help   # bypasses bin/ entirely — the one path that cannot be bent
 ```
 
-**Distribution `vacant-network`, command `vacant`, import `vacant`** — three names, two
-different owners.
+**Distribution `vacant-network`, main command `vacant`, second command `vacant-network`,
+import `vacant_network`.** Only the main command name is still shared with them.
 
 > **Python 3.11+.** One `pip install` pulls in **30 wheels, 60 MB** — `pyproject.toml`
 > declares only 3 runtime dependencies (`cryptography` / `mcp` / `jsonschema`); the rest
 > come in behind `mcp` (`pydantic` / `starlette` / `uvicorn` / `httpx`, …). The gate and
-> receipt path (`vacant.vrun.*`) does not use `mcp`, but there is currently no
+> receipt path (`vacant_network.vrun.*`) does not use `mcp`, but there is currently no
 > "gate only" extra, so installing gets you all of it.
 >
 > A from-scratch install transcript, stuck points included:
@@ -105,14 +110,14 @@ requester 鏈驗: ✓
 signature chains verify; how many answers were right does not count.
 
 **No clone needed.** (Since 2026-09-18 the gate's judgement layer lives inside the package —
-the same one copy, not a duplicate: `ops/gain/r530/*` now re-exports `vacant/vrun/*`, and the
+the same one copy, not a duplicate: `ops/gain/r530/*` now re-exports `vacant_network/vrun/*`, and the
 R530 experiments run that same code.)
 
 A fake agent declares it is done; the customer's acceptance suite says otherwise
 (excerpt of a real run; `$HOME` shortened to `~`, everything else verbatim):
 
 ```
-$ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
+$ python3 -m vacant_network.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
     --suite ~/.vacant-run/demo-gate/tests_visible --run-dir ~/.vacant-run/demo-gate/receipts -- …
   Done. I have created solution.py with add() and multiply().
   All requirements are implemented and the code is ready to use.
@@ -132,17 +137,17 @@ $ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
 that `solution.py` would already have shipped.
 
 Every number on that screen is produced on the spot: the fake agent is a real subprocess,
-the gate is `vacant/vrun/acceptance.py` (the very file the R530 experiments run), that
+the gate is `vacant_network/vrun/acceptance.py` (the very file the R530 experiments run), that
 `ImportError` is the exception the acceptance driver actually caught, and `20` is the real
 exit code of the `vacant run` subprocess.
-`vacant/vrun/demo.py::_assert_not_a_performance` and
+`vacant_network/vrun/demo.py::_assert_not_a_performance` and
 [`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
 stop it from ever degrading into printed string literals. The receipt is verified on the spot
 with the same verifier; you can re-verify it yourself:
 
 ```bash
-python3 -m vacant.vrun.verify_receipts --selftest      # first prove the verifier catches broken chains
-python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
+python3 -m vacant_network.vrun.verify_receipts --selftest      # first prove the verifier catches broken chains
+python3 -m vacant_network.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 ```
 
 (After a clone, `python3 ops/gain/replay/verify_run_receipts.py …` is **the same file** —
@@ -189,7 +194,7 @@ def check_mul():
 PY
 ```
 
-The shape of a suite file (execution semantics of `vacant/vrun/acceptance.py`,
+The shape of a suite file (execution semantics of `vacant_network/vrun/acceptance.py`,
 **no pytest dependency**): one `.py` holding a set of zero-argument `check_*()`
 functions — **one case per function**, run in definition order, **returning normally =
 pass, raising anything = fail**; or a single `main()`, in which case the whole file is
@@ -234,9 +239,9 @@ nor refusal is recorded**).
 Verify those two receipts (**negative control first**):
 
 ```
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
 selftest: PASS
-$ python3 -m vacant.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
+$ python3 -m vacant_network.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
 ═══ 收據鏈驗證 /home/user1/vacant-try/receipts_deliver ═══
 run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
 
@@ -273,7 +278,7 @@ Exit codes: `0` shipped, `20` refused, `22` `infra_void`. Full usage and on-disk
 
 **What "one switch" actually means.** `vacant run` redirects the model channel to its own
 proxy through **one list of environment variables**
-([`vacant/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant/vrun/envmap.py):
+([`vacant_network/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant_network/vrun/envmap.py):
 the OpenAI family, the Anthropic family, OpenRouter, Groq, Together, DeepSeek, Ollama,
 LM Studio, …) — **that list covers most frameworks; a framework that reads a config file
 needs its config file changed.** Measured: pi (`@earendil-works/pi-coding-agent`) keeps its
@@ -334,7 +339,7 @@ lower-quality kind of possession. All three "light" cells carry a precondition, 
 leaving it out would overstate them:
 
 - ⚠ **Claude Code's zero wiring rests on one upstream feature: the upstream must speak
-  Anthropic Messages (`POST /v1/messages`) itself.** `vacant/vrun/wireproxy.py` is a
+  Anthropic Messages (`POST /v1/messages`) itself.** `vacant_network/vrun/wireproxy.py` is a
   **reverse proxy, not a protocol translator** — it routes by path and does not rewrite
   `/v1/messages` into `/v1/chat/completions`. The LM Studio instance we measured serves
   `/v1/messages` natively (SSE and `tool_use` included), so no shim was needed; swap in
@@ -370,7 +375,7 @@ relative path resolves under the workspace ⇒ `agent_spawn_failed` / exit 22.
    egress blocking on top
    ([`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh),
    root once; **that script only exists in a repo checkout** — see "What still needs a clone"
-   above). `vacant/controller.py:7-8` applies verbatim: it cannot stop the same OS user
+   above). `vacant_network/controller.py:7-8` applies verbatim: it cannot stop the same OS user
    from bypassing this command.
 2. **What is mediated is the model channel, not the agent's behaviour.** Actions the
    framework starts by itself — auto-lint, git checkpoints, built-in retries, local tool
@@ -378,7 +383,7 @@ relative path resolves under the workspace ⇒ `agent_spawn_failed` / exit 22.
    receipt can say what happened on the model channel and what the workspace ended up as;
    it cannot say what the agent did.
 3. **Acceptance is a one-sided guarantee.**
-   [`vacant/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant/suitegauge.py)
+   [`vacant_network/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant_network/suitegauge.py)
    verbatim: blocking known-bad solutions does **not** prove the suite covers the real
    requirement. `accepted=true` only means "the few checks the customer wrote down passed".
    Measured: across R532's 836 tasks the gate accepted 811, of which 120 (14.8%) passed the
@@ -396,9 +401,9 @@ models that never touch HTTP, Bedrock SigV4, why we do not do transparent MITM) 
 No model call, no network.
 
 ```python
-from vacant.checks import run_python_check
-from vacant.identity import Identity, PublicIdentity
-from vacant.logbook import Logbook
+from vacant_network.checks import run_python_check
+from vacant_network.identity import Identity, PublicIdentity
+from vacant_network.logbook import Logbook
 
 # 1) Acceptance: the tests run in the runner process, the candidate in a separate worker
 tests = "assert solve([1, 2, 3, 4]) == 6\nassert solve([]) == 0\n"
@@ -418,7 +423,7 @@ print(book.verify_chain(who))                                            # True
 
 # 3) Tamper with an interior entry -> verification fails
 import copy
-from vacant.logbook import LogEntry
+from vacant_network.logbook import LogEntry
 forged = Logbook([copy.deepcopy(e) for e in book.entries])
 e = forged.entries[1]
 forged.entries[1] = LogEntry(e.stream_id, e.branch_id, e.seq, e.prev_hash, e.ts_ms, e.type,
@@ -454,18 +459,18 @@ with per-step timings, is
 
 | symptom | what happened | what to do |
 |---|---|---|
-| after installing, `import vacant` or `vacant --help` is not this project at all | **`pip install vacant` installs somebody else's package** (Rust bindings for an authoritative-DNS tool, 7.5 MB native wheel). It **also** occupies the `vacant` import name and **also** installs a `vacant` command; install ours first and theirs second and **theirs quietly wins, with no error message** | tell them apart with `python3 -c "import vacant; print(vacant.__version__)"` — ours prints `0.7.0`, theirs raises `AttributeError`. Ours is the `vacant --help` whose first line lists `{init,info,call,demo,…}` |
-| after `pip uninstall -y vacant` the `vacant` command is gone entirely, yet `pip list` still reports `vacant-network==0.7.0` | the two packages write to the same paths, so uninstalling theirs **takes the shared command with it**; pip has no idea ours was hollowed out | `pip install --force-reinstall --no-deps vacant-network` (measured to restore it fully: the command comes back and `vacant.__version__` is `0.7.0` again) |
+| after installing, `import vacant_network` or `vacant --help` is not this project at all | **`pip install vacant` installs somebody else's package** (Rust bindings for an authoritative-DNS tool, 7.5 MB native wheel). It **also** occupies the `vacant` import name and **also** installs a `vacant` command; install ours first and theirs second and **theirs quietly wins, with no error message** | tell them apart with `python3 -c "import vacant_network; print(vacant_network.__version__)"` — ours prints `0.7.0`, theirs raises `AttributeError`. Ours is the `vacant --help` whose first line lists `{init,info,call,demo,…}` |
+| after `pip uninstall -y vacant` the `vacant` command is gone entirely, yet `pip list` still reports `vacant-network==0.7.0` | the two packages write to the same paths, so uninstalling theirs **takes the shared command with it**; pip has no idea ours was hollowed out | `pip install --force-reinstall --no-deps vacant-network` (measured to restore it fully: the command comes back and `vacant_network.__version__` is `0.7.0` again) |
 | `python3 -m venv …` ⇒ `The virtual environment was not created successfully because ensurepip is not available.` | Debian/Ubuntu split `ensurepip` into its own package and the stock image does not carry it. The `venv` module itself is present; what dies is `ensurepip` underneath it | `sudo apt-get install -y python3-venv` (the message calls it `python3.12-venv`), then **recreate the venv**. Measured at 5.5 s; **no reboot needed** |
 | there is no `pip` / `pip3` on the system at all | same cause — `python3` is bare | same fix. Once the venv exists it ships its own pip 24.0 |
-| one `pip install` adds 30 packages and 60 MB to site-packages | `mcp` alone drags in `pydantic` / `starlette` / `uvicorn` / `httpx` / `sse-starlette`, … | there is currently **no** "gate only" extra, so installing gets all of it. The gate and receipt path (`vacant.vrun.*`) does not actually use `mcp` |
+| one `pip install` adds 30 packages and 60 MB to site-packages | `mcp` alone drags in `pydantic` / `starlette` / `uvicorn` / `httpx` / `sse-starlette`, … | there is currently **no** "gate only" extra, so installing gets all of it. The gate and receipt path (`vacant_network.vrun.*`) does not actually use `mcp` |
 | `pip show … \| head` prints `BrokenPipeError` | pip's SIGPIPE handling. **Not an install failure** (`exit=0`) | ignore it, or do not pipe into `head` |
 | `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | a **fail-closed** guard, not a typo in your path | keep the authoritative suite **outside** the workspace; copy a version in if the agent should see one |
 | `vacant run` exits `22` (`infra_void`) | infrastructure broke, and **neither delivery nor refusal is recorded**. The most common cause is a relative path after `--`: the launcher spawns with `cwd=<workspace>`, so it resolves under the workspace | use an absolute path after `--` |
-| your agent is wired up but `requests_seen` is `0` | that model channel **was not mediated** (the framework keeps its base url in a config file), or that run made no model call at all. **There is no error message** — and every other field of that run will look exactly like a legitimate refuse cell (the live specimen in honest boundary 23) | see "Wiring the five agents"; the single source of truth for the variable list is `vacant/vrun/envmap.py` |
+| your agent is wired up but `requests_seen` is `0` | that model channel **was not mediated** (the framework keeps its base url in a config file), or that run made no model call at all. **There is no error message** — and every other field of that run will look exactly like a legitimate refuse cell (the live specimen in honest boundary 23) | see "Wiring the five agents"; the single source of truth for the variable list is `vacant_network/vrun/envmap.py` |
 | the "correct answers" count printed by `vacant selftest` changes between runs | it is not a criterion (Linux prints `4/6`, macOS `3/6`) | only look at whether the three `✓` lines all passed |
 | `upstreams_defaulted` is missing from `run_RUN-ON.json` | **`vacant-network` 0.7.0 on PyPI does not have those two fields yet**; repo HEAD does — the version was not bumped | install from source (`pip install -e .`) if you need that field |
-| Windows | **not measured at all**, and `vacant/checks.py` has no usable Windows sandbox branch | use Linux / macOS, or a container |
+| Windows | **not measured at all**, and `vacant_network/checks.py` has no usable Windows sandbox branch | use Linux / macOS, or a container |
 
 ⚠ That last row is the shape of iron rule 3: **"not measured" ≠ "measured as zero"**.
 This log only establishes the Ubuntu 24.04 / Python 3.12.3 path. On macOS only
@@ -594,12 +599,12 @@ Part of the specification, not a disclaimer. Quote them with the numbers.
 1. **The premise, overriding everything below.** The requirement must compile into an
    executable acceptance suite; where it will not run, there is no free referee.
 2. **Vacant is not a mandatory layer that takes effect merely by being installed.** As a
-   library (`vacant/agent.py:51-103`, `self.brain` is a public attribute) or as an MCP tool
-   (`vacant/mcp_server.py:184-210`, whose tool docstring only *persuades*), it is
+   library (`vacant_network/agent.py:51-103`, `self.brain` is a public attribute) or as an MCP tool
+   (`vacant_network/mcp_server.py:184-210`, whose tool docstring only *persuades*), it is
    **voluntary** — an agent that does not call it is not involved with it at all, and
-   nothing notices. Only as a controller (`vacant/controller.py:304-530`) or with the
+   nothing notices. Only as a controller (`vacant_network/controller.py:304-530`) or with the
    harness owning the agent loop is it binding, and then only on the subprocess it spawns
-   itself. Verbatim, `vacant/controller.py:7-8`: *the guarantee covers only child processes
+   itself. Verbatim, `vacant_network/controller.py:7-8`: *the guarantee covers only child processes
    launched through this controller; it cannot stop the same OS user from running the agent
    directly. A machine-wide single exit requires containers, ACLs, or egress policy.*
    Nothing on this page may be read as more optimistic than that sentence.
@@ -662,17 +667,17 @@ Part of the specification, not a disclaimer. Quote them with the numbers.
    left after the sweep — because it says more about whether accountability is workable than
    any performance number does.
 4. **The gate guarantees "passed the tests that were written down", not "met the real
-   requirement".** Verbatim from `vacant/suitegauge.py:30-33`: blocking known-bad stubs
+   requirement".** Verbatim from `vacant_network/suitegauge.py:30-33`: blocking known-bad stubs
    proves only that the suite does not pass everything; it **does not** prove the suite
    covers the real requirement. Measured: of the 811 deliveries the gate accepted in R532,
    **120 (14.8%) passed the visible suite and still failed the hidden check**. Ungated it
    is 211/836 = 25.2%. The gate roughly **halves** false delivery; it does not remove it.
 5. **The chain gives integrity (nothing was altered), not completeness (nothing is
-   missing).** `vacant/logbook.py:168-195` checks sequence continuity, `prev_hash` linkage
+   missing).** `vacant_network/logbook.py:168-195` checks sequence continuity, `prev_hash` linkage
    and per-entry signatures — no length commitment, no external anchor — so **a valid prefix
    verifies** (quickstart step 4). The literature has a name for this: a
    **truncation / omission attack** (Ma & Tsudik 2009). Three things must be said together:
-   - **`vacant/checkpoint.py:144-155` has the same hole one level up.**
+   - **`vacant_network/checkpoint.py:144-155` has the same hole one level up.**
      `verify_checkpoint_chain` only walks `prev_checkpoint_sig` backwards and requires the
      first to be null; **drop the last few checkpoints and the rest still passes**
      (measured: 4 of 4 pass, dropping the last 2 still passes, removing an interior one
@@ -684,16 +689,16 @@ Part of the specification, not a disclaimer. Quote them with the numbers.
      not do this for you.
 6. **A signature identifies a key — not a person, and not the truth.** A receipt proves
    "this key said this and it has not been altered since"; it does **not** prove the
-   statement is true (`vacant/peerexec.py:117-120`). On the product path the receipt is
-   signed by the **delivering party itself** (`vacant/ecosystem.py:641-642`), and the
-   private key is a plaintext PEM readable by the same OS user (`vacant/body.py:160` calls
+   statement is true (`vacant_network/peerexec.py:117-120`). On the product path the receipt is
+   signed by the **delivering party itself** (`vacant_network/ecosystem.py:641-642`), and the
+   private key is a plaintext PEM readable by the same OS user (`vacant_network/body.py:160` calls
    `identity.save` with no passphrase). Key custody is a deployment assumption; software
    cannot *prevent* forgery by root.
 7. **Not a security boundary.** `run_python` runs in a separate process, a scratch cwd,
    under CPU limit and timeout; it blocks the common early `exit(0)`, same-file hidden-test
    reads and process/file APIs, but it is **not** a complete malicious-code boundary.
    Untrusted code belongs in a container, gVisor, or a separate VM. There is no working
-   Windows sandbox branch in `vacant/checks.py`.
+   Windows sandbox branch in `vacant_network/checks.py`.
 8. **Majority vote has a mathematical ceiling**: at most ⌊(k−1)/2⌋ corrupted executors.
    Past that the mechanism inverts, and **it cannot know which side of the threshold it is
    on**.
@@ -728,7 +733,7 @@ Part of the specification, not a disclaimer. Quote them with the numbers.
 19. **Not a proof.** A demo may say "you can see an improvement"; "proves an improvement" is
     reserved for a pre-registered batch run.
 20. **The `vacant run` proxy cannot stop a deliberate bypass.**
-    `vacant/vrun/wireproxy.py:45-47` says so verbatim: "**records, does not verify**: the
+    `vacant_network/vrun/wireproxy.py:45-47` says so verbatim: "**records, does not verify**: the
     proxy only proves 'these bytes went through me'; it does not prove the upstream
     actually did as asked, and it **does not stop the agent from taking another route
     around it**." In the formal vocabulary of boundary 2: **Saltzer & Schroeder 1975's
@@ -756,10 +761,20 @@ Part of the specification, not a disclaimer. Quote them with the numbers.
       `model` on a receipt records *who claimed what*, not *who answered*. Which is also
       why **misreporting a model name in order to get wired up is forbidden**: it
       falsifies the receipt and runs straight into the accountability framing.
-    - **A wire with no upstream named is forwarded to the public API default.** At repo
-      HEAD, `vacant/vrun/launcher.py:586-590` writes this down per run as `upstreams` /
-      `upstreams_defaulted` — but **that only makes the hole visible, it does not close
-      it**. ⚠ **Read `upstreams_defaulted` precisely** (`AGENT_COMPAT.md` §10.6): it says
+    - ~~**A wire with no upstream named is forwarded to the public API default.**~~
+      **Closed on 2026-09-19** (`DECISION_20260919_V1_GATES.md`): an unnamed wire now
+      resolves to a **refusing local sink** (`envmap.SINK_UPSTREAM`, an `.invalid`
+      hostname) and `wireproxy` returns 502 **before opening any connection** — no DNS
+      lookup, no bytes, works offline. Going to the public API must be **stated**:
+      `vacant run --allow-public-upstream` or `VACANT_RUN_ALLOW_PUBLIC_UPSTREAM=1`.
+      ⚠ **Runs that pin both upstreams are entirely unaffected** (the 20-cell five-agent
+      matrix), and so are runs where no traffic ever takes that route (pi's 40 cells).
+      ⚠ **This blocks "the route nobody named", not "egress"**: pointing an upstream at a
+      public API yourself is still allowed (you stated it), and an agent bypassing the
+      proxy is still not blocked — the structural fix for *that* is still
+      `block_egress.sh` (V3).
+      At repo HEAD, `vacant_network/vrun/launcher.py` writes this down per run as
+      `upstreams` / `upstreams_defaulted` / `upstreams_sinked` / `wire_blocked`. ⚠ **Read `upstreams_defaulted` precisely** (`AGENT_COMPAT.md` §10.6): it says
       "nobody named an upstream for this route, so traffic *would* go to the public API",
       **not** "traffic already left the machine". To decide whether anything actually
       went out, look at `wire_by_protocol` and the `upstream` field in
@@ -799,24 +814,24 @@ Full list in [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/
 
 These are true and have code behind them:
 
-- **The intake check cannot be routed around.** `vacant/receipt.py` plus
+- **The intake check cannot be routed around.** `vacant_network/receipt.py` plus
   `controller.verify_delivery` **recompute five sha256 digests** (request, task, tests,
   answer, trust card), verify the Ed25519 signature, compare `chain_head` / `stream_id` /
   `branch_id` against the **chain as it stands right now**, confirm every review is bound to
   this exact delivery, and only then `policy.admit`. The launch right is claimed with
-  `os.O_EXCL` (`vacant/controller.py:372`), so **a receipt can be consumed exactly once**.
+  `os.O_EXCL` (`vacant_network/controller.py:372`), so **a receipt can be consumed exactly once**.
   Enforcement happens at **acceptance time**, not execution time — and that part really works.
 
 - **A self-report is never taken on faith.** The ecosystem runs the verifier itself
-  (`vacant/ecosystem.py:531`), and the controller runs it **again, independently**, before
-  launching anything downstream (`vacant/controller.py:299-300`).
+  (`vacant_network/ecosystem.py:531`), and the controller runs it **again, independently**, before
+  launching anything downstream (`vacant_network/controller.py:299-300`).
 - **The acceptance sandbox is two processes.** Test code in the runner, candidate code in a
-  separate worker, talking over stdin/stdout with a nonce (`vacant/checks.py:577-600`,
+  separate worker, talking over stdin/stdout with a nonce (`vacant_network/checks.py:577-600`,
   `444-457`). Verbatim comment at `ops/gain/gain_run.py:957`: *"the candidate worker cannot
   see this test code"*. The candidate **structurally cannot read the tests** — it is not a
   blocklist.
 - **"Not measured is not passed" is written as code**:
-  `"all_pass": bool(total > 0 and passed == total)` (`vacant/vrun/acceptance.py:268`);
+  `"all_pass": bool(total > 0 and passed == total)` (`vacant_network/vrun/acceptance.py:268`);
   likewise the gauge requires `n_broken >= 1`, so an empty stub set cannot succeed vacuously.
 - **Refusal really happens**: in R532's 836 tasks the gated arm refused 25 deliveries and
   the loop arm 68 — and refusals are in the denominator of every rate.
@@ -840,12 +855,12 @@ These are true and have code behind them:
 
 | Layer | Modules | What it carries |
 |---|---|---|
-| L0 crypto | `vacant/canonical.py`, `identity.py`, `crypto.py` | the one serialization every signature uses; Ed25519 keypair + `vacant_id` |
-| L1 ledger | `vacant/logbook.py`, `envelope.py`, `checkpoint.py`, `attest.py`, `receipt.py` | append-only hash chain (`stream_id` = genesis hash); signed envelopes; checkpoints that chain to each other |
-| L2 accountability | `vacant/registry.py`, `reputation.py`, `router.py`, `auditor.py`, `memory.py`, `dashboard.py` | discovery + reputation index, 5-dimensional Beta, on/off switch, deterministic re-audit (**the dashboard is not a source of accountability**) |
-| L3 banks and gauge | `vacant/codebench.py`, `suitespec.py`, `suitegauge.py` | MBPP+, LiveCodeBench v1–v3, HumanEval+; **acceptance suites are data, not code**; the gauge is two-sided (**one-sided guarantee**) |
-| L4 experiment | `ops/gain/*`, `vacant/peerexec.py`, `record.py`, `research.py` | nine-arm runner, arbiter (four states, Holm, intervals, `--selftest` / `--mutation-check`), attestation layer, RECORD_SPEC packs |
-| L5 exhibit | `vacant/entrycost.py`, `examples/receipt_viewer_multiparty.html` | mechanism simulation (sub-second on site), single-file offline receipt viewer |
+| L0 crypto | `vacant_network/canonical.py`, `identity.py`, `crypto.py` | the one serialization every signature uses; Ed25519 keypair + `vacant_id` |
+| L1 ledger | `vacant_network/logbook.py`, `envelope.py`, `checkpoint.py`, `attest.py`, `receipt.py` | append-only hash chain (`stream_id` = genesis hash); signed envelopes; checkpoints that chain to each other |
+| L2 accountability | `vacant_network/registry.py`, `reputation.py`, `router.py`, `auditor.py`, `memory.py`, `dashboard.py` | discovery + reputation index, 5-dimensional Beta, on/off switch, deterministic re-audit (**the dashboard is not a source of accountability**) |
+| L3 banks and gauge | `vacant_network/codebench.py`, `suitespec.py`, `suitegauge.py` | MBPP+, LiveCodeBench v1–v3, HumanEval+; **acceptance suites are data, not code**; the gauge is two-sided (**one-sided guarantee**) |
+| L4 experiment | `ops/gain/*`, `vacant_network/peerexec.py`, `record.py`, `research.py` | nine-arm runner, arbiter (four states, Holm, intervals, `--selftest` / `--mutation-check`), attestation layer, RECORD_SPEC packs |
+| L5 exhibit | `vacant_network/entrycost.py`, `examples/receipt_viewer_multiparty.html` | mechanism simulation (sub-second on site), single-file offline receipt viewer |
 
 **Nine arms**: `OFF` (one-shot, 1.00 calls), `ON` (reputation routing + K=3 review + one
 revision, ≈5), `OFF5` (five-way vote, 5.00), `CONFORM` (acceptance gate with early stop,
@@ -891,14 +906,14 @@ machine-readable facts block, is [`AGENTS.md`](https://github.com/cosmopig/Vacan
 
 | Shape | Entry point | Binding on the agent? |
 |---|---|---|
-| **Library** | `vacant.agent.Vacant` (`vacant/agent.py:51-103`) | **No — voluntary.** `self.brain` is a public attribute; code that does not call Vacant does not involve Vacant. |
-| **MCP tool** | `vacant.mcp_server` (`vacant/mcp_server.py:184-210`) | **No — persuasion only.** The `delegate` docstring says "THE PREFERRED PATH". A model that ignores it is not intercepted and nothing detects that. |
-| **Controller** | `VacantFirstController.delegate_then_run` (`vacant/controller.py:304-530`) | **Yes — for the subprocess it spawns itself.** Verified delivery first, then `shell=False` exec. |
+| **Library** | `vacant_network.agent.Vacant` (`vacant_network/agent.py:51-103`) | **No — voluntary.** `self.brain` is a public attribute; code that does not call Vacant does not involve Vacant. |
+| **MCP tool** | `vacant_network.mcp_server` (`vacant_network/mcp_server.py:184-210`) | **No — persuasion only.** The `delegate` docstring says "THE PREFERRED PATH". A model that ignores it is not intercepted and nothing detects that. |
+| **Controller** | `VacantFirstController.delegate_then_run` (`vacant_network/controller.py:304-530`) | **Yes — for the subprocess it spawns itself.** Verified delivery first, then `shell=False` exec. |
 | **Harness owns the loop** | e.g. `ops/gain/r530/openwork_arms.py:642-696` | **Yes — the harness is the loop.** |
 
 **The right framing is "receiving desk", not "mandatory layer".** Enforcement happens at
 **acceptance time** — a delivery without a verifiable receipt is not accepted, and **that
-check cannot be routed around** (`vacant/receipt.py` + `controller.verify_delivery`
+check cannot be routed around** (`vacant_network/receipt.py` + `controller.verify_delivery`
 recompute five sha256 digests, verify Ed25519, compare `chain_head`, and `os.O_EXCL` makes a
 receipt consumable exactly once). Enforcement does **not** happen at execution time: making
 Vacant the single exit on a machine takes containers, ACLs or egress policy, which is the
@@ -912,7 +927,7 @@ accountable", not "the agent is constrained".
 
 ## B. Where to intercept
 
-1. **Just a pass/fail bar** → call `vacant.checks.run_python_check`. No identities, no
+1. **Just a pass/fail bar** → call `vacant_network.checks.run_python_check`. No identities, no
    chain, no configuration.
 2. **An audit trail of attempts** → add a `Logbook` and append every attempt.
 3. **A tamper-evident suite** → express it as a `SuiteSpec` and commit it with
@@ -960,11 +975,11 @@ red line A4).
 
 - **I-1** Edits and interior deletions are caught; so is removing genesis.
 - **I-2** The candidate **structurally cannot read the test code** — separate processes, a
-  nonce-tagged literal-only RPC (`vacant/checks.py:577-600`, `444-457`).
+  nonce-tagged literal-only RPC (`vacant_network/checks.py:577-600`, `444-457`).
 - **I-3** Self-reported success is never taken on faith (`ecosystem.py:531`, then
   `controller.py:299-300` independently).
 - **I-4** "Not measured" is failure, in code:
-  `bool(total > 0 and passed == total)` (`vacant/vrun/acceptance.py:268`); the gauge
+  `bool(total > 0 and passed == total)` (`vacant_network/vrun/acceptance.py:268`); the gauge
   requires `n_broken >= 1`.
 - **I-5** The gauge is two-sided: the reference must pass **and** every known-bad stub must
   be rejected.
@@ -990,17 +1005,17 @@ All 19 above apply. The four that will bite you:
   `ops.gain.gain_run.meets_demand`, which ships only in the git repository — it carries the
   experiment's own sandbox import allow-list and `infra_void` semantics, and a second copy
   of the acceptance criterion is exactly the drift both docstrings forbid. Without `ops/`
-  they raise `vacant.suitegauge.OpsRunnerUnavailable`, whose message contains the fix.
+  they raise `vacant_network.suitegauge.OpsRunnerUnavailable`, whose message contains the fix.
   **Inject instead**: `gauge_suite(..., runner=my_runner)`,
   `Executor.new(..., probe=my_probe)`, where
   `runner(code, check_code, entry_point, timeout_s) -> (ok, message)`;
-  `vacant.checks.run_python_check` is a ready foundation.
+  `vacant_network.checks.run_python_check` is a ready foundation.
 
 ## E. Common mistakes
 
 | Wrong | Right | Why |
 |---|---|---|
-| `VACANT_ENDPOINT=http://host:8765` for the experiment runner | `VACANT_GAIN_API=http://host:8765/v1/chat/completions` | Three variables, three shapes. `VACANT_GAIN_API` (`ops/gain/brain_cline.py:134`) is the **full path**; `VACANT_ENDPOINT` (`vacant/substrate.py:171`) is a base URL; the CLI uses `VACANT_MCP_BASE` + `VACANT_MCP_MODEL` + `VACANT_MCP_API`, and the last must be exactly `responses` or `openai`. |
+| `VACANT_ENDPOINT=http://host:8765` for the experiment runner | `VACANT_GAIN_API=http://host:8765/v1/chat/completions` | Three variables, three shapes. `VACANT_GAIN_API` (`ops/gain/brain_cline.py:134`) is the **full path**; `VACANT_ENDPOINT` (`vacant_network/substrate.py:171`) is a base URL; the CLI uses `VACANT_MCP_BASE` + `VACANT_MCP_MODEL` + `VACANT_MCP_API`, and the last must be exactly `responses` or `openai`. |
 | Gating on `contains` / `regex` | `equals` / `json_schema` / `run_python` | The first two are exploration checks; they cannot carry a delivery or authorize a launch. |
 | Recording only successes | Append every attempt | A success-only chain answers no interesting question. |
 | Reading a valid chain as "the work is correct" | Read it as "the record is unaltered" | Boundary 6: a signature identifies a key, not the truth. |
@@ -1022,7 +1037,7 @@ The full block is [`AGENTS.md` §9](https://github.com/cosmopig/Vacant/blob/main
 ```json
 {
   "schema": "vacant.facts/1",
-  "package": {"pypi_name": "vacant-network", "import_name": "vacant", "version": "0.7.0",
+  "package": {"pypi_name": "vacant-network", "import_name": "vacant_network", "version": "0.8.0",
               "requires_python": ">=3.11",
               "runtime_dependencies": ["cryptography>=42", "mcp>=1.26,<2", "jsonschema>=4.21"],
               "license": "MIT", "console_script": "vacant", "module_count": 50, "test_files": 78},
@@ -1042,7 +1057,7 @@ The full block is [`AGENTS.md` §9](https://github.com/cosmopig/Vacant/blob/main
                   "machine_wide": "requires container / ACL / egress policy"},
   "chain_guarantees": {"integrity": true, "completeness": false,
                        "truncation_attack": "not detected (Ma & Tsudik 2009)",
-                       "also_affects": "vacant/checkpoint.py:144-155",
+                       "also_affects": "vacant_network/checkpoint.py:144-155",
                        "seq_does_not_help": true,
                        "fix": "an exogenous length commitment"},
   "reconciliation": {"tool": "ops/gain/replay/verify_run_receipts.py", "same_origin": true,

@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from vacant.body import now_ms
-from vacant.envelope import Envelope, ReplayError
-from vacant.gateway import BadSignature, ReputationRejected
-from vacant.host import Host
-from vacant.identity import Identity
-from vacant.substrate import EchoSubstrate
-from vacant.tasks import make_task
+from vacant_network.body import now_ms
+from vacant_network.envelope import Envelope, ReplayError
+from vacant_network.gateway import BadSignature, ReputationRejected
+from vacant_network.host import Host
+from vacant_network.identity import Identity
+from vacant_network.substrate import EchoSubstrate
+from vacant_network.tasks import make_task
 
 
 def _host(tmp_path, p_base=1.0):
@@ -61,7 +61,7 @@ def test_ingress_rejects_unknown_sender(tmp_path):
 
 # --- Codex Bug 1：registry 必須驗身份綁定（vacant_id↔pubkey）---------------
 def test_registry_rejects_forged_identity_binding(tmp_path):
-    from vacant.body import CapabilityCard
+    from vacant_network.body import CapabilityCard
     h = _host(tmp_path)
     victim = h.mint("victim", niches=["reverse"])
     attacker = Identity.generate()
@@ -69,7 +69,7 @@ def test_registry_rejects_forged_identity_binding(tmp_path):
     forged_card = CapabilityCard(
         vacant_id=victim.vacant_id,           # 別人的 id
         niches=["reverse"],
-        pub_hex=__import__("vacant").crypto.pub_to_hex(attacker.pub),  # 自己的 key
+        pub_hex=__import__("vacant_network").crypto.pub_to_hex(attacker.pub),  # 自己的 key
     )
     with pytest.raises(ValueError):
         h.registry.announce(forged_card)
@@ -189,8 +189,8 @@ def test_reputation_routing_prefers_proven_expert(tmp_path):
     # good 永遠解對；bad 永遠解錯 → 幾輪後路由應收斂到 good
     class Mixed(EchoSubstrate):
         def run(self, home, prompt, task):
-            from vacant.substrate import SubstrateResult
-            from vacant.tasks import NICHE_SOLVERS
+            from vacant_network.substrate import SubstrateResult
+            from vacant_network.tasks import NICHE_SOLVERS
             if "bad" in home.parent.name:  # home = <root>/<name>/home → 取 vacant 名
                 return SubstrateResult(output="[wrong]", substrate_id=self.substrate_id, learned_skill=None)
             return SubstrateResult(output=str(NICHE_SOLVERS[task["niche"]](task["input"])), substrate_id=self.substrate_id, learned_skill=None)

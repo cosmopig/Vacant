@@ -12,7 +12,7 @@ round 55 量到 ON 臂 52 題裡 `revision_transition` 的 `improved=0`、`harme
 
 ## 判準（在任何量測之前寫死，原文存 `/dev/shm/r56/CRITERIA.md`，逐字抄錄於此）
 
-結構事實（量測前先讀 `vacant/codebench.py:653-663` 確認）：
+結構事實（量測前先讀 `vacant_network/codebench.py:653-663` 確認）：
 `hidden_check = _check_code(..., base + plus)`、`visible_check = _check_code(..., base)`
 ⇒ **hidden 的斷言是 visible 的嚴格超集** ⇒ visible 不過必然 hidden 不過
 ⇒ `selected_version == "revised_both_visible_fail"`（兩版都 visible 不過）

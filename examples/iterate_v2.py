@@ -114,7 +114,7 @@ import time
 from pathlib import Path
 
 from simgrid import DEFAULT_WORKERS, log_root, run_cell, write_manifest
-from vacant.entrycost import SimConfig
+from vacant_network.entrycost import SimConfig
 
 SEEDS = [f"p{i}" for i in range(30)]
 # 不含 1.0（退化端點）。**順序是刻意的**：機時被四個 agent 分著用，跑不完的
@@ -241,7 +241,7 @@ def analytic_return_table() -> list[dict]:
     為什麼**資深者更難翻身**：n 越大，同樣的均值缺口要指數倍多的觀測。
     這張表是確定性的，不吃機時，可以直接手算對照模擬結果。
     """
-    from vacant.entrycost import SLASH_FACTOR      # noqa: F401  (文件用)
+    from vacant_network.entrycost import SLASH_FACTOR      # noqa: F401  (文件用)
     rows = []
     c, target, m = 0.3, 0.95, 0.9
     for n0 in (1.0, 3.0, 10.0, 48.0):
@@ -268,7 +268,7 @@ def s1b(out: Path, n_seeds: int, lambdas: tuple[float, ...] | None = None) -> li
     仍然六個都跑，是因為驗收的意思是「這個操作點上整套牙齒還成立」，
     不是「λ 有沒有動到某兩個情境」。
     """
-    from vacant.blayer import run_all
+    from vacant_network.blayer import run_all
     d = out / "S1B"
     d.mkdir(parents=True, exist_ok=True)
     res = []

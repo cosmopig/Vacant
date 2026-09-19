@@ -296,8 +296,8 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `g_r532_mbpp_a8` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
 | `g_r532_mbpp_a9` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
 | `r535_retry_channel_20260918` | 2026-09-18 | other | PC/RF/RP/RS | 360／90 | 是 | 是 | 0 | 0 | 0 |
-| `twin_real_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 1 | 0 |
-| `v1_five_agent_matrix_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 1 | 0 |
+| `twin_real_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 2 | 0 |
+| `v1_five_agent_matrix_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 2 | 0 |
 
 > `其中屬裁決檔`＝檔名帶 AUDIT／WRAPUP／SETTLEMENT／VERDICT／KILL 的那些（PREREG／CRITERION 是**量測之前**寫的判準，不算裁決，已排除）。數字大於 0 只代表「有裁決檔提到它」，不代表那份裁決是在裁決它——`INDEX.json` 的 `verdict_decisions` 列出是哪幾份，自己打開看。
 
@@ -337,9 +337,9 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | **HumanEval+ v0.1.10** | `.vacant-private/evalplus/HumanEvalPlus-v0.1.10.jsonl.gz`（**私有、不轉散布**） | 164（**可用 156**） | 釘值 `272720b90ac37550…` | `humanevalplus_HumanEval/*` | — | — | 官方 GT | **8 題排除，見下** | 16 個 |
 
 - **版本關係**：v1 ⊂ v2（`True`）；v2 ∩ v3 = 0 題、聯集 309 題——v3 是刻意造出來的**樣本外**複製集，不是 v2 的超集。
-- **v3 的警語**：v3 的 contest_date 全部不晚於 2024-08-10，**不能**宣稱晚於訓練截止；污染風險比 v1/v2 高（R460 C3 判定，vacant/codebench.py 有同一句）。
+- **v3 的警語**：v3 的 contest_date 全部不晚於 2024-08-10，**不能**宣稱晚於訓練截止；污染風險比 v1/v2 高（R460 C3 判定，vacant_network/codebench.py 有同一句）。
 - **已知壞題**來源：`ops/gain/check_bank_precision.py::KNOWN_BAD`（白名單不是消音器：冒出新的照樣 FAIL）。
-- **MBPP+ 為什麼不在版控**：官方 EvalPlus MBPP+ v0.2.0 包。索引**只記路徑與 codebench.py 裡的釘值**，不讀內容、不複製、不進版控。要驗就在本機比對 sha256（`vacant/codebench.py::EvalPlusMBPPLoader` 是 fail-closed 的）。刻意不記「這個 checkout 有沒有這個檔」——那是環境屬性不是資料屬性，寫進去會讓索引在不同 checkout 之間漂掉。（`.gitignore:18` 的 `.vacant-private/` 擋住整個目錄。釘值 2026-09-07（round457）本機實測 shasum 與釘值逐字相同。）**索引裡不含它的任何一個位元組。**
+- **MBPP+ 為什麼不在版控**：官方 EvalPlus MBPP+ v0.2.0 包。索引**只記路徑與 codebench.py 裡的釘值**，不讀內容、不複製、不進版控。要驗就在本機比對 sha256（`vacant_network/codebench.py::EvalPlusMBPPLoader` 是 fail-closed 的）。刻意不記「這個 checkout 有沒有這個檔」——那是環境屬性不是資料屬性，寫進去會讓索引在不同 checkout 之間漂掉。（`.gitignore:18` 的 `.vacant-private/` 擋住整個目錄。釘值 2026-09-07（round457）本機實測 shasum 與釘值逐字相同。）**索引裡不含它的任何一個位元組。**
 - **HumanEval+ 的分母是 156 不是 164**：8 題被沙箱信封排除（來源 `ops/gain/gain_run.py::GAIN_HUMANEVAL_EXCLUSIONS`）。逐題理由：
   - `humanevalplus_HumanEval/100` — arithmetic-series pile exceeds the 128 MiB envelope
   - `humanevalplus_HumanEval/130` — tribonacci table exceeds the 128 MiB envelope
@@ -349,8 +349,8 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
   - `humanevalplus_HumanEval/162` — canonical needs `hashlib` (outside the import allowlist)
   - `humanevalplus_HumanEval/39` — canonical needs `random` (outside the import allowlist)
   - `humanevalplus_HumanEval/83` — 10**(n-1)-scale integers exceed the 128 MiB envelope
-  官方 EvalPlus HumanEval+ v0.1.10 包（R529 起的第三個真來源）。與 MBPP+ 同樣**私有、不轉散布**，索引只記路徑與 `vacant/codebench.py` 裡的釘值，不讀內容、不進版控。**分母是 156 不是 164**：8 題被沙箱信封排除（3 題連 visible_check 都過不了＝那些題根本沒有出貨閘門、4 題超出 128 MiB 記憶體信封、`HumanEval/15` 是本輪自訂的 2× 時間餘裕門檻，寫在資料之前）。排除是在**看到結果之前**定的，但它仍然是一個本專題自訂的門檻，引用 HumanEval+ 的數字時要一起講。
-- **程序生成題族**（`vacant/codebench.py::_FAMILY_BUILDERS`）：boundary、off_by_one、empty_input、duplicate_values、negative_numbers、type_coercion。程序生成的六坑型族，題目**不落盤**——由 seed:family:idx 決定性生成，task_id = sha256('codebench:seed:family:idx')[:16]。沒有題庫檔可以 hash，重現靠 seed。
+  官方 EvalPlus HumanEval+ v0.1.10 包（R529 起的第三個真來源）。與 MBPP+ 同樣**私有、不轉散布**，索引只記路徑與 `vacant_network/codebench.py` 裡的釘值，不讀內容、不進版控。**分母是 156 不是 164**：8 題被沙箱信封排除（3 題連 visible_check 都過不了＝那些題根本沒有出貨閘門、4 題超出 128 MiB 記憶體信封、`HumanEval/15` 是本輪自訂的 2× 時間餘裕門檻，寫在資料之前）。排除是在**看到結果之前**定的，但它仍然是一個本專題自訂的門檻，引用 HumanEval+ 的數字時要一起講。
+- **程序生成題族**（`vacant_network/codebench.py::_FAMILY_BUILDERS`）：boundary、off_by_one、empty_input、duplicate_values、negative_numbers、type_coercion。程序生成的六坑型族，題目**不落盤**——由 seed:family:idx 決定性生成，task_id = sha256('codebench:seed:family:idx')[:16]。沒有題庫檔可以 hash，重現靠 seed。
 
 ## 八、log 在哪、哪些進了版控
 
@@ -367,6 +367,10 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 - **沒有同步回 Mac 的 14 個項目**：`_analysis_r503/`、`_preliminary/`、`off_probe_n60_20260902b/`、`s1_smoke/`、`g_r448_eq5_mbpp_seed2.launch.log`、`g_r448_eq5_mbpp_seed2.backend.json`、`g_r449_eq5_lcb2.launch.log`、`g_r449_eq5_lcb2.backend.json`、`g_r449c_eq5_lcb3.launch.log`、`g_r449c_eq5_lcb3.backend.json`、`g_r461_lcb3_three_arm.launch.log`、`s13_main.log`、`s13_reload.log`、`s13_selftest.log`
 - vacant-dev 有 329 個項目、Mac repo 有 315 個，差的 14 個列在上面。**最近四個被稽核過的 run（r448／r449／r449c／r461）的 launcher log 與 backend.json 只存在於 vacant-dev**——那是「發射時用的是哪個後端」的唯一紀錄，掉了就補不回來。
 - **保留政策**：沒有任何自動保留／輪替政策。Mac repo 這一側靠 git 保存（runs/ 全數進版控，113 MB）；vacant-dev 那一側（~/vacant/logs/ 364 MB、runs/ 1.7 G）**沒有備份**，機器沒了就沒了。要保留 iteration log 與發射探針，得另外做一次搬運——本輪只做編目，不動任何檔案。
+
+## 九之前：舊腳本用的是舊 import 名
+
+**`runs/` 底下的腳本與紀錄引用的是舊的 import 名 `vacant.*`／路徑 `vacant/`。** 2026-09-19（0.8.0）套件改名為 `vacant_network`，但這裡**刻意不改**：歸檔的驅動腳本是「當時實際下了什麼指令」的證據，事後改寫等於讓紀錄描述一個沒下過的指令（同預註冊逐塊指令那條紀律）。**代價寫在這裡，不要假裝沒有**：`runs/s3_v1_analyze.py`、`runs/s7b_interact_dom.py` 這類腳本照抄會 `ModuleNotFoundError: No module named 'vacant'`——自己把 `vacant.` 換成 `vacant_network.` 即可。同一條理由也適用於 `decisions/**` 與 `docs/paper_2026-09-14/source_manifest.json` 釘住的那幾份。
 
 ## 九、與 RECORD_SPEC 的落差（不要跳過這一節）
 

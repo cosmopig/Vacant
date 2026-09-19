@@ -1,10 +1,10 @@
 import os, tempfile
 from pathlib import Path
-from vacant.host import Host
-from vacant.composer import Composer
-from vacant.verifier import is_correct
-from vacant.tasks import task_stream, NICHES
-from vacant.openai_substrate import ResponsesSubstrate
+from vacant_network.host import Host
+from vacant_network.composer import Composer
+from vacant_network.verifier import is_correct
+from vacant_network.tasks import task_stream, NICHES
+from vacant_network.openai_substrate import ResponsesSubstrate
 
 # 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
 URL = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/") + "/v1"

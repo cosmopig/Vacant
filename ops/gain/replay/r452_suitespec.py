@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""round452：把驗收套件從**程式**改成**資料**（`vacant/suitespec.SuiteSpec`），量兩件事。
+"""round452：把驗收套件從**程式**改成**資料**（`vacant_network/suitespec.SuiteSpec`），量兩件事。
 
 這支在架構裡承重什麼
 ====================
@@ -73,8 +73,8 @@ os.chdir(ROOT)
 
 import peer_exec_sim as sim  # noqa: E402  (同目錄；池子／facts／壞樁共用一份)
 from ops.gain.gain_run import meets_demand  # noqa: E402
-from vacant import peerexec as px  # noqa: E402
-from vacant import suitespec as ss  # noqa: E402
+from vacant_network import peerexec as px  # noqa: E402
+from vacant_network import suitespec as ss  # noqa: E402
 
 CACHE = sim.CACHE
 OUT = HERE
@@ -420,7 +420,7 @@ def load_flags(run: str) -> dict:
 # ── 真閘門 ──────────────────────────────────────────────────────────────────
 def _real_gauge_job(job):
     tid, code, ref, ep = job
-    from vacant.suitegauge import gauge_suite
+    from vacant_network.suitegauge import gauge_suite
     try:
         g = gauge_suite(code, ref, sim.stub_set(ep), entry_point=ep)
     except Exception as exc:                                        # noqa: BLE001

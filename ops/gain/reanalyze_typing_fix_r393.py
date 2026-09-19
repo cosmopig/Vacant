@@ -33,7 +33,7 @@ OLD_IMPORTS = ("bisect", "cmath", "collections", "functools", "heapq", "itertool
 assert set(_GAIN_ALLOWED_IMPORTS) == set(OLD_IMPORTS) | {"typing"}, "gain_run.py 現在應已含 typing"
 
 def meets_demand_with(code, check_code, entry_point, imports):
-    from vacant.checks import CheckInfraError, run_python_check
+    from vacant_network.checks import CheckInfraError, run_python_check
     try:
         return run_python_check(code, check_code, timeout=10, allowed_imports=imports,
                                  allowed_entry_points=(entry_point,) if entry_point else ())

@@ -227,7 +227,7 @@ CONFORM 把可見通過從 79 推到 113（＋34），hidden 通過只從 61 推
 
 **OFF 的 7 題全部被計成 hidden 錯**（`meets_demand=False`），佔 OFF 全部 59 個失敗的 11.9%。
 
-`.remove` 那 16 份是量具偏誤，不是模型能力：`vacant/checks.py:191` 的 `_FORBIDDEN_ATTRS`
+`.remove` 那 16 份是量具偏誤，不是模型能力：`vacant_network/checks.py:191` 的 `_FORBIDDEN_ATTRS`
 含 `remove`（防的是 `os.remove`），但 AST 層看不出 `x.remove(v)` 的 `x` 是 list 還是 `os`
 ⇒ **一個完全正常的 `list.remove()` 會讓候選連載都載不進去**。這與 round393 的
 `typing` 漏洞是同一型（`DECISION_20260831_R393_TYPING_IMPORT_WHITELIST_BUG.md`）。
@@ -237,7 +237,7 @@ CONFORM 把可見通過從 79 推到 113（＋34），hidden 通過只從 61 推
 超過 §5.6 門檻的一半，而它買到的是「我們自己的禁用屬性表太嚴」的修補，不是能力提升。
 **必須分層並報。**
 
-⚠ 本輪**不改** `_FORBIDDEN_ATTRS`（改它會動到 `vacant/checks.py` 這個承重件、
+⚠ 本輪**不改** `_FORBIDDEN_ATTRS`（改它會動到 `vacant_network/checks.py` 這個承重件、
 需要重跑 B 層與一批測試）。建議另開一份 DECISION 處理，不要夾帶在本實驗裡。
 
 **N4 成本與延遲的實測分佈（本實驗預算的依據）**，取自 `calls.jsonl` 的 `usage` 與 `latency_ms`：
@@ -265,7 +265,7 @@ CONFORM 把可見通過從 79 推到 113（＋34），hidden 通過只從 61 推
 
 ## 三、實作前必須先同意的六條承重決策
 
-### 3.1 不改 `vacant/checks.py`；回饋走 `run_python_capture` 包一層 try/except
+### 3.1 不改 `vacant_network/checks.py`；回饋走 `run_python_capture` 包一層 try/except
 
 **問題**：`run_python_check` 只回 bool（`checks.py:630-655`），`_run_sandboxed` 的
 `out, _ = proc.communicate(...)` 把 **stderr 丟掉了**（`checks.py:606`）。
@@ -396,7 +396,7 @@ harness 端 `ast.literal_eval` 兩邊，用 `_lcb_check_code` 同款的 `__aeq` 
 > 有人在看／這關係到你的評價」類措辭**。允許的只有「做什麼」與「執行結果是什麼」。
 
 理由與 KS-1 相同：那類措辭量到的是提示詞效果不是機制效果。
-`vacant/memory.py::assert_ks1_clean` 是既有的可執行防呆——
+`vacant_network/memory.py::assert_ks1_clean` 是既有的可執行防呆——
 **H 臂的所有 prompt 常數必須過這一關**（測試見 §4.6-T7）。
 
 **維持可比性的九條不變量**見 §5.2。
@@ -973,7 +973,7 @@ a2 的第 1 題拿到的是 r447 第 1 題的 persona，不是第 21 題的。
 | T4 | 四種 fail_kind | 用 §3.2 那五份候選（邏輯錯／例外／死迴圈／`import os`／語法錯）⇒ 四種 `fail_kind` 各命中一次，且 `loader` 那兩份的 `precheck_reason` 不同 |
 | T5 | `static_precheck` 不漂移 | 對一組候選語料，`static_precheck(...)[0]` 與 `checks._candidate_functions(...) is not None` 逐份一致。**本輪已在 r447 的 925 份真候選上跑過：0 分歧**；測試用小語料 + 這個判準防未來漂移 |
 | T6 | 回饋不含 GT | 對每一則送出的 user 訊息斷言：不含 `__canon`、不含 `exec(`、不含任何 `hidden_check` 專屬案例的 `repr(args)`（見 §5.8） |
-| T7 | KS-1 | `harness_arms` 模組裡所有 `PROMPT_*`／`DOOM_NUDGE`／回饋模板全部過 `vacant.memory.assert_ks1_clean` |
+| T7 | KS-1 | `harness_arms` 模組裡所有 `PROMPT_*`／`DOOM_NUDGE`／回饋模板全部過 `vacant_network.memory.assert_ks1_clean` |
 | T8 | 收據可驗 | 跑完後 `Logbook.verify_chain` 為真；改掉任一 entry 的一個欄位 ⇒ 驗不過 |
 | T9 | doom | H-MIX 連續兩輪同 signature ⇒ 第一次追加 `DOOM_NUDGE`、第二次 `stop_reason == "doom"`；H-PI／H-OC 同樣輸入下**不會**觸發 |
 | T10 | context 政策 | H-MIX 第 4 輪送出的 messages 長度 == 3；H-PI 第 4 輪 == 7 |
@@ -1125,9 +1125,9 @@ H 臂的 void 曝險比 OFF 高 3–5 倍（R7），三個分母在這個 run �
 所以 `n_common` **必須逐對印出來**，不准只印一個「n=120」。
 
 **(2) 顯著性＝Holm 調整後的精確 McNemar p 值。**
-每一對算 `p = mcnemar_exact(b, c)`（`vacant/research.py:141`），
+每一對算 `p = mcnemar_exact(b, c)`（`vacant_network/research.py:141`），
 家族是 **3 條 H 臂 × 2 個對照（OFF、CONFORM）＝ 6 個檢定**，
-一次性丟進 `vacant/research.py::holm_bonferroni`（α=0.05）。
+一次性丟進 `vacant_network/research.py::holm_bonferroni`（α=0.05）。
 仲裁欄位：`paired.<A>_vs_<B>.p_mcnemar_exact`（未調整）、
 `holm.<A>_vs_<B>.p_adj`（調整後）、`holm.family_size`（必須 == 6）。
 ⚠ 家族固定是 6，**不准**因為某一臂 void 太多就把它抽掉再重算 Holm
@@ -1156,7 +1156,7 @@ H-PI／H-OC 是拆解它的消融）。三條 H 臂各自判自己的裁決，�
 不准在看到數字之後改分母、改家族、改仲裁欄位。
 差異的**方向**、`b`／`c` 逐題清單一律落盤（`ops/gain/analyze_*` 的既有慣例）。
 
-### 5.5 檢定力（`vacant.research.mcnemar_power` 實算，不是估計）
+### 5.5 檢定力（`vacant_network.research.mcnemar_power` 實算，不是估計）
 
 模型：n 對配對、不一致率 `p_disc`、不一致對落在 b 方向的機率 ψ；Δ = p_disc·(2ψ−1)。
 
@@ -1307,7 +1307,7 @@ H 臂的回饋訊息裡有 `args=[…] got=… want=…`——那三個欄位全
 
 1. `ops/gain/harness_arms.py` 全文**不得出現** `hidden_check`、`canonical`、`__canon`、`plus`。
    一行 grep 斷言，放進 `tests/test_gain_harness_arms.py::T6`。
-2. `harness_arms` 不得 import `_canonical_solutions`、不得 import `vacant.suitegauge`。
+2. `harness_arms` 不得 import `_canonical_solutions`、不得 import `vacant_network.suitegauge`。
 
 **動態（`ops/gain/harness_vgt_audit.py`，run 之後跑，零模型呼叫）**：
 
@@ -1485,7 +1485,7 @@ for k, v in agg.items(): print(k, 'calls', v[0], 'tokens', v[1])
 PY
 ```
 
-N3（載入器拒收）需要 §3.1 的 `static_precheck` 與 `vacant.checks._candidate_functions`
+N3（載入器拒收）需要 §3.1 的 `static_precheck` 與 `vacant_network.checks._candidate_functions`
 逐份比對；N5（圍欄區塊數）只要數 `response` 裡三個反引號的出現次數除以 2。
 兩者的完整腳本在本輪的 scratchpad
 （`/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/{precheck,fences}.py`），

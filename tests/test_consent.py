@@ -1,4 +1,4 @@
-"""`vacant/consent.py` 的驗收——同意／撤回／刪除證明。
+"""`vacant_network/consent.py` 的驗收——同意／撤回／刪除證明。
 
 這組測試存在的理由：刪除證明是**展覽對觀眾的承諾的機制面**。一把會 PASS 的
 瞎尺在這裡的代價不是實驗作廢，是對著一個真人說了一句做不到的話。所以每一條
@@ -20,10 +20,10 @@ import pytest
 REPO = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from vacant import consent  # noqa: E402
-from vacant.canonical import canonical_bytes  # noqa: E402
-from vacant.identity import Identity, PublicIdentity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network import consent  # noqa: E402
+from vacant_network.canonical import canonical_bytes  # noqa: E402
+from vacant_network.identity import Identity, PublicIdentity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 PERSONA = {
     "domains": ["寫程式", "翻譯"],
@@ -179,6 +179,6 @@ def test_tampered_chain_is_caught(ident, who):
 
 def test_commitment_is_the_same_primitive_as_logbook():
     """不另造一套承諾構造：`persona_commitment` 就是 `review_commitment`。"""
-    from vacant import logbook as lb
+    from vacant_network import logbook as lb
     n = secrets.token_hex(32)
     assert consent.persona_commitment(PERSONA, n) == lb.review_commitment(PERSONA, n)

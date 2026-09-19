@@ -18,7 +18,7 @@ R460 的 H 臂三條 prompt **本來就不同**（那裡量的是 prompt 本身�
 **R530 不是那樣**：Fable 裁決「三臂 prompt 逐字相同，唯一差別是宣告完成之後
 發生什麼」。所以這裡有**兩道** import 時的斷言，繞不過去：
 
-  1. `assert_ks1_clean`（`vacant/memory.py`）對每一個凍結字串跑一遍
+  1. `assert_ks1_clean`（`vacant_network/memory.py`）對每一個凍結字串跑一遍
      ——寫出「你有責任／會被懲罰／有人在看」類措辭，這支就 import 不進來。
   2. `assert_arm_prompts_identical()`：對同一個 fixture 題目，三條臂算出來的
      **system ＋ 第一則 user 訊息**必須**逐位元相同**。
@@ -82,7 +82,7 @@ from ops.gain.brain_cline import InfraVoid  # noqa: E402
 from ops.gain.r530 import acceptance, receipts, wshash  # noqa: E402
 from ops.gain.r530.sandbox import (DEFAULT_TEST_TIMEOUT_S,  # noqa: E402
                                    Sandbox, SandboxInfraError)
-from vacant.memory import assert_ks1_clean  # noqa: E402
+from vacant_network.memory import assert_ks1_clean  # noqa: E402
 
 ARMS = ("A-SOLO", "A-CONF", "A-GATE")
 
@@ -404,7 +404,7 @@ def clip(s: str, n: int = TOOL_OUTPUT_CLIP) -> str:
 
 
 # ══ 工作區生命週期 ═══════════════════════════════════════════════════════
-GIT_IDENTITY = ("-c", "user.name=r530", "-c", "user.email=r530@vacant.local")
+GIT_IDENTITY = ("-c", "user.name=r530", "-c", "user.email=r530@vacant_network.local")
 
 
 def remove_workspace(cell: pathlib.Path) -> None:
@@ -1006,7 +1006,7 @@ def assert_arm_prompts_identical() -> None:
 
     這不是一個「應該相同」的註解，是一個 import 時就會炸的斷言：
     有人哪天在 `initial_messages` 裡加 `if arm == …`，這支就 import 不進來、
-    run 起不來（`vacant.memory.assert_ks1_clean` 的同一個性質）。
+    run 起不來（`vacant_network.memory.assert_ks1_clean` 的同一個性質）。
     """
     import tempfile
 

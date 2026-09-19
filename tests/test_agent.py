@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 
-from vacant.agent import Vacant, checkable_cases
+from vacant_network.agent import Vacant, checkable_cases
 
 
 class MockBrain:

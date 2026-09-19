@@ -6,7 +6,7 @@
 
 為什麼需要這一支
 ----------------
-`vacant/vrun/launcher.py` 的 `--test-timeout` 預設 10 秒，來源是 R530 凍結的
+`vacant_network/vrun/launcher.py` 的 `--test-timeout` 預設 10 秒，來源是 R530 凍結的
 `sandbox.DEFAULT_TEST_TIMEOUT_S`；R535 的發射腳本用的是 30 秒，那是為**秒級微型題**
 定的。兩個數字都**不是在這個題庫上量的**。
 
@@ -16,7 +16,7 @@
 
 量什麼（逾時的單位就是量測的單位）
 ----------------------------------
-`vacant/vrun/acceptance.py::run_suite` **一個測試檔一個子行程**，`--test-timeout`
+`vacant_network/vrun/acceptance.py::run_suite` **一個測試檔一個子行程**，`--test-timeout`
 是**每檔**的上限。而 `ops/gain/r530/export_bank.py` 把整個 `tests_visible/` 投影成
 **一個** `test_visible.py`、整個 `hidden/` 投影成**一個** `test_hidden.py`
 ⇒ 一題的可見驗收（2–4 條）與隱藏驗收（6–16 條）各自**整組**要在那個上限內跑完。
@@ -60,8 +60,8 @@ REPO = HERE.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from vacant.vrun import acceptance                      # noqa: E402
-from vacant.vrun.sandbox import make_sandbox            # noqa: E402
+from vacant_network.vrun import acceptance                      # noqa: E402
+from vacant_network.vrun.sandbox import make_sandbox            # noqa: E402
 
 R530 = REPO / "ops" / "gain" / "r530"
 BANK = R530 / "bank"

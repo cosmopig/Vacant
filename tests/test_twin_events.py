@@ -138,7 +138,7 @@ def test_validate_has_teeth(events):
 
 
 def test_receipt_event_carries_the_chain_head(pack, events):
-    from vacant.logbook import LogEntry
+    from vacant_network.logbook import LogEntry
     heads = {c["cell_id"]: LogEntry.from_json(json.loads(c["chain"][-1])).hash()
              for c in pack["cells"]}
     for e in events:

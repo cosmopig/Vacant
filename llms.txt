@@ -26,7 +26,7 @@ checkpoint chain has the same hole. (4) **Passing the acceptance suite is not me
 requirement** — measured false delivery is 14.8% even with the gate.
 
 Everything here is meant to be checkable without trusting us: the receipt chains re-verify
-offline (`python3 -m vacant.vrun.verify_receipts --selftest` runs negative controls first;
+offline (`python3 -m vacant_network.vrun.verify_receipts --selftest` runs negative controls first;
 in a clone, `ops/gain/replay/verify_run_receipts.py` is the same file),
 the task banks are sha256-pinned, and every conclusion can be recounted from
 `runs/g_*/rows.jsonl`. That includes our own mistakes: we claimed R532 was "V/GT 43/43

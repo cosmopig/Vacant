@@ -121,7 +121,7 @@ def _work(job):
     if not inputs:
         rec["fuzz_sig"] = ""
         return rec
-    from vacant.checks import CheckInfraError, run_python_capture
+    from vacant_network.checks import CheckInfraError, run_python_capture
     try:
         out = run_python_capture(
             code, probe(inputs, t["entry_point"]), timeout=15,

@@ -1,6 +1,6 @@
 import os
 
-from vacant import Vacant, HermesBrain
+from vacant_network import Vacant, HermesBrain
 
 # 腦 = 真 Hermes Agent（自己調 qwopus），vacant 在外層包 verify-fix + 簽章究責
 # 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio

@@ -219,14 +219,14 @@
  * 鏈、而且真的能自己重算一次」時才是可究責的證據。本頁就是那個重算端：
  * 零外部資源、file:// 直接開、不連任何伺服器。
  *
- * 位元組佈局必須與 vacant/logbook.py 完全一致（下面 CANON 區段由
+ * 位元組佈局必須與 vacant_network/logbook.py 完全一致（下面 CANON 區段由
  * ops/exhibit/twin/build_viewer.py 從 examples/receipt_viewer.html 逐位元組複製）：
  *   core    = {stream_id, branch_id, seq, prev_hash, ts_ms, type, payload}
- *   bytes   = canonical_bytes(core)   （vacant/canonical.py）
+ *   bytes   = canonical_bytes(core)   （vacant_network/canonical.py）
  *   hash    = sha256(bytes).hexdigest()
  *   簽章覆蓋的訊息 = 同一份 bytes
  *
- * 工作區樹雜湊的佈局來自 vacant/vrun/wshash.py：
+ * 工作區樹雜湊的佈局來自 vacant_network/vrun/wshash.py：
  *   leaves = 排序過的 [{path, sha256, exec}]
  *   root   = sha256(canonical_json(leaves))
  * 它讓「它交出來的那份程式碼」綁回簽章鏈上那一筆 —— 頁面自己算，算不出就說算不出。
@@ -310,7 +310,7 @@ function sha256Bytes(msg) {
   return out;
 }
 
-/* ---- canonical JSON（對齊 vacant/canonical.py）-------------------------- */
+/* ---- canonical JSON（對齊 vacant_network/canonical.py）-------------------------- */
 
 const TEXT_ENCODER = new TextEncoder();
 
@@ -418,7 +418,7 @@ async function makeVerifier(pubHex) {
   return { fn, why: "" };
 }
 
-/* ---- vacant_id ＝ multibase(multihash(公鑰))（對齊 vacant/crypto.py）------ */
+/* ---- vacant_id ＝ multibase(multihash(公鑰))（對齊 vacant_network/crypto.py）------ */
 const B58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 function b58encode(bytes) {
@@ -562,7 +562,7 @@ async function revalidateAt(res, entries, pubHex, idx) {
   return relinkChain(res, entries);
 }
 
-/* ---- 工作區樹雜湊（對齊 vacant/vrun/wshash.py）---------------------------
+/* ---- 工作區樹雜湊（對齊 vacant_network/vrun/wshash.py）---------------------------
  * leaves = 排序過的 [{path, sha256, exec}]；root = sha256(canonical_json(leaves))。
  * 這一段讓「它交出來的那份程式碼」綁回鏈上那一筆的 ws_end_sha256。 */
 function treeRoot(files) {
@@ -590,7 +590,7 @@ function checkDelivery(delivery) {
   return out;
 }
 
-/* ---- 從**簽章覆蓋的那一份**讀裁決（對齊 vacant/vrun/receipts.py）----------
+/* ---- 從**簽章覆蓋的那一份**讀裁決（對齊 vacant_network/vrun/receipts.py）----------
  * 刻意不讀 run_*.json 的摘要：摘要沒有進任何簽章。兩者不一致時，
  * 以鏈為準、並且把不一致講出來——那正是收據存在的理由。 */
 const VERDICT_TYPE = "ws_verdict";
@@ -622,7 +622,7 @@ function summaryMismatch(cell, fromChain) {
   return pairs.filter(([, a, b]) => a !== b).map(([k]) => k);
 }
 
-/* ---- 同意鏈（對齊 vacant/consent.py::audit）------------------------------ */
+/* ---- 同意鏈（對齊 vacant_network/consent.py::audit）------------------------------ */
 const GRANT_TYPE = "CONSENT_GRANT";
 const WITHDRAW_TYPE = "CONSENT_WITHDRAW";
 const ERASED_TYPE = "PERSONA_ERASED";
@@ -1133,7 +1133,7 @@ function renderMethod() {
       + "再用公鑰驗 Ed25519。從創世那一筆算到鏈頭，不是抽樣。"],
     ["裁決從哪讀", "從鏈上那一筆 ws_verdict 的 payload 讀，不讀 run 摘要——"
       + "摘要沒有進任何簽章。兩者不一致會在畫面上講出來。"],
-    ["程式碼怎麼綁回鏈上", "照 vacant/vrun/wshash.py 的佈局重算工作區樹雜湊，"
+    ["程式碼怎麼綁回鏈上", "照 vacant_network/vrun/wshash.py 的佈局重算工作區樹雜湊，"
       + "與鏈上那一筆的 ws_end_sha256 對照。"],
     ["離線", "整頁零外部資源、不連任何伺服器；Ed25519 用瀏覽器內建的 WebCrypto，"
       + "沒有的瀏覽器會退化成只驗 hash 鏈，並在上面講出來。"],

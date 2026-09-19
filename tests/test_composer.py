@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import random
 
-from vacant.composer import Composer
+from vacant_network.composer import Composer
 
 
 def _stochastic_generate(p: float):

@@ -337,7 +337,7 @@ def classify_texts(rec: dict) -> list[tuple[str, int, str]]:
 
 #: 沙箱回聲欄位：`got=` 之後、到下一個**凍結**欄位名（或行尾）之前的那一段。
 #: 兩個來源逐字都是凍結模板：
-#:   `vacant/codebench.py::_lcb_check_code` 的
+#:   `vacant_network/codebench.py::_lcb_check_code` 的
 #:     f"args={…!r} got={__got!r} want={…!r}"        ← 可見測資的 assert 訊息
 #:   `harness_arms.SELFTEST_SUFFIX` 的
 #:     "args={args!r} got={got} you expected={expected!r}"

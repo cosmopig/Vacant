@@ -23,7 +23,7 @@
 `validate` 只要求 entry_point 是識別字、非關鍵字、不以 `__` 開頭、不在
 RESERVED_NAMES。`exec` 三條都滿足，而渲染出來的
 `assert __aeq(exec(*['<payload>']), None, atol)` 會在 runner 的 module 命名空間
-裡執行供應者寫的任意 Python（`vacant/checks.py::_test_runner_source` 把 test_code
+裡執行供應者寫的任意 Python（`vacant_network/checks.py::_test_runner_source` 把 test_code
 原樣貼在 runner.py 的 module scope，builtins 與 os/subprocess/sys/_worker 全在）。
 """
 from __future__ import annotations
@@ -41,8 +41,8 @@ sys.path.insert(0, str(HERE.parents[2]))
 
 import peer_exec_sim as sim                      # noqa: E402
 import r452_suitespec as r452                    # noqa: E402
-import vacant.peerexec as px                     # noqa: E402
-import vacant.suitespec as ss                    # noqa: E402
+import vacant_network.peerexec as px                     # noqa: E402
+import vacant_network.suitespec as ss                    # noqa: E402
 
 RUN = "g_r446_eq5_mbpp"
 GATE_JSON = HERE / "peer_exec_suitespec_gate.json"

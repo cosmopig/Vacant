@@ -118,7 +118,7 @@ def _e10_from_rows() -> dict | None:
                "delta": round((b - c) / n, 4)}
         try:
             sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
-            from vacant.research import mcnemar_exact
+            from vacant_network.research import mcnemar_exact
             blk["mcnemar_p"] = round(mcnemar_exact(b, c), 6)
         except Exception:
             pass
@@ -144,7 +144,7 @@ def _e10_from_rows() -> dict | None:
         # n=400 要 3.2 秒。所以「要多少對才有 80% 檢定力」只在跑完之後算一次，
         # 而且用有上限的二分搜尋——這支腳本在實驗進行中會被反覆呼叫。
         try:
-            from vacant.research import mcnemar_power
+            from vacant_network.research import mcnemar_power
             disc_rate = (b + c) / n
             if b + c:
                 psi_obs = b / (b + c)

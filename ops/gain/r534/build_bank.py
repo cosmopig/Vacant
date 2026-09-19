@@ -32,7 +32,7 @@ hidden 不是工作區的子目錄，而是**另一棵樹**：agent 的工作目
    字串；改寫一個字，這 20 題就不再與那兩組歸檔資料比得起來（差異會混進「題目
    被重寫過」）。prompt 尾端那三行中文（頂層函式、只用標準函式庫、要 return）
    是題庫產生器加的，照樣留著。
-2. **比對語義沿用 `vacant/codebench.py::_lcb_check_code`**：先試 `==`，bool 與數值
+2. **比對語義沿用 `vacant_network/codebench.py::_lcb_check_code`**：先試 `==`，bool 與數值
    不混談，數值容差 1e-6，list/tuple 逐元素遞迴。渲染出來的 `_aeq` 與那支的
    `__aeq` 是同一套判等，斷言訊息也保持 `args=… got=… want=…` 三欄位逐字
    ——H 臂的回饋就是轉發這個字串（`harness_arms.visible_report`）。
@@ -120,11 +120,11 @@ sys.exit(1 if failed else 0)
 PY
 """
 
-# `_aeq` ＝ `vacant/codebench.py::_lcb_check_code` 裡那個 `__aeq` 的同義字，
+# `_aeq` ＝ `vacant_network/codebench.py::_lcb_check_code` 裡那個 `__aeq` 的同義字，
 # 一行一行對得上（先 ==、bool 不與數值混談、數值 1e-6、list/tuple 遞迴）。
 AEQ_SRC = '''\
 def _aeq(a, b):
-    """與 vacant/codebench.py::_lcb_check_code 的 __aeq 同一套判等（逐行對應）。"""
+    """與 vacant_network/codebench.py::_lcb_check_code 的 __aeq 同一套判等（逐行對應）。"""
     try:
         if a == b:
             return True
@@ -182,7 +182,7 @@ HIDDEN_HEADER = '''\
   都是 R534 的紅線。
 
 case 組成 ＝ 題庫的 `visible_tests` ＋ `hidden_tests`（超集），與
-vacant/codebench.py::LiveCodeBenchLoader 的 `hidden_check` 逐字同一組，
+vacant_network/codebench.py::LiveCodeBenchLoader 的 `hidden_check` 逐字同一組，
 所以算出來的分子與 runs/g_r460_harness_lcb2_*／runs/g_r532_lcb2_* 的
 `meets_demand` 是同一把尺。
 """
@@ -307,7 +307,7 @@ def build(check_only: bool = False) -> int:
             "red_line": "hidden/ 不是工作區的子目錄，永遠不複製進工作區；"
                         "任何把隱藏測資或其失敗訊息回饋給模型的路徑都作廢這一批資料。",
         },
-        "comparator": "vacant/codebench.py::_lcb_check_code 的 __aeq（逐行同義，"
+        "comparator": "vacant_network/codebench.py::_lcb_check_code 的 __aeq（逐行同義，"
                       "渲染成每個測試檔裡的 _aeq）",
         "hidden_case_composition": "visible_tests + hidden_tests（超集），"
                                    "與 LiveCodeBenchLoader.hidden_check 同一組 ⇒ "
@@ -318,7 +318,7 @@ def build(check_only: bool = False) -> int:
                                  "visible_tests + hidden_tests), entry_point=entry_point)",
             "why": "主指標走既有那條沙箱路徑，R534 的分子才與 r460／r532 是同一把尺。",
             "rendered_hidden_file_is": "同一組 case、同一個比對器，但**沒有沙箱的 AST "
-                                       "政策**（vacant/checks.py 的 _FORBIDDEN_ATTRS 連 "
+                                       "政策**（vacant_network/checks.py 的 _FORBIDDEN_ATTRS 連 "
                                        "list.remove 都擋、_GAIN_ALLOWED_IMPORTS 擋 typing "
                                        "以外的第三方 import）⇒ 對用到那些東西的碼，"
                                        "渲染檔比既有判準**寬**。ops/gain/r534/gauge_bank.py "

@@ -36,7 +36,7 @@ from ops.gain.gain_run import (
     load_tasks,
     parse_bank_filter,
 )
-from vacant.codebench import (
+from vacant_network.codebench import (
     EVALPLUS_DEFAULT_PATH,
     EVALPLUS_HUMANEVAL_DEFAULT_PATH,
     LCB_STRATUM_KEYS,

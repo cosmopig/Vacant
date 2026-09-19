@@ -3,7 +3,7 @@
 這一份是**題庫代理照著做的那張圖**。`ow_01_csvjson` 與 `ow_02_ratelimit`
 是兩個已經落地的實體範例——**形狀以這份文件為準，不以那兩題的內容為準**。
 
-執行語意在 `vacant/vrun/acceptance.py`（驗收 runner；2026-09-18 從
+執行語意在 `vacant_network/vrun/acceptance.py`（驗收 runner；2026-09-18 從
 `ops/gain/r530/acceptance.py` 搬進套件，舊路徑是 re-export、指令照舊）與
 `ops/gain/r530/tasks.py`（載入與釘死）的 docstring 裡；
 這份講的是**檔案長什麼樣**。

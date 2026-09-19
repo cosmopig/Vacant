@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """R530 的量具（PR-3／E-3）——**雙向**：參考解要全過，每個已知壞樁都要被擋。
 
-判準與紀律逐字沿用 `vacant/suitegauge.py`：
+判準與紀律逐字沿用 `vacant_network/suitegauge.py`：
 
   · **單邊保證**：擋得住已知壞解 **≠** 涵蓋真需求。這支全綠的意思是
     「這組驗收至少有鑑別力」，不是「驗收套件固定點已解」。
@@ -142,7 +142,7 @@ def run_gauge(task_set: str = "all", *, backend: str = "auto",
         "honest_bound": (
             "單邊保證：擋得住已知壞解 ≠ 涵蓋真需求。本表全綠的意思是"
             "「這組驗收至少有鑑別力」，不是「驗收套件固定點已解」"
-            "（vacant/suitegauge.py 的同一句）。"),
+            "（vacant_network/suitegauge.py 的同一句）。"),
     }
     return out
 

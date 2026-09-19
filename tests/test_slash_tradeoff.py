@@ -21,8 +21,8 @@ from __future__ import annotations
 
 import pytest
 
-from vacant.entrycost import SimConfig, _Agent, _should_defect, simulate
-from vacant.reputation import Beta, Reputation, DIMS, get_slash_n_factor, slash_n_factor
+from vacant_network.entrycost import SimConfig, _Agent, _should_defect, simulate
+from vacant_network.reputation import Beta, Reputation, DIMS, get_slash_n_factor, slash_n_factor
 
 
 # ── 1. 解耦本身 ──────────────────────────────────────────────────────

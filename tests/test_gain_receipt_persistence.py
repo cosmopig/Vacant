@@ -15,8 +15,8 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 from ops.gain.gain_run import save_receipts  # noqa: E402
-from vacant.identity import Identity, PublicIdentity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.identity import Identity, PublicIdentity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 
 def _st_with_chain(n=3):
@@ -74,7 +74,7 @@ def test_wrong_pubkey_fails_verification(tmp_path):
     save_receipts(tmp_path, st)
     book = Logbook.load(tmp_path / "receipts_CONFORM.ndjson")
     other = Identity.generate()
-    from vacant.crypto import pub_to_hex
+    from vacant_network.crypto import pub_to_hex
     assert book.verify_chain(
         PublicIdentity.from_hex(other.vacant_id, pub_to_hex(other.pub))) is False
 
@@ -100,7 +100,7 @@ def test_verify_run_receipts_names_the_failing_entry(tmp_path):
     import sys
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
     from ops.gain.replay.verify_run_receipts import verify_arm
-    from vacant.crypto import pub_to_hex
+    from vacant_network.crypto import pub_to_hex
 
     ident = Identity.generate()
     book = Logbook()

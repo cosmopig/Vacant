@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from vacant import brains
+from vacant_network import brains
 
 
 def test_openai_brain_passes_api_key_as_authorization(monkeypatch):

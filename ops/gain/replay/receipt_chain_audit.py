@@ -110,8 +110,8 @@ def verify_persisted_chains(run_dir: str) -> dict:
     """
     sys.path.insert(0, os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "..", "..")))
-    from vacant.identity import PublicIdentity
-    from vacant.logbook import Logbook
+    from vacant_network.identity import PublicIdentity
+    from vacant_network.logbook import Logbook
 
     out = {}
     if not os.path.isdir(run_dir):

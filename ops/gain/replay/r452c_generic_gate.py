@@ -65,7 +65,7 @@ os.chdir(ROOT)
 
 import peer_exec_sim as sim                       # noqa: E402
 import r452_suitespec as r452                     # noqa: E402
-from vacant import peerexec as px                 # noqa: E402
+from vacant_network import peerexec as px                 # noqa: E402
 
 RUN = "g_r446_eq5_mbpp"
 SWEEP = sim.CACHE / f"r452c_matrix_{RUN}.json"

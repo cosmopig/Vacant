@@ -11,11 +11,11 @@ import json
 import os
 from pathlib import Path
 
-from vacant import cli, crypto
-from vacant.body import VacantBody
-from vacant.canonical import canonical_bytes
-from vacant.identity import Identity
-from vacant.record import _write_sha256sums, check, pack
+from vacant_network import cli, crypto
+from vacant_network.body import VacantBody
+from vacant_network.canonical import canonical_bytes
+from vacant_network.identity import Identity
+from vacant_network.record import _write_sha256sums, check, pack
 
 
 # --- 夾具 --------------------------------------------------------------------

@@ -11,8 +11,8 @@ import json
 
 import pytest
 
-from vacant import cli
-from vacant.ecosystem import Ecosystem
+from vacant_network import cli
+from vacant_network.ecosystem import Ecosystem
 
 
 class FakeBrain:

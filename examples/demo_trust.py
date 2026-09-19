@@ -28,9 +28,9 @@ from pathlib import Path
 # 允許 `python examples/demo_trust.py` 直接跑（把 repo 根加進 path）。
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from vacant.checks import compile_check  # noqa: E402
-from vacant.ecosystem import Ecosystem  # noqa: E402
-from vacant.trustcard import render_trust_card  # noqa: E402
+from vacant_network.checks import compile_check  # noqa: E402
+from vacant_network.ecosystem import Ecosystem  # noqa: E402
+from vacant_network.trustcard import render_trust_card  # noqa: E402
 
 RED = "\033[31m"
 GREEN = "\033[32m"
@@ -64,7 +64,7 @@ class FakeBrain:
 
 def build_brain(args):
     if args.base or args.model:
-        from vacant.brains import LMStudioBrain
+        from vacant_network.brains import LMStudioBrain
         return LMStudioBrain(args.base or "http://localhost:1234/v1",
                              args.model or "local-model")
     return FakeBrain()

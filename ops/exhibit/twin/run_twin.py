@@ -7,11 +7,11 @@
 
   一位居民 × N 題（`ops/gain/r535/bank/`，現成的，不造新題）
     → 每題兩個工作區、**一個** run-dir（兩臂的落點靠 `ARM` 後綴分開）
-    → `vacant.vrun.launcher.run(...)` 跑兩次（**沒有第二把尺**，就是那一支）
+    → `vacant_network.vrun.launcher.run(...)` 跑兩次（**沒有第二把尺**，就是那一支）
     → ON：`receipts_RUN-ON.ndjson` ＋ `run_RUN-ON.json` ＋ `visible_RUN-ON*.json`
     → OFF：`run_RUN-OFF.json` ＋ `wire_RUN-OFF/`（**沒有收據、沒有驗收**）
 
-它**不改** `vacant/vrun/` 一個字；它只是那支的呼叫端。
+它**不改** `vacant_network/vrun/` 一個字；它只是那支的呼叫端。
 
 ## 為什麼 OFF 臂非跑不可（2026-09-19）
 
@@ -64,7 +64,7 @@ OFF 那一份交付到底過不過，`vacant run --vacant 0` **答不出來**—
 ## 誠實邊界
 
 1. 這支保證的是「每一格都被量過」，**不保證量得對**。驗收是單邊保證
-   （`vacant/suitegauge.py` 的同一條）：擋得住已知壞解 ≠ 涵蓋真需求。
+   （`vacant_network/suitegauge.py` 的同一條）：擋得住已知壞解 ≠ 涵蓋真需求。
 2. `--fixture` 的格子裡**沒有模型**。它驗的是閘門與收據，不是 agent 能力。
    把 fixture 格講成「分身做的事」就是把模擬講成證明（鐵律 5）。
 3. 這支不決定展件上寫什麼字。標籤由 `pack.py` 從資料推、由頁面印出來。
@@ -93,7 +93,7 @@ REPO = HERE.parents[3]
 sys.path.insert(0, str(REPO))
 
 from ops.exhibit.twin import roster as rosterlib  # noqa: E402
-from vacant.vrun import launcher  # noqa: E402
+from vacant_network.vrun import launcher  # noqa: E402
 
 BANK = REPO / "ops" / "gain" / "r535" / "bank"
 
@@ -235,8 +235,8 @@ def postaudit_off(run_dir: pathlib.Path, task_id: str, *, sandbox: str,
 
     ⚠ 只跑 `tests_visible`。隱藏測資一個 byte 都不碰（V/GT 紅線）。
     """
-    from vacant.vrun import acceptance
-    from vacant.vrun.sandbox import make_sandbox
+    from vacant_network.vrun import acceptance
+    from vacant_network.vrun.sandbox import make_sandbox
     frozen = run_dir / "_frozen_RUN-OFF"
     if not frozen.is_dir():
         return None
@@ -249,7 +249,7 @@ def postaudit_off(run_dir: pathlib.Path, task_id: str, *, sandbox: str,
         "when": "after_the_run",
         "is_verdict": False,
         "signed": False,
-        "ruler": "vacant/vrun/acceptance.py::run_suite(suite='visible')"
+        "ruler": "vacant_network/vrun/acceptance.py::run_suite(suite='visible')"
                  "——與 ON 臂同一把尺、同一份 tests_visible",
         "note": "OFF 臂當場沒有量過任何東西。這個判定是事後補的，"
                 "沒有進收據鏈，也沒有影響那一跑的任何一個位元。",

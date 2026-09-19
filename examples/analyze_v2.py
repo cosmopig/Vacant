@@ -35,7 +35,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from vacant.research import wilcoxon_signed_rank_exact
+from vacant_network.research import wilcoxon_signed_rank_exact
 
 
 def load(p: Path) -> list[dict]:

@@ -14,7 +14,7 @@
 
 跑客戶自己的可執行驗收測資、依結果決定交或不交，把每一次嘗試（含失敗那幾次）簽進可離線
 重驗的雜湊鏈。要讓它成為**全機唯一出口**，需要容器／ACL／egress policy——那是部署層的事，
-不是 Vacant 的（`vacant/controller.py:7-8` 早就逐字寫著，只是從沒出現在對外文字裡）。
+不是 Vacant 的（`vacant_network/controller.py:7-8` 早就逐字寫著，只是從沒出現在對外文字裡）。
 
 既有模式，不是我們發明的：供應鏈安全的 **in-toto／SLSA／Sigstore** 也是同一條
 ——「沒有合法 attestation 的 artifact，在收件時被拒」。
@@ -26,27 +26,34 @@ PyPI 上的 `vacant`（實測 2026-09-19 為 0.4.15，一個 7.5 MB 的
 *"Python bindings for the vacant Rust engine — domain availability via authoritative
 DNS"*（作者 David Poblador i Garcia，`github.com/alltuner/vacant`）。
 
-**兩個名字都撞。** 它**也**佔用 `vacant` 這個 import 名、**也**裝一支叫 `vacant`
-的指令，兩個套件寫到同一批路徑。實測四種安裝順序，**每一種都零錯誤訊息**：
+**0.7.0 之前兩個名字都撞**：它**也**佔用 `vacant` 這個 import 名、**也**裝一支叫
+`vacant` 的指令，兩個套件寫到同一批路徑，實測四種安裝順序**每一種都零錯誤訊息**。
 
-- **後裝的靜靜蓋過先裝的。** 先 `vacant-network` 後 `vacant` ⇒ `vacant --help` 變成
-  DNS 工具、`import vacant` 失去 `__version__`；反過來則是我們贏。`pip list` 兩個都列著。
-- **`pip uninstall -y vacant` 會把共用的那支指令一起帶走**，而 `pip list` 還說
-  `vacant-network==0.7.0` 裝著。
+**0.8.0 把 import 名改成 `vacant_network`**（破壞性變更，見
+[`CHANGELOG.md`](https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md)）。
+修掉的與**沒修掉的**要分清楚：
+
+| | 0.7.0 以前 | 0.8.0 起 |
+|---|---|---|
+| `import` | 兩個套件共用 `vacant/` 目錄，pip 逐檔覆蓋 ⇒ `import vacant` 可能拿到對方的碼 | **已修**：目錄名 `vacant_network/`，兩邊不再共用任何模組 |
+| `vacant` 指令 | 後裝的蓋過先裝的 | **沒修，也修不掉**——同名 console script 就是同一個檔案路徑 |
+| 救法 | `pip install --force-reinstall --no-deps vacant-network` | 直接改用 `vacant-network` 指令或 `python3 -m vacant_network` |
 
 ```bash
 pip install vacant-network                              # 本專案。⚠ 不是 vacant
 
-python3 -c "import vacant; print(vacant.__version__)"   # 判別式：我們印 0.7.0；對方丟 AttributeError
-pip install --force-reinstall --no-deps vacant-network  # 被蓋掉時的救法（實測可完整救回）
+python3 -c "import vacant_network; print(vacant_network.__version__)"   # 判別式：印 0.8.0
+vacant-network --help          # 第二指令名，import 的是 vacant_network.cli，對方蓋不到
+python3 -m vacant_network --help   # 完全不經過 bin/，最後一條打不歪的路
 ```
 
-**套件名 `vacant-network`、指令名 `vacant`、import 名 `vacant`**——三個名字兩個來源。
+**套件名 `vacant-network`、主指令名 `vacant`、第二指令名 `vacant-network`、
+import 名 `vacant_network`。** 只有主指令名還跟對方共用。
 
 > **Python 3.11+。** 一條 `pip install` 會拉進 **30 個 wheel、60 MB**——`pyproject.toml`
 > 宣告的 runtime 相依只有 3 個（`cryptography`／`mcp`／`jsonschema`），其餘是 `mcp`
 > 拖進來的（`pydantic`／`starlette`／`uvicorn`／`httpx`…）。閘門與收據那條路
-> （`vacant.vrun.*`）用不到 `mcp`，但目前沒有「只要閘門」的 extras，裝了就是全裝。
+> （`vacant_network.vrun.*`）用不到 `mcp`，但目前沒有「只要閘門」的 extras，裝了就是全裝。
 >
 > 從零開始、含卡住點的逐字安裝紀錄：
 > [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md)
@@ -93,12 +100,12 @@ requester 鏈驗: ✓
 「端到端迴圈不丟例外」＋「兩條簽章鏈驗得過」，答對幾題不算數。
 
 **不需要 clone。**（2026-09-18 起：閘門的判斷層搬進套件了——同一份，不是複製；
-`ops/gain/r530/*` 現在 re-export 到 `vacant/vrun/*`，R530 實驗跑的仍然是這一支。）
+`ops/gain/r530/*` 現在 re-export 到 `vacant_network/vrun/*`，R530 實驗跑的仍然是這一支。）
 
 一隻假 agent 宣告它完成了，客戶的驗收說沒有（實跑輸出摘錄；家目錄縮成 `~`，其餘逐字）：
 
 ```
-$ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
+$ python3 -m vacant_network.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
     --suite ~/.vacant-run/demo-gate/tests_visible --run-dir ~/.vacant-run/demo-gate/receipts -- …
   Done. I have created solution.py with add() and multiply().
   All requirements are implemented and the code is ready to use.
@@ -114,15 +121,15 @@ $ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
 
 **agent 說它做完了，客戶的驗收說沒有。** 沒有 Vacant，上面那份 `solution.py` 已經交出去了。
 
-畫面上每一個數字都是當場跑出來的：假 agent 是真子行程、閘門是 `vacant/vrun/acceptance.py`
+畫面上每一個數字都是當場跑出來的：假 agent 是真子行程、閘門是 `vacant_network/vrun/acceptance.py`
 那一支（R530 實驗跑的同一支）、那句 `ImportError` 是驗收 driver 當場抓到的例外原文、
-`20` 是 `vacant run` 這個真子行程的退出碼。`vacant/vrun/demo.py::_assert_not_a_performance` 與
+`20` 是 `vacant run` 這個真子行程的退出碼。`vacant_network/vrun/demo.py::_assert_not_a_performance` 與
 [`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
 擋著它不准退化成印死字串。收據當場用同一支驗章器驗過一次，你也可以自己再驗：
 
 ```bash
-python3 -m vacant.vrun.verify_receipts --selftest      # 先證明驗章器抓得到壞鏈
-python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
+python3 -m vacant_network.vrun.verify_receipts --selftest      # 先證明驗章器抓得到壞鏈
+python3 -m vacant_network.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 ```
 
 （clone 之後 `python3 ops/gain/replay/verify_run_receipts.py …` 是**同一支**——
@@ -167,7 +174,7 @@ def check_mul():
 PY
 ```
 
-驗收檔的形狀（`vacant/vrun/acceptance.py` 的執行語意，**不依賴 pytest**）：一個 `.py`
+驗收檔的形狀（`vacant_network/vrun/acceptance.py` 的執行語意，**不依賴 pytest**）：一個 `.py`
 裡放一組零引數的 `check_*()`，**每個函式一條 case**、依定義順序跑，**正常回傳＝過、
 丟任何例外＝不過**；或者只放一個 `main()`，整個檔案算一條。兩種寫法一個檔案裡只准有一種。
 
@@ -209,9 +216,9 @@ exit=0
 驗這兩張收據（**負控制先過**）：
 
 ```
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
 selftest: PASS
-$ python3 -m vacant.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
+$ python3 -m vacant_network.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
 ═══ 收據鏈驗證 /home/user1/vacant-try/receipts_deliver ═══
 run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
 
@@ -244,7 +251,7 @@ vacant run --suite ../tests_visible -- <你平常怎麼跑 agent 就怎麼打>
 完整用法與落盤形狀見 [`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md)。
 
 **「一個開關」的正確講法。** `vacant run` 把模型通道轉向到自己的 proxy，靠的是一份
-**環境變數名單**（[`vacant/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant/vrun/envmap.py)：
+**環境變數名單**（[`vacant_network/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant_network/vrun/envmap.py)：
 OpenAI 家族／Anthropic 家族／OpenRouter／Groq／Together／DeepSeek／Ollama／LM Studio…）
 ——**涵蓋大多數框架，用設定檔的框架要改設定檔**。實測：pi
 （`@earendil-works/pi-coding-agent`）的 provider `baseUrl` 寫在 `models.json` 裡，
@@ -297,7 +304,7 @@ Hermes 是一個 CLI 旗標；吃設定檔的兩個（pi、Codex）要寫一份�
 比較差的附身。三個「輕」的都有前提，不寫出來就是誇大：
 
 - ⚠ **Claude Code 的零接線建在「上游自己會講 Anthropic Messages（`POST /v1/messages`）」
-  這一個功能上。** `vacant/vrun/wireproxy.py` 是**反向代理不是協定轉換器**——它照 path
+  這一個功能上。** `vacant_network/vrun/wireproxy.py` 是**反向代理不是協定轉換器**——它照 path
   路由，不把 `/v1/messages` 改寫成 `/v1/chat/completions`。實測那台 LM Studio 原生就吃
   `/v1/messages`（含 SSE 與 `tool_use`）所以不需要 shim；換一個只講 OpenAI 的上游
   （純 llama.cpp server、vLLM 預設）就**必須**自備轉換層，而那一層不是本 repo 的東西。
@@ -326,11 +333,11 @@ claude | hermes` 各一段，每段在 runtime 讀 `$VACANT_RUN_PROXY`，所以�
 1. **proxy 單獨只有 L3。** 它證明「這些 bytes 經過我」，不阻止 agent 自己開一條連線。
    要「agent 逃不掉」必須再加出網封鎖
    （[`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)，
-   要 root 一次；**那支只在 repo checkout 裡**，見上面〈還需要 clone 的部分〉）。`vacant/controller.py:7-8` 那句逐字適用：無法阻止同一 OS 使用者繞過本命令。
+   要 root 一次；**那支只在 repo checkout 裡**，見上面〈還需要 clone 的部分〉）。`vacant_network/controller.py:7-8` 那句逐字適用：無法阻止同一 OS 使用者繞過本命令。
 2. **中介的是「模型通道」，不是 agent 的行為。** 框架自己發起的動作——自動 lint、
    git checkpoint、內建重試、本機工具呼叫——不經過模型通道，proxy 看不到也擋不到。
    收據能說「模型通道上發生了什麼」與「工作區最後長這樣」，不能說「agent 做了什麼」。
-3. **驗收是單邊保證。** [`vacant/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant/suitegauge.py)
+3. **驗收是單邊保證。** [`vacant_network/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant_network/suitegauge.py)
    逐字：擋得住已知壞解**不證明**涵蓋真需求。`accepted=true` 只代表「客戶寫下來的那幾條過了」。
    實測：R532 那 836 題裡閘門接受了 811 件，其中 120 件（14.8%）過了可見驗收卻沒過隱藏驗收。
 
@@ -345,9 +352,9 @@ Bedrock SigV4、為什麼不做透明 MITM）在
 零模型呼叫、零網路。
 
 ```python
-from vacant.checks import run_python_check
-from vacant.identity import Identity, PublicIdentity
-from vacant.logbook import Logbook
+from vacant_network.checks import run_python_check
+from vacant_network.identity import Identity, PublicIdentity
+from vacant_network.logbook import Logbook
 
 # 1) 驗收：客戶的測試在 runner 行程，候選碼在另一個 worker 行程
 tests = "assert solve([1, 2, 3, 4]) == 6\nassert solve([]) == 0\n"
@@ -367,7 +374,7 @@ print(book.verify_chain(who))                                            # True
 
 # 3) 竄改中間那一筆 ⇒ 驗章失敗
 import copy
-from vacant.logbook import LogEntry
+from vacant_network.logbook import LogEntry
 forged = Logbook([copy.deepcopy(e) for e in book.entries])
 e = forged.entries[1]
 forged.entries[1] = LogEntry(e.stream_id, e.branch_id, e.seq, e.prev_hash, e.ts_ms, e.type,
@@ -399,18 +406,18 @@ vacant --help                     # 安裝後可用的 CLI
 
 | 症狀 | 發生了什麼 | 怎麼辦 |
 |---|---|---|
-| 裝完之後 `import vacant` 或 `vacant --help` 完全不是這個專案 | **`pip install vacant` 裝到的是別人的套件**（authoritative-DNS 工具的 Rust bindings，7.5 MB 原生 wheel）。它**也**佔用 `vacant` 這個 import 名、**也**裝一支叫 `vacant` 的指令；先裝我們的再裝它 ⇒ **它靜靜蓋過去，零錯誤訊息** | 判別：`python3 -c "import vacant; print(vacant.__version__)"`——我們的印 `0.7.0`，對方丟 `AttributeError`。`vacant --help` 第一行有 `{init,info,call,demo,…}` 才是我們的 |
-| `pip uninstall -y vacant` 之後 `vacant` 這個指令整個不見了，`pip list` 卻還說 `vacant-network==0.7.0` 裝著 | 兩個套件寫到同一批路徑，解除安裝對方時**把共用的那支指令一起帶走**；pip 不知道我們的被挖空了 | `pip install --force-reinstall --no-deps vacant-network`（實測可完整救回：指令回來、`vacant.__version__` 回到 `0.7.0`） |
+| 裝完之後 `import vacant_network` 或 `vacant --help` 完全不是這個專案 | **`pip install vacant` 裝到的是別人的套件**（authoritative-DNS 工具的 Rust bindings，7.5 MB 原生 wheel）。它**也**佔用 `vacant` 這個 import 名、**也**裝一支叫 `vacant` 的指令；先裝我們的再裝它 ⇒ **它靜靜蓋過去，零錯誤訊息** | 判別：`python3 -c "import vacant_network; print(vacant_network.__version__)"`——我們的印 `0.7.0`，對方丟 `AttributeError`。`vacant --help` 第一行有 `{init,info,call,demo,…}` 才是我們的 |
+| `pip uninstall -y vacant` 之後 `vacant` 這個指令整個不見了，`pip list` 卻還說 `vacant-network==0.7.0` 裝著 | 兩個套件寫到同一批路徑，解除安裝對方時**把共用的那支指令一起帶走**；pip 不知道我們的被挖空了 | `pip install --force-reinstall --no-deps vacant-network`（實測可完整救回：指令回來、`vacant_network.__version__` 回到 `0.7.0`） |
 | `python3 -m venv …` ⇒ `The virtual environment was not created successfully because ensurepip is not available.` | Debian／Ubuntu 把 `ensurepip` 拆成獨立套件，原廠映像檔沒有。`venv` 這個 module 本身是在的，死的是它底下的 `ensurepip` | `sudo apt-get install -y python3-venv`（訊息裡寫的是 `python3.12-venv`），然後**重建一次 venv**。實測 5.5 秒，**不必重開機** |
 | 系統上根本沒有 `pip` / `pip3` | 同一個原因，`python3` 是裸的 | 同上。venv 建起來之後裡面自帶 pip 24.0 |
-| 一條 `pip install` 之後 site-packages 多了 30 個 wheel、60 MB | `mcp` 一個人拖進 `pydantic`／`starlette`／`uvicorn`／`httpx`／`sse-starlette`… | 目前**沒有**「只要閘門」的 extras，裝了就是全裝。閘門與收據那條路（`vacant.vrun.*`）其實用不到 `mcp` |
+| 一條 `pip install` 之後 site-packages 多了 30 個 wheel、60 MB | `mcp` 一個人拖進 `pydantic`／`starlette`／`uvicorn`／`httpx`／`sse-starlette`… | 目前**沒有**「只要閘門」的 extras，裝了就是全裝。閘門與收據那條路（`vacant_network.vrun.*`）其實用不到 `mcp` |
 | `pip show … \| head` 噴 `BrokenPipeError` | pip 對 SIGPIPE 的處理。**不是安裝失敗**（`exit=0`） | 忽略它，或不要接 `head` |
 | `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | **fail-closed 擋門**，不是你的路徑打錯 | 權威的驗收目錄放在工作區**外面**；要給 agent 看就另外複製一份進去 |
 | `vacant run` 回 `22`（`infra_void`） | 基礎設施壞了，**既不判交付也不判拒交**。最常見的原因是 `--` 之後給了相對路徑——launcher 用 `cwd=<workspace>` spawn，相對路徑會解析到工作區底下 | `--` 之後改成絕對路徑 |
-| 接上了自己的 agent，但 `requests_seen` 是 `0` | 那條模型通道**沒有被中介到**（框架把 base url 寫在設定檔裡），或那一跑根本沒呼叫模型。**不會有任何錯誤訊息**——而且那一跑的其他欄位會長得跟合法拒交格一模一樣（誠實邊界 23 的活體標本） | 看〈五個 agent 的接線〉；環境變數名單的單一真相是 `vacant/vrun/envmap.py` |
+| 接上了自己的 agent，但 `requests_seen` 是 `0` | 那條模型通道**沒有被中介到**（框架把 base url 寫在設定檔裡），或那一跑根本沒呼叫模型。**不會有任何錯誤訊息**——而且那一跑的其他欄位會長得跟合法拒交格一模一樣（誠實邊界 23 的活體標本） | 看〈五個 agent 的接線〉；環境變數名單的單一真相是 `vacant_network/vrun/envmap.py` |
 | `vacant selftest` 印的「答對」數字每次不一樣 | 那不是判準（Linux 印 `4/6`、macOS 印 `3/6`） | 只看 `✓` 那三行有沒有全過 |
 | `run_RUN-ON.json` 裡找不到 `upstreams_defaulted` | **PyPI 的 `vacant-network` 0.7.0 還沒有那兩個欄位**，repo HEAD 有——版本號沒有跟著 bump | 需要那個欄位就從原始碼裝（`pip install -e .`） |
-| Windows | **完全沒量**。而且 `vacant/checks.py` 沒有可用的 Windows 沙箱分支 | 用 Linux／macOS，或放進容器 |
+| Windows | **完全沒量**。而且 `vacant_network/checks.py` 沒有可用的 Windows 沙箱分支 | 用 Linux／macOS，或放進容器 |
 
 ⚠ 最後一列是鐵律 3 的形狀：**「沒量到」≠「量到 0」**。
 這份 log 只證明了 Ubuntu 24.04／Python 3.12.3 那一條路；macOS 只跑過
@@ -523,11 +530,11 @@ needle——**跳過 ≠ 檢查過**。
 
 1. **前提（凌駕以下各條）**：需求要能編譯成可執行的驗收測資；跑不起來的需求沒有免費的裁判。
 2. **Vacant 不是套在任意 agent 外面就自動生效的強制層。** 以 library
-   （`vacant/agent.py:51-103`，`self.brain` 是公開屬性）或 MCP 工具
-   （`vacant/mcp_server.py:184-210`，工具 docstring 只是在「勸」）的形態出現時，它是**自願的**
+   （`vacant_network/agent.py:51-103`，`self.brain` 是公開屬性）或 MCP 工具
+   （`vacant_network/mcp_server.py:184-210`，工具 docstring 只是在「勸」）的形態出現時，它是**自願的**
    ——agent 不呼叫就完全不存在，而且沒有任何東西會察覺這件事。只有以 controller
-   （`vacant/controller.py:304-530`）或由 harness 自己擁有 agent loop 的形態，對它**親手 spawn
-   的那個子行程**才是強制的。`vacant/controller.py:7-8` 逐字：「保證只涵蓋透過本 controller
+   （`vacant_network/controller.py:304-530`）或由 harness 自己擁有 agent loop 的形態，對它**親手 spawn
+   的那個子行程**才是強制的。`vacant_network/controller.py:7-8` 逐字：「保證只涵蓋透過本 controller
    啟動的子行程；無法阻止同一 OS 使用者繞過本命令直接執行 agent。需要強制全機唯一出口時，
    仍須容器、ACL 或 egress policy」。本頁任何一句都不得讀成比這句樂觀。
    用正式名詞講更精準：Saltzer & Schroeder 1975 的 reference monitor 三條件裡，
@@ -578,28 +585,28 @@ needle——**跳過 ≠ 檢查過**。
    留著這一整段過程（缺口怎麼被自己發現、怎麼掃完、掃完還剩什麼），是因為它比任何效能數字
    更能說明可究責是可行的。
 4. **閘門保證的是「過了寫下來的測試」，不是「達成真需求」。**
-   `vacant/suitegauge.py:30-33` 的單邊保證逐字：壞樁擋得住只證明這套驗收不是對什麼都放行，
+   `vacant_network/suitegauge.py:30-33` 的單邊保證逐字：壞樁擋得住只證明這套驗收不是對什麼都放行，
    **不證明**它涵蓋真需求。實測：R532 那 836 題裡，閘門**接受**了 811 件，其中
    **120 件（14.8%）過了可見驗收卻沒過隱藏驗收**。沒有閘門時是 211/836＝25.2%。
    ⇒ 閘門把假交付**大致砍半，但沒有消掉**。
 5. **鏈給的是 integrity（沒被改），不是 completeness（沒有漏）。**
-   `vacant/logbook.py:168-195` 只檢查 seq 連續、`prev_hash` 串接、逐筆簽章，沒有長度承諾、
+   `vacant_network/logbook.py:168-195` 只檢查 seq 連續、`prev_hash` 串接、逐筆簽章，沒有長度承諾、
    沒有外部錨 ⇒ **合法前綴照樣過**（quickstart 第 4 步）。這在文獻裡有正式名字：
    **truncation／omission attack**（Ma & Tsudik 2009）。三件必須一起講的事：
-   - **`vacant/checkpoint.py:144-155` 的存檔點鏈有同一個洞。** `verify_checkpoint_chain`
+   - **`vacant_network/checkpoint.py:144-155` 的存檔點鏈有同一個洞。** `verify_checkpoint_chain`
      只往前檢查 `prev_checkpoint_sig` 串接、首枚為 null；**丟掉最後幾枚，剩下的照樣全過**
      （實測：4 枚全過、丟掉最後 2 枚仍全過、抽掉中間一枚失敗、拔掉首枚失敗）。
    - **「把筆數簽進每一筆」擋不住它。** `seq` 本來就是筆數，截斷後的前綴每一筆仍然自洽。
      **長度承諾要有效必須是外生的**——在別人手上，或在時間上早於截斷。
    - 要偵測就得把 `Logbook.head()` 對外公示或找人會簽。Vacant 不會替你做。
 6. **簽章指認金鑰，不指認主體，也不指認真假。** 收據證明「這句話是這把金鑰說的、事後沒被改過」，
-   **不是**「這句話是真的」（`vacant/peerexec.py:117-120`）。產品路徑的收據是**交付方自己簽**的
-   （`vacant/ecosystem.py:641-642`），私鑰是同一個 OS 使用者可讀的明文 PEM
-   （`vacant/body.py:160` 呼叫 `identity.save` 沒傳 passphrase）。key custody 是部署假設，
+   **不是**「這句話是真的」（`vacant_network/peerexec.py:117-120`）。產品路徑的收據是**交付方自己簽**的
+   （`vacant_network/ecosystem.py:641-642`），私鑰是同一個 OS 使用者可讀的明文 PEM
+   （`vacant_network/body.py:160` 呼叫 `identity.save` 沒傳 passphrase）。key custody 是部署假設，
    軟體層無法 prevents。
 7. **不是安全邊界。** `run_python` 在獨立行程、暫存 cwd、CPU limit 與逾時下執行，擋得住常見的
    提前 `exit(0)`、讀同檔隱藏測資與 process/file API，但**不是完整的惡意程式邊界**；不可信程式
-   應放進 container、gVisor 或獨立 VM。`vacant/checks.py` 沒有可用的 Windows 沙箱分支。
+   應放進 container、gVisor 或獨立 VM。`vacant_network/checks.py` 沒有可用的 Windows 沙箱分支。
 8. **多數決有數學上界**：最多容忍 ⌊(k−1)/2⌋ 個腐化執行器；過半即反轉，且**機制無法知道自己在
    門檻哪一邊**。
 9. **對驗收套件本身腐化毫無防禦**：套件換成「載得進就算過」時，每一票誠實、每條鏈驗得過、
@@ -621,7 +628,7 @@ needle——**跳過 ≠ 檢查過**。
     寫出來的**。它抓得到不對稱的疏漏（bug），**抓不到兩邊一起不寫**（malice）。
     真正的對帳要求至少一端握在利益不同的人手上——那件事目前沒有做。
 19. **不是證明**：demo 只能說「看得到提升」；「證明提升」保留給預註冊 batch run。
-20. **`vacant run` 的 proxy 擋不住刻意繞過。** `vacant/vrun/wireproxy.py:45-47` 自己
+20. **`vacant run` 的 proxy 擋不住刻意繞過。** `vacant_network/vrun/wireproxy.py:45-47` 自己
     逐字寫著：「**records，不 verifies**：proxy 只證明『這些 bytes 經過我』，不證明上游
     真的照著跑，也**不阻止 agent 走別的路徑繞過它**。」用第 2 條的正式名詞講：
     **Saltzer & Schroeder 1975 的 complete mediation（完全中介），本系統不滿足。**
@@ -642,9 +649,19 @@ needle——**跳過 ≠ 檢查過**。
       （[`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) §2.3
       實測）。收據上的 `model` 只記「誰宣稱的」，不是「誰答的」。也因此
       **「為了接線而謊報模型名」是被禁止的**：它會讓收據失真，與可究責性口徑直接相衝。
-    - **沒有被指定上游的那條 wire 會轉送到公開 API 的預設值。** repo HEAD 的
-      `vacant/vrun/launcher.py:586-590` 把這件事逐跑落盤成 `upstreams`／
-      `upstreams_defaulted`——但**那只是讓洞看得見，不是把它補起來**。
+    - ~~**沒有被指定上游的那條 wire 會轉送到公開 API 的預設值。**~~
+      **2026-09-19 補起來了**（`DECISION_20260919_V1_GATES.md`）：沒人指定的 wire
+      現在指到一個**會拒絕的本機 sink**（`envmap.SINK_UPSTREAM`，一個 `.invalid`
+      主機名），`wireproxy` 在**開任何連線之前**就回 502 ⇒ 不解析 DNS、不送任何
+      bytes、離線也成立。要走公開 API 得**明講**：`vacant run --allow-public-upstream`
+      或 `VACANT_RUN_ALLOW_PUBLIC_UPSTREAM=1`。
+      ⚠ **兩條上游都釘死的跑完全不受影響**（五 agent 矩陣 20 格），
+      沒有流量走過那條路的跑也逐位元不變（pi 的 40 格）。
+      ⚠ **這擋的是「沒人指定的那條路由」，不是「出網」**：使用者自己把上游指到
+      公開 API 照樣放行（那是明講的），agent 繞過 proxy 直連也照樣擋不住
+      ——那一條的結構性補法仍然是 `block_egress.sh`（V3）。
+      repo HEAD 的 `vacant_network/vrun/launcher.py` 把這件事逐跑落盤成 `upstreams`／
+      `upstreams_defaulted`／`upstreams_sinked`／`wire_blocked`。
       ⚠ **`upstreams_defaulted` 的讀法要精確**（`AGENT_COMPAT.md` §10.6）：它說的是
       「這條路由沒人指定，**萬一**有流量會去公開 API」，**不是**「已經出網了」。
       要判有沒有真的出網，看的是 `wire_by_protocol` 與 `wire_*/index.jsonl` 的
@@ -679,20 +696,20 @@ needle——**跳過 ≠ 檢查過**。
 
 這幾條是真的、有程式碼支撐，不必寫得謙虛：
 
-- **收件那一關繞不過。** `vacant/receipt.py` ＋ `controller.verify_delivery` 會**重算五個
+- **收件那一關繞不過。** `vacant_network/receipt.py` ＋ `controller.verify_delivery` 會**重算五個
   sha256**（request／task／tests／answer／trust card）、驗 Ed25519 簽章、比對 `chain_head`／
   `stream_id`／`branch_id` 與**當下活著的鏈**是否一致、確認每一份評審都綁在這一筆交付上，
-  最後才 `policy.admit`。啟動權用 `os.O_EXCL` 認領（`vacant/controller.py:372`），
+  最後才 `policy.admit`。啟動權用 `os.O_EXCL` 認領（`vacant_network/controller.py:372`），
   **一張收據只能消費一次**。強制點在**驗收期**，不在執行期——這一段是真的做到了。
 
-- **agent 的自我宣稱從來沒被採信過。** 生態自己跑 verifier（`vacant/ecosystem.py:531`），
-  controller 在啟動任何下游 agent 之前**再獨立重跑一次**（`vacant/controller.py:299-300`）。
+- **agent 的自我宣稱從來沒被採信過。** 生態自己跑 verifier（`vacant_network/ecosystem.py:531`），
+  controller 在啟動任何下游 agent 之前**再獨立重跑一次**（`vacant_network/controller.py:299-300`）。
 - **驗收沙箱是兩個行程。** 測試碼在 runner、候選碼在另一個 worker，靠 stdin/stdout ＋ nonce
-  做 RPC（`vacant/checks.py:577-600`、`444-457`）。`ops/gain/gain_run.py:957` 註解逐字：
+  做 RPC（`vacant_network/checks.py:577-600`、`444-457`）。`ops/gain/gain_run.py:957` 註解逐字：
   *"the candidate worker cannot see this test code"*。**候選碼結構上看不到測試碼**，
   不是「被擋下來」。
 - **「量不到不是通過」寫成了程式碼**：`"all_pass": bool(total > 0 and passed == total)`
-  （`vacant/vrun/acceptance.py:268`）；量具同理，`n_broken >= 1` 才算數，空的壞樁集合
+  （`vacant_network/vrun/acceptance.py:268`）；量具同理，`n_broken >= 1` 才算數，空的壞樁集合
   不能空洞地成立。
 - **拒交是真的會發生**：R532 那 836 題裡，閘門臂拒交 25 件、迴圈臂拒交 68 件，
   而且拒交算在每一個比率的分母裡。
@@ -713,12 +730,12 @@ needle——**跳過 ≠ 檢查過**。
 
 | 層 | 模組 | 承重什麼 |
 |---|---|---|
-| L0 密碼學 | `vacant/canonical.py`／`identity.py`／`crypto.py` | 跨機驗章一致的唯一序列化；Ed25519 keypair ＋ `vacant_id` |
-| L1 帳 | `vacant/logbook.py`／`envelope.py`／`checkpoint.py`／`attest.py`／`receipt.py` | append-only hash-chain（`stream_id`＝創世 hash）；簽章信封＋`ReviewEnvelope`；V1 存檔點自身成鏈 |
-| L2 可究責層 | `vacant/registry.py`／`reputation.py`／`router.py`／`auditor.py`／`memory.py`／`dashboard.py` | 發現＋信譽索引、五維 Beta、on/off 單開關、確定性再驗、MemoryManager（**面板不是可究責性的來源**） |
-| L3 題庫與量具 | `vacant/codebench.py`／`suitespec.py`／`suitegauge.py` | MBPP+／LiveCodeBench v1–v3／HumanEval+；**驗收套件是資料不是程式**；量具＝參考解全過 ∧ 已知壞樁全擋（**單邊保證**） |
-| L4 實驗基建 | `ops/gain/*`／`vacant/peerexec.py`／`record.py`／`research.py` | 九條臂的 runner、仲裁者（四狀態、Holm、區間、`--selftest`／`--mutation-check`）、互跑不互審的執行證言層、RECORD_SPEC 證據包 |
-| L5 展件 | `vacant/entrycost.py`／`examples/receipt_viewer_multiparty.html`／`examples/e10_mediator.py` | 機制模擬（現場秒級）、離線單檔收據檢視器、E10 兩行路由序列重算 |
+| L0 密碼學 | `vacant_network/canonical.py`／`identity.py`／`crypto.py` | 跨機驗章一致的唯一序列化；Ed25519 keypair ＋ `vacant_id` |
+| L1 帳 | `vacant_network/logbook.py`／`envelope.py`／`checkpoint.py`／`attest.py`／`receipt.py` | append-only hash-chain（`stream_id`＝創世 hash）；簽章信封＋`ReviewEnvelope`；V1 存檔點自身成鏈 |
+| L2 可究責層 | `vacant_network/registry.py`／`reputation.py`／`router.py`／`auditor.py`／`memory.py`／`dashboard.py` | 發現＋信譽索引、五維 Beta、on/off 單開關、確定性再驗、MemoryManager（**面板不是可究責性的來源**） |
+| L3 題庫與量具 | `vacant_network/codebench.py`／`suitespec.py`／`suitegauge.py` | MBPP+／LiveCodeBench v1–v3／HumanEval+；**驗收套件是資料不是程式**；量具＝參考解全過 ∧ 已知壞樁全擋（**單邊保證**） |
+| L4 實驗基建 | `ops/gain/*`／`vacant_network/peerexec.py`／`record.py`／`research.py` | 九條臂的 runner、仲裁者（四狀態、Holm、區間、`--selftest`／`--mutation-check`）、互跑不互審的執行證言層、RECORD_SPEC 證據包 |
+| L5 展件 | `vacant_network/entrycost.py`／`examples/receipt_viewer_multiparty.html`／`examples/e10_mediator.py` | 機制模擬（現場秒級）、離線單檔收據檢視器、E10 兩行路由序列重算 |
 
 **九條臂**：`OFF`（單發，1.00 通）、`ON`（信譽路由＋K=3 評審＋一次修訂，≈5 通）、
 `OFF5`（五次投票，5.00 通）、`CONFORM`（驗收閘門、早停，1.3–1.7 通）、`EQ5`（等預算，恆 5.00 通）、
@@ -730,7 +747,7 @@ needle——**跳過 ≠ 檢查過**。
 
 ## 從原始碼跑（實驗與重算）
 
-PyPI 的輪子含 `vacant/vrun/`（閘門、proxy、驗章器），**不含 `ops/`**（實驗 runner
+PyPI 的輪子含 `vacant_network/vrun/`（閘門、proxy、驗章器），**不含 `ops/`**（實驗 runner
 與題庫）。要**重算實驗數字**必須 clone。
 
 ```bash
@@ -760,13 +777,13 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 
 | 形態 | 進入點 | 對 agent 有約束力嗎 |
 |---|---|---|
-| **Library** | `vacant.agent.Vacant`（`vacant/agent.py:51-103`） | **沒有——自願的。** `self.brain` 是公開屬性；不呼叫就不存在。 |
-| **MCP 工具** | `vacant.mcp_server`（`vacant/mcp_server.py:184-210`） | **沒有——只是在勸。** `delegate` 的 docstring 寫 "THE PREFERRED PATH"；模型忽略它不會被攔，也沒有東西偵測得到。 |
-| **Controller** | `VacantFirstController.delegate_then_run`（`vacant/controller.py:304-530`） | **有——但只對它親手 spawn 的子行程。** 先取得已驗證交付，才 `shell=False` 啟動下游 agent。 |
+| **Library** | `vacant_network.agent.Vacant`（`vacant_network/agent.py:51-103`） | **沒有——自願的。** `self.brain` 是公開屬性；不呼叫就不存在。 |
+| **MCP 工具** | `vacant_network.mcp_server`（`vacant_network/mcp_server.py:184-210`） | **沒有——只是在勸。** `delegate` 的 docstring 寫 "THE PREFERRED PATH"；模型忽略它不會被攔，也沒有東西偵測得到。 |
+| **Controller** | `VacantFirstController.delegate_then_run`（`vacant_network/controller.py:304-530`） | **有——但只對它親手 spawn 的子行程。** 先取得已驗證交付，才 `shell=False` 啟動下游 agent。 |
 | **harness 自己擁有 loop** | 例如 `ops/gain/r530/openwork_arms.py:642-696` | **有——harness 就是那個 loop**，agent 沒有繞過閘門的路徑。 |
 
 **正確的定位是「收件口」不是「強制層」**：強制點在**驗收期**——沒有可驗證收據的交付不被
-接受，而**那一關繞不過**（`vacant/receipt.py` ＋ `controller.verify_delivery` 重算五個
+接受，而**那一關繞不過**（`vacant_network/receipt.py` ＋ `controller.verify_delivery` 重算五個
 sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能消費一次）。強制點**不在
 執行期**：要讓 Vacant 成為全機唯一出口需要容器／ACL／egress policy，那是部署層的事。
 這與供應鏈安全的 in-toto／SLSA／Sigstore 是同一個模式。
@@ -780,7 +797,7 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 
 挑**最窄**的、剛好給你所要性質的那一層：
 
-1. **只要一條過／不過的線** → 直接呼叫 `vacant.checks.run_python_check`。不需要身分、鏈或設定。
+1. **只要一條過／不過的線** → 直接呼叫 `vacant_network.checks.run_python_check`。不需要身分、鏈或設定。
 2. **要一份嘗試的紀錄** → 加一個 `Logbook`，每一次嘗試都 append。其餘都不用改。
 3. **要驗收套件本身可被查覺竄改** → 把套件寫成 `SuiteSpec`，在產生任何候選之前用
    `commit_suite_with_gauge` 上鏈。執行器之後只跑**自己從 spec 渲染出來**的碼，
@@ -822,11 +839,11 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 
 - **I-1 改中間會被抓到**：改 payload、抽掉中間一筆、砍掉創世，`verify_chain` 都回 `False`。
 - **I-2 候選碼結構上看不到測試碼**：測試在 runner、候選在 worker，靠 nonce 標記的 literal-only
-  RPC 溝通（`vacant/checks.py:577-600`、`444-457`）。這是結構性質，不是黑名單。
+  RPC 溝通（`vacant_network/checks.py:577-600`、`444-457`）。這是結構性質，不是黑名單。
 - **I-3 自我宣稱從不被採信**：生態跑一次 verifier（`ecosystem.py:531`），controller 再獨立跑一次
   （`controller.py:299-300`）。
 - **I-4 「量不到不是通過」寫成了程式碼**：`bool(total > 0 and passed == total)`
-  （`vacant/vrun/acceptance.py:268`）；量具要求 `n_broken >= 1`。
+  （`vacant_network/vrun/acceptance.py:268`）；量具要求 `n_broken >= 1`。
 - **I-5 量具是雙向的**：`ok` 同時要求參考解通過**與**每個已知壞樁被擋。
 - **I-6 渲染是確定的**：`suitespec.render(spec)` 是 spec 的純函式 ⇒ `render_sha256` 跨機可比。
 - **I-7 拒交真的會發生**：R532 836 題，閘門臂拒交 25、迴圈臂拒交 68，且計入分母。
@@ -844,16 +861,16 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 - **H-5** **發布的輪子沒有預設驗收判準。** `suitegauge.default_runner` 與 `peerexec.sandbox_probe`
   委派給 `ops.gain.gain_run.meets_demand`，而那支只在 git repo 裡（它帶著 G 實驗自己的沙箱
   import 白名單與 `infra_void` 語意；函式庫不該替使用者宣告那份政策，而且第二份判準會漂移）。
-  沒有 `ops/` 時呼叫會拋 `vacant.suitegauge.OpsRunnerUnavailable`（訊息裡寫了該怎麼做）。
+  沒有 `ops/` 時呼叫會拋 `vacant_network.suitegauge.OpsRunnerUnavailable`（訊息裡寫了該怎麼做）。
   **正路是注入**：`gauge_suite(..., runner=my_runner)`、`Executor.new(..., probe=my_probe)`；
   `runner(code, check_code, entry_point, timeout_s) -> (ok, message)`，
-  可以拿 `vacant.checks.run_python_check` 當地基。
+  可以拿 `vacant_network.checks.run_python_check` 當地基。
 
 ## E. 常見錯誤
 
 | 錯 | 對 | 為什麼 |
 |---|---|---|
-| 給實驗 runner 設 `VACANT_ENDPOINT=http://host:8765` | `VACANT_GAIN_API=http://host:8765/v1/chat/completions` | 三個變數三種形狀。`VACANT_GAIN_API`（`ops/gain/brain_cline.py:134`）是**完整路徑**不是 base URL；`VACANT_ENDPOINT`（`vacant/substrate.py:171`）才是 base URL；CLI 走 `VACANT_MCP_BASE`＋`VACANT_MCP_MODEL`＋`VACANT_MCP_API`，而 `VACANT_MCP_API` 只能是 `responses` 或 `openai`。 |
+| 給實驗 runner 設 `VACANT_ENDPOINT=http://host:8765` | `VACANT_GAIN_API=http://host:8765/v1/chat/completions` | 三個變數三種形狀。`VACANT_GAIN_API`（`ops/gain/brain_cline.py:134`）是**完整路徑**不是 base URL；`VACANT_ENDPOINT`（`vacant_network/substrate.py:171`）才是 base URL；CLI 走 `VACANT_MCP_BASE`＋`VACANT_MCP_MODEL`＋`VACANT_MCP_API`，而 `VACANT_MCP_API` 只能是 `responses` 或 `openai`。 |
 | 用 `contains`／`regex` 當閘門 | `equals`／`json_schema`／`run_python` | 前兩者適合探索，不足以撐起一份交付或授權 agent 啟動。 |
 | 只記成功的嘗試 | 每一次都記，失敗優先 | 只有成功的鏈答不出「試了幾次」「有沒有交錯過」。 |
 | 把驗得過的鏈當成「工作是對的」 | 當成「紀錄沒被改過」 | 誠實邊界 6：簽章指認金鑰，不指認真假。 |
@@ -874,7 +891,7 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 {
   "schema": "vacant.facts/1",
   "package": {
-    "pypi_name": "vacant-network", "import_name": "vacant", "version": "0.7.0",
+    "pypi_name": "vacant-network", "import_name": "vacant_network", "version": "0.8.0",
     "requires_python": ">=3.11",
     "runtime_dependencies": ["cryptography>=42", "mcp>=1.26,<2", "jsonschema>=4.21"],
     "license": "MIT", "console_script": "vacant", "module_count": 50, "test_files": 78
@@ -898,13 +915,13 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
     "library": "voluntary", "mcp_tool": "advisory",
     "controller": "binding on its own spawned subprocess only",
     "harness_owns_loop": "binding",
-    "machine_wide": "requires container / ACL / egress policy (vacant/controller.py:7-8)"
+    "machine_wide": "requires container / ACL / egress policy (vacant_network/controller.py:7-8)"
   },
   "chain_guarantees": {
     "integrity": true,
     "completeness": false,
     "truncation_attack": "not detected (Ma & Tsudik 2009, truncation/omission attack)",
-    "also_affects": "vacant/checkpoint.py:144-155 verify_checkpoint_chain",
+    "also_affects": "vacant_network/checkpoint.py:144-155 verify_checkpoint_chain",
     "seq_does_not_help": "seq is already the count; a truncated prefix stays self-consistent",
     "fix": "an exogenous length commitment -- held by someone else, or timestamped before the truncation"
   },
@@ -976,7 +993,7 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 **唯一交付物＝實體場地展覽。不產出畢業論文，也不投稿。** 判斷任何工作要不要做，問的是
 「觀眾走到展場前面時，這件事有沒有差別」。由此推出的硬約束：
 
-1. **秒級互動**：真模型每題實測約 114 秒，現場等不起 ⇒ 展件跑機制模擬（`vacant/entrycost.py`）
+1. **秒級互動**：真模型每題實測約 114 秒，現場等不起 ⇒ 展件跑機制模擬（`vacant_network/entrycost.py`）
    或預跑重放，**畫面上必須明講「這是機制模擬」**。
 2. **離線可跑、可無人值守**：不假設網路、不假設有解說員。
 3. **先行研究仍然重要，但理由是不能對觀眾說錯話**：脈衝攻擊 2005 年就有名字（Srivatsa）、

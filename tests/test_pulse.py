@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import pytest
 
-from vacant.entrycost import SimConfig, simulate
+from vacant_network.entrycost import SimConfig, simulate
 
 
 def _cfg(**kw) -> SimConfig:

@@ -26,7 +26,7 @@ R534 問的是一句話：**把 Vacant 的驗收閘門裝進「別人的」agent
 ⚠ **誠實邊界（改碼請保留）**：閘門 records and gates，不 proves。
   它證明「宣告完成之後，可見驗收先跑了一次，沒過就沒出貨」，
   **不**證明交出去的東西是對的——可見驗收是客戶給的那幾條，不是真需求
-  （`vacant/suitegauge.py` 的單邊保證，逐字沿用）。
+  （`vacant_network/suitegauge.py` 的單邊保證，逐字沿用）。
 
 隱藏測資的紅線：本檔案、擴充、sidecar 的任何一條路徑都不碰 `hidden/`。
 它只在 driver 於工作區凍結＋打包之後、在另一個目錄裡用來事後算分。
@@ -44,7 +44,7 @@ if REPO not in sys.path:
 
 from ops.gain.r530.openwork_arms import PERSONAS, persona_for  # noqa: E402,F401
 from ops.gain.r530.sandbox import DEFAULT_TEST_TIMEOUT_S  # noqa: E402
-from vacant.memory import assert_ks1_clean  # noqa: E402
+from vacant_network.memory import assert_ks1_clean  # noqa: E402
 
 # ══ 四格 ═════════════════════════════════════════════════════════════════
 #: `arm`＝有沒有閘門；`think`＝送不送 `reasoning_effort:"none"`。

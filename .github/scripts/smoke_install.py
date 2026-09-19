@@ -4,17 +4,17 @@
 「裝起來能跑」。最常見的兩種壞法都不會讓 build 失敗：
 
   1. **套件資料沒進去**——`pyproject.toml` 的 `package-data` 漏了，
-     觀測台的 `vacant/web/*.html` 就不在 wheel 裡；只有在別的機器上
+     觀測台的 `vacant_network/web/*.html` 就不在 wheel 裡；只有在別的機器上
      真的去讀那個檔的時候才會炸。
   2. **依賴宣告漏了**——本機測試用得到的東西剛好裝在開發環境裡，
      wheel 的 `dependencies` 卻沒寫；全新環境一 import 就 ImportError。
   3. **第一屏跑不動**——`vacant demo gate` 的判斷層 2026-09-18 才從 `ops/`
-     搬進 `vacant/vrun/`（`ops/` 不進 wheel）。少一支模組、子行程的
+     搬進 `vacant_network/vrun/`（`ops/` 不進 wheel）。少一支模組、子行程的
      `PYTHONPATH` 指錯，上面兩條照樣全過，而下載的人拿到的是一個
      跑不起來的第一屏。
 
 所以這支**必須在 repo 目錄以外**執行（CI 會 `cd "$RUNNER_TEMP"`），
-否則 `import vacant` 會讀到原始碼那一份，上面三條都測不到。
+否則 `import vacant_network` 會讀到原始碼那一份，上面三條都測不到。
 
 跑的是簽章鏈的最小一圈（創世 → 接一筆 → 全鏈驗章），因為那是本專案
 唯一的 runtime 依賴（`cryptography`）真的被用到的地方；再加上整幕
@@ -29,16 +29,16 @@ import sys
 
 def main() -> int:
     here = pathlib.Path.cwd().resolve()
-    if (here / "vacant" / "__init__.py").exists():
+    if (here / "vacant_network" / "__init__.py").exists():
         print(f"× 這支要在 repo 以外跑（現在在 {here}）——"
               "不然 import 到的是原始碼不是裝進去的 wheel")
         return 2
 
-    import vacant
-    from vacant import Identity, Logbook, PublicIdentity
+    import vacant_network
+    from vacant_network import Identity, Logbook, PublicIdentity
 
-    mod = pathlib.Path(vacant.__file__).resolve()
-    print(f"import vacant  ← {mod}")
+    mod = pathlib.Path(vacant_network.__file__).resolve()
+    print(f"import vacant_network  ← {mod}")
     if "site-packages" not in mod.parts:
         print("× import 到的不是 site-packages 裡那一份")
         return 2
@@ -58,23 +58,23 @@ def main() -> int:
     web = mod.parent / "web"
     html = sorted(p.name for p in web.glob("*.html")) if web.is_dir() else []
     if not html:
-        print(f"× wheel 裡沒有 vacant/web/*.html（package-data 漏了）：{web}")
+        print(f"× wheel 裡沒有 vacant_network/web/*.html（package-data 漏了）：{web}")
         return 2
-    print(f"package-data  vacant/web/ 有 {len(html)} 個 html：{', '.join(html)}")
+    print(f"package-data  vacant_network/web/ 有 {len(html)} 個 html：{', '.join(html)}")
 
     # 3) console script 的進入點 import 得動（`vacant` 指令本身另外驗）。
-    from vacant.cli import main as cli_main
+    from vacant_network.cli import main as cli_main
     assert callable(cli_main)
-    print("entry point  vacant.cli:main 可呼叫")
+    print("entry point  vacant_network.cli:main 可呼叫")
 
     # 4) **第一屏**：`vacant demo gate` 真的把交付擋下來。
     #
     #    為什麼這一條要在 CI 裡：`pip install` 之後跑得動第一屏，是 2026-09-18
-    #    搬家（判斷層進 `vacant/vrun/`）的全部目的。而它壞掉的方式很安靜——
+    #    搬家（判斷層進 `vacant_network/vrun/`）的全部目的。而它壞掉的方式很安靜——
     #    少一個模組、少一份 package-data、子行程的 PYTHONPATH 指錯——
     #    上面三格全都會過。人類手測過一次不等於下一次改動之後還會過。
     #
-    #    ⚠ **不在這裡寫第二份判準**：`vacant/vrun/demo.py::_assert_not_a_performance`
+    #    ⚠ **不在這裡寫第二份判準**：`vacant_network/vrun/demo.py::_assert_not_a_performance`
     #    已經逐條檢查這一幕的每個前提（裸 agent rc=0、閘門 rc=EXIT_REFUSED、
     #    stop_reason、收據鏈最後一筆是 ws_verdict、驗章器的負控制先過…），
     #    任何一條不成立就 `SystemExit`。所以這裡只看**退出碼**與它自己吐的
@@ -83,11 +83,11 @@ def main() -> int:
     import subprocess
     import tempfile
 
-    from vacant.vrun.launcher import EXIT_REFUSED
+    from vacant_network.vrun.launcher import EXIT_REFUSED
 
     with tempfile.TemporaryDirectory(prefix="vacant-demo-gate-") as td:
         p = subprocess.run(
-            [sys.executable, "-m", "vacant.cli", "demo", "gate",
+            [sys.executable, "-m", "vacant_network.cli", "demo", "gate",
              "--root", td, "--json"],
             capture_output=True, text=True, timeout=300)
         if p.returncode != 0:

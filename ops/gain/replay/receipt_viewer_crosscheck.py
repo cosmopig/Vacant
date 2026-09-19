@@ -3,16 +3,16 @@
 
 這支在架構裡承重什麼（CLAUDE.md §展件可直接複用的、DECISION_20260903_R440P §四）：
 收據牆那一頁的整個宣稱是「你眼前這台機器自己重算了一次」。如果頁內那份 JS 的
-位元組佈局跟 `vacant/logbook.py` 差一個字元，畫面會照樣顯示綠色的「驗證通過」——
+位元組佈局跟 `vacant_network/logbook.py` 差一個字元，畫面會照樣顯示綠色的「驗證通過」——
 **一把會 PASS 的瞎尺**。所以每一條乾淨斷言旁邊都有一條竄改斷言，而且 JS 的
-正規化規則在這裡被**重寫一次**（不是呼叫 `vacant.canonical`），再拿去對
+正規化規則在這裡被**重寫一次**（不是呼叫 `vacant_network.canonical`），再拿去對
 `LogEntry.hash()`：兩條獨立的路走到同一個 hash，才算對得起來。
 
 檢查項（任一項 BROKEN ⇒ 退出碼 1）：
   C1 `Logbook.verify_chain` 對真檔為真（權威實作）
   C2 JS 正規化規則的 Python 鏡像，逐筆等於 `LogEntry.hash()`（482/482）
   C3 邊界案例（非 ASCII、非 BMP 鍵、控制字元、U+2028、負數、2^53−1）鏡像等於
-     `vacant.canonical.canonical_bytes`
+     `vacant_network.canonical.canonical_bytes`
   C4 頁內內嵌的樣本與**它自己宣稱的來源 run**（g_r445）逐位元組相同
      ——這是頁面的性質不是 run 的性質，所以 `--run` 指向別的 run 時它照樣比 g_r445
   C5 竄改斷言：翻一個 `visible_ok` ⇒ hash 變、簽章驗不過、下一筆 prev_hash 接不上
@@ -44,9 +44,9 @@ import sys
 REPO = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO))
 
-from vacant.canonical import canonical_bytes  # noqa: E402
-from vacant.identity import PublicIdentity  # noqa: E402
-from vacant.logbook import LogEntry, Logbook, _signed_bytes  # noqa: E402
+from vacant_network.canonical import canonical_bytes  # noqa: E402
+from vacant_network.identity import PublicIdentity  # noqa: E402
+from vacant_network.logbook import LogEntry, Logbook, _signed_bytes  # noqa: E402
 
 VIEWER = REPO / "examples" / "receipt_viewer.html"
 DEFAULT_RUN = REPO / "runs" / "g_r445_conform_mbpp_ext"
@@ -78,7 +78,7 @@ def js_stringify_string(s: str) -> str:
     JS 只跳脫 `"`、`\\` 與 <0x20 的控制字元（`\\b\\t\\n\\f\\r` 用短式，其餘 `\\u00xx`
     小寫十六進位），並把落單的代理對編成 `\\udxxx`；其餘字元原樣輸出（含非 ASCII、
     U+2028/U+2029、DEL）。這與 Python `json.dumps(ensure_ascii=False)` 的輸出相同，
-    也就是 `vacant/canonical.py` 用的那一套。
+    也就是 `vacant_network/canonical.py` 用的那一套。
     """
     out = ['"']
     for ch in s:
@@ -338,7 +338,7 @@ def run(run_dir: pathlib.Path, arm: str, viewer: pathlib.Path) -> dict:
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="收據牆頁面 vs vacant/logbook.py 對照")
+    ap = argparse.ArgumentParser(description="收據牆頁面 vs vacant_network/logbook.py 對照")
     ap.add_argument("--run", default=str(DEFAULT_RUN))
     ap.add_argument("--arm", default="CONFORM")
     ap.add_argument("--viewer", default=str(VIEWER))

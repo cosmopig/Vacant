@@ -39,7 +39,7 @@ from concurrent.futures import ProcessPoolExecutor
 from concurrent.futures.process import BrokenProcessPool
 from pathlib import Path
 
-from vacant.multiway import MWConfig, mean_sd, simulate_mw
+from vacant_network.multiway import MWConfig, mean_sd, simulate_mw
 
 ROUNDS = 300
 SEEDS = [f"w{i}" for i in range(24)]

@@ -28,12 +28,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from vacant.auditor import Auditor  # noqa: E402
-from vacant.batch import RunLedger  # noqa: E402
-from vacant.brains import LMStudioBrain  # noqa: E402
-from vacant.memory import MemoryManager, MemoryStream  # noqa: E402
-from vacant.codebench import EvalPlusMBPPLoader  # noqa: E402
-from vacant.x1 import make_pilot_tasks, run_x1, task_from_dict  # noqa: E402
+from vacant_network.auditor import Auditor  # noqa: E402
+from vacant_network.batch import RunLedger  # noqa: E402
+from vacant_network.brains import LMStudioBrain  # noqa: E402
+from vacant_network.memory import MemoryManager, MemoryStream  # noqa: E402
+from vacant_network.codebench import EvalPlusMBPPLoader  # noqa: E402
+from vacant_network.x1 import make_pilot_tasks, run_x1, task_from_dict  # noqa: E402
 
 
 def _load_tasks(source: str, n: int, seed: str):
@@ -56,8 +56,8 @@ def _commit() -> str:
 
 
 def _body(ident):
-    from vacant.identity import Identity
-    from vacant.logbook import Logbook
+    from vacant_network.identity import Identity
+    from vacant_network.logbook import Logbook
     i = Identity.generate()
     lb = Logbook()
     lb.append("GENESIS", {"who": ident}, i, ts_ms=0)
@@ -81,7 +81,7 @@ def _make_distill(oracle_families: bool):
     誠實邊界：這使 M2 的上限被蒸餾器的表達力限制住——它測不到
     「更好的蒸餾器會不會更有用」。
     """
-    from vacant.memory import lesson_leaks_test_data
+    from vacant_network.memory import lesson_leaks_test_data
 
     def _headline(prompt: str) -> str:
         """取題目敘述的第一句，且**砍掉任何範例／斷言之後的內容**。
@@ -159,8 +159,8 @@ def E10_trust_toggle(brain, tasks, out: Path, seed: str) -> dict:
     以 Ecosystem 跑真迴圈（路由→生成→互審→稽核→信譽回寫），trust off 時
     走確定性隨機路由、不注入記憶、不互審、不回寫。
     """
-    from vacant.checks import compile_check
-    from vacant.ecosystem import Ecosystem
+    from vacant_network.checks import compile_check
+    from vacant_network.ecosystem import Ecosystem
 
     res = {}
     for on in (False, True):
@@ -220,7 +220,7 @@ def E10_trust_toggle(brain, tasks, out: Path, seed: str) -> dict:
                     "counters": eco.counters(), "cost": eco.cost()}
         print(f"  {arm}: {ok}/{len(valid)} 通過，耗時 {res[arm]['elapsed_s']}s", flush=True)
     # ── 配對分析（兩臂跑的是同一批題目，所以配對檢定才是正確的分析）──
-    from vacant.research import boot_ci, mcnemar_exact
+    from vacant_network.research import boot_ci, mcnemar_exact
     on_by_i = {r["i"]: r for r in _read_rows(out / "E10" / "on" / "rows.jsonl")
                if "error" not in r}
     off_by_i = {r["i"]: r for r in _read_rows(out / "E10" / "off" / "rows.jsonl")

@@ -1,4 +1,4 @@
-"""B 層六情境 harness 驗收（13 §3；17 §P4；vacant/blayer.py）。
+"""B 層六情境 harness 驗收（13 §3；17 §P4；vacant_network/blayer.py）。
 
 鎖定每個情境的判準（事前寫死於 `_verdict`）——含 meta 判準：「拆掉機制，
 數字必須變」（on/off 雙組是每個情境的內建反事實）。正式掃描是每格 ≥1000
@@ -10,8 +10,8 @@ from __future__ import annotations
 import json
 from collections import Counter
 
-from vacant import blayer
-from vacant.blayer import RATIOS, SCENARIOS, run_all
+from vacant_network import blayer
+from vacant_network.blayer import RATIOS, SCENARIOS, run_all
 
 
 def _run(tmp_path, only=None):
@@ -157,7 +157,7 @@ def test_pack_check_passes_and_absences_have_real_reasons(tmp_path):
     未提供」——形式上通過、內容上說謊。blayer 沒有模型呼叫是**事實**，
     歸檔要寫的是那個事實。
     """
-    from vacant.record import check
+    from vacant_network.record import check
 
     reports = _run(tmp_path)
     ok, problems = blayer.finalize_run_package(

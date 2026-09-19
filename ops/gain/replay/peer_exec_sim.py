@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""peer_exec_sim — 把真實候選池重放過 `vacant/peerexec.py`，加上腐化的執行器。
+"""peer_exec_sim — 把真實候選池重放過 `vacant_network/peerexec.py`，加上腐化的執行器。
 
 零 API 呼叫、零模型呼叫。只讀 `runs/<run>/calls.jsonl`（每一次生成的完整回應都在
-磁碟上）＋本機沙箱。跑的是 `vacant/peerexec.py` 的**真程式碼路徑**：真的 Ed25519
+磁碟上）＋本機沙箱。跑的是 `vacant_network/peerexec.py` 的**真程式碼路徑**：真的 Ed25519
 簽章、真的 hash-chain、真的 `form_verdict`。腐化的執行器不是 mock 出來的判決，
 是**同一個 Executor 類別換一個探針**——它照樣誠實地簽名，只是簽了一句謊。
 歸屬之所以成立，正是因為謊被自己的金鑰簽住。
@@ -84,9 +84,9 @@ os.environ.setdefault(
 
 from ops.gain.gain_run import (conform_failure_detail, extract_code,  # noqa: E402
                                meets_demand)
-from vacant import peerexec as px  # noqa: E402
-from vacant import suitespec as ss  # noqa: E402
-from vacant.codebench import EvalPlusMBPPLoader, LiveCodeBenchLoader  # noqa: E402
+from vacant_network import peerexec as px  # noqa: E402
+from vacant_network import suitespec as ss  # noqa: E402
+from vacant_network.codebench import EvalPlusMBPPLoader, LiveCodeBenchLoader  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
 CACHE = HERE / "cache"
@@ -817,7 +817,7 @@ def trivial_suite_table(runs=("g_r446_eq5_mbpp", "g_r443_gemma_lcb"), ks=(1, 3, 
       - 每一票都誠實、每一條鏈都驗得過、`contested` 恆為 0、`dissenters` 恆為空；
       - 也就是說，**機制的所有健康指標都顯示滿分**，而出貨的東西已經沒有被驗過。
 
-    這正是 `vacant/peerexec.py` 誠實邊界 §2 那句「驗收套件仍然是被信任的輸入」的
+    這正是 `vacant_network/peerexec.py` 誠實邊界 §2 那句「驗收套件仍然是被信任的輸入」的
     數字版本。去中心化執行對這個破口**一點幫助都沒有**，因為它分散的是「誰來跑」，
     不是「跑什麼」。commit-reveal（`commit_suite`）只把套件在時間上釘死，防的是
     「看到草稿之後再改套件」，防不了「一開始就給一套爛套件」。
@@ -1034,7 +1034,7 @@ def calibrate(runs=("g_r446_eq5_mbpp", "g_r443_gemma_lcb")):
 GAUGE_NONCE = "r449-suite-gauge-nonce-0001"      # 固定 nonce：重放要可重現（>=16 bytes）
 #: 已知壞草稿集合。**驗證者側**的物件：不是任何 worker 的產出、不進任何 prompt、
 #: 不進 hidden_check 路徑（V/GT 分離，論證同 `gain_run._canonical_solutions`）。
-#: 第 0 個與 `probe_instrument` 的 `stub` 逐字相同（`vacant.suitegauge.broken_stub`），
+#: 第 0 個與 `probe_instrument` 的 `stub` 逐字相同（`vacant_network.suitegauge.broken_stub`），
 #: 所以「只用第 0 個」那一欄就是 repo 現成量具的原樣覆蓋率。
 def stub_set(entry_point: str | None) -> list[str]:
     ep = entry_point or "_f"
@@ -1093,7 +1093,7 @@ def targeted_suite(entry_point: str | None) -> str:
     （rc=0 ⇒ 通過）。於是量具的兩個方向**滿分**：參考解通過、四個壞樁全被擋，
     而任何一份真候選——不論多爛——都通過。
 
-    ⚠ 它拿得到候選原始碼這件事，是 `vacant/checks.py` 沙箱的一個實測性質，不是
+    ⚠ 它拿得到候選原始碼這件事，是 `vacant_network/checks.py` 沙箱的一個實測性質，不是
       假設：驗收碼跑在 runner 行程裡，`_worker` 這個 `subprocess.Popen` 物件在它的
       命名空間裡，`_worker.args` 就帶著 `candidate.py` 的路徑（round749 實測，見
       `tests/test_peerexec.py::test_a_suite_can_read_the_candidate_source_from_the_runner`）。
@@ -1192,7 +1192,7 @@ def suite_variants(run: str, tasks, cands) -> dict[str, dict[str, dict]]:
 
 def _gauge_job(job):
     tid, variant, code, ref, ep = job
-    from vacant.suitegauge import gauge_suite
+    from vacant_network.suitegauge import gauge_suite
     try:
         g = gauge_suite(code, ref, stub_set(ep), entry_point=ep)
     except Exception as exc:                                        # noqa: BLE001
@@ -1339,7 +1339,7 @@ def gate_delivery(run, variant, *, k=3, workers=6, stub_n=4):
     if variant != "real":
         raise SystemExit(
             f"變體 `{variant}` 是一段**任意 Python** 的驗收套件。round452 把套件改成"
-            f"資料（`vacant/suitespec.SuiteSpec`）之後它**不可表達**——不是被擋，是"
+            f"資料（`vacant_network/suitespec.SuiteSpec`）之後它**不可表達**——不是被擋，是"
             f"寫不出來（validator 只收 `ast.literal_eval` 過得了的字面值）。"
             f"R451 的舊數字留在 peer_exec_gauge_gate_k3_s*.json／r451_stateful_gate.json；"
             f"spec 形態下還表達得出來的殘餘（覆蓋不足＋比對旗標）改跑 "

@@ -24,7 +24,7 @@ os.environ.setdefault(
     "VACANT_EVALPLUS_PATH", str(ROOT / ".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz"))
 
 import gain_run as G  # noqa: E402
-from vacant.codebench import EvalPlusMBPPLoader  # noqa: E402
+from vacant_network.codebench import EvalPlusMBPPLoader  # noqa: E402
 
 SEED = "g-r212-route-20260828"
 

@@ -161,7 +161,7 @@ $ du -sh /home/user1/vacant-cleanroom-20260919/venv
    但實際落地是 **30 個 wheel（`vacant-network` ＋ 29 個相依）、60 MB**：`mcp` 一個人就拖進 `pydantic`／`starlette`／
    `uvicorn`／`httpx`／`sse-starlette`／`python-multipart`／`pyjwt` 這一整串。
    「runtime 依賴只有 `cryptography`」那句話**已經不成立**。
-   閘門與收據那條路（`vacant.vrun.*`）用不到 `mcp`，但目前的 metadata 沒有給
+   閘門與收據那條路（`vacant_network.vrun.*`）用不到 `mcp`，但目前的 metadata 沒有給
    「只要閘門」的 extras，所以裝了就是全裝。
 2. **`pip show … | head` 會噴 `BrokenPipeError`**。那是 pip 對 SIGPIPE 的處理，
    不是安裝失敗（`exit=0`）。會嚇到人，所以寫進 README 的〈你可能會遇到〉。
@@ -215,7 +215,7 @@ Files:
 
 **它也裝一支叫 `vacant` 的指令，也佔用 `vacant` 這個 import 名。** 兩個套件寫到同一批路徑。
 
-| 順序 | `vacant --help` 是誰的 | `import vacant.__version__` | 有沒有錯誤訊息 |
+| 順序 | `vacant --help` 是誰的 | `import vacant_network.__version__` | 有沒有錯誤訊息 |
 |---|---|---|---|
 | 只裝 `vacant-network` | 我們的（`{init,info,call,demo,…}`） | `0.7.0` | — |
 | 只裝 `vacant` | 對方的（`[-o {jsonl,text}] [--concurrency …]`） | `AttributeError` | — |
@@ -243,11 +243,11 @@ vacant-network==0.7.0                                ← pip 還說我們的裝�
 $ pip install --force-reinstall --no-deps vacant-network
 $ vacant --help | head -1
 usage: vacant [-h] [--root ROOT]
-$ python3 -c "import vacant; print(vacant.__version__)"
+$ python3 -c "import vacant_network; print(vacant_network.__version__)"
 0.7.0
 ```
 
-這一節是**判別式**的來源：`python3 -c "import vacant; print(vacant.__version__)"`
+這一節是**判別式**的來源：`python3 -c "import vacant_network; print(vacant_network.__version__)"`
 ——我們的印 `0.7.0`，對方丟 `AttributeError`。
 
 ---
@@ -319,8 +319,8 @@ $ cd ~/.vacant-run/demo-gate/ws_plain && python3 demo_agent.py
 ────────────────────────────────────────────────────────────────────
 [2/2] 加上 Vacant：同一隻 agent、同一份交付，這次有人收件
 ────────────────────────────────────────────────────────────────────
-$ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant --suite ~/.vacant-run/demo-gate/tests_visible --run-dir ~/.vacant-run/demo-gate/receipts --task-id demo-gate --sandbox auto --vacant 1 -- python3 ~/.vacant-run/demo-gate/demo_agent.py
-  （`python3 -m vacant.cli` ＝ 你會打的 `vacant`；這裡用模組形式＋明寫 PYTHONPATH，確保跑的是這一份安裝的 vacant）
+$ python3 -m vacant_network.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant --suite ~/.vacant-run/demo-gate/tests_visible --run-dir ~/.vacant-run/demo-gate/receipts --task-id demo-gate --sandbox auto --vacant 1 -- python3 ~/.vacant-run/demo-gate/demo_agent.py
+  （`python3 -m vacant_network.cli` ＝ 你會打的 `vacant`；這裡用模組形式＋明寫 PYTHONPATH，確保跑的是這一份安裝的 vacant）
   ── 以下到空行為止，是 `vacant run` 原樣印出來的 ──
   Done. I have created solution.py with add() and multiply().
   All requirements are implemented and the code is ready to use.
@@ -343,9 +343,9 @@ $ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant --suit
 ────────────────────────────────────────────────────────────────────
 這張收據任何人都能重算——包括先證明驗章器抓得到壞鏈
 ────────────────────────────────────────────────────────────────────
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
   selftest: PASS
-$ python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts --json ~/.vacant-run/demo-gate/verify.json
+$ python3 -m vacant_network.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts --json ~/.vacant-run/demo-gate/verify.json
   ═══ 收據鏈驗證 /home/user1/.vacant-run/demo-gate/receipts ═══
   run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
 
@@ -423,10 +423,10 @@ $ python3 -c "import json;d=json.load(open('$HOME/vacant-try/receipts_deliver/ru
 ## 11. 驗收據（負控制先過）
 
 ```
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
 selftest: PASS
 
-$ python3 -m vacant.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
+$ python3 -m vacant_network.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
 ═══ 收據鏈驗證 /home/user1/vacant-try/receipts_deliver ═══
 run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
 
@@ -434,7 +434,7 @@ run                           arm          條數    驗過    失敗 verdict  r
 receipts_deliver              RUN-ON        2     2     0       1     1  9a3abd1bd71c31cd…  OK
 
 總判：OK
-每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。
+每一列＝一個 run 的一條臂鏈。`verified_n` 數的是**逐筆都過**的 entry；`failures` 是原文（seq／type／原因），不是摘要。`chain_ok` 是本檔逐筆重跑的結論、`logbook_verify_chain` 是 `vacant_network/logbook.py` 那支的 bool——兩者必須一致，不一致算 BROKEN。
 ```
 
 `--selftest` 要**先**跑：它證明這把尺抓得到壞鏈。沒過負控制的驗章器，
@@ -466,7 +466,7 @@ upstreams_defaulted = <這個版本沒有這個欄位>
 ```
 
 `upstreams` / `upstreams_defaulted` 兩個欄位在 **repo HEAD 有**
-（`vacant/vrun/launcher.py:586-590`，commit `9eeb1d9e`），
+（`vacant_network/vrun/launcher.py:586-590`，commit `9eeb1d9e`），
 **PyPI 上的 `vacant-network` 0.7.0 沒有**——版本號沒有跟著 bump，
 所以 `0.7.0` 這個字串同時指兩份不同的碼。這件事寫進 README 的〈你可能會遇到〉，
 並列為待處理事項。
@@ -518,7 +518,7 @@ $ date -Is
 2. **沒有量 macOS 與 Windows 的完整路徑。** macOS（Python 3.13.1）上只跑過
    `pip install` ／ `selftest` ／ `demo gate` ／ 兩格 `vacant run`（都過）
    ＋ §5.1 的套件撞名四格，**沒有做 clean-room**。Windows **完全沒量**，而且
-   `vacant/checks.py` 本來就沒有可用的 Windows 沙箱分支。
+   `vacant_network/checks.py` 本來就沒有可用的 Windows 沙箱分支。
 3. **沒有量「裝了之後跑 repo 的測試套件」。** 那需要 clone ＋ `pytest`，
    不在「外人照著 README 裝起來用」這條路徑上。
 4. **沒有量出網封鎖。** `ops/vacantrun/block_egress.sh` 要 root、改整台機器的

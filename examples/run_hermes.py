@@ -2,9 +2,9 @@ import sys, tempfile
 from pathlib import Path
 from collections import Counter
 print("[start] vacant-on-Hermes", flush=True)
-from vacant.host import Host
-from vacant.hermes_substrate import HermesSubstrate
-from vacant.tasks import make_task, NICHES
+from vacant_network.host import Host
+from vacant_network.hermes_substrate import HermesSubstrate
+from vacant_network.tasks import make_task, NICHES
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 6
 sub = HermesSubstrate(model="google/gemma-4-e4b", toolsets="", timeout=180)
 root = Path(tempfile.mkdtemp(prefix="vacant-hermes-"))

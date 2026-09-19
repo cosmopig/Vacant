@@ -15,6 +15,7 @@
     "輸出無時間戳，同資料重跑必然逐位元組相同。",
     "零網路、零模型呼叫。"
   ],
+  "caveat_import_rename": "**`runs/` 底下的腳本與紀錄引用的是舊的 import 名 `vacant.*`／路徑 `vacant/`。** 2026-09-19（0.8.0）套件改名為 `vacant_network`，但這裡**刻意不改**：歸檔的驅動腳本是「當時實際下了什麼指令」的證據，事後改寫等於讓紀錄描述一個沒下過的指令（同預註冊逐塊指令那條紀律）。**代價寫在這裡，不要假裝沒有**：`runs/s3_v1_analyze.py`、`runs/s7b_interact_dom.py` 這類腳本照抄會 `ModuleNotFoundError: No module named 'vacant'`——自己把 `vacant.` 換成 `vacant_network.` 即可。同一條理由也適用於 `decisions/**` 與 `docs/paper_2026-09-14/source_manifest.json` 釘住的那幾份。",
   "caveat_record_spec": "G 系列 run 目錄（`g_*`）**不是** RECORD_SPEC §1 的證據包——它們沒有 manifest.json / ledger_events.jsonl / chain_verify.txt / anomalies.md / SHA256SUMS，用的是 gain_run.py 自己的 summary.json + rows/calls/notes 版面。符合 RECORD_SPEC 的只有 `blayer_*` 那幾個 B 層掃描。每個目錄的 `record_spec` 欄位逐項列出缺哪些。",
   "counts": {
     "entries": 723,
@@ -73806,7 +73807,8 @@
         "decisions/DECISION_20260919_TWIN_EXHIBIT.md",
         "decisions/DECISION_20260919_TWIN_LIVE.md",
         "decisions/DECISION_20260919_TWIN_REAL_RUN.md",
-        "decisions/DECISION_20260919_TWIN_V2_FIDELITY.md"
+        "decisions/DECISION_20260919_TWIN_V2_FIDELITY.md",
+        "decisions/DECISION_20260919_V1_GATES.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -87491,7 +87493,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "decisions/DECISION_20260919_TWIN_REAL_RUN.md"
+        "decisions/DECISION_20260919_TWIN_REAL_RUN.md",
+        "decisions/DECISION_20260919_V1_GATES.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -88937,7 +88940,8 @@
         "is_record_spec_pack": false
       },
       "decision_refs": [
-        "decisions/DECISION_20260919_FIVE_AGENT_MATRIX.md"
+        "decisions/DECISION_20260919_FIVE_AGENT_MATRIX.md",
+        "decisions/DECISION_20260919_V1_GATES.md"
       ],
       "verdict_decisions": [],
       "related_settlements": [],
@@ -91373,7 +91377,7 @@
       "v2_v3_overlap": 0,
       "v2_union_v3": 309
     },
-    "lcb_caveat_v3": "v3 的 contest_date 全部不晚於 2024-08-10，**不能**宣稱晚於訓練截止；污染風險比 v1/v2 高（R460 C3 判定，vacant/codebench.py 有同一句）。",
+    "lcb_caveat_v3": "v3 的 contest_date 全部不晚於 2024-08-10，**不能**宣稱晚於訓練截止；污染風險比 v1/v2 高（R460 C3 判定，vacant_network/codebench.py 有同一句）。",
     "mbpp_plus": {
       "path": ".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz",
       "private": true,
@@ -91382,7 +91386,7 @@
       "sha256_pin_in_codebench": "af43697e8791c4c149bdfd6b489d8b5412507551ac20e28a439f650b8225db63",
       "n_tasks_pin_in_codebench": 378,
       "verified_against_real_file": "2026-09-07（round457）本機實測 shasum 與釘值逐字相同",
-      "note": "官方 EvalPlus MBPP+ v0.2.0 包。索引**只記路徑與 codebench.py 裡的釘值**，不讀內容、不複製、不進版控。要驗就在本機比對 sha256（`vacant/codebench.py::EvalPlusMBPPLoader` 是 fail-closed 的）。刻意不記「這個 checkout 有沒有這個檔」——那是環境屬性不是資料屬性，寫進去會讓索引在不同 checkout 之間漂掉。"
+      "note": "官方 EvalPlus MBPP+ v0.2.0 包。索引**只記路徑與 codebench.py 裡的釘值**，不讀內容、不複製、不進版控。要驗就在本機比對 sha256（`vacant_network/codebench.py::EvalPlusMBPPLoader` 是 fail-closed 的）。刻意不記「這個 checkout 有沒有這個檔」——那是環境屬性不是資料屬性，寫進去會讓索引在不同 checkout 之間漂掉。"
     },
     "humaneval_plus": {
       "path": ".vacant-private/evalplus/HumanEvalPlus-v0.1.10.jsonl.gz",
@@ -91422,10 +91426,10 @@
         "g_r532_hep_a7",
         "g_r532_hep_a8"
       ],
-      "note": "官方 EvalPlus HumanEval+ v0.1.10 包（R529 起的第三個真來源）。與 MBPP+ 同樣**私有、不轉散布**，索引只記路徑與 `vacant/codebench.py` 裡的釘值，不讀內容、不進版控。**分母是 156 不是 164**：8 題被沙箱信封排除（3 題連 visible_check 都過不了＝那些題根本沒有出貨閘門、4 題超出 128 MiB 記憶體信封、`HumanEval/15` 是本輪自訂的 2× 時間餘裕門檻，寫在資料之前）。排除是在**看到結果之前**定的，但它仍然是一個本專題自訂的門檻，引用 HumanEval+ 的數字時要一起講。"
+      "note": "官方 EvalPlus HumanEval+ v0.1.10 包（R529 起的第三個真來源）。與 MBPP+ 同樣**私有、不轉散布**，索引只記路徑與 `vacant_network/codebench.py` 裡的釘值，不讀內容、不進版控。**分母是 156 不是 164**：8 題被沙箱信封排除（3 題連 visible_check 都過不了＝那些題根本沒有出貨閘門、4 題超出 128 MiB 記憶體信封、`HumanEval/15` 是本輪自訂的 2× 時間餘裕門檻，寫在資料之前）。排除是在**看到結果之前**定的，但它仍然是一個本專題自訂的門檻，引用 HumanEval+ 的數字時要一起講。"
     },
     "codebench_builtin_families": {
-      "source": "vacant/codebench.py::_FAMILY_BUILDERS",
+      "source": "vacant_network/codebench.py::_FAMILY_BUILDERS",
       "families": [
         "boundary",
         "off_by_one",

@@ -239,7 +239,7 @@ _NOTSET = object()
 
 
 def _resolve_dotted(path):
-    """把 "vacant.controller.atomic_write_text" 解成 (module_or_obj, "attr")。
+    """把 "vacant_network.controller.atomic_write_text" 解成 (module_or_obj, "attr")。
 
     照 pytest 的作法：先找**最長的可 import 前綴**，剩下的用 getattr 走下去。
     只用 rpartition 會在 "mod.Class.method" 這種路徑上解錯。

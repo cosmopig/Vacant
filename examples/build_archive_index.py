@@ -46,7 +46,7 @@ OUT = ROOT / "_index"
 SCHEMA: dict[str, Any] = {
     "sim_round": {
         "描述": "機制模擬的逐輪紀錄（entrycost / pulse 兩輪共用）。一行＝一輪。",
-        "產生者": "vacant/entrycost.py::simulate 的 log_path",
+        "產生者": "vacant_network/entrycost.py::simulate 的 log_path",
         "欄位": {
             "round": {"型別": "int", "意思": "輪次，從 0 開始"},
             "to": {"型別": "str", "意思": "這一輪被路由到誰（honest_N 或 attacker_gN）"},
@@ -200,7 +200,7 @@ CLAIMS: list[dict[str, Any]] = [
         "輪次": "pulse-2026-08-03",
         "宣稱": "脈衝攻擊＝放電 B 筆連續作惡 → 蓄積 R 筆乾淨交付 → 重複；既有三種策略是其特例",
         "型別": "定義",
-        "依據": {"程式": "vacant/entrycost.py::_should_defect 的 pulse 分支",
+        "依據": {"程式": "vacant_network/entrycost.py::_should_defect 的 pulse 分支",
                  "判準": "tests/test_pulse.py::test_pulse_with_zero_recover_is_continuous"},
         # 2026-08-06 文獻調研：這個攻擊不是本專題提出的，2005 年就有名字。
         # 定義本身站得住，站不住的是隱含的新穎性——索引必須把這件事講出來，
@@ -542,7 +542,7 @@ CLAIMS: list[dict[str, Any]] = [
                         "DECISION_20260906_R453_FABLE_AUDIT_REAL_MULTIPARTY.md、"
                         "DECISION_20260906_R454_FABLE_AUDIT_NAMED_DISSENT.md",
             "重算": "ops/gain/replay/peer_exec_sim.py（模擬）、ops/gain/replay/peer_exec_real.py（真跑）、"
-                    "ops/gain/replay/receipt_chain_audit.py（鏈驗證）；程式在 vacant/peerexec.py",
+                    "ops/gain/replay/receipt_chain_audit.py（鏈驗證）；程式在 vacant_network/peerexec.py",
             "數值": {"模擬 門檻以下": {"與無腐化基線逐位相同": "100 格",
                                        "說謊者被指名": 1.0, "誠實者被誣告": 0.0,
                                        "1 個腐化 k=1": "−7.8pp、偵測 0",
@@ -573,7 +573,7 @@ CLAIMS: list[dict[str, Any]] = [
                         "DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md、"
                         "DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md",
             "重算": "ops/gain/replay/r452_suitespec.py、ops/gain/replay/r452c_generic_gate.py、"
-                    "ops/gain/replay/r452b_smuggle_gate.py；程式在 vacant/suitegauge.py",
+                    "ops/gain/replay/r452b_smuggle_gate.py；程式在 vacant_network/suitegauge.py",
             "數值": {"trivial 套件": {"交付率": "−6.47pp／−18.68pp", "假交付": "31%／49%",
                                       "四個 k 的爭議率": "全部 0.0%"},
                      "R451 量具綁進 commit": "trivial 套件 371／371 在 commit 就被拒（沒花一次沙箱）",
@@ -593,7 +593,7 @@ CLAIMS: list[dict[str, Any]] = [
         "型別": "極限宣稱（機制的數學上界，不是量測結果）",
         "宣稱": "指名有數學上界：多數決最多容忍 ⌊(k−1)/2⌋ 個腐化執行器，過半即反轉",
         "依據": {
-            "程式": "vacant/peerexec.py::MAJORITY_BOUND_NOTE（機制性質寫死在這裡，"
+            "程式": "vacant_network/peerexec.py::MAJORITY_BOUND_NOTE（機制性質寫死在這裡，"
                     "不是實驗量到的效應量）與 form_verdict／select_by_quorum",
             "檔案": "ops/gain/replay/peer_exec_sweep.json（配套量測：固定腐化比例下 k 從 1 到 7"
                     "交付率一字不變）、ops/gain/replay/r454/r454_naming_table.tsv（真跑的指名欄）",

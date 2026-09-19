@@ -14,15 +14,15 @@ from __future__ import annotations
 
 import pytest
 
-from vacant import crypto
-from vacant.auditor import Auditor
-from vacant.body import CapabilityCard
-from vacant.envelope import ReviewEnvelope
-from vacant.identity import Identity
-from vacant.logbook import Logbook
-from vacant.registry import ReviewRejected, Registry
-from vacant.reputation import Beta, Reputation, ucb_score
-from vacant.research import wilcoxon_signed_rank_exact
+from vacant_network import crypto
+from vacant_network.auditor import Auditor
+from vacant_network.body import CapabilityCard
+from vacant_network.envelope import ReviewEnvelope
+from vacant_network.identity import Identity
+from vacant_network.logbook import Logbook
+from vacant_network.registry import ReviewRejected, Registry
+from vacant_network.reputation import Beta, Reputation, ucb_score
+from vacant_network.research import wilcoxon_signed_rank_exact
 
 FULL = {"factual": 1.0, "logical": 1.0, "relevance": 1.0, "honesty": 1.0, "adoption": 1.0}
 ZERO = {k: 0.0 for k in FULL}
@@ -436,7 +436,7 @@ class TestHumanArbitrationHasTeeth:
     而 demo 對人類印的是「記帳並下墜信用」——說了卻沒做。"""
 
     def _eco(self, tmp_path):
-        from vacant.ecosystem import DemoBrain, Ecosystem
+        from vacant_network.ecosystem import DemoBrain, Ecosystem
         eco = Ecosystem(tmp_path, DemoBrain(), root_mode="demo")
         eco.toggle(True)
         r = eco.delegate("寫 solve(nums)", {
@@ -492,21 +492,21 @@ class TestDistillerSelfChecksA4:
              "code": "assert sum_list([10,20,30],[15,25,35])==[25,45,65]"}
 
     def test_lesson_does_not_leak_when_task_embeds_assertions(self):
-        from vacant.ecosystem import _distill_lesson
-        from vacant.memory import lesson_leaks_test_data
+        from vacant_network.ecosystem import _distill_lesson
+        from vacant_network.memory import lesson_leaks_test_data
         for audit_passed in (True, False):
             lesson = _distill_lesson(self.TASK, audit_passed, self.CHECK)
             assert not lesson_leaks_test_data(lesson, self.CHECK), lesson
 
     def test_headline_stops_at_the_example(self):
-        from vacant.ecosystem import _task_headline
+        from vacant_network.ecosystem import _task_headline
         head = _task_headline(self.TASK)
         assert "sum_list([10,20,30]" not in head
         assert "returns their sums" in head
 
     def test_still_works_without_a_check(self):
         """沒給 check 時維持原行為——這是既有呼叫端的相容性。"""
-        from vacant.ecosystem import _distill_lesson
+        from vacant_network.ecosystem import _distill_lesson
         assert _distill_lesson(self.TASK, True).startswith("「")
 
     def test_delegate_survives_a_task_whose_text_embeds_a_check(self):
@@ -514,8 +514,8 @@ class TestDistillerSelfChecksA4:
         import tempfile
         from pathlib import Path
 
-        from vacant.cli import EchoLikeBrain
-        from vacant.ecosystem import Ecosystem
+        from vacant_network.cli import EchoLikeBrain
+        from vacant_network.ecosystem import Ecosystem
         eco = Ecosystem(Path(tempfile.mkdtemp()), EchoLikeBrain(), root_mode="demo")
         eco.toggle(True)
         r = eco.delegate(self.TASK, {"type": "run_python",

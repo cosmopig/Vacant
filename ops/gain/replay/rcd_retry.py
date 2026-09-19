@@ -13,7 +13,7 @@ os.environ.setdefault("VACANT_EVALPLUS_PATH",
 from ops.gain.gain_run import InfraVoid, meets_demand              # noqa: E402
 from ops.gain.replay import exec_select as ES                       # noqa: E402
 from ops.gain.replay.conformance_delivery import _wrap, alias_targets  # noqa: E402
-from vacant.codebench import EvalPlusMBPPLoader                     # noqa: E402
+from vacant_network.codebench import EvalPlusMBPPLoader                     # noqa: E402
 
 SEED = "g-r212-route-20260828"
 CACHE = pathlib.Path(__file__).resolve().parent / "cache"
@@ -31,7 +31,7 @@ def _init():
 
 def _vis40(code, task):
     """visible_grade 的 40s 版（複製 exec_select 的探針，只換 timeout）。"""
-    from vacant.checks import CheckInfraError, run_python_capture
+    from vacant_network.checks import CheckInfraError, run_python_capture
     parsed = ES._split_visible(task["visible_check"]["code"])
     ep = task.get("entry_point")
     if parsed is None:

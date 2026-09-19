@@ -25,7 +25,7 @@ from __future__ import annotations
 import pathlib
 import re
 
-from vacant.vrun import envmap
+from vacant_network.vrun import envmap
 
 WRAP = pathlib.Path(__file__).resolve().parents[1] / "ops" / "vacantrun" / "wrap_agent.sh"
 

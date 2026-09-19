@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from vacant.atomic import atomic_write_bytes, atomic_write_text, file_lock
-from vacant.body import now_ms
-from vacant.envelope import Envelope, MAX_BODY_BYTES
-from vacant.identity import Identity
-from vacant.logbook import Logbook, MAX_PAYLOAD_BYTES
+from vacant_network.atomic import atomic_write_bytes, atomic_write_text, file_lock
+from vacant_network.body import now_ms
+from vacant_network.envelope import Envelope, MAX_BODY_BYTES
+from vacant_network.identity import Identity
+from vacant_network.logbook import Logbook, MAX_PAYLOAD_BYTES
 
 
 # --- 原子寫入 ---------------------------------------------------------------
@@ -46,7 +46,7 @@ def test_logbook_payload_cap():
 
 
 def test_logbook_atomic_save_still_verifies(tmp_path):
-    from vacant.identity import PublicIdentity
+    from vacant_network.identity import PublicIdentity
     idn = Identity.generate()
     lb = Logbook()
     for i in range(3):
@@ -91,7 +91,7 @@ def test_envelope_from_json_rejects_malformed():
 def test_envelope_from_json_accepts_good():
     s = Identity.generate()
     env = Envelope.from_json(_good(s))
-    from vacant.identity import PublicIdentity
+    from vacant_network.identity import PublicIdentity
     assert env.verify_sig(PublicIdentity(s.vacant_id, s.pub))
 
 
@@ -111,7 +111,7 @@ def test_private_key_passphrase_encryption(tmp_path):
 
 # --- Vacant.solve 對崩潰的腦容錯 -------------------------------------------
 def test_vacant_solve_survives_crashing_brain():
-    from vacant.agent import Vacant
+    from vacant_network.agent import Vacant
 
     class CrashBrain:
         name = "crash"
@@ -126,11 +126,11 @@ def test_vacant_solve_survives_crashing_brain():
 
 # --- 跨重啟的防重放（持久化 ingress guard）---------------------------------
 def test_replay_guard_persists_across_restart(tmp_path):
-    from vacant.envelope import ReplayError
-    from vacant.gateway import Gateway
-    from vacant.host import Host
-    from vacant.substrate import EchoSubstrate
-    from vacant.tasks import make_task
+    from vacant_network.envelope import ReplayError
+    from vacant_network.gateway import Gateway
+    from vacant_network.host import Host
+    from vacant_network.substrate import EchoSubstrate
+    from vacant_network.tasks import make_task
 
     h = Host(tmp_path, substrate=EchoSubstrate(p_base=1.0))
     req = h.mint("requester", niches=[])

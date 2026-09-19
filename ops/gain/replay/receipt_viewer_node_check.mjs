@@ -72,7 +72,7 @@ for (const e of entries) {
   if (await crypto.subtle.verify({ name: "Ed25519" }, key, api.hexToBytes(e.sig),
                                  api.signedBytes(e))) sigOk++;
 }
-check("N3 Ed25519 全數通過（＝JS 的位元組佈局與 vacant/logbook.py 相同）",
+check("N3 Ed25519 全數通過（＝JS 的位元組佈局與 vacant_network/logbook.py 相同）",
   sigOk === entries.length, `${sigOk}/${entries.length}`);
 
 // N4 竄改斷言：乾淨路徑通過不算數。
@@ -107,8 +107,8 @@ check("N5a 鍵排序照 code point（比較器本身，孤立單元測試）",
 // N5a／N5c 照樣 OK，crosscheck／render check 三邊也全線，只因為沒有任何一組
 // fixture 的「鍵」跨過 BMP／非 BMP 邊界。這裡直接餵 canonicalString 本體
 // （不是比較器）一組鍵從第一個字元就跨邊界的物件，逐位元組比對
-// vacant/canonical.py 真正簽章用的那個函式。期望值取得方式：
-//   .venv/bin/python -c "from vacant.canonical import canonical_bytes; \
+// vacant_network/canonical.py 真正簽章用的那個函式。期望值取得方式：
+//   .venv/bin/python -c "from vacant_network.canonical import canonical_bytes; \
 //     print(canonical_bytes({'\U0001F331':2,'�':1,'Ａ':3,'a':4,' ':5}).hex())"
 // 同一組鍵也放進了 receipt_viewer_crosscheck.py 的 CANON_FIXTURES，三邊比對
 // 同一份期望值。
@@ -121,7 +121,7 @@ NON_BMP_FIXTURE[" "] = 5;
 const NON_BMP_EXPECTED_HEX =
   "7b2220223a352c2261223a342c22efbca1223a332c22efbfbd223a312c22f09f8cb1223a327d";
 const nonBmpHex = api.bytesToHex(api.canonicalBytes(NON_BMP_FIXTURE));
-check("N5b 跨平面鍵：canonicalString 本體（非孤立比較器）逐位元組＝vacant/canonical.py",
+check("N5b 跨平面鍵：canonicalString 本體（非孤立比較器）逐位元組＝vacant_network/canonical.py",
   nonBmpHex === NON_BMP_EXPECTED_HEX,
   `算出=${nonBmpHex}  期望=${NON_BMP_EXPECTED_HEX}`);
 

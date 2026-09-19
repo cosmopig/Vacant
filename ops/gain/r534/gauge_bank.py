@@ -21,7 +21,7 @@
      (a) 本 repo 既有判準 `gain_run.meets_demand(code, task["hidden_check"]["code"])`
      (b) 渲染出來的 `ops/gain/r534/hidden/<task_id>/test_hidden.py`
    兩邊逐一比對。零模型呼叫。**只比對沙箱的 AST 政策本來就收得下的候選**
-   （`vacant.checks._candidate_functions` 不回 None 的那些），否則比到的是沙箱政策
+   （`vacant_network.checks._candidate_functions` 不回 None 的那些），否則比到的是沙箱政策
    而不是 case 集合與比對器——政策差異是真的、而且是已知的（R393 的 typing 坑、
    `_FORBIDDEN_ATTRS` 連 `list.remove` 都擋），但那是**另一個**問題，
    混進來會讓這支量不到它該量的東西。被政策擋掉的候選單獨計數印出來。
@@ -50,7 +50,7 @@ sys.path.insert(0, REPO)
 
 from ops.gain.gain_run import (  # noqa: E402
     _GAIN_ALLOWED_IMPORTS, extract_code, meets_demand)
-from vacant.checks import _candidate_functions  # noqa: E402
+from vacant_network.checks import _candidate_functions  # noqa: E402
 from ops.gain.r534.select_tasks import BANK_PATH, BANK_SHA256  # noqa: E402
 
 CALLS_GLOBS = ("runs/g_r460_harness_lcb2_*/calls.jsonl",
@@ -93,7 +93,7 @@ def _bank() -> dict[str, dict]:
 def _policy_ok(code: str, entry_point: str) -> bool:
     """沙箱的 AST 政策收不收這份候選（＝既有判準會不會在跑之前就判 False）。
 
-    用的就是 `vacant.checks._candidate_functions` 本人，不自己重寫一份近似品——
+    用的就是 `vacant_network.checks._candidate_functions` 本人，不自己重寫一份近似品——
     重寫的近似品會在某個角落與真政策分岔，而那正是這支要排除的干擾。
     """
     try:
@@ -177,7 +177,7 @@ def main(argv: list[str] | None = None) -> int:
         ep = rec["entry_point"]
         hidden_code = None
         # 既有判準吃的 check 原始碼：直接用 loader 產的那一份，不自己重拼。
-        from vacant.codebench import _lcb_check_code
+        from vacant_network.codebench import _lcb_check_code
         hidden_code = _lcb_check_code(ep, rec["visible_tests"] + rec["hidden_tests"])
         visible_code = _lcb_check_code(ep, rec["visible_tests"])
 

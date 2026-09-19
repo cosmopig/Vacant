@@ -64,7 +64,7 @@ def bank_maps() -> dict[str, dict[str, dict]]:
     """五個釘死題庫的 `task_id → task` 全量對照表（lazy、只建一次）。"""
     if _TASK_MAPS:
         return _TASK_MAPS
-    from vacant.codebench import (EvalPlusHumanEvalLoader, EvalPlusMBPPLoader,
+    from vacant_network.codebench import (EvalPlusHumanEvalLoader, EvalPlusMBPPLoader,
                                   LiveCodeBenchLoader)
     # `expose_contract=True` 必須與 `gain_run.load_tasks` 逐字相同——
     # `task["prompt"]` 是稽核規則 (a)「題目原文逐字扣掉」的扣除對象，

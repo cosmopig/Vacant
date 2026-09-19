@@ -39,7 +39,7 @@ import time
 from pathlib import Path
 
 from simgrid import DEFAULT_WORKERS, log_root, run_cell, write_manifest
-from vacant.entrycost import SimConfig
+from vacant_network.entrycost import SimConfig
 
 ROUNDS = 600
 SEEDS = [f"p{i}" for i in range(30)]

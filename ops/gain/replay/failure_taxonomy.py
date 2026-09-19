@@ -2,10 +2,10 @@
 """Offline failure taxonomy + selection-ceiling replay over recorded G-experiment calls.
 
 READ-ONLY on runs/. Zero network calls: everything below re-executes candidate code that
-is already on disk (calls.jsonl responses) through the *local* sandbox in vacant/checks.py,
+is already on disk (calls.jsonl responses) through the *local* sandbox in vacant_network/checks.py,
 using gain_run.py's own extract_code()/meets_demand() so the pass/fail definition matches
 what the real runner used. See ops/gain/gain_run.py:98-130 for those two functions and
-vacant/checks.py for the sandbox itself.
+vacant_network/checks.py for the sandbox itself.
 
 Usage:
     export VACANT_EVALPLUS_PATH=.vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz
@@ -28,7 +28,7 @@ sys.path.insert(0, str(REPO))
 from ops.gain.gain_run import (  # noqa: E402
     _GAIN_ALLOWED_IMPORTS, behavior_signature, extract_code, load_tasks, meets_demand,
 )
-from vacant.checks import _candidate_functions, _run_sandboxed  # noqa: E402
+from vacant_network.checks import _candidate_functions, _run_sandboxed  # noqa: E402
 
 SEED = "g-r212-route-20260828"
 N = 179
@@ -37,9 +37,9 @@ TIMEOUT_S = 10.0  # authoritative sandbox timeout, only used for cross-validatio
 
 
 # ── FAST in-process re-execution ────────────────────────────────────────────
-# WHY THIS EXISTS: the authoritative scorer is vacant.checks.run_python_check via
+# WHY THIS EXISTS: the authoritative scorer is vacant_network.checks.run_python_check via
 # gain_run.meets_demand() -- a runner process that spawns a *second* worker process and
-# RPCs every call across a pipe (vacant/checks.py:488-595). That is the right design for
+# RPCs every call across a pipe (vacant_network/checks.py:488-595). That is the right design for
 # scoring a live run (it is the actual product's acceptance gate and must be adversary-
 # safe), but this replay is running on a machine shared by several concurrent sibling
 # sessions (observed load average ~600-1000 on 12 cores). Under that contention, spawning
@@ -56,7 +56,7 @@ TIMEOUT_S = 10.0  # authoritative sandbox timeout, only used for cross-validatio
 # code are exec'd directly into one shared namespace dict in this process, with a
 # SIGALRM wall-clock cutoff standing in for the subprocess timeout. This is safe to do
 # here specifically because every candidate passed through `_candidate_functions` first
-# -- the exact AST allowlist (vacant/checks.py:172-231) the real sandbox itself uses to
+# -- the exact AST allowlist (vacant_network/checks.py:172-231) the real sandbox itself uses to
 # decide whether to even attempt a run -- so only candidates using the same 11-module
 # import whitelist and no forbidden calls/attrs are ever exec'd.
 # Equivalence to the authoritative path is not assumed -- see `_cross_validate()` below,

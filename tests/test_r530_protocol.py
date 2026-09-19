@@ -18,8 +18,8 @@ sys.path.insert(0, str(ROOT))
 from ops.gain.r530 import brain_native as bn  # noqa: E402
 from ops.gain.r530 import openwork_arms as oa  # noqa: E402
 from ops.gain.r530 import sandbox as sb, tasks as taskmod  # noqa: E402
-from vacant.identity import Identity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.identity import Identity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 
 # ── tool_calls 正規化 ─────────────────────────────────────────────────────

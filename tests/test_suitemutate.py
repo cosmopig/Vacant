@@ -7,7 +7,7 @@
      `suitegauge` 的合格語意一個字都沒被改
   §4 誠實邊界句釘死（模組 docstring 的「下界」那幾句是規格的一部分）
 
-§2 的兩條跑**真沙箱**（`vacant.checks.run_python_check`）：負向控制的主張就是
+§2 的兩條跑**真沙箱**（`vacant_network.checks.run_python_check`）：負向控制的主張就是
 「真的跑起來分得開」，用假 runner 測只會測到假 runner。零模型呼叫、零 API、
 零 `runs/` 寫入；逾時壓到 2 秒，免得無窮迴圈的變異體把測試拖住。
 """
@@ -18,8 +18,8 @@ import ast
 
 import pytest
 
-from vacant.suitegauge import gauge_suite
-from vacant.suitemutate import (
+from vacant_network.suitegauge import gauge_suite
+from vacant_network.suitemutate import (
     MutationOutcome,
     build_mutants,
     mutant_sources,
@@ -68,7 +68,7 @@ def classify(items, flag):
 
 def real_runner(code, check_code, entry_point, timeout_s):
     """真沙箱，與 `gain_run.meets_demand` 同一顆（只是不帶 ops 的 import 白名單）。"""
-    from vacant.checks import run_python_check
+    from vacant_network.checks import run_python_check
     ok = run_python_check(
         code, check_code, timeout=timeout_s,
         allowed_entry_points=(entry_point,) if entry_point else (),
@@ -164,7 +164,7 @@ def test_the_gauge_cannot_tell_those_two_apart():
 
     這條會紅只有一種可能——有人改了 `suitegauge` 的合格語意。
     """
-    from vacant.suitegauge import broken_stub
+    from vacant_network.suitegauge import broken_stub
     stub = [broken_stub("is_prime")]
     for suite in (STRONG, WEAK):
         g = gauge_suite(suite, IS_PRIME, stub, entry_point="is_prime",
@@ -230,7 +230,7 @@ def test_runner_exceptions_are_not_swallowed():
 # ── 4. 誠實邊界句釘死 ──────────────────────────────────────────────────────
 def test_honest_boundary_sentences_survive_edits():
     """致死率是下界、100% ≠ 涵蓋需求、不綁 `ok`——三句都是規格的一部分。"""
-    import vacant.suitemutate as sm
+    import vacant_network.suitemutate as sm
     doc = sm.__doc__ or ""
     assert "下界" in doc
     assert "等價變異體" in doc

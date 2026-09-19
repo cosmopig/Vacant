@@ -15,7 +15,7 @@
 顧客自身の実行可能な受入テストを走らせ、その結果で納品するか拒否するかを決め、失敗した
 試行も含めて一回ごとにオフラインで再検証できるハッシュチェーンへ署名する。**マシン全体で
 唯一の出口**にするにはコンテナ／ACL／egress policy が要る——それは配備層の仕事であって
-Vacant の仕事ではない（`vacant/controller.py:7-8` には以前から逐語でそう書いてあったが、
+Vacant の仕事ではない（`vacant_network/controller.py:7-8` には以前から逐語でそう書いてあったが、
 対外的な文章に出たことが一度も無かった）。
 
 我々の発明ではなく既存のパターンである：サプライチェーン・セキュリティの
@@ -28,30 +28,35 @@ PyPI の `vacant`（2026-09-19 実測で 0.4.15、7.5 MB の `cp311-abi3-manylin
 *"Python bindings for the vacant Rust engine — domain availability via authoritative
 DNS"*（作者 David Poblador i Garcia、`github.com/alltuner/vacant`）。
 
-**名前は二つとも衝突する。** 相手のパッケージ**も** `vacant` という import 名を占有し、
-**も** `vacant` という名のコマンドを入れる。二つは同じパスに書き込む。
-四通りのインストール順を実測したが、**どれもエラーを一切出さない**：
+**0.7.0 までは名前が二つとも衝突していた。** 相手のパッケージ**も** `vacant` という
+import 名を占有し、**も** `vacant` という名のコマンドを入れる。二つは同じパスに
+書き込んでいた。四通りのインストール順を実測したが、**どれもエラーを一切出さなかった**。
 
-- **後に入れた方が静かに上書きする。** `vacant-network` を先・`vacant` を後に入れると
-  `vacant --help` は DNS ツールになり `import vacant` は `__version__` を失う。
-  逆順なら本物が勝つ。`pip list` は両方を列挙する。
-- **`pip uninstall -y vacant` は共有していたコマンドまで持って行く**のに、
-  `pip list` はまだ `vacant-network==0.7.0` が入っていると言う。
+**0.8.0 で import パッケージ名を `vacant_network` に改めた**（破壊的変更、
+[`CHANGELOG.md`](https://github.com/cosmopig/Vacant/blob/main/CHANGELOG.md) 参照）。
+**直ったもの**と**直っていないもの**を混ぜないこと：
+
+| | 0.7.0 まで | 0.8.0 から |
+|---|---|---|
+| `import` | 両方が `vacant/` ディレクトリを共有し、pip がファイル単位で上書き ⇒ `import vacant` が相手のコードを返すことがあった | **修正済**：ディレクトリ名は `vacant_network/`、共有モジュールはもうない |
+| `vacant` コマンド | 後に入れた方が勝つ | **未修正、そして修正不能**——同名の console script は同じファイルパスだから |
+| 復旧 | `pip install --force-reinstall --no-deps vacant-network` | `vacant-network` コマンドか `python3 -m vacant_network` を使えばよい |
 
 ```bash
 pip install vacant-network                              # 本プロジェクト。⚠ vacant ではない
 
-python3 -c "import vacant; print(vacant.__version__)"   # 見分け方：本物は 0.7.0、相手は AttributeError
-pip install --force-reinstall --no-deps vacant-network  # 上書きされたときの復旧（実測で完全に戻る）
+python3 -c "import vacant_network; print(vacant_network.__version__)"   # 見分け方：0.8.0 と出る
+vacant-network --help          # 第二のコマンド名。vacant_network.cli を import するので相手には上書きできない
+python3 -m vacant_network --help   # bin/ を一切経由しない、最後の曲がらない経路
 ```
 
-**配布名 `vacant-network`、コマンド名 `vacant`、import 名 `vacant`**——
-三つの名前、二つの持ち主。
+**配布名 `vacant-network`、主コマンド名 `vacant`、第二コマンド名 `vacant-network`、
+import 名 `vacant_network`。** 相手と共有しているのは主コマンド名だけ。
 
 > **Python 3.11+。** `pip install` 一回で **30 個の wheel、60 MB** が入る——
 > `pyproject.toml` が宣言する runtime 依存は 3 つだけ（`cryptography`／`mcp`／
 > `jsonschema`）で、残りは `mcp` が連れてくる（`pydantic`／`starlette`／`uvicorn`／
-> `httpx` など）。ゲートと領収書の経路（`vacant.vrun.*`）は `mcp` を使わないが、
+> `httpx` など）。ゲートと領収書の経路（`vacant_network.vrun.*`）は `mcp` を使わないが、
 > 現時点で「ゲートだけ」の extras は無いので、入れれば全部入る。
 >
 > ゼロからの、詰まった箇所も含む逐語インストール記録：
@@ -102,14 +107,14 @@ requester 鏈驗: ✓
 「二本の署名チェーンが検証を通ること」であり、何問正解したかは数に入らない。
 
 **clone は不要。**（2026-09-18 から、ゲートの判定層はパッケージの中に住む——複製ではなく
-同一の一本である：`ops/gain/r530/*` は現在 `vacant/vrun/*` への re-export であり、
+同一の一本である：`ops/gain/r530/*` は現在 `vacant_network/vrun/*` への re-export であり、
 R530 実験が走らせているのもこの同じコードである。）
 
 偽の agent が「完了した」と宣言し、顧客の受入テストは「していない」と言う
 （実行結果の抜粋。`$HOME` を `~` に縮めた以外は逐語）：
 
 ```
-$ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
+$ python3 -m vacant_network.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
     --suite ~/.vacant-run/demo-gate/tests_visible --run-dir ~/.vacant-run/demo-gate/receipts -- …
   Done. I have created solution.py with add() and multiply().
   All requirements are implemented and the code is ready to use.
@@ -129,16 +134,16 @@ $ python3 -m vacant.cli run --workspace ~/.vacant-run/demo-gate/ws_vacant \
 なければ、その `solution.py` はもう出荷されている。
 
 画面上の数値はすべてその場で出たものである：偽 agent は本物の子プロセス、ゲートは
-`vacant/vrun/acceptance.py`（R530 実験が走らせているのと同じファイル）、あの `ImportError`
+`vacant_network/vrun/acceptance.py`（R530 実験が走らせているのと同じファイル）、あの `ImportError`
 は受入 driver が実際に捕まえた例外の原文、`20` は `vacant run` という本物の子プロセスの
-終了コード。`vacant/vrun/demo.py::_assert_not_a_performance` と
+終了コード。`vacant_network/vrun/demo.py::_assert_not_a_performance` と
 [`tests/test_demo_gate.py`](https://github.com/cosmopig/Vacant/blob/main/tests/test_demo_gate.py)
 が、これが文字列リテラルの印字へ退化することを禁じている。領収書はその場で同じ検証器に
 かけてある。自分でもう一度検証できる：
 
 ```bash
-python3 -m vacant.vrun.verify_receipts --selftest      # まず検証器が壊れた鎖を捕まえることを示す
-python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
+python3 -m vacant_network.vrun.verify_receipts --selftest      # まず検証器が壊れた鎖を捕まえることを示す
+python3 -m vacant_network.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 ```
 
 （clone 後の `python3 ops/gain/replay/verify_run_receipts.py …` は**同一のファイル**である
@@ -184,7 +189,7 @@ def check_mul():
 PY
 ```
 
-受入ファイルの形（`vacant/vrun/acceptance.py` の実行意味論、**pytest に依存しない**）：
+受入ファイルの形（`vacant_network/vrun/acceptance.py` の実行意味論、**pytest に依存しない**）：
 一つの `.py` に引数なしの `check_*()` を並べる——**関数 1 つ＝ケース 1 つ**、定義順に実行、
 **正常に返れば合格・何か例外を投げれば不合格**。あるいは `main()` を 1 つだけ置き、
 その場合はファイル全体で 1 ケース。1 ファイルにつきどちらか一方のみ。
@@ -228,9 +233,9 @@ exit=0
 この二つの領収書を検証する（**先に負の対照**）：
 
 ```
-$ python3 -m vacant.vrun.verify_receipts --selftest
+$ python3 -m vacant_network.vrun.verify_receipts --selftest
 selftest: PASS
-$ python3 -m vacant.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
+$ python3 -m vacant_network.vrun.verify_receipts --glob ~/vacant-try/receipts_deliver
 ═══ 收據鏈驗證 /home/user1/vacant-try/receipts_deliver ═══
 run 1　鏈 1　entries 2　驗過 2　失敗 0　壞鏈 0
 
@@ -267,7 +272,7 @@ vacant run --suite ../tests_visible -- <普段 agent を動かすときのコマ
 
 **「スイッチ一つ」の正確な言い方。** `vacant run` はモデル経路を自前の proxy へ向け直す。
 その手段は**環境変数の一覧**
-（[`vacant/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant/vrun/envmap.py)：
+（[`vacant_network/vrun/envmap.py`](https://github.com/cosmopig/Vacant/blob/main/vacant_network/vrun/envmap.py)：
 OpenAI 系／Anthropic 系／OpenRouter／Groq／Together／DeepSeek／Ollama／LM Studio…）
 ——**大半のフレームワークを覆うが、設定ファイルを読むフレームワークは設定ファイルを直す**。
 実測：pi（`@earendil-works/pi-coding-agent`）は provider の `baseUrl` を `models.json` に
@@ -326,7 +331,7 @@ SSE のチャンク分割、ツール呼び出しの形式、タイムアウト�
 書かなければ誇大になる：
 
 - ⚠ **Claude Code の配線ゼロは「上流自身が Anthropic Messages（`POST /v1/messages`）を
-  話せる」という一つの機能の上に立っている。** `vacant/vrun/wireproxy.py` は
+  話せる」という一つの機能の上に立っている。** `vacant_network/vrun/wireproxy.py` は
   **リバースプロキシであってプロトコル変換器ではない**——path で振り分けるだけで、
   `/v1/messages` を `/v1/chat/completions` に書き換えない。実測した LM Studio は
   `/v1/messages`（SSE と `tool_use` を含む）をネイティブに話すので shim は不要だったが、
@@ -361,7 +366,7 @@ opencode | claude | hermes` に一段ずつ、各段が実行時に `$VACANT_RUN
    接続を開くことは止めない。「agent は逃げられない」が本当になるのは、出口遮断
    （[`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)、
    root が一度必要。**あのスクリプトは repo checkout にしかない**——上の
-   〈それでも clone が要るもの〉を見よ）を足したときだけ。`vacant/controller.py:7-8` が逐語で当てはまる：
+   〈それでも clone が要るもの〉を見よ）を足したときだけ。`vacant_network/controller.py:7-8` が逐語で当てはまる：
    同一 OS ユーザーが本コマンドを迂回することは防げない。
 2. **仲介されるのは「モデル経路」であって agent の振る舞いではない。** フレームワークが
    自分で起こす動作——自動 lint、git checkpoint、内蔵リトライ、ローカルのツール呼び出し
@@ -369,7 +374,7 @@ opencode | claude | hermes` に一段ずつ、各段が実行時に `$VACANT_RUN
    「モデル経路で何が起きたか」と「作業領域が最後どうなったか」であり、「agent が何を
    したか」ではない。
 3. **受入は片側保証である。**
-   [`vacant/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant/suitegauge.py)
+   [`vacant_network/suitegauge.py:30-33`](https://github.com/cosmopig/Vacant/blob/main/vacant_network/suitegauge.py)
    逐語：既知の不正解を止められることは、真の要求を覆うことを**証明しない**。
    `accepted=true` は「顧客が書き下したその数条が通った」だけを意味する。実測：R532 の
    836 問でゲートは 811 件を受理し、そのうち 120 件（14.8%）は可視受入を通ったが隠し受入を
@@ -387,9 +392,9 @@ Bedrock SigV4、透過型 MITM をやらない理由）は
 モデル呼び出しゼロ、ネットワークなし。
 
 ```python
-from vacant.checks import run_python_check
-from vacant.identity import Identity, PublicIdentity
-from vacant.logbook import Logbook
+from vacant_network.checks import run_python_check
+from vacant_network.identity import Identity, PublicIdentity
+from vacant_network.logbook import Logbook
 
 # 1) 受入：テストは runner プロセス、候補コードは別の worker プロセスで走る
 tests = "assert solve([1, 2, 3, 4]) == 6\nassert solve([]) == 0\n"
@@ -409,7 +414,7 @@ print(book.verify_chain(who))                                            # True
 
 # 3) 途中の一件を改竄 ⇒ 検証は失敗する
 import copy
-from vacant.logbook import LogEntry
+from vacant_network.logbook import LogEntry
 forged = Logbook([copy.deepcopy(e) for e in book.entries])
 e = forged.entries[1]
 forged.entries[1] = LogEntry(e.stream_id, e.branch_id, e.seq, e.prev_hash, e.ts_ms, e.type,
@@ -444,18 +449,18 @@ vacant --help                     # インストール後に使える CLI
 
 | 症状 | 何が起きたか | どうするか |
 |---|---|---|
-| 入れた後の `import vacant` や `vacant --help` が本プロジェクトで全く無い | **`pip install vacant` で入るのは別人のパッケージ**（authoritative-DNS ツールの Rust bindings、7.5 MB のネイティブ wheel）。それ**も** `vacant` という import 名を占有し、**も** `vacant` というコマンドを入れる。本物を先・相手を後に入れると**相手が静かに上書きし、エラーは一切出ない** | 見分け方：`python3 -c "import vacant; print(vacant.__version__)"`——本物は `0.7.0` を出力し、相手は `AttributeError` を投げる。`vacant --help` の一行目に `{init,info,call,demo,…}` が並ぶのが本物 |
-| `pip uninstall -y vacant` の後に `vacant` コマンドが丸ごと消えるのに、`pip list` はまだ `vacant-network==0.7.0` が入っていると言う | 二つのパッケージが同じパスに書き込むため、相手を消すと**共有していたコマンドまで持って行かれる**。pip は本物が空洞化したことを知らない | `pip install --force-reinstall --no-deps vacant-network`（実測で完全に復旧：コマンドが戻り、`vacant.__version__` も `0.7.0` に戻る） |
+| 入れた後の `import vacant_network` や `vacant --help` が本プロジェクトで全く無い | **`pip install vacant` で入るのは別人のパッケージ**（authoritative-DNS ツールの Rust bindings、7.5 MB のネイティブ wheel）。それ**も** `vacant` という import 名を占有し、**も** `vacant` というコマンドを入れる。本物を先・相手を後に入れると**相手が静かに上書きし、エラーは一切出ない** | 見分け方：`python3 -c "import vacant_network; print(vacant_network.__version__)"`——本物は `0.7.0` を出力し、相手は `AttributeError` を投げる。`vacant --help` の一行目に `{init,info,call,demo,…}` が並ぶのが本物 |
+| `pip uninstall -y vacant` の後に `vacant` コマンドが丸ごと消えるのに、`pip list` はまだ `vacant-network==0.7.0` が入っていると言う | 二つのパッケージが同じパスに書き込むため、相手を消すと**共有していたコマンドまで持って行かれる**。pip は本物が空洞化したことを知らない | `pip install --force-reinstall --no-deps vacant-network`（実測で完全に復旧：コマンドが戻り、`vacant_network.__version__` も `0.7.0` に戻る） |
 | `python3 -m venv …` ⇒ `The virtual environment was not created successfully because ensurepip is not available.` | Debian／Ubuntu が `ensurepip` を別パッケージに切り出しており、素のイメージには入っていない。`venv` モジュール自体はあり、落ちるのはその下の `ensurepip` | `sudo apt-get install -y python3-venv`（メッセージ上は `python3.12-venv`）を実行し、**venv を作り直す**。実測 5.5 秒、**再起動は不要** |
 | そもそもシステムに `pip` / `pip3` が無い | 同じ理由で `python3` が素のまま | 同上。venv を作れば中に pip 24.0 が付いてくる |
-| `pip install` 一回で site-packages に 30 個・60 MB 増える | `mcp` だけで `pydantic`／`starlette`／`uvicorn`／`httpx`／`sse-starlette` … を連れてくる | 現時点で「ゲートだけ」の extras は**無く**、入れれば全部入る。ゲートと領収書の経路（`vacant.vrun.*`）は実際には `mcp` を使わない |
+| `pip install` 一回で site-packages に 30 個・60 MB 増える | `mcp` だけで `pydantic`／`starlette`／`uvicorn`／`httpx`／`sse-starlette` … を連れてくる | 現時点で「ゲートだけ」の extras は**無く**、入れれば全部入る。ゲートと領収書の経路（`vacant_network.vrun.*`）は実際には `mcp` を使わない |
 | `pip show … \| head` が `BrokenPipeError` を出す | pip の SIGPIPE 処理。**インストール失敗ではない**（`exit=0`） | 無視するか、`head` に繋がない |
 | `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | **fail-closed の門**であって、パスの打ち間違いではない | 正本の受入ディレクトリは作業区の**外**に置く。agent に見せたいなら別途コピーを中へ置く |
 | `vacant run` が `22`（`infra_void`）で終わる | 基盤が壊れた場合で、**納品とも拒否とも判定しない**。最多の原因は `--` の後に相対パスを渡したこと——launcher は `cwd=<workspace>` で起動するため作業区の下に解決される | `--` の後は絶対パスにする |
-| 自分の agent をつないだのに `requests_seen` が `0` | そのモデル経路は**仲介されていない**（framework が base url を設定ファイルに持っている）か、その実行がモデルを呼んでいない。**エラーメッセージは一切出ない**——しかもその実行の他の欄は正当な拒否枠と寸分違わない（誠実な境界 23 の生体標本） | 〈五つの agent のつなぎ方〉を参照。環境変数一覧の単一の真実は `vacant/vrun/envmap.py` |
+| 自分の agent をつないだのに `requests_seen` が `0` | そのモデル経路は**仲介されていない**（framework が base url を設定ファイルに持っている）か、その実行がモデルを呼んでいない。**エラーメッセージは一切出ない**——しかもその実行の他の欄は正当な拒否枠と寸分違わない（誠実な境界 23 の生体標本） | 〈五つの agent のつなぎ方〉を参照。環境変数一覧の単一の真実は `vacant_network/vrun/envmap.py` |
 | `vacant selftest` の「正解数」が毎回変わる | それは判定基準ではない（Linux は `4/6`、macOS は `3/6`） | `✓` の三行が全部通っているかだけを見る |
 | `run_RUN-ON.json` に `upstreams_defaulted` が無い | **PyPI の `vacant-network` 0.7.0 にはまだその二つの欄が無い**。repo HEAD にはある——バージョン番号が上がっていない | その欄が要るならソースから入れる（`pip install -e .`） |
-| Windows | **全く計測していない**。しかも `vacant/checks.py` に使える Windows サンドボックス分岐は無い | Linux／macOS を使うか、コンテナに入れる |
+| Windows | **全く計測していない**。しかも `vacant_network/checks.py` に使える Windows サンドボックス分岐は無い | Linux／macOS を使うか、コンテナに入れる |
 
 ⚠ 最後の行は鉄則 3 の形である：**「計測していない」≠「0 と計測した」**。
 この log が示すのは Ubuntu 24.04／Python 3.12.3 の経路だけであり、macOS では
@@ -576,12 +581,12 @@ flowchart LR
 1. **前提（以下すべてに優越する）**：要求が実行可能な受入テストへコンパイルできること。
    走らない要求に無料の審判は存在しない。
 2. **Vacant は、インストールしただけで任意のエージェントを包む強制層になるわけではない。**
-   ライブラリ（`vacant/agent.py:51-103`、`self.brain` は公開属性）や MCP ツール
-   （`vacant/mcp_server.py:184-210`、ツールの docstring は「勧めている」だけ）の形態では
+   ライブラリ（`vacant_network/agent.py:51-103`、`self.brain` は公開属性）や MCP ツール
+   （`vacant_network/mcp_server.py:184-210`、ツールの docstring は「勧めている」だけ）の形態では
    **任意**である——エージェントが呼ばなければ存在しないに等しく、それを検知する仕組みも無い。
-   コントローラ（`vacant/controller.py:304-530`）、またはハーネス自身がエージェントループを
+   コントローラ（`vacant_network/controller.py:304-530`）、またはハーネス自身がエージェントループを
    所有する形態でのみ、**自分が spawn した子プロセスに対して**強制となる。
-   `vacant/controller.py:7-8` 逐語：保証は本コントローラ経由で起動した子プロセスのみを覆う。
+   `vacant_network/controller.py:7-8` 逐語：保証は本コントローラ経由で起動した子プロセスのみを覆う。
    同一 OS ユーザがこのコマンドを迂回してエージェントを直接実行することは阻止できない。
    マシン全体で唯一の出口を強制するにはコンテナ、ACL、egress policy が必要である。
    本ページのどの一文も、この文より楽観的に読まれてはならない。
@@ -640,17 +645,17 @@ flowchart LR
    この一連の経緯——穴を自分で見つけ、走査し切り、走査後に何が残ったか——を残すのは、
    それがどんな性能数値よりも「説明責任は実行可能か」に答えるからである。
 4. **ゲートが保証するのは「書かれたテストを通った」ことであり、「真の要求を満たした」ことではない。**
-   `vacant/suitegauge.py:30-33` の片側保証は逐語で：壊れたスタブを弾けることは、その受入テストが
+   `vacant_network/suitegauge.py:30-33` の片側保証は逐語で：壊れたスタブを弾けることは、その受入テストが
    何でも通すわけではないことを示すだけで、**真の要求を覆っていることは証明しない**。実測：
    R532 の 836 問のうちゲートが**受理した 811 件**の中に、**可視の受入を通ったが隠しテストを
    通らなかったものが 120 件（14.8%）**あった。ゲート無しでは 211/836＝25.2%。
    ⇒ ゲートは偽納品をおおむね**半減させるが、消しはしない**。
 5. **チェーンが与えるのは integrity（改変されていないこと）であって completeness
-   （欠落が無いこと）ではない。** `vacant/logbook.py:168-195` は seq の連続性、`prev_hash` の
+   （欠落が無いこと）ではない。** `vacant_network/logbook.py:168-195` は seq の連続性、`prev_hash` の
    連結、各エントリの署名しか見ず、長さのコミットメントも外部アンカーも無い ⇒
    **正当な接頭辞はそのまま通る**（クイックスタート 4 番）。文献にはこれの正式名がある：
    **truncation／omission attack**（Ma & Tsudik 2009）。必ず三点セットで述べること：
-   - **`vacant/checkpoint.py:144-155` の チェックポイント鎖に同じ穴がそのまま複製されている。**
+   - **`vacant_network/checkpoint.py:144-155` の チェックポイント鎖に同じ穴がそのまま複製されている。**
      `verify_checkpoint_chain` は `prev_checkpoint_sig` の後ろ向きの連結と先頭が null である
      ことしか見ない ⇒ **末尾を数枚捨てても残りは全通過する**（実測：4 枚全通過、末尾 2 枚を
      落としても全通過、途中の 1 枚を抜くと失敗、先頭を抜くと失敗）。
@@ -660,14 +665,14 @@ flowchart LR
    - 検出したければ `Logbook.head()` を外部に公示するか連署させること。Vacant は代行しない。
 6. **署名が指すのは鍵であって主体ではなく、真偽でもない。** 領収書は「この文をこの鍵が述べ、
    その後改変されていない」ことを証明するが、「その文が真である」ことは証明しない
-   （`vacant/peerexec.py:117-120`）。製品経路の領収書は**納品側自身が署名**しており
-   （`vacant/ecosystem.py:641-642`）、秘密鍵は同一 OS ユーザが読める平文 PEM である
-   （`vacant/body.py:160` は passphrase 無しで `identity.save` を呼ぶ）。鍵の保管は配備上の
+   （`vacant_network/peerexec.py:117-120`）。製品経路の領収書は**納品側自身が署名**しており
+   （`vacant_network/ecosystem.py:641-642`）、秘密鍵は同一 OS ユーザが読める平文 PEM である
+   （`vacant_network/body.py:160` は passphrase 無しで `identity.save` を呼ぶ）。鍵の保管は配備上の
    仮定であり、ソフトウェア層では prevents できない。
 7. **セキュリティ境界ではない。** `run_python` は独立プロセス・一時 cwd・CPU 制限・タイムアウトの
    下で走り、よくある早期 `exit(0)`、同一ファイルからの隠しテスト読み出し、process/file API を
    防ぐが、**完全な悪性コード境界ではない**。信頼できないコードはコンテナ、gVisor、独立 VM へ。
-   `vacant/checks.py` に動作する Windows サンドボックス分岐は無い。
+   `vacant_network/checks.py` に動作する Windows サンドボックス分岐は無い。
 8. **多数決には数学的上限がある**：腐敗した実行器は最大 ⌊(k−1)/2⌋ まで。過半を超えると機構は
    反転し、しかも**自分が閾値のどちら側にいるかを機構は知り得ない**。
 9. **受入テスト自体の腐敗には無防備**：テストを「読み込めれば通過」に差し替えると、全票が誠実で、
@@ -696,7 +701,7 @@ flowchart LR
 19. **証明ではない**：デモで言えるのは「向上が見える」まで。「向上を証明する」は事前登録した
     バッチ run のために取ってある。
 20. **`vacant run` の proxy は意図的な迂回を止められない。**
-    `vacant/vrun/wireproxy.py:45-47` に逐語でこう書いてある——「**records であって
+    `vacant_network/vrun/wireproxy.py:45-47` に逐語でこう書いてある——「**records であって
     verifies ではない**：proxy が示すのは『これらの bytes は自分を通った』だけで、
     上流が本当にその通りに動いたことは示さないし、**agent が別経路で迂回するのを
     阻止もしない**」。境界 2 の正式な用語で言えば：
@@ -721,10 +726,20 @@ flowchart LR
       領収書の `model` が記録するのは「誰がそう名乗ったか」であって「誰が答えたか」ではない。
       だからこそ **「つなぐためにモデル名を偽る」ことは禁止**である：領収書を歪め、
       可究責性の口径と正面から衝突する。
-    - **上流が名指しされていない wire は公開 API の既定値へ転送される。** repo HEAD の
-      `vacant/vrun/launcher.py:586-590` はこれを実行ごとに `upstreams`／
-      `upstreams_defaulted` として記録する——だが**それは穴を見えるようにしただけで、
-      塞いだわけではない**。⚠ **`upstreams_defaulted` の読み方は厳密に**
+    - ~~**上流が名指しされていない wire は公開 API の既定値へ転送される。**~~
+      **2026-09-19 に塞いだ**（`DECISION_20260919_V1_GATES.md`）：名指しされていない
+      wire は**拒否する本地 sink**（`envmap.SINK_UPSTREAM`、`.invalid` のホスト名）に
+      解決され、`wireproxy` は**接続を開く前に** 502 を返す ⇒ DNS も引かない、
+      1 byte も出さない、オフラインでも成立する。公開 API を使うなら**明示**が要る：
+      `vacant run --allow-public-upstream` または `VACANT_RUN_ALLOW_PUBLIC_UPSTREAM=1`。
+      ⚠ **両方の上流を固定した回は一切影響を受けない**（5 agent マトリクス 20 マス）。
+      その経路にトラフィックが無い回も 1 byte も変わらない（pi の 40 マス）。
+      ⚠ **これが塞ぐのは「誰も指定していない経路」であって「外向き通信」ではない**：
+      利用者が自分で公開 API を指すのは（明示なので）通るし、agent が proxy を
+      迂回するのも止められない——そちらの構造的な手当ては今も
+      `block_egress.sh`（V3）。
+      repo HEAD の `vacant_network/vrun/launcher.py` はこれを実行ごとに `upstreams`／
+      `upstreams_defaulted`／`upstreams_sinked`／`wire_blocked` として記録する。⚠ **`upstreams_defaulted` の読み方は厳密に**
       （`AGENT_COMPAT.md` §10.6）：これが言っているのは「この経路は誰も指定していないので、
       **万一**トラフィックがあれば公開 API へ行く」であって、**「既に外へ出た」ではない**。
       実際に外へ出たかは `wire_by_protocol` と `wire_*/index.jsonl` の `upstream` 欄で
@@ -762,22 +777,22 @@ flowchart LR
 
 以下は本当であり、コードの裏付けがある。控えめに書く必要はない：
 
-- **受付のところは迂回できない。** `vacant/receipt.py` ＋ `controller.verify_delivery` が
+- **受付のところは迂回できない。** `vacant_network/receipt.py` ＋ `controller.verify_delivery` が
   **5 つの sha256 を再計算**し（request／task／tests／answer／trust card）、Ed25519 署名を検証し、
   `chain_head`／`stream_id`／`branch_id` を**現に生きているチェーン**と突き合わせ、各査読が
   この納品そのものに束縛されていることを確認し、そのうえで初めて `policy.admit` する。
-  起動権は `os.O_EXCL` で確保され（`vacant/controller.py:372`）、**1 枚の領収書は一度しか
+  起動権は `os.O_EXCL` で確保され（`vacant_network/controller.py:372`）、**1 枚の領収書は一度しか
   消費できない**。強制点は**受入時**にあり、実行時ではない——この部分は実際に機能している。
 
 - **エージェントの自己申告が採用されたことは一度も無い。** エコシステム自身が verifier を走らせ
-  （`vacant/ecosystem.py:531`）、コントローラは下流エージェントを起動する前に**独立にもう一度**
-  走らせる（`vacant/controller.py:299-300`）。
+  （`vacant_network/ecosystem.py:531`）、コントローラは下流エージェントを起動する前に**独立にもう一度**
+  走らせる（`vacant_network/controller.py:299-300`）。
 - **受入サンドボックスは 2 プロセス。** テストコードは runner、候補コードは別の worker にあり、
-  stdin/stdout ＋ nonce で RPC する（`vacant/checks.py:577-600`、`444-457`）。
+  stdin/stdout ＋ nonce で RPC する（`vacant_network/checks.py:577-600`、`444-457`）。
   `ops/gain/gain_run.py:957` のコメント逐語：*"the candidate worker cannot see this test code"*。
   候補コードは**構造的にテストコードを見られない**——ブロックリストではない。
 - **「計測できていないことは通過ではない」がコードになっている**：
-  `"all_pass": bool(total > 0 and passed == total)`（`vacant/vrun/acceptance.py:268`）。
+  `"all_pass": bool(total > 0 and passed == total)`（`vacant_network/vrun/acceptance.py:268`）。
   ゲージも同様に `n_broken >= 1` を要求し、空のスタブ集合では空虚に成立しない。
 - **拒否は実際に起きる**：R532 の 836 問でゲート腕は 25 件、ループ腕は 68 件を拒否し、
   拒否はすべての比率の分母に入っている。
@@ -799,12 +814,12 @@ flowchart LR
 
 | 層 | モジュール | 何を支えるか |
 |---|---|---|
-| L0 暗号 | `vacant/canonical.py`／`identity.py`／`crypto.py` | 全署名が使う唯一の直列化；Ed25519 鍵対＋`vacant_id` |
-| L1 台帳 | `vacant/logbook.py`／`envelope.py`／`checkpoint.py`／`attest.py`／`receipt.py` | append-only ハッシュチェーン（`stream_id`＝創世ハッシュ）；署名済み封筒；チェックポイント自身も連鎖 |
-| L2 説明責任 | `vacant/registry.py`／`reputation.py`／`router.py`／`auditor.py`／`memory.py`／`dashboard.py` | 発見＋評判索引、5 次元 Beta、on/off 単一スイッチ、決定的な再監査（**ダッシュボードは説明責任の源ではない**） |
-| L3 問題集とゲージ | `vacant/codebench.py`／`suitespec.py`／`suitegauge.py` | MBPP+／LiveCodeBench v1–v3／HumanEval+；**受入テストはデータであってプログラムではない**；ゲージは両側（**片側保証**） |
-| L4 実験基盤 | `ops/gain/*`／`vacant/peerexec.py`／`record.py`／`research.py` | 9 腕の runner、仲裁者（4 状態、Holm、区間、`--selftest`／`--mutation-check`）、証言層、RECORD_SPEC 証拠パック |
-| L5 展示 | `vacant/entrycost.py`／`examples/receipt_viewer_multiparty.html` | 機構シミュレーション（会場で秒単位）、単一ファイルのオフライン領収書ビューア |
+| L0 暗号 | `vacant_network/canonical.py`／`identity.py`／`crypto.py` | 全署名が使う唯一の直列化；Ed25519 鍵対＋`vacant_id` |
+| L1 台帳 | `vacant_network/logbook.py`／`envelope.py`／`checkpoint.py`／`attest.py`／`receipt.py` | append-only ハッシュチェーン（`stream_id`＝創世ハッシュ）；署名済み封筒；チェックポイント自身も連鎖 |
+| L2 説明責任 | `vacant_network/registry.py`／`reputation.py`／`router.py`／`auditor.py`／`memory.py`／`dashboard.py` | 発見＋評判索引、5 次元 Beta、on/off 単一スイッチ、決定的な再監査（**ダッシュボードは説明責任の源ではない**） |
+| L3 問題集とゲージ | `vacant_network/codebench.py`／`suitespec.py`／`suitegauge.py` | MBPP+／LiveCodeBench v1–v3／HumanEval+；**受入テストはデータであってプログラムではない**；ゲージは両側（**片側保証**） |
+| L4 実験基盤 | `ops/gain/*`／`vacant_network/peerexec.py`／`record.py`／`research.py` | 9 腕の runner、仲裁者（4 状態、Holm、区間、`--selftest`／`--mutation-check`）、証言層、RECORD_SPEC 証拠パック |
+| L5 展示 | `vacant_network/entrycost.py`／`examples/receipt_viewer_multiparty.html` | 機構シミュレーション（会場で秒単位）、単一ファイルのオフライン領収書ビューア |
 
 **9 本の腕**：`OFF`（一発、1.00 呼び出し）、`ON`（評判ルーティング＋K=3 査読＋一回修正、≈5）、
 `OFF5`（5 回投票、5.00）、`CONFORM`（受入ゲート、早期停止、1.3–1.7）、`EQ5`（等予算、常に 5.00）、
@@ -847,14 +862,14 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 
 | 形態 | 入口 | エージェントを拘束するか |
 |---|---|---|
-| **ライブラリ** | `vacant.agent.Vacant`（`vacant/agent.py:51-103`） | **しない——任意。** `self.brain` は公開属性。呼ばなければ関与しない。 |
-| **MCP ツール** | `vacant.mcp_server`（`vacant/mcp_server.py:184-210`） | **しない——説得のみ。** `delegate` の docstring は "THE PREFERRED PATH" と書くだけ。無視しても阻止されず、検知もされない。 |
-| **コントローラ** | `VacantFirstController.delegate_then_run`（`vacant/controller.py:304-530`） | **する——ただし自分が spawn した子プロセスに対してのみ。** |
+| **ライブラリ** | `vacant_network.agent.Vacant`（`vacant_network/agent.py:51-103`） | **しない——任意。** `self.brain` は公開属性。呼ばなければ関与しない。 |
+| **MCP ツール** | `vacant_network.mcp_server`（`vacant_network/mcp_server.py:184-210`） | **しない——説得のみ。** `delegate` の docstring は "THE PREFERRED PATH" と書くだけ。無視しても阻止されず、検知もされない。 |
+| **コントローラ** | `VacantFirstController.delegate_then_run`（`vacant_network/controller.py:304-530`） | **する——ただし自分が spawn した子プロセスに対してのみ。** |
 | **ハーネスがループを所有** | 例：`ops/gain/r530/openwork_arms.py:642-696` | **する——ハーネスがループそのもの。** |
 
 **正しい位置づけは「強制層」ではなく「受付窓口」である。** 強制点は**受入時**にある——
 検証可能な領収書を伴わない納品は受理されず、**その関門は迂回できない**
-（`vacant/receipt.py` ＋ `controller.verify_delivery` が 5 つの sha256 を再計算し、Ed25519 を
+（`vacant_network/receipt.py` ＋ `controller.verify_delivery` が 5 つの sha256 を再計算し、Ed25519 を
 検証し、`chain_head` を突き合わせ、`os.O_EXCL` により領収書は一度しか消費できない）。
 強制点は**実行時にはない**：Vacant をマシン唯一の出口にするにはコンテナ／ACL／egress policy
 が必要で、それは配備層の仕事である。サプライチェーン・セキュリティの in-toto／SLSA／Sigstore
@@ -868,7 +883,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 
 ## B. どの層で割り込むか
 
-1. **合否の線だけ欲しい** → `vacant.checks.run_python_check` を直接呼ぶ。身元もチェーンも設定も不要。
+1. **合否の線だけ欲しい** → `vacant_network.checks.run_python_check` を直接呼ぶ。身元もチェーンも設定も不要。
 2. **試行の記録が欲しい** → `Logbook` を足し、試行ごとに append する。他は変えなくてよい。
 3. **受入テスト自体の改竄を検知したい** → `SuiteSpec` として表現し、候補を生成する**前に**
    `commit_suite_with_gauge` でチェーンへ載せる。以後、実行器は spec から自分でレンダリング
@@ -911,10 +926,10 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 
 - **I-1** 途中の改竄・途中の削除・創世の削除はいずれも検出される。
 - **I-2** 候補コードは**構造的にテストコードを見られない**——別プロセス、nonce 付きの
-  literal-only RPC（`vacant/checks.py:577-600`、`444-457`）。
+  literal-only RPC（`vacant_network/checks.py:577-600`、`444-457`）。
 - **I-3** 自己申告は採用されない（`ecosystem.py:531`、さらに `controller.py:299-300` で独立に再実行）。
 - **I-4** 「計測できていない＝不通過」がコードになっている：
-  `bool(total > 0 and passed == total)`（`vacant/vrun/acceptance.py:268`）。ゲージは `n_broken >= 1` を要求。
+  `bool(total > 0 and passed == total)`（`vacant_network/vrun/acceptance.py:268`）。ゲージは `n_broken >= 1` を要求。
 - **I-5** ゲージは両側：参照解が通ること**かつ**既知の壊れたスタブがすべて弾かれること。
 - **I-6** `suitespec.render(spec)` は決定的なので `render_sha256` はマシン横断で比較できる。
 - **I-7** 拒否は実際に起き、分母に数えられる：R532 836 問でゲート腕 25 件、ループ腕 68 件。
@@ -935,16 +950,16 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
   にしか無い（実験固有のサンドボックス import 許可リストと `infra_void` 意味論を抱えており、
   ライブラリが利用者に代わってその方針を宣言すべきではないし、判定器の二つ目のコピーは両方の
   docstring が禁じるドリフトそのものだから）。`ops/` 無しで呼ぶと
-  `vacant.suitegauge.OpsRunnerUnavailable` が上がり、その本文に対処法が書いてある。
+  `vacant_network.suitegauge.OpsRunnerUnavailable` が上がり、その本文に対処法が書いてある。
   **正道は注入**：`gauge_suite(..., runner=my_runner)`、`Executor.new(..., probe=my_probe)`。
   `runner(code, check_code, entry_point, timeout_s) -> (ok, message)` であり、
-  `vacant.checks.run_python_check` を土台にできる。
+  `vacant_network.checks.run_python_check` を土台にできる。
 
 ## E. よくある誤り
 
 | 誤 | 正 | 理由 |
 |---|---|---|
-| 実験 runner に `VACANT_ENDPOINT=http://host:8765` | `VACANT_GAIN_API=http://host:8765/v1/chat/completions` | 3 つの変数に 3 つの形。`VACANT_GAIN_API`（`ops/gain/brain_cline.py:134`）は**フルパス**、`VACANT_ENDPOINT`（`vacant/substrate.py:171`）はベース URL、CLI は `VACANT_MCP_BASE`＋`VACANT_MCP_MODEL`＋`VACANT_MCP_API`（最後は `responses` か `openai` のみ）。 |
+| 実験 runner に `VACANT_ENDPOINT=http://host:8765` | `VACANT_GAIN_API=http://host:8765/v1/chat/completions` | 3 つの変数に 3 つの形。`VACANT_GAIN_API`（`ops/gain/brain_cline.py:134`）は**フルパス**、`VACANT_ENDPOINT`（`vacant_network/substrate.py:171`）はベース URL、CLI は `VACANT_MCP_BASE`＋`VACANT_MCP_MODEL`＋`VACANT_MCP_API`（最後は `responses` か `openai` のみ）。 |
 | `contains`／`regex` でゲートする | `equals`／`json_schema`／`run_python` | 前二者は探索用で、納品や起動認可を支えられない。 |
 | 成功した試行だけ記録する | すべて記録する | 成功だけのチェーンは何も答えない。 |
 | 検証を通ったチェーンを「仕事が正しい」と読む | 「記録が改変されていない」と読む | 境界 6：署名は鍵を指し、真偽は指さない。 |
@@ -966,7 +981,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 ```json
 {
   "schema": "vacant.facts/1",
-  "package": {"pypi_name": "vacant-network", "import_name": "vacant", "version": "0.7.0",
+  "package": {"pypi_name": "vacant-network", "import_name": "vacant_network", "version": "0.8.0",
               "requires_python": ">=3.11",
               "runtime_dependencies": ["cryptography>=42", "mcp>=1.26,<2", "jsonschema>=4.21"],
               "license": "MIT", "console_script": "vacant", "module_count": 50, "test_files": 78},
@@ -986,7 +1001,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
                   "machine_wide": "requires container / ACL / egress policy"},
   "chain_guarantees": {"integrity": true, "completeness": false,
                        "truncation_attack": "not detected (Ma & Tsudik 2009)",
-                       "also_affects": "vacant/checkpoint.py:144-155",
+                       "also_affects": "vacant_network/checkpoint.py:144-155",
                        "seq_does_not_help": true,
                        "fix": "an exogenous length commitment"},
   "reconciliation": {"tool": "ops/gain/replay/verify_run_receipts.py", "same_origin": true,

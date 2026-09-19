@@ -391,11 +391,11 @@ def fmt(s):
             f"  拒絕 {s['refusals']:>2d}  轉接器 {s['adapters']:>2d}")
 
 
-# ── 收據（真的用 vacant/logbook.py 的簽章 hash-chain）──────────────
+# ── 收據（真的用 vacant_network/logbook.py 的簽章 hash-chain）──────────────
 def emit_receipts(run, res, pool_tasks):
-    from vacant.identity import Identity
-    from vacant.logbook import Logbook
-    from vacant.canonical import canonical_bytes
+    from vacant_network.identity import Identity
+    from vacant_network.logbook import Logbook
+    from vacant_network.canonical import canonical_bytes
     import time
     OUT.mkdir(parents=True, exist_ok=True)
     d = OUT / run
@@ -441,7 +441,7 @@ def emit_receipts(run, res, pool_tasks):
             }, ident, ts_ms=ts)
         ts += 1
     lb.save(d / "chain.ndjson")
-    from vacant import crypto
+    from vacant_network import crypto
     (d / "signer.json").write_text(json.dumps({
         "vacant_id": ident.vacant_id, "pub": crypto.pub_to_hex(ident.pub),
         "stream_id": lb.stream_id(), "branch_id": lb.branch_id(), "head": lb.head(),

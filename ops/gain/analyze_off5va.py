@@ -15,7 +15,7 @@
 若 OFF5VA 追上 ON（gap 收斂、p 值不再卡在同一個點）⇒ off5v 那道 8pp 差距的
 主要來源是「ON 結構性擁有、OFF5 結構性沒有」的免費稽核存取權，不是同儕評審
 ／修訂機制本身的判斷力。這件事本身不推翻「ON 比 OFF5 好」（稽核也是 Vacant
-機制的一部分，見 `vacant/auditor.py`），但它把「哪一段機制在加值」的歸因
+機制的一部分，見 `vacant_network/auditor.py`），但它把「哪一段機制在加值」的歸因
 從「多智能體評審」修正成「確定性稽核」——兩者是 Vacant 裡不同的子機制。
 """
 import argparse

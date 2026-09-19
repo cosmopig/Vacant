@@ -1,4 +1,4 @@
-"""對既有題庫的 `visible_check` 實跑變異致死率（`vacant/suitemutate.py` 的量測入口）。
+"""對既有題庫的 `visible_check` 實跑變異致死率（`vacant_network/suitemutate.py` 的量測入口）。
 
 這支在架構裡承重什麼
 ====================
@@ -35,12 +35,12 @@ import time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 from ops.gain.gain_run import _canonical_solutions, _gauge_runner  # noqa: E402
-from vacant.codebench import (  # noqa: E402
+from vacant_network.codebench import (  # noqa: E402
     EvalPlusHumanEvalLoader,
     EvalPlusMBPPLoader,
     LiveCodeBenchLoader,
 )
-from vacant.suitemutate import score_suite  # noqa: E402
+from vacant_network.suitemutate import score_suite  # noqa: E402
 
 BANKS = {
     "lcb": ("v1", "lcb"), "lcb2": ("v2", "lcb2"), "lcb3": ("v3", "lcb3"),

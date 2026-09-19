@@ -36,11 +36,11 @@ from ops.gain import brain_cline  # noqa: E402
 from ops.gain.brain_cline import (DEFAULT_MODEL, POOL, REVIEWER_SYSTEM,  # noqa: E402
                                   REVIEW_LENSES, ClineBrain, InfraVoid,
                                   load_keys)
-from vacant.codebench import BuiltinSampleLoader, EvalPlusMBPPLoader  # noqa: E402
-from vacant.crypto import pub_to_hex  # noqa: E402
-from vacant.identity import Identity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
-from vacant.suitegauge import gauge_suite  # noqa: E402
+from vacant_network.codebench import BuiltinSampleLoader, EvalPlusMBPPLoader  # noqa: E402
+from vacant_network.crypto import pub_to_hex  # noqa: E402
+from vacant_network.identity import Identity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
+from vacant_network.suitegauge import gauge_suite  # noqa: E402
 
 # round460b：H 臂（HARNESS_STUDY §4.5 改動 1／4）。放在既有 import 之後，
 # 既有五臂的碼一個字不動——`harness_arms` 只**呼叫** extract_code／meets_demand。
@@ -122,7 +122,7 @@ def bank_strata(bank: str) -> dict[str, dict[str, str]]:
     """
     if bank not in LCB_BANK_VERSION:
         return {}
-    from vacant.codebench import lcb_strata
+    from vacant_network.codebench import lcb_strata
     return lcb_strata(LCB_BANK_VERSION[bank])
 
 
@@ -149,10 +149,10 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0,
         #   ＋examples，該講的前提已經在題目裡；再貼一份官方 contract 進 prompt 會讓
         #   這個 bank 的「需求」形狀與 MBPP+／LCB 都不一樣，而本 run 換的應該是
         #   題目不是協定。（contract 仍然不是 GT：它只有輸入前提、沒有期望輸出。）
-        from vacant.codebench import EvalPlusHumanEvalLoader
+        from vacant_network.codebench import EvalPlusHumanEvalLoader
         loader = EvalPlusHumanEvalLoader()
     elif bank in LCB_BANK_VERSION:
-        from vacant.codebench import LiveCodeBenchLoader
+        from vacant_network.codebench import LiveCodeBenchLoader
         # lcb2＝v2（同 recipe 多吃 test4 視窗，120 題）。分成兩個 bank 名而不是靠環境變數，
         # 讓 rows/summary 裡 `bank` 一眼看得出用的是哪一版；兩版 sha256/題數都釘死、fail-closed。
         # round440y：這三段接線原本被誤放進一個後來丟掉的 commit，導致 `lcb2` 掉進 builtin
@@ -189,7 +189,7 @@ def load_tasks(bank: str, seed: str, n: int, *, offset: int = 0,
             raise SystemExit(
                 f"--bank-filter 對 bank={bank} 不成立：只有 "
                 f"{'／'.join(sorted(LCB_BANK_VERSION))} 的題目自帶平台原生分層標籤。停。")
-        from vacant.codebench import LCB_STRATUM_KEYS
+        from vacant_network.codebench import LCB_STRATUM_KEYS
         if key not in LCB_STRATUM_KEYS:
             raise SystemExit(
                 f"--bank-filter 不認得 key={key!r}（可用：{'／'.join(LCB_STRATUM_KEYS)}）。"
@@ -254,7 +254,7 @@ def meets_demand(
 
     隱藏測資**不進 prompt**——那個分離就是「需求 vs 產出」的操作定義。
     """
-    from vacant.checks import CheckInfraError, run_python_check
+    from vacant_network.checks import CheckInfraError, run_python_check
     try:
         ok = run_python_check(
             code, check_code, timeout=timeout_s, allowed_imports=_GAIN_ALLOWED_IMPORTS,
@@ -269,7 +269,7 @@ def meets_demand(
 
 def _gauge_runner(code: str, check_code: str, entry_point: str | None,
                   timeout_s: int) -> tuple[bool, str]:
-    """`vacant.suitegauge` 的注入點：量具用的判準＝**本檔案的** `meets_demand`。
+    """`vacant_network.suitegauge` 的注入點：量具用的判準＝**本檔案的** `meets_demand`。
 
     明著注入而不用 `suitegauge.default_runner` 的 lazy import，是為了避免這支被當成
     `__main__`（或被 `r474_stub_sweep` 用 importlib 另名載入）時，量具那條路徑
@@ -320,7 +320,7 @@ def _canonical_solutions(bank: str = "evalplus", path: str | None = None) -> dic
         # ⚠ `path` 在這一支對 humanevalplus **不開放**：換路徑要走
         #   `VACANT_HUMANEVALPLUS_PATH`，因為換檔案就要換釘死的 sha256，
         #   而「只換路徑不換 sha」正是 fail-closed 想擋的那一格。
-        from vacant.codebench import EvalPlusHumanEvalLoader
+        from vacant_network.codebench import EvalPlusHumanEvalLoader
         ld = EvalPlusHumanEvalLoader()
         return {f"humanevalplus_{r['task_id']}": ld.canonical_source(r)
                 for r in ld._records}
@@ -335,7 +335,7 @@ def _canonical_solutions(bank: str = "evalplus", path: str | None = None) -> dic
             return json.load(f)
     import gzip
     import os
-    from vacant.codebench import EVALPLUS_DEFAULT_PATH
+    from vacant_network.codebench import EVALPLUS_DEFAULT_PATH
     p = pathlib.Path(path or os.environ.get("VACANT_EVALPLUS_PATH", EVALPLUS_DEFAULT_PATH))
     out: dict[str, str] = {}
     with gzip.open(p, "rt", encoding="utf-8") as f:
@@ -388,7 +388,7 @@ def probe_instrument(tasks, log, *, sample=12, bank: str = "evalplus",
         ref = refs[t["task_id"]]
         stub = f"def {t.get('entry_point','_f')}(*a, **k):\n    return None\n"
         hidden = t["hidden_check"]["code"]
-        # round749（R449 §四-3）：兩個方向的判準改走 `vacant.suitegauge.gauge_suite`，
+        # round749（R449 §四-3）：兩個方向的判準改走 `vacant_network.suitegauge.gauge_suite`，
         # 與 `peerexec.commit_suite` 的套件合格閘**共用同一份實作**。呼叫順序
         # （參考解 → 壞樁；hidden → visible）與落盤欄位逐字不變，等價性由
         # `ops/gain/replay/r449_probe_equivalence.py` 對 HEAD 版逐鍵比對證明。
@@ -466,7 +466,7 @@ def behavior_signature(code: str, task: dict, timeout_s: int = 10) -> str:
             code, task["visible_check"]["code"], timeout_s, entry_point=entry_point)
         return "VISIBLE_PASS" if visible_ok else "VISIBLE_FAIL"
 
-    from vacant.checks import CheckInfraError, run_python_capture
+    from vacant_network.checks import CheckInfraError, run_python_capture
     probe = [
         "import json as __vacant_json",
         "__vacant_results = []",
@@ -546,7 +546,7 @@ def _visible_test_slicer(check_code: str):
     做法：切前綴、再交給**同一個** `meets_demand` 跑。「第 i 條沒過」因此和出貨閘門
     共用同一個執行器，不會多出第二套判準、也不會跟閘門漂移。
 
-    `vacant/codebench.py` 產生兩種形狀：
+    `vacant_network/codebench.py` 產生兩種形狀：
       A 扁平：尾端一串 top-level `assert ...`（`_check_code`，evalplus/MBPP+）
       B 迴圈：`__tests = [...]` 之後一個 for 迴圈（`_lcb_check_code`，LCB）
     認不出來就回 `None`，收據寫 null ＋ 理由——**不猜**。產生器改了形狀，
@@ -722,7 +722,7 @@ def arm_conform(task, agents, rng, calls, book, ident, k=5):
       （hidden ＝ base＋plus，可見沒過結構上蘊含隱藏沒過）。驗收測資不是真需求
       子集的部署裡，拒交會殺掉好答案。
 
-    收據：每一次嘗試都簽進 hash-chain（`vacant/logbook.py`），事後可獨立驗鏈。
+    收據：每一次嘗試都簽進 hash-chain（`vacant_network/logbook.py`），事後可獨立驗鏈。
     回傳的 `receipt_head` 是鏈頭 hash，`attempts` 是逐次的具名紀錄。
     """
     assigned = [rng.choice(agents) for _ in range(k)]

@@ -1,0 +1,1 @@
+{"channel": "unix_domain_socket_relay", "path": "/var/tmp/v3egress/or.sock", "ok": true, "value": "HTTP/1.1 200 OK", "elapsed_s": 0.038}

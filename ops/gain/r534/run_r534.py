@@ -35,7 +35,7 @@
 
 ⚠ **主指標走既有那條**（`bank_manifest.json` 的 `scoring.primary_numerator`）：
   `gain_run.meets_demand(solution.py, codebench._lcb_check_code(ep, visible+hidden))`。
-  渲染出來的 `test_hidden.py` 是**第二條**路徑，它沒有 `vacant/checks.py` 的
+  渲染出來的 `test_hidden.py` 是**第二條**路徑，它沒有 `vacant_network/checks.py` 的
   AST 政策 ⇒ 對用到被政策擋掉的東西的碼會比較寬。兩條路徑的數字逐列分開落盤，
   **不可混報**。
 
@@ -74,9 +74,9 @@ from ops.gain.r530.sandbox import make_sandbox  # noqa: E402
 from ops.gain.r534 import piarms, preflight  # noqa: E402
 from ops.gain.r534.build_bank import _bank_records  # noqa: E402
 from ops.gain.r534.sidecar import CellSidecar  # noqa: E402
-from vacant.crypto import pub_to_hex  # noqa: E402
-from vacant.identity import Identity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.crypto import pub_to_hex  # noqa: E402
+from vacant_network.identity import Identity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 TEMPLATES = pathlib.Path(HERE) / "templates"
 HIDDEN = pathlib.Path(HERE) / "hidden"
@@ -244,7 +244,7 @@ def score_cell(*, sandbox, bank_rec: dict, ws: pathlib.Path,
         try:
             from ops.gain.brain_cline import InfraVoid
             from ops.gain.gain_run import meets_demand
-            from vacant.codebench import _lcb_check_code
+            from vacant_network.codebench import _lcb_check_code
             check = _lcb_check_code(
                 bank_rec["entry_point"],
                 bank_rec["visible_tests"] + bank_rec["hidden_tests"])

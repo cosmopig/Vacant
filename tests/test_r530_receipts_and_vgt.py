@@ -16,9 +16,9 @@ from ops.gain.r530 import openwork_arms as oa  # noqa: E402
 from ops.gain.r530 import receipts, tasks as taskmod  # noqa: E402
 from ops.gain.replay.verify_run_receipts import (ATTEMPT_TYPES,  # noqa: E402
                                                  VERDICT_TYPES, verify_arm)
-from vacant.crypto import pub_to_hex  # noqa: E402
-from vacant.identity import Identity  # noqa: E402
-from vacant.logbook import MAX_PAYLOAD_BYTES, Logbook  # noqa: E402
+from vacant_network.crypto import pub_to_hex  # noqa: E402
+from vacant_network.identity import Identity  # noqa: E402
+from vacant_network.logbook import MAX_PAYLOAD_BYTES, Logbook  # noqa: E402
 
 
 # ── 收據型別 ──────────────────────────────────────────────────────────────
@@ -29,7 +29,7 @@ def test_verifier_knows_the_two_new_types():
 
 def test_receipt_payload_is_digest_only_and_fits_the_64k_cap():
     """簽 digest 不簽全文——`logbook.MAX_PAYLOAD_BYTES` 是硬限制（§五-4）。"""
-    from vacant.canonical import canonical_bytes
+    from vacant_network.canonical import canonical_bytes
     ident = Identity.generate()
     book = Logbook()
     entry = receipts.append_attempt(

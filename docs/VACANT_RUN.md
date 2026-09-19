@@ -5,13 +5,13 @@
 > **V1 再多一件事：沒過就重置或回饋，再 spawn 一次。**
 > **V2 再多一件事：那份回饋可以直接接在下一次 spawn 的 prompt 尾端（§8）。**
 
-程式碼：[`vacant/vrun/`](../vacant/vrun/)
-（[`launcher.py`](../vacant/vrun/launcher.py)、
-[`retry.py`](../vacant/vrun/retry.py)、
-[`wireproxy.py`](../vacant/vrun/wireproxy.py)、
-[`envmap.py`](../vacant/vrun/envmap.py)、
-[`demo.py`](../vacant/vrun/demo.py)、
-[`verify_receipts.py`](../vacant/vrun/verify_receipts.py)）
+程式碼：[`vacant_network/vrun/`](../vacant_network/vrun/)
+（[`launcher.py`](../vacant_network/vrun/launcher.py)、
+[`retry.py`](../vacant_network/vrun/retry.py)、
+[`wireproxy.py`](../vacant_network/vrun/wireproxy.py)、
+[`envmap.py`](../vacant_network/vrun/envmap.py)、
+[`demo.py`](../vacant_network/vrun/demo.py)、
+[`verify_receipts.py`](../vacant_network/vrun/verify_receipts.py)）
 · 維運側留在 repo：[`ops/vacantrun/`](../ops/vacantrun/)
 （[`selftest.py`](../ops/vacantrun/selftest.py)、
 [`block_egress.sh`](../ops/vacantrun/block_egress.sh)、
@@ -23,10 +23,10 @@
 
 > **2026-09-18 搬家**：判斷層原本住在 `ops/vacantrun/` 與 `ops/gain/r530/`，而 `ops/`
 > 不進 wheel ⇒ `pip install vacant-network` 的人跑不動 `vacant run`。改成**搬家＋反轉
-> 依賴**：實作進 `vacant/vrun/`，`ops/gain/r530/*` 與 `ops/vacantrun/*` 留 re-export
+> 依賴**：實作進 `vacant_network/vrun/`，`ops/gain/r530/*` 與 `ops/vacantrun/*` 留 re-export
 > （`sys.modules` 指過去，**同一個 module 物件**）。所以既有的 83 處 `ops.gain.r530.*`
 > 引用一行都沒改，而且**判準仍然只有一份**。理由與清單見
-> [`vacant/vrun/__init__.py`](../vacant/vrun/__init__.py)。
+> [`vacant_network/vrun/__init__.py`](../vacant_network/vrun/__init__.py)。
 > V1／V2 的政策層 `retry.py` 跟著 `launcher.py` 一起搬——套件不准依賴 `ops/`
 > （`tests/test_vrun_reexport.py::test_vrun_is_self_contained`），
 > 舊路徑 `ops/vacantrun/retry.py` 同樣是 re-export。
@@ -69,7 +69,7 @@
 
 ```bash
 # 先看一次它擋下來：零設定、零模型端點、零 API key、零網路，約 2 秒
-vacant demo gate                       # vacant/vrun/demo.py
+vacant demo gate                       # vacant_network/vrun/demo.py
 
 # 最小：把 agent 包起來，用**工作區外**的 tests_visible/ 當驗收
 vacant run --suite ../tests_visible --run-dir ~/.vacant-run/demo -- \
@@ -87,7 +87,7 @@ vacant run --suite ../tests_visible --retry revise --feedback-into prompt -- \
 VACANT=0 vacant run --run-dir ~/.vacant-run/demo -- <cmd>
 
 # 不透過 CLI（模組形式，pip 裝完就能用）
-python3 -m vacant.vrun.launcher --suite ../tests_visible --run-dir /tmp/r -- <cmd>
+python3 -m vacant_network.vrun.launcher --suite ../tests_visible --run-dir /tmp/r -- <cmd>
 # repo checkout 裡這一行是同一支（re-export）
 python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir /tmp/r -- <cmd>
 ```
@@ -97,7 +97,7 @@ python3 ops/vacantrun/launcher.py --suite ../tests_visible --run-dir /tmp/r -- <
 「收據寫了多少」的函數；`--suite` 是**agent 改得到的驗收不是驗收**——那不是
 「可能被繞過」，是量具與被量的東西放在同一個人手上，`accepted=True` 會退化成
 「它讓自己過了」。要給 agent 看驗收就**另外複製一份**進工作區
-（`vacant/vrun/demo.py::scaffold` 就是這樣做的：權威的那一份在外面）。
+（`vacant_network/vrun/demo.py::scaffold` 就是這樣做的：權威的那一份在外面）。
 
 退出碼**反映裁決**，不是 agent 自己的退出碼：
 
@@ -131,20 +131,55 @@ _origin/                      `--retry resample` 的起點完整副本（含 `.g
 收據用**既有的那把尺**驗，不准另寫第二把：
 
 ```bash
-python3 -m vacant.vrun.verify_receipts --selftest                 # 先證明它抓得到壞鏈
-python3 -m vacant.vrun.verify_receipts --glob 'runs/<你的 run 目錄>'
-python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
+python3 -m vacant_network.vrun.verify_receipts --selftest                 # 先證明它抓得到壞鏈
+python3 -m vacant_network.vrun.verify_receipts --glob 'runs/<你的 run 目錄>'
+python3 -m vacant_network.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 # repo checkout 裡這一行是同一支（re-export，R460R／R529／R532 的鏈驗的就是它）
 python3 ops/gain/replay/verify_run_receipts.py --glob 'runs/<你的 run 目錄>'
 ```
 
 `--glob` 的相對 pattern：在 repo checkout 裡以 **repo 根**為基準（`runs/g_*` 那種寫法
-照舊），`pip install` 之後以 **cwd** 為基準（`vacant/vrun/verify_receipts.py::_glob_base`）。
+照舊），`pip install` 之後以 **cwd** 為基準（`vacant_network/vrun/verify_receipts.py::_glob_base`）。
 搬進套件之後不能再無條件往上數四層——那會指到 site-packages，而那裡沒有 `runs/`，
 於是 `--glob 'runs/…'` 會**靜靜地零筆命中**，零筆命中在本檔的判準裡是 `UNVERIFIABLE`
 不是錯誤。**絕對 pattern 兩種情況都照絕對解**——`--run-dir` 本來就多半落在 repo 外
 （預設 `~/.vacant-run/<task_id>`），少了這條，畫面上印給使用者複製的那行驗證指令
 就是一行跑不動的字。
+
+### 總判有四種，`VOID` 是 2026-09-19 加的
+
+`verdict ∈ {OK, VOID, BROKEN, UNVERIFIABLE}`，退出碼分別是 `0 / 3 / 1 / 1`。
+
+| 值 | 意思 |
+|---|---|
+| `OK` | 鏈完整，而且每一格 `requests_seen > 0` |
+| **`VOID`** | **鏈完整，但有格子 `requests_seen == 0`** ⇒ 那一格沒有中介發生過 |
+| `BROKEN` | 鏈本身壞了（簽章／seq／prev_hash／條數對帳） |
+| `UNVERIFIABLE` | 沒有公鑰、空鏈、或 glob 零筆命中 |
+
+為什麼要有 `VOID`：2026-09-19 的負控制把 `/bin/true` 放在 agent 的位置，
+**一通模型都不打**，而**退出碼、`accepted`、`stop_reason`、`agent_rc`、`chain_ok`
+五個欄位全部成立**，驗章器當時的總判是乾淨的 `OK`
+（`runs/v1_five_agent_matrix_20260919/controls_receipts_verify.txt` 逐字留著那一行）。
+⇒ 尺說得出「這張收據沒被改過」，說不出「這張收據底下有沒有發生過中介」。
+
+**`chain_ok` 一個字都沒改**——零請求的那一格鏈確實是完整的，把它說成壞掉是
+另一種說謊。新增的是一個正交的維度：`mediated`（`true`／`false`／**`null`**）
+與 `void_reason`。
+
+⚠ **`mediated: null` ＝「這條鏈沒記這件事」**（R460R／R529／R530 的舊鏈都沒有
+`requests_seen` 欄位）——**沒量到 ≠ 量到 0**，所以舊鏈一律判 `OK`，
+已歸檔 6,468 筆 verdict 的可比性一個字都沒變。
+
+⚠ **誠實邊界**：這個維度擋得住「**完全沒打**」，**擋不住「打了但打到別的地方」**
+——那要看 `run_<ARM>.json` 的 `wire_by_protocol` 與 `upstreams`，
+而**那兩個欄位不在簽章鏈上**。
+
+⚠ `--allow-no-suite` 那種**刻意沒有驗收**的跑不是假拒交格（它明講「這一次不量」，
+而且模型通道照樣可能有流量）⇒ 兩個維度正交，不會互相誤殺。
+
+⚠ **`vacant demo gate` 自己的總判就是 `VOID`**，而且那是規格：那隻假 agent
+一通模型都沒打。demo 拿自己當那條負控制。
 
 ### 自檢：你的 agent 真的被中介到了嗎
 
@@ -156,7 +191,28 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 # 非 0 ⇒ 模型通道真的經過 Vacant；0 ⇒ 沒被中介到（框架用設定檔，或那一跑根本沒呼叫模型）。
 ```
 
-可執行證明在 `tests/test_demo_gate.py::test_selfcheck_requests_seen_is_the_evidence`。
+可執行證明在 `tests/test_demo_gate.py::test_selfcheck_requests_seen_is_the_evidence`；
+零請求那一格被驗章器抓到的可執行證明在
+`tests/test_vrun_receipt_mediation.py`（含交付格與拒交格兩種）。
+
+### 沒指定的 upstream ⇒ fail-closed 本機 sink（2026-09-19）
+
+沒有人指定上游的那條 wire ~~會落到公開 API~~ **現在指到
+`envmap.SINK_UPSTREAM`**（一個 `.invalid` 主機名）。`wireproxy` 在**開任何連線
+之前**就回 502 ⇒ 不解析 DNS、不送任何 bytes、離線也成立。
+
+```bash
+# 要走公開 API 得明講（兩個入口等價）
+vacant run --allow-public-upstream -- <你的 agent 命令>
+VACANT_RUN_ALLOW_PUBLIC_UPSTREAM=1 vacant run -- <你的 agent 命令>
+```
+
+逐跑落盤：`upstreams`（含 `fallback: null|sink|public`）、`upstreams_defaulted`、
+`upstreams_sinked`、`wire_blocked`。
+
+⚠ **兩條上游都釘死的跑完全不受影響**；那條路上沒有流量的跑也逐位元不變。
+⚠ **這擋的是「沒人指定的那條路由」，不是「出網」**——使用者自己指到公開 API
+照樣放行，agent 繞過 proxy 直連也照樣擋不住（§5 `block_egress.sh`）。
 
 ---
 
@@ -192,7 +248,7 @@ $ python3 ops/vacantrun/selftest.py
 ### 4.1 proxy 單獨只有 L3
 
 「agent 一旦被接上就逃不掉」**只有加上出網封鎖才是真的**。
-`vacant/controller.py:7-8` 原本就寫著：
+`vacant_network/controller.py:7-8` 原本就寫著：
 
 > 保證只涵蓋透過本 controller 啟動的子行程；無法阻止同一 OS 使用者繞過本命令
 > 直接執行 agent。
@@ -293,7 +349,7 @@ Anthropic Messages／Google GenAI）**。V0 只實作前面兩條路由的**轉�
 
 ### 4.7 驗收是單邊保證
 
-`vacant/suitegauge.py` 的那條，逐字適用：**擋得住已知壞解 ≠ 涵蓋真需求**。
+`vacant_network/suitegauge.py` 的那條，逐字適用：**擋得住已知壞解 ≠ 涵蓋真需求**。
 `accepted=true` 只代表「客戶給的那幾條過了」，不代表做對了。
 
 ### 4.8 「沒量」與「量到過」不可以同形
@@ -344,21 +400,89 @@ sudo -u '#1234' python3 ops/vacantrun/verify_egress_block.py \
 # 3) 人類自己封鎖
 sudo ops/vacantrun/block_egress.sh --uid 1234 --port 8899
 
-# 4) 封鎖之後再量一次——verdict 必須是 BLOCKED
+# 4) 封鎖之後再量一次
+#    ⚠ 舊版這裡寫「verdict 必須是 BLOCKED」。**2026-09-19 實測那句話在預設
+#      Ubuntu 上永遠不成立**——見下面的 §5.1 第 3、4 條。要看的是
+#      `negative_control_direct_upstream reached=False`
+#      ＋ `positive_control_proxy_port reached=True` 這兩條，不是 verdict。
 sudo -u '#1234' python3 ops/vacantrun/verify_egress_block.py \
     --proxy-port 8899 --upstream 100.119.113.56:1234 --json block_check.json
 
-# 5) 拆掉
+# 5) 拆掉（⚠ 套幾次就要拆幾次，見 §5.1 第 8 條）
 sudo ops/vacantrun/block_egress.sh --uid 1234 --port 8899 --undo
 ```
 
-**它擋不住什麼**（`verify_egress_block.py` docstring 有同一份）：
-`--uid-owner` 只認發出封包的 uid ⇒ agent 如果能 `sudo`、能寫 setuid 執行檔、
-或能請另一個 uid 的服務代發請求，這條規則就繞得過。
-所以它必須跟「agent 用一個專屬的低權限 uid 跑」一起用。
-IPv6、既有的長連線、raw socket 都要另外量；量不到就寫「沒量」，不要寫「沒有」。
+### 5.1 **量過了**（2026-09-19，vacant-dev）——量到什麼、擋不住什麼
+
+舊版這裡寫的是「IPv6、既有的長連線、raw socket 都要另外量」。
+**已經量了**：裁決 [`decisions/DECISION_20260919_BLOCK_EGRESS_V3.md`](../decisions/DECISION_20260919_BLOCK_EGRESS_V3.md)，
+逐字證據 `ops/vacantrun/egress_v3_20260919/`。
+Ubuntu 24.04.4 × iptables 1.8.10（nf_tables）× 專用 uid 1001 × Hermes 0.19.0。
+
+**擋得住**（負向控制：封鎖前每一條都實測通得過、封鎖後每一條都實測失敗、
+拆掉後每一條又通）：對外 TCP（IP 字面值與經 DNS 的域名都一樣）、
+完整 TLS 到第三方、直接打外部 DNS 伺服器的 UDP、ICMP。
+**正向控制也過**：封鎖之下接線正確的那一格照樣 `accepted=true`、`requests_seen=6`。
+
+**活體標本**：Hermes 漏設 `CUSTOM_BASE_URL` ⇒ 無封鎖時真的打到編死的
+`https://openrouter.ai/api/v1`（agent stdout 是 openrouter 回的
+`HTTP 401: Missing Authentication header`）；**封鎖之後變成
+`API call failed after 3 retries: Connection error.`** ⇒ 洩漏被擋住了。
+
+⚠ **但收據看不出差別。** 那兩格的 `run_*.json` **26 個判斷欄位逐字相同**
+（`accepted`／`stop_reason`／`requests_seen`／`agent_rc`／`wire_by_protocol`／
+`ws_end_sha256` 全部一樣），差異只在 `agent_stdout.log` 與耗時。
+⇒ **V3 改變的是世界，不是收據。** 想讓「有沒有人試圖繞過中介」變成一個欄位，
+最小改動是把 REJECT 規則的封包計數器差值寫進收據（實測該計數器會動：73 封包）。
+
+**它擋不住什麼**（每一條都實測，不是推論）：
+
+1. **同機另一個 uid 的任何 listener。** 規則 1 是 `-o lo -j ACCEPT`＝**放行整條
+   迴圈**，不是只放行 proxy 埠（規則 3 實測 0 封包＝死碼）。實測：user1 起一支
+   127.0.0.1 的中繼，被封的 uid 經它做完整 TLS 到 openrouter，`HTTP/1.1 200 OK`。
+   ⇒ 腳本說的「只留 proxy 那個埠」**名實不符**。
+2. **unix domain socket。** iptables 看不到，實測 0.038 秒拿到 `200 OK`。
+   把迴圈規則收緊也堵不住這一條。
+3. **DNS。** 腳本誠實邊界 3 寫「DNS 預設也被擋掉」，**在 systemd-resolved 機器上
+   是錯的**：`/etc/resolv.conf` 指向 `127.0.0.53`＝迴圈 ⇒ 被放行。實測封鎖後
+   `gethostbyname` 照樣回答。一條低頻寬外洩通道完整保留。
+4. **`verify_egress_block.py` 的 verdict 因此永遠是 `NOT_BLOCKED`**（它把
+   `negative_control_dns` 的期望寫死成 `False`）。錯的方向是安全的，但量具失去鑑別力。
+   附帶：該檔抓 `iptables -S` 旁證時**只接例外不看 returncode** ⇒ 在它自己規定的
+   執行方式（agent 的 uid）下 `iptables_S` 恆為 `''`，不是它承諾的「記下拿不到」。
+5. **IPv6 完全沒被碰**（腳本一行 `ip6tables` 都沒有）。實測封鎖之下 ICMPv6 照樣通。
+   ⚠ 「IPv6 上的 TCP 出網」**沒量**——那台機器沒有公網 v6 路由。**沒量不是沒有。**
+6. **已經送出去的位元組收不回來。** 封鎖前建好的連線，送出方向在一個週期內斷
+   （`BrokenPipeError`），但**核心接收緩衝區裡的殘料照樣讀得完**（實測四次）。
+7. **`--uid-owner` 只認送出封包的 uid**（腳本原有的邊界 2 成立）：agent 能 `sudo`、
+   能寫 setuid、能請別的 uid 代發就繞得過。⇒ 它**必須**跟「agent 跑在一個專屬、
+   不能提權的 uid」一起用，而那個前提**不是這支腳本提供的**。
+8. **操作危害三條**：套兩次拆一次 ⇒ 仍在封鎖但畫面說「已拆除」（實測仍
+   `No route to host`）；沒套用時 `--undo` 也印「已拆除」（`|| true` 吞掉四行
+   `Bad rule`）；**`--dry-run` 什麼都沒做也照樣印「已對 uid=… 封鎖出網」**。
+9. **不持久化**（機器上沒有 `iptables-persistent`）⇒ **重開機規則自動消失**。
+   展場機器開機後要重套。
+10. 只擋**網路層出口**：不擋寫共享檔案系統、不擋 agent 的本機動作、不擋非 IP 的 IPC。
+    agent 看到的是 `No route to host`／`Network is unreachable`／`EPERM`
+    ⇒ **它分不出「被管制」與「網路爛掉」**。
+
+### 5.2 ⚠ 要真的用 V3，`vacant run` 本身還缺兩件
+
+`vacant_network/vrun/launcher.py` 的 proxy 與 agent **同行程樹、同 uid**，而 `--uid-owner`
+只認 uid ⇒ 整支 `vacant run` 跑在被封的 uid 上，**proxy 自己的上游也會被封死**。
+launcher 沒有 `--agent-uid`。2026-09-19 那次是手工包一層
+`sudo -n -u '#<uid>'` 把 agent 降權、proxy 留在操作者 uid 才量得成。
+
+降權之後還會撞到第二件：**Hermes 以 0600 建檔（不吃 umask）**，launcher（另一個
+uid）讀不到 ⇒ `_frozen_*` 的 `copytree` 直接 `PermissionError` 把整跑炸掉、
+**沒有收據**。當時在 wrapper 收尾 `chmod -R a+rwX` 繞過。
+
+⇒ **「V3 可用」≠「`block_egress.sh` 存在」。** 這兩個缺口都**還沒補**。
 
 展場機器是 Linux VM（`user1@100.124.254.83` 可測）。
+展場說法的正確版本不是「agent 逃不掉」，是
+「**它只能走這一條路出去，而這條路上的每一個位元組都留了下來**」，
+後面接上面那十條，一條都不能省。
 
 ---
 
@@ -366,16 +490,16 @@ IPv6、既有的長連線、raw socket 都要另外量；量不到就寫「沒�
 
 | 複用 | 用在哪 |
 |---|---|
-| `vacant/vrun/acceptance.py` | 目錄級驗收（`run_suite(suite="visible")`、`render_failures`）。舊路徑 `ops/gain/r530/acceptance.py` 是 re-export |
-| `vacant/vrun/receipts.py` | `ws_attempt`／`ws_verdict` 兩種事件別，**判準一個字沒改**（舊路徑 `ops/gain/r530/receipts.py`） |
-| `vacant/vrun/wshash.py` | 工作區樹雜湊（起點／終點）（舊路徑 `ops/gain/r530/wshash.py`） |
-| `vacant/vrun/sandbox.py` | 驗收跑在沙箱裡（`make_sandbox`）（舊路徑 `ops/gain/r530/sandbox.py`） |
+| `vacant_network/vrun/acceptance.py` | 目錄級驗收（`run_suite(suite="visible")`、`render_failures`）。舊路徑 `ops/gain/r530/acceptance.py` 是 re-export |
+| `vacant_network/vrun/receipts.py` | `ws_attempt`／`ws_verdict` 兩種事件別，**判準一個字沒改**（舊路徑 `ops/gain/r530/receipts.py`） |
+| `vacant_network/vrun/wshash.py` | 工作區樹雜湊（起點／終點）（舊路徑 `ops/gain/r530/wshash.py`） |
+| `vacant_network/vrun/sandbox.py` | 驗收跑在沙箱裡（`make_sandbox`）（舊路徑 `ops/gain/r530/sandbox.py`） |
 | `ops/gain/r534/wire_tap.py` | `wireproxy.py` 的前身（本檔 §3 那條鐵律的來源） |
 | `ops/gain/r534/piarms.py` | `FEEDBACK_TEMPLATE` 的形狀（§7.3 逐字沿用） |
 | `ops/gain/harness_arms.py` | 回饋迴圈的做法（`render_feedback`／截斷／落全文簽雜湊） |
-| `vacant/vrun/verify_receipts.py` | 驗收據——**唯一那把尺**（舊路徑 `ops/gain/replay/verify_run_receipts.py` 是 re-export，仍可直接執行） |
-| `vacant/memory.py::assert_ks1_clean` | KS-1 可執行防呆（鐵律 1） |
-| `vacant/logbook.py`、`vacant/identity.py`、`vacant/crypto.py` | 簽章鏈 |
+| `vacant_network/vrun/verify_receipts.py` | 驗收據——**唯一那把尺**（舊路徑 `ops/gain/replay/verify_run_receipts.py` 是 re-export，仍可直接執行） |
+| `vacant_network/memory.py::assert_ks1_clean` | KS-1 可執行防呆（鐵律 1） |
+| `vacant_network/logbook.py`、`vacant_network/identity.py`、`vacant_network/crypto.py` | 簽章鏈 |
 
 `ops/gain/r534/sidecar.py` 的**判斷層**（`hello`／`turn_end`／`settled`／
 `message`／`event`／`final` 六個 op）與 pi 無關、可原封不動搬過來——但**用不到**：
@@ -464,7 +588,7 @@ V1 沒有改 `render_failures`（凍結碼）。實測的 12B 沒有因此改對
    `test_vgt_canary_scan_has_teeth`（把 hidden 當成可見套件餵進去，
    同一支掃描必須翻紅）。沒有負控的「零命中」跟把掃描關掉在輸出上同形。
 2. **KS-1（鐵律 1）**：回饋文字禁止「你有責任／會被懲罰」類措辭。
-   `vacant/memory.py::assert_ks1_clean` 在 `vacant/vrun/retry.py` import 時
+   `vacant_network/memory.py::assert_ks1_clean` 在 `vacant_network/vrun/retry.py` import 時
    就跑一次（模板），每次渲染再跑一次（**含插進去的失敗原文**）。
    責任修辭如果是從客戶測試的訊息帶進來的，判 `ks1_violation`＝`infra_void`
    ——鐵律 1 說的是「違反＝run 作廢」，不是「拒交」。
@@ -647,7 +771,7 @@ proxy **擁有一次 HTTP 往返的讀寫權，不擁有 agent 的迴圈狀態�
    同一個用意。第 2 次起才換成 `"\n\n"` ＋ 回饋，所以**第 2 次的 argv 是第 1 次的
    逐位元前綴**。
 3. 換了管道不放鬆鐵律 1：**我們接上去的那一段**再跑一次
-   `vacant/memory.py::assert_ks1_clean`（髒了就判 `ks1_violation`＝`infra_void`
+   `vacant_network/memory.py::assert_ks1_clean`（髒了就判 `ks1_violation`＝`infra_void`
    ——鐵律 1 說的是「違反＝run 作廢」，不是「拒交」）。
 
    ⚠ **範圍是「我們寫的字」，不是整條命令**（2026-09-18 人類裁決）。

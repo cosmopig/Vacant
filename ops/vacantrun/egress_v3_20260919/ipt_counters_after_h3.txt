@@ -1,0 +1,6 @@
+Chain OUTPUT (policy ACCEPT 3199 packets, 2752322 bytes)
+num      pkts      bytes target     prot opt in     out     source               destination         
+1          43     3437 ACCEPT     0    --  *      lo      0.0.0.0/0            0.0.0.0/0            owner UID match 1001
+2           0        0 ACCEPT     0    --  *      *       0.0.0.0/0            127.0.0.0/8          owner UID match 1001
+3           0        0 ACCEPT     6    --  *      *       0.0.0.0/0            127.0.0.0/8          owner UID match 1001 tcp dpt:8899
+4          73     5776 REJECT     0    --  *      *       0.0.0.0/0            0.0.0.0/0            owner UID match 1001 reject-with icmp-admin-prohibited

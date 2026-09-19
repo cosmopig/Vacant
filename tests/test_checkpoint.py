@@ -1,4 +1,4 @@
-"""V1 存檔點認證＋回溯稽核（18 §2；vacant/checkpoint.py＋ecosystem 整合）。
+"""V1 存檔點認證＋回溯稽核（18 §2；vacant_network/checkpoint.py＋ecosystem 整合）。
 
 三條規格判準：①認證可離線驗簽；②竄改窗口內任一 episode → 驗證失敗；
 ③存檔點鏈斷點可偵測。外加：delegate 同步路徑不簽存檔點（離線作業紀律）、
@@ -9,15 +9,15 @@ from __future__ import annotations
 
 import json
 
-from vacant.checkpoint import (
+from vacant_network.checkpoint import (
     issue_checkpoint,
     retro_audit_window,
     verify_checkpoint,
     verify_checkpoint_chain,
 )
-from vacant.identity import Identity
-from vacant.logbook import Logbook
-from vacant.memory import Episode, MemoryStream
+from vacant_network.identity import Identity
+from vacant_network.logbook import Logbook
+from vacant_network.memory import Episode, MemoryStream
 
 GOOD = "def solve(s):\n    return s[::-1]"
 BAD = "def solve(s):\n    return s"
@@ -103,7 +103,7 @@ class _GoodBrain:
 
 
 def _eco(tmp_path, **kw):
-    from vacant.ecosystem import Ecosystem
+    from vacant_network.ecosystem import Ecosystem
     return Ecosystem(tmp_path, _GoodBrain(),
                      roster={"good_1": "good", "good_2": "good", "good_3": "good"}, **kw)
 
@@ -118,8 +118,8 @@ def test_delegate_never_issues_checkpoint_in_sync_path(tmp_path):
 
 def test_checkpoint_upgrades_trust_card_and_survives_wipe(tmp_path):
     """事後升級（trust_card.retro_audit）＋ wipe 收尾＋歸檔鏈可離線驗證。"""
-    from vacant.checkpoint import DEFAULT_WINDOW_EPISODES
-    from vacant.ecosystem import Ecosystem
+    from vacant_network.checkpoint import DEFAULT_WINDOW_EPISODES
+    from vacant_network.ecosystem import Ecosystem
     # 單居民 roster：20 筆交付全落在同一條 episode 鏈上（滿窗）
     eco = Ecosystem(tmp_path, _GoodBrain(), roster={"solo": "good"})
     tids = []
@@ -148,7 +148,7 @@ def test_checkpoint_upgrades_trust_card_and_survives_wipe(tmp_path):
     archives = list(r.body.trust_dir.glob("logbook.archive-*.ndjson"))
     assert archives, "wipe 未歸檔舊鏈"
     # 歸檔鏈載回後，wipe 前簽發的存檔點仍可離線驗證
-    from vacant.logbook import Logbook
+    from vacant_network.logbook import Logbook
     archived = Logbook.load(archives[0])
     all_ckpts = eco._checkpoints_of(who)
     assert all_ckpts

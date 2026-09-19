@@ -26,7 +26,7 @@
 PC 就不再是同一題的天花板，整個 `CEILING_TOO_LOW` 判準失效。
 `--diff` 會把每一題實際插入的行印出來。
 
-⚠ **單邊保證（`vacant/suitegauge.py` 逐字）**：擋得住已知壞解 **≠** 涵蓋真需求。
+⚠ **單邊保證（`vacant_network/suitegauge.py` 逐字）**：擋得住已知壞解 **≠** 涵蓋真需求。
 第 1、2 項全綠只說明「參考解過得了我們自己寫的那幾條，而我們自己想到的三種錯
 被擋下來了」，**不准讀成「驗收套件固定點已解」**。同一句話也寫在
 `bank_manifest.json` 的 `honesty_bounds`。
@@ -34,7 +34,7 @@ PC 就不再是同一題的天花板，整個 `CEILING_TOO_LOW` 判準失效。
 ⚠ 第 3 項驗的是**回饋裡有那個名字／有 args= 與 want=**，
 **不驗 agent 會不會照做**。看得到 ≠ 照做（`docs/VACANT_RUN.md` 誠實邊界 10）。
 
-判準用的是**既有的那把尺**：`vacant/vrun/acceptance.py::run_suite` 與
+判準用的是**既有的那把尺**：`vacant_network/vrun/acceptance.py::run_suite` 與
 `render_failures`，和 `vacant run` 真跑時跑的是同一支，不准另寫第二把。
 
 用法
@@ -62,8 +62,8 @@ REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 if REPO not in sys.path:
     sys.path.insert(0, REPO)
 
-from vacant.vrun import acceptance  # noqa: E402
-from vacant.vrun.sandbox import make_sandbox  # noqa: E402
+from vacant_network.vrun import acceptance  # noqa: E402
+from vacant_network.vrun.sandbox import make_sandbox  # noqa: E402
 
 BANK_DIR = os.path.join(HERE, "bank")
 STAKES = ("bad_a", "bad_b", "bad_c")
@@ -326,7 +326,7 @@ def main() -> int:
             json.dump({"backend": backend_meta, "rows": rows}, fh,
                       ensure_ascii=False, indent=2)
         print("\nJSON → %s" % args.json)
-    print("\n單邊保證：擋得住已知壞解 ≠ 涵蓋真需求（vacant/suitegauge.py）。")
+    print("\n單邊保證：擋得住已知壞解 ≠ 涵蓋真需求（vacant_network/suitegauge.py）。")
     return 0 if not bad else 1
 
 

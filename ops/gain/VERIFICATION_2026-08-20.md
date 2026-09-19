@@ -66,7 +66,7 @@ sandbox 記憶體上限與非有限浮點 wire 編碼都是真的。
 4. **「OFF5 不再是安全漏洞」**：**不成立，且是本包的真實缺口。**
    `gain_run.py:behavior_signature()` 用 `subprocess.run([sys.executable, …])`
    直接執行模型產生的程式——沒有 RLIMIT、沒有 import 白名單、沒有 env 清理，
-   與 `vacant/checks.py` 的受限 worker 不同。OFF5 臂的多數決因此仍在
+   與 `vacant_network/checks.py` 的受限 worker 不同。OFF5 臂的多數決因此仍在
    非受限環境跑模型碼。要修：behavior signature 應改走 `run_python_check`
    的受限 worker 路徑。
 
@@ -87,7 +87,7 @@ sandbox 記憶體上限與非有限浮點 wire 編碼都是真的。
 
 ## 八、我補的修正（同分支，2026-08-20）
 
-**OFF5 沙箱缺口已修。** `vacant/checks.py` 新增 `run_python_capture`
+**OFF5 沙箱缺口已修。** `vacant_network/checks.py` 新增 `run_python_capture`
 （與 `run_python_check` 共用同一條受限路徑，差別只在帶回 runner stdout）；
 `gain_run.behavior_signature` 改走它。候選碼從此只在 worker 裡經
 literal-only proxy 被呼叫；候選自己的 stdout 留在 worker（DEVNULL），

@@ -23,7 +23,7 @@ from ops.gain.gain_run import (
 
 
 def test_verifier_infrastructure_failure_is_not_scored_as_wrong(monkeypatch):
-    from vacant import checks
+    from vacant_network import checks
 
     def broken_verifier(*args, **kwargs):
         raise checks.CheckInfraError("worker did not start")
@@ -128,7 +128,7 @@ def test_behavior_signature_runs_candidate_in_restricted_worker():
 
 
 def test_behavior_signature_infra_failure_is_infra_void(monkeypatch):
-    from vacant import checks
+    from vacant_network import checks
 
     def broken_verifier(*args, **kwargs):
         raise checks.CheckInfraError("worker did not start")

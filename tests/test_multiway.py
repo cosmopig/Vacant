@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 
-from vacant.multiway import MWConfig, simulate_mw
+from vacant_network.multiway import MWConfig, simulate_mw
 
 ROUNDS = 130
 SEEDS = ["u0", "u1", "u2", "u3", "u4"]

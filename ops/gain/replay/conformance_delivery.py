@@ -38,7 +38,7 @@ os.environ.setdefault(
 
 from ops.gain.gain_run import InfraVoid, meets_demand  # noqa: E402
 from ops.gain.replay.exec_select import load_candidates, visible_grade  # noqa: E402
-from vacant.codebench import EvalPlusMBPPLoader  # noqa: E402
+from vacant_network.codebench import EvalPlusMBPPLoader  # noqa: E402
 
 SEED = "g-r212-route-20260828"
 HERE = pathlib.Path(__file__).resolve().parent

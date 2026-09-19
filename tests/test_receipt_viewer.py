@@ -1,11 +1,11 @@
 """展件「收據牆」（`examples/receipt_viewer.html`）的驗收。
 
 這組測試存在的理由：那一頁的整個宣稱是「觀眾眼前這台機器自己把 482 筆重算了一次」。
-如果頁內 JS 的位元組佈局跟 `vacant/logbook.py` 差一個字元，畫面會照樣顯示綠色的
+如果頁內 JS 的位元組佈局跟 `vacant_network/logbook.py` 差一個字元，畫面會照樣顯示綠色的
 「驗證通過」——**一把會 PASS 的瞎尺**。所以：
 
   1. JS 的正規化規則在 `receipt_viewer_crosscheck.py` 裡被**重寫一次**（不是呼叫
-     `vacant.canonical`），再去對 `LogEntry.hash()`；兩條獨立的路走到同一個 hash。
+     `vacant_network.canonical`），再去對 `LogEntry.hash()`；兩條獨立的路走到同一個 hash。
   2. 每一條乾淨斷言旁邊都有一條竄改斷言（改 payload ⇒ hash 變、簽章掛、下一筆
      prev_hash 接不上）。
   3. 展場口徑（CLAUDE.md 鐵律：不准出現「信任／防止／保證」）與離線紅線
@@ -26,9 +26,9 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from ops.gain.replay import receipt_viewer_crosscheck as X  # noqa: E402
-from vacant.canonical import canonical_bytes  # noqa: E402
-from vacant.identity import Identity, PublicIdentity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.canonical import canonical_bytes  # noqa: E402
+from vacant_network.identity import Identity, PublicIdentity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 VIEWER = REPO / "examples" / "receipt_viewer.html"
 RUN = REPO / "runs" / "g_r445_conform_mbpp_ext"
@@ -211,7 +211,7 @@ def test_embedded_sample_is_byte_identical_to_the_run(html):
 # `canonicalString` 真的把它接上去用，而且唯一的形狀 fixture 全是 ASCII 鍵。
 # 把第 849 行的 `Object.keys(v).sort(cmpCodePoint)` 換成不吃比較器的
 # `Object.keys(v).sort()`，node check 9/9、crosscheck、render check 三邊照樣
-# 全線——頁面對非 BMP 鍵算出的 canonical bytes 已經跟 `vacant/canonical.py`
+# 全線——頁面對非 BMP 鍵算出的 canonical bytes 已經跟 `vacant_network/canonical.py`
 # 分岔，卻沒有任何一條 check 抓到。N5b（見 node_check.mjs）補了這個洞；
 # 這裡直接跑一次「真的那份 JS」來證明它會咬人：乾淨頁面過、竄改頁面不過。
 
@@ -282,16 +282,16 @@ def test_node_check_catches_the_sort_without_comparator_mutation(tmp_path):
 # 驗到鏈頭；每一格的裁決、指名與出貨都是這一頁自己重算的」。所以這裡要咬的是同一
 # 件事的三個面向：
 #   1. 頁內內嵌的三條鏈與 ops/gain/replay/r454/ 的原檔**逐位元組相同**（不是「差不多」）；
-#   2. 同一批 entry 用權威實作（vacant/logbook.py、vacant/peerexec.py）在 Python 這端
+#   2. 同一批 entry 用權威實作（vacant_network/logbook.py、vacant_network/peerexec.py）在 Python 這端
 #      再驗一次、再判一次——頁面說被指名的是 K3，Python 也必須自己得到 K3；
 #   3. 竄改斷言：翻掉 K3 那一票、少一票誠實的，兩條路徑都要真的變。
 # 「真的那兩段 JS」由 ops/gain/replay/multiparty_viewer_node_check.mjs 跑（要 node）。
 
 from ops.gain.replay import build_multiparty_viewer as B  # noqa: E402
-from vacant import peerexec as PX  # noqa: E402
-from vacant.crypto import vacant_id_from_pubkey  # noqa: E402
-from vacant.identity import PublicIdentity  # noqa: E402
-from vacant.logbook import LogEntry  # noqa: E402
+from vacant_network import peerexec as PX  # noqa: E402
+from vacant_network.crypto import vacant_id_from_pubkey  # noqa: E402
+from vacant_network.identity import PublicIdentity  # noqa: E402
+from vacant_network.logbook import LogEntry  # noqa: E402
 
 MP_VIEWER = REPO / "examples" / "receipt_viewer_multiparty.html"
 MP_NODE_CHECK = REPO / "ops" / "gain" / "replay" / "multiparty_viewer_node_check.mjs"

@@ -62,7 +62,7 @@ sys.path.insert(0, str(ROOT))
 
 from ops.gain.replay.paired_ci import diff_ci, verdict as raw_verdict  # noqa: E402
 from ops.gain.power_paired import mde_at_n, n_needed_for_power  # noqa: E402
-from vacant.research import holm_bonferroni, mcnemar_exact  # noqa: E402
+from vacant_network.research import holm_bonferroni, mcnemar_exact  # noqa: E402
 
 # ── 突變點（測試用；正式跑一律空字串）────────────────────────────────
 # 記憶鐵律：偵測條要有牙齒。每一個突變體都對應 selftest 裡一條具名檢查。

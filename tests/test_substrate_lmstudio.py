@@ -15,7 +15,7 @@ import json
 import urllib.error
 import urllib.request
 
-from vacant.substrate import LMStudioSubstrate, SubstrateResult
+from vacant_network.substrate import LMStudioSubstrate, SubstrateResult
 
 
 class _FakeResp:

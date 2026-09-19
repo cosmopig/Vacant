@@ -90,7 +90,7 @@ REPO = HERE.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from vacant.vrun import wshash                            # noqa: E402
+from vacant_network.vrun import wshash                            # noqa: E402
 
 R530 = REPO / "ops" / "gain" / "r530"
 BANK = R530 / "bank"
@@ -98,7 +98,7 @@ TEMPLATES = R530 / "templates"
 
 #: 量具借用：**以路徑載入 `ops/gain/r535/run_r535.py`**（`ops/gain` 沒有
 #: `__init__.py`，不能一般 import）。載入它只會執行模組層的常數與三個
-#: `vacant.*` import，沒有副作用（2026-09-19 逐行確認過）。
+#: `vacant_network.*` import，沒有副作用（2026-09-19 逐行確認過）。
 #: ⚠ 借的是**尺**不是**結果**：R535 的數字與本輪的數字不可以合併。
 _R535_PATH = REPO / "ops" / "gain" / "r535" / "run_r535.py"
 _spec = importlib.util.spec_from_file_location("_r535_gauge", _R535_PATH)
@@ -370,7 +370,7 @@ class Driver:
     def cell_argv(self, cell: pathlib.Path, task_id: str, arm: str) -> list[str]:
         spec = ARMS[arm]
         prompt = PI_PROMPT + (FEEDBACK_PLACEHOLDER if spec["placeholder"] else "")
-        return [sys.executable, "-m", "vacant.vrun.launcher",
+        return [sys.executable, "-m", "vacant_network.vrun.launcher",
                 "--workspace", str(cell / "ws"),
                 "--run-dir", str(cell / "run"),
                 "--suite", str(self.suite_dir(task_id)),

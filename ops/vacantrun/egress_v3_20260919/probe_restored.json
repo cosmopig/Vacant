@@ -1,0 +1,66 @@
+{
+  "uid": 1001,
+  "ts": "2026-09-19T15:27:27+0000",
+  "probes": {
+    "tcp4_tailnet_1004": {
+      "ok": true,
+      "value": "connected ('100.86.226.21', 1234)",
+      "error": null,
+      "elapsed_s": 0.002
+    },
+    "tcp6_tailnet_1004": {
+      "ok": false,
+      "value": null,
+      "error": "TimeoutError: timed out",
+      "elapsed_s": 6.006
+    },
+    "tcp4_public_ip_literal": {
+      "ok": true,
+      "value": "connected ('1.1.1.1', 443)",
+      "error": null,
+      "elapsed_s": 0.002
+    },
+    "tcp4_openrouter_dns": {
+      "ok": true,
+      "value": "connected ('104.18.3.115', 443)",
+      "error": null,
+      "elapsed_s": 0.004
+    },
+    "https_openrouter_models": {
+      "ok": true,
+      "value": "HTTP/1.1 200 OK",
+      "error": null,
+      "elapsed_s": 0.085
+    },
+    "dns_via_systemd_resolved": {
+      "ok": true,
+      "value": "172.66.0.243",
+      "error": null,
+      "elapsed_s": 0.007
+    },
+    "dns_udp_direct_8888": {
+      "ok": true,
+      "value": "answer 64 bytes",
+      "error": null,
+      "elapsed_s": 0.003
+    },
+    "icmp_ping_1111": {
+      "ok": true,
+      "value": "rc=0 rtt min/avg/max/mdev = 1.659/1.659/1.659/0.000 ms",
+      "error": null,
+      "elapsed_s": 0.004
+    },
+    "icmp6_ping_tailnet_1004": {
+      "ok": true,
+      "value": "rc=0 rtt min/avg/max/mdev = 0.965/0.965/0.965/0.000 ms",
+      "error": null,
+      "elapsed_s": 0.004
+    },
+    "proxy_port_loopback": {
+      "ok": true,
+      "value": "connected ('127.0.0.1', 8899)",
+      "error": null,
+      "elapsed_s": 0.0
+    }
+  }
+}

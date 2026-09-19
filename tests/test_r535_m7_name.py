@@ -58,7 +58,7 @@ FEEDBACK_TEXT = (
 
 def test_the_feedback_content_never_names_its_own_file():
     """⚠ 這是整個分工的地基。它一旦不成立，兩個指標就會互相汙染。"""
-    from vacant.vrun.retry import (FEEDBACK_BODY, FEEDBACK_FILENAME,
+    from vacant_network.vrun.retry import (FEEDBACK_BODY, FEEDBACK_FILENAME,
                                    FEEDBACK_HEADER, FEEDBACK_TEMPLATE)
     assert FEEDBACK_FILENAME == "VACANT_FEEDBACK.md"
     for blob in (FEEDBACK_HEADER, FEEDBACK_BODY, FEEDBACK_TEMPLATE):

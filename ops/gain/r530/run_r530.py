@@ -59,8 +59,8 @@ from ops.gain.gain_run import runner_git_info, save_receipts  # noqa: E402
 from ops.gain.r530 import openwork_arms as oa  # noqa: E402
 from ops.gain.r530 import gates, tasks as taskmod  # noqa: E402
 from ops.gain.r530.sandbox import make_sandbox  # noqa: E402
-from vacant.identity import Identity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.identity import Identity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 REPO = pathlib.Path(__file__).resolve().parents[3]
 DEFAULT_MODEL = "gemma-4-12b-it-qat"
@@ -234,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
     # ── E-3（發射閘門）：雙向量具全綠才准發射。────────────────────────
     # ⚠ 它跑的是**整個 bank 的 20 題**不是這一塊的 5 題：題庫是一份共用的正典，
     #   而「這一塊用到的那幾題沒問題」不等於「我們發射時用的題庫沒被動過」。
-    #   量不到不是通過（`vacant/suitegauge.py` 的單邊保證）。
+    #   量不到不是通過（`vacant_network/suitegauge.py` 的單邊保證）。
     if args.gauge_scope == "bank":
         _g = subprocess.run(
             [sys.executable, str(REPO / "ops/gain/r530/gauge_r530.py"), "--check"],

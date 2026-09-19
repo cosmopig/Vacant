@@ -64,7 +64,7 @@ gap vs ON           —       8.20pp        3.28pp
    聰明」**——在這批案例裡評審 0/5 命中，真正命中的是稽核。把 off5v 的差距
    講成「Vacant 的審查機制有效」是**歸因錯誤**：起作用的子機制是確定性稽核，
    不是評審／修訂那一段。
-2. **這不推翻「ON 整體比 OFF5V 好」**——稽核本身就是 `vacant/auditor.py`
+2. **這不推翻「ON 整體比 OFF5V 好」**——稽核本身就是 `vacant_network/auditor.py`
    代表的那個子系統（CLAUDE.md：「確定性稽核…provable-fault」），是 Vacant
    架構裡合法、真實存在的一部分，不是為了讓這次實驗好看而外掛的作弊。
    但它**是不是 SPEC_GAIN 真正想量的那個機制**，取決於 SPEC_GAIN 對「Vacant

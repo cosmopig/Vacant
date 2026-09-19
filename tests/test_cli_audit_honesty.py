@@ -23,11 +23,11 @@ import sys
 
 import pytest
 
-from vacant.body import VacantBody
+from vacant_network.body import VacantBody
 
 
 def _cli(*args: str) -> subprocess.CompletedProcess:
-    return subprocess.run([sys.executable, "-m", "vacant.cli", *args],
+    return subprocess.run([sys.executable, "-m", "vacant_network.cli", *args],
                           capture_output=True, text=True, timeout=120)
 
 

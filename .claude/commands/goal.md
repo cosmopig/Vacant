@@ -12,9 +12,47 @@ description: 第一優先目標——Vacant 要能附身在任何 agent 上；�
 
 ---
 
-## 一、目標的可量測定義
+## 〇、⚠ 2026-09-19 人類更正了「附身」的定義——先讀這一段
 
-「附身」不是「裝得起來」，是**兩格都成立**，而且**用真模型**：
+> **不對不對我發現你產生巨大偏差，我們要的不是用指令去喚醒 AGENT 而是
+> 安裝之後我 PI 打開就默認有 VACANT，而不是要用指令一筆筆的去加入。**
+
+⇒ **先前的定義（錯的）**：使用者每次打
+```
+vacant run --suite <目錄> -- pi -p "做這件事"
+```
+⇒ **正確的定義**：
+```
+vacant install          裝一次
+pi -p "做這件事"         之後照舊，Vacant 已經在裡面
+```
+
+**為什麼這個差別是要害**：包裝器最大的繞過洞不是 unix socket，是
+**使用者忘記打那一串**——忘了就完全沒有 Vacant，**而且零痕跡**。
+
+⚠ **底下 §一 到 §五 的「兩格都成立」判準仍然有效，但它量的是「閘門會不會動」，
+不是「預設在不在」。** 五個 agent 的 L-real 全部是在**打了完整包裝指令之後**量到的
+⇒ **那些證據不能拿來宣稱「裝好就有」。**
+
+### 兩層的難度不一樣，不要混講
+
+| 層 | 怎麼做 | 能不能真的「預設」 |
+|---|---|---|
+| **通道**（模型呼叫經過 Vacant） | 寫進 agent **自己的設定檔** | ✅ **可以真的預設**——連打完整路徑也跑不掉 |
+| **閘門**（結束時驗收＋簽收據） | 需要有人接手行程結束 ⇒ **PATH shim** | ⚠ 預設**但打完整路徑就繞過** |
+
+**誠實的宣稱**：通道做得到真正的預設；閘門做得到「預設但可繞」。
+**不准把後者寫成「不會被繞過」**——Saltzer & Schroeder 的 complete mediation
+在這一層做不到，2026-09-19 的 `block_egress` 量測逐條證實
+（unix socket、另一個 uid 的中繼、DNS 全部實測通）。
+
+**做得到而且同樣有力的宣稱是：繞得過，但繞過一定留下痕跡。**
+
+---
+
+## 一、閘門的可量測定義（仍然有效）
+
+「閘門會動」是**兩格都成立**，而且**用真模型**：
 
 | 格 | 判準 | 為什麼兩格都要 |
 |---|---|---|
@@ -80,7 +118,7 @@ OpenCode ＝ pi ＞ Claude Code ＞ Codex(API key) ＞ Hermes
    而且**沒有一格是真模型**（pi 除外，靠 R535）。
 2. **`vacant run --help` 曾經印舊介面**（已修，PR `fix/run-help`）——
    外人照 help 讀找不到收件口，等於沒發。這類「功能在但構不到」要當成附身失敗。
-3. **`envmap` 是單一真相**（`vacant/vrun/envmap.py`）。新增 agent 一律改那裡，
+3. **`envmap` 是單一真相**（`vacant_network/vrun/envmap.py`）。新增 agent 一律改那裡，
    不要在別處再開一張表。
 4. **零接線 vs 要接線**：Claude Code／OpenCode 吃環境變數（launcher 內建 ⇒ 零接線）；
    Codex／pi 吃設定檔（要寫 `config.toml`／`models.json`）。
@@ -93,7 +131,7 @@ OpenCode ＝ pi ＞ Claude Code ＞ Codex(API key) ＞ Hermes
 1. **先查現況**，不要憑記憶：
    ```bash
    sed -n '1,60p' docs/AGENT_COMPAT.md          # 矩陣（含誠實邊界）
-   cat vacant/vrun/envmap.py                     # 名單的單一真相
+   cat vacant_network/vrun/envmap.py                     # 名單的單一真相
    ssh user1@100.124.254.83 'export PATH=/home/user1/.local/opt/node-v22.23.2-linux-x64/bin:$PATH; for a in pi opencode claude codex; do printf "%-10s " "$a"; command -v $a >/dev/null && $a --version 2>&1|head -1 || echo "沒裝"; done'
    ```
 2. **報缺口**：哪個 agent 在哪一級、缺什麼才能升級。
@@ -120,8 +158,12 @@ pi、OpenCode **與 Claude Code** 三個都到 L-real，各自拒交格 exit 20 
    `claude-3-5-haiku` 去問 1003 照樣回 gemma 的內容；Claude Code 對不認得的 id
    **放行不擋**（OpenCode 是硬失敗，方向相反）⇒ **沒有任何一個環節會在
    「上游其實不是你以為的模型」時報錯。**
-3. **`route()` 按 path 猜家族**，未命名的家族會落到公開 API 的預設上游。
-   已讓它在收據上看得見（`upstreams_defaulted`），但**結構性補法是 `block_egress.sh`（V3）**。
+3. **`route()` 按 path 猜家族**，未命名的家族~~會落到公開 API 的預設上游~~
+   **2026-09-19 起指到一個會拒絕的本機 sink**（`DECISION_20260919_V1_GATES.md`）：
+   `wireproxy` 在開任何連線之前回 502，要走公開 API 得明講
+   （`--allow-public-upstream` 或 `VACANT_RUN_ALLOW_PUBLIC_UPSTREAM=1`）。
+   ⚠ `route()` **按 path 猜家族這件事本身沒修**，而且這擋的是「沒人指定的路由」
+   不是「出網」——agent 繞過 proxy 直連的**結構性補法仍然是 `block_egress.sh`（V3）**。
 
 ### ✅ Codex (API key) 也到 L-real（2026-09-19）
 
@@ -167,7 +209,10 @@ auth.json ⇒ 走的一定是 API key 那條。ChatGPT 登入那條一個字都�
 
 ### 下一個（優先序）
 
-1. **`block_egress.sh`（V3）** —— `upstreams_defaulted` 只是讓那個洞**看得見**，沒補起來。
+1. **`block_egress.sh`（V3）** —— ⚠ 口徑要更新：`upstreams_defaulted` 那個洞
+   （沒人指定的路由落到公開 API）**2026-09-19 已經補了**（fail-closed 本機 sink）。
+   `block_egress.sh` 現在守的是**另一個**洞：agent 繞過 proxy 直連，
+   以及 `envmap` 名單漏一個變數。那兩個 sink 擋不住。
 2. **`VACANT_CODEX_WIRE=chat`** —— Codex 走 chat/completions 那條**沒量過**，
    只有 chat/completions 的上游要靠它。
 3. ~~Hermes~~ ✅ **2026-09-19 到 L-real**（拒交格 exit 20／交付格 exit 0，

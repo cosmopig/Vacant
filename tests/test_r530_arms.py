@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT))
 from ops.gain.r530 import acceptance, gauge, openwork_arms as oa  # noqa: E402
 from ops.gain.r530 import sandbox as sb, tasks as taskmod, wshash  # noqa: E402
 from ops.localagent import DENY as LOCALAGENT_DENY  # noqa: E402
-from vacant.memory import KS1_FORBIDDEN, KS1Violation, assert_ks1_clean  # noqa: E402
+from vacant_network.memory import KS1_FORBIDDEN, KS1Violation, assert_ks1_clean  # noqa: E402
 
 
 # ── 三臂 prompt 逐字相同（Fable 裁決的核心約束）──────────────────────────

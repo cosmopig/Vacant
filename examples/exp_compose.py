@@ -11,10 +11,10 @@
 from __future__ import annotations
 import os, sys, tempfile, time, json, urllib.request
 from pathlib import Path
-from vacant.host import Host
-from vacant.composer import Composer
-from vacant.verifier import is_correct
-from vacant.tasks import task_stream, NICHES
+from vacant_network.host import Host
+from vacant_network.composer import Composer
+from vacant_network.verifier import is_correct
+from vacant_network.tasks import task_stream, NICHES
 
 # 端點不寫死（G10）：VACANT_ENDPOINT 指定，預設本機 LM Studio
 CAND = os.environ.get("VACANT_ENDPOINT", "http://localhost:1234").rstrip("/")
@@ -36,15 +36,15 @@ if not url:
     print("[BLOCKED] LM Studio 端點連不到", flush=True); sys.exit(2)
 
 if WHICH == "hermes":
-    from vacant.hermes_substrate import HermesSubstrate
+    from vacant_network.hermes_substrate import HermesSubstrate
     sub = HermesSubstrate(model=MODEL, toolsets="", timeout=180, learn=False)
     brain = f"Hermes Agent -> {MODEL}"
 elif WHICH == "responses":
-    from vacant.openai_substrate import ResponsesSubstrate
+    from vacant_network.openai_substrate import ResponsesSubstrate
     sub = ResponsesSubstrate(url, model=MODEL, timeout=75, learn=False)
     brain = f"{MODEL} via /api/v1/chat (reasoning model)"
 else:
-    from vacant.openai_substrate import OpenAISubstrate
+    from vacant_network.openai_substrate import OpenAISubstrate
     sub = OpenAISubstrate(url, model=MODEL, timeout=60, temperature=TEMP, learn=False)
     brain = f"{MODEL} @ {url} (temp={TEMP})"
 

@@ -13,8 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from vacant.checks import run_python_check
-from vacant.codebench import (
+from vacant_network.checks import run_python_check
+from vacant_network.codebench import (
     EVALPLUS_DEFAULT_PATH,
     EVALPLUS_MBPP_PLUS_COUNT,
     EVALPLUS_MBPP_PLUS_SHA256,
@@ -106,7 +106,7 @@ def test_environment_override_keeps_official_sha_pin(tmp_path, monkeypatch):
     p = tmp_path / "official-at-custom-location.jsonl"
     sha = _write_pack(p, [_REC1, _REC2, _REC3])
     monkeypatch.setenv("VACANT_EVALPLUS_PATH", str(p))
-    monkeypatch.setattr("vacant.codebench.EVALPLUS_MBPP_PLUS_SHA256", sha)
+    monkeypatch.setattr("vacant_network.codebench.EVALPLUS_MBPP_PLUS_SHA256", sha)
     loader = EvalPlusMBPPLoader(expected_count=3)
     assert len(list(loader.iter_tasks("env"))) == 3
 

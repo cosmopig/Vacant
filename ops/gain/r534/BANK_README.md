@@ -91,7 +91,7 @@ B 層抽的是**扣掉 A 層之後**的剩餘 ⇒ 高分歧題已被抽走一部
 1. **`goal.md` ＝ 題庫 `prompt` 欄位逐位元組**。r460／r532 送給模型的就是這個字串；
    改寫一個字，這 20 題就不再與那兩組歸檔資料比得起來。prompt 尾端那三行中文
    （頂層函式、只用標準函式庫、要 return）是題庫產生器加的，照樣留著。
-2. **比對器沿用 `vacant/codebench.py::_lcb_check_code` 的 `__aeq`**（先 `==`、
+2. **比對器沿用 `vacant_network/codebench.py::_lcb_check_code` 的 `__aeq`**（先 `==`、
    bool 不與數值混談、數值 1e-6、list/tuple 遞迴），斷言訊息維持
    `args=… got=… want=…` 三欄位逐字——H 臂的回饋就是轉發這個字串。
 3. **`test_hidden.py` ＝ 可見 ∪ 隱藏**（26–28 條），與 `LiveCodeBenchLoader`
@@ -115,7 +115,7 @@ verdict = OK
 - **正控制只有 1/20。** LCB 沒有 canonical solution，r530 的雙向量具（參考解全過／
   壞樁全擋）在這裡做不到。`lcb_3686`／`lcb_3700` 這兩題**歷史上沒有任何一個臂通過過**
   ⇒ 我們沒有證據證明一個正確解會被判過（manifest 的 `any_arm_passed_hidden=false`）。
-- **渲染檔比既有判準寬。** `vacant/checks.py` 的 AST 政策連 `list.remove` 都擋
+- **渲染檔比既有判準寬。** `vacant_network/checks.py` 的 AST 政策連 `list.remove` 都擋
   （`_FORBIDDEN_ATTRS`）、第三方 import 一律擋（R393 的 typing 坑就是這條）。
   被政策擋掉的碼，既有判準連跑都不跑就判 False，渲染出來的 `test_hidden.py` 會照跑。
   ⇒ **R534 的主指標走既有那條**：

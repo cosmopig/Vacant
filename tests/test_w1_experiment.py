@@ -5,18 +5,18 @@ batch（斷點續跑＋看門狗）/ x1 harness（任務族＋oracle-lesson pilo
 
 import pytest
 
-from vacant.auditor import Auditor
-from vacant.batch import RunLedger, Watchdog
-from vacant.host import Host
-from vacant.identity import Identity
-from vacant.logbook import Logbook
-from vacant.memory import (
+from vacant_network.auditor import Auditor
+from vacant_network.batch import RunLedger, Watchdog
+from vacant_network.host import Host
+from vacant_network.identity import Identity
+from vacant_network.logbook import Logbook
+from vacant_network.memory import (
     Episode, KS1Violation, MemoryManager, MemoryStream,
     assert_ks1_clean, lesson_leaks_test_data,
 )
-from vacant.router import Router
-from vacant.substrate import EchoSubstrate
-from vacant.x1 import (
+from vacant_network.router import Router
+from vacant_network.substrate import EchoSubstrate
+from vacant_network.x1 import (
     FAMILIES, ORACLE_LESSONS, make_pilot_tasks, run_x1, transfer_curve,
 )
 
@@ -82,7 +82,7 @@ def test_memory_episodes_are_signed_on_chain():
     MemoryManager("M2").record(st, **_ep(1, lesson="教訓：邊界要先想"))
     assert len(st.logbook) == 1
     assert st.episodes()[0].task_id == "t1"
-    from vacant.identity import PublicIdentity
+    from vacant_network.identity import PublicIdentity
     assert st.logbook.verify_chain(PublicIdentity(st.identity.vacant_id, st.identity.pub))
 
 
@@ -196,7 +196,7 @@ def test_x1_pilot_tasks_deterministic():
 
 def test_x1_oracle_lesson_transfer(tmp_path):
     """oracle-lesson 條件下，族內第 2 題起應被教訓救起（遷移通道打通）。"""
-    from vacant.x1 import make_family_sequence
+    from vacant_network.x1 import make_family_sequence
     # 變體 0 每 5 題輪到一次；取 15 題 → 3 個變體 0 的實例（有正解表）
     tasks = [t for t in make_family_sequence("string_edge", 15)
              if t.variant_params["variant"] == 0]
@@ -216,7 +216,7 @@ def test_x1_oracle_lesson_transfer(tmp_path):
 
 
 def test_x1_m0_arm_never_gets_memory(tmp_path):
-    from vacant.x1 import make_family_sequence
+    from vacant_network.x1 import make_family_sequence
     tasks = [t for t in make_family_sequence("string_edge", 2)
              if t.variant_params["variant"] == 0]
     st = _stream()
@@ -227,7 +227,7 @@ def test_x1_m0_arm_never_gets_memory(tmp_path):
 
 
 def test_x1_resume_skips_done(tmp_path):
-    from vacant.x1 import make_family_sequence
+    from vacant_network.x1 import make_family_sequence
     tasks = [t for t in make_family_sequence("string_edge", 2)
              if t.variant_params["variant"] == 0]
     led = RunLedger(tmp_path / "l.jsonl")
@@ -242,7 +242,7 @@ def test_x1_resume_skips_done(tmp_path):
 
 
 def test_x1_infra_void_on_persistent_failure(tmp_path):
-    from vacant.x1 import make_family_sequence
+    from vacant_network.x1 import make_family_sequence
 
     class DeadBrain:
         def generate(self, prompt):
@@ -260,7 +260,7 @@ def test_x1_infra_void_on_persistent_failure(tmp_path):
 
 def test_x1_resume_replays_memory(tmp_path):
     """resume 後 M2 臂的記憶必須與未中斷的 run 一致（episode 重播回 stream）。"""
-    from vacant.x1 import make_family_sequence
+    from vacant_network.x1 import make_family_sequence
     tasks = [t for t in make_family_sequence("string_edge", 15)
              if t.variant_params["variant"] == 0]  # 3 題同變體
     # 第一段：只跑第 1 題（模擬跑到一半崩潰）
@@ -279,7 +279,7 @@ def test_x1_resume_replays_memory(tmp_path):
 
 def test_x1_retry_backoff_then_success(tmp_path):
     """瞬斷（第一次失敗、第二次成功）不得被記成 infra_void；backoff 有被執行。"""
-    from vacant.x1 import make_family_sequence
+    from vacant_network.x1 import make_family_sequence
 
     class FlakyBrain:
         def __init__(self):
@@ -321,7 +321,7 @@ def test_run_ledger_tolerates_non_dict_line(tmp_path):
 
 
 def test_logbook_branch_mismatch_raises():
-    from vacant.logbook import Logbook
+    from vacant_network.logbook import Logbook
     idn = Identity.generate()
     lb = Logbook()
     lb.append("BIRTH", {}, idn, ts_ms=1)

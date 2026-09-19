@@ -3,7 +3,7 @@
 
 這支在架構裡承重什麼：R440P §六 對外那句「收據上照樣列出那五個人各自卡在第幾條」
 只有在 `conform_failure_detail` 真的算得出條號時才成立。而它的輸入是
-`vacant/codebench.py` 產生的 check code，形狀哪天改了、切片器就會安靜地回一片 null。
+`vacant_network/codebench.py` 產生的 check code，形狀哪天改了、切片器就會安靜地回一片 null。
 本支把「安靜失效」變成 FAIL。
 
 四層：

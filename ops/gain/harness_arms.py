@@ -11,7 +11,7 @@ F4（狀態明寫），而那條路徑在本 repo 從來沒被量過。這三條
 逐字相同的那條規則管的是**記憶臂**（X1 的 M0/M1/M2），那裡要量的是記憶的效果。
 這裡要量的就是 harness，而 prompt 是 harness 的一部分。**但 KS-1 的實質禁令照樣
 適用**：本模組任何 prompt／回饋訊息禁止出現「你有責任／會被懲罰／有人在看」類
-措辭，只准說「做什麼」與「執行結果是什麼」——`vacant.memory.assert_ks1_clean`
+措辭，只准說「做什麼」與「執行結果是什麼」——`vacant_network.memory.assert_ks1_clean`
 在 import 時就對每一個常數跑過一遍（見本檔尾端），繞不過去。
 
 **V/GT 分離（SPEC_GAIN §2、§5.8）**：本模組只轉發 `str(exc)`，永遠不自己計算期望值。
@@ -24,7 +24,7 @@ LCB 的 assert 訊息 `args=… got=… want=…` 三個欄位**全部來自 vis
   只有 `hidden \\ visible` 那一段才是 GT；稽核腳本檢查的正是後者。
 
 不改任何既有臂：`arm_off`／`arm_off5`／`arm_conform`／`arm_eq5`／`arm_on` 一個字不動，
-`gain_run.extract_code`／`meets_demand`／`vacant/checks.py` 也一個字不動——
+`gain_run.extract_code`／`meets_demand`／`vacant_network/checks.py` 也一個字不動——
 本模組只**呼叫**它們（§4.5 的「不動的東西」清單，`tests/test_gain_harness_arms.py`
 用原始碼 sha256 釘死）。
 """
@@ -41,7 +41,7 @@ import time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 from ops.gain.brain_cline import InfraVoid  # noqa: E402
-from vacant.memory import assert_ks1_clean  # noqa: E402
+from vacant_network.memory import assert_ks1_clean  # noqa: E402
 
 # ── 預算（三臂相同，寫死成模組常數，**不做成 CLI 旋鈕**；§4.0.6）────────────
 #
@@ -99,7 +99,7 @@ def static_precheck(code: str, allowed_imports=DEFAULT_ALLOWED_IMPORTS,
       暫存目錄裡的一份 .py，server 根本不會起來；pyflakes 會違反「runtime 依賴
       只有 cryptography」（CLAUDE.md 慣例）。`ast` ＋ 既有白名單務實得多。
     """
-    from vacant.checks import (_BASE_IMPORTS, _FORBIDDEN_ATTRS, _FORBIDDEN_CALLS,
+    from vacant_network.checks import (_BASE_IMPORTS, _FORBIDDEN_ATTRS, _FORBIDDEN_CALLS,
                                _FORBIDDEN_NAMES)
     if not (code or "").strip():
         return False, "empty"
@@ -142,7 +142,7 @@ def _top_level_functions(tree: ast.Module, entry_point: str | None) -> list[str]
     """
     import builtins
 
-    from vacant.checks import RUNNER_RESERVED_NAMES
+    from vacant_network.checks import RUNNER_RESERVED_NAMES
     names: list[str] = []
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -169,7 +169,7 @@ def precheck_detail(code: str, allowed_imports=DEFAULT_ALLOWED_IMPORTS,
     是哪一個名字被擋。OpenCode 只報 severity-1、上限 20 條的節制在我們這邊
     天然滿足（一次只有一個 reason）。
     """
-    from vacant.checks import (_BASE_IMPORTS, _FORBIDDEN_ATTRS, _FORBIDDEN_CALLS,
+    from vacant_network.checks import (_BASE_IMPORTS, _FORBIDDEN_ATTRS, _FORBIDDEN_CALLS,
                                _FORBIDDEN_NAMES)
     if not (code or "").strip():
         return None
@@ -224,7 +224,7 @@ def visible_report(code: str, task: dict,
       好讓 §5.8 的靜態斷言可以逐字 grep 而不必開例外——唯一的例外是下面 `_RULES`
       那句給模型的禁令，稽核腳本會先把那個**凍結常數**整段扣掉再掃。
     """
-    from vacant.checks import CheckInfraError, run_python_capture
+    from vacant_network.checks import CheckInfraError, run_python_capture
     nonce = "FB_" + secrets.token_hex(8)
     var = "__vacant_fb_" + secrets.token_hex(4)
     check_src = task["visible_check"]["code"]
@@ -383,7 +383,7 @@ def run_selftests(code: str, task: dict, cases: list[tuple[list, object]],
     """
     if not cases or not task.get("entry_point"):
         return None
-    from vacant.checks import CheckInfraError, run_python_capture
+    from vacant_network.checks import CheckInfraError, run_python_capture
     nonce = secrets.token_hex(4)
     marker = "ST_" + secrets.token_hex(8)
     body = render_selftest_check(task["entry_point"], cases, nonce)

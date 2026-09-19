@@ -1,6 +1,6 @@
 """suitespec 的確定性測試——「驗收套件是資料不是程式」這句話的可執行版本。
 
-每一條對應 `vacant/suitespec.py` 的一句主張。分成四組：
+每一條對應 `vacant_network/suitespec.py` 的一句主張。分成四組：
   §1 validator：什麼進得來、什麼進不來（不可表達性就是靠這一組成立的）
   §2 正規化與確定性：上鏈的位元組是重寫過的、渲染是確定性的
   §3 與 loader 的一致：前置逐位元組相同；真題無損轉換（**真沙箱**）
@@ -20,8 +20,8 @@ os.environ.setdefault(
     "VACANT_EVALPLUS_PATH", ".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz"
 )
 
-from vacant import suitespec as ss  # noqa: E402
-from vacant.suitespec import SuiteSpecError  # noqa: E402
+from vacant_network import suitespec as ss  # noqa: E402
+from vacant_network.suitespec import SuiteSpecError  # noqa: E402
 
 
 def spec(tests=None, **over):
@@ -168,7 +168,7 @@ def test_sets_are_emitted_in_a_hash_independent_order():
     import subprocess
     import sys
     prog = ("import sys; sys.path.insert(0, '.');"
-            "from vacant.suitespec import canonical_literal;"
+            "from vacant_network.suitespec import canonical_literal;"
             "print(canonical_literal(\"{'b', 'a', 'c', 'zz', 'q'}\"))")
     outs = set()
     for seed in ("0", "1", "12345"):
@@ -212,7 +212,7 @@ def test_preludes_are_byte_identical_to_the_loaders():
     兩份實作不共用一段字串是刻意的（機制層不相依題庫載入器），所以漂移防呆
     要有人吵——就是這一條。四種旗標組合都比。
     """
-    from vacant.codebench import _check_code, _lcb_check_code
+    from vacant_network.codebench import _check_code, _lcb_check_code
     for rxp in (False, True):
         for seq in (False, True):
             canon = ("import re\ndef g(x):\n    return re.search('a', x)\n" if rxp
@@ -236,7 +236,7 @@ def test_lcb_conversion_differs_from_the_loader_by_exactly_the_entry_binding():
     退回去的方式寫成可執行的：把綁定那一行拿掉、把 `__entry(` 換回原名，就必須
     與 loader 的碼逐位元組相同。這比舊版更嚴——它同時釘住「差別只有這一處」。
     """
-    from vacant.codebench import LiveCodeBenchLoader
+    from vacant_network.codebench import LiveCodeBenchLoader
     tasks = list(LiveCodeBenchLoader().iter_tasks("x"))
     assert len(tasks) == 91
     for t in tasks[:12]:
@@ -252,7 +252,7 @@ def test_lcb_conversion_differs_from_the_loader_by_exactly_the_entry_binding():
 
 @pytest.fixture(scope="module")
 def mbpp_tasks():
-    from vacant.codebench import EvalPlusMBPPLoader
+    from vacant_network.codebench import EvalPlusMBPPLoader
     try:
         return list(EvalPlusMBPPLoader(expose_contract=True).iter_tasks("x"))
     except FileNotFoundError:
@@ -348,7 +348,7 @@ def test_a_zero_test_spec_is_refused_by_the_validator_and_by_the_gauge():
     渲染出來只剩前置、零條 assert ⇒ 參考解通過、壞樁也通過 ⇒ `all_rejected=False`
     ⇒ 量具不合格。fail-open 要兩層都堵，因為「validator 有一天被改鬆」不是不可能。
     """
-    from vacant.suitegauge import broken_stub, gauge_suite
+    from vacant_network.suitegauge import broken_stub, gauge_suite
 
     with pytest.raises(SuiteSpecError):
         spec(tests=[])
@@ -361,7 +361,7 @@ def test_a_zero_test_spec_is_refused_by_the_validator_and_by_the_gauge():
     out = gauge_suite(code, ref, [broken_stub("f")], entry_point="f")
     assert out.ref_passed and not out.all_rejected and not out.ok
     # 而且 peerexec 那條路根本走不到這裡：它先 validate。
-    from vacant.peerexec import run_suite_gauge
+    from vacant_network.peerexec import run_suite_gauge
     with pytest.raises(SuiteSpecError) as e:
         run_suite_gauge(naked, ref, [broken_stub("f")], entry_point="f")
     assert "empty_suite_rejected" in str(e.value)
@@ -402,7 +402,7 @@ def test_dangerous_entry_points_are_refused_even_when_the_task_asks_for_them(ep)
 
     ⚠ 這層是**防禦縱深**不是修法：修法是 `entry_binding` 的命名空間查找
       （下一條測的），它讓這些名字在結構上就到不了 builtins。兩層都要在，
-      因為「結構上到不了」這句話依賴 `vacant/checks.py` 的模板，而兩個檔案會各自演化。
+      因為「結構上到不了」這句話依賴 `vacant_network/checks.py` 的模板，而兩個檔案會各自演化。
     """
     with pytest.raises(SuiteSpecError) as e:
         ss.validate({"v": 1, "dialect": "mbpp", "entry_point": ep,
@@ -431,12 +431,12 @@ def test_a_task_may_still_own_a_pure_value_builtin_name():
 def test_entry_point_blacklist_covers_the_runner_template():
     """漂移防呆：runner 模板在 module scope 綁的每一個名字都要在黑名單裡。
 
-    `vacant/checks.py::_test_runner_source` 是**另一個檔案**。它哪天多 import 一個
+    `vacant_network/checks.py::_test_runner_source` 是**另一個檔案**。它哪天多 import 一個
     模組，這條就會 FAIL——而不是安靜地多出一個可以被 entry_point 撞到的名字。
     """
     import ast as _ast
 
-    from vacant.checks import _test_runner_source
+    from vacant_network.checks import _test_runner_source
     src = _test_runner_source(worker_path="/w.py", candidate_path="/c.py",
                               worker_cwd="/tmp", nonce="N:", call_timeout=1.0,
                               test_code="pass", function_names=[])
@@ -659,7 +659,7 @@ def test_every_renderer_name_is_reserved_on_the_sandbox_side():
     """
     import builtins as _bi
 
-    from vacant import checks as ck
+    from vacant_network import checks as ck
 
     reserved = set(dir(_bi)) | set(ck.RUNNER_RESERVED_NAMES)
     assert ss.RESERVED_NAMES <= reserved, ss.RESERVED_NAMES - reserved

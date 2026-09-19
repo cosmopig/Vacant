@@ -10,9 +10,13 @@
       畫面上那句 `ImportError: cannot import name 'mul'` 必須是驗收
       driver 當場抓到的例外——所以 `demo.py` 的原始碼裡**不准**有那句話。
   · `test_receipt_is_real_and_verifies_with_the_existing_ruler`
-      收據是真的 Ed25519 鏈，而且用**既有的**驗章器（`vacant.vrun.verify_receipts`
+      收據是真的 Ed25519 鏈，而且用**既有的**驗章器（`vacant_network.vrun.verify_receipts`
       ＝`ops/gain/replay/verify_run_receipts.py` 的同一支）驗得過。
       不准另寫第二把尺。
+      ⚠ **2026-09-19 起這一幕的總判是 `VOID` 不是 `OK`，而且那是規格**：
+      這隻假 agent 一通模型都沒打 ⇒ `requests_seen == 0` ⇒ 鏈完整但不是
+      「中介發生過」的證據。判回 OK ＝ 尺分不出零請求的假拒交格，
+      那正是那天量到的洞，所以這條測試把 VOID 釘死。
   · `test_demo_agent_makes_no_network_call`
       「沒有網路也跑得完」的可執行版本：假 agent 的原始碼裡不准出現任何
       連線用的模組，而且真跑的 `requests_seen` 必須是 0。
@@ -40,8 +44,8 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from vacant.vrun import demo, launcher                           # noqa: E402
-from vacant.vrun import verify_receipts as vrr                   # noqa: E402
+from vacant_network.vrun import demo, launcher                           # noqa: E402
+from vacant_network.vrun import verify_receipts as vrr                   # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -61,7 +65,7 @@ def test_gate_really_refuses_the_delivery(ran):
 
 def test_failure_text_is_really_raised_not_a_string_literal(ran):
     assert "cannot import name 'mul'" in ran["failures"]
-    src = (ROOT / "vacant" / "vrun" / "demo.py").read_text(encoding="utf-8")
+    src = (ROOT / "vacant_network" / "vrun" / "demo.py").read_text(encoding="utf-8")
     # 那句話只准出現在**模組 docstring**裡（說明 V0 實測長什麼樣），
     # 不准出現在任何一行會被執行的碼上——否則畫面上那句就是印死字串。
     lines = src.splitlines()
@@ -73,8 +77,10 @@ def test_failure_text_is_really_raised_not_a_string_literal(ran):
 
 def test_receipt_is_real_and_verifies_with_the_existing_ruler(ran):
     assert ran["receipt_entries"] == 2                # ws_attempt + ws_verdict
-    assert ran["receipts_verdict"] == "OK"
+    # 鏈是完整的（失敗 0），但這一幕零模型請求 ⇒ 總判 VOID。兩件事分開講。
+    assert ran["receipts_verdict"] == "VOID"
     assert ran["receipts_failed_total"] == 0
+    assert ran["receipts_unmediated_chains_n"] == 1
     run_dir = pathlib.Path(ran["root"]) / "receipts"
     chain = [json.loads(l) for l in
              (run_dir / "receipts_RUN-ON.ndjson")
@@ -84,7 +90,13 @@ def test_receipt_is_real_and_verifies_with_the_existing_ruler(ran):
     assert chain[-1]["payload"]["stop_reason"] == "visible_fail"
     # 再用既有那把尺跑一次（不准另寫第二把）
     rows = vrr.verify_run(run_dir)
-    assert [r["verdict"] for r in rows] == ["OK"]
+    assert [r["verdict"] for r in rows] == ["VOID"]
+    # ⚠ **VOID 不准把鏈說成壞的**：鏈完整與中介發生過是兩個維度。
+    assert rows[0]["chain_ok"] is True
+    assert rows[0]["logbook_verify_chain"] is True
+    assert rows[0]["failures"] == []
+    assert rows[0]["mediated"] is False
+    assert rows[0]["void_reason"] == "no_requests_seen"
 
 
 def test_demo_agent_makes_no_network_call(ran, tmp_path):
@@ -102,9 +114,10 @@ def test_the_anti_performance_guard_actually_fires():
     summary = {"stop_reason": "visible_fail", "accepted": False, "refused": True,
                "failures": "boom", "visible_passed": 1, "visible_total": 2}
     chain = [{"type": "ws_verdict", "payload": {"accepted": False}}]
-    verified = {"verdict": "OK", "failed_total": 0}
+    verified = {"verdict": "VOID", "failed_total": 0, "unmediated_chains_n": 1}
     st = subprocess.CompletedProcess([], 0, stdout="selftest: PASS\n", stderr="")
-    vf = subprocess.CompletedProcess([], 0, stdout="", stderr="")
+    vf = subprocess.CompletedProcess([], demo.VERIFY_EXIT_VOID, stdout="",
+                                     stderr="")
     # 乾淨路徑不喊停
     demo._assert_not_a_performance(ok, gated_ok, summary, chain, verified, st, vf)
 
@@ -114,9 +127,16 @@ def test_the_anti_performance_guard_actually_fires():
         ("裁決不對", {"summary": {**summary, "stop_reason": "visible_pass"}}),
         ("收據說 accepted", {"chain": [{"type": "ws_verdict",
                                         "payload": {"accepted": True}}]}),
-        ("收據驗不過", {"verified": {"verdict": "BROKEN", "failed_total": 1}}),
+        ("收據驗不過", {"verified": {"verdict": "BROKEN", "failed_total": 1,
+                                      "unmediated_chains_n": 0}}),
+        # ⚠ 這一條是新的負控制：尺**判回 OK** 也要當場死掉——零請求的這一幕
+        #   如果驗成乾淨的 OK，代表那把尺分不出假拒交格。
+        ("尺判回 OK（分不出零請求）",
+         {"verified": {"verdict": "OK", "failed_total": 0,
+                       "unmediated_chains_n": 0}}),
         ("負控制沒過", {"st": subprocess.CompletedProcess([], 1, "1 FAILED", "")}),
-        ("驗章器回非 0", {"vf": subprocess.CompletedProcess([], 1, "", "")}),
+        ("驗章器回 0（應該是 VOID）",
+         {"vf": subprocess.CompletedProcess([], 0, "", "")}),
     ):
         args = {"plain": ok, "gated": gated_ok, "summary": summary,
                 "chain": chain, "verified": verified, "selftest": st,
@@ -132,7 +152,7 @@ def test_the_anti_performance_guard_actually_fires():
 
 def test_eco_demo_is_untouched():
     """`vacant demo` 不給 kind ⇒ 還是舊的 §11 生態對照實驗。"""
-    from vacant.cli import build_parser
+    from vacant_network.cli import build_parser
 
     assert build_parser().parse_args(["demo"]).kind == "eco"
     assert build_parser().parse_args(["demo", "gate"]).kind == "gate"
@@ -144,7 +164,7 @@ def test_cli_demo_gate_exits_zero_and_prints_json(tmp_path):
     真正非 0 的是它內部那個 `vacant run` 子行程——退出碼寫在 JSON 裡。
     """
     out = subprocess.run(
-        [sys.executable, "-m", "vacant.cli", "demo", "gate", "--json",
+        [sys.executable, "-m", "vacant_network.cli", "demo", "gate", "--json",
          "--root", str(tmp_path / "cli")],
         cwd=str(ROOT), capture_output=True, text=True, timeout=600)
     assert out.returncode == 0, out.stderr[-2000:]
@@ -214,7 +234,10 @@ def test_selfcheck_requests_seen_is_the_evidence(tmp_path, upstream, monkeypatch
 def test_verify_glob_accepts_absolute_path(ran):
     run_dir = pathlib.Path(ran["root"]) / "receipts"
     out = vrr.run_glob(str(run_dir))
-    assert out["runs_n"] == 1 and out["verdict"] == "OK"
+    # 這條測的是**路徑吃不吃**，不是判決內容；`VOID` 是那一幕的正解
+    # （零模型請求），只要 `runs_n` 數得對就代表 glob 命中了。
+    assert out["runs_n"] == 1 and out["verdict"] == "VOID"
+    assert out["broken_chains_n"] == 0
     # 帶萬用字元的絕對 pattern 也要吃（`--glob '~/.vacant-run/*'` 的形狀）
     out2 = vrr.run_glob(str(run_dir.parent / "*"))
-    assert out2["runs_n"] >= 1 and out2["verdict"] == "OK"
+    assert out2["runs_n"] >= 1 and out2["verdict"] == "VOID"

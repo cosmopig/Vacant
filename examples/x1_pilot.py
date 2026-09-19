@@ -28,11 +28,11 @@ import json
 import os
 from pathlib import Path
 
-from vacant.batch import RunLedger, Watchdog
-from vacant.identity import Identity
-from vacant.logbook import Logbook
-from vacant.memory import MemoryManager, MemoryStream
-from vacant.x1 import (
+from vacant_network.batch import RunLedger, Watchdog
+from vacant_network.identity import Identity
+from vacant_network.logbook import Logbook
+from vacant_network.memory import MemoryManager, MemoryStream
+from vacant_network.x1 import (
     finalize_run_package,
     load_x1_tasks,
     make_pilot_tasks,
@@ -63,9 +63,9 @@ def _build_tasks(args):
     if args.loader == "x1":
         return make_pilot_tasks(args.n_per_family)
     if args.loader == "builtin":
-        from vacant.codebench import BuiltinSampleLoader
+        from vacant_network.codebench import BuiltinSampleLoader
         return load_x1_tasks(BuiltinSampleLoader(), args.seed, args.n)
-    from vacant.codebench import EvalPlusMBPPLoader
+    from vacant_network.codebench import EvalPlusMBPPLoader
     return load_x1_tasks(EvalPlusMBPPLoader(), args.seed, args.n)
 
 
@@ -94,7 +94,7 @@ def main() -> None:
     if args.stub:
         brain = _StubBrain(usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0})
     else:
-        from vacant.brains import LMStudioBrain
+        from vacant_network.brains import LMStudioBrain
         wd = Watchdog(args.base, on_down=lambda m: print(f"[watchdog] {m}"))
         if not wd.wait_alive(retries=3, interval=5):
             raise SystemExit(f"端點 {args.base} 不可用；先開 LM Studio 再跑")

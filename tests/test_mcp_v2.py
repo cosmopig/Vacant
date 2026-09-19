@@ -7,9 +7,9 @@ from __future__ import annotations
 
 import json
 
-from vacant import mcp_server
-from vacant.ecosystem import Ecosystem
-from vacant.receipt import sha256_canonical
+from vacant_network import mcp_server
+from vacant_network.ecosystem import Ecosystem
+from vacant_network.receipt import sha256_canonical
 
 
 class FakeBrain:

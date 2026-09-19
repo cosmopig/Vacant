@@ -48,7 +48,7 @@ Popen → sudo -n env -i → unshare --net → setpriv --reuid=65534 → bash �
 
 ⚠ 它會**自我放大**：孤兒堆高 load ⇒ 後面每一格的逾時虛發 ⇒ 每次虛發再留一批孤兒。
 
-## 修法（`vacant/vrun/sandbox.py`）
+## 修法（`vacant_network/vrun/sandbox.py`）
 
 1. `_kill_group` 從模組函式改成**可覆寫的方法**；`UnshareSandbox` 覆寫成先走
    `sudo -n kill -9 -- -<pgid>`（提權過的行程組只有 root 殺得掉），再直接 `killpg` 一次。
@@ -71,6 +71,6 @@ Popen → sudo -n env -i → unshare --net → setpriv --reuid=65534 → bash �
   （`lcb_3686` 要 46 s），而 10 s 是它凍結的常數。
 
 ⚠ **單邊保證**：`kill_status` 觀測的是我們**自己新洩**的子行程，不是既有負載對逾時的影響。
-後者的觀測點在 `vacant/vrun/acceptance.py` 的 `kind == "timeout"`，靠事後在乾淨負載下
+後者的觀測點在 `vacant_network/vrun/acceptance.py` 的 `kind == "timeout"`，靠事後在乾淨負載下
 重算工作區快照（`_frozen_RUN-ON[_a<n>]/`）來分辨。重算救得回判定，
 **救不回「假失敗觸發的那次重試」**——所以要當 `infra_void` 剔題，不是改分。

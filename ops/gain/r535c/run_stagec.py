@@ -41,7 +41,7 @@ Messages（`content` 裡的 `tool_use` block）。**不擴充的話 Claude Code 
 
 - `requests_seen == 0` ⇒ **`infra_void`，不是 0 分**（§4.5 的現場版本）。
 - 四臂旗標、prompt、工作區樣板**全部從 `run_r535` 引用**，本檔不重打。
-- 本檔**不動** `ops/gain/r535/` 與 `vacant/` 的任何一個位元組。
+- 本檔**不動** `ops/gain/r535/` 與 `vacant_network/` 的任何一個位元組。
 """
 from __future__ import annotations
 
@@ -465,7 +465,7 @@ class StageCDriver:
         suite = self.bank / task_id / "tests_visible"
         prompt = R5.PI_PROMPT + (R5.FEEDBACK_PLACEHOLDER
                                  if spec["placeholder"] else "")
-        return [sys.executable, "-m", "vacant.vrun.launcher",
+        return [sys.executable, "-m", "vacant_network.vrun.launcher",
                 "--workspace", str(cell / "ws"),
                 "--run-dir", str(cell / "run"),
                 "--suite", str(suite),

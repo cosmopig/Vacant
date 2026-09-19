@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from vacant import crypto
-from vacant.agent import Vacant
-from vacant.attest import make_attestation, verify_attestation
-from vacant.body import now_ms
-from vacant.identity import Identity
+from vacant_network import crypto
+from vacant_network.agent import Vacant
+from vacant_network.attest import make_attestation, verify_attestation
+from vacant_network.body import now_ms
+from vacant_network.identity import Identity
 
 
 def test_attestation_roundtrip_and_answer_binding():

@@ -25,7 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from vacant.entrycost import EntryPolicy, SimConfig, simulate  # noqa: E402
+from vacant_network.entrycost import EntryPolicy, SimConfig, simulate  # noqa: E402
 
 DEFAULT_SEEDS = 20
 

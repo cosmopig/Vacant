@@ -13,12 +13,12 @@ import hashlib
 import json
 from pathlib import Path
 
-from vacant.batch import RunLedger
-from vacant.codebench import EvalPlusMBPPLoader
-from vacant.identity import Identity
-from vacant.logbook import Logbook
-from vacant.memory import MemoryManager, MemoryStream
-from vacant.x1 import (
+from vacant_network.batch import RunLedger
+from vacant_network.codebench import EvalPlusMBPPLoader
+from vacant_network.identity import Identity
+from vacant_network.logbook import Logbook
+from vacant_network.memory import MemoryManager, MemoryStream
+from vacant_network.x1 import (
     finalize_run_package,
     load_x1_tasks,
     pilot_report,

@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 import sys
 
-from vacant import cli
-from vacant.ecosystem import Ecosystem, PRODUCT_ROSTER
+from vacant_network import cli
+from vacant_network.ecosystem import Ecosystem, PRODUCT_ROSTER
 
 
 class GoodBrain:

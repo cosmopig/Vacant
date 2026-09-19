@@ -33,7 +33,7 @@ from ops.gain.gain_run import (  # noqa: E402
     load_tasks,
     probe_instrument,
 )
-from vacant.codebench import (  # noqa: E402
+from vacant_network.codebench import (  # noqa: E402
     EVALPLUS_HUMANEVAL_DEFAULT_PATH,
     EvalPlusHumanEvalLoader,
 )

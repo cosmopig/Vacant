@@ -1,6 +1,6 @@
 """B 層歸檔包的**事後判準**：CI 分不分得開、重跑重不重現、包合不合格。
 
-為什麼另外寫一支而不是加進 `vacant/blayer.py`：那支裡的 `_verdict` 六條是
+為什麼另外寫一支而不是加進 `vacant_network/blayer.py`：那支裡的 `_verdict` 六條是
 13 §3 訂的預註冊，改它就不是預註冊了。這裡三條（B-CI／B-DET／B-PACK）是
 **外加的、更嚴的**問法，跟那六條各自獨立成立或不成立——`_verdict` 比的是
 點值，而「拆掉它數字必須變」這句話真正要的是**區間分得開**。
@@ -27,7 +27,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-# 照 vacant/blayer.py `_verdict` 抄的：每個情境的判準自己引用哪一格。
+# 照 vacant_network/blayer.py `_verdict` 抄的：每個情境的判準自己引用哪一格。
 CITED_RATIO = {
     "sig_attribution": 0.7,
     "same_source": 0.7,
@@ -38,7 +38,7 @@ CITED_RATIO = {
 }
 
 
-# 同樣照 `vacant/blayer.py` 的原始碼抄的：**這些格根本沒有跑機制**，
+# 同樣照 `vacant_network/blayer.py` 的原始碼抄的：**這些格根本沒有跑機制**，
 # 情境函式在算之前就 `return 0.0`（不是「跑了、量到 0」）。
 #   same_source         L167 `if ratio < 0.5: return 0.0`（克隆團要 ≥5 人才成群）
 #   probation_whitewash L247 `n_white = round(7*ratio); if not whites: return 0.0`
@@ -379,7 +379,7 @@ def main() -> None:
         print(f"  {'✅' if l_ok else '❌'} {g1}\n     {'' if l_ok else '≠ '}{g2}")
 
     print("\nB-PACK（CLAUDE.md 紀錄紅線：不 pack ＝ 沒跑過）：")
-    from vacant.record import check
+    from vacant_network.record import check
     p_ok, problems = check(run_dir)
     ok = ok and p_ok
     print(f"  {'✅' if p_ok else '❌'} ok={p_ok} problems={problems}")

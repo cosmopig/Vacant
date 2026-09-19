@@ -4,11 +4,11 @@ E-9（Fable 2026-09-14）把沙箱從「事後註解」改成**發射前提**：
 `backend_meta.repo_hidden_from_sandbox` 不是 `true` 就不准發射。
 這份講怎麼拿到那個 `true`，以及每一條路的實測值。
 
-⚠ **2026-09-18 起實作住在 `vacant/vrun/sandbox.py`**（進 wheel，`pip install` 的人
+⚠ **2026-09-18 起實作住在 `vacant_network/vrun/sandbox.py`**（進 wheel，`pip install` 的人
 也要跑得動閘門）。`ops/gain/r530/sandbox.py` 是 re-export：**同一個 module 物件**，
 本文所有 `python3 ops/gain/r530/sandbox.py …` 的指令逐字照舊可用。
 
-判準只有三個，而且**三個都是量的不是宣稱的**（`vacant/vrun/sandbox.py::Sandbox.probe`）：
+判準只有三個，而且**三個都是量的不是宣稱的**（`vacant_network/vrun/sandbox.py::Sandbox.probe`）：
 
 | 欄位 | 量法 | 為什麼它承重 |
 |---|---|---|
@@ -68,7 +68,7 @@ python3 ops/gain/r530/run_r530.py … \
   並讓沙箱讀得到——因為驗收本來就要跑它。候選程式碼在那幾秒之內構得到那個目錄。
   這與 `bwrap` 的 `--ro-bind` 是**同一個**殘餘，不是這條路獨有的。
   跑完立刻刪（`acceptance.run_suite` 的 `finally`）。
-- `vacant/checks.py` 那句逐字適用：**應用層加固，不是對抗惡意程式碼的完整 OS 安全邊界。**
+- `vacant_network/checks.py` 那句逐字適用：**應用層加固，不是對抗惡意程式碼的完整 OS 安全邊界。**
   本 run 的威脅模型是「意外」不是「攻擊」。
 
 ---

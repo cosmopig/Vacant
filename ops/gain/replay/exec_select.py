@@ -33,7 +33,7 @@ os.environ.setdefault(
 from ops.gain.gain_run import (  # noqa: E402
     _GAIN_ALLOWED_IMPORTS, InfraVoid, extract_code, meets_demand,
 )
-from vacant.codebench import EvalPlusMBPPLoader  # noqa: E402
+from vacant_network.codebench import EvalPlusMBPPLoader  # noqa: E402
 
 SEED = "g-r212-route-20260828"
 CACHE = pathlib.Path(__file__).resolve().parent / "cache"
@@ -94,7 +94,7 @@ def _grade_probe(pre, items) -> str:
 
 def visible_grade(code: str, task: dict) -> tuple[int, int, str, bool]:
     """回傳 (通過筆數, 總筆數, 行為簽名, visible_ok)。只讀 visible_check。"""
-    from vacant.checks import CheckInfraError, run_python_capture
+    from vacant_network.checks import CheckInfraError, run_python_capture
     parsed = _split_visible(task["visible_check"]["code"])
     ep = task.get("entry_point")
     if parsed is None:

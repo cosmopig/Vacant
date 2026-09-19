@@ -298,7 +298,7 @@ def census_x7() -> dict:
     # 不是產物不存在**：`"lcb3"` 的 dispatch 在 gain_run.py（codebench.py 記的是 version="v3"）。
     # 加法式修正：舊的那格原樣留著（`bank:lcb3@codebench`，實測 False），新增正確的那格。
     # 修正理由是**語意**（dispatch 的真實落點，且能零 API 載出 189 題），不是「結果比較好看」。
-    names["bank:lcb3@codebench"] = '"lcb3"' in _safe_read(ROOT / "vacant/codebench.py")
+    names["bank:lcb3@codebench"] = '"lcb3"' in _safe_read(ROOT / "vacant_network/codebench.py")
     _gr_ok = '"lcb3"' in gr
     names["bank:lcb3@gain_run"] = _gr_ok
     names["bank:lcb3"] = _gr_ok

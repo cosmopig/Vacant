@@ -18,7 +18,7 @@ import shutil
 import pytest
 
 from ops.gain.verify_lcb_bank import PROBE_PATH, check_arity, signature_of
-from vacant.codebench import (
+from vacant_network.codebench import (
     LCB_BANK_DEFAULT_PATH,
     LCB_BANK_DEFAULT_VERSION,
     LCB_BANK_V1_COUNT,

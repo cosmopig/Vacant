@@ -13,7 +13,7 @@
 `(test_id, 檔案)` 不用行號——行號會隨無關的編輯漂掉，那種假紅會訓練人
 去忽略這道門。
 
-⚠ **這是單邊保證**：擋得住已知壞法 ≠ 涵蓋真需求（`vacant/suitegauge.py`
+⚠ **這是單邊保證**：擋得住已知壞法 ≠ 涵蓋真需求（`vacant_network/suitegauge.py`
 的同一句話）。bandit 是語法層樣式比對，它看不出邏輯上的權限錯誤。
 
 用法（CI 與本機同一支）：
@@ -31,7 +31,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: 掃描範圍。`tests/` 不掃：測試本來就在故意造壞輸入。
-TARGETS = ("vacant", "ops", "examples")
+TARGETS = ("vacant_network", "ops", "examples")
 
 #: 已知且**有理由**的 HIGH 發現。key＝(bandit test_id, 相對路徑)。
 #: 新增一筆就是一次明示決定——要寫得出理由才加得進來。
@@ -43,11 +43,11 @@ KNOWN: dict[tuple[str, str], str] = {
     ("B324", "ops/gain/replay/seq_shortstop.py"):
         "sha1 在這裡是**分組用的短鍵**不是安全雜湊：它把同一個 prompt 的呼叫"
         "併成一格好做重放比對。鏈上的簽章與 RECORD_SPEC 的逐檔雜湊一律 sha256"
-        "（`vacant/logbook.py`、`vacant/record.py`），沒有用到 sha1。",
+        "（`vacant_network/logbook.py`、`vacant_network/record.py`），沒有用到 sha1。",
     ("B602", "ops/progress.py"):
         "shell=True 的輸入是本檔自己寫死的字串常數（進度顯示用的 git 指令），"
         "不吃外部輸入。這支是開發期的終端機小工具，不進 wheel"
-        "（`pyproject.toml` 只打包 `vacant`）。",
+        "（`pyproject.toml` 只打包 `vacant_network`）。",
 }
 
 
@@ -119,7 +119,7 @@ def _selftest() -> int:
            "issue_text": "x"}
     all_hits = [{"test_id": k[0], "filename": str(ROOT / k[1]),
                  "line_number": 1, "issue_text": "x"} for k in KNOWN]
-    stranger = {"test_id": "B602", "filename": str(ROOT / "vacant/agent.py"),
+    stranger = {"test_id": "B602", "filename": str(ROOT / "vacant_network/agent.py"),
                 "line_number": 1, "issue_text": "x"}
 
     unknown, stale = classify(all_hits)

@@ -26,7 +26,7 @@ lanky／plain／round／small／stout）。不准抽象發光生物。體型是*
 1. 這份名冊裡的 persona 值**全部是假的**，由 seed 決定。它證明的是「資料形狀
    與同意機制接得起來」，不證明任何關於真人的事。
 2. 倫理定案之前，不要把這份名冊接到任何觀眾輸入。接上去的那一刻，
-   `vacant/consent.py` 的四條誠實邊界就從「示範」變成「義務」。
+   `vacant_network/consent.py` 的四條誠實邊界就從「示範」變成「義務」。
 """
 from __future__ import annotations
 
@@ -70,7 +70,7 @@ def _pick_n(seed: str, pool: list[str], n: int) -> list[str]:
 
 @dataclass(frozen=True)
 class Resident:
-    """一位居民。`persona` 的四個 key 就是 `vacant/consent.py::ALLOWED_FIELDS`。"""
+    """一位居民。`persona` 的四個 key 就是 `vacant_network/consent.py::ALLOWED_FIELDS`。"""
 
     codename: str
     body: str

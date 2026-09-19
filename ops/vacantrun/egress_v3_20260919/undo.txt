@@ -1,0 +1,5 @@
+iptables -D OUTPUT -m owner --uid-owner 1001 -o lo -j ACCEPT
+iptables -D OUTPUT -m owner --uid-owner 1001 -d 127.0.0.0/8 -j ACCEPT
+iptables -D OUTPUT -m owner --uid-owner 1001 -p tcp -d 127.0.0.0/8 --dport 8899 -j ACCEPT
+iptables -D OUTPUT -m owner --uid-owner 1001 -j REJECT --reject-with icmp-admin-prohibited
+已拆除 uid=1001 的出網封鎖。

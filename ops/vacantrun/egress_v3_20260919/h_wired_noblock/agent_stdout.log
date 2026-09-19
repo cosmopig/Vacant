@@ -1,0 +1,13 @@
+<|channel>thought
+<channel|>I have created the `solution.py` file with the requested `add` and `mul` functions as specified in `TASK.md`.
+
+The content of `/var/tmp/v3egress/ws_h_wired_noblock/solution.py` is:
+```python
+def add(a: float, b: float) -> float:
+    """Returns the sum of two numbers."""
+    return a + b
+
+def mul(a: float, b: float) -> float:
+    """Returns the product of two numbers."""
+    return a * b
+```

@@ -1,5 +1,98 @@
 # Changelog
 
+## 0.8.0 — 2026-09-19
+
+**Breaking: the import package is renamed `vacant` → `vacant_network`. Every
+`import vacant` / `from vacant.… import …` in your code must be changed.** There is
+**no compatibility shim**, deliberately — a shim would reinstate the very collision this
+release exists to remove (see below). Pin `0.7.0` if you cannot change your imports yet.
+
+```python
+- from vacant.logbook import Logbook          # 0.7.0 and earlier
++ from vacant_network.logbook import Logbook  # 0.8.0
+```
+
+### Why — `pip install vacant` was silently replacing our code
+
+PyPI's `vacant` (alltuner/vacant, a Rust-backed authoritative-DNS tool; 0.4.15 as measured
+2026-09-19) shipped **the same top-level directory name `vacant/`** we did. pip overwrites
+file by file, so installing both produced, with **zero error messages in all four install
+orders** (measured 2026-09-19 against real wheels):
+
+```
+pip list       → both listed; vacant-network 0.7.0 still "installed"
+import vacant  → AttributeError: module 'vacant' has no attribute '__version__'
+vacant --help  → their DNS tool's interface
+```
+
+Adding a second console script was tried first and **measured not to work**: both scripts
+did `from vacant.cli import main`, so their `vacant/cli.py` shadowed ours either way. A
+second command name only helps *after* the import package is renamed — which is what this
+release does.
+
+### What this fixes, and what it does not
+
+| | up to 0.7.0 | from 0.8.0 |
+|---|---|---|
+| `import` | shared `vacant/` directory; pip overwrites file by file | **fixed** — `vacant_network/`, no shared module |
+| the `vacant` command | whichever package is installed second wins | **not fixed, not fixable** — identical console-script names are the same file path |
+
+Two escape hatches are added for the half that cannot be fixed:
+
+- **`vacant-network`** — a second console script, same entry point. It imports
+  `vacant_network.cli`, which the other package cannot shadow.
+- **`python -m vacant_network`** — new `vacant_network/__main__.py`; bypasses `bin/`
+  entirely.
+
+`vacant` remains the primary command name.
+
+### Not renamed (deliberate)
+
+These are **not** the package name and changing them would break stored data or rewrite
+records of runs that already happened:
+
+- Wire/format strings: `vacant.facts/1`, `vacant.delegation.context`,
+  `vacant.delegation.receipt`, the `vacant` field in `summary.json`.
+- The config filename `vacant.toml`; the arm name `"vacant"`; the task-generator seed
+  `"vacant"`; the CLI `prog=` string; the MCP server name.
+- `runs/**` and `decisions/**` — archived drivers and pre-registration documents still
+  read `vacant.*`. Rewriting them would make the record describe a command that was never
+  issued (same discipline as the frozen `--decision` paths). `runs/INDEX.md` says so
+  explicitly. Three files pinned by `docs/paper_2026-09-14/source_manifest.json`
+  (`docs/VACANT_COMPLETE_2026-09-12.md`, `docs/JOURNEY_2026-09-13.md`,
+  `docs/HMIX_ARCHITECTURE_2026-09-11.md`) are untouched for the same reason.
+- **108 archived data files** (`.json`/`.jsonl`/`.log`/`.txt` under `ops/gain/replay/**`,
+  `ops/gain/r53*/bank*`, `ops/gain/r530/smoke9/`, `ops/exhibit/twin/twin_pack.json`) keep
+  `vacant/…` verbatim. Two reasons, both hard:
+  1. Their `file_sha256` maps record **which source bytes produced that run**. Renaming a
+     key would claim we hashed `vacant_network/checks.py` on 2026-09-06, when that path
+     did not exist.
+  2. Fields such as `ruler` (`vacant/vrun/acceptance.py::run_suite(…)`) sit **inside
+     signed receipt payloads**. Editing them breaks signature verification — including in
+     `examples/twin_viewer.html` and `examples/receipt_viewer_multiparty.html`, which
+     re-verify those chains in the browser in front of an audience. The viewers' embedded
+     data blobs are therefore byte-identical; only their source comments were renamed
+     (`ops/gain/replay/build_multiparty_viewer.py --check` still reports OK).
+
+  Consequence, stated rather than hidden: those files name a path that no longer exists in
+  the tree. That is the same trade as the frozen `--decision` paths.
+
+### Fixed — one version string no longer means two different codebases
+
+Before this release the three "version" sources disagreed: the newest git tag was
+`v0.6.0`, PyPI had `0.7.0`, and `vacant/__init__.py` also said `0.7.0` while HEAD had
+moved on — so `0.7.0` named two different sets of bytes (recorded in
+`docs/INSTALL_LOG_20260919.md` §11 and README's "you may hit this" table).
+
+- `tests/test_version_discipline.py` — `__version__`, the newest `CHANGELOG.md` heading
+  and the version `pyproject.toml` resolves must agree. Fail-closed.
+- `.github/workflows/publish.yml` — a release-triggered publish now **refuses to build**
+  unless the release tag is exactly `v$__version__`.
+- **Still true, and not measured away**: PyPI's newest `vacant-network` is `0.7.0` until
+  0.8.0 is actually published. The tag `v0.8.0` is cut locally and is **not pushed**. And
+  **we still cannot say which commit PyPI's 0.7.0 was built from** — there is no build
+  record; that is "not measured", not "measured to be none".
+
 ## 0.7.0 — 2026-09-18
 
 **Breaking: this is not an upgrade of 0.6.0, it is a different codebase.**

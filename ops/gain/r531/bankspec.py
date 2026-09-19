@@ -33,7 +33,7 @@ R531 不新寫任何實驗邏輯——兩條臂就是 R530 的 `A-SOLO`／`A-GAT
 
 - 產出的樹**不進版控**（ClassEval 資料是 CC BY-NC 4.0、LCB 授權只寫 `cc`
   未指明 BY/SA/NC）。repo 裡只有這支轉換器與 `manifest.json`。
-- 「參考解全過 ＋ 每個壞樁被擋」是 `vacant/suitegauge.py` 的**單邊保證**：
+- 「參考解全過 ＋ 每個壞樁被擋」是 `vacant_network/suitegauge.py` 的**單邊保證**：
   擋得住已知壞解 ≠ 涵蓋真需求。這裡的 `bad_*.py` 是**決定性突變**產生的，
   證明力比人工寫的壞樁**更弱**——這一條要寫進收官報告，不准省略。
 """

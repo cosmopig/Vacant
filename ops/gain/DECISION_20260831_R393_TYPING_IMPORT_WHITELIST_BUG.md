@@ -11,7 +11,7 @@ round392 交棒明寫「off5va 剩下的 2 個 discordant（736/790）值得找�
 ON 的 initial 與 revised 兩次產出都寫了 `from typing import List, Union`，
 邏輯完全正確（跟官方 `bisect.bisect_left` 逐位元一致），但 `visible_ok`
 判定為 `False`。原因不是邏輯——`ops/gain/gain_run.py` 的
-`_GAIN_ALLOWED_IMPORTS`（餵給 `vacant/checks.py` 的候選碼 import 白名單）
+`_GAIN_ALLOWED_IMPORTS`（餵給 `vacant_network/checks.py` 的候選碼 import 白名單）
 只有：
 
 ```
@@ -19,13 +19,13 @@ ON 的 initial 與 revised 兩次產出都寫了 `from typing import List, Union
 "math", "operator", "re", "sys"
 ```
 
-`typing` 不在裡面。`vacant/checks.py:_candidate_functions` 對於白名單外的
+`typing` 不在裡面。`vacant_network/checks.py:_candidate_functions` 對於白名單外的
 import 直接回傳 `None`（判定為找不到候選函式），這條路徑跟「邏輯錯誤」
 在 `meets_demand` 的回傳值上完全無法區分，都是
 `(False, "sandbox_check_failed")`。
 
 `typing` 是純型別標註模組，**零執行期副作用**（不碰 I/O／檔案／網路／
-process），被排除純屬白名單疏漏，不是刻意的安全邊界（`vacant/checks.py`
+process），被排除純屬白名單疏漏，不是刻意的安全邊界（`vacant_network/checks.py`
 自己的沙箱 worker 只 import `collections/json/math/os/re/sys`，跟候選碼
 的白名單是兩件事）。
 

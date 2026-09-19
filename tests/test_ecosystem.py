@@ -22,7 +22,7 @@ import json
 
 import pytest
 
-from vacant.ecosystem import Ecosystem
+from vacant_network.ecosystem import Ecosystem
 
 # 反轉字串 check（run_python＝最強、客觀可執行；saboteur 的 off-by-one 必被抓）。
 REVERSE_CHECK = {
@@ -282,7 +282,7 @@ def test_m2_lesson_written_and_injected(tmp_path):
 
 def test_trust_card_full_sig_verifies(tmp_path):
     """信任狀簽章全文可獨立驗證；竄改即失敗（finding [1]）。"""
-    from vacant.trustcard import verify_trust_card
+    from vacant_network.trustcard import verify_trust_card
     eco = Ecosystem(tmp_path, FakeBrain(), roster={"a": "good", "b": "good"}, k_reviewers=1)
     card = eco.delegate(_task(0), REVERSE_CHECK)["trust_card"]
     assert len(card["host_sig"]) == 128  # Ed25519 64 bytes 全文
@@ -304,7 +304,7 @@ def test_report_rejects_unknown_task(tmp_path):
 def test_cli_up_dashboard_wiring(tmp_path, monkeypatch):
     """`vacant up` 的 make_dashboard 呼叫簽名正確（finding [0]）。"""
     import http.server
-    from vacant import cli
+    from vacant_network import cli
     monkeypatch.setattr(http.server.ThreadingHTTPServer, "serve_forever",
                         lambda self, poll_interval=0.5: None)
     rc = cli.main(["up", "--root", str(tmp_path), "--port", "0"])

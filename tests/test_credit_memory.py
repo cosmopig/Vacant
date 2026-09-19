@@ -8,14 +8,14 @@ weight 內生、同源非線性降權（floor/k）。
 
 import pytest
 
-from vacant.body import now_ms
-from vacant.envelope import ReviewEnvelope
-from vacant.host import Host
-from vacant.identity import Identity, PublicIdentity
-from vacant.logbook import EMPTY_PREV_HASH, GENESIS_STREAM_ID, Logbook
-from vacant.registry import REVIEWER_WEIGHT_FLOOR, ReviewRejected
-from vacant.reputation import DIMS, SAME_SIGNAL_FLOOR
-from vacant.substrate import EchoSubstrate
+from vacant_network.body import now_ms
+from vacant_network.envelope import ReviewEnvelope
+from vacant_network.host import Host
+from vacant_network.identity import Identity, PublicIdentity
+from vacant_network.logbook import EMPTY_PREV_HASH, GENESIS_STREAM_ID, Logbook
+from vacant_network.registry import REVIEWER_WEIGHT_FLOOR, ReviewRejected
+from vacant_network.reputation import DIMS, SAME_SIGNAL_FLOOR
+from vacant_network.substrate import EchoSubstrate
 
 GOOD = {d: 1.0 for d in DIMS}
 
@@ -63,7 +63,7 @@ def test_branch_tamper_detected():
 
 
 def test_old_wire_format_rejected():
-    from vacant.logbook import LogEntry
+    from vacant_network.logbook import LogEntry
     with pytest.raises(ValueError):
         LogEntry.from_json({"seq": 1, "prev_hash": "0" * 64, "ts_ms": 1,
                             "type": "BIRTH", "payload": {}, "sig": "00"})
@@ -240,8 +240,8 @@ def test_credit_follows_stream_not_body(tmp_path):
                       substrate="echo", task_id=f"tA{i}")
         # reviewer 未公告 → 拒收；先公告一張卡
         if i == 0:
-            from vacant.body import CapabilityCard
-            from vacant import crypto
+            from vacant_network.body import CapabilityCard
+            from vacant_network import crypto
             h.registry.announce(CapabilityCard(
                 vacant_id=reviewer.vacant_id, niches=[],
                 pub_hex=crypto.pub_to_hex(reviewer.pub)))
@@ -260,7 +260,7 @@ def test_credit_follows_stream_not_body(tmp_path):
 
 def test_reputation_json_roundtrip_triple_key():
     """三元組序列化 round-trip（␟ 分隔；改動2 後的線材格式）。"""
-    from vacant.reputation import Reputation
+    from vacant_network.reputation import Reputation
     rep = Reputation()
     rep.record_review("s1", "main", "echo", GOOD, weight=1.0)
     rep.record_review("s1", "fork", "echo", {d: 0.0 for d in DIMS}, weight=1.0)

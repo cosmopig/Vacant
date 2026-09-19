@@ -79,7 +79,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
 from ops.gain.replay.paired_ci import diff_ci  # noqa: E402
-from vacant.research import (  # noqa: E402
+from vacant_network.research import (  # noqa: E402
     bc_heterogeneity_chisq, holm_bonferroni, mcnemar_exact, mcnemar_power,
     stratified_mcnemar_exact, wilcoxon_signed_rank_exact,
 )

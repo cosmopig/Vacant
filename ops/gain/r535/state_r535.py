@@ -40,7 +40,7 @@
 （預註冊 §六-2 第 2、3 列逐字）：那兩條問的是「閘門有沒有被打開」，
 不是「客戶拿到了什麼」，所以它們該讀可見。**不要一起改。**
 
-## 為什麼不借用 `vacant/research.py::discordance`（三個理由，都要留著）
+## 為什麼不借用 `vacant_network/research.py::discordance`（三個理由，都要留著）
 
 1. **它只讀 `.passed_gt`（＝hidden）**——欄位語意寫死在 comprehension 裡，
    與本輪要防的那種漂移正好同形：哪天有人改了它讀哪一欄，本輪的主指標會
@@ -112,7 +112,7 @@
    `f6` 的 `null` 一律不進分母，並且逐項印出「有第 ≥2 次嘗試卻量不到」的格數。
 5. **本檔不重算汙染**：L-4 的假逾時重算是 ops 的事。這裡只把 `suspect_timeout`
    與 `inconsistent` 的格數印出來，並在還沒處理時出聲。
-6. **hidden 全過 ≠ 做對了**：`vacant/suitegauge.py` 的單邊保證對隱藏套件一樣成立
+6. **hidden 全過 ≠ 做對了**：`vacant_network/suitegauge.py` 的單邊保證對隱藏套件一樣成立
    （擋得住已知壞解 ≠ 涵蓋真需求）。M1 量的是「兩套驗收都過了」。
 7. **口徑**：本輪講的是**可究責性**（讓依賴有根據），不是那兩個字。
 8. 本輪不得與 R530／R532／R534 併表或併 n。
@@ -137,7 +137,7 @@ REPO = HERE.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from vacant.research import (                                   # noqa: E402
+from vacant_network.research import (                                   # noqa: E402
     boot_ci, holm_bonferroni, mcnemar_exact, tost_equiv_boot,
     wilcoxon_signed_rank_exact,
 )
@@ -194,7 +194,7 @@ BC_CONVENTION = (
     "⚠ 預註冊 §六-2 第 4／5 列的字母與本約定**相反**（鏡像），對照時互換。"
 )
 WHY_NOT_DISCORDANCE = (
-    "不借用 vacant/research.py::discordance，三個理由："
+    "不借用 vacant_network/research.py::discordance，三個理由："
     "(1) 它只讀 `.passed_gt`（＝hidden），欄位語意寫死在 comprehension 裡，"
     "與本輪要防的漂移正好同形；"
     "(2) **它忽略 asserted／refused**——一格拒交但凍結快照碰巧過了 hidden，"
@@ -1170,7 +1170,7 @@ def analyse(cells: list[dict], *, reconcile_invalid: bool = False,
     holm = holm_bonferroni(raw)
     out: dict = {"family": {"members": list(FAMILY), "size": len(FAMILY),
                             "raw_p": raw, "holm_p": holm,
-                            "method": "vacant/research.py::holm_bonferroni",
+                            "method": "vacant_network/research.py::holm_bonferroni",
                             "note": ("家族大小固定 2：一層算不出 p 時用 1.0 "
                                      "補位，不縮家族。")},
                  "per_stratum": {}, "state": {}, "control": {},

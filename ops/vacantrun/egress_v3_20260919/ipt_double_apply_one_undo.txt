@@ -1,0 +1,5 @@
+-P OUTPUT ACCEPT
+-A OUTPUT -o lo -m owner --uid-owner 1001 -j ACCEPT
+-A OUTPUT -d 127.0.0.0/8 -m owner --uid-owner 1001 -j ACCEPT
+-A OUTPUT -d 127.0.0.0/8 -p tcp -m owner --uid-owner 1001 -m tcp --dport 8899 -j ACCEPT
+-A OUTPUT -m owner --uid-owner 1001 -j REJECT --reject-with icmp-admin-prohibited

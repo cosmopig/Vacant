@@ -4,7 +4,7 @@
 它**不出題**（題庫＝`ops/gain/r535/bank/`，量具＝`gauge_bank.py`，兩者都不在本檔
 的職責裡，本檔一個位元都不碰），**不寫預註冊**，也**不計分**（事後計分是
 `ops/gain/r535/score_r535.py`，分開的一支，零模型呼叫、可離線重跑）。
-本檔只做一件事：把 360 格逐格交給 `vacant/vrun/launcher.py` 的 CLI，
+本檔只做一件事：把 360 格逐格交給 `vacant_network/vrun/launcher.py` 的 CLI，
 把每一格發生了什麼逐格落盤。
 
 ## 四臂（唯一差異是旗標與工作區樣板；prompt 逐字相同）
@@ -159,7 +159,7 @@ R532 為此誤發兩次打到雲端（產物留在 `runs/_falsestart_20260917_*`
 ## 誠實邊界（改碼請保留）
 
 1. 本檔**不判斷題目做對了沒有**。它記的是「可見驗收過了沒有」，而可見驗收是
-   **單邊保證**（`vacant/suitegauge.py` 的 docstring）：擋得住已知壞解 ≠ 涵蓋真需求。
+   **單邊保證**（`vacant_network/suitegauge.py` 的 docstring）：擋得住已知壞解 ≠ 涵蓋真需求。
    隱藏驗收只在 `score_r535.py` 跑，**只計分不回饋**（V/GT 紅線）。
 2. `suspect_timeout` 是**標記不是剔除**。剔除是收官時依預註冊規則做的事，
    當場剔除會讓「基建壞了」與「模型答錯了」在資料上同形。
@@ -196,9 +196,9 @@ REPO = HERE.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from vacant.identity import Identity            # noqa: E402
-from vacant.logbook import Logbook              # noqa: E402
-from vacant.crypto import pub_to_hex            # noqa: E402
+from vacant_network.identity import Identity            # noqa: E402
+from vacant_network.logbook import Logbook              # noqa: E402
+from vacant_network.crypto import pub_to_hex            # noqa: E402
 
 # ── 凍結常數（改這裡就是改實驗，不要在別處臨時寫字串）─────────────────────
 
@@ -269,7 +269,7 @@ DEFAULT_LOAD_PAUSE = 80.0
 UPTIME_EVERY_S = 900.0
 
 #: 回饋正文的固定夾子，用來把 `{block}` 切出來當特徵字串
-#: （`vacant/vrun/retry.py::FEEDBACK_BODY` 逐字，那一段是凍結碼）。
+#: （`vacant_network/vrun/retry.py::FEEDBACK_BODY` 逐字，那一段是凍結碼）。
 _BLOCK_PREFIX = "working directory. They did not all pass.\n\n"
 _BLOCK_SUFFIX = "\n\nFix the working directory."
 
@@ -457,7 +457,7 @@ def check_plan_receipt(out: pathlib.Path, plan_sha: str) -> dict:
     rp, pp = out / "plan_receipt.ndjson", out / "plan_receipt.pub.json"
     if not rp.exists() or not pp.exists():
         raise SystemExit(f"找不到計畫收據（{rp}）。先跑一次 `--write-plan`。")
-    from vacant.identity import PublicIdentity
+    from vacant_network.identity import PublicIdentity
     book = Logbook.load(rp)
     pub = json.loads(pp.read_text(encoding="utf-8"))
     who = PublicIdentity.from_hex(pub["vacant_id"], pub["pub_hex"])
@@ -1308,7 +1308,7 @@ class Driver:
         spec = ARMS[arm]
         suite = self.bank / task_id / "tests_visible"
         prompt = PI_PROMPT + (FEEDBACK_PLACEHOLDER if spec["placeholder"] else "")
-        return [sys.executable, "-m", "vacant.vrun.launcher",
+        return [sys.executable, "-m", "vacant_network.vrun.launcher",
                 "--workspace", str(cell / "ws"),
                 "--run-dir", str(cell / "run"),
                 "--suite", str(suite),
@@ -1808,11 +1808,11 @@ def gate_timing(manifest_path: pathlib.Path, manifest: dict, *,
                 scratch: pathlib.Path) -> tuple[bool, list[str]]:
     """① F8 時序門：**用參考解跑同一支驗收 runner**，可見＋隱藏各 ≤ limit_s。
 
-    同一支＝`vacant/vrun/acceptance.py::run_suite`（manifest 寫死「不准另寫第
+    同一支＝`vacant_network/vrun/acceptance.py::run_suite`（manifest 寫死「不准另寫第
     二把尺」）。零模型呼叫。
     """
-    from vacant.vrun import acceptance
-    from vacant.vrun.sandbox import make_sandbox
+    from vacant_network.vrun import acceptance
+    from vacant_network.vrun.sandbox import make_sandbox
     bank = bank_dir(manifest_path, manifest)
     scratch.mkdir(parents=True, exist_ok=True)
     sb, _meta = make_sandbox(sandbox_name, workdir=str(scratch))
@@ -2343,7 +2343,7 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=(
             "R535 發射驅動：四臂（RS／RF／RP／PC）× 90 題（S1 50／S2 40）＝ 360 格，"
-            "每格跑一次 `vacant run`（vacant/vrun/launcher.py）。\n"
+            "每格跑一次 `vacant run`（vacant_network/vrun/launcher.py）。\n"
             "不出題、不寫預註冊、不計分（計分＝ops/gain/r535/score_r535.py）。"),
         epilog=(
             "順序：\n"

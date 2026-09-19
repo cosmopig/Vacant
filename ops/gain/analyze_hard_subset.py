@@ -41,7 +41,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 os.chdir(str(pathlib.Path(__file__).resolve().parents[2]))
 
 from ops.gain.gain_run import load_tasks, extract_code, behavior_signature, _GAIN_ALLOWED_IMPORTS
-from vacant.checks import CheckInfraError, run_python_check
+from vacant_network.checks import CheckInfraError, run_python_check
 
 RUN = pathlib.Path("runs/g_r356_3arm_20260830")
 OLD_IMPORTS = ("bisect", "cmath", "collections", "functools", "heapq", "itertools", "math", "operator", "re", "sys")

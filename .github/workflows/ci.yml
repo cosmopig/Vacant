@@ -58,18 +58,18 @@ jobs:
       # 行號**釘死 `gain_run.py:588` 與 `:1586`。讓 formatter 動那個檔會把
       # 兩個既有的稽核釘子一起弄斷。要擴規則請連同那兩個釘子一起處理。
       - name: ruff（會炸的那組，全 repo）
-        run: ruff check --no-cache --select E9,F63,F7,F82 vacant ops examples tests
+        run: ruff check --no-cache --select E9,F63,F7,F82 vacant_network ops examples tests
 
-      # mypy：範圍是 `vacant/` 裡**目前乾淨的 39 個模組**。
+      # mypy：範圍是 `vacant_network/` 裡**目前乾淨的 39 個模組**。
       # 排除的 11 個是既有債（2026-09-18 實測：entrycost 50、ecosystem 10、
       # research 3、cli 2、checks 2、agent／channels／collusion／memory／
       # multiway／peerexec 各 1）。把它們塞進門只會逼人加 `--ignore-errors`，
       # 那就退化成空跑。**這個排除清單只准縮短不准變長**：新模組預設要乾淨。
-      - name: mypy（vacant 的 39 個乾淨模組）
+      - name: mypy（vacant_network 的 39 個乾淨模組）
         run: |
           mypy --ignore-missing-imports --follow-imports=silent \
-            --exclude '^vacant/(agent|channels|checks|cli|collusion|ecosystem|entrycost|memory|multiway|peerexec|research)\.py$' \
-            vacant
+            --exclude '^vacant_network/(agent|channels|checks|cli|collusion|ecosystem|entrycost|memory|multiway|peerexec|research)\.py$' \
+            vacant_network
 
   tests:
     name: "tests (${{ matrix.os }}, py${{ matrix.python }})"
@@ -182,8 +182,8 @@ jobs:
           #       拒絕處理**整份**清單：
           #         `vacant-network: URL requirements cannot be pinned to a specific package version`
           #       ⇒ exit 1。本機不一定踩得到，因為 freeze 檔的產生方式可能不同。
-          # 發布名是 `vacant-network`，import 名才是 `vacant`（見 pyproject 第一段註解）
-          # ——舊版這裡寫 `^vacant( |==|@)`，用的是 import 名，所以從來沒有命中過。
+          # 發布名與 import 名 0.8.0 起都是 `vacant-network`／`vacant_network`（見 pyproject 第一段註解）
+          # ——舊版這裡寫 `^vacant( |==|@)`，用的是當時的 import 名，所以從來沒有命中過。
           # PEP 503 正規化下底線與連字號等價、大小寫不分，三種寫法一起蓋。
           grep_rc=0
           grep -viE '^vacant[-_]network([[:space:]]|==|@|$)' \
@@ -246,16 +246,16 @@ jobs:
           import glob, zipfile
           whl = glob.glob("dist/*.whl")[0]
           names = zipfile.ZipFile(whl).namelist()
-          html = [n for n in names if n.startswith("vacant/web/") and n.endswith(".html")]
-          print(f"{whl}：{len(names)} 個檔，其中 vacant/web/*.html {len(html)} 個")
-          assert html, "wheel 裡沒有 vacant/web/*.html——package-data 漏了"
+          html = [n for n in names if n.startswith("vacant_network/web/") and n.endswith(".html")]
+          print(f"{whl}：{len(names)} 個檔，其中 vacant_network/web/*.html {len(html)} 個")
+          assert html, "wheel 裡沒有 vacant_network/web/*.html——package-data 漏了"
           PY
 
       # 全新 venv 裝 wheel，而且**在 repo 以外**跑最小 quickstart ＋ 第一屏：
-      # 在 repo 根目錄跑的話 `import vacant` 會讀到原始碼，「依賴宣告漏了」
+      # 在 repo 根目錄跑的話 `import vacant_network` 會讀到原始碼，「依賴宣告漏了」
       # 「package-data 漏了」「第一屏跑不動」三種壞法都測不到
       #（腳本自己會擋在 repo 裡執行這件事）。
-      # 第一屏＝`vacant demo gate`：2026-09-18 把判斷層搬進 `vacant/vrun/` 的
+      # 第一屏＝`vacant demo gate`：2026-09-18 把判斷層搬進 `vacant_network/vrun/` 的
       # 全部目的就是它在 `pip install` 之後跑得動，所以它要有 CI 守著。
       - name: 全新 venv 裝 wheel ＋ 最小 quickstart ＋ vacant demo gate
         run: |
@@ -274,7 +274,7 @@ jobs:
           "$RUNNER_TEMP/sdistenv/bin/python" -m pip install --upgrade pip
           "$RUNNER_TEMP/sdistenv/bin/python" -m pip install dist/*.tar.gz
           cd "$RUNNER_TEMP"
-          "$RUNNER_TEMP/sdistenv/bin/python" -c "import vacant; print(vacant.__file__)"
+          "$RUNNER_TEMP/sdistenv/bin/python" -c "import vacant_network; print(vacant_network.__file__)"
 
       - uses: actions/upload-artifact@v4
         with:

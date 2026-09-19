@@ -1,0 +1,36 @@
+{
+  "uid": 1001,
+  "euid": 1001,
+  "proxy": "127.0.0.1:8899",
+  "upstream": "100.86.226.21:1234",
+  "checks": {
+    "negative_control_direct_upstream": {
+      "reached": false,
+      "error": "OSError: [Errno 113] No route to host",
+      "elapsed_s": 0.001
+    },
+    "positive_control_proxy_port": {
+      "reached": true,
+      "error": null,
+      "elapsed_s": 0.0
+    },
+    "negative_control_dns": {
+      "reached": true,
+      "addr": "162.159.140.245",
+      "error": null,
+      "elapsed_s": 0.001
+    }
+  },
+  "expect": {
+    "negative_control_direct_upstream": false,
+    "negative_control_direct_upstream_ipv6": false,
+    "positive_control_proxy_port": true,
+    "negative_control_dns": false
+  },
+  "failed": [
+    "negative_control_dns"
+  ],
+  "verdict": "NOT_BLOCKED",
+  "note": "`verdict=BLOCKED` 只代表這三（四）條如預期。它不證明沒有別的出口（既有長連線、其他 uid 代發、raw socket）——見本檔 docstring。`iptables_S` 是旁證，不是判準。",
+  "iptables_S": ""
+}

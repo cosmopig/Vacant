@@ -1,6 +1,6 @@
 """blayer_replay — 兩份 B 層歸檔的**逐格對帳**（RECORD_SPEC；13 §3）。
 
-用途：改了 `vacant/blayer.py` 之後重跑一次，證明**改的是描述、不是數字**。
+用途：改了 `vacant_network/blayer.py` 之後重跑一次，證明**改的是描述、不是數字**。
 比的是兩份 `cells.jsonl` 共同擁有的欄位（`value`／`ci_lo`／`ci_hi`），
 **新版多出來的欄位不比**——否則「加了欄位」永遠會被判成「數字變了」。
 

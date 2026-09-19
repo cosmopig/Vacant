@@ -28,7 +28,7 @@
 誠實邊界
 --------
 `passed/total` 是「過了我們自己寫的幾條」，不是「做對了幾成」
-（`vacant/suitegauge.py` 的單邊保證逐字適用）。
+（`vacant_network/suitegauge.py` 的單邊保證逐字適用）。
 
 用法
 ----
@@ -49,8 +49,8 @@ REPO = HERE.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from vacant.vrun import acceptance                        # noqa: E402
-from vacant.vrun.sandbox import make_sandbox              # noqa: E402
+from vacant_network.vrun import acceptance                        # noqa: E402
+from vacant_network.vrun.sandbox import make_sandbox              # noqa: E402
 
 R530 = REPO / "ops" / "gain" / "r530"
 HIDDEN = R530 / "hidden"
@@ -543,7 +543,7 @@ def main(argv: list[str] | None = None) -> int:
     add("## 誠實邊界")
     add("")
     add("* `passed/total` 是「過了我們自己寫的幾條」，不是「做對了幾成」"
-        "（`vacant/suitegauge.py` 的單邊保證）。")
+        "（`vacant_network/suitegauge.py` 的單邊保證）。")
     add("* `hidden_frac` 與 `hidden_frac_delivered` **都不是主指標**——"
         "本輪沒有預註冊，這支不指名。")
 

@@ -38,9 +38,9 @@ if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
 from ops.gain.replay import peer_exec_real as per  # noqa: E402
-from vacant import peerexec as px  # noqa: E402
-from vacant.identity import PublicIdentity  # noqa: E402
-from vacant.logbook import LogEntry  # noqa: E402
+from vacant_network import peerexec as px  # noqa: E402
+from vacant_network.identity import PublicIdentity  # noqa: E402
+from vacant_network.logbook import LogEntry  # noqa: E402
 
 #: 預註冊 §三 寫死的腐化參數。改這三個數字＝改實驗，必須另寫預註冊。
 PREREG_SEED = 20260906

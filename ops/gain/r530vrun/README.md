@@ -101,7 +101,7 @@ R530 的題目結構與 R535 **不同**：`tests_visible/` 是**工作區的一�
 | 支 | 做什麼 | 燒機時嗎 |
 |---|---|---|
 | `probe_timeout.py` | 拿**參考解**跑一次全部驗收，量單檔牆鐘，`--test-timeout` ＝ 最慢那一檔 × 3 | 否（零模型呼叫） |
-| `run_r530vrun.py` | 40 格逐格交給 `vacant/vrun/launcher.py`，逐格落盤 | 是 |
+| `run_r530vrun.py` | 40 格逐格交給 `vacant_network/vrun/launcher.py`，逐格落盤 | 是 |
 | `score_r530vrun.py` | 隱藏驗收計分＋收官表 | 否（零模型呼叫、可離線重跑） |
 
 ```bash
@@ -135,7 +135,7 @@ python3 ops/gain/r530vrun/score_r530vrun.py --out $OUT
 * `--test-timeout` 是拿**參考解**量的。模型寫出來的解可能更慢 ⇒ 3 倍是工程餘裕
   **不是上界**，逾時格仍然可能出現，出現時是觀測不是 bug。
 * `passed/total` 是「過了我們自己寫的幾條」，不是「做對了幾成」
-  （`vacant/suitegauge.py` 的單邊保證逐字適用）。
+  （`vacant_network/suitegauge.py` 的單邊保證逐字適用）。
 * `hidden_frac` 與 `hidden_frac_delivered` **都不是主指標**——沒有預註冊，
   `score_r530vrun.py` 不指名。
 

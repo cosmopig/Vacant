@@ -33,7 +33,7 @@ from ops.gain.r530.judge_r530 import (  # noqa: E402
     run_judging, sample_id_for, score_one, selftest, spearman,
 )
 from ops.gain.brain_cline import InfraVoid  # noqa: E402
-from vacant.memory import KS1Violation, assert_ks1_clean  # noqa: E402
+from vacant_network.memory import KS1Violation, assert_ks1_clean  # noqa: E402
 
 PREREG = ROOT / "decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md"
 

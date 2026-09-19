@@ -53,7 +53,7 @@ from ops.gain.analyze_r460 import (_deliv, _pct,  # noqa: E402
                                    rescore_turn1)
 from ops.gain.analyze_r529 import SETS  # noqa: E402
 from ops.gain.replay.paired_ci import diff_ci  # noqa: E402
-from vacant.research import mcnemar_exact, stratified_mcnemar_exact  # noqa: E402
+from vacant_network.research import mcnemar_exact, stratified_mcnemar_exact  # noqa: E402
 
 ARM = "HMIX"
 IDENTITY_WARNING = (

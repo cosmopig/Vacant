@@ -23,7 +23,7 @@ import time
 
 import pytest
 
-from vacant.research import mcnemar_n_required, mcnemar_power
+from vacant_network.research import mcnemar_n_required, mcnemar_power
 
 # (p_disc, psi, alpha, power, 期望 n)。獨立算出來的，不是從實作回填的。
 KNOWN = [

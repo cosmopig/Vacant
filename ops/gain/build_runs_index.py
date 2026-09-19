@@ -32,7 +32,7 @@
 
 `.vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz` 是**不轉散布**的官方包
 （`.gitignore` 第 18 行 `.vacant-private/` 擋住整個目錄）。索引裡只記
-**路徑字串、`vacant/codebench.py` 裡的 sha256 釘值、378 這個題數**，
+**路徑字串、`vacant_network/codebench.py` 裡的 sha256 釘值、378 這個題數**，
 不含任何一個位元組的題目內容，也不去讀它的內容。
 
 ## 用法
@@ -251,12 +251,12 @@ def _load_banks() -> dict[str, Any]:
 
 
 def _codebench_pins() -> dict[str, Any]:
-    """從 `vacant/codebench.py` 抄釘值——**不 import**，避免把 runtime 帶進來。
+    """從 `vacant_network/codebench.py` 抄釘值——**不 import**，避免把 runtime 帶進來。
 
     這裡刻意用文字解析而非 import：索引要能在沒裝 cryptography 的環境跑，
     而且釘值本來就該是「原始碼裡寫死的那個字串」，不是某次執行的結果。
     """
-    src = (ROOT / "vacant/codebench.py").read_text()
+    src = (ROOT / "vacant_network/codebench.py").read_text()
 
     def grab(name: str) -> str | None:
         m = re.search(rf'^{name}\s*=\s*"([^"]+)"', src, re.M)
@@ -911,7 +911,7 @@ def build_banks(banks: dict[str, Any], runs: list[dict[str, Any]]) -> dict[str, 
         "lcb_relations": relations,
         "lcb_caveat_v3": (
             "v3 的 contest_date 全部不晚於 2024-08-10，**不能**宣稱晚於訓練截止；"
-            "污染風險比 v1/v2 高（R460 C3 判定，vacant/codebench.py 有同一句）。"),
+            "污染風險比 v1/v2 高（R460 C3 判定，vacant_network/codebench.py 有同一句）。"),
         "mbpp_plus": {
             "path": pins["evalplus_path"],
             "private": True,
@@ -923,7 +923,7 @@ def build_banks(banks: dict[str, Any], runs: list[dict[str, Any]]) -> dict[str, 
                                           "與釘值逐字相同",
             "note": ("官方 EvalPlus MBPP+ v0.2.0 包。索引**只記路徑與 codebench.py "
                      "裡的釘值**，不讀內容、不複製、不進版控。要驗就在本機比對 "
-                     "sha256（`vacant/codebench.py::EvalPlusMBPPLoader` 是 fail-closed 的）。"
+                     "sha256（`vacant_network/codebench.py::EvalPlusMBPPLoader` 是 fail-closed 的）。"
                      "刻意不記「這個 checkout 有沒有這個檔」——那是環境屬性不是資料屬性，"
                      "寫進去會讓索引在不同 checkout 之間漂掉。"),
         },
@@ -943,7 +943,7 @@ def build_banks(banks: dict[str, Any], runs: list[dict[str, Any]]) -> dict[str, 
                                    if r["bank"].get("family") == "humanevalplus"),
             "note": ("官方 EvalPlus HumanEval+ v0.1.10 包（R529 起的第三個真來源）。"
                      "與 MBPP+ 同樣**私有、不轉散布**，索引只記路徑與 "
-                     "`vacant/codebench.py` 裡的釘值，不讀內容、不進版控。"
+                     "`vacant_network/codebench.py` 裡的釘值，不讀內容、不進版控。"
                      "**分母是 156 不是 164**：8 題被沙箱信封排除（3 題連 visible_check "
                      "都過不了＝那些題根本沒有出貨閘門、4 題超出 128 MiB 記憶體信封、"
                      "`HumanEval/15` 是本輪自訂的 2× 時間餘裕門檻，寫在資料之前）。"
@@ -951,7 +951,7 @@ def build_banks(banks: dict[str, Any], runs: list[dict[str, Any]]) -> dict[str, 
                      "引用 HumanEval+ 的數字時要一起講。"),
         },
         "codebench_builtin_families": {
-            "source": "vacant/codebench.py::_FAMILY_BUILDERS",
+            "source": "vacant_network/codebench.py::_FAMILY_BUILDERS",
             "families": pins["builtin_families"],
             "note": ("程序生成的六坑型族，題目**不落盤**——由 seed:family:idx 決定性生成，"
                      "task_id = sha256('codebench:seed:family:idx')[:16]。"
@@ -1096,6 +1096,16 @@ def build_index() -> dict[str, Any]:
             "輸出無時間戳，同資料重跑必然逐位元組相同。",
             "零網路、零模型呼叫。",
         ],
+        "caveat_import_rename": (
+            "**`runs/` 底下的腳本與紀錄引用的是舊的 import 名 `vacant.*`／路徑 "
+            "`vacant/`。** 2026-09-19（0.8.0）套件改名為 `vacant_network`，但這裡"
+            "**刻意不改**：歸檔的驅動腳本是「當時實際下了什麼指令」的證據，事後改寫"
+            "等於讓紀錄描述一個沒下過的指令（同預註冊逐塊指令那條紀律）。"
+            "**代價寫在這裡，不要假裝沒有**：`runs/s3_v1_analyze.py`、"
+            "`runs/s7b_interact_dom.py` 這類腳本照抄會 `ModuleNotFoundError: "
+            "No module named 'vacant'`——自己把 `vacant.` 換成 `vacant_network.` 即可。"
+            "同一條理由也適用於 `decisions/**` 與 "
+            "`docs/paper_2026-09-14/source_manifest.json` 釘住的那幾份。"),
         "caveat_record_spec": (
             "G 系列 run 目錄（`g_*`）**不是** RECORD_SPEC §1 的證據包——它們沒有 "
             "manifest.json / ledger_events.jsonl / chain_verify.txt / anomalies.md / "
@@ -1607,6 +1617,11 @@ def render_md(idx: dict[str, Any]) -> str:
       + "、".join(f"`{x}`" for x in lg["not_mirrored_to_mac"]))
     A(f"- {lg['not_mirrored_note']}")
     A(f"- **保留政策**：{lg['retention']}")
+    A("")
+
+    A("## 九之前：舊腳本用的是舊 import 名")
+    A("")
+    A(idx["caveat_import_rename"])
     A("")
 
     A("## 九、與 RECORD_SPEC 的落差（不要跳過這一節）")

@@ -84,7 +84,7 @@ sys.path.insert(0, str(ROOT))
 from ops.gain.replay import verify_run_receipts as vrr           # noqa: E402
 from ops.vacantrun import launcher                               # noqa: E402
 from ops.vacantrun import retry as retrypolicy                   # noqa: E402
-from vacant.memory import KS1Violation                           # noqa: E402
+from vacant_network.memory import KS1Violation                           # noqa: E402
 
 #: 唯一標記，兩個形狀各擋一種洩漏：字串（註解／訊息）與數值（測資字面值）。
 #: 逐字沿用 `tests/test_gain_vgt_canary.py` 的用意。

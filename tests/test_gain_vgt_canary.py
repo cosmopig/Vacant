@@ -30,8 +30,8 @@ import pytest
 
 from ops.gain.gain_run import (arm_conform, arm_eq5, arm_off,  # noqa: E402
                                arm_off5, arm_on, arm_onr, calibrate_pool)
-from vacant.identity import Identity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.identity import Identity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 #: 唯一標記。兩個形狀各擋一種洩漏：字串（註解／訊息）與數值（測資字面值）。
 GT_CANARY = "CANARY_GT_9f3c7e"

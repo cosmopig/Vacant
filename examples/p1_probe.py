@@ -22,12 +22,12 @@ import statistics
 import time
 from pathlib import Path
 
-from vacant.batch import Watchdog
-from vacant.brains import LMStudioBrain
-from vacant.checks import compile_check
-from vacant.record import check as record_check
-from vacant.record import pack as record_pack
-from vacant.x1 import make_pilot_tasks
+from vacant_network.batch import Watchdog
+from vacant_network.brains import LMStudioBrain
+from vacant_network.checks import compile_check
+from vacant_network.record import check as record_check
+from vacant_network.record import pack as record_pack
+from vacant_network.x1 import make_pilot_tasks
 
 
 def _pct(xs: list[float], p: float) -> float:

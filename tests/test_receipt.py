@@ -6,8 +6,8 @@ import copy
 
 import pytest
 
-from vacant.ecosystem import Ecosystem, PRODUCT_ROSTER
-from vacant.receipt import ReceiptError, verify_delegation_receipt
+from vacant_network.ecosystem import Ecosystem, PRODUCT_ROSTER
+from vacant_network.receipt import ReceiptError, verify_delegation_receipt
 
 CHECK = {
     "type": "run_python",

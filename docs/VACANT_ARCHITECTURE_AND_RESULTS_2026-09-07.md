@@ -36,7 +36,7 @@ R440P §五-1 同時寫死了它的適用範圍：**展場與任何對外宣稱�
 （來源：`DECISION_20260903_R440P_CONFORMANCE_GATE.md`§五-1 逐字，`……` 處略去題庫附帶
 說明「MBPP+ 有 3 條 base assert 可跑；」；同一條誠實邊界複述於
 `ops/gain/gain_run.py::arm_conform` docstring 誠實邊界第 1 條、
-`vacant/peerexec.py` docstring 誠實邊界 1「這條是 R440P §五-1 的原句，搬到這裡一樣有效」）
+`vacant_network/peerexec.py` docstring 誠實邊界 1「這條是 R440P §五-1 的原句，搬到這裡一樣有效」）
 
 它不宣稱讓 agent 變聰明，也不宣稱擋住壞人。目前量到的價值集中在一句可操作的話：
 **用執行取代意見、用收據取代投票**——跑客戶自己的驗收測資、交第一份通過的、
@@ -80,55 +80,55 @@ R440P §五-1 同時寫死了它的適用範圍：**展場與任何對外宣稱�
 
 | 模組 | 承重什麼 | 來源 |
 |---|---|---|
-| `vacant/canonical.py` | 跨機驗章一致的**唯一**序列化規則（sort_keys、緊湊分隔、UTF-8 不轉義）；簽章覆蓋的永遠是 canonical bytes，不是 Python dict | `vacant/canonical.py` module docstring |
-| `vacant/identity.py` | Ed25519 keypair ＋ `vacant_id`；私鑰放閘道、0o600、**agent 推理看不到身分** | `vacant/identity.py` docstring |
-| `vacant/crypto.py` | Ed25519 簽／驗的底層 | 同上 import |
+| `vacant_network/canonical.py` | 跨機驗章一致的**唯一**序列化規則（sort_keys、緊湊分隔、UTF-8 不轉義）；簽章覆蓋的永遠是 canonical bytes，不是 Python dict | `vacant_network/canonical.py` module docstring |
+| `vacant_network/identity.py` | Ed25519 keypair ＋ `vacant_id`；私鑰放閘道、0o600、**agent 推理看不到身分** | `vacant_network/identity.py` docstring |
+| `vacant_network/crypto.py` | Ed25519 簽／驗的底層 | 同上 import |
 
 #### L1 — 帳：簽章鏈與存檔點
 
 | 模組 | 承重什麼 | 來源 |
 |---|---|---|
-| `vacant/logbook.py` | append-only hash-chain：`seq` 真單調、`prev_hash` 串接、簽章覆蓋全欄位；`stream_id`＝創世事件 hash。**任何中間竄改都驗不過（tamper-evident）**，且持公鑰者都能 `verify_chain` | `vacant/logbook.py` docstring |
-| `vacant/envelope.py` | 每筆 A2A 訊息的簽章信封＋`ReviewEnvelope`（簽章 review）；body 是黑箱，閘道只簽／驗／記 | `vacant/envelope.py` docstring |
-| `vacant/checkpoint.py` | V1 存檔點認證＋回溯稽核：結算不只發生在交付瞬間，而是**沿鏈累積**（docstring 原文用「信任」二字，此處照口徑紅線改寫）；存檔點**自身成鏈**，「記憶沒了，帳還在」 | `vacant/checkpoint.py` docstring |
-| `vacant/attest.py`／`vacant/receipt.py`／`vacant/trustcard.py` | 可攜的通過憑證與委派收據：讓「已驗證」離開 vacant 仍可被獨立核對（key custody 假設下是 prevents，私鑰外洩即退化為 detects） | `vacant/attest.py`、`vacant/receipt.py` docstring |
+| `vacant_network/logbook.py` | append-only hash-chain：`seq` 真單調、`prev_hash` 串接、簽章覆蓋全欄位；`stream_id`＝創世事件 hash。**任何中間竄改都驗不過（tamper-evident）**，且持公鑰者都能 `verify_chain` | `vacant_network/logbook.py` docstring |
+| `vacant_network/envelope.py` | 每筆 A2A 訊息的簽章信封＋`ReviewEnvelope`（簽章 review）；body 是黑箱，閘道只簽／驗／記 | `vacant_network/envelope.py` docstring |
+| `vacant_network/checkpoint.py` | V1 存檔點認證＋回溯稽核：結算不只發生在交付瞬間，而是**沿鏈累積**（docstring 原文用「信任」二字，此處照口徑紅線改寫）；存檔點**自身成鏈**，「記憶沒了，帳還在」 | `vacant_network/checkpoint.py` docstring |
+| `vacant_network/attest.py`／`vacant_network/receipt.py`／`vacant_network/trustcard.py` | 可攜的通過憑證與委派收據：讓「已驗證」離開 vacant 仍可被獨立核對（key custody 假設下是 prevents，私鑰外洩即退化為 detects） | `vacant_network/attest.py`、`vacant_network/receipt.py` docstring |
 
 #### L2 — 可究責層（Phase-1 本體）
 
 | 模組 | 承重什麼 | 來源 |
 |---|---|---|
-| `vacant/registry.py` | 發現＋信譽索引；**不是中央路由器**（查到後點對點直連）。`record_review` 只收驗簽＋head 新鮮＋去重；reviewer weight 內生；同源非線性降權（raises-cost，非 prevents） | `vacant/registry.py` docstring |
-| `vacant/reputation.py` | 五維 Beta 信譽，key＝(stream_id, branch_id, substrate[, family])——**credit 跟著記憶走，不跟身體走**；牙齒：decay 半衰期 200 事件、slash 乘法扣減 | `vacant/reputation.py` docstring |
-| `vacant/router.py` | trust on/off 單開關：on＝UCB 信譽路由、off＝確定性隨機。這就是「掛勾」的產品化表示 | `vacant/router.py` docstring |
-| `vacant/auditor.py` | 確定性再驗：在 `checks.py` 沙箱重跑客觀 check（環境真值，不是「再問一次 LLM」）；抽樣確定性（sha256(seed:task_id)），同 seed 完全可重放 | `vacant/auditor.py` docstring |
-| `vacant/memory.py` | MemoryStream（episode 上鏈）＋MemoryManager **M0／M1／M2**：M0 無記憶、M1 最近 k 筆原文、M2 只有被稽核／被審確認過的 episode 才蒸餾成教訓。KS-1／A4 是**可執行防呆**（`assert_ks1_clean`、`lesson_leaks_test_data`） | `vacant/memory.py` docstring |
-| `vacant/dashboard.py` | 觀測台＋`/api/roster`／`/api/scoreboard`／`/api/snapshot`。**面板不是信任來源**：面板與 ledger 不符時以 ledger 為準 | `vacant/dashboard.py` docstring |
+| `vacant_network/registry.py` | 發現＋信譽索引；**不是中央路由器**（查到後點對點直連）。`record_review` 只收驗簽＋head 新鮮＋去重；reviewer weight 內生；同源非線性降權（raises-cost，非 prevents） | `vacant_network/registry.py` docstring |
+| `vacant_network/reputation.py` | 五維 Beta 信譽，key＝(stream_id, branch_id, substrate[, family])——**credit 跟著記憶走，不跟身體走**；牙齒：decay 半衰期 200 事件、slash 乘法扣減 | `vacant_network/reputation.py` docstring |
+| `vacant_network/router.py` | trust on/off 單開關：on＝UCB 信譽路由、off＝確定性隨機。這就是「掛勾」的產品化表示 | `vacant_network/router.py` docstring |
+| `vacant_network/auditor.py` | 確定性再驗：在 `checks.py` 沙箱重跑客觀 check（環境真值，不是「再問一次 LLM」）；抽樣確定性（sha256(seed:task_id)），同 seed 完全可重放 | `vacant_network/auditor.py` docstring |
+| `vacant_network/memory.py` | MemoryStream（episode 上鏈）＋MemoryManager **M0／M1／M2**：M0 無記憶、M1 最近 k 筆原文、M2 只有被稽核／被審確認過的 episode 才蒸餾成教訓。KS-1／A4 是**可執行防呆**（`assert_ks1_clean`、`lesson_leaks_test_data`） | `vacant_network/memory.py` docstring |
+| `vacant_network/dashboard.py` | 觀測台＋`/api/roster`／`/api/scoreboard`／`/api/snapshot`。**面板不是信任來源**：面板與 ledger 不符時以 ledger 為準 | `vacant_network/dashboard.py` docstring |
 
 #### L3 — 題庫、V/GT 分離與量具
 
 | 模組 | 承重什麼 | 來源 |
 |---|---|---|
-| `vacant/codebench.py` | 自帶客觀 verifier 的題庫；`EvalPlusMBPPLoader`（MBPP+ v0.2.0，sha256 釘死、fail-closed）＋`LiveCodeBenchLoader`（v1／v2 120 題／v3 189 題，明表映射） | `vacant/codebench.py` docstring；`ops/gain/gain_run.py::load_tasks` |
+| `vacant_network/codebench.py` | 自帶客觀 verifier 的題庫；`EvalPlusMBPPLoader`（MBPP+ v0.2.0，sha256 釘死、fail-closed）＋`LiveCodeBenchLoader`（v1／v2 120 題／v3 189 題，明表映射） | `vacant_network/codebench.py` docstring；`ops/gain/gain_run.py::load_tasks` |
 | V/GT 分離 | **需求**＝prompt＋input contract＋`hidden_check`；**選擇時只准碰 `visible_check`**。這個分離是整件事的要害：agent 可以通過看得到的測試卻不滿足真需求 | `SPEC_GAIN.md`§二 |
 | 題庫固定子集 | MBPP+ 378 題中 7 題連 canonical 都跑不完 10 秒／128 MiB 沙箱 ⇒ 固定排除，餘 **371 題** | `SPEC_GAIN.md`§二；`ops/gain/gain_run.py::GAIN_EVALPLUS_RESOURCE_EXCLUSIONS` |
-| `vacant/suitegauge.py` | 套件量具的**純函式核心**：參考解要過 ∧ 每個已知壞樁都要被擋 ∧ `n_broken ≥ 1`。`probe_instrument` 與 `peerexec.commit_suite` 共用同一份判準（兩份實作＝兩條會漂移的判準） | `vacant/suitegauge.py` docstring |
-| `vacant/suitespec.py` | **驗收套件是資料不是程式**：`SuiteSpec = {v, dialect, entry_point, tests:[{args, expected}], cmp}`，執行器只跑**自己的**渲染器產生的碼 | `vacant/suitespec.py` docstring |
+| `vacant_network/suitegauge.py` | 套件量具的**純函式核心**：參考解要過 ∧ 每個已知壞樁都要被擋 ∧ `n_broken ≥ 1`。`probe_instrument` 與 `peerexec.commit_suite` 共用同一份判準（兩份實作＝兩條會漂移的判準） | `vacant_network/suitegauge.py` docstring |
+| `vacant_network/suitespec.py` | **驗收套件是資料不是程式**：`SuiteSpec = {v, dialect, entry_point, tests:[{args, expected}], cmp}`，執行器只跑**自己的**渲染器產生的碼 | `vacant_network/suitespec.py` docstring |
 
 #### L4 — 實驗與裁決基建
 
 | 模組 | 承重什麼 | 來源 |
 |---|---|---|
 | `ops/gain/gain_run.py` | G 實驗 runner，五條臂（下節）＋量具驗證＋全 I/O 落盤（`calls.jsonl`／`rows.jsonl`／`summary.json`） | `ops/gain/gain_run.py` docstring |
-| `vacant/peerexec.py` | 「互跑不互審」的去中心化執行證言層 | `vacant/peerexec.py` docstring |
-| `vacant/record.py`＋`docs/RECORD_SPEC.md` | 一次 run 的最小證據包：`pack`／`check`。缺必要項＝記錄層 `infra_void`，不得進統計 | `docs/RECORD_SPEC.md`§2（必要項 vs 可缺項）、**§5（infra_void／retry×4／parse_void 規律）** |
-| `vacant/research.py` | McNemar＋bootstrap＋預註冊四函式（holm_bonferroni／tost_equiv_boot／wilcoxon_signed_rank_exact／mcnemar_power） | `CLAUDE.md`§程式碼地圖 |
-| `vacant/blayer.py`／`vacant/batch.py` | B 層六情境驗收（判準寫死）／RunLedger 斷點續跑＋Watchdog | `CLAUDE.md`§程式碼地圖 |
+| `vacant_network/peerexec.py` | 「互跑不互審」的去中心化執行證言層 | `vacant_network/peerexec.py` docstring |
+| `vacant_network/record.py`＋`docs/RECORD_SPEC.md` | 一次 run 的最小證據包：`pack`／`check`。缺必要項＝記錄層 `infra_void`，不得進統計 | `docs/RECORD_SPEC.md`§2（必要項 vs 可缺項）、**§5（infra_void／retry×4／parse_void 規律）** |
+| `vacant_network/research.py` | McNemar＋bootstrap＋預註冊四函式（holm_bonferroni／tost_equiv_boot／wilcoxon_signed_rank_exact／mcnemar_power） | `CLAUDE.md`§程式碼地圖 |
+| `vacant_network/blayer.py`／`vacant_network/batch.py` | B 層六情境驗收（判準寫死）／RunLedger 斷點續跑＋Watchdog | `CLAUDE.md`§程式碼地圖 |
 
 #### L5 — 展件與對外發布
 
 | 模組 | 承重什麼 | 來源 |
 |---|---|---|
-| `vacant/entrycost.py` | 入場成本的**機制模擬**：路由走真 `Registry.route`、稽核走真 `Auditor`、扣分走真 `Reputation.slash`，模擬的只有「交付好壞」這一件事。現場的雙世界對照跑這個，不跑真模型 | `vacant/entrycost.py` docstring；`CLAUDE.md`§展件可直接複用的 |
+| `vacant_network/entrycost.py` | 入場成本的**機制模擬**：路由走真 `Registry.route`、稽核走真 `Auditor`、扣分走真 `Reputation.slash`，模擬的只有「交付好壞」這一件事。現場的雙世界對照跑這個，不跑真模型 | `vacant_network/entrycost.py` docstring；`CLAUDE.md`§展件可直接複用的 |
 | `examples/receipt_viewer.html` | 展件「收據牆」（單機 r445 那條鏈），離線單檔 | `tests/test_receipt_viewer.py` L1–L33；`DECISION_20260906_R455_FABLE_AUDIT_VIEWER.md`§一 |
 | `examples/receipt_viewer_multiparty.html` | 展件「三把金鑰的收據」：內嵌 r454 真跑的三條完整鏈（1840／1840／1899＝5,579 筆），瀏覽器內從創世驗到鏈頭、逐格重算裁決／指名／出貨，並示範三種竄改。零外部資源、`file://` 直開。**展件格＝`Mbpp/100` 第 0 份，是排序後第一個說謊格，不是挑的** | `CLAUDE.md`§展件可直接複用的（L98–105）；`DECISION_20260906_R455_FABLE_AUDIT_VIEWER.md`§一；`DECISION_20260906_R454_FABLE_AUDIT_NAMED_DISSENT.md`§三-4 |
 | `examples/e10_mediator.py` | 重算 E10 那兩行路由序列（零機時，只讀已歸檔 JSONL） | `CLAUDE.md`§展件可直接複用的（L97） |
@@ -155,7 +155,7 @@ R440P §五-1 同時寫死了它的適用範圍：**展場與任何對外宣稱�
 
 1. 只用 `visible_check` 決定去留——碰 `hidden_check` 就是 V/GT 分離破功
    （**V/GT 分離的定義在 `SPEC_GAIN.md`§二**；程式碼註解沿用舊編號寫「SPEC §5.3」
-   ——`gain_run.py:581`／`:649`、`vacant/peerexec.py:124`——但現行 `SPEC_GAIN.md` 只有§一–§七，
+   ——`gain_run.py:581`／`:649`、`vacant_network/peerexec.py:124`——但現行 `SPEC_GAIN.md` 只有§一–§七，
    **沒有 §5.3 這一節**，引用時一律指§二）；
 2. 第一份通過的出貨（CONFORM 早停；EQ5 不早停但選擇語意逐字相同）；
 3. 全不通過＝拒交，**拒交算失敗**（分母是全部題目）；
@@ -205,12 +205,12 @@ flowchart TB
 **機制只有三件事，沒有第四件**：`Executor.attest`（各自跑、各自簽進自己的鏈）、
 `form_verdict`（取多數，並回傳**少數方是誰**）、`select_by_quorum`（CONFORM 的選擇
 語意不變，只是「通過」改由法定人數決定）。
-（來源：`vacant/peerexec.py` docstring 機制段）
+（來源：`vacant_network/peerexec.py` docstring 機制段）
 
 **為什麼是「互跑」不是「互審」**：驗收測資是確定性的程式，誠實執行器**必須**得到
 同一個結果 ⇒ **意見分歧沒有資訊，執行分歧有資訊**；而執行分歧只有兩種可能——
 有人沒真的跑，或有人簽了跟自己跑出來不一樣的東西，兩者都是可歸屬的過錯。
-（來源：`vacant/peerexec.py` docstring；`DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md`§一）
+（來源：`vacant_network/peerexec.py` docstring；`DECISION_20260905_R449_PEEREXEC_ARCHITECTURE_AUDIT.md`§一）
 
 ---
 
@@ -441,11 +441,11 @@ r446 的 **P-R446-5 是 MISS，要照實記，而且要記它偏的方向對我�
 | 但攻擊者造出 `stateful` 變體 | 量具兩方向滿分、`gauge_status="ok"`、鏈全驗得過，**交付率 −75.20pp、交付 0.00%**，假交付 24.8% ⇒ **R449 §七-2 推翻條件成立**，量具作為套件固定點的部分解**作廢** | 同上§二、§三-2、§三-3 |
 | R452 把套件改成資料 | `exec` 走私從「上鏈 368/371、假交付 31.5%」變成「上鏈 **0/371**、`entry_point_mismatch` 368」；超大十六進位整數從「裸 ValueError 穿過 11/11 道門」變成 **0/11** | `DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md`§二 |
 | 無損轉換 | 真套件轉資料後，在 **1840（MBPP+）＋455（LCB）** 個候選上可見標籤逐格相同、0 個不一致；兩位攻擊者各自全量重量 **11430 格**逐格相同 | 同上§二 |
-| **殘餘（唯一可表達的攻擊＝覆蓋不足），一律講兩個數字** | **可實現**（`generic_gauged`，只用供應者手上資訊）：假交付 17.93%→20.65%＝**+2.72pp**；**事後諸葛上限**（`weak_oracle`，看得到候選與隱藏標籤）：**+4.35pp** | 同上§二；`vacant/peerexec.py` docstring 誠實邊界 2 |
+| **殘餘（唯一可表達的攻擊＝覆蓋不足），一律講兩個數字** | **可實現**（`generic_gauged`，只用供應者手上資訊）：假交付 17.93%→20.65%＝**+2.72pp**；**事後諸葛上限**（`weak_oracle`，看得到候選與隱藏標籤）：**+4.35pp** | 同上§二；`vacant_network/peerexec.py` docstring 誠實邊界 2 |
 
 ⚠ 舊講法「殘餘＝−8.70pp」（`weak_first`）**停用**：那個數字大半是量具把它擋掉
 （上鏈 331/371 vs 完整套件 366），是機制在運作，不是攻擊上界。
-（來源：`DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md`§二；`vacant/peerexec.py` docstring）
+（來源：`DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md`§二；`vacant_network/peerexec.py` docstring）
 
 **這三輪都 break 了 wire-format**（`ATTEST_VERSION`=2、`SUITE_COMMIT_VERSION`=2）：
 round452 起證言多帶 `render_sha256`、`suite_sha256` 語意從「驗收碼的雜湊」改成
@@ -453,7 +453,7 @@ round452 起證言多帶 `render_sha256`、`suite_sha256` 語意從「驗收碼�
 `verify_attestation` 以 `bad_version` 拒收，**這是刻意的**——同 CLAUDE.md 鐵律 6
 （wire-format 一 break，舊資料就清掉重鑄，不做相容層）。repo 內無舊證言需遷移。
 （來源：`DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md`§四；
-`vacant/peerexec.py` `ATTEST_VERSION`／`SUITE_COMMIT_VERSION` 註解；`CLAUDE.md`§鐵律 6）
+`vacant_network/peerexec.py` `ATTEST_VERSION`／`SUITE_COMMIT_VERSION` 註解；`CLAUDE.md`§鐵律 6）
 
 **展件檢視器（R455）**：`examples/receipt_viewer_multiparty.html`（4.48 MB）內嵌
 r454 三條完整的鏈，瀏覽器內純 JS SHA-256 重算 entry hash、seq／prev_hash 串接、
@@ -502,7 +502,7 @@ WebCrypto Ed25519 逐筆驗簽；裁決／指名／出貨由頁面自己重算�
 | `gain.reviewer_tracks_difficulty` | **held** | MBPP+ 上近乎一律 PASS、LCB 上 89.7% 主張 FAIL，兩邊都貼著常數基線（−2.99pp／+0.77pp） | `examples/verdicts.py` · `gain.reviewer_tracks_difficulty` |
 | `gain.clean_dataset` | **overstated** | 「第一個乾淨的完整資料集」說太滿：ON 臂 infra_void **66/179＝36.9%**，`equal_budget_comparison_valid=false`。更正：應說「無已知 bug 污染、配對子集 n=101」，void 率照實列 | `examples/verdicts.py` · `gain.clean_dataset` |
 
-#### 入場成本系列（機制模擬，`vacant/entrycost.py`）
+#### 入場成本系列（機制模擬，`vacant_network/entrycost.py`）
 
 | 結論 | 數字 | 來源 |
 |---|---|---|
@@ -525,7 +525,7 @@ WebCrypto Ed25519 逐筆驗簽；裁決／指名／出貨由頁面自己重算�
 | 被打穿的宣稱 | 更正 | 來源 |
 |---|---|---|
 | 56a1221 commit 訊息「殘餘上限＝targeted −6.47pp」 | **作廢**（`stateful` 變體交付 0.00%） | `DECISION_20260906_R451_FABLE_AUDIT_SUITE_GAUGE.md`§三-2 |
-| R452 第一版「三種攻擊不可表達」 | **是錯的**——錯在把資料／程式的界線畫在字面值上、漏掉名字綁定；`entry_point="exec"` 一擊打穿（368/371 上鏈、假交付 31.5%）。修法是結構性的（綁題目＋命名空間查找），不是黑名單。**這一段要進展場的誠實敘事：每一版都被獨立攻擊者打過，打穿的那次也留在紀錄裡** | `DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md`§三-2；`vacant/suitespec.py` docstring round452b／452c |
+| R452 第一版「三種攻擊不可表達」 | **是錯的**——錯在把資料／程式的界線畫在字面值上、漏掉名字綁定；`entry_point="exec"` 一擊打穿（368/371 上鏈、假交付 31.5%）。修法是結構性的（綁題目＋命名空間查找），不是黑名單。**這一段要進展場的誠實敘事：每一版都被獨立攻擊者打過，打穿的那次也留在紀錄裡** | `DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md`§三-2；`vacant_network/suitespec.py` docstring round452b／452c |
 | R453 預註冊 P-3a 窗口 | **窗口寫壞了**（把 `rejected` 灌進聯集、與 P-2 重複計數）；作者沒有事後改窗，而是加報 P-3b 並把 FAIL 照印，報的是對自己較不利的數字 | `DECISION_20260906_R453_FABLE_AUDIT_REAL_MULTIPARTY.md`§三-2 |
 
 ---
@@ -534,24 +534,24 @@ WebCrypto Ed25519 逐筆驗簽；裁決／指名／出貨由頁面自己重算�
 
 | # | 邊界 | 具體內容 | 來源 |
 |---|---|---|---|
-| **B0** | **前提：需求要能編譯成可執行的驗收測資**（最大的外部效度限制，凌駕以下各條） | 逐字（`……` 處略去題庫附帶說明「MBPP+ 有 3 條 base assert 可跑；」）：「整件事建立在『需求可以被編譯成可執行的驗收測資』。……需求跑不起來的場合，這個機制沒有免費的裁判，會退化成『問一個模型』，而那正是量出來很差的東西。」R440P §五-1 並寫死**展場與任何對外宣稱都必須帶這一句** | `DECISION_20260903_R440P_CONFORMANCE_GATE.md`§五-1；`ops/gain/gain_run.py::arm_conform` docstring 誠實邊界 1；`vacant/peerexec.py` docstring 誠實邊界 1 |
+| **B0** | **前提：需求要能編譯成可執行的驗收測資**（最大的外部效度限制，凌駕以下各條） | 逐字（`……` 處略去題庫附帶說明「MBPP+ 有 3 條 base assert 可跑；」）：「整件事建立在『需求可以被編譯成可執行的驗收測資』。……需求跑不起來的場合，這個機制沒有免費的裁判，會退化成『問一個模型』，而那正是量出來很差的東西。」R440P §五-1 並寫死**展場與任何對外宣稱都必須帶這一句** | `DECISION_20260903_R440P_CONFORMANCE_GATE.md`§五-1；`ops/gain/gain_run.py::arm_conform` docstring 誠實邊界 1；`vacant_network/peerexec.py` docstring 誠實邊界 1 |
 | B1 | **n 不夠** | LCB v2 n=120 只辨得出約 12pp 級差異；r449b 下界只有 +0.30pp，事前檢定力表說 n=120 在效果成立時只有 18–53% 機會讓下界過 0。要把區間收到 ±5pp 需要 **278 題**，LCB v2 沒有 | `DECISION_20260905_R440Z_WRAPUP_LCB2.md`§五；`DECISION_20260906_R449B_...`§四-1 |
 | B2 | **題庫特性** | 「可見篩選無損」部分是題庫性質：MBPP+ 的 `hidden_check` ＝ base＋plus assert，「可見沒過」結構上蘊含「隱藏沒過」。驗收套件不是真需求子集的部署裡，拒交會殺掉好答案 | `DECISION_20260903_R440P_CONFORMANCE_GATE.md`§（誠實邊界 2）；`ops/gain/gain_run.py::arm_conform` docstring |
 | B3 | **量具覆蓋 12/120** | LCB v2 上量具只覆蓋 12/120 題；lcb_3026 是 2023 年題；lcb_3763／lcb_3613 已知量具問題在池內。LCB（r443）只有 **12/91** 題可量具，n=12 的區間全部跨 0、**不作證據**——因此 3.1-E 的**殘餘表（+2.72pp／+4.35pp）只在 MBPP+ 上有意義**，不可搬到 LCB 講 | `DECISION_20260905_R440Z_WRAPUP_LCB2.md`§五；`DECISION_20260906_R451_...`§二；`DECISION_20260906_R452_...`§四 |
 | B4 | **hidden `atol=0` 跨機不可攜** | MBPP+ 隱藏測資 `atol=0` 比對，1 ULP 差異即翻。R453 實測一格（Mbpp/266 浮點面積題）出貨 sha 相同但重算 hidden 為 false ⇒ 計分口徑 274/66 與 runtime 275/65 差此一格 | `DECISION_20260905_R449_...`§六；`DECISION_20260906_R453_...`§三-5 |
 | B5 | **第三把金鑰在同一台機器** | R454 的 K3 與 K2 同機（同 libm、同 `checks.py`），這一軸比 R453 弱；且 k=2 時全票 ⇒ R453 **沒有量到少數方被指名那條路徑**；跨 CPU 架構（arm64，正是 1 ULP 邊界來源）未測；**量具白名單仍只在 Mac 一台算**（R454 §三-2 的限定清單逐條之一） | `DECISION_20260906_R454_...`§三-2；`DECISION_20260906_R453_...`§三-3 |
 | B6 | **耐心說謊者零量測** | 只在不會被抓時說謊者：四個 k、兩個題庫偵測率全部 0.000；真跑側完全沒量 | `DECISION_20260905_R449_...`§三-2；`DECISION_20260906_R454_...`§三-2 |
-| B7 | **套件覆蓋是殘餘固定點** | 改成資料之後唯一可表達的攻擊是「覆蓋不足＋比對旗標放寬」；殘餘一律講**兩個數字**：可實現 +2.72pp、事後諸葛上限 +4.35pp。`weak_oracle` 是上限不是攻擊；`generic_gauged` 只是攻擊者設計的一種，不是所有可實現攻擊的上確界。**這張殘餘表只在 MBPP+ 上有意義**：LCB 只有 12/91 題可量具（同檔§四）；MBPP+ mimic 交付列從未量過 | `DECISION_20260906_R452_...`§二、§四；`vacant/peerexec.py` docstring |
-| B8 | **渲染器與沙箱仍是被信任的輸入** | 信任被搬走，不是消滅：渲染器與它渲染給的沙箱（`vacant/checks.py`）現在是全體共用的被信任輸入；渲染器有 bug，k 台機器會**一致地**錯，爭議率仍是 0。k 台跑同一份 `checks.py`＝相關失效，本模組不提供也不宣稱提供實作多樣性 | `DECISION_20260906_R452_...`§三-3；`vacant/peerexec.py` docstring 誠實邊界 3 |
-| B9 | **Windows 沙箱跑不起來** | win1003 未能參加 R453：`vacant/checks.py` 的非 posix 分支看起來有、實際跑不起來（`selectors.DefaultSelector` 監看 pipe，Windows 的 select 只吃 socket）。展場用 Mac／Linux VM 不受影響；要在 Windows 跑展件是前置修補 | `DECISION_20260906_R453_...`§三-4；`DECISION_20260906_R455_...`§六 |
-| B10 | **多數決有數學上界** | 容忍上界是 ⌊(k−1)/2⌋；過半即反轉，誠實者成為被指名的一方，且**機制無法知道自己在門檻哪一邊**。k=3／quorum=2 時，只要任一把誠實證言缺席或被拒，1-1 平手 ⇒ 未決、不指名——「指名」的前提是**誠實多數在場**，不是「有簽章」 | `vacant/peerexec.py`§`MAJORITY_BOUND_NOTE`；`DECISION_20260906_R454_...`§三-3 |
-| B11 | **簽章指認金鑰，不指認主體** | 收據能證明「這筆證言事後沒被改過、且與同一把金鑰的其他證言同源」，**不能**證明背後是哪一個主體。R455 的 T8（整條鏈用自己的金鑰重鑄）是離線單檔檢視器的結構性界線；緩解是把三把金鑰的 `vacant_id` 印在實體標示牌上 | `vacant/peerexec.py` docstring 誠實邊界 5；`DECISION_20260906_R455_...`§二 |
+| B7 | **套件覆蓋是殘餘固定點** | 改成資料之後唯一可表達的攻擊是「覆蓋不足＋比對旗標放寬」；殘餘一律講**兩個數字**：可實現 +2.72pp、事後諸葛上限 +4.35pp。`weak_oracle` 是上限不是攻擊；`generic_gauged` 只是攻擊者設計的一種，不是所有可實現攻擊的上確界。**這張殘餘表只在 MBPP+ 上有意義**：LCB 只有 12/91 題可量具（同檔§四）；MBPP+ mimic 交付列從未量過 | `DECISION_20260906_R452_...`§二、§四；`vacant_network/peerexec.py` docstring |
+| B8 | **渲染器與沙箱仍是被信任的輸入** | 信任被搬走，不是消滅：渲染器與它渲染給的沙箱（`vacant_network/checks.py`）現在是全體共用的被信任輸入；渲染器有 bug，k 台機器會**一致地**錯，爭議率仍是 0。k 台跑同一份 `checks.py`＝相關失效，本模組不提供也不宣稱提供實作多樣性 | `DECISION_20260906_R452_...`§三-3；`vacant_network/peerexec.py` docstring 誠實邊界 3 |
+| B9 | **Windows 沙箱跑不起來** | win1003 未能參加 R453：`vacant_network/checks.py` 的非 posix 分支看起來有、實際跑不起來（`selectors.DefaultSelector` 監看 pipe，Windows 的 select 只吃 socket）。展場用 Mac／Linux VM 不受影響；要在 Windows 跑展件是前置修補 | `DECISION_20260906_R453_...`§三-4；`DECISION_20260906_R455_...`§六 |
+| B10 | **多數決有數學上界** | 容忍上界是 ⌊(k−1)/2⌋；過半即反轉，誠實者成為被指名的一方，且**機制無法知道自己在門檻哪一邊**。k=3／quorum=2 時，只要任一把誠實證言缺席或被拒，1-1 平手 ⇒ 未決、不指名——「指名」的前提是**誠實多數在場**，不是「有簽章」 | `vacant_network/peerexec.py`§`MAJORITY_BOUND_NOTE`；`DECISION_20260906_R454_...`§三-3 |
+| B11 | **簽章指認金鑰，不指認主體** | 收據能證明「這筆證言事後沒被改過、且與同一把金鑰的其他證言同源」，**不能**證明背後是哪一個主體。R455 的 T8（整條鏈用自己的金鑰重鑄）是離線單檔檢視器的結構性界線；緩解是把三把金鑰的 `vacant_id` 印在實體標示牌上 | `vacant_network/peerexec.py` docstring 誠實邊界 5；`DECISION_20260906_R455_...`§二 |
 | B12 | **證據包只保證自洽，不保證內容為真** | `pack` 只能保證「這個包完整且自洽」；內容真實性由簽章鏈與稽核承擔。`SHA256SUMS` **detects** 落盤後的竄改，**不 prevents**；`repo_commit` 不等於「照這個 commit 就重現得出這個 run」（`-uno` ⇒ 未追蹤的新原始碼檔偵測不到） | `docs/RECORD_SPEC.md`§4 |
 | B13 | **區間口徑不一致要照講** | 同一批資料的區間隨方法而異：r446 Δ 收官報精確條件區間 [+0.796, +6.529]、R448 稽核以 bootstrap 重算 [+1.08, +7.01]；r449b analyzer 配對區間下界 +0.30 比 bootstrap [+1.67, +15.83] 保守（**仲裁以 analyzer 為準**）；r449c analyzer [−0.66, +7.68] vs bootstrap [0.00, +8.47] | `CONCLUSION_20260904_R446_EQUAL_BUDGET.md`§一；`DECISION_20260906_R448_...`§三；`DECISION_20260906_R449B_...`§二；`DECISION_20260907_R449C_...`§二 |
 | B14 | **不准合併樣本** | 三個 EQ5 run 不准併成 n=862；四個不准併成 n=1051；r446→r448 只准報逐題四格，禁寫 n=742 | `DECISION_20260906_R449B_...`§三；`DECISION_20260907_R449C_...`§三；`DECISION_20260906_R448_...`§三 |
 | B15 | **重放不等於真跑** | R451／R452 的全部數字來自重放與模擬（真簽章真鏈，但候選是 r446／r443 已歸檔草稿）；MBPP+ mimic 交付列未量；3/371 題不可轉 SuiteSpec（參考解回傳 `re.Match`）——資料形態排除「期望輸出是物件」的需求 | `DECISION_20260906_R451_...`§六；`DECISION_20260906_R452_...`§四 |
 | B16 | **來源存疑的舊數字** | r443 的「61/91」在 repo 裡找不到來源（另兩個算法得 63/91、舊標籤 60/91，可見側 455/455 相同）；引用前要先確認出處 | `DECISION_20260905_R449_...`§六 |
-| B17 | **模擬不是生態** | `entrycost` 回答「在這套規則下攻擊者的最佳策略值多少」，**不**回答「真實世界的攻擊者會不會這樣做」；攻擊者策略空間是我們寫死的三種 ⇒ 它給的是攻擊成本的**上界的下界**，證不了安全 | `vacant/entrycost.py` docstring 誠實邊界 |
+| B17 | **模擬不是生態** | `entrycost` 回答「在這套規則下攻擊者的最佳策略值多少」，**不**回答「真實世界的攻擊者會不會這樣做」；攻擊者策略空間是我們寫死的三種 ⇒ 它給的是攻擊成本的**上界的下界**，證不了安全 | `vacant_network/entrycost.py` docstring 誠實邊界 |
 | B18 | **盲區 β 未在自己系統上量過** | 外部有四組相鄰量測（Kim 2025 兩模型都錯時的同答案率 HELM **0.600（隨機基線 1/3）**、HuggingFace **0.423（隨機基線 0.127）**，且越準的模型錯得越像；Begin 2026 ρ=0.70、N=10 有效獨立數 1.38；Bugaud 2026 1.5–6.5%；Krumdick 2025 κ 0.86→0.16），但量的是「錯得像不像」與「有效獨立數」，**不是**我們的 β；換算需要未驗證的假設。**隨機基線一定要一起報**——0.600 對 1/3 與 0.423 對 0.127 是不同量級的超額一致 | `examples/publish_now.py` · `EXTERNAL[ext.correlated-errors]`（隨機基線在 `publish_now.py:437–438`）；`build_unknowns`[blindspot-unanchored] |
 | B18b | **人類同儕評審本身信度接近零**（所以「開評審會」這條路的地基本來就軟） | 三個獨立來源：Bornmann 2010（PLoS ONE，48 篇研究、70 個係數、**19,443 篇稿件**）平均 ICC/r²=.34、平均 **κ=.17**，且涵蓋稿件越多的研究回報信度越低；Cortes & Lawrence 2021 的 NeurIPS 2014 雙委員會實驗 166 篇中 43 篇（**26%**）決定不一致；Pier 2018（PNAS）真實 NIH 評審重評已獲資助案，整體評分 **ICC=0**（95% CI 0–0.14）。這是地基問題：模擬裡 `reviewer_accuracy=0.7` 這個預設**沒有依據**，它應該是要量的東西不是要設的參數。Cicchetti 的補充有救：評審在**拒絕**上的一致度顯著高於接受——與 E10「擅長避開持續失敗者、不擅長排序好的」一致 | `examples/publish_now.py` · `EXTERNAL[ext.peer-review-unreliable]`（`publish_now.py:739–766`） |
 | B19 | **`gain_run` 那條路沒被 SuiteSpec 保護** | CONFORM／EQ5 臂仍跑 loader 產生的驗收碼（裸名字），不經 SuiteSpec——那份碼由題庫產生不是供應者寫的，不是破口；但「peerexec 這條路安全了」≠「gain_run 那條路安全了」 | `DECISION_20260906_R452_...`§三-4 |
@@ -612,14 +612,14 @@ WebCrypto Ed25519 逐筆驗簽；裁決／指名／出貨由頁面自己重算�
 | 8 | 把三／四個 EQ5 run 併成 n=862／n=1051 | 預註冊禁令 | `DECISION_20260906_R449B_...`§三；`DECISION_20260907_R449C_...`§三 |
 | 9 | 「無損是普遍性質」 | 它在 MBPP+（3 run）與 LCB（2 run）成立，兩者 hidden 都包含 visible 的結構；驗收套件不是需求子集的場合另當別論 | `DECISION_20260905_R440Z_...`§三 |
 | 10 | 「加預算沒用」（不加限定） | 要收窄成「MBPP+ 上沒用；難題上有用，但改花法更有用」 | 同上 |
-| 11 | 「套件固定點已解」 | 量具是**單邊保證**、是下界；R451 證明量具量的是一次執行不是一件工件 | `vacant/suitegauge.py` docstring 邊界 3；`DECISION_20260906_R451_...`§三-3 |
+| 11 | 「套件固定點已解」 | 量具是**單邊保證**、是下界；R451 證明量具量的是一次執行不是一件工件 | `vacant_network/suitegauge.py` docstring 邊界 3；`DECISION_20260906_R451_...`§三-3 |
 | 12 | 「抗 Sybil」 | 對稱的信譽函數不可能同時是 sybilproof（Cheng & Friedman 2005） | `examples/publish_now.py` · `DIRECTIONS_DONE[dir.ext.reputation-attacks]` |
 | 13 | 「我們發現脈衝攻擊／入場費沒用」 | Srivatsa 2005 已命名；Friedman & Resnick 2001 已證明 | `examples/publish_now.py` · `EXTERNAL[ext.oscillation-2005]`／`[ext.entry-fee-known-2001]` |
 | 14 | 把 r449b 當成 r447 的複製 | 同一批 120 題、不同設計 | `DECISION_20260906_R449B_...`§三 |
 | 15 | 把 r461 當「難題複製」 | lcb3 的 OFF 失敗率 27.5% 已回到 MBPP+ 量級（31.8%）；難題證據仍只有 r449b／r447 一次 | `DECISION_20260906_R461_...`§二-2；`DECISION_20260907_R449C_...`§四 |
 | 16 | 交付包那四條敘述（deadline quorum／五呼叫重配／corpus 13-4-9／「OFF5 不再是安全漏洞」） | 不在實際交付物內 | `ops/gain/VERIFICATION_2026-08-20.md`§五 |
 | 17 | 「殘餘＝−8.70pp」 | 停用：那個數字大半是量具擋掉的，是機制在生效 | `DECISION_20260906_R452_...`§二 |
-| 18 | 面板／指標好看＝系統可信 | 面板不是信任來源；套件腐化時所有健康指標滿格而系統在交垃圾 | `vacant/dashboard.py` docstring；`DECISION_20260905_R449_...`§三-3 |
+| 18 | 面板／指標好看＝系統可信 | 面板不是信任來源；套件腐化時所有健康指標滿格而系統在交垃圾 | `vacant_network/dashboard.py` docstring；`DECISION_20260905_R449_...`§三-3 |
 | 19 | **外推到 LCB／MBPP+ 以外**（任何「在別的題庫上也會這樣」的話） | 預註冊逐條沿用的禁令：EQ5 四個 run 全部落在這兩個題庫，且兩者的 hidden 都包含 visible；R448 §四 另註明 LCB 上 CONFORM vs OFF5 的獨立抽樣比較（r447／r461）仍分不開，那是不同估計量 | `DECISION_20260906_R448_...`§四；`DECISION_20260906_R449B_...`§三 |
 
 ---

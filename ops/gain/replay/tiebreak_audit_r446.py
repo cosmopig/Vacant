@@ -7,7 +7,7 @@
 `win = rng.choice(tied)` 再 `chosen = rng.choice(win)`——**冠軍桶內部是均勻隨機抽**。
 
 而 `behavior_signature` 探的 `behavior_inputs` 對 MBPP+ 就是 `base`
-（`vacant/codebench.py:656`，可見驗收用的同一組輸入），對 LCB 就是可見測資的 args
+（`vacant_network/codebench.py:656`，可見驗收用的同一組輸入），對 LCB 就是可見測資的 args
 （同檔 870）。⇒ 所有「通過可見驗收」的候選在探針上輸出一致 ⇒ 落在**同一個簽名桶**。
 於是只要冠軍桶是通過者那一桶，`_vote_first` 傳回的就是 min(通過者 index)
 ＝ `FILTER_FIRST` 的同一個 pick，兩條規則被**強制同意**——c=0 是算出來的，不是量出來的。

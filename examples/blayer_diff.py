@@ -8,7 +8,7 @@
    但標註不是校正。
 
 這一支換成：`diff = mean(on) − mean(off)` 的 bootstrap 95% CI ＋ 置換檢定 p 值
-＋ **Holm–Bonferroni**（`vacant/research.py` 已有，同一支函式不另寫）。
+＋ **Holm–Bonferroni**（`vacant_network/research.py` 已有，同一支函式不另寫）。
 
 **資料來源是 `samples.jsonl` 的原始值**，不是 `cells.jsonl` 的三個摘要數。
 只存 mean 與兩個端點，等於在落盤那一刻鎖死「之後還能問什麼問題」——
@@ -41,8 +41,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from examples.blayer_check import NOT_MEASURED  # noqa: E402  單一真相來源
-from vacant.blayer import RATIOS, SAMPLES_NAME, SCENARIOS  # noqa: E402
-from vacant.research import holm_bonferroni  # noqa: E402
+from vacant_network.blayer import RATIOS, SAMPLES_NAME, SCENARIOS  # noqa: E402
+from vacant_network.research import holm_bonferroni  # noqa: E402
 
 ALPHA = 0.05
 N_BOOT = 2000

@@ -12,7 +12,7 @@ Stage C（`decisions/DECISION_20260919_R535_RETRY_CHANNEL_PREREG.md` L-6）要�
     帶 "reasoning_effort": "none"   ⇒ reasoning_tokens = 0
 
 ⇒ **不補就不是同一個推論模式**，而推論模式會改變 agent 的行為。所以本檔是一層
-**只改一個欄位**的轉送：坐在 `vacant/vrun/wireproxy.py` 與真端點之間，
+**只改一個欄位**的轉送：坐在 `vacant_network/vrun/wireproxy.py` 與真端點之間，
 對帶 `model` 的 JSON request body 補上 `reasoning_effort`，其餘位元組原樣轉送。
 
 ⚠ **誠實邊界（改碼請保留）**

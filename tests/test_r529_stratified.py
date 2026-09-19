@@ -15,7 +15,7 @@ import math
 
 import pytest
 
-from vacant.research import (
+from vacant_network.research import (
     bc_heterogeneity_chisq,
     holm_bonferroni,
     mcnemar_exact,
@@ -125,5 +125,5 @@ def test_min_expected_is_reported_so_small_cells_cannot_hide():
 ])
 def test_chisq_tail_matches_published_critical_values(x, df, want):
     """零 scipy 的卡方上尾：對表定臨界值（誤差 < 5e-4）。"""
-    from vacant.research import _chisq_sf
+    from vacant_network.research import _chisq_sf
     assert math.isclose(_chisq_sf(x, df), want, abs_tol=5e-4)

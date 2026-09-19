@@ -18,8 +18,8 @@ sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(ROOT / "ops/gain"))
 os.environ.setdefault("VACANT_EVALPLUS_PATH",
                       str(ROOT / ".vacant-private/evalplus/MbppPlus-v0.2.0.jsonl.gz"))
 import gain_run as G  # noqa
-from vacant.checks import run_python_capture  # noqa
-from vacant.codebench import EvalPlusMBPPLoader  # noqa
+from vacant_network.checks import run_python_capture  # noqa
+from vacant_network.codebench import EvalPlusMBPPLoader  # noqa
 sys.path.insert(0, str(ROOT / "ops/gain/replay"))
 from claim_truth import eq  # noqa
 

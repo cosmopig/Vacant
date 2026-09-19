@@ -25,8 +25,8 @@ from pathlib import Path
 
 import pytest
 
-from vacant.checks import run_python_check
-from vacant.codebench import (
+from vacant_network.checks import run_python_check
+from vacant_network.codebench import (
     EVALPLUS_HUMANEVAL_DEFAULT_PATH,
     EVALPLUS_HUMANEVAL_PLUS_COUNT,
     EVALPLUS_HUMANEVAL_PLUS_SHA256,

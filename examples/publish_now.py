@@ -1436,7 +1436,7 @@ GATE_UNKNOWNS = [
         },
         "sources": [
             "data/archive.json · claims[peerexec.majority_bound]",
-            "vacant/peerexec.py · MAJORITY_BOUND_NOTE",
+            "vacant_network/peerexec.py · MAJORITY_BOUND_NOTE",
         ],
     },
     {
@@ -1800,7 +1800,7 @@ SELF_CORRECTIONS = [
         },
         "sources": [
             "DECISION_20260906_R452_FABLE_AUDIT_SUITE_AS_DATA.md · §三-2",
-            "vacant/suitespec.py · docstring round452b／452c",
+            "vacant_network/suitespec.py · docstring round452b／452c",
             "docs/VACANT_ARCHITECTURE_AND_RESULTS_2026-09-07.md · §3.3「本輪自我更正」",
         ],
     },

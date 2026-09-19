@@ -11,7 +11,7 @@ import urllib.request
 
 import pytest
 
-from vacant.dashboard import make_dashboard
+from vacant_network.dashboard import make_dashboard
 
 
 def _serve(server):
@@ -111,7 +111,7 @@ def test_missing_ledger_is_tolerated(tmp_path):
 
 
 # --- GET /api/snapshot（17 §P0-3）---------------------------------------------
-from vacant.dashboard import build_snapshot, ledger_head
+from vacant_network.dashboard import build_snapshot, ledger_head
 
 
 def test_snapshot_shape_and_ledger_seq(tmp_path):
@@ -228,7 +228,7 @@ def test_static_assets_and_no_path_traversal(tmp_path):
 
 def test_claim_ladder_never_defaults_to_met():
     """宣稱階梯的預設必須是「未達」——寧可顯示未達，不可預設已達。"""
-    from vacant.dashboard import claim_ladder
+    from vacant_network.dashboard import claim_ladder
     empty = claim_ladder(integrity={}, scoreboard={})
     assert all(r["met"] is False for r in empty)
 
@@ -251,8 +251,8 @@ def test_claim_ladder_never_defaults_to_met():
 
 def test_cost_reports_per_pass_not_just_totals(tmp_path):
     """成本切面必須算得出「每次通過的呼叫數」——只報總量會讓信任層的代價隱形。"""
-    from vacant.cli import EchoLikeBrain
-    from vacant.ecosystem import Ecosystem
+    from vacant_network.cli import EchoLikeBrain
+    from vacant_network.ecosystem import Ecosystem
     eco = Ecosystem(tmp_path, EchoLikeBrain(), root_mode="demo")
     eco.toggle(True)
     for i in range(3):

@@ -37,7 +37,7 @@ pi 的擴充是 TypeScript，而 Vacant 的承重件（沙箱、目錄級驗收�
 
 ⚠ **誠實邊界（改碼請保留）**：閘門 records and gates，不 proves。它證明
   「宣告完成之後可見驗收先跑了一次，沒過就沒出貨」，**不**證明交出去的東西
-  是對的——可見驗收是客戶給的那幾條，不是真需求（`vacant/suitegauge.py`
+  是對的——可見驗收是客戶給的那幾條，不是真需求（`vacant_network/suitegauge.py`
   的單邊保證）。
 """
 from __future__ import annotations
@@ -548,8 +548,8 @@ def main() -> int:
     import argparse
     import tempfile
 
-    from vacant.identity import Identity
-    from vacant.logbook import Logbook
+    from vacant_network.identity import Identity
+    from vacant_network.logbook import Logbook
 
     ap = argparse.ArgumentParser(description="R534 sidecar 自我檢查（零模型呼叫）")
     ap.add_argument("--sock", default=None)

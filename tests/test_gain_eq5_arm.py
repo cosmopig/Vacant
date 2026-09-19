@@ -21,9 +21,9 @@ os.environ.setdefault(
 )
 
 from ops.gain.gain_run import arm_conform, arm_eq5, arm_off5  # noqa: E402
-from vacant.codebench import EvalPlusMBPPLoader  # noqa: E402
-from vacant.identity import Identity, PublicIdentity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.codebench import EvalPlusMBPPLoader  # noqa: E402
+from vacant_network.identity import Identity, PublicIdentity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 GOOD = "def similar_elements(a, b):\n    return tuple(sorted(set(a) & set(b)))\n"
 GOOD2 = ("def similar_elements(a, b):\n"

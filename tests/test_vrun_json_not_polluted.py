@@ -53,7 +53,7 @@ def bed(tmp_path):
 
 
 def _run(ws, suite, rd, *, agent_cmd: str, json_flag: bool):
-    argv = [sys.executable, "-m", "vacant.vrun.launcher",
+    argv = [sys.executable, "-m", "vacant_network.vrun.launcher",
             "--workspace", str(ws), "--suite", str(suite),
             "--run-dir", str(rd), "--sandbox", "none"]
     if json_flag:

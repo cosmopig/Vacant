@@ -21,7 +21,7 @@
 |---|---|---|
 | 規則值（最慢單一觀測 × 3） | **1 秒**（5 次量測裡 4 次）／2 秒（1 次） | **不穩定，沒有採用** |
 | **實際採用** | **20 秒** | 由量測 ＋ 成本上界推導，見下面「為什麼不用規則值」 |
-| r530 凍結常數 | 10 秒 | `vacant/vrun/sandbox.py::DEFAULT_TEST_TIMEOUT_S` |
+| r530 凍結常數 | 10 秒 | `vacant_network/vrun/sandbox.py::DEFAULT_TEST_TIMEOUT_S` |
 | R535 發射腳本 | 30 秒 | 為**秒級微型題**定的，**本輪沒有照抄** |
 
 **一句話**：這個題庫「重」在寫題（參考解 16–200 行、隱藏驗收 6–16 條），
@@ -30,7 +30,7 @@
 
 ### 1-1　怎麼量的
 
-逾時的單位就是量測的單位：`vacant/vrun/acceptance.py::run_suite`
+逾時的單位就是量測的單位：`vacant_network/vrun/acceptance.py::run_suite`
 **一個測試檔一個子行程**，`--test-timeout` 是**每檔**的上限。而
 `ops/gain/r530/export_bank.py` 把整個 `tests_visible/` 投影成**一個**
 `test_visible.py`、整個 `hidden/` 投影成**一個** `test_hidden.py`
@@ -171,7 +171,7 @@ floor 0.030 s   median 0.035 s   p90 0.067 s   p99 0.175 s   max 0.369 s
 * probe 量的是**參考解與已知壞樁**，不是模型寫的解。20 秒是工程餘裕**不是上界**；
   逾時格仍然可能出現，出現時是**觀測不是 bug**——本輪確實出現一格（見 1-4）。
 * 這個數字只對 `ops/gain/r530/bank/` 這 20 題、這台機器、bwrap 後端成立。
-* 「參考解全過 ＋ 每個壞樁都被擋」是**單邊**保證（`vacant/suitegauge.py`
+* 「參考解全過 ＋ 每個壞樁都被擋」是**單邊**保證（`vacant_network/suitegauge.py`
   逐字適用）：擋得住已知壞解 ≠ 涵蓋真需求。
 
 ---
@@ -342,7 +342,7 @@ V/GT 紅線成立——`ws_moved_during_freeze` ＝ 0 格，
 
 ### 3-8　收據（**負控制先跑**）
 
-* **負控制先跑**：`python3 -m vacant.vrun.verify_receipts --selftest`
+* **負控制先跑**：`python3 -m vacant_network.vrun.verify_receipts --selftest`
   → **PASS**（三種竄改都被指名抓到；乾淨路徑通過不算數）。
 * **本批**：`--glob '/var/tmp/vacant_r530vrun/run/cells/*/run'`
   → **run 40、鏈 40、entries 108、驗過 108、失敗 0、壞鏈 0、總判 OK**。
@@ -363,7 +363,7 @@ V/GT 紅線成立——`ws_moved_during_freeze` ＝ 0 格，
    統計設計，而且 `M7_file` 在兩臂量的**本來就不是同一件事**
    （RF 問「檔案內容有沒有進 wire」，RP 問「argv 尾端那段有沒有進 wire」）。
 5. **不能把 `accepted` 讀成「做對了幾成」。** 那是「過了我們自己寫的 2–4 條
-   可見驗收」，單邊保證（`vacant/suitegauge.py` 逐字適用）。
+   可見驗收」，單邊保證（`vacant_network/suitegauge.py` 逐字適用）。
 6. **不能把 `--test-timeout = 20s` 當成別的題庫的建議值。** 它是從**這 20 題、
    這台機器、bwrap 後端**量出來的。
 7. **不能把「大部分嘗試都逾時」讀成模型能力的量測。** 那一半是端點吞吐
@@ -380,10 +380,10 @@ V/GT 紅線成立——`ws_moved_during_freeze` ＝ 0 格，
   （exit 144）——**那是被砍不是測試失敗**，畫面上全是點沒有 F。
 * **實際跑的是子集**：`pytest tests/ -q -k "vrun or r530 or sandbox or receipt
   or acceptance"` ⇒ **exit 0，全過（2 skipped）**。
-  子集涵蓋 `vacant/vrun/`（launcher／acceptance／sandbox／receipts／
+  子集涵蓋 `vacant_network/vrun/`（launcher／acceptance／sandbox／receipts／
   upstream provenance）與 `ops/gain/r530/` 的協定與 V/GT 測試，
   也就是本輪**唯一會碰到**的既有程式面。
-  **本輪沒有改動 `vacant/`、`ops/gain/r530/`、`ops/gain/r535/` 任何一個位元組**，
+  **本輪沒有改動 `vacant_network/`、`ops/gain/r530/`、`ops/gain/r535/` 任何一個位元組**，
   新增的全部在 `ops/gain/r530vrun/`。
 * ⚠ **子集綠 ≠ 全套綠。** 不要把這一節讀成 CI 通過。
 * `ops/check_repo_links.py`：**OK**（死連結／死路徑擋門）。

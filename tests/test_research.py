@@ -1,4 +1,4 @@
-"""Track A 四臂 harness 的確定性自驗（vacant/research.py）。
+"""Track A 四臂 harness 的確定性自驗（vacant_network/research.py）。
 
 用 StubBrain + 合成任務（每類 10 題）鎖住指標與 H0 因果拆解的算術，
 確保管線/統計不被改壞。數字為刻意設計、非實證（見 research.py docstring）。
@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from vacant.research import (
+from vacant_network.research import (
     decompose,
     discordance,
     mcnemar_exact,
@@ -75,7 +75,7 @@ import math
 
 import pytest
 
-from vacant.research import (
+from vacant_network.research import (
     holm_bonferroni,
     mcnemar_n_required,
     mcnemar_power,

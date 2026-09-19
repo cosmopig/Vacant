@@ -1,0 +1,8 @@
+iptables -I OUTPUT 1 -m owner --uid-owner 1001 -j REJECT --reject-with icmp-admin-prohibited
+iptables -I OUTPUT 1 -m owner --uid-owner 1001 -p tcp -d 127.0.0.0/8 --dport 8899 -j ACCEPT
+iptables -I OUTPUT 1 -m owner --uid-owner 1001 -d 127.0.0.0/8 -j ACCEPT
+iptables -I OUTPUT 1 -m owner --uid-owner 1001 -o lo -j ACCEPT
+已對 uid=1001 封鎖出網，只留 127.0.0.1:8899。
+⚠ 封鎖生效 ≠ 封鎖有效。請跑負向控制：
+    sudo -u '#1001' python3 ops/vacantrun/verify_egress_block.py \
+        --proxy-port 8899 --upstream <真上游 host:port>

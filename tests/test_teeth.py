@@ -2,17 +2,17 @@
 
 對應 13 §2 A-W1 門：decay 半衰期、slash 乘法扣減、probation 權重上限——
 各有手算對照（對照值寫進測試註解）。也對應 B 層情境③④⑤的單元級前題；
-六情境的端到端掃描在 vacant/blayer.py。
+六情境的端到端掃描在 vacant_network/blayer.py。
 """
 
 from __future__ import annotations
 
 import pytest
 
-from vacant import registry as registry_mod
-from vacant.body import CapabilityCard
-from vacant.registry import PROBATION_SCORE_CAP, Registry
-from vacant.reputation import DIMS, Beta, Reputation
+from vacant_network import registry as registry_mod
+from vacant_network.body import CapabilityCard
+from vacant_network.registry import PROBATION_SCORE_CAP, Registry
+from vacant_network.reputation import DIMS, Beta, Reputation
 
 GOOD = {d: 1.0 for d in DIMS}
 KEY = ("streamX", "main", "echo")
@@ -191,7 +191,7 @@ class TestSlashRouting:
 class TestEcosystemTeeth:
     def test_provable_fault_slashes_deliverer_and_pass_reviewer(self, tmp_path):
         """saboteur 埋雷被稽核抓 → 交付方信用下墜（不是只有 SLASH 事件）。"""
-        from vacant.ecosystem import Ecosystem
+        from vacant_network.ecosystem import Ecosystem
 
         class Brain:
             name = "fake"

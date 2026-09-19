@@ -9,7 +9,7 @@
 在它之前，`peer_exec_sim.py`／`r452_suitespec.py` 的 k 個「執行器」共用同一份
 `facts` cache 或同一支 `_LabelProbe`，所以「k 台一致」是恆真句不是量測
 （R452 §四已把這件事列在誠實邊界裡）。本檔把執行器搬到三台真機器上：
-每台自己 `SuiteSpec.render()`、自己跑 `vacant/checks.py` 的沙箱、自己用
+每台自己 `SuiteSpec.render()`、自己跑 `vacant_network/checks.py` 的沙箱、自己用
 自己的 Ed25519 金鑰簽進自己的 `Logbook`；合票在 Mac 上用
 `peerexec.form_verdict`（帶量具白名單、帶 `render_sha256`）＋
 `select_by_quorum` 的同一條早停迴圈。
@@ -67,12 +67,12 @@ from concurrent.futures import ProcessPoolExecutor
 
 _HERE = pathlib.Path(__file__).resolve()
 #: 本檔可能被放在 repo 內（Mac）或 scratch 目錄旁（遠端解開的 git archive）。
-#: `--repo` 明著指定時以它為準；否則往上找有 `vacant/peerexec.py` 的那一層。
+#: `--repo` 明著指定時以它為準；否則往上找有 `vacant_network/peerexec.py` 的那一層。
 def _guess_repo(explicit: str | None) -> pathlib.Path:
     if explicit:
         return pathlib.Path(explicit).resolve()
     for p in [_HERE.parents[3], *_HERE.parents]:
-        if (p / "vacant" / "peerexec.py").exists():
+        if (p / "vacant_network" / "peerexec.py").exists():
             return p
     return _HERE.parents[3]
 
@@ -81,16 +81,16 @@ _REPO = _guess_repo(os.environ.get("R453_REPO"))
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
-from vacant import peerexec as px  # noqa: E402
-from vacant import suitespec as ss  # noqa: E402
-from vacant.identity import Identity, PublicIdentity  # noqa: E402
-from vacant.logbook import LogEntry, Logbook  # noqa: E402
+from vacant_network import peerexec as px  # noqa: E402
+from vacant_network import suitespec as ss  # noqa: E402
+from vacant_network.identity import Identity, PublicIdentity  # noqa: E402
+from vacant_network.logbook import LogEntry, Logbook  # noqa: E402
 
 #: 承重檔案：三台機器上這幾支的 sha256 必須逐位相同，否則「跨機一致」講的是
 #: 兩份不同的程式碼碰巧同意。逐檔落盤進 `pub_<machine>.json`。
 LOAD_BEARING = (
-    "vacant/peerexec.py", "vacant/suitespec.py", "vacant/checks.py",
-    "vacant/logbook.py", "vacant/identity.py", "ops/gain/gain_run.py",
+    "vacant_network/peerexec.py", "vacant_network/suitespec.py", "vacant_network/checks.py",
+    "vacant_network/logbook.py", "vacant_network/identity.py", "ops/gain/gain_run.py",
     "ops/gain/replay/peer_exec_real.py",
 )
 
@@ -466,7 +466,7 @@ def run_executor(args) -> int:  # noqa: ANN001
 
 
 def _pub_hex(who: PublicIdentity) -> str:
-    from vacant.crypto import pub_to_hex
+    from vacant_network.crypto import pub_to_hex
     return pub_to_hex(who.pub)
 
 

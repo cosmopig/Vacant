@@ -21,7 +21,7 @@ import time
 
 import pytest
 
-from vacant.vrun import sandbox as sb
+from vacant_network.vrun import sandbox as sb
 
 posix_only = pytest.mark.skipif(os.name != "posix", reason="POSIX 才有行程組")
 
@@ -127,15 +127,15 @@ def test_unshare_backend_overrides_the_kill_path():
 
 # ══ 同一個 bug 的另外三處（2026-09-19 一起收）══════════════════════════════
 def test_checks_timeout_survives_a_permission_error(monkeypatch, tmp_path):
-    """`vacant/checks.py` 的逾時收尾**不准把逾時判定弄丟**。
+    """`vacant_network/checks.py` 的逾時收尾**不准把逾時判定弄丟**。
 
-    2026-09-19 在 macOS CI 上實際炸過：`vacant/checks.py:614: PermissionError`。
+    2026-09-19 在 macOS CI 上實際炸過：`vacant_network/checks.py:614: PermissionError`。
     舊版只 catch `ProcessLookupError`，於是子行程在 `communicate` 逾時與 `killpg`
     之間結束掉時，例外會從逾時處理器逃出去——呼叫端收到的不是「超時」而是爆炸。
     """
-    from vacant import checks
+    from vacant_network import checks
 
-    src = checks.__loader__.get_source("vacant.checks") or ""
+    src = checks.__loader__.get_source("vacant_network.checks") or ""
     # ⚠ 錨在 `os.killpg` 上，不要錨在 `except subprocess.TimeoutExpired:`——
     #   那個字串在 runner **樣板的字串常值**裡也出現一次，`index` 會先找到它。
     i = src.index("os.killpg(proc.pid")
@@ -145,10 +145,10 @@ def test_checks_timeout_survives_a_permission_error(monkeypatch, tmp_path):
 
 
 def test_controller_timeout_survives_a_permission_error():
-    """`vacant/controller.py` 是同一個形狀的第三處。"""
-    from vacant import controller
+    """`vacant_network/controller.py` 是同一個形狀的第三處。"""
+    from vacant_network import controller
 
-    src = controller.__loader__.get_source("vacant.controller") or ""
+    src = controller.__loader__.get_source("vacant_network.controller") or ""
     i = src.index("except subprocess.TimeoutExpired as exc:")
     seg = src[i:i + 1600]
     assert "PermissionError" in seg
@@ -161,7 +161,7 @@ def test_launcher_distinguishes_empty_group_from_not_ours(monkeypatch):
     舊版兩者都記成 `orphans_killed=False`，於是收據上兩種完全相反的處境
     長得一模一樣。送不到訊號代表「它還在而且我們管不到」，是最糟的情況。
     """
-    from vacant.vrun import launcher
+    from vacant_network.vrun import launcher
 
     class _P:
         pid = 424242

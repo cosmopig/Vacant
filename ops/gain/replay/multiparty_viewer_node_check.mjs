@@ -213,7 +213,7 @@ check("M7d 被指名那把金鑰的鏈本身驗得過（鏈驗得過 ≠ 話是�
 {
   const obj = { "\u{1F331}": 2, "�": 1, "Ａ": 3, "a": 4, " ": 5 };
   const want = '{" ":5,"a":4,"Ａ":3,"�":1,"\u{1F331}":2}';
-  check("M11 跨平面鍵：canonicalString 本體逐位元組＝vacant/canonical.py 的排序",
+  check("M11 跨平面鍵：canonicalString 本體逐位元組＝vacant_network/canonical.py 的排序",
     api.canonicalString(obj) === want, api.canonicalString(obj));
 }
 

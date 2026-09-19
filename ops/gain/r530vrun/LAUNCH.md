@@ -14,7 +14,7 @@
 | 併發 | 起跑 **2 串**（`--shard 0:2`／`1:2`，埠 8880／8881）；**10:48 加寬到 4 串**（`2:4`／`3:4`，埠 8882／8883），見下面「加寬」一節 |
 
 ⚠ **不碰**別的 agent 的目錄（`/var/tmp/vacant_codex/`、`/var/tmp/vacant_cc/`、
-`/var/tmp/vacant_opencode/`），也**不碰** `ops/gain/r530/`、`ops/gain/r535/`、`vacant/`。
+`/var/tmp/vacant_opencode/`），也**不碰** `ops/gain/r530/`、`ops/gain/r535/`、`vacant_network/`。
 
 ## 逐步
 
@@ -25,14 +25,14 @@ PI=/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/pi
 cd /var/tmp/vacant_r530vrun/repo
 
 # 0. 沙箱探針（量具先講清楚退到哪一級）
-python3 -m vacant.vrun.sandbox --backend auto
+python3 -m vacant_network.vrun.sandbox --backend auto
 
 # 1. 量 --test-timeout（零模型呼叫）
 python3 ops/gain/r530vrun/probe_timeout.py \
     --out /var/tmp/vacant_r530vrun/probe --sandbox auto --parallel 2 --include-bad
 
 # 2. 收據量具的**負控制**先跑（乾淨路徑通過不算數）
-python3 -m vacant.vrun.verify_receipts --selftest        # → selftest: PASS
+python3 -m vacant_network.vrun.verify_receipts --selftest        # → selftest: PASS
 
 # 3. 冒煙一題兩格（接線壞掉不要用 40 格去發現）
 python3 ops/gain/r530vrun/run_r530vrun.py \
@@ -52,7 +52,7 @@ done; wait
 python3 ops/gain/r530vrun/score_r530vrun.py --out /var/tmp/vacant_r530vrun/run
 
 # 6. 收據：負控制已在第 2 步跑過，這裡驗**這一跑**
-python3 -m vacant.vrun.verify_receipts \
+python3 -m vacant_network.vrun.verify_receipts \
     --glob '/var/tmp/vacant_r530vrun/run/cells/*/run' \
     --json /var/tmp/vacant_r530vrun/run/receipts_verify.json
 

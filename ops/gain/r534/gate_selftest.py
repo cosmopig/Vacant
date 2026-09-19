@@ -49,8 +49,8 @@ from ops.gain.r530.openwork_arms import prepare_workspace  # noqa: E402
 from ops.gain.r530.sandbox import make_sandbox  # noqa: E402
 from ops.gain.r534 import piarms  # noqa: E402
 from ops.gain.r534.sidecar import CellSidecar  # noqa: E402
-from vacant.identity import Identity, PublicIdentity  # noqa: E402
-from vacant.logbook import Logbook  # noqa: E402
+from vacant_network.identity import Identity, PublicIdentity  # noqa: E402
+from vacant_network.logbook import Logbook  # noqa: E402
 
 CONTRACT = """# Contract
 

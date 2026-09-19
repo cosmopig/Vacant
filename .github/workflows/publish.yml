@@ -44,9 +44,25 @@ jobs:
         id: version
         run: |
           python -m pip install --upgrade pip
-          version=$(python -c "import pathlib,re; s=pathlib.Path('vacant/__init__.py').read_text(); print(re.search(r'__version__\s*=\s*[\"\x27]([^\"\x27]+)', s).group(1))")
+          version=$(python -c "import pathlib,re; s=pathlib.Path('vacant_network/__init__.py').read_text(); print(re.search(r'__version__\s*=\s*[\"\x27]([^\"\x27]+)', s).group(1))")
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "要發的是 vacant-network==$version"
+
+      # ⚠ **tag ＝ `__version__`，不符就拒絕 build（fail-closed）。**
+      # 0.7.0 就是在這裡漂開的：git tag 停在 v0.6.0、PyPI 是 0.7.0、`__version__`
+      # 也是 0.7.0 但 HEAD 已經往前跑 ⇒ `0.7.0` 這個字串同時指兩份不同的碼。
+      # repo 內部那一半由 `tests/test_version_discipline.py` 擋，這裡擋的是
+      # 「發出去的 tag 與版本號不符」——手動 dispatch 沒有 tag，所以只在 release 時檢查。
+      - name: tag 必須等於 __version__
+        if: github.event_name == 'release'
+        run: |
+          version='${{ steps.version.outputs.version }}'
+          tag='${{ github.event.release.tag_name }}'
+          if [ "$tag" != "v$version" ]; then
+            echo "::error::release tag 是 $tag，但 __version__ 是 $version（要的是 v$version）"
+            exit 1
+          fi
+          echo "tag $tag ＝ v$version"
 
       - name: 建 sdist ＋ wheel
         run: |
@@ -55,7 +71,7 @@ jobs:
           python -m twine check dist/*
 
       # ⚠ **從 wheel 裝進一個乾淨的 venv 再跑一次**，不是在 repo 根目錄 import。
-      #   在 repo 根目錄 `import vacant` 會撿到本地目錄而不是裝好的套件，
+      #   在 repo 根目錄 `import vacant_network` 會撿到本地目錄而不是裝好的套件，
       #   於是「發出去的那份能不能用」根本沒被驗到（2026-09-18 踩過一次）。
       - name: 從 wheel 裝起來冒煙
         run: |
@@ -63,10 +79,10 @@ jobs:
           /tmp/smoke/bin/pip install --quiet dist/*.whl
           cd /tmp                      # 離開 repo 根目錄，避免 import 被本地目錄遮住
           /tmp/smoke/bin/vacant --help > /dev/null
-          /tmp/smoke/bin/python -c "import vacant, pathlib; \
-            print('imported', vacant.__version__, 'from', pathlib.Path(vacant.__file__).parent); \
-            assert 'site-packages' in vacant.__file__, '裝起來的不是 wheel 裡那份'"
-          /tmp/smoke/bin/python -c "from vacant.vrun import launcher; print('vacant run 進得去', launcher.__name__)"
+          /tmp/smoke/bin/python -c "import vacant_network, pathlib; \
+            print('imported', vacant_network.__version__, 'from', pathlib.Path(vacant_network.__file__).parent); \
+            assert 'site-packages' in vacant_network.__file__, '裝起來的不是 wheel 裡那份'"
+          /tmp/smoke/bin/python -c "from vacant_network.vrun import launcher; print('vacant run 進得去', launcher.__name__)"
 
       - uses: actions/upload-artifact@v4
         with:

@@ -9,7 +9,7 @@ import time
 
 import pytest
 
-from vacant.controller import (
+from vacant_network.controller import (
     AgentEvidenceError,
     AgentRunFailed,
     ArgvTemplate,
@@ -19,14 +19,14 @@ from vacant.controller import (
     hermes_argv,
     verify_delivery,
 )
-from vacant.controller import _run_agent_process
-from vacant import crypto
-from vacant.canonical import canonical_bytes
-from vacant.envelope import ReviewEnvelope
-from vacant.ecosystem import Ecosystem, PRODUCT_ROSTER
-from vacant.identity import Identity
-from vacant.receipt import make_delegation_receipt
-from vacant.reputation import DIMS
+from vacant_network.controller import _run_agent_process
+from vacant_network import crypto
+from vacant_network.canonical import canonical_bytes
+from vacant_network.envelope import ReviewEnvelope
+from vacant_network.ecosystem import Ecosystem, PRODUCT_ROSTER
+from vacant_network.identity import Identity
+from vacant_network.receipt import make_delegation_receipt
+from vacant_network.reputation import DIMS
 
 CHECK = {"type": "run_python", "code": "assert solve('abc') == 'cba'"}
 
@@ -160,7 +160,7 @@ def test_transient_delegate_error_uses_remaining_attempt(tmp_path):
 def test_evidence_write_failure_never_reaches_runner(tmp_path, monkeypatch):
     eco = _eco(tmp_path)
     monkeypatch.setattr(
-        "vacant.controller.atomic_write_text",
+        "vacant_network.controller.atomic_write_text",
         lambda *a, **k: (_ for _ in ()).throw(OSError("disk full")),
     )
     controller = VacantFirstController(
@@ -228,7 +228,7 @@ def test_nonzero_agent_exit_preserves_receipt_and_raises(tmp_path):
 
 def test_post_spawn_evidence_failure_reports_agent_already_ran(tmp_path, monkeypatch):
     eco = _eco(tmp_path)
-    from vacant import controller as controller_module
+    from vacant_network import controller as controller_module
 
     real_write = controller_module.atomic_write_text
     writes = 0
