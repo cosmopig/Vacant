@@ -19,24 +19,30 @@
 既有模式，不是我們發明的：供應鏈安全的 **in-toto／SLSA／Sigstore** 也是同一條
 ——「沒有合法 attestation 的 artifact，在收件時被拒」。
 
+## ⚠ 裝之前先讀這一條：`pip install vacant` 裝到的不是這個專案
+
+PyPI 上的 `vacant`（實測 2026-09-19 為 0.4.15，一個 7.5 MB 的
+`cp311-abi3-manylinux` 原生 wheel）是**別人的**套件——它自己的 Summary 逐字是
+*"Python bindings for the vacant Rust engine — domain availability via authoritative
+DNS"*（作者 David Poblador i Garcia，`github.com/alltuner/vacant`）。
+
+**兩個名字都撞。** 它**也**佔用 `vacant` 這個 import 名、**也**裝一支叫 `vacant`
+的指令，兩個套件寫到同一批路徑。實測四種安裝順序，**每一種都零錯誤訊息**：
+
+- **後裝的靜靜蓋過先裝的。** 先 `vacant-network` 後 `vacant` ⇒ `vacant --help` 變成
+  DNS 工具、`import vacant` 失去 `__version__`；反過來則是我們贏。`pip list` 兩個都列著。
+- **`pip uninstall -y vacant` 會把共用的那支指令一起帶走**，而 `pip list` 還說
+  `vacant-network==0.7.0` 裝著。
+
 ```bash
-pip install vacant-network        # ⚠ 是 vacant-network，不是 vacant
-vacant --help                     # 裝完之後，指令的名字叫 vacant
+pip install vacant-network                              # 本專案。⚠ 不是 vacant
+
+python3 -c "import vacant; print(vacant.__version__)"   # 判別式：我們印 0.7.0；對方丟 AttributeError
+pip install --force-reinstall --no-deps vacant-network  # 被蓋掉時的救法（實測可完整救回）
 ```
 
-> ⚠ **`pip install vacant` 裝到的不是這個專案。** PyPI 上的 `vacant`（實測 2026-09-19
-> 為 0.4.15，一個 7.5 MB 的 `cp311-abi3-manylinux` 原生 wheel）是**別人的**套件——
-> 它自己的 Summary 逐字是 *"Python bindings for the vacant Rust engine — domain
-> availability via authoritative DNS"*（作者 David Poblador i Garcia，
-> `github.com/alltuner/vacant`）。它**不會報錯**，會安安靜靜地裝好。
-> 三個名字要分開記：**套件名 `vacant-network`**、**指令名 `vacant`**、
-> **import 名 `vacant`**。
->
-> ⚠ **而且兩個名字都撞。** 對方那個套件**也**佔用 `vacant` 這個 import 名、**也**裝一支
-> 叫 `vacant` 的指令。實測（同一個 venv）：先裝 `vacant-network` 再裝 `vacant`，
-> **對方會靜靜蓋過去**——`vacant --help` 變成 DNS 工具、`import vacant` 也變成對方的，
-> 全程零錯誤訊息。怎麼認、怎麼救見〈[你可能會遇到](#你可能會遇到)〉頭兩列。
->
+**套件名 `vacant-network`、指令名 `vacant`、import 名 `vacant`**——三個名字兩個來源。
+
 > **Python 3.11+。** 一條 `pip install` 會拉進 **30 個 wheel、60 MB**——`pyproject.toml`
 > 宣告的 runtime 相依只有 3 個（`cryptography`／`mcp`／`jsonschema`），其餘是 `mcp`
 > 拖進來的（`pydantic`／`starlette`／`uvicorn`／`httpx`…）。閘門與收據那條路
@@ -130,7 +136,7 @@ python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 |---|---|
 | [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)（V3 出網封鎖）＋ `verify_egress_block.py` | 要 root 一次的**維運動作**，不是產品功能；而且它改的是整台機器的網路規則 |
 | `ops/vacantrun/selftest.py` | 端到端自檢，會去讀 repo 的 `runs/` |
-| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh)（pi／Codex／OpenCode 的接線） | 那三個框架把 base url 寫在**設定檔**裡，接線是一段 shell 不是產品功能；吃環境變數的框架（Claude Code、走內建 provider 的 OpenCode）**零接線**、不需要它。逐格實測見 [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
+| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh)（pi／Codex／OpenCode／Hermes 的接線） | 那幾個框架把 base url 寫在**設定檔**裡（Hermes 是一個 `--provider custom` 旗標），接線是一段 shell 不是產品功能；吃環境變數的框架（Claude Code、走內建 provider 的 OpenCode）**零接線**、不需要它。逐格實測見 [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
 | `ops/gain/**`、`runs/**` | R529／R530／R532／R534 的 runner、題庫、**隱藏驗收**、judge、排程器與落盤資料。要**重算實驗數字**必須 clone（見下面〈從原始碼跑〉） |
 | `examples/**`、`decisions/**`、`docs/**` | 展件、裁決檔、規格文件 |
 
@@ -255,7 +261,7 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 
 名單漏一個變數＝那條路沒被中介，而且**不會有任何錯誤訊息**——這是 V0 已知的殘餘風險。
 
-### 四個 agent 的接線（都有實測，等級不可混講）
+### 五個 agent 的接線（**五個都有真模型證據**，等級不可混講）
 
 判準的單一真相是
 [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md)
@@ -265,18 +271,30 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 ⚠ **`L-fake` 不能寫成「這個 agent 可以用 Vacant」**：假上游碰不到 SSE 分塊、
 工具呼叫格式、逾時、上下文長度。
 
+**2026-09-19 的現況：五個 agent，五個都接通了、五個都有真模型證據。**
+矩陣裡**不再有「完全沒量過」的 agent**；仍然空著的兩格是**同一個 agent 的另外兩條路**，
+不是另外兩個 agent。
+
 | agent | 怎麼接 | 等級 | 拒交／交付 |
 |---|---|---|---|
-| **Claude Code** 2.1.278 | **環境變數 `ANTHROPIC_BASE_URL` ⇒ 零接線**（已在 `envmap` 名單裡，launcher 自己注入） | **L-real** | ✅ exit 20 ／ ✅ exit 0 |
-| **OpenCode** 1.18.31 | 走內建 `openai` provider ＝ **環境變數 `OPENAI_BASE_URL` ⇒ 零接線**；指到本地模型必須改走設定（`OPENCODE_CONFIG_CONTENT`） | **L-real**（真模型那兩格走的是設定那條） | ✅ exit 20 ／ ✅ exit 0 |
+| **Claude Code** 2.1.278 | **環境變數 `ANTHROPIC_BASE_URL` ⇒ 零接線**（已在 `envmap` 名單裡，launcher 自己注入） | **L-real**（§9） | ✅ exit 20 ／ ✅ exit 0 |
+| **OpenCode** 1.18.31 | 走內建 `openai` provider ＝ **環境變數 `OPENAI_BASE_URL` ⇒ 零接線**；指到本地模型必須改走設定（`OPENCODE_CONFIG_CONTENT`） | **L-real**（§8；真模型那兩格走的是設定那條） | ✅ exit 20 ／ ✅ exit 0 |
 | **pi** 0.85.1 | **設定檔**：`PI_CODING_AGENT_DIR` 指到暫存目錄＋寫一份 `models.json`。**不吃 `OPENAI_BASE_URL`** | **L-real**（R535） | ✅ exit 20 ／ ✅ exit 0 |
-| **Codex CLI** 0.153.2（API key／自訂 provider） | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`）。**不吃 `OPENAI_BASE_URL`** | **L-fake** | ✅ exit 20 ／ ✅ exit 0 |
-| **Codex CLI** 0.153.2（`codex login`／ChatGPT 帳號） | ❌ **沒有辦法**：模型通道是寫死的 `wss://chatgpt.com/backend-api/codex/responses`，HTTP 反向代理在那條路上不存在 | — | 閘門**照跑**（觸發點在行程結束不在 wire 上），但**逐字落盤在那條路上不成立** |
-| **Hermes** | **未測** | **L-none** | **未測** |
+| **Codex CLI**（API key／自訂 provider）<br>**0.147.0**＝真模型那輪（vacant-dev）／`0.153.2`＝假上游那輪（別台機器） | **設定**：`model_providers.<新 id>.base_url`（`-c` 旗標或 `config.toml`；repo 出廠的 `wrap_agent.sh codex` 就夠，不必自己再寫）。**不吃 `OPENAI_BASE_URL`** | **L-real**（§10） | ✅ exit 20 ／ ✅ exit 0 |
+| **Hermes Agent** 0.19.0（Nous Research，PyPI `hermes-agent`） | **一個 CLI 旗標** `--provider custom`；`CUSTOM_BASE_URL`（launcher 已內建）**蓋得過 `base_url`，但蓋不掉 provider**。兩句話都要講，見下面 | **L-real**（§12）<br>⚠ **從 L-none 直接跳到 L-real，中間沒有經過 L-fake** | ✅ exit 20 ／ ✅ exit 0 |
+| Codex（`codex login`／ChatGPT 帳號） | ❌ **沒有辦法**：模型通道是寫死的 `wss://chatgpt.com/backend-api/codex/responses`，HTTP 反向代理在那條路上不存在 | **L-none** | 閘門**照跑**（觸發點在行程結束不在 wire 上），但**逐字落盤在那條路上不成立** |
+| Codex × `wire_api="chat"` | ❌ 0.147.0 **在載設定那一步就退掉**，一通都沒送出 ⇒ `requests_seen = 0` | **L-none**（§11.1） | — |
 
-⇒ **吃環境變數的兩個（Claude Code、雲端模型的 OpenCode）零接線；吃設定檔的兩個
-（pi、Codex）要多做事**，那是品質比較差的一種附身。兩個「零接線」都有前提，
-不寫出來就是誇大：
+⚠ **Codex 的版本號兩個都對，不是筆誤**：`0.153.2` 是 2026-09-18 **假上游**那一輪
+（別台機器），`0.147.0` 是 2026-09-19 **真模型**那一輪（vacant-dev）。
+**引用時要連機器一起講。**
+
+⚠ **Hermes 的 `requests_seen = 6` 裡有 2 通不是模型**：它在第一通模型請求之前會探
+`GET /api/v1/models`。**模型通道是 4 通。**
+
+⇒ 接線的成本分成三級：**吃環境變數的兩個（Claude Code、雲端模型的 OpenCode）零接線；
+Hermes 是一個 CLI 旗標；吃設定檔的兩個（pi、Codex）要寫一份設定**——後面兩級是品質
+比較差的附身。三個「輕」的都有前提，不寫出來就是誇大：
 
 - ⚠ **Claude Code 的零接線建在「上游自己會講 Anthropic Messages（`POST /v1/messages`）」
   這一個功能上。** `vacant/vrun/wireproxy.py` 是**反向代理不是協定轉換器**——它照 path
@@ -287,9 +305,18 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
   註冊表以外的模型 id（例如本地 LM Studio 的 `gemma-4-12b-it-qat`）會在**送出任何請求
   之前**就死在模型解析 ⇒ `requests_seen = 0`——那是 `infra_void` 不是 0 分。
   指到本地模型必須走設定路線。
+- ⚠ **Hermes 兩句話都要講，只講一句就會誤導**（`AGENT_COMPAT.md` §12.2 的結論）：
+  1. **對全新環境：不是零接線。** 只給 `CUSTOM_BASE_URL`、沒有選 provider ⇒ 死在
+     `No inference provider configured`，`requests_seen = 0`。最小接線是**一個 CLI
+     旗標** `--provider custom`——比 pi／Codex／OpenCode 的「寫一份設定檔」都輕，
+     **但不是零**。
+  2. **對已經設好自訂 provider 的使用者：是零接線。** `CUSTOM_BASE_URL` 的優先序
+     **高過**他自己 `config.yaml` 裡的 `model.base_url`（實測 D 格），`vacant run`
+     包上去就轉向了，**不必動他的 `~/.hermes/config.yaml`**。
 
-那四段接線已經寫成一支 `ops/vacantrun/wrap_agent.sh`（四個 agent 各一段，每段在
-runtime 讀 `$VACANT_RUN_PROXY`，所以不必固定埠也不必動使用者的設定檔）。
+那五段接線已經寫成一支 `ops/vacantrun/wrap_agent.sh`（`pi | codex | opencode |
+claude | hermes` 各一段，每段在 runtime 讀 `$VACANT_RUN_PROXY`，所以不必固定埠也
+不必動使用者的設定檔）。
 ⚠ **它只在 repo checkout 裡**，pip 裝的版本沒有它——見上面〈還需要 clone 的部分〉。
 ⚠ **`--` 之後要給絕對路徑**：launcher 用 `cwd=<workspace>` spawn 子行程，相對路徑會
 解析到工作區底下 ⇒ `agent_spawn_failed`／exit 22。
@@ -380,7 +407,7 @@ vacant --help                     # 安裝後可用的 CLI
 | `pip show … \| head` 噴 `BrokenPipeError` | pip 對 SIGPIPE 的處理。**不是安裝失敗**（`exit=0`） | 忽略它，或不要接 `head` |
 | `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | **fail-closed 擋門**，不是你的路徑打錯 | 權威的驗收目錄放在工作區**外面**；要給 agent 看就另外複製一份進去 |
 | `vacant run` 回 `22`（`infra_void`） | 基礎設施壞了，**既不判交付也不判拒交**。最常見的原因是 `--` 之後給了相對路徑——launcher 用 `cwd=<workspace>` spawn，相對路徑會解析到工作區底下 | `--` 之後改成絕對路徑 |
-| 接上了自己的 agent，但 `requests_seen` 是 `0` | 那條模型通道**沒有被中介到**（框架把 base url 寫在設定檔裡），或那一跑根本沒呼叫模型。**不會有任何錯誤訊息** | 看〈四個 agent 的接線〉；環境變數名單的單一真相是 `vacant/vrun/envmap.py` |
+| 接上了自己的 agent，但 `requests_seen` 是 `0` | 那條模型通道**沒有被中介到**（框架把 base url 寫在設定檔裡），或那一跑根本沒呼叫模型。**不會有任何錯誤訊息**——而且那一跑的其他欄位會長得跟合法拒交格一模一樣（誠實邊界 23 的活體標本） | 看〈五個 agent 的接線〉；環境變數名單的單一真相是 `vacant/vrun/envmap.py` |
 | `vacant selftest` 印的「答對」數字每次不一樣 | 那不是判準（Linux 印 `4/6`、macOS 印 `3/6`） | 只看 `✓` 那三行有沒有全過 |
 | `run_RUN-ON.json` 裡找不到 `upstreams_defaulted` | **PyPI 的 `vacant-network` 0.7.0 還沒有那兩個欄位**，repo HEAD 有——版本號沒有跟著 bump | 需要那個欄位就從原始碼裝（`pip install -e .`） |
 | Windows | **完全沒量**。而且 `vacant/checks.py` 沒有可用的 Windows 沙箱分支 | 用 Linux／macOS，或放進容器 |
@@ -618,8 +645,32 @@ needle——**跳過 ≠ 檢查過**。
     - **沒有被指定上游的那條 wire 會轉送到公開 API 的預設值。** repo HEAD 的
       `vacant/vrun/launcher.py:586-590` 把這件事逐跑落盤成 `upstreams`／
       `upstreams_defaulted`——但**那只是讓洞看得見，不是把它補起來**。
+      ⚠ **`upstreams_defaulted` 的讀法要精確**（`AGENT_COMPAT.md` §10.6）：它說的是
+      「這條路由沒人指定，**萬一**有流量會去公開 API」，**不是**「已經出網了」。
+      要判有沒有真的出網，看的是 `wire_by_protocol` 與 `wire_*/index.jsonl` 的
+      `upstream` 欄位——Codex 那一跑 `upstreams_defaulted` 列著 `anthropic` 而那條路
+      **一通都沒被用到**；Claude Code 那一跑則是兩者都成立（列了 ＋ 真的有一通
+      `HEAD /api/hello` 出網）。
       ⚠ 而且 **PyPI 上的 `vacant-network` 0.7.0 還沒有這兩個欄位**（版本號沒有跟著
       bump），pip 裝的那一份 `run_RUN-ON.json` 裡找不到它們。
+23. **漏一個環境變數，會得到一個「每個欄位都像合法拒交格」的跑——而它真的出網去了
+    第三方。** 這不是抽象的風險，是 2026-09-19 抓到的活體標本
+    （`AGENT_COMPAT.md` §12.2 對照 C）：Hermes 少了 `CUSTOM_BASE_URL`，
+    **它不報錯**，安靜地走到解析鏈的尾端、去打編死的 `https://openrouter.ai/api/v1`，
+    拿了一個 `HTTP 401: Missing Authentication header` 回來。那一跑的收據是：
+
+    ```
+    requests_seen = 0      wire_by_protocol = {}      agent_rc = 0
+    stop_reason   = visible_fail                      退出碼 = 20
+    ```
+
+    **除了 `requests_seen`，每一個欄位都跟一個合法的拒交格一模一樣**——連 `agent_rc`
+    都是 `0`，跟 §8–§10 三個真拒交格相同；而依第 21 條（零請求的跑一樣
+    `chain_ok=true`，我們自己量過），這種跑的鏈**照樣驗得過**。
+    ⇒ 這是 `envmap` 誠實邊界 1（「名單漏一個變數＝那條路沒被中介，而且不會有任何
+    錯誤訊息」）的活體標本，也是第 21 條為什麼重要的原因：**`requests_seen` 是這裡
+    唯一分得開「閘門擋下一次真交付」與「什麼都沒發生但流量跑去別人家」的欄位。**
+    結構性補法仍然是出網封鎖（`ops/vacantrun/block_egress.sh`，V3），**沒量過**。
 
 完整清單（B0–B20、H1–H9 與各 run 的收官邊界）見
 [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md)§四。
@@ -967,7 +1018,7 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 | [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | 怎麼自己重跑題庫 |
 | [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md) | **從零安裝的逐字紀錄**：原廠 Ubuntu 24.04、端到端 27 秒、三個卡住點 |
 | [`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md) | `vacant run` 完整用法、落盤形狀、§4 誠實邊界（一條都沒省略） |
-| [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) | 四個 agent 逐格實測與接線；**證據等級 L-real／L-fake／L-none 的單一真相** |
+| [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) | 五個 agent 逐格實測與接線（§8–§12，五個都有真模型證據）；**證據等級 L-real／L-fake／L-none 的單一真相** |
 | [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](https://github.com/cosmopig/Vacant/blob/main/docs/HMIX_ARCHITECTURE_2026-09-11.md) | 迴圈：六個零件、逐字 prompt、它做不到什麼 |
 | [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | 五次複製收官稽核 |
 | [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | 跨題庫收官稽核 |

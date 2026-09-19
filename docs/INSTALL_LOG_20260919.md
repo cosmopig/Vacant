@@ -513,7 +513,7 @@ $ date -Is
 
 1. **沒有量真模型。** 這一整份從頭到尾 `requests_seen = 0`，假 agent 是
    `sh -c printf`。它證明的是**安裝、閘門、退出碼、收據鏈**，
-   **不是**「某個 agent 用 Vacant 做得好」。真模型的四個 agent 逐格實測在
+   **不是**「某個 agent 用 Vacant 做得好」。真模型的五個 agent 逐格實測在
    [`docs/AGENT_COMPAT.md`](AGENT_COMPAT.md)。
 2. **沒有量 macOS 與 Windows 的完整路徑。** macOS（Python 3.13.1）上只跑過
    `pip install` ／ `selftest` ／ `demo gate` ／ 兩格 `vacant run`（都過）

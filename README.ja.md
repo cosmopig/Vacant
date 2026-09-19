@@ -21,26 +21,33 @@ Vacant の仕事ではない（`vacant/controller.py:7-8` には以前から逐�
 我々の発明ではなく既存のパターンである：サプライチェーン・セキュリティの
 **in-toto／SLSA／Sigstore** も同じ——正当な attestation を伴わない artifact は受入時に拒否される。
 
+## ⚠ 入れる前にこれを読む：`pip install vacant` で入るのは本プロジェクトではない
+
+PyPI の `vacant`（2026-09-19 実測で 0.4.15、7.5 MB の `cp311-abi3-manylinux`
+ネイティブ wheel）は**別人の**パッケージであり、その Summary は逐語で
+*"Python bindings for the vacant Rust engine — domain availability via authoritative
+DNS"*（作者 David Poblador i Garcia、`github.com/alltuner/vacant`）。
+
+**名前は二つとも衝突する。** 相手のパッケージ**も** `vacant` という import 名を占有し、
+**も** `vacant` という名のコマンドを入れる。二つは同じパスに書き込む。
+四通りのインストール順を実測したが、**どれもエラーを一切出さない**：
+
+- **後に入れた方が静かに上書きする。** `vacant-network` を先・`vacant` を後に入れると
+  `vacant --help` は DNS ツールになり `import vacant` は `__version__` を失う。
+  逆順なら本物が勝つ。`pip list` は両方を列挙する。
+- **`pip uninstall -y vacant` は共有していたコマンドまで持って行く**のに、
+  `pip list` はまだ `vacant-network==0.7.0` が入っていると言う。
+
 ```bash
-pip install vacant-network        # ⚠ vacant ではなく vacant-network
-vacant --help                     # インストール後、コマンド名は vacant
+pip install vacant-network                              # 本プロジェクト。⚠ vacant ではない
+
+python3 -c "import vacant; print(vacant.__version__)"   # 見分け方：本物は 0.7.0、相手は AttributeError
+pip install --force-reinstall --no-deps vacant-network  # 上書きされたときの復旧（実測で完全に戻る）
 ```
 
-> ⚠ **`pip install vacant` で入るのは本プロジェクトではない。** PyPI の `vacant`
-> （2026-09-19 実測で 0.4.15、7.5 MB の `cp311-abi3-manylinux` ネイティブ wheel）は
-> **別人の**パッケージであり、その Summary は逐語で *"Python bindings for the vacant
-> Rust engine — domain availability via authoritative DNS"*（作者 David Poblador i
-> Garcia、`github.com/alltuner/vacant`）。しかも**エラーにならず**静かに入る。
-> 三つの名前を分けて覚えること：**配布名 `vacant-network`**、**コマンド名 `vacant`**、
-> **import 名 `vacant`**。
->
-> ⚠ **しかも名前は二つとも衝突する。** 相手のパッケージ**も** `vacant` という import 名を
-> 占有し、**も** `vacant` という名のコマンドを入れる。同一 venv での実測：
-> `vacant-network` を先に、`vacant` を後に入れると**相手が静かに上書きする**——
-> `vacant --help` は DNS ツールになり、`import vacant` も相手のものになり、
-> 途中どこにもエラーは出ない。見分け方と復旧は
-> 〈[遭遇するかもしれないこと](#遭遇するかもしれないこと)〉の最初の二行。
->
+**配布名 `vacant-network`、コマンド名 `vacant`、import 名 `vacant`**——
+三つの名前、二つの持ち主。
+
 > **Python 3.11+。** `pip install` 一回で **30 個の wheel、60 MB** が入る——
 > `pyproject.toml` が宣言する runtime 依存は 3 つだけ（`cryptography`／`mcp`／
 > `jsonschema`）で、残りは `mcp` が連れてくる（`pydantic`／`starlette`／`uvicorn`／
@@ -145,7 +152,7 @@ python3 -m vacant.vrun.verify_receipts --glob ~/.vacant-run/demo-gate/receipts
 |---|---|
 | [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh)（V3 出口遮断）＋ `verify_egress_block.py` | root が一度必要な**運用動作**であって製品機能ではない。機械全体のネットワーク規則を書き換える |
 | `ops/vacantrun/selftest.py` | 端から端までの自己点検。repo の `runs/` を読む |
-| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh)（pi／Codex／OpenCode の配線） | この三つは base url を**設定ファイル**に持つため、配線は shell の一片であって製品機能ではない。環境変数を読む框架（Claude Code、内蔵 provider 経由の OpenCode）は**配線不要**。実測は [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
+| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh)（pi／Codex／OpenCode／Hermes の配線） | これらは base url を**設定ファイル**に持つ（Hermes は `--provider custom` フラグ一つ）ため、配線は shell の一片であって製品機能ではない。環境変数を読む框架（Claude Code、内蔵 provider 経由の OpenCode）は**配線不要**。実測は [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
 | `ops/gain/**`、`runs/**` | R529／R530／R532／R534 の runner、問題バンク、**隠し受入**、judge、スケジューラと落盤データ。**実験の数値を再計算するには clone が要る**（下の〈ソースから動かす〉） |
 | `examples/**`、`decisions/**`、`docs/**` | 展示物、裁定記録、仕様文書 |
 
@@ -281,7 +288,7 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 一覧から変数が一つ漏れればその経路は仲介されず、**エラーメッセージは一切出ない**。
 これは V0 の既知の残余リスクである。
 
-### 四つの agent のつなぎ方（いずれも実測。等級を混ぜてはいけない）
+### 五つの agent のつなぎ方（**五つとも実モデルの証拠がある**。等級を混ぜてはいけない）
 
 判定基準の単一の真実は
 [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md)
@@ -292,18 +299,31 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 ⚠ **`L-fake` を「この agent は Vacant を使える」と書いてはいけない**：偽の上流は
 SSE のチャンク分割、ツール呼び出しの形式、タイムアウト、文脈長のどれにも触れない。
 
+**2026-09-19 時点：五つの agent、五つとも接続でき、五つとも実モデルの証拠がある。**
+行列に**「一度も計測していない」agent はもう無い**。残る二つの空白は
+**同じ agent の別の二経路**であって、別の二つの agent ではない。
+
 | agent | つなぎ方 | 等級 | 拒否／納品 |
 |---|---|---|---|
-| **Claude Code** 2.1.278 | **環境変数 `ANTHROPIC_BASE_URL` ⇒ 配線ゼロ**（`envmap` の一覧に既にあり、launcher が自分で注入する） | **L-real** | ✅ exit 20 ／ ✅ exit 0 |
-| **OpenCode** 1.18.31 | 内蔵 `openai` provider 経由＝**環境変数 `OPENAI_BASE_URL` ⇒ 配線ゼロ**。ローカルモデルへ向けるには設定経路（`OPENCODE_CONFIG_CONTENT`）が必要 | **L-real**（実モデルの二枠は設定経路を通った） | ✅ exit 20 ／ ✅ exit 0 |
+| **Claude Code** 2.1.278 | **環境変数 `ANTHROPIC_BASE_URL` ⇒ 配線ゼロ**（`envmap` の一覧に既にあり、launcher が自分で注入する） | **L-real**（§9） | ✅ exit 20 ／ ✅ exit 0 |
+| **OpenCode** 1.18.31 | 内蔵 `openai` provider 経由＝**環境変数 `OPENAI_BASE_URL` ⇒ 配線ゼロ**。ローカルモデルへ向けるには設定経路（`OPENCODE_CONFIG_CONTENT`）が必要 | **L-real**（§8。実モデルの二枠は設定経路を通った） | ✅ exit 20 ／ ✅ exit 0 |
 | **pi** 0.85.1 | **設定ファイル**：`PI_CODING_AGENT_DIR` を一時ディレクトリへ向け `models.json` を書く。**`OPENAI_BASE_URL` は効かない** | **L-real**（R535） | ✅ exit 20 ／ ✅ exit 0 |
-| **Codex CLI** 0.153.2（API キー／自前 provider） | **設定**：`model_providers.<新しい id>.base_url`（`-c` フラグまたは `config.toml`）。**`OPENAI_BASE_URL` は効かない** | **L-fake** | ✅ exit 20 ／ ✅ exit 0 |
-| **Codex CLI** 0.153.2（`codex login`／ChatGPT アカウント） | ❌ **手が無い**：モデル経路が `wss://chatgpt.com/backend-api/codex/responses` に固定されており、HTTP リバースプロキシはその経路に存在しない | — | ゲートは**そのまま動く**（起動点は wire ではなくプロセス終了）が、**逐語の記録はその経路では成立しない** |
-| **Hermes** | **未計測** | **L-none** | **未計測** |
+| **Codex CLI**（API キー／自前 provider）<br>**0.147.0** ＝実モデルの回（vacant-dev）／`0.153.2` ＝偽上流の回（別のマシン） | **設定**：`model_providers.<新しい id>.base_url`（`-c` フラグまたは `config.toml`。repo 同梱の `wrap_agent.sh codex` で足り、自分で書く必要は無い）。**`OPENAI_BASE_URL` は効かない** | **L-real**（§10） | ✅ exit 20 ／ ✅ exit 0 |
+| **Hermes Agent** 0.19.0（Nous Research、PyPI `hermes-agent`） | **CLI フラグ一つ** `--provider custom`。`CUSTOM_BASE_URL`（launcher に内蔵済み）は **`base_url` は上書きできるが provider は上書きできない**。二文セットで述べること——下記参照 | **L-real**（§12）<br>⚠ **L-none から L-real へ直行し、L-fake を経ていない** | ✅ exit 20 ／ ✅ exit 0 |
+| Codex（`codex login`／ChatGPT アカウント） | ❌ **手が無い**：モデル経路が `wss://chatgpt.com/backend-api/codex/responses` に固定されており、HTTP リバースプロキシはその経路に存在しない | **L-none** | ゲートは**そのまま動く**（起動点は wire ではなくプロセス終了）が、**逐語の記録はその経路では成立しない** |
+| Codex × `wire_api="chat"` | ❌ 0.147.0 は**設定を読み込む段階で退ける**。一通も送られない ⇒ `requests_seen = 0` | **L-none**（§11.1） | — |
 
-⇒ **環境変数を読む二つ（Claude Code、クラウドモデルの OpenCode）は配線ゼロ。
-設定ファイルを読む二つ（pi、Codex）は手間が要る**——質の劣る憑依である。
-「配線ゼロ」の二つにはいずれも前提があり、書かなければ誇大になる：
+⚠ **Codex のバージョン番号は二つとも正しく、誤記ではない**：`0.153.2` は 2026-09-18 の
+**偽上流**の回（別マシン）、`0.147.0` は 2026-09-19 の**実モデル**の回（vacant-dev）。
+**引用するときはマシンも一緒に述べること。**
+
+⚠ **Hermes の `requests_seen = 6` のうち 2 通はモデル呼び出しではない**：最初の
+モデル要求の前に `GET /api/v1/models` を探る。**モデル経路は 4 通**。
+
+⇒ 配線コストは三段階：**環境変数を読む二つ（Claude Code、クラウドモデルの OpenCode）は
+配線ゼロ。Hermes は CLI フラグ一つ。設定ファイルを読む二つ（pi、Codex）は設定を一式
+書く**——後の二段は質の劣る憑依である。「軽い」三つにはいずれも前提があり、
+書かなければ誇大になる：
 
 - ⚠ **Claude Code の配線ゼロは「上流自身が Anthropic Messages（`POST /v1/messages`）を
   話せる」という一つの機能の上に立っている。** `vacant/vrun/wireproxy.py` は
@@ -317,9 +337,19 @@ SSE のチャンク分割、ツール呼び出しの形式、タイムアウト�
   `gemma-4-12b-it-qat`）を渡すと、**リクエストを一通も送る前に**モデル解決で落ちる ⇒
   `requests_seen = 0`——これは 0 点ではなく `infra_void` である。
   ローカルモデルへ向けるなら設定経路を通ること。
+- ⚠ **Hermes は二文セットで述べること。片方だけでは誤導する**（`AGENT_COMPAT.md` §12.2）：
+  1. **まっさらな環境では配線ゼロではない。** `CUSTOM_BASE_URL` だけを与えて provider を
+     選ばないと `No inference provider configured` で死に、`requests_seen = 0` になる。
+     最小の配線は **CLI フラグ一つ** `--provider custom`——pi／Codex／OpenCode の
+     「設定ファイルを一式書く」より軽いが、**ゼロではない**。
+  2. **既に自前 provider を設定済みの利用者にとっては配線ゼロである。**
+     `CUSTOM_BASE_URL` は利用者自身の `config.yaml` の `model.base_url` **より優先される**
+     （実測 D 枠）ので、`vacant run` で包むだけで転送先が変わり、
+     **その人の `~/.hermes/config.yaml` に触る必要が無い**。
 
-その四つのつなぎ方は `ops/vacantrun/wrap_agent.sh` にまとめてある（agent ごとに一段、
-各段が実行時に `$VACANT_RUN_PROXY` を読むので、固定ポートも利用者自身の設定の変更も要らない）。
+その五つのつなぎ方は `ops/vacantrun/wrap_agent.sh` にまとめてある（`pi | codex |
+opencode | claude | hermes` に一段ずつ、各段が実行時に `$VACANT_RUN_PROXY` を読むので、
+固定ポートも利用者自身の設定の変更も要らない）。
 ⚠ **それは repo の checkout にしか無い**。pip で入る版には含まれない——
 上の〈それでも clone が要るもの〉を参照。
 ⚠ **`--` の後は絶対パスで渡すこと**：launcher は `cwd=<workspace>` で子プロセスを起動する
@@ -422,7 +452,7 @@ vacant --help                     # インストール後に使える CLI
 | `pip show … \| head` が `BrokenPipeError` を出す | pip の SIGPIPE 処理。**インストール失敗ではない**（`exit=0`） | 無視するか、`head` に繋がない |
 | `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | **fail-closed の門**であって、パスの打ち間違いではない | 正本の受入ディレクトリは作業区の**外**に置く。agent に見せたいなら別途コピーを中へ置く |
 | `vacant run` が `22`（`infra_void`）で終わる | 基盤が壊れた場合で、**納品とも拒否とも判定しない**。最多の原因は `--` の後に相対パスを渡したこと——launcher は `cwd=<workspace>` で起動するため作業区の下に解決される | `--` の後は絶対パスにする |
-| 自分の agent をつないだのに `requests_seen` が `0` | そのモデル経路は**仲介されていない**（framework が base url を設定ファイルに持っている）か、その実行がモデルを呼んでいない。**エラーメッセージは一切出ない** | 〈四つの agent のつなぎ方〉を参照。環境変数一覧の単一の真実は `vacant/vrun/envmap.py` |
+| 自分の agent をつないだのに `requests_seen` が `0` | そのモデル経路は**仲介されていない**（framework が base url を設定ファイルに持っている）か、その実行がモデルを呼んでいない。**エラーメッセージは一切出ない**——しかもその実行の他の欄は正当な拒否枠と寸分違わない（誠実な境界 23 の生体標本） | 〈五つの agent のつなぎ方〉を参照。環境変数一覧の単一の真実は `vacant/vrun/envmap.py` |
 | `vacant selftest` の「正解数」が毎回変わる | それは判定基準ではない（Linux は `4/6`、macOS は `3/6`） | `✓` の三行が全部通っているかだけを見る |
 | `run_RUN-ON.json` に `upstreams_defaulted` が無い | **PyPI の `vacant-network` 0.7.0 にはまだその二つの欄が無い**。repo HEAD にはある——バージョン番号が上がっていない | その欄が要るならソースから入れる（`pip install -e .`） |
 | Windows | **全く計測していない**。しかも `vacant/checks.py` に使える Windows サンドボックス分岐は無い | Linux／macOS を使うか、コンテナに入れる |
@@ -694,9 +724,37 @@ flowchart LR
     - **上流が名指しされていない wire は公開 API の既定値へ転送される。** repo HEAD の
       `vacant/vrun/launcher.py:586-590` はこれを実行ごとに `upstreams`／
       `upstreams_defaulted` として記録する——だが**それは穴を見えるようにしただけで、
-      塞いだわけではない**。⚠ しかも **PyPI の `vacant-network` 0.7.0 にはまだこの二つの
+      塞いだわけではない**。⚠ **`upstreams_defaulted` の読み方は厳密に**
+      （`AGENT_COMPAT.md` §10.6）：これが言っているのは「この経路は誰も指定していないので、
+      **万一**トラフィックがあれば公開 API へ行く」であって、**「既に外へ出た」ではない**。
+      実際に外へ出たかは `wire_by_protocol` と `wire_*/index.jsonl` の `upstream` 欄で
+      判断する——Codex の回は `upstreams_defaulted` に `anthropic` が載っていたが
+      **その経路は一通も使われていない**。Claude Code の回は両方成立した
+      （載っていて、かつ `HEAD /api/hello` が実際に外へ出た）。
+      ⚠ しかも **PyPI の `vacant-network` 0.7.0 にはまだこの二つの
       欄が無い**（バージョン番号が上がっていない）ので、pip で入れた版の
       `run_RUN-ON.json` には見つからない。
+23. **環境変数を一つ落とすと、全部の欄が正当な拒否枠に見える実行が出来上がる——
+    しかもトラフィックは本当に第三者へ出て行っている。** これは抽象的なリスクではなく、
+    2026-09-19 に捕まえた生体標本である（`AGENT_COMPAT.md` §12.2 対照 C）：
+    `CUSTOM_BASE_URL` が無いと Hermes は**エラーを出さない**。静かに解決チェーンの末尾まで
+    歩き、ハードコードされた `https://openrouter.ai/api/v1` を叩き、
+    `HTTP 401: Missing Authentication header` を持ち帰る。その実行の領収書はこうである：
+
+    ```
+    requests_seen = 0      wire_by_protocol = {}      agent_rc = 0
+    stop_reason   = visible_fail                      終了コード = 20
+    ```
+
+    **`requests_seen` 以外のすべての欄が、正当な拒否枠と同一**——`agent_rc` すら `0` で、
+    §8–§10 の三つの本物の拒否枠と同じ。さらに境界 21（リクエスト 0 件の実行でも
+    `chain_ok=true`。自分たちで計測済み）により、**チェーンも通ってしまう**。
+    ⇒ これが `envmap` 誠実な境界 1（「一覧から変数が一つ漏れればその経路は仲介されず、
+    エラーメッセージは一切出ない」）の生体標本であり、境界 21 が重要な理由でもある：
+    **ここで「ゲートが本物の納品を止めた」と「何も起きず、トラフィックは他人のサーバへ
+    行った」を分けられる欄は `requests_seen` だけである。**
+    構造的な手当ては依然として出口遮断（`ops/vacantrun/block_egress.sh`、V3）であり、
+    **計測していない**。
 
 完全な一覧は [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) §四。
 
@@ -1016,7 +1074,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 | [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | 問題集を自分で再実行する方法 |
 | [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md) | **ゼロからのインストール逐語記録**：素の Ubuntu 24.04、端から端まで 27 秒、詰まった箇所 3 つ |
 | [`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md) | `vacant run` の完全な使い方、落とすファイルの形、§4 の誠実な境界（一つも省いていない） |
-| [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) | 四つの agent の枠ごとの実測と配線。**証拠等級 L-real／L-fake／L-none の単一の真実** |
+| [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) | 五つの agent の枠ごとの実測と配線（§8–§12。五つとも実モデルの証拠あり）。**証拠等級 L-real／L-fake／L-none の単一の真実** |
 | [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](https://github.com/cosmopig/Vacant/blob/main/docs/HMIX_ARCHITECTURE_2026-09-11.md) | ループ：6 つの部品、逐語プロンプト、できないこと |
 | [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | 5 回反復の収束監査 |
 | [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | 問題集横断の収束監査 |

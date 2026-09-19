@@ -23,26 +23,33 @@ in anything outward-facing).
 An existing pattern, not one we invented: supply-chain security does the same thing with
 **in-toto / SLSA / Sigstore** — an artifact without a valid attestation is rejected at intake.
 
+## ⚠ Read this before installing: `pip install vacant` does not install this project
+
+The `vacant` name on PyPI (measured 2026-09-19: version 0.4.15, a 7.5 MB
+`cp311-abi3-manylinux` native wheel) is **somebody else's** package — its own Summary
+reads verbatim *"Python bindings for the vacant Rust engine — domain availability via
+authoritative DNS"* (author David Poblador i Garcia, `github.com/alltuner/vacant`).
+
+**Both names collide.** It **also** occupies the `vacant` import name and **also**
+installs a command called `vacant`; the two packages write to the same paths. Four
+install orders were measured and **every one of them is silent**:
+
+- **Whichever is installed second quietly wins.** `vacant-network` first, then `vacant`
+  ⇒ `vacant --help` becomes the DNS tool and `import vacant` loses `__version__`; the
+  other order and ours wins. `pip list` lists both.
+- **`pip uninstall -y vacant` takes the shared command with it**, while `pip list` still
+  reports `vacant-network==0.7.0` as installed.
+
 ```bash
-pip install vacant-network        # NOTE: vacant-network, not vacant
-vacant --help                     # once installed, the command is called `vacant`
+pip install vacant-network                              # this project. NOTE: not `vacant`
+
+python3 -c "import vacant; print(vacant.__version__)"   # discriminator: ours prints 0.7.0; theirs raises AttributeError
+pip install --force-reinstall --no-deps vacant-network  # recovery when it got overwritten (measured to restore fully)
 ```
 
-> ⚠ **`pip install vacant` does not install this project.** The `vacant` name on PyPI
-> (measured 2026-09-19: version 0.4.15, a 7.5 MB `cp311-abi3-manylinux` native wheel) is
-> **somebody else's** package — its own Summary reads verbatim *"Python bindings for the
-> vacant Rust engine — domain availability via authoritative DNS"* (author David Poblador
-> i Garcia, `github.com/alltuner/vacant`). It **does not error**; it installs quietly.
-> Three names, keep them apart: **distribution `vacant-network`**, **command `vacant`**,
-> **import `vacant`**.
->
-> ⚠ **And both names collide.** That package **also** occupies the `vacant` import name
-> and **also** installs a command called `vacant`. Measured in one venv: install
-> `vacant-network` first, then `vacant`, and **theirs quietly wins** — `vacant --help`
-> becomes the DNS tool and `import vacant` becomes theirs, with no error anywhere. How to
-> tell them apart and how to recover: the first two rows of
-> [What you will run into](#what-you-will-run-into).
->
+**Distribution `vacant-network`, command `vacant`, import `vacant`** — three names, two
+different owners.
+
 > **Python 3.11+.** One `pip install` pulls in **30 wheels, 60 MB** — `pyproject.toml`
 > declares only 3 runtime dependencies (`cryptography` / `mcp` / `jsonschema`); the rest
 > come in behind `mcp` (`pydantic` / `starlette` / `uvicorn` / `httpx`, …). The gate and
@@ -149,7 +156,7 @@ that path is now a re-export, and it is what verified the R460R / R529 / R532 ch
 |---|---|
 | [`ops/vacantrun/block_egress.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/block_egress.sh) (V3 egress blocking) + `verify_egress_block.py` | A root-once **operations action**, not a product feature; it rewrites the whole machine's network rules |
 | `ops/vacantrun/selftest.py` | End-to-end self-check; it reads the repo's `runs/` |
-| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh) (pi／Codex／OpenCode wiring) | Those three keep the base url in a **config file**, so the wiring is a shell snippet, not a product feature. Frameworks that read env vars (Claude Code; OpenCode via its built-in provider) need **no wiring** at all. Per-cell measurements: [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
+| [`ops/vacantrun/wrap_agent.sh`](https://github.com/cosmopig/Vacant/blob/main/ops/vacantrun/wrap_agent.sh) (pi／Codex／OpenCode／Hermes wiring) | Those keep the base url in a **config file** (Hermes needs one `--provider custom` flag), so the wiring is a shell snippet, not a product feature. Frameworks that read env vars (Claude Code; OpenCode via its built-in provider) need **no wiring** at all. Per-cell measurements: [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) |
 | `ops/gain/**`, `runs/**` | The R529 / R530 / R532 / R534 runners, task banks, **hidden acceptance suites**, judge, scheduler and on-disk data. **Re-computing the experiment numbers requires a clone** (see "Run from source" below) |
 | `examples/**`, `decisions/**`, `docs/**` | Exhibit pieces, verdict records, spec documents |
 
@@ -287,7 +294,7 @@ python3 -c "import json;print(json.load(open('/tmp/vr/run_RUN-ON.json'))['reques
 A variable missing from the list means that path was not mediated — **and there is no error
 message**. That is V0's known residual risk.
 
-### Wiring the four agents (all measured; the grades must not be blended)
+### Wiring the five agents (**all five have real-model evidence**; the grades must not be blended)
 
 The single source of truth for the criteria is
 [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md)
@@ -299,18 +306,31 @@ gate only; `L-none` = not measured.
 ⚠ **`L-fake` may not be written up as "this agent can use Vacant"**: a fake upstream
 never touches SSE chunking, tool-call formats, timeouts or context length.
 
+**Status as of 2026-09-19: five agents, all five wired up, all five with real-model
+evidence.** There is **no longer any agent in the matrix that was never measured**; the
+two remaining gaps are **two other routes into the same agent**, not two other agents.
+
 | agent | how it is wired | grade | refuse / deliver |
 |---|---|---|---|
-| **Claude Code** 2.1.278 | **env var `ANTHROPIC_BASE_URL` ⇒ zero wiring** (already in the `envmap` list; the launcher injects it) | **L-real** | ✅ exit 20 / ✅ exit 0 |
-| **OpenCode** 1.18.31 | via the built-in `openai` provider = **env var `OPENAI_BASE_URL` ⇒ zero wiring**; pointing at a local model requires the config route (`OPENCODE_CONFIG_CONTENT`) | **L-real** (the real-model cells went through the config route) | ✅ exit 20 / ✅ exit 0 |
+| **Claude Code** 2.1.278 | **env var `ANTHROPIC_BASE_URL` ⇒ zero wiring** (already in the `envmap` list; the launcher injects it) | **L-real** (§9) | ✅ exit 20 / ✅ exit 0 |
+| **OpenCode** 1.18.31 | via the built-in `openai` provider = **env var `OPENAI_BASE_URL` ⇒ zero wiring**; pointing at a local model requires the config route (`OPENCODE_CONFIG_CONTENT`) | **L-real** (§8; the real-model cells went through the config route) | ✅ exit 20 / ✅ exit 0 |
 | **pi** 0.85.1 | **config file**: point `PI_CODING_AGENT_DIR` at a temp dir and write a `models.json`. **Ignores `OPENAI_BASE_URL`** | **L-real** (R535) | ✅ exit 20 / ✅ exit 0 |
-| **Codex CLI** 0.153.2 (API key / custom provider) | **config**: `model_providers.<new id>.base_url` (`-c` flag or `config.toml`). **Ignores `OPENAI_BASE_URL`** | **L-fake** | ✅ exit 20 / ✅ exit 0 |
-| **Codex CLI** 0.153.2 (`codex login` / ChatGPT account) | ❌ **no way**: the model channel is a hard-coded `wss://chatgpt.com/backend-api/codex/responses`; an HTTP reverse proxy does not exist on that path | — | the gate **still runs** (its trigger is process exit, not the wire), but **verbatim wire capture does not hold on that path** |
-| **Hermes** | **not measured** | **L-none** | **not measured** |
+| **Codex CLI** (API key / custom provider)<br>**0.147.0** = the real-model round (vacant-dev) / `0.153.2` = the fake-upstream round (a different machine) | **config**: `model_providers.<new id>.base_url` (`-c` flag or `config.toml`; the `wrap_agent.sh codex` shipped in the repo is enough — you do not have to write your own). **Ignores `OPENAI_BASE_URL`** | **L-real** (§10) | ✅ exit 20 / ✅ exit 0 |
+| **Hermes Agent** 0.19.0 (Nous Research, PyPI `hermes-agent`) | **one CLI flag**, `--provider custom`; `CUSTOM_BASE_URL` (already in the launcher) **overrides `base_url` but cannot override the provider**. Both halves of this belong together — see below | **L-real** (§12)<br>⚠ **it jumped from L-none straight to L-real, never passing through L-fake** | ✅ exit 20 / ✅ exit 0 |
+| Codex (`codex login` / ChatGPT account) | ❌ **no way**: the model channel is a hard-coded `wss://chatgpt.com/backend-api/codex/responses`; an HTTP reverse proxy does not exist on that path | **L-none** | the gate **still runs** (its trigger is process exit, not the wire), but **verbatim wire capture does not hold on that path** |
+| Codex × `wire_api="chat"` | ❌ 0.147.0 **rejects it while loading the config**; not a single request goes out ⇒ `requests_seen = 0` | **L-none** (§11.1) | — |
 
-⇒ **The two that read environment variables (Claude Code, and OpenCode on a cloud model)
-need zero wiring; the two that read config files (pi, Codex) need extra work** — a
-lower-quality kind of possession. Both "zero wiring" cells carry a precondition, and
+⚠ **Both Codex version numbers are correct, neither is a typo**: `0.153.2` is the
+2026-09-18 **fake-upstream** round (a different machine), `0.147.0` is the 2026-09-19
+**real-model** round (vacant-dev). **Quote the machine along with the number.**
+
+⚠ **2 of Hermes's `requests_seen = 6` are not model calls**: it probes
+`GET /api/v1/models` before the first model request. **The model channel is 4 calls.**
+
+⇒ Wiring cost comes in three tiers: **the two that read environment variables (Claude
+Code, and OpenCode on a cloud model) need zero wiring; Hermes needs one CLI flag; the two
+that read config files (pi, Codex) need a config written** — the latter two are a
+lower-quality kind of possession. All three "light" cells carry a precondition, and
 leaving it out would overstate them:
 
 - ⚠ **Claude Code's zero wiring rests on one upstream feature: the upstream must speak
@@ -325,10 +345,19 @@ leaving it out would overstate them:
   `gemma-4-12b-it-qat`) dies in model resolution **before sending any request** ⇒
   `requests_seen = 0` — which is `infra_void`, not a score of 0. Pointing at a local
   model means taking the config route.
+- ⚠ **Hermes needs both halves stated; one alone misleads** (`AGENT_COMPAT.md` §12.2):
+  1. **On a fresh environment it is not zero wiring.** Give it only `CUSTOM_BASE_URL`
+     with no provider selected and it dies on `No inference provider configured`,
+     `requests_seen = 0`. The minimum is **one CLI flag**, `--provider custom` — lighter
+     than the "write a config file" that pi / Codex / OpenCode need, **but not zero**.
+  2. **For a user who already has a custom provider configured it *is* zero wiring.**
+     `CUSTOM_BASE_URL` takes precedence **over** their own `model.base_url` in
+     `config.yaml` (measured, cell D), so wrapping with `vacant run` redirects them
+     **without touching their `~/.hermes/config.yaml`**.
 
-Those four wirings are packaged as `ops/vacantrun/wrap_agent.sh` (one stanza per agent,
-each reading `$VACANT_RUN_PROXY` at runtime, so neither a fixed port nor edits to the
-user's own config are needed).
+Those five wirings are packaged as `ops/vacantrun/wrap_agent.sh` (`pi | codex | opencode
+| claude | hermes`, one stanza each, reading `$VACANT_RUN_PROXY` at runtime, so neither a
+fixed port nor edits to the user's own config are needed).
 ⚠ **It only exists in a repo checkout**, not in the pip wheel — see "What still needs a
 clone" above.
 ⚠ **Give an absolute path after `--`**: the launcher spawns with `cwd=<workspace>`, so a
@@ -433,7 +462,7 @@ with per-step timings, is
 | `pip show … \| head` prints `BrokenPipeError` | pip's SIGPIPE handling. **Not an install failure** (`exit=0`) | ignore it, or do not pipe into `head` |
 | `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | a **fail-closed** guard, not a typo in your path | keep the authoritative suite **outside** the workspace; copy a version in if the agent should see one |
 | `vacant run` exits `22` (`infra_void`) | infrastructure broke, and **neither delivery nor refusal is recorded**. The most common cause is a relative path after `--`: the launcher spawns with `cwd=<workspace>`, so it resolves under the workspace | use an absolute path after `--` |
-| your agent is wired up but `requests_seen` is `0` | that model channel **was not mediated** (the framework keeps its base url in a config file), or that run made no model call at all. **There is no error message** | see "Wiring the four agents"; the single source of truth for the variable list is `vacant/vrun/envmap.py` |
+| your agent is wired up but `requests_seen` is `0` | that model channel **was not mediated** (the framework keeps its base url in a config file), or that run made no model call at all. **There is no error message** — and every other field of that run will look exactly like a legitimate refuse cell (the live specimen in honest boundary 23) | see "Wiring the five agents"; the single source of truth for the variable list is `vacant/vrun/envmap.py` |
 | the "correct answers" count printed by `vacant selftest` changes between runs | it is not a criterion (Linux prints `4/6`, macOS `3/6`) | only look at whether the three `✓` lines all passed |
 | `upstreams_defaulted` is missing from `run_RUN-ON.json` | **`vacant-network` 0.7.0 on PyPI does not have those two fields yet**; repo HEAD does — the version was not bumped | install from source (`pip install -e .`) if you need that field |
 | Windows | **not measured at all**, and `vacant/checks.py` has no usable Windows sandbox branch | use Linux / macOS, or a container |
@@ -730,9 +759,39 @@ Part of the specification, not a disclaimer. Quote them with the numbers.
     - **A wire with no upstream named is forwarded to the public API default.** At repo
       HEAD, `vacant/vrun/launcher.py:586-590` writes this down per run as `upstreams` /
       `upstreams_defaulted` — but **that only makes the hole visible, it does not close
-      it**. ⚠ And **`vacant-network` 0.7.0 on PyPI does not have those two fields yet**
+      it**. ⚠ **Read `upstreams_defaulted` precisely** (`AGENT_COMPAT.md` §10.6): it says
+      "nobody named an upstream for this route, so traffic *would* go to the public API",
+      **not** "traffic already left the machine". To decide whether anything actually
+      went out, look at `wire_by_protocol` and the `upstream` field in
+      `wire_*/index.jsonl` — in the Codex run `upstreams_defaulted` listed `anthropic`
+      while **not one call used that route**; in the Claude Code run both were true
+      (listed, *and* one `HEAD /api/hello` really went out).
+      ⚠ And **`vacant-network` 0.7.0 on PyPI does not have those two fields yet**
       (the version was not bumped), so you will not find them in a pip-installed
       `run_RUN-ON.json`.
+23. **Miss one environment variable and you get a run where every field looks like a
+    legitimate refusal — while traffic really did leave for a third party.** This is not
+    an abstract risk; it is a live specimen caught on 2026-09-19 (`AGENT_COMPAT.md` §12.2,
+    control C): with `CUSTOM_BASE_URL` absent, Hermes **does not error**. It walks quietly
+    to the end of its resolution chain, hits the hard-coded
+    `https://openrouter.ai/api/v1`, and comes back with
+    `HTTP 401: Missing Authentication header`. That run's receipt reads:
+
+    ```
+    requests_seen = 0      wire_by_protocol = {}      agent_rc = 0
+    stop_reason   = visible_fail                      exit code = 20
+    ```
+
+    **Every field except `requests_seen` is identical to a legitimate refuse cell** —
+    `agent_rc` is `0`, exactly as in the three real refuse cells of §8–§10 — and by
+    boundary 21 (a zero-request run still gets `chain_ok=true`, which we measured
+    ourselves) **the chain verifies too**.
+    ⇒ This is the live specimen for `envmap` honest boundary 1 ("a variable missing from
+    the list means that path was not mediated, and there is no error message"), and it is
+    why boundary 21 matters: **`requests_seen` is the only field here that separates "the
+    gate stopped a real delivery" from "nothing happened and the traffic went to somebody
+    else's server."** The structural fix is still egress blocking
+    (`ops/vacantrun/block_egress.sh`, V3), **which has not been measured**.
 
 Full list in [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_COMPLETE_2026-09-12.md) §四.
 
@@ -1073,7 +1132,7 @@ The full block is [`AGENTS.md` §9](https://github.com/cosmopig/Vacant/blob/main
 | [`docs/BANKS_HOWTO.md`](https://github.com/cosmopig/Vacant/blob/main/docs/BANKS_HOWTO.md) | how to re-run the task banks |
 | [`docs/INSTALL_LOG_20260919.md`](https://github.com/cosmopig/Vacant/blob/main/docs/INSTALL_LOG_20260919.md) | **verbatim from-scratch install transcript**: stock Ubuntu 24.04, 27 s end to end, three stuck points |
 | [`docs/VACANT_RUN.md`](https://github.com/cosmopig/Vacant/blob/main/docs/VACANT_RUN.md) | full `vacant run` usage, on-disk shapes, §4 honest boundaries (none omitted) |
-| [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) | per-cell measurements and wiring for four agents; **single source of truth for the L-real / L-fake / L-none grades** |
+| [`docs/AGENT_COMPAT.md`](https://github.com/cosmopig/Vacant/blob/main/docs/AGENT_COMPAT.md) | per-cell measurements and wiring for five agents (§8–§12; all five have real-model evidence); **single source of truth for the L-real / L-fake / L-none grades** |
 | [`docs/HMIX_ARCHITECTURE_2026-09-11.md`](https://github.com/cosmopig/Vacant/blob/main/docs/HMIX_ARCHITECTURE_2026-09-11.md) | the loop: six parts, verbatim prompts, what it cannot do |
 | [`DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R460R_FABLE_AUDIT_REPLICATIONS.md) | five-replication closing audit |
 | [`DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md`](https://github.com/cosmopig/Vacant/blob/main/decisions/DECISION_20260912_R529_FABLE_AUDIT_CROSS_BANK.md) | cross-bank closing audit |
